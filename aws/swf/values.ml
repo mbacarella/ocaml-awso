@@ -212,6 +212,9 @@ module TagList =
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -245,8 +248,8 @@ module TaskList =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" Name.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "name" Name.of_json in make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a task list."]
 module TaskPriority =
@@ -350,9 +353,9 @@ module ActivityType =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~version ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "version" Version.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+    let of_json json__ =
+      let version = field_map_exn json__ "version" Version.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       make ~version ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents an activity type."]
@@ -452,9 +455,9 @@ module WorkflowType =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~version ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "version" Version.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+    let of_json json__ =
+      let version = field_map_exn json__ "version" Version.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       make ~version ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a workflow type."]
@@ -631,9 +634,9 @@ module WorkflowExecution =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
       make ~runId ~workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let runId = field_map_exn json "runId" WorkflowRunId.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
+    let of_json json__ =
+      let runId = field_map_exn json__ "runId" WorkflowRunId.of_json in
+      let workflowId = field_map_exn json__ "workflowId" WorkflowId.of_json in
       make ~runId ~workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a workflow execution."]
@@ -748,12 +751,19 @@ module DecisionTaskTimeoutType =
   struct
     type nonrec t =
       | START_TO_CLOSE 
+      | SCHEDULE_TO_START 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | START_TO_CLOSE -> "START_TO_CLOSE" | Non_static_id s -> s
+      function
+      | START_TO_CLOSE -> "START_TO_CLOSE"
+      | SCHEDULE_TO_START -> "SCHEDULE_TO_START"
+      | Non_static_id s -> s
     let of_string =
-      function | "START_TO_CLOSE" -> START_TO_CLOSE | x -> Non_static_id x
+      function
+      | "START_TO_CLOSE" -> START_TO_CLOSE
+      | "SCHEDULE_TO_START" -> SCHEDULE_TO_START
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -1415,8 +1425,8 @@ module CancelTimerDecisionAttributes =
         TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
       make ~timerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timerId = field_map_exn json "timerId" TimerId.of_json in
+    let of_json json__ =
+      let timerId = field_map_exn json__ "timerId" TimerId.of_json in
       make ~timerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1436,8 +1446,9 @@ module CancelWorkflowExecutionDecisionAttributes =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "details") in
       make ?details ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "details" Data.of_json in make ?details ()
+    let of_json json__ =
+      let details = field_map json__ "details" Data.of_json in
+      make ?details ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the CancelWorkflowExecution decision. Access Control You can use IAM policies to control this decision's access to Amazon SWF resources as follows: Use a Resource element with the domain name to limit the action to only specified domains. Use an Action element to allow or deny permission to call this action. You cannot use an IAM policy to constrain this action's parameters. If the caller doesn't have sufficient permissions to invoke the action, or the parameter values fall outside the specified constraints, the action fails. The associated event attribute's cause parameter is set to OPERATION_NOT_PERMITTED. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."]
@@ -1456,8 +1467,8 @@ module CompleteWorkflowExecutionDecisionAttributes =
       let result = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "result") in
       make ?result ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let result = field_map json "result" Data.of_json in make ?result ()
+    let of_json json__ =
+      let result = field_map json__ "result" Data.of_json in make ?result ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the CompleteWorkflowExecution decision. Access Control You can use IAM policies to control this decision's access to Amazon SWF resources as follows: Use a Resource element with the domain name to limit the action to only specified domains. Use an Action element to allow or deny permission to call this action. You cannot use an IAM policy to constrain this action's parameters. If the caller doesn't have sufficient permissions to invoke the action, or the parameter values fall outside the specified constraints, the action fails. The associated event attribute's cause parameter is set to OPERATION_NOT_PERMITTED. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."]
@@ -1555,21 +1566,21 @@ module ContinueAsNewWorkflowExecutionDecisionAttributes =
         ?taskStartToCloseTimeout ?taskPriority ?taskList
         ?executionStartToCloseTimeout ?input ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lambdaRole = field_map json "lambdaRole" Arn.of_json in
+    let of_json json__ =
+      let lambdaRole = field_map json__ "lambdaRole" Arn.of_json in
       let workflowTypeVersion =
-        field_map json "workflowTypeVersion" Version.of_json in
-      let tagList = field_map json "tagList" TagList.of_json in
-      let childPolicy = field_map json "childPolicy" ChildPolicy.of_json in
+        field_map json__ "workflowTypeVersion" Version.of_json in
+      let tagList = field_map json__ "tagList" TagList.of_json in
+      let childPolicy = field_map json__ "childPolicy" ChildPolicy.of_json in
       let taskStartToCloseTimeout =
-        field_map json "taskStartToCloseTimeout"
+        field_map json__ "taskStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let taskPriority = field_map json "taskPriority" TaskPriority.of_json in
-      let taskList = field_map json "taskList" TaskList.of_json in
+      let taskPriority = field_map json__ "taskPriority" TaskPriority.of_json in
+      let taskList = field_map json__ "taskList" TaskList.of_json in
       let executionStartToCloseTimeout =
-        field_map json "executionStartToCloseTimeout"
+        field_map json__ "executionStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let input = field_map json "input" Data.of_json in
+      let input = field_map json__ "input" Data.of_json in
       make ?lambdaRole ?workflowTypeVersion ?tagList ?childPolicy
         ?taskStartToCloseTimeout ?taskPriority ?taskList
         ?executionStartToCloseTimeout ?input ()
@@ -1657,9 +1668,9 @@ module FailWorkflowExecutionDecisionAttributes =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "reason") in
       make ?details ?reason ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "details" Data.of_json in
-      let reason = field_map json "reason" FailureReason.of_json in
+    let of_json json__ =
+      let details = field_map json__ "details" Data.of_json in
+      let reason = field_map json__ "reason" FailureReason.of_json in
       make ?details ?reason ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1685,9 +1696,9 @@ module RecordMarkerDecisionAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "markerName") in
       make ?details ~markerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "details" Data.of_json in
-      let markerName = field_map_exn json "markerName" MarkerName.of_json in
+    let of_json json__ =
+      let details = field_map json__ "details" Data.of_json in
+      let markerName = field_map_exn json__ "markerName" MarkerName.of_json in
       make ?details ~markerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1710,8 +1721,8 @@ module RequestCancelActivityTaskDecisionAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "activityId") in
       make ~activityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let activityId = field_map_exn json "activityId" ActivityId.of_json in
+    let of_json json__ =
+      let activityId = field_map_exn json__ "activityId" ActivityId.of_json in
       make ~activityId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1750,10 +1761,10 @@ module RequestCancelExternalWorkflowExecutionDecisionAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
       make ?control ?runId ~workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let control = field_map json "control" Data.of_json in
-      let runId = field_map json "runId" WorkflowRunIdOptional.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
+    let of_json json__ =
+      let control = field_map json__ "control" Data.of_json in
+      let runId = field_map json__ "runId" WorkflowRunIdOptional.of_json in
+      let workflowId = field_map_exn json__ "workflowId" WorkflowId.of_json in
       make ?control ?runId ~workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1766,7 +1777,7 @@ module ScheduleActivityTaskDecisionAttributes =
         [@ocaml.doc "The type of the activity task to schedule."];
       activityId: ActivityId.t
         [@ocaml.doc
-          "The activityId of the activity task. The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not contain the literal string arn."];
+          "The activityId of the activity task. The specified string must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
       control: Data.t option
         [@ocaml.doc
           "Data attached to the event that can be used by the decider in subsequent workflow tasks. This data isn't sent to the activity."];
@@ -1777,7 +1788,7 @@ module ScheduleActivityTaskDecisionAttributes =
           "The maximum duration for this activity task. The duration is specified in seconds, an integer greater than or equal to 0. You can use NONE to specify unlimited duration. A schedule-to-close timeout for this activity task must be specified either as a default for the activity type or through this field. If neither this field is set nor a default schedule-to-close timeout was specified at registration time then a fault is returned."];
       taskList: TaskList.t option
         [@ocaml.doc
-          "If set, specifies the name of the task list in which to schedule the activity task. If not specified, the defaultTaskList registered with the activity type is used. A task list for this activity task must be specified either as a default for the activity type or through this field. If neither this field is set nor a default task list was specified at registration time then a fault is returned. The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not contain the literal string arn."];
+          "If set, specifies the name of the task list in which to schedule the activity task. If not specified, the defaultTaskList registered with the activity type is used. A task list for this activity task must be specified either as a default for the activity type or through this field. If neither this field is set nor a default task list was specified at registration time then a fault is returned. The specified string must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
       taskPriority: TaskPriority.t option
         [@ocaml.doc
           "If set, specifies the priority with which the activity task is to be assigned to a worker. This overrides the defaultTaskPriority specified when registering the activity type using RegisterActivityType. Valid values are integers that range from Java's Integer.MIN_VALUE (-2147483648) to Integer.MAX_VALUE (2147483647). Higher numbers indicate higher priority. For more information about setting task priority, see Setting Task Priority in the Amazon SWF Developer Guide."];
@@ -1867,25 +1878,25 @@ module ScheduleActivityTaskDecisionAttributes =
         ?taskPriority ?taskList ?scheduleToCloseTimeout ?input ?control
         ~activityId ~activityType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let heartbeatTimeout =
-        field_map json "heartbeatTimeout" DurationInSecondsOptional.of_json in
+        field_map json__ "heartbeatTimeout" DurationInSecondsOptional.of_json in
       let startToCloseTimeout =
-        field_map json "startToCloseTimeout"
+        field_map json__ "startToCloseTimeout"
           DurationInSecondsOptional.of_json in
       let scheduleToStartTimeout =
-        field_map json "scheduleToStartTimeout"
+        field_map json__ "scheduleToStartTimeout"
           DurationInSecondsOptional.of_json in
-      let taskPriority = field_map json "taskPriority" TaskPriority.of_json in
-      let taskList = field_map json "taskList" TaskList.of_json in
+      let taskPriority = field_map json__ "taskPriority" TaskPriority.of_json in
+      let taskList = field_map json__ "taskList" TaskList.of_json in
       let scheduleToCloseTimeout =
-        field_map json "scheduleToCloseTimeout"
+        field_map json__ "scheduleToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let input = field_map json "input" Data.of_json in
-      let control = field_map json "control" Data.of_json in
-      let activityId = field_map_exn json "activityId" ActivityId.of_json in
+      let input = field_map json__ "input" Data.of_json in
+      let control = field_map json__ "control" Data.of_json in
+      let activityId = field_map_exn json__ "activityId" ActivityId.of_json in
       let activityType =
-        field_map_exn json "activityType" ActivityType.of_json in
+        field_map_exn json__ "activityType" ActivityType.of_json in
       make ?heartbeatTimeout ?startToCloseTimeout ?scheduleToStartTimeout
         ?taskPriority ?taskList ?scheduleToCloseTimeout ?input ?control
         ~activityId ~activityType ()
@@ -1909,7 +1920,7 @@ module ScheduleLambdaFunctionDecisionAttributes =
           "The optional input data to be supplied to the Lambda function."];
       startToCloseTimeout: DurationInSecondsOptional.t option
         [@ocaml.doc
-          "The timeout value, in seconds, after which the Lambda function is considered to be failed once it has started. This can be any integer from 1-300 (1s-5m). If no value is supplied, than a default value of 300s is assumed."]}
+          "The timeout value, in seconds, after which the Lambda function is considered to be failed once it has started. This can be any integer from 1-900 (1s-15m). If no value is supplied, then a default value of 900s is assumed."]}
     let context_ = "ScheduleLambdaFunctionDecisionAttributes"
     let make ?control =
       fun ?input ->
@@ -1941,14 +1952,14 @@ module ScheduleLambdaFunctionDecisionAttributes =
         FunctionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ?startToCloseTimeout ?input ?control ~name ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let startToCloseTimeout =
-        field_map json "startToCloseTimeout"
+        field_map json__ "startToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let input = field_map json "input" FunctionInput.of_json in
-      let control = field_map json "control" Data.of_json in
-      let name = field_map_exn json "name" FunctionName.of_json in
-      let id = field_map_exn json "id" FunctionId.of_json in
+      let input = field_map json__ "input" FunctionInput.of_json in
+      let control = field_map json__ "control" Data.of_json in
+      let name = field_map_exn json__ "name" FunctionName.of_json in
+      let id = field_map_exn json__ "id" FunctionId.of_json in
       make ?startToCloseTimeout ?input ?control ~name ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2001,12 +2012,12 @@ module SignalExternalWorkflowExecutionDecisionAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
       make ?control ?input ~signalName ?runId ~workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let control = field_map json "control" Data.of_json in
-      let input = field_map json "input" Data.of_json in
-      let signalName = field_map_exn json "signalName" SignalName.of_json in
-      let runId = field_map json "runId" WorkflowRunIdOptional.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
+    let of_json json__ =
+      let control = field_map json__ "control" Data.of_json in
+      let input = field_map json__ "input" Data.of_json in
+      let signalName = field_map_exn json__ "signalName" SignalName.of_json in
+      let runId = field_map json__ "runId" WorkflowRunIdOptional.of_json in
+      let workflowId = field_map_exn json__ "workflowId" WorkflowId.of_json in
       make ?control ?input ~signalName ?runId ~workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2019,7 +2030,7 @@ module StartChildWorkflowExecutionDecisionAttributes =
         [@ocaml.doc "The type of the workflow execution to be started."];
       workflowId: WorkflowId.t
         [@ocaml.doc
-          "The workflowId of the workflow execution. The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not contain the literal string arn."];
+          "The workflowId of the workflow execution. The specified string must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
       control: Data.t option
         [@ocaml.doc
           "The data attached to the event that can be used by the decider in subsequent workflow tasks. This data isn't sent to the child workflow execution."];
@@ -2030,7 +2041,7 @@ module StartChildWorkflowExecutionDecisionAttributes =
           "The total duration for this workflow execution. This overrides the defaultExecutionStartToCloseTimeout specified when registering the workflow type. The duration is specified in seconds, an integer greater than or equal to 0. You can use NONE to specify unlimited duration. An execution start-to-close timeout for this workflow execution must be specified either as a default for the workflow type or through this parameter. If neither this parameter is set nor a default execution start-to-close timeout was specified at registration time then a fault is returned."];
       taskList: TaskList.t option
         [@ocaml.doc
-          "The name of the task list to be used for decision tasks of the child workflow execution. A task list for this workflow execution must be specified either as a default for the workflow type or through this parameter. If neither this parameter is set nor a default task list was specified at registration time then a fault is returned. The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not contain the literal string arn."];
+          "The name of the task list to be used for decision tasks of the child workflow execution. A task list for this workflow execution must be specified either as a default for the workflow type or through this parameter. If neither this parameter is set nor a default task list was specified at registration time then a fault is returned. The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
       taskPriority: TaskPriority.t option
         [@ocaml.doc
           "A task priority that, if set, specifies the priority for a decision task of this workflow execution. This overrides the defaultTaskPriority specified when registering the workflow type. Valid values are integers that range from Java's Integer.MIN_VALUE (-2147483648) to Integer.MAX_VALUE (2147483647). Higher numbers indicate higher priority. For more information about setting task priority, see Setting Task Priority in the Amazon SWF Developer Guide."];
@@ -2121,23 +2132,23 @@ module StartChildWorkflowExecutionDecisionAttributes =
         ?taskPriority ?taskList ?executionStartToCloseTimeout ?input ?control
         ~workflowId ~workflowType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lambdaRole = field_map json "lambdaRole" Arn.of_json in
-      let tagList = field_map json "tagList" TagList.of_json in
-      let childPolicy = field_map json "childPolicy" ChildPolicy.of_json in
+    let of_json json__ =
+      let lambdaRole = field_map json__ "lambdaRole" Arn.of_json in
+      let tagList = field_map json__ "tagList" TagList.of_json in
+      let childPolicy = field_map json__ "childPolicy" ChildPolicy.of_json in
       let taskStartToCloseTimeout =
-        field_map json "taskStartToCloseTimeout"
+        field_map json__ "taskStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let taskPriority = field_map json "taskPriority" TaskPriority.of_json in
-      let taskList = field_map json "taskList" TaskList.of_json in
+      let taskPriority = field_map json__ "taskPriority" TaskPriority.of_json in
+      let taskList = field_map json__ "taskList" TaskList.of_json in
       let executionStartToCloseTimeout =
-        field_map json "executionStartToCloseTimeout"
+        field_map json__ "executionStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let input = field_map json "input" Data.of_json in
-      let control = field_map json "control" Data.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
+      let input = field_map json__ "input" Data.of_json in
+      let control = field_map json__ "control" Data.of_json in
+      let workflowId = field_map_exn json__ "workflowId" WorkflowId.of_json in
       let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
+        field_map_exn json__ "workflowType" WorkflowType.of_json in
       make ?lambdaRole ?tagList ?childPolicy ?taskStartToCloseTimeout
         ?taskPriority ?taskList ?executionStartToCloseTimeout ?input ?control
         ~workflowId ~workflowType ()
@@ -2150,7 +2161,7 @@ module StartTimerDecisionAttributes =
       {
       timerId: TimerId.t
         [@ocaml.doc
-          "The unique ID of the timer. The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not contain the literal string arn."];
+          "The unique ID of the timer. The specified string must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
       control: Data.t option
         [@ocaml.doc
           "The data attached to the event that can be used by the decider in subsequent workflow tasks."];
@@ -2179,11 +2190,11 @@ module StartTimerDecisionAttributes =
         TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
       make ~startToFireTimeout ?control ~timerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let startToFireTimeout =
-        field_map_exn json "startToFireTimeout" DurationInSeconds.of_json in
-      let control = field_map json "control" Data.of_json in
-      let timerId = field_map_exn json "timerId" TimerId.of_json in
+        field_map_exn json__ "startToFireTimeout" DurationInSeconds.of_json in
+      let control = field_map json__ "control" Data.of_json in
+      let timerId = field_map_exn json__ "timerId" TimerId.of_json in
       make ~startToFireTimeout ?control ~timerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2192,35 +2203,33 @@ module ActivityTaskCancelRequestedEventAttributes =
   struct
     type nonrec t =
       {
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the RequestCancelActivityTask decision for this cancellation request. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      activityId: ActivityId.t [@ocaml.doc "The unique ID of the task."]}
-    let context_ = "ActivityTaskCancelRequestedEventAttributes"
-    let make ~decisionTaskCompletedEventId =
-      fun ~activityId ->
+      activityId: ActivityId.t option
+        [@ocaml.doc "The unique ID of the task."]}
+    let make ?decisionTaskCompletedEventId =
+      fun ?activityId ->
         fun () -> { decisionTaskCompletedEventId; activityId }
     let to_value x =
       structure_to_value
         [("decisionTaskCompletedEventId",
-           (Some (EventId.to_value x.decisionTaskCompletedEventId)));
-        ("activityId", (Some (ActivityId.to_value x.activityId)))]
+           (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value));
+        ("activityId", (Option.map x.activityId ~f:ActivityId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let activityId =
-        ActivityId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "activityId") in
+        (Option.map ~f:ActivityId.of_xml) (Xml.child xml_arg0 "activityId") in
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
-      make ~activityId ~decisionTaskCompletedEventId ()
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
+      make ?activityId ?decisionTaskCompletedEventId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let activityId = field_map_exn json "activityId" ActivityId.of_json in
+    let of_json json__ =
+      let activityId = field_map json__ "activityId" ActivityId.of_json in
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      make ~activityId ~decisionTaskCompletedEventId ()
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      make ?activityId ?decisionTaskCompletedEventId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the ActivityTaskCancelRequested event."]
@@ -2229,32 +2238,32 @@ module ActivityTaskCanceledEventAttributes =
     type nonrec t =
       {
       details: Data.t option [@ocaml.doc "Details of the cancellation."];
-      scheduledEventId: EventId.t
+      scheduledEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ActivityTaskScheduled event that was recorded when this activity task was scheduled. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ActivityTaskStarted event recorded when this activity task was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
       latestCancelRequestedEventId: EventId.t option
         [@ocaml.doc
           "If set, contains the ID of the last ActivityTaskCancelRequested event recorded for this activity task. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ActivityTaskCanceledEventAttributes"
     let make ?details =
-      fun ?latestCancelRequestedEventId ->
-        fun ~scheduledEventId ->
-          fun ~startedEventId ->
+      fun ?scheduledEventId ->
+        fun ?startedEventId ->
+          fun ?latestCancelRequestedEventId ->
             fun () ->
               {
                 details;
-                latestCancelRequestedEventId;
                 scheduledEventId;
-                startedEventId
+                startedEventId;
+                latestCancelRequestedEventId
               }
     let to_value x =
       structure_to_value
         [("details", (Option.map x.details ~f:Data.to_value));
-        ("scheduledEventId", (Some (EventId.to_value x.scheduledEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)));
+        ("scheduledEventId",
+          (Option.map x.scheduledEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value));
         ("latestCancelRequestedEventId",
           (Option.map x.latestCancelRequestedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
@@ -2263,25 +2272,23 @@ module ActivityTaskCanceledEventAttributes =
         (Option.map ~f:EventId.of_xml)
           (Xml.child xml_arg0 "latestCancelRequestedEventId") in
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let scheduledEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "scheduledEventId") in
       let details =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "details") in
-      make ?latestCancelRequestedEventId ~startedEventId ~scheduledEventId
+      make ?latestCancelRequestedEventId ?startedEventId ?scheduledEventId
         ?details ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let latestCancelRequestedEventId =
-        field_map json "latestCancelRequestedEventId" EventId.of_json in
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+        field_map json__ "latestCancelRequestedEventId" EventId.of_json in
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let scheduledEventId =
-        field_map_exn json "scheduledEventId" EventId.of_json in
-      let details = field_map json "details" Data.of_json in
-      make ?latestCancelRequestedEventId ~startedEventId ~scheduledEventId
+        field_map json__ "scheduledEventId" EventId.of_json in
+      let details = field_map json__ "details" Data.of_json in
+      make ?latestCancelRequestedEventId ?startedEventId ?scheduledEventId
         ?details ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the ActivityTaskCanceled event."]
@@ -2290,40 +2297,38 @@ module ActivityTaskCompletedEventAttributes =
     type nonrec t =
       {
       result: Data.t option [@ocaml.doc "The results of the activity task."];
-      scheduledEventId: EventId.t
+      scheduledEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ActivityTaskScheduled event that was recorded when this activity task was scheduled. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ActivityTaskStarted event recorded when this activity task was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ActivityTaskCompletedEventAttributes"
     let make ?result =
-      fun ~scheduledEventId ->
-        fun ~startedEventId ->
+      fun ?scheduledEventId ->
+        fun ?startedEventId ->
           fun () -> { result; scheduledEventId; startedEventId }
     let to_value x =
       structure_to_value
         [("result", (Option.map x.result ~f:Data.to_value));
-        ("scheduledEventId", (Some (EventId.to_value x.scheduledEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)))]
+        ("scheduledEventId",
+          (Option.map x.scheduledEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let scheduledEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "scheduledEventId") in
       let result = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "result") in
-      make ~startedEventId ~scheduledEventId ?result ()
+      make ?startedEventId ?scheduledEventId ?result ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+    let of_json json__ =
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let scheduledEventId =
-        field_map_exn json "scheduledEventId" EventId.of_json in
-      let result = field_map json "result" Data.of_json in
-      make ~startedEventId ~scheduledEventId ?result ()
+        field_map json__ "scheduledEventId" EventId.of_json in
+      let result = field_map json__ "result" Data.of_json in
+      make ?startedEventId ?scheduledEventId ?result ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the ActivityTaskCompleted event."]
 module ActivityTaskFailedEventAttributes =
@@ -2333,55 +2338,53 @@ module ActivityTaskFailedEventAttributes =
       reason: FailureReason.t option
         [@ocaml.doc "The reason provided for the failure."];
       details: Data.t option [@ocaml.doc "The details of the failure."];
-      scheduledEventId: EventId.t
+      scheduledEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ActivityTaskScheduled event that was recorded when this activity task was scheduled. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ActivityTaskStarted event recorded when this activity task was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ActivityTaskFailedEventAttributes"
     let make ?reason =
       fun ?details ->
-        fun ~scheduledEventId ->
-          fun ~startedEventId ->
+        fun ?scheduledEventId ->
+          fun ?startedEventId ->
             fun () -> { reason; details; scheduledEventId; startedEventId }
     let to_value x =
       structure_to_value
         [("reason", (Option.map x.reason ~f:FailureReason.to_value));
         ("details", (Option.map x.details ~f:Data.to_value));
-        ("scheduledEventId", (Some (EventId.to_value x.scheduledEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)))]
+        ("scheduledEventId",
+          (Option.map x.scheduledEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let scheduledEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "scheduledEventId") in
       let details =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "details") in
       let reason =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "reason") in
-      make ~startedEventId ~scheduledEventId ?details ?reason ()
+      make ?startedEventId ?scheduledEventId ?details ?reason ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+    let of_json json__ =
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let scheduledEventId =
-        field_map_exn json "scheduledEventId" EventId.of_json in
-      let details = field_map json "details" Data.of_json in
-      let reason = field_map json "reason" FailureReason.of_json in
-      make ~startedEventId ~scheduledEventId ?details ?reason ()
+        field_map json__ "scheduledEventId" EventId.of_json in
+      let details = field_map json__ "details" Data.of_json in
+      let reason = field_map json__ "reason" FailureReason.of_json in
+      make ?startedEventId ?scheduledEventId ?details ?reason ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the ActivityTaskFailed event."]
 module ActivityTaskScheduledEventAttributes =
   struct
     type nonrec t =
       {
-      activityType: ActivityType.t
+      activityType: ActivityType.t option
         [@ocaml.doc "The type of the activity task."];
-      activityId: ActivityId.t
+      activityId: ActivityId.t option
         [@ocaml.doc "The unique ID of the activity task."];
       input: Data.t option
         [@ocaml.doc "The input provided to the activity task."];
@@ -2396,48 +2399,48 @@ module ActivityTaskScheduledEventAttributes =
       startToCloseTimeout: DurationInSecondsOptional.t option
         [@ocaml.doc
           "The maximum amount of time a worker may take to process the activity task."];
-      taskList: TaskList.t
+      taskList: TaskList.t option
         [@ocaml.doc
           "The task list in which the activity task has been scheduled."];
       taskPriority: TaskPriority.t option
         [@ocaml.doc
           "The priority to assign to the scheduled activity task. If set, this overrides any default priority value that was assigned when the activity type was registered. Valid values are integers that range from Java's Integer.MIN_VALUE (-2147483648) to Integer.MAX_VALUE (2147483647). Higher numbers indicate higher priority. For more information about setting task priority, see Setting Task Priority in the Amazon SWF Developer Guide."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision that resulted in the scheduling of this activity task. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
       heartbeatTimeout: DurationInSecondsOptional.t option
         [@ocaml.doc
           "The maximum time before which the worker processing this task must report progress by calling RecordActivityTaskHeartbeat. If the timeout is exceeded, the activity task is automatically timed out. If the worker subsequently attempts to record a heartbeat or return a result, it is ignored."]}
-    let context_ = "ActivityTaskScheduledEventAttributes"
-    let make ?input =
-      fun ?control ->
-        fun ?scheduleToStartTimeout ->
-          fun ?scheduleToCloseTimeout ->
-            fun ?startToCloseTimeout ->
-              fun ?taskPriority ->
-                fun ?heartbeatTimeout ->
-                  fun ~activityType ->
-                    fun ~activityId ->
-                      fun ~taskList ->
-                        fun ~decisionTaskCompletedEventId ->
+    let make ?activityType =
+      fun ?activityId ->
+        fun ?input ->
+          fun ?control ->
+            fun ?scheduleToStartTimeout ->
+              fun ?scheduleToCloseTimeout ->
+                fun ?startToCloseTimeout ->
+                  fun ?taskList ->
+                    fun ?taskPriority ->
+                      fun ?decisionTaskCompletedEventId ->
+                        fun ?heartbeatTimeout ->
                           fun () ->
                             {
+                              activityType;
+                              activityId;
                               input;
                               control;
                               scheduleToStartTimeout;
                               scheduleToCloseTimeout;
                               startToCloseTimeout;
-                              taskPriority;
-                              heartbeatTimeout;
-                              activityType;
-                              activityId;
                               taskList;
-                              decisionTaskCompletedEventId
+                              taskPriority;
+                              decisionTaskCompletedEventId;
+                              heartbeatTimeout
                             }
     let to_value x =
       structure_to_value
-        [("activityType", (Some (ActivityType.to_value x.activityType)));
-        ("activityId", (Some (ActivityId.to_value x.activityId)));
+        [("activityType",
+           (Option.map x.activityType ~f:ActivityType.to_value));
+        ("activityId", (Option.map x.activityId ~f:ActivityId.to_value));
         ("input", (Option.map x.input ~f:Data.to_value));
         ("control", (Option.map x.control ~f:Data.to_value));
         ("scheduleToStartTimeout",
@@ -2449,11 +2452,11 @@ module ActivityTaskScheduledEventAttributes =
         ("startToCloseTimeout",
           (Option.map x.startToCloseTimeout
              ~f:DurationInSecondsOptional.to_value));
-        ("taskList", (Some (TaskList.to_value x.taskList)));
+        ("taskList", (Option.map x.taskList ~f:TaskList.to_value));
         ("taskPriority",
           (Option.map x.taskPriority ~f:TaskPriority.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)));
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value));
         ("heartbeatTimeout",
           (Option.map x.heartbeatTimeout
              ~f:DurationInSecondsOptional.to_value))]
@@ -2463,14 +2466,13 @@ module ActivityTaskScheduledEventAttributes =
         (Option.map ~f:DurationInSecondsOptional.of_xml)
           (Xml.child xml_arg0 "heartbeatTimeout") in
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let taskPriority =
         (Option.map ~f:TaskPriority.of_xml)
           (Xml.child xml_arg0 "taskPriority") in
       let taskList =
-        TaskList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskList") in
+        (Option.map ~f:TaskList.of_xml) (Xml.child xml_arg0 "taskList") in
       let startToCloseTimeout =
         (Option.map ~f:DurationInSecondsOptional.of_xml)
           (Xml.child xml_arg0 "startToCloseTimeout") in
@@ -2484,39 +2486,37 @@ module ActivityTaskScheduledEventAttributes =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "control") in
       let input = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "input") in
       let activityId =
-        ActivityId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "activityId") in
+        (Option.map ~f:ActivityId.of_xml) (Xml.child xml_arg0 "activityId") in
       let activityType =
-        ActivityType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "activityType") in
-      make ?heartbeatTimeout ~decisionTaskCompletedEventId ?taskPriority
-        ~taskList ?startToCloseTimeout ?scheduleToCloseTimeout
-        ?scheduleToStartTimeout ?control ?input ~activityId ~activityType ()
+        (Option.map ~f:ActivityType.of_xml)
+          (Xml.child xml_arg0 "activityType") in
+      make ?heartbeatTimeout ?decisionTaskCompletedEventId ?taskPriority
+        ?taskList ?startToCloseTimeout ?scheduleToCloseTimeout
+        ?scheduleToStartTimeout ?control ?input ?activityId ?activityType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let heartbeatTimeout =
-        field_map json "heartbeatTimeout" DurationInSecondsOptional.of_json in
+        field_map json__ "heartbeatTimeout" DurationInSecondsOptional.of_json in
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      let taskPriority = field_map json "taskPriority" TaskPriority.of_json in
-      let taskList = field_map_exn json "taskList" TaskList.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      let taskPriority = field_map json__ "taskPriority" TaskPriority.of_json in
+      let taskList = field_map json__ "taskList" TaskList.of_json in
       let startToCloseTimeout =
-        field_map json "startToCloseTimeout"
+        field_map json__ "startToCloseTimeout"
           DurationInSecondsOptional.of_json in
       let scheduleToCloseTimeout =
-        field_map json "scheduleToCloseTimeout"
+        field_map json__ "scheduleToCloseTimeout"
           DurationInSecondsOptional.of_json in
       let scheduleToStartTimeout =
-        field_map json "scheduleToStartTimeout"
+        field_map json__ "scheduleToStartTimeout"
           DurationInSecondsOptional.of_json in
-      let control = field_map json "control" Data.of_json in
-      let input = field_map json "input" Data.of_json in
-      let activityId = field_map_exn json "activityId" ActivityId.of_json in
-      let activityType =
-        field_map_exn json "activityType" ActivityType.of_json in
-      make ?heartbeatTimeout ~decisionTaskCompletedEventId ?taskPriority
-        ~taskList ?startToCloseTimeout ?scheduleToCloseTimeout
-        ?scheduleToStartTimeout ?control ?input ~activityId ~activityType ()
+      let control = field_map json__ "control" Data.of_json in
+      let input = field_map json__ "input" Data.of_json in
+      let activityId = field_map json__ "activityId" ActivityId.of_json in
+      let activityType = field_map json__ "activityType" ActivityType.of_json in
+      make ?heartbeatTimeout ?decisionTaskCompletedEventId ?taskPriority
+        ?taskList ?startToCloseTimeout ?scheduleToCloseTimeout
+        ?scheduleToStartTimeout ?control ?input ?activityId ?activityType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the ActivityTaskScheduled event."]
 module ActivityTaskStartedEventAttributes =
@@ -2526,169 +2526,163 @@ module ActivityTaskStartedEventAttributes =
       identity: Identity.t option
         [@ocaml.doc
           "Identity of the worker that was assigned this task. This aids diagnostics when problems arise. The form of this identity is user defined."];
-      scheduledEventId: EventId.t
+      scheduledEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ActivityTaskScheduled event that was recorded when this activity task was scheduled. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ActivityTaskStartedEventAttributes"
     let make ?identity =
-      fun ~scheduledEventId -> fun () -> { identity; scheduledEventId }
+      fun ?scheduledEventId -> fun () -> { identity; scheduledEventId }
     let to_value x =
       structure_to_value
         [("identity", (Option.map x.identity ~f:Identity.to_value));
-        ("scheduledEventId", (Some (EventId.to_value x.scheduledEventId)))]
+        ("scheduledEventId",
+          (Option.map x.scheduledEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let scheduledEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "scheduledEventId") in
       let identity =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "identity") in
-      make ~scheduledEventId ?identity ()
+      make ?scheduledEventId ?identity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledEventId =
-        field_map_exn json "scheduledEventId" EventId.of_json in
-      let identity = field_map json "identity" Identity.of_json in
-      make ~scheduledEventId ?identity ()
+        field_map json__ "scheduledEventId" EventId.of_json in
+      let identity = field_map json__ "identity" Identity.of_json in
+      make ?scheduledEventId ?identity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the ActivityTaskStarted event."]
 module ActivityTaskTimedOutEventAttributes =
   struct
     type nonrec t =
       {
-      timeoutType: ActivityTaskTimeoutType.t
+      timeoutType: ActivityTaskTimeoutType.t option
         [@ocaml.doc "The type of the timeout that caused this event."];
-      scheduledEventId: EventId.t
+      scheduledEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ActivityTaskScheduled event that was recorded when this activity task was scheduled. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ActivityTaskStarted event recorded when this activity task was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
       details: LimitedData.t option
         [@ocaml.doc
           "Contains the content of the details parameter for the last call made by the activity to RecordActivityTaskHeartbeat."]}
-    let context_ = "ActivityTaskTimedOutEventAttributes"
-    let make ?details =
-      fun ~timeoutType ->
-        fun ~scheduledEventId ->
-          fun ~startedEventId ->
+    let make ?timeoutType =
+      fun ?scheduledEventId ->
+        fun ?startedEventId ->
+          fun ?details ->
             fun () ->
-              { details; timeoutType; scheduledEventId; startedEventId }
+              { timeoutType; scheduledEventId; startedEventId; details }
     let to_value x =
       structure_to_value
         [("timeoutType",
-           (Some (ActivityTaskTimeoutType.to_value x.timeoutType)));
-        ("scheduledEventId", (Some (EventId.to_value x.scheduledEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)));
+           (Option.map x.timeoutType ~f:ActivityTaskTimeoutType.to_value));
+        ("scheduledEventId",
+          (Option.map x.scheduledEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value));
         ("details", (Option.map x.details ~f:LimitedData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let details =
         (Option.map ~f:LimitedData.of_xml) (Xml.child xml_arg0 "details") in
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let scheduledEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "scheduledEventId") in
       let timeoutType =
-        ActivityTaskTimeoutType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "timeoutType") in
-      make ?details ~startedEventId ~scheduledEventId ~timeoutType ()
+        (Option.map ~f:ActivityTaskTimeoutType.of_xml)
+          (Xml.child xml_arg0 "timeoutType") in
+      make ?details ?startedEventId ?scheduledEventId ?timeoutType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "details" LimitedData.of_json in
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+    let of_json json__ =
+      let details = field_map json__ "details" LimitedData.of_json in
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let scheduledEventId =
-        field_map_exn json "scheduledEventId" EventId.of_json in
+        field_map json__ "scheduledEventId" EventId.of_json in
       let timeoutType =
-        field_map_exn json "timeoutType" ActivityTaskTimeoutType.of_json in
-      make ?details ~startedEventId ~scheduledEventId ~timeoutType ()
+        field_map json__ "timeoutType" ActivityTaskTimeoutType.of_json in
+      make ?details ?startedEventId ?scheduledEventId ?timeoutType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the ActivityTaskTimedOut event."]
 module CancelTimerFailedEventAttributes =
   struct
     type nonrec t =
       {
-      timerId: TimerId.t
+      timerId: TimerId.t option
         [@ocaml.doc
           "The timerId provided in the CancelTimer decision that failed."];
-      cause: CancelTimerFailedCause.t
+      cause: CancelTimerFailedCause.t option
         [@ocaml.doc
           "The cause of the failure. This information is generated by the system and can be useful for diagnostic purposes. If cause is set to OPERATION_NOT_PERMITTED, the decision failed because it lacked sufficient permissions. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the CancelTimer decision to cancel this timer. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "CancelTimerFailedEventAttributes"
-    let make ~timerId =
-      fun ~cause ->
-        fun ~decisionTaskCompletedEventId ->
+    let make ?timerId =
+      fun ?cause ->
+        fun ?decisionTaskCompletedEventId ->
           fun () -> { timerId; cause; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
-        [("timerId", (Some (TimerId.to_value x.timerId)));
-        ("cause", (Some (CancelTimerFailedCause.to_value x.cause)));
+        [("timerId", (Option.map x.timerId ~f:TimerId.to_value));
+        ("cause", (Option.map x.cause ~f:CancelTimerFailedCause.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let cause =
-        CancelTimerFailedCause.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cause") in
+        (Option.map ~f:CancelTimerFailedCause.of_xml)
+          (Xml.child xml_arg0 "cause") in
       let timerId =
-        TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
-      make ~decisionTaskCompletedEventId ~cause ~timerId ()
+        (Option.map ~f:TimerId.of_xml) (Xml.child xml_arg0 "timerId") in
+      make ?decisionTaskCompletedEventId ?cause ?timerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      let cause = field_map_exn json "cause" CancelTimerFailedCause.of_json in
-      let timerId = field_map_exn json "timerId" TimerId.of_json in
-      make ~decisionTaskCompletedEventId ~cause ~timerId ()
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      let cause = field_map json__ "cause" CancelTimerFailedCause.of_json in
+      let timerId = field_map json__ "timerId" TimerId.of_json in
+      make ?decisionTaskCompletedEventId ?cause ?timerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the CancelTimerFailed event."]
 module CancelWorkflowExecutionFailedEventAttributes =
   struct
     type nonrec t =
       {
-      cause: CancelWorkflowExecutionFailedCause.t
+      cause: CancelWorkflowExecutionFailedCause.t option
         [@ocaml.doc
           "The cause of the failure. This information is generated by the system and can be useful for diagnostic purposes. If cause is set to OPERATION_NOT_PERMITTED, the decision failed because it lacked sufficient permissions. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the CancelWorkflowExecution decision for this cancellation request. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "CancelWorkflowExecutionFailedEventAttributes"
-    let make ~cause =
-      fun ~decisionTaskCompletedEventId ->
+    let make ?cause =
+      fun ?decisionTaskCompletedEventId ->
         fun () -> { cause; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
         [("cause",
-           (Some (CancelWorkflowExecutionFailedCause.to_value x.cause)));
+           (Option.map x.cause ~f:CancelWorkflowExecutionFailedCause.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let cause =
-        CancelWorkflowExecutionFailedCause.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cause") in
-      make ~decisionTaskCompletedEventId ~cause ()
+        (Option.map ~f:CancelWorkflowExecutionFailedCause.of_xml)
+          (Xml.child xml_arg0 "cause") in
+      make ?decisionTaskCompletedEventId ?cause ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
       let cause =
-        field_map_exn json "cause" CancelWorkflowExecutionFailedCause.of_json in
-      make ~decisionTaskCompletedEventId ~cause ()
+        field_map json__ "cause" CancelWorkflowExecutionFailedCause.of_json in
+      make ?decisionTaskCompletedEventId ?cause ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the CancelWorkflowExecutionFailed event."]
@@ -2696,71 +2690,69 @@ module ChildWorkflowExecutionCanceledEventAttributes =
   struct
     type nonrec t =
       {
-      workflowExecution: WorkflowExecution.t
+      workflowExecution: WorkflowExecution.t option
         [@ocaml.doc "The child workflow execution that was canceled."];
-      workflowType: WorkflowType.t
+      workflowType: WorkflowType.t option
         [@ocaml.doc "The type of the child workflow execution."];
       details: Data.t option
         [@ocaml.doc "Details of the cancellation (if provided)."];
-      initiatedEventId: EventId.t
+      initiatedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the StartChildWorkflowExecutionInitiated event corresponding to the StartChildWorkflowExecution Decision to start this child workflow execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ChildWorkflowExecutionStarted event recorded when this child workflow execution was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ChildWorkflowExecutionCanceledEventAttributes"
-    let make ?details =
-      fun ~workflowExecution ->
-        fun ~workflowType ->
-          fun ~initiatedEventId ->
-            fun ~startedEventId ->
+    let make ?workflowExecution =
+      fun ?workflowType ->
+        fun ?details ->
+          fun ?initiatedEventId ->
+            fun ?startedEventId ->
               fun () ->
                 {
-                  details;
                   workflowExecution;
                   workflowType;
+                  details;
                   initiatedEventId;
                   startedEventId
                 }
     let to_value x =
       structure_to_value
         [("workflowExecution",
-           (Some (WorkflowExecution.to_value x.workflowExecution)));
-        ("workflowType", (Some (WorkflowType.to_value x.workflowType)));
+           (Option.map x.workflowExecution ~f:WorkflowExecution.to_value));
+        ("workflowType",
+          (Option.map x.workflowType ~f:WorkflowType.to_value));
         ("details", (Option.map x.details ~f:Data.to_value));
-        ("initiatedEventId", (Some (EventId.to_value x.initiatedEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)))]
+        ("initiatedEventId",
+          (Option.map x.initiatedEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let initiatedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "initiatedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "initiatedEventId") in
       let details =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "details") in
       let workflowType =
-        WorkflowType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
+        (Option.map ~f:WorkflowType.of_xml)
+          (Xml.child xml_arg0 "workflowType") in
       let workflowExecution =
-        WorkflowExecution.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
-      make ~startedEventId ~initiatedEventId ?details ~workflowType
-        ~workflowExecution ()
+        (Option.map ~f:WorkflowExecution.of_xml)
+          (Xml.child xml_arg0 "workflowExecution") in
+      make ?startedEventId ?initiatedEventId ?details ?workflowType
+        ?workflowExecution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+    let of_json json__ =
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let initiatedEventId =
-        field_map_exn json "initiatedEventId" EventId.of_json in
-      let details = field_map json "details" Data.of_json in
-      let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
+        field_map json__ "initiatedEventId" EventId.of_json in
+      let details = field_map json__ "details" Data.of_json in
+      let workflowType = field_map json__ "workflowType" WorkflowType.of_json in
       let workflowExecution =
-        field_map_exn json "workflowExecution" WorkflowExecution.of_json in
-      make ~startedEventId ~initiatedEventId ?details ~workflowType
-        ~workflowExecution ()
+        field_map json__ "workflowExecution" WorkflowExecution.of_json in
+      make ?startedEventId ?initiatedEventId ?details ?workflowType
+        ?workflowExecution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provide details of the ChildWorkflowExecutionCanceled event."]
@@ -2768,70 +2760,68 @@ module ChildWorkflowExecutionCompletedEventAttributes =
   struct
     type nonrec t =
       {
-      workflowExecution: WorkflowExecution.t
+      workflowExecution: WorkflowExecution.t option
         [@ocaml.doc "The child workflow execution that was completed."];
-      workflowType: WorkflowType.t
+      workflowType: WorkflowType.t option
         [@ocaml.doc "The type of the child workflow execution."];
       result: Data.t option
         [@ocaml.doc "The result of the child workflow execution."];
-      initiatedEventId: EventId.t
+      initiatedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the StartChildWorkflowExecutionInitiated event corresponding to the StartChildWorkflowExecution Decision to start this child workflow execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ChildWorkflowExecutionStarted event recorded when this child workflow execution was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ChildWorkflowExecutionCompletedEventAttributes"
-    let make ?result =
-      fun ~workflowExecution ->
-        fun ~workflowType ->
-          fun ~initiatedEventId ->
-            fun ~startedEventId ->
+    let make ?workflowExecution =
+      fun ?workflowType ->
+        fun ?result ->
+          fun ?initiatedEventId ->
+            fun ?startedEventId ->
               fun () ->
                 {
-                  result;
                   workflowExecution;
                   workflowType;
+                  result;
                   initiatedEventId;
                   startedEventId
                 }
     let to_value x =
       structure_to_value
         [("workflowExecution",
-           (Some (WorkflowExecution.to_value x.workflowExecution)));
-        ("workflowType", (Some (WorkflowType.to_value x.workflowType)));
+           (Option.map x.workflowExecution ~f:WorkflowExecution.to_value));
+        ("workflowType",
+          (Option.map x.workflowType ~f:WorkflowType.to_value));
         ("result", (Option.map x.result ~f:Data.to_value));
-        ("initiatedEventId", (Some (EventId.to_value x.initiatedEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)))]
+        ("initiatedEventId",
+          (Option.map x.initiatedEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let initiatedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "initiatedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "initiatedEventId") in
       let result = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "result") in
       let workflowType =
-        WorkflowType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
+        (Option.map ~f:WorkflowType.of_xml)
+          (Xml.child xml_arg0 "workflowType") in
       let workflowExecution =
-        WorkflowExecution.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
-      make ~startedEventId ~initiatedEventId ?result ~workflowType
-        ~workflowExecution ()
+        (Option.map ~f:WorkflowExecution.of_xml)
+          (Xml.child xml_arg0 "workflowExecution") in
+      make ?startedEventId ?initiatedEventId ?result ?workflowType
+        ?workflowExecution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+    let of_json json__ =
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let initiatedEventId =
-        field_map_exn json "initiatedEventId" EventId.of_json in
-      let result = field_map json "result" Data.of_json in
-      let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
+        field_map json__ "initiatedEventId" EventId.of_json in
+      let result = field_map json__ "result" Data.of_json in
+      let workflowType = field_map json__ "workflowType" WorkflowType.of_json in
       let workflowExecution =
-        field_map_exn json "workflowExecution" WorkflowExecution.of_json in
-      make ~startedEventId ~initiatedEventId ?result ~workflowType
-        ~workflowExecution ()
+        field_map json__ "workflowExecution" WorkflowExecution.of_json in
+      make ?startedEventId ?initiatedEventId ?result ?workflowType
+        ?workflowExecution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the ChildWorkflowExecutionCompleted event."]
@@ -2839,79 +2829,77 @@ module ChildWorkflowExecutionFailedEventAttributes =
   struct
     type nonrec t =
       {
-      workflowExecution: WorkflowExecution.t
+      workflowExecution: WorkflowExecution.t option
         [@ocaml.doc "The child workflow execution that failed."];
-      workflowType: WorkflowType.t
+      workflowType: WorkflowType.t option
         [@ocaml.doc "The type of the child workflow execution."];
       reason: FailureReason.t option
         [@ocaml.doc "The reason for the failure (if provided)."];
       details: Data.t option
         [@ocaml.doc "The details of the failure (if provided)."];
-      initiatedEventId: EventId.t
+      initiatedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the StartChildWorkflowExecutionInitiated event corresponding to the StartChildWorkflowExecution Decision to start this child workflow execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ChildWorkflowExecutionStarted event recorded when this child workflow execution was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ChildWorkflowExecutionFailedEventAttributes"
-    let make ?reason =
-      fun ?details ->
-        fun ~workflowExecution ->
-          fun ~workflowType ->
-            fun ~initiatedEventId ->
-              fun ~startedEventId ->
+    let make ?workflowExecution =
+      fun ?workflowType ->
+        fun ?reason ->
+          fun ?details ->
+            fun ?initiatedEventId ->
+              fun ?startedEventId ->
                 fun () ->
                   {
-                    reason;
-                    details;
                     workflowExecution;
                     workflowType;
+                    reason;
+                    details;
                     initiatedEventId;
                     startedEventId
                   }
     let to_value x =
       structure_to_value
         [("workflowExecution",
-           (Some (WorkflowExecution.to_value x.workflowExecution)));
-        ("workflowType", (Some (WorkflowType.to_value x.workflowType)));
+           (Option.map x.workflowExecution ~f:WorkflowExecution.to_value));
+        ("workflowType",
+          (Option.map x.workflowType ~f:WorkflowType.to_value));
         ("reason", (Option.map x.reason ~f:FailureReason.to_value));
         ("details", (Option.map x.details ~f:Data.to_value));
-        ("initiatedEventId", (Some (EventId.to_value x.initiatedEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)))]
+        ("initiatedEventId",
+          (Option.map x.initiatedEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let initiatedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "initiatedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "initiatedEventId") in
       let details =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "details") in
       let reason =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "reason") in
       let workflowType =
-        WorkflowType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
+        (Option.map ~f:WorkflowType.of_xml)
+          (Xml.child xml_arg0 "workflowType") in
       let workflowExecution =
-        WorkflowExecution.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
-      make ~startedEventId ~initiatedEventId ?details ?reason ~workflowType
-        ~workflowExecution ()
+        (Option.map ~f:WorkflowExecution.of_xml)
+          (Xml.child xml_arg0 "workflowExecution") in
+      make ?startedEventId ?initiatedEventId ?details ?reason ?workflowType
+        ?workflowExecution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+    let of_json json__ =
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let initiatedEventId =
-        field_map_exn json "initiatedEventId" EventId.of_json in
-      let details = field_map json "details" Data.of_json in
-      let reason = field_map json "reason" FailureReason.of_json in
-      let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
+        field_map json__ "initiatedEventId" EventId.of_json in
+      let details = field_map json__ "details" Data.of_json in
+      let reason = field_map json__ "reason" FailureReason.of_json in
+      let workflowType = field_map json__ "workflowType" WorkflowType.of_json in
       let workflowExecution =
-        field_map_exn json "workflowExecution" WorkflowExecution.of_json in
-      make ~startedEventId ~initiatedEventId ?details ?reason ~workflowType
-        ~workflowExecution ()
+        field_map json__ "workflowExecution" WorkflowExecution.of_json in
+      make ?startedEventId ?initiatedEventId ?details ?reason ?workflowType
+        ?workflowExecution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the ChildWorkflowExecutionFailed event."]
@@ -2919,45 +2907,45 @@ module ChildWorkflowExecutionStartedEventAttributes =
   struct
     type nonrec t =
       {
-      workflowExecution: WorkflowExecution.t
+      workflowExecution: WorkflowExecution.t option
         [@ocaml.doc "The child workflow execution that was started."];
-      workflowType: WorkflowType.t
+      workflowType: WorkflowType.t option
         [@ocaml.doc "The type of the child workflow execution."];
-      initiatedEventId: EventId.t
+      initiatedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the StartChildWorkflowExecutionInitiated event corresponding to the StartChildWorkflowExecution Decision to start this child workflow execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ChildWorkflowExecutionStartedEventAttributes"
-    let make ~workflowExecution =
-      fun ~workflowType ->
-        fun ~initiatedEventId ->
+    let make ?workflowExecution =
+      fun ?workflowType ->
+        fun ?initiatedEventId ->
           fun () -> { workflowExecution; workflowType; initiatedEventId }
     let to_value x =
       structure_to_value
         [("workflowExecution",
-           (Some (WorkflowExecution.to_value x.workflowExecution)));
-        ("workflowType", (Some (WorkflowType.to_value x.workflowType)));
-        ("initiatedEventId", (Some (EventId.to_value x.initiatedEventId)))]
+           (Option.map x.workflowExecution ~f:WorkflowExecution.to_value));
+        ("workflowType",
+          (Option.map x.workflowType ~f:WorkflowType.to_value));
+        ("initiatedEventId",
+          (Option.map x.initiatedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let initiatedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "initiatedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "initiatedEventId") in
       let workflowType =
-        WorkflowType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
+        (Option.map ~f:WorkflowType.of_xml)
+          (Xml.child xml_arg0 "workflowType") in
       let workflowExecution =
-        WorkflowExecution.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
-      make ~initiatedEventId ~workflowType ~workflowExecution ()
+        (Option.map ~f:WorkflowExecution.of_xml)
+          (Xml.child xml_arg0 "workflowExecution") in
+      make ?initiatedEventId ?workflowType ?workflowExecution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let initiatedEventId =
-        field_map_exn json "initiatedEventId" EventId.of_json in
-      let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
+        field_map json__ "initiatedEventId" EventId.of_json in
+      let workflowType = field_map json__ "workflowType" WorkflowType.of_json in
       let workflowExecution =
-        field_map_exn json "workflowExecution" WorkflowExecution.of_json in
-      make ~initiatedEventId ~workflowType ~workflowExecution ()
+        field_map json__ "workflowExecution" WorkflowExecution.of_json in
+      make ?initiatedEventId ?workflowType ?workflowExecution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the ChildWorkflowExecutionStarted event."]
@@ -2965,21 +2953,20 @@ module ChildWorkflowExecutionTerminatedEventAttributes =
   struct
     type nonrec t =
       {
-      workflowExecution: WorkflowExecution.t
+      workflowExecution: WorkflowExecution.t option
         [@ocaml.doc "The child workflow execution that was terminated."];
-      workflowType: WorkflowType.t
+      workflowType: WorkflowType.t option
         [@ocaml.doc "The type of the child workflow execution."];
-      initiatedEventId: EventId.t
+      initiatedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the StartChildWorkflowExecutionInitiated event corresponding to the StartChildWorkflowExecution Decision to start this child workflow execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ChildWorkflowExecutionStarted event recorded when this child workflow execution was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ChildWorkflowExecutionTerminatedEventAttributes"
-    let make ~workflowExecution =
-      fun ~workflowType ->
-        fun ~initiatedEventId ->
-          fun ~startedEventId ->
+    let make ?workflowExecution =
+      fun ?workflowType ->
+        fun ?initiatedEventId ->
+          fun ?startedEventId ->
             fun () ->
               {
                 workflowExecution;
@@ -2990,37 +2977,36 @@ module ChildWorkflowExecutionTerminatedEventAttributes =
     let to_value x =
       structure_to_value
         [("workflowExecution",
-           (Some (WorkflowExecution.to_value x.workflowExecution)));
-        ("workflowType", (Some (WorkflowType.to_value x.workflowType)));
-        ("initiatedEventId", (Some (EventId.to_value x.initiatedEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)))]
+           (Option.map x.workflowExecution ~f:WorkflowExecution.to_value));
+        ("workflowType",
+          (Option.map x.workflowType ~f:WorkflowType.to_value));
+        ("initiatedEventId",
+          (Option.map x.initiatedEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let initiatedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "initiatedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "initiatedEventId") in
       let workflowType =
-        WorkflowType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
+        (Option.map ~f:WorkflowType.of_xml)
+          (Xml.child xml_arg0 "workflowType") in
       let workflowExecution =
-        WorkflowExecution.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
-      make ~startedEventId ~initiatedEventId ~workflowType ~workflowExecution
+        (Option.map ~f:WorkflowExecution.of_xml)
+          (Xml.child xml_arg0 "workflowExecution") in
+      make ?startedEventId ?initiatedEventId ?workflowType ?workflowExecution
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+    let of_json json__ =
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let initiatedEventId =
-        field_map_exn json "initiatedEventId" EventId.of_json in
-      let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
+        field_map json__ "initiatedEventId" EventId.of_json in
+      let workflowType = field_map json__ "workflowType" WorkflowType.of_json in
       let workflowExecution =
-        field_map_exn json "workflowExecution" WorkflowExecution.of_json in
-      make ~startedEventId ~initiatedEventId ~workflowType ~workflowExecution
+        field_map json__ "workflowExecution" WorkflowExecution.of_json in
+      make ?startedEventId ?initiatedEventId ?workflowType ?workflowExecution
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3029,25 +3015,24 @@ module ChildWorkflowExecutionTimedOutEventAttributes =
   struct
     type nonrec t =
       {
-      workflowExecution: WorkflowExecution.t
+      workflowExecution: WorkflowExecution.t option
         [@ocaml.doc "The child workflow execution that timed out."];
-      workflowType: WorkflowType.t
+      workflowType: WorkflowType.t option
         [@ocaml.doc "The type of the child workflow execution."];
-      timeoutType: WorkflowExecutionTimeoutType.t
+      timeoutType: WorkflowExecutionTimeoutType.t option
         [@ocaml.doc
           "The type of the timeout that caused the child workflow execution to time out."];
-      initiatedEventId: EventId.t
+      initiatedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the StartChildWorkflowExecutionInitiated event corresponding to the StartChildWorkflowExecution Decision to start this child workflow execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ChildWorkflowExecutionStarted event recorded when this child workflow execution was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ChildWorkflowExecutionTimedOutEventAttributes"
-    let make ~workflowExecution =
-      fun ~workflowType ->
-        fun ~timeoutType ->
-          fun ~initiatedEventId ->
-            fun ~startedEventId ->
+    let make ?workflowExecution =
+      fun ?workflowType ->
+        fun ?timeoutType ->
+          fun ?initiatedEventId ->
+            fun ?startedEventId ->
               fun () ->
                 {
                   workflowExecution;
@@ -3059,45 +3044,44 @@ module ChildWorkflowExecutionTimedOutEventAttributes =
     let to_value x =
       structure_to_value
         [("workflowExecution",
-           (Some (WorkflowExecution.to_value x.workflowExecution)));
-        ("workflowType", (Some (WorkflowType.to_value x.workflowType)));
+           (Option.map x.workflowExecution ~f:WorkflowExecution.to_value));
+        ("workflowType",
+          (Option.map x.workflowType ~f:WorkflowType.to_value));
         ("timeoutType",
-          (Some (WorkflowExecutionTimeoutType.to_value x.timeoutType)));
-        ("initiatedEventId", (Some (EventId.to_value x.initiatedEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)))]
+          (Option.map x.timeoutType ~f:WorkflowExecutionTimeoutType.to_value));
+        ("initiatedEventId",
+          (Option.map x.initiatedEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let initiatedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "initiatedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "initiatedEventId") in
       let timeoutType =
-        WorkflowExecutionTimeoutType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "timeoutType") in
+        (Option.map ~f:WorkflowExecutionTimeoutType.of_xml)
+          (Xml.child xml_arg0 "timeoutType") in
       let workflowType =
-        WorkflowType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
+        (Option.map ~f:WorkflowType.of_xml)
+          (Xml.child xml_arg0 "workflowType") in
       let workflowExecution =
-        WorkflowExecution.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
-      make ~startedEventId ~initiatedEventId ~timeoutType ~workflowType
-        ~workflowExecution ()
+        (Option.map ~f:WorkflowExecution.of_xml)
+          (Xml.child xml_arg0 "workflowExecution") in
+      make ?startedEventId ?initiatedEventId ?timeoutType ?workflowType
+        ?workflowExecution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+    let of_json json__ =
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let initiatedEventId =
-        field_map_exn json "initiatedEventId" EventId.of_json in
+        field_map json__ "initiatedEventId" EventId.of_json in
       let timeoutType =
-        field_map_exn json "timeoutType" WorkflowExecutionTimeoutType.of_json in
-      let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
+        field_map json__ "timeoutType" WorkflowExecutionTimeoutType.of_json in
+      let workflowType = field_map json__ "workflowType" WorkflowType.of_json in
       let workflowExecution =
-        field_map_exn json "workflowExecution" WorkflowExecution.of_json in
-      make ~startedEventId ~initiatedEventId ~timeoutType ~workflowType
-        ~workflowExecution ()
+        field_map json__ "workflowExecution" WorkflowExecution.of_json in
+      make ?startedEventId ?initiatedEventId ?timeoutType ?workflowType
+        ?workflowExecution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the ChildWorkflowExecutionTimedOut event."]
@@ -3105,40 +3089,38 @@ module CompleteWorkflowExecutionFailedEventAttributes =
   struct
     type nonrec t =
       {
-      cause: CompleteWorkflowExecutionFailedCause.t
+      cause: CompleteWorkflowExecutionFailedCause.t option
         [@ocaml.doc
           "The cause of the failure. This information is generated by the system and can be useful for diagnostic purposes. If cause is set to OPERATION_NOT_PERMITTED, the decision failed because it lacked sufficient permissions. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the CompleteWorkflowExecution decision to complete this execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "CompleteWorkflowExecutionFailedEventAttributes"
-    let make ~cause =
-      fun ~decisionTaskCompletedEventId ->
+    let make ?cause =
+      fun ?decisionTaskCompletedEventId ->
         fun () -> { cause; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
         [("cause",
-           (Some (CompleteWorkflowExecutionFailedCause.to_value x.cause)));
+           (Option.map x.cause
+              ~f:CompleteWorkflowExecutionFailedCause.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let cause =
-        CompleteWorkflowExecutionFailedCause.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cause") in
-      make ~decisionTaskCompletedEventId ~cause ()
+        (Option.map ~f:CompleteWorkflowExecutionFailedCause.of_xml)
+          (Xml.child xml_arg0 "cause") in
+      make ?decisionTaskCompletedEventId ?cause ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
       let cause =
-        field_map_exn json "cause"
-          CompleteWorkflowExecutionFailedCause.of_json in
-      make ~decisionTaskCompletedEventId ~cause ()
+        field_map json__ "cause" CompleteWorkflowExecutionFailedCause.of_json in
+      make ?decisionTaskCompletedEventId ?cause ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the CompleteWorkflowExecutionFailed event."]
@@ -3146,40 +3128,39 @@ module ContinueAsNewWorkflowExecutionFailedEventAttributes =
   struct
     type nonrec t =
       {
-      cause: ContinueAsNewWorkflowExecutionFailedCause.t
+      cause: ContinueAsNewWorkflowExecutionFailedCause.t option
         [@ocaml.doc
           "The cause of the failure. This information is generated by the system and can be useful for diagnostic purposes. If cause is set to OPERATION_NOT_PERMITTED, the decision failed because it lacked sufficient permissions. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the ContinueAsNewWorkflowExecution decision that started this execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ContinueAsNewWorkflowExecutionFailedEventAttributes"
-    let make ~cause =
-      fun ~decisionTaskCompletedEventId ->
+    let make ?cause =
+      fun ?decisionTaskCompletedEventId ->
         fun () -> { cause; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
         [("cause",
-           (Some (ContinueAsNewWorkflowExecutionFailedCause.to_value x.cause)));
+           (Option.map x.cause
+              ~f:ContinueAsNewWorkflowExecutionFailedCause.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let cause =
-        ContinueAsNewWorkflowExecutionFailedCause.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cause") in
-      make ~decisionTaskCompletedEventId ~cause ()
+        (Option.map ~f:ContinueAsNewWorkflowExecutionFailedCause.of_xml)
+          (Xml.child xml_arg0 "cause") in
+      make ?decisionTaskCompletedEventId ?cause ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
       let cause =
-        field_map_exn json "cause"
+        field_map json__ "cause"
           ContinueAsNewWorkflowExecutionFailedCause.of_json in
-      make ~decisionTaskCompletedEventId ~cause ()
+      make ?decisionTaskCompletedEventId ?cause ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the ContinueAsNewWorkflowExecutionFailed event."]
@@ -3189,49 +3170,75 @@ module DecisionTaskCompletedEventAttributes =
       {
       executionContext: Data.t option
         [@ocaml.doc "User defined context for the workflow execution."];
-      scheduledEventId: EventId.t
+      scheduledEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskScheduled event that was recorded when this decision task was scheduled. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
-          "The ID of the DecisionTaskStarted event recorded when this decision task was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "DecisionTaskCompletedEventAttributes"
+          "The ID of the DecisionTaskStarted event recorded when this decision task was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
+      taskList: TaskList.t option ;
+      taskListScheduleToStartTimeout: DurationInSecondsOptional.t option
+        [@ocaml.doc
+          "The maximum amount of time the decision task can wait to be assigned to a worker."]}
     let make ?executionContext =
-      fun ~scheduledEventId ->
-        fun ~startedEventId ->
-          fun () -> { executionContext; scheduledEventId; startedEventId }
+      fun ?scheduledEventId ->
+        fun ?startedEventId ->
+          fun ?taskList ->
+            fun ?taskListScheduleToStartTimeout ->
+              fun () ->
+                {
+                  executionContext;
+                  scheduledEventId;
+                  startedEventId;
+                  taskList;
+                  taskListScheduleToStartTimeout
+                }
     let to_value x =
       structure_to_value
         [("executionContext",
            (Option.map x.executionContext ~f:Data.to_value));
-        ("scheduledEventId", (Some (EventId.to_value x.scheduledEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)))]
+        ("scheduledEventId",
+          (Option.map x.scheduledEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value));
+        ("taskList", (Option.map x.taskList ~f:TaskList.to_value));
+        ("taskListScheduleToStartTimeout",
+          (Option.map x.taskListScheduleToStartTimeout
+             ~f:DurationInSecondsOptional.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let taskListScheduleToStartTimeout =
+        (Option.map ~f:DurationInSecondsOptional.of_xml)
+          (Xml.child xml_arg0 "taskListScheduleToStartTimeout") in
+      let taskList =
+        (Option.map ~f:TaskList.of_xml) (Xml.child xml_arg0 "taskList") in
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let scheduledEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "scheduledEventId") in
       let executionContext =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "executionContext") in
-      make ~startedEventId ~scheduledEventId ?executionContext ()
+      make ?taskListScheduleToStartTimeout ?taskList ?startedEventId
+        ?scheduledEventId ?executionContext ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+    let of_json json__ =
+      let taskListScheduleToStartTimeout =
+        field_map json__ "taskListScheduleToStartTimeout"
+          DurationInSecondsOptional.of_json in
+      let taskList = field_map json__ "taskList" TaskList.of_json in
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let scheduledEventId =
-        field_map_exn json "scheduledEventId" EventId.of_json in
-      let executionContext = field_map json "executionContext" Data.of_json in
-      make ~startedEventId ~scheduledEventId ?executionContext ()
+        field_map json__ "scheduledEventId" EventId.of_json in
+      let executionContext = field_map json__ "executionContext" Data.of_json in
+      make ?taskListScheduleToStartTimeout ?taskList ?startedEventId
+        ?scheduledEventId ?executionContext ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the DecisionTaskCompleted event."]
 module DecisionTaskScheduledEventAttributes =
   struct
     type nonrec t =
       {
-      taskList: TaskList.t
+      taskList: TaskList.t option
         [@ocaml.doc
           "The name of the task list in which the decision task was scheduled."];
       taskPriority: TaskPriority.t option
@@ -3239,22 +3246,37 @@ module DecisionTaskScheduledEventAttributes =
           "A task priority that, if set, specifies the priority for this decision task. Valid values are integers that range from Java's Integer.MIN_VALUE (-2147483648) to Integer.MAX_VALUE (2147483647). Higher numbers indicate higher priority. For more information about setting task priority, see Setting Task Priority in the Amazon SWF Developer Guide."];
       startToCloseTimeout: DurationInSecondsOptional.t option
         [@ocaml.doc
-          "The maximum duration for this decision task. The task is considered timed out if it doesn't completed within this duration. The duration is specified in seconds, an integer greater than or equal to 0. You can use NONE to specify unlimited duration."]}
-    let context_ = "DecisionTaskScheduledEventAttributes"
-    let make ?taskPriority =
-      fun ?startToCloseTimeout ->
-        fun ~taskList ->
-          fun () -> { taskPriority; startToCloseTimeout; taskList }
+          "The maximum duration for this decision task. The task is considered timed out if it doesn't completed within this duration. The duration is specified in seconds, an integer greater than or equal to 0. You can use NONE to specify unlimited duration."];
+      scheduleToStartTimeout: DurationInSecondsOptional.t option
+        [@ocaml.doc
+          "The maximum amount of time the decision task can wait to be assigned to a worker."]}
+    let make ?taskList =
+      fun ?taskPriority ->
+        fun ?startToCloseTimeout ->
+          fun ?scheduleToStartTimeout ->
+            fun () ->
+              {
+                taskList;
+                taskPriority;
+                startToCloseTimeout;
+                scheduleToStartTimeout
+              }
     let to_value x =
       structure_to_value
-        [("taskList", (Some (TaskList.to_value x.taskList)));
+        [("taskList", (Option.map x.taskList ~f:TaskList.to_value));
         ("taskPriority",
           (Option.map x.taskPriority ~f:TaskPriority.to_value));
         ("startToCloseTimeout",
           (Option.map x.startToCloseTimeout
+             ~f:DurationInSecondsOptional.to_value));
+        ("scheduleToStartTimeout",
+          (Option.map x.scheduleToStartTimeout
              ~f:DurationInSecondsOptional.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let scheduleToStartTimeout =
+        (Option.map ~f:DurationInSecondsOptional.of_xml)
+          (Xml.child xml_arg0 "scheduleToStartTimeout") in
       let startToCloseTimeout =
         (Option.map ~f:DurationInSecondsOptional.of_xml)
           (Xml.child xml_arg0 "startToCloseTimeout") in
@@ -3262,16 +3284,21 @@ module DecisionTaskScheduledEventAttributes =
         (Option.map ~f:TaskPriority.of_xml)
           (Xml.child xml_arg0 "taskPriority") in
       let taskList =
-        TaskList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskList") in
-      make ?startToCloseTimeout ?taskPriority ~taskList ()
+        (Option.map ~f:TaskList.of_xml) (Xml.child xml_arg0 "taskList") in
+      make ?scheduleToStartTimeout ?startToCloseTimeout ?taskPriority
+        ?taskList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startToCloseTimeout =
-        field_map json "startToCloseTimeout"
+    let of_json json__ =
+      let scheduleToStartTimeout =
+        field_map json__ "scheduleToStartTimeout"
           DurationInSecondsOptional.of_json in
-      let taskPriority = field_map json "taskPriority" TaskPriority.of_json in
-      let taskList = field_map_exn json "taskList" TaskList.of_json in
-      make ?startToCloseTimeout ?taskPriority ~taskList ()
+      let startToCloseTimeout =
+        field_map json__ "startToCloseTimeout"
+          DurationInSecondsOptional.of_json in
+      let taskPriority = field_map json__ "taskPriority" TaskPriority.of_json in
+      let taskList = field_map json__ "taskList" TaskList.of_json in
+      make ?scheduleToStartTimeout ?startToCloseTimeout ?taskPriority
+        ?taskList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides details about the DecisionTaskScheduled event."]
 module DecisionTaskStartedEventAttributes =
@@ -3281,77 +3308,75 @@ module DecisionTaskStartedEventAttributes =
       identity: Identity.t option
         [@ocaml.doc
           "Identity of the decider making the request. This enables diagnostic tracing when problems arise. The form of this identity is user defined."];
-      scheduledEventId: EventId.t
+      scheduledEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskScheduled event that was recorded when this decision task was scheduled. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "DecisionTaskStartedEventAttributes"
     let make ?identity =
-      fun ~scheduledEventId -> fun () -> { identity; scheduledEventId }
+      fun ?scheduledEventId -> fun () -> { identity; scheduledEventId }
     let to_value x =
       structure_to_value
         [("identity", (Option.map x.identity ~f:Identity.to_value));
-        ("scheduledEventId", (Some (EventId.to_value x.scheduledEventId)))]
+        ("scheduledEventId",
+          (Option.map x.scheduledEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let scheduledEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "scheduledEventId") in
       let identity =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "identity") in
-      make ~scheduledEventId ?identity ()
+      make ?scheduledEventId ?identity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledEventId =
-        field_map_exn json "scheduledEventId" EventId.of_json in
-      let identity = field_map json "identity" Identity.of_json in
-      make ~scheduledEventId ?identity ()
+        field_map json__ "scheduledEventId" EventId.of_json in
+      let identity = field_map json__ "identity" Identity.of_json in
+      make ?scheduledEventId ?identity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the DecisionTaskStarted event."]
 module DecisionTaskTimedOutEventAttributes =
   struct
     type nonrec t =
       {
-      timeoutType: DecisionTaskTimeoutType.t
+      timeoutType: DecisionTaskTimeoutType.t option
         [@ocaml.doc
           "The type of timeout that expired before the decision task could be completed."];
-      scheduledEventId: EventId.t
+      scheduledEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskScheduled event that was recorded when this decision task was scheduled. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskStarted event recorded when this decision task was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "DecisionTaskTimedOutEventAttributes"
-    let make ~timeoutType =
-      fun ~scheduledEventId ->
-        fun ~startedEventId ->
+    let make ?timeoutType =
+      fun ?scheduledEventId ->
+        fun ?startedEventId ->
           fun () -> { timeoutType; scheduledEventId; startedEventId }
     let to_value x =
       structure_to_value
         [("timeoutType",
-           (Some (DecisionTaskTimeoutType.to_value x.timeoutType)));
-        ("scheduledEventId", (Some (EventId.to_value x.scheduledEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)))]
+           (Option.map x.timeoutType ~f:DecisionTaskTimeoutType.to_value));
+        ("scheduledEventId",
+          (Option.map x.scheduledEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let scheduledEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "scheduledEventId") in
       let timeoutType =
-        DecisionTaskTimeoutType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "timeoutType") in
-      make ~startedEventId ~scheduledEventId ~timeoutType ()
+        (Option.map ~f:DecisionTaskTimeoutType.of_xml)
+          (Xml.child xml_arg0 "timeoutType") in
+      make ?startedEventId ?scheduledEventId ?timeoutType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+    let of_json json__ =
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let scheduledEventId =
-        field_map_exn json "scheduledEventId" EventId.of_json in
+        field_map json__ "scheduledEventId" EventId.of_json in
       let timeoutType =
-        field_map_exn json "timeoutType" DecisionTaskTimeoutType.of_json in
-      make ~startedEventId ~scheduledEventId ~timeoutType ()
+        field_map json__ "timeoutType" DecisionTaskTimeoutType.of_json in
+      make ?startedEventId ?scheduledEventId ?timeoutType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the DecisionTaskTimedOut event."]
 module EventType =
@@ -3561,37 +3586,37 @@ module ExternalWorkflowExecutionCancelRequestedEventAttributes =
   struct
     type nonrec t =
       {
-      workflowExecution: WorkflowExecution.t
+      workflowExecution: WorkflowExecution.t option
         [@ocaml.doc
           "The external workflow execution to which the cancellation request was delivered."];
-      initiatedEventId: EventId.t
+      initiatedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the RequestCancelExternalWorkflowExecutionInitiated event corresponding to the RequestCancelExternalWorkflowExecution decision to cancel this external workflow execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ExternalWorkflowExecutionCancelRequestedEventAttributes"
-    let make ~workflowExecution =
-      fun ~initiatedEventId ->
+    let make ?workflowExecution =
+      fun ?initiatedEventId ->
         fun () -> { workflowExecution; initiatedEventId }
     let to_value x =
       structure_to_value
         [("workflowExecution",
-           (Some (WorkflowExecution.to_value x.workflowExecution)));
-        ("initiatedEventId", (Some (EventId.to_value x.initiatedEventId)))]
+           (Option.map x.workflowExecution ~f:WorkflowExecution.to_value));
+        ("initiatedEventId",
+          (Option.map x.initiatedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let initiatedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "initiatedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "initiatedEventId") in
       let workflowExecution =
-        WorkflowExecution.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
-      make ~initiatedEventId ~workflowExecution ()
+        (Option.map ~f:WorkflowExecution.of_xml)
+          (Xml.child xml_arg0 "workflowExecution") in
+      make ?initiatedEventId ?workflowExecution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let initiatedEventId =
-        field_map_exn json "initiatedEventId" EventId.of_json in
+        field_map json__ "initiatedEventId" EventId.of_json in
       let workflowExecution =
-        field_map_exn json "workflowExecution" WorkflowExecution.of_json in
-      make ~initiatedEventId ~workflowExecution ()
+        field_map json__ "workflowExecution" WorkflowExecution.of_json in
+      make ?initiatedEventId ?workflowExecution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the ExternalWorkflowExecutionCancelRequested event."]
@@ -3599,37 +3624,37 @@ module ExternalWorkflowExecutionSignaledEventAttributes =
   struct
     type nonrec t =
       {
-      workflowExecution: WorkflowExecution.t
+      workflowExecution: WorkflowExecution.t option
         [@ocaml.doc
           "The external workflow execution that the signal was delivered to."];
-      initiatedEventId: EventId.t
+      initiatedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the SignalExternalWorkflowExecutionInitiated event corresponding to the SignalExternalWorkflowExecution decision to request this signal. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ExternalWorkflowExecutionSignaledEventAttributes"
-    let make ~workflowExecution =
-      fun ~initiatedEventId ->
+    let make ?workflowExecution =
+      fun ?initiatedEventId ->
         fun () -> { workflowExecution; initiatedEventId }
     let to_value x =
       structure_to_value
         [("workflowExecution",
-           (Some (WorkflowExecution.to_value x.workflowExecution)));
-        ("initiatedEventId", (Some (EventId.to_value x.initiatedEventId)))]
+           (Option.map x.workflowExecution ~f:WorkflowExecution.to_value));
+        ("initiatedEventId",
+          (Option.map x.initiatedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let initiatedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "initiatedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "initiatedEventId") in
       let workflowExecution =
-        WorkflowExecution.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
-      make ~initiatedEventId ~workflowExecution ()
+        (Option.map ~f:WorkflowExecution.of_xml)
+          (Xml.child xml_arg0 "workflowExecution") in
+      make ?initiatedEventId ?workflowExecution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let initiatedEventId =
-        field_map_exn json "initiatedEventId" EventId.of_json in
+        field_map json__ "initiatedEventId" EventId.of_json in
       let workflowExecution =
-        field_map_exn json "workflowExecution" WorkflowExecution.of_json in
-      make ~initiatedEventId ~workflowExecution ()
+        field_map json__ "workflowExecution" WorkflowExecution.of_json in
+      make ?initiatedEventId ?workflowExecution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the ExternalWorkflowExecutionSignaled event."]
@@ -3637,39 +3662,37 @@ module FailWorkflowExecutionFailedEventAttributes =
   struct
     type nonrec t =
       {
-      cause: FailWorkflowExecutionFailedCause.t
+      cause: FailWorkflowExecutionFailedCause.t option
         [@ocaml.doc
           "The cause of the failure. This information is generated by the system and can be useful for diagnostic purposes. If cause is set to OPERATION_NOT_PERMITTED, the decision failed because it lacked sufficient permissions. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the FailWorkflowExecution decision to fail this execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "FailWorkflowExecutionFailedEventAttributes"
-    let make ~cause =
-      fun ~decisionTaskCompletedEventId ->
+    let make ?cause =
+      fun ?decisionTaskCompletedEventId ->
         fun () -> { cause; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
         [("cause",
-           (Some (FailWorkflowExecutionFailedCause.to_value x.cause)));
+           (Option.map x.cause ~f:FailWorkflowExecutionFailedCause.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let cause =
-        FailWorkflowExecutionFailedCause.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cause") in
-      make ~decisionTaskCompletedEventId ~cause ()
+        (Option.map ~f:FailWorkflowExecutionFailedCause.of_xml)
+          (Xml.child xml_arg0 "cause") in
+      make ?decisionTaskCompletedEventId ?cause ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
       let cause =
-        field_map_exn json "cause" FailWorkflowExecutionFailedCause.of_json in
-      make ~decisionTaskCompletedEventId ~cause ()
+        field_map json__ "cause" FailWorkflowExecutionFailedCause.of_json in
+      make ?decisionTaskCompletedEventId ?cause ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the FailWorkflowExecutionFailed event."]
@@ -3677,41 +3700,38 @@ module LambdaFunctionCompletedEventAttributes =
   struct
     type nonrec t =
       {
-      scheduledEventId: EventId.t
+      scheduledEventId: EventId.t option
         [@ocaml.doc
           "The ID of the LambdaFunctionScheduled event that was recorded when this Lambda task was scheduled. To help diagnose issues, use this information to trace back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the LambdaFunctionStarted event recorded when this activity task started. To help diagnose issues, use this information to trace back the chain of events leading up to this event."];
       result: Data.t option [@ocaml.doc "The results of the Lambda task."]}
-    let context_ = "LambdaFunctionCompletedEventAttributes"
-    let make ?result =
-      fun ~scheduledEventId ->
-        fun ~startedEventId ->
-          fun () -> { result; scheduledEventId; startedEventId }
+    let make ?scheduledEventId =
+      fun ?startedEventId ->
+        fun ?result -> fun () -> { scheduledEventId; startedEventId; result }
     let to_value x =
       structure_to_value
-        [("scheduledEventId", (Some (EventId.to_value x.scheduledEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)));
+        [("scheduledEventId",
+           (Option.map x.scheduledEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value));
         ("result", (Option.map x.result ~f:Data.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let result = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "result") in
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let scheduledEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
-      make ?result ~startedEventId ~scheduledEventId ()
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "scheduledEventId") in
+      make ?result ?startedEventId ?scheduledEventId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let result = field_map json "result" Data.of_json in
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+    let of_json json__ =
+      let result = field_map json__ "result" Data.of_json in
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let scheduledEventId =
-        field_map_exn json "scheduledEventId" EventId.of_json in
-      make ?result ~startedEventId ~scheduledEventId ()
+        field_map json__ "scheduledEventId" EventId.of_json in
+      make ?result ?startedEventId ?scheduledEventId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the LambdaFunctionCompleted event. It isn't set for other event types."]
@@ -3719,25 +3739,25 @@ module LambdaFunctionFailedEventAttributes =
   struct
     type nonrec t =
       {
-      scheduledEventId: EventId.t
+      scheduledEventId: EventId.t option
         [@ocaml.doc
           "The ID of the LambdaFunctionScheduled event that was recorded when this activity task was scheduled. To help diagnose issues, use this information to trace back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the LambdaFunctionStarted event recorded when this activity task started. To help diagnose issues, use this information to trace back the chain of events leading up to this event."];
       reason: FailureReason.t option
         [@ocaml.doc "The reason provided for the failure."];
       details: Data.t option [@ocaml.doc "The details of the failure."]}
-    let context_ = "LambdaFunctionFailedEventAttributes"
-    let make ?reason =
-      fun ?details ->
-        fun ~scheduledEventId ->
-          fun ~startedEventId ->
-            fun () -> { reason; details; scheduledEventId; startedEventId }
+    let make ?scheduledEventId =
+      fun ?startedEventId ->
+        fun ?reason ->
+          fun ?details ->
+            fun () -> { scheduledEventId; startedEventId; reason; details }
     let to_value x =
       structure_to_value
-        [("scheduledEventId", (Some (EventId.to_value x.scheduledEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)));
+        [("scheduledEventId",
+           (Option.map x.scheduledEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value));
         ("reason", (Option.map x.reason ~f:FailureReason.to_value));
         ("details", (Option.map x.details ~f:Data.to_value))]
     let to_query v = to_query to_value v
@@ -3747,21 +3767,19 @@ module LambdaFunctionFailedEventAttributes =
       let reason =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "reason") in
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let scheduledEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
-      make ?details ?reason ~startedEventId ~scheduledEventId ()
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "scheduledEventId") in
+      make ?details ?reason ?startedEventId ?scheduledEventId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "details" Data.of_json in
-      let reason = field_map json "reason" FailureReason.of_json in
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+    let of_json json__ =
+      let details = field_map json__ "details" Data.of_json in
+      let reason = field_map json__ "reason" FailureReason.of_json in
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let scheduledEventId =
-        field_map_exn json "scheduledEventId" EventId.of_json in
-      make ?details ?reason ~startedEventId ~scheduledEventId ()
+        field_map json__ "scheduledEventId" EventId.of_json in
+      make ?details ?reason ?startedEventId ?scheduledEventId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the LambdaFunctionFailed event. It isn't set for other event types."]
@@ -3769,8 +3787,10 @@ module LambdaFunctionScheduledEventAttributes =
   struct
     type nonrec t =
       {
-      id: FunctionId.t [@ocaml.doc "The unique ID of the Lambda task."];
-      name: FunctionName.t [@ocaml.doc "The name of the Lambda function."];
+      id: FunctionId.t option
+        [@ocaml.doc "The unique ID of the Lambda task."];
+      name: FunctionName.t option
+        [@ocaml.doc "The name of the Lambda function."];
       control: Data.t option
         [@ocaml.doc
           "Data attached to the event that the decider can use in subsequent workflow tasks. This data isn't sent to the Lambda task."];
@@ -3779,42 +3799,40 @@ module LambdaFunctionScheduledEventAttributes =
       startToCloseTimeout: DurationInSecondsOptional.t option
         [@ocaml.doc
           "The maximum amount of time a worker can take to process the Lambda task."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the LambdaFunctionCompleted event corresponding to the decision that resulted in scheduling this activity task. To help diagnose issues, use this information to trace back the chain of events leading up to this event."]}
-    let context_ = "LambdaFunctionScheduledEventAttributes"
-    let make ?control =
-      fun ?input ->
-        fun ?startToCloseTimeout ->
-          fun ~id ->
-            fun ~name ->
-              fun ~decisionTaskCompletedEventId ->
+    let make ?id =
+      fun ?name ->
+        fun ?control ->
+          fun ?input ->
+            fun ?startToCloseTimeout ->
+              fun ?decisionTaskCompletedEventId ->
                 fun () ->
                   {
+                    id;
+                    name;
                     control;
                     input;
                     startToCloseTimeout;
-                    id;
-                    name;
                     decisionTaskCompletedEventId
                   }
     let to_value x =
       structure_to_value
-        [("id", (Some (FunctionId.to_value x.id)));
-        ("name", (Some (FunctionName.to_value x.name)));
+        [("id", (Option.map x.id ~f:FunctionId.to_value));
+        ("name", (Option.map x.name ~f:FunctionName.to_value));
         ("control", (Option.map x.control ~f:Data.to_value));
         ("input", (Option.map x.input ~f:FunctionInput.to_value));
         ("startToCloseTimeout",
           (Option.map x.startToCloseTimeout
              ~f:DurationInSecondsOptional.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let startToCloseTimeout =
         (Option.map ~f:DurationInSecondsOptional.of_xml)
           (Xml.child xml_arg0 "startToCloseTimeout") in
@@ -3823,24 +3841,23 @@ module LambdaFunctionScheduledEventAttributes =
       let control =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "control") in
       let name =
-        FunctionName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let id =
-        FunctionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
-      make ~decisionTaskCompletedEventId ?startToCloseTimeout ?input ?control
-        ~name ~id ()
+        (Option.map ~f:FunctionName.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:FunctionId.of_xml) (Xml.child xml_arg0 "id") in
+      make ?decisionTaskCompletedEventId ?startToCloseTimeout ?input ?control
+        ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
       let startToCloseTimeout =
-        field_map json "startToCloseTimeout"
+        field_map json__ "startToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let input = field_map json "input" FunctionInput.of_json in
-      let control = field_map json "control" Data.of_json in
-      let name = field_map_exn json "name" FunctionName.of_json in
-      let id = field_map_exn json "id" FunctionId.of_json in
-      make ~decisionTaskCompletedEventId ?startToCloseTimeout ?input ?control
-        ~name ~id ()
+      let input = field_map json__ "input" FunctionInput.of_json in
+      let control = field_map json__ "control" Data.of_json in
+      let name = field_map json__ "name" FunctionName.of_json in
+      let id = field_map json__ "id" FunctionId.of_json in
+      make ?decisionTaskCompletedEventId ?startToCloseTimeout ?input ?control
+        ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the LambdaFunctionScheduled event. It isn't set for other event types."]
@@ -3848,25 +3865,25 @@ module LambdaFunctionStartedEventAttributes =
   struct
     type nonrec t =
       {
-      scheduledEventId: EventId.t
+      scheduledEventId: EventId.t option
         [@ocaml.doc
           "The ID of the LambdaFunctionScheduled event that was recorded when this activity task was scheduled. To help diagnose issues, use this information to trace back the chain of events leading up to this event."]}
-    let context_ = "LambdaFunctionStartedEventAttributes"
-    let make ~scheduledEventId = fun () -> { scheduledEventId }
+    let make ?scheduledEventId = fun () -> { scheduledEventId }
     let to_value x =
       structure_to_value
-        [("scheduledEventId", (Some (EventId.to_value x.scheduledEventId)))]
+        [("scheduledEventId",
+           (Option.map x.scheduledEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let scheduledEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
-      make ~scheduledEventId ()
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "scheduledEventId") in
+      make ?scheduledEventId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledEventId =
-        field_map_exn json "scheduledEventId" EventId.of_json in
-      make ~scheduledEventId ()
+        field_map json__ "scheduledEventId" EventId.of_json in
+      make ?scheduledEventId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the LambdaFunctionStarted event. It isn't set for other event types."]
@@ -3874,23 +3891,23 @@ module LambdaFunctionTimedOutEventAttributes =
   struct
     type nonrec t =
       {
-      scheduledEventId: EventId.t
+      scheduledEventId: EventId.t option
         [@ocaml.doc
           "The ID of the LambdaFunctionScheduled event that was recorded when this activity task was scheduled. To help diagnose issues, use this information to trace back the chain of events leading up to this event."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ActivityTaskStarted event that was recorded when this activity task started. To help diagnose issues, use this information to trace back the chain of events leading up to this event."];
       timeoutType: LambdaFunctionTimeoutType.t option
         [@ocaml.doc "The type of the timeout that caused this event."]}
-    let context_ = "LambdaFunctionTimedOutEventAttributes"
-    let make ?timeoutType =
-      fun ~scheduledEventId ->
-        fun ~startedEventId ->
-          fun () -> { timeoutType; scheduledEventId; startedEventId }
+    let make ?scheduledEventId =
+      fun ?startedEventId ->
+        fun ?timeoutType ->
+          fun () -> { scheduledEventId; startedEventId; timeoutType }
     let to_value x =
       structure_to_value
-        [("scheduledEventId", (Some (EventId.to_value x.scheduledEventId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)));
+        [("scheduledEventId",
+           (Option.map x.scheduledEventId ~f:EventId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value));
         ("timeoutType",
           (Option.map x.timeoutType ~f:LambdaFunctionTimeoutType.to_value))]
     let to_query v = to_query to_value v
@@ -3899,155 +3916,144 @@ module LambdaFunctionTimedOutEventAttributes =
         (Option.map ~f:LambdaFunctionTimeoutType.of_xml)
           (Xml.child xml_arg0 "timeoutType") in
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let scheduledEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "scheduledEventId") in
-      make ?timeoutType ~startedEventId ~scheduledEventId ()
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "scheduledEventId") in
+      make ?timeoutType ?startedEventId ?scheduledEventId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timeoutType =
-        field_map json "timeoutType" LambdaFunctionTimeoutType.of_json in
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
+        field_map json__ "timeoutType" LambdaFunctionTimeoutType.of_json in
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
       let scheduledEventId =
-        field_map_exn json "scheduledEventId" EventId.of_json in
-      make ?timeoutType ~startedEventId ~scheduledEventId ()
+        field_map json__ "scheduledEventId" EventId.of_json in
+      make ?timeoutType ?startedEventId ?scheduledEventId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides details of the LambdaFunctionTimedOut event."]
 module MarkerRecordedEventAttributes =
   struct
     type nonrec t =
       {
-      markerName: MarkerName.t [@ocaml.doc "The name of the marker."];
+      markerName: MarkerName.t option [@ocaml.doc "The name of the marker."];
       details: Data.t option [@ocaml.doc "The details of the marker."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the RecordMarker decision that requested this marker. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "MarkerRecordedEventAttributes"
-    let make ?details =
-      fun ~markerName ->
-        fun ~decisionTaskCompletedEventId ->
-          fun () -> { details; markerName; decisionTaskCompletedEventId }
+    let make ?markerName =
+      fun ?details ->
+        fun ?decisionTaskCompletedEventId ->
+          fun () -> { markerName; details; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
-        [("markerName", (Some (MarkerName.to_value x.markerName)));
+        [("markerName", (Option.map x.markerName ~f:MarkerName.to_value));
         ("details", (Option.map x.details ~f:Data.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let details =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "details") in
       let markerName =
-        MarkerName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "markerName") in
-      make ~decisionTaskCompletedEventId ?details ~markerName ()
+        (Option.map ~f:MarkerName.of_xml) (Xml.child xml_arg0 "markerName") in
+      make ?decisionTaskCompletedEventId ?details ?markerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      let details = field_map json "details" Data.of_json in
-      let markerName = field_map_exn json "markerName" MarkerName.of_json in
-      make ~decisionTaskCompletedEventId ?details ~markerName ()
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      let details = field_map json__ "details" Data.of_json in
+      let markerName = field_map json__ "markerName" MarkerName.of_json in
+      make ?decisionTaskCompletedEventId ?details ?markerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the MarkerRecorded event."]
 module RecordMarkerFailedEventAttributes =
   struct
     type nonrec t =
       {
-      markerName: MarkerName.t [@ocaml.doc "The marker's name."];
-      cause: RecordMarkerFailedCause.t
+      markerName: MarkerName.t option [@ocaml.doc "The marker's name."];
+      cause: RecordMarkerFailedCause.t option
         [@ocaml.doc
           "The cause of the failure. This information is generated by the system and can be useful for diagnostic purposes. If cause is set to OPERATION_NOT_PERMITTED, the decision failed because it lacked sufficient permissions. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the RecordMarkerFailed decision for this cancellation request. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "RecordMarkerFailedEventAttributes"
-    let make ~markerName =
-      fun ~cause ->
-        fun ~decisionTaskCompletedEventId ->
+    let make ?markerName =
+      fun ?cause ->
+        fun ?decisionTaskCompletedEventId ->
           fun () -> { markerName; cause; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
-        [("markerName", (Some (MarkerName.to_value x.markerName)));
-        ("cause", (Some (RecordMarkerFailedCause.to_value x.cause)));
+        [("markerName", (Option.map x.markerName ~f:MarkerName.to_value));
+        ("cause", (Option.map x.cause ~f:RecordMarkerFailedCause.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let cause =
-        RecordMarkerFailedCause.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cause") in
+        (Option.map ~f:RecordMarkerFailedCause.of_xml)
+          (Xml.child xml_arg0 "cause") in
       let markerName =
-        MarkerName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "markerName") in
-      make ~decisionTaskCompletedEventId ~cause ~markerName ()
+        (Option.map ~f:MarkerName.of_xml) (Xml.child xml_arg0 "markerName") in
+      make ?decisionTaskCompletedEventId ?cause ?markerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      let cause = field_map_exn json "cause" RecordMarkerFailedCause.of_json in
-      let markerName = field_map_exn json "markerName" MarkerName.of_json in
-      make ~decisionTaskCompletedEventId ~cause ~markerName ()
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      let cause = field_map json__ "cause" RecordMarkerFailedCause.of_json in
+      let markerName = field_map json__ "markerName" MarkerName.of_json in
+      make ?decisionTaskCompletedEventId ?cause ?markerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the RecordMarkerFailed event."]
 module RequestCancelActivityTaskFailedEventAttributes =
   struct
     type nonrec t =
       {
-      activityId: ActivityId.t
+      activityId: ActivityId.t option
         [@ocaml.doc
           "The activityId provided in the RequestCancelActivityTask decision that failed."];
-      cause: RequestCancelActivityTaskFailedCause.t
+      cause: RequestCancelActivityTaskFailedCause.t option
         [@ocaml.doc
           "The cause of the failure. This information is generated by the system and can be useful for diagnostic purposes. If cause is set to OPERATION_NOT_PERMITTED, the decision failed because it lacked sufficient permissions. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the RequestCancelActivityTask decision for this cancellation request. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "RequestCancelActivityTaskFailedEventAttributes"
-    let make ~activityId =
-      fun ~cause ->
-        fun ~decisionTaskCompletedEventId ->
+    let make ?activityId =
+      fun ?cause ->
+        fun ?decisionTaskCompletedEventId ->
           fun () -> { activityId; cause; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
-        [("activityId", (Some (ActivityId.to_value x.activityId)));
+        [("activityId", (Option.map x.activityId ~f:ActivityId.to_value));
         ("cause",
-          (Some (RequestCancelActivityTaskFailedCause.to_value x.cause)));
+          (Option.map x.cause
+             ~f:RequestCancelActivityTaskFailedCause.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let cause =
-        RequestCancelActivityTaskFailedCause.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cause") in
+        (Option.map ~f:RequestCancelActivityTaskFailedCause.of_xml)
+          (Xml.child xml_arg0 "cause") in
       let activityId =
-        ActivityId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "activityId") in
-      make ~decisionTaskCompletedEventId ~cause ~activityId ()
+        (Option.map ~f:ActivityId.of_xml) (Xml.child xml_arg0 "activityId") in
+      make ?decisionTaskCompletedEventId ?cause ?activityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
       let cause =
-        field_map_exn json "cause"
-          RequestCancelActivityTaskFailedCause.of_json in
-      let activityId = field_map_exn json "activityId" ActivityId.of_json in
-      make ~decisionTaskCompletedEventId ~cause ~activityId ()
+        field_map json__ "cause" RequestCancelActivityTaskFailedCause.of_json in
+      let activityId = field_map json__ "activityId" ActivityId.of_json in
+      make ?decisionTaskCompletedEventId ?cause ?activityId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the RequestCancelActivityTaskFailed event."]
@@ -4055,88 +4061,85 @@ module RequestCancelExternalWorkflowExecutionFailedEventAttributes =
   struct
     type nonrec t =
       {
-      workflowId: WorkflowId.t
+      workflowId: WorkflowId.t option
         [@ocaml.doc
           "The workflowId of the external workflow to which the cancel request was to be delivered."];
       runId: WorkflowRunIdOptional.t option
         [@ocaml.doc "The runId of the external workflow execution."];
-      cause: RequestCancelExternalWorkflowExecutionFailedCause.t
+      cause: RequestCancelExternalWorkflowExecutionFailedCause.t option
         [@ocaml.doc
           "The cause of the failure. This information is generated by the system and can be useful for diagnostic purposes. If cause is set to OPERATION_NOT_PERMITTED, the decision failed because it lacked sufficient permissions. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."];
-      initiatedEventId: EventId.t
+      initiatedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the RequestCancelExternalWorkflowExecutionInitiated event corresponding to the RequestCancelExternalWorkflowExecution decision to cancel this external workflow execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the RequestCancelExternalWorkflowExecution decision for this cancellation request. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
       control: Data.t option
         [@ocaml.doc
           "The data attached to the event that the decider can use in subsequent workflow tasks. This data isn't sent to the workflow execution."]}
-    let context_ =
-      "RequestCancelExternalWorkflowExecutionFailedEventAttributes"
-    let make ?runId =
-      fun ?control ->
-        fun ~workflowId ->
-          fun ~cause ->
-            fun ~initiatedEventId ->
-              fun ~decisionTaskCompletedEventId ->
+    let make ?workflowId =
+      fun ?runId ->
+        fun ?cause ->
+          fun ?initiatedEventId ->
+            fun ?decisionTaskCompletedEventId ->
+              fun ?control ->
                 fun () ->
                   {
-                    runId;
-                    control;
                     workflowId;
+                    runId;
                     cause;
                     initiatedEventId;
-                    decisionTaskCompletedEventId
+                    decisionTaskCompletedEventId;
+                    control
                   }
     let to_value x =
       structure_to_value
-        [("workflowId", (Some (WorkflowId.to_value x.workflowId)));
+        [("workflowId", (Option.map x.workflowId ~f:WorkflowId.to_value));
         ("runId", (Option.map x.runId ~f:WorkflowRunIdOptional.to_value));
         ("cause",
-          (Some
-             (RequestCancelExternalWorkflowExecutionFailedCause.to_value
-                x.cause)));
-        ("initiatedEventId", (Some (EventId.to_value x.initiatedEventId)));
+          (Option.map x.cause
+             ~f:RequestCancelExternalWorkflowExecutionFailedCause.to_value));
+        ("initiatedEventId",
+          (Option.map x.initiatedEventId ~f:EventId.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)));
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value));
         ("control", (Option.map x.control ~f:Data.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let control =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "control") in
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let initiatedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "initiatedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "initiatedEventId") in
       let cause =
-        RequestCancelExternalWorkflowExecutionFailedCause.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cause") in
+        (Option.map
+           ~f:RequestCancelExternalWorkflowExecutionFailedCause.of_xml)
+          (Xml.child xml_arg0 "cause") in
       let runId =
         (Option.map ~f:WorkflowRunIdOptional.of_xml)
           (Xml.child xml_arg0 "runId") in
       let workflowId =
-        WorkflowId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
-      make ?control ~decisionTaskCompletedEventId ~initiatedEventId ~cause
-        ?runId ~workflowId ()
+        (Option.map ~f:WorkflowId.of_xml) (Xml.child xml_arg0 "workflowId") in
+      make ?control ?decisionTaskCompletedEventId ?initiatedEventId ?cause
+        ?runId ?workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let control = field_map json "control" Data.of_json in
+    let of_json json__ =
+      let control = field_map json__ "control" Data.of_json in
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
       let initiatedEventId =
-        field_map_exn json "initiatedEventId" EventId.of_json in
+        field_map json__ "initiatedEventId" EventId.of_json in
       let cause =
-        field_map_exn json "cause"
+        field_map json__ "cause"
           RequestCancelExternalWorkflowExecutionFailedCause.of_json in
-      let runId = field_map json "runId" WorkflowRunIdOptional.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
-      make ?control ~decisionTaskCompletedEventId ~initiatedEventId ~cause
-        ?runId ~workflowId ()
+      let runId = field_map json__ "runId" WorkflowRunIdOptional.of_json in
+      let workflowId = field_map json__ "workflowId" WorkflowId.of_json in
+      make ?control ?decisionTaskCompletedEventId ?initiatedEventId ?cause
+        ?runId ?workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the RequestCancelExternalWorkflowExecutionFailed event."]
@@ -4144,56 +4147,52 @@ module RequestCancelExternalWorkflowExecutionInitiatedEventAttributes =
   struct
     type nonrec t =
       {
-      workflowId: WorkflowId.t
+      workflowId: WorkflowId.t option
         [@ocaml.doc
           "The workflowId of the external workflow execution to be canceled."];
       runId: WorkflowRunIdOptional.t option
         [@ocaml.doc
           "The runId of the external workflow execution to be canceled."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the RequestCancelExternalWorkflowExecution decision for this cancellation request. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
       control: Data.t option
         [@ocaml.doc
           "Data attached to the event that can be used by the decider in subsequent workflow tasks."]}
-    let context_ =
-      "RequestCancelExternalWorkflowExecutionInitiatedEventAttributes"
-    let make ?runId =
-      fun ?control ->
-        fun ~workflowId ->
-          fun ~decisionTaskCompletedEventId ->
+    let make ?workflowId =
+      fun ?runId ->
+        fun ?decisionTaskCompletedEventId ->
+          fun ?control ->
             fun () ->
-              { runId; control; workflowId; decisionTaskCompletedEventId }
+              { workflowId; runId; decisionTaskCompletedEventId; control }
     let to_value x =
       structure_to_value
-        [("workflowId", (Some (WorkflowId.to_value x.workflowId)));
+        [("workflowId", (Option.map x.workflowId ~f:WorkflowId.to_value));
         ("runId", (Option.map x.runId ~f:WorkflowRunIdOptional.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)));
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value));
         ("control", (Option.map x.control ~f:Data.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let control =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "control") in
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let runId =
         (Option.map ~f:WorkflowRunIdOptional.of_xml)
           (Xml.child xml_arg0 "runId") in
       let workflowId =
-        WorkflowId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
-      make ?control ~decisionTaskCompletedEventId ?runId ~workflowId ()
+        (Option.map ~f:WorkflowId.of_xml) (Xml.child xml_arg0 "workflowId") in
+      make ?control ?decisionTaskCompletedEventId ?runId ?workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let control = field_map json "control" Data.of_json in
+    let of_json json__ =
+      let control = field_map json__ "control" Data.of_json in
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      let runId = field_map json "runId" WorkflowRunIdOptional.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
-      make ?control ~decisionTaskCompletedEventId ?runId ~workflowId ()
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      let runId = field_map json__ "runId" WorkflowRunIdOptional.of_json in
+      let workflowId = field_map json__ "workflowId" WorkflowId.of_json in
+      make ?control ?decisionTaskCompletedEventId ?runId ?workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the RequestCancelExternalWorkflowExecutionInitiated event."]
@@ -4201,59 +4200,57 @@ module ScheduleActivityTaskFailedEventAttributes =
   struct
     type nonrec t =
       {
-      activityType: ActivityType.t
+      activityType: ActivityType.t option
         [@ocaml.doc
           "The activity type provided in the ScheduleActivityTask decision that failed."];
-      activityId: ActivityId.t
+      activityId: ActivityId.t option
         [@ocaml.doc
           "The activityId provided in the ScheduleActivityTask decision that failed."];
-      cause: ScheduleActivityTaskFailedCause.t
+      cause: ScheduleActivityTaskFailedCause.t option
         [@ocaml.doc
           "The cause of the failure. This information is generated by the system and can be useful for diagnostic purposes. If cause is set to OPERATION_NOT_PERMITTED, the decision failed because it lacked sufficient permissions. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision that resulted in the scheduling of this activity task. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "ScheduleActivityTaskFailedEventAttributes"
-    let make ~activityType =
-      fun ~activityId ->
-        fun ~cause ->
-          fun ~decisionTaskCompletedEventId ->
+    let make ?activityType =
+      fun ?activityId ->
+        fun ?cause ->
+          fun ?decisionTaskCompletedEventId ->
             fun () ->
               { activityType; activityId; cause; decisionTaskCompletedEventId
               }
     let to_value x =
       structure_to_value
-        [("activityType", (Some (ActivityType.to_value x.activityType)));
-        ("activityId", (Some (ActivityId.to_value x.activityId)));
-        ("cause", (Some (ScheduleActivityTaskFailedCause.to_value x.cause)));
+        [("activityType",
+           (Option.map x.activityType ~f:ActivityType.to_value));
+        ("activityId", (Option.map x.activityId ~f:ActivityId.to_value));
+        ("cause",
+          (Option.map x.cause ~f:ScheduleActivityTaskFailedCause.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let cause =
-        ScheduleActivityTaskFailedCause.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cause") in
+        (Option.map ~f:ScheduleActivityTaskFailedCause.of_xml)
+          (Xml.child xml_arg0 "cause") in
       let activityId =
-        ActivityId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "activityId") in
+        (Option.map ~f:ActivityId.of_xml) (Xml.child xml_arg0 "activityId") in
       let activityType =
-        ActivityType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "activityType") in
-      make ~decisionTaskCompletedEventId ~cause ~activityId ~activityType ()
+        (Option.map ~f:ActivityType.of_xml)
+          (Xml.child xml_arg0 "activityType") in
+      make ?decisionTaskCompletedEventId ?cause ?activityId ?activityType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
       let cause =
-        field_map_exn json "cause" ScheduleActivityTaskFailedCause.of_json in
-      let activityId = field_map_exn json "activityId" ActivityId.of_json in
-      let activityType =
-        field_map_exn json "activityType" ActivityType.of_json in
-      make ~decisionTaskCompletedEventId ~cause ~activityId ~activityType ()
+        field_map json__ "cause" ScheduleActivityTaskFailedCause.of_json in
+      let activityId = field_map json__ "activityId" ActivityId.of_json in
+      let activityType = field_map json__ "activityType" ActivityType.of_json in
+      make ?decisionTaskCompletedEventId ?cause ?activityId ?activityType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the ScheduleActivityTaskFailed event."]
@@ -4261,53 +4258,51 @@ module ScheduleLambdaFunctionFailedEventAttributes =
   struct
     type nonrec t =
       {
-      id: FunctionId.t
+      id: FunctionId.t option
         [@ocaml.doc
           "The ID provided in the ScheduleLambdaFunction decision that failed."];
-      name: FunctionName.t [@ocaml.doc "The name of the Lambda function."];
-      cause: ScheduleLambdaFunctionFailedCause.t
+      name: FunctionName.t option
+        [@ocaml.doc "The name of the Lambda function."];
+      cause: ScheduleLambdaFunctionFailedCause.t option
         [@ocaml.doc
           "The cause of the failure. To help diagnose issues, use this information to trace back the chain of events leading up to this event. If cause is set to OPERATION_NOT_PERMITTED, the decision failed because it lacked sufficient permissions. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the LambdaFunctionCompleted event corresponding to the decision that resulted in scheduling this Lambda task. To help diagnose issues, use this information to trace back the chain of events leading up to this event."]}
-    let context_ = "ScheduleLambdaFunctionFailedEventAttributes"
-    let make ~id =
-      fun ~name ->
-        fun ~cause ->
-          fun ~decisionTaskCompletedEventId ->
+    let make ?id =
+      fun ?name ->
+        fun ?cause ->
+          fun ?decisionTaskCompletedEventId ->
             fun () -> { id; name; cause; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
-        [("id", (Some (FunctionId.to_value x.id)));
-        ("name", (Some (FunctionName.to_value x.name)));
+        [("id", (Option.map x.id ~f:FunctionId.to_value));
+        ("name", (Option.map x.name ~f:FunctionName.to_value));
         ("cause",
-          (Some (ScheduleLambdaFunctionFailedCause.to_value x.cause)));
+          (Option.map x.cause ~f:ScheduleLambdaFunctionFailedCause.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let cause =
-        ScheduleLambdaFunctionFailedCause.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cause") in
+        (Option.map ~f:ScheduleLambdaFunctionFailedCause.of_xml)
+          (Xml.child xml_arg0 "cause") in
       let name =
-        FunctionName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let id =
-        FunctionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
-      make ~decisionTaskCompletedEventId ~cause ~name ~id ()
+        (Option.map ~f:FunctionName.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:FunctionId.of_xml) (Xml.child xml_arg0 "id") in
+      make ?decisionTaskCompletedEventId ?cause ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
       let cause =
-        field_map_exn json "cause" ScheduleLambdaFunctionFailedCause.of_json in
-      let name = field_map_exn json "name" FunctionName.of_json in
-      let id = field_map_exn json "id" FunctionId.of_json in
-      make ~decisionTaskCompletedEventId ~cause ~name ~id ()
+        field_map json__ "cause" ScheduleLambdaFunctionFailedCause.of_json in
+      let name = field_map json__ "name" FunctionName.of_json in
+      let id = field_map json__ "id" FunctionId.of_json in
+      make ?decisionTaskCompletedEventId ?cause ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the ScheduleLambdaFunctionFailed event. It isn't set for other event types."]
@@ -4315,86 +4310,85 @@ module SignalExternalWorkflowExecutionFailedEventAttributes =
   struct
     type nonrec t =
       {
-      workflowId: WorkflowId.t
+      workflowId: WorkflowId.t option
         [@ocaml.doc
           "The workflowId of the external workflow execution that the signal was being delivered to."];
       runId: WorkflowRunIdOptional.t option
         [@ocaml.doc
           "The runId of the external workflow execution that the signal was being delivered to."];
-      cause: SignalExternalWorkflowExecutionFailedCause.t
+      cause: SignalExternalWorkflowExecutionFailedCause.t option
         [@ocaml.doc
           "The cause of the failure. This information is generated by the system and can be useful for diagnostic purposes. If cause is set to OPERATION_NOT_PERMITTED, the decision failed because it lacked sufficient permissions. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."];
-      initiatedEventId: EventId.t
+      initiatedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the SignalExternalWorkflowExecutionInitiated event corresponding to the SignalExternalWorkflowExecution decision to request this signal. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the SignalExternalWorkflowExecution decision for this signal. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
       control: Data.t option
         [@ocaml.doc
           "The data attached to the event that the decider can use in subsequent workflow tasks. This data isn't sent to the workflow execution."]}
-    let context_ = "SignalExternalWorkflowExecutionFailedEventAttributes"
-    let make ?runId =
-      fun ?control ->
-        fun ~workflowId ->
-          fun ~cause ->
-            fun ~initiatedEventId ->
-              fun ~decisionTaskCompletedEventId ->
+    let make ?workflowId =
+      fun ?runId ->
+        fun ?cause ->
+          fun ?initiatedEventId ->
+            fun ?decisionTaskCompletedEventId ->
+              fun ?control ->
                 fun () ->
                   {
-                    runId;
-                    control;
                     workflowId;
+                    runId;
                     cause;
                     initiatedEventId;
-                    decisionTaskCompletedEventId
+                    decisionTaskCompletedEventId;
+                    control
                   }
     let to_value x =
       structure_to_value
-        [("workflowId", (Some (WorkflowId.to_value x.workflowId)));
+        [("workflowId", (Option.map x.workflowId ~f:WorkflowId.to_value));
         ("runId", (Option.map x.runId ~f:WorkflowRunIdOptional.to_value));
         ("cause",
-          (Some (SignalExternalWorkflowExecutionFailedCause.to_value x.cause)));
-        ("initiatedEventId", (Some (EventId.to_value x.initiatedEventId)));
+          (Option.map x.cause
+             ~f:SignalExternalWorkflowExecutionFailedCause.to_value));
+        ("initiatedEventId",
+          (Option.map x.initiatedEventId ~f:EventId.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)));
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value));
         ("control", (Option.map x.control ~f:Data.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let control =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "control") in
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let initiatedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "initiatedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "initiatedEventId") in
       let cause =
-        SignalExternalWorkflowExecutionFailedCause.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cause") in
+        (Option.map ~f:SignalExternalWorkflowExecutionFailedCause.of_xml)
+          (Xml.child xml_arg0 "cause") in
       let runId =
         (Option.map ~f:WorkflowRunIdOptional.of_xml)
           (Xml.child xml_arg0 "runId") in
       let workflowId =
-        WorkflowId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
-      make ?control ~decisionTaskCompletedEventId ~initiatedEventId ~cause
-        ?runId ~workflowId ()
+        (Option.map ~f:WorkflowId.of_xml) (Xml.child xml_arg0 "workflowId") in
+      make ?control ?decisionTaskCompletedEventId ?initiatedEventId ?cause
+        ?runId ?workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let control = field_map json "control" Data.of_json in
+    let of_json json__ =
+      let control = field_map json__ "control" Data.of_json in
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
       let initiatedEventId =
-        field_map_exn json "initiatedEventId" EventId.of_json in
+        field_map json__ "initiatedEventId" EventId.of_json in
       let cause =
-        field_map_exn json "cause"
+        field_map json__ "cause"
           SignalExternalWorkflowExecutionFailedCause.of_json in
-      let runId = field_map json "runId" WorkflowRunIdOptional.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
-      make ?control ~decisionTaskCompletedEventId ~initiatedEventId ~cause
-        ?runId ~workflowId ()
+      let runId = field_map json__ "runId" WorkflowRunIdOptional.of_json in
+      let workflowId = field_map json__ "workflowId" WorkflowId.of_json in
+      make ?control ?decisionTaskCompletedEventId ?initiatedEventId ?cause
+        ?runId ?workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the SignalExternalWorkflowExecutionFailed event."]
@@ -4402,75 +4396,71 @@ module SignalExternalWorkflowExecutionInitiatedEventAttributes =
   struct
     type nonrec t =
       {
-      workflowId: WorkflowId.t
+      workflowId: WorkflowId.t option
         [@ocaml.doc "The workflowId of the external workflow execution."];
       runId: WorkflowRunIdOptional.t option
         [@ocaml.doc
           "The runId of the external workflow execution to send the signal to."];
-      signalName: SignalName.t [@ocaml.doc "The name of the signal."];
+      signalName: SignalName.t option [@ocaml.doc "The name of the signal."];
       input: Data.t option [@ocaml.doc "The input provided to the signal."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the SignalExternalWorkflowExecution decision for this signal. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
       control: Data.t option
         [@ocaml.doc
           "Data attached to the event that can be used by the decider in subsequent decision tasks."]}
-    let context_ = "SignalExternalWorkflowExecutionInitiatedEventAttributes"
-    let make ?runId =
-      fun ?input ->
-        fun ?control ->
-          fun ~workflowId ->
-            fun ~signalName ->
-              fun ~decisionTaskCompletedEventId ->
+    let make ?workflowId =
+      fun ?runId ->
+        fun ?signalName ->
+          fun ?input ->
+            fun ?decisionTaskCompletedEventId ->
+              fun ?control ->
                 fun () ->
                   {
-                    runId;
-                    input;
-                    control;
                     workflowId;
+                    runId;
                     signalName;
-                    decisionTaskCompletedEventId
+                    input;
+                    decisionTaskCompletedEventId;
+                    control
                   }
     let to_value x =
       structure_to_value
-        [("workflowId", (Some (WorkflowId.to_value x.workflowId)));
+        [("workflowId", (Option.map x.workflowId ~f:WorkflowId.to_value));
         ("runId", (Option.map x.runId ~f:WorkflowRunIdOptional.to_value));
-        ("signalName", (Some (SignalName.to_value x.signalName)));
+        ("signalName", (Option.map x.signalName ~f:SignalName.to_value));
         ("input", (Option.map x.input ~f:Data.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)));
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value));
         ("control", (Option.map x.control ~f:Data.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let control =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "control") in
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let input = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "input") in
       let signalName =
-        SignalName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "signalName") in
+        (Option.map ~f:SignalName.of_xml) (Xml.child xml_arg0 "signalName") in
       let runId =
         (Option.map ~f:WorkflowRunIdOptional.of_xml)
           (Xml.child xml_arg0 "runId") in
       let workflowId =
-        WorkflowId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
-      make ?control ~decisionTaskCompletedEventId ?input ~signalName ?runId
-        ~workflowId ()
+        (Option.map ~f:WorkflowId.of_xml) (Xml.child xml_arg0 "workflowId") in
+      make ?control ?decisionTaskCompletedEventId ?input ?signalName ?runId
+        ?workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let control = field_map json "control" Data.of_json in
+    let of_json json__ =
+      let control = field_map json__ "control" Data.of_json in
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      let input = field_map json "input" Data.of_json in
-      let signalName = field_map_exn json "signalName" SignalName.of_json in
-      let runId = field_map json "runId" WorkflowRunIdOptional.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
-      make ?control ~decisionTaskCompletedEventId ?input ~signalName ?runId
-        ~workflowId ()
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      let input = field_map json__ "input" Data.of_json in
+      let signalName = field_map json__ "signalName" SignalName.of_json in
+      let runId = field_map json__ "runId" WorkflowRunIdOptional.of_json in
+      let workflowId = field_map json__ "workflowId" WorkflowId.of_json in
+      make ?control ?decisionTaskCompletedEventId ?input ?signalName ?runId
+        ?workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the SignalExternalWorkflowExecutionInitiated event."]
@@ -4478,86 +4468,85 @@ module StartChildWorkflowExecutionFailedEventAttributes =
   struct
     type nonrec t =
       {
-      workflowType: WorkflowType.t
+      workflowType: WorkflowType.t option
         [@ocaml.doc
           "The workflow type provided in the StartChildWorkflowExecution Decision that failed."];
-      cause: StartChildWorkflowExecutionFailedCause.t
+      cause: StartChildWorkflowExecutionFailedCause.t option
         [@ocaml.doc
           "The cause of the failure. This information is generated by the system and can be useful for diagnostic purposes. When cause is set to OPERATION_NOT_PERMITTED, the decision fails because it lacks sufficient permissions. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."];
-      workflowId: WorkflowId.t
+      workflowId: WorkflowId.t option
         [@ocaml.doc "The workflowId of the child workflow execution."];
-      initiatedEventId: EventId.t
+      initiatedEventId: EventId.t option
         [@ocaml.doc
           "When the cause is WORKFLOW_ALREADY_RUNNING, initiatedEventId is the ID of the StartChildWorkflowExecutionInitiated event that corresponds to the StartChildWorkflowExecution Decision to start the workflow execution. You can use this information to diagnose problems by tracing back the chain of events leading up to this event. When the cause isn't WORKFLOW_ALREADY_RUNNING, initiatedEventId is set to 0 because the StartChildWorkflowExecutionInitiated event doesn't exist."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the StartChildWorkflowExecution Decision to request this child workflow execution. This information can be useful for diagnosing problems by tracing back the chain of events."];
       control: Data.t option
         [@ocaml.doc
           "The data attached to the event that the decider can use in subsequent workflow tasks. This data isn't sent to the child workflow execution."]}
-    let context_ = "StartChildWorkflowExecutionFailedEventAttributes"
-    let make ?control =
-      fun ~workflowType ->
-        fun ~cause ->
-          fun ~workflowId ->
-            fun ~initiatedEventId ->
-              fun ~decisionTaskCompletedEventId ->
+    let make ?workflowType =
+      fun ?cause ->
+        fun ?workflowId ->
+          fun ?initiatedEventId ->
+            fun ?decisionTaskCompletedEventId ->
+              fun ?control ->
                 fun () ->
                   {
-                    control;
                     workflowType;
                     cause;
                     workflowId;
                     initiatedEventId;
-                    decisionTaskCompletedEventId
+                    decisionTaskCompletedEventId;
+                    control
                   }
     let to_value x =
       structure_to_value
-        [("workflowType", (Some (WorkflowType.to_value x.workflowType)));
+        [("workflowType",
+           (Option.map x.workflowType ~f:WorkflowType.to_value));
         ("cause",
-          (Some (StartChildWorkflowExecutionFailedCause.to_value x.cause)));
-        ("workflowId", (Some (WorkflowId.to_value x.workflowId)));
-        ("initiatedEventId", (Some (EventId.to_value x.initiatedEventId)));
+          (Option.map x.cause
+             ~f:StartChildWorkflowExecutionFailedCause.to_value));
+        ("workflowId", (Option.map x.workflowId ~f:WorkflowId.to_value));
+        ("initiatedEventId",
+          (Option.map x.initiatedEventId ~f:EventId.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)));
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value));
         ("control", (Option.map x.control ~f:Data.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let control =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "control") in
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let initiatedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "initiatedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "initiatedEventId") in
       let workflowId =
-        WorkflowId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
+        (Option.map ~f:WorkflowId.of_xml) (Xml.child xml_arg0 "workflowId") in
       let cause =
-        StartChildWorkflowExecutionFailedCause.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cause") in
+        (Option.map ~f:StartChildWorkflowExecutionFailedCause.of_xml)
+          (Xml.child xml_arg0 "cause") in
       let workflowType =
-        WorkflowType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
-      make ?control ~decisionTaskCompletedEventId ~initiatedEventId
-        ~workflowId ~cause ~workflowType ()
+        (Option.map ~f:WorkflowType.of_xml)
+          (Xml.child xml_arg0 "workflowType") in
+      make ?control ?decisionTaskCompletedEventId ?initiatedEventId
+        ?workflowId ?cause ?workflowType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let control = field_map json "control" Data.of_json in
+    let of_json json__ =
+      let control = field_map json__ "control" Data.of_json in
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
       let initiatedEventId =
-        field_map_exn json "initiatedEventId" EventId.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
+        field_map json__ "initiatedEventId" EventId.of_json in
+      let workflowId = field_map json__ "workflowId" WorkflowId.of_json in
       let cause =
-        field_map_exn json "cause"
+        field_map json__ "cause"
           StartChildWorkflowExecutionFailedCause.of_json in
-      let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
-      make ?control ~decisionTaskCompletedEventId ~initiatedEventId
-        ~workflowId ~cause ~workflowType ()
+      let workflowType = field_map json__ "workflowType" WorkflowType.of_json in
+      make ?control ?decisionTaskCompletedEventId ?initiatedEventId
+        ?workflowId ?cause ?workflowType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the StartChildWorkflowExecutionFailed event."]
@@ -4565,9 +4554,9 @@ module StartChildWorkflowExecutionInitiatedEventAttributes =
   struct
     type nonrec t =
       {
-      workflowId: WorkflowId.t
+      workflowId: WorkflowId.t option
         [@ocaml.doc "The workflowId of the child workflow execution."];
-      workflowType: WorkflowType.t
+      workflowType: WorkflowType.t option
         [@ocaml.doc "The type of the child workflow execution."];
       control: Data.t option
         [@ocaml.doc
@@ -4577,16 +4566,16 @@ module StartChildWorkflowExecutionInitiatedEventAttributes =
       executionStartToCloseTimeout: DurationInSecondsOptional.t option
         [@ocaml.doc
           "The maximum duration for the child workflow execution. If the workflow execution isn't closed within this duration, it is timed out and force-terminated. The duration is specified in seconds, an integer greater than or equal to 0. You can use NONE to specify unlimited duration."];
-      taskList: TaskList.t
+      taskList: TaskList.t option
         [@ocaml.doc
           "The name of the task list used for the decision tasks of the child workflow execution."];
       taskPriority: TaskPriority.t option
         [@ocaml.doc
           "The priority assigned for the decision tasks for this workflow execution. Valid values are integers that range from Java's Integer.MIN_VALUE (-2147483648) to Integer.MAX_VALUE (2147483647). Higher numbers indicate higher priority. For more information about setting task priority, see Setting Task Priority in the Amazon SWF Developer Guide."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the StartChildWorkflowExecution Decision to request this child workflow execution. This information can be useful for diagnosing problems by tracing back the cause of events."];
-      childPolicy: ChildPolicy.t
+      childPolicy: ChildPolicy.t option
         [@ocaml.doc
           "The policy to use for the child workflow executions if this execution gets terminated by explicitly calling the TerminateWorkflowExecution action or due to an expired timeout. The supported child policies are: TERMINATE \226\128\147 The child executions are terminated. REQUEST_CANCEL \226\128\147 A request to cancel is attempted for each child execution by recording a WorkflowExecutionCancelRequested event in its history. It is up to the decider to take appropriate actions when it receives an execution history with this event. ABANDON \226\128\147 No action is taken. The child executions continue to run."];
       taskStartToCloseTimeout: DurationInSecondsOptional.t option
@@ -4598,49 +4587,49 @@ module StartChildWorkflowExecutionInitiatedEventAttributes =
       lambdaRole: Arn.t option
         [@ocaml.doc
           "The IAM role to attach to the child workflow execution."]}
-    let context_ = "StartChildWorkflowExecutionInitiatedEventAttributes"
-    let make ?control =
-      fun ?input ->
-        fun ?executionStartToCloseTimeout ->
-          fun ?taskPriority ->
-            fun ?taskStartToCloseTimeout ->
-              fun ?tagList ->
-                fun ?lambdaRole ->
-                  fun ~workflowId ->
-                    fun ~workflowType ->
-                      fun ~taskList ->
-                        fun ~decisionTaskCompletedEventId ->
-                          fun ~childPolicy ->
+    let make ?workflowId =
+      fun ?workflowType ->
+        fun ?control ->
+          fun ?input ->
+            fun ?executionStartToCloseTimeout ->
+              fun ?taskList ->
+                fun ?taskPriority ->
+                  fun ?decisionTaskCompletedEventId ->
+                    fun ?childPolicy ->
+                      fun ?taskStartToCloseTimeout ->
+                        fun ?tagList ->
+                          fun ?lambdaRole ->
                             fun () ->
                               {
+                                workflowId;
+                                workflowType;
                                 control;
                                 input;
                                 executionStartToCloseTimeout;
+                                taskList;
                                 taskPriority;
+                                decisionTaskCompletedEventId;
+                                childPolicy;
                                 taskStartToCloseTimeout;
                                 tagList;
-                                lambdaRole;
-                                workflowId;
-                                workflowType;
-                                taskList;
-                                decisionTaskCompletedEventId;
-                                childPolicy
+                                lambdaRole
                               }
     let to_value x =
       structure_to_value
-        [("workflowId", (Some (WorkflowId.to_value x.workflowId)));
-        ("workflowType", (Some (WorkflowType.to_value x.workflowType)));
+        [("workflowId", (Option.map x.workflowId ~f:WorkflowId.to_value));
+        ("workflowType",
+          (Option.map x.workflowType ~f:WorkflowType.to_value));
         ("control", (Option.map x.control ~f:Data.to_value));
         ("input", (Option.map x.input ~f:Data.to_value));
         ("executionStartToCloseTimeout",
           (Option.map x.executionStartToCloseTimeout
              ~f:DurationInSecondsOptional.to_value));
-        ("taskList", (Some (TaskList.to_value x.taskList)));
+        ("taskList", (Option.map x.taskList ~f:TaskList.to_value));
         ("taskPriority",
           (Option.map x.taskPriority ~f:TaskPriority.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)));
-        ("childPolicy", (Some (ChildPolicy.to_value x.childPolicy)));
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value));
+        ("childPolicy", (Option.map x.childPolicy ~f:ChildPolicy.to_value));
         ("taskStartToCloseTimeout",
           (Option.map x.taskStartToCloseTimeout
              ~f:DurationInSecondsOptional.to_value));
@@ -4656,17 +4645,15 @@ module StartChildWorkflowExecutionInitiatedEventAttributes =
         (Option.map ~f:DurationInSecondsOptional.of_xml)
           (Xml.child xml_arg0 "taskStartToCloseTimeout") in
       let childPolicy =
-        ChildPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "childPolicy") in
+        (Option.map ~f:ChildPolicy.of_xml) (Xml.child xml_arg0 "childPolicy") in
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let taskPriority =
         (Option.map ~f:TaskPriority.of_xml)
           (Xml.child xml_arg0 "taskPriority") in
       let taskList =
-        TaskList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskList") in
+        (Option.map ~f:TaskList.of_xml) (Xml.child xml_arg0 "taskList") in
       let executionStartToCloseTimeout =
         (Option.map ~f:DurationInSecondsOptional.of_xml)
           (Xml.child xml_arg0 "executionStartToCloseTimeout") in
@@ -4674,39 +4661,37 @@ module StartChildWorkflowExecutionInitiatedEventAttributes =
       let control =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "control") in
       let workflowType =
-        WorkflowType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
+        (Option.map ~f:WorkflowType.of_xml)
+          (Xml.child xml_arg0 "workflowType") in
       let workflowId =
-        WorkflowId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
-      make ?lambdaRole ?tagList ?taskStartToCloseTimeout ~childPolicy
-        ~decisionTaskCompletedEventId ?taskPriority ~taskList
-        ?executionStartToCloseTimeout ?input ?control ~workflowType
-        ~workflowId ()
+        (Option.map ~f:WorkflowId.of_xml) (Xml.child xml_arg0 "workflowId") in
+      make ?lambdaRole ?tagList ?taskStartToCloseTimeout ?childPolicy
+        ?decisionTaskCompletedEventId ?taskPriority ?taskList
+        ?executionStartToCloseTimeout ?input ?control ?workflowType
+        ?workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lambdaRole = field_map json "lambdaRole" Arn.of_json in
-      let tagList = field_map json "tagList" TagList.of_json in
+    let of_json json__ =
+      let lambdaRole = field_map json__ "lambdaRole" Arn.of_json in
+      let tagList = field_map json__ "tagList" TagList.of_json in
       let taskStartToCloseTimeout =
-        field_map json "taskStartToCloseTimeout"
+        field_map json__ "taskStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let childPolicy = field_map_exn json "childPolicy" ChildPolicy.of_json in
+      let childPolicy = field_map json__ "childPolicy" ChildPolicy.of_json in
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      let taskPriority = field_map json "taskPriority" TaskPriority.of_json in
-      let taskList = field_map_exn json "taskList" TaskList.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      let taskPriority = field_map json__ "taskPriority" TaskPriority.of_json in
+      let taskList = field_map json__ "taskList" TaskList.of_json in
       let executionStartToCloseTimeout =
-        field_map json "executionStartToCloseTimeout"
+        field_map json__ "executionStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let input = field_map json "input" Data.of_json in
-      let control = field_map json "control" Data.of_json in
-      let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
-      make ?lambdaRole ?tagList ?taskStartToCloseTimeout ~childPolicy
-        ~decisionTaskCompletedEventId ?taskPriority ~taskList
-        ?executionStartToCloseTimeout ?input ?control ~workflowType
-        ~workflowId ()
+      let input = field_map json__ "input" Data.of_json in
+      let control = field_map json__ "control" Data.of_json in
+      let workflowType = field_map json__ "workflowType" WorkflowType.of_json in
+      let workflowId = field_map json__ "workflowId" WorkflowId.of_json in
+      make ?lambdaRole ?tagList ?taskStartToCloseTimeout ?childPolicy
+        ?decisionTaskCompletedEventId ?taskPriority ?taskList
+        ?executionStartToCloseTimeout ?input ?control ?workflowType
+        ?workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the StartChildWorkflowExecutionInitiated event."]
@@ -4745,12 +4730,12 @@ module StartLambdaFunctionFailedEventAttributes =
           (Xml.child xml_arg0 "scheduledEventId") in
       make ?message ?cause ?scheduledEventId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" CauseMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" CauseMessage.of_json in
       let cause =
-        field_map json "cause" StartLambdaFunctionFailedCause.of_json in
+        field_map json__ "cause" StartLambdaFunctionFailedCause.of_json in
       let scheduledEventId =
-        field_map json "scheduledEventId" EventId.of_json in
+        field_map json__ "scheduledEventId" EventId.of_json in
       make ?message ?cause ?scheduledEventId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4759,184 +4744,173 @@ module StartTimerFailedEventAttributes =
   struct
     type nonrec t =
       {
-      timerId: TimerId.t
+      timerId: TimerId.t option
         [@ocaml.doc
           "The timerId provided in the StartTimer decision that failed."];
-      cause: StartTimerFailedCause.t
+      cause: StartTimerFailedCause.t option
         [@ocaml.doc
           "The cause of the failure. This information is generated by the system and can be useful for diagnostic purposes. If cause is set to OPERATION_NOT_PERMITTED, the decision failed because it lacked sufficient permissions. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the StartTimer decision for this activity task. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "StartTimerFailedEventAttributes"
-    let make ~timerId =
-      fun ~cause ->
-        fun ~decisionTaskCompletedEventId ->
+    let make ?timerId =
+      fun ?cause ->
+        fun ?decisionTaskCompletedEventId ->
           fun () -> { timerId; cause; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
-        [("timerId", (Some (TimerId.to_value x.timerId)));
-        ("cause", (Some (StartTimerFailedCause.to_value x.cause)));
+        [("timerId", (Option.map x.timerId ~f:TimerId.to_value));
+        ("cause", (Option.map x.cause ~f:StartTimerFailedCause.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let cause =
-        StartTimerFailedCause.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cause") in
+        (Option.map ~f:StartTimerFailedCause.of_xml)
+          (Xml.child xml_arg0 "cause") in
       let timerId =
-        TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
-      make ~decisionTaskCompletedEventId ~cause ~timerId ()
+        (Option.map ~f:TimerId.of_xml) (Xml.child xml_arg0 "timerId") in
+      make ?decisionTaskCompletedEventId ?cause ?timerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      let cause = field_map_exn json "cause" StartTimerFailedCause.of_json in
-      let timerId = field_map_exn json "timerId" TimerId.of_json in
-      make ~decisionTaskCompletedEventId ~cause ~timerId ()
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      let cause = field_map json__ "cause" StartTimerFailedCause.of_json in
+      let timerId = field_map json__ "timerId" TimerId.of_json in
+      make ?decisionTaskCompletedEventId ?cause ?timerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the StartTimerFailed event."]
 module TimerCanceledEventAttributes =
   struct
     type nonrec t =
       {
-      timerId: TimerId.t
+      timerId: TimerId.t option
         [@ocaml.doc "The unique ID of the timer that was canceled."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the TimerStarted event that was recorded when this timer was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the CancelTimer decision to cancel this timer. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "TimerCanceledEventAttributes"
-    let make ~timerId =
-      fun ~startedEventId ->
-        fun ~decisionTaskCompletedEventId ->
+    let make ?timerId =
+      fun ?startedEventId ->
+        fun ?decisionTaskCompletedEventId ->
           fun () -> { timerId; startedEventId; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
-        [("timerId", (Some (TimerId.to_value x.timerId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)));
+        [("timerId", (Option.map x.timerId ~f:TimerId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let timerId =
-        TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
-      make ~decisionTaskCompletedEventId ~startedEventId ~timerId ()
+        (Option.map ~f:TimerId.of_xml) (Xml.child xml_arg0 "timerId") in
+      make ?decisionTaskCompletedEventId ?startedEventId ?timerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
-      let timerId = field_map_exn json "timerId" TimerId.of_json in
-      make ~decisionTaskCompletedEventId ~startedEventId ~timerId ()
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
+      let timerId = field_map json__ "timerId" TimerId.of_json in
+      make ?decisionTaskCompletedEventId ?startedEventId ?timerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the TimerCanceled event."]
 module TimerFiredEventAttributes =
   struct
     type nonrec t =
       {
-      timerId: TimerId.t
+      timerId: TimerId.t option
         [@ocaml.doc "The unique ID of the timer that fired."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the TimerStarted event that was recorded when this timer was started. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "TimerFiredEventAttributes"
-    let make ~timerId =
-      fun ~startedEventId -> fun () -> { timerId; startedEventId }
+    let make ?timerId =
+      fun ?startedEventId -> fun () -> { timerId; startedEventId }
     let to_value x =
       structure_to_value
-        [("timerId", (Some (TimerId.to_value x.timerId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)))]
+        [("timerId", (Option.map x.timerId ~f:TimerId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let timerId =
-        TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
-      make ~startedEventId ~timerId ()
+        (Option.map ~f:TimerId.of_xml) (Xml.child xml_arg0 "timerId") in
+      make ?startedEventId ?timerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
-      let timerId = field_map_exn json "timerId" TimerId.of_json in
-      make ~startedEventId ~timerId ()
+    let of_json json__ =
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
+      let timerId = field_map json__ "timerId" TimerId.of_json in
+      make ?startedEventId ?timerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the TimerFired event."]
 module TimerStartedEventAttributes =
   struct
     type nonrec t =
       {
-      timerId: TimerId.t
+      timerId: TimerId.t option
         [@ocaml.doc "The unique ID of the timer that was started."];
       control: Data.t option
         [@ocaml.doc
           "Data attached to the event that can be used by the decider in subsequent workflow tasks."];
-      startToFireTimeout: DurationInSeconds.t
+      startToFireTimeout: DurationInSeconds.t option
         [@ocaml.doc
           "The duration of time after which the timer fires. The duration is specified in seconds, an integer greater than or equal to 0."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the StartTimer decision for this activity task. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "TimerStartedEventAttributes"
-    let make ?control =
-      fun ~timerId ->
-        fun ~startToFireTimeout ->
-          fun ~decisionTaskCompletedEventId ->
+    let make ?timerId =
+      fun ?control ->
+        fun ?startToFireTimeout ->
+          fun ?decisionTaskCompletedEventId ->
             fun () ->
               {
-                control;
                 timerId;
+                control;
                 startToFireTimeout;
                 decisionTaskCompletedEventId
               }
     let to_value x =
       structure_to_value
-        [("timerId", (Some (TimerId.to_value x.timerId)));
+        [("timerId", (Option.map x.timerId ~f:TimerId.to_value));
         ("control", (Option.map x.control ~f:Data.to_value));
         ("startToFireTimeout",
-          (Some (DurationInSeconds.to_value x.startToFireTimeout)));
+          (Option.map x.startToFireTimeout ~f:DurationInSeconds.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let startToFireTimeout =
-        DurationInSeconds.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startToFireTimeout") in
+        (Option.map ~f:DurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "startToFireTimeout") in
       let control =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "control") in
       let timerId =
-        TimerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timerId") in
-      make ~decisionTaskCompletedEventId ~startToFireTimeout ?control
-        ~timerId ()
+        (Option.map ~f:TimerId.of_xml) (Xml.child xml_arg0 "timerId") in
+      make ?decisionTaskCompletedEventId ?startToFireTimeout ?control
+        ?timerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
       let startToFireTimeout =
-        field_map_exn json "startToFireTimeout" DurationInSeconds.of_json in
-      let control = field_map json "control" Data.of_json in
-      let timerId = field_map_exn json "timerId" TimerId.of_json in
-      make ~decisionTaskCompletedEventId ~startToFireTimeout ?control
-        ~timerId ()
+        field_map json__ "startToFireTimeout" DurationInSeconds.of_json in
+      let control = field_map json__ "control" Data.of_json in
+      let timerId = field_map json__ "timerId" TimerId.of_json in
+      make ?decisionTaskCompletedEventId ?startToFireTimeout ?control
+        ?timerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details of the TimerStarted event."]
 module WorkflowExecutionCancelRequestedEventAttributes =
@@ -4980,13 +4954,15 @@ module WorkflowExecutionCancelRequestedEventAttributes =
           (Xml.child xml_arg0 "externalWorkflowExecution") in
       make ?cause ?externalInitiatedEventId ?externalWorkflowExecution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cause =
-        field_map json "cause" WorkflowExecutionCancelRequestedCause.of_json in
+        field_map json__ "cause"
+          WorkflowExecutionCancelRequestedCause.of_json in
       let externalInitiatedEventId =
-        field_map json "externalInitiatedEventId" EventId.of_json in
+        field_map json__ "externalInitiatedEventId" EventId.of_json in
       let externalWorkflowExecution =
-        field_map json "externalWorkflowExecution" WorkflowExecution.of_json in
+        field_map json__ "externalWorkflowExecution"
+          WorkflowExecution.of_json in
       make ?cause ?externalInitiatedEventId ?externalWorkflowExecution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4996,33 +4972,31 @@ module WorkflowExecutionCanceledEventAttributes =
     type nonrec t =
       {
       details: Data.t option [@ocaml.doc "The details of the cancellation."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the CancelWorkflowExecution decision for this cancellation request. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "WorkflowExecutionCanceledEventAttributes"
     let make ?details =
-      fun ~decisionTaskCompletedEventId ->
+      fun ?decisionTaskCompletedEventId ->
         fun () -> { details; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
         [("details", (Option.map x.details ~f:Data.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let details =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "details") in
-      make ~decisionTaskCompletedEventId ?details ()
+      make ?decisionTaskCompletedEventId ?details ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      let details = field_map json "details" Data.of_json in
-      make ~decisionTaskCompletedEventId ?details ()
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      let details = field_map json__ "details" Data.of_json in
+      make ?decisionTaskCompletedEventId ?details ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the WorkflowExecutionCanceled event."]
@@ -5033,32 +5007,30 @@ module WorkflowExecutionCompletedEventAttributes =
       result: Data.t option
         [@ocaml.doc
           "The result produced by the workflow execution upon successful completion."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the CompleteWorkflowExecution decision to complete this execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "WorkflowExecutionCompletedEventAttributes"
     let make ?result =
-      fun ~decisionTaskCompletedEventId ->
+      fun ?decisionTaskCompletedEventId ->
         fun () -> { result; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
         [("result", (Option.map x.result ~f:Data.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let result = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "result") in
-      make ~decisionTaskCompletedEventId ?result ()
+      make ?decisionTaskCompletedEventId ?result ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      let result = field_map json "result" Data.of_json in
-      make ~decisionTaskCompletedEventId ?result ()
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      let result = field_map json__ "result" Data.of_json in
+      make ?decisionTaskCompletedEventId ?result ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the WorkflowExecutionCompleted event."]
@@ -5068,15 +5040,15 @@ module WorkflowExecutionContinuedAsNewEventAttributes =
       {
       input: Data.t option
         [@ocaml.doc "The input provided to the new workflow execution."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the ContinueAsNewWorkflowExecution decision that started this execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
-      newExecutionRunId: WorkflowRunId.t
+      newExecutionRunId: WorkflowRunId.t option
         [@ocaml.doc "The runId of the new workflow execution."];
       executionStartToCloseTimeout: DurationInSecondsOptional.t option
         [@ocaml.doc
           "The total duration allowed for the new workflow execution. The duration is specified in seconds, an integer greater than or equal to 0. You can use NONE to specify unlimited duration."];
-      taskList: TaskList.t
+      taskList: TaskList.t option
         [@ocaml.doc
           "The task list to use for the decisions of the new (continued) workflow execution."];
       taskPriority: TaskPriority.t option
@@ -5085,75 +5057,74 @@ module WorkflowExecutionContinuedAsNewEventAttributes =
       taskStartToCloseTimeout: DurationInSecondsOptional.t option
         [@ocaml.doc
           "The maximum duration of decision tasks for the new workflow execution. The duration is specified in seconds, an integer greater than or equal to 0. You can use NONE to specify unlimited duration."];
-      childPolicy: ChildPolicy.t
+      childPolicy: ChildPolicy.t option
         [@ocaml.doc
           "The policy to use for the child workflow executions of the new execution if it is terminated by calling the TerminateWorkflowExecution action explicitly or due to an expired timeout. The supported child policies are: TERMINATE \226\128\147 The child executions are terminated. REQUEST_CANCEL \226\128\147 A request to cancel is attempted for each child execution by recording a WorkflowExecutionCancelRequested event in its history. It is up to the decider to take appropriate actions when it receives an execution history with this event. ABANDON \226\128\147 No action is taken. The child executions continue to run."];
       tagList: TagList.t option
         [@ocaml.doc
           "The list of tags associated with the new workflow execution."];
-      workflowType: WorkflowType.t
+      workflowType: WorkflowType.t option
         [@ocaml.doc "The workflow type of this execution."];
       lambdaRole: Arn.t option
         [@ocaml.doc
           "The IAM role to attach to the new (continued) workflow execution."]}
-    let context_ = "WorkflowExecutionContinuedAsNewEventAttributes"
     let make ?input =
-      fun ?executionStartToCloseTimeout ->
-        fun ?taskPriority ->
-          fun ?taskStartToCloseTimeout ->
-            fun ?tagList ->
-              fun ?lambdaRole ->
-                fun ~decisionTaskCompletedEventId ->
-                  fun ~newExecutionRunId ->
-                    fun ~taskList ->
-                      fun ~childPolicy ->
-                        fun ~workflowType ->
+      fun ?decisionTaskCompletedEventId ->
+        fun ?newExecutionRunId ->
+          fun ?executionStartToCloseTimeout ->
+            fun ?taskList ->
+              fun ?taskPriority ->
+                fun ?taskStartToCloseTimeout ->
+                  fun ?childPolicy ->
+                    fun ?tagList ->
+                      fun ?workflowType ->
+                        fun ?lambdaRole ->
                           fun () ->
                             {
                               input;
-                              executionStartToCloseTimeout;
-                              taskPriority;
-                              taskStartToCloseTimeout;
-                              tagList;
-                              lambdaRole;
                               decisionTaskCompletedEventId;
                               newExecutionRunId;
+                              executionStartToCloseTimeout;
                               taskList;
+                              taskPriority;
+                              taskStartToCloseTimeout;
                               childPolicy;
-                              workflowType
+                              tagList;
+                              workflowType;
+                              lambdaRole
                             }
     let to_value x =
       structure_to_value
         [("input", (Option.map x.input ~f:Data.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)));
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value));
         ("newExecutionRunId",
-          (Some (WorkflowRunId.to_value x.newExecutionRunId)));
+          (Option.map x.newExecutionRunId ~f:WorkflowRunId.to_value));
         ("executionStartToCloseTimeout",
           (Option.map x.executionStartToCloseTimeout
              ~f:DurationInSecondsOptional.to_value));
-        ("taskList", (Some (TaskList.to_value x.taskList)));
+        ("taskList", (Option.map x.taskList ~f:TaskList.to_value));
         ("taskPriority",
           (Option.map x.taskPriority ~f:TaskPriority.to_value));
         ("taskStartToCloseTimeout",
           (Option.map x.taskStartToCloseTimeout
              ~f:DurationInSecondsOptional.to_value));
-        ("childPolicy", (Some (ChildPolicy.to_value x.childPolicy)));
+        ("childPolicy", (Option.map x.childPolicy ~f:ChildPolicy.to_value));
         ("tagList", (Option.map x.tagList ~f:TagList.to_value));
-        ("workflowType", (Some (WorkflowType.to_value x.workflowType)));
+        ("workflowType",
+          (Option.map x.workflowType ~f:WorkflowType.to_value));
         ("lambdaRole", (Option.map x.lambdaRole ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let lambdaRole =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "lambdaRole") in
       let workflowType =
-        WorkflowType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
+        (Option.map ~f:WorkflowType.of_xml)
+          (Xml.child xml_arg0 "workflowType") in
       let tagList =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagList") in
       let childPolicy =
-        ChildPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "childPolicy") in
+        (Option.map ~f:ChildPolicy.of_xml) (Xml.child xml_arg0 "childPolicy") in
       let taskStartToCloseTimeout =
         (Option.map ~f:DurationInSecondsOptional.of_xml)
           (Xml.child xml_arg0 "taskStartToCloseTimeout") in
@@ -5161,46 +5132,44 @@ module WorkflowExecutionContinuedAsNewEventAttributes =
         (Option.map ~f:TaskPriority.of_xml)
           (Xml.child xml_arg0 "taskPriority") in
       let taskList =
-        TaskList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskList") in
+        (Option.map ~f:TaskList.of_xml) (Xml.child xml_arg0 "taskList") in
       let executionStartToCloseTimeout =
         (Option.map ~f:DurationInSecondsOptional.of_xml)
           (Xml.child xml_arg0 "executionStartToCloseTimeout") in
       let newExecutionRunId =
-        WorkflowRunId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "newExecutionRunId") in
+        (Option.map ~f:WorkflowRunId.of_xml)
+          (Xml.child xml_arg0 "newExecutionRunId") in
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let input = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "input") in
-      make ?lambdaRole ~workflowType ?tagList ~childPolicy
-        ?taskStartToCloseTimeout ?taskPriority ~taskList
-        ?executionStartToCloseTimeout ~newExecutionRunId
-        ~decisionTaskCompletedEventId ?input ()
+      make ?lambdaRole ?workflowType ?tagList ?childPolicy
+        ?taskStartToCloseTimeout ?taskPriority ?taskList
+        ?executionStartToCloseTimeout ?newExecutionRunId
+        ?decisionTaskCompletedEventId ?input ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lambdaRole = field_map json "lambdaRole" Arn.of_json in
-      let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
-      let tagList = field_map json "tagList" TagList.of_json in
-      let childPolicy = field_map_exn json "childPolicy" ChildPolicy.of_json in
+    let of_json json__ =
+      let lambdaRole = field_map json__ "lambdaRole" Arn.of_json in
+      let workflowType = field_map json__ "workflowType" WorkflowType.of_json in
+      let tagList = field_map json__ "tagList" TagList.of_json in
+      let childPolicy = field_map json__ "childPolicy" ChildPolicy.of_json in
       let taskStartToCloseTimeout =
-        field_map json "taskStartToCloseTimeout"
+        field_map json__ "taskStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let taskPriority = field_map json "taskPriority" TaskPriority.of_json in
-      let taskList = field_map_exn json "taskList" TaskList.of_json in
+      let taskPriority = field_map json__ "taskPriority" TaskPriority.of_json in
+      let taskList = field_map json__ "taskList" TaskList.of_json in
       let executionStartToCloseTimeout =
-        field_map json "executionStartToCloseTimeout"
+        field_map json__ "executionStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
       let newExecutionRunId =
-        field_map_exn json "newExecutionRunId" WorkflowRunId.of_json in
+        field_map json__ "newExecutionRunId" WorkflowRunId.of_json in
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      let input = field_map json "input" Data.of_json in
-      make ?lambdaRole ~workflowType ?tagList ~childPolicy
-        ?taskStartToCloseTimeout ?taskPriority ~taskList
-        ?executionStartToCloseTimeout ~newExecutionRunId
-        ~decisionTaskCompletedEventId ?input ()
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      let input = field_map json__ "input" Data.of_json in
+      make ?lambdaRole ?workflowType ?tagList ?childPolicy
+        ?taskStartToCloseTimeout ?taskPriority ?taskList
+        ?executionStartToCloseTimeout ?newExecutionRunId
+        ?decisionTaskCompletedEventId ?input ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the WorkflowExecutionContinuedAsNew event."]
@@ -5211,38 +5180,36 @@ module WorkflowExecutionFailedEventAttributes =
       reason: FailureReason.t option
         [@ocaml.doc "The descriptive reason provided for the failure."];
       details: Data.t option [@ocaml.doc "The details of the failure."];
-      decisionTaskCompletedEventId: EventId.t
+      decisionTaskCompletedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskCompleted event corresponding to the decision task that resulted in the FailWorkflowExecution decision to fail this execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."]}
-    let context_ = "WorkflowExecutionFailedEventAttributes"
     let make ?reason =
       fun ?details ->
-        fun ~decisionTaskCompletedEventId ->
+        fun ?decisionTaskCompletedEventId ->
           fun () -> { reason; details; decisionTaskCompletedEventId }
     let to_value x =
       structure_to_value
         [("reason", (Option.map x.reason ~f:FailureReason.to_value));
         ("details", (Option.map x.details ~f:Data.to_value));
         ("decisionTaskCompletedEventId",
-          (Some (EventId.to_value x.decisionTaskCompletedEventId)))]
+          (Option.map x.decisionTaskCompletedEventId ~f:EventId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let decisionTaskCompletedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "decisionTaskCompletedEventId") in
+        (Option.map ~f:EventId.of_xml)
+          (Xml.child xml_arg0 "decisionTaskCompletedEventId") in
       let details =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "details") in
       let reason =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "reason") in
-      make ~decisionTaskCompletedEventId ?details ?reason ()
+      make ?decisionTaskCompletedEventId ?details ?reason ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let decisionTaskCompletedEventId =
-        field_map_exn json "decisionTaskCompletedEventId" EventId.of_json in
-      let details = field_map json "details" Data.of_json in
-      let reason = field_map json "reason" FailureReason.of_json in
-      make ~decisionTaskCompletedEventId ?details ?reason ()
+        field_map json__ "decisionTaskCompletedEventId" EventId.of_json in
+      let details = field_map json__ "details" Data.of_json in
+      let reason = field_map json__ "reason" FailureReason.of_json in
+      make ?decisionTaskCompletedEventId ?details ?reason ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the WorkflowExecutionFailed event."]
@@ -5250,7 +5217,7 @@ module WorkflowExecutionSignaledEventAttributes =
   struct
     type nonrec t =
       {
-      signalName: SignalName.t
+      signalName: SignalName.t option
         [@ocaml.doc
           "The name of the signal received. The decider can use the signal name and inputs to determine how to the process the signal."];
       input: Data.t option
@@ -5262,21 +5229,20 @@ module WorkflowExecutionSignaledEventAttributes =
       externalInitiatedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the SignalExternalWorkflowExecutionInitiated event corresponding to the SignalExternalWorkflow decision to signal this workflow execution.The source event with this ID can be found in the history of the source workflow execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event. This field is set only if the signal was initiated by another workflow execution."]}
-    let context_ = "WorkflowExecutionSignaledEventAttributes"
-    let make ?input =
-      fun ?externalWorkflowExecution ->
-        fun ?externalInitiatedEventId ->
-          fun ~signalName ->
+    let make ?signalName =
+      fun ?input ->
+        fun ?externalWorkflowExecution ->
+          fun ?externalInitiatedEventId ->
             fun () ->
               {
+                signalName;
                 input;
                 externalWorkflowExecution;
-                externalInitiatedEventId;
-                signalName
+                externalInitiatedEventId
               }
     let to_value x =
       structure_to_value
-        [("signalName", (Some (SignalName.to_value x.signalName)));
+        [("signalName", (Option.map x.signalName ~f:SignalName.to_value));
         ("input", (Option.map x.input ~f:Data.to_value));
         ("externalWorkflowExecution",
           (Option.map x.externalWorkflowExecution
@@ -5293,20 +5259,20 @@ module WorkflowExecutionSignaledEventAttributes =
           (Xml.child xml_arg0 "externalWorkflowExecution") in
       let input = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "input") in
       let signalName =
-        SignalName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "signalName") in
+        (Option.map ~f:SignalName.of_xml) (Xml.child xml_arg0 "signalName") in
       make ?externalInitiatedEventId ?externalWorkflowExecution ?input
-        ~signalName ()
+        ?signalName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let externalInitiatedEventId =
-        field_map json "externalInitiatedEventId" EventId.of_json in
+        field_map json__ "externalInitiatedEventId" EventId.of_json in
       let externalWorkflowExecution =
-        field_map json "externalWorkflowExecution" WorkflowExecution.of_json in
-      let input = field_map json "input" Data.of_json in
-      let signalName = field_map_exn json "signalName" SignalName.of_json in
+        field_map json__ "externalWorkflowExecution"
+          WorkflowExecution.of_json in
+      let input = field_map json__ "input" Data.of_json in
+      let signalName = field_map json__ "signalName" SignalName.of_json in
       make ?externalInitiatedEventId ?externalWorkflowExecution ?input
-        ~signalName ()
+        ?signalName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the WorkflowExecutionSignaled event."]
@@ -5322,16 +5288,16 @@ module WorkflowExecutionStartedEventAttributes =
       taskStartToCloseTimeout: DurationInSecondsOptional.t option
         [@ocaml.doc
           "The maximum duration of decision tasks for this workflow type. The duration is specified in seconds, an integer greater than or equal to 0. You can use NONE to specify unlimited duration."];
-      childPolicy: ChildPolicy.t
+      childPolicy: ChildPolicy.t option
         [@ocaml.doc
           "The policy to use for the child workflow executions if this workflow execution is terminated, by calling the TerminateWorkflowExecution action explicitly or due to an expired timeout. The supported child policies are: TERMINATE \226\128\147 The child executions are terminated. REQUEST_CANCEL \226\128\147 A request to cancel is attempted for each child execution by recording a WorkflowExecutionCancelRequested event in its history. It is up to the decider to take appropriate actions when it receives an execution history with this event. ABANDON \226\128\147 No action is taken. The child executions continue to run."];
-      taskList: TaskList.t
+      taskList: TaskList.t option
         [@ocaml.doc
           "The name of the task list for scheduling the decision tasks for this workflow execution."];
       taskPriority: TaskPriority.t option
         [@ocaml.doc
           "The priority of the decision tasks in the workflow execution."];
-      workflowType: WorkflowType.t
+      workflowType: WorkflowType.t option
         [@ocaml.doc "The workflow type of this execution."];
       tagList: TagList.t option
         [@ocaml.doc
@@ -5347,33 +5313,32 @@ module WorkflowExecutionStartedEventAttributes =
           "The ID of the StartChildWorkflowExecutionInitiated event corresponding to the StartChildWorkflowExecution Decision to start this workflow execution. The source event with this ID can be found in the history of the source workflow execution. This information can be useful for diagnosing problems by tracing back the chain of events leading up to this event."];
       lambdaRole: Arn.t option
         [@ocaml.doc "The IAM role attached to the workflow execution."]}
-    let context_ = "WorkflowExecutionStartedEventAttributes"
     let make ?input =
       fun ?executionStartToCloseTimeout ->
         fun ?taskStartToCloseTimeout ->
-          fun ?taskPriority ->
-            fun ?tagList ->
-              fun ?continuedExecutionRunId ->
-                fun ?parentWorkflowExecution ->
-                  fun ?parentInitiatedEventId ->
-                    fun ?lambdaRole ->
-                      fun ~childPolicy ->
-                        fun ~taskList ->
-                          fun ~workflowType ->
+          fun ?childPolicy ->
+            fun ?taskList ->
+              fun ?taskPriority ->
+                fun ?workflowType ->
+                  fun ?tagList ->
+                    fun ?continuedExecutionRunId ->
+                      fun ?parentWorkflowExecution ->
+                        fun ?parentInitiatedEventId ->
+                          fun ?lambdaRole ->
                             fun () ->
                               {
                                 input;
                                 executionStartToCloseTimeout;
                                 taskStartToCloseTimeout;
+                                childPolicy;
+                                taskList;
                                 taskPriority;
+                                workflowType;
                                 tagList;
                                 continuedExecutionRunId;
                                 parentWorkflowExecution;
                                 parentInitiatedEventId;
-                                lambdaRole;
-                                childPolicy;
-                                taskList;
-                                workflowType
+                                lambdaRole
                               }
     let to_value x =
       structure_to_value
@@ -5384,11 +5349,12 @@ module WorkflowExecutionStartedEventAttributes =
         ("taskStartToCloseTimeout",
           (Option.map x.taskStartToCloseTimeout
              ~f:DurationInSecondsOptional.to_value));
-        ("childPolicy", (Some (ChildPolicy.to_value x.childPolicy)));
-        ("taskList", (Some (TaskList.to_value x.taskList)));
+        ("childPolicy", (Option.map x.childPolicy ~f:ChildPolicy.to_value));
+        ("taskList", (Option.map x.taskList ~f:TaskList.to_value));
         ("taskPriority",
           (Option.map x.taskPriority ~f:TaskPriority.to_value));
-        ("workflowType", (Some (WorkflowType.to_value x.workflowType)));
+        ("workflowType",
+          (Option.map x.workflowType ~f:WorkflowType.to_value));
         ("tagList", (Option.map x.tagList ~f:TagList.to_value));
         ("continuedExecutionRunId",
           (Option.map x.continuedExecutionRunId
@@ -5414,16 +5380,15 @@ module WorkflowExecutionStartedEventAttributes =
       let tagList =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagList") in
       let workflowType =
-        WorkflowType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
+        (Option.map ~f:WorkflowType.of_xml)
+          (Xml.child xml_arg0 "workflowType") in
       let taskPriority =
         (Option.map ~f:TaskPriority.of_xml)
           (Xml.child xml_arg0 "taskPriority") in
       let taskList =
-        TaskList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskList") in
+        (Option.map ~f:TaskList.of_xml) (Xml.child xml_arg0 "taskList") in
       let childPolicy =
-        ChildPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "childPolicy") in
+        (Option.map ~f:ChildPolicy.of_xml) (Xml.child xml_arg0 "childPolicy") in
       let taskStartToCloseTimeout =
         (Option.map ~f:DurationInSecondsOptional.of_xml)
           (Xml.child xml_arg0 "taskStartToCloseTimeout") in
@@ -5432,35 +5397,34 @@ module WorkflowExecutionStartedEventAttributes =
           (Xml.child xml_arg0 "executionStartToCloseTimeout") in
       let input = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "input") in
       make ?lambdaRole ?parentInitiatedEventId ?parentWorkflowExecution
-        ?continuedExecutionRunId ?tagList ~workflowType ?taskPriority
-        ~taskList ~childPolicy ?taskStartToCloseTimeout
+        ?continuedExecutionRunId ?tagList ?workflowType ?taskPriority
+        ?taskList ?childPolicy ?taskStartToCloseTimeout
         ?executionStartToCloseTimeout ?input ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lambdaRole = field_map json "lambdaRole" Arn.of_json in
+    let of_json json__ =
+      let lambdaRole = field_map json__ "lambdaRole" Arn.of_json in
       let parentInitiatedEventId =
-        field_map json "parentInitiatedEventId" EventId.of_json in
+        field_map json__ "parentInitiatedEventId" EventId.of_json in
       let parentWorkflowExecution =
-        field_map json "parentWorkflowExecution" WorkflowExecution.of_json in
+        field_map json__ "parentWorkflowExecution" WorkflowExecution.of_json in
       let continuedExecutionRunId =
-        field_map json "continuedExecutionRunId"
+        field_map json__ "continuedExecutionRunId"
           WorkflowRunIdOptional.of_json in
-      let tagList = field_map json "tagList" TagList.of_json in
-      let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
-      let taskPriority = field_map json "taskPriority" TaskPriority.of_json in
-      let taskList = field_map_exn json "taskList" TaskList.of_json in
-      let childPolicy = field_map_exn json "childPolicy" ChildPolicy.of_json in
+      let tagList = field_map json__ "tagList" TagList.of_json in
+      let workflowType = field_map json__ "workflowType" WorkflowType.of_json in
+      let taskPriority = field_map json__ "taskPriority" TaskPriority.of_json in
+      let taskList = field_map json__ "taskList" TaskList.of_json in
+      let childPolicy = field_map json__ "childPolicy" ChildPolicy.of_json in
       let taskStartToCloseTimeout =
-        field_map json "taskStartToCloseTimeout"
+        field_map json__ "taskStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
       let executionStartToCloseTimeout =
-        field_map json "executionStartToCloseTimeout"
+        field_map json__ "executionStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let input = field_map json "input" Data.of_json in
+      let input = field_map json__ "input" Data.of_json in
       make ?lambdaRole ?parentInitiatedEventId ?parentWorkflowExecution
-        ?continuedExecutionRunId ?tagList ~workflowType ?taskPriority
-        ~taskList ~childPolicy ?taskStartToCloseTimeout
+        ?continuedExecutionRunId ?tagList ?workflowType ?taskPriority
+        ?taskList ?childPolicy ?taskStartToCloseTimeout
         ?executionStartToCloseTimeout ?input ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides details of WorkflowExecutionStarted event."]
@@ -5472,23 +5436,21 @@ module WorkflowExecutionTerminatedEventAttributes =
         [@ocaml.doc "The reason provided for the termination."];
       details: Data.t option
         [@ocaml.doc "The details provided for the termination."];
-      childPolicy: ChildPolicy.t
+      childPolicy: ChildPolicy.t option
         [@ocaml.doc
           "The policy used for the child workflow executions of this workflow execution. The supported child policies are: TERMINATE \226\128\147 The child executions are terminated. REQUEST_CANCEL \226\128\147 A request to cancel is attempted for each child execution by recording a WorkflowExecutionCancelRequested event in its history. It is up to the decider to take appropriate actions when it receives an execution history with this event. ABANDON \226\128\147 No action is taken. The child executions continue to run."];
       cause: WorkflowExecutionTerminatedCause.t option
         [@ocaml.doc
           "If set, indicates that the workflow execution was automatically terminated, and specifies the cause. This happens if the parent workflow execution times out or is terminated and the child policy is set to terminate child executions."]}
-    let context_ = "WorkflowExecutionTerminatedEventAttributes"
     let make ?reason =
       fun ?details ->
-        fun ?cause ->
-          fun ~childPolicy ->
-            fun () -> { reason; details; cause; childPolicy }
+        fun ?childPolicy ->
+          fun ?cause -> fun () -> { reason; details; childPolicy; cause }
     let to_value x =
       structure_to_value
         [("reason", (Option.map x.reason ~f:TerminateReason.to_value));
         ("details", (Option.map x.details ~f:Data.to_value));
-        ("childPolicy", (Some (ChildPolicy.to_value x.childPolicy)));
+        ("childPolicy", (Option.map x.childPolicy ~f:ChildPolicy.to_value));
         ("cause",
           (Option.map x.cause ~f:WorkflowExecutionTerminatedCause.to_value))]
     let to_query v = to_query to_value v
@@ -5497,21 +5459,20 @@ module WorkflowExecutionTerminatedEventAttributes =
         (Option.map ~f:WorkflowExecutionTerminatedCause.of_xml)
           (Xml.child xml_arg0 "cause") in
       let childPolicy =
-        ChildPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "childPolicy") in
+        (Option.map ~f:ChildPolicy.of_xml) (Xml.child xml_arg0 "childPolicy") in
       let details =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "details") in
       let reason =
         (Option.map ~f:TerminateReason.of_xml) (Xml.child xml_arg0 "reason") in
-      make ?cause ~childPolicy ?details ?reason ()
+      make ?cause ?childPolicy ?details ?reason ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cause =
-        field_map json "cause" WorkflowExecutionTerminatedCause.of_json in
-      let childPolicy = field_map_exn json "childPolicy" ChildPolicy.of_json in
-      let details = field_map json "details" Data.of_json in
-      let reason = field_map json "reason" TerminateReason.of_json in
-      make ?cause ~childPolicy ?details ?reason ()
+        field_map json__ "cause" WorkflowExecutionTerminatedCause.of_json in
+      let childPolicy = field_map json__ "childPolicy" ChildPolicy.of_json in
+      let details = field_map json__ "details" Data.of_json in
+      let reason = field_map json__ "reason" TerminateReason.of_json in
+      make ?cause ?childPolicy ?details ?reason ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the WorkflowExecutionTerminated event."]
@@ -5519,34 +5480,32 @@ module WorkflowExecutionTimedOutEventAttributes =
   struct
     type nonrec t =
       {
-      timeoutType: WorkflowExecutionTimeoutType.t
+      timeoutType: WorkflowExecutionTimeoutType.t option
         [@ocaml.doc "The type of timeout that caused this event."];
-      childPolicy: ChildPolicy.t
+      childPolicy: ChildPolicy.t option
         [@ocaml.doc
           "The policy used for the child workflow executions of this workflow execution. The supported child policies are: TERMINATE \226\128\147 The child executions are terminated. REQUEST_CANCEL \226\128\147 A request to cancel is attempted for each child execution by recording a WorkflowExecutionCancelRequested event in its history. It is up to the decider to take appropriate actions when it receives an execution history with this event. ABANDON \226\128\147 No action is taken. The child executions continue to run."]}
-    let context_ = "WorkflowExecutionTimedOutEventAttributes"
-    let make ~timeoutType =
-      fun ~childPolicy -> fun () -> { timeoutType; childPolicy }
+    let make ?timeoutType =
+      fun ?childPolicy -> fun () -> { timeoutType; childPolicy }
     let to_value x =
       structure_to_value
         [("timeoutType",
-           (Some (WorkflowExecutionTimeoutType.to_value x.timeoutType)));
-        ("childPolicy", (Some (ChildPolicy.to_value x.childPolicy)))]
+           (Option.map x.timeoutType ~f:WorkflowExecutionTimeoutType.to_value));
+        ("childPolicy", (Option.map x.childPolicy ~f:ChildPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let childPolicy =
-        ChildPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "childPolicy") in
+        (Option.map ~f:ChildPolicy.of_xml) (Xml.child xml_arg0 "childPolicy") in
       let timeoutType =
-        WorkflowExecutionTimeoutType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "timeoutType") in
-      make ~childPolicy ~timeoutType ()
+        (Option.map ~f:WorkflowExecutionTimeoutType.of_xml)
+          (Xml.child xml_arg0 "timeoutType") in
+      make ?childPolicy ?timeoutType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let childPolicy = field_map_exn json "childPolicy" ChildPolicy.of_json in
+    let of_json json__ =
+      let childPolicy = field_map json__ "childPolicy" ChildPolicy.of_json in
       let timeoutType =
-        field_map_exn json "timeoutType" WorkflowExecutionTimeoutType.of_json in
-      make ~childPolicy ~timeoutType ()
+        field_map json__ "timeoutType" WorkflowExecutionTimeoutType.of_json in
+      make ?childPolicy ?timeoutType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of the WorkflowExecutionTimedOut event."]
@@ -5585,38 +5544,38 @@ module WorkflowTypeInfo =
   struct
     type nonrec t =
       {
-      workflowType: WorkflowType.t
+      workflowType: WorkflowType.t option
         [@ocaml.doc "The workflow type this information is about."];
-      status: RegistrationStatus.t
+      status: RegistrationStatus.t option
         [@ocaml.doc "The current status of the workflow type."];
       description: Description.t option
         [@ocaml.doc
           "The description of the type registered through RegisterWorkflowType."];
-      creationDate: Timestamp.t
+      creationDate: Timestamp.t option
         [@ocaml.doc "The date when this type was registered."];
       deprecationDate: Timestamp.t option
         [@ocaml.doc
           "If the type is in deprecated state, then it is set to the date when the type was deprecated."]}
-    let context_ = "WorkflowTypeInfo"
-    let make ?description =
-      fun ?deprecationDate ->
-        fun ~workflowType ->
-          fun ~status ->
-            fun ~creationDate ->
+    let make ?workflowType =
+      fun ?status ->
+        fun ?description ->
+          fun ?creationDate ->
+            fun ?deprecationDate ->
               fun () ->
                 {
-                  description;
-                  deprecationDate;
                   workflowType;
                   status;
-                  creationDate
+                  description;
+                  creationDate;
+                  deprecationDate
                 }
     let to_value x =
       structure_to_value
-        [("workflowType", (Some (WorkflowType.to_value x.workflowType)));
-        ("status", (Some (RegistrationStatus.to_value x.status)));
+        [("workflowType",
+           (Option.map x.workflowType ~f:WorkflowType.to_value));
+        ("status", (Option.map x.status ~f:RegistrationStatus.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
-        ("creationDate", (Some (Timestamp.to_value x.creationDate)));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
         ("deprecationDate",
           (Option.map x.deprecationDate ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
@@ -5625,28 +5584,26 @@ module WorkflowTypeInfo =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "deprecationDate") in
       let creationDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationDate") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let status =
-        RegistrationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:RegistrationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let workflowType =
-        WorkflowType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
-      make ?deprecationDate ~creationDate ?description ~status ~workflowType
+        (Option.map ~f:WorkflowType.of_xml)
+          (Xml.child xml_arg0 "workflowType") in
+      make ?deprecationDate ?creationDate ?description ?status ?workflowType
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deprecationDate =
-        field_map json "deprecationDate" Timestamp.of_json in
-      let creationDate = field_map_exn json "creationDate" Timestamp.of_json in
-      let description = field_map json "description" Description.of_json in
-      let status = field_map_exn json "status" RegistrationStatus.of_json in
-      let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
-      make ?deprecationDate ~creationDate ?description ~status ~workflowType
+        field_map json__ "deprecationDate" Timestamp.of_json in
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let status = field_map json__ "status" RegistrationStatus.of_json in
+      let workflowType = field_map json__ "workflowType" WorkflowType.of_json in
+      make ?deprecationDate ?creationDate ?description ?status ?workflowType
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a workflow type."]
@@ -5654,16 +5611,16 @@ module WorkflowExecutionInfo =
   struct
     type nonrec t =
       {
-      execution: WorkflowExecution.t
+      execution: WorkflowExecution.t option
         [@ocaml.doc "The workflow execution this information is about."];
-      workflowType: WorkflowType.t
+      workflowType: WorkflowType.t option
         [@ocaml.doc "The type of the workflow execution."];
-      startTimestamp: Timestamp.t
+      startTimestamp: Timestamp.t option
         [@ocaml.doc "The time when the execution was started."];
       closeTimestamp: Timestamp.t option
         [@ocaml.doc
           "The time when the workflow execution was closed. Set only if the execution status is CLOSED."];
-      executionStatus: ExecutionStatus.t
+      executionStatus: ExecutionStatus.t option
         [@ocaml.doc "The current status of the execution."];
       closeStatus: CloseStatus.t option
         [@ocaml.doc
@@ -5677,37 +5634,39 @@ module WorkflowExecutionInfo =
       cancelRequested: Canceled.t option
         [@ocaml.doc
           "Set to true if a cancellation is requested for this workflow execution."]}
-    let context_ = "WorkflowExecutionInfo"
-    let make ?closeTimestamp =
-      fun ?closeStatus ->
-        fun ?parent ->
-          fun ?tagList ->
-            fun ?cancelRequested ->
-              fun ~execution ->
-                fun ~workflowType ->
-                  fun ~startTimestamp ->
-                    fun ~executionStatus ->
+    let make ?execution =
+      fun ?workflowType ->
+        fun ?startTimestamp ->
+          fun ?closeTimestamp ->
+            fun ?executionStatus ->
+              fun ?closeStatus ->
+                fun ?parent ->
+                  fun ?tagList ->
+                    fun ?cancelRequested ->
                       fun () ->
                         {
-                          closeTimestamp;
-                          closeStatus;
-                          parent;
-                          tagList;
-                          cancelRequested;
                           execution;
                           workflowType;
                           startTimestamp;
-                          executionStatus
+                          closeTimestamp;
+                          executionStatus;
+                          closeStatus;
+                          parent;
+                          tagList;
+                          cancelRequested
                         }
     let to_value x =
       structure_to_value
-        [("execution", (Some (WorkflowExecution.to_value x.execution)));
-        ("workflowType", (Some (WorkflowType.to_value x.workflowType)));
-        ("startTimestamp", (Some (Timestamp.to_value x.startTimestamp)));
+        [("execution",
+           (Option.map x.execution ~f:WorkflowExecution.to_value));
+        ("workflowType",
+          (Option.map x.workflowType ~f:WorkflowType.to_value));
+        ("startTimestamp",
+          (Option.map x.startTimestamp ~f:Timestamp.to_value));
         ("closeTimestamp",
           (Option.map x.closeTimestamp ~f:Timestamp.to_value));
         ("executionStatus",
-          (Some (ExecutionStatus.to_value x.executionStatus)));
+          (Option.map x.executionStatus ~f:ExecutionStatus.to_value));
         ("closeStatus", (Option.map x.closeStatus ~f:CloseStatus.to_value));
         ("parent", (Option.map x.parent ~f:WorkflowExecution.to_value));
         ("tagList", (Option.map x.tagList ~f:TagList.to_value));
@@ -5726,39 +5685,39 @@ module WorkflowExecutionInfo =
       let closeStatus =
         (Option.map ~f:CloseStatus.of_xml) (Xml.child xml_arg0 "closeStatus") in
       let executionStatus =
-        ExecutionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "executionStatus") in
+        (Option.map ~f:ExecutionStatus.of_xml)
+          (Xml.child xml_arg0 "executionStatus") in
       let closeTimestamp =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "closeTimestamp") in
       let startTimestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startTimestamp") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "startTimestamp") in
       let workflowType =
-        WorkflowType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
+        (Option.map ~f:WorkflowType.of_xml)
+          (Xml.child xml_arg0 "workflowType") in
       let execution =
-        WorkflowExecution.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "execution") in
-      make ?cancelRequested ?tagList ?parent ?closeStatus ~executionStatus
-        ?closeTimestamp ~startTimestamp ~workflowType ~execution ()
+        (Option.map ~f:WorkflowExecution.of_xml)
+          (Xml.child xml_arg0 "execution") in
+      make ?cancelRequested ?tagList ?parent ?closeStatus ?executionStatus
+        ?closeTimestamp ?startTimestamp ?workflowType ?execution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cancelRequested = field_map json "cancelRequested" Canceled.of_json in
-      let tagList = field_map json "tagList" TagList.of_json in
-      let parent = field_map json "parent" WorkflowExecution.of_json in
-      let closeStatus = field_map json "closeStatus" CloseStatus.of_json in
+    let of_json json__ =
+      let cancelRequested =
+        field_map json__ "cancelRequested" Canceled.of_json in
+      let tagList = field_map json__ "tagList" TagList.of_json in
+      let parent = field_map json__ "parent" WorkflowExecution.of_json in
+      let closeStatus = field_map json__ "closeStatus" CloseStatus.of_json in
       let executionStatus =
-        field_map_exn json "executionStatus" ExecutionStatus.of_json in
-      let closeTimestamp = field_map json "closeTimestamp" Timestamp.of_json in
+        field_map json__ "executionStatus" ExecutionStatus.of_json in
+      let closeTimestamp =
+        field_map json__ "closeTimestamp" Timestamp.of_json in
       let startTimestamp =
-        field_map_exn json "startTimestamp" Timestamp.of_json in
-      let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
-      let execution =
-        field_map_exn json "execution" WorkflowExecution.of_json in
-      make ?cancelRequested ?tagList ?parent ?closeStatus ~executionStatus
-        ?closeTimestamp ~startTimestamp ~workflowType ~execution ()
+        field_map json__ "startTimestamp" Timestamp.of_json in
+      let workflowType = field_map json__ "workflowType" WorkflowType.of_json in
+      let execution = field_map json__ "execution" WorkflowExecution.of_json in
+      make ?cancelRequested ?tagList ?parent ?closeStatus ?executionStatus
+        ?closeTimestamp ?startTimestamp ?workflowType ?execution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a workflow execution."]
 module Count =
@@ -5814,9 +5773,9 @@ module ResourceTag =
           (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" ResourceTagValue.of_json in
-      let key = field_map_exn json "key" ResourceTagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" ResourceTagValue.of_json in
+      let key = field_map_exn json__ "key" ResourceTagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6018,49 +5977,49 @@ module Decision =
         ?requestCancelActivityTaskDecisionAttributes
         ?scheduleActivityTaskDecisionAttributes ~decisionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduleLambdaFunctionDecisionAttributes =
-        field_map json "scheduleLambdaFunctionDecisionAttributes"
+        field_map json__ "scheduleLambdaFunctionDecisionAttributes"
           ScheduleLambdaFunctionDecisionAttributes.of_json in
       let startChildWorkflowExecutionDecisionAttributes =
-        field_map json "startChildWorkflowExecutionDecisionAttributes"
+        field_map json__ "startChildWorkflowExecutionDecisionAttributes"
           StartChildWorkflowExecutionDecisionAttributes.of_json in
       let requestCancelExternalWorkflowExecutionDecisionAttributes =
-        field_map json
+        field_map json__
           "requestCancelExternalWorkflowExecutionDecisionAttributes"
           RequestCancelExternalWorkflowExecutionDecisionAttributes.of_json in
       let signalExternalWorkflowExecutionDecisionAttributes =
-        field_map json "signalExternalWorkflowExecutionDecisionAttributes"
+        field_map json__ "signalExternalWorkflowExecutionDecisionAttributes"
           SignalExternalWorkflowExecutionDecisionAttributes.of_json in
       let cancelTimerDecisionAttributes =
-        field_map json "cancelTimerDecisionAttributes"
+        field_map json__ "cancelTimerDecisionAttributes"
           CancelTimerDecisionAttributes.of_json in
       let startTimerDecisionAttributes =
-        field_map json "startTimerDecisionAttributes"
+        field_map json__ "startTimerDecisionAttributes"
           StartTimerDecisionAttributes.of_json in
       let recordMarkerDecisionAttributes =
-        field_map json "recordMarkerDecisionAttributes"
+        field_map json__ "recordMarkerDecisionAttributes"
           RecordMarkerDecisionAttributes.of_json in
       let continueAsNewWorkflowExecutionDecisionAttributes =
-        field_map json "continueAsNewWorkflowExecutionDecisionAttributes"
+        field_map json__ "continueAsNewWorkflowExecutionDecisionAttributes"
           ContinueAsNewWorkflowExecutionDecisionAttributes.of_json in
       let cancelWorkflowExecutionDecisionAttributes =
-        field_map json "cancelWorkflowExecutionDecisionAttributes"
+        field_map json__ "cancelWorkflowExecutionDecisionAttributes"
           CancelWorkflowExecutionDecisionAttributes.of_json in
       let failWorkflowExecutionDecisionAttributes =
-        field_map json "failWorkflowExecutionDecisionAttributes"
+        field_map json__ "failWorkflowExecutionDecisionAttributes"
           FailWorkflowExecutionDecisionAttributes.of_json in
       let completeWorkflowExecutionDecisionAttributes =
-        field_map json "completeWorkflowExecutionDecisionAttributes"
+        field_map json__ "completeWorkflowExecutionDecisionAttributes"
           CompleteWorkflowExecutionDecisionAttributes.of_json in
       let requestCancelActivityTaskDecisionAttributes =
-        field_map json "requestCancelActivityTaskDecisionAttributes"
+        field_map json__ "requestCancelActivityTaskDecisionAttributes"
           RequestCancelActivityTaskDecisionAttributes.of_json in
       let scheduleActivityTaskDecisionAttributes =
-        field_map json "scheduleActivityTaskDecisionAttributes"
+        field_map json__ "scheduleActivityTaskDecisionAttributes"
           ScheduleActivityTaskDecisionAttributes.of_json in
       let decisionType =
-        field_map_exn json "decisionType" DecisionType.of_json in
+        field_map_exn json__ "decisionType" DecisionType.of_json in
       make ?scheduleLambdaFunctionDecisionAttributes
         ?startChildWorkflowExecutionDecisionAttributes
         ?requestCancelExternalWorkflowExecutionDecisionAttributes
@@ -6094,10 +6053,11 @@ module HistoryEvent =
   struct
     type nonrec t =
       {
-      eventTimestamp: Timestamp.t
+      eventTimestamp: Timestamp.t option
         [@ocaml.doc "The date and time when the event occurred."];
-      eventType: EventType.t [@ocaml.doc "The type of the history event."];
-      eventId: EventId.t
+      eventType: EventType.t option
+        [@ocaml.doc "The type of the history event."];
+      eventId: EventId.t option
         [@ocaml.doc
           "The system generated ID of the event. This ID uniquely identifies the event with in the workflow execution history."];
       workflowExecutionStartedEventAttributes:
@@ -6313,71 +6273,83 @@ module HistoryEvent =
         StartLambdaFunctionFailedEventAttributes.t option
         [@ocaml.doc
           "Provides the details of the StartLambdaFunctionFailed event. It isn't set for other event types."]}
-    let context_ = "HistoryEvent"
-    let make ?workflowExecutionStartedEventAttributes =
-      fun ?workflowExecutionCompletedEventAttributes ->
-        fun ?completeWorkflowExecutionFailedEventAttributes ->
-          fun ?workflowExecutionFailedEventAttributes ->
-            fun ?failWorkflowExecutionFailedEventAttributes ->
-              fun ?workflowExecutionTimedOutEventAttributes ->
-                fun ?workflowExecutionCanceledEventAttributes ->
-                  fun ?cancelWorkflowExecutionFailedEventAttributes ->
-                    fun ?workflowExecutionContinuedAsNewEventAttributes ->
-                      fun
-                        ?continueAsNewWorkflowExecutionFailedEventAttributes
-                        ->
-                        fun ?workflowExecutionTerminatedEventAttributes ->
-                          fun
-                            ?workflowExecutionCancelRequestedEventAttributes
+    let make ?eventTimestamp =
+      fun ?eventType ->
+        fun ?eventId ->
+          fun ?workflowExecutionStartedEventAttributes ->
+            fun ?workflowExecutionCompletedEventAttributes ->
+              fun ?completeWorkflowExecutionFailedEventAttributes ->
+                fun ?workflowExecutionFailedEventAttributes ->
+                  fun ?failWorkflowExecutionFailedEventAttributes ->
+                    fun ?workflowExecutionTimedOutEventAttributes ->
+                      fun ?workflowExecutionCanceledEventAttributes ->
+                        fun ?cancelWorkflowExecutionFailedEventAttributes ->
+                          fun ?workflowExecutionContinuedAsNewEventAttributes
                             ->
-                            fun ?decisionTaskScheduledEventAttributes ->
-                              fun ?decisionTaskStartedEventAttributes ->
-                                fun ?decisionTaskCompletedEventAttributes ->
-                                  fun ?decisionTaskTimedOutEventAttributes ->
-                                    fun ?activityTaskScheduledEventAttributes
+                            fun
+                              ?continueAsNewWorkflowExecutionFailedEventAttributes
+                              ->
+                              fun ?workflowExecutionTerminatedEventAttributes
+                                ->
+                                fun
+                                  ?workflowExecutionCancelRequestedEventAttributes
+                                  ->
+                                  fun ?decisionTaskScheduledEventAttributes
+                                    ->
+                                    fun ?decisionTaskStartedEventAttributes
                                       ->
-                                      fun ?activityTaskStartedEventAttributes
+                                      fun
+                                        ?decisionTaskCompletedEventAttributes
                                         ->
                                         fun
-                                          ?activityTaskCompletedEventAttributes
+                                          ?decisionTaskTimedOutEventAttributes
                                           ->
                                           fun
-                                            ?activityTaskFailedEventAttributes
+                                            ?activityTaskScheduledEventAttributes
                                             ->
                                             fun
-                                              ?activityTaskTimedOutEventAttributes
+                                              ?activityTaskStartedEventAttributes
                                               ->
                                               fun
-                                                ?activityTaskCanceledEventAttributes
+                                                ?activityTaskCompletedEventAttributes
                                                 ->
                                                 fun
-                                                  ?activityTaskCancelRequestedEventAttributes
+                                                  ?activityTaskFailedEventAttributes
                                                   ->
                                                   fun
-                                                    ?workflowExecutionSignaledEventAttributes
+                                                    ?activityTaskTimedOutEventAttributes
                                                     ->
                                                     fun
-                                                      ?markerRecordedEventAttributes
+                                                      ?activityTaskCanceledEventAttributes
                                                       ->
                                                       fun
-                                                        ?recordMarkerFailedEventAttributes
+                                                        ?activityTaskCancelRequestedEventAttributes
                                                         ->
                                                         fun
-                                                          ?timerStartedEventAttributes
+                                                          ?workflowExecutionSignaledEventAttributes
                                                           ->
                                                           fun
-                                                            ?timerFiredEventAttributes
+                                                            ?markerRecordedEventAttributes
                                                             ->
                                                             fun
-                                                              ?timerCanceledEventAttributes
+                                                              ?recordMarkerFailedEventAttributes
                                                               ->
                                                               fun
-                                                                ?startChildWorkflowExecutionInitiatedEventAttributes
+                                                                ?timerStartedEventAttributes
                                                                 ->
                                                                 fun
-                                                                  ?childWorkflowExecutionStartedEventAttributes
+                                                                  ?timerFiredEventAttributes
                                                                   ->
                                                                   fun
+                                                                    ?timerCanceledEventAttributes
+                                                                    ->
+                                                                    fun
+                                                                    ?startChildWorkflowExecutionInitiatedEventAttributes
+                                                                    ->
+                                                                    fun
+                                                                    ?childWorkflowExecutionStartedEventAttributes
+                                                                    ->
+                                                                    fun
                                                                     ?childWorkflowExecutionCompletedEventAttributes
                                                                     ->
                                                                     fun
@@ -6446,17 +6418,11 @@ module HistoryEvent =
                                                                     fun
                                                                     ?startLambdaFunctionFailedEventAttributes
                                                                     ->
-                                                                    fun
-                                                                    ~eventTimestamp
-                                                                    ->
-                                                                    fun
-                                                                    ~eventType
-                                                                    ->
-                                                                    fun
-                                                                    ~eventId
-                                                                    ->
                                                                     fun () ->
                                                                     {
+                                                                    eventTimestamp;
+                                                                    eventType;
+                                                                    eventId;
                                                                     workflowExecutionStartedEventAttributes;
                                                                     workflowExecutionCompletedEventAttributes;
                                                                     completeWorkflowExecutionFailedEventAttributes;
@@ -6510,16 +6476,14 @@ module HistoryEvent =
                                                                     lambdaFunctionFailedEventAttributes;
                                                                     lambdaFunctionTimedOutEventAttributes;
                                                                     scheduleLambdaFunctionFailedEventAttributes;
-                                                                    startLambdaFunctionFailedEventAttributes;
-                                                                    eventTimestamp;
-                                                                    eventType;
-                                                                    eventId
+                                                                    startLambdaFunctionFailedEventAttributes
                                                                     }
     let to_value x =
       structure_to_value
-        [("eventTimestamp", (Some (Timestamp.to_value x.eventTimestamp)));
-        ("eventType", (Some (EventType.to_value x.eventType)));
-        ("eventId", (Some (EventId.to_value x.eventId)));
+        [("eventTimestamp",
+           (Option.map x.eventTimestamp ~f:Timestamp.to_value));
+        ("eventType", (Option.map x.eventType ~f:EventType.to_value));
+        ("eventId", (Option.map x.eventId ~f:EventId.to_value));
         ("workflowExecutionStartedEventAttributes",
           (Option.map x.workflowExecutionStartedEventAttributes
              ~f:WorkflowExecutionStartedEventAttributes.to_value));
@@ -6875,13 +6839,12 @@ module HistoryEvent =
         (Option.map ~f:WorkflowExecutionStartedEventAttributes.of_xml)
           (Xml.child xml_arg0 "workflowExecutionStartedEventAttributes") in
       let eventId =
-        EventId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "eventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "eventId") in
       let eventType =
-        EventType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "eventType") in
+        (Option.map ~f:EventType.of_xml) (Xml.child xml_arg0 "eventType") in
       let eventTimestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "eventTimestamp") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "eventTimestamp") in
       make ?startLambdaFunctionFailedEventAttributes
         ?scheduleLambdaFunctionFailedEventAttributes
         ?lambdaFunctionTimedOutEventAttributes
@@ -6932,180 +6895,183 @@ module HistoryEvent =
         ?workflowExecutionFailedEventAttributes
         ?completeWorkflowExecutionFailedEventAttributes
         ?workflowExecutionCompletedEventAttributes
-        ?workflowExecutionStartedEventAttributes ~eventId ~eventType
-        ~eventTimestamp ()
+        ?workflowExecutionStartedEventAttributes ?eventId ?eventType
+        ?eventTimestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let startLambdaFunctionFailedEventAttributes =
-        field_map json "startLambdaFunctionFailedEventAttributes"
+        field_map json__ "startLambdaFunctionFailedEventAttributes"
           StartLambdaFunctionFailedEventAttributes.of_json in
       let scheduleLambdaFunctionFailedEventAttributes =
-        field_map json "scheduleLambdaFunctionFailedEventAttributes"
+        field_map json__ "scheduleLambdaFunctionFailedEventAttributes"
           ScheduleLambdaFunctionFailedEventAttributes.of_json in
       let lambdaFunctionTimedOutEventAttributes =
-        field_map json "lambdaFunctionTimedOutEventAttributes"
+        field_map json__ "lambdaFunctionTimedOutEventAttributes"
           LambdaFunctionTimedOutEventAttributes.of_json in
       let lambdaFunctionFailedEventAttributes =
-        field_map json "lambdaFunctionFailedEventAttributes"
+        field_map json__ "lambdaFunctionFailedEventAttributes"
           LambdaFunctionFailedEventAttributes.of_json in
       let lambdaFunctionCompletedEventAttributes =
-        field_map json "lambdaFunctionCompletedEventAttributes"
+        field_map json__ "lambdaFunctionCompletedEventAttributes"
           LambdaFunctionCompletedEventAttributes.of_json in
       let lambdaFunctionStartedEventAttributes =
-        field_map json "lambdaFunctionStartedEventAttributes"
+        field_map json__ "lambdaFunctionStartedEventAttributes"
           LambdaFunctionStartedEventAttributes.of_json in
       let lambdaFunctionScheduledEventAttributes =
-        field_map json "lambdaFunctionScheduledEventAttributes"
+        field_map json__ "lambdaFunctionScheduledEventAttributes"
           LambdaFunctionScheduledEventAttributes.of_json in
       let startChildWorkflowExecutionFailedEventAttributes =
-        field_map json "startChildWorkflowExecutionFailedEventAttributes"
+        field_map json__ "startChildWorkflowExecutionFailedEventAttributes"
           StartChildWorkflowExecutionFailedEventAttributes.of_json in
       let cancelTimerFailedEventAttributes =
-        field_map json "cancelTimerFailedEventAttributes"
+        field_map json__ "cancelTimerFailedEventAttributes"
           CancelTimerFailedEventAttributes.of_json in
       let startTimerFailedEventAttributes =
-        field_map json "startTimerFailedEventAttributes"
+        field_map json__ "startTimerFailedEventAttributes"
           StartTimerFailedEventAttributes.of_json in
       let requestCancelActivityTaskFailedEventAttributes =
-        field_map json "requestCancelActivityTaskFailedEventAttributes"
+        field_map json__ "requestCancelActivityTaskFailedEventAttributes"
           RequestCancelActivityTaskFailedEventAttributes.of_json in
       let scheduleActivityTaskFailedEventAttributes =
-        field_map json "scheduleActivityTaskFailedEventAttributes"
+        field_map json__ "scheduleActivityTaskFailedEventAttributes"
           ScheduleActivityTaskFailedEventAttributes.of_json in
       let requestCancelExternalWorkflowExecutionFailedEventAttributes =
-        field_map json
+        field_map json__
           "requestCancelExternalWorkflowExecutionFailedEventAttributes"
           RequestCancelExternalWorkflowExecutionFailedEventAttributes.of_json in
       let requestCancelExternalWorkflowExecutionInitiatedEventAttributes =
-        field_map json
+        field_map json__
           "requestCancelExternalWorkflowExecutionInitiatedEventAttributes"
           RequestCancelExternalWorkflowExecutionInitiatedEventAttributes.of_json in
       let externalWorkflowExecutionCancelRequestedEventAttributes =
-        field_map json
+        field_map json__
           "externalWorkflowExecutionCancelRequestedEventAttributes"
           ExternalWorkflowExecutionCancelRequestedEventAttributes.of_json in
       let signalExternalWorkflowExecutionFailedEventAttributes =
-        field_map json "signalExternalWorkflowExecutionFailedEventAttributes"
+        field_map json__
+          "signalExternalWorkflowExecutionFailedEventAttributes"
           SignalExternalWorkflowExecutionFailedEventAttributes.of_json in
       let externalWorkflowExecutionSignaledEventAttributes =
-        field_map json "externalWorkflowExecutionSignaledEventAttributes"
+        field_map json__ "externalWorkflowExecutionSignaledEventAttributes"
           ExternalWorkflowExecutionSignaledEventAttributes.of_json in
       let signalExternalWorkflowExecutionInitiatedEventAttributes =
-        field_map json
+        field_map json__
           "signalExternalWorkflowExecutionInitiatedEventAttributes"
           SignalExternalWorkflowExecutionInitiatedEventAttributes.of_json in
       let childWorkflowExecutionTerminatedEventAttributes =
-        field_map json "childWorkflowExecutionTerminatedEventAttributes"
+        field_map json__ "childWorkflowExecutionTerminatedEventAttributes"
           ChildWorkflowExecutionTerminatedEventAttributes.of_json in
       let childWorkflowExecutionCanceledEventAttributes =
-        field_map json "childWorkflowExecutionCanceledEventAttributes"
+        field_map json__ "childWorkflowExecutionCanceledEventAttributes"
           ChildWorkflowExecutionCanceledEventAttributes.of_json in
       let childWorkflowExecutionTimedOutEventAttributes =
-        field_map json "childWorkflowExecutionTimedOutEventAttributes"
+        field_map json__ "childWorkflowExecutionTimedOutEventAttributes"
           ChildWorkflowExecutionTimedOutEventAttributes.of_json in
       let childWorkflowExecutionFailedEventAttributes =
-        field_map json "childWorkflowExecutionFailedEventAttributes"
+        field_map json__ "childWorkflowExecutionFailedEventAttributes"
           ChildWorkflowExecutionFailedEventAttributes.of_json in
       let childWorkflowExecutionCompletedEventAttributes =
-        field_map json "childWorkflowExecutionCompletedEventAttributes"
+        field_map json__ "childWorkflowExecutionCompletedEventAttributes"
           ChildWorkflowExecutionCompletedEventAttributes.of_json in
       let childWorkflowExecutionStartedEventAttributes =
-        field_map json "childWorkflowExecutionStartedEventAttributes"
+        field_map json__ "childWorkflowExecutionStartedEventAttributes"
           ChildWorkflowExecutionStartedEventAttributes.of_json in
       let startChildWorkflowExecutionInitiatedEventAttributes =
-        field_map json "startChildWorkflowExecutionInitiatedEventAttributes"
+        field_map json__
+          "startChildWorkflowExecutionInitiatedEventAttributes"
           StartChildWorkflowExecutionInitiatedEventAttributes.of_json in
       let timerCanceledEventAttributes =
-        field_map json "timerCanceledEventAttributes"
+        field_map json__ "timerCanceledEventAttributes"
           TimerCanceledEventAttributes.of_json in
       let timerFiredEventAttributes =
-        field_map json "timerFiredEventAttributes"
+        field_map json__ "timerFiredEventAttributes"
           TimerFiredEventAttributes.of_json in
       let timerStartedEventAttributes =
-        field_map json "timerStartedEventAttributes"
+        field_map json__ "timerStartedEventAttributes"
           TimerStartedEventAttributes.of_json in
       let recordMarkerFailedEventAttributes =
-        field_map json "recordMarkerFailedEventAttributes"
+        field_map json__ "recordMarkerFailedEventAttributes"
           RecordMarkerFailedEventAttributes.of_json in
       let markerRecordedEventAttributes =
-        field_map json "markerRecordedEventAttributes"
+        field_map json__ "markerRecordedEventAttributes"
           MarkerRecordedEventAttributes.of_json in
       let workflowExecutionSignaledEventAttributes =
-        field_map json "workflowExecutionSignaledEventAttributes"
+        field_map json__ "workflowExecutionSignaledEventAttributes"
           WorkflowExecutionSignaledEventAttributes.of_json in
       let activityTaskCancelRequestedEventAttributes =
-        field_map json "activityTaskCancelRequestedEventAttributes"
+        field_map json__ "activityTaskCancelRequestedEventAttributes"
           ActivityTaskCancelRequestedEventAttributes.of_json in
       let activityTaskCanceledEventAttributes =
-        field_map json "activityTaskCanceledEventAttributes"
+        field_map json__ "activityTaskCanceledEventAttributes"
           ActivityTaskCanceledEventAttributes.of_json in
       let activityTaskTimedOutEventAttributes =
-        field_map json "activityTaskTimedOutEventAttributes"
+        field_map json__ "activityTaskTimedOutEventAttributes"
           ActivityTaskTimedOutEventAttributes.of_json in
       let activityTaskFailedEventAttributes =
-        field_map json "activityTaskFailedEventAttributes"
+        field_map json__ "activityTaskFailedEventAttributes"
           ActivityTaskFailedEventAttributes.of_json in
       let activityTaskCompletedEventAttributes =
-        field_map json "activityTaskCompletedEventAttributes"
+        field_map json__ "activityTaskCompletedEventAttributes"
           ActivityTaskCompletedEventAttributes.of_json in
       let activityTaskStartedEventAttributes =
-        field_map json "activityTaskStartedEventAttributes"
+        field_map json__ "activityTaskStartedEventAttributes"
           ActivityTaskStartedEventAttributes.of_json in
       let activityTaskScheduledEventAttributes =
-        field_map json "activityTaskScheduledEventAttributes"
+        field_map json__ "activityTaskScheduledEventAttributes"
           ActivityTaskScheduledEventAttributes.of_json in
       let decisionTaskTimedOutEventAttributes =
-        field_map json "decisionTaskTimedOutEventAttributes"
+        field_map json__ "decisionTaskTimedOutEventAttributes"
           DecisionTaskTimedOutEventAttributes.of_json in
       let decisionTaskCompletedEventAttributes =
-        field_map json "decisionTaskCompletedEventAttributes"
+        field_map json__ "decisionTaskCompletedEventAttributes"
           DecisionTaskCompletedEventAttributes.of_json in
       let decisionTaskStartedEventAttributes =
-        field_map json "decisionTaskStartedEventAttributes"
+        field_map json__ "decisionTaskStartedEventAttributes"
           DecisionTaskStartedEventAttributes.of_json in
       let decisionTaskScheduledEventAttributes =
-        field_map json "decisionTaskScheduledEventAttributes"
+        field_map json__ "decisionTaskScheduledEventAttributes"
           DecisionTaskScheduledEventAttributes.of_json in
       let workflowExecutionCancelRequestedEventAttributes =
-        field_map json "workflowExecutionCancelRequestedEventAttributes"
+        field_map json__ "workflowExecutionCancelRequestedEventAttributes"
           WorkflowExecutionCancelRequestedEventAttributes.of_json in
       let workflowExecutionTerminatedEventAttributes =
-        field_map json "workflowExecutionTerminatedEventAttributes"
+        field_map json__ "workflowExecutionTerminatedEventAttributes"
           WorkflowExecutionTerminatedEventAttributes.of_json in
       let continueAsNewWorkflowExecutionFailedEventAttributes =
-        field_map json "continueAsNewWorkflowExecutionFailedEventAttributes"
+        field_map json__
+          "continueAsNewWorkflowExecutionFailedEventAttributes"
           ContinueAsNewWorkflowExecutionFailedEventAttributes.of_json in
       let workflowExecutionContinuedAsNewEventAttributes =
-        field_map json "workflowExecutionContinuedAsNewEventAttributes"
+        field_map json__ "workflowExecutionContinuedAsNewEventAttributes"
           WorkflowExecutionContinuedAsNewEventAttributes.of_json in
       let cancelWorkflowExecutionFailedEventAttributes =
-        field_map json "cancelWorkflowExecutionFailedEventAttributes"
+        field_map json__ "cancelWorkflowExecutionFailedEventAttributes"
           CancelWorkflowExecutionFailedEventAttributes.of_json in
       let workflowExecutionCanceledEventAttributes =
-        field_map json "workflowExecutionCanceledEventAttributes"
+        field_map json__ "workflowExecutionCanceledEventAttributes"
           WorkflowExecutionCanceledEventAttributes.of_json in
       let workflowExecutionTimedOutEventAttributes =
-        field_map json "workflowExecutionTimedOutEventAttributes"
+        field_map json__ "workflowExecutionTimedOutEventAttributes"
           WorkflowExecutionTimedOutEventAttributes.of_json in
       let failWorkflowExecutionFailedEventAttributes =
-        field_map json "failWorkflowExecutionFailedEventAttributes"
+        field_map json__ "failWorkflowExecutionFailedEventAttributes"
           FailWorkflowExecutionFailedEventAttributes.of_json in
       let workflowExecutionFailedEventAttributes =
-        field_map json "workflowExecutionFailedEventAttributes"
+        field_map json__ "workflowExecutionFailedEventAttributes"
           WorkflowExecutionFailedEventAttributes.of_json in
       let completeWorkflowExecutionFailedEventAttributes =
-        field_map json "completeWorkflowExecutionFailedEventAttributes"
+        field_map json__ "completeWorkflowExecutionFailedEventAttributes"
           CompleteWorkflowExecutionFailedEventAttributes.of_json in
       let workflowExecutionCompletedEventAttributes =
-        field_map json "workflowExecutionCompletedEventAttributes"
+        field_map json__ "workflowExecutionCompletedEventAttributes"
           WorkflowExecutionCompletedEventAttributes.of_json in
       let workflowExecutionStartedEventAttributes =
-        field_map json "workflowExecutionStartedEventAttributes"
+        field_map json__ "workflowExecutionStartedEventAttributes"
           WorkflowExecutionStartedEventAttributes.of_json in
-      let eventId = field_map_exn json "eventId" EventId.of_json in
-      let eventType = field_map_exn json "eventType" EventType.of_json in
+      let eventId = field_map json__ "eventId" EventId.of_json in
+      let eventType = field_map json__ "eventType" EventType.of_json in
       let eventTimestamp =
-        field_map_exn json "eventTimestamp" Timestamp.of_json in
+        field_map json__ "eventTimestamp" Timestamp.of_json in
       make ?startLambdaFunctionFailedEventAttributes
         ?scheduleLambdaFunctionFailedEventAttributes
         ?lambdaFunctionTimedOutEventAttributes
@@ -7156,8 +7122,8 @@ module HistoryEvent =
         ?workflowExecutionFailedEventAttributes
         ?completeWorkflowExecutionFailedEventAttributes
         ?workflowExecutionCompletedEventAttributes
-        ?workflowExecutionStartedEventAttributes ~eventId ~eventType
-        ~eventTimestamp ()
+        ?workflowExecutionStartedEventAttributes ?eventId ?eventType
+        ?eventTimestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Event within a workflow execution. A history event can be one of these types: ActivityTaskCancelRequested \226\128\147 A RequestCancelActivityTask decision was received by the system. ActivityTaskCanceled \226\128\147 The activity task was successfully canceled. ActivityTaskCompleted \226\128\147 An activity worker successfully completed an activity task by calling RespondActivityTaskCompleted. ActivityTaskFailed \226\128\147 An activity worker failed an activity task by calling RespondActivityTaskFailed. ActivityTaskScheduled \226\128\147 An activity task was scheduled for execution. ActivityTaskStarted \226\128\147 The scheduled activity task was dispatched to a worker. ActivityTaskTimedOut \226\128\147 The activity task timed out. CancelTimerFailed \226\128\147 Failed to process CancelTimer decision. This happens when the decision isn't configured properly, for example no timer exists with the specified timer Id. CancelWorkflowExecutionFailed \226\128\147 A request to cancel a workflow execution failed. ChildWorkflowExecutionCanceled \226\128\147 A child workflow execution, started by this workflow execution, was canceled and closed. ChildWorkflowExecutionCompleted \226\128\147 A child workflow execution, started by this workflow execution, completed successfully and was closed. ChildWorkflowExecutionFailed \226\128\147 A child workflow execution, started by this workflow execution, failed to complete successfully and was closed. ChildWorkflowExecutionStarted \226\128\147 A child workflow execution was successfully started. ChildWorkflowExecutionTerminated \226\128\147 A child workflow execution, started by this workflow execution, was terminated. ChildWorkflowExecutionTimedOut \226\128\147 A child workflow execution, started by this workflow execution, timed out and was closed. CompleteWorkflowExecutionFailed \226\128\147 The workflow execution failed to complete. ContinueAsNewWorkflowExecutionFailed \226\128\147 The workflow execution failed to complete after being continued as a new workflow execution. DecisionTaskCompleted \226\128\147 The decider successfully completed a decision task by calling RespondDecisionTaskCompleted. DecisionTaskScheduled \226\128\147 A decision task was scheduled for the workflow execution. DecisionTaskStarted \226\128\147 The decision task was dispatched to a decider. DecisionTaskTimedOut \226\128\147 The decision task timed out. ExternalWorkflowExecutionCancelRequested \226\128\147 Request to cancel an external workflow execution was successfully delivered to the target execution. ExternalWorkflowExecutionSignaled \226\128\147 A signal, requested by this workflow execution, was successfully delivered to the target external workflow execution. FailWorkflowExecutionFailed \226\128\147 A request to mark a workflow execution as failed, itself failed. MarkerRecorded \226\128\147 A marker was recorded in the workflow history as the result of a RecordMarker decision. RecordMarkerFailed \226\128\147 A RecordMarker decision was returned as failed. RequestCancelActivityTaskFailed \226\128\147 Failed to process RequestCancelActivityTask decision. This happens when the decision isn't configured properly. RequestCancelExternalWorkflowExecutionFailed \226\128\147 Request to cancel an external workflow execution failed. RequestCancelExternalWorkflowExecutionInitiated \226\128\147 A request was made to request the cancellation of an external workflow execution. ScheduleActivityTaskFailed \226\128\147 Failed to process ScheduleActivityTask decision. This happens when the decision isn't configured properly, for example the activity type specified isn't registered. SignalExternalWorkflowExecutionFailed \226\128\147 The request to signal an external workflow execution failed. SignalExternalWorkflowExecutionInitiated \226\128\147 A request to signal an external workflow was made. StartActivityTaskFailed \226\128\147 A scheduled activity task failed to start. StartChildWorkflowExecutionFailed \226\128\147 Failed to process StartChildWorkflowExecution decision. This happens when the decision isn't configured properly, for example the workflow type specified isn't registered. StartChildWorkflowExecutionInitiated \226\128\147 A request was made to start a child workflow execution. StartTimerFailed \226\128\147 Failed to process StartTimer decision. This happens when the decision isn't configured properly, for example a timer already exists with the specified timer Id. TimerCanceled \226\128\147 A timer, previously started for this workflow execution, was successfully canceled. TimerFired \226\128\147 A timer, previously started for this workflow execution, fired. TimerStarted \226\128\147 A timer was started for the workflow execution due to a StartTimer decision. WorkflowExecutionCancelRequested \226\128\147 A request to cancel this workflow execution was made. WorkflowExecutionCanceled \226\128\147 The workflow execution was successfully canceled and closed. WorkflowExecutionCompleted \226\128\147 The workflow execution was closed due to successful completion. WorkflowExecutionContinuedAsNew \226\128\147 The workflow execution was closed and a new execution of the same type was created with the same workflowId. WorkflowExecutionFailed \226\128\147 The workflow execution closed due to a failure. WorkflowExecutionSignaled \226\128\147 An external signal was received for the workflow execution. WorkflowExecutionStarted \226\128\147 The workflow execution was started. WorkflowExecutionTerminated \226\128\147 The workflow execution was terminated. WorkflowExecutionTimedOut \226\128\147 The workflow execution was closed because a time out was exceeded."]
@@ -7165,25 +7131,24 @@ module DomainInfo =
   struct
     type nonrec t =
       {
-      name: DomainName.t
+      name: DomainName.t option
         [@ocaml.doc
           "The name of the domain. This name is unique within the account."];
-      status: RegistrationStatus.t
+      status: RegistrationStatus.t option
         [@ocaml.doc
           "The status of the domain: REGISTERED \226\128\147 The domain is properly registered and available. You can use this domain for registering types and creating new workflow executions. DEPRECATED \226\128\147 The domain was deprecated using DeprecateDomain, but is still in use. You should not create new workflow executions in this domain."];
       description: Description.t option
         [@ocaml.doc
           "The description of the domain provided through RegisterDomain."];
       arn: Arn.t option [@ocaml.doc "The ARN of the domain."]}
-    let context_ = "DomainInfo"
-    let make ?description =
-      fun ?arn ->
-        fun ~name ->
-          fun ~status -> fun () -> { description; arn; name; status }
+    let make ?name =
+      fun ?status ->
+        fun ?description ->
+          fun ?arn -> fun () -> { name; status; description; arn }
     let to_value x =
       structure_to_value
-        [("name", (Some (DomainName.to_value x.name)));
-        ("status", (Some (RegistrationStatus.to_value x.status)));
+        [("name", (Option.map x.name ~f:DomainName.to_value));
+        ("status", (Option.map x.status ~f:RegistrationStatus.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
         ("arn", (Option.map x.arn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
@@ -7192,18 +7157,18 @@ module DomainInfo =
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let status =
-        RegistrationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:RegistrationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let name =
-        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?arn ?description ~status ~name ()
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?arn ?description ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "arn" Arn.of_json in
-      let description = field_map json "description" Description.of_json in
-      let status = field_map_exn json "status" RegistrationStatus.of_json in
-      let name = field_map_exn json "name" DomainName.of_json in
-      make ?arn ?description ~status ~name ()
+    let of_json json__ =
+      let arn = field_map json__ "arn" Arn.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let status = field_map json__ "status" RegistrationStatus.of_json in
+      let name = field_map json__ "name" DomainName.of_json in
+      make ?arn ?description ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains general information about a domain."]
 module DurationInDays =
@@ -7228,40 +7193,40 @@ module ActivityTypeInfo =
   struct
     type nonrec t =
       {
-      activityType: ActivityType.t
+      activityType: ActivityType.t option
         [@ocaml.doc
           "The ActivityType type structure representing the activity type."];
-      status: RegistrationStatus.t
+      status: RegistrationStatus.t option
         [@ocaml.doc "The current status of the activity type."];
       description: Description.t option
         [@ocaml.doc
           "The description of the activity type provided in RegisterActivityType."];
-      creationDate: Timestamp.t
+      creationDate: Timestamp.t option
         [@ocaml.doc
           "The date and time this activity type was created through RegisterActivityType."];
       deprecationDate: Timestamp.t option
         [@ocaml.doc
           "If DEPRECATED, the date and time DeprecateActivityType was called."]}
-    let context_ = "ActivityTypeInfo"
-    let make ?description =
-      fun ?deprecationDate ->
-        fun ~activityType ->
-          fun ~status ->
-            fun ~creationDate ->
+    let make ?activityType =
+      fun ?status ->
+        fun ?description ->
+          fun ?creationDate ->
+            fun ?deprecationDate ->
               fun () ->
                 {
-                  description;
-                  deprecationDate;
                   activityType;
                   status;
-                  creationDate
+                  description;
+                  creationDate;
+                  deprecationDate
                 }
     let to_value x =
       structure_to_value
-        [("activityType", (Some (ActivityType.to_value x.activityType)));
-        ("status", (Some (RegistrationStatus.to_value x.status)));
+        [("activityType",
+           (Option.map x.activityType ~f:ActivityType.to_value));
+        ("status", (Option.map x.status ~f:RegistrationStatus.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
-        ("creationDate", (Some (Timestamp.to_value x.creationDate)));
+        ("creationDate", (Option.map x.creationDate ~f:Timestamp.to_value));
         ("deprecationDate",
           (Option.map x.deprecationDate ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
@@ -7270,28 +7235,26 @@ module ActivityTypeInfo =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "deprecationDate") in
       let creationDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationDate") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "creationDate") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let status =
-        RegistrationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:RegistrationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let activityType =
-        ActivityType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "activityType") in
-      make ?deprecationDate ~creationDate ?description ~status ~activityType
+        (Option.map ~f:ActivityType.of_xml)
+          (Xml.child xml_arg0 "activityType") in
+      make ?deprecationDate ?creationDate ?description ?status ?activityType
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deprecationDate =
-        field_map json "deprecationDate" Timestamp.of_json in
-      let creationDate = field_map_exn json "creationDate" Timestamp.of_json in
-      let description = field_map json "description" Description.of_json in
-      let status = field_map_exn json "status" RegistrationStatus.of_json in
-      let activityType =
-        field_map_exn json "activityType" ActivityType.of_json in
-      make ?deprecationDate ~creationDate ?description ~status ~activityType
+        field_map json__ "deprecationDate" Timestamp.of_json in
+      let creationDate = field_map json__ "creationDate" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let status = field_map json__ "status" RegistrationStatus.of_json in
+      let activityType = field_map json__ "activityType" ActivityType.of_json in
+      make ?deprecationDate ?creationDate ?description ?status ?activityType
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detailed information about an activity type."]
@@ -7312,8 +7275,8 @@ module OperationNotPermittedFault =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7349,8 +7312,8 @@ module UnknownResourceFault =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7359,6 +7322,9 @@ module WorkflowTypeInfoList =
   struct
     type nonrec t = WorkflowTypeInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WorkflowTypeInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7456,18 +7422,20 @@ module WorkflowTypeConfiguration =
         ?defaultTaskList ?defaultExecutionStartToCloseTimeout
         ?defaultTaskStartToCloseTimeout ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let defaultLambdaRole = field_map json "defaultLambdaRole" Arn.of_json in
+    let of_json json__ =
+      let defaultLambdaRole =
+        field_map json__ "defaultLambdaRole" Arn.of_json in
       let defaultChildPolicy =
-        field_map json "defaultChildPolicy" ChildPolicy.of_json in
+        field_map json__ "defaultChildPolicy" ChildPolicy.of_json in
       let defaultTaskPriority =
-        field_map json "defaultTaskPriority" TaskPriority.of_json in
-      let defaultTaskList = field_map json "defaultTaskList" TaskList.of_json in
+        field_map json__ "defaultTaskPriority" TaskPriority.of_json in
+      let defaultTaskList =
+        field_map json__ "defaultTaskList" TaskList.of_json in
       let defaultExecutionStartToCloseTimeout =
-        field_map json "defaultExecutionStartToCloseTimeout"
+        field_map json__ "defaultExecutionStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
       let defaultTaskStartToCloseTimeout =
-        field_map json "defaultTaskStartToCloseTimeout"
+        field_map json__ "defaultTaskStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
       make ?defaultLambdaRole ?defaultChildPolicy ?defaultTaskPriority
         ?defaultTaskList ?defaultExecutionStartToCloseTimeout
@@ -7478,6 +7446,9 @@ module WorkflowExecutionInfoList =
   struct
     type nonrec t = WorkflowExecutionInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WorkflowExecutionInfo.to_value)) |>
         (fun x -> `List x)
@@ -7504,85 +7475,83 @@ module WorkflowExecutionConfiguration =
   struct
     type nonrec t =
       {
-      taskStartToCloseTimeout: DurationInSeconds.t
+      taskStartToCloseTimeout: DurationInSeconds.t option
         [@ocaml.doc
           "The maximum duration allowed for decision tasks for this workflow execution. The duration is specified in seconds, an integer greater than or equal to 0. You can use NONE to specify unlimited duration."];
-      executionStartToCloseTimeout: DurationInSeconds.t
+      executionStartToCloseTimeout: DurationInSeconds.t option
         [@ocaml.doc
           "The total duration for this workflow execution. The duration is specified in seconds, an integer greater than or equal to 0. You can use NONE to specify unlimited duration."];
-      taskList: TaskList.t
+      taskList: TaskList.t option
         [@ocaml.doc
           "The task list used for the decision tasks generated for this workflow execution."];
       taskPriority: TaskPriority.t option
         [@ocaml.doc
           "The priority assigned to decision tasks for this workflow execution. Valid values are integers that range from Java's Integer.MIN_VALUE (-2147483648) to Integer.MAX_VALUE (2147483647). Higher numbers indicate higher priority. For more information about setting task priority, see Setting Task Priority in the Amazon SWF Developer Guide."];
-      childPolicy: ChildPolicy.t
+      childPolicy: ChildPolicy.t option
         [@ocaml.doc
           "The policy to use for the child workflow executions if this workflow execution is terminated, by calling the TerminateWorkflowExecution action explicitly or due to an expired timeout. The supported child policies are: TERMINATE \226\128\147 The child executions are terminated. REQUEST_CANCEL \226\128\147 A request to cancel is attempted for each child execution by recording a WorkflowExecutionCancelRequested event in its history. It is up to the decider to take appropriate actions when it receives an execution history with this event. ABANDON \226\128\147 No action is taken. The child executions continue to run."];
       lambdaRole: Arn.t option
         [@ocaml.doc "The IAM role attached to the child workflow execution."]}
-    let context_ = "WorkflowExecutionConfiguration"
-    let make ?taskPriority =
-      fun ?lambdaRole ->
-        fun ~taskStartToCloseTimeout ->
-          fun ~executionStartToCloseTimeout ->
-            fun ~taskList ->
-              fun ~childPolicy ->
+    let make ?taskStartToCloseTimeout =
+      fun ?executionStartToCloseTimeout ->
+        fun ?taskList ->
+          fun ?taskPriority ->
+            fun ?childPolicy ->
+              fun ?lambdaRole ->
                 fun () ->
                   {
-                    taskPriority;
-                    lambdaRole;
                     taskStartToCloseTimeout;
                     executionStartToCloseTimeout;
                     taskList;
-                    childPolicy
+                    taskPriority;
+                    childPolicy;
+                    lambdaRole
                   }
     let to_value x =
       structure_to_value
         [("taskStartToCloseTimeout",
-           (Some (DurationInSeconds.to_value x.taskStartToCloseTimeout)));
+           (Option.map x.taskStartToCloseTimeout
+              ~f:DurationInSeconds.to_value));
         ("executionStartToCloseTimeout",
-          (Some (DurationInSeconds.to_value x.executionStartToCloseTimeout)));
-        ("taskList", (Some (TaskList.to_value x.taskList)));
+          (Option.map x.executionStartToCloseTimeout
+             ~f:DurationInSeconds.to_value));
+        ("taskList", (Option.map x.taskList ~f:TaskList.to_value));
         ("taskPriority",
           (Option.map x.taskPriority ~f:TaskPriority.to_value));
-        ("childPolicy", (Some (ChildPolicy.to_value x.childPolicy)));
+        ("childPolicy", (Option.map x.childPolicy ~f:ChildPolicy.to_value));
         ("lambdaRole", (Option.map x.lambdaRole ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let lambdaRole =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "lambdaRole") in
       let childPolicy =
-        ChildPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "childPolicy") in
+        (Option.map ~f:ChildPolicy.of_xml) (Xml.child xml_arg0 "childPolicy") in
       let taskPriority =
         (Option.map ~f:TaskPriority.of_xml)
           (Xml.child xml_arg0 "taskPriority") in
       let taskList =
-        TaskList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskList") in
+        (Option.map ~f:TaskList.of_xml) (Xml.child xml_arg0 "taskList") in
       let executionStartToCloseTimeout =
-        DurationInSeconds.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "executionStartToCloseTimeout") in
+        (Option.map ~f:DurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "executionStartToCloseTimeout") in
       let taskStartToCloseTimeout =
-        DurationInSeconds.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "taskStartToCloseTimeout") in
-      make ?lambdaRole ~childPolicy ?taskPriority ~taskList
-        ~executionStartToCloseTimeout ~taskStartToCloseTimeout ()
+        (Option.map ~f:DurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "taskStartToCloseTimeout") in
+      make ?lambdaRole ?childPolicy ?taskPriority ?taskList
+        ?executionStartToCloseTimeout ?taskStartToCloseTimeout ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lambdaRole = field_map json "lambdaRole" Arn.of_json in
-      let childPolicy = field_map_exn json "childPolicy" ChildPolicy.of_json in
-      let taskPriority = field_map json "taskPriority" TaskPriority.of_json in
-      let taskList = field_map_exn json "taskList" TaskList.of_json in
+    let of_json json__ =
+      let lambdaRole = field_map json__ "lambdaRole" Arn.of_json in
+      let childPolicy = field_map json__ "childPolicy" ChildPolicy.of_json in
+      let taskPriority = field_map json__ "taskPriority" TaskPriority.of_json in
+      let taskList = field_map json__ "taskList" TaskList.of_json in
       let executionStartToCloseTimeout =
-        field_map_exn json "executionStartToCloseTimeout"
+        field_map json__ "executionStartToCloseTimeout"
           DurationInSeconds.of_json in
       let taskStartToCloseTimeout =
-        field_map_exn json "taskStartToCloseTimeout"
-          DurationInSeconds.of_json in
-      make ?lambdaRole ~childPolicy ?taskPriority ~taskList
-        ~executionStartToCloseTimeout ~taskStartToCloseTimeout ()
+        field_map json__ "taskStartToCloseTimeout" DurationInSeconds.of_json in
+      make ?lambdaRole ?childPolicy ?taskPriority ?taskList
+        ?executionStartToCloseTimeout ?taskStartToCloseTimeout ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration settings for a workflow execution including timeout values, tasklist etc. These configuration settings are determined from the defaults specified when registering the workflow type and those specified when starting the workflow execution."]
@@ -7590,41 +7559,41 @@ module WorkflowExecutionOpenCounts =
   struct
     type nonrec t =
       {
-      openActivityTasks: Count.t
+      openActivityTasks: Count.t option
         [@ocaml.doc "The count of activity tasks whose status is OPEN."];
-      openDecisionTasks: OpenDecisionTasksCount.t
+      openDecisionTasks: OpenDecisionTasksCount.t option
         [@ocaml.doc
           "The count of decision tasks whose status is OPEN. A workflow execution can have at most one open decision task."];
-      openTimers: Count.t
+      openTimers: Count.t option
         [@ocaml.doc
           "The count of timers started by this workflow execution that have not fired yet."];
-      openChildWorkflowExecutions: Count.t
+      openChildWorkflowExecutions: Count.t option
         [@ocaml.doc
           "The count of child workflow executions whose status is OPEN."];
       openLambdaFunctions: Count.t option
         [@ocaml.doc "The count of Lambda tasks whose status is OPEN."]}
-    let context_ = "WorkflowExecutionOpenCounts"
-    let make ?openLambdaFunctions =
-      fun ~openActivityTasks ->
-        fun ~openDecisionTasks ->
-          fun ~openTimers ->
-            fun ~openChildWorkflowExecutions ->
+    let make ?openActivityTasks =
+      fun ?openDecisionTasks ->
+        fun ?openTimers ->
+          fun ?openChildWorkflowExecutions ->
+            fun ?openLambdaFunctions ->
               fun () ->
                 {
-                  openLambdaFunctions;
                   openActivityTasks;
                   openDecisionTasks;
                   openTimers;
-                  openChildWorkflowExecutions
+                  openChildWorkflowExecutions;
+                  openLambdaFunctions
                 }
     let to_value x =
       structure_to_value
-        [("openActivityTasks", (Some (Count.to_value x.openActivityTasks)));
+        [("openActivityTasks",
+           (Option.map x.openActivityTasks ~f:Count.to_value));
         ("openDecisionTasks",
-          (Some (OpenDecisionTasksCount.to_value x.openDecisionTasks)));
-        ("openTimers", (Some (Count.to_value x.openTimers)));
+          (Option.map x.openDecisionTasks ~f:OpenDecisionTasksCount.to_value));
+        ("openTimers", (Option.map x.openTimers ~f:Count.to_value));
         ("openChildWorkflowExecutions",
-          (Some (Count.to_value x.openChildWorkflowExecutions)));
+          (Option.map x.openChildWorkflowExecutions ~f:Count.to_value));
         ("openLambdaFunctions",
           (Option.map x.openLambdaFunctions ~f:Count.to_value))]
     let to_query v = to_query to_value v
@@ -7633,32 +7602,30 @@ module WorkflowExecutionOpenCounts =
         (Option.map ~f:Count.of_xml)
           (Xml.child xml_arg0 "openLambdaFunctions") in
       let openChildWorkflowExecutions =
-        Count.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "openChildWorkflowExecutions") in
+        (Option.map ~f:Count.of_xml)
+          (Xml.child xml_arg0 "openChildWorkflowExecutions") in
       let openTimers =
-        Count.of_xml (Xml.child_exn ~context:context_ xml_arg0 "openTimers") in
+        (Option.map ~f:Count.of_xml) (Xml.child xml_arg0 "openTimers") in
       let openDecisionTasks =
-        OpenDecisionTasksCount.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "openDecisionTasks") in
+        (Option.map ~f:OpenDecisionTasksCount.of_xml)
+          (Xml.child xml_arg0 "openDecisionTasks") in
       let openActivityTasks =
-        Count.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "openActivityTasks") in
-      make ?openLambdaFunctions ~openChildWorkflowExecutions ~openTimers
-        ~openDecisionTasks ~openActivityTasks ()
+        (Option.map ~f:Count.of_xml) (Xml.child xml_arg0 "openActivityTasks") in
+      make ?openLambdaFunctions ?openChildWorkflowExecutions ?openTimers
+        ?openDecisionTasks ?openActivityTasks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let openLambdaFunctions =
-        field_map json "openLambdaFunctions" Count.of_json in
+        field_map json__ "openLambdaFunctions" Count.of_json in
       let openChildWorkflowExecutions =
-        field_map_exn json "openChildWorkflowExecutions" Count.of_json in
-      let openTimers = field_map_exn json "openTimers" Count.of_json in
+        field_map json__ "openChildWorkflowExecutions" Count.of_json in
+      let openTimers = field_map json__ "openTimers" Count.of_json in
       let openDecisionTasks =
-        field_map_exn json "openDecisionTasks" OpenDecisionTasksCount.of_json in
+        field_map json__ "openDecisionTasks" OpenDecisionTasksCount.of_json in
       let openActivityTasks =
-        field_map_exn json "openActivityTasks" Count.of_json in
-      make ?openLambdaFunctions ~openChildWorkflowExecutions ~openTimers
-        ~openDecisionTasks ~openActivityTasks ()
+        field_map json__ "openActivityTasks" Count.of_json in
+      make ?openLambdaFunctions ?openChildWorkflowExecutions ?openTimers
+        ?openDecisionTasks ?openActivityTasks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the counts of open tasks, child workflow executions and timers for a workflow execution."]
@@ -7679,6 +7646,9 @@ module ResourceTagKeyList =
   struct
     type nonrec t = ResourceTagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceTagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7704,6 +7674,9 @@ module ResourceTagList =
   struct
     type nonrec t = ResourceTag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7738,8 +7711,8 @@ module DefaultUndefinedFault =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7761,8 +7734,8 @@ module LimitExceededFault =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7784,8 +7757,8 @@ module TypeDeprecatedFault =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7807,8 +7780,8 @@ module WorkflowExecutionAlreadyStartedFault =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7817,6 +7790,9 @@ module DecisionList =
   struct
     type nonrec t = Decision.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Decision.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7885,6 +7861,19 @@ module ReverseOrder =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module StartAtPreviousStartedEvent =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module ExecutionTimeFilter =
   struct
     type nonrec t =
@@ -7911,9 +7900,9 @@ module ExecutionTimeFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "oldestDate") in
       make ?latestDate ~oldestDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let latestDate = field_map json "latestDate" Timestamp.of_json in
-      let oldestDate = field_map_exn json "oldestDate" Timestamp.of_json in
+    let of_json json__ =
+      let latestDate = field_map json__ "latestDate" Timestamp.of_json in
+      let oldestDate = field_map_exn json__ "oldestDate" Timestamp.of_json in
       make ?latestDate ~oldestDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7934,8 +7923,8 @@ module TagFilter =
       let tag = Tag.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tag") in
       make ~tag ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tag = field_map_exn json "tag" Tag.of_json in make ~tag ()
+    let of_json json__ =
+      let tag = field_map_exn json__ "tag" Tag.of_json in make ~tag ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Used to filter the workflow executions in visibility APIs based on a tag."]
@@ -7958,8 +7947,8 @@ module WorkflowExecutionFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "workflowId") in
       make ~workflowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
+    let of_json json__ =
+      let workflowId = field_map_exn json__ "workflowId" WorkflowId.of_json in
       make ~workflowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7985,9 +7974,9 @@ module WorkflowTypeFilter =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?version ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "version" VersionOptional.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+    let of_json json__ =
+      let version = field_map json__ "version" VersionOptional.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       make ?version ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8010,8 +7999,8 @@ module CloseStatusFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" CloseStatus.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "status" CloseStatus.of_json in
       make ~status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8020,6 +8009,9 @@ module HistoryEventList =
   struct
     type nonrec t = HistoryEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HistoryEvent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8044,6 +8036,9 @@ module DomainInfoList =
   struct
     type nonrec t = DomainInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8068,37 +8063,37 @@ module DomainConfiguration =
   struct
     type nonrec t =
       {
-      workflowExecutionRetentionPeriodInDays: DurationInDays.t
+      workflowExecutionRetentionPeriodInDays: DurationInDays.t option
         [@ocaml.doc
           "The retention period for workflow executions in this domain."]}
-    let context_ = "DomainConfiguration"
-    let make ~workflowExecutionRetentionPeriodInDays =
+    let make ?workflowExecutionRetentionPeriodInDays =
       fun () -> { workflowExecutionRetentionPeriodInDays }
     let to_value x =
       structure_to_value
         [("workflowExecutionRetentionPeriodInDays",
-           (Some
-              (DurationInDays.to_value
-                 x.workflowExecutionRetentionPeriodInDays)))]
+           (Option.map x.workflowExecutionRetentionPeriodInDays
+              ~f:DurationInDays.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workflowExecutionRetentionPeriodInDays =
-        DurationInDays.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "workflowExecutionRetentionPeriodInDays") in
-      make ~workflowExecutionRetentionPeriodInDays ()
+        (Option.map ~f:DurationInDays.of_xml)
+          (Xml.child xml_arg0 "workflowExecutionRetentionPeriodInDays") in
+      make ?workflowExecutionRetentionPeriodInDays ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workflowExecutionRetentionPeriodInDays =
-        field_map_exn json "workflowExecutionRetentionPeriodInDays"
+        field_map json__ "workflowExecutionRetentionPeriodInDays"
           DurationInDays.of_json in
-      make ~workflowExecutionRetentionPeriodInDays ()
+      make ?workflowExecutionRetentionPeriodInDays ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the configuration settings of a domain."]
 module ActivityTypeInfoList =
   struct
     type nonrec t = ActivityTypeInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ActivityTypeInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8200,21 +8195,22 @@ module ActivityTypeConfiguration =
         ?defaultTaskList ?defaultTaskHeartbeatTimeout
         ?defaultTaskStartToCloseTimeout ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultTaskScheduleToCloseTimeout =
-        field_map json "defaultTaskScheduleToCloseTimeout"
+        field_map json__ "defaultTaskScheduleToCloseTimeout"
           DurationInSecondsOptional.of_json in
       let defaultTaskScheduleToStartTimeout =
-        field_map json "defaultTaskScheduleToStartTimeout"
+        field_map json__ "defaultTaskScheduleToStartTimeout"
           DurationInSecondsOptional.of_json in
       let defaultTaskPriority =
-        field_map json "defaultTaskPriority" TaskPriority.of_json in
-      let defaultTaskList = field_map json "defaultTaskList" TaskList.of_json in
+        field_map json__ "defaultTaskPriority" TaskPriority.of_json in
+      let defaultTaskList =
+        field_map json__ "defaultTaskList" TaskList.of_json in
       let defaultTaskHeartbeatTimeout =
-        field_map json "defaultTaskHeartbeatTimeout"
+        field_map json__ "defaultTaskHeartbeatTimeout"
           DurationInSecondsOptional.of_json in
       let defaultTaskStartToCloseTimeout =
-        field_map json "defaultTaskStartToCloseTimeout"
+        field_map json__ "defaultTaskStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
       make ?defaultTaskScheduleToCloseTimeout
         ?defaultTaskScheduleToStartTimeout ?defaultTaskPriority
@@ -8227,7 +8223,7 @@ module WorkflowTypeInfos =
   struct
     type nonrec t =
       {
-      typeInfos: WorkflowTypeInfoList.t
+      typeInfos: WorkflowTypeInfoList.t option
         [@ocaml.doc "The list of workflow type information."];
       nextPageToken: PageToken.t option
         [@ocaml.doc
@@ -8236,9 +8232,8 @@ module WorkflowTypeInfos =
       [ `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `UnknownResourceFault of UnknownResourceFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "WorkflowTypeInfos"
-    let make ?nextPageToken =
-      fun ~typeInfos -> fun () -> { nextPageToken; typeInfos }
+    let make ?typeInfos =
+      fun ?nextPageToken -> fun () -> { typeInfos; nextPageToken }
     let error_of_json name json =
       match name with
       | "OperationNotPermittedFault" ->
@@ -8274,22 +8269,23 @@ module WorkflowTypeInfos =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("typeInfos", (Some (WorkflowTypeInfoList.to_value x.typeInfos)));
+        [("typeInfos",
+           (Option.map x.typeInfos ~f:WorkflowTypeInfoList.to_value));
         ("nextPageToken", (Option.map x.nextPageToken ~f:PageToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextPageToken =
         (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextPageToken") in
       let typeInfos =
-        WorkflowTypeInfoList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "typeInfos") in
-      make ?nextPageToken ~typeInfos ()
+        (Option.map ~f:WorkflowTypeInfoList.of_xml)
+          (Xml.child xml_arg0 "typeInfos") in
+      make ?nextPageToken ?typeInfos ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "nextPageToken" PageToken.of_json in
       let typeInfos =
-        field_map_exn json "typeInfos" WorkflowTypeInfoList.of_json in
-      make ?nextPageToken ~typeInfos ()
+        field_map json__ "typeInfos" WorkflowTypeInfoList.of_json in
+      make ?nextPageToken ?typeInfos ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains a paginated list of information structures about workflow types."]
@@ -8297,19 +8293,18 @@ module WorkflowTypeDetail =
   struct
     type nonrec t =
       {
-      typeInfo: WorkflowTypeInfo.t
+      typeInfo: WorkflowTypeInfo.t option
         [@ocaml.doc
           "General information about the workflow type. The status of the workflow type (returned in the WorkflowTypeInfo structure) can be one of the following. REGISTERED \226\128\147 The type is registered and available. Workers supporting this type should be running. DEPRECATED \226\128\147 The type was deprecated using DeprecateWorkflowType, but is still in use. You should keep workers supporting this type running. You cannot create new workflow executions of this type."];
-      configuration: WorkflowTypeConfiguration.t
+      configuration: WorkflowTypeConfiguration.t option
         [@ocaml.doc
           "Configuration settings of the workflow type registered through RegisterWorkflowType"]}
     type nonrec error =
       [ `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `UnknownResourceFault of UnknownResourceFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "WorkflowTypeDetail"
-    let make ~typeInfo =
-      fun ~configuration -> fun () -> { typeInfo; configuration }
+    let make ?typeInfo =
+      fun ?configuration -> fun () -> { typeInfo; configuration }
     let error_of_json name json =
       match name with
       | "OperationNotPermittedFault" ->
@@ -8345,31 +8340,31 @@ module WorkflowTypeDetail =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("typeInfo", (Some (WorkflowTypeInfo.to_value x.typeInfo)));
+        [("typeInfo", (Option.map x.typeInfo ~f:WorkflowTypeInfo.to_value));
         ("configuration",
-          (Some (WorkflowTypeConfiguration.to_value x.configuration)))]
+          (Option.map x.configuration ~f:WorkflowTypeConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let configuration =
-        WorkflowTypeConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "configuration") in
+        (Option.map ~f:WorkflowTypeConfiguration.of_xml)
+          (Xml.child xml_arg0 "configuration") in
       let typeInfo =
-        WorkflowTypeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "typeInfo") in
-      make ~configuration ~typeInfo ()
+        (Option.map ~f:WorkflowTypeInfo.of_xml)
+          (Xml.child xml_arg0 "typeInfo") in
+      make ?configuration ?typeInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configuration =
-        field_map_exn json "configuration" WorkflowTypeConfiguration.of_json in
-      let typeInfo = field_map_exn json "typeInfo" WorkflowTypeInfo.of_json in
-      make ~configuration ~typeInfo ()
+        field_map json__ "configuration" WorkflowTypeConfiguration.of_json in
+      let typeInfo = field_map json__ "typeInfo" WorkflowTypeInfo.of_json in
+      make ?configuration ?typeInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about a workflow type."]
 module WorkflowExecutionInfos =
   struct
     type nonrec t =
       {
-      executionInfos: WorkflowExecutionInfoList.t
+      executionInfos: WorkflowExecutionInfoList.t option
         [@ocaml.doc "The list of workflow information structures."];
       nextPageToken: PageToken.t option
         [@ocaml.doc
@@ -8378,9 +8373,8 @@ module WorkflowExecutionInfos =
       [ `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `UnknownResourceFault of UnknownResourceFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "WorkflowExecutionInfos"
-    let make ?nextPageToken =
-      fun ~executionInfos -> fun () -> { nextPageToken; executionInfos }
+    let make ?executionInfos =
+      fun ?nextPageToken -> fun () -> { executionInfos; nextPageToken }
     let error_of_json name json =
       match name with
       | "OperationNotPermittedFault" ->
@@ -8417,22 +8411,22 @@ module WorkflowExecutionInfos =
     let to_value x =
       structure_to_value
         [("executionInfos",
-           (Some (WorkflowExecutionInfoList.to_value x.executionInfos)));
+           (Option.map x.executionInfos ~f:WorkflowExecutionInfoList.to_value));
         ("nextPageToken", (Option.map x.nextPageToken ~f:PageToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextPageToken =
         (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextPageToken") in
       let executionInfos =
-        WorkflowExecutionInfoList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "executionInfos") in
-      make ?nextPageToken ~executionInfos ()
+        (Option.map ~f:WorkflowExecutionInfoList.of_xml)
+          (Xml.child xml_arg0 "executionInfos") in
+      make ?nextPageToken ?executionInfos ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "nextPageToken" PageToken.of_json in
       let executionInfos =
-        field_map_exn json "executionInfos" WorkflowExecutionInfoList.of_json in
-      make ?nextPageToken ~executionInfos ()
+        field_map json__ "executionInfos" WorkflowExecutionInfoList.of_json in
+      make ?nextPageToken ?executionInfos ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains a paginated list of information about workflow executions."]
@@ -8440,12 +8434,12 @@ module WorkflowExecutionDetail =
   struct
     type nonrec t =
       {
-      executionInfo: WorkflowExecutionInfo.t
+      executionInfo: WorkflowExecutionInfo.t option
         [@ocaml.doc "Information about the workflow execution."];
-      executionConfiguration: WorkflowExecutionConfiguration.t
+      executionConfiguration: WorkflowExecutionConfiguration.t option
         [@ocaml.doc
           "The configuration settings for this workflow execution including timeout values, tasklist etc."];
-      openCounts: WorkflowExecutionOpenCounts.t
+      openCounts: WorkflowExecutionOpenCounts.t option
         [@ocaml.doc
           "The number of tasks for this workflow execution. This includes open and closed tasks of all types."];
       latestActivityTaskTimestamp: Timestamp.t option
@@ -8458,19 +8452,18 @@ module WorkflowExecutionDetail =
       [ `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `UnknownResourceFault of UnknownResourceFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "WorkflowExecutionDetail"
-    let make ?latestActivityTaskTimestamp =
-      fun ?latestExecutionContext ->
-        fun ~executionInfo ->
-          fun ~executionConfiguration ->
-            fun ~openCounts ->
+    let make ?executionInfo =
+      fun ?executionConfiguration ->
+        fun ?openCounts ->
+          fun ?latestActivityTaskTimestamp ->
+            fun ?latestExecutionContext ->
               fun () ->
                 {
-                  latestActivityTaskTimestamp;
-                  latestExecutionContext;
                   executionInfo;
                   executionConfiguration;
-                  openCounts
+                  openCounts;
+                  latestActivityTaskTimestamp;
+                  latestExecutionContext
                 }
     let error_of_json name json =
       match name with
@@ -8508,13 +8501,12 @@ module WorkflowExecutionDetail =
     let to_value x =
       structure_to_value
         [("executionInfo",
-           (Some (WorkflowExecutionInfo.to_value x.executionInfo)));
+           (Option.map x.executionInfo ~f:WorkflowExecutionInfo.to_value));
         ("executionConfiguration",
-          (Some
-             (WorkflowExecutionConfiguration.to_value
-                x.executionConfiguration)));
+          (Option.map x.executionConfiguration
+             ~f:WorkflowExecutionConfiguration.to_value));
         ("openCounts",
-          (Some (WorkflowExecutionOpenCounts.to_value x.openCounts)));
+          (Option.map x.openCounts ~f:WorkflowExecutionOpenCounts.to_value));
         ("latestActivityTaskTimestamp",
           (Option.map x.latestActivityTaskTimestamp ~f:Timestamp.to_value));
         ("latestExecutionContext",
@@ -8528,38 +8520,38 @@ module WorkflowExecutionDetail =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "latestActivityTaskTimestamp") in
       let openCounts =
-        WorkflowExecutionOpenCounts.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "openCounts") in
+        (Option.map ~f:WorkflowExecutionOpenCounts.of_xml)
+          (Xml.child xml_arg0 "openCounts") in
       let executionConfiguration =
-        WorkflowExecutionConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "executionConfiguration") in
+        (Option.map ~f:WorkflowExecutionConfiguration.of_xml)
+          (Xml.child xml_arg0 "executionConfiguration") in
       let executionInfo =
-        WorkflowExecutionInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "executionInfo") in
-      make ?latestExecutionContext ?latestActivityTaskTimestamp ~openCounts
-        ~executionConfiguration ~executionInfo ()
+        (Option.map ~f:WorkflowExecutionInfo.of_xml)
+          (Xml.child xml_arg0 "executionInfo") in
+      make ?latestExecutionContext ?latestActivityTaskTimestamp ?openCounts
+        ?executionConfiguration ?executionInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let latestExecutionContext =
-        field_map json "latestExecutionContext" Data.of_json in
+        field_map json__ "latestExecutionContext" Data.of_json in
       let latestActivityTaskTimestamp =
-        field_map json "latestActivityTaskTimestamp" Timestamp.of_json in
+        field_map json__ "latestActivityTaskTimestamp" Timestamp.of_json in
       let openCounts =
-        field_map_exn json "openCounts" WorkflowExecutionOpenCounts.of_json in
+        field_map json__ "openCounts" WorkflowExecutionOpenCounts.of_json in
       let executionConfiguration =
-        field_map_exn json "executionConfiguration"
+        field_map json__ "executionConfiguration"
           WorkflowExecutionConfiguration.of_json in
       let executionInfo =
-        field_map_exn json "executionInfo" WorkflowExecutionInfo.of_json in
-      make ?latestExecutionContext ?latestActivityTaskTimestamp ~openCounts
-        ~executionConfiguration ~executionInfo ()
+        field_map json__ "executionInfo" WorkflowExecutionInfo.of_json in
+      make ?latestExecutionContext ?latestActivityTaskTimestamp ?openCounts
+        ?executionConfiguration ?executionInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about a workflow execution."]
 module WorkflowExecutionCount =
   struct
     type nonrec t =
       {
-      count: Count.t [@ocaml.doc "The number of workflow executions."];
+      count: Count.t option [@ocaml.doc "The number of workflow executions."];
       truncated: Truncated.t option
         [@ocaml.doc
           "If set to true, indicates that the actual count was more than the maximum supported by this API and the count returned is the truncated value."]}
@@ -8567,8 +8559,7 @@ module WorkflowExecutionCount =
       [ `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `UnknownResourceFault of UnknownResourceFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "WorkflowExecutionCount"
-    let make ?truncated = fun ~count -> fun () -> { truncated; count }
+    let make ?count = fun ?truncated -> fun () -> { count; truncated }
     let error_of_json name json =
       match name with
       | "OperationNotPermittedFault" ->
@@ -8604,20 +8595,19 @@ module WorkflowExecutionCount =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("count", (Some (Count.to_value x.count)));
+        [("count", (Option.map x.count ~f:Count.to_value));
         ("truncated", (Option.map x.truncated ~f:Truncated.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let truncated =
         (Option.map ~f:Truncated.of_xml) (Xml.child xml_arg0 "truncated") in
-      let count =
-        Count.of_xml (Xml.child_exn ~context:context_ xml_arg0 "count") in
-      make ?truncated ~count ()
+      let count = (Option.map ~f:Count.of_xml) (Xml.child xml_arg0 "count") in
+      make ?truncated ?count ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let truncated = field_map json "truncated" Truncated.of_json in
-      let count = field_map_exn json "count" Count.of_json in
-      make ?truncated ~count ()
+    let of_json json__ =
+      let truncated = field_map json__ "truncated" Truncated.of_json in
+      let count = field_map json__ "count" Count.of_json in
+      make ?truncated ?count ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the count of workflow executions returned from CountOpenWorkflowExecutions or CountClosedWorkflowExecutions"]
@@ -8646,9 +8636,9 @@ module UntagResourceInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" ResourceTagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" ResourceTagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Remove a tag from a Amazon SWF domain."]
@@ -8678,10 +8668,10 @@ module UndeprecateWorkflowTypeInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~workflowType ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "workflowType" WorkflowType.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~workflowType ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8703,8 +8693,8 @@ module UndeprecateDomainInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" DomainName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" DomainName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8734,14 +8724,33 @@ module UndeprecateActivityTypeInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~activityType ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let activityType =
-        field_map_exn json "activityType" ActivityType.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "activityType" ActivityType.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~activityType ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Undeprecates a previously deprecated activity type. After an activity type has been undeprecated, you can create new tasks of that activity type. This operation is eventually consistent. The results are best effort and may not exactly reflect recent updates and changes. Access Control You can use IAM policies to control this action's access to Amazon SWF resources as follows: Use a Resource element with the domain name to limit the action to only specified domains. Use an Action element to allow or deny permission to call this action. Constrain the following parameters by using a Condition element with the appropriate keys. activityType.name: String constraint. The key is swf:activityType.name. activityType.version: String constraint. The key is swf:activityType.version. If the caller doesn't have sufficient permissions to invoke the action, or the parameter values fall outside the specified constraints, the action fails. The associated event attribute's cause parameter is set to OPERATION_NOT_PERMITTED. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."]
+module TypeNotDeprecatedFault =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returned when the resource type has not been deprecated."]
 module TypeAlreadyExistsFault =
   struct
     type nonrec t =
@@ -8759,8 +8768,8 @@ module TypeAlreadyExistsFault =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8779,8 +8788,8 @@ module TooManyTagsFault =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You've exceeded the number of tags allowed for a domain."]
@@ -8837,13 +8846,13 @@ module TerminateWorkflowExecutionInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?childPolicy ?details ?reason ?runId ~workflowId ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let childPolicy = field_map json "childPolicy" ChildPolicy.of_json in
-      let details = field_map json "details" Data.of_json in
-      let reason = field_map json "reason" TerminateReason.of_json in
-      let runId = field_map json "runId" WorkflowRunIdOptional.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+    let of_json json__ =
+      let childPolicy = field_map json__ "childPolicy" ChildPolicy.of_json in
+      let details = field_map json__ "details" Data.of_json in
+      let reason = field_map json__ "reason" TerminateReason.of_json in
+      let runId = field_map json__ "runId" WorkflowRunIdOptional.of_json in
+      let workflowId = field_map_exn json__ "workflowId" WorkflowId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?childPolicy ?details ?reason ?runId ~workflowId ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8873,9 +8882,9 @@ module TagResourceInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" ResourceTagList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" ResourceTagList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8886,15 +8895,15 @@ module StartWorkflowExecutionInput =
       {
       domain: DomainName.t
         [@ocaml.doc
-          "The name of the domain in which the workflow execution is created."];
+          "The name of the domain in which the workflow execution is created. The specified string must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
       workflowId: WorkflowId.t
         [@ocaml.doc
-          "The user defined identifier associated with the workflow execution. You can use this to associate a custom identifier with the workflow execution. You may specify the same identifier if a workflow execution is logically a restart of a previous execution. You cannot have two open workflow executions with the same workflowId at the same time within the same domain. The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
+          "The user defined identifier associated with the workflow execution. You can use this to associate a custom identifier with the workflow execution. You may specify the same identifier if a workflow execution is logically a restart of a previous execution. You cannot have two open workflow executions with the same workflowId at the same time within the same domain. The specified string must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
       workflowType: WorkflowType.t
         [@ocaml.doc "The type of the workflow to start."];
       taskList: TaskList.t option
         [@ocaml.doc
-          "The task list to use for the decision tasks generated for this workflow execution. This overrides the defaultTaskList specified when registering the workflow type. A task list for this workflow execution must be specified either as a default for the workflow type or through this parameter. If neither this parameter is set nor a default task list was specified at registration time then a fault is returned. The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
+          "The task list to use for the decision tasks generated for this workflow execution. This overrides the defaultTaskList specified when registering the workflow type. A task list for this workflow execution must be specified either as a default for the workflow type or through this parameter. If neither this parameter is set nor a default task list was specified at registration time then a fault is returned. The specified string must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
       taskPriority: TaskPriority.t option
         [@ocaml.doc
           "The task priority to use for this workflow execution. This overrides any default priority that was assigned when the workflow type was registered. If not set, then the default task priority for the workflow type is used. Valid values are integers that range from Java's Integer.MIN_VALUE (-2147483648) to Integer.MAX_VALUE (2147483647). Higher numbers indicate higher priority. For more information about setting task priority, see Setting Task Priority in the Amazon SWF Developer Guide."];
@@ -8992,23 +9001,23 @@ module StartWorkflowExecutionInput =
         ?executionStartToCloseTimeout ?input ?taskPriority ?taskList
         ~workflowType ~workflowId ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lambdaRole = field_map json "lambdaRole" Arn.of_json in
-      let childPolicy = field_map json "childPolicy" ChildPolicy.of_json in
+    let of_json json__ =
+      let lambdaRole = field_map json__ "lambdaRole" Arn.of_json in
+      let childPolicy = field_map json__ "childPolicy" ChildPolicy.of_json in
       let taskStartToCloseTimeout =
-        field_map json "taskStartToCloseTimeout"
+        field_map json__ "taskStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let tagList = field_map json "tagList" TagList.of_json in
+      let tagList = field_map json__ "tagList" TagList.of_json in
       let executionStartToCloseTimeout =
-        field_map json "executionStartToCloseTimeout"
+        field_map json__ "executionStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let input = field_map json "input" Data.of_json in
-      let taskPriority = field_map json "taskPriority" TaskPriority.of_json in
-      let taskList = field_map json "taskList" TaskList.of_json in
+      let input = field_map json__ "input" Data.of_json in
+      let taskPriority = field_map json__ "taskPriority" TaskPriority.of_json in
+      let taskList = field_map json__ "taskList" TaskList.of_json in
       let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "workflowType" WorkflowType.of_json in
+      let workflowId = field_map_exn json__ "workflowId" WorkflowId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?lambdaRole ?childPolicy ?taskStartToCloseTimeout ?tagList
         ?executionStartToCloseTimeout ?input ?taskPriority ?taskList
         ~workflowType ~workflowId ~domain ()
@@ -9062,12 +9071,12 @@ module SignalWorkflowExecutionInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?input ~signalName ?runId ~workflowId ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let input = field_map json "input" Data.of_json in
-      let signalName = field_map_exn json "signalName" SignalName.of_json in
-      let runId = field_map json "runId" WorkflowRunIdOptional.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+    let of_json json__ =
+      let input = field_map json__ "input" Data.of_json in
+      let signalName = field_map_exn json__ "signalName" SignalName.of_json in
+      let runId = field_map json__ "runId" WorkflowRunIdOptional.of_json in
+      let workflowId = field_map_exn json__ "workflowId" WorkflowId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?input ~signalName ?runId ~workflowId ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9165,8 +9174,8 @@ module Run =
         (Option.map ~f:WorkflowRunId.of_xml) (Xml.child xml_arg0 "runId") in
       make ?runId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let runId = field_map json "runId" WorkflowRunId.of_json in
+    let of_json json__ =
+      let runId = field_map json__ "runId" WorkflowRunId.of_json in
       make ?runId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies the runId of a workflow execution."]
@@ -9181,20 +9190,44 @@ module RespondDecisionTaskCompletedInput =
         [@ocaml.doc
           "The list of decisions (possibly empty) made by the decider while processing this decision task. See the docs for the Decision structure for details."];
       executionContext: Data.t option
-        [@ocaml.doc "User defined context to add to workflow execution."]}
+        [@ocaml.doc "User defined context to add to workflow execution."];
+      taskList: TaskList.t option
+        [@ocaml.doc
+          "The task list to use for the future decision tasks of this workflow execution. This list overrides the original task list you specified while starting the workflow execution."];
+      taskListScheduleToStartTimeout: DurationInSecondsOptional.t option
+        [@ocaml.doc
+          "Specifies a timeout (in seconds) for the task list override. When this parameter is missing, the task list override is permanent. This parameter makes it possible to temporarily override the task list. If a decision task scheduled on the override task list is not started within the timeout, the decision task will time out. Amazon SWF will revert the override and schedule a new decision task to the original task list. If a decision task scheduled on the override task list is started within the timeout, but not completed within the start-to-close timeout, Amazon SWF will also revert the override and schedule a new decision task to the original task list."]}
     let context_ = "RespondDecisionTaskCompletedInput"
     let make ?decisions =
       fun ?executionContext ->
-        fun ~taskToken ->
-          fun () -> { decisions; executionContext; taskToken }
+        fun ?taskList ->
+          fun ?taskListScheduleToStartTimeout ->
+            fun ~taskToken ->
+              fun () ->
+                {
+                  decisions;
+                  executionContext;
+                  taskList;
+                  taskListScheduleToStartTimeout;
+                  taskToken
+                }
     let to_value x =
       structure_to_value
         [("taskToken", (Some (TaskToken.to_value x.taskToken)));
         ("decisions", (Option.map x.decisions ~f:DecisionList.to_value));
         ("executionContext",
-          (Option.map x.executionContext ~f:Data.to_value))]
+          (Option.map x.executionContext ~f:Data.to_value));
+        ("taskList", (Option.map x.taskList ~f:TaskList.to_value));
+        ("taskListScheduleToStartTimeout",
+          (Option.map x.taskListScheduleToStartTimeout
+             ~f:DurationInSecondsOptional.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let taskListScheduleToStartTimeout =
+        (Option.map ~f:DurationInSecondsOptional.of_xml)
+          (Xml.child xml_arg0 "taskListScheduleToStartTimeout") in
+      let taskList =
+        (Option.map ~f:TaskList.of_xml) (Xml.child xml_arg0 "taskList") in
       let executionContext =
         (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "executionContext") in
       let decisions =
@@ -9202,13 +9235,19 @@ module RespondDecisionTaskCompletedInput =
       let taskToken =
         TaskToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
-      make ?executionContext ?decisions ~taskToken ()
+      make ?taskListScheduleToStartTimeout ?taskList ?executionContext
+        ?decisions ~taskToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let executionContext = field_map json "executionContext" Data.of_json in
-      let decisions = field_map json "decisions" DecisionList.of_json in
-      let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
-      make ?executionContext ?decisions ~taskToken ()
+    let of_json json__ =
+      let taskListScheduleToStartTimeout =
+        field_map json__ "taskListScheduleToStartTimeout"
+          DurationInSecondsOptional.of_json in
+      let taskList = field_map json__ "taskList" TaskList.of_json in
+      let executionContext = field_map json__ "executionContext" Data.of_json in
+      let decisions = field_map json__ "decisions" DecisionList.of_json in
+      let taskToken = field_map_exn json__ "taskToken" TaskToken.of_json in
+      make ?taskListScheduleToStartTimeout ?taskList ?executionContext
+        ?decisions ~taskToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Input data for a TaskCompleted response to a decision task."]
@@ -9244,10 +9283,10 @@ module RespondActivityTaskFailedInput =
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ?details ?reason ~taskToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "details" Data.of_json in
-      let reason = field_map json "reason" FailureReason.of_json in
-      let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
+    let of_json json__ =
+      let details = field_map json__ "details" Data.of_json in
+      let reason = field_map json__ "reason" FailureReason.of_json in
+      let taskToken = field_map_exn json__ "taskToken" TaskToken.of_json in
       make ?details ?reason ~taskToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9276,9 +9315,9 @@ module RespondActivityTaskCompletedInput =
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ?result ~taskToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let result = field_map json "result" Data.of_json in
-      let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
+    let of_json json__ =
+      let result = field_map json__ "result" Data.of_json in
+      let taskToken = field_map_exn json__ "taskToken" TaskToken.of_json in
       make ?result ~taskToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9307,9 +9346,9 @@ module RespondActivityTaskCanceledInput =
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ?details ~taskToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "details" Data.of_json in
-      let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
+    let of_json json__ =
+      let details = field_map json__ "details" Data.of_json in
+      let taskToken = field_map_exn json__ "taskToken" TaskToken.of_json in
       make ?details ~taskToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9346,10 +9385,10 @@ module RequestCancelWorkflowExecutionInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?runId ~workflowId ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let runId = field_map json "runId" WorkflowRunIdOptional.of_json in
-      let workflowId = field_map_exn json "workflowId" WorkflowId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+    let of_json json__ =
+      let runId = field_map json__ "runId" WorkflowRunIdOptional.of_json in
+      let workflowId = field_map_exn json__ "workflowId" WorkflowId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?runId ~workflowId ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9363,10 +9402,10 @@ module RegisterWorkflowTypeInput =
           "The name of the domain in which to register the workflow type."];
       name: Name.t
         [@ocaml.doc
-          "The name of the workflow type. The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
+          "The name of the workflow type. The specified string must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
       version: Version.t
         [@ocaml.doc
-          "The version of the workflow type. The workflow type consists of the name and version, the combination of which must be unique within the domain. To get a list of all currently registered workflow types, use the ListWorkflowTypes action. The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
+          "The version of the workflow type. The workflow type consists of the name and version, the combination of which must be unique within the domain. To get a list of all currently registered workflow types, use the ListWorkflowTypes action. The specified string must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
       description: Description.t option
         [@ocaml.doc "Textual description of the workflow type."];
       defaultTaskStartToCloseTimeout: DurationInSecondsOptional.t option
@@ -9463,23 +9502,25 @@ module RegisterWorkflowTypeInput =
         ?defaultTaskStartToCloseTimeout ?description ~version ~name ~domain
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let defaultLambdaRole = field_map json "defaultLambdaRole" Arn.of_json in
+    let of_json json__ =
+      let defaultLambdaRole =
+        field_map json__ "defaultLambdaRole" Arn.of_json in
       let defaultChildPolicy =
-        field_map json "defaultChildPolicy" ChildPolicy.of_json in
+        field_map json__ "defaultChildPolicy" ChildPolicy.of_json in
       let defaultTaskPriority =
-        field_map json "defaultTaskPriority" TaskPriority.of_json in
-      let defaultTaskList = field_map json "defaultTaskList" TaskList.of_json in
+        field_map json__ "defaultTaskPriority" TaskPriority.of_json in
+      let defaultTaskList =
+        field_map json__ "defaultTaskList" TaskList.of_json in
       let defaultExecutionStartToCloseTimeout =
-        field_map json "defaultExecutionStartToCloseTimeout"
+        field_map json__ "defaultExecutionStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
       let defaultTaskStartToCloseTimeout =
-        field_map json "defaultTaskStartToCloseTimeout"
+        field_map json__ "defaultTaskStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let description = field_map json "description" Description.of_json in
-      let version = field_map_exn json "version" Version.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let version = field_map_exn json__ "version" Version.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?defaultLambdaRole ?defaultChildPolicy ?defaultTaskPriority
         ?defaultTaskList ?defaultExecutionStartToCloseTimeout
         ?defaultTaskStartToCloseTimeout ?description ~version ~name ~domain
@@ -9538,13 +9579,13 @@ module RegisterDomainInput =
       make ?tags ~workflowExecutionRetentionPeriodInDays ?description ~name
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" ResourceTagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" ResourceTagList.of_json in
       let workflowExecutionRetentionPeriodInDays =
-        field_map_exn json "workflowExecutionRetentionPeriodInDays"
+        field_map_exn json__ "workflowExecutionRetentionPeriodInDays"
           DurationInDays.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map_exn json "name" DomainName.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map_exn json__ "name" DomainName.of_json in
       make ?tags ~workflowExecutionRetentionPeriodInDays ?description ~name
         ()
     let to_json v = composed_to_json to_value v
@@ -9559,10 +9600,10 @@ module RegisterActivityTypeInput =
           "The name of the domain in which this activity is to be registered."];
       name: Name.t
         [@ocaml.doc
-          "The name of the activity type within the domain. The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
+          "The name of the activity type within the domain. The specified string must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
       version: Version.t
         [@ocaml.doc
-          "The version of the activity type. The activity type consists of the name and version, the combination of which must be unique within the domain. The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
+          "The version of the activity type. The activity type consists of the name and version, the combination of which must be unique within the domain. The specified string must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
       description: Description.t option
         [@ocaml.doc "A textual description of the activity type."];
       defaultTaskStartToCloseTimeout: DurationInSecondsOptional.t option
@@ -9663,26 +9704,27 @@ module RegisterActivityTypeInput =
         ?defaultTaskStartToCloseTimeout ?description ~version ~name ~domain
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultTaskScheduleToCloseTimeout =
-        field_map json "defaultTaskScheduleToCloseTimeout"
+        field_map json__ "defaultTaskScheduleToCloseTimeout"
           DurationInSecondsOptional.of_json in
       let defaultTaskScheduleToStartTimeout =
-        field_map json "defaultTaskScheduleToStartTimeout"
+        field_map json__ "defaultTaskScheduleToStartTimeout"
           DurationInSecondsOptional.of_json in
       let defaultTaskPriority =
-        field_map json "defaultTaskPriority" TaskPriority.of_json in
-      let defaultTaskList = field_map json "defaultTaskList" TaskList.of_json in
+        field_map json__ "defaultTaskPriority" TaskPriority.of_json in
+      let defaultTaskList =
+        field_map json__ "defaultTaskList" TaskList.of_json in
       let defaultTaskHeartbeatTimeout =
-        field_map json "defaultTaskHeartbeatTimeout"
+        field_map json__ "defaultTaskHeartbeatTimeout"
           DurationInSecondsOptional.of_json in
       let defaultTaskStartToCloseTimeout =
-        field_map json "defaultTaskStartToCloseTimeout"
+        field_map json__ "defaultTaskStartToCloseTimeout"
           DurationInSecondsOptional.of_json in
-      let description = field_map json "description" Description.of_json in
-      let version = field_map_exn json "version" Version.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let version = field_map_exn json__ "version" Version.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?defaultTaskScheduleToCloseTimeout
         ?defaultTaskScheduleToStartTimeout ?defaultTaskPriority
         ?defaultTaskList ?defaultTaskHeartbeatTimeout
@@ -9716,9 +9758,9 @@ module RecordActivityTaskHeartbeatInput =
           (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
       make ?details ~taskToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "details" LimitedData.of_json in
-      let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
+    let of_json json__ =
+      let details = field_map json__ "details" LimitedData.of_json in
+      let taskToken = field_map_exn json__ "taskToken" TaskToken.of_json in
       make ?details ~taskToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9732,35 +9774,40 @@ module PollForDecisionTaskInput =
           "The name of the domain containing the task lists to poll."];
       taskList: TaskList.t
         [@ocaml.doc
-          "Specifies the task list to poll for decision tasks. The specified string must not start or end with whitespace. It must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
+          "Specifies the task list to poll for decision tasks. The specified string must not contain a : (colon), / (slash), | (vertical bar), or any control characters (\\u0000-\\u001f | \\u007f-\\u009f). Also, it must not be the literal string arn."];
       identity: Identity.t option
         [@ocaml.doc
           "Identity of the decider making the request, which is recorded in the DecisionTaskStarted event in the workflow history. This enables diagnostic tracing when problems arise. The form of this identity is user defined."];
       nextPageToken: PageToken.t option
         [@ocaml.doc
-          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 60 seconds. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call. The nextPageToken returned by this action cannot be used with GetWorkflowExecutionHistory to get the next page. You must call PollForDecisionTask again (with the nextPageToken) to retrieve the next page of history records. Calling PollForDecisionTask with a nextPageToken doesn't return a new decision task."];
+          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call. The nextPageToken returned by this action cannot be used with GetWorkflowExecutionHistory to get the next page. You must call PollForDecisionTask again (with the nextPageToken) to retrieve the next page of history records. Calling PollForDecisionTask with a nextPageToken doesn't return a new decision task."];
       maximumPageSize: PageSize.t option
         [@ocaml.doc
           "The maximum number of results that are returned per call. Use nextPageToken to obtain further pages of results. This is an upper limit only; the actual number of results returned per call may be fewer than the specified maximum."];
       reverseOrder: ReverseOrder.t option
         [@ocaml.doc
-          "When set to true, returns the events in reverse order. By default the results are returned in ascending order of the eventTimestamp of the events."]}
+          "When set to true, returns the events in reverse order. By default the results are returned in ascending order of the eventTimestamp of the events."];
+      startAtPreviousStartedEvent: StartAtPreviousStartedEvent.t option
+        [@ocaml.doc
+          "When set to true, returns the events with eventTimestamp greater than or equal to eventTimestamp of the most recent DecisionTaskStarted event. By default, this parameter is set to false."]}
     let context_ = "PollForDecisionTaskInput"
     let make ?identity =
       fun ?nextPageToken ->
         fun ?maximumPageSize ->
           fun ?reverseOrder ->
-            fun ~domain ->
-              fun ~taskList ->
-                fun () ->
-                  {
-                    identity;
-                    nextPageToken;
-                    maximumPageSize;
-                    reverseOrder;
-                    domain;
-                    taskList
-                  }
+            fun ?startAtPreviousStartedEvent ->
+              fun ~domain ->
+                fun ~taskList ->
+                  fun () ->
+                    {
+                      identity;
+                      nextPageToken;
+                      maximumPageSize;
+                      reverseOrder;
+                      startAtPreviousStartedEvent;
+                      domain;
+                      taskList
+                    }
     let to_value x =
       structure_to_value
         [("domain", (Some (DomainName.to_value x.domain)));
@@ -9770,9 +9817,15 @@ module PollForDecisionTaskInput =
         ("maximumPageSize",
           (Option.map x.maximumPageSize ~f:PageSize.to_value));
         ("reverseOrder",
-          (Option.map x.reverseOrder ~f:ReverseOrder.to_value))]
+          (Option.map x.reverseOrder ~f:ReverseOrder.to_value));
+        ("startAtPreviousStartedEvent",
+          (Option.map x.startAtPreviousStartedEvent
+             ~f:StartAtPreviousStartedEvent.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let startAtPreviousStartedEvent =
+        (Option.map ~f:StartAtPreviousStartedEvent.of_xml)
+          (Xml.child xml_arg0 "startAtPreviousStartedEvent") in
       let reverseOrder =
         (Option.map ~f:ReverseOrder.of_xml)
           (Xml.child xml_arg0 "reverseOrder") in
@@ -9787,18 +9840,22 @@ module PollForDecisionTaskInput =
         TaskList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskList") in
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
-      make ?reverseOrder ?maximumPageSize ?nextPageToken ?identity ~taskList
-        ~domain ()
+      make ?startAtPreviousStartedEvent ?reverseOrder ?maximumPageSize
+        ?nextPageToken ?identity ~taskList ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
-      let maximumPageSize = field_map json "maximumPageSize" PageSize.of_json in
-      let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
-      let identity = field_map json "identity" Identity.of_json in
-      let taskList = field_map_exn json "taskList" TaskList.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
-      make ?reverseOrder ?maximumPageSize ?nextPageToken ?identity ~taskList
-        ~domain ()
+    let of_json json__ =
+      let startAtPreviousStartedEvent =
+        field_map json__ "startAtPreviousStartedEvent"
+          StartAtPreviousStartedEvent.of_json in
+      let reverseOrder = field_map json__ "reverseOrder" ReverseOrder.of_json in
+      let maximumPageSize =
+        field_map json__ "maximumPageSize" PageSize.of_json in
+      let nextPageToken = field_map json__ "nextPageToken" PageToken.of_json in
+      let identity = field_map json__ "identity" Identity.of_json in
+      let taskList = field_map_exn json__ "taskList" TaskList.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ?startAtPreviousStartedEvent ?reverseOrder ?maximumPageSize
+        ?nextPageToken ?identity ~taskList ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Used by deciders to get a DecisionTask from the specified decision taskList. A decision task may be returned for any open workflow execution that is using the specified task list. The task includes a paginated view of the history of the workflow execution. The decider should use the workflow type and the history to determine how to properly handle the task. This action initiates a long poll, where the service holds the HTTP connection open and responds as soon a task becomes available. If no decision task is available in the specified task list before the timeout of 60 seconds expires, an empty result is returned. An empty result, in this context, means that a DecisionTask is returned, but that the value of taskToken is an empty string. Deciders should set their client side socket timeout to at least 70 seconds (10 seconds higher than the timeout). Because the number of workflow history events for a single workflow execution might be very large, the result returned might be split up across a number of pages. To retrieve subsequent pages, make additional calls to PollForDecisionTask using the nextPageToken returned by the initial call. Note that you do not call GetWorkflowExecutionHistory with this nextPageToken. Instead, call PollForDecisionTask again. Access Control You can use IAM policies to control this action's access to Amazon SWF resources as follows: Use a Resource element with the domain name to limit the action to only specified domains. Use an Action element to allow or deny permission to call this action. Constrain the taskList.name parameter by using a Condition element with the swf:taskList.name key to allow the action to access only certain task lists. If the caller doesn't have sufficient permissions to invoke the action, or the parameter values fall outside the specified constraints, the action fails. The associated event attribute's cause parameter is set to OPERATION_NOT_PERMITTED. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."]
@@ -9834,10 +9891,10 @@ module PollForActivityTaskInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?identity ~taskList ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identity = field_map json "identity" Identity.of_json in
-      let taskList = field_map_exn json "taskList" TaskList.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+    let of_json json__ =
+      let identity = field_map json__ "identity" Identity.of_json in
+      let taskList = field_map_exn json__ "taskList" TaskList.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?identity ~taskList ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9846,7 +9903,8 @@ module PendingTaskCount =
   struct
     type nonrec t =
       {
-      count: Count.t [@ocaml.doc "The number of tasks in the task list."];
+      count: Count.t option
+        [@ocaml.doc "The number of tasks in the task list."];
       truncated: Truncated.t option
         [@ocaml.doc
           "If set to true, indicates that the actual count was more than the maximum supported by this API and the count returned is the truncated value."]}
@@ -9854,8 +9912,7 @@ module PendingTaskCount =
       [ `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `UnknownResourceFault of UnknownResourceFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PendingTaskCount"
-    let make ?truncated = fun ~count -> fun () -> { truncated; count }
+    let make ?count = fun ?truncated -> fun () -> { count; truncated }
     let error_of_json name json =
       match name with
       | "OperationNotPermittedFault" ->
@@ -9891,20 +9948,19 @@ module PendingTaskCount =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("count", (Some (Count.to_value x.count)));
+        [("count", (Option.map x.count ~f:Count.to_value));
         ("truncated", (Option.map x.truncated ~f:Truncated.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let truncated =
         (Option.map ~f:Truncated.of_xml) (Xml.child xml_arg0 "truncated") in
-      let count =
-        Count.of_xml (Xml.child_exn ~context:context_ xml_arg0 "count") in
-      make ?truncated ~count ()
+      let count = (Option.map ~f:Count.of_xml) (Xml.child xml_arg0 "count") in
+      make ?truncated ?count ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let truncated = field_map json "truncated" Truncated.of_json in
-      let count = field_map_exn json "count" Count.of_json in
-      make ?truncated ~count ()
+    let of_json json__ =
+      let truncated = field_map json__ "truncated" Truncated.of_json in
+      let count = field_map json__ "count" Count.of_json in
+      make ?truncated ?count ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the count of tasks in a task list."]
 module ListWorkflowTypesInput =
@@ -9921,7 +9977,7 @@ module ListWorkflowTypesInput =
           "Specifies the registration status of the workflow types to list."];
       nextPageToken: PageToken.t option
         [@ocaml.doc
-          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 60 seconds. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call."];
+          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call."];
       maximumPageSize: PageSize.t option
         [@ocaml.doc
           "The maximum number of results that are returned per call. Use nextPageToken to obtain further pages of results."];
@@ -9974,14 +10030,15 @@ module ListWorkflowTypesInput =
       make ?reverseOrder ?maximumPageSize ?nextPageToken ~registrationStatus
         ?name ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
-      let maximumPageSize = field_map json "maximumPageSize" PageSize.of_json in
-      let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let reverseOrder = field_map json__ "reverseOrder" ReverseOrder.of_json in
+      let maximumPageSize =
+        field_map json__ "maximumPageSize" PageSize.of_json in
+      let nextPageToken = field_map json__ "nextPageToken" PageToken.of_json in
       let registrationStatus =
-        field_map_exn json "registrationStatus" RegistrationStatus.of_json in
-      let name = field_map json "name" Name.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "registrationStatus" RegistrationStatus.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?reverseOrder ?maximumPageSize ?nextPageToken ~registrationStatus
         ?name ~domain ()
     let to_json v = composed_to_json to_value v
@@ -10049,8 +10106,8 @@ module ListTagsForResourceOutput =
         (Option.map ~f:ResourceTagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" ResourceTagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" ResourceTagList.of_json in
       make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List tags for a given domain."]
@@ -10072,8 +10129,8 @@ module ListTagsForResourceInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List tags for a given domain."]
@@ -10095,7 +10152,7 @@ module ListOpenWorkflowExecutionsInput =
           "If specified, only executions that have the matching tag are listed. executionFilter, typeFilter and tagFilter are mutually exclusive. You can specify at most one of these in a request."];
       nextPageToken: PageToken.t option
         [@ocaml.doc
-          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 60 seconds. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call."];
+          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call."];
       maximumPageSize: PageSize.t option
         [@ocaml.doc
           "The maximum number of results that are returned per call. Use nextPageToken to obtain further pages of results."];
@@ -10166,17 +10223,19 @@ module ListOpenWorkflowExecutionsInput =
       make ?executionFilter ?reverseOrder ?maximumPageSize ?nextPageToken
         ?tagFilter ?typeFilter ~startTimeFilter ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let executionFilter =
-        field_map json "executionFilter" WorkflowExecutionFilter.of_json in
-      let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
-      let maximumPageSize = field_map json "maximumPageSize" PageSize.of_json in
-      let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
-      let tagFilter = field_map json "tagFilter" TagFilter.of_json in
-      let typeFilter = field_map json "typeFilter" WorkflowTypeFilter.of_json in
+        field_map json__ "executionFilter" WorkflowExecutionFilter.of_json in
+      let reverseOrder = field_map json__ "reverseOrder" ReverseOrder.of_json in
+      let maximumPageSize =
+        field_map json__ "maximumPageSize" PageSize.of_json in
+      let nextPageToken = field_map json__ "nextPageToken" PageToken.of_json in
+      let tagFilter = field_map json__ "tagFilter" TagFilter.of_json in
+      let typeFilter =
+        field_map json__ "typeFilter" WorkflowTypeFilter.of_json in
       let startTimeFilter =
-        field_map_exn json "startTimeFilter" ExecutionTimeFilter.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "startTimeFilter" ExecutionTimeFilter.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?executionFilter ?reverseOrder ?maximumPageSize ?nextPageToken
         ?tagFilter ?typeFilter ~startTimeFilter ~domain ()
     let to_json v = composed_to_json to_value v
@@ -10188,7 +10247,7 @@ module ListDomainsInput =
       {
       nextPageToken: PageToken.t option
         [@ocaml.doc
-          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 60 seconds. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call."];
+          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call."];
       registrationStatus: RegistrationStatus.t
         [@ocaml.doc
           "Specifies the registration status of the domains to list."];
@@ -10236,12 +10295,13 @@ module ListDomainsInput =
       make ?reverseOrder ?maximumPageSize ~registrationStatus ?nextPageToken
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
-      let maximumPageSize = field_map json "maximumPageSize" PageSize.of_json in
+    let of_json json__ =
+      let reverseOrder = field_map json__ "reverseOrder" ReverseOrder.of_json in
+      let maximumPageSize =
+        field_map json__ "maximumPageSize" PageSize.of_json in
       let registrationStatus =
-        field_map_exn json "registrationStatus" RegistrationStatus.of_json in
-      let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
+        field_map_exn json__ "registrationStatus" RegistrationStatus.of_json in
+      let nextPageToken = field_map json__ "nextPageToken" PageToken.of_json in
       make ?reverseOrder ?maximumPageSize ~registrationStatus ?nextPageToken
         ()
     let to_json v = composed_to_json to_value v
@@ -10274,7 +10334,7 @@ module ListClosedWorkflowExecutionsInput =
           "If specified, only executions that have the matching tag are listed. closeStatusFilter, executionFilter, typeFilter and tagFilter are mutually exclusive. You can specify at most one of these in a request."];
       nextPageToken: PageToken.t option
         [@ocaml.doc
-          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 60 seconds. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call."];
+          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call."];
       maximumPageSize: PageSize.t option
         [@ocaml.doc
           "The maximum number of results that are returned per call. Use nextPageToken to obtain further pages of results."];
@@ -10357,21 +10417,23 @@ module ListClosedWorkflowExecutionsInput =
         ?typeFilter ?closeStatusFilter ?executionFilter ?closeTimeFilter
         ?startTimeFilter ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
-      let maximumPageSize = field_map json "maximumPageSize" PageSize.of_json in
-      let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
-      let tagFilter = field_map json "tagFilter" TagFilter.of_json in
-      let typeFilter = field_map json "typeFilter" WorkflowTypeFilter.of_json in
+    let of_json json__ =
+      let reverseOrder = field_map json__ "reverseOrder" ReverseOrder.of_json in
+      let maximumPageSize =
+        field_map json__ "maximumPageSize" PageSize.of_json in
+      let nextPageToken = field_map json__ "nextPageToken" PageToken.of_json in
+      let tagFilter = field_map json__ "tagFilter" TagFilter.of_json in
+      let typeFilter =
+        field_map json__ "typeFilter" WorkflowTypeFilter.of_json in
       let closeStatusFilter =
-        field_map json "closeStatusFilter" CloseStatusFilter.of_json in
+        field_map json__ "closeStatusFilter" CloseStatusFilter.of_json in
       let executionFilter =
-        field_map json "executionFilter" WorkflowExecutionFilter.of_json in
+        field_map json__ "executionFilter" WorkflowExecutionFilter.of_json in
       let closeTimeFilter =
-        field_map json "closeTimeFilter" ExecutionTimeFilter.of_json in
+        field_map json__ "closeTimeFilter" ExecutionTimeFilter.of_json in
       let startTimeFilter =
-        field_map json "startTimeFilter" ExecutionTimeFilter.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map json__ "startTimeFilter" ExecutionTimeFilter.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?reverseOrder ?maximumPageSize ?nextPageToken ?tagFilter
         ?typeFilter ?closeStatusFilter ?executionFilter ?closeTimeFilter
         ?startTimeFilter ~domain ()
@@ -10393,7 +10455,7 @@ module ListActivityTypesInput =
           "Specifies the registration status of the activity types to list."];
       nextPageToken: PageToken.t option
         [@ocaml.doc
-          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 60 seconds. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call."];
+          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call."];
       maximumPageSize: PageSize.t option
         [@ocaml.doc
           "The maximum number of results that are returned per call. Use nextPageToken to obtain further pages of results."];
@@ -10446,14 +10508,15 @@ module ListActivityTypesInput =
       make ?reverseOrder ?maximumPageSize ?nextPageToken ~registrationStatus
         ?name ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
-      let maximumPageSize = field_map json "maximumPageSize" PageSize.of_json in
-      let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let reverseOrder = field_map json__ "reverseOrder" ReverseOrder.of_json in
+      let maximumPageSize =
+        field_map json__ "maximumPageSize" PageSize.of_json in
+      let nextPageToken = field_map json__ "nextPageToken" PageToken.of_json in
       let registrationStatus =
-        field_map_exn json "registrationStatus" RegistrationStatus.of_json in
-      let name = field_map json "name" Name.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "registrationStatus" RegistrationStatus.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?reverseOrder ?maximumPageSize ?nextPageToken ~registrationStatus
         ?name ~domain ()
     let to_json v = composed_to_json to_value v
@@ -10463,7 +10526,8 @@ module History =
   struct
     type nonrec t =
       {
-      events: HistoryEventList.t [@ocaml.doc "The list of history events."];
+      events: HistoryEventList.t option
+        [@ocaml.doc "The list of history events."];
       nextPageToken: PageToken.t option
         [@ocaml.doc
           "If a NextPageToken was returned by a previous call, there are more results available. To retrieve the next page of results, make the call again using the returned token in nextPageToken. Keep all other arguments unchanged. The configured maximumPageSize determines how many results can be returned in a single call."]}
@@ -10471,9 +10535,8 @@ module History =
       [ `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `UnknownResourceFault of UnknownResourceFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "History"
-    let make ?nextPageToken =
-      fun ~events -> fun () -> { nextPageToken; events }
+    let make ?events =
+      fun ?nextPageToken -> fun () -> { events; nextPageToken }
     let error_of_json name json =
       match name with
       | "OperationNotPermittedFault" ->
@@ -10509,21 +10572,20 @@ module History =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("events", (Some (HistoryEventList.to_value x.events)));
+        [("events", (Option.map x.events ~f:HistoryEventList.to_value));
         ("nextPageToken", (Option.map x.nextPageToken ~f:PageToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextPageToken =
         (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextPageToken") in
       let events =
-        HistoryEventList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "events") in
-      make ?nextPageToken ~events ()
+        (Option.map ~f:HistoryEventList.of_xml) (Xml.child xml_arg0 "events") in
+      make ?nextPageToken ?events ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
-      let events = field_map_exn json "events" HistoryEventList.of_json in
-      make ?nextPageToken ~events ()
+    let of_json json__ =
+      let nextPageToken = field_map json__ "nextPageToken" PageToken.of_json in
+      let events = field_map json__ "events" HistoryEventList.of_json in
+      make ?nextPageToken ?events ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Paginated representation of a workflow history for a workflow execution. This is the up to date, complete and authoritative record of the events related to all tasks and events in the life of the workflow execution."]
@@ -10539,7 +10601,7 @@ module GetWorkflowExecutionHistoryInput =
           "Specifies the workflow execution for which to return the history."];
       nextPageToken: PageToken.t option
         [@ocaml.doc
-          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 60 seconds. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call."];
+          "If NextPageToken is returned there are more results available. The value of NextPageToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return a 400 error: \"Specified token has exceeded its maximum lifetime\". The configured maximumPageSize determines how many results can be returned in a single call."];
       maximumPageSize: PageSize.t option
         [@ocaml.doc
           "The maximum number of results that are returned per call. Use nextPageToken to obtain further pages of results."];
@@ -10587,13 +10649,14 @@ module GetWorkflowExecutionHistoryInput =
       make ?reverseOrder ?maximumPageSize ?nextPageToken ~execution ~domain
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reverseOrder = field_map json "reverseOrder" ReverseOrder.of_json in
-      let maximumPageSize = field_map json "maximumPageSize" PageSize.of_json in
-      let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let reverseOrder = field_map json__ "reverseOrder" ReverseOrder.of_json in
+      let maximumPageSize =
+        field_map json__ "maximumPageSize" PageSize.of_json in
+      let nextPageToken = field_map json__ "nextPageToken" PageToken.of_json in
       let execution =
-        field_map_exn json "execution" WorkflowExecution.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "execution" WorkflowExecution.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?reverseOrder ?maximumPageSize ?nextPageToken ~execution ~domain
         ()
     let to_json v = composed_to_json to_value v
@@ -10603,7 +10666,7 @@ module DomainInfos =
   struct
     type nonrec t =
       {
-      domainInfos: DomainInfoList.t
+      domainInfos: DomainInfoList.t option
         [@ocaml.doc "A list of DomainInfo structures."];
       nextPageToken: PageToken.t option
         [@ocaml.doc
@@ -10611,9 +10674,8 @@ module DomainInfos =
     type nonrec error =
       [ `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DomainInfos"
-    let make ?nextPageToken =
-      fun ~domainInfos -> fun () -> { nextPageToken; domainInfos }
+    let make ?domainInfos =
+      fun ?nextPageToken -> fun () -> { domainInfos; nextPageToken }
     let error_of_json name json =
       match name with
       | "OperationNotPermittedFault" ->
@@ -10641,22 +10703,22 @@ module DomainInfos =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("domainInfos", (Some (DomainInfoList.to_value x.domainInfos)));
+        [("domainInfos",
+           (Option.map x.domainInfos ~f:DomainInfoList.to_value));
         ("nextPageToken", (Option.map x.nextPageToken ~f:PageToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextPageToken =
         (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextPageToken") in
       let domainInfos =
-        DomainInfoList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "domainInfos") in
-      make ?nextPageToken ~domainInfos ()
+        (Option.map ~f:DomainInfoList.of_xml)
+          (Xml.child xml_arg0 "domainInfos") in
+      make ?nextPageToken ?domainInfos ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
-      let domainInfos =
-        field_map_exn json "domainInfos" DomainInfoList.of_json in
-      make ?nextPageToken ~domainInfos ()
+    let of_json json__ =
+      let nextPageToken = field_map json__ "nextPageToken" PageToken.of_json in
+      let domainInfos = field_map json__ "domainInfos" DomainInfoList.of_json in
+      make ?nextPageToken ?domainInfos ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains a paginated collection of DomainInfo structures."]
@@ -10664,19 +10726,18 @@ module DomainDetail =
   struct
     type nonrec t =
       {
-      domainInfo: DomainInfo.t
+      domainInfo: DomainInfo.t option
         [@ocaml.doc
           "The basic information about a domain, such as its name, status, and description."];
-      configuration: DomainConfiguration.t
+      configuration: DomainConfiguration.t option
         [@ocaml.doc
           "The domain configuration. Currently, this includes only the domain's retention period."]}
     type nonrec error =
       [ `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `UnknownResourceFault of UnknownResourceFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DomainDetail"
-    let make ~domainInfo =
-      fun ~configuration -> fun () -> { domainInfo; configuration }
+    let make ?domainInfo =
+      fun ?configuration -> fun () -> { domainInfo; configuration }
     let error_of_json name json =
       match name with
       | "OperationNotPermittedFault" ->
@@ -10712,24 +10773,23 @@ module DomainDetail =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("domainInfo", (Some (DomainInfo.to_value x.domainInfo)));
+        [("domainInfo", (Option.map x.domainInfo ~f:DomainInfo.to_value));
         ("configuration",
-          (Some (DomainConfiguration.to_value x.configuration)))]
+          (Option.map x.configuration ~f:DomainConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let configuration =
-        DomainConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "configuration") in
+        (Option.map ~f:DomainConfiguration.of_xml)
+          (Xml.child xml_arg0 "configuration") in
       let domainInfo =
-        DomainInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "domainInfo") in
-      make ~configuration ~domainInfo ()
+        (Option.map ~f:DomainInfo.of_xml) (Xml.child xml_arg0 "domainInfo") in
+      make ?configuration ?domainInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configuration =
-        field_map_exn json "configuration" DomainConfiguration.of_json in
-      let domainInfo = field_map_exn json "domainInfo" DomainInfo.of_json in
-      make ~configuration ~domainInfo ()
+        field_map json__ "configuration" DomainConfiguration.of_json in
+      let domainInfo = field_map json__ "domainInfo" DomainInfo.of_json in
+      make ?configuration ?domainInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details of a domain."]
 module DomainDeprecatedFault =
@@ -10749,8 +10809,8 @@ module DomainDeprecatedFault =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returned when the specified domain has been deprecated."]
@@ -10771,8 +10831,8 @@ module DomainAlreadyExistsFault =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10802,10 +10862,10 @@ module DescribeWorkflowTypeInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~workflowType ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "workflowType" WorkflowType.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~workflowType ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10834,10 +10894,10 @@ module DescribeWorkflowExecutionInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~execution ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let execution =
-        field_map_exn json "execution" WorkflowExecution.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "execution" WorkflowExecution.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~execution ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10857,8 +10917,8 @@ module DescribeDomainInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" DomainName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" DomainName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10889,10 +10949,10 @@ module DescribeActivityTypeInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~activityType ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let activityType =
-        field_map_exn json "activityType" ActivityType.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "activityType" ActivityType.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~activityType ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10922,10 +10982,10 @@ module DeprecateWorkflowTypeInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~workflowType ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "workflowType" WorkflowType.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~workflowType ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10945,8 +11005,8 @@ module DeprecateDomainInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" DomainName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" DomainName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10976,31 +11036,97 @@ module DeprecateActivityTypeInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~activityType ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let activityType =
-        field_map_exn json "activityType" ActivityType.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "activityType" ActivityType.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~activityType ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deprecates the specified activity type. After an activity type has been deprecated, you cannot create new tasks of that activity type. Tasks of this type that were scheduled before the type was deprecated continue to run. This operation is eventually consistent. The results are best effort and may not exactly reflect recent updates and changes. Access Control You can use IAM policies to control this action's access to Amazon SWF resources as follows: Use a Resource element with the domain name to limit the action to only specified domains. Use an Action element to allow or deny permission to call this action. Constrain the following parameters by using a Condition element with the appropriate keys. activityType.name: String constraint. The key is swf:activityType.name. activityType.version: String constraint. The key is swf:activityType.version. If the caller doesn't have sufficient permissions to invoke the action, or the parameter values fall outside the specified constraints, the action fails. The associated event attribute's cause parameter is set to OPERATION_NOT_PERMITTED. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."]
+       "Deprecates the specified activity type. After an activity type has been deprecated, you cannot create new tasks of that activity type. Tasks of this type that were scheduled before the type was deprecated continue to run. Access Control You can use IAM policies to control this action's access to Amazon SWF resources as follows: Use a Resource element with the domain name to limit the action to only specified domains. Use an Action element to allow or deny permission to call this action. Constrain the following parameters by using a Condition element with the appropriate keys. activityType.name: String constraint. The key is swf:activityType.name. activityType.version: String constraint. The key is swf:activityType.version. If the caller doesn't have sufficient permissions to invoke the action, or the parameter values fall outside the specified constraints, the action fails. The associated event attribute's cause parameter is set to OPERATION_NOT_PERMITTED. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."]
+module DeleteWorkflowTypeInput =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain in which the workflow type is registered."];
+      workflowType: WorkflowType.t
+        [@ocaml.doc "The workflow type to delete."]}
+    let context_ = "DeleteWorkflowTypeInput"
+    let make ~domain =
+      fun ~workflowType -> fun () -> { domain; workflowType }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("workflowType", (Some (WorkflowType.to_value x.workflowType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workflowType =
+        WorkflowType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ~workflowType ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workflowType =
+        field_map_exn json__ "workflowType" WorkflowType.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ~workflowType ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified workflow type. Note: Prior to deletion, workflow types must first be deprecated. After a workflow type has been deleted, you cannot create new executions of that type. Executions that started before the type was deleted will continue to run. Access Control You can use IAM policies to control this action's access to Amazon SWF resources as follows: Use a Resource element with the domain name to limit the action to only specified domains. Use an Action element to allow or deny permission to call this action. Constrain the following parameters by using a Condition element with the appropriate keys. workflowType.name: String constraint. The key is swf:workflowType.name. workflowType.version: String constraint. The key is swf:workflowType.version. If the caller doesn't have sufficient permissions to invoke the action, or the parameter values fall outside the specified constraints, the action fails. The associated event attribute's cause parameter is set to OPERATION_NOT_PERMITTED. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."]
+module DeleteActivityTypeInput =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain in which the activity type is registered."];
+      activityType: ActivityType.t
+        [@ocaml.doc "The activity type to delete."]}
+    let context_ = "DeleteActivityTypeInput"
+    let make ~domain =
+      fun ~activityType -> fun () -> { domain; activityType }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("activityType", (Some (ActivityType.to_value x.activityType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let activityType =
+        ActivityType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "activityType") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ~activityType ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let activityType =
+        field_map_exn json__ "activityType" ActivityType.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ~activityType ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified activity type. Note: Prior to deletion, activity types must first be deprecated. After an activity type has been deleted, you cannot schedule new activities of that type. Activities that started before the type was deleted will continue to run. Access Control You can use IAM policies to control this action's access to Amazon SWF resources as follows: Use a Resource element with the domain name to limit the action to only specified domains. Use an Action element to allow or deny permission to call this action. Constrain the following parameters by using a Condition element with the appropriate keys. activityType.name: String constraint. The key is swf:activityType.name. activityType.version: String constraint. The key is swf:activityType.version. If the caller doesn't have sufficient permissions to invoke the action, or the parameter values fall outside the specified constraints, the action fails. The associated event attribute's cause parameter is set to OPERATION_NOT_PERMITTED. For details and example IAM policies, see Using IAM to Manage Access to Amazon SWF Workflows in the Amazon SWF Developer Guide."]
 module DecisionTask =
   struct
     type nonrec t =
       {
-      taskToken: TaskToken.t
+      taskToken: TaskToken.t option
         [@ocaml.doc
           "The opaque string used as a handle on the task. This token is used by workers to communicate progress and response information back to the system about the task."];
-      startedEventId: EventId.t
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the DecisionTaskStarted event recorded in the history."];
-      workflowExecution: WorkflowExecution.t
+      workflowExecution: WorkflowExecution.t option
         [@ocaml.doc
           "The workflow execution for which this decision task was created."];
-      workflowType: WorkflowType.t
+      workflowType: WorkflowType.t option
         [@ocaml.doc
           "The type of the workflow execution for which this decision task was created."];
-      events: HistoryEventList.t
+      events: HistoryEventList.t option
         [@ocaml.doc
           "A paginated list of history events of the workflow execution. The decider uses this during the processing of the decision task."];
       nextPageToken: PageToken.t option
@@ -11014,23 +11140,22 @@ module DecisionTask =
       | `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `UnknownResourceFault of UnknownResourceFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DecisionTask"
-    let make ?nextPageToken =
-      fun ?previousStartedEventId ->
-        fun ~taskToken ->
-          fun ~startedEventId ->
-            fun ~workflowExecution ->
-              fun ~workflowType ->
-                fun ~events ->
+    let make ?taskToken =
+      fun ?startedEventId ->
+        fun ?workflowExecution ->
+          fun ?workflowType ->
+            fun ?events ->
+              fun ?nextPageToken ->
+                fun ?previousStartedEventId ->
                   fun () ->
                     {
-                      nextPageToken;
-                      previousStartedEventId;
                       taskToken;
                       startedEventId;
                       workflowExecution;
                       workflowType;
-                      events
+                      events;
+                      nextPageToken;
+                      previousStartedEventId
                     }
     let error_of_json name json =
       match name with
@@ -11075,12 +11200,13 @@ module DecisionTask =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("taskToken", (Some (TaskToken.to_value x.taskToken)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)));
+        [("taskToken", (Option.map x.taskToken ~f:TaskToken.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value));
         ("workflowExecution",
-          (Some (WorkflowExecution.to_value x.workflowExecution)));
-        ("workflowType", (Some (WorkflowType.to_value x.workflowType)));
-        ("events", (Some (HistoryEventList.to_value x.events)));
+          (Option.map x.workflowExecution ~f:WorkflowExecution.to_value));
+        ("workflowType",
+          (Option.map x.workflowType ~f:WorkflowType.to_value));
+        ("events", (Option.map x.events ~f:HistoryEventList.to_value));
         ("nextPageToken", (Option.map x.nextPageToken ~f:PageToken.to_value));
         ("previousStartedEventId",
           (Option.map x.previousStartedEventId ~f:EventId.to_value))]
@@ -11092,37 +11218,32 @@ module DecisionTask =
       let nextPageToken =
         (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextPageToken") in
       let events =
-        HistoryEventList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "events") in
+        (Option.map ~f:HistoryEventList.of_xml) (Xml.child xml_arg0 "events") in
       let workflowType =
-        WorkflowType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowType") in
+        (Option.map ~f:WorkflowType.of_xml)
+          (Xml.child xml_arg0 "workflowType") in
       let workflowExecution =
-        WorkflowExecution.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
+        (Option.map ~f:WorkflowExecution.of_xml)
+          (Xml.child xml_arg0 "workflowExecution") in
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let taskToken =
-        TaskToken.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
-      make ?previousStartedEventId ?nextPageToken ~events ~workflowType
-        ~workflowExecution ~startedEventId ~taskToken ()
+        (Option.map ~f:TaskToken.of_xml) (Xml.child xml_arg0 "taskToken") in
+      make ?previousStartedEventId ?nextPageToken ?events ?workflowType
+        ?workflowExecution ?startedEventId ?taskToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let previousStartedEventId =
-        field_map json "previousStartedEventId" EventId.of_json in
-      let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
-      let events = field_map_exn json "events" HistoryEventList.of_json in
-      let workflowType =
-        field_map_exn json "workflowType" WorkflowType.of_json in
+        field_map json__ "previousStartedEventId" EventId.of_json in
+      let nextPageToken = field_map json__ "nextPageToken" PageToken.of_json in
+      let events = field_map json__ "events" HistoryEventList.of_json in
+      let workflowType = field_map json__ "workflowType" WorkflowType.of_json in
       let workflowExecution =
-        field_map_exn json "workflowExecution" WorkflowExecution.of_json in
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
-      let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
-      make ?previousStartedEventId ?nextPageToken ~events ~workflowType
-        ~workflowExecution ~startedEventId ~taskToken ()
+        field_map json__ "workflowExecution" WorkflowExecution.of_json in
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
+      let taskToken = field_map json__ "taskToken" TaskToken.of_json in
+      make ?previousStartedEventId ?nextPageToken ?events ?workflowType
+        ?workflowExecution ?startedEventId ?taskToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that represents a decision task. Decision tasks are sent to deciders in order for them to make decisions."]
@@ -11147,9 +11268,9 @@ module CountPendingDecisionTasksInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~taskList ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskList = field_map_exn json "taskList" TaskList.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+    let of_json json__ =
+      let taskList = field_map_exn json__ "taskList" TaskList.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~taskList ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11175,9 +11296,9 @@ module CountPendingActivityTasksInput =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~taskList ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskList = field_map_exn json "taskList" TaskList.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+    let of_json json__ =
+      let taskList = field_map_exn json__ "taskList" TaskList.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~taskList ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11243,14 +11364,15 @@ module CountOpenWorkflowExecutionsInput =
       make ?executionFilter ?tagFilter ?typeFilter ~startTimeFilter ~domain
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let executionFilter =
-        field_map json "executionFilter" WorkflowExecutionFilter.of_json in
-      let tagFilter = field_map json "tagFilter" TagFilter.of_json in
-      let typeFilter = field_map json "typeFilter" WorkflowTypeFilter.of_json in
+        field_map json__ "executionFilter" WorkflowExecutionFilter.of_json in
+      let tagFilter = field_map json__ "tagFilter" TagFilter.of_json in
+      let typeFilter =
+        field_map json__ "typeFilter" WorkflowTypeFilter.of_json in
       let startTimeFilter =
-        field_map_exn json "startTimeFilter" ExecutionTimeFilter.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "startTimeFilter" ExecutionTimeFilter.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?executionFilter ?tagFilter ?typeFilter ~startTimeFilter ~domain
         ()
     let to_json v = composed_to_json to_value v
@@ -11337,18 +11459,19 @@ module CountClosedWorkflowExecutionsInput =
       make ?closeStatusFilter ?tagFilter ?typeFilter ?executionFilter
         ?closeTimeFilter ?startTimeFilter ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let closeStatusFilter =
-        field_map json "closeStatusFilter" CloseStatusFilter.of_json in
-      let tagFilter = field_map json "tagFilter" TagFilter.of_json in
-      let typeFilter = field_map json "typeFilter" WorkflowTypeFilter.of_json in
+        field_map json__ "closeStatusFilter" CloseStatusFilter.of_json in
+      let tagFilter = field_map json__ "tagFilter" TagFilter.of_json in
+      let typeFilter =
+        field_map json__ "typeFilter" WorkflowTypeFilter.of_json in
       let executionFilter =
-        field_map json "executionFilter" WorkflowExecutionFilter.of_json in
+        field_map json__ "executionFilter" WorkflowExecutionFilter.of_json in
       let closeTimeFilter =
-        field_map json "closeTimeFilter" ExecutionTimeFilter.of_json in
+        field_map json__ "closeTimeFilter" ExecutionTimeFilter.of_json in
       let startTimeFilter =
-        field_map json "startTimeFilter" ExecutionTimeFilter.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map json__ "startTimeFilter" ExecutionTimeFilter.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?closeStatusFilter ?tagFilter ?typeFilter ?executionFilter
         ?closeTimeFilter ?startTimeFilter ~domain ()
     let to_json v = composed_to_json to_value v
@@ -11358,7 +11481,7 @@ module ActivityTypeInfos =
   struct
     type nonrec t =
       {
-      typeInfos: ActivityTypeInfoList.t
+      typeInfos: ActivityTypeInfoList.t option
         [@ocaml.doc "List of activity type information."];
       nextPageToken: PageToken.t option
         [@ocaml.doc
@@ -11367,9 +11490,8 @@ module ActivityTypeInfos =
       [ `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `UnknownResourceFault of UnknownResourceFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ActivityTypeInfos"
-    let make ?nextPageToken =
-      fun ~typeInfos -> fun () -> { nextPageToken; typeInfos }
+    let make ?typeInfos =
+      fun ?nextPageToken -> fun () -> { typeInfos; nextPageToken }
     let error_of_json name json =
       match name with
       | "OperationNotPermittedFault" ->
@@ -11405,22 +11527,23 @@ module ActivityTypeInfos =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("typeInfos", (Some (ActivityTypeInfoList.to_value x.typeInfos)));
+        [("typeInfos",
+           (Option.map x.typeInfos ~f:ActivityTypeInfoList.to_value));
         ("nextPageToken", (Option.map x.nextPageToken ~f:PageToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextPageToken =
         (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "nextPageToken") in
       let typeInfos =
-        ActivityTypeInfoList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "typeInfos") in
-      make ?nextPageToken ~typeInfos ()
+        (Option.map ~f:ActivityTypeInfoList.of_xml)
+          (Xml.child xml_arg0 "typeInfos") in
+      make ?nextPageToken ?typeInfos ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "nextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "nextPageToken" PageToken.of_json in
       let typeInfos =
-        field_map_exn json "typeInfos" ActivityTypeInfoList.of_json in
-      make ?nextPageToken ~typeInfos ()
+        field_map json__ "typeInfos" ActivityTypeInfoList.of_json in
+      make ?nextPageToken ?typeInfos ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains a paginated list of activity type information structures."]
@@ -11428,19 +11551,18 @@ module ActivityTypeDetail =
   struct
     type nonrec t =
       {
-      typeInfo: ActivityTypeInfo.t
+      typeInfo: ActivityTypeInfo.t option
         [@ocaml.doc
           "General information about the activity type. The status of activity type (returned in the ActivityTypeInfo structure) can be one of the following. REGISTERED \226\128\147 The type is registered and available. Workers supporting this type should be running. DEPRECATED \226\128\147 The type was deprecated using DeprecateActivityType, but is still in use. You should keep workers supporting this type running. You cannot create new tasks of this type."];
-      configuration: ActivityTypeConfiguration.t
+      configuration: ActivityTypeConfiguration.t option
         [@ocaml.doc
           "The configuration settings registered with the activity type."]}
     type nonrec error =
       [ `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `UnknownResourceFault of UnknownResourceFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ActivityTypeDetail"
-    let make ~typeInfo =
-      fun ~configuration -> fun () -> { typeInfo; configuration }
+    let make ?typeInfo =
+      fun ?configuration -> fun () -> { typeInfo; configuration }
     let error_of_json name json =
       match name with
       | "OperationNotPermittedFault" ->
@@ -11476,38 +11598,37 @@ module ActivityTypeDetail =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("typeInfo", (Some (ActivityTypeInfo.to_value x.typeInfo)));
+        [("typeInfo", (Option.map x.typeInfo ~f:ActivityTypeInfo.to_value));
         ("configuration",
-          (Some (ActivityTypeConfiguration.to_value x.configuration)))]
+          (Option.map x.configuration ~f:ActivityTypeConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let configuration =
-        ActivityTypeConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "configuration") in
+        (Option.map ~f:ActivityTypeConfiguration.of_xml)
+          (Xml.child xml_arg0 "configuration") in
       let typeInfo =
-        ActivityTypeInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "typeInfo") in
-      make ~configuration ~typeInfo ()
+        (Option.map ~f:ActivityTypeInfo.of_xml)
+          (Xml.child xml_arg0 "typeInfo") in
+      make ?configuration ?typeInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configuration =
-        field_map_exn json "configuration" ActivityTypeConfiguration.of_json in
-      let typeInfo = field_map_exn json "typeInfo" ActivityTypeInfo.of_json in
-      make ~configuration ~typeInfo ()
+        field_map json__ "configuration" ActivityTypeConfiguration.of_json in
+      let typeInfo = field_map json__ "typeInfo" ActivityTypeInfo.of_json in
+      make ?configuration ?typeInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detailed information about an activity type."]
 module ActivityTaskStatus =
   struct
     type nonrec t =
       {
-      cancelRequested: Canceled.t
+      cancelRequested: Canceled.t option
         [@ocaml.doc "Set to true if cancellation of the task is requested."]}
     type nonrec error =
       [ `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `UnknownResourceFault of UnknownResourceFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ActivityTaskStatus"
-    let make ~cancelRequested = fun () -> { cancelRequested }
+    let make ?cancelRequested = fun () -> { cancelRequested }
     let error_of_json name json =
       match name with
       | "OperationNotPermittedFault" ->
@@ -11543,35 +11664,37 @@ module ActivityTaskStatus =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("cancelRequested", (Some (Canceled.to_value x.cancelRequested)))]
+        [("cancelRequested",
+           (Option.map x.cancelRequested ~f:Canceled.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let cancelRequested =
-        Canceled.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cancelRequested") in
-      make ~cancelRequested ()
+        (Option.map ~f:Canceled.of_xml)
+          (Xml.child xml_arg0 "cancelRequested") in
+      make ?cancelRequested ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cancelRequested =
-        field_map_exn json "cancelRequested" Canceled.of_json in
-      make ~cancelRequested ()
+        field_map json__ "cancelRequested" Canceled.of_json in
+      make ?cancelRequested ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Status information about an activity task."]
 module ActivityTask =
   struct
     type nonrec t =
       {
-      taskToken: TaskToken.t
+      taskToken: TaskToken.t option
         [@ocaml.doc
           "The opaque string used as a handle on the task. This token is used by workers to communicate progress and response information back to the system about the task."];
-      activityId: ActivityId.t [@ocaml.doc "The unique ID of the task."];
-      startedEventId: EventId.t
+      activityId: ActivityId.t option
+        [@ocaml.doc "The unique ID of the task."];
+      startedEventId: EventId.t option
         [@ocaml.doc
           "The ID of the ActivityTaskStarted event recorded in the history."];
-      workflowExecution: WorkflowExecution.t
+      workflowExecution: WorkflowExecution.t option
         [@ocaml.doc
           "The workflow execution that started this activity task."];
-      activityType: ActivityType.t
+      activityType: ActivityType.t option
         [@ocaml.doc "The type of this activity task."];
       input: Data.t option
         [@ocaml.doc
@@ -11581,21 +11704,20 @@ module ActivityTask =
       | `OperationNotPermittedFault of OperationNotPermittedFault.t 
       | `UnknownResourceFault of UnknownResourceFault.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ActivityTask"
-    let make ?input =
-      fun ~taskToken ->
-        fun ~activityId ->
-          fun ~startedEventId ->
-            fun ~workflowExecution ->
-              fun ~activityType ->
+    let make ?taskToken =
+      fun ?activityId ->
+        fun ?startedEventId ->
+          fun ?workflowExecution ->
+            fun ?activityType ->
+              fun ?input ->
                 fun () ->
                   {
-                    input;
                     taskToken;
                     activityId;
                     startedEventId;
                     workflowExecution;
-                    activityType
+                    activityType;
+                    input
                   }
     let error_of_json name json =
       match name with
@@ -11640,45 +11762,41 @@ module ActivityTask =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("taskToken", (Some (TaskToken.to_value x.taskToken)));
-        ("activityId", (Some (ActivityId.to_value x.activityId)));
-        ("startedEventId", (Some (EventId.to_value x.startedEventId)));
+        [("taskToken", (Option.map x.taskToken ~f:TaskToken.to_value));
+        ("activityId", (Option.map x.activityId ~f:ActivityId.to_value));
+        ("startedEventId", (Option.map x.startedEventId ~f:EventId.to_value));
         ("workflowExecution",
-          (Some (WorkflowExecution.to_value x.workflowExecution)));
-        ("activityType", (Some (ActivityType.to_value x.activityType)));
+          (Option.map x.workflowExecution ~f:WorkflowExecution.to_value));
+        ("activityType",
+          (Option.map x.activityType ~f:ActivityType.to_value));
         ("input", (Option.map x.input ~f:Data.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let input = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "input") in
       let activityType =
-        ActivityType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "activityType") in
+        (Option.map ~f:ActivityType.of_xml)
+          (Xml.child xml_arg0 "activityType") in
       let workflowExecution =
-        WorkflowExecution.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workflowExecution") in
+        (Option.map ~f:WorkflowExecution.of_xml)
+          (Xml.child xml_arg0 "workflowExecution") in
       let startedEventId =
-        EventId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedEventId") in
+        (Option.map ~f:EventId.of_xml) (Xml.child xml_arg0 "startedEventId") in
       let activityId =
-        ActivityId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "activityId") in
+        (Option.map ~f:ActivityId.of_xml) (Xml.child xml_arg0 "activityId") in
       let taskToken =
-        TaskToken.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "taskToken") in
-      make ?input ~activityType ~workflowExecution ~startedEventId
-        ~activityId ~taskToken ()
+        (Option.map ~f:TaskToken.of_xml) (Xml.child xml_arg0 "taskToken") in
+      make ?input ?activityType ?workflowExecution ?startedEventId
+        ?activityId ?taskToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let input = field_map json "input" Data.of_json in
-      let activityType =
-        field_map_exn json "activityType" ActivityType.of_json in
+    let of_json json__ =
+      let input = field_map json__ "input" Data.of_json in
+      let activityType = field_map json__ "activityType" ActivityType.of_json in
       let workflowExecution =
-        field_map_exn json "workflowExecution" WorkflowExecution.of_json in
-      let startedEventId =
-        field_map_exn json "startedEventId" EventId.of_json in
-      let activityId = field_map_exn json "activityId" ActivityId.of_json in
-      let taskToken = field_map_exn json "taskToken" TaskToken.of_json in
-      make ?input ~activityType ~workflowExecution ~startedEventId
-        ~activityId ~taskToken ()
+        field_map json__ "workflowExecution" WorkflowExecution.of_json in
+      let startedEventId = field_map json__ "startedEventId" EventId.of_json in
+      let activityId = field_map json__ "activityId" ActivityId.of_json in
+      let taskToken = field_map json__ "taskToken" TaskToken.of_json in
+      make ?input ?activityType ?workflowExecution ?startedEventId
+        ?activityId ?taskToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Unit of work sent to an activity worker."]

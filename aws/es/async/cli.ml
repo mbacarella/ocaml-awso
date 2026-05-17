@@ -87,6 +87,46 @@ let associate_package =
            (Values.AssociatePackageRequest.make ~packageID ~domainName ())
            (Some Values.AssociatePackageResponse.to_json)
            (Some Values.AssociatePackageResponse.error_to_json)])
+let authorize_vpc_endpoint_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and account =
+         flag "account" (required string) ~doc:"STRING AWSAccount" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.authorize_vpc_endpoint_access
+           (Values.AuthorizeVpcEndpointAccessRequest.make ~domainName
+              ~account ())
+           (Some Values.AuthorizeVpcEndpointAccessResponse.to_json)
+           (Some Values.AuthorizeVpcEndpointAccessResponse.error_to_json)])
+let cancel_domain_config_change =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL DryRun"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_domain_config_change
+           (Values.CancelDomainConfigChangeRequest.make ?dryRun ~domainName
+              ()) (Some Values.CancelDomainConfigChangeResponse.to_json)
+           (Some Values.CancelDomainConfigChangeResponse.error_to_json)])
 let cancel_elasticsearch_service_software_update =
   Command.async ~summary:""
     ([%map_open.Command
@@ -159,6 +199,12 @@ let create_elasticsearch_domain =
          flag "auto-tune-options" (optional json_arg)
            ~doc:"JSON AutoTuneOptionsInput"
        and tagList = flag "tag-list" (optional json_arg) ~doc:"JSON TagList"
+       and deploymentStrategyOptions =
+         flag "deployment-strategy-options" (optional json_arg)
+           ~doc:"JSON DeploymentStrategyOptions"
+       and automatedSnapshotPauseOptions =
+         flag "automated-snapshot-pause-options" (optional json_arg)
+           ~doc:"JSON AutomatedSnapshotPauseRequestOptions"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING DomainName" in
        fun () ->
@@ -197,6 +243,12 @@ let create_elasticsearch_domain =
                                   ~f:Values.AutoTuneOptionsInput.of_json
                                   autoTuneOptions)
               ?tagList:(Option.map ~f:Values.TagList.of_json tagList)
+              ?deploymentStrategyOptions:(Option.map
+                                            ~f:Values.DeploymentStrategyOptions.of_json
+                                            deploymentStrategyOptions)
+              ?automatedSnapshotPauseOptions:(Option.map
+                                                ~f:Values.AutomatedSnapshotPauseRequestOptions.of_json
+                                                automatedSnapshotPauseOptions)
               ~domainName ())
            (Some Values.CreateElasticsearchDomainResponse.to_json)
            (Some Values.CreateElasticsearchDomainResponse.error_to_json)])
@@ -259,6 +311,29 @@ let create_package =
               ~packageSource:(Values.PackageSource.of_json packageSource) ())
            (Some Values.CreatePackageResponse.to_json)
            (Some Values.CreatePackageResponse.error_to_json)])
+let create_vpc_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and domainArn =
+         flag "domain-arn" (required string) ~doc:"STRING DomainArn"
+       and vpcOptions =
+         flag "vpc-options" (required json_arg) ~doc:"JSON VPCOptions" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_vpc_endpoint
+           (Values.CreateVpcEndpointRequest.make ?clientToken ~domainArn
+              ~vpcOptions:(Values.VPCOptions.of_json vpcOptions) ())
+           (Some Values.CreateVpcEndpointResponse.to_json)
+           (Some Values.CreateVpcEndpointResponse.error_to_json)])
 let delete_elasticsearch_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -352,6 +427,24 @@ let delete_package =
            Io.delete_package (Values.DeletePackageRequest.make ~packageID ())
            (Some Values.DeletePackageResponse.to_json)
            (Some Values.DeletePackageResponse.error_to_json)])
+let delete_vpc_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vpcEndpointId =
+         flag "vpc-endpoint-id" (required string) ~doc:"STRING VpcEndpointId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_vpc_endpoint
+           (Values.DeleteVpcEndpointRequest.make ~vpcEndpointId ())
+           (Some Values.DeleteVpcEndpointResponse.to_json)
+           (Some Values.DeleteVpcEndpointResponse.error_to_json)])
 let describe_domain_auto_tunes =
   Command.async ~summary:""
     ([%map_open.Command
@@ -612,6 +705,27 @@ let describe_reserved_elasticsearch_instances =
               Values.DescribeReservedElasticsearchInstancesResponse.to_json)
            (Some
               Values.DescribeReservedElasticsearchInstancesResponse.error_to_json)])
+let describe_vpc_endpoints =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vpcEndpointIds =
+         flag "vpc-endpoint-ids" (required json_arg)
+           ~doc:"JSON VpcEndpointIdList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_vpc_endpoints
+           (Values.DescribeVpcEndpointsRequest.make
+              ~vpcEndpointIds:(Values.VpcEndpointIdList.of_json
+                                 vpcEndpointIds) ())
+           (Some Values.DescribeVpcEndpointsResponse.to_json)
+           (Some Values.DescribeVpcEndpointsResponse.error_to_json)])
 let dissociate_package =
   Command.async ~summary:""
     ([%map_open.Command
@@ -843,6 +957,65 @@ let list_tags =
            Io.list_tags (Values.ListTagsRequest.make ~aRN ())
            (Some Values.ListTagsResponse.to_json)
            (Some Values.ListTagsResponse.error_to_json)])
+let list_vpc_endpoint_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_vpc_endpoint_access
+           (Values.ListVpcEndpointAccessRequest.make ?nextToken ~domainName
+              ()) (Some Values.ListVpcEndpointAccessResponse.to_json)
+           (Some Values.ListVpcEndpointAccessResponse.error_to_json)])
+let list_vpc_endpoints =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_vpc_endpoints
+           (Values.ListVpcEndpointsRequest.make ?nextToken ())
+           (Some Values.ListVpcEndpointsResponse.to_json)
+           (Some Values.ListVpcEndpointsResponse.error_to_json)])
+let list_vpc_endpoints_for_domain =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_vpc_endpoints_for_domain
+           (Values.ListVpcEndpointsForDomainRequest.make ?nextToken
+              ~domainName ())
+           (Some Values.ListVpcEndpointsForDomainResponse.to_json)
+           (Some Values.ListVpcEndpointsForDomainResponse.error_to_json)])
 let purchase_reserved_elasticsearch_instance_offering =
   Command.async ~summary:""
     ([%map_open.Command
@@ -911,6 +1084,26 @@ let remove_tags =
            Io.remove_tags
            (Values.RemoveTagsRequest.make ~aRN
               ~tagKeys:(Values.StringList.of_json tagKeys) ()) None None])
+let revoke_vpc_endpoint_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and account =
+         flag "account" (required string) ~doc:"STRING AWSAccount" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.revoke_vpc_endpoint_access
+           (Values.RevokeVpcEndpointAccessRequest.make ~domainName ~account
+              ()) (Some Values.RevokeVpcEndpointAccessResponse.to_json)
+           (Some Values.RevokeVpcEndpointAccessResponse.error_to_json)])
 let start_elasticsearch_service_software_update =
   Command.async ~summary:""
     ([%map_open.Command
@@ -980,6 +1173,12 @@ let update_elasticsearch_domain_config =
          flag "auto-tune-options" (optional json_arg)
            ~doc:"JSON AutoTuneOptions"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL DryRun"
+       and deploymentStrategyOptions =
+         flag "deployment-strategy-options" (optional json_arg)
+           ~doc:"JSON DeploymentStrategyOptions"
+       and automatedSnapshotPauseOptions =
+         flag "automated-snapshot-pause-options" (optional json_arg)
+           ~doc:"JSON AutomatedSnapshotPauseRequestOptions"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING DomainName" in
        fun () ->
@@ -1013,7 +1212,14 @@ let update_elasticsearch_domain_config =
                                           ~f:Values.EncryptionAtRestOptions.of_json
                                           encryptionAtRestOptions)
               ?autoTuneOptions:(Option.map ~f:Values.AutoTuneOptions.of_json
-                                  autoTuneOptions) ?dryRun ~domainName ())
+                                  autoTuneOptions) ?dryRun
+              ?deploymentStrategyOptions:(Option.map
+                                            ~f:Values.DeploymentStrategyOptions.of_json
+                                            deploymentStrategyOptions)
+              ?automatedSnapshotPauseOptions:(Option.map
+                                                ~f:Values.AutomatedSnapshotPauseRequestOptions.of_json
+                                                automatedSnapshotPauseOptions)
+              ~domainName ())
            (Some Values.UpdateElasticsearchDomainConfigResponse.to_json)
            (Some Values.UpdateElasticsearchDomainConfigResponse.error_to_json)])
 let update_package =
@@ -1043,6 +1249,27 @@ let update_package =
               ~packageSource:(Values.PackageSource.of_json packageSource) ())
            (Some Values.UpdatePackageResponse.to_json)
            (Some Values.UpdatePackageResponse.error_to_json)])
+let update_vpc_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vpcEndpointId =
+         flag "vpc-endpoint-id" (required string) ~doc:"STRING VpcEndpointId"
+       and vpcOptions =
+         flag "vpc-options" (required json_arg) ~doc:"JSON VPCOptions" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_vpc_endpoint
+           (Values.UpdateVpcEndpointRequest.make ~vpcEndpointId
+              ~vpcOptions:(Values.VPCOptions.of_json vpcOptions) ())
+           (Some Values.UpdateVpcEndpointResponse.to_json)
+           (Some Values.UpdateVpcEndpointResponse.error_to_json)])
 let upgrade_elasticsearch_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1074,12 +1301,15 @@ let main =
        accept_inbound_cross_cluster_search_connection);
     ("add-tags", add_tags);
     ("associate-package", associate_package);
+    ("authorize-vpc-endpoint-access", authorize_vpc_endpoint_access);
+    ("cancel-domain-config-change", cancel_domain_config_change);
     ("cancel-elasticsearch-service-software-update",
       cancel_elasticsearch_service_software_update);
     ("create-elasticsearch-domain", create_elasticsearch_domain);
     ("create-outbound-cross-cluster-search-connection",
       create_outbound_cross_cluster_search_connection);
     ("create-package", create_package);
+    ("create-vpc-endpoint", create_vpc_endpoint);
     ("delete-elasticsearch-domain", delete_elasticsearch_domain);
     ("delete-elasticsearch-service-role", delete_elasticsearch_service_role);
     ("delete-inbound-cross-cluster-search-connection",
@@ -1087,6 +1317,7 @@ let main =
     ("delete-outbound-cross-cluster-search-connection",
       delete_outbound_cross_cluster_search_connection);
     ("delete-package", delete_package);
+    ("delete-vpc-endpoint", delete_vpc_endpoint);
     ("describe-domain-auto-tunes", describe_domain_auto_tunes);
     ("describe-domain-change-progress", describe_domain_change_progress);
     ("describe-elasticsearch-domain", describe_elasticsearch_domain);
@@ -1104,6 +1335,7 @@ let main =
       describe_reserved_elasticsearch_instance_offerings);
     ("describe-reserved-elasticsearch-instances",
       describe_reserved_elasticsearch_instances);
+    ("describe-vpc-endpoints", describe_vpc_endpoints);
     ("dissociate-package", dissociate_package);
     ("get-compatible-elasticsearch-versions",
       get_compatible_elasticsearch_versions);
@@ -1116,14 +1348,19 @@ let main =
     ("list-elasticsearch-versions", list_elasticsearch_versions);
     ("list-packages-for-domain", list_packages_for_domain);
     ("list-tags", list_tags);
+    ("list-vpc-endpoint-access", list_vpc_endpoint_access);
+    ("list-vpc-endpoints", list_vpc_endpoints);
+    ("list-vpc-endpoints-for-domain", list_vpc_endpoints_for_domain);
     ("purchase-reserved-elasticsearch-instance-offering",
       purchase_reserved_elasticsearch_instance_offering);
     ("reject-inbound-cross-cluster-search-connection",
       reject_inbound_cross_cluster_search_connection);
     ("remove-tags", remove_tags);
+    ("revoke-vpc-endpoint-access", revoke_vpc_endpoint_access);
     ("start-elasticsearch-service-software-update",
       start_elasticsearch_service_software_update);
     ("update-elasticsearch-domain-config",
       update_elasticsearch_domain_config);
     ("update-package", update_package);
+    ("update-vpc-endpoint", update_vpc_endpoint);
     ("upgrade-elasticsearch-domain", upgrade_elasticsearch_domain)]

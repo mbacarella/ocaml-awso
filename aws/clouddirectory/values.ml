@@ -170,10 +170,10 @@ module AttributeKey =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SchemaArn") in
       make ~name ~facetName ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" AttributeName.of_json in
-      let facetName = field_map_exn json "FacetName" FacetName.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" AttributeName.of_json in
+      let facetName = field_map_exn json__ "FacetName" FacetName.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ~name ~facetName ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A unique identifier for an attribute."]
@@ -236,17 +236,17 @@ module TypedAttributeValue =
       make ?datetimeValue ?numberValue ?booleanValue ?binaryValue
         ?stringValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datetimeValue =
-        field_map json "DatetimeValue" DatetimeAttributeValue.of_json in
+        field_map json__ "DatetimeValue" DatetimeAttributeValue.of_json in
       let numberValue =
-        field_map json "NumberValue" NumberAttributeValue.of_json in
+        field_map json__ "NumberValue" NumberAttributeValue.of_json in
       let booleanValue =
-        field_map json "BooleanValue" BooleanAttributeValue.of_json in
+        field_map json__ "BooleanValue" BooleanAttributeValue.of_json in
       let binaryValue =
-        field_map json "BinaryValue" BinaryAttributeValue.of_json in
+        field_map json__ "BinaryValue" BinaryAttributeValue.of_json in
       let stringValue =
-        field_map json "StringValue" StringAttributeValue.of_json in
+        field_map json__ "StringValue" StringAttributeValue.of_json in
       make ?datetimeValue ?numberValue ?booleanValue ?binaryValue
         ?stringValue ()
     let to_json v = composed_to_json to_value v
@@ -325,9 +325,9 @@ module AttributeKeyAndValue =
         AttributeKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TypedAttributeValue.of_json in
-      let key = field_map_exn json "Key" AttributeKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TypedAttributeValue.of_json in
+      let key = field_map_exn json__ "Key" AttributeKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -357,10 +357,10 @@ module AttributeNameAndValue =
           (Xml.child_exn ~context:context_ xml_arg0 "AttributeName") in
       make ~value ~attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TypedAttributeValue.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TypedAttributeValue.of_json in
       let attributeName =
-        field_map_exn json "AttributeName" AttributeName.of_json in
+        field_map_exn json__ "AttributeName" AttributeName.of_json in
       make ~value ~attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -427,11 +427,11 @@ module PolicyAttachment =
           (Xml.child xml_arg0 "PolicyId") in
       make ?policyType ?objectIdentifier ?policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyType = field_map json "PolicyType" PolicyType.of_json in
+    let of_json json__ =
+      let policyType = field_map json__ "PolicyType" PolicyType.of_json in
       let objectIdentifier =
-        field_map json "ObjectIdentifier" ObjectIdentifier.of_json in
-      let policyId = field_map json "PolicyId" ObjectIdentifier.of_json in
+        field_map json__ "ObjectIdentifier" ObjectIdentifier.of_json in
+      let policyId = field_map json__ "PolicyId" ObjectIdentifier.of_json in
       make ?policyType ?objectIdentifier ?policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -458,6 +458,8 @@ module RuleParameterMap =
                        (RuleParameterValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -525,6 +527,9 @@ module AttributeKeyAndValueList =
   struct
     type nonrec t = AttributeKeyAndValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeKeyAndValue.to_value)) |>
         (fun x -> `List x)
@@ -551,6 +556,9 @@ module AttributeNameAndValueList =
   struct
     type nonrec t = AttributeNameAndValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeNameAndValue.to_value)) |>
         (fun x -> `List x)
@@ -592,9 +600,9 @@ module ObjectReference =
           (Xml.child xml_arg0 "Selector") in
       make ?selector ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let selector =
-        field_map json "Selector" SelectorObjectReference.of_json in
+        field_map json__ "Selector" SelectorObjectReference.of_json in
       make ?selector ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The reference that identifies an object."]
@@ -623,10 +631,10 @@ module TypedLinkSchemaAndFacetName =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SchemaArn") in
       make ~typedLinkName ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let typedLinkName =
-        field_map_exn json "TypedLinkName" TypedLinkName.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+        field_map_exn json__ "TypedLinkName" TypedLinkName.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ~typedLinkName ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -635,6 +643,9 @@ module ObjectIdentifierList =
   struct
     type nonrec t = ObjectIdentifier.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ObjectIdentifier.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -695,6 +706,9 @@ module PolicyAttachmentList =
   struct
     type nonrec t = PolicyAttachment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyAttachment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -773,9 +787,9 @@ module Rule =
       let type_ = (Option.map ~f:RuleType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?parameters ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" RuleParameterMap.of_json in
-      let type_ = field_map json "Type" RuleType.of_json in
+    let of_json json__ =
+      let parameters = field_map json__ "Parameters" RuleParameterMap.of_json in
+      let type_ = field_map json__ "Type" RuleType.of_json in
       make ?parameters ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -827,11 +841,11 @@ module LinkAttributeAction =
           (Xml.child xml_arg0 "AttributeActionType") in
       make ?attributeUpdateValue ?attributeActionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeUpdateValue =
-        field_map json "AttributeUpdateValue" TypedAttributeValue.of_json in
+        field_map json__ "AttributeUpdateValue" TypedAttributeValue.of_json in
       let attributeActionType =
-        field_map json "AttributeActionType" UpdateActionType.of_json in
+        field_map json__ "AttributeActionType" UpdateActionType.of_json in
       make ?attributeUpdateValue ?attributeActionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -865,12 +879,12 @@ module ObjectAttributeAction =
           (Xml.child xml_arg0 "ObjectAttributeActionType") in
       make ?objectAttributeUpdateValue ?objectAttributeActionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectAttributeUpdateValue =
-        field_map json "ObjectAttributeUpdateValue"
+        field_map json__ "ObjectAttributeUpdateValue"
           TypedAttributeValue.of_json in
       let objectAttributeActionType =
-        field_map json "ObjectAttributeActionType" UpdateActionType.of_json in
+        field_map json__ "ObjectAttributeActionType" UpdateActionType.of_json in
       make ?objectAttributeUpdateValue ?objectAttributeActionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The action to take on the object attribute."]
@@ -898,9 +912,9 @@ module SchemaFacet =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SchemaArn") in
       make ?facetName ?schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let facetName = field_map json "FacetName" FacetName.of_json in
-      let schemaArn = field_map json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let facetName = field_map json__ "FacetName" FacetName.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Arn.of_json in
       make ?facetName ?schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A facet."]
@@ -933,11 +947,11 @@ module IndexAttachment =
           (Xml.child xml_arg0 "IndexedAttributes") in
       make ?objectIdentifier ?indexedAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectIdentifier =
-        field_map json "ObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "ObjectIdentifier" ObjectIdentifier.of_json in
       let indexedAttributes =
-        field_map json "IndexedAttributes" AttributeKeyAndValueList.of_json in
+        field_map json__ "IndexedAttributes" AttributeKeyAndValueList.of_json in
       make ?objectIdentifier ?indexedAttributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents an index and an attached object."]
@@ -996,16 +1010,16 @@ module TypedLinkSpecifier =
       make ~identityAttributeValues ~targetObjectReference
         ~sourceObjectReference ~typedLinkFacet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityAttributeValues =
-        field_map_exn json "IdentityAttributeValues"
+        field_map_exn json__ "IdentityAttributeValues"
           AttributeNameAndValueList.of_json in
       let targetObjectReference =
-        field_map_exn json "TargetObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "TargetObjectReference" ObjectReference.of_json in
       let sourceObjectReference =
-        field_map_exn json "SourceObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "SourceObjectReference" ObjectReference.of_json in
       let typedLinkFacet =
-        field_map_exn json "TypedLinkFacet"
+        field_map_exn json__ "TypedLinkFacet"
           TypedLinkSchemaAndFacetName.of_json in
       make ~identityAttributeValues ~targetObjectReference
         ~sourceObjectReference ~typedLinkFacet ()
@@ -1038,10 +1052,10 @@ module PathToObjectIdentifiers =
         (Option.map ~f:PathString.of_xml) (Xml.child xml_arg0 "Path") in
       make ?objectIdentifiers ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectIdentifiers =
-        field_map json "ObjectIdentifiers" ObjectIdentifierList.of_json in
-      let path = field_map json "Path" PathString.of_json in
+        field_map json__ "ObjectIdentifiers" ObjectIdentifierList.of_json in
+      let path = field_map json__ "Path" PathString.of_json in
       make ?objectIdentifiers ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1071,10 +1085,10 @@ module ObjectIdentifierAndLinkNameTuple =
           (Xml.child xml_arg0 "ObjectIdentifier") in
       make ?linkName ?objectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let linkName = field_map json "LinkName" LinkName.of_json in
+    let of_json json__ =
+      let linkName = field_map json__ "LinkName" LinkName.of_json in
       let objectIdentifier =
-        field_map json "ObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "ObjectIdentifier" ObjectIdentifier.of_json in
       make ?linkName ?objectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A pair of ObjectIdentifier and LinkName."]
@@ -1101,9 +1115,9 @@ module PolicyToPath =
         (Option.map ~f:PathString.of_xml) (Xml.child xml_arg0 "Path") in
       make ?policies ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policies = field_map json "Policies" PolicyAttachmentList.of_json in
-      let path = field_map json "Path" PathString.of_json in
+    let of_json json__ =
+      let policies = field_map json__ "Policies" PolicyAttachmentList.of_json in
+      let path = field_map json__ "Path" PathString.of_json in
       make ?policies ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1148,17 +1162,17 @@ module TypedAttributeValueRange =
           (Xml.child_exn ~context:context_ xml_arg0 "StartMode") in
       make ?endValue ~endMode ?startValue ~startMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endValue = field_map json "EndValue" TypedAttributeValue.of_json in
-      let endMode = field_map_exn json "EndMode" RangeMode.of_json in
+    let of_json json__ =
+      let endValue = field_map json__ "EndValue" TypedAttributeValue.of_json in
+      let endMode = field_map_exn json__ "EndMode" RangeMode.of_json in
       let startValue =
-        field_map json "StartValue" TypedAttributeValue.of_json in
-      let startMode = field_map_exn json "StartMode" RangeMode.of_json in
+        field_map json__ "StartValue" TypedAttributeValue.of_json in
+      let startMode = field_map_exn json__ "StartMode" RangeMode.of_json in
       make ?endValue ~endMode ?startValue ~startMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A range of attribute values. For more information, see Range Filters."]
-module Bool =
+module Bool_ =
   struct
     type nonrec t = bool
     let make i = i
@@ -1232,6 +1246,8 @@ module RuleMap =
                     (fun x -> (Rule.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1264,10 +1280,10 @@ module LinkAttributeUpdate =
           (Xml.child xml_arg0 "AttributeKey") in
       make ?attributeAction ?attributeKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeAction =
-        field_map json "AttributeAction" LinkAttributeAction.of_json in
-      let attributeKey = field_map json "AttributeKey" AttributeKey.of_json in
+        field_map json__ "AttributeAction" LinkAttributeAction.of_json in
+      let attributeKey = field_map json__ "AttributeKey" AttributeKey.of_json in
       make ?attributeAction ?attributeKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Structure that contains attribute update information."]
@@ -1299,11 +1315,12 @@ module ObjectAttributeUpdate =
           (Xml.child xml_arg0 "ObjectAttributeKey") in
       make ?objectAttributeAction ?objectAttributeKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectAttributeAction =
-        field_map json "ObjectAttributeAction" ObjectAttributeAction.of_json in
+        field_map json__ "ObjectAttributeAction"
+          ObjectAttributeAction.of_json in
       let objectAttributeKey =
-        field_map json "ObjectAttributeKey" AttributeKey.of_json in
+        field_map json__ "ObjectAttributeKey" AttributeKey.of_json in
       make ?objectAttributeAction ?objectAttributeKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Structure that contains attribute update information."]
@@ -1311,6 +1328,9 @@ module SchemaFacetList =
   struct
     type nonrec t = SchemaFacet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SchemaFacet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1335,6 +1355,9 @@ module IndexAttachmentList =
   struct
     type nonrec t = IndexAttachment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IndexAttachment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1373,6 +1396,9 @@ module TypedLinkSpecifierList =
   struct
     type nonrec t = TypedLinkSpecifier.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TypedLinkSpecifier.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1416,6 +1442,8 @@ module LinkNameToObjectIdentifierMap =
                        (ObjectIdentifier.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1427,6 +1455,9 @@ module PathToObjectIdentifiersList =
   struct
     type nonrec t = PathToObjectIdentifiers.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PathToObjectIdentifiers.to_value)) |>
         (fun x -> `List x)
@@ -1453,6 +1484,9 @@ module ObjectIdentifierAndLinkNameList =
   struct
     type nonrec t = ObjectIdentifierAndLinkNameTuple.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ObjectIdentifierAndLinkNameTuple.to_value)) |>
         (fun x -> `List x)
@@ -1480,6 +1514,9 @@ module PolicyToPathList =
   struct
     type nonrec t = PolicyToPath.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyToPath.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1526,10 +1563,11 @@ module TypedLinkAttributeRange =
           (Xml.child xml_arg0 "AttributeName") in
       make ~range ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let range = field_map_exn json "Range" TypedAttributeValueRange.of_json in
+    let of_json json__ =
+      let range =
+        field_map_exn json__ "Range" TypedAttributeValueRange.of_json in
       let attributeName =
-        field_map json "AttributeName" AttributeName.of_json in
+        field_map json__ "AttributeName" AttributeName.of_json in
       make ~range ?attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1559,9 +1597,9 @@ module ObjectAttributeRange =
           (Xml.child xml_arg0 "AttributeKey") in
       make ?range ?attributeKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let range = field_map json "Range" TypedAttributeValueRange.of_json in
-      let attributeKey = field_map json "AttributeKey" AttributeKey.of_json in
+    let of_json json__ =
+      let range = field_map json__ "Range" TypedAttributeValueRange.of_json in
+      let attributeKey = field_map json__ "AttributeKey" AttributeKey.of_json in
       make ?range ?attributeKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A range of attributes."]
@@ -1599,7 +1637,7 @@ module FacetAttributeDefinition =
       type_: FacetAttributeType.t [@ocaml.doc "The type of the attribute."];
       defaultValue: TypedAttributeValue.t option
         [@ocaml.doc "The default value of the attribute (if configured)."];
-      isImmutable: Bool.t option
+      isImmutable: Bool_.t option
         [@ocaml.doc "Whether the attribute is mutable or not."];
       rules: RuleMap.t option
         [@ocaml.doc "Validation rules attached to the attribute definition."]}
@@ -1613,13 +1651,13 @@ module FacetAttributeDefinition =
         [("Type", (Some (FacetAttributeType.to_value x.type_)));
         ("DefaultValue",
           (Option.map x.defaultValue ~f:TypedAttributeValue.to_value));
-        ("IsImmutable", (Option.map x.isImmutable ~f:Bool.to_value));
+        ("IsImmutable", (Option.map x.isImmutable ~f:Bool_.to_value));
         ("Rules", (Option.map x.rules ~f:RuleMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let rules = (Option.map ~f:RuleMap.of_xml) (Xml.child xml_arg0 "Rules") in
       let isImmutable =
-        (Option.map ~f:Bool.of_xml) (Xml.child xml_arg0 "IsImmutable") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "IsImmutable") in
       let defaultValue =
         (Option.map ~f:TypedAttributeValue.of_xml)
           (Xml.child xml_arg0 "DefaultValue") in
@@ -1628,12 +1666,12 @@ module FacetAttributeDefinition =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?rules ?isImmutable ?defaultValue ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "Rules" RuleMap.of_json in
-      let isImmutable = field_map json "IsImmutable" Bool.of_json in
+    let of_json json__ =
+      let rules = field_map json__ "Rules" RuleMap.of_json in
+      let isImmutable = field_map json__ "IsImmutable" Bool_.of_json in
       let defaultValue =
-        field_map json "DefaultValue" TypedAttributeValue.of_json in
-      let type_ = field_map_exn json "Type" FacetAttributeType.of_json in
+        field_map json__ "DefaultValue" TypedAttributeValue.of_json in
+      let type_ = field_map_exn json__ "Type" FacetAttributeType.of_json in
       make ?rules ?isImmutable ?defaultValue ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1667,11 +1705,11 @@ module FacetAttributeReference =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetFacetName") in
       make ~targetAttributeName ~targetFacetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetAttributeName =
-        field_map_exn json "TargetAttributeName" AttributeName.of_json in
+        field_map_exn json__ "TargetAttributeName" AttributeName.of_json in
       let targetFacetName =
-        field_map_exn json "TargetFacetName" FacetName.of_json in
+        field_map_exn json__ "TargetFacetName" FacetName.of_json in
       make ~targetAttributeName ~targetFacetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1680,6 +1718,9 @@ module AttributeKeyList =
   struct
     type nonrec t = AttributeKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1717,6 +1758,9 @@ module LinkAttributeUpdateList =
   struct
     type nonrec t = LinkAttributeUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LinkAttributeUpdate.to_value)) |>
         (fun x -> `List x)
@@ -1743,6 +1787,9 @@ module ObjectAttributeUpdateList =
   struct
     type nonrec t = ObjectAttributeUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ObjectAttributeUpdate.to_value)) |>
         (fun x -> `List x)
@@ -1857,9 +1904,9 @@ module BatchGetLinkAttributesResponse =
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map json "Attributes" AttributeKeyAndValueList.of_json in
+        field_map json__ "Attributes" AttributeKeyAndValueList.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1883,9 +1930,9 @@ module BatchGetObjectAttributesResponse =
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map json "Attributes" AttributeKeyAndValueList.of_json in
+        field_map json__ "Attributes" AttributeKeyAndValueList.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1916,11 +1963,11 @@ module BatchGetObjectInformationResponse =
           (Xml.child xml_arg0 "SchemaFacets") in
       make ?objectIdentifier ?schemaFacets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectIdentifier =
-        field_map json "ObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "ObjectIdentifier" ObjectIdentifier.of_json in
       let schemaFacets =
-        field_map json "SchemaFacets" SchemaFacetList.of_json in
+        field_map json__ "SchemaFacets" SchemaFacetList.of_json in
       make ?objectIdentifier ?schemaFacets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1948,10 +1995,10 @@ module BatchListAttachedIndicesResponse =
           (Xml.child xml_arg0 "IndexAttachments") in
       make ?nextToken ?indexAttachments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let indexAttachments =
-        field_map json "IndexAttachments" IndexAttachmentList.of_json in
+        field_map json__ "IndexAttachments" IndexAttachmentList.of_json in
       make ?nextToken ?indexAttachments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1979,10 +2026,10 @@ module BatchListIncomingTypedLinksResponse =
           (Xml.child xml_arg0 "LinkSpecifiers") in
       make ?nextToken ?linkSpecifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let linkSpecifiers =
-        field_map json "LinkSpecifiers" TypedLinkSpecifierList.of_json in
+        field_map json__ "LinkSpecifiers" TypedLinkSpecifierList.of_json in
       make ?nextToken ?linkSpecifiers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2010,10 +2057,10 @@ module BatchListIndexResponse =
           (Xml.child xml_arg0 "IndexAttachments") in
       make ?nextToken ?indexAttachments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let indexAttachments =
-        field_map json "IndexAttachments" IndexAttachmentList.of_json in
+        field_map json__ "IndexAttachments" IndexAttachmentList.of_json in
       make ?nextToken ?indexAttachments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a ListIndex response operation."]
@@ -2041,10 +2088,10 @@ module BatchListObjectAttributesResponse =
           (Xml.child xml_arg0 "Attributes") in
       make ?nextToken ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let attributes =
-        field_map json "Attributes" AttributeKeyAndValueList.of_json in
+        field_map json__ "Attributes" AttributeKeyAndValueList.of_json in
       make ?nextToken ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2072,10 +2119,10 @@ module BatchListObjectChildrenResponse =
           (Xml.child xml_arg0 "Children") in
       make ?nextToken ?children ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let children =
-        field_map json "Children" LinkNameToObjectIdentifierMap.of_json in
+        field_map json__ "Children" LinkNameToObjectIdentifierMap.of_json in
       make ?nextToken ?children ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2105,10 +2152,10 @@ module BatchListObjectParentPathsResponse =
           (Xml.child xml_arg0 "PathToObjectIdentifiersList") in
       make ?nextToken ?pathToObjectIdentifiersList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let pathToObjectIdentifiersList =
-        field_map json "PathToObjectIdentifiersList"
+        field_map json__ "PathToObjectIdentifiersList"
           PathToObjectIdentifiersList.of_json in
       make ?nextToken ?pathToObjectIdentifiersList ()
     let to_json v = composed_to_json to_value v
@@ -2139,10 +2186,11 @@ module BatchListObjectParentsResponse =
           (Xml.child xml_arg0 "ParentLinks") in
       make ?nextToken ?parentLinks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let parentLinks =
-        field_map json "ParentLinks" ObjectIdentifierAndLinkNameList.of_json in
+        field_map json__ "ParentLinks"
+          ObjectIdentifierAndLinkNameList.of_json in
       make ?nextToken ?parentLinks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2171,10 +2219,10 @@ module BatchListObjectPoliciesResponse =
           (Xml.child xml_arg0 "AttachedPolicyIds") in
       make ?nextToken ?attachedPolicyIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let attachedPolicyIds =
-        field_map json "AttachedPolicyIds" ObjectIdentifierList.of_json in
+        field_map json__ "AttachedPolicyIds" ObjectIdentifierList.of_json in
       make ?nextToken ?attachedPolicyIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2203,10 +2251,10 @@ module BatchListOutgoingTypedLinksResponse =
           (Xml.child xml_arg0 "TypedLinkSpecifiers") in
       make ?nextToken ?typedLinkSpecifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let typedLinkSpecifiers =
-        field_map json "TypedLinkSpecifiers" TypedLinkSpecifierList.of_json in
+        field_map json__ "TypedLinkSpecifiers" TypedLinkSpecifierList.of_json in
       make ?nextToken ?typedLinkSpecifiers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2235,10 +2283,10 @@ module BatchListPolicyAttachmentsResponse =
           (Xml.child xml_arg0 "ObjectIdentifiers") in
       make ?nextToken ?objectIdentifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectIdentifiers =
-        field_map json "ObjectIdentifiers" ObjectIdentifierList.of_json in
+        field_map json__ "ObjectIdentifiers" ObjectIdentifierList.of_json in
       make ?nextToken ?objectIdentifiers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2267,10 +2315,10 @@ module BatchLookupPolicyResponse =
           (Xml.child xml_arg0 "PolicyToPathList") in
       make ?nextToken ?policyToPathList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let policyToPathList =
-        field_map json "PolicyToPathList" PolicyToPathList.of_json in
+        field_map json__ "PolicyToPathList" PolicyToPathList.of_json in
       make ?nextToken ?policyToPathList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2279,6 +2327,9 @@ module AttributeNameList =
   struct
     type nonrec t = AttributeName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2318,6 +2369,9 @@ module TypedLinkAttributeRangeList =
   struct
     type nonrec t = TypedLinkAttributeRange.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TypedLinkAttributeRange.to_value)) |>
         (fun x -> `List x)
@@ -2344,6 +2398,9 @@ module ObjectAttributeRangeList =
   struct
     type nonrec t = ObjectAttributeRange.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ObjectAttributeRange.to_value)) |>
         (fun x -> `List x)
@@ -2375,7 +2432,7 @@ module TypedLinkAttributeDefinition =
       type_: FacetAttributeType.t [@ocaml.doc "The type of the attribute."];
       defaultValue: TypedAttributeValue.t option
         [@ocaml.doc "The default value of the attribute (if configured)."];
-      isImmutable: Bool.t option
+      isImmutable: Bool_.t option
         [@ocaml.doc "Whether the attribute is mutable or not."];
       rules: RuleMap.t option
         [@ocaml.doc
@@ -2405,7 +2462,7 @@ module TypedLinkAttributeDefinition =
         ("Type", (Some (FacetAttributeType.to_value x.type_)));
         ("DefaultValue",
           (Option.map x.defaultValue ~f:TypedAttributeValue.to_value));
-        ("IsImmutable", (Option.map x.isImmutable ~f:Bool.to_value));
+        ("IsImmutable", (Option.map x.isImmutable ~f:Bool_.to_value));
         ("Rules", (Option.map x.rules ~f:RuleMap.to_value));
         ("RequiredBehavior",
           (Some (RequiredAttributeBehavior.to_value x.requiredBehavior)))]
@@ -2416,7 +2473,7 @@ module TypedLinkAttributeDefinition =
           (Xml.child_exn ~context:context_ xml_arg0 "RequiredBehavior") in
       let rules = (Option.map ~f:RuleMap.of_xml) (Xml.child xml_arg0 "Rules") in
       let isImmutable =
-        (Option.map ~f:Bool.of_xml) (Xml.child xml_arg0 "IsImmutable") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "IsImmutable") in
       let defaultValue =
         (Option.map ~f:TypedAttributeValue.of_xml)
           (Xml.child xml_arg0 "DefaultValue") in
@@ -2429,16 +2486,16 @@ module TypedLinkAttributeDefinition =
       make ~requiredBehavior ?rules ?isImmutable ?defaultValue ~type_ ~name
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requiredBehavior =
-        field_map_exn json "RequiredBehavior"
+        field_map_exn json__ "RequiredBehavior"
           RequiredAttributeBehavior.of_json in
-      let rules = field_map json "Rules" RuleMap.of_json in
-      let isImmutable = field_map json "IsImmutable" Bool.of_json in
+      let rules = field_map json__ "Rules" RuleMap.of_json in
+      let isImmutable = field_map json__ "IsImmutable" Bool_.of_json in
       let defaultValue =
-        field_map json "DefaultValue" TypedAttributeValue.of_json in
-      let type_ = field_map_exn json "Type" FacetAttributeType.of_json in
-      let name = field_map_exn json "Name" AttributeName.of_json in
+        field_map json__ "DefaultValue" TypedAttributeValue.of_json in
+      let type_ = field_map_exn json__ "Type" FacetAttributeType.of_json in
+      let name = field_map_exn json__ "Name" AttributeName.of_json in
       make ~requiredBehavior ?rules ?isImmutable ?defaultValue ~type_ ~name
         ()
     let to_json v = composed_to_json to_value v
@@ -2497,14 +2554,15 @@ module FacetAttribute =
       make ?requiredBehavior ?attributeReference ?attributeDefinition ~name
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requiredBehavior =
-        field_map json "RequiredBehavior" RequiredAttributeBehavior.of_json in
+        field_map json__ "RequiredBehavior" RequiredAttributeBehavior.of_json in
       let attributeReference =
-        field_map json "AttributeReference" FacetAttributeReference.of_json in
+        field_map json__ "AttributeReference" FacetAttributeReference.of_json in
       let attributeDefinition =
-        field_map json "AttributeDefinition" FacetAttributeDefinition.of_json in
-      let name = field_map_exn json "Name" AttributeName.of_json in
+        field_map json__ "AttributeDefinition"
+          FacetAttributeDefinition.of_json in
+      let name = field_map_exn json__ "Name" AttributeName.of_json in
       make ?requiredBehavior ?attributeReference ?attributeDefinition ~name
         ()
     let to_json v = composed_to_json to_value v
@@ -2641,9 +2699,9 @@ module BatchAttachObjectResponse =
           (Xml.child xml_arg0 "attachedObjectIdentifier") in
       make ?attachedObjectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachedObjectIdentifier =
-        field_map json "attachedObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "attachedObjectIdentifier" ObjectIdentifier.of_json in
       make ?attachedObjectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2682,9 +2740,9 @@ module BatchAttachToIndexResponse =
           (Xml.child xml_arg0 "AttachedObjectIdentifier") in
       make ?attachedObjectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachedObjectIdentifier =
-        field_map json "AttachedObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "AttachedObjectIdentifier" ObjectIdentifier.of_json in
       make ?attachedObjectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2707,9 +2765,9 @@ module BatchAttachTypedLinkResponse =
           (Xml.child xml_arg0 "TypedLinkSpecifier") in
       make ?typedLinkSpecifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let typedLinkSpecifier =
-        field_map json "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
+        field_map json__ "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
       make ?typedLinkSpecifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2733,9 +2791,9 @@ module BatchCreateIndexResponse =
           (Xml.child xml_arg0 "ObjectIdentifier") in
       make ?objectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectIdentifier =
-        field_map json "ObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "ObjectIdentifier" ObjectIdentifier.of_json in
       make ?objectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2758,9 +2816,9 @@ module BatchCreateObjectResponse =
           (Xml.child xml_arg0 "ObjectIdentifier") in
       make ?objectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectIdentifier =
-        field_map json "ObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "ObjectIdentifier" ObjectIdentifier.of_json in
       make ?objectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2799,9 +2857,9 @@ module BatchDetachFromIndexResponse =
           (Xml.child xml_arg0 "DetachedObjectIdentifier") in
       make ?detachedObjectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let detachedObjectIdentifier =
-        field_map json "DetachedObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "DetachedObjectIdentifier" ObjectIdentifier.of_json in
       make ?detachedObjectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2826,9 +2884,9 @@ module BatchDetachObjectResponse =
           (Xml.child xml_arg0 "detachedObjectIdentifier") in
       make ?detachedObjectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let detachedObjectIdentifier =
-        field_map json "detachedObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "detachedObjectIdentifier" ObjectIdentifier.of_json in
       make ?detachedObjectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2902,9 +2960,9 @@ module BatchUpdateObjectAttributesResponse =
           (Xml.child xml_arg0 "ObjectIdentifier") in
       make ?objectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectIdentifier =
-        field_map json "ObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "ObjectIdentifier" ObjectIdentifier.of_json in
       make ?objectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2944,13 +3002,14 @@ module BatchAddFacetToObject =
           (Xml.child_exn ~context:context_ xml_arg0 "SchemaFacet") in
       make ~objectReference ~objectAttributeList ~schemaFacet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       let objectAttributeList =
-        field_map_exn json "ObjectAttributeList"
+        field_map_exn json__ "ObjectAttributeList"
           AttributeKeyAndValueList.of_json in
-      let schemaFacet = field_map_exn json "SchemaFacet" SchemaFacet.of_json in
+      let schemaFacet =
+        field_map_exn json__ "SchemaFacet" SchemaFacet.of_json in
       make ~objectReference ~objectAttributeList ~schemaFacet ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2989,12 +3048,12 @@ module BatchAttachObject =
           (Xml.child_exn ~context:context_ xml_arg0 "ParentReference") in
       make ~linkName ~childReference ~parentReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let linkName = field_map_exn json "LinkName" LinkName.of_json in
+    let of_json json__ =
+      let linkName = field_map_exn json__ "LinkName" LinkName.of_json in
       let childReference =
-        field_map_exn json "ChildReference" ObjectReference.of_json in
+        field_map_exn json__ "ChildReference" ObjectReference.of_json in
       let parentReference =
-        field_map_exn json "ParentReference" ObjectReference.of_json in
+        field_map_exn json__ "ParentReference" ObjectReference.of_json in
       make ~linkName ~childReference ~parentReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of an AttachObject operation."]
@@ -3027,11 +3086,11 @@ module BatchAttachPolicy =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyReference") in
       make ~objectReference ~policyReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       let policyReference =
-        field_map_exn json "PolicyReference" ObjectReference.of_json in
+        field_map_exn json__ "PolicyReference" ObjectReference.of_json in
       make ~objectReference ~policyReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3065,11 +3124,11 @@ module BatchAttachToIndex =
           (Xml.child_exn ~context:context_ xml_arg0 "IndexReference") in
       make ~targetReference ~indexReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetReference =
-        field_map_exn json "TargetReference" ObjectReference.of_json in
+        field_map_exn json__ "TargetReference" ObjectReference.of_json in
       let indexReference =
-        field_map_exn json "IndexReference" ObjectReference.of_json in
+        field_map_exn json__ "IndexReference" ObjectReference.of_json in
       make ~targetReference ~indexReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3129,16 +3188,16 @@ module BatchAttachTypedLink =
       make ~attributes ~typedLinkFacet ~targetObjectReference
         ~sourceObjectReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map_exn json "Attributes" AttributeNameAndValueList.of_json in
+        field_map_exn json__ "Attributes" AttributeNameAndValueList.of_json in
       let typedLinkFacet =
-        field_map_exn json "TypedLinkFacet"
+        field_map_exn json__ "TypedLinkFacet"
           TypedLinkSchemaAndFacetName.of_json in
       let targetObjectReference =
-        field_map_exn json "TargetObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "TargetObjectReference" ObjectReference.of_json in
       let sourceObjectReference =
-        field_map_exn json "SourceObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "SourceObjectReference" ObjectReference.of_json in
       make ~attributes ~typedLinkFacet ~targetObjectReference
         ~sourceObjectReference ()
     let to_json v = composed_to_json to_value v
@@ -3151,7 +3210,7 @@ module BatchCreateIndex =
       orderedIndexedAttributeList: AttributeKeyList.t
         [@ocaml.doc
           "Specifies the attributes that should be indexed on. Currently only a single attribute is supported."];
-      isUnique: Bool.t
+      isUnique: Bool_.t
         [@ocaml.doc
           "Indicates whether the attribute that is being indexed has unique values or not."];
       parentReference: ObjectReference.t option
@@ -3181,7 +3240,7 @@ module BatchCreateIndex =
       structure_to_value
         [("OrderedIndexedAttributeList",
            (Some (AttributeKeyList.to_value x.orderedIndexedAttributeList)));
-        ("IsUnique", (Some (Bool.to_value x.isUnique)));
+        ("IsUnique", (Some (Bool_.to_value x.isUnique)));
         ("ParentReference",
           (Option.map x.parentReference ~f:ObjectReference.to_value));
         ("LinkName", (Option.map x.linkName ~f:LinkName.to_value));
@@ -3198,7 +3257,7 @@ module BatchCreateIndex =
         (Option.map ~f:ObjectReference.of_xml)
           (Xml.child xml_arg0 "ParentReference") in
       let isUnique =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IsUnique") in
+        Bool_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IsUnique") in
       let orderedIndexedAttributeList =
         AttributeKeyList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
@@ -3206,15 +3265,15 @@ module BatchCreateIndex =
       make ?batchReferenceName ?linkName ?parentReference ~isUnique
         ~orderedIndexedAttributeList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchReferenceName =
-        field_map json "BatchReferenceName" BatchReferenceName.of_json in
-      let linkName = field_map json "LinkName" LinkName.of_json in
+        field_map json__ "BatchReferenceName" BatchReferenceName.of_json in
+      let linkName = field_map json__ "LinkName" LinkName.of_json in
       let parentReference =
-        field_map json "ParentReference" ObjectReference.of_json in
-      let isUnique = field_map_exn json "IsUnique" Bool.of_json in
+        field_map json__ "ParentReference" ObjectReference.of_json in
+      let isUnique = field_map_exn json__ "IsUnique" Bool_.of_json in
       let orderedIndexedAttributeList =
-        field_map_exn json "OrderedIndexedAttributeList"
+        field_map_exn json__ "OrderedIndexedAttributeList"
           AttributeKeyList.of_json in
       make ?batchReferenceName ?linkName ?parentReference ~isUnique
         ~orderedIndexedAttributeList ()
@@ -3281,17 +3340,17 @@ module BatchCreateObject =
       make ?batchReferenceName ?linkName ?parentReference
         ~objectAttributeList ~schemaFacet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchReferenceName =
-        field_map json "BatchReferenceName" BatchReferenceName.of_json in
-      let linkName = field_map json "LinkName" LinkName.of_json in
+        field_map json__ "BatchReferenceName" BatchReferenceName.of_json in
+      let linkName = field_map json__ "LinkName" LinkName.of_json in
       let parentReference =
-        field_map json "ParentReference" ObjectReference.of_json in
+        field_map json__ "ParentReference" ObjectReference.of_json in
       let objectAttributeList =
-        field_map_exn json "ObjectAttributeList"
+        field_map_exn json__ "ObjectAttributeList"
           AttributeKeyAndValueList.of_json in
       let schemaFacet =
-        field_map_exn json "SchemaFacet" SchemaFacetList.of_json in
+        field_map_exn json__ "SchemaFacet" SchemaFacetList.of_json in
       make ?batchReferenceName ?linkName ?parentReference
         ~objectAttributeList ~schemaFacet ()
     let to_json v = composed_to_json to_value v
@@ -3315,9 +3374,9 @@ module BatchDeleteObject =
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectReference") in
       make ~objectReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       make ~objectReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a DeleteObject operation."]
@@ -3349,11 +3408,11 @@ module BatchDetachFromIndex =
           (Xml.child_exn ~context:context_ xml_arg0 "IndexReference") in
       make ~targetReference ~indexReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetReference =
-        field_map_exn json "TargetReference" ObjectReference.of_json in
+        field_map_exn json__ "TargetReference" ObjectReference.of_json in
       let indexReference =
-        field_map_exn json "IndexReference" ObjectReference.of_json in
+        field_map_exn json__ "IndexReference" ObjectReference.of_json in
       make ~targetReference ~indexReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3393,12 +3452,12 @@ module BatchDetachObject =
           (Xml.child_exn ~context:context_ xml_arg0 "ParentReference") in
       make ?batchReferenceName ~linkName ~parentReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchReferenceName =
-        field_map json "BatchReferenceName" BatchReferenceName.of_json in
-      let linkName = field_map_exn json "LinkName" LinkName.of_json in
+        field_map json__ "BatchReferenceName" BatchReferenceName.of_json in
+      let linkName = field_map_exn json__ "LinkName" LinkName.of_json in
       let parentReference =
-        field_map_exn json "ParentReference" ObjectReference.of_json in
+        field_map_exn json__ "ParentReference" ObjectReference.of_json in
       make ?batchReferenceName ~linkName ~parentReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a DetachObject operation."]
@@ -3430,11 +3489,11 @@ module BatchDetachPolicy =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyReference") in
       make ~objectReference ~policyReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       let policyReference =
-        field_map_exn json "PolicyReference" ObjectReference.of_json in
+        field_map_exn json__ "PolicyReference" ObjectReference.of_json in
       make ~objectReference ~policyReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3458,9 +3517,9 @@ module BatchDetachTypedLink =
           (Xml.child_exn ~context:context_ xml_arg0 "TypedLinkSpecifier") in
       make ~typedLinkSpecifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let typedLinkSpecifier =
-        field_map_exn json "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
+        field_map_exn json__ "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
       make ~typedLinkSpecifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3491,10 +3550,11 @@ module BatchRemoveFacetFromObject =
           (Xml.child_exn ~context:context_ xml_arg0 "SchemaFacet") in
       make ~objectReference ~schemaFacet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let schemaFacet = field_map_exn json "SchemaFacet" SchemaFacet.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let schemaFacet =
+        field_map_exn json__ "SchemaFacet" SchemaFacet.of_json in
       make ~objectReference ~schemaFacet ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A batch operation to remove a facet from an object."]
@@ -3526,11 +3586,12 @@ module BatchUpdateLinkAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "TypedLinkSpecifier") in
       make ~attributeUpdates ~typedLinkSpecifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeUpdates =
-        field_map_exn json "AttributeUpdates" LinkAttributeUpdateList.of_json in
+        field_map_exn json__ "AttributeUpdates"
+          LinkAttributeUpdateList.of_json in
       let typedLinkSpecifier =
-        field_map_exn json "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
+        field_map_exn json__ "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
       make ~attributeUpdates ~typedLinkSpecifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3563,12 +3624,12 @@ module BatchUpdateObjectAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectReference") in
       make ~attributeUpdates ~objectReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeUpdates =
-        field_map_exn json "AttributeUpdates"
+        field_map_exn json__ "AttributeUpdates"
           ObjectAttributeUpdateList.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       make ~attributeUpdates ~objectReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a BatchUpdate operation."]
@@ -3596,9 +3657,9 @@ module BatchReadException =
           (Xml.child xml_arg0 "Type") in
       make ?message ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
-      let type_ = field_map json "Type" BatchReadExceptionType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      let type_ = field_map json__ "Type" BatchReadExceptionType.of_json in
       make ?message ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3768,46 +3829,46 @@ module BatchReadSuccessfulResponse =
         ?listAttachedIndices ?getObjectAttributes ?getObjectInformation
         ?listObjectChildren ?listObjectAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let listObjectParents =
-        field_map json "ListObjectParents"
+        field_map json__ "ListObjectParents"
           BatchListObjectParentsResponse.of_json in
       let getLinkAttributes =
-        field_map json "GetLinkAttributes"
+        field_map json__ "GetLinkAttributes"
           BatchGetLinkAttributesResponse.of_json in
       let listIncomingTypedLinks =
-        field_map json "ListIncomingTypedLinks"
+        field_map json__ "ListIncomingTypedLinks"
           BatchListIncomingTypedLinksResponse.of_json in
       let listOutgoingTypedLinks =
-        field_map json "ListOutgoingTypedLinks"
+        field_map json__ "ListOutgoingTypedLinks"
           BatchListOutgoingTypedLinksResponse.of_json in
       let listIndex =
-        field_map json "ListIndex" BatchListIndexResponse.of_json in
+        field_map json__ "ListIndex" BatchListIndexResponse.of_json in
       let lookupPolicy =
-        field_map json "LookupPolicy" BatchLookupPolicyResponse.of_json in
+        field_map json__ "LookupPolicy" BatchLookupPolicyResponse.of_json in
       let listPolicyAttachments =
-        field_map json "ListPolicyAttachments"
+        field_map json__ "ListPolicyAttachments"
           BatchListPolicyAttachmentsResponse.of_json in
       let listObjectPolicies =
-        field_map json "ListObjectPolicies"
+        field_map json__ "ListObjectPolicies"
           BatchListObjectPoliciesResponse.of_json in
       let listObjectParentPaths =
-        field_map json "ListObjectParentPaths"
+        field_map json__ "ListObjectParentPaths"
           BatchListObjectParentPathsResponse.of_json in
       let listAttachedIndices =
-        field_map json "ListAttachedIndices"
+        field_map json__ "ListAttachedIndices"
           BatchListAttachedIndicesResponse.of_json in
       let getObjectAttributes =
-        field_map json "GetObjectAttributes"
+        field_map json__ "GetObjectAttributes"
           BatchGetObjectAttributesResponse.of_json in
       let getObjectInformation =
-        field_map json "GetObjectInformation"
+        field_map json__ "GetObjectInformation"
           BatchGetObjectInformationResponse.of_json in
       let listObjectChildren =
-        field_map json "ListObjectChildren"
+        field_map json__ "ListObjectChildren"
           BatchListObjectChildrenResponse.of_json in
       let listObjectAttributes =
-        field_map json "ListObjectAttributes"
+        field_map json__ "ListObjectAttributes"
           BatchListObjectAttributesResponse.of_json in
       make ?listObjectParents ?getLinkAttributes ?listIncomingTypedLinks
         ?listOutgoingTypedLinks ?listIndex ?lookupPolicy
@@ -3845,11 +3906,11 @@ module BatchGetLinkAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "TypedLinkSpecifier") in
       make ~attributeNames ~typedLinkSpecifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeNames =
-        field_map_exn json "AttributeNames" AttributeNameList.of_json in
+        field_map_exn json__ "AttributeNames" AttributeNameList.of_json in
       let typedLinkSpecifier =
-        field_map_exn json "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
+        field_map_exn json__ "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
       make ~attributeNames ~typedLinkSpecifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3892,12 +3953,13 @@ module BatchGetObjectAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectReference") in
       make ~attributeNames ~schemaFacet ~objectReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeNames =
-        field_map_exn json "AttributeNames" AttributeNameList.of_json in
-      let schemaFacet = field_map_exn json "SchemaFacet" SchemaFacet.of_json in
+        field_map_exn json__ "AttributeNames" AttributeNameList.of_json in
+      let schemaFacet =
+        field_map_exn json__ "SchemaFacet" SchemaFacet.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       make ~attributeNames ~schemaFacet ~objectReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3921,9 +3983,9 @@ module BatchGetObjectInformation =
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectReference") in
       make ~objectReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       make ~objectReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3960,11 +4022,11 @@ module BatchListAttachedIndices =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetReference") in
       make ?maxResults ?nextToken ~targetReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let targetReference =
-        field_map_exn json "TargetReference" ObjectReference.of_json in
+        field_map_exn json__ "TargetReference" ObjectReference.of_json in
       make ?maxResults ?nextToken ~targetReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4030,16 +4092,17 @@ module BatchListIncomingTypedLinks =
       make ?maxResults ?nextToken ?filterTypedLink ?filterAttributeRanges
         ~objectReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let filterTypedLink =
-        field_map json "FilterTypedLink" TypedLinkSchemaAndFacetName.of_json in
+        field_map json__ "FilterTypedLink"
+          TypedLinkSchemaAndFacetName.of_json in
       let filterAttributeRanges =
-        field_map json "FilterAttributeRanges"
+        field_map json__ "FilterAttributeRanges"
           TypedLinkAttributeRangeList.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       make ?maxResults ?nextToken ?filterTypedLink ?filterAttributeRanges
         ~objectReference ()
     let to_json v = composed_to_json to_value v
@@ -4089,13 +4152,13 @@ module BatchListIndex =
           (Xml.child xml_arg0 "RangesOnIndexedValues") in
       make ?nextToken ?maxResults ~indexReference ?rangesOnIndexedValues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
       let indexReference =
-        field_map_exn json "IndexReference" ObjectReference.of_json in
+        field_map_exn json__ "IndexReference" ObjectReference.of_json in
       let rangesOnIndexedValues =
-        field_map json "RangesOnIndexedValues"
+        field_map json__ "RangesOnIndexedValues"
           ObjectAttributeRangeList.of_json in
       make ?nextToken ?maxResults ~indexReference ?rangesOnIndexedValues ()
     let to_json v = composed_to_json to_value v
@@ -4142,12 +4205,12 @@ module BatchListObjectAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectReference") in
       make ?facetFilter ?maxResults ?nextToken ~objectReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let facetFilter = field_map json "FacetFilter" SchemaFacet.of_json in
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let facetFilter = field_map json__ "FacetFilter" SchemaFacet.of_json in
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       make ?facetFilter ?maxResults ?nextToken ~objectReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4186,11 +4249,11 @@ module BatchListObjectChildren =
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectReference") in
       make ?maxResults ?nextToken ~objectReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       make ?maxResults ?nextToken ~objectReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a ListObjectChildren operation."]
@@ -4227,11 +4290,11 @@ module BatchListObjectParentPaths =
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectReference") in
       make ?maxResults ?nextToken ~objectReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       make ?maxResults ?nextToken ~objectReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4268,11 +4331,11 @@ module BatchListObjectParents =
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectReference") in
       make ?maxResults ?nextToken ~objectReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       make ?maxResults ?nextToken ~objectReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4310,11 +4373,11 @@ module BatchListObjectPolicies =
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectReference") in
       make ?maxResults ?nextToken ~objectReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       make ?maxResults ?nextToken ~objectReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4380,16 +4443,17 @@ module BatchListOutgoingTypedLinks =
       make ?maxResults ?nextToken ?filterTypedLink ?filterAttributeRanges
         ~objectReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let filterTypedLink =
-        field_map json "FilterTypedLink" TypedLinkSchemaAndFacetName.of_json in
+        field_map json__ "FilterTypedLink"
+          TypedLinkSchemaAndFacetName.of_json in
       let filterAttributeRanges =
-        field_map json "FilterAttributeRanges"
+        field_map json__ "FilterAttributeRanges"
           TypedLinkAttributeRangeList.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       make ?maxResults ?nextToken ?filterTypedLink ?filterAttributeRanges
         ~objectReference ()
     let to_json v = composed_to_json to_value v
@@ -4427,11 +4491,11 @@ module BatchListPolicyAttachments =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyReference") in
       make ?maxResults ?nextToken ~policyReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let policyReference =
-        field_map_exn json "PolicyReference" ObjectReference.of_json in
+        field_map_exn json__ "PolicyReference" ObjectReference.of_json in
       make ?maxResults ?nextToken ~policyReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4469,11 +4533,11 @@ module BatchLookupPolicy =
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectReference") in
       make ?maxResults ?nextToken ~objectReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       make ?maxResults ?nextToken ~objectReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4503,10 +4567,10 @@ module TypedLinkFacetAttributeUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "Attribute") in
       make ~action ~attribute ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map_exn json "Action" UpdateActionType.of_json in
+    let of_json json__ =
+      let action = field_map_exn json__ "Action" UpdateActionType.of_json in
       let attribute =
-        field_map_exn json "Attribute" TypedLinkAttributeDefinition.of_json in
+        field_map_exn json__ "Attribute" TypedLinkAttributeDefinition.of_json in
       make ~action ~attribute ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A typed link facet attribute update."]
@@ -4532,9 +4596,9 @@ module FacetAttributeUpdate =
           (Xml.child xml_arg0 "Attribute") in
       make ?action ?attribute ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map json "Action" UpdateActionType.of_json in
-      let attribute = field_map json "Attribute" FacetAttribute.of_json in
+    let of_json json__ =
+      let action = field_map json__ "Action" UpdateActionType.of_json in
+      let attribute = field_map json__ "Attribute" FacetAttribute.of_json in
       make ?action ?attribute ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4559,9 +4623,9 @@ module Tag =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The tag structure that contains a tag key and value."]
 module Directory =
@@ -4603,11 +4667,11 @@ module Directory =
         (Option.map ~f:DirectoryName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?creationDateTime ?state ?directoryArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationDateTime = field_map json "CreationDateTime" Date.of_json in
-      let state = field_map json "State" DirectoryState.of_json in
-      let directoryArn = field_map json "DirectoryArn" DirectoryArn.of_json in
-      let name = field_map json "Name" DirectoryName.of_json in
+    let of_json json__ =
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
+      let state = field_map json__ "State" DirectoryState.of_json in
+      let directoryArn = field_map json__ "DirectoryArn" DirectoryArn.of_json in
+      let name = field_map json__ "Name" DirectoryName.of_json in
       make ?creationDateTime ?state ?directoryArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4672,6 +4736,9 @@ module TypedLinkAttributeDefinitionList =
   struct
     type nonrec t = TypedLinkAttributeDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TypedLinkAttributeDefinition.to_value)) |>
         (fun x -> `List x)
@@ -4950,41 +5017,44 @@ module BatchWriteOperationResponse =
         ?attachPolicy ?removeFacetFromObject ?addFacetToObject ?deleteObject
         ?updateObjectAttributes ?detachObject ?attachObject ?createObject ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updateLinkAttributes =
-        field_map json "UpdateLinkAttributes"
+        field_map json__ "UpdateLinkAttributes"
           BatchUpdateLinkAttributesResponse.of_json in
       let detachTypedLink =
-        field_map json "DetachTypedLink" BatchDetachTypedLinkResponse.of_json in
+        field_map json__ "DetachTypedLink"
+          BatchDetachTypedLinkResponse.of_json in
       let attachTypedLink =
-        field_map json "AttachTypedLink" BatchAttachTypedLinkResponse.of_json in
+        field_map json__ "AttachTypedLink"
+          BatchAttachTypedLinkResponse.of_json in
       let detachFromIndex =
-        field_map json "DetachFromIndex" BatchDetachFromIndexResponse.of_json in
+        field_map json__ "DetachFromIndex"
+          BatchDetachFromIndexResponse.of_json in
       let attachToIndex =
-        field_map json "AttachToIndex" BatchAttachToIndexResponse.of_json in
+        field_map json__ "AttachToIndex" BatchAttachToIndexResponse.of_json in
       let createIndex =
-        field_map json "CreateIndex" BatchCreateIndexResponse.of_json in
+        field_map json__ "CreateIndex" BatchCreateIndexResponse.of_json in
       let detachPolicy =
-        field_map json "DetachPolicy" BatchDetachPolicyResponse.of_json in
+        field_map json__ "DetachPolicy" BatchDetachPolicyResponse.of_json in
       let attachPolicy =
-        field_map json "AttachPolicy" BatchAttachPolicyResponse.of_json in
+        field_map json__ "AttachPolicy" BatchAttachPolicyResponse.of_json in
       let removeFacetFromObject =
-        field_map json "RemoveFacetFromObject"
+        field_map json__ "RemoveFacetFromObject"
           BatchRemoveFacetFromObjectResponse.of_json in
       let addFacetToObject =
-        field_map json "AddFacetToObject"
+        field_map json__ "AddFacetToObject"
           BatchAddFacetToObjectResponse.of_json in
       let deleteObject =
-        field_map json "DeleteObject" BatchDeleteObjectResponse.of_json in
+        field_map json__ "DeleteObject" BatchDeleteObjectResponse.of_json in
       let updateObjectAttributes =
-        field_map json "UpdateObjectAttributes"
+        field_map json__ "UpdateObjectAttributes"
           BatchUpdateObjectAttributesResponse.of_json in
       let detachObject =
-        field_map json "DetachObject" BatchDetachObjectResponse.of_json in
+        field_map json__ "DetachObject" BatchDetachObjectResponse.of_json in
       let attachObject =
-        field_map json "AttachObject" BatchAttachObjectResponse.of_json in
+        field_map json__ "AttachObject" BatchAttachObjectResponse.of_json in
       let createObject =
-        field_map json "CreateObject" BatchCreateObjectResponse.of_json in
+        field_map json__ "CreateObject" BatchCreateObjectResponse.of_json in
       make ?updateLinkAttributes ?detachTypedLink ?attachTypedLink
         ?detachFromIndex ?attachToIndex ?createIndex ?detachPolicy
         ?attachPolicy ?removeFacetFromObject ?addFacetToObject ?deleteObject
@@ -5151,39 +5221,40 @@ module BatchWriteOperation =
         ?attachPolicy ?removeFacetFromObject ?addFacetToObject ?deleteObject
         ?updateObjectAttributes ?detachObject ?attachObject ?createObject ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updateLinkAttributes =
-        field_map json "UpdateLinkAttributes"
+        field_map json__ "UpdateLinkAttributes"
           BatchUpdateLinkAttributes.of_json in
       let detachTypedLink =
-        field_map json "DetachTypedLink" BatchDetachTypedLink.of_json in
+        field_map json__ "DetachTypedLink" BatchDetachTypedLink.of_json in
       let attachTypedLink =
-        field_map json "AttachTypedLink" BatchAttachTypedLink.of_json in
+        field_map json__ "AttachTypedLink" BatchAttachTypedLink.of_json in
       let detachFromIndex =
-        field_map json "DetachFromIndex" BatchDetachFromIndex.of_json in
+        field_map json__ "DetachFromIndex" BatchDetachFromIndex.of_json in
       let attachToIndex =
-        field_map json "AttachToIndex" BatchAttachToIndex.of_json in
-      let createIndex = field_map json "CreateIndex" BatchCreateIndex.of_json in
+        field_map json__ "AttachToIndex" BatchAttachToIndex.of_json in
+      let createIndex =
+        field_map json__ "CreateIndex" BatchCreateIndex.of_json in
       let detachPolicy =
-        field_map json "DetachPolicy" BatchDetachPolicy.of_json in
+        field_map json__ "DetachPolicy" BatchDetachPolicy.of_json in
       let attachPolicy =
-        field_map json "AttachPolicy" BatchAttachPolicy.of_json in
+        field_map json__ "AttachPolicy" BatchAttachPolicy.of_json in
       let removeFacetFromObject =
-        field_map json "RemoveFacetFromObject"
+        field_map json__ "RemoveFacetFromObject"
           BatchRemoveFacetFromObject.of_json in
       let addFacetToObject =
-        field_map json "AddFacetToObject" BatchAddFacetToObject.of_json in
+        field_map json__ "AddFacetToObject" BatchAddFacetToObject.of_json in
       let deleteObject =
-        field_map json "DeleteObject" BatchDeleteObject.of_json in
+        field_map json__ "DeleteObject" BatchDeleteObject.of_json in
       let updateObjectAttributes =
-        field_map json "UpdateObjectAttributes"
+        field_map json__ "UpdateObjectAttributes"
           BatchUpdateObjectAttributes.of_json in
       let detachObject =
-        field_map json "DetachObject" BatchDetachObject.of_json in
+        field_map json__ "DetachObject" BatchDetachObject.of_json in
       let attachObject =
-        field_map json "AttachObject" BatchAttachObject.of_json in
+        field_map json__ "AttachObject" BatchAttachObject.of_json in
       let createObject =
-        field_map json "CreateObject" BatchCreateObject.of_json in
+        field_map json__ "CreateObject" BatchCreateObject.of_json in
       make ?updateLinkAttributes ?detachTypedLink ?attachTypedLink
         ?detachFromIndex ?attachToIndex ?createIndex ?detachPolicy
         ?attachPolicy ?removeFacetFromObject ?addFacetToObject ?deleteObject
@@ -5218,11 +5289,11 @@ module BatchReadOperationResponse =
           (Xml.child xml_arg0 "SuccessfulResponse") in
       make ?exceptionResponse ?successfulResponse ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exceptionResponse =
-        field_map json "ExceptionResponse" BatchReadException.of_json in
+        field_map json__ "ExceptionResponse" BatchReadException.of_json in
       let successfulResponse =
-        field_map json "SuccessfulResponse"
+        field_map json__ "SuccessfulResponse"
           BatchReadSuccessfulResponse.of_json in
       make ?exceptionResponse ?successfulResponse ()
     let to_json v = composed_to_json to_value v
@@ -5390,39 +5461,41 @@ module BatchReadOperation =
         ?listObjectParentPaths ?listAttachedIndices ?listObjectChildren
         ?listObjectAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let getLinkAttributes =
-        field_map json "GetLinkAttributes" BatchGetLinkAttributes.of_json in
+        field_map json__ "GetLinkAttributes" BatchGetLinkAttributes.of_json in
       let listIncomingTypedLinks =
-        field_map json "ListIncomingTypedLinks"
+        field_map json__ "ListIncomingTypedLinks"
           BatchListIncomingTypedLinks.of_json in
       let listOutgoingTypedLinks =
-        field_map json "ListOutgoingTypedLinks"
+        field_map json__ "ListOutgoingTypedLinks"
           BatchListOutgoingTypedLinks.of_json in
-      let listIndex = field_map json "ListIndex" BatchListIndex.of_json in
+      let listIndex = field_map json__ "ListIndex" BatchListIndex.of_json in
       let lookupPolicy =
-        field_map json "LookupPolicy" BatchLookupPolicy.of_json in
+        field_map json__ "LookupPolicy" BatchLookupPolicy.of_json in
       let listPolicyAttachments =
-        field_map json "ListPolicyAttachments"
+        field_map json__ "ListPolicyAttachments"
           BatchListPolicyAttachments.of_json in
       let listObjectPolicies =
-        field_map json "ListObjectPolicies" BatchListObjectPolicies.of_json in
+        field_map json__ "ListObjectPolicies" BatchListObjectPolicies.of_json in
       let listObjectParents =
-        field_map json "ListObjectParents" BatchListObjectParents.of_json in
+        field_map json__ "ListObjectParents" BatchListObjectParents.of_json in
       let getObjectAttributes =
-        field_map json "GetObjectAttributes" BatchGetObjectAttributes.of_json in
+        field_map json__ "GetObjectAttributes"
+          BatchGetObjectAttributes.of_json in
       let getObjectInformation =
-        field_map json "GetObjectInformation"
+        field_map json__ "GetObjectInformation"
           BatchGetObjectInformation.of_json in
       let listObjectParentPaths =
-        field_map json "ListObjectParentPaths"
+        field_map json__ "ListObjectParentPaths"
           BatchListObjectParentPaths.of_json in
       let listAttachedIndices =
-        field_map json "ListAttachedIndices" BatchListAttachedIndices.of_json in
+        field_map json__ "ListAttachedIndices"
+          BatchListAttachedIndices.of_json in
       let listObjectChildren =
-        field_map json "ListObjectChildren" BatchListObjectChildren.of_json in
+        field_map json__ "ListObjectChildren" BatchListObjectChildren.of_json in
       let listObjectAttributes =
-        field_map json "ListObjectAttributes"
+        field_map json__ "ListObjectAttributes"
           BatchListObjectAttributes.of_json in
       make ?getLinkAttributes ?listIncomingTypedLinks ?listOutgoingTypedLinks
         ?listIndex ?lookupPolicy ?listPolicyAttachments ?listObjectPolicies
@@ -5446,8 +5519,8 @@ module AccessDeniedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5467,8 +5540,8 @@ module IncompatibleSchemaException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5488,8 +5561,8 @@ module InternalServiceException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5509,8 +5582,8 @@ module InvalidArnException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Indicates that the provided ARN value is not valid."]
@@ -5529,8 +5602,8 @@ module InvalidAttachmentException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5550,8 +5623,8 @@ module LimitExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5571,8 +5644,8 @@ module ResourceNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource could not be found."]
@@ -5591,8 +5664,8 @@ module RetryableConflictException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5612,8 +5685,8 @@ module ValidationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5653,8 +5726,8 @@ module SchemaAlreadyExistsException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5674,8 +5747,8 @@ module FacetNotFoundException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified Facet could not be found."]
@@ -5694,8 +5767,8 @@ module FacetValidationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5715,8 +5788,8 @@ module InvalidFacetUpdateException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5736,8 +5809,8 @@ module InvalidRuleException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5746,6 +5819,9 @@ module TypedLinkFacetAttributeUpdateList =
   struct
     type nonrec t = TypedLinkFacetAttributeUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TypedLinkFacetAttributeUpdate.to_value)) |>
         (fun x -> `List x)
@@ -5803,8 +5879,8 @@ module DirectoryNotEnabledException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Operations are only permitted on enabled directories."]
@@ -5823,8 +5899,8 @@ module LinkNameAlreadyInUseException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5833,6 +5909,9 @@ module FacetAttributeUpdateList =
   struct
     type nonrec t = FacetAttributeUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FacetAttributeUpdate.to_value)) |>
         (fun x -> `List x)
@@ -5870,8 +5949,8 @@ module InvalidTaggingRequestException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5880,6 +5959,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5903,6 +5985,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5937,8 +6022,8 @@ module InvalidSchemaDocException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5971,8 +6056,8 @@ module SchemaAlreadyPublishedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Indicates that a schema is already published."]
@@ -5991,8 +6076,8 @@ module InvalidNextTokenException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Indicates that the NextToken value is not valid."]
@@ -6000,6 +6085,9 @@ module TypedLinkNameList =
   struct
     type nonrec t = TypedLinkName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TypedLinkName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6039,6 +6127,9 @@ module Arns =
   struct
     type nonrec t = Arn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6073,8 +6164,8 @@ module NotPolicyException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6119,8 +6210,8 @@ module CannotListParentOfRootException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cannot list the parents of a Directory root."]
@@ -6145,6 +6236,8 @@ module ObjectIdentifierToLinkNameMap =
                     (fun x -> (LinkName.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -6167,8 +6260,8 @@ module NotNodeException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6188,8 +6281,8 @@ module NotIndexException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6198,6 +6291,9 @@ module FacetNameList =
   struct
     type nonrec t = FacetName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FacetName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6222,6 +6318,9 @@ module FacetAttributeList =
   struct
     type nonrec t = FacetAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FacetAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6247,6 +6346,9 @@ module DirectoryList =
   struct
     type nonrec t = Directory.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Directory.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6295,10 +6397,10 @@ module Facet =
       let name = (Option.map ~f:FacetName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?facetStyle ?objectType ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let facetStyle = field_map json "FacetStyle" FacetStyle.of_json in
-      let objectType = field_map json "ObjectType" ObjectType.of_json in
-      let name = field_map json "Name" FacetName.of_json in
+    let of_json json__ =
+      let facetStyle = field_map json__ "FacetStyle" FacetStyle.of_json in
+      let objectType = field_map json__ "ObjectType" ObjectType.of_json in
+      let name = field_map json__ "Name" FacetName.of_json in
       make ?facetStyle ?objectType ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6318,8 +6420,8 @@ module DirectoryDeletedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6339,8 +6441,8 @@ module ObjectAlreadyDetachedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Indicates that the object is not attached to the index."]
@@ -6359,8 +6461,8 @@ module StillContainsLinksException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6380,8 +6482,8 @@ module ObjectNotDetachedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6401,8 +6503,8 @@ module FacetInUseException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6422,8 +6524,8 @@ module DirectoryNotDisabledException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An operation can only operate on a disabled directory."]
@@ -6442,8 +6544,8 @@ module FacetAlreadyExistsException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A facet with the same name already exists."]
@@ -6484,13 +6586,14 @@ module TypedLinkFacet =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~identityAttributeOrder ~attributes ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityAttributeOrder =
-        field_map_exn json "IdentityAttributeOrder" AttributeNameList.of_json in
+        field_map_exn json__ "IdentityAttributeOrder"
+          AttributeNameList.of_json in
       let attributes =
-        field_map_exn json "Attributes"
+        field_map_exn json__ "Attributes"
           TypedLinkAttributeDefinitionList.of_json in
-      let name = field_map_exn json "Name" TypedLinkName.of_json in
+      let name = field_map_exn json__ "Name" TypedLinkName.of_json in
       make ~identityAttributeOrder ~attributes ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6510,8 +6613,8 @@ module UnsupportedIndexTypeException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6531,8 +6634,8 @@ module DirectoryAlreadyExistsException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6564,10 +6667,10 @@ module BatchWriteException =
           (Xml.child xml_arg0 "Index") in
       make ?message ?type_ ?index ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
-      let type_ = field_map json "Type" BatchWriteExceptionType.of_json in
-      let index = field_map json "Index" BatchOperationIndex.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      let type_ = field_map json__ "Type" BatchWriteExceptionType.of_json in
+      let index = field_map json__ "Index" BatchOperationIndex.of_json in
       make ?message ?type_ ?index ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A BatchWrite exception has occurred."]
@@ -6575,6 +6678,9 @@ module BatchWriteOperationResponseList =
   struct
     type nonrec t = BatchWriteOperationResponse.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchWriteOperationResponse.to_value)) |>
         (fun x -> `List x)
@@ -6601,6 +6707,9 @@ module BatchWriteOperationList =
   struct
     type nonrec t = BatchWriteOperation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchWriteOperation.to_value)) |>
         (fun x -> `List x)
@@ -6627,6 +6736,9 @@ module BatchReadOperationResponseList =
   struct
     type nonrec t = BatchReadOperationResponse.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchReadOperationResponse.to_value)) |>
         (fun x -> `List x)
@@ -6653,6 +6765,9 @@ module BatchReadOperationList =
   struct
     type nonrec t = BatchReadOperation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchReadOperation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6689,8 +6804,8 @@ module IndexedAttributeMissingException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6816,8 +6931,9 @@ module UpgradePublishedSchemaResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "UpgradedSchemaArn") in
       make ?upgradedSchemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let upgradedSchemaArn = field_map json "UpgradedSchemaArn" Arn.of_json in
+    let of_json json__ =
+      let upgradedSchemaArn =
+        field_map json__ "UpgradedSchemaArn" Arn.of_json in
       make ?upgradedSchemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6834,7 +6950,7 @@ module UpgradePublishedSchemaRequest =
       minorVersion: Version.t
         [@ocaml.doc
           "Identifies the minor version of the published schema that will be created. This parameter is NOT optional."];
-      dryRun: Bool.t option
+      dryRun: Bool_.t option
         [@ocaml.doc
           "Used for testing whether the Development schema provided is backwards compatible, or not, with the publish schema provided by the user to be upgraded. If schema compatibility fails, an exception would be thrown else the call would succeed. This parameter is optional and defaults to false."]}
     let context_ = "UpgradePublishedSchemaRequest"
@@ -6855,10 +6971,10 @@ module UpgradePublishedSchemaRequest =
            (Some (Arn.to_value x.developmentSchemaArn)));
         ("PublishedSchemaArn", (Some (Arn.to_value x.publishedSchemaArn)));
         ("MinorVersion", (Some (Version.to_value x.minorVersion)));
-        ("DryRun", (Option.map x.dryRun ~f:Bool.to_value))]
+        ("DryRun", (Option.map x.dryRun ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let dryRun = (Option.map ~f:Bool.of_xml) (Xml.child xml_arg0 "DryRun") in
+      let dryRun = (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "DryRun") in
       let minorVersion =
         Version.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MinorVersion") in
@@ -6870,13 +6986,13 @@ module UpgradePublishedSchemaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DevelopmentSchemaArn") in
       make ?dryRun ~minorVersion ~publishedSchemaArn ~developmentSchemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" Bool.of_json in
-      let minorVersion = field_map_exn json "MinorVersion" Version.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" Bool_.of_json in
+      let minorVersion = field_map_exn json__ "MinorVersion" Version.of_json in
       let publishedSchemaArn =
-        field_map_exn json "PublishedSchemaArn" Arn.of_json in
+        field_map_exn json__ "PublishedSchemaArn" Arn.of_json in
       let developmentSchemaArn =
-        field_map_exn json "DevelopmentSchemaArn" Arn.of_json in
+        field_map_exn json__ "DevelopmentSchemaArn" Arn.of_json in
       make ?dryRun ~minorVersion ~publishedSchemaArn ~developmentSchemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7011,9 +7127,10 @@ module UpgradeAppliedSchemaResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "UpgradedSchemaArn") in
       make ?directoryArn ?upgradedSchemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryArn = field_map json "DirectoryArn" Arn.of_json in
-      let upgradedSchemaArn = field_map json "UpgradedSchemaArn" Arn.of_json in
+    let of_json json__ =
+      let directoryArn = field_map json__ "DirectoryArn" Arn.of_json in
+      let upgradedSchemaArn =
+        field_map json__ "UpgradedSchemaArn" Arn.of_json in
       make ?directoryArn ?upgradedSchemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7028,7 +7145,7 @@ module UpgradeAppliedSchemaRequest =
       directoryArn: Arn.t
         [@ocaml.doc
           "The ARN for the directory to which the upgraded schema will be applied."];
-      dryRun: Bool.t option
+      dryRun: Bool_.t option
         [@ocaml.doc
           "Used for testing whether the major version schemas are backward compatible or not. If schema compatibility fails, an exception would be thrown else the call would succeed but no changes will be saved. This parameter is optional."]}
     let context_ = "UpgradeAppliedSchemaRequest"
@@ -7040,10 +7157,10 @@ module UpgradeAppliedSchemaRequest =
       structure_to_value
         [("PublishedSchemaArn", (Some (Arn.to_value x.publishedSchemaArn)));
         ("DirectoryArn", (Some (Arn.to_value x.directoryArn)));
-        ("DryRun", (Option.map x.dryRun ~f:Bool.to_value))]
+        ("DryRun", (Option.map x.dryRun ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let dryRun = (Option.map ~f:Bool.of_xml) (Xml.child xml_arg0 "DryRun") in
+      let dryRun = (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "DryRun") in
       let directoryArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DirectoryArn") in
       let publishedSchemaArn =
@@ -7051,11 +7168,11 @@ module UpgradeAppliedSchemaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PublishedSchemaArn") in
       make ?dryRun ~directoryArn ~publishedSchemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" Bool.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" Bool_.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       let publishedSchemaArn =
-        field_map_exn json "PublishedSchemaArn" Arn.of_json in
+        field_map_exn json__ "PublishedSchemaArn" Arn.of_json in
       make ?dryRun ~directoryArn ~publishedSchemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7239,14 +7356,15 @@ module UpdateTypedLinkFacetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~identityAttributeOrder ~attributeUpdates ~name ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityAttributeOrder =
-        field_map_exn json "IdentityAttributeOrder" AttributeNameList.of_json in
+        field_map_exn json__ "IdentityAttributeOrder"
+          AttributeNameList.of_json in
       let attributeUpdates =
-        field_map_exn json "AttributeUpdates"
+        field_map_exn json__ "AttributeUpdates"
           TypedLinkFacetAttributeUpdateList.of_json in
-      let name = field_map_exn json "Name" TypedLinkName.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+      let name = field_map_exn json__ "Name" TypedLinkName.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ~identityAttributeOrder ~attributeUpdates ~name ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7350,8 +7468,8 @@ module UpdateSchemaResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SchemaArn") in
       make ?schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaArn = field_map json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let schemaArn = field_map json__ "SchemaArn" Arn.of_json in
       make ?schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7379,9 +7497,9 @@ module UpdateSchemaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~name ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" SchemaName.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" SchemaName.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ~name ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7517,9 +7635,9 @@ module UpdateObjectAttributesResponse =
           (Xml.child xml_arg0 "ObjectIdentifier") in
       make ?objectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectIdentifier =
-        field_map json "ObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "ObjectIdentifier" ObjectIdentifier.of_json in
       make ?objectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a given object's attributes."]
@@ -7559,13 +7677,13 @@ module UpdateObjectAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~attributeUpdates ~objectReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeUpdates =
-        field_map_exn json "AttributeUpdates"
+        field_map_exn json__ "AttributeUpdates"
           ObjectAttributeUpdateList.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~attributeUpdates ~objectReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a given object's attributes."]
@@ -7720,12 +7838,13 @@ module UpdateLinkAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~attributeUpdates ~typedLinkSpecifier ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeUpdates =
-        field_map_exn json "AttributeUpdates" LinkAttributeUpdateList.of_json in
+        field_map_exn json__ "AttributeUpdates"
+          LinkAttributeUpdateList.of_json in
       let typedLinkSpecifier =
-        field_map_exn json "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~attributeUpdates ~typedLinkSpecifier ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7904,12 +8023,12 @@ module UpdateFacetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ?objectType ?attributeUpdates ~name ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let objectType = field_map json "ObjectType" ObjectType.of_json in
+    let of_json json__ =
+      let objectType = field_map json__ "ObjectType" ObjectType.of_json in
       let attributeUpdates =
-        field_map json "AttributeUpdates" FacetAttributeUpdateList.of_json in
-      let name = field_map_exn json "Name" FacetName.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+        field_map json__ "AttributeUpdates" FacetAttributeUpdateList.of_json in
+      let name = field_map_exn json__ "Name" FacetName.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ?objectType ?attributeUpdates ~name ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8045,9 +8164,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An API operation for removing tags from a resource."]
@@ -8178,9 +8297,9 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An API operation for adding tags to a resource."]
@@ -8332,11 +8451,12 @@ module RemoveFacetFromObjectRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~objectReference ~schemaFacet ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let schemaFacet = field_map_exn json "SchemaFacet" SchemaFacet.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let schemaFacet =
+        field_map_exn json__ "SchemaFacet" SchemaFacet.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~objectReference ~schemaFacet ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified facet from the specified object."]
@@ -8444,8 +8564,8 @@ module PutSchemaFromJsonResponse =
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" Arn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" Arn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Allows a schema to be updated using JSON upload. Only available for development schemas. See JSON Schema Format for more information."]
@@ -8472,9 +8592,10 @@ module PutSchemaFromJsonRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~document ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let document = field_map_exn json "Document" SchemaJsonDocument.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let document =
+        field_map_exn json__ "Document" SchemaJsonDocument.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ~document ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8590,9 +8711,9 @@ module PublishSchemaResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "PublishedSchemaArn") in
       make ?publishedSchemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let publishedSchemaArn =
-        field_map json "PublishedSchemaArn" Arn.of_json in
+        field_map json__ "PublishedSchemaArn" Arn.of_json in
       make ?publishedSchemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8639,12 +8760,12 @@ module PublishSchemaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ?name ?minorVersion ~version ~developmentSchemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" SchemaName.of_json in
-      let minorVersion = field_map json "MinorVersion" Version.of_json in
-      let version = field_map_exn json "Version" Version.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" SchemaName.of_json in
+      let minorVersion = field_map json__ "MinorVersion" Version.of_json in
+      let version = field_map_exn json__ "Version" Version.of_json in
       let developmentSchemaArn =
-        field_map_exn json "DevelopmentSchemaArn" Arn.of_json in
+        field_map_exn json__ "DevelopmentSchemaArn" Arn.of_json in
       make ?name ?minorVersion ~version ~developmentSchemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8775,10 +8896,10 @@ module LookupPolicyResponse =
           (Xml.child xml_arg0 "PolicyToPathList") in
       make ?nextToken ?policyToPathList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let policyToPathList =
-        field_map json "PolicyToPathList" PolicyToPathList.of_json in
+        field_map json__ "PolicyToPathList" PolicyToPathList.of_json in
       make ?nextToken ?policyToPathList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8827,12 +8948,12 @@ module LookupPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ?maxResults ?nextToken ~objectReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?maxResults ?nextToken ~objectReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8952,9 +9073,10 @@ module ListTypedLinkFacetNamesResponse =
           (Xml.child xml_arg0 "FacetNames") in
       make ?nextToken ?facetNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let facetNames = field_map json "FacetNames" TypedLinkNameList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let facetNames =
+        field_map json__ "FacetNames" TypedLinkNameList.of_json in
       make ?nextToken ?facetNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8990,10 +9112,10 @@ module ListTypedLinkFacetNamesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ?maxResults ?nextToken ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ?maxResults ?nextToken ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9123,10 +9245,11 @@ module ListTypedLinkFacetAttributesResponse =
           (Xml.child xml_arg0 "Attributes") in
       make ?nextToken ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let attributes =
-        field_map json "Attributes" TypedLinkAttributeDefinitionList.of_json in
+        field_map json__ "Attributes"
+          TypedLinkAttributeDefinitionList.of_json in
       make ?nextToken ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9169,11 +9292,11 @@ module ListTypedLinkFacetAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ?maxResults ?nextToken ~name ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let name = field_map_exn json "Name" TypedLinkName.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let name = field_map_exn json__ "Name" TypedLinkName.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ?maxResults ?nextToken ~name ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9293,9 +9416,9 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9334,10 +9457,11 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?maxResults ?nextToken ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" TagsNumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" TagsNumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ?maxResults ?nextToken ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9453,9 +9577,9 @@ module ListPublishedSchemaArnsResponse =
         (Option.map ~f:Arns.of_xml) (Xml.child xml_arg0 "SchemaArns") in
       make ?nextToken ?schemaArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let schemaArns = field_map json "SchemaArns" Arns.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let schemaArns = field_map json__ "SchemaArns" Arns.of_json in
       make ?nextToken ?schemaArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9489,10 +9613,10 @@ module ListPublishedSchemaArnsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SchemaArn") in
       make ?maxResults ?nextToken ?schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let schemaArn = field_map json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Arn.of_json in
       make ?maxResults ?nextToken ?schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9632,10 +9756,10 @@ module ListPolicyAttachmentsResponse =
           (Xml.child xml_arg0 "ObjectIdentifiers") in
       make ?nextToken ?objectIdentifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectIdentifiers =
-        field_map json "ObjectIdentifiers" ObjectIdentifierList.of_json in
+        field_map json__ "ObjectIdentifiers" ObjectIdentifierList.of_json in
       make ?nextToken ?objectIdentifiers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9698,14 +9822,14 @@ module ListPolicyAttachmentsRequest =
       make ?consistencyLevel ?maxResults ?nextToken ~policyReference
         ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consistencyLevel =
-        field_map json "ConsistencyLevel" ConsistencyLevel.of_json in
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ConsistencyLevel" ConsistencyLevel.of_json in
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let policyReference =
-        field_map_exn json "PolicyReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "PolicyReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?consistencyLevel ?maxResults ?nextToken ~policyReference
         ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -9846,10 +9970,10 @@ module ListOutgoingTypedLinksResponse =
           (Xml.child xml_arg0 "TypedLinkSpecifiers") in
       make ?nextToken ?typedLinkSpecifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let typedLinkSpecifiers =
-        field_map json "TypedLinkSpecifiers" TypedLinkSpecifierList.of_json in
+        field_map json__ "TypedLinkSpecifiers" TypedLinkSpecifierList.of_json in
       make ?nextToken ?typedLinkSpecifiers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9933,19 +10057,20 @@ module ListOutgoingTypedLinksRequest =
       make ?consistencyLevel ?maxResults ?nextToken ?filterTypedLink
         ?filterAttributeRanges ~objectReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consistencyLevel =
-        field_map json "ConsistencyLevel" ConsistencyLevel.of_json in
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ConsistencyLevel" ConsistencyLevel.of_json in
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let filterTypedLink =
-        field_map json "FilterTypedLink" TypedLinkSchemaAndFacetName.of_json in
+        field_map json__ "FilterTypedLink"
+          TypedLinkSchemaAndFacetName.of_json in
       let filterAttributeRanges =
-        field_map json "FilterAttributeRanges"
+        field_map json__ "FilterAttributeRanges"
           TypedLinkAttributeRangeList.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?consistencyLevel ?maxResults ?nextToken ?filterTypedLink
         ?filterAttributeRanges ~objectReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -10077,10 +10202,10 @@ module ListObjectPoliciesResponse =
           (Xml.child xml_arg0 "AttachedPolicyIds") in
       make ?nextToken ?attachedPolicyIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let attachedPolicyIds =
-        field_map json "AttachedPolicyIds" ObjectIdentifierList.of_json in
+        field_map json__ "AttachedPolicyIds" ObjectIdentifierList.of_json in
       make ?nextToken ?attachedPolicyIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10144,14 +10269,14 @@ module ListObjectPoliciesRequest =
       make ?consistencyLevel ?maxResults ?nextToken ~objectReference
         ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consistencyLevel =
-        field_map json "ConsistencyLevel" ConsistencyLevel.of_json in
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ConsistencyLevel" ConsistencyLevel.of_json in
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?consistencyLevel ?maxResults ?nextToken ~objectReference
         ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -10304,12 +10429,13 @@ module ListObjectParentsResponse =
           (Xml.child xml_arg0 "Parents") in
       make ?parentLinks ?nextToken ?parents ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parentLinks =
-        field_map json "ParentLinks" ObjectIdentifierAndLinkNameList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ParentLinks"
+          ObjectIdentifierAndLinkNameList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let parents =
-        field_map json "Parents" ObjectIdentifierToLinkNameMap.of_json in
+        field_map json__ "Parents" ObjectIdentifierToLinkNameMap.of_json in
       make ?parentLinks ?nextToken ?parents ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10331,7 +10457,7 @@ module ListObjectParentsRequest =
       consistencyLevel: ConsistencyLevel.t option
         [@ocaml.doc
           "Represents the manner and timing in which the successful write or update of an object is reflected in a subsequent read operation of that same object."];
-      includeAllLinksToEachParent: Bool.t option
+      includeAllLinksToEachParent: Bool_.t option
         [@ocaml.doc
           "When set to True, returns all ListObjectParentsResponse$ParentLinks. There could be multiple links between a parent-child pair."]}
     let context_ = "ListObjectParentsRequest"
@@ -10360,11 +10486,11 @@ module ListObjectParentsRequest =
         ("x-amz-consistency-level",
           (Option.map x.consistencyLevel ~f:ConsistencyLevel.to_value));
         ("IncludeAllLinksToEachParent",
-          (Option.map x.includeAllLinksToEachParent ~f:Bool.to_value))]
+          (Option.map x.includeAllLinksToEachParent ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let includeAllLinksToEachParent =
-        (Option.map ~f:Bool.of_xml)
+        (Option.map ~f:Bool_.of_xml)
           (Xml.child xml_arg0 "IncludeAllLinksToEachParent") in
       let consistencyLevel =
         (Option.map ~f:ConsistencyLevel.of_xml)
@@ -10383,16 +10509,16 @@ module ListObjectParentsRequest =
       make ?includeAllLinksToEachParent ?consistencyLevel ?maxResults
         ?nextToken ~objectReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeAllLinksToEachParent =
-        field_map json "IncludeAllLinksToEachParent" Bool.of_json in
+        field_map json__ "IncludeAllLinksToEachParent" Bool_.of_json in
       let consistencyLevel =
-        field_map json "ConsistencyLevel" ConsistencyLevel.of_json in
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ConsistencyLevel" ConsistencyLevel.of_json in
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?includeAllLinksToEachParent ?consistencyLevel ?maxResults
         ?nextToken ~objectReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -10525,10 +10651,10 @@ module ListObjectParentPathsResponse =
           (Xml.child xml_arg0 "PathToObjectIdentifiersList") in
       make ?nextToken ?pathToObjectIdentifiersList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let pathToObjectIdentifiersList =
-        field_map json "PathToObjectIdentifiersList"
+        field_map json__ "PathToObjectIdentifiersList"
           PathToObjectIdentifiersList.of_json in
       make ?nextToken ?pathToObjectIdentifiersList ()
     let to_json v = composed_to_json to_value v
@@ -10577,12 +10703,12 @@ module ListObjectParentPathsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ?maxResults ?nextToken ~objectReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?maxResults ?nextToken ~objectReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10720,10 +10846,10 @@ module ListObjectChildrenResponse =
           (Xml.child xml_arg0 "Children") in
       make ?nextToken ?children ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let children =
-        field_map json "Children" LinkNameToObjectIdentifierMap.of_json in
+        field_map json__ "Children" LinkNameToObjectIdentifierMap.of_json in
       make ?nextToken ?children ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10787,14 +10913,14 @@ module ListObjectChildrenRequest =
       make ?consistencyLevel ?maxResults ?nextToken ~objectReference
         ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consistencyLevel =
-        field_map json "ConsistencyLevel" ConsistencyLevel.of_json in
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ConsistencyLevel" ConsistencyLevel.of_json in
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?consistencyLevel ?maxResults ?nextToken ~objectReference
         ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -10935,10 +11061,10 @@ module ListObjectAttributesResponse =
           (Xml.child xml_arg0 "Attributes") in
       make ?nextToken ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let attributes =
-        field_map json "Attributes" AttributeKeyAndValueList.of_json in
+        field_map json__ "Attributes" AttributeKeyAndValueList.of_json in
       make ?nextToken ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all attributes that are associated with an object."]
@@ -11009,15 +11135,15 @@ module ListObjectAttributesRequest =
       make ?facetFilter ?consistencyLevel ?maxResults ?nextToken
         ~objectReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let facetFilter = field_map json "FacetFilter" SchemaFacet.of_json in
+    let of_json json__ =
+      let facetFilter = field_map json__ "FacetFilter" SchemaFacet.of_json in
       let consistencyLevel =
-        field_map json "ConsistencyLevel" ConsistencyLevel.of_json in
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ConsistencyLevel" ConsistencyLevel.of_json in
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?facetFilter ?consistencyLevel ?maxResults ?nextToken
         ~objectReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -11115,9 +11241,9 @@ module ListManagedSchemaArnsResponse =
         (Option.map ~f:Arns.of_xml) (Xml.child xml_arg0 "SchemaArns") in
       make ?nextToken ?schemaArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let schemaArns = field_map json "SchemaArns" Arns.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let schemaArns = field_map json__ "SchemaArns" Arns.of_json in
       make ?nextToken ?schemaArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11151,10 +11277,10 @@ module ListManagedSchemaArnsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SchemaArn") in
       make ?maxResults ?nextToken ?schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let schemaArn = field_map json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Arn.of_json in
       make ?maxResults ?nextToken ?schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11302,10 +11428,10 @@ module ListIndexResponse =
           (Xml.child xml_arg0 "IndexAttachments") in
       make ?nextToken ?indexAttachments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let indexAttachments =
-        field_map json "IndexAttachments" IndexAttachmentList.of_json in
+        field_map json__ "IndexAttachments" IndexAttachmentList.of_json in
       make ?nextToken ?indexAttachments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists objects attached to the specified index."]
@@ -11376,17 +11502,17 @@ module ListIndexRequest =
       make ?consistencyLevel ?nextToken ?maxResults ~indexReference
         ?rangesOnIndexedValues ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consistencyLevel =
-        field_map json "ConsistencyLevel" ConsistencyLevel.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
+        field_map json__ "ConsistencyLevel" ConsistencyLevel.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
       let indexReference =
-        field_map_exn json "IndexReference" ObjectReference.of_json in
+        field_map_exn json__ "IndexReference" ObjectReference.of_json in
       let rangesOnIndexedValues =
-        field_map json "RangesOnIndexedValues"
+        field_map json__ "RangesOnIndexedValues"
           ObjectAttributeRangeList.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?consistencyLevel ?nextToken ?maxResults ~indexReference
         ?rangesOnIndexedValues ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -11525,10 +11651,10 @@ module ListIncomingTypedLinksResponse =
           (Xml.child xml_arg0 "LinkSpecifiers") in
       make ?nextToken ?linkSpecifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let linkSpecifiers =
-        field_map json "LinkSpecifiers" TypedLinkSpecifierList.of_json in
+        field_map json__ "LinkSpecifiers" TypedLinkSpecifierList.of_json in
       make ?nextToken ?linkSpecifiers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11612,19 +11738,20 @@ module ListIncomingTypedLinksRequest =
       make ?consistencyLevel ?maxResults ?nextToken ?filterTypedLink
         ?filterAttributeRanges ~objectReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consistencyLevel =
-        field_map json "ConsistencyLevel" ConsistencyLevel.of_json in
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ConsistencyLevel" ConsistencyLevel.of_json in
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let filterTypedLink =
-        field_map json "FilterTypedLink" TypedLinkSchemaAndFacetName.of_json in
+        field_map json__ "FilterTypedLink"
+          TypedLinkSchemaAndFacetName.of_json in
       let filterAttributeRanges =
-        field_map json "FilterAttributeRanges"
+        field_map json__ "FilterAttributeRanges"
           TypedLinkAttributeRangeList.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?consistencyLevel ?maxResults ?nextToken ?filterTypedLink
         ?filterAttributeRanges ~objectReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -11743,9 +11870,9 @@ module ListFacetNamesResponse =
           (Xml.child xml_arg0 "FacetNames") in
       make ?nextToken ?facetNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let facetNames = field_map json "FacetNames" FacetNameList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let facetNames = field_map json__ "FacetNames" FacetNameList.of_json in
       make ?nextToken ?facetNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the names of facets that exist in a schema."]
@@ -11780,10 +11907,10 @@ module ListFacetNamesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ?maxResults ?nextToken ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ?maxResults ?nextToken ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the names of facets that exist in a schema."]
@@ -11910,9 +12037,10 @@ module ListFacetAttributesResponse =
           (Xml.child xml_arg0 "Attributes") in
       make ?nextToken ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let attributes = field_map json "Attributes" FacetAttributeList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let attributes =
+        field_map json__ "Attributes" FacetAttributeList.of_json in
       make ?nextToken ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves attributes attached to the facet."]
@@ -11953,11 +12081,11 @@ module ListFacetAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ?maxResults ?nextToken ~name ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let name = field_map_exn json "Name" FacetName.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let name = field_map_exn json__ "Name" FacetName.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ?maxResults ?nextToken ~name ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves attributes attached to the facet."]
@@ -11965,7 +12093,7 @@ module ListDirectoriesResponse =
   struct
     type nonrec t =
       {
-      directories: DirectoryList.t
+      directories: DirectoryList.t option
         [@ocaml.doc
           "Lists all directories that are associated with your account in pagination fashion."];
       nextToken: NextToken.t option [@ocaml.doc "The pagination token."]}
@@ -11978,9 +12106,8 @@ module ListDirectoriesResponse =
       | `RetryableConflictException of RetryableConflictException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListDirectoriesResponse"
-    let make ?nextToken =
-      fun ~directories -> fun () -> { nextToken; directories }
+    let make ?directories =
+      fun ?nextToken -> fun () -> { directories; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12056,22 +12183,22 @@ module ListDirectoriesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Directories", (Some (DirectoryList.to_value x.directories)));
+        [("Directories",
+           (Option.map x.directories ~f:DirectoryList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let directories =
-        DirectoryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Directories") in
-      make ?nextToken ~directories ()
+        (Option.map ~f:DirectoryList.of_xml)
+          (Xml.child xml_arg0 "Directories") in
+      make ?nextToken ?directories ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let directories =
-        field_map_exn json "Directories" DirectoryList.of_json in
-      make ?nextToken ~directories ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let directories = field_map json__ "Directories" DirectoryList.of_json in
+      make ?nextToken ?directories ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists directories created within an account."]
 module ListDirectoriesRequest =
@@ -12103,10 +12230,10 @@ module ListDirectoriesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?state ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "state" DirectoryState.of_json in
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let state = field_map json__ "state" DirectoryState.of_json in
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?state ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists directories created within an account."]
@@ -12222,9 +12349,9 @@ module ListDevelopmentSchemaArnsResponse =
         (Option.map ~f:Arns.of_xml) (Xml.child xml_arg0 "SchemaArns") in
       make ?nextToken ?schemaArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let schemaArns = field_map json "SchemaArns" Arns.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let schemaArns = field_map json__ "SchemaArns" Arns.of_json in
       make ?nextToken ?schemaArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12251,9 +12378,9 @@ module ListDevelopmentSchemaArnsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12374,10 +12501,10 @@ module ListAttachedIndicesResponse =
           (Xml.child xml_arg0 "IndexAttachments") in
       make ?nextToken ?indexAttachments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let indexAttachments =
-        field_map json "IndexAttachments" IndexAttachmentList.of_json in
+        field_map json__ "IndexAttachments" IndexAttachmentList.of_json in
       make ?nextToken ?indexAttachments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists indices attached to the specified object."]
@@ -12435,14 +12562,14 @@ module ListAttachedIndicesRequest =
       make ?consistencyLevel ?maxResults ?nextToken ~targetReference
         ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consistencyLevel =
-        field_map json "ConsistencyLevel" ConsistencyLevel.of_json in
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ConsistencyLevel" ConsistencyLevel.of_json in
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let targetReference =
-        field_map_exn json "TargetReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "TargetReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?consistencyLevel ?maxResults ?nextToken ~targetReference
         ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -12559,9 +12686,9 @@ module ListAppliedSchemaArnsResponse =
         (Option.map ~f:Arns.of_xml) (Xml.child xml_arg0 "SchemaArns") in
       make ?nextToken ?schemaArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let schemaArns = field_map json "SchemaArns" Arns.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let schemaArns = field_map json__ "SchemaArns" Arns.of_json in
       make ?nextToken ?schemaArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12603,11 +12730,11 @@ module ListAppliedSchemaArnsRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DirectoryArn") in
       make ?maxResults ?nextToken ?schemaArn ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" NumberResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let schemaArn = field_map json "SchemaArn" Arn.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" NumberResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Arn.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?maxResults ?nextToken ?schemaArn ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12731,9 +12858,9 @@ module GetTypedLinkFacetInformationResponse =
           (Xml.child xml_arg0 "IdentityAttributeOrder") in
       make ?identityAttributeOrder ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityAttributeOrder =
-        field_map json "IdentityAttributeOrder" AttributeNameList.of_json in
+        field_map json__ "IdentityAttributeOrder" AttributeNameList.of_json in
       make ?identityAttributeOrder ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12763,9 +12890,9 @@ module GetTypedLinkFacetInformationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~name ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" TypedLinkName.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" TypedLinkName.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ~name ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12874,9 +13001,9 @@ module GetSchemaAsJsonResponse =
         (Option.map ~f:SchemaName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?document ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let document = field_map json "Document" SchemaJsonDocument.of_json in
-      let name = field_map json "Name" SchemaName.of_json in
+    let of_json json__ =
+      let document = field_map json__ "Document" SchemaJsonDocument.of_json in
+      let name = field_map json__ "Name" SchemaName.of_json in
       make ?document ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12905,8 +13032,8 @@ module GetSchemaAsJsonRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13031,11 +13158,11 @@ module GetObjectInformationResponse =
           (Xml.child xml_arg0 "SchemaFacets") in
       make ?objectIdentifier ?schemaFacets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectIdentifier =
-        field_map json "ObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "ObjectIdentifier" ObjectIdentifier.of_json in
       let schemaFacets =
-        field_map json "SchemaFacets" SchemaFacetList.of_json in
+        field_map json__ "SchemaFacets" SchemaFacetList.of_json in
       make ?objectIdentifier ?schemaFacets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves metadata about an object."]
@@ -13075,12 +13202,12 @@ module GetObjectInformationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ?consistencyLevel ~objectReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consistencyLevel =
-        field_map json "ConsistencyLevel" ConsistencyLevel.of_json in
+        field_map json__ "ConsistencyLevel" ConsistencyLevel.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?consistencyLevel ~objectReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves metadata about an object."]
@@ -13204,9 +13331,9 @@ module GetObjectAttributesResponse =
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map json "Attributes" AttributeKeyAndValueList.of_json in
+        field_map json__ "Attributes" AttributeKeyAndValueList.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13274,15 +13401,16 @@ module GetObjectAttributesRequest =
       make ~attributeNames ~schemaFacet ?consistencyLevel ~objectReference
         ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeNames =
-        field_map_exn json "AttributeNames" AttributeNameList.of_json in
-      let schemaFacet = field_map_exn json "SchemaFacet" SchemaFacet.of_json in
+        field_map_exn json__ "AttributeNames" AttributeNameList.of_json in
+      let schemaFacet =
+        field_map_exn json__ "SchemaFacet" SchemaFacet.of_json in
       let consistencyLevel =
-        field_map json "ConsistencyLevel" ConsistencyLevel.of_json in
+        field_map json__ "ConsistencyLevel" ConsistencyLevel.of_json in
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~attributeNames ~schemaFacet ?consistencyLevel ~objectReference
         ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -13409,9 +13537,9 @@ module GetLinkAttributesResponse =
           (Xml.child xml_arg0 "Attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map json "Attributes" AttributeKeyAndValueList.of_json in
+        field_map json__ "Attributes" AttributeKeyAndValueList.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13469,14 +13597,14 @@ module GetLinkAttributesRequest =
       make ?consistencyLevel ~attributeNames ~typedLinkSpecifier
         ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consistencyLevel =
-        field_map json "ConsistencyLevel" ConsistencyLevel.of_json in
+        field_map json__ "ConsistencyLevel" ConsistencyLevel.of_json in
       let attributeNames =
-        field_map_exn json "AttributeNames" AttributeNameList.of_json in
+        field_map_exn json__ "AttributeNames" AttributeNameList.of_json in
       let typedLinkSpecifier =
-        field_map_exn json "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?consistencyLevel ~attributeNames ~typedLinkSpecifier
         ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -13587,8 +13715,8 @@ module GetFacetResponse =
       let facet = (Option.map ~f:Facet.of_xml) (Xml.child xml_arg0 "Facet") in
       make ?facet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let facet = field_map json "Facet" Facet.of_json in make ?facet ()
+    let of_json json__ =
+      let facet = field_map json__ "Facet" Facet.of_json in make ?facet ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets details of the Facet, such as facet name, attributes, Rules, or ObjectType. You can call this on all kinds of schema facets -- published, development, or applied."]
@@ -13615,9 +13743,9 @@ module GetFacetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~name ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" FacetName.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" FacetName.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ~name ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13626,7 +13754,8 @@ module GetDirectoryResponse =
   struct
     type nonrec t =
       {
-      directory: Directory.t [@ocaml.doc "Metadata about the directory."]}
+      directory: Directory.t option
+        [@ocaml.doc "Metadata about the directory."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceException of InternalServiceException.t 
@@ -13635,8 +13764,7 @@ module GetDirectoryResponse =
       | `RetryableConflictException of RetryableConflictException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDirectoryResponse"
-    let make ~directory = fun () -> { directory }
+    let make ?directory = fun () -> { directory }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -13704,17 +13832,16 @@ module GetDirectoryResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Directory", (Some (Directory.to_value x.directory)))]
+        [("Directory", (Option.map x.directory ~f:Directory.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let directory =
-        Directory.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Directory") in
-      make ~directory ()
+        (Option.map ~f:Directory.of_xml) (Xml.child xml_arg0 "Directory") in
+      make ?directory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directory = field_map_exn json "Directory" Directory.of_json in
-      make ~directory ()
+    let of_json json__ =
+      let directory = field_map json__ "Directory" Directory.of_json in
+      make ?directory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves metadata about a directory."]
 module GetDirectoryRequest =
@@ -13743,9 +13870,9 @@ module GetDirectoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directoryArn =
-        field_map_exn json "DirectoryArn" DirectoryArn.of_json in
+        field_map_exn json__ "DirectoryArn" DirectoryArn.of_json in
       make ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves metadata about a directory."]
@@ -13849,8 +13976,8 @@ module GetAppliedSchemaVersionResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AppliedSchemaArn") in
       make ?appliedSchemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appliedSchemaArn = field_map json "AppliedSchemaArn" Arn.of_json in
+    let of_json json__ =
+      let appliedSchemaArn = field_map json__ "AppliedSchemaArn" Arn.of_json in
       make ?appliedSchemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13870,8 +13997,8 @@ module GetAppliedSchemaVersionRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SchemaArn") in
       make ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13880,7 +14007,8 @@ module EnableDirectoryResponse =
   struct
     type nonrec t =
       {
-      directoryArn: Arn.t [@ocaml.doc "The ARN of the enabled directory."]}
+      directoryArn: Arn.t option
+        [@ocaml.doc "The ARN of the enabled directory."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `DirectoryDeletedException of DirectoryDeletedException.t 
@@ -13891,8 +14019,7 @@ module EnableDirectoryResponse =
       | `RetryableConflictException of RetryableConflictException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "EnableDirectoryResponse"
-    let make ~directoryArn = fun () -> { directoryArn }
+    let make ?directoryArn = fun () -> { directoryArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -13976,16 +14103,16 @@ module EnableDirectoryResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DirectoryArn", (Some (Arn.to_value x.directoryArn)))]
+        [("DirectoryArn", (Option.map x.directoryArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let directoryArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DirectoryArn") in
-      make ~directoryArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DirectoryArn") in
+      make ?directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
-      make ~directoryArn ()
+    let of_json json__ =
+      let directoryArn = field_map json__ "DirectoryArn" Arn.of_json in
+      make ?directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Enables the specified directory. Only disabled directories can be enabled. Once enabled, the directory can then be read and written to."]
@@ -14014,8 +14141,8 @@ module EnableDirectoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+    let of_json json__ =
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14024,7 +14151,7 @@ module DisableDirectoryResponse =
   struct
     type nonrec t =
       {
-      directoryArn: Arn.t
+      directoryArn: Arn.t option
         [@ocaml.doc "The ARN of the directory that has been disabled."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -14036,8 +14163,7 @@ module DisableDirectoryResponse =
       | `RetryableConflictException of RetryableConflictException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DisableDirectoryResponse"
-    let make ~directoryArn = fun () -> { directoryArn }
+    let make ?directoryArn = fun () -> { directoryArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -14121,16 +14247,16 @@ module DisableDirectoryResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DirectoryArn", (Some (Arn.to_value x.directoryArn)))]
+        [("DirectoryArn", (Option.map x.directoryArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let directoryArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DirectoryArn") in
-      make ~directoryArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DirectoryArn") in
+      make ?directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
-      make ~directoryArn ()
+    let of_json json__ =
+      let directoryArn = field_map json__ "DirectoryArn" Arn.of_json in
+      make ?directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Disables the specified directory. Disabled directories cannot be read or written to. Only enabled directories can be disabled. Disabled directories may be reenabled."]
@@ -14159,8 +14285,8 @@ module DisableDirectoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+    let of_json json__ =
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14193,10 +14319,10 @@ module DetachTypedLinkRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~typedLinkSpecifier ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let typedLinkSpecifier =
-        field_map_exn json "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~typedLinkSpecifier ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14352,12 +14478,12 @@ module DetachPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~objectReference ~policyReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       let policyReference =
-        field_map_exn json "PolicyReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "PolicyReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~objectReference ~policyReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detaches a policy from an object."]
@@ -14483,9 +14609,9 @@ module DetachObjectResponse =
           (Xml.child xml_arg0 "DetachedObjectIdentifier") in
       make ?detachedObjectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let detachedObjectIdentifier =
-        field_map json "DetachedObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "DetachedObjectIdentifier" ObjectIdentifier.of_json in
       make ?detachedObjectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14526,11 +14652,11 @@ module DetachObjectRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~linkName ~parentReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let linkName = field_map_exn json "LinkName" LinkName.of_json in
+    let of_json json__ =
+      let linkName = field_map_exn json__ "LinkName" LinkName.of_json in
       let parentReference =
-        field_map_exn json "ParentReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ParentReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~linkName ~parentReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14669,9 +14795,9 @@ module DetachFromIndexResponse =
           (Xml.child xml_arg0 "DetachedObjectIdentifier") in
       make ?detachedObjectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let detachedObjectIdentifier =
-        field_map json "DetachedObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "DetachedObjectIdentifier" ObjectIdentifier.of_json in
       make ?detachedObjectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detaches the specified object from the specified index."]
@@ -14712,12 +14838,12 @@ module DetachFromIndexRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~targetReference ~indexReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetReference =
-        field_map_exn json "TargetReference" ObjectReference.of_json in
+        field_map_exn json__ "TargetReference" ObjectReference.of_json in
       let indexReference =
-        field_map_exn json "IndexReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "IndexReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~targetReference ~indexReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detaches the specified object from the specified index."]
@@ -14850,9 +14976,9 @@ module DeleteTypedLinkFacetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~name ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" TypedLinkName.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" TypedLinkName.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ~name ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14967,8 +15093,8 @@ module DeleteSchemaResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SchemaArn") in
       make ?schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaArn = field_map json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let schemaArn = field_map json__ "SchemaArn" Arn.of_json in
       make ?schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14999,8 +15125,8 @@ module DeleteSchemaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15148,10 +15274,10 @@ module DeleteObjectRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~objectReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~objectReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15292,9 +15418,9 @@ module DeleteFacetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~name ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" FacetName.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" FacetName.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ~name ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15303,7 +15429,8 @@ module DeleteDirectoryResponse =
   struct
     type nonrec t =
       {
-      directoryArn: Arn.t [@ocaml.doc "The ARN of the deleted directory."]}
+      directoryArn: Arn.t option
+        [@ocaml.doc "The ARN of the deleted directory."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `DirectoryDeletedException of DirectoryDeletedException.t 
@@ -15315,8 +15442,7 @@ module DeleteDirectoryResponse =
       | `RetryableConflictException of RetryableConflictException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteDirectoryResponse"
-    let make ~directoryArn = fun () -> { directoryArn }
+    let make ?directoryArn = fun () -> { directoryArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -15410,16 +15536,16 @@ module DeleteDirectoryResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DirectoryArn", (Some (Arn.to_value x.directoryArn)))]
+        [("DirectoryArn", (Option.map x.directoryArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let directoryArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DirectoryArn") in
-      make ~directoryArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "DirectoryArn") in
+      make ?directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
-      make ~directoryArn ()
+    let of_json json__ =
+      let directoryArn = field_map json__ "DirectoryArn" Arn.of_json in
+      make ?directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a directory. Only disabled directories can be deleted. A deleted directory cannot be undone. Exercise extreme caution when deleting directories."]
@@ -15448,8 +15574,8 @@ module DeleteDirectoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+    let of_json json__ =
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15604,9 +15730,9 @@ module CreateTypedLinkFacetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~facet ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let facet = field_map_exn json "Facet" TypedLinkFacet.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let facet = field_map_exn json__ "Facet" TypedLinkFacet.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ~facet ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15712,8 +15838,8 @@ module CreateSchemaResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "SchemaArn") in
       make ?schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaArn = field_map json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let schemaArn = field_map json__ "SchemaArn" Arn.of_json in
       make ?schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15735,8 +15861,8 @@ module CreateSchemaRequest =
         SchemaName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" SchemaName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" SchemaName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15883,9 +16009,9 @@ module CreateObjectResponse =
           (Xml.child xml_arg0 "ObjectIdentifier") in
       make ?objectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectIdentifier =
-        field_map json "ObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "ObjectIdentifier" ObjectIdentifier.of_json in
       make ?objectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15952,15 +16078,16 @@ module CreateObjectRequest =
       make ?linkName ?parentReference ?objectAttributeList ~schemaFacets
         ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let linkName = field_map json "LinkName" LinkName.of_json in
+    let of_json json__ =
+      let linkName = field_map json__ "LinkName" LinkName.of_json in
       let parentReference =
-        field_map json "ParentReference" ObjectReference.of_json in
+        field_map json__ "ParentReference" ObjectReference.of_json in
       let objectAttributeList =
-        field_map json "ObjectAttributeList" AttributeKeyAndValueList.of_json in
+        field_map json__ "ObjectAttributeList"
+          AttributeKeyAndValueList.of_json in
       let schemaFacets =
-        field_map_exn json "SchemaFacets" SchemaFacetList.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "SchemaFacets" SchemaFacetList.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?linkName ?parentReference ?objectAttributeList ~schemaFacets
         ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -16109,9 +16236,9 @@ module CreateIndexResponse =
           (Xml.child xml_arg0 "ObjectIdentifier") in
       make ?objectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectIdentifier =
-        field_map json "ObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "ObjectIdentifier" ObjectIdentifier.of_json in
       make ?objectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16126,7 +16253,7 @@ module CreateIndexRequest =
       orderedIndexedAttributeList: AttributeKeyList.t
         [@ocaml.doc
           "Specifies the attributes that should be indexed on. Currently only a single attribute is supported."];
-      isUnique: Bool.t
+      isUnique: Bool_.t
         [@ocaml.doc
           "Indicates whether the attribute that is being indexed has unique values or not."];
       parentReference: ObjectReference.t option
@@ -16154,7 +16281,7 @@ module CreateIndexRequest =
         [("x-amz-data-partition", (Some (Arn.to_value x.directoryArn)));
         ("OrderedIndexedAttributeList",
           (Some (AttributeKeyList.to_value x.orderedIndexedAttributeList)));
-        ("IsUnique", (Some (Bool.to_value x.isUnique)));
+        ("IsUnique", (Some (Bool_.to_value x.isUnique)));
         ("ParentReference",
           (Option.map x.parentReference ~f:ObjectReference.to_value));
         ("LinkName", (Option.map x.linkName ~f:LinkName.to_value))]
@@ -16166,7 +16293,7 @@ module CreateIndexRequest =
         (Option.map ~f:ObjectReference.of_xml)
           (Xml.child xml_arg0 "ParentReference") in
       let isUnique =
-        Bool.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IsUnique") in
+        Bool_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IsUnique") in
       let orderedIndexedAttributeList =
         AttributeKeyList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
@@ -16177,15 +16304,15 @@ module CreateIndexRequest =
       make ?linkName ?parentReference ~isUnique ~orderedIndexedAttributeList
         ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let linkName = field_map json "LinkName" LinkName.of_json in
+    let of_json json__ =
+      let linkName = field_map json__ "LinkName" LinkName.of_json in
       let parentReference =
-        field_map json "ParentReference" ObjectReference.of_json in
-      let isUnique = field_map_exn json "IsUnique" Bool.of_json in
+        field_map json__ "ParentReference" ObjectReference.of_json in
+      let isUnique = field_map_exn json__ "IsUnique" Bool_.of_json in
       let orderedIndexedAttributeList =
-        field_map_exn json "OrderedIndexedAttributeList"
+        field_map_exn json__ "OrderedIndexedAttributeList"
           AttributeKeyList.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?linkName ?parentReference ~isUnique ~orderedIndexedAttributeList
         ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -16365,12 +16492,13 @@ module CreateFacetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ?facetStyle ?objectType ?attributes ~name ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let facetStyle = field_map json "FacetStyle" FacetStyle.of_json in
-      let objectType = field_map json "ObjectType" ObjectType.of_json in
-      let attributes = field_map json "Attributes" FacetAttributeList.of_json in
-      let name = field_map_exn json "Name" FacetName.of_json in
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
+    let of_json json__ =
+      let facetStyle = field_map json__ "FacetStyle" FacetStyle.of_json in
+      let objectType = field_map json__ "ObjectType" ObjectType.of_json in
+      let attributes =
+        field_map json__ "Attributes" FacetAttributeList.of_json in
+      let name = field_map_exn json__ "Name" FacetName.of_json in
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
       make ?facetStyle ?objectType ?attributes ~name ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16379,13 +16507,13 @@ module CreateDirectoryResponse =
   struct
     type nonrec t =
       {
-      directoryArn: DirectoryArn.t
+      directoryArn: DirectoryArn.t option
         [@ocaml.doc
           "The ARN that is associated with the Directory. For more information, see arns."];
-      name: DirectoryName.t [@ocaml.doc "The name of the Directory."];
-      objectIdentifier: ObjectIdentifier.t
+      name: DirectoryName.t option [@ocaml.doc "The name of the Directory."];
+      objectIdentifier: ObjectIdentifier.t option
         [@ocaml.doc "The root object node of the created directory."];
-      appliedSchemaArn: Arn.t
+      appliedSchemaArn: Arn.t option
         [@ocaml.doc
           "The ARN of the published schema in the Directory. Once a published schema is copied into the directory, it has its own ARN, which is referred to applied schema ARN. For more information, see arns."]}
     type nonrec error =
@@ -16398,11 +16526,10 @@ module CreateDirectoryResponse =
       | `RetryableConflictException of RetryableConflictException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateDirectoryResponse"
-    let make ~directoryArn =
-      fun ~name ->
-        fun ~objectIdentifier ->
-          fun ~appliedSchemaArn ->
+    let make ?directoryArn =
+      fun ?name ->
+        fun ?objectIdentifier ->
+          fun ?appliedSchemaArn ->
             fun () ->
               { directoryArn; name; objectIdentifier; appliedSchemaArn }
     let error_of_json name json =
@@ -16490,36 +16617,33 @@ module CreateDirectoryResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DirectoryArn", (Some (DirectoryArn.to_value x.directoryArn)));
-        ("Name", (Some (DirectoryName.to_value x.name)));
+        [("DirectoryArn",
+           (Option.map x.directoryArn ~f:DirectoryArn.to_value));
+        ("Name", (Option.map x.name ~f:DirectoryName.to_value));
         ("ObjectIdentifier",
-          (Some (ObjectIdentifier.to_value x.objectIdentifier)));
-        ("AppliedSchemaArn", (Some (Arn.to_value x.appliedSchemaArn)))]
+          (Option.map x.objectIdentifier ~f:ObjectIdentifier.to_value));
+        ("AppliedSchemaArn", (Option.map x.appliedSchemaArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let appliedSchemaArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AppliedSchemaArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AppliedSchemaArn") in
       let objectIdentifier =
-        ObjectIdentifier.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ObjectIdentifier") in
+        (Option.map ~f:ObjectIdentifier.of_xml)
+          (Xml.child xml_arg0 "ObjectIdentifier") in
       let name =
-        DirectoryName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:DirectoryName.of_xml) (Xml.child xml_arg0 "Name") in
       let directoryArn =
-        DirectoryArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DirectoryArn") in
-      make ~appliedSchemaArn ~objectIdentifier ~name ~directoryArn ()
+        (Option.map ~f:DirectoryArn.of_xml)
+          (Xml.child xml_arg0 "DirectoryArn") in
+      make ?appliedSchemaArn ?objectIdentifier ?name ?directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appliedSchemaArn =
-        field_map_exn json "AppliedSchemaArn" Arn.of_json in
+    let of_json json__ =
+      let appliedSchemaArn = field_map json__ "AppliedSchemaArn" Arn.of_json in
       let objectIdentifier =
-        field_map_exn json "ObjectIdentifier" ObjectIdentifier.of_json in
-      let name = field_map_exn json "Name" DirectoryName.of_json in
-      let directoryArn =
-        field_map_exn json "DirectoryArn" DirectoryArn.of_json in
-      make ~appliedSchemaArn ~objectIdentifier ~name ~directoryArn ()
+        field_map json__ "ObjectIdentifier" ObjectIdentifier.of_json in
+      let name = field_map json__ "Name" DirectoryName.of_json in
+      let directoryArn = field_map json__ "DirectoryArn" DirectoryArn.of_json in
+      make ?appliedSchemaArn ?objectIdentifier ?name ?directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a Directory by copying the published schema into the directory. A directory cannot be created without a schema. You can also quickly create a directory using a managed schema, called the QuickStartSchema. For more information, see Managed Schema in the Amazon Cloud Directory Developer Guide."]
@@ -16549,9 +16673,9 @@ module CreateDirectoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~schemaArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaArn = field_map_exn json "SchemaArn" Arn.of_json in
-      let name = field_map_exn json "Name" DirectoryName.of_json in
+    let of_json json__ =
+      let schemaArn = field_map_exn json__ "SchemaArn" Arn.of_json in
+      let name = field_map_exn json__ "Name" DirectoryName.of_json in
       make ~schemaArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16668,9 +16792,9 @@ module BatchWriteResponse =
           (Xml.child xml_arg0 "Responses") in
       make ?responses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let responses =
-        field_map json "Responses" BatchWriteOperationResponseList.of_json in
+        field_map json__ "Responses" BatchWriteOperationResponseList.of_json in
       make ?responses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16702,10 +16826,10 @@ module BatchWriteRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~operations ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let operations =
-        field_map_exn json "Operations" BatchWriteOperationList.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "Operations" BatchWriteOperationList.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~operations ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16812,9 +16936,9 @@ module BatchReadResponse =
           (Xml.child xml_arg0 "Responses") in
       make ?responses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let responses =
-        field_map json "Responses" BatchReadOperationResponseList.of_json in
+        field_map json__ "Responses" BatchReadOperationResponseList.of_json in
       make ?responses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Performs all the read operations in a batch."]
@@ -16854,12 +16978,12 @@ module BatchReadRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ?consistencyLevel ~operations ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consistencyLevel =
-        field_map json "ConsistencyLevel" ConsistencyLevel.of_json in
+        field_map json__ "ConsistencyLevel" ConsistencyLevel.of_json in
       let operations =
-        field_map_exn json "Operations" BatchReadOperationList.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "Operations" BatchReadOperationList.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ?consistencyLevel ~operations ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Performs all the read operations in a batch."]
@@ -16993,9 +17117,9 @@ module AttachTypedLinkResponse =
           (Xml.child xml_arg0 "TypedLinkSpecifier") in
       make ?typedLinkSpecifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let typedLinkSpecifier =
-        field_map json "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
+        field_map json__ "TypedLinkSpecifier" TypedLinkSpecifier.of_json in
       make ?typedLinkSpecifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17064,17 +17188,17 @@ module AttachTypedLinkRequest =
       make ~attributes ~typedLinkFacet ~targetObjectReference
         ~sourceObjectReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map_exn json "Attributes" AttributeNameAndValueList.of_json in
+        field_map_exn json__ "Attributes" AttributeNameAndValueList.of_json in
       let typedLinkFacet =
-        field_map_exn json "TypedLinkFacet"
+        field_map_exn json__ "TypedLinkFacet"
           TypedLinkSchemaAndFacetName.of_json in
       let targetObjectReference =
-        field_map_exn json "TargetObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "TargetObjectReference" ObjectReference.of_json in
       let sourceObjectReference =
-        field_map_exn json "SourceObjectReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "SourceObjectReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~attributes ~typedLinkFacet ~targetObjectReference
         ~sourceObjectReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
@@ -17236,9 +17360,9 @@ module AttachToIndexResponse =
           (Xml.child xml_arg0 "AttachedObjectIdentifier") in
       make ?attachedObjectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachedObjectIdentifier =
-        field_map json "AttachedObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "AttachedObjectIdentifier" ObjectIdentifier.of_json in
       make ?attachedObjectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attaches the specified object to the specified index."]
@@ -17280,12 +17404,12 @@ module AttachToIndexRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~targetReference ~indexReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetReference =
-        field_map_exn json "TargetReference" ObjectReference.of_json in
+        field_map_exn json__ "TargetReference" ObjectReference.of_json in
       let indexReference =
-        field_map_exn json "IndexReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "IndexReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~targetReference ~indexReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attaches the specified object to the specified index."]
@@ -17442,12 +17566,12 @@ module AttachPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~objectReference ~policyReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       let policyReference =
-        field_map_exn json "PolicyReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "PolicyReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~objectReference ~policyReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17596,9 +17720,9 @@ module AttachObjectResponse =
           (Xml.child xml_arg0 "AttachedObjectIdentifier") in
       make ?attachedObjectIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachedObjectIdentifier =
-        field_map json "AttachedObjectIdentifier" ObjectIdentifier.of_json in
+        field_map json__ "AttachedObjectIdentifier" ObjectIdentifier.of_json in
       make ?attachedObjectIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17648,13 +17772,13 @@ module AttachObjectRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-data-partition") in
       make ~linkName ~childReference ~parentReference ~directoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let linkName = field_map_exn json "LinkName" LinkName.of_json in
+    let of_json json__ =
+      let linkName = field_map_exn json__ "LinkName" LinkName.of_json in
       let childReference =
-        field_map_exn json "ChildReference" ObjectReference.of_json in
+        field_map_exn json__ "ChildReference" ObjectReference.of_json in
       let parentReference =
-        field_map_exn json "ParentReference" ObjectReference.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map_exn json__ "ParentReference" ObjectReference.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~linkName ~childReference ~parentReference ~directoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17787,9 +17911,9 @@ module ApplySchemaResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "AppliedSchemaArn") in
       make ?directoryArn ?appliedSchemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryArn = field_map json "DirectoryArn" Arn.of_json in
-      let appliedSchemaArn = field_map json "AppliedSchemaArn" Arn.of_json in
+    let of_json json__ =
+      let directoryArn = field_map json__ "DirectoryArn" Arn.of_json in
+      let appliedSchemaArn = field_map json__ "AppliedSchemaArn" Arn.of_json in
       make ?directoryArn ?appliedSchemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17821,10 +17945,10 @@ module ApplySchemaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PublishedSchemaArn") in
       make ~directoryArn ~publishedSchemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+    let of_json json__ =
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       let publishedSchemaArn =
-        field_map_exn json "PublishedSchemaArn" Arn.of_json in
+        field_map_exn json__ "PublishedSchemaArn" Arn.of_json in
       make ~directoryArn ~publishedSchemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17998,13 +18122,15 @@ module AddFacetToObjectRequest =
       make ~objectReference ?objectAttributeList ~schemaFacet ~directoryArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectReference =
-        field_map_exn json "ObjectReference" ObjectReference.of_json in
+        field_map_exn json__ "ObjectReference" ObjectReference.of_json in
       let objectAttributeList =
-        field_map json "ObjectAttributeList" AttributeKeyAndValueList.of_json in
-      let schemaFacet = field_map_exn json "SchemaFacet" SchemaFacet.of_json in
-      let directoryArn = field_map_exn json "DirectoryArn" Arn.of_json in
+        field_map json__ "ObjectAttributeList"
+          AttributeKeyAndValueList.of_json in
+      let schemaFacet =
+        field_map_exn json__ "SchemaFacet" SchemaFacet.of_json in
+      let directoryArn = field_map_exn json__ "DirectoryArn" Arn.of_json in
       make ~objectReference ?objectAttributeList ~schemaFacet ~directoryArn
         ()
     let to_json v = composed_to_json to_value v

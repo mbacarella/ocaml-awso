@@ -111,22 +111,104 @@ module NonEmptyString =
     let of_json j = string_of_json ~kind:"NonEmptyString" j
     let to_json = simple_to_json to_value
   end
+module ToxicityCategory =
+  struct
+    type nonrec t =
+      | ALL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | ALL -> "ALL" | Non_static_id s -> s
+    let of_string = function | "ALL" -> ALL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ToxicityCategory" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ToxicityCategory" j)
+    let to_json = simple_to_json to_value
+  end
+module CallAnalyticsFeature =
+  struct
+    type nonrec t =
+      | GENERATIVE_SUMMARIZATION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | GENERATIVE_SUMMARIZATION -> "GENERATIVE_SUMMARIZATION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GENERATIVE_SUMMARIZATION" -> GENERATIVE_SUMMARIZATION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CallAnalyticsFeature" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CallAnalyticsFeature" j)
+    let to_json = simple_to_json to_value
+  end
+module CallAnalyticsSkippedReasonCode =
+  struct
+    type nonrec t =
+      | INSUFFICIENT_CONVERSATION_CONTENT 
+      | FAILED_SAFETY_GUIDELINES 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INSUFFICIENT_CONVERSATION_CONTENT ->
+          "INSUFFICIENT_CONVERSATION_CONTENT"
+      | FAILED_SAFETY_GUIDELINES -> "FAILED_SAFETY_GUIDELINES"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INSUFFICIENT_CONVERSATION_CONTENT" ->
+          INSUFFICIENT_CONVERSATION_CONTENT
+      | "FAILED_SAFETY_GUIDELINES" -> FAILED_SAFETY_GUIDELINES
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CallAnalyticsSkippedReasonCode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CallAnalyticsSkippedReasonCode" j)
+    let to_json = simple_to_json to_value
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
 module AbsoluteTimeRange =
   struct
     type nonrec t =
       {
       startTime: TimestampMilliseconds.t option
         [@ocaml.doc
-          "A value that indicates the beginning of the time range in seconds. To set absolute time range, you must specify a start time and an end time. For example, if you specify the following values: StartTime - 10000 Endtime - 50000 The time range is set between 10,000 milliseconds and 50,000 milliseconds into the call."];
+          "The time, in milliseconds, when Amazon Transcribe starts searching for the specified criteria in your audio. If you include StartTime in your request, you must also include EndTime."];
       endTime: TimestampMilliseconds.t option
         [@ocaml.doc
-          "A value that indicates the end of the time range in milliseconds. To set absolute time range, you must specify a start time and an end time. For example, if you specify the following values: StartTime - 10000 Endtime - 50000 The time range is set between 10,000 milliseconds and 50,000 milliseconds into the call."];
+          "The time, in milliseconds, when Amazon Transcribe stops searching for the specified criteria in your audio. If you include EndTime in your request, you must also include StartTime."];
       first: TimestampMilliseconds.t option
         [@ocaml.doc
-          "A time range from the beginning of the call to the value that you've specified. For example, if you specify 100000, the time range is set to the first 100,000 milliseconds of the call."];
+          "The time, in milliseconds, from the start of your media file until the specified value. Amazon Transcribe searches for your specified criteria in this time segment."];
       last: TimestampMilliseconds.t option
         [@ocaml.doc
-          "A time range from the value that you've specified to the end of the call. For example, if you specify 100000, the time range is set to the last 100,000 milliseconds of the call."]}
+          "The time, in milliseconds, from the specified value until the end of your media file. Amazon Transcribe searches for your specified criteria in this time segment."]}
     let make ?startTime =
       fun ?endTime ->
         fun ?first ->
@@ -154,16 +236,16 @@ module AbsoluteTimeRange =
           (Xml.child xml_arg0 "StartTime") in
       make ?last ?first ?endTime ?startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let last = field_map json "Last" TimestampMilliseconds.of_json in
-      let first = field_map json "First" TimestampMilliseconds.of_json in
-      let endTime = field_map json "EndTime" TimestampMilliseconds.of_json in
+    let of_json json__ =
+      let last = field_map json__ "Last" TimestampMilliseconds.of_json in
+      let first = field_map json__ "First" TimestampMilliseconds.of_json in
+      let endTime = field_map json__ "EndTime" TimestampMilliseconds.of_json in
       let startTime =
-        field_map json "StartTime" TimestampMilliseconds.of_json in
+        field_map json__ "StartTime" TimestampMilliseconds.of_json in
       make ?last ?first ?endTime ?startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A time range, set in seconds, between two points in the call."]
+       "A time range, in milliseconds, between two points in your media file. You can use StartTime and EndTime to search a custom segment. For example, setting StartTime to 10000 and EndTime to 50000 only searches for your specified criteria in the audio contained between the 10,000 millisecond mark and the 50,000 millisecond mark of your media file. You must use StartTime and EndTime as a set; that is, if you include one, you must include both. You can use also First to search from the start of the audio until the time that you specify, or Last to search from the time that you specify until the end of the audio. For example, setting First to 50000 only searches for your specified criteria in the audio contained between the start of the media file to the 50,000 millisecond mark. You can use First and Last independently of each other. If you prefer to use percentage instead of milliseconds, see ."]
 module Boolean =
   struct
     type nonrec t = bool
@@ -208,16 +290,16 @@ module RelativeTimeRange =
       {
       startPercentage: Percentage.t option
         [@ocaml.doc
-          "A value that indicates the percentage of the beginning of the time range. To set a relative time range, you must specify a start percentage and an end percentage. For example, if you specify the following values: StartPercentage - 10 EndPercentage - 50 This looks at the time range starting from 10% of the way into the call to 50% of the way through the call. For a call that lasts 100,000 milliseconds, this example range would apply from the 10,000 millisecond mark to the 50,000 millisecond mark."];
+          "The time, in percentage, when Amazon Transcribe starts searching for the specified criteria in your media file. If you include StartPercentage in your request, you must also include EndPercentage."];
       endPercentage: Percentage.t option
         [@ocaml.doc
-          "A value that indicates the percentage of the end of the time range. To set a relative time range, you must specify a start percentage and an end percentage. For example, if you specify the following values: StartPercentage - 10 EndPercentage - 50 This looks at the time range starting from 10% of the way into the call to 50% of the way through the call. For a call that lasts 100,000 milliseconds, this example range would apply from the 10,000 millisecond mark to the 50,000 millisecond mark."];
+          "The time, in percentage, when Amazon Transcribe stops searching for the specified criteria in your media file. If you include EndPercentage in your request, you must also include StartPercentage."];
       first: Percentage.t option
         [@ocaml.doc
-          "A range that takes the portion of the call up to the time in milliseconds set by the value that you've specified. For example, if you specify 120000, the time range is set for the first 120,000 milliseconds of the call."];
+          "The time, in percentage, from the start of your media file until the specified value. Amazon Transcribe searches for your specified criteria in this time segment."];
       last: Percentage.t option
         [@ocaml.doc
-          "A range that takes the portion of the call from the time in milliseconds set by the value that you've specified to the end of the call. For example, if you specify 120000, the time range is set for the last 120,000 milliseconds of the call."]}
+          "The time, in percentage, from the specified value until the end of your media file. Amazon Transcribe searches for your specified criteria in this time segment."]}
     let make ?startPercentage =
       fun ?endPercentage ->
         fun ?first ->
@@ -245,21 +327,27 @@ module RelativeTimeRange =
           (Xml.child xml_arg0 "StartPercentage") in
       make ?last ?first ?endPercentage ?startPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let last = field_map json "Last" Percentage.of_json in
-      let first = field_map json "First" Percentage.of_json in
-      let endPercentage = field_map json "EndPercentage" Percentage.of_json in
+    let of_json json__ =
+      let last = field_map json__ "Last" Percentage.of_json in
+      let first = field_map json__ "First" Percentage.of_json in
+      let endPercentage = field_map json__ "EndPercentage" Percentage.of_json in
       let startPercentage =
-        field_map json "StartPercentage" Percentage.of_json in
+        field_map json__ "StartPercentage" Percentage.of_json in
       make ?last ?first ?endPercentage ?startPercentage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that allows percentages to specify the proportion of the call where you would like to apply a filter. For example, you can specify the first half of the call. You can also specify the period of time between halfway through to three-quarters of the way through the call. Because the length of conversation can vary between calls, you can apply relative time ranges across all calls."]
+       "A time range, in percentage, between two points in your media file. You can use StartPercentage and EndPercentage to search a custom segment. For example, setting StartPercentage to 10 and EndPercentage to 50 only searches for your specified criteria in the audio contained between the 10 percent mark and the 50 percent mark of your media file. You can use also First to search from the start of the media file until the time that you specify. Or use Last to search from the time that you specify until the end of the media file. For example, setting First to 10 only searches for your specified criteria in the audio contained in the first 10 percent of the media file. If you prefer to use milliseconds instead of percentage, see ."]
 module SentimentValueList =
   struct
     type nonrec t = SentimentValue.t list
     let make i =
-      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SentimentValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -286,6 +374,9 @@ module StringTargetList =
     type nonrec t = NonEmptyString.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -438,24 +529,447 @@ module VocabularyName =
     let of_json j = string_of_json ~kind:"VocabularyName" j
     let to_json = simple_to_json to_value
   end
+module DurationInSeconds =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module LanguageCode =
+  struct
+    type nonrec t =
+      | Af_ZA 
+      | Ar_AE 
+      | Ar_SA 
+      | Da_DK 
+      | De_CH 
+      | De_DE 
+      | En_AB 
+      | En_AU 
+      | En_GB 
+      | En_IE 
+      | En_IN 
+      | En_US 
+      | En_WL 
+      | Es_ES 
+      | Es_US 
+      | Fa_IR 
+      | Fr_CA 
+      | Fr_FR 
+      | He_IL 
+      | Hi_IN 
+      | Id_ID 
+      | It_IT 
+      | Ja_JP 
+      | Ko_KR 
+      | Ms_MY 
+      | Nl_NL 
+      | Pt_BR 
+      | Pt_PT 
+      | Ru_RU 
+      | Ta_IN 
+      | Te_IN 
+      | Tr_TR 
+      | Zh_CN 
+      | Zh_TW 
+      | Th_TH 
+      | En_ZA 
+      | En_NZ 
+      | Vi_VN 
+      | Sv_SE 
+      | Ab_GE 
+      | Ast_ES 
+      | Az_AZ 
+      | Ba_RU 
+      | Be_BY 
+      | Bg_BG 
+      | Bn_IN 
+      | Bs_BA 
+      | Ca_ES 
+      | Ckb_IQ 
+      | Ckb_IR 
+      | Cs_CZ 
+      | Cy_WL 
+      | El_GR 
+      | Et_EE 
+      | Et_ET 
+      | Eu_ES 
+      | Fi_FI 
+      | Gl_ES 
+      | Gu_IN 
+      | Ha_NG 
+      | Hr_HR 
+      | Hu_HU 
+      | Hy_AM 
+      | Is_IS 
+      | Ka_GE 
+      | Kab_DZ 
+      | Kk_KZ 
+      | Kn_IN 
+      | Ky_KG 
+      | Lg_IN 
+      | Lt_LT 
+      | Lv_LV 
+      | Mhr_RU 
+      | Mi_NZ 
+      | Mk_MK 
+      | Ml_IN 
+      | Mn_MN 
+      | Mr_IN 
+      | Mt_MT 
+      | No_NO 
+      | Or_IN 
+      | Pa_IN 
+      | Pl_PL 
+      | Ps_AF 
+      | Ro_RO 
+      | Rw_RW 
+      | Si_LK 
+      | Sk_SK 
+      | Sl_SI 
+      | So_SO 
+      | Sr_RS 
+      | Su_ID 
+      | Sw_BI 
+      | Sw_KE 
+      | Sw_RW 
+      | Sw_TZ 
+      | Sw_UG 
+      | Tl_PH 
+      | Tt_RU 
+      | Ug_CN 
+      | Uk_UA 
+      | Uz_UZ 
+      | Wo_SN 
+      | Zh_HK 
+      | Zu_ZA 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Af_ZA -> "af-ZA"
+      | Ar_AE -> "ar-AE"
+      | Ar_SA -> "ar-SA"
+      | Da_DK -> "da-DK"
+      | De_CH -> "de-CH"
+      | De_DE -> "de-DE"
+      | En_AB -> "en-AB"
+      | En_AU -> "en-AU"
+      | En_GB -> "en-GB"
+      | En_IE -> "en-IE"
+      | En_IN -> "en-IN"
+      | En_US -> "en-US"
+      | En_WL -> "en-WL"
+      | Es_ES -> "es-ES"
+      | Es_US -> "es-US"
+      | Fa_IR -> "fa-IR"
+      | Fr_CA -> "fr-CA"
+      | Fr_FR -> "fr-FR"
+      | He_IL -> "he-IL"
+      | Hi_IN -> "hi-IN"
+      | Id_ID -> "id-ID"
+      | It_IT -> "it-IT"
+      | Ja_JP -> "ja-JP"
+      | Ko_KR -> "ko-KR"
+      | Ms_MY -> "ms-MY"
+      | Nl_NL -> "nl-NL"
+      | Pt_BR -> "pt-BR"
+      | Pt_PT -> "pt-PT"
+      | Ru_RU -> "ru-RU"
+      | Ta_IN -> "ta-IN"
+      | Te_IN -> "te-IN"
+      | Tr_TR -> "tr-TR"
+      | Zh_CN -> "zh-CN"
+      | Zh_TW -> "zh-TW"
+      | Th_TH -> "th-TH"
+      | En_ZA -> "en-ZA"
+      | En_NZ -> "en-NZ"
+      | Vi_VN -> "vi-VN"
+      | Sv_SE -> "sv-SE"
+      | Ab_GE -> "ab-GE"
+      | Ast_ES -> "ast-ES"
+      | Az_AZ -> "az-AZ"
+      | Ba_RU -> "ba-RU"
+      | Be_BY -> "be-BY"
+      | Bg_BG -> "bg-BG"
+      | Bn_IN -> "bn-IN"
+      | Bs_BA -> "bs-BA"
+      | Ca_ES -> "ca-ES"
+      | Ckb_IQ -> "ckb-IQ"
+      | Ckb_IR -> "ckb-IR"
+      | Cs_CZ -> "cs-CZ"
+      | Cy_WL -> "cy-WL"
+      | El_GR -> "el-GR"
+      | Et_EE -> "et-EE"
+      | Et_ET -> "et-ET"
+      | Eu_ES -> "eu-ES"
+      | Fi_FI -> "fi-FI"
+      | Gl_ES -> "gl-ES"
+      | Gu_IN -> "gu-IN"
+      | Ha_NG -> "ha-NG"
+      | Hr_HR -> "hr-HR"
+      | Hu_HU -> "hu-HU"
+      | Hy_AM -> "hy-AM"
+      | Is_IS -> "is-IS"
+      | Ka_GE -> "ka-GE"
+      | Kab_DZ -> "kab-DZ"
+      | Kk_KZ -> "kk-KZ"
+      | Kn_IN -> "kn-IN"
+      | Ky_KG -> "ky-KG"
+      | Lg_IN -> "lg-IN"
+      | Lt_LT -> "lt-LT"
+      | Lv_LV -> "lv-LV"
+      | Mhr_RU -> "mhr-RU"
+      | Mi_NZ -> "mi-NZ"
+      | Mk_MK -> "mk-MK"
+      | Ml_IN -> "ml-IN"
+      | Mn_MN -> "mn-MN"
+      | Mr_IN -> "mr-IN"
+      | Mt_MT -> "mt-MT"
+      | No_NO -> "no-NO"
+      | Or_IN -> "or-IN"
+      | Pa_IN -> "pa-IN"
+      | Pl_PL -> "pl-PL"
+      | Ps_AF -> "ps-AF"
+      | Ro_RO -> "ro-RO"
+      | Rw_RW -> "rw-RW"
+      | Si_LK -> "si-LK"
+      | Sk_SK -> "sk-SK"
+      | Sl_SI -> "sl-SI"
+      | So_SO -> "so-SO"
+      | Sr_RS -> "sr-RS"
+      | Su_ID -> "su-ID"
+      | Sw_BI -> "sw-BI"
+      | Sw_KE -> "sw-KE"
+      | Sw_RW -> "sw-RW"
+      | Sw_TZ -> "sw-TZ"
+      | Sw_UG -> "sw-UG"
+      | Tl_PH -> "tl-PH"
+      | Tt_RU -> "tt-RU"
+      | Ug_CN -> "ug-CN"
+      | Uk_UA -> "uk-UA"
+      | Uz_UZ -> "uz-UZ"
+      | Wo_SN -> "wo-SN"
+      | Zh_HK -> "zh-HK"
+      | Zu_ZA -> "zu-ZA"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "af-ZA" -> Af_ZA
+      | "ar-AE" -> Ar_AE
+      | "ar-SA" -> Ar_SA
+      | "da-DK" -> Da_DK
+      | "de-CH" -> De_CH
+      | "de-DE" -> De_DE
+      | "en-AB" -> En_AB
+      | "en-AU" -> En_AU
+      | "en-GB" -> En_GB
+      | "en-IE" -> En_IE
+      | "en-IN" -> En_IN
+      | "en-US" -> En_US
+      | "en-WL" -> En_WL
+      | "es-ES" -> Es_ES
+      | "es-US" -> Es_US
+      | "fa-IR" -> Fa_IR
+      | "fr-CA" -> Fr_CA
+      | "fr-FR" -> Fr_FR
+      | "he-IL" -> He_IL
+      | "hi-IN" -> Hi_IN
+      | "id-ID" -> Id_ID
+      | "it-IT" -> It_IT
+      | "ja-JP" -> Ja_JP
+      | "ko-KR" -> Ko_KR
+      | "ms-MY" -> Ms_MY
+      | "nl-NL" -> Nl_NL
+      | "pt-BR" -> Pt_BR
+      | "pt-PT" -> Pt_PT
+      | "ru-RU" -> Ru_RU
+      | "ta-IN" -> Ta_IN
+      | "te-IN" -> Te_IN
+      | "tr-TR" -> Tr_TR
+      | "zh-CN" -> Zh_CN
+      | "zh-TW" -> Zh_TW
+      | "th-TH" -> Th_TH
+      | "en-ZA" -> En_ZA
+      | "en-NZ" -> En_NZ
+      | "vi-VN" -> Vi_VN
+      | "sv-SE" -> Sv_SE
+      | "ab-GE" -> Ab_GE
+      | "ast-ES" -> Ast_ES
+      | "az-AZ" -> Az_AZ
+      | "ba-RU" -> Ba_RU
+      | "be-BY" -> Be_BY
+      | "bg-BG" -> Bg_BG
+      | "bn-IN" -> Bn_IN
+      | "bs-BA" -> Bs_BA
+      | "ca-ES" -> Ca_ES
+      | "ckb-IQ" -> Ckb_IQ
+      | "ckb-IR" -> Ckb_IR
+      | "cs-CZ" -> Cs_CZ
+      | "cy-WL" -> Cy_WL
+      | "el-GR" -> El_GR
+      | "et-EE" -> Et_EE
+      | "et-ET" -> Et_ET
+      | "eu-ES" -> Eu_ES
+      | "fi-FI" -> Fi_FI
+      | "gl-ES" -> Gl_ES
+      | "gu-IN" -> Gu_IN
+      | "ha-NG" -> Ha_NG
+      | "hr-HR" -> Hr_HR
+      | "hu-HU" -> Hu_HU
+      | "hy-AM" -> Hy_AM
+      | "is-IS" -> Is_IS
+      | "ka-GE" -> Ka_GE
+      | "kab-DZ" -> Kab_DZ
+      | "kk-KZ" -> Kk_KZ
+      | "kn-IN" -> Kn_IN
+      | "ky-KG" -> Ky_KG
+      | "lg-IN" -> Lg_IN
+      | "lt-LT" -> Lt_LT
+      | "lv-LV" -> Lv_LV
+      | "mhr-RU" -> Mhr_RU
+      | "mi-NZ" -> Mi_NZ
+      | "mk-MK" -> Mk_MK
+      | "ml-IN" -> Ml_IN
+      | "mn-MN" -> Mn_MN
+      | "mr-IN" -> Mr_IN
+      | "mt-MT" -> Mt_MT
+      | "no-NO" -> No_NO
+      | "or-IN" -> Or_IN
+      | "pa-IN" -> Pa_IN
+      | "pl-PL" -> Pl_PL
+      | "ps-AF" -> Ps_AF
+      | "ro-RO" -> Ro_RO
+      | "rw-RW" -> Rw_RW
+      | "si-LK" -> Si_LK
+      | "sk-SK" -> Sk_SK
+      | "sl-SI" -> Sl_SI
+      | "so-SO" -> So_SO
+      | "sr-RS" -> Sr_RS
+      | "su-ID" -> Su_ID
+      | "sw-BI" -> Sw_BI
+      | "sw-KE" -> Sw_KE
+      | "sw-RW" -> Sw_RW
+      | "sw-TZ" -> Sw_TZ
+      | "sw-UG" -> Sw_UG
+      | "tl-PH" -> Tl_PH
+      | "tt-RU" -> Tt_RU
+      | "ug-CN" -> Ug_CN
+      | "uk-UA" -> Uk_UA
+      | "uz-UZ" -> Uz_UZ
+      | "wo-SN" -> Wo_SN
+      | "zh-HK" -> Zh_HK
+      | "zu-ZA" -> Zu_ZA
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LanguageCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LanguageCode" j)
+    let to_json = simple_to_json to_value
+  end
+module ToxicityCategories =
+  struct
+    type nonrec t = ToxicityCategory.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ToxicityCategory.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ToxicityCategory.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ToxicityCategories"
+        ~of_json:ToxicityCategory.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CallAnalyticsSkippedFeature =
+  struct
+    type nonrec t =
+      {
+      feature: CallAnalyticsFeature.t option
+        [@ocaml.doc
+          "Indicates the type of analytics feature that was skipped during the analysis of a call analytics job."];
+      reasonCode: CallAnalyticsSkippedReasonCode.t option
+        [@ocaml.doc
+          "Provides a code indicating the reason why a specific analytics feature was skipped during the analysis of a call analytics job."];
+      message: String_.t option
+        [@ocaml.doc
+          "Contains additional information or a message explaining why a specific analytics feature was skipped during the analysis of a call analytics job."]}
+    let make ?feature =
+      fun ?reasonCode ->
+        fun ?message -> fun () -> { feature; reasonCode; message }
+    let to_value x =
+      structure_to_value
+        [("Feature", (Option.map x.feature ~f:CallAnalyticsFeature.to_value));
+        ("ReasonCode",
+          (Option.map x.reasonCode ~f:CallAnalyticsSkippedReasonCode.to_value));
+        ("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      let reasonCode =
+        (Option.map ~f:CallAnalyticsSkippedReasonCode.of_xml)
+          (Xml.child xml_arg0 "ReasonCode") in
+      let feature =
+        (Option.map ~f:CallAnalyticsFeature.of_xml)
+          (Xml.child xml_arg0 "Feature") in
+      make ?message ?reasonCode ?feature ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let reasonCode =
+        field_map json__ "ReasonCode" CallAnalyticsSkippedReasonCode.of_json in
+      let feature = field_map json__ "Feature" CallAnalyticsFeature.of_json in
+      make ?message ?reasonCode ?feature ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a skipped analytics feature during the analysis of a call analytics job. The Feature field indicates the type of analytics feature that was skipped. The Message field contains additional information or a message explaining why the analytics feature was skipped. The ReasonCode field provides a code indicating the reason why the analytics feature was skipped."]
 module InterruptionFilter =
   struct
     type nonrec t =
       {
       threshold: TimestampMilliseconds.t option
-        [@ocaml.doc "The duration of the interruption."];
+        [@ocaml.doc
+          "Specify the duration of the interruptions in milliseconds. For example, you can flag speech that contains more than 10,000 milliseconds of interruptions."];
       participantRole: ParticipantRole.t option
         [@ocaml.doc
-          "Indicates whether the caller or customer was interrupting."];
+          "Specify the interrupter that you want to flag. Omitting this parameter is equivalent to specifying both participants."];
       absoluteTimeRange: AbsoluteTimeRange.t option
         [@ocaml.doc
-          "An object you can use to specify a time range (in milliseconds) for when you'd want to find the interruption. For example, you could search for an interruption between the 30,000 millisecond mark and the 45,000 millisecond mark. You could also specify the time period as the first 15,000 milliseconds or the last 15,000 milliseconds."];
+          "Makes it possible to specify a time range (in milliseconds) in your audio, during which you want to search for an interruption. See for more detail."];
       relativeTimeRange: RelativeTimeRange.t option
         [@ocaml.doc
-          "An object that allows percentages to specify the proportion of the call where there was a interruption. For example, you can specify the first half of the call. You can also specify the period of time between halfway through to three-quarters of the way through the call. Because the length of conversation can vary between calls, you can apply relative time ranges across all calls."];
+          "Makes it possible to specify a time range (in percentage) in your media file, during which you want to search for an interruption. See for more detail."];
       negate: Boolean.t option
         [@ocaml.doc
-          "Set to TRUE to look for a time period where there was no interruption."]}
+          "Set to TRUE to flag speech that does not contain interruptions. Set to FALSE to flag speech that contains interruptions."]}
     let make ?threshold =
       fun ?participantRole ->
         fun ?absoluteTimeRange ->
@@ -499,37 +1013,37 @@ module InterruptionFilter =
       make ?negate ?relativeTimeRange ?absoluteTimeRange ?participantRole
         ?threshold ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let negate = field_map json "Negate" Boolean.of_json in
+    let of_json json__ =
+      let negate = field_map json__ "Negate" Boolean.of_json in
       let relativeTimeRange =
-        field_map json "RelativeTimeRange" RelativeTimeRange.of_json in
+        field_map json__ "RelativeTimeRange" RelativeTimeRange.of_json in
       let absoluteTimeRange =
-        field_map json "AbsoluteTimeRange" AbsoluteTimeRange.of_json in
+        field_map json__ "AbsoluteTimeRange" AbsoluteTimeRange.of_json in
       let participantRole =
-        field_map json "ParticipantRole" ParticipantRole.of_json in
+        field_map json__ "ParticipantRole" ParticipantRole.of_json in
       let threshold =
-        field_map json "Threshold" TimestampMilliseconds.of_json in
+        field_map json__ "Threshold" TimestampMilliseconds.of_json in
       make ?negate ?relativeTimeRange ?absoluteTimeRange ?participantRole
         ?threshold ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that enables you to configure your category to be applied to call analytics jobs where either the customer or agent was interrupted."]
+       "Flag the presence or absence of interruptions in your Call Analytics transcription output. Rules using InterruptionFilter are designed to match: Instances where an agent interrupts a customer Instances where a customer interrupts an agent Either participant interrupting the other A lack of interruptions See Rule criteria for post-call categories for usage examples."]
 module NonTalkTimeFilter =
   struct
     type nonrec t =
       {
       threshold: TimestampMilliseconds.t option
         [@ocaml.doc
-          "The duration of the period when neither the customer nor agent was talking."];
+          "Specify the duration, in milliseconds, of the period of silence that you want to flag. For example, you can flag a silent period that lasts 30,000 milliseconds."];
       absoluteTimeRange: AbsoluteTimeRange.t option
         [@ocaml.doc
-          "An object you can use to specify a time range (in milliseconds) for when no one is talking. For example, you could specify a time period between the 30,000 millisecond mark and the 45,000 millisecond mark. You could also specify the time period as the first 15,000 milliseconds or the last 15,000 milliseconds."];
+          "Makes it possible to specify a time range (in milliseconds) in your audio, during which you want to search for a period of silence. See for more detail."];
       relativeTimeRange: RelativeTimeRange.t option
         [@ocaml.doc
-          "An object that allows percentages to specify the proportion of the call where there was silence. For example, you can specify the first half of the call. You can also specify the period of time between halfway through to three-quarters of the way through the call. Because the length of conversation can vary between calls, you can apply relative time ranges across all calls."];
+          "Makes it possible to specify a time range (in percentage) in your media file, during which you want to search for a period of silence. See for more detail."];
       negate: Boolean.t option
         [@ocaml.doc
-          "Set to TRUE to look for a time period when people were talking."]}
+          "Set to TRUE to flag periods of speech. Set to FALSE to flag periods of silence"]}
     let make ?threshold =
       fun ?absoluteTimeRange ->
         fun ?relativeTimeRange ->
@@ -560,36 +1074,36 @@ module NonTalkTimeFilter =
           (Xml.child xml_arg0 "Threshold") in
       make ?negate ?relativeTimeRange ?absoluteTimeRange ?threshold ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let negate = field_map json "Negate" Boolean.of_json in
+    let of_json json__ =
+      let negate = field_map json__ "Negate" Boolean.of_json in
       let relativeTimeRange =
-        field_map json "RelativeTimeRange" RelativeTimeRange.of_json in
+        field_map json__ "RelativeTimeRange" RelativeTimeRange.of_json in
       let absoluteTimeRange =
-        field_map json "AbsoluteTimeRange" AbsoluteTimeRange.of_json in
+        field_map json__ "AbsoluteTimeRange" AbsoluteTimeRange.of_json in
       let threshold =
-        field_map json "Threshold" TimestampMilliseconds.of_json in
+        field_map json__ "Threshold" TimestampMilliseconds.of_json in
       make ?negate ?relativeTimeRange ?absoluteTimeRange ?threshold ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that enables you to configure your category to be applied to call analytics jobs where either the customer or agent was interrupted."]
+       "Flag the presence or absence of periods of silence in your Call Analytics transcription output. Rules using NonTalkTimeFilter are designed to match: The presence of silence at specified periods throughout the call The presence of speech at specified periods throughout the call See Rule criteria for post-call categories for usage examples."]
 module SentimentFilter =
   struct
     type nonrec t =
       {
       sentiments: SentimentValueList.t
-        [@ocaml.doc
-          "An array that enables you to specify sentiments for the customer or agent. You can specify one or more values."];
+        [@ocaml.doc "Specify the sentiments that you want to flag."];
       absoluteTimeRange: AbsoluteTimeRange.t option
-        [@ocaml.doc "The time range, measured in seconds, of the sentiment."];
+        [@ocaml.doc
+          "Makes it possible to specify a time range (in milliseconds) in your audio, during which you want to search for the specified sentiments. See for more detail."];
       relativeTimeRange: RelativeTimeRange.t option
         [@ocaml.doc
-          "The time range, set in percentages, that correspond to proportion of the call."];
+          "Makes it possible to specify a time range (in percentage) in your media file, during which you want to search for the specified sentiments. See for more detail."];
       participantRole: ParticipantRole.t option
         [@ocaml.doc
-          "A value that determines whether the sentiment belongs to the customer or the agent."];
+          "Specify the participant that you want to flag. Omitting this parameter is equivalent to specifying both participants."];
       negate: Boolean.t option
         [@ocaml.doc
-          "Set to TRUE to look for sentiments that weren't specified in the request."]}
+          "Set to TRUE to flag the sentiments that you didn't include in your request. Set to FALSE to flag the sentiments that you specified in your request."]}
     let context_ = "SentimentFilter"
     let make ?absoluteTimeRange =
       fun ?relativeTimeRange ->
@@ -633,43 +1147,42 @@ module SentimentFilter =
       make ?negate ?participantRole ?relativeTimeRange ?absoluteTimeRange
         ~sentiments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let negate = field_map json "Negate" Boolean.of_json in
+    let of_json json__ =
+      let negate = field_map json__ "Negate" Boolean.of_json in
       let participantRole =
-        field_map json "ParticipantRole" ParticipantRole.of_json in
+        field_map json__ "ParticipantRole" ParticipantRole.of_json in
       let relativeTimeRange =
-        field_map json "RelativeTimeRange" RelativeTimeRange.of_json in
+        field_map json__ "RelativeTimeRange" RelativeTimeRange.of_json in
       let absoluteTimeRange =
-        field_map json "AbsoluteTimeRange" AbsoluteTimeRange.of_json in
+        field_map json__ "AbsoluteTimeRange" AbsoluteTimeRange.of_json in
       let sentiments =
-        field_map_exn json "Sentiments" SentimentValueList.of_json in
+        field_map_exn json__ "Sentiments" SentimentValueList.of_json in
       make ?negate ?participantRole ?relativeTimeRange ?absoluteTimeRange
         ~sentiments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that enables you to specify a particular customer or agent sentiment. If at least 50 percent of the conversation turns (the back-and-forth between two speakers) in a specified time period match the specified sentiment, Amazon Transcribe will consider the sentiment a match."]
+       "Flag the presence or absence of specific sentiments detected in your Call Analytics transcription output. Rules using SentimentFilter are designed to match: The presence or absence of a positive sentiment felt by the customer, agent, or both at specified points in the call The presence or absence of a negative sentiment felt by the customer, agent, or both at specified points in the call The presence or absence of a neutral sentiment felt by the customer, agent, or both at specified points in the call The presence or absence of a mixed sentiment felt by the customer, the agent, or both at specified points in the call See Rule criteria for post-call categories for usage examples."]
 module TranscriptFilter =
   struct
     type nonrec t =
       {
       transcriptFilterType: TranscriptFilterType.t
         [@ocaml.doc
-          "Matches the phrase to the transcription output in a word for word fashion. For example, if you specify the phrase \"I want to speak to the manager.\" Amazon Transcribe attempts to match that specific phrase to the transcription."];
+          "Flag the presence or absence of an exact match to the phrases that you specify. For example, if you specify the phrase \"speak to a manager\" as your Targets value, only that exact phrase is flagged. Note that semantic matching is not supported. For example, if your customer says \"speak to the manager\", instead of \"speak to a manager\", your content is not flagged."];
       absoluteTimeRange: AbsoluteTimeRange.t option
         [@ocaml.doc
-          "A time range, set in seconds, between two points in the call."];
+          "Makes it possible to specify a time range (in milliseconds) in your audio, during which you want to search for the specified key words or phrases. See for more detail."];
       relativeTimeRange: RelativeTimeRange.t option
         [@ocaml.doc
-          "An object that allows percentages to specify the proportion of the call where you would like to apply a filter. For example, you can specify the first half of the call. You can also specify the period of time between halfway through to three-quarters of the way through the call. Because the length of conversation can vary between calls, you can apply relative time ranges across all calls."];
+          "Makes it possible to specify a time range (in percentage) in your media file, during which you want to search for the specified key words or phrases. See for more detail."];
       participantRole: ParticipantRole.t option
         [@ocaml.doc
-          "Determines whether the customer or the agent is speaking the phrases that you've specified."];
+          "Specify the participant that you want to flag. Omitting this parameter is equivalent to specifying both participants."];
       negate: Boolean.t option
         [@ocaml.doc
-          "If TRUE, the rule that you specify is applied to everything except for the phrases that you specify."];
+          "Set to TRUE to flag the absence of the phrase that you specified in your request. Set to FALSE to flag the presence of the phrase that you specified in your request."];
       targets: StringTargetList.t
-        [@ocaml.doc
-          "The phrases that you're specifying for the transcript filter to match."]}
+        [@ocaml.doc "Specify the phrases that you want to flag."]}
     let context_ = "TranscriptFilter"
     let make ?absoluteTimeRange =
       fun ?relativeTimeRange ->
@@ -720,23 +1233,59 @@ module TranscriptFilter =
       make ~targets ?negate ?participantRole ?relativeTimeRange
         ?absoluteTimeRange ~transcriptFilterType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targets = field_map_exn json "Targets" StringTargetList.of_json in
-      let negate = field_map json "Negate" Boolean.of_json in
+    let of_json json__ =
+      let targets = field_map_exn json__ "Targets" StringTargetList.of_json in
+      let negate = field_map json__ "Negate" Boolean.of_json in
       let participantRole =
-        field_map json "ParticipantRole" ParticipantRole.of_json in
+        field_map json__ "ParticipantRole" ParticipantRole.of_json in
       let relativeTimeRange =
-        field_map json "RelativeTimeRange" RelativeTimeRange.of_json in
+        field_map json__ "RelativeTimeRange" RelativeTimeRange.of_json in
       let absoluteTimeRange =
-        field_map json "AbsoluteTimeRange" AbsoluteTimeRange.of_json in
+        field_map json__ "AbsoluteTimeRange" AbsoluteTimeRange.of_json in
       let transcriptFilterType =
-        field_map_exn json "TranscriptFilterType"
+        field_map_exn json__ "TranscriptFilterType"
           TranscriptFilterType.of_json in
       make ~targets ?negate ?participantRole ?relativeTimeRange
         ?absoluteTimeRange ~transcriptFilterType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Matches the output of the transcription to either the specific phrases that you specify, or the intent of the phrases that you specify."]
+       "Flag the presence or absence of specific words or phrases detected in your Call Analytics transcription output. Rules using TranscriptFilter are designed to match: Custom words or phrases spoken by the agent, the customer, or both Custom words or phrases not spoken by the agent, the customer, or either Custom words or phrases that occur at a specific time frame See Rule criteria for post-call categories and Rule criteria for streaming categories for usage examples."]
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
 module Uri_ =
   struct
     type nonrec t = string
@@ -776,40 +1325,92 @@ module SubtitleFormat =
     let of_json j = of_string (string_of_json ~kind:"SubtitleFormat" j)
     let to_json = simple_to_json to_value
   end
-module TagKey =
+module MedicalScribeChannelId =
   struct
-    type nonrec t = string
-    let context_ = "TagKey"
+    type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:128) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_int_max i ~max:1) >>= (fun () -> check_int_min i ~min:0));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MedicalScribeChannelId" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module TagValue =
+module MedicalScribeParticipantRole =
   struct
-    type nonrec t = string
-    let context_ = "TagValue"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:0));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | PATIENT 
+      | CLINICIAN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PATIENT -> "PATIENT"
+      | CLINICIAN -> "CLINICIAN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PATIENT" -> PATIENT
+      | "CLINICIAN" -> CLINICIAN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MedicalScribeParticipantRole"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MedicalScribeParticipantRole" j)
+    let to_json = simple_to_json to_value
+  end
+module MedicalScribeNoteTemplate =
+  struct
+    type nonrec t =
+      | HISTORY_AND_PHYSICAL 
+      | GIRPP 
+      | BIRP 
+      | SIRP 
+      | DAP 
+      | BEHAVIORAL_SOAP 
+      | PHYSICAL_SOAP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HISTORY_AND_PHYSICAL -> "HISTORY_AND_PHYSICAL"
+      | GIRPP -> "GIRPP"
+      | BIRP -> "BIRP"
+      | SIRP -> "SIRP"
+      | DAP -> "DAP"
+      | BEHAVIORAL_SOAP -> "BEHAVIORAL_SOAP"
+      | PHYSICAL_SOAP -> "PHYSICAL_SOAP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HISTORY_AND_PHYSICAL" -> HISTORY_AND_PHYSICAL
+      | "GIRPP" -> GIRPP
+      | "BIRP" -> BIRP
+      | "SIRP" -> SIRP
+      | "DAP" -> DAP
+      | "BEHAVIORAL_SOAP" -> BEHAVIORAL_SOAP
+      | "PHYSICAL_SOAP" -> PHYSICAL_SOAP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MedicalScribeNoteTemplate" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MedicalScribeNoteTemplate" j)
     let to_json = simple_to_json to_value
   end
 module PiiEntityTypes =
@@ -820,6 +1421,9 @@ module PiiEntityTypes =
         ok_or_failwith
           ((check_list_max i ~max:11) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PiiEntityType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -881,158 +1485,19 @@ module RedactionType =
     let of_json j = of_string (string_of_json ~kind:"RedactionType" j)
     let to_json = simple_to_json to_value
   end
-module LanguageCode =
-  struct
-    type nonrec t =
-      | Af_ZA 
-      | Ar_AE 
-      | Ar_SA 
-      | Cy_GB 
-      | Da_DK 
-      | De_CH 
-      | De_DE 
-      | En_AB 
-      | En_AU 
-      | En_GB 
-      | En_IE 
-      | En_IN 
-      | En_US 
-      | En_WL 
-      | Es_ES 
-      | Es_US 
-      | Fa_IR 
-      | Fr_CA 
-      | Fr_FR 
-      | Ga_IE 
-      | Gd_GB 
-      | He_IL 
-      | Hi_IN 
-      | Id_ID 
-      | It_IT 
-      | Ja_JP 
-      | Ko_KR 
-      | Ms_MY 
-      | Nl_NL 
-      | Pt_BR 
-      | Pt_PT 
-      | Ru_RU 
-      | Ta_IN 
-      | Te_IN 
-      | Tr_TR 
-      | Zh_CN 
-      | Zh_TW 
-      | Th_TH 
-      | En_ZA 
-      | En_NZ 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | Af_ZA -> "af-ZA"
-      | Ar_AE -> "ar-AE"
-      | Ar_SA -> "ar-SA"
-      | Cy_GB -> "cy-GB"
-      | Da_DK -> "da-DK"
-      | De_CH -> "de-CH"
-      | De_DE -> "de-DE"
-      | En_AB -> "en-AB"
-      | En_AU -> "en-AU"
-      | En_GB -> "en-GB"
-      | En_IE -> "en-IE"
-      | En_IN -> "en-IN"
-      | En_US -> "en-US"
-      | En_WL -> "en-WL"
-      | Es_ES -> "es-ES"
-      | Es_US -> "es-US"
-      | Fa_IR -> "fa-IR"
-      | Fr_CA -> "fr-CA"
-      | Fr_FR -> "fr-FR"
-      | Ga_IE -> "ga-IE"
-      | Gd_GB -> "gd-GB"
-      | He_IL -> "he-IL"
-      | Hi_IN -> "hi-IN"
-      | Id_ID -> "id-ID"
-      | It_IT -> "it-IT"
-      | Ja_JP -> "ja-JP"
-      | Ko_KR -> "ko-KR"
-      | Ms_MY -> "ms-MY"
-      | Nl_NL -> "nl-NL"
-      | Pt_BR -> "pt-BR"
-      | Pt_PT -> "pt-PT"
-      | Ru_RU -> "ru-RU"
-      | Ta_IN -> "ta-IN"
-      | Te_IN -> "te-IN"
-      | Tr_TR -> "tr-TR"
-      | Zh_CN -> "zh-CN"
-      | Zh_TW -> "zh-TW"
-      | Th_TH -> "th-TH"
-      | En_ZA -> "en-ZA"
-      | En_NZ -> "en-NZ"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "af-ZA" -> Af_ZA
-      | "ar-AE" -> Ar_AE
-      | "ar-SA" -> Ar_SA
-      | "cy-GB" -> Cy_GB
-      | "da-DK" -> Da_DK
-      | "de-CH" -> De_CH
-      | "de-DE" -> De_DE
-      | "en-AB" -> En_AB
-      | "en-AU" -> En_AU
-      | "en-GB" -> En_GB
-      | "en-IE" -> En_IE
-      | "en-IN" -> En_IN
-      | "en-US" -> En_US
-      | "en-WL" -> En_WL
-      | "es-ES" -> Es_ES
-      | "es-US" -> Es_US
-      | "fa-IR" -> Fa_IR
-      | "fr-CA" -> Fr_CA
-      | "fr-FR" -> Fr_FR
-      | "ga-IE" -> Ga_IE
-      | "gd-GB" -> Gd_GB
-      | "he-IL" -> He_IL
-      | "hi-IN" -> Hi_IN
-      | "id-ID" -> Id_ID
-      | "it-IT" -> It_IT
-      | "ja-JP" -> Ja_JP
-      | "ko-KR" -> Ko_KR
-      | "ms-MY" -> Ms_MY
-      | "nl-NL" -> Nl_NL
-      | "pt-BR" -> Pt_BR
-      | "pt-PT" -> Pt_PT
-      | "ru-RU" -> Ru_RU
-      | "ta-IN" -> Ta_IN
-      | "te-IN" -> Te_IN
-      | "tr-TR" -> Tr_TR
-      | "zh-CN" -> Zh_CN
-      | "zh-TW" -> Zh_TW
-      | "th-TH" -> Th_TH
-      | "en-ZA" -> En_ZA
-      | "en-NZ" -> En_NZ
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration LanguageCode" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"LanguageCode" j)
-    let to_json = simple_to_json to_value
-  end
 module LanguageIdSettings =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t option
         [@ocaml.doc
-          "The name of the vocabulary you want to use when processing your transcription job. The vocabulary you specify must have the same language codes as the transcription job; if the languages don't match, the vocabulary isn't applied."];
+          "The name of the custom vocabulary you want to use when processing your transcription job. Custom vocabulary names are case sensitive. The language of the specified custom vocabulary must match the language code that you specify in your transcription request. If the languages do not match, the custom vocabulary isn't applied. There are no errors or warnings associated with a language mismatch."];
       vocabularyFilterName: VocabularyFilterName.t option
         [@ocaml.doc
-          "The name of the vocabulary filter you want to use when transcribing your audio. The filter you specify must have the same language codes as the transcription job; if the languages don't match, the vocabulary filter isn't be applied."];
+          "The name of the custom vocabulary filter you want to use when processing your transcription job. Custom vocabulary filter names are case sensitive. The language of the specified custom vocabulary filter must match the language code that you specify in your transcription request. If the languages do not match, the custom vocabulary filter isn't applied. There are no errors or warnings associated with a language mismatch. Note that if you include VocabularyFilterName in your request, you must also include VocabularyFilterMethod."];
       languageModelName: ModelName.t option
         [@ocaml.doc
-          "The name of the language model you want to use when transcribing your audio. The model you specify must have the same language codes as the transcription job; if the languages don't match, the language model isn't be applied."]}
+          "The name of the custom language model you want to use when processing your transcription job. Note that custom language model names are case sensitive. The language of the specified custom language model must match the language code that you specify in your transcription request. If the languages do not match, the custom language model isn't applied. There are no errors or warnings associated with a language mismatch."]}
     let make ?vocabularyName =
       fun ?vocabularyFilterName ->
         fun ?languageModelName ->
@@ -1059,17 +1524,17 @@ module LanguageIdSettings =
           (Xml.child xml_arg0 "VocabularyName") in
       make ?languageModelName ?vocabularyFilterName ?vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageModelName =
-        field_map json "LanguageModelName" ModelName.of_json in
+        field_map json__ "LanguageModelName" ModelName.of_json in
       let vocabularyFilterName =
-        field_map json "VocabularyFilterName" VocabularyFilterName.of_json in
+        field_map json__ "VocabularyFilterName" VocabularyFilterName.of_json in
       let vocabularyName =
-        field_map json "VocabularyName" VocabularyName.of_json in
+        field_map json__ "VocabularyName" VocabularyName.of_json in
       make ?languageModelName ?vocabularyFilterName ?vocabularyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Language-specific settings that can be specified when language identification is enabled."]
+       "If using automatic language identification in your request and you want to apply a custom language model, a custom vocabulary, or a custom vocabulary filter, include LanguageIdSettings with the relevant sub-parameters (VocabularyName, LanguageModelName, and VocabularyFilterName). Note that multi-language identification (IdentifyMultipleLanguages) doesn't support custom language models. LanguageIdSettings supports two to five language codes. Each language code you include can have an associated custom language model, custom vocabulary, and custom vocabulary filter. The language codes that you specify must match the languages of the associated custom language models, custom vocabularies, and custom vocabulary filters. It's recommended that you include LanguageOptions when using LanguageIdSettings to ensure that the correct language dialect is identified. For example, if you specify a custom vocabulary that is in en-US but Amazon Transcribe determines that the language spoken in your media is en-AU, your custom vocabulary is not applied to your transcription. If you include LanguageOptions and include en-US as the only English language dialect, your custom vocabulary is applied to your transcription. If you want to include a custom language model with your request but do not want to use automatic language identification, use instead the parameter with the LanguageModelName sub-parameter. If you want to include a custom vocabulary or a custom vocabulary filter (or both) with your request but do not want to use automatic language identification, use instead the parameter with the VocabularyName or VocabularyFilterName (or both) sub-parameter."]
 module ChannelId =
   struct
     type nonrec t = int
@@ -1087,6 +1552,69 @@ module ChannelId =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module LanguageCodeItem =
+  struct
+    type nonrec t =
+      {
+      languageCode: LanguageCode.t option
+        [@ocaml.doc
+          "Provides the language code for each language identified in your media."];
+      durationInSeconds: DurationInSeconds.t option
+        [@ocaml.doc
+          "Provides the total time, in seconds, each identified language is spoken in your media."]}
+    let make ?languageCode =
+      fun ?durationInSeconds -> fun () -> { languageCode; durationInSeconds }
+    let to_value x =
+      structure_to_value
+        [("LanguageCode",
+           (Option.map x.languageCode ~f:LanguageCode.to_value));
+        ("DurationInSeconds",
+          (Option.map x.durationInSeconds ~f:DurationInSeconds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let durationInSeconds =
+        (Option.map ~f:DurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "DurationInSeconds") in
+      let languageCode =
+        (Option.map ~f:LanguageCode.of_xml)
+          (Xml.child xml_arg0 "LanguageCode") in
+      make ?durationInSeconds ?languageCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let durationInSeconds =
+        field_map json__ "DurationInSeconds" DurationInSeconds.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      make ?durationInSeconds ?languageCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information on the speech contained in a discreet utterance when multi-language identification is enabled in your request. This utterance represents a block of speech consisting of one language, preceded or followed by a block of speech in a different language."]
+module ToxicityDetectionSettings =
+  struct
+    type nonrec t =
+      {
+      toxicityCategories: ToxicityCategories.t
+        [@ocaml.doc
+          "If you include ToxicityDetection in your transcription request, you must also include ToxicityCategories. The only accepted value for this parameter is ALL."]}
+    let context_ = "ToxicityDetectionSettings"
+    let make ~toxicityCategories = fun () -> { toxicityCategories }
+    let to_value x =
+      structure_to_value
+        [("ToxicityCategories",
+           (Some (ToxicityCategories.to_value x.toxicityCategories)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let toxicityCategories =
+        ToxicityCategories.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ToxicityCategories") in
+      make ~toxicityCategories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let toxicityCategories =
+        field_map_exn json__ "ToxicityCategories" ToxicityCategories.of_json in
+      make ~toxicityCategories ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains ToxicityCategories, which is a required parameter if you want to enable toxicity detection (ToxicityDetection) in your transcription request."]
 module DataAccessRoleArn =
   struct
     type nonrec t = string
@@ -1109,22 +1637,51 @@ module DataAccessRoleArn =
     let of_json j = string_of_json ~kind:"DataAccessRoleArn" j
     let to_json = simple_to_json to_value
   end
+module CallAnalyticsSkippedFeatureList =
+  struct
+    type nonrec t = CallAnalyticsSkippedFeature.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CallAnalyticsSkippedFeature.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CallAnalyticsSkippedFeature.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CallAnalyticsSkippedFeatureList"
+        ~of_json:CallAnalyticsSkippedFeature.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Rule =
   struct
     type nonrec t =
       {
       nonTalkTimeFilter: NonTalkTimeFilter.t option
         [@ocaml.doc
-          "A condition for a time period when neither the customer nor the agent was talking."];
+          "Flag the presence or absence of periods of silence in your Call Analytics transcription output. Refer to for more detail."];
       interruptionFilter: InterruptionFilter.t option
         [@ocaml.doc
-          "A condition for a time period when either the customer or agent was interrupting the other person."];
+          "Flag the presence or absence of interruptions in your Call Analytics transcription output. Refer to for more detail."];
       transcriptFilter: TranscriptFilter.t option
         [@ocaml.doc
-          "A condition that catches particular words or phrases based on a exact match. For example, if you set the phrase \"I want to speak to the manager\", only that exact phrase will be returned."];
+          "Flag the presence or absence of specific words or phrases in your Call Analytics transcription output. Refer to for more detail."];
       sentimentFilter: SentimentFilter.t option
         [@ocaml.doc
-          "A condition that is applied to a particular customer sentiment."]}
+          "Flag the presence or absence of specific sentiments in your Call Analytics transcription output. Refer to for more detail."]}
     let make ?nonTalkTimeFilter =
       fun ?interruptionFilter ->
         fun ?transcriptFilter ->
@@ -1163,20 +1720,51 @@ module Rule =
       make ?sentimentFilter ?transcriptFilter ?interruptionFilter
         ?nonTalkTimeFilter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sentimentFilter =
-        field_map json "SentimentFilter" SentimentFilter.of_json in
+        field_map json__ "SentimentFilter" SentimentFilter.of_json in
       let transcriptFilter =
-        field_map json "TranscriptFilter" TranscriptFilter.of_json in
+        field_map json__ "TranscriptFilter" TranscriptFilter.of_json in
       let interruptionFilter =
-        field_map json "InterruptionFilter" InterruptionFilter.of_json in
+        field_map json__ "InterruptionFilter" InterruptionFilter.of_json in
       let nonTalkTimeFilter =
-        field_map json "NonTalkTimeFilter" NonTalkTimeFilter.of_json in
+        field_map json__ "NonTalkTimeFilter" NonTalkTimeFilter.of_json in
       make ?sentimentFilter ?transcriptFilter ?interruptionFilter
         ?nonTalkTimeFilter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A condition in the call between the customer and the agent that you want to filter for."]
+       "A rule is a set of criteria that you can specify to flag an attribute in your Call Analytics output. Rules define a Call Analytics category. Rules can include these parameters: , , , and . To learn more about Call Analytics rules and categories, see Creating categories for post-call transcriptions and Creating categories for real-time transcriptions. To learn more about Call Analytics, see Analyzing call center audio with Call Analytics."]
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t
+        [@ocaml.doc
+          "The first part of a key:value pair that forms a tag associated with a given resource. For example, in the tag Department:Sales, the key is 'Department'."];
+      value: TagValue.t
+        [@ocaml.doc
+          "The second part of a key:value pair that forms a tag associated with a given resource. For example, in the tag Department:Sales, the value is 'Sales'. Note that you can set the value of a tag to an empty string, but you can't set the value of a tag to null. Omitting the tag value is the same as using an empty string."]}
+    let context_ = "Tag"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (TagKey.to_value x.key)));
+        ("Value", (Some (TagValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds metadata, in the form of a key:value pair, to the specified resource. For example, you could add the tag Department:Sales to a resource to indicate that it pertains to your organization's sales department. You can also use tags for tag-based access control. To learn more about tagging, see Tagging resources."]
 module MaxAlternatives =
   struct
     type nonrec t = int
@@ -1201,7 +1789,7 @@ module MaxSpeakers =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:2));
+          ((check_int_max i ~max:30) >>= (fun () -> check_int_min i ~min:2));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -1247,6 +1835,9 @@ module SubtitleFileUris =
   struct
     type nonrec t = Uri_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Uri_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1271,6 +1862,9 @@ module SubtitleFormats =
   struct
     type nonrec t = SubtitleFormat.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubtitleFormat.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1310,50 +1904,109 @@ module SubtitleOutputStartIndex =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module Tag =
+module MedicalScribeChannelDefinition =
   struct
     type nonrec t =
       {
-      key: TagKey.t
+      channelId: MedicalScribeChannelId.t
+        [@ocaml.doc "Specify the audio channel you want to define."];
+      participantRole: MedicalScribeParticipantRole.t
         [@ocaml.doc
-          "The first part of a key:value pair that forms a tag associated with a given resource. For example, in the tag \226\128\152Department\226\128\153:\226\128\153Sales\226\128\153, the key is 'Department'."];
-      value: TagValue.t
-        [@ocaml.doc
-          "The second part of a key:value pair that forms a tag associated with a given resource. For example, in the tag \226\128\152Department\226\128\153:\226\128\153Sales\226\128\153, the value is 'Sales'."]}
-    let context_ = "Tag"
-    let make ~key = fun ~value -> fun () -> { key; value }
+          "Specify the participant that you want to flag. The options are CLINICIAN and PATIENT"]}
+    let context_ = "MedicalScribeChannelDefinition"
+    let make ~channelId =
+      fun ~participantRole -> fun () -> { channelId; participantRole }
     let to_value x =
       structure_to_value
-        [("Key", (Some (TagKey.to_value x.key)));
-        ("Value", (Some (TagValue.to_value x.value)))]
+        [("ChannelId", (Some (MedicalScribeChannelId.to_value x.channelId)));
+        ("ParticipantRole",
+          (Some (MedicalScribeParticipantRole.to_value x.participantRole)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let value =
-        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
-      let key =
-        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
-      make ~value ~key ()
+      let participantRole =
+        MedicalScribeParticipantRole.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ParticipantRole") in
+      let channelId =
+        MedicalScribeChannelId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelId") in
+      make ~participantRole ~channelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
-      make ~value ~key ()
+    let of_json json__ =
+      let participantRole =
+        field_map_exn json__ "ParticipantRole"
+          MedicalScribeParticipantRole.of_json in
+      let channelId =
+        field_map_exn json__ "ChannelId" MedicalScribeChannelId.of_json in
+      make ~participantRole ~channelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A key:value pair that adds metadata to a resource used by Amazon Transcribe. For example, a tag with the key:value pair \226\128\152Department\226\128\153:\226\128\153Sales\226\128\153 might be added to a resource to indicate its use by your organization's sales department."]
+       "Indicates which speaker is on which channel. The options are CLINICIAN and PATIENT"]
+module ClinicalNoteGenerationSettings =
+  struct
+    type nonrec t =
+      {
+      noteTemplate: MedicalScribeNoteTemplate.t option
+        [@ocaml.doc
+          "Specify one of the following templates to use for the clinical note summary. The default is HISTORY_AND_PHYSICAL. HISTORY_AND_PHYSICAL: Provides summaries for key sections of the clinical documentation. Examples of sections include Chief Complaint, History of Present Illness, Review of Systems, Past Medical History, Assessment, and Plan. GIRPP: Provides summaries based on the patients progress toward goals. Examples of sections include Goal, Intervention, Response, Progress, and Plan. BIRP: Focuses on the patient's behavioral patterns and responses. Examples of sections include Behavior, Intervention, Response, and Plan. SIRP: Emphasizes the situational context of therapy. Examples of sections include Situation, Intervention, Response, and Plan. DAP: Provides a simplified format for clinical documentation. Examples of sections include Data, Assessment, and Plan. BEHAVIORAL_SOAP: Behavioral health focused documentation format. Examples of sections include Subjective, Objective, Assessment, and Plan. PHYSICAL_SOAP: Physical health focused documentation format. Examples of sections include Subjective, Objective, Assessment, and Plan."]}
+    let make ?noteTemplate = fun () -> { noteTemplate }
+    let to_value x =
+      structure_to_value
+        [("NoteTemplate",
+           (Option.map x.noteTemplate ~f:MedicalScribeNoteTemplate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let noteTemplate =
+        (Option.map ~f:MedicalScribeNoteTemplate.of_xml)
+          (Xml.child xml_arg0 "NoteTemplate") in
+      make ?noteTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let noteTemplate =
+        field_map json__ "NoteTemplate" MedicalScribeNoteTemplate.of_json in
+      make ?noteTemplate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The output configuration for clinical note generation."]
+module Pronouns =
+  struct
+    type nonrec t =
+      | HE_HIM 
+      | SHE_HER 
+      | THEY_THEM 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HE_HIM -> "HE_HIM"
+      | SHE_HER -> "SHE_HER"
+      | THEY_THEM -> "THEY_THEM"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HE_HIM" -> HE_HIM
+      | "SHE_HER" -> SHE_HER
+      | "THEY_THEM" -> THEY_THEM
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Pronouns" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Pronouns" j)
+    let to_json = simple_to_json to_value
+  end
 module ContentRedaction =
   struct
     type nonrec t =
       {
       redactionType: RedactionType.t
         [@ocaml.doc
-          "Request parameter that defines the entities to be redacted. The only accepted value is PII."];
+          "Specify the category of information you want to redact; PII (personally identifiable information) is the only valid value. You can use PiiEntityTypes to choose which types of PII you want to redact. If you do not include PiiEntityTypes in your request, all PII is redacted."];
       redactionOutput: RedactionOutput.t
         [@ocaml.doc
-          "The output transcript file stored in either the default S3 bucket or in a bucket you specify. When you choose redacted Amazon Transcribe outputs only the redacted transcript. When you choose redacted_and_unredacted Amazon Transcribe outputs both the redacted and unredacted transcripts."];
+          "Specify if you want only a redacted transcript, or if you want a redacted and an unredacted transcript. When you choose redacted Amazon Transcribe creates only a redacted transcript. When you choose redacted_and_unredacted Amazon Transcribe creates a redacted and an unredacted transcript (as two separate files)."];
       piiEntityTypes: PiiEntityTypes.t option
         [@ocaml.doc
-          "The types of personally identifiable information (PII) you want to redact in your transcript."]}
+          "Specify which types of personally identifiable information (PII) you want to redact in your transcript. You can include as many types as you'd like, or you can select ALL. If you do not include PiiEntityTypes in your request, all PII is redacted."]}
     let context_ = "ContentRedaction"
     let make ?piiEntityTypes =
       fun ~redactionType ->
@@ -1379,17 +2032,17 @@ module ContentRedaction =
           (Xml.child_exn ~context:context_ xml_arg0 "RedactionType") in
       make ?piiEntityTypes ~redactionOutput ~redactionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let piiEntityTypes =
-        field_map json "PiiEntityTypes" PiiEntityTypes.of_json in
+        field_map json__ "PiiEntityTypes" PiiEntityTypes.of_json in
       let redactionOutput =
-        field_map_exn json "RedactionOutput" RedactionOutput.of_json in
+        field_map_exn json__ "RedactionOutput" RedactionOutput.of_json in
       let redactionType =
-        field_map_exn json "RedactionType" RedactionType.of_json in
+        field_map_exn json__ "RedactionType" RedactionType.of_json in
       make ?piiEntityTypes ~redactionOutput ~redactionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Settings for content redaction within a transcription job."]
+       "Makes it possible to redact or flag specified personally identifiable information (PII) in your transcript. If you use ContentRedaction, you must also include the sub-parameters: RedactionOutput and RedactionType. You can optionally include PiiEntityTypes to choose which types of PII you want to redact."]
 module LanguageIdSettingsMap =
   struct
     type nonrec t = (LanguageCode.t * LanguageIdSettings.t) list
@@ -1418,6 +2071,8 @@ module LanguageIdSettingsMap =
                        (LanguageIdSettings.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1430,6 +2085,9 @@ module LanguageOptions =
     type nonrec t = LanguageCode.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LanguageCode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1450,15 +2108,44 @@ module LanguageOptions =
       list_of_json ~kind:"LanguageOptions" ~of_json:LanguageCode.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Summarization =
+  struct
+    type nonrec t =
+      {
+      generateAbstractiveSummary: Boolean.t
+        [@ocaml.doc
+          "Enables Generative call summarization in your Call Analytics request Generative call summarization provides a summary of the transcript including important components discussed in the conversation. For more information, see Enabling generative call summarization."]}
+    let context_ = "Summarization"
+    let make ~generateAbstractiveSummary =
+      fun () -> { generateAbstractiveSummary }
+    let to_value x =
+      structure_to_value
+        [("GenerateAbstractiveSummary",
+           (Some (Boolean.to_value x.generateAbstractiveSummary)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let generateAbstractiveSummary =
+        Boolean.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "GenerateAbstractiveSummary") in
+      make ~generateAbstractiveSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let generateAbstractiveSummary =
+        field_map_exn json__ "GenerateAbstractiveSummary" Boolean.of_json in
+      make ~generateAbstractiveSummary ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains GenerateAbstractiveSummary, which is a required parameter if you want to enable Generative call summarization in your Call Analytics request."]
 module ChannelDefinition =
   struct
     type nonrec t =
       {
       channelId: ChannelId.t option
-        [@ocaml.doc "A value that indicates the audio channel."];
+        [@ocaml.doc "Specify the audio channel you want to define."];
       participantRole: ParticipantRole.t option
         [@ocaml.doc
-          "Indicates whether the person speaking on the audio channel is the agent or customer."]}
+          "Specify the speaker you want to define. Omitting this parameter is equivalent to specifying both participants."]}
     let make ?channelId =
       fun ?participantRole -> fun () -> { channelId; participantRole }
     let to_value x =
@@ -1475,14 +2162,14 @@ module ChannelDefinition =
         (Option.map ~f:ChannelId.of_xml) (Xml.child xml_arg0 "ChannelId") in
       make ?participantRole ?channelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let participantRole =
-        field_map json "ParticipantRole" ParticipantRole.of_json in
-      let channelId = field_map json "ChannelId" ChannelId.of_json in
+        field_map json__ "ParticipantRole" ParticipantRole.of_json in
+      let channelId = field_map json__ "ChannelId" ChannelId.of_json in
       make ?participantRole ?channelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For a call analytics job, an object that indicates the audio channel that belongs to the agent and the audio channel that belongs to the customer."]
+       "Makes it possible to specify which speaker is on which channel. For example, if your agent is the first participant to speak, you would set ChannelId to 0 (to indicate the first channel) and ParticipantRole to AGENT (to indicate that it's the agent speaking)."]
 module DateTime =
   struct
     type nonrec t = string
@@ -1549,12 +2236,41 @@ module IdentifiedLanguageScore =
     let of_json j = float_of_json ~kind:"a float" j
     let to_json = simple_to_json to_value
   end
+module LanguageCodeList =
+  struct
+    type nonrec t = LanguageCodeItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LanguageCodeItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LanguageCodeItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LanguageCodeList" ~of_json:LanguageCodeItem.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module ModelSettings =
   struct
     type nonrec t =
       {
       languageModelName: ModelName.t option
-        [@ocaml.doc "The name of your custom language model."]}
+        [@ocaml.doc
+          "The name of the custom language model you want to use when processing your transcription job. Note that custom language model names are case sensitive. The language of the specified custom language model must match the language code that you specify in your transcription request. If the languages do not match, the custom language model isn't applied. There are no errors or warnings associated with a language mismatch."]}
     let make ?languageModelName = fun () -> { languageModelName }
     let to_value x =
       structure_to_value
@@ -1567,13 +2283,13 @@ module ModelSettings =
           (Xml.child xml_arg0 "LanguageModelName") in
       make ?languageModelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageModelName =
-        field_map json "LanguageModelName" ModelName.of_json in
+        field_map json__ "LanguageModelName" ModelName.of_json in
       make ?languageModelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The object used to call your custom language model to your transcription job."]
+       "Provides the name of the custom language model that was included in the specified transcription job. Only use ModelSettings with the LanguageModelName sub-parameter if you're not using automatic language identification (). If using LanguageIdSettings in your request, this parameter contains a LanguageModelName sub-parameter."]
 module OutputLocationType =
   struct
     type nonrec t =
@@ -1599,6 +2315,39 @@ module OutputLocationType =
         (string_of_xml ~kind:"enumeration OutputLocationType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"OutputLocationType" j)
     let to_json = simple_to_json to_value
+  end
+module ToxicityDetection =
+  struct
+    type nonrec t = ToxicityDetectionSettings.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ToxicityDetectionSettings.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ToxicityDetectionSettings.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ToxicityDetection"
+        ~of_json:ToxicityDetectionSettings.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module TranscriptionJobName =
   struct
@@ -1715,6 +2464,57 @@ module Type =
     let of_json j = of_string (string_of_json ~kind:"Type" j)
     let to_json = simple_to_json to_value
   end
+module MedicalScribeJobStatus =
+  struct
+    type nonrec t =
+      | QUEUED 
+      | IN_PROGRESS 
+      | FAILED 
+      | COMPLETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | QUEUED -> "QUEUED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | FAILED -> "FAILED"
+      | COMPLETED -> "COMPLETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "QUEUED" -> QUEUED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "FAILED" -> FAILED
+      | "COMPLETED" -> COMPLETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MedicalScribeJobStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MedicalScribeJobStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module MedicalScribeLanguageCode =
+  struct
+    type nonrec t =
+      | En_US 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | En_US -> "en-US" | Non_static_id s -> s
+    let of_string = function | "en-US" -> En_US | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MedicalScribeLanguageCode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MedicalScribeLanguageCode" j)
+    let to_json = simple_to_json to_value
+  end
 module BaseModelName =
   struct
     type nonrec t =
@@ -1748,6 +2548,8 @@ module CLMLanguageCode =
       | Es_US 
       | En_GB 
       | En_AU 
+      | De_DE 
+      | Ja_JP 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1757,6 +2559,8 @@ module CLMLanguageCode =
       | Es_US -> "es-US"
       | En_GB -> "en-GB"
       | En_AU -> "en-AU"
+      | De_DE -> "de-DE"
+      | Ja_JP -> "ja-JP"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1765,6 +2569,8 @@ module CLMLanguageCode =
       | "es-US" -> Es_US
       | "en-GB" -> En_GB
       | "en-AU" -> En_AU
+      | "de-DE" -> De_DE
+      | "ja-JP" -> Ja_JP
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1780,13 +2586,13 @@ module InputDataConfig =
       {
       s3Uri: Uri_.t
         [@ocaml.doc
-          "The Amazon S3 prefix you specify to access the plain text files that you use to train your custom language model."];
+          "The Amazon S3 location (URI) of the text files you want to use to train your custom language model. Here's an example URI path: s3://DOC-EXAMPLE-BUCKET/my-model-training-data/"];
       tuningDataS3Uri: Uri_.t option
         [@ocaml.doc
-          "The Amazon S3 prefix you specify to access the plain text files that you use to tune your custom language model."];
+          "The Amazon S3 location (URI) of the text files you want to use to tune your custom language model. Here's an example URI path: s3://DOC-EXAMPLE-BUCKET/my-model-tuning-data/"];
       dataAccessRoleArn: DataAccessRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that uniquely identifies the permissions you've given Amazon Transcribe to access your Amazon S3 buckets containing your media files or text data. ARNs have the format arn:partition:service:region:account-id:resource-type/resource-id."]}
+          "The Amazon Resource Name (ARN) of an IAM role that has permissions to access the Amazon S3 bucket that contains your input files. If the role that you specify doesn\226\128\153t have the appropriate permissions to access the specified Amazon S3 location, your request fails. IAM role ARNs have the format arn:partition:iam::account:role/role-name-with-path. For example: arn:aws:iam::111122223333:role/Admin. For more information, see IAM ARNs."]}
     let context_ = "InputDataConfig"
     let make ?tuningDataS3Uri =
       fun ~s3Uri ->
@@ -1809,15 +2615,15 @@ module InputDataConfig =
         Uri_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ~dataAccessRoleArn ?tuningDataS3Uri ~s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" DataAccessRoleArn.of_json in
-      let tuningDataS3Uri = field_map json "TuningDataS3Uri" Uri_.of_json in
-      let s3Uri = field_map_exn json "S3Uri" Uri_.of_json in
+        field_map_exn json__ "DataAccessRoleArn" DataAccessRoleArn.of_json in
+      let tuningDataS3Uri = field_map json__ "TuningDataS3Uri" Uri_.of_json in
+      let s3Uri = field_map_exn json__ "S3Uri" Uri_.of_json in
       make ~dataAccessRoleArn ?tuningDataS3Uri ~s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The object that contains the Amazon S3 object location and access role required to train and tune your custom language model."]
+       "Contains the Amazon S3 location of the training data you want to use to create a new custom language model, and permissions to access this location. When using InputDataConfig, you must include these sub-parameters: S3Uri and DataAccessRoleArn. You can optionally include TuningDataS3Uri."]
 module ModelStatus =
   struct
     type nonrec t =
@@ -1846,6 +2652,32 @@ module ModelStatus =
     let of_json j = of_string (string_of_json ~kind:"ModelStatus" j)
     let to_json = simple_to_json to_value
   end
+module CallAnalyticsJobDetails =
+  struct
+    type nonrec t =
+      {
+      skipped: CallAnalyticsSkippedFeatureList.t option
+        [@ocaml.doc
+          "Contains information about any skipped analytics features during the analysis of a call analytics job. This array lists all the analytics features that were skipped, along with their corresponding reason code and message."]}
+    let make ?skipped = fun () -> { skipped }
+    let to_value x =
+      structure_to_value
+        [("Skipped",
+           (Option.map x.skipped ~f:CallAnalyticsSkippedFeatureList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let skipped =
+        (Option.map ~f:CallAnalyticsSkippedFeatureList.of_xml)
+          (Xml.child xml_arg0 "Skipped") in
+      make ?skipped ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let skipped =
+        field_map json__ "Skipped" CallAnalyticsSkippedFeatureList.of_json in
+      make ?skipped ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains details about a call analytics job, including information about skipped analytics features."]
 module CallAnalyticsJobName =
   struct
     type nonrec t = string
@@ -1919,6 +2751,31 @@ module CategoryName =
     let of_json j = string_of_json ~kind:"CategoryName" j
     let to_json = simple_to_json to_value
   end
+module InputType =
+  struct
+    type nonrec t =
+      | REAL_TIME 
+      | POST_CALL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | REAL_TIME -> "REAL_TIME"
+      | POST_CALL -> "POST_CALL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "REAL_TIME" -> REAL_TIME
+      | "POST_CALL" -> POST_CALL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration InputType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InputType" j)
+    let to_json = simple_to_json to_value
+  end
 module RuleList =
   struct
     type nonrec t = Rule.t list
@@ -1927,6 +2784,9 @@ module RuleList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Rule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1946,18 +2806,36 @@ module RuleList =
     let of_json j = list_of_json ~kind:"RuleList" ~of_json:Rule.of_json j
     let to_json v = composed_to_json to_value v
   end
-module String_ =
+module TagList =
   struct
-    type nonrec t = string
-    let context_ = "String"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = Tag.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module Phrase =
   struct
@@ -2003,10 +2881,10 @@ module JobExecutionSettings =
       {
       allowDeferredExecution: Boolean.t option
         [@ocaml.doc
-          "Indicates whether a job should be queued by Amazon Transcribe when the concurrent execution limit is exceeded. When the AllowDeferredExecution field is true, jobs are queued and executed when the number of executing jobs falls below the concurrent execution limit. If the field is false, Amazon Transcribe returns a LimitExceededException exception. Note that job queuing is enabled by default for call analytics jobs. If you specify the AllowDeferredExecution field, you must specify the DataAccessRoleArn field."];
+          "Makes it possible to enable job queuing when your concurrent request limit is exceeded. When AllowDeferredExecution is set to true, transcription job requests are placed in a queue until the number of jobs falls below the concurrent request limit. If AllowDeferredExecution is set to false and the number of transcription job requests exceed the concurrent request limit, you get a LimitExceededException error. If you include AllowDeferredExecution in your request, you must also include DataAccessRoleArn."];
       dataAccessRoleArn: DataAccessRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN), in the form arn:partition:service:region:account-id:resource-type/resource-id, of a role that has access to the S3 bucket that contains the input files. Amazon Transcribe assumes this role to read queued media files. If you have specified an output S3 bucket for the transcription results, this role should have access to the output bucket as well. If you specify the AllowDeferredExecution field, you must specify the DataAccessRoleArn field."]}
+          "The Amazon Resource Name (ARN) of an IAM role that has permissions to access the Amazon S3 bucket that contains your input files. If the role that you specify doesn\226\128\153t have the appropriate permissions to access the specified Amazon S3 location, your request fails. IAM role ARNs have the format arn:partition:iam::account:role/role-name-with-path. For example: arn:aws:iam::111122223333:role/Admin. For more information, see IAM ARNs. Note that if you include DataAccessRoleArn in your request, you must also include AllowDeferredExecution."]}
     let make ?allowDeferredExecution =
       fun ?dataAccessRoleArn ->
         fun () -> { allowDeferredExecution; dataAccessRoleArn }
@@ -2026,25 +2904,25 @@ module JobExecutionSettings =
           (Xml.child xml_arg0 "AllowDeferredExecution") in
       make ?dataAccessRoleArn ?allowDeferredExecution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" DataAccessRoleArn.of_json in
+        field_map json__ "DataAccessRoleArn" DataAccessRoleArn.of_json in
       let allowDeferredExecution =
-        field_map json "AllowDeferredExecution" Boolean.of_json in
+        field_map json__ "AllowDeferredExecution" Boolean.of_json in
       make ?dataAccessRoleArn ?allowDeferredExecution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about when a transcription job should be executed."]
+       "Makes it possible to control how your transcription job is processed. Currently, the only JobExecutionSettings modification you can choose is enabling job queueing using the AllowDeferredExecution sub-parameter. If you include JobExecutionSettings in your request, you must also include the sub-parameters: AllowDeferredExecution and DataAccessRoleArn."]
 module Media =
   struct
     type nonrec t =
       {
       mediaFileUri: Uri_.t option
         [@ocaml.doc
-          "The S3 object location of the input media file. The URI must be in the same region as the API endpoint that you are calling. The general form is: s3://DOC-EXAMPLE-BUCKET/keyprefix/objectkey For example: s3://DOC-EXAMPLE-BUCKET/example.flac s3://DOC-EXAMPLE-BUCKET/mediafiles/example.flac For more information about S3 object names, see Object Keys in the Amazon S3 Developer Guide."];
+          "The Amazon S3 location of the media file you want to transcribe. For example: s3://DOC-EXAMPLE-BUCKET/my-media-file.flac s3://DOC-EXAMPLE-BUCKET/media-files/my-media-file.flac Note that the Amazon S3 bucket that contains your input media must be located in the same Amazon Web Services Region where you're making your transcription request."];
       redactedMediaFileUri: Uri_.t option
         [@ocaml.doc
-          "The S3 object location for your redacted output media file. This is only supported for call analytics jobs."]}
+          "The Amazon S3 location of the media file you want to redact. For example: s3://DOC-EXAMPLE-BUCKET/my-media-file.flac s3://DOC-EXAMPLE-BUCKET/media-files/my-media-file.flac Note that the Amazon S3 bucket that contains your input media must be located in the same Amazon Web Services Region where you're making your transcription request. RedactedMediaFileUri produces a redacted audio file in addition to a redacted transcript. It is only supported for Call Analytics (StartCallAnalyticsJob) transcription requests."]}
     let make ?mediaFileUri =
       fun ?redactedMediaFileUri ->
         fun () -> { mediaFileUri; redactedMediaFileUri }
@@ -2062,14 +2940,14 @@ module Media =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "MediaFileUri") in
       make ?redactedMediaFileUri ?mediaFileUri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let redactedMediaFileUri =
-        field_map json "RedactedMediaFileUri" Uri_.of_json in
-      let mediaFileUri = field_map json "MediaFileUri" Uri_.of_json in
+        field_map json__ "RedactedMediaFileUri" Uri_.of_json in
+      let mediaFileUri = field_map json__ "MediaFileUri" Uri_.of_json in
       make ?redactedMediaFileUri ?mediaFileUri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the input media file in a transcription request."]
+       "Describes the Amazon S3 location of the media file you want to use in your request. For information on supported media formats, refer to the MediaFormat parameter or the Media formats section in the Amazon S3 Developer Guide."]
 module MediaFormat =
   struct
     type nonrec t =
@@ -2080,6 +2958,7 @@ module MediaFormat =
       | Ogg 
       | Amr 
       | Webm 
+      | M4a 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2091,6 +2970,7 @@ module MediaFormat =
       | Ogg -> "ogg"
       | Amr -> "amr"
       | Webm -> "webm"
+      | M4a -> "m4a"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2101,6 +2981,7 @@ module MediaFormat =
       | "ogg" -> Ogg
       | "amr" -> Amr
       | "webm" -> Webm
+      | "m4a" -> M4a
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2135,28 +3016,28 @@ module Settings =
       {
       vocabularyName: VocabularyName.t option
         [@ocaml.doc
-          "The name of a vocabulary to use when processing the transcription job."];
+          "The name of the custom vocabulary you want to use in your transcription job request. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account."];
       showSpeakerLabels: Boolean.t option
         [@ocaml.doc
-          "Determines whether the transcription job uses speaker recognition to identify different speakers in the input audio. Speaker recognition labels individual speakers in the audio file. If you set the ShowSpeakerLabels field to true, you must also set the maximum number of speaker labels MaxSpeakerLabels field. You can't set both ShowSpeakerLabels and ChannelIdentification in the same request. If you set both, your request returns a BadRequestException."];
+          "Enables speaker partitioning (diarization) in your transcription output. Speaker partitioning labels the speech from individual speakers in your media file. If you enable ShowSpeakerLabels in your request, you must also include MaxSpeakerLabels. For more information, see Partitioning speakers (diarization)."];
       maxSpeakerLabels: MaxSpeakers.t option
         [@ocaml.doc
-          "The maximum number of speakers to identify in the input audio. If there are more speakers in the audio than this number, multiple speakers are identified as a single speaker. If you specify the MaxSpeakerLabels field, you must set the ShowSpeakerLabels field to true."];
+          "Specify the maximum number of speakers you want to partition in your media. Note that if your media contains more speakers than the specified number, multiple speakers are treated as a single speaker. If you specify the MaxSpeakerLabels field, you must set the ShowSpeakerLabels field to true."];
       channelIdentification: Boolean.t option
         [@ocaml.doc
-          "Instructs Amazon Transcribe to process each audio channel separately and then merge the transcription output of each channel into a single transcription. Amazon Transcribe also produces a transcription of each item detected on an audio channel, including the start time and end time of the item and alternative transcriptions of the item including the confidence that Amazon Transcribe has in the transcription. You can't set both ShowSpeakerLabels and ChannelIdentification in the same request. If you set both, your request returns a BadRequestException."];
+          "Enables channel identification in multi-channel audio. Channel identification transcribes the audio on each channel independently, then appends the output for each channel into one transcript. For more information, see Transcribing multi-channel audio."];
       showAlternatives: Boolean.t option
         [@ocaml.doc
-          "Determines whether the transcription contains alternative transcriptions. If you set the ShowAlternatives field to true, you must also set the maximum number of alternatives to return in the MaxAlternatives field."];
+          "To include alternative transcriptions within your transcription output, include ShowAlternatives in your transcription request. If you have multi-channel audio and do not enable channel identification, your audio is transcribed in a continuous manner and your transcript does not separate the speech by channel. If you include ShowAlternatives, you must also include MaxAlternatives, which is the maximum number of alternative transcriptions you want Amazon Transcribe to generate. For more information, see Alternative transcriptions."];
       maxAlternatives: MaxAlternatives.t option
         [@ocaml.doc
-          "The number of alternative transcriptions that the service should return. If you specify the MaxAlternatives field, you must set the ShowAlternatives field to true."];
+          "Indicate the maximum number of alternative transcriptions you want Amazon Transcribe to include in your transcript. If you select a number greater than the number of alternative transcriptions generated by Amazon Transcribe, only the actual number of alternative transcriptions are included. If you include MaxAlternatives in your request, you must also include ShowAlternatives with a value of true. For more information, see Alternative transcriptions."];
       vocabularyFilterName: VocabularyFilterName.t option
         [@ocaml.doc
-          "The name of the vocabulary filter to use when transcribing the audio. The filter that you specify must have the same language code as the transcription job."];
+          "The name of the custom vocabulary filter you want to use in your transcription job request. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account. Note that if you include VocabularyFilterName in your request, you must also include VocabularyFilterMethod."];
       vocabularyFilterMethod: VocabularyFilterMethod.t option
         [@ocaml.doc
-          "Set to mask to remove filtered text from the transcript and replace it with three asterisks (\"***\") as placeholder text. Set to remove to remove filtered text from the transcript without using placeholder text. Set to tag to mark the word in the transcription output that matches the vocabulary filter. When you set the filter method to tag, the words matching your vocabulary filter are not masked or removed."]}
+          "Specify how you want your custom vocabulary filter applied to your transcript. To replace words with ***, choose mask. To delete words, choose remove. To flag words without changing them, choose tag."]}
     let make ?vocabularyName =
       fun ?showSpeakerLabels ->
         fun ?maxSpeakerLabels ->
@@ -2225,43 +3106,43 @@ module Settings =
         ?showAlternatives ?channelIdentification ?maxSpeakerLabels
         ?showSpeakerLabels ?vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vocabularyFilterMethod =
-        field_map json "VocabularyFilterMethod"
+        field_map json__ "VocabularyFilterMethod"
           VocabularyFilterMethod.of_json in
       let vocabularyFilterName =
-        field_map json "VocabularyFilterName" VocabularyFilterName.of_json in
+        field_map json__ "VocabularyFilterName" VocabularyFilterName.of_json in
       let maxAlternatives =
-        field_map json "MaxAlternatives" MaxAlternatives.of_json in
+        field_map json__ "MaxAlternatives" MaxAlternatives.of_json in
       let showAlternatives =
-        field_map json "ShowAlternatives" Boolean.of_json in
+        field_map json__ "ShowAlternatives" Boolean.of_json in
       let channelIdentification =
-        field_map json "ChannelIdentification" Boolean.of_json in
+        field_map json__ "ChannelIdentification" Boolean.of_json in
       let maxSpeakerLabels =
-        field_map json "MaxSpeakerLabels" MaxSpeakers.of_json in
+        field_map json__ "MaxSpeakerLabels" MaxSpeakers.of_json in
       let showSpeakerLabels =
-        field_map json "ShowSpeakerLabels" Boolean.of_json in
+        field_map json__ "ShowSpeakerLabels" Boolean.of_json in
       let vocabularyName =
-        field_map json "VocabularyName" VocabularyName.of_json in
+        field_map json__ "VocabularyName" VocabularyName.of_json in
       make ?vocabularyFilterMethod ?vocabularyFilterName ?maxAlternatives
         ?showAlternatives ?channelIdentification ?maxSpeakerLabels
         ?showSpeakerLabels ?vocabularyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides optional settings for the StartTranscriptionJob operation."]
+       "Allows additional optional settings in your request, including channel identification, alternative transcriptions, and speaker partitioning. You can use that to apply custom vocabularies to your transcription job."]
 module SubtitlesOutput =
   struct
     type nonrec t =
       {
       formats: SubtitleFormats.t option
         [@ocaml.doc
-          "The format of your subtitle files. If your request specified both srt and vtt formats, both formats are shown."];
+          "Provides the format of your subtitle files. If your request included both WebVTT (vtt) and SubRip (srt) formats, both formats are shown."];
       subtitleFileUris: SubtitleFileUris.t option
         [@ocaml.doc
-          "Contains the output location for your subtitle file. This location must be an S3 bucket."];
+          "The Amazon S3 location of your transcript. You can use this URI to access or download your subtitle file. Your subtitle file is stored in the same location as your transcript. If you specified both WebVTT and SubRip subtitle formats, two URIs are provided. If you included OutputBucketName in your transcription job request, this is the URI of that bucket. If you also included OutputKey in your request, your output is located in the path you specified in your request. If you didn't include OutputBucketName in your transcription job request, your subtitle file is stored in a service-managed bucket, and TranscriptFileUri provides you with a temporary URI you can use for secure access to your subtitle file. Temporary URIs for service-managed Amazon S3 buckets are only valid for 15 minutes. If you get an AccesDenied error, you can get a new temporary URI by running a GetTranscriptionJob or ListTranscriptionJob request."];
       outputStartIndex: SubtitleOutputStartIndex.t option
         [@ocaml.doc
-          "Shows the output start index value for your subtitle files. If you did not specify a value in your request, the default value of 0 is used."]}
+          "Provides the start index value for your subtitle files. If you did not specify a value in your request, the default value of 0 is used."]}
     let make ?formats =
       fun ?subtitleFileUris ->
         fun ?outputStartIndex ->
@@ -2285,54 +3166,26 @@ module SubtitlesOutput =
         (Option.map ~f:SubtitleFormats.of_xml) (Xml.child xml_arg0 "Formats") in
       make ?outputStartIndex ?subtitleFileUris ?formats ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputStartIndex =
-        field_map json "OutputStartIndex" SubtitleOutputStartIndex.of_json in
+        field_map json__ "OutputStartIndex" SubtitleOutputStartIndex.of_json in
       let subtitleFileUris =
-        field_map json "SubtitleFileUris" SubtitleFileUris.of_json in
-      let formats = field_map json "Formats" SubtitleFormats.of_json in
+        field_map json__ "SubtitleFileUris" SubtitleFileUris.of_json in
+      let formats = field_map json__ "Formats" SubtitleFormats.of_json in
       make ?outputStartIndex ?subtitleFileUris ?formats ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The S3 location where your subtitle files are located. Note that your subtitle files are placed in the same location as your transcription output. Refer to TranscriptFileUri to download your files."]
-module TagList =
-  struct
-    type nonrec t = Tag.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:200) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Tag.of_xml)
-    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
-    let to_json v = composed_to_json to_value v
-  end
+       "Provides information about your subtitle file, including format, start index, and Amazon S3 location."]
 module Transcript =
   struct
     type nonrec t =
       {
       transcriptFileUri: Uri_.t option
         [@ocaml.doc
-          "The S3 object location of the transcript. Use this URI to access the transcript. If you specified an S3 bucket in the OutputBucketName field when you created the job, this is the URI of that bucket. If you chose to store the transcript in Amazon Transcribe, this is a shareable URL that provides secure access to that location."];
+          "The Amazon S3 location of your transcript. You can use this URI to access or download your transcript. If you included OutputBucketName in your transcription job request, this is the URI of that bucket. If you also included OutputKey in your request, your output is located in the path you specified in your request. If you didn't include OutputBucketName in your transcription job request, your transcript is stored in a service-managed bucket, and TranscriptFileUri provides you with a temporary URI you can use for secure access to your transcript. Temporary URIs for service-managed Amazon S3 buckets are only valid for 15 minutes. If you get an AccesDenied error, you can get a new temporary URI by running a GetTranscriptionJob or ListTranscriptionJob request."];
       redactedTranscriptFileUri: Uri_.t option
         [@ocaml.doc
-          "The S3 object location of the redacted transcript. Use this URI to access the redacted transcript. If you specified an S3 bucket in the OutputBucketName field when you created the job, this is the URI of that bucket. If you chose to store the transcript in Amazon Transcribe, this is a shareable URL that provides secure access to that location."]}
+          "The Amazon S3 location of your redacted transcript. You can use this URI to access or download your transcript. If you included OutputBucketName in your transcription job request, this is the URI of that bucket. If you also included OutputKey in your request, your output is located in the path you specified in your request. If you didn't include OutputBucketName in your transcription job request, your transcript is stored in a service-managed bucket, and RedactedTranscriptFileUri provides you with a temporary URI you can use for secure access to your transcript. Temporary URIs for service-managed Amazon S3 buckets are only valid for 15 minutes. If you get an AccesDenied error, you can get a new temporary URI by running a GetTranscriptionJob or ListTranscriptionJob request."]}
     let make ?transcriptFileUri =
       fun ?redactedTranscriptFileUri ->
         fun () -> { transcriptFileUri; redactedTranscriptFileUri }
@@ -2351,13 +3204,15 @@ module Transcript =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "TranscriptFileUri") in
       make ?redactedTranscriptFileUri ?transcriptFileUri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let redactedTranscriptFileUri =
-        field_map json "RedactedTranscriptFileUri" Uri_.of_json in
-      let transcriptFileUri = field_map json "TranscriptFileUri" Uri_.of_json in
+        field_map json__ "RedactedTranscriptFileUri" Uri_.of_json in
+      let transcriptFileUri =
+        field_map json__ "TranscriptFileUri" Uri_.of_json in
       make ?redactedTranscriptFileUri ?transcriptFileUri ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Identifies the location of a transcription."]
+  end[@@ocaml.doc
+       "Provides you with the Amazon S3 URI you can use to access your transcript."]
 module MedicalMediaSampleRateHertz =
   struct
     type nonrec t = int
@@ -2384,7 +3239,7 @@ module MedicalTranscript =
       {
       transcriptFileUri: Uri_.t option
         [@ocaml.doc
-          "The S3 object location of the medical transcript. Use this URI to access the medical transcript. This URI points to the S3 bucket you created to store the medical transcript."]}
+          "The Amazon S3 location of your transcript. You can use this URI to access or download your transcript. Note that this is the Amazon S3 location you specified in your request using the OutputBucketName parameter."]}
     let make ?transcriptFileUri = fun () -> { transcriptFileUri }
     let to_value x =
       structure_to_value
@@ -2396,33 +3251,35 @@ module MedicalTranscript =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "TranscriptFileUri") in
       make ?transcriptFileUri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let transcriptFileUri = field_map json "TranscriptFileUri" Uri_.of_json in
+    let of_json json__ =
+      let transcriptFileUri =
+        field_map json__ "TranscriptFileUri" Uri_.of_json in
       make ?transcriptFileUri ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Identifies the location of a medical transcript."]
+  end[@@ocaml.doc
+       "Provides you with the Amazon S3 URI you can use to access your transcript."]
 module MedicalTranscriptionSetting =
   struct
     type nonrec t =
       {
       showSpeakerLabels: Boolean.t option
         [@ocaml.doc
-          "Determines whether the transcription job uses speaker recognition to identify different speakers in the input audio. Speaker recognition labels individual speakers in the audio file. If you set the ShowSpeakerLabels field to true, you must also set the maximum number of speaker labels in the MaxSpeakerLabels field. You can't set both ShowSpeakerLabels and ChannelIdentification in the same request. If you set both, your request returns a BadRequestException."];
+          "Enables speaker partitioning (diarization) in your transcription output. Speaker partitioning labels the speech from individual speakers in your media file. If you enable ShowSpeakerLabels in your request, you must also include MaxSpeakerLabels. For more information, see Partitioning speakers (diarization)."];
       maxSpeakerLabels: MaxSpeakers.t option
         [@ocaml.doc
-          "The maximum number of speakers to identify in the input audio. If there are more speakers in the audio than this number, multiple speakers are identified as a single speaker. If you specify the MaxSpeakerLabels field, you must set the ShowSpeakerLabels field to true."];
+          "Specify the maximum number of speakers you want to partition in your media. Note that if your media contains more speakers than the specified number, multiple speakers are treated as a single speaker. If you specify the MaxSpeakerLabels field, you must set the ShowSpeakerLabels field to true."];
       channelIdentification: Boolean.t option
         [@ocaml.doc
-          "Instructs Amazon Transcribe Medical to process each audio channel separately and then merge the transcription output of each channel into a single transcription. Amazon Transcribe Medical also produces a transcription of each item detected on an audio channel, including the start time and end time of the item and alternative transcriptions of item. The alternative transcriptions also come with confidence scores provided by Amazon Transcribe Medical. You can't set both ShowSpeakerLabels and ChannelIdentification in the same request. If you set both, your request returns a BadRequestException."];
+          "Enables channel identification in multi-channel audio. Channel identification transcribes the audio on each channel independently, then appends the output for each channel into one transcript. If you have multi-channel audio and do not enable channel identification, your audio is transcribed in a continuous manner and your transcript does not separate the speech by channel. For more information, see Transcribing multi-channel audio."];
       showAlternatives: Boolean.t option
         [@ocaml.doc
-          "Determines whether alternative transcripts are generated along with the transcript that has the highest confidence. If you set ShowAlternatives field to true, you must also set the maximum number of alternatives to return in the MaxAlternatives field."];
+          "To include alternative transcriptions within your transcription output, include ShowAlternatives in your transcription request. If you include ShowAlternatives, you must also include MaxAlternatives, which is the maximum number of alternative transcriptions you want Amazon Transcribe Medical to generate. For more information, see Alternative transcriptions."];
       maxAlternatives: MaxAlternatives.t option
         [@ocaml.doc
-          "The maximum number of alternatives that you tell the service to return. If you specify the MaxAlternatives field, you must set the ShowAlternatives field to true."];
+          "Indicate the maximum number of alternative transcriptions you want Amazon Transcribe Medical to include in your transcript. If you select a number greater than the number of alternative transcriptions generated by Amazon Transcribe Medical, only the actual number of alternative transcriptions are included. If you include MaxAlternatives in your request, you must also include ShowAlternatives with a value of true. For more information, see Alternative transcriptions."];
       vocabularyName: VocabularyName.t option
         [@ocaml.doc
-          "The name of the vocabulary to use when processing a medical transcription job."]}
+          "The name of the custom vocabulary you want to use when processing your medical transcription job. Custom vocabulary names are case sensitive. The language of the specified custom vocabulary must match the language code that you specify in your transcription request. If the languages do not match, the custom vocabulary isn't applied. There are no errors or warnings associated with a language mismatch. US English (en-US) is the only valid language for Amazon Transcribe Medical."]}
     let make ?showSpeakerLabels =
       fun ?maxSpeakerLabels ->
         fun ?channelIdentification ->
@@ -2475,47 +3332,250 @@ module MedicalTranscriptionSetting =
       make ?vocabularyName ?maxAlternatives ?showAlternatives
         ?channelIdentification ?maxSpeakerLabels ?showSpeakerLabels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vocabularyName =
-        field_map json "VocabularyName" VocabularyName.of_json in
+        field_map json__ "VocabularyName" VocabularyName.of_json in
       let maxAlternatives =
-        field_map json "MaxAlternatives" MaxAlternatives.of_json in
+        field_map json__ "MaxAlternatives" MaxAlternatives.of_json in
       let showAlternatives =
-        field_map json "ShowAlternatives" Boolean.of_json in
+        field_map json__ "ShowAlternatives" Boolean.of_json in
       let channelIdentification =
-        field_map json "ChannelIdentification" Boolean.of_json in
+        field_map json__ "ChannelIdentification" Boolean.of_json in
       let maxSpeakerLabels =
-        field_map json "MaxSpeakerLabels" MaxSpeakers.of_json in
+        field_map json__ "MaxSpeakerLabels" MaxSpeakers.of_json in
       let showSpeakerLabels =
-        field_map json "ShowSpeakerLabels" Boolean.of_json in
+        field_map json__ "ShowSpeakerLabels" Boolean.of_json in
       make ?vocabularyName ?maxAlternatives ?showAlternatives
         ?channelIdentification ?maxSpeakerLabels ?showSpeakerLabels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Optional settings for the StartMedicalTranscriptionJob operation."]
+       "Allows additional optional settings in your request, including channel identification, alternative transcriptions, and speaker partitioning. You can use that to apply custom vocabularies to your medical transcription job."]
+module MedicalScribeChannelDefinitions =
+  struct
+    type nonrec t = MedicalScribeChannelDefinition.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:2));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MedicalScribeChannelDefinition.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MedicalScribeChannelDefinition.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MedicalScribeChannelDefinitions"
+        ~of_json:MedicalScribeChannelDefinition.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MedicalScribeOutput =
+  struct
+    type nonrec t =
+      {
+      transcriptFileUri: Uri_.t option
+        [@ocaml.doc "Holds the Amazon S3 URI for the Transcript."];
+      clinicalDocumentUri: Uri_.t option
+        [@ocaml.doc "Holds the Amazon S3 URI for the Clinical Document."]}
+    let make ?transcriptFileUri =
+      fun ?clinicalDocumentUri ->
+        fun () -> { transcriptFileUri; clinicalDocumentUri }
+    let to_value x =
+      structure_to_value
+        [("TranscriptFileUri",
+           (Option.map x.transcriptFileUri ~f:Uri_.to_value));
+        ("ClinicalDocumentUri",
+          (Option.map x.clinicalDocumentUri ~f:Uri_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clinicalDocumentUri =
+        (Option.map ~f:Uri_.of_xml)
+          (Xml.child xml_arg0 "ClinicalDocumentUri") in
+      let transcriptFileUri =
+        (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "TranscriptFileUri") in
+      make ?clinicalDocumentUri ?transcriptFileUri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clinicalDocumentUri =
+        field_map json__ "ClinicalDocumentUri" Uri_.of_json in
+      let transcriptFileUri =
+        field_map json__ "TranscriptFileUri" Uri_.of_json in
+      make ?clinicalDocumentUri ?transcriptFileUri ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The location of the output of your Medical Scribe job. ClinicalDocumentUri holds the Amazon S3 URI for the Clinical Document and TranscriptFileUri holds the Amazon S3 URI for the Transcript."]
+module MedicalScribeSettings =
+  struct
+    type nonrec t =
+      {
+      showSpeakerLabels: Boolean.t option
+        [@ocaml.doc
+          "Enables speaker partitioning (diarization) in your Medical Scribe output. Speaker partitioning labels the speech from individual speakers in your media file. If you enable ShowSpeakerLabels in your request, you must also include MaxSpeakerLabels. For more information, see Partitioning speakers (diarization)."];
+      maxSpeakerLabels: MaxSpeakers.t option
+        [@ocaml.doc
+          "Specify the maximum number of speakers you want to partition in your media. Note that if your media contains more speakers than the specified number, multiple speakers are treated as a single speaker. If you specify the MaxSpeakerLabels field, you must set the ShowSpeakerLabels field to true."];
+      channelIdentification: Boolean.t option
+        [@ocaml.doc
+          "Enables channel identification in multi-channel audio. Channel identification transcribes the audio on each channel independently, then appends the output for each channel into one transcript. For more information, see Transcribing multi-channel audio."];
+      vocabularyName: VocabularyName.t option
+        [@ocaml.doc
+          "The name of the custom vocabulary you want to include in your Medical Scribe request. Custom vocabulary names are case sensitive."];
+      vocabularyFilterName: VocabularyFilterName.t option
+        [@ocaml.doc
+          "The name of the custom vocabulary filter you want to include in your Medical Scribe request. Custom vocabulary filter names are case sensitive. Note that if you include VocabularyFilterName in your request, you must also include VocabularyFilterMethod."];
+      vocabularyFilterMethod: VocabularyFilterMethod.t option
+        [@ocaml.doc
+          "Specify how you want your custom vocabulary filter applied to your transcript. To replace words with ***, choose mask. To delete words, choose remove. To flag words without changing them, choose tag."];
+      clinicalNoteGenerationSettings: ClinicalNoteGenerationSettings.t option
+        [@ocaml.doc "Specify settings for the clinical note generation."]}
+    let make ?showSpeakerLabels =
+      fun ?maxSpeakerLabels ->
+        fun ?channelIdentification ->
+          fun ?vocabularyName ->
+            fun ?vocabularyFilterName ->
+              fun ?vocabularyFilterMethod ->
+                fun ?clinicalNoteGenerationSettings ->
+                  fun () ->
+                    {
+                      showSpeakerLabels;
+                      maxSpeakerLabels;
+                      channelIdentification;
+                      vocabularyName;
+                      vocabularyFilterName;
+                      vocabularyFilterMethod;
+                      clinicalNoteGenerationSettings
+                    }
+    let to_value x =
+      structure_to_value
+        [("ShowSpeakerLabels",
+           (Option.map x.showSpeakerLabels ~f:Boolean.to_value));
+        ("MaxSpeakerLabels",
+          (Option.map x.maxSpeakerLabels ~f:MaxSpeakers.to_value));
+        ("ChannelIdentification",
+          (Option.map x.channelIdentification ~f:Boolean.to_value));
+        ("VocabularyName",
+          (Option.map x.vocabularyName ~f:VocabularyName.to_value));
+        ("VocabularyFilterName",
+          (Option.map x.vocabularyFilterName ~f:VocabularyFilterName.to_value));
+        ("VocabularyFilterMethod",
+          (Option.map x.vocabularyFilterMethod
+             ~f:VocabularyFilterMethod.to_value));
+        ("ClinicalNoteGenerationSettings",
+          (Option.map x.clinicalNoteGenerationSettings
+             ~f:ClinicalNoteGenerationSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clinicalNoteGenerationSettings =
+        (Option.map ~f:ClinicalNoteGenerationSettings.of_xml)
+          (Xml.child xml_arg0 "ClinicalNoteGenerationSettings") in
+      let vocabularyFilterMethod =
+        (Option.map ~f:VocabularyFilterMethod.of_xml)
+          (Xml.child xml_arg0 "VocabularyFilterMethod") in
+      let vocabularyFilterName =
+        (Option.map ~f:VocabularyFilterName.of_xml)
+          (Xml.child xml_arg0 "VocabularyFilterName") in
+      let vocabularyName =
+        (Option.map ~f:VocabularyName.of_xml)
+          (Xml.child xml_arg0 "VocabularyName") in
+      let channelIdentification =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "ChannelIdentification") in
+      let maxSpeakerLabels =
+        (Option.map ~f:MaxSpeakers.of_xml)
+          (Xml.child xml_arg0 "MaxSpeakerLabels") in
+      let showSpeakerLabels =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "ShowSpeakerLabels") in
+      make ?clinicalNoteGenerationSettings ?vocabularyFilterMethod
+        ?vocabularyFilterName ?vocabularyName ?channelIdentification
+        ?maxSpeakerLabels ?showSpeakerLabels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clinicalNoteGenerationSettings =
+        field_map json__ "ClinicalNoteGenerationSettings"
+          ClinicalNoteGenerationSettings.of_json in
+      let vocabularyFilterMethod =
+        field_map json__ "VocabularyFilterMethod"
+          VocabularyFilterMethod.of_json in
+      let vocabularyFilterName =
+        field_map json__ "VocabularyFilterName" VocabularyFilterName.of_json in
+      let vocabularyName =
+        field_map json__ "VocabularyName" VocabularyName.of_json in
+      let channelIdentification =
+        field_map json__ "ChannelIdentification" Boolean.of_json in
+      let maxSpeakerLabels =
+        field_map json__ "MaxSpeakerLabels" MaxSpeakers.of_json in
+      let showSpeakerLabels =
+        field_map json__ "ShowSpeakerLabels" Boolean.of_json in
+      make ?clinicalNoteGenerationSettings ?vocabularyFilterMethod
+        ?vocabularyFilterName ?vocabularyName ?channelIdentification
+        ?maxSpeakerLabels ?showSpeakerLabels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Makes it possible to control how your Medical Scribe job is processed using a MedicalScribeSettings object. Specify ChannelIdentification if ChannelDefinitions are set. Enabled ShowSpeakerLabels if ChannelIdentification and ChannelDefinitions are not set. One and only one of ChannelIdentification and ShowSpeakerLabels must be set. If ShowSpeakerLabels is set, MaxSpeakerLabels must also be set. Use Settings to specify a vocabulary or vocabulary filter or both using VocabularyName, VocabularyFilterName. VocabularyFilterMethod must be specified if VocabularyFilterName is set."]
+module MedicalScribePatientContext =
+  struct
+    type nonrec t =
+      {
+      pronouns: Pronouns.t option
+        [@ocaml.doc
+          "The patient's preferred pronouns that the user wants to provide as a context for clinical note generation."]}
+    let make ?pronouns = fun () -> { pronouns }
+    let to_value x =
+      structure_to_value
+        [("Pronouns", (Option.map x.pronouns ~f:Pronouns.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pronouns =
+        (Option.map ~f:Pronouns.of_xml) (Xml.child xml_arg0 "Pronouns") in
+      make ?pronouns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pronouns = field_map json__ "Pronouns" Pronouns.of_json in
+      make ?pronouns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains patient-specific information used to customize the clinical note generation."]
 module CallAnalyticsJobSettings =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t option
         [@ocaml.doc
-          "The name of a vocabulary to use when processing the call analytics job."];
+          "The name of the custom vocabulary you want to include in your Call Analytics transcription request. Custom vocabulary names are case sensitive."];
       vocabularyFilterName: VocabularyFilterName.t option
         [@ocaml.doc
-          "The name of the vocabulary filter to use when running a call analytics job. The filter that you specify must have the same language code as the analytics job."];
+          "The name of the custom vocabulary filter you want to include in your Call Analytics transcription request. Custom vocabulary filter names are case sensitive. Note that if you include VocabularyFilterName in your request, you must also include VocabularyFilterMethod."];
       vocabularyFilterMethod: VocabularyFilterMethod.t option
         [@ocaml.doc
-          "Set to mask to remove filtered text from the transcript and replace it with three asterisks (\"***\") as placeholder text. Set to remove to remove filtered text from the transcript without using placeholder text. Set to tag to mark the word in the transcription output that matches the vocabulary filter. When you set the filter method to tag, the words matching your vocabulary filter are not masked or removed."];
+          "Specify how you want your custom vocabulary filter applied to your transcript. To replace words with ***, choose mask. To delete words, choose remove. To flag words without changing them, choose tag."];
       languageModelName: ModelName.t option
         [@ocaml.doc
-          "The structure used to describe a custom language model."];
+          "The name of the custom language model you want to use when processing your Call Analytics job. Note that custom language model names are case sensitive. The language of the specified custom language model must match the language code that you specify in your transcription request. If the languages do not match, the custom language model isn't applied. There are no errors or warnings associated with a language mismatch."];
       contentRedaction: ContentRedaction.t option ;
       languageOptions: LanguageOptions.t option
         [@ocaml.doc
-          "When you run a call analytics job, you can specify the language spoken in the audio, or you can have Amazon Transcribe identify the language for you. To specify a language, specify an array with one language code. If you don't know the language, you can leave this field blank and Amazon Transcribe will use machine learning to identify the language for you. To improve the ability of Amazon Transcribe to correctly identify the language, you can provide an array of the languages that can be present in the audio. Refer to Supported languages for additional information."];
+          "You can specify two or more language codes that represent the languages you think may be present in your media. Including more than five is not recommended. If you're unsure what languages are present, do not include this parameter. Including language options can improve the accuracy of language identification. For a list of languages supported with Call Analytics, refer to the Supported languages table. To transcribe speech in Modern Standard Arabic (ar-SA) in Amazon Web Services GovCloud (US) (US-West, us-gov-west-1), Amazon Web Services GovCloud (US) (US-East, us-gov-east-1), Canada (Calgary) ca-west-1 and Africa (Cape Town) af-south-1, your media file must be encoded at a sample rate of 16,000 Hz or higher."];
       languageIdSettings: LanguageIdSettingsMap.t option
         [@ocaml.doc
-          "The language identification settings associated with your call analytics job. These settings include VocabularyName, VocabularyFilterName, and LanguageModelName."]}
+          "If using automatic language identification in your request and you want to apply a custom language model, a custom vocabulary, or a custom vocabulary filter, include LanguageIdSettings with the relevant sub-parameters (VocabularyName, LanguageModelName, and VocabularyFilterName). LanguageIdSettings supports two to five language codes. Each language code you include can have an associated custom language model, custom vocabulary, and custom vocabulary filter. The language codes that you specify must match the languages of the associated custom language models, custom vocabularies, and custom vocabulary filters. It's recommended that you include LanguageOptions when using LanguageIdSettings to ensure that the correct language dialect is identified. For example, if you specify a custom vocabulary that is in en-US but Amazon Transcribe determines that the language spoken in your media is en-AU, your custom vocabulary is not applied to your transcription. If you include LanguageOptions and include en-US as the only English language dialect, your custom vocabulary is applied to your transcription. If you want to include a custom language model, custom vocabulary, or custom vocabulary filter with your request but do not want to use automatic language identification, use instead the parameter with the LanguageModelName, VocabularyName, or VocabularyFilterName sub-parameters. For a list of languages supported with Call Analytics, refer to Supported languages and language-specific features."];
+      summarization: Summarization.t option
+        [@ocaml.doc
+          "Contains GenerateAbstractiveSummary, which is a required parameter if you want to enable Generative call summarization in your Call Analytics request."]}
     let make ?vocabularyName =
       fun ?vocabularyFilterName ->
         fun ?vocabularyFilterMethod ->
@@ -2523,16 +3583,18 @@ module CallAnalyticsJobSettings =
             fun ?contentRedaction ->
               fun ?languageOptions ->
                 fun ?languageIdSettings ->
-                  fun () ->
-                    {
-                      vocabularyName;
-                      vocabularyFilterName;
-                      vocabularyFilterMethod;
-                      languageModelName;
-                      contentRedaction;
-                      languageOptions;
-                      languageIdSettings
-                    }
+                  fun ?summarization ->
+                    fun () ->
+                      {
+                        vocabularyName;
+                        vocabularyFilterName;
+                        vocabularyFilterMethod;
+                        languageModelName;
+                        contentRedaction;
+                        languageOptions;
+                        languageIdSettings;
+                        summarization
+                      }
     let to_value x =
       structure_to_value
         [("VocabularyName",
@@ -2549,9 +3611,14 @@ module CallAnalyticsJobSettings =
         ("LanguageOptions",
           (Option.map x.languageOptions ~f:LanguageOptions.to_value));
         ("LanguageIdSettings",
-          (Option.map x.languageIdSettings ~f:LanguageIdSettingsMap.to_value))]
+          (Option.map x.languageIdSettings ~f:LanguageIdSettingsMap.to_value));
+        ("Summarization",
+          (Option.map x.summarization ~f:Summarization.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let summarization =
+        (Option.map ~f:Summarization.of_xml)
+          (Xml.child xml_arg0 "Summarization") in
       let languageIdSettings =
         (Option.map ~f:LanguageIdSettingsMap.of_xml)
           (Xml.child xml_arg0 "LanguageIdSettings") in
@@ -2573,32 +3640,34 @@ module CallAnalyticsJobSettings =
       let vocabularyName =
         (Option.map ~f:VocabularyName.of_xml)
           (Xml.child xml_arg0 "VocabularyName") in
-      make ?languageIdSettings ?languageOptions ?contentRedaction
-        ?languageModelName ?vocabularyFilterMethod ?vocabularyFilterName
-        ?vocabularyName ()
+      make ?summarization ?languageIdSettings ?languageOptions
+        ?contentRedaction ?languageModelName ?vocabularyFilterMethod
+        ?vocabularyFilterName ?vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let summarization =
+        field_map json__ "Summarization" Summarization.of_json in
       let languageIdSettings =
-        field_map json "LanguageIdSettings" LanguageIdSettingsMap.of_json in
+        field_map json__ "LanguageIdSettings" LanguageIdSettingsMap.of_json in
       let languageOptions =
-        field_map json "LanguageOptions" LanguageOptions.of_json in
+        field_map json__ "LanguageOptions" LanguageOptions.of_json in
       let contentRedaction =
-        field_map json "ContentRedaction" ContentRedaction.of_json in
+        field_map json__ "ContentRedaction" ContentRedaction.of_json in
       let languageModelName =
-        field_map json "LanguageModelName" ModelName.of_json in
+        field_map json__ "LanguageModelName" ModelName.of_json in
       let vocabularyFilterMethod =
-        field_map json "VocabularyFilterMethod"
+        field_map json__ "VocabularyFilterMethod"
           VocabularyFilterMethod.of_json in
       let vocabularyFilterName =
-        field_map json "VocabularyFilterName" VocabularyFilterName.of_json in
+        field_map json__ "VocabularyFilterName" VocabularyFilterName.of_json in
       let vocabularyName =
-        field_map json "VocabularyName" VocabularyName.of_json in
-      make ?languageIdSettings ?languageOptions ?contentRedaction
-        ?languageModelName ?vocabularyFilterMethod ?vocabularyFilterName
-        ?vocabularyName ()
+        field_map json__ "VocabularyName" VocabularyName.of_json in
+      make ?summarization ?languageIdSettings ?languageOptions
+        ?contentRedaction ?languageModelName ?vocabularyFilterMethod
+        ?vocabularyFilterName ?vocabularyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides optional settings for the CallAnalyticsJob operation."]
+       "Provides additional optional settings for your request, including content redaction, automatic language identification; allows you to apply custom language models, custom vocabulary filters, and custom vocabularies."]
 module ChannelDefinitions =
   struct
     type nonrec t = ChannelDefinition.t list
@@ -2607,6 +3676,9 @@ module ChannelDefinitions =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:2));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelDefinition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2634,13 +3706,13 @@ module VocabularyFilterInfo =
       {
       vocabularyFilterName: VocabularyFilterName.t option
         [@ocaml.doc
-          "The name of the vocabulary filter. The name must be unique in the account that holds the filter."];
+          "A unique name, chosen by you, for your custom vocabulary filter. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "The language code of the words in the vocabulary filter."];
+          "The language code that represents the language of the entries in your vocabulary filter. Each custom vocabulary filter must contain terms in only one language. A custom vocabulary filter can only be used to transcribe files in the same language as the filter. For example, if you create a custom vocabulary filter using US English (en-US), you can only apply this filter to files that contain English audio. For a list of supported languages and their associated language codes, refer to the Supported languages table."];
       lastModifiedTime: DateTime.t option
         [@ocaml.doc
-          "The date and time that the vocabulary was last updated."]}
+          "The date and time the specified custom vocabulary filter was last modified. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."]}
     let make ?vocabularyFilterName =
       fun ?languageCode ->
         fun ?lastModifiedTime ->
@@ -2667,29 +3739,32 @@ module VocabularyFilterInfo =
           (Xml.child xml_arg0 "VocabularyFilterName") in
       make ?lastModifiedTime ?languageCode ?vocabularyFilterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyFilterName =
-        field_map json "VocabularyFilterName" VocabularyFilterName.of_json in
+        field_map json__ "VocabularyFilterName" VocabularyFilterName.of_json in
       make ?lastModifiedTime ?languageCode ?vocabularyFilterName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Provides information about a vocabulary filter."]
+  end[@@ocaml.doc
+       "Provides information about a custom vocabulary filter, including the language of the filter, when it was last modified, and its name."]
 module VocabularyInfo =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t option
-        [@ocaml.doc "The name of the vocabulary."];
+        [@ocaml.doc
+          "A unique name, chosen by you, for your custom vocabulary. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account."];
       languageCode: LanguageCode.t option
-        [@ocaml.doc "The language code of the vocabulary entries."];
+        [@ocaml.doc
+          "The language code used to create your custom vocabulary. Each custom vocabulary must contain terms in only one language. A custom vocabulary can only be used to transcribe files in the same language as the custom vocabulary. For example, if you create a custom vocabulary using US English (en-US), you can only apply this custom vocabulary to files that contain English audio."];
       lastModifiedTime: DateTime.t option
         [@ocaml.doc
-          "The date and time that the vocabulary was last modified."];
+          "The date and time the specified custom vocabulary was last modified. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."];
       vocabularyState: VocabularyState.t option
         [@ocaml.doc
-          "The processing state of the vocabulary. If the state is READY you can use the vocabulary in a StartTranscriptionJob request."]}
+          "The processing state of your custom vocabulary. If the state is READY, you can use the custom vocabulary in a StartTranscriptionJob request."]}
     let make ?vocabularyName =
       fun ?languageCode ->
         fun ?lastModifiedTime ->
@@ -2728,52 +3803,65 @@ module VocabularyInfo =
       make ?vocabularyState ?lastModifiedTime ?languageCode ?vocabularyName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vocabularyState =
-        field_map json "VocabularyState" VocabularyState.of_json in
+        field_map json__ "VocabularyState" VocabularyState.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyName =
-        field_map json "VocabularyName" VocabularyName.of_json in
+        field_map json__ "VocabularyName" VocabularyName.of_json in
       make ?vocabularyState ?lastModifiedTime ?languageCode ?vocabularyName
         ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Provides information about a custom vocabulary."]
+  end[@@ocaml.doc
+       "Provides information about a custom vocabulary, including the language of the custom vocabulary, when it was last modified, its name, and the processing state."]
 module TranscriptionJobSummary =
   struct
     type nonrec t =
       {
       transcriptionJobName: TranscriptionJobName.t option
-        [@ocaml.doc "The name of the transcription job."];
+        [@ocaml.doc
+          "The name of the transcription job. Job names are case sensitive and must be unique within an Amazon Web Services account."];
       creationTime: DateTime.t option
-        [@ocaml.doc "A timestamp that shows when the job was created."];
+        [@ocaml.doc
+          "The date and time the specified transcription job request was made. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents a transcription job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
       startTime: DateTime.t option
         [@ocaml.doc
-          "A timestamp that shows when the job started processing."];
+          "The date and time your transcription job began processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.789000-07:00 represents a transcription job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
       completionTime: DateTime.t option
-        [@ocaml.doc "A timestamp that shows when the job was completed."];
+        [@ocaml.doc
+          "The date and time the specified transcription job finished processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:33:13.922000-07:00 represents a transcription job that started processing at 12:33 PM UTC-7 on May 4, 2022."];
       languageCode: LanguageCode.t option
-        [@ocaml.doc "The language code for the input speech."];
+        [@ocaml.doc "The language code used to create your transcription."];
       transcriptionJobStatus: TranscriptionJobStatus.t option
         [@ocaml.doc
-          "The status of the transcription job. When the status is COMPLETED, use the GetTranscriptionJob operation to get the results of the transcription."];
+          "Provides the status of your transcription job. If the status is COMPLETED, the job is finished and you can find the results at the location specified in TranscriptFileUri (or RedactedTranscriptFileUri, if you requested transcript redaction). If the status is FAILED, FailureReason provides details on why your transcription job failed."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "If the TranscriptionJobStatus field is FAILED, a description of the error."];
+          "If TranscriptionJobStatus is FAILED, FailureReason contains information about why the transcription job failed. See also: Common Errors."];
       outputLocationType: OutputLocationType.t option
         [@ocaml.doc
-          "Indicates the location of the output of the transcription job. If the value is CUSTOMER_BUCKET then the location is the S3 bucket specified in the outputBucketName field when the transcription job was started with the StartTranscriptionJob operation. If the value is SERVICE_BUCKET then the output is stored by Amazon Transcribe and can be retrieved using the URI in the GetTranscriptionJob response's TranscriptFileUri field."];
+          "Indicates where the specified transcription output is stored. If the value is CUSTOMER_BUCKET, the location is the Amazon S3 bucket you specified using the OutputBucketName parameter in your request. If you also included OutputKey in your request, your output is located in the path you specified in your request. If the value is SERVICE_BUCKET, the location is a service-managed Amazon S3 bucket. To access a transcript stored in a service-managed bucket, use the URI shown in the TranscriptFileUri or RedactedTranscriptFileUri field."];
       contentRedaction: ContentRedaction.t option
         [@ocaml.doc
           "The content redaction settings of the transcription job."];
       modelSettings: ModelSettings.t option ;
       identifyLanguage: Boolean.t option
         [@ocaml.doc
-          "Whether automatic language identification was enabled for a transcription job."];
+          "Indicates whether automatic language identification was enabled (TRUE) for the specified transcription job."];
+      identifyMultipleLanguages: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether automatic multi-language identification was enabled (TRUE) for the specified transcription job."];
       identifiedLanguageScore: IdentifiedLanguageScore.t option
         [@ocaml.doc
-          "A value between zero and one that Amazon Transcribe assigned to the language it identified in the source audio. A higher score indicates that Amazon Transcribe is more confident in the language it identified."]}
+          "The confidence score associated with the language identified in your media file. Confidence scores are values between 0 and 1; a larger value indicates a higher probability that the identified language correctly matches the language spoken in your media."];
+      languageCodes: LanguageCodeList.t option
+        [@ocaml.doc
+          "The language codes used to create your transcription job. This parameter is used with multi-language identification. For single-language identification, the singular version of this parameter, LanguageCode, is present."];
+      toxicityDetection: ToxicityDetection.t option
+        [@ocaml.doc
+          "Indicates whether toxicity detection was enabled for the specified transcription job."]}
     let make ?transcriptionJobName =
       fun ?creationTime ->
         fun ?startTime ->
@@ -2785,22 +3873,28 @@ module TranscriptionJobSummary =
                     fun ?contentRedaction ->
                       fun ?modelSettings ->
                         fun ?identifyLanguage ->
-                          fun ?identifiedLanguageScore ->
-                            fun () ->
-                              {
-                                transcriptionJobName;
-                                creationTime;
-                                startTime;
-                                completionTime;
-                                languageCode;
-                                transcriptionJobStatus;
-                                failureReason;
-                                outputLocationType;
-                                contentRedaction;
-                                modelSettings;
-                                identifyLanguage;
-                                identifiedLanguageScore
-                              }
+                          fun ?identifyMultipleLanguages ->
+                            fun ?identifiedLanguageScore ->
+                              fun ?languageCodes ->
+                                fun ?toxicityDetection ->
+                                  fun () ->
+                                    {
+                                      transcriptionJobName;
+                                      creationTime;
+                                      startTime;
+                                      completionTime;
+                                      languageCode;
+                                      transcriptionJobStatus;
+                                      failureReason;
+                                      outputLocationType;
+                                      contentRedaction;
+                                      modelSettings;
+                                      identifyLanguage;
+                                      identifyMultipleLanguages;
+                                      identifiedLanguageScore;
+                                      languageCodes;
+                                      toxicityDetection
+                                    }
     let to_value x =
       structure_to_value
         [("TranscriptionJobName",
@@ -2825,14 +3919,29 @@ module TranscriptionJobSummary =
           (Option.map x.modelSettings ~f:ModelSettings.to_value));
         ("IdentifyLanguage",
           (Option.map x.identifyLanguage ~f:Boolean.to_value));
+        ("IdentifyMultipleLanguages",
+          (Option.map x.identifyMultipleLanguages ~f:Boolean.to_value));
         ("IdentifiedLanguageScore",
           (Option.map x.identifiedLanguageScore
-             ~f:IdentifiedLanguageScore.to_value))]
+             ~f:IdentifiedLanguageScore.to_value));
+        ("LanguageCodes",
+          (Option.map x.languageCodes ~f:LanguageCodeList.to_value));
+        ("ToxicityDetection",
+          (Option.map x.toxicityDetection ~f:ToxicityDetection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let toxicityDetection =
+        (Option.map ~f:ToxicityDetection.of_xml)
+          (Xml.child xml_arg0 "ToxicityDetection") in
+      let languageCodes =
+        (Option.map ~f:LanguageCodeList.of_xml)
+          (Xml.child xml_arg0 "LanguageCodes") in
       let identifiedLanguageScore =
         (Option.map ~f:IdentifiedLanguageScore.of_xml)
           (Xml.child xml_arg0 "IdentifiedLanguageScore") in
+      let identifyMultipleLanguages =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "IdentifyMultipleLanguages") in
       let identifyLanguage =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "IdentifyLanguage") in
@@ -2863,73 +3972,86 @@ module TranscriptionJobSummary =
       let transcriptionJobName =
         (Option.map ~f:TranscriptionJobName.of_xml)
           (Xml.child xml_arg0 "TranscriptionJobName") in
-      make ?identifiedLanguageScore ?identifyLanguage ?modelSettings
+      make ?toxicityDetection ?languageCodes ?identifiedLanguageScore
+        ?identifyMultipleLanguages ?identifyLanguage ?modelSettings
         ?contentRedaction ?outputLocationType ?failureReason
         ?transcriptionJobStatus ?languageCode ?completionTime ?startTime
         ?creationTime ?transcriptionJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let toxicityDetection =
+        field_map json__ "ToxicityDetection" ToxicityDetection.of_json in
+      let languageCodes =
+        field_map json__ "LanguageCodes" LanguageCodeList.of_json in
       let identifiedLanguageScore =
-        field_map json "IdentifiedLanguageScore"
+        field_map json__ "IdentifiedLanguageScore"
           IdentifiedLanguageScore.of_json in
+      let identifyMultipleLanguages =
+        field_map json__ "IdentifyMultipleLanguages" Boolean.of_json in
       let identifyLanguage =
-        field_map json "IdentifyLanguage" Boolean.of_json in
+        field_map json__ "IdentifyLanguage" Boolean.of_json in
       let modelSettings =
-        field_map json "ModelSettings" ModelSettings.of_json in
+        field_map json__ "ModelSettings" ModelSettings.of_json in
       let contentRedaction =
-        field_map json "ContentRedaction" ContentRedaction.of_json in
+        field_map json__ "ContentRedaction" ContentRedaction.of_json in
       let outputLocationType =
-        field_map json "OutputLocationType" OutputLocationType.of_json in
+        field_map json__ "OutputLocationType" OutputLocationType.of_json in
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
       let transcriptionJobStatus =
-        field_map json "TranscriptionJobStatus"
+        field_map json__ "TranscriptionJobStatus"
           TranscriptionJobStatus.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let completionTime = field_map json "CompletionTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let completionTime = field_map json__ "CompletionTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
       let transcriptionJobName =
-        field_map json "TranscriptionJobName" TranscriptionJobName.of_json in
-      make ?identifiedLanguageScore ?identifyLanguage ?modelSettings
+        field_map json__ "TranscriptionJobName" TranscriptionJobName.of_json in
+      make ?toxicityDetection ?languageCodes ?identifiedLanguageScore
+        ?identifyMultipleLanguages ?identifyLanguage ?modelSettings
         ?contentRedaction ?outputLocationType ?failureReason
         ?transcriptionJobStatus ?languageCode ?completionTime ?startTime
         ?creationTime ?transcriptionJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a summary of information about a transcription job."]
+       "Provides detailed information about a specific transcription job."]
 module MedicalTranscriptionJobSummary =
   struct
     type nonrec t =
       {
       medicalTranscriptionJobName: TranscriptionJobName.t option
-        [@ocaml.doc "The name of a medical transcription job."];
+        [@ocaml.doc
+          "The name of the medical transcription job. Job names are case sensitive and must be unique within an Amazon Web Services account."];
       creationTime: DateTime.t option
         [@ocaml.doc
-          "A timestamp that shows when the medical transcription job was created."];
+          "The date and time the specified medical transcription job request was made. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents a transcription job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
       startTime: DateTime.t option
-        [@ocaml.doc "A timestamp that shows when the job began processing."];
+        [@ocaml.doc
+          "The date and time your medical transcription job began processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.789000-07:00 represents a transcription job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
       completionTime: DateTime.t option
-        [@ocaml.doc "A timestamp that shows when the job was completed."];
+        [@ocaml.doc
+          "The date and time the specified medical transcription job finished processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:33:13.922000-07:00 represents a transcription job that started processing at 12:33 PM UTC-7 on May 4, 2022."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "The language of the transcript in the source audio file."];
+          "The language code used to create your medical transcription. US English (en-US) is the only supported language for medical transcriptions."];
       transcriptionJobStatus: TranscriptionJobStatus.t option
-        [@ocaml.doc "The status of the medical transcription job."];
+        [@ocaml.doc
+          "Provides the status of your medical transcription job. If the status is COMPLETED, the job is finished and you can find the results at the location specified in TranscriptFileUri. If the status is FAILED, FailureReason provides details on why your transcription job failed."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "If the TranscriptionJobStatus field is FAILED, a description of the error."];
+          "If TranscriptionJobStatus is FAILED, FailureReason contains information about why the transcription job failed. See also: Common Errors."];
       outputLocationType: OutputLocationType.t option
         [@ocaml.doc
-          "Indicates the location of the transcription job's output. This field must be the path of an S3 bucket; if you don't already have an S3 bucket, one is created based on the path you add."];
+          "Indicates where the specified medical transcription output is stored. If the value is CUSTOMER_BUCKET, the location is the Amazon S3 bucket you specified using the OutputBucketName parameter in your request. If you also included OutputKey in your request, your output is located in the path you specified in your request. If the value is SERVICE_BUCKET, the location is a service-managed Amazon S3 bucket. To access a transcript stored in a service-managed bucket, use the URI shown in the TranscriptFileUri field."];
       specialty: Specialty.t option
         [@ocaml.doc
-          "The medical specialty of the transcription job. Refer to Transcribing a medical conversationfor a list of supported specialties."];
+          "Provides the medical specialty represented in your media."];
       contentIdentificationType: MedicalContentIdentificationType.t option
         [@ocaml.doc
-          "Shows the type of information you've configured Amazon Transcribe Medical to identify in a transcription job. If the value is PHI, you've configured the transcription job to identify personal health information (PHI)."];
+          "Labels all personal health information (PHI) identified in your transcript. For more information, see Identifying personal health information (PHI) in a transcription."];
       type_: Type.t option
-        [@ocaml.doc "The speech of the clinician in the input audio."]}
+        [@ocaml.doc
+          "Indicates whether the input media is a dictation or a conversation, as specified in the StartMedicalTranscriptionJob request."]}
     let make ?medicalTranscriptionJobName =
       fun ?creationTime ->
         fun ?startTime ->
@@ -3011,60 +4133,162 @@ module MedicalTranscriptionJobSummary =
         ?failureReason ?transcriptionJobStatus ?languageCode ?completionTime
         ?startTime ?creationTime ?medicalTranscriptionJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" Type.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" Type.of_json in
       let contentIdentificationType =
-        field_map json "ContentIdentificationType"
+        field_map json__ "ContentIdentificationType"
           MedicalContentIdentificationType.of_json in
-      let specialty = field_map json "Specialty" Specialty.of_json in
+      let specialty = field_map json__ "Specialty" Specialty.of_json in
       let outputLocationType =
-        field_map json "OutputLocationType" OutputLocationType.of_json in
+        field_map json__ "OutputLocationType" OutputLocationType.of_json in
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
       let transcriptionJobStatus =
-        field_map json "TranscriptionJobStatus"
+        field_map json__ "TranscriptionJobStatus"
           TranscriptionJobStatus.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let completionTime = field_map json "CompletionTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let completionTime = field_map json__ "CompletionTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
       let medicalTranscriptionJobName =
-        field_map json "MedicalTranscriptionJobName"
+        field_map json__ "MedicalTranscriptionJobName"
           TranscriptionJobName.of_json in
       make ?type_ ?contentIdentificationType ?specialty ?outputLocationType
         ?failureReason ?transcriptionJobStatus ?languageCode ?completionTime
         ?startTime ?creationTime ?medicalTranscriptionJobName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Provides summary information about a transcription job."]
+  end[@@ocaml.doc
+       "Provides detailed information about a specific medical transcription job."]
+module MedicalScribeJobSummary =
+  struct
+    type nonrec t =
+      {
+      medicalScribeJobName: TranscriptionJobName.t option
+        [@ocaml.doc
+          "The name of the Medical Scribe job. Job names are case sensitive and must be unique within an Amazon Web Services account."];
+      creationTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time the specified Medical Scribe job request was made. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents a Medical Scribe job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
+      startTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time your Medical Scribe job began processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.789000-07:00 represents a Medical Scribe job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
+      completionTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time the specified Medical Scribe job finished processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents a Medical Scribe job that finished processing at 12:32 PM UTC-7 on May 4, 2022."];
+      languageCode: MedicalScribeLanguageCode.t option
+        [@ocaml.doc
+          "The language code used to create your Medical Scribe job. US English (en-US) is the only supported language for Medical Scribe jobs."];
+      medicalScribeJobStatus: MedicalScribeJobStatus.t option
+        [@ocaml.doc
+          "Provides the status of the specified Medical Scribe job. If the status is COMPLETED, the job is finished and you can find the results at the location specified in MedicalScribeOutput If the status is FAILED, FailureReason provides details on why your Medical Scribe job failed."];
+      failureReason: FailureReason.t option
+        [@ocaml.doc
+          "If MedicalScribeJobStatus is FAILED, FailureReason contains information about why the transcription job failed. See also: Common Errors."]}
+    let make ?medicalScribeJobName =
+      fun ?creationTime ->
+        fun ?startTime ->
+          fun ?completionTime ->
+            fun ?languageCode ->
+              fun ?medicalScribeJobStatus ->
+                fun ?failureReason ->
+                  fun () ->
+                    {
+                      medicalScribeJobName;
+                      creationTime;
+                      startTime;
+                      completionTime;
+                      languageCode;
+                      medicalScribeJobStatus;
+                      failureReason
+                    }
+    let to_value x =
+      structure_to_value
+        [("MedicalScribeJobName",
+           (Option.map x.medicalScribeJobName
+              ~f:TranscriptionJobName.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:DateTime.to_value));
+        ("StartTime", (Option.map x.startTime ~f:DateTime.to_value));
+        ("CompletionTime",
+          (Option.map x.completionTime ~f:DateTime.to_value));
+        ("LanguageCode",
+          (Option.map x.languageCode ~f:MedicalScribeLanguageCode.to_value));
+        ("MedicalScribeJobStatus",
+          (Option.map x.medicalScribeJobStatus
+             ~f:MedicalScribeJobStatus.to_value));
+        ("FailureReason",
+          (Option.map x.failureReason ~f:FailureReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureReason =
+        (Option.map ~f:FailureReason.of_xml)
+          (Xml.child xml_arg0 "FailureReason") in
+      let medicalScribeJobStatus =
+        (Option.map ~f:MedicalScribeJobStatus.of_xml)
+          (Xml.child xml_arg0 "MedicalScribeJobStatus") in
+      let languageCode =
+        (Option.map ~f:MedicalScribeLanguageCode.of_xml)
+          (Xml.child xml_arg0 "LanguageCode") in
+      let completionTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CompletionTime") in
+      let startTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let creationTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let medicalScribeJobName =
+        (Option.map ~f:TranscriptionJobName.of_xml)
+          (Xml.child xml_arg0 "MedicalScribeJobName") in
+      make ?failureReason ?medicalScribeJobStatus ?languageCode
+        ?completionTime ?startTime ?creationTime ?medicalScribeJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureReason =
+        field_map json__ "FailureReason" FailureReason.of_json in
+      let medicalScribeJobStatus =
+        field_map json__ "MedicalScribeJobStatus"
+          MedicalScribeJobStatus.of_json in
+      let languageCode =
+        field_map json__ "LanguageCode" MedicalScribeLanguageCode.of_json in
+      let completionTime = field_map json__ "CompletionTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
+      let medicalScribeJobName =
+        field_map json__ "MedicalScribeJobName" TranscriptionJobName.of_json in
+      make ?failureReason ?medicalScribeJobStatus ?languageCode
+        ?completionTime ?startTime ?creationTime ?medicalScribeJobName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides detailed information about a specific Medical Scribe job."]
 module LanguageModel =
   struct
     type nonrec t =
       {
       modelName: ModelName.t option
-        [@ocaml.doc "The name of the custom language model."];
+        [@ocaml.doc
+          "A unique name, chosen by you, for your custom language model. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account."];
       createTime: DateTime.t option
-        [@ocaml.doc "The time the custom language model was created."];
+        [@ocaml.doc
+          "The date and time the specified custom language model was created. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."];
       lastModifiedTime: DateTime.t option
         [@ocaml.doc
-          "The most recent time the custom language model was modified."];
+          "The date and time the specified custom language model was last modified. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."];
       languageCode: CLMLanguageCode.t option
         [@ocaml.doc
-          "The language code you used to create your custom language model."];
+          "The language code used to create your custom language model. Each custom language model must contain terms in only one language, and the language you select for your custom language model must match the language of your training and tuning data. For a list of supported languages and their associated language codes, refer to the Supported languages table. Note that US English (en-US) is the only language supported with Amazon Transcribe Medical."];
       baseModelName: BaseModelName.t option
         [@ocaml.doc
-          "The Amazon Transcribe standard language model, or base model used to create the custom language model."];
+          "The Amazon Transcribe standard language model, or base model, used to create your custom language model."];
       modelStatus: ModelStatus.t option
         [@ocaml.doc
-          "The creation status of a custom language model. When the status is COMPLETED the model is ready for use."];
+          "The status of the specified custom language model. When the status displays as COMPLETED the model is ready for use."];
       upgradeAvailability: Boolean.t option
         [@ocaml.doc
-          "Whether the base model used for the custom language model is up to date. If this field is false then you are running the most up-to-date version of the base model in your custom language model."];
+          "Shows if a more current base model is available for use with the specified custom language model. If false, your custom language model is using the most up-to-date base model. If true, there is a newer base model available than the one your language model is using. Note that to update a base model, you must recreate the custom language model using the new base model. Base model upgrades for existing custom language models are not supported."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "The reason why the custom language model couldn't be created."];
+          "If ModelStatus is FAILED, FailureReason contains information about why the custom language model request failed. See also: Common Errors."];
       inputDataConfig: InputDataConfig.t option
         [@ocaml.doc
-          "The data access role and Amazon S3 prefixes for the input files used to train the custom language model."]}
+          "The Amazon S3 location of the input files used to train and tune your custom language model, in addition to the data access role ARN (Amazon Resource Name) that has permissions to access these data."]}
     let make ?modelName =
       fun ?createTime ->
         fun ?lastModifiedTime ->
@@ -3133,65 +4357,75 @@ module LanguageModel =
         ?baseModelName ?languageCode ?lastModifiedTime ?createTime ?modelName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
       let upgradeAvailability =
-        field_map json "UpgradeAvailability" Boolean.of_json in
-      let modelStatus = field_map json "ModelStatus" ModelStatus.of_json in
+        field_map json__ "UpgradeAvailability" Boolean.of_json in
+      let modelStatus = field_map json__ "ModelStatus" ModelStatus.of_json in
       let baseModelName =
-        field_map json "BaseModelName" BaseModelName.of_json in
+        field_map json__ "BaseModelName" BaseModelName.of_json in
       let languageCode =
-        field_map json "LanguageCode" CLMLanguageCode.of_json in
+        field_map json__ "LanguageCode" CLMLanguageCode.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
-      let createTime = field_map json "CreateTime" DateTime.of_json in
-      let modelName = field_map json "ModelName" ModelName.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
+      let createTime = field_map json__ "CreateTime" DateTime.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
       make ?inputDataConfig ?failureReason ?upgradeAvailability ?modelStatus
         ?baseModelName ?languageCode ?lastModifiedTime ?createTime ?modelName
         ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The structure used to describe a custom language model."]
+  end[@@ocaml.doc
+       "Provides information about a custom language model, including: The base model name When the model was created The location of the files used to train the model When the model was last modified The name you chose for the model The model's language The model's processing state Any available upgrades for the base model"]
 module CallAnalyticsJobSummary =
   struct
     type nonrec t =
       {
       callAnalyticsJobName: CallAnalyticsJobName.t option
-        [@ocaml.doc "The name of the call analytics job."];
+        [@ocaml.doc
+          "The name of the Call Analytics job. Job names are case sensitive and must be unique within an Amazon Web Services account."];
       creationTime: DateTime.t option
         [@ocaml.doc
-          "A timestamp that shows when the call analytics job was created."];
+          "The date and time the specified Call Analytics job request was made. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents a transcription job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
       startTime: DateTime.t option
-        [@ocaml.doc "A timestamp that shows when the job began processing."];
+        [@ocaml.doc
+          "The date and time your Call Analytics job began processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.789000-07:00 represents a transcription job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
       completionTime: DateTime.t option
-        [@ocaml.doc "A timestamp that shows when the job was completed."];
+        [@ocaml.doc
+          "The date and time the specified Call Analytics job finished processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:33:13.922000-07:00 represents a transcription job that started processing at 12:33 PM UTC-7 on May 4, 2022."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "The language of the transcript in the source audio file."];
+          "The language code used to create your Call Analytics transcription."];
       callAnalyticsJobStatus: CallAnalyticsJobStatus.t option
-        [@ocaml.doc "The status of the call analytics job."];
+        [@ocaml.doc
+          "Provides the status of your Call Analytics job. If the status is COMPLETED, the job is finished and you can find the results at the location specified in TranscriptFileUri (or RedactedTranscriptFileUri, if you requested transcript redaction). If the status is FAILED, FailureReason provides details on why your transcription job failed."];
+      callAnalyticsJobDetails: CallAnalyticsJobDetails.t option
+        [@ocaml.doc
+          "Provides detailed information about a call analytics job, including information about skipped analytics features."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "If the CallAnalyticsJobStatus is FAILED, a description of the error."]}
+          "If CallAnalyticsJobStatus is FAILED, FailureReason contains information about why the Call Analytics job failed. See also: Common Errors."]}
     let make ?callAnalyticsJobName =
       fun ?creationTime ->
         fun ?startTime ->
           fun ?completionTime ->
             fun ?languageCode ->
               fun ?callAnalyticsJobStatus ->
-                fun ?failureReason ->
-                  fun () ->
-                    {
-                      callAnalyticsJobName;
-                      creationTime;
-                      startTime;
-                      completionTime;
-                      languageCode;
-                      callAnalyticsJobStatus;
-                      failureReason
-                    }
+                fun ?callAnalyticsJobDetails ->
+                  fun ?failureReason ->
+                    fun () ->
+                      {
+                        callAnalyticsJobName;
+                        creationTime;
+                        startTime;
+                        completionTime;
+                        languageCode;
+                        callAnalyticsJobStatus;
+                        callAnalyticsJobDetails;
+                        failureReason
+                      }
     let to_value x =
       structure_to_value
         [("CallAnalyticsJobName",
@@ -3206,6 +4440,9 @@ module CallAnalyticsJobSummary =
         ("CallAnalyticsJobStatus",
           (Option.map x.callAnalyticsJobStatus
              ~f:CallAnalyticsJobStatus.to_value));
+        ("CallAnalyticsJobDetails",
+          (Option.map x.callAnalyticsJobDetails
+             ~f:CallAnalyticsJobDetails.to_value));
         ("FailureReason",
           (Option.map x.failureReason ~f:FailureReason.to_value))]
     let to_query v = to_query to_value v
@@ -3213,6 +4450,9 @@ module CallAnalyticsJobSummary =
       let failureReason =
         (Option.map ~f:FailureReason.of_xml)
           (Xml.child xml_arg0 "FailureReason") in
+      let callAnalyticsJobDetails =
+        (Option.map ~f:CallAnalyticsJobDetails.of_xml)
+          (Xml.child xml_arg0 "CallAnalyticsJobDetails") in
       let callAnalyticsJobStatus =
         (Option.map ~f:CallAnalyticsJobStatus.of_xml)
           (Xml.child xml_arg0 "CallAnalyticsJobStatus") in
@@ -3228,44 +4468,68 @@ module CallAnalyticsJobSummary =
       let callAnalyticsJobName =
         (Option.map ~f:CallAnalyticsJobName.of_xml)
           (Xml.child xml_arg0 "CallAnalyticsJobName") in
-      make ?failureReason ?callAnalyticsJobStatus ?languageCode
-        ?completionTime ?startTime ?creationTime ?callAnalyticsJobName ()
+      make ?failureReason ?callAnalyticsJobDetails ?callAnalyticsJobStatus
+        ?languageCode ?completionTime ?startTime ?creationTime
+        ?callAnalyticsJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
+      let callAnalyticsJobDetails =
+        field_map json__ "CallAnalyticsJobDetails"
+          CallAnalyticsJobDetails.of_json in
       let callAnalyticsJobStatus =
-        field_map json "CallAnalyticsJobStatus"
+        field_map json__ "CallAnalyticsJobStatus"
           CallAnalyticsJobStatus.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let completionTime = field_map json "CompletionTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let completionTime = field_map json__ "CompletionTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
       let callAnalyticsJobName =
-        field_map json "CallAnalyticsJobName" CallAnalyticsJobName.of_json in
-      make ?failureReason ?callAnalyticsJobStatus ?languageCode
-        ?completionTime ?startTime ?creationTime ?callAnalyticsJobName ()
+        field_map json__ "CallAnalyticsJobName" CallAnalyticsJobName.of_json in
+      make ?failureReason ?callAnalyticsJobDetails ?callAnalyticsJobStatus
+        ?languageCode ?completionTime ?startTime ?creationTime
+        ?callAnalyticsJobName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Provides summary information about a call analytics job."]
+  end[@@ocaml.doc
+       "Provides detailed information about a specific Call Analytics job."]
 module CategoryProperties =
   struct
     type nonrec t =
       {
       categoryName: CategoryName.t option
-        [@ocaml.doc "The name of the call analytics category."];
+        [@ocaml.doc
+          "The name of the Call Analytics category. Category names are case sensitive and must be unique within an Amazon Web Services account."];
       rules: RuleList.t option
-        [@ocaml.doc "The rules used to create a call analytics category."];
+        [@ocaml.doc
+          "The rules used to define a Call Analytics category. Each category can have between 1 and 20 rules."];
       createTime: DateTime.t option
         [@ocaml.doc
-          "A timestamp that shows when the call analytics category was created."];
+          "The date and time the specified Call Analytics category was created. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."];
       lastUpdateTime: DateTime.t option
         [@ocaml.doc
-          "A timestamp that shows when the call analytics category was most recently updated."]}
+          "The date and time the specified Call Analytics category was last updated. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-05T12:45:32.691000-07:00 represents 12:45 PM UTC-7 on May 5, 2022."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The tags, each in the form of a key:value pair, assigned to the specified call analytics category."];
+      inputType: InputType.t option
+        [@ocaml.doc
+          "The input type associated with the specified category. POST_CALL refers to a category that is applied to batch transcriptions; REAL_TIME refers to a category that is applied to streaming transcriptions."]}
     let make ?categoryName =
       fun ?rules ->
         fun ?createTime ->
           fun ?lastUpdateTime ->
-            fun () -> { categoryName; rules; createTime; lastUpdateTime }
+            fun ?tags ->
+              fun ?inputType ->
+                fun () ->
+                  {
+                    categoryName;
+                    rules;
+                    createTime;
+                    lastUpdateTime;
+                    tags;
+                    inputType
+                  }
     let to_value x =
       structure_to_value
         [("CategoryName",
@@ -3273,9 +4537,14 @@ module CategoryProperties =
         ("Rules", (Option.map x.rules ~f:RuleList.to_value));
         ("CreateTime", (Option.map x.createTime ~f:DateTime.to_value));
         ("LastUpdateTime",
-          (Option.map x.lastUpdateTime ~f:DateTime.to_value))]
+          (Option.map x.lastUpdateTime ~f:DateTime.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("InputType", (Option.map x.inputType ~f:InputType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let inputType =
+        (Option.map ~f:InputType.of_xml) (Xml.child xml_arg0 "InputType") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let lastUpdateTime =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "LastUpdateTime") in
       let createTime =
@@ -3285,17 +4554,21 @@ module CategoryProperties =
       let categoryName =
         (Option.map ~f:CategoryName.of_xml)
           (Xml.child xml_arg0 "CategoryName") in
-      make ?lastUpdateTime ?createTime ?rules ?categoryName ()
+      make ?inputType ?tags ?lastUpdateTime ?createTime ?rules ?categoryName
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdateTime = field_map json "LastUpdateTime" DateTime.of_json in
-      let createTime = field_map json "CreateTime" DateTime.of_json in
-      let rules = field_map json "Rules" RuleList.of_json in
-      let categoryName = field_map json "CategoryName" CategoryName.of_json in
-      make ?lastUpdateTime ?createTime ?rules ?categoryName ()
+    let of_json json__ =
+      let inputType = field_map json__ "InputType" InputType.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let lastUpdateTime = field_map json__ "LastUpdateTime" DateTime.of_json in
+      let createTime = field_map json__ "CreateTime" DateTime.of_json in
+      let rules = field_map json__ "Rules" RuleList.of_json in
+      let categoryName = field_map json__ "CategoryName" CategoryName.of_json in
+      make ?inputType ?tags ?lastUpdateTime ?createTime ?rules ?categoryName
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that contains the rules and additional information about a call analytics category."]
+       "Provides you with the properties of the Call Analytics category you specified in your request. This includes the list of rules that define the specified category."]
 module BadRequestException =
   struct
     type nonrec t = {
@@ -3310,12 +4583,12 @@ module BadRequestException =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" FailureReason.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" FailureReason.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Your request didn't pass one or more validation tests. For example, if the entity that you're trying to delete doesn't exist or if it is in a non-terminal state (for example, it's \"in progress\"). See the exception Message field for more information."]
+       "Your request didn't pass one or more validation tests. This can occur when the entity you're trying to delete doesn't exist or if it's in a non-terminal state (such as IN PROGRESS). See the exception message field for more information."]
 module ConflictException =
   struct
     type nonrec t = {
@@ -3330,11 +4603,12 @@ module ConflictException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "There is already a resource with that name."]
+  end[@@ocaml.doc
+       "A resource already exists with this name. Resource names must be unique within an Amazon Web Services account."]
 module InternalFailureException =
   struct
     type nonrec t = {
@@ -3349,12 +4623,12 @@ module InternalFailureException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "There was an internal error. Check the error message and try your request again."]
+       "There was an internal error. Check the error message, correct the issue, and try your request again."]
 module LimitExceededException =
   struct
     type nonrec t = {
@@ -3369,12 +4643,12 @@ module LimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Either you have sent too many requests or your input file is too long. Wait before you resend your request, or use a smaller file and resend the request."]
+       "You've either sent too many requests or your input file is too long. Wait before retrying your request, or use a smaller file and try your request again."]
 module NotFoundException =
   struct
     type nonrec t = {
@@ -3389,16 +4663,19 @@ module NotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "We can't find the requested resource. Check the name and try your request again."]
+       "We can't find the requested resource. Check that the specified name is correct and try your request again."]
 module Phrases =
   struct
     type nonrec t = Phrase.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Phrase.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3423,6 +4700,9 @@ module Words =
     type nonrec t = Word.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Word.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3451,6 +4731,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3497,61 +4780,76 @@ module TranscriptionJob =
     type nonrec t =
       {
       transcriptionJobName: TranscriptionJobName.t option
-        [@ocaml.doc "The name of the transcription job."];
+        [@ocaml.doc
+          "The name of the transcription job. Job names are case sensitive and must be unique within an Amazon Web Services account."];
       transcriptionJobStatus: TranscriptionJobStatus.t option
-        [@ocaml.doc "The status of the transcription job."];
+        [@ocaml.doc
+          "Provides the status of the specified transcription job. If the status is COMPLETED, the job is finished and you can find the results at the location specified in TranscriptFileUri (or RedactedTranscriptFileUri, if you requested transcript redaction). If the status is FAILED, FailureReason provides details on why your transcription job failed."];
       languageCode: LanguageCode.t option
-        [@ocaml.doc "The language code for the input speech."];
+        [@ocaml.doc
+          "The language code used to create your transcription job. This parameter is used with single-language identification. For multi-language identification requests, refer to the plural version of this parameter, LanguageCodes."];
       mediaSampleRateHertz: MediaSampleRateHertz.t option
         [@ocaml.doc
-          "The sample rate, in Hertz (Hz), of the audio track in the input media file."];
+          "The sample rate, in hertz, of the audio track in your input media file."];
       mediaFormat: MediaFormat.t option
         [@ocaml.doc "The format of the input media file."];
       media: Media.t option
         [@ocaml.doc
-          "An object that describes the input media for the transcription job."];
+          "Provides the Amazon S3 location of the media file you used in your request."];
       transcript: Transcript.t option
         [@ocaml.doc
-          "An object that describes the output of the transcription job."];
+          "Provides you with the Amazon S3 URI you can use to access your transcript."];
       startTime: DateTime.t option
         [@ocaml.doc
-          "A timestamp that shows when the job started processing."];
+          "The date and time the specified transcription job began processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.789000-07:00 represents a transcription job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
       creationTime: DateTime.t option
-        [@ocaml.doc "A timestamp that shows when the job was created."];
+        [@ocaml.doc
+          "The date and time the specified transcription job request was made. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents a transcription job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
       completionTime: DateTime.t option
-        [@ocaml.doc "A timestamp that shows when the job completed."];
+        [@ocaml.doc
+          "The date and time the specified transcription job finished processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:33:13.922000-07:00 represents a transcription job that started processing at 12:33 PM UTC-7 on May 4, 2022."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "If the TranscriptionJobStatus field is FAILED, this field contains information about why the job failed. The FailureReason field can contain one of the following values: Unsupported media format - The media format specified in the MediaFormat field of the request isn't valid. See the description of the MediaFormat field for a list of valid values. The media format provided does not match the detected media format - The media format of the audio file doesn't match the format specified in the MediaFormat field in the request. Check the media format of your media file and make sure that the two values match. Invalid sample rate for audio file - The sample rate specified in the MediaSampleRateHertz of the request isn't valid. The sample rate must be between 8,000 and 48,000 Hertz. The sample rate provided does not match the detected sample rate - The sample rate in the audio file doesn't match the sample rate specified in the MediaSampleRateHertz field in the request. Check the sample rate of your media file and make sure that the two values match. Invalid file size: file size too large - The size of your audio file is larger than Amazon Transcribe can process. For more information, see Limits in the Amazon Transcribe Developer Guide. Invalid number of channels: number of channels too large - Your audio contains more channels than Amazon Transcribe is configured to process. To request additional channels, see Amazon Transcribe Limits in the Amazon Web Services General Reference."];
+          "If TranscriptionJobStatus is FAILED, FailureReason contains information about why the transcription job request failed. The FailureReason field contains one of the following values: Unsupported media format. The media format specified in MediaFormat isn't valid. Refer to refer to the MediaFormat parameter for a list of supported formats. The media format provided does not match the detected media format. The media format specified in MediaFormat doesn't match the format of the input file. Check the media format of your media file and correct the specified value. Invalid sample rate for audio file. The sample rate specified in MediaSampleRateHertz isn't valid. The sample rate must be between 8,000 and 48,000 hertz. The sample rate provided does not match the detected sample rate. The sample rate specified in MediaSampleRateHertz doesn't match the sample rate detected in your input media file. Check the sample rate of your media file and correct the specified value. Invalid file size: file size too large. The size of your media file is larger than what Amazon Transcribe can process. For more information, refer to Service quotas. Invalid number of channels: number of channels too large. Your audio contains more channels than Amazon Transcribe is able to process. For more information, refer to Service quotas."];
       settings: Settings.t option
         [@ocaml.doc
-          "Optional settings for the transcription job. Use these settings to turn on speaker recognition, to set the maximum number of speakers that should be identified and to specify a custom vocabulary to use when processing the transcription job."];
+          "Provides information on any additional settings that were included in your request. Additional settings include channel identification, alternative transcriptions, speaker partitioning, custom vocabularies, and custom vocabulary filters."];
       modelSettings: ModelSettings.t option
         [@ocaml.doc
-          "An object containing the details of your custom language model."];
+          "Provides information on the custom language model you included in your request."];
       jobExecutionSettings: JobExecutionSettings.t option
         [@ocaml.doc
-          "Provides information about how a transcription job is executed."];
+          "Provides information about how your transcription job was processed. This parameter shows if your request was queued and what data access role was used."];
       contentRedaction: ContentRedaction.t option
         [@ocaml.doc
-          "An object that describes content redaction settings for the transcription job."];
+          "Indicates whether redaction was enabled in your transcript."];
       identifyLanguage: Boolean.t option
         [@ocaml.doc
-          "A value that shows if automatic language identification was enabled for a transcription job."];
+          "Indicates whether automatic language identification was enabled (TRUE) for the specified transcription job."];
+      identifyMultipleLanguages: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether automatic multi-language identification was enabled (TRUE) for the specified transcription job."];
       languageOptions: LanguageOptions.t option
         [@ocaml.doc
-          "An object that shows the optional array of languages inputted for transcription jobs with automatic language identification enabled."];
+          "Provides the language codes you specified in your request."];
       identifiedLanguageScore: IdentifiedLanguageScore.t option
         [@ocaml.doc
-          "A value between zero and one that Amazon Transcribe assigned to the language that it identified in the source audio. Larger values indicate that Amazon Transcribe has higher confidence in the language it identified."];
+          "The confidence score associated with the language identified in your media file. Confidence scores are values between 0 and 1; a larger value indicates a higher probability that the identified language correctly matches the language spoken in your media."];
+      languageCodes: LanguageCodeList.t option
+        [@ocaml.doc
+          "The language codes used to create your transcription job. This parameter is used with multi-language identification. For single-language identification requests, refer to the singular version of this parameter, LanguageCode."];
       tags: TagList.t option
         [@ocaml.doc
-          "A key:value pair assigned to a given transcription job."];
+          "The tags, each in the form of a key:value pair, assigned to the specified transcription job."];
       subtitles: SubtitlesOutput.t option
-        [@ocaml.doc "Generate subtitles for your batch transcription job."];
+        [@ocaml.doc
+          "Indicates whether subtitles were generated with your transcription."];
       languageIdSettings: LanguageIdSettingsMap.t option
         [@ocaml.doc
-          "Language-specific settings that can be specified when language identification is enabled for your transcription job. These settings include VocabularyName, VocabularyFilterName, and LanguageModelName."]}
+          "Provides the name and language of all custom language models, custom vocabularies, and custom vocabulary filters that you included in your request."];
+      toxicityDetection: ToxicityDetection.t option
+        [@ocaml.doc
+          "Provides information about the toxicity detection settings applied to your transcription."]}
     let make ?transcriptionJobName =
       fun ?transcriptionJobStatus ->
         fun ?languageCode ->
@@ -3568,35 +4866,41 @@ module TranscriptionJob =
                               fun ?jobExecutionSettings ->
                                 fun ?contentRedaction ->
                                   fun ?identifyLanguage ->
-                                    fun ?languageOptions ->
-                                      fun ?identifiedLanguageScore ->
-                                        fun ?tags ->
-                                          fun ?subtitles ->
-                                            fun ?languageIdSettings ->
-                                              fun () ->
-                                                {
-                                                  transcriptionJobName;
-                                                  transcriptionJobStatus;
-                                                  languageCode;
-                                                  mediaSampleRateHertz;
-                                                  mediaFormat;
-                                                  media;
-                                                  transcript;
-                                                  startTime;
-                                                  creationTime;
-                                                  completionTime;
-                                                  failureReason;
-                                                  settings;
-                                                  modelSettings;
-                                                  jobExecutionSettings;
-                                                  contentRedaction;
-                                                  identifyLanguage;
-                                                  languageOptions;
-                                                  identifiedLanguageScore;
-                                                  tags;
-                                                  subtitles;
-                                                  languageIdSettings
-                                                }
+                                    fun ?identifyMultipleLanguages ->
+                                      fun ?languageOptions ->
+                                        fun ?identifiedLanguageScore ->
+                                          fun ?languageCodes ->
+                                            fun ?tags ->
+                                              fun ?subtitles ->
+                                                fun ?languageIdSettings ->
+                                                  fun ?toxicityDetection ->
+                                                    fun () ->
+                                                      {
+                                                        transcriptionJobName;
+                                                        transcriptionJobStatus;
+                                                        languageCode;
+                                                        mediaSampleRateHertz;
+                                                        mediaFormat;
+                                                        media;
+                                                        transcript;
+                                                        startTime;
+                                                        creationTime;
+                                                        completionTime;
+                                                        failureReason;
+                                                        settings;
+                                                        modelSettings;
+                                                        jobExecutionSettings;
+                                                        contentRedaction;
+                                                        identifyLanguage;
+                                                        identifyMultipleLanguages;
+                                                        languageOptions;
+                                                        identifiedLanguageScore;
+                                                        languageCodes;
+                                                        tags;
+                                                        subtitles;
+                                                        languageIdSettings;
+                                                        toxicityDetection
+                                                      }
     let to_value x =
       structure_to_value
         [("TranscriptionJobName",
@@ -3627,17 +4931,26 @@ module TranscriptionJob =
           (Option.map x.contentRedaction ~f:ContentRedaction.to_value));
         ("IdentifyLanguage",
           (Option.map x.identifyLanguage ~f:Boolean.to_value));
+        ("IdentifyMultipleLanguages",
+          (Option.map x.identifyMultipleLanguages ~f:Boolean.to_value));
         ("LanguageOptions",
           (Option.map x.languageOptions ~f:LanguageOptions.to_value));
         ("IdentifiedLanguageScore",
           (Option.map x.identifiedLanguageScore
              ~f:IdentifiedLanguageScore.to_value));
+        ("LanguageCodes",
+          (Option.map x.languageCodes ~f:LanguageCodeList.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("Subtitles", (Option.map x.subtitles ~f:SubtitlesOutput.to_value));
         ("LanguageIdSettings",
-          (Option.map x.languageIdSettings ~f:LanguageIdSettingsMap.to_value))]
+          (Option.map x.languageIdSettings ~f:LanguageIdSettingsMap.to_value));
+        ("ToxicityDetection",
+          (Option.map x.toxicityDetection ~f:ToxicityDetection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let toxicityDetection =
+        (Option.map ~f:ToxicityDetection.of_xml)
+          (Xml.child xml_arg0 "ToxicityDetection") in
       let languageIdSettings =
         (Option.map ~f:LanguageIdSettingsMap.of_xml)
           (Xml.child xml_arg0 "LanguageIdSettings") in
@@ -3645,12 +4958,18 @@ module TranscriptionJob =
         (Option.map ~f:SubtitlesOutput.of_xml)
           (Xml.child xml_arg0 "Subtitles") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let languageCodes =
+        (Option.map ~f:LanguageCodeList.of_xml)
+          (Xml.child xml_arg0 "LanguageCodes") in
       let identifiedLanguageScore =
         (Option.map ~f:IdentifiedLanguageScore.of_xml)
           (Xml.child xml_arg0 "IdentifiedLanguageScore") in
       let languageOptions =
         (Option.map ~f:LanguageOptions.of_xml)
           (Xml.child xml_arg0 "LanguageOptions") in
+      let identifyMultipleLanguages =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "IdentifyMultipleLanguages") in
       let identifyLanguage =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "IdentifyLanguage") in
@@ -3691,57 +5010,65 @@ module TranscriptionJob =
       let transcriptionJobName =
         (Option.map ~f:TranscriptionJobName.of_xml)
           (Xml.child xml_arg0 "TranscriptionJobName") in
-      make ?languageIdSettings ?subtitles ?tags ?identifiedLanguageScore
-        ?languageOptions ?identifyLanguage ?contentRedaction
+      make ?toxicityDetection ?languageIdSettings ?subtitles ?tags
+        ?languageCodes ?identifiedLanguageScore ?languageOptions
+        ?identifyMultipleLanguages ?identifyLanguage ?contentRedaction
         ?jobExecutionSettings ?modelSettings ?settings ?failureReason
         ?completionTime ?creationTime ?startTime ?transcript ?media
         ?mediaFormat ?mediaSampleRateHertz ?languageCode
         ?transcriptionJobStatus ?transcriptionJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let toxicityDetection =
+        field_map json__ "ToxicityDetection" ToxicityDetection.of_json in
       let languageIdSettings =
-        field_map json "LanguageIdSettings" LanguageIdSettingsMap.of_json in
-      let subtitles = field_map json "Subtitles" SubtitlesOutput.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "LanguageIdSettings" LanguageIdSettingsMap.of_json in
+      let subtitles = field_map json__ "Subtitles" SubtitlesOutput.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let languageCodes =
+        field_map json__ "LanguageCodes" LanguageCodeList.of_json in
       let identifiedLanguageScore =
-        field_map json "IdentifiedLanguageScore"
+        field_map json__ "IdentifiedLanguageScore"
           IdentifiedLanguageScore.of_json in
       let languageOptions =
-        field_map json "LanguageOptions" LanguageOptions.of_json in
+        field_map json__ "LanguageOptions" LanguageOptions.of_json in
+      let identifyMultipleLanguages =
+        field_map json__ "IdentifyMultipleLanguages" Boolean.of_json in
       let identifyLanguage =
-        field_map json "IdentifyLanguage" Boolean.of_json in
+        field_map json__ "IdentifyLanguage" Boolean.of_json in
       let contentRedaction =
-        field_map json "ContentRedaction" ContentRedaction.of_json in
+        field_map json__ "ContentRedaction" ContentRedaction.of_json in
       let jobExecutionSettings =
-        field_map json "JobExecutionSettings" JobExecutionSettings.of_json in
+        field_map json__ "JobExecutionSettings" JobExecutionSettings.of_json in
       let modelSettings =
-        field_map json "ModelSettings" ModelSettings.of_json in
-      let settings = field_map json "Settings" Settings.of_json in
+        field_map json__ "ModelSettings" ModelSettings.of_json in
+      let settings = field_map json__ "Settings" Settings.of_json in
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
-      let completionTime = field_map json "CompletionTime" DateTime.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
-      let transcript = field_map json "Transcript" Transcript.of_json in
-      let media = field_map json "Media" Media.of_json in
-      let mediaFormat = field_map json "MediaFormat" MediaFormat.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
+      let completionTime = field_map json__ "CompletionTime" DateTime.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
+      let transcript = field_map json__ "Transcript" Transcript.of_json in
+      let media = field_map json__ "Media" Media.of_json in
+      let mediaFormat = field_map json__ "MediaFormat" MediaFormat.of_json in
       let mediaSampleRateHertz =
-        field_map json "MediaSampleRateHertz" MediaSampleRateHertz.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "MediaSampleRateHertz" MediaSampleRateHertz.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let transcriptionJobStatus =
-        field_map json "TranscriptionJobStatus"
+        field_map json__ "TranscriptionJobStatus"
           TranscriptionJobStatus.of_json in
       let transcriptionJobName =
-        field_map json "TranscriptionJobName" TranscriptionJobName.of_json in
-      make ?languageIdSettings ?subtitles ?tags ?identifiedLanguageScore
-        ?languageOptions ?identifyLanguage ?contentRedaction
+        field_map json__ "TranscriptionJobName" TranscriptionJobName.of_json in
+      make ?toxicityDetection ?languageIdSettings ?subtitles ?tags
+        ?languageCodes ?identifiedLanguageScore ?languageOptions
+        ?identifyMultipleLanguages ?identifyLanguage ?contentRedaction
         ?jobExecutionSettings ?modelSettings ?settings ?failureReason
         ?completionTime ?creationTime ?startTime ?transcript ?media
         ?mediaFormat ?mediaSampleRateHertz ?languageCode
         ?transcriptionJobStatus ?transcriptionJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes an asynchronous transcription job that was created with the StartTranscriptionJob operation."]
+       "Provides detailed information about a transcription job. To view the status of the specified transcription job, check the TranscriptionJobStatus field. If the status is COMPLETED, the job is finished and you can find the results at the location specified in TranscriptFileUri. If the status is FAILED, FailureReason provides details on why your transcription job failed. If you enabled content redaction, the redacted transcript can be found at the location specified in RedactedTranscriptFileUri."]
 module KMSEncryptionContextMap =
   struct
     type nonrec t = (NonEmptyString.t * NonEmptyString.t) list
@@ -3768,6 +5095,8 @@ module KMSEncryptionContextMap =
                        (NonEmptyString.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3844,10 +5173,10 @@ module Subtitles =
       {
       formats: SubtitleFormats.t option
         [@ocaml.doc
-          "Specify the output format for your subtitle file; if you select both srt and vtt formats, two output files are generated."];
+          "Specify the output format for your subtitle file; if you select both WebVTT (vtt) and SubRip (srt) formats, two output files are generated."];
       outputStartIndex: SubtitleOutputStartIndex.t option
         [@ocaml.doc
-          "Defines the starting value that is assigned to the first subtitle segment. The default start index for Amazon Transcribe is 0, which differs from the more widely used standard of 1. If you're uncertain which value to use, we recommend choosing 1, as this may improve compatibility with other services."]}
+          "Specify the starting value that is assigned to the first subtitle segment. The default start index for Amazon Transcribe is 0, which differs from the more widely used standard of 1. If you're uncertain which value to use, we recommend choosing 1, as this may improve compatibility with other services."]}
     let make ?formats =
       fun ?outputStartIndex -> fun () -> { formats; outputStartIndex }
     let to_value x =
@@ -3864,58 +5193,63 @@ module Subtitles =
         (Option.map ~f:SubtitleFormats.of_xml) (Xml.child xml_arg0 "Formats") in
       make ?outputStartIndex ?formats ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputStartIndex =
-        field_map json "OutputStartIndex" SubtitleOutputStartIndex.of_json in
-      let formats = field_map json "Formats" SubtitleFormats.of_json in
+        field_map json__ "OutputStartIndex" SubtitleOutputStartIndex.of_json in
+      let formats = field_map json__ "Formats" SubtitleFormats.of_json in
       make ?outputStartIndex ?formats ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generate subtitles for your batch transcription job. Note that your subtitle files are placed in the same location as your transcription output."]
+       "Generate subtitles for your media file with your transcription request. You can choose a start index of 0 or 1, and you can specify either WebVTT or SubRip (or both) as your output format. Note that your subtitle files are placed in the same location as your transcription output."]
 module MedicalTranscriptionJob =
   struct
     type nonrec t =
       {
       medicalTranscriptionJobName: TranscriptionJobName.t option
-        [@ocaml.doc "The name for a given medical transcription job."];
+        [@ocaml.doc
+          "The name of the medical transcription job. Job names are case sensitive and must be unique within an Amazon Web Services account."];
       transcriptionJobStatus: TranscriptionJobStatus.t option
-        [@ocaml.doc "The completion status of a medical transcription job."];
+        [@ocaml.doc
+          "Provides the status of the specified medical transcription job. If the status is COMPLETED, the job is finished and you can find the results at the location specified in TranscriptFileUri. If the status is FAILED, FailureReason provides details on why your transcription job failed."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "The language code for the language spoken in the source audio file. US English (en-US) is the only supported language for medical transcriptions. Any other value you enter for language code results in a BadRequestException error."];
+          "The language code used to create your medical transcription job. US English (en-US) is the only supported language for medical transcriptions."];
       mediaSampleRateHertz: MedicalMediaSampleRateHertz.t option
         [@ocaml.doc
-          "The sample rate, in Hertz, of the source audio containing medical information. If you don't specify the sample rate, Amazon Transcribe Medical determines it for you. If you choose to specify the sample rate, it must match the rate detected by Amazon Transcribe Medical."];
+          "The sample rate, in hertz, of the audio track in your input media file."];
       mediaFormat: MediaFormat.t option
         [@ocaml.doc "The format of the input media file."];
       media: Media.t option ;
       transcript: MedicalTranscript.t option
         [@ocaml.doc
-          "An object that contains the MedicalTranscript. The MedicalTranscript contains the TranscriptFileUri."];
+          "Provides you with the Amazon S3 URI you can use to access your transcript."];
       startTime: DateTime.t option
         [@ocaml.doc
-          "A timestamp that shows when the job started processing."];
+          "The date and time the specified medical transcription job began processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.789000-07:00 represents a transcription job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
       creationTime: DateTime.t option
-        [@ocaml.doc "A timestamp that shows when the job was created."];
+        [@ocaml.doc
+          "The date and time the specified medical transcription job request was made. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents a transcription job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
       completionTime: DateTime.t option
-        [@ocaml.doc "A timestamp that shows when the job was completed."];
+        [@ocaml.doc
+          "The date and time the specified medical transcription job finished processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:33:13.922000-07:00 represents a transcription job that started processing at 12:33 PM UTC-7 on May 4, 2022."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "If the TranscriptionJobStatus field is FAILED, this field contains information about why the job failed. The FailureReason field contains one of the following values: Unsupported media format- The media format specified in the MediaFormat field of the request isn't valid. See the description of the MediaFormat field for a list of valid values. The media format provided does not match the detected media format- The media format of the audio file doesn't match the format specified in the MediaFormat field in the request. Check the media format of your media file and make sure the two values match. Invalid sample rate for audio file- The sample rate specified in the MediaSampleRateHertz of the request isn't valid. The sample rate must be between 8,000 and 48,000 Hertz. The sample rate provided does not match the detected sample rate- The sample rate in the audio file doesn't match the sample rate specified in the MediaSampleRateHertz field in the request. Check the sample rate of your media file and make sure that the two values match. Invalid file size: file size too large- The size of your audio file is larger than what Amazon Transcribe Medical can process. For more information, see Guidelines and Quotas in the Amazon Transcribe Medical Guide. Invalid number of channels: number of channels too large- Your audio contains more channels than Amazon Transcribe Medical is configured to process. To request additional channels, see Amazon Transcribe Medical Endpoints and Quotas in the Amazon Web Services General Reference."];
+          "If TranscriptionJobStatus is FAILED, FailureReason contains information about why the transcription job request failed. The FailureReason field contains one of the following values: Unsupported media format. The media format specified in MediaFormat isn't valid. Refer to refer to the MediaFormat parameter for a list of supported formats. The media format provided does not match the detected media format. The media format specified in MediaFormat doesn't match the format of the input file. Check the media format of your media file and correct the specified value. Invalid sample rate for audio file. The sample rate specified in MediaSampleRateHertz isn't valid. The sample rate must be between 16,000 and 48,000 hertz. The sample rate provided does not match the detected sample rate. The sample rate specified in MediaSampleRateHertz doesn't match the sample rate detected in your input media file. Check the sample rate of your media file and correct the specified value. Invalid file size: file size too large. The size of your media file is larger than what Amazon Transcribe can process. For more information, refer to Service quotas. Invalid number of channels: number of channels too large. Your audio contains more channels than Amazon Transcribe is able to process. For more information, refer to Service quotas."];
       settings: MedicalTranscriptionSetting.t option
-        [@ocaml.doc "Object that contains object."];
+        [@ocaml.doc
+          "Provides information on any additional settings that were included in your request. Additional settings include channel identification, alternative transcriptions, speaker partitioning, custom vocabularies, and custom vocabulary filters."];
       contentIdentificationType: MedicalContentIdentificationType.t option
         [@ocaml.doc
-          "Shows the type of content that you've configured Amazon Transcribe Medical to identify in a transcription job. If the value is PHI, you've configured the job to identify personal health information (PHI) in the transcription output."];
+          "Indicates whether content identification was enabled for your transcription request."];
       specialty: Specialty.t option
         [@ocaml.doc
-          "The medical specialty of any clinicians providing a dictation or having a conversation. Refer to Transcribing a medical conversationfor a list of supported specialties."];
+          "Describes the medical specialty represented in your media."];
       type_: Type.t option
         [@ocaml.doc
-          "The type of speech in the transcription job. CONVERSATION is generally used for patient-physician dialogues. DICTATION is the setting for physicians speaking their notes after seeing a patient. For more information, see What is Amazon Transcribe Medical?."];
+          "Indicates whether the input media is a dictation or a conversation, as specified in the StartMedicalTranscriptionJob request."];
       tags: TagList.t option
         [@ocaml.doc
-          "A key:value pair assigned to a given medical transcription job."]}
+          "The tags, each in the form of a key:value pair, assigned to the specified medical transcription job."]}
     let make ?medicalTranscriptionJobName =
       fun ?transcriptionJobStatus ->
         fun ?languageCode ->
@@ -4026,32 +5360,33 @@ module MedicalTranscriptionJob =
         ?media ?mediaFormat ?mediaSampleRateHertz ?languageCode
         ?transcriptionJobStatus ?medicalTranscriptionJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let type_ = field_map json "Type" Type.of_json in
-      let specialty = field_map json "Specialty" Specialty.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let type_ = field_map json__ "Type" Type.of_json in
+      let specialty = field_map json__ "Specialty" Specialty.of_json in
       let contentIdentificationType =
-        field_map json "ContentIdentificationType"
+        field_map json__ "ContentIdentificationType"
           MedicalContentIdentificationType.of_json in
       let settings =
-        field_map json "Settings" MedicalTranscriptionSetting.of_json in
+        field_map json__ "Settings" MedicalTranscriptionSetting.of_json in
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
-      let completionTime = field_map json "CompletionTime" DateTime.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
-      let transcript = field_map json "Transcript" MedicalTranscript.of_json in
-      let media = field_map json "Media" Media.of_json in
-      let mediaFormat = field_map json "MediaFormat" MediaFormat.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
+      let completionTime = field_map json__ "CompletionTime" DateTime.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
+      let transcript =
+        field_map json__ "Transcript" MedicalTranscript.of_json in
+      let media = field_map json__ "Media" Media.of_json in
+      let mediaFormat = field_map json__ "MediaFormat" MediaFormat.of_json in
       let mediaSampleRateHertz =
-        field_map json "MediaSampleRateHertz"
+        field_map json__ "MediaSampleRateHertz"
           MedicalMediaSampleRateHertz.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let transcriptionJobStatus =
-        field_map json "TranscriptionJobStatus"
+        field_map json__ "TranscriptionJobStatus"
           TranscriptionJobStatus.of_json in
       let medicalTranscriptionJobName =
-        field_map json "MedicalTranscriptionJobName"
+        field_map json__ "MedicalTranscriptionJobName"
           TranscriptionJobName.of_json in
       make ?tags ?type_ ?specialty ?contentIdentificationType ?settings
         ?failureReason ?completionTime ?creationTime ?startTime ?transcript
@@ -4059,82 +5394,300 @@ module MedicalTranscriptionJob =
         ?transcriptionJobStatus ?medicalTranscriptionJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The data structure that contains the information for a medical transcription job."]
+       "Provides detailed information about a medical transcription job. To view the status of the specified medical transcription job, check the TranscriptionJobStatus field. If the status is COMPLETED, the job is finished and you can find the results at the location specified in TranscriptFileUri. If the status is FAILED, FailureReason provides details on why your transcription job failed."]
+module MedicalScribeJob =
+  struct
+    type nonrec t =
+      {
+      medicalScribeJobName: TranscriptionJobName.t option
+        [@ocaml.doc
+          "The name of the Medical Scribe job. Job names are case sensitive and must be unique within an Amazon Web Services account."];
+      medicalScribeJobStatus: MedicalScribeJobStatus.t option
+        [@ocaml.doc
+          "Provides the status of the specified Medical Scribe job. If the status is COMPLETED, the job is finished and you can find the results at the location specified in MedicalScribeOutput If the status is FAILED, FailureReason provides details on why your Medical Scribe job failed."];
+      languageCode: MedicalScribeLanguageCode.t option
+        [@ocaml.doc
+          "The language code used to create your Medical Scribe job. US English (en-US) is the only supported language for Medical Scribe jobs."];
+      media: Media.t option ;
+      medicalScribeOutput: MedicalScribeOutput.t option
+        [@ocaml.doc
+          "The location of the output of your Medical Scribe job. ClinicalDocumentUri holds the Amazon S3 URI for the Clinical Document and TranscriptFileUri holds the Amazon S3 URI for the Transcript."];
+      startTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time your Medical Scribe job began processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.789000-07:00 represents a Medical Scribe job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
+      creationTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time the specified Medical Scribe job request was made. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents a Medical Scribe job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
+      completionTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time the specified Medical Scribe job finished processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents a Medical Scribe job that finished processing at 12:32 PM UTC-7 on May 4, 2022."];
+      failureReason: FailureReason.t option
+        [@ocaml.doc
+          "If MedicalScribeJobStatus is FAILED, FailureReason contains information about why the transcription job failed. See also: Common Errors."];
+      settings: MedicalScribeSettings.t option
+        [@ocaml.doc
+          "Makes it possible to control how your Medical Scribe job is processed using a MedicalScribeSettings object. Specify ChannelIdentification if ChannelDefinitions are set. Enabled ShowSpeakerLabels if ChannelIdentification and ChannelDefinitions are not set. One and only one of ChannelIdentification and ShowSpeakerLabels must be set. If ShowSpeakerLabels is set, MaxSpeakerLabels must also be set. Use Settings to specify a vocabulary or vocabulary filter or both using VocabularyName, VocabularyFilterName. VocabularyFilterMethod must be specified if VocabularyFilterName is set."];
+      dataAccessRoleArn: DataAccessRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role that has permissions to access the Amazon S3 bucket that contains your input files, write to the output bucket, and use your KMS key if supplied. If the role that you specify doesn\226\128\153t have the appropriate permissions your request fails. IAM role ARNs have the format arn:partition:iam::account:role/role-name-with-path. For example: arn:aws:iam::111122223333:role/Admin. For more information, see IAM ARNs."];
+      channelDefinitions: MedicalScribeChannelDefinitions.t option
+        [@ocaml.doc
+          "Makes it possible to specify which speaker is on which channel. For example, if the clinician is the first participant to speak, you would set ChannelId of the first ChannelDefinition in the list to 0 (to indicate the first channel) and ParticipantRole to CLINICIAN (to indicate that it's the clinician speaking). Then you would set the ChannelId of the second ChannelDefinition in the list to 1 (to indicate the second channel) and ParticipantRole to PATIENT (to indicate that it's the patient speaking)."];
+      medicalScribeContextProvided: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the MedicalScribeContext object was provided when the Medical Scribe job was started."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Adds one or more custom tags, each in the form of a key:value pair, to the Medical Scribe job. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."]}
+    let make ?medicalScribeJobName =
+      fun ?medicalScribeJobStatus ->
+        fun ?languageCode ->
+          fun ?media ->
+            fun ?medicalScribeOutput ->
+              fun ?startTime ->
+                fun ?creationTime ->
+                  fun ?completionTime ->
+                    fun ?failureReason ->
+                      fun ?settings ->
+                        fun ?dataAccessRoleArn ->
+                          fun ?channelDefinitions ->
+                            fun ?medicalScribeContextProvided ->
+                              fun ?tags ->
+                                fun () ->
+                                  {
+                                    medicalScribeJobName;
+                                    medicalScribeJobStatus;
+                                    languageCode;
+                                    media;
+                                    medicalScribeOutput;
+                                    startTime;
+                                    creationTime;
+                                    completionTime;
+                                    failureReason;
+                                    settings;
+                                    dataAccessRoleArn;
+                                    channelDefinitions;
+                                    medicalScribeContextProvided;
+                                    tags
+                                  }
+    let to_value x =
+      structure_to_value
+        [("MedicalScribeJobName",
+           (Option.map x.medicalScribeJobName
+              ~f:TranscriptionJobName.to_value));
+        ("MedicalScribeJobStatus",
+          (Option.map x.medicalScribeJobStatus
+             ~f:MedicalScribeJobStatus.to_value));
+        ("LanguageCode",
+          (Option.map x.languageCode ~f:MedicalScribeLanguageCode.to_value));
+        ("Media", (Option.map x.media ~f:Media.to_value));
+        ("MedicalScribeOutput",
+          (Option.map x.medicalScribeOutput ~f:MedicalScribeOutput.to_value));
+        ("StartTime", (Option.map x.startTime ~f:DateTime.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:DateTime.to_value));
+        ("CompletionTime",
+          (Option.map x.completionTime ~f:DateTime.to_value));
+        ("FailureReason",
+          (Option.map x.failureReason ~f:FailureReason.to_value));
+        ("Settings",
+          (Option.map x.settings ~f:MedicalScribeSettings.to_value));
+        ("DataAccessRoleArn",
+          (Option.map x.dataAccessRoleArn ~f:DataAccessRoleArn.to_value));
+        ("ChannelDefinitions",
+          (Option.map x.channelDefinitions
+             ~f:MedicalScribeChannelDefinitions.to_value));
+        ("MedicalScribeContextProvided",
+          (Option.map x.medicalScribeContextProvided ~f:Boolean.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let medicalScribeContextProvided =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "MedicalScribeContextProvided") in
+      let channelDefinitions =
+        (Option.map ~f:MedicalScribeChannelDefinitions.of_xml)
+          (Xml.child xml_arg0 "ChannelDefinitions") in
+      let dataAccessRoleArn =
+        (Option.map ~f:DataAccessRoleArn.of_xml)
+          (Xml.child xml_arg0 "DataAccessRoleArn") in
+      let settings =
+        (Option.map ~f:MedicalScribeSettings.of_xml)
+          (Xml.child xml_arg0 "Settings") in
+      let failureReason =
+        (Option.map ~f:FailureReason.of_xml)
+          (Xml.child xml_arg0 "FailureReason") in
+      let completionTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CompletionTime") in
+      let creationTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let startTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let medicalScribeOutput =
+        (Option.map ~f:MedicalScribeOutput.of_xml)
+          (Xml.child xml_arg0 "MedicalScribeOutput") in
+      let media = (Option.map ~f:Media.of_xml) (Xml.child xml_arg0 "Media") in
+      let languageCode =
+        (Option.map ~f:MedicalScribeLanguageCode.of_xml)
+          (Xml.child xml_arg0 "LanguageCode") in
+      let medicalScribeJobStatus =
+        (Option.map ~f:MedicalScribeJobStatus.of_xml)
+          (Xml.child xml_arg0 "MedicalScribeJobStatus") in
+      let medicalScribeJobName =
+        (Option.map ~f:TranscriptionJobName.of_xml)
+          (Xml.child xml_arg0 "MedicalScribeJobName") in
+      make ?tags ?medicalScribeContextProvided ?channelDefinitions
+        ?dataAccessRoleArn ?settings ?failureReason ?completionTime
+        ?creationTime ?startTime ?medicalScribeOutput ?media ?languageCode
+        ?medicalScribeJobStatus ?medicalScribeJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let medicalScribeContextProvided =
+        field_map json__ "MedicalScribeContextProvided" Boolean.of_json in
+      let channelDefinitions =
+        field_map json__ "ChannelDefinitions"
+          MedicalScribeChannelDefinitions.of_json in
+      let dataAccessRoleArn =
+        field_map json__ "DataAccessRoleArn" DataAccessRoleArn.of_json in
+      let settings =
+        field_map json__ "Settings" MedicalScribeSettings.of_json in
+      let failureReason =
+        field_map json__ "FailureReason" FailureReason.of_json in
+      let completionTime = field_map json__ "CompletionTime" DateTime.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
+      let medicalScribeOutput =
+        field_map json__ "MedicalScribeOutput" MedicalScribeOutput.of_json in
+      let media = field_map json__ "Media" Media.of_json in
+      let languageCode =
+        field_map json__ "LanguageCode" MedicalScribeLanguageCode.of_json in
+      let medicalScribeJobStatus =
+        field_map json__ "MedicalScribeJobStatus"
+          MedicalScribeJobStatus.of_json in
+      let medicalScribeJobName =
+        field_map json__ "MedicalScribeJobName" TranscriptionJobName.of_json in
+      make ?tags ?medicalScribeContextProvided ?channelDefinitions
+        ?dataAccessRoleArn ?settings ?failureReason ?completionTime
+        ?creationTime ?startTime ?medicalScribeOutput ?media ?languageCode
+        ?medicalScribeJobStatus ?medicalScribeJobName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides detailed information about a Medical Scribe job. To view the status of the specified Medical Scribe job, check the MedicalScribeJobStatus field. If the status is COMPLETED, the job is finished and you can find the results at the locations specified in MedicalScribeOutput. If the status is FAILED, FailureReason provides details on why your Medical Scribe job failed."]
+module MedicalScribeContext =
+  struct
+    type nonrec t =
+      {
+      patientContext: MedicalScribePatientContext.t option
+        [@ocaml.doc "Contains patient-specific information."]}
+    let make ?patientContext = fun () -> { patientContext }
+    let to_value x =
+      structure_to_value
+        [("PatientContext",
+           (Option.map x.patientContext
+              ~f:MedicalScribePatientContext.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let patientContext =
+        (Option.map ~f:MedicalScribePatientContext.of_xml)
+          (Xml.child xml_arg0 "PatientContext") in
+      make ?patientContext ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let patientContext =
+        field_map json__ "PatientContext" MedicalScribePatientContext.of_json in
+      make ?patientContext ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The MedicalScribeContext object that contains contextual information used to generate customized clinical notes."]
 module CallAnalyticsJob =
   struct
     type nonrec t =
       {
       callAnalyticsJobName: CallAnalyticsJobName.t option
-        [@ocaml.doc "The name of the call analytics job."];
+        [@ocaml.doc
+          "The name of the Call Analytics job. Job names are case sensitive and must be unique within an Amazon Web Services account."];
       callAnalyticsJobStatus: CallAnalyticsJobStatus.t option
-        [@ocaml.doc "The status of the analytics job."];
+        [@ocaml.doc
+          "Provides the status of the specified Call Analytics job. If the status is COMPLETED, the job is finished and you can find the results at the location specified in TranscriptFileUri (or RedactedTranscriptFileUri, if you requested transcript redaction). If the status is FAILED, FailureReason provides details on why your transcription job failed."];
+      callAnalyticsJobDetails: CallAnalyticsJobDetails.t option
+        [@ocaml.doc
+          "Provides detailed information about a call analytics job, including information about skipped analytics features."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "If you know the language spoken between the customer and the agent, specify a language code for this field. If you don't know the language, you can leave this field blank, and Amazon Transcribe will use machine learning to automatically identify the language. To improve the accuracy of language identification, you can provide an array containing the possible language codes for the language spoken in your audio. Refer to Supported languages for additional information."];
+          "The language code used to create your Call Analytics job. For a list of supported languages and their associated language codes, refer to the Supported languages table. If you do not know the language spoken in your media file, you can omit this field and let Amazon Transcribe automatically identify the language of your media. To improve the accuracy of language identification, you can include several language codes and Amazon Transcribe chooses the closest match for your transcription."];
       mediaSampleRateHertz: MediaSampleRateHertz.t option
-        [@ocaml.doc "The sample rate, in Hertz, of the input audio."];
-      mediaFormat: MediaFormat.t option
         [@ocaml.doc
-          "The format of the input audio file. Note: for call analytics jobs, only the following media formats are supported: MP3, MP4, WAV, FLAC, OGG, and WebM."];
-      media: Media.t option ;
+          "The sample rate, in hertz, of the audio track in your input media file."];
+      mediaFormat: MediaFormat.t option
+        [@ocaml.doc "The format of the input media file."];
+      media: Media.t option
+        [@ocaml.doc
+          "Provides the Amazon S3 location of the media file you used in your Call Analytics request."];
       transcript: Transcript.t option ;
       startTime: DateTime.t option
         [@ocaml.doc
-          "A timestamp that shows when the analytics job started processing."];
+          "The date and time the specified Call Analytics job began processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.789000-07:00 represents a transcription job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
       creationTime: DateTime.t option
         [@ocaml.doc
-          "A timestamp that shows when the analytics job was created."];
+          "The date and time the specified Call Analytics job request was made. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents a transcription job that started processing at 12:32 PM UTC-7 on May 4, 2022."];
       completionTime: DateTime.t option
         [@ocaml.doc
-          "A timestamp that shows when the analytics job was completed."];
+          "The date and time the specified Call Analytics job finished processing. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:33:13.922000-07:00 represents a transcription job that started processing at 12:33 PM UTC-7 on May 4, 2022."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "If the AnalyticsJobStatus is FAILED, this field contains information about why the job failed. The FailureReason field can contain one of the following values: Unsupported media format: The media format specified in the MediaFormat field of the request isn't valid. See the description of the MediaFormat field for a list of valid values. The media format provided does not match the detected media format: The media format of the audio file doesn't match the format specified in the MediaFormat field in the request. Check the media format of your media file and make sure the two values match. Invalid sample rate for audio file: The sample rate specified in the MediaSampleRateHertz of the request isn't valid. The sample rate must be between 8,000 and 48,000 Hertz. The sample rate provided does not match the detected sample rate: The sample rate in the audio file doesn't match the sample rate specified in the MediaSampleRateHertz field in the request. Check the sample rate of your media file and make sure that the two values match. Invalid file size: file size too large: The size of your audio file is larger than what Amazon Transcribe Medical can process. For more information, see Guidelines and Quotas in the Amazon Transcribe Medical Guide. Invalid number of channels: number of channels too large: Your audio contains more channels than Amazon Transcribe Medical is configured to process. To request additional channels, see Amazon Transcribe Medical Endpoints and Quotas in the Amazon Web Services General Reference."];
+          "If CallAnalyticsJobStatus is FAILED, FailureReason contains information about why the Call Analytics job request failed. The FailureReason field contains one of the following values: Unsupported media format. The media format specified in MediaFormat isn't valid. Refer to refer to the MediaFormat parameter for a list of supported formats. The media format provided does not match the detected media format. The media format specified in MediaFormat doesn't match the format of the input file. Check the media format of your media file and correct the specified value. Invalid sample rate for audio file. The sample rate specified in MediaSampleRateHertz isn't valid. The sample rate must be between 8,000 and 48,000 hertz. The sample rate provided does not match the detected sample rate. The sample rate specified in MediaSampleRateHertz doesn't match the sample rate detected in your input media file. Check the sample rate of your media file and correct the specified value. Invalid file size: file size too large. The size of your media file is larger than what Amazon Transcribe can process. For more information, refer to Service quotas. Invalid number of channels: number of channels too large. Your audio contains more channels than Amazon Transcribe is able to process. For more information, refer to Service quotas."];
       dataAccessRoleArn: DataAccessRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Number (ARN) that you use to access the analytics job. ARNs have the format arn:partition:service:region:account-id:resource-type/resource-id."];
+          "The Amazon Resource Name (ARN) you included in your request."];
       identifiedLanguageScore: IdentifiedLanguageScore.t option
         [@ocaml.doc
-          "A value between zero and one that Amazon Transcribe assigned to the language that it identified in the source audio. This value appears only when you don't provide a single language code. Larger values indicate that Amazon Transcribe has higher confidence in the language that it identified."];
+          "The confidence score associated with the language identified in your media file. Confidence scores are values between 0 and 1; a larger value indicates a higher probability that the identified language correctly matches the language spoken in your media."];
       settings: CallAnalyticsJobSettings.t option
         [@ocaml.doc
-          "Provides information about the settings used to run a transcription job."];
+          "Provides information on any additional settings that were included in your request. Additional settings include content redaction and language identification settings."];
       channelDefinitions: ChannelDefinitions.t option
+        [@ocaml.doc "Indicates which speaker is on which channel."];
+      tags: TagList.t option
         [@ocaml.doc
-          "Shows numeric values to indicate the channel assigned to the agent's audio and the channel assigned to the customer's audio."]}
+          "The tags, each in the form of a key:value pair, assigned to the specified call analytics job."]}
     let make ?callAnalyticsJobName =
       fun ?callAnalyticsJobStatus ->
-        fun ?languageCode ->
-          fun ?mediaSampleRateHertz ->
-            fun ?mediaFormat ->
-              fun ?media ->
-                fun ?transcript ->
-                  fun ?startTime ->
-                    fun ?creationTime ->
-                      fun ?completionTime ->
-                        fun ?failureReason ->
-                          fun ?dataAccessRoleArn ->
-                            fun ?identifiedLanguageScore ->
-                              fun ?settings ->
-                                fun ?channelDefinitions ->
-                                  fun () ->
-                                    {
-                                      callAnalyticsJobName;
-                                      callAnalyticsJobStatus;
-                                      languageCode;
-                                      mediaSampleRateHertz;
-                                      mediaFormat;
-                                      media;
-                                      transcript;
-                                      startTime;
-                                      creationTime;
-                                      completionTime;
-                                      failureReason;
-                                      dataAccessRoleArn;
-                                      identifiedLanguageScore;
-                                      settings;
-                                      channelDefinitions
-                                    }
+        fun ?callAnalyticsJobDetails ->
+          fun ?languageCode ->
+            fun ?mediaSampleRateHertz ->
+              fun ?mediaFormat ->
+                fun ?media ->
+                  fun ?transcript ->
+                    fun ?startTime ->
+                      fun ?creationTime ->
+                        fun ?completionTime ->
+                          fun ?failureReason ->
+                            fun ?dataAccessRoleArn ->
+                              fun ?identifiedLanguageScore ->
+                                fun ?settings ->
+                                  fun ?channelDefinitions ->
+                                    fun ?tags ->
+                                      fun () ->
+                                        {
+                                          callAnalyticsJobName;
+                                          callAnalyticsJobStatus;
+                                          callAnalyticsJobDetails;
+                                          languageCode;
+                                          mediaSampleRateHertz;
+                                          mediaFormat;
+                                          media;
+                                          transcript;
+                                          startTime;
+                                          creationTime;
+                                          completionTime;
+                                          failureReason;
+                                          dataAccessRoleArn;
+                                          identifiedLanguageScore;
+                                          settings;
+                                          channelDefinitions;
+                                          tags
+                                        }
     let to_value x =
       structure_to_value
         [("CallAnalyticsJobName",
@@ -4143,6 +5696,9 @@ module CallAnalyticsJob =
         ("CallAnalyticsJobStatus",
           (Option.map x.callAnalyticsJobStatus
              ~f:CallAnalyticsJobStatus.to_value));
+        ("CallAnalyticsJobDetails",
+          (Option.map x.callAnalyticsJobDetails
+             ~f:CallAnalyticsJobDetails.to_value));
         ("LanguageCode",
           (Option.map x.languageCode ~f:LanguageCode.to_value));
         ("MediaSampleRateHertz",
@@ -4164,9 +5720,11 @@ module CallAnalyticsJob =
         ("Settings",
           (Option.map x.settings ~f:CallAnalyticsJobSettings.to_value));
         ("ChannelDefinitions",
-          (Option.map x.channelDefinitions ~f:ChannelDefinitions.to_value))]
+          (Option.map x.channelDefinitions ~f:ChannelDefinitions.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let channelDefinitions =
         (Option.map ~f:ChannelDefinitions.of_xml)
           (Xml.child xml_arg0 "ChannelDefinitions") in
@@ -4199,50 +5757,59 @@ module CallAnalyticsJob =
       let languageCode =
         (Option.map ~f:LanguageCode.of_xml)
           (Xml.child xml_arg0 "LanguageCode") in
+      let callAnalyticsJobDetails =
+        (Option.map ~f:CallAnalyticsJobDetails.of_xml)
+          (Xml.child xml_arg0 "CallAnalyticsJobDetails") in
       let callAnalyticsJobStatus =
         (Option.map ~f:CallAnalyticsJobStatus.of_xml)
           (Xml.child xml_arg0 "CallAnalyticsJobStatus") in
       let callAnalyticsJobName =
         (Option.map ~f:CallAnalyticsJobName.of_xml)
           (Xml.child xml_arg0 "CallAnalyticsJobName") in
-      make ?channelDefinitions ?settings ?identifiedLanguageScore
+      make ?tags ?channelDefinitions ?settings ?identifiedLanguageScore
         ?dataAccessRoleArn ?failureReason ?completionTime ?creationTime
         ?startTime ?transcript ?media ?mediaFormat ?mediaSampleRateHertz
-        ?languageCode ?callAnalyticsJobStatus ?callAnalyticsJobName ()
+        ?languageCode ?callAnalyticsJobDetails ?callAnalyticsJobStatus
+        ?callAnalyticsJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let channelDefinitions =
-        field_map json "ChannelDefinitions" ChannelDefinitions.of_json in
+        field_map json__ "ChannelDefinitions" ChannelDefinitions.of_json in
       let settings =
-        field_map json "Settings" CallAnalyticsJobSettings.of_json in
+        field_map json__ "Settings" CallAnalyticsJobSettings.of_json in
       let identifiedLanguageScore =
-        field_map json "IdentifiedLanguageScore"
+        field_map json__ "IdentifiedLanguageScore"
           IdentifiedLanguageScore.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" DataAccessRoleArn.of_json in
+        field_map json__ "DataAccessRoleArn" DataAccessRoleArn.of_json in
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
-      let completionTime = field_map json "CompletionTime" DateTime.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
-      let transcript = field_map json "Transcript" Transcript.of_json in
-      let media = field_map json "Media" Media.of_json in
-      let mediaFormat = field_map json "MediaFormat" MediaFormat.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
+      let completionTime = field_map json__ "CompletionTime" DateTime.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
+      let transcript = field_map json__ "Transcript" Transcript.of_json in
+      let media = field_map json__ "Media" Media.of_json in
+      let mediaFormat = field_map json__ "MediaFormat" MediaFormat.of_json in
       let mediaSampleRateHertz =
-        field_map json "MediaSampleRateHertz" MediaSampleRateHertz.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "MediaSampleRateHertz" MediaSampleRateHertz.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let callAnalyticsJobDetails =
+        field_map json__ "CallAnalyticsJobDetails"
+          CallAnalyticsJobDetails.of_json in
       let callAnalyticsJobStatus =
-        field_map json "CallAnalyticsJobStatus"
+        field_map json__ "CallAnalyticsJobStatus"
           CallAnalyticsJobStatus.of_json in
       let callAnalyticsJobName =
-        field_map json "CallAnalyticsJobName" CallAnalyticsJobName.of_json in
-      make ?channelDefinitions ?settings ?identifiedLanguageScore
+        field_map json__ "CallAnalyticsJobName" CallAnalyticsJobName.of_json in
+      make ?tags ?channelDefinitions ?settings ?identifiedLanguageScore
         ?dataAccessRoleArn ?failureReason ?completionTime ?creationTime
         ?startTime ?transcript ?media ?mediaFormat ?mediaSampleRateHertz
-        ?languageCode ?callAnalyticsJobStatus ?callAnalyticsJobName ()
+        ?languageCode ?callAnalyticsJobDetails ?callAnalyticsJobStatus
+        ?callAnalyticsJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes an asynchronous analytics job that was created with the StartAnalyticsJob operation."]
+       "Provides detailed information about a Call Analytics job. To view the job's status, refer to CallAnalyticsJobStatus. If the status is COMPLETED, the job is finished. You can find your completed transcript at the URI specified in TranscriptFileUri. If the status is FAILED, FailureReason provides details on why your transcription job failed. If you enabled personally identifiable information (PII) redaction, the redacted transcript appears at the location specified in RedactedTranscriptFileUri. If you chose to redact the audio in your media file, you can find your redacted media file at the location specified in the RedactedMediaFileUri field of your response."]
 module NextToken =
   struct
     type nonrec t = string
@@ -4265,6 +5832,9 @@ module VocabularyFilters =
   struct
     type nonrec t = VocabularyFilterInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VocabularyFilterInfo.to_value)) |>
         (fun x -> `List x)
@@ -4309,6 +5879,9 @@ module Vocabularies =
   struct
     type nonrec t = VocabularyInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VocabularyInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4333,6 +5906,9 @@ module TranscriptionJobSummaries =
   struct
     type nonrec t = TranscriptionJobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TranscriptionJobSummary.to_value)) |>
         (fun x -> `List x)
@@ -4359,6 +5935,9 @@ module MedicalTranscriptionJobSummaries =
   struct
     type nonrec t = MedicalTranscriptionJobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MedicalTranscriptionJobSummary.to_value)) |>
         (fun x -> `List x)
@@ -4381,10 +5960,42 @@ module MedicalTranscriptionJobSummaries =
         ~of_json:MedicalTranscriptionJobSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MedicalScribeJobSummaries =
+  struct
+    type nonrec t = MedicalScribeJobSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MedicalScribeJobSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MedicalScribeJobSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MedicalScribeJobSummaries"
+        ~of_json:MedicalScribeJobSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Models =
   struct
     type nonrec t = LanguageModel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LanguageModel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4409,6 +6020,9 @@ module CallAnalyticsJobSummaries =
   struct
     type nonrec t = CallAnalyticsJobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CallAnalyticsJobSummary.to_value)) |>
         (fun x -> `List x)
@@ -4435,6 +6049,9 @@ module CategoryPropertiesList =
   struct
     type nonrec t = CategoryProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CategoryProperties.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4461,14 +6078,16 @@ module UpdateVocabularyResponse =
     type nonrec t =
       {
       vocabularyName: VocabularyName.t option
-        [@ocaml.doc "The name of the vocabulary that was updated."];
+        [@ocaml.doc "The name of the updated custom vocabulary."];
       languageCode: LanguageCode.t option
-        [@ocaml.doc "The language code of the vocabulary entries."];
+        [@ocaml.doc
+          "The language code you selected for your custom vocabulary."];
       lastModifiedTime: DateTime.t option
-        [@ocaml.doc "The date and time that the vocabulary was updated."];
+        [@ocaml.doc
+          "The date and time the specified custom vocabulary was last updated. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."];
       vocabularyState: VocabularyState.t option
         [@ocaml.doc
-          "The processing state of the vocabulary. When the VocabularyState field contains READY the vocabulary is ready to be used in a StartTranscriptionJob request."]}
+          "The processing state of your custom vocabulary. If the state is READY, you can use the custom vocabulary in a StartTranscriptionJob request."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -4570,41 +6189,52 @@ module UpdateVocabularyResponse =
       make ?vocabularyState ?lastModifiedTime ?languageCode ?vocabularyName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vocabularyState =
-        field_map json "VocabularyState" VocabularyState.of_json in
+        field_map json__ "VocabularyState" VocabularyState.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyName =
-        field_map json "VocabularyName" VocabularyName.of_json in
+        field_map json__ "VocabularyName" VocabularyName.of_json in
       make ?vocabularyState ?lastModifiedTime ?languageCode ?vocabularyName
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an existing vocabulary with new values. The UpdateVocabulary operation overwrites all of the existing information with the values that you provide in the request."]
+       "Updates an existing custom vocabulary with new values. This operation overwrites all existing information with your new values; you cannot append new terms onto an existing custom vocabulary."]
 module UpdateVocabularyRequest =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t
         [@ocaml.doc
-          "The name of the vocabulary to update. The name is case sensitive. If you try to update a vocabulary with the same name as a previous vocabulary you will receive a ConflictException error."];
+          "The name of the custom vocabulary you want to update. Custom vocabulary names are case sensitive."];
       languageCode: LanguageCode.t
         [@ocaml.doc
-          "The language code of the vocabulary entries. For a list of languages and their corresponding language codes, see Supported languages."];
+          "The language code that represents the language of the entries in the custom vocabulary you want to update. Each custom vocabulary must contain terms in only one language. A custom vocabulary can only be used to transcribe files in the same language as the custom vocabulary. For example, if you create a custom vocabulary using US English (en-US), you can only apply this custom vocabulary to files that contain English audio. For a list of supported languages and their associated language codes, refer to the Supported languages table."];
       phrases: Phrases.t option
-        [@ocaml.doc "An array of strings containing the vocabulary entries."];
+        [@ocaml.doc
+          "Use this parameter if you want to update your custom vocabulary by including all desired terms, as comma-separated values, within your request. The other option for updating your custom vocabulary is to save your entries in a text file and upload them to an Amazon S3 bucket, then specify the location of your file using the VocabularyFileUri parameter. Note that if you include Phrases in your request, you cannot use VocabularyFileUri; you must choose one or the other. Each language has a character set that contains all allowed characters for that specific language. If you use unsupported characters, your custom vocabulary filter request fails. Refer to Character Sets for Custom Vocabularies to get the character set for your language."];
       vocabularyFileUri: Uri_.t option
         [@ocaml.doc
-          "The S3 location of the text file that contains the definition of the custom vocabulary. The URI must be in the same region as the API endpoint that you are calling. The general form is: https://s3.aws-region.amazonaws.com/bucket-name/keyprefix/objectkey For example: https://s3.us-east-1.amazonaws.com/DOC-EXAMPLE-BUCKET/vocab.txt For more information about S3 object names, see Object Keys in the Amazon S3 Developer Guide. For more information about custom vocabularies, see Custom Vocabularies."]}
+          "The Amazon S3 location of the text file that contains your custom vocabulary. The URI must be located in the same Amazon Web Services Region as the resource you're calling. Here's an example URI path: s3://DOC-EXAMPLE-BUCKET/my-vocab-file.txt Note that if you include VocabularyFileUri in your request, you cannot use the Phrases flag; you must choose one or the other."];
+      dataAccessRoleArn: DataAccessRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role that has permissions to access the Amazon S3 bucket that contains your input files (in this case, your custom vocabulary). If the role that you specify doesn\226\128\153t have the appropriate permissions to access the specified Amazon S3 location, your request fails. IAM role ARNs have the format arn:partition:iam::account:role/role-name-with-path. For example: arn:aws:iam::111122223333:role/Admin. For more information, see IAM ARNs."]}
     let context_ = "UpdateVocabularyRequest"
     let make ?phrases =
       fun ?vocabularyFileUri ->
-        fun ~vocabularyName ->
-          fun ~languageCode ->
-            fun () ->
-              { phrases; vocabularyFileUri; vocabularyName; languageCode }
+        fun ?dataAccessRoleArn ->
+          fun ~vocabularyName ->
+            fun ~languageCode ->
+              fun () ->
+                {
+                  phrases;
+                  vocabularyFileUri;
+                  dataAccessRoleArn;
+                  vocabularyName;
+                  languageCode
+                }
     let to_value x =
       structure_to_value
         [("VocabularyName",
@@ -4612,9 +6242,14 @@ module UpdateVocabularyRequest =
         ("LanguageCode", (Some (LanguageCode.to_value x.languageCode)));
         ("Phrases", (Option.map x.phrases ~f:Phrases.to_value));
         ("VocabularyFileUri",
-          (Option.map x.vocabularyFileUri ~f:Uri_.to_value))]
+          (Option.map x.vocabularyFileUri ~f:Uri_.to_value));
+        ("DataAccessRoleArn",
+          (Option.map x.dataAccessRoleArn ~f:DataAccessRoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataAccessRoleArn =
+        (Option.map ~f:DataAccessRoleArn.of_xml)
+          (Xml.child xml_arg0 "DataAccessRoleArn") in
       let vocabularyFileUri =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "VocabularyFileUri") in
       let phrases =
@@ -4625,31 +6260,36 @@ module UpdateVocabularyRequest =
       let vocabularyName =
         VocabularyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
-      make ?vocabularyFileUri ?phrases ~languageCode ~vocabularyName ()
+      make ?dataAccessRoleArn ?vocabularyFileUri ?phrases ~languageCode
+        ~vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vocabularyFileUri = field_map json "VocabularyFileUri" Uri_.of_json in
-      let phrases = field_map json "Phrases" Phrases.of_json in
+    let of_json json__ =
+      let dataAccessRoleArn =
+        field_map json__ "DataAccessRoleArn" DataAccessRoleArn.of_json in
+      let vocabularyFileUri =
+        field_map json__ "VocabularyFileUri" Uri_.of_json in
+      let phrases = field_map json__ "Phrases" Phrases.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyName =
-        field_map_exn json "VocabularyName" VocabularyName.of_json in
-      make ?vocabularyFileUri ?phrases ~languageCode ~vocabularyName ()
+        field_map_exn json__ "VocabularyName" VocabularyName.of_json in
+      make ?dataAccessRoleArn ?vocabularyFileUri ?phrases ~languageCode
+        ~vocabularyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an existing vocabulary with new values. The UpdateVocabulary operation overwrites all of the existing information with the values that you provide in the request."]
+       "Updates an existing custom vocabulary with new values. This operation overwrites all existing information with your new values; you cannot append new terms onto an existing custom vocabulary."]
 module UpdateVocabularyFilterResponse =
   struct
     type nonrec t =
       {
       vocabularyFilterName: VocabularyFilterName.t option
-        [@ocaml.doc "The name of the updated vocabulary filter."];
+        [@ocaml.doc "The name of the updated custom vocabulary filter."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "The language code of the words in the vocabulary filter."];
+          "The language code you selected for your custom vocabulary filter."];
       lastModifiedTime: DateTime.t option
         [@ocaml.doc
-          "The date and time that the vocabulary filter was updated."]}
+          "The date and time the specified custom vocabulary filter was last updated. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -4730,43 +6370,58 @@ module UpdateVocabularyFilterResponse =
           (Xml.child xml_arg0 "VocabularyFilterName") in
       make ?lastModifiedTime ?languageCode ?vocabularyFilterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyFilterName =
-        field_map json "VocabularyFilterName" VocabularyFilterName.of_json in
+        field_map json__ "VocabularyFilterName" VocabularyFilterName.of_json in
       make ?lastModifiedTime ?languageCode ?vocabularyFilterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a vocabulary filter with a new list of filtered words."]
+       "Updates an existing custom vocabulary filter with a new list of words. The new list you provide overwrites all previous entries; you cannot append new terms onto an existing custom vocabulary filter."]
 module UpdateVocabularyFilterRequest =
   struct
     type nonrec t =
       {
       vocabularyFilterName: VocabularyFilterName.t
         [@ocaml.doc
-          "The name of the vocabulary filter to update. If you try to update a vocabulary filter with the same name as another vocabulary filter, you get a ConflictException error."];
+          "The name of the custom vocabulary filter you want to update. Custom vocabulary filter names are case sensitive."];
       words: Words.t option
         [@ocaml.doc
-          "The words to use in the vocabulary filter. Only use characters from the character set defined for custom vocabularies. For a list of character sets, see Character Sets for Custom Vocabularies. If you provide a list of words in the Words parameter, you can't use the VocabularyFilterFileUri parameter."];
+          "Use this parameter if you want to update your custom vocabulary filter by including all desired terms, as comma-separated values, within your request. The other option for updating your vocabulary filter is to save your entries in a text file and upload them to an Amazon S3 bucket, then specify the location of your file using the VocabularyFilterFileUri parameter. Note that if you include Words in your request, you cannot use VocabularyFilterFileUri; you must choose one or the other. Each language has a character set that contains all allowed characters for that specific language. If you use unsupported characters, your custom vocabulary filter request fails. Refer to Character Sets for Custom Vocabularies to get the character set for your language."];
       vocabularyFilterFileUri: Uri_.t option
         [@ocaml.doc
-          "The Amazon S3 location of a text file used as input to create the vocabulary filter. Only use characters from the character set defined for custom vocabularies. For a list of character sets, see Character Sets for Custom Vocabularies. The specified file must be less than 50 KB of UTF-8 characters. If you provide the location of a list of words in the VocabularyFilterFileUri parameter, you can't use the Words parameter."]}
+          "The Amazon S3 location of the text file that contains your custom vocabulary filter terms. The URI must be located in the same Amazon Web Services Region as the resource you're calling. Here's an example URI path: s3://DOC-EXAMPLE-BUCKET/my-vocab-filter-file.txt Note that if you include VocabularyFilterFileUri in your request, you cannot use Words; you must choose one or the other."];
+      dataAccessRoleArn: DataAccessRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role that has permissions to access the Amazon S3 bucket that contains your input files (in this case, your custom vocabulary filter). If the role that you specify doesn\226\128\153t have the appropriate permissions to access the specified Amazon S3 location, your request fails. IAM role ARNs have the format arn:partition:iam::account:role/role-name-with-path. For example: arn:aws:iam::111122223333:role/Admin. For more information, see IAM ARNs."]}
     let context_ = "UpdateVocabularyFilterRequest"
     let make ?words =
       fun ?vocabularyFilterFileUri ->
-        fun ~vocabularyFilterName ->
-          fun () -> { words; vocabularyFilterFileUri; vocabularyFilterName }
+        fun ?dataAccessRoleArn ->
+          fun ~vocabularyFilterName ->
+            fun () ->
+              {
+                words;
+                vocabularyFilterFileUri;
+                dataAccessRoleArn;
+                vocabularyFilterName
+              }
     let to_value x =
       structure_to_value
         [("VocabularyFilterName",
            (Some (VocabularyFilterName.to_value x.vocabularyFilterName)));
         ("Words", (Option.map x.words ~f:Words.to_value));
         ("VocabularyFilterFileUri",
-          (Option.map x.vocabularyFilterFileUri ~f:Uri_.to_value))]
+          (Option.map x.vocabularyFilterFileUri ~f:Uri_.to_value));
+        ("DataAccessRoleArn",
+          (Option.map x.dataAccessRoleArn ~f:DataAccessRoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataAccessRoleArn =
+        (Option.map ~f:DataAccessRoleArn.of_xml)
+          (Xml.child xml_arg0 "DataAccessRoleArn") in
       let vocabularyFilterFileUri =
         (Option.map ~f:Uri_.of_xml)
           (Xml.child xml_arg0 "VocabularyFilterFileUri") in
@@ -4774,33 +6429,38 @@ module UpdateVocabularyFilterRequest =
       let vocabularyFilterName =
         VocabularyFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyFilterName") in
-      make ?vocabularyFilterFileUri ?words ~vocabularyFilterName ()
+      make ?dataAccessRoleArn ?vocabularyFilterFileUri ?words
+        ~vocabularyFilterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let dataAccessRoleArn =
+        field_map json__ "DataAccessRoleArn" DataAccessRoleArn.of_json in
       let vocabularyFilterFileUri =
-        field_map json "VocabularyFilterFileUri" Uri_.of_json in
-      let words = field_map json "Words" Words.of_json in
+        field_map json__ "VocabularyFilterFileUri" Uri_.of_json in
+      let words = field_map json__ "Words" Words.of_json in
       let vocabularyFilterName =
-        field_map_exn json "VocabularyFilterName"
+        field_map_exn json__ "VocabularyFilterName"
           VocabularyFilterName.of_json in
-      make ?vocabularyFilterFileUri ?words ~vocabularyFilterName ()
+      make ?dataAccessRoleArn ?vocabularyFilterFileUri ?words
+        ~vocabularyFilterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a vocabulary filter with a new list of filtered words."]
+       "Updates an existing custom vocabulary filter with a new list of words. The new list you provide overwrites all previous entries; you cannot append new terms onto an existing custom vocabulary filter."]
 module UpdateMedicalVocabularyResponse =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t option
-        [@ocaml.doc "The name of the updated vocabulary."];
+        [@ocaml.doc "The name of the updated custom medical vocabulary."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "The language code for the language of the text file used to update the custom vocabulary. US English (en-US) is the only language supported in Amazon Transcribe Medical."];
+          "The language code you selected for your custom medical vocabulary. US English (en-US) is the only language supported with Amazon Transcribe Medical."];
       lastModifiedTime: DateTime.t option
-        [@ocaml.doc "The date and time that the vocabulary was updated."];
+        [@ocaml.doc
+          "The date and time the specified custom medical vocabulary was last updated. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."];
       vocabularyState: VocabularyState.t option
         [@ocaml.doc
-          "The processing state of the update to the vocabulary. When the VocabularyState field is READY, the vocabulary is ready to be used in a StartMedicalTranscriptionJob request."]}
+          "The processing state of your custom medical vocabulary. If the state is READY, you can use the custom vocabulary in a StartMedicalTranscriptionJob request."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -4902,73 +6562,74 @@ module UpdateMedicalVocabularyResponse =
       make ?vocabularyState ?lastModifiedTime ?languageCode ?vocabularyName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vocabularyState =
-        field_map json "VocabularyState" VocabularyState.of_json in
+        field_map json__ "VocabularyState" VocabularyState.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyName =
-        field_map json "VocabularyName" VocabularyName.of_json in
+        field_map json__ "VocabularyName" VocabularyName.of_json in
       make ?vocabularyState ?lastModifiedTime ?languageCode ?vocabularyName
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a vocabulary with new values that you provide in a different text file from the one you used to create the vocabulary. The UpdateMedicalVocabulary operation overwrites all of the existing information with the values that you provide in the request."]
+       "Updates an existing custom medical vocabulary with new values. This operation overwrites all existing information with your new values; you cannot append new terms onto an existing custom vocabulary."]
 module UpdateMedicalVocabularyRequest =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t
         [@ocaml.doc
-          "The name of the vocabulary to update. The name is case sensitive. If you try to update a vocabulary with the same name as a vocabulary you've already made, you get a ConflictException error."];
+          "The name of the custom medical vocabulary you want to update. Custom medical vocabulary names are case sensitive."];
       languageCode: LanguageCode.t
         [@ocaml.doc
-          "The language code of the language used for the entries in the updated vocabulary. U.S. English (en-US) is the only valid language code in Amazon Transcribe Medical."];
-      vocabularyFileUri: Uri_.t option
+          "The language code that represents the language of the entries in the custom vocabulary you want to update. US English (en-US) is the only language supported with Amazon Transcribe Medical."];
+      vocabularyFileUri: Uri_.t
         [@ocaml.doc
-          "The location in Amazon S3 of the text file that contains your custom vocabulary. The URI must be in the same Amazon Web Services Region as the resource that you are calling. The following is the format for a URI: https://s3.aws-region.amazonaws.com/bucket-name/keyprefix/objectkey For example: https://s3.us-east-1.amazonaws.com/DOC-EXAMPLE-BUCKET/vocab.txt For more information about Amazon S3 object names, see Object Keys in the Amazon S3 Developer Guide. For more information about custom vocabularies in Amazon Transcribe Medical, see Medical Custom Vocabularies."]}
+          "The Amazon S3 location of the text file that contains your custom medical vocabulary. The URI must be located in the same Amazon Web Services Region as the resource you're calling. Here's an example URI path: s3://DOC-EXAMPLE-BUCKET/my-vocab-file.txt"]}
     let context_ = "UpdateMedicalVocabularyRequest"
-    let make ?vocabularyFileUri =
-      fun ~vocabularyName ->
-        fun ~languageCode ->
-          fun () -> { vocabularyFileUri; vocabularyName; languageCode }
+    let make ~vocabularyName =
+      fun ~languageCode ->
+        fun ~vocabularyFileUri ->
+          fun () -> { vocabularyName; languageCode; vocabularyFileUri }
     let to_value x =
       structure_to_value
         [("VocabularyName",
            (Some (VocabularyName.to_value x.vocabularyName)));
         ("LanguageCode", (Some (LanguageCode.to_value x.languageCode)));
-        ("VocabularyFileUri",
-          (Option.map x.vocabularyFileUri ~f:Uri_.to_value))]
+        ("VocabularyFileUri", (Some (Uri_.to_value x.vocabularyFileUri)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let vocabularyFileUri =
-        (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "VocabularyFileUri") in
+        Uri_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VocabularyFileUri") in
       let languageCode =
         LanguageCode.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LanguageCode") in
       let vocabularyName =
         VocabularyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
-      make ?vocabularyFileUri ~languageCode ~vocabularyName ()
+      make ~vocabularyFileUri ~languageCode ~vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vocabularyFileUri = field_map json "VocabularyFileUri" Uri_.of_json in
+    let of_json json__ =
+      let vocabularyFileUri =
+        field_map_exn json__ "VocabularyFileUri" Uri_.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyName =
-        field_map_exn json "VocabularyName" VocabularyName.of_json in
-      make ?vocabularyFileUri ~languageCode ~vocabularyName ()
+        field_map_exn json__ "VocabularyName" VocabularyName.of_json in
+      make ~vocabularyFileUri ~languageCode ~vocabularyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a vocabulary with new values that you provide in a different text file from the one you used to create the vocabulary. The UpdateMedicalVocabulary operation overwrites all of the existing information with the values that you provide in the request."]
+       "Updates an existing custom medical vocabulary with new values. This operation overwrites all existing information with your new values; you cannot append new terms onto an existing custom vocabulary."]
 module UpdateCallAnalyticsCategoryResponse =
   struct
     type nonrec t =
       {
       categoryProperties: CategoryProperties.t option
         [@ocaml.doc
-          "The attributes describing the analytics category. You can see information such as the rules that you've used to update the category and when the category was originally created."]}
+          "Provides you with the properties of the Call Analytics category you specified in your UpdateCallAnalyticsCategory request."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -5044,46 +6705,55 @@ module UpdateCallAnalyticsCategoryResponse =
           (Xml.child xml_arg0 "CategoryProperties") in
       make ?categoryProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let categoryProperties =
-        field_map json "CategoryProperties" CategoryProperties.of_json in
+        field_map json__ "CategoryProperties" CategoryProperties.of_json in
       make ?categoryProperties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the call analytics category with new values. The UpdateCallAnalyticsCategory operation overwrites all of the existing information with the values that you provide in the request."]
+       "Updates the specified Call Analytics category with new rules. Note that the UpdateCallAnalyticsCategory operation overwrites all existing rules contained in the specified category. You cannot append additional rules onto an existing category. To create a new category, see ."]
 module UpdateCallAnalyticsCategoryRequest =
   struct
     type nonrec t =
       {
       categoryName: CategoryName.t
         [@ocaml.doc
-          "The name of the analytics category to update. The name is case sensitive. If you try to update a call analytics category with the same name as a previous category you will receive a ConflictException error."];
+          "The name of the Call Analytics category you want to update. Category names are case sensitive."];
       rules: RuleList.t
         [@ocaml.doc
-          "The rules used for the updated analytics category. The rules that you provide in this field replace the ones that are currently being used."]}
+          "The rules used for the updated Call Analytics category. The rules you provide in this field replace the ones that are currently being used in the specified category."];
+      inputType: InputType.t option
+        [@ocaml.doc
+          "Choose whether you want to update a real-time or a post-call category. The input type you specify must match the input type specified when the category was created. For example, if you created a category with the POST_CALL input type, you must use POST_CALL as the input type when updating this category."]}
     let context_ = "UpdateCallAnalyticsCategoryRequest"
-    let make ~categoryName = fun ~rules -> fun () -> { categoryName; rules }
+    let make ?inputType =
+      fun ~categoryName ->
+        fun ~rules -> fun () -> { inputType; categoryName; rules }
     let to_value x =
       structure_to_value
         [("CategoryName", (Some (CategoryName.to_value x.categoryName)));
-        ("Rules", (Some (RuleList.to_value x.rules)))]
+        ("Rules", (Some (RuleList.to_value x.rules)));
+        ("InputType", (Option.map x.inputType ~f:InputType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let inputType =
+        (Option.map ~f:InputType.of_xml) (Xml.child xml_arg0 "InputType") in
       let rules =
         RuleList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Rules") in
       let categoryName =
         CategoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CategoryName") in
-      make ~rules ~categoryName ()
+      make ?inputType ~rules ~categoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map_exn json "Rules" RuleList.of_json in
+    let of_json json__ =
+      let inputType = field_map json__ "InputType" InputType.of_json in
+      let rules = field_map_exn json__ "Rules" RuleList.of_json in
       let categoryName =
-        field_map_exn json "CategoryName" CategoryName.of_json in
-      make ~rules ~categoryName ()
+        field_map_exn json__ "CategoryName" CategoryName.of_json in
+      make ?inputType ~rules ~categoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the call analytics category with new values. The UpdateCallAnalyticsCategory operation overwrites all of the existing information with the values that you provide in the request."]
+       "Updates the specified Call Analytics category with new rules. Note that the UpdateCallAnalyticsCategory operation overwrites all existing rules contained in the specified category. You cannot append additional rules onto an existing category. To create a new category, see ."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -5159,17 +6829,17 @@ module UntagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes specified tags from a specified Amazon Transcribe resource."]
+       "Removes the specified tags from the specified Amazon Transcribe resource. If you include UntagResource in your request, you must also include ResourceArn and TagKeys."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: TranscribeArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon Transcribe resource you want to remove tags from. ARNs have the format arn:partition:service:region:account-id:resource-type/resource-id (for example, arn:aws:transcribe:us-east-1:account-id:transcription-job/your-job-name). Valid values for resource-type are: transcription-job, medical-transcription-job, vocabulary, medical-vocabulary, vocabulary-filter, and language-model."];
+          "The Amazon Resource Name (ARN) of the Amazon Transcribe resource you want to remove tags from. ARNs have the format arn:partition:service:region:account-id:resource-type/resource-id. For example, arn:aws:transcribe:us-west-2:111122223333:transcription-job/transcription-job-name. Valid values for resource-type are: transcription-job, medical-transcription-job, vocabulary, medical-vocabulary, vocabulary-filter, and language-model."];
       tagKeys: TagKeyList.t
         [@ocaml.doc
-          "A list of tag keys you want to remove from a specified Amazon Transcribe resource."]}
+          "Removes the specified tag keys from the specified Amazon Transcribe resource."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn =
       fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
@@ -5187,14 +6857,14 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" TranscribeArn.of_json in
+        field_map_exn json__ "ResourceArn" TranscribeArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes specified tags from a specified Amazon Transcribe resource."]
+       "Removes the specified tags from the specified Amazon Transcribe resource. If you include UntagResource in your request, you must also include ResourceArn and TagKeys."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -5270,17 +6940,17 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Tags an Amazon Transcribe resource with the given list of tags."]
+       "Adds one or more custom tags, each in the form of a key:value pair, to the specified resource. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: TranscribeArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon Transcribe resource you want to tag. ARNs have the format arn:partition:service:region:account-id:resource-type/resource-id (for example, arn:aws:transcribe:us-east-1:account-id:transcription-job/your-job-name). Valid values for resource-type are: transcription-job, medical-transcription-job, vocabulary, medical-vocabulary, vocabulary-filter, and language-model."];
+          "The Amazon Resource Name (ARN) of the resource you want to tag. ARNs have the format arn:partition:service:region:account-id:resource-type/resource-id. For example, arn:aws:transcribe:us-west-2:111122223333:transcription-job/transcription-job-name. Valid values for resource-type are: transcription-job, medical-transcription-job, vocabulary, medical-vocabulary, vocabulary-filter, and language-model."];
       tags: TagList.t
         [@ocaml.doc
-          "The tags you are assigning to a given Amazon Transcribe resource."]}
+          "Adds one or more custom tags, each in the form of a key:value pair, to the specified resource. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -5296,21 +6966,21 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" TranscribeArn.of_json in
+        field_map_exn json__ "ResourceArn" TranscribeArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Tags an Amazon Transcribe resource with the given list of tags."]
+       "Adds one or more custom tags, each in the form of a key:value pair, to the specified resource. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."]
 module StartTranscriptionJobResponse =
   struct
     type nonrec t =
       {
       transcriptionJob: TranscriptionJob.t option
         [@ocaml.doc
-          "Provides information about your asynchronous transcription job."]}
+          "Provides detailed information about the current transcription job, including job status and, if applicable, failure reason."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -5377,67 +7047,76 @@ module StartTranscriptionJobResponse =
           (Xml.child xml_arg0 "TranscriptionJob") in
       make ?transcriptionJob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transcriptionJob =
-        field_map json "TranscriptionJob" TranscriptionJob.of_json in
+        field_map json__ "TranscriptionJob" TranscriptionJob.of_json in
       make ?transcriptionJob ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Starts an asynchronous job to transcribe speech to text."]
+  end[@@ocaml.doc
+       "Transcribes the audio from a media file and applies any additional Request Parameters you choose to include in your request. To make a StartTranscriptionJob request, you must first upload your media file into an Amazon S3 bucket; you can then specify the Amazon S3 location of the file using the Media parameter. You must include the following parameters in your StartTranscriptionJob request: region: The Amazon Web Services Region where you are making your request. For a list of Amazon Web Services Regions supported with Amazon Transcribe, refer to Amazon Transcribe endpoints and quotas. TranscriptionJobName: A custom name you create for your transcription job that is unique within your Amazon Web Services account. Media (MediaFileUri): The Amazon S3 location of your media file. One of LanguageCode, IdentifyLanguage, or IdentifyMultipleLanguages: If you know the language of your media file, specify it using the LanguageCode parameter; you can find all valid language codes in the Supported languages table. If you do not know the languages spoken in your media, use either IdentifyLanguage or IdentifyMultipleLanguages and let Amazon Transcribe identify the languages for you."]
 module StartTranscriptionJobRequest =
   struct
     type nonrec t =
       {
       transcriptionJobName: TranscriptionJobName.t
         [@ocaml.doc
-          "The name of the job. You can't use the strings \".\" or \"..\" by themselves as the job name. The name must also be unique within an Amazon Web Services account. If you try to create a transcription job with the same name as a previous transcription job, you get a ConflictException error."];
+          "A unique name, chosen by you, for your transcription job. The name that you specify is also used as the default name of your transcription output file. If you want to specify a different name for your transcription output, use the OutputKey parameter. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account. If you try to create a new job with the same name as an existing job, you get a ConflictException error."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "The language code for the language used in the input media file. You must include either LanguageCode or IdentifyLanguage in your request. To transcribe speech in Modern Standard Arabic (ar-SA), your audio or video file must be encoded at a sample rate of 16,000 Hz or higher."];
+          "The language code that represents the language spoken in the input media file. If you're unsure of the language spoken in your media file, consider using IdentifyLanguage or IdentifyMultipleLanguages to enable automatic language identification. Note that you must include one of LanguageCode, IdentifyLanguage, or IdentifyMultipleLanguages in your request. If you include more than one of these parameters, your transcription job fails. For a list of supported languages and their associated language codes, refer to the Supported languages table. To transcribe speech in Modern Standard Arabic (ar-SA) in Amazon Web Services GovCloud (US) (US-West, us-gov-west-1), Amazon Web Services GovCloud (US) (US-East, us-gov-east-1), Canada (Calgary, ca-west-1) and Africa (Cape Town, af-south-1), your media file must be encoded at a sample rate of 16,000 Hz or higher."];
       mediaSampleRateHertz: MediaSampleRateHertz.t option
         [@ocaml.doc
-          "The sample rate, in Hertz, of the audio track in the input media file. If you do not specify the media sample rate, Amazon Transcribe determines the sample rate. If you specify the sample rate, it must match the sample rate detected by Amazon Transcribe. In most cases, you should leave the MediaSampleRateHertz field blank and let Amazon Transcribe determine the sample rate."];
+          "The sample rate, in hertz, of the audio track in your input media file. If you do not specify the media sample rate, Amazon Transcribe determines it for you. If you specify the sample rate, it must match the rate detected by Amazon Transcribe. If there's a mismatch between the value that you specify and the value detected, your job fails. In most cases, you can omit MediaSampleRateHertz and let Amazon Transcribe determine the sample rate."];
       mediaFormat: MediaFormat.t option
-        [@ocaml.doc "The format of the input media file."];
+        [@ocaml.doc "Specify the format of your input media file."];
       media: Media.t
         [@ocaml.doc
-          "An object that describes the input media for a transcription job."];
+          "Describes the Amazon S3 location of the media file you want to use in your request."];
       outputBucketName: OutputBucketName.t option
         [@ocaml.doc
-          "The location where the transcription is stored. If you set the OutputBucketName, Amazon Transcribe puts the transcript in the specified S3 bucket. When you call the GetTranscriptionJob operation, the operation returns this location in the TranscriptFileUri field. If you enable content redaction, the redacted transcript appears in RedactedTranscriptFileUri. If you enable content redaction and choose to output an unredacted transcript, that transcript's location still appears in the TranscriptFileUri. The S3 bucket must have permissions that allow Amazon Transcribe to put files in the bucket. For more information, see Permissions Required for IAM User Roles. You can specify an Amazon Web Services Key Management Service (KMS) key to encrypt the output of your transcription using the OutputEncryptionKMSKeyId parameter. If you don't specify a KMS key, Amazon Transcribe uses the default Amazon S3 key for server-side encryption of transcripts that are placed in your S3 bucket. If you don't set the OutputBucketName, Amazon Transcribe generates a pre-signed URL, a shareable URL that provides secure access to your transcription, and returns it in the TranscriptFileUri field. Use this URL to download the transcription."];
+          "The name of the Amazon S3 bucket where you want your transcription output stored. Do not include the S3:// prefix of the specified bucket. If you want your output to go to a sub-folder of this bucket, specify it using the OutputKey parameter; OutputBucketName only accepts the name of a bucket. For example, if you want your output stored in S3://DOC-EXAMPLE-BUCKET, set OutputBucketName to DOC-EXAMPLE-BUCKET. However, if you want your output stored in S3://DOC-EXAMPLE-BUCKET/test-files/, set OutputBucketName to DOC-EXAMPLE-BUCKET and OutputKey to test-files/. Note that Amazon Transcribe must have permission to use the specified location. You can change Amazon S3 permissions using the Amazon Web Services Management Console. See also Permissions Required for IAM User Roles. If you do not specify OutputBucketName, your transcript is placed in a service-managed Amazon S3 bucket and you are provided with a URI to access your transcript."];
       outputKey: OutputKey.t option
         [@ocaml.doc
-          "You can specify a location in an Amazon S3 bucket to store the output of your transcription job. If you don't specify an output key, Amazon Transcribe stores the output of your transcription job in the Amazon S3 bucket you specified. By default, the object key is \"your-transcription-job-name.json\". You can use output keys to specify the Amazon S3 prefix and file name of the transcription output. For example, specifying the Amazon S3 prefix, \"folder1/folder2/\", as an output key would lead to the output being stored as \"folder1/folder2/your-transcription-job-name.json\". If you specify \"my-other-job-name.json\" as the output key, the object key is changed to \"my-other-job-name.json\". You can use an output key to change both the prefix and the file name, for example \"folder/my-other-job-name.json\". If you specify an output key, you must also specify an S3 bucket in the OutputBucketName parameter."];
+          "Use in combination with OutputBucketName to specify the output location of your transcript and, optionally, a unique name for your output file. The default name for your transcription output is the same as the name you specified for your transcription job (TranscriptionJobName). Here are some examples of how you can use OutputKey: If you specify 'DOC-EXAMPLE-BUCKET' as the OutputBucketName and 'my-transcript.json' as the OutputKey, your transcription output path is s3://DOC-EXAMPLE-BUCKET/my-transcript.json. If you specify 'my-first-transcription' as the TranscriptionJobName, 'DOC-EXAMPLE-BUCKET' as the OutputBucketName, and 'my-transcript' as the OutputKey, your transcription output path is s3://DOC-EXAMPLE-BUCKET/my-transcript/my-first-transcription.json. If you specify 'DOC-EXAMPLE-BUCKET' as the OutputBucketName and 'test-files/my-transcript.json' as the OutputKey, your transcription output path is s3://DOC-EXAMPLE-BUCKET/test-files/my-transcript.json. If you specify 'my-first-transcription' as the TranscriptionJobName, 'DOC-EXAMPLE-BUCKET' as the OutputBucketName, and 'test-files/my-transcript' as the OutputKey, your transcription output path is s3://DOC-EXAMPLE-BUCKET/test-files/my-transcript/my-first-transcription.json. If you specify the name of an Amazon S3 bucket sub-folder that doesn't exist, one is created for you."];
       outputEncryptionKMSKeyId: KMSKeyId.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon Web Services Key Management Service (KMS) key used to encrypt the output of the transcription job. The user calling the StartTranscriptionJob operation must have permission to use the specified KMS key. You can use either of the following to identify a KMS key in the current account: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" KMS Key Alias: \"alias/ExampleAlias\" You can use either of the following to identify a KMS key in the current account or another account: Amazon Resource Name (ARN) of a KMS Key: \"arn:aws:kms:region:account ID:key/1234abcd-12ab-34cd-56ef-1234567890ab\" ARN of a KMS Key Alias: \"arn:aws:kms:region:account-ID:alias/ExampleAlias\" If you don't specify an encryption key, the output of the transcription job is encrypted with the default Amazon S3 key (SSE-S3). If you specify a KMS key to encrypt your output, you must also specify an output location in the OutputBucketName parameter."];
+          "The Amazon Resource Name (ARN) of a KMS key that you want to use to encrypt your transcription output. KMS key ARNs have the format arn:partition:kms:region:account:key/key-id. For example: arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab. For more information, see KMS key ARNs. If you do not specify an encryption key, your output is encrypted with the default Amazon S3 key (SSE-S3). Note that the role making the request and the role specified in the DataAccessRoleArn request parameter (if present) must have permission to use the specified KMS key."];
       kMSEncryptionContext: KMSEncryptionContextMap.t option
         [@ocaml.doc
-          "A map of plain text, non-secret key:value pairs, known as encryption context pairs, that provide an added layer of security for your data."];
+          "A map of plain text, non-secret key:value pairs, known as encryption context pairs, that provide an added layer of security for your data. For more information, see KMS encryption context and Asymmetric keys in KMS."];
       settings: Settings.t option
         [@ocaml.doc
-          "A Settings object that provides optional settings for a transcription job."];
+          "Specify additional optional settings in your request, including channel identification, alternative transcriptions, speaker partitioning. You can use that to apply custom vocabularies and vocabulary filters. If you want to include a custom vocabulary or a custom vocabulary filter (or both) with your request but do not want to use automatic language identification, use Settings with the VocabularyName or VocabularyFilterName (or both) sub-parameter. If you're using automatic language identification with your request and want to include a custom language model, a custom vocabulary, or a custom vocabulary filter, use instead the parameter with the LanguageModelName, VocabularyName or VocabularyFilterName sub-parameters."];
       modelSettings: ModelSettings.t option
         [@ocaml.doc
-          "Choose the custom language model you use for your transcription job in this parameter."];
+          "Specify the custom language model you want to include with your transcription job. If you include ModelSettings in your request, you must include the LanguageModelName sub-parameter. For more information, see Custom language models."];
       jobExecutionSettings: JobExecutionSettings.t option
         [@ocaml.doc
-          "Provides information about how a transcription job is executed. Use this field to indicate that the job can be queued for deferred execution if the concurrency limit is reached and there are no slots available to immediately run the job."];
+          "Makes it possible to control how your transcription job is processed. Currently, the only JobExecutionSettings modification you can choose is enabling job queueing using the AllowDeferredExecution sub-parameter. If you include JobExecutionSettings in your request, you must also include the sub-parameters: AllowDeferredExecution and DataAccessRoleArn."];
       contentRedaction: ContentRedaction.t option
         [@ocaml.doc
-          "An object that contains the request parameters for content redaction."];
+          "Makes it possible to redact or flag specified personally identifiable information (PII) in your transcript. If you use ContentRedaction, you must also include the sub-parameters: RedactionOutput and RedactionType. You can optionally include PiiEntityTypes to choose which types of PII you want to redact. If you do not include PiiEntityTypes in your request, all PII is redacted."];
       identifyLanguage: Boolean.t option
         [@ocaml.doc
-          "Set this field to true to enable automatic language identification. Automatic language identification is disabled by default. You receive a BadRequestException error if you enter a value for a LanguageCode. You must include either LanguageCode or IdentifyLanguage in your request."];
+          "Enables automatic language identification in your transcription job request. Use this parameter if your media file contains only one language. If your media contains multiple languages, use IdentifyMultipleLanguages instead. If you include IdentifyLanguage, you can optionally include a list of language codes, using LanguageOptions, that you think may be present in your media file. Including LanguageOptions restricts IdentifyLanguage to only the language options that you specify, which can improve transcription accuracy. If you want to apply a custom language model, a custom vocabulary, or a custom vocabulary filter to your automatic language identification request, include LanguageIdSettings with the relevant sub-parameters (VocabularyName, LanguageModelName, and VocabularyFilterName). If you include LanguageIdSettings, also include LanguageOptions. Note that you must include one of LanguageCode, IdentifyLanguage, or IdentifyMultipleLanguages in your request. If you include more than one of these parameters, your transcription job fails."];
+      identifyMultipleLanguages: Boolean.t option
+        [@ocaml.doc
+          "Enables automatic multi-language identification in your transcription job request. Use this parameter if your media file contains more than one language. If your media contains only one language, use IdentifyLanguage instead. If you include IdentifyMultipleLanguages, you can optionally include a list of language codes, using LanguageOptions, that you think may be present in your media file. Including LanguageOptions restricts IdentifyLanguage to only the language options that you specify, which can improve transcription accuracy. If you want to apply a custom vocabulary or a custom vocabulary filter to your automatic language identification request, include LanguageIdSettings with the relevant sub-parameters (VocabularyName and VocabularyFilterName). If you include LanguageIdSettings, also include LanguageOptions. Note that you must include one of LanguageCode, IdentifyLanguage, or IdentifyMultipleLanguages in your request. If you include more than one of these parameters, your transcription job fails."];
       languageOptions: LanguageOptions.t option
         [@ocaml.doc
-          "An object containing a list of languages that might be present in your collection of audio files. Automatic language identification chooses a language that best matches the source audio from that list. To transcribe speech in Modern Standard Arabic (ar-SA), your audio or video file must be encoded at a sample rate of 16,000 Hz or higher."];
+          "You can specify two or more language codes that represent the languages you think may be present in your media. Including more than five is not recommended. If you're unsure what languages are present, do not include this parameter. If you include LanguageOptions in your request, you must also include IdentifyLanguage. For more information, refer to Supported languages. To transcribe speech in Modern Standard Arabic (ar-SA)in Amazon Web Services GovCloud (US) (US-West, us-gov-west-1), Amazon Web Services GovCloud (US) (US-East, us-gov-east-1), in Canada (Calgary) ca-west-1 and Africa (Cape Town) af-south-1, your media file must be encoded at a sample rate of 16,000 Hz or higher."];
       subtitles: Subtitles.t option
-        [@ocaml.doc "Add subtitles to your batch transcription job."];
+        [@ocaml.doc
+          "Produces subtitle files for your input media. You can specify WebVTT (*.vtt) and SubRip (*.srt) formats."];
       tags: TagList.t option
-        [@ocaml.doc "Add tags to an Amazon Transcribe transcription job."];
+        [@ocaml.doc
+          "Adds one or more custom tags, each in the form of a key:value pair, to a new transcription job at the time you start this new job. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."];
       languageIdSettings: LanguageIdSettingsMap.t option
         [@ocaml.doc
-          "The language identification settings associated with your transcription job. These settings include VocabularyName, VocabularyFilterName, and LanguageModelName."]}
+          "If using automatic language identification in your request and you want to apply a custom language model, a custom vocabulary, or a custom vocabulary filter, include LanguageIdSettings with the relevant sub-parameters (VocabularyName, LanguageModelName, and VocabularyFilterName). Note that multi-language identification (IdentifyMultipleLanguages) doesn't support custom language models. LanguageIdSettings supports two to five language codes. Each language code you include can have an associated custom language model, custom vocabulary, and custom vocabulary filter. The language codes that you specify must match the languages of the associated custom language models, custom vocabularies, and custom vocabulary filters. It's recommended that you include LanguageOptions when using LanguageIdSettings to ensure that the correct language dialect is identified. For example, if you specify a custom vocabulary that is in en-US but Amazon Transcribe determines that the language spoken in your media is en-AU, your custom vocabulary is not applied to your transcription. If you include LanguageOptions and include en-US as the only English language dialect, your custom vocabulary is applied to your transcription. If you want to include a custom language model with your request but do not want to use automatic language identification, use instead the parameter with the LanguageModelName sub-parameter. If you want to include a custom vocabulary or a custom vocabulary filter (or both) with your request but do not want to use automatic language identification, use instead the parameter with the VocabularyName or VocabularyFilterName (or both) sub-parameter."];
+      toxicityDetection: ToxicityDetection.t option
+        [@ocaml.doc
+          "Enables toxic speech detection in your transcript. If you include ToxicityDetection in your request, you must also include ToxicityCategories. For information on the types of toxic speech Amazon Transcribe can detect, see Detecting toxic speech."]}
     let context_ = "StartTranscriptionJobRequest"
     let make ?languageCode =
       fun ?mediaSampleRateHertz ->
@@ -5451,33 +7130,37 @@ module StartTranscriptionJobRequest =
                       fun ?jobExecutionSettings ->
                         fun ?contentRedaction ->
                           fun ?identifyLanguage ->
-                            fun ?languageOptions ->
-                              fun ?subtitles ->
-                                fun ?tags ->
-                                  fun ?languageIdSettings ->
-                                    fun ~transcriptionJobName ->
-                                      fun ~media ->
-                                        fun () ->
-                                          {
-                                            languageCode;
-                                            mediaSampleRateHertz;
-                                            mediaFormat;
-                                            outputBucketName;
-                                            outputKey;
-                                            outputEncryptionKMSKeyId;
-                                            kMSEncryptionContext;
-                                            settings;
-                                            modelSettings;
-                                            jobExecutionSettings;
-                                            contentRedaction;
-                                            identifyLanguage;
-                                            languageOptions;
-                                            subtitles;
-                                            tags;
-                                            languageIdSettings;
-                                            transcriptionJobName;
-                                            media
-                                          }
+                            fun ?identifyMultipleLanguages ->
+                              fun ?languageOptions ->
+                                fun ?subtitles ->
+                                  fun ?tags ->
+                                    fun ?languageIdSettings ->
+                                      fun ?toxicityDetection ->
+                                        fun ~transcriptionJobName ->
+                                          fun ~media ->
+                                            fun () ->
+                                              {
+                                                languageCode;
+                                                mediaSampleRateHertz;
+                                                mediaFormat;
+                                                outputBucketName;
+                                                outputKey;
+                                                outputEncryptionKMSKeyId;
+                                                kMSEncryptionContext;
+                                                settings;
+                                                modelSettings;
+                                                jobExecutionSettings;
+                                                contentRedaction;
+                                                identifyLanguage;
+                                                identifyMultipleLanguages;
+                                                languageOptions;
+                                                subtitles;
+                                                tags;
+                                                languageIdSettings;
+                                                toxicityDetection;
+                                                transcriptionJobName;
+                                                media
+                                              }
     let to_value x =
       structure_to_value
         [("TranscriptionJobName",
@@ -5505,14 +7188,21 @@ module StartTranscriptionJobRequest =
           (Option.map x.contentRedaction ~f:ContentRedaction.to_value));
         ("IdentifyLanguage",
           (Option.map x.identifyLanguage ~f:Boolean.to_value));
+        ("IdentifyMultipleLanguages",
+          (Option.map x.identifyMultipleLanguages ~f:Boolean.to_value));
         ("LanguageOptions",
           (Option.map x.languageOptions ~f:LanguageOptions.to_value));
         ("Subtitles", (Option.map x.subtitles ~f:Subtitles.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("LanguageIdSettings",
-          (Option.map x.languageIdSettings ~f:LanguageIdSettingsMap.to_value))]
+          (Option.map x.languageIdSettings ~f:LanguageIdSettingsMap.to_value));
+        ("ToxicityDetection",
+          (Option.map x.toxicityDetection ~f:ToxicityDetection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let toxicityDetection =
+        (Option.map ~f:ToxicityDetection.of_xml)
+          (Xml.child xml_arg0 "ToxicityDetection") in
       let languageIdSettings =
         (Option.map ~f:LanguageIdSettingsMap.of_xml)
           (Xml.child xml_arg0 "LanguageIdSettings") in
@@ -5522,6 +7212,9 @@ module StartTranscriptionJobRequest =
       let languageOptions =
         (Option.map ~f:LanguageOptions.of_xml)
           (Xml.child xml_arg0 "LanguageOptions") in
+      let identifyMultipleLanguages =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "IdentifyMultipleLanguages") in
       let identifyLanguage =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "IdentifyLanguage") in
@@ -5560,59 +7253,65 @@ module StartTranscriptionJobRequest =
       let transcriptionJobName =
         TranscriptionJobName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TranscriptionJobName") in
-      make ?languageIdSettings ?tags ?subtitles ?languageOptions
-        ?identifyLanguage ?contentRedaction ?jobExecutionSettings
-        ?modelSettings ?settings ?kMSEncryptionContext
-        ?outputEncryptionKMSKeyId ?outputKey ?outputBucketName ~media
-        ?mediaFormat ?mediaSampleRateHertz ?languageCode
-        ~transcriptionJobName ()
+      make ?toxicityDetection ?languageIdSettings ?tags ?subtitles
+        ?languageOptions ?identifyMultipleLanguages ?identifyLanguage
+        ?contentRedaction ?jobExecutionSettings ?modelSettings ?settings
+        ?kMSEncryptionContext ?outputEncryptionKMSKeyId ?outputKey
+        ?outputBucketName ~media ?mediaFormat ?mediaSampleRateHertz
+        ?languageCode ~transcriptionJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let toxicityDetection =
+        field_map json__ "ToxicityDetection" ToxicityDetection.of_json in
       let languageIdSettings =
-        field_map json "LanguageIdSettings" LanguageIdSettingsMap.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let subtitles = field_map json "Subtitles" Subtitles.of_json in
+        field_map json__ "LanguageIdSettings" LanguageIdSettingsMap.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let subtitles = field_map json__ "Subtitles" Subtitles.of_json in
       let languageOptions =
-        field_map json "LanguageOptions" LanguageOptions.of_json in
+        field_map json__ "LanguageOptions" LanguageOptions.of_json in
+      let identifyMultipleLanguages =
+        field_map json__ "IdentifyMultipleLanguages" Boolean.of_json in
       let identifyLanguage =
-        field_map json "IdentifyLanguage" Boolean.of_json in
+        field_map json__ "IdentifyLanguage" Boolean.of_json in
       let contentRedaction =
-        field_map json "ContentRedaction" ContentRedaction.of_json in
+        field_map json__ "ContentRedaction" ContentRedaction.of_json in
       let jobExecutionSettings =
-        field_map json "JobExecutionSettings" JobExecutionSettings.of_json in
+        field_map json__ "JobExecutionSettings" JobExecutionSettings.of_json in
       let modelSettings =
-        field_map json "ModelSettings" ModelSettings.of_json in
-      let settings = field_map json "Settings" Settings.of_json in
+        field_map json__ "ModelSettings" ModelSettings.of_json in
+      let settings = field_map json__ "Settings" Settings.of_json in
       let kMSEncryptionContext =
-        field_map json "KMSEncryptionContext" KMSEncryptionContextMap.of_json in
+        field_map json__ "KMSEncryptionContext"
+          KMSEncryptionContextMap.of_json in
       let outputEncryptionKMSKeyId =
-        field_map json "OutputEncryptionKMSKeyId" KMSKeyId.of_json in
-      let outputKey = field_map json "OutputKey" OutputKey.of_json in
+        field_map json__ "OutputEncryptionKMSKeyId" KMSKeyId.of_json in
+      let outputKey = field_map json__ "OutputKey" OutputKey.of_json in
       let outputBucketName =
-        field_map json "OutputBucketName" OutputBucketName.of_json in
-      let media = field_map_exn json "Media" Media.of_json in
-      let mediaFormat = field_map json "MediaFormat" MediaFormat.of_json in
+        field_map json__ "OutputBucketName" OutputBucketName.of_json in
+      let media = field_map_exn json__ "Media" Media.of_json in
+      let mediaFormat = field_map json__ "MediaFormat" MediaFormat.of_json in
       let mediaSampleRateHertz =
-        field_map json "MediaSampleRateHertz" MediaSampleRateHertz.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "MediaSampleRateHertz" MediaSampleRateHertz.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let transcriptionJobName =
-        field_map_exn json "TranscriptionJobName"
+        field_map_exn json__ "TranscriptionJobName"
           TranscriptionJobName.of_json in
-      make ?languageIdSettings ?tags ?subtitles ?languageOptions
-        ?identifyLanguage ?contentRedaction ?jobExecutionSettings
-        ?modelSettings ?settings ?kMSEncryptionContext
-        ?outputEncryptionKMSKeyId ?outputKey ?outputBucketName ~media
-        ?mediaFormat ?mediaSampleRateHertz ?languageCode
-        ~transcriptionJobName ()
+      make ?toxicityDetection ?languageIdSettings ?tags ?subtitles
+        ?languageOptions ?identifyMultipleLanguages ?identifyLanguage
+        ?contentRedaction ?jobExecutionSettings ?modelSettings ?settings
+        ?kMSEncryptionContext ?outputEncryptionKMSKeyId ?outputKey
+        ?outputBucketName ~media ?mediaFormat ?mediaSampleRateHertz
+        ?languageCode ~transcriptionJobName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Starts an asynchronous job to transcribe speech to text."]
+  end[@@ocaml.doc
+       "Transcribes the audio from a media file and applies any additional Request Parameters you choose to include in your request. To make a StartTranscriptionJob request, you must first upload your media file into an Amazon S3 bucket; you can then specify the Amazon S3 location of the file using the Media parameter. You must include the following parameters in your StartTranscriptionJob request: region: The Amazon Web Services Region where you are making your request. For a list of Amazon Web Services Regions supported with Amazon Transcribe, refer to Amazon Transcribe endpoints and quotas. TranscriptionJobName: A custom name you create for your transcription job that is unique within your Amazon Web Services account. Media (MediaFileUri): The Amazon S3 location of your media file. One of LanguageCode, IdentifyLanguage, or IdentifyMultipleLanguages: If you know the language of your media file, specify it using the LanguageCode parameter; you can find all valid language codes in the Supported languages table. If you do not know the languages spoken in your media, use either IdentifyLanguage or IdentifyMultipleLanguages and let Amazon Transcribe identify the languages for you."]
 module StartMedicalTranscriptionJobResponse =
   struct
     type nonrec t =
       {
       medicalTranscriptionJob: MedicalTranscriptionJob.t option
         [@ocaml.doc
-          "A batch job submitted to transcribe medical speech to text."]}
+          "Provides detailed information about the current medical transcription job, including job status and, if applicable, failure reason."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -5680,55 +7379,57 @@ module StartMedicalTranscriptionJobResponse =
           (Xml.child xml_arg0 "MedicalTranscriptionJob") in
       make ?medicalTranscriptionJob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let medicalTranscriptionJob =
-        field_map json "MedicalTranscriptionJob"
+        field_map json__ "MedicalTranscriptionJob"
           MedicalTranscriptionJob.of_json in
       make ?medicalTranscriptionJob ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Starts a batch job to transcribe medical speech to text."]
+  end[@@ocaml.doc
+       "Transcribes the audio from a medical dictation or conversation and applies any additional Request Parameters you choose to include in your request. In addition to many standard transcription features, Amazon Transcribe Medical provides you with a robust medical vocabulary and, optionally, content identification, which adds flags to personal health information (PHI). To learn more about these features, refer to How Amazon Transcribe Medical works. To make a StartMedicalTranscriptionJob request, you must first upload your media file into an Amazon S3 bucket; you can then specify the Amazon S3 location of the file using the Media parameter. You must include the following parameters in your StartMedicalTranscriptionJob request: region: The Amazon Web Services Region where you are making your request. For a list of Amazon Web Services Regions supported with Amazon Transcribe, refer to Amazon Transcribe endpoints and quotas. MedicalTranscriptionJobName: A custom name you create for your transcription job that is unique within your Amazon Web Services account. Media (MediaFileUri): The Amazon S3 location of your media file. LanguageCode: This must be en-US. OutputBucketName: The Amazon S3 bucket where you want your transcript stored. If you want your output stored in a sub-folder of this bucket, you must also include OutputKey. Specialty: This must be PRIMARYCARE. Type: Choose whether your audio is a conversation or a dictation."]
 module StartMedicalTranscriptionJobRequest =
   struct
     type nonrec t =
       {
       medicalTranscriptionJobName: TranscriptionJobName.t
         [@ocaml.doc
-          "The name of the medical transcription job. You can't use the strings \".\" or \"..\" by themselves as the job name. The name must also be unique within an Amazon Web Services account. If you try to create a medical transcription job with the same name as a previous medical transcription job, you get a ConflictException error."];
+          "A unique name, chosen by you, for your medical transcription job. The name that you specify is also used as the default name of your transcription output file. If you want to specify a different name for your transcription output, use the OutputKey parameter. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account. If you try to create a new job with the same name as an existing job, you get a ConflictException error."];
       languageCode: LanguageCode.t
         [@ocaml.doc
-          "The language code for the language spoken in the input media file. US English (en-US) is the valid value for medical transcription jobs. Any other value you enter for language code results in a BadRequestException error."];
+          "The language code that represents the language spoken in the input media file. US English (en-US) is the only valid value for medical transcription jobs. Any other value you enter for language code results in a BadRequestException error."];
       mediaSampleRateHertz: MedicalMediaSampleRateHertz.t option
         [@ocaml.doc
-          "The sample rate, in Hertz, of the audio track in the input media file. If you do not specify the media sample rate, Amazon Transcribe Medical determines the sample rate. If you specify the sample rate, it must match the rate detected by Amazon Transcribe Medical. In most cases, you should leave the MediaSampleRateHertz field blank and let Amazon Transcribe Medical determine the sample rate."];
+          "The sample rate, in hertz, of the audio track in your input media file. If you do not specify the media sample rate, Amazon Transcribe Medical determines it for you. If you specify the sample rate, it must match the rate detected by Amazon Transcribe Medical; if there's a mismatch between the value that you specify and the value detected, your job fails. Therefore, in most cases, it's advised to omit MediaSampleRateHertz and let Amazon Transcribe Medical determine the sample rate."];
       mediaFormat: MediaFormat.t option
-        [@ocaml.doc "The audio format of the input media file."];
+        [@ocaml.doc "Specify the format of your input media file."];
       media: Media.t ;
       outputBucketName: OutputBucketName.t
         [@ocaml.doc
-          "The Amazon S3 location where the transcription is stored. You must set OutputBucketName for Amazon Transcribe Medical to store the transcription results. Your transcript appears in the S3 location you specify. When you call the GetMedicalTranscriptionJob, the operation returns this location in the TranscriptFileUri field. The S3 bucket must have permissions that allow Amazon Transcribe Medical to put files in the bucket. For more information, see Permissions Required for IAM User Roles. You can specify an Amazon Web Services Key Management Service (KMS) key to encrypt the output of your transcription using the OutputEncryptionKMSKeyId parameter. If you don't specify a KMS key, Amazon Transcribe Medical uses the default Amazon S3 key for server-side encryption of transcripts that are placed in your S3 bucket."];
+          "The name of the Amazon S3 bucket where you want your medical transcription output stored. Do not include the S3:// prefix of the specified bucket. If you want your output to go to a sub-folder of this bucket, specify it using the OutputKey parameter; OutputBucketName only accepts the name of a bucket. For example, if you want your output stored in S3://DOC-EXAMPLE-BUCKET, set OutputBucketName to DOC-EXAMPLE-BUCKET. However, if you want your output stored in S3://DOC-EXAMPLE-BUCKET/test-files/, set OutputBucketName to DOC-EXAMPLE-BUCKET and OutputKey to test-files/. Note that Amazon Transcribe must have permission to use the specified location. You can change Amazon S3 permissions using the Amazon Web Services Management Console. See also Permissions Required for IAM User Roles."];
       outputKey: OutputKey.t option
         [@ocaml.doc
-          "You can specify a location in an Amazon S3 bucket to store the output of your medical transcription job. If you don't specify an output key, Amazon Transcribe Medical stores the output of your transcription job in the Amazon S3 bucket you specified. By default, the object key is \"your-transcription-job-name.json\". You can use output keys to specify the Amazon S3 prefix and file name of the transcription output. For example, specifying the Amazon S3 prefix, \"folder1/folder2/\", as an output key would lead to the output being stored as \"folder1/folder2/your-transcription-job-name.json\". If you specify \"my-other-job-name.json\" as the output key, the object key is changed to \"my-other-job-name.json\". You can use an output key to change both the prefix and the file name, for example \"folder/my-other-job-name.json\". If you specify an output key, you must also specify an S3 bucket in the OutputBucketName parameter."];
+          "Use in combination with OutputBucketName to specify the output location of your transcript and, optionally, a unique name for your output file. The default name for your transcription output is the same as the name you specified for your medical transcription job (MedicalTranscriptionJobName). Here are some examples of how you can use OutputKey: If you specify 'DOC-EXAMPLE-BUCKET' as the OutputBucketName and 'my-transcript.json' as the OutputKey, your transcription output path is s3://DOC-EXAMPLE-BUCKET/my-transcript.json. If you specify 'my-first-transcription' as the MedicalTranscriptionJobName, 'DOC-EXAMPLE-BUCKET' as the OutputBucketName, and 'my-transcript' as the OutputKey, your transcription output path is s3://DOC-EXAMPLE-BUCKET/my-transcript/my-first-transcription.json. If you specify 'DOC-EXAMPLE-BUCKET' as the OutputBucketName and 'test-files/my-transcript.json' as the OutputKey, your transcription output path is s3://DOC-EXAMPLE-BUCKET/test-files/my-transcript.json. If you specify 'my-first-transcription' as the MedicalTranscriptionJobName, 'DOC-EXAMPLE-BUCKET' as the OutputBucketName, and 'test-files/my-transcript' as the OutputKey, your transcription output path is s3://DOC-EXAMPLE-BUCKET/test-files/my-transcript/my-first-transcription.json. If you specify the name of an Amazon S3 bucket sub-folder that doesn't exist, one is created for you."];
       outputEncryptionKMSKeyId: KMSKeyId.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon Web Services Key Management Service (KMS) key used to encrypt the output of the transcription job. The user calling the StartMedicalTranscriptionJob operation must have permission to use the specified KMS key. You use either of the following to identify a KMS key in the current account: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" KMS Key Alias: \"alias/ExampleAlias\" You can use either of the following to identify a KMS key in the current account or another account: Amazon Resource Name (ARN) of a KMS key in the current account or another account: \"arn:aws:kms:region:account-ID:key/1234abcd-12ab-34cd-56ef-1234567890ab\" ARN of a KMS Key Alias: \"arn:aws:kms:region:account ID:alias/ExampleAlias\" If you don't specify an encryption key, the output of the medical transcription job is encrypted with the default Amazon S3 key (SSE-S3). If you specify a KMS key to encrypt your output, you must also specify an output location in the OutputBucketName parameter."];
+          "The Amazon Resource Name (ARN) of a KMS key that you want to use to encrypt your medical transcription output. KMS key ARNs have the format arn:partition:kms:region:account:key/key-id. For example: arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab. For more information, see KMS key ARNs. If you do not specify an encryption key, your output is encrypted with the default Amazon S3 key (SSE-S3). Note that the role making the request and the role specified in the DataAccessRoleArn request parameter (if present) must have permission to use the specified KMS key."];
       kMSEncryptionContext: KMSEncryptionContextMap.t option
         [@ocaml.doc
-          "A map of plain text, non-secret key:value pairs, known as encryption context pairs, that provide an added layer of security for your data."];
+          "A map of plain text, non-secret key:value pairs, known as encryption context pairs, that provide an added layer of security for your data. For more information, see KMS encryption context and Asymmetric keys in KMS."];
       settings: MedicalTranscriptionSetting.t option
-        [@ocaml.doc "Optional settings for the medical transcription job."];
+        [@ocaml.doc
+          "Specify additional optional settings in your request, including channel identification, alternative transcriptions, and speaker partitioning. You can use that to apply custom vocabularies to your transcription job."];
       contentIdentificationType: MedicalContentIdentificationType.t option
         [@ocaml.doc
-          "You can configure Amazon Transcribe Medical to label content in the transcription output. If you specify PHI, Amazon Transcribe Medical labels the personal health information (PHI) that it identifies in the transcription output."];
+          "Labels all personal health information (PHI) identified in your transcript. For more information, see Identifying personal health information (PHI) in a transcription."];
       specialty: Specialty.t
         [@ocaml.doc
-          "The medical specialty of any clinician speaking in the input media."];
+          "Specify the predominant medical specialty represented in your media. For batch transcriptions, PRIMARYCARE is the only valid value. If you require additional specialties, refer to ."];
       type_: Type.t
         [@ocaml.doc
-          "The type of speech in the input audio. CONVERSATION refers to conversations between two or more speakers, e.g., a conversations between doctors and patients. DICTATION refers to single-speaker dictated speech, such as clinical notes."];
+          "Specify whether your input media contains only one person (DICTATION) or contains a conversation between two people (CONVERSATION). For example, DICTATION could be used for a medical professional wanting to transcribe voice memos; CONVERSATION could be used for transcribing the doctor-patient dialogue during the patient's office visit."];
       tags: TagList.t option
         [@ocaml.doc
-          "Add tags to an Amazon Transcribe Medical transcription job."]}
+          "Adds one or more custom tags, each in the form of a key:value pair, to a new medical transcription job at the time you start this new job. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."]}
     let context_ = "StartMedicalTranscriptionJobRequest"
     let make ?mediaSampleRateHertz =
       fun ?mediaFormat ->
@@ -5832,45 +7533,265 @@ module StartMedicalTranscriptionJobRequest =
         ~outputBucketName ~media ?mediaFormat ?mediaSampleRateHertz
         ~languageCode ~medicalTranscriptionJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let type_ = field_map_exn json "Type" Type.of_json in
-      let specialty = field_map_exn json "Specialty" Specialty.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let type_ = field_map_exn json__ "Type" Type.of_json in
+      let specialty = field_map_exn json__ "Specialty" Specialty.of_json in
       let contentIdentificationType =
-        field_map json "ContentIdentificationType"
+        field_map json__ "ContentIdentificationType"
           MedicalContentIdentificationType.of_json in
       let settings =
-        field_map json "Settings" MedicalTranscriptionSetting.of_json in
+        field_map json__ "Settings" MedicalTranscriptionSetting.of_json in
       let kMSEncryptionContext =
-        field_map json "KMSEncryptionContext" KMSEncryptionContextMap.of_json in
+        field_map json__ "KMSEncryptionContext"
+          KMSEncryptionContextMap.of_json in
       let outputEncryptionKMSKeyId =
-        field_map json "OutputEncryptionKMSKeyId" KMSKeyId.of_json in
-      let outputKey = field_map json "OutputKey" OutputKey.of_json in
+        field_map json__ "OutputEncryptionKMSKeyId" KMSKeyId.of_json in
+      let outputKey = field_map json__ "OutputKey" OutputKey.of_json in
       let outputBucketName =
-        field_map_exn json "OutputBucketName" OutputBucketName.of_json in
-      let media = field_map_exn json "Media" Media.of_json in
-      let mediaFormat = field_map json "MediaFormat" MediaFormat.of_json in
+        field_map_exn json__ "OutputBucketName" OutputBucketName.of_json in
+      let media = field_map_exn json__ "Media" Media.of_json in
+      let mediaFormat = field_map json__ "MediaFormat" MediaFormat.of_json in
       let mediaSampleRateHertz =
-        field_map json "MediaSampleRateHertz"
+        field_map json__ "MediaSampleRateHertz"
           MedicalMediaSampleRateHertz.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
       let medicalTranscriptionJobName =
-        field_map_exn json "MedicalTranscriptionJobName"
+        field_map_exn json__ "MedicalTranscriptionJobName"
           TranscriptionJobName.of_json in
       make ?tags ~type_ ~specialty ?contentIdentificationType ?settings
         ?kMSEncryptionContext ?outputEncryptionKMSKeyId ?outputKey
         ~outputBucketName ~media ?mediaFormat ?mediaSampleRateHertz
         ~languageCode ~medicalTranscriptionJobName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Starts a batch job to transcribe medical speech to text."]
+  end[@@ocaml.doc
+       "Transcribes the audio from a medical dictation or conversation and applies any additional Request Parameters you choose to include in your request. In addition to many standard transcription features, Amazon Transcribe Medical provides you with a robust medical vocabulary and, optionally, content identification, which adds flags to personal health information (PHI). To learn more about these features, refer to How Amazon Transcribe Medical works. To make a StartMedicalTranscriptionJob request, you must first upload your media file into an Amazon S3 bucket; you can then specify the Amazon S3 location of the file using the Media parameter. You must include the following parameters in your StartMedicalTranscriptionJob request: region: The Amazon Web Services Region where you are making your request. For a list of Amazon Web Services Regions supported with Amazon Transcribe, refer to Amazon Transcribe endpoints and quotas. MedicalTranscriptionJobName: A custom name you create for your transcription job that is unique within your Amazon Web Services account. Media (MediaFileUri): The Amazon S3 location of your media file. LanguageCode: This must be en-US. OutputBucketName: The Amazon S3 bucket where you want your transcript stored. If you want your output stored in a sub-folder of this bucket, you must also include OutputKey. Specialty: This must be PRIMARYCARE. Type: Choose whether your audio is a conversation or a dictation."]
+module StartMedicalScribeJobResponse =
+  struct
+    type nonrec t =
+      {
+      medicalScribeJob: MedicalScribeJob.t option
+        [@ocaml.doc
+          "Provides detailed information about the current Medical Scribe job, including job status and, if applicable, failure reason."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalFailureException of InternalFailureException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?medicalScribeJob = fun () -> { medicalScribeJob }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalFailureException e ->
+          `Assoc
+            [("error", (`String "InternalFailureException"));
+            ("details", (InternalFailureException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MedicalScribeJob",
+           (Option.map x.medicalScribeJob ~f:MedicalScribeJob.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let medicalScribeJob =
+        (Option.map ~f:MedicalScribeJob.of_xml)
+          (Xml.child xml_arg0 "MedicalScribeJob") in
+      make ?medicalScribeJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let medicalScribeJob =
+        field_map json__ "MedicalScribeJob" MedicalScribeJob.of_json in
+      make ?medicalScribeJob ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Transcribes patient-clinician conversations and generates clinical notes. Amazon Web Services HealthScribe automatically provides rich conversation transcripts, identifies speaker roles, classifies dialogues, extracts medical terms, and generates preliminary clinical notes. To learn more about these features, refer to Amazon Web Services HealthScribe. To make a StartMedicalScribeJob request, you must first upload your media file into an Amazon S3 bucket; you can then specify the Amazon S3 location of the file using the Media parameter. You must include the following parameters in your StartMedicalTranscriptionJob request: DataAccessRoleArn: The ARN of an IAM role with the these minimum permissions: read permission on input file Amazon S3 bucket specified in Media, write permission on the Amazon S3 bucket specified in OutputBucketName, and full permissions on the KMS key specified in OutputEncryptionKMSKeyId (if set). The role should also allow transcribe.amazonaws.com to assume it. Media (MediaFileUri): The Amazon S3 location of your media file. MedicalScribeJobName: A custom name you create for your MedicalScribe job that is unique within your Amazon Web Services account. OutputBucketName: The Amazon S3 bucket where you want your output files stored. Settings: A MedicalScribeSettings object that must set exactly one of ShowSpeakerLabels or ChannelIdentification to true. If ShowSpeakerLabels is true, MaxSpeakerLabels must also be set. ChannelDefinitions: A MedicalScribeChannelDefinitions array should be set if and only if the ChannelIdentification value of Settings is set to true."]
+module StartMedicalScribeJobRequest =
+  struct
+    type nonrec t =
+      {
+      medicalScribeJobName: TranscriptionJobName.t
+        [@ocaml.doc
+          "A unique name, chosen by you, for your Medical Scribe job. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account. If you try to create a new job with the same name as an existing job, you get a ConflictException error."];
+      media: Media.t ;
+      outputBucketName: OutputBucketName.t
+        [@ocaml.doc
+          "The name of the Amazon S3 bucket where you want your Medical Scribe output stored. Do not include the S3:// prefix of the specified bucket. Note that the role specified in the DataAccessRoleArn request parameter must have permission to use the specified location. You can change Amazon S3 permissions using the Amazon Web Services Management Console. See also Permissions Required for IAM User Roles."];
+      outputEncryptionKMSKeyId: KMSKeyId.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of a KMS key that you want to use to encrypt your Medical Scribe output. KMS key ARNs have the format arn:partition:kms:region:account:key/key-id. For example: arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab. For more information, see KMS key ARNs. If you do not specify an encryption key, your output is encrypted with the default Amazon S3 key (SSE-S3). Note that the role making the request and the role specified in the DataAccessRoleArn request parameter (if present) must have permission to use the specified KMS key."];
+      kMSEncryptionContext: KMSEncryptionContextMap.t option
+        [@ocaml.doc
+          "A map of plain text, non-secret key:value pairs, known as encryption context pairs, that provide an added layer of security for your data. For more information, see KMS encryption context and Asymmetric keys in KMS."];
+      dataAccessRoleArn: DataAccessRoleArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role that has permissions to access the Amazon S3 bucket that contains your input files, write to the output bucket, and use your KMS key if supplied. If the role that you specify doesn\226\128\153t have the appropriate permissions your request fails. IAM role ARNs have the format arn:partition:iam::account:role/role-name-with-path. For example: arn:aws:iam::111122223333:role/Admin. For more information, see IAM ARNs."];
+      settings: MedicalScribeSettings.t
+        [@ocaml.doc
+          "Makes it possible to control how your Medical Scribe job is processed using a MedicalScribeSettings object. Specify ChannelIdentification if ChannelDefinitions are set. Enabled ShowSpeakerLabels if ChannelIdentification and ChannelDefinitions are not set. One and only one of ChannelIdentification and ShowSpeakerLabels must be set. If ShowSpeakerLabels is set, MaxSpeakerLabels must also be set. Use Settings to specify a vocabulary or vocabulary filter or both using VocabularyName, VocabularyFilterName. VocabularyFilterMethod must be specified if VocabularyFilterName is set."];
+      channelDefinitions: MedicalScribeChannelDefinitions.t option
+        [@ocaml.doc
+          "Makes it possible to specify which speaker is on which channel. For example, if the clinician is the first participant to speak, you would set ChannelId of the first ChannelDefinition in the list to 0 (to indicate the first channel) and ParticipantRole to CLINICIAN (to indicate that it's the clinician speaking). Then you would set the ChannelId of the second ChannelDefinition in the list to 1 (to indicate the second channel) and ParticipantRole to PATIENT (to indicate that it's the patient speaking)."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Adds one or more custom tags, each in the form of a key:value pair, to the Medical Scribe job. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."];
+      medicalScribeContext: MedicalScribeContext.t option
+        [@ocaml.doc
+          "The MedicalScribeContext object that contains contextual information which is used during clinical note generation to add relevant context to the note."]}
+    let context_ = "StartMedicalScribeJobRequest"
+    let make ?outputEncryptionKMSKeyId =
+      fun ?kMSEncryptionContext ->
+        fun ?channelDefinitions ->
+          fun ?tags ->
+            fun ?medicalScribeContext ->
+              fun ~medicalScribeJobName ->
+                fun ~media ->
+                  fun ~outputBucketName ->
+                    fun ~dataAccessRoleArn ->
+                      fun ~settings ->
+                        fun () ->
+                          {
+                            outputEncryptionKMSKeyId;
+                            kMSEncryptionContext;
+                            channelDefinitions;
+                            tags;
+                            medicalScribeContext;
+                            medicalScribeJobName;
+                            media;
+                            outputBucketName;
+                            dataAccessRoleArn;
+                            settings
+                          }
+    let to_value x =
+      structure_to_value
+        [("MedicalScribeJobName",
+           (Some (TranscriptionJobName.to_value x.medicalScribeJobName)));
+        ("Media", (Some (Media.to_value x.media)));
+        ("OutputBucketName",
+          (Some (OutputBucketName.to_value x.outputBucketName)));
+        ("OutputEncryptionKMSKeyId",
+          (Option.map x.outputEncryptionKMSKeyId ~f:KMSKeyId.to_value));
+        ("KMSEncryptionContext",
+          (Option.map x.kMSEncryptionContext
+             ~f:KMSEncryptionContextMap.to_value));
+        ("DataAccessRoleArn",
+          (Some (DataAccessRoleArn.to_value x.dataAccessRoleArn)));
+        ("Settings", (Some (MedicalScribeSettings.to_value x.settings)));
+        ("ChannelDefinitions",
+          (Option.map x.channelDefinitions
+             ~f:MedicalScribeChannelDefinitions.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("MedicalScribeContext",
+          (Option.map x.medicalScribeContext ~f:MedicalScribeContext.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let medicalScribeContext =
+        (Option.map ~f:MedicalScribeContext.of_xml)
+          (Xml.child xml_arg0 "MedicalScribeContext") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let channelDefinitions =
+        (Option.map ~f:MedicalScribeChannelDefinitions.of_xml)
+          (Xml.child xml_arg0 "ChannelDefinitions") in
+      let settings =
+        MedicalScribeSettings.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Settings") in
+      let dataAccessRoleArn =
+        DataAccessRoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DataAccessRoleArn") in
+      let kMSEncryptionContext =
+        (Option.map ~f:KMSEncryptionContextMap.of_xml)
+          (Xml.child xml_arg0 "KMSEncryptionContext") in
+      let outputEncryptionKMSKeyId =
+        (Option.map ~f:KMSKeyId.of_xml)
+          (Xml.child xml_arg0 "OutputEncryptionKMSKeyId") in
+      let outputBucketName =
+        OutputBucketName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutputBucketName") in
+      let media =
+        Media.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Media") in
+      let medicalScribeJobName =
+        TranscriptionJobName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MedicalScribeJobName") in
+      make ?medicalScribeContext ?tags ?channelDefinitions ~settings
+        ~dataAccessRoleArn ?kMSEncryptionContext ?outputEncryptionKMSKeyId
+        ~outputBucketName ~media ~medicalScribeJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let medicalScribeContext =
+        field_map json__ "MedicalScribeContext" MedicalScribeContext.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let channelDefinitions =
+        field_map json__ "ChannelDefinitions"
+          MedicalScribeChannelDefinitions.of_json in
+      let settings =
+        field_map_exn json__ "Settings" MedicalScribeSettings.of_json in
+      let dataAccessRoleArn =
+        field_map_exn json__ "DataAccessRoleArn" DataAccessRoleArn.of_json in
+      let kMSEncryptionContext =
+        field_map json__ "KMSEncryptionContext"
+          KMSEncryptionContextMap.of_json in
+      let outputEncryptionKMSKeyId =
+        field_map json__ "OutputEncryptionKMSKeyId" KMSKeyId.of_json in
+      let outputBucketName =
+        field_map_exn json__ "OutputBucketName" OutputBucketName.of_json in
+      let media = field_map_exn json__ "Media" Media.of_json in
+      let medicalScribeJobName =
+        field_map_exn json__ "MedicalScribeJobName"
+          TranscriptionJobName.of_json in
+      make ?medicalScribeContext ?tags ?channelDefinitions ~settings
+        ~dataAccessRoleArn ?kMSEncryptionContext ?outputEncryptionKMSKeyId
+        ~outputBucketName ~media ~medicalScribeJobName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Transcribes patient-clinician conversations and generates clinical notes. Amazon Web Services HealthScribe automatically provides rich conversation transcripts, identifies speaker roles, classifies dialogues, extracts medical terms, and generates preliminary clinical notes. To learn more about these features, refer to Amazon Web Services HealthScribe. To make a StartMedicalScribeJob request, you must first upload your media file into an Amazon S3 bucket; you can then specify the Amazon S3 location of the file using the Media parameter. You must include the following parameters in your StartMedicalTranscriptionJob request: DataAccessRoleArn: The ARN of an IAM role with the these minimum permissions: read permission on input file Amazon S3 bucket specified in Media, write permission on the Amazon S3 bucket specified in OutputBucketName, and full permissions on the KMS key specified in OutputEncryptionKMSKeyId (if set). The role should also allow transcribe.amazonaws.com to assume it. Media (MediaFileUri): The Amazon S3 location of your media file. MedicalScribeJobName: A custom name you create for your MedicalScribe job that is unique within your Amazon Web Services account. OutputBucketName: The Amazon S3 bucket where you want your output files stored. Settings: A MedicalScribeSettings object that must set exactly one of ShowSpeakerLabels or ChannelIdentification to true. If ShowSpeakerLabels is true, MaxSpeakerLabels must also be set. ChannelDefinitions: A MedicalScribeChannelDefinitions array should be set if and only if the ChannelIdentification value of Settings is set to true."]
 module StartCallAnalyticsJobResponse =
   struct
     type nonrec t =
       {
       callAnalyticsJob: CallAnalyticsJob.t option
         [@ocaml.doc
-          "An object containing the details of the asynchronous call analytics job."]}
+          "Provides detailed information about the current Call Analytics job, including job status and, if applicable, failure reason."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -5937,54 +7858,61 @@ module StartCallAnalyticsJobResponse =
           (Xml.child xml_arg0 "CallAnalyticsJob") in
       make ?callAnalyticsJob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let callAnalyticsJob =
-        field_map json "CallAnalyticsJob" CallAnalyticsJob.of_json in
+        field_map json__ "CallAnalyticsJob" CallAnalyticsJob.of_json in
       make ?callAnalyticsJob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts an asynchronous analytics job that not only transcribes the audio recording of a caller and agent, but also returns additional insights. These insights include how quickly or loudly the caller or agent was speaking. To retrieve additional insights with your analytics jobs, create categories. A category is a way to classify analytics jobs based on attributes, such as a customer's sentiment or a particular phrase being used during the call. For more information, see the operation."]
+       "Transcribes the audio from a customer service call and applies any additional Request Parameters you choose to include in your request. In addition to many standard transcription features, Call Analytics provides you with call characteristics, call summarization, speaker sentiment, and optional redaction of your text transcript and your audio file. You can also apply custom categories to flag specified conditions. To learn more about these features and insights, refer to Analyzing call center audio with Call Analytics. If you want to apply categories to your Call Analytics job, you must create them before submitting your job request. Categories cannot be retroactively applied to a job. To create a new category, use the operation. To learn more about Call Analytics categories, see Creating categories for post-call transcriptions and Creating categories for real-time transcriptions. To make a StartCallAnalyticsJob request, you must first upload your media file into an Amazon S3 bucket; you can then specify the Amazon S3 location of the file using the Media parameter. Job queuing is available for Call Analytics jobs. If you pass a DataAccessRoleArn in your request and you exceed your Concurrent Job Limit, your job will automatically be added to a queue to be processed once your concurrent job count is below the limit. You must include the following parameters in your StartCallAnalyticsJob request: region: The Amazon Web Services Region where you are making your request. For a list of Amazon Web Services Regions supported with Amazon Transcribe, refer to Amazon Transcribe endpoints and quotas. CallAnalyticsJobName: A custom name that you create for your transcription job that's unique within your Amazon Web Services account. Media (MediaFileUri or RedactedMediaFileUri): The Amazon S3 location of your media file. With Call Analytics, you can redact the audio contained in your media file by including RedactedMediaFileUri, instead of MediaFileUri, to specify the location of your input audio. If you choose to redact your audio, you can find your redacted media at the location specified in the RedactedMediaFileUri field of your response."]
 module StartCallAnalyticsJobRequest =
   struct
     type nonrec t =
       {
       callAnalyticsJobName: CallAnalyticsJobName.t
         [@ocaml.doc
-          "The name of the call analytics job. You can't use the string \".\" or \"..\" by themselves as the job name. The name must also be unique within an Amazon Web Services account. If you try to create a call analytics job with the same name as a previous call analytics job, you get a ConflictException error."];
-      media: Media.t ;
+          "A unique name, chosen by you, for your Call Analytics job. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account. If you try to create a new job with the same name as an existing job, you get a ConflictException error."];
+      media: Media.t
+        [@ocaml.doc
+          "Describes the Amazon S3 location of the media file you want to use in your Call Analytics request."];
       outputLocation: Uri_.t option
         [@ocaml.doc
-          "The Amazon S3 location where the output of the call analytics job is stored. You can provide the following location types to store the output of call analytics job: s3://DOC-EXAMPLE-BUCKET1 If you specify a bucket, Amazon Transcribe saves the output of the analytics job as a JSON file at the root level of the bucket. s3://DOC-EXAMPLE-BUCKET1/folder/ f you specify a path, Amazon Transcribe saves the output of the analytics job as s3://DOC-EXAMPLE-BUCKET1/folder/your-transcription-job-name.json. If you specify a folder, you must provide a trailing slash. s3://DOC-EXAMPLE-BUCKET1/folder/filename.json. If you provide a path that has the filename specified, Amazon Transcribe saves the output of the analytics job as s3://DOC-EXAMPLEBUCKET1/folder/filename.json. You can specify an Amazon Web Services Key Management Service (KMS) key to encrypt the output of our analytics job using the OutputEncryptionKMSKeyId parameter. If you don't specify a KMS key, Amazon Transcribe uses the default Amazon S3 key for server-side encryption of the analytics job output that is placed in your S3 bucket."];
+          "The Amazon S3 location where you want your Call Analytics transcription output stored. You can use any of the following formats to specify the output location: s3://DOC-EXAMPLE-BUCKET s3://DOC-EXAMPLE-BUCKET/my-output-folder/ s3://DOC-EXAMPLE-BUCKET/my-output-folder/my-call-analytics-job.json Unless you specify a file name (option 3), the name of your output file has a default value that matches the name you specified for your transcription job using the CallAnalyticsJobName parameter. You can specify a KMS key to encrypt your output using the OutputEncryptionKMSKeyId parameter. If you do not specify a KMS key, Amazon Transcribe uses the default Amazon S3 key for server-side encryption. If you do not specify OutputLocation, your transcript is placed in a service-managed Amazon S3 bucket and you are provided with a URI to access your transcript."];
       outputEncryptionKMSKeyId: KMSKeyId.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon Web Services Key Management Service key used to encrypt the output of the call analytics job. The user calling the operation must have permission to use the specified KMS key. You use either of the following to identify an Amazon Web Services KMS key in the current account: KMS Key ID: \"1234abcd-12ab-34cd-56ef-1234567890ab\" KMS Key Alias: \"alias/ExampleAlias\" You can use either of the following to identify a KMS key in the current account or another account: Amazon Resource Name (ARN) of a KMS key in the current account or another account: \"arn:aws:kms:region:account ID:key/1234abcd-12ab-34cd-56ef1234567890ab\" ARN of a KMS Key Alias: \"arn:aws:kms:region:accountID:alias/ExampleAlias\" If you don't specify an encryption key, the output of the call analytics job is encrypted with the default Amazon S3 key (SSE-S3). If you specify a KMS key to encrypt your output, you must also specify an output location in the OutputLocation parameter."];
-      dataAccessRoleArn: DataAccessRoleArn.t
+          "The Amazon Resource Name (ARN) of a KMS key that you want to use to encrypt your Call Analytics output. KMS key ARNs have the format arn:partition:kms:region:account:key/key-id. For example: arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab. For more information, see KMS key ARNs. If you do not specify an encryption key, your output is encrypted with the default Amazon S3 key (SSE-S3). Note that the role making the request and the role specified in the DataAccessRoleArn request parameter (if present) must have permission to use the specified KMS key."];
+      dataAccessRoleArn: DataAccessRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a role that has access to the S3 bucket that contains your input files. Amazon Transcribe assumes this role to read queued audio files. If you have specified an output S3 bucket for your transcription results, this role should have access to the output bucket as well."];
+          "The Amazon Resource Name (ARN) of an IAM role that has permissions to access the Amazon S3 bucket that contains your input files. If the role that you specify doesn\226\128\153t have the appropriate permissions to access the specified Amazon S3 location, your request fails. IAM role ARNs have the format arn:partition:iam::account:role/role-name-with-path. For example: arn:aws:iam::111122223333:role/Admin. For more information, see IAM ARNs."];
       settings: CallAnalyticsJobSettings.t option
         [@ocaml.doc
-          "A Settings object that provides optional settings for a call analytics job."];
+          "Specify additional optional settings in your request, including content redaction; allows you to apply custom language models, vocabulary filters, and custom vocabularies to your Call Analytics job."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Adds one or more custom tags, each in the form of a key:value pair, to a new call analytics job at the time you start this new job. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."];
       channelDefinitions: ChannelDefinitions.t option
         [@ocaml.doc
-          "When you start a call analytics job, you must pass an array that maps the agent and the customer to specific audio channels. The values you can assign to a channel are 0 and 1. The agent and the customer must each have their own channel. You can't assign more than one channel to an agent or customer."]}
+          "Makes it possible to specify which speaker is on which channel. For example, if your agent is the first participant to speak, you would set ChannelId to 0 (to indicate the first channel) and ParticipantRole to AGENT (to indicate that it's the agent speaking)."]}
     let context_ = "StartCallAnalyticsJobRequest"
     let make ?outputLocation =
       fun ?outputEncryptionKMSKeyId ->
-        fun ?settings ->
-          fun ?channelDefinitions ->
-            fun ~callAnalyticsJobName ->
-              fun ~media ->
-                fun ~dataAccessRoleArn ->
-                  fun () ->
-                    {
-                      outputLocation;
-                      outputEncryptionKMSKeyId;
-                      settings;
-                      channelDefinitions;
-                      callAnalyticsJobName;
-                      media;
-                      dataAccessRoleArn
-                    }
+        fun ?dataAccessRoleArn ->
+          fun ?settings ->
+            fun ?tags ->
+              fun ?channelDefinitions ->
+                fun ~callAnalyticsJobName ->
+                  fun ~media ->
+                    fun () ->
+                      {
+                        outputLocation;
+                        outputEncryptionKMSKeyId;
+                        dataAccessRoleArn;
+                        settings;
+                        tags;
+                        channelDefinitions;
+                        callAnalyticsJobName;
+                        media
+                      }
     let to_value x =
       structure_to_value
         [("CallAnalyticsJobName",
@@ -5994,9 +7922,10 @@ module StartCallAnalyticsJobRequest =
         ("OutputEncryptionKMSKeyId",
           (Option.map x.outputEncryptionKMSKeyId ~f:KMSKeyId.to_value));
         ("DataAccessRoleArn",
-          (Some (DataAccessRoleArn.to_value x.dataAccessRoleArn)));
+          (Option.map x.dataAccessRoleArn ~f:DataAccessRoleArn.to_value));
         ("Settings",
           (Option.map x.settings ~f:CallAnalyticsJobSettings.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("ChannelDefinitions",
           (Option.map x.channelDefinitions ~f:ChannelDefinitions.to_value))]
     let to_query v = to_query to_value v
@@ -6004,12 +7933,13 @@ module StartCallAnalyticsJobRequest =
       let channelDefinitions =
         (Option.map ~f:ChannelDefinitions.of_xml)
           (Xml.child xml_arg0 "ChannelDefinitions") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let settings =
         (Option.map ~f:CallAnalyticsJobSettings.of_xml)
           (Xml.child xml_arg0 "Settings") in
       let dataAccessRoleArn =
-        DataAccessRoleArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataAccessRoleArn") in
+        (Option.map ~f:DataAccessRoleArn.of_xml)
+          (Xml.child xml_arg0 "DataAccessRoleArn") in
       let outputEncryptionKMSKeyId =
         (Option.map ~f:KMSKeyId.of_xml)
           (Xml.child xml_arg0 "OutputEncryptionKMSKeyId") in
@@ -6020,40 +7950,41 @@ module StartCallAnalyticsJobRequest =
       let callAnalyticsJobName =
         CallAnalyticsJobName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CallAnalyticsJobName") in
-      make ?channelDefinitions ?settings ~dataAccessRoleArn
+      make ?channelDefinitions ?tags ?settings ?dataAccessRoleArn
         ?outputEncryptionKMSKeyId ?outputLocation ~media
         ~callAnalyticsJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelDefinitions =
-        field_map json "ChannelDefinitions" ChannelDefinitions.of_json in
+        field_map json__ "ChannelDefinitions" ChannelDefinitions.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let settings =
-        field_map json "Settings" CallAnalyticsJobSettings.of_json in
+        field_map json__ "Settings" CallAnalyticsJobSettings.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" DataAccessRoleArn.of_json in
+        field_map json__ "DataAccessRoleArn" DataAccessRoleArn.of_json in
       let outputEncryptionKMSKeyId =
-        field_map json "OutputEncryptionKMSKeyId" KMSKeyId.of_json in
-      let outputLocation = field_map json "OutputLocation" Uri_.of_json in
-      let media = field_map_exn json "Media" Media.of_json in
+        field_map json__ "OutputEncryptionKMSKeyId" KMSKeyId.of_json in
+      let outputLocation = field_map json__ "OutputLocation" Uri_.of_json in
+      let media = field_map_exn json__ "Media" Media.of_json in
       let callAnalyticsJobName =
-        field_map_exn json "CallAnalyticsJobName"
+        field_map_exn json__ "CallAnalyticsJobName"
           CallAnalyticsJobName.of_json in
-      make ?channelDefinitions ?settings ~dataAccessRoleArn
+      make ?channelDefinitions ?tags ?settings ?dataAccessRoleArn
         ?outputEncryptionKMSKeyId ?outputLocation ~media
         ~callAnalyticsJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts an asynchronous analytics job that not only transcribes the audio recording of a caller and agent, but also returns additional insights. These insights include how quickly or loudly the caller or agent was speaking. To retrieve additional insights with your analytics jobs, create categories. A category is a way to classify analytics jobs based on attributes, such as a customer's sentiment or a particular phrase being used during the call. For more information, see the operation."]
+       "Transcribes the audio from a customer service call and applies any additional Request Parameters you choose to include in your request. In addition to many standard transcription features, Call Analytics provides you with call characteristics, call summarization, speaker sentiment, and optional redaction of your text transcript and your audio file. You can also apply custom categories to flag specified conditions. To learn more about these features and insights, refer to Analyzing call center audio with Call Analytics. If you want to apply categories to your Call Analytics job, you must create them before submitting your job request. Categories cannot be retroactively applied to a job. To create a new category, use the operation. To learn more about Call Analytics categories, see Creating categories for post-call transcriptions and Creating categories for real-time transcriptions. To make a StartCallAnalyticsJob request, you must first upload your media file into an Amazon S3 bucket; you can then specify the Amazon S3 location of the file using the Media parameter. Job queuing is available for Call Analytics jobs. If you pass a DataAccessRoleArn in your request and you exceed your Concurrent Job Limit, your job will automatically be added to a queue to be processed once your concurrent job count is below the limit. You must include the following parameters in your StartCallAnalyticsJob request: region: The Amazon Web Services Region where you are making your request. For a list of Amazon Web Services Regions supported with Amazon Transcribe, refer to Amazon Transcribe endpoints and quotas. CallAnalyticsJobName: A custom name that you create for your transcription job that's unique within your Amazon Web Services account. Media (MediaFileUri or RedactedMediaFileUri): The Amazon S3 location of your media file. With Call Analytics, you can redact the audio contained in your media file by including RedactedMediaFileUri, instead of MediaFileUri, to specify the location of your input audio. If you choose to redact your audio, you can find your redacted media at the location specified in the RedactedMediaFileUri field of your response."]
 module ListVocabularyFiltersResponse =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The ListVocabularyFilters operation returns a page of collections at a time. The maximum size of the page is set by the MaxResults parameter. If there are more jobs in the list than the page size, Amazon Transcribe returns the NextPage token. Include the token in the next request to the ListVocabularyFilters operation to return in the next page of jobs."];
+          "If NextToken is present in your response, it indicates that not all results are displayed. To view the next set of results, copy the string associated with the NextToken parameter in your results output, then run your request again including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       vocabularyFilters: VocabularyFilters.t option
         [@ocaml.doc
-          "The list of vocabulary filters. It contains at most MaxResults number of filters. If there are more filters, call the ListVocabularyFilters operation again with the NextToken parameter in the request set to the value of the NextToken field in the response."]}
+          "Provides information about the custom vocabulary filters that match the criteria specified in your request."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -6115,26 +8046,27 @@ module ListVocabularyFiltersResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?vocabularyFilters ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vocabularyFilters =
-        field_map json "VocabularyFilters" VocabularyFilters.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "VocabularyFilters" VocabularyFilters.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?vocabularyFilters ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about vocabulary filters."]
+  end[@@ocaml.doc
+       "Provides a list of custom vocabulary filters that match the specified criteria. If no criteria are specified, all custom vocabularies are returned. To get detailed information about a specific custom vocabulary filter, use the operation."]
 module ListVocabularyFiltersRequest =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "If the result of the previous request to ListVocabularyFilters was truncated, include the NextToken to fetch the next set of collections."];
+          "If your ListVocabularyFilters request returns more results than can be displayed, NextToken is displayed in the response with an associated string. To get the next page of results, copy this string and repeat your request, including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of filters to return in each page of results. If there are fewer results than the value you specify, only the actual results are returned. If you do not specify a value, the default of 5 is used."];
+          "The maximum number of custom vocabulary filters to return in each page of results. If there are fewer results than the value that you specify, only the actual results are returned. If you do not specify a value, a default of 5 is used."];
       nameContains: VocabularyFilterName.t option
         [@ocaml.doc
-          "Filters the response so that it only contains vocabulary filters whose name contains the specified string."]}
+          "Returns only the custom vocabulary filters that contain the specified string. The search is not case sensitive."]}
     let make ?nextToken =
       fun ?maxResults ->
         fun ?nameContains ->
@@ -6156,26 +8088,28 @@ module ListVocabularyFiltersRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nameContains ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nameContains =
-        field_map json "NameContains" VocabularyFilterName.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "NameContains" VocabularyFilterName.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?nameContains ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about vocabulary filters."]
+  end[@@ocaml.doc
+       "Provides a list of custom vocabulary filters that match the specified criteria. If no criteria are specified, all custom vocabularies are returned. To get detailed information about a specific custom vocabulary filter, use the operation."]
 module ListVocabulariesResponse =
   struct
     type nonrec t =
       {
       status: VocabularyState.t option
-        [@ocaml.doc "The requested vocabulary state."];
+        [@ocaml.doc
+          "Lists all custom vocabularies that have the status specified in your request. Vocabularies are ordered by creation date, with the newest vocabulary first."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The ListVocabularies operation returns a page of vocabularies at a time. The maximum size of the page is set in the MaxResults parameter. If there are more jobs in the list than will fit on the page, Amazon Transcribe returns the NextPage token. To return in the next page of jobs, include the token in the next request to the ListVocabularies operation."];
+          "If NextToken is present in your response, it indicates that not all results are displayed. To view the next set of results, copy the string associated with the NextToken parameter in your results output, then run your request again including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       vocabularies: Vocabularies.t option
         [@ocaml.doc
-          "A list of objects that describe the vocabularies that match the search criteria in the request."]}
+          "Provides information about the custom vocabularies that match the criteria specified in your request."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -6241,30 +8175,30 @@ module ListVocabulariesResponse =
         (Option.map ~f:VocabularyState.of_xml) (Xml.child xml_arg0 "Status") in
       make ?vocabularies ?nextToken ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vocabularies = field_map json "Vocabularies" Vocabularies.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let status = field_map json "Status" VocabularyState.of_json in
+    let of_json json__ =
+      let vocabularies = field_map json__ "Vocabularies" Vocabularies.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let status = field_map json__ "Status" VocabularyState.of_json in
       make ?vocabularies ?nextToken ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of vocabularies that match the specified criteria. If no criteria are specified, returns the entire list of vocabularies."]
+       "Provides a list of custom vocabularies that match the specified criteria. If no criteria are specified, all custom vocabularies are returned. To get detailed information about a specific custom vocabulary, use the operation."]
 module ListVocabulariesRequest =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "If the result of the previous request to ListVocabularies was truncated, include the NextToken to fetch the next set of jobs."];
+          "If your ListVocabularies request returns more results than can be displayed, NextToken is displayed in the response with an associated string. To get the next page of results, copy this string and repeat your request, including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of vocabularies to return in each page of results. If there are fewer results than the value you specify, only the actual results are returned. If you do not specify a value, the default of 5 is used."];
+          "The maximum number of custom vocabularies to return in each page of results. If there are fewer results than the value that you specify, only the actual results are returned. If you do not specify a value, a default of 5 is used."];
       stateEquals: VocabularyState.t option
         [@ocaml.doc
-          "When specified, only returns vocabularies with the VocabularyState field equal to the specified state."];
+          "Returns only custom vocabularies with the specified state. Vocabularies are ordered by creation date, with the newest vocabulary first. If you do not include StateEquals, all custom medical vocabularies are returned."];
       nameContains: VocabularyName.t option
         [@ocaml.doc
-          "When specified, the vocabularies returned in the list are limited to vocabularies whose name contains the specified string. The search is not case sensitive, ListVocabularies returns both \"vocabularyname\" and \"VocabularyName\" in the response list."]}
+          "Returns only the custom vocabularies that contain the specified string. The search is not case sensitive."]}
     let make ?nextToken =
       fun ?maxResults ->
         fun ?stateEquals ->
@@ -6292,27 +8226,29 @@ module ListVocabulariesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nameContains ?stateEquals ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nameContains = field_map json "NameContains" VocabularyName.of_json in
-      let stateEquals = field_map json "StateEquals" VocabularyState.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nameContains =
+        field_map json__ "NameContains" VocabularyName.of_json in
+      let stateEquals =
+        field_map json__ "StateEquals" VocabularyState.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?nameContains ?stateEquals ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of vocabularies that match the specified criteria. If no criteria are specified, returns the entire list of vocabularies."]
+       "Provides a list of custom vocabularies that match the specified criteria. If no criteria are specified, all custom vocabularies are returned. To get detailed information about a specific custom vocabulary, use the operation."]
 module ListTranscriptionJobsResponse =
   struct
     type nonrec t =
       {
       status: TranscriptionJobStatus.t option
-        [@ocaml.doc "The requested status of the jobs returned."];
+        [@ocaml.doc
+          "Lists all transcription jobs that have the status specified in your request. Jobs are ordered by creation date, with the newest job first."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The ListTranscriptionJobs operation returns a page of jobs at a time. The maximum size of the page is set by the MaxResults parameter. If there are more jobs in the list than the page size, Amazon Transcribe returns the NextPage token. Include the token in the next request to the ListTranscriptionJobs operation to return in the next page of jobs."];
+          "If NextToken is present in your response, it indicates that not all results are displayed. To view the next set of results, copy the string associated with the NextToken parameter in your results output, then run your request again including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       transcriptionJobSummaries: TranscriptionJobSummaries.t option
-        [@ocaml.doc
-          "A list of objects containing summary information for a transcription job."]}
+        [@ocaml.doc "Provides a summary of information about each result."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -6381,31 +8317,32 @@ module ListTranscriptionJobsResponse =
           (Xml.child xml_arg0 "Status") in
       make ?transcriptionJobSummaries ?nextToken ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transcriptionJobSummaries =
-        field_map json "TranscriptionJobSummaries"
+        field_map json__ "TranscriptionJobSummaries"
           TranscriptionJobSummaries.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let status = field_map json "Status" TranscriptionJobStatus.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let status = field_map json__ "Status" TranscriptionJobStatus.of_json in
       make ?transcriptionJobSummaries ?nextToken ?status ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists transcription jobs with the specified status."]
+  end[@@ocaml.doc
+       "Provides a list of transcription jobs that match the specified criteria. If no criteria are specified, all transcription jobs are returned. To get detailed information about a specific transcription job, use the operation."]
 module ListTranscriptionJobsRequest =
   struct
     type nonrec t =
       {
       status: TranscriptionJobStatus.t option
         [@ocaml.doc
-          "When specified, returns only transcription jobs with the specified status. Jobs are ordered by creation date, with the newest jobs returned first. If you don\226\128\153t specify a status, Amazon Transcribe returns all transcription jobs ordered by creation date."];
+          "Returns only transcription jobs with the specified status. Jobs are ordered by creation date, with the newest job first. If you do not include Status, all transcription jobs are returned."];
       jobNameContains: TranscriptionJobName.t option
         [@ocaml.doc
-          "When specified, the jobs returned in the list are limited to jobs whose name contains the specified string."];
+          "Returns only the transcription jobs that contain the specified string. The search is not case sensitive."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "If the result of the previous request to ListTranscriptionJobs is truncated, include the NextToken to fetch the next set of jobs."];
+          "If your ListTranscriptionJobs request returns more results than can be displayed, NextToken is displayed in the response with an associated string. To get the next page of results, copy this string and repeat your request, including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of jobs to return in each page of results. If there are fewer results than the value you specify, only the actual results are returned. If you do not specify a value, the default of 5 is used."]}
+          "The maximum number of transcription jobs to return in each page of results. If there are fewer results than the value that you specify, only the actual results are returned. If you do not specify a value, a default of 5 is used."]}
     let make ?status =
       fun ?jobNameContains ->
         fun ?nextToken ->
@@ -6432,25 +8369,26 @@ module ListTranscriptionJobsRequest =
           (Xml.child xml_arg0 "Status") in
       make ?maxResults ?nextToken ?jobNameContains ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let jobNameContains =
-        field_map json "JobNameContains" TranscriptionJobName.of_json in
-      let status = field_map json "Status" TranscriptionJobStatus.of_json in
+        field_map json__ "JobNameContains" TranscriptionJobName.of_json in
+      let status = field_map json__ "Status" TranscriptionJobStatus.of_json in
       make ?maxResults ?nextToken ?jobNameContains ?status ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists transcription jobs with the specified status."]
+  end[@@ocaml.doc
+       "Provides a list of transcription jobs that match the specified criteria. If no criteria are specified, all transcription jobs are returned. To get detailed information about a specific transcription job, use the operation."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
       {
       resourceArn: TranscribeArn.t option
         [@ocaml.doc
-          "Lists all tags associated with the given Amazon Resource Name (ARN)."];
+          "The Amazon Resource Name (ARN) specified in your request."];
       tags: TagList.t option
         [@ocaml.doc
-          "Lists all tags associated with the given transcription job, vocabulary, or resource."]}
+          "Lists all tags associated with the given transcription job, vocabulary, model, or resource."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -6519,20 +8457,20 @@ module ListTagsForResourceResponse =
           (Xml.child xml_arg0 "ResourceArn") in
       make ?tags ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let resourceArn = field_map json "ResourceArn" TranscribeArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let resourceArn = field_map json__ "ResourceArn" TranscribeArn.of_json in
       make ?tags ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all tags associated with a given transcription job, vocabulary, or resource."]
+       "Lists all tags associated with the specified transcription job, vocabulary, model, or resource. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: TranscribeArn.t
         [@ocaml.doc
-          "Lists all tags associated with a given Amazon Resource Name (ARN). ARNs have the format arn:partition:service:region:account-id:resource-type/resource-id (for example, arn:aws:transcribe:us-east-1:account-id:transcription-job/your-job-name). Valid values for resource-type are: transcription-job, medical-transcription-job, vocabulary, medical-vocabulary, vocabulary-filter, and language-model."]}
+          "Returns a list of all tags associated with the specified Amazon Resource Name (ARN). ARNs have the format arn:partition:service:region:account-id:resource-type/resource-id. For example, arn:aws:transcribe:us-west-2:111122223333:transcription-job/transcription-job-name. Valid values for resource-type are: transcription-job, medical-transcription-job, vocabulary, medical-vocabulary, vocabulary-filter, and language-model."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -6545,25 +8483,26 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" TranscribeArn.of_json in
+        field_map_exn json__ "ResourceArn" TranscribeArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all tags associated with a given transcription job, vocabulary, or resource."]
+       "Lists all tags associated with the specified transcription job, vocabulary, model, or resource. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."]
 module ListMedicalVocabulariesResponse =
   struct
     type nonrec t =
       {
       status: VocabularyState.t option
-        [@ocaml.doc "The requested vocabulary state."];
+        [@ocaml.doc
+          "Lists all custom medical vocabularies that have the status specified in your request. Custom vocabularies are ordered by creation date, with the newest vocabulary first."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The ListMedicalVocabularies operation returns a page of vocabularies at a time. You set the maximum number of vocabularies to return on a page with the MaxResults parameter. If there are more jobs in the list will fit on a page, Amazon Transcribe Medical returns the NextPage token. To return the next page of vocabularies, include the token in the next request to the ListMedicalVocabularies operation."];
+          "If NextToken is present in your response, it indicates that not all results are displayed. To view the next set of results, copy the string associated with the NextToken parameter in your results output, then run your request again including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       vocabularies: Vocabularies.t option
         [@ocaml.doc
-          "A list of objects that describe the vocabularies that match your search criteria."]}
+          "Provides information about the custom medical vocabularies that match the criteria specified in your request."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -6629,30 +8568,30 @@ module ListMedicalVocabulariesResponse =
         (Option.map ~f:VocabularyState.of_xml) (Xml.child xml_arg0 "Status") in
       make ?vocabularies ?nextToken ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vocabularies = field_map json "Vocabularies" Vocabularies.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let status = field_map json "Status" VocabularyState.of_json in
+    let of_json json__ =
+      let vocabularies = field_map json__ "Vocabularies" Vocabularies.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let status = field_map json__ "Status" VocabularyState.of_json in
       make ?vocabularies ?nextToken ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of vocabularies that match the specified criteria. If you don't enter a value in any of the request parameters, returns the entire list of vocabularies."]
+       "Provides a list of custom medical vocabularies that match the specified criteria. If no criteria are specified, all custom medical vocabularies are returned. To get detailed information about a specific custom medical vocabulary, use the operation."]
 module ListMedicalVocabulariesRequest =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "If the result of your previous request to ListMedicalVocabularies was truncated, include the NextToken to fetch the next set of vocabularies."];
+          "If your ListMedicalVocabularies request returns more results than can be displayed, NextToken is displayed in the response with an associated string. To get the next page of results, copy this string and repeat your request, including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of vocabularies to return in each page of results. If there are fewer results than the value you specify, only the actual results are returned. If you do not specify a value, the default of 5 is used."];
+          "The maximum number of custom medical vocabularies to return in each page of results. If there are fewer results than the value that you specify, only the actual results are returned. If you do not specify a value, a default of 5 is used."];
       stateEquals: VocabularyState.t option
         [@ocaml.doc
-          "When specified, returns only vocabularies with the VocabularyState equal to the specified vocabulary state. Use this field to see which vocabularies are ready for your medical transcription jobs."];
+          "Returns only custom medical vocabularies with the specified state. Custom vocabularies are ordered by creation date, with the newest vocabulary first. If you do not include StateEquals, all custom medical vocabularies are returned."];
       nameContains: VocabularyName.t option
         [@ocaml.doc
-          "Returns vocabularies whose names contain the specified string. The search is not case sensitive. ListMedicalVocabularies returns both \"vocabularyname\" and \"VocabularyName\"."]}
+          "Returns only the custom medical vocabularies that contain the specified string. The search is not case sensitive."]}
     let make ?nextToken =
       fun ?maxResults ->
         fun ?stateEquals ->
@@ -6680,29 +8619,30 @@ module ListMedicalVocabulariesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nameContains ?stateEquals ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nameContains = field_map json "NameContains" VocabularyName.of_json in
-      let stateEquals = field_map json "StateEquals" VocabularyState.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nameContains =
+        field_map json__ "NameContains" VocabularyName.of_json in
+      let stateEquals =
+        field_map json__ "StateEquals" VocabularyState.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?nameContains ?stateEquals ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of vocabularies that match the specified criteria. If you don't enter a value in any of the request parameters, returns the entire list of vocabularies."]
+       "Provides a list of custom medical vocabularies that match the specified criteria. If no criteria are specified, all custom medical vocabularies are returned. To get detailed information about a specific custom medical vocabulary, use the operation."]
 module ListMedicalTranscriptionJobsResponse =
   struct
     type nonrec t =
       {
       status: TranscriptionJobStatus.t option
         [@ocaml.doc
-          "The requested status of the medical transcription jobs returned."];
+          "Lists all medical transcription jobs that have the status specified in your request. Jobs are ordered by creation date, with the newest job first."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The ListMedicalTranscriptionJobs operation returns a page of jobs at a time. The maximum size of the page is set by the MaxResults parameter. If the number of jobs exceeds what can fit on a page, Amazon Transcribe Medical returns the NextPage token. Include the token in the next request to the ListMedicalTranscriptionJobs operation to return in the next page of jobs."];
+          "If NextToken is present in your response, it indicates that not all results are displayed. To view the next set of results, copy the string associated with the NextToken parameter in your results output, then run your request again including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       medicalTranscriptionJobSummaries:
         MedicalTranscriptionJobSummaries.t option
-        [@ocaml.doc
-          "A list of objects containing summary information for a transcription job."]}
+        [@ocaml.doc "Provides a summary of information about each result."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -6771,32 +8711,32 @@ module ListMedicalTranscriptionJobsResponse =
           (Xml.child xml_arg0 "Status") in
       make ?medicalTranscriptionJobSummaries ?nextToken ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let medicalTranscriptionJobSummaries =
-        field_map json "MedicalTranscriptionJobSummaries"
+        field_map json__ "MedicalTranscriptionJobSummaries"
           MedicalTranscriptionJobSummaries.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let status = field_map json "Status" TranscriptionJobStatus.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let status = field_map json__ "Status" TranscriptionJobStatus.of_json in
       make ?medicalTranscriptionJobSummaries ?nextToken ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists medical transcription jobs with a specified status or substring that matches their names."]
+       "Provides a list of medical transcription jobs that match the specified criteria. If no criteria are specified, all medical transcription jobs are returned. To get detailed information about a specific medical transcription job, use the operation."]
 module ListMedicalTranscriptionJobsRequest =
   struct
     type nonrec t =
       {
       status: TranscriptionJobStatus.t option
         [@ocaml.doc
-          "When specified, returns only medical transcription jobs with the specified status. Jobs are ordered by creation date, with the newest jobs returned first. If you don't specify a status, Amazon Transcribe Medical returns all transcription jobs ordered by creation date."];
+          "Returns only medical transcription jobs with the specified status. Jobs are ordered by creation date, with the newest job first. If you do not include Status, all medical transcription jobs are returned."];
       jobNameContains: TranscriptionJobName.t option
         [@ocaml.doc
-          "When specified, the jobs returned in the list are limited to jobs whose name contains the specified string."];
+          "Returns only the medical transcription jobs that contain the specified string. The search is not case sensitive."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "If you a receive a truncated result in the previous request of ListMedicalTranscriptionJobs, include NextToken to fetch the next set of jobs."];
+          "If your ListMedicalTranscriptionJobs request returns more results than can be displayed, NextToken is displayed in the response with an associated string. To get the next page of results, copy this string and repeat your request, including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of medical transcription jobs to return in each page of results. If there are fewer results than the value you specify, only the actual results are returned. If you do not specify a value, the default of 5 is used."]}
+          "The maximum number of medical transcription jobs to return in each page of results. If there are fewer results than the value that you specify, only the actual results are returned. If you do not specify a value, a default of 5 is used."]}
     let make ?status =
       fun ?jobNameContains ->
         fun ?nextToken ->
@@ -6823,26 +8763,168 @@ module ListMedicalTranscriptionJobsRequest =
           (Xml.child xml_arg0 "Status") in
       make ?maxResults ?nextToken ?jobNameContains ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let jobNameContains =
-        field_map json "JobNameContains" TranscriptionJobName.of_json in
-      let status = field_map json "Status" TranscriptionJobStatus.of_json in
+        field_map json__ "JobNameContains" TranscriptionJobName.of_json in
+      let status = field_map json__ "Status" TranscriptionJobStatus.of_json in
       make ?maxResults ?nextToken ?jobNameContains ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists medical transcription jobs with a specified status or substring that matches their names."]
+       "Provides a list of medical transcription jobs that match the specified criteria. If no criteria are specified, all medical transcription jobs are returned. To get detailed information about a specific medical transcription job, use the operation."]
+module ListMedicalScribeJobsResponse =
+  struct
+    type nonrec t =
+      {
+      status: MedicalScribeJobStatus.t option
+        [@ocaml.doc
+          "Lists all Medical Scribe jobs that have the status specified in your request. Jobs are ordered by creation date, with the newest job first."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If NextToken is present in your response, it indicates that not all results are displayed. To view the next set of results, copy the string associated with the NextToken parameter in your results output, then run your request again including NextToken with the value of the copied string. Repeat as needed to view all your results."];
+      medicalScribeJobSummaries: MedicalScribeJobSummaries.t option
+        [@ocaml.doc "Provides a summary of information about each result."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `InternalFailureException of InternalFailureException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status =
+      fun ?nextToken ->
+        fun ?medicalScribeJobSummaries ->
+          fun () -> { status; nextToken; medicalScribeJobSummaries }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `InternalFailureException e ->
+          `Assoc
+            [("error", (`String "InternalFailureException"));
+            ("details", (InternalFailureException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:MedicalScribeJobStatus.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MedicalScribeJobSummaries",
+          (Option.map x.medicalScribeJobSummaries
+             ~f:MedicalScribeJobSummaries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let medicalScribeJobSummaries =
+        (Option.map ~f:MedicalScribeJobSummaries.of_xml)
+          (Xml.child xml_arg0 "MedicalScribeJobSummaries") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let status =
+        (Option.map ~f:MedicalScribeJobStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?medicalScribeJobSummaries ?nextToken ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let medicalScribeJobSummaries =
+        field_map json__ "MedicalScribeJobSummaries"
+          MedicalScribeJobSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let status = field_map json__ "Status" MedicalScribeJobStatus.of_json in
+      make ?medicalScribeJobSummaries ?nextToken ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a list of Medical Scribe jobs that match the specified criteria. If no criteria are specified, all Medical Scribe jobs are returned. To get detailed information about a specific Medical Scribe job, use the operation."]
+module ListMedicalScribeJobsRequest =
+  struct
+    type nonrec t =
+      {
+      status: MedicalScribeJobStatus.t option
+        [@ocaml.doc
+          "Returns only Medical Scribe jobs with the specified status. Jobs are ordered by creation date, with the newest job first. If you do not include Status, all Medical Scribe jobs are returned."];
+      jobNameContains: TranscriptionJobName.t option
+        [@ocaml.doc
+          "Returns only the Medical Scribe jobs that contain the specified string. The search is not case sensitive."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If your ListMedicalScribeJobs request returns more results than can be displayed, NextToken is displayed in the response with an associated string. To get the next page of results, copy this string and repeat your request, including NextToken with the value of the copied string. Repeat as needed to view all your results."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of Medical Scribe jobs to return in each page of results. If there are fewer results than the value that you specify, only the actual results are returned. If you do not specify a value, a default of 5 is used."]}
+    let make ?status =
+      fun ?jobNameContains ->
+        fun ?nextToken ->
+          fun ?maxResults ->
+            fun () -> { status; jobNameContains; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:MedicalScribeJobStatus.to_value));
+        ("JobNameContains",
+          (Option.map x.jobNameContains ~f:TranscriptionJobName.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let jobNameContains =
+        (Option.map ~f:TranscriptionJobName.of_xml)
+          (Xml.child xml_arg0 "JobNameContains") in
+      let status =
+        (Option.map ~f:MedicalScribeJobStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?maxResults ?nextToken ?jobNameContains ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let jobNameContains =
+        field_map json__ "JobNameContains" TranscriptionJobName.of_json in
+      let status = field_map json__ "Status" MedicalScribeJobStatus.of_json in
+      make ?maxResults ?nextToken ?jobNameContains ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a list of Medical Scribe jobs that match the specified criteria. If no criteria are specified, all Medical Scribe jobs are returned. To get detailed information about a specific Medical Scribe job, use the operation."]
 module ListLanguageModelsResponse =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The operation returns a page of jobs at a time. The maximum size of the list is set by the MaxResults parameter. If there are more language models in the list than the page size, Amazon Transcribe returns the NextPage token. Include the token in the next request to the operation to return the next page of language models."];
+          "If NextToken is present in your response, it indicates that not all results are displayed. To view the next set of results, copy the string associated with the NextToken parameter in your results output, then run your request again including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       models: Models.t option
         [@ocaml.doc
-          "A list of objects containing information about custom language models."]}
+          "Provides information about the custom language models that match the criteria specified in your request."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -6901,29 +8983,29 @@ module ListLanguageModelsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?models ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let models = field_map json "Models" Models.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let models = field_map json__ "Models" Models.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?models ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides more information about the custom language models you've created. You can use the information in this list to find a specific custom language model. You can then use the operation to get more information about it."]
+       "Provides a list of custom language models that match the specified criteria. If no criteria are specified, all custom language models are returned. To get detailed information about a specific custom language model, use the operation."]
 module ListLanguageModelsRequest =
   struct
     type nonrec t =
       {
       statusEquals: ModelStatus.t option
         [@ocaml.doc
-          "When specified, returns only custom language models with the specified status. Language models are ordered by creation date, with the newest models first. If you don't specify a status, Amazon Transcribe returns all custom language models ordered by date."];
+          "Returns only custom language models with the specified status. Language models are ordered by creation date, with the newest model first. If you do not include StatusEquals, all custom language models are returned."];
       nameContains: ModelName.t option
         [@ocaml.doc
-          "When specified, the custom language model names returned contain the substring you've specified."];
+          "Returns only the custom language models that contain the specified string. The search is not case sensitive."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "When included, fetches the next set of jobs if the result of the previous request was truncated."];
+          "If your ListLanguageModels request returns more results than can be displayed, NextToken is displayed in the response with an associated string. To get the next page of results, copy this string and repeat your request, including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of language models to return in each page of results. If there are fewer results than the value you specify, only the actual results are returned. If you do not specify a value, the default of 5 is used."]}
+          "The maximum number of custom language models to return in each page of results. If there are fewer results than the value that you specify, only the actual results are returned. If you do not specify a value, a default of 5 is used."]}
     let make ?statusEquals =
       fun ?nameContains ->
         fun ?nextToken ->
@@ -6949,28 +9031,27 @@ module ListLanguageModelsRequest =
           (Xml.child xml_arg0 "StatusEquals") in
       make ?maxResults ?nextToken ?nameContains ?statusEquals ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let nameContains = field_map json "NameContains" ModelName.of_json in
-      let statusEquals = field_map json "StatusEquals" ModelStatus.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let nameContains = field_map json__ "NameContains" ModelName.of_json in
+      let statusEquals = field_map json__ "StatusEquals" ModelStatus.of_json in
       make ?maxResults ?nextToken ?nameContains ?statusEquals ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides more information about the custom language models you've created. You can use the information in this list to find a specific custom language model. You can then use the operation to get more information about it."]
+       "Provides a list of custom language models that match the specified criteria. If no criteria are specified, all custom language models are returned. To get detailed information about a specific custom language model, use the operation."]
 module ListCallAnalyticsJobsResponse =
   struct
     type nonrec t =
       {
       status: CallAnalyticsJobStatus.t option
         [@ocaml.doc
-          "When specified, returns only call analytics jobs with that status. Jobs are ordered by creation date, with the most recent jobs returned first. If you don't specify a status, Amazon Transcribe returns all transcription jobs ordered by creation date."];
+          "Lists all Call Analytics jobs that have the status specified in your request. Jobs are ordered by creation date, with the newest job first."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The operation returns a page of jobs at a time. The maximum size of the page is set by the MaxResults parameter. If there are more jobs in the list than the page size, Amazon Transcribe returns the NextPage token. Include the token in your next request to the operation to return next page of jobs."];
+          "If NextToken is present in your response, it indicates that not all results are displayed. To view the next set of results, copy the string associated with the NextToken parameter in your results output, then run your request again including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       callAnalyticsJobSummaries: CallAnalyticsJobSummaries.t option
-        [@ocaml.doc
-          "A list of objects containing summary information for a transcription job."]}
+        [@ocaml.doc "Provides a summary of information about each result."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -7039,32 +9120,32 @@ module ListCallAnalyticsJobsResponse =
           (Xml.child xml_arg0 "Status") in
       make ?callAnalyticsJobSummaries ?nextToken ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let callAnalyticsJobSummaries =
-        field_map json "CallAnalyticsJobSummaries"
+        field_map json__ "CallAnalyticsJobSummaries"
           CallAnalyticsJobSummaries.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let status = field_map json "Status" CallAnalyticsJobStatus.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let status = field_map json__ "Status" CallAnalyticsJobStatus.of_json in
       make ?callAnalyticsJobSummaries ?nextToken ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List call analytics jobs with a specified status or substring that matches their names."]
+       "Provides a list of Call Analytics jobs that match the specified criteria. If no criteria are specified, all Call Analytics jobs are returned. To get detailed information about a specific Call Analytics job, use the operation."]
 module ListCallAnalyticsJobsRequest =
   struct
     type nonrec t =
       {
       status: CallAnalyticsJobStatus.t option
         [@ocaml.doc
-          "When specified, returns only call analytics jobs with the specified status. Jobs are ordered by creation date, with the most recent jobs returned first. If you don't specify a status, Amazon Transcribe returns all analytics jobs ordered by creation date."];
+          "Returns only Call Analytics jobs with the specified status. Jobs are ordered by creation date, with the newest job first. If you do not include Status, all Call Analytics jobs are returned."];
       jobNameContains: CallAnalyticsJobName.t option
         [@ocaml.doc
-          "When specified, the jobs returned in the list are limited to jobs whose name contains the specified string."];
+          "Returns only the Call Analytics jobs that contain the specified string. The search is not case sensitive."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "If you receive a truncated result in the previous request of , include NextToken to fetch the next set of jobs."];
+          "If your ListCallAnalyticsJobs request returns more results than can be displayed, NextToken is displayed in the response with an associated string. To get the next page of results, copy this string and repeat your request, including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of call analytics jobs to return in each page of results. If there are fewer results than the value you specify, only the actual results are returned. If you do not specify a value, the default of 5 is used."]}
+          "The maximum number of Call Analytics jobs to return in each page of results. If there are fewer results than the value that you specify, only the actual results are returned. If you do not specify a value, a default of 5 is used."]}
     let make ?status =
       fun ?jobNameContains ->
         fun ?nextToken ->
@@ -7091,26 +9172,26 @@ module ListCallAnalyticsJobsRequest =
           (Xml.child xml_arg0 "Status") in
       make ?maxResults ?nextToken ?jobNameContains ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let jobNameContains =
-        field_map json "JobNameContains" CallAnalyticsJobName.of_json in
-      let status = field_map json "Status" CallAnalyticsJobStatus.of_json in
+        field_map json__ "JobNameContains" CallAnalyticsJobName.of_json in
+      let status = field_map json__ "Status" CallAnalyticsJobStatus.of_json in
       make ?maxResults ?nextToken ?jobNameContains ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List call analytics jobs with a specified status or substring that matches their names."]
+       "Provides a list of Call Analytics jobs that match the specified criteria. If no criteria are specified, all Call Analytics jobs are returned. To get detailed information about a specific Call Analytics job, use the operation."]
 module ListCallAnalyticsCategoriesResponse =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The operation returns a page of jobs at a time. The maximum size of the list is set by the MaxResults parameter. If there are more categories in the list than the page size, Amazon Transcribe returns the NextPage token. Include the token in the next request to the operation to return the next page of analytics categories."];
+          "If NextToken is present in your response, it indicates that not all results are displayed. To view the next set of results, copy the string associated with the NextToken parameter in your results output, then run your request again including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       categories: CategoryPropertiesList.t option
         [@ocaml.doc
-          "A list of objects containing information about analytics categories."]}
+          "Provides detailed information about your Call Analytics categories, including all the rules associated with each category."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -7172,24 +9253,24 @@ module ListCallAnalyticsCategoriesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?categories ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let categories =
-        field_map json "Categories" CategoryPropertiesList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "Categories" CategoryPropertiesList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?categories ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides more information about the call analytics categories that you've created. You can use the information in this list to find a specific category. You can then use the operation to get more information about it."]
+       "Provides a list of Call Analytics categories, including all rules that make up each category. To get detailed information about a specific Call Analytics category, use the operation."]
 module ListCallAnalyticsCategoriesRequest =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "When included, NextTokenfetches the next set of categories if the result of the previous request was truncated."];
+          "If your ListCallAnalyticsCategories request returns more results than can be displayed, NextToken is displayed in the response with an associated string. To get the next page of results, copy this string and repeat your request, including NextToken with the value of the copied string. Repeat as needed to view all your results."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of categories to return in each page of results. If there are fewer results than the value you specify, only the actual results are returned. If you do not specify a value, the default of 5 is used."]}
+          "The maximum number of Call Analytics categories to return in each page of results. If there are fewer results than the value that you specify, only the actual results are returned. If you do not specify a value, a default of 5 is used."]}
     let make ?nextToken =
       fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
@@ -7204,32 +9285,35 @@ module ListCallAnalyticsCategoriesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides more information about the call analytics categories that you've created. You can use the information in this list to find a specific category. You can then use the operation to get more information about it."]
+       "Provides a list of Call Analytics categories, including all rules that make up each category. To get detailed information about a specific Call Analytics category, use the operation."]
 module GetVocabularyResponse =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t option
-        [@ocaml.doc "The name of the vocabulary to return."];
+        [@ocaml.doc
+          "The name of the custom vocabulary you requested information about."];
       languageCode: LanguageCode.t option
-        [@ocaml.doc "The language code of the vocabulary entries."];
+        [@ocaml.doc
+          "The language code you selected for your custom vocabulary."];
       vocabularyState: VocabularyState.t option
-        [@ocaml.doc "The processing state of the vocabulary."];
+        [@ocaml.doc
+          "The processing state of your custom vocabulary. If the state is READY, you can use the custom vocabulary in a StartTranscriptionJob request."];
       lastModifiedTime: DateTime.t option
         [@ocaml.doc
-          "The date and time that the vocabulary was last modified."];
+          "The date and time the specified custom vocabulary was last modified. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "If the VocabularyState field is FAILED, this field contains information about why the job failed."];
+          "If VocabularyState is FAILED, FailureReason contains information about why the custom vocabulary request failed. See also: Common Errors."];
       downloadUri: Uri_.t option
         [@ocaml.doc
-          "The S3 location where the vocabulary is stored. Use this URI to get the contents of the vocabulary. The URI is available for a limited time."]}
+          "The Amazon S3 location where the custom vocabulary is stored; use this URI to view or download the custom vocabulary."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -7334,28 +9418,29 @@ module GetVocabularyResponse =
       make ?downloadUri ?failureReason ?lastModifiedTime ?vocabularyState
         ?languageCode ?vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let downloadUri = field_map json "DownloadUri" Uri_.of_json in
+    let of_json json__ =
+      let downloadUri = field_map json__ "DownloadUri" Uri_.of_json in
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
       let vocabularyState =
-        field_map json "VocabularyState" VocabularyState.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "VocabularyState" VocabularyState.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyName =
-        field_map json "VocabularyName" VocabularyName.of_json in
+        field_map json__ "VocabularyName" VocabularyName.of_json in
       make ?downloadUri ?failureReason ?lastModifiedTime ?vocabularyState
         ?languageCode ?vocabularyName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about a vocabulary."]
+  end[@@ocaml.doc
+       "Provides information about the specified custom vocabulary. To view the status of the specified custom vocabulary, check the VocabularyState field. If the status is READY, your custom vocabulary is available to use. If the status is FAILED, FailureReason provides details on why your custom vocabulary failed. To get a list of your custom vocabularies, use the operation."]
 module GetVocabularyRequest =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t
         [@ocaml.doc
-          "The name of the vocabulary to return information about. The name is case sensitive."]}
+          "The name of the custom vocabulary you want information about. Custom vocabulary names are case sensitive."]}
     let context_ = "GetVocabularyRequest"
     let make ~vocabularyName = fun () -> { vocabularyName }
     let to_value x =
@@ -7369,27 +9454,29 @@ module GetVocabularyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
       make ~vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vocabularyName =
-        field_map_exn json "VocabularyName" VocabularyName.of_json in
+        field_map_exn json__ "VocabularyName" VocabularyName.of_json in
       make ~vocabularyName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about a vocabulary."]
+  end[@@ocaml.doc
+       "Provides information about the specified custom vocabulary. To view the status of the specified custom vocabulary, check the VocabularyState field. If the status is READY, your custom vocabulary is available to use. If the status is FAILED, FailureReason provides details on why your custom vocabulary failed. To get a list of your custom vocabularies, use the operation."]
 module GetVocabularyFilterResponse =
   struct
     type nonrec t =
       {
       vocabularyFilterName: VocabularyFilterName.t option
-        [@ocaml.doc "The name of the vocabulary filter."];
+        [@ocaml.doc
+          "The name of the custom vocabulary filter you requested information about."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "The language code of the words in the vocabulary filter."];
+          "The language code you selected for your custom vocabulary filter."];
       lastModifiedTime: DateTime.t option
         [@ocaml.doc
-          "The date and time that the contents of the vocabulary filter were updated."];
+          "The date and time the specified custom vocabulary filter was last modified. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."];
       downloadUri: Uri_.t option
         [@ocaml.doc
-          "The URI of the list of words in the vocabulary filter. You can use this URI to get the list of words."]}
+          "The Amazon S3 location where the custom vocabulary filter is stored; use this URI to view or download the custom vocabulary filter."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -7481,24 +9568,25 @@ module GetVocabularyFilterResponse =
       make ?downloadUri ?lastModifiedTime ?languageCode ?vocabularyFilterName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let downloadUri = field_map json "DownloadUri" Uri_.of_json in
+    let of_json json__ =
+      let downloadUri = field_map json__ "DownloadUri" Uri_.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyFilterName =
-        field_map json "VocabularyFilterName" VocabularyFilterName.of_json in
+        field_map json__ "VocabularyFilterName" VocabularyFilterName.of_json in
       make ?downloadUri ?lastModifiedTime ?languageCode ?vocabularyFilterName
         ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns information about a vocabulary filter."]
+  end[@@ocaml.doc
+       "Provides information about the specified custom vocabulary filter. To get a list of your custom vocabulary filters, use the operation."]
 module GetVocabularyFilterRequest =
   struct
     type nonrec t =
       {
       vocabularyFilterName: VocabularyFilterName.t
         [@ocaml.doc
-          "The name of the vocabulary filter for which to return information."]}
+          "The name of the custom vocabulary filter you want information about. Custom vocabulary filter names are case sensitive."]}
     let context_ = "GetVocabularyFilterRequest"
     let make ~vocabularyFilterName = fun () -> { vocabularyFilterName }
     let to_value x =
@@ -7512,20 +9600,21 @@ module GetVocabularyFilterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyFilterName") in
       make ~vocabularyFilterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vocabularyFilterName =
-        field_map_exn json "VocabularyFilterName"
+        field_map_exn json__ "VocabularyFilterName"
           VocabularyFilterName.of_json in
       make ~vocabularyFilterName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns information about a vocabulary filter."]
+  end[@@ocaml.doc
+       "Provides information about the specified custom vocabulary filter. To get a list of your custom vocabulary filters, use the operation."]
 module GetTranscriptionJobResponse =
   struct
     type nonrec t =
       {
       transcriptionJob: TranscriptionJob.t option
         [@ocaml.doc
-          "An object that contains the results of the transcription job."]}
+          "Provides detailed information about the specified transcription job, including job status and, if applicable, failure reason."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -7592,19 +9681,20 @@ module GetTranscriptionJobResponse =
           (Xml.child xml_arg0 "TranscriptionJob") in
       make ?transcriptionJob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transcriptionJob =
-        field_map json "TranscriptionJob" TranscriptionJob.of_json in
+        field_map json__ "TranscriptionJob" TranscriptionJob.of_json in
       make ?transcriptionJob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about a transcription job. To see the status of the job, check the TranscriptionJobStatus field. If the status is COMPLETED, the job is finished and you can find the results at the location specified in the TranscriptFileUri field. If you enable content redaction, the redacted transcript appears in RedactedTranscriptFileUri."]
+       "Provides information about the specified transcription job. To view the status of the specified transcription job, check the TranscriptionJobStatus field. If the status is COMPLETED, the job is finished. You can find the results at the location specified in TranscriptFileUri. If the status is FAILED, FailureReason provides details on why your transcription job failed. If you enabled content redaction, the redacted transcript can be found at the location specified in RedactedTranscriptFileUri. To get a list of your transcription jobs, use the operation."]
 module GetTranscriptionJobRequest =
   struct
     type nonrec t =
       {
       transcriptionJobName: TranscriptionJobName.t
-        [@ocaml.doc "The name of the job."]}
+        [@ocaml.doc
+          "The name of the transcription job you want information about. Job names are case sensitive."]}
     let context_ = "GetTranscriptionJobRequest"
     let make ~transcriptionJobName = fun () -> { transcriptionJobName }
     let to_value x =
@@ -7618,35 +9708,36 @@ module GetTranscriptionJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TranscriptionJobName") in
       make ~transcriptionJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transcriptionJobName =
-        field_map_exn json "TranscriptionJobName"
+        field_map_exn json__ "TranscriptionJobName"
           TranscriptionJobName.of_json in
       make ~transcriptionJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about a transcription job. To see the status of the job, check the TranscriptionJobStatus field. If the status is COMPLETED, the job is finished and you can find the results at the location specified in the TranscriptFileUri field. If you enable content redaction, the redacted transcript appears in RedactedTranscriptFileUri."]
+       "Provides information about the specified transcription job. To view the status of the specified transcription job, check the TranscriptionJobStatus field. If the status is COMPLETED, the job is finished. You can find the results at the location specified in TranscriptFileUri. If the status is FAILED, FailureReason provides details on why your transcription job failed. If you enabled content redaction, the redacted transcript can be found at the location specified in RedactedTranscriptFileUri. To get a list of your transcription jobs, use the operation."]
 module GetMedicalVocabularyResponse =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t option
         [@ocaml.doc
-          "The name of the vocabulary returned by Amazon Transcribe Medical."];
+          "The name of the custom medical vocabulary you requested information about."];
       languageCode: LanguageCode.t option
-        [@ocaml.doc "The valid language code for your vocabulary entries."];
+        [@ocaml.doc
+          "The language code you selected for your custom medical vocabulary. US English (en-US) is the only language supported with Amazon Transcribe Medical."];
       vocabularyState: VocabularyState.t option
         [@ocaml.doc
-          "The processing state of the vocabulary. If the VocabularyState is READY then you can use it in the StartMedicalTranscriptionJob operation."];
+          "The processing state of your custom medical vocabulary. If the state is READY, you can use the custom vocabulary in a StartMedicalTranscriptionJob request."];
       lastModifiedTime: DateTime.t option
         [@ocaml.doc
-          "The date and time that the vocabulary was last modified with a text file different from the one that was previously used."];
+          "The date and time the specified custom medical vocabulary was last modified. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "If your request returns a VocabularyState that is FAILED, the FailureReason field contains information about why the request failed. For more information, refer to the Common Errors section."];
+          "If VocabularyState is FAILED, FailureReason contains information about why the custom medical vocabulary request failed. See also: Common Errors."];
       downloadUri: Uri_.t option
         [@ocaml.doc
-          "The S3 location where the vocabulary is stored; use this URI to view or download the vocabulary."]}
+          "The Amazon S3 location where the specified custom medical vocabulary is stored; use this URI to view or download the custom vocabulary."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -7751,28 +9842,29 @@ module GetMedicalVocabularyResponse =
       make ?downloadUri ?failureReason ?lastModifiedTime ?vocabularyState
         ?languageCode ?vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let downloadUri = field_map json "DownloadUri" Uri_.of_json in
+    let of_json json__ =
+      let downloadUri = field_map json__ "DownloadUri" Uri_.of_json in
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
       let vocabularyState =
-        field_map json "VocabularyState" VocabularyState.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "VocabularyState" VocabularyState.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyName =
-        field_map json "VocabularyName" VocabularyName.of_json in
+        field_map json__ "VocabularyName" VocabularyName.of_json in
       make ?downloadUri ?failureReason ?lastModifiedTime ?vocabularyState
         ?languageCode ?vocabularyName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves information about a medical vocabulary."]
+  end[@@ocaml.doc
+       "Provides information about the specified custom medical vocabulary. To view the status of the specified custom medical vocabulary, check the VocabularyState field. If the status is READY, your custom vocabulary is available to use. If the status is FAILED, FailureReason provides details on why your vocabulary failed. To get a list of your custom medical vocabularies, use the operation."]
 module GetMedicalVocabularyRequest =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t
         [@ocaml.doc
-          "The name of the medical vocabulary you want information about. This value is case sensitive."]}
+          "The name of the custom medical vocabulary you want information about. Custom medical vocabulary names are case sensitive."]}
     let context_ = "GetMedicalVocabularyRequest"
     let make ~vocabularyName = fun () -> { vocabularyName }
     let to_value x =
@@ -7786,19 +9878,20 @@ module GetMedicalVocabularyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
       make ~vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vocabularyName =
-        field_map_exn json "VocabularyName" VocabularyName.of_json in
+        field_map_exn json__ "VocabularyName" VocabularyName.of_json in
       make ~vocabularyName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves information about a medical vocabulary."]
+  end[@@ocaml.doc
+       "Provides information about the specified custom medical vocabulary. To view the status of the specified custom medical vocabulary, check the VocabularyState field. If the status is READY, your custom vocabulary is available to use. If the status is FAILED, FailureReason provides details on why your vocabulary failed. To get a list of your custom medical vocabularies, use the operation."]
 module GetMedicalTranscriptionJobResponse =
   struct
     type nonrec t =
       {
       medicalTranscriptionJob: MedicalTranscriptionJob.t option
         [@ocaml.doc
-          "An object that contains detailed information about your medical transcription job. Returned fields include: CompletionTime, ContentIdentificationType, CreationTime, FailureReason, LanguageCode, Media, MediaFormat, MediaSampleRateHertz, MedicalTranscriptionJobName, Settings, Specialty, StartTime, Tags, Transcript, TranscriptionJobStatus, and Type."]}
+          "Provides detailed information about the specified medical transcription job, including job status and, if applicable, failure reason."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -7866,21 +9959,21 @@ module GetMedicalTranscriptionJobResponse =
           (Xml.child xml_arg0 "MedicalTranscriptionJob") in
       make ?medicalTranscriptionJob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let medicalTranscriptionJob =
-        field_map json "MedicalTranscriptionJob"
+        field_map json__ "MedicalTranscriptionJob"
           MedicalTranscriptionJob.of_json in
       make ?medicalTranscriptionJob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about a medical transcription job. To view the job's status, refer to the TranscriptionJobStatus field. If the status is COMPLETED, the job is finished. You can then find your transcript at the URI specified in the TranscriptFileUri field."]
+       "Provides information about the specified medical transcription job. To view the status of the specified medical transcription job, check the TranscriptionJobStatus field. If the status is COMPLETED, the job is finished. You can find the results at the location specified in TranscriptFileUri. If the status is FAILED, FailureReason provides details on why your transcription job failed. To get a list of your medical transcription jobs, use the operation."]
 module GetMedicalTranscriptionJobRequest =
   struct
     type nonrec t =
       {
       medicalTranscriptionJobName: TranscriptionJobName.t
         [@ocaml.doc
-          "The name of the medical transcription job you want information about. This value is case sensitive."]}
+          "The name of the medical transcription job you want information about. Job names are case sensitive."]}
     let context_ = "GetMedicalTranscriptionJobRequest"
     let make ~medicalTranscriptionJobName =
       fun () -> { medicalTranscriptionJobName }
@@ -7897,21 +9990,129 @@ module GetMedicalTranscriptionJobRequest =
              "MedicalTranscriptionJobName") in
       make ~medicalTranscriptionJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let medicalTranscriptionJobName =
-        field_map_exn json "MedicalTranscriptionJobName"
+        field_map_exn json__ "MedicalTranscriptionJobName"
           TranscriptionJobName.of_json in
       make ~medicalTranscriptionJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about a medical transcription job. To view the job's status, refer to the TranscriptionJobStatus field. If the status is COMPLETED, the job is finished. You can then find your transcript at the URI specified in the TranscriptFileUri field."]
+       "Provides information about the specified medical transcription job. To view the status of the specified medical transcription job, check the TranscriptionJobStatus field. If the status is COMPLETED, the job is finished. You can find the results at the location specified in TranscriptFileUri. If the status is FAILED, FailureReason provides details on why your transcription job failed. To get a list of your medical transcription jobs, use the operation."]
+module GetMedicalScribeJobResponse =
+  struct
+    type nonrec t =
+      {
+      medicalScribeJob: MedicalScribeJob.t option
+        [@ocaml.doc
+          "Provides detailed information about the specified Medical Scribe job, including job status and, if applicable, failure reason"]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `InternalFailureException of InternalFailureException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?medicalScribeJob = fun () -> { medicalScribeJob }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `InternalFailureException e ->
+          `Assoc
+            [("error", (`String "InternalFailureException"));
+            ("details", (InternalFailureException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MedicalScribeJob",
+           (Option.map x.medicalScribeJob ~f:MedicalScribeJob.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let medicalScribeJob =
+        (Option.map ~f:MedicalScribeJob.of_xml)
+          (Xml.child xml_arg0 "MedicalScribeJob") in
+      make ?medicalScribeJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let medicalScribeJob =
+        field_map json__ "MedicalScribeJob" MedicalScribeJob.of_json in
+      make ?medicalScribeJob ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about the specified Medical Scribe job. To view the status of the specified medical transcription job, check the MedicalScribeJobStatus field. If the status is COMPLETED, the job is finished. You can find the results at the location specified in MedicalScribeOutput. If the status is FAILED, FailureReason provides details on why your Medical Scribe job failed. To get a list of your Medical Scribe jobs, use the operation."]
+module GetMedicalScribeJobRequest =
+  struct
+    type nonrec t =
+      {
+      medicalScribeJobName: TranscriptionJobName.t
+        [@ocaml.doc
+          "The name of the Medical Scribe job you want information about. Job names are case sensitive."]}
+    let context_ = "GetMedicalScribeJobRequest"
+    let make ~medicalScribeJobName = fun () -> { medicalScribeJobName }
+    let to_value x =
+      structure_to_value
+        [("MedicalScribeJobName",
+           (Some (TranscriptionJobName.to_value x.medicalScribeJobName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let medicalScribeJobName =
+        TranscriptionJobName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MedicalScribeJobName") in
+      make ~medicalScribeJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let medicalScribeJobName =
+        field_map_exn json__ "MedicalScribeJobName"
+          TranscriptionJobName.of_json in
+      make ~medicalScribeJobName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about the specified Medical Scribe job. To view the status of the specified medical transcription job, check the MedicalScribeJobStatus field. If the status is COMPLETED, the job is finished. You can find the results at the location specified in MedicalScribeOutput. If the status is FAILED, FailureReason provides details on why your Medical Scribe job failed. To get a list of your Medical Scribe jobs, use the operation."]
 module GetCallAnalyticsJobResponse =
   struct
     type nonrec t =
       {
       callAnalyticsJob: CallAnalyticsJob.t option
         [@ocaml.doc
-          "An object that contains detailed information about your call analytics job. Returned fields include: CallAnalyticsJobName, CallAnalyticsJobStatus, ChannelDefinitions, CompletionTime, CreationTime, DataAccessRoleArn, FailureReason, IdentifiedLanguageScore, LanguageCode, Media, MediaFormat, MediaSampleRateHertz, Settings, StartTime, and Transcript."]}
+          "Provides detailed information about the specified Call Analytics job, including job status and, if applicable, failure reason."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -7978,20 +10179,20 @@ module GetCallAnalyticsJobResponse =
           (Xml.child xml_arg0 "CallAnalyticsJob") in
       make ?callAnalyticsJob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let callAnalyticsJob =
-        field_map json "CallAnalyticsJob" CallAnalyticsJob.of_json in
+        field_map json__ "CallAnalyticsJob" CallAnalyticsJob.of_json in
       make ?callAnalyticsJob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about a call analytics job. To view the job's status, refer to the CallAnalyticsJobStatus field. If the status is COMPLETED, the job is finished. You can then find your transcript at the URI specified in the TranscriptFileUri field. If you enabled personally identifiable information (PII) redaction, the redacted transcript appears in the RedactedTranscriptFileUri field."]
+       "Provides information about the specified Call Analytics job. To view the job's status, refer to CallAnalyticsJobStatus. If the status is COMPLETED, the job is finished. You can find your completed transcript at the URI specified in TranscriptFileUri. If the status is FAILED, FailureReason provides details on why your transcription job failed. If you enabled personally identifiable information (PII) redaction, the redacted transcript appears at the location specified in RedactedTranscriptFileUri. If you chose to redact the audio in your media file, you can find your redacted media file at the location specified in RedactedMediaFileUri. To get a list of your Call Analytics jobs, use the operation."]
 module GetCallAnalyticsJobRequest =
   struct
     type nonrec t =
       {
       callAnalyticsJobName: CallAnalyticsJobName.t
         [@ocaml.doc
-          "The name of the analytics job you want information about. This value is case sensitive."]}
+          "The name of the Call Analytics job you want information about. Job names are case sensitive."]}
     let context_ = "GetCallAnalyticsJobRequest"
     let make ~callAnalyticsJobName = fun () -> { callAnalyticsJobName }
     let to_value x =
@@ -8005,21 +10206,21 @@ module GetCallAnalyticsJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CallAnalyticsJobName") in
       make ~callAnalyticsJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let callAnalyticsJobName =
-        field_map_exn json "CallAnalyticsJobName"
+        field_map_exn json__ "CallAnalyticsJobName"
           CallAnalyticsJobName.of_json in
       make ~callAnalyticsJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information about a call analytics job. To view the job's status, refer to the CallAnalyticsJobStatus field. If the status is COMPLETED, the job is finished. You can then find your transcript at the URI specified in the TranscriptFileUri field. If you enabled personally identifiable information (PII) redaction, the redacted transcript appears in the RedactedTranscriptFileUri field."]
+       "Provides information about the specified Call Analytics job. To view the job's status, refer to CallAnalyticsJobStatus. If the status is COMPLETED, the job is finished. You can find your completed transcript at the URI specified in TranscriptFileUri. If the status is FAILED, FailureReason provides details on why your transcription job failed. If you enabled personally identifiable information (PII) redaction, the redacted transcript appears at the location specified in RedactedTranscriptFileUri. If you chose to redact the audio in your media file, you can find your redacted media file at the location specified in RedactedMediaFileUri. To get a list of your Call Analytics jobs, use the operation."]
 module GetCallAnalyticsCategoryResponse =
   struct
     type nonrec t =
       {
       categoryProperties: CategoryProperties.t option
         [@ocaml.doc
-          "Provides you with the rules associated with the category you specified in your GetCallAnalyticsCategory request."]}
+          "Provides you with the properties of the Call Analytics category you specified in your GetCallAnalyticsCategory request."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -8086,19 +10287,20 @@ module GetCallAnalyticsCategoryResponse =
           (Xml.child xml_arg0 "CategoryProperties") in
       make ?categoryProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let categoryProperties =
-        field_map json "CategoryProperties" CategoryProperties.of_json in
+        field_map json__ "CategoryProperties" CategoryProperties.of_json in
       make ?categoryProperties ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves information about a call analytics category."]
+  end[@@ocaml.doc
+       "Provides information about the specified Call Analytics category. To get a list of your Call Analytics categories, use the operation."]
 module GetCallAnalyticsCategoryRequest =
   struct
     type nonrec t =
       {
       categoryName: CategoryName.t
         [@ocaml.doc
-          "The name of the category you want information about. Category names are case sensitive."]}
+          "The name of the Call Analytics category you want information about. Category names are case sensitive."]}
     let context_ = "GetCallAnalyticsCategoryRequest"
     let make ~categoryName = fun () -> { categoryName }
     let to_value x =
@@ -8111,19 +10313,20 @@ module GetCallAnalyticsCategoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CategoryName") in
       make ~categoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let categoryName =
-        field_map_exn json "CategoryName" CategoryName.of_json in
+        field_map_exn json__ "CategoryName" CategoryName.of_json in
       make ~categoryName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves information about a call analytics category."]
+  end[@@ocaml.doc
+       "Provides information about the specified Call Analytics category. To get a list of your Call Analytics categories, use the operation."]
 module DescribeLanguageModelResponse =
   struct
     type nonrec t =
       {
       languageModel: LanguageModel.t option
         [@ocaml.doc
-          "The name of the custom language model you requested more information about."]}
+          "Provides information about the specified custom language model. This parameter also shows if the base language model you used to create your custom language model has been updated. If Amazon Transcribe has updated the base model, you can create a new custom language model using the updated base model. If you tried to create a new custom language model and the request wasn't successful, you can use this DescribeLanguageModel to help identify the reason for this failure."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `InternalFailureException of InternalFailureException.t 
@@ -8190,20 +10393,20 @@ module DescribeLanguageModelResponse =
           (Xml.child xml_arg0 "LanguageModel") in
       make ?languageModel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageModel =
-        field_map json "LanguageModel" LanguageModel.of_json in
+        field_map json__ "LanguageModel" LanguageModel.of_json in
       make ?languageModel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about a specific custom language model in your Amazon Web Services account. This operation also shows if the base language model you used to create your custom language model has been updated. If Amazon Transcribe has updated the base model, you can create a new custom language model using the updated base model. If you tried to create a new custom language model and the request wasn't successful, you can use this operation to help identify the reason."]
+       "Provides information about the specified custom language model. This operation also shows if the base language model that you used to create your custom language model has been updated. If Amazon Transcribe has updated the base model, you can create a new custom language model using the updated base model. If you tried to create a new custom language model and the request wasn't successful, you can use DescribeLanguageModel to help identify the reason for this failure."]
 module DescribeLanguageModelRequest =
   struct
     type nonrec t =
       {
       modelName: ModelName.t
         [@ocaml.doc
-          "The name of the custom language model you want described. Model names are case-sensitive."]}
+          "The name of the custom language model you want information about. Model names are case sensitive."]}
     let context_ = "DescribeLanguageModelRequest"
     let make ~modelName = fun () -> { modelName }
     let to_value x =
@@ -8216,19 +10419,19 @@ module DescribeLanguageModelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
       make ~modelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelName = field_map_exn json "ModelName" ModelName.of_json in
+    let of_json json__ =
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
       make ~modelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about a specific custom language model in your Amazon Web Services account. This operation also shows if the base language model you used to create your custom language model has been updated. If Amazon Transcribe has updated the base model, you can create a new custom language model using the updated base model. If you tried to create a new custom language model and the request wasn't successful, you can use this operation to help identify the reason."]
+       "Provides information about the specified custom language model. This operation also shows if the base language model that you used to create your custom language model has been updated. If Amazon Transcribe has updated the base model, you can create a new custom language model using the updated base model. If you tried to create a new custom language model and the request wasn't successful, you can use DescribeLanguageModel to help identify the reason for this failure."]
 module DeleteVocabularyRequest =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t
         [@ocaml.doc
-          "The name of the vocabulary you want to delete. Vocabulary names are case-sensitive."]}
+          "The name of the custom vocabulary you want to delete. Custom vocabulary names are case sensitive."]}
     let context_ = "DeleteVocabularyRequest"
     let make ~vocabularyName = fun () -> { vocabularyName }
     let to_value x =
@@ -8242,20 +10445,20 @@ module DeleteVocabularyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
       make ~vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vocabularyName =
-        field_map_exn json "VocabularyName" VocabularyName.of_json in
+        field_map_exn json__ "VocabularyName" VocabularyName.of_json in
       make ~vocabularyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a custom vocabulary. To use this operation, specify the name of the vocabulary you want to delete using VocabularyName."]
+       "Deletes a custom vocabulary. To use this operation, specify the name of the custom vocabulary you want to delete using VocabularyName. Custom vocabulary names are case sensitive."]
 module DeleteVocabularyFilterRequest =
   struct
     type nonrec t =
       {
       vocabularyFilterName: VocabularyFilterName.t
         [@ocaml.doc
-          "The name of the vocabulary filter you want to delete. Vocabulary filter names are case-sensitive."]}
+          "The name of the custom vocabulary filter you want to delete. Custom vocabulary filter names are case sensitive."]}
     let context_ = "DeleteVocabularyFilterRequest"
     let make ~vocabularyFilterName = fun () -> { vocabularyFilterName }
     let to_value x =
@@ -8269,21 +10472,21 @@ module DeleteVocabularyFilterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyFilterName") in
       make ~vocabularyFilterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vocabularyFilterName =
-        field_map_exn json "VocabularyFilterName"
+        field_map_exn json__ "VocabularyFilterName"
           VocabularyFilterName.of_json in
       make ~vocabularyFilterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a vocabulary filter. To use this operation, specify the name of the vocabulary filter you want to delete using VocabularyFilterName."]
+       "Deletes a custom vocabulary filter. To use this operation, specify the name of the custom vocabulary filter you want to delete using VocabularyFilterName. Custom vocabulary filter names are case sensitive."]
 module DeleteTranscriptionJobRequest =
   struct
     type nonrec t =
       {
       transcriptionJobName: TranscriptionJobName.t
         [@ocaml.doc
-          "The name of the transcription job you want to delete. Job names are case-sensitive."]}
+          "The name of the transcription job you want to delete. Job names are case sensitive."]}
     let context_ = "DeleteTranscriptionJobRequest"
     let make ~transcriptionJobName = fun () -> { transcriptionJobName }
     let to_value x =
@@ -8297,21 +10500,21 @@ module DeleteTranscriptionJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TranscriptionJobName") in
       make ~transcriptionJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transcriptionJobName =
-        field_map_exn json "TranscriptionJobName"
+        field_map_exn json__ "TranscriptionJobName"
           TranscriptionJobName.of_json in
       make ~transcriptionJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a transcription job, along with any related information. To use this operation, specify the name of the job you want to delete using TranscriptionJobName."]
+       "Deletes a transcription job. To use this operation, specify the name of the job you want to delete using TranscriptionJobName. Job names are case sensitive."]
 module DeleteMedicalVocabularyRequest =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t
         [@ocaml.doc
-          "The name of the vocabulary that you want to delete. Vocabulary names are case-sensitive."]}
+          "The name of the custom medical vocabulary you want to delete. Custom medical vocabulary names are case sensitive."]}
     let context_ = "DeleteMedicalVocabularyRequest"
     let make ~vocabularyName = fun () -> { vocabularyName }
     let to_value x =
@@ -8325,20 +10528,20 @@ module DeleteMedicalVocabularyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
       make ~vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vocabularyName =
-        field_map_exn json "VocabularyName" VocabularyName.of_json in
+        field_map_exn json__ "VocabularyName" VocabularyName.of_json in
       make ~vocabularyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a custom medical vocabulary. To use this operation, specify the name of the vocabulary you want to delete using VocabularyName."]
+       "Deletes a custom medical vocabulary. To use this operation, specify the name of the custom vocabulary you want to delete using VocabularyName. Custom vocabulary names are case sensitive."]
 module DeleteMedicalTranscriptionJobRequest =
   struct
     type nonrec t =
       {
       medicalTranscriptionJobName: TranscriptionJobName.t
         [@ocaml.doc
-          "The name of the medical transcription job you want to delete. Job names are case-sensitive."]}
+          "The name of the medical transcription job you want to delete. Job names are case sensitive."]}
     let context_ = "DeleteMedicalTranscriptionJobRequest"
     let make ~medicalTranscriptionJobName =
       fun () -> { medicalTranscriptionJobName }
@@ -8355,21 +10558,49 @@ module DeleteMedicalTranscriptionJobRequest =
              "MedicalTranscriptionJobName") in
       make ~medicalTranscriptionJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let medicalTranscriptionJobName =
-        field_map_exn json "MedicalTranscriptionJobName"
+        field_map_exn json__ "MedicalTranscriptionJobName"
           TranscriptionJobName.of_json in
       make ~medicalTranscriptionJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a medical transcription job, along with any related information. To use this operation, specify the name of the job you want to delete using MedicalTranscriptionJobName."]
+       "Deletes a medical transcription job. To use this operation, specify the name of the job you want to delete using MedicalTranscriptionJobName. Job names are case sensitive."]
+module DeleteMedicalScribeJobRequest =
+  struct
+    type nonrec t =
+      {
+      medicalScribeJobName: TranscriptionJobName.t
+        [@ocaml.doc
+          "The name of the Medical Scribe job you want to delete. Job names are case sensitive."]}
+    let context_ = "DeleteMedicalScribeJobRequest"
+    let make ~medicalScribeJobName = fun () -> { medicalScribeJobName }
+    let to_value x =
+      structure_to_value
+        [("MedicalScribeJobName",
+           (Some (TranscriptionJobName.to_value x.medicalScribeJobName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let medicalScribeJobName =
+        TranscriptionJobName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MedicalScribeJobName") in
+      make ~medicalScribeJobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let medicalScribeJobName =
+        field_map_exn json__ "MedicalScribeJobName"
+          TranscriptionJobName.of_json in
+      make ~medicalScribeJobName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a Medical Scribe job. To use this operation, specify the name of the job you want to delete using MedicalScribeJobName. Job names are case sensitive."]
 module DeleteLanguageModelRequest =
   struct
     type nonrec t =
       {
       modelName: ModelName.t
         [@ocaml.doc
-          "The name of the model you want to delete. Model names are case-sensitive."]}
+          "The name of the custom language model you want to delete. Model names are case sensitive."]}
     let context_ = "DeleteLanguageModelRequest"
     let make ~modelName = fun () -> { modelName }
     let to_value x =
@@ -8382,12 +10613,12 @@ module DeleteLanguageModelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
       make ~modelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelName = field_map_exn json "ModelName" ModelName.of_json in
+    let of_json json__ =
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
       make ~modelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a custom language model. To use this operation, specify the name of the language model you want to delete using ModelName."]
+       "Deletes a custom language model. To use this operation, specify the name of the language model you want to delete using ModelName. custom language model names are case sensitive."]
 module DeleteCallAnalyticsJobResponse =
   struct
     type nonrec t = unit
@@ -8445,14 +10676,14 @@ module DeleteCallAnalyticsJobResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a call analytics job. To use this operation, specify the name of the job you want to delete using CallAnalyticsJobName."]
+       "Deletes a Call Analytics job. To use this operation, specify the name of the job you want to delete using CallAnalyticsJobName. Job names are case sensitive."]
 module DeleteCallAnalyticsJobRequest =
   struct
     type nonrec t =
       {
       callAnalyticsJobName: CallAnalyticsJobName.t
         [@ocaml.doc
-          "The name of the call analytics job you want to delete. Job names are case-sensitive."]}
+          "The name of the Call Analytics job you want to delete. Job names are case sensitive."]}
     let context_ = "DeleteCallAnalyticsJobRequest"
     let make ~callAnalyticsJobName = fun () -> { callAnalyticsJobName }
     let to_value x =
@@ -8466,14 +10697,14 @@ module DeleteCallAnalyticsJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CallAnalyticsJobName") in
       make ~callAnalyticsJobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let callAnalyticsJobName =
-        field_map_exn json "CallAnalyticsJobName"
+        field_map_exn json__ "CallAnalyticsJobName"
           CallAnalyticsJobName.of_json in
       make ~callAnalyticsJobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a call analytics job. To use this operation, specify the name of the job you want to delete using CallAnalyticsJobName."]
+       "Deletes a Call Analytics job. To use this operation, specify the name of the job you want to delete using CallAnalyticsJobName. Job names are case sensitive."]
 module DeleteCallAnalyticsCategoryResponse =
   struct
     type nonrec t = unit
@@ -8540,14 +10771,14 @@ module DeleteCallAnalyticsCategoryResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a call analytics category. To use this operation, specify the name of the category you want to delete using CategoryName."]
+       "Deletes a Call Analytics category. To use this operation, specify the name of the category you want to delete using CategoryName. Category names are case sensitive."]
 module DeleteCallAnalyticsCategoryRequest =
   struct
     type nonrec t =
       {
       categoryName: CategoryName.t
         [@ocaml.doc
-          "The name of the call analytics category you want to delete. Category names are case-sensitive."]}
+          "The name of the Call Analytics category you want to delete. Category names are case sensitive."]}
     let context_ = "DeleteCallAnalyticsCategoryRequest"
     let make ~categoryName = fun () -> { categoryName }
     let to_value x =
@@ -8560,29 +10791,31 @@ module DeleteCallAnalyticsCategoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CategoryName") in
       make ~categoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let categoryName =
-        field_map_exn json "CategoryName" CategoryName.of_json in
+        field_map_exn json__ "CategoryName" CategoryName.of_json in
       make ~categoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a call analytics category. To use this operation, specify the name of the category you want to delete using CategoryName."]
+       "Deletes a Call Analytics category. To use this operation, specify the name of the category you want to delete using CategoryName. Category names are case sensitive."]
 module CreateVocabularyResponse =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t option
-        [@ocaml.doc "The name you chose for your vocabulary."];
+        [@ocaml.doc "The name you chose for your custom vocabulary."];
       languageCode: LanguageCode.t option
-        [@ocaml.doc "The language code you selected for your vocabulary."];
+        [@ocaml.doc
+          "The language code you selected for your custom vocabulary."];
       vocabularyState: VocabularyState.t option
         [@ocaml.doc
-          "The processing state of your vocabulary. If the state is READY, you can use the vocabulary in a StartTranscriptionJob request."];
+          "The processing state of your custom vocabulary. If the state is READY, you can use the custom vocabulary in a StartTranscriptionJob request."];
       lastModifiedTime: DateTime.t option
-        [@ocaml.doc "The date and time you created your custom vocabulary."];
+        [@ocaml.doc
+          "The date and time you created your custom vocabulary. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "If the VocabularyState field is FAILED, FailureReason contains information about why the job failed."]}
+          "If VocabularyState is FAILED, FailureReason contains information about why the custom vocabulary request failed. See also: Common Errors."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -8682,54 +10915,59 @@ module CreateVocabularyResponse =
       make ?failureReason ?lastModifiedTime ?vocabularyState ?languageCode
         ?vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
       let vocabularyState =
-        field_map json "VocabularyState" VocabularyState.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "VocabularyState" VocabularyState.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyName =
-        field_map json "VocabularyName" VocabularyName.of_json in
+        field_map json__ "VocabularyName" VocabularyName.of_json in
       make ?failureReason ?lastModifiedTime ?vocabularyState ?languageCode
         ?vocabularyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new custom vocabulary. When creating a new medical vocabulary, you can either upload a text file that contains your new entries, phrases, and terms into an S3 bucket or include a list of terms directly in your request using the Phrases flag. For more information on creating a custom vocabulary, see Creating a custom vocabulary."]
+       "Creates a new custom vocabulary. When creating a new custom vocabulary, you can either upload a text file that contains your new entries, phrases, and terms into an Amazon S3 bucket and include the URI in your request. Or you can include a list of terms directly in your request using the Phrases flag. Each language has a character set that contains all allowed characters for that specific language. If you use unsupported characters, your custom vocabulary request fails. Refer to Character Sets for Custom Vocabularies to get the character set for your language. For more information, see Custom vocabularies."]
 module CreateVocabularyRequest =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t
         [@ocaml.doc
-          "The name of your new vocabulary. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account. If you try to create a vocabulary with the same name as a previous vocabulary, you get a ConflictException error."];
+          "A unique name, chosen by you, for your new custom vocabulary. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account. If you try to create a new custom vocabulary with the same name as an existing custom vocabulary, you get a ConflictException error."];
       languageCode: LanguageCode.t
         [@ocaml.doc
-          "The language code that represents the language of the entries in your custom vocabulary. Each vocabulary must contain terms in only one language. For a list of languages and their corresponding language codes, see Supported languages."];
+          "The language code that represents the language of the entries in your custom vocabulary. Each custom vocabulary must contain terms in only one language. A custom vocabulary can only be used to transcribe files in the same language as the custom vocabulary. For example, if you create a custom vocabulary using US English (en-US), you can only apply this custom vocabulary to files that contain English audio. For a list of supported languages and their associated language codes, refer to the Supported languages table."];
       phrases: Phrases.t option
         [@ocaml.doc
-          "Use this flag to include a list of terms within your request. Note that if you include Phrases in your request, you cannot use VocabularyFileUri; you must choose one or the other."];
+          "Use this parameter if you want to create your custom vocabulary by including all desired terms, as comma-separated values, within your request. The other option for creating your custom vocabulary is to save your entries in a text file and upload them to an Amazon S3 bucket, then specify the location of your file using the VocabularyFileUri parameter. Note that if you include Phrases in your request, you cannot use VocabularyFileUri; you must choose one or the other. Each language has a character set that contains all allowed characters for that specific language. If you use unsupported characters, your custom vocabulary filter request fails. Refer to Character Sets for Custom Vocabularies to get the character set for your language."];
       vocabularyFileUri: Uri_.t option
         [@ocaml.doc
-          "The S3 location of the text file that contains your custom vocabulary. The URI must be located in the same region as the API endpoint you're calling. Here's an example URI path: https://s3.us-east-1.amazonaws.com/my-s3-bucket/my-vocab-file.txt Note that if you include VocabularyFileUri in your request, you cannot use the Phrases flag; you must choose one or the other."];
+          "The Amazon S3 location of the text file that contains your custom vocabulary. The URI must be located in the same Amazon Web Services Region as the resource you're calling. Here's an example URI path: s3://DOC-EXAMPLE-BUCKET/my-vocab-file.txt Note that if you include VocabularyFileUri in your request, you cannot use the Phrases flag; you must choose one or the other."];
       tags: TagList.t option
         [@ocaml.doc
-          "Adds one or more tags, each in the form of a key:value pair, to a new custom vocabulary at the time you create this new vocabulary."]}
+          "Adds one or more custom tags, each in the form of a key:value pair, to a new custom vocabulary at the time you create this new custom vocabulary. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."];
+      dataAccessRoleArn: DataAccessRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role that has permissions to access the Amazon S3 bucket that contains your input files (in this case, your custom vocabulary). If the role that you specify doesn\226\128\153t have the appropriate permissions to access the specified Amazon S3 location, your request fails. IAM role ARNs have the format arn:partition:iam::account:role/role-name-with-path. For example: arn:aws:iam::111122223333:role/Admin. For more information, see IAM ARNs."]}
     let context_ = "CreateVocabularyRequest"
     let make ?phrases =
       fun ?vocabularyFileUri ->
         fun ?tags ->
-          fun ~vocabularyName ->
-            fun ~languageCode ->
-              fun () ->
-                {
-                  phrases;
-                  vocabularyFileUri;
-                  tags;
-                  vocabularyName;
-                  languageCode
-                }
+          fun ?dataAccessRoleArn ->
+            fun ~vocabularyName ->
+              fun ~languageCode ->
+                fun () ->
+                  {
+                    phrases;
+                    vocabularyFileUri;
+                    tags;
+                    dataAccessRoleArn;
+                    vocabularyName;
+                    languageCode
+                  }
     let to_value x =
       structure_to_value
         [("VocabularyName",
@@ -8738,9 +10976,14 @@ module CreateVocabularyRequest =
         ("Phrases", (Option.map x.phrases ~f:Phrases.to_value));
         ("VocabularyFileUri",
           (Option.map x.vocabularyFileUri ~f:Uri_.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("DataAccessRoleArn",
+          (Option.map x.dataAccessRoleArn ~f:DataAccessRoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataAccessRoleArn =
+        (Option.map ~f:DataAccessRoleArn.of_xml)
+          (Xml.child xml_arg0 "DataAccessRoleArn") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let vocabularyFileUri =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "VocabularyFileUri") in
@@ -8752,31 +10995,37 @@ module CreateVocabularyRequest =
       let vocabularyName =
         VocabularyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
-      make ?tags ?vocabularyFileUri ?phrases ~languageCode ~vocabularyName ()
+      make ?dataAccessRoleArn ?tags ?vocabularyFileUri ?phrases ~languageCode
+        ~vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let vocabularyFileUri = field_map json "VocabularyFileUri" Uri_.of_json in
-      let phrases = field_map json "Phrases" Phrases.of_json in
+    let of_json json__ =
+      let dataAccessRoleArn =
+        field_map json__ "DataAccessRoleArn" DataAccessRoleArn.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let vocabularyFileUri =
+        field_map json__ "VocabularyFileUri" Uri_.of_json in
+      let phrases = field_map json__ "Phrases" Phrases.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyName =
-        field_map_exn json "VocabularyName" VocabularyName.of_json in
-      make ?tags ?vocabularyFileUri ?phrases ~languageCode ~vocabularyName ()
+        field_map_exn json__ "VocabularyName" VocabularyName.of_json in
+      make ?dataAccessRoleArn ?tags ?vocabularyFileUri ?phrases ~languageCode
+        ~vocabularyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new custom vocabulary. When creating a new medical vocabulary, you can either upload a text file that contains your new entries, phrases, and terms into an S3 bucket or include a list of terms directly in your request using the Phrases flag. For more information on creating a custom vocabulary, see Creating a custom vocabulary."]
+       "Creates a new custom vocabulary. When creating a new custom vocabulary, you can either upload a text file that contains your new entries, phrases, and terms into an Amazon S3 bucket and include the URI in your request. Or you can include a list of terms directly in your request using the Phrases flag. Each language has a character set that contains all allowed characters for that specific language. If you use unsupported characters, your custom vocabulary request fails. Refer to Character Sets for Custom Vocabularies to get the character set for your language. For more information, see Custom vocabularies."]
 module CreateVocabularyFilterResponse =
   struct
     type nonrec t =
       {
       vocabularyFilterName: VocabularyFilterName.t option
-        [@ocaml.doc "The name of the vocabulary filter."];
+        [@ocaml.doc "The name you chose for your custom vocabulary filter."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "The language code associated with your vocabulary filter."];
+          "The language code you selected for your custom vocabulary filter."];
       lastModifiedTime: DateTime.t option
-        [@ocaml.doc "The date and time the vocabulary filter was modified."]}
+        [@ocaml.doc
+          "The date and time you created your custom vocabulary filter. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -8857,49 +11106,54 @@ module CreateVocabularyFilterResponse =
           (Xml.child xml_arg0 "VocabularyFilterName") in
       make ?lastModifiedTime ?languageCode ?vocabularyFilterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyFilterName =
-        field_map json "VocabularyFilterName" VocabularyFilterName.of_json in
+        field_map json__ "VocabularyFilterName" VocabularyFilterName.of_json in
       make ?lastModifiedTime ?languageCode ?vocabularyFilterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new vocabulary filter that you can use to filter words from your transcription output. For example, you can use this operation to remove profanity from your transcript."]
+       "Creates a new custom vocabulary filter. You can use custom vocabulary filters to mask, delete, or flag specific words from your transcript. Custom vocabulary filters are commonly used to mask profanity in transcripts. Each language has a character set that contains all allowed characters for that specific language. If you use unsupported characters, your custom vocabulary filter request fails. Refer to Character Sets for Custom Vocabularies to get the character set for your language. For more information, see Vocabulary filtering."]
 module CreateVocabularyFilterRequest =
   struct
     type nonrec t =
       {
       vocabularyFilterName: VocabularyFilterName.t
         [@ocaml.doc
-          "The name of your new vocabulary filter. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account. If you try to create a vocabulary filter with the same name as a previous vocabulary filter, you get a ConflictException error."];
+          "A unique name, chosen by you, for your new custom vocabulary filter. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account. If you try to create a new custom vocabulary filter with the same name as an existing custom vocabulary filter, you get a ConflictException error."];
       languageCode: LanguageCode.t
         [@ocaml.doc
-          "The language code of the words in the vocabulary filter. All words in the filter must be in the same language. The vocabulary filter can only be used with transcription jobs in the specified language."];
+          "The language code that represents the language of the entries in your vocabulary filter. Each custom vocabulary filter must contain terms in only one language. A custom vocabulary filter can only be used to transcribe files in the same language as the filter. For example, if you create a custom vocabulary filter using US English (en-US), you can only apply this filter to files that contain English audio. For a list of supported languages and their associated language codes, refer to the Supported languages table."];
       words: Words.t option
         [@ocaml.doc
-          "The words you want in your vocabulary filter. Only use characters specified in the Character sets for the language you're transcribing. Note that if you include Words in your request, you cannot use VocabularyFilterFileUri; you must choose one or the other."];
+          "Use this parameter if you want to create your custom vocabulary filter by including all desired terms, as comma-separated values, within your request. The other option for creating your vocabulary filter is to save your entries in a text file and upload them to an Amazon S3 bucket, then specify the location of your file using the VocabularyFilterFileUri parameter. Note that if you include Words in your request, you cannot use VocabularyFilterFileUri; you must choose one or the other. Each language has a character set that contains all allowed characters for that specific language. If you use unsupported characters, your custom vocabulary filter request fails. Refer to Character Sets for Custom Vocabularies to get the character set for your language."];
       vocabularyFilterFileUri: Uri_.t option
         [@ocaml.doc
-          "The Amazon S3 location of a text file used as input to create the vocabulary filter. Only use characters from the character set defined for custom vocabularies. For a list of character sets, see Character Sets for Custom Vocabularies. Your vocabulary filter file must be less than 50 KB in size. Note that if you include VocabularyFilterFileUri in your request, you cannot use Words; you must choose one or the other."];
+          "The Amazon S3 location of the text file that contains your custom vocabulary filter terms. The URI must be located in the same Amazon Web Services Region as the resource you're calling. Here's an example URI path: s3://DOC-EXAMPLE-BUCKET/my-vocab-filter-file.txt Note that if you include VocabularyFilterFileUri in your request, you cannot use Words; you must choose one or the other."];
       tags: TagList.t option
         [@ocaml.doc
-          "Adds one or more tags, each in the form of a key:value pair, to a new vocabulary filter at the time you create this new vocabulary filter."]}
+          "Adds one or more custom tags, each in the form of a key:value pair, to a new custom vocabulary filter at the time you create this new vocabulary filter. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."];
+      dataAccessRoleArn: DataAccessRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role that has permissions to access the Amazon S3 bucket that contains your input files (in this case, your custom vocabulary filter). If the role that you specify doesn\226\128\153t have the appropriate permissions to access the specified Amazon S3 location, your request fails. IAM role ARNs have the format arn:partition:iam::account:role/role-name-with-path. For example: arn:aws:iam::111122223333:role/Admin. For more information, see IAM ARNs."]}
     let context_ = "CreateVocabularyFilterRequest"
     let make ?words =
       fun ?vocabularyFilterFileUri ->
         fun ?tags ->
-          fun ~vocabularyFilterName ->
-            fun ~languageCode ->
-              fun () ->
-                {
-                  words;
-                  vocabularyFilterFileUri;
-                  tags;
-                  vocabularyFilterName;
-                  languageCode
-                }
+          fun ?dataAccessRoleArn ->
+            fun ~vocabularyFilterName ->
+              fun ~languageCode ->
+                fun () ->
+                  {
+                    words;
+                    vocabularyFilterFileUri;
+                    tags;
+                    dataAccessRoleArn;
+                    vocabularyFilterName;
+                    languageCode
+                  }
     let to_value x =
       structure_to_value
         [("VocabularyFilterName",
@@ -8908,9 +11162,14 @@ module CreateVocabularyFilterRequest =
         ("Words", (Option.map x.words ~f:Words.to_value));
         ("VocabularyFilterFileUri",
           (Option.map x.vocabularyFilterFileUri ~f:Uri_.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("DataAccessRoleArn",
+          (Option.map x.dataAccessRoleArn ~f:DataAccessRoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dataAccessRoleArn =
+        (Option.map ~f:DataAccessRoleArn.of_xml)
+          (Xml.child xml_arg0 "DataAccessRoleArn") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let vocabularyFilterFileUri =
         (Option.map ~f:Uri_.of_xml)
@@ -8922,42 +11181,44 @@ module CreateVocabularyFilterRequest =
       let vocabularyFilterName =
         VocabularyFilterName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyFilterName") in
-      make ?tags ?vocabularyFilterFileUri ?words ~languageCode
-        ~vocabularyFilterName ()
+      make ?dataAccessRoleArn ?tags ?vocabularyFilterFileUri ?words
+        ~languageCode ~vocabularyFilterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let dataAccessRoleArn =
+        field_map json__ "DataAccessRoleArn" DataAccessRoleArn.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let vocabularyFilterFileUri =
-        field_map json "VocabularyFilterFileUri" Uri_.of_json in
-      let words = field_map json "Words" Words.of_json in
+        field_map json__ "VocabularyFilterFileUri" Uri_.of_json in
+      let words = field_map json__ "Words" Words.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyFilterName =
-        field_map_exn json "VocabularyFilterName"
+        field_map_exn json__ "VocabularyFilterName"
           VocabularyFilterName.of_json in
-      make ?tags ?vocabularyFilterFileUri ?words ~languageCode
-        ~vocabularyFilterName ()
+      make ?dataAccessRoleArn ?tags ?vocabularyFilterFileUri ?words
+        ~languageCode ~vocabularyFilterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new vocabulary filter that you can use to filter words from your transcription output. For example, you can use this operation to remove profanity from your transcript."]
+       "Creates a new custom vocabulary filter. You can use custom vocabulary filters to mask, delete, or flag specific words from your transcript. Custom vocabulary filters are commonly used to mask profanity in transcripts. Each language has a character set that contains all allowed characters for that specific language. If you use unsupported characters, your custom vocabulary filter request fails. Refer to Character Sets for Custom Vocabularies to get the character set for your language. For more information, see Vocabulary filtering."]
 module CreateMedicalVocabularyResponse =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t option
-        [@ocaml.doc "The name you chose for your vocabulary."];
+        [@ocaml.doc "The name you chose for your custom medical vocabulary."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
-          "The language code you selected for your medical vocabulary. Note that U.S. English (en-US) is the only language supported with Amazon Transcribe Medical."];
+          "The language code you selected for your custom medical vocabulary. US English (en-US) is the only language supported with Amazon Transcribe Medical."];
       vocabularyState: VocabularyState.t option
         [@ocaml.doc
-          "The processing state of your custom medical vocabulary. If the state is READY, you can use the vocabulary in a StartMedicalTranscriptionJob request."];
+          "The processing state of your custom medical vocabulary. If the state is READY, you can use the custom vocabulary in a StartMedicalTranscriptionJob request."];
       lastModifiedTime: DateTime.t option
         [@ocaml.doc
-          "The date and time you created your custom medical vocabulary."];
+          "The date and time you created your custom medical vocabulary. Timestamps are in the format YYYY-MM-DD'T'HH:MM:SS.SSSSSS-UTC. For example, 2022-05-04T12:32:58.761000-07:00 represents 12:32 PM UTC-7 on May 4, 2022."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "If the VocabularyState field is FAILED, FailureReason contains information about why the job failed."]}
+          "If VocabularyState is FAILED, FailureReason contains information about why the medical transcription job request failed. See also: Common Errors."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -9057,37 +11318,37 @@ module CreateMedicalVocabularyResponse =
       make ?failureReason ?lastModifiedTime ?vocabularyState ?languageCode
         ?vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" DateTime.of_json in
+        field_map json__ "LastModifiedTime" DateTime.of_json in
       let vocabularyState =
-        field_map json "VocabularyState" VocabularyState.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "VocabularyState" VocabularyState.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyName =
-        field_map json "VocabularyName" VocabularyName.of_json in
+        field_map json__ "VocabularyName" VocabularyName.of_json in
       make ?failureReason ?lastModifiedTime ?vocabularyState ?languageCode
         ?vocabularyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new custom medical vocabulary. When creating a new medical vocabulary, you must upload a text file that contains your new entries, phrases, and terms into an S3 bucket. Note that this differs from , where you can include a list of terms within your request using the Phrases flag, as CreateMedicalVocabulary does not support the Phrases flag. For more information on creating a custom vocabulary text file, see Creating a custom vocabulary."]
+       "Creates a new custom medical vocabulary. Before creating a new custom medical vocabulary, you must first upload a text file that contains your vocabulary table into an Amazon S3 bucket. Note that this differs from , where you can include a list of terms within your request using the Phrases flag; CreateMedicalVocabulary does not support the Phrases flag and only accepts vocabularies in table format. Each language has a character set that contains all allowed characters for that specific language. If you use unsupported characters, your custom vocabulary request fails. Refer to Character Sets for Custom Vocabularies to get the character set for your language. For more information, see Custom vocabularies."]
 module CreateMedicalVocabularyRequest =
   struct
     type nonrec t =
       {
       vocabularyName: VocabularyName.t
         [@ocaml.doc
-          "The name of your new vocabulary. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account. If you try to create a vocabulary with the same name as a previous vocabulary, you get a ConflictException error."];
+          "A unique name, chosen by you, for your new custom medical vocabulary. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account. If you try to create a new custom medical vocabulary with the same name as an existing custom medical vocabulary, you get a ConflictException error."];
       languageCode: LanguageCode.t
         [@ocaml.doc
-          "The language code that represents the language of the entries in your custom vocabulary. Note that U.S. English (en-US) is the only language supported with Amazon Transcribe Medical."];
+          "The language code that represents the language of the entries in your custom vocabulary. US English (en-US) is the only language supported with Amazon Transcribe Medical."];
       vocabularyFileUri: Uri_.t
         [@ocaml.doc
-          "The Amazon S3 location (URI) of the text file that contains your custom vocabulary. The URI must be in the same Amazon Web Services Region as the resource that you're calling. Here's an example URI path: https://s3.us-east-1.amazonaws.com/my-s3-bucket/my-vocab-file.txt"];
+          "The Amazon S3 location (URI) of the text file that contains your custom medical vocabulary. The URI must be in the same Amazon Web Services Region as the resource you're calling. Here's an example URI path: s3://DOC-EXAMPLE-BUCKET/my-vocab-file.txt"];
       tags: TagList.t option
         [@ocaml.doc
-          "Adds one or more tags, each in the form of a key:value pair, to a new medical vocabulary at the time you create the new vocabulary. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."]}
+          "Adds one or more custom tags, each in the form of a key:value pair, to a new custom medical vocabulary at the time you create this new custom vocabulary. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."]}
     let context_ = "CreateMedicalVocabularyRequest"
     let make ?tags =
       fun ~vocabularyName ->
@@ -9116,18 +11377,18 @@ module CreateMedicalVocabularyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VocabularyName") in
       make ?tags ~vocabularyFileUri ~languageCode ~vocabularyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let vocabularyFileUri =
-        field_map_exn json "VocabularyFileUri" Uri_.of_json in
+        field_map_exn json__ "VocabularyFileUri" Uri_.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
       let vocabularyName =
-        field_map_exn json "VocabularyName" VocabularyName.of_json in
+        field_map_exn json__ "VocabularyName" VocabularyName.of_json in
       make ?tags ~vocabularyFileUri ~languageCode ~vocabularyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new custom medical vocabulary. When creating a new medical vocabulary, you must upload a text file that contains your new entries, phrases, and terms into an S3 bucket. Note that this differs from , where you can include a list of terms within your request using the Phrases flag, as CreateMedicalVocabulary does not support the Phrases flag. For more information on creating a custom vocabulary text file, see Creating a custom vocabulary."]
+       "Creates a new custom medical vocabulary. Before creating a new custom medical vocabulary, you must first upload a text file that contains your vocabulary table into an Amazon S3 bucket. Note that this differs from , where you can include a list of terms within your request using the Phrases flag; CreateMedicalVocabulary does not support the Phrases flag and only accepts vocabularies in table format. Each language has a character set that contains all allowed characters for that specific language. If you use unsupported characters, your custom vocabulary request fails. Refer to Character Sets for Custom Vocabularies to get the character set for your language. For more information, see Custom vocabularies."]
 module CreateLanguageModelResponse =
   struct
     type nonrec t =
@@ -9137,16 +11398,15 @@ module CreateLanguageModelResponse =
           "The language code you selected for your custom language model."];
       baseModelName: BaseModelName.t option
         [@ocaml.doc
-          "The Amazon Transcribe standard language model, or base model, you used when creating your custom language model. If your audio has a sample rate of 16,000 Hz or greater, this value should be WideBand. If your audio has a sample rate of less than 16,000 Hz, this value should be NarrowBand."];
+          "The Amazon Transcribe standard language model, or base model, you specified when creating your custom language model."];
       modelName: ModelName.t option
-        [@ocaml.doc
-          "The unique name you chose for your custom language model."];
+        [@ocaml.doc "The name of your custom language model."];
       inputDataConfig: InputDataConfig.t option
         [@ocaml.doc
-          "Lists your data access role ARN (Amazon Resource Name) and the Amazon S3 locations your provided for your training (S3Uri) and tuning (TuningDataS3Uri) data."];
+          "Lists your data access role ARN (Amazon Resource Name) and the Amazon S3 locations you provided for your training (S3Uri) and tuning (TuningDataS3Uri) data."];
       modelStatus: ModelStatus.t option
         [@ocaml.doc
-          "The status of your custom language model. When the status shows as COMPLETED, your model is ready to use."]}
+          "The status of your custom language model. When the status displays as COMPLETED, your model is ready to use."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -9242,39 +11502,39 @@ module CreateLanguageModelResponse =
       make ?modelStatus ?inputDataConfig ?modelName ?baseModelName
         ?languageCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelStatus = field_map json "ModelStatus" ModelStatus.of_json in
+    let of_json json__ =
+      let modelStatus = field_map json__ "ModelStatus" ModelStatus.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
-      let modelName = field_map json "ModelName" ModelName.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
       let baseModelName =
-        field_map json "BaseModelName" BaseModelName.of_json in
+        field_map json__ "BaseModelName" BaseModelName.of_json in
       let languageCode =
-        field_map json "LanguageCode" CLMLanguageCode.of_json in
+        field_map json__ "LanguageCode" CLMLanguageCode.of_json in
       make ?modelStatus ?inputDataConfig ?modelName ?baseModelName
         ?languageCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new custom language model. When creating a new language model, you must specify if you want a Wideband (audio sample rates over 16,000 Hz) or Narrowband (audio sample rates under 16,000 Hz) base model. You then include the S3 URI location of your training and tuning files, the language for the model, a unique name, and any tags you want associated with your model."]
+       "Creates a new custom language model. When creating a new custom language model, you must specify: If you want a Wideband (audio sample rates over 16,000 Hz) or Narrowband (audio sample rates under 16,000 Hz) base model The location of your training and tuning files (this must be an Amazon S3 URI) The language of your model A unique name for your model"]
 module CreateLanguageModelRequest =
   struct
     type nonrec t =
       {
       languageCode: CLMLanguageCode.t
         [@ocaml.doc
-          "The language of your custom language model; note that the language code you select must match the language of your training and tuning data."];
+          "The language code that represents the language of your model. Each custom language model must contain terms in only one language, and the language you select for your custom language model must match the language of your training and tuning data. For a list of supported languages and their associated language codes, refer to the Supported languages table. Note that US English (en-US) is the only language supported with Amazon Transcribe Medical. A custom language model can only be used to transcribe files in the same language as the model. For example, if you create a custom language model using US English (en-US), you can only apply this model to files that contain English audio."];
       baseModelName: BaseModelName.t
         [@ocaml.doc
           "The Amazon Transcribe standard language model, or base model, used to create your custom language model. Amazon Transcribe offers two options for base models: Wideband and Narrowband. If the audio you want to transcribe has a sample rate of 16,000 Hz or greater, choose WideBand. To transcribe audio with a sample rate less than 16,000 Hz, choose NarrowBand."];
       modelName: ModelName.t
         [@ocaml.doc
-          "The name of your new custom language model. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account. If you try to create a language model with the same name as a previous language model, you get a ConflictException error."];
+          "A unique name, chosen by you, for your custom language model. This name is case sensitive, cannot contain spaces, and must be unique within an Amazon Web Services account. If you try to create a new custom language model with the same name as an existing custom language model, you get a ConflictException error."];
       inputDataConfig: InputDataConfig.t
         [@ocaml.doc
-          "Contains your data access role ARN (Amazon Resource Name) and the Amazon S3 locations of your training (S3Uri) and tuning (TuningDataS3Uri) data."];
+          "Contains the Amazon S3 location of the training data you want to use to create a new custom language model, and permissions to access this location. When using InputDataConfig, you must include these sub-parameters: S3Uri, which is the Amazon S3 location of your training data, and DataAccessRoleArn, which is the Amazon Resource Name (ARN) of the role that has permission to access your specified Amazon S3 location. You can optionally include TuningDataS3Uri, which is the Amazon S3 location of your tuning data. If you specify different Amazon S3 locations for training and tuning data, the ARN you use must have permissions to access both locations."];
       tags: TagList.t option
         [@ocaml.doc
-          "Optionally add tags, each in the form of a key:value pair, to your new language model. See also: ."]}
+          "Adds one or more custom tags, each in the form of a key:value pair, to a new custom language model at the time you create this new model. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."]}
     let context_ = "CreateLanguageModelRequest"
     let make ?tags =
       fun ~languageCode ->
@@ -9314,26 +11574,26 @@ module CreateLanguageModelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LanguageCode") in
       make ?tags ~inputDataConfig ~modelName ~baseModelName ~languageCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
-      let modelName = field_map_exn json "ModelName" ModelName.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
       let baseModelName =
-        field_map_exn json "BaseModelName" BaseModelName.of_json in
+        field_map_exn json__ "BaseModelName" BaseModelName.of_json in
       let languageCode =
-        field_map_exn json "LanguageCode" CLMLanguageCode.of_json in
+        field_map_exn json__ "LanguageCode" CLMLanguageCode.of_json in
       make ?tags ~inputDataConfig ~modelName ~baseModelName ~languageCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new custom language model. When creating a new language model, you must specify if you want a Wideband (audio sample rates over 16,000 Hz) or Narrowband (audio sample rates under 16,000 Hz) base model. You then include the S3 URI location of your training and tuning files, the language for the model, a unique name, and any tags you want associated with your model."]
+       "Creates a new custom language model. When creating a new custom language model, you must specify: If you want a Wideband (audio sample rates over 16,000 Hz) or Narrowband (audio sample rates under 16,000 Hz) base model The location of your training and tuning files (this must be an Amazon S3 URI) The language of your model A unique name for your model"]
 module CreateCallAnalyticsCategoryResponse =
   struct
     type nonrec t =
       {
       categoryProperties: CategoryProperties.t option
         [@ocaml.doc
-          "If your audio matches one of your categories, this field contains data on that category and its associated rules. This parameter shows which category is flagged (CategoryName) along with metadata for the rules that match your audio. Metadata includes the rule filter (such as InterruptionFilter, NonTalkTimeFilter, SentimentFilter, and TranscriptFilter) and where in your audio (StartTime and EndTime) the rule has a match."]}
+          "Provides you with the properties of your new category, including its associated rules."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -9400,43 +11660,59 @@ module CreateCallAnalyticsCategoryResponse =
           (Xml.child xml_arg0 "CategoryProperties") in
       make ?categoryProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let categoryProperties =
-        field_map json "CategoryProperties" CategoryProperties.of_json in
+        field_map json__ "CategoryProperties" CategoryProperties.of_json in
       make ?categoryProperties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a call analytics category. Amazon Transcribe applies the conditions specified by your call analytics categories to your call analytics jobs. For each analytics category, you must create between 1 and 20 rules. For example, you can create a 'greeting' category with a rule that flags calls in which your agent does not use a specified phrase (for example: \"Please note this call may be recorded.\") in the first 15 seconds of the call. When you start a call analytics job, Amazon Transcribe applies all your existing call analytics categories to that job."]
+       "Creates a new Call Analytics category. All categories are automatically applied to your Call Analytics transcriptions. Note that in order to apply categories to your transcriptions, you must create them before submitting your transcription request, as categories cannot be applied retroactively. When creating a new category, you can use the InputType parameter to label the category as a POST_CALL or a REAL_TIME category. POST_CALL categories can only be applied to post-call transcriptions and REAL_TIME categories can only be applied to real-time transcriptions. If you do not include InputType, your category is created as a POST_CALL category by default. Call Analytics categories are composed of rules. For each category, you must create between 1 and 20 rules. Rules can include these parameters: , , , and . To update an existing category, see . To learn more about Call Analytics categories, see Creating categories for post-call transcriptions and Creating categories for real-time transcriptions."]
 module CreateCallAnalyticsCategoryRequest =
   struct
     type nonrec t =
       {
       categoryName: CategoryName.t
         [@ocaml.doc
-          "A unique name, chosen by you, for your call analytics category. For example, sentiment-positive-last30seconds."];
+          "A unique name, chosen by you, for your Call Analytics category. It's helpful to use a detailed naming system that will make sense to you in the future. For example, it's better to use sentiment-positive-last30seconds for a category over a generic name like test-category. Category names are case sensitive."];
       rules: RuleList.t
         [@ocaml.doc
-          "Rules make up a call analytics category. When creating a call analytics category, you must create between 1 and 20 rules for your category. For each rule, you specify a filter you want applied to the attributes of a call. For example, you can choose a sentiment filter that detects if a customer's sentiment was positive during the last 30 seconds of the call."]}
+          "Rules define a Call Analytics category. When creating a new category, you must create between 1 and 20 rules for that category. For each rule, you specify a filter you want applied to the attributes of a call. For example, you can choose a sentiment filter that detects if a customer's sentiment was positive during the last 30 seconds of the call."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Adds one or more custom tags, each in the form of a key:value pair, to a new call analytics category at the time you start this new job. To learn more about using tags with Amazon Transcribe, refer to Tagging resources."];
+      inputType: InputType.t option
+        [@ocaml.doc
+          "Choose whether you want to create a real-time or a post-call category for your Call Analytics transcription. Specifying POST_CALL assigns your category to post-call transcriptions; categories with this input type cannot be applied to streaming (real-time) transcriptions. Specifying REAL_TIME assigns your category to streaming transcriptions; categories with this input type cannot be applied to post-call transcriptions. If you do not include InputType, your category is created as a post-call category by default."]}
     let context_ = "CreateCallAnalyticsCategoryRequest"
-    let make ~categoryName = fun ~rules -> fun () -> { categoryName; rules }
+    let make ?tags =
+      fun ?inputType ->
+        fun ~categoryName ->
+          fun ~rules -> fun () -> { tags; inputType; categoryName; rules }
     let to_value x =
       structure_to_value
         [("CategoryName", (Some (CategoryName.to_value x.categoryName)));
-        ("Rules", (Some (RuleList.to_value x.rules)))]
+        ("Rules", (Some (RuleList.to_value x.rules)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("InputType", (Option.map x.inputType ~f:InputType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let inputType =
+        (Option.map ~f:InputType.of_xml) (Xml.child xml_arg0 "InputType") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let rules =
         RuleList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Rules") in
       let categoryName =
         CategoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CategoryName") in
-      make ~rules ~categoryName ()
+      make ?inputType ?tags ~rules ~categoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map_exn json "Rules" RuleList.of_json in
+    let of_json json__ =
+      let inputType = field_map json__ "InputType" InputType.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let rules = field_map_exn json__ "Rules" RuleList.of_json in
       let categoryName =
-        field_map_exn json "CategoryName" CategoryName.of_json in
-      make ~rules ~categoryName ()
+        field_map_exn json__ "CategoryName" CategoryName.of_json in
+      make ?inputType ?tags ~rules ~categoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a call analytics category. Amazon Transcribe applies the conditions specified by your call analytics categories to your call analytics jobs. For each analytics category, you must create between 1 and 20 rules. For example, you can create a 'greeting' category with a rule that flags calls in which your agent does not use a specified phrase (for example: \"Please note this call may be recorded.\") in the first 15 seconds of the call. When you start a call analytics job, Amazon Transcribe applies all your existing call analytics categories to that job."]
+       "Creates a new Call Analytics category. All categories are automatically applied to your Call Analytics transcriptions. Note that in order to apply categories to your transcriptions, you must create them before submitting your transcription request, as categories cannot be applied retroactively. When creating a new category, you can use the InputType parameter to label the category as a POST_CALL or a REAL_TIME category. POST_CALL categories can only be applied to post-call transcriptions and REAL_TIME categories can only be applied to real-time transcriptions. If you do not include InputType, your category is created as a POST_CALL category by default. Call Analytics categories are composed of rules. For each category, you must create between 1 and 20 rules. Rules can include these parameters: , , , and . To update an existing category, see . To learn more about Call Analytics categories, see Creating categories for post-call transcriptions and Creating categories for real-time transcriptions."]

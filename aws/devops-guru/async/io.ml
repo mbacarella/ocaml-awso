@@ -45,10 +45,14 @@ let get_resource_collection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetResourceCollection input
 let list_anomalies_for_insight ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAnomaliesForInsight input
+let list_anomalous_log_groups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAnomalousLogGroups input
 let list_events ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEvents input
 let list_insights ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListInsights input
+let list_monitored_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMonitoredResources input
 let list_notification_channels ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListNotificationChannels input
 let list_organization_insights ?endpoint_url ?cfg input =

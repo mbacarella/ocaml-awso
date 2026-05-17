@@ -24,6 +24,566 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module LaunchActionParameterType =
+  struct
+    type nonrec t =
+      | SSM_STORE 
+      | DYNAMIC 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SSM_STORE -> "SSM_STORE"
+      | DYNAMIC -> "DYNAMIC"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SSM_STORE" -> SSM_STORE
+      | "DYNAMIC" -> DYNAMIC
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LaunchActionParameterType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LaunchActionParameterType" j)
+    let to_json = simple_to_json to_value
+  end
+module LaunchActionParameterValue =
+  struct
+    type nonrec t = string
+    let context_ = "LaunchActionParameterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1011) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9.-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LaunchActionParameterValue" j
+    let to_json = simple_to_json to_value
+  end
+module LaunchActionParameter =
+  struct
+    type nonrec t =
+      {
+      value: LaunchActionParameterValue.t option [@ocaml.doc "Value."];
+      type_: LaunchActionParameterType.t option [@ocaml.doc "Type."]}
+    let make ?value = fun ?type_ -> fun () -> { value; type_ }
+    let to_value x =
+      structure_to_value
+        [("value",
+           (Option.map x.value ~f:LaunchActionParameterValue.to_value));
+        ("type", (Option.map x.type_ ~f:LaunchActionParameterType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:LaunchActionParameterType.of_xml)
+          (Xml.child xml_arg0 "type") in
+      let value =
+        (Option.map ~f:LaunchActionParameterValue.of_xml)
+          (Xml.child xml_arg0 "value") in
+      make ?type_ ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "type" LaunchActionParameterType.of_json in
+      let value = field_map json__ "value" LaunchActionParameterValue.of_json in
+      make ?type_ ?value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Launch action parameter."]
+module LaunchActionParameterName =
+  struct
+    type nonrec t = string
+    let context_ = "LaunchActionParameterName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1011) >>=
+                  (fun () -> check_pattern i ~pattern:"([A-Za-z0-9])+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LaunchActionParameterName" j
+    let to_json = simple_to_json to_value
+  end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module LaunchActionCategory =
+  struct
+    type nonrec t =
+      | MONITORING 
+      | VALIDATION 
+      | CONFIGURATION 
+      | SECURITY 
+      | OTHER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MONITORING -> "MONITORING"
+      | VALIDATION -> "VALIDATION"
+      | CONFIGURATION -> "CONFIGURATION"
+      | SECURITY -> "SECURITY"
+      | OTHER -> "OTHER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MONITORING" -> MONITORING
+      | "VALIDATION" -> VALIDATION
+      | "CONFIGURATION" -> CONFIGURATION
+      | "SECURITY" -> SECURITY
+      | "OTHER" -> OTHER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LaunchActionCategory" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LaunchActionCategory" j)
+    let to_json = simple_to_json to_value
+  end
+module LaunchActionDescription =
+  struct
+    type nonrec t = string[@@ocaml.doc "Launch action description."]
+    let context_ = "LaunchActionDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[0-9a-zA-Z ():/.,'-_#*; ]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LaunchActionDescription" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "Launch action description."]
+module LaunchActionId =
+  struct
+    type nonrec t = string[@@ocaml.doc "Launch action Id."]
+    let context_ = "LaunchActionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LaunchActionId" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "Launch action Id."]
+module LaunchActionName =
+  struct
+    type nonrec t = string[@@ocaml.doc "Launch action name."]
+    let context_ = "LaunchActionName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[A-Za-z0-9][A-Za-z0-9 /_-]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LaunchActionName" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "Launch action name."]
+module LaunchActionOrder =
+  struct
+    type nonrec t = int[@@ocaml.doc "Launch action order."]
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10000) >>=
+             (fun () -> check_int_min i ~min:2));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for LaunchActionOrder" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "Launch action order."]
+module LaunchActionParameters =
+  struct
+    type nonrec t =
+      (LaunchActionParameterName.t * LaunchActionParameter.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types LaunchActionParameterName LaunchActionParameter"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (LaunchActionParameterName.to_value x) |>
+                    (fun x ->
+                       (LaunchActionParameter.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:LaunchActionParameterName.of_string
+        ~of_json:LaunchActionParameter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LaunchActionType =
+  struct
+    type nonrec t =
+      | SSM_AUTOMATION 
+      | SSM_COMMAND 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SSM_AUTOMATION -> "SSM_AUTOMATION"
+      | SSM_COMMAND -> "SSM_COMMAND"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SSM_AUTOMATION" -> SSM_AUTOMATION
+      | "SSM_COMMAND" -> SSM_COMMAND
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LaunchActionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LaunchActionType" j)
+    let to_json = simple_to_json to_value
+  end
+module LaunchActionVersion =
+  struct
+    type nonrec t = string[@@ocaml.doc "Launch action version."]
+    let context_ = "LaunchActionVersion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:10) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"(\\$DEFAULT|\\$LATEST|[0-9]+)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LaunchActionVersion" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "Launch action version."]
+module SsmDocumentName =
+  struct
+    type nonrec t = string
+    let context_ = "SsmDocumentName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1011) >>=
+                  (fun () -> check_pattern i ~pattern:"([A-Za-z0-9-/:])+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SsmDocumentName" j
+    let to_json = simple_to_json to_value
+  end
+module FailureReason =
+  struct
+    type nonrec t = string
+    let context_ = "FailureReason"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[0-9a-zA-Z ():/.,'-_#*;]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FailureReason" j
+    let to_json = simple_to_json to_value
+  end
+module LaunchAction =
+  struct
+    type nonrec t =
+      {
+      actionId: LaunchActionId.t option ;
+      actionCode: SsmDocumentName.t option [@ocaml.doc "Launch action code."];
+      type_: LaunchActionType.t option [@ocaml.doc "Launch action type."];
+      name: LaunchActionName.t option ;
+      active: Boolean.t option
+        [@ocaml.doc "Whether the launch action is active."];
+      order: LaunchActionOrder.t option ;
+      actionVersion: LaunchActionVersion.t option ;
+      optional: Boolean.t option
+        [@ocaml.doc
+          "Whether the launch will not be marked as failed if this action fails."];
+      parameters: LaunchActionParameters.t option ;
+      description: LaunchActionDescription.t option ;
+      category: LaunchActionCategory.t option }
+    let make ?actionId =
+      fun ?actionCode ->
+        fun ?type_ ->
+          fun ?name ->
+            fun ?active ->
+              fun ?order ->
+                fun ?actionVersion ->
+                  fun ?optional ->
+                    fun ?parameters ->
+                      fun ?description ->
+                        fun ?category ->
+                          fun () ->
+                            {
+                              actionId;
+                              actionCode;
+                              type_;
+                              name;
+                              active;
+                              order;
+                              actionVersion;
+                              optional;
+                              parameters;
+                              description;
+                              category
+                            }
+    let to_value x =
+      structure_to_value
+        [("actionId", (Option.map x.actionId ~f:LaunchActionId.to_value));
+        ("actionCode", (Option.map x.actionCode ~f:SsmDocumentName.to_value));
+        ("type", (Option.map x.type_ ~f:LaunchActionType.to_value));
+        ("name", (Option.map x.name ~f:LaunchActionName.to_value));
+        ("active", (Option.map x.active ~f:Boolean.to_value));
+        ("order", (Option.map x.order ~f:LaunchActionOrder.to_value));
+        ("actionVersion",
+          (Option.map x.actionVersion ~f:LaunchActionVersion.to_value));
+        ("optional", (Option.map x.optional ~f:Boolean.to_value));
+        ("parameters",
+          (Option.map x.parameters ~f:LaunchActionParameters.to_value));
+        ("description",
+          (Option.map x.description ~f:LaunchActionDescription.to_value));
+        ("category",
+          (Option.map x.category ~f:LaunchActionCategory.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let category =
+        (Option.map ~f:LaunchActionCategory.of_xml)
+          (Xml.child xml_arg0 "category") in
+      let description =
+        (Option.map ~f:LaunchActionDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let parameters =
+        (Option.map ~f:LaunchActionParameters.of_xml)
+          (Xml.child xml_arg0 "parameters") in
+      let optional =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "optional") in
+      let actionVersion =
+        (Option.map ~f:LaunchActionVersion.of_xml)
+          (Xml.child xml_arg0 "actionVersion") in
+      let order =
+        (Option.map ~f:LaunchActionOrder.of_xml) (Xml.child xml_arg0 "order") in
+      let active =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "active") in
+      let name =
+        (Option.map ~f:LaunchActionName.of_xml) (Xml.child xml_arg0 "name") in
+      let type_ =
+        (Option.map ~f:LaunchActionType.of_xml) (Xml.child xml_arg0 "type") in
+      let actionCode =
+        (Option.map ~f:SsmDocumentName.of_xml)
+          (Xml.child xml_arg0 "actionCode") in
+      let actionId =
+        (Option.map ~f:LaunchActionId.of_xml) (Xml.child xml_arg0 "actionId") in
+      make ?category ?description ?parameters ?optional ?actionVersion ?order
+        ?active ?name ?type_ ?actionCode ?actionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let category = field_map json__ "category" LaunchActionCategory.of_json in
+      let description =
+        field_map json__ "description" LaunchActionDescription.of_json in
+      let parameters =
+        field_map json__ "parameters" LaunchActionParameters.of_json in
+      let optional = field_map json__ "optional" Boolean.of_json in
+      let actionVersion =
+        field_map json__ "actionVersion" LaunchActionVersion.of_json in
+      let order = field_map json__ "order" LaunchActionOrder.of_json in
+      let active = field_map json__ "active" Boolean.of_json in
+      let name = field_map json__ "name" LaunchActionName.of_json in
+      let type_ = field_map json__ "type" LaunchActionType.of_json in
+      let actionCode = field_map json__ "actionCode" SsmDocumentName.of_json in
+      let actionId = field_map json__ "actionId" LaunchActionId.of_json in
+      make ?category ?description ?parameters ?optional ?actionVersion ?order
+        ?active ?name ?type_ ?actionCode ?actionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Launch action."]
+module LaunchActionRunId =
+  struct
+    type nonrec t = string
+    let context_ = "LaunchActionRunId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LaunchActionRunId" j
+    let to_json = simple_to_json to_value
+  end
+module LaunchActionRunStatus =
+  struct
+    type nonrec t =
+      | IN_PROGRESS 
+      | SUCCEEDED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | SUCCEEDED -> "SUCCEEDED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "SUCCEEDED" -> SUCCEEDED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LaunchActionRunStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LaunchActionRunStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ProductCodeId =
+  struct
+    type nonrec t = string
+    let context_ = "ProductCodeId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:25) >>=
+             (fun () ->
+                (check_string_max i ~max:25) >>=
+                  (fun () -> check_pattern i ~pattern:"([A-Za-z0-9])+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProductCodeId" j
+    let to_json = simple_to_json to_value
+  end
+module ProductCodeMode =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ProductCodeMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ProductCodeMode" j)
+    let to_json = simple_to_json to_value
+  end
 module DataReplicationInitiationStepName =
   struct
     type nonrec t =
@@ -149,6 +709,17 @@ module RecoveryInstanceDataReplicationInitiationStepName =
       | CONFIGURE_REPLICATION_SOFTWARE 
       | PAIR_AGENT_WITH_REPLICATION_SOFTWARE 
       | ESTABLISH_AGENT_REPLICATOR_SOFTWARE_COMMUNICATION 
+      | WAIT 
+      | CREATE_SECURITY_GROUP 
+      | LAUNCH_REPLICATION_SERVER 
+      | BOOT_REPLICATION_SERVER 
+      | AUTHENTICATE_WITH_SERVICE 
+      | DOWNLOAD_REPLICATION_SOFTWARE 
+      | CREATE_STAGING_DISKS 
+      | ATTACH_STAGING_DISKS 
+      | PAIR_REPLICATION_SERVER_WITH_AGENT 
+      | CONNECT_AGENT_TO_REPLICATION_SERVER 
+      | START_DATA_TRANSFER 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -165,6 +736,19 @@ module RecoveryInstanceDataReplicationInitiationStepName =
           "PAIR_AGENT_WITH_REPLICATION_SOFTWARE"
       | ESTABLISH_AGENT_REPLICATOR_SOFTWARE_COMMUNICATION ->
           "ESTABLISH_AGENT_REPLICATOR_SOFTWARE_COMMUNICATION"
+      | WAIT -> "WAIT"
+      | CREATE_SECURITY_GROUP -> "CREATE_SECURITY_GROUP"
+      | LAUNCH_REPLICATION_SERVER -> "LAUNCH_REPLICATION_SERVER"
+      | BOOT_REPLICATION_SERVER -> "BOOT_REPLICATION_SERVER"
+      | AUTHENTICATE_WITH_SERVICE -> "AUTHENTICATE_WITH_SERVICE"
+      | DOWNLOAD_REPLICATION_SOFTWARE -> "DOWNLOAD_REPLICATION_SOFTWARE"
+      | CREATE_STAGING_DISKS -> "CREATE_STAGING_DISKS"
+      | ATTACH_STAGING_DISKS -> "ATTACH_STAGING_DISKS"
+      | PAIR_REPLICATION_SERVER_WITH_AGENT ->
+          "PAIR_REPLICATION_SERVER_WITH_AGENT"
+      | CONNECT_AGENT_TO_REPLICATION_SERVER ->
+          "CONNECT_AGENT_TO_REPLICATION_SERVER"
+      | START_DATA_TRANSFER -> "START_DATA_TRANSFER"
       | Non_static_id s -> s
     let of_string =
       function
@@ -180,6 +764,19 @@ module RecoveryInstanceDataReplicationInitiationStepName =
           PAIR_AGENT_WITH_REPLICATION_SOFTWARE
       | "ESTABLISH_AGENT_REPLICATOR_SOFTWARE_COMMUNICATION" ->
           ESTABLISH_AGENT_REPLICATOR_SOFTWARE_COMMUNICATION
+      | "WAIT" -> WAIT
+      | "CREATE_SECURITY_GROUP" -> CREATE_SECURITY_GROUP
+      | "LAUNCH_REPLICATION_SERVER" -> LAUNCH_REPLICATION_SERVER
+      | "BOOT_REPLICATION_SERVER" -> BOOT_REPLICATION_SERVER
+      | "AUTHENTICATE_WITH_SERVICE" -> AUTHENTICATE_WITH_SERVICE
+      | "DOWNLOAD_REPLICATION_SOFTWARE" -> DOWNLOAD_REPLICATION_SOFTWARE
+      | "CREATE_STAGING_DISKS" -> CREATE_STAGING_DISKS
+      | "ATTACH_STAGING_DISKS" -> ATTACH_STAGING_DISKS
+      | "PAIR_REPLICATION_SERVER_WITH_AGENT" ->
+          PAIR_REPLICATION_SERVER_WITH_AGENT
+      | "CONNECT_AGENT_TO_REPLICATION_SERVER" ->
+          CONNECT_AGENT_TO_REPLICATION_SERVER
+      | "START_DATA_TRANSFER" -> START_DATA_TRANSFER
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -235,6 +832,98 @@ module RecoveryInstanceDataReplicationInitiationStepStatus =
            ~kind:"RecoveryInstanceDataReplicationInitiationStepStatus" j)
     let to_json = simple_to_json to_value
   end
+module LaunchActionRun =
+  struct
+    type nonrec t =
+      {
+      action: LaunchAction.t option [@ocaml.doc "Action."];
+      runId: LaunchActionRunId.t option [@ocaml.doc "Run Id."];
+      status: LaunchActionRunStatus.t option [@ocaml.doc "Run status."];
+      failureReason: FailureReason.t option [@ocaml.doc "Failure reason."]}
+    let make ?action =
+      fun ?runId ->
+        fun ?status ->
+          fun ?failureReason ->
+            fun () -> { action; runId; status; failureReason }
+    let to_value x =
+      structure_to_value
+        [("action", (Option.map x.action ~f:LaunchAction.to_value));
+        ("runId", (Option.map x.runId ~f:LaunchActionRunId.to_value));
+        ("status", (Option.map x.status ~f:LaunchActionRunStatus.to_value));
+        ("failureReason",
+          (Option.map x.failureReason ~f:FailureReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureReason =
+        (Option.map ~f:FailureReason.of_xml)
+          (Xml.child xml_arg0 "failureReason") in
+      let status =
+        (Option.map ~f:LaunchActionRunStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let runId =
+        (Option.map ~f:LaunchActionRunId.of_xml) (Xml.child xml_arg0 "runId") in
+      let action =
+        (Option.map ~f:LaunchAction.of_xml) (Xml.child xml_arg0 "action") in
+      make ?failureReason ?status ?runId ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureReason =
+        field_map json__ "failureReason" FailureReason.of_json in
+      let status = field_map json__ "status" LaunchActionRunStatus.of_json in
+      let runId = field_map json__ "runId" LaunchActionRunId.of_json in
+      let action = field_map json__ "action" LaunchAction.of_json in
+      make ?failureReason ?status ?runId ?action ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Launch action run."]
+module EbsSnapshot =
+  struct
+    type nonrec t = string
+    let context_ = "EbsSnapshot"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"snap-[0-9a-zA-Z]{17}"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EbsSnapshot" j
+    let to_json = simple_to_json to_value
+  end
+module ProductCode =
+  struct
+    type nonrec t =
+      {
+      productCodeId: ProductCodeId.t option
+        [@ocaml.doc "Id of a product code associated with a volume."];
+      productCodeMode: ProductCodeMode.t option
+        [@ocaml.doc "Mode of a product code associated with a volume."]}
+    let make ?productCodeId =
+      fun ?productCodeMode -> fun () -> { productCodeId; productCodeMode }
+    let to_value x =
+      structure_to_value
+        [("productCodeId",
+           (Option.map x.productCodeId ~f:ProductCodeId.to_value));
+        ("productCodeMode",
+          (Option.map x.productCodeMode ~f:ProductCodeMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let productCodeMode =
+        (Option.map ~f:ProductCodeMode.of_xml)
+          (Xml.child xml_arg0 "productCodeMode") in
+      let productCodeId =
+        (Option.map ~f:ProductCodeId.of_xml)
+          (Xml.child xml_arg0 "productCodeId") in
+      make ?productCodeMode ?productCodeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let productCodeMode =
+        field_map json__ "productCodeMode" ProductCodeMode.of_json in
+      let productCodeId =
+        field_map json__ "productCodeId" ProductCodeId.of_json in
+      make ?productCodeMode ?productCodeId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Properties of a product code associated with a volume."]
 module PositiveInteger =
   struct
     type nonrec t = Int64.t
@@ -247,6 +936,44 @@ module PositiveInteger =
     let of_xml xml_arg0 =
       Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module VolumeStatus =
+  struct
+    type nonrec t =
+      | REGULAR 
+      | CONTAINS_MARKETPLACE_PRODUCT_CODES 
+      | MISSING_VOLUME_ATTRIBUTES 
+      | MISSING_VOLUME_ATTRIBUTES_AND_PRECHECK_UNAVAILABLE 
+      | PENDING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | REGULAR -> "REGULAR"
+      | CONTAINS_MARKETPLACE_PRODUCT_CODES ->
+          "CONTAINS_MARKETPLACE_PRODUCT_CODES"
+      | MISSING_VOLUME_ATTRIBUTES -> "MISSING_VOLUME_ATTRIBUTES"
+      | MISSING_VOLUME_ATTRIBUTES_AND_PRECHECK_UNAVAILABLE ->
+          "MISSING_VOLUME_ATTRIBUTES_AND_PRECHECK_UNAVAILABLE"
+      | PENDING -> "PENDING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "REGULAR" -> REGULAR
+      | "CONTAINS_MARKETPLACE_PRODUCT_CODES" ->
+          CONTAINS_MARKETPLACE_PRODUCT_CODES
+      | "MISSING_VOLUME_ATTRIBUTES" -> MISSING_VOLUME_ATTRIBUTES
+      | "MISSING_VOLUME_ATTRIBUTES_AND_PRECHECK_UNAVAILABLE" ->
+          MISSING_VOLUME_ATTRIBUTES_AND_PRECHECK_UNAVAILABLE
+      | "PENDING" -> PENDING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration VolumeStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VolumeStatus" j)
     let to_json = simple_to_json to_value
   end
 module DataReplicationInitiationStep =
@@ -275,11 +1002,11 @@ module DataReplicationInitiationStep =
           (Xml.child xml_arg0 "name") in
       make ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map json "status" DataReplicationInitiationStepStatus.of_json in
+        field_map json__ "status" DataReplicationInitiationStepStatus.of_json in
       let name =
-        field_map json "name" DataReplicationInitiationStepName.of_json in
+        field_map json__ "name" DataReplicationInitiationStepName.of_json in
       make ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Data replication initiation step."]
@@ -295,7 +1022,7 @@ module ISO8601DatetimeString =
                 (check_string_max i ~max:32) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[1-9][0-9]*-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?Z$")));
+                       ~pattern:"[1-9][0-9]*-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?Z")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -316,7 +1043,7 @@ module JobID =
              (fun () ->
                 (check_string_max i ~max:24) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^drsjob-[0-9a-zA-Z]{17}$")));
+                     check_pattern i ~pattern:"drsjob-[0-9a-zA-Z]{17}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -351,23 +1078,13 @@ module LastLaunchType =
     let of_json j = of_string (string_of_json ~kind:"LastLaunchType" j)
     let to_json = simple_to_json to_value
   end
-module Boolean =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
-    let to_json = simple_to_json to_value
-  end
 module IPsList =
   struct
     type nonrec t = BoundedString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BoundedString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -435,12 +1152,12 @@ module RecoveryInstanceDataReplicationInitiationStep =
           (Xml.child xml_arg0 "name") in
       make ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map json "status"
+        field_map json__ "status"
           RecoveryInstanceDataReplicationInitiationStepStatus.of_json in
       let name =
-        field_map json "name"
+        field_map json__ "name"
           RecoveryInstanceDataReplicationInitiationStepName.of_json in
       make ?status ?name ()
     let to_json v = composed_to_json to_value v
@@ -457,7 +1174,7 @@ module EbsVolumeID =
                 (check_string_max i ~max:19) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^vol-([0-9a-fA-F]{8}|[0-9a-fA-F]{17})$")));
+                       ~pattern:"vol-([0-9a-fA-F]{8}|[0-9a-fA-F]{17})")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -465,6 +1182,131 @@ module EbsVolumeID =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"EbsVolumeID" j
+    let to_json = simple_to_json to_value
+  end
+module SourceNetworkID =
+  struct
+    type nonrec t = string
+    let context_ = "SourceNetworkID"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () -> check_pattern i ~pattern:"sn-[0-9a-zA-Z]{17}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SourceNetworkID" j
+    let to_json = simple_to_json to_value
+  end
+module LaunchActionRuns =
+  struct
+    type nonrec t = LaunchActionRun.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LaunchActionRun.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LaunchActionRun.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LaunchActionRuns" ~of_json:LaunchActionRun.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ConversionMap =
+  struct
+    type nonrec t = (EbsSnapshot.t * EbsSnapshot.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((EbsSnapshot.of_string chopped),
+                              (EbsSnapshot.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (EbsSnapshot.to_value x) |>
+                    (fun x -> (EbsSnapshot.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:EbsSnapshot.of_string
+        ~of_json:EbsSnapshot.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ProductCodes =
+  struct
+    type nonrec t = ProductCode.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProductCode.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProductCode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProductCodes" ~of_json:ProductCode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VpcID =
+  struct
+    type nonrec t = string
+    let context_ = "VpcID"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:21) >>=
+                  (fun () -> check_pattern i ~pattern:"vpc-[0-9a-fA-F]{8,}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VpcID" j
     let to_json = simple_to_json to_value
   end
 module DataReplicationErrorString =
@@ -547,78 +1389,91 @@ module DataReplicationInfoReplicatedDisk =
   struct
     type nonrec t =
       {
-      backloggedStorageBytes: PositiveInteger.t option
-        [@ocaml.doc "The size of the replication backlog in bytes."];
       deviceName: BoundedString.t option
         [@ocaml.doc "The name of the device."];
+      totalStorageBytes: PositiveInteger.t option
+        [@ocaml.doc "The total amount of data to be replicated in bytes."];
       replicatedStorageBytes: PositiveInteger.t option
         [@ocaml.doc "The amount of data replicated so far in bytes."];
       rescannedStorageBytes: PositiveInteger.t option
         [@ocaml.doc "The amount of data to be rescanned in bytes."];
-      totalStorageBytes: PositiveInteger.t option
-        [@ocaml.doc "The total amount of data to be replicated in bytes."]}
-    let make ?backloggedStorageBytes =
-      fun ?deviceName ->
+      backloggedStorageBytes: PositiveInteger.t option
+        [@ocaml.doc "The size of the replication backlog in bytes."];
+      volumeStatus: VolumeStatus.t option
+        [@ocaml.doc "The status of the volume."]}
+    let make ?deviceName =
+      fun ?totalStorageBytes ->
         fun ?replicatedStorageBytes ->
           fun ?rescannedStorageBytes ->
-            fun ?totalStorageBytes ->
-              fun () ->
-                {
-                  backloggedStorageBytes;
-                  deviceName;
-                  replicatedStorageBytes;
-                  rescannedStorageBytes;
-                  totalStorageBytes
-                }
+            fun ?backloggedStorageBytes ->
+              fun ?volumeStatus ->
+                fun () ->
+                  {
+                    deviceName;
+                    totalStorageBytes;
+                    replicatedStorageBytes;
+                    rescannedStorageBytes;
+                    backloggedStorageBytes;
+                    volumeStatus
+                  }
     let to_value x =
       structure_to_value
-        [("backloggedStorageBytes",
-           (Option.map x.backloggedStorageBytes ~f:PositiveInteger.to_value));
-        ("deviceName", (Option.map x.deviceName ~f:BoundedString.to_value));
+        [("deviceName", (Option.map x.deviceName ~f:BoundedString.to_value));
+        ("totalStorageBytes",
+          (Option.map x.totalStorageBytes ~f:PositiveInteger.to_value));
         ("replicatedStorageBytes",
           (Option.map x.replicatedStorageBytes ~f:PositiveInteger.to_value));
         ("rescannedStorageBytes",
           (Option.map x.rescannedStorageBytes ~f:PositiveInteger.to_value));
-        ("totalStorageBytes",
-          (Option.map x.totalStorageBytes ~f:PositiveInteger.to_value))]
+        ("backloggedStorageBytes",
+          (Option.map x.backloggedStorageBytes ~f:PositiveInteger.to_value));
+        ("volumeStatus",
+          (Option.map x.volumeStatus ~f:VolumeStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let totalStorageBytes =
+      let volumeStatus =
+        (Option.map ~f:VolumeStatus.of_xml)
+          (Xml.child xml_arg0 "volumeStatus") in
+      let backloggedStorageBytes =
         (Option.map ~f:PositiveInteger.of_xml)
-          (Xml.child xml_arg0 "totalStorageBytes") in
+          (Xml.child xml_arg0 "backloggedStorageBytes") in
       let rescannedStorageBytes =
         (Option.map ~f:PositiveInteger.of_xml)
           (Xml.child xml_arg0 "rescannedStorageBytes") in
       let replicatedStorageBytes =
         (Option.map ~f:PositiveInteger.of_xml)
           (Xml.child xml_arg0 "replicatedStorageBytes") in
+      let totalStorageBytes =
+        (Option.map ~f:PositiveInteger.of_xml)
+          (Xml.child xml_arg0 "totalStorageBytes") in
       let deviceName =
         (Option.map ~f:BoundedString.of_xml)
           (Xml.child xml_arg0 "deviceName") in
-      let backloggedStorageBytes =
-        (Option.map ~f:PositiveInteger.of_xml)
-          (Xml.child xml_arg0 "backloggedStorageBytes") in
-      make ?totalStorageBytes ?rescannedStorageBytes ?replicatedStorageBytes
-        ?deviceName ?backloggedStorageBytes ()
+      make ?volumeStatus ?backloggedStorageBytes ?rescannedStorageBytes
+        ?replicatedStorageBytes ?totalStorageBytes ?deviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let totalStorageBytes =
-        field_map json "totalStorageBytes" PositiveInteger.of_json in
-      let rescannedStorageBytes =
-        field_map json "rescannedStorageBytes" PositiveInteger.of_json in
-      let replicatedStorageBytes =
-        field_map json "replicatedStorageBytes" PositiveInteger.of_json in
-      let deviceName = field_map json "deviceName" BoundedString.of_json in
+    let of_json json__ =
+      let volumeStatus = field_map json__ "volumeStatus" VolumeStatus.of_json in
       let backloggedStorageBytes =
-        field_map json "backloggedStorageBytes" PositiveInteger.of_json in
-      make ?totalStorageBytes ?rescannedStorageBytes ?replicatedStorageBytes
-        ?deviceName ?backloggedStorageBytes ()
+        field_map json__ "backloggedStorageBytes" PositiveInteger.of_json in
+      let rescannedStorageBytes =
+        field_map json__ "rescannedStorageBytes" PositiveInteger.of_json in
+      let replicatedStorageBytes =
+        field_map json__ "replicatedStorageBytes" PositiveInteger.of_json in
+      let totalStorageBytes =
+        field_map json__ "totalStorageBytes" PositiveInteger.of_json in
+      let deviceName = field_map json__ "deviceName" BoundedString.of_json in
+      make ?volumeStatus ?backloggedStorageBytes ?rescannedStorageBytes
+        ?replicatedStorageBytes ?totalStorageBytes ?deviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A disk that should be replicated."]
 module DataReplicationInitiationSteps =
   struct
     type nonrec t = DataReplicationInitiationStep.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataReplicationInitiationStep.to_value)) |>
         (fun x -> `List x)
@@ -640,6 +1495,40 @@ module DataReplicationInitiationSteps =
       list_of_json ~kind:"DataReplicationInitiationSteps"
         ~of_json:DataReplicationInitiationStep.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module LaunchStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | IN_PROGRESS 
+      | LAUNCHED 
+      | FAILED 
+      | TERMINATED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | LAUNCHED -> "LAUNCHED"
+      | FAILED -> "FAILED"
+      | TERMINATED -> "TERMINATED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "LAUNCHED" -> LAUNCHED
+      | "FAILED" -> FAILED
+      | "TERMINATED" -> TERMINATED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LaunchStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LaunchStatus" j)
+    let to_json = simple_to_json to_value
   end
 module LifeCycleLastLaunchInitiated =
   struct
@@ -672,11 +1561,11 @@ module LifeCycleLastLaunchInitiated =
           (Xml.child xml_arg0 "apiCallDateTime") in
       make ?type_ ?jobID ?apiCallDateTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" LastLaunchType.of_json in
-      let jobID = field_map json "jobID" JobID.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "type" LastLaunchType.of_json in
+      let jobID = field_map json__ "jobID" JobID.of_json in
       let apiCallDateTime =
-        field_map json "apiCallDateTime" ISO8601DatetimeString.of_json in
+        field_map json__ "apiCallDateTime" ISO8601DatetimeString.of_json in
       make ?type_ ?jobID ?apiCallDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -701,9 +1590,9 @@ module CPU =
         (Option.map ~f:PositiveInteger.of_xml) (Xml.child xml_arg0 "cores") in
       make ?modelName ?cores ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelName = field_map json "modelName" BoundedString.of_json in
-      let cores = field_map json "cores" PositiveInteger.of_json in
+    let of_json json__ =
+      let modelName = field_map json__ "modelName" BoundedString.of_json in
+      let cores = field_map json__ "cores" PositiveInteger.of_json in
       make ?modelName ?cores ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a server's CPU."]
@@ -711,28 +1600,28 @@ module Disk =
   struct
     type nonrec t =
       {
-      bytes: PositiveInteger.t option
-        [@ocaml.doc "The amount of storage on the disk in bytes."];
       deviceName: BoundedString.t option
-        [@ocaml.doc "The disk or device name."]}
-    let make ?bytes = fun ?deviceName -> fun () -> { bytes; deviceName }
+        [@ocaml.doc "The disk or device name."];
+      bytes: PositiveInteger.t option
+        [@ocaml.doc "The amount of storage on the disk in bytes."]}
+    let make ?deviceName = fun ?bytes -> fun () -> { deviceName; bytes }
     let to_value x =
       structure_to_value
-        [("bytes", (Option.map x.bytes ~f:PositiveInteger.to_value));
-        ("deviceName", (Option.map x.deviceName ~f:BoundedString.to_value))]
+        [("deviceName", (Option.map x.deviceName ~f:BoundedString.to_value));
+        ("bytes", (Option.map x.bytes ~f:PositiveInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let bytes =
+        (Option.map ~f:PositiveInteger.of_xml) (Xml.child xml_arg0 "bytes") in
       let deviceName =
         (Option.map ~f:BoundedString.of_xml)
           (Xml.child xml_arg0 "deviceName") in
-      let bytes =
-        (Option.map ~f:PositiveInteger.of_xml) (Xml.child xml_arg0 "bytes") in
-      make ?deviceName ?bytes ()
+      make ?bytes ?deviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deviceName = field_map json "deviceName" BoundedString.of_json in
-      let bytes = field_map json "bytes" PositiveInteger.of_json in
-      make ?deviceName ?bytes ()
+    let of_json json__ =
+      let bytes = field_map json__ "bytes" PositiveInteger.of_json in
+      let deviceName = field_map json__ "deviceName" BoundedString.of_json in
+      make ?bytes ?deviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing a data storage device on a server."]
@@ -746,7 +1635,7 @@ module EC2InstanceID =
           ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:255) >>=
-                  (fun () -> check_pattern i ~pattern:"^i-[0-9a-fA-F]{8,}$")));
+                  (fun () -> check_pattern i ~pattern:"i-[0-9a-fA-F]{8,}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -760,62 +1649,61 @@ module NetworkInterface =
   struct
     type nonrec t =
       {
+      macAddress: BoundedString.t option
+        [@ocaml.doc "The MAC address of the network interface."];
       ips: IPsList.t option [@ocaml.doc "Network interface IPs."];
       isPrimary: Boolean.t option
-        [@ocaml.doc "Whether this is the primary network interface."];
-      macAddress: BoundedString.t option
-        [@ocaml.doc "The MAC address of the network interface."]}
-    let make ?ips =
-      fun ?isPrimary ->
-        fun ?macAddress -> fun () -> { ips; isPrimary; macAddress }
+        [@ocaml.doc "Whether this is the primary network interface."]}
+    let make ?macAddress =
+      fun ?ips -> fun ?isPrimary -> fun () -> { macAddress; ips; isPrimary }
     let to_value x =
       structure_to_value
-        [("ips", (Option.map x.ips ~f:IPsList.to_value));
-        ("isPrimary", (Option.map x.isPrimary ~f:Boolean.to_value));
-        ("macAddress", (Option.map x.macAddress ~f:BoundedString.to_value))]
+        [("macAddress", (Option.map x.macAddress ~f:BoundedString.to_value));
+        ("ips", (Option.map x.ips ~f:IPsList.to_value));
+        ("isPrimary", (Option.map x.isPrimary ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let macAddress =
-        (Option.map ~f:BoundedString.of_xml)
-          (Xml.child xml_arg0 "macAddress") in
       let isPrimary =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPrimary") in
       let ips = (Option.map ~f:IPsList.of_xml) (Xml.child xml_arg0 "ips") in
-      make ?macAddress ?isPrimary ?ips ()
+      let macAddress =
+        (Option.map ~f:BoundedString.of_xml)
+          (Xml.child xml_arg0 "macAddress") in
+      make ?isPrimary ?ips ?macAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let macAddress = field_map json "macAddress" BoundedString.of_json in
-      let isPrimary = field_map json "isPrimary" Boolean.of_json in
-      let ips = field_map json "ips" IPsList.of_json in
-      make ?macAddress ?isPrimary ?ips ()
+    let of_json json__ =
+      let isPrimary = field_map json__ "isPrimary" Boolean.of_json in
+      let ips = field_map json__ "ips" IPsList.of_json in
+      let macAddress = field_map json__ "macAddress" BoundedString.of_json in
+      make ?isPrimary ?ips ?macAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Network interface."]
 module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      message: LargeBoundedString.t option
-        [@ocaml.doc "Validate exception field message."];
       name: LargeBoundedString.t option
-        [@ocaml.doc "Validate exception field name."]}
-    let make ?message = fun ?name -> fun () -> { message; name }
+        [@ocaml.doc "Validate exception field name."];
+      message: LargeBoundedString.t option
+        [@ocaml.doc "Validate exception field message."]}
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:LargeBoundedString.to_value));
-        ("name", (Option.map x.name ~f:LargeBoundedString.to_value))]
+        [("name", (Option.map x.name ~f:LargeBoundedString.to_value));
+        ("message", (Option.map x.message ~f:LargeBoundedString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "name") in
       let message =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "message") in
-      make ?name ?message ()
+      let name =
+        (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" LargeBoundedString.of_json in
-      let message = field_map json "message" LargeBoundedString.of_json in
-      make ?name ?message ()
+    let of_json json__ =
+      let message = field_map json__ "message" LargeBoundedString.of_json in
+      let name = field_map json__ "name" LargeBoundedString.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Validate exception field."]
 module PITPolicyRuleUnits =
@@ -875,6 +1763,18 @@ module FailbackReplicationError =
       | FAILED_TO_CONFIGURE_REPLICATION_SOFTWARE 
       | FAILED_TO_PAIR_AGENT_WITH_REPLICATION_SOFTWARE 
       | FAILED_TO_ESTABLISH_AGENT_REPLICATOR_SOFTWARE_COMMUNICATION 
+      | FAILED_GETTING_REPLICATION_STATE 
+      | SNAPSHOTS_FAILURE 
+      | FAILED_TO_CREATE_SECURITY_GROUP 
+      | FAILED_TO_LAUNCH_REPLICATION_SERVER 
+      | FAILED_TO_BOOT_REPLICATION_SERVER 
+      | FAILED_TO_AUTHENTICATE_WITH_SERVICE 
+      | FAILED_TO_DOWNLOAD_REPLICATION_SOFTWARE 
+      | FAILED_TO_CREATE_STAGING_DISKS 
+      | FAILED_TO_ATTACH_STAGING_DISKS 
+      | FAILED_TO_PAIR_REPLICATION_SERVER_WITH_AGENT 
+      | FAILED_TO_CONNECT_AGENT_TO_REPLICATION_SERVER 
+      | FAILED_TO_START_DATA_TRANSFER 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -893,6 +1793,25 @@ module FailbackReplicationError =
           "FAILED_TO_PAIR_AGENT_WITH_REPLICATION_SOFTWARE"
       | FAILED_TO_ESTABLISH_AGENT_REPLICATOR_SOFTWARE_COMMUNICATION ->
           "FAILED_TO_ESTABLISH_AGENT_REPLICATOR_SOFTWARE_COMMUNICATION"
+      | FAILED_GETTING_REPLICATION_STATE ->
+          "FAILED_GETTING_REPLICATION_STATE"
+      | SNAPSHOTS_FAILURE -> "SNAPSHOTS_FAILURE"
+      | FAILED_TO_CREATE_SECURITY_GROUP -> "FAILED_TO_CREATE_SECURITY_GROUP"
+      | FAILED_TO_LAUNCH_REPLICATION_SERVER ->
+          "FAILED_TO_LAUNCH_REPLICATION_SERVER"
+      | FAILED_TO_BOOT_REPLICATION_SERVER ->
+          "FAILED_TO_BOOT_REPLICATION_SERVER"
+      | FAILED_TO_AUTHENTICATE_WITH_SERVICE ->
+          "FAILED_TO_AUTHENTICATE_WITH_SERVICE"
+      | FAILED_TO_DOWNLOAD_REPLICATION_SOFTWARE ->
+          "FAILED_TO_DOWNLOAD_REPLICATION_SOFTWARE"
+      | FAILED_TO_CREATE_STAGING_DISKS -> "FAILED_TO_CREATE_STAGING_DISKS"
+      | FAILED_TO_ATTACH_STAGING_DISKS -> "FAILED_TO_ATTACH_STAGING_DISKS"
+      | FAILED_TO_PAIR_REPLICATION_SERVER_WITH_AGENT ->
+          "FAILED_TO_PAIR_REPLICATION_SERVER_WITH_AGENT"
+      | FAILED_TO_CONNECT_AGENT_TO_REPLICATION_SERVER ->
+          "FAILED_TO_CONNECT_AGENT_TO_REPLICATION_SERVER"
+      | FAILED_TO_START_DATA_TRANSFER -> "FAILED_TO_START_DATA_TRANSFER"
       | Non_static_id s -> s
     let of_string =
       function
@@ -910,6 +1829,25 @@ module FailbackReplicationError =
           FAILED_TO_PAIR_AGENT_WITH_REPLICATION_SOFTWARE
       | "FAILED_TO_ESTABLISH_AGENT_REPLICATOR_SOFTWARE_COMMUNICATION" ->
           FAILED_TO_ESTABLISH_AGENT_REPLICATOR_SOFTWARE_COMMUNICATION
+      | "FAILED_GETTING_REPLICATION_STATE" ->
+          FAILED_GETTING_REPLICATION_STATE
+      | "SNAPSHOTS_FAILURE" -> SNAPSHOTS_FAILURE
+      | "FAILED_TO_CREATE_SECURITY_GROUP" -> FAILED_TO_CREATE_SECURITY_GROUP
+      | "FAILED_TO_LAUNCH_REPLICATION_SERVER" ->
+          FAILED_TO_LAUNCH_REPLICATION_SERVER
+      | "FAILED_TO_BOOT_REPLICATION_SERVER" ->
+          FAILED_TO_BOOT_REPLICATION_SERVER
+      | "FAILED_TO_AUTHENTICATE_WITH_SERVICE" ->
+          FAILED_TO_AUTHENTICATE_WITH_SERVICE
+      | "FAILED_TO_DOWNLOAD_REPLICATION_SOFTWARE" ->
+          FAILED_TO_DOWNLOAD_REPLICATION_SOFTWARE
+      | "FAILED_TO_CREATE_STAGING_DISKS" -> FAILED_TO_CREATE_STAGING_DISKS
+      | "FAILED_TO_ATTACH_STAGING_DISKS" -> FAILED_TO_ATTACH_STAGING_DISKS
+      | "FAILED_TO_PAIR_REPLICATION_SERVER_WITH_AGENT" ->
+          FAILED_TO_PAIR_REPLICATION_SERVER_WITH_AGENT
+      | "FAILED_TO_CONNECT_AGENT_TO_REPLICATION_SERVER" ->
+          FAILED_TO_CONNECT_AGENT_TO_REPLICATION_SERVER
+      | "FAILED_TO_START_DATA_TRANSFER" -> FAILED_TO_START_DATA_TRANSFER
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -925,78 +1863,81 @@ module RecoveryInstanceDataReplicationInfoReplicatedDisk =
   struct
     type nonrec t =
       {
-      backloggedStorageBytes: PositiveInteger.t option
-        [@ocaml.doc "The size of the replication backlog in bytes."];
       deviceName: BoundedString.t option
         [@ocaml.doc "The name of the device."];
+      totalStorageBytes: PositiveInteger.t option
+        [@ocaml.doc "The total amount of data to be replicated in bytes."];
       replicatedStorageBytes: PositiveInteger.t option
         [@ocaml.doc "The amount of data replicated so far in bytes."];
       rescannedStorageBytes: PositiveInteger.t option
         [@ocaml.doc "The amount of data to be rescanned in bytes."];
-      totalStorageBytes: PositiveInteger.t option
-        [@ocaml.doc "The total amount of data to be replicated in bytes."]}
-    let make ?backloggedStorageBytes =
-      fun ?deviceName ->
+      backloggedStorageBytes: PositiveInteger.t option
+        [@ocaml.doc "The size of the replication backlog in bytes."]}
+    let make ?deviceName =
+      fun ?totalStorageBytes ->
         fun ?replicatedStorageBytes ->
           fun ?rescannedStorageBytes ->
-            fun ?totalStorageBytes ->
+            fun ?backloggedStorageBytes ->
               fun () ->
                 {
-                  backloggedStorageBytes;
                   deviceName;
+                  totalStorageBytes;
                   replicatedStorageBytes;
                   rescannedStorageBytes;
-                  totalStorageBytes
+                  backloggedStorageBytes
                 }
     let to_value x =
       structure_to_value
-        [("backloggedStorageBytes",
-           (Option.map x.backloggedStorageBytes ~f:PositiveInteger.to_value));
-        ("deviceName", (Option.map x.deviceName ~f:BoundedString.to_value));
+        [("deviceName", (Option.map x.deviceName ~f:BoundedString.to_value));
+        ("totalStorageBytes",
+          (Option.map x.totalStorageBytes ~f:PositiveInteger.to_value));
         ("replicatedStorageBytes",
           (Option.map x.replicatedStorageBytes ~f:PositiveInteger.to_value));
         ("rescannedStorageBytes",
           (Option.map x.rescannedStorageBytes ~f:PositiveInteger.to_value));
-        ("totalStorageBytes",
-          (Option.map x.totalStorageBytes ~f:PositiveInteger.to_value))]
+        ("backloggedStorageBytes",
+          (Option.map x.backloggedStorageBytes ~f:PositiveInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let totalStorageBytes =
+      let backloggedStorageBytes =
         (Option.map ~f:PositiveInteger.of_xml)
-          (Xml.child xml_arg0 "totalStorageBytes") in
+          (Xml.child xml_arg0 "backloggedStorageBytes") in
       let rescannedStorageBytes =
         (Option.map ~f:PositiveInteger.of_xml)
           (Xml.child xml_arg0 "rescannedStorageBytes") in
       let replicatedStorageBytes =
         (Option.map ~f:PositiveInteger.of_xml)
           (Xml.child xml_arg0 "replicatedStorageBytes") in
+      let totalStorageBytes =
+        (Option.map ~f:PositiveInteger.of_xml)
+          (Xml.child xml_arg0 "totalStorageBytes") in
       let deviceName =
         (Option.map ~f:BoundedString.of_xml)
           (Xml.child xml_arg0 "deviceName") in
-      let backloggedStorageBytes =
-        (Option.map ~f:PositiveInteger.of_xml)
-          (Xml.child xml_arg0 "backloggedStorageBytes") in
-      make ?totalStorageBytes ?rescannedStorageBytes ?replicatedStorageBytes
-        ?deviceName ?backloggedStorageBytes ()
+      make ?backloggedStorageBytes ?rescannedStorageBytes
+        ?replicatedStorageBytes ?totalStorageBytes ?deviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let totalStorageBytes =
-        field_map json "totalStorageBytes" PositiveInteger.of_json in
-      let rescannedStorageBytes =
-        field_map json "rescannedStorageBytes" PositiveInteger.of_json in
-      let replicatedStorageBytes =
-        field_map json "replicatedStorageBytes" PositiveInteger.of_json in
-      let deviceName = field_map json "deviceName" BoundedString.of_json in
+    let of_json json__ =
       let backloggedStorageBytes =
-        field_map json "backloggedStorageBytes" PositiveInteger.of_json in
-      make ?totalStorageBytes ?rescannedStorageBytes ?replicatedStorageBytes
-        ?deviceName ?backloggedStorageBytes ()
+        field_map json__ "backloggedStorageBytes" PositiveInteger.of_json in
+      let rescannedStorageBytes =
+        field_map json__ "rescannedStorageBytes" PositiveInteger.of_json in
+      let replicatedStorageBytes =
+        field_map json__ "replicatedStorageBytes" PositiveInteger.of_json in
+      let totalStorageBytes =
+        field_map json__ "totalStorageBytes" PositiveInteger.of_json in
+      let deviceName = field_map json__ "deviceName" BoundedString.of_json in
+      make ?backloggedStorageBytes ?rescannedStorageBytes
+        ?replicatedStorageBytes ?totalStorageBytes ?deviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A disk that should be replicated."]
 module RecoveryInstanceDataReplicationInitiationSteps =
   struct
     type nonrec t = RecoveryInstanceDataReplicationInitiationStep.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:RecoveryInstanceDataReplicationInitiationStep.to_value))
@@ -1025,77 +1966,101 @@ module RecoveryInstanceDisk =
   struct
     type nonrec t =
       {
+      internalDeviceName: BoundedString.t option
+        [@ocaml.doc
+          "The internal device name of this disk. This is the name that is visible on the machine itself and not from the EC2 console."];
       bytes: PositiveInteger.t option
         [@ocaml.doc "The amount of storage on the disk in bytes."];
       ebsVolumeID: EbsVolumeID.t option
-        [@ocaml.doc "The EBS Volume ID of this disk."];
-      internalDeviceName: BoundedString.t option
-        [@ocaml.doc
-          "The internal device name of this disk. This is the name that is visible on the machine itself and not from the EC2 console."]}
-    let make ?bytes =
-      fun ?ebsVolumeID ->
-        fun ?internalDeviceName ->
-          fun () -> { bytes; ebsVolumeID; internalDeviceName }
+        [@ocaml.doc "The EBS Volume ID of this disk."]}
+    let make ?internalDeviceName =
+      fun ?bytes ->
+        fun ?ebsVolumeID ->
+          fun () -> { internalDeviceName; bytes; ebsVolumeID }
     let to_value x =
       structure_to_value
-        [("bytes", (Option.map x.bytes ~f:PositiveInteger.to_value));
-        ("ebsVolumeID", (Option.map x.ebsVolumeID ~f:EbsVolumeID.to_value));
-        ("internalDeviceName",
-          (Option.map x.internalDeviceName ~f:BoundedString.to_value))]
+        [("internalDeviceName",
+           (Option.map x.internalDeviceName ~f:BoundedString.to_value));
+        ("bytes", (Option.map x.bytes ~f:PositiveInteger.to_value));
+        ("ebsVolumeID", (Option.map x.ebsVolumeID ~f:EbsVolumeID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let internalDeviceName =
-        (Option.map ~f:BoundedString.of_xml)
-          (Xml.child xml_arg0 "internalDeviceName") in
       let ebsVolumeID =
         (Option.map ~f:EbsVolumeID.of_xml) (Xml.child xml_arg0 "ebsVolumeID") in
       let bytes =
         (Option.map ~f:PositiveInteger.of_xml) (Xml.child xml_arg0 "bytes") in
-      make ?internalDeviceName ?ebsVolumeID ?bytes ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let internalDeviceName =
-        field_map json "internalDeviceName" BoundedString.of_json in
-      let ebsVolumeID = field_map json "ebsVolumeID" EbsVolumeID.of_json in
-      let bytes = field_map json "bytes" PositiveInteger.of_json in
-      make ?internalDeviceName ?ebsVolumeID ?bytes ()
+        (Option.map ~f:BoundedString.of_xml)
+          (Xml.child xml_arg0 "internalDeviceName") in
+      make ?ebsVolumeID ?bytes ?internalDeviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ebsVolumeID = field_map json__ "ebsVolumeID" EbsVolumeID.of_json in
+      let bytes = field_map json__ "bytes" PositiveInteger.of_json in
+      let internalDeviceName =
+        field_map json__ "internalDeviceName" BoundedString.of_json in
+      make ?ebsVolumeID ?bytes ?internalDeviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing a block storage device on the Recovery Instance."]
-module LaunchStatus =
+module ParticipatingResourceID =
   struct
     type nonrec t =
-      | PENDING 
-      | IN_PROGRESS 
-      | LAUNCHED 
-      | FAILED 
-      | TERMINATED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | PENDING -> "PENDING"
-      | IN_PROGRESS -> "IN_PROGRESS"
-      | LAUNCHED -> "LAUNCHED"
-      | FAILED -> "FAILED"
-      | TERMINATED -> "TERMINATED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "PENDING" -> PENDING
-      | "IN_PROGRESS" -> IN_PROGRESS
-      | "LAUNCHED" -> LAUNCHED
-      | "FAILED" -> FAILED
-      | "TERMINATED" -> TERMINATED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+      {
+      sourceNetworkID: SourceNetworkID.t option
+        [@ocaml.doc "Source Network ID."]}
+    let make ?sourceNetworkID = fun () -> { sourceNetworkID }
+    let to_value x =
+      structure_to_value
+        [("sourceNetworkID",
+           (Option.map x.sourceNetworkID ~f:SourceNetworkID.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration LaunchStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"LaunchStatus" j)
-    let to_json = simple_to_json to_value
-  end
+      let sourceNetworkID =
+        (Option.map ~f:SourceNetworkID.of_xml)
+          (Xml.child xml_arg0 "sourceNetworkID") in
+      make ?sourceNetworkID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceNetworkID =
+        field_map json__ "sourceNetworkID" SourceNetworkID.of_json in
+      make ?sourceNetworkID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "ID of a resource participating in an asynchronous Job."]
+module LaunchActionsStatus =
+  struct
+    type nonrec t =
+      {
+      ssmAgentDiscoveryDatetime: ISO8601DatetimeString.t option
+        [@ocaml.doc
+          "Time where the AWS Systems Manager was detected as running on the launched instance."];
+      runs: LaunchActionRuns.t option
+        [@ocaml.doc "List of post launch action status."]}
+    let make ?ssmAgentDiscoveryDatetime =
+      fun ?runs -> fun () -> { ssmAgentDiscoveryDatetime; runs }
+    let to_value x =
+      structure_to_value
+        [("ssmAgentDiscoveryDatetime",
+           (Option.map x.ssmAgentDiscoveryDatetime
+              ~f:ISO8601DatetimeString.to_value));
+        ("runs", (Option.map x.runs ~f:LaunchActionRuns.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let runs =
+        (Option.map ~f:LaunchActionRuns.of_xml) (Xml.child xml_arg0 "runs") in
+      let ssmAgentDiscoveryDatetime =
+        (Option.map ~f:ISO8601DatetimeString.of_xml)
+          (Xml.child xml_arg0 "ssmAgentDiscoveryDatetime") in
+      make ?runs ?ssmAgentDiscoveryDatetime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let runs = field_map json__ "runs" LaunchActionRuns.of_json in
+      let ssmAgentDiscoveryDatetime =
+        field_map json__ "ssmAgentDiscoveryDatetime"
+          ISO8601DatetimeString.of_json in
+      make ?runs ?ssmAgentDiscoveryDatetime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Launch actions status."]
 module RecoveryInstanceID =
   struct
     type nonrec t = string
@@ -1106,7 +2071,7 @@ module RecoveryInstanceID =
           ((check_string_min i ~min:10) >>=
              (fun () ->
                 (check_string_max i ~max:19) >>=
-                  (fun () -> check_pattern i ~pattern:"^i-[0-9a-fA-F]{8,}$")));
+                  (fun () -> check_pattern i ~pattern:"i-[0-9a-fA-F]{8,}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1126,7 +2091,7 @@ module SourceServerID =
           ((check_string_min i ~min:19) >>=
              (fun () ->
                 (check_string_max i ~max:19) >>=
-                  (fun () -> check_pattern i ~pattern:"^s-[0-9a-zA-Z]{17}$")));
+                  (fun () -> check_pattern i ~pattern:"s-[0-9a-zA-Z]{17}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1134,6 +2099,209 @@ module SourceServerID =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"SourceServerID" j
+    let to_json = simple_to_json to_value
+  end
+module VolumeToConversionMap =
+  struct
+    type nonrec t = (LargeBoundedString.t * ConversionMap.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types LargeBoundedString ConversionMap"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (LargeBoundedString.to_value x) |>
+                    (fun x -> (ConversionMap.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:LargeBoundedString.of_string
+        ~of_json:ConversionMap.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VolumeToProductCodes =
+  struct
+    type nonrec t = (LargeBoundedString.t * ProductCodes.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types LargeBoundedString ProductCodes"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (LargeBoundedString.to_value x) |>
+                    (fun x -> (ProductCodes.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:LargeBoundedString.of_string
+        ~of_json:ProductCodes.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VolumeToSizeMap =
+  struct
+    type nonrec t = (LargeBoundedString.t * PositiveInteger.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((LargeBoundedString.of_string chopped),
+                              (PositiveInteger.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (LargeBoundedString.to_value x) |>
+                    (fun x ->
+                       (PositiveInteger.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:LargeBoundedString.of_string
+        ~of_json:PositiveInteger.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SourceNetworkData =
+  struct
+    type nonrec t =
+      {
+      sourceNetworkID: SourceNetworkID.t option
+        [@ocaml.doc "Source Network ID."];
+      sourceVpc: VpcID.t option
+        [@ocaml.doc "VPC ID protected by the Source Network."];
+      targetVpc: VpcID.t option
+        [@ocaml.doc
+          "ID of the recovered VPC following Source Network recovery."];
+      stackName: LargeBoundedString.t option
+        [@ocaml.doc
+          "CloudFormation stack name that was deployed for recovering the Source Network."]}
+    let make ?sourceNetworkID =
+      fun ?sourceVpc ->
+        fun ?targetVpc ->
+          fun ?stackName ->
+            fun () -> { sourceNetworkID; sourceVpc; targetVpc; stackName }
+    let to_value x =
+      structure_to_value
+        [("sourceNetworkID",
+           (Option.map x.sourceNetworkID ~f:SourceNetworkID.to_value));
+        ("sourceVpc", (Option.map x.sourceVpc ~f:VpcID.to_value));
+        ("targetVpc", (Option.map x.targetVpc ~f:VpcID.to_value));
+        ("stackName",
+          (Option.map x.stackName ~f:LargeBoundedString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stackName =
+        (Option.map ~f:LargeBoundedString.of_xml)
+          (Xml.child xml_arg0 "stackName") in
+      let targetVpc =
+        (Option.map ~f:VpcID.of_xml) (Xml.child xml_arg0 "targetVpc") in
+      let sourceVpc =
+        (Option.map ~f:VpcID.of_xml) (Xml.child xml_arg0 "sourceVpc") in
+      let sourceNetworkID =
+        (Option.map ~f:SourceNetworkID.of_xml)
+          (Xml.child xml_arg0 "sourceNetworkID") in
+      make ?stackName ?targetVpc ?sourceVpc ?sourceNetworkID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stackName = field_map json__ "stackName" LargeBoundedString.of_json in
+      let targetVpc = field_map json__ "targetVpc" VpcID.of_json in
+      let sourceVpc = field_map json__ "sourceVpc" VpcID.of_json in
+      let sourceNetworkID =
+        field_map json__ "sourceNetworkID" SourceNetworkID.of_json in
+      make ?stackName ?targetVpc ?sourceVpc ?sourceNetworkID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Properties of Source Network related to a job event."]
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module AwsAvailabilityZone =
+  struct
+    type nonrec t = string
+    let context_ = "AwsAvailabilityZone"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(us(-gov)?|ap|ca|cn|eu|eusc|sa|af|me|il)-([a-z]{2}-)?(central|north|(north(?:east|west))|south|south(?:east|west)|east|west)-[0-9][a-z]")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AwsAvailabilityZone" j
     let to_json = simple_to_json to_value
   end
 module DataReplicationError =
@@ -1160,9 +2328,9 @@ module DataReplicationError =
           (Xml.child xml_arg0 "error") in
       make ?rawError ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rawError = field_map json "rawError" LargeBoundedString.of_json in
-      let error = field_map json "error" DataReplicationErrorString.of_json in
+    let of_json json__ =
+      let rawError = field_map json__ "rawError" LargeBoundedString.of_json in
+      let error = field_map json__ "error" DataReplicationErrorString.of_json in
       make ?rawError ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Error in data replication."]
@@ -1174,6 +2342,9 @@ module DataReplicationInfoReplicatedDisks =
         ok_or_failwith
           ((check_list_max i ~max:60) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataReplicationInfoReplicatedDisk.to_value)) |>
         (fun x -> `List x)
@@ -1201,25 +2372,24 @@ module DataReplicationInitiation =
   struct
     type nonrec t =
       {
-      nextAttemptDateTime: ISO8601DatetimeString.t option
-        [@ocaml.doc
-          "The date and time of the next attempt to initiate data replication."];
       startDateTime: ISO8601DatetimeString.t option
         [@ocaml.doc
           "The date and time of the current attempt to initiate data replication."];
+      nextAttemptDateTime: ISO8601DatetimeString.t option
+        [@ocaml.doc
+          "The date and time of the next attempt to initiate data replication."];
       steps: DataReplicationInitiationSteps.t option
         [@ocaml.doc
           "The steps of the current attempt to initiate data replication."]}
-    let make ?nextAttemptDateTime =
-      fun ?startDateTime ->
-        fun ?steps -> fun () -> { nextAttemptDateTime; startDateTime; steps }
+    let make ?startDateTime =
+      fun ?nextAttemptDateTime ->
+        fun ?steps -> fun () -> { startDateTime; nextAttemptDateTime; steps }
     let to_value x =
       structure_to_value
-        [("nextAttemptDateTime",
-           (Option.map x.nextAttemptDateTime
-              ~f:ISO8601DatetimeString.to_value));
-        ("startDateTime",
-          (Option.map x.startDateTime ~f:ISO8601DatetimeString.to_value));
+        [("startDateTime",
+           (Option.map x.startDateTime ~f:ISO8601DatetimeString.to_value));
+        ("nextAttemptDateTime",
+          (Option.map x.nextAttemptDateTime ~f:ISO8601DatetimeString.to_value));
         ("steps",
           (Option.map x.steps ~f:DataReplicationInitiationSteps.to_value))]
     let to_query v = to_query to_value v
@@ -1227,22 +2397,22 @@ module DataReplicationInitiation =
       let steps =
         (Option.map ~f:DataReplicationInitiationSteps.of_xml)
           (Xml.child xml_arg0 "steps") in
-      let startDateTime =
-        (Option.map ~f:ISO8601DatetimeString.of_xml)
-          (Xml.child xml_arg0 "startDateTime") in
       let nextAttemptDateTime =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "nextAttemptDateTime") in
-      make ?steps ?startDateTime ?nextAttemptDateTime ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let steps =
-        field_map json "steps" DataReplicationInitiationSteps.of_json in
       let startDateTime =
-        field_map json "startDateTime" ISO8601DatetimeString.of_json in
+        (Option.map ~f:ISO8601DatetimeString.of_xml)
+          (Xml.child xml_arg0 "startDateTime") in
+      make ?steps ?nextAttemptDateTime ?startDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let steps =
+        field_map json__ "steps" DataReplicationInitiationSteps.of_json in
       let nextAttemptDateTime =
-        field_map json "nextAttemptDateTime" ISO8601DatetimeString.of_json in
-      make ?steps ?startDateTime ?nextAttemptDateTime ()
+        field_map json__ "nextAttemptDateTime" ISO8601DatetimeString.of_json in
+      let startDateTime =
+        field_map json__ "startDateTime" ISO8601DatetimeString.of_json in
+      make ?steps ?nextAttemptDateTime ?startDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Data replication initiation."]
 module DataReplicationState =
@@ -1295,32 +2465,120 @@ module DataReplicationState =
     let of_json j = of_string (string_of_json ~kind:"DataReplicationState" j)
     let to_json = simple_to_json to_value
   end
+module ISO8601DurationString =
+  struct
+    type nonrec t = string
+    let context_ = "ISO8601DurationString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ISO8601DurationString" j
+    let to_json = simple_to_json to_value
+  end
+module OutpostARN =
+  struct
+    type nonrec t = string
+    let context_ = "OutpostARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws([a-z-]+)?:outposts:[a-z\\d-]+:\\d{12}:outpost/op-[a-f0-9]{17}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OutpostARN" j
+    let to_json = simple_to_json to_value
+  end
 module LifeCycleLastLaunch =
   struct
     type nonrec t =
       {
       initiated: LifeCycleLastLaunchInitiated.t option
         [@ocaml.doc
-          "An object containing information regarding the initiation of the last launch of a Source Server."]}
-    let make ?initiated = fun () -> { initiated }
+          "An object containing information regarding the initiation of the last launch of a Source Server."];
+      status: LaunchStatus.t option
+        [@ocaml.doc "Status of Source Server's last launch."]}
+    let make ?initiated = fun ?status -> fun () -> { initiated; status }
     let to_value x =
       structure_to_value
         [("initiated",
-           (Option.map x.initiated ~f:LifeCycleLastLaunchInitiated.to_value))]
+           (Option.map x.initiated ~f:LifeCycleLastLaunchInitiated.to_value));
+        ("status", (Option.map x.status ~f:LaunchStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:LaunchStatus.of_xml) (Xml.child xml_arg0 "status") in
       let initiated =
         (Option.map ~f:LifeCycleLastLaunchInitiated.of_xml)
           (Xml.child xml_arg0 "initiated") in
-      make ?initiated ()
+      make ?status ?initiated ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let status = field_map json__ "status" LaunchStatus.of_json in
       let initiated =
-        field_map json "initiated" LifeCycleLastLaunchInitiated.of_json in
-      make ?initiated ()
+        field_map json__ "initiated" LifeCycleLastLaunchInitiated.of_json in
+      make ?status ?initiated ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object containing information regarding the last launch of a Source Server."]
+module AccountID =
+  struct
+    type nonrec t = string
+    let context_ = "AccountID"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:".*[0-9]{12,}.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccountID" j
+    let to_json = simple_to_json to_value
+  end
+module AwsRegion =
+  struct
+    type nonrec t = string
+    let context_ = "AwsRegion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(us(-gov)?|ap|ca|cn|eu|eusc|sa|af|me|il)-([a-z]{2}-)?(central|north|(north(?:east|west))|south|south(?:east|west)|east|west)-[0-9]")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AwsRegion" j
+    let to_json = simple_to_json to_value
+  end
 module Cpus =
   struct
     type nonrec t = CPU.t list
@@ -1330,6 +2588,9 @@ module Cpus =
           ((check_list_max i ~max:256) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CPU.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1358,6 +2619,9 @@ module Disks =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Disk.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1399,28 +2663,31 @@ module IdentificationHints =
   struct
     type nonrec t =
       {
-      awsInstanceID: EC2InstanceID.t option
-        [@ocaml.doc "AWS Instance ID identification hint."];
       fqdn: BoundedString.t option
         [@ocaml.doc "Fully Qualified Domain Name identification hint."];
       hostname: BoundedString.t option
         [@ocaml.doc "Hostname identification hint."];
       vmWareUuid: BoundedString.t option
-        [@ocaml.doc "vCenter VM path identification hint."]}
-    let make ?awsInstanceID =
-      fun ?fqdn ->
-        fun ?hostname ->
-          fun ?vmWareUuid ->
-            fun () -> { awsInstanceID; fqdn; hostname; vmWareUuid }
+        [@ocaml.doc "vCenter VM path identification hint."];
+      awsInstanceID: EC2InstanceID.t option
+        [@ocaml.doc "AWS Instance ID identification hint."]}
+    let make ?fqdn =
+      fun ?hostname ->
+        fun ?vmWareUuid ->
+          fun ?awsInstanceID ->
+            fun () -> { fqdn; hostname; vmWareUuid; awsInstanceID }
     let to_value x =
       structure_to_value
-        [("awsInstanceID",
-           (Option.map x.awsInstanceID ~f:EC2InstanceID.to_value));
-        ("fqdn", (Option.map x.fqdn ~f:BoundedString.to_value));
+        [("fqdn", (Option.map x.fqdn ~f:BoundedString.to_value));
         ("hostname", (Option.map x.hostname ~f:BoundedString.to_value));
-        ("vmWareUuid", (Option.map x.vmWareUuid ~f:BoundedString.to_value))]
+        ("vmWareUuid", (Option.map x.vmWareUuid ~f:BoundedString.to_value));
+        ("awsInstanceID",
+          (Option.map x.awsInstanceID ~f:EC2InstanceID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let awsInstanceID =
+        (Option.map ~f:EC2InstanceID.of_xml)
+          (Xml.child xml_arg0 "awsInstanceID") in
       let vmWareUuid =
         (Option.map ~f:BoundedString.of_xml)
           (Xml.child xml_arg0 "vmWareUuid") in
@@ -1428,18 +2695,15 @@ module IdentificationHints =
         (Option.map ~f:BoundedString.of_xml) (Xml.child xml_arg0 "hostname") in
       let fqdn =
         (Option.map ~f:BoundedString.of_xml) (Xml.child xml_arg0 "fqdn") in
-      let awsInstanceID =
-        (Option.map ~f:EC2InstanceID.of_xml)
-          (Xml.child xml_arg0 "awsInstanceID") in
-      make ?vmWareUuid ?hostname ?fqdn ?awsInstanceID ()
+      make ?awsInstanceID ?vmWareUuid ?hostname ?fqdn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vmWareUuid = field_map json "vmWareUuid" BoundedString.of_json in
-      let hostname = field_map json "hostname" BoundedString.of_json in
-      let fqdn = field_map json "fqdn" BoundedString.of_json in
+    let of_json json__ =
       let awsInstanceID =
-        field_map json "awsInstanceID" EC2InstanceID.of_json in
-      make ?vmWareUuid ?hostname ?fqdn ?awsInstanceID ()
+        field_map json__ "awsInstanceID" EC2InstanceID.of_json in
+      let vmWareUuid = field_map json__ "vmWareUuid" BoundedString.of_json in
+      let hostname = field_map json__ "hostname" BoundedString.of_json in
+      let fqdn = field_map json__ "fqdn" BoundedString.of_json in
+      make ?awsInstanceID ?vmWareUuid ?hostname ?fqdn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Hints used to uniquely identify a machine."]
 module NetworkInterfaces =
@@ -1450,6 +2714,9 @@ module NetworkInterfaces =
         ok_or_failwith
           ((check_list_max i ~max:32) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterface.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1488,51 +2755,66 @@ module OS =
           (Xml.child xml_arg0 "fullString") in
       make ?fullString ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fullString = field_map json "fullString" BoundedString.of_json in
+    let of_json json__ =
+      let fullString = field_map json__ "fullString" BoundedString.of_json in
       make ?fullString ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Operating System."]
-module TagKey =
+module ARN =
   struct
     type nonrec t = string
-    let context_ = "TagKey"
+    let context_ = "ARN"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"arn:.{16,2044}")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagKey" j
+    let of_json j = string_of_json ~kind:"ARN" j
     let to_json = simple_to_json to_value
   end
-module TagValue =
+module ExtensionStatus =
   struct
-    type nonrec t = string
-    let context_ = "TagValue"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:0));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | EXTENDED 
+      | EXTENSION_ERROR 
+      | NOT_EXTENDED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EXTENDED -> "EXTENDED"
+      | EXTENSION_ERROR -> "EXTENSION_ERROR"
+      | NOT_EXTENDED -> "NOT_EXTENDED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EXTENDED" -> EXTENDED
+      | "EXTENSION_ERROR" -> EXTENSION_ERROR
+      | "NOT_EXTENDED" -> NOT_EXTENDED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ExtensionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExtensionStatus" j)
     let to_json = simple_to_json to_value
   end
 module ValidationExceptionFieldList =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -1588,65 +2870,117 @@ module ValidationExceptionReason =
       of_string (string_of_json ~kind:"ValidationExceptionReason" j)
     let to_json = simple_to_json to_value
   end
+module RecoveryResult =
+  struct
+    type nonrec t =
+      | NOT_STARTED 
+      | IN_PROGRESS 
+      | SUCCESS 
+      | FAIL 
+      | PARTIAL_SUCCESS 
+      | ASSOCIATE_SUCCESS 
+      | ASSOCIATE_FAIL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NOT_STARTED -> "NOT_STARTED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | SUCCESS -> "SUCCESS"
+      | FAIL -> "FAIL"
+      | PARTIAL_SUCCESS -> "PARTIAL_SUCCESS"
+      | ASSOCIATE_SUCCESS -> "ASSOCIATE_SUCCESS"
+      | ASSOCIATE_FAIL -> "ASSOCIATE_FAIL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NOT_STARTED" -> NOT_STARTED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "SUCCESS" -> SUCCESS
+      | "FAIL" -> FAIL
+      | "PARTIAL_SUCCESS" -> PARTIAL_SUCCESS
+      | "ASSOCIATE_SUCCESS" -> ASSOCIATE_SUCCESS
+      | "ASSOCIATE_FAIL" -> ASSOCIATE_FAIL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RecoveryResult" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RecoveryResult" j)
+    let to_json = simple_to_json to_value
+  end
+module SyntheticTimestamp_date_time =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
 module PITPolicyRule =
   struct
     type nonrec t =
       {
-      enabled: Boolean.t option
-        [@ocaml.doc "Whether this rule is enabled or not."];
+      ruleID: PositiveInteger.t option [@ocaml.doc "The ID of the rule."];
+      units: PITPolicyRuleUnits.t
+        [@ocaml.doc
+          "The units used to measure the interval and retentionDuration."];
       interval: StrictlyPositiveInteger.t
         [@ocaml.doc
           "How often, in the chosen units, a snapshot should be taken."];
       retentionDuration: StrictlyPositiveInteger.t
         [@ocaml.doc
           "The duration to retain a snapshot for, in the chosen units."];
-      ruleID: PositiveInteger.t option [@ocaml.doc "The ID of the rule."];
-      units: PITPolicyRuleUnits.t
-        [@ocaml.doc
-          "The units used to measure the interval and retentionDuration."]}
+      enabled: Boolean.t option
+        [@ocaml.doc "Whether this rule is enabled or not."]}
     let context_ = "PITPolicyRule"
-    let make ?enabled =
-      fun ?ruleID ->
-        fun ~interval ->
-          fun ~retentionDuration ->
-            fun ~units ->
+    let make ?ruleID =
+      fun ?enabled ->
+        fun ~units ->
+          fun ~interval ->
+            fun ~retentionDuration ->
               fun () ->
-                { enabled; ruleID; interval; retentionDuration; units }
+                { ruleID; enabled; units; interval; retentionDuration }
     let to_value x =
       structure_to_value
-        [("enabled", (Option.map x.enabled ~f:Boolean.to_value));
+        [("ruleID", (Option.map x.ruleID ~f:PositiveInteger.to_value));
+        ("units", (Some (PITPolicyRuleUnits.to_value x.units)));
         ("interval", (Some (StrictlyPositiveInteger.to_value x.interval)));
         ("retentionDuration",
           (Some (StrictlyPositiveInteger.to_value x.retentionDuration)));
-        ("ruleID", (Option.map x.ruleID ~f:PositiveInteger.to_value));
-        ("units", (Some (PITPolicyRuleUnits.to_value x.units)))]
+        ("enabled", (Option.map x.enabled ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let units =
-        PITPolicyRuleUnits.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "units") in
-      let ruleID =
-        (Option.map ~f:PositiveInteger.of_xml) (Xml.child xml_arg0 "ruleID") in
+      let enabled =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       let retentionDuration =
         StrictlyPositiveInteger.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "retentionDuration") in
       let interval =
         StrictlyPositiveInteger.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "interval") in
-      let enabled =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
-      make ~units ?ruleID ~retentionDuration ~interval ?enabled ()
+      let units =
+        PITPolicyRuleUnits.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "units") in
+      let ruleID =
+        (Option.map ~f:PositiveInteger.of_xml) (Xml.child xml_arg0 "ruleID") in
+      make ?enabled ~retentionDuration ~interval ~units ?ruleID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let units = field_map_exn json "units" PITPolicyRuleUnits.of_json in
-      let ruleID = field_map json "ruleID" PositiveInteger.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "enabled" Boolean.of_json in
       let retentionDuration =
-        field_map_exn json "retentionDuration"
+        field_map_exn json__ "retentionDuration"
           StrictlyPositiveInteger.of_json in
       let interval =
-        field_map_exn json "interval" StrictlyPositiveInteger.of_json in
-      let enabled = field_map json "enabled" Boolean.of_json in
-      make ~units ?ruleID ~retentionDuration ~interval ?enabled ()
+        field_map_exn json__ "interval" StrictlyPositiveInteger.of_json in
+      let units = field_map_exn json__ "units" PITPolicyRuleUnits.of_json in
+      let ruleID = field_map json__ "ruleID" PositiveInteger.of_json in
+      make ?enabled ~retentionDuration ~interval ~units ?ruleID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A rule in the Point in Time (PIT) policy representing when to take snapshots and how long to retain them for."]
@@ -1660,7 +2994,7 @@ module SecurityGroupID =
           ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:255) >>=
-                  (fun () -> check_pattern i ~pattern:"^sg-[0-9a-fA-F]{8,}$")));
+                  (fun () -> check_pattern i ~pattern:"sg-[0-9a-fA-F]{8,}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1668,21 +3002,6 @@ module SecurityGroupID =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"SecurityGroupID" j
-    let to_json = simple_to_json to_value
-  end
-module EbsSnapshot =
-  struct
-    type nonrec t = string
-    let context_ = "ebsSnapshot"
-    let make i =
-      let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"^snap-[0-9a-zA-Z]{17}$"); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ebsSnapshot" j
     let to_json = simple_to_json to_value
   end
 module RecoveryInstanceDataReplicationError =
@@ -1708,9 +3027,9 @@ module RecoveryInstanceDataReplicationError =
           (Xml.child xml_arg0 "error") in
       make ?rawError ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rawError = field_map json "rawError" LargeBoundedString.of_json in
-      let error = field_map json "error" FailbackReplicationError.of_json in
+    let of_json json__ =
+      let rawError = field_map json__ "rawError" LargeBoundedString.of_json in
+      let error = field_map json__ "error" FailbackReplicationError.of_json in
       make ?rawError ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Error in data replication."]
@@ -1722,6 +3041,9 @@ module RecoveryInstanceDataReplicationInfoReplicatedDisks =
         ok_or_failwith
           ((check_list_max i ~max:60) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map
@@ -1776,12 +3098,12 @@ module RecoveryInstanceDataReplicationInitiation =
           (Xml.child xml_arg0 "startDateTime") in
       make ?steps ?startDateTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let steps =
-        field_map json "steps"
+        field_map json__ "steps"
           RecoveryInstanceDataReplicationInitiationSteps.of_json in
       let startDateTime =
-        field_map json "startDateTime" ISO8601DatetimeString.of_json in
+        field_map json__ "startDateTime" ISO8601DatetimeString.of_json in
       make ?steps ?startDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Data replication initiation."]
@@ -1798,6 +3120,8 @@ module RecoveryInstanceDataReplicationState =
       | RESCAN 
       | STALLED 
       | DISCONNECTED 
+      | REPLICATION_STATE_NOT_AVAILABLE 
+      | NOT_STARTED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1812,6 +3136,8 @@ module RecoveryInstanceDataReplicationState =
       | RESCAN -> "RESCAN"
       | STALLED -> "STALLED"
       | DISCONNECTED -> "DISCONNECTED"
+      | REPLICATION_STATE_NOT_AVAILABLE -> "REPLICATION_STATE_NOT_AVAILABLE"
+      | NOT_STARTED -> "NOT_STARTED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1825,6 +3151,8 @@ module RecoveryInstanceDataReplicationState =
       | "RESCAN" -> RESCAN
       | "STALLED" -> STALLED
       | "DISCONNECTED" -> DISCONNECTED
+      | "REPLICATION_STATE_NOT_AVAILABLE" -> REPLICATION_STATE_NOT_AVAILABLE
+      | "NOT_STARTED" -> NOT_STARTED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1838,6 +3166,32 @@ module RecoveryInstanceDataReplicationState =
         (string_of_json ~kind:"RecoveryInstanceDataReplicationState" j)
     let to_json = simple_to_json to_value
   end
+module FailbackLaunchType =
+  struct
+    type nonrec t =
+      | RECOVERY 
+      | DRILL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RECOVERY -> "RECOVERY"
+      | DRILL -> "DRILL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RECOVERY" -> RECOVERY
+      | "DRILL" -> DRILL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FailbackLaunchType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FailbackLaunchType" j)
+    let to_json = simple_to_json to_value
+  end
 module FailbackState =
   struct
     type nonrec t =
@@ -1846,6 +3200,8 @@ module FailbackState =
       | FAILBACK_READY_FOR_LAUNCH 
       | FAILBACK_COMPLETED 
       | FAILBACK_ERROR 
+      | FAILBACK_NOT_READY_FOR_LAUNCH 
+      | FAILBACK_LAUNCH_STATE_NOT_AVAILABLE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1855,6 +3211,9 @@ module FailbackState =
       | FAILBACK_READY_FOR_LAUNCH -> "FAILBACK_READY_FOR_LAUNCH"
       | FAILBACK_COMPLETED -> "FAILBACK_COMPLETED"
       | FAILBACK_ERROR -> "FAILBACK_ERROR"
+      | FAILBACK_NOT_READY_FOR_LAUNCH -> "FAILBACK_NOT_READY_FOR_LAUNCH"
+      | FAILBACK_LAUNCH_STATE_NOT_AVAILABLE ->
+          "FAILBACK_LAUNCH_STATE_NOT_AVAILABLE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1863,6 +3222,9 @@ module FailbackState =
       | "FAILBACK_READY_FOR_LAUNCH" -> FAILBACK_READY_FOR_LAUNCH
       | "FAILBACK_COMPLETED" -> FAILBACK_COMPLETED
       | "FAILBACK_ERROR" -> FAILBACK_ERROR
+      | "FAILBACK_NOT_READY_FOR_LAUNCH" -> FAILBACK_NOT_READY_FOR_LAUNCH
+      | "FAILBACK_LAUNCH_STATE_NOT_AVAILABLE" ->
+          FAILBACK_LAUNCH_STATE_NOT_AVAILABLE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1881,6 +3243,9 @@ module RecoveryInstanceDisks =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecoveryInstanceDisk.to_value)) |>
         (fun x -> `List x)
@@ -1903,51 +3268,235 @@ module RecoveryInstanceDisks =
         ~of_json:RecoveryInstanceDisk.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ParticipatingResource =
+  struct
+    type nonrec t =
+      {
+      participatingResourceID: ParticipatingResourceID.t option
+        [@ocaml.doc "The ID of a participating resource."];
+      launchStatus: LaunchStatus.t option
+        [@ocaml.doc "The launch status of a participating resource."]}
+    let make ?participatingResourceID =
+      fun ?launchStatus ->
+        fun () -> { participatingResourceID; launchStatus }
+    let to_value x =
+      structure_to_value
+        [("participatingResourceID",
+           (Option.map x.participatingResourceID
+              ~f:ParticipatingResourceID.to_value));
+        ("launchStatus",
+          (Option.map x.launchStatus ~f:LaunchStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let launchStatus =
+        (Option.map ~f:LaunchStatus.of_xml)
+          (Xml.child xml_arg0 "launchStatus") in
+      let participatingResourceID =
+        (Option.map ~f:ParticipatingResourceID.of_xml)
+          (Xml.child xml_arg0 "participatingResourceID") in
+      make ?launchStatus ?participatingResourceID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let launchStatus = field_map json__ "launchStatus" LaunchStatus.of_json in
+      let participatingResourceID =
+        field_map json__ "participatingResourceID"
+          ParticipatingResourceID.of_json in
+      make ?launchStatus ?participatingResourceID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a resource participating in an asynchronous Job."]
 module ParticipatingServer =
   struct
     type nonrec t =
       {
-      launchStatus: LaunchStatus.t option
-        [@ocaml.doc "The launch status of a participating server."];
+      sourceServerID: SourceServerID.t option
+        [@ocaml.doc "The Source Server ID of a participating server."];
       recoveryInstanceID: RecoveryInstanceID.t option
         [@ocaml.doc "The Recovery Instance ID of a participating server."];
-      sourceServerID: SourceServerID.t option
-        [@ocaml.doc "The Source Server ID of a participating server."]}
-    let make ?launchStatus =
+      launchStatus: LaunchStatus.t option
+        [@ocaml.doc "The launch status of a participating server."];
+      launchActionsStatus: LaunchActionsStatus.t option
+        [@ocaml.doc "The post-launch action runs of a participating server."]}
+    let make ?sourceServerID =
       fun ?recoveryInstanceID ->
-        fun ?sourceServerID ->
-          fun () -> { launchStatus; recoveryInstanceID; sourceServerID }
+        fun ?launchStatus ->
+          fun ?launchActionsStatus ->
+            fun () ->
+              {
+                sourceServerID;
+                recoveryInstanceID;
+                launchStatus;
+                launchActionsStatus
+              }
     let to_value x =
       structure_to_value
-        [("launchStatus",
-           (Option.map x.launchStatus ~f:LaunchStatus.to_value));
+        [("sourceServerID",
+           (Option.map x.sourceServerID ~f:SourceServerID.to_value));
         ("recoveryInstanceID",
           (Option.map x.recoveryInstanceID ~f:RecoveryInstanceID.to_value));
-        ("sourceServerID",
-          (Option.map x.sourceServerID ~f:SourceServerID.to_value))]
+        ("launchStatus",
+          (Option.map x.launchStatus ~f:LaunchStatus.to_value));
+        ("launchActionsStatus",
+          (Option.map x.launchActionsStatus ~f:LaunchActionsStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sourceServerID =
-        (Option.map ~f:SourceServerID.of_xml)
-          (Xml.child xml_arg0 "sourceServerID") in
-      let recoveryInstanceID =
-        (Option.map ~f:RecoveryInstanceID.of_xml)
-          (Xml.child xml_arg0 "recoveryInstanceID") in
+      let launchActionsStatus =
+        (Option.map ~f:LaunchActionsStatus.of_xml)
+          (Xml.child xml_arg0 "launchActionsStatus") in
       let launchStatus =
         (Option.map ~f:LaunchStatus.of_xml)
           (Xml.child xml_arg0 "launchStatus") in
-      make ?sourceServerID ?recoveryInstanceID ?launchStatus ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceServerID =
-        field_map json "sourceServerID" SourceServerID.of_json in
       let recoveryInstanceID =
-        field_map json "recoveryInstanceID" RecoveryInstanceID.of_json in
-      let launchStatus = field_map json "launchStatus" LaunchStatus.of_json in
-      make ?sourceServerID ?recoveryInstanceID ?launchStatus ()
+        (Option.map ~f:RecoveryInstanceID.of_xml)
+          (Xml.child xml_arg0 "recoveryInstanceID") in
+      let sourceServerID =
+        (Option.map ~f:SourceServerID.of_xml)
+          (Xml.child xml_arg0 "sourceServerID") in
+      make ?launchActionsStatus ?launchStatus ?recoveryInstanceID
+        ?sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let launchActionsStatus =
+        field_map json__ "launchActionsStatus" LaunchActionsStatus.of_json in
+      let launchStatus = field_map json__ "launchStatus" LaunchStatus.of_json in
+      let recoveryInstanceID =
+        field_map json__ "recoveryInstanceID" RecoveryInstanceID.of_json in
+      let sourceServerID =
+        field_map json__ "sourceServerID" SourceServerID.of_json in
+      make ?launchActionsStatus ?launchStatus ?recoveryInstanceID
+        ?sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a server participating in an asynchronous Job."]
+module ConversionProperties =
+  struct
+    type nonrec t =
+      {
+      volumeToConversionMap: VolumeToConversionMap.t option
+        [@ocaml.doc
+          "A mapping between the volumes being converted and the converted snapshot ids"];
+      rootVolumeName: LargeBoundedString.t option
+        [@ocaml.doc "The root volume name of a conversion job"];
+      forceUefi: Boolean.t option
+        [@ocaml.doc "Whether the volume being converted uses UEFI or not"];
+      dataTimestamp: LargeBoundedString.t option
+        [@ocaml.doc
+          "The timestamp of when the snapshot being converted was taken"];
+      volumeToVolumeSize: VolumeToSizeMap.t option
+        [@ocaml.doc "A mapping between the volumes and their sizes"];
+      volumeToProductCodes: VolumeToProductCodes.t option
+        [@ocaml.doc
+          "A mapping between the volumes being converted and the product codes associated with them"]}
+    let make ?volumeToConversionMap =
+      fun ?rootVolumeName ->
+        fun ?forceUefi ->
+          fun ?dataTimestamp ->
+            fun ?volumeToVolumeSize ->
+              fun ?volumeToProductCodes ->
+                fun () ->
+                  {
+                    volumeToConversionMap;
+                    rootVolumeName;
+                    forceUefi;
+                    dataTimestamp;
+                    volumeToVolumeSize;
+                    volumeToProductCodes
+                  }
+    let to_value x =
+      structure_to_value
+        [("volumeToConversionMap",
+           (Option.map x.volumeToConversionMap
+              ~f:VolumeToConversionMap.to_value));
+        ("rootVolumeName",
+          (Option.map x.rootVolumeName ~f:LargeBoundedString.to_value));
+        ("forceUefi", (Option.map x.forceUefi ~f:Boolean.to_value));
+        ("dataTimestamp",
+          (Option.map x.dataTimestamp ~f:LargeBoundedString.to_value));
+        ("volumeToVolumeSize",
+          (Option.map x.volumeToVolumeSize ~f:VolumeToSizeMap.to_value));
+        ("volumeToProductCodes",
+          (Option.map x.volumeToProductCodes ~f:VolumeToProductCodes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let volumeToProductCodes =
+        (Option.map ~f:VolumeToProductCodes.of_xml)
+          (Xml.child xml_arg0 "volumeToProductCodes") in
+      let volumeToVolumeSize =
+        (Option.map ~f:VolumeToSizeMap.of_xml)
+          (Xml.child xml_arg0 "volumeToVolumeSize") in
+      let dataTimestamp =
+        (Option.map ~f:LargeBoundedString.of_xml)
+          (Xml.child xml_arg0 "dataTimestamp") in
+      let forceUefi =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "forceUefi") in
+      let rootVolumeName =
+        (Option.map ~f:LargeBoundedString.of_xml)
+          (Xml.child xml_arg0 "rootVolumeName") in
+      let volumeToConversionMap =
+        (Option.map ~f:VolumeToConversionMap.of_xml)
+          (Xml.child xml_arg0 "volumeToConversionMap") in
+      make ?volumeToProductCodes ?volumeToVolumeSize ?dataTimestamp
+        ?forceUefi ?rootVolumeName ?volumeToConversionMap ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let volumeToProductCodes =
+        field_map json__ "volumeToProductCodes" VolumeToProductCodes.of_json in
+      let volumeToVolumeSize =
+        field_map json__ "volumeToVolumeSize" VolumeToSizeMap.of_json in
+      let dataTimestamp =
+        field_map json__ "dataTimestamp" LargeBoundedString.of_json in
+      let forceUefi = field_map json__ "forceUefi" Boolean.of_json in
+      let rootVolumeName =
+        field_map json__ "rootVolumeName" LargeBoundedString.of_json in
+      let volumeToConversionMap =
+        field_map json__ "volumeToConversionMap"
+          VolumeToConversionMap.of_json in
+      make ?volumeToProductCodes ?volumeToVolumeSize ?dataTimestamp
+        ?forceUefi ?rootVolumeName ?volumeToConversionMap ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Properties of a conversion job"]
+module EventResourceData =
+  struct
+    type nonrec t =
+      {
+      sourceNetworkData: SourceNetworkData.t option
+        [@ocaml.doc "Source Network properties."]}
+    let make ?sourceNetworkData = fun () -> { sourceNetworkData }
+    let to_value x =
+      structure_to_value
+        [("sourceNetworkData",
+           (Option.map x.sourceNetworkData ~f:SourceNetworkData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceNetworkData =
+        (Option.map ~f:SourceNetworkData.of_xml)
+          (Xml.child xml_arg0 "sourceNetworkData") in
+      make ?sourceNetworkData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceNetworkData =
+        field_map json__ "sourceNetworkData" SourceNetworkData.of_json in
+      make ?sourceNetworkData ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Properties of resource related to a job event."]
+module JobEventAttemptCount =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int64_max i ~max:9L) >>=
+             (fun () -> check_int64_min i ~min:0L));
+        i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module ReplicationConfigurationReplicatedDiskStagingDiskType =
   struct
     type nonrec t =
@@ -1994,6 +3543,26 @@ module ReplicationConfigurationReplicatedDiskStagingDiskType =
            ~kind:"ReplicationConfigurationReplicatedDiskStagingDiskType" j)
     let to_json = simple_to_json to_value
   end
+module CfnStackName =
+  struct
+    type nonrec t = string
+    let context_ = "CfnStackName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z][-a-zA-Z0-9]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CfnStackName" j
+    let to_json = simple_to_json to_value
+  end
 module RecoverySnapshotID =
   struct
     type nonrec t = string
@@ -2004,7 +3573,7 @@ module RecoverySnapshotID =
           ((check_string_min i ~min:21) >>=
              (fun () ->
                 (check_string_max i ~max:21) >>=
-                  (fun () -> check_pattern i ~pattern:"^pit-[0-9a-zA-Z]{17}$")));
+                  (fun () -> check_pattern i ~pattern:"pit-[0-9a-zA-Z]{17}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2014,45 +3583,95 @@ module RecoverySnapshotID =
     let of_json j = string_of_json ~kind:"RecoverySnapshotID" j
     let to_json = simple_to_json to_value
   end
-module ARN =
+module SourceServerARN =
   struct
     type nonrec t = string
-    let context_ = "ARN"
+    let context_ = "SourceServerARN"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:20) >>=
              (fun () ->
                 (check_string_max i ~max:2048) >>=
-                  (fun () -> check_pattern i ~pattern:"^arn:.{16,2044}$")));
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:(?:[0-9a-zA-Z_-]+:){3}([0-9]{12,}):source-server/(s-[0-9a-zA-Z]{17})")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ARN" j
+    let of_json j = string_of_json ~kind:"SourceServerARN" j
+    let to_json = simple_to_json to_value
+  end
+module TagsMap =
+  struct
+    type nonrec t = (TagKey.t * TagValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((TagKey.of_string chopped),
+                              (TagValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (TagKey.to_value x) |>
+                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:TagKey.of_string
+        ~of_json:TagValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AgentVersion =
+  struct
+    type nonrec t = string
+    let context_ = "AgentVersion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"[0-9]{1,5}.[0-9]{1,5}.[0-9]{1,5}(.[0-9]{4}.[0-9]{3}.[0-9]{4})?");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AgentVersion" j
     let to_json = simple_to_json to_value
   end
 module ConflictException =
   struct
     type nonrec t =
       {
-      code: LargeBoundedString.t option ;
       message: LargeBoundedString.t option ;
+      code: LargeBoundedString.t option ;
       resourceId: LargeBoundedString.t option
         [@ocaml.doc "The ID of the resource."];
       resourceType: LargeBoundedString.t option
         [@ocaml.doc "The type of the resource."]}
-    let make ?code =
-      fun ?message ->
+    let make ?message =
+      fun ?code ->
         fun ?resourceId ->
           fun ?resourceType ->
-            fun () -> { code; message; resourceId; resourceType }
+            fun () -> { message; code; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("code", (Option.map x.code ~f:LargeBoundedString.to_value));
-        ("message", (Option.map x.message ~f:LargeBoundedString.to_value));
+        [("message", (Option.map x.message ~f:LargeBoundedString.to_value));
+        ("code", (Option.map x.code ~f:LargeBoundedString.to_value));
         ("resourceId",
           (Option.map x.resourceId ~f:LargeBoundedString.to_value));
         ("resourceType",
@@ -2065,20 +3684,21 @@ module ConflictException =
       let resourceId =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "resourceId") in
+      let code =
+        (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
       let message =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "message") in
-      let code =
-        (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
-      make ?resourceType ?resourceId ?message ?code ()
+      make ?resourceType ?resourceId ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map json "resourceType" LargeBoundedString.of_json in
-      let resourceId = field_map json "resourceId" LargeBoundedString.of_json in
-      let message = field_map json "message" LargeBoundedString.of_json in
-      let code = field_map json "code" LargeBoundedString.of_json in
-      make ?resourceType ?resourceId ?message ?code ()
+        field_map json__ "resourceType" LargeBoundedString.of_json in
+      let resourceId =
+        field_map json__ "resourceId" LargeBoundedString.of_json in
+      let code = field_map json__ "code" LargeBoundedString.of_json in
+      let message = field_map json__ "message" LargeBoundedString.of_json in
+      make ?resourceType ?resourceId ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request could not be completed due to a conflict with the current state of the target resource."]
@@ -2086,108 +3706,133 @@ module DataReplicationInfo =
   struct
     type nonrec t =
       {
-      dataReplicationError: DataReplicationError.t option
-        [@ocaml.doc "Error in data replication."];
-      dataReplicationInitiation: DataReplicationInitiation.t option
-        [@ocaml.doc
-          "Information about whether the data replication has been initiated."];
-      dataReplicationState: DataReplicationState.t option
-        [@ocaml.doc "The state of the data replication."];
+      lagDuration: ISO8601DurationString.t option
+        [@ocaml.doc "Data replication lag duration."];
       etaDateTime: ISO8601DatetimeString.t option
         [@ocaml.doc
           "An estimate of when the data replication will be completed."];
-      lagDuration: ISO8601DatetimeString.t option
-        [@ocaml.doc "Data replication lag duration."];
       replicatedDisks: DataReplicationInfoReplicatedDisks.t option
-        [@ocaml.doc "The disks that should be replicated."]}
-    let make ?dataReplicationError =
-      fun ?dataReplicationInitiation ->
-        fun ?dataReplicationState ->
-          fun ?etaDateTime ->
-            fun ?lagDuration ->
-              fun ?replicatedDisks ->
-                fun () ->
-                  {
-                    dataReplicationError;
-                    dataReplicationInitiation;
-                    dataReplicationState;
-                    etaDateTime;
-                    lagDuration;
-                    replicatedDisks
-                  }
+        [@ocaml.doc "The disks that should be replicated."];
+      dataReplicationState: DataReplicationState.t option
+        [@ocaml.doc "The state of the data replication."];
+      dataReplicationInitiation: DataReplicationInitiation.t option
+        [@ocaml.doc
+          "Information about whether the data replication has been initiated."];
+      dataReplicationError: DataReplicationError.t option
+        [@ocaml.doc "Error in data replication."];
+      stagingAvailabilityZone: AwsAvailabilityZone.t option
+        [@ocaml.doc
+          "AWS Availability zone into which data is being replicated."];
+      stagingOutpostArn: OutpostARN.t option
+        [@ocaml.doc "The ARN of the staging Outpost"]}
+    let make ?lagDuration =
+      fun ?etaDateTime ->
+        fun ?replicatedDisks ->
+          fun ?dataReplicationState ->
+            fun ?dataReplicationInitiation ->
+              fun ?dataReplicationError ->
+                fun ?stagingAvailabilityZone ->
+                  fun ?stagingOutpostArn ->
+                    fun () ->
+                      {
+                        lagDuration;
+                        etaDateTime;
+                        replicatedDisks;
+                        dataReplicationState;
+                        dataReplicationInitiation;
+                        dataReplicationError;
+                        stagingAvailabilityZone;
+                        stagingOutpostArn
+                      }
     let to_value x =
       structure_to_value
-        [("dataReplicationError",
-           (Option.map x.dataReplicationError
-              ~f:DataReplicationError.to_value));
+        [("lagDuration",
+           (Option.map x.lagDuration ~f:ISO8601DurationString.to_value));
+        ("etaDateTime",
+          (Option.map x.etaDateTime ~f:ISO8601DatetimeString.to_value));
+        ("replicatedDisks",
+          (Option.map x.replicatedDisks
+             ~f:DataReplicationInfoReplicatedDisks.to_value));
+        ("dataReplicationState",
+          (Option.map x.dataReplicationState ~f:DataReplicationState.to_value));
         ("dataReplicationInitiation",
           (Option.map x.dataReplicationInitiation
              ~f:DataReplicationInitiation.to_value));
-        ("dataReplicationState",
-          (Option.map x.dataReplicationState ~f:DataReplicationState.to_value));
-        ("etaDateTime",
-          (Option.map x.etaDateTime ~f:ISO8601DatetimeString.to_value));
-        ("lagDuration",
-          (Option.map x.lagDuration ~f:ISO8601DatetimeString.to_value));
-        ("replicatedDisks",
-          (Option.map x.replicatedDisks
-             ~f:DataReplicationInfoReplicatedDisks.to_value))]
+        ("dataReplicationError",
+          (Option.map x.dataReplicationError ~f:DataReplicationError.to_value));
+        ("stagingAvailabilityZone",
+          (Option.map x.stagingAvailabilityZone
+             ~f:AwsAvailabilityZone.to_value));
+        ("stagingOutpostArn",
+          (Option.map x.stagingOutpostArn ~f:OutpostARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let replicatedDisks =
-        (Option.map ~f:DataReplicationInfoReplicatedDisks.of_xml)
-          (Xml.child xml_arg0 "replicatedDisks") in
-      let lagDuration =
-        (Option.map ~f:ISO8601DatetimeString.of_xml)
-          (Xml.child xml_arg0 "lagDuration") in
-      let etaDateTime =
-        (Option.map ~f:ISO8601DatetimeString.of_xml)
-          (Xml.child xml_arg0 "etaDateTime") in
-      let dataReplicationState =
-        (Option.map ~f:DataReplicationState.of_xml)
-          (Xml.child xml_arg0 "dataReplicationState") in
-      let dataReplicationInitiation =
-        (Option.map ~f:DataReplicationInitiation.of_xml)
-          (Xml.child xml_arg0 "dataReplicationInitiation") in
+      let stagingOutpostArn =
+        (Option.map ~f:OutpostARN.of_xml)
+          (Xml.child xml_arg0 "stagingOutpostArn") in
+      let stagingAvailabilityZone =
+        (Option.map ~f:AwsAvailabilityZone.of_xml)
+          (Xml.child xml_arg0 "stagingAvailabilityZone") in
       let dataReplicationError =
         (Option.map ~f:DataReplicationError.of_xml)
           (Xml.child xml_arg0 "dataReplicationError") in
-      make ?replicatedDisks ?lagDuration ?etaDateTime ?dataReplicationState
-        ?dataReplicationInitiation ?dataReplicationError ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let replicatedDisks =
-        field_map json "replicatedDisks"
-          DataReplicationInfoReplicatedDisks.of_json in
-      let lagDuration =
-        field_map json "lagDuration" ISO8601DatetimeString.of_json in
-      let etaDateTime =
-        field_map json "etaDateTime" ISO8601DatetimeString.of_json in
-      let dataReplicationState =
-        field_map json "dataReplicationState" DataReplicationState.of_json in
       let dataReplicationInitiation =
-        field_map json "dataReplicationInitiation"
-          DataReplicationInitiation.of_json in
+        (Option.map ~f:DataReplicationInitiation.of_xml)
+          (Xml.child xml_arg0 "dataReplicationInitiation") in
+      let dataReplicationState =
+        (Option.map ~f:DataReplicationState.of_xml)
+          (Xml.child xml_arg0 "dataReplicationState") in
+      let replicatedDisks =
+        (Option.map ~f:DataReplicationInfoReplicatedDisks.of_xml)
+          (Xml.child xml_arg0 "replicatedDisks") in
+      let etaDateTime =
+        (Option.map ~f:ISO8601DatetimeString.of_xml)
+          (Xml.child xml_arg0 "etaDateTime") in
+      let lagDuration =
+        (Option.map ~f:ISO8601DurationString.of_xml)
+          (Xml.child xml_arg0 "lagDuration") in
+      make ?stagingOutpostArn ?stagingAvailabilityZone ?dataReplicationError
+        ?dataReplicationInitiation ?dataReplicationState ?replicatedDisks
+        ?etaDateTime ?lagDuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stagingOutpostArn =
+        field_map json__ "stagingOutpostArn" OutpostARN.of_json in
+      let stagingAvailabilityZone =
+        field_map json__ "stagingAvailabilityZone"
+          AwsAvailabilityZone.of_json in
       let dataReplicationError =
-        field_map json "dataReplicationError" DataReplicationError.of_json in
-      make ?replicatedDisks ?lagDuration ?etaDateTime ?dataReplicationState
-        ?dataReplicationInitiation ?dataReplicationError ()
+        field_map json__ "dataReplicationError" DataReplicationError.of_json in
+      let dataReplicationInitiation =
+        field_map json__ "dataReplicationInitiation"
+          DataReplicationInitiation.of_json in
+      let dataReplicationState =
+        field_map json__ "dataReplicationState" DataReplicationState.of_json in
+      let replicatedDisks =
+        field_map json__ "replicatedDisks"
+          DataReplicationInfoReplicatedDisks.of_json in
+      let etaDateTime =
+        field_map json__ "etaDateTime" ISO8601DatetimeString.of_json in
+      let lagDuration =
+        field_map json__ "lagDuration" ISO8601DurationString.of_json in
+      make ?stagingOutpostArn ?stagingAvailabilityZone ?dataReplicationError
+        ?dataReplicationInitiation ?dataReplicationState ?replicatedDisks
+        ?etaDateTime ?lagDuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about Data Replication"]
 module InternalServerException =
   struct
     type nonrec t =
       {
-      message: LargeBoundedString.t ;
+      message: LargeBoundedString.t option ;
       retryAfterSeconds: PositiveInteger.t option
         [@ocaml.doc
           "The number of seconds after which the request should be safe to retry."]}
-    let context_ = "InternalServerException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("message", (Some (LargeBoundedString.to_value x.message)));
+        [("message", (Option.map x.message ~f:LargeBoundedString.to_value));
         ("Retry-After",
           (Option.map x.retryAfterSeconds ~f:PositiveInteger.to_value))]
     let to_query v = to_query to_value v
@@ -2196,15 +3841,15 @@ module InternalServerException =
         (Option.map ~f:PositiveInteger.of_xml)
           (Xml.child xml_arg0 "Retry-After") in
       let message =
-        LargeBoundedString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:LargeBoundedString.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" PositiveInteger.of_json in
-      let message = field_map_exn json "message" LargeBoundedString.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "retryAfterSeconds" PositiveInteger.of_json in
+      let message = field_map json__ "message" LargeBoundedString.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request processing has failed because of an unknown error, exception or failure."]
@@ -2246,102 +3891,129 @@ module LifeCycle =
       addedToServiceDateTime: ISO8601DatetimeString.t option
         [@ocaml.doc
           "The date and time of when the Source Server was added to the service."];
-      elapsedReplicationDuration: ISO8601DatetimeString.t option
-        [@ocaml.doc
-          "The amount of time that the Source Server has been replicating for."];
       firstByteDateTime: ISO8601DatetimeString.t option
         [@ocaml.doc
           "The date and time of the first byte that was replicated from the Source Server."];
-      lastLaunch: LifeCycleLastLaunch.t option
+      elapsedReplicationDuration: ISO8601DurationString.t option
         [@ocaml.doc
-          "An object containing information regarding the last launch of the Source Server."];
+          "The amount of time that the Source Server has been replicating for."];
       lastSeenByServiceDateTime: ISO8601DatetimeString.t option
         [@ocaml.doc
-          "The date and time this Source Server was last seen by the service."]}
+          "The date and time this Source Server was last seen by the service."];
+      lastLaunch: LifeCycleLastLaunch.t option
+        [@ocaml.doc
+          "An object containing information regarding the last launch of the Source Server."]}
     let make ?addedToServiceDateTime =
-      fun ?elapsedReplicationDuration ->
-        fun ?firstByteDateTime ->
-          fun ?lastLaunch ->
-            fun ?lastSeenByServiceDateTime ->
+      fun ?firstByteDateTime ->
+        fun ?elapsedReplicationDuration ->
+          fun ?lastSeenByServiceDateTime ->
+            fun ?lastLaunch ->
               fun () ->
                 {
                   addedToServiceDateTime;
-                  elapsedReplicationDuration;
                   firstByteDateTime;
-                  lastLaunch;
-                  lastSeenByServiceDateTime
+                  elapsedReplicationDuration;
+                  lastSeenByServiceDateTime;
+                  lastLaunch
                 }
     let to_value x =
       structure_to_value
         [("addedToServiceDateTime",
            (Option.map x.addedToServiceDateTime
               ~f:ISO8601DatetimeString.to_value));
-        ("elapsedReplicationDuration",
-          (Option.map x.elapsedReplicationDuration
-             ~f:ISO8601DatetimeString.to_value));
         ("firstByteDateTime",
           (Option.map x.firstByteDateTime ~f:ISO8601DatetimeString.to_value));
-        ("lastLaunch",
-          (Option.map x.lastLaunch ~f:LifeCycleLastLaunch.to_value));
+        ("elapsedReplicationDuration",
+          (Option.map x.elapsedReplicationDuration
+             ~f:ISO8601DurationString.to_value));
         ("lastSeenByServiceDateTime",
           (Option.map x.lastSeenByServiceDateTime
-             ~f:ISO8601DatetimeString.to_value))]
+             ~f:ISO8601DatetimeString.to_value));
+        ("lastLaunch",
+          (Option.map x.lastLaunch ~f:LifeCycleLastLaunch.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let lastSeenByServiceDateTime =
-        (Option.map ~f:ISO8601DatetimeString.of_xml)
-          (Xml.child xml_arg0 "lastSeenByServiceDateTime") in
       let lastLaunch =
         (Option.map ~f:LifeCycleLastLaunch.of_xml)
           (Xml.child xml_arg0 "lastLaunch") in
+      let lastSeenByServiceDateTime =
+        (Option.map ~f:ISO8601DatetimeString.of_xml)
+          (Xml.child xml_arg0 "lastSeenByServiceDateTime") in
+      let elapsedReplicationDuration =
+        (Option.map ~f:ISO8601DurationString.of_xml)
+          (Xml.child xml_arg0 "elapsedReplicationDuration") in
       let firstByteDateTime =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "firstByteDateTime") in
-      let elapsedReplicationDuration =
-        (Option.map ~f:ISO8601DatetimeString.of_xml)
-          (Xml.child xml_arg0 "elapsedReplicationDuration") in
       let addedToServiceDateTime =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "addedToServiceDateTime") in
-      make ?lastSeenByServiceDateTime ?lastLaunch ?firstByteDateTime
-        ?elapsedReplicationDuration ?addedToServiceDateTime ()
+      make ?lastLaunch ?lastSeenByServiceDateTime ?elapsedReplicationDuration
+        ?firstByteDateTime ?addedToServiceDateTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastSeenByServiceDateTime =
-        field_map json "lastSeenByServiceDateTime"
-          ISO8601DatetimeString.of_json in
+    let of_json json__ =
       let lastLaunch =
-        field_map json "lastLaunch" LifeCycleLastLaunch.of_json in
-      let firstByteDateTime =
-        field_map json "firstByteDateTime" ISO8601DatetimeString.of_json in
-      let elapsedReplicationDuration =
-        field_map json "elapsedReplicationDuration"
+        field_map json__ "lastLaunch" LifeCycleLastLaunch.of_json in
+      let lastSeenByServiceDateTime =
+        field_map json__ "lastSeenByServiceDateTime"
           ISO8601DatetimeString.of_json in
+      let elapsedReplicationDuration =
+        field_map json__ "elapsedReplicationDuration"
+          ISO8601DurationString.of_json in
+      let firstByteDateTime =
+        field_map json__ "firstByteDateTime" ISO8601DatetimeString.of_json in
       let addedToServiceDateTime =
-        field_map json "addedToServiceDateTime" ISO8601DatetimeString.of_json in
-      make ?lastSeenByServiceDateTime ?lastLaunch ?firstByteDateTime
-        ?elapsedReplicationDuration ?addedToServiceDateTime ()
+        field_map json__ "addedToServiceDateTime"
+          ISO8601DatetimeString.of_json in
+      make ?lastLaunch ?lastSeenByServiceDateTime ?elapsedReplicationDuration
+        ?firstByteDateTime ?addedToServiceDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing the Source Server Lifecycle."]
+module ReplicationDirection =
+  struct
+    type nonrec t =
+      | FAILOVER 
+      | FAILBACK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FAILOVER -> "FAILOVER"
+      | FAILBACK -> "FAILBACK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FAILOVER" -> FAILOVER
+      | "FAILBACK" -> FAILBACK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ReplicationDirection" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ReplicationDirection" j)
+    let to_json = simple_to_json to_value
+  end
 module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      code: LargeBoundedString.t option ;
       message: LargeBoundedString.t option ;
+      code: LargeBoundedString.t option ;
       resourceId: LargeBoundedString.t option
         [@ocaml.doc "The ID of the resource."];
       resourceType: LargeBoundedString.t option
         [@ocaml.doc "The type of the resource."]}
-    let make ?code =
-      fun ?message ->
+    let make ?message =
+      fun ?code ->
         fun ?resourceId ->
           fun ?resourceType ->
-            fun () -> { code; message; resourceId; resourceType }
+            fun () -> { message; code; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("code", (Option.map x.code ~f:LargeBoundedString.to_value));
-        ("message", (Option.map x.message ~f:LargeBoundedString.to_value));
+        [("message", (Option.map x.message ~f:LargeBoundedString.to_value));
+        ("code", (Option.map x.code ~f:LargeBoundedString.to_value));
         ("resourceId",
           (Option.map x.resourceId ~f:LargeBoundedString.to_value));
         ("resourceType",
@@ -2354,217 +4026,329 @@ module ResourceNotFoundException =
       let resourceId =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "resourceId") in
+      let code =
+        (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
       let message =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "message") in
-      let code =
-        (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
-      make ?resourceType ?resourceId ?message ?code ()
+      make ?resourceType ?resourceId ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map json "resourceType" LargeBoundedString.of_json in
-      let resourceId = field_map json "resourceId" LargeBoundedString.of_json in
-      let message = field_map json "message" LargeBoundedString.of_json in
-      let code = field_map json "code" LargeBoundedString.of_json in
-      make ?resourceType ?resourceId ?message ?code ()
+        field_map json__ "resourceType" LargeBoundedString.of_json in
+      let resourceId =
+        field_map json__ "resourceId" LargeBoundedString.of_json in
+      let code = field_map json__ "code" LargeBoundedString.of_json in
+      let message = field_map json__ "message" LargeBoundedString.of_json in
+      make ?resourceType ?resourceId ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource for this operation was not found."]
+module SourceCloudProperties =
+  struct
+    type nonrec t =
+      {
+      originAccountID: AccountID.t option
+        [@ocaml.doc "AWS Account ID for an EC2-originated Source Server."];
+      originRegion: AwsRegion.t option
+        [@ocaml.doc "AWS Region for an EC2-originated Source Server."];
+      originAvailabilityZone: AwsAvailabilityZone.t option
+        [@ocaml.doc
+          "AWS Availability Zone for an EC2-originated Source Server."];
+      sourceOutpostArn: OutpostARN.t option
+        [@ocaml.doc "The ARN of the source Outpost"]}
+    let make ?originAccountID =
+      fun ?originRegion ->
+        fun ?originAvailabilityZone ->
+          fun ?sourceOutpostArn ->
+            fun () ->
+              {
+                originAccountID;
+                originRegion;
+                originAvailabilityZone;
+                sourceOutpostArn
+              }
+    let to_value x =
+      structure_to_value
+        [("originAccountID",
+           (Option.map x.originAccountID ~f:AccountID.to_value));
+        ("originRegion", (Option.map x.originRegion ~f:AwsRegion.to_value));
+        ("originAvailabilityZone",
+          (Option.map x.originAvailabilityZone
+             ~f:AwsAvailabilityZone.to_value));
+        ("sourceOutpostArn",
+          (Option.map x.sourceOutpostArn ~f:OutpostARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceOutpostArn =
+        (Option.map ~f:OutpostARN.of_xml)
+          (Xml.child xml_arg0 "sourceOutpostArn") in
+      let originAvailabilityZone =
+        (Option.map ~f:AwsAvailabilityZone.of_xml)
+          (Xml.child xml_arg0 "originAvailabilityZone") in
+      let originRegion =
+        (Option.map ~f:AwsRegion.of_xml) (Xml.child xml_arg0 "originRegion") in
+      let originAccountID =
+        (Option.map ~f:AccountID.of_xml)
+          (Xml.child xml_arg0 "originAccountID") in
+      make ?sourceOutpostArn ?originAvailabilityZone ?originRegion
+        ?originAccountID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceOutpostArn =
+        field_map json__ "sourceOutpostArn" OutpostARN.of_json in
+      let originAvailabilityZone =
+        field_map json__ "originAvailabilityZone" AwsAvailabilityZone.of_json in
+      let originRegion = field_map json__ "originRegion" AwsRegion.of_json in
+      let originAccountID =
+        field_map json__ "originAccountID" AccountID.of_json in
+      make ?sourceOutpostArn ?originAvailabilityZone ?originRegion
+        ?originAccountID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Properties of the cloud environment where this Source Server originated from."]
 module SourceProperties =
   struct
     type nonrec t =
       {
-      cpus: Cpus.t option [@ocaml.doc "An array of CPUs."];
-      disks: Disks.t option [@ocaml.doc "An array of disks."];
-      identificationHints: IdentificationHints.t option
-        [@ocaml.doc "Hints used to uniquely identify a machine."];
       lastUpdatedDateTime: ISO8601DatetimeString.t option
         [@ocaml.doc
           "The date and time the Source Properties were last updated on."];
-      networkInterfaces: NetworkInterfaces.t option
-        [@ocaml.doc "An array of network interfaces."];
-      os: OS.t option [@ocaml.doc "Operating system."];
-      ramBytes: PositiveInteger.t option
-        [@ocaml.doc "The amount of RAM in bytes."];
       recommendedInstanceType: EC2InstanceType.t option
         [@ocaml.doc
-          "The recommended EC2 instance type that will be used when recovering the Source Server."]}
-    let make ?cpus =
-      fun ?disks ->
+          "The recommended EC2 instance type that will be used when recovering the Source Server."];
+      identificationHints: IdentificationHints.t option
+        [@ocaml.doc "Hints used to uniquely identify a machine."];
+      networkInterfaces: NetworkInterfaces.t option
+        [@ocaml.doc "An array of network interfaces."];
+      disks: Disks.t option [@ocaml.doc "An array of disks."];
+      cpus: Cpus.t option [@ocaml.doc "An array of CPUs."];
+      ramBytes: PositiveInteger.t option
+        [@ocaml.doc "The amount of RAM in bytes."];
+      os: OS.t option [@ocaml.doc "Operating system."];
+      supportsNitroInstances: Boolean.t option
+        [@ocaml.doc
+          "Are EC2 nitro instance types supported when recovering the Source Server."]}
+    let make ?lastUpdatedDateTime =
+      fun ?recommendedInstanceType ->
         fun ?identificationHints ->
-          fun ?lastUpdatedDateTime ->
-            fun ?networkInterfaces ->
-              fun ?os ->
+          fun ?networkInterfaces ->
+            fun ?disks ->
+              fun ?cpus ->
                 fun ?ramBytes ->
-                  fun ?recommendedInstanceType ->
-                    fun () ->
-                      {
-                        cpus;
-                        disks;
-                        identificationHints;
-                        lastUpdatedDateTime;
-                        networkInterfaces;
-                        os;
-                        ramBytes;
-                        recommendedInstanceType
-                      }
+                  fun ?os ->
+                    fun ?supportsNitroInstances ->
+                      fun () ->
+                        {
+                          lastUpdatedDateTime;
+                          recommendedInstanceType;
+                          identificationHints;
+                          networkInterfaces;
+                          disks;
+                          cpus;
+                          ramBytes;
+                          os;
+                          supportsNitroInstances
+                        }
     let to_value x =
       structure_to_value
-        [("cpus", (Option.map x.cpus ~f:Cpus.to_value));
-        ("disks", (Option.map x.disks ~f:Disks.to_value));
+        [("lastUpdatedDateTime",
+           (Option.map x.lastUpdatedDateTime
+              ~f:ISO8601DatetimeString.to_value));
+        ("recommendedInstanceType",
+          (Option.map x.recommendedInstanceType ~f:EC2InstanceType.to_value));
         ("identificationHints",
           (Option.map x.identificationHints ~f:IdentificationHints.to_value));
-        ("lastUpdatedDateTime",
-          (Option.map x.lastUpdatedDateTime ~f:ISO8601DatetimeString.to_value));
         ("networkInterfaces",
           (Option.map x.networkInterfaces ~f:NetworkInterfaces.to_value));
-        ("os", (Option.map x.os ~f:OS.to_value));
+        ("disks", (Option.map x.disks ~f:Disks.to_value));
+        ("cpus", (Option.map x.cpus ~f:Cpus.to_value));
         ("ramBytes", (Option.map x.ramBytes ~f:PositiveInteger.to_value));
-        ("recommendedInstanceType",
-          (Option.map x.recommendedInstanceType ~f:EC2InstanceType.to_value))]
+        ("os", (Option.map x.os ~f:OS.to_value));
+        ("supportsNitroInstances",
+          (Option.map x.supportsNitroInstances ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let recommendedInstanceType =
-        (Option.map ~f:EC2InstanceType.of_xml)
-          (Xml.child xml_arg0 "recommendedInstanceType") in
+      let supportsNitroInstances =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "supportsNitroInstances") in
+      let os = (Option.map ~f:OS.of_xml) (Xml.child xml_arg0 "os") in
       let ramBytes =
         (Option.map ~f:PositiveInteger.of_xml)
           (Xml.child xml_arg0 "ramBytes") in
-      let os = (Option.map ~f:OS.of_xml) (Xml.child xml_arg0 "os") in
+      let cpus = (Option.map ~f:Cpus.of_xml) (Xml.child xml_arg0 "cpus") in
+      let disks = (Option.map ~f:Disks.of_xml) (Xml.child xml_arg0 "disks") in
       let networkInterfaces =
         (Option.map ~f:NetworkInterfaces.of_xml)
           (Xml.child xml_arg0 "networkInterfaces") in
-      let lastUpdatedDateTime =
-        (Option.map ~f:ISO8601DatetimeString.of_xml)
-          (Xml.child xml_arg0 "lastUpdatedDateTime") in
       let identificationHints =
         (Option.map ~f:IdentificationHints.of_xml)
           (Xml.child xml_arg0 "identificationHints") in
-      let disks = (Option.map ~f:Disks.of_xml) (Xml.child xml_arg0 "disks") in
-      let cpus = (Option.map ~f:Cpus.of_xml) (Xml.child xml_arg0 "cpus") in
-      make ?recommendedInstanceType ?ramBytes ?os ?networkInterfaces
-        ?lastUpdatedDateTime ?identificationHints ?disks ?cpus ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let recommendedInstanceType =
-        field_map json "recommendedInstanceType" EC2InstanceType.of_json in
-      let ramBytes = field_map json "ramBytes" PositiveInteger.of_json in
-      let os = field_map json "os" OS.of_json in
-      let networkInterfaces =
-        field_map json "networkInterfaces" NetworkInterfaces.of_json in
+        (Option.map ~f:EC2InstanceType.of_xml)
+          (Xml.child xml_arg0 "recommendedInstanceType") in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" ISO8601DatetimeString.of_json in
+        (Option.map ~f:ISO8601DatetimeString.of_xml)
+          (Xml.child xml_arg0 "lastUpdatedDateTime") in
+      make ?supportsNitroInstances ?os ?ramBytes ?cpus ?disks
+        ?networkInterfaces ?identificationHints ?recommendedInstanceType
+        ?lastUpdatedDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let supportsNitroInstances =
+        field_map json__ "supportsNitroInstances" Boolean.of_json in
+      let os = field_map json__ "os" OS.of_json in
+      let ramBytes = field_map json__ "ramBytes" PositiveInteger.of_json in
+      let cpus = field_map json__ "cpus" Cpus.of_json in
+      let disks = field_map json__ "disks" Disks.of_json in
+      let networkInterfaces =
+        field_map json__ "networkInterfaces" NetworkInterfaces.of_json in
       let identificationHints =
-        field_map json "identificationHints" IdentificationHints.of_json in
-      let disks = field_map json "disks" Disks.of_json in
-      let cpus = field_map json "cpus" Cpus.of_json in
-      make ?recommendedInstanceType ?ramBytes ?os ?networkInterfaces
-        ?lastUpdatedDateTime ?identificationHints ?disks ?cpus ()
+        field_map json__ "identificationHints" IdentificationHints.of_json in
+      let recommendedInstanceType =
+        field_map json__ "recommendedInstanceType" EC2InstanceType.of_json in
+      let lastUpdatedDateTime =
+        field_map json__ "lastUpdatedDateTime" ISO8601DatetimeString.of_json in
+      make ?supportsNitroInstances ?os ?ramBytes ?cpus ?disks
+        ?networkInterfaces ?identificationHints ?recommendedInstanceType
+        ?lastUpdatedDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Properties of the Source Server machine."]
-module TagsMap =
+module StagingArea =
   struct
-    type nonrec t = (TagKey.t * TagValue.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((TagKey.of_string chopped),
-                              (TagValue.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (TagKey.to_value x) |>
-                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
+    type nonrec t =
+      {
+      status: ExtensionStatus.t option
+        [@ocaml.doc
+          "Status of Source server extension. Possible values: (a) NOT_EXTENDED - This is a source server that is replicating in the current account. (b) EXTENDED - Source server is extended from a staging source server. In this case, the value of stagingSourceServerArn is pointing to the Arn of the source server in the staging account. (c) EXTENSION_ERROR - Some issue occurred when accessing staging source server. In this case, errorMessage field will contain an error message that explains what happened."];
+      stagingAccountID: AccountID.t option
+        [@ocaml.doc
+          "Account ID of the account to which source server belongs. If this source server is extended - shows Account ID of staging source server."];
+      stagingSourceServerArn: ARN.t option
+        [@ocaml.doc
+          "Arn of the staging source server if this source server is extended"];
+      errorMessage: LargeBoundedString.t option
+        [@ocaml.doc
+          "Shows an error message that occurred when DRS tried to access the staging source server. In this case StagingArea$status will have value EXTENSION_ERROR"]}
+    let make ?status =
+      fun ?stagingAccountID ->
+        fun ?stagingSourceServerArn ->
+          fun ?errorMessage ->
+            fun () ->
+              {
+                status;
+                stagingAccountID;
+                stagingSourceServerArn;
+                errorMessage
+              }
+    let to_value x =
+      structure_to_value
+        [("status", (Option.map x.status ~f:ExtensionStatus.to_value));
+        ("stagingAccountID",
+          (Option.map x.stagingAccountID ~f:AccountID.to_value));
+        ("stagingSourceServerArn",
+          (Option.map x.stagingSourceServerArn ~f:ARN.to_value));
+        ("errorMessage",
+          (Option.map x.errorMessage ~f:LargeBoundedString.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:TagKey.of_string
-        ~of_json:TagValue.of_json j
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:LargeBoundedString.of_xml)
+          (Xml.child xml_arg0 "errorMessage") in
+      let stagingSourceServerArn =
+        (Option.map ~f:ARN.of_xml)
+          (Xml.child xml_arg0 "stagingSourceServerArn") in
+      let stagingAccountID =
+        (Option.map ~f:AccountID.of_xml)
+          (Xml.child xml_arg0 "stagingAccountID") in
+      let status =
+        (Option.map ~f:ExtensionStatus.of_xml) (Xml.child xml_arg0 "status") in
+      make ?errorMessage ?stagingSourceServerArn ?stagingAccountID ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage =
+        field_map json__ "errorMessage" LargeBoundedString.of_json in
+      let stagingSourceServerArn =
+        field_map json__ "stagingSourceServerArn" ARN.of_json in
+      let stagingAccountID =
+        field_map json__ "stagingAccountID" AccountID.of_json in
+      let status = field_map json__ "status" ExtensionStatus.of_json in
+      make ?errorMessage ?stagingSourceServerArn ?stagingAccountID ?status ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Staging information related to source server."]
 module ThrottlingException =
   struct
     type nonrec t =
       {
-      message: LargeBoundedString.t ;
+      message: LargeBoundedString.t option ;
+      serviceCode: LargeBoundedString.t option [@ocaml.doc "Service code."];
       quotaCode: LargeBoundedString.t option [@ocaml.doc "Quota code."];
       retryAfterSeconds: LargeBoundedString.t option
         [@ocaml.doc
-          "The number of seconds after which the request should be safe to retry."];
-      serviceCode: LargeBoundedString.t option [@ocaml.doc "Service code."]}
-    let context_ = "ThrottlingException"
-    let make ?quotaCode =
-      fun ?retryAfterSeconds ->
-        fun ?serviceCode ->
-          fun ~message ->
-            fun () -> { quotaCode; retryAfterSeconds; serviceCode; message }
+          "The number of seconds after which the request should be safe to retry."]}
+    let make ?message =
+      fun ?serviceCode ->
+        fun ?quotaCode ->
+          fun ?retryAfterSeconds ->
+            fun () -> { message; serviceCode; quotaCode; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("message", (Some (LargeBoundedString.to_value x.message)));
+        [("message", (Option.map x.message ~f:LargeBoundedString.to_value));
+        ("serviceCode",
+          (Option.map x.serviceCode ~f:LargeBoundedString.to_value));
         ("quotaCode",
           (Option.map x.quotaCode ~f:LargeBoundedString.to_value));
         ("Retry-After",
-          (Option.map x.retryAfterSeconds ~f:LargeBoundedString.to_value));
-        ("serviceCode",
-          (Option.map x.serviceCode ~f:LargeBoundedString.to_value))]
+          (Option.map x.retryAfterSeconds ~f:LargeBoundedString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let serviceCode =
-        (Option.map ~f:LargeBoundedString.of_xml)
-          (Xml.child xml_arg0 "serviceCode") in
       let retryAfterSeconds =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "Retry-After") in
       let quotaCode =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "quotaCode") in
-      let message =
-        LargeBoundedString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let serviceCode =
-        field_map json "serviceCode" LargeBoundedString.of_json in
+        (Option.map ~f:LargeBoundedString.of_xml)
+          (Xml.child xml_arg0 "serviceCode") in
+      let message =
+        (Option.map ~f:LargeBoundedString.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?quotaCode ?serviceCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" LargeBoundedString.of_json in
-      let quotaCode = field_map json "quotaCode" LargeBoundedString.of_json in
-      let message = field_map_exn json "message" LargeBoundedString.of_json in
-      make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
+        field_map json__ "retryAfterSeconds" LargeBoundedString.of_json in
+      let quotaCode = field_map json__ "quotaCode" LargeBoundedString.of_json in
+      let serviceCode =
+        field_map json__ "serviceCode" LargeBoundedString.of_json in
+      let message = field_map json__ "message" LargeBoundedString.of_json in
+      make ?retryAfterSeconds ?quotaCode ?serviceCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
 module UninitializedAccountException =
   struct
     type nonrec t =
       {
-      code: LargeBoundedString.t option ;
-      message: LargeBoundedString.t option }
-    let make ?code = fun ?message -> fun () -> { code; message }
+      message: LargeBoundedString.t option ;
+      code: LargeBoundedString.t option }
+    let make ?message = fun ?code -> fun () -> { message; code }
     let to_value x =
       structure_to_value
-        [("code", (Option.map x.code ~f:LargeBoundedString.to_value));
-        ("message", (Option.map x.message ~f:LargeBoundedString.to_value))]
+        [("message", (Option.map x.message ~f:LargeBoundedString.to_value));
+        ("code", (Option.map x.code ~f:LargeBoundedString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let code =
+        (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
       let message =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "message") in
-      let code =
-        (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
-      make ?message ?code ()
+      make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" LargeBoundedString.of_json in
-      let code = field_map json "code" LargeBoundedString.of_json in
-      make ?message ?code ()
+    let of_json json__ =
+      let code = field_map json__ "code" LargeBoundedString.of_json in
+      let message = field_map json__ "message" LargeBoundedString.of_json in
+      make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The account performing the request has not been initialized."]
@@ -2572,76 +4356,193 @@ module ValidationException =
   struct
     type nonrec t =
       {
-      code: LargeBoundedString.t option ;
-      fieldList: ValidationExceptionFieldList.t option
-        [@ocaml.doc "A list of fields that failed validation."];
       message: LargeBoundedString.t option ;
+      code: LargeBoundedString.t option ;
       reason: ValidationExceptionReason.t option
-        [@ocaml.doc "Validation exception reason."]}
-    let make ?code =
-      fun ?fieldList ->
-        fun ?message ->
-          fun ?reason -> fun () -> { code; fieldList; message; reason }
+        [@ocaml.doc "Validation exception reason."];
+      fieldList: ValidationExceptionFieldList.t option
+        [@ocaml.doc "A list of fields that failed validation."]}
+    let make ?message =
+      fun ?code ->
+        fun ?reason ->
+          fun ?fieldList -> fun () -> { message; code; reason; fieldList }
     let to_value x =
       structure_to_value
-        [("code", (Option.map x.code ~f:LargeBoundedString.to_value));
-        ("fieldList",
-          (Option.map x.fieldList ~f:ValidationExceptionFieldList.to_value));
-        ("message", (Option.map x.message ~f:LargeBoundedString.to_value));
+        [("message", (Option.map x.message ~f:LargeBoundedString.to_value));
+        ("code", (Option.map x.code ~f:LargeBoundedString.to_value));
         ("reason",
-          (Option.map x.reason ~f:ValidationExceptionReason.to_value))]
+          (Option.map x.reason ~f:ValidationExceptionReason.to_value));
+        ("fieldList",
+          (Option.map x.fieldList ~f:ValidationExceptionFieldList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let reason =
-        (Option.map ~f:ValidationExceptionReason.of_xml)
-          (Xml.child xml_arg0 "reason") in
-      let message =
-        (Option.map ~f:LargeBoundedString.of_xml)
-          (Xml.child xml_arg0 "message") in
       let fieldList =
         (Option.map ~f:ValidationExceptionFieldList.of_xml)
           (Xml.child xml_arg0 "fieldList") in
+      let reason =
+        (Option.map ~f:ValidationExceptionReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
       let code =
         (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
-      make ?reason ?message ?fieldList ?code ()
+      let message =
+        (Option.map ~f:LargeBoundedString.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?fieldList ?reason ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "reason" ValidationExceptionReason.of_json in
-      let message = field_map json "message" LargeBoundedString.of_json in
+    let of_json json__ =
       let fieldList =
-        field_map json "fieldList" ValidationExceptionFieldList.of_json in
-      let code = field_map json "code" LargeBoundedString.of_json in
-      make ?reason ?message ?fieldList ?code ()
+        field_map json__ "fieldList" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let code = field_map json__ "code" LargeBoundedString.of_json in
+      let message = field_map json__ "message" LargeBoundedString.of_json in
+      make ?fieldList ?reason ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The input fails to satisfy the constraints specified by the AWS service."]
+module RecoveryLifeCycle =
+  struct
+    type nonrec t =
+      {
+      apiCallDateTime: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc
+          "The date and time the last Source Network recovery was initiated."];
+      jobID: JobID.t option
+        [@ocaml.doc
+          "The ID of the Job that was used to last recover the Source Network."];
+      lastRecoveryResult: RecoveryResult.t option
+        [@ocaml.doc
+          "The status of the last recovery status of this Source Network."]}
+    let make ?apiCallDateTime =
+      fun ?jobID ->
+        fun ?lastRecoveryResult ->
+          fun () -> { apiCallDateTime; jobID; lastRecoveryResult }
+    let to_value x =
+      structure_to_value
+        [("apiCallDateTime",
+           (Option.map x.apiCallDateTime
+              ~f:SyntheticTimestamp_date_time.to_value));
+        ("jobID", (Option.map x.jobID ~f:JobID.to_value));
+        ("lastRecoveryResult",
+          (Option.map x.lastRecoveryResult ~f:RecoveryResult.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastRecoveryResult =
+        (Option.map ~f:RecoveryResult.of_xml)
+          (Xml.child xml_arg0 "lastRecoveryResult") in
+      let jobID = (Option.map ~f:JobID.of_xml) (Xml.child xml_arg0 "jobID") in
+      let apiCallDateTime =
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "apiCallDateTime") in
+      make ?lastRecoveryResult ?jobID ?apiCallDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastRecoveryResult =
+        field_map json__ "lastRecoveryResult" RecoveryResult.of_json in
+      let jobID = field_map json__ "jobID" JobID.of_json in
+      let apiCallDateTime =
+        field_map json__ "apiCallDateTime"
+          SyntheticTimestamp_date_time.of_json in
+      make ?lastRecoveryResult ?jobID ?apiCallDateTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object representing the Source Network recovery Lifecycle."]
+module ReplicationStatus =
+  struct
+    type nonrec t =
+      | STOPPED 
+      | IN_PROGRESS 
+      | PROTECTED 
+      | ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STOPPED -> "STOPPED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | PROTECTED -> "PROTECTED"
+      | ERROR -> "ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STOPPED" -> STOPPED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "PROTECTED" -> PROTECTED
+      | "ERROR" -> ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ReplicationStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ReplicationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module SensitiveBoundedString =
+  struct
+    type nonrec t = string
+    let context_ = "SensitiveBoundedString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SensitiveBoundedString" j
+    let to_json = simple_to_json to_value
+  end
 module AccessDeniedException =
   struct
     type nonrec t =
       {
-      code: LargeBoundedString.t option ;
-      message: LargeBoundedString.t option }
-    let make ?code = fun ?message -> fun () -> { code; message }
+      message: LargeBoundedString.t option ;
+      code: LargeBoundedString.t option }
+    let make ?message = fun ?code -> fun () -> { message; code }
     let to_value x =
       structure_to_value
-        [("code", (Option.map x.code ~f:LargeBoundedString.to_value));
-        ("message", (Option.map x.message ~f:LargeBoundedString.to_value))]
+        [("message", (Option.map x.message ~f:LargeBoundedString.to_value));
+        ("code", (Option.map x.code ~f:LargeBoundedString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let code =
+        (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
       let message =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "message") in
-      let code =
-        (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
-      make ?message ?code ()
+      make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" LargeBoundedString.of_json in
-      let code = field_map json "code" LargeBoundedString.of_json in
-      make ?message ?code ()
+    let of_json json__ =
+      let code = field_map json__ "code" LargeBoundedString.of_json in
+      let message = field_map json__ "message" LargeBoundedString.of_json in
+      make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "TYou do not have sufficient access to perform this action."]
+       "You do not have sufficient access to perform this action."]
+module InternetProtocol =
+  struct
+    type nonrec t =
+      | IPV4 
+      | IPV6 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | IPV4 -> "IPV4" | IPV6 -> "IPV6" | Non_static_id s -> s
+    let of_string =
+      function | "IPV4" -> IPV4 | "IPV6" -> IPV6 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration InternetProtocol" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InternetProtocol" j)
+    let to_json = simple_to_json to_value
+  end
 module PITPolicy =
   struct
     type nonrec t = PITPolicyRule.t list
@@ -2650,6 +4551,9 @@ module PITPolicy =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PITPolicyRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2706,6 +4610,7 @@ module ReplicationConfigurationDefaultLargeStagingDiskType =
       | GP2 
       | GP3 
       | ST1 
+      | AUTO 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2713,12 +4618,14 @@ module ReplicationConfigurationDefaultLargeStagingDiskType =
       | GP2 -> "GP2"
       | GP3 -> "GP3"
       | ST1 -> "ST1"
+      | AUTO -> "AUTO"
       | Non_static_id s -> s
     let of_string =
       function
       | "GP2" -> GP2
       | "GP3" -> GP3
       | "ST1" -> ST1
+      | "AUTO" -> AUTO
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2739,17 +4646,20 @@ module ReplicationConfigurationEbsEncryption =
     type nonrec t =
       | DEFAULT 
       | CUSTOM 
+      | NONE 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | DEFAULT -> "DEFAULT"
       | CUSTOM -> "CUSTOM"
+      | NONE -> "NONE"
       | Non_static_id s -> s
     let of_string =
       function
       | "DEFAULT" -> DEFAULT
       | "CUSTOM" -> CUSTOM
+      | "NONE" -> NONE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2773,7 +4683,7 @@ module ReplicationConfigurationTemplateID =
           ((check_string_min i ~min:21) >>=
              (fun () ->
                 (check_string_max i ~max:21) >>=
-                  (fun () -> check_pattern i ~pattern:"^rct-[0-9a-zA-Z]{17}$")));
+                  (fun () -> check_pattern i ~pattern:"rct-[0-9a-zA-Z]{17}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2792,6 +4702,9 @@ module ReplicationServersSecurityGroupsIDs =
         ok_or_failwith
           ((check_list_max i ~max:32) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupID.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2817,43 +4730,46 @@ module ServiceQuotaExceededException =
   struct
     type nonrec t =
       {
-      code: LargeBoundedString.t option ;
       message: LargeBoundedString.t option ;
-      quotaCode: LargeBoundedString.t option [@ocaml.doc "Quota code."];
+      code: LargeBoundedString.t option ;
       resourceId: LargeBoundedString.t option
         [@ocaml.doc "The ID of the resource."];
       resourceType: LargeBoundedString.t option
         [@ocaml.doc "The type of the resource."];
-      serviceCode: LargeBoundedString.t option [@ocaml.doc "Service code."]}
-    let make ?code =
-      fun ?message ->
-        fun ?quotaCode ->
-          fun ?resourceId ->
-            fun ?resourceType ->
-              fun ?serviceCode ->
+      serviceCode: LargeBoundedString.t option [@ocaml.doc "Service code."];
+      quotaCode: LargeBoundedString.t option [@ocaml.doc "Quota code."]}
+    let make ?message =
+      fun ?code ->
+        fun ?resourceId ->
+          fun ?resourceType ->
+            fun ?serviceCode ->
+              fun ?quotaCode ->
                 fun () ->
                   {
-                    code;
                     message;
-                    quotaCode;
+                    code;
                     resourceId;
                     resourceType;
-                    serviceCode
+                    serviceCode;
+                    quotaCode
                   }
     let to_value x =
       structure_to_value
-        [("code", (Option.map x.code ~f:LargeBoundedString.to_value));
-        ("message", (Option.map x.message ~f:LargeBoundedString.to_value));
-        ("quotaCode",
-          (Option.map x.quotaCode ~f:LargeBoundedString.to_value));
+        [("message", (Option.map x.message ~f:LargeBoundedString.to_value));
+        ("code", (Option.map x.code ~f:LargeBoundedString.to_value));
         ("resourceId",
           (Option.map x.resourceId ~f:LargeBoundedString.to_value));
         ("resourceType",
           (Option.map x.resourceType ~f:LargeBoundedString.to_value));
         ("serviceCode",
-          (Option.map x.serviceCode ~f:LargeBoundedString.to_value))]
+          (Option.map x.serviceCode ~f:LargeBoundedString.to_value));
+        ("quotaCode",
+          (Option.map x.quotaCode ~f:LargeBoundedString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let quotaCode =
+        (Option.map ~f:LargeBoundedString.of_xml)
+          (Xml.child xml_arg0 "quotaCode") in
       let serviceCode =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "serviceCode") in
@@ -2863,27 +4779,25 @@ module ServiceQuotaExceededException =
       let resourceId =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "resourceId") in
-      let quotaCode =
-        (Option.map ~f:LargeBoundedString.of_xml)
-          (Xml.child xml_arg0 "quotaCode") in
+      let code =
+        (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
       let message =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "message") in
-      let code =
-        (Option.map ~f:LargeBoundedString.of_xml) (Xml.child xml_arg0 "code") in
-      make ?serviceCode ?resourceType ?resourceId ?quotaCode ?message ?code
+      make ?quotaCode ?serviceCode ?resourceType ?resourceId ?code ?message
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let quotaCode = field_map json__ "quotaCode" LargeBoundedString.of_json in
       let serviceCode =
-        field_map json "serviceCode" LargeBoundedString.of_json in
+        field_map json__ "serviceCode" LargeBoundedString.of_json in
       let resourceType =
-        field_map json "resourceType" LargeBoundedString.of_json in
-      let resourceId = field_map json "resourceId" LargeBoundedString.of_json in
-      let quotaCode = field_map json "quotaCode" LargeBoundedString.of_json in
-      let message = field_map json "message" LargeBoundedString.of_json in
-      let code = field_map json "code" LargeBoundedString.of_json in
-      make ?serviceCode ?resourceType ?resourceId ?quotaCode ?message ?code
+        field_map json__ "resourceType" LargeBoundedString.of_json in
+      let resourceId =
+        field_map json__ "resourceId" LargeBoundedString.of_json in
+      let code = field_map json__ "code" LargeBoundedString.of_json in
+      let message = field_map json__ "message" LargeBoundedString.of_json in
+      make ?quotaCode ?serviceCode ?resourceType ?resourceId ?code ?message
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2899,7 +4813,7 @@ module SubnetID =
              (fun () ->
                 (check_string_max i ~max:255) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^subnet-[0-9a-fA-F]{8,}$")));
+                     check_pattern i ~pattern:"subnet-[0-9a-fA-F]{8,}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2913,6 +4827,9 @@ module EbsSnapshotsList =
   struct
     type nonrec t = EbsSnapshot.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EbsSnapshot.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2973,234 +4890,300 @@ module EC2InstanceState =
     let of_json j = of_string (string_of_json ~kind:"EC2InstanceState" j)
     let to_json = simple_to_json to_value
   end
+module OriginEnvironment =
+  struct
+    type nonrec t =
+      | ON_PREMISES 
+      | AWS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ON_PREMISES -> "ON_PREMISES"
+      | AWS -> "AWS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ON_PREMISES" -> ON_PREMISES
+      | "AWS" -> AWS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OriginEnvironment" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OriginEnvironment" j)
+    let to_json = simple_to_json to_value
+  end
 module RecoveryInstanceDataReplicationInfo =
   struct
     type nonrec t =
       {
-      dataReplicationError: RecoveryInstanceDataReplicationError.t option
-        [@ocaml.doc "Information about Data Replication"];
+      lagDuration: ISO8601DatetimeString.t option
+        [@ocaml.doc "Data replication lag duration."];
+      etaDateTime: ISO8601DatetimeString.t option
+        [@ocaml.doc
+          "An estimate of when the data replication will be completed."];
+      replicatedDisks:
+        RecoveryInstanceDataReplicationInfoReplicatedDisks.t option
+        [@ocaml.doc "The disks that should be replicated."];
+      dataReplicationState: RecoveryInstanceDataReplicationState.t option
+        [@ocaml.doc "The state of the data replication."];
       dataReplicationInitiation:
         RecoveryInstanceDataReplicationInitiation.t option
         [@ocaml.doc
           "Information about whether the data replication has been initiated."];
-      dataReplicationState: RecoveryInstanceDataReplicationState.t option
-        [@ocaml.doc "The state of the data replication."];
-      etaDateTime: ISO8601DatetimeString.t option
+      dataReplicationError: RecoveryInstanceDataReplicationError.t option
+        [@ocaml.doc "Information about Data Replication"];
+      stagingAvailabilityZone: AwsAvailabilityZone.t option
         [@ocaml.doc
-          "An estimate of when the data replication will be completed."];
-      lagDuration: ISO8601DatetimeString.t option
-        [@ocaml.doc "Data replication lag duration."];
-      replicatedDisks:
-        RecoveryInstanceDataReplicationInfoReplicatedDisks.t option
-        [@ocaml.doc "The disks that should be replicated."]}
-    let make ?dataReplicationError =
-      fun ?dataReplicationInitiation ->
-        fun ?dataReplicationState ->
-          fun ?etaDateTime ->
-            fun ?lagDuration ->
-              fun ?replicatedDisks ->
-                fun () ->
-                  {
-                    dataReplicationError;
-                    dataReplicationInitiation;
-                    dataReplicationState;
-                    etaDateTime;
-                    lagDuration;
-                    replicatedDisks
-                  }
+          "AWS Availability zone into which data is being replicated."];
+      stagingOutpostArn: OutpostARN.t option
+        [@ocaml.doc "The ARN of the staging Outpost"]}
+    let make ?lagDuration =
+      fun ?etaDateTime ->
+        fun ?replicatedDisks ->
+          fun ?dataReplicationState ->
+            fun ?dataReplicationInitiation ->
+              fun ?dataReplicationError ->
+                fun ?stagingAvailabilityZone ->
+                  fun ?stagingOutpostArn ->
+                    fun () ->
+                      {
+                        lagDuration;
+                        etaDateTime;
+                        replicatedDisks;
+                        dataReplicationState;
+                        dataReplicationInitiation;
+                        dataReplicationError;
+                        stagingAvailabilityZone;
+                        stagingOutpostArn
+                      }
     let to_value x =
       structure_to_value
-        [("dataReplicationError",
-           (Option.map x.dataReplicationError
-              ~f:RecoveryInstanceDataReplicationError.to_value));
-        ("dataReplicationInitiation",
-          (Option.map x.dataReplicationInitiation
-             ~f:RecoveryInstanceDataReplicationInitiation.to_value));
+        [("lagDuration",
+           (Option.map x.lagDuration ~f:ISO8601DatetimeString.to_value));
+        ("etaDateTime",
+          (Option.map x.etaDateTime ~f:ISO8601DatetimeString.to_value));
+        ("replicatedDisks",
+          (Option.map x.replicatedDisks
+             ~f:RecoveryInstanceDataReplicationInfoReplicatedDisks.to_value));
         ("dataReplicationState",
           (Option.map x.dataReplicationState
              ~f:RecoveryInstanceDataReplicationState.to_value));
-        ("etaDateTime",
-          (Option.map x.etaDateTime ~f:ISO8601DatetimeString.to_value));
-        ("lagDuration",
-          (Option.map x.lagDuration ~f:ISO8601DatetimeString.to_value));
-        ("replicatedDisks",
-          (Option.map x.replicatedDisks
-             ~f:RecoveryInstanceDataReplicationInfoReplicatedDisks.to_value))]
+        ("dataReplicationInitiation",
+          (Option.map x.dataReplicationInitiation
+             ~f:RecoveryInstanceDataReplicationInitiation.to_value));
+        ("dataReplicationError",
+          (Option.map x.dataReplicationError
+             ~f:RecoveryInstanceDataReplicationError.to_value));
+        ("stagingAvailabilityZone",
+          (Option.map x.stagingAvailabilityZone
+             ~f:AwsAvailabilityZone.to_value));
+        ("stagingOutpostArn",
+          (Option.map x.stagingOutpostArn ~f:OutpostARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let stagingOutpostArn =
+        (Option.map ~f:OutpostARN.of_xml)
+          (Xml.child xml_arg0 "stagingOutpostArn") in
+      let stagingAvailabilityZone =
+        (Option.map ~f:AwsAvailabilityZone.of_xml)
+          (Xml.child xml_arg0 "stagingAvailabilityZone") in
+      let dataReplicationError =
+        (Option.map ~f:RecoveryInstanceDataReplicationError.of_xml)
+          (Xml.child xml_arg0 "dataReplicationError") in
+      let dataReplicationInitiation =
+        (Option.map ~f:RecoveryInstanceDataReplicationInitiation.of_xml)
+          (Xml.child xml_arg0 "dataReplicationInitiation") in
+      let dataReplicationState =
+        (Option.map ~f:RecoveryInstanceDataReplicationState.of_xml)
+          (Xml.child xml_arg0 "dataReplicationState") in
       let replicatedDisks =
         (Option.map
            ~f:RecoveryInstanceDataReplicationInfoReplicatedDisks.of_xml)
           (Xml.child xml_arg0 "replicatedDisks") in
-      let lagDuration =
-        (Option.map ~f:ISO8601DatetimeString.of_xml)
-          (Xml.child xml_arg0 "lagDuration") in
       let etaDateTime =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "etaDateTime") in
-      let dataReplicationState =
-        (Option.map ~f:RecoveryInstanceDataReplicationState.of_xml)
-          (Xml.child xml_arg0 "dataReplicationState") in
-      let dataReplicationInitiation =
-        (Option.map ~f:RecoveryInstanceDataReplicationInitiation.of_xml)
-          (Xml.child xml_arg0 "dataReplicationInitiation") in
-      let dataReplicationError =
-        (Option.map ~f:RecoveryInstanceDataReplicationError.of_xml)
-          (Xml.child xml_arg0 "dataReplicationError") in
-      make ?replicatedDisks ?lagDuration ?etaDateTime ?dataReplicationState
-        ?dataReplicationInitiation ?dataReplicationError ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let replicatedDisks =
-        field_map json "replicatedDisks"
-          RecoveryInstanceDataReplicationInfoReplicatedDisks.of_json in
       let lagDuration =
-        field_map json "lagDuration" ISO8601DatetimeString.of_json in
-      let etaDateTime =
-        field_map json "etaDateTime" ISO8601DatetimeString.of_json in
-      let dataReplicationState =
-        field_map json "dataReplicationState"
-          RecoveryInstanceDataReplicationState.of_json in
-      let dataReplicationInitiation =
-        field_map json "dataReplicationInitiation"
-          RecoveryInstanceDataReplicationInitiation.of_json in
+        (Option.map ~f:ISO8601DatetimeString.of_xml)
+          (Xml.child xml_arg0 "lagDuration") in
+      make ?stagingOutpostArn ?stagingAvailabilityZone ?dataReplicationError
+        ?dataReplicationInitiation ?dataReplicationState ?replicatedDisks
+        ?etaDateTime ?lagDuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stagingOutpostArn =
+        field_map json__ "stagingOutpostArn" OutpostARN.of_json in
+      let stagingAvailabilityZone =
+        field_map json__ "stagingAvailabilityZone"
+          AwsAvailabilityZone.of_json in
       let dataReplicationError =
-        field_map json "dataReplicationError"
+        field_map json__ "dataReplicationError"
           RecoveryInstanceDataReplicationError.of_json in
-      make ?replicatedDisks ?lagDuration ?etaDateTime ?dataReplicationState
-        ?dataReplicationInitiation ?dataReplicationError ()
+      let dataReplicationInitiation =
+        field_map json__ "dataReplicationInitiation"
+          RecoveryInstanceDataReplicationInitiation.of_json in
+      let dataReplicationState =
+        field_map json__ "dataReplicationState"
+          RecoveryInstanceDataReplicationState.of_json in
+      let replicatedDisks =
+        field_map json__ "replicatedDisks"
+          RecoveryInstanceDataReplicationInfoReplicatedDisks.of_json in
+      let etaDateTime =
+        field_map json__ "etaDateTime" ISO8601DatetimeString.of_json in
+      let lagDuration =
+        field_map json__ "lagDuration" ISO8601DatetimeString.of_json in
+      make ?stagingOutpostArn ?stagingAvailabilityZone ?dataReplicationError
+        ?dataReplicationInitiation ?dataReplicationState ?replicatedDisks
+        ?etaDateTime ?lagDuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about Data Replication"]
 module RecoveryInstanceFailback =
   struct
     type nonrec t =
       {
-      agentLastSeenByServiceDateTime: ISO8601DatetimeString.t option
-        [@ocaml.doc
-          "The date and time the agent on the Recovery Instance was last seen by the service."];
-      elapsedReplicationDuration: ISO8601DatetimeString.t option
-        [@ocaml.doc
-          "The amount of time that the Recovery Instance has been replicating for."];
       failbackClientID: BoundedString.t option
         [@ocaml.doc
           "The ID of the failback client that this Recovery Instance is associated with."];
-      failbackClientLastSeenByServiceDateTime: ISO8601DatetimeString.t option
-        [@ocaml.doc
-          "The date and time that the failback client was last seen by the service."];
-      failbackInitiationTime: ISO8601DatetimeString.t option
-        [@ocaml.doc
-          "The date and time that the failback initiation started."];
       failbackJobID: JobID.t option
         [@ocaml.doc
           "The Job ID of the last failback log for this Recovery Instance."];
+      failbackInitiationTime: ISO8601DatetimeString.t option
+        [@ocaml.doc
+          "The date and time that the failback initiation started."];
+      state: FailbackState.t option
+        [@ocaml.doc
+          "The state of the failback process that this Recovery Instance is in."];
+      agentLastSeenByServiceDateTime: ISO8601DatetimeString.t option
+        [@ocaml.doc
+          "The date and time the agent on the Recovery Instance was last seen by the service."];
+      failbackClientLastSeenByServiceDateTime: ISO8601DatetimeString.t option
+        [@ocaml.doc
+          "The date and time that the failback client was last seen by the service."];
       failbackToOriginalServer: Boolean.t option
         [@ocaml.doc
           "Whether we are failing back to the original Source Server for this Recovery Instance."];
       firstByteDateTime: ISO8601DatetimeString.t option
         [@ocaml.doc
           "The date and time of the first byte that was replicated from the Recovery Instance."];
-      state: FailbackState.t option
+      elapsedReplicationDuration: ISO8601DatetimeString.t option
         [@ocaml.doc
-          "The state of the failback process that this Recovery Instance is in."]}
-    let make ?agentLastSeenByServiceDateTime =
-      fun ?elapsedReplicationDuration ->
-        fun ?failbackClientID ->
-          fun ?failbackClientLastSeenByServiceDateTime ->
-            fun ?failbackInitiationTime ->
-              fun ?failbackJobID ->
+          "The amount of time that the Recovery Instance has been replicating for."];
+      failbackLaunchType: FailbackLaunchType.t option
+        [@ocaml.doc
+          "The launch type (Recovery / Drill) of the last launch for the failback replication of this recovery instance."]}
+    let make ?failbackClientID =
+      fun ?failbackJobID ->
+        fun ?failbackInitiationTime ->
+          fun ?state ->
+            fun ?agentLastSeenByServiceDateTime ->
+              fun ?failbackClientLastSeenByServiceDateTime ->
                 fun ?failbackToOriginalServer ->
                   fun ?firstByteDateTime ->
-                    fun ?state ->
-                      fun () ->
-                        {
-                          agentLastSeenByServiceDateTime;
-                          elapsedReplicationDuration;
-                          failbackClientID;
-                          failbackClientLastSeenByServiceDateTime;
-                          failbackInitiationTime;
-                          failbackJobID;
-                          failbackToOriginalServer;
-                          firstByteDateTime;
-                          state
-                        }
+                    fun ?elapsedReplicationDuration ->
+                      fun ?failbackLaunchType ->
+                        fun () ->
+                          {
+                            failbackClientID;
+                            failbackJobID;
+                            failbackInitiationTime;
+                            state;
+                            agentLastSeenByServiceDateTime;
+                            failbackClientLastSeenByServiceDateTime;
+                            failbackToOriginalServer;
+                            firstByteDateTime;
+                            elapsedReplicationDuration;
+                            failbackLaunchType
+                          }
     let to_value x =
       structure_to_value
-        [("agentLastSeenByServiceDateTime",
-           (Option.map x.agentLastSeenByServiceDateTime
-              ~f:ISO8601DatetimeString.to_value));
-        ("elapsedReplicationDuration",
-          (Option.map x.elapsedReplicationDuration
-             ~f:ISO8601DatetimeString.to_value));
-        ("failbackClientID",
-          (Option.map x.failbackClientID ~f:BoundedString.to_value));
-        ("failbackClientLastSeenByServiceDateTime",
-          (Option.map x.failbackClientLastSeenByServiceDateTime
-             ~f:ISO8601DatetimeString.to_value));
+        [("failbackClientID",
+           (Option.map x.failbackClientID ~f:BoundedString.to_value));
+        ("failbackJobID", (Option.map x.failbackJobID ~f:JobID.to_value));
         ("failbackInitiationTime",
           (Option.map x.failbackInitiationTime
              ~f:ISO8601DatetimeString.to_value));
-        ("failbackJobID", (Option.map x.failbackJobID ~f:JobID.to_value));
+        ("state", (Option.map x.state ~f:FailbackState.to_value));
+        ("agentLastSeenByServiceDateTime",
+          (Option.map x.agentLastSeenByServiceDateTime
+             ~f:ISO8601DatetimeString.to_value));
+        ("failbackClientLastSeenByServiceDateTime",
+          (Option.map x.failbackClientLastSeenByServiceDateTime
+             ~f:ISO8601DatetimeString.to_value));
         ("failbackToOriginalServer",
           (Option.map x.failbackToOriginalServer ~f:Boolean.to_value));
         ("firstByteDateTime",
           (Option.map x.firstByteDateTime ~f:ISO8601DatetimeString.to_value));
-        ("state", (Option.map x.state ~f:FailbackState.to_value))]
+        ("elapsedReplicationDuration",
+          (Option.map x.elapsedReplicationDuration
+             ~f:ISO8601DatetimeString.to_value));
+        ("failbackLaunchType",
+          (Option.map x.failbackLaunchType ~f:FailbackLaunchType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let state =
-        (Option.map ~f:FailbackState.of_xml) (Xml.child xml_arg0 "state") in
+      let failbackLaunchType =
+        (Option.map ~f:FailbackLaunchType.of_xml)
+          (Xml.child xml_arg0 "failbackLaunchType") in
+      let elapsedReplicationDuration =
+        (Option.map ~f:ISO8601DatetimeString.of_xml)
+          (Xml.child xml_arg0 "elapsedReplicationDuration") in
       let firstByteDateTime =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "firstByteDateTime") in
       let failbackToOriginalServer =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "failbackToOriginalServer") in
-      let failbackJobID =
-        (Option.map ~f:JobID.of_xml) (Xml.child xml_arg0 "failbackJobID") in
-      let failbackInitiationTime =
-        (Option.map ~f:ISO8601DatetimeString.of_xml)
-          (Xml.child xml_arg0 "failbackInitiationTime") in
       let failbackClientLastSeenByServiceDateTime =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "failbackClientLastSeenByServiceDateTime") in
-      let failbackClientID =
-        (Option.map ~f:BoundedString.of_xml)
-          (Xml.child xml_arg0 "failbackClientID") in
-      let elapsedReplicationDuration =
-        (Option.map ~f:ISO8601DatetimeString.of_xml)
-          (Xml.child xml_arg0 "elapsedReplicationDuration") in
       let agentLastSeenByServiceDateTime =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "agentLastSeenByServiceDateTime") in
-      make ?state ?firstByteDateTime ?failbackToOriginalServer ?failbackJobID
-        ?failbackInitiationTime ?failbackClientLastSeenByServiceDateTime
-        ?failbackClientID ?elapsedReplicationDuration
-        ?agentLastSeenByServiceDateTime ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "state" FailbackState.of_json in
-      let firstByteDateTime =
-        field_map json "firstByteDateTime" ISO8601DatetimeString.of_json in
-      let failbackToOriginalServer =
-        field_map json "failbackToOriginalServer" Boolean.of_json in
-      let failbackJobID = field_map json "failbackJobID" JobID.of_json in
+      let state =
+        (Option.map ~f:FailbackState.of_xml) (Xml.child xml_arg0 "state") in
       let failbackInitiationTime =
-        field_map json "failbackInitiationTime" ISO8601DatetimeString.of_json in
-      let failbackClientLastSeenByServiceDateTime =
-        field_map json "failbackClientLastSeenByServiceDateTime"
-          ISO8601DatetimeString.of_json in
+        (Option.map ~f:ISO8601DatetimeString.of_xml)
+          (Xml.child xml_arg0 "failbackInitiationTime") in
+      let failbackJobID =
+        (Option.map ~f:JobID.of_xml) (Xml.child xml_arg0 "failbackJobID") in
       let failbackClientID =
-        field_map json "failbackClientID" BoundedString.of_json in
+        (Option.map ~f:BoundedString.of_xml)
+          (Xml.child xml_arg0 "failbackClientID") in
+      make ?failbackLaunchType ?elapsedReplicationDuration ?firstByteDateTime
+        ?failbackToOriginalServer ?failbackClientLastSeenByServiceDateTime
+        ?agentLastSeenByServiceDateTime ?state ?failbackInitiationTime
+        ?failbackJobID ?failbackClientID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failbackLaunchType =
+        field_map json__ "failbackLaunchType" FailbackLaunchType.of_json in
       let elapsedReplicationDuration =
-        field_map json "elapsedReplicationDuration"
+        field_map json__ "elapsedReplicationDuration"
+          ISO8601DatetimeString.of_json in
+      let firstByteDateTime =
+        field_map json__ "firstByteDateTime" ISO8601DatetimeString.of_json in
+      let failbackToOriginalServer =
+        field_map json__ "failbackToOriginalServer" Boolean.of_json in
+      let failbackClientLastSeenByServiceDateTime =
+        field_map json__ "failbackClientLastSeenByServiceDateTime"
           ISO8601DatetimeString.of_json in
       let agentLastSeenByServiceDateTime =
-        field_map json "agentLastSeenByServiceDateTime"
+        field_map json__ "agentLastSeenByServiceDateTime"
           ISO8601DatetimeString.of_json in
-      make ?state ?firstByteDateTime ?failbackToOriginalServer ?failbackJobID
-        ?failbackInitiationTime ?failbackClientLastSeenByServiceDateTime
-        ?failbackClientID ?elapsedReplicationDuration
-        ?agentLastSeenByServiceDateTime ()
+      let state = field_map json__ "state" FailbackState.of_json in
+      let failbackInitiationTime =
+        field_map json__ "failbackInitiationTime"
+          ISO8601DatetimeString.of_json in
+      let failbackJobID = field_map json__ "failbackJobID" JobID.of_json in
+      let failbackClientID =
+        field_map json__ "failbackClientID" BoundedString.of_json in
+      make ?failbackLaunchType ?elapsedReplicationDuration ?firstByteDateTime
+        ?failbackToOriginalServer ?failbackClientLastSeenByServiceDateTime
+        ?agentLastSeenByServiceDateTime ?state ?failbackInitiationTime
+        ?failbackJobID ?failbackClientID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing failback related information of the Recovery Instance."]
@@ -3208,84 +5191,184 @@ module RecoveryInstanceProperties =
   struct
     type nonrec t =
       {
-      cpus: Cpus.t option [@ocaml.doc "An array of CPUs."];
-      disks: RecoveryInstanceDisks.t option [@ocaml.doc "An array of disks."];
-      identificationHints: IdentificationHints.t option
-        [@ocaml.doc "Hints used to uniquely identify a machine."];
       lastUpdatedDateTime: ISO8601DatetimeString.t option
         [@ocaml.doc
           "The date and time the Recovery Instance properties were last updated on."];
+      identificationHints: IdentificationHints.t option
+        [@ocaml.doc "Hints used to uniquely identify a machine."];
       networkInterfaces: NetworkInterfaces.t option
         [@ocaml.doc "An array of network interfaces."];
-      os: OS.t option [@ocaml.doc "Operating system."];
+      disks: RecoveryInstanceDisks.t option [@ocaml.doc "An array of disks."];
+      cpus: Cpus.t option [@ocaml.doc "An array of CPUs."];
       ramBytes: PositiveInteger.t option
-        [@ocaml.doc "The amount of RAM in bytes."]}
-    let make ?cpus =
-      fun ?disks ->
-        fun ?identificationHints ->
-          fun ?lastUpdatedDateTime ->
-            fun ?networkInterfaces ->
-              fun ?os ->
-                fun ?ramBytes ->
+        [@ocaml.doc "The amount of RAM in bytes."];
+      os: OS.t option [@ocaml.doc "Operating system."]}
+    let make ?lastUpdatedDateTime =
+      fun ?identificationHints ->
+        fun ?networkInterfaces ->
+          fun ?disks ->
+            fun ?cpus ->
+              fun ?ramBytes ->
+                fun ?os ->
                   fun () ->
                     {
-                      cpus;
-                      disks;
-                      identificationHints;
                       lastUpdatedDateTime;
+                      identificationHints;
                       networkInterfaces;
-                      os;
-                      ramBytes
+                      disks;
+                      cpus;
+                      ramBytes;
+                      os
                     }
     let to_value x =
       structure_to_value
-        [("cpus", (Option.map x.cpus ~f:Cpus.to_value));
-        ("disks", (Option.map x.disks ~f:RecoveryInstanceDisks.to_value));
+        [("lastUpdatedDateTime",
+           (Option.map x.lastUpdatedDateTime
+              ~f:ISO8601DatetimeString.to_value));
         ("identificationHints",
           (Option.map x.identificationHints ~f:IdentificationHints.to_value));
-        ("lastUpdatedDateTime",
-          (Option.map x.lastUpdatedDateTime ~f:ISO8601DatetimeString.to_value));
         ("networkInterfaces",
           (Option.map x.networkInterfaces ~f:NetworkInterfaces.to_value));
-        ("os", (Option.map x.os ~f:OS.to_value));
-        ("ramBytes", (Option.map x.ramBytes ~f:PositiveInteger.to_value))]
+        ("disks", (Option.map x.disks ~f:RecoveryInstanceDisks.to_value));
+        ("cpus", (Option.map x.cpus ~f:Cpus.to_value));
+        ("ramBytes", (Option.map x.ramBytes ~f:PositiveInteger.to_value));
+        ("os", (Option.map x.os ~f:OS.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let os = (Option.map ~f:OS.of_xml) (Xml.child xml_arg0 "os") in
       let ramBytes =
         (Option.map ~f:PositiveInteger.of_xml)
           (Xml.child xml_arg0 "ramBytes") in
-      let os = (Option.map ~f:OS.of_xml) (Xml.child xml_arg0 "os") in
-      let networkInterfaces =
-        (Option.map ~f:NetworkInterfaces.of_xml)
-          (Xml.child xml_arg0 "networkInterfaces") in
-      let lastUpdatedDateTime =
-        (Option.map ~f:ISO8601DatetimeString.of_xml)
-          (Xml.child xml_arg0 "lastUpdatedDateTime") in
-      let identificationHints =
-        (Option.map ~f:IdentificationHints.of_xml)
-          (Xml.child xml_arg0 "identificationHints") in
+      let cpus = (Option.map ~f:Cpus.of_xml) (Xml.child xml_arg0 "cpus") in
       let disks =
         (Option.map ~f:RecoveryInstanceDisks.of_xml)
           (Xml.child xml_arg0 "disks") in
-      let cpus = (Option.map ~f:Cpus.of_xml) (Xml.child xml_arg0 "cpus") in
-      make ?ramBytes ?os ?networkInterfaces ?lastUpdatedDateTime
-        ?identificationHints ?disks ?cpus ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ramBytes = field_map json "ramBytes" PositiveInteger.of_json in
-      let os = field_map json "os" OS.of_json in
       let networkInterfaces =
-        field_map json "networkInterfaces" NetworkInterfaces.of_json in
-      let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" ISO8601DatetimeString.of_json in
+        (Option.map ~f:NetworkInterfaces.of_xml)
+          (Xml.child xml_arg0 "networkInterfaces") in
       let identificationHints =
-        field_map json "identificationHints" IdentificationHints.of_json in
-      let disks = field_map json "disks" RecoveryInstanceDisks.of_json in
-      let cpus = field_map json "cpus" Cpus.of_json in
-      make ?ramBytes ?os ?networkInterfaces ?lastUpdatedDateTime
-        ?identificationHints ?disks ?cpus ()
+        (Option.map ~f:IdentificationHints.of_xml)
+          (Xml.child xml_arg0 "identificationHints") in
+      let lastUpdatedDateTime =
+        (Option.map ~f:ISO8601DatetimeString.of_xml)
+          (Xml.child xml_arg0 "lastUpdatedDateTime") in
+      make ?os ?ramBytes ?cpus ?disks ?networkInterfaces ?identificationHints
+        ?lastUpdatedDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let os = field_map json__ "os" OS.of_json in
+      let ramBytes = field_map json__ "ramBytes" PositiveInteger.of_json in
+      let cpus = field_map json__ "cpus" Cpus.of_json in
+      let disks = field_map json__ "disks" RecoveryInstanceDisks.of_json in
+      let networkInterfaces =
+        field_map json__ "networkInterfaces" NetworkInterfaces.of_json in
+      let identificationHints =
+        field_map json__ "identificationHints" IdentificationHints.of_json in
+      let lastUpdatedDateTime =
+        field_map json__ "lastUpdatedDateTime" ISO8601DatetimeString.of_json in
+      make ?os ?ramBytes ?cpus ?disks ?networkInterfaces ?identificationHints
+        ?lastUpdatedDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Properties of the Recovery Instance machine."]
+module LaunchConfigurationTemplateID =
+  struct
+    type nonrec t = string
+    let context_ = "LaunchConfigurationTemplateID"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:21) >>=
+             (fun () ->
+                (check_string_max i ~max:21) >>=
+                  (fun () -> check_pattern i ~pattern:"lct-[0-9a-zA-Z]{17}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LaunchConfigurationTemplateID" j
+    let to_json = simple_to_json to_value
+  end
+module LaunchDisposition =
+  struct
+    type nonrec t =
+      | STOPPED 
+      | STARTED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STOPPED -> "STOPPED"
+      | STARTED -> "STARTED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STOPPED" -> STOPPED
+      | "STARTED" -> STARTED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LaunchDisposition" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LaunchDisposition" j)
+    let to_json = simple_to_json to_value
+  end
+module Licensing =
+  struct
+    type nonrec t =
+      {
+      osByol: Boolean.t option
+        [@ocaml.doc "Whether to enable \"Bring your own license\" or not."]}
+    let make ?osByol = fun () -> { osByol }
+    let to_value x =
+      structure_to_value
+        [("osByol", (Option.map x.osByol ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let osByol =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "osByol") in
+      make ?osByol ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let osByol = field_map json__ "osByol" Boolean.of_json in
+      make ?osByol ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configuration of a machine's license."]
+module TargetInstanceTypeRightSizingMethod =
+  struct
+    type nonrec t =
+      | NONE 
+      | BASIC 
+      | IN_AWS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NONE -> "NONE"
+      | BASIC -> "BASIC"
+      | IN_AWS -> "IN_AWS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NONE" -> NONE
+      | "BASIC" -> BASIC
+      | "IN_AWS" -> IN_AWS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration TargetInstanceTypeRightSizingMethod" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"TargetInstanceTypeRightSizingMethod" j)
+    let to_json = simple_to_json to_value
+  end
 module InitiatedBy =
   struct
     type nonrec t =
@@ -3294,6 +5377,10 @@ module InitiatedBy =
       | FAILBACK 
       | DIAGNOSTIC 
       | TERMINATE_RECOVERY_INSTANCES 
+      | TARGET_ACCOUNT 
+      | CREATE_NETWORK_RECOVERY 
+      | UPDATE_NETWORK_RECOVERY 
+      | ASSOCIATE_NETWORK_RECOVERY 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3303,6 +5390,10 @@ module InitiatedBy =
       | FAILBACK -> "FAILBACK"
       | DIAGNOSTIC -> "DIAGNOSTIC"
       | TERMINATE_RECOVERY_INSTANCES -> "TERMINATE_RECOVERY_INSTANCES"
+      | TARGET_ACCOUNT -> "TARGET_ACCOUNT"
+      | CREATE_NETWORK_RECOVERY -> "CREATE_NETWORK_RECOVERY"
+      | UPDATE_NETWORK_RECOVERY -> "UPDATE_NETWORK_RECOVERY"
+      | ASSOCIATE_NETWORK_RECOVERY -> "ASSOCIATE_NETWORK_RECOVERY"
       | Non_static_id s -> s
     let of_string =
       function
@@ -3311,6 +5402,10 @@ module InitiatedBy =
       | "FAILBACK" -> FAILBACK
       | "DIAGNOSTIC" -> DIAGNOSTIC
       | "TERMINATE_RECOVERY_INSTANCES" -> TERMINATE_RECOVERY_INSTANCES
+      | "TARGET_ACCOUNT" -> TARGET_ACCOUNT
+      | "CREATE_NETWORK_RECOVERY" -> CREATE_NETWORK_RECOVERY
+      | "UPDATE_NETWORK_RECOVERY" -> UPDATE_NETWORK_RECOVERY
+      | "ASSOCIATE_NETWORK_RECOVERY" -> ASSOCIATE_NETWORK_RECOVERY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3353,17 +5448,20 @@ module JobType =
     type nonrec t =
       | LAUNCH 
       | TERMINATE 
+      | CREATE_CONVERTED_SNAPSHOT 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | LAUNCH -> "LAUNCH"
       | TERMINATE -> "TERMINATE"
+      | CREATE_CONVERTED_SNAPSHOT -> "CREATE_CONVERTED_SNAPSHOT"
       | Non_static_id s -> s
     let of_string =
       function
       | "LAUNCH" -> LAUNCH
       | "TERMINATE" -> TERMINATE
+      | "CREATE_CONVERTED_SNAPSHOT" -> CREATE_CONVERTED_SNAPSHOT
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3373,10 +5471,42 @@ module JobType =
     let of_json j = of_string (string_of_json ~kind:"JobType" j)
     let to_json = simple_to_json to_value
   end
+module ParticipatingResources =
+  struct
+    type nonrec t = ParticipatingResource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ParticipatingResource.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ParticipatingResource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ParticipatingResources"
+        ~of_json:ParticipatingResource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ParticipatingServers =
   struct
     type nonrec t = ParticipatingServer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParticipatingServer.to_value)) |>
         (fun x -> `List x)
@@ -3419,6 +5549,16 @@ module JobLogEvent =
       | LAUNCH_FAILED 
       | JOB_CANCEL 
       | JOB_END 
+      | DEPLOY_NETWORK_CONFIGURATION_START 
+      | DEPLOY_NETWORK_CONFIGURATION_END 
+      | DEPLOY_NETWORK_CONFIGURATION_FAILED 
+      | UPDATE_NETWORK_CONFIGURATION_START 
+      | UPDATE_NETWORK_CONFIGURATION_END 
+      | UPDATE_NETWORK_CONFIGURATION_FAILED 
+      | UPDATE_LAUNCH_TEMPLATE_START 
+      | UPDATE_LAUNCH_TEMPLATE_END 
+      | UPDATE_LAUNCH_TEMPLATE_FAILED 
+      | NETWORK_RECOVERY_FAIL 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3440,6 +5580,22 @@ module JobLogEvent =
       | LAUNCH_FAILED -> "LAUNCH_FAILED"
       | JOB_CANCEL -> "JOB_CANCEL"
       | JOB_END -> "JOB_END"
+      | DEPLOY_NETWORK_CONFIGURATION_START ->
+          "DEPLOY_NETWORK_CONFIGURATION_START"
+      | DEPLOY_NETWORK_CONFIGURATION_END ->
+          "DEPLOY_NETWORK_CONFIGURATION_END"
+      | DEPLOY_NETWORK_CONFIGURATION_FAILED ->
+          "DEPLOY_NETWORK_CONFIGURATION_FAILED"
+      | UPDATE_NETWORK_CONFIGURATION_START ->
+          "UPDATE_NETWORK_CONFIGURATION_START"
+      | UPDATE_NETWORK_CONFIGURATION_END ->
+          "UPDATE_NETWORK_CONFIGURATION_END"
+      | UPDATE_NETWORK_CONFIGURATION_FAILED ->
+          "UPDATE_NETWORK_CONFIGURATION_FAILED"
+      | UPDATE_LAUNCH_TEMPLATE_START -> "UPDATE_LAUNCH_TEMPLATE_START"
+      | UPDATE_LAUNCH_TEMPLATE_END -> "UPDATE_LAUNCH_TEMPLATE_END"
+      | UPDATE_LAUNCH_TEMPLATE_FAILED -> "UPDATE_LAUNCH_TEMPLATE_FAILED"
+      | NETWORK_RECOVERY_FAIL -> "NETWORK_RECOVERY_FAIL"
       | Non_static_id s -> s
     let of_string =
       function
@@ -3460,6 +5616,22 @@ module JobLogEvent =
       | "LAUNCH_FAILED" -> LAUNCH_FAILED
       | "JOB_CANCEL" -> JOB_CANCEL
       | "JOB_END" -> JOB_END
+      | "DEPLOY_NETWORK_CONFIGURATION_START" ->
+          DEPLOY_NETWORK_CONFIGURATION_START
+      | "DEPLOY_NETWORK_CONFIGURATION_END" ->
+          DEPLOY_NETWORK_CONFIGURATION_END
+      | "DEPLOY_NETWORK_CONFIGURATION_FAILED" ->
+          DEPLOY_NETWORK_CONFIGURATION_FAILED
+      | "UPDATE_NETWORK_CONFIGURATION_START" ->
+          UPDATE_NETWORK_CONFIGURATION_START
+      | "UPDATE_NETWORK_CONFIGURATION_END" ->
+          UPDATE_NETWORK_CONFIGURATION_END
+      | "UPDATE_NETWORK_CONFIGURATION_FAILED" ->
+          UPDATE_NETWORK_CONFIGURATION_FAILED
+      | "UPDATE_LAUNCH_TEMPLATE_START" -> UPDATE_LAUNCH_TEMPLATE_START
+      | "UPDATE_LAUNCH_TEMPLATE_END" -> UPDATE_LAUNCH_TEMPLATE_END
+      | "UPDATE_LAUNCH_TEMPLATE_FAILED" -> UPDATE_LAUNCH_TEMPLATE_FAILED
+      | "NETWORK_RECOVERY_FAIL" -> NETWORK_RECOVERY_FAIL
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3473,59 +5645,108 @@ module JobLogEventData =
   struct
     type nonrec t =
       {
-      conversionServerID: EC2InstanceID.t option
-        [@ocaml.doc "The ID of a conversion server."];
-      rawError: LargeBoundedString.t option
-        [@ocaml.doc "A string representing a job error."];
       sourceServerID: SourceServerID.t option
         [@ocaml.doc "The ID of a Source Server."];
+      conversionServerID: EC2InstanceID.t option
+        [@ocaml.doc "The ID of a conversion server."];
       targetInstanceID: EC2InstanceID.t option
-        [@ocaml.doc "The ID of a Recovery Instance."]}
-    let make ?conversionServerID =
-      fun ?rawError ->
-        fun ?sourceServerID ->
-          fun ?targetInstanceID ->
-            fun () ->
-              {
-                conversionServerID;
-                rawError;
-                sourceServerID;
-                targetInstanceID
-              }
+        [@ocaml.doc "The ID of a Recovery Instance."];
+      rawError: LargeBoundedString.t option
+        [@ocaml.doc "A string representing a job error."];
+      conversionProperties: ConversionProperties.t option
+        [@ocaml.doc "Properties of a conversion job"];
+      eventResourceData: EventResourceData.t option
+        [@ocaml.doc "Properties of resource related to a job event."];
+      attemptCount: JobEventAttemptCount.t option
+        [@ocaml.doc "Retries for this operation."];
+      maxAttemptsCount: JobEventAttemptCount.t option
+        [@ocaml.doc
+          "The maximum number of retries that will be attempted if this operation failed."]}
+    let make ?sourceServerID =
+      fun ?conversionServerID ->
+        fun ?targetInstanceID ->
+          fun ?rawError ->
+            fun ?conversionProperties ->
+              fun ?eventResourceData ->
+                fun ?attemptCount ->
+                  fun ?maxAttemptsCount ->
+                    fun () ->
+                      {
+                        sourceServerID;
+                        conversionServerID;
+                        targetInstanceID;
+                        rawError;
+                        conversionProperties;
+                        eventResourceData;
+                        attemptCount;
+                        maxAttemptsCount
+                      }
     let to_value x =
       structure_to_value
-        [("conversionServerID",
-           (Option.map x.conversionServerID ~f:EC2InstanceID.to_value));
-        ("rawError", (Option.map x.rawError ~f:LargeBoundedString.to_value));
-        ("sourceServerID",
-          (Option.map x.sourceServerID ~f:SourceServerID.to_value));
+        [("sourceServerID",
+           (Option.map x.sourceServerID ~f:SourceServerID.to_value));
+        ("conversionServerID",
+          (Option.map x.conversionServerID ~f:EC2InstanceID.to_value));
         ("targetInstanceID",
-          (Option.map x.targetInstanceID ~f:EC2InstanceID.to_value))]
+          (Option.map x.targetInstanceID ~f:EC2InstanceID.to_value));
+        ("rawError", (Option.map x.rawError ~f:LargeBoundedString.to_value));
+        ("conversionProperties",
+          (Option.map x.conversionProperties ~f:ConversionProperties.to_value));
+        ("eventResourceData",
+          (Option.map x.eventResourceData ~f:EventResourceData.to_value));
+        ("attemptCount",
+          (Option.map x.attemptCount ~f:JobEventAttemptCount.to_value));
+        ("maxAttemptsCount",
+          (Option.map x.maxAttemptsCount ~f:JobEventAttemptCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let targetInstanceID =
-        (Option.map ~f:EC2InstanceID.of_xml)
-          (Xml.child xml_arg0 "targetInstanceID") in
-      let sourceServerID =
-        (Option.map ~f:SourceServerID.of_xml)
-          (Xml.child xml_arg0 "sourceServerID") in
+      let maxAttemptsCount =
+        (Option.map ~f:JobEventAttemptCount.of_xml)
+          (Xml.child xml_arg0 "maxAttemptsCount") in
+      let attemptCount =
+        (Option.map ~f:JobEventAttemptCount.of_xml)
+          (Xml.child xml_arg0 "attemptCount") in
+      let eventResourceData =
+        (Option.map ~f:EventResourceData.of_xml)
+          (Xml.child xml_arg0 "eventResourceData") in
+      let conversionProperties =
+        (Option.map ~f:ConversionProperties.of_xml)
+          (Xml.child xml_arg0 "conversionProperties") in
       let rawError =
         (Option.map ~f:LargeBoundedString.of_xml)
           (Xml.child xml_arg0 "rawError") in
+      let targetInstanceID =
+        (Option.map ~f:EC2InstanceID.of_xml)
+          (Xml.child xml_arg0 "targetInstanceID") in
       let conversionServerID =
         (Option.map ~f:EC2InstanceID.of_xml)
           (Xml.child xml_arg0 "conversionServerID") in
-      make ?targetInstanceID ?sourceServerID ?rawError ?conversionServerID ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetInstanceID =
-        field_map json "targetInstanceID" EC2InstanceID.of_json in
       let sourceServerID =
-        field_map json "sourceServerID" SourceServerID.of_json in
-      let rawError = field_map json "rawError" LargeBoundedString.of_json in
+        (Option.map ~f:SourceServerID.of_xml)
+          (Xml.child xml_arg0 "sourceServerID") in
+      make ?maxAttemptsCount ?attemptCount ?eventResourceData
+        ?conversionProperties ?rawError ?targetInstanceID ?conversionServerID
+        ?sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxAttemptsCount =
+        field_map json__ "maxAttemptsCount" JobEventAttemptCount.of_json in
+      let attemptCount =
+        field_map json__ "attemptCount" JobEventAttemptCount.of_json in
+      let eventResourceData =
+        field_map json__ "eventResourceData" EventResourceData.of_json in
+      let conversionProperties =
+        field_map json__ "conversionProperties" ConversionProperties.of_json in
+      let rawError = field_map json__ "rawError" LargeBoundedString.of_json in
+      let targetInstanceID =
+        field_map json__ "targetInstanceID" EC2InstanceID.of_json in
       let conversionServerID =
-        field_map json "conversionServerID" EC2InstanceID.of_json in
-      make ?targetInstanceID ?sourceServerID ?rawError ?conversionServerID ()
+        field_map json__ "conversionServerID" EC2InstanceID.of_json in
+      let sourceServerID =
+        field_map json__ "sourceServerID" SourceServerID.of_json in
+      make ?maxAttemptsCount ?attemptCount ?eventResourceData
+        ?conversionProperties ?rawError ?targetInstanceID ?conversionServerID
+        ?sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Metadata associated with a Job log."]
 module ReplicationConfigurationReplicatedDisk =
@@ -3534,120 +5755,282 @@ module ReplicationConfigurationReplicatedDisk =
       {
       deviceName: BoundedString.t option
         [@ocaml.doc "The name of the device."];
-      iops: PositiveInteger.t option
-        [@ocaml.doc
-          "The requested number of I/O operations per second (IOPS)."];
       isBootDisk: Boolean.t option
         [@ocaml.doc "Whether to boot from this disk or not."];
       stagingDiskType:
         ReplicationConfigurationReplicatedDiskStagingDiskType.t option
         [@ocaml.doc
           "The Staging Disk EBS volume type to be used during replication."];
+      iops: PositiveInteger.t option
+        [@ocaml.doc
+          "The requested number of I/O operations per second (IOPS)."];
       throughput: PositiveInteger.t option
         [@ocaml.doc
-          "The throughput to use for the EBS volume in MiB/s. This parameter is valid only for gp3 volumes."]}
+          "The throughput to use for the EBS volume in MiB/s. This parameter is valid only for gp3 volumes."];
+      optimizedStagingDiskType:
+        ReplicationConfigurationReplicatedDiskStagingDiskType.t option
+        [@ocaml.doc
+          "The Staging Disk EBS volume type to be used during replication when stagingDiskType is set to Auto. This is a read-only field."]}
     let make ?deviceName =
-      fun ?iops ->
-        fun ?isBootDisk ->
-          fun ?stagingDiskType ->
+      fun ?isBootDisk ->
+        fun ?stagingDiskType ->
+          fun ?iops ->
             fun ?throughput ->
-              fun () ->
-                { deviceName; iops; isBootDisk; stagingDiskType; throughput }
+              fun ?optimizedStagingDiskType ->
+                fun () ->
+                  {
+                    deviceName;
+                    isBootDisk;
+                    stagingDiskType;
+                    iops;
+                    throughput;
+                    optimizedStagingDiskType
+                  }
     let to_value x =
       structure_to_value
         [("deviceName", (Option.map x.deviceName ~f:BoundedString.to_value));
-        ("iops", (Option.map x.iops ~f:PositiveInteger.to_value));
         ("isBootDisk", (Option.map x.isBootDisk ~f:Boolean.to_value));
         ("stagingDiskType",
           (Option.map x.stagingDiskType
              ~f:ReplicationConfigurationReplicatedDiskStagingDiskType.to_value));
-        ("throughput", (Option.map x.throughput ~f:PositiveInteger.to_value))]
+        ("iops", (Option.map x.iops ~f:PositiveInteger.to_value));
+        ("throughput", (Option.map x.throughput ~f:PositiveInteger.to_value));
+        ("optimizedStagingDiskType",
+          (Option.map x.optimizedStagingDiskType
+             ~f:ReplicationConfigurationReplicatedDiskStagingDiskType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let optimizedStagingDiskType =
+        (Option.map
+           ~f:ReplicationConfigurationReplicatedDiskStagingDiskType.of_xml)
+          (Xml.child xml_arg0 "optimizedStagingDiskType") in
       let throughput =
         (Option.map ~f:PositiveInteger.of_xml)
           (Xml.child xml_arg0 "throughput") in
+      let iops =
+        (Option.map ~f:PositiveInteger.of_xml) (Xml.child xml_arg0 "iops") in
       let stagingDiskType =
         (Option.map
            ~f:ReplicationConfigurationReplicatedDiskStagingDiskType.of_xml)
           (Xml.child xml_arg0 "stagingDiskType") in
       let isBootDisk =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isBootDisk") in
-      let iops =
-        (Option.map ~f:PositiveInteger.of_xml) (Xml.child xml_arg0 "iops") in
       let deviceName =
         (Option.map ~f:BoundedString.of_xml)
           (Xml.child xml_arg0 "deviceName") in
-      make ?throughput ?stagingDiskType ?isBootDisk ?iops ?deviceName ()
+      make ?optimizedStagingDiskType ?throughput ?iops ?stagingDiskType
+        ?isBootDisk ?deviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let throughput = field_map json "throughput" PositiveInteger.of_json in
-      let stagingDiskType =
-        field_map json "stagingDiskType"
+    let of_json json__ =
+      let optimizedStagingDiskType =
+        field_map json__ "optimizedStagingDiskType"
           ReplicationConfigurationReplicatedDiskStagingDiskType.of_json in
-      let isBootDisk = field_map json "isBootDisk" Boolean.of_json in
-      let iops = field_map json "iops" PositiveInteger.of_json in
-      let deviceName = field_map json "deviceName" BoundedString.of_json in
-      make ?throughput ?stagingDiskType ?isBootDisk ?iops ?deviceName ()
+      let throughput = field_map json__ "throughput" PositiveInteger.of_json in
+      let iops = field_map json__ "iops" PositiveInteger.of_json in
+      let stagingDiskType =
+        field_map json__ "stagingDiskType"
+          ReplicationConfigurationReplicatedDiskStagingDiskType.of_json in
+      let isBootDisk = field_map json__ "isBootDisk" Boolean.of_json in
+      let deviceName = field_map json__ "deviceName" BoundedString.of_json in
+      make ?optimizedStagingDiskType ?throughput ?iops ?stagingDiskType
+        ?isBootDisk ?deviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration of a disk of the Source Server to be replicated."]
+module StartSourceNetworkRecoveryRequestNetworkEntry =
+  struct
+    type nonrec t =
+      {
+      sourceNetworkID: SourceNetworkID.t
+        [@ocaml.doc "The ID of the Source Network you want to recover."];
+      cfnStackName: CfnStackName.t option
+        [@ocaml.doc
+          "CloudFormation stack name to be used for recovering the network."]}
+    let context_ = "StartSourceNetworkRecoveryRequestNetworkEntry"
+    let make ?cfnStackName =
+      fun ~sourceNetworkID -> fun () -> { cfnStackName; sourceNetworkID }
+    let to_value x =
+      structure_to_value
+        [("sourceNetworkID",
+           (Some (SourceNetworkID.to_value x.sourceNetworkID)));
+        ("cfnStackName",
+          (Option.map x.cfnStackName ~f:CfnStackName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cfnStackName =
+        (Option.map ~f:CfnStackName.of_xml)
+          (Xml.child xml_arg0 "cfnStackName") in
+      let sourceNetworkID =
+        SourceNetworkID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceNetworkID") in
+      make ?cfnStackName ~sourceNetworkID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cfnStackName = field_map json__ "cfnStackName" CfnStackName.of_json in
+      let sourceNetworkID =
+        field_map_exn json__ "sourceNetworkID" SourceNetworkID.of_json in
+      make ?cfnStackName ~sourceNetworkID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An object representing the Source Network to recover."]
 module StartRecoveryRequestSourceServer =
   struct
     type nonrec t =
       {
+      sourceServerID: SourceServerID.t
+        [@ocaml.doc "The ID of the Source Server you want to recover."];
       recoverySnapshotID: RecoverySnapshotID.t option
         [@ocaml.doc
-          "The ID of a Recovery Snapshot we want to recover from. Omit this field to launch from the latest data by taking an on-demand snapshot."];
-      sourceServerID: SourceServerID.t
-        [@ocaml.doc "The ID of the Source Server you want to recover."]}
+          "The ID of a Recovery Snapshot we want to recover from. Omit this field to launch from the latest data by taking an on-demand snapshot."]}
     let context_ = "StartRecoveryRequestSourceServer"
     let make ?recoverySnapshotID =
       fun ~sourceServerID -> fun () -> { recoverySnapshotID; sourceServerID }
     let to_value x =
       structure_to_value
-        [("recoverySnapshotID",
-           (Option.map x.recoverySnapshotID ~f:RecoverySnapshotID.to_value));
-        ("sourceServerID", (Some (SourceServerID.to_value x.sourceServerID)))]
+        [("sourceServerID",
+           (Some (SourceServerID.to_value x.sourceServerID)));
+        ("recoverySnapshotID",
+          (Option.map x.recoverySnapshotID ~f:RecoverySnapshotID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sourceServerID =
-        SourceServerID.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       let recoverySnapshotID =
         (Option.map ~f:RecoverySnapshotID.of_xml)
           (Xml.child xml_arg0 "recoverySnapshotID") in
-      make ~sourceServerID ?recoverySnapshotID ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let sourceServerID =
-        field_map_exn json "sourceServerID" SourceServerID.of_json in
+        SourceServerID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
+      make ?recoverySnapshotID ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let recoverySnapshotID =
-        field_map json "recoverySnapshotID" RecoverySnapshotID.of_json in
-      make ~sourceServerID ?recoverySnapshotID ()
+        field_map json__ "recoverySnapshotID" RecoverySnapshotID.of_json in
+      let sourceServerID =
+        field_map_exn json__ "sourceServerID" SourceServerID.of_json in
+      make ?recoverySnapshotID ~sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing the Source Server to recover."]
+module Account =
+  struct
+    type nonrec t =
+      {
+      accountID: AccountID.t option [@ocaml.doc "Account ID of AWS account."]}
+    let make ?accountID = fun () -> { accountID }
+    let to_value x =
+      structure_to_value
+        [("accountID", (Option.map x.accountID ~f:AccountID.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountID =
+        (Option.map ~f:AccountID.of_xml) (Xml.child xml_arg0 "accountID") in
+      make ?accountID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountID = field_map json__ "accountID" AccountID.of_json in
+      make ?accountID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "AWS account."]
+module LaunchActionIds =
+  struct
+    type nonrec t = LaunchActionId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LaunchActionId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LaunchActionId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LaunchActionIds" ~of_json:LaunchActionId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module StagingSourceServer =
+  struct
+    type nonrec t =
+      {
+      hostname: BoundedString.t option
+        [@ocaml.doc "Hostname of staging source server."];
+      arn: SourceServerARN.t option
+        [@ocaml.doc "The ARN of the source server."];
+      tags: TagsMap.t option
+        [@ocaml.doc
+          "A list of tags associated with the staging source server."]}
+    let make ?hostname =
+      fun ?arn -> fun ?tags -> fun () -> { hostname; arn; tags }
+    let to_value x =
+      structure_to_value
+        [("hostname", (Option.map x.hostname ~f:BoundedString.to_value));
+        ("arn", (Option.map x.arn ~f:SourceServerARN.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let arn =
+        (Option.map ~f:SourceServerARN.of_xml) (Xml.child xml_arg0 "arn") in
+      let hostname =
+        (Option.map ~f:BoundedString.of_xml) (Xml.child xml_arg0 "hostname") in
+      make ?tags ?arn ?hostname ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let arn = field_map json__ "arn" SourceServerARN.of_json in
+      let hostname = field_map json__ "hostname" BoundedString.of_json in
+      make ?tags ?arn ?hostname ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Source server in staging account that extended source server connected to."]
 module SourceServer =
   struct
     type nonrec t =
       {
+      sourceServerID: SourceServerID.t option
+        [@ocaml.doc "The ID of the Source Server."];
       arn: ARN.t option [@ocaml.doc "The ARN of the Source Server."];
-      dataReplicationInfo: DataReplicationInfo.t option
-        [@ocaml.doc "The Data Replication Info of the Source Server."];
-      lastLaunchResult: LastLaunchResult.t option
-        [@ocaml.doc
-          "The status of the last recovery launch of this Source Server."];
-      lifeCycle: LifeCycle.t option
-        [@ocaml.doc "The lifecycle information of this Source Server."];
+      tags: TagsMap.t option
+        [@ocaml.doc "The tags associated with the Source Server."];
       recoveryInstanceId: RecoveryInstanceID.t option
         [@ocaml.doc
           "The ID of the Recovery Instance associated with this Source Server."];
+      lastLaunchResult: LastLaunchResult.t option
+        [@ocaml.doc
+          "The status of the last recovery launch of this Source Server."];
+      dataReplicationInfo: DataReplicationInfo.t option
+        [@ocaml.doc "The Data Replication Info of the Source Server."];
+      lifeCycle: LifeCycle.t option
+        [@ocaml.doc "The lifecycle information of this Source Server."];
       sourceProperties: SourceProperties.t option
         [@ocaml.doc "The source properties of the Source Server."];
-      sourceServerID: SourceServerID.t option
-        [@ocaml.doc "The ID of the Source Server."];
-      tags: TagsMap.t option
-        [@ocaml.doc "The tags associated with the Source Server."]}
+      stagingArea: StagingArea.t option
+        [@ocaml.doc "The staging area of the source server."];
+      sourceCloudProperties: SourceCloudProperties.t option
+        [@ocaml.doc "Source cloud properties of the Source Server."];
+      replicationDirection: ReplicationDirection.t option
+        [@ocaml.doc "Replication direction of the Source Server."];
+      reversedDirectionSourceServerArn: SourceServerARN.t option
+        [@ocaml.doc
+          "For EC2-originated Source Servers which have been failed over and then failed back, this value will mean the ARN of the Source Server on the opposite replication direction."];
+      sourceNetworkID: SourceNetworkID.t option
+        [@ocaml.doc
+          "ID of the Source Network which is protecting this Source Server's network."];
+      agentVersion: AgentVersion.t option
+        [@ocaml.doc
+          "The version of the DRS agent installed on the source server"]}
     type nonrec error =
       [ `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
@@ -3655,25 +6038,37 @@ module SourceServer =
       | `ThrottlingException of ThrottlingException.t 
       | `UninitializedAccountException of UninitializedAccountException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?arn =
-      fun ?dataReplicationInfo ->
-        fun ?lastLaunchResult ->
-          fun ?lifeCycle ->
-            fun ?recoveryInstanceId ->
-              fun ?sourceProperties ->
-                fun ?sourceServerID ->
-                  fun ?tags ->
-                    fun () ->
-                      {
-                        arn;
-                        dataReplicationInfo;
-                        lastLaunchResult;
-                        lifeCycle;
-                        recoveryInstanceId;
-                        sourceProperties;
-                        sourceServerID;
-                        tags
-                      }
+    let make ?sourceServerID =
+      fun ?arn ->
+        fun ?tags ->
+          fun ?recoveryInstanceId ->
+            fun ?lastLaunchResult ->
+              fun ?dataReplicationInfo ->
+                fun ?lifeCycle ->
+                  fun ?sourceProperties ->
+                    fun ?stagingArea ->
+                      fun ?sourceCloudProperties ->
+                        fun ?replicationDirection ->
+                          fun ?reversedDirectionSourceServerArn ->
+                            fun ?sourceNetworkID ->
+                              fun ?agentVersion ->
+                                fun () ->
+                                  {
+                                    sourceServerID;
+                                    arn;
+                                    tags;
+                                    recoveryInstanceId;
+                                    lastLaunchResult;
+                                    dataReplicationInfo;
+                                    lifeCycle;
+                                    sourceProperties;
+                                    stagingArea;
+                                    sourceCloudProperties;
+                                    replicationDirection;
+                                    reversedDirectionSourceServerArn;
+                                    sourceNetworkID;
+                                    agentVersion
+                                  }
     let error_of_json name json =
       match name with
       | "ConflictException" ->
@@ -3734,62 +6129,140 @@ module SourceServer =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("arn", (Option.map x.arn ~f:ARN.to_value));
-        ("dataReplicationInfo",
-          (Option.map x.dataReplicationInfo ~f:DataReplicationInfo.to_value));
-        ("lastLaunchResult",
-          (Option.map x.lastLaunchResult ~f:LastLaunchResult.to_value));
-        ("lifeCycle", (Option.map x.lifeCycle ~f:LifeCycle.to_value));
+        [("sourceServerID",
+           (Option.map x.sourceServerID ~f:SourceServerID.to_value));
+        ("arn", (Option.map x.arn ~f:ARN.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
         ("recoveryInstanceId",
           (Option.map x.recoveryInstanceId ~f:RecoveryInstanceID.to_value));
+        ("lastLaunchResult",
+          (Option.map x.lastLaunchResult ~f:LastLaunchResult.to_value));
+        ("dataReplicationInfo",
+          (Option.map x.dataReplicationInfo ~f:DataReplicationInfo.to_value));
+        ("lifeCycle", (Option.map x.lifeCycle ~f:LifeCycle.to_value));
         ("sourceProperties",
           (Option.map x.sourceProperties ~f:SourceProperties.to_value));
-        ("sourceServerID",
-          (Option.map x.sourceServerID ~f:SourceServerID.to_value));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+        ("stagingArea", (Option.map x.stagingArea ~f:StagingArea.to_value));
+        ("sourceCloudProperties",
+          (Option.map x.sourceCloudProperties
+             ~f:SourceCloudProperties.to_value));
+        ("replicationDirection",
+          (Option.map x.replicationDirection ~f:ReplicationDirection.to_value));
+        ("reversedDirectionSourceServerArn",
+          (Option.map x.reversedDirectionSourceServerArn
+             ~f:SourceServerARN.to_value));
+        ("sourceNetworkID",
+          (Option.map x.sourceNetworkID ~f:SourceNetworkID.to_value));
+        ("agentVersion",
+          (Option.map x.agentVersion ~f:AgentVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let sourceServerID =
-        (Option.map ~f:SourceServerID.of_xml)
-          (Xml.child xml_arg0 "sourceServerID") in
+      let agentVersion =
+        (Option.map ~f:AgentVersion.of_xml)
+          (Xml.child xml_arg0 "agentVersion") in
+      let sourceNetworkID =
+        (Option.map ~f:SourceNetworkID.of_xml)
+          (Xml.child xml_arg0 "sourceNetworkID") in
+      let reversedDirectionSourceServerArn =
+        (Option.map ~f:SourceServerARN.of_xml)
+          (Xml.child xml_arg0 "reversedDirectionSourceServerArn") in
+      let replicationDirection =
+        (Option.map ~f:ReplicationDirection.of_xml)
+          (Xml.child xml_arg0 "replicationDirection") in
+      let sourceCloudProperties =
+        (Option.map ~f:SourceCloudProperties.of_xml)
+          (Xml.child xml_arg0 "sourceCloudProperties") in
+      let stagingArea =
+        (Option.map ~f:StagingArea.of_xml) (Xml.child xml_arg0 "stagingArea") in
       let sourceProperties =
         (Option.map ~f:SourceProperties.of_xml)
           (Xml.child xml_arg0 "sourceProperties") in
-      let recoveryInstanceId =
-        (Option.map ~f:RecoveryInstanceID.of_xml)
-          (Xml.child xml_arg0 "recoveryInstanceId") in
       let lifeCycle =
         (Option.map ~f:LifeCycle.of_xml) (Xml.child xml_arg0 "lifeCycle") in
-      let lastLaunchResult =
-        (Option.map ~f:LastLaunchResult.of_xml)
-          (Xml.child xml_arg0 "lastLaunchResult") in
       let dataReplicationInfo =
         (Option.map ~f:DataReplicationInfo.of_xml)
           (Xml.child xml_arg0 "dataReplicationInfo") in
-      let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?sourceServerID ?sourceProperties ?recoveryInstanceId
-        ?lifeCycle ?lastLaunchResult ?dataReplicationInfo ?arn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let sourceServerID =
-        field_map json "sourceServerID" SourceServerID.of_json in
-      let sourceProperties =
-        field_map json "sourceProperties" SourceProperties.of_json in
-      let recoveryInstanceId =
-        field_map json "recoveryInstanceId" RecoveryInstanceID.of_json in
-      let lifeCycle = field_map json "lifeCycle" LifeCycle.of_json in
       let lastLaunchResult =
-        field_map json "lastLaunchResult" LastLaunchResult.of_json in
+        (Option.map ~f:LastLaunchResult.of_xml)
+          (Xml.child xml_arg0 "lastLaunchResult") in
+      let recoveryInstanceId =
+        (Option.map ~f:RecoveryInstanceID.of_xml)
+          (Xml.child xml_arg0 "recoveryInstanceId") in
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "arn") in
+      let sourceServerID =
+        (Option.map ~f:SourceServerID.of_xml)
+          (Xml.child xml_arg0 "sourceServerID") in
+      make ?agentVersion ?sourceNetworkID ?reversedDirectionSourceServerArn
+        ?replicationDirection ?sourceCloudProperties ?stagingArea
+        ?sourceProperties ?lifeCycle ?dataReplicationInfo ?lastLaunchResult
+        ?recoveryInstanceId ?tags ?arn ?sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let agentVersion = field_map json__ "agentVersion" AgentVersion.of_json in
+      let sourceNetworkID =
+        field_map json__ "sourceNetworkID" SourceNetworkID.of_json in
+      let reversedDirectionSourceServerArn =
+        field_map json__ "reversedDirectionSourceServerArn"
+          SourceServerARN.of_json in
+      let replicationDirection =
+        field_map json__ "replicationDirection" ReplicationDirection.of_json in
+      let sourceCloudProperties =
+        field_map json__ "sourceCloudProperties"
+          SourceCloudProperties.of_json in
+      let stagingArea = field_map json__ "stagingArea" StagingArea.of_json in
+      let sourceProperties =
+        field_map json__ "sourceProperties" SourceProperties.of_json in
+      let lifeCycle = field_map json__ "lifeCycle" LifeCycle.of_json in
       let dataReplicationInfo =
-        field_map json "dataReplicationInfo" DataReplicationInfo.of_json in
-      let arn = field_map json "arn" ARN.of_json in
-      make ?tags ?sourceServerID ?sourceProperties ?recoveryInstanceId
-        ?lifeCycle ?lastLaunchResult ?dataReplicationInfo ?arn ()
+        field_map json__ "dataReplicationInfo" DataReplicationInfo.of_json in
+      let lastLaunchResult =
+        field_map json__ "lastLaunchResult" LastLaunchResult.of_json in
+      let recoveryInstanceId =
+        field_map json__ "recoveryInstanceId" RecoveryInstanceID.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let arn = field_map json__ "arn" ARN.of_json in
+      let sourceServerID =
+        field_map json__ "sourceServerID" SourceServerID.of_json in
+      make ?agentVersion ?sourceNetworkID ?reversedDirectionSourceServerArn
+        ?replicationDirection ?sourceCloudProperties ?stagingArea
+        ?sourceProperties ?lifeCycle ?dataReplicationInfo ?lastLaunchResult
+        ?recoveryInstanceId ?tags ?arn ?sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Disconnects a specific Source Server from Elastic Disaster Recovery. Data replication is stopped immediately. All AWS resources created by Elastic Disaster Recovery for enabling the replication of the Source Server will be terminated / deleted within 90 minutes. You cannot disconnect a Source Server if it has a Recovery Instance. If the agent on the Source Server has not been prevented from communicating with the Elastic Disaster Recovery service, then it will receive a command to uninstall itself (within approximately 10 minutes). The following properties of the SourceServer will be changed immediately: dataReplicationInfo.dataReplicationState will be set to DISCONNECTED; The totalStorageBytes property for each of dataReplicationInfo.replicatedDisks will be set to zero; dataReplicationInfo.lagDuration and dataReplicationInfo.lagDuration will be nullified."]
+module AccountIDs =
+  struct
+    type nonrec t = AccountID.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AccountID.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AccountID.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccountIDs" ~of_json:AccountID.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DescribeSourceServersRequestFiltersIDs =
   struct
     type nonrec t = SourceServerID.t list
@@ -3799,6 +6272,9 @@ module DescribeSourceServersRequestFiltersIDs =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SourceServerID.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3820,24 +6296,195 @@ module DescribeSourceServersRequestFiltersIDs =
         ~of_json:SourceServerID.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SourceNetwork =
+  struct
+    type nonrec t =
+      {
+      sourceNetworkID: SourceNetworkID.t option
+        [@ocaml.doc "Source Network ID."];
+      sourceVpcID: VpcID.t option
+        [@ocaml.doc "VPC ID protected by the Source Network."];
+      arn: ARN.t option [@ocaml.doc "The ARN of the Source Network."];
+      tags: TagsMap.t option
+        [@ocaml.doc "A list of tags associated with the Source Network."];
+      replicationStatus: ReplicationStatus.t option
+        [@ocaml.doc
+          "Status of Source Network Replication. Possible values: (a) STOPPED - Source Network is not replicating. (b) IN_PROGRESS - Source Network is being replicated. (c) PROTECTED - Source Network was replicated successfully and is being synchronized for changes. (d) ERROR - Source Network replication has failed"];
+      replicationStatusDetails: SensitiveBoundedString.t option
+        [@ocaml.doc
+          "Error details in case Source Network replication status is ERROR."];
+      cfnStackName: CfnStackName.t option
+        [@ocaml.doc
+          "CloudFormation stack name that was deployed for recovering the Source Network."];
+      sourceRegion: AwsRegion.t option
+        [@ocaml.doc
+          "Region containing the VPC protected by the Source Network."];
+      sourceAccountID: AccountID.t option
+        [@ocaml.doc
+          "Account ID containing the VPC protected by the Source Network."];
+      lastRecovery: RecoveryLifeCycle.t option
+        [@ocaml.doc
+          "An object containing information regarding the last recovery of the Source Network."];
+      launchedVpcID: VpcID.t option
+        [@ocaml.doc
+          "ID of the recovered VPC following Source Network recovery."]}
+    let make ?sourceNetworkID =
+      fun ?sourceVpcID ->
+        fun ?arn ->
+          fun ?tags ->
+            fun ?replicationStatus ->
+              fun ?replicationStatusDetails ->
+                fun ?cfnStackName ->
+                  fun ?sourceRegion ->
+                    fun ?sourceAccountID ->
+                      fun ?lastRecovery ->
+                        fun ?launchedVpcID ->
+                          fun () ->
+                            {
+                              sourceNetworkID;
+                              sourceVpcID;
+                              arn;
+                              tags;
+                              replicationStatus;
+                              replicationStatusDetails;
+                              cfnStackName;
+                              sourceRegion;
+                              sourceAccountID;
+                              lastRecovery;
+                              launchedVpcID
+                            }
+    let to_value x =
+      structure_to_value
+        [("sourceNetworkID",
+           (Option.map x.sourceNetworkID ~f:SourceNetworkID.to_value));
+        ("sourceVpcID", (Option.map x.sourceVpcID ~f:VpcID.to_value));
+        ("arn", (Option.map x.arn ~f:ARN.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("replicationStatus",
+          (Option.map x.replicationStatus ~f:ReplicationStatus.to_value));
+        ("replicationStatusDetails",
+          (Option.map x.replicationStatusDetails
+             ~f:SensitiveBoundedString.to_value));
+        ("cfnStackName",
+          (Option.map x.cfnStackName ~f:CfnStackName.to_value));
+        ("sourceRegion", (Option.map x.sourceRegion ~f:AwsRegion.to_value));
+        ("sourceAccountID",
+          (Option.map x.sourceAccountID ~f:AccountID.to_value));
+        ("lastRecovery",
+          (Option.map x.lastRecovery ~f:RecoveryLifeCycle.to_value));
+        ("launchedVpcID", (Option.map x.launchedVpcID ~f:VpcID.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let launchedVpcID =
+        (Option.map ~f:VpcID.of_xml) (Xml.child xml_arg0 "launchedVpcID") in
+      let lastRecovery =
+        (Option.map ~f:RecoveryLifeCycle.of_xml)
+          (Xml.child xml_arg0 "lastRecovery") in
+      let sourceAccountID =
+        (Option.map ~f:AccountID.of_xml)
+          (Xml.child xml_arg0 "sourceAccountID") in
+      let sourceRegion =
+        (Option.map ~f:AwsRegion.of_xml) (Xml.child xml_arg0 "sourceRegion") in
+      let cfnStackName =
+        (Option.map ~f:CfnStackName.of_xml)
+          (Xml.child xml_arg0 "cfnStackName") in
+      let replicationStatusDetails =
+        (Option.map ~f:SensitiveBoundedString.of_xml)
+          (Xml.child xml_arg0 "replicationStatusDetails") in
+      let replicationStatus =
+        (Option.map ~f:ReplicationStatus.of_xml)
+          (Xml.child xml_arg0 "replicationStatus") in
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "arn") in
+      let sourceVpcID =
+        (Option.map ~f:VpcID.of_xml) (Xml.child xml_arg0 "sourceVpcID") in
+      let sourceNetworkID =
+        (Option.map ~f:SourceNetworkID.of_xml)
+          (Xml.child xml_arg0 "sourceNetworkID") in
+      make ?launchedVpcID ?lastRecovery ?sourceAccountID ?sourceRegion
+        ?cfnStackName ?replicationStatusDetails ?replicationStatus ?tags ?arn
+        ?sourceVpcID ?sourceNetworkID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let launchedVpcID = field_map json__ "launchedVpcID" VpcID.of_json in
+      let lastRecovery =
+        field_map json__ "lastRecovery" RecoveryLifeCycle.of_json in
+      let sourceAccountID =
+        field_map json__ "sourceAccountID" AccountID.of_json in
+      let sourceRegion = field_map json__ "sourceRegion" AwsRegion.of_json in
+      let cfnStackName = field_map json__ "cfnStackName" CfnStackName.of_json in
+      let replicationStatusDetails =
+        field_map json__ "replicationStatusDetails"
+          SensitiveBoundedString.of_json in
+      let replicationStatus =
+        field_map json__ "replicationStatus" ReplicationStatus.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let arn = field_map json__ "arn" ARN.of_json in
+      let sourceVpcID = field_map json__ "sourceVpcID" VpcID.of_json in
+      let sourceNetworkID =
+        field_map json__ "sourceNetworkID" SourceNetworkID.of_json in
+      make ?launchedVpcID ?lastRecovery ?sourceAccountID ?sourceRegion
+        ?cfnStackName ?replicationStatusDetails ?replicationStatus ?tags ?arn
+        ?sourceVpcID ?sourceNetworkID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The ARN of the Source Network."]
+module DescribeSourceNetworksRequestFiltersIDs =
+  struct
+    type nonrec t = SourceNetworkID.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SourceNetworkID.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SourceNetworkID.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DescribeSourceNetworksRequestFiltersIDs"
+        ~of_json:SourceNetworkID.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ReplicationConfigurationTemplate =
   struct
     type nonrec t =
       {
+      replicationConfigurationTemplateID:
+        ReplicationConfigurationTemplateID.t option
+        [@ocaml.doc "The Replication Configuration Template ID."];
       arn: ARN.t option
         [@ocaml.doc "The Replication Configuration Template ARN."];
+      stagingAreaSubnetId: SubnetID.t option
+        [@ocaml.doc "The subnet to be used by the replication staging area."];
       associateDefaultSecurityGroup: Boolean.t option
         [@ocaml.doc
           "Whether to associate the default Elastic Disaster Recovery Security group with the Replication Configuration Template."];
-      bandwidthThrottling: PositiveInteger.t option
+      replicationServersSecurityGroupsIDs:
+        ReplicationServersSecurityGroupsIDs.t option
         [@ocaml.doc
-          "Configure bandwidth throttling for the outbound data transfer rate of the Source Server in Mbps."];
-      createPublicIP: Boolean.t option
+          "The security group IDs that will be used by the replication server."];
+      replicationServerInstanceType: EC2InstanceType.t option
         [@ocaml.doc
-          "Whether to create a Public IP for the Recovery Instance by default."];
-      dataPlaneRouting: ReplicationConfigurationDataPlaneRouting.t option
+          "The instance type to be used for the replication server."];
+      useDedicatedReplicationServer: Boolean.t option
         [@ocaml.doc
-          "The data plane routing mechanism that will be used for replication."];
+          "Whether to use a dedicated Replication Server in the replication staging area."];
       defaultLargeStagingDiskType:
         ReplicationConfigurationDefaultLargeStagingDiskType.t option
         [@ocaml.doc
@@ -3848,30 +6495,30 @@ module ReplicationConfigurationTemplate =
       ebsEncryptionKeyArn: ARN.t option
         [@ocaml.doc
           "The ARN of the EBS encryption key to be used during replication."];
-      pitPolicy: PITPolicy.t option
+      bandwidthThrottling: PositiveInteger.t option
         [@ocaml.doc
-          "The Point in time (PIT) policy to manage snapshots taken during replication."];
-      replicationConfigurationTemplateID:
-        ReplicationConfigurationTemplateID.t
-        [@ocaml.doc "The Replication Configuration Template ID."];
-      replicationServerInstanceType: EC2InstanceType.t option
+          "Configure bandwidth throttling for the outbound data transfer rate of the Source Server in Mbps."];
+      dataPlaneRouting: ReplicationConfigurationDataPlaneRouting.t option
         [@ocaml.doc
-          "The instance type to be used for the replication server."];
-      replicationServersSecurityGroupsIDs:
-        ReplicationServersSecurityGroupsIDs.t option
+          "The data plane routing mechanism that will be used for replication."];
+      createPublicIP: Boolean.t option
         [@ocaml.doc
-          "The security group IDs that will be used by the replication server."];
-      stagingAreaSubnetId: SubnetID.t option
-        [@ocaml.doc "The subnet to be used by the replication staging area."];
+          "Whether to create a Public IP for the Recovery Instance by default."];
       stagingAreaTags: TagsMap.t option
         [@ocaml.doc
           "A set of tags to be associated with all resources created in the replication staging area: EC2 replication server, EBS volumes, EBS snapshots, etc."];
       tags: TagsMap.t option
         [@ocaml.doc
           "A set of tags to be associated with the Replication Configuration Template resource."];
-      useDedicatedReplicationServer: Boolean.t option
+      pitPolicy: PITPolicy.t option
         [@ocaml.doc
-          "Whether to use a dedicated Replication Server in the replication staging area."]}
+          "The Point in time (PIT) policy to manage snapshots taken during replication."];
+      autoReplicateNewDisks: Boolean.t option
+        [@ocaml.doc
+          "Whether to allow the AWS replication agent to automatically replicate newly added disks."];
+      internetProtocol: InternetProtocol.t option
+        [@ocaml.doc
+          "Which version of the Internet Protocol to use for replication of data. (IPv4 or IPv6)"]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -3880,42 +6527,45 @@ module ReplicationConfigurationTemplate =
       | `UninitializedAccountException of UninitializedAccountException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ReplicationConfigurationTemplate"
-    let make ?arn =
-      fun ?associateDefaultSecurityGroup ->
-        fun ?bandwidthThrottling ->
-          fun ?createPublicIP ->
-            fun ?dataPlaneRouting ->
-              fun ?defaultLargeStagingDiskType ->
-                fun ?ebsEncryption ->
-                  fun ?ebsEncryptionKeyArn ->
-                    fun ?pitPolicy ->
-                      fun ?replicationServerInstanceType ->
-                        fun ?replicationServersSecurityGroupsIDs ->
-                          fun ?stagingAreaSubnetId ->
-                            fun ?stagingAreaTags ->
-                              fun ?tags ->
-                                fun ?useDedicatedReplicationServer ->
-                                  fun ~replicationConfigurationTemplateID ->
-                                    fun () ->
-                                      {
-                                        arn;
-                                        associateDefaultSecurityGroup;
-                                        bandwidthThrottling;
-                                        createPublicIP;
-                                        dataPlaneRouting;
-                                        defaultLargeStagingDiskType;
-                                        ebsEncryption;
-                                        ebsEncryptionKeyArn;
-                                        pitPolicy;
-                                        replicationServerInstanceType;
-                                        replicationServersSecurityGroupsIDs;
-                                        stagingAreaSubnetId;
-                                        stagingAreaTags;
-                                        tags;
-                                        useDedicatedReplicationServer;
-                                        replicationConfigurationTemplateID
-                                      }
+    let make ?replicationConfigurationTemplateID =
+      fun ?arn ->
+        fun ?stagingAreaSubnetId ->
+          fun ?associateDefaultSecurityGroup ->
+            fun ?replicationServersSecurityGroupsIDs ->
+              fun ?replicationServerInstanceType ->
+                fun ?useDedicatedReplicationServer ->
+                  fun ?defaultLargeStagingDiskType ->
+                    fun ?ebsEncryption ->
+                      fun ?ebsEncryptionKeyArn ->
+                        fun ?bandwidthThrottling ->
+                          fun ?dataPlaneRouting ->
+                            fun ?createPublicIP ->
+                              fun ?stagingAreaTags ->
+                                fun ?tags ->
+                                  fun ?pitPolicy ->
+                                    fun ?autoReplicateNewDisks ->
+                                      fun ?internetProtocol ->
+                                        fun () ->
+                                          {
+                                            replicationConfigurationTemplateID;
+                                            arn;
+                                            stagingAreaSubnetId;
+                                            associateDefaultSecurityGroup;
+                                            replicationServersSecurityGroupsIDs;
+                                            replicationServerInstanceType;
+                                            useDedicatedReplicationServer;
+                                            defaultLargeStagingDiskType;
+                                            ebsEncryption;
+                                            ebsEncryptionKeyArn;
+                                            bandwidthThrottling;
+                                            dataPlaneRouting;
+                                            createPublicIP;
+                                            stagingAreaTags;
+                                            tags;
+                                            pitPolicy;
+                                            autoReplicateNewDisks;
+                                            internetProtocol
+                                          }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3986,15 +6636,22 @@ module ReplicationConfigurationTemplate =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("arn", (Option.map x.arn ~f:ARN.to_value));
+        [("replicationConfigurationTemplateID",
+           (Option.map x.replicationConfigurationTemplateID
+              ~f:ReplicationConfigurationTemplateID.to_value));
+        ("arn", (Option.map x.arn ~f:ARN.to_value));
+        ("stagingAreaSubnetId",
+          (Option.map x.stagingAreaSubnetId ~f:SubnetID.to_value));
         ("associateDefaultSecurityGroup",
           (Option.map x.associateDefaultSecurityGroup ~f:Boolean.to_value));
-        ("bandwidthThrottling",
-          (Option.map x.bandwidthThrottling ~f:PositiveInteger.to_value));
-        ("createPublicIP", (Option.map x.createPublicIP ~f:Boolean.to_value));
-        ("dataPlaneRouting",
-          (Option.map x.dataPlaneRouting
-             ~f:ReplicationConfigurationDataPlaneRouting.to_value));
+        ("replicationServersSecurityGroupsIDs",
+          (Option.map x.replicationServersSecurityGroupsIDs
+             ~f:ReplicationServersSecurityGroupsIDs.to_value));
+        ("replicationServerInstanceType",
+          (Option.map x.replicationServerInstanceType
+             ~f:EC2InstanceType.to_value));
+        ("useDedicatedReplicationServer",
+          (Option.map x.useDedicatedReplicationServer ~f:Boolean.to_value));
         ("defaultLargeStagingDiskType",
           (Option.map x.defaultLargeStagingDiskType
              ~f:ReplicationConfigurationDefaultLargeStagingDiskType.to_value));
@@ -4003,47 +6660,41 @@ module ReplicationConfigurationTemplate =
              ~f:ReplicationConfigurationEbsEncryption.to_value));
         ("ebsEncryptionKeyArn",
           (Option.map x.ebsEncryptionKeyArn ~f:ARN.to_value));
-        ("pitPolicy", (Option.map x.pitPolicy ~f:PITPolicy.to_value));
-        ("replicationConfigurationTemplateID",
-          (Some
-             (ReplicationConfigurationTemplateID.to_value
-                x.replicationConfigurationTemplateID)));
-        ("replicationServerInstanceType",
-          (Option.map x.replicationServerInstanceType
-             ~f:EC2InstanceType.to_value));
-        ("replicationServersSecurityGroupsIDs",
-          (Option.map x.replicationServersSecurityGroupsIDs
-             ~f:ReplicationServersSecurityGroupsIDs.to_value));
-        ("stagingAreaSubnetId",
-          (Option.map x.stagingAreaSubnetId ~f:SubnetID.to_value));
+        ("bandwidthThrottling",
+          (Option.map x.bandwidthThrottling ~f:PositiveInteger.to_value));
+        ("dataPlaneRouting",
+          (Option.map x.dataPlaneRouting
+             ~f:ReplicationConfigurationDataPlaneRouting.to_value));
+        ("createPublicIP", (Option.map x.createPublicIP ~f:Boolean.to_value));
         ("stagingAreaTags",
           (Option.map x.stagingAreaTags ~f:TagsMap.to_value));
         ("tags", (Option.map x.tags ~f:TagsMap.to_value));
-        ("useDedicatedReplicationServer",
-          (Option.map x.useDedicatedReplicationServer ~f:Boolean.to_value))]
+        ("pitPolicy", (Option.map x.pitPolicy ~f:PITPolicy.to_value));
+        ("autoReplicateNewDisks",
+          (Option.map x.autoReplicateNewDisks ~f:Boolean.to_value));
+        ("internetProtocol",
+          (Option.map x.internetProtocol ~f:InternetProtocol.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let useDedicatedReplicationServer =
+      let internetProtocol =
+        (Option.map ~f:InternetProtocol.of_xml)
+          (Xml.child xml_arg0 "internetProtocol") in
+      let autoReplicateNewDisks =
         (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "useDedicatedReplicationServer") in
+          (Xml.child xml_arg0 "autoReplicateNewDisks") in
+      let pitPolicy =
+        (Option.map ~f:PITPolicy.of_xml) (Xml.child xml_arg0 "pitPolicy") in
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       let stagingAreaTags =
         (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "stagingAreaTags") in
-      let stagingAreaSubnetId =
-        (Option.map ~f:SubnetID.of_xml)
-          (Xml.child xml_arg0 "stagingAreaSubnetId") in
-      let replicationServersSecurityGroupsIDs =
-        (Option.map ~f:ReplicationServersSecurityGroupsIDs.of_xml)
-          (Xml.child xml_arg0 "replicationServersSecurityGroupsIDs") in
-      let replicationServerInstanceType =
-        (Option.map ~f:EC2InstanceType.of_xml)
-          (Xml.child xml_arg0 "replicationServerInstanceType") in
-      let replicationConfigurationTemplateID =
-        ReplicationConfigurationTemplateID.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "replicationConfigurationTemplateID") in
-      let pitPolicy =
-        (Option.map ~f:PITPolicy.of_xml) (Xml.child xml_arg0 "pitPolicy") in
+      let createPublicIP =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "createPublicIP") in
+      let dataPlaneRouting =
+        (Option.map ~f:ReplicationConfigurationDataPlaneRouting.of_xml)
+          (Xml.child xml_arg0 "dataPlaneRouting") in
+      let bandwidthThrottling =
+        (Option.map ~f:PositiveInteger.of_xml)
+          (Xml.child xml_arg0 "bandwidthThrottling") in
       let ebsEncryptionKeyArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ebsEncryptionKeyArn") in
       let ebsEncryption =
@@ -4053,291 +6704,355 @@ module ReplicationConfigurationTemplate =
         (Option.map
            ~f:ReplicationConfigurationDefaultLargeStagingDiskType.of_xml)
           (Xml.child xml_arg0 "defaultLargeStagingDiskType") in
-      let dataPlaneRouting =
-        (Option.map ~f:ReplicationConfigurationDataPlaneRouting.of_xml)
-          (Xml.child xml_arg0 "dataPlaneRouting") in
-      let createPublicIP =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "createPublicIP") in
-      let bandwidthThrottling =
-        (Option.map ~f:PositiveInteger.of_xml)
-          (Xml.child xml_arg0 "bandwidthThrottling") in
+      let useDedicatedReplicationServer =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "useDedicatedReplicationServer") in
+      let replicationServerInstanceType =
+        (Option.map ~f:EC2InstanceType.of_xml)
+          (Xml.child xml_arg0 "replicationServerInstanceType") in
+      let replicationServersSecurityGroupsIDs =
+        (Option.map ~f:ReplicationServersSecurityGroupsIDs.of_xml)
+          (Xml.child xml_arg0 "replicationServersSecurityGroupsIDs") in
       let associateDefaultSecurityGroup =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "associateDefaultSecurityGroup") in
-      let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?useDedicatedReplicationServer ?tags ?stagingAreaTags
-        ?stagingAreaSubnetId ?replicationServersSecurityGroupsIDs
-        ?replicationServerInstanceType ~replicationConfigurationTemplateID
-        ?pitPolicy ?ebsEncryptionKeyArn ?ebsEncryption
-        ?defaultLargeStagingDiskType ?dataPlaneRouting ?createPublicIP
-        ?bandwidthThrottling ?associateDefaultSecurityGroup ?arn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let useDedicatedReplicationServer =
-        field_map json "useDedicatedReplicationServer" Boolean.of_json in
-      let tags = field_map json "tags" TagsMap.of_json in
-      let stagingAreaTags = field_map json "stagingAreaTags" TagsMap.of_json in
       let stagingAreaSubnetId =
-        field_map json "stagingAreaSubnetId" SubnetID.of_json in
-      let replicationServersSecurityGroupsIDs =
-        field_map json "replicationServersSecurityGroupsIDs"
-          ReplicationServersSecurityGroupsIDs.of_json in
-      let replicationServerInstanceType =
-        field_map json "replicationServerInstanceType"
-          EC2InstanceType.of_json in
+        (Option.map ~f:SubnetID.of_xml)
+          (Xml.child xml_arg0 "stagingAreaSubnetId") in
+      let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "arn") in
       let replicationConfigurationTemplateID =
-        field_map_exn json "replicationConfigurationTemplateID"
-          ReplicationConfigurationTemplateID.of_json in
-      let pitPolicy = field_map json "pitPolicy" PITPolicy.of_json in
+        (Option.map ~f:ReplicationConfigurationTemplateID.of_xml)
+          (Xml.child xml_arg0 "replicationConfigurationTemplateID") in
+      make ?internetProtocol ?autoReplicateNewDisks ?pitPolicy ?tags
+        ?stagingAreaTags ?createPublicIP ?dataPlaneRouting
+        ?bandwidthThrottling ?ebsEncryptionKeyArn ?ebsEncryption
+        ?defaultLargeStagingDiskType ?useDedicatedReplicationServer
+        ?replicationServerInstanceType ?replicationServersSecurityGroupsIDs
+        ?associateDefaultSecurityGroup ?stagingAreaSubnetId ?arn
+        ?replicationConfigurationTemplateID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let internetProtocol =
+        field_map json__ "internetProtocol" InternetProtocol.of_json in
+      let autoReplicateNewDisks =
+        field_map json__ "autoReplicateNewDisks" Boolean.of_json in
+      let pitPolicy = field_map json__ "pitPolicy" PITPolicy.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let stagingAreaTags =
+        field_map json__ "stagingAreaTags" TagsMap.of_json in
+      let createPublicIP = field_map json__ "createPublicIP" Boolean.of_json in
+      let dataPlaneRouting =
+        field_map json__ "dataPlaneRouting"
+          ReplicationConfigurationDataPlaneRouting.of_json in
+      let bandwidthThrottling =
+        field_map json__ "bandwidthThrottling" PositiveInteger.of_json in
       let ebsEncryptionKeyArn =
-        field_map json "ebsEncryptionKeyArn" ARN.of_json in
+        field_map json__ "ebsEncryptionKeyArn" ARN.of_json in
       let ebsEncryption =
-        field_map json "ebsEncryption"
+        field_map json__ "ebsEncryption"
           ReplicationConfigurationEbsEncryption.of_json in
       let defaultLargeStagingDiskType =
-        field_map json "defaultLargeStagingDiskType"
+        field_map json__ "defaultLargeStagingDiskType"
           ReplicationConfigurationDefaultLargeStagingDiskType.of_json in
-      let dataPlaneRouting =
-        field_map json "dataPlaneRouting"
-          ReplicationConfigurationDataPlaneRouting.of_json in
-      let createPublicIP = field_map json "createPublicIP" Boolean.of_json in
-      let bandwidthThrottling =
-        field_map json "bandwidthThrottling" PositiveInteger.of_json in
+      let useDedicatedReplicationServer =
+        field_map json__ "useDedicatedReplicationServer" Boolean.of_json in
+      let replicationServerInstanceType =
+        field_map json__ "replicationServerInstanceType"
+          EC2InstanceType.of_json in
+      let replicationServersSecurityGroupsIDs =
+        field_map json__ "replicationServersSecurityGroupsIDs"
+          ReplicationServersSecurityGroupsIDs.of_json in
       let associateDefaultSecurityGroup =
-        field_map json "associateDefaultSecurityGroup" Boolean.of_json in
-      let arn = field_map json "arn" ARN.of_json in
-      make ?useDedicatedReplicationServer ?tags ?stagingAreaTags
-        ?stagingAreaSubnetId ?replicationServersSecurityGroupsIDs
-        ?replicationServerInstanceType ~replicationConfigurationTemplateID
-        ?pitPolicy ?ebsEncryptionKeyArn ?ebsEncryption
-        ?defaultLargeStagingDiskType ?dataPlaneRouting ?createPublicIP
-        ?bandwidthThrottling ?associateDefaultSecurityGroup ?arn ()
+        field_map json__ "associateDefaultSecurityGroup" Boolean.of_json in
+      let stagingAreaSubnetId =
+        field_map json__ "stagingAreaSubnetId" SubnetID.of_json in
+      let arn = field_map json__ "arn" ARN.of_json in
+      let replicationConfigurationTemplateID =
+        field_map json__ "replicationConfigurationTemplateID"
+          ReplicationConfigurationTemplateID.of_json in
+      make ?internetProtocol ?autoReplicateNewDisks ?pitPolicy ?tags
+        ?stagingAreaTags ?createPublicIP ?dataPlaneRouting
+        ?bandwidthThrottling ?ebsEncryptionKeyArn ?ebsEncryption
+        ?defaultLargeStagingDiskType ?useDedicatedReplicationServer
+        ?replicationServerInstanceType ?replicationServersSecurityGroupsIDs
+        ?associateDefaultSecurityGroup ?stagingAreaSubnetId ?arn
+        ?replicationConfigurationTemplateID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new ReplicationConfigurationTemplate."]
 module RecoverySnapshot =
   struct
     type nonrec t =
       {
-      ebsSnapshots: EbsSnapshotsList.t option
-        [@ocaml.doc "A list of EBS snapshots."];
-      expectedTimestamp: ISO8601DatetimeString.t
-        [@ocaml.doc
-          "The timestamp of when we expect the snapshot to be taken."];
-      snapshotID: RecoverySnapshotID.t
+      snapshotID: RecoverySnapshotID.t option
         [@ocaml.doc "The ID of the Recovery Snapshot."];
-      sourceServerID: SourceServerID.t
+      sourceServerID: SourceServerID.t option
         [@ocaml.doc
           "The ID of the Source Server that the snapshot was taken for."];
+      expectedTimestamp: ISO8601DatetimeString.t option
+        [@ocaml.doc
+          "The timestamp of when we expect the snapshot to be taken."];
       timestamp: ISO8601DatetimeString.t option
-        [@ocaml.doc "The actual timestamp that the snapshot was taken."]}
-    let context_ = "RecoverySnapshot"
-    let make ?ebsSnapshots =
-      fun ?timestamp ->
-        fun ~expectedTimestamp ->
-          fun ~snapshotID ->
-            fun ~sourceServerID ->
+        [@ocaml.doc "The actual timestamp that the snapshot was taken."];
+      ebsSnapshots: EbsSnapshotsList.t option
+        [@ocaml.doc "A list of EBS snapshots."]}
+    let make ?snapshotID =
+      fun ?sourceServerID ->
+        fun ?expectedTimestamp ->
+          fun ?timestamp ->
+            fun ?ebsSnapshots ->
               fun () ->
                 {
-                  ebsSnapshots;
-                  timestamp;
-                  expectedTimestamp;
                   snapshotID;
-                  sourceServerID
+                  sourceServerID;
+                  expectedTimestamp;
+                  timestamp;
+                  ebsSnapshots
                 }
     let to_value x =
       structure_to_value
-        [("ebsSnapshots",
-           (Option.map x.ebsSnapshots ~f:EbsSnapshotsList.to_value));
+        [("snapshotID",
+           (Option.map x.snapshotID ~f:RecoverySnapshotID.to_value));
+        ("sourceServerID",
+          (Option.map x.sourceServerID ~f:SourceServerID.to_value));
         ("expectedTimestamp",
-          (Some (ISO8601DatetimeString.to_value x.expectedTimestamp)));
-        ("snapshotID", (Some (RecoverySnapshotID.to_value x.snapshotID)));
-        ("sourceServerID", (Some (SourceServerID.to_value x.sourceServerID)));
+          (Option.map x.expectedTimestamp ~f:ISO8601DatetimeString.to_value));
         ("timestamp",
-          (Option.map x.timestamp ~f:ISO8601DatetimeString.to_value))]
+          (Option.map x.timestamp ~f:ISO8601DatetimeString.to_value));
+        ("ebsSnapshots",
+          (Option.map x.ebsSnapshots ~f:EbsSnapshotsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let timestamp =
-        (Option.map ~f:ISO8601DatetimeString.of_xml)
-          (Xml.child xml_arg0 "timestamp") in
-      let sourceServerID =
-        SourceServerID.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
-      let snapshotID =
-        RecoverySnapshotID.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "snapshotID") in
-      let expectedTimestamp =
-        ISO8601DatetimeString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "expectedTimestamp") in
       let ebsSnapshots =
         (Option.map ~f:EbsSnapshotsList.of_xml)
           (Xml.child xml_arg0 "ebsSnapshots") in
-      make ?timestamp ~sourceServerID ~snapshotID ~expectedTimestamp
-        ?ebsSnapshots ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let timestamp =
-        field_map json "timestamp" ISO8601DatetimeString.of_json in
-      let sourceServerID =
-        field_map_exn json "sourceServerID" SourceServerID.of_json in
-      let snapshotID =
-        field_map_exn json "snapshotID" RecoverySnapshotID.of_json in
+        (Option.map ~f:ISO8601DatetimeString.of_xml)
+          (Xml.child xml_arg0 "timestamp") in
       let expectedTimestamp =
-        field_map_exn json "expectedTimestamp" ISO8601DatetimeString.of_json in
+        (Option.map ~f:ISO8601DatetimeString.of_xml)
+          (Xml.child xml_arg0 "expectedTimestamp") in
+      let sourceServerID =
+        (Option.map ~f:SourceServerID.of_xml)
+          (Xml.child xml_arg0 "sourceServerID") in
+      let snapshotID =
+        (Option.map ~f:RecoverySnapshotID.of_xml)
+          (Xml.child xml_arg0 "snapshotID") in
+      make ?ebsSnapshots ?timestamp ?expectedTimestamp ?sourceServerID
+        ?snapshotID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let ebsSnapshots =
-        field_map json "ebsSnapshots" EbsSnapshotsList.of_json in
-      make ?timestamp ~sourceServerID ~snapshotID ~expectedTimestamp
-        ?ebsSnapshots ()
+        field_map json__ "ebsSnapshots" EbsSnapshotsList.of_json in
+      let timestamp =
+        field_map json__ "timestamp" ISO8601DatetimeString.of_json in
+      let expectedTimestamp =
+        field_map json__ "expectedTimestamp" ISO8601DatetimeString.of_json in
+      let sourceServerID =
+        field_map json__ "sourceServerID" SourceServerID.of_json in
+      let snapshotID =
+        field_map json__ "snapshotID" RecoverySnapshotID.of_json in
+      make ?ebsSnapshots ?timestamp ?expectedTimestamp ?sourceServerID
+        ?snapshotID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A snapshot of a Source Server used during recovery."]
 module RecoveryInstance =
   struct
     type nonrec t =
       {
-      arn: ARN.t option [@ocaml.doc "The ARN of the Recovery Instance."];
-      dataReplicationInfo: RecoveryInstanceDataReplicationInfo.t option
-        [@ocaml.doc "The Data Replication Info of the Recovery Instance."];
       ec2InstanceID: EC2InstanceID.t option
         [@ocaml.doc "The EC2 instance ID of the Recovery Instance."];
       ec2InstanceState: EC2InstanceState.t option
         [@ocaml.doc
           "The state of the EC2 instance for this Recovery Instance."];
-      failback: RecoveryInstanceFailback.t option
-        [@ocaml.doc
-          "An object representing failback related information of the Recovery Instance."];
-      isDrill: Boolean.t option
-        [@ocaml.doc
-          "Whether this Recovery Instance was created for a drill or for an actual Recovery event."];
       jobID: JobID.t option
         [@ocaml.doc "The ID of the Job that created the Recovery Instance."];
-      pointInTimeSnapshotDateTime: ISO8601DatetimeString.t option
-        [@ocaml.doc
-          "The date and time of the Point in Time (PIT) snapshot that this Recovery Instance was launched from."];
       recoveryInstanceID: RecoveryInstanceID.t option
         [@ocaml.doc "The ID of the Recovery Instance."];
-      recoveryInstanceProperties: RecoveryInstanceProperties.t option
-        [@ocaml.doc "Properties of the Recovery Instance machine."];
       sourceServerID: SourceServerID.t option
         [@ocaml.doc
           "The Source Server ID that this Recovery Instance is associated with."];
+      arn: ARN.t option [@ocaml.doc "The ARN of the Recovery Instance."];
       tags: TagsMap.t option
         [@ocaml.doc
-          "An array of tags that are associated with the Recovery Instance."]}
-    let make ?arn =
-      fun ?dataReplicationInfo ->
-        fun ?ec2InstanceID ->
-          fun ?ec2InstanceState ->
-            fun ?failback ->
-              fun ?isDrill ->
-                fun ?jobID ->
-                  fun ?pointInTimeSnapshotDateTime ->
-                    fun ?recoveryInstanceID ->
+          "An array of tags that are associated with the Recovery Instance."];
+      failback: RecoveryInstanceFailback.t option
+        [@ocaml.doc
+          "An object representing failback related information of the Recovery Instance."];
+      dataReplicationInfo: RecoveryInstanceDataReplicationInfo.t option
+        [@ocaml.doc "The Data Replication Info of the Recovery Instance."];
+      recoveryInstanceProperties: RecoveryInstanceProperties.t option
+        [@ocaml.doc "Properties of the Recovery Instance machine."];
+      pointInTimeSnapshotDateTime: ISO8601DatetimeString.t option
+        [@ocaml.doc
+          "The date and time of the Point in Time (PIT) snapshot that this Recovery Instance was launched from."];
+      isDrill: Boolean.t option
+        [@ocaml.doc
+          "Whether this Recovery Instance was created for a drill or for an actual Recovery event."];
+      originEnvironment: OriginEnvironment.t option
+        [@ocaml.doc
+          "Environment (On Premises / AWS) of the instance that the recovery instance originated from."];
+      originAvailabilityZone: AwsAvailabilityZone.t option
+        [@ocaml.doc
+          "AWS availability zone associated with the recovery instance."];
+      agentVersion: AgentVersion.t option
+        [@ocaml.doc
+          "The version of the DRS agent installed on the recovery instance"];
+      sourceOutpostArn: OutpostARN.t option
+        [@ocaml.doc "The ARN of the source Outpost"]}
+    let make ?ec2InstanceID =
+      fun ?ec2InstanceState ->
+        fun ?jobID ->
+          fun ?recoveryInstanceID ->
+            fun ?sourceServerID ->
+              fun ?arn ->
+                fun ?tags ->
+                  fun ?failback ->
+                    fun ?dataReplicationInfo ->
                       fun ?recoveryInstanceProperties ->
-                        fun ?sourceServerID ->
-                          fun ?tags ->
-                            fun () ->
-                              {
-                                arn;
-                                dataReplicationInfo;
-                                ec2InstanceID;
-                                ec2InstanceState;
-                                failback;
-                                isDrill;
-                                jobID;
-                                pointInTimeSnapshotDateTime;
-                                recoveryInstanceID;
-                                recoveryInstanceProperties;
-                                sourceServerID;
-                                tags
-                              }
+                        fun ?pointInTimeSnapshotDateTime ->
+                          fun ?isDrill ->
+                            fun ?originEnvironment ->
+                              fun ?originAvailabilityZone ->
+                                fun ?agentVersion ->
+                                  fun ?sourceOutpostArn ->
+                                    fun () ->
+                                      {
+                                        ec2InstanceID;
+                                        ec2InstanceState;
+                                        jobID;
+                                        recoveryInstanceID;
+                                        sourceServerID;
+                                        arn;
+                                        tags;
+                                        failback;
+                                        dataReplicationInfo;
+                                        recoveryInstanceProperties;
+                                        pointInTimeSnapshotDateTime;
+                                        isDrill;
+                                        originEnvironment;
+                                        originAvailabilityZone;
+                                        agentVersion;
+                                        sourceOutpostArn
+                                      }
     let to_value x =
       structure_to_value
-        [("arn", (Option.map x.arn ~f:ARN.to_value));
+        [("ec2InstanceID",
+           (Option.map x.ec2InstanceID ~f:EC2InstanceID.to_value));
+        ("ec2InstanceState",
+          (Option.map x.ec2InstanceState ~f:EC2InstanceState.to_value));
+        ("jobID", (Option.map x.jobID ~f:JobID.to_value));
+        ("recoveryInstanceID",
+          (Option.map x.recoveryInstanceID ~f:RecoveryInstanceID.to_value));
+        ("sourceServerID",
+          (Option.map x.sourceServerID ~f:SourceServerID.to_value));
+        ("arn", (Option.map x.arn ~f:ARN.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("failback",
+          (Option.map x.failback ~f:RecoveryInstanceFailback.to_value));
         ("dataReplicationInfo",
           (Option.map x.dataReplicationInfo
              ~f:RecoveryInstanceDataReplicationInfo.to_value));
-        ("ec2InstanceID",
-          (Option.map x.ec2InstanceID ~f:EC2InstanceID.to_value));
-        ("ec2InstanceState",
-          (Option.map x.ec2InstanceState ~f:EC2InstanceState.to_value));
-        ("failback",
-          (Option.map x.failback ~f:RecoveryInstanceFailback.to_value));
-        ("isDrill", (Option.map x.isDrill ~f:Boolean.to_value));
-        ("jobID", (Option.map x.jobID ~f:JobID.to_value));
-        ("pointInTimeSnapshotDateTime",
-          (Option.map x.pointInTimeSnapshotDateTime
-             ~f:ISO8601DatetimeString.to_value));
-        ("recoveryInstanceID",
-          (Option.map x.recoveryInstanceID ~f:RecoveryInstanceID.to_value));
         ("recoveryInstanceProperties",
           (Option.map x.recoveryInstanceProperties
              ~f:RecoveryInstanceProperties.to_value));
-        ("sourceServerID",
-          (Option.map x.sourceServerID ~f:SourceServerID.to_value));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+        ("pointInTimeSnapshotDateTime",
+          (Option.map x.pointInTimeSnapshotDateTime
+             ~f:ISO8601DatetimeString.to_value));
+        ("isDrill", (Option.map x.isDrill ~f:Boolean.to_value));
+        ("originEnvironment",
+          (Option.map x.originEnvironment ~f:OriginEnvironment.to_value));
+        ("originAvailabilityZone",
+          (Option.map x.originAvailabilityZone
+             ~f:AwsAvailabilityZone.to_value));
+        ("agentVersion",
+          (Option.map x.agentVersion ~f:AgentVersion.to_value));
+        ("sourceOutpostArn",
+          (Option.map x.sourceOutpostArn ~f:OutpostARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let sourceServerID =
-        (Option.map ~f:SourceServerID.of_xml)
-          (Xml.child xml_arg0 "sourceServerID") in
-      let recoveryInstanceProperties =
-        (Option.map ~f:RecoveryInstanceProperties.of_xml)
-          (Xml.child xml_arg0 "recoveryInstanceProperties") in
-      let recoveryInstanceID =
-        (Option.map ~f:RecoveryInstanceID.of_xml)
-          (Xml.child xml_arg0 "recoveryInstanceID") in
+      let sourceOutpostArn =
+        (Option.map ~f:OutpostARN.of_xml)
+          (Xml.child xml_arg0 "sourceOutpostArn") in
+      let agentVersion =
+        (Option.map ~f:AgentVersion.of_xml)
+          (Xml.child xml_arg0 "agentVersion") in
+      let originAvailabilityZone =
+        (Option.map ~f:AwsAvailabilityZone.of_xml)
+          (Xml.child xml_arg0 "originAvailabilityZone") in
+      let originEnvironment =
+        (Option.map ~f:OriginEnvironment.of_xml)
+          (Xml.child xml_arg0 "originEnvironment") in
+      let isDrill =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isDrill") in
       let pointInTimeSnapshotDateTime =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "pointInTimeSnapshotDateTime") in
-      let jobID = (Option.map ~f:JobID.of_xml) (Xml.child xml_arg0 "jobID") in
-      let isDrill =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isDrill") in
+      let recoveryInstanceProperties =
+        (Option.map ~f:RecoveryInstanceProperties.of_xml)
+          (Xml.child xml_arg0 "recoveryInstanceProperties") in
+      let dataReplicationInfo =
+        (Option.map ~f:RecoveryInstanceDataReplicationInfo.of_xml)
+          (Xml.child xml_arg0 "dataReplicationInfo") in
       let failback =
         (Option.map ~f:RecoveryInstanceFailback.of_xml)
           (Xml.child xml_arg0 "failback") in
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "arn") in
+      let sourceServerID =
+        (Option.map ~f:SourceServerID.of_xml)
+          (Xml.child xml_arg0 "sourceServerID") in
+      let recoveryInstanceID =
+        (Option.map ~f:RecoveryInstanceID.of_xml)
+          (Xml.child xml_arg0 "recoveryInstanceID") in
+      let jobID = (Option.map ~f:JobID.of_xml) (Xml.child xml_arg0 "jobID") in
       let ec2InstanceState =
         (Option.map ~f:EC2InstanceState.of_xml)
           (Xml.child xml_arg0 "ec2InstanceState") in
       let ec2InstanceID =
         (Option.map ~f:EC2InstanceID.of_xml)
           (Xml.child xml_arg0 "ec2InstanceID") in
-      let dataReplicationInfo =
-        (Option.map ~f:RecoveryInstanceDataReplicationInfo.of_xml)
-          (Xml.child xml_arg0 "dataReplicationInfo") in
-      let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?sourceServerID ?recoveryInstanceProperties
-        ?recoveryInstanceID ?pointInTimeSnapshotDateTime ?jobID ?isDrill
-        ?failback ?ec2InstanceState ?ec2InstanceID ?dataReplicationInfo ?arn
-        ()
+      make ?sourceOutpostArn ?agentVersion ?originAvailabilityZone
+        ?originEnvironment ?isDrill ?pointInTimeSnapshotDateTime
+        ?recoveryInstanceProperties ?dataReplicationInfo ?failback ?tags ?arn
+        ?sourceServerID ?recoveryInstanceID ?jobID ?ec2InstanceState
+        ?ec2InstanceID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let sourceServerID =
-        field_map json "sourceServerID" SourceServerID.of_json in
-      let recoveryInstanceProperties =
-        field_map json "recoveryInstanceProperties"
-          RecoveryInstanceProperties.of_json in
-      let recoveryInstanceID =
-        field_map json "recoveryInstanceID" RecoveryInstanceID.of_json in
+    let of_json json__ =
+      let sourceOutpostArn =
+        field_map json__ "sourceOutpostArn" OutpostARN.of_json in
+      let agentVersion = field_map json__ "agentVersion" AgentVersion.of_json in
+      let originAvailabilityZone =
+        field_map json__ "originAvailabilityZone" AwsAvailabilityZone.of_json in
+      let originEnvironment =
+        field_map json__ "originEnvironment" OriginEnvironment.of_json in
+      let isDrill = field_map json__ "isDrill" Boolean.of_json in
       let pointInTimeSnapshotDateTime =
-        field_map json "pointInTimeSnapshotDateTime"
+        field_map json__ "pointInTimeSnapshotDateTime"
           ISO8601DatetimeString.of_json in
-      let jobID = field_map json "jobID" JobID.of_json in
-      let isDrill = field_map json "isDrill" Boolean.of_json in
-      let failback =
-        field_map json "failback" RecoveryInstanceFailback.of_json in
-      let ec2InstanceState =
-        field_map json "ec2InstanceState" EC2InstanceState.of_json in
-      let ec2InstanceID =
-        field_map json "ec2InstanceID" EC2InstanceID.of_json in
+      let recoveryInstanceProperties =
+        field_map json__ "recoveryInstanceProperties"
+          RecoveryInstanceProperties.of_json in
       let dataReplicationInfo =
-        field_map json "dataReplicationInfo"
+        field_map json__ "dataReplicationInfo"
           RecoveryInstanceDataReplicationInfo.of_json in
-      let arn = field_map json "arn" ARN.of_json in
-      make ?tags ?sourceServerID ?recoveryInstanceProperties
-        ?recoveryInstanceID ?pointInTimeSnapshotDateTime ?jobID ?isDrill
-        ?failback ?ec2InstanceState ?ec2InstanceID ?dataReplicationInfo ?arn
-        ()
+      let failback =
+        field_map json__ "failback" RecoveryInstanceFailback.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let arn = field_map json__ "arn" ARN.of_json in
+      let sourceServerID =
+        field_map json__ "sourceServerID" SourceServerID.of_json in
+      let recoveryInstanceID =
+        field_map json__ "recoveryInstanceID" RecoveryInstanceID.of_json in
+      let jobID = field_map json__ "jobID" JobID.of_json in
+      let ec2InstanceState =
+        field_map json__ "ec2InstanceState" EC2InstanceState.of_json in
+      let ec2InstanceID =
+        field_map json__ "ec2InstanceID" EC2InstanceID.of_json in
+      make ?sourceOutpostArn ?agentVersion ?originAvailabilityZone
+        ?originEnvironment ?isDrill ?pointInTimeSnapshotDateTime
+        ?recoveryInstanceProperties ?dataReplicationInfo ?failback ?tags ?arn
+        ?sourceServerID ?recoveryInstanceID ?jobID ?ec2InstanceState
+        ?ec2InstanceID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A Recovery Instance is a replica of a Source Server running on EC2."]
@@ -4350,6 +7065,9 @@ module RecoveryInstanceIDs =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecoveryInstanceID.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4375,6 +7093,9 @@ module SourceServerIDs =
   struct
     type nonrec t = SourceServerID.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SourceServerID.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4395,98 +7116,236 @@ module SourceServerIDs =
       list_of_json ~kind:"SourceServerIDs" ~of_json:SourceServerID.of_json j
     let to_json v = composed_to_json to_value v
   end
+module LaunchConfigurationTemplate =
+  struct
+    type nonrec t =
+      {
+      launchConfigurationTemplateID: LaunchConfigurationTemplateID.t option
+        [@ocaml.doc "ID of the Launch Configuration Template."];
+      arn: ARN.t option
+        [@ocaml.doc "ARN of the Launch Configuration Template."];
+      tags: TagsMap.t option
+        [@ocaml.doc "Tags of the Launch Configuration Template."];
+      launchDisposition: LaunchDisposition.t option
+        [@ocaml.doc "Launch disposition."];
+      targetInstanceTypeRightSizingMethod:
+        TargetInstanceTypeRightSizingMethod.t option
+        [@ocaml.doc "Target instance type right-sizing method."];
+      copyPrivateIp: Boolean.t option [@ocaml.doc "Copy private IP."];
+      copyTags: Boolean.t option [@ocaml.doc "Copy tags."];
+      licensing: Licensing.t option [@ocaml.doc "Licensing."];
+      exportBucketArn: ARN.t option
+        [@ocaml.doc "S3 bucket ARN to export Source Network templates."];
+      postLaunchEnabled: Boolean.t option
+        [@ocaml.doc "Post-launch actions activated."];
+      launchIntoSourceInstance: Boolean.t option
+        [@ocaml.doc
+          "DRS will set the 'launch into instance ID' of any source server when performing a drill, recovery or failback to the previous region or availability zone, using the instance ID of the source instance."]}
+    let make ?launchConfigurationTemplateID =
+      fun ?arn ->
+        fun ?tags ->
+          fun ?launchDisposition ->
+            fun ?targetInstanceTypeRightSizingMethod ->
+              fun ?copyPrivateIp ->
+                fun ?copyTags ->
+                  fun ?licensing ->
+                    fun ?exportBucketArn ->
+                      fun ?postLaunchEnabled ->
+                        fun ?launchIntoSourceInstance ->
+                          fun () ->
+                            {
+                              launchConfigurationTemplateID;
+                              arn;
+                              tags;
+                              launchDisposition;
+                              targetInstanceTypeRightSizingMethod;
+                              copyPrivateIp;
+                              copyTags;
+                              licensing;
+                              exportBucketArn;
+                              postLaunchEnabled;
+                              launchIntoSourceInstance
+                            }
+    let to_value x =
+      structure_to_value
+        [("launchConfigurationTemplateID",
+           (Option.map x.launchConfigurationTemplateID
+              ~f:LaunchConfigurationTemplateID.to_value));
+        ("arn", (Option.map x.arn ~f:ARN.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("launchDisposition",
+          (Option.map x.launchDisposition ~f:LaunchDisposition.to_value));
+        ("targetInstanceTypeRightSizingMethod",
+          (Option.map x.targetInstanceTypeRightSizingMethod
+             ~f:TargetInstanceTypeRightSizingMethod.to_value));
+        ("copyPrivateIp", (Option.map x.copyPrivateIp ~f:Boolean.to_value));
+        ("copyTags", (Option.map x.copyTags ~f:Boolean.to_value));
+        ("licensing", (Option.map x.licensing ~f:Licensing.to_value));
+        ("exportBucketArn", (Option.map x.exportBucketArn ~f:ARN.to_value));
+        ("postLaunchEnabled",
+          (Option.map x.postLaunchEnabled ~f:Boolean.to_value));
+        ("launchIntoSourceInstance",
+          (Option.map x.launchIntoSourceInstance ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let launchIntoSourceInstance =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "launchIntoSourceInstance") in
+      let postLaunchEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "postLaunchEnabled") in
+      let exportBucketArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "exportBucketArn") in
+      let licensing =
+        (Option.map ~f:Licensing.of_xml) (Xml.child xml_arg0 "licensing") in
+      let copyTags =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "copyTags") in
+      let copyPrivateIp =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "copyPrivateIp") in
+      let targetInstanceTypeRightSizingMethod =
+        (Option.map ~f:TargetInstanceTypeRightSizingMethod.of_xml)
+          (Xml.child xml_arg0 "targetInstanceTypeRightSizingMethod") in
+      let launchDisposition =
+        (Option.map ~f:LaunchDisposition.of_xml)
+          (Xml.child xml_arg0 "launchDisposition") in
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "arn") in
+      let launchConfigurationTemplateID =
+        (Option.map ~f:LaunchConfigurationTemplateID.of_xml)
+          (Xml.child xml_arg0 "launchConfigurationTemplateID") in
+      make ?launchIntoSourceInstance ?postLaunchEnabled ?exportBucketArn
+        ?licensing ?copyTags ?copyPrivateIp
+        ?targetInstanceTypeRightSizingMethod ?launchDisposition ?tags ?arn
+        ?launchConfigurationTemplateID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let launchIntoSourceInstance =
+        field_map json__ "launchIntoSourceInstance" Boolean.of_json in
+      let postLaunchEnabled =
+        field_map json__ "postLaunchEnabled" Boolean.of_json in
+      let exportBucketArn = field_map json__ "exportBucketArn" ARN.of_json in
+      let licensing = field_map json__ "licensing" Licensing.of_json in
+      let copyTags = field_map json__ "copyTags" Boolean.of_json in
+      let copyPrivateIp = field_map json__ "copyPrivateIp" Boolean.of_json in
+      let targetInstanceTypeRightSizingMethod =
+        field_map json__ "targetInstanceTypeRightSizingMethod"
+          TargetInstanceTypeRightSizingMethod.of_json in
+      let launchDisposition =
+        field_map json__ "launchDisposition" LaunchDisposition.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let arn = field_map json__ "arn" ARN.of_json in
+      let launchConfigurationTemplateID =
+        field_map json__ "launchConfigurationTemplateID"
+          LaunchConfigurationTemplateID.of_json in
+      make ?launchIntoSourceInstance ?postLaunchEnabled ?exportBucketArn
+        ?licensing ?copyTags ?copyPrivateIp
+        ?targetInstanceTypeRightSizingMethod ?launchDisposition ?tags ?arn
+        ?launchConfigurationTemplateID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Account level Launch Configuration Template."]
 module Job =
   struct
     type nonrec t =
       {
+      jobID: JobID.t option [@ocaml.doc "The ID of the Job."];
       arn: ARN.t option [@ocaml.doc "The ARN of a Job."];
+      type_: JobType.t option [@ocaml.doc "The type of the Job."];
+      initiatedBy: InitiatedBy.t option
+        [@ocaml.doc "A string representing who initiated the Job."];
       creationDateTime: ISO8601DatetimeString.t option
         [@ocaml.doc "The date and time of when the Job was created."];
       endDateTime: ISO8601DatetimeString.t option
         [@ocaml.doc "The date and time of when the Job ended."];
-      initiatedBy: InitiatedBy.t option
-        [@ocaml.doc "A string representing who initiated the Job."];
-      jobID: JobID.t [@ocaml.doc "The ID of the Job."];
+      status: JobStatus.t option [@ocaml.doc "The status of the Job."];
       participatingServers: ParticipatingServers.t option
         [@ocaml.doc "A list of servers that the Job is acting upon."];
-      status: JobStatus.t option [@ocaml.doc "The status of the Job."];
       tags: TagsMap.t option
         [@ocaml.doc "A list of tags associated with the Job."];
-      type_: JobType.t option [@ocaml.doc "The type of the Job."]}
-    let context_ = "Job"
-    let make ?arn =
-      fun ?creationDateTime ->
-        fun ?endDateTime ->
+      participatingResources: ParticipatingResources.t option
+        [@ocaml.doc "A list of resources that the Job is acting upon."]}
+    let make ?jobID =
+      fun ?arn ->
+        fun ?type_ ->
           fun ?initiatedBy ->
-            fun ?participatingServers ->
-              fun ?status ->
-                fun ?tags ->
-                  fun ?type_ ->
-                    fun ~jobID ->
-                      fun () ->
-                        {
-                          arn;
-                          creationDateTime;
-                          endDateTime;
-                          initiatedBy;
-                          participatingServers;
-                          status;
-                          tags;
-                          type_;
-                          jobID
-                        }
+            fun ?creationDateTime ->
+              fun ?endDateTime ->
+                fun ?status ->
+                  fun ?participatingServers ->
+                    fun ?tags ->
+                      fun ?participatingResources ->
+                        fun () ->
+                          {
+                            jobID;
+                            arn;
+                            type_;
+                            initiatedBy;
+                            creationDateTime;
+                            endDateTime;
+                            status;
+                            participatingServers;
+                            tags;
+                            participatingResources
+                          }
     let to_value x =
       structure_to_value
-        [("arn", (Option.map x.arn ~f:ARN.to_value));
+        [("jobID", (Option.map x.jobID ~f:JobID.to_value));
+        ("arn", (Option.map x.arn ~f:ARN.to_value));
+        ("type", (Option.map x.type_ ~f:JobType.to_value));
+        ("initiatedBy", (Option.map x.initiatedBy ~f:InitiatedBy.to_value));
         ("creationDateTime",
           (Option.map x.creationDateTime ~f:ISO8601DatetimeString.to_value));
         ("endDateTime",
           (Option.map x.endDateTime ~f:ISO8601DatetimeString.to_value));
-        ("initiatedBy", (Option.map x.initiatedBy ~f:InitiatedBy.to_value));
-        ("jobID", (Some (JobID.to_value x.jobID)));
+        ("status", (Option.map x.status ~f:JobStatus.to_value));
         ("participatingServers",
           (Option.map x.participatingServers ~f:ParticipatingServers.to_value));
-        ("status", (Option.map x.status ~f:JobStatus.to_value));
         ("tags", (Option.map x.tags ~f:TagsMap.to_value));
-        ("type", (Option.map x.type_ ~f:JobType.to_value))]
+        ("participatingResources",
+          (Option.map x.participatingResources
+             ~f:ParticipatingResources.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ = (Option.map ~f:JobType.of_xml) (Xml.child xml_arg0 "type") in
+      let participatingResources =
+        (Option.map ~f:ParticipatingResources.of_xml)
+          (Xml.child xml_arg0 "participatingResources") in
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let status =
-        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "status") in
       let participatingServers =
         (Option.map ~f:ParticipatingServers.of_xml)
           (Xml.child xml_arg0 "participatingServers") in
-      let jobID =
-        JobID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobID") in
-      let initiatedBy =
-        (Option.map ~f:InitiatedBy.of_xml) (Xml.child xml_arg0 "initiatedBy") in
+      let status =
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "status") in
       let endDateTime =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "endDateTime") in
       let creationDateTime =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "creationDateTime") in
+      let initiatedBy =
+        (Option.map ~f:InitiatedBy.of_xml) (Xml.child xml_arg0 "initiatedBy") in
+      let type_ = (Option.map ~f:JobType.of_xml) (Xml.child xml_arg0 "type") in
       let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?type_ ?tags ?status ?participatingServers ~jobID ?initiatedBy
-        ?endDateTime ?creationDateTime ?arn ()
+      let jobID = (Option.map ~f:JobID.of_xml) (Xml.child xml_arg0 "jobID") in
+      make ?participatingResources ?tags ?participatingServers ?status
+        ?endDateTime ?creationDateTime ?initiatedBy ?type_ ?arn ?jobID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" JobType.of_json in
-      let tags = field_map json "tags" TagsMap.of_json in
-      let status = field_map json "status" JobStatus.of_json in
+    let of_json json__ =
+      let participatingResources =
+        field_map json__ "participatingResources"
+          ParticipatingResources.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
       let participatingServers =
-        field_map json "participatingServers" ParticipatingServers.of_json in
-      let jobID = field_map_exn json "jobID" JobID.of_json in
-      let initiatedBy = field_map json "initiatedBy" InitiatedBy.of_json in
+        field_map json__ "participatingServers" ParticipatingServers.of_json in
+      let status = field_map json__ "status" JobStatus.of_json in
       let endDateTime =
-        field_map json "endDateTime" ISO8601DatetimeString.of_json in
+        field_map json__ "endDateTime" ISO8601DatetimeString.of_json in
       let creationDateTime =
-        field_map json "creationDateTime" ISO8601DatetimeString.of_json in
-      let arn = field_map json "arn" ARN.of_json in
-      make ?type_ ?tags ?status ?participatingServers ~jobID ?initiatedBy
-        ?endDateTime ?creationDateTime ?arn ()
+        field_map json__ "creationDateTime" ISO8601DatetimeString.of_json in
+      let initiatedBy = field_map json__ "initiatedBy" InitiatedBy.of_json in
+      let type_ = field_map json__ "type" JobType.of_json in
+      let arn = field_map json__ "arn" ARN.of_json in
+      let jobID = field_map json__ "jobID" JobID.of_json in
+      make ?participatingResources ?tags ?participatingServers ?status
+        ?endDateTime ?creationDateTime ?initiatedBy ?type_ ?arn ?jobID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A job is an asynchronous workflow."]
 module DescribeJobsRequestFiltersJobIDs =
@@ -4498,6 +7357,9 @@ module DescribeJobsRequestFiltersJobIDs =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobID.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4523,39 +7385,39 @@ module JobLog =
   struct
     type nonrec t =
       {
+      logDateTime: ISO8601DatetimeString.t option
+        [@ocaml.doc "The date and time the log was taken."];
       event: JobLogEvent.t option
         [@ocaml.doc "The event represents the type of a log."];
       eventData: JobLogEventData.t option
-        [@ocaml.doc "Metadata associated with a Job log."];
-      logDateTime: ISO8601DatetimeString.t option
-        [@ocaml.doc "The date and time the log was taken."]}
-    let make ?event =
-      fun ?eventData ->
-        fun ?logDateTime -> fun () -> { event; eventData; logDateTime }
+        [@ocaml.doc "Metadata associated with a Job log."]}
+    let make ?logDateTime =
+      fun ?event ->
+        fun ?eventData -> fun () -> { logDateTime; event; eventData }
     let to_value x =
       structure_to_value
-        [("event", (Option.map x.event ~f:JobLogEvent.to_value));
-        ("eventData", (Option.map x.eventData ~f:JobLogEventData.to_value));
-        ("logDateTime",
-          (Option.map x.logDateTime ~f:ISO8601DatetimeString.to_value))]
+        [("logDateTime",
+           (Option.map x.logDateTime ~f:ISO8601DatetimeString.to_value));
+        ("event", (Option.map x.event ~f:JobLogEvent.to_value));
+        ("eventData", (Option.map x.eventData ~f:JobLogEventData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let logDateTime =
-        (Option.map ~f:ISO8601DatetimeString.of_xml)
-          (Xml.child xml_arg0 "logDateTime") in
       let eventData =
         (Option.map ~f:JobLogEventData.of_xml)
           (Xml.child xml_arg0 "eventData") in
       let event =
         (Option.map ~f:JobLogEvent.of_xml) (Xml.child xml_arg0 "event") in
-      make ?logDateTime ?eventData ?event ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let logDateTime =
-        field_map json "logDateTime" ISO8601DatetimeString.of_json in
-      let eventData = field_map json "eventData" JobLogEventData.of_json in
-      let event = field_map json "event" JobLogEvent.of_json in
-      make ?logDateTime ?eventData ?event ()
+        (Option.map ~f:ISO8601DatetimeString.of_xml)
+          (Xml.child xml_arg0 "logDateTime") in
+      make ?eventData ?event ?logDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventData = field_map json__ "eventData" JobLogEventData.of_json in
+      let event = field_map json__ "event" JobLogEvent.of_json in
+      let logDateTime =
+        field_map json__ "logDateTime" ISO8601DatetimeString.of_json in
+      make ?eventData ?event ?logDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A log outputted by a Job."]
 module ReplicationConfigurationReplicatedDisks =
@@ -4566,6 +7428,9 @@ module ReplicationConfigurationReplicatedDisks =
         ok_or_failwith
           ((check_list_max i ~max:60) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicationConfigurationReplicatedDisk.to_value))
         |> (fun x -> `List x)
@@ -4607,79 +7472,38 @@ module SmallBoundedString =
     let of_json j = string_of_json ~kind:"SmallBoundedString" j
     let to_json = simple_to_json to_value
   end
-module LaunchDisposition =
-  struct
-    type nonrec t =
-      | STOPPED 
-      | STARTED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | STOPPED -> "STOPPED"
-      | STARTED -> "STARTED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "STOPPED" -> STOPPED
-      | "STARTED" -> STARTED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration LaunchDisposition" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"LaunchDisposition" j)
-    let to_json = simple_to_json to_value
-  end
-module Licensing =
+module LaunchIntoInstanceProperties =
   struct
     type nonrec t =
       {
-      osByol: Boolean.t option
-        [@ocaml.doc "Whether to enable \"Bring your own license\" or not."]}
-    let make ?osByol = fun () -> { osByol }
+      launchIntoEC2InstanceID: EC2InstanceID.t option
+        [@ocaml.doc
+          "Optionally holds EC2 instance ID of an instance to launch into, instead of launching a new instance during drill, recovery or failback."]}
+    let make ?launchIntoEC2InstanceID = fun () -> { launchIntoEC2InstanceID }
     let to_value x =
       structure_to_value
-        [("osByol", (Option.map x.osByol ~f:Boolean.to_value))]
+        [("launchIntoEC2InstanceID",
+           (Option.map x.launchIntoEC2InstanceID ~f:EC2InstanceID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let osByol =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "osByol") in
-      make ?osByol ()
+      let launchIntoEC2InstanceID =
+        (Option.map ~f:EC2InstanceID.of_xml)
+          (Xml.child xml_arg0 "launchIntoEC2InstanceID") in
+      make ?launchIntoEC2InstanceID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let osByol = field_map json "osByol" Boolean.of_json in make ?osByol ()
+    let of_json json__ =
+      let launchIntoEC2InstanceID =
+        field_map json__ "launchIntoEC2InstanceID" EC2InstanceID.of_json in
+      make ?launchIntoEC2InstanceID ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Configuration of a machine's license."]
-module TargetInstanceTypeRightSizingMethod =
-  struct
-    type nonrec t =
-      | NONE 
-      | BASIC 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | NONE -> "NONE" | BASIC -> "BASIC" | Non_static_id s -> s
-    let of_string =
-      function | "NONE" -> NONE | "BASIC" -> BASIC | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml
-           ~kind:"enumeration TargetInstanceTypeRightSizingMethod" xml_arg0)
-    let of_json j =
-      of_string
-        (string_of_json ~kind:"TargetInstanceTypeRightSizingMethod" j)
-    let to_json = simple_to_json to_value
-  end
+  end[@@ocaml.doc "Launch into existing instance."]
 module TagKeys =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4708,6 +7532,9 @@ module RecoveryInstancesForTerminationRequest =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecoveryInstanceID.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4729,6 +7556,42 @@ module RecoveryInstancesForTerminationRequest =
         ~of_json:RecoveryInstanceID.of_json j
     let to_json v = composed_to_json to_value v
   end
+module StartSourceNetworkRecoveryRequestNetworkEntries =
+  struct
+    type nonrec t = StartSourceNetworkRecoveryRequestNetworkEntry.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:StartSourceNetworkRecoveryRequestNetworkEntry.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:StartSourceNetworkRecoveryRequestNetworkEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StartSourceNetworkRecoveryRequestNetworkEntries"
+        ~of_json:StartSourceNetworkRecoveryRequestNetworkEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module StartRecoveryRequestSourceServers =
   struct
     type nonrec t = StartRecoveryRequestSourceServer.t list
@@ -4738,6 +7601,9 @@ module StartRecoveryRequestSourceServers =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StartRecoveryRequestSourceServer.to_value)) |>
         (fun x -> `List x)
@@ -4770,6 +7636,9 @@ module StartFailbackRequestRecoveryInstanceIDs =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecoveryInstanceID.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4791,6 +7660,55 @@ module StartFailbackRequestRecoveryInstanceIDs =
         ~of_json:RecoveryInstanceID.of_json j
     let to_json v = composed_to_json to_value v
   end
+module LaunchActionResourceId =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "Launch configuration template Id or Source Server Id"]
+    let context_ = "LaunchActionResourceId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"(s-[0-9a-zA-Z]{17}$|lct-[0-9a-zA-Z]{17})");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LaunchActionResourceId" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "Launch configuration template Id or Source Server Id"]
+module Accounts =
+  struct
+    type nonrec t = Account.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Account.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Account.of_xml)
+    let of_json j = list_of_json ~kind:"Accounts" ~of_json:Account.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PaginationToken =
   struct
     type nonrec t = string
@@ -4809,10 +7727,152 @@ module PaginationToken =
     let of_json j = string_of_json ~kind:"PaginationToken" j
     let to_json = simple_to_json to_value
   end
+module ListStagingAccountsRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListStagingAccountsRequestMaxResultsInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LaunchActions =
+  struct
+    type nonrec t = LaunchAction.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LaunchAction.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LaunchAction.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LaunchActions" ~of_json:LaunchAction.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LaunchActionsRequestFilters =
+  struct
+    type nonrec t =
+      {
+      actionIds: LaunchActionIds.t option [@ocaml.doc "Launch actions Ids."]}
+    let make ?actionIds = fun () -> { actionIds }
+    let to_value x =
+      structure_to_value
+        [("actionIds", (Option.map x.actionIds ~f:LaunchActionIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actionIds =
+        (Option.map ~f:LaunchActionIds.of_xml)
+          (Xml.child xml_arg0 "actionIds") in
+      make ?actionIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actionIds = field_map json__ "actionIds" LaunchActionIds.of_json in
+      make ?actionIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Resource launch actions filter."]
+module MaxResultsType =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResultsType" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module StagingSourceServersList =
+  struct
+    type nonrec t = StagingSourceServer.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:StagingSourceServer.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:StagingSourceServer.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StagingSourceServersList"
+        ~of_json:StagingSourceServer.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResultsReplicatingSourceServers =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:300) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for MaxResultsReplicatingSourceServers" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module SourceServersList =
   struct
     type nonrec t = SourceServer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SourceServer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4837,42 +7897,132 @@ module DescribeSourceServersRequestFilters =
   struct
     type nonrec t =
       {
+      sourceServerIDs: DescribeSourceServersRequestFiltersIDs.t option
+        [@ocaml.doc
+          "An array of Source Servers IDs that should be returned. An empty array means all Source Servers."];
       hardwareId: BoundedString.t option
         [@ocaml.doc
           "An ID that describes the hardware of the Source Server. This is either an EC2 instance id, a VMware uuid or a mac address."];
-      sourceServerIDs: DescribeSourceServersRequestFiltersIDs.t option
+      stagingAccountIDs: AccountIDs.t option
         [@ocaml.doc
-          "An array of Source Servers IDs that should be returned. An empty array means all Source Servers."]}
-    let make ?hardwareId =
-      fun ?sourceServerIDs -> fun () -> { hardwareId; sourceServerIDs }
+          "An array of staging account IDs that extended source servers belong to. An empty array means all source servers will be shown."]}
+    let make ?sourceServerIDs =
+      fun ?hardwareId ->
+        fun ?stagingAccountIDs ->
+          fun () -> { sourceServerIDs; hardwareId; stagingAccountIDs }
     let to_value x =
       structure_to_value
-        [("hardwareId", (Option.map x.hardwareId ~f:BoundedString.to_value));
-        ("sourceServerIDs",
-          (Option.map x.sourceServerIDs
-             ~f:DescribeSourceServersRequestFiltersIDs.to_value))]
+        [("sourceServerIDs",
+           (Option.map x.sourceServerIDs
+              ~f:DescribeSourceServersRequestFiltersIDs.to_value));
+        ("hardwareId", (Option.map x.hardwareId ~f:BoundedString.to_value));
+        ("stagingAccountIDs",
+          (Option.map x.stagingAccountIDs ~f:AccountIDs.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sourceServerIDs =
-        (Option.map ~f:DescribeSourceServersRequestFiltersIDs.of_xml)
-          (Xml.child xml_arg0 "sourceServerIDs") in
+      let stagingAccountIDs =
+        (Option.map ~f:AccountIDs.of_xml)
+          (Xml.child xml_arg0 "stagingAccountIDs") in
       let hardwareId =
         (Option.map ~f:BoundedString.of_xml)
           (Xml.child xml_arg0 "hardwareId") in
-      make ?sourceServerIDs ?hardwareId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let sourceServerIDs =
-        field_map json "sourceServerIDs"
+        (Option.map ~f:DescribeSourceServersRequestFiltersIDs.of_xml)
+          (Xml.child xml_arg0 "sourceServerIDs") in
+      make ?stagingAccountIDs ?hardwareId ?sourceServerIDs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stagingAccountIDs =
+        field_map json__ "stagingAccountIDs" AccountIDs.of_json in
+      let hardwareId = field_map json__ "hardwareId" BoundedString.of_json in
+      let sourceServerIDs =
+        field_map json__ "sourceServerIDs"
           DescribeSourceServersRequestFiltersIDs.of_json in
-      let hardwareId = field_map json "hardwareId" BoundedString.of_json in
-      make ?sourceServerIDs ?hardwareId ()
+      make ?stagingAccountIDs ?hardwareId ?sourceServerIDs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A set of filters by which to return Source Servers."]
+module SourceNetworksList =
+  struct
+    type nonrec t = SourceNetwork.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SourceNetwork.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SourceNetwork.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SourceNetworksList" ~of_json:SourceNetwork.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeSourceNetworksRequestFilters =
+  struct
+    type nonrec t =
+      {
+      sourceNetworkIDs: DescribeSourceNetworksRequestFiltersIDs.t option
+        [@ocaml.doc
+          "An array of Source Network IDs that should be returned. An empty array means all Source Networks."];
+      originAccountID: AccountID.t option
+        [@ocaml.doc
+          "Filter Source Networks by account ID containing the protected VPCs."];
+      originRegion: AwsRegion.t option
+        [@ocaml.doc
+          "Filter Source Networks by the region containing the protected VPCs."]}
+    let make ?sourceNetworkIDs =
+      fun ?originAccountID ->
+        fun ?originRegion ->
+          fun () -> { sourceNetworkIDs; originAccountID; originRegion }
+    let to_value x =
+      structure_to_value
+        [("sourceNetworkIDs",
+           (Option.map x.sourceNetworkIDs
+              ~f:DescribeSourceNetworksRequestFiltersIDs.to_value));
+        ("originAccountID",
+          (Option.map x.originAccountID ~f:AccountID.to_value));
+        ("originRegion", (Option.map x.originRegion ~f:AwsRegion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let originRegion =
+        (Option.map ~f:AwsRegion.of_xml) (Xml.child xml_arg0 "originRegion") in
+      let originAccountID =
+        (Option.map ~f:AccountID.of_xml)
+          (Xml.child xml_arg0 "originAccountID") in
+      let sourceNetworkIDs =
+        (Option.map ~f:DescribeSourceNetworksRequestFiltersIDs.of_xml)
+          (Xml.child xml_arg0 "sourceNetworkIDs") in
+      make ?originRegion ?originAccountID ?sourceNetworkIDs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let originRegion = field_map json__ "originRegion" AwsRegion.of_json in
+      let originAccountID =
+        field_map json__ "originAccountID" AccountID.of_json in
+      let sourceNetworkIDs =
+        field_map json__ "sourceNetworkIDs"
+          DescribeSourceNetworksRequestFiltersIDs.of_json in
+      make ?originRegion ?originAccountID ?sourceNetworkIDs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A set of filters by which to return Source Networks."]
 module ReplicationConfigurationTemplates =
   struct
     type nonrec t = ReplicationConfigurationTemplate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicationConfigurationTemplate.to_value)) |>
         (fun x -> `List x)
@@ -4905,6 +8055,9 @@ module ReplicationConfigurationTemplateIDs =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicationConfigurationTemplateID.to_value)) |>
         (fun x -> `List x)
@@ -4932,6 +8085,9 @@ module RecoverySnapshotsList =
   struct
     type nonrec t = RecoverySnapshot.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecoverySnapshot.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4979,11 +8135,11 @@ module DescribeRecoverySnapshotsRequestFilters =
           (Xml.child xml_arg0 "fromDateTime") in
       make ?toDateTime ?fromDateTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let toDateTime =
-        field_map json "toDateTime" ISO8601DatetimeString.of_json in
+        field_map json__ "toDateTime" ISO8601DatetimeString.of_json in
       let fromDateTime =
-        field_map json "fromDateTime" ISO8601DatetimeString.of_json in
+        field_map json__ "fromDateTime" ISO8601DatetimeString.of_json in
       make ?toDateTime ?fromDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A set of filters by which to return Recovery Snapshots."]
@@ -5012,6 +8168,9 @@ module DescribeRecoveryInstancesItems =
   struct
     type nonrec t = RecoveryInstance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecoveryInstance.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5062,18 +8221,88 @@ module DescribeRecoveryInstancesRequestFilters =
           (Xml.child xml_arg0 "recoveryInstanceIDs") in
       make ?sourceServerIDs ?recoveryInstanceIDs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceServerIDs =
-        field_map json "sourceServerIDs" SourceServerIDs.of_json in
+        field_map json__ "sourceServerIDs" SourceServerIDs.of_json in
       let recoveryInstanceIDs =
-        field_map json "recoveryInstanceIDs" RecoveryInstanceIDs.of_json in
+        field_map json__ "recoveryInstanceIDs" RecoveryInstanceIDs.of_json in
       make ?sourceServerIDs ?recoveryInstanceIDs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A set of filters by which to return Recovery Instances."]
+module LaunchConfigurationTemplates =
+  struct
+    type nonrec t = LaunchConfigurationTemplate.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LaunchConfigurationTemplate.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LaunchConfigurationTemplate.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LaunchConfigurationTemplates"
+        ~of_json:LaunchConfigurationTemplate.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LaunchConfigurationTemplateIDs =
+  struct
+    type nonrec t = LaunchConfigurationTemplateID.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LaunchConfigurationTemplateID.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LaunchConfigurationTemplateID.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LaunchConfigurationTemplateIDs"
+        ~of_json:LaunchConfigurationTemplateID.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module JobsList =
   struct
     type nonrec t = Job.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Job.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5097,47 +8326,51 @@ module DescribeJobsRequestFilters =
   struct
     type nonrec t =
       {
-      fromDate: ISO8601DatetimeString.t option
-        [@ocaml.doc "The start date in a date range query."];
       jobIDs: DescribeJobsRequestFiltersJobIDs.t option
         [@ocaml.doc
           "An array of Job IDs that should be returned. An empty array means all jobs."];
+      fromDate: ISO8601DatetimeString.t option
+        [@ocaml.doc "The start date in a date range query."];
       toDate: ISO8601DatetimeString.t option
         [@ocaml.doc "The end date in a date range query."]}
-    let make ?fromDate =
-      fun ?jobIDs -> fun ?toDate -> fun () -> { fromDate; jobIDs; toDate }
+    let make ?jobIDs =
+      fun ?fromDate -> fun ?toDate -> fun () -> { jobIDs; fromDate; toDate }
     let to_value x =
       structure_to_value
-        [("fromDate",
-           (Option.map x.fromDate ~f:ISO8601DatetimeString.to_value));
-        ("jobIDs",
-          (Option.map x.jobIDs ~f:DescribeJobsRequestFiltersJobIDs.to_value));
+        [("jobIDs",
+           (Option.map x.jobIDs ~f:DescribeJobsRequestFiltersJobIDs.to_value));
+        ("fromDate",
+          (Option.map x.fromDate ~f:ISO8601DatetimeString.to_value));
         ("toDate", (Option.map x.toDate ~f:ISO8601DatetimeString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let toDate =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "toDate") in
-      let jobIDs =
-        (Option.map ~f:DescribeJobsRequestFiltersJobIDs.of_xml)
-          (Xml.child xml_arg0 "jobIDs") in
       let fromDate =
         (Option.map ~f:ISO8601DatetimeString.of_xml)
           (Xml.child xml_arg0 "fromDate") in
-      make ?toDate ?jobIDs ?fromDate ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let toDate = field_map json "toDate" ISO8601DatetimeString.of_json in
       let jobIDs =
-        field_map json "jobIDs" DescribeJobsRequestFiltersJobIDs.of_json in
-      let fromDate = field_map json "fromDate" ISO8601DatetimeString.of_json in
-      make ?toDate ?jobIDs ?fromDate ()
+        (Option.map ~f:DescribeJobsRequestFiltersJobIDs.of_xml)
+          (Xml.child xml_arg0 "jobIDs") in
+      make ?toDate ?fromDate ?jobIDs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let toDate = field_map json__ "toDate" ISO8601DatetimeString.of_json in
+      let fromDate =
+        field_map json__ "fromDate" ISO8601DatetimeString.of_json in
+      let jobIDs =
+        field_map json__ "jobIDs" DescribeJobsRequestFiltersJobIDs.of_json in
+      make ?toDate ?fromDate ?jobIDs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A set of filters by which to return Jobs."]
 module JobLogs =
   struct
     type nonrec t = JobLog.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobLog.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5161,20 +8394,26 @@ module UpdateReplicationConfigurationTemplateRequest =
   struct
     type nonrec t =
       {
+      replicationConfigurationTemplateID:
+        ReplicationConfigurationTemplateID.t
+        [@ocaml.doc "The Replication Configuration Template ID."];
       arn: ARN.t option
         [@ocaml.doc "The Replication Configuration Template ARN."];
+      stagingAreaSubnetId: SubnetID.t option
+        [@ocaml.doc "The subnet to be used by the replication staging area."];
       associateDefaultSecurityGroup: Boolean.t option
         [@ocaml.doc
           "Whether to associate the default Elastic Disaster Recovery Security group with the Replication Configuration Template."];
-      bandwidthThrottling: PositiveInteger.t option
+      replicationServersSecurityGroupsIDs:
+        ReplicationServersSecurityGroupsIDs.t option
         [@ocaml.doc
-          "Configure bandwidth throttling for the outbound data transfer rate of the Source Server in Mbps."];
-      createPublicIP: Boolean.t option
+          "The security group IDs that will be used by the replication server."];
+      replicationServerInstanceType: EC2InstanceType.t option
         [@ocaml.doc
-          "Whether to create a Public IP for the Recovery Instance by default."];
-      dataPlaneRouting: ReplicationConfigurationDataPlaneRouting.t option
+          "The instance type to be used for the replication server."];
+      useDedicatedReplicationServer: Boolean.t option
         [@ocaml.doc
-          "The data plane routing mechanism that will be used for replication."];
+          "Whether to use a dedicated Replication Server in the replication staging area."];
       defaultLargeStagingDiskType:
         ReplicationConfigurationDefaultLargeStagingDiskType.t option
         [@ocaml.doc
@@ -5185,72 +8424,85 @@ module UpdateReplicationConfigurationTemplateRequest =
       ebsEncryptionKeyArn: ARN.t option
         [@ocaml.doc
           "The ARN of the EBS encryption key to be used during replication."];
-      pitPolicy: PITPolicy.t option
+      bandwidthThrottling: PositiveInteger.t option
         [@ocaml.doc
-          "The Point in time (PIT) policy to manage snapshots taken during replication."];
-      replicationConfigurationTemplateID:
-        ReplicationConfigurationTemplateID.t
-        [@ocaml.doc "The Replication Configuration Template ID."];
-      replicationServerInstanceType: EC2InstanceType.t option
+          "Configure bandwidth throttling for the outbound data transfer rate of the Source Server in Mbps."];
+      dataPlaneRouting: ReplicationConfigurationDataPlaneRouting.t option
         [@ocaml.doc
-          "The instance type to be used for the replication server."];
-      replicationServersSecurityGroupsIDs:
-        ReplicationServersSecurityGroupsIDs.t option
+          "The data plane routing mechanism that will be used for replication."];
+      createPublicIP: Boolean.t option
         [@ocaml.doc
-          "The security group IDs that will be used by the replication server."];
-      stagingAreaSubnetId: SubnetID.t option
-        [@ocaml.doc "The subnet to be used by the replication staging area."];
+          "Whether to create a Public IP for the Recovery Instance by default."];
       stagingAreaTags: TagsMap.t option
         [@ocaml.doc
           "A set of tags to be associated with all resources created in the replication staging area: EC2 replication server, EBS volumes, EBS snapshots, etc."];
-      useDedicatedReplicationServer: Boolean.t option
+      pitPolicy: PITPolicy.t option
         [@ocaml.doc
-          "Whether to use a dedicated Replication Server in the replication staging area."]}
+          "The Point in time (PIT) policy to manage snapshots taken during replication."];
+      autoReplicateNewDisks: Boolean.t option
+        [@ocaml.doc
+          "Whether to allow the AWS replication agent to automatically replicate newly added disks."];
+      internetProtocol: InternetProtocol.t option
+        [@ocaml.doc
+          "Which version of the Internet Protocol to use for replication of data. (IPv4 or IPv6)"]}
     let context_ = "UpdateReplicationConfigurationTemplateRequest"
     let make ?arn =
-      fun ?associateDefaultSecurityGroup ->
-        fun ?bandwidthThrottling ->
-          fun ?createPublicIP ->
-            fun ?dataPlaneRouting ->
-              fun ?defaultLargeStagingDiskType ->
-                fun ?ebsEncryption ->
-                  fun ?ebsEncryptionKeyArn ->
-                    fun ?pitPolicy ->
-                      fun ?replicationServerInstanceType ->
-                        fun ?replicationServersSecurityGroupsIDs ->
-                          fun ?stagingAreaSubnetId ->
+      fun ?stagingAreaSubnetId ->
+        fun ?associateDefaultSecurityGroup ->
+          fun ?replicationServersSecurityGroupsIDs ->
+            fun ?replicationServerInstanceType ->
+              fun ?useDedicatedReplicationServer ->
+                fun ?defaultLargeStagingDiskType ->
+                  fun ?ebsEncryption ->
+                    fun ?ebsEncryptionKeyArn ->
+                      fun ?bandwidthThrottling ->
+                        fun ?dataPlaneRouting ->
+                          fun ?createPublicIP ->
                             fun ?stagingAreaTags ->
-                              fun ?useDedicatedReplicationServer ->
-                                fun ~replicationConfigurationTemplateID ->
-                                  fun () ->
-                                    {
-                                      arn;
-                                      associateDefaultSecurityGroup;
-                                      bandwidthThrottling;
-                                      createPublicIP;
-                                      dataPlaneRouting;
-                                      defaultLargeStagingDiskType;
-                                      ebsEncryption;
-                                      ebsEncryptionKeyArn;
-                                      pitPolicy;
-                                      replicationServerInstanceType;
-                                      replicationServersSecurityGroupsIDs;
-                                      stagingAreaSubnetId;
-                                      stagingAreaTags;
-                                      useDedicatedReplicationServer;
-                                      replicationConfigurationTemplateID
-                                    }
+                              fun ?pitPolicy ->
+                                fun ?autoReplicateNewDisks ->
+                                  fun ?internetProtocol ->
+                                    fun ~replicationConfigurationTemplateID
+                                      ->
+                                      fun () ->
+                                        {
+                                          arn;
+                                          stagingAreaSubnetId;
+                                          associateDefaultSecurityGroup;
+                                          replicationServersSecurityGroupsIDs;
+                                          replicationServerInstanceType;
+                                          useDedicatedReplicationServer;
+                                          defaultLargeStagingDiskType;
+                                          ebsEncryption;
+                                          ebsEncryptionKeyArn;
+                                          bandwidthThrottling;
+                                          dataPlaneRouting;
+                                          createPublicIP;
+                                          stagingAreaTags;
+                                          pitPolicy;
+                                          autoReplicateNewDisks;
+                                          internetProtocol;
+                                          replicationConfigurationTemplateID
+                                        }
     let to_value x =
       structure_to_value
-        [("arn", (Option.map x.arn ~f:ARN.to_value));
+        [("replicationConfigurationTemplateID",
+           (Some
+              (ReplicationConfigurationTemplateID.to_value
+                 x.replicationConfigurationTemplateID)));
+        ("arn", (Option.map x.arn ~f:ARN.to_value));
+        ("stagingAreaSubnetId",
+          (Option.map x.stagingAreaSubnetId ~f:SubnetID.to_value));
         ("associateDefaultSecurityGroup",
           (Option.map x.associateDefaultSecurityGroup ~f:Boolean.to_value));
-        ("bandwidthThrottling",
-          (Option.map x.bandwidthThrottling ~f:PositiveInteger.to_value));
-        ("createPublicIP", (Option.map x.createPublicIP ~f:Boolean.to_value));
-        ("dataPlaneRouting",
-          (Option.map x.dataPlaneRouting
-             ~f:ReplicationConfigurationDataPlaneRouting.to_value));
+        ("replicationServersSecurityGroupsIDs",
+          (Option.map x.replicationServersSecurityGroupsIDs
+             ~f:ReplicationServersSecurityGroupsIDs.to_value));
+        ("replicationServerInstanceType",
+          (Option.map x.replicationServerInstanceType
+             ~f:EC2InstanceType.to_value));
+        ("useDedicatedReplicationServer",
+          (Option.map x.useDedicatedReplicationServer ~f:Boolean.to_value));
         ("defaultLargeStagingDiskType",
           (Option.map x.defaultLargeStagingDiskType
              ~f:ReplicationConfigurationDefaultLargeStagingDiskType.to_value));
@@ -5259,45 +8511,39 @@ module UpdateReplicationConfigurationTemplateRequest =
              ~f:ReplicationConfigurationEbsEncryption.to_value));
         ("ebsEncryptionKeyArn",
           (Option.map x.ebsEncryptionKeyArn ~f:ARN.to_value));
-        ("pitPolicy", (Option.map x.pitPolicy ~f:PITPolicy.to_value));
-        ("replicationConfigurationTemplateID",
-          (Some
-             (ReplicationConfigurationTemplateID.to_value
-                x.replicationConfigurationTemplateID)));
-        ("replicationServerInstanceType",
-          (Option.map x.replicationServerInstanceType
-             ~f:EC2InstanceType.to_value));
-        ("replicationServersSecurityGroupsIDs",
-          (Option.map x.replicationServersSecurityGroupsIDs
-             ~f:ReplicationServersSecurityGroupsIDs.to_value));
-        ("stagingAreaSubnetId",
-          (Option.map x.stagingAreaSubnetId ~f:SubnetID.to_value));
+        ("bandwidthThrottling",
+          (Option.map x.bandwidthThrottling ~f:PositiveInteger.to_value));
+        ("dataPlaneRouting",
+          (Option.map x.dataPlaneRouting
+             ~f:ReplicationConfigurationDataPlaneRouting.to_value));
+        ("createPublicIP", (Option.map x.createPublicIP ~f:Boolean.to_value));
         ("stagingAreaTags",
           (Option.map x.stagingAreaTags ~f:TagsMap.to_value));
-        ("useDedicatedReplicationServer",
-          (Option.map x.useDedicatedReplicationServer ~f:Boolean.to_value))]
+        ("pitPolicy", (Option.map x.pitPolicy ~f:PITPolicy.to_value));
+        ("autoReplicateNewDisks",
+          (Option.map x.autoReplicateNewDisks ~f:Boolean.to_value));
+        ("internetProtocol",
+          (Option.map x.internetProtocol ~f:InternetProtocol.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let useDedicatedReplicationServer =
+      let internetProtocol =
+        (Option.map ~f:InternetProtocol.of_xml)
+          (Xml.child xml_arg0 "internetProtocol") in
+      let autoReplicateNewDisks =
         (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "useDedicatedReplicationServer") in
-      let stagingAreaTags =
-        (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "stagingAreaTags") in
-      let stagingAreaSubnetId =
-        (Option.map ~f:SubnetID.of_xml)
-          (Xml.child xml_arg0 "stagingAreaSubnetId") in
-      let replicationServersSecurityGroupsIDs =
-        (Option.map ~f:ReplicationServersSecurityGroupsIDs.of_xml)
-          (Xml.child xml_arg0 "replicationServersSecurityGroupsIDs") in
-      let replicationServerInstanceType =
-        (Option.map ~f:EC2InstanceType.of_xml)
-          (Xml.child xml_arg0 "replicationServerInstanceType") in
-      let replicationConfigurationTemplateID =
-        ReplicationConfigurationTemplateID.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "replicationConfigurationTemplateID") in
+          (Xml.child xml_arg0 "autoReplicateNewDisks") in
       let pitPolicy =
         (Option.map ~f:PITPolicy.of_xml) (Xml.child xml_arg0 "pitPolicy") in
+      let stagingAreaTags =
+        (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "stagingAreaTags") in
+      let createPublicIP =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "createPublicIP") in
+      let dataPlaneRouting =
+        (Option.map ~f:ReplicationConfigurationDataPlaneRouting.of_xml)
+          (Xml.child xml_arg0 "dataPlaneRouting") in
+      let bandwidthThrottling =
+        (Option.map ~f:PositiveInteger.of_xml)
+          (Xml.child xml_arg0 "bandwidthThrottling") in
       let ebsEncryptionKeyArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ebsEncryptionKeyArn") in
       let ebsEncryption =
@@ -5307,431 +8553,738 @@ module UpdateReplicationConfigurationTemplateRequest =
         (Option.map
            ~f:ReplicationConfigurationDefaultLargeStagingDiskType.of_xml)
           (Xml.child xml_arg0 "defaultLargeStagingDiskType") in
-      let dataPlaneRouting =
-        (Option.map ~f:ReplicationConfigurationDataPlaneRouting.of_xml)
-          (Xml.child xml_arg0 "dataPlaneRouting") in
-      let createPublicIP =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "createPublicIP") in
-      let bandwidthThrottling =
-        (Option.map ~f:PositiveInteger.of_xml)
-          (Xml.child xml_arg0 "bandwidthThrottling") in
+      let useDedicatedReplicationServer =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "useDedicatedReplicationServer") in
+      let replicationServerInstanceType =
+        (Option.map ~f:EC2InstanceType.of_xml)
+          (Xml.child xml_arg0 "replicationServerInstanceType") in
+      let replicationServersSecurityGroupsIDs =
+        (Option.map ~f:ReplicationServersSecurityGroupsIDs.of_xml)
+          (Xml.child xml_arg0 "replicationServersSecurityGroupsIDs") in
       let associateDefaultSecurityGroup =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "associateDefaultSecurityGroup") in
-      let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?useDedicatedReplicationServer ?stagingAreaTags
-        ?stagingAreaSubnetId ?replicationServersSecurityGroupsIDs
-        ?replicationServerInstanceType ~replicationConfigurationTemplateID
-        ?pitPolicy ?ebsEncryptionKeyArn ?ebsEncryption
-        ?defaultLargeStagingDiskType ?dataPlaneRouting ?createPublicIP
-        ?bandwidthThrottling ?associateDefaultSecurityGroup ?arn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let useDedicatedReplicationServer =
-        field_map json "useDedicatedReplicationServer" Boolean.of_json in
-      let stagingAreaTags = field_map json "stagingAreaTags" TagsMap.of_json in
       let stagingAreaSubnetId =
-        field_map json "stagingAreaSubnetId" SubnetID.of_json in
-      let replicationServersSecurityGroupsIDs =
-        field_map json "replicationServersSecurityGroupsIDs"
-          ReplicationServersSecurityGroupsIDs.of_json in
-      let replicationServerInstanceType =
-        field_map json "replicationServerInstanceType"
-          EC2InstanceType.of_json in
+        (Option.map ~f:SubnetID.of_xml)
+          (Xml.child xml_arg0 "stagingAreaSubnetId") in
+      let arn = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "arn") in
       let replicationConfigurationTemplateID =
-        field_map_exn json "replicationConfigurationTemplateID"
-          ReplicationConfigurationTemplateID.of_json in
-      let pitPolicy = field_map json "pitPolicy" PITPolicy.of_json in
+        ReplicationConfigurationTemplateID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "replicationConfigurationTemplateID") in
+      make ?internetProtocol ?autoReplicateNewDisks ?pitPolicy
+        ?stagingAreaTags ?createPublicIP ?dataPlaneRouting
+        ?bandwidthThrottling ?ebsEncryptionKeyArn ?ebsEncryption
+        ?defaultLargeStagingDiskType ?useDedicatedReplicationServer
+        ?replicationServerInstanceType ?replicationServersSecurityGroupsIDs
+        ?associateDefaultSecurityGroup ?stagingAreaSubnetId ?arn
+        ~replicationConfigurationTemplateID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let internetProtocol =
+        field_map json__ "internetProtocol" InternetProtocol.of_json in
+      let autoReplicateNewDisks =
+        field_map json__ "autoReplicateNewDisks" Boolean.of_json in
+      let pitPolicy = field_map json__ "pitPolicy" PITPolicy.of_json in
+      let stagingAreaTags =
+        field_map json__ "stagingAreaTags" TagsMap.of_json in
+      let createPublicIP = field_map json__ "createPublicIP" Boolean.of_json in
+      let dataPlaneRouting =
+        field_map json__ "dataPlaneRouting"
+          ReplicationConfigurationDataPlaneRouting.of_json in
+      let bandwidthThrottling =
+        field_map json__ "bandwidthThrottling" PositiveInteger.of_json in
       let ebsEncryptionKeyArn =
-        field_map json "ebsEncryptionKeyArn" ARN.of_json in
+        field_map json__ "ebsEncryptionKeyArn" ARN.of_json in
       let ebsEncryption =
-        field_map json "ebsEncryption"
+        field_map json__ "ebsEncryption"
           ReplicationConfigurationEbsEncryption.of_json in
       let defaultLargeStagingDiskType =
-        field_map json "defaultLargeStagingDiskType"
+        field_map json__ "defaultLargeStagingDiskType"
           ReplicationConfigurationDefaultLargeStagingDiskType.of_json in
-      let dataPlaneRouting =
-        field_map json "dataPlaneRouting"
-          ReplicationConfigurationDataPlaneRouting.of_json in
-      let createPublicIP = field_map json "createPublicIP" Boolean.of_json in
-      let bandwidthThrottling =
-        field_map json "bandwidthThrottling" PositiveInteger.of_json in
+      let useDedicatedReplicationServer =
+        field_map json__ "useDedicatedReplicationServer" Boolean.of_json in
+      let replicationServerInstanceType =
+        field_map json__ "replicationServerInstanceType"
+          EC2InstanceType.of_json in
+      let replicationServersSecurityGroupsIDs =
+        field_map json__ "replicationServersSecurityGroupsIDs"
+          ReplicationServersSecurityGroupsIDs.of_json in
       let associateDefaultSecurityGroup =
-        field_map json "associateDefaultSecurityGroup" Boolean.of_json in
-      let arn = field_map json "arn" ARN.of_json in
-      make ?useDedicatedReplicationServer ?stagingAreaTags
-        ?stagingAreaSubnetId ?replicationServersSecurityGroupsIDs
-        ?replicationServerInstanceType ~replicationConfigurationTemplateID
-        ?pitPolicy ?ebsEncryptionKeyArn ?ebsEncryption
-        ?defaultLargeStagingDiskType ?dataPlaneRouting ?createPublicIP
-        ?bandwidthThrottling ?associateDefaultSecurityGroup ?arn ()
+        field_map json__ "associateDefaultSecurityGroup" Boolean.of_json in
+      let stagingAreaSubnetId =
+        field_map json__ "stagingAreaSubnetId" SubnetID.of_json in
+      let arn = field_map json__ "arn" ARN.of_json in
+      let replicationConfigurationTemplateID =
+        field_map_exn json__ "replicationConfigurationTemplateID"
+          ReplicationConfigurationTemplateID.of_json in
+      make ?internetProtocol ?autoReplicateNewDisks ?pitPolicy
+        ?stagingAreaTags ?createPublicIP ?dataPlaneRouting
+        ?bandwidthThrottling ?ebsEncryptionKeyArn ?ebsEncryption
+        ?defaultLargeStagingDiskType ?useDedicatedReplicationServer
+        ?replicationServerInstanceType ?replicationServersSecurityGroupsIDs
+        ?associateDefaultSecurityGroup ?stagingAreaSubnetId ?arn
+        ~replicationConfigurationTemplateID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a ReplicationConfigurationTemplate by ID."]
 module UpdateReplicationConfigurationRequest =
   struct
     type nonrec t =
       {
+      sourceServerID: SourceServerID.t
+        [@ocaml.doc
+          "The ID of the Source Server for this Replication Configuration."];
+      name: SmallBoundedString.t option
+        [@ocaml.doc "The name of the Replication Configuration."];
+      stagingAreaSubnetId: SubnetID.t option
+        [@ocaml.doc "The subnet to be used by the replication staging area."];
       associateDefaultSecurityGroup: Boolean.t option
         [@ocaml.doc
           "Whether to associate the default Elastic Disaster Recovery Security group with the Replication Configuration."];
-      bandwidthThrottling: PositiveInteger.t option
+      replicationServersSecurityGroupsIDs:
+        ReplicationServersSecurityGroupsIDs.t option
         [@ocaml.doc
-          "Configure bandwidth throttling for the outbound data transfer rate of the Source Server in Mbps."];
-      createPublicIP: Boolean.t option
+          "The security group IDs that will be used by the replication server."];
+      replicationServerInstanceType: EC2InstanceType.t option
         [@ocaml.doc
-          "Whether to create a Public IP for the Recovery Instance by default."];
-      dataPlaneRouting: ReplicationConfigurationDataPlaneRouting.t option
+          "The instance type to be used for the replication server."];
+      useDedicatedReplicationServer: Boolean.t option
         [@ocaml.doc
-          "The data plane routing mechanism that will be used for replication."];
+          "Whether to use a dedicated Replication Server in the replication staging area."];
       defaultLargeStagingDiskType:
         ReplicationConfigurationDefaultLargeStagingDiskType.t option
         [@ocaml.doc
           "The Staging Disk EBS volume type to be used during replication."];
+      replicatedDisks: ReplicationConfigurationReplicatedDisks.t option
+        [@ocaml.doc
+          "The configuration of the disks of the Source Server to be replicated."];
       ebsEncryption: ReplicationConfigurationEbsEncryption.t option
         [@ocaml.doc
           "The type of EBS encryption to be used during replication."];
       ebsEncryptionKeyArn: ARN.t option
         [@ocaml.doc
           "The ARN of the EBS encryption key to be used during replication."];
-      name: SmallBoundedString.t option
-        [@ocaml.doc "The name of the Replication Configuration."];
-      pitPolicy: PITPolicy.t option
+      bandwidthThrottling: PositiveInteger.t option
         [@ocaml.doc
-          "The Point in time (PIT) policy to manage snapshots taken during replication."];
-      replicatedDisks: ReplicationConfigurationReplicatedDisks.t option
+          "Configure bandwidth throttling for the outbound data transfer rate of the Source Server in Mbps."];
+      dataPlaneRouting: ReplicationConfigurationDataPlaneRouting.t option
         [@ocaml.doc
-          "The configuration of the disks of the Source Server to be replicated."];
-      replicationServerInstanceType: EC2InstanceType.t option
+          "The data plane routing mechanism that will be used for replication."];
+      createPublicIP: Boolean.t option
         [@ocaml.doc
-          "The instance type to be used for the replication server."];
-      replicationServersSecurityGroupsIDs:
-        ReplicationServersSecurityGroupsIDs.t option
-        [@ocaml.doc
-          "The security group IDs that will be used by the replication server."];
-      sourceServerID: SourceServerID.t
-        [@ocaml.doc
-          "The ID of the Source Server for this Replication Configuration."];
-      stagingAreaSubnetId: SubnetID.t option
-        [@ocaml.doc "The subnet to be used by the replication staging area."];
+          "Whether to create a Public IP for the Recovery Instance by default."];
       stagingAreaTags: TagsMap.t option
         [@ocaml.doc
           "A set of tags to be associated with all resources created in the replication staging area: EC2 replication server, EBS volumes, EBS snapshots, etc."];
-      useDedicatedReplicationServer: Boolean.t option
+      pitPolicy: PITPolicy.t option
         [@ocaml.doc
-          "Whether to use a dedicated Replication Server in the replication staging area."]}
+          "The Point in time (PIT) policy to manage snapshots taken during replication."];
+      autoReplicateNewDisks: Boolean.t option
+        [@ocaml.doc
+          "Whether to allow the AWS replication agent to automatically replicate newly added disks."];
+      internetProtocol: InternetProtocol.t option
+        [@ocaml.doc
+          "Which version of the Internet Protocol to use for replication of data. (IPv4 or IPv6)"]}
     let context_ = "UpdateReplicationConfigurationRequest"
-    let make ?associateDefaultSecurityGroup =
-      fun ?bandwidthThrottling ->
-        fun ?createPublicIP ->
-          fun ?dataPlaneRouting ->
-            fun ?defaultLargeStagingDiskType ->
-              fun ?ebsEncryption ->
-                fun ?ebsEncryptionKeyArn ->
-                  fun ?name ->
-                    fun ?pitPolicy ->
-                      fun ?replicatedDisks ->
-                        fun ?replicationServerInstanceType ->
-                          fun ?replicationServersSecurityGroupsIDs ->
-                            fun ?stagingAreaSubnetId ->
+    let make ?name =
+      fun ?stagingAreaSubnetId ->
+        fun ?associateDefaultSecurityGroup ->
+          fun ?replicationServersSecurityGroupsIDs ->
+            fun ?replicationServerInstanceType ->
+              fun ?useDedicatedReplicationServer ->
+                fun ?defaultLargeStagingDiskType ->
+                  fun ?replicatedDisks ->
+                    fun ?ebsEncryption ->
+                      fun ?ebsEncryptionKeyArn ->
+                        fun ?bandwidthThrottling ->
+                          fun ?dataPlaneRouting ->
+                            fun ?createPublicIP ->
                               fun ?stagingAreaTags ->
-                                fun ?useDedicatedReplicationServer ->
-                                  fun ~sourceServerID ->
-                                    fun () ->
-                                      {
-                                        associateDefaultSecurityGroup;
-                                        bandwidthThrottling;
-                                        createPublicIP;
-                                        dataPlaneRouting;
-                                        defaultLargeStagingDiskType;
-                                        ebsEncryption;
-                                        ebsEncryptionKeyArn;
-                                        name;
-                                        pitPolicy;
-                                        replicatedDisks;
-                                        replicationServerInstanceType;
-                                        replicationServersSecurityGroupsIDs;
-                                        stagingAreaSubnetId;
-                                        stagingAreaTags;
-                                        useDedicatedReplicationServer;
-                                        sourceServerID
-                                      }
+                                fun ?pitPolicy ->
+                                  fun ?autoReplicateNewDisks ->
+                                    fun ?internetProtocol ->
+                                      fun ~sourceServerID ->
+                                        fun () ->
+                                          {
+                                            name;
+                                            stagingAreaSubnetId;
+                                            associateDefaultSecurityGroup;
+                                            replicationServersSecurityGroupsIDs;
+                                            replicationServerInstanceType;
+                                            useDedicatedReplicationServer;
+                                            defaultLargeStagingDiskType;
+                                            replicatedDisks;
+                                            ebsEncryption;
+                                            ebsEncryptionKeyArn;
+                                            bandwidthThrottling;
+                                            dataPlaneRouting;
+                                            createPublicIP;
+                                            stagingAreaTags;
+                                            pitPolicy;
+                                            autoReplicateNewDisks;
+                                            internetProtocol;
+                                            sourceServerID
+                                          }
     let to_value x =
       structure_to_value
-        [("associateDefaultSecurityGroup",
-           (Option.map x.associateDefaultSecurityGroup ~f:Boolean.to_value));
-        ("bandwidthThrottling",
-          (Option.map x.bandwidthThrottling ~f:PositiveInteger.to_value));
-        ("createPublicIP", (Option.map x.createPublicIP ~f:Boolean.to_value));
-        ("dataPlaneRouting",
-          (Option.map x.dataPlaneRouting
-             ~f:ReplicationConfigurationDataPlaneRouting.to_value));
+        [("sourceServerID",
+           (Some (SourceServerID.to_value x.sourceServerID)));
+        ("name", (Option.map x.name ~f:SmallBoundedString.to_value));
+        ("stagingAreaSubnetId",
+          (Option.map x.stagingAreaSubnetId ~f:SubnetID.to_value));
+        ("associateDefaultSecurityGroup",
+          (Option.map x.associateDefaultSecurityGroup ~f:Boolean.to_value));
+        ("replicationServersSecurityGroupsIDs",
+          (Option.map x.replicationServersSecurityGroupsIDs
+             ~f:ReplicationServersSecurityGroupsIDs.to_value));
+        ("replicationServerInstanceType",
+          (Option.map x.replicationServerInstanceType
+             ~f:EC2InstanceType.to_value));
+        ("useDedicatedReplicationServer",
+          (Option.map x.useDedicatedReplicationServer ~f:Boolean.to_value));
         ("defaultLargeStagingDiskType",
           (Option.map x.defaultLargeStagingDiskType
              ~f:ReplicationConfigurationDefaultLargeStagingDiskType.to_value));
+        ("replicatedDisks",
+          (Option.map x.replicatedDisks
+             ~f:ReplicationConfigurationReplicatedDisks.to_value));
         ("ebsEncryption",
           (Option.map x.ebsEncryption
              ~f:ReplicationConfigurationEbsEncryption.to_value));
         ("ebsEncryptionKeyArn",
           (Option.map x.ebsEncryptionKeyArn ~f:ARN.to_value));
-        ("name", (Option.map x.name ~f:SmallBoundedString.to_value));
-        ("pitPolicy", (Option.map x.pitPolicy ~f:PITPolicy.to_value));
-        ("replicatedDisks",
-          (Option.map x.replicatedDisks
-             ~f:ReplicationConfigurationReplicatedDisks.to_value));
-        ("replicationServerInstanceType",
-          (Option.map x.replicationServerInstanceType
-             ~f:EC2InstanceType.to_value));
-        ("replicationServersSecurityGroupsIDs",
-          (Option.map x.replicationServersSecurityGroupsIDs
-             ~f:ReplicationServersSecurityGroupsIDs.to_value));
-        ("sourceServerID", (Some (SourceServerID.to_value x.sourceServerID)));
-        ("stagingAreaSubnetId",
-          (Option.map x.stagingAreaSubnetId ~f:SubnetID.to_value));
+        ("bandwidthThrottling",
+          (Option.map x.bandwidthThrottling ~f:PositiveInteger.to_value));
+        ("dataPlaneRouting",
+          (Option.map x.dataPlaneRouting
+             ~f:ReplicationConfigurationDataPlaneRouting.to_value));
+        ("createPublicIP", (Option.map x.createPublicIP ~f:Boolean.to_value));
         ("stagingAreaTags",
           (Option.map x.stagingAreaTags ~f:TagsMap.to_value));
-        ("useDedicatedReplicationServer",
-          (Option.map x.useDedicatedReplicationServer ~f:Boolean.to_value))]
+        ("pitPolicy", (Option.map x.pitPolicy ~f:PITPolicy.to_value));
+        ("autoReplicateNewDisks",
+          (Option.map x.autoReplicateNewDisks ~f:Boolean.to_value));
+        ("internetProtocol",
+          (Option.map x.internetProtocol ~f:InternetProtocol.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let useDedicatedReplicationServer =
+      let internetProtocol =
+        (Option.map ~f:InternetProtocol.of_xml)
+          (Xml.child xml_arg0 "internetProtocol") in
+      let autoReplicateNewDisks =
         (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "useDedicatedReplicationServer") in
-      let stagingAreaTags =
-        (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "stagingAreaTags") in
-      let stagingAreaSubnetId =
-        (Option.map ~f:SubnetID.of_xml)
-          (Xml.child xml_arg0 "stagingAreaSubnetId") in
-      let sourceServerID =
-        SourceServerID.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
-      let replicationServersSecurityGroupsIDs =
-        (Option.map ~f:ReplicationServersSecurityGroupsIDs.of_xml)
-          (Xml.child xml_arg0 "replicationServersSecurityGroupsIDs") in
-      let replicationServerInstanceType =
-        (Option.map ~f:EC2InstanceType.of_xml)
-          (Xml.child xml_arg0 "replicationServerInstanceType") in
-      let replicatedDisks =
-        (Option.map ~f:ReplicationConfigurationReplicatedDisks.of_xml)
-          (Xml.child xml_arg0 "replicatedDisks") in
+          (Xml.child xml_arg0 "autoReplicateNewDisks") in
       let pitPolicy =
         (Option.map ~f:PITPolicy.of_xml) (Xml.child xml_arg0 "pitPolicy") in
-      let name =
-        (Option.map ~f:SmallBoundedString.of_xml) (Xml.child xml_arg0 "name") in
+      let stagingAreaTags =
+        (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "stagingAreaTags") in
+      let createPublicIP =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "createPublicIP") in
+      let dataPlaneRouting =
+        (Option.map ~f:ReplicationConfigurationDataPlaneRouting.of_xml)
+          (Xml.child xml_arg0 "dataPlaneRouting") in
+      let bandwidthThrottling =
+        (Option.map ~f:PositiveInteger.of_xml)
+          (Xml.child xml_arg0 "bandwidthThrottling") in
       let ebsEncryptionKeyArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ebsEncryptionKeyArn") in
       let ebsEncryption =
         (Option.map ~f:ReplicationConfigurationEbsEncryption.of_xml)
           (Xml.child xml_arg0 "ebsEncryption") in
+      let replicatedDisks =
+        (Option.map ~f:ReplicationConfigurationReplicatedDisks.of_xml)
+          (Xml.child xml_arg0 "replicatedDisks") in
       let defaultLargeStagingDiskType =
         (Option.map
            ~f:ReplicationConfigurationDefaultLargeStagingDiskType.of_xml)
           (Xml.child xml_arg0 "defaultLargeStagingDiskType") in
-      let dataPlaneRouting =
-        (Option.map ~f:ReplicationConfigurationDataPlaneRouting.of_xml)
-          (Xml.child xml_arg0 "dataPlaneRouting") in
-      let createPublicIP =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "createPublicIP") in
-      let bandwidthThrottling =
-        (Option.map ~f:PositiveInteger.of_xml)
-          (Xml.child xml_arg0 "bandwidthThrottling") in
+      let useDedicatedReplicationServer =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "useDedicatedReplicationServer") in
+      let replicationServerInstanceType =
+        (Option.map ~f:EC2InstanceType.of_xml)
+          (Xml.child xml_arg0 "replicationServerInstanceType") in
+      let replicationServersSecurityGroupsIDs =
+        (Option.map ~f:ReplicationServersSecurityGroupsIDs.of_xml)
+          (Xml.child xml_arg0 "replicationServersSecurityGroupsIDs") in
       let associateDefaultSecurityGroup =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "associateDefaultSecurityGroup") in
-      make ?useDedicatedReplicationServer ?stagingAreaTags
-        ?stagingAreaSubnetId ~sourceServerID
-        ?replicationServersSecurityGroupsIDs ?replicationServerInstanceType
-        ?replicatedDisks ?pitPolicy ?name ?ebsEncryptionKeyArn ?ebsEncryption
-        ?defaultLargeStagingDiskType ?dataPlaneRouting ?createPublicIP
-        ?bandwidthThrottling ?associateDefaultSecurityGroup ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let useDedicatedReplicationServer =
-        field_map json "useDedicatedReplicationServer" Boolean.of_json in
-      let stagingAreaTags = field_map json "stagingAreaTags" TagsMap.of_json in
       let stagingAreaSubnetId =
-        field_map json "stagingAreaSubnetId" SubnetID.of_json in
+        (Option.map ~f:SubnetID.of_xml)
+          (Xml.child xml_arg0 "stagingAreaSubnetId") in
+      let name =
+        (Option.map ~f:SmallBoundedString.of_xml) (Xml.child xml_arg0 "name") in
       let sourceServerID =
-        field_map_exn json "sourceServerID" SourceServerID.of_json in
-      let replicationServersSecurityGroupsIDs =
-        field_map json "replicationServersSecurityGroupsIDs"
-          ReplicationServersSecurityGroupsIDs.of_json in
-      let replicationServerInstanceType =
-        field_map json "replicationServerInstanceType"
-          EC2InstanceType.of_json in
-      let replicatedDisks =
-        field_map json "replicatedDisks"
-          ReplicationConfigurationReplicatedDisks.of_json in
-      let pitPolicy = field_map json "pitPolicy" PITPolicy.of_json in
-      let name = field_map json "name" SmallBoundedString.of_json in
-      let ebsEncryptionKeyArn =
-        field_map json "ebsEncryptionKeyArn" ARN.of_json in
-      let ebsEncryption =
-        field_map json "ebsEncryption"
-          ReplicationConfigurationEbsEncryption.of_json in
-      let defaultLargeStagingDiskType =
-        field_map json "defaultLargeStagingDiskType"
-          ReplicationConfigurationDefaultLargeStagingDiskType.of_json in
+        SourceServerID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
+      make ?internetProtocol ?autoReplicateNewDisks ?pitPolicy
+        ?stagingAreaTags ?createPublicIP ?dataPlaneRouting
+        ?bandwidthThrottling ?ebsEncryptionKeyArn ?ebsEncryption
+        ?replicatedDisks ?defaultLargeStagingDiskType
+        ?useDedicatedReplicationServer ?replicationServerInstanceType
+        ?replicationServersSecurityGroupsIDs ?associateDefaultSecurityGroup
+        ?stagingAreaSubnetId ?name ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let internetProtocol =
+        field_map json__ "internetProtocol" InternetProtocol.of_json in
+      let autoReplicateNewDisks =
+        field_map json__ "autoReplicateNewDisks" Boolean.of_json in
+      let pitPolicy = field_map json__ "pitPolicy" PITPolicy.of_json in
+      let stagingAreaTags =
+        field_map json__ "stagingAreaTags" TagsMap.of_json in
+      let createPublicIP = field_map json__ "createPublicIP" Boolean.of_json in
       let dataPlaneRouting =
-        field_map json "dataPlaneRouting"
+        field_map json__ "dataPlaneRouting"
           ReplicationConfigurationDataPlaneRouting.of_json in
-      let createPublicIP = field_map json "createPublicIP" Boolean.of_json in
       let bandwidthThrottling =
-        field_map json "bandwidthThrottling" PositiveInteger.of_json in
+        field_map json__ "bandwidthThrottling" PositiveInteger.of_json in
+      let ebsEncryptionKeyArn =
+        field_map json__ "ebsEncryptionKeyArn" ARN.of_json in
+      let ebsEncryption =
+        field_map json__ "ebsEncryption"
+          ReplicationConfigurationEbsEncryption.of_json in
+      let replicatedDisks =
+        field_map json__ "replicatedDisks"
+          ReplicationConfigurationReplicatedDisks.of_json in
+      let defaultLargeStagingDiskType =
+        field_map json__ "defaultLargeStagingDiskType"
+          ReplicationConfigurationDefaultLargeStagingDiskType.of_json in
+      let useDedicatedReplicationServer =
+        field_map json__ "useDedicatedReplicationServer" Boolean.of_json in
+      let replicationServerInstanceType =
+        field_map json__ "replicationServerInstanceType"
+          EC2InstanceType.of_json in
+      let replicationServersSecurityGroupsIDs =
+        field_map json__ "replicationServersSecurityGroupsIDs"
+          ReplicationServersSecurityGroupsIDs.of_json in
       let associateDefaultSecurityGroup =
-        field_map json "associateDefaultSecurityGroup" Boolean.of_json in
-      make ?useDedicatedReplicationServer ?stagingAreaTags
-        ?stagingAreaSubnetId ~sourceServerID
-        ?replicationServersSecurityGroupsIDs ?replicationServerInstanceType
-        ?replicatedDisks ?pitPolicy ?name ?ebsEncryptionKeyArn ?ebsEncryption
-        ?defaultLargeStagingDiskType ?dataPlaneRouting ?createPublicIP
-        ?bandwidthThrottling ?associateDefaultSecurityGroup ()
+        field_map json__ "associateDefaultSecurityGroup" Boolean.of_json in
+      let stagingAreaSubnetId =
+        field_map json__ "stagingAreaSubnetId" SubnetID.of_json in
+      let name = field_map json__ "name" SmallBoundedString.of_json in
+      let sourceServerID =
+        field_map_exn json__ "sourceServerID" SourceServerID.of_json in
+      make ?internetProtocol ?autoReplicateNewDisks ?pitPolicy
+        ?stagingAreaTags ?createPublicIP ?dataPlaneRouting
+        ?bandwidthThrottling ?ebsEncryptionKeyArn ?ebsEncryption
+        ?replicatedDisks ?defaultLargeStagingDiskType
+        ?useDedicatedReplicationServer ?replicationServerInstanceType
+        ?replicationServersSecurityGroupsIDs ?associateDefaultSecurityGroup
+        ?stagingAreaSubnetId ?name ~sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Allows you to update a ReplicationConfiguration by Source Server ID."]
+module UpdateLaunchConfigurationTemplateResponse =
+  struct
+    type nonrec t =
+      {
+      launchConfigurationTemplate: LaunchConfigurationTemplate.t option
+        [@ocaml.doc "Updated Launch Configuration Template."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?launchConfigurationTemplate =
+      fun () -> { launchConfigurationTemplate }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("launchConfigurationTemplate",
+           (Option.map x.launchConfigurationTemplate
+              ~f:LaunchConfigurationTemplate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let launchConfigurationTemplate =
+        (Option.map ~f:LaunchConfigurationTemplate.of_xml)
+          (Xml.child xml_arg0 "launchConfigurationTemplate") in
+      make ?launchConfigurationTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let launchConfigurationTemplate =
+        field_map json__ "launchConfigurationTemplate"
+          LaunchConfigurationTemplate.of_json in
+      make ?launchConfigurationTemplate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates an existing Launch Configuration Template by ID."]
+module UpdateLaunchConfigurationTemplateRequest =
+  struct
+    type nonrec t =
+      {
+      launchConfigurationTemplateID: LaunchConfigurationTemplateID.t
+        [@ocaml.doc "Launch Configuration Template ID."];
+      launchDisposition: LaunchDisposition.t option
+        [@ocaml.doc "Launch disposition."];
+      targetInstanceTypeRightSizingMethod:
+        TargetInstanceTypeRightSizingMethod.t option
+        [@ocaml.doc "Target instance type right-sizing method."];
+      copyPrivateIp: Boolean.t option [@ocaml.doc "Copy private IP."];
+      copyTags: Boolean.t option [@ocaml.doc "Copy tags."];
+      licensing: Licensing.t option [@ocaml.doc "Licensing."];
+      exportBucketArn: ARN.t option
+        [@ocaml.doc "S3 bucket ARN to export Source Network templates."];
+      postLaunchEnabled: Boolean.t option
+        [@ocaml.doc "Whether we want to activate post-launch actions."];
+      launchIntoSourceInstance: Boolean.t option
+        [@ocaml.doc
+          "DRS will set the 'launch into instance ID' of any source server when performing a drill, recovery or failback to the previous region or availability zone, using the instance ID of the source instance."]}
+    let context_ = "UpdateLaunchConfigurationTemplateRequest"
+    let make ?launchDisposition =
+      fun ?targetInstanceTypeRightSizingMethod ->
+        fun ?copyPrivateIp ->
+          fun ?copyTags ->
+            fun ?licensing ->
+              fun ?exportBucketArn ->
+                fun ?postLaunchEnabled ->
+                  fun ?launchIntoSourceInstance ->
+                    fun ~launchConfigurationTemplateID ->
+                      fun () ->
+                        {
+                          launchDisposition;
+                          targetInstanceTypeRightSizingMethod;
+                          copyPrivateIp;
+                          copyTags;
+                          licensing;
+                          exportBucketArn;
+                          postLaunchEnabled;
+                          launchIntoSourceInstance;
+                          launchConfigurationTemplateID
+                        }
+    let to_value x =
+      structure_to_value
+        [("launchConfigurationTemplateID",
+           (Some
+              (LaunchConfigurationTemplateID.to_value
+                 x.launchConfigurationTemplateID)));
+        ("launchDisposition",
+          (Option.map x.launchDisposition ~f:LaunchDisposition.to_value));
+        ("targetInstanceTypeRightSizingMethod",
+          (Option.map x.targetInstanceTypeRightSizingMethod
+             ~f:TargetInstanceTypeRightSizingMethod.to_value));
+        ("copyPrivateIp", (Option.map x.copyPrivateIp ~f:Boolean.to_value));
+        ("copyTags", (Option.map x.copyTags ~f:Boolean.to_value));
+        ("licensing", (Option.map x.licensing ~f:Licensing.to_value));
+        ("exportBucketArn", (Option.map x.exportBucketArn ~f:ARN.to_value));
+        ("postLaunchEnabled",
+          (Option.map x.postLaunchEnabled ~f:Boolean.to_value));
+        ("launchIntoSourceInstance",
+          (Option.map x.launchIntoSourceInstance ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let launchIntoSourceInstance =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "launchIntoSourceInstance") in
+      let postLaunchEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "postLaunchEnabled") in
+      let exportBucketArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "exportBucketArn") in
+      let licensing =
+        (Option.map ~f:Licensing.of_xml) (Xml.child xml_arg0 "licensing") in
+      let copyTags =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "copyTags") in
+      let copyPrivateIp =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "copyPrivateIp") in
+      let targetInstanceTypeRightSizingMethod =
+        (Option.map ~f:TargetInstanceTypeRightSizingMethod.of_xml)
+          (Xml.child xml_arg0 "targetInstanceTypeRightSizingMethod") in
+      let launchDisposition =
+        (Option.map ~f:LaunchDisposition.of_xml)
+          (Xml.child xml_arg0 "launchDisposition") in
+      let launchConfigurationTemplateID =
+        LaunchConfigurationTemplateID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "launchConfigurationTemplateID") in
+      make ?launchIntoSourceInstance ?postLaunchEnabled ?exportBucketArn
+        ?licensing ?copyTags ?copyPrivateIp
+        ?targetInstanceTypeRightSizingMethod ?launchDisposition
+        ~launchConfigurationTemplateID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let launchIntoSourceInstance =
+        field_map json__ "launchIntoSourceInstance" Boolean.of_json in
+      let postLaunchEnabled =
+        field_map json__ "postLaunchEnabled" Boolean.of_json in
+      let exportBucketArn = field_map json__ "exportBucketArn" ARN.of_json in
+      let licensing = field_map json__ "licensing" Licensing.of_json in
+      let copyTags = field_map json__ "copyTags" Boolean.of_json in
+      let copyPrivateIp = field_map json__ "copyPrivateIp" Boolean.of_json in
+      let targetInstanceTypeRightSizingMethod =
+        field_map json__ "targetInstanceTypeRightSizingMethod"
+          TargetInstanceTypeRightSizingMethod.of_json in
+      let launchDisposition =
+        field_map json__ "launchDisposition" LaunchDisposition.of_json in
+      let launchConfigurationTemplateID =
+        field_map_exn json__ "launchConfigurationTemplateID"
+          LaunchConfigurationTemplateID.of_json in
+      make ?launchIntoSourceInstance ?postLaunchEnabled ?exportBucketArn
+        ?licensing ?copyTags ?copyPrivateIp
+        ?targetInstanceTypeRightSizingMethod ?launchDisposition
+        ~launchConfigurationTemplateID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates an existing Launch Configuration Template by ID."]
 module UpdateLaunchConfigurationRequest =
   struct
     type nonrec t =
       {
+      sourceServerID: SourceServerID.t
+        [@ocaml.doc
+          "The ID of the Source Server that we want to retrieve a Launch Configuration for."];
+      name: SmallBoundedString.t option
+        [@ocaml.doc "The name of the launch configuration."];
+      launchDisposition: LaunchDisposition.t option
+        [@ocaml.doc
+          "The state of the Recovery Instance in EC2 after the recovery operation."];
+      targetInstanceTypeRightSizingMethod:
+        TargetInstanceTypeRightSizingMethod.t option
+        [@ocaml.doc
+          "Whether Elastic Disaster Recovery should try to automatically choose the instance type that best matches the OS, CPU, and RAM of your Source Server."];
       copyPrivateIp: Boolean.t option
         [@ocaml.doc
           "Whether we should copy the Private IP of the Source Server to the Recovery Instance."];
       copyTags: Boolean.t option
         [@ocaml.doc
           "Whether we want to copy the tags of the Source Server to the EC2 machine of the Recovery Instance."];
-      launchDisposition: LaunchDisposition.t option
-        [@ocaml.doc
-          "The state of the Recovery Instance in EC2 after the recovery operation."];
       licensing: Licensing.t option
         [@ocaml.doc
           "The licensing configuration to be used for this launch configuration."];
-      name: SmallBoundedString.t option
-        [@ocaml.doc "The name of the launch configuration."];
-      sourceServerID: SourceServerID.t
+      postLaunchEnabled: Boolean.t option
         [@ocaml.doc
-          "The ID of the Source Server that we want to retrieve a Launch Configuration for."];
-      targetInstanceTypeRightSizingMethod:
-        TargetInstanceTypeRightSizingMethod.t option
-        [@ocaml.doc
-          "Whether Elastic Disaster Recovery should try to automatically choose the instance type that best matches the OS, CPU, and RAM of your Source Server."]}
+          "Whether we want to enable post-launch actions for the Source Server."];
+      launchIntoInstanceProperties: LaunchIntoInstanceProperties.t option
+        [@ocaml.doc "Launch into existing instance properties."]}
     let context_ = "UpdateLaunchConfigurationRequest"
-    let make ?copyPrivateIp =
-      fun ?copyTags ->
-        fun ?launchDisposition ->
-          fun ?licensing ->
-            fun ?name ->
-              fun ?targetInstanceTypeRightSizingMethod ->
-                fun ~sourceServerID ->
-                  fun () ->
-                    {
-                      copyPrivateIp;
-                      copyTags;
-                      launchDisposition;
-                      licensing;
-                      name;
-                      targetInstanceTypeRightSizingMethod;
-                      sourceServerID
-                    }
+    let make ?name =
+      fun ?launchDisposition ->
+        fun ?targetInstanceTypeRightSizingMethod ->
+          fun ?copyPrivateIp ->
+            fun ?copyTags ->
+              fun ?licensing ->
+                fun ?postLaunchEnabled ->
+                  fun ?launchIntoInstanceProperties ->
+                    fun ~sourceServerID ->
+                      fun () ->
+                        {
+                          name;
+                          launchDisposition;
+                          targetInstanceTypeRightSizingMethod;
+                          copyPrivateIp;
+                          copyTags;
+                          licensing;
+                          postLaunchEnabled;
+                          launchIntoInstanceProperties;
+                          sourceServerID
+                        }
     let to_value x =
       structure_to_value
-        [("copyPrivateIp", (Option.map x.copyPrivateIp ~f:Boolean.to_value));
-        ("copyTags", (Option.map x.copyTags ~f:Boolean.to_value));
+        [("sourceServerID",
+           (Some (SourceServerID.to_value x.sourceServerID)));
+        ("name", (Option.map x.name ~f:SmallBoundedString.to_value));
         ("launchDisposition",
           (Option.map x.launchDisposition ~f:LaunchDisposition.to_value));
-        ("licensing", (Option.map x.licensing ~f:Licensing.to_value));
-        ("name", (Option.map x.name ~f:SmallBoundedString.to_value));
-        ("sourceServerID", (Some (SourceServerID.to_value x.sourceServerID)));
         ("targetInstanceTypeRightSizingMethod",
           (Option.map x.targetInstanceTypeRightSizingMethod
-             ~f:TargetInstanceTypeRightSizingMethod.to_value))]
+             ~f:TargetInstanceTypeRightSizingMethod.to_value));
+        ("copyPrivateIp", (Option.map x.copyPrivateIp ~f:Boolean.to_value));
+        ("copyTags", (Option.map x.copyTags ~f:Boolean.to_value));
+        ("licensing", (Option.map x.licensing ~f:Licensing.to_value));
+        ("postLaunchEnabled",
+          (Option.map x.postLaunchEnabled ~f:Boolean.to_value));
+        ("launchIntoInstanceProperties",
+          (Option.map x.launchIntoInstanceProperties
+             ~f:LaunchIntoInstanceProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let targetInstanceTypeRightSizingMethod =
-        (Option.map ~f:TargetInstanceTypeRightSizingMethod.of_xml)
-          (Xml.child xml_arg0 "targetInstanceTypeRightSizingMethod") in
-      let sourceServerID =
-        SourceServerID.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
-      let name =
-        (Option.map ~f:SmallBoundedString.of_xml) (Xml.child xml_arg0 "name") in
+      let launchIntoInstanceProperties =
+        (Option.map ~f:LaunchIntoInstanceProperties.of_xml)
+          (Xml.child xml_arg0 "launchIntoInstanceProperties") in
+      let postLaunchEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "postLaunchEnabled") in
       let licensing =
         (Option.map ~f:Licensing.of_xml) (Xml.child xml_arg0 "licensing") in
-      let launchDisposition =
-        (Option.map ~f:LaunchDisposition.of_xml)
-          (Xml.child xml_arg0 "launchDisposition") in
       let copyTags =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "copyTags") in
       let copyPrivateIp =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "copyPrivateIp") in
-      make ?targetInstanceTypeRightSizingMethod ~sourceServerID ?name
-        ?licensing ?launchDisposition ?copyTags ?copyPrivateIp ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let targetInstanceTypeRightSizingMethod =
-        field_map json "targetInstanceTypeRightSizingMethod"
-          TargetInstanceTypeRightSizingMethod.of_json in
-      let sourceServerID =
-        field_map_exn json "sourceServerID" SourceServerID.of_json in
-      let name = field_map json "name" SmallBoundedString.of_json in
-      let licensing = field_map json "licensing" Licensing.of_json in
+        (Option.map ~f:TargetInstanceTypeRightSizingMethod.of_xml)
+          (Xml.child xml_arg0 "targetInstanceTypeRightSizingMethod") in
       let launchDisposition =
-        field_map json "launchDisposition" LaunchDisposition.of_json in
-      let copyTags = field_map json "copyTags" Boolean.of_json in
-      let copyPrivateIp = field_map json "copyPrivateIp" Boolean.of_json in
-      make ?targetInstanceTypeRightSizingMethod ~sourceServerID ?name
-        ?licensing ?launchDisposition ?copyTags ?copyPrivateIp ()
+        (Option.map ~f:LaunchDisposition.of_xml)
+          (Xml.child xml_arg0 "launchDisposition") in
+      let name =
+        (Option.map ~f:SmallBoundedString.of_xml) (Xml.child xml_arg0 "name") in
+      let sourceServerID =
+        SourceServerID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
+      make ?launchIntoInstanceProperties ?postLaunchEnabled ?licensing
+        ?copyTags ?copyPrivateIp ?targetInstanceTypeRightSizingMethod
+        ?launchDisposition ?name ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let launchIntoInstanceProperties =
+        field_map json__ "launchIntoInstanceProperties"
+          LaunchIntoInstanceProperties.of_json in
+      let postLaunchEnabled =
+        field_map json__ "postLaunchEnabled" Boolean.of_json in
+      let licensing = field_map json__ "licensing" Licensing.of_json in
+      let copyTags = field_map json__ "copyTags" Boolean.of_json in
+      let copyPrivateIp = field_map json__ "copyPrivateIp" Boolean.of_json in
+      let targetInstanceTypeRightSizingMethod =
+        field_map json__ "targetInstanceTypeRightSizingMethod"
+          TargetInstanceTypeRightSizingMethod.of_json in
+      let launchDisposition =
+        field_map json__ "launchDisposition" LaunchDisposition.of_json in
+      let name = field_map json__ "name" SmallBoundedString.of_json in
+      let sourceServerID =
+        field_map_exn json__ "sourceServerID" SourceServerID.of_json in
+      make ?launchIntoInstanceProperties ?postLaunchEnabled ?licensing
+        ?copyTags ?copyPrivateIp ?targetInstanceTypeRightSizingMethod
+        ?launchDisposition ?name ~sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a LaunchConfiguration by Source Server ID."]
 module UpdateFailbackReplicationConfigurationRequest =
   struct
     type nonrec t =
       {
+      recoveryInstanceID: RecoveryInstanceID.t
+        [@ocaml.doc "The ID of the Recovery Instance."];
+      name: BoundedString.t option
+        [@ocaml.doc "The name of the Failback Replication Configuration."];
       bandwidthThrottling: PositiveInteger.t option
         [@ocaml.doc
           "Configure bandwidth throttling for the outbound data transfer rate of the Recovery Instance in Mbps."];
-      name: BoundedString.t option
-        [@ocaml.doc "The name of the Failback Replication Configuration."];
-      recoveryInstanceID: RecoveryInstanceID.t
-        [@ocaml.doc "The ID of the Recovery Instance."];
       usePrivateIP: Boolean.t option
         [@ocaml.doc
-          "Whether to use Private IP for the failback replication of the Recovery Instance."]}
+          "Whether to use Private IP for the failback replication of the Recovery Instance."];
+      internetProtocol: InternetProtocol.t option
+        [@ocaml.doc
+          "Which version of the Internet Protocol to use for replication of data. (IPv4 or IPv6)"]}
     let context_ = "UpdateFailbackReplicationConfigurationRequest"
-    let make ?bandwidthThrottling =
-      fun ?name ->
+    let make ?name =
+      fun ?bandwidthThrottling ->
         fun ?usePrivateIP ->
-          fun ~recoveryInstanceID ->
-            fun () ->
-              { bandwidthThrottling; name; usePrivateIP; recoveryInstanceID }
+          fun ?internetProtocol ->
+            fun ~recoveryInstanceID ->
+              fun () ->
+                {
+                  name;
+                  bandwidthThrottling;
+                  usePrivateIP;
+                  internetProtocol;
+                  recoveryInstanceID
+                }
     let to_value x =
       structure_to_value
-        [("bandwidthThrottling",
-           (Option.map x.bandwidthThrottling ~f:PositiveInteger.to_value));
+        [("recoveryInstanceID",
+           (Some (RecoveryInstanceID.to_value x.recoveryInstanceID)));
         ("name", (Option.map x.name ~f:BoundedString.to_value));
-        ("recoveryInstanceID",
-          (Some (RecoveryInstanceID.to_value x.recoveryInstanceID)));
-        ("usePrivateIP", (Option.map x.usePrivateIP ~f:Boolean.to_value))]
+        ("bandwidthThrottling",
+          (Option.map x.bandwidthThrottling ~f:PositiveInteger.to_value));
+        ("usePrivateIP", (Option.map x.usePrivateIP ~f:Boolean.to_value));
+        ("internetProtocol",
+          (Option.map x.internetProtocol ~f:InternetProtocol.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let internetProtocol =
+        (Option.map ~f:InternetProtocol.of_xml)
+          (Xml.child xml_arg0 "internetProtocol") in
       let usePrivateIP =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "usePrivateIP") in
-      let recoveryInstanceID =
-        RecoveryInstanceID.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recoveryInstanceID") in
-      let name =
-        (Option.map ~f:BoundedString.of_xml) (Xml.child xml_arg0 "name") in
       let bandwidthThrottling =
         (Option.map ~f:PositiveInteger.of_xml)
           (Xml.child xml_arg0 "bandwidthThrottling") in
-      make ?usePrivateIP ~recoveryInstanceID ?name ?bandwidthThrottling ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let usePrivateIP = field_map json "usePrivateIP" Boolean.of_json in
+      let name =
+        (Option.map ~f:BoundedString.of_xml) (Xml.child xml_arg0 "name") in
       let recoveryInstanceID =
-        field_map_exn json "recoveryInstanceID" RecoveryInstanceID.of_json in
-      let name = field_map json "name" BoundedString.of_json in
+        RecoveryInstanceID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "recoveryInstanceID") in
+      make ?internetProtocol ?usePrivateIP ?bandwidthThrottling ?name
+        ~recoveryInstanceID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let internetProtocol =
+        field_map json__ "internetProtocol" InternetProtocol.of_json in
+      let usePrivateIP = field_map json__ "usePrivateIP" Boolean.of_json in
       let bandwidthThrottling =
-        field_map json "bandwidthThrottling" PositiveInteger.of_json in
-      make ?usePrivateIP ~recoveryInstanceID ?name ?bandwidthThrottling ()
+        field_map json__ "bandwidthThrottling" PositiveInteger.of_json in
+      let name = field_map json__ "name" BoundedString.of_json in
+      let recoveryInstanceID =
+        field_map_exn json__ "recoveryInstanceID" RecoveryInstanceID.of_json in
+      make ?internetProtocol ?usePrivateIP ?bandwidthThrottling ?name
+        ~recoveryInstanceID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Allows you to update the failback replication configuration of a Recovery Instance by ID."]
@@ -5757,9 +9310,9 @@ module UntagResourceRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeys.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" ARN.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5845,8 +9398,8 @@ module TerminateRecoveryInstancesResponse =
       let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "job") in
       make ?job ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let job = field_map json "job" Job.of_json in make ?job ()
+    let of_json json__ =
+      let job = field_map json__ "job" Job.of_json in make ?job ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Initiates a Job for terminating the EC2 resources associated with the specified Recovery Instances, and then will delete the Recovery Instances from the Elastic Disaster Recovery service."]
@@ -5872,9 +9425,9 @@ module TerminateRecoveryInstancesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "recoveryInstanceIDs") in
       make ~recoveryInstanceIDs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recoveryInstanceIDs =
-        field_map_exn json "recoveryInstanceIDs"
+        field_map_exn json__ "recoveryInstanceIDs"
           RecoveryInstancesForTerminationRequest.of_json in
       make ~recoveryInstanceIDs ()
     let to_json v = composed_to_json to_value v
@@ -5902,13 +9455,254 @@ module TagResourceRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagsMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagsMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" ARN.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Adds or overwrites only the specified tags for the specified Elastic Disaster Recovery resource or resources. When you specify an existing tag key, the value is overwritten with the new value. Each resource can have a maximum of 50 tags. Each tag consists of a key and optional value."]
+module StopSourceNetworkReplicationResponse =
+  struct
+    type nonrec t =
+      {
+      sourceNetwork: SourceNetwork.t option
+        [@ocaml.doc
+          "Source Network which was requested to stop replication."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sourceNetwork = fun () -> { sourceNetwork }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("sourceNetwork",
+           (Option.map x.sourceNetwork ~f:SourceNetwork.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceNetwork =
+        (Option.map ~f:SourceNetwork.of_xml)
+          (Xml.child xml_arg0 "sourceNetwork") in
+      make ?sourceNetwork ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceNetwork =
+        field_map json__ "sourceNetwork" SourceNetwork.of_json in
+      make ?sourceNetwork ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stops replication for a Source Network. This action would make the Source Network unprotected."]
+module StopSourceNetworkReplicationRequest =
+  struct
+    type nonrec t =
+      {
+      sourceNetworkID: SourceNetworkID.t
+        [@ocaml.doc "ID of the Source Network to stop replication."]}
+    let context_ = "StopSourceNetworkReplicationRequest"
+    let make ~sourceNetworkID = fun () -> { sourceNetworkID }
+    let to_value x =
+      structure_to_value
+        [("sourceNetworkID",
+           (Some (SourceNetworkID.to_value x.sourceNetworkID)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceNetworkID =
+        SourceNetworkID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceNetworkID") in
+      make ~sourceNetworkID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceNetworkID =
+        field_map_exn json__ "sourceNetworkID" SourceNetworkID.of_json in
+      make ~sourceNetworkID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stops replication for a Source Network. This action would make the Source Network unprotected."]
+module StopReplicationResponse =
+  struct
+    type nonrec t =
+      {
+      sourceServer: SourceServer.t option
+        [@ocaml.doc "The Source Server that this action was targeted on."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sourceServer = fun () -> { sourceServer }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("sourceServer",
+           (Option.map x.sourceServer ~f:SourceServer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceServer =
+        (Option.map ~f:SourceServer.of_xml)
+          (Xml.child xml_arg0 "sourceServer") in
+      make ?sourceServer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceServer = field_map json__ "sourceServer" SourceServer.of_json in
+      make ?sourceServer ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stops replication for a Source Server. This action would make the Source Server unprotected, delete its existing snapshots and stop billing for it."]
+module StopReplicationRequest =
+  struct
+    type nonrec t =
+      {
+      sourceServerID: SourceServerID.t
+        [@ocaml.doc "The ID of the Source Server to stop replication for."]}
+    let context_ = "StopReplicationRequest"
+    let make ~sourceServerID = fun () -> { sourceServerID }
+    let to_value x =
+      structure_to_value
+        [("sourceServerID",
+           (Some (SourceServerID.to_value x.sourceServerID)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceServerID =
+        SourceServerID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
+      make ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceServerID =
+        field_map_exn json__ "sourceServerID" SourceServerID.of_json in
+      make ~sourceServerID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stops replication for a Source Server. This action would make the Source Server unprotected, delete its existing snapshots and stop billing for it."]
 module StopFailbackRequest =
   struct
     type nonrec t =
@@ -5929,13 +9723,384 @@ module StopFailbackRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "recoveryInstanceID") in
       make ~recoveryInstanceID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recoveryInstanceID =
-        field_map_exn json "recoveryInstanceID" RecoveryInstanceID.of_json in
+        field_map_exn json__ "recoveryInstanceID" RecoveryInstanceID.of_json in
       make ~recoveryInstanceID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stops the failback process for a specified Recovery Instance. This changes the Failback State of the Recovery Instance back to FAILBACK_NOT_STARTED."]
+module StartSourceNetworkReplicationResponse =
+  struct
+    type nonrec t =
+      {
+      sourceNetwork: SourceNetwork.t option
+        [@ocaml.doc "Source Network which was requested for replication."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sourceNetwork = fun () -> { sourceNetwork }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("sourceNetwork",
+           (Option.map x.sourceNetwork ~f:SourceNetwork.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceNetwork =
+        (Option.map ~f:SourceNetwork.of_xml)
+          (Xml.child xml_arg0 "sourceNetwork") in
+      make ?sourceNetwork ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceNetwork =
+        field_map json__ "sourceNetwork" SourceNetwork.of_json in
+      make ?sourceNetwork ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts replication for a Source Network. This action would make the Source Network protected."]
+module StartSourceNetworkReplicationRequest =
+  struct
+    type nonrec t =
+      {
+      sourceNetworkID: SourceNetworkID.t
+        [@ocaml.doc "ID of the Source Network to replicate."]}
+    let context_ = "StartSourceNetworkReplicationRequest"
+    let make ~sourceNetworkID = fun () -> { sourceNetworkID }
+    let to_value x =
+      structure_to_value
+        [("sourceNetworkID",
+           (Some (SourceNetworkID.to_value x.sourceNetworkID)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceNetworkID =
+        SourceNetworkID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceNetworkID") in
+      make ~sourceNetworkID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceNetworkID =
+        field_map_exn json__ "sourceNetworkID" SourceNetworkID.of_json in
+      make ~sourceNetworkID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts replication for a Source Network. This action would make the Source Network protected."]
+module StartSourceNetworkRecoveryResponse =
+  struct
+    type nonrec t =
+      {
+      job: Job.t option [@ocaml.doc "The Source Network recovery Job."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?job = fun () -> { job }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("job", (Option.map x.job ~f:Job.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "job") in
+      make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let job = field_map json__ "job" Job.of_json in make ?job ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deploy VPC for the specified Source Network and modify launch templates to use this network. The VPC will be deployed using a dedicated CloudFormation stack."]
+module StartSourceNetworkRecoveryRequest =
+  struct
+    type nonrec t =
+      {
+      sourceNetworks: StartSourceNetworkRecoveryRequestNetworkEntries.t
+        [@ocaml.doc
+          "The Source Networks that we want to start a Recovery Job for."];
+      deployAsNew: Boolean.t option
+        [@ocaml.doc
+          "Don't update existing CloudFormation Stack, recover the network using a new stack."];
+      tags: TagsMap.t option
+        [@ocaml.doc
+          "The tags to be associated with the Source Network recovery Job."]}
+    let context_ = "StartSourceNetworkRecoveryRequest"
+    let make ?deployAsNew =
+      fun ?tags ->
+        fun ~sourceNetworks ->
+          fun () -> { deployAsNew; tags; sourceNetworks }
+    let to_value x =
+      structure_to_value
+        [("sourceNetworks",
+           (Some
+              (StartSourceNetworkRecoveryRequestNetworkEntries.to_value
+                 x.sourceNetworks)));
+        ("deployAsNew", (Option.map x.deployAsNew ~f:Boolean.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let deployAsNew =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "deployAsNew") in
+      let sourceNetworks =
+        StartSourceNetworkRecoveryRequestNetworkEntries.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceNetworks") in
+      make ?tags ?deployAsNew ~sourceNetworks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let deployAsNew = field_map json__ "deployAsNew" Boolean.of_json in
+      let sourceNetworks =
+        field_map_exn json__ "sourceNetworks"
+          StartSourceNetworkRecoveryRequestNetworkEntries.of_json in
+      make ?tags ?deployAsNew ~sourceNetworks ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deploy VPC for the specified Source Network and modify launch templates to use this network. The VPC will be deployed using a dedicated CloudFormation stack."]
+module StartReplicationResponse =
+  struct
+    type nonrec t =
+      {
+      sourceServer: SourceServer.t option
+        [@ocaml.doc "The Source Server that this action was targeted on."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sourceServer = fun () -> { sourceServer }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("sourceServer",
+           (Option.map x.sourceServer ~f:SourceServer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceServer =
+        (Option.map ~f:SourceServer.of_xml)
+          (Xml.child xml_arg0 "sourceServer") in
+      make ?sourceServer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceServer = field_map json__ "sourceServer" SourceServer.of_json in
+      make ?sourceServer ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts replication for a stopped Source Server. This action would make the Source Server protected again and restart billing for it."]
+module StartReplicationRequest =
+  struct
+    type nonrec t =
+      {
+      sourceServerID: SourceServerID.t
+        [@ocaml.doc "The ID of the Source Server to start replication for."]}
+    let context_ = "StartReplicationRequest"
+    let make ~sourceServerID = fun () -> { sourceServerID }
+    let to_value x =
+      structure_to_value
+        [("sourceServerID",
+           (Some (SourceServerID.to_value x.sourceServerID)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceServerID =
+        SourceServerID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
+      make ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceServerID =
+        field_map_exn json__ "sourceServerID" SourceServerID.of_json in
+      make ~sourceServerID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts replication for a stopped Source Server. This action would make the Source Server protected again and restart billing for it."]
 module StartRecoveryResponse =
   struct
     type nonrec t = {
@@ -6015,8 +10180,8 @@ module StartRecoveryResponse =
       let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "job") in
       make ?job ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let job = field_map json "job" Job.of_json in make ?job ()
+    let of_json json__ =
+      let job = field_map json__ "job" Job.of_json in make ?job ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Launches Recovery Instances for the specified Source Servers. For each Source Server you may choose a point in time snapshot to launch from, or use an on demand snapshot."]
@@ -6024,12 +10189,12 @@ module StartRecoveryRequest =
   struct
     type nonrec t =
       {
-      isDrill: Boolean.t option
-        [@ocaml.doc
-          "Whether this Source Server Recovery operation is a drill or not."];
       sourceServers: StartRecoveryRequestSourceServers.t
         [@ocaml.doc
           "The Source Servers that we want to start a Recovery Job for."];
+      isDrill: Boolean.t option
+        [@ocaml.doc
+          "Whether this Source Server Recovery operation is a drill or not."];
       tags: TagsMap.t option
         [@ocaml.doc "The tags to be associated with the Recovery Job."]}
     let context_ = "StartRecoveryRequest"
@@ -6038,27 +10203,27 @@ module StartRecoveryRequest =
         fun ~sourceServers -> fun () -> { isDrill; tags; sourceServers }
     let to_value x =
       structure_to_value
-        [("isDrill", (Option.map x.isDrill ~f:Boolean.to_value));
-        ("sourceServers",
-          (Some (StartRecoveryRequestSourceServers.to_value x.sourceServers)));
+        [("sourceServers",
+           (Some (StartRecoveryRequestSourceServers.to_value x.sourceServers)));
+        ("isDrill", (Option.map x.isDrill ~f:Boolean.to_value));
         ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let isDrill =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isDrill") in
       let sourceServers =
         StartRecoveryRequestSourceServers.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServers") in
-      let isDrill =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isDrill") in
-      make ?tags ~sourceServers ?isDrill ()
+      make ?tags ?isDrill ~sourceServers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let isDrill = field_map json__ "isDrill" Boolean.of_json in
       let sourceServers =
-        field_map_exn json "sourceServers"
+        field_map_exn json__ "sourceServers"
           StartRecoveryRequestSourceServers.of_json in
-      let isDrill = field_map json "isDrill" Boolean.of_json in
-      make ?tags ~sourceServers ?isDrill ()
+      make ?tags ?isDrill ~sourceServers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Launches Recovery Instances for the specified Source Servers. For each Source Server you may choose a point in time snapshot to launch from, or use an on demand snapshot."]
@@ -6151,8 +10316,8 @@ module StartFailbackLaunchResponse =
       let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "job") in
       make ?job ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let job = field_map json "job" Job.of_json in make ?job ()
+    let of_json json__ =
+      let job = field_map json__ "job" Job.of_json in make ?job ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Initiates a Job for launching the machine that is being failed back to from the specified Recovery Instance. This will run conversion on the failback client and will reboot your machine, thus completing the failback process."]
@@ -6184,15 +10349,153 @@ module StartFailbackLaunchRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "recoveryInstanceIDs") in
       make ?tags ~recoveryInstanceIDs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
       let recoveryInstanceIDs =
-        field_map_exn json "recoveryInstanceIDs"
+        field_map_exn json__ "recoveryInstanceIDs"
           StartFailbackRequestRecoveryInstanceIDs.of_json in
       make ?tags ~recoveryInstanceIDs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Initiates a Job for launching the machine that is being failed back to from the specified Recovery Instance. This will run conversion on the failback client and will reboot your machine, thus completing the failback process."]
+module ReverseReplicationResponse =
+  struct
+    type nonrec t =
+      {
+      reversedDirectionSourceServerArn: SourceServerARN.t option
+        [@ocaml.doc "ARN of created SourceServer."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?reversedDirectionSourceServerArn =
+      fun () -> { reversedDirectionSourceServerArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("reversedDirectionSourceServerArn",
+           (Option.map x.reversedDirectionSourceServerArn
+              ~f:SourceServerARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reversedDirectionSourceServerArn =
+        (Option.map ~f:SourceServerARN.of_xml)
+          (Xml.child xml_arg0 "reversedDirectionSourceServerArn") in
+      make ?reversedDirectionSourceServerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reversedDirectionSourceServerArn =
+        field_map json__ "reversedDirectionSourceServerArn"
+          SourceServerARN.of_json in
+      make ?reversedDirectionSourceServerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Start replication to origin / target region - applies only to protected instances that originated in EC2. For recovery instances on target region - starts replication back to origin region. For failback instances on origin region - starts replication to target region to re-protect them."]
+module ReverseReplicationRequest =
+  struct
+    type nonrec t =
+      {
+      recoveryInstanceID: RecoveryInstanceID.t
+        [@ocaml.doc
+          "The ID of the Recovery Instance that we want to reverse the replication for."]}
+    let context_ = "ReverseReplicationRequest"
+    let make ~recoveryInstanceID = fun () -> { recoveryInstanceID }
+    let to_value x =
+      structure_to_value
+        [("recoveryInstanceID",
+           (Some (RecoveryInstanceID.to_value x.recoveryInstanceID)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recoveryInstanceID =
+        RecoveryInstanceID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "recoveryInstanceID") in
+      make ~recoveryInstanceID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recoveryInstanceID =
+        field_map_exn json__ "recoveryInstanceID" RecoveryInstanceID.of_json in
+      make ~recoveryInstanceID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Start replication to origin / target region - applies only to protected instances that originated in EC2. For recovery instances on target region - starts replication back to origin region. For failback instances on origin region - starts replication to target region to re-protect them."]
 module RetryDataReplicationRequest =
   struct
     type nonrec t =
@@ -6213,108 +10516,121 @@ module RetryDataReplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       make ~sourceServerID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceServerID =
-        field_map_exn json "sourceServerID" SourceServerID.of_json in
+        field_map_exn json__ "sourceServerID" SourceServerID.of_json in
       make ~sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Causes the data replication initiation sequence to begin immediately upon next Handshake for the specified Source Server ID, regardless of when the previous initiation started. This command will work only if the Source Server is stalled or is in a DISCONNECTED or STOPPED state."]
+       "WARNING: RetryDataReplication is deprecated. Causes the data replication initiation sequence to begin immediately upon next Handshake for the specified Source Server ID, regardless of when the previous initiation started. This command will work only if the Source Server is stalled or is in a DISCONNECTED or STOPPED state."]
 module ReplicationConfiguration =
   struct
     type nonrec t =
       {
+      sourceServerID: SourceServerID.t option
+        [@ocaml.doc
+          "The ID of the Source Server for this Replication Configuration."];
+      name: SmallBoundedString.t option
+        [@ocaml.doc "The name of the Replication Configuration."];
+      stagingAreaSubnetId: SubnetID.t option
+        [@ocaml.doc "The subnet to be used by the replication staging area."];
       associateDefaultSecurityGroup: Boolean.t option
         [@ocaml.doc
           "Whether to associate the default Elastic Disaster Recovery Security group with the Replication Configuration."];
-      bandwidthThrottling: PositiveInteger.t option
+      replicationServersSecurityGroupsIDs:
+        ReplicationServersSecurityGroupsIDs.t option
         [@ocaml.doc
-          "Configure bandwidth throttling for the outbound data transfer rate of the Source Server in Mbps."];
-      createPublicIP: Boolean.t option
+          "The security group IDs that will be used by the replication server."];
+      replicationServerInstanceType: EC2InstanceType.t option
         [@ocaml.doc
-          "Whether to create a Public IP for the Recovery Instance by default."];
-      dataPlaneRouting: ReplicationConfigurationDataPlaneRouting.t option
+          "The instance type to be used for the replication server."];
+      useDedicatedReplicationServer: Boolean.t option
         [@ocaml.doc
-          "The data plane routing mechanism that will be used for replication."];
+          "Whether to use a dedicated Replication Server in the replication staging area."];
       defaultLargeStagingDiskType:
         ReplicationConfigurationDefaultLargeStagingDiskType.t option
         [@ocaml.doc
           "The Staging Disk EBS volume type to be used during replication."];
+      replicatedDisks: ReplicationConfigurationReplicatedDisks.t option
+        [@ocaml.doc
+          "The configuration of the disks of the Source Server to be replicated."];
       ebsEncryption: ReplicationConfigurationEbsEncryption.t option
         [@ocaml.doc
           "The type of EBS encryption to be used during replication."];
       ebsEncryptionKeyArn: ARN.t option
         [@ocaml.doc
           "The ARN of the EBS encryption key to be used during replication."];
-      name: SmallBoundedString.t option
-        [@ocaml.doc "The name of the Replication Configuration."];
-      pitPolicy: PITPolicy.t option
+      bandwidthThrottling: PositiveInteger.t option
         [@ocaml.doc
-          "The Point in time (PIT) policy to manage snapshots taken during replication."];
-      replicatedDisks: ReplicationConfigurationReplicatedDisks.t option
+          "Configure bandwidth throttling for the outbound data transfer rate of the Source Server in Mbps."];
+      dataPlaneRouting: ReplicationConfigurationDataPlaneRouting.t option
         [@ocaml.doc
-          "The configuration of the disks of the Source Server to be replicated."];
-      replicationServerInstanceType: EC2InstanceType.t option
+          "The data plane routing mechanism that will be used for replication."];
+      createPublicIP: Boolean.t option
         [@ocaml.doc
-          "The instance type to be used for the replication server."];
-      replicationServersSecurityGroupsIDs:
-        ReplicationServersSecurityGroupsIDs.t option
-        [@ocaml.doc
-          "The security group IDs that will be used by the replication server."];
-      sourceServerID: SourceServerID.t option
-        [@ocaml.doc
-          "The ID of the Source Server for this Replication Configuration."];
-      stagingAreaSubnetId: SubnetID.t option
-        [@ocaml.doc "The subnet to be used by the replication staging area."];
+          "Whether to create a Public IP for the Recovery Instance by default."];
       stagingAreaTags: TagsMap.t option
         [@ocaml.doc
           "A set of tags to be associated with all resources created in the replication staging area: EC2 replication server, EBS volumes, EBS snapshots, etc."];
-      useDedicatedReplicationServer: Boolean.t option
+      pitPolicy: PITPolicy.t option
         [@ocaml.doc
-          "Whether to use a dedicated Replication Server in the replication staging area."]}
+          "The Point in time (PIT) policy to manage snapshots taken during replication."];
+      autoReplicateNewDisks: Boolean.t option
+        [@ocaml.doc
+          "Whether to allow the AWS replication agent to automatically replicate newly added disks."];
+      internetProtocol: InternetProtocol.t option
+        [@ocaml.doc
+          "Which version of the Internet Protocol to use for replication of data. (IPv4 or IPv6)"]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `UninitializedAccountException of UninitializedAccountException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?associateDefaultSecurityGroup =
-      fun ?bandwidthThrottling ->
-        fun ?createPublicIP ->
-          fun ?dataPlaneRouting ->
-            fun ?defaultLargeStagingDiskType ->
-              fun ?ebsEncryption ->
-                fun ?ebsEncryptionKeyArn ->
-                  fun ?name ->
-                    fun ?pitPolicy ->
-                      fun ?replicatedDisks ->
-                        fun ?replicationServerInstanceType ->
-                          fun ?replicationServersSecurityGroupsIDs ->
-                            fun ?sourceServerID ->
-                              fun ?stagingAreaSubnetId ->
+    let make ?sourceServerID =
+      fun ?name ->
+        fun ?stagingAreaSubnetId ->
+          fun ?associateDefaultSecurityGroup ->
+            fun ?replicationServersSecurityGroupsIDs ->
+              fun ?replicationServerInstanceType ->
+                fun ?useDedicatedReplicationServer ->
+                  fun ?defaultLargeStagingDiskType ->
+                    fun ?replicatedDisks ->
+                      fun ?ebsEncryption ->
+                        fun ?ebsEncryptionKeyArn ->
+                          fun ?bandwidthThrottling ->
+                            fun ?dataPlaneRouting ->
+                              fun ?createPublicIP ->
                                 fun ?stagingAreaTags ->
-                                  fun ?useDedicatedReplicationServer ->
-                                    fun () ->
-                                      {
-                                        associateDefaultSecurityGroup;
-                                        bandwidthThrottling;
-                                        createPublicIP;
-                                        dataPlaneRouting;
-                                        defaultLargeStagingDiskType;
-                                        ebsEncryption;
-                                        ebsEncryptionKeyArn;
-                                        name;
-                                        pitPolicy;
-                                        replicatedDisks;
-                                        replicationServerInstanceType;
-                                        replicationServersSecurityGroupsIDs;
-                                        sourceServerID;
-                                        stagingAreaSubnetId;
-                                        stagingAreaTags;
-                                        useDedicatedReplicationServer
-                                      }
+                                  fun ?pitPolicy ->
+                                    fun ?autoReplicateNewDisks ->
+                                      fun ?internetProtocol ->
+                                        fun () ->
+                                          {
+                                            sourceServerID;
+                                            name;
+                                            stagingAreaSubnetId;
+                                            associateDefaultSecurityGroup;
+                                            replicationServersSecurityGroupsIDs;
+                                            replicationServerInstanceType;
+                                            useDedicatedReplicationServer;
+                                            defaultLargeStagingDiskType;
+                                            replicatedDisks;
+                                            ebsEncryption;
+                                            ebsEncryptionKeyArn;
+                                            bandwidthThrottling;
+                                            dataPlaneRouting;
+                                            createPublicIP;
+                                            stagingAreaTags;
+                                            pitPolicy;
+                                            autoReplicateNewDisks;
+                                            internetProtocol
+                                          }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -6329,6 +10645,8 @@ module ReplicationConfiguration =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -6342,6 +10660,10 @@ module ReplicationConfiguration =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -6365,138 +10687,468 @@ module ReplicationConfiguration =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("associateDefaultSecurityGroup",
-           (Option.map x.associateDefaultSecurityGroup ~f:Boolean.to_value));
-        ("bandwidthThrottling",
-          (Option.map x.bandwidthThrottling ~f:PositiveInteger.to_value));
-        ("createPublicIP", (Option.map x.createPublicIP ~f:Boolean.to_value));
-        ("dataPlaneRouting",
-          (Option.map x.dataPlaneRouting
-             ~f:ReplicationConfigurationDataPlaneRouting.to_value));
+        [("sourceServerID",
+           (Option.map x.sourceServerID ~f:SourceServerID.to_value));
+        ("name", (Option.map x.name ~f:SmallBoundedString.to_value));
+        ("stagingAreaSubnetId",
+          (Option.map x.stagingAreaSubnetId ~f:SubnetID.to_value));
+        ("associateDefaultSecurityGroup",
+          (Option.map x.associateDefaultSecurityGroup ~f:Boolean.to_value));
+        ("replicationServersSecurityGroupsIDs",
+          (Option.map x.replicationServersSecurityGroupsIDs
+             ~f:ReplicationServersSecurityGroupsIDs.to_value));
+        ("replicationServerInstanceType",
+          (Option.map x.replicationServerInstanceType
+             ~f:EC2InstanceType.to_value));
+        ("useDedicatedReplicationServer",
+          (Option.map x.useDedicatedReplicationServer ~f:Boolean.to_value));
         ("defaultLargeStagingDiskType",
           (Option.map x.defaultLargeStagingDiskType
              ~f:ReplicationConfigurationDefaultLargeStagingDiskType.to_value));
+        ("replicatedDisks",
+          (Option.map x.replicatedDisks
+             ~f:ReplicationConfigurationReplicatedDisks.to_value));
         ("ebsEncryption",
           (Option.map x.ebsEncryption
              ~f:ReplicationConfigurationEbsEncryption.to_value));
         ("ebsEncryptionKeyArn",
           (Option.map x.ebsEncryptionKeyArn ~f:ARN.to_value));
-        ("name", (Option.map x.name ~f:SmallBoundedString.to_value));
-        ("pitPolicy", (Option.map x.pitPolicy ~f:PITPolicy.to_value));
-        ("replicatedDisks",
-          (Option.map x.replicatedDisks
-             ~f:ReplicationConfigurationReplicatedDisks.to_value));
-        ("replicationServerInstanceType",
-          (Option.map x.replicationServerInstanceType
-             ~f:EC2InstanceType.to_value));
-        ("replicationServersSecurityGroupsIDs",
-          (Option.map x.replicationServersSecurityGroupsIDs
-             ~f:ReplicationServersSecurityGroupsIDs.to_value));
-        ("sourceServerID",
-          (Option.map x.sourceServerID ~f:SourceServerID.to_value));
-        ("stagingAreaSubnetId",
-          (Option.map x.stagingAreaSubnetId ~f:SubnetID.to_value));
+        ("bandwidthThrottling",
+          (Option.map x.bandwidthThrottling ~f:PositiveInteger.to_value));
+        ("dataPlaneRouting",
+          (Option.map x.dataPlaneRouting
+             ~f:ReplicationConfigurationDataPlaneRouting.to_value));
+        ("createPublicIP", (Option.map x.createPublicIP ~f:Boolean.to_value));
         ("stagingAreaTags",
           (Option.map x.stagingAreaTags ~f:TagsMap.to_value));
-        ("useDedicatedReplicationServer",
-          (Option.map x.useDedicatedReplicationServer ~f:Boolean.to_value))]
+        ("pitPolicy", (Option.map x.pitPolicy ~f:PITPolicy.to_value));
+        ("autoReplicateNewDisks",
+          (Option.map x.autoReplicateNewDisks ~f:Boolean.to_value));
+        ("internetProtocol",
+          (Option.map x.internetProtocol ~f:InternetProtocol.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let useDedicatedReplicationServer =
+      let internetProtocol =
+        (Option.map ~f:InternetProtocol.of_xml)
+          (Xml.child xml_arg0 "internetProtocol") in
+      let autoReplicateNewDisks =
         (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "useDedicatedReplicationServer") in
-      let stagingAreaTags =
-        (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "stagingAreaTags") in
-      let stagingAreaSubnetId =
-        (Option.map ~f:SubnetID.of_xml)
-          (Xml.child xml_arg0 "stagingAreaSubnetId") in
-      let sourceServerID =
-        (Option.map ~f:SourceServerID.of_xml)
-          (Xml.child xml_arg0 "sourceServerID") in
-      let replicationServersSecurityGroupsIDs =
-        (Option.map ~f:ReplicationServersSecurityGroupsIDs.of_xml)
-          (Xml.child xml_arg0 "replicationServersSecurityGroupsIDs") in
-      let replicationServerInstanceType =
-        (Option.map ~f:EC2InstanceType.of_xml)
-          (Xml.child xml_arg0 "replicationServerInstanceType") in
-      let replicatedDisks =
-        (Option.map ~f:ReplicationConfigurationReplicatedDisks.of_xml)
-          (Xml.child xml_arg0 "replicatedDisks") in
+          (Xml.child xml_arg0 "autoReplicateNewDisks") in
       let pitPolicy =
         (Option.map ~f:PITPolicy.of_xml) (Xml.child xml_arg0 "pitPolicy") in
-      let name =
-        (Option.map ~f:SmallBoundedString.of_xml) (Xml.child xml_arg0 "name") in
+      let stagingAreaTags =
+        (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "stagingAreaTags") in
+      let createPublicIP =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "createPublicIP") in
+      let dataPlaneRouting =
+        (Option.map ~f:ReplicationConfigurationDataPlaneRouting.of_xml)
+          (Xml.child xml_arg0 "dataPlaneRouting") in
+      let bandwidthThrottling =
+        (Option.map ~f:PositiveInteger.of_xml)
+          (Xml.child xml_arg0 "bandwidthThrottling") in
       let ebsEncryptionKeyArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ebsEncryptionKeyArn") in
       let ebsEncryption =
         (Option.map ~f:ReplicationConfigurationEbsEncryption.of_xml)
           (Xml.child xml_arg0 "ebsEncryption") in
+      let replicatedDisks =
+        (Option.map ~f:ReplicationConfigurationReplicatedDisks.of_xml)
+          (Xml.child xml_arg0 "replicatedDisks") in
       let defaultLargeStagingDiskType =
         (Option.map
            ~f:ReplicationConfigurationDefaultLargeStagingDiskType.of_xml)
           (Xml.child xml_arg0 "defaultLargeStagingDiskType") in
-      let dataPlaneRouting =
-        (Option.map ~f:ReplicationConfigurationDataPlaneRouting.of_xml)
-          (Xml.child xml_arg0 "dataPlaneRouting") in
-      let createPublicIP =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "createPublicIP") in
-      let bandwidthThrottling =
-        (Option.map ~f:PositiveInteger.of_xml)
-          (Xml.child xml_arg0 "bandwidthThrottling") in
+      let useDedicatedReplicationServer =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "useDedicatedReplicationServer") in
+      let replicationServerInstanceType =
+        (Option.map ~f:EC2InstanceType.of_xml)
+          (Xml.child xml_arg0 "replicationServerInstanceType") in
+      let replicationServersSecurityGroupsIDs =
+        (Option.map ~f:ReplicationServersSecurityGroupsIDs.of_xml)
+          (Xml.child xml_arg0 "replicationServersSecurityGroupsIDs") in
       let associateDefaultSecurityGroup =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "associateDefaultSecurityGroup") in
-      make ?useDedicatedReplicationServer ?stagingAreaTags
-        ?stagingAreaSubnetId ?sourceServerID
-        ?replicationServersSecurityGroupsIDs ?replicationServerInstanceType
-        ?replicatedDisks ?pitPolicy ?name ?ebsEncryptionKeyArn ?ebsEncryption
-        ?defaultLargeStagingDiskType ?dataPlaneRouting ?createPublicIP
-        ?bandwidthThrottling ?associateDefaultSecurityGroup ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let useDedicatedReplicationServer =
-        field_map json "useDedicatedReplicationServer" Boolean.of_json in
-      let stagingAreaTags = field_map json "stagingAreaTags" TagsMap.of_json in
       let stagingAreaSubnetId =
-        field_map json "stagingAreaSubnetId" SubnetID.of_json in
+        (Option.map ~f:SubnetID.of_xml)
+          (Xml.child xml_arg0 "stagingAreaSubnetId") in
+      let name =
+        (Option.map ~f:SmallBoundedString.of_xml) (Xml.child xml_arg0 "name") in
       let sourceServerID =
-        field_map json "sourceServerID" SourceServerID.of_json in
-      let replicationServersSecurityGroupsIDs =
-        field_map json "replicationServersSecurityGroupsIDs"
-          ReplicationServersSecurityGroupsIDs.of_json in
-      let replicationServerInstanceType =
-        field_map json "replicationServerInstanceType"
-          EC2InstanceType.of_json in
-      let replicatedDisks =
-        field_map json "replicatedDisks"
-          ReplicationConfigurationReplicatedDisks.of_json in
-      let pitPolicy = field_map json "pitPolicy" PITPolicy.of_json in
-      let name = field_map json "name" SmallBoundedString.of_json in
-      let ebsEncryptionKeyArn =
-        field_map json "ebsEncryptionKeyArn" ARN.of_json in
-      let ebsEncryption =
-        field_map json "ebsEncryption"
-          ReplicationConfigurationEbsEncryption.of_json in
-      let defaultLargeStagingDiskType =
-        field_map json "defaultLargeStagingDiskType"
-          ReplicationConfigurationDefaultLargeStagingDiskType.of_json in
+        (Option.map ~f:SourceServerID.of_xml)
+          (Xml.child xml_arg0 "sourceServerID") in
+      make ?internetProtocol ?autoReplicateNewDisks ?pitPolicy
+        ?stagingAreaTags ?createPublicIP ?dataPlaneRouting
+        ?bandwidthThrottling ?ebsEncryptionKeyArn ?ebsEncryption
+        ?replicatedDisks ?defaultLargeStagingDiskType
+        ?useDedicatedReplicationServer ?replicationServerInstanceType
+        ?replicationServersSecurityGroupsIDs ?associateDefaultSecurityGroup
+        ?stagingAreaSubnetId ?name ?sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let internetProtocol =
+        field_map json__ "internetProtocol" InternetProtocol.of_json in
+      let autoReplicateNewDisks =
+        field_map json__ "autoReplicateNewDisks" Boolean.of_json in
+      let pitPolicy = field_map json__ "pitPolicy" PITPolicy.of_json in
+      let stagingAreaTags =
+        field_map json__ "stagingAreaTags" TagsMap.of_json in
+      let createPublicIP = field_map json__ "createPublicIP" Boolean.of_json in
       let dataPlaneRouting =
-        field_map json "dataPlaneRouting"
+        field_map json__ "dataPlaneRouting"
           ReplicationConfigurationDataPlaneRouting.of_json in
-      let createPublicIP = field_map json "createPublicIP" Boolean.of_json in
       let bandwidthThrottling =
-        field_map json "bandwidthThrottling" PositiveInteger.of_json in
+        field_map json__ "bandwidthThrottling" PositiveInteger.of_json in
+      let ebsEncryptionKeyArn =
+        field_map json__ "ebsEncryptionKeyArn" ARN.of_json in
+      let ebsEncryption =
+        field_map json__ "ebsEncryption"
+          ReplicationConfigurationEbsEncryption.of_json in
+      let replicatedDisks =
+        field_map json__ "replicatedDisks"
+          ReplicationConfigurationReplicatedDisks.of_json in
+      let defaultLargeStagingDiskType =
+        field_map json__ "defaultLargeStagingDiskType"
+          ReplicationConfigurationDefaultLargeStagingDiskType.of_json in
+      let useDedicatedReplicationServer =
+        field_map json__ "useDedicatedReplicationServer" Boolean.of_json in
+      let replicationServerInstanceType =
+        field_map json__ "replicationServerInstanceType"
+          EC2InstanceType.of_json in
+      let replicationServersSecurityGroupsIDs =
+        field_map json__ "replicationServersSecurityGroupsIDs"
+          ReplicationServersSecurityGroupsIDs.of_json in
       let associateDefaultSecurityGroup =
-        field_map json "associateDefaultSecurityGroup" Boolean.of_json in
-      make ?useDedicatedReplicationServer ?stagingAreaTags
-        ?stagingAreaSubnetId ?sourceServerID
-        ?replicationServersSecurityGroupsIDs ?replicationServerInstanceType
-        ?replicatedDisks ?pitPolicy ?name ?ebsEncryptionKeyArn ?ebsEncryption
-        ?defaultLargeStagingDiskType ?dataPlaneRouting ?createPublicIP
-        ?bandwidthThrottling ?associateDefaultSecurityGroup ()
+        field_map json__ "associateDefaultSecurityGroup" Boolean.of_json in
+      let stagingAreaSubnetId =
+        field_map json__ "stagingAreaSubnetId" SubnetID.of_json in
+      let name = field_map json__ "name" SmallBoundedString.of_json in
+      let sourceServerID =
+        field_map json__ "sourceServerID" SourceServerID.of_json in
+      make ?internetProtocol ?autoReplicateNewDisks ?pitPolicy
+        ?stagingAreaTags ?createPublicIP ?dataPlaneRouting
+        ?bandwidthThrottling ?ebsEncryptionKeyArn ?ebsEncryption
+        ?replicatedDisks ?defaultLargeStagingDiskType
+        ?useDedicatedReplicationServer ?replicationServerInstanceType
+        ?replicationServersSecurityGroupsIDs ?associateDefaultSecurityGroup
+        ?stagingAreaSubnetId ?name ?sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets a ReplicationConfiguration, filtered by Source Server ID."]
+module PutLaunchActionResponse =
+  struct
+    type nonrec t =
+      {
+      resourceId: LaunchActionResourceId.t option ;
+      actionId: LaunchActionId.t option ;
+      actionCode: SsmDocumentName.t option [@ocaml.doc "Launch action code."];
+      type_: LaunchActionType.t option [@ocaml.doc "Launch action type."];
+      name: LaunchActionName.t option ;
+      active: Boolean.t option
+        [@ocaml.doc "Whether the launch action is active."];
+      order: LaunchActionOrder.t option ;
+      actionVersion: LaunchActionVersion.t option ;
+      optional: Boolean.t option
+        [@ocaml.doc
+          "Whether the launch will not be marked as failed if this action fails."];
+      parameters: LaunchActionParameters.t option ;
+      description: LaunchActionDescription.t option ;
+      category: LaunchActionCategory.t option }
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceId =
+      fun ?actionId ->
+        fun ?actionCode ->
+          fun ?type_ ->
+            fun ?name ->
+              fun ?active ->
+                fun ?order ->
+                  fun ?actionVersion ->
+                    fun ?optional ->
+                      fun ?parameters ->
+                        fun ?description ->
+                          fun ?category ->
+                            fun () ->
+                              {
+                                resourceId;
+                                actionId;
+                                actionCode;
+                                type_;
+                                name;
+                                active;
+                                order;
+                                actionVersion;
+                                optional;
+                                parameters;
+                                description;
+                                category
+                              }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("resourceId",
+           (Option.map x.resourceId ~f:LaunchActionResourceId.to_value));
+        ("actionId", (Option.map x.actionId ~f:LaunchActionId.to_value));
+        ("actionCode", (Option.map x.actionCode ~f:SsmDocumentName.to_value));
+        ("type", (Option.map x.type_ ~f:LaunchActionType.to_value));
+        ("name", (Option.map x.name ~f:LaunchActionName.to_value));
+        ("active", (Option.map x.active ~f:Boolean.to_value));
+        ("order", (Option.map x.order ~f:LaunchActionOrder.to_value));
+        ("actionVersion",
+          (Option.map x.actionVersion ~f:LaunchActionVersion.to_value));
+        ("optional", (Option.map x.optional ~f:Boolean.to_value));
+        ("parameters",
+          (Option.map x.parameters ~f:LaunchActionParameters.to_value));
+        ("description",
+          (Option.map x.description ~f:LaunchActionDescription.to_value));
+        ("category",
+          (Option.map x.category ~f:LaunchActionCategory.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let category =
+        (Option.map ~f:LaunchActionCategory.of_xml)
+          (Xml.child xml_arg0 "category") in
+      let description =
+        (Option.map ~f:LaunchActionDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let parameters =
+        (Option.map ~f:LaunchActionParameters.of_xml)
+          (Xml.child xml_arg0 "parameters") in
+      let optional =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "optional") in
+      let actionVersion =
+        (Option.map ~f:LaunchActionVersion.of_xml)
+          (Xml.child xml_arg0 "actionVersion") in
+      let order =
+        (Option.map ~f:LaunchActionOrder.of_xml) (Xml.child xml_arg0 "order") in
+      let active =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "active") in
+      let name =
+        (Option.map ~f:LaunchActionName.of_xml) (Xml.child xml_arg0 "name") in
+      let type_ =
+        (Option.map ~f:LaunchActionType.of_xml) (Xml.child xml_arg0 "type") in
+      let actionCode =
+        (Option.map ~f:SsmDocumentName.of_xml)
+          (Xml.child xml_arg0 "actionCode") in
+      let actionId =
+        (Option.map ~f:LaunchActionId.of_xml) (Xml.child xml_arg0 "actionId") in
+      let resourceId =
+        (Option.map ~f:LaunchActionResourceId.of_xml)
+          (Xml.child xml_arg0 "resourceId") in
+      make ?category ?description ?parameters ?optional ?actionVersion ?order
+        ?active ?name ?type_ ?actionCode ?actionId ?resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let category = field_map json__ "category" LaunchActionCategory.of_json in
+      let description =
+        field_map json__ "description" LaunchActionDescription.of_json in
+      let parameters =
+        field_map json__ "parameters" LaunchActionParameters.of_json in
+      let optional = field_map json__ "optional" Boolean.of_json in
+      let actionVersion =
+        field_map json__ "actionVersion" LaunchActionVersion.of_json in
+      let order = field_map json__ "order" LaunchActionOrder.of_json in
+      let active = field_map json__ "active" Boolean.of_json in
+      let name = field_map json__ "name" LaunchActionName.of_json in
+      let type_ = field_map json__ "type" LaunchActionType.of_json in
+      let actionCode = field_map json__ "actionCode" SsmDocumentName.of_json in
+      let actionId = field_map json__ "actionId" LaunchActionId.of_json in
+      let resourceId =
+        field_map json__ "resourceId" LaunchActionResourceId.of_json in
+      make ?category ?description ?parameters ?optional ?actionVersion ?order
+        ?active ?name ?type_ ?actionCode ?actionId ?resourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Puts a resource launch action."]
+module PutLaunchActionRequest =
+  struct
+    type nonrec t =
+      {
+      resourceId: LaunchActionResourceId.t ;
+      actionCode: SsmDocumentName.t [@ocaml.doc "Launch action code."];
+      order: LaunchActionOrder.t ;
+      actionId: LaunchActionId.t ;
+      optional: Boolean.t
+        [@ocaml.doc
+          "Whether the launch will not be marked as failed if this action fails."];
+      active: Boolean.t [@ocaml.doc "Whether the launch action is active."];
+      name: LaunchActionName.t ;
+      actionVersion: LaunchActionVersion.t ;
+      category: LaunchActionCategory.t ;
+      parameters: LaunchActionParameters.t option ;
+      description: LaunchActionDescription.t }
+    let context_ = "PutLaunchActionRequest"
+    let make ?parameters =
+      fun ~resourceId ->
+        fun ~actionCode ->
+          fun ~order ->
+            fun ~actionId ->
+              fun ~optional ->
+                fun ~active ->
+                  fun ~name ->
+                    fun ~actionVersion ->
+                      fun ~category ->
+                        fun ~description ->
+                          fun () ->
+                            {
+                              parameters;
+                              resourceId;
+                              actionCode;
+                              order;
+                              actionId;
+                              optional;
+                              active;
+                              name;
+                              actionVersion;
+                              category;
+                              description
+                            }
+    let to_value x =
+      structure_to_value
+        [("resourceId",
+           (Some (LaunchActionResourceId.to_value x.resourceId)));
+        ("actionCode", (Some (SsmDocumentName.to_value x.actionCode)));
+        ("order", (Some (LaunchActionOrder.to_value x.order)));
+        ("actionId", (Some (LaunchActionId.to_value x.actionId)));
+        ("optional", (Some (Boolean.to_value x.optional)));
+        ("active", (Some (Boolean.to_value x.active)));
+        ("name", (Some (LaunchActionName.to_value x.name)));
+        ("actionVersion",
+          (Some (LaunchActionVersion.to_value x.actionVersion)));
+        ("category", (Some (LaunchActionCategory.to_value x.category)));
+        ("parameters",
+          (Option.map x.parameters ~f:LaunchActionParameters.to_value));
+        ("description",
+          (Some (LaunchActionDescription.to_value x.description)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        LaunchActionDescription.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "description") in
+      let parameters =
+        (Option.map ~f:LaunchActionParameters.of_xml)
+          (Xml.child xml_arg0 "parameters") in
+      let category =
+        LaunchActionCategory.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "category") in
+      let actionVersion =
+        LaunchActionVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "actionVersion") in
+      let name =
+        LaunchActionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let active =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "active") in
+      let optional =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "optional") in
+      let actionId =
+        LaunchActionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "actionId") in
+      let order =
+        LaunchActionOrder.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "order") in
+      let actionCode =
+        SsmDocumentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "actionCode") in
+      let resourceId =
+        LaunchActionResourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
+      make ~description ?parameters ~category ~actionVersion ~name ~active
+        ~optional ~actionId ~order ~actionCode ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map_exn json__ "description" LaunchActionDescription.of_json in
+      let parameters =
+        field_map json__ "parameters" LaunchActionParameters.of_json in
+      let category =
+        field_map_exn json__ "category" LaunchActionCategory.of_json in
+      let actionVersion =
+        field_map_exn json__ "actionVersion" LaunchActionVersion.of_json in
+      let name = field_map_exn json__ "name" LaunchActionName.of_json in
+      let active = field_map_exn json__ "active" Boolean.of_json in
+      let optional = field_map_exn json__ "optional" Boolean.of_json in
+      let actionId = field_map_exn json__ "actionId" LaunchActionId.of_json in
+      let order = field_map_exn json__ "order" LaunchActionOrder.of_json in
+      let actionCode =
+        field_map_exn json__ "actionCode" SsmDocumentName.of_json in
+      let resourceId =
+        field_map_exn json__ "resourceId" LaunchActionResourceId.of_json in
+      make ~description ?parameters ~category ~actionVersion ~name ~active
+        ~optional ~actionId ~order ~actionCode ~resourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Puts a resource launch action."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -6574,8 +11226,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List all tags for your Elastic Disaster Recovery resources."]
@@ -6596,65 +11248,498 @@ module ListTagsForResourceRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" ARN.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List all tags for your Elastic Disaster Recovery resources."]
+module ListStagingAccountsResponse =
+  struct
+    type nonrec t =
+      {
+      accounts: Accounts.t option
+        [@ocaml.doc "An array of staging AWS Accounts."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "The token of the next staging Account to retrieve."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accounts = fun ?nextToken -> fun () -> { accounts; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("accounts", (Option.map x.accounts ~f:Accounts.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let accounts =
+        (Option.map ~f:Accounts.of_xml) (Xml.child xml_arg0 "accounts") in
+      make ?nextToken ?accounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let accounts = field_map json__ "accounts" Accounts.of_json in
+      make ?nextToken ?accounts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns an array of staging accounts for existing extended source servers."]
+module ListStagingAccountsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: ListStagingAccountsRequestMaxResultsInteger.t option
+        [@ocaml.doc "The maximum number of staging Accounts to retrieve."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "The token of the next staging Account to retrieve."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("maxResults",
+           (Option.map x.maxResults
+              ~f:ListStagingAccountsRequestMaxResultsInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:ListStagingAccountsRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          ListStagingAccountsRequestMaxResultsInteger.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns an array of staging accounts for existing extended source servers."]
+module ListLaunchActionsResponse =
+  struct
+    type nonrec t =
+      {
+      items: LaunchActions.t option
+        [@ocaml.doc "List of resource launch actions."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "Next token returned when listing resource launch actions."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("items", (Option.map x.items ~f:LaunchActions.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let items =
+        (Option.map ~f:LaunchActions.of_xml) (Xml.child xml_arg0 "items") in
+      make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let items = field_map json__ "items" LaunchActions.of_json in
+      make ?nextToken ?items ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists resource launch actions."]
+module ListLaunchActionsRequest =
+  struct
+    type nonrec t =
+      {
+      resourceId: LaunchActionResourceId.t ;
+      filters: LaunchActionsRequestFilters.t option
+        [@ocaml.doc "Filters to apply when listing resource launch actions."];
+      maxResults: MaxResultsType.t option
+        [@ocaml.doc
+          "Maximum amount of items to return when listing resource launch actions."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "Next token to use when listing resource launch actions."]}
+    let context_ = "ListLaunchActionsRequest"
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~resourceId ->
+            fun () -> { filters; maxResults; nextToken; resourceId }
+    let to_value x =
+      structure_to_value
+        [("resourceId",
+           (Some (LaunchActionResourceId.to_value x.resourceId)));
+        ("filters",
+          (Option.map x.filters ~f:LaunchActionsRequestFilters.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResultsType.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultsType.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let filters =
+        (Option.map ~f:LaunchActionsRequestFilters.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      let resourceId =
+        LaunchActionResourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
+      make ?nextToken ?maxResults ?filters ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultsType.of_json in
+      let filters =
+        field_map json__ "filters" LaunchActionsRequestFilters.of_json in
+      let resourceId =
+        field_map_exn json__ "resourceId" LaunchActionResourceId.of_json in
+      make ?nextToken ?maxResults ?filters ~resourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists resource launch actions."]
+module ListExtensibleSourceServersResponse =
+  struct
+    type nonrec t =
+      {
+      items: StagingSourceServersList.t option
+        [@ocaml.doc
+          "A list of source servers on a staging Account that are extensible."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token of the next extensible source server to retrieve."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("items", (Option.map x.items ~f:StagingSourceServersList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let items =
+        (Option.map ~f:StagingSourceServersList.of_xml)
+          (Xml.child xml_arg0 "items") in
+      make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let items = field_map json__ "items" StagingSourceServersList.of_json in
+      make ?nextToken ?items ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of source servers on a staging account that are extensible, which means that: a. The source server is not already extended into this Account. b. The source server on the Account we\226\128\153re reading from is not an extension of another source server."]
+module ListExtensibleSourceServersRequest =
+  struct
+    type nonrec t =
+      {
+      stagingAccountID: AccountID.t
+        [@ocaml.doc
+          "The Id of the staging Account to retrieve extensible source servers from."];
+      maxResults: MaxResultsReplicatingSourceServers.t option
+        [@ocaml.doc
+          "The maximum number of extensible source servers to retrieve."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token of the next extensible source server to retrieve."]}
+    let context_ = "ListExtensibleSourceServersRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~stagingAccountID ->
+          fun () -> { maxResults; nextToken; stagingAccountID }
+    let to_value x =
+      structure_to_value
+        [("stagingAccountID", (Some (AccountID.to_value x.stagingAccountID)));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:MaxResultsReplicatingSourceServers.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultsReplicatingSourceServers.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let stagingAccountID =
+        AccountID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stagingAccountID") in
+      make ?nextToken ?maxResults ~stagingAccountID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          MaxResultsReplicatingSourceServers.of_json in
+      let stagingAccountID =
+        field_map_exn json__ "stagingAccountID" AccountID.of_json in
+      make ?nextToken ?maxResults ~stagingAccountID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of source servers on a staging account that are extensible, which means that: a. The source server is not already extended into this Account. b. The source server on the Account we\226\128\153re reading from is not an extension of another source server."]
 module LaunchConfiguration =
   struct
     type nonrec t =
       {
-      copyPrivateIp: Boolean.t option
+      sourceServerID: SourceServerID.t option
         [@ocaml.doc
-          "Whether we should copy the Private IP of the Source Server to the Recovery Instance."];
-      copyTags: Boolean.t option
-        [@ocaml.doc
-          "Whether we want to copy the tags of the Source Server to the EC2 machine of the Recovery Instance."];
+          "The ID of the Source Server for this launch configuration."];
+      name: SmallBoundedString.t option
+        [@ocaml.doc "The name of the launch configuration."];
       ec2LaunchTemplateID: BoundedString.t option
         [@ocaml.doc
           "The EC2 launch template ID of this launch configuration."];
       launchDisposition: LaunchDisposition.t option
         [@ocaml.doc
           "The state of the Recovery Instance in EC2 after the recovery operation."];
-      licensing: Licensing.t option
-        [@ocaml.doc
-          "The licensing configuration to be used for this launch configuration."];
-      name: SmallBoundedString.t option
-        [@ocaml.doc "The name of the launch configuration."];
-      sourceServerID: SourceServerID.t option
-        [@ocaml.doc
-          "The ID of the Source Server for this launch configuration."];
       targetInstanceTypeRightSizingMethod:
         TargetInstanceTypeRightSizingMethod.t option
         [@ocaml.doc
-          "Whether Elastic Disaster Recovery should try to automatically choose the instance type that best matches the OS, CPU, and RAM of your Source Server."]}
+          "Whether Elastic Disaster Recovery should try to automatically choose the instance type that best matches the OS, CPU, and RAM of your Source Server."];
+      copyPrivateIp: Boolean.t option
+        [@ocaml.doc
+          "Whether we should copy the Private IP of the Source Server to the Recovery Instance."];
+      copyTags: Boolean.t option
+        [@ocaml.doc
+          "Whether we want to copy the tags of the Source Server to the EC2 machine of the Recovery Instance."];
+      licensing: Licensing.t option
+        [@ocaml.doc
+          "The licensing configuration to be used for this launch configuration."];
+      postLaunchEnabled: Boolean.t option
+        [@ocaml.doc
+          "Whether we want to activate post-launch actions for the Source Server."];
+      launchIntoInstanceProperties: LaunchIntoInstanceProperties.t option
+        [@ocaml.doc "Launch into existing instance properties."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `UninitializedAccountException of UninitializedAccountException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?copyPrivateIp =
-      fun ?copyTags ->
+    let make ?sourceServerID =
+      fun ?name ->
         fun ?ec2LaunchTemplateID ->
           fun ?launchDisposition ->
-            fun ?licensing ->
-              fun ?name ->
-                fun ?sourceServerID ->
-                  fun ?targetInstanceTypeRightSizingMethod ->
-                    fun () ->
-                      {
-                        copyPrivateIp;
-                        copyTags;
-                        ec2LaunchTemplateID;
-                        launchDisposition;
-                        licensing;
-                        name;
-                        sourceServerID;
-                        targetInstanceTypeRightSizingMethod
-                      }
+            fun ?targetInstanceTypeRightSizingMethod ->
+              fun ?copyPrivateIp ->
+                fun ?copyTags ->
+                  fun ?licensing ->
+                    fun ?postLaunchEnabled ->
+                      fun ?launchIntoInstanceProperties ->
+                        fun () ->
+                          {
+                            sourceServerID;
+                            name;
+                            ec2LaunchTemplateID;
+                            launchDisposition;
+                            targetInstanceTypeRightSizingMethod;
+                            copyPrivateIp;
+                            copyTags;
+                            licensing;
+                            postLaunchEnabled;
+                            launchIntoInstanceProperties
+                          }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -6707,62 +11792,78 @@ module LaunchConfiguration =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("copyPrivateIp", (Option.map x.copyPrivateIp ~f:Boolean.to_value));
-        ("copyTags", (Option.map x.copyTags ~f:Boolean.to_value));
+        [("sourceServerID",
+           (Option.map x.sourceServerID ~f:SourceServerID.to_value));
+        ("name", (Option.map x.name ~f:SmallBoundedString.to_value));
         ("ec2LaunchTemplateID",
           (Option.map x.ec2LaunchTemplateID ~f:BoundedString.to_value));
         ("launchDisposition",
           (Option.map x.launchDisposition ~f:LaunchDisposition.to_value));
-        ("licensing", (Option.map x.licensing ~f:Licensing.to_value));
-        ("name", (Option.map x.name ~f:SmallBoundedString.to_value));
-        ("sourceServerID",
-          (Option.map x.sourceServerID ~f:SourceServerID.to_value));
         ("targetInstanceTypeRightSizingMethod",
           (Option.map x.targetInstanceTypeRightSizingMethod
-             ~f:TargetInstanceTypeRightSizingMethod.to_value))]
+             ~f:TargetInstanceTypeRightSizingMethod.to_value));
+        ("copyPrivateIp", (Option.map x.copyPrivateIp ~f:Boolean.to_value));
+        ("copyTags", (Option.map x.copyTags ~f:Boolean.to_value));
+        ("licensing", (Option.map x.licensing ~f:Licensing.to_value));
+        ("postLaunchEnabled",
+          (Option.map x.postLaunchEnabled ~f:Boolean.to_value));
+        ("launchIntoInstanceProperties",
+          (Option.map x.launchIntoInstanceProperties
+             ~f:LaunchIntoInstanceProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let launchIntoInstanceProperties =
+        (Option.map ~f:LaunchIntoInstanceProperties.of_xml)
+          (Xml.child xml_arg0 "launchIntoInstanceProperties") in
+      let postLaunchEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "postLaunchEnabled") in
+      let licensing =
+        (Option.map ~f:Licensing.of_xml) (Xml.child xml_arg0 "licensing") in
+      let copyTags =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "copyTags") in
+      let copyPrivateIp =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "copyPrivateIp") in
       let targetInstanceTypeRightSizingMethod =
         (Option.map ~f:TargetInstanceTypeRightSizingMethod.of_xml)
           (Xml.child xml_arg0 "targetInstanceTypeRightSizingMethod") in
-      let sourceServerID =
-        (Option.map ~f:SourceServerID.of_xml)
-          (Xml.child xml_arg0 "sourceServerID") in
-      let name =
-        (Option.map ~f:SmallBoundedString.of_xml) (Xml.child xml_arg0 "name") in
-      let licensing =
-        (Option.map ~f:Licensing.of_xml) (Xml.child xml_arg0 "licensing") in
       let launchDisposition =
         (Option.map ~f:LaunchDisposition.of_xml)
           (Xml.child xml_arg0 "launchDisposition") in
       let ec2LaunchTemplateID =
         (Option.map ~f:BoundedString.of_xml)
           (Xml.child xml_arg0 "ec2LaunchTemplateID") in
-      let copyTags =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "copyTags") in
-      let copyPrivateIp =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "copyPrivateIp") in
-      make ?targetInstanceTypeRightSizingMethod ?sourceServerID ?name
-        ?licensing ?launchDisposition ?ec2LaunchTemplateID ?copyTags
-        ?copyPrivateIp ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetInstanceTypeRightSizingMethod =
-        field_map json "targetInstanceTypeRightSizingMethod"
-          TargetInstanceTypeRightSizingMethod.of_json in
+      let name =
+        (Option.map ~f:SmallBoundedString.of_xml) (Xml.child xml_arg0 "name") in
       let sourceServerID =
-        field_map json "sourceServerID" SourceServerID.of_json in
-      let name = field_map json "name" SmallBoundedString.of_json in
-      let licensing = field_map json "licensing" Licensing.of_json in
+        (Option.map ~f:SourceServerID.of_xml)
+          (Xml.child xml_arg0 "sourceServerID") in
+      make ?launchIntoInstanceProperties ?postLaunchEnabled ?licensing
+        ?copyTags ?copyPrivateIp ?targetInstanceTypeRightSizingMethod
+        ?launchDisposition ?ec2LaunchTemplateID ?name ?sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let launchIntoInstanceProperties =
+        field_map json__ "launchIntoInstanceProperties"
+          LaunchIntoInstanceProperties.of_json in
+      let postLaunchEnabled =
+        field_map json__ "postLaunchEnabled" Boolean.of_json in
+      let licensing = field_map json__ "licensing" Licensing.of_json in
+      let copyTags = field_map json__ "copyTags" Boolean.of_json in
+      let copyPrivateIp = field_map json__ "copyPrivateIp" Boolean.of_json in
+      let targetInstanceTypeRightSizingMethod =
+        field_map json__ "targetInstanceTypeRightSizingMethod"
+          TargetInstanceTypeRightSizingMethod.of_json in
       let launchDisposition =
-        field_map json "launchDisposition" LaunchDisposition.of_json in
+        field_map json__ "launchDisposition" LaunchDisposition.of_json in
       let ec2LaunchTemplateID =
-        field_map json "ec2LaunchTemplateID" BoundedString.of_json in
-      let copyTags = field_map json "copyTags" Boolean.of_json in
-      let copyPrivateIp = field_map json "copyPrivateIp" Boolean.of_json in
-      make ?targetInstanceTypeRightSizingMethod ?sourceServerID ?name
-        ?licensing ?launchDisposition ?ec2LaunchTemplateID ?copyTags
-        ?copyPrivateIp ()
+        field_map json__ "ec2LaunchTemplateID" BoundedString.of_json in
+      let name = field_map json__ "name" SmallBoundedString.of_json in
+      let sourceServerID =
+        field_map json__ "sourceServerID" SourceServerID.of_json in
+      make ?launchIntoInstanceProperties ?postLaunchEnabled ?licensing
+        ?copyTags ?copyPrivateIp ?targetInstanceTypeRightSizingMethod
+        ?launchDisposition ?ec2LaunchTemplateID ?name ?sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets a LaunchConfiguration, filtered by Source Server IDs."]
@@ -6864,9 +11965,9 @@ module GetReplicationConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       make ~sourceServerID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceServerID =
-        field_map_exn json "sourceServerID" SourceServerID.of_json in
+        field_map_exn json__ "sourceServerID" SourceServerID.of_json in
       make ~sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6891,9 +11992,9 @@ module GetLaunchConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       make ~sourceServerID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceServerID =
-        field_map_exn json "sourceServerID" SourceServerID.of_json in
+        field_map_exn json__ "sourceServerID" SourceServerID.of_json in
       make ~sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6902,29 +12003,38 @@ module GetFailbackReplicationConfigurationResponse =
   struct
     type nonrec t =
       {
+      recoveryInstanceID: RecoveryInstanceID.t option
+        [@ocaml.doc "The ID of the Recovery Instance."];
+      name: BoundedString.t option
+        [@ocaml.doc "The name of the Failback Replication Configuration."];
       bandwidthThrottling: PositiveInteger.t option
         [@ocaml.doc
           "Configure bandwidth throttling for the outbound data transfer rate of the Recovery Instance in Mbps."];
-      name: BoundedString.t option
-        [@ocaml.doc "The name of the Failback Replication Configuration."];
-      recoveryInstanceID: RecoveryInstanceID.t
-        [@ocaml.doc "The ID of the Recovery Instance."];
       usePrivateIP: Boolean.t option
         [@ocaml.doc
-          "Whether to use Private IP for the failback replication of the Recovery Instance."]}
+          "Whether to use Private IP for the failback replication of the Recovery Instance."];
+      internetProtocol: InternetProtocol.t option
+        [@ocaml.doc
+          "Which version of the Internet Protocol to use for replication of data. (IPv4 or IPv6)"]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `UninitializedAccountException of UninitializedAccountException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetFailbackReplicationConfigurationResponse"
-    let make ?bandwidthThrottling =
+    let make ?recoveryInstanceID =
       fun ?name ->
-        fun ?usePrivateIP ->
-          fun ~recoveryInstanceID ->
-            fun () ->
-              { bandwidthThrottling; name; usePrivateIP; recoveryInstanceID }
+        fun ?bandwidthThrottling ->
+          fun ?usePrivateIP ->
+            fun ?internetProtocol ->
+              fun () ->
+                {
+                  recoveryInstanceID;
+                  name;
+                  bandwidthThrottling;
+                  usePrivateIP;
+                  internetProtocol
+                }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -6977,34 +12087,43 @@ module GetFailbackReplicationConfigurationResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("bandwidthThrottling",
-           (Option.map x.bandwidthThrottling ~f:PositiveInteger.to_value));
+        [("recoveryInstanceID",
+           (Option.map x.recoveryInstanceID ~f:RecoveryInstanceID.to_value));
         ("name", (Option.map x.name ~f:BoundedString.to_value));
-        ("recoveryInstanceID",
-          (Some (RecoveryInstanceID.to_value x.recoveryInstanceID)));
-        ("usePrivateIP", (Option.map x.usePrivateIP ~f:Boolean.to_value))]
+        ("bandwidthThrottling",
+          (Option.map x.bandwidthThrottling ~f:PositiveInteger.to_value));
+        ("usePrivateIP", (Option.map x.usePrivateIP ~f:Boolean.to_value));
+        ("internetProtocol",
+          (Option.map x.internetProtocol ~f:InternetProtocol.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let internetProtocol =
+        (Option.map ~f:InternetProtocol.of_xml)
+          (Xml.child xml_arg0 "internetProtocol") in
       let usePrivateIP =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "usePrivateIP") in
-      let recoveryInstanceID =
-        RecoveryInstanceID.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recoveryInstanceID") in
-      let name =
-        (Option.map ~f:BoundedString.of_xml) (Xml.child xml_arg0 "name") in
       let bandwidthThrottling =
         (Option.map ~f:PositiveInteger.of_xml)
           (Xml.child xml_arg0 "bandwidthThrottling") in
-      make ?usePrivateIP ~recoveryInstanceID ?name ?bandwidthThrottling ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let usePrivateIP = field_map json "usePrivateIP" Boolean.of_json in
+      let name =
+        (Option.map ~f:BoundedString.of_xml) (Xml.child xml_arg0 "name") in
       let recoveryInstanceID =
-        field_map_exn json "recoveryInstanceID" RecoveryInstanceID.of_json in
-      let name = field_map json "name" BoundedString.of_json in
+        (Option.map ~f:RecoveryInstanceID.of_xml)
+          (Xml.child xml_arg0 "recoveryInstanceID") in
+      make ?internetProtocol ?usePrivateIP ?bandwidthThrottling ?name
+        ?recoveryInstanceID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let internetProtocol =
+        field_map json__ "internetProtocol" InternetProtocol.of_json in
+      let usePrivateIP = field_map json__ "usePrivateIP" Boolean.of_json in
       let bandwidthThrottling =
-        field_map json "bandwidthThrottling" PositiveInteger.of_json in
-      make ?usePrivateIP ~recoveryInstanceID ?name ?bandwidthThrottling ()
+        field_map json__ "bandwidthThrottling" PositiveInteger.of_json in
+      let name = field_map json__ "name" BoundedString.of_json in
+      let recoveryInstanceID =
+        field_map json__ "recoveryInstanceID" RecoveryInstanceID.of_json in
+      make ?internetProtocol ?usePrivateIP ?bandwidthThrottling ?name
+        ?recoveryInstanceID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all Failback ReplicationConfigurations, filtered by Recovery Instance ID."]
@@ -7028,13 +12147,140 @@ module GetFailbackReplicationConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "recoveryInstanceID") in
       make ~recoveryInstanceID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recoveryInstanceID =
-        field_map_exn json "recoveryInstanceID" RecoveryInstanceID.of_json in
+        field_map_exn json__ "recoveryInstanceID" RecoveryInstanceID.of_json in
       make ~recoveryInstanceID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all Failback ReplicationConfigurations, filtered by Recovery Instance ID."]
+module ExportSourceNetworkCfnTemplateResponse =
+  struct
+    type nonrec t =
+      {
+      s3DestinationUrl: LargeBoundedString.t option
+        [@ocaml.doc
+          "S3 bucket URL where the Source Network CloudFormation template was exported to."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?s3DestinationUrl = fun () -> { s3DestinationUrl }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("s3DestinationUrl",
+           (Option.map x.s3DestinationUrl ~f:LargeBoundedString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3DestinationUrl =
+        (Option.map ~f:LargeBoundedString.of_xml)
+          (Xml.child xml_arg0 "s3DestinationUrl") in
+      make ?s3DestinationUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3DestinationUrl =
+        field_map json__ "s3DestinationUrl" LargeBoundedString.of_json in
+      make ?s3DestinationUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Export the Source Network CloudFormation template to an S3 bucket."]
+module ExportSourceNetworkCfnTemplateRequest =
+  struct
+    type nonrec t =
+      {
+      sourceNetworkID: SourceNetworkID.t
+        [@ocaml.doc
+          "The Source Network ID to export its CloudFormation template to an S3 bucket."]}
+    let context_ = "ExportSourceNetworkCfnTemplateRequest"
+    let make ~sourceNetworkID = fun () -> { sourceNetworkID }
+    let to_value x =
+      structure_to_value
+        [("sourceNetworkID",
+           (Some (SourceNetworkID.to_value x.sourceNetworkID)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceNetworkID =
+        SourceNetworkID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceNetworkID") in
+      make ~sourceNetworkID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceNetworkID =
+        field_map_exn json__ "sourceNetworkID" SourceNetworkID.of_json in
+      make ~sourceNetworkID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Export the Source Network CloudFormation template to an S3 bucket."]
 module DisconnectSourceServerRequest =
   struct
     type nonrec t =
@@ -7054,9 +12300,9 @@ module DisconnectSourceServerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       make ~sourceServerID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceServerID =
-        field_map_exn json "sourceServerID" SourceServerID.of_json in
+        field_map_exn json__ "sourceServerID" SourceServerID.of_json in
       make ~sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7080,9 +12326,9 @@ module DisconnectRecoveryInstanceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "recoveryInstanceID") in
       make ~recoveryInstanceID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recoveryInstanceID =
-        field_map_exn json "recoveryInstanceID" RecoveryInstanceID.of_json in
+        field_map_exn json__ "recoveryInstanceID" RecoveryInstanceID.of_json in
       make ~recoveryInstanceID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7165,9 +12411,9 @@ module DescribeSourceServersResponse =
         (Option.map ~f:SourceServersList.of_xml) (Xml.child xml_arg0 "items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let items = field_map json "items" SourceServersList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let items = field_map json__ "items" SourceServersList.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7176,20 +12422,20 @@ module DescribeSourceServersRequest =
   struct
     type nonrec t =
       {
-      filters: DescribeSourceServersRequestFilters.t
+      filters: DescribeSourceServersRequestFilters.t option
         [@ocaml.doc "A set of filters by which to return Source Servers."];
       maxResults: StrictlyPositiveInteger.t option
         [@ocaml.doc "Maximum number of Source Servers to retrieve."];
       nextToken: PaginationToken.t option
         [@ocaml.doc "The token of the next Source Server to retrieve."]}
-    let context_ = "DescribeSourceServersRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~filters -> fun () -> { maxResults; nextToken; filters }
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
     let to_value x =
       structure_to_value
         [("filters",
-           (Some (DescribeSourceServersRequestFilters.to_value x.filters)));
+           (Option.map x.filters
+              ~f:DescribeSourceServersRequestFilters.to_value));
         ("maxResults",
           (Option.map x.maxResults ~f:StrictlyPositiveInteger.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
@@ -7202,21 +12448,152 @@ module DescribeSourceServersRequest =
         (Option.map ~f:StrictlyPositiveInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       let filters =
-        DescribeSourceServersRequestFilters.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "filters") in
-      make ?nextToken ?maxResults ~filters ()
+        (Option.map ~f:DescribeSourceServersRequestFilters.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults" StrictlyPositiveInteger.of_json in
+        field_map json__ "maxResults" StrictlyPositiveInteger.of_json in
       let filters =
-        field_map_exn json "filters"
+        field_map json__ "filters"
           DescribeSourceServersRequestFilters.of_json in
-      make ?nextToken ?maxResults ~filters ()
+      make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all Source Servers or multiple Source Servers filtered by ID."]
+module DescribeSourceNetworksResponse =
+  struct
+    type nonrec t =
+      {
+      items: SourceNetworksList.t option
+        [@ocaml.doc "An array of Source Networks."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "The token of the next Source Networks to retrieve."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("items", (Option.map x.items ~f:SourceNetworksList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let items =
+        (Option.map ~f:SourceNetworksList.of_xml)
+          (Xml.child xml_arg0 "items") in
+      make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let items = field_map json__ "items" SourceNetworksList.of_json in
+      make ?nextToken ?items ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all Source Networks or multiple Source Networks filtered by ID."]
+module DescribeSourceNetworksRequest =
+  struct
+    type nonrec t =
+      {
+      filters: DescribeSourceNetworksRequestFilters.t option
+        [@ocaml.doc "A set of filters by which to return Source Networks."];
+      maxResults: StrictlyPositiveInteger.t option
+        [@ocaml.doc "Maximum number of Source Networks to retrieve."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "The token of the next Source Networks to retrieve."]}
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("filters",
+           (Option.map x.filters
+              ~f:DescribeSourceNetworksRequestFilters.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:StrictlyPositiveInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:StrictlyPositiveInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let filters =
+        (Option.map ~f:DescribeSourceNetworksRequestFilters.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      make ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" StrictlyPositiveInteger.of_json in
+      let filters =
+        field_map json__ "filters"
+          DescribeSourceNetworksRequestFilters.of_json in
+      make ?nextToken ?maxResults ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all Source Networks or multiple Source Networks filtered by ID."]
 module DescribeReplicationConfigurationTemplatesResponse =
   struct
     type nonrec t =
@@ -7307,10 +12684,10 @@ module DescribeReplicationConfigurationTemplatesResponse =
           (Xml.child xml_arg0 "items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let items =
-        field_map json "items" ReplicationConfigurationTemplates.of_json in
+        field_map json__ "items" ReplicationConfigurationTemplates.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7319,53 +12696,50 @@ module DescribeReplicationConfigurationTemplatesRequest =
   struct
     type nonrec t =
       {
+      replicationConfigurationTemplateIDs:
+        ReplicationConfigurationTemplateIDs.t option
+        [@ocaml.doc
+          "The IDs of the Replication Configuration Templates to retrieve. An empty list means all Replication Configuration Templates."];
       maxResults: StrictlyPositiveInteger.t option
         [@ocaml.doc
           "Maximum number of Replication Configuration Templates to retrieve."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The token of the next Replication Configuration Template to retrieve."];
-      replicationConfigurationTemplateIDs:
-        ReplicationConfigurationTemplateIDs.t
-        [@ocaml.doc
-          "The IDs of the Replication Configuration Templates to retrieve. An empty list means all Replication Configuration Templates."]}
-    let context_ = "DescribeReplicationConfigurationTemplatesRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~replicationConfigurationTemplateIDs ->
+          "The token of the next Replication Configuration Template to retrieve."]}
+    let make ?replicationConfigurationTemplateIDs =
+      fun ?maxResults ->
+        fun ?nextToken ->
           fun () ->
-            { maxResults; nextToken; replicationConfigurationTemplateIDs }
+            { replicationConfigurationTemplateIDs; maxResults; nextToken }
     let to_value x =
       structure_to_value
-        [("maxResults",
-           (Option.map x.maxResults ~f:StrictlyPositiveInteger.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("replicationConfigurationTemplateIDs",
-          (Some
-             (ReplicationConfigurationTemplateIDs.to_value
-                x.replicationConfigurationTemplateIDs)))]
+        [("replicationConfigurationTemplateIDs",
+           (Option.map x.replicationConfigurationTemplateIDs
+              ~f:ReplicationConfigurationTemplateIDs.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:StrictlyPositiveInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let replicationConfigurationTemplateIDs =
-        ReplicationConfigurationTemplateIDs.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "replicationConfigurationTemplateIDs") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:StrictlyPositiveInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
-      make ~replicationConfigurationTemplateIDs ?nextToken ?maxResults ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let replicationConfigurationTemplateIDs =
-        field_map_exn json "replicationConfigurationTemplateIDs"
-          ReplicationConfigurationTemplateIDs.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+        (Option.map ~f:ReplicationConfigurationTemplateIDs.of_xml)
+          (Xml.child xml_arg0 "replicationConfigurationTemplateIDs") in
+      make ?nextToken ?maxResults ?replicationConfigurationTemplateIDs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults" StrictlyPositiveInteger.of_json in
-      make ~replicationConfigurationTemplateIDs ?nextToken ?maxResults ()
+        field_map json__ "maxResults" StrictlyPositiveInteger.of_json in
+      let replicationConfigurationTemplateIDs =
+        field_map json__ "replicationConfigurationTemplateIDs"
+          ReplicationConfigurationTemplateIDs.of_json in
+      make ?nextToken ?maxResults ?replicationConfigurationTemplateIDs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all ReplicationConfigurationTemplates, filtered by Source Server IDs."]
@@ -7457,9 +12831,9 @@ module DescribeRecoverySnapshotsResponse =
           (Xml.child xml_arg0 "items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let items = field_map json "items" RecoverySnapshotsList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let items = field_map json__ "items" RecoverySnapshotsList.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all Recovery Snapshots for a single Source Server."]
@@ -7467,83 +12841,84 @@ module DescribeRecoverySnapshotsRequest =
   struct
     type nonrec t =
       {
+      sourceServerID: SourceServerID.t
+        [@ocaml.doc "Filter Recovery Snapshots by Source Server ID."];
       filters: DescribeRecoverySnapshotsRequestFilters.t option
         [@ocaml.doc
           "A set of filters by which to return Recovery Snapshots."];
-      maxResults: StrictlyPositiveInteger.t option
-        [@ocaml.doc "Maximum number of Recovery Snapshots to retrieve."];
-      nextToken: PaginationToken.t option
-        [@ocaml.doc "The token of the next Recovery Snapshot to retrieve."];
       order: RecoverySnapshotsOrder.t option
         [@ocaml.doc
           "The sorted ordering by which to return Recovery Snapshots."];
-      sourceServerID: SourceServerID.t
-        [@ocaml.doc "Filter Recovery Snapshots by Source Server ID."]}
+      maxResults: StrictlyPositiveInteger.t option
+        [@ocaml.doc "Maximum number of Recovery Snapshots to retrieve."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "The token of the next Recovery Snapshot to retrieve."]}
     let context_ = "DescribeRecoverySnapshotsRequest"
     let make ?filters =
-      fun ?maxResults ->
-        fun ?nextToken ->
-          fun ?order ->
+      fun ?order ->
+        fun ?maxResults ->
+          fun ?nextToken ->
             fun ~sourceServerID ->
               fun () ->
-                { filters; maxResults; nextToken; order; sourceServerID }
+                { filters; order; maxResults; nextToken; sourceServerID }
     let to_value x =
       structure_to_value
-        [("filters",
-           (Option.map x.filters
-              ~f:DescribeRecoverySnapshotsRequestFilters.to_value));
+        [("sourceServerID",
+           (Some (SourceServerID.to_value x.sourceServerID)));
+        ("filters",
+          (Option.map x.filters
+             ~f:DescribeRecoverySnapshotsRequestFilters.to_value));
+        ("order", (Option.map x.order ~f:RecoverySnapshotsOrder.to_value));
         ("maxResults",
           (Option.map x.maxResults ~f:StrictlyPositiveInteger.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("order", (Option.map x.order ~f:RecoverySnapshotsOrder.to_value));
-        ("sourceServerID", (Some (SourceServerID.to_value x.sourceServerID)))]
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sourceServerID =
-        SourceServerID.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
-      let order =
-        (Option.map ~f:RecoverySnapshotsOrder.of_xml)
-          (Xml.child xml_arg0 "order") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:StrictlyPositiveInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
+      let order =
+        (Option.map ~f:RecoverySnapshotsOrder.of_xml)
+          (Xml.child xml_arg0 "order") in
       let filters =
         (Option.map ~f:DescribeRecoverySnapshotsRequestFilters.of_xml)
           (Xml.child xml_arg0 "filters") in
-      make ~sourceServerID ?order ?nextToken ?maxResults ?filters ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let sourceServerID =
-        field_map_exn json "sourceServerID" SourceServerID.of_json in
-      let order = field_map json "order" RecoverySnapshotsOrder.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+        SourceServerID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
+      make ?nextToken ?maxResults ?order ?filters ~sourceServerID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults" StrictlyPositiveInteger.of_json in
+        field_map json__ "maxResults" StrictlyPositiveInteger.of_json in
+      let order = field_map json__ "order" RecoverySnapshotsOrder.of_json in
       let filters =
-        field_map json "filters"
+        field_map json__ "filters"
           DescribeRecoverySnapshotsRequestFilters.of_json in
-      make ~sourceServerID ?order ?nextToken ?maxResults ?filters ()
+      let sourceServerID =
+        field_map_exn json__ "sourceServerID" SourceServerID.of_json in
+      make ?nextToken ?maxResults ?order ?filters ~sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all Recovery Snapshots for a single Source Server."]
 module DescribeRecoveryInstancesResponse =
   struct
     type nonrec t =
       {
-      items: DescribeRecoveryInstancesItems.t option
-        [@ocaml.doc "An array of Recovery Instances."];
       nextToken: PaginationToken.t option
-        [@ocaml.doc "The token of the next Recovery Instance to retrieve."]}
+        [@ocaml.doc "The token of the next Recovery Instance to retrieve."];
+      items: DescribeRecoveryInstancesItems.t option
+        [@ocaml.doc "An array of Recovery Instances."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `UninitializedAccountException of UninitializedAccountException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
+    let make ?nextToken = fun ?items -> fun () -> { nextToken; items }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7596,24 +12971,24 @@ module DescribeRecoveryInstancesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("items",
-           (Option.map x.items ~f:DescribeRecoveryInstancesItems.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("items",
+          (Option.map x.items ~f:DescribeRecoveryInstancesItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:PaginationToken.of_xml)
-          (Xml.child xml_arg0 "nextToken") in
       let items =
         (Option.map ~f:DescribeRecoveryInstancesItems.of_xml)
           (Xml.child xml_arg0 "items") in
-      make ?nextToken ?items ()
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?items ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
       let items =
-        field_map json "items" DescribeRecoveryInstancesItems.of_json in
-      make ?nextToken ?items ()
+        field_map json__ "items" DescribeRecoveryInstancesItems.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?items ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all Recovery Instances or multiple Recovery Instances by ID."]
@@ -7621,21 +12996,21 @@ module DescribeRecoveryInstancesRequest =
   struct
     type nonrec t =
       {
-      filters: DescribeRecoveryInstancesRequestFilters.t
+      filters: DescribeRecoveryInstancesRequestFilters.t option
         [@ocaml.doc
           "A set of filters by which to return Recovery Instances."];
       maxResults: StrictlyPositiveInteger.t option
         [@ocaml.doc "Maximum number of Recovery Instances to retrieve."];
       nextToken: PaginationToken.t option
         [@ocaml.doc "The token of the next Recovery Instance to retrieve."]}
-    let context_ = "DescribeRecoveryInstancesRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~filters -> fun () -> { maxResults; nextToken; filters }
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
     let to_value x =
       structure_to_value
         [("filters",
-           (Some (DescribeRecoveryInstancesRequestFilters.to_value x.filters)));
+           (Option.map x.filters
+              ~f:DescribeRecoveryInstancesRequestFilters.to_value));
         ("maxResults",
           (Option.map x.maxResults ~f:StrictlyPositiveInteger.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
@@ -7648,21 +13023,167 @@ module DescribeRecoveryInstancesRequest =
         (Option.map ~f:StrictlyPositiveInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       let filters =
-        DescribeRecoveryInstancesRequestFilters.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "filters") in
-      make ?nextToken ?maxResults ~filters ()
+        (Option.map ~f:DescribeRecoveryInstancesRequestFilters.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults" StrictlyPositiveInteger.of_json in
+        field_map json__ "maxResults" StrictlyPositiveInteger.of_json in
       let filters =
-        field_map_exn json "filters"
+        field_map json__ "filters"
           DescribeRecoveryInstancesRequestFilters.of_json in
-      make ?nextToken ?maxResults ~filters ()
+      make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all Recovery Instances or multiple Recovery Instances by ID."]
+module DescribeLaunchConfigurationTemplatesResponse =
+  struct
+    type nonrec t =
+      {
+      items: LaunchConfigurationTemplates.t option
+        [@ocaml.doc
+          "List of items returned by DescribeLaunchConfigurationTemplates."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token of the next Launch Configuration Template to retrieve."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("items",
+           (Option.map x.items ~f:LaunchConfigurationTemplates.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let items =
+        (Option.map ~f:LaunchConfigurationTemplates.of_xml)
+          (Xml.child xml_arg0 "items") in
+      make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let items =
+        field_map json__ "items" LaunchConfigurationTemplates.of_json in
+      make ?nextToken ?items ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all Launch Configuration Templates, filtered by Launch Configuration Template IDs"]
+module DescribeLaunchConfigurationTemplatesRequest =
+  struct
+    type nonrec t =
+      {
+      launchConfigurationTemplateIDs: LaunchConfigurationTemplateIDs.t option
+        [@ocaml.doc
+          "Request to filter Launch Configuration Templates list by Launch Configuration Template ID."];
+      maxResults: MaxResultsType.t option
+        [@ocaml.doc
+          "Maximum results to be returned in DescribeLaunchConfigurationTemplates."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token of the next Launch Configuration Template to retrieve."]}
+    let make ?launchConfigurationTemplateIDs =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun () -> { launchConfigurationTemplateIDs; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("launchConfigurationTemplateIDs",
+           (Option.map x.launchConfigurationTemplateIDs
+              ~f:LaunchConfigurationTemplateIDs.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResultsType.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultsType.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let launchConfigurationTemplateIDs =
+        (Option.map ~f:LaunchConfigurationTemplateIDs.of_xml)
+          (Xml.child xml_arg0 "launchConfigurationTemplateIDs") in
+      make ?nextToken ?maxResults ?launchConfigurationTemplateIDs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultsType.of_json in
+      let launchConfigurationTemplateIDs =
+        field_map json__ "launchConfigurationTemplateIDs"
+          LaunchConfigurationTemplateIDs.of_json in
+      make ?nextToken ?maxResults ?launchConfigurationTemplateIDs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all Launch Configuration Templates, filtered by Launch Configuration Template IDs"]
 module DescribeJobsResponse =
   struct
     type nonrec t =
@@ -7740,9 +13261,9 @@ module DescribeJobsResponse =
         (Option.map ~f:JobsList.of_xml) (Xml.child xml_arg0 "items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let items = field_map json "items" JobsList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let items = field_map json__ "items" JobsList.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7751,19 +13272,19 @@ module DescribeJobsRequest =
   struct
     type nonrec t =
       {
-      filters: DescribeJobsRequestFilters.t
+      filters: DescribeJobsRequestFilters.t option
         [@ocaml.doc "A set of filters by which to return Jobs."];
       maxResults: StrictlyPositiveInteger.t option
         [@ocaml.doc "Maximum number of Jobs to retrieve."];
       nextToken: PaginationToken.t option
         [@ocaml.doc "The token of the next Job to retrieve."]}
-    let context_ = "DescribeJobsRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~filters -> fun () -> { maxResults; nextToken; filters }
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
     let to_value x =
       structure_to_value
-        [("filters", (Some (DescribeJobsRequestFilters.to_value x.filters)));
+        [("filters",
+           (Option.map x.filters ~f:DescribeJobsRequestFilters.to_value));
         ("maxResults",
           (Option.map x.maxResults ~f:StrictlyPositiveInteger.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
@@ -7776,17 +13297,17 @@ module DescribeJobsRequest =
         (Option.map ~f:StrictlyPositiveInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
       let filters =
-        DescribeJobsRequestFilters.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "filters") in
-      make ?nextToken ?maxResults ~filters ()
+        (Option.map ~f:DescribeJobsRequestFilters.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults" StrictlyPositiveInteger.of_json in
+        field_map json__ "maxResults" StrictlyPositiveInteger.of_json in
       let filters =
-        field_map_exn json "filters" DescribeJobsRequestFilters.of_json in
-      make ?nextToken ?maxResults ~filters ()
+        field_map json__ "filters" DescribeJobsRequestFilters.of_json in
+      make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of Jobs. Use the JobsID and fromDate and toDate filters to limit which jobs are returned. The response is sorted by creationDataTime - latest date first. Jobs are created by the StartRecovery, TerminateRecoveryInstances and StartFailbackLaunch APIs. Jobs are also created by DiagnosticLaunch and TerminateDiagnosticInstances, which are APIs available only to *Support* and only used in response to relevant support tickets."]
@@ -7866,9 +13387,9 @@ module DescribeJobLogItemsResponse =
       let items = (Option.map ~f:JobLogs.of_xml) (Xml.child xml_arg0 "items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let items = field_map json "items" JobLogs.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let items = field_map json__ "items" JobLogs.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a detailed Job log with pagination."]
@@ -7905,11 +13426,11 @@ module DescribeJobLogItemsRequest =
         JobID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobID") in
       make ?nextToken ?maxResults ~jobID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults" StrictlyPositiveInteger.of_json in
-      let jobID = field_map_exn json "jobID" JobID.of_json in
+        field_map json__ "maxResults" StrictlyPositiveInteger.of_json in
+      let jobID = field_map_exn json__ "jobID" JobID.of_json in
       make ?nextToken ?maxResults ~jobID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a detailed Job log with pagination."]
@@ -8010,13 +13531,115 @@ module DeleteSourceServerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "sourceServerID") in
       make ~sourceServerID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceServerID =
-        field_map_exn json "sourceServerID" SourceServerID.of_json in
+        field_map_exn json__ "sourceServerID" SourceServerID.of_json in
       make ~sourceServerID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a single Source Server by ID. The Source Server must be disconnected first."]
+module DeleteSourceNetworkResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete Source Network resource."]
+module DeleteSourceNetworkRequest =
+  struct
+    type nonrec t =
+      {
+      sourceNetworkID: SourceNetworkID.t
+        [@ocaml.doc "ID of the Source Network to delete."]}
+    let context_ = "DeleteSourceNetworkRequest"
+    let make ~sourceNetworkID = fun () -> { sourceNetworkID }
+    let to_value x =
+      structure_to_value
+        [("sourceNetworkID",
+           (Some (SourceNetworkID.to_value x.sourceNetworkID)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceNetworkID =
+        SourceNetworkID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceNetworkID") in
+      make ~sourceNetworkID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceNetworkID =
+        field_map_exn json__ "sourceNetworkID" SourceNetworkID.of_json in
+      make ~sourceNetworkID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete Source Network resource."]
 module DeleteReplicationConfigurationTemplateResponse =
   struct
     type nonrec t = unit
@@ -8120,9 +13743,9 @@ module DeleteReplicationConfigurationTemplateRequest =
              "replicationConfigurationTemplateID") in
       make ~replicationConfigurationTemplateID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationConfigurationTemplateID =
-        field_map_exn json "replicationConfigurationTemplateID"
+        field_map_exn json__ "replicationConfigurationTemplateID"
           ReplicationConfigurationTemplateID.of_json in
       make ~replicationConfigurationTemplateID ()
     let to_json v = composed_to_json to_value v
@@ -8133,7 +13756,7 @@ module DeleteRecoveryInstanceRequest =
     type nonrec t =
       {
       recoveryInstanceID: RecoveryInstanceID.t
-        [@ocaml.doc "RThe ID of the Recovery Instance to be deleted."]}
+        [@ocaml.doc "The ID of the Recovery Instance to be deleted."]}
     let context_ = "DeleteRecoveryInstanceRequest"
     let make ~recoveryInstanceID = fun () -> { recoveryInstanceID }
     let to_value x =
@@ -8147,13 +13770,229 @@ module DeleteRecoveryInstanceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "recoveryInstanceID") in
       make ~recoveryInstanceID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recoveryInstanceID =
-        field_map_exn json "recoveryInstanceID" RecoveryInstanceID.of_json in
+        field_map_exn json__ "recoveryInstanceID" RecoveryInstanceID.of_json in
       make ~recoveryInstanceID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a single Recovery Instance by ID. This deletes the Recovery Instance resource from Elastic Disaster Recovery. The Recovery Instance must be disconnected first in order to delete it."]
+module DeleteLaunchConfigurationTemplateResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a single Launch Configuration Template by ID."]
+module DeleteLaunchConfigurationTemplateRequest =
+  struct
+    type nonrec t =
+      {
+      launchConfigurationTemplateID: LaunchConfigurationTemplateID.t
+        [@ocaml.doc
+          "The ID of the Launch Configuration Template to be deleted."]}
+    let context_ = "DeleteLaunchConfigurationTemplateRequest"
+    let make ~launchConfigurationTemplateID =
+      fun () -> { launchConfigurationTemplateID }
+    let to_value x =
+      structure_to_value
+        [("launchConfigurationTemplateID",
+           (Some
+              (LaunchConfigurationTemplateID.to_value
+                 x.launchConfigurationTemplateID)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let launchConfigurationTemplateID =
+        LaunchConfigurationTemplateID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "launchConfigurationTemplateID") in
+      make ~launchConfigurationTemplateID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let launchConfigurationTemplateID =
+        field_map_exn json__ "launchConfigurationTemplateID"
+          LaunchConfigurationTemplateID.of_json in
+      make ~launchConfigurationTemplateID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a single Launch Configuration Template by ID."]
+module DeleteLaunchActionResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a resource launch action."]
+module DeleteLaunchActionRequest =
+  struct
+    type nonrec t =
+      {
+      resourceId: LaunchActionResourceId.t ;
+      actionId: LaunchActionId.t }
+    let context_ = "DeleteLaunchActionRequest"
+    let make ~resourceId =
+      fun ~actionId -> fun () -> { resourceId; actionId }
+    let to_value x =
+      structure_to_value
+        [("resourceId",
+           (Some (LaunchActionResourceId.to_value x.resourceId)));
+        ("actionId", (Some (LaunchActionId.to_value x.actionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actionId =
+        LaunchActionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "actionId") in
+      let resourceId =
+        LaunchActionResourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
+      make ~actionId ~resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actionId = field_map_exn json__ "actionId" LaunchActionId.of_json in
+      let resourceId =
+        field_map_exn json__ "resourceId" LaunchActionResourceId.of_json in
+      make ~actionId ~resourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a resource launch action."]
 module DeleteJobResponse =
   struct
     type nonrec t = unit
@@ -8246,28 +14085,190 @@ module DeleteJobRequest =
         JobID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobID") in
       make ~jobID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobID = field_map_exn json "jobID" JobID.of_json in make ~jobID ()
+    let of_json json__ =
+      let jobID = field_map_exn json__ "jobID" JobID.of_json in
+      make ~jobID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a single Job by ID."]
+module CreateSourceNetworkResponse =
+  struct
+    type nonrec t =
+      {
+      sourceNetworkID: SourceNetworkID.t option
+        [@ocaml.doc "ID of the created Source Network."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sourceNetworkID = fun () -> { sourceNetworkID }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("sourceNetworkID",
+           (Option.map x.sourceNetworkID ~f:SourceNetworkID.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceNetworkID =
+        (Option.map ~f:SourceNetworkID.of_xml)
+          (Xml.child xml_arg0 "sourceNetworkID") in
+      make ?sourceNetworkID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceNetworkID =
+        field_map json__ "sourceNetworkID" SourceNetworkID.of_json in
+      make ?sourceNetworkID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create a new Source Network resource for a provided VPC ID."]
+module CreateSourceNetworkRequest =
+  struct
+    type nonrec t =
+      {
+      vpcID: VpcID.t [@ocaml.doc "Which VPC ID to protect."];
+      originAccountID: AccountID.t
+        [@ocaml.doc "Account containing the VPC to protect."];
+      originRegion: AwsRegion.t
+        [@ocaml.doc "Region containing the VPC to protect."];
+      tags: TagsMap.t option
+        [@ocaml.doc
+          "A set of tags to be associated with the Source Network resource."]}
+    let context_ = "CreateSourceNetworkRequest"
+    let make ?tags =
+      fun ~vpcID ->
+        fun ~originAccountID ->
+          fun ~originRegion ->
+            fun () -> { tags; vpcID; originAccountID; originRegion }
+    let to_value x =
+      structure_to_value
+        [("vpcID", (Some (VpcID.to_value x.vpcID)));
+        ("originAccountID", (Some (AccountID.to_value x.originAccountID)));
+        ("originRegion", (Some (AwsRegion.to_value x.originRegion)));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let originRegion =
+        AwsRegion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "originRegion") in
+      let originAccountID =
+        AccountID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "originAccountID") in
+      let vpcID =
+        VpcID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vpcID") in
+      make ?tags ~originRegion ~originAccountID ~vpcID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let originRegion =
+        field_map_exn json__ "originRegion" AwsRegion.of_json in
+      let originAccountID =
+        field_map_exn json__ "originAccountID" AccountID.of_json in
+      let vpcID = field_map_exn json__ "vpcID" VpcID.of_json in
+      make ?tags ~originRegion ~originAccountID ~vpcID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create a new Source Network resource for a provided VPC ID."]
 module CreateReplicationConfigurationTemplateRequest =
   struct
     type nonrec t =
       {
-      associateDefaultSecurityGroup: Boolean.t
+      stagingAreaSubnetId: SubnetID.t
+        [@ocaml.doc "The subnet to be used by the replication staging area."];
+      associateDefaultSecurityGroup: Boolean.t option
         [@ocaml.doc
           "Whether to associate the default Elastic Disaster Recovery Security group with the Replication Configuration Template."];
-      bandwidthThrottling: PositiveInteger.t
+      replicationServersSecurityGroupsIDs:
+        ReplicationServersSecurityGroupsIDs.t
         [@ocaml.doc
-          "Configure bandwidth throttling for the outbound data transfer rate of the Source Server in Mbps."];
-      createPublicIP: Boolean.t
+          "The security group IDs that will be used by the replication server."];
+      replicationServerInstanceType: EC2InstanceType.t option
         [@ocaml.doc
-          "Whether to create a Public IP for the Recovery Instance by default."];
-      dataPlaneRouting: ReplicationConfigurationDataPlaneRouting.t
+          "The instance type to be used for the replication server."];
+      useDedicatedReplicationServer: Boolean.t option
         [@ocaml.doc
-          "The data plane routing mechanism that will be used for replication."];
+          "Whether to use a dedicated Replication Server in the replication staging area."];
       defaultLargeStagingDiskType:
-        ReplicationConfigurationDefaultLargeStagingDiskType.t
+        ReplicationConfigurationDefaultLargeStagingDiskType.t option
         [@ocaml.doc
           "The Staging Disk EBS volume type to be used during replication."];
       ebsEncryption: ReplicationConfigurationEbsEncryption.t
@@ -8276,182 +14277,689 @@ module CreateReplicationConfigurationTemplateRequest =
       ebsEncryptionKeyArn: ARN.t option
         [@ocaml.doc
           "The ARN of the EBS encryption key to be used during replication."];
-      pitPolicy: PITPolicy.t
+      bandwidthThrottling: PositiveInteger.t
         [@ocaml.doc
-          "The Point in time (PIT) policy to manage snapshots taken during replication."];
-      replicationServerInstanceType: EC2InstanceType.t
+          "Configure bandwidth throttling for the outbound data transfer rate of the Source Server in Mbps."];
+      dataPlaneRouting: ReplicationConfigurationDataPlaneRouting.t option
         [@ocaml.doc
-          "The instance type to be used for the replication server."];
-      replicationServersSecurityGroupsIDs:
-        ReplicationServersSecurityGroupsIDs.t
+          "The data plane routing mechanism that will be used for replication."];
+      createPublicIP: Boolean.t option
         [@ocaml.doc
-          "The security group IDs that will be used by the replication server."];
-      stagingAreaSubnetId: SubnetID.t
-        [@ocaml.doc "The subnet to be used by the replication staging area."];
+          "Whether to create a Public IP for the Recovery Instance by default."];
       stagingAreaTags: TagsMap.t
         [@ocaml.doc
           "A set of tags to be associated with all resources created in the replication staging area: EC2 replication server, EBS volumes, EBS snapshots, etc."];
+      pitPolicy: PITPolicy.t
+        [@ocaml.doc
+          "The Point in time (PIT) policy to manage snapshots taken during replication."];
       tags: TagsMap.t option
         [@ocaml.doc
           "A set of tags to be associated with the Replication Configuration Template resource."];
-      useDedicatedReplicationServer: Boolean.t
+      autoReplicateNewDisks: Boolean.t option
         [@ocaml.doc
-          "Whether to use a dedicated Replication Server in the replication staging area."]}
+          "Whether to allow the AWS replication agent to automatically replicate newly added disks."];
+      internetProtocol: InternetProtocol.t option
+        [@ocaml.doc
+          "Which version of the Internet Protocol to use for replication of data. (IPv4 or IPv6)"]}
     let context_ = "CreateReplicationConfigurationTemplateRequest"
-    let make ?ebsEncryptionKeyArn =
-      fun ?tags ->
-        fun ~associateDefaultSecurityGroup ->
-          fun ~bandwidthThrottling ->
-            fun ~createPublicIP ->
-              fun ~dataPlaneRouting ->
-                fun ~defaultLargeStagingDiskType ->
-                  fun ~ebsEncryption ->
-                    fun ~pitPolicy ->
-                      fun ~replicationServerInstanceType ->
-                        fun ~replicationServersSecurityGroupsIDs ->
-                          fun ~stagingAreaSubnetId ->
-                            fun ~stagingAreaTags ->
-                              fun ~useDedicatedReplicationServer ->
-                                fun () ->
-                                  {
-                                    ebsEncryptionKeyArn;
-                                    tags;
-                                    associateDefaultSecurityGroup;
-                                    bandwidthThrottling;
-                                    createPublicIP;
-                                    dataPlaneRouting;
-                                    defaultLargeStagingDiskType;
-                                    ebsEncryption;
-                                    pitPolicy;
-                                    replicationServerInstanceType;
-                                    replicationServersSecurityGroupsIDs;
-                                    stagingAreaSubnetId;
-                                    stagingAreaTags;
-                                    useDedicatedReplicationServer
-                                  }
+    let make ?associateDefaultSecurityGroup =
+      fun ?replicationServerInstanceType ->
+        fun ?useDedicatedReplicationServer ->
+          fun ?defaultLargeStagingDiskType ->
+            fun ?ebsEncryptionKeyArn ->
+              fun ?dataPlaneRouting ->
+                fun ?createPublicIP ->
+                  fun ?tags ->
+                    fun ?autoReplicateNewDisks ->
+                      fun ?internetProtocol ->
+                        fun ~stagingAreaSubnetId ->
+                          fun ~replicationServersSecurityGroupsIDs ->
+                            fun ~ebsEncryption ->
+                              fun ~bandwidthThrottling ->
+                                fun ~stagingAreaTags ->
+                                  fun ~pitPolicy ->
+                                    fun () ->
+                                      {
+                                        associateDefaultSecurityGroup;
+                                        replicationServerInstanceType;
+                                        useDedicatedReplicationServer;
+                                        defaultLargeStagingDiskType;
+                                        ebsEncryptionKeyArn;
+                                        dataPlaneRouting;
+                                        createPublicIP;
+                                        tags;
+                                        autoReplicateNewDisks;
+                                        internetProtocol;
+                                        stagingAreaSubnetId;
+                                        replicationServersSecurityGroupsIDs;
+                                        ebsEncryption;
+                                        bandwidthThrottling;
+                                        stagingAreaTags;
+                                        pitPolicy
+                                      }
     let to_value x =
       structure_to_value
-        [("associateDefaultSecurityGroup",
-           (Some (Boolean.to_value x.associateDefaultSecurityGroup)));
-        ("bandwidthThrottling",
-          (Some (PositiveInteger.to_value x.bandwidthThrottling)));
-        ("createPublicIP", (Some (Boolean.to_value x.createPublicIP)));
-        ("dataPlaneRouting",
+        [("stagingAreaSubnetId",
+           (Some (SubnetID.to_value x.stagingAreaSubnetId)));
+        ("associateDefaultSecurityGroup",
+          (Option.map x.associateDefaultSecurityGroup ~f:Boolean.to_value));
+        ("replicationServersSecurityGroupsIDs",
           (Some
-             (ReplicationConfigurationDataPlaneRouting.to_value
-                x.dataPlaneRouting)));
+             (ReplicationServersSecurityGroupsIDs.to_value
+                x.replicationServersSecurityGroupsIDs)));
+        ("replicationServerInstanceType",
+          (Option.map x.replicationServerInstanceType
+             ~f:EC2InstanceType.to_value));
+        ("useDedicatedReplicationServer",
+          (Option.map x.useDedicatedReplicationServer ~f:Boolean.to_value));
         ("defaultLargeStagingDiskType",
-          (Some
-             (ReplicationConfigurationDefaultLargeStagingDiskType.to_value
-                x.defaultLargeStagingDiskType)));
+          (Option.map x.defaultLargeStagingDiskType
+             ~f:ReplicationConfigurationDefaultLargeStagingDiskType.to_value));
         ("ebsEncryption",
           (Some
              (ReplicationConfigurationEbsEncryption.to_value x.ebsEncryption)));
         ("ebsEncryptionKeyArn",
           (Option.map x.ebsEncryptionKeyArn ~f:ARN.to_value));
-        ("pitPolicy", (Some (PITPolicy.to_value x.pitPolicy)));
-        ("replicationServerInstanceType",
-          (Some (EC2InstanceType.to_value x.replicationServerInstanceType)));
-        ("replicationServersSecurityGroupsIDs",
-          (Some
-             (ReplicationServersSecurityGroupsIDs.to_value
-                x.replicationServersSecurityGroupsIDs)));
-        ("stagingAreaSubnetId",
-          (Some (SubnetID.to_value x.stagingAreaSubnetId)));
+        ("bandwidthThrottling",
+          (Some (PositiveInteger.to_value x.bandwidthThrottling)));
+        ("dataPlaneRouting",
+          (Option.map x.dataPlaneRouting
+             ~f:ReplicationConfigurationDataPlaneRouting.to_value));
+        ("createPublicIP", (Option.map x.createPublicIP ~f:Boolean.to_value));
         ("stagingAreaTags", (Some (TagsMap.to_value x.stagingAreaTags)));
+        ("pitPolicy", (Some (PITPolicy.to_value x.pitPolicy)));
         ("tags", (Option.map x.tags ~f:TagsMap.to_value));
-        ("useDedicatedReplicationServer",
-          (Some (Boolean.to_value x.useDedicatedReplicationServer)))]
+        ("autoReplicateNewDisks",
+          (Option.map x.autoReplicateNewDisks ~f:Boolean.to_value));
+        ("internetProtocol",
+          (Option.map x.internetProtocol ~f:InternetProtocol.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let useDedicatedReplicationServer =
-        Boolean.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "useDedicatedReplicationServer") in
+      let internetProtocol =
+        (Option.map ~f:InternetProtocol.of_xml)
+          (Xml.child xml_arg0 "internetProtocol") in
+      let autoReplicateNewDisks =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "autoReplicateNewDisks") in
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let stagingAreaTags =
-        TagsMap.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stagingAreaTags") in
-      let stagingAreaSubnetId =
-        SubnetID.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stagingAreaSubnetId") in
-      let replicationServersSecurityGroupsIDs =
-        ReplicationServersSecurityGroupsIDs.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "replicationServersSecurityGroupsIDs") in
-      let replicationServerInstanceType =
-        EC2InstanceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "replicationServerInstanceType") in
       let pitPolicy =
         PITPolicy.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "pitPolicy") in
+      let stagingAreaTags =
+        TagsMap.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stagingAreaTags") in
+      let createPublicIP =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "createPublicIP") in
+      let dataPlaneRouting =
+        (Option.map ~f:ReplicationConfigurationDataPlaneRouting.of_xml)
+          (Xml.child xml_arg0 "dataPlaneRouting") in
+      let bandwidthThrottling =
+        PositiveInteger.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "bandwidthThrottling") in
       let ebsEncryptionKeyArn =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ebsEncryptionKeyArn") in
       let ebsEncryption =
         ReplicationConfigurationEbsEncryption.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ebsEncryption") in
       let defaultLargeStagingDiskType =
-        ReplicationConfigurationDefaultLargeStagingDiskType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "defaultLargeStagingDiskType") in
-      let dataPlaneRouting =
-        ReplicationConfigurationDataPlaneRouting.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "dataPlaneRouting") in
-      let createPublicIP =
-        Boolean.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createPublicIP") in
-      let bandwidthThrottling =
-        PositiveInteger.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "bandwidthThrottling") in
-      let associateDefaultSecurityGroup =
-        Boolean.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "associateDefaultSecurityGroup") in
-      make ~useDedicatedReplicationServer ?tags ~stagingAreaTags
-        ~stagingAreaSubnetId ~replicationServersSecurityGroupsIDs
-        ~replicationServerInstanceType ~pitPolicy ?ebsEncryptionKeyArn
-        ~ebsEncryption ~defaultLargeStagingDiskType ~dataPlaneRouting
-        ~createPublicIP ~bandwidthThrottling ~associateDefaultSecurityGroup
-        ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+        (Option.map
+           ~f:ReplicationConfigurationDefaultLargeStagingDiskType.of_xml)
+          (Xml.child xml_arg0 "defaultLargeStagingDiskType") in
       let useDedicatedReplicationServer =
-        field_map_exn json "useDedicatedReplicationServer" Boolean.of_json in
-      let tags = field_map json "tags" TagsMap.of_json in
-      let stagingAreaTags =
-        field_map_exn json "stagingAreaTags" TagsMap.of_json in
-      let stagingAreaSubnetId =
-        field_map_exn json "stagingAreaSubnetId" SubnetID.of_json in
-      let replicationServersSecurityGroupsIDs =
-        field_map_exn json "replicationServersSecurityGroupsIDs"
-          ReplicationServersSecurityGroupsIDs.of_json in
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "useDedicatedReplicationServer") in
       let replicationServerInstanceType =
-        field_map_exn json "replicationServerInstanceType"
-          EC2InstanceType.of_json in
-      let pitPolicy = field_map_exn json "pitPolicy" PITPolicy.of_json in
+        (Option.map ~f:EC2InstanceType.of_xml)
+          (Xml.child xml_arg0 "replicationServerInstanceType") in
+      let replicationServersSecurityGroupsIDs =
+        ReplicationServersSecurityGroupsIDs.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "replicationServersSecurityGroupsIDs") in
+      let associateDefaultSecurityGroup =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "associateDefaultSecurityGroup") in
+      let stagingAreaSubnetId =
+        SubnetID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stagingAreaSubnetId") in
+      make ?internetProtocol ?autoReplicateNewDisks ?tags ~pitPolicy
+        ~stagingAreaTags ?createPublicIP ?dataPlaneRouting
+        ~bandwidthThrottling ?ebsEncryptionKeyArn ~ebsEncryption
+        ?defaultLargeStagingDiskType ?useDedicatedReplicationServer
+        ?replicationServerInstanceType ~replicationServersSecurityGroupsIDs
+        ?associateDefaultSecurityGroup ~stagingAreaSubnetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let internetProtocol =
+        field_map json__ "internetProtocol" InternetProtocol.of_json in
+      let autoReplicateNewDisks =
+        field_map json__ "autoReplicateNewDisks" Boolean.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let pitPolicy = field_map_exn json__ "pitPolicy" PITPolicy.of_json in
+      let stagingAreaTags =
+        field_map_exn json__ "stagingAreaTags" TagsMap.of_json in
+      let createPublicIP = field_map json__ "createPublicIP" Boolean.of_json in
+      let dataPlaneRouting =
+        field_map json__ "dataPlaneRouting"
+          ReplicationConfigurationDataPlaneRouting.of_json in
+      let bandwidthThrottling =
+        field_map_exn json__ "bandwidthThrottling" PositiveInteger.of_json in
       let ebsEncryptionKeyArn =
-        field_map json "ebsEncryptionKeyArn" ARN.of_json in
+        field_map json__ "ebsEncryptionKeyArn" ARN.of_json in
       let ebsEncryption =
-        field_map_exn json "ebsEncryption"
+        field_map_exn json__ "ebsEncryption"
           ReplicationConfigurationEbsEncryption.of_json in
       let defaultLargeStagingDiskType =
-        field_map_exn json "defaultLargeStagingDiskType"
+        field_map json__ "defaultLargeStagingDiskType"
           ReplicationConfigurationDefaultLargeStagingDiskType.of_json in
-      let dataPlaneRouting =
-        field_map_exn json "dataPlaneRouting"
-          ReplicationConfigurationDataPlaneRouting.of_json in
-      let createPublicIP =
-        field_map_exn json "createPublicIP" Boolean.of_json in
-      let bandwidthThrottling =
-        field_map_exn json "bandwidthThrottling" PositiveInteger.of_json in
+      let useDedicatedReplicationServer =
+        field_map json__ "useDedicatedReplicationServer" Boolean.of_json in
+      let replicationServerInstanceType =
+        field_map json__ "replicationServerInstanceType"
+          EC2InstanceType.of_json in
+      let replicationServersSecurityGroupsIDs =
+        field_map_exn json__ "replicationServersSecurityGroupsIDs"
+          ReplicationServersSecurityGroupsIDs.of_json in
       let associateDefaultSecurityGroup =
-        field_map_exn json "associateDefaultSecurityGroup" Boolean.of_json in
-      make ~useDedicatedReplicationServer ?tags ~stagingAreaTags
-        ~stagingAreaSubnetId ~replicationServersSecurityGroupsIDs
-        ~replicationServerInstanceType ~pitPolicy ?ebsEncryptionKeyArn
-        ~ebsEncryption ~defaultLargeStagingDiskType ~dataPlaneRouting
-        ~createPublicIP ~bandwidthThrottling ~associateDefaultSecurityGroup
-        ()
+        field_map json__ "associateDefaultSecurityGroup" Boolean.of_json in
+      let stagingAreaSubnetId =
+        field_map_exn json__ "stagingAreaSubnetId" SubnetID.of_json in
+      make ?internetProtocol ?autoReplicateNewDisks ?tags ~pitPolicy
+        ~stagingAreaTags ?createPublicIP ?dataPlaneRouting
+        ~bandwidthThrottling ?ebsEncryptionKeyArn ~ebsEncryption
+        ?defaultLargeStagingDiskType ?useDedicatedReplicationServer
+        ?replicationServerInstanceType ~replicationServersSecurityGroupsIDs
+        ?associateDefaultSecurityGroup ~stagingAreaSubnetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new ReplicationConfigurationTemplate."]
+module CreateLaunchConfigurationTemplateResponse =
+  struct
+    type nonrec t =
+      {
+      launchConfigurationTemplate: LaunchConfigurationTemplate.t option
+        [@ocaml.doc "Created Launch Configuration Template."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?launchConfigurationTemplate =
+      fun () -> { launchConfigurationTemplate }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("launchConfigurationTemplate",
+           (Option.map x.launchConfigurationTemplate
+              ~f:LaunchConfigurationTemplate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let launchConfigurationTemplate =
+        (Option.map ~f:LaunchConfigurationTemplate.of_xml)
+          (Xml.child xml_arg0 "launchConfigurationTemplate") in
+      make ?launchConfigurationTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let launchConfigurationTemplate =
+        field_map json__ "launchConfigurationTemplate"
+          LaunchConfigurationTemplate.of_json in
+      make ?launchConfigurationTemplate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new Launch Configuration Template."]
+module CreateLaunchConfigurationTemplateRequest =
+  struct
+    type nonrec t =
+      {
+      tags: TagsMap.t option
+        [@ocaml.doc
+          "Request to associate tags during creation of a Launch Configuration Template."];
+      launchDisposition: LaunchDisposition.t option
+        [@ocaml.doc "Launch disposition."];
+      targetInstanceTypeRightSizingMethod:
+        TargetInstanceTypeRightSizingMethod.t option
+        [@ocaml.doc "Target instance type right-sizing method."];
+      copyPrivateIp: Boolean.t option [@ocaml.doc "Copy private IP."];
+      copyTags: Boolean.t option [@ocaml.doc "Copy tags."];
+      licensing: Licensing.t option [@ocaml.doc "Licensing."];
+      exportBucketArn: ARN.t option
+        [@ocaml.doc "S3 bucket ARN to export Source Network templates."];
+      postLaunchEnabled: Boolean.t option
+        [@ocaml.doc "Whether we want to activate post-launch actions."];
+      launchIntoSourceInstance: Boolean.t option
+        [@ocaml.doc
+          "DRS will set the 'launch into instance ID' of any source server when performing a drill, recovery or failback to the previous region or availability zone, using the instance ID of the source instance."]}
+    let make ?tags =
+      fun ?launchDisposition ->
+        fun ?targetInstanceTypeRightSizingMethod ->
+          fun ?copyPrivateIp ->
+            fun ?copyTags ->
+              fun ?licensing ->
+                fun ?exportBucketArn ->
+                  fun ?postLaunchEnabled ->
+                    fun ?launchIntoSourceInstance ->
+                      fun () ->
+                        {
+                          tags;
+                          launchDisposition;
+                          targetInstanceTypeRightSizingMethod;
+                          copyPrivateIp;
+                          copyTags;
+                          licensing;
+                          exportBucketArn;
+                          postLaunchEnabled;
+                          launchIntoSourceInstance
+                        }
+    let to_value x =
+      structure_to_value
+        [("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("launchDisposition",
+          (Option.map x.launchDisposition ~f:LaunchDisposition.to_value));
+        ("targetInstanceTypeRightSizingMethod",
+          (Option.map x.targetInstanceTypeRightSizingMethod
+             ~f:TargetInstanceTypeRightSizingMethod.to_value));
+        ("copyPrivateIp", (Option.map x.copyPrivateIp ~f:Boolean.to_value));
+        ("copyTags", (Option.map x.copyTags ~f:Boolean.to_value));
+        ("licensing", (Option.map x.licensing ~f:Licensing.to_value));
+        ("exportBucketArn", (Option.map x.exportBucketArn ~f:ARN.to_value));
+        ("postLaunchEnabled",
+          (Option.map x.postLaunchEnabled ~f:Boolean.to_value));
+        ("launchIntoSourceInstance",
+          (Option.map x.launchIntoSourceInstance ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let launchIntoSourceInstance =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "launchIntoSourceInstance") in
+      let postLaunchEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "postLaunchEnabled") in
+      let exportBucketArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "exportBucketArn") in
+      let licensing =
+        (Option.map ~f:Licensing.of_xml) (Xml.child xml_arg0 "licensing") in
+      let copyTags =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "copyTags") in
+      let copyPrivateIp =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "copyPrivateIp") in
+      let targetInstanceTypeRightSizingMethod =
+        (Option.map ~f:TargetInstanceTypeRightSizingMethod.of_xml)
+          (Xml.child xml_arg0 "targetInstanceTypeRightSizingMethod") in
+      let launchDisposition =
+        (Option.map ~f:LaunchDisposition.of_xml)
+          (Xml.child xml_arg0 "launchDisposition") in
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      make ?launchIntoSourceInstance ?postLaunchEnabled ?exportBucketArn
+        ?licensing ?copyTags ?copyPrivateIp
+        ?targetInstanceTypeRightSizingMethod ?launchDisposition ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let launchIntoSourceInstance =
+        field_map json__ "launchIntoSourceInstance" Boolean.of_json in
+      let postLaunchEnabled =
+        field_map json__ "postLaunchEnabled" Boolean.of_json in
+      let exportBucketArn = field_map json__ "exportBucketArn" ARN.of_json in
+      let licensing = field_map json__ "licensing" Licensing.of_json in
+      let copyTags = field_map json__ "copyTags" Boolean.of_json in
+      let copyPrivateIp = field_map json__ "copyPrivateIp" Boolean.of_json in
+      let targetInstanceTypeRightSizingMethod =
+        field_map json__ "targetInstanceTypeRightSizingMethod"
+          TargetInstanceTypeRightSizingMethod.of_json in
+      let launchDisposition =
+        field_map json__ "launchDisposition" LaunchDisposition.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      make ?launchIntoSourceInstance ?postLaunchEnabled ?exportBucketArn
+        ?licensing ?copyTags ?copyPrivateIp
+        ?targetInstanceTypeRightSizingMethod ?launchDisposition ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new Launch Configuration Template."]
+module CreateExtendedSourceServerResponse =
+  struct
+    type nonrec t =
+      {
+      sourceServer: SourceServer.t option
+        [@ocaml.doc "Created extended source server."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sourceServer = fun () -> { sourceServer }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("sourceServer",
+           (Option.map x.sourceServer ~f:SourceServer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceServer =
+        (Option.map ~f:SourceServer.of_xml)
+          (Xml.child xml_arg0 "sourceServer") in
+      make ?sourceServer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceServer = field_map json__ "sourceServer" SourceServer.of_json in
+      make ?sourceServer ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create an extended source server in the target Account based on the source server in staging account."]
+module CreateExtendedSourceServerRequest =
+  struct
+    type nonrec t =
+      {
+      sourceServerArn: SourceServerARN.t
+        [@ocaml.doc
+          "This defines the ARN of the source server in staging Account based on which you want to create an extended source server."];
+      tags: TagsMap.t option
+        [@ocaml.doc
+          "A list of tags associated with the extended source server."]}
+    let context_ = "CreateExtendedSourceServerRequest"
+    let make ?tags =
+      fun ~sourceServerArn -> fun () -> { tags; sourceServerArn }
+    let to_value x =
+      structure_to_value
+        [("sourceServerArn",
+           (Some (SourceServerARN.to_value x.sourceServerArn)));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let sourceServerArn =
+        SourceServerARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceServerArn") in
+      make ?tags ~sourceServerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let sourceServerArn =
+        field_map_exn json__ "sourceServerArn" SourceServerARN.of_json in
+      make ?tags ~sourceServerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create an extended source server in the target Account based on the source server in staging account."]
+module AssociateSourceNetworkStackResponse =
+  struct
+    type nonrec t =
+      {
+      job: Job.t option [@ocaml.doc "The Source Network association Job."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UninitializedAccountException of UninitializedAccountException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?job = fun () -> { job }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UninitializedAccountException" ->
+          `UninitializedAccountException
+            (UninitializedAccountException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UninitializedAccountException e ->
+          `Assoc
+            [("error", (`String "UninitializedAccountException"));
+            ("details", (UninitializedAccountException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("job", (Option.map x.job ~f:Job.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let job = (Option.map ~f:Job.of_xml) (Xml.child xml_arg0 "job") in
+      make ?job ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let job = field_map json__ "job" Job.of_json in make ?job ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associate a Source Network to an existing CloudFormation Stack and modify launch templates to use this network. Can be used for reverting to previously deployed CloudFormation stacks."]
+module AssociateSourceNetworkStackRequest =
+  struct
+    type nonrec t =
+      {
+      sourceNetworkID: SourceNetworkID.t
+        [@ocaml.doc
+          "The Source Network ID to associate with CloudFormation template."];
+      cfnStackName: CfnStackName.t
+        [@ocaml.doc
+          "CloudFormation template to associate with a Source Network."]}
+    let context_ = "AssociateSourceNetworkStackRequest"
+    let make ~sourceNetworkID =
+      fun ~cfnStackName -> fun () -> { sourceNetworkID; cfnStackName }
+    let to_value x =
+      structure_to_value
+        [("sourceNetworkID",
+           (Some (SourceNetworkID.to_value x.sourceNetworkID)));
+        ("cfnStackName", (Some (CfnStackName.to_value x.cfnStackName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cfnStackName =
+        CfnStackName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "cfnStackName") in
+      let sourceNetworkID =
+        SourceNetworkID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceNetworkID") in
+      make ~cfnStackName ~sourceNetworkID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cfnStackName =
+        field_map_exn json__ "cfnStackName" CfnStackName.of_json in
+      let sourceNetworkID =
+        field_map_exn json__ "sourceNetworkID" SourceNetworkID.of_json in
+      make ~cfnStackName ~sourceNetworkID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associate a Source Network to an existing CloudFormation Stack and modify launch templates to use this network. Can be used for reverting to previously deployed CloudFormation stacks."]

@@ -112,16 +112,19 @@ let create_archive =
          flag "event-pattern" (optional string) ~doc:"STRING EventPattern"
        and retentionDays =
          flag "retention-days" (optional int) ~doc:"INT RetentionDays"
+       and kmsKeyIdentifier =
+         flag "kms-key-identifier" (optional string)
+           ~doc:"STRING KmsKeyIdentifier"
        and archiveName =
          flag "archive-name" (required string) ~doc:"STRING ArchiveName"
        and eventSourceArn =
-         flag "event-source-arn" (required string) ~doc:"STRING Arn" in
+         flag "event-source-arn" (required string) ~doc:"STRING EventBusArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_archive
            (Values.CreateArchiveRequest.make ?description ?eventPattern
-              ?retentionDays ~archiveName ~eventSourceArn ())
-           (Some Values.CreateArchiveResponse.to_json)
+              ?retentionDays ?kmsKeyIdentifier ~archiveName ~eventSourceArn
+              ()) (Some Values.CreateArchiveResponse.to_json)
            (Some Values.CreateArchiveResponse.error_to_json)])
 let create_connection =
   Command.async ~summary:""
@@ -136,6 +139,12 @@ let create_connection =
        and description =
          flag "description" (optional string)
            ~doc:"STRING ConnectionDescription"
+       and invocationConnectivityParameters =
+         flag "invocation-connectivity-parameters" (optional json_arg)
+           ~doc:"JSON ConnectivityResourceParameters"
+       and kmsKeyIdentifier =
+         flag "kms-key-identifier" (optional string)
+           ~doc:"STRING KmsKeyIdentifier"
        and name = flag "name" (required string) ~doc:"STRING ConnectionName"
        and authorizationType =
          flag "authorization-type" (required json_arg)
@@ -146,7 +155,11 @@ let create_connection =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_connection
-           (Values.CreateConnectionRequest.make ?description ~name
+           (Values.CreateConnectionRequest.make ?description
+              ?invocationConnectivityParameters:(Option.map
+                                                   ~f:Values.ConnectivityResourceParameters.of_json
+                                                   invocationConnectivityParameters)
+              ?kmsKeyIdentifier ~name
               ~authorizationType:(Values.ConnectionAuthorizationType.of_json
                                     authorizationType)
               ~authParameters:(Values.CreateConnectionAuthRequestParameters.of_json
@@ -201,12 +214,28 @@ let create_event_bus =
        and eventSourceName =
          flag "event-source-name" (optional string)
            ~doc:"STRING EventSourceName"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING EventBusDescription"
+       and kmsKeyIdentifier =
+         flag "kms-key-identifier" (optional string)
+           ~doc:"STRING KmsKeyIdentifier"
+       and deadLetterConfig =
+         flag "dead-letter-config" (optional json_arg)
+           ~doc:"JSON DeadLetterConfig"
+       and logConfig =
+         flag "log-config" (optional json_arg) ~doc:"JSON LogConfig"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and name = flag "name" (required string) ~doc:"STRING EventBusName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_event_bus
-           (Values.CreateEventBusRequest.make ?eventSourceName
+           (Values.CreateEventBusRequest.make ?eventSourceName ?description
+              ?kmsKeyIdentifier
+              ?deadLetterConfig:(Option.map
+                                   ~f:Values.DeadLetterConfig.of_json
+                                   deadLetterConfig)
+              ?logConfig:(Option.map ~f:Values.LogConfig.of_json logConfig)
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name ())
            (Some Values.CreateEventBusResponse.to_json)
            (Some Values.CreateEventBusResponse.error_to_json)])
@@ -617,7 +646,7 @@ let list_archives =
        and namePrefix =
          flag "name-prefix" (optional string) ~doc:"STRING ArchiveName"
        and eventSourceArn =
-         flag "event-source-arn" (optional string) ~doc:"STRING Arn"
+         flag "event-source-arn" (optional string) ~doc:"STRING EventBusArn"
        and state = flag "state" (optional json_arg) ~doc:"JSON ArchiveState"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
@@ -784,7 +813,7 @@ let list_replays =
          flag "name-prefix" (optional string) ~doc:"STRING ReplayName"
        and state = flag "state" (optional json_arg) ~doc:"JSON ReplayState"
        and eventSourceArn =
-         flag "event-source-arn" (optional string) ~doc:"STRING Arn"
+         flag "event-source-arn" (optional string) ~doc:"STRING ArchiveArn"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and limit = flag "limit" (optional int) ~doc:"INT LimitMax100" in
@@ -1074,7 +1103,7 @@ let start_replay =
        and replayName =
          flag "replay-name" (required string) ~doc:"STRING ReplayName"
        and eventSourceArn =
-         flag "event-source-arn" (required string) ~doc:"STRING Arn"
+         flag "event-source-arn" (required string) ~doc:"STRING ArchiveArn"
        and eventStartTime =
          flag "event-start-time" (required json_arg) ~doc:"JSON Timestamp"
        and eventEndTime =
@@ -1204,13 +1233,16 @@ let update_archive =
          flag "event-pattern" (optional string) ~doc:"STRING EventPattern"
        and retentionDays =
          flag "retention-days" (optional int) ~doc:"INT RetentionDays"
+       and kmsKeyIdentifier =
+         flag "kms-key-identifier" (optional string)
+           ~doc:"STRING KmsKeyIdentifier"
        and archiveName =
          flag "archive-name" (required string) ~doc:"STRING ArchiveName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_archive
            (Values.UpdateArchiveRequest.make ?description ?eventPattern
-              ?retentionDays ~archiveName ())
+              ?retentionDays ?kmsKeyIdentifier ~archiveName ())
            (Some Values.UpdateArchiveResponse.to_json)
            (Some Values.UpdateArchiveResponse.error_to_json)])
 let update_connection =
@@ -1232,6 +1264,12 @@ let update_connection =
        and authParameters =
          flag "auth-parameters" (optional json_arg)
            ~doc:"JSON UpdateConnectionAuthRequestParameters"
+       and invocationConnectivityParameters =
+         flag "invocation-connectivity-parameters" (optional json_arg)
+           ~doc:"JSON ConnectivityResourceParameters"
+       and kmsKeyIdentifier =
+         flag "kms-key-identifier" (optional string)
+           ~doc:"STRING KmsKeyIdentifier"
        and name = flag "name" (required string) ~doc:"STRING ConnectionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1242,7 +1280,11 @@ let update_connection =
                                     authorizationType)
               ?authParameters:(Option.map
                                  ~f:Values.UpdateConnectionAuthRequestParameters.of_json
-                                 authParameters) ~name ())
+                                 authParameters)
+              ?invocationConnectivityParameters:(Option.map
+                                                   ~f:Values.ConnectivityResourceParameters.of_json
+                                                   invocationConnectivityParameters)
+              ?kmsKeyIdentifier ~name ())
            (Some Values.UpdateConnectionResponse.to_json)
            (Some Values.UpdateConnectionResponse.error_to_json)])
 let update_endpoint =
@@ -1282,6 +1324,39 @@ let update_endpoint =
                              eventBuses) ?roleArn ~name ())
            (Some Values.UpdateEndpointResponse.to_json)
            (Some Values.UpdateEndpointResponse.error_to_json)])
+let update_event_bus =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING EventBusName"
+       and kmsKeyIdentifier =
+         flag "kms-key-identifier" (optional string)
+           ~doc:"STRING KmsKeyIdentifier"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING EventBusDescription"
+       and deadLetterConfig =
+         flag "dead-letter-config" (optional json_arg)
+           ~doc:"JSON DeadLetterConfig"
+       and logConfig =
+         flag "log-config" (optional json_arg) ~doc:"JSON LogConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_event_bus
+           (Values.UpdateEventBusRequest.make ?name ?kmsKeyIdentifier
+              ?description
+              ?deadLetterConfig:(Option.map
+                                   ~f:Values.DeadLetterConfig.of_json
+                                   deadLetterConfig)
+              ?logConfig:(Option.map ~f:Values.LogConfig.of_json logConfig)
+              ()) (Some Values.UpdateEventBusResponse.to_json)
+           (Some Values.UpdateEventBusResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -1341,4 +1416,5 @@ let main =
     ("update-api-destination", update_api_destination);
     ("update-archive", update_archive);
     ("update-connection", update_connection);
-    ("update-endpoint", update_endpoint)]
+    ("update-endpoint", update_endpoint);
+    ("update-event-bus", update_event_bus)]

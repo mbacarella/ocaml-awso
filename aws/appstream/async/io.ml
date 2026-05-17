@@ -11,12 +11,16 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let associate_app_block_builder_app_block ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateAppBlockBuilderAppBlock input
 let associate_application_fleet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateApplicationFleet input
 let associate_application_to_entitlement ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateApplicationToEntitlement input
 let associate_fleet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateFleet input
+let associate_software_to_image_builder ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateSoftwareToImageBuilder input
 let batch_associate_user_stack ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchAssociateUserStack input
 let batch_disassociate_user_stack ?endpoint_url ?cfg input =
@@ -25,22 +29,32 @@ let copy_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CopyImage input
 let create_app_block ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAppBlock input
+let create_app_block_builder ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAppBlockBuilder input
+let create_app_block_builder_streaming_u_r_l ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAppBlockBuilderStreamingURL input
 let create_application ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateApplication input
 let create_directory_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDirectoryConfig input
 let create_entitlement ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateEntitlement input
+let create_export_image_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateExportImageTask input
 let create_fleet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFleet input
 let create_image_builder ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateImageBuilder input
 let create_image_builder_streaming_u_r_l ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateImageBuilderStreamingURL input
+let create_imported_image ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateImportedImage input
 let create_stack ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateStack input
 let create_streaming_u_r_l ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateStreamingURL input
+let create_theme_for_stack ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateThemeForStack input
 let create_updated_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateUpdatedImage input
 let create_usage_report_subscription ?endpoint_url ?cfg input =
@@ -49,6 +63,8 @@ let create_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateUser input
 let delete_app_block ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAppBlock input
+let delete_app_block_builder ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAppBlockBuilder input
 let delete_application ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteApplication input
 let delete_directory_config ?endpoint_url ?cfg input =
@@ -65,12 +81,22 @@ let delete_image_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteImagePermissions input
 let delete_stack ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteStack input
+let delete_theme_for_stack ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteThemeForStack input
 let delete_usage_report_subscription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteUsageReportSubscription input
 let delete_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteUser input
+let describe_app_block_builder_app_block_associations ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.DescribeAppBlockBuilderAppBlockAssociations input
+let describe_app_block_builders ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAppBlockBuilders input
 let describe_app_blocks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAppBlocks input
+let describe_app_license_usage ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAppLicenseUsage input
 let describe_application_fleet_associations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeApplicationFleetAssociations
     input
@@ -90,8 +116,12 @@ let describe_images ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeImages input
 let describe_sessions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSessions input
+let describe_software_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeSoftwareAssociations input
 let describe_stacks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeStacks input
+let describe_theme_for_stack ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeThemeForStack input
 let describe_usage_report_subscriptions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeUsageReportSubscriptions input
 let describe_user_stack_associations ?endpoint_url ?cfg input =
@@ -100,6 +130,8 @@ let describe_users ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeUsers input
 let disable_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableUser input
+let disassociate_app_block_builder_app_block ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateAppBlockBuilderAppBlock input
 let disassociate_application_fleet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateApplicationFleet input
 let disassociate_application_from_entitlement ?endpoint_url ?cfg input =
@@ -107,22 +139,38 @@ let disassociate_application_from_entitlement ?endpoint_url ?cfg input =
     input
 let disassociate_fleet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateFleet input
+let disassociate_software_from_image_builder ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateSoftwareFromImageBuilder
+    input
+let drain_session_instance ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DrainSessionInstance input
 let enable_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableUser input
 let expire_session ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExpireSession input
+let get_export_image_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetExportImageTask input
 let list_associated_fleets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAssociatedFleets input
 let list_associated_stacks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAssociatedStacks input
 let list_entitled_applications ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEntitledApplications input
+let list_export_image_tasks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListExportImageTasks input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let start_app_block_builder ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartAppBlockBuilder input
 let start_fleet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartFleet input
 let start_image_builder ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartImageBuilder input
+let start_software_deployment_to_image_builder ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartSoftwareDeploymentToImageBuilder
+    input
+let stop_app_block_builder ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopAppBlockBuilder input
 let stop_fleet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopFleet input
 let stop_image_builder ?endpoint_url ?cfg input =
@@ -131,6 +179,8 @@ let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_app_block_builder ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAppBlockBuilder input
 let update_application ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateApplication input
 let update_directory_config ?endpoint_url ?cfg input =
@@ -143,3 +193,5 @@ let update_image_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateImagePermissions input
 let update_stack ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateStack input
+let update_theme_for_stack ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateThemeForStack input

@@ -43,14 +43,17 @@ let create_connector =
            ~doc:"STRING __stringMax1024"
        and logDelivery =
          flag "log-delivery" (optional json_arg) ~doc:"JSON LogDelivery"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
        and workerConfiguration =
          flag "worker-configuration" (optional json_arg)
            ~doc:"JSON WorkerConfiguration"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
        and capacity =
          flag "capacity" (required json_arg) ~doc:"JSON Capacity"
        and connectorConfiguration =
          flag "connector-configuration" (required json_arg)
-           ~doc:"JSON SyntheticCreateConnectorRequest__mapOf__string"
+           ~doc:"JSON ConnectorConfiguration"
        and connectorName =
          flag "connector-name" (required string)
            ~doc:"STRING __stringMin1Max128"
@@ -76,11 +79,14 @@ let create_connector =
            (Values.CreateConnectorRequest.make ?connectorDescription
               ?logDelivery:(Option.map ~f:Values.LogDelivery.of_json
                               logDelivery)
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType)
               ?workerConfiguration:(Option.map
                                       ~f:Values.WorkerConfiguration.of_json
                                       workerConfiguration)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
               ~capacity:(Values.Capacity.of_json capacity)
-              ~connectorConfiguration:(Values.SyntheticCreateConnectorRequest__mapOf__string.of_json
+              ~connectorConfiguration:(Values.ConnectorConfiguration.of_json
                                          connectorConfiguration)
               ~connectorName
               ~kafkaCluster:(Values.KafkaCluster.of_json kafkaCluster)
@@ -105,6 +111,7 @@ let create_custom_plugin =
            ~doc:"URL override endpoint url"
        and description =
          flag "description" (optional string) ~doc:"STRING __stringMax1024"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
        and contentType =
          flag "content-type" (required json_arg)
            ~doc:"JSON CustomPluginContentType"
@@ -116,6 +123,7 @@ let create_custom_plugin =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_custom_plugin
            (Values.CreateCustomPluginRequest.make ?description
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
               ~contentType:(Values.CustomPluginContentType.of_json
                               contentType)
               ~location:(Values.CustomPluginLocation.of_json location) ~name
@@ -133,15 +141,17 @@ let create_worker_configuration =
            ~doc:"URL override endpoint url"
        and description =
          flag "description" (optional string) ~doc:"STRING __stringMax1024"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
        and name =
          flag "name" (required string) ~doc:"STRING __stringMin1Max128"
        and propertiesFileContent =
          flag "properties-file-content" (required string)
-           ~doc:"STRING SyntheticCreateWorkerConfigurationRequest__string" in
+           ~doc:"STRING __sensitiveString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_worker_configuration
-           (Values.CreateWorkerConfigurationRequest.make ?description ~name
+           (Values.CreateWorkerConfigurationRequest.make ?description
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name
               ~propertiesFileContent ())
            (Some Values.CreateWorkerConfigurationResponse.to_json)
            (Some Values.CreateWorkerConfigurationResponse.error_to_json)])
@@ -183,6 +193,26 @@ let delete_custom_plugin =
            (Values.DeleteCustomPluginRequest.make ~customPluginArn ())
            (Some Values.DeleteCustomPluginResponse.to_json)
            (Some Values.DeleteCustomPluginResponse.error_to_json)])
+let delete_worker_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workerConfigurationArn =
+         flag "worker-configuration-arn" (required string)
+           ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_worker_configuration
+           (Values.DeleteWorkerConfigurationRequest.make
+              ~workerConfigurationArn ())
+           (Some Values.DeleteWorkerConfigurationResponse.to_json)
+           (Some Values.DeleteWorkerConfigurationResponse.error_to_json)])
 let describe_connector =
   Command.async ~summary:""
     ([%map_open.Command
@@ -201,6 +231,26 @@ let describe_connector =
            (Values.DescribeConnectorRequest.make ~connectorArn ())
            (Some Values.DescribeConnectorResponse.to_json)
            (Some Values.DescribeConnectorResponse.error_to_json)])
+let describe_connector_operation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectorOperationArn =
+         flag "connector-operation-arn" (required string)
+           ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_connector_operation
+           (Values.DescribeConnectorOperationRequest.make
+              ~connectorOperationArn ())
+           (Some Values.DescribeConnectorOperationResponse.to_json)
+           (Some Values.DescribeConnectorOperationResponse.error_to_json)])
 let describe_custom_plugin =
   Command.async ~summary:""
     ([%map_open.Command
@@ -239,6 +289,29 @@ let describe_worker_configuration =
               ~workerConfigurationArn ())
            (Some Values.DescribeWorkerConfigurationResponse.to_json)
            (Some Values.DescribeWorkerConfigurationResponse.error_to_json)])
+let list_connector_operations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and connectorArn =
+         flag "connector-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_connector_operations
+           (Values.ListConnectorOperationsRequest.make ?maxResults ?nextToken
+              ~connectorArn ())
+           (Some Values.ListConnectorOperationsResponse.to_json)
+           (Some Values.ListConnectorOperationsResponse.error_to_json)])
 let list_connectors =
   Command.async ~summary:""
     ([%map_open.Command
@@ -276,13 +349,33 @@ let list_custom_plugins =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING __string" in
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and namePrefix =
+         flag "name-prefix" (optional string) ~doc:"STRING __string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_custom_plugins
-           (Values.ListCustomPluginsRequest.make ?maxResults ?nextToken ())
-           (Some Values.ListCustomPluginsResponse.to_json)
+           (Values.ListCustomPluginsRequest.make ?maxResults ?nextToken
+              ?namePrefix ()) (Some Values.ListCustomPluginsResponse.to_json)
            (Some Values.ListCustomPluginsResponse.error_to_json)])
+let list_tags_for_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tags_for_resource
+           (Values.ListTagsForResourceRequest.make ~resourceArn ())
+           (Some Values.ListTagsForResourceResponse.to_json)
+           (Some Values.ListTagsForResourceResponse.error_to_json)])
 let list_worker_configurations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -296,14 +389,57 @@ let list_worker_configurations =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING __string" in
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and namePrefix =
+         flag "name-prefix" (optional string) ~doc:"STRING __string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_worker_configurations
            (Values.ListWorkerConfigurationsRequest.make ?maxResults
-              ?nextToken ())
+              ?nextToken ?namePrefix ())
            (Some Values.ListWorkerConfigurationsResponse.to_json)
            (Some Values.ListWorkerConfigurationsResponse.error_to_json)])
+let tag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING __string"
+       and tags = flag "tags" (required json_arg) ~doc:"JSON Tags" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.tag_resource
+           (Values.TagResourceRequest.make ~resourceArn
+              ~tags:(Values.Tags.of_json tags) ())
+           (Some Values.TagResourceResponse.to_json)
+           (Some Values.TagResourceResponse.error_to_json)])
+let untag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING __string"
+       and tagKeys =
+         flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.untag_resource
+           (Values.UntagResourceRequest.make ~resourceArn
+              ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
+           (Some Values.UntagResourceResponse.to_json)
+           (Some Values.UntagResourceResponse.error_to_json)])
 let update_connector =
   Command.async ~summary:""
     ([%map_open.Command
@@ -315,7 +451,10 @@ let update_connector =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and capacity =
-         flag "capacity" (required json_arg) ~doc:"JSON CapacityUpdate"
+         flag "capacity" (optional json_arg) ~doc:"JSON CapacityUpdate"
+       and connectorConfiguration =
+         flag "connector-configuration" (optional json_arg)
+           ~doc:"JSON ConnectorConfigurationUpdate"
        and connectorArn =
          flag "connector-arn" (required string) ~doc:"STRING __string"
        and currentVersion =
@@ -324,7 +463,10 @@ let update_connector =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_connector
            (Values.UpdateConnectorRequest.make
-              ~capacity:(Values.CapacityUpdate.of_json capacity)
+              ?capacity:(Option.map ~f:Values.CapacityUpdate.of_json capacity)
+              ?connectorConfiguration:(Option.map
+                                         ~f:Values.ConnectorConfigurationUpdate.of_json
+                                         connectorConfiguration)
               ~connectorArn ~currentVersion ())
            (Some Values.UpdateConnectorResponse.to_json)
            (Some Values.UpdateConnectorResponse.error_to_json)])
@@ -336,10 +478,16 @@ let main =
     ("create-worker-configuration", create_worker_configuration);
     ("delete-connector", delete_connector);
     ("delete-custom-plugin", delete_custom_plugin);
+    ("delete-worker-configuration", delete_worker_configuration);
     ("describe-connector", describe_connector);
+    ("describe-connector-operation", describe_connector_operation);
     ("describe-custom-plugin", describe_custom_plugin);
     ("describe-worker-configuration", describe_worker_configuration);
+    ("list-connector-operations", list_connector_operations);
     ("list-connectors", list_connectors);
     ("list-custom-plugins", list_custom_plugins);
+    ("list-tags-for-resource", list_tags_for_resource);
     ("list-worker-configurations", list_worker_configurations);
+    ("tag-resource", tag_resource);
+    ("untag-resource", untag_resource);
     ("update-connector", update_connector)]

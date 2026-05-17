@@ -28,6 +28,46 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let put_action_interactions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trackingId =
+         flag "tracking-id" (required string) ~doc:"STRING StringType"
+       and actionInteractions =
+         flag "action-interactions" (required json_arg)
+           ~doc:"JSON ActionInteractionsList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_action_interactions
+           (Values.PutActionInteractionsRequest.make ~trackingId
+              ~actionInteractions:(Values.ActionInteractionsList.of_json
+                                     actionInteractions) ()) None None])
+let put_actions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and datasetArn =
+         flag "dataset-arn" (required string) ~doc:"STRING Arn"
+       and actions =
+         flag "actions" (required json_arg) ~doc:"JSON ActionList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_actions
+           (Values.PutActionsRequest.make ~datasetArn
+              ~actions:(Values.ActionList.of_json actions) ()) None None])
 let put_events =
   Command.async ~summary:""
     ([%map_open.Command
@@ -89,6 +129,8 @@ let put_users =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("put-events", put_events);
+    [("put-action-interactions", put_action_interactions);
+    ("put-actions", put_actions);
+    ("put-events", put_events);
     ("put-items", put_items);
     ("put-users", put_users)]

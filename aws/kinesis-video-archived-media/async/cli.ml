@@ -158,6 +158,57 @@ let get_h_l_s_streaming_session_u_r_l =
                                                   maxMediaPlaylistFragmentResults)
               ()) (Some Values.GetHLSStreamingSessionURLOutput.to_json)
            (Some Values.GetHLSStreamingSessionURLOutput.error_to_json)])
+let get_images =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING ResourceARN"
+       and samplingInterval =
+         flag "sampling-interval" (optional int) ~doc:"INT SamplingInterval"
+       and formatConfig =
+         flag "format-config" (optional json_arg) ~doc:"JSON FormatConfig"
+       and widthPixels =
+         flag "width-pixels" (optional int) ~doc:"INT WidthPixels"
+       and heightPixels =
+         flag "height-pixels" (optional int) ~doc:"INT HeightPixels"
+       and maxResults =
+         flag "max-results" (optional json_arg)
+           ~doc:"JSON GetImagesMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and imageSelectorType =
+         flag "image-selector-type" (required json_arg)
+           ~doc:"JSON ImageSelectorType"
+       and startTimestamp =
+         flag "start-timestamp" (required json_arg) ~doc:"JSON Timestamp"
+       and endTimestamp =
+         flag "end-timestamp" (required json_arg) ~doc:"JSON Timestamp"
+       and format = flag "format" (required json_arg) ~doc:"JSON Format" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_images
+           (Values.GetImagesInput.make ?streamName ?streamARN
+              ?samplingInterval
+              ?formatConfig:(Option.map ~f:Values.FormatConfig.of_json
+                               formatConfig) ?widthPixels ?heightPixels
+              ?maxResults:(Option.map ~f:Values.GetImagesMaxResults.of_json
+                             maxResults) ?nextToken
+              ~imageSelectorType:(Values.ImageSelectorType.of_json
+                                    imageSelectorType)
+              ~startTimestamp:(Values.Timestamp.of_json startTimestamp)
+              ~endTimestamp:(Values.Timestamp.of_json endTimestamp)
+              ~format:(Values.Format_.of_json format) ())
+           (Some Values.GetImagesOutput.to_json)
+           (Some Values.GetImagesOutput.error_to_json)])
 let get_media_for_fragment_list =
   Command.async ~summary:""
     ([%map_open.Command
@@ -222,5 +273,6 @@ let main =
     ("get-d-a-s-h-streaming-session-u-r-l",
       get_d_a_s_h_streaming_session_u_r_l);
     ("get-h-l-s-streaming-session-u-r-l", get_h_l_s_streaming_session_u_r_l);
+    ("get-images", get_images);
     ("get-media-for-fragment-list", get_media_for_fragment_list);
     ("list-fragments", list_fragments)]

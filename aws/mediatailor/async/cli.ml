@@ -28,6 +28,27 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let configure_logs_for_channel =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and channelName =
+         flag "channel-name" (required string) ~doc:"STRING __string"
+       and logTypes =
+         flag "log-types" (required json_arg) ~doc:"JSON LogTypes" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.configure_logs_for_channel
+           (Values.ConfigureLogsForChannelRequest.make ~channelName
+              ~logTypes:(Values.LogTypes.of_json logTypes) ())
+           (Some Values.ConfigureLogsForChannelResponse.to_json)
+           (Some Values.ConfigureLogsForChannelResponse.error_to_json)])
 let configure_logs_for_playback_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -38,6 +59,15 @@ let configure_logs_for_playback_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and enabledLoggingStrategies =
+         flag "enabled-logging-strategies" (optional json_arg)
+           ~doc:"JSON __listOfLoggingStrategies"
+       and adsInteractionLog =
+         flag "ads-interaction-log" (optional json_arg)
+           ~doc:"JSON AdsInteractionLog"
+       and manifestServiceInteractionLog =
+         flag "manifest-service-interaction-log" (optional json_arg)
+           ~doc:"JSON ManifestServiceInteractionLog"
        and percentEnabled =
          flag "percent-enabled" (required int) ~doc:"INT __integer"
        and playbackConfigurationName =
@@ -47,6 +77,15 @@ let configure_logs_for_playback_configuration =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.configure_logs_for_playback_configuration
            (Values.ConfigureLogsForPlaybackConfigurationRequest.make
+              ?enabledLoggingStrategies:(Option.map
+                                           ~f:Values.Zz__listOfLoggingStrategies.of_json
+                                           enabledLoggingStrategies)
+              ?adsInteractionLog:(Option.map
+                                    ~f:Values.AdsInteractionLog.of_json
+                                    adsInteractionLog)
+              ?manifestServiceInteractionLog:(Option.map
+                                                ~f:Values.ManifestServiceInteractionLog.of_json
+                                                manifestServiceInteractionLog)
               ~percentEnabled ~playbackConfigurationName ())
            (Some Values.ConfigureLogsForPlaybackConfigurationResponse.to_json)
            (Some
@@ -64,6 +103,12 @@ let create_channel =
        and fillerSlate =
          flag "filler-slate" (optional json_arg) ~doc:"JSON SlateSource"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON __mapOf__string"
+       and tier = flag "tier" (optional json_arg) ~doc:"JSON Tier"
+       and timeShiftConfiguration =
+         flag "time-shift-configuration" (optional json_arg)
+           ~doc:"JSON TimeShiftConfiguration"
+       and audiences =
+         flag "audiences" (optional json_arg) ~doc:"JSON Audiences"
        and channelName =
          flag "channel-name" (required string) ~doc:"STRING __string"
        and outputs =
@@ -77,10 +122,43 @@ let create_channel =
               ?fillerSlate:(Option.map ~f:Values.SlateSource.of_json
                               fillerSlate)
               ?tags:(Option.map ~f:Values.Zz__mapOf__string.of_json tags)
+              ?tier:(Option.map ~f:Values.Tier.of_json tier)
+              ?timeShiftConfiguration:(Option.map
+                                         ~f:Values.TimeShiftConfiguration.of_json
+                                         timeShiftConfiguration)
+              ?audiences:(Option.map ~f:Values.Audiences.of_json audiences)
               ~channelName ~outputs:(Values.RequestOutputs.of_json outputs)
               ~playbackMode:(Values.PlaybackMode.of_json playbackMode) ())
            (Some Values.CreateChannelResponse.to_json)
            (Some Values.CreateChannelResponse.error_to_json)])
+let create_live_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON __mapOf__string"
+       and httpPackageConfigurations =
+         flag "http-package-configurations" (required json_arg)
+           ~doc:"JSON HttpPackageConfigurations"
+       and liveSourceName =
+         flag "live-source-name" (required string) ~doc:"STRING __string"
+       and sourceLocationName =
+         flag "source-location-name" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_live_source
+           (Values.CreateLiveSourceRequest.make
+              ?tags:(Option.map ~f:Values.Zz__mapOf__string.of_json tags)
+              ~httpPackageConfigurations:(Values.HttpPackageConfigurations.of_json
+                                            httpPackageConfigurations)
+              ~liveSourceName ~sourceLocationName ())
+           (Some Values.CreateLiveSourceResponse.to_json)
+           (Some Values.CreateLiveSourceResponse.error_to_json)])
 let create_prefetch_schedule =
   Command.async ~summary:""
     ([%map_open.Command
@@ -91,24 +169,40 @@ let create_prefetch_schedule =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and consumption =
+         flag "consumption" (optional json_arg)
+           ~doc:"JSON PrefetchConsumption"
+       and retrieval =
+         flag "retrieval" (optional json_arg) ~doc:"JSON PrefetchRetrieval"
+       and recurringPrefetchConfiguration =
+         flag "recurring-prefetch-configuration" (optional json_arg)
+           ~doc:"JSON RecurringPrefetchConfiguration"
+       and scheduleType =
+         flag "schedule-type" (optional json_arg)
+           ~doc:"JSON PrefetchScheduleType"
        and streamId =
          flag "stream-id" (optional string) ~doc:"STRING __string"
-       and consumption =
-         flag "consumption" (required json_arg)
-           ~doc:"JSON PrefetchConsumption"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON __mapOf__string"
        and name = flag "name" (required string) ~doc:"STRING __string"
        and playbackConfigurationName =
          flag "playback-configuration-name" (required string)
-           ~doc:"STRING __string"
-       and retrieval =
-         flag "retrieval" (required json_arg) ~doc:"JSON PrefetchRetrieval" in
+           ~doc:"STRING __string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_prefetch_schedule
-           (Values.CreatePrefetchScheduleRequest.make ?streamId
-              ~consumption:(Values.PrefetchConsumption.of_json consumption)
-              ~name ~playbackConfigurationName
-              ~retrieval:(Values.PrefetchRetrieval.of_json retrieval) ())
+           (Values.CreatePrefetchScheduleRequest.make
+              ?consumption:(Option.map ~f:Values.PrefetchConsumption.of_json
+                              consumption)
+              ?retrieval:(Option.map ~f:Values.PrefetchRetrieval.of_json
+                            retrieval)
+              ?recurringPrefetchConfiguration:(Option.map
+                                                 ~f:Values.RecurringPrefetchConfiguration.of_json
+                                                 recurringPrefetchConfiguration)
+              ?scheduleType:(Option.map
+                               ~f:Values.PrefetchScheduleType.of_json
+                               scheduleType) ?streamId
+              ?tags:(Option.map ~f:Values.Zz__mapOf__string.of_json tags)
+              ~name ~playbackConfigurationName ())
            (Some Values.CreatePrefetchScheduleResponse.to_json)
            (Some Values.CreatePrefetchScheduleResponse.error_to_json)])
 let create_program =
@@ -123,6 +217,14 @@ let create_program =
            ~doc:"URL override endpoint url"
        and adBreaks =
          flag "ad-breaks" (optional json_arg) ~doc:"JSON __listOfAdBreak"
+       and liveSourceName =
+         flag "live-source-name" (optional string) ~doc:"STRING __string"
+       and vodSourceName =
+         flag "vod-source-name" (optional string) ~doc:"STRING __string"
+       and audienceMedia =
+         flag "audience-media" (optional json_arg)
+           ~doc:"JSON __listOfAudienceMedia"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON __mapOf__string"
        and channelName =
          flag "channel-name" (required string) ~doc:"STRING __string"
        and programName =
@@ -131,18 +233,21 @@ let create_program =
          flag "schedule-configuration" (required json_arg)
            ~doc:"JSON ScheduleConfiguration"
        and sourceLocationName =
-         flag "source-location-name" (required string) ~doc:"STRING __string"
-       and vodSourceName =
-         flag "vod-source-name" (required string) ~doc:"STRING __string" in
+         flag "source-location-name" (required string) ~doc:"STRING __string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_program
            (Values.CreateProgramRequest.make
               ?adBreaks:(Option.map ~f:Values.Zz__listOfAdBreak.of_json
-                           adBreaks) ~channelName ~programName
+                           adBreaks) ?liveSourceName ?vodSourceName
+              ?audienceMedia:(Option.map
+                                ~f:Values.Zz__listOfAudienceMedia.of_json
+                                audienceMedia)
+              ?tags:(Option.map ~f:Values.Zz__mapOf__string.of_json tags)
+              ~channelName ~programName
               ~scheduleConfiguration:(Values.ScheduleConfiguration.of_json
                                         scheduleConfiguration)
-              ~sourceLocationName ~vodSourceName ())
+              ~sourceLocationName ())
            (Some Values.CreateProgramResponse.to_json)
            (Some Values.CreateProgramResponse.error_to_json)])
 let create_source_location =
@@ -252,6 +357,45 @@ let delete_channel_policy =
            (Values.DeleteChannelPolicyRequest.make ~channelName ())
            (Some Values.DeleteChannelPolicyResponse.to_json)
            (Some Values.DeleteChannelPolicyResponse.error_to_json)])
+let delete_function =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and functionId =
+         flag "function-id" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_function
+           (Values.DeleteFunctionRequest.make ~functionId ())
+           (Some Values.DeleteFunctionResponse.to_json)
+           (Some Values.DeleteFunctionResponse.error_to_json)])
+let delete_live_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and liveSourceName =
+         flag "live-source-name" (required string) ~doc:"STRING __string"
+       and sourceLocationName =
+         flag "source-location-name" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_live_source
+           (Values.DeleteLiveSourceRequest.make ~liveSourceName
+              ~sourceLocationName ())
+           (Some Values.DeleteLiveSourceResponse.to_json)
+           (Some Values.DeleteLiveSourceResponse.error_to_json)])
 let delete_playback_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -367,6 +511,27 @@ let describe_channel =
            (Values.DescribeChannelRequest.make ~channelName ())
            (Some Values.DescribeChannelResponse.to_json)
            (Some Values.DescribeChannelResponse.error_to_json)])
+let describe_live_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and liveSourceName =
+         flag "live-source-name" (required string) ~doc:"STRING __string"
+       and sourceLocationName =
+         flag "source-location-name" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_live_source
+           (Values.DescribeLiveSourceRequest.make ~liveSourceName
+              ~sourceLocationName ())
+           (Some Values.DescribeLiveSourceResponse.to_json)
+           (Some Values.DescribeLiveSourceResponse.error_to_json)])
 let describe_program =
   Command.async ~summary:""
     ([%map_open.Command
@@ -460,15 +625,34 @@ let get_channel_schedule =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING __string"
+       and audience =
+         flag "audience" (optional string) ~doc:"STRING __string"
        and channelName =
          flag "channel-name" (required string) ~doc:"STRING __string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_channel_schedule
            (Values.GetChannelScheduleRequest.make ?durationMinutes
-              ?maxResults ?nextToken ~channelName ())
+              ?maxResults ?nextToken ?audience ~channelName ())
            (Some Values.GetChannelScheduleResponse.to_json)
            (Some Values.GetChannelScheduleResponse.error_to_json)])
+let get_function =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and functionId =
+         flag "function-id" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_function (Values.GetFunctionRequest.make ~functionId ())
+           (Some Values.GetFunctionResponse.to_json)
+           (Some Values.GetFunctionResponse.error_to_json)])
 let get_playback_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -549,6 +733,49 @@ let list_channels =
            (Values.ListChannelsRequest.make ?maxResults ?nextToken ())
            (Some Values.ListChannelsResponse.to_json)
            (Some Values.ListChannelsResponse.error_to_json)])
+let list_functions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_functions
+           (Values.ListFunctionsRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListFunctionsResponse.to_json)
+           (Some Values.ListFunctionsResponse.error_to_json)])
+let list_live_sources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and sourceLocationName =
+         flag "source-location-name" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_live_sources
+           (Values.ListLiveSourcesRequest.make ?maxResults ?nextToken
+              ~sourceLocationName ())
+           (Some Values.ListLiveSourcesResponse.to_json)
+           (Some Values.ListLiveSourcesResponse.error_to_json)])
 let list_playback_configurations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -584,6 +811,9 @@ let list_prefetch_schedules =
          flag "max-results" (optional int) ~doc:"INT __integerMin1Max100"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING __string"
+       and scheduleType =
+         flag "schedule-type" (optional json_arg)
+           ~doc:"JSON ListPrefetchScheduleType"
        and streamId =
          flag "stream-id" (optional string) ~doc:"STRING __string"
        and playbackConfigurationName =
@@ -593,7 +823,10 @@ let list_prefetch_schedules =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_prefetch_schedules
            (Values.ListPrefetchSchedulesRequest.make ?maxResults ?nextToken
-              ?streamId ~playbackConfigurationName ())
+              ?scheduleType:(Option.map
+                               ~f:Values.ListPrefetchScheduleType.of_json
+                               scheduleType) ?streamId
+              ~playbackConfigurationName ())
            (Some Values.ListPrefetchSchedulesResponse.to_json)
            (Some Values.ListPrefetchSchedulesResponse.error_to_json)])
 let list_source_locations =
@@ -676,6 +909,50 @@ let put_channel_policy =
            (Values.PutChannelPolicyRequest.make ~channelName ~policy ())
            (Some Values.PutChannelPolicyResponse.to_json)
            (Some Values.PutChannelPolicyResponse.error_to_json)])
+let put_function =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING __string"
+       and httpRequestConfiguration =
+         flag "http-request-configuration" (optional json_arg)
+           ~doc:"JSON HttpRequestConfiguration"
+       and customOutputConfiguration =
+         flag "custom-output-configuration" (optional json_arg)
+           ~doc:"JSON CustomOutputConfiguration"
+       and sequentialExecutorConfiguration =
+         flag "sequential-executor-configuration" (optional json_arg)
+           ~doc:"JSON SequentialExecutorConfiguration"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON __mapOf__string"
+       and functionId =
+         flag "function-id" (required string) ~doc:"STRING __string"
+       and functionType =
+         flag "function-type" (required json_arg) ~doc:"JSON FunctionType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_function
+           (Values.PutFunctionRequest.make ?description
+              ?httpRequestConfiguration:(Option.map
+                                           ~f:Values.HttpRequestConfiguration.of_json
+                                           httpRequestConfiguration)
+              ?customOutputConfiguration:(Option.map
+                                            ~f:Values.CustomOutputConfiguration.of_json
+                                            customOutputConfiguration)
+              ?sequentialExecutorConfiguration:(Option.map
+                                                  ~f:Values.SequentialExecutorConfiguration.of_json
+                                                  sequentialExecutorConfiguration)
+              ?tags:(Option.map ~f:Values.Zz__mapOf__string.of_json tags)
+              ~functionId
+              ~functionType:(Values.FunctionType.of_json functionType) ())
+           (Some Values.PutFunctionResponse.to_json)
+           (Some Values.PutFunctionResponse.error_to_json)])
 let put_playback_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -702,13 +979,14 @@ let put_playback_configuration =
        and dashConfiguration =
          flag "dash-configuration" (optional json_arg)
            ~doc:"JSON DashConfigurationForPut"
+       and insertionMode =
+         flag "insertion-mode" (optional json_arg) ~doc:"JSON InsertionMode"
        and livePreRollConfiguration =
          flag "live-pre-roll-configuration" (optional json_arg)
            ~doc:"JSON LivePreRollConfiguration"
        and manifestProcessingRules =
          flag "manifest-processing-rules" (optional json_arg)
            ~doc:"JSON ManifestProcessingRules"
-       and name = flag "name" (optional string) ~doc:"STRING __string"
        and personalizationThresholdSeconds =
          flag "personalization-threshold-seconds" (optional int)
            ~doc:"INT __integerMin1"
@@ -720,7 +998,17 @@ let put_playback_configuration =
            ~doc:"STRING __string"
        and videoContentSourceUrl =
          flag "video-content-source-url" (optional string)
-           ~doc:"STRING __string" in
+           ~doc:"STRING __string"
+       and adConditioningConfiguration =
+         flag "ad-conditioning-configuration" (optional json_arg)
+           ~doc:"JSON AdConditioningConfiguration"
+       and adDecisionServerConfiguration =
+         flag "ad-decision-server-configuration" (optional json_arg)
+           ~doc:"JSON AdDecisionServerConfiguration"
+       and functionMapping =
+         flag "function-mapping" (optional json_arg)
+           ~doc:"JSON FunctionMapping"
+       and name = flag "name" (required string) ~doc:"STRING __string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_playback_configuration
@@ -738,15 +1026,25 @@ let put_playback_configuration =
               ?dashConfiguration:(Option.map
                                     ~f:Values.DashConfigurationForPut.of_json
                                     dashConfiguration)
+              ?insertionMode:(Option.map ~f:Values.InsertionMode.of_json
+                                insertionMode)
               ?livePreRollConfiguration:(Option.map
                                            ~f:Values.LivePreRollConfiguration.of_json
                                            livePreRollConfiguration)
               ?manifestProcessingRules:(Option.map
                                           ~f:Values.ManifestProcessingRules.of_json
-                                          manifestProcessingRules) ?name
+                                          manifestProcessingRules)
               ?personalizationThresholdSeconds ?slateAdUrl
               ?tags:(Option.map ~f:Values.Zz__mapOf__string.of_json tags)
-              ?transcodeProfileName ?videoContentSourceUrl ())
+              ?transcodeProfileName ?videoContentSourceUrl
+              ?adConditioningConfiguration:(Option.map
+                                              ~f:Values.AdConditioningConfiguration.of_json
+                                              adConditioningConfiguration)
+              ?adDecisionServerConfiguration:(Option.map
+                                                ~f:Values.AdDecisionServerConfiguration.of_json
+                                                adDecisionServerConfiguration)
+              ?functionMapping:(Option.map ~f:Values.FunctionMapping.of_json
+                                  functionMapping) ~name ())
            (Some Values.PutPlaybackConfigurationResponse.to_json)
            (Some Values.PutPlaybackConfigurationResponse.error_to_json)])
 let start_channel =
@@ -833,6 +1131,11 @@ let update_channel =
            ~doc:"URL override endpoint url"
        and fillerSlate =
          flag "filler-slate" (optional json_arg) ~doc:"JSON SlateSource"
+       and timeShiftConfiguration =
+         flag "time-shift-configuration" (optional json_arg)
+           ~doc:"JSON TimeShiftConfiguration"
+       and audiences =
+         flag "audiences" (optional json_arg) ~doc:"JSON Audiences"
        and channelName =
          flag "channel-name" (required string) ~doc:"STRING __string"
        and outputs =
@@ -842,10 +1145,75 @@ let update_channel =
            Io.update_channel
            (Values.UpdateChannelRequest.make
               ?fillerSlate:(Option.map ~f:Values.SlateSource.of_json
-                              fillerSlate) ~channelName
-              ~outputs:(Values.RequestOutputs.of_json outputs) ())
-           (Some Values.UpdateChannelResponse.to_json)
+                              fillerSlate)
+              ?timeShiftConfiguration:(Option.map
+                                         ~f:Values.TimeShiftConfiguration.of_json
+                                         timeShiftConfiguration)
+              ?audiences:(Option.map ~f:Values.Audiences.of_json audiences)
+              ~channelName ~outputs:(Values.RequestOutputs.of_json outputs)
+              ()) (Some Values.UpdateChannelResponse.to_json)
            (Some Values.UpdateChannelResponse.error_to_json)])
+let update_live_source =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and httpPackageConfigurations =
+         flag "http-package-configurations" (required json_arg)
+           ~doc:"JSON HttpPackageConfigurations"
+       and liveSourceName =
+         flag "live-source-name" (required string) ~doc:"STRING __string"
+       and sourceLocationName =
+         flag "source-location-name" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_live_source
+           (Values.UpdateLiveSourceRequest.make
+              ~httpPackageConfigurations:(Values.HttpPackageConfigurations.of_json
+                                            httpPackageConfigurations)
+              ~liveSourceName ~sourceLocationName ())
+           (Some Values.UpdateLiveSourceResponse.to_json)
+           (Some Values.UpdateLiveSourceResponse.error_to_json)])
+let update_program =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and adBreaks =
+         flag "ad-breaks" (optional json_arg) ~doc:"JSON __listOfAdBreak"
+       and audienceMedia =
+         flag "audience-media" (optional json_arg)
+           ~doc:"JSON __listOfAudienceMedia"
+       and channelName =
+         flag "channel-name" (required string) ~doc:"STRING __string"
+       and programName =
+         flag "program-name" (required string) ~doc:"STRING __string"
+       and scheduleConfiguration =
+         flag "schedule-configuration" (required json_arg)
+           ~doc:"JSON UpdateProgramScheduleConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_program
+           (Values.UpdateProgramRequest.make
+              ?adBreaks:(Option.map ~f:Values.Zz__listOfAdBreak.of_json
+                           adBreaks)
+              ?audienceMedia:(Option.map
+                                ~f:Values.Zz__listOfAudienceMedia.of_json
+                                audienceMedia) ~channelName ~programName
+              ~scheduleConfiguration:(Values.UpdateProgramScheduleConfiguration.of_json
+                                        scheduleConfiguration) ())
+           (Some Values.UpdateProgramResponse.to_json)
+           (Some Values.UpdateProgramResponse.error_to_json)])
 let update_source_location =
   Command.async ~summary:""
     ([%map_open.Command
@@ -916,41 +1284,52 @@ let update_vod_source =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("configure-logs-for-playback-configuration",
-       configure_logs_for_playback_configuration);
+    [("configure-logs-for-channel", configure_logs_for_channel);
+    ("configure-logs-for-playback-configuration",
+      configure_logs_for_playback_configuration);
     ("create-channel", create_channel);
+    ("create-live-source", create_live_source);
     ("create-prefetch-schedule", create_prefetch_schedule);
     ("create-program", create_program);
     ("create-source-location", create_source_location);
     ("create-vod-source", create_vod_source);
     ("delete-channel", delete_channel);
     ("delete-channel-policy", delete_channel_policy);
+    ("delete-function", delete_function);
+    ("delete-live-source", delete_live_source);
     ("delete-playback-configuration", delete_playback_configuration);
     ("delete-prefetch-schedule", delete_prefetch_schedule);
     ("delete-program", delete_program);
     ("delete-source-location", delete_source_location);
     ("delete-vod-source", delete_vod_source);
     ("describe-channel", describe_channel);
+    ("describe-live-source", describe_live_source);
     ("describe-program", describe_program);
     ("describe-source-location", describe_source_location);
     ("describe-vod-source", describe_vod_source);
     ("get-channel-policy", get_channel_policy);
     ("get-channel-schedule", get_channel_schedule);
+    ("get-function", get_function);
     ("get-playback-configuration", get_playback_configuration);
     ("get-prefetch-schedule", get_prefetch_schedule);
     ("list-alerts", list_alerts);
     ("list-channels", list_channels);
+    ("list-functions", list_functions);
+    ("list-live-sources", list_live_sources);
     ("list-playback-configurations", list_playback_configurations);
     ("list-prefetch-schedules", list_prefetch_schedules);
     ("list-source-locations", list_source_locations);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-vod-sources", list_vod_sources);
     ("put-channel-policy", put_channel_policy);
+    ("put-function", put_function);
     ("put-playback-configuration", put_playback_configuration);
     ("start-channel", start_channel);
     ("stop-channel", stop_channel);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-channel", update_channel);
+    ("update-live-source", update_live_source);
+    ("update-program", update_program);
     ("update-source-location", update_source_location);
     ("update-vod-source", update_vod_source)]

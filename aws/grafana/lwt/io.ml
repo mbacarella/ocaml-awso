@@ -15,18 +15,38 @@ let associate_license ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateLicense input
 let create_workspace ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateWorkspace input
+let create_workspace_api_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateWorkspaceApiKey input
+let create_workspace_service_account ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateWorkspaceServiceAccount input
+let create_workspace_service_account_token ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateWorkspaceServiceAccountToken input
 let delete_workspace ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteWorkspace input
+let delete_workspace_api_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteWorkspaceApiKey input
+let delete_workspace_service_account ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteWorkspaceServiceAccount input
+let delete_workspace_service_account_token ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteWorkspaceServiceAccountToken input
 let describe_workspace ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeWorkspace input
 let describe_workspace_authentication ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeWorkspaceAuthentication input
+let describe_workspace_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeWorkspaceConfiguration input
 let disassociate_license ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateLicense input
 let list_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPermissions input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListVersions input
+let list_workspace_service_account_tokens ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListWorkspaceServiceAccountTokens input
+let list_workspace_service_accounts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListWorkspaceServiceAccounts input
 let list_workspaces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListWorkspaces input
 let tag_resource ?endpoint_url ?cfg input =
@@ -39,3 +59,5 @@ let update_workspace ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateWorkspace input
 let update_workspace_authentication ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateWorkspaceAuthentication input
+let update_workspace_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateWorkspaceConfiguration input

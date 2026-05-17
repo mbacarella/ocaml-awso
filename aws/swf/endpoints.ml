@@ -10,6 +10,8 @@ type ('i, 'o, 'e) t =
   PendingTaskCount.t, PendingTaskCount.error) t 
   | CountPendingDecisionTasks: (CountPendingDecisionTasksInput.t,
   PendingTaskCount.t, PendingTaskCount.error) t 
+  | DeleteActivityType: (DeleteActivityTypeInput.t, unit, unit) t 
+  | DeleteWorkflowType: (DeleteWorkflowTypeInput.t, unit, unit) t 
   | DeprecateActivityType: (DeprecateActivityTypeInput.t, unit, unit) t 
   | DeprecateDomain: (DeprecateDomainInput.t, unit, unit) t 
   | DeprecateWorkflowType: (DeprecateWorkflowTypeInput.t, unit, unit) t 
@@ -69,6 +71,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CountOpenWorkflowExecutions -> `POST
   | CountPendingActivityTasks -> `POST
   | CountPendingDecisionTasks -> `POST
+  | DeleteActivityType -> `POST
+  | DeleteWorkflowType -> `POST
   | DeprecateActivityType -> `POST
   | DeprecateDomain -> `POST
   | DeprecateWorkflowType -> `POST
@@ -109,6 +113,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CountOpenWorkflowExecutions -> (Format.kasprintf Uri.of_string) "/"
       | CountPendingActivityTasks -> (Format.kasprintf Uri.of_string) "/"
       | CountPendingDecisionTasks -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteActivityType -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteWorkflowType -> (Format.kasprintf Uri.of_string) "/"
       | DeprecateActivityType -> (Format.kasprintf Uri.of_string) "/"
       | DeprecateDomain -> (Format.kasprintf Uri.of_string) "/"
       | DeprecateWorkflowType -> (Format.kasprintf Uri.of_string) "/"
@@ -179,6 +185,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "SimpleWorkflowService.CountPendingDecisionTasks")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteActivityType ->
+      let json = DeleteActivityTypeInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "SimpleWorkflowService.DeleteActivityType")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteWorkflowType ->
+      let json = DeleteWorkflowTypeInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "SimpleWorkflowService.DeleteWorkflowType")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeprecateActivityType ->
       let json = DeprecateActivityTypeInput.to_json req in
@@ -502,6 +524,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (PendingTaskCount.of_json json)
       else Error (parse_aws_error (Some PendingTaskCount.error_of_json))
+  | DeleteActivityType ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteWorkflowType ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeprecateActivityType ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeprecateDomain ->

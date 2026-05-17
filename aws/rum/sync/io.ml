@@ -11,23 +11,43 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let batch_create_rum_metric_definitions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchCreateRumMetricDefinitions input
+let batch_delete_rum_metric_definitions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchDeleteRumMetricDefinitions input
+let batch_get_rum_metric_definitions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetRumMetricDefinitions input
 let create_app_monitor ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAppMonitor input
 let delete_app_monitor ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAppMonitor input
+let delete_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
+let delete_rum_metrics_destination ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteRumMetricsDestination input
 let get_app_monitor ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAppMonitor input
 let get_app_monitor_data ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAppMonitorData input
+let get_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourcePolicy input
 let list_app_monitors ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAppMonitors input
+let list_rum_metrics_destinations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRumMetricsDestinations input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let put_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutResourcePolicy input
 let put_rum_events ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutRumEvents input
+let put_rum_metrics_destination ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutRumMetricsDestination input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_app_monitor ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAppMonitor input
+let update_rum_metric_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateRumMetricDefinition input

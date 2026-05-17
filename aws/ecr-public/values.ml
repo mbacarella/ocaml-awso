@@ -106,60 +106,60 @@ module RegistryAlias =
   struct
     type nonrec t =
       {
-      name: RegistryAliasName.t
+      name: RegistryAliasName.t option
         [@ocaml.doc "The name of the registry alias."];
-      status: RegistryAliasStatus.t
+      status: RegistryAliasStatus.t option
         [@ocaml.doc "The status of the registry alias."];
-      primaryRegistryAlias: PrimaryRegistryAliasFlag.t
+      primaryRegistryAlias: PrimaryRegistryAliasFlag.t option
         [@ocaml.doc
-          "Whether or not the registry alias is the primary alias for the registry. If true, the alias is the primary registry alias and is displayed in both the repository URL and the image URI used in the docker pull commands on the Amazon ECR Public Gallery. A registry alias that is not the primary registry alias can be used in the repository URI in a docker pull command."];
-      defaultRegistryAlias: DefaultRegistryAliasFlag.t
+          "Indicates whether the registry alias is the primary alias for the registry. If true, the alias is the primary registry alias and is displayed in both the repository URL and the image URI used in the docker pull commands on the Amazon ECR Public Gallery. A registry alias that isn't the primary registry alias can be used in the repository URI in a docker pull command."];
+      defaultRegistryAlias: DefaultRegistryAliasFlag.t option
         [@ocaml.doc
-          "Whether or not the registry alias is the default alias for the registry. When the first public repository is created, your public registry is assigned a default registry alias."]}
-    let context_ = "RegistryAlias"
-    let make ~name =
-      fun ~status ->
-        fun ~primaryRegistryAlias ->
-          fun ~defaultRegistryAlias ->
+          "Indicates whether the registry alias is the default alias for the registry. When the first public repository is created, your public registry is assigned a default registry alias."]}
+    let make ?name =
+      fun ?status ->
+        fun ?primaryRegistryAlias ->
+          fun ?defaultRegistryAlias ->
             fun () ->
               { name; status; primaryRegistryAlias; defaultRegistryAlias }
     let to_value x =
       structure_to_value
-        [("name", (Some (RegistryAliasName.to_value x.name)));
-        ("status", (Some (RegistryAliasStatus.to_value x.status)));
+        [("name", (Option.map x.name ~f:RegistryAliasName.to_value));
+        ("status", (Option.map x.status ~f:RegistryAliasStatus.to_value));
         ("primaryRegistryAlias",
-          (Some (PrimaryRegistryAliasFlag.to_value x.primaryRegistryAlias)));
+          (Option.map x.primaryRegistryAlias
+             ~f:PrimaryRegistryAliasFlag.to_value));
         ("defaultRegistryAlias",
-          (Some (DefaultRegistryAliasFlag.to_value x.defaultRegistryAlias)))]
+          (Option.map x.defaultRegistryAlias
+             ~f:DefaultRegistryAliasFlag.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let defaultRegistryAlias =
-        DefaultRegistryAliasFlag.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "defaultRegistryAlias") in
+        (Option.map ~f:DefaultRegistryAliasFlag.of_xml)
+          (Xml.child xml_arg0 "defaultRegistryAlias") in
       let primaryRegistryAlias =
-        PrimaryRegistryAliasFlag.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "primaryRegistryAlias") in
+        (Option.map ~f:PrimaryRegistryAliasFlag.of_xml)
+          (Xml.child xml_arg0 "primaryRegistryAlias") in
       let status =
-        RegistryAliasStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:RegistryAliasStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let name =
-        RegistryAliasName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~defaultRegistryAlias ~primaryRegistryAlias ~status ~name ()
+        (Option.map ~f:RegistryAliasName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?defaultRegistryAlias ?primaryRegistryAlias ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultRegistryAlias =
-        field_map_exn json "defaultRegistryAlias"
+        field_map json__ "defaultRegistryAlias"
           DefaultRegistryAliasFlag.of_json in
       let primaryRegistryAlias =
-        field_map_exn json "primaryRegistryAlias"
+        field_map json__ "primaryRegistryAlias"
           PrimaryRegistryAliasFlag.of_json in
-      let status = field_map_exn json "status" RegistryAliasStatus.of_json in
-      let name = field_map_exn json "name" RegistryAliasName.of_json in
-      make ~defaultRegistryAlias ~primaryRegistryAlias ~status ~name ()
+      let status = field_map json__ "status" RegistryAliasStatus.of_json in
+      let name = field_map json__ "name" RegistryAliasName.of_json in
+      make ?defaultRegistryAlias ?primaryRegistryAlias ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing the aliases for a public registry. A public registry is given an alias upon creation but a custom alias can be set using the Amazon ECR console. For more information, see Registries in the Amazon Elastic Container Registry User Guide."]
+       "An object representing the aliases for a public registry. A public registry is given an alias when it's created. However, a custom alias can be set using the Amazon ECR console. For more information, see Registries in the Amazon Elastic Container Registry User Guide."]
 module ImageTag =
   struct
     type nonrec t = string
@@ -305,7 +305,12 @@ module Arn =
   struct
     type nonrec t = string
     let context_ = "Arn"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -380,6 +385,9 @@ module RegistryAliasList =
   struct
     type nonrec t = RegistryAlias.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RegistryAlias.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -417,6 +425,9 @@ module ImageTagList =
   struct
     type nonrec t = ImageTag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -445,10 +456,10 @@ module ReferencedImageDetail =
         [@ocaml.doc "The sha256 digest of the image manifest."];
       imageSizeInBytes: ImageSizeInBytes.t option
         [@ocaml.doc
-          "The size, in bytes, of the image in the repository. If the image is a manifest list, this will be the max size of all manifests in the list. Beginning with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size, so it may return a larger image size than the image sizes returned by DescribeImages."];
+          "The size, in bytes, of the image in the repository. If the image is a manifest list, this is the max size of all manifests in the list. Beginning with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size, so it might return a larger image size than the image sizes that are returned by DescribeImages."];
       imagePushedAt: PushTimestamp.t option
         [@ocaml.doc
-          "The date and time, expressed in standard JavaScript date format, at which the current image tag was pushed to the repository."];
+          "The date and time, expressed in standard JavaScript date format, which the current image tag was pushed to the repository at."];
       imageManifestMediaType: MediaType.t option
         [@ocaml.doc "The media type of the image manifest."];
       artifactMediaType: MediaType.t option
@@ -496,21 +507,21 @@ module ReferencedImageDetail =
       make ?artifactMediaType ?imageManifestMediaType ?imagePushedAt
         ?imageSizeInBytes ?imageDigest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let artifactMediaType =
-        field_map json "artifactMediaType" MediaType.of_json in
+        field_map json__ "artifactMediaType" MediaType.of_json in
       let imageManifestMediaType =
-        field_map json "imageManifestMediaType" MediaType.of_json in
+        field_map json__ "imageManifestMediaType" MediaType.of_json in
       let imagePushedAt =
-        field_map json "imagePushedAt" PushTimestamp.of_json in
+        field_map json__ "imagePushedAt" PushTimestamp.of_json in
       let imageSizeInBytes =
-        field_map json "imageSizeInBytes" ImageSizeInBytes.of_json in
-      let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
+        field_map json__ "imageSizeInBytes" ImageSizeInBytes.of_json in
+      let imageDigest = field_map json__ "imageDigest" ImageDigest.of_json in
       make ?artifactMediaType ?imageManifestMediaType ?imagePushedAt
         ?imageSizeInBytes ?imageDigest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that describes the image tag details returned by a DescribeImageTags action."]
+       "An object that describes the image tag details that are returned by a DescribeImageTags action."]
 module ImageFailureCode =
   struct
     type nonrec t =
@@ -570,7 +581,8 @@ module ImageIdentifier =
       {
       imageDigest: ImageDigest.t option
         [@ocaml.doc "The sha256 digest of the image manifest."];
-      imageTag: ImageTag.t option [@ocaml.doc "The tag used for the image."]}
+      imageTag: ImageTag.t option
+        [@ocaml.doc "The tag that's used for the image."]}
     let make ?imageDigest =
       fun ?imageTag -> fun () -> { imageDigest; imageTag }
     let to_value x =
@@ -585,9 +597,9 @@ module ImageIdentifier =
         (Option.map ~f:ImageDigest.of_xml) (Xml.child xml_arg0 "imageDigest") in
       make ?imageTag ?imageDigest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let imageTag = field_map json "imageTag" ImageTag.of_json in
-      let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
+    let of_json json__ =
+      let imageTag = field_map json__ "imageTag" ImageTag.of_json in
+      let imageDigest = field_map json__ "imageDigest" ImageDigest.of_json in
       make ?imageTag ?imageDigest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -771,18 +783,18 @@ module Tag =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The metadata that you apply to a resource to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."]
+       "The metadata that you apply to a resource to help you categorize and organize them. Each tag consists of a key and an optional value. You define both. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."]
 module AboutText =
   struct
     type nonrec t = string
     let context_ = "AboutText"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:10240); i
+      let open Result in ok_or_failwith (check_string_max i ~max:25600); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -796,6 +808,9 @@ module ArchitectureList =
     type nonrec t = Architecture.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Architecture.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -834,6 +849,9 @@ module OperatingSystemList =
     type nonrec t = OperatingSystem.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OperatingSystem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -888,7 +906,7 @@ module UsageText =
     type nonrec t = string
     let context_ = "UsageText"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:10240); i
+      let open Result in ok_or_failwith (check_string_max i ~max:25600); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -952,8 +970,8 @@ module RegistryIdOrAlias =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:2));
         i
     let of_string x = x
     let to_value x = `String x
@@ -996,10 +1014,10 @@ module Repository =
       {
       repositoryArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that identifies the repository. The ARN contains the arn:aws:ecr namespace, followed by the region of the repository, AWS account ID of the repository owner, repository namespace, and repository name. For example, arn:aws:ecr:region:012345678910:repository/test."];
+          "The Amazon Resource Name (ARN) that identifies the repository. The ARN contains the arn:aws:ecr namespace, followed by the region of the repository, Amazon Web Services account ID of the repository owner, repository namespace, and repository name. For example, arn:aws:ecr:region:012345678910:repository/test."];
       registryId: RegistryId.t option
         [@ocaml.doc
-          "The AWS account ID associated with the public registry that contains the repository."];
+          "The Amazon Web Services account ID that's associated with the public registry that contains the repository."];
       repositoryName: RepositoryName.t option
         [@ocaml.doc "The name of the repository."];
       repositoryUri: Url.t option
@@ -1046,13 +1064,13 @@ module Repository =
       make ?createdAt ?repositoryUri ?repositoryName ?registryId
         ?repositoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map json "createdAt" CreationTimestamp.of_json in
-      let repositoryUri = field_map json "repositoryUri" Url.of_json in
+    let of_json json__ =
+      let createdAt = field_map json__ "createdAt" CreationTimestamp.of_json in
+      let repositoryUri = field_map json__ "repositoryUri" Url.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
-      let repositoryArn = field_map json "repositoryArn" Arn.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      let repositoryArn = field_map json__ "repositoryArn" Arn.of_json in
       make ?createdAt ?repositoryUri ?repositoryName ?registryId
         ?repositoryArn ()
     let to_json v = composed_to_json to_value v
@@ -1061,59 +1079,57 @@ module Registry =
   struct
     type nonrec t =
       {
-      registryId: RegistryId.t
+      registryId: RegistryId.t option
         [@ocaml.doc
-          "The AWS account ID associated with the registry. If you do not specify a registry, the default public registry is assumed."];
-      registryArn: Arn.t
+          "The Amazon Web Services account ID that's associated with the registry. If you do not specify a registry, the default public registry is assumed."];
+      registryArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the public registry."];
-      registryUri: Url.t
+      registryUri: Url.t option
         [@ocaml.doc
           "The URI of a public registry. The URI contains a universal prefix and the registry alias."];
-      verified: RegistryVerified.t
+      verified: RegistryVerified.t option
         [@ocaml.doc
-          "Whether the account is verified. This indicates whether the account is an AWS Marketplace vendor. If an account is verified, each public repository will received a verified account badge on the Amazon ECR Public Gallery."];
-      aliases: RegistryAliasList.t
+          "Indicates whether the account is a verified Amazon Web Services Marketplace vendor. If an account is verified, each public repository receives a verified account badge on the Amazon ECR Public Gallery."];
+      aliases: RegistryAliasList.t option
         [@ocaml.doc
-          "An array of objects representing the aliases for a public registry."]}
-    let context_ = "Registry"
-    let make ~registryId =
-      fun ~registryArn ->
-        fun ~registryUri ->
-          fun ~verified ->
-            fun ~aliases ->
+          "An array of objects that represents the aliases for a public registry."]}
+    let make ?registryId =
+      fun ?registryArn ->
+        fun ?registryUri ->
+          fun ?verified ->
+            fun ?aliases ->
               fun () ->
                 { registryId; registryArn; registryUri; verified; aliases }
     let to_value x =
       structure_to_value
-        [("registryId", (Some (RegistryId.to_value x.registryId)));
-        ("registryArn", (Some (Arn.to_value x.registryArn)));
-        ("registryUri", (Some (Url.to_value x.registryUri)));
-        ("verified", (Some (RegistryVerified.to_value x.verified)));
-        ("aliases", (Some (RegistryAliasList.to_value x.aliases)))]
+        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("registryArn", (Option.map x.registryArn ~f:Arn.to_value));
+        ("registryUri", (Option.map x.registryUri ~f:Url.to_value));
+        ("verified", (Option.map x.verified ~f:RegistryVerified.to_value));
+        ("aliases", (Option.map x.aliases ~f:RegistryAliasList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let aliases =
-        RegistryAliasList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "aliases") in
+        (Option.map ~f:RegistryAliasList.of_xml)
+          (Xml.child xml_arg0 "aliases") in
       let verified =
-        RegistryVerified.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "verified") in
+        (Option.map ~f:RegistryVerified.of_xml)
+          (Xml.child xml_arg0 "verified") in
       let registryUri =
-        Url.of_xml (Xml.child_exn ~context:context_ xml_arg0 "registryUri") in
+        (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "registryUri") in
       let registryArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "registryArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "registryArn") in
       let registryId =
-        RegistryId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "registryId") in
-      make ~aliases ~verified ~registryUri ~registryArn ~registryId ()
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      make ?aliases ?verified ?registryUri ?registryArn ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aliases = field_map_exn json "aliases" RegistryAliasList.of_json in
-      let verified = field_map_exn json "verified" RegistryVerified.of_json in
-      let registryUri = field_map_exn json "registryUri" Url.of_json in
-      let registryArn = field_map_exn json "registryArn" Arn.of_json in
-      let registryId = field_map_exn json "registryId" RegistryId.of_json in
-      make ~aliases ~verified ~registryUri ~registryArn ~registryId ()
+    let of_json json__ =
+      let aliases = field_map json__ "aliases" RegistryAliasList.of_json in
+      let verified = field_map json__ "verified" RegistryVerified.of_json in
+      let registryUri = field_map json__ "registryUri" Url.of_json in
+      let registryArn = field_map json__ "registryArn" Arn.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?aliases ?verified ?registryUri ?registryArn ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of a public registry."]
 module ImageDetail =
@@ -1122,20 +1138,19 @@ module ImageDetail =
       {
       registryId: RegistryId.t option
         [@ocaml.doc
-          "The AWS account ID associated with the public registry to which this image belongs."];
+          "The Amazon Web Services account ID that's associated with the public registry where this image belongs."];
       repositoryName: RepositoryName.t option
-        [@ocaml.doc
-          "The name of the repository to which this image belongs."];
+        [@ocaml.doc "The name of the repository where this image belongs."];
       imageDigest: ImageDigest.t option
         [@ocaml.doc "The sha256 digest of the image manifest."];
       imageTags: ImageTagList.t option
-        [@ocaml.doc "The list of tags associated with this image."];
+        [@ocaml.doc "The list of tags that's associated with this image."];
       imageSizeInBytes: ImageSizeInBytes.t option
         [@ocaml.doc
-          "The size, in bytes, of the image in the repository. If the image is a manifest list, this will be the max size of all manifests in the list. Beginning with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size, so it may return a larger image size than the image sizes returned by DescribeImages."];
+          "The size, in bytes, of the image in the repository. If the image is a manifest list, this is the max size of all manifests in the list. Beginning with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size, so it might return a larger image size than the image sizes that are returned by DescribeImages."];
       imagePushedAt: PushTimestamp.t option
         [@ocaml.doc
-          "The date and time, expressed in standard JavaScript date format, at which the current image was pushed to the repository."];
+          "The date and time, expressed in standard JavaScript date format, that the current image was pushed to the repository at."];
       imageManifestMediaType: MediaType.t option
         [@ocaml.doc "The media type of the image manifest."];
       artifactMediaType: MediaType.t option
@@ -1201,35 +1216,35 @@ module ImageDetail =
         ?imageSizeInBytes ?imageTags ?imageDigest ?repositoryName ?registryId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let artifactMediaType =
-        field_map json "artifactMediaType" MediaType.of_json in
+        field_map json__ "artifactMediaType" MediaType.of_json in
       let imageManifestMediaType =
-        field_map json "imageManifestMediaType" MediaType.of_json in
+        field_map json__ "imageManifestMediaType" MediaType.of_json in
       let imagePushedAt =
-        field_map json "imagePushedAt" PushTimestamp.of_json in
+        field_map json__ "imagePushedAt" PushTimestamp.of_json in
       let imageSizeInBytes =
-        field_map json "imageSizeInBytes" ImageSizeInBytes.of_json in
-      let imageTags = field_map json "imageTags" ImageTagList.of_json in
-      let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
+        field_map json__ "imageSizeInBytes" ImageSizeInBytes.of_json in
+      let imageTags = field_map json__ "imageTags" ImageTagList.of_json in
+      let imageDigest = field_map json__ "imageDigest" ImageDigest.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?artifactMediaType ?imageManifestMediaType ?imagePushedAt
         ?imageSizeInBytes ?imageTags ?imageDigest ?repositoryName ?registryId
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that describes an image returned by a DescribeImages operation."]
+       "An object that describes an image that's returned by a DescribeImages operation."]
 module ImageTagDetail =
   struct
     type nonrec t =
       {
       imageTag: ImageTag.t option
-        [@ocaml.doc "The tag associated with the image."];
+        [@ocaml.doc "The tag that's associated with the image."];
       createdAt: CreationTimestamp.t option
         [@ocaml.doc
-          "The time stamp indicating when the image tag was created."];
+          "The time stamp that indicates when the image tag was created."];
       imageDetail: ReferencedImageDetail.t option
         [@ocaml.doc "An object that describes the details of an image."]}
     let make ?imageTag =
@@ -1253,23 +1268,23 @@ module ImageTagDetail =
         (Option.map ~f:ImageTag.of_xml) (Xml.child xml_arg0 "imageTag") in
       make ?imageDetail ?createdAt ?imageTag ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageDetail =
-        field_map json "imageDetail" ReferencedImageDetail.of_json in
-      let createdAt = field_map json "createdAt" CreationTimestamp.of_json in
-      let imageTag = field_map json "imageTag" ImageTag.of_json in
+        field_map json__ "imageDetail" ReferencedImageDetail.of_json in
+      let createdAt = field_map json__ "createdAt" CreationTimestamp.of_json in
+      let imageTag = field_map json__ "imageTag" ImageTag.of_json in
       make ?imageDetail ?createdAt ?imageTag ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing the image tag details for an image."]
+       "An object that represents the image tag details for an image."]
 module ImageFailure =
   struct
     type nonrec t =
       {
       imageId: ImageIdentifier.t option
-        [@ocaml.doc "The image ID associated with the failure."];
+        [@ocaml.doc "The image ID that's associated with the failure."];
       failureCode: ImageFailureCode.t option
-        [@ocaml.doc "The code associated with the failure."];
+        [@ocaml.doc "The code that's associated with the failure."];
       failureReason: ImageFailureReason.t option
         [@ocaml.doc "The reason for the failure."]}
     let make ?imageId =
@@ -1295,22 +1310,23 @@ module ImageFailure =
         (Option.map ~f:ImageIdentifier.of_xml) (Xml.child xml_arg0 "imageId") in
       make ?failureReason ?failureCode ?imageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "failureReason" ImageFailureReason.of_json in
-      let failureCode = field_map json "failureCode" ImageFailureCode.of_json in
-      let imageId = field_map json "imageId" ImageIdentifier.of_json in
+        field_map json__ "failureReason" ImageFailureReason.of_json in
+      let failureCode =
+        field_map json__ "failureCode" ImageFailureCode.of_json in
+      let imageId = field_map json__ "imageId" ImageIdentifier.of_json in
       make ?failureReason ?failureCode ?imageId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An object representing an Amazon ECR image failure."]
+  end[@@ocaml.doc "An object that represents an Amazon ECR image failure."]
 module LayerFailure =
   struct
     type nonrec t =
       {
       layerDigest: BatchedOperationLayerDigest.t option
-        [@ocaml.doc "The layer digest associated with the failure."];
+        [@ocaml.doc "The layer digest that's associated with the failure."];
       failureCode: LayerFailureCode.t option
-        [@ocaml.doc "The failure code associated with the failure."];
+        [@ocaml.doc "The failure code that's associated with the failure."];
       failureReason: LayerFailureReason.t option
         [@ocaml.doc "The reason for the failure."]}
     let make ?layerDigest =
@@ -1338,16 +1354,17 @@ module LayerFailure =
           (Xml.child xml_arg0 "layerDigest") in
       make ?failureReason ?failureCode ?layerDigest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "failureReason" LayerFailureReason.of_json in
-      let failureCode = field_map json "failureCode" LayerFailureCode.of_json in
+        field_map json__ "failureReason" LayerFailureReason.of_json in
+      let failureCode =
+        field_map json__ "failureCode" LayerFailureCode.of_json in
       let layerDigest =
-        field_map json "layerDigest" BatchedOperationLayerDigest.of_json in
+        field_map json__ "layerDigest" BatchedOperationLayerDigest.of_json in
       make ?failureReason ?failureCode ?layerDigest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing an Amazon ECR image layer failure."]
+       "An object that represents an Amazon ECR image layer failure."]
 module Layer =
   struct
     type nonrec t =
@@ -1388,25 +1405,26 @@ module Layer =
         (Option.map ~f:LayerDigest.of_xml) (Xml.child xml_arg0 "layerDigest") in
       make ?mediaType ?layerSize ?layerAvailability ?layerDigest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mediaType = field_map json "mediaType" MediaType.of_json in
-      let layerSize = field_map json "layerSize" LayerSizeInBytes.of_json in
+    let of_json json__ =
+      let mediaType = field_map json__ "mediaType" MediaType.of_json in
+      let layerSize = field_map json__ "layerSize" LayerSizeInBytes.of_json in
       let layerAvailability =
-        field_map json "layerAvailability" LayerAvailability.of_json in
-      let layerDigest = field_map json "layerDigest" LayerDigest.of_json in
+        field_map json__ "layerAvailability" LayerAvailability.of_json in
+      let layerDigest = field_map json__ "layerDigest" LayerDigest.of_json in
       make ?mediaType ?layerSize ?layerAvailability ?layerDigest ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An object representing an Amazon ECR image layer."]
+  end[@@ocaml.doc "An object that represents an Amazon ECR image layer."]
 module InvalidLayerPartException =
   struct
     type nonrec t =
       {
       registryId: RegistryId.t option
-        [@ocaml.doc "The AWS account ID associated with the layer part."];
+        [@ocaml.doc
+          "The Amazon Web Services account ID that's associated with the layer part."];
       repositoryName: RepositoryName.t option
         [@ocaml.doc "The name of the repository."];
       uploadId: UploadId.t option
-        [@ocaml.doc "The upload ID associated with the layer part."];
+        [@ocaml.doc "The upload ID that's associated with the layer part."];
       lastValidByteReceived: PartSize.t option
         [@ocaml.doc "The position of the last byte of the layer part."];
       message: ExceptionMessage.t option }
@@ -1450,19 +1468,19 @@ module InvalidLayerPartException =
       make ?message ?lastValidByteReceived ?uploadId ?repositoryName
         ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       let lastValidByteReceived =
-        field_map json "lastValidByteReceived" PartSize.of_json in
-      let uploadId = field_map json "uploadId" UploadId.of_json in
+        field_map json__ "lastValidByteReceived" PartSize.of_json in
+      let uploadId = field_map json__ "uploadId" UploadId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?message ?lastValidByteReceived ?uploadId ?repositoryName
         ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The layer part size is not valid, or the first byte specified is not consecutive to the last byte of a previous layer part upload."]
+       "The layer part size isn't valid, or the first byte specified isn't consecutive to the last byte of a previous layer part upload."]
 module InvalidParameterException =
   struct
     type nonrec t = {
@@ -1478,8 +1496,8 @@ module InvalidParameterException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1499,12 +1517,12 @@ module LimitExceededException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The operation did not succeed because it would have exceeded a service limit for your account. For more information, see Amazon ECR Service Quotas in the Amazon Elastic Container Registry User Guide."]
+       "The operation didn't succeed because it would have exceeded a service limit for your account. For more information, see Amazon ECR Service Quotas in the Amazon Elastic Container Registry User Guide."]
 module RegistryNotFoundException =
   struct
     type nonrec t = {
@@ -1520,11 +1538,11 @@ module RegistryNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The registry does not exist."]
+  end[@@ocaml.doc "The registry doesn't exist."]
 module RepositoryNotFoundException =
   struct
     type nonrec t = {
@@ -1540,12 +1558,12 @@ module RepositoryNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified repository could not be found. Check the spelling of the specified repository and ensure that you are performing operations on the correct registry."]
+       "The specified repository can't be found. Check the spelling of the specified repository and ensure that you're performing operations on the correct registry."]
 module ServerException =
   struct
     type nonrec t = {
@@ -1561,8 +1579,8 @@ module ServerException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "These errors are usually caused by a server-side issue."]
@@ -1581,11 +1599,11 @@ module UnsupportedCommandException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The action is not supported in this Region."]
+  end[@@ocaml.doc "The action isn't supported in this Region."]
 module UploadNotFoundException =
   struct
     type nonrec t = {
@@ -1601,12 +1619,12 @@ module UploadNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The upload could not be found, or the specified upload ID is not valid for this repository."]
+       "The upload can't be found, or the specified upload ID isn't valid for this repository."]
 module LayerPartBlob =
   struct
     type nonrec t = string
@@ -1634,8 +1652,8 @@ module InvalidTagParameterException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1655,8 +1673,8 @@ module TooManyTagsException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1670,6 +1688,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1698,6 +1719,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1762,7 +1786,7 @@ module RepositoryCatalogData =
           "The operating system tags that are associated with the repository. Only supported operating system tags appear publicly in the Amazon ECR Public Gallery. For more information, see RepositoryCatalogDataInput."];
       logoUrl: ResourceUrl.t option
         [@ocaml.doc
-          "The URL containing the logo associated with the repository."];
+          "The URL that contains the logo that's associated with the repository."];
       aboutText: AboutText.t option
         [@ocaml.doc
           "The longform description of the contents of the repository. This text appears in the repository details on the Amazon ECR Public Gallery."];
@@ -1771,7 +1795,7 @@ module RepositoryCatalogData =
           "The longform usage details of the contents of the repository. The usage text provides context for users of the repository."];
       marketplaceCertified: MarketplaceCertified.t option
         [@ocaml.doc
-          "Whether or not the repository is certified by AWS Marketplace."]}
+          "Indicates whether the repository is certified by Amazon Web Services Marketplace."]}
     let make ?description =
       fun ?architectures ->
         fun ?operatingSystems ->
@@ -1825,18 +1849,18 @@ module RepositoryCatalogData =
       make ?marketplaceCertified ?usageText ?aboutText ?logoUrl
         ?operatingSystems ?architectures ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let marketplaceCertified =
-        field_map json "marketplaceCertified" MarketplaceCertified.of_json in
-      let usageText = field_map json "usageText" UsageText.of_json in
-      let aboutText = field_map json "aboutText" AboutText.of_json in
-      let logoUrl = field_map json "logoUrl" ResourceUrl.of_json in
+        field_map json__ "marketplaceCertified" MarketplaceCertified.of_json in
+      let usageText = field_map json__ "usageText" UsageText.of_json in
+      let aboutText = field_map json__ "aboutText" AboutText.of_json in
+      let logoUrl = field_map json__ "logoUrl" ResourceUrl.of_json in
       let operatingSystems =
-        field_map json "operatingSystems" OperatingSystemList.of_json in
+        field_map json__ "operatingSystems" OperatingSystemList.of_json in
       let architectures =
-        field_map json "architectures" ArchitectureList.of_json in
+        field_map json__ "architectures" ArchitectureList.of_json in
       let description =
-        field_map json "description" RepositoryDescription.of_json in
+        field_map json__ "description" RepositoryDescription.of_json in
       make ?marketplaceCertified ?usageText ?aboutText ?logoUrl
         ?operatingSystems ?architectures ?description ()
     let to_json v = composed_to_json to_value v
@@ -1851,19 +1875,19 @@ module RepositoryCatalogDataInput =
           "A short description of the contents of the repository. This text appears in both the image details and also when searching for repositories on the Amazon ECR Public Gallery."];
       architectures: ArchitectureList.t option
         [@ocaml.doc
-          "The system architecture that the images in the repository are compatible with. On the Amazon ECR Public Gallery, the following supported architectures will appear as badges on the repository and are used as search filters. Linux Windows If an unsupported tag is added to your repository catalog data, it will be associated with the repository and can be retrieved using the API but will not be discoverable in the Amazon ECR Public Gallery."];
+          "The system architecture that the images in the repository are compatible with. On the Amazon ECR Public Gallery, the following supported architectures appear as badges on the repository and are used as search filters. If an unsupported tag is added to your repository catalog data, it's associated with the repository and can be retrieved using the API but isn't discoverable in the Amazon ECR Public Gallery. ARM ARM 64 x86 x86-64"];
       operatingSystems: OperatingSystemList.t option
         [@ocaml.doc
-          "The operating systems that the images in the repository are compatible with. On the Amazon ECR Public Gallery, the following supported operating systems will appear as badges on the repository and are used as search filters. ARM ARM 64 x86 x86-64 If an unsupported tag is added to your repository catalog data, it will be associated with the repository and can be retrieved using the API but will not be discoverable in the Amazon ECR Public Gallery."];
+          "The operating systems that the images in the repository are compatible with. On the Amazon ECR Public Gallery, the following supported operating systems appear as badges on the repository and are used as search filters. If an unsupported tag is added to your repository catalog data, it's associated with the repository and can be retrieved using the API but isn't discoverable in the Amazon ECR Public Gallery. Linux Windows"];
       logoImageBlob: LogoImageBlob.t option
         [@ocaml.doc
           "The base64-encoded repository logo payload. The repository logo is only publicly visible in the Amazon ECR Public Gallery for verified accounts."];
       aboutText: AboutText.t option
         [@ocaml.doc
-          "A detailed description of the contents of the repository. It is publicly visible in the Amazon ECR Public Gallery. The text must be in markdown format."];
+          "A detailed description of the contents of the repository. It's publicly visible in the Amazon ECR Public Gallery. The text must be in markdown format."];
       usageText: UsageText.t option
         [@ocaml.doc
-          "Detailed information on how to use the contents of the repository. It is publicly visible in the Amazon ECR Public Gallery. The usage text provides context, support information, and additional usage details for users of the repository. The text must be in markdown format."]}
+          "Detailed information about how to use the contents of the repository. It's publicly visible in the Amazon ECR Public Gallery. The usage text provides context, support information, and additional usage details for users of the repository. The text must be in markdown format."]}
     let make ?description =
       fun ?architectures ->
         fun ?operatingSystems ->
@@ -1912,22 +1936,22 @@ module RepositoryCatalogDataInput =
       make ?usageText ?aboutText ?logoImageBlob ?operatingSystems
         ?architectures ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let usageText = field_map json "usageText" UsageText.of_json in
-      let aboutText = field_map json "aboutText" AboutText.of_json in
+    let of_json json__ =
+      let usageText = field_map json__ "usageText" UsageText.of_json in
+      let aboutText = field_map json__ "aboutText" AboutText.of_json in
       let logoImageBlob =
-        field_map json "logoImageBlob" LogoImageBlob.of_json in
+        field_map json__ "logoImageBlob" LogoImageBlob.of_json in
       let operatingSystems =
-        field_map json "operatingSystems" OperatingSystemList.of_json in
+        field_map json__ "operatingSystems" OperatingSystemList.of_json in
       let architectures =
-        field_map json "architectures" ArchitectureList.of_json in
+        field_map json__ "architectures" ArchitectureList.of_json in
       let description =
-        field_map json "description" RepositoryDescription.of_json in
+        field_map json__ "description" RepositoryDescription.of_json in
       make ?usageText ?aboutText ?logoImageBlob ?operatingSystems
         ?architectures ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object containing the catalog data for a repository. This data is publicly visible in the Amazon ECR Public Gallery."]
+       "An object that contains the catalog data for a repository. This data is publicly visible in the Amazon ECR Public Gallery."]
 module RegistryCatalogData =
   struct
     type nonrec t =
@@ -1947,9 +1971,9 @@ module RegistryCatalogData =
           (Xml.child xml_arg0 "displayName") in
       make ?displayName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let displayName =
-        field_map json "displayName" RegistryDisplayName.of_json in
+        field_map json__ "displayName" RegistryDisplayName.of_json in
       make ?displayName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The metadata for a public registry."]
@@ -1959,14 +1983,15 @@ module Image =
       {
       registryId: RegistryIdOrAlias.t option
         [@ocaml.doc
-          "The AWS account ID associated with the registry containing the image."];
+          "The Amazon Web Services account ID that's associated with the registry containing the image."];
       repositoryName: RepositoryName.t option
-        [@ocaml.doc "The name of the repository associated with the image."];
+        [@ocaml.doc
+          "The name of the repository that's associated with the image."];
       imageId: ImageIdentifier.t option
         [@ocaml.doc
-          "An object containing the image tag and image digest associated with an image."];
+          "An object that contains the image tag and image digest associated with an image."];
       imageManifest: ImageManifest.t option
-        [@ocaml.doc "The image manifest associated with the image."];
+        [@ocaml.doc "The image manifest that's associated with the image."];
       imageManifestMediaType: MediaType.t option
         [@ocaml.doc "The manifest media type of the image."]}
     let make ?registryId =
@@ -2012,19 +2037,20 @@ module Image =
       make ?imageManifestMediaType ?imageManifest ?imageId ?repositoryName
         ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageManifestMediaType =
-        field_map json "imageManifestMediaType" MediaType.of_json in
+        field_map json__ "imageManifestMediaType" MediaType.of_json in
       let imageManifest =
-        field_map json "imageManifest" ImageManifest.of_json in
-      let imageId = field_map json "imageId" ImageIdentifier.of_json in
+        field_map json__ "imageManifest" ImageManifest.of_json in
+      let imageId = field_map json__ "imageId" ImageIdentifier.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryIdOrAlias.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId =
+        field_map json__ "registryId" RegistryIdOrAlias.of_json in
       make ?imageManifestMediaType ?imageManifest ?imageId ?repositoryName
         ?registryId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An object representing an Amazon ECR image."]
+  end[@@ocaml.doc "An object that represents an Amazon ECR image."]
 module ImageAlreadyExistsException =
   struct
     type nonrec t = {
@@ -2040,8 +2066,8 @@ module ImageAlreadyExistsException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2061,12 +2087,12 @@ module ImageDigestDoesNotMatchException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified image digest does not match the digest that Amazon ECR calculated for the image."]
+       "The specified image digest doesn't match the digest that Amazon ECR calculated for the image."]
 module ImageTagAlreadyExistsException =
   struct
     type nonrec t = {
@@ -2082,8 +2108,8 @@ module ImageTagAlreadyExistsException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2103,12 +2129,12 @@ module LayersNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified layers could not be found, or the specified layer is not valid for this repository."]
+       "The specified layers can't be found, or the specified layer isn't valid for this repository."]
 module ReferencedImagesNotFoundException =
   struct
     type nonrec t = {
@@ -2124,12 +2150,12 @@ module ReferencedImagesNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The manifest list is referencing an image that does not exist."]
+       "The manifest list is referencing an image that doesn't exist."]
 module RepositoryPolicyNotFoundException =
   struct
     type nonrec t = {
@@ -2145,19 +2171,39 @@ module RepositoryPolicyNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified repository and registry combination does not have an associated repository policy."]
+       "The specified repository and registry combination doesn't have an associated repository policy."]
+module RepositoryCatalogDataNotFoundException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The repository catalog data doesn't exist."]
 module AuthorizationData =
   struct
     type nonrec t =
       {
       authorizationToken: Base64.t option
         [@ocaml.doc
-          "A base64-encoded string that contains authorization data for a public Amazon ECR registry. When the string is decoded, it is presented in the format user:password for public registry authentication using docker login."];
+          "A base64-encoded string that contains authorization data for a public Amazon ECR registry. When the string is decoded, it's presented in the format user:password for public registry authentication using docker login."];
       expiresAt: ExpirationTimestamp.t option
         [@ocaml.doc
           "The Unix time in seconds and milliseconds when the authorization token expires. Authorization tokens are valid for 12 hours."]}
@@ -2179,10 +2225,11 @@ module AuthorizationData =
           (Xml.child xml_arg0 "authorizationToken") in
       make ?expiresAt ?authorizationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expiresAt = field_map json "expiresAt" ExpirationTimestamp.of_json in
+    let of_json json__ =
+      let expiresAt =
+        field_map json__ "expiresAt" ExpirationTimestamp.of_json in
       let authorizationToken =
-        field_map json "authorizationToken" Base64.of_json in
+        field_map json__ "authorizationToken" Base64.of_json in
       make ?expiresAt ?authorizationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2204,6 +2251,9 @@ module RepositoryList =
   struct
     type nonrec t = Repository.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Repository.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2251,6 +2301,9 @@ module RepositoryNameList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2276,6 +2329,9 @@ module RegistryList =
   struct
     type nonrec t = Registry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Registry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2300,6 +2356,9 @@ module ImageDetailList =
   struct
     type nonrec t = ImageDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2335,12 +2394,12 @@ module ImageNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The image requested does not exist in the specified repository."]
+       "The image requested doesn't exist in the specified repository."]
 module ImageIdentifierList =
   struct
     type nonrec t = ImageIdentifier.t list
@@ -2350,6 +2409,9 @@ module ImageIdentifierList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageIdentifier.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2375,6 +2437,9 @@ module ImageTagDetailList =
   struct
     type nonrec t = ImageTagDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageTagDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2411,8 +2476,8 @@ module RepositoryNotEmptyException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2432,8 +2497,8 @@ module RepositoryAlreadyExistsException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2453,12 +2518,12 @@ module EmptyUploadException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified layer upload does not contain any layer parts."]
+       "The specified layer upload doesn't contain any layer parts."]
 module InvalidLayerException =
   struct
     type nonrec t = {
@@ -2474,12 +2539,12 @@ module InvalidLayerException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The layer digest calculation performed by Amazon ECR upon receipt of the image layer does not match the digest specified."]
+       "The layer digest calculation performed by Amazon ECR when the image layer doesn't match the digest specified."]
 module LayerAlreadyExistsException =
   struct
     type nonrec t = {
@@ -2495,8 +2560,8 @@ module LayerAlreadyExistsException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2516,8 +2581,8 @@ module LayerPartTooSmallException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Layer parts must be at least 5 MiB in size."]
@@ -2530,6 +2595,9 @@ module LayerDigestList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LayerDigest.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2554,6 +2622,9 @@ module ImageFailureList =
   struct
     type nonrec t = ImageFailure.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageFailure.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2578,6 +2649,9 @@ module LayerFailureList =
   struct
     type nonrec t = LayerFailure.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LayerFailure.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2602,6 +2676,9 @@ module LayerList =
   struct
     type nonrec t = Layer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Layer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2630,6 +2707,9 @@ module BatchedOperationLayerDigestList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchedOperationLayerDigest.to_value)) |>
         (fun x -> `List x)
@@ -2657,14 +2737,15 @@ module UploadLayerPartResponse =
     type nonrec t =
       {
       registryId: RegistryId.t option
-        [@ocaml.doc "The registry ID associated with the request."];
+        [@ocaml.doc "The registry ID that's associated with the request."];
       repositoryName: RepositoryName.t option
-        [@ocaml.doc "The repository name associated with the request."];
+        [@ocaml.doc
+          "The repository name that's associated with the request."];
       uploadId: UploadId.t option
-        [@ocaml.doc "The upload ID associated with the request."];
+        [@ocaml.doc "The upload ID that's associated with the request."];
       lastByteReceived: PartSize.t option
         [@ocaml.doc
-          "The integer value of the last byte received in the request."]}
+          "The integer value of the last byte that's received in the request."]}
     type nonrec error =
       [ `InvalidLayerPartException of InvalidLayerPartException.t 
       | `InvalidParameterException of InvalidParameterException.t 
@@ -2785,27 +2866,27 @@ module UploadLayerPartResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?lastByteReceived ?uploadId ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastByteReceived =
-        field_map json "lastByteReceived" PartSize.of_json in
-      let uploadId = field_map json "uploadId" UploadId.of_json in
+        field_map json__ "lastByteReceived" PartSize.of_json in
+      let uploadId = field_map json__ "uploadId" UploadId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?lastByteReceived ?uploadId ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Uploads an image layer part to Amazon ECR. When an image is pushed, each new image layer is uploaded in parts. The maximum size of each image layer part can be 20971520 bytes (or about 20MB). The UploadLayerPart API is called once per each new image layer part. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
+       "Uploads an image layer part to Amazon ECR. When an image is pushed, each new image layer is uploaded in parts. The maximum size of each image layer part can be 20971520 bytes (about 20MB). The UploadLayerPart API is called once for each new image layer part. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
 module UploadLayerPartRequest =
   struct
     type nonrec t =
       {
       registryId: RegistryIdOrAlias.t option
         [@ocaml.doc
-          "The AWS account ID associated with the registry to which you are uploading layer parts. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID, or registry alias, that's associated with the registry that you're uploading layer parts to. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc
-          "The name of the repository to which you are uploading layer parts."];
+          "The name of the repository that you're uploading layer parts to."];
       uploadId: UploadId.t
         [@ocaml.doc
           "The upload ID from a previous InitiateLayerUpload operation to associate with the layer part upload."];
@@ -2864,20 +2945,22 @@ module UploadLayerPartRequest =
       make ~layerPartBlob ~partLastByte ~partFirstByte ~uploadId
         ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let layerPartBlob =
-        field_map_exn json "layerPartBlob" LayerPartBlob.of_json in
-      let partLastByte = field_map_exn json "partLastByte" PartSize.of_json in
-      let partFirstByte = field_map_exn json "partFirstByte" PartSize.of_json in
-      let uploadId = field_map_exn json "uploadId" UploadId.of_json in
+        field_map_exn json__ "layerPartBlob" LayerPartBlob.of_json in
+      let partLastByte = field_map_exn json__ "partLastByte" PartSize.of_json in
+      let partFirstByte =
+        field_map_exn json__ "partFirstByte" PartSize.of_json in
+      let uploadId = field_map_exn json__ "uploadId" UploadId.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryIdOrAlias.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId =
+        field_map json__ "registryId" RegistryIdOrAlias.of_json in
       make ~layerPartBlob ~partLastByte ~partFirstByte ~uploadId
         ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Uploads an image layer part to Amazon ECR. When an image is pushed, each new image layer is uploaded in parts. The maximum size of each image layer part can be 20971520 bytes (or about 20MB). The UploadLayerPart API is called once per each new image layer part. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
+       "Uploads an image layer part to Amazon ECR. When an image is pushed, each new image layer is uploaded in parts. The maximum size of each image layer part can be 20971520 bytes (about 20MB). The UploadLayerPart API is called once for each new image layer part. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -2887,6 +2970,7 @@ module UntagResourceResponse =
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
       | `TooManyTagsException of TooManyTagsException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
@@ -2902,6 +2986,9 @@ module UntagResourceResponse =
       | "ServerException" -> `ServerException (ServerException.of_json json)
       | "TooManyTagsException" ->
           `TooManyTagsException (TooManyTagsException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -2918,6 +3005,9 @@ module UntagResourceResponse =
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
       | "TooManyTagsException" ->
           `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -2942,6 +3032,10 @@ module UntagResourceResponse =
           `Assoc
             [("error", (`String "TooManyTagsException"));
             ("details", (TooManyTagsException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2961,7 +3055,7 @@ module UntagResourceRequest =
       {
       resourceArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource from which to delete tags. Currently, the supported resource is an Amazon ECR Public repository."];
+          "The Amazon Resource Name (ARN) of the resource to delete tags from. Currently, the supported resource is an Amazon ECR Public repository."];
       tagKeys: TagKeyList.t
         [@ocaml.doc "The keys of the tags to be removed."]}
     let context_ = "UntagResourceRequest"
@@ -2980,9 +3074,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes specified tags from a resource."]
@@ -2995,6 +3089,7 @@ module TagResourceResponse =
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
       | `TooManyTagsException of TooManyTagsException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
@@ -3010,6 +3105,9 @@ module TagResourceResponse =
       | "ServerException" -> `ServerException (ServerException.of_json json)
       | "TooManyTagsException" ->
           `TooManyTagsException (TooManyTagsException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3026,6 +3124,9 @@ module TagResourceResponse =
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
       | "TooManyTagsException" ->
           `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3050,6 +3151,10 @@ module TagResourceResponse =
           `Assoc
             [("error", (`String "TooManyTagsException"));
             ("details", (TooManyTagsException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3063,14 +3168,14 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates the specified tags to a resource with the specified resourceArn. If existing tags on a resource are not specified in the request parameters, they are not changed. When a resource is deleted, the tags associated with that resource are deleted as well."]
+       "Associates the specified tags to a resource with the specified resourceArn. If existing tags on a resource aren't specified in the request parameters, they aren't changed. When a resource is deleted, the tags associated with that resource are also deleted."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource to which to add tags. Currently, the supported resource is an Amazon ECR Public repository."];
+          "The Amazon Resource Name (ARN) of the resource to add tags to. Currently, the supported resource is an Amazon ECR Public repository."];
       tags: TagList.t
         [@ocaml.doc
           "The tags to add to the resource. A tag is an array of key-value pairs. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."]}
@@ -3088,28 +3193,30 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates the specified tags to a resource with the specified resourceArn. If existing tags on a resource are not specified in the request parameters, they are not changed. When a resource is deleted, the tags associated with that resource are deleted as well."]
+       "Associates the specified tags to a resource with the specified resourceArn. If existing tags on a resource aren't specified in the request parameters, they aren't changed. When a resource is deleted, the tags associated with that resource are also deleted."]
 module SetRepositoryPolicyResponse =
   struct
     type nonrec t =
       {
       registryId: RegistryId.t option
-        [@ocaml.doc "The registry ID associated with the request."];
+        [@ocaml.doc "The registry ID that's associated with the request."];
       repositoryName: RepositoryName.t option
-        [@ocaml.doc "The repository name associated with the request."];
+        [@ocaml.doc
+          "The repository name that's associated with the request."];
       policyText: RepositoryPolicyText.t option
         [@ocaml.doc
-          "The JSON repository policy text applied to the repository."]}
+          "The JSON repository policy text that's applied to the repository."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?registryId =
       fun ?repositoryName ->
@@ -3123,6 +3230,9 @@ module SetRepositoryPolicyResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3134,6 +3244,9 @@ module SetRepositoryPolicyResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3150,6 +3263,10 @@ module SetRepositoryPolicyResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3174,12 +3291,12 @@ module SetRepositoryPolicyResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?policyText ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyText =
-        field_map json "policyText" RepositoryPolicyText.of_json in
+        field_map json__ "policyText" RepositoryPolicyText.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?policyText ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3190,7 +3307,7 @@ module SetRepositoryPolicyRequest =
       {
       registryId: RegistryId.t option
         [@ocaml.doc
-          "The AWS account ID associated with the registry that contains the repository. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID that's associated with the registry that contains the repository. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc "The name of the repository to receive the policy."];
       policyText: RepositoryPolicyText.t
@@ -3198,7 +3315,7 @@ module SetRepositoryPolicyRequest =
           "The JSON repository policy text to apply to the repository. For more information, see Amazon ECR Repository Policies in the Amazon Elastic Container Registry User Guide."];
       force: ForceFlag.t option
         [@ocaml.doc
-          "If the policy you are attempting to set on a repository policy would prevent you from setting another policy in the future, you must force the SetRepositoryPolicy operation. This is intended to prevent accidental repository lock outs."]}
+          "If the policy that you want to set on a repository policy would prevent you from setting another policy in the future, you must force the SetRepositoryPolicy operation. This prevents accidental repository lockouts."]}
     let context_ = "SetRepositoryPolicyRequest"
     let make ?registryId =
       fun ?force ->
@@ -3225,13 +3342,13 @@ module SetRepositoryPolicyRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?force ~policyText ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let force = field_map json "force" ForceFlag.of_json in
+    let of_json json__ =
+      let force = field_map json__ "force" ForceFlag.of_json in
       let policyText =
-        field_map_exn json "policyText" RepositoryPolicyText.of_json in
+        field_map_exn json__ "policyText" RepositoryPolicyText.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?force ~policyText ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3246,6 +3363,7 @@ module PutRepositoryCatalogDataResponse =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?catalogData = fun () -> { catalogData }
     let error_of_json name json =
@@ -3256,6 +3374,9 @@ module PutRepositoryCatalogDataResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3267,6 +3388,9 @@ module PutRepositoryCatalogDataResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3283,6 +3407,10 @@ module PutRepositoryCatalogDataResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3299,9 +3427,9 @@ module PutRepositoryCatalogDataResponse =
           (Xml.child xml_arg0 "catalogData") in
       make ?catalogData ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let catalogData =
-        field_map json "catalogData" RepositoryCatalogData.of_json in
+        field_map json__ "catalogData" RepositoryCatalogData.of_json in
       make ?catalogData ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3312,7 +3440,7 @@ module PutRepositoryCatalogDataRequest =
       {
       registryId: RegistryId.t option
         [@ocaml.doc
-          "The AWS account ID associated with the public registry the repository is in. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID that's associated with the public registry the repository is in. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc
           "The name of the repository to create or update the catalog data for."];
@@ -3342,12 +3470,12 @@ module PutRepositoryCatalogDataRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~catalogData ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let catalogData =
-        field_map_exn json "catalogData" RepositoryCatalogDataInput.of_json in
+        field_map_exn json__ "catalogData" RepositoryCatalogDataInput.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~catalogData ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3356,15 +3484,14 @@ module PutRegistryCatalogDataResponse =
   struct
     type nonrec t =
       {
-      registryCatalogData: RegistryCatalogData.t
+      registryCatalogData: RegistryCatalogData.t option
         [@ocaml.doc "The catalog data for the public registry."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `ServerException of ServerException.t 
       | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PutRegistryCatalogDataResponse"
-    let make ~registryCatalogData = fun () -> { registryCatalogData }
+    let make ?registryCatalogData = fun () -> { registryCatalogData }
     let error_of_json name json =
       match name with
       | "InvalidParameterException" ->
@@ -3408,21 +3535,20 @@ module PutRegistryCatalogDataResponse =
     let to_value x =
       structure_to_value
         [("registryCatalogData",
-           (Some (RegistryCatalogData.to_value x.registryCatalogData)))]
+           (Option.map x.registryCatalogData ~f:RegistryCatalogData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let registryCatalogData =
-        RegistryCatalogData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "registryCatalogData") in
-      make ~registryCatalogData ()
+        (Option.map ~f:RegistryCatalogData.of_xml)
+          (Xml.child xml_arg0 "registryCatalogData") in
+      make ?registryCatalogData ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let registryCatalogData =
-        field_map_exn json "registryCatalogData" RegistryCatalogData.of_json in
-      make ~registryCatalogData ()
+        field_map json__ "registryCatalogData" RegistryCatalogData.of_json in
+      make ?registryCatalogData ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Create or updates the catalog data for a public registry."]
+  end[@@ocaml.doc "Create or update the catalog data for a public registry."]
 module PutRegistryCatalogDataRequest =
   struct
     type nonrec t =
@@ -3442,13 +3568,12 @@ module PutRegistryCatalogDataRequest =
           (Xml.child xml_arg0 "displayName") in
       make ?displayName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let displayName =
-        field_map json "displayName" RegistryDisplayName.of_json in
+        field_map json__ "displayName" RegistryDisplayName.of_json in
       make ?displayName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Create or updates the catalog data for a public registry."]
+  end[@@ocaml.doc "Create or update the catalog data for a public registry."]
 module PutImageResponse =
   struct
     type nonrec t =
@@ -3591,32 +3716,32 @@ module PutImageResponse =
       let image = (Option.map ~f:Image.of_xml) (Xml.child xml_arg0 "image") in
       make ?image ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let image = field_map json "image" Image.of_json in make ?image ()
+    let of_json json__ =
+      let image = field_map json__ "image" Image.of_json in make ?image ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates the image manifest and tags associated with an image. When an image is pushed and all new image layers have been uploaded, the PutImage API is called once to create or update the image manifest and the tags associated with the image. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
+       "Creates or updates the image manifest and tags that are associated with an image. When an image is pushed and all new image layers have been uploaded, the PutImage API is called once to create or update the image manifest and the tags that are associated with the image. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
 module PutImageRequest =
   struct
     type nonrec t =
       {
       registryId: RegistryIdOrAlias.t option
         [@ocaml.doc
-          "The AWS account ID associated with the public registry that contains the repository in which to put the image. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID, or registry alias, that's associated with the public registry that contains the repository where the image is put. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
-        [@ocaml.doc "The name of the repository in which to put the image."];
+        [@ocaml.doc "The name of the repository where the image is put."];
       imageManifest: ImageManifest.t
         [@ocaml.doc
-          "The image manifest corresponding to the image to be uploaded."];
+          "The image manifest that corresponds to the image to be uploaded."];
       imageManifestMediaType: MediaType.t option
         [@ocaml.doc
-          "The media type of the image manifest. If you push an image manifest that does not contain the mediaType field, you must specify the imageManifestMediaType in the request."];
+          "The media type of the image manifest. If you push an image manifest that doesn't contain the mediaType field, you must specify the imageManifestMediaType in the request."];
       imageTag: ImageTag.t option
         [@ocaml.doc
           "The tag to associate with the image. This parameter is required for images that use the Docker Image Manifest V2 Schema 2 or Open Container Initiative (OCI) formats."];
       imageDigest: ImageDigest.t option
         [@ocaml.doc
-          "The image digest of the image manifest corresponding to the image."]}
+          "The image digest of the image manifest that corresponds to the image."]}
     let context_ = "PutImageRequest"
     let make ?registryId =
       fun ?imageManifestMediaType ->
@@ -3664,21 +3789,22 @@ module PutImageRequest =
       make ?imageDigest ?imageTag ?imageManifestMediaType ~imageManifest
         ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
-      let imageTag = field_map json "imageTag" ImageTag.of_json in
+    let of_json json__ =
+      let imageDigest = field_map json__ "imageDigest" ImageDigest.of_json in
+      let imageTag = field_map json__ "imageTag" ImageTag.of_json in
       let imageManifestMediaType =
-        field_map json "imageManifestMediaType" MediaType.of_json in
+        field_map json__ "imageManifestMediaType" MediaType.of_json in
       let imageManifest =
-        field_map_exn json "imageManifest" ImageManifest.of_json in
+        field_map_exn json__ "imageManifest" ImageManifest.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryIdOrAlias.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId =
+        field_map json__ "registryId" RegistryIdOrAlias.of_json in
       make ?imageDigest ?imageTag ?imageManifestMediaType ~imageManifest
         ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates the image manifest and tags associated with an image. When an image is pushed and all new image layers have been uploaded, the PutImage API is called once to create or update the image manifest and the tags associated with the image. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
+       "Creates or updates the image manifest and tags that are associated with an image. When an image is pushed and all new image layers have been uploaded, the PutImage API is called once to create or update the image manifest and the tags that are associated with the image. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -3688,6 +3814,7 @@ module ListTagsForResourceResponse =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?tags = fun () -> { tags }
     let error_of_json name json =
@@ -3698,6 +3825,9 @@ module ListTagsForResourceResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3709,6 +3839,9 @@ module ListTagsForResourceResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3725,6 +3858,10 @@ module ListTagsForResourceResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3737,8 +3874,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the tags for an Amazon ECR Public resource."]
 module ListTagsForResourceRequest =
@@ -3747,7 +3884,7 @@ module ListTagsForResourceRequest =
       {
       resourceArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that identifies the resource for which to list the tags. Currently, the supported resource is an Amazon ECR Public repository."]}
+          "The Amazon Resource Name (ARN) that identifies the resource to list the tags for. Currently, the supported resource is an Amazon ECR Public repository."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -3759,8 +3896,8 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the tags for an Amazon ECR Public resource."]
@@ -3852,23 +3989,23 @@ module InitiateLayerUploadResponse =
         (Option.map ~f:UploadId.of_xml) (Xml.child xml_arg0 "uploadId") in
       make ?partSize ?uploadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let partSize = field_map json "partSize" PartSize.of_json in
-      let uploadId = field_map json "uploadId" UploadId.of_json in
+    let of_json json__ =
+      let partSize = field_map json__ "partSize" PartSize.of_json in
+      let uploadId = field_map json__ "uploadId" UploadId.of_json in
       make ?partSize ?uploadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Notifies Amazon ECR that you intend to upload an image layer. When an image is pushed, the InitiateLayerUpload API is called once per image layer that has not already been uploaded. Whether or not an image layer has been uploaded is determined by the BatchCheckLayerAvailability API action. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
+       "Notifies Amazon ECR that you intend to upload an image layer. When an image is pushed, the InitiateLayerUpload API is called once for each image layer that hasn't already been uploaded. Whether an image layer uploads is determined by the BatchCheckLayerAvailability API action. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
 module InitiateLayerUploadRequest =
   struct
     type nonrec t =
       {
       registryId: RegistryIdOrAlias.t option
         [@ocaml.doc
-          "The AWS account ID associated with the registry to which you intend to upload layers. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID, or registry alias, that's associated with the registry to which you intend to upload layers. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc
-          "The name of the repository to which you intend to upload layers."]}
+          "The name of the repository that you want to upload layers to."]}
     let context_ = "InitiateLayerUploadRequest"
     let make ?registryId =
       fun ~repositoryName -> fun () -> { registryId; repositoryName }
@@ -3887,31 +4024,34 @@ module InitiateLayerUploadRequest =
           (Xml.child xml_arg0 "registryId") in
       make ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryIdOrAlias.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId =
+        field_map json__ "registryId" RegistryIdOrAlias.of_json in
       make ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Notifies Amazon ECR that you intend to upload an image layer. When an image is pushed, the InitiateLayerUpload API is called once per image layer that has not already been uploaded. Whether or not an image layer has been uploaded is determined by the BatchCheckLayerAvailability API action. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
+       "Notifies Amazon ECR that you intend to upload an image layer. When an image is pushed, the InitiateLayerUpload API is called once for each image layer that hasn't already been uploaded. Whether an image layer uploads is determined by the BatchCheckLayerAvailability API action. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
 module GetRepositoryPolicyResponse =
   struct
     type nonrec t =
       {
       registryId: RegistryId.t option
-        [@ocaml.doc "The registry ID associated with the request."];
+        [@ocaml.doc "The registry ID that's associated with the request."];
       repositoryName: RepositoryName.t option
-        [@ocaml.doc "The repository name associated with the request."];
+        [@ocaml.doc
+          "The repository name that's associated with the request."];
       policyText: RepositoryPolicyText.t option
         [@ocaml.doc
-          "The repository policy text associated with the repository. The policy text will be in JSON format."]}
+          "The repository policy text that's associated with the repository. The policy text will be in JSON format."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `RepositoryPolicyNotFoundException of
           RepositoryPolicyNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?registryId =
       fun ?repositoryName ->
@@ -3928,6 +4068,9 @@ module GetRepositoryPolicyResponse =
           `RepositoryPolicyNotFoundException
             (RepositoryPolicyNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3942,6 +4085,9 @@ module GetRepositoryPolicyResponse =
           `RepositoryPolicyNotFoundException
             (RepositoryPolicyNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3962,6 +4108,10 @@ module GetRepositoryPolicyResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3986,12 +4136,12 @@ module GetRepositoryPolicyResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?policyText ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyText =
-        field_map json "policyText" RepositoryPolicyText.of_json in
+        field_map json__ "policyText" RepositoryPolicyText.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?policyText ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4002,7 +4152,7 @@ module GetRepositoryPolicyRequest =
       {
       registryId: RegistryId.t option
         [@ocaml.doc
-          "The AWS account ID associated with the public registry that contains the repository. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID that's associated with the public registry that contains the repository. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc
           "The name of the repository with the policy to retrieve."]}
@@ -4022,10 +4172,10 @@ module GetRepositoryPolicyRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4038,18 +4188,27 @@ module GetRepositoryCatalogDataResponse =
         [@ocaml.doc "The catalog metadata for the repository."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
+      | `RepositoryCatalogDataNotFoundException of
+          RepositoryCatalogDataNotFoundException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?catalogData = fun () -> { catalogData }
     let error_of_json name json =
       match name with
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "RepositoryCatalogDataNotFoundException" ->
+          `RepositoryCatalogDataNotFoundException
+            (RepositoryCatalogDataNotFoundException.of_json json)
       | "RepositoryNotFoundException" ->
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4057,10 +4216,16 @@ module GetRepositoryCatalogDataResponse =
       match name with
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "RepositoryCatalogDataNotFoundException" ->
+          `RepositoryCatalogDataNotFoundException
+            (RepositoryCatalogDataNotFoundException.of_xml xml)
       | "RepositoryNotFoundException" ->
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4069,6 +4234,10 @@ module GetRepositoryCatalogDataResponse =
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `RepositoryCatalogDataNotFoundException e ->
+          `Assoc
+            [("error", (`String "RepositoryCatalogDataNotFoundException"));
+            ("details", (RepositoryCatalogDataNotFoundException.to_json e))]
       | `RepositoryNotFoundException e ->
           `Assoc
             [("error", (`String "RepositoryNotFoundException"));
@@ -4077,6 +4246,10 @@ module GetRepositoryCatalogDataResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4093,9 +4266,9 @@ module GetRepositoryCatalogDataResponse =
           (Xml.child xml_arg0 "catalogData") in
       make ?catalogData ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let catalogData =
-        field_map json "catalogData" RepositoryCatalogData.of_json in
+        field_map json__ "catalogData" RepositoryCatalogData.of_json in
       make ?catalogData ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4106,7 +4279,7 @@ module GetRepositoryCatalogDataRequest =
       {
       registryId: RegistryId.t option
         [@ocaml.doc
-          "The AWS account ID associated with the registry that contains the repositories to be described. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID that's associated with the registry that contains the repositories to be described. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc
           "The name of the repository to retrieve the catalog metadata for."]}
@@ -4126,10 +4299,10 @@ module GetRepositoryCatalogDataRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4138,14 +4311,13 @@ module GetRegistryCatalogDataResponse =
   struct
     type nonrec t =
       {
-      registryCatalogData: RegistryCatalogData.t
+      registryCatalogData: RegistryCatalogData.t option
         [@ocaml.doc "The catalog metadata for the public registry."]}
     type nonrec error =
       [ `ServerException of ServerException.t 
       | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetRegistryCatalogDataResponse"
-    let make ~registryCatalogData = fun () -> { registryCatalogData }
+    let make ?registryCatalogData = fun () -> { registryCatalogData }
     let error_of_json name json =
       match name with
       | "ServerException" -> `ServerException (ServerException.of_json json)
@@ -4181,18 +4353,18 @@ module GetRegistryCatalogDataResponse =
     let to_value x =
       structure_to_value
         [("registryCatalogData",
-           (Some (RegistryCatalogData.to_value x.registryCatalogData)))]
+           (Option.map x.registryCatalogData ~f:RegistryCatalogData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let registryCatalogData =
-        RegistryCatalogData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "registryCatalogData") in
-      make ~registryCatalogData ()
+        (Option.map ~f:RegistryCatalogData.of_xml)
+          (Xml.child xml_arg0 "registryCatalogData") in
+      make ?registryCatalogData ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let registryCatalogData =
-        field_map_exn json "registryCatalogData" RegistryCatalogData.of_json in
-      make ~registryCatalogData ()
+        field_map json__ "registryCatalogData" RegistryCatalogData.of_json in
+      make ?registryCatalogData ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves catalog metadata for a public registry."]
 module GetRegistryCatalogDataRequest =
@@ -4217,214 +4389,9 @@ module GetAuthorizationTokenResponse =
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `ServerException of ServerException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?authorizationData = fun () -> { authorizationData }
-    let error_of_json name json =
-      match name with
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "ServerException" -> `ServerException (ServerException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "ServerException" -> `ServerException (ServerException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `ServerException e ->
-          `Assoc
-            [("error", (`String "ServerException"));
-            ("details", (ServerException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("authorizationData",
-           (Option.map x.authorizationData ~f:AuthorizationData.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let authorizationData =
-        (Option.map ~f:AuthorizationData.of_xml)
-          (Xml.child xml_arg0 "authorizationData") in
-      make ?authorizationData ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let authorizationData =
-        field_map json "authorizationData" AuthorizationData.of_json in
-      make ?authorizationData ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieves an authorization token. An authorization token represents your IAM authentication credentials and can be used to access any Amazon ECR registry that your IAM principal has access to. The authorization token is valid for 12 hours. This API requires the ecr-public:GetAuthorizationToken and sts:GetServiceBearerToken permissions."]
-module GetAuthorizationTokenRequest =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieves an authorization token. An authorization token represents your IAM authentication credentials and can be used to access any Amazon ECR registry that your IAM principal has access to. The authorization token is valid for 12 hours. This API requires the ecr-public:GetAuthorizationToken and sts:GetServiceBearerToken permissions."]
-module DescribeRepositoriesResponse =
-  struct
-    type nonrec t =
-      {
-      repositories: RepositoryList.t option
-        [@ocaml.doc
-          "A list of repository objects corresponding to valid repositories."];
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "The nextToken value to include in a future DescribeRepositories request. When the results of a DescribeRepositories request exceed maxResults, this value can be used to retrieve the next page of results. This value is null when there are no more results to return."]}
-    type nonrec error =
-      [ `InvalidParameterException of InvalidParameterException.t 
-      | `RepositoryNotFoundException of RepositoryNotFoundException.t 
-      | `ServerException of ServerException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?repositories =
-      fun ?nextToken -> fun () -> { repositories; nextToken }
-    let error_of_json name json =
-      match name with
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "RepositoryNotFoundException" ->
-          `RepositoryNotFoundException
-            (RepositoryNotFoundException.of_json json)
-      | "ServerException" -> `ServerException (ServerException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "RepositoryNotFoundException" ->
-          `RepositoryNotFoundException
-            (RepositoryNotFoundException.of_xml xml)
-      | "ServerException" -> `ServerException (ServerException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InvalidParameterException e ->
-          `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `RepositoryNotFoundException e ->
-          `Assoc
-            [("error", (`String "RepositoryNotFoundException"));
-            ("details", (RepositoryNotFoundException.to_json e))]
-      | `ServerException e ->
-          `Assoc
-            [("error", (`String "ServerException"));
-            ("details", (ServerException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("repositories",
-           (Option.map x.repositories ~f:RepositoryList.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      let repositories =
-        (Option.map ~f:RepositoryList.of_xml)
-          (Xml.child xml_arg0 "repositories") in
-      make ?nextToken ?repositories ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let repositories = field_map json "repositories" RepositoryList.of_json in
-      make ?nextToken ?repositories ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes repositories in a public registry."]
-module DescribeRepositoriesRequest =
-  struct
-    type nonrec t =
-      {
-      registryId: RegistryId.t option
-        [@ocaml.doc
-          "The AWS account ID associated with the registry that contains the repositories to be described. If you do not specify a registry, the default public registry is assumed."];
-      repositoryNames: RepositoryNameList.t option
-        [@ocaml.doc
-          "A list of repositories to describe. If this parameter is omitted, then all repositories in a registry are described."];
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "The nextToken value returned from a previous paginated DescribeRepositories request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This option cannot be used when you specify repositories with repositoryNames. This token should be treated as an opaque identifier that is only used to retrieve the next items in a list and not for other programmatic purposes."];
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "The maximum number of repository results returned by DescribeRepositories in paginated output. When this parameter is used, DescribeRepositories only returns maxResults results in a single page along with a nextToken response element. The remaining results of the initial request can be seen by sending another DescribeRepositories request with the returned nextToken value. This value can be between 1 and 1000. If this parameter is not used, then DescribeRepositories returns up to 100 results and a nextToken value, if applicable. This option cannot be used when you specify repositories with repositoryNames."]}
-    let make ?registryId =
-      fun ?repositoryNames ->
-        fun ?nextToken ->
-          fun ?maxResults ->
-            fun () -> { registryId; repositoryNames; nextToken; maxResults }
-    let to_value x =
-      structure_to_value
-        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
-        ("repositoryNames",
-          (Option.map x.repositoryNames ~f:RepositoryNameList.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      let repositoryNames =
-        (Option.map ~f:RepositoryNameList.of_xml)
-          (Xml.child xml_arg0 "repositoryNames") in
-      let registryId =
-        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
-      make ?maxResults ?nextToken ?repositoryNames ?registryId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let repositoryNames =
-        field_map json "repositoryNames" RepositoryNameList.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
-      make ?maxResults ?nextToken ?repositoryNames ?registryId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes repositories in a public registry."]
-module DescribeRegistriesResponse =
-  struct
-    type nonrec t =
-      {
-      registries: RegistryList.t
-        [@ocaml.doc
-          "An object containing the details for a public registry."];
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "The nextToken value to include in a future DescribeRepositories request. When the results of a DescribeRepositories request exceed maxResults, this value can be used to retrieve the next page of results. This value is null when there are no more results to return."]}
-    type nonrec error =
-      [ `InvalidParameterException of InvalidParameterException.t 
-      | `ServerException of ServerException.t 
       | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeRegistriesResponse"
-    let make ?nextToken =
-      fun ~registries -> fun () -> { nextToken; registries }
+    let make ?authorizationData = fun () -> { authorizationData }
     let error_of_json name json =
       match name with
       | "InvalidParameterException" ->
@@ -4467,21 +4434,247 @@ module DescribeRegistriesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("registries", (Some (RegistryList.to_value x.registries)));
+        [("authorizationData",
+           (Option.map x.authorizationData ~f:AuthorizationData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authorizationData =
+        (Option.map ~f:AuthorizationData.of_xml)
+          (Xml.child xml_arg0 "authorizationData") in
+      make ?authorizationData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authorizationData =
+        field_map json__ "authorizationData" AuthorizationData.of_json in
+      make ?authorizationData ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves an authorization token. An authorization token represents your IAM authentication credentials. You can use it to access any Amazon ECR registry that your IAM principal has access to. The authorization token is valid for 12 hours. This API requires the ecr-public:GetAuthorizationToken and sts:GetServiceBearerToken permissions."]
+module GetAuthorizationTokenRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves an authorization token. An authorization token represents your IAM authentication credentials. You can use it to access any Amazon ECR registry that your IAM principal has access to. The authorization token is valid for 12 hours. This API requires the ecr-public:GetAuthorizationToken and sts:GetServiceBearerToken permissions."]
+module DescribeRepositoriesResponse =
+  struct
+    type nonrec t =
+      {
+      repositories: RepositoryList.t option
+        [@ocaml.doc
+          "A list of repository objects corresponding to valid repositories."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future DescribeRepositories request. When the results of a DescribeRepositories request exceed maxResults, this value can be used to retrieve the next page of results. If there are no more results to return, this value is null."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `RepositoryNotFoundException of RepositoryNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?repositories =
+      fun ?nextToken -> fun () -> { repositories; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "RepositoryNotFoundException" ->
+          `RepositoryNotFoundException
+            (RepositoryNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "RepositoryNotFoundException" ->
+          `RepositoryNotFoundException
+            (RepositoryNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `RepositoryNotFoundException e ->
+          `Assoc
+            [("error", (`String "RepositoryNotFoundException"));
+            ("details", (RepositoryNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("repositories",
+           (Option.map x.repositories ~f:RepositoryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let repositories =
+        (Option.map ~f:RepositoryList.of_xml)
+          (Xml.child xml_arg0 "repositories") in
+      make ?nextToken ?repositories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let repositories =
+        field_map json__ "repositories" RepositoryList.of_json in
+      make ?nextToken ?repositories ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes repositories that are in a public registry."]
+module DescribeRepositoriesRequest =
+  struct
+    type nonrec t =
+      {
+      registryId: RegistryId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID that's associated with the registry that contains the repositories to be described. If you do not specify a registry, the default public registry is assumed."];
+      repositoryNames: RepositoryNameList.t option
+        [@ocaml.doc
+          "A list of repositories to describe. If this parameter is omitted, then all repositories in a registry are described."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The nextToken value that's returned from a previous paginated DescribeRepositories request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. If there are no more results to return, this value is null. If you specify repositories with repositoryNames, you can't use this option. This token should be treated as an opaque identifier that is only used to retrieve the next items in a list and not for other programmatic purposes."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of repository results that's returned by DescribeRepositories in paginated output. When this parameter is used, DescribeRepositories only returns maxResults results in a single page along with a nextToken response element. You can see the remaining results of the initial request by sending another DescribeRepositories request with the returned nextToken value. This value can be between 1 and 1000. If this parameter isn't used, then DescribeRepositories returns up to 100 results and a nextToken value, if applicable. If you specify repositories with repositoryNames, you can't use this option."]}
+    let make ?registryId =
+      fun ?repositoryNames ->
+        fun ?nextToken ->
+          fun ?maxResults ->
+            fun () -> { registryId; repositoryNames; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("repositoryNames",
+          (Option.map x.repositoryNames ~f:RepositoryNameList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let repositoryNames =
+        (Option.map ~f:RepositoryNameList.of_xml)
+          (Xml.child xml_arg0 "repositoryNames") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      make ?maxResults ?nextToken ?repositoryNames ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let repositoryNames =
+        field_map json__ "repositoryNames" RepositoryNameList.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?maxResults ?nextToken ?repositoryNames ?registryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes repositories that are in a public registry."]
+module DescribeRegistriesResponse =
+  struct
+    type nonrec t =
+      {
+      registries: RegistryList.t option
+        [@ocaml.doc
+          "An object that contains the details for a public registry."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future DescribeRepositories request. If the results of a DescribeRepositories request exceed maxResults, you can use this value to retrieve the next page of results. If there are no more results, this value is null."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `ServerException of ServerException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?registries =
+      fun ?nextToken -> fun () -> { registries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("registries", (Option.map x.registries ~f:RegistryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let registries =
-        RegistryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "registries") in
-      make ?nextToken ~registries ()
+        (Option.map ~f:RegistryList.of_xml) (Xml.child xml_arg0 "registries") in
+      make ?nextToken ?registries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let registries = field_map_exn json "registries" RegistryList.of_json in
-      make ?nextToken ~registries ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let registries = field_map json__ "registries" RegistryList.of_json in
+      make ?nextToken ?registries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns details for a public registry."]
 module DescribeRegistriesRequest =
@@ -4490,10 +4683,10 @@ module DescribeRegistriesRequest =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated DescribeRegistries request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is only used to retrieve the next items in a list and not for other programmatic purposes."];
+          "The nextToken value that's returned from a previous paginated DescribeRegistries request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. If there are no more results to return, this value is null. This token should be treated as an opaque identifier that is only used to retrieve the next items in a list and not for other programmatic purposes."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of repository results returned by DescribeRegistries in paginated output. When this parameter is used, DescribeRegistries only returns maxResults results in a single page along with a nextToken response element. The remaining results of the initial request can be seen by sending another DescribeRegistries request with the returned nextToken value. This value can be between 1 and 1000. If this parameter is not used, then DescribeRegistries returns up to 100 results and a nextToken value, if applicable."]}
+          "The maximum number of repository results that's returned by DescribeRegistries in paginated output. When this parameter is used, DescribeRegistries only returns maxResults results in a single page along with a nextToken response element. The remaining results of the initial request can be seen by sending another DescribeRegistries request with the returned nextToken value. This value can be between 1 and 1000. If this parameter isn't used, then DescribeRegistries returns up to 100 results and a nextToken value, if applicable."]}
     let make ?nextToken =
       fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
@@ -4508,9 +4701,9 @@ module DescribeRegistriesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns details for a public registry."]
@@ -4523,12 +4716,13 @@ module DescribeImagesResponse =
           "A list of ImageDetail objects that contain data about the image."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The nextToken value to include in a future DescribeImages request. When the results of a DescribeImages request exceed maxResults, this value can be used to retrieve the next page of results. This value is null when there are no more results to return."]}
+          "The nextToken value to include in a future DescribeImages request. When the results of a DescribeImages request exceed maxResults, you can use this value to retrieve the next page of results. If there are no more results to return, this value is null."]}
     type nonrec error =
       [ `ImageNotFoundException of ImageNotFoundException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?imageDetails =
       fun ?nextToken -> fun () -> { imageDetails; nextToken }
@@ -4542,6 +4736,9 @@ module DescribeImagesResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4555,6 +4752,9 @@ module DescribeImagesResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4575,6 +4775,10 @@ module DescribeImagesResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4594,31 +4798,31 @@ module DescribeImagesResponse =
           (Xml.child xml_arg0 "imageDetails") in
       make ?nextToken ?imageDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let imageDetails =
-        field_map json "imageDetails" ImageDetailList.of_json in
+        field_map json__ "imageDetails" ImageDetailList.of_json in
       make ?nextToken ?imageDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata about the images in a repository in a public registry. Beginning with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size, so it may return a larger image size than the image sizes returned by DescribeImages."]
+       "Returns metadata that's related to the images in a repository in a public registry. Beginning with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size. Therefore, it might return a larger image size than the image sizes that are returned by DescribeImages."]
 module DescribeImagesRequest =
   struct
     type nonrec t =
       {
       registryId: RegistryId.t option
         [@ocaml.doc
-          "The AWS account ID associated with the public registry that contains the repository in which to describe images. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID that's associated with the public registry that contains the repository where images are described. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc "The repository that contains the images to describe."];
       imageIds: ImageIdentifierList.t option
         [@ocaml.doc "The list of image IDs for the requested repository."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated DescribeImages request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This option cannot be used when you specify images with imageIds."];
+          "The nextToken value that's returned from a previous paginated DescribeImages request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. If there are no more results to return, this value is null. If you specify images with imageIds, you can't use this option."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of repository results returned by DescribeImages in paginated output. When this parameter is used, DescribeImages only returns maxResults results in a single page along with a nextToken response element. The remaining results of the initial request can be seen by sending another DescribeImages request with the returned nextToken value. This value can be between 1 and 1000. If this parameter is not used, then DescribeImages returns up to 100 results and a nextToken value, if applicable. This option cannot be used when you specify images with imageIds."]}
+          "The maximum number of repository results that's returned by DescribeImages in paginated output. When this parameter is used, DescribeImages only returns maxResults results in a single page along with a nextToken response element. You can see the remaining results of the initial request by sending another DescribeImages request with the returned nextToken value. This value can be between 1 and 1000. If this parameter isn't used, then DescribeImages returns up to 100 results and a nextToken value, if applicable. If you specify images with imageIds, you can't use this option."]}
     let context_ = "DescribeImagesRequest"
     let make ?registryId =
       fun ?imageIds ->
@@ -4651,17 +4855,17 @@ module DescribeImagesRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?maxResults ?nextToken ?imageIds ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let imageIds = field_map json "imageIds" ImageIdentifierList.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let imageIds = field_map json__ "imageIds" ImageIdentifierList.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?maxResults ?nextToken ?imageIds ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata about the images in a repository in a public registry. Beginning with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size, so it may return a larger image size than the image sizes returned by DescribeImages."]
+       "Returns metadata that's related to the images in a repository in a public registry. Beginning with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size. Therefore, it might return a larger image size than the image sizes that are returned by DescribeImages."]
 module DescribeImageTagsResponse =
   struct
     type nonrec t =
@@ -4671,11 +4875,12 @@ module DescribeImageTagsResponse =
           "The image tag details for the images in the requested repository."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The nextToken value to include in a future DescribeImageTags request. When the results of a DescribeImageTags request exceed maxResults, this value can be used to retrieve the next page of results. This value is null when there are no more results to return."]}
+          "The nextToken value to include in a future DescribeImageTags request. When the results of a DescribeImageTags request exceed maxResults, you can use this value to retrieve the next page of results. If there are no more results to return, this value is null."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?imageTagDetails =
       fun ?nextToken -> fun () -> { imageTagDetails; nextToken }
@@ -4687,6 +4892,9 @@ module DescribeImageTagsResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4698,6 +4906,9 @@ module DescribeImageTagsResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4714,6 +4925,10 @@ module DescribeImageTagsResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4733,10 +4948,10 @@ module DescribeImageTagsResponse =
           (Xml.child xml_arg0 "imageTagDetails") in
       make ?nextToken ?imageTagDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let imageTagDetails =
-        field_map json "imageTagDetails" ImageTagDetailList.of_json in
+        field_map json__ "imageTagDetails" ImageTagDetailList.of_json in
       make ?nextToken ?imageTagDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4747,16 +4962,16 @@ module DescribeImageTagsRequest =
       {
       registryId: RegistryId.t option
         [@ocaml.doc
-          "The AWS account ID associated with the public registry that contains the repository in which to describe images. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID that's associated with the public registry that contains the repository where images are described. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc
           "The name of the repository that contains the image tag details to describe."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated DescribeImageTags request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This option cannot be used when you specify images with imageIds."];
+          "The nextToken value that's returned from a previous paginated DescribeImageTags request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. If there are no more results to return, this value is null. If you specify images with imageIds, you can't use this option."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of repository results returned by DescribeImageTags in paginated output. When this parameter is used, DescribeImageTags only returns maxResults results in a single page along with a nextToken response element. The remaining results of the initial request can be seen by sending another DescribeImageTags request with the returned nextToken value. This value can be between 1 and 1000. If this parameter is not used, then DescribeImageTags returns up to 100 results and a nextToken value, if applicable. This option cannot be used when you specify images with imageIds."]}
+          "The maximum number of repository results that's returned by DescribeImageTags in paginated output. When this parameter is used, DescribeImageTags only returns maxResults results in a single page along with a nextToken response element. You can see the remaining results of the initial request by sending another DescribeImageTags request with the returned nextToken value. This value can be between 1 and 1000. If this parameter isn't used, then DescribeImageTags returns up to 100 results and a nextToken value, if applicable. If you specify images with imageIds, you can't use this option."]}
     let context_ = "DescribeImageTagsRequest"
     let make ?registryId =
       fun ?nextToken ->
@@ -4782,12 +4997,12 @@ module DescribeImageTagsRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?maxResults ?nextToken ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?maxResults ?nextToken ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4803,6 +5018,7 @@ module DeleteRepositoryResponse =
       | `RepositoryNotEmptyException of RepositoryNotEmptyException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?repository = fun () -> { repository }
     let error_of_json name json =
@@ -4816,6 +5032,9 @@ module DeleteRepositoryResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4830,6 +5049,9 @@ module DeleteRepositoryResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4850,6 +5072,10 @@ module DeleteRepositoryResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4864,23 +5090,24 @@ module DeleteRepositoryResponse =
         (Option.map ~f:Repository.of_xml) (Xml.child xml_arg0 "repository") in
       make ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let repository = field_map json "repository" Repository.of_json in
+    let of_json json__ =
+      let repository = field_map json__ "repository" Repository.of_json in
       make ?repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a repository in a public registry. If the repository contains images, you must either delete all images in the repository or use the force option which deletes all images on your behalf before deleting the repository."]
+       "Deletes a repository in a public registry. If the repository contains images, you must either manually delete all images in the repository or use the force option. This option deletes all images on your behalf before deleting the repository."]
 module DeleteRepositoryRequest =
   struct
     type nonrec t =
       {
       registryId: RegistryId.t option
         [@ocaml.doc
-          "The AWS account ID associated with the public registry that contains the repository to delete. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID that's associated with the public registry that contains the repository to delete. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc "The name of the repository to delete."];
       force: ForceFlag.t option
-        [@ocaml.doc "If a repository contains images, forces the deletion."]}
+        [@ocaml.doc
+          "The force option can be used to delete a repository that contains images. If the force option is not used, the repository must be empty prior to deletion."]}
     let context_ = "DeleteRepositoryRequest"
     let make ?registryId =
       fun ?force ->
@@ -4902,23 +5129,24 @@ module DeleteRepositoryRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?force ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let force = field_map json "force" ForceFlag.of_json in
+    let of_json json__ =
+      let force = field_map json__ "force" ForceFlag.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?force ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a repository in a public registry. If the repository contains images, you must either delete all images in the repository or use the force option which deletes all images on your behalf before deleting the repository."]
+       "Deletes a repository in a public registry. If the repository contains images, you must either manually delete all images in the repository or use the force option. This option deletes all images on your behalf before deleting the repository."]
 module DeleteRepositoryPolicyResponse =
   struct
     type nonrec t =
       {
       registryId: RegistryId.t option
-        [@ocaml.doc "The registry ID associated with the request."];
+        [@ocaml.doc "The registry ID that's associated with the request."];
       repositoryName: RepositoryName.t option
-        [@ocaml.doc "The repository name associated with the request."];
+        [@ocaml.doc
+          "The repository name that's associated with the request."];
       policyText: RepositoryPolicyText.t option
         [@ocaml.doc
           "The JSON repository policy that was deleted from the repository."]}
@@ -4928,6 +5156,7 @@ module DeleteRepositoryPolicyResponse =
       | `RepositoryPolicyNotFoundException of
           RepositoryPolicyNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?registryId =
       fun ?repositoryName ->
@@ -4944,6 +5173,9 @@ module DeleteRepositoryPolicyResponse =
           `RepositoryPolicyNotFoundException
             (RepositoryPolicyNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4958,6 +5190,9 @@ module DeleteRepositoryPolicyResponse =
           `RepositoryPolicyNotFoundException
             (RepositoryPolicyNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4978,6 +5213,10 @@ module DeleteRepositoryPolicyResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5002,26 +5241,26 @@ module DeleteRepositoryPolicyResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?policyText ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyText =
-        field_map json "policyText" RepositoryPolicyText.of_json in
+        field_map json__ "policyText" RepositoryPolicyText.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?policyText ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the repository policy associated with the specified repository."]
+       "Deletes the repository policy that's associated with the specified repository."]
 module DeleteRepositoryPolicyRequest =
   struct
     type nonrec t =
       {
       registryId: RegistryId.t option
         [@ocaml.doc
-          "The AWS account ID associated with the public registry that contains the repository policy to delete. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID that's associated with the public registry that contains the repository policy to delete. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc
-          "The name of the repository that is associated with the repository policy to delete."]}
+          "The name of the repository that's associated with the repository policy to delete."]}
     let context_ = "DeleteRepositoryPolicyRequest"
     let make ?registryId =
       fun ~repositoryName -> fun () -> { registryId; repositoryName }
@@ -5038,14 +5277,14 @@ module DeleteRepositoryPolicyRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the repository policy associated with the specified repository."]
+       "Deletes the repository policy that's associated with the specified repository."]
 module CreateRepositoryResponse =
   struct
     type nonrec t =
@@ -5061,6 +5300,7 @@ module CreateRepositoryResponse =
           RepositoryAlreadyExistsException.t 
       | `ServerException of ServerException.t 
       | `TooManyTagsException of TooManyTagsException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?repository =
       fun ?catalogData -> fun () -> { repository; catalogData }
@@ -5079,6 +5319,9 @@ module CreateRepositoryResponse =
       | "ServerException" -> `ServerException (ServerException.of_json json)
       | "TooManyTagsException" ->
           `TooManyTagsException (TooManyTagsException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -5097,6 +5340,9 @@ module CreateRepositoryResponse =
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
       | "TooManyTagsException" ->
           `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -5125,6 +5371,10 @@ module CreateRepositoryResponse =
           `Assoc
             [("error", (`String "TooManyTagsException"));
             ("details", (TooManyTagsException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5144,10 +5394,10 @@ module CreateRepositoryResponse =
         (Option.map ~f:Repository.of_xml) (Xml.child xml_arg0 "repository") in
       make ?catalogData ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let catalogData =
-        field_map json "catalogData" RepositoryCatalogData.of_json in
-      let repository = field_map json "repository" Repository.of_json in
+        field_map json__ "catalogData" RepositoryCatalogData.of_json in
+      let repository = field_map json__ "repository" Repository.of_json in
       make ?catalogData ?repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5158,13 +5408,13 @@ module CreateRepositoryRequest =
       {
       repositoryName: RepositoryName.t
         [@ocaml.doc
-          "The name to use for the repository. This appears publicly in the Amazon ECR Public Gallery. The repository name may be specified on its own (such as nginx-web-app) or it can be prepended with a namespace to group the repository into a category (such as project-a/nginx-web-app)."];
+          "The name to use for the repository. This appears publicly in the Amazon ECR Public Gallery. The repository name can be specified on its own (for example nginx-web-app) or prepended with a namespace to group the repository into a category (for example project-a/nginx-web-app)."];
       catalogData: RepositoryCatalogDataInput.t option
         [@ocaml.doc
           "The details about the repository that are publicly visible in the Amazon ECR Public Gallery."];
       tags: TagList.t option
         [@ocaml.doc
-          "The metadata that you apply to the repository to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."]}
+          "The metadata that you apply to each repository to help categorize and organize your repositories. Each tag consists of a key and an optional value. You define both of them. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."]}
     let context_ = "CreateRepositoryRequest"
     let make ?catalogData =
       fun ?tags ->
@@ -5188,12 +5438,12 @@ module CreateRepositoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?tags ?catalogData ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
       let catalogData =
-        field_map json "catalogData" RepositoryCatalogDataInput.of_json in
+        field_map json__ "catalogData" RepositoryCatalogDataInput.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?tags ?catalogData ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5203,11 +5453,13 @@ module CompleteLayerUploadResponse =
     type nonrec t =
       {
       registryId: RegistryId.t option
-        [@ocaml.doc "The public registry ID associated with the request."];
+        [@ocaml.doc
+          "The public registry ID that's associated with the request."];
       repositoryName: RepositoryName.t option
-        [@ocaml.doc "The repository name associated with the request."];
+        [@ocaml.doc
+          "The repository name that's associated with the request."];
       uploadId: UploadId.t option
-        [@ocaml.doc "The upload ID associated with the layer."];
+        [@ocaml.doc "The upload ID that's associated with the layer."];
       layerDigest: LayerDigest.t option
         [@ocaml.doc "The sha256 digest of the image layer."]}
     type nonrec error =
@@ -5348,23 +5600,23 @@ module CompleteLayerUploadResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?layerDigest ?uploadId ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let layerDigest = field_map json "layerDigest" LayerDigest.of_json in
-      let uploadId = field_map json "uploadId" UploadId.of_json in
+    let of_json json__ =
+      let layerDigest = field_map json__ "layerDigest" LayerDigest.of_json in
+      let uploadId = field_map json__ "uploadId" UploadId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?layerDigest ?uploadId ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Informs Amazon ECR that the image layer upload has completed for a specified public registry, repository name, and upload ID. You can optionally provide a sha256 digest of the image layer for data validation purposes. When an image is pushed, the CompleteLayerUpload API is called once per each new image layer to verify that the upload has completed. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
+       "Informs Amazon ECR that the image layer upload is complete for a specified public registry, repository name, and upload ID. You can optionally provide a sha256 digest of the image layer for data validation purposes. When an image is pushed, the CompleteLayerUpload API is called once for each new image layer to verify that the upload is complete. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
 module CompleteLayerUploadRequest =
   struct
     type nonrec t =
       {
       registryId: RegistryIdOrAlias.t option
         [@ocaml.doc
-          "The AWS account ID associated with the registry to which to upload layers. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID, or registry alias, associated with the registry where layers are uploaded. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc
           "The name of the repository in a public registry to associate with the image layer."];
@@ -5401,17 +5653,18 @@ module CompleteLayerUploadRequest =
           (Xml.child xml_arg0 "registryId") in
       make ~layerDigests ~uploadId ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let layerDigests =
-        field_map_exn json "layerDigests" LayerDigestList.of_json in
-      let uploadId = field_map_exn json "uploadId" UploadId.of_json in
+        field_map_exn json__ "layerDigests" LayerDigestList.of_json in
+      let uploadId = field_map_exn json__ "uploadId" UploadId.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryIdOrAlias.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId =
+        field_map json__ "registryId" RegistryIdOrAlias.of_json in
       make ~layerDigests ~uploadId ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Informs Amazon ECR that the image layer upload has completed for a specified public registry, repository name, and upload ID. You can optionally provide a sha256 digest of the image layer for data validation purposes. When an image is pushed, the CompleteLayerUpload API is called once per each new image layer to verify that the upload has completed. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
+       "Informs Amazon ECR that the image layer upload is complete for a specified public registry, repository name, and upload ID. You can optionally provide a sha256 digest of the image layer for data validation purposes. When an image is pushed, the CompleteLayerUpload API is called once for each new image layer to verify that the upload is complete. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
 module BatchDeleteImageResponse =
   struct
     type nonrec t =
@@ -5424,6 +5677,7 @@ module BatchDeleteImageResponse =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?imageIds = fun ?failures -> fun () -> { imageIds; failures }
     let error_of_json name json =
@@ -5434,6 +5688,9 @@ module BatchDeleteImageResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -5445,6 +5702,9 @@ module BatchDeleteImageResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -5461,6 +5721,10 @@ module BatchDeleteImageResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5481,20 +5745,20 @@ module BatchDeleteImageResponse =
           (Xml.child xml_arg0 "imageIds") in
       make ?failures ?imageIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failures = field_map json "failures" ImageFailureList.of_json in
-      let imageIds = field_map json "imageIds" ImageIdentifierList.of_json in
+    let of_json json__ =
+      let failures = field_map json__ "failures" ImageFailureList.of_json in
+      let imageIds = field_map json__ "imageIds" ImageIdentifierList.of_json in
       make ?failures ?imageIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a list of specified images within a repository in a public registry. Images are specified with either an imageTag or imageDigest. You can remove a tag from an image by specifying the image's tag in your request. When you remove the last tag from an image, the image is deleted from your repository. You can completely delete an image (and all of its tags) by specifying the image's digest in your request."]
+       "Deletes a list of specified images that are within a repository in a public registry. Images are specified with either an imageTag or imageDigest. You can remove a tag from an image by specifying the image's tag in your request. When you remove the last tag from an image, the image is deleted from your repository. You can completely delete an image (and all of its tags) by specifying the digest of the image in your request."]
 module BatchDeleteImageRequest =
   struct
     type nonrec t =
       {
-      registryId: RegistryId.t option
+      registryId: RegistryIdOrAlias.t option
         [@ocaml.doc
-          "The AWS account ID associated with the registry that contains the image to delete. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID, or registry alias, that's associated with the registry that contains the image to delete. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc
           "The repository in a public registry that contains the image to delete."];
@@ -5507,7 +5771,8 @@ module BatchDeleteImageRequest =
         fun ~imageIds -> fun () -> { registryId; repositoryName; imageIds }
     let to_value x =
       structure_to_value
-        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        [("registryId",
+           (Option.map x.registryId ~f:RegistryIdOrAlias.to_value));
         ("repositoryName", (Some (RepositoryName.to_value x.repositoryName)));
         ("imageIds", (Some (ImageIdentifierList.to_value x.imageIds)))]
     let to_query v = to_query to_value v
@@ -5519,26 +5784,28 @@ module BatchDeleteImageRequest =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       let registryId =
-        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+        (Option.map ~f:RegistryIdOrAlias.of_xml)
+          (Xml.child xml_arg0 "registryId") in
       make ~imageIds ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageIds =
-        field_map_exn json "imageIds" ImageIdentifierList.of_json in
+        field_map_exn json__ "imageIds" ImageIdentifierList.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId =
+        field_map json__ "registryId" RegistryIdOrAlias.of_json in
       make ~imageIds ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a list of specified images within a repository in a public registry. Images are specified with either an imageTag or imageDigest. You can remove a tag from an image by specifying the image's tag in your request. When you remove the last tag from an image, the image is deleted from your repository. You can completely delete an image (and all of its tags) by specifying the image's digest in your request."]
+       "Deletes a list of specified images that are within a repository in a public registry. Images are specified with either an imageTag or imageDigest. You can remove a tag from an image by specifying the image's tag in your request. When you remove the last tag from an image, the image is deleted from your repository. You can completely delete an image (and all of its tags) by specifying the digest of the image in your request."]
 module BatchCheckLayerAvailabilityResponse =
   struct
     type nonrec t =
       {
       layers: LayerList.t option
         [@ocaml.doc
-          "A list of image layer objects corresponding to the image layer references in the request."];
+          "A list of image layer objects that correspond to the image layer references in the request."];
       failures: LayerFailureList.t option
         [@ocaml.doc "Any failures associated with the call."]}
     type nonrec error =
@@ -5546,6 +5813,7 @@ module BatchCheckLayerAvailabilityResponse =
       | `RegistryNotFoundException of RegistryNotFoundException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnsupportedCommandException of UnsupportedCommandException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?layers = fun ?failures -> fun () -> { layers; failures }
     let error_of_json name json =
@@ -5558,6 +5826,9 @@ module BatchCheckLayerAvailabilityResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -5571,6 +5842,9 @@ module BatchCheckLayerAvailabilityResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnsupportedCommandException" ->
+          `UnsupportedCommandException
+            (UnsupportedCommandException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -5591,6 +5865,10 @@ module BatchCheckLayerAvailabilityResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnsupportedCommandException e ->
+          `Assoc
+            [("error", (`String "UnsupportedCommandException"));
+            ("details", (UnsupportedCommandException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5609,23 +5887,23 @@ module BatchCheckLayerAvailabilityResponse =
         (Option.map ~f:LayerList.of_xml) (Xml.child xml_arg0 "layers") in
       make ?failures ?layers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failures = field_map json "failures" LayerFailureList.of_json in
-      let layers = field_map json "layers" LayerList.of_json in
+    let of_json json__ =
+      let failures = field_map json__ "failures" LayerFailureList.of_json in
+      let layers = field_map json__ "layers" LayerList.of_json in
       make ?failures ?layers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Checks the availability of one or more image layers within a repository in a public registry. When an image is pushed to a repository, each image layer is checked to verify if it has been uploaded before. If it has been uploaded, then the image layer is skipped. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
+       "Checks the availability of one or more image layers that are within a repository in a public registry. When an image is pushed to a repository, each image layer is checked to verify if it has been uploaded before. If it has been uploaded, then the image layer is skipped. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
 module BatchCheckLayerAvailabilityRequest =
   struct
     type nonrec t =
       {
       registryId: RegistryIdOrAlias.t option
         [@ocaml.doc
-          "The AWS account ID associated with the public registry that contains the image layers to check. If you do not specify a registry, the default public registry is assumed."];
+          "The Amazon Web Services account ID, or registry alias, associated with the public registry that contains the image layers to check. If you do not specify a registry, the default public registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc
-          "The name of the repository that is associated with the image layers to check."];
+          "The name of the repository that's associated with the image layers to check."];
       layerDigests: BatchedOperationLayerDigestList.t
         [@ocaml.doc "The digests of the image layers to check."]}
     let context_ = "BatchCheckLayerAvailabilityRequest"
@@ -5653,14 +5931,15 @@ module BatchCheckLayerAvailabilityRequest =
           (Xml.child xml_arg0 "registryId") in
       make ~layerDigests ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let layerDigests =
-        field_map_exn json "layerDigests"
+        field_map_exn json__ "layerDigests"
           BatchedOperationLayerDigestList.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryIdOrAlias.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId =
+        field_map json__ "registryId" RegistryIdOrAlias.of_json in
       make ~layerDigests ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Checks the availability of one or more image layers within a repository in a public registry. When an image is pushed to a repository, each image layer is checked to verify if it has been uploaded before. If it has been uploaded, then the image layer is skipped. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
+       "Checks the availability of one or more image layers that are within a repository in a public registry. When an image is pushed to a repository, each image layer is checked to verify if it has been uploaded before. If it has been uploaded, then the image layer is skipped. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]

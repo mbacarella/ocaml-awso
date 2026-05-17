@@ -358,6 +358,8 @@ let create_repository =
          flag "repository-description" (optional string)
            ~doc:"STRING RepositoryDescription"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
        and repositoryName =
          flag "repository-name" (required string)
            ~doc:"STRING RepositoryName" in
@@ -365,7 +367,7 @@ let create_repository =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_repository
            (Values.CreateRepositoryInput.make ?repositoryDescription
-              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ?kmsKeyId
               ~repositoryName ())
            (Some Values.CreateRepositoryOutput.to_json)
            (Some Values.CreateRepositoryOutput.error_to_json)])
@@ -1229,6 +1231,32 @@ let list_branches =
            (Values.ListBranchesInput.make ?nextToken ~repositoryName ())
            (Some Values.ListBranchesOutput.to_json)
            (Some Values.ListBranchesOutput.error_to_json)])
+let list_file_commit_history =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and commitSpecifier =
+         flag "commit-specifier" (optional string) ~doc:"STRING CommitName"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Limit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and repositoryName =
+         flag "repository-name" (required string)
+           ~doc:"STRING RepositoryName"
+       and filePath = flag "file-path" (required string) ~doc:"STRING Path" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_file_commit_history
+           (Values.ListFileCommitHistoryRequest.make ?commitSpecifier
+              ?maxResults ?nextToken ~repositoryName ~filePath ())
+           (Some Values.ListFileCommitHistoryResponse.to_json)
+           (Some Values.ListFileCommitHistoryResponse.error_to_json)])
 let list_pull_requests =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2092,6 +2120,28 @@ let update_repository_description =
            Io.update_repository_description
            (Values.UpdateRepositoryDescriptionInput.make
               ?repositoryDescription ~repositoryName ()) None None])
+let update_repository_encryption_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and repositoryName =
+         flag "repository-name" (required string)
+           ~doc:"STRING RepositoryName"
+       and kmsKeyId =
+         flag "kms-key-id" (required string) ~doc:"STRING KmsKeyId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_repository_encryption_key
+           (Values.UpdateRepositoryEncryptionKeyInput.make ~repositoryName
+              ~kmsKeyId ())
+           (Some Values.UpdateRepositoryEncryptionKeyOutput.to_json)
+           (Some Values.UpdateRepositoryEncryptionKeyOutput.error_to_json)])
 let update_repository_name =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2165,6 +2215,7 @@ let main =
     ("list-associated-approval-rule-templates-for-repository",
       list_associated_approval_rule_templates_for_repository);
     ("list-branches", list_branches);
+    ("list-file-commit-history", list_file_commit_history);
     ("list-pull-requests", list_pull_requests);
     ("list-repositories", list_repositories);
     ("list-repositories-for-approval-rule-template",
@@ -2204,4 +2255,5 @@ let main =
     ("update-pull-request-status", update_pull_request_status);
     ("update-pull-request-title", update_pull_request_title);
     ("update-repository-description", update_repository_description);
+    ("update-repository-encryption-key", update_repository_encryption_key);
     ("update-repository-name", update_repository_name)]

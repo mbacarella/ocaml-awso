@@ -419,6 +419,35 @@ let list_action_types =
                                     actionOwnerFilter) ?nextToken
               ?regionFilter ()) (Some Values.ListActionTypesOutput.to_json)
            (Some Values.ListActionTypesOutput.error_to_json)])
+let list_deploy_action_execution_targets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and pipelineName =
+         flag "pipeline-name" (optional string) ~doc:"STRING PipelineName"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON TargetFilterList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and actionExecutionId =
+         flag "action-execution-id" (required string)
+           ~doc:"STRING ActionExecutionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_deploy_action_execution_targets
+           (Values.ListDeployActionExecutionTargetsInput.make ?pipelineName
+              ?filters:(Option.map ~f:Values.TargetFilterList.of_json filters)
+              ?maxResults ?nextToken ~actionExecutionId ())
+           (Some Values.ListDeployActionExecutionTargetsOutput.to_json)
+           (Some Values.ListDeployActionExecutionTargetsOutput.error_to_json)])
 let list_pipeline_executions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -431,6 +460,9 @@ let list_pipeline_executions =
            ~doc:"URL override endpoint url"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON PipelineExecutionFilter"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and pipelineName =
@@ -438,8 +470,9 @@ let list_pipeline_executions =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_pipeline_executions
-           (Values.ListPipelineExecutionsInput.make ?maxResults ?nextToken
-              ~pipelineName ())
+           (Values.ListPipelineExecutionsInput.make ?maxResults
+              ?filter:(Option.map ~f:Values.PipelineExecutionFilter.of_json
+                         filter) ?nextToken ~pipelineName ())
            (Some Values.ListPipelineExecutionsOutput.to_json)
            (Some Values.ListPipelineExecutionsOutput.error_to_json)])
 let list_pipelines =
@@ -462,6 +495,54 @@ let list_pipelines =
            (Values.ListPipelinesInput.make ?nextToken ?maxResults ())
            (Some Values.ListPipelinesOutput.to_json)
            (Some Values.ListPipelinesOutput.error_to_json)])
+let list_rule_executions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg) ~doc:"JSON RuleExecutionFilter"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and pipelineName =
+         flag "pipeline-name" (required string) ~doc:"STRING PipelineName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_rule_executions
+           (Values.ListRuleExecutionsInput.make
+              ?filter:(Option.map ~f:Values.RuleExecutionFilter.of_json
+                         filter) ?maxResults ?nextToken ~pipelineName ())
+           (Some Values.ListRuleExecutionsOutput.to_json)
+           (Some Values.ListRuleExecutionsOutput.error_to_json)])
+let list_rule_types =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ruleOwnerFilter =
+         flag "rule-owner-filter" (optional json_arg) ~doc:"JSON RuleOwner"
+       and regionFilter =
+         flag "region-filter" (optional string) ~doc:"STRING AWSRegionName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_rule_types
+           (Values.ListRuleTypesInput.make
+              ?ruleOwnerFilter:(Option.map ~f:Values.RuleOwner.of_json
+                                  ruleOwnerFilter) ?regionFilter ())
+           (Some Values.ListRuleTypesOutput.to_json)
+           (Some Values.ListRuleTypesOutput.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -505,6 +586,32 @@ let list_webhooks =
            (Values.ListWebhooksInput.make ?nextToken ?maxResults ())
            (Some Values.ListWebhooksOutput.to_json)
            (Some Values.ListWebhooksOutput.error_to_json)])
+let override_stage_condition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and pipelineName =
+         flag "pipeline-name" (required string) ~doc:"STRING PipelineName"
+       and stageName =
+         flag "stage-name" (required string) ~doc:"STRING StageName"
+       and pipelineExecutionId =
+         flag "pipeline-execution-id" (required string)
+           ~doc:"STRING PipelineExecutionId"
+       and conditionType =
+         flag "condition-type" (required json_arg) ~doc:"JSON ConditionType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.override_stage_condition
+           (Values.OverrideStageConditionInput.make ~pipelineName ~stageName
+              ~pipelineExecutionId
+              ~conditionType:(Values.ConditionType.of_json conditionType) ())
+           None None])
 let poll_for_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -782,6 +889,30 @@ let retry_stage_execution =
               ~retryMode:(Values.StageRetryMode.of_json retryMode) ())
            (Some Values.RetryStageExecutionOutput.to_json)
            (Some Values.RetryStageExecutionOutput.error_to_json)])
+let rollback_stage =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and pipelineName =
+         flag "pipeline-name" (required string) ~doc:"STRING PipelineName"
+       and stageName =
+         flag "stage-name" (required string) ~doc:"STRING StageName"
+       and targetPipelineExecutionId =
+         flag "target-pipeline-execution-id" (required string)
+           ~doc:"STRING PipelineExecutionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.rollback_stage
+           (Values.RollbackStageInput.make ~pipelineName ~stageName
+              ~targetPipelineExecutionId ())
+           (Some Values.RollbackStageOutput.to_json)
+           (Some Values.RollbackStageOutput.error_to_json)])
 let start_pipeline_execution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -792,15 +923,26 @@ let start_pipeline_execution =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and variables =
+         flag "variables" (optional json_arg)
+           ~doc:"JSON PipelineVariableList"
        and clientRequestToken =
          flag "client-request-token" (optional string)
            ~doc:"STRING ClientRequestToken"
+       and sourceRevisions =
+         flag "source-revisions" (optional json_arg)
+           ~doc:"JSON SourceRevisionOverrideList"
        and name = flag "name" (required string) ~doc:"STRING PipelineName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_pipeline_execution
-           (Values.StartPipelineExecutionInput.make ?clientRequestToken ~name
-              ()) (Some Values.StartPipelineExecutionOutput.to_json)
+           (Values.StartPipelineExecutionInput.make
+              ?variables:(Option.map ~f:Values.PipelineVariableList.of_json
+                            variables) ?clientRequestToken
+              ?sourceRevisions:(Option.map
+                                  ~f:Values.SourceRevisionOverrideList.of_json
+                                  sourceRevisions) ~name ())
+           (Some Values.StartPipelineExecutionOutput.to_json)
            (Some Values.StartPipelineExecutionOutput.error_to_json)])
 let stop_pipeline_execution =
   Command.async ~summary:""
@@ -929,10 +1071,15 @@ let main =
     ("get-third-party-job-details", get_third_party_job_details);
     ("list-action-executions", list_action_executions);
     ("list-action-types", list_action_types);
+    ("list-deploy-action-execution-targets",
+      list_deploy_action_execution_targets);
     ("list-pipeline-executions", list_pipeline_executions);
     ("list-pipelines", list_pipelines);
+    ("list-rule-executions", list_rule_executions);
+    ("list-rule-types", list_rule_types);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-webhooks", list_webhooks);
+    ("override-stage-condition", override_stage_condition);
     ("poll-for-jobs", poll_for_jobs);
     ("poll-for-third-party-jobs", poll_for_third_party_jobs);
     ("put-action-revision", put_action_revision);
@@ -946,6 +1093,7 @@ let main =
     ("put-webhook", put_webhook);
     ("register-webhook-with-third-party", register_webhook_with_third_party);
     ("retry-stage-execution", retry_stage_execution);
+    ("rollback-stage", rollback_stage);
     ("start-pipeline-execution", start_pipeline_execution);
     ("stop-pipeline-execution", stop_pipeline_execution);
     ("tag-resource", tag_resource);

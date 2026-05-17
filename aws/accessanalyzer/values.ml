@@ -23,6 +23,119 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceType =
+  struct
+    type nonrec t =
+      | AWS__S3__Bucket 
+      | AWS__IAM__Role 
+      | AWS__SQS__Queue 
+      | AWS__Lambda__Function 
+      | AWS__Lambda__LayerVersion 
+      | AWS__KMS__Key 
+      | AWS__SecretsManager__Secret 
+      | AWS__EFS__FileSystem 
+      | AWS__EC2__Snapshot 
+      | AWS__ECR__Repository 
+      | AWS__RDS__DBSnapshot 
+      | AWS__RDS__DBClusterSnapshot 
+      | AWS__SNS__Topic 
+      | AWS__S3Express__DirectoryBucket 
+      | AWS__DynamoDB__Table 
+      | AWS__DynamoDB__Stream 
+      | AWS__IAM__User 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWS__S3__Bucket -> "AWS::S3::Bucket"
+      | AWS__IAM__Role -> "AWS::IAM::Role"
+      | AWS__SQS__Queue -> "AWS::SQS::Queue"
+      | AWS__Lambda__Function -> "AWS::Lambda::Function"
+      | AWS__Lambda__LayerVersion -> "AWS::Lambda::LayerVersion"
+      | AWS__KMS__Key -> "AWS::KMS::Key"
+      | AWS__SecretsManager__Secret -> "AWS::SecretsManager::Secret"
+      | AWS__EFS__FileSystem -> "AWS::EFS::FileSystem"
+      | AWS__EC2__Snapshot -> "AWS::EC2::Snapshot"
+      | AWS__ECR__Repository -> "AWS::ECR::Repository"
+      | AWS__RDS__DBSnapshot -> "AWS::RDS::DBSnapshot"
+      | AWS__RDS__DBClusterSnapshot -> "AWS::RDS::DBClusterSnapshot"
+      | AWS__SNS__Topic -> "AWS::SNS::Topic"
+      | AWS__S3Express__DirectoryBucket -> "AWS::S3Express::DirectoryBucket"
+      | AWS__DynamoDB__Table -> "AWS::DynamoDB::Table"
+      | AWS__DynamoDB__Stream -> "AWS::DynamoDB::Stream"
+      | AWS__IAM__User -> "AWS::IAM::User"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWS::S3::Bucket" -> AWS__S3__Bucket
+      | "AWS::IAM::Role" -> AWS__IAM__Role
+      | "AWS::SQS::Queue" -> AWS__SQS__Queue
+      | "AWS::Lambda::Function" -> AWS__Lambda__Function
+      | "AWS::Lambda::LayerVersion" -> AWS__Lambda__LayerVersion
+      | "AWS::KMS::Key" -> AWS__KMS__Key
+      | "AWS::SecretsManager::Secret" -> AWS__SecretsManager__Secret
+      | "AWS::EFS::FileSystem" -> AWS__EFS__FileSystem
+      | "AWS::EC2::Snapshot" -> AWS__EC2__Snapshot
+      | "AWS::ECR::Repository" -> AWS__ECR__Repository
+      | "AWS::RDS::DBSnapshot" -> AWS__RDS__DBSnapshot
+      | "AWS::RDS::DBClusterSnapshot" -> AWS__RDS__DBClusterSnapshot
+      | "AWS::SNS::Topic" -> AWS__SNS__Topic
+      | "AWS::S3Express::DirectoryBucket" -> AWS__S3Express__DirectoryBucket
+      | "AWS::DynamoDB::Table" -> AWS__DynamoDB__Table
+      | "AWS::DynamoDB::Stream" -> AWS__DynamoDB__Stream
+      | "AWS::IAM::User" -> AWS__IAM__User
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ResourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module TagsMap =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module KmsConstraintsKey =
   struct
     type nonrec t = string
@@ -79,6 +192,113 @@ module Integer =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module AccountIdsList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccountIdsList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceArnsList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceArnsList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceTypeList =
+  struct
+    type nonrec t = ResourceType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceTypeList" ~of_json:ResourceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagsList =
+  struct
+    type nonrec t = TagsMap.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagsMap.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagsMap.of_xml)
+    let of_json j = list_of_json ~kind:"TagsList" ~of_json:TagsMap.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module KmsConstraintsMap =
   struct
     type nonrec t = (KmsConstraintsKey.t * KmsConstraintsValue.t) list
@@ -101,6 +321,8 @@ module KmsConstraintsMap =
                        (KmsConstraintsValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -172,6 +394,32 @@ module KmsGrantOperation =
     let of_json j = of_string (string_of_json ~kind:"KmsGrantOperation" j)
     let to_json = simple_to_json to_value
   end
+module RdsDbClusterSnapshotAccountId =
+  struct
+    type nonrec t = string
+    let context_ = "RdsDbClusterSnapshotAccountId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RdsDbClusterSnapshotAccountId" j
+    let to_json = simple_to_json to_value
+  end
+module RdsDbSnapshotAccountId =
+  struct
+    type nonrec t = string
+    let context_ = "RdsDbSnapshotAccountId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RdsDbSnapshotAccountId" j
+    let to_json = simple_to_json to_value
+  end
 module InternetConfiguration =
   struct
     type nonrec t = unit
@@ -202,8 +450,9 @@ module VpcConfiguration =
         VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vpcId") in
       make ~vpcId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map_exn json "vpcId" VpcId.of_json in make ~vpcId ()
+    let of_json json__ =
+      let vpcId = field_map_exn json__ "vpcId" VpcId.of_json in
+      make ~vpcId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The proposed virtual private cloud (VPC) configuration for the Amazon S3 access point. VPC configuration does not apply to multi-region access points. For more information, see VpcConfiguration."]
@@ -246,47 +495,111 @@ module AclUri =
     let of_json j = string_of_json ~kind:"AclUri" j
     let to_json = simple_to_json to_value
   end
-module String_ =
-  struct
-    type nonrec t = string
-    let context_ = "String"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
-    let to_json = simple_to_json to_value
-  end
 module Substring =
   struct
     type nonrec t =
       {
-      length: Integer.t [@ocaml.doc "The length of the substring."];
-      start: Integer.t
-        [@ocaml.doc "The start index of the substring, starting from 0."]}
-    let context_ = "Substring"
-    let make ~length = fun ~start -> fun () -> { length; start }
+      start: Integer.t option
+        [@ocaml.doc "The start index of the substring, starting from 0."];
+      length: Integer.t option [@ocaml.doc "The length of the substring."]}
+    let make ?start = fun ?length -> fun () -> { start; length }
     let to_value x =
       structure_to_value
-        [("length", (Some (Integer.to_value x.length)));
-        ("start", (Some (Integer.to_value x.start)))]
+        [("start", (Option.map x.start ~f:Integer.to_value));
+        ("length", (Option.map x.length ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let start =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "start") in
       let length =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "length") in
-      make ~start ~length ()
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "length") in
+      let start = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "start") in
+      make ?length ?start ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let start = field_map_exn json "start" Integer.of_json in
-      let length = field_map_exn json "length" Integer.of_json in
-      make ~start ~length ()
+    let of_json json__ =
+      let length = field_map json__ "length" Integer.of_json in
+      let start = field_map json__ "start" Integer.of_json in
+      make ?length ?start ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A reference to a substring of a literal string in a JSON document."]
+module InternalAccessAnalysisRuleCriteria =
+  struct
+    type nonrec t =
+      {
+      accountIds: AccountIdsList.t option
+        [@ocaml.doc
+          "A list of Amazon Web Services account IDs to apply to the internal access analysis rule criteria. Account IDs can only be applied to the analysis rule criteria for organization-level analyzers."];
+      resourceTypes: ResourceTypeList.t option
+        [@ocaml.doc
+          "A list of resource types to apply to the internal access analysis rule criteria. The analyzer will only generate findings for resources of these types. These resource types are currently supported for internal access analyzers: AWS::S3::Bucket AWS::RDS::DBSnapshot AWS::RDS::DBClusterSnapshot AWS::S3Express::DirectoryBucket AWS::DynamoDB::Table AWS::DynamoDB::Stream"];
+      resourceArns: ResourceArnsList.t option
+        [@ocaml.doc
+          "A list of resource ARNs to apply to the internal access analysis rule criteria. The analyzer will only generate findings for resources that match these ARNs."]}
+    let make ?accountIds =
+      fun ?resourceTypes ->
+        fun ?resourceArns ->
+          fun () -> { accountIds; resourceTypes; resourceArns }
+    let to_value x =
+      structure_to_value
+        [("accountIds", (Option.map x.accountIds ~f:AccountIdsList.to_value));
+        ("resourceTypes",
+          (Option.map x.resourceTypes ~f:ResourceTypeList.to_value));
+        ("resourceArns",
+          (Option.map x.resourceArns ~f:ResourceArnsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArns =
+        (Option.map ~f:ResourceArnsList.of_xml)
+          (Xml.child xml_arg0 "resourceArns") in
+      let resourceTypes =
+        (Option.map ~f:ResourceTypeList.of_xml)
+          (Xml.child xml_arg0 "resourceTypes") in
+      let accountIds =
+        (Option.map ~f:AccountIdsList.of_xml)
+          (Xml.child xml_arg0 "accountIds") in
+      make ?resourceArns ?resourceTypes ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArns =
+        field_map json__ "resourceArns" ResourceArnsList.of_json in
+      let resourceTypes =
+        field_map json__ "resourceTypes" ResourceTypeList.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIdsList.of_json in
+      make ?resourceArns ?resourceTypes ?accountIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The criteria for an analysis rule for an internal access analyzer."]
+module AnalysisRuleCriteria =
+  struct
+    type nonrec t =
+      {
+      accountIds: AccountIdsList.t option
+        [@ocaml.doc
+          "A list of Amazon Web Services account IDs to apply to the analysis rule criteria. The accounts cannot include the organization analyzer owner account. Account IDs can only be applied to the analysis rule criteria for organization-level analyzers. The list cannot include more than 2,000 account IDs."];
+      resourceTags: TagsList.t option
+        [@ocaml.doc
+          "An array of key-value pairs to match for your resources. You can use the set of Unicode letters, digits, whitespace, _, ., /, =, +, and -. For the tag key, you can specify a value that is 1 to 128 characters in length and cannot be prefixed with aws:. For the tag value, you can specify a value that is 0 to 256 characters in length. If the specified tag value is 0 characters, the rule is applied to all principals with the specified tag key."]}
+    let make ?accountIds =
+      fun ?resourceTags -> fun () -> { accountIds; resourceTags }
+    let to_value x =
+      structure_to_value
+        [("accountIds", (Option.map x.accountIds ~f:AccountIdsList.to_value));
+        ("resourceTags", (Option.map x.resourceTags ~f:TagsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceTags =
+        (Option.map ~f:TagsList.of_xml) (Xml.child xml_arg0 "resourceTags") in
+      let accountIds =
+        (Option.map ~f:AccountIdsList.of_xml)
+          (Xml.child xml_arg0 "accountIds") in
+      make ?resourceTags ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceTags = field_map json__ "resourceTags" TagsList.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIdsList.of_json in
+      make ?resourceTags ?accountIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The criteria for an analysis rule for an analyzer. The criteria determine which entities will generate findings."]
 module GranteePrincipal =
   struct
     type nonrec t = string
@@ -343,11 +656,11 @@ module KmsGrantConstraints =
           (Xml.child xml_arg0 "encryptionContextEquals") in
       make ?encryptionContextSubset ?encryptionContextEquals ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionContextSubset =
-        field_map json "encryptionContextSubset" KmsConstraintsMap.of_json in
+        field_map json__ "encryptionContextSubset" KmsConstraintsMap.of_json in
       let encryptionContextEquals =
-        field_map json "encryptionContextEquals" KmsConstraintsMap.of_json in
+        field_map json__ "encryptionContextEquals" KmsConstraintsMap.of_json in
       make ?encryptionContextSubset ?encryptionContextEquals ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -356,6 +669,9 @@ module KmsGrantOperationsList =
   struct
     type nonrec t = KmsGrantOperation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KmsGrantOperation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -390,6 +706,64 @@ module RetiringPrincipal =
     let of_json j = string_of_json ~kind:"RetiringPrincipal" j
     let to_json = simple_to_json to_value
   end
+module RdsDbClusterSnapshotAccountIdsList =
+  struct
+    type nonrec t = RdsDbClusterSnapshotAccountId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RdsDbClusterSnapshotAccountId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RdsDbClusterSnapshotAccountId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RdsDbClusterSnapshotAccountIdsList"
+        ~of_json:RdsDbClusterSnapshotAccountId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RdsDbSnapshotAccountIdsList =
+  struct
+    type nonrec t = RdsDbSnapshotAccountId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RdsDbSnapshotAccountId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RdsDbSnapshotAccountId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RdsDbSnapshotAccountIdsList"
+        ~of_json:RdsDbSnapshotAccountId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AccessPointPolicy =
   struct
     type nonrec t = string
@@ -407,39 +781,40 @@ module NetworkOriginConfiguration =
   struct
     type nonrec t =
       {
+      vpcConfiguration: VpcConfiguration.t option ;
       internetConfiguration: InternetConfiguration.t option
         [@ocaml.doc
-          "The configuration for the Amazon S3 access point or multi-region access point with an Internet origin."];
-      vpcConfiguration: VpcConfiguration.t option }
-    let make ?internetConfiguration =
-      fun ?vpcConfiguration ->
-        fun () -> { internetConfiguration; vpcConfiguration }
+          "The configuration for the Amazon S3 access point or multi-region access point with an Internet origin."]}
+    let make ?vpcConfiguration =
+      fun ?internetConfiguration ->
+        fun () -> { vpcConfiguration; internetConfiguration }
     let to_value x =
       structure_to_value
-        [("internetConfiguration",
-           (Option.map x.internetConfiguration
-              ~f:InternetConfiguration.to_value));
-        ("vpcConfiguration",
-          (Option.map x.vpcConfiguration ~f:VpcConfiguration.to_value))]
+        [("vpcConfiguration",
+           (Option.map x.vpcConfiguration ~f:VpcConfiguration.to_value));
+        ("internetConfiguration",
+          (Option.map x.internetConfiguration
+             ~f:InternetConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let vpcConfiguration =
-        (Option.map ~f:VpcConfiguration.of_xml)
-          (Xml.child xml_arg0 "vpcConfiguration") in
       let internetConfiguration =
         (Option.map ~f:InternetConfiguration.of_xml)
           (Xml.child xml_arg0 "internetConfiguration") in
-      make ?vpcConfiguration ?internetConfiguration ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let vpcConfiguration =
-        field_map json "vpcConfiguration" VpcConfiguration.of_json in
+        (Option.map ~f:VpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "vpcConfiguration") in
+      make ?internetConfiguration ?vpcConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let internetConfiguration =
-        field_map json "internetConfiguration" InternetConfiguration.of_json in
-      make ?vpcConfiguration ?internetConfiguration ()
+        field_map json__ "internetConfiguration"
+          InternetConfiguration.of_json in
+      let vpcConfiguration =
+        field_map json__ "vpcConfiguration" VpcConfiguration.of_json in
+      make ?internetConfiguration ?vpcConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The proposed InternetConfiguration or VpcConfiguration to apply to the Amazon S3 access point. VpcConfiguration does not apply to multi-region access points. You can make the access point accessible from the internet, or you can specify that all requests made through that access point must originate from a specific virtual private cloud (VPC). You can specify only one type of network configuration. For more information, see Creating access points."]
+       "The proposed InternetConfiguration or VpcConfiguration to apply to the Amazon S3 access point. You can make the access point accessible from the internet, or you can specify that all requests made through that access point must originate from a specific virtual private cloud (VPC). You can specify only one type of network configuration. For more information, see Creating access points."]
 module S3PublicAccessBlockConfiguration =
   struct
     type nonrec t =
@@ -469,11 +844,11 @@ module S3PublicAccessBlockConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "ignorePublicAcls") in
       make ~restrictPublicBuckets ~ignorePublicAcls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let restrictPublicBuckets =
-        field_map_exn json "restrictPublicBuckets" Boolean.of_json in
+        field_map_exn json__ "restrictPublicBuckets" Boolean.of_json in
       let ignorePublicAcls =
-        field_map_exn json "ignorePublicAcls" Boolean.of_json in
+        field_map_exn json__ "ignorePublicAcls" Boolean.of_json in
       make ~restrictPublicBuckets ~ignorePublicAcls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -499,9 +874,10 @@ module AclGrantee =
         (Option.map ~f:AclCanonicalId.of_xml) (Xml.child xml_arg0 "id") in
       make ?uri ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uri = field_map json "uri" AclUri.of_json in
-      let id = field_map json "id" AclCanonicalId.of_json in make ?uri ?id ()
+    let of_json json__ =
+      let uri = field_map json__ "uri" AclUri.of_json in
+      let id = field_map json__ "id" AclCanonicalId.of_json in
+      make ?uri ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You specify each grantee as a type-value pair using one of these types. You can specify only one type of grantee. For more information, see PutBucketAcl."]
@@ -571,11 +947,11 @@ module PathElement =
       let index = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "index") in
       make ?value ?substring ?key ?index ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" String_.of_json in
-      let substring = field_map json "substring" Substring.of_json in
-      let key = field_map json "key" String_.of_json in
-      let index = field_map json "index" Integer.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" String_.of_json in
+      let substring = field_map json__ "substring" Substring.of_json in
+      let key = field_map json__ "key" String_.of_json in
+      let index = field_map json__ "index" Integer.of_json in
       make ?value ?substring ?key ?index ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -584,38 +960,95 @@ module Position =
   struct
     type nonrec t =
       {
-      column: Integer.t
-        [@ocaml.doc "The column of the position, starting from 0."];
-      line: Integer.t
+      line: Integer.t option
         [@ocaml.doc "The line of the position, starting from 1."];
-      offset: Integer.t
+      column: Integer.t option
+        [@ocaml.doc "The column of the position, starting from 0."];
+      offset: Integer.t option
         [@ocaml.doc
           "The offset within the policy that corresponds to the position, starting from 0."]}
-    let context_ = "Position"
-    let make ~column =
-      fun ~line -> fun ~offset -> fun () -> { column; line; offset }
+    let make ?line =
+      fun ?column -> fun ?offset -> fun () -> { line; column; offset }
     let to_value x =
       structure_to_value
-        [("column", (Some (Integer.to_value x.column)));
-        ("line", (Some (Integer.to_value x.line)));
-        ("offset", (Some (Integer.to_value x.offset)))]
+        [("line", (Option.map x.line ~f:Integer.to_value));
+        ("column", (Option.map x.column ~f:Integer.to_value));
+        ("offset", (Option.map x.offset ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let offset =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "offset") in
-      let line =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "line") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "offset") in
       let column =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "column") in
-      make ~offset ~line ~column ()
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "column") in
+      let line = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "line") in
+      make ?offset ?column ?line ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let offset = field_map_exn json "offset" Integer.of_json in
-      let line = field_map_exn json "line" Integer.of_json in
-      let column = field_map_exn json "column" Integer.of_json in
-      make ~offset ~line ~column ()
+    let of_json json__ =
+      let offset = field_map json__ "offset" Integer.of_json in
+      let column = field_map json__ "column" Integer.of_json in
+      let line = field_map json__ "line" Integer.of_json in
+      make ?offset ?column ?line ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A position in a policy."]
+module InternalAccessAnalysisRuleCriteriaList =
+  struct
+    type nonrec t = InternalAccessAnalysisRuleCriteria.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InternalAccessAnalysisRuleCriteria.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:InternalAccessAnalysisRuleCriteria.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InternalAccessAnalysisRuleCriteriaList"
+        ~of_json:InternalAccessAnalysisRuleCriteria.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AnalysisRuleCriteriaList =
+  struct
+    type nonrec t = AnalysisRuleCriteria.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AnalysisRuleCriteria.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AnalysisRuleCriteria.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AnalysisRuleCriteriaList"
+        ~of_json:AnalysisRuleCriteria.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CloudTrailArn =
   struct
     type nonrec t = string
@@ -638,6 +1071,9 @@ module RegionList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -658,81 +1094,218 @@ module RegionList =
       list_of_json ~kind:"RegionList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module FindingAggregationAccountDetailsMap =
+  struct
+    type nonrec t = (String_.t * Integer.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (Integer.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (Integer.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:Integer.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FindingSourceDetail =
+  struct
+    type nonrec t =
+      {
+      accessPointArn: String_.t option
+        [@ocaml.doc
+          "The ARN of the access point that generated the finding. The ARN format depends on whether the ARN represents an access point or a multi-region access point."];
+      accessPointAccount: String_.t option
+        [@ocaml.doc
+          "The account of the cross-account access point that generated the finding."]}
+    let make ?accessPointArn =
+      fun ?accessPointAccount ->
+        fun () -> { accessPointArn; accessPointAccount }
+    let to_value x =
+      structure_to_value
+        [("accessPointArn",
+           (Option.map x.accessPointArn ~f:String_.to_value));
+        ("accessPointAccount",
+          (Option.map x.accessPointAccount ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessPointAccount =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "accessPointAccount") in
+      let accessPointArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accessPointArn") in
+      make ?accessPointAccount ?accessPointArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessPointAccount =
+        field_map json__ "accessPointAccount" String_.of_json in
+      let accessPointArn = field_map json__ "accessPointArn" String_.of_json in
+      make ?accessPointAccount ?accessPointArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Includes details about how the access that generated the finding is granted. This is populated for Amazon S3 bucket findings."]
+module FindingSourceType =
+  struct
+    type nonrec t =
+      | POLICY 
+      | BUCKET_ACL 
+      | S3_ACCESS_POINT 
+      | S3_ACCESS_POINT_ACCOUNT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | POLICY -> "POLICY"
+      | BUCKET_ACL -> "BUCKET_ACL"
+      | S3_ACCESS_POINT -> "S3_ACCESS_POINT"
+      | S3_ACCESS_POINT_ACCOUNT -> "S3_ACCESS_POINT_ACCOUNT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "POLICY" -> POLICY
+      | "BUCKET_ACL" -> BUCKET_ACL
+      | "S3_ACCESS_POINT" -> S3_ACCESS_POINT
+      | "S3_ACCESS_POINT_ACCOUNT" -> S3_ACCESS_POINT_ACCOUNT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FindingSourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FindingSourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module EbsGroup =
+  struct
+    type nonrec t = string
+    let context_ = "EbsGroup"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EbsGroup" j
+    let to_json = simple_to_json to_value
+  end
+module EbsUserId =
+  struct
+    type nonrec t = string
+    let context_ = "EbsUserId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EbsUserId" j
+    let to_json = simple_to_json to_value
+  end
 module KmsGrantConfiguration =
   struct
     type nonrec t =
       {
-      constraints: KmsGrantConstraints.t option
-        [@ocaml.doc
-          "Use this structure to propose allowing cryptographic operations in the grant only when the operation request includes the specified encryption context."];
+      operations: KmsGrantOperationsList.t
+        [@ocaml.doc "A list of operations that the grant permits."];
       granteePrincipal: GranteePrincipal.t
         [@ocaml.doc
           "The principal that is given permission to perform the operations that the grant permits."];
-      issuingAccount: IssuingAccount.t
-        [@ocaml.doc
-          "The Amazon Web Services account under which the grant was issued. The account is used to propose KMS grants issued by accounts other than the owner of the key."];
-      operations: KmsGrantOperationsList.t
-        [@ocaml.doc "A list of operations that the grant permits."];
       retiringPrincipal: RetiringPrincipal.t option
         [@ocaml.doc
-          "The principal that is given permission to retire the grant by using RetireGrant operation."]}
+          "The principal that is given permission to retire the grant by using RetireGrant operation."];
+      constraints: KmsGrantConstraints.t option
+        [@ocaml.doc
+          "Use this structure to propose allowing cryptographic operations in the grant only when the operation request includes the specified encryption context."];
+      issuingAccount: IssuingAccount.t
+        [@ocaml.doc
+          "The Amazon Web Services account under which the grant was issued. The account is used to propose KMS grants issued by accounts other than the owner of the key."]}
     let context_ = "KmsGrantConfiguration"
-    let make ?constraints =
-      fun ?retiringPrincipal ->
-        fun ~granteePrincipal ->
-          fun ~issuingAccount ->
-            fun ~operations ->
+    let make ?retiringPrincipal =
+      fun ?constraints ->
+        fun ~operations ->
+          fun ~granteePrincipal ->
+            fun ~issuingAccount ->
               fun () ->
                 {
-                  constraints;
                   retiringPrincipal;
+                  constraints;
+                  operations;
                   granteePrincipal;
-                  issuingAccount;
-                  operations
+                  issuingAccount
                 }
     let to_value x =
       structure_to_value
-        [("constraints",
-           (Option.map x.constraints ~f:KmsGrantConstraints.to_value));
+        [("operations",
+           (Some (KmsGrantOperationsList.to_value x.operations)));
         ("granteePrincipal",
           (Some (GranteePrincipal.to_value x.granteePrincipal)));
-        ("issuingAccount", (Some (IssuingAccount.to_value x.issuingAccount)));
-        ("operations", (Some (KmsGrantOperationsList.to_value x.operations)));
         ("retiringPrincipal",
-          (Option.map x.retiringPrincipal ~f:RetiringPrincipal.to_value))]
+          (Option.map x.retiringPrincipal ~f:RetiringPrincipal.to_value));
+        ("constraints",
+          (Option.map x.constraints ~f:KmsGrantConstraints.to_value));
+        ("issuingAccount", (Some (IssuingAccount.to_value x.issuingAccount)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let retiringPrincipal =
-        (Option.map ~f:RetiringPrincipal.of_xml)
-          (Xml.child xml_arg0 "retiringPrincipal") in
-      let operations =
-        KmsGrantOperationsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "operations") in
       let issuingAccount =
         IssuingAccount.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "issuingAccount") in
-      let granteePrincipal =
-        GranteePrincipal.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "granteePrincipal") in
       let constraints =
         (Option.map ~f:KmsGrantConstraints.of_xml)
           (Xml.child xml_arg0 "constraints") in
-      make ?retiringPrincipal ~operations ~issuingAccount ~granteePrincipal
-        ?constraints ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let retiringPrincipal =
-        field_map json "retiringPrincipal" RetiringPrincipal.of_json in
-      let operations =
-        field_map_exn json "operations" KmsGrantOperationsList.of_json in
-      let issuingAccount =
-        field_map_exn json "issuingAccount" IssuingAccount.of_json in
+        (Option.map ~f:RetiringPrincipal.of_xml)
+          (Xml.child xml_arg0 "retiringPrincipal") in
       let granteePrincipal =
-        field_map_exn json "granteePrincipal" GranteePrincipal.of_json in
+        GranteePrincipal.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "granteePrincipal") in
+      let operations =
+        KmsGrantOperationsList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "operations") in
+      make ~issuingAccount ?constraints ?retiringPrincipal ~granteePrincipal
+        ~operations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let issuingAccount =
+        field_map_exn json__ "issuingAccount" IssuingAccount.of_json in
       let constraints =
-        field_map json "constraints" KmsGrantConstraints.of_json in
-      make ?retiringPrincipal ~operations ~issuingAccount ~granteePrincipal
-        ?constraints ()
+        field_map json__ "constraints" KmsGrantConstraints.of_json in
+      let retiringPrincipal =
+        field_map json__ "retiringPrincipal" RetiringPrincipal.of_json in
+      let granteePrincipal =
+        field_map_exn json__ "granteePrincipal" GranteePrincipal.of_json in
+      let operations =
+        field_map_exn json__ "operations" KmsGrantOperationsList.of_json in
+      make ~issuingAccount ?constraints ?retiringPrincipal ~granteePrincipal
+        ~operations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A proposed grant configuration for a KMS key. For more information, see CreateGrant."]
@@ -762,6 +1335,87 @@ module PolicyName =
     let of_json j = string_of_json ~kind:"PolicyName" j
     let to_json = simple_to_json to_value
   end
+module RdsDbClusterSnapshotAttributeName =
+  struct
+    type nonrec t = string
+    let context_ = "RdsDbClusterSnapshotAttributeName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"RdsDbClusterSnapshotAttributeName" j
+    let to_json = simple_to_json to_value
+  end
+module RdsDbClusterSnapshotAttributeValue =
+  struct
+    type nonrec t =
+      {
+      accountIds: RdsDbClusterSnapshotAccountIdsList.t option
+        [@ocaml.doc
+          "The Amazon Web Services account IDs that have access to the manual Amazon RDS DB cluster snapshot. If the value all is specified, then the Amazon RDS DB cluster snapshot is public and can be copied or restored by all Amazon Web Services accounts. If the configuration is for an existing Amazon RDS DB cluster snapshot and you do not specify the accountIds in RdsDbClusterSnapshotAttributeValue, then the access preview uses the existing shared accountIds for the snapshot. If the access preview is for a new resource and you do not specify the specify the accountIds in RdsDbClusterSnapshotAttributeValue, then the access preview considers the snapshot without any attributes. To propose deletion of existing shared accountIds, you can specify an empty list for accountIds in the RdsDbClusterSnapshotAttributeValue."]}
+    let make ?accountIds = fun () -> { accountIds }
+    let to_value x =
+      structure_to_value
+        [("accountIds",
+           (Option.map x.accountIds
+              ~f:RdsDbClusterSnapshotAccountIdsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountIds =
+        (Option.map ~f:RdsDbClusterSnapshotAccountIdsList.of_xml)
+          (Xml.child xml_arg0 "accountIds") in
+      make ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountIds =
+        field_map json__ "accountIds"
+          RdsDbClusterSnapshotAccountIdsList.of_json in
+      make ?accountIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The values for a manual Amazon RDS DB cluster snapshot attribute."]
+module RdsDbSnapshotAttributeName =
+  struct
+    type nonrec t = string
+    let context_ = "RdsDbSnapshotAttributeName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RdsDbSnapshotAttributeName" j
+    let to_json = simple_to_json to_value
+  end
+module RdsDbSnapshotAttributeValue =
+  struct
+    type nonrec t =
+      {
+      accountIds: RdsDbSnapshotAccountIdsList.t option
+        [@ocaml.doc
+          "The Amazon Web Services account IDs that have access to the manual Amazon RDS DB snapshot. If the value all is specified, then the Amazon RDS DB snapshot is public and can be copied or restored by all Amazon Web Services accounts. If the configuration is for an existing Amazon RDS DB snapshot and you do not specify the accountIds in RdsDbSnapshotAttributeValue, then the access preview uses the existing shared accountIds for the snapshot. If the access preview is for a new resource and you do not specify the specify the accountIds in RdsDbSnapshotAttributeValue, then the access preview considers the snapshot without any attributes. To propose deletion of an existing shared accountIds, you can specify an empty list for accountIds in the RdsDbSnapshotAttributeValue."]}
+    let make ?accountIds = fun () -> { accountIds }
+    let to_value x =
+      structure_to_value
+        [("accountIds",
+           (Option.map x.accountIds ~f:RdsDbSnapshotAccountIdsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountIds =
+        (Option.map ~f:RdsDbSnapshotAccountIdsList.of_xml)
+          (Xml.child xml_arg0 "accountIds") in
+      make ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountIds =
+        field_map json__ "accountIds" RdsDbSnapshotAccountIdsList.of_json in
+      make ?accountIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The name and values of a manual Amazon RDS DB snapshot attribute. Manual DB snapshot attributes are used to authorize other Amazon Web Services accounts to restore a manual DB snapshot."]
 module AccessPointArn =
   struct
     type nonrec t = string
@@ -785,47 +1439,47 @@ module S3AccessPointConfiguration =
       {
       accessPointPolicy: AccessPointPolicy.t option
         [@ocaml.doc "The access point or multi-region access point policy."];
-      networkOrigin: NetworkOriginConfiguration.t option
-        [@ocaml.doc
-          "The proposed Internet and VpcConfiguration to apply to this Amazon S3 access point. VpcConfiguration does not apply to multi-region access points. If the access preview is for a new resource and neither is specified, the access preview uses Internet for the network origin. If the access preview is for an existing resource and neither is specified, the access preview uses the exiting network origin."];
       publicAccessBlock: S3PublicAccessBlockConfiguration.t option
         [@ocaml.doc
-          "The proposed S3PublicAccessBlock configuration to apply to this Amazon S3 access point or multi-region access point."]}
+          "The proposed S3PublicAccessBlock configuration to apply to this Amazon S3 access point or multi-region access point."];
+      networkOrigin: NetworkOriginConfiguration.t option
+        [@ocaml.doc
+          "The proposed Internet and VpcConfiguration to apply to this Amazon S3 access point. VpcConfiguration does not apply to multi-region access points. If the access preview is for a new resource and neither is specified, the access preview uses Internet for the network origin. If the access preview is for an existing resource and neither is specified, the access preview uses the existing network origin."]}
     let make ?accessPointPolicy =
-      fun ?networkOrigin ->
-        fun ?publicAccessBlock ->
-          fun () -> { accessPointPolicy; networkOrigin; publicAccessBlock }
+      fun ?publicAccessBlock ->
+        fun ?networkOrigin ->
+          fun () -> { accessPointPolicy; publicAccessBlock; networkOrigin }
     let to_value x =
       structure_to_value
         [("accessPointPolicy",
            (Option.map x.accessPointPolicy ~f:AccessPointPolicy.to_value));
-        ("networkOrigin",
-          (Option.map x.networkOrigin ~f:NetworkOriginConfiguration.to_value));
         ("publicAccessBlock",
           (Option.map x.publicAccessBlock
-             ~f:S3PublicAccessBlockConfiguration.to_value))]
+             ~f:S3PublicAccessBlockConfiguration.to_value));
+        ("networkOrigin",
+          (Option.map x.networkOrigin ~f:NetworkOriginConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let publicAccessBlock =
-        (Option.map ~f:S3PublicAccessBlockConfiguration.of_xml)
-          (Xml.child xml_arg0 "publicAccessBlock") in
       let networkOrigin =
         (Option.map ~f:NetworkOriginConfiguration.of_xml)
           (Xml.child xml_arg0 "networkOrigin") in
+      let publicAccessBlock =
+        (Option.map ~f:S3PublicAccessBlockConfiguration.of_xml)
+          (Xml.child xml_arg0 "publicAccessBlock") in
       let accessPointPolicy =
         (Option.map ~f:AccessPointPolicy.of_xml)
           (Xml.child xml_arg0 "accessPointPolicy") in
-      make ?publicAccessBlock ?networkOrigin ?accessPointPolicy ()
+      make ?networkOrigin ?publicAccessBlock ?accessPointPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let publicAccessBlock =
-        field_map json "publicAccessBlock"
-          S3PublicAccessBlockConfiguration.of_json in
+    let of_json json__ =
       let networkOrigin =
-        field_map json "networkOrigin" NetworkOriginConfiguration.of_json in
+        field_map json__ "networkOrigin" NetworkOriginConfiguration.of_json in
+      let publicAccessBlock =
+        field_map json__ "publicAccessBlock"
+          S3PublicAccessBlockConfiguration.of_json in
       let accessPointPolicy =
-        field_map json "accessPointPolicy" AccessPointPolicy.of_json in
-      make ?publicAccessBlock ?networkOrigin ?accessPointPolicy ()
+        field_map json__ "accessPointPolicy" AccessPointPolicy.of_json in
+      make ?networkOrigin ?publicAccessBlock ?accessPointPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration for an Amazon S3 access point or multi-region access point for the bucket. You can propose up to 10 access points or multi-region access points per bucket. If the proposed Amazon S3 access point configuration is for an existing bucket, the access preview uses the proposed access point configuration in place of the existing access points. To propose an access point without a policy, you can provide an empty string as the access point policy. For more information, see Creating access points. For more information about access point policy limits, see Access points restrictions and limitations."]
@@ -833,38 +1487,95 @@ module S3BucketAclGrantConfiguration =
   struct
     type nonrec t =
       {
+      permission: AclPermission.t
+        [@ocaml.doc "The permissions being granted."];
       grantee: AclGrantee.t
         [@ocaml.doc
-          "The grantee to whom you\226\128\153re assigning access rights."];
-      permission: AclPermission.t
-        [@ocaml.doc "The permissions being granted."]}
+          "The grantee to whom you\226\128\153re assigning access rights."]}
     let context_ = "S3BucketAclGrantConfiguration"
-    let make ~grantee = fun ~permission -> fun () -> { grantee; permission }
+    let make ~permission = fun ~grantee -> fun () -> { permission; grantee }
     let to_value x =
       structure_to_value
-        [("grantee", (Some (AclGrantee.to_value x.grantee)));
-        ("permission", (Some (AclPermission.to_value x.permission)))]
+        [("permission", (Some (AclPermission.to_value x.permission)));
+        ("grantee", (Some (AclGrantee.to_value x.grantee)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let permission =
-        AclPermission.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "permission") in
       let grantee =
         AclGrantee.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "grantee") in
-      make ~permission ~grantee ()
+      let permission =
+        AclPermission.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "permission") in
+      make ~grantee ~permission ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let permission = field_map_exn json "permission" AclPermission.of_json in
-      let grantee = field_map_exn json "grantee" AclGrantee.of_json in
-      make ~permission ~grantee ()
+    let of_json json__ =
+      let grantee = field_map_exn json__ "grantee" AclGrantee.of_json in
+      let permission =
+        field_map_exn json__ "permission" AclPermission.of_json in
+      make ~grantee ~permission ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A proposed access control list grant configuration for an Amazon S3 bucket. For more information, see How to Specify an ACL."]
+module S3ExpressDirectoryAccessPointArn =
+  struct
+    type nonrec t = string
+    let context_ = "S3ExpressDirectoryAccessPointArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"arn:[^:]*:s3express:[^:]*:[^:]*:accesspoint/.*");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3ExpressDirectoryAccessPointArn" j
+    let to_json = simple_to_json to_value
+  end
+module S3ExpressDirectoryAccessPointConfiguration =
+  struct
+    type nonrec t =
+      {
+      accessPointPolicy: AccessPointPolicy.t option
+        [@ocaml.doc
+          "The proposed access point policy for an Amazon S3 directory bucket access point."];
+      networkOrigin: NetworkOriginConfiguration.t option }
+    let make ?accessPointPolicy =
+      fun ?networkOrigin -> fun () -> { accessPointPolicy; networkOrigin }
+    let to_value x =
+      structure_to_value
+        [("accessPointPolicy",
+           (Option.map x.accessPointPolicy ~f:AccessPointPolicy.to_value));
+        ("networkOrigin",
+          (Option.map x.networkOrigin ~f:NetworkOriginConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkOrigin =
+        (Option.map ~f:NetworkOriginConfiguration.of_xml)
+          (Xml.child xml_arg0 "networkOrigin") in
+      let accessPointPolicy =
+        (Option.map ~f:AccessPointPolicy.of_xml)
+          (Xml.child xml_arg0 "accessPointPolicy") in
+      make ?networkOrigin ?accessPointPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkOrigin =
+        field_map json__ "networkOrigin" NetworkOriginConfiguration.of_json in
+      let accessPointPolicy =
+        field_map json__ "accessPointPolicy" AccessPointPolicy.of_json in
+      make ?networkOrigin ?accessPointPolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Proposed configuration for an access point attached to an Amazon S3 directory bucket. You can propose up to 10 access points per bucket. If the proposed access point configuration is for an existing Amazon S3 directory bucket, the access preview uses the proposed access point configuration in place of the existing access points. To propose an access point without a policy, you can provide an empty string as the access point policy. For more information about access points for Amazon S3 directory buckets, see Managing access to directory buckets with access points in the Amazon Simple Storage Service User Guide."]
 module PathElementList =
   struct
     type nonrec t = PathElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PathElement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -889,84 +1600,29 @@ module Span =
   struct
     type nonrec t =
       {
-      end_: Position.t
-        [@ocaml.doc "The end position of the span (exclusive)."];
-      start: Position.t
-        [@ocaml.doc "The start position of the span (inclusive)."]}
-    let context_ = "Span"
-    let make ~end_ = fun ~start -> fun () -> { end_; start }
+      start: Position.t option
+        [@ocaml.doc "The start position of the span (inclusive)."];
+      end_: Position.t option
+        [@ocaml.doc "The end position of the span (exclusive)."]}
+    let make ?start = fun ?end_ -> fun () -> { start; end_ }
     let to_value x =
       structure_to_value
-        [("end", (Some (Position.to_value x.end_)));
-        ("start", (Some (Position.to_value x.start)))]
+        [("start", (Option.map x.start ~f:Position.to_value));
+        ("end", (Option.map x.end_ ~f:Position.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let end_ = (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "end") in
       let start =
-        Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "start") in
-      let end_ =
-        Position.of_xml (Xml.child_exn ~context:context_ xml_arg0 "end") in
-      make ~start ~end_ ()
+        (Option.map ~f:Position.of_xml) (Xml.child xml_arg0 "start") in
+      make ?end_ ?start ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let start = field_map_exn json "start" Position.of_json in
-      let end_ = field_map_exn json "end" Position.of_json in
-      make ~start ~end_ ()
+    let of_json json__ =
+      let end_ = field_map json__ "end" Position.of_json in
+      let start = field_map json__ "start" Position.of_json in
+      make ?end_ ?start ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A span in a policy. The span consists of a start position (inclusive) and end position (exclusive)."]
-module FindingSourceDetail =
-  struct
-    type nonrec t =
-      {
-      accessPointArn: String_.t option
-        [@ocaml.doc
-          "The ARN of the access point that generated the finding. The ARN format depends on whether the ARN represents an access point or a multi-region access point."]}
-    let make ?accessPointArn = fun () -> { accessPointArn }
-    let to_value x =
-      structure_to_value
-        [("accessPointArn",
-           (Option.map x.accessPointArn ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let accessPointArn =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accessPointArn") in
-      make ?accessPointArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accessPointArn = field_map json "accessPointArn" String_.of_json in
-      make ?accessPointArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Includes details about how the access that generated the finding is granted. This is populated for Amazon S3 bucket findings."]
-module FindingSourceType =
-  struct
-    type nonrec t =
-      | POLICY 
-      | BUCKET_ACL 
-      | S3_ACCESS_POINT 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | POLICY -> "POLICY"
-      | BUCKET_ACL -> "BUCKET_ACL"
-      | S3_ACCESS_POINT -> "S3_ACCESS_POINT"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "POLICY" -> POLICY
-      | "BUCKET_ACL" -> BUCKET_ACL
-      | "S3_ACCESS_POINT" -> S3_ACCESS_POINT
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration FindingSourceType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"FindingSourceType" j)
-    let to_json = simple_to_json to_value
-  end
 module ValueList =
   struct
     type nonrec t = String_.t list
@@ -975,6 +1631,9 @@ module ValueList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -994,49 +1653,468 @@ module ValueList =
     let of_json j = list_of_json ~kind:"ValueList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InternalAccessAnalysisRule =
+  struct
+    type nonrec t =
+      {
+      inclusions: InternalAccessAnalysisRuleCriteriaList.t option
+        [@ocaml.doc
+          "A list of rules for the internal access analyzer containing criteria to include in analysis. Only resources that meet the rule criteria will generate findings."]}
+    let make ?inclusions = fun () -> { inclusions }
+    let to_value x =
+      structure_to_value
+        [("inclusions",
+           (Option.map x.inclusions
+              ~f:InternalAccessAnalysisRuleCriteriaList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let inclusions =
+        (Option.map ~f:InternalAccessAnalysisRuleCriteriaList.of_xml)
+          (Xml.child xml_arg0 "inclusions") in
+      make ?inclusions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let inclusions =
+        field_map json__ "inclusions"
+          InternalAccessAnalysisRuleCriteriaList.of_json in
+      make ?inclusions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about analysis rules for the internal access analyzer. Analysis rules determine which entities will generate findings based on the criteria you define when you create the rule."]
+module AnalysisRule =
+  struct
+    type nonrec t =
+      {
+      exclusions: AnalysisRuleCriteriaList.t option
+        [@ocaml.doc
+          "A list of rules for the analyzer containing criteria to exclude from analysis. Entities that meet the rule criteria will not generate findings."]}
+    let make ?exclusions = fun () -> { exclusions }
+    let to_value x =
+      structure_to_value
+        [("exclusions",
+           (Option.map x.exclusions ~f:AnalysisRuleCriteriaList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exclusions =
+        (Option.map ~f:AnalysisRuleCriteriaList.of_xml)
+          (Xml.child xml_arg0 "exclusions") in
+      make ?exclusions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exclusions =
+        field_map json__ "exclusions" AnalysisRuleCriteriaList.of_json in
+      make ?exclusions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about analysis rules for the analyzer. Analysis rules determine which entities will generate findings based on the criteria you define when you create the rule."]
 module TrailProperties =
   struct
     type nonrec t =
       {
-      allRegions: Boolean.t option
-        [@ocaml.doc
-          "Possible values are true or false. If set to true, IAM Access Analyzer retrieves CloudTrail data from all regions to analyze and generate a policy."];
-      cloudTrailArn: CloudTrailArn.t
+      cloudTrailArn: CloudTrailArn.t option
         [@ocaml.doc
           "Specifies the ARN of the trail. The format of a trail ARN is arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail."];
       regions: RegionList.t option
         [@ocaml.doc
-          "A list of regions to get CloudTrail data from and analyze to generate a policy."]}
-    let context_ = "TrailProperties"
-    let make ?allRegions =
+          "A list of regions to get CloudTrail data from and analyze to generate a policy."];
+      allRegions: Boolean.t option
+        [@ocaml.doc
+          "Possible values are true or false. If set to true, IAM Access Analyzer retrieves CloudTrail data from all regions to analyze and generate a policy."]}
+    let make ?cloudTrailArn =
       fun ?regions ->
-        fun ~cloudTrailArn ->
-          fun () -> { allRegions; regions; cloudTrailArn }
+        fun ?allRegions -> fun () -> { cloudTrailArn; regions; allRegions }
     let to_value x =
       structure_to_value
-        [("allRegions", (Option.map x.allRegions ~f:Boolean.to_value));
-        ("cloudTrailArn", (Some (CloudTrailArn.to_value x.cloudTrailArn)));
-        ("regions", (Option.map x.regions ~f:RegionList.to_value))]
+        [("cloudTrailArn",
+           (Option.map x.cloudTrailArn ~f:CloudTrailArn.to_value));
+        ("regions", (Option.map x.regions ~f:RegionList.to_value));
+        ("allRegions", (Option.map x.allRegions ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let allRegions =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "allRegions") in
       let regions =
         (Option.map ~f:RegionList.of_xml) (Xml.child xml_arg0 "regions") in
       let cloudTrailArn =
-        CloudTrailArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cloudTrailArn") in
-      let allRegions =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "allRegions") in
-      make ?regions ~cloudTrailArn ?allRegions ()
+        (Option.map ~f:CloudTrailArn.of_xml)
+          (Xml.child xml_arg0 "cloudTrailArn") in
+      make ?allRegions ?regions ?cloudTrailArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regions = field_map json "regions" RegionList.of_json in
+    let of_json json__ =
+      let allRegions = field_map json__ "allRegions" Boolean.of_json in
+      let regions = field_map json__ "regions" RegionList.of_json in
       let cloudTrailArn =
-        field_map_exn json "cloudTrailArn" CloudTrailArn.of_json in
-      let allRegions = field_map json "allRegions" Boolean.of_json in
-      make ?regions ~cloudTrailArn ?allRegions ()
+        field_map json__ "cloudTrailArn" CloudTrailArn.of_json in
+      make ?allRegions ?regions ?cloudTrailArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about the CloudTrail trail being analyzed to generate a policy."]
+module ResourceTypeDetails =
+  struct
+    type nonrec t =
+      {
+      totalActivePublic: Integer.t option
+        [@ocaml.doc
+          "The total number of active public findings for the resource type."];
+      totalActiveCrossAccount: Integer.t option
+        [@ocaml.doc
+          "The total number of active cross-account findings for the resource type."];
+      totalActiveErrors: Integer.t option
+        [@ocaml.doc
+          "The total number of active errors for the resource type."]}
+    let make ?totalActivePublic =
+      fun ?totalActiveCrossAccount ->
+        fun ?totalActiveErrors ->
+          fun () ->
+            { totalActivePublic; totalActiveCrossAccount; totalActiveErrors }
+    let to_value x =
+      structure_to_value
+        [("totalActivePublic",
+           (Option.map x.totalActivePublic ~f:Integer.to_value));
+        ("totalActiveCrossAccount",
+          (Option.map x.totalActiveCrossAccount ~f:Integer.to_value));
+        ("totalActiveErrors",
+          (Option.map x.totalActiveErrors ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalActiveErrors =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalActiveErrors") in
+      let totalActiveCrossAccount =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalActiveCrossAccount") in
+      let totalActivePublic =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalActivePublic") in
+      make ?totalActiveErrors ?totalActiveCrossAccount ?totalActivePublic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalActiveErrors =
+        field_map json__ "totalActiveErrors" Integer.of_json in
+      let totalActiveCrossAccount =
+        field_map json__ "totalActiveCrossAccount" Integer.of_json in
+      let totalActivePublic =
+        field_map json__ "totalActivePublic" Integer.of_json in
+      make ?totalActiveErrors ?totalActiveCrossAccount ?totalActivePublic ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the total number of active cross-account and public findings for a resource type of an external access analyzer."]
+module InternalAccessResourceTypeDetails =
+  struct
+    type nonrec t =
+      {
+      totalActiveFindings: Integer.t option
+        [@ocaml.doc
+          "The total number of active findings for the resource type in the internal access analyzer."];
+      totalResolvedFindings: Integer.t option
+        [@ocaml.doc
+          "The total number of resolved findings for the resource type in the internal access analyzer."];
+      totalArchivedFindings: Integer.t option
+        [@ocaml.doc
+          "The total number of archived findings for the resource type in the internal access analyzer."]}
+    let make ?totalActiveFindings =
+      fun ?totalResolvedFindings ->
+        fun ?totalArchivedFindings ->
+          fun () ->
+            {
+              totalActiveFindings;
+              totalResolvedFindings;
+              totalArchivedFindings
+            }
+    let to_value x =
+      structure_to_value
+        [("totalActiveFindings",
+           (Option.map x.totalActiveFindings ~f:Integer.to_value));
+        ("totalResolvedFindings",
+          (Option.map x.totalResolvedFindings ~f:Integer.to_value));
+        ("totalArchivedFindings",
+          (Option.map x.totalArchivedFindings ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalArchivedFindings =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalArchivedFindings") in
+      let totalResolvedFindings =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalResolvedFindings") in
+      let totalActiveFindings =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalActiveFindings") in
+      make ?totalArchivedFindings ?totalResolvedFindings ?totalActiveFindings
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalArchivedFindings =
+        field_map json__ "totalArchivedFindings" Integer.of_json in
+      let totalResolvedFindings =
+        field_map json__ "totalResolvedFindings" Integer.of_json in
+      let totalActiveFindings =
+        field_map json__ "totalActiveFindings" Integer.of_json in
+      make ?totalArchivedFindings ?totalResolvedFindings ?totalActiveFindings
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the total number of active, archived, and resolved findings for a resource type of an internal access analyzer."]
+module FindingAggregationAccountDetails =
+  struct
+    type nonrec t =
+      {
+      account: String_.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account for which unused access finding details are provided."];
+      numberOfActiveFindings: Integer.t option
+        [@ocaml.doc
+          "The number of active unused access findings for the specified Amazon Web Services account."];
+      details: FindingAggregationAccountDetailsMap.t option
+        [@ocaml.doc
+          "Provides the number of active findings for each type of unused access for the specified Amazon Web Services account."]}
+    let make ?account =
+      fun ?numberOfActiveFindings ->
+        fun ?details ->
+          fun () -> { account; numberOfActiveFindings; details }
+    let to_value x =
+      structure_to_value
+        [("account", (Option.map x.account ~f:String_.to_value));
+        ("numberOfActiveFindings",
+          (Option.map x.numberOfActiveFindings ~f:Integer.to_value));
+        ("details",
+          (Option.map x.details
+             ~f:FindingAggregationAccountDetailsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let details =
+        (Option.map ~f:FindingAggregationAccountDetailsMap.of_xml)
+          (Xml.child xml_arg0 "details") in
+      let numberOfActiveFindings =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "numberOfActiveFindings") in
+      let account =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "account") in
+      make ?details ?numberOfActiveFindings ?account ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let details =
+        field_map json__ "details"
+          FindingAggregationAccountDetailsMap.of_json in
+      let numberOfActiveFindings =
+        field_map json__ "numberOfActiveFindings" Integer.of_json in
+      let account = field_map json__ "account" String_.of_json in
+      make ?details ?numberOfActiveFindings ?account ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the findings for an Amazon Web Services account in an organization unused access analyzer."]
+module UnusedAccessTypeStatistics =
+  struct
+    type nonrec t =
+      {
+      unusedAccessType: String_.t option
+        [@ocaml.doc "The type of unused access."];
+      total: Integer.t option
+        [@ocaml.doc
+          "The total number of findings for the specified unused access type."]}
+    let make ?unusedAccessType =
+      fun ?total -> fun () -> { unusedAccessType; total }
+    let to_value x =
+      structure_to_value
+        [("unusedAccessType",
+           (Option.map x.unusedAccessType ~f:String_.to_value));
+        ("total", (Option.map x.total ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let total = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "total") in
+      let unusedAccessType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "unusedAccessType") in
+      make ?total ?unusedAccessType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let total = field_map json__ "total" Integer.of_json in
+      let unusedAccessType =
+        field_map json__ "unusedAccessType" String_.of_json in
+      make ?total ?unusedAccessType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the total number of findings for a type of unused access."]
+module FindingSource =
+  struct
+    type nonrec t =
+      {
+      type_: FindingSourceType.t option
+        [@ocaml.doc
+          "Indicates the type of access that generated the finding."];
+      detail: FindingSourceDetail.t option
+        [@ocaml.doc
+          "Includes details about how the access that generated the finding is granted. This is populated for Amazon S3 bucket findings."]}
+    let make ?type_ = fun ?detail -> fun () -> { type_; detail }
+    let to_value x =
+      structure_to_value
+        [("type", (Option.map x.type_ ~f:FindingSourceType.to_value));
+        ("detail", (Option.map x.detail ~f:FindingSourceDetail.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let detail =
+        (Option.map ~f:FindingSourceDetail.of_xml)
+          (Xml.child xml_arg0 "detail") in
+      let type_ =
+        (Option.map ~f:FindingSourceType.of_xml) (Xml.child xml_arg0 "type") in
+      make ?detail ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let detail = field_map json__ "detail" FindingSourceDetail.of_json in
+      let type_ = field_map json__ "type" FindingSourceType.of_json in
+      make ?detail ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The source of the finding. This indicates how the access that generated the finding is granted. It is populated for Amazon S3 bucket findings."]
+module UnusedAction =
+  struct
+    type nonrec t =
+      {
+      action: String_.t option
+        [@ocaml.doc
+          "The action for which the unused access finding was generated."];
+      lastAccessed: Timestamp.t option
+        [@ocaml.doc "The time at which the action was last accessed."]}
+    let make ?action =
+      fun ?lastAccessed -> fun () -> { action; lastAccessed }
+    let to_value x =
+      structure_to_value
+        [("action", (Option.map x.action ~f:String_.to_value));
+        ("lastAccessed", (Option.map x.lastAccessed ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastAccessed =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastAccessed") in
+      let action =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "action") in
+      make ?lastAccessed ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastAccessed = field_map json__ "lastAccessed" Timestamp.of_json in
+      let action = field_map json__ "action" String_.of_json in
+      make ?lastAccessed ?action ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about an unused access finding for an action. IAM Access Analyzer charges for unused access analysis based on the number of IAM roles and users analyzed per month. For more details on pricing, see IAM Access Analyzer pricing."]
+module DynamodbStreamPolicy =
+  struct
+    type nonrec t = string
+    let context_ = "DynamodbStreamPolicy"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DynamodbStreamPolicy" j
+    let to_json = simple_to_json to_value
+  end
+module DynamodbTablePolicy =
+  struct
+    type nonrec t = string
+    let context_ = "DynamodbTablePolicy"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DynamodbTablePolicy" j
+    let to_json = simple_to_json to_value
+  end
+module EbsGroupList =
+  struct
+    type nonrec t = EbsGroup.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EbsGroup.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EbsGroup.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EbsGroupList" ~of_json:EbsGroup.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EbsSnapshotDataEncryptionKeyId =
+  struct
+    type nonrec t = string
+    let context_ = "EbsSnapshotDataEncryptionKeyId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EbsSnapshotDataEncryptionKeyId" j
+    let to_json = simple_to_json to_value
+  end
+module EbsUserIdList =
+  struct
+    type nonrec t = EbsUserId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EbsUserId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EbsUserId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EbsUserIdList" ~of_json:EbsUserId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EcrRepositoryPolicy =
+  struct
+    type nonrec t = string
+    let context_ = "EcrRepositoryPolicy"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EcrRepositoryPolicy" j
+    let to_json = simple_to_json to_value
+  end
+module EfsFileSystemPolicy =
+  struct
+    type nonrec t = string
+    let context_ = "EfsFileSystemPolicy"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EfsFileSystemPolicy" j
+    let to_json = simple_to_json to_value
+  end
 module IamTrustPolicy =
   struct
     type nonrec t = string
@@ -1054,6 +2132,9 @@ module KmsGrantConfigurationsList =
   struct
     type nonrec t = KmsGrantConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KmsGrantConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -1097,12 +2178,112 @@ module KmsKeyPoliciesMap =
                     (fun x -> (KmsKeyPolicy.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:PolicyName.of_string
         ~of_json:KmsKeyPolicy.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module RdsDbClusterSnapshotAttributesMap =
+  struct
+    type nonrec t =
+      (RdsDbClusterSnapshotAttributeName.t *
+        RdsDbClusterSnapshotAttributeValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types RdsDbClusterSnapshotAttributeName RdsDbClusterSnapshotAttributeValue"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (RdsDbClusterSnapshotAttributeName.to_value x) |>
+                    (fun x ->
+                       (RdsDbClusterSnapshotAttributeValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json
+        ~key_of_string:RdsDbClusterSnapshotAttributeName.of_string
+        ~of_json:RdsDbClusterSnapshotAttributeValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RdsDbClusterSnapshotKmsKeyId =
+  struct
+    type nonrec t = string
+    let context_ = "RdsDbClusterSnapshotKmsKeyId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RdsDbClusterSnapshotKmsKeyId" j
+    let to_json = simple_to_json to_value
+  end
+module RdsDbSnapshotAttributesMap =
+  struct
+    type nonrec t =
+      (RdsDbSnapshotAttributeName.t * RdsDbSnapshotAttributeValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types RdsDbSnapshotAttributeName RdsDbSnapshotAttributeValue"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (RdsDbSnapshotAttributeName.to_value x) |>
+                    (fun x ->
+                       (RdsDbSnapshotAttributeValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:RdsDbSnapshotAttributeName.of_string
+        ~of_json:RdsDbSnapshotAttributeValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RdsDbSnapshotKmsKeyId =
+  struct
+    type nonrec t = string
+    let context_ = "RdsDbSnapshotKmsKeyId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RdsDbSnapshotKmsKeyId" j
+    let to_json = simple_to_json to_value
   end
 module S3AccessPointConfigurationsMap =
   struct
@@ -1129,6 +2310,8 @@ module S3AccessPointConfigurationsMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1140,6 +2323,9 @@ module S3BucketAclGrantConfigurationsList =
   struct
     type nonrec t = S3BucketAclGrantConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:S3BucketAclGrantConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -1175,6 +2361,56 @@ module S3BucketPolicy =
     let of_json j = string_of_json ~kind:"S3BucketPolicy" j
     let to_json = simple_to_json to_value
   end
+module S3ExpressDirectoryAccessPointConfigurationsMap =
+  struct
+    type nonrec t =
+      (S3ExpressDirectoryAccessPointArn.t *
+        S3ExpressDirectoryAccessPointConfiguration.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types S3ExpressDirectoryAccessPointArn S3ExpressDirectoryAccessPointConfiguration"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (S3ExpressDirectoryAccessPointArn.to_value x) |>
+                    (fun x ->
+                       (S3ExpressDirectoryAccessPointConfiguration.to_value y)
+                         |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json
+        ~key_of_string:S3ExpressDirectoryAccessPointArn.of_string
+        ~of_json:S3ExpressDirectoryAccessPointConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module S3ExpressDirectoryBucketPolicy =
+  struct
+    type nonrec t = string
+    let context_ = "S3ExpressDirectoryBucketPolicy"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3ExpressDirectoryBucketPolicy" j
+    let to_json = simple_to_json to_value
+  end
 module SecretsManagerSecretKmsId =
   struct
     type nonrec t = string
@@ -1201,6 +2437,24 @@ module SecretsManagerSecretPolicy =
     let of_json j = string_of_json ~kind:"SecretsManagerSecretPolicy" j
     let to_json = simple_to_json to_value
   end
+module SnsTopicPolicy =
+  struct
+    type nonrec t = string
+    let context_ = "SnsTopicPolicy"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:30720) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SnsTopicPolicy" j
+    let to_json = simple_to_json to_value
+  end
 module SqsQueuePolicy =
   struct
     type nonrec t = string
@@ -1218,109 +2472,132 @@ module Location =
   struct
     type nonrec t =
       {
-      path: PathElementList.t
+      path: PathElementList.t option
         [@ocaml.doc
           "A path in a policy, represented as a sequence of path elements."];
-      span: Span.t [@ocaml.doc "A span in a policy."]}
-    let context_ = "Location"
-    let make ~path = fun ~span -> fun () -> { path; span }
+      span: Span.t option [@ocaml.doc "A span in a policy."]}
+    let make ?path = fun ?span -> fun () -> { path; span }
     let to_value x =
       structure_to_value
-        [("path", (Some (PathElementList.to_value x.path)));
-        ("span", (Some (Span.to_value x.span)))]
+        [("path", (Option.map x.path ~f:PathElementList.to_value));
+        ("span", (Option.map x.span ~f:Span.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let span =
-        Span.of_xml (Xml.child_exn ~context:context_ xml_arg0 "span") in
+      let span = (Option.map ~f:Span.of_xml) (Xml.child xml_arg0 "span") in
       let path =
-        PathElementList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "path") in
-      make ~span ~path ()
+        (Option.map ~f:PathElementList.of_xml) (Xml.child xml_arg0 "path") in
+      make ?span ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let span = field_map_exn json "span" Span.of_json in
-      let path = field_map_exn json "path" PathElementList.of_json in
-      make ~span ~path ()
+    let of_json json__ =
+      let span = field_map json__ "span" Span.of_json in
+      let path = field_map json__ "path" PathElementList.of_json in
+      make ?span ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A location in a policy that is represented as a path through the JSON representation and a corresponding span."]
-module FindingSource =
-  struct
-    type nonrec t =
-      {
-      detail: FindingSourceDetail.t option
-        [@ocaml.doc
-          "Includes details about how the access that generated the finding is granted. This is populated for Amazon S3 bucket findings."];
-      type_: FindingSourceType.t
-        [@ocaml.doc
-          "Indicates the type of access that generated the finding."]}
-    let context_ = "FindingSource"
-    let make ?detail = fun ~type_ -> fun () -> { detail; type_ }
-    let to_value x =
-      structure_to_value
-        [("detail", (Option.map x.detail ~f:FindingSourceDetail.to_value));
-        ("type", (Some (FindingSourceType.to_value x.type_)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let type_ =
-        FindingSourceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      let detail =
-        (Option.map ~f:FindingSourceDetail.of_xml)
-          (Xml.child xml_arg0 "detail") in
-      make ~type_ ?detail ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" FindingSourceType.of_json in
-      let detail = field_map json "detail" FindingSourceDetail.of_json in
-      make ~type_ ?detail ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The source of the finding. This indicates how the access that generated the finding is granted. It is populated for Amazon S3 bucket findings."]
 module Criterion =
   struct
     type nonrec t =
       {
-      contains: ValueList.t option
-        [@ocaml.doc
-          "A \"contains\" operator to match for the filter used to create the rule."];
       eq: ValueList.t option
         [@ocaml.doc
           "An \"equals\" operator to match for the filter used to create the rule."];
-      exists: Boolean.t option
-        [@ocaml.doc
-          "An \"exists\" operator to match for the filter used to create the rule."];
       neq: ValueList.t option
         [@ocaml.doc
-          "A \"not equals\" operator to match for the filter used to create the rule."]}
-    let make ?contains =
-      fun ?eq ->
-        fun ?exists -> fun ?neq -> fun () -> { contains; eq; exists; neq }
+          "A \"not equals\" operator to match for the filter used to create the rule."];
+      contains: ValueList.t option
+        [@ocaml.doc
+          "A \"contains\" operator to match for the filter used to create the rule."];
+      exists: Boolean.t option
+        [@ocaml.doc
+          "An \"exists\" operator to match for the filter used to create the rule."]}
+    let make ?eq =
+      fun ?neq ->
+        fun ?contains ->
+          fun ?exists -> fun () -> { eq; neq; contains; exists }
     let to_value x =
       structure_to_value
-        [("contains", (Option.map x.contains ~f:ValueList.to_value));
-        ("eq", (Option.map x.eq ~f:ValueList.to_value));
-        ("exists", (Option.map x.exists ~f:Boolean.to_value));
-        ("neq", (Option.map x.neq ~f:ValueList.to_value))]
+        [("eq", (Option.map x.eq ~f:ValueList.to_value));
+        ("neq", (Option.map x.neq ~f:ValueList.to_value));
+        ("contains", (Option.map x.contains ~f:ValueList.to_value));
+        ("exists", (Option.map x.exists ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let neq = (Option.map ~f:ValueList.of_xml) (Xml.child xml_arg0 "neq") in
       let exists =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "exists") in
-      let eq = (Option.map ~f:ValueList.of_xml) (Xml.child xml_arg0 "eq") in
       let contains =
         (Option.map ~f:ValueList.of_xml) (Xml.child xml_arg0 "contains") in
-      make ?neq ?exists ?eq ?contains ()
+      let neq = (Option.map ~f:ValueList.of_xml) (Xml.child xml_arg0 "neq") in
+      let eq = (Option.map ~f:ValueList.of_xml) (Xml.child xml_arg0 "eq") in
+      make ?exists ?contains ?neq ?eq ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let neq = field_map json "neq" ValueList.of_json in
-      let exists = field_map json "exists" Boolean.of_json in
-      let eq = field_map json "eq" ValueList.of_json in
-      let contains = field_map json "contains" ValueList.of_json in
-      make ?neq ?exists ?eq ?contains ()
+    let of_json json__ =
+      let exists = field_map json__ "exists" Boolean.of_json in
+      let contains = field_map json__ "contains" ValueList.of_json in
+      let neq = field_map json__ "neq" ValueList.of_json in
+      let eq = field_map json__ "eq" ValueList.of_json in
+      make ?exists ?contains ?neq ?eq ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The criteria to use in the filter that defines the archive rule."]
+       "The criteria to use in the filter that defines the archive rule. For more information on available filter keys, see IAM Access Analyzer filter keys."]
+module InternalAccessConfiguration =
+  struct
+    type nonrec t =
+      {
+      analysisRule: InternalAccessAnalysisRule.t option
+        [@ocaml.doc
+          "Contains information about analysis rules for the internal access analyzer. These rules determine which resources and access patterns will be analyzed."]}
+    let make ?analysisRule = fun () -> { analysisRule }
+    let to_value x =
+      structure_to_value
+        [("analysisRule",
+           (Option.map x.analysisRule ~f:InternalAccessAnalysisRule.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let analysisRule =
+        (Option.map ~f:InternalAccessAnalysisRule.of_xml)
+          (Xml.child xml_arg0 "analysisRule") in
+      make ?analysisRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let analysisRule =
+        field_map json__ "analysisRule" InternalAccessAnalysisRule.of_json in
+      make ?analysisRule ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the configuration of an internal access analyzer for an Amazon Web Services organization or account. This configuration determines how the analyzer evaluates internal access within your Amazon Web Services environment."]
+module UnusedAccessConfiguration =
+  struct
+    type nonrec t =
+      {
+      unusedAccessAge: Integer.t option
+        [@ocaml.doc
+          "The specified access age in days for which to generate findings for unused access. For example, if you specify 90 days, the analyzer will generate findings for IAM entities within the accounts of the selected organization for any access that hasn't been used in 90 or more days since the analyzer's last scan. You can choose a value between 1 and 365 days."];
+      analysisRule: AnalysisRule.t option }
+    let make ?unusedAccessAge =
+      fun ?analysisRule -> fun () -> { unusedAccessAge; analysisRule }
+    let to_value x =
+      structure_to_value
+        [("unusedAccessAge",
+           (Option.map x.unusedAccessAge ~f:Integer.to_value));
+        ("analysisRule",
+          (Option.map x.analysisRule ~f:AnalysisRule.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let analysisRule =
+        (Option.map ~f:AnalysisRule.of_xml)
+          (Xml.child xml_arg0 "analysisRule") in
+      let unusedAccessAge =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "unusedAccessAge") in
+      make ?analysisRule ?unusedAccessAge ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let analysisRule = field_map json__ "analysisRule" AnalysisRule.of_json in
+      let unusedAccessAge =
+        field_map json__ "unusedAccessAge" Integer.of_json in
+      make ?analysisRule ?unusedAccessAge ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains information about an unused access analyzer."]
 module ReasonCode =
   struct
     type nonrec t =
@@ -1384,22 +2661,13 @@ module AccessPreviewStatusReasonCode =
       of_string (string_of_json ~kind:"AccessPreviewStatusReasonCode" j)
     let to_json = simple_to_json to_value
   end
-module Timestamp =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
 module TrailPropertiesList =
   struct
     type nonrec t = TrailProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrailProperties.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1421,6 +2689,570 @@ module TrailPropertiesList =
         ~of_json:TrailProperties.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ResourceTypeStatisticsMap =
+  struct
+    type nonrec t = (ResourceType.t * ResourceTypeDetails.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types ResourceType ResourceTypeDetails"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ResourceType.to_value x) |>
+                    (fun x ->
+                       (ResourceTypeDetails.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ResourceType.of_string
+        ~of_json:ResourceTypeDetails.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InternalAccessResourceTypeStatisticsMap =
+  struct
+    type nonrec t =
+      (ResourceType.t * InternalAccessResourceTypeDetails.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types ResourceType InternalAccessResourceTypeDetails"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ResourceType.to_value x) |>
+                    (fun x ->
+                       (InternalAccessResourceTypeDetails.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ResourceType.of_string
+        ~of_json:InternalAccessResourceTypeDetails.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AccountAggregations =
+  struct
+    type nonrec t = FindingAggregationAccountDetails.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FindingAggregationAccountDetails.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:FindingAggregationAccountDetails.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccountAggregations"
+        ~of_json:FindingAggregationAccountDetails.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UnusedAccessTypeStatisticsList =
+  struct
+    type nonrec t = UnusedAccessTypeStatistics.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UnusedAccessTypeStatistics.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UnusedAccessTypeStatistics.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UnusedAccessTypeStatisticsList"
+        ~of_json:UnusedAccessTypeStatistics.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ActionList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ActionList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ConditionKeyMap =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FindingSourceList =
+  struct
+    type nonrec t = FindingSource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FindingSource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FindingSource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FindingSourceList" ~of_json:FindingSource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PrincipalMap =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceControlPolicyRestriction =
+  struct
+    type nonrec t =
+      | APPLICABLE 
+      | FAILED_TO_EVALUATE_RCP 
+      | NOT_APPLICABLE 
+      | APPLIED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | APPLICABLE -> "APPLICABLE"
+      | FAILED_TO_EVALUATE_RCP -> "FAILED_TO_EVALUATE_RCP"
+      | NOT_APPLICABLE -> "NOT_APPLICABLE"
+      | APPLIED -> "APPLIED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "APPLICABLE" -> APPLICABLE
+      | "FAILED_TO_EVALUATE_RCP" -> FAILED_TO_EVALUATE_RCP
+      | "NOT_APPLICABLE" -> NOT_APPLICABLE
+      | "APPLIED" -> APPLIED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResourceControlPolicyRestriction"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ResourceControlPolicyRestriction" j)
+    let to_json = simple_to_json to_value
+  end
+module InternalAccessType =
+  struct
+    type nonrec t =
+      | INTRA_ACCOUNT 
+      | INTRA_ORG 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INTRA_ACCOUNT -> "INTRA_ACCOUNT"
+      | INTRA_ORG -> "INTRA_ORG"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INTRA_ACCOUNT" -> INTRA_ACCOUNT
+      | "INTRA_ORG" -> INTRA_ORG
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InternalAccessType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InternalAccessType" j)
+    let to_json = simple_to_json to_value
+  end
+module PrincipalType =
+  struct
+    type nonrec t =
+      | IAM_ROLE 
+      | IAM_USER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IAM_ROLE -> "IAM_ROLE"
+      | IAM_USER -> "IAM_USER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IAM_ROLE" -> IAM_ROLE
+      | "IAM_USER" -> IAM_USER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PrincipalType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PrincipalType" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceControlPolicyRestriction =
+  struct
+    type nonrec t =
+      | APPLICABLE 
+      | FAILED_TO_EVALUATE_SCP 
+      | NOT_APPLICABLE 
+      | APPLIED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | APPLICABLE -> "APPLICABLE"
+      | FAILED_TO_EVALUATE_SCP -> "FAILED_TO_EVALUATE_SCP"
+      | NOT_APPLICABLE -> "NOT_APPLICABLE"
+      | APPLIED -> "APPLIED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "APPLICABLE" -> APPLICABLE
+      | "FAILED_TO_EVALUATE_SCP" -> FAILED_TO_EVALUATE_SCP
+      | "NOT_APPLICABLE" -> NOT_APPLICABLE
+      | "APPLIED" -> APPLIED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ServiceControlPolicyRestriction"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ServiceControlPolicyRestriction" j)
+    let to_json = simple_to_json to_value
+  end
+module UnusedActionList =
+  struct
+    type nonrec t = UnusedAction.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UnusedAction.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UnusedAction.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UnusedActionList" ~of_json:UnusedAction.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RecommendedRemediationAction =
+  struct
+    type nonrec t =
+      | CREATE_POLICY 
+      | DETACH_POLICY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATE_POLICY -> "CREATE_POLICY"
+      | DETACH_POLICY -> "DETACH_POLICY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATE_POLICY" -> CREATE_POLICY
+      | "DETACH_POLICY" -> DETACH_POLICY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecommendedRemediationAction"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RecommendedRemediationAction" j)
+    let to_json = simple_to_json to_value
+  end
+module DynamodbStreamConfiguration =
+  struct
+    type nonrec t =
+      {
+      streamPolicy: DynamodbStreamPolicy.t option
+        [@ocaml.doc
+          "The proposed resource policy defining who can access or manage the DynamoDB stream."]}
+    let make ?streamPolicy = fun () -> { streamPolicy }
+    let to_value x =
+      structure_to_value
+        [("streamPolicy",
+           (Option.map x.streamPolicy ~f:DynamodbStreamPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamPolicy =
+        (Option.map ~f:DynamodbStreamPolicy.of_xml)
+          (Xml.child xml_arg0 "streamPolicy") in
+      make ?streamPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamPolicy =
+        field_map json__ "streamPolicy" DynamodbStreamPolicy.of_json in
+      make ?streamPolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The proposed access control configuration for a DynamoDB stream. You can propose a configuration for a new DynamoDB stream or an existing DynamoDB stream that you own by specifying the policy for the DynamoDB stream. For more information, see PutResourcePolicy. If the configuration is for an existing DynamoDB stream and you do not specify the DynamoDB policy, then the access preview uses the existing DynamoDB policy for the stream. If the access preview is for a new resource and you do not specify the policy, then the access preview assumes a DynamoDB stream without a policy. To propose deletion of an existing DynamoDB stream policy, you can specify an empty string for the DynamoDB policy."]
+module DynamodbTableConfiguration =
+  struct
+    type nonrec t =
+      {
+      tablePolicy: DynamodbTablePolicy.t option
+        [@ocaml.doc
+          "The proposed resource policy defining who can access or manage the DynamoDB table."]}
+    let make ?tablePolicy = fun () -> { tablePolicy }
+    let to_value x =
+      structure_to_value
+        [("tablePolicy",
+           (Option.map x.tablePolicy ~f:DynamodbTablePolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tablePolicy =
+        (Option.map ~f:DynamodbTablePolicy.of_xml)
+          (Xml.child xml_arg0 "tablePolicy") in
+      make ?tablePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tablePolicy =
+        field_map json__ "tablePolicy" DynamodbTablePolicy.of_json in
+      make ?tablePolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The proposed access control configuration for a DynamoDB table or index. You can propose a configuration for a new DynamoDB table or index or an existing DynamoDB table or index that you own by specifying the policy for the DynamoDB table or index. For more information, see PutResourcePolicy. If the configuration is for an existing DynamoDB table or index and you do not specify the DynamoDB policy, then the access preview uses the existing DynamoDB policy for the table or index. If the access preview is for a new resource and you do not specify the policy, then the access preview assumes a DynamoDB table without a policy. To propose deletion of an existing DynamoDB table or index policy, you can specify an empty string for the DynamoDB policy."]
+module EbsSnapshotConfiguration =
+  struct
+    type nonrec t =
+      {
+      userIds: EbsUserIdList.t option
+        [@ocaml.doc
+          "The IDs of the Amazon Web Services accounts that have access to the Amazon EBS volume snapshot. If the configuration is for an existing Amazon EBS volume snapshot and you do not specify the userIds, then the access preview uses the existing shared userIds for the snapshot. If the access preview is for a new resource and you do not specify the userIds, then the access preview considers the snapshot without any userIds. To propose deletion of existing shared accountIds, you can specify an empty list for userIds."];
+      groups: EbsGroupList.t option
+        [@ocaml.doc
+          "The groups that have access to the Amazon EBS volume snapshot. If the value all is specified, then the Amazon EBS volume snapshot is public. If the configuration is for an existing Amazon EBS volume snapshot and you do not specify the groups, then the access preview uses the existing shared groups for the snapshot. If the access preview is for a new resource and you do not specify the groups, then the access preview considers the snapshot without any groups. To propose deletion of existing shared groups, you can specify an empty list for groups."];
+      kmsKeyId: EbsSnapshotDataEncryptionKeyId.t option
+        [@ocaml.doc
+          "The KMS key identifier for an encrypted Amazon EBS volume snapshot. The KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key. If the configuration is for an existing Amazon EBS volume snapshot and you do not specify the kmsKeyId, or you specify an empty string, then the access preview uses the existing kmsKeyId of the snapshot. If the access preview is for a new resource and you do not specify the kmsKeyId, the access preview considers the snapshot as unencrypted."]}
+    let make ?userIds =
+      fun ?groups -> fun ?kmsKeyId -> fun () -> { userIds; groups; kmsKeyId }
+    let to_value x =
+      structure_to_value
+        [("userIds", (Option.map x.userIds ~f:EbsUserIdList.to_value));
+        ("groups", (Option.map x.groups ~f:EbsGroupList.to_value));
+        ("kmsKeyId",
+          (Option.map x.kmsKeyId ~f:EbsSnapshotDataEncryptionKeyId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKeyId =
+        (Option.map ~f:EbsSnapshotDataEncryptionKeyId.of_xml)
+          (Xml.child xml_arg0 "kmsKeyId") in
+      let groups =
+        (Option.map ~f:EbsGroupList.of_xml) (Xml.child xml_arg0 "groups") in
+      let userIds =
+        (Option.map ~f:EbsUserIdList.of_xml) (Xml.child xml_arg0 "userIds") in
+      make ?kmsKeyId ?groups ?userIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyId =
+        field_map json__ "kmsKeyId" EbsSnapshotDataEncryptionKeyId.of_json in
+      let groups = field_map json__ "groups" EbsGroupList.of_json in
+      let userIds = field_map json__ "userIds" EbsUserIdList.of_json in
+      make ?kmsKeyId ?groups ?userIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The proposed access control configuration for an Amazon EBS volume snapshot. You can propose a configuration for a new Amazon EBS volume snapshot or an Amazon EBS volume snapshot that you own by specifying the user IDs, groups, and optional KMS encryption key. For more information, see ModifySnapshotAttribute."]
+module EcrRepositoryConfiguration =
+  struct
+    type nonrec t =
+      {
+      repositoryPolicy: EcrRepositoryPolicy.t option
+        [@ocaml.doc
+          "The JSON repository policy text to apply to the Amazon ECR repository. For more information, see Private repository policy examples in the Amazon ECR User Guide."]}
+    let make ?repositoryPolicy = fun () -> { repositoryPolicy }
+    let to_value x =
+      structure_to_value
+        [("repositoryPolicy",
+           (Option.map x.repositoryPolicy ~f:EcrRepositoryPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repositoryPolicy =
+        (Option.map ~f:EcrRepositoryPolicy.of_xml)
+          (Xml.child xml_arg0 "repositoryPolicy") in
+      make ?repositoryPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repositoryPolicy =
+        field_map json__ "repositoryPolicy" EcrRepositoryPolicy.of_json in
+      make ?repositoryPolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The proposed access control configuration for an Amazon ECR repository. You can propose a configuration for a new Amazon ECR repository or an existing Amazon ECR repository that you own by specifying the Amazon ECR policy. For more information, see Repository. If the configuration is for an existing Amazon ECR repository and you do not specify the Amazon ECR policy, then the access preview uses the existing Amazon ECR policy for the repository. If the access preview is for a new resource and you do not specify the policy, then the access preview assumes an Amazon ECR repository without a policy. To propose deletion of an existing Amazon ECR repository policy, you can specify an empty string for the Amazon ECR policy."]
+module EfsFileSystemConfiguration =
+  struct
+    type nonrec t =
+      {
+      fileSystemPolicy: EfsFileSystemPolicy.t option
+        [@ocaml.doc
+          "The JSON policy definition to apply to the Amazon EFS file system. For more information on the elements that make up a file system policy, see Amazon EFS Resource-based policies."]}
+    let make ?fileSystemPolicy = fun () -> { fileSystemPolicy }
+    let to_value x =
+      structure_to_value
+        [("fileSystemPolicy",
+           (Option.map x.fileSystemPolicy ~f:EfsFileSystemPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fileSystemPolicy =
+        (Option.map ~f:EfsFileSystemPolicy.of_xml)
+          (Xml.child xml_arg0 "fileSystemPolicy") in
+      make ?fileSystemPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fileSystemPolicy =
+        field_map json__ "fileSystemPolicy" EfsFileSystemPolicy.of_json in
+      make ?fileSystemPolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The proposed access control configuration for an Amazon EFS file system. You can propose a configuration for a new Amazon EFS file system or an existing Amazon EFS file system that you own by specifying the Amazon EFS policy. For more information, see Using file systems in Amazon EFS. If the configuration is for an existing Amazon EFS file system and you do not specify the Amazon EFS policy, then the access preview uses the existing Amazon EFS policy for the file system. If the access preview is for a new resource and you do not specify the policy, then the access preview assumes an Amazon EFS file system without a policy. To propose deletion of an existing Amazon EFS file system policy, you can specify an empty string for the Amazon EFS policy."]
 module IamRoleConfiguration =
   struct
     type nonrec t =
@@ -1439,8 +3271,8 @@ module IamRoleConfiguration =
           (Xml.child xml_arg0 "trustPolicy") in
       make ?trustPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustPolicy = field_map json "trustPolicy" IamTrustPolicy.of_json in
+    let of_json json__ =
+      let trustPolicy = field_map json__ "trustPolicy" IamTrustPolicy.of_json in
       make ?trustPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1449,108 +3281,228 @@ module KmsKeyConfiguration =
   struct
     type nonrec t =
       {
-      grants: KmsGrantConfigurationsList.t option
-        [@ocaml.doc
-          "A list of proposed grant configurations for the KMS key. If the proposed grant configuration is for an existing key, the access preview uses the proposed list of grant configurations in place of the existing grants. Otherwise, the access preview uses the existing grants for the key."];
       keyPolicies: KmsKeyPoliciesMap.t option
         [@ocaml.doc
-          "Resource policy configuration for the KMS key. The only valid value for the name of the key policy is default. For more information, see Default key policy."]}
-    let make ?grants = fun ?keyPolicies -> fun () -> { grants; keyPolicies }
+          "Resource policy configuration for the KMS key. The only valid value for the name of the key policy is default. For more information, see Default key policy."];
+      grants: KmsGrantConfigurationsList.t option
+        [@ocaml.doc
+          "A list of proposed grant configurations for the KMS key. If the proposed grant configuration is for an existing key, the access preview uses the proposed list of grant configurations in place of the existing grants. Otherwise, the access preview uses the existing grants for the key."]}
+    let make ?keyPolicies = fun ?grants -> fun () -> { keyPolicies; grants }
     let to_value x =
       structure_to_value
-        [("grants",
-           (Option.map x.grants ~f:KmsGrantConfigurationsList.to_value));
-        ("keyPolicies",
-          (Option.map x.keyPolicies ~f:KmsKeyPoliciesMap.to_value))]
+        [("keyPolicies",
+           (Option.map x.keyPolicies ~f:KmsKeyPoliciesMap.to_value));
+        ("grants",
+          (Option.map x.grants ~f:KmsGrantConfigurationsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let keyPolicies =
-        (Option.map ~f:KmsKeyPoliciesMap.of_xml)
-          (Xml.child xml_arg0 "keyPolicies") in
       let grants =
         (Option.map ~f:KmsGrantConfigurationsList.of_xml)
           (Xml.child xml_arg0 "grants") in
-      make ?keyPolicies ?grants ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let keyPolicies =
-        field_map json "keyPolicies" KmsKeyPoliciesMap.of_json in
-      let grants = field_map json "grants" KmsGrantConfigurationsList.of_json in
-      make ?keyPolicies ?grants ()
+        (Option.map ~f:KmsKeyPoliciesMap.of_xml)
+          (Xml.child xml_arg0 "keyPolicies") in
+      make ?grants ?keyPolicies ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let grants =
+        field_map json__ "grants" KmsGrantConfigurationsList.of_json in
+      let keyPolicies =
+        field_map json__ "keyPolicies" KmsKeyPoliciesMap.of_json in
+      make ?grants ?keyPolicies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Proposed access control configuration for a KMS key. You can propose a configuration for a new KMS key or an existing KMS key that you own by specifying the key policy and KMS grant configuration. If the configuration is for an existing key and you do not specify the key policy, the access preview uses the existing policy for the key. If the access preview is for a new resource and you do not specify the key policy, then the access preview uses the default key policy. The proposed key policy cannot be an empty string. For more information, see Default key policy. For more information about key policy limits, see Resource quotas."]
+module RdsDbClusterSnapshotConfiguration =
+  struct
+    type nonrec t =
+      {
+      attributes: RdsDbClusterSnapshotAttributesMap.t option
+        [@ocaml.doc
+          "The names and values of manual DB cluster snapshot attributes. Manual DB cluster snapshot attributes are used to authorize other Amazon Web Services accounts to restore a manual DB cluster snapshot. The only valid value for AttributeName for the attribute map is restore"];
+      kmsKeyId: RdsDbClusterSnapshotKmsKeyId.t option
+        [@ocaml.doc
+          "The KMS key identifier for an encrypted Amazon RDS DB cluster snapshot. The KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key. If the configuration is for an existing Amazon RDS DB cluster snapshot and you do not specify the kmsKeyId, or you specify an empty string, then the access preview uses the existing kmsKeyId of the snapshot. If the access preview is for a new resource and you do not specify the specify the kmsKeyId, then the access preview considers the snapshot as unencrypted."]}
+    let make ?attributes =
+      fun ?kmsKeyId -> fun () -> { attributes; kmsKeyId }
+    let to_value x =
+      structure_to_value
+        [("attributes",
+           (Option.map x.attributes
+              ~f:RdsDbClusterSnapshotAttributesMap.to_value));
+        ("kmsKeyId",
+          (Option.map x.kmsKeyId ~f:RdsDbClusterSnapshotKmsKeyId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKeyId =
+        (Option.map ~f:RdsDbClusterSnapshotKmsKeyId.of_xml)
+          (Xml.child xml_arg0 "kmsKeyId") in
+      let attributes =
+        (Option.map ~f:RdsDbClusterSnapshotAttributesMap.of_xml)
+          (Xml.child xml_arg0 "attributes") in
+      make ?kmsKeyId ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyId =
+        field_map json__ "kmsKeyId" RdsDbClusterSnapshotKmsKeyId.of_json in
+      let attributes =
+        field_map json__ "attributes"
+          RdsDbClusterSnapshotAttributesMap.of_json in
+      make ?kmsKeyId ?attributes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The proposed access control configuration for an Amazon RDS DB cluster snapshot. You can propose a configuration for a new Amazon RDS DB cluster snapshot or an Amazon RDS DB cluster snapshot that you own by specifying the RdsDbClusterSnapshotAttributeValue and optional KMS encryption key. For more information, see ModifyDBClusterSnapshotAttribute."]
+module RdsDbSnapshotConfiguration =
+  struct
+    type nonrec t =
+      {
+      attributes: RdsDbSnapshotAttributesMap.t option
+        [@ocaml.doc
+          "The names and values of manual DB snapshot attributes. Manual DB snapshot attributes are used to authorize other Amazon Web Services accounts to restore a manual DB snapshot. The only valid value for attributeName for the attribute map is restore."];
+      kmsKeyId: RdsDbSnapshotKmsKeyId.t option
+        [@ocaml.doc
+          "The KMS key identifier for an encrypted Amazon RDS DB snapshot. The KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key. If the configuration is for an existing Amazon RDS DB snapshot and you do not specify the kmsKeyId, or you specify an empty string, then the access preview uses the existing kmsKeyId of the snapshot. If the access preview is for a new resource and you do not specify the specify the kmsKeyId, then the access preview considers the snapshot as unencrypted."]}
+    let make ?attributes =
+      fun ?kmsKeyId -> fun () -> { attributes; kmsKeyId }
+    let to_value x =
+      structure_to_value
+        [("attributes",
+           (Option.map x.attributes ~f:RdsDbSnapshotAttributesMap.to_value));
+        ("kmsKeyId",
+          (Option.map x.kmsKeyId ~f:RdsDbSnapshotKmsKeyId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKeyId =
+        (Option.map ~f:RdsDbSnapshotKmsKeyId.of_xml)
+          (Xml.child xml_arg0 "kmsKeyId") in
+      let attributes =
+        (Option.map ~f:RdsDbSnapshotAttributesMap.of_xml)
+          (Xml.child xml_arg0 "attributes") in
+      make ?kmsKeyId ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyId =
+        field_map json__ "kmsKeyId" RdsDbSnapshotKmsKeyId.of_json in
+      let attributes =
+        field_map json__ "attributes" RdsDbSnapshotAttributesMap.of_json in
+      make ?kmsKeyId ?attributes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The proposed access control configuration for an Amazon RDS DB snapshot. You can propose a configuration for a new Amazon RDS DB snapshot or an Amazon RDS DB snapshot that you own by specifying the RdsDbSnapshotAttributeValue and optional KMS encryption key. For more information, see ModifyDBSnapshotAttribute."]
 module S3BucketConfiguration =
   struct
     type nonrec t =
       {
-      accessPoints: S3AccessPointConfigurationsMap.t option
-        [@ocaml.doc
-          "The configuration of Amazon S3 access points or multi-region access points for the bucket. You can propose up to 10 new access points per bucket."];
+      bucketPolicy: S3BucketPolicy.t option
+        [@ocaml.doc "The proposed bucket policy for the Amazon S3 bucket."];
       bucketAclGrants: S3BucketAclGrantConfigurationsList.t option
         [@ocaml.doc
           "The proposed list of ACL grants for the Amazon S3 bucket. You can propose up to 100 ACL grants per bucket. If the proposed grant configuration is for an existing bucket, the access preview uses the proposed list of grant configurations in place of the existing grants. Otherwise, the access preview uses the existing grants for the bucket."];
-      bucketPolicy: S3BucketPolicy.t option
-        [@ocaml.doc "The proposed bucket policy for the Amazon S3 bucket."];
       bucketPublicAccessBlock: S3PublicAccessBlockConfiguration.t option
         [@ocaml.doc
-          "The proposed block public access configuration for the Amazon S3 bucket."]}
-    let make ?accessPoints =
+          "The proposed block public access configuration for the Amazon S3 bucket."];
+      accessPoints: S3AccessPointConfigurationsMap.t option
+        [@ocaml.doc
+          "The configuration of Amazon S3 access points or multi-region access points for the bucket. You can propose up to 10 new access points per bucket."]}
+    let make ?bucketPolicy =
       fun ?bucketAclGrants ->
-        fun ?bucketPolicy ->
-          fun ?bucketPublicAccessBlock ->
+        fun ?bucketPublicAccessBlock ->
+          fun ?accessPoints ->
             fun () ->
               {
-                accessPoints;
-                bucketAclGrants;
                 bucketPolicy;
-                bucketPublicAccessBlock
+                bucketAclGrants;
+                bucketPublicAccessBlock;
+                accessPoints
               }
     let to_value x =
       structure_to_value
-        [("accessPoints",
-           (Option.map x.accessPoints
-              ~f:S3AccessPointConfigurationsMap.to_value));
+        [("bucketPolicy",
+           (Option.map x.bucketPolicy ~f:S3BucketPolicy.to_value));
         ("bucketAclGrants",
           (Option.map x.bucketAclGrants
              ~f:S3BucketAclGrantConfigurationsList.to_value));
-        ("bucketPolicy",
-          (Option.map x.bucketPolicy ~f:S3BucketPolicy.to_value));
         ("bucketPublicAccessBlock",
           (Option.map x.bucketPublicAccessBlock
-             ~f:S3PublicAccessBlockConfiguration.to_value))]
+             ~f:S3PublicAccessBlockConfiguration.to_value));
+        ("accessPoints",
+          (Option.map x.accessPoints
+             ~f:S3AccessPointConfigurationsMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let bucketPublicAccessBlock =
-        (Option.map ~f:S3PublicAccessBlockConfiguration.of_xml)
-          (Xml.child xml_arg0 "bucketPublicAccessBlock") in
-      let bucketPolicy =
-        (Option.map ~f:S3BucketPolicy.of_xml)
-          (Xml.child xml_arg0 "bucketPolicy") in
-      let bucketAclGrants =
-        (Option.map ~f:S3BucketAclGrantConfigurationsList.of_xml)
-          (Xml.child xml_arg0 "bucketAclGrants") in
       let accessPoints =
         (Option.map ~f:S3AccessPointConfigurationsMap.of_xml)
           (Xml.child xml_arg0 "accessPoints") in
-      make ?bucketPublicAccessBlock ?bucketPolicy ?bucketAclGrants
-        ?accessPoints ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let bucketPublicAccessBlock =
-        field_map json "bucketPublicAccessBlock"
-          S3PublicAccessBlockConfiguration.of_json in
-      let bucketPolicy = field_map json "bucketPolicy" S3BucketPolicy.of_json in
+        (Option.map ~f:S3PublicAccessBlockConfiguration.of_xml)
+          (Xml.child xml_arg0 "bucketPublicAccessBlock") in
       let bucketAclGrants =
-        field_map json "bucketAclGrants"
-          S3BucketAclGrantConfigurationsList.of_json in
+        (Option.map ~f:S3BucketAclGrantConfigurationsList.of_xml)
+          (Xml.child xml_arg0 "bucketAclGrants") in
+      let bucketPolicy =
+        (Option.map ~f:S3BucketPolicy.of_xml)
+          (Xml.child xml_arg0 "bucketPolicy") in
+      make ?accessPoints ?bucketPublicAccessBlock ?bucketAclGrants
+        ?bucketPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let accessPoints =
-        field_map json "accessPoints" S3AccessPointConfigurationsMap.of_json in
-      make ?bucketPublicAccessBlock ?bucketPolicy ?bucketAclGrants
-        ?accessPoints ()
+        field_map json__ "accessPoints"
+          S3AccessPointConfigurationsMap.of_json in
+      let bucketPublicAccessBlock =
+        field_map json__ "bucketPublicAccessBlock"
+          S3PublicAccessBlockConfiguration.of_json in
+      let bucketAclGrants =
+        field_map json__ "bucketAclGrants"
+          S3BucketAclGrantConfigurationsList.of_json in
+      let bucketPolicy =
+        field_map json__ "bucketPolicy" S3BucketPolicy.of_json in
+      make ?accessPoints ?bucketPublicAccessBlock ?bucketAclGrants
+        ?bucketPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Proposed access control configuration for an Amazon S3 bucket. You can propose a configuration for a new Amazon S3 bucket or an existing Amazon S3 bucket that you own by specifying the Amazon S3 bucket policy, bucket ACLs, bucket BPA settings, Amazon S3 access points, and multi-region access points attached to the bucket. If the configuration is for an existing Amazon S3 bucket and you do not specify the Amazon S3 bucket policy, the access preview uses the existing policy attached to the bucket. If the access preview is for a new resource and you do not specify the Amazon S3 bucket policy, the access preview assumes a bucket without a policy. To propose deletion of an existing bucket policy, you can specify an empty string. For more information about bucket policy limits, see Bucket Policy Examples."]
+module S3ExpressDirectoryBucketConfiguration =
+  struct
+    type nonrec t =
+      {
+      bucketPolicy: S3ExpressDirectoryBucketPolicy.t option
+        [@ocaml.doc
+          "The proposed bucket policy for the Amazon S3 directory bucket."];
+      accessPoints: S3ExpressDirectoryAccessPointConfigurationsMap.t option
+        [@ocaml.doc
+          "The proposed access points for the Amazon S3 directory bucket."]}
+    let make ?bucketPolicy =
+      fun ?accessPoints -> fun () -> { bucketPolicy; accessPoints }
+    let to_value x =
+      structure_to_value
+        [("bucketPolicy",
+           (Option.map x.bucketPolicy
+              ~f:S3ExpressDirectoryBucketPolicy.to_value));
+        ("accessPoints",
+          (Option.map x.accessPoints
+             ~f:S3ExpressDirectoryAccessPointConfigurationsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessPoints =
+        (Option.map ~f:S3ExpressDirectoryAccessPointConfigurationsMap.of_xml)
+          (Xml.child xml_arg0 "accessPoints") in
+      let bucketPolicy =
+        (Option.map ~f:S3ExpressDirectoryBucketPolicy.of_xml)
+          (Xml.child xml_arg0 "bucketPolicy") in
+      make ?accessPoints ?bucketPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessPoints =
+        field_map json__ "accessPoints"
+          S3ExpressDirectoryAccessPointConfigurationsMap.of_json in
+      let bucketPolicy =
+        field_map json__ "bucketPolicy"
+          S3ExpressDirectoryBucketPolicy.of_json in
+      make ?accessPoints ?bucketPolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Proposed access control configuration for an Amazon S3 directory bucket. You can propose a configuration for a new Amazon S3 directory bucket or an existing Amazon S3 directory bucket that you own by specifying the Amazon S3 bucket policy. If the configuration is for an existing Amazon S3 directory bucket and you do not specify the Amazon S3 bucket policy, the access preview uses the existing policy attached to the directory bucket. If the access preview is for a new resource and you do not specify the Amazon S3 bucket policy, the access preview assumes an directory bucket without a policy. To propose deletion of an existing bucket policy, you can specify an empty string. For more information about Amazon S3 directory bucket policies, see Example bucket policies for directory buckets in the Amazon Simple Storage Service User Guide."]
 module SecretsManagerSecretConfiguration =
   struct
     type nonrec t =
@@ -1578,15 +3530,40 @@ module SecretsManagerSecretConfiguration =
           (Xml.child xml_arg0 "kmsKeyId") in
       make ?secretPolicy ?kmsKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secretPolicy =
-        field_map json "secretPolicy" SecretsManagerSecretPolicy.of_json in
+        field_map json__ "secretPolicy" SecretsManagerSecretPolicy.of_json in
       let kmsKeyId =
-        field_map json "kmsKeyId" SecretsManagerSecretKmsId.of_json in
+        field_map json__ "kmsKeyId" SecretsManagerSecretKmsId.of_json in
       make ?secretPolicy ?kmsKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration for a Secrets Manager secret. For more information, see CreateSecret. You can propose a configuration for a new secret or an existing secret that you own by specifying the secret policy and optional KMS encryption key. If the configuration is for an existing secret and you do not specify the secret policy, the access preview uses the existing policy for the secret. If the access preview is for a new resource and you do not specify the policy, the access preview assumes a secret without a policy. To propose deletion of an existing policy, you can specify an empty string. If the proposed configuration is for a new secret and you do not specify the KMS key ID, the access preview uses the Amazon Web Services managed key aws/secretsmanager. If you specify an empty string for the KMS key ID, the access preview uses the Amazon Web Services managed key of the Amazon Web Services account. For more information about secret policy limits, see Quotas for Secrets Manager.."]
+module SnsTopicConfiguration =
+  struct
+    type nonrec t =
+      {
+      topicPolicy: SnsTopicPolicy.t option
+        [@ocaml.doc
+          "The JSON policy text that defines who can access an Amazon SNS topic. For more information, see Example cases for Amazon SNS access control in the Amazon SNS Developer Guide."]}
+    let make ?topicPolicy = fun () -> { topicPolicy }
+    let to_value x =
+      structure_to_value
+        [("topicPolicy",
+           (Option.map x.topicPolicy ~f:SnsTopicPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let topicPolicy =
+        (Option.map ~f:SnsTopicPolicy.of_xml)
+          (Xml.child xml_arg0 "topicPolicy") in
+      make ?topicPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let topicPolicy = field_map json__ "topicPolicy" SnsTopicPolicy.of_json in
+      make ?topicPolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The proposed access control configuration for an Amazon SNS topic. You can propose a configuration for a new Amazon SNS topic or an existing Amazon SNS topic that you own by specifying the policy. If the configuration is for an existing Amazon SNS topic and you do not specify the Amazon SNS policy, then the access preview uses the existing Amazon SNS policy for the topic. If the access preview is for a new resource and you do not specify the policy, then the access preview assumes an Amazon SNS topic without a policy. To propose deletion of an existing Amazon SNS topic policy, you can specify an empty string for the Amazon SNS policy. For more information, see Topic."]
 module SqsQueueConfiguration =
   struct
     type nonrec t =
@@ -1605,12 +3582,43 @@ module SqsQueueConfiguration =
           (Xml.child xml_arg0 "queuePolicy") in
       make ?queuePolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queuePolicy = field_map json "queuePolicy" SqsQueuePolicy.of_json in
+    let of_json json__ =
+      let queuePolicy = field_map json__ "queuePolicy" SqsQueuePolicy.of_json in
       make ?queuePolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The proposed access control configuration for an Amazon SQS queue. You can propose a configuration for a new Amazon SQS queue or an existing Amazon SQS queue that you own by specifying the Amazon SQS policy. If the configuration is for an existing Amazon SQS queue and you do not specify the Amazon SQS policy, the access preview uses the existing Amazon SQS policy for the queue. If the access preview is for a new resource and you do not specify the policy, the access preview assumes an Amazon SQS queue without a policy. To propose deletion of an existing Amazon SQS queue policy, you can specify an empty string for the Amazon SQS policy. For more information about Amazon SQS policy limits, see Quotas related to policies."]
+module Action =
+  struct
+    type nonrec t = string
+    let context_ = "Action"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Action" j
+    let to_json = simple_to_json to_value
+  end
+module Resource =
+  struct
+    type nonrec t = string
+    let context_ = "Resource"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Resource" j
+    let to_json = simple_to_json to_value
+  end
 module IssueCode =
   struct
     type nonrec t = string
@@ -1641,6 +3649,9 @@ module LocationList =
   struct
     type nonrec t = Location.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Location.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1698,69 +3709,68 @@ module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      message: String_.t
-        [@ocaml.doc "A message about the validation exception."];
-      name: String_.t [@ocaml.doc "The name of the validation exception."]}
-    let context_ = "ValidationExceptionField"
-    let make ~message = fun ~name -> fun () -> { message; name }
+      name: String_.t option
+        [@ocaml.doc "The name of the validation exception."];
+      message: String_.t option
+        [@ocaml.doc "A message about the validation exception."]}
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("name", (Some (String_.to_value x.name)))]
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~name ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~name ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a validation exception."]
 module Trail =
   struct
     type nonrec t =
       {
-      allRegions: Boolean.t option
-        [@ocaml.doc
-          "Possible values are true or false. If set to true, IAM Access Analyzer retrieves CloudTrail data from all regions to analyze and generate a policy."];
       cloudTrailArn: CloudTrailArn.t
         [@ocaml.doc
           "Specifies the ARN of the trail. The format of a trail ARN is arn:aws:cloudtrail:us-east-2:123456789012:trail/MyTrail."];
       regions: RegionList.t option
         [@ocaml.doc
-          "A list of regions to get CloudTrail data from and analyze to generate a policy."]}
+          "A list of regions to get CloudTrail data from and analyze to generate a policy."];
+      allRegions: Boolean.t option
+        [@ocaml.doc
+          "Possible values are true or false. If set to true, IAM Access Analyzer retrieves CloudTrail data from all regions to analyze and generate a policy."]}
     let context_ = "Trail"
-    let make ?allRegions =
-      fun ?regions ->
+    let make ?regions =
+      fun ?allRegions ->
         fun ~cloudTrailArn ->
-          fun () -> { allRegions; regions; cloudTrailArn }
+          fun () -> { regions; allRegions; cloudTrailArn }
     let to_value x =
       structure_to_value
-        [("allRegions", (Option.map x.allRegions ~f:Boolean.to_value));
-        ("cloudTrailArn", (Some (CloudTrailArn.to_value x.cloudTrailArn)));
-        ("regions", (Option.map x.regions ~f:RegionList.to_value))]
+        [("cloudTrailArn", (Some (CloudTrailArn.to_value x.cloudTrailArn)));
+        ("regions", (Option.map x.regions ~f:RegionList.to_value));
+        ("allRegions", (Option.map x.allRegions ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let allRegions =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "allRegions") in
       let regions =
         (Option.map ~f:RegionList.of_xml) (Xml.child xml_arg0 "regions") in
       let cloudTrailArn =
         CloudTrailArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "cloudTrailArn") in
-      let allRegions =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "allRegions") in
-      make ?regions ~cloudTrailArn ?allRegions ()
+      make ?allRegions ?regions ~cloudTrailArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regions = field_map json "regions" RegionList.of_json in
+    let of_json json__ =
+      let allRegions = field_map json__ "allRegions" Boolean.of_json in
+      let regions = field_map json__ "regions" RegionList.of_json in
       let cloudTrailArn =
-        field_map_exn json "cloudTrailArn" CloudTrailArn.of_json in
-      let allRegions = field_map json "allRegions" Boolean.of_json in
-      make ?regions ~cloudTrailArn ?allRegions ()
+        field_map_exn json__ "cloudTrailArn" CloudTrailArn.of_json in
+      make ?allRegions ?regions ~cloudTrailArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about the CloudTrail trail being analyzed to generate a policy."]
@@ -1826,58 +3836,6 @@ module PrincipalArn =
     let of_json j = string_of_json ~kind:"PrincipalArn" j
     let to_json = simple_to_json to_value
   end
-module ActionList =
-  struct
-    type nonrec t = String_.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:String_.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ActionList" ~of_json:String_.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ConditionKeyMap =
-  struct
-    type nonrec t = (String_.t * String_.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((String_.of_string chopped),
-                              (String_.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (String_.to_value x) |>
-                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:String_.of_string
-        ~of_json:String_.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module FindingId =
   struct
     type nonrec t = string
@@ -1890,30 +3848,6 @@ module FindingId =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"FindingId" j
     let to_json = simple_to_json to_value
-  end
-module FindingSourceList =
-  struct
-    type nonrec t = FindingSource.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:FindingSource.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:FindingSource.of_xml)
-    let of_json j =
-      list_of_json ~kind:"FindingSourceList" ~of_json:FindingSource.of_json j
-    let to_json v = composed_to_json to_value v
   end
 module FindingStatus =
   struct
@@ -1943,72 +3877,41 @@ module FindingStatus =
     let of_json j = of_string (string_of_json ~kind:"FindingStatus" j)
     let to_json = simple_to_json to_value
   end
-module PrincipalMap =
-  struct
-    type nonrec t = (String_.t * String_.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((String_.of_string chopped),
-                              (String_.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (String_.to_value x) |>
-                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:String_.of_string
-        ~of_json:String_.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ResourceType =
+module FindingType =
   struct
     type nonrec t =
-      | AWS__S3__Bucket 
-      | AWS__IAM__Role 
-      | AWS__SQS__Queue 
-      | AWS__Lambda__Function 
-      | AWS__Lambda__LayerVersion 
-      | AWS__KMS__Key 
-      | AWS__SecretsManager__Secret 
+      | ExternalAccess 
+      | UnusedIAMRole 
+      | UnusedIAMUserAccessKey 
+      | UnusedIAMUserPassword 
+      | UnusedPermission 
+      | InternalAccess 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | AWS__S3__Bucket -> "AWS::S3::Bucket"
-      | AWS__IAM__Role -> "AWS::IAM::Role"
-      | AWS__SQS__Queue -> "AWS::SQS::Queue"
-      | AWS__Lambda__Function -> "AWS::Lambda::Function"
-      | AWS__Lambda__LayerVersion -> "AWS::Lambda::LayerVersion"
-      | AWS__KMS__Key -> "AWS::KMS::Key"
-      | AWS__SecretsManager__Secret -> "AWS::SecretsManager::Secret"
+      | ExternalAccess -> "ExternalAccess"
+      | UnusedIAMRole -> "UnusedIAMRole"
+      | UnusedIAMUserAccessKey -> "UnusedIAMUserAccessKey"
+      | UnusedIAMUserPassword -> "UnusedIAMUserPassword"
+      | UnusedPermission -> "UnusedPermission"
+      | InternalAccess -> "InternalAccess"
       | Non_static_id s -> s
     let of_string =
       function
-      | "AWS::S3::Bucket" -> AWS__S3__Bucket
-      | "AWS::IAM::Role" -> AWS__IAM__Role
-      | "AWS::SQS::Queue" -> AWS__SQS__Queue
-      | "AWS::Lambda::Function" -> AWS__Lambda__Function
-      | "AWS::Lambda::LayerVersion" -> AWS__Lambda__LayerVersion
-      | "AWS::KMS::Key" -> AWS__KMS__Key
-      | "AWS::SecretsManager::Secret" -> AWS__SecretsManager__Secret
+      | "ExternalAccess" -> ExternalAccess
+      | "UnusedIAMRole" -> UnusedIAMRole
+      | "UnusedIAMUserAccessKey" -> UnusedIAMUserAccessKey
+      | "UnusedIAMUserPassword" -> UnusedIAMUserPassword
+      | "UnusedPermission" -> UnusedPermission
+      | "InternalAccess" -> InternalAccess
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ResourceType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
+      of_string (string_of_xml ~kind:"enumeration FindingType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FindingType" j)
     let to_json = simple_to_json to_value
   end
 module FilterCriteriaMap =
@@ -2034,6 +3937,8 @@ module FilterCriteriaMap =
                     (fun x -> (Criterion.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2080,6 +3985,44 @@ module AnalyzerArn =
     let of_json j = string_of_json ~kind:"AnalyzerArn" j
     let to_json = simple_to_json to_value
   end
+module AnalyzerConfiguration =
+  struct
+    type nonrec t =
+      {
+      unusedAccess: UnusedAccessConfiguration.t option
+        [@ocaml.doc
+          "Specifies the configuration of an unused access analyzer for an Amazon Web Services organization or account."];
+      internalAccess: InternalAccessConfiguration.t option
+        [@ocaml.doc
+          "Specifies the configuration of an internal access analyzer for an Amazon Web Services organization or account. This configuration determines how the analyzer evaluates access within your Amazon Web Services environment."]}
+    let make ?unusedAccess =
+      fun ?internalAccess -> fun () -> { unusedAccess; internalAccess }
+    let to_value x =
+      structure_to_value
+        [("unusedAccess",
+           (Option.map x.unusedAccess ~f:UnusedAccessConfiguration.to_value));
+        ("internalAccess",
+          (Option.map x.internalAccess
+             ~f:InternalAccessConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let internalAccess =
+        (Option.map ~f:InternalAccessConfiguration.of_xml)
+          (Xml.child xml_arg0 "internalAccess") in
+      let unusedAccess =
+        (Option.map ~f:UnusedAccessConfiguration.of_xml)
+          (Xml.child xml_arg0 "unusedAccess") in
+      make ?internalAccess ?unusedAccess ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let internalAccess =
+        field_map json__ "internalAccess" InternalAccessConfiguration.of_json in
+      let unusedAccess =
+        field_map json__ "unusedAccess" UnusedAccessConfiguration.of_json in
+      make ?internalAccess ?unusedAccess ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the configuration of an analyzer for an Amazon Web Services organization or account."]
 module AnalyzerStatus =
   struct
     type nonrec t =
@@ -2115,69 +4058,52 @@ module StatusReason =
   struct
     type nonrec t =
       {
-      code: ReasonCode.t
+      code: ReasonCode.t option
         [@ocaml.doc
           "The reason code for the current status of the analyzer."]}
-    let context_ = "StatusReason"
-    let make ~code = fun () -> { code }
+    let make ?code = fun () -> { code }
     let to_value x =
-      structure_to_value [("code", (Some (ReasonCode.to_value x.code)))]
+      structure_to_value
+        [("code", (Option.map x.code ~f:ReasonCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let code =
-        ReasonCode.of_xml (Xml.child_exn ~context:context_ xml_arg0 "code") in
-      make ~code ()
+        (Option.map ~f:ReasonCode.of_xml) (Xml.child xml_arg0 "code") in
+      make ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map_exn json "code" ReasonCode.of_json in
-      make ~code ()
+    let of_json json__ =
+      let code = field_map json__ "code" ReasonCode.of_json in make ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides more details about the current status of the analyzer. For example, if the creation for the analyzer fails, a Failed status is returned. For an analyzer with organization as the type, this failure can be due to an issue with creating the service-linked roles required in the member accounts of the Amazon Web Services organization."]
-module TagsMap =
-  struct
-    type nonrec t = (String_.t * String_.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((String_.of_string chopped),
-                              (String_.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (String_.to_value x) |>
-                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:String_.of_string
-        ~of_json:String_.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module Type =
   struct
     type nonrec t =
       | ACCOUNT 
       | ORGANIZATION 
+      | ACCOUNT_UNUSED_ACCESS 
+      | ORGANIZATION_UNUSED_ACCESS 
+      | ACCOUNT_INTERNAL_ACCESS 
+      | ORGANIZATION_INTERNAL_ACCESS 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | ACCOUNT -> "ACCOUNT"
       | ORGANIZATION -> "ORGANIZATION"
+      | ACCOUNT_UNUSED_ACCESS -> "ACCOUNT_UNUSED_ACCESS"
+      | ORGANIZATION_UNUSED_ACCESS -> "ORGANIZATION_UNUSED_ACCESS"
+      | ACCOUNT_INTERNAL_ACCESS -> "ACCOUNT_INTERNAL_ACCESS"
+      | ORGANIZATION_INTERNAL_ACCESS -> "ORGANIZATION_INTERNAL_ACCESS"
       | Non_static_id s -> s
     let of_string =
       function
       | "ACCOUNT" -> ACCOUNT
       | "ORGANIZATION" -> ORGANIZATION
+      | "ACCOUNT_UNUSED_ACCESS" -> ACCOUNT_UNUSED_ACCESS
+      | "ORGANIZATION_UNUSED_ACCESS" -> ORGANIZATION_UNUSED_ACCESS
+      | "ACCOUNT_INTERNAL_ACCESS" -> ACCOUNT_INTERNAL_ACCESS
+      | "ORGANIZATION_INTERNAL_ACCESS" -> ORGANIZATION_INTERNAL_ACCESS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2255,25 +4181,25 @@ module AccessPreviewStatusReason =
   struct
     type nonrec t =
       {
-      code: AccessPreviewStatusReasonCode.t
+      code: AccessPreviewStatusReasonCode.t option
         [@ocaml.doc
           "The reason code for the current status of the access preview."]}
-    let context_ = "AccessPreviewStatusReason"
-    let make ~code = fun () -> { code }
+    let make ?code = fun () -> { code }
     let to_value x =
       structure_to_value
-        [("code", (Some (AccessPreviewStatusReasonCode.to_value x.code)))]
+        [("code",
+           (Option.map x.code ~f:AccessPreviewStatusReasonCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let code =
-        AccessPreviewStatusReasonCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "code") in
-      make ~code ()
+        (Option.map ~f:AccessPreviewStatusReasonCode.of_xml)
+          (Xml.child xml_arg0 "code") in
+      make ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let code =
-        field_map_exn json "code" AccessPreviewStatusReasonCode.of_json in
-      make ~code ()
+        field_map json__ "code" AccessPreviewStatusReasonCode.of_json in
+      make ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides more details about the current status of the access preview. For example, if the creation of the access preview fails, a Failed status is returned. This failure can be due to an internal issue with the analysis or due to an invalid proposed resource configuration."]
@@ -2323,66 +4249,63 @@ module GeneratedPolicy =
   struct
     type nonrec t =
       {
-      policy: String_.t
+      policy: String_.t option
         [@ocaml.doc
           "The text to use as the content for the new policy. The policy is created using the CreatePolicy action."]}
-    let context_ = "GeneratedPolicy"
-    let make ~policy = fun () -> { policy }
+    let make ?policy = fun () -> { policy }
     let to_value x =
-      structure_to_value [("policy", (Some (String_.to_value x.policy)))]
+      structure_to_value
+        [("policy", (Option.map x.policy ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let policy =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policy") in
-      make ~policy ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "policy") in
+      make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "policy" String_.of_json in
-      make ~policy ()
+    let of_json json__ =
+      let policy = field_map json__ "policy" String_.of_json in
+      make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the text for the generated policy."]
 module CloudTrailProperties =
   struct
     type nonrec t =
       {
-      endTime: Timestamp.t
+      trailProperties: TrailPropertiesList.t option
         [@ocaml.doc
-          "The end of the time range for which IAM Access Analyzer reviews your CloudTrail events. Events with a timestamp after this time are not considered to generate a policy. If this is not included in the request, the default value is the current time."];
-      startTime: Timestamp.t
+          "A TrailProperties object that contains settings for trail properties."];
+      startTime: Timestamp.t option
         [@ocaml.doc
           "The start of the time range for which IAM Access Analyzer reviews your CloudTrail events. Events with a timestamp before this time are not considered to generate a policy."];
-      trailProperties: TrailPropertiesList.t
+      endTime: Timestamp.t option
         [@ocaml.doc
-          "A TrailProperties object that contains settings for trail properties."]}
-    let context_ = "CloudTrailProperties"
-    let make ~endTime =
-      fun ~startTime ->
-        fun ~trailProperties ->
-          fun () -> { endTime; startTime; trailProperties }
+          "The end of the time range for which IAM Access Analyzer reviews your CloudTrail events. Events with a timestamp after this time are not considered to generate a policy. If this is not included in the request, the default value is the current time."]}
+    let make ?trailProperties =
+      fun ?startTime ->
+        fun ?endTime -> fun () -> { trailProperties; startTime; endTime }
     let to_value x =
       structure_to_value
-        [("endTime", (Some (Timestamp.to_value x.endTime)));
-        ("startTime", (Some (Timestamp.to_value x.startTime)));
-        ("trailProperties",
-          (Some (TrailPropertiesList.to_value x.trailProperties)))]
+        [("trailProperties",
+           (Option.map x.trailProperties ~f:TrailPropertiesList.to_value));
+        ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trailProperties =
-        TrailPropertiesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "trailProperties") in
-      let startTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
       let endTime =
-        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
-      make ~trailProperties ~startTime ~endTime ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
       let trailProperties =
-        field_map_exn json "trailProperties" TrailPropertiesList.of_json in
-      let startTime = field_map_exn json "startTime" Timestamp.of_json in
-      let endTime = field_map_exn json "endTime" Timestamp.of_json in
-      make ~trailProperties ~startTime ~endTime ()
+        (Option.map ~f:TrailPropertiesList.of_xml)
+          (Xml.child xml_arg0 "trailProperties") in
+      make ?endTime ?startTime ?trailProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let trailProperties =
+        field_map json__ "trailProperties" TrailPropertiesList.of_json in
+      make ?endTime ?startTime ?trailProperties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about CloudTrail access."]
 module JobErrorCode =
@@ -2416,69 +4339,814 @@ module JobErrorCode =
     let of_json j = of_string (string_of_json ~kind:"JobErrorCode" j)
     let to_json = simple_to_json to_value
   end
+module ExternalAccessFindingsStatistics =
+  struct
+    type nonrec t =
+      {
+      resourceTypeStatistics: ResourceTypeStatisticsMap.t option
+        [@ocaml.doc
+          "The total number of active cross-account and public findings for each resource type of the specified external access analyzer."];
+      totalActiveFindings: Integer.t option
+        [@ocaml.doc
+          "The number of active findings for the specified external access analyzer."];
+      totalArchivedFindings: Integer.t option
+        [@ocaml.doc
+          "The number of archived findings for the specified external access analyzer."];
+      totalResolvedFindings: Integer.t option
+        [@ocaml.doc
+          "The number of resolved findings for the specified external access analyzer."]}
+    let make ?resourceTypeStatistics =
+      fun ?totalActiveFindings ->
+        fun ?totalArchivedFindings ->
+          fun ?totalResolvedFindings ->
+            fun () ->
+              {
+                resourceTypeStatistics;
+                totalActiveFindings;
+                totalArchivedFindings;
+                totalResolvedFindings
+              }
+    let to_value x =
+      structure_to_value
+        [("resourceTypeStatistics",
+           (Option.map x.resourceTypeStatistics
+              ~f:ResourceTypeStatisticsMap.to_value));
+        ("totalActiveFindings",
+          (Option.map x.totalActiveFindings ~f:Integer.to_value));
+        ("totalArchivedFindings",
+          (Option.map x.totalArchivedFindings ~f:Integer.to_value));
+        ("totalResolvedFindings",
+          (Option.map x.totalResolvedFindings ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalResolvedFindings =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalResolvedFindings") in
+      let totalArchivedFindings =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalArchivedFindings") in
+      let totalActiveFindings =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalActiveFindings") in
+      let resourceTypeStatistics =
+        (Option.map ~f:ResourceTypeStatisticsMap.of_xml)
+          (Xml.child xml_arg0 "resourceTypeStatistics") in
+      make ?totalResolvedFindings ?totalArchivedFindings ?totalActiveFindings
+        ?resourceTypeStatistics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalResolvedFindings =
+        field_map json__ "totalResolvedFindings" Integer.of_json in
+      let totalArchivedFindings =
+        field_map json__ "totalArchivedFindings" Integer.of_json in
+      let totalActiveFindings =
+        field_map json__ "totalActiveFindings" Integer.of_json in
+      let resourceTypeStatistics =
+        field_map json__ "resourceTypeStatistics"
+          ResourceTypeStatisticsMap.of_json in
+      make ?totalResolvedFindings ?totalArchivedFindings ?totalActiveFindings
+        ?resourceTypeStatistics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides aggregate statistics about the findings for the specified external access analyzer."]
+module InternalAccessFindingsStatistics =
+  struct
+    type nonrec t =
+      {
+      resourceTypeStatistics:
+        InternalAccessResourceTypeStatisticsMap.t option
+        [@ocaml.doc
+          "The total number of active findings for each resource type of the specified internal access analyzer."];
+      totalActiveFindings: Integer.t option
+        [@ocaml.doc
+          "The number of active findings for the specified internal access analyzer."];
+      totalArchivedFindings: Integer.t option
+        [@ocaml.doc
+          "The number of archived findings for the specified internal access analyzer."];
+      totalResolvedFindings: Integer.t option
+        [@ocaml.doc
+          "The number of resolved findings for the specified internal access analyzer."]}
+    let make ?resourceTypeStatistics =
+      fun ?totalActiveFindings ->
+        fun ?totalArchivedFindings ->
+          fun ?totalResolvedFindings ->
+            fun () ->
+              {
+                resourceTypeStatistics;
+                totalActiveFindings;
+                totalArchivedFindings;
+                totalResolvedFindings
+              }
+    let to_value x =
+      structure_to_value
+        [("resourceTypeStatistics",
+           (Option.map x.resourceTypeStatistics
+              ~f:InternalAccessResourceTypeStatisticsMap.to_value));
+        ("totalActiveFindings",
+          (Option.map x.totalActiveFindings ~f:Integer.to_value));
+        ("totalArchivedFindings",
+          (Option.map x.totalArchivedFindings ~f:Integer.to_value));
+        ("totalResolvedFindings",
+          (Option.map x.totalResolvedFindings ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalResolvedFindings =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalResolvedFindings") in
+      let totalArchivedFindings =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalArchivedFindings") in
+      let totalActiveFindings =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalActiveFindings") in
+      let resourceTypeStatistics =
+        (Option.map ~f:InternalAccessResourceTypeStatisticsMap.of_xml)
+          (Xml.child xml_arg0 "resourceTypeStatistics") in
+      make ?totalResolvedFindings ?totalArchivedFindings ?totalActiveFindings
+        ?resourceTypeStatistics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalResolvedFindings =
+        field_map json__ "totalResolvedFindings" Integer.of_json in
+      let totalArchivedFindings =
+        field_map json__ "totalArchivedFindings" Integer.of_json in
+      let totalActiveFindings =
+        field_map json__ "totalActiveFindings" Integer.of_json in
+      let resourceTypeStatistics =
+        field_map json__ "resourceTypeStatistics"
+          InternalAccessResourceTypeStatisticsMap.of_json in
+      make ?totalResolvedFindings ?totalArchivedFindings ?totalActiveFindings
+        ?resourceTypeStatistics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides aggregate statistics about the findings for the specified internal access analyzer. This includes counts of active, archived, and resolved findings."]
+module UnusedAccessFindingsStatistics =
+  struct
+    type nonrec t =
+      {
+      unusedAccessTypeStatistics: UnusedAccessTypeStatisticsList.t option
+        [@ocaml.doc
+          "A list of details about the total number of findings for each type of unused access for the analyzer."];
+      topAccounts: AccountAggregations.t option
+        [@ocaml.doc
+          "A list of one to ten Amazon Web Services accounts that have the most active findings for the unused access analyzer."];
+      totalActiveFindings: Integer.t option
+        [@ocaml.doc
+          "The total number of active findings for the unused access analyzer."];
+      totalArchivedFindings: Integer.t option
+        [@ocaml.doc
+          "The total number of archived findings for the unused access analyzer."];
+      totalResolvedFindings: Integer.t option
+        [@ocaml.doc
+          "The total number of resolved findings for the unused access analyzer."]}
+    let make ?unusedAccessTypeStatistics =
+      fun ?topAccounts ->
+        fun ?totalActiveFindings ->
+          fun ?totalArchivedFindings ->
+            fun ?totalResolvedFindings ->
+              fun () ->
+                {
+                  unusedAccessTypeStatistics;
+                  topAccounts;
+                  totalActiveFindings;
+                  totalArchivedFindings;
+                  totalResolvedFindings
+                }
+    let to_value x =
+      structure_to_value
+        [("unusedAccessTypeStatistics",
+           (Option.map x.unusedAccessTypeStatistics
+              ~f:UnusedAccessTypeStatisticsList.to_value));
+        ("topAccounts",
+          (Option.map x.topAccounts ~f:AccountAggregations.to_value));
+        ("totalActiveFindings",
+          (Option.map x.totalActiveFindings ~f:Integer.to_value));
+        ("totalArchivedFindings",
+          (Option.map x.totalArchivedFindings ~f:Integer.to_value));
+        ("totalResolvedFindings",
+          (Option.map x.totalResolvedFindings ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalResolvedFindings =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalResolvedFindings") in
+      let totalArchivedFindings =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalArchivedFindings") in
+      let totalActiveFindings =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "totalActiveFindings") in
+      let topAccounts =
+        (Option.map ~f:AccountAggregations.of_xml)
+          (Xml.child xml_arg0 "topAccounts") in
+      let unusedAccessTypeStatistics =
+        (Option.map ~f:UnusedAccessTypeStatisticsList.of_xml)
+          (Xml.child xml_arg0 "unusedAccessTypeStatistics") in
+      make ?totalResolvedFindings ?totalArchivedFindings ?totalActiveFindings
+        ?topAccounts ?unusedAccessTypeStatistics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalResolvedFindings =
+        field_map json__ "totalResolvedFindings" Integer.of_json in
+      let totalArchivedFindings =
+        field_map json__ "totalArchivedFindings" Integer.of_json in
+      let totalActiveFindings =
+        field_map json__ "totalActiveFindings" Integer.of_json in
+      let topAccounts =
+        field_map json__ "topAccounts" AccountAggregations.of_json in
+      let unusedAccessTypeStatistics =
+        field_map json__ "unusedAccessTypeStatistics"
+          UnusedAccessTypeStatisticsList.of_json in
+      make ?totalResolvedFindings ?totalArchivedFindings ?totalActiveFindings
+        ?topAccounts ?unusedAccessTypeStatistics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides aggregate statistics about the findings for the specified unused access analyzer."]
+module ExternalAccessDetails =
+  struct
+    type nonrec t =
+      {
+      action: ActionList.t option
+        [@ocaml.doc
+          "The action in the analyzed policy statement that an external principal has permission to use."];
+      condition: ConditionKeyMap.t option
+        [@ocaml.doc
+          "The condition in the analyzed policy statement that resulted in an external access finding."];
+      isPublic: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the external access finding is public."];
+      principal: PrincipalMap.t option
+        [@ocaml.doc
+          "The external principal that has access to a resource within the zone of trust."];
+      sources: FindingSourceList.t option
+        [@ocaml.doc
+          "The sources of the external access finding. This indicates how the access that generated the finding is granted. It is populated for Amazon S3 bucket findings."];
+      resourceControlPolicyRestriction:
+        ResourceControlPolicyRestriction.t option
+        [@ocaml.doc
+          "The type of restriction applied to the finding by the resource owner with an Organizations resource control policy (RCP). APPLICABLE: There is an RCP present in the organization but IAM Access Analyzer does not include it in the evaluation of effective permissions. For example, if s3:DeleteObject is blocked by the RCP and the restriction is APPLICABLE, then s3:DeleteObject would still be included in the list of actions for the finding. FAILED_TO_EVALUATE_RCP: There was an error evaluating the RCP. NOT_APPLICABLE: There was no RCP present in the organization, or there was no RCP applicable to the resource. For example, the resource being analyzed is an Amazon RDS snapshot and there is an RCP in the organization, but the RCP only impacts Amazon S3 buckets. APPLIED: This restriction is not currently available for external access findings."]}
+    let make ?action =
+      fun ?condition ->
+        fun ?isPublic ->
+          fun ?principal ->
+            fun ?sources ->
+              fun ?resourceControlPolicyRestriction ->
+                fun () ->
+                  {
+                    action;
+                    condition;
+                    isPublic;
+                    principal;
+                    sources;
+                    resourceControlPolicyRestriction
+                  }
+    let to_value x =
+      structure_to_value
+        [("action", (Option.map x.action ~f:ActionList.to_value));
+        ("condition", (Option.map x.condition ~f:ConditionKeyMap.to_value));
+        ("isPublic", (Option.map x.isPublic ~f:Boolean.to_value));
+        ("principal", (Option.map x.principal ~f:PrincipalMap.to_value));
+        ("sources", (Option.map x.sources ~f:FindingSourceList.to_value));
+        ("resourceControlPolicyRestriction",
+          (Option.map x.resourceControlPolicyRestriction
+             ~f:ResourceControlPolicyRestriction.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceControlPolicyRestriction =
+        (Option.map ~f:ResourceControlPolicyRestriction.of_xml)
+          (Xml.child xml_arg0 "resourceControlPolicyRestriction") in
+      let sources =
+        (Option.map ~f:FindingSourceList.of_xml)
+          (Xml.child xml_arg0 "sources") in
+      let principal =
+        (Option.map ~f:PrincipalMap.of_xml) (Xml.child xml_arg0 "principal") in
+      let isPublic =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPublic") in
+      let condition =
+        (Option.map ~f:ConditionKeyMap.of_xml)
+          (Xml.child xml_arg0 "condition") in
+      let action =
+        (Option.map ~f:ActionList.of_xml) (Xml.child xml_arg0 "action") in
+      make ?resourceControlPolicyRestriction ?sources ?principal ?isPublic
+        ?condition ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceControlPolicyRestriction =
+        field_map json__ "resourceControlPolicyRestriction"
+          ResourceControlPolicyRestriction.of_json in
+      let sources = field_map json__ "sources" FindingSourceList.of_json in
+      let principal = field_map json__ "principal" PrincipalMap.of_json in
+      let isPublic = field_map json__ "isPublic" Boolean.of_json in
+      let condition = field_map json__ "condition" ConditionKeyMap.of_json in
+      let action = field_map json__ "action" ActionList.of_json in
+      make ?resourceControlPolicyRestriction ?sources ?principal ?isPublic
+        ?condition ?action ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains information about an external access finding."]
+module InternalAccessDetails =
+  struct
+    type nonrec t =
+      {
+      action: ActionList.t option
+        [@ocaml.doc
+          "The action in the analyzed policy statement that has internal access permission to use."];
+      condition: ConditionKeyMap.t option
+        [@ocaml.doc
+          "The condition in the analyzed policy statement that resulted in an internal access finding."];
+      principal: PrincipalMap.t option
+        [@ocaml.doc
+          "The principal that has access to a resource within the internal environment."];
+      principalOwnerAccount: String_.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID that owns the principal identified in the internal access finding."];
+      accessType: InternalAccessType.t option
+        [@ocaml.doc
+          "The type of internal access identified in the finding. This indicates how the access is granted within your Amazon Web Services environment."];
+      principalType: PrincipalType.t option
+        [@ocaml.doc
+          "The type of principal identified in the internal access finding, such as IAM role or IAM user."];
+      sources: FindingSourceList.t option
+        [@ocaml.doc
+          "The sources of the internal access finding. This indicates how the access that generated the finding is granted within your Amazon Web Services environment."];
+      resourceControlPolicyRestriction:
+        ResourceControlPolicyRestriction.t option
+        [@ocaml.doc
+          "The type of restriction applied to the finding by the resource owner with an Organizations resource control policy (RCP). APPLICABLE: There is an RCP present in the organization but IAM Access Analyzer does not include it in the evaluation of effective permissions. For example, if s3:DeleteObject is blocked by the RCP and the restriction is APPLICABLE, then s3:DeleteObject would still be included in the list of actions for the finding. Only applicable to internal access findings with the account as the zone of trust. FAILED_TO_EVALUATE_RCP: There was an error evaluating the RCP. NOT_APPLICABLE: There was no RCP present in the organization. For internal access findings with the account as the zone of trust, NOT_APPLICABLE could also indicate that there was no RCP applicable to the resource. APPLIED: An RCP is present in the organization and IAM Access Analyzer included it in the evaluation of effective permissions. For example, if s3:DeleteObject is blocked by the RCP and the restriction is APPLIED, then s3:DeleteObject would not be included in the list of actions for the finding. Only applicable to internal access findings with the organization as the zone of trust."];
+      serviceControlPolicyRestriction:
+        ServiceControlPolicyRestriction.t option
+        [@ocaml.doc
+          "The type of restriction applied to the finding by an Organizations service control policy (SCP). APPLICABLE: There is an SCP present in the organization but IAM Access Analyzer does not include it in the evaluation of effective permissions. Only applicable to internal access findings with the account as the zone of trust. FAILED_TO_EVALUATE_SCP: There was an error evaluating the SCP. NOT_APPLICABLE: There was no SCP present in the organization. For internal access findings with the account as the zone of trust, NOT_APPLICABLE could also indicate that there was no SCP applicable to the principal. APPLIED: An SCP is present in the organization and IAM Access Analyzer included it in the evaluation of effective permissions. Only applicable to internal access findings with the organization as the zone of trust."]}
+    let make ?action =
+      fun ?condition ->
+        fun ?principal ->
+          fun ?principalOwnerAccount ->
+            fun ?accessType ->
+              fun ?principalType ->
+                fun ?sources ->
+                  fun ?resourceControlPolicyRestriction ->
+                    fun ?serviceControlPolicyRestriction ->
+                      fun () ->
+                        {
+                          action;
+                          condition;
+                          principal;
+                          principalOwnerAccount;
+                          accessType;
+                          principalType;
+                          sources;
+                          resourceControlPolicyRestriction;
+                          serviceControlPolicyRestriction
+                        }
+    let to_value x =
+      structure_to_value
+        [("action", (Option.map x.action ~f:ActionList.to_value));
+        ("condition", (Option.map x.condition ~f:ConditionKeyMap.to_value));
+        ("principal", (Option.map x.principal ~f:PrincipalMap.to_value));
+        ("principalOwnerAccount",
+          (Option.map x.principalOwnerAccount ~f:String_.to_value));
+        ("accessType",
+          (Option.map x.accessType ~f:InternalAccessType.to_value));
+        ("principalType",
+          (Option.map x.principalType ~f:PrincipalType.to_value));
+        ("sources", (Option.map x.sources ~f:FindingSourceList.to_value));
+        ("resourceControlPolicyRestriction",
+          (Option.map x.resourceControlPolicyRestriction
+             ~f:ResourceControlPolicyRestriction.to_value));
+        ("serviceControlPolicyRestriction",
+          (Option.map x.serviceControlPolicyRestriction
+             ~f:ServiceControlPolicyRestriction.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceControlPolicyRestriction =
+        (Option.map ~f:ServiceControlPolicyRestriction.of_xml)
+          (Xml.child xml_arg0 "serviceControlPolicyRestriction") in
+      let resourceControlPolicyRestriction =
+        (Option.map ~f:ResourceControlPolicyRestriction.of_xml)
+          (Xml.child xml_arg0 "resourceControlPolicyRestriction") in
+      let sources =
+        (Option.map ~f:FindingSourceList.of_xml)
+          (Xml.child xml_arg0 "sources") in
+      let principalType =
+        (Option.map ~f:PrincipalType.of_xml)
+          (Xml.child xml_arg0 "principalType") in
+      let accessType =
+        (Option.map ~f:InternalAccessType.of_xml)
+          (Xml.child xml_arg0 "accessType") in
+      let principalOwnerAccount =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "principalOwnerAccount") in
+      let principal =
+        (Option.map ~f:PrincipalMap.of_xml) (Xml.child xml_arg0 "principal") in
+      let condition =
+        (Option.map ~f:ConditionKeyMap.of_xml)
+          (Xml.child xml_arg0 "condition") in
+      let action =
+        (Option.map ~f:ActionList.of_xml) (Xml.child xml_arg0 "action") in
+      make ?serviceControlPolicyRestriction ?resourceControlPolicyRestriction
+        ?sources ?principalType ?accessType ?principalOwnerAccount ?principal
+        ?condition ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceControlPolicyRestriction =
+        field_map json__ "serviceControlPolicyRestriction"
+          ServiceControlPolicyRestriction.of_json in
+      let resourceControlPolicyRestriction =
+        field_map json__ "resourceControlPolicyRestriction"
+          ResourceControlPolicyRestriction.of_json in
+      let sources = field_map json__ "sources" FindingSourceList.of_json in
+      let principalType =
+        field_map json__ "principalType" PrincipalType.of_json in
+      let accessType =
+        field_map json__ "accessType" InternalAccessType.of_json in
+      let principalOwnerAccount =
+        field_map json__ "principalOwnerAccount" String_.of_json in
+      let principal = field_map json__ "principal" PrincipalMap.of_json in
+      let condition = field_map json__ "condition" ConditionKeyMap.of_json in
+      let action = field_map json__ "action" ActionList.of_json in
+      make ?serviceControlPolicyRestriction ?resourceControlPolicyRestriction
+        ?sources ?principalType ?accessType ?principalOwnerAccount ?principal
+        ?condition ?action ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about an internal access finding. This includes details about the access that was identified within your Amazon Web Services organization or account."]
+module UnusedIamRoleDetails =
+  struct
+    type nonrec t =
+      {
+      lastAccessed: Timestamp.t option
+        [@ocaml.doc "The time at which the role was last accessed."]}
+    let make ?lastAccessed = fun () -> { lastAccessed }
+    let to_value x =
+      structure_to_value
+        [("lastAccessed", (Option.map x.lastAccessed ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastAccessed =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastAccessed") in
+      make ?lastAccessed ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastAccessed = field_map json__ "lastAccessed" Timestamp.of_json in
+      make ?lastAccessed ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about an unused access finding for an IAM role. IAM Access Analyzer charges for unused access analysis based on the number of IAM roles and users analyzed per month. For more details on pricing, see IAM Access Analyzer pricing."]
+module UnusedIamUserAccessKeyDetails =
+  struct
+    type nonrec t =
+      {
+      accessKeyId: String_.t option
+        [@ocaml.doc
+          "The ID of the access key for which the unused access finding was generated."];
+      lastAccessed: Timestamp.t option
+        [@ocaml.doc "The time at which the access key was last accessed."]}
+    let make ?accessKeyId =
+      fun ?lastAccessed -> fun () -> { accessKeyId; lastAccessed }
+    let to_value x =
+      structure_to_value
+        [("accessKeyId", (Option.map x.accessKeyId ~f:String_.to_value));
+        ("lastAccessed", (Option.map x.lastAccessed ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastAccessed =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastAccessed") in
+      let accessKeyId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accessKeyId") in
+      make ?lastAccessed ?accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastAccessed = field_map json__ "lastAccessed" Timestamp.of_json in
+      let accessKeyId = field_map json__ "accessKeyId" String_.of_json in
+      make ?lastAccessed ?accessKeyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about an unused access finding for an IAM user access key. IAM Access Analyzer charges for unused access analysis based on the number of IAM roles and users analyzed per month. For more details on pricing, see IAM Access Analyzer pricing."]
+module UnusedIamUserPasswordDetails =
+  struct
+    type nonrec t =
+      {
+      lastAccessed: Timestamp.t option
+        [@ocaml.doc "The time at which the password was last accessed."]}
+    let make ?lastAccessed = fun () -> { lastAccessed }
+    let to_value x =
+      structure_to_value
+        [("lastAccessed", (Option.map x.lastAccessed ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastAccessed =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastAccessed") in
+      make ?lastAccessed ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastAccessed = field_map json__ "lastAccessed" Timestamp.of_json in
+      make ?lastAccessed ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about an unused access finding for an IAM user password. IAM Access Analyzer charges for unused access analysis based on the number of IAM roles and users analyzed per month. For more details on pricing, see IAM Access Analyzer pricing."]
+module UnusedPermissionDetails =
+  struct
+    type nonrec t =
+      {
+      actions: UnusedActionList.t option
+        [@ocaml.doc
+          "A list of unused actions for which the unused access finding was generated."];
+      serviceNamespace: String_.t option
+        [@ocaml.doc
+          "The namespace of the Amazon Web Services service that contains the unused actions."];
+      lastAccessed: Timestamp.t option
+        [@ocaml.doc "The time at which the permission was last accessed."]}
+    let make ?actions =
+      fun ?serviceNamespace ->
+        fun ?lastAccessed ->
+          fun () -> { actions; serviceNamespace; lastAccessed }
+    let to_value x =
+      structure_to_value
+        [("actions", (Option.map x.actions ~f:UnusedActionList.to_value));
+        ("serviceNamespace",
+          (Option.map x.serviceNamespace ~f:String_.to_value));
+        ("lastAccessed", (Option.map x.lastAccessed ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastAccessed =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastAccessed") in
+      let serviceNamespace =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceNamespace") in
+      let actions =
+        (Option.map ~f:UnusedActionList.of_xml)
+          (Xml.child xml_arg0 "actions") in
+      make ?lastAccessed ?serviceNamespace ?actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastAccessed = field_map json__ "lastAccessed" Timestamp.of_json in
+      let serviceNamespace =
+        field_map json__ "serviceNamespace" String_.of_json in
+      let actions = field_map json__ "actions" UnusedActionList.of_json in
+      make ?lastAccessed ?serviceNamespace ?actions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about an unused access finding for a permission. IAM Access Analyzer charges for unused access analysis based on the number of IAM roles and users analyzed per month. For more details on pricing, see IAM Access Analyzer pricing."]
+module UnusedPermissionsRecommendedStep =
+  struct
+    type nonrec t =
+      {
+      policyUpdatedAt: Timestamp.t option
+        [@ocaml.doc
+          "The time at which the existing policy for the unused permissions finding was last updated."];
+      recommendedAction: RecommendedRemediationAction.t option
+        [@ocaml.doc
+          "A recommendation of whether to create or detach a policy for an unused permissions finding."];
+      recommendedPolicy: String_.t option
+        [@ocaml.doc
+          "If the recommended action for the unused permissions finding is to replace the existing policy, the contents of the recommended policy to replace the policy specified in the existingPolicyId field."];
+      existingPolicyId: String_.t option
+        [@ocaml.doc
+          "If the recommended action for the unused permissions finding is to detach a policy, the ID of an existing policy to be detached."]}
+    let make ?policyUpdatedAt =
+      fun ?recommendedAction ->
+        fun ?recommendedPolicy ->
+          fun ?existingPolicyId ->
+            fun () ->
+              {
+                policyUpdatedAt;
+                recommendedAction;
+                recommendedPolicy;
+                existingPolicyId
+              }
+    let to_value x =
+      structure_to_value
+        [("policyUpdatedAt",
+           (Option.map x.policyUpdatedAt ~f:Timestamp.to_value));
+        ("recommendedAction",
+          (Option.map x.recommendedAction
+             ~f:RecommendedRemediationAction.to_value));
+        ("recommendedPolicy",
+          (Option.map x.recommendedPolicy ~f:String_.to_value));
+        ("existingPolicyId",
+          (Option.map x.existingPolicyId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let existingPolicyId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "existingPolicyId") in
+      let recommendedPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "recommendedPolicy") in
+      let recommendedAction =
+        (Option.map ~f:RecommendedRemediationAction.of_xml)
+          (Xml.child xml_arg0 "recommendedAction") in
+      let policyUpdatedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "policyUpdatedAt") in
+      make ?existingPolicyId ?recommendedPolicy ?recommendedAction
+        ?policyUpdatedAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let existingPolicyId =
+        field_map json__ "existingPolicyId" String_.of_json in
+      let recommendedPolicy =
+        field_map json__ "recommendedPolicy" String_.of_json in
+      let recommendedAction =
+        field_map json__ "recommendedAction"
+          RecommendedRemediationAction.of_json in
+      let policyUpdatedAt =
+        field_map json__ "policyUpdatedAt" Timestamp.of_json in
+      make ?existingPolicyId ?recommendedPolicy ?recommendedAction
+        ?policyUpdatedAt ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the action to take for a policy in an unused permissions finding."]
 module Configuration =
   struct
     type nonrec t =
       {
+      ebsSnapshot: EbsSnapshotConfiguration.t option
+        [@ocaml.doc
+          "The access control configuration is for an Amazon EBS volume snapshot."];
+      ecrRepository: EcrRepositoryConfiguration.t option
+        [@ocaml.doc
+          "The access control configuration is for an Amazon ECR repository."];
       iamRole: IamRoleConfiguration.t option
         [@ocaml.doc "The access control configuration is for an IAM role."];
+      efsFileSystem: EfsFileSystemConfiguration.t option
+        [@ocaml.doc
+          "The access control configuration is for an Amazon EFS file system."];
       kmsKey: KmsKeyConfiguration.t option
         [@ocaml.doc "The access control configuration is for a KMS key."];
-      s3Bucket: S3BucketConfiguration.t option
+      rdsDbClusterSnapshot: RdsDbClusterSnapshotConfiguration.t option
         [@ocaml.doc
-          "The access control configuration is for an Amazon S3 Bucket."];
+          "The access control configuration is for an Amazon RDS DB cluster snapshot."];
+      rdsDbSnapshot: RdsDbSnapshotConfiguration.t option
+        [@ocaml.doc
+          "The access control configuration is for an Amazon RDS DB snapshot."];
       secretsManagerSecret: SecretsManagerSecretConfiguration.t option
         [@ocaml.doc
           "The access control configuration is for a Secrets Manager secret."];
+      s3Bucket: S3BucketConfiguration.t option
+        [@ocaml.doc
+          "The access control configuration is for an Amazon S3 bucket."];
+      snsTopic: SnsTopicConfiguration.t option
+        [@ocaml.doc
+          "The access control configuration is for an Amazon SNS topic"];
       sqsQueue: SqsQueueConfiguration.t option
         [@ocaml.doc
-          "The access control configuration is for an Amazon SQS queue."]}
-    let make ?iamRole =
-      fun ?kmsKey ->
-        fun ?s3Bucket ->
-          fun ?secretsManagerSecret ->
-            fun ?sqsQueue ->
-              fun () ->
-                { iamRole; kmsKey; s3Bucket; secretsManagerSecret; sqsQueue }
+          "The access control configuration is for an Amazon SQS queue."];
+      s3ExpressDirectoryBucket:
+        S3ExpressDirectoryBucketConfiguration.t option
+        [@ocaml.doc
+          "The access control configuration is for an Amazon S3 directory bucket."];
+      dynamodbStream: DynamodbStreamConfiguration.t option
+        [@ocaml.doc
+          "The access control configuration is for a DynamoDB stream."];
+      dynamodbTable: DynamodbTableConfiguration.t option
+        [@ocaml.doc
+          "The access control configuration is for a DynamoDB table or index."]}
+    let make ?ebsSnapshot =
+      fun ?ecrRepository ->
+        fun ?iamRole ->
+          fun ?efsFileSystem ->
+            fun ?kmsKey ->
+              fun ?rdsDbClusterSnapshot ->
+                fun ?rdsDbSnapshot ->
+                  fun ?secretsManagerSecret ->
+                    fun ?s3Bucket ->
+                      fun ?snsTopic ->
+                        fun ?sqsQueue ->
+                          fun ?s3ExpressDirectoryBucket ->
+                            fun ?dynamodbStream ->
+                              fun ?dynamodbTable ->
+                                fun () ->
+                                  {
+                                    ebsSnapshot;
+                                    ecrRepository;
+                                    iamRole;
+                                    efsFileSystem;
+                                    kmsKey;
+                                    rdsDbClusterSnapshot;
+                                    rdsDbSnapshot;
+                                    secretsManagerSecret;
+                                    s3Bucket;
+                                    snsTopic;
+                                    sqsQueue;
+                                    s3ExpressDirectoryBucket;
+                                    dynamodbStream;
+                                    dynamodbTable
+                                  }
     let to_value x =
       structure_to_value
-        [("iamRole", (Option.map x.iamRole ~f:IamRoleConfiguration.to_value));
+        [("ebsSnapshot",
+           (Option.map x.ebsSnapshot ~f:EbsSnapshotConfiguration.to_value));
+        ("ecrRepository",
+          (Option.map x.ecrRepository ~f:EcrRepositoryConfiguration.to_value));
+        ("iamRole", (Option.map x.iamRole ~f:IamRoleConfiguration.to_value));
+        ("efsFileSystem",
+          (Option.map x.efsFileSystem ~f:EfsFileSystemConfiguration.to_value));
         ("kmsKey", (Option.map x.kmsKey ~f:KmsKeyConfiguration.to_value));
-        ("s3Bucket",
-          (Option.map x.s3Bucket ~f:S3BucketConfiguration.to_value));
+        ("rdsDbClusterSnapshot",
+          (Option.map x.rdsDbClusterSnapshot
+             ~f:RdsDbClusterSnapshotConfiguration.to_value));
+        ("rdsDbSnapshot",
+          (Option.map x.rdsDbSnapshot ~f:RdsDbSnapshotConfiguration.to_value));
         ("secretsManagerSecret",
           (Option.map x.secretsManagerSecret
              ~f:SecretsManagerSecretConfiguration.to_value));
+        ("s3Bucket",
+          (Option.map x.s3Bucket ~f:S3BucketConfiguration.to_value));
+        ("snsTopic",
+          (Option.map x.snsTopic ~f:SnsTopicConfiguration.to_value));
         ("sqsQueue",
-          (Option.map x.sqsQueue ~f:SqsQueueConfiguration.to_value))]
+          (Option.map x.sqsQueue ~f:SqsQueueConfiguration.to_value));
+        ("s3ExpressDirectoryBucket",
+          (Option.map x.s3ExpressDirectoryBucket
+             ~f:S3ExpressDirectoryBucketConfiguration.to_value));
+        ("dynamodbStream",
+          (Option.map x.dynamodbStream
+             ~f:DynamodbStreamConfiguration.to_value));
+        ("dynamodbTable",
+          (Option.map x.dynamodbTable ~f:DynamodbTableConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dynamodbTable =
+        (Option.map ~f:DynamodbTableConfiguration.of_xml)
+          (Xml.child xml_arg0 "dynamodbTable") in
+      let dynamodbStream =
+        (Option.map ~f:DynamodbStreamConfiguration.of_xml)
+          (Xml.child xml_arg0 "dynamodbStream") in
+      let s3ExpressDirectoryBucket =
+        (Option.map ~f:S3ExpressDirectoryBucketConfiguration.of_xml)
+          (Xml.child xml_arg0 "s3ExpressDirectoryBucket") in
       let sqsQueue =
         (Option.map ~f:SqsQueueConfiguration.of_xml)
           (Xml.child xml_arg0 "sqsQueue") in
-      let secretsManagerSecret =
-        (Option.map ~f:SecretsManagerSecretConfiguration.of_xml)
-          (Xml.child xml_arg0 "secretsManagerSecret") in
+      let snsTopic =
+        (Option.map ~f:SnsTopicConfiguration.of_xml)
+          (Xml.child xml_arg0 "snsTopic") in
       let s3Bucket =
         (Option.map ~f:S3BucketConfiguration.of_xml)
           (Xml.child xml_arg0 "s3Bucket") in
+      let secretsManagerSecret =
+        (Option.map ~f:SecretsManagerSecretConfiguration.of_xml)
+          (Xml.child xml_arg0 "secretsManagerSecret") in
+      let rdsDbSnapshot =
+        (Option.map ~f:RdsDbSnapshotConfiguration.of_xml)
+          (Xml.child xml_arg0 "rdsDbSnapshot") in
+      let rdsDbClusterSnapshot =
+        (Option.map ~f:RdsDbClusterSnapshotConfiguration.of_xml)
+          (Xml.child xml_arg0 "rdsDbClusterSnapshot") in
       let kmsKey =
         (Option.map ~f:KmsKeyConfiguration.of_xml)
           (Xml.child xml_arg0 "kmsKey") in
+      let efsFileSystem =
+        (Option.map ~f:EfsFileSystemConfiguration.of_xml)
+          (Xml.child xml_arg0 "efsFileSystem") in
       let iamRole =
         (Option.map ~f:IamRoleConfiguration.of_xml)
           (Xml.child xml_arg0 "iamRole") in
-      make ?sqsQueue ?secretsManagerSecret ?s3Bucket ?kmsKey ?iamRole ()
+      let ecrRepository =
+        (Option.map ~f:EcrRepositoryConfiguration.of_xml)
+          (Xml.child xml_arg0 "ecrRepository") in
+      let ebsSnapshot =
+        (Option.map ~f:EbsSnapshotConfiguration.of_xml)
+          (Xml.child xml_arg0 "ebsSnapshot") in
+      make ?dynamodbTable ?dynamodbStream ?s3ExpressDirectoryBucket ?sqsQueue
+        ?snsTopic ?s3Bucket ?secretsManagerSecret ?rdsDbSnapshot
+        ?rdsDbClusterSnapshot ?kmsKey ?efsFileSystem ?iamRole ?ecrRepository
+        ?ebsSnapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sqsQueue = field_map json "sqsQueue" SqsQueueConfiguration.of_json in
+    let of_json json__ =
+      let dynamodbTable =
+        field_map json__ "dynamodbTable" DynamodbTableConfiguration.of_json in
+      let dynamodbStream =
+        field_map json__ "dynamodbStream" DynamodbStreamConfiguration.of_json in
+      let s3ExpressDirectoryBucket =
+        field_map json__ "s3ExpressDirectoryBucket"
+          S3ExpressDirectoryBucketConfiguration.of_json in
+      let sqsQueue =
+        field_map json__ "sqsQueue" SqsQueueConfiguration.of_json in
+      let snsTopic =
+        field_map json__ "snsTopic" SnsTopicConfiguration.of_json in
+      let s3Bucket =
+        field_map json__ "s3Bucket" S3BucketConfiguration.of_json in
       let secretsManagerSecret =
-        field_map json "secretsManagerSecret"
+        field_map json__ "secretsManagerSecret"
           SecretsManagerSecretConfiguration.of_json in
-      let s3Bucket = field_map json "s3Bucket" S3BucketConfiguration.of_json in
-      let kmsKey = field_map json "kmsKey" KmsKeyConfiguration.of_json in
-      let iamRole = field_map json "iamRole" IamRoleConfiguration.of_json in
-      make ?sqsQueue ?secretsManagerSecret ?s3Bucket ?kmsKey ?iamRole ()
+      let rdsDbSnapshot =
+        field_map json__ "rdsDbSnapshot" RdsDbSnapshotConfiguration.of_json in
+      let rdsDbClusterSnapshot =
+        field_map json__ "rdsDbClusterSnapshot"
+          RdsDbClusterSnapshotConfiguration.of_json in
+      let kmsKey = field_map json__ "kmsKey" KmsKeyConfiguration.of_json in
+      let efsFileSystem =
+        field_map json__ "efsFileSystem" EfsFileSystemConfiguration.of_json in
+      let iamRole = field_map json__ "iamRole" IamRoleConfiguration.of_json in
+      let ecrRepository =
+        field_map json__ "ecrRepository" EcrRepositoryConfiguration.of_json in
+      let ebsSnapshot =
+        field_map json__ "ebsSnapshot" EbsSnapshotConfiguration.of_json in
+      make ?dynamodbTable ?dynamodbStream ?s3ExpressDirectoryBucket ?sqsQueue
+        ?snsTopic ?s3Bucket ?secretsManagerSecret ?rdsDbSnapshot
+        ?rdsDbClusterSnapshot ?kmsKey ?efsFileSystem ?iamRole ?ecrRepository
+        ?ebsSnapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Access control configuration structures for your resource. You specify the configuration as a type-value pair. You can specify only one type of access control configuration."]
@@ -2495,31 +5163,94 @@ module ConfigurationsMapKey =
     let of_json j = string_of_json ~kind:"ConfigurationsMapKey" j
     let to_json = simple_to_json to_value
   end
+module AccessActionsList =
+  struct
+    type nonrec t = Action.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Action.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Action.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccessActionsList" ~of_json:Action.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AccessResourcesList =
+  struct
+    type nonrec t = Resource.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Resource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Resource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccessResourcesList" ~of_json:Resource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ValidatePolicyFinding =
   struct
     type nonrec t =
       {
-      findingDetails: String_.t
+      findingDetails: String_.t option
         [@ocaml.doc
           "A localized message that explains the finding and provides guidance on how to address it."];
-      findingType: ValidatePolicyFindingType.t
+      findingType: ValidatePolicyFindingType.t option
         [@ocaml.doc
           "The impact of the finding. Security warnings report when the policy allows access that we consider overly permissive. Errors report when a part of the policy is not functional. Warnings report non-security issues when a policy does not conform to policy writing best practices. Suggestions recommend stylistic improvements in the policy that do not impact access."];
-      issueCode: IssueCode.t
+      issueCode: IssueCode.t option
         [@ocaml.doc
           "The issue code provides an identifier of the issue associated with this finding."];
-      learnMoreLink: LearnMoreLink.t
+      learnMoreLink: LearnMoreLink.t option
         [@ocaml.doc
           "A link to additional documentation about the type of finding."];
-      locations: LocationList.t
+      locations: LocationList.t option
         [@ocaml.doc
           "The list of locations in the policy document that are related to the finding. The issue code provides a summary of an issue identified by the finding."]}
-    let context_ = "ValidatePolicyFinding"
-    let make ~findingDetails =
-      fun ~findingType ->
-        fun ~issueCode ->
-          fun ~learnMoreLink ->
-            fun ~locations ->
+    let make ?findingDetails =
+      fun ?findingType ->
+        fun ?issueCode ->
+          fun ?learnMoreLink ->
+            fun ?locations ->
               fun () ->
                 {
                   findingDetails;
@@ -2530,42 +5261,40 @@ module ValidatePolicyFinding =
                 }
     let to_value x =
       structure_to_value
-        [("findingDetails", (Some (String_.to_value x.findingDetails)));
+        [("findingDetails",
+           (Option.map x.findingDetails ~f:String_.to_value));
         ("findingType",
-          (Some (ValidatePolicyFindingType.to_value x.findingType)));
-        ("issueCode", (Some (IssueCode.to_value x.issueCode)));
-        ("learnMoreLink", (Some (LearnMoreLink.to_value x.learnMoreLink)));
-        ("locations", (Some (LocationList.to_value x.locations)))]
+          (Option.map x.findingType ~f:ValidatePolicyFindingType.to_value));
+        ("issueCode", (Option.map x.issueCode ~f:IssueCode.to_value));
+        ("learnMoreLink",
+          (Option.map x.learnMoreLink ~f:LearnMoreLink.to_value));
+        ("locations", (Option.map x.locations ~f:LocationList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let locations =
-        LocationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "locations") in
+        (Option.map ~f:LocationList.of_xml) (Xml.child xml_arg0 "locations") in
       let learnMoreLink =
-        LearnMoreLink.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "learnMoreLink") in
+        (Option.map ~f:LearnMoreLink.of_xml)
+          (Xml.child xml_arg0 "learnMoreLink") in
       let issueCode =
-        IssueCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "issueCode") in
+        (Option.map ~f:IssueCode.of_xml) (Xml.child xml_arg0 "issueCode") in
       let findingType =
-        ValidatePolicyFindingType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "findingType") in
+        (Option.map ~f:ValidatePolicyFindingType.of_xml)
+          (Xml.child xml_arg0 "findingType") in
       let findingDetails =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "findingDetails") in
-      make ~locations ~learnMoreLink ~issueCode ~findingType ~findingDetails
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "findingDetails") in
+      make ?locations ?learnMoreLink ?issueCode ?findingType ?findingDetails
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locations = field_map_exn json "locations" LocationList.of_json in
+    let of_json json__ =
+      let locations = field_map json__ "locations" LocationList.of_json in
       let learnMoreLink =
-        field_map_exn json "learnMoreLink" LearnMoreLink.of_json in
-      let issueCode = field_map_exn json "issueCode" IssueCode.of_json in
+        field_map json__ "learnMoreLink" LearnMoreLink.of_json in
+      let issueCode = field_map json__ "issueCode" IssueCode.of_json in
       let findingType =
-        field_map_exn json "findingType" ValidatePolicyFindingType.of_json in
-      let findingDetails =
-        field_map_exn json "findingDetails" String_.of_json in
-      make ~locations ~learnMoreLink ~issueCode ~findingType ~findingDetails
+        field_map json__ "findingType" ValidatePolicyFindingType.of_json in
+      let findingDetails = field_map json__ "findingDetails" String_.of_json in
+      make ?locations ?learnMoreLink ?issueCode ?findingType ?findingDetails
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2574,6 +5303,9 @@ module ValidationExceptionFieldList =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -2603,6 +5335,7 @@ module ValidationExceptionReason =
       | CannotParse 
       | FieldValidationFailed 
       | Other 
+      | NotSupported 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2611,6 +5344,7 @@ module ValidationExceptionReason =
       | CannotParse -> "cannotParse"
       | FieldValidationFailed -> "fieldValidationFailed"
       | Other -> "other"
+      | NotSupported -> "notSupported"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2618,6 +5352,7 @@ module ValidationExceptionReason =
       | "cannotParse" -> CannotParse
       | "fieldValidationFailed" -> FieldValidationFailed
       | "other" -> Other
+      | "notSupported" -> NotSupported
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2650,6 +5385,9 @@ module TrailList =
   struct
     type nonrec t = Trail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Trail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2673,211 +5411,163 @@ module PolicyGeneration =
   struct
     type nonrec t =
       {
-      completedOn: Timestamp.t option
-        [@ocaml.doc
-          "A timestamp of when the policy generation was completed."];
-      jobId: JobId.t
+      jobId: JobId.t option
         [@ocaml.doc
           "The JobId that is returned by the StartPolicyGeneration operation. The JobId can be used with GetGeneratedPolicy to retrieve the generated policies or used with CancelPolicyGeneration to cancel the policy generation request."];
-      principalArn: PrincipalArn.t
+      principalArn: PrincipalArn.t option
         [@ocaml.doc
           "The ARN of the IAM entity (user or role) for which you are generating a policy."];
-      startedOn: Timestamp.t
+      status: JobStatus.t option
+        [@ocaml.doc "The status of the policy generation request."];
+      startedOn: Timestamp.t option
         [@ocaml.doc "A timestamp of when the policy generation started."];
-      status: JobStatus.t
-        [@ocaml.doc "The status of the policy generation request."]}
-    let context_ = "PolicyGeneration"
-    let make ?completedOn =
-      fun ~jobId ->
-        fun ~principalArn ->
-          fun ~startedOn ->
-            fun ~status ->
+      completedOn: Timestamp.t option
+        [@ocaml.doc
+          "A timestamp of when the policy generation was completed."]}
+    let make ?jobId =
+      fun ?principalArn ->
+        fun ?status ->
+          fun ?startedOn ->
+            fun ?completedOn ->
               fun () ->
-                { completedOn; jobId; principalArn; startedOn; status }
+                { jobId; principalArn; status; startedOn; completedOn }
     let to_value x =
       structure_to_value
-        [("completedOn", (Option.map x.completedOn ~f:Timestamp.to_value));
-        ("jobId", (Some (JobId.to_value x.jobId)));
-        ("principalArn", (Some (PrincipalArn.to_value x.principalArn)));
-        ("startedOn", (Some (Timestamp.to_value x.startedOn)));
-        ("status", (Some (JobStatus.to_value x.status)))]
+        [("jobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("principalArn",
+          (Option.map x.principalArn ~f:PrincipalArn.to_value));
+        ("status", (Option.map x.status ~f:JobStatus.to_value));
+        ("startedOn", (Option.map x.startedOn ~f:Timestamp.to_value));
+        ("completedOn", (Option.map x.completedOn ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let status =
-        JobStatus.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let startedOn =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedOn") in
-      let principalArn =
-        PrincipalArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
-      let jobId =
-        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       let completedOn =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "completedOn") in
-      make ~status ~startedOn ~principalArn ~jobId ?completedOn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" JobStatus.of_json in
-      let startedOn = field_map_exn json "startedOn" Timestamp.of_json in
+      let startedOn =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startedOn") in
+      let status =
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "status") in
       let principalArn =
-        field_map_exn json "principalArn" PrincipalArn.of_json in
-      let jobId = field_map_exn json "jobId" JobId.of_json in
-      let completedOn = field_map json "completedOn" Timestamp.of_json in
-      make ~status ~startedOn ~principalArn ~jobId ?completedOn ()
+        (Option.map ~f:PrincipalArn.of_xml)
+          (Xml.child xml_arg0 "principalArn") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
+      make ?completedOn ?startedOn ?status ?principalArn ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let completedOn = field_map json__ "completedOn" Timestamp.of_json in
+      let startedOn = field_map json__ "startedOn" Timestamp.of_json in
+      let status = field_map json__ "status" JobStatus.of_json in
+      let principalArn = field_map json__ "principalArn" PrincipalArn.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
+      make ?completedOn ?startedOn ?status ?principalArn ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details about the policy generation status and properties."]
-module FindingSummary =
+module FindingSummaryV2 =
   struct
     type nonrec t =
       {
-      action: ActionList.t option
+      analyzedAt: Timestamp.t option
         [@ocaml.doc
-          "The action in the analyzed policy statement that an external principal has permission to use."];
-      analyzedAt: Timestamp.t
-        [@ocaml.doc
-          "The time at which the resource-based policy that generated the finding was analyzed."];
-      condition: ConditionKeyMap.t
-        [@ocaml.doc
-          "The condition in the analyzed policy statement that resulted in a finding."];
-      createdAt: Timestamp.t
+          "The time at which the resource-based policy or IAM entity that generated the finding was analyzed."];
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time at which the finding was created."];
       error: String_.t option
         [@ocaml.doc "The error that resulted in an Error finding."];
-      id: FindingId.t [@ocaml.doc "The ID of the finding."];
-      isPublic: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether the finding reports a resource that has a policy that allows public access."];
-      principal: PrincipalMap.t option
-        [@ocaml.doc
-          "The external principal that has access to a resource within the zone of trust."];
+      id: FindingId.t option [@ocaml.doc "The ID of the finding."];
       resource: String_.t option
         [@ocaml.doc
           "The resource that the external principal has access to."];
-      resourceOwnerAccount: String_.t
-        [@ocaml.doc
-          "The Amazon Web Services account ID that owns the resource."];
-      resourceType: ResourceType.t
+      resourceType: ResourceType.t option
         [@ocaml.doc
           "The type of the resource that the external principal has access to."];
-      sources: FindingSourceList.t option
+      resourceOwnerAccount: String_.t option
         [@ocaml.doc
-          "The sources of the finding. This indicates how the access that generated the finding is granted. It is populated for Amazon S3 bucket findings."];
-      status: FindingStatus.t [@ocaml.doc "The status of the finding."];
-      updatedAt: Timestamp.t
+          "The Amazon Web Services account ID that owns the resource."];
+      status: FindingStatus.t option
+        [@ocaml.doc "The status of the finding."];
+      updatedAt: Timestamp.t option
         [@ocaml.doc
-          "The time at which the finding was most recently updated."]}
-    let context_ = "FindingSummary"
-    let make ?action =
-      fun ?error ->
-        fun ?isPublic ->
-          fun ?principal ->
+          "The time at which the finding was most recently updated."];
+      findingType: FindingType.t option
+        [@ocaml.doc
+          "The type of the access finding. For external access analyzers, the type is ExternalAccess. For unused access analyzers, the type can be UnusedIAMRole, UnusedIAMUserAccessKey, UnusedIAMUserPassword, or UnusedPermission. For internal access analyzers, the type is InternalAccess."]}
+    let make ?analyzedAt =
+      fun ?createdAt ->
+        fun ?error ->
+          fun ?id ->
             fun ?resource ->
-              fun ?sources ->
-                fun ~analyzedAt ->
-                  fun ~condition ->
-                    fun ~createdAt ->
-                      fun ~id ->
-                        fun ~resourceOwnerAccount ->
-                          fun ~resourceType ->
-                            fun ~status ->
-                              fun ~updatedAt ->
-                                fun () ->
-                                  {
-                                    action;
-                                    error;
-                                    isPublic;
-                                    principal;
-                                    resource;
-                                    sources;
-                                    analyzedAt;
-                                    condition;
-                                    createdAt;
-                                    id;
-                                    resourceOwnerAccount;
-                                    resourceType;
-                                    status;
-                                    updatedAt
-                                  }
+              fun ?resourceType ->
+                fun ?resourceOwnerAccount ->
+                  fun ?status ->
+                    fun ?updatedAt ->
+                      fun ?findingType ->
+                        fun () ->
+                          {
+                            analyzedAt;
+                            createdAt;
+                            error;
+                            id;
+                            resource;
+                            resourceType;
+                            resourceOwnerAccount;
+                            status;
+                            updatedAt;
+                            findingType
+                          }
     let to_value x =
       structure_to_value
-        [("action", (Option.map x.action ~f:ActionList.to_value));
-        ("analyzedAt", (Some (Timestamp.to_value x.analyzedAt)));
-        ("condition", (Some (ConditionKeyMap.to_value x.condition)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("analyzedAt", (Option.map x.analyzedAt ~f:Timestamp.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("error", (Option.map x.error ~f:String_.to_value));
-        ("id", (Some (FindingId.to_value x.id)));
-        ("isPublic", (Option.map x.isPublic ~f:Boolean.to_value));
-        ("principal", (Option.map x.principal ~f:PrincipalMap.to_value));
+        ("id", (Option.map x.id ~f:FindingId.to_value));
         ("resource", (Option.map x.resource ~f:String_.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value));
         ("resourceOwnerAccount",
-          (Some (String_.to_value x.resourceOwnerAccount)));
-        ("resourceType", (Some (ResourceType.to_value x.resourceType)));
-        ("sources", (Option.map x.sources ~f:FindingSourceList.to_value));
-        ("status", (Some (FindingStatus.to_value x.status)));
-        ("updatedAt", (Some (Timestamp.to_value x.updatedAt)))]
+          (Option.map x.resourceOwnerAccount ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:FindingStatus.to_value));
+        ("updatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("findingType", (Option.map x.findingType ~f:FindingType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let findingType =
+        (Option.map ~f:FindingType.of_xml) (Xml.child xml_arg0 "findingType") in
       let updatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "updatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updatedAt") in
       let status =
-        FindingStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let sources =
-        (Option.map ~f:FindingSourceList.of_xml)
-          (Xml.child xml_arg0 "sources") in
-      let resourceType =
-        ResourceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:FindingStatus.of_xml) (Xml.child xml_arg0 "status") in
       let resourceOwnerAccount =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceOwnerAccount") in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "resourceOwnerAccount") in
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
       let resource =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resource") in
-      let principal =
-        (Option.map ~f:PrincipalMap.of_xml) (Xml.child xml_arg0 "principal") in
-      let isPublic =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPublic") in
-      let id =
-        FindingId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let id = (Option.map ~f:FindingId.of_xml) (Xml.child xml_arg0 "id") in
       let error = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "error") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let condition =
-        ConditionKeyMap.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "condition") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let analyzedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "analyzedAt") in
-      let action =
-        (Option.map ~f:ActionList.of_xml) (Xml.child xml_arg0 "action") in
-      make ~updatedAt ~status ?sources ~resourceType ~resourceOwnerAccount
-        ?resource ?principal ?isPublic ~id ?error ~createdAt ~condition
-        ~analyzedAt ?action ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "analyzedAt") in
+      make ?findingType ?updatedAt ?status ?resourceOwnerAccount
+        ?resourceType ?resource ?id ?error ?createdAt ?analyzedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map_exn json "updatedAt" Timestamp.of_json in
-      let status = field_map_exn json "status" FindingStatus.of_json in
-      let sources = field_map json "sources" FindingSourceList.of_json in
-      let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+    let of_json json__ =
+      let findingType = field_map json__ "findingType" FindingType.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let status = field_map json__ "status" FindingStatus.of_json in
       let resourceOwnerAccount =
-        field_map_exn json "resourceOwnerAccount" String_.of_json in
-      let resource = field_map json "resource" String_.of_json in
-      let principal = field_map json "principal" PrincipalMap.of_json in
-      let isPublic = field_map json "isPublic" Boolean.of_json in
-      let id = field_map_exn json "id" FindingId.of_json in
-      let error = field_map json "error" String_.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let condition = field_map_exn json "condition" ConditionKeyMap.of_json in
-      let analyzedAt = field_map_exn json "analyzedAt" Timestamp.of_json in
-      let action = field_map json "action" ActionList.of_json in
-      make ~updatedAt ~status ?sources ~resourceType ~resourceOwnerAccount
-        ?resource ?principal ?isPublic ~id ?error ~createdAt ~condition
-        ~analyzedAt ?action ()
+        field_map json__ "resourceOwnerAccount" String_.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let resource = field_map json__ "resource" String_.of_json in
+      let id = field_map json__ "id" FindingId.of_json in
+      let error = field_map json__ "error" String_.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let analyzedAt = field_map json__ "analyzedAt" Timestamp.of_json in
+      make ?findingType ?updatedAt ?status ?resourceOwnerAccount
+        ?resourceType ?resource ?id ?error ?createdAt ?analyzedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a finding."]
 module OrderBy =
@@ -2899,58 +5589,224 @@ module OrderBy =
     let of_json j = of_string (string_of_json ~kind:"OrderBy" j)
     let to_json = simple_to_json to_value
   end
+module FindingSummary =
+  struct
+    type nonrec t =
+      {
+      id: FindingId.t option [@ocaml.doc "The ID of the finding."];
+      principal: PrincipalMap.t option
+        [@ocaml.doc
+          "The external principal that has access to a resource within the zone of trust."];
+      action: ActionList.t option
+        [@ocaml.doc
+          "The action in the analyzed policy statement that an external principal has permission to use."];
+      resource: String_.t option
+        [@ocaml.doc
+          "The resource that the external principal has access to."];
+      isPublic: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the finding reports a resource that has a policy that allows public access."];
+      resourceType: ResourceType.t option
+        [@ocaml.doc
+          "The type of the resource that the external principal has access to."];
+      condition: ConditionKeyMap.t option
+        [@ocaml.doc
+          "The condition in the analyzed policy statement that resulted in a finding."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The time at which the finding was created."];
+      analyzedAt: Timestamp.t option
+        [@ocaml.doc
+          "The time at which the resource-based policy that generated the finding was analyzed."];
+      updatedAt: Timestamp.t option
+        [@ocaml.doc
+          "The time at which the finding was most recently updated."];
+      status: FindingStatus.t option
+        [@ocaml.doc "The status of the finding."];
+      resourceOwnerAccount: String_.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID that owns the resource."];
+      error: String_.t option
+        [@ocaml.doc "The error that resulted in an Error finding."];
+      sources: FindingSourceList.t option
+        [@ocaml.doc
+          "The sources of the finding. This indicates how the access that generated the finding is granted. It is populated for Amazon S3 bucket findings."];
+      resourceControlPolicyRestriction:
+        ResourceControlPolicyRestriction.t option
+        [@ocaml.doc
+          "The type of restriction applied to the finding by the resource owner with an Organizations resource control policy (RCP)."]}
+    let make ?id =
+      fun ?principal ->
+        fun ?action ->
+          fun ?resource ->
+            fun ?isPublic ->
+              fun ?resourceType ->
+                fun ?condition ->
+                  fun ?createdAt ->
+                    fun ?analyzedAt ->
+                      fun ?updatedAt ->
+                        fun ?status ->
+                          fun ?resourceOwnerAccount ->
+                            fun ?error ->
+                              fun ?sources ->
+                                fun ?resourceControlPolicyRestriction ->
+                                  fun () ->
+                                    {
+                                      id;
+                                      principal;
+                                      action;
+                                      resource;
+                                      isPublic;
+                                      resourceType;
+                                      condition;
+                                      createdAt;
+                                      analyzedAt;
+                                      updatedAt;
+                                      status;
+                                      resourceOwnerAccount;
+                                      error;
+                                      sources;
+                                      resourceControlPolicyRestriction
+                                    }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:FindingId.to_value));
+        ("principal", (Option.map x.principal ~f:PrincipalMap.to_value));
+        ("action", (Option.map x.action ~f:ActionList.to_value));
+        ("resource", (Option.map x.resource ~f:String_.to_value));
+        ("isPublic", (Option.map x.isPublic ~f:Boolean.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value));
+        ("condition", (Option.map x.condition ~f:ConditionKeyMap.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("analyzedAt", (Option.map x.analyzedAt ~f:Timestamp.to_value));
+        ("updatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:FindingStatus.to_value));
+        ("resourceOwnerAccount",
+          (Option.map x.resourceOwnerAccount ~f:String_.to_value));
+        ("error", (Option.map x.error ~f:String_.to_value));
+        ("sources", (Option.map x.sources ~f:FindingSourceList.to_value));
+        ("resourceControlPolicyRestriction",
+          (Option.map x.resourceControlPolicyRestriction
+             ~f:ResourceControlPolicyRestriction.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceControlPolicyRestriction =
+        (Option.map ~f:ResourceControlPolicyRestriction.of_xml)
+          (Xml.child xml_arg0 "resourceControlPolicyRestriction") in
+      let sources =
+        (Option.map ~f:FindingSourceList.of_xml)
+          (Xml.child xml_arg0 "sources") in
+      let error = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "error") in
+      let resourceOwnerAccount =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "resourceOwnerAccount") in
+      let status =
+        (Option.map ~f:FindingStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updatedAt") in
+      let analyzedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "analyzedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let condition =
+        (Option.map ~f:ConditionKeyMap.of_xml)
+          (Xml.child xml_arg0 "condition") in
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let isPublic =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPublic") in
+      let resource =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resource") in
+      let action =
+        (Option.map ~f:ActionList.of_xml) (Xml.child xml_arg0 "action") in
+      let principal =
+        (Option.map ~f:PrincipalMap.of_xml) (Xml.child xml_arg0 "principal") in
+      let id = (Option.map ~f:FindingId.of_xml) (Xml.child xml_arg0 "id") in
+      make ?resourceControlPolicyRestriction ?sources ?error
+        ?resourceOwnerAccount ?status ?updatedAt ?analyzedAt ?createdAt
+        ?condition ?resourceType ?isPublic ?resource ?action ?principal ?id
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceControlPolicyRestriction =
+        field_map json__ "resourceControlPolicyRestriction"
+          ResourceControlPolicyRestriction.of_json in
+      let sources = field_map json__ "sources" FindingSourceList.of_json in
+      let error = field_map json__ "error" String_.of_json in
+      let resourceOwnerAccount =
+        field_map json__ "resourceOwnerAccount" String_.of_json in
+      let status = field_map json__ "status" FindingStatus.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let analyzedAt = field_map json__ "analyzedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let condition = field_map json__ "condition" ConditionKeyMap.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let isPublic = field_map json__ "isPublic" Boolean.of_json in
+      let resource = field_map json__ "resource" String_.of_json in
+      let action = field_map json__ "action" ActionList.of_json in
+      let principal = field_map json__ "principal" PrincipalMap.of_json in
+      let id = field_map json__ "id" FindingId.of_json in
+      make ?resourceControlPolicyRestriction ?sources ?error
+        ?resourceOwnerAccount ?status ?updatedAt ?analyzedAt ?createdAt
+        ?condition ?resourceType ?isPublic ?resource ?action ?principal ?id
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains information about a finding."]
 module ArchiveRuleSummary =
   struct
     type nonrec t =
       {
-      createdAt: Timestamp.t
-        [@ocaml.doc "The time at which the archive rule was created."];
-      filter: FilterCriteriaMap.t
+      ruleName: Name.t option [@ocaml.doc "The name of the archive rule."];
+      filter: FilterCriteriaMap.t option
         [@ocaml.doc "A filter used to define the archive rule."];
-      ruleName: Name.t [@ocaml.doc "The name of the archive rule."];
-      updatedAt: Timestamp.t
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The time at which the archive rule was created."];
+      updatedAt: Timestamp.t option
         [@ocaml.doc "The time at which the archive rule was last updated."]}
-    let context_ = "ArchiveRuleSummary"
-    let make ~createdAt =
-      fun ~filter ->
-        fun ~ruleName ->
-          fun ~updatedAt ->
-            fun () -> { createdAt; filter; ruleName; updatedAt }
+    let make ?ruleName =
+      fun ?filter ->
+        fun ?createdAt ->
+          fun ?updatedAt ->
+            fun () -> { ruleName; filter; createdAt; updatedAt }
     let to_value x =
       structure_to_value
-        [("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("filter", (Some (FilterCriteriaMap.to_value x.filter)));
-        ("ruleName", (Some (Name.to_value x.ruleName)));
-        ("updatedAt", (Some (Timestamp.to_value x.updatedAt)))]
+        [("ruleName", (Option.map x.ruleName ~f:Name.to_value));
+        ("filter", (Option.map x.filter ~f:FilterCriteriaMap.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("updatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let updatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "updatedAt") in
-      let ruleName =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ruleName") in
-      let filter =
-        FilterCriteriaMap.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "filter") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updatedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      make ~updatedAt ~ruleName ~filter ~createdAt ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let filter =
+        (Option.map ~f:FilterCriteriaMap.of_xml)
+          (Xml.child xml_arg0 "filter") in
+      let ruleName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "ruleName") in
+      make ?updatedAt ?createdAt ?filter ?ruleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map_exn json "updatedAt" Timestamp.of_json in
-      let ruleName = field_map_exn json "ruleName" Name.of_json in
-      let filter = field_map_exn json "filter" FilterCriteriaMap.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      make ~updatedAt ~ruleName ~filter ~createdAt ()
+    let of_json json__ =
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let filter = field_map json__ "filter" FilterCriteriaMap.of_json in
+      let ruleName = field_map json__ "ruleName" Name.of_json in
+      make ?updatedAt ?createdAt ?filter ?ruleName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains information about an archive rule."]
+  end[@@ocaml.doc
+       "Contains information about an archive rule. Archive rules automatically archive new findings that meet the criteria you define when you create the rule."]
 module AnalyzerSummary =
   struct
     type nonrec t =
       {
-      arn: AnalyzerArn.t [@ocaml.doc "The ARN of the analyzer."];
-      createdAt: Timestamp.t
+      arn: AnalyzerArn.t option [@ocaml.doc "The ARN of the analyzer."];
+      name: Name.t option [@ocaml.doc "The name of the analyzer."];
+      type_: Type.t option
+        [@ocaml.doc
+          "The type represents the zone of trust or scope for the analyzer."];
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "A timestamp for the time at which the analyzer was created."];
       lastResourceAnalyzed: String_.t option
@@ -2959,66 +5815,68 @@ module AnalyzerSummary =
       lastResourceAnalyzedAt: Timestamp.t option
         [@ocaml.doc
           "The time at which the most recently analyzed resource was analyzed."];
-      name: Name.t [@ocaml.doc "The name of the analyzer."];
-      status: AnalyzerStatus.t
+      tags: TagsMap.t option
+        [@ocaml.doc
+          "An array of key-value pairs applied to the analyzer. The key-value pairs consist of the set of Unicode letters, digits, whitespace, _, ., /, =, +, and -. The tag key is a value that is 1 to 128 characters in length and cannot be prefixed with aws:. The tag value is a value that is 0 to 256 characters in length."];
+      status: AnalyzerStatus.t option
         [@ocaml.doc
           "The status of the analyzer. An Active analyzer successfully monitors supported resources and generates new findings. The analyzer is Disabled when a user action, such as removing trusted access for Identity and Access Management Access Analyzer from Organizations, causes the analyzer to stop generating new findings. The status is Creating when the analyzer creation is in progress and Failed when the analyzer creation has failed."];
       statusReason: StatusReason.t option
         [@ocaml.doc
           "The statusReason provides more details about the current status of the analyzer. For example, if the creation for the analyzer fails, a Failed status is returned. For an analyzer with organization as the type, this failure can be due to an issue with creating the service-linked roles required in the member accounts of the Amazon Web Services organization."];
-      tags: TagsMap.t option [@ocaml.doc "The tags added to the analyzer."];
-      type_: Type.t
+      configuration: AnalyzerConfiguration.t option
         [@ocaml.doc
-          "The type of analyzer, which corresponds to the zone of trust chosen for the analyzer."]}
-    let context_ = "AnalyzerSummary"
-    let make ?lastResourceAnalyzed =
-      fun ?lastResourceAnalyzedAt ->
-        fun ?statusReason ->
-          fun ?tags ->
-            fun ~arn ->
-              fun ~createdAt ->
-                fun ~name ->
-                  fun ~status ->
-                    fun ~type_ ->
-                      fun () ->
-                        {
-                          lastResourceAnalyzed;
-                          lastResourceAnalyzedAt;
-                          statusReason;
-                          tags;
-                          arn;
-                          createdAt;
-                          name;
-                          status;
-                          type_
-                        }
+          "Specifies if the analyzer is an external access, unused access, or internal access analyzer. The GetAnalyzer action includes this property in its response if a configuration is specified, while the ListAnalyzers action omits it."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?type_ ->
+          fun ?createdAt ->
+            fun ?lastResourceAnalyzed ->
+              fun ?lastResourceAnalyzedAt ->
+                fun ?tags ->
+                  fun ?status ->
+                    fun ?statusReason ->
+                      fun ?configuration ->
+                        fun () ->
+                          {
+                            arn;
+                            name;
+                            type_;
+                            createdAt;
+                            lastResourceAnalyzed;
+                            lastResourceAnalyzedAt;
+                            tags;
+                            status;
+                            statusReason;
+                            configuration
+                          }
     let to_value x =
       structure_to_value
-        [("arn", (Some (AnalyzerArn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn", (Option.map x.arn ~f:AnalyzerArn.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
+        ("type", (Option.map x.type_ ~f:Type.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("lastResourceAnalyzed",
           (Option.map x.lastResourceAnalyzed ~f:String_.to_value));
         ("lastResourceAnalyzedAt",
           (Option.map x.lastResourceAnalyzedAt ~f:Timestamp.to_value));
-        ("name", (Some (Name.to_value x.name)));
-        ("status", (Some (AnalyzerStatus.to_value x.status)));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("status", (Option.map x.status ~f:AnalyzerStatus.to_value));
         ("statusReason",
           (Option.map x.statusReason ~f:StatusReason.to_value));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
-        ("type", (Some (Type.to_value x.type_)))]
+        ("configuration",
+          (Option.map x.configuration ~f:AnalyzerConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ =
-        Type.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let configuration =
+        (Option.map ~f:AnalyzerConfiguration.of_xml)
+          (Xml.child xml_arg0 "configuration") in
       let statusReason =
         (Option.map ~f:StatusReason.of_xml)
           (Xml.child xml_arg0 "statusReason") in
       let status =
-        AnalyzerStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:AnalyzerStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       let lastResourceAnalyzedAt =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "lastResourceAnalyzedAt") in
@@ -3026,101 +5884,100 @@ module AnalyzerSummary =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "lastResourceAnalyzed") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let arn =
-        AnalyzerArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~type_ ?tags ?statusReason ~status ~name ?lastResourceAnalyzedAt
-        ?lastResourceAnalyzed ~createdAt ~arn ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let type_ = (Option.map ~f:Type.of_xml) (Xml.child xml_arg0 "type") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      let arn = (Option.map ~f:AnalyzerArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?configuration ?statusReason ?status ?tags ?lastResourceAnalyzedAt
+        ?lastResourceAnalyzed ?createdAt ?type_ ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" Type.of_json in
-      let tags = field_map json "tags" TagsMap.of_json in
-      let statusReason = field_map json "statusReason" StatusReason.of_json in
-      let status = field_map_exn json "status" AnalyzerStatus.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+    let of_json json__ =
+      let configuration =
+        field_map json__ "configuration" AnalyzerConfiguration.of_json in
+      let statusReason = field_map json__ "statusReason" StatusReason.of_json in
+      let status = field_map json__ "status" AnalyzerStatus.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
       let lastResourceAnalyzedAt =
-        field_map json "lastResourceAnalyzedAt" Timestamp.of_json in
+        field_map json__ "lastResourceAnalyzedAt" Timestamp.of_json in
       let lastResourceAnalyzed =
-        field_map json "lastResourceAnalyzed" String_.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" AnalyzerArn.of_json in
-      make ~type_ ?tags ?statusReason ~status ~name ?lastResourceAnalyzedAt
-        ?lastResourceAnalyzed ~createdAt ~arn ()
+        field_map json__ "lastResourceAnalyzed" String_.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let type_ = field_map json__ "type" Type.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let arn = field_map json__ "arn" AnalyzerArn.of_json in
+      make ?configuration ?statusReason ?status ?tags ?lastResourceAnalyzedAt
+        ?lastResourceAnalyzed ?createdAt ?type_ ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the analyzer."]
 module AnalyzedResourceSummary =
   struct
     type nonrec t =
       {
-      resourceArn: ResourceArn.t
+      resourceArn: ResourceArn.t option
         [@ocaml.doc "The ARN of the analyzed resource."];
-      resourceOwnerAccount: String_.t
+      resourceOwnerAccount: String_.t option
         [@ocaml.doc
           "The Amazon Web Services account ID that owns the resource."];
-      resourceType: ResourceType.t
+      resourceType: ResourceType.t option
         [@ocaml.doc "The type of resource that was analyzed."]}
-    let context_ = "AnalyzedResourceSummary"
-    let make ~resourceArn =
-      fun ~resourceOwnerAccount ->
-        fun ~resourceType ->
+    let make ?resourceArn =
+      fun ?resourceOwnerAccount ->
+        fun ?resourceType ->
           fun () -> { resourceArn; resourceOwnerAccount; resourceType }
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (ResourceArn.to_value x.resourceArn)));
+        [("resourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
         ("resourceOwnerAccount",
-          (Some (String_.to_value x.resourceOwnerAccount)));
-        ("resourceType", (Some (ResourceType.to_value x.resourceType)))]
+          (Option.map x.resourceOwnerAccount ~f:String_.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        ResourceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
       let resourceOwnerAccount =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceOwnerAccount") in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "resourceOwnerAccount") in
       let resourceArn =
-        ResourceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
-      make ~resourceType ~resourceOwnerAccount ~resourceArn ()
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      make ?resourceType ?resourceOwnerAccount ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
       let resourceOwnerAccount =
-        field_map_exn json "resourceOwnerAccount" String_.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
-      make ~resourceType ~resourceOwnerAccount ~resourceArn ()
+        field_map json__ "resourceOwnerAccount" String_.of_json in
+      let resourceArn = field_map json__ "resourceArn" ResourceArn.of_json in
+      make ?resourceType ?resourceOwnerAccount ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the ARN of the analyzed resource."]
 module AccessPreviewSummary =
   struct
     type nonrec t =
       {
-      analyzerArn: AnalyzerArn.t
+      id: AccessPreviewId.t option
+        [@ocaml.doc "The unique ID for the access preview."];
+      analyzerArn: AnalyzerArn.t option
         [@ocaml.doc
           "The ARN of the analyzer used to generate the access preview."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time at which the access preview was created."];
-      id: AccessPreviewId.t
-        [@ocaml.doc "The unique ID for the access preview."];
-      status: AccessPreviewStatus.t
+      status: AccessPreviewStatus.t option
         [@ocaml.doc
           "The status of the access preview. Creating - The access preview creation is in progress. Completed - The access preview is complete and previews the findings for external access to the resource. Failed - The access preview creation has failed."];
       statusReason: AccessPreviewStatusReason.t option }
-    let context_ = "AccessPreviewSummary"
-    let make ?statusReason =
-      fun ~analyzerArn ->
-        fun ~createdAt ->
-          fun ~id ->
-            fun ~status ->
-              fun () -> { statusReason; analyzerArn; createdAt; id; status }
+    let make ?id =
+      fun ?analyzerArn ->
+        fun ?createdAt ->
+          fun ?status ->
+            fun ?statusReason ->
+              fun () -> { id; analyzerArn; createdAt; status; statusReason }
     let to_value x =
       structure_to_value
-        [("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("id", (Some (AccessPreviewId.to_value x.id)));
-        ("status", (Some (AccessPreviewStatus.to_value x.status)));
+        [("id", (Option.map x.id ~f:AccessPreviewId.to_value));
+        ("analyzerArn", (Option.map x.analyzerArn ~f:AnalyzerArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:AccessPreviewStatus.to_value));
         ("statusReason",
           (Option.map x.statusReason ~f:AccessPreviewStatusReason.to_value))]
     let to_query v = to_query to_value v
@@ -3129,27 +5986,24 @@ module AccessPreviewSummary =
         (Option.map ~f:AccessPreviewStatusReason.of_xml)
           (Xml.child xml_arg0 "statusReason") in
       let status =
-        AccessPreviewStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let id =
-        AccessPreviewId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "id") in
+        (Option.map ~f:AccessPreviewStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let analyzerArn =
-        AnalyzerArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
-      make ?statusReason ~status ~id ~createdAt ~analyzerArn ()
+        (Option.map ~f:AnalyzerArn.of_xml) (Xml.child xml_arg0 "analyzerArn") in
+      let id =
+        (Option.map ~f:AccessPreviewId.of_xml) (Xml.child xml_arg0 "id") in
+      make ?statusReason ?status ?createdAt ?analyzerArn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusReason =
-        field_map json "statusReason" AccessPreviewStatusReason.of_json in
-      let status = field_map_exn json "status" AccessPreviewStatus.of_json in
-      let id = field_map_exn json "id" AccessPreviewId.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
-      make ?statusReason ~status ~id ~createdAt ~analyzerArn ()
+        field_map json__ "statusReason" AccessPreviewStatusReason.of_json in
+      let status = field_map json__ "status" AccessPreviewStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let analyzerArn = field_map json__ "analyzerArn" AnalyzerArn.of_json in
+      let id = field_map json__ "id" AccessPreviewId.of_json in
+      make ?statusReason ?status ?createdAt ?analyzerArn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains a summary of information about an access preview."]
@@ -3157,172 +6011,187 @@ module AccessPreviewFinding =
   struct
     type nonrec t =
       {
-      action: ActionList.t option
+      id: AccessPreviewFindingId.t option
         [@ocaml.doc
-          "The action in the analyzed policy statement that an external principal has permission to perform."];
-      changeType: FindingChangeType.t
-        [@ocaml.doc
-          "Provides context on how the access preview finding compares to existing access identified in IAM Access Analyzer. New - The finding is for newly-introduced access. Unchanged - The preview finding is an existing finding that would remain unchanged. Changed - The preview finding is an existing finding with a change in status. For example, a Changed finding with preview status Resolved and existing status Active indicates the existing Active finding would become Resolved as a result of the proposed permissions change."];
-      condition: ConditionKeyMap.t option
-        [@ocaml.doc
-          "The condition in the analyzed policy statement that resulted in a finding."];
-      createdAt: Timestamp.t
-        [@ocaml.doc
-          "The time at which the access preview finding was created."];
-      error: String_.t option [@ocaml.doc "An error."];
+          "The ID of the access preview finding. This ID uniquely identifies the element in the list of access preview findings and is not related to the finding ID in Access Analyzer."];
       existingFindingId: FindingId.t option
         [@ocaml.doc
           "The existing ID of the finding in IAM Access Analyzer, provided only for existing findings."];
       existingFindingStatus: FindingStatus.t option
         [@ocaml.doc
           "The existing status of the finding, provided only for existing findings."];
-      id: AccessPreviewFindingId.t
-        [@ocaml.doc
-          "The ID of the access preview finding. This ID uniquely identifies the element in the list of access preview findings and is not related to the finding ID in Access Analyzer."];
-      isPublic: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether the policy that generated the finding allows public access to the resource."];
       principal: PrincipalMap.t option
         [@ocaml.doc
           "The external principal that has access to a resource within the zone of trust."];
+      action: ActionList.t option
+        [@ocaml.doc
+          "The action in the analyzed policy statement that an external principal has permission to perform."];
+      condition: ConditionKeyMap.t option
+        [@ocaml.doc
+          "The condition in the analyzed policy statement that resulted in a finding."];
       resource: String_.t option
         [@ocaml.doc
           "The resource that an external principal has access to. This is the resource associated with the access preview."];
-      resourceOwnerAccount: String_.t
+      isPublic: Boolean.t option
         [@ocaml.doc
-          "The Amazon Web Services account ID that owns the resource. For most Amazon Web Services resources, the owning account is the account in which the resource was created."];
-      resourceType: ResourceType.t
+          "Indicates whether the policy that generated the finding allows public access to the resource."];
+      resourceType: ResourceType.t option
         [@ocaml.doc
           "The type of the resource that can be accessed in the finding."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The time at which the access preview finding was created."];
+      changeType: FindingChangeType.t option
+        [@ocaml.doc
+          "Provides context on how the access preview finding compares to existing access identified in IAM Access Analyzer. New - The finding is for newly-introduced access. Unchanged - The preview finding is an existing finding that would remain unchanged. Changed - The preview finding is an existing finding with a change in status. For example, a Changed finding with preview status Resolved and existing status Active indicates the existing Active finding would become Resolved as a result of the proposed permissions change."];
+      status: FindingStatus.t option
+        [@ocaml.doc
+          "The preview status of the finding. This is what the status of the finding would be after permissions deployment. For example, a Changed finding with preview status Resolved and existing status Active indicates the existing Active finding would become Resolved as a result of the proposed permissions change."];
+      resourceOwnerAccount: String_.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID that owns the resource. For most Amazon Web Services resources, the owning account is the account in which the resource was created."];
+      error: String_.t option [@ocaml.doc "An error."];
       sources: FindingSourceList.t option
         [@ocaml.doc
           "The sources of the finding. This indicates how the access that generated the finding is granted. It is populated for Amazon S3 bucket findings."];
-      status: FindingStatus.t
+      resourceControlPolicyRestriction:
+        ResourceControlPolicyRestriction.t option
         [@ocaml.doc
-          "The preview status of the finding. This is what the status of the finding would be after permissions deployment. For example, a Changed finding with preview status Resolved and existing status Active indicates the existing Active finding would become Resolved as a result of the proposed permissions change."]}
-    let context_ = "AccessPreviewFinding"
-    let make ?action =
-      fun ?condition ->
-        fun ?error ->
-          fun ?existingFindingId ->
-            fun ?existingFindingStatus ->
-              fun ?isPublic ->
-                fun ?principal ->
-                  fun ?resource ->
-                    fun ?sources ->
-                      fun ~changeType ->
-                        fun ~createdAt ->
-                          fun ~id ->
-                            fun ~resourceOwnerAccount ->
-                              fun ~resourceType ->
-                                fun ~status ->
-                                  fun () ->
-                                    {
-                                      action;
-                                      condition;
-                                      error;
-                                      existingFindingId;
-                                      existingFindingStatus;
-                                      isPublic;
-                                      principal;
-                                      resource;
-                                      sources;
-                                      changeType;
-                                      createdAt;
-                                      id;
-                                      resourceOwnerAccount;
-                                      resourceType;
-                                      status
-                                    }
+          "The type of restriction applied to the finding by the resource owner with an Organizations resource control policy (RCP)."]}
+    let make ?id =
+      fun ?existingFindingId ->
+        fun ?existingFindingStatus ->
+          fun ?principal ->
+            fun ?action ->
+              fun ?condition ->
+                fun ?resource ->
+                  fun ?isPublic ->
+                    fun ?resourceType ->
+                      fun ?createdAt ->
+                        fun ?changeType ->
+                          fun ?status ->
+                            fun ?resourceOwnerAccount ->
+                              fun ?error ->
+                                fun ?sources ->
+                                  fun ?resourceControlPolicyRestriction ->
+                                    fun () ->
+                                      {
+                                        id;
+                                        existingFindingId;
+                                        existingFindingStatus;
+                                        principal;
+                                        action;
+                                        condition;
+                                        resource;
+                                        isPublic;
+                                        resourceType;
+                                        createdAt;
+                                        changeType;
+                                        status;
+                                        resourceOwnerAccount;
+                                        error;
+                                        sources;
+                                        resourceControlPolicyRestriction
+                                      }
     let to_value x =
       structure_to_value
-        [("action", (Option.map x.action ~f:ActionList.to_value));
-        ("changeType", (Some (FindingChangeType.to_value x.changeType)));
-        ("condition", (Option.map x.condition ~f:ConditionKeyMap.to_value));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("error", (Option.map x.error ~f:String_.to_value));
+        [("id", (Option.map x.id ~f:AccessPreviewFindingId.to_value));
         ("existingFindingId",
           (Option.map x.existingFindingId ~f:FindingId.to_value));
         ("existingFindingStatus",
           (Option.map x.existingFindingStatus ~f:FindingStatus.to_value));
-        ("id", (Some (AccessPreviewFindingId.to_value x.id)));
-        ("isPublic", (Option.map x.isPublic ~f:Boolean.to_value));
         ("principal", (Option.map x.principal ~f:PrincipalMap.to_value));
+        ("action", (Option.map x.action ~f:ActionList.to_value));
+        ("condition", (Option.map x.condition ~f:ConditionKeyMap.to_value));
         ("resource", (Option.map x.resource ~f:String_.to_value));
+        ("isPublic", (Option.map x.isPublic ~f:Boolean.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("changeType",
+          (Option.map x.changeType ~f:FindingChangeType.to_value));
+        ("status", (Option.map x.status ~f:FindingStatus.to_value));
         ("resourceOwnerAccount",
-          (Some (String_.to_value x.resourceOwnerAccount)));
-        ("resourceType", (Some (ResourceType.to_value x.resourceType)));
+          (Option.map x.resourceOwnerAccount ~f:String_.to_value));
+        ("error", (Option.map x.error ~f:String_.to_value));
         ("sources", (Option.map x.sources ~f:FindingSourceList.to_value));
-        ("status", (Some (FindingStatus.to_value x.status)))]
+        ("resourceControlPolicyRestriction",
+          (Option.map x.resourceControlPolicyRestriction
+             ~f:ResourceControlPolicyRestriction.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let status =
-        FindingStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      let resourceControlPolicyRestriction =
+        (Option.map ~f:ResourceControlPolicyRestriction.of_xml)
+          (Xml.child xml_arg0 "resourceControlPolicyRestriction") in
       let sources =
         (Option.map ~f:FindingSourceList.of_xml)
           (Xml.child xml_arg0 "sources") in
-      let resourceType =
-        ResourceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      let error = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "error") in
       let resourceOwnerAccount =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceOwnerAccount") in
-      let resource =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resource") in
-      let principal =
-        (Option.map ~f:PrincipalMap.of_xml) (Xml.child xml_arg0 "principal") in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "resourceOwnerAccount") in
+      let status =
+        (Option.map ~f:FindingStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let changeType =
+        (Option.map ~f:FindingChangeType.of_xml)
+          (Xml.child xml_arg0 "changeType") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
       let isPublic =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPublic") in
-      let id =
-        AccessPreviewFindingId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let resource =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resource") in
+      let condition =
+        (Option.map ~f:ConditionKeyMap.of_xml)
+          (Xml.child xml_arg0 "condition") in
+      let action =
+        (Option.map ~f:ActionList.of_xml) (Xml.child xml_arg0 "action") in
+      let principal =
+        (Option.map ~f:PrincipalMap.of_xml) (Xml.child xml_arg0 "principal") in
       let existingFindingStatus =
         (Option.map ~f:FindingStatus.of_xml)
           (Xml.child xml_arg0 "existingFindingStatus") in
       let existingFindingId =
         (Option.map ~f:FindingId.of_xml)
           (Xml.child xml_arg0 "existingFindingId") in
-      let error = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "error") in
-      let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let condition =
-        (Option.map ~f:ConditionKeyMap.of_xml)
-          (Xml.child xml_arg0 "condition") in
-      let changeType =
-        FindingChangeType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "changeType") in
-      let action =
-        (Option.map ~f:ActionList.of_xml) (Xml.child xml_arg0 "action") in
-      make ~status ?sources ~resourceType ~resourceOwnerAccount ?resource
-        ?principal ?isPublic ~id ?existingFindingStatus ?existingFindingId
-        ?error ~createdAt ?condition ~changeType ?action ()
+      let id =
+        (Option.map ~f:AccessPreviewFindingId.of_xml)
+          (Xml.child xml_arg0 "id") in
+      make ?resourceControlPolicyRestriction ?sources ?error
+        ?resourceOwnerAccount ?status ?changeType ?createdAt ?resourceType
+        ?isPublic ?resource ?condition ?action ?principal
+        ?existingFindingStatus ?existingFindingId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" FindingStatus.of_json in
-      let sources = field_map json "sources" FindingSourceList.of_json in
-      let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+    let of_json json__ =
+      let resourceControlPolicyRestriction =
+        field_map json__ "resourceControlPolicyRestriction"
+          ResourceControlPolicyRestriction.of_json in
+      let sources = field_map json__ "sources" FindingSourceList.of_json in
+      let error = field_map json__ "error" String_.of_json in
       let resourceOwnerAccount =
-        field_map_exn json "resourceOwnerAccount" String_.of_json in
-      let resource = field_map json "resource" String_.of_json in
-      let principal = field_map json "principal" PrincipalMap.of_json in
-      let isPublic = field_map json "isPublic" Boolean.of_json in
-      let id = field_map_exn json "id" AccessPreviewFindingId.of_json in
-      let existingFindingStatus =
-        field_map json "existingFindingStatus" FindingStatus.of_json in
-      let existingFindingId =
-        field_map json "existingFindingId" FindingId.of_json in
-      let error = field_map json "error" String_.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let condition = field_map json "condition" ConditionKeyMap.of_json in
+        field_map json__ "resourceOwnerAccount" String_.of_json in
+      let status = field_map json__ "status" FindingStatus.of_json in
       let changeType =
-        field_map_exn json "changeType" FindingChangeType.of_json in
-      let action = field_map json "action" ActionList.of_json in
-      make ~status ?sources ~resourceType ~resourceOwnerAccount ?resource
-        ?principal ?isPublic ~id ?existingFindingStatus ?existingFindingId
-        ?error ~createdAt ?condition ~changeType ?action ()
+        field_map json__ "changeType" FindingChangeType.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let isPublic = field_map json__ "isPublic" Boolean.of_json in
+      let resource = field_map json__ "resource" String_.of_json in
+      let condition = field_map json__ "condition" ConditionKeyMap.of_json in
+      let action = field_map json__ "action" ActionList.of_json in
+      let principal = field_map json__ "principal" PrincipalMap.of_json in
+      let existingFindingStatus =
+        field_map json__ "existingFindingStatus" FindingStatus.of_json in
+      let existingFindingId =
+        field_map json__ "existingFindingId" FindingId.of_json in
+      let id = field_map json__ "id" AccessPreviewFindingId.of_json in
+      make ?resourceControlPolicyRestriction ?sources ?error
+        ?resourceOwnerAccount ?status ?changeType ?createdAt ?resourceType
+        ?isPublic ?resource ?condition ?action ?principal
+        ?existingFindingStatus ?existingFindingId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An access preview finding generated by the access preview."]
@@ -3330,6 +6199,9 @@ module GeneratedPolicyList =
   struct
     type nonrec t = GeneratedPolicy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GeneratedPolicy.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3355,80 +6227,276 @@ module GeneratedPolicyProperties =
   struct
     type nonrec t =
       {
-      cloudTrailProperties: CloudTrailProperties.t option
-        [@ocaml.doc
-          "Lists details about the Trail used to generated policy."];
       isComplete: Boolean.t option
         [@ocaml.doc
           "This value is set to true if the generated policy contains all possible actions for a service that IAM Access Analyzer identified from the CloudTrail trail that you specified, and false otherwise."];
-      principalArn: PrincipalArn.t
+      principalArn: PrincipalArn.t option
         [@ocaml.doc
-          "The ARN of the IAM entity (user or role) for which you are generating a policy."]}
-    let context_ = "GeneratedPolicyProperties"
-    let make ?cloudTrailProperties =
-      fun ?isComplete ->
-        fun ~principalArn ->
-          fun () -> { cloudTrailProperties; isComplete; principalArn }
+          "The ARN of the IAM entity (user or role) for which you are generating a policy."];
+      cloudTrailProperties: CloudTrailProperties.t option
+        [@ocaml.doc
+          "Lists details about the Trail used to generated policy."]}
+    let make ?isComplete =
+      fun ?principalArn ->
+        fun ?cloudTrailProperties ->
+          fun () -> { isComplete; principalArn; cloudTrailProperties }
     let to_value x =
       structure_to_value
-        [("cloudTrailProperties",
-           (Option.map x.cloudTrailProperties
-              ~f:CloudTrailProperties.to_value));
-        ("isComplete", (Option.map x.isComplete ~f:Boolean.to_value));
-        ("principalArn", (Some (PrincipalArn.to_value x.principalArn)))]
+        [("isComplete", (Option.map x.isComplete ~f:Boolean.to_value));
+        ("principalArn",
+          (Option.map x.principalArn ~f:PrincipalArn.to_value));
+        ("cloudTrailProperties",
+          (Option.map x.cloudTrailProperties ~f:CloudTrailProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let principalArn =
-        PrincipalArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
-      let isComplete =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isComplete") in
       let cloudTrailProperties =
         (Option.map ~f:CloudTrailProperties.of_xml)
           (Xml.child xml_arg0 "cloudTrailProperties") in
-      make ~principalArn ?isComplete ?cloudTrailProperties ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let principalArn =
-        field_map_exn json "principalArn" PrincipalArn.of_json in
-      let isComplete = field_map json "isComplete" Boolean.of_json in
+        (Option.map ~f:PrincipalArn.of_xml)
+          (Xml.child xml_arg0 "principalArn") in
+      let isComplete =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isComplete") in
+      make ?cloudTrailProperties ?principalArn ?isComplete ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let cloudTrailProperties =
-        field_map json "cloudTrailProperties" CloudTrailProperties.of_json in
-      make ~principalArn ?isComplete ?cloudTrailProperties ()
+        field_map json__ "cloudTrailProperties" CloudTrailProperties.of_json in
+      let principalArn = field_map json__ "principalArn" PrincipalArn.of_json in
+      let isComplete = field_map json__ "isComplete" Boolean.of_json in
+      make ?cloudTrailProperties ?principalArn ?isComplete ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the generated policy details."]
 module JobError =
   struct
     type nonrec t =
       {
-      code: JobErrorCode.t [@ocaml.doc "The job error code."];
-      message: String_.t
+      code: JobErrorCode.t option [@ocaml.doc "The job error code."];
+      message: String_.t option
         [@ocaml.doc
           "Specific information about the error. For example, which service quota was exceeded or which resource was not found."]}
-    let context_ = "JobError"
-    let make ~code = fun ~message -> fun () -> { code; message }
+    let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
-        [("code", (Some (JobErrorCode.to_value x.code)));
-        ("message", (Some (String_.to_value x.message)))]
+        [("code", (Option.map x.code ~f:JobErrorCode.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       let code =
-        JobErrorCode.of_xml (Xml.child_exn ~context:context_ xml_arg0 "code") in
-      make ~message ~code ()
+        (Option.map ~f:JobErrorCode.of_xml) (Xml.child xml_arg0 "code") in
+      make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      let code = field_map_exn json "code" JobErrorCode.of_json in
-      make ~message ~code ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" JobErrorCode.of_json in
+      make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the details about the policy generation error."]
+module FindingsStatistics =
+  struct
+    type nonrec t =
+      {
+      externalAccessFindingsStatistics:
+        ExternalAccessFindingsStatistics.t option
+        [@ocaml.doc
+          "The aggregate statistics for an external access analyzer."];
+      internalAccessFindingsStatistics:
+        InternalAccessFindingsStatistics.t option
+        [@ocaml.doc
+          "The aggregate statistics for an internal access analyzer. This includes information about active, archived, and resolved findings related to internal access within your Amazon Web Services organization or account."];
+      unusedAccessFindingsStatistics: UnusedAccessFindingsStatistics.t option
+        [@ocaml.doc
+          "The aggregate statistics for an unused access analyzer."]}
+    let make ?externalAccessFindingsStatistics =
+      fun ?internalAccessFindingsStatistics ->
+        fun ?unusedAccessFindingsStatistics ->
+          fun () ->
+            {
+              externalAccessFindingsStatistics;
+              internalAccessFindingsStatistics;
+              unusedAccessFindingsStatistics
+            }
+    let to_value x =
+      structure_to_value
+        [("externalAccessFindingsStatistics",
+           (Option.map x.externalAccessFindingsStatistics
+              ~f:ExternalAccessFindingsStatistics.to_value));
+        ("internalAccessFindingsStatistics",
+          (Option.map x.internalAccessFindingsStatistics
+             ~f:InternalAccessFindingsStatistics.to_value));
+        ("unusedAccessFindingsStatistics",
+          (Option.map x.unusedAccessFindingsStatistics
+             ~f:UnusedAccessFindingsStatistics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unusedAccessFindingsStatistics =
+        (Option.map ~f:UnusedAccessFindingsStatistics.of_xml)
+          (Xml.child xml_arg0 "unusedAccessFindingsStatistics") in
+      let internalAccessFindingsStatistics =
+        (Option.map ~f:InternalAccessFindingsStatistics.of_xml)
+          (Xml.child xml_arg0 "internalAccessFindingsStatistics") in
+      let externalAccessFindingsStatistics =
+        (Option.map ~f:ExternalAccessFindingsStatistics.of_xml)
+          (Xml.child xml_arg0 "externalAccessFindingsStatistics") in
+      make ?unusedAccessFindingsStatistics ?internalAccessFindingsStatistics
+        ?externalAccessFindingsStatistics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unusedAccessFindingsStatistics =
+        field_map json__ "unusedAccessFindingsStatistics"
+          UnusedAccessFindingsStatistics.of_json in
+      let internalAccessFindingsStatistics =
+        field_map json__ "internalAccessFindingsStatistics"
+          InternalAccessFindingsStatistics.of_json in
+      let externalAccessFindingsStatistics =
+        field_map json__ "externalAccessFindingsStatistics"
+          ExternalAccessFindingsStatistics.of_json in
+      make ?unusedAccessFindingsStatistics ?internalAccessFindingsStatistics
+        ?externalAccessFindingsStatistics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the aggregate statistics for an external or unused access analyzer. Only one parameter can be used in a FindingsStatistics object."]
+module FindingDetails =
+  struct
+    type nonrec t =
+      {
+      internalAccessDetails: InternalAccessDetails.t option
+        [@ocaml.doc
+          "The details for an internal access analyzer finding. This contains information about access patterns identified within your Amazon Web Services organization or account."];
+      externalAccessDetails: ExternalAccessDetails.t option
+        [@ocaml.doc "The details for an external access analyzer finding."];
+      unusedPermissionDetails: UnusedPermissionDetails.t option
+        [@ocaml.doc
+          "The details for an unused access analyzer finding with an unused permission finding type."];
+      unusedIamUserAccessKeyDetails: UnusedIamUserAccessKeyDetails.t option
+        [@ocaml.doc
+          "The details for an unused access analyzer finding with an unused IAM user access key finding type."];
+      unusedIamRoleDetails: UnusedIamRoleDetails.t option
+        [@ocaml.doc
+          "The details for an unused access analyzer finding with an unused IAM role finding type."];
+      unusedIamUserPasswordDetails: UnusedIamUserPasswordDetails.t option
+        [@ocaml.doc
+          "The details for an unused access analyzer finding with an unused IAM user password finding type."]}
+    let make ?internalAccessDetails =
+      fun ?externalAccessDetails ->
+        fun ?unusedPermissionDetails ->
+          fun ?unusedIamUserAccessKeyDetails ->
+            fun ?unusedIamRoleDetails ->
+              fun ?unusedIamUserPasswordDetails ->
+                fun () ->
+                  {
+                    internalAccessDetails;
+                    externalAccessDetails;
+                    unusedPermissionDetails;
+                    unusedIamUserAccessKeyDetails;
+                    unusedIamRoleDetails;
+                    unusedIamUserPasswordDetails
+                  }
+    let to_value x =
+      structure_to_value
+        [("internalAccessDetails",
+           (Option.map x.internalAccessDetails
+              ~f:InternalAccessDetails.to_value));
+        ("externalAccessDetails",
+          (Option.map x.externalAccessDetails
+             ~f:ExternalAccessDetails.to_value));
+        ("unusedPermissionDetails",
+          (Option.map x.unusedPermissionDetails
+             ~f:UnusedPermissionDetails.to_value));
+        ("unusedIamUserAccessKeyDetails",
+          (Option.map x.unusedIamUserAccessKeyDetails
+             ~f:UnusedIamUserAccessKeyDetails.to_value));
+        ("unusedIamRoleDetails",
+          (Option.map x.unusedIamRoleDetails ~f:UnusedIamRoleDetails.to_value));
+        ("unusedIamUserPasswordDetails",
+          (Option.map x.unusedIamUserPasswordDetails
+             ~f:UnusedIamUserPasswordDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unusedIamUserPasswordDetails =
+        (Option.map ~f:UnusedIamUserPasswordDetails.of_xml)
+          (Xml.child xml_arg0 "unusedIamUserPasswordDetails") in
+      let unusedIamRoleDetails =
+        (Option.map ~f:UnusedIamRoleDetails.of_xml)
+          (Xml.child xml_arg0 "unusedIamRoleDetails") in
+      let unusedIamUserAccessKeyDetails =
+        (Option.map ~f:UnusedIamUserAccessKeyDetails.of_xml)
+          (Xml.child xml_arg0 "unusedIamUserAccessKeyDetails") in
+      let unusedPermissionDetails =
+        (Option.map ~f:UnusedPermissionDetails.of_xml)
+          (Xml.child xml_arg0 "unusedPermissionDetails") in
+      let externalAccessDetails =
+        (Option.map ~f:ExternalAccessDetails.of_xml)
+          (Xml.child xml_arg0 "externalAccessDetails") in
+      let internalAccessDetails =
+        (Option.map ~f:InternalAccessDetails.of_xml)
+          (Xml.child xml_arg0 "internalAccessDetails") in
+      make ?unusedIamUserPasswordDetails ?unusedIamRoleDetails
+        ?unusedIamUserAccessKeyDetails ?unusedPermissionDetails
+        ?externalAccessDetails ?internalAccessDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unusedIamUserPasswordDetails =
+        field_map json__ "unusedIamUserPasswordDetails"
+          UnusedIamUserPasswordDetails.of_json in
+      let unusedIamRoleDetails =
+        field_map json__ "unusedIamRoleDetails" UnusedIamRoleDetails.of_json in
+      let unusedIamUserAccessKeyDetails =
+        field_map json__ "unusedIamUserAccessKeyDetails"
+          UnusedIamUserAccessKeyDetails.of_json in
+      let unusedPermissionDetails =
+        field_map json__ "unusedPermissionDetails"
+          UnusedPermissionDetails.of_json in
+      let externalAccessDetails =
+        field_map json__ "externalAccessDetails"
+          ExternalAccessDetails.of_json in
+      let internalAccessDetails =
+        field_map json__ "internalAccessDetails"
+          InternalAccessDetails.of_json in
+      make ?unusedIamUserPasswordDetails ?unusedIamRoleDetails
+        ?unusedIamUserAccessKeyDetails ?unusedPermissionDetails
+        ?externalAccessDetails ?internalAccessDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about an external access or unused access finding. Only one parameter can be used in a FindingDetails object."]
+module RecommendedStep =
+  struct
+    type nonrec t =
+      {
+      unusedPermissionsRecommendedStep:
+        UnusedPermissionsRecommendedStep.t option
+        [@ocaml.doc "A recommended step for an unused permissions finding."]}
+    let make ?unusedPermissionsRecommendedStep =
+      fun () -> { unusedPermissionsRecommendedStep }
+    let to_value x =
+      structure_to_value
+        [("unusedPermissionsRecommendedStep",
+           (Option.map x.unusedPermissionsRecommendedStep
+              ~f:UnusedPermissionsRecommendedStep.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unusedPermissionsRecommendedStep =
+        (Option.map ~f:UnusedPermissionsRecommendedStep.of_xml)
+          (Xml.child xml_arg0 "unusedPermissionsRecommendedStep") in
+      make ?unusedPermissionsRecommendedStep ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unusedPermissionsRecommendedStep =
+        field_map json__ "unusedPermissionsRecommendedStep"
+          UnusedPermissionsRecommendedStep.of_json in
+      make ?unusedPermissionsRecommendedStep ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about a recommended step for an unused access analyzer finding."]
 module SharedViaList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3472,6 +6540,8 @@ module ConfigurationsMap =
                     (fun x -> (Configuration.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3483,48 +6553,120 @@ module InlineArchiveRule =
   struct
     type nonrec t =
       {
+      ruleName: Name.t [@ocaml.doc "The name of the rule."];
       filter: FilterCriteriaMap.t
-        [@ocaml.doc "The condition and values for a criterion."];
-      ruleName: Name.t [@ocaml.doc "The name of the rule."]}
+        [@ocaml.doc "The condition and values for a criterion."]}
     let context_ = "InlineArchiveRule"
-    let make ~filter = fun ~ruleName -> fun () -> { filter; ruleName }
+    let make ~ruleName = fun ~filter -> fun () -> { ruleName; filter }
     let to_value x =
       structure_to_value
-        [("filter", (Some (FilterCriteriaMap.to_value x.filter)));
-        ("ruleName", (Some (Name.to_value x.ruleName)))]
+        [("ruleName", (Some (Name.to_value x.ruleName)));
+        ("filter", (Some (FilterCriteriaMap.to_value x.filter)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let ruleName =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ruleName") in
       let filter =
         FilterCriteriaMap.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filter") in
-      make ~ruleName ~filter ()
+      let ruleName =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ruleName") in
+      make ~filter ~ruleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleName = field_map_exn json "ruleName" Name.of_json in
-      let filter = field_map_exn json "filter" FilterCriteriaMap.of_json in
-      make ~ruleName ~filter ()
+    let of_json json__ =
+      let filter = field_map_exn json__ "filter" FilterCriteriaMap.of_json in
+      let ruleName = field_map_exn json__ "ruleName" Name.of_json in
+      make ~filter ~ruleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An criterion statement in an archive rule. Each archive rule may have multiple criteria."]
+module ReasonSummary =
+  struct
+    type nonrec t =
+      {
+      description: String_.t option
+        [@ocaml.doc
+          "A description of the reasoning of a result of checking for access."];
+      statementIndex: Integer.t option
+        [@ocaml.doc "The index number of the reason statement."];
+      statementId: String_.t option
+        [@ocaml.doc "The identifier for the reason statement."]}
+    let make ?description =
+      fun ?statementIndex ->
+        fun ?statementId ->
+          fun () -> { description; statementIndex; statementId }
+    let to_value x =
+      structure_to_value
+        [("description", (Option.map x.description ~f:String_.to_value));
+        ("statementIndex", (Option.map x.statementIndex ~f:Integer.to_value));
+        ("statementId", (Option.map x.statementId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statementId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statementId") in
+      let statementIndex =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "statementIndex") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
+      make ?statementId ?statementIndex ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statementId = field_map json__ "statementId" String_.of_json in
+      let statementIndex = field_map json__ "statementIndex" Integer.of_json in
+      let description = field_map json__ "description" String_.of_json in
+      make ?statementId ?statementIndex ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the reasoning why a check for access passed or failed."]
+module Access =
+  struct
+    type nonrec t =
+      {
+      actions: AccessActionsList.t option
+        [@ocaml.doc
+          "A list of actions for the access permissions. Any strings that can be used as an action in an IAM policy can be used in the list of actions to check."];
+      resources: AccessResourcesList.t option
+        [@ocaml.doc
+          "A list of resources for the access permissions. Any strings that can be used as an Amazon Resource Name (ARN) in an IAM policy can be used in the list of resources to check. You can only use a wildcard in the portion of the ARN that specifies the resource ID."]}
+    let make ?actions = fun ?resources -> fun () -> { actions; resources }
+    let to_value x =
+      structure_to_value
+        [("actions", (Option.map x.actions ~f:AccessActionsList.to_value));
+        ("resources",
+          (Option.map x.resources ~f:AccessResourcesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resources =
+        (Option.map ~f:AccessResourcesList.of_xml)
+          (Xml.child xml_arg0 "resources") in
+      let actions =
+        (Option.map ~f:AccessActionsList.of_xml)
+          (Xml.child xml_arg0 "actions") in
+      make ?resources ?actions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resources =
+        field_map json__ "resources" AccessResourcesList.of_json in
+      let actions = field_map json__ "actions" AccessActionsList.of_json in
+      make ?resources ?actions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about actions and resources that define permissions to check against a policy."]
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You do not have sufficient access to perform this action."]
@@ -3532,58 +6674,56 @@ module InternalServerException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       retryAfterSeconds: Integer.t option
         [@ocaml.doc "The seconds to wait to retry."]}
-    let context_ = "InternalServerException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("Retry-After", (Option.map x.retryAfterSeconds ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let retryAfterSeconds =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Retry-After") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" Integer.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "retryAfterSeconds" Integer.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Internal server error."]
 module ThrottlingException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       retryAfterSeconds: Integer.t option
         [@ocaml.doc "The seconds to wait to retry."]}
-    let context_ = "ThrottlingException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("Retry-After", (Option.map x.retryAfterSeconds ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let retryAfterSeconds =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Retry-After") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" Integer.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "retryAfterSeconds" Integer.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Throttling limit exceeded error."]
 module Token =
@@ -3603,6 +6743,9 @@ module ValidatePolicyFindingList =
   struct
     type nonrec t = ValidatePolicyFinding.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidatePolicyFinding.to_value)) |>
         (fun x -> `List x)
@@ -3629,39 +6772,40 @@ module ValidationException =
   struct
     type nonrec t =
       {
+      message: String_.t option ;
+      reason: ValidationExceptionReason.t option
+        [@ocaml.doc "The reason for the exception."];
       fieldList: ValidationExceptionFieldList.t option
-        [@ocaml.doc "A list of fields that didn't validate."];
-      message: String_.t ;
-      reason: ValidationExceptionReason.t
-        [@ocaml.doc "The reason for the exception."]}
-    let context_ = "ValidationException"
-    let make ?fieldList =
-      fun ~message -> fun ~reason -> fun () -> { fieldList; message; reason }
+        [@ocaml.doc "A list of fields that didn't validate."]}
+    let make ?message =
+      fun ?reason ->
+        fun ?fieldList -> fun () -> { message; reason; fieldList }
     let to_value x =
       structure_to_value
-        [("fieldList",
-           (Option.map x.fieldList ~f:ValidationExceptionFieldList.to_value));
-        ("message", (Some (String_.to_value x.message)));
-        ("reason", (Some (ValidationExceptionReason.to_value x.reason)))]
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("reason",
+          (Option.map x.reason ~f:ValidationExceptionReason.to_value));
+        ("fieldList",
+          (Option.map x.fieldList ~f:ValidationExceptionFieldList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let reason =
-        ValidationExceptionReason.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "reason") in
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       let fieldList =
         (Option.map ~f:ValidationExceptionFieldList.of_xml)
           (Xml.child xml_arg0 "fieldList") in
-      make ~reason ~message ?fieldList ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let reason =
-        field_map_exn json "reason" ValidationExceptionReason.of_json in
-      let message = field_map_exn json "message" String_.of_json in
+        (Option.map ~f:ValidationExceptionReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?fieldList ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let fieldList =
-        field_map json "fieldList" ValidationExceptionFieldList.of_json in
-      make ~reason ~message ?fieldList ()
+        field_map json__ "fieldList" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?fieldList ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Validation exception error."]
 module Locale =
@@ -3732,6 +6876,7 @@ module PolicyType =
       | IDENTITY_POLICY 
       | RESOURCE_POLICY 
       | SERVICE_CONTROL_POLICY 
+      | RESOURCE_CONTROL_POLICY 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3739,12 +6884,14 @@ module PolicyType =
       | IDENTITY_POLICY -> "IDENTITY_POLICY"
       | RESOURCE_POLICY -> "RESOURCE_POLICY"
       | SERVICE_CONTROL_POLICY -> "SERVICE_CONTROL_POLICY"
+      | RESOURCE_CONTROL_POLICY -> "RESOURCE_CONTROL_POLICY"
       | Non_static_id s -> s
     let of_string =
       function
       | "IDENTITY_POLICY" -> IDENTITY_POLICY
       | "RESOURCE_POLICY" -> RESOURCE_POLICY
       | "SERVICE_CONTROL_POLICY" -> SERVICE_CONTROL_POLICY
+      | "RESOURCE_CONTROL_POLICY" -> RESOURCE_CONTROL_POLICY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3761,6 +6908,8 @@ module ValidatePolicyResourceType =
       | AWS__S3__AccessPoint 
       | AWS__S3__MultiRegionAccessPoint 
       | AWS__S3ObjectLambda__AccessPoint 
+      | AWS__IAM__AssumeRolePolicyDocument 
+      | AWS__DynamoDB__Table 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3770,6 +6919,9 @@ module ValidatePolicyResourceType =
       | AWS__S3__MultiRegionAccessPoint -> "AWS::S3::MultiRegionAccessPoint"
       | AWS__S3ObjectLambda__AccessPoint ->
           "AWS::S3ObjectLambda::AccessPoint"
+      | AWS__IAM__AssumeRolePolicyDocument ->
+          "AWS::IAM::AssumeRolePolicyDocument"
+      | AWS__DynamoDB__Table -> "AWS::DynamoDB::Table"
       | Non_static_id s -> s
     let of_string =
       function
@@ -3778,6 +6930,9 @@ module ValidatePolicyResourceType =
       | "AWS::S3::MultiRegionAccessPoint" -> AWS__S3__MultiRegionAccessPoint
       | "AWS::S3ObjectLambda::AccessPoint" ->
           AWS__S3ObjectLambda__AccessPoint
+      | "AWS::IAM::AssumeRolePolicyDocument" ->
+          AWS__IAM__AssumeRolePolicyDocument
+      | "AWS::DynamoDB::Table" -> AWS__DynamoDB__Table
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3794,6 +6949,9 @@ module FindingIdList =
   struct
     type nonrec t = FindingId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FindingId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3840,45 +6998,77 @@ module FindingStatusUpdate =
     let of_json j = of_string (string_of_json ~kind:"FindingStatusUpdate" j)
     let to_json = simple_to_json to_value
   end
+module ConflictException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      resourceId: String_.t option [@ocaml.doc "The ID of the resource."];
+      resourceType: String_.t option [@ocaml.doc "The resource type."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
+      let resourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A conflict exception error."]
 module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
-      resourceId: String_.t [@ocaml.doc "The ID of the resource."];
-      resourceType: String_.t [@ocaml.doc "The type of the resource."]}
-    let context_ = "ResourceNotFoundException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+      message: String_.t option ;
+      resourceId: String_.t option [@ocaml.doc "The ID of the resource."];
+      resourceType: String_.t option [@ocaml.doc "The type of the resource."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)))]
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource could not be found."]
 module TagKeys =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3898,122 +7088,85 @@ module TagKeys =
     let of_json j = list_of_json ~kind:"TagKeys" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ConflictException =
-  struct
-    type nonrec t =
-      {
-      message: String_.t ;
-      resourceId: String_.t [@ocaml.doc "The ID of the resource."];
-      resourceType: String_.t [@ocaml.doc "The resource type."]}
-    let context_ = "ConflictException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
-    let to_value x =
-      structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~resourceType ~resourceId ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A conflict exception error."]
 module ServiceQuotaExceededException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
-      resourceId: String_.t [@ocaml.doc "The resource ID."];
-      resourceType: String_.t [@ocaml.doc "The resource type."]}
-    let context_ = "ServiceQuotaExceededException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+      message: String_.t option ;
+      resourceId: String_.t option [@ocaml.doc "The resource ID."];
+      resourceType: String_.t option [@ocaml.doc "The resource type."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)))]
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Service quote met error."]
 module CloudTrailDetails =
   struct
     type nonrec t =
       {
+      trails: TrailList.t
+        [@ocaml.doc "A Trail object that contains settings for a trail."];
       accessRole: RoleArn.t
         [@ocaml.doc
           "The ARN of the service role that IAM Access Analyzer uses to access your CloudTrail trail and service last accessed information."];
-      endTime: Timestamp.t option
-        [@ocaml.doc
-          "The end of the time range for which IAM Access Analyzer reviews your CloudTrail events. Events with a timestamp after this time are not considered to generate a policy. If this is not included in the request, the default value is the current time."];
       startTime: Timestamp.t
         [@ocaml.doc
           "The start of the time range for which IAM Access Analyzer reviews your CloudTrail events. Events with a timestamp before this time are not considered to generate a policy."];
-      trails: TrailList.t
-        [@ocaml.doc "A Trail object that contains settings for a trail."]}
+      endTime: Timestamp.t option
+        [@ocaml.doc
+          "The end of the time range for which IAM Access Analyzer reviews your CloudTrail events. Events with a timestamp after this time are not considered to generate a policy. If this is not included in the request, the default value is the current time."]}
     let context_ = "CloudTrailDetails"
     let make ?endTime =
-      fun ~accessRole ->
-        fun ~startTime ->
-          fun ~trails -> fun () -> { endTime; accessRole; startTime; trails }
+      fun ~trails ->
+        fun ~accessRole ->
+          fun ~startTime ->
+            fun () -> { endTime; trails; accessRole; startTime }
     let to_value x =
       structure_to_value
-        [("accessRole", (Some (RoleArn.to_value x.accessRole)));
-        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        [("trails", (Some (TrailList.to_value x.trails)));
+        ("accessRole", (Some (RoleArn.to_value x.accessRole)));
         ("startTime", (Some (Timestamp.to_value x.startTime)));
-        ("trails", (Some (TrailList.to_value x.trails)))]
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let trails =
-        TrailList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trails") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
       let startTime =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
-      let endTime =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
       let accessRole =
         RoleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accessRole") in
-      make ~trails ~startTime ?endTime ~accessRole ()
+      let trails =
+        TrailList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "trails") in
+      make ?endTime ~startTime ~accessRole ~trails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trails = field_map_exn json "trails" TrailList.of_json in
-      let startTime = field_map_exn json "startTime" Timestamp.of_json in
-      let endTime = field_map json "endTime" Timestamp.of_json in
-      let accessRole = field_map_exn json "accessRole" RoleArn.of_json in
-      make ~trails ~startTime ?endTime ~accessRole ()
+    let of_json json__ =
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "startTime" Timestamp.of_json in
+      let accessRole = field_map_exn json__ "accessRole" RoleArn.of_json in
+      let trails = field_map_exn json__ "trails" TrailList.of_json in
+      make ?endTime ~startTime ~accessRole ~trails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about CloudTrail access."]
 module PolicyGenerationDetails =
@@ -4035,9 +7188,9 @@ module PolicyGenerationDetails =
           (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
       make ~principalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let principalArn =
-        field_map_exn json "principalArn" PrincipalArn.of_json in
+        field_map_exn json__ "principalArn" PrincipalArn.of_json in
       make ~principalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4046,6 +7199,9 @@ module PolicyGenerationList =
   struct
     type nonrec t = PolicyGeneration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyGeneration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4084,12 +7240,15 @@ module ListPolicyGenerationsRequestMaxResultsInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module FindingsList =
+module FindingsListV2 =
   struct
-    type nonrec t = FindingSummary.t list
+    type nonrec t = FindingSummaryV2.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:FindingSummary.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:FindingSummaryV2.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -4103,9 +7262,9 @@ module FindingsList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:FindingSummary.of_xml)
+                     | _ -> true))) ~f:FindingSummaryV2.of_xml)
     let of_json j =
-      list_of_json ~kind:"FindingsList" ~of_json:FindingSummary.of_json j
+      list_of_json ~kind:"FindingsListV2" ~of_json:FindingSummaryV2.of_json j
     let to_json v = composed_to_json to_value v
   end
 module SortCriteria =
@@ -4130,16 +7289,46 @@ module SortCriteria =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "attributeName") in
       make ?orderBy ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orderBy = field_map json "orderBy" OrderBy.of_json in
-      let attributeName = field_map json "attributeName" String_.of_json in
+    let of_json json__ =
+      let orderBy = field_map json__ "orderBy" OrderBy.of_json in
+      let attributeName = field_map json__ "attributeName" String_.of_json in
       make ?orderBy ?attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The criteria used to sort."]
+module FindingsList =
+  struct
+    type nonrec t = FindingSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FindingSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FindingSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FindingsList" ~of_json:FindingSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ArchiveRulesList =
   struct
     type nonrec t = ArchiveRuleSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ArchiveRuleSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4165,6 +7354,9 @@ module AnalyzersList =
   struct
     type nonrec t = AnalyzerSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AnalyzerSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4189,6 +7381,9 @@ module AnalyzedResourcesList =
   struct
     type nonrec t = AnalyzedResourceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AnalyzedResourceSummary.to_value)) |>
         (fun x -> `List x)
@@ -4215,6 +7410,9 @@ module AccessPreviewsList =
   struct
     type nonrec t = AccessPreviewSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessPreviewSummary.to_value)) |>
         (fun x -> `List x)
@@ -4241,6 +7439,9 @@ module AccessPreviewFindingsList =
   struct
     type nonrec t = AccessPreviewFinding.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessPreviewFinding.to_value)) |>
         (fun x -> `List x)
@@ -4267,37 +7468,36 @@ module GeneratedPolicyResult =
   struct
     type nonrec t =
       {
+      properties: GeneratedPolicyProperties.t option
+        [@ocaml.doc
+          "A GeneratedPolicyProperties object that contains properties of the generated policy."];
       generatedPolicies: GeneratedPolicyList.t option
         [@ocaml.doc
-          "The text to use as the content for the new policy. The policy is created using the CreatePolicy action."];
-      properties: GeneratedPolicyProperties.t
-        [@ocaml.doc
-          "A GeneratedPolicyProperties object that contains properties of the generated policy."]}
-    let context_ = "GeneratedPolicyResult"
-    let make ?generatedPolicies =
-      fun ~properties -> fun () -> { generatedPolicies; properties }
+          "The text to use as the content for the new policy. The policy is created using the CreatePolicy action."]}
+    let make ?properties =
+      fun ?generatedPolicies -> fun () -> { properties; generatedPolicies }
     let to_value x =
       structure_to_value
-        [("generatedPolicies",
-           (Option.map x.generatedPolicies ~f:GeneratedPolicyList.to_value));
-        ("properties",
-          (Some (GeneratedPolicyProperties.to_value x.properties)))]
+        [("properties",
+           (Option.map x.properties ~f:GeneratedPolicyProperties.to_value));
+        ("generatedPolicies",
+          (Option.map x.generatedPolicies ~f:GeneratedPolicyList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let properties =
-        GeneratedPolicyProperties.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "properties") in
       let generatedPolicies =
         (Option.map ~f:GeneratedPolicyList.of_xml)
           (Xml.child xml_arg0 "generatedPolicies") in
-      make ~properties ?generatedPolicies ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let properties =
-        field_map_exn json "properties" GeneratedPolicyProperties.of_json in
+        (Option.map ~f:GeneratedPolicyProperties.of_xml)
+          (Xml.child xml_arg0 "properties") in
+      make ?generatedPolicies ?properties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let generatedPolicies =
-        field_map json "generatedPolicies" GeneratedPolicyList.of_json in
-      make ~properties ?generatedPolicies ()
+        field_map json__ "generatedPolicies" GeneratedPolicyList.of_json in
+      let properties =
+        field_map json__ "properties" GeneratedPolicyProperties.of_json in
+      make ?generatedPolicies ?properties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the text for the generated policy and its details."]
@@ -4305,366 +7505,572 @@ module JobDetails =
   struct
     type nonrec t =
       {
+      jobId: JobId.t option
+        [@ocaml.doc
+          "The JobId that is returned by the StartPolicyGeneration operation. The JobId can be used with GetGeneratedPolicy to retrieve the generated policies or used with CancelPolicyGeneration to cancel the policy generation request."];
+      status: JobStatus.t option
+        [@ocaml.doc "The status of the job request."];
+      startedOn: Timestamp.t option
+        [@ocaml.doc "A timestamp of when the job was started."];
       completedOn: Timestamp.t option
         [@ocaml.doc "A timestamp of when the job was completed."];
       jobError: JobError.t option
-        [@ocaml.doc "The job error for the policy generation request."];
-      jobId: JobId.t
-        [@ocaml.doc
-          "The JobId that is returned by the StartPolicyGeneration operation. The JobId can be used with GetGeneratedPolicy to retrieve the generated policies or used with CancelPolicyGeneration to cancel the policy generation request."];
-      startedOn: Timestamp.t
-        [@ocaml.doc "A timestamp of when the job was started."];
-      status: JobStatus.t [@ocaml.doc "The status of the job request."]}
-    let context_ = "JobDetails"
-    let make ?completedOn =
-      fun ?jobError ->
-        fun ~jobId ->
-          fun ~startedOn ->
-            fun ~status ->
-              fun () -> { completedOn; jobError; jobId; startedOn; status }
+        [@ocaml.doc "The job error for the policy generation request."]}
+    let make ?jobId =
+      fun ?status ->
+        fun ?startedOn ->
+          fun ?completedOn ->
+            fun ?jobError ->
+              fun () -> { jobId; status; startedOn; completedOn; jobError }
     let to_value x =
       structure_to_value
-        [("completedOn", (Option.map x.completedOn ~f:Timestamp.to_value));
-        ("jobError", (Option.map x.jobError ~f:JobError.to_value));
-        ("jobId", (Some (JobId.to_value x.jobId)));
-        ("startedOn", (Some (Timestamp.to_value x.startedOn)));
-        ("status", (Some (JobStatus.to_value x.status)))]
+        [("jobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("status", (Option.map x.status ~f:JobStatus.to_value));
+        ("startedOn", (Option.map x.startedOn ~f:Timestamp.to_value));
+        ("completedOn", (Option.map x.completedOn ~f:Timestamp.to_value));
+        ("jobError", (Option.map x.jobError ~f:JobError.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let status =
-        JobStatus.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let startedOn =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "startedOn") in
-      let jobId =
-        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       let jobError =
         (Option.map ~f:JobError.of_xml) (Xml.child xml_arg0 "jobError") in
       let completedOn =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "completedOn") in
-      make ~status ~startedOn ~jobId ?jobError ?completedOn ()
+      let startedOn =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startedOn") in
+      let status =
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
+      make ?jobError ?completedOn ?startedOn ?status ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" JobStatus.of_json in
-      let startedOn = field_map_exn json "startedOn" Timestamp.of_json in
-      let jobId = field_map_exn json "jobId" JobId.of_json in
-      let jobError = field_map json "jobError" JobError.of_json in
-      let completedOn = field_map json "completedOn" Timestamp.of_json in
-      make ~status ~startedOn ~jobId ?jobError ?completedOn ()
+    let of_json json__ =
+      let jobError = field_map json__ "jobError" JobError.of_json in
+      let completedOn = field_map json__ "completedOn" Timestamp.of_json in
+      let startedOn = field_map json__ "startedOn" Timestamp.of_json in
+      let status = field_map json__ "status" JobStatus.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
+      make ?jobError ?completedOn ?startedOn ?status ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about the policy generation request."]
+module FindingsStatisticsList =
+  struct
+    type nonrec t = FindingsStatistics.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FindingsStatistics.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FindingsStatistics.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FindingsStatisticsList"
+        ~of_json:FindingsStatistics.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FindingDetailsList =
+  struct
+    type nonrec t = FindingDetails.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FindingDetails.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FindingDetails.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FindingDetailsList" ~of_json:FindingDetails.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module Finding =
   struct
     type nonrec t =
       {
+      id: FindingId.t option [@ocaml.doc "The ID of the finding."];
+      principal: PrincipalMap.t option
+        [@ocaml.doc
+          "The external principal that has access to a resource within the zone of trust."];
       action: ActionList.t option
         [@ocaml.doc
           "The action in the analyzed policy statement that an external principal has permission to use."];
-      analyzedAt: Timestamp.t
-        [@ocaml.doc "The time at which the resource was analyzed."];
-      condition: ConditionKeyMap.t
-        [@ocaml.doc
-          "The condition in the analyzed policy statement that resulted in a finding."];
-      createdAt: Timestamp.t
-        [@ocaml.doc "The time at which the finding was generated."];
-      error: String_.t option [@ocaml.doc "An error."];
-      id: FindingId.t [@ocaml.doc "The ID of the finding."];
+      resource: String_.t option
+        [@ocaml.doc "The resource that an external principal has access to."];
       isPublic: Boolean.t option
         [@ocaml.doc
           "Indicates whether the policy that generated the finding allows public access to the resource."];
-      principal: PrincipalMap.t option
+      resourceType: ResourceType.t option
+        [@ocaml.doc "The type of the resource identified in the finding."];
+      condition: ConditionKeyMap.t option
         [@ocaml.doc
-          "The external principal that access to a resource within the zone of trust."];
-      resource: String_.t option
-        [@ocaml.doc "The resource that an external principal has access to."];
-      resourceOwnerAccount: String_.t
+          "The condition in the analyzed policy statement that resulted in a finding."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The time at which the finding was generated."];
+      analyzedAt: Timestamp.t option
+        [@ocaml.doc "The time at which the resource was analyzed."];
+      updatedAt: Timestamp.t option
+        [@ocaml.doc "The time at which the finding was updated."];
+      status: FindingStatus.t option
+        [@ocaml.doc "The current status of the finding."];
+      resourceOwnerAccount: String_.t option
         [@ocaml.doc
           "The Amazon Web Services account ID that owns the resource."];
-      resourceType: ResourceType.t
-        [@ocaml.doc "The type of the resource identified in the finding."];
+      error: String_.t option [@ocaml.doc "An error."];
       sources: FindingSourceList.t option
         [@ocaml.doc
           "The sources of the finding. This indicates how the access that generated the finding is granted. It is populated for Amazon S3 bucket findings."];
-      status: FindingStatus.t
-        [@ocaml.doc "The current status of the finding."];
-      updatedAt: Timestamp.t
-        [@ocaml.doc "The time at which the finding was updated."]}
-    let context_ = "Finding"
-    let make ?action =
-      fun ?error ->
-        fun ?isPublic ->
-          fun ?principal ->
-            fun ?resource ->
-              fun ?sources ->
-                fun ~analyzedAt ->
-                  fun ~condition ->
-                    fun ~createdAt ->
-                      fun ~id ->
-                        fun ~resourceOwnerAccount ->
-                          fun ~resourceType ->
-                            fun ~status ->
-                              fun ~updatedAt ->
-                                fun () ->
-                                  {
-                                    action;
-                                    error;
-                                    isPublic;
-                                    principal;
-                                    resource;
-                                    sources;
-                                    analyzedAt;
-                                    condition;
-                                    createdAt;
-                                    id;
-                                    resourceOwnerAccount;
-                                    resourceType;
-                                    status;
-                                    updatedAt
-                                  }
+      resourceControlPolicyRestriction:
+        ResourceControlPolicyRestriction.t option
+        [@ocaml.doc
+          "The type of restriction applied to the finding by the resource owner with an Organizations resource control policy (RCP)."]}
+    let make ?id =
+      fun ?principal ->
+        fun ?action ->
+          fun ?resource ->
+            fun ?isPublic ->
+              fun ?resourceType ->
+                fun ?condition ->
+                  fun ?createdAt ->
+                    fun ?analyzedAt ->
+                      fun ?updatedAt ->
+                        fun ?status ->
+                          fun ?resourceOwnerAccount ->
+                            fun ?error ->
+                              fun ?sources ->
+                                fun ?resourceControlPolicyRestriction ->
+                                  fun () ->
+                                    {
+                                      id;
+                                      principal;
+                                      action;
+                                      resource;
+                                      isPublic;
+                                      resourceType;
+                                      condition;
+                                      createdAt;
+                                      analyzedAt;
+                                      updatedAt;
+                                      status;
+                                      resourceOwnerAccount;
+                                      error;
+                                      sources;
+                                      resourceControlPolicyRestriction
+                                    }
     let to_value x =
       structure_to_value
-        [("action", (Option.map x.action ~f:ActionList.to_value));
-        ("analyzedAt", (Some (Timestamp.to_value x.analyzedAt)));
-        ("condition", (Some (ConditionKeyMap.to_value x.condition)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("error", (Option.map x.error ~f:String_.to_value));
-        ("id", (Some (FindingId.to_value x.id)));
-        ("isPublic", (Option.map x.isPublic ~f:Boolean.to_value));
+        [("id", (Option.map x.id ~f:FindingId.to_value));
         ("principal", (Option.map x.principal ~f:PrincipalMap.to_value));
+        ("action", (Option.map x.action ~f:ActionList.to_value));
         ("resource", (Option.map x.resource ~f:String_.to_value));
+        ("isPublic", (Option.map x.isPublic ~f:Boolean.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value));
+        ("condition", (Option.map x.condition ~f:ConditionKeyMap.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("analyzedAt", (Option.map x.analyzedAt ~f:Timestamp.to_value));
+        ("updatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:FindingStatus.to_value));
         ("resourceOwnerAccount",
-          (Some (String_.to_value x.resourceOwnerAccount)));
-        ("resourceType", (Some (ResourceType.to_value x.resourceType)));
+          (Option.map x.resourceOwnerAccount ~f:String_.to_value));
+        ("error", (Option.map x.error ~f:String_.to_value));
         ("sources", (Option.map x.sources ~f:FindingSourceList.to_value));
-        ("status", (Some (FindingStatus.to_value x.status)));
-        ("updatedAt", (Some (Timestamp.to_value x.updatedAt)))]
+        ("resourceControlPolicyRestriction",
+          (Option.map x.resourceControlPolicyRestriction
+             ~f:ResourceControlPolicyRestriction.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let updatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "updatedAt") in
-      let status =
-        FindingStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      let resourceControlPolicyRestriction =
+        (Option.map ~f:ResourceControlPolicyRestriction.of_xml)
+          (Xml.child xml_arg0 "resourceControlPolicyRestriction") in
       let sources =
         (Option.map ~f:FindingSourceList.of_xml)
           (Xml.child xml_arg0 "sources") in
-      let resourceType =
-        ResourceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      let error = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "error") in
       let resourceOwnerAccount =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceOwnerAccount") in
-      let resource =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resource") in
-      let principal =
-        (Option.map ~f:PrincipalMap.of_xml) (Xml.child xml_arg0 "principal") in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "resourceOwnerAccount") in
+      let status =
+        (Option.map ~f:FindingStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updatedAt") in
+      let analyzedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "analyzedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let condition =
+        (Option.map ~f:ConditionKeyMap.of_xml)
+          (Xml.child xml_arg0 "condition") in
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
       let isPublic =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPublic") in
-      let id =
-        FindingId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
-      let error = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "error") in
-      let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let condition =
-        ConditionKeyMap.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "condition") in
-      let analyzedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "analyzedAt") in
+      let resource =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resource") in
       let action =
         (Option.map ~f:ActionList.of_xml) (Xml.child xml_arg0 "action") in
-      make ~updatedAt ~status ?sources ~resourceType ~resourceOwnerAccount
-        ?resource ?principal ?isPublic ~id ?error ~createdAt ~condition
-        ~analyzedAt ?action ()
+      let principal =
+        (Option.map ~f:PrincipalMap.of_xml) (Xml.child xml_arg0 "principal") in
+      let id = (Option.map ~f:FindingId.of_xml) (Xml.child xml_arg0 "id") in
+      make ?resourceControlPolicyRestriction ?sources ?error
+        ?resourceOwnerAccount ?status ?updatedAt ?analyzedAt ?createdAt
+        ?condition ?resourceType ?isPublic ?resource ?action ?principal ?id
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map_exn json "updatedAt" Timestamp.of_json in
-      let status = field_map_exn json "status" FindingStatus.of_json in
-      let sources = field_map json "sources" FindingSourceList.of_json in
-      let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+    let of_json json__ =
+      let resourceControlPolicyRestriction =
+        field_map json__ "resourceControlPolicyRestriction"
+          ResourceControlPolicyRestriction.of_json in
+      let sources = field_map json__ "sources" FindingSourceList.of_json in
+      let error = field_map json__ "error" String_.of_json in
       let resourceOwnerAccount =
-        field_map_exn json "resourceOwnerAccount" String_.of_json in
-      let resource = field_map json "resource" String_.of_json in
-      let principal = field_map json "principal" PrincipalMap.of_json in
-      let isPublic = field_map json "isPublic" Boolean.of_json in
-      let id = field_map_exn json "id" FindingId.of_json in
-      let error = field_map json "error" String_.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let condition = field_map_exn json "condition" ConditionKeyMap.of_json in
-      let analyzedAt = field_map_exn json "analyzedAt" Timestamp.of_json in
-      let action = field_map json "action" ActionList.of_json in
-      make ~updatedAt ~status ?sources ~resourceType ~resourceOwnerAccount
-        ?resource ?principal ?isPublic ~id ?error ~createdAt ~condition
-        ~analyzedAt ?action ()
+        field_map json__ "resourceOwnerAccount" String_.of_json in
+      let status = field_map json__ "status" FindingStatus.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let analyzedAt = field_map json__ "analyzedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let condition = field_map json__ "condition" ConditionKeyMap.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let isPublic = field_map json__ "isPublic" Boolean.of_json in
+      let resource = field_map json__ "resource" String_.of_json in
+      let action = field_map json__ "action" ActionList.of_json in
+      let principal = field_map json__ "principal" PrincipalMap.of_json in
+      let id = field_map json__ "id" FindingId.of_json in
+      make ?resourceControlPolicyRestriction ?sources ?error
+        ?resourceOwnerAccount ?status ?updatedAt ?analyzedAt ?createdAt
+        ?condition ?resourceType ?isPublic ?resource ?action ?principal ?id
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a finding."]
+module RecommendationError =
+  struct
+    type nonrec t =
+      {
+      code: String_.t option
+        [@ocaml.doc
+          "The error code for a failed retrieval of a recommendation for a finding."];
+      message: String_.t option
+        [@ocaml.doc
+          "The error message for a failed retrieval of a recommendation for a finding."]}
+    let make ?code = fun ?message -> fun () -> { code; message }
+    let to_value x =
+      structure_to_value
+        [("code", (Option.map x.code ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
+      make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" String_.of_json in
+      make ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the reason that the retrieval of a recommendation for a finding failed."]
+module RecommendationType =
+  struct
+    type nonrec t =
+      | UnusedPermissionRecommendation 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UnusedPermissionRecommendation -> "UnusedPermissionRecommendation"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UnusedPermissionRecommendation" -> UnusedPermissionRecommendation
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecommendationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RecommendationType" j)
+    let to_json = simple_to_json to_value
+  end
+module RecommendedStepList =
+  struct
+    type nonrec t = RecommendedStep.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RecommendedStep.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RecommendedStep.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RecommendedStepList"
+        ~of_json:RecommendedStep.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Status =
+  struct
+    type nonrec t =
+      | SUCCEEDED 
+      | FAILED 
+      | IN_PROGRESS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCEEDED -> "SUCCEEDED"
+      | FAILED -> "FAILED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCEEDED" -> SUCCEEDED
+      | "FAILED" -> FAILED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Status" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Status" j)
+    let to_json = simple_to_json to_value
+  end
+module GetFindingRecommendationRequestIdString =
+  struct
+    type nonrec t = string
+    let context_ = "GetFindingRecommendationRequestIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"GetFindingRecommendationRequestIdString" j
+    let to_json = simple_to_json to_value
+  end
+module GetFindingRecommendationRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for GetFindingRecommendationRequestMaxResultsInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module AnalyzedResource =
   struct
     type nonrec t =
       {
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc "The ARN of the resource that was analyzed."];
+      resourceType: ResourceType.t option
+        [@ocaml.doc "The type of the resource that was analyzed."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The time at which the finding was created."];
+      analyzedAt: Timestamp.t option
+        [@ocaml.doc "The time at which the resource was analyzed."];
+      updatedAt: Timestamp.t option
+        [@ocaml.doc "The time at which the finding was updated."];
+      isPublic: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the policy that generated the finding grants public access to the resource."];
       actions: ActionList.t option
         [@ocaml.doc
           "The actions that an external principal is granted permission to use by the policy that generated the finding."];
-      analyzedAt: Timestamp.t
-        [@ocaml.doc "The time at which the resource was analyzed."];
-      createdAt: Timestamp.t
-        [@ocaml.doc "The time at which the finding was created."];
-      error: String_.t option [@ocaml.doc "An error message."];
-      isPublic: Boolean.t
-        [@ocaml.doc
-          "Indicates whether the policy that generated the finding grants public access to the resource."];
-      resourceArn: ResourceArn.t
-        [@ocaml.doc "The ARN of the resource that was analyzed."];
-      resourceOwnerAccount: String_.t
-        [@ocaml.doc
-          "The Amazon Web Services account ID that owns the resource."];
-      resourceType: ResourceType.t
-        [@ocaml.doc "The type of the resource that was analyzed."];
       sharedVia: SharedViaList.t option
         [@ocaml.doc
           "Indicates how the access that generated the finding is granted. This is populated for Amazon S3 bucket findings."];
       status: FindingStatus.t option
         [@ocaml.doc
           "The current status of the finding generated from the analyzed resource."];
-      updatedAt: Timestamp.t
-        [@ocaml.doc "The time at which the finding was updated."]}
-    let context_ = "AnalyzedResource"
-    let make ?actions =
-      fun ?error ->
-        fun ?sharedVia ->
-          fun ?status ->
-            fun ~analyzedAt ->
-              fun ~createdAt ->
-                fun ~isPublic ->
-                  fun ~resourceArn ->
-                    fun ~resourceOwnerAccount ->
-                      fun ~resourceType ->
-                        fun ~updatedAt ->
+      resourceOwnerAccount: String_.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID that owns the resource."];
+      error: String_.t option [@ocaml.doc "An error message."]}
+    let make ?resourceArn =
+      fun ?resourceType ->
+        fun ?createdAt ->
+          fun ?analyzedAt ->
+            fun ?updatedAt ->
+              fun ?isPublic ->
+                fun ?actions ->
+                  fun ?sharedVia ->
+                    fun ?status ->
+                      fun ?resourceOwnerAccount ->
+                        fun ?error ->
                           fun () ->
                             {
+                              resourceArn;
+                              resourceType;
+                              createdAt;
+                              analyzedAt;
+                              updatedAt;
+                              isPublic;
                               actions;
-                              error;
                               sharedVia;
                               status;
-                              analyzedAt;
-                              createdAt;
-                              isPublic;
-                              resourceArn;
                               resourceOwnerAccount;
-                              resourceType;
-                              updatedAt
+                              error
                             }
     let to_value x =
       structure_to_value
-        [("actions", (Option.map x.actions ~f:ActionList.to_value));
-        ("analyzedAt", (Some (Timestamp.to_value x.analyzedAt)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("error", (Option.map x.error ~f:String_.to_value));
-        ("isPublic", (Some (Boolean.to_value x.isPublic)));
-        ("resourceArn", (Some (ResourceArn.to_value x.resourceArn)));
-        ("resourceOwnerAccount",
-          (Some (String_.to_value x.resourceOwnerAccount)));
-        ("resourceType", (Some (ResourceType.to_value x.resourceType)));
+        [("resourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("analyzedAt", (Option.map x.analyzedAt ~f:Timestamp.to_value));
+        ("updatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("isPublic", (Option.map x.isPublic ~f:Boolean.to_value));
+        ("actions", (Option.map x.actions ~f:ActionList.to_value));
         ("sharedVia", (Option.map x.sharedVia ~f:SharedViaList.to_value));
         ("status", (Option.map x.status ~f:FindingStatus.to_value));
-        ("updatedAt", (Some (Timestamp.to_value x.updatedAt)))]
+        ("resourceOwnerAccount",
+          (Option.map x.resourceOwnerAccount ~f:String_.to_value));
+        ("error", (Option.map x.error ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let updatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "updatedAt") in
+      let error = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "error") in
+      let resourceOwnerAccount =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "resourceOwnerAccount") in
       let status =
         (Option.map ~f:FindingStatus.of_xml) (Xml.child xml_arg0 "status") in
       let sharedVia =
         (Option.map ~f:SharedViaList.of_xml) (Xml.child xml_arg0 "sharedVia") in
-      let resourceType =
-        ResourceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      let resourceOwnerAccount =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceOwnerAccount") in
-      let resourceArn =
-        ResourceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
-      let isPublic =
-        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "isPublic") in
-      let error = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "error") in
-      let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let analyzedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "analyzedAt") in
       let actions =
         (Option.map ~f:ActionList.of_xml) (Xml.child xml_arg0 "actions") in
-      make ~updatedAt ?status ?sharedVia ~resourceType ~resourceOwnerAccount
-        ~resourceArn ~isPublic ?error ~createdAt ~analyzedAt ?actions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map_exn json "updatedAt" Timestamp.of_json in
-      let status = field_map json "status" FindingStatus.of_json in
-      let sharedVia = field_map json "sharedVia" SharedViaList.of_json in
+      let isPublic =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPublic") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updatedAt") in
+      let analyzedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "analyzedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      make ?error ?resourceOwnerAccount ?status ?sharedVia ?actions ?isPublic
+        ?updatedAt ?analyzedAt ?createdAt ?resourceType ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let error = field_map json__ "error" String_.of_json in
       let resourceOwnerAccount =
-        field_map_exn json "resourceOwnerAccount" String_.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
-      let isPublic = field_map_exn json "isPublic" Boolean.of_json in
-      let error = field_map json "error" String_.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let analyzedAt = field_map_exn json "analyzedAt" Timestamp.of_json in
-      let actions = field_map json "actions" ActionList.of_json in
-      make ~updatedAt ?status ?sharedVia ~resourceType ~resourceOwnerAccount
-        ~resourceArn ~isPublic ?error ~createdAt ~analyzedAt ?actions ()
+        field_map json__ "resourceOwnerAccount" String_.of_json in
+      let status = field_map json__ "status" FindingStatus.of_json in
+      let sharedVia = field_map json__ "sharedVia" SharedViaList.of_json in
+      let actions = field_map json__ "actions" ActionList.of_json in
+      let isPublic = field_map json__ "isPublic" Boolean.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let analyzedAt = field_map json__ "analyzedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let resourceArn = field_map json__ "resourceArn" ResourceArn.of_json in
+      make ?error ?resourceOwnerAccount ?status ?sharedVia ?actions ?isPublic
+        ?updatedAt ?analyzedAt ?createdAt ?resourceType ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about the analyzed resource."]
 module AccessPreview =
   struct
     type nonrec t =
       {
-      analyzerArn: AnalyzerArn.t
+      id: AccessPreviewId.t option
+        [@ocaml.doc "The unique ID for the access preview."];
+      analyzerArn: AnalyzerArn.t option
         [@ocaml.doc
           "The ARN of the analyzer used to generate the access preview."];
-      configurations: ConfigurationsMap.t
+      configurations: ConfigurationsMap.t option
         [@ocaml.doc
           "A map of resource ARNs for the proposed resource configuration."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc "The time at which the access preview was created."];
-      id: AccessPreviewId.t
-        [@ocaml.doc "The unique ID for the access preview."];
-      status: AccessPreviewStatus.t
+      status: AccessPreviewStatus.t option
         [@ocaml.doc
           "The status of the access preview. Creating - The access preview creation is in progress. Completed - The access preview is complete. You can preview findings for external access to the resource. Failed - The access preview creation has failed."];
       statusReason: AccessPreviewStatusReason.t option
         [@ocaml.doc
           "Provides more details about the current status of the access preview. For example, if the creation of the access preview fails, a Failed status is returned. This failure can be due to an internal issue with the analysis or due to an invalid resource configuration."]}
-    let context_ = "AccessPreview"
-    let make ?statusReason =
-      fun ~analyzerArn ->
-        fun ~configurations ->
-          fun ~createdAt ->
-            fun ~id ->
-              fun ~status ->
+    let make ?id =
+      fun ?analyzerArn ->
+        fun ?configurations ->
+          fun ?createdAt ->
+            fun ?status ->
+              fun ?statusReason ->
                 fun () ->
                   {
-                    statusReason;
+                    id;
                     analyzerArn;
                     configurations;
                     createdAt;
-                    id;
-                    status
+                    status;
+                    statusReason
                   }
     let to_value x =
       structure_to_value
-        [("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)));
+        [("id", (Option.map x.id ~f:AccessPreviewId.to_value));
+        ("analyzerArn", (Option.map x.analyzerArn ~f:AnalyzerArn.to_value));
         ("configurations",
-          (Some (ConfigurationsMap.to_value x.configurations)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("id", (Some (AccessPreviewId.to_value x.id)));
-        ("status", (Some (AccessPreviewStatus.to_value x.status)));
+          (Option.map x.configurations ~f:ConfigurationsMap.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:AccessPreviewStatus.to_value));
         ("statusReason",
           (Option.map x.statusReason ~f:AccessPreviewStatusReason.to_value))]
     let to_query v = to_query to_value v
@@ -4673,40 +8079,59 @@ module AccessPreview =
         (Option.map ~f:AccessPreviewStatusReason.of_xml)
           (Xml.child xml_arg0 "statusReason") in
       let status =
-        AccessPreviewStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let id =
-        AccessPreviewId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "id") in
+        (Option.map ~f:AccessPreviewStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let configurations =
-        ConfigurationsMap.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "configurations") in
+        (Option.map ~f:ConfigurationsMap.of_xml)
+          (Xml.child xml_arg0 "configurations") in
       let analyzerArn =
-        AnalyzerArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
-      make ?statusReason ~status ~id ~createdAt ~configurations ~analyzerArn
+        (Option.map ~f:AnalyzerArn.of_xml) (Xml.child xml_arg0 "analyzerArn") in
+      let id =
+        (Option.map ~f:AccessPreviewId.of_xml) (Xml.child xml_arg0 "id") in
+      make ?statusReason ?status ?createdAt ?configurations ?analyzerArn ?id
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusReason =
-        field_map json "statusReason" AccessPreviewStatusReason.of_json in
-      let status = field_map_exn json "status" AccessPreviewStatus.of_json in
-      let id = field_map_exn json "id" AccessPreviewId.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
+        field_map json__ "statusReason" AccessPreviewStatusReason.of_json in
+      let status = field_map json__ "status" AccessPreviewStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let configurations =
-        field_map_exn json "configurations" ConfigurationsMap.of_json in
-      let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
-      make ?statusReason ~status ~id ~createdAt ~configurations ~analyzerArn
+        field_map json__ "configurations" ConfigurationsMap.of_json in
+      let analyzerArn = field_map json__ "analyzerArn" AnalyzerArn.of_json in
+      let id = field_map json__ "id" AccessPreviewId.of_json in
+      make ?statusReason ?status ?createdAt ?configurations ?analyzerArn ?id
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about an access preview."]
+module GenerateFindingRecommendationRequestIdString =
+  struct
+    type nonrec t = string
+    let context_ = "GenerateFindingRecommendationRequestIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"GenerateFindingRecommendationRequestIdString" j
+    let to_json = simple_to_json to_value
+  end
 module InlineArchiveRulesList =
   struct
     type nonrec t = InlineArchiveRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InlineArchiveRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4728,11 +8153,313 @@ module InlineArchiveRulesList =
         ~of_json:InlineArchiveRule.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CheckNoPublicAccessResult =
+  struct
+    type nonrec t =
+      | PASS 
+      | FAIL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | PASS -> "PASS" | FAIL -> "FAIL" | Non_static_id s -> s
+    let of_string =
+      function | "PASS" -> PASS | "FAIL" -> FAIL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CheckNoPublicAccessResult" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CheckNoPublicAccessResult" j)
+    let to_json = simple_to_json to_value
+  end
+module InvalidParameterException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified parameter is invalid."]
+module ReasonSummaryList =
+  struct
+    type nonrec t = ReasonSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ReasonSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ReasonSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReasonSummaryList" ~of_json:ReasonSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UnprocessableEntityException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified entity could not be processed."]
+module AccessCheckPolicyDocument =
+  struct
+    type nonrec t = string
+    let context_ = "AccessCheckPolicyDocument"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccessCheckPolicyDocument" j
+    let to_json = simple_to_json to_value
+  end
+module AccessCheckResourceType =
+  struct
+    type nonrec t =
+      | AWS__DynamoDB__Table 
+      | AWS__DynamoDB__Stream 
+      | AWS__EFS__FileSystem 
+      | AWS__OpenSearchService__Domain 
+      | AWS__Kinesis__Stream 
+      | AWS__Kinesis__StreamConsumer 
+      | AWS__KMS__Key 
+      | AWS__Lambda__Function 
+      | AWS__S3__Bucket 
+      | AWS__S3__AccessPoint 
+      | AWS__S3Express__DirectoryBucket 
+      | AWS__S3__Glacier 
+      | AWS__S3Outposts__Bucket 
+      | AWS__S3Outposts__AccessPoint 
+      | AWS__SecretsManager__Secret 
+      | AWS__SNS__Topic 
+      | AWS__SQS__Queue 
+      | AWS__IAM__AssumeRolePolicyDocument 
+      | AWS__S3Tables__TableBucket 
+      | AWS__ApiGateway__RestApi 
+      | AWS__CodeArtifact__Domain 
+      | AWS__Backup__BackupVault 
+      | AWS__CloudTrail__Dashboard 
+      | AWS__CloudTrail__EventDataStore 
+      | AWS__S3Tables__Table 
+      | AWS__S3Express__AccessPoint 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWS__DynamoDB__Table -> "AWS::DynamoDB::Table"
+      | AWS__DynamoDB__Stream -> "AWS::DynamoDB::Stream"
+      | AWS__EFS__FileSystem -> "AWS::EFS::FileSystem"
+      | AWS__OpenSearchService__Domain -> "AWS::OpenSearchService::Domain"
+      | AWS__Kinesis__Stream -> "AWS::Kinesis::Stream"
+      | AWS__Kinesis__StreamConsumer -> "AWS::Kinesis::StreamConsumer"
+      | AWS__KMS__Key -> "AWS::KMS::Key"
+      | AWS__Lambda__Function -> "AWS::Lambda::Function"
+      | AWS__S3__Bucket -> "AWS::S3::Bucket"
+      | AWS__S3__AccessPoint -> "AWS::S3::AccessPoint"
+      | AWS__S3Express__DirectoryBucket -> "AWS::S3Express::DirectoryBucket"
+      | AWS__S3__Glacier -> "AWS::S3::Glacier"
+      | AWS__S3Outposts__Bucket -> "AWS::S3Outposts::Bucket"
+      | AWS__S3Outposts__AccessPoint -> "AWS::S3Outposts::AccessPoint"
+      | AWS__SecretsManager__Secret -> "AWS::SecretsManager::Secret"
+      | AWS__SNS__Topic -> "AWS::SNS::Topic"
+      | AWS__SQS__Queue -> "AWS::SQS::Queue"
+      | AWS__IAM__AssumeRolePolicyDocument ->
+          "AWS::IAM::AssumeRolePolicyDocument"
+      | AWS__S3Tables__TableBucket -> "AWS::S3Tables::TableBucket"
+      | AWS__ApiGateway__RestApi -> "AWS::ApiGateway::RestApi"
+      | AWS__CodeArtifact__Domain -> "AWS::CodeArtifact::Domain"
+      | AWS__Backup__BackupVault -> "AWS::Backup::BackupVault"
+      | AWS__CloudTrail__Dashboard -> "AWS::CloudTrail::Dashboard"
+      | AWS__CloudTrail__EventDataStore -> "AWS::CloudTrail::EventDataStore"
+      | AWS__S3Tables__Table -> "AWS::S3Tables::Table"
+      | AWS__S3Express__AccessPoint -> "AWS::S3Express::AccessPoint"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWS::DynamoDB::Table" -> AWS__DynamoDB__Table
+      | "AWS::DynamoDB::Stream" -> AWS__DynamoDB__Stream
+      | "AWS::EFS::FileSystem" -> AWS__EFS__FileSystem
+      | "AWS::OpenSearchService::Domain" -> AWS__OpenSearchService__Domain
+      | "AWS::Kinesis::Stream" -> AWS__Kinesis__Stream
+      | "AWS::Kinesis::StreamConsumer" -> AWS__Kinesis__StreamConsumer
+      | "AWS::KMS::Key" -> AWS__KMS__Key
+      | "AWS::Lambda::Function" -> AWS__Lambda__Function
+      | "AWS::S3::Bucket" -> AWS__S3__Bucket
+      | "AWS::S3::AccessPoint" -> AWS__S3__AccessPoint
+      | "AWS::S3Express::DirectoryBucket" -> AWS__S3Express__DirectoryBucket
+      | "AWS::S3::Glacier" -> AWS__S3__Glacier
+      | "AWS::S3Outposts::Bucket" -> AWS__S3Outposts__Bucket
+      | "AWS::S3Outposts::AccessPoint" -> AWS__S3Outposts__AccessPoint
+      | "AWS::SecretsManager::Secret" -> AWS__SecretsManager__Secret
+      | "AWS::SNS::Topic" -> AWS__SNS__Topic
+      | "AWS::SQS::Queue" -> AWS__SQS__Queue
+      | "AWS::IAM::AssumeRolePolicyDocument" ->
+          AWS__IAM__AssumeRolePolicyDocument
+      | "AWS::S3Tables::TableBucket" -> AWS__S3Tables__TableBucket
+      | "AWS::ApiGateway::RestApi" -> AWS__ApiGateway__RestApi
+      | "AWS::CodeArtifact::Domain" -> AWS__CodeArtifact__Domain
+      | "AWS::Backup::BackupVault" -> AWS__Backup__BackupVault
+      | "AWS::CloudTrail::Dashboard" -> AWS__CloudTrail__Dashboard
+      | "AWS::CloudTrail::EventDataStore" -> AWS__CloudTrail__EventDataStore
+      | "AWS::S3Tables::Table" -> AWS__S3Tables__Table
+      | "AWS::S3Express::AccessPoint" -> AWS__S3Express__AccessPoint
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AccessCheckResourceType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AccessCheckResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module CheckNoNewAccessResult =
+  struct
+    type nonrec t =
+      | PASS 
+      | FAIL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | PASS -> "PASS" | FAIL -> "FAIL" | Non_static_id s -> s
+    let of_string =
+      function | "PASS" -> PASS | "FAIL" -> FAIL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CheckNoNewAccessResult" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CheckNoNewAccessResult" j)
+    let to_json = simple_to_json to_value
+  end
+module AccessCheckPolicyType =
+  struct
+    type nonrec t =
+      | IDENTITY_POLICY 
+      | RESOURCE_POLICY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IDENTITY_POLICY -> "IDENTITY_POLICY"
+      | RESOURCE_POLICY -> "RESOURCE_POLICY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IDENTITY_POLICY" -> IDENTITY_POLICY
+      | "RESOURCE_POLICY" -> RESOURCE_POLICY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AccessCheckPolicyType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AccessCheckPolicyType" j)
+    let to_json = simple_to_json to_value
+  end
+module CheckAccessNotGrantedResult =
+  struct
+    type nonrec t =
+      | PASS 
+      | FAIL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | PASS -> "PASS" | FAIL -> "FAIL" | Non_static_id s -> s
+    let of_string =
+      function | "PASS" -> PASS | "FAIL" -> FAIL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CheckAccessNotGrantedResult"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CheckAccessNotGrantedResult" j)
+    let to_json = simple_to_json to_value
+  end
+module CheckAccessNotGrantedRequestAccessList =
+  struct
+    type nonrec t = Access.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Access.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Access.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CheckAccessNotGrantedRequestAccessList"
+        ~of_json:Access.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ValidatePolicyResponse =
   struct
     type nonrec t =
       {
-      findings: ValidatePolicyFindingList.t
+      findings: ValidatePolicyFindingList.t option
         [@ocaml.doc
           "The list of findings in a policy returned by IAM Access Analyzer based on its suite of policy checks."];
       nextToken: Token.t option
@@ -4743,8 +8470,7 @@ module ValidatePolicyResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ValidatePolicyResponse"
-    let make ?nextToken = fun ~findings -> fun () -> { nextToken; findings }
+    let make ?findings = fun ?nextToken -> fun () -> { findings; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4795,22 +8521,23 @@ module ValidatePolicyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("findings", (Some (ValidatePolicyFindingList.to_value x.findings)));
+        [("findings",
+           (Option.map x.findings ~f:ValidatePolicyFindingList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let findings =
-        ValidatePolicyFindingList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "findings") in
-      make ?nextToken ~findings ()
+        (Option.map ~f:ValidatePolicyFindingList.of_xml)
+          (Xml.child xml_arg0 "findings") in
+      make ?nextToken ?findings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let findings =
-        field_map_exn json "findings" ValidatePolicyFindingList.of_json in
-      make ?nextToken ~findings ()
+        field_map json__ "findings" ValidatePolicyFindingList.of_json in
+      make ?nextToken ?findings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Requests the validation of a policy and returns a list of findings. The findings help you identify issues and provide actionable recommendations to resolve the issue and enable you to author functional policies that meet security best practices."]
@@ -4830,7 +8557,7 @@ module ValidatePolicyRequest =
           "The JSON policy document to use as the content for the policy."];
       policyType: PolicyType.t
         [@ocaml.doc
-          "The type of policy to validate. Identity policies grant permissions to IAM principals. Identity policies include managed and inline policies for IAM roles, users, and groups. They also include service-control policies (SCPs) that are attached to an Amazon Web Services organization, organizational unit (OU), or an account. Resource policies grant permissions on Amazon Web Services resources. Resource policies include trust policies for IAM roles and bucket policies for Amazon S3 buckets. You can provide a generic input such as identity policy or resource policy or a specific input such as managed policy or Amazon S3 bucket policy."];
+          "The type of policy to validate. Identity policies grant permissions to IAM principals. Identity policies include managed and inline policies for IAM roles, users, and groups. Resource policies grant permissions on Amazon Web Services resources. Resource policies include trust policies for IAM roles and bucket policies for Amazon S3 buckets. You can provide a generic input such as identity policy or resource policy or a specific input such as managed policy or Amazon S3 bucket policy. Service control policies (SCPs) are a type of organization policy attached to an Amazon Web Services organization, organizational unit (OU), or an account."];
       validatePolicyResourceType: ValidatePolicyResourceType.t option
         [@ocaml.doc
           "The type of resource to attach to your resource policy. Specify a value for the policy validation resource type only if the policy type is RESOURCE_POLICY. For example, to validate a resource policy to attach to an Amazon S3 bucket, you can choose AWS::S3::Bucket for the policy validation resource type. For resource types not supported as valid values, IAM Access Analyzer runs policy checks that apply to all resource policies. For example, to validate a resource policy to attach to a KMS key, do not specify a value for the policy validation resource type and IAM Access Analyzer will run policy checks that apply to all resource policies."]}
@@ -4880,16 +8607,16 @@ module ValidatePolicyRequest =
       make ?validatePolicyResourceType ~policyType ~policyDocument ?nextToken
         ?maxResults ?locale ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validatePolicyResourceType =
-        field_map json "validatePolicyResourceType"
+        field_map json__ "validatePolicyResourceType"
           ValidatePolicyResourceType.of_json in
-      let policyType = field_map_exn json "policyType" PolicyType.of_json in
+      let policyType = field_map_exn json__ "policyType" PolicyType.of_json in
       let policyDocument =
-        field_map_exn json "policyDocument" PolicyDocument.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let locale = field_map json "locale" Locale.of_json in
+        field_map_exn json__ "policyDocument" PolicyDocument.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let locale = field_map json__ "locale" Locale.of_json in
       make ?validatePolicyResourceType ~policyType ~policyDocument ?nextToken
         ?maxResults ?locale ()
     let to_json v = composed_to_json to_value v
@@ -4902,52 +8629,53 @@ module UpdateFindingsRequest =
       analyzerArn: AnalyzerArn.t
         [@ocaml.doc
           "The ARN of the analyzer that generated the findings to update."];
-      clientToken: String_.t option [@ocaml.doc "A client token."];
+      status: FindingStatusUpdate.t
+        [@ocaml.doc
+          "The state represents the action to take to update the finding Status. Use ARCHIVE to change an Active finding to an Archived finding. Use ACTIVE to change an Archived finding to an Active finding."];
       ids: FindingIdList.t option
         [@ocaml.doc "The IDs of the findings to update."];
       resourceArn: ResourceArn.t option
         [@ocaml.doc "The ARN of the resource identified in the finding."];
-      status: FindingStatusUpdate.t
-        [@ocaml.doc
-          "The state represents the action to take to update the finding Status. Use ARCHIVE to change an Active finding to an Archived finding. Use ACTIVE to change an Archived finding to an Active finding."]}
+      clientToken: String_.t option [@ocaml.doc "A client token."]}
     let context_ = "UpdateFindingsRequest"
-    let make ?clientToken =
-      fun ?ids ->
-        fun ?resourceArn ->
+    let make ?ids =
+      fun ?resourceArn ->
+        fun ?clientToken ->
           fun ~analyzerArn ->
             fun ~status ->
               fun () ->
-                { clientToken; ids; resourceArn; analyzerArn; status }
+                { ids; resourceArn; clientToken; analyzerArn; status }
     let to_value x =
       structure_to_value
         [("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)));
-        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("status", (Some (FindingStatusUpdate.to_value x.status)));
         ("ids", (Option.map x.ids ~f:FindingIdList.to_value));
         ("resourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
-        ("status", (Some (FindingStatusUpdate.to_value x.status)))]
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let status =
-        FindingStatusUpdate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let resourceArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "resourceArn") in
       let ids =
         (Option.map ~f:FindingIdList.of_xml) (Xml.child xml_arg0 "ids") in
-      let clientToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let status =
+        FindingStatusUpdate.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "status") in
       let analyzerArn =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
-      make ~status ?resourceArn ?ids ?clientToken ~analyzerArn ()
+      make ?clientToken ?resourceArn ?ids ~status ~analyzerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" FindingStatusUpdate.of_json in
-      let resourceArn = field_map json "resourceArn" ResourceArn.of_json in
-      let ids = field_map json "ids" FindingIdList.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
-      make ~status ?resourceArn ?ids ?clientToken ~analyzerArn ()
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let resourceArn = field_map json__ "resourceArn" ResourceArn.of_json in
+      let ids = field_map json__ "ids" FindingIdList.of_json in
+      let status = field_map_exn json__ "status" FindingStatusUpdate.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
+      make ?clientToken ?resourceArn ?ids ~status ~analyzerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates findings with the new values provided in the request."]
@@ -4958,44 +8686,170 @@ module UpdateArchiveRuleRequest =
       analyzerName: Name.t
         [@ocaml.doc
           "The name of the analyzer to update the archive rules for."];
-      clientToken: String_.t option [@ocaml.doc "A client token."];
+      ruleName: Name.t [@ocaml.doc "The name of the rule to update."];
       filter: FilterCriteriaMap.t
         [@ocaml.doc
           "A filter to match for the rules to update. Only rules that match the filter are updated."];
-      ruleName: Name.t [@ocaml.doc "The name of the rule to update."]}
+      clientToken: String_.t option [@ocaml.doc "A client token."]}
     let context_ = "UpdateArchiveRuleRequest"
     let make ?clientToken =
       fun ~analyzerName ->
-        fun ~filter ->
-          fun ~ruleName ->
-            fun () -> { clientToken; analyzerName; filter; ruleName }
+        fun ~ruleName ->
+          fun ~filter ->
+            fun () -> { clientToken; analyzerName; ruleName; filter }
     let to_value x =
       structure_to_value
         [("analyzerName", (Some (Name.to_value x.analyzerName)));
-        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("ruleName", (Some (Name.to_value x.ruleName)));
         ("filter", (Some (FilterCriteriaMap.to_value x.filter)));
-        ("ruleName", (Some (Name.to_value x.ruleName)))]
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let ruleName =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ruleName") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let filter =
         FilterCriteriaMap.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filter") in
-      let clientToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let ruleName =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ruleName") in
       let analyzerName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
-      make ~ruleName ~filter ?clientToken ~analyzerName ()
+      make ?clientToken ~filter ~ruleName ~analyzerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleName = field_map_exn json "ruleName" Name.of_json in
-      let filter = field_map_exn json "filter" FilterCriteriaMap.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let analyzerName = field_map_exn json "analyzerName" Name.of_json in
-      make ~ruleName ~filter ?clientToken ~analyzerName ()
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let filter = field_map_exn json__ "filter" FilterCriteriaMap.of_json in
+      let ruleName = field_map_exn json__ "ruleName" Name.of_json in
+      let analyzerName = field_map_exn json__ "analyzerName" Name.of_json in
+      make ?clientToken ~filter ~ruleName ~analyzerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified archive rule."]
+module UpdateAnalyzerResponse =
+  struct
+    type nonrec t = {
+      configuration: AnalyzerConfiguration.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?configuration = fun () -> { configuration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("configuration",
+           (Option.map x.configuration ~f:AnalyzerConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let configuration =
+        (Option.map ~f:AnalyzerConfiguration.of_xml)
+          (Xml.child xml_arg0 "configuration") in
+      make ?configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configuration =
+        field_map json__ "configuration" AnalyzerConfiguration.of_json in
+      make ?configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the configuration of an existing analyzer. This action is not supported for external access analyzers."]
+module UpdateAnalyzerRequest =
+  struct
+    type nonrec t =
+      {
+      analyzerName: Name.t [@ocaml.doc "The name of the analyzer to modify."];
+      configuration: AnalyzerConfiguration.t option }
+    let context_ = "UpdateAnalyzerRequest"
+    let make ?configuration =
+      fun ~analyzerName -> fun () -> { configuration; analyzerName }
+    let to_value x =
+      structure_to_value
+        [("analyzerName", (Some (Name.to_value x.analyzerName)));
+        ("configuration",
+          (Option.map x.configuration ~f:AnalyzerConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let configuration =
+        (Option.map ~f:AnalyzerConfiguration.of_xml)
+          (Xml.child xml_arg0 "configuration") in
+      let analyzerName =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
+      make ?configuration ~analyzerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configuration =
+        field_map json__ "configuration" AnalyzerConfiguration.of_json in
+      let analyzerName = field_map_exn json__ "analyzerName" Name.of_json in
+      make ?configuration ~analyzerName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the configuration of an existing analyzer. This action is not supported for external access analyzers."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -5094,9 +8948,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeys.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from the specified resource."]
@@ -5197,9 +9051,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagsMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagsMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a tag to the specified resource."]
@@ -5211,28 +9065,42 @@ module StartResourceScanRequest =
         [@ocaml.doc
           "The ARN of the analyzer to use to scan the policies applied to the specified resource."];
       resourceArn: ResourceArn.t
-        [@ocaml.doc "The ARN of the resource to scan."]}
+        [@ocaml.doc "The ARN of the resource to scan."];
+      resourceOwnerAccount: String_.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID that owns the resource. For most Amazon Web Services resources, the owning account is the account in which the resource was created."]}
     let context_ = "StartResourceScanRequest"
-    let make ~analyzerArn =
-      fun ~resourceArn -> fun () -> { analyzerArn; resourceArn }
+    let make ?resourceOwnerAccount =
+      fun ~analyzerArn ->
+        fun ~resourceArn ->
+          fun () -> { resourceOwnerAccount; analyzerArn; resourceArn }
     let to_value x =
       structure_to_value
         [("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)));
-        ("resourceArn", (Some (ResourceArn.to_value x.resourceArn)))]
+        ("resourceArn", (Some (ResourceArn.to_value x.resourceArn)));
+        ("resourceOwnerAccount",
+          (Option.map x.resourceOwnerAccount ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resourceOwnerAccount =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "resourceOwnerAccount") in
       let resourceArn =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       let analyzerArn =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
-      make ~resourceArn ~analyzerArn ()
+      make ?resourceOwnerAccount ~resourceArn ~analyzerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
-      let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
-      make ~resourceArn ~analyzerArn ()
+    let of_json json__ =
+      let resourceOwnerAccount =
+        field_map json__ "resourceOwnerAccount" String_.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
+      make ?resourceOwnerAccount ~resourceArn ~analyzerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts a scan of the policies applied to the specified resource."]
@@ -5240,7 +9108,7 @@ module StartPolicyGenerationResponse =
   struct
     type nonrec t =
       {
-      jobId: JobId.t
+      jobId: JobId.t option
         [@ocaml.doc
           "The JobId that is returned by the StartPolicyGeneration operation. The JobId can be used with GetGeneratedPolicy to retrieve the generated policies or used with CancelPolicyGeneration to cancel the policy generation request."]}
     type nonrec error =
@@ -5251,8 +9119,7 @@ module StartPolicyGenerationResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartPolicyGenerationResponse"
-    let make ~jobId = fun () -> { jobId }
+    let make ?jobId = fun () -> { jobId }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5320,63 +9187,62 @@ module StartPolicyGenerationResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("jobId", (Some (JobId.to_value x.jobId)))]
+      structure_to_value [("jobId", (Option.map x.jobId ~f:JobId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let jobId =
-        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
-      make ~jobId ()
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
+      make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "jobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "jobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts the policy generation request."]
 module StartPolicyGenerationRequest =
   struct
     type nonrec t =
       {
-      clientToken: String_.t option
+      policyGenerationDetails: PolicyGenerationDetails.t
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, the subsequent retries with the same client token return the result from the original successful request and they have no additional effect. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."];
+          "Contains the ARN of the IAM entity (user or role) for which you are generating a policy."];
       cloudTrailDetails: CloudTrailDetails.t option
         [@ocaml.doc
           "A CloudTrailDetails object that contains details about a Trail that you want to analyze to generate policies."];
-      policyGenerationDetails: PolicyGenerationDetails.t
+      clientToken: String_.t option
         [@ocaml.doc
-          "Contains the ARN of the IAM entity (user or role) for which you are generating a policy."]}
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Idempotency ensures that an API request completes only once. With an idempotent request, if the original request completes successfully, the subsequent retries with the same client token return the result from the original successful request and they have no additional effect. If you do not specify a client token, one is automatically generated by the Amazon Web Services SDK."]}
     let context_ = "StartPolicyGenerationRequest"
-    let make ?clientToken =
-      fun ?cloudTrailDetails ->
+    let make ?cloudTrailDetails =
+      fun ?clientToken ->
         fun ~policyGenerationDetails ->
           fun () ->
-            { clientToken; cloudTrailDetails; policyGenerationDetails }
+            { cloudTrailDetails; clientToken; policyGenerationDetails }
     let to_value x =
       structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        [("policyGenerationDetails",
+           (Some (PolicyGenerationDetails.to_value x.policyGenerationDetails)));
         ("cloudTrailDetails",
           (Option.map x.cloudTrailDetails ~f:CloudTrailDetails.to_value));
-        ("policyGenerationDetails",
-          (Some (PolicyGenerationDetails.to_value x.policyGenerationDetails)))]
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let policyGenerationDetails =
-        PolicyGenerationDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "policyGenerationDetails") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let cloudTrailDetails =
         (Option.map ~f:CloudTrailDetails.of_xml)
           (Xml.child xml_arg0 "cloudTrailDetails") in
-      let clientToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ~policyGenerationDetails ?cloudTrailDetails ?clientToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let policyGenerationDetails =
-        field_map_exn json "policyGenerationDetails"
-          PolicyGenerationDetails.of_json in
+        PolicyGenerationDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "policyGenerationDetails") in
+      make ?clientToken ?cloudTrailDetails ~policyGenerationDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let cloudTrailDetails =
-        field_map json "cloudTrailDetails" CloudTrailDetails.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      make ~policyGenerationDetails ?cloudTrailDetails ?clientToken ()
+        field_map json__ "cloudTrailDetails" CloudTrailDetails.of_json in
+      let policyGenerationDetails =
+        field_map_exn json__ "policyGenerationDetails"
+          PolicyGenerationDetails.of_json in
+      make ?clientToken ?cloudTrailDetails ~policyGenerationDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts the policy generation request."]
 module ListTagsForResourceResponse =
@@ -5456,8 +9322,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to the request."]
 module ListTagsForResourceRequest =
@@ -5478,8 +9344,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5488,20 +9354,19 @@ module ListPolicyGenerationsResponse =
   struct
     type nonrec t =
       {
-      nextToken: Token.t option
-        [@ocaml.doc "A token used for pagination of results returned."];
-      policyGenerations: PolicyGenerationList.t
+      policyGenerations: PolicyGenerationList.t option
         [@ocaml.doc
-          "A PolicyGeneration object that contains details about the generated policy."]}
+          "A PolicyGeneration object that contains details about the generated policy."];
+      nextToken: Token.t option
+        [@ocaml.doc "A token used for pagination of results returned."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListPolicyGenerationsResponse"
-    let make ?nextToken =
-      fun ~policyGenerations -> fun () -> { nextToken; policyGenerations }
+    let make ?policyGenerations =
+      fun ?nextToken -> fun () -> { policyGenerations; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5552,23 +9417,23 @@ module ListPolicyGenerationsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("policyGenerations",
-          (Some (PolicyGenerationList.to_value x.policyGenerations)))]
+        [("policyGenerations",
+           (Option.map x.policyGenerations ~f:PolicyGenerationList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let policyGenerations =
-        PolicyGenerationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "policyGenerations") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~policyGenerations ?nextToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let policyGenerations =
-        field_map_exn json "policyGenerations" PolicyGenerationList.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      make ~policyGenerations ?nextToken ()
+        (Option.map ~f:PolicyGenerationList.of_xml)
+          (Xml.child xml_arg0 "policyGenerations") in
+      make ?nextToken ?policyGenerations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let policyGenerations =
+        field_map json__ "policyGenerations" PolicyGenerationList.of_json in
+      make ?nextToken ?policyGenerations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all of the policy generations requested in the last seven days."]
@@ -5576,53 +9441,52 @@ module ListPolicyGenerationsRequest =
   struct
     type nonrec t =
       {
+      principalArn: PrincipalArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM entity (user or role) for which you are generating a policy. Use this with ListGeneratedPolicies to filter the results to only include results for a specific principal."];
       maxResults: ListPolicyGenerationsRequestMaxResultsInteger.t option
         [@ocaml.doc
           "The maximum number of results to return in the response."];
       nextToken: Token.t option
-        [@ocaml.doc "A token used for pagination of results returned."];
-      principalArn: PrincipalArn.t option
-        [@ocaml.doc
-          "The ARN of the IAM entity (user or role) for which you are generating a policy. Use this with ListGeneratedPolicies to filter the results to only include results for a specific principal."]}
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ?principalArn ->
-          fun () -> { maxResults; nextToken; principalArn }
+        [@ocaml.doc "A token used for pagination of results returned."]}
+    let make ?principalArn =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { principalArn; maxResults; nextToken }
     let to_value x =
       structure_to_value
-        [("maxResults",
-           (Option.map x.maxResults
-              ~f:ListPolicyGenerationsRequestMaxResultsInteger.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("principalArn",
-          (Option.map x.principalArn ~f:PrincipalArn.to_value))]
+        [("principalArn",
+           (Option.map x.principalArn ~f:PrincipalArn.to_value));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:ListPolicyGenerationsRequestMaxResultsInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let principalArn =
-        (Option.map ~f:PrincipalArn.of_xml)
-          (Xml.child xml_arg0 "principalArn") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:ListPolicyGenerationsRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
-      make ?principalArn ?nextToken ?maxResults ()
+      let principalArn =
+        (Option.map ~f:PrincipalArn.of_xml)
+          (Xml.child xml_arg0 "principalArn") in
+      make ?nextToken ?maxResults ?principalArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let principalArn = field_map json "principalArn" PrincipalArn.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let maxResults =
-        field_map json "maxResults"
+        field_map json__ "maxResults"
           ListPolicyGenerationsRequestMaxResultsInteger.of_json in
-      make ?principalArn ?nextToken ?maxResults ()
+      let principalArn = field_map json__ "principalArn" PrincipalArn.of_json in
+      make ?nextToken ?maxResults ?principalArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all of the policy generations requested in the last seven days."]
-module ListFindingsResponse =
+module ListFindingsV2Response =
   struct
     type nonrec t =
       {
-      findings: FindingsList.t
+      findings: FindingsListV2.t option
         [@ocaml.doc
           "A list of findings retrieved from the analyzer that match the filter criteria specified, if any."];
       nextToken: Token.t option
@@ -5634,8 +9498,7 @@ module ListFindingsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListFindingsResponse"
-    let make ?nextToken = fun ~findings -> fun () -> { nextToken; findings }
+    let make ?findings = fun ?nextToken -> fun () -> { findings; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5694,24 +9557,24 @@ module ListFindingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("findings", (Some (FindingsList.to_value x.findings)));
+        [("findings", (Option.map x.findings ~f:FindingsListV2.to_value));
         ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let findings =
-        FindingsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "findings") in
-      make ?nextToken ~findings ()
+        (Option.map ~f:FindingsListV2.of_xml) (Xml.child xml_arg0 "findings") in
+      make ?nextToken ?findings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let findings = field_map_exn json "findings" FindingsList.of_json in
-      make ?nextToken ~findings ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let findings = field_map json__ "findings" FindingsListV2.of_json in
+      make ?nextToken ?findings ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The response to the request."]
-module ListFindingsRequest =
+  end[@@ocaml.doc
+       "Retrieves a list of findings generated by the specified analyzer. ListFindings and ListFindingsV2 both use access-analyzer:ListFindings in the Action element of an IAM policy statement. You must have permission to perform the access-analyzer:ListFindings action. To learn about filter keys that you can use to retrieve a list of findings, see IAM Access Analyzer filter keys in the IAM User Guide."]
+module ListFindingsV2Request =
   struct
     type nonrec t =
       {
@@ -5724,9 +9587,8 @@ module ListFindingsRequest =
           "The maximum number of results to return in the response."];
       nextToken: Token.t option
         [@ocaml.doc "A token used for pagination of results returned."];
-      sort: SortCriteria.t option
-        [@ocaml.doc "The sort order for the findings returned."]}
-    let context_ = "ListFindingsRequest"
+      sort: SortCriteria.t option }
+    let context_ = "ListFindingsV2Request"
     let make ?filter =
       fun ?maxResults ->
         fun ?nextToken ->
@@ -5756,13 +9618,161 @@ module ListFindingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ?sort ?nextToken ?maxResults ?filter ~analyzerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sort = field_map json "sort" SortCriteria.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let filter = field_map json "filter" FilterCriteriaMap.of_json in
-      let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
+    let of_json json__ =
+      let sort = field_map json__ "sort" SortCriteria.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let filter = field_map json__ "filter" FilterCriteriaMap.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
       make ?sort ?nextToken ?maxResults ?filter ~analyzerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of findings generated by the specified analyzer. ListFindings and ListFindingsV2 both use access-analyzer:ListFindings in the Action element of an IAM policy statement. You must have permission to perform the access-analyzer:ListFindings action. To learn about filter keys that you can use to retrieve a list of findings, see IAM Access Analyzer filter keys in the IAM User Guide."]
+module ListFindingsResponse =
+  struct
+    type nonrec t =
+      {
+      findings: FindingsList.t option
+        [@ocaml.doc
+          "A list of findings retrieved from the analyzer that match the filter criteria specified, if any."];
+      nextToken: Token.t option
+        [@ocaml.doc "A token used for pagination of results returned."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?findings = fun ?nextToken -> fun () -> { findings; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("findings", (Option.map x.findings ~f:FindingsList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let findings =
+        (Option.map ~f:FindingsList.of_xml) (Xml.child xml_arg0 "findings") in
+      make ?nextToken ?findings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let findings = field_map json__ "findings" FindingsList.of_json in
+      make ?nextToken ?findings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The response to the request."]
+module ListFindingsRequest =
+  struct
+    type nonrec t =
+      {
+      analyzerArn: AnalyzerArn.t
+        [@ocaml.doc "The ARN of the analyzer to retrieve findings from."];
+      filter: FilterCriteriaMap.t option
+        [@ocaml.doc "A filter to match for the findings to return."];
+      sort: SortCriteria.t option
+        [@ocaml.doc "The sort order for the findings returned."];
+      nextToken: Token.t option
+        [@ocaml.doc "A token used for pagination of results returned."];
+      maxResults: Integer.t option
+        [@ocaml.doc
+          "The maximum number of results to return in the response."]}
+    let context_ = "ListFindingsRequest"
+    let make ?filter =
+      fun ?sort ->
+        fun ?nextToken ->
+          fun ?maxResults ->
+            fun ~analyzerArn ->
+              fun () -> { filter; sort; nextToken; maxResults; analyzerArn }
+    let to_value x =
+      structure_to_value
+        [("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)));
+        ("filter", (Option.map x.filter ~f:FilterCriteriaMap.to_value));
+        ("sort", (Option.map x.sort ~f:SortCriteria.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let sort =
+        (Option.map ~f:SortCriteria.of_xml) (Xml.child xml_arg0 "sort") in
+      let filter =
+        (Option.map ~f:FilterCriteriaMap.of_xml)
+          (Xml.child xml_arg0 "filter") in
+      let analyzerArn =
+        AnalyzerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
+      make ?maxResults ?nextToken ?sort ?filter ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let sort = field_map json__ "sort" SortCriteria.of_json in
+      let filter = field_map json__ "filter" FilterCriteriaMap.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
+      make ?maxResults ?nextToken ?sort ?filter ~analyzerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of findings generated by the specified analyzer."]
@@ -5770,7 +9780,7 @@ module ListArchiveRulesResponse =
   struct
     type nonrec t =
       {
-      archiveRules: ArchiveRulesList.t
+      archiveRules: ArchiveRulesList.t option
         [@ocaml.doc
           "A list of archive rules created for the specified analyzer."];
       nextToken: Token.t option
@@ -5781,9 +9791,8 @@ module ListArchiveRulesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListArchiveRulesResponse"
-    let make ?nextToken =
-      fun ~archiveRules -> fun () -> { nextToken; archiveRules }
+    let make ?archiveRules =
+      fun ?nextToken -> fun () -> { archiveRules; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5834,22 +9843,23 @@ module ListArchiveRulesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("archiveRules", (Some (ArchiveRulesList.to_value x.archiveRules)));
+        [("archiveRules",
+           (Option.map x.archiveRules ~f:ArchiveRulesList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let archiveRules =
-        ArchiveRulesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "archiveRules") in
-      make ?nextToken ~archiveRules ()
+        (Option.map ~f:ArchiveRulesList.of_xml)
+          (Xml.child xml_arg0 "archiveRules") in
+      make ?nextToken ?archiveRules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let archiveRules =
-        field_map_exn json "archiveRules" ArchiveRulesList.of_json in
-      make ?nextToken ~archiveRules ()
+        field_map json__ "archiveRules" ArchiveRulesList.of_json in
+      make ?nextToken ?archiveRules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to the request."]
 module ListArchiveRulesRequest =
@@ -5858,36 +9868,36 @@ module ListArchiveRulesRequest =
       {
       analyzerName: Name.t
         [@ocaml.doc "The name of the analyzer to retrieve rules from."];
+      nextToken: Token.t option
+        [@ocaml.doc "A token used for pagination of results returned."];
       maxResults: Integer.t option
         [@ocaml.doc
-          "The maximum number of results to return in the request."];
-      nextToken: Token.t option
-        [@ocaml.doc "A token used for pagination of results returned."]}
+          "The maximum number of results to return in the request."]}
     let context_ = "ListArchiveRulesRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
+    let make ?nextToken =
+      fun ?maxResults ->
         fun ~analyzerName ->
-          fun () -> { maxResults; nextToken; analyzerName }
+          fun () -> { nextToken; maxResults; analyzerName }
     let to_value x =
       structure_to_value
         [("analyzerName", (Some (Name.to_value x.analyzerName)));
-        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let analyzerName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
-      make ?nextToken ?maxResults ~analyzerName ()
+      make ?maxResults ?nextToken ~analyzerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let analyzerName = field_map_exn json "analyzerName" Name.of_json in
-      make ?nextToken ?maxResults ~analyzerName ()
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let analyzerName = field_map_exn json__ "analyzerName" Name.of_json in
+      make ?maxResults ?nextToken ~analyzerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of archive rules created for the specified analyzer."]
@@ -5895,7 +9905,8 @@ module ListAnalyzersResponse =
   struct
     type nonrec t =
       {
-      analyzers: AnalyzersList.t [@ocaml.doc "The analyzers retrieved."];
+      analyzers: AnalyzersList.t option
+        [@ocaml.doc "The analyzers retrieved."];
       nextToken: Token.t option
         [@ocaml.doc "A token used for pagination of results returned."]}
     type nonrec error =
@@ -5904,9 +9915,8 @@ module ListAnalyzersResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAnalyzersResponse"
-    let make ?nextToken =
-      fun ~analyzers -> fun () -> { nextToken; analyzers }
+    let make ?analyzers =
+      fun ?nextToken -> fun () -> { analyzers; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5957,62 +9967,61 @@ module ListAnalyzersResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("analyzers", (Some (AnalyzersList.to_value x.analyzers)));
+        [("analyzers", (Option.map x.analyzers ~f:AnalyzersList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let analyzers =
-        AnalyzersList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "analyzers") in
-      make ?nextToken ~analyzers ()
+        (Option.map ~f:AnalyzersList.of_xml) (Xml.child xml_arg0 "analyzers") in
+      make ?nextToken ?analyzers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let analyzers = field_map_exn json "analyzers" AnalyzersList.of_json in
-      make ?nextToken ~analyzers ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let analyzers = field_map json__ "analyzers" AnalyzersList.of_json in
+      make ?nextToken ?analyzers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to the request."]
 module ListAnalyzersRequest =
   struct
     type nonrec t =
       {
+      nextToken: Token.t option
+        [@ocaml.doc "A token used for pagination of results returned."];
       maxResults: Integer.t option
         [@ocaml.doc
           "The maximum number of results to return in the response."];
-      nextToken: Token.t option
-        [@ocaml.doc "A token used for pagination of results returned."];
       type_: Type.t option [@ocaml.doc "The type of analyzer."]}
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ?type_ -> fun () -> { maxResults; nextToken; type_ }
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?type_ -> fun () -> { nextToken; maxResults; type_ }
     let to_value x =
       structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
+        [("nextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
         ("type", (Option.map x.type_ ~f:Type.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let type_ = (Option.map ~f:Type.of_xml) (Xml.child xml_arg0 "type") in
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
-      make ?type_ ?nextToken ?maxResults ()
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?type_ ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" Type.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      make ?type_ ?nextToken ?maxResults ()
+    let of_json json__ =
+      let type_ = field_map json__ "type" Type.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      make ?type_ ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of analyzers."]
 module ListAnalyzedResourcesResponse =
   struct
     type nonrec t =
       {
-      analyzedResources: AnalyzedResourcesList.t
+      analyzedResources: AnalyzedResourcesList.t option
         [@ocaml.doc "A list of resources that were analyzed."];
       nextToken: Token.t option
         [@ocaml.doc "A token used for pagination of results returned."]}
@@ -6023,9 +10032,8 @@ module ListAnalyzedResourcesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAnalyzedResourcesResponse"
-    let make ?nextToken =
-      fun ~analyzedResources -> fun () -> { nextToken; analyzedResources }
+    let make ?analyzedResources =
+      fun ?nextToken -> fun () -> { analyzedResources; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6085,22 +10093,22 @@ module ListAnalyzedResourcesResponse =
     let to_value x =
       structure_to_value
         [("analyzedResources",
-           (Some (AnalyzedResourcesList.to_value x.analyzedResources)));
+           (Option.map x.analyzedResources ~f:AnalyzedResourcesList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let analyzedResources =
-        AnalyzedResourcesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "analyzedResources") in
-      make ?nextToken ~analyzedResources ()
+        (Option.map ~f:AnalyzedResourcesList.of_xml)
+          (Xml.child xml_arg0 "analyzedResources") in
+      make ?nextToken ?analyzedResources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let analyzedResources =
-        field_map_exn json "analyzedResources" AnalyzedResourcesList.of_json in
-      make ?nextToken ~analyzedResources ()
+        field_map json__ "analyzedResources" AnalyzedResourcesList.of_json in
+      make ?nextToken ?analyzedResources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to the request."]
 module ListAnalyzedResourcesRequest =
@@ -6110,53 +10118,54 @@ module ListAnalyzedResourcesRequest =
       analyzerArn: AnalyzerArn.t
         [@ocaml.doc
           "The ARN of the analyzer to retrieve a list of analyzed resources from."];
-      maxResults: Integer.t option
-        [@ocaml.doc
-          "The maximum number of results to return in the response."];
+      resourceType: ResourceType.t option
+        [@ocaml.doc "The type of resource."];
       nextToken: Token.t option
         [@ocaml.doc "A token used for pagination of results returned."];
-      resourceType: ResourceType.t option
-        [@ocaml.doc "The type of resource."]}
+      maxResults: Integer.t option
+        [@ocaml.doc
+          "The maximum number of results to return in the response."]}
     let context_ = "ListAnalyzedResourcesRequest"
-    let make ?maxResults =
+    let make ?resourceType =
       fun ?nextToken ->
-        fun ?resourceType ->
+        fun ?maxResults ->
           fun ~analyzerArn ->
-            fun () -> { maxResults; nextToken; resourceType; analyzerArn }
+            fun () -> { resourceType; nextToken; maxResults; analyzerArn }
     let to_value x =
       structure_to_value
         [("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)));
-        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
         ("resourceType",
-          (Option.map x.resourceType ~f:ResourceType.to_value))]
+          (Option.map x.resourceType ~f:ResourceType.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let resourceType =
         (Option.map ~f:ResourceType.of_xml)
           (Xml.child xml_arg0 "resourceType") in
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
-      let maxResults =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       let analyzerArn =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
-      make ?resourceType ?nextToken ?maxResults ~analyzerArn ()
+      make ?maxResults ?nextToken ?resourceType ~analyzerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
-      make ?resourceType ?nextToken ?maxResults ~analyzerArn ()
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
+      make ?maxResults ?nextToken ?resourceType ~analyzerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a list of resources that have been analyzed."]
 module ListAccessPreviewsResponse =
   struct
     type nonrec t =
       {
-      accessPreviews: AccessPreviewsList.t
+      accessPreviews: AccessPreviewsList.t option
         [@ocaml.doc "A list of access previews retrieved for the analyzer."];
       nextToken: Token.t option
         [@ocaml.doc "A token used for pagination of results returned."]}
@@ -6167,9 +10176,8 @@ module ListAccessPreviewsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAccessPreviewsResponse"
-    let make ?nextToken =
-      fun ~accessPreviews -> fun () -> { nextToken; accessPreviews }
+    let make ?accessPreviews =
+      fun ?nextToken -> fun () -> { accessPreviews; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6229,22 +10237,22 @@ module ListAccessPreviewsResponse =
     let to_value x =
       structure_to_value
         [("accessPreviews",
-           (Some (AccessPreviewsList.to_value x.accessPreviews)));
+           (Option.map x.accessPreviews ~f:AccessPreviewsList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let accessPreviews =
-        AccessPreviewsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "accessPreviews") in
-      make ?nextToken ~accessPreviews ()
+        (Option.map ~f:AccessPreviewsList.of_xml)
+          (Xml.child xml_arg0 "accessPreviews") in
+      make ?nextToken ?accessPreviews ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let accessPreviews =
-        field_map_exn json "accessPreviews" AccessPreviewsList.of_json in
-      make ?nextToken ~accessPreviews ()
+        field_map json__ "accessPreviews" AccessPreviewsList.of_json in
+      make ?nextToken ?accessPreviews ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of access previews for the specified analyzer."]
@@ -6255,36 +10263,37 @@ module ListAccessPreviewsRequest =
       analyzerArn: AnalyzerArn.t
         [@ocaml.doc
           "The ARN of the analyzer used to generate the access preview."];
+      nextToken: Token.t option
+        [@ocaml.doc "A token used for pagination of results returned."];
       maxResults: Integer.t option
         [@ocaml.doc
-          "The maximum number of results to return in the response."];
-      nextToken: Token.t option
-        [@ocaml.doc "A token used for pagination of results returned."]}
+          "The maximum number of results to return in the response."]}
     let context_ = "ListAccessPreviewsRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~analyzerArn -> fun () -> { maxResults; nextToken; analyzerArn }
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~analyzerArn -> fun () -> { nextToken; maxResults; analyzerArn }
     let to_value x =
       structure_to_value
         [("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)));
-        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let analyzerArn =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
-      make ?nextToken ?maxResults ~analyzerArn ()
+      make ?maxResults ?nextToken ~analyzerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
-      make ?nextToken ?maxResults ~analyzerArn ()
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
+      make ?maxResults ?nextToken ~analyzerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of access previews for the specified analyzer."]
@@ -6292,7 +10301,7 @@ module ListAccessPreviewFindingsResponse =
   struct
     type nonrec t =
       {
-      findings: AccessPreviewFindingsList.t
+      findings: AccessPreviewFindingsList.t option
         [@ocaml.doc
           "A list of access preview findings that match the specified filter criteria."];
       nextToken: Token.t option
@@ -6305,8 +10314,7 @@ module ListAccessPreviewFindingsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAccessPreviewFindingsResponse"
-    let make ?nextToken = fun ~findings -> fun () -> { nextToken; findings }
+    let make ?findings = fun ?nextToken -> fun () -> { findings; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6373,22 +10381,23 @@ module ListAccessPreviewFindingsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("findings", (Some (AccessPreviewFindingsList.to_value x.findings)));
+        [("findings",
+           (Option.map x.findings ~f:AccessPreviewFindingsList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let findings =
-        AccessPreviewFindingsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "findings") in
-      make ?nextToken ~findings ()
+        (Option.map ~f:AccessPreviewFindingsList.of_xml)
+          (Xml.child xml_arg0 "findings") in
+      make ?nextToken ?findings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let findings =
-        field_map_exn json "findings" AccessPreviewFindingsList.of_json in
-      make ?nextToken ~findings ()
+        field_map json__ "findings" AccessPreviewFindingsList.of_json in
+      make ?nextToken ?findings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of access preview findings generated by the specified access preview."]
@@ -6402,19 +10411,19 @@ module ListAccessPreviewFindingsRequest =
         [@ocaml.doc "The ARN of the analyzer used to generate the access."];
       filter: FilterCriteriaMap.t option
         [@ocaml.doc "Criteria to filter the returned findings."];
+      nextToken: Token.t option
+        [@ocaml.doc "A token used for pagination of results returned."];
       maxResults: Integer.t option
         [@ocaml.doc
-          "The maximum number of results to return in the response."];
-      nextToken: Token.t option
-        [@ocaml.doc "A token used for pagination of results returned."]}
+          "The maximum number of results to return in the response."]}
     let context_ = "ListAccessPreviewFindingsRequest"
     let make ?filter =
-      fun ?maxResults ->
-        fun ?nextToken ->
+      fun ?nextToken ->
+        fun ?maxResults ->
           fun ~accessPreviewId ->
             fun ~analyzerArn ->
               fun () ->
-                { filter; maxResults; nextToken; accessPreviewId; analyzerArn
+                { filter; nextToken; maxResults; accessPreviewId; analyzerArn
                 }
     let to_value x =
       structure_to_value
@@ -6422,14 +10431,14 @@ module ListAccessPreviewFindingsRequest =
            (Some (AccessPreviewId.to_value x.accessPreviewId)));
         ("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)));
         ("filter", (Option.map x.filter ~f:FilterCriteriaMap.to_value));
-        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       let filter =
         (Option.map ~f:FilterCriteriaMap.of_xml)
           (Xml.child xml_arg0 "filter") in
@@ -6439,16 +10448,17 @@ module ListAccessPreviewFindingsRequest =
       let accessPreviewId =
         AccessPreviewId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accessPreviewId") in
-      make ?nextToken ?maxResults ?filter ~analyzerArn ~accessPreviewId ()
+      make ?maxResults ?nextToken ?filter ~analyzerArn ~accessPreviewId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let filter = field_map json "filter" FilterCriteriaMap.of_json in
-      let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let filter = field_map json__ "filter" FilterCriteriaMap.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
       let accessPreviewId =
-        field_map_exn json "accessPreviewId" AccessPreviewId.of_json in
-      make ?nextToken ?maxResults ?filter ~analyzerArn ~accessPreviewId ()
+        field_map_exn json__ "accessPreviewId" AccessPreviewId.of_json in
+      make ?maxResults ?nextToken ?filter ~analyzerArn ~accessPreviewId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a list of access preview findings generated by the specified access preview."]
@@ -6456,21 +10466,21 @@ module GetGeneratedPolicyResponse =
   struct
     type nonrec t =
       {
-      generatedPolicyResult: GeneratedPolicyResult.t
+      jobDetails: JobDetails.t option
         [@ocaml.doc
-          "A GeneratedPolicyResult object that contains the generated policies and associated details."];
-      jobDetails: JobDetails.t
+          "A GeneratedPolicyDetails object that contains details about the generated policy."];
+      generatedPolicyResult: GeneratedPolicyResult.t option
         [@ocaml.doc
-          "A GeneratedPolicyDetails object that contains details about the generated policy."]}
+          "A GeneratedPolicyResult object that contains the generated policies and associated details."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetGeneratedPolicyResponse"
-    let make ~generatedPolicyResult =
-      fun ~jobDetails -> fun () -> { generatedPolicyResult; jobDetails }
+    let make ?jobDetails =
+      fun ?generatedPolicyResult ->
+        fun () -> { jobDetails; generatedPolicyResult }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6521,25 +10531,25 @@ module GetGeneratedPolicyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("generatedPolicyResult",
-           (Some (GeneratedPolicyResult.to_value x.generatedPolicyResult)));
-        ("jobDetails", (Some (JobDetails.to_value x.jobDetails)))]
+        [("jobDetails", (Option.map x.jobDetails ~f:JobDetails.to_value));
+        ("generatedPolicyResult",
+          (Option.map x.generatedPolicyResult
+             ~f:GeneratedPolicyResult.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let generatedPolicyResult =
+        (Option.map ~f:GeneratedPolicyResult.of_xml)
+          (Xml.child xml_arg0 "generatedPolicyResult") in
       let jobDetails =
-        JobDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobDetails") in
-      let generatedPolicyResult =
-        GeneratedPolicyResult.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "generatedPolicyResult") in
-      make ~jobDetails ~generatedPolicyResult ()
+        (Option.map ~f:JobDetails.of_xml) (Xml.child xml_arg0 "jobDetails") in
+      make ?generatedPolicyResult ?jobDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobDetails = field_map_exn json "jobDetails" JobDetails.of_json in
+    let of_json json__ =
       let generatedPolicyResult =
-        field_map_exn json "generatedPolicyResult"
+        field_map json__ "generatedPolicyResult"
           GeneratedPolicyResult.of_json in
-      make ~jobDetails ~generatedPolicyResult ()
+      let jobDetails = field_map json__ "jobDetails" JobDetails.of_json in
+      make ?generatedPolicyResult ?jobDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the policy that was generated using StartPolicyGeneration."]
@@ -6547,15 +10557,15 @@ module GetGeneratedPolicyRequest =
   struct
     type nonrec t =
       {
+      jobId: JobId.t
+        [@ocaml.doc
+          "The JobId that is returned by the StartPolicyGeneration operation. The JobId can be used with GetGeneratedPolicy to retrieve the generated policies or used with CancelPolicyGeneration to cancel the policy generation request."];
       includeResourcePlaceholders: Boolean.t option
         [@ocaml.doc
           "The level of detail that you want to generate. You can specify whether to generate policies with placeholders for resource ARNs for actions that support resource level granularity in policies. For example, in the resource section of a policy, you can receive a placeholder such as \"Resource\":\"arn:aws:s3:::$\\{BucketName\\}\" instead of \"*\"."];
       includeServiceLevelTemplate: Boolean.t option
         [@ocaml.doc
-          "The level of detail that you want to generate. You can specify whether to generate service-level policies. IAM Access Analyzer uses iam:servicelastaccessed to identify services that have been used recently to create this service-level template."];
-      jobId: JobId.t
-        [@ocaml.doc
-          "The JobId that is returned by the StartPolicyGeneration operation. The JobId can be used with GetGeneratedPolicy to retrieve the generated policies or used with CancelPolicyGeneration to cancel the policy generation request."]}
+          "The level of detail that you want to generate. You can specify whether to generate service-level policies. IAM Access Analyzer uses iam:servicelastaccessed to identify services that have been used recently to create this service-level template."]}
     let context_ = "GetGeneratedPolicyRequest"
     let make ?includeResourcePlaceholders =
       fun ?includeServiceLevelTemplate ->
@@ -6565,35 +10575,395 @@ module GetGeneratedPolicyRequest =
             }
     let to_value x =
       structure_to_value
-        [("includeResourcePlaceholders",
-           (Option.map x.includeResourcePlaceholders ~f:Boolean.to_value));
+        [("jobId", (Some (JobId.to_value x.jobId)));
+        ("includeResourcePlaceholders",
+          (Option.map x.includeResourcePlaceholders ~f:Boolean.to_value));
         ("includeServiceLevelTemplate",
-          (Option.map x.includeServiceLevelTemplate ~f:Boolean.to_value));
-        ("jobId", (Some (JobId.to_value x.jobId)))]
+          (Option.map x.includeServiceLevelTemplate ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let jobId =
-        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       let includeServiceLevelTemplate =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "includeServiceLevelTemplate") in
       let includeResourcePlaceholders =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "includeResourcePlaceholders") in
-      make ~jobId ?includeServiceLevelTemplate ?includeResourcePlaceholders
+      let jobId =
+        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
+      make ?includeServiceLevelTemplate ?includeResourcePlaceholders ~jobId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "jobId" JobId.of_json in
+    let of_json json__ =
       let includeServiceLevelTemplate =
-        field_map json "includeServiceLevelTemplate" Boolean.of_json in
+        field_map json__ "includeServiceLevelTemplate" Boolean.of_json in
       let includeResourcePlaceholders =
-        field_map json "includeResourcePlaceholders" Boolean.of_json in
-      make ~jobId ?includeServiceLevelTemplate ?includeResourcePlaceholders
+        field_map json__ "includeResourcePlaceholders" Boolean.of_json in
+      let jobId = field_map_exn json__ "jobId" JobId.of_json in
+      make ?includeServiceLevelTemplate ?includeResourcePlaceholders ~jobId
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the policy that was generated using StartPolicyGeneration."]
+module GetFindingsStatisticsResponse =
+  struct
+    type nonrec t =
+      {
+      findingsStatistics: FindingsStatisticsList.t option
+        [@ocaml.doc
+          "A group of external access or unused access findings statistics."];
+      lastUpdatedAt: Timestamp.t option
+        [@ocaml.doc
+          "The time at which the retrieval of the findings statistics was last updated. If the findings statistics have not been previously retrieved for the specified analyzer, this field will not be populated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?findingsStatistics =
+      fun ?lastUpdatedAt -> fun () -> { findingsStatistics; lastUpdatedAt }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("findingsStatistics",
+           (Option.map x.findingsStatistics
+              ~f:FindingsStatisticsList.to_value));
+        ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastUpdatedAt") in
+      let findingsStatistics =
+        (Option.map ~f:FindingsStatisticsList.of_xml)
+          (Xml.child xml_arg0 "findingsStatistics") in
+      make ?lastUpdatedAt ?findingsStatistics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let findingsStatistics =
+        field_map json__ "findingsStatistics" FindingsStatisticsList.of_json in
+      make ?lastUpdatedAt ?findingsStatistics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of aggregated finding statistics for an external access or unused access analyzer."]
+module GetFindingsStatisticsRequest =
+  struct
+    type nonrec t =
+      {
+      analyzerArn: AnalyzerArn.t
+        [@ocaml.doc
+          "The ARN of the analyzer used to generate the statistics."]}
+    let context_ = "GetFindingsStatisticsRequest"
+    let make ~analyzerArn = fun () -> { analyzerArn }
+    let to_value x =
+      structure_to_value
+        [("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let analyzerArn =
+        AnalyzerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
+      make ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
+      make ~analyzerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of aggregated finding statistics for an external access or unused access analyzer."]
+module GetFindingV2Response =
+  struct
+    type nonrec t =
+      {
+      analyzedAt: Timestamp.t option
+        [@ocaml.doc
+          "The time at which the resource-based policy or IAM entity that generated the finding was analyzed."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The time at which the finding was created."];
+      error: String_.t option [@ocaml.doc "An error."];
+      id: FindingId.t option
+        [@ocaml.doc "The ID of the finding to retrieve."];
+      nextToken: Token.t option
+        [@ocaml.doc "A token used for pagination of results returned."];
+      resource: String_.t option
+        [@ocaml.doc "The resource that generated the finding."];
+      resourceType: ResourceType.t option
+        [@ocaml.doc "The type of the resource identified in the finding."];
+      resourceOwnerAccount: String_.t option
+        [@ocaml.doc
+          "Tye Amazon Web Services account ID that owns the resource."];
+      status: FindingStatus.t option
+        [@ocaml.doc "The status of the finding."];
+      updatedAt: Timestamp.t option
+        [@ocaml.doc "The time at which the finding was updated."];
+      findingDetails: FindingDetailsList.t option
+        [@ocaml.doc
+          "A localized message that explains the finding and provides guidance on how to address it."];
+      findingType: FindingType.t option
+        [@ocaml.doc
+          "The type of the finding. For external access analyzers, the type is ExternalAccess. For unused access analyzers, the type can be UnusedIAMRole, UnusedIAMUserAccessKey, UnusedIAMUserPassword, or UnusedPermission. For internal access analyzers, the type is InternalAccess."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?analyzedAt =
+      fun ?createdAt ->
+        fun ?error ->
+          fun ?id ->
+            fun ?nextToken ->
+              fun ?resource ->
+                fun ?resourceType ->
+                  fun ?resourceOwnerAccount ->
+                    fun ?status ->
+                      fun ?updatedAt ->
+                        fun ?findingDetails ->
+                          fun ?findingType ->
+                            fun () ->
+                              {
+                                analyzedAt;
+                                createdAt;
+                                error;
+                                id;
+                                nextToken;
+                                resource;
+                                resourceType;
+                                resourceOwnerAccount;
+                                status;
+                                updatedAt;
+                                findingDetails;
+                                findingType
+                              }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("analyzedAt", (Option.map x.analyzedAt ~f:Timestamp.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("error", (Option.map x.error ~f:String_.to_value));
+        ("id", (Option.map x.id ~f:FindingId.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("resource", (Option.map x.resource ~f:String_.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value));
+        ("resourceOwnerAccount",
+          (Option.map x.resourceOwnerAccount ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:FindingStatus.to_value));
+        ("updatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("findingDetails",
+          (Option.map x.findingDetails ~f:FindingDetailsList.to_value));
+        ("findingType", (Option.map x.findingType ~f:FindingType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let findingType =
+        (Option.map ~f:FindingType.of_xml) (Xml.child xml_arg0 "findingType") in
+      let findingDetails =
+        (Option.map ~f:FindingDetailsList.of_xml)
+          (Xml.child xml_arg0 "findingDetails") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "updatedAt") in
+      let status =
+        (Option.map ~f:FindingStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let resourceOwnerAccount =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "resourceOwnerAccount") in
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let resource =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resource") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let id = (Option.map ~f:FindingId.of_xml) (Xml.child xml_arg0 "id") in
+      let error = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "error") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let analyzedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "analyzedAt") in
+      make ?findingType ?findingDetails ?updatedAt ?status
+        ?resourceOwnerAccount ?resourceType ?resource ?nextToken ?id ?error
+        ?createdAt ?analyzedAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let findingType = field_map json__ "findingType" FindingType.of_json in
+      let findingDetails =
+        field_map json__ "findingDetails" FindingDetailsList.of_json in
+      let updatedAt = field_map json__ "updatedAt" Timestamp.of_json in
+      let status = field_map json__ "status" FindingStatus.of_json in
+      let resourceOwnerAccount =
+        field_map json__ "resourceOwnerAccount" String_.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let resource = field_map json__ "resource" String_.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let id = field_map json__ "id" FindingId.of_json in
+      let error = field_map json__ "error" String_.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let analyzedAt = field_map json__ "analyzedAt" Timestamp.of_json in
+      make ?findingType ?findingDetails ?updatedAt ?status
+        ?resourceOwnerAccount ?resourceType ?resource ?nextToken ?id ?error
+        ?createdAt ?analyzedAt ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about the specified finding. GetFinding and GetFindingV2 both use access-analyzer:GetFinding in the Action element of an IAM policy statement. You must have permission to perform the access-analyzer:GetFinding action."]
+module GetFindingV2Request =
+  struct
+    type nonrec t =
+      {
+      analyzerArn: AnalyzerArn.t
+        [@ocaml.doc "The ARN of the analyzer that generated the finding."];
+      id: FindingId.t [@ocaml.doc "The ID of the finding to retrieve."];
+      maxResults: Integer.t option
+        [@ocaml.doc
+          "The maximum number of results to return in the response."];
+      nextToken: Token.t option
+        [@ocaml.doc "A token used for pagination of results returned."]}
+    let context_ = "GetFindingV2Request"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~analyzerArn ->
+          fun ~id -> fun () -> { maxResults; nextToken; analyzerArn; id }
+    let to_value x =
+      structure_to_value
+        [("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)));
+        ("id", (Some (FindingId.to_value x.id)));
+        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let id =
+        FindingId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let analyzerArn =
+        AnalyzerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
+      make ?nextToken ?maxResults ~id ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let id = field_map_exn json__ "id" FindingId.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
+      make ?nextToken ?maxResults ~id ~analyzerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about the specified finding. GetFinding and GetFindingV2 both use access-analyzer:GetFinding in the Action element of an IAM policy statement. You must have permission to perform the access-analyzer:GetFinding action."]
 module GetFindingResponse =
   struct
     type nonrec t =
@@ -6673,8 +11043,8 @@ module GetFindingResponse =
         (Option.map ~f:Finding.of_xml) (Xml.child xml_arg0 "finding") in
       make ?finding ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let finding = field_map json "finding" Finding.of_json in
+    let of_json json__ =
+      let finding = field_map json__ "finding" Finding.of_json in
       make ?finding ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to the request."]
@@ -6700,16 +11070,37 @@ module GetFindingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ~id ~analyzerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" FindingId.of_json in
-      let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "id" FindingId.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
       make ~id ~analyzerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a finding."]
-module GetArchiveRuleResponse =
+module GetFindingRecommendationResponse =
   struct
-    type nonrec t = {
-      archiveRule: ArchiveRuleSummary.t }
+    type nonrec t =
+      {
+      startedAt: Timestamp.t option
+        [@ocaml.doc
+          "The time at which the retrieval of the finding recommendation was started."];
+      completedAt: Timestamp.t option
+        [@ocaml.doc
+          "The time at which the retrieval of the finding recommendation was completed."];
+      nextToken: Token.t option
+        [@ocaml.doc "A token used for pagination of results returned."];
+      error: RecommendationError.t option
+        [@ocaml.doc
+          "Detailed information about the reason that the retrieval of a recommendation for the finding failed."];
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc "The ARN of the resource of the finding."];
+      recommendedSteps: RecommendedStepList.t option
+        [@ocaml.doc "A group of recommended steps for the finding."];
+      recommendationType: RecommendationType.t option
+        [@ocaml.doc "The type of recommendation for the finding."];
+      status: Status.t option
+        [@ocaml.doc
+          "The status of the retrieval of the finding recommendation."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -6717,8 +11108,25 @@ module GetArchiveRuleResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetArchiveRuleResponse"
-    let make ~archiveRule = fun () -> { archiveRule }
+    let make ?startedAt =
+      fun ?completedAt ->
+        fun ?nextToken ->
+          fun ?error ->
+            fun ?resourceArn ->
+              fun ?recommendedSteps ->
+                fun ?recommendationType ->
+                  fun ?status ->
+                    fun () ->
+                      {
+                        startedAt;
+                        completedAt;
+                        nextToken;
+                        error;
+                        resourceArn;
+                        recommendedSteps;
+                        recommendationType;
+                        status
+                      }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6777,18 +11185,197 @@ module GetArchiveRuleResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("archiveRule", (Some (ArchiveRuleSummary.to_value x.archiveRule)))]
+        [("startedAt", (Option.map x.startedAt ~f:Timestamp.to_value));
+        ("completedAt", (Option.map x.completedAt ~f:Timestamp.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("error", (Option.map x.error ~f:RecommendationError.to_value));
+        ("resourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("recommendedSteps",
+          (Option.map x.recommendedSteps ~f:RecommendedStepList.to_value));
+        ("recommendationType",
+          (Option.map x.recommendationType ~f:RecommendationType.to_value));
+        ("status", (Option.map x.status ~f:Status.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
+      let recommendationType =
+        (Option.map ~f:RecommendationType.of_xml)
+          (Xml.child xml_arg0 "recommendationType") in
+      let recommendedSteps =
+        (Option.map ~f:RecommendedStepList.of_xml)
+          (Xml.child xml_arg0 "recommendedSteps") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      let error =
+        (Option.map ~f:RecommendationError.of_xml)
+          (Xml.child xml_arg0 "error") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let completedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "completedAt") in
+      let startedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startedAt") in
+      make ?status ?recommendationType ?recommendedSteps ?resourceArn ?error
+        ?nextToken ?completedAt ?startedAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" Status.of_json in
+      let recommendationType =
+        field_map json__ "recommendationType" RecommendationType.of_json in
+      let recommendedSteps =
+        field_map json__ "recommendedSteps" RecommendedStepList.of_json in
+      let resourceArn = field_map json__ "resourceArn" ResourceArn.of_json in
+      let error = field_map json__ "error" RecommendationError.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let completedAt = field_map json__ "completedAt" Timestamp.of_json in
+      let startedAt = field_map json__ "startedAt" Timestamp.of_json in
+      make ?status ?recommendationType ?recommendedSteps ?resourceArn ?error
+        ?nextToken ?completedAt ?startedAt ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about a finding recommendation for the specified analyzer."]
+module GetFindingRecommendationRequest =
+  struct
+    type nonrec t =
+      {
+      analyzerArn: AnalyzerArn.t
+        [@ocaml.doc
+          "The ARN of the analyzer used to generate the finding recommendation."];
+      id: GetFindingRecommendationRequestIdString.t
+        [@ocaml.doc "The unique ID for the finding recommendation."];
+      maxResults: GetFindingRecommendationRequestMaxResultsInteger.t option
+        [@ocaml.doc
+          "The maximum number of results to return in the response."];
+      nextToken: Token.t option
+        [@ocaml.doc "A token used for pagination of results returned."]}
+    let context_ = "GetFindingRecommendationRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~analyzerArn ->
+          fun ~id -> fun () -> { maxResults; nextToken; analyzerArn; id }
+    let to_value x =
+      structure_to_value
+        [("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)));
+        ("id",
+          (Some (GetFindingRecommendationRequestIdString.to_value x.id)));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:GetFindingRecommendationRequestMaxResultsInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map
+           ~f:GetFindingRecommendationRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let id =
+        GetFindingRecommendationRequestIdString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let analyzerArn =
+        AnalyzerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
+      make ?nextToken ?maxResults ~id ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          GetFindingRecommendationRequestMaxResultsInteger.of_json in
+      let id =
+        field_map_exn json__ "id"
+          GetFindingRecommendationRequestIdString.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
+      make ?nextToken ?maxResults ~id ~analyzerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about a finding recommendation for the specified analyzer."]
+module GetArchiveRuleResponse =
+  struct
+    type nonrec t = {
+      archiveRule: ArchiveRuleSummary.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?archiveRule = fun () -> { archiveRule }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("archiveRule",
+           (Option.map x.archiveRule ~f:ArchiveRuleSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let archiveRule =
-        ArchiveRuleSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "archiveRule") in
-      make ~archiveRule ()
+        (Option.map ~f:ArchiveRuleSummary.of_xml)
+          (Xml.child xml_arg0 "archiveRule") in
+      make ?archiveRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let archiveRule =
-        field_map_exn json "archiveRule" ArchiveRuleSummary.of_json in
-      make ~archiveRule ()
+        field_map json__ "archiveRule" ArchiveRuleSummary.of_json in
+      make ?archiveRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to the request."]
 module GetArchiveRuleRequest =
@@ -6813,9 +11400,9 @@ module GetArchiveRuleRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
       make ~ruleName ~analyzerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleName = field_map_exn json "ruleName" Name.of_json in
-      let analyzerName = field_map_exn json "analyzerName" Name.of_json in
+    let of_json json__ =
+      let ruleName = field_map_exn json__ "ruleName" Name.of_json in
+      let analyzerName = field_map_exn json__ "analyzerName" Name.of_json in
       make ~ruleName ~analyzerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves an archive rule."]
@@ -6823,7 +11410,7 @@ module GetAnalyzerResponse =
   struct
     type nonrec t =
       {
-      analyzer: AnalyzerSummary.t
+      analyzer: AnalyzerSummary.t option
         [@ocaml.doc
           "An AnalyzerSummary object that contains information about the analyzer."]}
     type nonrec error =
@@ -6833,8 +11420,7 @@ module GetAnalyzerResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetAnalyzerResponse"
-    let make ~analyzer = fun () -> { analyzer }
+    let make ?analyzer = fun () -> { analyzer }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6893,17 +11479,17 @@ module GetAnalyzerResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("analyzer", (Some (AnalyzerSummary.to_value x.analyzer)))]
+        [("analyzer", (Option.map x.analyzer ~f:AnalyzerSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let analyzer =
-        AnalyzerSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "analyzer") in
-      make ~analyzer ()
+        (Option.map ~f:AnalyzerSummary.of_xml)
+          (Xml.child xml_arg0 "analyzer") in
+      make ?analyzer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let analyzer = field_map_exn json "analyzer" AnalyzerSummary.of_json in
-      make ~analyzer ()
+    let of_json json__ =
+      let analyzer = field_map json__ "analyzer" AnalyzerSummary.of_json in
+      make ?analyzer ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to the request."]
 module GetAnalyzerRequest =
@@ -6922,8 +11508,8 @@ module GetAnalyzerRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
       make ~analyzerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let analyzerName = field_map_exn json "analyzerName" Name.of_json in
+    let of_json json__ =
+      let analyzerName = field_map_exn json__ "analyzerName" Name.of_json in
       make ~analyzerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves an analyzer."]
@@ -7008,8 +11594,8 @@ module GetAnalyzedResourceResponse =
           (Xml.child xml_arg0 "resource") in
       make ?resource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resource = field_map json "resource" AnalyzedResource.of_json in
+    let of_json json__ =
+      let resource = field_map json__ "resource" AnalyzedResource.of_json in
       make ?resource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to the request."]
@@ -7038,9 +11624,11 @@ module GetAnalyzedResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
       make ~resourceArn ~analyzerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
-      let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
       make ~resourceArn ~analyzerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves an analyzed resource."]
@@ -7048,7 +11636,7 @@ module GetAccessPreviewResponse =
   struct
     type nonrec t =
       {
-      accessPreview: AccessPreview.t
+      accessPreview: AccessPreview.t option
         [@ocaml.doc
           "An object that contains information about the access preview."]}
     type nonrec error =
@@ -7058,8 +11646,7 @@ module GetAccessPreviewResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetAccessPreviewResponse"
-    let make ~accessPreview = fun () -> { accessPreview }
+    let make ?accessPreview = fun () -> { accessPreview }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7118,18 +11705,19 @@ module GetAccessPreviewResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("accessPreview", (Some (AccessPreview.to_value x.accessPreview)))]
+        [("accessPreview",
+           (Option.map x.accessPreview ~f:AccessPreview.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let accessPreview =
-        AccessPreview.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "accessPreview") in
-      make ~accessPreview ()
+        (Option.map ~f:AccessPreview.of_xml)
+          (Xml.child xml_arg0 "accessPreview") in
+      make ?accessPreview ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessPreview =
-        field_map_exn json "accessPreview" AccessPreview.of_json in
-      make ~accessPreview ()
+        field_map json__ "accessPreview" AccessPreview.of_json in
+      make ?accessPreview ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves information about an access preview for the specified analyzer."]
@@ -7160,14 +11748,51 @@ module GetAccessPreviewRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "accessPreviewId") in
       make ~analyzerArn ~accessPreviewId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
+    let of_json json__ =
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
       let accessPreviewId =
-        field_map_exn json "accessPreviewId" AccessPreviewId.of_json in
+        field_map_exn json__ "accessPreviewId" AccessPreviewId.of_json in
       make ~analyzerArn ~accessPreviewId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves information about an access preview for the specified analyzer."]
+module GenerateFindingRecommendationRequest =
+  struct
+    type nonrec t =
+      {
+      analyzerArn: AnalyzerArn.t
+        [@ocaml.doc
+          "The ARN of the analyzer used to generate the finding recommendation."];
+      id: GenerateFindingRecommendationRequestIdString.t
+        [@ocaml.doc "The unique ID for the finding recommendation."]}
+    let context_ = "GenerateFindingRecommendationRequest"
+    let make ~analyzerArn = fun ~id -> fun () -> { analyzerArn; id }
+    let to_value x =
+      structure_to_value
+        [("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)));
+        ("id",
+          (Some (GenerateFindingRecommendationRequestIdString.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        GenerateFindingRecommendationRequestIdString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let analyzerArn =
+        AnalyzerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
+      make ~id ~analyzerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id =
+        field_map_exn json__ "id"
+          GenerateFindingRecommendationRequestIdString.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
+      make ~id ~analyzerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a recommendation for an unused permissions finding."]
 module DeleteArchiveRuleRequest =
   struct
     type nonrec t =
@@ -7175,8 +11800,8 @@ module DeleteArchiveRuleRequest =
       analyzerName: Name.t
         [@ocaml.doc
           "The name of the analyzer that associated with the archive rule to delete."];
-      clientToken: String_.t option [@ocaml.doc "A client token."];
-      ruleName: Name.t [@ocaml.doc "The name of the rule to delete."]}
+      ruleName: Name.t [@ocaml.doc "The name of the rule to delete."];
+      clientToken: String_.t option [@ocaml.doc "A client token."]}
     let context_ = "DeleteArchiveRuleRequest"
     let make ?clientToken =
       fun ~analyzerName ->
@@ -7184,23 +11809,23 @@ module DeleteArchiveRuleRequest =
     let to_value x =
       structure_to_value
         [("analyzerName", (Some (Name.to_value x.analyzerName)));
-        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
-        ("ruleName", (Some (Name.to_value x.ruleName)))]
+        ("ruleName", (Some (Name.to_value x.ruleName)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let ruleName =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ruleName") in
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let ruleName =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ruleName") in
       let analyzerName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
-      make ~ruleName ?clientToken ~analyzerName ()
+      make ?clientToken ~ruleName ~analyzerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleName = field_map_exn json "ruleName" Name.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let analyzerName = field_map_exn json "analyzerName" Name.of_json in
-      make ~ruleName ?clientToken ~analyzerName ()
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let ruleName = field_map_exn json__ "ruleName" Name.of_json in
+      let analyzerName = field_map_exn json__ "analyzerName" Name.of_json in
+      make ?clientToken ~ruleName ~analyzerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an archive rule."]
 module DeleteAnalyzerRequest =
@@ -7224,9 +11849,9 @@ module DeleteAnalyzerRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
       make ?clientToken ~analyzerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let analyzerName = field_map_exn json "analyzerName" Name.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let analyzerName = field_map_exn json__ "analyzerName" Name.of_json in
       make ?clientToken ~analyzerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an analyzer."]
@@ -7235,40 +11860,40 @@ module CreateArchiveRuleRequest =
     type nonrec t =
       {
       analyzerName: Name.t [@ocaml.doc "The name of the created analyzer."];
-      clientToken: String_.t option [@ocaml.doc "A client token."];
+      ruleName: Name.t [@ocaml.doc "The name of the rule to create."];
       filter: FilterCriteriaMap.t [@ocaml.doc "The criteria for the rule."];
-      ruleName: Name.t [@ocaml.doc "The name of the rule to create."]}
+      clientToken: String_.t option [@ocaml.doc "A client token."]}
     let context_ = "CreateArchiveRuleRequest"
     let make ?clientToken =
       fun ~analyzerName ->
-        fun ~filter ->
-          fun ~ruleName ->
-            fun () -> { clientToken; analyzerName; filter; ruleName }
+        fun ~ruleName ->
+          fun ~filter ->
+            fun () -> { clientToken; analyzerName; ruleName; filter }
     let to_value x =
       structure_to_value
         [("analyzerName", (Some (Name.to_value x.analyzerName)));
-        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("ruleName", (Some (Name.to_value x.ruleName)));
         ("filter", (Some (FilterCriteriaMap.to_value x.filter)));
-        ("ruleName", (Some (Name.to_value x.ruleName)))]
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let ruleName =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ruleName") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let filter =
         FilterCriteriaMap.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filter") in
-      let clientToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let ruleName =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ruleName") in
       let analyzerName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
-      make ~ruleName ~filter ?clientToken ~analyzerName ()
+      make ?clientToken ~filter ~ruleName ~analyzerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleName = field_map_exn json "ruleName" Name.of_json in
-      let filter = field_map_exn json "filter" FilterCriteriaMap.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let analyzerName = field_map_exn json "analyzerName" Name.of_json in
-      make ~ruleName ~filter ?clientToken ~analyzerName ()
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let filter = field_map_exn json__ "filter" FilterCriteriaMap.of_json in
+      let ruleName = field_map_exn json__ "ruleName" Name.of_json in
+      let analyzerName = field_map_exn json__ "analyzerName" Name.of_json in
+      make ?clientToken ~filter ~ruleName ~analyzerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an archive rule."]
 module CreateAnalyzerResponse =
@@ -7361,8 +11986,8 @@ module CreateAnalyzerResponse =
       let arn = (Option.map ~f:AnalyzerArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "arn" AnalyzerArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "arn" AnalyzerArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to the request to create an analyzer."]
 module CreateAnalyzerRequest =
@@ -7370,60 +11995,81 @@ module CreateAnalyzerRequest =
     type nonrec t =
       {
       analyzerName: Name.t [@ocaml.doc "The name of the analyzer to create."];
+      type_: Type.t
+        [@ocaml.doc
+          "The type of analyzer to create. You can create only one analyzer per account per Region. You can create up to 5 analyzers per organization per Region."];
       archiveRules: InlineArchiveRulesList.t option
         [@ocaml.doc
           "Specifies the archive rules to add for the analyzer. Archive rules automatically archive findings that meet the criteria you define for the rule."];
-      clientToken: String_.t option [@ocaml.doc "A client token."];
       tags: TagsMap.t option
-        [@ocaml.doc "The tags to apply to the analyzer."];
-      type_: Type.t
         [@ocaml.doc
-          "The type of analyzer to create. Only ACCOUNT and ORGANIZATION analyzers are supported. You can create only one analyzer per account per Region. You can create up to 5 analyzers per organization per Region."]}
+          "An array of key-value pairs to apply to the analyzer. You can use the set of Unicode letters, digits, whitespace, _, ., /, =, +, and -. For the tag key, you can specify a value that is 1 to 128 characters in length and cannot be prefixed with aws:. For the tag value, you can specify a value that is 0 to 256 characters in length."];
+      clientToken: String_.t option [@ocaml.doc "A client token."];
+      configuration: AnalyzerConfiguration.t option
+        [@ocaml.doc
+          "Specifies the configuration of the analyzer. If the analyzer is an unused access analyzer, the specified scope of unused access is used for the configuration. If the analyzer is an internal access analyzer, the specified internal access analysis rules are used for the configuration."]}
     let context_ = "CreateAnalyzerRequest"
     let make ?archiveRules =
-      fun ?clientToken ->
-        fun ?tags ->
-          fun ~analyzerName ->
-            fun ~type_ ->
-              fun () ->
-                { archiveRules; clientToken; tags; analyzerName; type_ }
+      fun ?tags ->
+        fun ?clientToken ->
+          fun ?configuration ->
+            fun ~analyzerName ->
+              fun ~type_ ->
+                fun () ->
+                  {
+                    archiveRules;
+                    tags;
+                    clientToken;
+                    configuration;
+                    analyzerName;
+                    type_
+                  }
     let to_value x =
       structure_to_value
         [("analyzerName", (Some (Name.to_value x.analyzerName)));
+        ("type", (Some (Type.to_value x.type_)));
         ("archiveRules",
           (Option.map x.archiveRules ~f:InlineArchiveRulesList.to_value));
-        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
         ("tags", (Option.map x.tags ~f:TagsMap.to_value));
-        ("type", (Some (Type.to_value x.type_)))]
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("configuration",
+          (Option.map x.configuration ~f:AnalyzerConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ =
-        Type.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let configuration =
+        (Option.map ~f:AnalyzerConfiguration.of_xml)
+          (Xml.child xml_arg0 "configuration") in
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       let archiveRules =
         (Option.map ~f:InlineArchiveRulesList.of_xml)
           (Xml.child xml_arg0 "archiveRules") in
+      let type_ =
+        Type.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
       let analyzerName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "analyzerName") in
-      make ~type_ ?tags ?clientToken ?archiveRules ~analyzerName ()
+      make ?configuration ?clientToken ?tags ?archiveRules ~type_
+        ~analyzerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" Type.of_json in
-      let tags = field_map json "tags" TagsMap.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let configuration =
+        field_map json__ "configuration" AnalyzerConfiguration.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
       let archiveRules =
-        field_map json "archiveRules" InlineArchiveRulesList.of_json in
-      let analyzerName = field_map_exn json "analyzerName" Name.of_json in
-      make ~type_ ?tags ?clientToken ?archiveRules ~analyzerName ()
+        field_map json__ "archiveRules" InlineArchiveRulesList.of_json in
+      let type_ = field_map_exn json__ "type" Type.of_json in
+      let analyzerName = field_map_exn json__ "analyzerName" Name.of_json in
+      make ?configuration ?clientToken ?tags ?archiveRules ~type_
+        ~analyzerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an analyzer."]
 module CreateAccessPreviewResponse =
   struct
     type nonrec t =
       {
-      id: AccessPreviewId.t
+      id: AccessPreviewId.t option
         [@ocaml.doc "The unique ID for the access preview."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -7434,8 +12080,7 @@ module CreateAccessPreviewResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateAccessPreviewResponse"
-    let make ~id = fun () -> { id }
+    let make ?id = fun () -> { id }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7511,16 +12156,16 @@ module CreateAccessPreviewResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("id", (Some (AccessPreviewId.to_value x.id)))]
+      structure_to_value
+        [("id", (Option.map x.id ~f:AccessPreviewId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let id =
-        AccessPreviewId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "id") in
-      make ~id ()
+        (Option.map ~f:AccessPreviewId.of_xml) (Xml.child xml_arg0 "id") in
+      make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" AccessPreviewId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map json__ "id" AccessPreviewId.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an access preview that allows you to preview IAM Access Analyzer findings for your resource before deploying resource permissions."]
@@ -7531,10 +12176,10 @@ module CreateAccessPreviewRequest =
       analyzerArn: AnalyzerArn.t
         [@ocaml.doc
           "The ARN of the account analyzer used to generate the access preview. You can only create an access preview for analyzers with an Account type and Active status."];
-      clientToken: String_.t option [@ocaml.doc "A client token."];
       configurations: ConfigurationsMap.t
         [@ocaml.doc
-          "Access control configuration for your resource that is used to generate the access preview. The access preview includes findings for external access allowed to the resource with the proposed access control configuration. The configuration must contain exactly one element."]}
+          "Access control configuration for your resource that is used to generate the access preview. The access preview includes findings for external access allowed to the resource with the proposed access control configuration. The configuration must contain exactly one element."];
+      clientToken: String_.t option [@ocaml.doc "A client token."]}
     let context_ = "CreateAccessPreviewRequest"
     let make ?clientToken =
       fun ~analyzerArn ->
@@ -7543,30 +12188,515 @@ module CreateAccessPreviewRequest =
     let to_value x =
       structure_to_value
         [("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)));
-        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
         ("configurations",
-          (Some (ConfigurationsMap.to_value x.configurations)))]
+          (Some (ConfigurationsMap.to_value x.configurations)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let configurations =
         ConfigurationsMap.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "configurations") in
-      let clientToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       let analyzerArn =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
-      make ~configurations ?clientToken ~analyzerArn ()
+      make ?clientToken ~configurations ~analyzerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       let configurations =
-        field_map_exn json "configurations" ConfigurationsMap.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
-      make ~configurations ?clientToken ~analyzerArn ()
+        field_map_exn json__ "configurations" ConfigurationsMap.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
+      make ?clientToken ~configurations ~analyzerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an access preview that allows you to preview IAM Access Analyzer findings for your resource before deploying resource permissions."]
+module CheckNoPublicAccessResponse =
+  struct
+    type nonrec t =
+      {
+      result: CheckNoPublicAccessResult.t option
+        [@ocaml.doc
+          "The result of the check for public access to the specified resource type. If the result is PASS, the policy doesn't allow public access to the specified resource type. If the result is FAIL, the policy might allow public access to the specified resource type."];
+      message: String_.t option
+        [@ocaml.doc
+          "The message indicating whether the specified policy allows public access to resources."];
+      reasons: ReasonSummaryList.t option
+        [@ocaml.doc
+          "A list of reasons why the specified resource policy grants public access for the resource type."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnprocessableEntityException of UnprocessableEntityException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?result =
+      fun ?message -> fun ?reasons -> fun () -> { result; message; reasons }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnprocessableEntityException" ->
+          `UnprocessableEntityException
+            (UnprocessableEntityException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnprocessableEntityException" ->
+          `UnprocessableEntityException
+            (UnprocessableEntityException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnprocessableEntityException e ->
+          `Assoc
+            [("error", (`String "UnprocessableEntityException"));
+            ("details", (UnprocessableEntityException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("result",
+           (Option.map x.result ~f:CheckNoPublicAccessResult.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value));
+        ("reasons", (Option.map x.reasons ~f:ReasonSummaryList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reasons =
+        (Option.map ~f:ReasonSummaryList.of_xml)
+          (Xml.child xml_arg0 "reasons") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let result =
+        (Option.map ~f:CheckNoPublicAccessResult.of_xml)
+          (Xml.child xml_arg0 "result") in
+      make ?reasons ?message ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reasons = field_map json__ "reasons" ReasonSummaryList.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      let result =
+        field_map json__ "result" CheckNoPublicAccessResult.of_json in
+      make ?reasons ?message ?result ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Checks whether a resource policy can grant public access to the specified resource type."]
+module CheckNoPublicAccessRequest =
+  struct
+    type nonrec t =
+      {
+      policyDocument: AccessCheckPolicyDocument.t
+        [@ocaml.doc
+          "The JSON policy document to evaluate for public access."];
+      resourceType: AccessCheckResourceType.t
+        [@ocaml.doc
+          "The type of resource to evaluate for public access. For example, to check for public access to Amazon S3 buckets, you can choose AWS::S3::Bucket for the resource type. For resource types not supported as valid values, IAM Access Analyzer will return an error."]}
+    let context_ = "CheckNoPublicAccessRequest"
+    let make ~policyDocument =
+      fun ~resourceType -> fun () -> { policyDocument; resourceType }
+    let to_value x =
+      structure_to_value
+        [("policyDocument",
+           (Some (AccessCheckPolicyDocument.to_value x.policyDocument)));
+        ("resourceType",
+          (Some (AccessCheckResourceType.to_value x.resourceType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        AccessCheckResourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      let policyDocument =
+        AccessCheckPolicyDocument.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "policyDocument") in
+      make ~resourceType ~policyDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType =
+        field_map_exn json__ "resourceType" AccessCheckResourceType.of_json in
+      let policyDocument =
+        field_map_exn json__ "policyDocument"
+          AccessCheckPolicyDocument.of_json in
+      make ~resourceType ~policyDocument ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Checks whether a resource policy can grant public access to the specified resource type."]
+module CheckNoNewAccessResponse =
+  struct
+    type nonrec t =
+      {
+      result: CheckNoNewAccessResult.t option
+        [@ocaml.doc
+          "The result of the check for new access. If the result is PASS, no new access is allowed by the updated policy. If the result is FAIL, the updated policy might allow new access."];
+      message: String_.t option
+        [@ocaml.doc
+          "The message indicating whether the updated policy allows new access."];
+      reasons: ReasonSummaryList.t option
+        [@ocaml.doc "A description of the reasoning of the result."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnprocessableEntityException of UnprocessableEntityException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?result =
+      fun ?message -> fun ?reasons -> fun () -> { result; message; reasons }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnprocessableEntityException" ->
+          `UnprocessableEntityException
+            (UnprocessableEntityException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnprocessableEntityException" ->
+          `UnprocessableEntityException
+            (UnprocessableEntityException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnprocessableEntityException e ->
+          `Assoc
+            [("error", (`String "UnprocessableEntityException"));
+            ("details", (UnprocessableEntityException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("result", (Option.map x.result ~f:CheckNoNewAccessResult.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value));
+        ("reasons", (Option.map x.reasons ~f:ReasonSummaryList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reasons =
+        (Option.map ~f:ReasonSummaryList.of_xml)
+          (Xml.child xml_arg0 "reasons") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let result =
+        (Option.map ~f:CheckNoNewAccessResult.of_xml)
+          (Xml.child xml_arg0 "result") in
+      make ?reasons ?message ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reasons = field_map json__ "reasons" ReasonSummaryList.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      let result = field_map json__ "result" CheckNoNewAccessResult.of_json in
+      make ?reasons ?message ?result ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Checks whether new access is allowed for an updated policy when compared to the existing policy. You can find examples for reference policies and learn how to set up and run a custom policy check for new access in the IAM Access Analyzer custom policy checks samples repository on GitHub. The reference policies in this repository are meant to be passed to the existingPolicyDocument request parameter."]
+module CheckNoNewAccessRequest =
+  struct
+    type nonrec t =
+      {
+      newPolicyDocument: AccessCheckPolicyDocument.t
+        [@ocaml.doc
+          "The JSON policy document to use as the content for the updated policy."];
+      existingPolicyDocument: AccessCheckPolicyDocument.t
+        [@ocaml.doc
+          "The JSON policy document to use as the content for the existing policy."];
+      policyType: AccessCheckPolicyType.t
+        [@ocaml.doc
+          "The type of policy to compare. Identity policies grant permissions to IAM principals. Identity policies include managed and inline policies for IAM roles, users, and groups. Resource policies grant permissions on Amazon Web Services resources. Resource policies include trust policies for IAM roles and bucket policies for Amazon S3 buckets. You can provide a generic input such as identity policy or resource policy or a specific input such as managed policy or Amazon S3 bucket policy."]}
+    let context_ = "CheckNoNewAccessRequest"
+    let make ~newPolicyDocument =
+      fun ~existingPolicyDocument ->
+        fun ~policyType ->
+          fun () -> { newPolicyDocument; existingPolicyDocument; policyType }
+    let to_value x =
+      structure_to_value
+        [("newPolicyDocument",
+           (Some (AccessCheckPolicyDocument.to_value x.newPolicyDocument)));
+        ("existingPolicyDocument",
+          (Some (AccessCheckPolicyDocument.to_value x.existingPolicyDocument)));
+        ("policyType", (Some (AccessCheckPolicyType.to_value x.policyType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyType =
+        AccessCheckPolicyType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "policyType") in
+      let existingPolicyDocument =
+        AccessCheckPolicyDocument.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "existingPolicyDocument") in
+      let newPolicyDocument =
+        AccessCheckPolicyDocument.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "newPolicyDocument") in
+      make ~policyType ~existingPolicyDocument ~newPolicyDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyType =
+        field_map_exn json__ "policyType" AccessCheckPolicyType.of_json in
+      let existingPolicyDocument =
+        field_map_exn json__ "existingPolicyDocument"
+          AccessCheckPolicyDocument.of_json in
+      let newPolicyDocument =
+        field_map_exn json__ "newPolicyDocument"
+          AccessCheckPolicyDocument.of_json in
+      make ~policyType ~existingPolicyDocument ~newPolicyDocument ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Checks whether new access is allowed for an updated policy when compared to the existing policy. You can find examples for reference policies and learn how to set up and run a custom policy check for new access in the IAM Access Analyzer custom policy checks samples repository on GitHub. The reference policies in this repository are meant to be passed to the existingPolicyDocument request parameter."]
+module CheckAccessNotGrantedResponse =
+  struct
+    type nonrec t =
+      {
+      result: CheckAccessNotGrantedResult.t option
+        [@ocaml.doc
+          "The result of the check for whether the access is allowed. If the result is PASS, the specified policy doesn't allow any of the specified permissions in the access object. If the result is FAIL, the specified policy might allow some or all of the permissions in the access object."];
+      message: String_.t option
+        [@ocaml.doc
+          "The message indicating whether the specified access is allowed."];
+      reasons: ReasonSummaryList.t option
+        [@ocaml.doc "A description of the reasoning of the result."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnprocessableEntityException of UnprocessableEntityException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?result =
+      fun ?message -> fun ?reasons -> fun () -> { result; message; reasons }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnprocessableEntityException" ->
+          `UnprocessableEntityException
+            (UnprocessableEntityException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnprocessableEntityException" ->
+          `UnprocessableEntityException
+            (UnprocessableEntityException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnprocessableEntityException e ->
+          `Assoc
+            [("error", (`String "UnprocessableEntityException"));
+            ("details", (UnprocessableEntityException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("result",
+           (Option.map x.result ~f:CheckAccessNotGrantedResult.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value));
+        ("reasons", (Option.map x.reasons ~f:ReasonSummaryList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reasons =
+        (Option.map ~f:ReasonSummaryList.of_xml)
+          (Xml.child xml_arg0 "reasons") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let result =
+        (Option.map ~f:CheckAccessNotGrantedResult.of_xml)
+          (Xml.child xml_arg0 "result") in
+      make ?reasons ?message ?result ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reasons = field_map json__ "reasons" ReasonSummaryList.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      let result =
+        field_map json__ "result" CheckAccessNotGrantedResult.of_json in
+      make ?reasons ?message ?result ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Checks whether the specified access isn't allowed by a policy."]
+module CheckAccessNotGrantedRequest =
+  struct
+    type nonrec t =
+      {
+      policyDocument: AccessCheckPolicyDocument.t
+        [@ocaml.doc
+          "The JSON policy document to use as the content for the policy."];
+      access: CheckAccessNotGrantedRequestAccessList.t
+        [@ocaml.doc
+          "An access object containing the permissions that shouldn't be granted by the specified policy. If only actions are specified, IAM Access Analyzer checks for access to peform at least one of the actions on any resource in the policy. If only resources are specified, then IAM Access Analyzer checks for access to perform any action on at least one of the resources. If both actions and resources are specified, IAM Access Analyzer checks for access to perform at least one of the specified actions on at least one of the specified resources."];
+      policyType: AccessCheckPolicyType.t
+        [@ocaml.doc
+          "The type of policy. Identity policies grant permissions to IAM principals. Identity policies include managed and inline policies for IAM roles, users, and groups. Resource policies grant permissions on Amazon Web Services resources. Resource policies include trust policies for IAM roles and bucket policies for Amazon S3 buckets."]}
+    let context_ = "CheckAccessNotGrantedRequest"
+    let make ~policyDocument =
+      fun ~access ->
+        fun ~policyType -> fun () -> { policyDocument; access; policyType }
+    let to_value x =
+      structure_to_value
+        [("policyDocument",
+           (Some (AccessCheckPolicyDocument.to_value x.policyDocument)));
+        ("access",
+          (Some (CheckAccessNotGrantedRequestAccessList.to_value x.access)));
+        ("policyType", (Some (AccessCheckPolicyType.to_value x.policyType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyType =
+        AccessCheckPolicyType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "policyType") in
+      let access =
+        CheckAccessNotGrantedRequestAccessList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "access") in
+      let policyDocument =
+        AccessCheckPolicyDocument.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "policyDocument") in
+      make ~policyType ~access ~policyDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyType =
+        field_map_exn json__ "policyType" AccessCheckPolicyType.of_json in
+      let access =
+        field_map_exn json__ "access"
+          CheckAccessNotGrantedRequestAccessList.of_json in
+      let policyDocument =
+        field_map_exn json__ "policyDocument"
+          AccessCheckPolicyDocument.of_json in
+      make ~policyType ~access ~policyDocument ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Checks whether the specified access isn't allowed by a policy."]
 module CancelPolicyGenerationResponse =
   struct
     type nonrec t = unit
@@ -7650,8 +12780,9 @@ module CancelPolicyGenerationRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "jobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "jobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels the requested policy generation."]
 module ApplyArchiveRuleRequest =
@@ -7660,8 +12791,8 @@ module ApplyArchiveRuleRequest =
       {
       analyzerArn: AnalyzerArn.t
         [@ocaml.doc "The Amazon resource name (ARN) of the analyzer."];
-      clientToken: String_.t option [@ocaml.doc "A client token."];
-      ruleName: Name.t [@ocaml.doc "The name of the rule to apply."]}
+      ruleName: Name.t [@ocaml.doc "The name of the rule to apply."];
+      clientToken: String_.t option [@ocaml.doc "A client token."]}
     let context_ = "ApplyArchiveRuleRequest"
     let make ?clientToken =
       fun ~analyzerArn ->
@@ -7669,23 +12800,24 @@ module ApplyArchiveRuleRequest =
     let to_value x =
       structure_to_value
         [("analyzerArn", (Some (AnalyzerArn.to_value x.analyzerArn)));
-        ("clientToken", (Option.map x.clientToken ~f:String_.to_value));
-        ("ruleName", (Some (Name.to_value x.ruleName)))]
+        ("ruleName", (Some (Name.to_value x.ruleName)));
+        ("clientToken", (Option.map x.clientToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let ruleName =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ruleName") in
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let ruleName =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ruleName") in
       let analyzerArn =
         AnalyzerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "analyzerArn") in
-      make ~ruleName ?clientToken ~analyzerArn ()
+      make ?clientToken ~ruleName ~analyzerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleName = field_map_exn json "ruleName" Name.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      let analyzerArn = field_map_exn json "analyzerArn" AnalyzerArn.of_json in
-      make ~ruleName ?clientToken ~analyzerArn ()
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      let ruleName = field_map_exn json__ "ruleName" Name.of_json in
+      let analyzerArn =
+        field_map_exn json__ "analyzerArn" AnalyzerArn.of_json in
+      make ?clientToken ~ruleName ~analyzerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retroactively applies an archive rule."]

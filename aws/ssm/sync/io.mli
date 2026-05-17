@@ -97,6 +97,11 @@ val delete_maintenance_window :
       DeleteMaintenanceWindowRequest.t ->
         (DeleteMaintenanceWindowResult.t,
           DeleteMaintenanceWindowResult.error) Result.t
+val delete_ops_item :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteOpsItemRequest.t ->
+        (DeleteOpsItemResponse.t, DeleteOpsItemResponse.error) Result.t
 val delete_ops_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -123,6 +128,12 @@ val delete_resource_data_sync :
     ?cfg:Awso.Cfg.t ->
       DeleteResourceDataSyncRequest.t ->
         (DeleteResourceDataSyncResult.t, DeleteResourceDataSyncResult.error)
+          Result.t
+val delete_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteResourcePolicyRequest.t ->
+        (DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error)
           Result.t
 val deregister_managed_instance :
   ?endpoint_url:string ->
@@ -243,6 +254,12 @@ val describe_instance_patches :
       DescribeInstancePatchesRequest.t ->
         (DescribeInstancePatchesResult.t,
           DescribeInstancePatchesResult.error) Result.t
+val describe_instance_properties :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeInstancePropertiesRequest.t ->
+        (DescribeInstancePropertiesResult.t,
+          DescribeInstancePropertiesResult.error) Result.t
 val describe_inventory_deletions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -343,6 +360,11 @@ val disassociate_ops_item_related_item :
       DisassociateOpsItemRelatedItemRequest.t ->
         (DisassociateOpsItemRelatedItemResponse.t,
           DisassociateOpsItemRelatedItemResponse.error) Result.t
+val get_access_token :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAccessTokenRequest.t ->
+        (GetAccessTokenResponse.t, GetAccessTokenResponse.error) Result.t
 val get_automation_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -383,6 +405,12 @@ val get_document :
     ?cfg:Awso.Cfg.t ->
       GetDocumentRequest.t ->
         (GetDocumentResult.t, GetDocumentResult.error) Result.t
+val get_execution_preview :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetExecutionPreviewRequest.t ->
+        (GetExecutionPreviewResponse.t, GetExecutionPreviewResponse.error)
+          Result.t
 val get_inventory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -471,6 +499,12 @@ val get_patch_baseline_for_patch_group :
       GetPatchBaselineForPatchGroupRequest.t ->
         (GetPatchBaselineForPatchGroupResult.t,
           GetPatchBaselineForPatchGroupResult.error) Result.t
+val get_resource_policies :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcePoliciesRequest.t ->
+        (GetResourcePoliciesResponse.t, GetResourcePoliciesResponse.error)
+          Result.t
 val get_service_setting :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -539,6 +573,16 @@ val list_inventory_entries :
       ListInventoryEntriesRequest.t ->
         (ListInventoryEntriesResult.t, ListInventoryEntriesResult.error)
           Result.t
+val list_nodes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListNodesRequest.t ->
+        (ListNodesResult.t, ListNodesResult.error) Result.t
+val list_nodes_summary :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListNodesSummaryRequest.t ->
+        (ListNodesSummaryResult.t, ListNodesSummaryResult.error) Result.t
 val list_ops_item_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -595,6 +639,12 @@ val put_parameter :
     ?cfg:Awso.Cfg.t ->
       PutParameterRequest.t ->
         (PutParameterResult.t, PutParameterResult.error) Result.t
+val put_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutResourcePolicyRequest.t ->
+        (PutResourcePolicyResponse.t, PutResourcePolicyResponse.error)
+          Result.t
 val register_default_patch_baseline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -647,6 +697,12 @@ val send_command :
     ?cfg:Awso.Cfg.t ->
       SendCommandRequest.t ->
         (SendCommandResult.t, SendCommandResult.error) Result.t
+val start_access_request :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartAccessRequestRequest.t ->
+        (StartAccessRequestResponse.t, StartAccessRequestResponse.error)
+          Result.t
 val start_associations_once :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -665,6 +721,12 @@ val start_change_request_execution :
       StartChangeRequestExecutionRequest.t ->
         (StartChangeRequestExecutionResult.t,
           StartChangeRequestExecutionResult.error) Result.t
+val start_execution_preview :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartExecutionPreviewRequest.t ->
+        (StartExecutionPreviewResponse.t,
+          StartExecutionPreviewResponse.error) Result.t
 val start_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

@@ -53,6 +53,31 @@ let add_custom_routing_endpoints =
               ~endpointGroupArn ())
            (Some Values.AddCustomRoutingEndpointsResponse.to_json)
            (Some Values.AddCustomRoutingEndpointsResponse.error_to_json)])
+let add_endpoints =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and endpointConfigurations =
+         flag "endpoint-configurations" (required json_arg)
+           ~doc:"JSON EndpointConfigurations"
+       and endpointGroupArn =
+         flag "endpoint-group-arn" (required string)
+           ~doc:"STRING GenericString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.add_endpoints
+           (Values.AddEndpointsRequest.make
+              ~endpointConfigurations:(Values.EndpointConfigurations.of_json
+                                         endpointConfigurations)
+              ~endpointGroupArn ())
+           (Some Values.AddEndpointsResponse.to_json)
+           (Some Values.AddEndpointsResponse.error_to_json)])
 let advertise_byoip_cidr =
   Command.async ~summary:""
     ([%map_open.Command
@@ -139,6 +164,35 @@ let create_accelerator =
               ~idempotencyToken ())
            (Some Values.CreateAcceleratorResponse.to_json)
            (Some Values.CreateAcceleratorResponse.error_to_json)])
+let create_cross_account_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and principals =
+         flag "principals" (optional json_arg) ~doc:"JSON Principals"
+       and resources =
+         flag "resources" (optional json_arg) ~doc:"JSON Resources"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and name = flag "name" (required string) ~doc:"STRING AttachmentName"
+       and idempotencyToken =
+         flag "idempotency-token" (required string)
+           ~doc:"STRING IdempotencyToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_cross_account_attachment
+           (Values.CreateCrossAccountAttachmentRequest.make
+              ?principals:(Option.map ~f:Values.Principals.of_json principals)
+              ?resources:(Option.map ~f:Values.Resources.of_json resources)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name
+              ~idempotencyToken ())
+           (Some Values.CreateCrossAccountAttachmentResponse.to_json)
+           (Some Values.CreateCrossAccountAttachmentResponse.error_to_json)])
 let create_custom_routing_accelerator =
   Command.async ~summary:""
     ([%map_open.Command
@@ -334,6 +388,23 @@ let delete_accelerator =
            Io.delete_accelerator
            (Values.DeleteAcceleratorRequest.make ~acceleratorArn ()) None
            None])
+let delete_cross_account_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and attachmentArn =
+         flag "attachment-arn" (required string) ~doc:"STRING GenericString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_cross_account_attachment
+           (Values.DeleteCrossAccountAttachmentRequest.make ~attachmentArn ())
+           None None])
 let delete_custom_routing_accelerator =
   Command.async ~summary:""
     ([%map_open.Command
@@ -509,6 +580,25 @@ let describe_accelerator_attributes =
            (Values.DescribeAcceleratorAttributesRequest.make ~acceleratorArn
               ()) (Some Values.DescribeAcceleratorAttributesResponse.to_json)
            (Some Values.DescribeAcceleratorAttributesResponse.error_to_json)])
+let describe_cross_account_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and attachmentArn =
+         flag "attachment-arn" (required string) ~doc:"STRING GenericString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_cross_account_attachment
+           (Values.DescribeCrossAccountAttachmentRequest.make ~attachmentArn
+              ())
+           (Some Values.DescribeCrossAccountAttachmentResponse.to_json)
+           (Some Values.DescribeCrossAccountAttachmentResponse.error_to_json)])
 let describe_custom_routing_accelerator =
   Command.async ~summary:""
     ([%map_open.Command
@@ -666,6 +756,71 @@ let list_byoip_cidrs =
            (Values.ListByoipCidrsRequest.make ?maxResults ?nextToken ())
            (Some Values.ListByoipCidrsResponse.to_json)
            (Some Values.ListByoipCidrsResponse.error_to_json)])
+let list_cross_account_attachments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING GenericString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cross_account_attachments
+           (Values.ListCrossAccountAttachmentsRequest.make ?maxResults
+              ?nextToken ())
+           (Some Values.ListCrossAccountAttachmentsResponse.to_json)
+           (Some Values.ListCrossAccountAttachmentsResponse.error_to_json)])
+let list_cross_account_resource_accounts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cross_account_resource_accounts
+           (Values.ListCrossAccountResourceAccountsRequest.make ())
+           (Some Values.ListCrossAccountResourceAccountsResponse.to_json)
+           (Some
+              Values.ListCrossAccountResourceAccountsResponse.error_to_json)])
+let list_cross_account_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and acceleratorArn =
+         flag "accelerator-arn" (optional string) ~doc:"STRING GenericString"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING GenericString"
+       and resourceOwnerAwsAccountId =
+         flag "resource-owner-aws-account-id" (required string)
+           ~doc:"STRING AwsAccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cross_account_resources
+           (Values.ListCrossAccountResourcesRequest.make ?acceleratorArn
+              ?maxResults ?nextToken ~resourceOwnerAwsAccountId ())
+           (Some Values.ListCrossAccountResourcesResponse.to_json)
+           (Some Values.ListCrossAccountResourcesResponse.error_to_json)])
 let list_custom_routing_accelerators =
   Command.async ~summary:""
     ([%map_open.Command
@@ -893,6 +1048,29 @@ let remove_custom_routing_endpoints =
            (Values.RemoveCustomRoutingEndpointsRequest.make
               ~endpointIds:(Values.EndpointIds.of_json endpointIds)
               ~endpointGroupArn ()) None None])
+let remove_endpoints =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and endpointIdentifiers =
+         flag "endpoint-identifiers" (required json_arg)
+           ~doc:"JSON EndpointIdentifiers"
+       and endpointGroupArn =
+         flag "endpoint-group-arn" (required string)
+           ~doc:"STRING GenericString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.remove_endpoints
+           (Values.RemoveEndpointsRequest.make
+              ~endpointIdentifiers:(Values.EndpointIdentifiers.of_json
+                                      endpointIdentifiers) ~endpointGroupArn
+              ()) None None])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -946,6 +1124,8 @@ let update_accelerator =
        and name = flag "name" (optional string) ~doc:"STRING GenericString"
        and ipAddressType =
          flag "ip-address-type" (optional json_arg) ~doc:"JSON IpAddressType"
+       and ipAddresses =
+         flag "ip-addresses" (optional json_arg) ~doc:"JSON IpAddresses"
        and enabled =
          flag "enabled" (optional bool) ~doc:"BOOL GenericBoolean"
        and acceleratorArn =
@@ -955,7 +1135,9 @@ let update_accelerator =
            Io.update_accelerator
            (Values.UpdateAcceleratorRequest.make ?name
               ?ipAddressType:(Option.map ~f:Values.IpAddressType.of_json
-                                ipAddressType) ?enabled ~acceleratorArn ())
+                                ipAddressType)
+              ?ipAddresses:(Option.map ~f:Values.IpAddresses.of_json
+                              ipAddresses) ?enabled ~acceleratorArn ())
            (Some Values.UpdateAcceleratorResponse.to_json)
            (Some Values.UpdateAcceleratorResponse.error_to_json)])
 let update_accelerator_attributes =
@@ -985,6 +1167,41 @@ let update_accelerator_attributes =
               ?flowLogsS3Bucket ?flowLogsS3Prefix ~acceleratorArn ())
            (Some Values.UpdateAcceleratorAttributesResponse.to_json)
            (Some Values.UpdateAcceleratorAttributesResponse.error_to_json)])
+let update_cross_account_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING AttachmentName"
+       and addPrincipals =
+         flag "add-principals" (optional json_arg) ~doc:"JSON Principals"
+       and removePrincipals =
+         flag "remove-principals" (optional json_arg) ~doc:"JSON Principals"
+       and addResources =
+         flag "add-resources" (optional json_arg) ~doc:"JSON Resources"
+       and removeResources =
+         flag "remove-resources" (optional json_arg) ~doc:"JSON Resources"
+       and attachmentArn =
+         flag "attachment-arn" (required string) ~doc:"STRING GenericString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_cross_account_attachment
+           (Values.UpdateCrossAccountAttachmentRequest.make ?name
+              ?addPrincipals:(Option.map ~f:Values.Principals.of_json
+                                addPrincipals)
+              ?removePrincipals:(Option.map ~f:Values.Principals.of_json
+                                   removePrincipals)
+              ?addResources:(Option.map ~f:Values.Resources.of_json
+                               addResources)
+              ?removeResources:(Option.map ~f:Values.Resources.of_json
+                                  removeResources) ~attachmentArn ())
+           (Some Values.UpdateCrossAccountAttachmentResponse.to_json)
+           (Some Values.UpdateCrossAccountAttachmentResponse.error_to_json)])
 let update_custom_routing_accelerator =
   Command.async ~summary:""
     ([%map_open.Command
@@ -998,6 +1215,8 @@ let update_custom_routing_accelerator =
        and name = flag "name" (optional string) ~doc:"STRING GenericString"
        and ipAddressType =
          flag "ip-address-type" (optional json_arg) ~doc:"JSON IpAddressType"
+       and ipAddresses =
+         flag "ip-addresses" (optional json_arg) ~doc:"JSON IpAddresses"
        and enabled =
          flag "enabled" (optional bool) ~doc:"BOOL GenericBoolean"
        and acceleratorArn =
@@ -1007,7 +1226,9 @@ let update_custom_routing_accelerator =
            Io.update_custom_routing_accelerator
            (Values.UpdateCustomRoutingAcceleratorRequest.make ?name
               ?ipAddressType:(Option.map ~f:Values.IpAddressType.of_json
-                                ipAddressType) ?enabled ~acceleratorArn ())
+                                ipAddressType)
+              ?ipAddresses:(Option.map ~f:Values.IpAddresses.of_json
+                              ipAddresses) ?enabled ~acceleratorArn ())
            (Some Values.UpdateCustomRoutingAcceleratorResponse.to_json)
            (Some Values.UpdateCustomRoutingAcceleratorResponse.error_to_json)])
 let update_custom_routing_accelerator_attributes =
@@ -1161,9 +1382,11 @@ let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-custom-routing-endpoints", add_custom_routing_endpoints);
+    ("add-endpoints", add_endpoints);
     ("advertise-byoip-cidr", advertise_byoip_cidr);
     ("allow-custom-routing-traffic", allow_custom_routing_traffic);
     ("create-accelerator", create_accelerator);
+    ("create-cross-account-attachment", create_cross_account_attachment);
     ("create-custom-routing-accelerator", create_custom_routing_accelerator);
     ("create-custom-routing-endpoint-group",
       create_custom_routing_endpoint_group);
@@ -1171,6 +1394,7 @@ let main =
     ("create-endpoint-group", create_endpoint_group);
     ("create-listener", create_listener);
     ("delete-accelerator", delete_accelerator);
+    ("delete-cross-account-attachment", delete_cross_account_attachment);
     ("delete-custom-routing-accelerator", delete_custom_routing_accelerator);
     ("delete-custom-routing-endpoint-group",
       delete_custom_routing_endpoint_group);
@@ -1181,6 +1405,7 @@ let main =
     ("deprovision-byoip-cidr", deprovision_byoip_cidr);
     ("describe-accelerator", describe_accelerator);
     ("describe-accelerator-attributes", describe_accelerator_attributes);
+    ("describe-cross-account-attachment", describe_cross_account_attachment);
     ("describe-custom-routing-accelerator",
       describe_custom_routing_accelerator);
     ("describe-custom-routing-accelerator-attributes",
@@ -1192,6 +1417,10 @@ let main =
     ("describe-listener", describe_listener);
     ("list-accelerators", list_accelerators);
     ("list-byoip-cidrs", list_byoip_cidrs);
+    ("list-cross-account-attachments", list_cross_account_attachments);
+    ("list-cross-account-resource-accounts",
+      list_cross_account_resource_accounts);
+    ("list-cross-account-resources", list_cross_account_resources);
     ("list-custom-routing-accelerators", list_custom_routing_accelerators);
     ("list-custom-routing-endpoint-groups",
       list_custom_routing_endpoint_groups);
@@ -1204,10 +1433,12 @@ let main =
     ("list-tags-for-resource", list_tags_for_resource);
     ("provision-byoip-cidr", provision_byoip_cidr);
     ("remove-custom-routing-endpoints", remove_custom_routing_endpoints);
+    ("remove-endpoints", remove_endpoints);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-accelerator", update_accelerator);
     ("update-accelerator-attributes", update_accelerator_attributes);
+    ("update-cross-account-attachment", update_cross_account_attachment);
     ("update-custom-routing-accelerator", update_custom_routing_accelerator);
     ("update-custom-routing-accelerator-attributes",
       update_custom_routing_accelerator_attributes);

@@ -5,23 +5,10 @@ type ('i, 'o, 'e) t =
   | AssociatePhoneNumberWithUser: (AssociatePhoneNumberWithUserRequest.t,
   AssociatePhoneNumberWithUserResponse.t,
   AssociatePhoneNumberWithUserResponse.error) t 
-  | AssociatePhoneNumbersWithVoiceConnector:
-  (AssociatePhoneNumbersWithVoiceConnectorRequest.t,
-  AssociatePhoneNumbersWithVoiceConnectorResponse.t,
-  AssociatePhoneNumbersWithVoiceConnectorResponse.error) t 
-  | AssociatePhoneNumbersWithVoiceConnectorGroup:
-  (AssociatePhoneNumbersWithVoiceConnectorGroupRequest.t,
-  AssociatePhoneNumbersWithVoiceConnectorGroupResponse.t,
-  AssociatePhoneNumbersWithVoiceConnectorGroupResponse.error) t 
   | AssociateSigninDelegateGroupsWithAccount:
   (AssociateSigninDelegateGroupsWithAccountRequest.t,
   AssociateSigninDelegateGroupsWithAccountResponse.t,
   AssociateSigninDelegateGroupsWithAccountResponse.error) t 
-  | BatchCreateAttendee: (BatchCreateAttendeeRequest.t,
-  BatchCreateAttendeeResponse.t, BatchCreateAttendeeResponse.error) t 
-  | BatchCreateChannelMembership: (BatchCreateChannelMembershipRequest.t,
-  BatchCreateChannelMembershipResponse.t,
-  BatchCreateChannelMembershipResponse.error) t 
   | BatchCreateRoomMembership: (BatchCreateRoomMembershipRequest.t,
   BatchCreateRoomMembershipResponse.t,
   BatchCreateRoomMembershipResponse.error) t 
@@ -37,138 +24,29 @@ type ('i, 'o, 'e) t =
   BatchUpdateUserResponse.error) t 
   | CreateAccount: (CreateAccountRequest.t, CreateAccountResponse.t,
   CreateAccountResponse.error) t 
-  | CreateAppInstance: (CreateAppInstanceRequest.t,
-  CreateAppInstanceResponse.t, CreateAppInstanceResponse.error) t 
-  | CreateAppInstanceAdmin: (CreateAppInstanceAdminRequest.t,
-  CreateAppInstanceAdminResponse.t, CreateAppInstanceAdminResponse.error) t 
-  | CreateAppInstanceUser: (CreateAppInstanceUserRequest.t,
-  CreateAppInstanceUserResponse.t, CreateAppInstanceUserResponse.error) t 
-  | CreateAttendee: (CreateAttendeeRequest.t, CreateAttendeeResponse.t,
-  CreateAttendeeResponse.error) t 
   | CreateBot: (CreateBotRequest.t, CreateBotResponse.t,
   CreateBotResponse.error) t 
-  | CreateChannel: (CreateChannelRequest.t, CreateChannelResponse.t,
-  CreateChannelResponse.error) t 
-  | CreateChannelBan: (CreateChannelBanRequest.t, CreateChannelBanResponse.t,
-  CreateChannelBanResponse.error) t 
-  | CreateChannelMembership: (CreateChannelMembershipRequest.t,
-  CreateChannelMembershipResponse.t, CreateChannelMembershipResponse.error) t
-  
-  | CreateChannelModerator: (CreateChannelModeratorRequest.t,
-  CreateChannelModeratorResponse.t, CreateChannelModeratorResponse.error) t 
-  | CreateMediaCapturePipeline: (CreateMediaCapturePipelineRequest.t,
-  CreateMediaCapturePipelineResponse.t,
-  CreateMediaCapturePipelineResponse.error) t 
-  | CreateMeeting: (CreateMeetingRequest.t, CreateMeetingResponse.t,
-  CreateMeetingResponse.error) t 
   | CreateMeetingDialOut: (CreateMeetingDialOutRequest.t,
   CreateMeetingDialOutResponse.t, CreateMeetingDialOutResponse.error) t 
-  | CreateMeetingWithAttendees: (CreateMeetingWithAttendeesRequest.t,
-  CreateMeetingWithAttendeesResponse.t,
-  CreateMeetingWithAttendeesResponse.error) t 
   | CreatePhoneNumberOrder: (CreatePhoneNumberOrderRequest.t,
   CreatePhoneNumberOrderResponse.t, CreatePhoneNumberOrderResponse.error) t 
-  | CreateProxySession: (CreateProxySessionRequest.t,
-  CreateProxySessionResponse.t, CreateProxySessionResponse.error) t 
   | CreateRoom: (CreateRoomRequest.t, CreateRoomResponse.t,
   CreateRoomResponse.error) t 
   | CreateRoomMembership: (CreateRoomMembershipRequest.t,
   CreateRoomMembershipResponse.t, CreateRoomMembershipResponse.error) t 
-  | CreateSipMediaApplication: (CreateSipMediaApplicationRequest.t,
-  CreateSipMediaApplicationResponse.t,
-  CreateSipMediaApplicationResponse.error) t 
-  | CreateSipMediaApplicationCall: (CreateSipMediaApplicationCallRequest.t,
-  CreateSipMediaApplicationCallResponse.t,
-  CreateSipMediaApplicationCallResponse.error) t 
-  | CreateSipRule: (CreateSipRuleRequest.t, CreateSipRuleResponse.t,
-  CreateSipRuleResponse.error) t 
   | CreateUser: (CreateUserRequest.t, CreateUserResponse.t,
   CreateUserResponse.error) t 
-  | CreateVoiceConnector: (CreateVoiceConnectorRequest.t,
-  CreateVoiceConnectorResponse.t, CreateVoiceConnectorResponse.error) t 
-  | CreateVoiceConnectorGroup: (CreateVoiceConnectorGroupRequest.t,
-  CreateVoiceConnectorGroupResponse.t,
-  CreateVoiceConnectorGroupResponse.error) t 
   | DeleteAccount: (DeleteAccountRequest.t, DeleteAccountResponse.t,
   DeleteAccountResponse.error) t 
-  | DeleteAppInstance: (DeleteAppInstanceRequest.t, unit, unit) t 
-  | DeleteAppInstanceAdmin: (DeleteAppInstanceAdminRequest.t, unit, unit) t 
-  | DeleteAppInstanceStreamingConfigurations:
-  (DeleteAppInstanceStreamingConfigurationsRequest.t, unit, unit) t 
-  | DeleteAppInstanceUser: (DeleteAppInstanceUserRequest.t, unit, unit) t 
-  | DeleteAttendee: (DeleteAttendeeRequest.t, unit, unit) t 
-  | DeleteChannel: (DeleteChannelRequest.t, unit, unit) t 
-  | DeleteChannelBan: (DeleteChannelBanRequest.t, unit, unit) t 
-  | DeleteChannelMembership: (DeleteChannelMembershipRequest.t, unit, 
-  unit) t 
-  | DeleteChannelMessage: (DeleteChannelMessageRequest.t, unit, unit) t 
-  | DeleteChannelModerator: (DeleteChannelModeratorRequest.t, unit, unit) t 
   | DeleteEventsConfiguration: (DeleteEventsConfigurationRequest.t, unit,
   unit) t 
-  | DeleteMediaCapturePipeline: (DeleteMediaCapturePipelineRequest.t, 
-  unit, unit) t 
-  | DeleteMeeting: (DeleteMeetingRequest.t, unit, unit) t 
   | DeletePhoneNumber: (DeletePhoneNumberRequest.t, unit, unit) t 
-  | DeleteProxySession: (DeleteProxySessionRequest.t, unit, unit) t 
   | DeleteRoom: (DeleteRoomRequest.t, unit, unit) t 
   | DeleteRoomMembership: (DeleteRoomMembershipRequest.t, unit, unit) t 
-  | DeleteSipMediaApplication: (DeleteSipMediaApplicationRequest.t, unit,
-  unit) t 
-  | DeleteSipRule: (DeleteSipRuleRequest.t, unit, unit) t 
-  | DeleteVoiceConnector: (DeleteVoiceConnectorRequest.t, unit, unit) t 
-  | DeleteVoiceConnectorEmergencyCallingConfiguration:
-  (DeleteVoiceConnectorEmergencyCallingConfigurationRequest.t, unit, 
-  unit) t 
-  | DeleteVoiceConnectorGroup: (DeleteVoiceConnectorGroupRequest.t, unit,
-  unit) t 
-  | DeleteVoiceConnectorOrigination:
-  (DeleteVoiceConnectorOriginationRequest.t, unit, unit) t 
-  | DeleteVoiceConnectorProxy: (DeleteVoiceConnectorProxyRequest.t, unit,
-  unit) t 
-  | DeleteVoiceConnectorStreamingConfiguration:
-  (DeleteVoiceConnectorStreamingConfigurationRequest.t, unit, unit) t 
-  | DeleteVoiceConnectorTermination:
-  (DeleteVoiceConnectorTerminationRequest.t, unit, unit) t 
-  | DeleteVoiceConnectorTerminationCredentials:
-  (DeleteVoiceConnectorTerminationCredentialsRequest.t, unit, unit) t 
-  | DescribeAppInstance: (DescribeAppInstanceRequest.t,
-  DescribeAppInstanceResponse.t, DescribeAppInstanceResponse.error) t 
-  | DescribeAppInstanceAdmin: (DescribeAppInstanceAdminRequest.t,
-  DescribeAppInstanceAdminResponse.t, DescribeAppInstanceAdminResponse.error)
-  t 
-  | DescribeAppInstanceUser: (DescribeAppInstanceUserRequest.t,
-  DescribeAppInstanceUserResponse.t, DescribeAppInstanceUserResponse.error) t
-  
-  | DescribeChannel: (DescribeChannelRequest.t, DescribeChannelResponse.t,
-  DescribeChannelResponse.error) t 
-  | DescribeChannelBan: (DescribeChannelBanRequest.t,
-  DescribeChannelBanResponse.t, DescribeChannelBanResponse.error) t 
-  | DescribeChannelMembership: (DescribeChannelMembershipRequest.t,
-  DescribeChannelMembershipResponse.t,
-  DescribeChannelMembershipResponse.error) t 
-  | DescribeChannelMembershipForAppInstanceUser:
-  (DescribeChannelMembershipForAppInstanceUserRequest.t,
-  DescribeChannelMembershipForAppInstanceUserResponse.t,
-  DescribeChannelMembershipForAppInstanceUserResponse.error) t 
-  | DescribeChannelModeratedByAppInstanceUser:
-  (DescribeChannelModeratedByAppInstanceUserRequest.t,
-  DescribeChannelModeratedByAppInstanceUserResponse.t,
-  DescribeChannelModeratedByAppInstanceUserResponse.error) t 
-  | DescribeChannelModerator: (DescribeChannelModeratorRequest.t,
-  DescribeChannelModeratorResponse.t, DescribeChannelModeratorResponse.error)
-  t 
   | DisassociatePhoneNumberFromUser:
   (DisassociatePhoneNumberFromUserRequest.t,
   DisassociatePhoneNumberFromUserResponse.t,
   DisassociatePhoneNumberFromUserResponse.error) t 
-  | DisassociatePhoneNumbersFromVoiceConnector:
-  (DisassociatePhoneNumbersFromVoiceConnectorRequest.t,
-  DisassociatePhoneNumbersFromVoiceConnectorResponse.t,
-  DisassociatePhoneNumbersFromVoiceConnectorResponse.error) t 
-  | DisassociatePhoneNumbersFromVoiceConnectorGroup:
-  (DisassociatePhoneNumbersFromVoiceConnectorGroupRequest.t,
-  DisassociatePhoneNumbersFromVoiceConnectorGroupResponse.t,
-  DisassociatePhoneNumbersFromVoiceConnectorGroupResponse.error) t 
   | DisassociateSigninDelegateGroupsFromAccount:
   (DisassociateSigninDelegateGroupsFromAccountRequest.t,
   DisassociateSigninDelegateGroupsFromAccountResponse.t,
@@ -177,196 +55,49 @@ type ('i, 'o, 'e) t =
   GetAccountResponse.error) t 
   | GetAccountSettings: (GetAccountSettingsRequest.t,
   GetAccountSettingsResponse.t, GetAccountSettingsResponse.error) t 
-  | GetAppInstanceRetentionSettings:
-  (GetAppInstanceRetentionSettingsRequest.t,
-  GetAppInstanceRetentionSettingsResponse.t,
-  GetAppInstanceRetentionSettingsResponse.error) t 
-  | GetAppInstanceStreamingConfigurations:
-  (GetAppInstanceStreamingConfigurationsRequest.t,
-  GetAppInstanceStreamingConfigurationsResponse.t,
-  GetAppInstanceStreamingConfigurationsResponse.error) t 
-  | GetAttendee: (GetAttendeeRequest.t, GetAttendeeResponse.t,
-  GetAttendeeResponse.error) t 
   | GetBot: (GetBotRequest.t, GetBotResponse.t, GetBotResponse.error) t 
-  | GetChannelMessage: (GetChannelMessageRequest.t,
-  GetChannelMessageResponse.t, GetChannelMessageResponse.error) t 
   | GetEventsConfiguration: (GetEventsConfigurationRequest.t,
   GetEventsConfigurationResponse.t, GetEventsConfigurationResponse.error) t 
   | GetGlobalSettings: (unit, GetGlobalSettingsResponse.t,
   GetGlobalSettingsResponse.error) t 
-  | GetMediaCapturePipeline: (GetMediaCapturePipelineRequest.t,
-  GetMediaCapturePipelineResponse.t, GetMediaCapturePipelineResponse.error) t
-  
-  | GetMeeting: (GetMeetingRequest.t, GetMeetingResponse.t,
-  GetMeetingResponse.error) t 
-  | GetMessagingSessionEndpoint: (GetMessagingSessionEndpointRequest.t,
-  GetMessagingSessionEndpointResponse.t,
-  GetMessagingSessionEndpointResponse.error) t 
   | GetPhoneNumber: (GetPhoneNumberRequest.t, GetPhoneNumberResponse.t,
   GetPhoneNumberResponse.error) t 
   | GetPhoneNumberOrder: (GetPhoneNumberOrderRequest.t,
   GetPhoneNumberOrderResponse.t, GetPhoneNumberOrderResponse.error) t 
   | GetPhoneNumberSettings: (unit, GetPhoneNumberSettingsResponse.t,
   GetPhoneNumberSettingsResponse.error) t 
-  | GetProxySession: (GetProxySessionRequest.t, GetProxySessionResponse.t,
-  GetProxySessionResponse.error) t 
   | GetRetentionSettings: (GetRetentionSettingsRequest.t,
   GetRetentionSettingsResponse.t, GetRetentionSettingsResponse.error) t 
   | GetRoom: (GetRoomRequest.t, GetRoomResponse.t, GetRoomResponse.error) t 
-  | GetSipMediaApplication: (GetSipMediaApplicationRequest.t,
-  GetSipMediaApplicationResponse.t, GetSipMediaApplicationResponse.error) t 
-  | GetSipMediaApplicationLoggingConfiguration:
-  (GetSipMediaApplicationLoggingConfigurationRequest.t,
-  GetSipMediaApplicationLoggingConfigurationResponse.t,
-  GetSipMediaApplicationLoggingConfigurationResponse.error) t 
-  | GetSipRule: (GetSipRuleRequest.t, GetSipRuleResponse.t,
-  GetSipRuleResponse.error) t 
   | GetUser: (GetUserRequest.t, GetUserResponse.t, GetUserResponse.error) t 
   | GetUserSettings: (GetUserSettingsRequest.t, GetUserSettingsResponse.t,
   GetUserSettingsResponse.error) t 
-  | GetVoiceConnector: (GetVoiceConnectorRequest.t,
-  GetVoiceConnectorResponse.t, GetVoiceConnectorResponse.error) t 
-  | GetVoiceConnectorEmergencyCallingConfiguration:
-  (GetVoiceConnectorEmergencyCallingConfigurationRequest.t,
-  GetVoiceConnectorEmergencyCallingConfigurationResponse.t,
-  GetVoiceConnectorEmergencyCallingConfigurationResponse.error) t 
-  | GetVoiceConnectorGroup: (GetVoiceConnectorGroupRequest.t,
-  GetVoiceConnectorGroupResponse.t, GetVoiceConnectorGroupResponse.error) t 
-  | GetVoiceConnectorLoggingConfiguration:
-  (GetVoiceConnectorLoggingConfigurationRequest.t,
-  GetVoiceConnectorLoggingConfigurationResponse.t,
-  GetVoiceConnectorLoggingConfigurationResponse.error) t 
-  | GetVoiceConnectorOrigination: (GetVoiceConnectorOriginationRequest.t,
-  GetVoiceConnectorOriginationResponse.t,
-  GetVoiceConnectorOriginationResponse.error) t 
-  | GetVoiceConnectorProxy: (GetVoiceConnectorProxyRequest.t,
-  GetVoiceConnectorProxyResponse.t, GetVoiceConnectorProxyResponse.error) t 
-  | GetVoiceConnectorStreamingConfiguration:
-  (GetVoiceConnectorStreamingConfigurationRequest.t,
-  GetVoiceConnectorStreamingConfigurationResponse.t,
-  GetVoiceConnectorStreamingConfigurationResponse.error) t 
-  | GetVoiceConnectorTermination: (GetVoiceConnectorTerminationRequest.t,
-  GetVoiceConnectorTerminationResponse.t,
-  GetVoiceConnectorTerminationResponse.error) t 
-  | GetVoiceConnectorTerminationHealth:
-  (GetVoiceConnectorTerminationHealthRequest.t,
-  GetVoiceConnectorTerminationHealthResponse.t,
-  GetVoiceConnectorTerminationHealthResponse.error) t 
   | InviteUsers: (InviteUsersRequest.t, InviteUsersResponse.t,
   InviteUsersResponse.error) t 
   | ListAccounts: (ListAccountsRequest.t, ListAccountsResponse.t,
   ListAccountsResponse.error) t 
-  | ListAppInstanceAdmins: (ListAppInstanceAdminsRequest.t,
-  ListAppInstanceAdminsResponse.t, ListAppInstanceAdminsResponse.error) t 
-  | ListAppInstanceUsers: (ListAppInstanceUsersRequest.t,
-  ListAppInstanceUsersResponse.t, ListAppInstanceUsersResponse.error) t 
-  | ListAppInstances: (ListAppInstancesRequest.t, ListAppInstancesResponse.t,
-  ListAppInstancesResponse.error) t 
-  | ListAttendeeTags: (ListAttendeeTagsRequest.t, ListAttendeeTagsResponse.t,
-  ListAttendeeTagsResponse.error) t 
-  | ListAttendees: (ListAttendeesRequest.t, ListAttendeesResponse.t,
-  ListAttendeesResponse.error) t 
   | ListBots: (ListBotsRequest.t, ListBotsResponse.t, ListBotsResponse.error)
   t 
-  | ListChannelBans: (ListChannelBansRequest.t, ListChannelBansResponse.t,
-  ListChannelBansResponse.error) t 
-  | ListChannelMemberships: (ListChannelMembershipsRequest.t,
-  ListChannelMembershipsResponse.t, ListChannelMembershipsResponse.error) t 
-  | ListChannelMembershipsForAppInstanceUser:
-  (ListChannelMembershipsForAppInstanceUserRequest.t,
-  ListChannelMembershipsForAppInstanceUserResponse.t,
-  ListChannelMembershipsForAppInstanceUserResponse.error) t 
-  | ListChannelMessages: (ListChannelMessagesRequest.t,
-  ListChannelMessagesResponse.t, ListChannelMessagesResponse.error) t 
-  | ListChannelModerators: (ListChannelModeratorsRequest.t,
-  ListChannelModeratorsResponse.t, ListChannelModeratorsResponse.error) t 
-  | ListChannels: (ListChannelsRequest.t, ListChannelsResponse.t,
-  ListChannelsResponse.error) t 
-  | ListChannelsModeratedByAppInstanceUser:
-  (ListChannelsModeratedByAppInstanceUserRequest.t,
-  ListChannelsModeratedByAppInstanceUserResponse.t,
-  ListChannelsModeratedByAppInstanceUserResponse.error) t 
-  | ListMediaCapturePipelines: (ListMediaCapturePipelinesRequest.t,
-  ListMediaCapturePipelinesResponse.t,
-  ListMediaCapturePipelinesResponse.error) t 
-  | ListMeetingTags: (ListMeetingTagsRequest.t, ListMeetingTagsResponse.t,
-  ListMeetingTagsResponse.error) t 
-  | ListMeetings: (ListMeetingsRequest.t, ListMeetingsResponse.t,
-  ListMeetingsResponse.error) t 
   | ListPhoneNumberOrders: (ListPhoneNumberOrdersRequest.t,
   ListPhoneNumberOrdersResponse.t, ListPhoneNumberOrdersResponse.error) t 
   | ListPhoneNumbers: (ListPhoneNumbersRequest.t, ListPhoneNumbersResponse.t,
   ListPhoneNumbersResponse.error) t 
-  | ListProxySessions: (ListProxySessionsRequest.t,
-  ListProxySessionsResponse.t, ListProxySessionsResponse.error) t 
   | ListRoomMemberships: (ListRoomMembershipsRequest.t,
   ListRoomMembershipsResponse.t, ListRoomMembershipsResponse.error) t 
   | ListRooms: (ListRoomsRequest.t, ListRoomsResponse.t,
   ListRoomsResponse.error) t 
-  | ListSipMediaApplications: (ListSipMediaApplicationsRequest.t,
-  ListSipMediaApplicationsResponse.t, ListSipMediaApplicationsResponse.error)
-  t 
-  | ListSipRules: (ListSipRulesRequest.t, ListSipRulesResponse.t,
-  ListSipRulesResponse.error) t 
   | ListSupportedPhoneNumberCountries:
   (ListSupportedPhoneNumberCountriesRequest.t,
   ListSupportedPhoneNumberCountriesResponse.t,
   ListSupportedPhoneNumberCountriesResponse.error) t 
-  | ListTagsForResource: (ListTagsForResourceRequest.t,
-  ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListUsers: (ListUsersRequest.t, ListUsersResponse.t,
   ListUsersResponse.error) t 
-  | ListVoiceConnectorGroups: (ListVoiceConnectorGroupsRequest.t,
-  ListVoiceConnectorGroupsResponse.t, ListVoiceConnectorGroupsResponse.error)
-  t 
-  | ListVoiceConnectorTerminationCredentials:
-  (ListVoiceConnectorTerminationCredentialsRequest.t,
-  ListVoiceConnectorTerminationCredentialsResponse.t,
-  ListVoiceConnectorTerminationCredentialsResponse.error) t 
-  | ListVoiceConnectors: (ListVoiceConnectorsRequest.t,
-  ListVoiceConnectorsResponse.t, ListVoiceConnectorsResponse.error) t 
   | LogoutUser: (LogoutUserRequest.t, LogoutUserResponse.t,
   LogoutUserResponse.error) t 
-  | PutAppInstanceRetentionSettings:
-  (PutAppInstanceRetentionSettingsRequest.t,
-  PutAppInstanceRetentionSettingsResponse.t,
-  PutAppInstanceRetentionSettingsResponse.error) t 
-  | PutAppInstanceStreamingConfigurations:
-  (PutAppInstanceStreamingConfigurationsRequest.t,
-  PutAppInstanceStreamingConfigurationsResponse.t,
-  PutAppInstanceStreamingConfigurationsResponse.error) t 
   | PutEventsConfiguration: (PutEventsConfigurationRequest.t,
   PutEventsConfigurationResponse.t, PutEventsConfigurationResponse.error) t 
   | PutRetentionSettings: (PutRetentionSettingsRequest.t,
   PutRetentionSettingsResponse.t, PutRetentionSettingsResponse.error) t 
-  | PutSipMediaApplicationLoggingConfiguration:
-  (PutSipMediaApplicationLoggingConfigurationRequest.t,
-  PutSipMediaApplicationLoggingConfigurationResponse.t,
-  PutSipMediaApplicationLoggingConfigurationResponse.error) t 
-  | PutVoiceConnectorEmergencyCallingConfiguration:
-  (PutVoiceConnectorEmergencyCallingConfigurationRequest.t,
-  PutVoiceConnectorEmergencyCallingConfigurationResponse.t,
-  PutVoiceConnectorEmergencyCallingConfigurationResponse.error) t 
-  | PutVoiceConnectorLoggingConfiguration:
-  (PutVoiceConnectorLoggingConfigurationRequest.t,
-  PutVoiceConnectorLoggingConfigurationResponse.t,
-  PutVoiceConnectorLoggingConfigurationResponse.error) t 
-  | PutVoiceConnectorOrigination: (PutVoiceConnectorOriginationRequest.t,
-  PutVoiceConnectorOriginationResponse.t,
-  PutVoiceConnectorOriginationResponse.error) t 
-  | PutVoiceConnectorProxy: (PutVoiceConnectorProxyRequest.t,
-  PutVoiceConnectorProxyResponse.t, PutVoiceConnectorProxyResponse.error) t 
-  | PutVoiceConnectorStreamingConfiguration:
-  (PutVoiceConnectorStreamingConfigurationRequest.t,
-  PutVoiceConnectorStreamingConfigurationResponse.t,
-  PutVoiceConnectorStreamingConfigurationResponse.error) t 
-  | PutVoiceConnectorTermination: (PutVoiceConnectorTerminationRequest.t,
-  PutVoiceConnectorTerminationResponse.t,
-  PutVoiceConnectorTerminationResponse.error) t 
-  | PutVoiceConnectorTerminationCredentials:
-  (PutVoiceConnectorTerminationCredentialsRequest.t, unit, unit) t 
-  | RedactChannelMessage: (RedactChannelMessageRequest.t,
-  RedactChannelMessageResponse.t, RedactChannelMessageResponse.error) t 
   | RedactConversationMessage: (RedactConversationMessageRequest.t,
   RedactConversationMessageResponse.t,
   RedactConversationMessageResponse.error) t 
@@ -382,72 +113,28 @@ type ('i, 'o, 'e) t =
   | SearchAvailablePhoneNumbers: (SearchAvailablePhoneNumbersRequest.t,
   SearchAvailablePhoneNumbersResponse.t,
   SearchAvailablePhoneNumbersResponse.error) t 
-  | SendChannelMessage: (SendChannelMessageRequest.t,
-  SendChannelMessageResponse.t, SendChannelMessageResponse.error) t 
-  | StartMeetingTranscription: (StartMeetingTranscriptionRequest.t,
-  StartMeetingTranscriptionResponse.t,
-  StartMeetingTranscriptionResponse.error) t 
-  | StopMeetingTranscription: (StopMeetingTranscriptionRequest.t,
-  StopMeetingTranscriptionResponse.t, StopMeetingTranscriptionResponse.error)
-  t 
-  | TagAttendee: (TagAttendeeRequest.t, unit, unit) t 
-  | TagMeeting: (TagMeetingRequest.t, unit, unit) t 
-  | TagResource: (TagResourceRequest.t, unit, unit) t 
-  | UntagAttendee: (UntagAttendeeRequest.t, unit, unit) t 
-  | UntagMeeting: (UntagMeetingRequest.t, unit, unit) t 
-  | UntagResource: (UntagResourceRequest.t, unit, unit) t 
   | UpdateAccount: (UpdateAccountRequest.t, UpdateAccountResponse.t,
   UpdateAccountResponse.error) t 
   | UpdateAccountSettings: (UpdateAccountSettingsRequest.t,
   UpdateAccountSettingsResponse.t, UpdateAccountSettingsResponse.error) t 
-  | UpdateAppInstance: (UpdateAppInstanceRequest.t,
-  UpdateAppInstanceResponse.t, UpdateAppInstanceResponse.error) t 
-  | UpdateAppInstanceUser: (UpdateAppInstanceUserRequest.t,
-  UpdateAppInstanceUserResponse.t, UpdateAppInstanceUserResponse.error) t 
   | UpdateBot: (UpdateBotRequest.t, UpdateBotResponse.t,
   UpdateBotResponse.error) t 
-  | UpdateChannel: (UpdateChannelRequest.t, UpdateChannelResponse.t,
-  UpdateChannelResponse.error) t 
-  | UpdateChannelMessage: (UpdateChannelMessageRequest.t,
-  UpdateChannelMessageResponse.t, UpdateChannelMessageResponse.error) t 
-  | UpdateChannelReadMarker: (UpdateChannelReadMarkerRequest.t,
-  UpdateChannelReadMarkerResponse.t, UpdateChannelReadMarkerResponse.error) t
-  
   | UpdateGlobalSettings: (UpdateGlobalSettingsRequest.t, unit, unit) t 
   | UpdatePhoneNumber: (UpdatePhoneNumberRequest.t,
   UpdatePhoneNumberResponse.t, UpdatePhoneNumberResponse.error) t 
   | UpdatePhoneNumberSettings: (UpdatePhoneNumberSettingsRequest.t, unit,
   unit) t 
-  | UpdateProxySession: (UpdateProxySessionRequest.t,
-  UpdateProxySessionResponse.t, UpdateProxySessionResponse.error) t 
   | UpdateRoom: (UpdateRoomRequest.t, UpdateRoomResponse.t,
   UpdateRoomResponse.error) t 
   | UpdateRoomMembership: (UpdateRoomMembershipRequest.t,
   UpdateRoomMembershipResponse.t, UpdateRoomMembershipResponse.error) t 
-  | UpdateSipMediaApplication: (UpdateSipMediaApplicationRequest.t,
-  UpdateSipMediaApplicationResponse.t,
-  UpdateSipMediaApplicationResponse.error) t 
-  | UpdateSipMediaApplicationCall: (UpdateSipMediaApplicationCallRequest.t,
-  UpdateSipMediaApplicationCallResponse.t,
-  UpdateSipMediaApplicationCallResponse.error) t 
-  | UpdateSipRule: (UpdateSipRuleRequest.t, UpdateSipRuleResponse.t,
-  UpdateSipRuleResponse.error) t 
   | UpdateUser: (UpdateUserRequest.t, UpdateUserResponse.t,
   UpdateUserResponse.error) t 
   | UpdateUserSettings: (UpdateUserSettingsRequest.t, unit, unit) t 
-  | UpdateVoiceConnector: (UpdateVoiceConnectorRequest.t,
-  UpdateVoiceConnectorResponse.t, UpdateVoiceConnectorResponse.error) t 
-  | UpdateVoiceConnectorGroup: (UpdateVoiceConnectorGroupRequest.t,
-  UpdateVoiceConnectorGroupResponse.t,
-  UpdateVoiceConnectorGroupResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociatePhoneNumberWithUser -> `POST
-  | AssociatePhoneNumbersWithVoiceConnector -> `POST
-  | AssociatePhoneNumbersWithVoiceConnectorGroup -> `POST
   | AssociateSigninDelegateGroupsWithAccount -> `POST
-  | BatchCreateAttendee -> `POST
-  | BatchCreateChannelMembership -> `POST
   | BatchCreateRoomMembership -> `POST
   | BatchDeletePhoneNumber -> `POST
   | BatchSuspendUser -> `POST
@@ -455,183 +142,59 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | BatchUpdatePhoneNumber -> `POST
   | BatchUpdateUser -> `POST
   | CreateAccount -> `POST
-  | CreateAppInstance -> `POST
-  | CreateAppInstanceAdmin -> `POST
-  | CreateAppInstanceUser -> `POST
-  | CreateAttendee -> `POST
   | CreateBot -> `POST
-  | CreateChannel -> `POST
-  | CreateChannelBan -> `POST
-  | CreateChannelMembership -> `POST
-  | CreateChannelModerator -> `POST
-  | CreateMediaCapturePipeline -> `POST
-  | CreateMeeting -> `POST
   | CreateMeetingDialOut -> `POST
-  | CreateMeetingWithAttendees -> `POST
   | CreatePhoneNumberOrder -> `POST
-  | CreateProxySession -> `POST
   | CreateRoom -> `POST
   | CreateRoomMembership -> `POST
-  | CreateSipMediaApplication -> `POST
-  | CreateSipMediaApplicationCall -> `POST
-  | CreateSipRule -> `POST
   | CreateUser -> `POST
-  | CreateVoiceConnector -> `POST
-  | CreateVoiceConnectorGroup -> `POST
   | DeleteAccount -> `DELETE
-  | DeleteAppInstance -> `DELETE
-  | DeleteAppInstanceAdmin -> `DELETE
-  | DeleteAppInstanceStreamingConfigurations -> `DELETE
-  | DeleteAppInstanceUser -> `DELETE
-  | DeleteAttendee -> `DELETE
-  | DeleteChannel -> `DELETE
-  | DeleteChannelBan -> `DELETE
-  | DeleteChannelMembership -> `DELETE
-  | DeleteChannelMessage -> `DELETE
-  | DeleteChannelModerator -> `DELETE
   | DeleteEventsConfiguration -> `DELETE
-  | DeleteMediaCapturePipeline -> `DELETE
-  | DeleteMeeting -> `DELETE
   | DeletePhoneNumber -> `DELETE
-  | DeleteProxySession -> `DELETE
   | DeleteRoom -> `DELETE
   | DeleteRoomMembership -> `DELETE
-  | DeleteSipMediaApplication -> `DELETE
-  | DeleteSipRule -> `DELETE
-  | DeleteVoiceConnector -> `DELETE
-  | DeleteVoiceConnectorEmergencyCallingConfiguration -> `DELETE
-  | DeleteVoiceConnectorGroup -> `DELETE
-  | DeleteVoiceConnectorOrigination -> `DELETE
-  | DeleteVoiceConnectorProxy -> `DELETE
-  | DeleteVoiceConnectorStreamingConfiguration -> `DELETE
-  | DeleteVoiceConnectorTermination -> `DELETE
-  | DeleteVoiceConnectorTerminationCredentials -> `POST
-  | DescribeAppInstance -> `GET
-  | DescribeAppInstanceAdmin -> `GET
-  | DescribeAppInstanceUser -> `GET
-  | DescribeChannel -> `GET
-  | DescribeChannelBan -> `GET
-  | DescribeChannelMembership -> `GET
-  | DescribeChannelMembershipForAppInstanceUser -> `GET
-  | DescribeChannelModeratedByAppInstanceUser -> `GET
-  | DescribeChannelModerator -> `GET
   | DisassociatePhoneNumberFromUser -> `POST
-  | DisassociatePhoneNumbersFromVoiceConnector -> `POST
-  | DisassociatePhoneNumbersFromVoiceConnectorGroup -> `POST
   | DisassociateSigninDelegateGroupsFromAccount -> `POST
   | GetAccount -> `GET
   | GetAccountSettings -> `GET
-  | GetAppInstanceRetentionSettings -> `GET
-  | GetAppInstanceStreamingConfigurations -> `GET
-  | GetAttendee -> `GET
   | GetBot -> `GET
-  | GetChannelMessage -> `GET
   | GetEventsConfiguration -> `GET
   | GetGlobalSettings -> `GET
-  | GetMediaCapturePipeline -> `GET
-  | GetMeeting -> `GET
-  | GetMessagingSessionEndpoint -> `GET
   | GetPhoneNumber -> `GET
   | GetPhoneNumberOrder -> `GET
   | GetPhoneNumberSettings -> `GET
-  | GetProxySession -> `GET
   | GetRetentionSettings -> `GET
   | GetRoom -> `GET
-  | GetSipMediaApplication -> `GET
-  | GetSipMediaApplicationLoggingConfiguration -> `GET
-  | GetSipRule -> `GET
   | GetUser -> `GET
   | GetUserSettings -> `GET
-  | GetVoiceConnector -> `GET
-  | GetVoiceConnectorEmergencyCallingConfiguration -> `GET
-  | GetVoiceConnectorGroup -> `GET
-  | GetVoiceConnectorLoggingConfiguration -> `GET
-  | GetVoiceConnectorOrigination -> `GET
-  | GetVoiceConnectorProxy -> `GET
-  | GetVoiceConnectorStreamingConfiguration -> `GET
-  | GetVoiceConnectorTermination -> `GET
-  | GetVoiceConnectorTerminationHealth -> `GET
   | InviteUsers -> `POST
   | ListAccounts -> `GET
-  | ListAppInstanceAdmins -> `GET
-  | ListAppInstanceUsers -> `GET
-  | ListAppInstances -> `GET
-  | ListAttendeeTags -> `GET
-  | ListAttendees -> `GET
   | ListBots -> `GET
-  | ListChannelBans -> `GET
-  | ListChannelMemberships -> `GET
-  | ListChannelMembershipsForAppInstanceUser -> `GET
-  | ListChannelMessages -> `GET
-  | ListChannelModerators -> `GET
-  | ListChannels -> `GET
-  | ListChannelsModeratedByAppInstanceUser -> `GET
-  | ListMediaCapturePipelines -> `GET
-  | ListMeetingTags -> `GET
-  | ListMeetings -> `GET
   | ListPhoneNumberOrders -> `GET
   | ListPhoneNumbers -> `GET
-  | ListProxySessions -> `GET
   | ListRoomMemberships -> `GET
   | ListRooms -> `GET
-  | ListSipMediaApplications -> `GET
-  | ListSipRules -> `GET
   | ListSupportedPhoneNumberCountries -> `GET
-  | ListTagsForResource -> `GET
   | ListUsers -> `GET
-  | ListVoiceConnectorGroups -> `GET
-  | ListVoiceConnectorTerminationCredentials -> `GET
-  | ListVoiceConnectors -> `GET
   | LogoutUser -> `POST
-  | PutAppInstanceRetentionSettings -> `PUT
-  | PutAppInstanceStreamingConfigurations -> `PUT
   | PutEventsConfiguration -> `PUT
   | PutRetentionSettings -> `PUT
-  | PutSipMediaApplicationLoggingConfiguration -> `PUT
-  | PutVoiceConnectorEmergencyCallingConfiguration -> `PUT
-  | PutVoiceConnectorLoggingConfiguration -> `PUT
-  | PutVoiceConnectorOrigination -> `PUT
-  | PutVoiceConnectorProxy -> `PUT
-  | PutVoiceConnectorStreamingConfiguration -> `PUT
-  | PutVoiceConnectorTermination -> `PUT
-  | PutVoiceConnectorTerminationCredentials -> `POST
-  | RedactChannelMessage -> `POST
   | RedactConversationMessage -> `POST
   | RedactRoomMessage -> `POST
   | RegenerateSecurityToken -> `POST
   | ResetPersonalPIN -> `POST
   | RestorePhoneNumber -> `POST
   | SearchAvailablePhoneNumbers -> `GET
-  | SendChannelMessage -> `POST
-  | StartMeetingTranscription -> `POST
-  | StopMeetingTranscription -> `POST
-  | TagAttendee -> `POST
-  | TagMeeting -> `POST
-  | TagResource -> `POST
-  | UntagAttendee -> `POST
-  | UntagMeeting -> `POST
-  | UntagResource -> `POST
   | UpdateAccount -> `POST
   | UpdateAccountSettings -> `PUT
-  | UpdateAppInstance -> `PUT
-  | UpdateAppInstanceUser -> `PUT
   | UpdateBot -> `POST
-  | UpdateChannel -> `PUT
-  | UpdateChannelMessage -> `PUT
-  | UpdateChannelReadMarker -> `PUT
   | UpdateGlobalSettings -> `PUT
   | UpdatePhoneNumber -> `POST
   | UpdatePhoneNumberSettings -> `PUT
-  | UpdateProxySession -> `POST
   | UpdateRoom -> `POST
   | UpdateRoomMembership -> `POST
-  | UpdateSipMediaApplication -> `PUT
-  | UpdateSipMediaApplicationCall -> `POST
-  | UpdateSipRule -> `PUT
   | UpdateUser -> `POST
   | UpdateUserSettings -> `PUT
-  | UpdateVoiceConnector -> `PUT
-  | UpdateVoiceConnectorGroup -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -641,30 +204,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (String_.to_header
                x.AssociatePhoneNumberWithUserRequest.accountId)
             (String_.to_header x.AssociatePhoneNumberWithUserRequest.userId)
-      | AssociatePhoneNumbersWithVoiceConnector ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s?operation=associate-phone-numbers"
-            (NonEmptyString.to_header
-               x.AssociatePhoneNumbersWithVoiceConnectorRequest.voiceConnectorId)
-      | AssociatePhoneNumbersWithVoiceConnectorGroup ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connector-groups/%s?operation=associate-phone-numbers"
-            (NonEmptyString.to_header
-               x.AssociatePhoneNumbersWithVoiceConnectorGroupRequest.voiceConnectorGroupId)
       | AssociateSigninDelegateGroupsWithAccount ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s?operation=associate-signin-delegate-groups"
             (NonEmptyString.to_header
                x.AssociateSigninDelegateGroupsWithAccountRequest.accountId)
-      | BatchCreateAttendee ->
-          (Format.kasprintf Uri.of_string)
-            "/meetings/%s/attendees?operation=batch-create"
-            (GuidString.to_header x.BatchCreateAttendeeRequest.meetingId)
-      | BatchCreateChannelMembership ->
-          (Format.kasprintf Uri.of_string)
-            "/channels/%s/memberships?operation=batch-create"
-            (ChimeArn.to_header
-               x.BatchCreateChannelMembershipRequest.channelArn)
       | BatchCreateRoomMembership ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/rooms/%s/memberships?operation=batch-create"
@@ -690,46 +234,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/accounts/%s/users"
             (NonEmptyString.to_header x.BatchUpdateUserRequest.accountId)
       | CreateAccount -> (Format.kasprintf Uri.of_string) "/accounts"
-      | CreateAppInstance ->
-          (Format.kasprintf Uri.of_string) "/app-instances"
-      | CreateAppInstanceAdmin ->
-          (Format.kasprintf Uri.of_string) "/app-instances/%s/admins"
-            (ChimeArn.to_header
-               x.CreateAppInstanceAdminRequest.appInstanceArn)
-      | CreateAppInstanceUser ->
-          (Format.kasprintf Uri.of_string) "/app-instance-users"
-      | CreateAttendee ->
-          (Format.kasprintf Uri.of_string) "/meetings/%s/attendees"
-            (GuidString.to_header x.CreateAttendeeRequest.meetingId)
       | CreateBot ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/bots"
             (NonEmptyString.to_header x.CreateBotRequest.accountId)
-      | CreateChannel -> (Format.kasprintf Uri.of_string) "/channels"
-      | CreateChannelBan ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/bans"
-            (ChimeArn.to_header x.CreateChannelBanRequest.channelArn)
-      | CreateChannelMembership ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/memberships"
-            (ChimeArn.to_header x.CreateChannelMembershipRequest.channelArn)
-      | CreateChannelModerator ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/moderators"
-            (ChimeArn.to_header x.CreateChannelModeratorRequest.channelArn)
-      | CreateMediaCapturePipeline ->
-          (Format.kasprintf Uri.of_string) "/media-capture-pipelines"
-      | CreateMeeting -> (Format.kasprintf Uri.of_string) "/meetings"
       | CreateMeetingDialOut ->
           (Format.kasprintf Uri.of_string) "/meetings/%s/dial-outs"
             (GuidString.to_header x.CreateMeetingDialOutRequest.meetingId)
-      | CreateMeetingWithAttendees ->
-          (Format.kasprintf Uri.of_string)
-            "/meetings?operation=create-attendees"
       | CreatePhoneNumberOrder ->
           (Format.kasprintf Uri.of_string) "/phone-number-orders"
-      | CreateProxySession ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/proxy-sessions"
-            (NonEmptyString128.to_header
-               x.CreateProxySessionRequest.voiceConnectorId)
       | CreateRoom ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/rooms"
             (NonEmptyString.to_header x.CreateRoomRequest.accountId)
@@ -738,66 +250,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/accounts/%s/rooms/%s/memberships"
             (NonEmptyString.to_header x.CreateRoomMembershipRequest.accountId)
             (NonEmptyString.to_header x.CreateRoomMembershipRequest.roomId)
-      | CreateSipMediaApplication ->
-          (Format.kasprintf Uri.of_string) "/sip-media-applications"
-      | CreateSipMediaApplicationCall ->
-          (Format.kasprintf Uri.of_string) "/sip-media-applications/%s/calls"
-            (NonEmptyString.to_header
-               x.CreateSipMediaApplicationCallRequest.sipMediaApplicationId)
-      | CreateSipRule -> (Format.kasprintf Uri.of_string) "/sip-rules"
       | CreateUser ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/users?operation=create"
             (NonEmptyString.to_header x.CreateUserRequest.accountId)
-      | CreateVoiceConnector ->
-          (Format.kasprintf Uri.of_string) "/voice-connectors"
-      | CreateVoiceConnectorGroup ->
-          (Format.kasprintf Uri.of_string) "/voice-connector-groups"
       | DeleteAccount ->
           (Format.kasprintf Uri.of_string) "/accounts/%s"
             (NonEmptyString.to_header x.DeleteAccountRequest.accountId)
-      | DeleteAppInstance ->
-          (Format.kasprintf Uri.of_string) "/app-instances/%s"
-            (ChimeArn.to_header x.DeleteAppInstanceRequest.appInstanceArn)
-      | DeleteAppInstanceAdmin ->
-          (Format.kasprintf Uri.of_string) "/app-instances/%s/admins/%s"
-            (ChimeArn.to_header
-               x.DeleteAppInstanceAdminRequest.appInstanceArn)
-            (ChimeArn.to_header
-               x.DeleteAppInstanceAdminRequest.appInstanceAdminArn)
-      | DeleteAppInstanceStreamingConfigurations ->
-          (Format.kasprintf Uri.of_string)
-            "/app-instances/%s/streaming-configurations"
-            (ChimeArn.to_header
-               x.DeleteAppInstanceStreamingConfigurationsRequest.appInstanceArn)
-      | DeleteAppInstanceUser ->
-          (Format.kasprintf Uri.of_string) "/app-instance-users/%s"
-            (ChimeArn.to_header
-               x.DeleteAppInstanceUserRequest.appInstanceUserArn)
-      | DeleteAttendee ->
-          (Format.kasprintf Uri.of_string) "/meetings/%s/attendees/%s"
-            (GuidString.to_header x.DeleteAttendeeRequest.meetingId)
-            (GuidString.to_header x.DeleteAttendeeRequest.attendeeId)
-      | DeleteChannel ->
-          (Format.kasprintf Uri.of_string) "/channels/%s"
-            (ChimeArn.to_header x.DeleteChannelRequest.channelArn)
-      | DeleteChannelBan ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/bans/%s"
-            (ChimeArn.to_header x.DeleteChannelBanRequest.channelArn)
-            (ChimeArn.to_header x.DeleteChannelBanRequest.memberArn)
-      | DeleteChannelMembership ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/memberships/%s"
-            (ChimeArn.to_header x.DeleteChannelMembershipRequest.channelArn)
-            (ChimeArn.to_header x.DeleteChannelMembershipRequest.memberArn)
-      | DeleteChannelMessage ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/messages/%s"
-            (ChimeArn.to_header x.DeleteChannelMessageRequest.channelArn)
-            (MessageId.to_header x.DeleteChannelMessageRequest.messageId)
-      | DeleteChannelModerator ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/moderators/%s"
-            (ChimeArn.to_header x.DeleteChannelModeratorRequest.channelArn)
-            (ChimeArn.to_header
-               x.DeleteChannelModeratorRequest.channelModeratorArn)
       | DeleteEventsConfiguration ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/bots/%s/events-configuration"
@@ -805,23 +264,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DeleteEventsConfigurationRequest.accountId)
             (NonEmptyString.to_header
                x.DeleteEventsConfigurationRequest.botId)
-      | DeleteMediaCapturePipeline ->
-          (Format.kasprintf Uri.of_string) "/media-capture-pipelines/%s"
-            (GuidString.to_header
-               x.DeleteMediaCapturePipelineRequest.mediaPipelineId)
-      | DeleteMeeting ->
-          (Format.kasprintf Uri.of_string) "/meetings/%s"
-            (GuidString.to_header x.DeleteMeetingRequest.meetingId)
       | DeletePhoneNumber ->
           (Format.kasprintf Uri.of_string) "/phone-numbers/%s"
             (String_.to_header x.DeletePhoneNumberRequest.phoneNumberId)
-      | DeleteProxySession ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/proxy-sessions/%s"
-            (NonEmptyString128.to_header
-               x.DeleteProxySessionRequest.voiceConnectorId)
-            (NonEmptyString128.to_header
-               x.DeleteProxySessionRequest.proxySessionId)
       | DeleteRoom ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/rooms/%s"
             (NonEmptyString.to_header x.DeleteRoomRequest.accountId)
@@ -832,98 +277,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (NonEmptyString.to_header x.DeleteRoomMembershipRequest.accountId)
             (NonEmptyString.to_header x.DeleteRoomMembershipRequest.roomId)
             (NonEmptyString.to_header x.DeleteRoomMembershipRequest.memberId)
-      | DeleteSipMediaApplication ->
-          (Format.kasprintf Uri.of_string) "/sip-media-applications/%s"
-            (NonEmptyString.to_header
-               x.DeleteSipMediaApplicationRequest.sipMediaApplicationId)
-      | DeleteSipRule ->
-          (Format.kasprintf Uri.of_string) "/sip-rules/%s"
-            (NonEmptyString.to_header x.DeleteSipRuleRequest.sipRuleId)
-      | DeleteVoiceConnector ->
-          (Format.kasprintf Uri.of_string) "/voice-connectors/%s"
-            (NonEmptyString.to_header
-               x.DeleteVoiceConnectorRequest.voiceConnectorId)
-      | DeleteVoiceConnectorEmergencyCallingConfiguration ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/emergency-calling-configuration"
-            (NonEmptyString.to_header
-               x.DeleteVoiceConnectorEmergencyCallingConfigurationRequest.voiceConnectorId)
-      | DeleteVoiceConnectorGroup ->
-          (Format.kasprintf Uri.of_string) "/voice-connector-groups/%s"
-            (NonEmptyString.to_header
-               x.DeleteVoiceConnectorGroupRequest.voiceConnectorGroupId)
-      | DeleteVoiceConnectorOrigination ->
-          (Format.kasprintf Uri.of_string) "/voice-connectors/%s/origination"
-            (NonEmptyString.to_header
-               x.DeleteVoiceConnectorOriginationRequest.voiceConnectorId)
-      | DeleteVoiceConnectorProxy ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/programmable-numbers/proxy"
-            (NonEmptyString128.to_header
-               x.DeleteVoiceConnectorProxyRequest.voiceConnectorId)
-      | DeleteVoiceConnectorStreamingConfiguration ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/streaming-configuration"
-            (NonEmptyString.to_header
-               x.DeleteVoiceConnectorStreamingConfigurationRequest.voiceConnectorId)
-      | DeleteVoiceConnectorTermination ->
-          (Format.kasprintf Uri.of_string) "/voice-connectors/%s/termination"
-            (NonEmptyString.to_header
-               x.DeleteVoiceConnectorTerminationRequest.voiceConnectorId)
-      | DeleteVoiceConnectorTerminationCredentials ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/termination/credentials?operation=delete"
-            (NonEmptyString.to_header
-               x.DeleteVoiceConnectorTerminationCredentialsRequest.voiceConnectorId)
-      | DescribeAppInstance ->
-          (Format.kasprintf Uri.of_string) "/app-instances/%s"
-            (ChimeArn.to_header x.DescribeAppInstanceRequest.appInstanceArn)
-      | DescribeAppInstanceAdmin ->
-          (Format.kasprintf Uri.of_string) "/app-instances/%s/admins/%s"
-            (ChimeArn.to_header
-               x.DescribeAppInstanceAdminRequest.appInstanceArn)
-            (ChimeArn.to_header
-               x.DescribeAppInstanceAdminRequest.appInstanceAdminArn)
-      | DescribeAppInstanceUser ->
-          (Format.kasprintf Uri.of_string) "/app-instance-users/%s"
-            (ChimeArn.to_header
-               x.DescribeAppInstanceUserRequest.appInstanceUserArn)
-      | DescribeChannel ->
-          (Format.kasprintf Uri.of_string) "/channels/%s"
-            (ChimeArn.to_header x.DescribeChannelRequest.channelArn)
-      | DescribeChannelBan ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/bans/%s"
-            (ChimeArn.to_header x.DescribeChannelBanRequest.channelArn)
-            (ChimeArn.to_header x.DescribeChannelBanRequest.memberArn)
-      | DescribeChannelMembership ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/memberships/%s"
-            (ChimeArn.to_header x.DescribeChannelMembershipRequest.channelArn)
-            (ChimeArn.to_header x.DescribeChannelMembershipRequest.memberArn)
-      | DescribeChannelMembershipForAppInstanceUser ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string)
-               "/channels/%s?scope=app-instance-user-membership"
-               (ChimeArn.to_header
-                  x.DescribeChannelMembershipForAppInstanceUserRequest.channelArn))
-            (List.filter_opt
-               [Some
-                  ("app-instance-user-arn",
-                    (ChimeArn.to_header x.appInstanceUserArn))])
-      | DescribeChannelModeratedByAppInstanceUser ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string)
-               "/channels/%s?scope=app-instance-user-moderated-channel"
-               (ChimeArn.to_header
-                  x.DescribeChannelModeratedByAppInstanceUserRequest.channelArn))
-            (List.filter_opt
-               [Some
-                  ("app-instance-user-arn",
-                    (ChimeArn.to_header x.appInstanceUserArn))])
-      | DescribeChannelModerator ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/moderators/%s"
-            (ChimeArn.to_header x.DescribeChannelModeratorRequest.channelArn)
-            (ChimeArn.to_header
-               x.DescribeChannelModeratorRequest.channelModeratorArn)
       | DisassociatePhoneNumberFromUser ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/users/%s?operation=disassociate-phone-number"
@@ -931,16 +284,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DisassociatePhoneNumberFromUserRequest.accountId)
             (String_.to_header
                x.DisassociatePhoneNumberFromUserRequest.userId)
-      | DisassociatePhoneNumbersFromVoiceConnector ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s?operation=disassociate-phone-numbers"
-            (NonEmptyString.to_header
-               x.DisassociatePhoneNumbersFromVoiceConnectorRequest.voiceConnectorId)
-      | DisassociatePhoneNumbersFromVoiceConnectorGroup ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connector-groups/%s?operation=disassociate-phone-numbers"
-            (NonEmptyString.to_header
-               x.DisassociatePhoneNumbersFromVoiceConnectorGroupRequest.voiceConnectorGroupId)
       | DisassociateSigninDelegateGroupsFromAccount ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s?operation=disassociate-signin-delegate-groups"
@@ -952,28 +295,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetAccountSettings ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/settings"
             (NonEmptyString.to_header x.GetAccountSettingsRequest.accountId)
-      | GetAppInstanceRetentionSettings ->
-          (Format.kasprintf Uri.of_string)
-            "/app-instances/%s/retention-settings"
-            (ChimeArn.to_header
-               x.GetAppInstanceRetentionSettingsRequest.appInstanceArn)
-      | GetAppInstanceStreamingConfigurations ->
-          (Format.kasprintf Uri.of_string)
-            "/app-instances/%s/streaming-configurations"
-            (ChimeArn.to_header
-               x.GetAppInstanceStreamingConfigurationsRequest.appInstanceArn)
-      | GetAttendee ->
-          (Format.kasprintf Uri.of_string) "/meetings/%s/attendees/%s"
-            (GuidString.to_header x.GetAttendeeRequest.meetingId)
-            (GuidString.to_header x.GetAttendeeRequest.attendeeId)
       | GetBot ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/bots/%s"
             (NonEmptyString.to_header x.GetBotRequest.accountId)
             (NonEmptyString.to_header x.GetBotRequest.botId)
-      | GetChannelMessage ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/messages/%s"
-            (ChimeArn.to_header x.GetChannelMessageRequest.channelArn)
-            (MessageId.to_header x.GetChannelMessageRequest.messageId)
       | GetEventsConfiguration ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/bots/%s/events-configuration"
@@ -981,15 +306,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.GetEventsConfigurationRequest.accountId)
             (NonEmptyString.to_header x.GetEventsConfigurationRequest.botId)
       | GetGlobalSettings -> (Format.kasprintf Uri.of_string) "/settings"
-      | GetMediaCapturePipeline ->
-          (Format.kasprintf Uri.of_string) "/media-capture-pipelines/%s"
-            (GuidString.to_header
-               x.GetMediaCapturePipelineRequest.mediaPipelineId)
-      | GetMeeting ->
-          (Format.kasprintf Uri.of_string) "/meetings/%s"
-            (GuidString.to_header x.GetMeetingRequest.meetingId)
-      | GetMessagingSessionEndpoint ->
-          (Format.kasprintf Uri.of_string) "/endpoints/messaging-session"
       | GetPhoneNumber ->
           (Format.kasprintf Uri.of_string) "/phone-numbers/%s"
             (String_.to_header x.GetPhoneNumberRequest.phoneNumberId)
@@ -999,13 +315,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.GetPhoneNumberOrderRequest.phoneNumberOrderId)
       | GetPhoneNumberSettings ->
           (Format.kasprintf Uri.of_string) "/settings/phone-number"
-      | GetProxySession ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/proxy-sessions/%s"
-            (NonEmptyString128.to_header
-               x.GetProxySessionRequest.voiceConnectorId)
-            (NonEmptyString128.to_header
-               x.GetProxySessionRequest.proxySessionId)
       | GetRetentionSettings ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/retention-settings"
             (NonEmptyString.to_header x.GetRetentionSettingsRequest.accountId)
@@ -1013,18 +322,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/accounts/%s/rooms/%s"
             (NonEmptyString.to_header x.GetRoomRequest.accountId)
             (NonEmptyString.to_header x.GetRoomRequest.roomId)
-      | GetSipMediaApplication ->
-          (Format.kasprintf Uri.of_string) "/sip-media-applications/%s"
-            (NonEmptyString.to_header
-               x.GetSipMediaApplicationRequest.sipMediaApplicationId)
-      | GetSipMediaApplicationLoggingConfiguration ->
-          (Format.kasprintf Uri.of_string)
-            "/sip-media-applications/%s/logging-configuration"
-            (NonEmptyString.to_header
-               x.GetSipMediaApplicationLoggingConfigurationRequest.sipMediaApplicationId)
-      | GetSipRule ->
-          (Format.kasprintf Uri.of_string) "/sip-rules/%s"
-            (NonEmptyString.to_header x.GetSipRuleRequest.sipRuleId)
       | GetUser ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/users/%s"
             (NonEmptyString.to_header x.GetUserRequest.accountId)
@@ -1033,47 +330,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/accounts/%s/users/%s/settings"
             (String_.to_header x.GetUserSettingsRequest.accountId)
             (String_.to_header x.GetUserSettingsRequest.userId)
-      | GetVoiceConnector ->
-          (Format.kasprintf Uri.of_string) "/voice-connectors/%s"
-            (NonEmptyString.to_header
-               x.GetVoiceConnectorRequest.voiceConnectorId)
-      | GetVoiceConnectorEmergencyCallingConfiguration ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/emergency-calling-configuration"
-            (NonEmptyString.to_header
-               x.GetVoiceConnectorEmergencyCallingConfigurationRequest.voiceConnectorId)
-      | GetVoiceConnectorGroup ->
-          (Format.kasprintf Uri.of_string) "/voice-connector-groups/%s"
-            (NonEmptyString.to_header
-               x.GetVoiceConnectorGroupRequest.voiceConnectorGroupId)
-      | GetVoiceConnectorLoggingConfiguration ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/logging-configuration"
-            (NonEmptyString.to_header
-               x.GetVoiceConnectorLoggingConfigurationRequest.voiceConnectorId)
-      | GetVoiceConnectorOrigination ->
-          (Format.kasprintf Uri.of_string) "/voice-connectors/%s/origination"
-            (NonEmptyString.to_header
-               x.GetVoiceConnectorOriginationRequest.voiceConnectorId)
-      | GetVoiceConnectorProxy ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/programmable-numbers/proxy"
-            (NonEmptyString128.to_header
-               x.GetVoiceConnectorProxyRequest.voiceConnectorId)
-      | GetVoiceConnectorStreamingConfiguration ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/streaming-configuration"
-            (NonEmptyString.to_header
-               x.GetVoiceConnectorStreamingConfigurationRequest.voiceConnectorId)
-      | GetVoiceConnectorTermination ->
-          (Format.kasprintf Uri.of_string) "/voice-connectors/%s/termination"
-            (NonEmptyString.to_header
-               x.GetVoiceConnectorTerminationRequest.voiceConnectorId)
-      | GetVoiceConnectorTerminationHealth ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/termination/health"
-            (NonEmptyString.to_header
-               x.GetVoiceConnectorTerminationHealthRequest.voiceConnectorId)
       | InviteUsers ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/users?operation=add"
             (NonEmptyString.to_header x.InviteUsersRequest.accountId)
@@ -1093,55 +349,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                        ("max-results",
                          (ProfileServiceMaxResults.to_header v)))
                  x.maxResults])
-      | ListAppInstanceAdmins ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/app-instances/%s/admins"
-               (ChimeArn.to_header
-                  x.ListAppInstanceAdminsRequest.appInstanceArn))
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
-                  x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("next-token", (NextToken.to_header v)))
-                 x.nextToken])
-      | ListAppInstanceUsers ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/app-instance-users")
-            (List.filter_opt
-               [Some
-                  ("app-instance-arn", (ChimeArn.to_header x.appInstanceArn));
-               Option.map
-                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
-                 x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("next-token", (NextToken.to_header v)))
-                 x.nextToken])
-      | ListAppInstances ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/app-instances")
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
-                  x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("next-token", (NextToken.to_header v)))
-                 x.nextToken])
-      | ListAttendeeTags ->
-          (Format.kasprintf Uri.of_string) "/meetings/%s/attendees/%s/tags"
-            (GuidString.to_header x.ListAttendeeTagsRequest.meetingId)
-            (GuidString.to_header x.ListAttendeeTagsRequest.attendeeId)
-      | ListAttendees ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/meetings/%s/attendees"
-               (GuidString.to_header x.ListAttendeesRequest.meetingId))
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("next-token", (String_.to_header v)))
-                  x.nextToken;
-               Option.map
-                 ~f:(fun v -> ("max-results", (ResultMax.to_header v)))
-                 x.maxResults])
       | ListBots ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/bots"
@@ -1152,130 +359,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.maxResults;
                Option.map ~f:(fun v -> ("next-token", (String_.to_header v)))
                  x.nextToken])
-      | ListChannelBans ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/channels/%s/bans"
-               (ChimeArn.to_header x.ListChannelBansRequest.channelArn))
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
-                  x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("next-token", (NextToken.to_header v)))
-                 x.nextToken])
-      | ListChannelMemberships ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/channels/%s/memberships"
-               (ChimeArn.to_header x.ListChannelMembershipsRequest.channelArn))
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("type", (ChannelMembershipType.to_header v)))
-                  x.type_;
-               Option.map
-                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
-                 x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("next-token", (NextToken.to_header v)))
-                 x.nextToken])
-      | ListChannelMembershipsForAppInstanceUser ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string)
-               "/channels?scope=app-instance-user-memberships")
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v ->
-                        ("app-instance-user-arn", (ChimeArn.to_header v)))
-                  x.appInstanceUserArn;
-               Option.map
-                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
-                 x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("next-token", (NextToken.to_header v)))
-                 x.nextToken])
-      | ListChannelMessages ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/channels/%s/messages"
-               (ChimeArn.to_header x.ListChannelMessagesRequest.channelArn))
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("sort-order", (SortOrder.to_header v)))
-                  x.sortOrder;
-               Option.map
-                 ~f:(fun v -> ("not-before", (Timestamp.to_header v)))
-                 x.notBefore;
-               Option.map
-                 ~f:(fun v -> ("not-after", (Timestamp.to_header v)))
-                 x.notAfter;
-               Option.map
-                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
-                 x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("next-token", (NextToken.to_header v)))
-                 x.nextToken])
-      | ListChannelModerators ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/channels/%s/moderators"
-               (ChimeArn.to_header x.ListChannelModeratorsRequest.channelArn))
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
-                  x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("next-token", (NextToken.to_header v)))
-                 x.nextToken])
-      | ListChannels ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/channels")
-            (List.filter_opt
-               [Some
-                  ("app-instance-arn", (ChimeArn.to_header x.appInstanceArn));
-               Option.map
-                 ~f:(fun v -> ("privacy", (ChannelPrivacy.to_header v)))
-                 x.privacy;
-               Option.map
-                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
-                 x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("next-token", (NextToken.to_header v)))
-                 x.nextToken])
-      | ListChannelsModeratedByAppInstanceUser ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string)
-               "/channels?scope=app-instance-user-moderated-channels")
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v ->
-                        ("app-instance-user-arn", (ChimeArn.to_header v)))
-                  x.appInstanceUserArn;
-               Option.map
-                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
-                 x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("next-token", (NextToken.to_header v)))
-                 x.nextToken])
-      | ListMediaCapturePipelines ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/media-capture-pipelines")
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("next-token", (String_.to_header v)))
-                  x.nextToken;
-               Option.map
-                 ~f:(fun v -> ("max-results", (ResultMax.to_header v)))
-                 x.maxResults])
-      | ListMeetingTags ->
-          (Format.kasprintf Uri.of_string) "/meetings/%s/tags"
-            (GuidString.to_header x.ListMeetingTagsRequest.meetingId)
-      | ListMeetings ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/meetings")
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("next-token", (String_.to_header v)))
-                  x.nextToken;
-               Option.map
-                 ~f:(fun v -> ("max-results", (ResultMax.to_header v)))
-                 x.maxResults])
       | ListPhoneNumberOrders ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/phone-number-orders")
@@ -1310,22 +393,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults;
                Option.map ~f:(fun v -> ("next-token", (String_.to_header v)))
                  x.nextToken])
-      | ListProxySessions ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string)
-               "/voice-connectors/%s/proxy-sessions"
-               (NonEmptyString128.to_header
-                  x.ListProxySessionsRequest.voiceConnectorId))
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("status", (ProxySessionStatus.to_header v)))
-                  x.status;
-               Option.map
-                 ~f:(fun v -> ("next-token", (NextTokenString.to_header v)))
-                 x.nextToken;
-               Option.map
-                 ~f:(fun v -> ("max-results", (ResultMax.to_header v)))
-                 x.maxResults])
       | ListRoomMemberships ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -1351,31 +418,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults;
                Option.map ~f:(fun v -> ("next-token", (String_.to_header v)))
                  x.nextToken])
-      | ListSipMediaApplications ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/sip-media-applications")
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("max-results", (ResultMax.to_header v)))
-                  x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("next-token", (NextTokenString.to_header v)))
-                 x.nextToken])
-      | ListSipRules ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/sip-rules")
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v ->
-                        ("sip-media-application",
-                          (NonEmptyString.to_header v)))
-                  x.sipMediaApplicationId;
-               Option.map
-                 ~f:(fun v -> ("max-results", (ResultMax.to_header v)))
-                 x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("next-token", (NextTokenString.to_header v)))
-                 x.nextToken])
       | ListSupportedPhoneNumberCountries ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/phone-number-countries")
@@ -1383,9 +425,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some
                   ("product-type",
                     (PhoneNumberProductType.to_header x.productType))])
-      | ListTagsForResource ->
-          Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/tags")
-            (List.filter_opt [Some ("arn", (Arn.to_header x.resourceARN))])
       | ListUsers ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/users"
@@ -1403,46 +442,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults;
                Option.map ~f:(fun v -> ("next-token", (String_.to_header v)))
                  x.nextToken])
-      | ListVoiceConnectorGroups ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/voice-connector-groups")
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("next-token", (String_.to_header v)))
-                  x.nextToken;
-               Option.map
-                 ~f:(fun v -> ("max-results", (ResultMax.to_header v)))
-                 x.maxResults])
-      | ListVoiceConnectorTerminationCredentials ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/termination/credentials"
-            (NonEmptyString.to_header
-               x.ListVoiceConnectorTerminationCredentialsRequest.voiceConnectorId)
-      | ListVoiceConnectors ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/voice-connectors")
-            (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("next-token", (String_.to_header v)))
-                  x.nextToken;
-               Option.map
-                 ~f:(fun v -> ("max-results", (ResultMax.to_header v)))
-                 x.maxResults])
       | LogoutUser ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/users/%s?operation=logout"
             (NonEmptyString.to_header x.LogoutUserRequest.accountId)
             (NonEmptyString.to_header x.LogoutUserRequest.userId)
-      | PutAppInstanceRetentionSettings ->
-          (Format.kasprintf Uri.of_string)
-            "/app-instances/%s/retention-settings"
-            (ChimeArn.to_header
-               x.PutAppInstanceRetentionSettingsRequest.appInstanceArn)
-      | PutAppInstanceStreamingConfigurations ->
-          (Format.kasprintf Uri.of_string)
-            "/app-instances/%s/streaming-configurations"
-            (ChimeArn.to_header
-               x.PutAppInstanceStreamingConfigurationsRequest.appInstanceArn)
       | PutEventsConfiguration ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/bots/%s/events-configuration"
@@ -1452,49 +456,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | PutRetentionSettings ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/retention-settings"
             (NonEmptyString.to_header x.PutRetentionSettingsRequest.accountId)
-      | PutSipMediaApplicationLoggingConfiguration ->
-          (Format.kasprintf Uri.of_string)
-            "/sip-media-applications/%s/logging-configuration"
-            (NonEmptyString.to_header
-               x.PutSipMediaApplicationLoggingConfigurationRequest.sipMediaApplicationId)
-      | PutVoiceConnectorEmergencyCallingConfiguration ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/emergency-calling-configuration"
-            (NonEmptyString.to_header
-               x.PutVoiceConnectorEmergencyCallingConfigurationRequest.voiceConnectorId)
-      | PutVoiceConnectorLoggingConfiguration ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/logging-configuration"
-            (NonEmptyString.to_header
-               x.PutVoiceConnectorLoggingConfigurationRequest.voiceConnectorId)
-      | PutVoiceConnectorOrigination ->
-          (Format.kasprintf Uri.of_string) "/voice-connectors/%s/origination"
-            (NonEmptyString.to_header
-               x.PutVoiceConnectorOriginationRequest.voiceConnectorId)
-      | PutVoiceConnectorProxy ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/programmable-numbers/proxy"
-            (NonEmptyString128.to_header
-               x.PutVoiceConnectorProxyRequest.voiceConnectorId)
-      | PutVoiceConnectorStreamingConfiguration ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/streaming-configuration"
-            (NonEmptyString.to_header
-               x.PutVoiceConnectorStreamingConfigurationRequest.voiceConnectorId)
-      | PutVoiceConnectorTermination ->
-          (Format.kasprintf Uri.of_string) "/voice-connectors/%s/termination"
-            (NonEmptyString.to_header
-               x.PutVoiceConnectorTerminationRequest.voiceConnectorId)
-      | PutVoiceConnectorTerminationCredentials ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/termination/credentials?operation=put"
-            (NonEmptyString.to_header
-               x.PutVoiceConnectorTerminationCredentialsRequest.voiceConnectorId)
-      | RedactChannelMessage ->
-          (Format.kasprintf Uri.of_string)
-            "/channels/%s/messages/%s?operation=redact"
-            (ChimeArn.to_header x.RedactChannelMessageRequest.channelArn)
-            (MessageId.to_header x.RedactChannelMessageRequest.messageId)
       | RedactConversationMessage ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/conversations/%s/messages/%s?operation=redact"
@@ -1553,39 +514,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults;
                Option.map ~f:(fun v -> ("next-token", (String_.to_header v)))
                  x.nextToken])
-      | SendChannelMessage ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/messages"
-            (ChimeArn.to_header x.SendChannelMessageRequest.channelArn)
-      | StartMeetingTranscription ->
-          (Format.kasprintf Uri.of_string)
-            "/meetings/%s/transcription?operation=start"
-            (GuidString.to_header
-               x.StartMeetingTranscriptionRequest.meetingId)
-      | StopMeetingTranscription ->
-          (Format.kasprintf Uri.of_string)
-            "/meetings/%s/transcription?operation=stop"
-            (GuidString.to_header x.StopMeetingTranscriptionRequest.meetingId)
-      | TagAttendee ->
-          (Format.kasprintf Uri.of_string)
-            "/meetings/%s/attendees/%s/tags?operation=add"
-            (GuidString.to_header x.TagAttendeeRequest.meetingId)
-            (GuidString.to_header x.TagAttendeeRequest.attendeeId)
-      | TagMeeting ->
-          (Format.kasprintf Uri.of_string) "/meetings/%s/tags?operation=add"
-            (GuidString.to_header x.TagMeetingRequest.meetingId)
-      | TagResource ->
-          (Format.kasprintf Uri.of_string) "/tags?operation=tag-resource"
-      | UntagAttendee ->
-          (Format.kasprintf Uri.of_string)
-            "/meetings/%s/attendees/%s/tags?operation=delete"
-            (GuidString.to_header x.UntagAttendeeRequest.meetingId)
-            (GuidString.to_header x.UntagAttendeeRequest.attendeeId)
-      | UntagMeeting ->
-          (Format.kasprintf Uri.of_string)
-            "/meetings/%s/tags?operation=delete"
-            (GuidString.to_header x.UntagMeetingRequest.meetingId)
-      | UntagResource ->
-          (Format.kasprintf Uri.of_string) "/tags?operation=untag-resource"
       | UpdateAccount ->
           (Format.kasprintf Uri.of_string) "/accounts/%s"
             (NonEmptyString.to_header x.UpdateAccountRequest.accountId)
@@ -1593,40 +521,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/accounts/%s/settings"
             (NonEmptyString.to_header
                x.UpdateAccountSettingsRequest.accountId)
-      | UpdateAppInstance ->
-          (Format.kasprintf Uri.of_string) "/app-instances/%s"
-            (ChimeArn.to_header x.UpdateAppInstanceRequest.appInstanceArn)
-      | UpdateAppInstanceUser ->
-          (Format.kasprintf Uri.of_string) "/app-instance-users/%s"
-            (ChimeArn.to_header
-               x.UpdateAppInstanceUserRequest.appInstanceUserArn)
       | UpdateBot ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/bots/%s"
             (NonEmptyString.to_header x.UpdateBotRequest.accountId)
             (NonEmptyString.to_header x.UpdateBotRequest.botId)
-      | UpdateChannel ->
-          (Format.kasprintf Uri.of_string) "/channels/%s"
-            (ChimeArn.to_header x.UpdateChannelRequest.channelArn)
-      | UpdateChannelMessage ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/messages/%s"
-            (ChimeArn.to_header x.UpdateChannelMessageRequest.channelArn)
-            (MessageId.to_header x.UpdateChannelMessageRequest.messageId)
-      | UpdateChannelReadMarker ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/readMarker"
-            (ChimeArn.to_header x.UpdateChannelReadMarkerRequest.channelArn)
       | UpdateGlobalSettings -> (Format.kasprintf Uri.of_string) "/settings"
       | UpdatePhoneNumber ->
           (Format.kasprintf Uri.of_string) "/phone-numbers/%s"
             (String_.to_header x.UpdatePhoneNumberRequest.phoneNumberId)
       | UpdatePhoneNumberSettings ->
           (Format.kasprintf Uri.of_string) "/settings/phone-number"
-      | UpdateProxySession ->
-          (Format.kasprintf Uri.of_string)
-            "/voice-connectors/%s/proxy-sessions/%s"
-            (NonEmptyString128.to_header
-               x.UpdateProxySessionRequest.voiceConnectorId)
-            (NonEmptyString128.to_header
-               x.UpdateProxySessionRequest.proxySessionId)
       | UpdateRoom ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/rooms/%s"
             (NonEmptyString.to_header x.UpdateRoomRequest.accountId)
@@ -1637,20 +541,6 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (NonEmptyString.to_header x.UpdateRoomMembershipRequest.accountId)
             (NonEmptyString.to_header x.UpdateRoomMembershipRequest.roomId)
             (NonEmptyString.to_header x.UpdateRoomMembershipRequest.memberId)
-      | UpdateSipMediaApplication ->
-          (Format.kasprintf Uri.of_string) "/sip-media-applications/%s"
-            (NonEmptyString.to_header
-               x.UpdateSipMediaApplicationRequest.sipMediaApplicationId)
-      | UpdateSipMediaApplicationCall ->
-          (Format.kasprintf Uri.of_string)
-            "/sip-media-applications/%s/calls/%s"
-            (NonEmptyString.to_header
-               x.UpdateSipMediaApplicationCallRequest.sipMediaApplicationId)
-            (NonEmptyString.to_header
-               x.UpdateSipMediaApplicationCallRequest.transactionId)
-      | UpdateSipRule ->
-          (Format.kasprintf Uri.of_string) "/sip-rules/%s"
-            (NonEmptyString.to_header x.UpdateSipRuleRequest.sipRuleId)
       | UpdateUser ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/users/%s"
             (NonEmptyString.to_header x.UpdateUserRequest.accountId)
@@ -1658,15 +548,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateUserSettings ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/users/%s/settings"
             (String_.to_header x.UpdateUserSettingsRequest.accountId)
-            (String_.to_header x.UpdateUserSettingsRequest.userId)
-      | UpdateVoiceConnector ->
-          (Format.kasprintf Uri.of_string) "/voice-connectors/%s"
-            (NonEmptyString.to_header
-               x.UpdateVoiceConnectorRequest.voiceConnectorId)
-      | UpdateVoiceConnectorGroup ->
-          (Format.kasprintf Uri.of_string) "/voice-connector-groups/%s"
-            (NonEmptyString.to_header
-               x.UpdateVoiceConnectorGroupRequest.voiceConnectorGroupId))
+            (String_.to_header x.UpdateUserSettingsRequest.userId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -1691,56 +573,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | AssociatePhoneNumbersWithVoiceConnector ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("E164PhoneNumbers",
-                           (E164PhoneNumberList.to_value
-                              req.AssociatePhoneNumbersWithVoiceConnectorRequest.e164PhoneNumbers));
-                      Option.map
-                        req.AssociatePhoneNumbersWithVoiceConnectorRequest.forceAssociate
-                        ~f:(fun x ->
-                              ("ForceAssociate",
-                                (NullableBoolean.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | AssociatePhoneNumbersWithVoiceConnectorGroup ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("E164PhoneNumbers",
-                           (E164PhoneNumberList.to_value
-                              req.AssociatePhoneNumbersWithVoiceConnectorGroupRequest.e164PhoneNumbers));
-                      Option.map
-                        req.AssociatePhoneNumbersWithVoiceConnectorGroupRequest.forceAssociate
-                        ~f:(fun x ->
-                              ("ForceAssociate",
-                                (NullableBoolean.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | AssociateSigninDelegateGroupsWithAccount ->
       let (headers, body) =
         let headers =
@@ -1754,56 +586,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("SigninDelegateGroups",
                            (SigninDelegateGroupList.to_value
                               req.AssociateSigninDelegateGroupsWithAccountRequest.signinDelegateGroups))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | BatchCreateAttendee ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("Attendees",
-                           (CreateAttendeeRequestItemList.to_value
-                              req.BatchCreateAttendeeRequest.attendees))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | BatchCreateChannelMembership ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map
-                   req.BatchCreateChannelMembershipRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Option.map
-                         req.BatchCreateChannelMembershipRequest.type_
-                         ~f:(fun x ->
-                               ("Type", (ChannelMembershipType.to_value x)));
-                      Some
-                        ("MemberArns",
-                          (MemberArns.to_value
-                             req.BatchCreateChannelMembershipRequest.memberArns))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1951,112 +733,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateAppInstance ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("Name",
-                           (NonEmptyResourceName.to_value
-                              req.CreateAppInstanceRequest.name));
-                      Option.map req.CreateAppInstanceRequest.metadata
-                        ~f:(fun x -> ("Metadata", (Metadata.to_value x)));
-                      Some
-                        ("ClientRequestToken",
-                          (ClientRequestToken.to_value
-                             req.CreateAppInstanceRequest.clientRequestToken));
-                      Option.map req.CreateAppInstanceRequest.tags
-                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateAppInstanceAdmin ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("AppInstanceAdminArn",
-                           (ChimeArn.to_value
-                              req.CreateAppInstanceAdminRequest.appInstanceAdminArn))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateAppInstanceUser ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("AppInstanceArn",
-                           (ChimeArn.to_value
-                              req.CreateAppInstanceUserRequest.appInstanceArn));
-                      Some
-                        ("AppInstanceUserId",
-                          (UserId.to_value
-                             req.CreateAppInstanceUserRequest.appInstanceUserId));
-                      Some
-                        ("Name",
-                          (UserName.to_value
-                             req.CreateAppInstanceUserRequest.name));
-                      Option.map req.CreateAppInstanceUserRequest.metadata
-                        ~f:(fun x -> ("Metadata", (Metadata.to_value x)));
-                      Some
-                        ("ClientRequestToken",
-                          (ClientRequestToken.to_value
-                             req.CreateAppInstanceUserRequest.clientRequestToken));
-                      Option.map req.CreateAppInstanceUserRequest.tags
-                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateAttendee ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("ExternalUserId",
-                           (ExternalUserIdType.to_value
-                              req.CreateAttendeeRequest.externalUserId));
-                      Option.map req.CreateAttendeeRequest.tags
-                        ~f:(fun x -> ("Tags", (AttendeeTagList.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateBot ->
       let (headers, body) =
         let headers =
@@ -2072,205 +748,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               req.CreateBotRequest.displayName));
                       Option.map req.CreateBotRequest.domain
                         ~f:(fun x -> ("Domain", (NonEmptyString.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateChannel ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.CreateChannelRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("AppInstanceArn",
-                           (ChimeArn.to_value
-                              req.CreateChannelRequest.appInstanceArn));
-                      Some
-                        ("Name",
-                          (NonEmptyResourceName.to_value
-                             req.CreateChannelRequest.name));
-                      Option.map req.CreateChannelRequest.mode
-                        ~f:(fun x -> ("Mode", (ChannelMode.to_value x)));
-                      Option.map req.CreateChannelRequest.privacy
-                        ~f:(fun x -> ("Privacy", (ChannelPrivacy.to_value x)));
-                      Option.map req.CreateChannelRequest.metadata
-                        ~f:(fun x -> ("Metadata", (Metadata.to_value x)));
-                      Some
-                        ("ClientRequestToken",
-                          (ClientRequestToken.to_value
-                             req.CreateChannelRequest.clientRequestToken));
-                      Option.map req.CreateChannelRequest.tags
-                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateChannelBan ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.CreateChannelBanRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("MemberArn",
-                           (ChimeArn.to_value
-                              req.CreateChannelBanRequest.memberArn))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateChannelMembership ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.CreateChannelMembershipRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("MemberArn",
-                           (ChimeArn.to_value
-                              req.CreateChannelMembershipRequest.memberArn));
-                      Some
-                        ("Type",
-                          (ChannelMembershipType.to_value
-                             req.CreateChannelMembershipRequest.type_))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateChannelModerator ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.CreateChannelModeratorRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("ChannelModeratorArn",
-                           (ChimeArn.to_value
-                              req.CreateChannelModeratorRequest.channelModeratorArn))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateMediaCapturePipeline ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("SourceType",
-                           (MediaPipelineSourceType.to_value
-                              req.CreateMediaCapturePipelineRequest.sourceType));
-                      Some
-                        ("SourceArn",
-                          (Arn.to_value
-                             req.CreateMediaCapturePipelineRequest.sourceArn));
-                      Some
-                        ("SinkType",
-                          (MediaPipelineSinkType.to_value
-                             req.CreateMediaCapturePipelineRequest.sinkType));
-                      Some
-                        ("SinkArn",
-                          (Arn.to_value
-                             req.CreateMediaCapturePipelineRequest.sinkArn));
-                      Option.map
-                        req.CreateMediaCapturePipelineRequest.clientRequestToken
-                        ~f:(fun x ->
-                              ("ClientRequestToken",
-                                (ClientRequestToken.to_value x)));
-                      Option.map
-                        req.CreateMediaCapturePipelineRequest.chimeSdkMeetingConfiguration
-                        ~f:(fun x ->
-                              ("ChimeSdkMeetingConfiguration",
-                                (ChimeSdkMeetingConfiguration.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateMeeting ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("ClientRequestToken",
-                           (ClientRequestToken.to_value
-                              req.CreateMeetingRequest.clientRequestToken));
-                      Option.map req.CreateMeetingRequest.externalMeetingId
-                        ~f:(fun x ->
-                              ("ExternalMeetingId",
-                                (ExternalMeetingIdType.to_value x)));
-                      Option.map req.CreateMeetingRequest.meetingHostId
-                        ~f:(fun x ->
-                              ("MeetingHostId",
-                                (ExternalUserIdType.to_value x)));
-                      Option.map req.CreateMeetingRequest.mediaRegion
-                        ~f:(fun x -> ("MediaRegion", (String_.to_value x)));
-                      Option.map req.CreateMeetingRequest.tags
-                        ~f:(fun x -> ("Tags", (MeetingTagList.to_value x)));
-                      Option.map
-                        req.CreateMeetingRequest.notificationsConfiguration
-                        ~f:(fun x ->
-                              ("NotificationsConfiguration",
-                                (MeetingNotificationConfiguration.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2306,52 +783,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateMeetingWithAttendees ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("ClientRequestToken",
-                           (ClientRequestToken.to_value
-                              req.CreateMeetingWithAttendeesRequest.clientRequestToken));
-                      Option.map
-                        req.CreateMeetingWithAttendeesRequest.externalMeetingId
-                        ~f:(fun x ->
-                              ("ExternalMeetingId",
-                                (ExternalMeetingIdType.to_value x)));
-                      Option.map
-                        req.CreateMeetingWithAttendeesRequest.meetingHostId
-                        ~f:(fun x ->
-                              ("MeetingHostId",
-                                (ExternalUserIdType.to_value x)));
-                      Option.map
-                        req.CreateMeetingWithAttendeesRequest.mediaRegion
-                        ~f:(fun x -> ("MediaRegion", (String_.to_value x)));
-                      Option.map req.CreateMeetingWithAttendeesRequest.tags
-                        ~f:(fun x -> ("Tags", (MeetingTagList.to_value x)));
-                      Option.map
-                        req.CreateMeetingWithAttendeesRequest.notificationsConfiguration
-                        ~f:(fun x ->
-                              ("NotificationsConfiguration",
-                                (MeetingNotificationConfiguration.to_value x)));
-                      Option.map
-                        req.CreateMeetingWithAttendeesRequest.attendees
-                        ~f:(fun x ->
-                              ("Attendees",
-                                (CreateMeetingWithAttendeesRequestItemList.to_value
-                                   x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreatePhoneNumberOrder ->
       let (headers, body) =
         let headers =
@@ -2369,47 +800,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("E164PhoneNumbers",
                           (E164PhoneNumberList.to_value
                              req.CreatePhoneNumberOrderRequest.e164PhoneNumbers))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateProxySession ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("ParticipantPhoneNumbers",
-                           (ParticipantPhoneNumberList.to_value
-                              req.CreateProxySessionRequest.participantPhoneNumbers));
-                      Option.map req.CreateProxySessionRequest.name
-                        ~f:(fun x ->
-                              ("Name", (ProxySessionNameString.to_value x)));
-                      Option.map req.CreateProxySessionRequest.expiryMinutes
-                        ~f:(fun x ->
-                              ("ExpiryMinutes", (PositiveInteger.to_value x)));
-                      Some
-                        ("Capabilities",
-                          (CapabilityList.to_value
-                             req.CreateProxySessionRequest.capabilities));
-                      Option.map
-                        req.CreateProxySessionRequest.numberSelectionBehavior
-                        ~f:(fun x ->
-                              ("NumberSelectionBehavior",
-                                (NumberSelectionBehavior.to_value x)));
-                      Option.map req.CreateProxySessionRequest.geoMatchLevel
-                        ~f:(fun x ->
-                              ("GeoMatchLevel", (GeoMatchLevel.to_value x)));
-                      Option.map req.CreateProxySessionRequest.geoMatchParams
-                        ~f:(fun x ->
-                              ("GeoMatchParams", (GeoMatchParams.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2464,97 +854,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateSipMediaApplication ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("AwsRegion",
-                           (String_.to_value
-                              req.CreateSipMediaApplicationRequest.awsRegion));
-                      Some
-                        ("Name",
-                          (SipMediaApplicationName.to_value
-                             req.CreateSipMediaApplicationRequest.name));
-                      Some
-                        ("Endpoints",
-                          (SipMediaApplicationEndpointList.to_value
-                             req.CreateSipMediaApplicationRequest.endpoints))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateSipMediaApplicationCall ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("FromPhoneNumber",
-                           (E164PhoneNumber.to_value
-                              req.CreateSipMediaApplicationCallRequest.fromPhoneNumber));
-                      Some
-                        ("ToPhoneNumber",
-                          (E164PhoneNumber.to_value
-                             req.CreateSipMediaApplicationCallRequest.toPhoneNumber));
-                      Option.map
-                        req.CreateSipMediaApplicationCallRequest.sipHeaders
-                        ~f:(fun x ->
-                              ("SipHeaders", (SipHeadersMap.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateSipRule ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("Name",
-                           (SipRuleName.to_value
-                              req.CreateSipRuleRequest.name));
-                      Some
-                        ("TriggerType",
-                          (SipRuleTriggerType.to_value
-                             req.CreateSipRuleRequest.triggerType));
-                      Some
-                        ("TriggerValue",
-                          (NonEmptyString.to_value
-                             req.CreateSipRuleRequest.triggerValue));
-                      Option.map req.CreateSipRuleRequest.disabled
-                        ~f:(fun x ->
-                              ("Disabled", (NullableBoolean.to_value x)));
-                      Some
-                        ("TargetApplications",
-                          (SipRuleTargetApplicationList.to_value
-                             req.CreateSipRuleRequest.targetApplications))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateUser ->
       let (headers, body) =
         let headers =
@@ -2577,292 +876,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateVoiceConnector ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("Name",
-                           (VoiceConnectorName.to_value
-                              req.CreateVoiceConnectorRequest.name));
-                      Option.map req.CreateVoiceConnectorRequest.awsRegion
-                        ~f:(fun x ->
-                              ("AwsRegion",
-                                (VoiceConnectorAwsRegion.to_value x)));
-                      Some
-                        ("RequireEncryption",
-                          (Boolean.to_value
-                             req.CreateVoiceConnectorRequest.requireEncryption))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateVoiceConnectorGroup ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("Name",
-                           (VoiceConnectorGroupName.to_value
-                              req.CreateVoiceConnectorGroupRequest.name));
-                      Option.map
-                        req.CreateVoiceConnectorGroupRequest.voiceConnectorItems
-                        ~f:(fun x ->
-                              ("VoiceConnectorItems",
-                                (VoiceConnectorItemList.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteAccount -> Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteAppInstance -> Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteAppInstanceAdmin ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteAppInstanceStreamingConfigurations ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteAppInstanceUser -> Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteAttendee -> Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteChannel -> Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteChannelBan -> Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteChannelMembership ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteChannelMessage -> Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteChannelModerator ->
-      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteEventsConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteMediaCapturePipeline ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteMeeting -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeletePhoneNumber -> Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteProxySession -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteRoom -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteRoomMembership -> Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteSipMediaApplication ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteSipRule -> Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteVoiceConnector -> Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteVoiceConnectorEmergencyCallingConfiguration ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteVoiceConnectorGroup ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteVoiceConnectorOrigination ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteVoiceConnectorProxy ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteVoiceConnectorStreamingConfiguration ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteVoiceConnectorTermination ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | DeleteVoiceConnectorTerminationCredentials ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("Usernames",
-                           (SensitiveStringList.to_value
-                              req.DeleteVoiceConnectorTerminationCredentialsRequest.usernames))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | DescribeAppInstance ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | DescribeAppInstanceAdmin ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | DescribeAppInstanceUser ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | DescribeChannel ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.DescribeChannelRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | DescribeChannelBan ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.DescribeChannelBanRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | DescribeChannelMembership ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.DescribeChannelMembershipRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | DescribeChannelMembershipForAppInstanceUser ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map
-                   req.DescribeChannelMembershipForAppInstanceUserRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | DescribeChannelModeratedByAppInstanceUser ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map
-                   req.DescribeChannelModeratedByAppInstanceUserRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | DescribeChannelModerator ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.DescribeChannelModeratorRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DisassociatePhoneNumberFromUser ->
       let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | DisassociatePhoneNumbersFromVoiceConnector ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("E164PhoneNumbers",
-                           (E164PhoneNumberList.to_value
-                              req.DisassociatePhoneNumbersFromVoiceConnectorRequest.e164PhoneNumbers))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | DisassociatePhoneNumbersFromVoiceConnectorGroup ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("E164PhoneNumbers",
-                           (E164PhoneNumberList.to_value
-                              req.DisassociatePhoneNumbersFromVoiceConnectorGroupRequest.e164PhoneNumbers))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DisassociateSigninDelegateGroupsFromAccount ->
       let (headers, body) =
@@ -2890,51 +911,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetAccountSettings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetAppInstanceRetentionSettings ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetAppInstanceStreamingConfigurations ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetAttendee ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetBot ->
       let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetChannelMessage ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.GetChannelMessageRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetEventsConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetGlobalSettings ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetMediaCapturePipeline ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetMeeting ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetMessagingSessionEndpoint ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetPhoneNumber ->
@@ -2946,55 +929,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetPhoneNumberSettings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetProxySession ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetRetentionSettings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetRoom ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetSipMediaApplication ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetSipMediaApplicationLoggingConfiguration ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetSipRule ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetUser ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetUserSettings ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetVoiceConnector ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetVoiceConnectorEmergencyCallingConfiguration ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetVoiceConnectorGroup ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetVoiceConnectorLoggingConfiguration ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetVoiceConnectorOrigination ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetVoiceConnectorProxy ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetVoiceConnectorStreamingConfiguration ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetVoiceConnectorTermination ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | GetVoiceConnectorTerminationHealth ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | InviteUsers ->
@@ -3022,173 +966,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListAccounts ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListAppInstanceAdmins ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListAppInstanceUsers ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListAppInstances ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListAttendeeTags ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListAttendees ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListBots ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListChannelBans ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.ListChannelBansRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListChannelMemberships ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.ListChannelMembershipsRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListChannelMembershipsForAppInstanceUser ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map
-                   req.ListChannelMembershipsForAppInstanceUserRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListChannelMessages ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.ListChannelMessagesRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListChannelModerators ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.ListChannelModeratorsRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListChannels ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.ListChannelsRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListChannelsModeratedByAppInstanceUser ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map
-                   req.ListChannelsModeratedByAppInstanceUserRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListMediaCapturePipelines ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListMeetingTags ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListMeetings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListPhoneNumberOrders ->
@@ -3197,103 +975,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListPhoneNumbers ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListProxySessions ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListRoomMemberships ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListRooms ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListSipMediaApplications ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListSipRules ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListSupportedPhoneNumberCountries ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListUsers ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListVoiceConnectorGroups ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListVoiceConnectorTerminationCredentials ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | ListVoiceConnectors ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | LogoutUser ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | PutAppInstanceRetentionSettings ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | PutAppInstanceStreamingConfigurations ->
-      Awso.Http.Request.make (method_of_endpoint endp)
   | PutEventsConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | PutRetentionSettings -> Awso.Http.Request.make (method_of_endpoint endp)
-  | PutSipMediaApplicationLoggingConfiguration ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | PutVoiceConnectorEmergencyCallingConfiguration ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | PutVoiceConnectorLoggingConfiguration ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | PutVoiceConnectorOrigination ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | PutVoiceConnectorProxy ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | PutVoiceConnectorStreamingConfiguration ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | PutVoiceConnectorTermination ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | PutVoiceConnectorTerminationCredentials ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Option.map
-                         req.PutVoiceConnectorTerminationCredentialsRequest.credentials
-                         ~f:(fun x ->
-                               ("Credentials", (CredentialList.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | RedactChannelMessage ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.RedactChannelMessageRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map (List.filter_opt [])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | RedactConversationMessage ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -3311,193 +1010,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | SearchAvailablePhoneNumbers ->
       let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | SendChannelMessage ->
-      let (headers, body) =
-        let headers =
-          Some
-            ((List.filter_opt
-                [Option.map req.SendChannelMessageRequest.chimeBearer
-                   ~f:(fun x ->
-                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
-               |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("Content",
-                           (NonEmptyContent.to_value
-                              req.SendChannelMessageRequest.content));
-                      Some
-                        ("Type",
-                          (ChannelMessageType.to_value
-                             req.SendChannelMessageRequest.type_));
-                      Some
-                        ("Persistence",
-                          (ChannelMessagePersistenceType.to_value
-                             req.SendChannelMessageRequest.persistence));
-                      Option.map req.SendChannelMessageRequest.metadata
-                        ~f:(fun x -> ("Metadata", (Metadata.to_value x)));
-                      Some
-                        ("ClientRequestToken",
-                          (ClientRequestToken.to_value
-                             req.SendChannelMessageRequest.clientRequestToken))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | StartMeetingTranscription ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("TranscriptionConfiguration",
-                           (TranscriptionConfiguration.to_value
-                              req.StartMeetingTranscriptionRequest.transcriptionConfiguration))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | StopMeetingTranscription ->
-      let (headers, body) = (None, None) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | TagAttendee ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("Tags",
-                           (AttendeeTagList.to_value
-                              req.TagAttendeeRequest.tags))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | TagMeeting ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("Tags",
-                           (MeetingTagList.to_value
-                              req.TagMeetingRequest.tags))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | TagResource ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("ResourceARN",
-                           (Arn.to_value req.TagResourceRequest.resourceARN));
-                      Some
-                        ("Tags",
-                          (TagList.to_value req.TagResourceRequest.tags))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | UntagAttendee ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("TagKeys",
-                           (AttendeeTagKeyList.to_value
-                              req.UntagAttendeeRequest.tagKeys))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | UntagMeeting ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("TagKeys",
-                           (MeetingTagKeyList.to_value
-                              req.UntagMeetingRequest.tagKeys))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | UntagResource ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("ResourceARN",
-                           (Arn.to_value req.UntagResourceRequest.resourceARN));
-                      Some
-                        ("TagKeys",
-                          (TagKeyList.to_value
-                             req.UntagResourceRequest.tagKeys))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateAccount ->
       let (headers, body) =
@@ -3520,8 +1032,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateAccountSettings -> Awso.Http.Request.make (method_of_endpoint endp)
-  | UpdateAppInstance -> Awso.Http.Request.make (method_of_endpoint endp)
-  | UpdateAppInstanceUser -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateBot ->
       let (headers, body) =
         let headers =
@@ -3541,10 +1051,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | UpdateChannel -> Awso.Http.Request.make (method_of_endpoint endp)
-  | UpdateChannelMessage -> Awso.Http.Request.make (method_of_endpoint endp)
-  | UpdateChannelReadMarker ->
-      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateGlobalSettings -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdatePhoneNumber ->
       let (headers, body) =
@@ -3571,29 +1077,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdatePhoneNumberSettings ->
       Awso.Http.Request.make (method_of_endpoint endp)
-  | UpdateProxySession ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("Capabilities",
-                           (CapabilityList.to_value
-                              req.UpdateProxySessionRequest.capabilities));
-                      Option.map req.UpdateProxySessionRequest.expiryMinutes
-                        ~f:(fun x ->
-                              ("ExpiryMinutes", (PositiveInteger.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateRoom ->
       let (headers, body) =
         let headers =
@@ -3631,29 +1114,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | UpdateSipMediaApplication ->
-      Awso.Http.Request.make (method_of_endpoint endp)
-  | UpdateSipMediaApplicationCall ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Some
-                         ("Arguments",
-                           (SMAUpdateCallArgumentsMap.to_value
-                              req.UpdateSipMediaApplicationCallRequest.arguments))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
-      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | UpdateSipRule -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateUser ->
       let (headers, body) =
         let headers =
@@ -3680,9 +1140,6 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateUserSettings -> Awso.Http.Request.make (method_of_endpoint endp)
-  | UpdateVoiceConnector -> Awso.Http.Request.make (method_of_endpoint endp)
-  | UpdateVoiceConnectorGroup ->
-      Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -3743,28 +1200,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssociatePhoneNumberWithUserResponse.error_of_json))
-  | AssociatePhoneNumbersWithVoiceConnector ->
-      if is_success
-      then
-        Ok
-          (AssociatePhoneNumbersWithVoiceConnectorResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                AssociatePhoneNumbersWithVoiceConnectorResponse.error_of_json))
-  | AssociatePhoneNumbersWithVoiceConnectorGroup ->
-      if is_success
-      then
-        Ok
-          (AssociatePhoneNumbersWithVoiceConnectorGroupResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                AssociatePhoneNumbersWithVoiceConnectorGroupResponse.error_of_json))
   | AssociateSigninDelegateGroupsWithAccount ->
       if is_success
       then
@@ -3778,22 +1213,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 AssociateSigninDelegateGroupsWithAccountResponse.error_of_json))
-  | BatchCreateAttendee ->
-      if is_success
-      then Ok (BatchCreateAttendeeResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some BatchCreateAttendeeResponse.error_of_json))
-  | BatchCreateChannelMembership ->
-      if is_success
-      then
-        Ok
-          (BatchCreateChannelMembershipResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some BatchCreateChannelMembershipResponse.error_of_json))
   | BatchCreateRoomMembership ->
       if is_success
       then
@@ -3839,88 +1258,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreateAccountResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateAccountResponse.error_of_json))
-  | CreateAppInstance ->
-      if is_success
-      then Ok (CreateAppInstanceResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some CreateAppInstanceResponse.error_of_json))
-  | CreateAppInstanceAdmin ->
-      if is_success
-      then
-        Ok (CreateAppInstanceAdminResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some CreateAppInstanceAdminResponse.error_of_json))
-  | CreateAppInstanceUser ->
-      if is_success
-      then Ok (CreateAppInstanceUserResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some CreateAppInstanceUserResponse.error_of_json))
-  | CreateAttendee ->
-      if is_success
-      then Ok (CreateAttendeeResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some CreateAttendeeResponse.error_of_json))
   | CreateBot ->
       if is_success
       then Ok (CreateBotResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateBotResponse.error_of_json))
-  | CreateChannel ->
-      if is_success
-      then Ok (CreateChannelResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some CreateChannelResponse.error_of_json))
-  | CreateChannelBan ->
-      if is_success
-      then Ok (CreateChannelBanResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some CreateChannelBanResponse.error_of_json))
-  | CreateChannelMembership ->
-      if is_success
-      then
-        Ok (CreateChannelMembershipResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some CreateChannelMembershipResponse.error_of_json))
-  | CreateChannelModerator ->
-      if is_success
-      then
-        Ok (CreateChannelModeratorResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some CreateChannelModeratorResponse.error_of_json))
-  | CreateMediaCapturePipeline ->
-      if is_success
-      then
-        Ok
-          (CreateMediaCapturePipelineResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some CreateMediaCapturePipelineResponse.error_of_json))
-  | CreateMeeting ->
-      if is_success
-      then Ok (CreateMeetingResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some CreateMeetingResponse.error_of_json))
   | CreateMeetingDialOut ->
       if is_success
       then Ok (CreateMeetingDialOutResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some CreateMeetingDialOutResponse.error_of_json))
-  | CreateMeetingWithAttendees ->
-      if is_success
-      then
-        Ok
-          (CreateMeetingWithAttendeesResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some CreateMeetingWithAttendeesResponse.error_of_json))
   | CreatePhoneNumberOrder ->
       if is_success
       then
@@ -3929,12 +1276,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreatePhoneNumberOrderResponse.error_of_json))
-  | CreateProxySession ->
-      if is_success
-      then Ok (CreateProxySessionResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some CreateProxySessionResponse.error_of_json))
   | CreateRoom ->
       if is_success
       then Ok (CreateRoomResponse.of_json (response_to_json resp))
@@ -3945,48 +1286,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateRoomMembershipResponse.error_of_json))
-  | CreateSipMediaApplication ->
-      if is_success
-      then
-        Ok
-          (CreateSipMediaApplicationResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some CreateSipMediaApplicationResponse.error_of_json))
-  | CreateSipMediaApplicationCall ->
-      if is_success
-      then
-        Ok
-          (CreateSipMediaApplicationCallResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some CreateSipMediaApplicationCallResponse.error_of_json))
-  | CreateSipRule ->
-      if is_success
-      then Ok (CreateSipRuleResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some CreateSipRuleResponse.error_of_json))
   | CreateUser ->
       if is_success
       then Ok (CreateUserResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateUserResponse.error_of_json))
-  | CreateVoiceConnector ->
-      if is_success
-      then Ok (CreateVoiceConnectorResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some CreateVoiceConnectorResponse.error_of_json))
-  | CreateVoiceConnectorGroup ->
-      if is_success
-      then
-        Ok
-          (CreateVoiceConnectorGroupResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some CreateVoiceConnectorGroupResponse.error_of_json))
   | DeleteAccount ->
       if is_success
       then
@@ -3994,131 +1297,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteAccountResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some DeleteAccountResponse.error_of_json))
-  | DeleteAppInstance ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteAppInstanceAdmin ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteAppInstanceStreamingConfigurations ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteAppInstanceUser ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteAttendee ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteChannel ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteChannelBan ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteChannelMembership ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteChannelMessage ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteChannelModerator ->
-      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteEventsConfiguration ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteMediaCapturePipeline ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteMeeting ->
-      if is_success then Ok () else Error (parse_aws_error None)
   | DeletePhoneNumber ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteProxySession ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteRoom -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteRoomMembership ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteSipMediaApplication ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteSipRule ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteVoiceConnector ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteVoiceConnectorEmergencyCallingConfiguration ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteVoiceConnectorGroup ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteVoiceConnectorOrigination ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteVoiceConnectorProxy ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteVoiceConnectorStreamingConfiguration ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteVoiceConnectorTermination ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DeleteVoiceConnectorTerminationCredentials ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | DescribeAppInstance ->
-      if is_success
-      then Ok (DescribeAppInstanceResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some DescribeAppInstanceResponse.error_of_json))
-  | DescribeAppInstanceAdmin ->
-      if is_success
-      then
-        Ok (DescribeAppInstanceAdminResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some DescribeAppInstanceAdminResponse.error_of_json))
-  | DescribeAppInstanceUser ->
-      if is_success
-      then
-        Ok (DescribeAppInstanceUserResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some DescribeAppInstanceUserResponse.error_of_json))
-  | DescribeChannel ->
-      if is_success
-      then Ok (DescribeChannelResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some DescribeChannelResponse.error_of_json))
-  | DescribeChannelBan ->
-      if is_success
-      then Ok (DescribeChannelBanResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some DescribeChannelBanResponse.error_of_json))
-  | DescribeChannelMembership ->
-      if is_success
-      then
-        Ok
-          (DescribeChannelMembershipResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some DescribeChannelMembershipResponse.error_of_json))
-  | DescribeChannelMembershipForAppInstanceUser ->
-      if is_success
-      then
-        Ok
-          (DescribeChannelMembershipForAppInstanceUserResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                DescribeChannelMembershipForAppInstanceUserResponse.error_of_json))
-  | DescribeChannelModeratedByAppInstanceUser ->
-      if is_success
-      then
-        Ok
-          (DescribeChannelModeratedByAppInstanceUserResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                DescribeChannelModeratedByAppInstanceUserResponse.error_of_json))
-  | DescribeChannelModerator ->
-      if is_success
-      then
-        Ok (DescribeChannelModeratorResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some DescribeChannelModeratorResponse.error_of_json))
   | DisassociatePhoneNumberFromUser ->
       if is_success
       then
@@ -4131,28 +1316,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisassociatePhoneNumberFromUserResponse.error_of_json))
-  | DisassociatePhoneNumbersFromVoiceConnector ->
-      if is_success
-      then
-        Ok
-          (DisassociatePhoneNumbersFromVoiceConnectorResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                DisassociatePhoneNumbersFromVoiceConnectorResponse.error_of_json))
-  | DisassociatePhoneNumbersFromVoiceConnectorGroup ->
-      if is_success
-      then
-        Ok
-          (DisassociatePhoneNumbersFromVoiceConnectorGroupResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                DisassociatePhoneNumbersFromVoiceConnectorGroupResponse.error_of_json))
   | DisassociateSigninDelegateGroupsFromAccount ->
       if is_success
       then
@@ -4176,41 +1339,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetAccountSettingsResponse.error_of_json))
-  | GetAppInstanceRetentionSettings ->
-      if is_success
-      then
-        Ok
-          (GetAppInstanceRetentionSettingsResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some GetAppInstanceRetentionSettingsResponse.error_of_json))
-  | GetAppInstanceStreamingConfigurations ->
-      if is_success
-      then
-        Ok
-          (GetAppInstanceStreamingConfigurationsResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                GetAppInstanceStreamingConfigurationsResponse.error_of_json))
-  | GetAttendee ->
-      if is_success
-      then Ok (GetAttendeeResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some GetAttendeeResponse.error_of_json))
   | GetBot ->
       if is_success
       then Ok (GetBotResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetBotResponse.error_of_json))
-  | GetChannelMessage ->
-      if is_success
-      then Ok (GetChannelMessageResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some GetChannelMessageResponse.error_of_json))
   | GetEventsConfiguration ->
       if is_success
       then
@@ -4225,28 +1357,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetGlobalSettingsResponse.error_of_json))
-  | GetMediaCapturePipeline ->
-      if is_success
-      then
-        Ok (GetMediaCapturePipelineResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some GetMediaCapturePipelineResponse.error_of_json))
-  | GetMeeting ->
-      if is_success
-      then Ok (GetMeetingResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some GetMeetingResponse.error_of_json))
-  | GetMessagingSessionEndpoint ->
-      if is_success
-      then
-        Ok
-          (GetMessagingSessionEndpointResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some GetMessagingSessionEndpointResponse.error_of_json))
   | GetPhoneNumber ->
       if is_success
       then Ok (GetPhoneNumberResponse.of_json (response_to_json resp))
@@ -4266,11 +1376,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetPhoneNumberSettingsResponse.error_of_json))
-  | GetProxySession ->
-      if is_success
-      then Ok (GetProxySessionResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some GetProxySessionResponse.error_of_json))
   | GetRetentionSettings ->
       if is_success
       then Ok (GetRetentionSettingsResponse.of_json (response_to_json resp))
@@ -4281,29 +1386,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetRoomResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetRoomResponse.error_of_json))
-  | GetSipMediaApplication ->
-      if is_success
-      then
-        Ok (GetSipMediaApplicationResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some GetSipMediaApplicationResponse.error_of_json))
-  | GetSipMediaApplicationLoggingConfiguration ->
-      if is_success
-      then
-        Ok
-          (GetSipMediaApplicationLoggingConfigurationResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                GetSipMediaApplicationLoggingConfigurationResponse.error_of_json))
-  | GetSipRule ->
-      if is_success
-      then Ok (GetSipRuleResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some GetSipRuleResponse.error_of_json))
   | GetUser ->
       if is_success
       then Ok (GetUserResponse.of_json (response_to_json resp))
@@ -4313,91 +1395,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (GetUserSettingsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetUserSettingsResponse.error_of_json))
-  | GetVoiceConnector ->
-      if is_success
-      then Ok (GetVoiceConnectorResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some GetVoiceConnectorResponse.error_of_json))
-  | GetVoiceConnectorEmergencyCallingConfiguration ->
-      if is_success
-      then
-        Ok
-          (GetVoiceConnectorEmergencyCallingConfigurationResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                GetVoiceConnectorEmergencyCallingConfigurationResponse.error_of_json))
-  | GetVoiceConnectorGroup ->
-      if is_success
-      then
-        Ok (GetVoiceConnectorGroupResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some GetVoiceConnectorGroupResponse.error_of_json))
-  | GetVoiceConnectorLoggingConfiguration ->
-      if is_success
-      then
-        Ok
-          (GetVoiceConnectorLoggingConfigurationResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                GetVoiceConnectorLoggingConfigurationResponse.error_of_json))
-  | GetVoiceConnectorOrigination ->
-      if is_success
-      then
-        Ok
-          (GetVoiceConnectorOriginationResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some GetVoiceConnectorOriginationResponse.error_of_json))
-  | GetVoiceConnectorProxy ->
-      if is_success
-      then
-        Ok (GetVoiceConnectorProxyResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some GetVoiceConnectorProxyResponse.error_of_json))
-  | GetVoiceConnectorStreamingConfiguration ->
-      if is_success
-      then
-        Ok
-          (GetVoiceConnectorStreamingConfigurationResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                GetVoiceConnectorStreamingConfigurationResponse.error_of_json))
-  | GetVoiceConnectorTermination ->
-      if is_success
-      then
-        Ok
-          (GetVoiceConnectorTerminationResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some GetVoiceConnectorTerminationResponse.error_of_json))
-  | GetVoiceConnectorTerminationHealth ->
-      if is_success
-      then
-        Ok
-          (GetVoiceConnectorTerminationHealthResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some GetVoiceConnectorTerminationHealthResponse.error_of_json))
   | InviteUsers ->
       if is_success
       then Ok (InviteUsersResponse.of_json (response_to_json resp))
@@ -4406,105 +1403,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListAccountsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListAccountsResponse.error_of_json))
-  | ListAppInstanceAdmins ->
-      if is_success
-      then Ok (ListAppInstanceAdminsResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some ListAppInstanceAdminsResponse.error_of_json))
-  | ListAppInstanceUsers ->
-      if is_success
-      then Ok (ListAppInstanceUsersResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some ListAppInstanceUsersResponse.error_of_json))
-  | ListAppInstances ->
-      if is_success
-      then Ok (ListAppInstancesResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some ListAppInstancesResponse.error_of_json))
-  | ListAttendeeTags ->
-      if is_success
-      then Ok (ListAttendeeTagsResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some ListAttendeeTagsResponse.error_of_json))
-  | ListAttendees ->
-      if is_success
-      then Ok (ListAttendeesResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some ListAttendeesResponse.error_of_json))
   | ListBots ->
       if is_success
       then Ok (ListBotsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListBotsResponse.error_of_json))
-  | ListChannelBans ->
-      if is_success
-      then Ok (ListChannelBansResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some ListChannelBansResponse.error_of_json))
-  | ListChannelMemberships ->
-      if is_success
-      then
-        Ok (ListChannelMembershipsResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some ListChannelMembershipsResponse.error_of_json))
-  | ListChannelMembershipsForAppInstanceUser ->
-      if is_success
-      then
-        Ok
-          (ListChannelMembershipsForAppInstanceUserResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                ListChannelMembershipsForAppInstanceUserResponse.error_of_json))
-  | ListChannelMessages ->
-      if is_success
-      then Ok (ListChannelMessagesResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some ListChannelMessagesResponse.error_of_json))
-  | ListChannelModerators ->
-      if is_success
-      then Ok (ListChannelModeratorsResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some ListChannelModeratorsResponse.error_of_json))
-  | ListChannels ->
-      if is_success
-      then Ok (ListChannelsResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some ListChannelsResponse.error_of_json))
-  | ListChannelsModeratedByAppInstanceUser ->
-      if is_success
-      then
-        Ok
-          (ListChannelsModeratedByAppInstanceUserResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                ListChannelsModeratedByAppInstanceUserResponse.error_of_json))
-  | ListMediaCapturePipelines ->
-      if is_success
-      then
-        Ok
-          (ListMediaCapturePipelinesResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some ListMediaCapturePipelinesResponse.error_of_json))
-  | ListMeetingTags ->
-      if is_success
-      then Ok (ListMeetingTagsResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some ListMeetingTagsResponse.error_of_json))
-  | ListMeetings ->
-      if is_success
-      then Ok (ListMeetingsResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some ListMeetingsResponse.error_of_json))
   | ListPhoneNumberOrders ->
       if is_success
       then Ok (ListPhoneNumberOrdersResponse.of_json (response_to_json resp))
@@ -4516,12 +1418,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListPhoneNumbersResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListPhoneNumbersResponse.error_of_json))
-  | ListProxySessions ->
-      if is_success
-      then Ok (ListProxySessionsResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some ListProxySessionsResponse.error_of_json))
   | ListRoomMemberships ->
       if is_success
       then Ok (ListRoomMembershipsResponse.of_json (response_to_json resp))
@@ -4532,18 +1428,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListRoomsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListRoomsResponse.error_of_json))
-  | ListSipMediaApplications ->
-      if is_success
-      then
-        Ok (ListSipMediaApplicationsResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some ListSipMediaApplicationsResponse.error_of_json))
-  | ListSipRules ->
-      if is_success
-      then Ok (ListSipRulesResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some ListSipRulesResponse.error_of_json))
   | ListSupportedPhoneNumberCountries ->
       if is_success
       then
@@ -4554,41 +1438,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListSupportedPhoneNumberCountriesResponse.error_of_json))
-  | ListTagsForResource ->
-      if is_success
-      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListUsers ->
       if is_success
       then Ok (ListUsersResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListUsersResponse.error_of_json))
-  | ListVoiceConnectorGroups ->
-      if is_success
-      then
-        Ok (ListVoiceConnectorGroupsResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some ListVoiceConnectorGroupsResponse.error_of_json))
-  | ListVoiceConnectorTerminationCredentials ->
-      if is_success
-      then
-        Ok
-          (ListVoiceConnectorTerminationCredentialsResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                ListVoiceConnectorTerminationCredentialsResponse.error_of_json))
-  | ListVoiceConnectors ->
-      if is_success
-      then Ok (ListVoiceConnectorsResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some ListVoiceConnectorsResponse.error_of_json))
   | LogoutUser ->
       if is_success
       then
@@ -4596,27 +1449,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (LogoutUserResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some LogoutUserResponse.error_of_json))
-  | PutAppInstanceRetentionSettings ->
-      if is_success
-      then
-        Ok
-          (PutAppInstanceRetentionSettingsResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some PutAppInstanceRetentionSettingsResponse.error_of_json))
-  | PutAppInstanceStreamingConfigurations ->
-      if is_success
-      then
-        Ok
-          (PutAppInstanceStreamingConfigurationsResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                PutAppInstanceStreamingConfigurationsResponse.error_of_json))
   | PutEventsConfiguration ->
       if is_success
       then
@@ -4631,86 +1463,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some PutRetentionSettingsResponse.error_of_json))
-  | PutSipMediaApplicationLoggingConfiguration ->
-      if is_success
-      then
-        Ok
-          (PutSipMediaApplicationLoggingConfigurationResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                PutSipMediaApplicationLoggingConfigurationResponse.error_of_json))
-  | PutVoiceConnectorEmergencyCallingConfiguration ->
-      if is_success
-      then
-        Ok
-          (PutVoiceConnectorEmergencyCallingConfigurationResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                PutVoiceConnectorEmergencyCallingConfigurationResponse.error_of_json))
-  | PutVoiceConnectorLoggingConfiguration ->
-      if is_success
-      then
-        Ok
-          (PutVoiceConnectorLoggingConfigurationResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                PutVoiceConnectorLoggingConfigurationResponse.error_of_json))
-  | PutVoiceConnectorOrigination ->
-      if is_success
-      then
-        Ok
-          (PutVoiceConnectorOriginationResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some PutVoiceConnectorOriginationResponse.error_of_json))
-  | PutVoiceConnectorProxy ->
-      if is_success
-      then
-        Ok (PutVoiceConnectorProxyResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some PutVoiceConnectorProxyResponse.error_of_json))
-  | PutVoiceConnectorStreamingConfiguration ->
-      if is_success
-      then
-        Ok
-          (PutVoiceConnectorStreamingConfigurationResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                PutVoiceConnectorStreamingConfigurationResponse.error_of_json))
-  | PutVoiceConnectorTermination ->
-      if is_success
-      then
-        Ok
-          (PutVoiceConnectorTerminationResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some PutVoiceConnectorTerminationResponse.error_of_json))
-  | PutVoiceConnectorTerminationCredentials ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | RedactChannelMessage ->
-      if is_success
-      then Ok (RedactChannelMessageResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some RedactChannelMessageResponse.error_of_json))
   | RedactConversationMessage ->
       if is_success
       then
@@ -4760,43 +1512,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some SearchAvailablePhoneNumbersResponse.error_of_json))
-  | SendChannelMessage ->
-      if is_success
-      then Ok (SendChannelMessageResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some SendChannelMessageResponse.error_of_json))
-  | StartMeetingTranscription ->
-      if is_success
-      then
-        let headers =
-          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-        Ok
-          (StartMeetingTranscriptionResponse.of_header_and_body (headers, ()))
-      else
-        Error
-          (parse_aws_error
-             (Some StartMeetingTranscriptionResponse.error_of_json))
-  | StopMeetingTranscription ->
-      if is_success
-      then
-        let headers =
-          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
-        Ok
-          (StopMeetingTranscriptionResponse.of_header_and_body (headers, ()))
-      else
-        Error
-          (parse_aws_error
-             (Some StopMeetingTranscriptionResponse.error_of_json))
-  | TagAttendee -> if is_success then Ok () else Error (parse_aws_error None)
-  | TagMeeting -> if is_success then Ok () else Error (parse_aws_error None)
-  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
-  | UntagAttendee ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | UntagMeeting ->
-      if is_success then Ok () else Error (parse_aws_error None)
-  | UntagResource ->
-      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateAccount ->
       if is_success
       then Ok (UpdateAccountResponse.of_json (response_to_json resp))
@@ -4810,40 +1525,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateAccountSettingsResponse.error_of_json))
-  | UpdateAppInstance ->
-      if is_success
-      then Ok (UpdateAppInstanceResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some UpdateAppInstanceResponse.error_of_json))
-  | UpdateAppInstanceUser ->
-      if is_success
-      then Ok (UpdateAppInstanceUserResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some UpdateAppInstanceUserResponse.error_of_json))
   | UpdateBot ->
       if is_success
       then Ok (UpdateBotResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdateBotResponse.error_of_json))
-  | UpdateChannel ->
-      if is_success
-      then Ok (UpdateChannelResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some UpdateChannelResponse.error_of_json))
-  | UpdateChannelMessage ->
-      if is_success
-      then Ok (UpdateChannelMessageResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some UpdateChannelMessageResponse.error_of_json))
-  | UpdateChannelReadMarker ->
-      if is_success
-      then
-        Ok (UpdateChannelReadMarkerResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some UpdateChannelReadMarkerResponse.error_of_json))
   | UpdateGlobalSettings ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdatePhoneNumber ->
@@ -4854,12 +1539,6 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some UpdatePhoneNumberResponse.error_of_json))
   | UpdatePhoneNumberSettings ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | UpdateProxySession ->
-      if is_success
-      then Ok (UpdateProxySessionResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some UpdateProxySessionResponse.error_of_json))
   | UpdateRoom ->
       if is_success
       then Ok (UpdateRoomResponse.of_json (response_to_json resp))
@@ -4870,47 +1549,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateRoomMembershipResponse.error_of_json))
-  | UpdateSipMediaApplication ->
-      if is_success
-      then
-        Ok
-          (UpdateSipMediaApplicationResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some UpdateSipMediaApplicationResponse.error_of_json))
-  | UpdateSipMediaApplicationCall ->
-      if is_success
-      then
-        Ok
-          (UpdateSipMediaApplicationCallResponse.of_json
-             (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some UpdateSipMediaApplicationCallResponse.error_of_json))
-  | UpdateSipRule ->
-      if is_success
-      then Ok (UpdateSipRuleResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some UpdateSipRuleResponse.error_of_json))
   | UpdateUser ->
       if is_success
       then Ok (UpdateUserResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdateUserResponse.error_of_json))
   | UpdateUserSettings ->
       if is_success then Ok () else Error (parse_aws_error None)
-  | UpdateVoiceConnector ->
-      if is_success
-      then Ok (UpdateVoiceConnectorResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some UpdateVoiceConnectorResponse.error_of_json))
-  | UpdateVoiceConnectorGroup ->
-      if is_success
-      then
-        Ok
-          (UpdateVoiceConnectorGroupResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some UpdateVoiceConnectorGroupResponse.error_of_json))

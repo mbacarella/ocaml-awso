@@ -17,12 +17,60 @@ val associate_trial_component :
       AssociateTrialComponentRequest.t ->
         (AssociateTrialComponentResponse.t,
           AssociateTrialComponentResponse.error) Result.t Async.Deferred.t
+val attach_cluster_node_volume :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AttachClusterNodeVolumeRequest.t ->
+        (AttachClusterNodeVolumeResponse.t,
+          AttachClusterNodeVolumeResponse.error) Result.t Async.Deferred.t
+val batch_add_cluster_nodes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchAddClusterNodesRequest.t ->
+        (BatchAddClusterNodesResponse.t, BatchAddClusterNodesResponse.error)
+          Result.t Async.Deferred.t
+val batch_delete_cluster_nodes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchDeleteClusterNodesRequest.t ->
+        (BatchDeleteClusterNodesResponse.t,
+          BatchDeleteClusterNodesResponse.error) Result.t Async.Deferred.t
 val batch_describe_model_package :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchDescribeModelPackageInput.t ->
         (BatchDescribeModelPackageOutput.t,
           BatchDescribeModelPackageOutput.error) Result.t Async.Deferred.t
+val batch_reboot_cluster_nodes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchRebootClusterNodesRequest.t ->
+        (BatchRebootClusterNodesResponse.t,
+          BatchRebootClusterNodesResponse.error) Result.t Async.Deferred.t
+val batch_replace_cluster_nodes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchReplaceClusterNodesRequest.t ->
+        (BatchReplaceClusterNodesResponse.t,
+          BatchReplaceClusterNodesResponse.error) Result.t Async.Deferred.t
+val create_a_i_benchmark_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAIBenchmarkJobRequest.t ->
+        (CreateAIBenchmarkJobResponse.t, CreateAIBenchmarkJobResponse.error)
+          Result.t Async.Deferred.t
+val create_a_i_recommendation_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAIRecommendationJobRequest.t ->
+        (CreateAIRecommendationJobResponse.t,
+          CreateAIRecommendationJobResponse.error) Result.t Async.Deferred.t
+val create_a_i_workload_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAIWorkloadConfigRequest.t ->
+        (CreateAIWorkloadConfigResponse.t,
+          CreateAIWorkloadConfigResponse.error) Result.t Async.Deferred.t
 val create_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -59,6 +107,25 @@ val create_auto_m_l_job :
       CreateAutoMLJobRequest.t ->
         (CreateAutoMLJobResponse.t, CreateAutoMLJobResponse.error) Result.t
           Async.Deferred.t
+val create_auto_m_l_job_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAutoMLJobV2Request.t ->
+        (CreateAutoMLJobV2Response.t, CreateAutoMLJobV2Response.error)
+          Result.t Async.Deferred.t
+val create_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateClusterRequest.t ->
+        (CreateClusterResponse.t, CreateClusterResponse.error) Result.t
+          Async.Deferred.t
+val create_cluster_scheduler_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateClusterSchedulerConfigRequest.t ->
+        (CreateClusterSchedulerConfigResponse.t,
+          CreateClusterSchedulerConfigResponse.error) Result.t
+          Async.Deferred.t
 val create_code_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -70,6 +137,12 @@ val create_compilation_job :
     ?cfg:Awso.Cfg.t ->
       CreateCompilationJobRequest.t ->
         (CreateCompilationJobResponse.t, CreateCompilationJobResponse.error)
+          Result.t Async.Deferred.t
+val create_compute_quota :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateComputeQuotaRequest.t ->
+        (CreateComputeQuotaResponse.t, CreateComputeQuotaResponse.error)
           Result.t Async.Deferred.t
 val create_context :
   ?endpoint_url:string ->
@@ -94,6 +167,17 @@ val create_domain :
       CreateDomainRequest.t ->
         (CreateDomainResponse.t, CreateDomainResponse.error) Result.t
           Async.Deferred.t
+val create_edge_deployment_plan :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateEdgeDeploymentPlanRequest.t ->
+        (CreateEdgeDeploymentPlanResponse.t,
+          CreateEdgeDeploymentPlanResponse.error) Result.t Async.Deferred.t
+val create_edge_deployment_stage :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateEdgeDeploymentStageRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
 val create_edge_packaging_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -129,6 +213,25 @@ val create_flow_definition :
       CreateFlowDefinitionRequest.t ->
         (CreateFlowDefinitionResponse.t, CreateFlowDefinitionResponse.error)
           Result.t Async.Deferred.t
+val create_hub :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateHubRequest.t ->
+        (CreateHubResponse.t, CreateHubResponse.error) Result.t
+          Async.Deferred.t
+val create_hub_content_presigned_urls :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateHubContentPresignedUrlsRequest.t ->
+        (CreateHubContentPresignedUrlsResponse.t,
+          CreateHubContentPresignedUrlsResponse.error) Result.t
+          Async.Deferred.t
+val create_hub_content_reference :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateHubContentReferenceRequest.t ->
+        (CreateHubContentReferenceResponse.t,
+          CreateHubContentReferenceResponse.error) Result.t Async.Deferred.t
 val create_human_task_ui :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -154,6 +257,18 @@ val create_image_version :
       CreateImageVersionRequest.t ->
         (CreateImageVersionResponse.t, CreateImageVersionResponse.error)
           Result.t Async.Deferred.t
+val create_inference_component :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateInferenceComponentInput.t ->
+        (CreateInferenceComponentOutput.t,
+          CreateInferenceComponentOutput.error) Result.t Async.Deferred.t
+val create_inference_experiment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateInferenceExperimentRequest.t ->
+        (CreateInferenceExperimentResponse.t,
+          CreateInferenceExperimentResponse.error) Result.t Async.Deferred.t
 val create_inference_recommendations_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -167,6 +282,18 @@ val create_labeling_job :
       CreateLabelingJobRequest.t ->
         (CreateLabelingJobResponse.t, CreateLabelingJobResponse.error)
           Result.t Async.Deferred.t
+val create_mlflow_app :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateMlflowAppRequest.t ->
+        (CreateMlflowAppResponse.t, CreateMlflowAppResponse.error) Result.t
+          Async.Deferred.t
+val create_mlflow_tracking_server :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateMlflowTrackingServerRequest.t ->
+        (CreateMlflowTrackingServerResponse.t,
+          CreateMlflowTrackingServerResponse.error) Result.t Async.Deferred.t
 val create_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -180,6 +307,18 @@ val create_model_bias_job_definition :
         (CreateModelBiasJobDefinitionResponse.t,
           CreateModelBiasJobDefinitionResponse.error) Result.t
           Async.Deferred.t
+val create_model_card :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateModelCardRequest.t ->
+        (CreateModelCardResponse.t, CreateModelCardResponse.error) Result.t
+          Async.Deferred.t
+val create_model_card_export_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateModelCardExportJobRequest.t ->
+        (CreateModelCardExportJobResponse.t,
+          CreateModelCardExportJobResponse.error) Result.t Async.Deferred.t
 val create_model_explainability_job_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -225,6 +364,25 @@ val create_notebook_instance_lifecycle_config :
         (CreateNotebookInstanceLifecycleConfigOutput.t,
           CreateNotebookInstanceLifecycleConfigOutput.error) Result.t
           Async.Deferred.t
+val create_optimization_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateOptimizationJobRequest.t ->
+        (CreateOptimizationJobResponse.t,
+          CreateOptimizationJobResponse.error) Result.t Async.Deferred.t
+val create_partner_app :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreatePartnerAppRequest.t ->
+        (CreatePartnerAppResponse.t, CreatePartnerAppResponse.error) Result.t
+          Async.Deferred.t
+val create_partner_app_presigned_url :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreatePartnerAppPresignedUrlRequest.t ->
+        (CreatePartnerAppPresignedUrlResponse.t,
+          CreatePartnerAppPresignedUrlResponse.error) Result.t
+          Async.Deferred.t
 val create_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -237,6 +395,20 @@ val create_presigned_domain_url :
       CreatePresignedDomainUrlRequest.t ->
         (CreatePresignedDomainUrlResponse.t,
           CreatePresignedDomainUrlResponse.error) Result.t Async.Deferred.t
+val create_presigned_mlflow_app_url :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreatePresignedMlflowAppUrlRequest.t ->
+        (CreatePresignedMlflowAppUrlResponse.t,
+          CreatePresignedMlflowAppUrlResponse.error) Result.t
+          Async.Deferred.t
+val create_presigned_mlflow_tracking_server_url :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreatePresignedMlflowTrackingServerUrlRequest.t ->
+        (CreatePresignedMlflowTrackingServerUrlResponse.t,
+          CreatePresignedMlflowTrackingServerUrlResponse.error) Result.t
+          Async.Deferred.t
 val create_presigned_notebook_instance_url :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -256,6 +428,12 @@ val create_project :
       CreateProjectInput.t ->
         (CreateProjectOutput.t, CreateProjectOutput.error) Result.t
           Async.Deferred.t
+val create_space :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateSpaceRequest.t ->
+        (CreateSpaceResponse.t, CreateSpaceResponse.error) Result.t
+          Async.Deferred.t
 val create_studio_lifecycle_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -268,6 +446,12 @@ val create_training_job :
     ?cfg:Awso.Cfg.t ->
       CreateTrainingJobRequest.t ->
         (CreateTrainingJobResponse.t, CreateTrainingJobResponse.error)
+          Result.t Async.Deferred.t
+val create_training_plan :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateTrainingPlanRequest.t ->
+        (CreateTrainingPlanResponse.t, CreateTrainingPlanResponse.error)
           Result.t Async.Deferred.t
 val create_transform_job :
   ?endpoint_url:string ->
@@ -305,6 +489,24 @@ val create_workteam :
       CreateWorkteamRequest.t ->
         (CreateWorkteamResponse.t, CreateWorkteamResponse.error) Result.t
           Async.Deferred.t
+val delete_a_i_benchmark_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAIBenchmarkJobRequest.t ->
+        (DeleteAIBenchmarkJobResponse.t, DeleteAIBenchmarkJobResponse.error)
+          Result.t Async.Deferred.t
+val delete_a_i_recommendation_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAIRecommendationJobRequest.t ->
+        (DeleteAIRecommendationJobResponse.t,
+          DeleteAIRecommendationJobResponse.error) Result.t Async.Deferred.t
+val delete_a_i_workload_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAIWorkloadConfigRequest.t ->
+        (DeleteAIWorkloadConfigResponse.t,
+          DeleteAIWorkloadConfigResponse.error) Result.t Async.Deferred.t
 val delete_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -335,10 +537,29 @@ val delete_association :
       DeleteAssociationRequest.t ->
         (DeleteAssociationResponse.t, DeleteAssociationResponse.error)
           Result.t Async.Deferred.t
+val delete_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteClusterRequest.t ->
+        (DeleteClusterResponse.t, DeleteClusterResponse.error) Result.t
+          Async.Deferred.t
+val delete_cluster_scheduler_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteClusterSchedulerConfigRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
 val delete_code_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCodeRepositoryInput.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_compilation_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCompilationJobRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_compute_quota :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteComputeQuotaRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_context :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -358,6 +579,16 @@ val delete_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDomainRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_edge_deployment_plan :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteEdgeDeploymentPlanRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
+val delete_edge_deployment_stage :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteEdgeDeploymentStageRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
 val delete_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -382,12 +613,30 @@ val delete_flow_definition :
       DeleteFlowDefinitionRequest.t ->
         (DeleteFlowDefinitionResponse.t, DeleteFlowDefinitionResponse.error)
           Result.t Async.Deferred.t
+val delete_hub :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteHubRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_hub_content :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteHubContentRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_hub_content_reference :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteHubContentReferenceRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
 val delete_human_task_ui :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteHumanTaskUiRequest.t ->
         (DeleteHumanTaskUiResponse.t, DeleteHumanTaskUiResponse.error)
           Result.t Async.Deferred.t
+val delete_hyper_parameter_tuning_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteHyperParameterTuningJobRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
 val delete_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -400,6 +649,29 @@ val delete_image_version :
       DeleteImageVersionRequest.t ->
         (DeleteImageVersionResponse.t, DeleteImageVersionResponse.error)
           Result.t Async.Deferred.t
+val delete_inference_component :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteInferenceComponentInput.t ->
+        (unit, unit) Result.t Async.Deferred.t
+val delete_inference_experiment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteInferenceExperimentRequest.t ->
+        (DeleteInferenceExperimentResponse.t,
+          DeleteInferenceExperimentResponse.error) Result.t Async.Deferred.t
+val delete_mlflow_app :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteMlflowAppRequest.t ->
+        (DeleteMlflowAppResponse.t, DeleteMlflowAppResponse.error) Result.t
+          Async.Deferred.t
+val delete_mlflow_tracking_server :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteMlflowTrackingServerRequest.t ->
+        (DeleteMlflowTrackingServerResponse.t,
+          DeleteMlflowTrackingServerResponse.error) Result.t Async.Deferred.t
 val delete_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -409,6 +681,10 @@ val delete_model_bias_job_definition :
     ?cfg:Awso.Cfg.t ->
       DeleteModelBiasJobDefinitionRequest.t ->
         (unit, unit) Result.t Async.Deferred.t
+val delete_model_card :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteModelCardRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_model_explainability_job_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -447,16 +723,35 @@ val delete_notebook_instance_lifecycle_config :
     ?cfg:Awso.Cfg.t ->
       DeleteNotebookInstanceLifecycleConfigInput.t ->
         (unit, unit) Result.t Async.Deferred.t
+val delete_optimization_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteOptimizationJobRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
+val delete_partner_app :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeletePartnerAppRequest.t ->
+        (DeletePartnerAppResponse.t, DeletePartnerAppResponse.error) Result.t
+          Async.Deferred.t
 val delete_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePipelineRequest.t ->
         (DeletePipelineResponse.t, DeletePipelineResponse.error) Result.t
           Async.Deferred.t
+val delete_processing_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteProcessingJobRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteProjectInput.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_space :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteSpaceRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_studio_lifecycle_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -468,6 +763,10 @@ val delete_tags :
       DeleteTagsInput.t ->
         (DeleteTagsOutput.t, DeleteTagsOutput.error) Result.t
           Async.Deferred.t
+val delete_training_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteTrainingJobRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_trial :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -500,6 +799,25 @@ val deregister_devices :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeregisterDevicesRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val describe_a_i_benchmark_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAIBenchmarkJobRequest.t ->
+        (DescribeAIBenchmarkJobResponse.t,
+          DescribeAIBenchmarkJobResponse.error) Result.t Async.Deferred.t
+val describe_a_i_recommendation_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAIRecommendationJobRequest.t ->
+        (DescribeAIRecommendationJobResponse.t,
+          DescribeAIRecommendationJobResponse.error) Result.t
+          Async.Deferred.t
+val describe_a_i_workload_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAIWorkloadConfigRequest.t ->
+        (DescribeAIWorkloadConfigResponse.t,
+          DescribeAIWorkloadConfigResponse.error) Result.t Async.Deferred.t
 val describe_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -536,6 +854,37 @@ val describe_auto_m_l_job :
       DescribeAutoMLJobRequest.t ->
         (DescribeAutoMLJobResponse.t, DescribeAutoMLJobResponse.error)
           Result.t Async.Deferred.t
+val describe_auto_m_l_job_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAutoMLJobV2Request.t ->
+        (DescribeAutoMLJobV2Response.t, DescribeAutoMLJobV2Response.error)
+          Result.t Async.Deferred.t
+val describe_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeClusterRequest.t ->
+        (DescribeClusterResponse.t, DescribeClusterResponse.error) Result.t
+          Async.Deferred.t
+val describe_cluster_event :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeClusterEventRequest.t ->
+        (DescribeClusterEventResponse.t, DescribeClusterEventResponse.error)
+          Result.t Async.Deferred.t
+val describe_cluster_node :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeClusterNodeRequest.t ->
+        (DescribeClusterNodeResponse.t, DescribeClusterNodeResponse.error)
+          Result.t Async.Deferred.t
+val describe_cluster_scheduler_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeClusterSchedulerConfigRequest.t ->
+        (DescribeClusterSchedulerConfigResponse.t,
+          DescribeClusterSchedulerConfigResponse.error) Result.t
+          Async.Deferred.t
 val describe_code_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -548,6 +897,12 @@ val describe_compilation_job :
       DescribeCompilationJobRequest.t ->
         (DescribeCompilationJobResponse.t,
           DescribeCompilationJobResponse.error) Result.t Async.Deferred.t
+val describe_compute_quota :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeComputeQuotaRequest.t ->
+        (DescribeComputeQuotaResponse.t, DescribeComputeQuotaResponse.error)
+          Result.t Async.Deferred.t
 val describe_context :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -579,6 +934,12 @@ val describe_domain :
       DescribeDomainRequest.t ->
         (DescribeDomainResponse.t, DescribeDomainResponse.error) Result.t
           Async.Deferred.t
+val describe_edge_deployment_plan :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeEdgeDeploymentPlanRequest.t ->
+        (DescribeEdgeDeploymentPlanResponse.t,
+          DescribeEdgeDeploymentPlanResponse.error) Result.t Async.Deferred.t
 val describe_edge_packaging_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -609,12 +970,30 @@ val describe_feature_group :
       DescribeFeatureGroupRequest.t ->
         (DescribeFeatureGroupResponse.t, DescribeFeatureGroupResponse.error)
           Result.t Async.Deferred.t
+val describe_feature_metadata :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeFeatureMetadataRequest.t ->
+        (DescribeFeatureMetadataResponse.t,
+          DescribeFeatureMetadataResponse.error) Result.t Async.Deferred.t
 val describe_flow_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeFlowDefinitionRequest.t ->
         (DescribeFlowDefinitionResponse.t,
           DescribeFlowDefinitionResponse.error) Result.t Async.Deferred.t
+val describe_hub :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeHubRequest.t ->
+        (DescribeHubResponse.t, DescribeHubResponse.error) Result.t
+          Async.Deferred.t
+val describe_hub_content :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeHubContentRequest.t ->
+        (DescribeHubContentResponse.t, DescribeHubContentResponse.error)
+          Result.t Async.Deferred.t
 val describe_human_task_ui :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -640,6 +1019,19 @@ val describe_image_version :
       DescribeImageVersionRequest.t ->
         (DescribeImageVersionResponse.t, DescribeImageVersionResponse.error)
           Result.t Async.Deferred.t
+val describe_inference_component :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeInferenceComponentInput.t ->
+        (DescribeInferenceComponentOutput.t,
+          DescribeInferenceComponentOutput.error) Result.t Async.Deferred.t
+val describe_inference_experiment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeInferenceExperimentRequest.t ->
+        (DescribeInferenceExperimentResponse.t,
+          DescribeInferenceExperimentResponse.error) Result.t
+          Async.Deferred.t
 val describe_inference_recommendations_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -659,6 +1051,19 @@ val describe_lineage_group :
       DescribeLineageGroupRequest.t ->
         (DescribeLineageGroupResponse.t, DescribeLineageGroupResponse.error)
           Result.t Async.Deferred.t
+val describe_mlflow_app :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMlflowAppRequest.t ->
+        (DescribeMlflowAppResponse.t, DescribeMlflowAppResponse.error)
+          Result.t Async.Deferred.t
+val describe_mlflow_tracking_server :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMlflowTrackingServerRequest.t ->
+        (DescribeMlflowTrackingServerResponse.t,
+          DescribeMlflowTrackingServerResponse.error) Result.t
+          Async.Deferred.t
 val describe_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -672,6 +1077,18 @@ val describe_model_bias_job_definition :
         (DescribeModelBiasJobDefinitionResponse.t,
           DescribeModelBiasJobDefinitionResponse.error) Result.t
           Async.Deferred.t
+val describe_model_card :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeModelCardRequest.t ->
+        (DescribeModelCardResponse.t, DescribeModelCardResponse.error)
+          Result.t Async.Deferred.t
+val describe_model_card_export_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeModelCardExportJobRequest.t ->
+        (DescribeModelCardExportJobResponse.t,
+          DescribeModelCardExportJobResponse.error) Result.t Async.Deferred.t
 val describe_model_explainability_job_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -717,6 +1134,18 @@ val describe_notebook_instance_lifecycle_config :
         (DescribeNotebookInstanceLifecycleConfigOutput.t,
           DescribeNotebookInstanceLifecycleConfigOutput.error) Result.t
           Async.Deferred.t
+val describe_optimization_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeOptimizationJobRequest.t ->
+        (DescribeOptimizationJobResponse.t,
+          DescribeOptimizationJobResponse.error) Result.t Async.Deferred.t
+val describe_partner_app :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribePartnerAppRequest.t ->
+        (DescribePartnerAppResponse.t, DescribePartnerAppResponse.error)
+          Result.t Async.Deferred.t
 val describe_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -748,6 +1177,18 @@ val describe_project :
       DescribeProjectInput.t ->
         (DescribeProjectOutput.t, DescribeProjectOutput.error) Result.t
           Async.Deferred.t
+val describe_reserved_capacity :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeReservedCapacityRequest.t ->
+        (DescribeReservedCapacityResponse.t,
+          DescribeReservedCapacityResponse.error) Result.t Async.Deferred.t
+val describe_space :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeSpaceRequest.t ->
+        (DescribeSpaceResponse.t, DescribeSpaceResponse.error) Result.t
+          Async.Deferred.t
 val describe_studio_lifecycle_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -767,6 +1208,19 @@ val describe_training_job :
       DescribeTrainingJobRequest.t ->
         (DescribeTrainingJobResponse.t, DescribeTrainingJobResponse.error)
           Result.t Async.Deferred.t
+val describe_training_plan :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeTrainingPlanRequest.t ->
+        (DescribeTrainingPlanResponse.t, DescribeTrainingPlanResponse.error)
+          Result.t Async.Deferred.t
+val describe_training_plan_extension_history :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeTrainingPlanExtensionHistoryRequest.t ->
+        (DescribeTrainingPlanExtensionHistoryResponse.t,
+          DescribeTrainingPlanExtensionHistoryResponse.error) Result.t
+          Async.Deferred.t
 val describe_transform_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -803,6 +1257,12 @@ val describe_workteam :
       DescribeWorkteamRequest.t ->
         (DescribeWorkteamResponse.t, DescribeWorkteamResponse.error) Result.t
           Async.Deferred.t
+val detach_cluster_node_volume :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DetachClusterNodeVolumeRequest.t ->
+        (DetachClusterNodeVolumeResponse.t,
+          DetachClusterNodeVolumeResponse.error) Result.t Async.Deferred.t
 val disable_sagemaker_servicecatalog_portfolio :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -823,6 +1283,12 @@ val enable_sagemaker_servicecatalog_portfolio :
         (EnableSagemakerServicecatalogPortfolioOutput.t,
           EnableSagemakerServicecatalogPortfolioOutput.error) Result.t
           Async.Deferred.t
+val extend_training_plan :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ExtendTrainingPlanRequest.t ->
+        (ExtendTrainingPlanResponse.t, ExtendTrainingPlanResponse.error)
+          Result.t Async.Deferred.t
 val get_device_fleet_report :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -848,12 +1314,43 @@ val get_sagemaker_servicecatalog_portfolio_status :
         (GetSagemakerServicecatalogPortfolioStatusOutput.t,
           GetSagemakerServicecatalogPortfolioStatusOutput.error) Result.t
           Async.Deferred.t
+val get_scaling_configuration_recommendation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetScalingConfigurationRecommendationRequest.t ->
+        (GetScalingConfigurationRecommendationResponse.t,
+          GetScalingConfigurationRecommendationResponse.error) Result.t
+          Async.Deferred.t
 val get_search_suggestions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetSearchSuggestionsRequest.t ->
         (GetSearchSuggestionsResponse.t, GetSearchSuggestionsResponse.error)
           Result.t Async.Deferred.t
+val import_hub_content :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ImportHubContentRequest.t ->
+        (ImportHubContentResponse.t, ImportHubContentResponse.error) Result.t
+          Async.Deferred.t
+val list_a_i_benchmark_jobs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAIBenchmarkJobsRequest.t ->
+        (ListAIBenchmarkJobsResponse.t, ListAIBenchmarkJobsResponse.error)
+          Result.t Async.Deferred.t
+val list_a_i_recommendation_jobs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAIRecommendationJobsRequest.t ->
+        (ListAIRecommendationJobsResponse.t,
+          ListAIRecommendationJobsResponse.error) Result.t Async.Deferred.t
+val list_a_i_workload_configs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAIWorkloadConfigsRequest.t ->
+        (ListAIWorkloadConfigsResponse.t,
+          ListAIWorkloadConfigsResponse.error) Result.t Async.Deferred.t
 val list_actions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -865,6 +1362,12 @@ val list_algorithms :
     ?cfg:Awso.Cfg.t ->
       ListAlgorithmsInput.t ->
         (ListAlgorithmsOutput.t, ListAlgorithmsOutput.error) Result.t
+          Async.Deferred.t
+val list_aliases :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAliasesRequest.t ->
+        (ListAliasesResponse.t, ListAliasesResponse.error) Result.t
           Async.Deferred.t
 val list_app_image_configs :
   ?endpoint_url:string ->
@@ -902,6 +1405,31 @@ val list_candidates_for_auto_m_l_job :
       ListCandidatesForAutoMLJobRequest.t ->
         (ListCandidatesForAutoMLJobResponse.t,
           ListCandidatesForAutoMLJobResponse.error) Result.t Async.Deferred.t
+val list_cluster_events :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListClusterEventsRequest.t ->
+        (ListClusterEventsResponse.t, ListClusterEventsResponse.error)
+          Result.t Async.Deferred.t
+val list_cluster_nodes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListClusterNodesRequest.t ->
+        (ListClusterNodesResponse.t, ListClusterNodesResponse.error) Result.t
+          Async.Deferred.t
+val list_cluster_scheduler_configs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListClusterSchedulerConfigsRequest.t ->
+        (ListClusterSchedulerConfigsResponse.t,
+          ListClusterSchedulerConfigsResponse.error) Result.t
+          Async.Deferred.t
+val list_clusters :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListClustersRequest.t ->
+        (ListClustersResponse.t, ListClustersResponse.error) Result.t
+          Async.Deferred.t
 val list_code_repositories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -913,6 +1441,12 @@ val list_compilation_jobs :
     ?cfg:Awso.Cfg.t ->
       ListCompilationJobsRequest.t ->
         (ListCompilationJobsResponse.t, ListCompilationJobsResponse.error)
+          Result.t Async.Deferred.t
+val list_compute_quotas :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListComputeQuotasRequest.t ->
+        (ListComputeQuotasResponse.t, ListComputeQuotasResponse.error)
           Result.t Async.Deferred.t
 val list_contexts :
   ?endpoint_url:string ->
@@ -945,6 +1479,12 @@ val list_domains :
       ListDomainsRequest.t ->
         (ListDomainsResponse.t, ListDomainsResponse.error) Result.t
           Async.Deferred.t
+val list_edge_deployment_plans :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListEdgeDeploymentPlansRequest.t ->
+        (ListEdgeDeploymentPlansResponse.t,
+          ListEdgeDeploymentPlansResponse.error) Result.t Async.Deferred.t
 val list_edge_packaging_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -981,6 +1521,24 @@ val list_flow_definitions :
       ListFlowDefinitionsRequest.t ->
         (ListFlowDefinitionsResponse.t, ListFlowDefinitionsResponse.error)
           Result.t Async.Deferred.t
+val list_hub_content_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListHubContentVersionsRequest.t ->
+        (ListHubContentVersionsResponse.t,
+          ListHubContentVersionsResponse.error) Result.t Async.Deferred.t
+val list_hub_contents :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListHubContentsRequest.t ->
+        (ListHubContentsResponse.t, ListHubContentsResponse.error) Result.t
+          Async.Deferred.t
+val list_hubs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListHubsRequest.t ->
+        (ListHubsResponse.t, ListHubsResponse.error) Result.t
+          Async.Deferred.t
 val list_human_task_uis :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1005,6 +1563,25 @@ val list_images :
     ?cfg:Awso.Cfg.t ->
       ListImagesRequest.t ->
         (ListImagesResponse.t, ListImagesResponse.error) Result.t
+          Async.Deferred.t
+val list_inference_components :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListInferenceComponentsInput.t ->
+        (ListInferenceComponentsOutput.t,
+          ListInferenceComponentsOutput.error) Result.t Async.Deferred.t
+val list_inference_experiments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListInferenceExperimentsRequest.t ->
+        (ListInferenceExperimentsResponse.t,
+          ListInferenceExperimentsResponse.error) Result.t Async.Deferred.t
+val list_inference_recommendations_job_steps :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListInferenceRecommendationsJobStepsRequest.t ->
+        (ListInferenceRecommendationsJobStepsResponse.t,
+          ListInferenceRecommendationsJobStepsResponse.error) Result.t
           Async.Deferred.t
 val list_inference_recommendations_jobs :
   ?endpoint_url:string ->
@@ -1032,12 +1609,42 @@ val list_lineage_groups :
       ListLineageGroupsRequest.t ->
         (ListLineageGroupsResponse.t, ListLineageGroupsResponse.error)
           Result.t Async.Deferred.t
+val list_mlflow_apps :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMlflowAppsRequest.t ->
+        (ListMlflowAppsResponse.t, ListMlflowAppsResponse.error) Result.t
+          Async.Deferred.t
+val list_mlflow_tracking_servers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMlflowTrackingServersRequest.t ->
+        (ListMlflowTrackingServersResponse.t,
+          ListMlflowTrackingServersResponse.error) Result.t Async.Deferred.t
 val list_model_bias_job_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListModelBiasJobDefinitionsRequest.t ->
         (ListModelBiasJobDefinitionsResponse.t,
           ListModelBiasJobDefinitionsResponse.error) Result.t
+          Async.Deferred.t
+val list_model_card_export_jobs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListModelCardExportJobsRequest.t ->
+        (ListModelCardExportJobsResponse.t,
+          ListModelCardExportJobsResponse.error) Result.t Async.Deferred.t
+val list_model_card_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListModelCardVersionsRequest.t ->
+        (ListModelCardVersionsResponse.t,
+          ListModelCardVersionsResponse.error) Result.t Async.Deferred.t
+val list_model_cards :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListModelCardsRequest.t ->
+        (ListModelCardsResponse.t, ListModelCardsResponse.error) Result.t
           Async.Deferred.t
 val list_model_explainability_job_definitions :
   ?endpoint_url:string ->
@@ -1077,6 +1684,18 @@ val list_models :
       ListModelsInput.t ->
         (ListModelsOutput.t, ListModelsOutput.error) Result.t
           Async.Deferred.t
+val list_monitoring_alert_history :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMonitoringAlertHistoryRequest.t ->
+        (ListMonitoringAlertHistoryResponse.t,
+          ListMonitoringAlertHistoryResponse.error) Result.t Async.Deferred.t
+val list_monitoring_alerts :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMonitoringAlertsRequest.t ->
+        (ListMonitoringAlertsResponse.t, ListMonitoringAlertsResponse.error)
+          Result.t Async.Deferred.t
 val list_monitoring_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1102,6 +1721,18 @@ val list_notebook_instances :
       ListNotebookInstancesInput.t ->
         (ListNotebookInstancesOutput.t, ListNotebookInstancesOutput.error)
           Result.t Async.Deferred.t
+val list_optimization_jobs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListOptimizationJobsRequest.t ->
+        (ListOptimizationJobsResponse.t, ListOptimizationJobsResponse.error)
+          Result.t Async.Deferred.t
+val list_partner_apps :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPartnerAppsRequest.t ->
+        (ListPartnerAppsResponse.t, ListPartnerAppsResponse.error) Result.t
+          Async.Deferred.t
 val list_pipeline_execution_steps :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1121,6 +1752,12 @@ val list_pipeline_parameters_for_execution :
         (ListPipelineParametersForExecutionResponse.t,
           ListPipelineParametersForExecutionResponse.error) Result.t
           Async.Deferred.t
+val list_pipeline_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPipelineVersionsRequest.t ->
+        (ListPipelineVersionsResponse.t, ListPipelineVersionsResponse.error)
+          Result.t Async.Deferred.t
 val list_pipelines :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1138,6 +1775,24 @@ val list_projects :
     ?cfg:Awso.Cfg.t ->
       ListProjectsInput.t ->
         (ListProjectsOutput.t, ListProjectsOutput.error) Result.t
+          Async.Deferred.t
+val list_resource_catalogs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListResourceCatalogsRequest.t ->
+        (ListResourceCatalogsResponse.t, ListResourceCatalogsResponse.error)
+          Result.t Async.Deferred.t
+val list_spaces :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSpacesRequest.t ->
+        (ListSpacesResponse.t, ListSpacesResponse.error) Result.t
+          Async.Deferred.t
+val list_stage_devices :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListStageDevicesRequest.t ->
+        (ListStageDevicesResponse.t, ListStageDevicesResponse.error) Result.t
           Async.Deferred.t
 val list_studio_lifecycle_configs :
   ?endpoint_url:string ->
@@ -1169,6 +1824,12 @@ val list_training_jobs_for_hyper_parameter_tuning_job :
         (ListTrainingJobsForHyperParameterTuningJobResponse.t,
           ListTrainingJobsForHyperParameterTuningJobResponse.error) Result.t
           Async.Deferred.t
+val list_training_plans :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTrainingPlansRequest.t ->
+        (ListTrainingPlansResponse.t, ListTrainingPlansResponse.error)
+          Result.t Async.Deferred.t
 val list_transform_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1186,6 +1847,13 @@ val list_trials :
     ?cfg:Awso.Cfg.t ->
       ListTrialsRequest.t ->
         (ListTrialsResponse.t, ListTrialsResponse.error) Result.t
+          Async.Deferred.t
+val list_ultra_servers_by_reserved_capacity :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListUltraServersByReservedCapacityRequest.t ->
+        (ListUltraServersByReservedCapacityResponse.t,
+          ListUltraServersByReservedCapacityResponse.error) Result.t
           Async.Deferred.t
 val list_user_profiles :
   ?endpoint_url:string ->
@@ -1238,6 +1906,13 @@ val search :
     ?cfg:Awso.Cfg.t ->
       SearchRequest.t ->
         (SearchResponse.t, SearchResponse.error) Result.t Async.Deferred.t
+val search_training_plan_offerings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SearchTrainingPlanOfferingsRequest.t ->
+        (SearchTrainingPlanOfferingsResponse.t,
+          SearchTrainingPlanOfferingsResponse.error) Result.t
+          Async.Deferred.t
 val send_pipeline_execution_step_failure :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1252,6 +1927,29 @@ val send_pipeline_execution_step_success :
         (SendPipelineExecutionStepSuccessResponse.t,
           SendPipelineExecutionStepSuccessResponse.error) Result.t
           Async.Deferred.t
+val start_cluster_health_check :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartClusterHealthCheckRequest.t ->
+        (StartClusterHealthCheckResponse.t,
+          StartClusterHealthCheckResponse.error) Result.t Async.Deferred.t
+val start_edge_deployment_stage :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartEdgeDeploymentStageRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
+val start_inference_experiment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartInferenceExperimentRequest.t ->
+        (StartInferenceExperimentResponse.t,
+          StartInferenceExperimentResponse.error) Result.t Async.Deferred.t
+val start_mlflow_tracking_server :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartMlflowTrackingServerRequest.t ->
+        (StartMlflowTrackingServerResponse.t,
+          StartMlflowTrackingServerResponse.error) Result.t Async.Deferred.t
 val start_monitoring_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1267,6 +1965,24 @@ val start_pipeline_execution :
       StartPipelineExecutionRequest.t ->
         (StartPipelineExecutionResponse.t,
           StartPipelineExecutionResponse.error) Result.t Async.Deferred.t
+val start_session :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartSessionRequest.t ->
+        (StartSessionResponse.t, StartSessionResponse.error) Result.t
+          Async.Deferred.t
+val stop_a_i_benchmark_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopAIBenchmarkJobRequest.t ->
+        (StopAIBenchmarkJobResponse.t, StopAIBenchmarkJobResponse.error)
+          Result.t Async.Deferred.t
+val stop_a_i_recommendation_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopAIRecommendationJobRequest.t ->
+        (StopAIRecommendationJobResponse.t,
+          StopAIRecommendationJobResponse.error) Result.t Async.Deferred.t
 val stop_auto_m_l_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1275,6 +1991,11 @@ val stop_compilation_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopCompilationJobRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val stop_edge_deployment_stage :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopEdgeDeploymentStageRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
 val stop_edge_packaging_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1284,6 +2005,12 @@ val stop_hyper_parameter_tuning_job :
     ?cfg:Awso.Cfg.t ->
       StopHyperParameterTuningJobRequest.t ->
         (unit, unit) Result.t Async.Deferred.t
+val stop_inference_experiment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopInferenceExperimentRequest.t ->
+        (StopInferenceExperimentResponse.t,
+          StopInferenceExperimentResponse.error) Result.t Async.Deferred.t
 val stop_inference_recommendations_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1293,6 +2020,12 @@ val stop_labeling_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopLabelingJobRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val stop_mlflow_tracking_server :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopMlflowTrackingServerRequest.t ->
+        (StopMlflowTrackingServerResponse.t,
+          StopMlflowTrackingServerResponse.error) Result.t Async.Deferred.t
 val stop_monitoring_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1302,6 +2035,10 @@ val stop_notebook_instance :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StopNotebookInstanceInput.t -> (unit, unit) Result.t Async.Deferred.t
+val stop_optimization_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopOptimizationJobRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val stop_pipeline_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1338,11 +2075,36 @@ val update_artifact :
       UpdateArtifactRequest.t ->
         (UpdateArtifactResponse.t, UpdateArtifactResponse.error) Result.t
           Async.Deferred.t
+val update_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateClusterRequest.t ->
+        (UpdateClusterResponse.t, UpdateClusterResponse.error) Result.t
+          Async.Deferred.t
+val update_cluster_scheduler_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateClusterSchedulerConfigRequest.t ->
+        (UpdateClusterSchedulerConfigResponse.t,
+          UpdateClusterSchedulerConfigResponse.error) Result.t
+          Async.Deferred.t
+val update_cluster_software :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateClusterSoftwareRequest.t ->
+        (UpdateClusterSoftwareResponse.t,
+          UpdateClusterSoftwareResponse.error) Result.t Async.Deferred.t
 val update_code_repository :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateCodeRepositoryInput.t ->
         (UpdateCodeRepositoryOutput.t, UpdateCodeRepositoryOutput.error)
+          Result.t Async.Deferred.t
+val update_compute_quota :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateComputeQuotaRequest.t ->
+        (UpdateComputeQuotaResponse.t, UpdateComputeQuotaResponse.error)
           Result.t Async.Deferred.t
 val update_context :
   ?endpoint_url:string ->
@@ -1383,11 +2145,83 @@ val update_experiment :
       UpdateExperimentRequest.t ->
         (UpdateExperimentResponse.t, UpdateExperimentResponse.error) Result.t
           Async.Deferred.t
+val update_feature_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateFeatureGroupRequest.t ->
+        (UpdateFeatureGroupResponse.t, UpdateFeatureGroupResponse.error)
+          Result.t Async.Deferred.t
+val update_feature_metadata :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateFeatureMetadataRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
+val update_hub :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateHubRequest.t ->
+        (UpdateHubResponse.t, UpdateHubResponse.error) Result.t
+          Async.Deferred.t
+val update_hub_content :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateHubContentRequest.t ->
+        (UpdateHubContentResponse.t, UpdateHubContentResponse.error) Result.t
+          Async.Deferred.t
+val update_hub_content_reference :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateHubContentReferenceRequest.t ->
+        (UpdateHubContentReferenceResponse.t,
+          UpdateHubContentReferenceResponse.error) Result.t Async.Deferred.t
 val update_image :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateImageRequest.t ->
         (UpdateImageResponse.t, UpdateImageResponse.error) Result.t
+          Async.Deferred.t
+val update_image_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateImageVersionRequest.t ->
+        (UpdateImageVersionResponse.t, UpdateImageVersionResponse.error)
+          Result.t Async.Deferred.t
+val update_inference_component :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateInferenceComponentInput.t ->
+        (UpdateInferenceComponentOutput.t,
+          UpdateInferenceComponentOutput.error) Result.t Async.Deferred.t
+val update_inference_component_runtime_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateInferenceComponentRuntimeConfigInput.t ->
+        (UpdateInferenceComponentRuntimeConfigOutput.t,
+          UpdateInferenceComponentRuntimeConfigOutput.error) Result.t
+          Async.Deferred.t
+val update_inference_experiment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateInferenceExperimentRequest.t ->
+        (UpdateInferenceExperimentResponse.t,
+          UpdateInferenceExperimentResponse.error) Result.t Async.Deferred.t
+val update_mlflow_app :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateMlflowAppRequest.t ->
+        (UpdateMlflowAppResponse.t, UpdateMlflowAppResponse.error) Result.t
+          Async.Deferred.t
+val update_mlflow_tracking_server :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateMlflowTrackingServerRequest.t ->
+        (UpdateMlflowTrackingServerResponse.t,
+          UpdateMlflowTrackingServerResponse.error) Result.t Async.Deferred.t
+val update_model_card :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateModelCardRequest.t ->
+        (UpdateModelCardResponse.t, UpdateModelCardResponse.error) Result.t
           Async.Deferred.t
 val update_model_package :
   ?endpoint_url:string ->
@@ -1395,6 +2229,12 @@ val update_model_package :
       UpdateModelPackageInput.t ->
         (UpdateModelPackageOutput.t, UpdateModelPackageOutput.error) Result.t
           Async.Deferred.t
+val update_monitoring_alert :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateMonitoringAlertRequest.t ->
+        (UpdateMonitoringAlertResponse.t,
+          UpdateMonitoringAlertResponse.error) Result.t Async.Deferred.t
 val update_monitoring_schedule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1414,6 +2254,12 @@ val update_notebook_instance_lifecycle_config :
         (UpdateNotebookInstanceLifecycleConfigOutput.t,
           UpdateNotebookInstanceLifecycleConfigOutput.error) Result.t
           Async.Deferred.t
+val update_partner_app :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdatePartnerAppRequest.t ->
+        (UpdatePartnerAppResponse.t, UpdatePartnerAppResponse.error) Result.t
+          Async.Deferred.t
 val update_pipeline :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1426,11 +2272,23 @@ val update_pipeline_execution :
       UpdatePipelineExecutionRequest.t ->
         (UpdatePipelineExecutionResponse.t,
           UpdatePipelineExecutionResponse.error) Result.t Async.Deferred.t
+val update_pipeline_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdatePipelineVersionRequest.t ->
+        (UpdatePipelineVersionResponse.t,
+          UpdatePipelineVersionResponse.error) Result.t Async.Deferred.t
 val update_project :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProjectInput.t ->
         (UpdateProjectOutput.t, UpdateProjectOutput.error) Result.t
+          Async.Deferred.t
+val update_space :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSpaceRequest.t ->
+        (UpdateSpaceResponse.t, UpdateSpaceResponse.error) Result.t
           Async.Deferred.t
 val update_training_job :
   ?endpoint_url:string ->

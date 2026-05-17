@@ -42,9 +42,9 @@ let associate_delegate_to_resource =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and resourceId =
-         flag "resource-id" (required string) ~doc:"STRING ResourceId"
+         flag "resource-id" (required string) ~doc:"STRING EntityIdentifier"
        and entityId =
-         flag "entity-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+         flag "entity-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.associate_delegate_to_resource
@@ -66,9 +66,9 @@ let associate_member_to_group =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and groupId =
-         flag "group-id" (required string) ~doc:"STRING WorkMailIdentifier"
+         flag "group-id" (required string) ~doc:"STRING EntityIdentifier"
        and memberId =
-         flag "member-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+         flag "member-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.associate_member_to_group
@@ -76,6 +76,29 @@ let associate_member_to_group =
               ~groupId ~memberId ())
            (Some Values.AssociateMemberToGroupResponse.to_json)
            (Some Values.AssociateMemberToGroupResponse.error_to_json)])
+let assume_impersonation_role =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and impersonationRoleId =
+         flag "impersonation-role-id" (required string)
+           ~doc:"STRING ImpersonationRoleId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.assume_impersonation_role
+           (Values.AssumeImpersonationRoleRequest.make ~organizationId
+              ~impersonationRoleId ())
+           (Some Values.AssumeImpersonationRoleResponse.to_json)
+           (Some Values.AssumeImpersonationRoleResponse.error_to_json)])
 let cancel_mailbox_export_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -123,6 +146,43 @@ let create_alias =
            (Values.CreateAliasRequest.make ~organizationId ~entityId ~alias
               ()) (Some Values.CreateAliasResponse.to_json)
            (Some Values.CreateAliasResponse.error_to_json)])
+let create_availability_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING IdempotencyClientToken"
+       and ewsProvider =
+         flag "ews-provider" (optional json_arg)
+           ~doc:"JSON EwsAvailabilityProvider"
+       and lambdaProvider =
+         flag "lambda-provider" (optional json_arg)
+           ~doc:"JSON LambdaAvailabilityProvider"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_availability_configuration
+           (Values.CreateAvailabilityConfigurationRequest.make ?clientToken
+              ?ewsProvider:(Option.map
+                              ~f:Values.EwsAvailabilityProvider.of_json
+                              ewsProvider)
+              ?lambdaProvider:(Option.map
+                                 ~f:Values.LambdaAvailabilityProvider.of_json
+                                 lambdaProvider) ~organizationId ~domainName
+              ())
+           (Some Values.CreateAvailabilityConfigurationResponse.to_json)
+           (Some Values.CreateAvailabilityConfigurationResponse.error_to_json)])
 let create_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -133,6 +193,9 @@ let create_group =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and hiddenFromGlobalAddressList =
+         flag "hidden-from-global-address-list" (optional bool)
+           ~doc:"BOOL Boolean"
        and organizationId =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
@@ -140,9 +203,69 @@ let create_group =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_group
-           (Values.CreateGroupRequest.make ~organizationId ~name ())
+           (Values.CreateGroupRequest.make ?hiddenFromGlobalAddressList
+              ~organizationId ~name ())
            (Some Values.CreateGroupResponse.to_json)
            (Some Values.CreateGroupResponse.error_to_json)])
+let create_identity_center_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING IdempotencyClientToken"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING IdentityCenterApplicationName"
+       and instanceArn =
+         flag "instance-arn" (required string) ~doc:"STRING InstanceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_identity_center_application
+           (Values.CreateIdentityCenterApplicationRequest.make ?clientToken
+              ~name ~instanceArn ())
+           (Some Values.CreateIdentityCenterApplicationResponse.to_json)
+           (Some Values.CreateIdentityCenterApplicationResponse.error_to_json)])
+let create_impersonation_role =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING IdempotencyClientToken"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ImpersonationRoleDescription"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and name =
+         flag "name" (required string) ~doc:"STRING ImpersonationRoleName"
+       and type_ =
+         flag "type-" (required json_arg) ~doc:"JSON ImpersonationRoleType"
+       and rules =
+         flag "rules" (required json_arg) ~doc:"JSON ImpersonationRuleList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_impersonation_role
+           (Values.CreateImpersonationRoleRequest.make ?clientToken
+              ?description ~organizationId ~name
+              ~type_:(Values.ImpersonationRoleType.of_json type_)
+              ~rules:(Values.ImpersonationRuleList.of_json rules) ())
+           (Some Values.CreateImpersonationRoleResponse.to_json)
+           (Some Values.CreateImpersonationRoleResponse.error_to_json)])
 let create_mobile_device_access_rule =
   Command.async ~summary:""
     ([%map_open.Command
@@ -259,6 +382,12 @@ let create_resource =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ResourceDescription"
+       and hiddenFromGlobalAddressList =
+         flag "hidden-from-global-address-list" (optional bool)
+           ~doc:"BOOL Boolean"
        and organizationId =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
@@ -267,7 +396,8 @@ let create_resource =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_resource
-           (Values.CreateResourceRequest.make ~organizationId ~name
+           (Values.CreateResourceRequest.make ?description
+              ?hiddenFromGlobalAddressList ~organizationId ~name
               ~type_:(Values.ResourceType.of_json type_) ())
            (Some Values.CreateResourceResponse.to_json)
            (Some Values.CreateResourceResponse.error_to_json)])
@@ -281,19 +411,33 @@ let create_user =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and password =
+         flag "password" (optional string) ~doc:"STRING Password"
+       and role = flag "role" (optional json_arg) ~doc:"JSON UserRole"
+       and firstName =
+         flag "first-name" (optional string) ~doc:"STRING UserAttribute"
+       and lastName =
+         flag "last-name" (optional string) ~doc:"STRING UserAttribute"
+       and hiddenFromGlobalAddressList =
+         flag "hidden-from-global-address-list" (optional bool)
+           ~doc:"BOOL Boolean"
+       and identityProviderUserId =
+         flag "identity-provider-user-id" (optional string)
+           ~doc:"STRING IdentityProviderUserId"
        and organizationId =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and name = flag "name" (required string) ~doc:"STRING UserName"
        and displayName =
-         flag "display-name" (required string) ~doc:"STRING String"
-       and password =
-         flag "password" (required string) ~doc:"STRING Password" in
+         flag "display-name" (required string) ~doc:"STRING UserAttribute" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_user
-           (Values.CreateUserRequest.make ~organizationId ~name ~displayName
-              ~password ()) (Some Values.CreateUserResponse.to_json)
+           (Values.CreateUserRequest.make ?password
+              ?role:(Option.map ~f:Values.UserRole.of_json role) ?firstName
+              ?lastName ?hiddenFromGlobalAddressList ?identityProviderUserId
+              ~organizationId ~name ~displayName ())
+           (Some Values.CreateUserResponse.to_json)
            (Some Values.CreateUserResponse.error_to_json)])
 let delete_access_control_rule =
   Command.async ~summary:""
@@ -338,6 +482,28 @@ let delete_alias =
            (Values.DeleteAliasRequest.make ~organizationId ~entityId ~alias
               ()) (Some Values.DeleteAliasResponse.to_json)
            (Some Values.DeleteAliasResponse.error_to_json)])
+let delete_availability_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_availability_configuration
+           (Values.DeleteAvailabilityConfigurationRequest.make
+              ~organizationId ~domainName ())
+           (Some Values.DeleteAvailabilityConfigurationResponse.to_json)
+           (Some Values.DeleteAvailabilityConfigurationResponse.error_to_json)])
 let delete_email_monitoring_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -373,13 +539,77 @@ let delete_group =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and groupId =
-         flag "group-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+         flag "group-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_group
            (Values.DeleteGroupRequest.make ~organizationId ~groupId ())
            (Some Values.DeleteGroupResponse.to_json)
            (Some Values.DeleteGroupResponse.error_to_json)])
+let delete_identity_center_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationArn =
+         flag "application-arn" (required string)
+           ~doc:"STRING ApplicationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_identity_center_application
+           (Values.DeleteIdentityCenterApplicationRequest.make
+              ~applicationArn ())
+           (Some Values.DeleteIdentityCenterApplicationResponse.to_json)
+           (Some Values.DeleteIdentityCenterApplicationResponse.error_to_json)])
+let delete_identity_provider_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_identity_provider_configuration
+           (Values.DeleteIdentityProviderConfigurationRequest.make
+              ~organizationId ())
+           (Some Values.DeleteIdentityProviderConfigurationResponse.to_json)
+           (Some
+              Values.DeleteIdentityProviderConfigurationResponse.error_to_json)])
+let delete_impersonation_role =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and impersonationRoleId =
+         flag "impersonation-role-id" (required string)
+           ~doc:"STRING ImpersonationRoleId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_impersonation_role
+           (Values.DeleteImpersonationRoleRequest.make ~organizationId
+              ~impersonationRoleId ())
+           (Some Values.DeleteImpersonationRoleResponse.to_json)
+           (Some Values.DeleteImpersonationRoleResponse.error_to_json)])
 let delete_mailbox_permissions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -394,9 +624,9 @@ let delete_mailbox_permissions =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and entityId =
-         flag "entity-id" (required string) ~doc:"STRING WorkMailIdentifier"
+         flag "entity-id" (required string) ~doc:"STRING EntityIdentifier"
        and granteeId =
-         flag "grantee-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+         flag "grantee-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_mailbox_permissions
@@ -465,6 +695,11 @@ let delete_organization =
        and clientToken =
          flag "client-token" (optional string)
            ~doc:"STRING IdempotencyClientToken"
+       and forceDelete =
+         flag "force-delete" (optional bool) ~doc:"BOOL Boolean"
+       and deleteIdentityCenterApplication =
+         flag "delete-identity-center-application" (optional bool)
+           ~doc:"BOOL Boolean"
        and organizationId =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
@@ -473,10 +708,34 @@ let delete_organization =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_organization
-           (Values.DeleteOrganizationRequest.make ?clientToken
-              ~organizationId ~deleteDirectory ())
+           (Values.DeleteOrganizationRequest.make ?clientToken ?forceDelete
+              ?deleteIdentityCenterApplication ~organizationId
+              ~deleteDirectory ())
            (Some Values.DeleteOrganizationResponse.to_json)
            (Some Values.DeleteOrganizationResponse.error_to_json)])
+let delete_personal_access_token =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and personalAccessTokenId =
+         flag "personal-access-token-id" (required string)
+           ~doc:"STRING PersonalAccessTokenId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_personal_access_token
+           (Values.DeletePersonalAccessTokenRequest.make ~organizationId
+              ~personalAccessTokenId ())
+           (Some Values.DeletePersonalAccessTokenResponse.to_json)
+           (Some Values.DeletePersonalAccessTokenResponse.error_to_json)])
 let delete_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -491,7 +750,7 @@ let delete_resource =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and resourceId =
-         flag "resource-id" (required string) ~doc:"STRING ResourceId" in
+         flag "resource-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_resource
@@ -532,7 +791,7 @@ let delete_user =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and userId =
-         flag "user-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+         flag "user-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_user
@@ -553,7 +812,7 @@ let deregister_from_work_mail =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and entityId =
-         flag "entity-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+         flag "entity-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.deregister_from_work_mail
@@ -605,6 +864,26 @@ let describe_email_monitoring_configuration =
            (Some Values.DescribeEmailMonitoringConfigurationResponse.to_json)
            (Some
               Values.DescribeEmailMonitoringConfigurationResponse.error_to_json)])
+let describe_entity =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and email = flag "email" (required string) ~doc:"STRING EmailAddress" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_entity
+           (Values.DescribeEntityRequest.make ~organizationId ~email ())
+           (Some Values.DescribeEntityResponse.to_json)
+           (Some Values.DescribeEntityResponse.error_to_json)])
 let describe_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -619,13 +898,34 @@ let describe_group =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and groupId =
-         flag "group-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+         flag "group-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_group
            (Values.DescribeGroupRequest.make ~organizationId ~groupId ())
            (Some Values.DescribeGroupResponse.to_json)
            (Some Values.DescribeGroupResponse.error_to_json)])
+let describe_identity_provider_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_identity_provider_configuration
+           (Values.DescribeIdentityProviderConfigurationRequest.make
+              ~organizationId ())
+           (Some Values.DescribeIdentityProviderConfigurationResponse.to_json)
+           (Some
+              Values.DescribeIdentityProviderConfigurationResponse.error_to_json)])
 let describe_inbound_dmarc_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -700,7 +1000,7 @@ let describe_resource =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and resourceId =
-         flag "resource-id" (required string) ~doc:"STRING ResourceId" in
+         flag "resource-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_resource
@@ -721,7 +1021,7 @@ let describe_user =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and userId =
-         flag "user-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+         flag "user-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_user
@@ -742,9 +1042,9 @@ let disassociate_delegate_from_resource =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and resourceId =
-         flag "resource-id" (required string) ~doc:"STRING ResourceId"
+         flag "resource-id" (required string) ~doc:"STRING EntityIdentifier"
        and entityId =
-         flag "entity-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+         flag "entity-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.disassociate_delegate_from_resource
@@ -767,9 +1067,9 @@ let disassociate_member_from_group =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and groupId =
-         flag "group-id" (required string) ~doc:"STRING WorkMailIdentifier"
+         flag "group-id" (required string) ~doc:"STRING EntityIdentifier"
        and memberId =
-         flag "member-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+         flag "member-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.disassociate_member_from_group
@@ -787,6 +1087,11 @@ let get_access_control_effect =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and userId =
+         flag "user-id" (optional string) ~doc:"STRING WorkMailIdentifier"
+       and impersonationRoleId =
+         flag "impersonation-role-id" (optional string)
+           ~doc:"STRING ImpersonationRoleId"
        and organizationId =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
@@ -794,14 +1099,12 @@ let get_access_control_effect =
          flag "ip-address" (required string) ~doc:"STRING IpAddress"
        and action =
          flag "action" (required string)
-           ~doc:"STRING AccessControlRuleAction"
-       and userId =
-         flag "user-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+           ~doc:"STRING AccessControlRuleAction" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_access_control_effect
-           (Values.GetAccessControlEffectRequest.make ~organizationId
-              ~ipAddress ~action ~userId ())
+           (Values.GetAccessControlEffectRequest.make ?userId
+              ?impersonationRoleId ~organizationId ~ipAddress ~action ())
            (Some Values.GetAccessControlEffectResponse.to_json)
            (Some Values.GetAccessControlEffectResponse.error_to_json)])
 let get_default_retention_policy =
@@ -823,6 +1126,54 @@ let get_default_retention_policy =
            (Values.GetDefaultRetentionPolicyRequest.make ~organizationId ())
            (Some Values.GetDefaultRetentionPolicyResponse.to_json)
            (Some Values.GetDefaultRetentionPolicyResponse.error_to_json)])
+let get_impersonation_role =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and impersonationRoleId =
+         flag "impersonation-role-id" (required string)
+           ~doc:"STRING ImpersonationRoleId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_impersonation_role
+           (Values.GetImpersonationRoleRequest.make ~organizationId
+              ~impersonationRoleId ())
+           (Some Values.GetImpersonationRoleResponse.to_json)
+           (Some Values.GetImpersonationRoleResponse.error_to_json)])
+let get_impersonation_role_effect =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and impersonationRoleId =
+         flag "impersonation-role-id" (required string)
+           ~doc:"STRING ImpersonationRoleId"
+       and targetUser =
+         flag "target-user" (required string) ~doc:"STRING EntityIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_impersonation_role_effect
+           (Values.GetImpersonationRoleEffectRequest.make ~organizationId
+              ~impersonationRoleId ~targetUser ())
+           (Some Values.GetImpersonationRoleEffectResponse.to_json)
+           (Some Values.GetImpersonationRoleEffectResponse.error_to_json)])
 let get_mail_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -859,7 +1210,7 @@ let get_mailbox_details =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and userId =
-         flag "user-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+         flag "user-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_mailbox_details
@@ -921,6 +1272,29 @@ let get_mobile_device_access_override =
               ~userId ~deviceId ())
            (Some Values.GetMobileDeviceAccessOverrideResponse.to_json)
            (Some Values.GetMobileDeviceAccessOverrideResponse.error_to_json)])
+let get_personal_access_token_metadata =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and personalAccessTokenId =
+         flag "personal-access-token-id" (required string)
+           ~doc:"STRING PersonalAccessTokenId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_personal_access_token_metadata
+           (Values.GetPersonalAccessTokenMetadataRequest.make ~organizationId
+              ~personalAccessTokenId ())
+           (Some Values.GetPersonalAccessTokenMetadataResponse.to_json)
+           (Some Values.GetPersonalAccessTokenMetadataResponse.error_to_json)])
 let list_access_control_rules =
   Command.async ~summary:""
     ([%map_open.Command
@@ -966,6 +1340,30 @@ let list_aliases =
               ~organizationId ~entityId ())
            (Some Values.ListAliasesResponse.to_json)
            (Some Values.ListAliasesResponse.error_to_json)])
+let list_availability_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_availability_configurations
+           (Values.ListAvailabilityConfigurationsRequest.make ?maxResults
+              ?nextToken ~organizationId ())
+           (Some Values.ListAvailabilityConfigurationsResponse.to_json)
+           (Some Values.ListAvailabilityConfigurationsResponse.error_to_json)])
 let list_group_members =
   Command.async ~summary:""
     ([%map_open.Command
@@ -984,7 +1382,7 @@ let list_group_members =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and groupId =
-         flag "group-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+         flag "group-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_group_members
@@ -1006,6 +1404,8 @@ let list_groups =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON ListGroupsFilters"
        and organizationId =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId" in
@@ -1013,8 +1413,65 @@ let list_groups =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_groups
            (Values.ListGroupsRequest.make ?nextToken ?maxResults
-              ~organizationId ()) (Some Values.ListGroupsResponse.to_json)
+              ?filters:(Option.map ~f:Values.ListGroupsFilters.of_json
+                          filters) ~organizationId ())
+           (Some Values.ListGroupsResponse.to_json)
            (Some Values.ListGroupsResponse.error_to_json)])
+let list_groups_for_entity =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListGroupsForEntityFilters"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and entityId =
+         flag "entity-id" (required string) ~doc:"STRING EntityIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_groups_for_entity
+           (Values.ListGroupsForEntityRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListGroupsForEntityFilters.of_json
+                          filters) ?nextToken ?maxResults ~organizationId
+              ~entityId ()) (Some Values.ListGroupsForEntityResponse.to_json)
+           (Some Values.ListGroupsForEntityResponse.error_to_json)])
+let list_impersonation_roles =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_impersonation_roles
+           (Values.ListImpersonationRolesRequest.make ?nextToken ?maxResults
+              ~organizationId ())
+           (Some Values.ListImpersonationRolesResponse.to_json)
+           (Some Values.ListImpersonationRolesResponse.error_to_json)])
 let list_mail_domains =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1081,7 +1538,7 @@ let list_mailbox_permissions =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and entityId =
-         flag "entity-id" (required string) ~doc:"STRING WorkMailIdentifier" in
+         flag "entity-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_mailbox_permissions
@@ -1156,6 +1613,32 @@ let list_organizations =
            (Values.ListOrganizationsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListOrganizationsResponse.to_json)
            (Some Values.ListOrganizationsResponse.error_to_json)])
+let list_personal_access_tokens =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userId =
+         flag "user-id" (optional string) ~doc:"STRING EntityIdentifier"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_personal_access_tokens
+           (Values.ListPersonalAccessTokensRequest.make ?userId ?nextToken
+              ?maxResults ~organizationId ())
+           (Some Values.ListPersonalAccessTokensResponse.to_json)
+           (Some Values.ListPersonalAccessTokensResponse.error_to_json)])
 let list_resource_delegates =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1174,8 +1657,7 @@ let list_resource_delegates =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and resourceId =
-         flag "resource-id" (required string)
-           ~doc:"STRING WorkMailIdentifier" in
+         flag "resource-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_resource_delegates
@@ -1197,6 +1679,8 @@ let list_resources =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON ListResourcesFilters"
        and organizationId =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId" in
@@ -1204,7 +1688,9 @@ let list_resources =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_resources
            (Values.ListResourcesRequest.make ?nextToken ?maxResults
-              ~organizationId ()) (Some Values.ListResourcesResponse.to_json)
+              ?filters:(Option.map ~f:Values.ListResourcesFilters.of_json
+                          filters) ~organizationId ())
+           (Some Values.ListResourcesResponse.to_json)
            (Some Values.ListResourcesResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
@@ -1239,6 +1725,8 @@ let list_users =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON ListUsersFilters"
        and organizationId =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId" in
@@ -1246,6 +1734,7 @@ let list_users =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_users
            (Values.ListUsersRequest.make ?nextToken ?maxResults
+              ?filters:(Option.map ~f:Values.ListUsersFilters.of_json filters)
               ~organizationId ()) (Some Values.ListUsersResponse.to_json)
            (Some Values.ListUsersResponse.error_to_json)])
 let put_access_control_rule =
@@ -1270,6 +1759,12 @@ let put_access_control_rule =
          flag "user-ids" (optional json_arg) ~doc:"JSON UserIdList"
        and notUserIds =
          flag "not-user-ids" (optional json_arg) ~doc:"JSON UserIdList"
+       and impersonationRoleIds =
+         flag "impersonation-role-ids" (optional json_arg)
+           ~doc:"JSON ImpersonationRoleIdList"
+       and notImpersonationRoleIds =
+         flag "not-impersonation-role-ids" (optional json_arg)
+           ~doc:"JSON ImpersonationRoleIdList"
        and name =
          flag "name" (required string) ~doc:"STRING AccessControlRuleName"
        and effect_ =
@@ -1293,7 +1788,13 @@ let put_access_control_rule =
                              notActions)
               ?userIds:(Option.map ~f:Values.UserIdList.of_json userIds)
               ?notUserIds:(Option.map ~f:Values.UserIdList.of_json notUserIds)
-              ~name ~effect_:(Values.AccessControlRuleEffect.of_json effect_)
+              ?impersonationRoleIds:(Option.map
+                                       ~f:Values.ImpersonationRoleIdList.of_json
+                                       impersonationRoleIds)
+              ?notImpersonationRoleIds:(Option.map
+                                          ~f:Values.ImpersonationRoleIdList.of_json
+                                          notImpersonationRoleIds) ~name
+              ~effect_:(Values.AccessControlRuleEffect.of_json effect_)
               ~description ~organizationId ())
            (Some Values.PutAccessControlRuleResponse.to_json)
            (Some Values.PutAccessControlRuleResponse.error_to_json)])
@@ -1307,19 +1808,56 @@ let put_email_monitoring_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and roleArn = flag "role-arn" (optional string) ~doc:"STRING RoleArn"
        and organizationId =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
-       and roleArn = flag "role-arn" (required string) ~doc:"STRING RoleArn"
        and logGroupArn =
          flag "log-group-arn" (required string) ~doc:"STRING LogGroupArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_email_monitoring_configuration
-           (Values.PutEmailMonitoringConfigurationRequest.make
-              ~organizationId ~roleArn ~logGroupArn ())
+           (Values.PutEmailMonitoringConfigurationRequest.make ?roleArn
+              ~organizationId ~logGroupArn ())
            (Some Values.PutEmailMonitoringConfigurationResponse.to_json)
            (Some Values.PutEmailMonitoringConfigurationResponse.error_to_json)])
+let put_identity_provider_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and authenticationMode =
+         flag "authentication-mode" (required json_arg)
+           ~doc:"JSON IdentityProviderAuthenticationMode"
+       and identityCenterConfiguration =
+         flag "identity-center-configuration" (required json_arg)
+           ~doc:"JSON IdentityCenterConfiguration"
+       and personalAccessTokenConfiguration =
+         flag "personal-access-token-configuration" (required json_arg)
+           ~doc:"JSON PersonalAccessTokenConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_identity_provider_configuration
+           (Values.PutIdentityProviderConfigurationRequest.make
+              ~organizationId
+              ~authenticationMode:(Values.IdentityProviderAuthenticationMode.of_json
+                                     authenticationMode)
+              ~identityCenterConfiguration:(Values.IdentityCenterConfiguration.of_json
+                                              identityCenterConfiguration)
+              ~personalAccessTokenConfiguration:(Values.PersonalAccessTokenConfiguration.of_json
+                                                   personalAccessTokenConfiguration)
+              ())
+           (Some Values.PutIdentityProviderConfigurationResponse.to_json)
+           (Some
+              Values.PutIdentityProviderConfigurationResponse.error_to_json)])
 let put_inbound_dmarc_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1356,9 +1894,9 @@ let put_mailbox_permissions =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and entityId =
-         flag "entity-id" (required string) ~doc:"STRING WorkMailIdentifier"
+         flag "entity-id" (required string) ~doc:"STRING EntityIdentifier"
        and granteeId =
-         flag "grantee-id" (required string) ~doc:"STRING WorkMailIdentifier"
+         flag "grantee-id" (required string) ~doc:"STRING EntityIdentifier"
        and permissionValues =
          flag "permission-values" (required json_arg)
            ~doc:"JSON PermissionValues" in
@@ -1471,7 +2009,7 @@ let register_to_work_mail =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and entityId =
-         flag "entity-id" (required string) ~doc:"STRING WorkMailIdentifier"
+         flag "entity-id" (required string) ~doc:"STRING EntityIdentifier"
        and email = flag "email" (required string) ~doc:"STRING EmailAddress" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1521,7 +2059,7 @@ let start_mailbox_export_job =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and entityId =
-         flag "entity-id" (required string) ~doc:"STRING WorkMailIdentifier"
+         flag "entity-id" (required string) ~doc:"STRING EntityIdentifier"
        and roleArn = flag "role-arn" (required string) ~doc:"STRING RoleArn"
        and kmsKeyArn =
          flag "kms-key-arn" (required string) ~doc:"STRING KmsKeyArn"
@@ -1558,6 +2096,39 @@ let tag_resource =
               ~tags:(Values.TagList.of_json tags) ())
            (Some Values.TagResourceResponse.to_json)
            (Some Values.TagResourceResponse.error_to_json)])
+let test_availability_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (optional string) ~doc:"STRING DomainName"
+       and ewsProvider =
+         flag "ews-provider" (optional json_arg)
+           ~doc:"JSON EwsAvailabilityProvider"
+       and lambdaProvider =
+         flag "lambda-provider" (optional json_arg)
+           ~doc:"JSON LambdaAvailabilityProvider"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.test_availability_configuration
+           (Values.TestAvailabilityConfigurationRequest.make ?domainName
+              ?ewsProvider:(Option.map
+                              ~f:Values.EwsAvailabilityProvider.of_json
+                              ewsProvider)
+              ?lambdaProvider:(Option.map
+                                 ~f:Values.LambdaAvailabilityProvider.of_json
+                                 lambdaProvider) ~organizationId ())
+           (Some Values.TestAvailabilityConfigurationResponse.to_json)
+           (Some Values.TestAvailabilityConfigurationResponse.error_to_json)])
 let untag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1580,6 +2151,40 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_availability_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ewsProvider =
+         flag "ews-provider" (optional json_arg)
+           ~doc:"JSON EwsAvailabilityProvider"
+       and lambdaProvider =
+         flag "lambda-provider" (optional json_arg)
+           ~doc:"JSON LambdaAvailabilityProvider"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_availability_configuration
+           (Values.UpdateAvailabilityConfigurationRequest.make
+              ?ewsProvider:(Option.map
+                              ~f:Values.EwsAvailabilityProvider.of_json
+                              ewsProvider)
+              ?lambdaProvider:(Option.map
+                                 ~f:Values.LambdaAvailabilityProvider.of_json
+                                 lambdaProvider) ~organizationId ~domainName
+              ())
+           (Some Values.UpdateAvailabilityConfigurationResponse.to_json)
+           (Some Values.UpdateAvailabilityConfigurationResponse.error_to_json)])
 let update_default_mail_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1603,6 +2208,65 @@ let update_default_mail_domain =
               ~domainName ())
            (Some Values.UpdateDefaultMailDomainResponse.to_json)
            (Some Values.UpdateDefaultMailDomainResponse.error_to_json)])
+let update_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and hiddenFromGlobalAddressList =
+         flag "hidden-from-global-address-list" (optional bool)
+           ~doc:"BOOL BooleanObject"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and groupId =
+         flag "group-id" (required string) ~doc:"STRING EntityIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_group
+           (Values.UpdateGroupRequest.make ?hiddenFromGlobalAddressList
+              ~organizationId ~groupId ())
+           (Some Values.UpdateGroupResponse.to_json)
+           (Some Values.UpdateGroupResponse.error_to_json)])
+let update_impersonation_role =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ImpersonationRoleDescription"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and impersonationRoleId =
+         flag "impersonation-role-id" (required string)
+           ~doc:"STRING ImpersonationRoleId"
+       and name =
+         flag "name" (required string) ~doc:"STRING ImpersonationRoleName"
+       and type_ =
+         flag "type-" (required json_arg) ~doc:"JSON ImpersonationRoleType"
+       and rules =
+         flag "rules" (required json_arg) ~doc:"JSON ImpersonationRuleList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_impersonation_role
+           (Values.UpdateImpersonationRoleRequest.make ?description
+              ~organizationId ~impersonationRoleId ~name
+              ~type_:(Values.ImpersonationRoleType.of_json type_)
+              ~rules:(Values.ImpersonationRuleList.of_json rules) ())
+           (Some Values.UpdateImpersonationRoleResponse.to_json)
+           (Some Values.UpdateImpersonationRoleResponse.error_to_json)])
 let update_mailbox_quota =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1617,7 +2281,7 @@ let update_mailbox_quota =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and userId =
-         flag "user-id" (required string) ~doc:"STRING WorkMailIdentifier"
+         flag "user-id" (required string) ~doc:"STRING EntityIdentifier"
        and mailboxQuota =
          flag "mailbox-quota" (required int) ~doc:"INT MailboxQuota" in
        fun () ->
@@ -1716,7 +2380,7 @@ let update_primary_email_address =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and entityId =
-         flag "entity-id" (required string) ~doc:"STRING WorkMailIdentifier"
+         flag "entity-id" (required string) ~doc:"STRING EntityIdentifier"
        and email = flag "email" (required string) ~doc:"STRING EmailAddress" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1739,41 +2403,120 @@ let update_resource =
        and bookingOptions =
          flag "booking-options" (optional json_arg)
            ~doc:"JSON BookingOptions"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING NewResourceDescription"
+       and type_ = flag "type-" (optional json_arg) ~doc:"JSON ResourceType"
+       and hiddenFromGlobalAddressList =
+         flag "hidden-from-global-address-list" (optional bool)
+           ~doc:"BOOL BooleanObject"
        and organizationId =
          flag "organization-id" (required string)
            ~doc:"STRING OrganizationId"
        and resourceId =
-         flag "resource-id" (required string) ~doc:"STRING ResourceId" in
+         flag "resource-id" (required string) ~doc:"STRING EntityIdentifier" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_resource
            (Values.UpdateResourceRequest.make ?name
               ?bookingOptions:(Option.map ~f:Values.BookingOptions.of_json
-                                 bookingOptions) ~organizationId ~resourceId
-              ()) (Some Values.UpdateResourceResponse.to_json)
+                                 bookingOptions) ?description
+              ?type_:(Option.map ~f:Values.ResourceType.of_json type_)
+              ?hiddenFromGlobalAddressList ~organizationId ~resourceId ())
+           (Some Values.UpdateResourceResponse.to_json)
            (Some Values.UpdateResourceResponse.error_to_json)])
+let update_user =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and role = flag "role" (optional json_arg) ~doc:"JSON UserRole"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING UserAttribute"
+       and firstName =
+         flag "first-name" (optional string) ~doc:"STRING UserAttribute"
+       and lastName =
+         flag "last-name" (optional string) ~doc:"STRING UserAttribute"
+       and hiddenFromGlobalAddressList =
+         flag "hidden-from-global-address-list" (optional bool)
+           ~doc:"BOOL BooleanObject"
+       and initials =
+         flag "initials" (optional string) ~doc:"STRING UserAttribute"
+       and telephone =
+         flag "telephone" (optional string) ~doc:"STRING UserAttribute"
+       and street =
+         flag "street" (optional string) ~doc:"STRING UserAttribute"
+       and jobTitle =
+         flag "job-title" (optional string) ~doc:"STRING UserAttribute"
+       and city = flag "city" (optional string) ~doc:"STRING UserAttribute"
+       and company =
+         flag "company" (optional string) ~doc:"STRING UserAttribute"
+       and zipCode =
+         flag "zip-code" (optional string) ~doc:"STRING UserAttribute"
+       and department =
+         flag "department" (optional string) ~doc:"STRING UserAttribute"
+       and country =
+         flag "country" (optional string) ~doc:"STRING UserAttribute"
+       and office =
+         flag "office" (optional string) ~doc:"STRING UserAttribute"
+       and identityProviderUserId =
+         flag "identity-provider-user-id" (optional string)
+           ~doc:"STRING IdentityProviderUserIdForUpdate"
+       and organizationId =
+         flag "organization-id" (required string)
+           ~doc:"STRING OrganizationId"
+       and userId =
+         flag "user-id" (required string) ~doc:"STRING EntityIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_user
+           (Values.UpdateUserRequest.make
+              ?role:(Option.map ~f:Values.UserRole.of_json role) ?displayName
+              ?firstName ?lastName ?hiddenFromGlobalAddressList ?initials
+              ?telephone ?street ?jobTitle ?city ?company ?zipCode
+              ?department ?country ?office ?identityProviderUserId
+              ~organizationId ~userId ())
+           (Some Values.UpdateUserResponse.to_json)
+           (Some Values.UpdateUserResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-delegate-to-resource", associate_delegate_to_resource);
     ("associate-member-to-group", associate_member_to_group);
+    ("assume-impersonation-role", assume_impersonation_role);
     ("cancel-mailbox-export-job", cancel_mailbox_export_job);
     ("create-alias", create_alias);
+    ("create-availability-configuration", create_availability_configuration);
     ("create-group", create_group);
+    ("create-identity-center-application",
+      create_identity_center_application);
+    ("create-impersonation-role", create_impersonation_role);
     ("create-mobile-device-access-rule", create_mobile_device_access_rule);
     ("create-organization", create_organization);
     ("create-resource", create_resource);
     ("create-user", create_user);
     ("delete-access-control-rule", delete_access_control_rule);
     ("delete-alias", delete_alias);
+    ("delete-availability-configuration", delete_availability_configuration);
     ("delete-email-monitoring-configuration",
       delete_email_monitoring_configuration);
     ("delete-group", delete_group);
+    ("delete-identity-center-application",
+      delete_identity_center_application);
+    ("delete-identity-provider-configuration",
+      delete_identity_provider_configuration);
+    ("delete-impersonation-role", delete_impersonation_role);
     ("delete-mailbox-permissions", delete_mailbox_permissions);
     ("delete-mobile-device-access-override",
       delete_mobile_device_access_override);
     ("delete-mobile-device-access-rule", delete_mobile_device_access_rule);
     ("delete-organization", delete_organization);
+    ("delete-personal-access-token", delete_personal_access_token);
     ("delete-resource", delete_resource);
     ("delete-retention-policy", delete_retention_policy);
     ("delete-user", delete_user);
@@ -1781,7 +2524,10 @@ let main =
     ("deregister-mail-domain", deregister_mail_domain);
     ("describe-email-monitoring-configuration",
       describe_email_monitoring_configuration);
+    ("describe-entity", describe_entity);
     ("describe-group", describe_group);
+    ("describe-identity-provider-configuration",
+      describe_identity_provider_configuration);
     ("describe-inbound-dmarc-settings", describe_inbound_dmarc_settings);
     ("describe-mailbox-export-job", describe_mailbox_export_job);
     ("describe-organization", describe_organization);
@@ -1792,14 +2538,21 @@ let main =
     ("disassociate-member-from-group", disassociate_member_from_group);
     ("get-access-control-effect", get_access_control_effect);
     ("get-default-retention-policy", get_default_retention_policy);
+    ("get-impersonation-role", get_impersonation_role);
+    ("get-impersonation-role-effect", get_impersonation_role_effect);
     ("get-mail-domain", get_mail_domain);
     ("get-mailbox-details", get_mailbox_details);
     ("get-mobile-device-access-effect", get_mobile_device_access_effect);
     ("get-mobile-device-access-override", get_mobile_device_access_override);
+    ("get-personal-access-token-metadata",
+      get_personal_access_token_metadata);
     ("list-access-control-rules", list_access_control_rules);
     ("list-aliases", list_aliases);
+    ("list-availability-configurations", list_availability_configurations);
     ("list-group-members", list_group_members);
     ("list-groups", list_groups);
+    ("list-groups-for-entity", list_groups_for_entity);
+    ("list-impersonation-roles", list_impersonation_roles);
     ("list-mail-domains", list_mail_domains);
     ("list-mailbox-export-jobs", list_mailbox_export_jobs);
     ("list-mailbox-permissions", list_mailbox_permissions);
@@ -1807,6 +2560,7 @@ let main =
       list_mobile_device_access_overrides);
     ("list-mobile-device-access-rules", list_mobile_device_access_rules);
     ("list-organizations", list_organizations);
+    ("list-personal-access-tokens", list_personal_access_tokens);
     ("list-resource-delegates", list_resource_delegates);
     ("list-resources", list_resources);
     ("list-tags-for-resource", list_tags_for_resource);
@@ -1814,6 +2568,8 @@ let main =
     ("put-access-control-rule", put_access_control_rule);
     ("put-email-monitoring-configuration",
       put_email_monitoring_configuration);
+    ("put-identity-provider-configuration",
+      put_identity_provider_configuration);
     ("put-inbound-dmarc-settings", put_inbound_dmarc_settings);
     ("put-mailbox-permissions", put_mailbox_permissions);
     ("put-mobile-device-access-override", put_mobile_device_access_override);
@@ -1823,9 +2579,14 @@ let main =
     ("reset-password", reset_password);
     ("start-mailbox-export-job", start_mailbox_export_job);
     ("tag-resource", tag_resource);
+    ("test-availability-configuration", test_availability_configuration);
     ("untag-resource", untag_resource);
+    ("update-availability-configuration", update_availability_configuration);
     ("update-default-mail-domain", update_default_mail_domain);
+    ("update-group", update_group);
+    ("update-impersonation-role", update_impersonation_role);
     ("update-mailbox-quota", update_mailbox_quota);
     ("update-mobile-device-access-rule", update_mobile_device_access_rule);
     ("update-primary-email-address", update_primary_email_address);
-    ("update-resource", update_resource)]
+    ("update-resource", update_resource);
+    ("update-user", update_user)]

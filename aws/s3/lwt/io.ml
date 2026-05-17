@@ -19,8 +19,15 @@ let copy_object ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CopyObject input
 let create_bucket ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateBucket input
+let create_bucket_metadata_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateBucketMetadataConfiguration input
+let create_bucket_metadata_table_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateBucketMetadataTableConfiguration
+    input
 let create_multipart_upload ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateMultipartUpload input
+let create_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateSession input
 let delete_bucket ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBucket input
 let delete_bucket_analytics_configuration ?endpoint_url ?cfg input =
@@ -37,6 +44,11 @@ let delete_bucket_inventory_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBucketInventoryConfiguration input
 let delete_bucket_lifecycle ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBucketLifecycle input
+let delete_bucket_metadata_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteBucketMetadataConfiguration input
+let delete_bucket_metadata_table_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteBucketMetadataTableConfiguration
+    input
 let delete_bucket_metrics_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBucketMetricsConfiguration input
 let delete_bucket_ownership_controls ?endpoint_url ?cfg input =
@@ -57,6 +69,8 @@ let delete_objects ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteObjects input
 let delete_public_access_block ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePublicAccessBlock input
+let get_bucket_abac ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetBucketAbac input
 let get_bucket_accelerate_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBucketAccelerateConfiguration input
 let get_bucket_acl ?endpoint_url ?cfg input =
@@ -80,6 +94,10 @@ let get_bucket_location ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBucketLocation input
 let get_bucket_logging ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBucketLogging input
+let get_bucket_metadata_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetBucketMetadataConfiguration input
+let get_bucket_metadata_table_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetBucketMetadataTableConfiguration input
 let get_bucket_metrics_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBucketMetricsConfiguration input
 let get_bucket_notification ?endpoint_url ?cfg input =
@@ -135,6 +153,8 @@ let list_bucket_metrics_configurations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBucketMetricsConfigurations input
 let list_buckets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBuckets input
+let list_directory_buckets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDirectoryBuckets input
 let list_multipart_uploads ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMultipartUploads input
 let list_object_versions ?endpoint_url ?cfg input =
@@ -145,6 +165,8 @@ let list_objects_v2 ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListObjectsV2 input
 let list_parts ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListParts input
+let put_bucket_abac ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutBucketAbac input
 let put_bucket_accelerate_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutBucketAccelerateConfiguration input
 let put_bucket_acl ?endpoint_url ?cfg input =
@@ -200,10 +222,22 @@ let put_object_tagging ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutObjectTagging input
 let put_public_access_block ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutPublicAccessBlock input
+let rename_object ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RenameObject input
 let restore_object ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RestoreObject input
 let select_object_content ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SelectObjectContent input
+let update_bucket_metadata_inventory_table_configuration ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.UpdateBucketMetadataInventoryTableConfiguration input
+let update_bucket_metadata_journal_table_configuration ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.UpdateBucketMetadataJournalTableConfiguration input
+let update_object_encryption ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateObjectEncryption input
 let upload_part ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UploadPart input
 let upload_part_copy ?endpoint_url ?cfg input =

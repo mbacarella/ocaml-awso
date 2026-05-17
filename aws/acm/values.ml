@@ -25,158 +25,59 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
-module RecordType =
-  struct
-    type nonrec t =
-      | CNAME 
-      | Non_static_id of string 
-    let make i = i
-    let to_string = function | CNAME -> "CNAME" | Non_static_id s -> s
-    let of_string = function | "CNAME" -> CNAME | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration RecordType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"RecordType" j)
-    let to_json = simple_to_json to_value
-  end
-module String_ =
+module ServiceErrorMessage =
   struct
     type nonrec t = string
-    let context_ = "String"
+    let context_ = "ServiceErrorMessage"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
+    let of_json j = string_of_json ~kind:"ServiceErrorMessage" j
     let to_json = simple_to_json to_value
   end
-module DomainNameString =
+module AccessDeniedException =
   struct
-    type nonrec t = string
-    let context_ = "DomainNameString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:253) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^(\\*\\.)?(((?!-)[A-Za-z0-9-]{0,62}[A-Za-z0-9])\\.)+((?!-)[A-Za-z0-9-]{1,62}[A-Za-z0-9])$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DomainNameString" j
-    let to_json = simple_to_json to_value
-  end
-module DomainStatus =
-  struct
-    type nonrec t =
-      | PENDING_VALIDATION 
-      | SUCCESS 
-      | FAILED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | PENDING_VALIDATION -> "PENDING_VALIDATION"
-      | SUCCESS -> "SUCCESS"
-      | FAILED -> "FAILED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "PENDING_VALIDATION" -> PENDING_VALIDATION
-      | "SUCCESS" -> SUCCESS
-      | "FAILED" -> FAILED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration DomainStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"DomainStatus" j)
-    let to_json = simple_to_json to_value
-  end
-module ResourceRecord =
-  struct
-    type nonrec t =
-      {
-      name: String_.t
-        [@ocaml.doc
-          "The name of the DNS record to create in your domain. This is supplied by ACM."];
-      type_: RecordType.t
-        [@ocaml.doc "The type of DNS record. Currently this can be CNAME."];
-      value: String_.t
-        [@ocaml.doc
-          "The value of the CNAME record to add to your DNS database. This is supplied by ACM."]}
-    let context_ = "ResourceRecord"
-    let make ~name =
-      fun ~type_ -> fun ~value -> fun () -> { name; type_; value }
+    type nonrec t = {
+      message: ServiceErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Name", (Some (String_.to_value x.name)));
-        ("Type", (Some (RecordType.to_value x.type_)));
-        ("Value", (Some (String_.to_value x.value)))]
+        [("Message", (Option.map x.message ~f:ServiceErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let value =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
-      let type_ =
-        RecordType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~value ~type_ ~name ()
+      let message =
+        (Option.map ~f:ServiceErrorMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" String_.of_json in
-      let type_ = field_map_exn json "Type" RecordType.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
-      make ~value ~type_ ~name ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ServiceErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains a DNS record value that you can use to validate ownership or control of a domain. This is used by the DescribeCertificate action."]
-module ValidationEmailList =
-  struct
-    type nonrec t = String_.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:String_.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ValidationEmailList" ~of_json:String_.of_json j
-    let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "You do not have access required to perform this action."]
 module ValidationMethod =
   struct
     type nonrec t =
       | EMAIL 
       | DNS 
+      | HTTP 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | EMAIL -> "EMAIL" | DNS -> "DNS" | Non_static_id s -> s
+      function
+      | EMAIL -> "EMAIL"
+      | DNS -> "DNS"
+      | HTTP -> "HTTP"
+      | Non_static_id s -> s
     let of_string =
-      function | "EMAIL" -> EMAIL | "DNS" -> DNS | x -> Non_static_id x
+      function
+      | "EMAIL" -> EMAIL
+      | "DNS" -> DNS
+      | "HTTP" -> HTTP
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -185,162 +86,287 @@ module ValidationMethod =
     let of_json j = of_string (string_of_json ~kind:"ValidationMethod" j)
     let to_json = simple_to_json to_value
   end
-module ExtendedKeyUsageName =
+module TStamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module RenewalStatus =
   struct
     type nonrec t =
-      | TLS_WEB_SERVER_AUTHENTICATION 
-      | TLS_WEB_CLIENT_AUTHENTICATION 
-      | CODE_SIGNING 
-      | EMAIL_PROTECTION 
-      | TIME_STAMPING 
-      | OCSP_SIGNING 
-      | IPSEC_END_SYSTEM 
-      | IPSEC_TUNNEL 
-      | IPSEC_USER 
-      | ANY 
-      | NONE 
-      | CUSTOM 
+      | PENDING_AUTO_RENEWAL 
+      | PENDING_VALIDATION 
+      | SUCCESS 
+      | FAILED 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | TLS_WEB_SERVER_AUTHENTICATION -> "TLS_WEB_SERVER_AUTHENTICATION"
-      | TLS_WEB_CLIENT_AUTHENTICATION -> "TLS_WEB_CLIENT_AUTHENTICATION"
-      | CODE_SIGNING -> "CODE_SIGNING"
-      | EMAIL_PROTECTION -> "EMAIL_PROTECTION"
-      | TIME_STAMPING -> "TIME_STAMPING"
-      | OCSP_SIGNING -> "OCSP_SIGNING"
-      | IPSEC_END_SYSTEM -> "IPSEC_END_SYSTEM"
-      | IPSEC_TUNNEL -> "IPSEC_TUNNEL"
-      | IPSEC_USER -> "IPSEC_USER"
-      | ANY -> "ANY"
-      | NONE -> "NONE"
-      | CUSTOM -> "CUSTOM"
+      | PENDING_AUTO_RENEWAL -> "PENDING_AUTO_RENEWAL"
+      | PENDING_VALIDATION -> "PENDING_VALIDATION"
+      | SUCCESS -> "SUCCESS"
+      | FAILED -> "FAILED"
       | Non_static_id s -> s
     let of_string =
       function
-      | "TLS_WEB_SERVER_AUTHENTICATION" -> TLS_WEB_SERVER_AUTHENTICATION
-      | "TLS_WEB_CLIENT_AUTHENTICATION" -> TLS_WEB_CLIENT_AUTHENTICATION
-      | "CODE_SIGNING" -> CODE_SIGNING
-      | "EMAIL_PROTECTION" -> EMAIL_PROTECTION
-      | "TIME_STAMPING" -> TIME_STAMPING
-      | "OCSP_SIGNING" -> OCSP_SIGNING
-      | "IPSEC_END_SYSTEM" -> IPSEC_END_SYSTEM
-      | "IPSEC_TUNNEL" -> IPSEC_TUNNEL
-      | "IPSEC_USER" -> IPSEC_USER
-      | "ANY" -> ANY
-      | "NONE" -> NONE
-      | "CUSTOM" -> CUSTOM
+      | "PENDING_AUTO_RENEWAL" -> PENDING_AUTO_RENEWAL
+      | "PENDING_VALIDATION" -> PENDING_VALIDATION
+      | "SUCCESS" -> SUCCESS
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RenewalStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RenewalStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module RenewalEligibility =
+  struct
+    type nonrec t =
+      | ELIGIBLE 
+      | INELIGIBLE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ELIGIBLE -> "ELIGIBLE"
+      | INELIGIBLE -> "INELIGIBLE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ELIGIBLE" -> ELIGIBLE
+      | "INELIGIBLE" -> INELIGIBLE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
       of_string
-        (string_of_xml ~kind:"enumeration ExtendedKeyUsageName" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ExtendedKeyUsageName" j)
+        (string_of_xml ~kind:"enumeration RenewalEligibility" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RenewalEligibility" j)
     let to_json = simple_to_json to_value
   end
-module KeyUsageName =
+module NullableBoolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module CertificateType =
   struct
     type nonrec t =
-      | DIGITAL_SIGNATURE 
-      | NON_REPUDIATION 
-      | KEY_ENCIPHERMENT 
-      | DATA_ENCIPHERMENT 
-      | KEY_AGREEMENT 
-      | CERTIFICATE_SIGNING 
-      | CRL_SIGNING 
-      | ENCIPHER_ONLY 
-      | DECIPHER_ONLY 
-      | ANY 
-      | CUSTOM 
+      | IMPORTED 
+      | AMAZON_ISSUED 
+      | PRIVATE 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | DIGITAL_SIGNATURE -> "DIGITAL_SIGNATURE"
-      | NON_REPUDIATION -> "NON_REPUDIATION"
-      | KEY_ENCIPHERMENT -> "KEY_ENCIPHERMENT"
-      | DATA_ENCIPHERMENT -> "DATA_ENCIPHERMENT"
-      | KEY_AGREEMENT -> "KEY_AGREEMENT"
-      | CERTIFICATE_SIGNING -> "CERTIFICATE_SIGNING"
-      | CRL_SIGNING -> "CRL_SIGNING"
-      | ENCIPHER_ONLY -> "ENCIPHER_ONLY"
-      | DECIPHER_ONLY -> "DECIPHER_ONLY"
-      | ANY -> "ANY"
-      | CUSTOM -> "CUSTOM"
+      | IMPORTED -> "IMPORTED"
+      | AMAZON_ISSUED -> "AMAZON_ISSUED"
+      | PRIVATE -> "PRIVATE"
       | Non_static_id s -> s
     let of_string =
       function
-      | "DIGITAL_SIGNATURE" -> DIGITAL_SIGNATURE
-      | "NON_REPUDIATION" -> NON_REPUDIATION
-      | "KEY_ENCIPHERMENT" -> KEY_ENCIPHERMENT
-      | "DATA_ENCIPHERMENT" -> DATA_ENCIPHERMENT
-      | "KEY_AGREEMENT" -> KEY_AGREEMENT
-      | "CERTIFICATE_SIGNING" -> CERTIFICATE_SIGNING
-      | "CRL_SIGNING" -> CRL_SIGNING
-      | "ENCIPHER_ONLY" -> ENCIPHER_ONLY
-      | "DECIPHER_ONLY" -> DECIPHER_ONLY
-      | "ANY" -> ANY
-      | "CUSTOM" -> CUSTOM
+      | "IMPORTED" -> IMPORTED
+      | "AMAZON_ISSUED" -> AMAZON_ISSUED
+      | "PRIVATE" -> PRIVATE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration KeyUsageName" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"KeyUsageName" j)
+      of_string (string_of_xml ~kind:"enumeration CertificateType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CertificateType" j)
     let to_json = simple_to_json to_value
   end
-module DomainValidation =
+module CertificateStatus =
+  struct
+    type nonrec t =
+      | PENDING_VALIDATION 
+      | ISSUED 
+      | INACTIVE 
+      | EXPIRED 
+      | VALIDATION_TIMED_OUT 
+      | REVOKED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING_VALIDATION -> "PENDING_VALIDATION"
+      | ISSUED -> "ISSUED"
+      | INACTIVE -> "INACTIVE"
+      | EXPIRED -> "EXPIRED"
+      | VALIDATION_TIMED_OUT -> "VALIDATION_TIMED_OUT"
+      | REVOKED -> "REVOKED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING_VALIDATION" -> PENDING_VALIDATION
+      | "ISSUED" -> ISSUED
+      | "INACTIVE" -> INACTIVE
+      | "EXPIRED" -> EXPIRED
+      | "VALIDATION_TIMED_OUT" -> VALIDATION_TIMED_OUT
+      | "REVOKED" -> REVOKED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CertificateStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CertificateStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CertificateManagedBy =
+  struct
+    type nonrec t =
+      | CLOUDFRONT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | CLOUDFRONT -> "CLOUDFRONT" | Non_static_id s -> s
+    let of_string =
+      function | "CLOUDFRONT" -> CLOUDFRONT | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CertificateManagedBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CertificateManagedBy" j)
+    let to_json = simple_to_json to_value
+  end
+module CertificateExport =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CertificateExport" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CertificateExport" j)
+    let to_json = simple_to_json to_value
+  end
+module AcmCertificateMetadata =
   struct
     type nonrec t =
       {
-      domainName: DomainNameString.t
+      createdAt: TStamp.t option
+        [@ocaml.doc "The time at which the certificate was requested."];
+      exported: NullableBoolean.t option
+        [@ocaml.doc "Indicates whether the certificate has been exported."];
+      importedAt: TStamp.t option
         [@ocaml.doc
-          "A fully qualified domain name (FQDN) in the certificate. For example, www.example.com or example.com."];
-      validationEmails: ValidationEmailList.t option
+          "The date and time when the certificate was imported. This value exists only when the certificate type is IMPORTED."];
+      inUse: NullableBoolean.t option
         [@ocaml.doc
-          "A list of email addresses that ACM used to send domain validation emails."];
-      validationDomain: DomainNameString.t option
+          "Indicates whether the certificate is currently in use by an Amazon Web Services service."];
+      issuedAt: TStamp.t option
         [@ocaml.doc
-          "The domain name that ACM used to send domain validation emails."];
-      validationStatus: DomainStatus.t option
+          "The time at which the certificate was issued. This value exists only when the certificate type is AMAZON_ISSUED."];
+      renewalEligibility: RenewalEligibility.t option
         [@ocaml.doc
-          "The validation status of the domain name. This can be one of the following values: PENDING_VALIDATION SUCCESS FAILED"];
-      resourceRecord: ResourceRecord.t option
+          "Specifies whether the certificate is eligible for renewal. At this time, only exported private certificates can be renewed with the RenewCertificate command."];
+      revokedAt: TStamp.t option
         [@ocaml.doc
-          "Contains the CNAME record that you add to your DNS database for domain validation. For more information, see Use DNS to Validate Domain Ownership. Note: The CNAME information that you need does not include the name of your domain. If you include&#x2028; your domain name in the DNS database CNAME record, validation fails.&#x2028; For example, if the name is \"_a79865eb4cd1a6ab990a45779b4e0b96.yourdomain.com\", only \"_a79865eb4cd1a6ab990a45779b4e0b96\" must be used."];
+          "The time at which the certificate was revoked. This value exists only when the certificate status is REVOKED."];
+      status: CertificateStatus.t option
+        [@ocaml.doc
+          "The status of the certificate. A certificate enters status PENDING_VALIDATION upon being requested, unless it fails for any of the reasons given in the troubleshooting topic Certificate request fails. ACM makes repeated attempts to validate a certificate for 72 hours and then times out. If a certificate shows status FAILED or VALIDATION_TIMED_OUT, delete the request, correct the issue with DNS validation or Email validation, and try again. If validation succeeds, the certificate enters status ISSUED."];
+      renewalStatus: RenewalStatus.t option
+        [@ocaml.doc "The renewal status of the certificate."];
+      type_: CertificateType.t option
+        [@ocaml.doc
+          "The source of the certificate. For certificates provided by ACM, this value is AMAZON_ISSUED. For certificates that you imported with ImportCertificate, this value is IMPORTED. ACM does not provide managed renewal for imported certificates. For more information about the differences between certificates that you import and those that ACM provides, see Importing Certificates in the Certificate Manager User Guide."];
+      exportOption: CertificateExport.t option
+        [@ocaml.doc "Indicates whether the certificate can be exported."];
+      managedBy: CertificateManagedBy.t option
+        [@ocaml.doc
+          "Identifies the Amazon Web Services service that manages the certificate issued by ACM."];
       validationMethod: ValidationMethod.t option
         [@ocaml.doc "Specifies the domain validation method."]}
-    let context_ = "DomainValidation"
-    let make ?validationEmails =
-      fun ?validationDomain ->
-        fun ?validationStatus ->
-          fun ?resourceRecord ->
-            fun ?validationMethod ->
-              fun ~domainName ->
-                fun () ->
-                  {
-                    validationEmails;
-                    validationDomain;
-                    validationStatus;
-                    resourceRecord;
-                    validationMethod;
-                    domainName
-                  }
+    let make ?createdAt =
+      fun ?exported ->
+        fun ?importedAt ->
+          fun ?inUse ->
+            fun ?issuedAt ->
+              fun ?renewalEligibility ->
+                fun ?revokedAt ->
+                  fun ?status ->
+                    fun ?renewalStatus ->
+                      fun ?type_ ->
+                        fun ?exportOption ->
+                          fun ?managedBy ->
+                            fun ?validationMethod ->
+                              fun () ->
+                                {
+                                  createdAt;
+                                  exported;
+                                  importedAt;
+                                  inUse;
+                                  issuedAt;
+                                  renewalEligibility;
+                                  revokedAt;
+                                  status;
+                                  renewalStatus;
+                                  type_;
+                                  exportOption;
+                                  managedBy;
+                                  validationMethod
+                                }
     let to_value x =
       structure_to_value
-        [("DomainName", (Some (DomainNameString.to_value x.domainName)));
-        ("ValidationEmails",
-          (Option.map x.validationEmails ~f:ValidationEmailList.to_value));
-        ("ValidationDomain",
-          (Option.map x.validationDomain ~f:DomainNameString.to_value));
-        ("ValidationStatus",
-          (Option.map x.validationStatus ~f:DomainStatus.to_value));
-        ("ResourceRecord",
-          (Option.map x.resourceRecord ~f:ResourceRecord.to_value));
+        [("CreatedAt", (Option.map x.createdAt ~f:TStamp.to_value));
+        ("Exported", (Option.map x.exported ~f:NullableBoolean.to_value));
+        ("ImportedAt", (Option.map x.importedAt ~f:TStamp.to_value));
+        ("InUse", (Option.map x.inUse ~f:NullableBoolean.to_value));
+        ("IssuedAt", (Option.map x.issuedAt ~f:TStamp.to_value));
+        ("RenewalEligibility",
+          (Option.map x.renewalEligibility ~f:RenewalEligibility.to_value));
+        ("RevokedAt", (Option.map x.revokedAt ~f:TStamp.to_value));
+        ("Status", (Option.map x.status ~f:CertificateStatus.to_value));
+        ("RenewalStatus",
+          (Option.map x.renewalStatus ~f:RenewalStatus.to_value));
+        ("Type", (Option.map x.type_ ~f:CertificateType.to_value));
+        ("ExportOption",
+          (Option.map x.exportOption ~f:CertificateExport.to_value));
+        ("ManagedBy",
+          (Option.map x.managedBy ~f:CertificateManagedBy.to_value));
         ("ValidationMethod",
           (Option.map x.validationMethod ~f:ValidationMethod.to_value))]
     let to_query v = to_query to_value v
@@ -348,64 +374,161 @@ module DomainValidation =
       let validationMethod =
         (Option.map ~f:ValidationMethod.of_xml)
           (Xml.child xml_arg0 "ValidationMethod") in
-      let resourceRecord =
-        (Option.map ~f:ResourceRecord.of_xml)
-          (Xml.child xml_arg0 "ResourceRecord") in
-      let validationStatus =
-        (Option.map ~f:DomainStatus.of_xml)
-          (Xml.child xml_arg0 "ValidationStatus") in
-      let validationDomain =
-        (Option.map ~f:DomainNameString.of_xml)
-          (Xml.child xml_arg0 "ValidationDomain") in
-      let validationEmails =
-        (Option.map ~f:ValidationEmailList.of_xml)
-          (Xml.child xml_arg0 "ValidationEmails") in
-      let domainName =
-        DomainNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
-      make ?validationMethod ?resourceRecord ?validationStatus
-        ?validationDomain ?validationEmails ~domainName ()
+      let managedBy =
+        (Option.map ~f:CertificateManagedBy.of_xml)
+          (Xml.child xml_arg0 "ManagedBy") in
+      let exportOption =
+        (Option.map ~f:CertificateExport.of_xml)
+          (Xml.child xml_arg0 "ExportOption") in
+      let type_ =
+        (Option.map ~f:CertificateType.of_xml) (Xml.child xml_arg0 "Type") in
+      let renewalStatus =
+        (Option.map ~f:RenewalStatus.of_xml)
+          (Xml.child xml_arg0 "RenewalStatus") in
+      let status =
+        (Option.map ~f:CertificateStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let revokedAt =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "RevokedAt") in
+      let renewalEligibility =
+        (Option.map ~f:RenewalEligibility.of_xml)
+          (Xml.child xml_arg0 "RenewalEligibility") in
+      let issuedAt =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "IssuedAt") in
+      let inUse =
+        (Option.map ~f:NullableBoolean.of_xml) (Xml.child xml_arg0 "InUse") in
+      let importedAt =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "ImportedAt") in
+      let exported =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "Exported") in
+      let createdAt =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      make ?validationMethod ?managedBy ?exportOption ?type_ ?renewalStatus
+        ?status ?revokedAt ?renewalEligibility ?issuedAt ?inUse ?importedAt
+        ?exported ?createdAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validationMethod =
-        field_map json "ValidationMethod" ValidationMethod.of_json in
-      let resourceRecord =
-        field_map json "ResourceRecord" ResourceRecord.of_json in
-      let validationStatus =
-        field_map json "ValidationStatus" DomainStatus.of_json in
-      let validationDomain =
-        field_map json "ValidationDomain" DomainNameString.of_json in
-      let validationEmails =
-        field_map json "ValidationEmails" ValidationEmailList.of_json in
-      let domainName =
-        field_map_exn json "DomainName" DomainNameString.of_json in
-      make ?validationMethod ?resourceRecord ?validationStatus
-        ?validationDomain ?validationEmails ~domainName ()
+        field_map json__ "ValidationMethod" ValidationMethod.of_json in
+      let managedBy =
+        field_map json__ "ManagedBy" CertificateManagedBy.of_json in
+      let exportOption =
+        field_map json__ "ExportOption" CertificateExport.of_json in
+      let type_ = field_map json__ "Type" CertificateType.of_json in
+      let renewalStatus =
+        field_map json__ "RenewalStatus" RenewalStatus.of_json in
+      let status = field_map json__ "Status" CertificateStatus.of_json in
+      let revokedAt = field_map json__ "RevokedAt" TStamp.of_json in
+      let renewalEligibility =
+        field_map json__ "RenewalEligibility" RenewalEligibility.of_json in
+      let issuedAt = field_map json__ "IssuedAt" TStamp.of_json in
+      let inUse = field_map json__ "InUse" NullableBoolean.of_json in
+      let importedAt = field_map json__ "ImportedAt" TStamp.of_json in
+      let exported = field_map json__ "Exported" NullableBoolean.of_json in
+      let createdAt = field_map json__ "CreatedAt" TStamp.of_json in
+      make ?validationMethod ?managedBy ?exportOption ?type_ ?renewalStatus
+        ?status ?revokedAt ?renewalEligibility ?issuedAt ?inUse ?importedAt
+        ?exported ?createdAt ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains information about the validation of each domain name in the certificate."]
-module TagKey =
+  end[@@ocaml.doc "Contains ACM-specific metadata about a certificate."]
+module AcmCertificateMetadataFilter =
   struct
-    type nonrec t = string
-    let context_ = "TagKey"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[\\p{L}\\p{Z}\\p{N}_.:\\/=+\\-@]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      status: CertificateStatus.t option
+        [@ocaml.doc "Filter by certificate status."];
+      renewalStatus: RenewalStatus.t option
+        [@ocaml.doc "Filter by certificate renewal status."];
+      type_: CertificateType.t option
+        [@ocaml.doc "Filter by certificate type."];
+      inUse: NullableBoolean.t option
+        [@ocaml.doc "Filter by whether the certificate is in use."];
+      exported: NullableBoolean.t option
+        [@ocaml.doc "Filter by whether the certificate has been exported."];
+      exportOption: CertificateExport.t option
+        [@ocaml.doc "Filter by certificate export option."];
+      managedBy: CertificateManagedBy.t option
+        [@ocaml.doc "Filter by the entity that manages the certificate."];
+      validationMethod: ValidationMethod.t option
+        [@ocaml.doc "Filter by validation method."]}
+    let make ?status =
+      fun ?renewalStatus ->
+        fun ?type_ ->
+          fun ?inUse ->
+            fun ?exported ->
+              fun ?exportOption ->
+                fun ?managedBy ->
+                  fun ?validationMethod ->
+                    fun () ->
+                      {
+                        status;
+                        renewalStatus;
+                        type_;
+                        inUse;
+                        exported;
+                        exportOption;
+                        managedBy;
+                        validationMethod
+                      }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:CertificateStatus.to_value));
+        ("RenewalStatus",
+          (Option.map x.renewalStatus ~f:RenewalStatus.to_value));
+        ("Type", (Option.map x.type_ ~f:CertificateType.to_value));
+        ("InUse", (Option.map x.inUse ~f:NullableBoolean.to_value));
+        ("Exported", (Option.map x.exported ~f:NullableBoolean.to_value));
+        ("ExportOption",
+          (Option.map x.exportOption ~f:CertificateExport.to_value));
+        ("ManagedBy",
+          (Option.map x.managedBy ~f:CertificateManagedBy.to_value));
+        ("ValidationMethod",
+          (Option.map x.validationMethod ~f:ValidationMethod.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagKey" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let validationMethod =
+        (Option.map ~f:ValidationMethod.of_xml)
+          (Xml.child xml_arg0 "ValidationMethod") in
+      let managedBy =
+        (Option.map ~f:CertificateManagedBy.of_xml)
+          (Xml.child xml_arg0 "ManagedBy") in
+      let exportOption =
+        (Option.map ~f:CertificateExport.of_xml)
+          (Xml.child xml_arg0 "ExportOption") in
+      let exported =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "Exported") in
+      let inUse =
+        (Option.map ~f:NullableBoolean.of_xml) (Xml.child xml_arg0 "InUse") in
+      let type_ =
+        (Option.map ~f:CertificateType.of_xml) (Xml.child xml_arg0 "Type") in
+      let renewalStatus =
+        (Option.map ~f:RenewalStatus.of_xml)
+          (Xml.child xml_arg0 "RenewalStatus") in
+      let status =
+        (Option.map ~f:CertificateStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?validationMethod ?managedBy ?exportOption ?exported ?inUse ?type_
+        ?renewalStatus ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let validationMethod =
+        field_map json__ "ValidationMethod" ValidationMethod.of_json in
+      let managedBy =
+        field_map json__ "ManagedBy" CertificateManagedBy.of_json in
+      let exportOption =
+        field_map json__ "ExportOption" CertificateExport.of_json in
+      let exported = field_map json__ "Exported" NullableBoolean.of_json in
+      let inUse = field_map json__ "InUse" NullableBoolean.of_json in
+      let type_ = field_map json__ "Type" CertificateType.of_json in
+      let renewalStatus =
+        field_map json__ "RenewalStatus" RenewalStatus.of_json in
+      let status = field_map json__ "Status" CertificateStatus.of_json in
+      make ?validationMethod ?managedBy ?exportOption ?exported ?inUse ?type_
+        ?renewalStatus ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filters certificates by ACM metadata."]
 module TagValue =
   struct
     type nonrec t = string
@@ -428,160 +551,68 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
-module Arn =
+module TagKey =
   struct
     type nonrec t = string
-    let context_ = "Arn"
+    let context_ = "TagKey"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:20) >>=
+          ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:2048) >>=
+                (check_string_max i ~max:128) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"arn:[\\w+=/,.@-]+:[\\w+=/,.@-]+:[\\w+=/,.@-]*:[0-9]+:[\\w+=,.@-]+(/[\\w+=,.@-]+)*")));
+                       ~pattern:"[\\p{L}\\p{Z}\\p{N}_.:\\/=+\\-@]*")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Arn" j
+    let of_json j = string_of_json ~kind:"TagKey" j
     let to_json = simple_to_json to_value
   end
-module KeyAlgorithm =
-  struct
-    type nonrec t =
-      | RSA_1024 
-      | RSA_2048 
-      | RSA_3072 
-      | RSA_4096 
-      | EC_prime256v1 
-      | EC_secp384r1 
-      | EC_secp521r1 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | RSA_1024 -> "RSA_1024"
-      | RSA_2048 -> "RSA_2048"
-      | RSA_3072 -> "RSA_3072"
-      | RSA_4096 -> "RSA_4096"
-      | EC_prime256v1 -> "EC_prime256v1"
-      | EC_secp384r1 -> "EC_secp384r1"
-      | EC_secp521r1 -> "EC_secp521r1"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "RSA_1024" -> RSA_1024
-      | "RSA_2048" -> RSA_2048
-      | "RSA_3072" -> RSA_3072
-      | "RSA_4096" -> RSA_4096
-      | "EC_prime256v1" -> EC_prime256v1
-      | "EC_secp384r1" -> EC_secp384r1
-      | "EC_secp521r1" -> EC_secp521r1
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration KeyAlgorithm" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"KeyAlgorithm" j)
-    let to_json = simple_to_json to_value
-  end
-module CertificateTransparencyLoggingPreference =
-  struct
-    type nonrec t =
-      | ENABLED 
-      | DISABLED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ENABLED -> "ENABLED"
-      | DISABLED -> "DISABLED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ENABLED" -> ENABLED
-      | "DISABLED" -> DISABLED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml
-           ~kind:"enumeration CertificateTransparencyLoggingPreference"
-           xml_arg0)
-    let of_json j =
-      of_string
-        (string_of_json ~kind:"CertificateTransparencyLoggingPreference" j)
-    let to_json = simple_to_json to_value
-  end
-module ExtendedKeyUsage =
+module Tag =
   struct
     type nonrec t =
       {
-      name: ExtendedKeyUsageName.t option
-        [@ocaml.doc "The name of an Extended Key Usage value."];
-      oID: String_.t option
-        [@ocaml.doc
-          "An object identifier (OID) for the extension value. OIDs are strings of numbers separated by periods. The following OIDs are defined in RFC 3280 and RFC 5280. 1.3.6.1.5.5.7.3.1 (TLS_WEB_SERVER_AUTHENTICATION) 1.3.6.1.5.5.7.3.2 (TLS_WEB_CLIENT_AUTHENTICATION) 1.3.6.1.5.5.7.3.3 (CODE_SIGNING) 1.3.6.1.5.5.7.3.4 (EMAIL_PROTECTION) 1.3.6.1.5.5.7.3.8 (TIME_STAMPING) 1.3.6.1.5.5.7.3.9 (OCSP_SIGNING) 1.3.6.1.5.5.7.3.5 (IPSEC_END_SYSTEM) 1.3.6.1.5.5.7.3.6 (IPSEC_TUNNEL) 1.3.6.1.5.5.7.3.7 (IPSEC_USER)"]}
-    let make ?name = fun ?oID -> fun () -> { name; oID }
+      key: TagKey.t [@ocaml.doc "The key of the tag."];
+      value: TagValue.t option [@ocaml.doc "The value of the tag."]}
+    let context_ = "Tag"
+    let make ?value = fun ~key -> fun () -> { value; key }
     let to_value x =
       structure_to_value
-        [("Name", (Option.map x.name ~f:ExtendedKeyUsageName.to_value));
-        ("OID", (Option.map x.oID ~f:String_.to_value))]
+        [("Key", (Some (TagKey.to_value x.key)));
+        ("Value", (Option.map x.value ~f:TagValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let oID = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OID") in
-      let name =
-        (Option.map ~f:ExtendedKeyUsageName.of_xml)
-          (Xml.child xml_arg0 "Name") in
-      make ?oID ?name ()
+      let value =
+        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
+      let key =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let oID = field_map json "OID" String_.of_json in
-      let name = field_map json "Name" ExtendedKeyUsageName.of_json in
-      make ?oID ?name ()
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
+      make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Extended Key Usage X.509 v3 extension defines one or more purposes for which the public key can be used. This is in addition to or in place of the basic purposes specified by the Key Usage extension."]
-module KeyUsage =
+       "A key-value pair that identifies or specifies metadata about an ACM resource."]
+module TagList =
   struct
-    type nonrec t =
-      {
-      name: KeyUsageName.t option
-        [@ocaml.doc
-          "A string value that contains a Key Usage extension name."]}
-    let make ?name = fun () -> { name }
-    let to_value x =
-      structure_to_value
-        [("Name", (Option.map x.name ~f:KeyUsageName.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let name =
-        (Option.map ~f:KeyUsageName.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" KeyUsageName.of_json in make ?name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The Key Usage X.509 v3 extension defines the purpose of the public key contained in the certificate."]
-module DomainValidationList =
-  struct
-    type nonrec t = DomainValidation.t list
+    type nonrec t = Tag.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:1000) >>=
-             (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:DomainValidation.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -595,11 +626,210 @@ module DomainValidationList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:DomainValidation.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DomainValidationList"
-        ~of_json:DomainValidation.of_json j
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module Arn =
+  struct
+    type nonrec t = string
+    let context_ = "Arn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[\\w+=/,.@-]+:acm:[\\w+=/,.@-]*:[0-9]+:[\\w+=,.@-]+(/[\\w+=,.@-]+)*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Arn" j
+    let to_json = simple_to_json to_value
+  end
+module AddTagsToCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      certificateArn: Arn.t
+        [@ocaml.doc
+          "String that contains the ARN of the ACM certificate to which the tag is to be applied. This must be of the form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."];
+      tags: TagList.t
+        [@ocaml.doc
+          "The key-value pair that defines the tag. The tag value is optional."]}
+    let context_ = "AddTagsToCertificateRequest"
+    let make ~certificateArn =
+      fun ~tags -> fun () -> { certificateArn; tags }
+    let to_value x =
+      structure_to_value
+        [("CertificateArn", (Some (Arn.to_value x.certificateArn)));
+        ("Tags", (Some (TagList.to_value x.tags)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let certificateArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
+      make ~tags ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let certificateArn = field_map_exn json__ "CertificateArn" Arn.of_json in
+      make ~tags ~certificateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds one or more tags to an ACM certificate. Tags are labels that you can use to identify and organize your Amazon Web Services resources. Each tag consists of a key and an optional value. You specify the certificate on input by its Amazon Resource Name (ARN). You specify the tag by using a key-value pair. You can apply a tag to just one certificate if you want to identify a specific characteristic of that certificate, or you can apply the same tag to multiple certificates if you want to filter for a common relationship among those certificates. Similarly, you can apply the same tag to multiple resources if you want to specify a relationship among those resources. For example, you can add the same tag to an ACM certificate and an Elastic Load Balancing load balancer to indicate that they are both used by the same website. For more information, see Tagging ACM certificates. To remove one or more tags, use the RemoveTagsFromCertificate action. To view all of the tags that have been applied to the certificate, use the ListTagsForCertificate action."]
+module AvailabilityErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "AvailabilityErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AvailabilityErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module CertificateBody =
+  struct
+    type nonrec t = string
+    let context_ = "CertificateBody"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:32768) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"-{5}BEGIN CERTIFICATE-{5}\\u000D?\\u000A([A-Za-z0-9/+]{64}\\u000D?\\u000A)*[A-Za-z0-9/+]{1,64}={0,2}\\u000D?\\u000A-{5}END CERTIFICATE-{5}(\\u000D?\\u000A)?")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CertificateBody" j
+    let to_json = simple_to_json to_value
+  end
+module CertificateBodyBlob =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module CertificateChain =
+  struct
+    type nonrec t = string
+    let context_ = "CertificateChain"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2097152) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(-{5}BEGIN CERTIFICATE-{5}\\u000D?\\u000A([A-Za-z0-9/+]{64}\\u000D?\\u000A)*[A-Za-z0-9/+]{1,64}={0,2}\\u000D?\\u000A-{5}END CERTIFICATE-{5}\\u000D?\\u000A)*-{5}BEGIN CERTIFICATE-{5}\\u000D?\\u000A([A-Za-z0-9/+]{64}\\u000D?\\u000A)*[A-Za-z0-9/+]{1,64}={0,2}\\u000D?\\u000A-{5}END CERTIFICATE-{5}(\\u000D?\\u000A)?")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CertificateChain" j
+    let to_json = simple_to_json to_value
+  end
+module CertificateChainBlob =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module RevocationReason =
+  struct
+    type nonrec t =
+      | UNSPECIFIED 
+      | KEY_COMPROMISE 
+      | CA_COMPROMISE 
+      | AFFILIATION_CHANGED 
+      | SUPERCEDED 
+      | SUPERSEDED 
+      | CESSATION_OF_OPERATION 
+      | CERTIFICATE_HOLD 
+      | REMOVE_FROM_CRL 
+      | PRIVILEGE_WITHDRAWN 
+      | A_A_COMPROMISE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UNSPECIFIED -> "UNSPECIFIED"
+      | KEY_COMPROMISE -> "KEY_COMPROMISE"
+      | CA_COMPROMISE -> "CA_COMPROMISE"
+      | AFFILIATION_CHANGED -> "AFFILIATION_CHANGED"
+      | SUPERCEDED -> "SUPERCEDED"
+      | SUPERSEDED -> "SUPERSEDED"
+      | CESSATION_OF_OPERATION -> "CESSATION_OF_OPERATION"
+      | CERTIFICATE_HOLD -> "CERTIFICATE_HOLD"
+      | REMOVE_FROM_CRL -> "REMOVE_FROM_CRL"
+      | PRIVILEGE_WITHDRAWN -> "PRIVILEGE_WITHDRAWN"
+      | A_A_COMPROMISE -> "A_A_COMPROMISE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UNSPECIFIED" -> UNSPECIFIED
+      | "KEY_COMPROMISE" -> KEY_COMPROMISE
+      | "CA_COMPROMISE" -> CA_COMPROMISE
+      | "AFFILIATION_CHANGED" -> AFFILIATION_CHANGED
+      | "SUPERCEDED" -> SUPERCEDED
+      | "SUPERSEDED" -> SUPERSEDED
+      | "CESSATION_OF_OPERATION" -> CESSATION_OF_OPERATION
+      | "CERTIFICATE_HOLD" -> CERTIFICATE_HOLD
+      | "REMOVE_FROM_CRL" -> REMOVE_FROM_CRL
+      | "PRIVILEGE_WITHDRAWN" -> PRIVILEGE_WITHDRAWN
+      | "A_A_COMPROMISE" -> A_A_COMPROMISE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RevocationReason" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RevocationReason" j)
+    let to_json = simple_to_json to_value
   end
 module FailureReason =
   struct
@@ -673,10 +903,118 @@ module FailureReason =
     let of_json j = of_string (string_of_json ~kind:"FailureReason" j)
     let to_json = simple_to_json to_value
   end
-module RenewalStatus =
+module ValidationEmailList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ValidationEmailList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RecordType =
   struct
     type nonrec t =
-      | PENDING_AUTO_RENEWAL 
+      | CNAME 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | CNAME -> "CNAME" | Non_static_id s -> s
+    let of_string = function | "CNAME" -> CNAME | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RecordType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RecordType" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceRecord =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc
+          "The name of the DNS record to create in your domain. This is supplied by ACM."];
+      type_: RecordType.t option
+        [@ocaml.doc "The type of DNS record. Currently this can be CNAME."];
+      value: String_.t option
+        [@ocaml.doc
+          "The value of the CNAME record to add to your DNS database. This is supplied by ACM."]}
+    let make ?name =
+      fun ?type_ -> fun ?value -> fun () -> { name; type_; value }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:String_.to_value));
+        ("Type", (Option.map x.type_ ~f:RecordType.to_value));
+        ("Value", (Option.map x.value ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
+      let type_ =
+        (Option.map ~f:RecordType.of_xml) (Xml.child xml_arg0 "Type") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?value ?type_ ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let type_ = field_map json__ "Type" RecordType.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?value ?type_ ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains a DNS record value that you can use to validate ownership or control of a domain. This is used by the DescribeCertificate action."]
+module HttpRedirect =
+  struct
+    type nonrec t =
+      {
+      redirectFrom: String_.t option
+        [@ocaml.doc
+          "The URL including the domain to be validated. The certificate authority sends GET requests here during validation."];
+      redirectTo: String_.t option
+        [@ocaml.doc
+          "The URL hosting the validation token. RedirectFrom must return this content or redirect here."]}
+    let make ?redirectFrom =
+      fun ?redirectTo -> fun () -> { redirectFrom; redirectTo }
+    let to_value x =
+      structure_to_value
+        [("RedirectFrom", (Option.map x.redirectFrom ~f:String_.to_value));
+        ("RedirectTo", (Option.map x.redirectTo ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let redirectTo =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RedirectTo") in
+      let redirectFrom =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RedirectFrom") in
+      make ?redirectTo ?redirectFrom ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redirectTo = field_map json__ "RedirectTo" String_.of_json in
+      let redirectFrom = field_map json__ "RedirectFrom" String_.of_json in
+      make ?redirectTo ?redirectFrom ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information for HTTP-based domain validation of certificates requested through Amazon CloudFront and issued by ACM. This field exists only when the certificate type is AMAZON_ISSUED and the validation method is HTTP."]
+module DomainStatus =
+  struct
+    type nonrec t =
       | PENDING_VALIDATION 
       | SUCCESS 
       | FAILED 
@@ -684,14 +1022,12 @@ module RenewalStatus =
     let make i = i
     let to_string =
       function
-      | PENDING_AUTO_RENEWAL -> "PENDING_AUTO_RENEWAL"
       | PENDING_VALIDATION -> "PENDING_VALIDATION"
       | SUCCESS -> "SUCCESS"
       | FAILED -> "FAILED"
       | Non_static_id s -> s
     let of_string =
       function
-      | "PENDING_AUTO_RENEWAL" -> PENDING_AUTO_RENEWAL
       | "PENDING_VALIDATION" -> PENDING_VALIDATION
       | "SUCCESS" -> SUCCESS
       | "FAILED" -> FAILED
@@ -700,366 +1036,492 @@ module RenewalStatus =
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration RenewalStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"RenewalStatus" j)
+      of_string (string_of_xml ~kind:"enumeration DomainStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DomainStatus" j)
     let to_json = simple_to_json to_value
   end
-module TStamp =
+module DomainNameString =
   struct
     type nonrec t = string
-    let make i = i
+    let context_ = "DomainNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:253) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(\\*\\.)?(((?!-)[A-Za-z0-9-]{0,62}[A-Za-z0-9])\\.)+((?!-)[A-Za-z0-9-]{1,62}[A-Za-z0-9])")));
+        i
     let of_string x = x
-    let to_value x = `Timestamp x
+    let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DomainNameString" j
     let to_json = simple_to_json to_value
   end
-module DomainValidationOption =
+module DomainValidation =
   struct
     type nonrec t =
       {
-      domainName: DomainNameString.t
-        [@ocaml.doc
-          "A fully qualified domain name (FQDN) in the certificate request."];
-      validationDomain: DomainNameString.t
-        [@ocaml.doc
-          "The domain name that you want ACM to use to send you validation emails. This domain name is the suffix of the email addresses that you want ACM to use. This must be the same as the DomainName value or a superdomain of the DomainName value. For example, if you request a certificate for testing.example.com, you can specify example.com for this value. In that case, ACM sends domain validation emails to the following five addresses: admin\\@example.com administrator\\@example.com hostmaster\\@example.com postmaster\\@example.com webmaster\\@example.com"]}
-    let context_ = "DomainValidationOption"
-    let make ~domainName =
-      fun ~validationDomain -> fun () -> { domainName; validationDomain }
-    let to_value x =
-      structure_to_value
-        [("DomainName", (Some (DomainNameString.to_value x.domainName)));
-        ("ValidationDomain",
-          (Some (DomainNameString.to_value x.validationDomain)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let validationDomain =
-        DomainNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ValidationDomain") in
-      let domainName =
-        DomainNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
-      make ~validationDomain ~domainName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let validationDomain =
-        field_map_exn json "ValidationDomain" DomainNameString.of_json in
-      let domainName =
-        field_map_exn json "DomainName" DomainNameString.of_json in
-      make ~validationDomain ~domainName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains information about the domain names that you want ACM to use to send you emails that enable you to validate domain ownership."]
-module Tag =
-  struct
-    type nonrec t =
-      {
-      key: TagKey.t [@ocaml.doc "The key of the tag."];
-      value: TagValue.t option [@ocaml.doc "The value of the tag."]}
-    let context_ = "Tag"
-    let make ?value = fun ~key -> fun () -> { value; key }
-    let to_value x =
-      structure_to_value
-        [("Key", (Some (TagKey.to_value x.key)));
-        ("Value", (Option.map x.value ~f:TagValue.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let value =
-        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
-      let key =
-        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
-      make ?value ~key ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
-      make ?value ~key ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A key-value pair that identifies or specifies metadata about an ACM resource."]
-module PositiveInteger =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in ok_or_failwith (check_int_min i ~min:1); i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for PositiveInteger" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module CertificateSummary =
-  struct
-    type nonrec t =
-      {
-      certificateArn: Arn.t option
-        [@ocaml.doc
-          "Amazon Resource Name (ARN) of the certificate. This is of the form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."];
       domainName: DomainNameString.t option
         [@ocaml.doc
-          "Fully qualified domain name (FQDN), such as www.example.com or example.com, for the certificate."]}
-    let make ?certificateArn =
-      fun ?domainName -> fun () -> { certificateArn; domainName }
+          "A fully qualified domain name (FQDN) in the certificate. For example, www.example.com or example.com."];
+      validationEmails: ValidationEmailList.t option
+        [@ocaml.doc
+          "A list of email addresses that ACM used to send domain validation emails."];
+      validationDomain: DomainNameString.t option
+        [@ocaml.doc
+          "The domain name that ACM used to send domain validation emails."];
+      validationStatus: DomainStatus.t option
+        [@ocaml.doc
+          "The validation status of the domain name. This can be one of the following values: PENDING_VALIDATION SUCCESS FAILED"];
+      resourceRecord: ResourceRecord.t option
+        [@ocaml.doc
+          "Contains the CNAME record that you add to your DNS database for domain validation. For more information, see Use DNS to Validate Domain Ownership. The CNAME information that you need does not include the name of your domain. If you include your domain name in the DNS database CNAME record, validation fails. For example, if the name is _a79865eb4cd1a6ab990a45779b4e0b96.yourdomain.com, only _a79865eb4cd1a6ab990a45779b4e0b96 must be used."];
+      httpRedirect: HttpRedirect.t option
+        [@ocaml.doc
+          "Contains information for HTTP-based domain validation of certificates requested through Amazon CloudFront and issued by ACM. This field exists only when the certificate type is AMAZON_ISSUED and the validation method is HTTP."];
+      validationMethod: ValidationMethod.t option
+        [@ocaml.doc "Specifies the domain validation method."]}
+    let make ?domainName =
+      fun ?validationEmails ->
+        fun ?validationDomain ->
+          fun ?validationStatus ->
+            fun ?resourceRecord ->
+              fun ?httpRedirect ->
+                fun ?validationMethod ->
+                  fun () ->
+                    {
+                      domainName;
+                      validationEmails;
+                      validationDomain;
+                      validationStatus;
+                      resourceRecord;
+                      httpRedirect;
+                      validationMethod
+                    }
     let to_value x =
       structure_to_value
-        [("CertificateArn", (Option.map x.certificateArn ~f:Arn.to_value));
-        ("DomainName",
-          (Option.map x.domainName ~f:DomainNameString.to_value))]
+        [("DomainName",
+           (Option.map x.domainName ~f:DomainNameString.to_value));
+        ("ValidationEmails",
+          (Option.map x.validationEmails ~f:ValidationEmailList.to_value));
+        ("ValidationDomain",
+          (Option.map x.validationDomain ~f:DomainNameString.to_value));
+        ("ValidationStatus",
+          (Option.map x.validationStatus ~f:DomainStatus.to_value));
+        ("ResourceRecord",
+          (Option.map x.resourceRecord ~f:ResourceRecord.to_value));
+        ("HttpRedirect",
+          (Option.map x.httpRedirect ~f:HttpRedirect.to_value));
+        ("ValidationMethod",
+          (Option.map x.validationMethod ~f:ValidationMethod.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let validationMethod =
+        (Option.map ~f:ValidationMethod.of_xml)
+          (Xml.child xml_arg0 "ValidationMethod") in
+      let httpRedirect =
+        (Option.map ~f:HttpRedirect.of_xml)
+          (Xml.child xml_arg0 "HttpRedirect") in
+      let resourceRecord =
+        (Option.map ~f:ResourceRecord.of_xml)
+          (Xml.child xml_arg0 "ResourceRecord") in
+      let validationStatus =
+        (Option.map ~f:DomainStatus.of_xml)
+          (Xml.child xml_arg0 "ValidationStatus") in
+      let validationDomain =
+        (Option.map ~f:DomainNameString.of_xml)
+          (Xml.child xml_arg0 "ValidationDomain") in
+      let validationEmails =
+        (Option.map ~f:ValidationEmailList.of_xml)
+          (Xml.child xml_arg0 "ValidationEmails") in
       let domainName =
         (Option.map ~f:DomainNameString.of_xml)
           (Xml.child xml_arg0 "DomainName") in
-      let certificateArn =
-        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CertificateArn") in
-      make ?domainName ?certificateArn ()
+      make ?validationMethod ?httpRedirect ?resourceRecord ?validationStatus
+        ?validationDomain ?validationEmails ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map json "DomainName" DomainNameString.of_json in
-      let certificateArn = field_map json "CertificateArn" Arn.of_json in
-      make ?domainName ?certificateArn ()
+    let of_json json__ =
+      let validationMethod =
+        field_map json__ "ValidationMethod" ValidationMethod.of_json in
+      let httpRedirect = field_map json__ "HttpRedirect" HttpRedirect.of_json in
+      let resourceRecord =
+        field_map json__ "ResourceRecord" ResourceRecord.of_json in
+      let validationStatus =
+        field_map json__ "ValidationStatus" DomainStatus.of_json in
+      let validationDomain =
+        field_map json__ "ValidationDomain" DomainNameString.of_json in
+      let validationEmails =
+        field_map json__ "ValidationEmails" ValidationEmailList.of_json in
+      let domainName = field_map json__ "DomainName" DomainNameString.of_json in
+      make ?validationMethod ?httpRedirect ?resourceRecord ?validationStatus
+        ?validationDomain ?validationEmails ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This structure is returned in the response object of ListCertificates action."]
-module CertificateStatus =
+       "Contains information about the validation of each domain name in the certificate."]
+module DomainValidationList =
+  struct
+    type nonrec t = DomainValidation.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1000) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DomainValidation.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DomainValidation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DomainValidationList"
+        ~of_json:DomainValidation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RenewalSummary =
   struct
     type nonrec t =
-      | PENDING_VALIDATION 
-      | ISSUED 
-      | INACTIVE 
-      | EXPIRED 
-      | VALIDATION_TIMED_OUT 
-      | REVOKED 
-      | FAILED 
+      {
+      renewalStatus: RenewalStatus.t option
+        [@ocaml.doc
+          "The status of ACM's managed renewal of the certificate."];
+      domainValidationOptions: DomainValidationList.t option
+        [@ocaml.doc
+          "Contains information about the validation of each domain name in the certificate, as it pertains to ACM's managed renewal. This is different from the initial validation that occurs as a result of the RequestCertificate request. This field exists only when the certificate type is AMAZON_ISSUED."];
+      renewalStatusReason: FailureReason.t option
+        [@ocaml.doc "The reason that a renewal request was unsuccessful."];
+      updatedAt: TStamp.t option
+        [@ocaml.doc
+          "The time at which the renewal summary was last updated."]}
+    let make ?renewalStatus =
+      fun ?domainValidationOptions ->
+        fun ?renewalStatusReason ->
+          fun ?updatedAt ->
+            fun () ->
+              {
+                renewalStatus;
+                domainValidationOptions;
+                renewalStatusReason;
+                updatedAt
+              }
+    let to_value x =
+      structure_to_value
+        [("RenewalStatus",
+           (Option.map x.renewalStatus ~f:RenewalStatus.to_value));
+        ("DomainValidationOptions",
+          (Option.map x.domainValidationOptions
+             ~f:DomainValidationList.to_value));
+        ("RenewalStatusReason",
+          (Option.map x.renewalStatusReason ~f:FailureReason.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:TStamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedAt =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let renewalStatusReason =
+        (Option.map ~f:FailureReason.of_xml)
+          (Xml.child xml_arg0 "RenewalStatusReason") in
+      let domainValidationOptions =
+        (Option.map ~f:DomainValidationList.of_xml)
+          (Xml.child xml_arg0 "DomainValidationOptions") in
+      let renewalStatus =
+        (Option.map ~f:RenewalStatus.of_xml)
+          (Xml.child xml_arg0 "RenewalStatus") in
+      make ?updatedAt ?renewalStatusReason ?domainValidationOptions
+        ?renewalStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" TStamp.of_json in
+      let renewalStatusReason =
+        field_map json__ "RenewalStatusReason" FailureReason.of_json in
+      let domainValidationOptions =
+        field_map json__ "DomainValidationOptions"
+          DomainValidationList.of_json in
+      let renewalStatus =
+        field_map json__ "RenewalStatus" RenewalStatus.of_json in
+      make ?updatedAt ?renewalStatusReason ?domainValidationOptions
+        ?renewalStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the status of ACM's managed renewal for the certificate. This structure exists only when the certificate type is AMAZON_ISSUED."]
+module KeyUsageName =
+  struct
+    type nonrec t =
+      | DIGITAL_SIGNATURE 
+      | NON_REPUDIATION 
+      | KEY_ENCIPHERMENT 
+      | DATA_ENCIPHERMENT 
+      | KEY_AGREEMENT 
+      | CERTIFICATE_SIGNING 
+      | CRL_SIGNING 
+      | ENCIPHER_ONLY 
+      | DECIPHER_ONLY 
+      | ANY 
+      | CUSTOM 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | PENDING_VALIDATION -> "PENDING_VALIDATION"
-      | ISSUED -> "ISSUED"
-      | INACTIVE -> "INACTIVE"
-      | EXPIRED -> "EXPIRED"
-      | VALIDATION_TIMED_OUT -> "VALIDATION_TIMED_OUT"
-      | REVOKED -> "REVOKED"
-      | FAILED -> "FAILED"
+      | DIGITAL_SIGNATURE -> "DIGITAL_SIGNATURE"
+      | NON_REPUDIATION -> "NON_REPUDIATION"
+      | KEY_ENCIPHERMENT -> "KEY_ENCIPHERMENT"
+      | DATA_ENCIPHERMENT -> "DATA_ENCIPHERMENT"
+      | KEY_AGREEMENT -> "KEY_AGREEMENT"
+      | CERTIFICATE_SIGNING -> "CERTIFICATE_SIGNING"
+      | CRL_SIGNING -> "CRL_SIGNING"
+      | ENCIPHER_ONLY -> "ENCIPHER_ONLY"
+      | DECIPHER_ONLY -> "DECIPHER_ONLY"
+      | ANY -> "ANY"
+      | CUSTOM -> "CUSTOM"
       | Non_static_id s -> s
     let of_string =
       function
-      | "PENDING_VALIDATION" -> PENDING_VALIDATION
-      | "ISSUED" -> ISSUED
-      | "INACTIVE" -> INACTIVE
-      | "EXPIRED" -> EXPIRED
-      | "VALIDATION_TIMED_OUT" -> VALIDATION_TIMED_OUT
-      | "REVOKED" -> REVOKED
-      | "FAILED" -> FAILED
+      | "DIGITAL_SIGNATURE" -> DIGITAL_SIGNATURE
+      | "NON_REPUDIATION" -> NON_REPUDIATION
+      | "KEY_ENCIPHERMENT" -> KEY_ENCIPHERMENT
+      | "DATA_ENCIPHERMENT" -> DATA_ENCIPHERMENT
+      | "KEY_AGREEMENT" -> KEY_AGREEMENT
+      | "CERTIFICATE_SIGNING" -> CERTIFICATE_SIGNING
+      | "CRL_SIGNING" -> CRL_SIGNING
+      | "ENCIPHER_ONLY" -> ENCIPHER_ONLY
+      | "DECIPHER_ONLY" -> DECIPHER_ONLY
+      | "ANY" -> ANY
+      | "CUSTOM" -> CUSTOM
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KeyUsageName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KeyUsageName" j)
+    let to_json = simple_to_json to_value
+  end
+module KeyUsage =
+  struct
+    type nonrec t =
+      {
+      name: KeyUsageName.t option
+        [@ocaml.doc
+          "A string value that contains a Key Usage extension name."]}
+    let make ?name = fun () -> { name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:KeyUsageName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:KeyUsageName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" KeyUsageName.of_json in
+      make ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Key Usage X.509 v3 extension defines the purpose of the public key contained in the certificate."]
+module KeyUsageList =
+  struct
+    type nonrec t = KeyUsage.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KeyUsage.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KeyUsage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KeyUsageList" ~of_json:KeyUsage.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KeyAlgorithm =
+  struct
+    type nonrec t =
+      | RSA_1024 
+      | RSA_2048 
+      | RSA_3072 
+      | RSA_4096 
+      | EC_prime256v1 
+      | EC_secp384r1 
+      | EC_secp521r1 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RSA_1024 -> "RSA_1024"
+      | RSA_2048 -> "RSA_2048"
+      | RSA_3072 -> "RSA_3072"
+      | RSA_4096 -> "RSA_4096"
+      | EC_prime256v1 -> "EC_prime256v1"
+      | EC_secp384r1 -> "EC_secp384r1"
+      | EC_secp521r1 -> "EC_secp521r1"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RSA_1024" -> RSA_1024
+      | "RSA_2048" -> RSA_2048
+      | "RSA_3072" -> RSA_3072
+      | "RSA_4096" -> RSA_4096
+      | "EC_prime256v1" -> EC_prime256v1
+      | "EC_secp384r1" -> EC_secp384r1
+      | "EC_secp521r1" -> EC_secp521r1
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KeyAlgorithm" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KeyAlgorithm" j)
+    let to_json = simple_to_json to_value
+  end
+module InUseList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j = list_of_json ~kind:"InUseList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExtendedKeyUsageName =
+  struct
+    type nonrec t =
+      | TLS_WEB_SERVER_AUTHENTICATION 
+      | TLS_WEB_CLIENT_AUTHENTICATION 
+      | CODE_SIGNING 
+      | EMAIL_PROTECTION 
+      | TIME_STAMPING 
+      | OCSP_SIGNING 
+      | IPSEC_END_SYSTEM 
+      | IPSEC_TUNNEL 
+      | IPSEC_USER 
+      | ANY 
+      | NONE 
+      | CUSTOM 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TLS_WEB_SERVER_AUTHENTICATION -> "TLS_WEB_SERVER_AUTHENTICATION"
+      | TLS_WEB_CLIENT_AUTHENTICATION -> "TLS_WEB_CLIENT_AUTHENTICATION"
+      | CODE_SIGNING -> "CODE_SIGNING"
+      | EMAIL_PROTECTION -> "EMAIL_PROTECTION"
+      | TIME_STAMPING -> "TIME_STAMPING"
+      | OCSP_SIGNING -> "OCSP_SIGNING"
+      | IPSEC_END_SYSTEM -> "IPSEC_END_SYSTEM"
+      | IPSEC_TUNNEL -> "IPSEC_TUNNEL"
+      | IPSEC_USER -> "IPSEC_USER"
+      | ANY -> "ANY"
+      | NONE -> "NONE"
+      | CUSTOM -> "CUSTOM"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TLS_WEB_SERVER_AUTHENTICATION" -> TLS_WEB_SERVER_AUTHENTICATION
+      | "TLS_WEB_CLIENT_AUTHENTICATION" -> TLS_WEB_CLIENT_AUTHENTICATION
+      | "CODE_SIGNING" -> CODE_SIGNING
+      | "EMAIL_PROTECTION" -> EMAIL_PROTECTION
+      | "TIME_STAMPING" -> TIME_STAMPING
+      | "OCSP_SIGNING" -> OCSP_SIGNING
+      | "IPSEC_END_SYSTEM" -> IPSEC_END_SYSTEM
+      | "IPSEC_TUNNEL" -> IPSEC_TUNNEL
+      | "IPSEC_USER" -> IPSEC_USER
+      | "ANY" -> ANY
+      | "NONE" -> NONE
+      | "CUSTOM" -> CUSTOM
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
       of_string
-        (string_of_xml ~kind:"enumeration CertificateStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"CertificateStatus" j)
+        (string_of_xml ~kind:"enumeration ExtendedKeyUsageName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExtendedKeyUsageName" j)
     let to_json = simple_to_json to_value
   end
-module ExtendedKeyUsageFilterList =
-  struct
-    type nonrec t = ExtendedKeyUsageName.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:ExtendedKeyUsageName.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ExtendedKeyUsageName.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ExtendedKeyUsageFilterList"
-        ~of_json:ExtendedKeyUsageName.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module KeyAlgorithmList =
-  struct
-    type nonrec t = KeyAlgorithm.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:KeyAlgorithm.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:KeyAlgorithm.of_xml)
-    let of_json j =
-      list_of_json ~kind:"KeyAlgorithmList" ~of_json:KeyAlgorithm.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module KeyUsageFilterList =
-  struct
-    type nonrec t = KeyUsageName.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:KeyUsageName.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:KeyUsageName.of_xml)
-    let of_json j =
-      list_of_json ~kind:"KeyUsageFilterList" ~of_json:KeyUsageName.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ServiceErrorMessage =
-  struct
-    type nonrec t = string
-    let context_ = "ServiceErrorMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ServiceErrorMessage" j
-    let to_json = simple_to_json to_value
-  end
-module AvailabilityErrorMessage =
-  struct
-    type nonrec t = string
-    let context_ = "AvailabilityErrorMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AvailabilityErrorMessage" j
-    let to_json = simple_to_json to_value
-  end
-module CertificateOptions =
+module ExtendedKeyUsage =
   struct
     type nonrec t =
       {
-      certificateTransparencyLoggingPreference:
-        CertificateTransparencyLoggingPreference.t option
+      name: ExtendedKeyUsageName.t option
+        [@ocaml.doc "The name of an Extended Key Usage value."];
+      oID: String_.t option
         [@ocaml.doc
-          "You can opt out of certificate transparency logging by specifying the DISABLED option. Opt in by specifying ENABLED."]}
-    let make ?certificateTransparencyLoggingPreference =
-      fun () -> { certificateTransparencyLoggingPreference }
+          "An object identifier (OID) for the extension value. OIDs are strings of numbers separated by periods. The following OIDs are defined in RFC 3280 and RFC 5280. 1.3.6.1.5.5.7.3.1 (TLS_WEB_SERVER_AUTHENTICATION) 1.3.6.1.5.5.7.3.2 (TLS_WEB_CLIENT_AUTHENTICATION) 1.3.6.1.5.5.7.3.3 (CODE_SIGNING) 1.3.6.1.5.5.7.3.4 (EMAIL_PROTECTION) 1.3.6.1.5.5.7.3.8 (TIME_STAMPING) 1.3.6.1.5.5.7.3.9 (OCSP_SIGNING) 1.3.6.1.5.5.7.3.5 (IPSEC_END_SYSTEM) 1.3.6.1.5.5.7.3.6 (IPSEC_TUNNEL) 1.3.6.1.5.5.7.3.7 (IPSEC_USER)"]}
+    let make ?name = fun ?oID -> fun () -> { name; oID }
     let to_value x =
       structure_to_value
-        [("CertificateTransparencyLoggingPreference",
-           (Option.map x.certificateTransparencyLoggingPreference
-              ~f:CertificateTransparencyLoggingPreference.to_value))]
+        [("Name", (Option.map x.name ~f:ExtendedKeyUsageName.to_value));
+        ("OID", (Option.map x.oID ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let certificateTransparencyLoggingPreference =
-        (Option.map ~f:CertificateTransparencyLoggingPreference.of_xml)
-          (Xml.child xml_arg0 "CertificateTransparencyLoggingPreference") in
-      make ?certificateTransparencyLoggingPreference ()
+      let oID = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OID") in
+      let name =
+        (Option.map ~f:ExtendedKeyUsageName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      make ?oID ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateTransparencyLoggingPreference =
-        field_map json "CertificateTransparencyLoggingPreference"
-          CertificateTransparencyLoggingPreference.of_json in
-      make ?certificateTransparencyLoggingPreference ()
+    let of_json json__ =
+      let oID = field_map json__ "OID" String_.of_json in
+      let name = field_map json__ "Name" ExtendedKeyUsageName.of_json in
+      make ?oID ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Structure that contains options for your certificate. Currently, you can use this only to specify whether to opt in to or out of certificate transparency logging. Some browsers require that public certificates issued for your domain be recorded in a log. Certificates that are not logged typically generate a browser error. Transparency makes it possible for you to detect SSL/TLS certificates that have been mistakenly or maliciously issued for your domain. For general information, see Certificate Transparency Logging."]
-module CertificateType =
-  struct
-    type nonrec t =
-      | IMPORTED 
-      | AMAZON_ISSUED 
-      | PRIVATE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | IMPORTED -> "IMPORTED"
-      | AMAZON_ISSUED -> "AMAZON_ISSUED"
-      | PRIVATE -> "PRIVATE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "IMPORTED" -> IMPORTED
-      | "AMAZON_ISSUED" -> AMAZON_ISSUED
-      | "PRIVATE" -> PRIVATE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration CertificateType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"CertificateType" j)
-    let to_json = simple_to_json to_value
-  end
-module DomainList =
-  struct
-    type nonrec t = DomainNameString.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:100) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:DomainNameString.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:DomainNameString.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DomainList" ~of_json:DomainNameString.of_json j
-    let to_json v = composed_to_json to_value v
-  end
+       "The Extended Key Usage X.509 v3 extension defines one or more purposes for which the public key can be used. This is in addition to or in place of the basic purposes specified by the Key Usage extension."]
 module ExtendedKeyUsageList =
   struct
     type nonrec t = ExtendedKeyUsage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExtendedKeyUsage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1081,356 +1543,20 @@ module ExtendedKeyUsageList =
         ~of_json:ExtendedKeyUsage.of_json j
     let to_json v = composed_to_json to_value v
   end
-module InUseList =
+module DomainList =
   struct
-    type nonrec t = String_.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:String_.of_xml)
-    let of_json j = list_of_json ~kind:"InUseList" ~of_json:String_.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module KeyUsageList =
-  struct
-    type nonrec t = KeyUsage.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:KeyUsage.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:KeyUsage.of_xml)
-    let of_json j =
-      list_of_json ~kind:"KeyUsageList" ~of_json:KeyUsage.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module RenewalEligibility =
-  struct
-    type nonrec t =
-      | ELIGIBLE 
-      | INELIGIBLE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ELIGIBLE -> "ELIGIBLE"
-      | INELIGIBLE -> "INELIGIBLE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ELIGIBLE" -> ELIGIBLE
-      | "INELIGIBLE" -> INELIGIBLE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration RenewalEligibility" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"RenewalEligibility" j)
-    let to_json = simple_to_json to_value
-  end
-module RenewalSummary =
-  struct
-    type nonrec t =
-      {
-      renewalStatus: RenewalStatus.t
-        [@ocaml.doc
-          "The status of ACM's managed renewal of the certificate."];
-      domainValidationOptions: DomainValidationList.t
-        [@ocaml.doc
-          "Contains information about the validation of each domain name in the certificate, as it pertains to ACM's managed renewal. This is different from the initial validation that occurs as a result of the RequestCertificate request. This field exists only when the certificate type is AMAZON_ISSUED."];
-      renewalStatusReason: FailureReason.t option
-        [@ocaml.doc "The reason that a renewal request was unsuccessful."];
-      updatedAt: TStamp.t
-        [@ocaml.doc
-          "The time at which the renewal summary was last updated."]}
-    let context_ = "RenewalSummary"
-    let make ?renewalStatusReason =
-      fun ~renewalStatus ->
-        fun ~domainValidationOptions ->
-          fun ~updatedAt ->
-            fun () ->
-              {
-                renewalStatusReason;
-                renewalStatus;
-                domainValidationOptions;
-                updatedAt
-              }
-    let to_value x =
-      structure_to_value
-        [("RenewalStatus", (Some (RenewalStatus.to_value x.renewalStatus)));
-        ("DomainValidationOptions",
-          (Some (DomainValidationList.to_value x.domainValidationOptions)));
-        ("RenewalStatusReason",
-          (Option.map x.renewalStatusReason ~f:FailureReason.to_value));
-        ("UpdatedAt", (Some (TStamp.to_value x.updatedAt)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let updatedAt =
-        TStamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UpdatedAt") in
-      let renewalStatusReason =
-        (Option.map ~f:FailureReason.of_xml)
-          (Xml.child xml_arg0 "RenewalStatusReason") in
-      let domainValidationOptions =
-        DomainValidationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DomainValidationOptions") in
-      let renewalStatus =
-        RenewalStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RenewalStatus") in
-      make ~updatedAt ?renewalStatusReason ~domainValidationOptions
-        ~renewalStatus ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map_exn json "UpdatedAt" TStamp.of_json in
-      let renewalStatusReason =
-        field_map json "RenewalStatusReason" FailureReason.of_json in
-      let domainValidationOptions =
-        field_map_exn json "DomainValidationOptions"
-          DomainValidationList.of_json in
-      let renewalStatus =
-        field_map_exn json "RenewalStatus" RenewalStatus.of_json in
-      make ~updatedAt ?renewalStatusReason ~domainValidationOptions
-        ~renewalStatus ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains information about the status of ACM's managed renewal for the certificate. This structure exists only when the certificate type is AMAZON_ISSUED."]
-module RevocationReason =
-  struct
-    type nonrec t =
-      | UNSPECIFIED 
-      | KEY_COMPROMISE 
-      | CA_COMPROMISE 
-      | AFFILIATION_CHANGED 
-      | SUPERCEDED 
-      | CESSATION_OF_OPERATION 
-      | CERTIFICATE_HOLD 
-      | REMOVE_FROM_CRL 
-      | PRIVILEGE_WITHDRAWN 
-      | A_A_COMPROMISE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | UNSPECIFIED -> "UNSPECIFIED"
-      | KEY_COMPROMISE -> "KEY_COMPROMISE"
-      | CA_COMPROMISE -> "CA_COMPROMISE"
-      | AFFILIATION_CHANGED -> "AFFILIATION_CHANGED"
-      | SUPERCEDED -> "SUPERCEDED"
-      | CESSATION_OF_OPERATION -> "CESSATION_OF_OPERATION"
-      | CERTIFICATE_HOLD -> "CERTIFICATE_HOLD"
-      | REMOVE_FROM_CRL -> "REMOVE_FROM_CRL"
-      | PRIVILEGE_WITHDRAWN -> "PRIVILEGE_WITHDRAWN"
-      | A_A_COMPROMISE -> "A_A_COMPROMISE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "UNSPECIFIED" -> UNSPECIFIED
-      | "KEY_COMPROMISE" -> KEY_COMPROMISE
-      | "CA_COMPROMISE" -> CA_COMPROMISE
-      | "AFFILIATION_CHANGED" -> AFFILIATION_CHANGED
-      | "SUPERCEDED" -> SUPERCEDED
-      | "CESSATION_OF_OPERATION" -> CESSATION_OF_OPERATION
-      | "CERTIFICATE_HOLD" -> CERTIFICATE_HOLD
-      | "REMOVE_FROM_CRL" -> REMOVE_FROM_CRL
-      | "PRIVILEGE_WITHDRAWN" -> PRIVILEGE_WITHDRAWN
-      | "A_A_COMPROMISE" -> A_A_COMPROMISE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration RevocationReason" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"RevocationReason" j)
-    let to_json = simple_to_json to_value
-  end
-module ValidationExceptionMessage =
-  struct
-    type nonrec t = string
-    let context_ = "ValidationExceptionMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ValidationExceptionMessage" j
-    let to_json = simple_to_json to_value
-  end
-module InvalidArnException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The requested Amazon Resource Name (ARN) does not refer to an existing resource."]
-module InvalidDomainValidationOptionsException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "One or more values in the DomainValidationOption structure is incorrect."]
-module InvalidParameterException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An input parameter was invalid."]
-module InvalidTagException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "One or both of the values that make up the key-value pair is not valid. For example, you cannot specify a tag value that begins with aws:."]
-module LimitExceededException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An ACM quota has been exceeded."]
-module TagPolicyException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A specified tag did not comply with an existing tag policy and was rejected."]
-module TooManyTagsException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The request contains too many tags. Try the request again with fewer tags."]
-module DomainValidationOptionList =
-  struct
-    type nonrec t = DomainValidationOption.t list
+    type nonrec t = DomainNameString.t list
     let make i =
       let open Result in
         ok_or_failwith
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:DomainValidationOption.to_value)) |>
-        (fun x -> `List x)
+      (xs |> (List.map ~f:DomainNameString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -1444,432 +1570,80 @@ module DomainValidationOptionList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:DomainValidationOption.of_xml)
+                     | _ -> true))) ~f:DomainNameString.of_xml)
     let of_json j =
-      list_of_json ~kind:"DomainValidationOptionList"
-        ~of_json:DomainValidationOption.of_json j
+      list_of_json ~kind:"DomainList" ~of_json:DomainNameString.of_json j
     let to_json v = composed_to_json to_value v
   end
-module IdempotencyToken =
+module CertificateTransparencyLoggingPreference =
   struct
-    type nonrec t = string
-    let context_ = "IdempotencyToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:32) >>=
-                  (fun () -> check_pattern i ~pattern:"\\w+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"IdempotencyToken" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration CertificateTransparencyLoggingPreference"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"CertificateTransparencyLoggingPreference" j)
     let to_json = simple_to_json to_value
   end
-module TagList =
-  struct
-    type nonrec t = Tag.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Tag.of_xml)
-    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ExpiryEventsConfiguration =
+module CertificateOptions =
   struct
     type nonrec t =
       {
-      daysBeforeExpiry: PositiveInteger.t option
+      certificateTransparencyLoggingPreference:
+        CertificateTransparencyLoggingPreference.t option
         [@ocaml.doc
-          "Specifies the number of days prior to certificate expiration when ACM starts generating EventBridge events. ACM sends one event per day per certificate until the certificate expires. By default, accounts receive events starting 45 days before certificate expiration."]}
-    let make ?daysBeforeExpiry = fun () -> { daysBeforeExpiry }
-    let to_value x =
-      structure_to_value
-        [("DaysBeforeExpiry",
-           (Option.map x.daysBeforeExpiry ~f:PositiveInteger.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let daysBeforeExpiry =
-        (Option.map ~f:PositiveInteger.of_xml)
-          (Xml.child xml_arg0 "DaysBeforeExpiry") in
-      make ?daysBeforeExpiry ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let daysBeforeExpiry =
-        field_map json "DaysBeforeExpiry" PositiveInteger.of_json in
-      make ?daysBeforeExpiry ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Object containing expiration events options associated with an Amazon Web Services account."]
-module ResourceNotFoundException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The specified certificate cannot be found in the caller's account or the caller's account cannot be found."]
-module CertificateSummaryList =
-  struct
-    type nonrec t = CertificateSummary.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:CertificateSummary.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:CertificateSummary.of_xml)
-    let of_json j =
-      list_of_json ~kind:"CertificateSummaryList"
-        ~of_json:CertificateSummary.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module InvalidArgsException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "One or more of of request parameters specified is not valid."]
-module NextToken =
-  struct
-    type nonrec t = string
-    let context_ = "NextToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:10000) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u00FF]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NextToken" j
-    let to_json = simple_to_json to_value
-  end
-module CertificateStatuses =
-  struct
-    type nonrec t = CertificateStatus.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:CertificateStatus.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:CertificateStatus.of_xml)
-    let of_json j =
-      list_of_json ~kind:"CertificateStatuses"
-        ~of_json:CertificateStatus.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module Filters =
-  struct
-    type nonrec t =
-      {
-      extendedKeyUsage: ExtendedKeyUsageFilterList.t option
-        [@ocaml.doc "Specify one or more ExtendedKeyUsage extension values."];
-      keyUsage: KeyUsageFilterList.t option
-        [@ocaml.doc "Specify one or more KeyUsage extension values."];
-      keyTypes: KeyAlgorithmList.t option
+          "You can opt out of certificate transparency logging by specifying the DISABLED option. Opt in by specifying ENABLED."];
+      export: CertificateExport.t option
         [@ocaml.doc
-          "Specify one or more algorithms that can be used to generate key pairs. Default filtering returns only RSA_1024 and RSA_2048 certificates that have at least one domain. To return other certificate types, provide the desired type signatures in a comma-separated list. For example, \"keyTypes\": \\[\"RSA_2048,RSA_4096\"\\] returns both RSA_2048 and RSA_4096 certificates."]}
-    let make ?extendedKeyUsage =
-      fun ?keyUsage ->
-        fun ?keyTypes -> fun () -> { extendedKeyUsage; keyUsage; keyTypes }
+          "You can opt in to allow the export of your certificates by specifying ENABLED. You cannot update the value of Export after the the certificate is created."]}
+    let make ?certificateTransparencyLoggingPreference =
+      fun ?export ->
+        fun () -> { certificateTransparencyLoggingPreference; export }
     let to_value x =
       structure_to_value
-        [("extendedKeyUsage",
-           (Option.map x.extendedKeyUsage
-              ~f:ExtendedKeyUsageFilterList.to_value));
-        ("keyUsage", (Option.map x.keyUsage ~f:KeyUsageFilterList.to_value));
-        ("keyTypes", (Option.map x.keyTypes ~f:KeyAlgorithmList.to_value))]
+        [("CertificateTransparencyLoggingPreference",
+           (Option.map x.certificateTransparencyLoggingPreference
+              ~f:CertificateTransparencyLoggingPreference.to_value));
+        ("Export", (Option.map x.export ~f:CertificateExport.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let keyTypes =
-        (Option.map ~f:KeyAlgorithmList.of_xml)
-          (Xml.child xml_arg0 "keyTypes") in
-      let keyUsage =
-        (Option.map ~f:KeyUsageFilterList.of_xml)
-          (Xml.child xml_arg0 "keyUsage") in
-      let extendedKeyUsage =
-        (Option.map ~f:ExtendedKeyUsageFilterList.of_xml)
-          (Xml.child xml_arg0 "extendedKeyUsage") in
-      make ?keyTypes ?keyUsage ?extendedKeyUsage ()
+      let export =
+        (Option.map ~f:CertificateExport.of_xml)
+          (Xml.child xml_arg0 "Export") in
+      let certificateTransparencyLoggingPreference =
+        (Option.map ~f:CertificateTransparencyLoggingPreference.of_xml)
+          (Xml.child xml_arg0 "CertificateTransparencyLoggingPreference") in
+      make ?export ?certificateTransparencyLoggingPreference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyTypes = field_map json "keyTypes" KeyAlgorithmList.of_json in
-      let keyUsage = field_map json "keyUsage" KeyUsageFilterList.of_json in
-      let extendedKeyUsage =
-        field_map json "extendedKeyUsage" ExtendedKeyUsageFilterList.of_json in
-      make ?keyTypes ?keyUsage ?extendedKeyUsage ()
+    let of_json json__ =
+      let export = field_map json__ "Export" CertificateExport.of_json in
+      let certificateTransparencyLoggingPreference =
+        field_map json__ "CertificateTransparencyLoggingPreference"
+          CertificateTransparencyLoggingPreference.of_json in
+      make ?export ?certificateTransparencyLoggingPreference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This structure can be used in the ListCertificates action to filter the output of the certificate list."]
-module MaxItems =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for MaxItems" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module CertificateBodyBlob =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Blob x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
-    let of_json j = string_of_json ~kind:"a blob" j
-    let to_json = simple_to_json to_value
-  end
-module CertificateChainBlob =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Blob x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
-    let of_json j = string_of_json ~kind:"a blob" j
-    let to_json = simple_to_json to_value
-  end
-module PrivateKeyBlob =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Blob x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
-    let of_json j = string_of_json ~kind:"a blob" j
-    let to_json = simple_to_json to_value
-  end
-module CertificateBody =
-  struct
-    type nonrec t = string
-    let context_ = "CertificateBody"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:32768) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"-{5}BEGIN CERTIFICATE-{5}\\u000D?\\u000A([A-Za-z0-9/+]{64}\\u000D?\\u000A)*[A-Za-z0-9/+]{1,64}={0,2}\\u000D?\\u000A-{5}END CERTIFICATE-{5}(\\u000D?\\u000A)?")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CertificateBody" j
-    let to_json = simple_to_json to_value
-  end
-module CertificateChain =
-  struct
-    type nonrec t = string
-    let context_ = "CertificateChain"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:2097152) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"(-{5}BEGIN CERTIFICATE-{5}\\u000D?\\u000A([A-Za-z0-9/+]{64}\\u000D?\\u000A)*[A-Za-z0-9/+]{1,64}={0,2}\\u000D?\\u000A-{5}END CERTIFICATE-{5}\\u000D?\\u000A)*-{5}BEGIN CERTIFICATE-{5}\\u000D?\\u000A([A-Za-z0-9/+]{64}\\u000D?\\u000A)*[A-Za-z0-9/+]{1,64}={0,2}\\u000D?\\u000A-{5}END CERTIFICATE-{5}(\\u000D?\\u000A)?")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CertificateChain" j
-    let to_json = simple_to_json to_value
-  end
-module RequestInProgressException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The certificate request is in process and the certificate in your account has not yet been issued."]
-module AccessDeniedException =
-  struct
-    type nonrec t = {
-      message: ServiceErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ServiceErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ServiceErrorMessage.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ServiceErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "You do not have access required to perform this action."]
-module ThrottlingException =
-  struct
-    type nonrec t = {
-      message: AvailabilityErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message",
-           (Option.map x.message ~f:AvailabilityErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:AvailabilityErrorMessage.of_xml)
-          (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" AvailabilityErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The request was denied because it exceeded a quota."]
-module PrivateKey =
-  struct
-    type nonrec t = string
-    let context_ = "PrivateKey"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:524288) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"-{5}BEGIN PRIVATE KEY-{5}\\u000D?\\u000A([A-Za-z0-9/+]{64}\\u000D?\\u000A)*[A-Za-z0-9/+]{1,64}={0,2}\\u000D?\\u000A-{5}END PRIVATE KEY-{5}(\\u000D?\\u000A)?")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"PrivateKey" j
-    let to_json = simple_to_json to_value
-  end
-module PassphraseBlob =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Blob x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
-    let of_json j = string_of_json ~kind:"a blob" j
-    let to_json = simple_to_json to_value
-  end
+       "Structure that contains options for your certificate. You can use this structure to specify whether to opt in to or out of certificate transparency logging and export your certificate. Some browsers require that public certificates issued for your domain be recorded in a log. Certificates that are not logged typically generate a browser error. Transparency makes it possible for you to detect SSL/TLS certificates that have been mistakenly or maliciously issued for your domain. For general information, see Certificate Transparency Logging. You can export public ACM certificates to use with Amazon Web Services services as well as outside Amazon Web Services Cloud. For more information, see Certificate Manager exportable public certificate."]
 module CertificateDetail =
   struct
     type nonrec t =
@@ -1883,6 +1657,9 @@ module CertificateDetail =
       subjectAlternativeNames: DomainList.t option
         [@ocaml.doc
           "One or more domain names (subject alternative names) included in the certificate. This list contains the domain names that are bound to the public key that is contained in the certificate. The subject alternative names include the canonical domain name (CN) of the certificate and additional domain names that can be used to connect to the website."];
+      managedBy: CertificateManagedBy.t option
+        [@ocaml.doc
+          "Identifies the Amazon Web Services service that manages the certificate issued by ACM."];
       domainValidationOptions: DomainValidationList.t option
         [@ocaml.doc
           "Contains information about the initial validation of each domain name that occurs as a result of the RequestCertificate request. This field exists only when the certificate type is AMAZON_ISSUED."];
@@ -1901,9 +1678,10 @@ module CertificateDetail =
           "The time at which the certificate was issued. This value exists only when the certificate type is AMAZON_ISSUED."];
       importedAt: TStamp.t option
         [@ocaml.doc
-          "The date and time at which the certificate was imported. This value exists only when the certificate type is IMPORTED."];
+          "The date and time when the certificate was imported. This value exists only when the certificate type is IMPORTED."];
       status: CertificateStatus.t option
-        [@ocaml.doc "The status of the certificate."];
+        [@ocaml.doc
+          "The status of the certificate. A certificate enters status PENDING_VALIDATION upon being requested, unless it fails for any of the reasons given in the troubleshooting topic Certificate request fails. ACM makes repeated attempts to validate a certificate for 72 hours and then times out. If a certificate shows status FAILED or VALIDATION_TIMED_OUT, delete the request, correct the issue with DNS validation or Email validation, and try again. If validation succeeds, the certificate enters status ISSUED."];
       revokedAt: TStamp.t option
         [@ocaml.doc
           "The time at which the certificate was revoked. This value exists only when the certificate status is REVOKED."];
@@ -1924,10 +1702,10 @@ module CertificateDetail =
           "A list of ARNs for the Amazon Web Services resources that are using the certificate. A certificate can be used by multiple Amazon Web Services resources."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "The reason the certificate request failed. This value exists only when the certificate status is FAILED. For more information, see Certificate Request Failed in the Amazon Web Services Certificate Manager User Guide."];
+          "The reason the certificate request failed. This value exists only when the certificate status is FAILED. For more information, see Certificate Request Failed in the Certificate Manager User Guide."];
       type_: CertificateType.t option
         [@ocaml.doc
-          "The source of the certificate. For certificates provided by ACM, this value is AMAZON_ISSUED. For certificates that you imported with ImportCertificate, this value is IMPORTED. ACM does not provide managed renewal for imported certificates. For more information about the differences between certificates that you import and those that ACM provides, see Importing Certificates in the Amazon Web Services Certificate Manager User Guide."];
+          "The source of the certificate. For certificates provided by ACM, this value is AMAZON_ISSUED. For certificates that you imported with ImportCertificate, this value is IMPORTED. ACM does not provide managed renewal for imported certificates. For more information about the differences between certificates that you import and those that ACM provides, see Importing Certificates in the Certificate Manager User Guide."];
       renewalSummary: RenewalSummary.t option
         [@ocaml.doc
           "Contains information about the status of ACM's managed renewal for the certificate. This field exists only when the certificate type is AMAZON_ISSUED."];
@@ -1939,7 +1717,7 @@ module CertificateDetail =
           "Contains a list of Extended Key Usage X.509 v3 extension objects. Each object specifies a purpose for which the certificate public key can be used and consists of a name and an object identifier (OID)."];
       certificateAuthorityArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the ACM PCA private certificate authority (CA) that issued the certificate. This has the following format: arn:aws:acm-pca:region:account:certificate-authority/12345678-1234-1234-1234-123456789012"];
+          "The Amazon Resource Name (ARN) of the private certificate authority (CA) that issued the certificate. This has the following format: arn:aws:acm-pca:region:account:certificate-authority/12345678-1234-1234-1234-123456789012"];
       renewalEligibility: RenewalEligibility.t option
         [@ocaml.doc
           "Specifies whether the certificate is eligible for renewal. At this time, only exported private certificates can be renewed with the RenewCertificate command."];
@@ -1949,61 +1727,63 @@ module CertificateDetail =
     let make ?certificateArn =
       fun ?domainName ->
         fun ?subjectAlternativeNames ->
-          fun ?domainValidationOptions ->
-            fun ?serial ->
-              fun ?subject ->
-                fun ?issuer ->
-                  fun ?createdAt ->
-                    fun ?issuedAt ->
-                      fun ?importedAt ->
-                        fun ?status ->
-                          fun ?revokedAt ->
-                            fun ?revocationReason ->
-                              fun ?notBefore ->
-                                fun ?notAfter ->
-                                  fun ?keyAlgorithm ->
-                                    fun ?signatureAlgorithm ->
-                                      fun ?inUseBy ->
-                                        fun ?failureReason ->
-                                          fun ?type_ ->
-                                            fun ?renewalSummary ->
-                                              fun ?keyUsages ->
-                                                fun ?extendedKeyUsages ->
-                                                  fun
-                                                    ?certificateAuthorityArn
-                                                    ->
-                                                    fun ?renewalEligibility
+          fun ?managedBy ->
+            fun ?domainValidationOptions ->
+              fun ?serial ->
+                fun ?subject ->
+                  fun ?issuer ->
+                    fun ?createdAt ->
+                      fun ?issuedAt ->
+                        fun ?importedAt ->
+                          fun ?status ->
+                            fun ?revokedAt ->
+                              fun ?revocationReason ->
+                                fun ?notBefore ->
+                                  fun ?notAfter ->
+                                    fun ?keyAlgorithm ->
+                                      fun ?signatureAlgorithm ->
+                                        fun ?inUseBy ->
+                                          fun ?failureReason ->
+                                            fun ?type_ ->
+                                              fun ?renewalSummary ->
+                                                fun ?keyUsages ->
+                                                  fun ?extendedKeyUsages ->
+                                                    fun
+                                                      ?certificateAuthorityArn
                                                       ->
-                                                      fun ?options ->
-                                                        fun () ->
-                                                          {
-                                                            certificateArn;
-                                                            domainName;
-                                                            subjectAlternativeNames;
-                                                            domainValidationOptions;
-                                                            serial;
-                                                            subject;
-                                                            issuer;
-                                                            createdAt;
-                                                            issuedAt;
-                                                            importedAt;
-                                                            status;
-                                                            revokedAt;
-                                                            revocationReason;
-                                                            notBefore;
-                                                            notAfter;
-                                                            keyAlgorithm;
-                                                            signatureAlgorithm;
-                                                            inUseBy;
-                                                            failureReason;
-                                                            type_;
-                                                            renewalSummary;
-                                                            keyUsages;
-                                                            extendedKeyUsages;
-                                                            certificateAuthorityArn;
-                                                            renewalEligibility;
-                                                            options
-                                                          }
+                                                      fun ?renewalEligibility
+                                                        ->
+                                                        fun ?options ->
+                                                          fun () ->
+                                                            {
+                                                              certificateArn;
+                                                              domainName;
+                                                              subjectAlternativeNames;
+                                                              managedBy;
+                                                              domainValidationOptions;
+                                                              serial;
+                                                              subject;
+                                                              issuer;
+                                                              createdAt;
+                                                              issuedAt;
+                                                              importedAt;
+                                                              status;
+                                                              revokedAt;
+                                                              revocationReason;
+                                                              notBefore;
+                                                              notAfter;
+                                                              keyAlgorithm;
+                                                              signatureAlgorithm;
+                                                              inUseBy;
+                                                              failureReason;
+                                                              type_;
+                                                              renewalSummary;
+                                                              keyUsages;
+                                                              extendedKeyUsages;
+                                                              certificateAuthorityArn;
+                                                              renewalEligibility;
+                                                              options
+                                                            }
     let to_value x =
       structure_to_value
         [("CertificateArn", (Option.map x.certificateArn ~f:Arn.to_value));
@@ -2011,6 +1791,8 @@ module CertificateDetail =
           (Option.map x.domainName ~f:DomainNameString.to_value));
         ("SubjectAlternativeNames",
           (Option.map x.subjectAlternativeNames ~f:DomainList.to_value));
+        ("ManagedBy",
+          (Option.map x.managedBy ~f:CertificateManagedBy.to_value));
         ("DomainValidationOptions",
           (Option.map x.domainValidationOptions
              ~f:DomainValidationList.to_value));
@@ -2103,6 +1885,9 @@ module CertificateDetail =
       let domainValidationOptions =
         (Option.map ~f:DomainValidationList.of_xml)
           (Xml.child xml_arg0 "DomainValidationOptions") in
+      let managedBy =
+        (Option.map ~f:CertificateManagedBy.of_xml)
+          (Xml.child xml_arg0 "ManagedBy") in
       let subjectAlternativeNames =
         (Option.map ~f:DomainList.of_xml)
           (Xml.child xml_arg0 "SubjectAlternativeNames") in
@@ -2115,54 +1900,2930 @@ module CertificateDetail =
         ?extendedKeyUsages ?keyUsages ?renewalSummary ?type_ ?failureReason
         ?inUseBy ?signatureAlgorithm ?keyAlgorithm ?notAfter ?notBefore
         ?revocationReason ?revokedAt ?status ?importedAt ?issuedAt ?createdAt
-        ?issuer ?subject ?serial ?domainValidationOptions
+        ?issuer ?subject ?serial ?domainValidationOptions ?managedBy
         ?subjectAlternativeNames ?domainName ?certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let options = field_map json "Options" CertificateOptions.of_json in
+    let of_json json__ =
+      let options = field_map json__ "Options" CertificateOptions.of_json in
       let renewalEligibility =
-        field_map json "RenewalEligibility" RenewalEligibility.of_json in
+        field_map json__ "RenewalEligibility" RenewalEligibility.of_json in
       let certificateAuthorityArn =
-        field_map json "CertificateAuthorityArn" Arn.of_json in
+        field_map json__ "CertificateAuthorityArn" Arn.of_json in
       let extendedKeyUsages =
-        field_map json "ExtendedKeyUsages" ExtendedKeyUsageList.of_json in
-      let keyUsages = field_map json "KeyUsages" KeyUsageList.of_json in
+        field_map json__ "ExtendedKeyUsages" ExtendedKeyUsageList.of_json in
+      let keyUsages = field_map json__ "KeyUsages" KeyUsageList.of_json in
       let renewalSummary =
-        field_map json "RenewalSummary" RenewalSummary.of_json in
-      let type_ = field_map json "Type" CertificateType.of_json in
+        field_map json__ "RenewalSummary" RenewalSummary.of_json in
+      let type_ = field_map json__ "Type" CertificateType.of_json in
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
-      let inUseBy = field_map json "InUseBy" InUseList.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
+      let inUseBy = field_map json__ "InUseBy" InUseList.of_json in
       let signatureAlgorithm =
-        field_map json "SignatureAlgorithm" String_.of_json in
-      let keyAlgorithm = field_map json "KeyAlgorithm" KeyAlgorithm.of_json in
-      let notAfter = field_map json "NotAfter" TStamp.of_json in
-      let notBefore = field_map json "NotBefore" TStamp.of_json in
+        field_map json__ "SignatureAlgorithm" String_.of_json in
+      let keyAlgorithm = field_map json__ "KeyAlgorithm" KeyAlgorithm.of_json in
+      let notAfter = field_map json__ "NotAfter" TStamp.of_json in
+      let notBefore = field_map json__ "NotBefore" TStamp.of_json in
       let revocationReason =
-        field_map json "RevocationReason" RevocationReason.of_json in
-      let revokedAt = field_map json "RevokedAt" TStamp.of_json in
-      let status = field_map json "Status" CertificateStatus.of_json in
-      let importedAt = field_map json "ImportedAt" TStamp.of_json in
-      let issuedAt = field_map json "IssuedAt" TStamp.of_json in
-      let createdAt = field_map json "CreatedAt" TStamp.of_json in
-      let issuer = field_map json "Issuer" String_.of_json in
-      let subject = field_map json "Subject" String_.of_json in
-      let serial = field_map json "Serial" String_.of_json in
+        field_map json__ "RevocationReason" RevocationReason.of_json in
+      let revokedAt = field_map json__ "RevokedAt" TStamp.of_json in
+      let status = field_map json__ "Status" CertificateStatus.of_json in
+      let importedAt = field_map json__ "ImportedAt" TStamp.of_json in
+      let issuedAt = field_map json__ "IssuedAt" TStamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" TStamp.of_json in
+      let issuer = field_map json__ "Issuer" String_.of_json in
+      let subject = field_map json__ "Subject" String_.of_json in
+      let serial = field_map json__ "Serial" String_.of_json in
       let domainValidationOptions =
-        field_map json "DomainValidationOptions" DomainValidationList.of_json in
+        field_map json__ "DomainValidationOptions"
+          DomainValidationList.of_json in
+      let managedBy =
+        field_map json__ "ManagedBy" CertificateManagedBy.of_json in
       let subjectAlternativeNames =
-        field_map json "SubjectAlternativeNames" DomainList.of_json in
-      let domainName = field_map json "DomainName" DomainNameString.of_json in
-      let certificateArn = field_map json "CertificateArn" Arn.of_json in
+        field_map json__ "SubjectAlternativeNames" DomainList.of_json in
+      let domainName = field_map json__ "DomainName" DomainNameString.of_json in
+      let certificateArn = field_map json__ "CertificateArn" Arn.of_json in
       make ?options ?renewalEligibility ?certificateAuthorityArn
         ?extendedKeyUsages ?keyUsages ?renewalSummary ?type_ ?failureReason
         ?inUseBy ?signatureAlgorithm ?keyAlgorithm ?notAfter ?notBefore
         ?revocationReason ?revokedAt ?status ?importedAt ?issuedAt ?createdAt
-        ?issuer ?subject ?serial ?domainValidationOptions
+        ?issuer ?subject ?serial ?domainValidationOptions ?managedBy
         ?subjectAlternativeNames ?domainName ?certificateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains metadata about an ACM certificate. This structure is returned in the response to a DescribeCertificate request."]
+module TimestampRange =
+  struct
+    type nonrec t =
+      {
+      start: TStamp.t option
+        [@ocaml.doc "The start of the time range. This value is inclusive."];
+      end_: TStamp.t option
+        [@ocaml.doc "The end of the time range. This value is inclusive."]}
+    let make ?start = fun ?end_ -> fun () -> { start; end_ }
+    let to_value x =
+      structure_to_value
+        [("Start", (Option.map x.start ~f:TStamp.to_value));
+        ("End", (Option.map x.end_ ~f:TStamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let end_ = (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "End") in
+      let start = (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "Start") in
+      make ?end_ ?start ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let end_ = field_map json__ "End" TStamp.of_json in
+      let start = field_map json__ "Start" TStamp.of_json in
+      make ?end_ ?start ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies a time range for filtering certificates."]
+module FilterString =
+  struct
+    type nonrec t = string
+    let context_ = "FilterString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilterString" j
+    let to_json = simple_to_json to_value
+  end
+module ComparisonOperator =
+  struct
+    type nonrec t =
+      | CONTAINS 
+      | EQUALS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CONTAINS -> "CONTAINS"
+      | EQUALS -> "EQUALS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CONTAINS" -> CONTAINS
+      | "EQUALS" -> EQUALS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ComparisonOperator" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ComparisonOperator" j)
+    let to_json = simple_to_json to_value
+  end
+module CommonNameFilter =
+  struct
+    type nonrec t =
+      {
+      value: FilterString.t [@ocaml.doc "The value to match against."];
+      comparisonOperator: ComparisonOperator.t
+        [@ocaml.doc "The comparison operator to use."]}
+    let context_ = "CommonNameFilter"
+    let make ~value =
+      fun ~comparisonOperator -> fun () -> { value; comparisonOperator }
+    let to_value x =
+      structure_to_value
+        [("Value", (Some (FilterString.to_value x.value)));
+        ("ComparisonOperator",
+          (Some (ComparisonOperator.to_value x.comparisonOperator)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let comparisonOperator =
+        ComparisonOperator.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ComparisonOperator") in
+      let value =
+        FilterString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      make ~comparisonOperator ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let comparisonOperator =
+        field_map_exn json__ "ComparisonOperator" ComparisonOperator.of_json in
+      let value = field_map_exn json__ "Value" FilterString.of_json in
+      make ~comparisonOperator ~value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filters certificates by common name."]
+module SubjectFilter =
+  struct
+    type nonrec t =
+      {
+      commonName: CommonNameFilter.t option
+        [@ocaml.doc "Filter by common name in the subject."]}
+    let make ?commonName = fun () -> { commonName }
+    let to_value x =
+      structure_to_value
+        [("CommonName",
+           (Option.map x.commonName ~f:CommonNameFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let commonName =
+        (Option.map ~f:CommonNameFilter.of_xml)
+          (Xml.child xml_arg0 "CommonName") in
+      make ?commonName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let commonName = field_map json__ "CommonName" CommonNameFilter.of_json in
+      make ?commonName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filters certificates by subject attributes."]
+module DnsNameFilter =
+  struct
+    type nonrec t =
+      {
+      value: FilterString.t
+        [@ocaml.doc "The DNS name value to match against."];
+      comparisonOperator: ComparisonOperator.t
+        [@ocaml.doc "The comparison operator to use."]}
+    let context_ = "DnsNameFilter"
+    let make ~value =
+      fun ~comparisonOperator -> fun () -> { value; comparisonOperator }
+    let to_value x =
+      structure_to_value
+        [("Value", (Some (FilterString.to_value x.value)));
+        ("ComparisonOperator",
+          (Some (ComparisonOperator.to_value x.comparisonOperator)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let comparisonOperator =
+        ComparisonOperator.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ComparisonOperator") in
+      let value =
+        FilterString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      make ~comparisonOperator ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let comparisonOperator =
+        field_map_exn json__ "ComparisonOperator" ComparisonOperator.of_json in
+      let value = field_map_exn json__ "Value" FilterString.of_json in
+      make ~comparisonOperator ~value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filters certificates by DNS name."]
+module SubjectAlternativeNameFilter =
+  struct
+    type nonrec t =
+      {
+      dnsName: DnsNameFilter.t option
+        [@ocaml.doc "Filter by DNS name in subject alternative names."]}
+    let make ?dnsName = fun () -> { dnsName }
+    let to_value x =
+      structure_to_value
+        [("DnsName", (Option.map x.dnsName ~f:DnsNameFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dnsName =
+        (Option.map ~f:DnsNameFilter.of_xml) (Xml.child xml_arg0 "DnsName") in
+      make ?dnsName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dnsName = field_map json__ "DnsName" DnsNameFilter.of_json in
+      make ?dnsName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Filters certificates by subject alternative name attributes."]
+module SerialNumber =
+  struct
+    type nonrec t = string
+    let context_ = "SerialNumber"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:2) >>=
+             (fun () ->
+                (check_string_max i ~max:59) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[0-9a-f]{2}(:[0-9a-f]{2}){1,19}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SerialNumber" j
+    let to_json = simple_to_json to_value
+  end
+module X509AttributeFilter =
+  struct
+    type nonrec t =
+      {
+      subject: SubjectFilter.t option
+        [@ocaml.doc "Filter by certificate subject."];
+      subjectAlternativeName: SubjectAlternativeNameFilter.t option
+        [@ocaml.doc "Filter by subject alternative names."];
+      extendedKeyUsage: ExtendedKeyUsageName.t option
+        [@ocaml.doc "Filter by extended key usage."];
+      keyUsage: KeyUsageName.t option [@ocaml.doc "Filter by key usage."];
+      keyAlgorithm: KeyAlgorithm.t option
+        [@ocaml.doc "Filter by key algorithm."];
+      serialNumber: SerialNumber.t option
+        [@ocaml.doc "Filter by serial number."];
+      notAfter: TimestampRange.t option
+        [@ocaml.doc
+          "Filter by certificate expiration date. The start date is inclusive."];
+      notBefore: TimestampRange.t option
+        [@ocaml.doc
+          "Filter by certificate validity start date. The start date is inclusive."]}
+    let make ?subject =
+      fun ?subjectAlternativeName ->
+        fun ?extendedKeyUsage ->
+          fun ?keyUsage ->
+            fun ?keyAlgorithm ->
+              fun ?serialNumber ->
+                fun ?notAfter ->
+                  fun ?notBefore ->
+                    fun () ->
+                      {
+                        subject;
+                        subjectAlternativeName;
+                        extendedKeyUsage;
+                        keyUsage;
+                        keyAlgorithm;
+                        serialNumber;
+                        notAfter;
+                        notBefore
+                      }
+    let to_value x =
+      structure_to_value
+        [("Subject", (Option.map x.subject ~f:SubjectFilter.to_value));
+        ("SubjectAlternativeName",
+          (Option.map x.subjectAlternativeName
+             ~f:SubjectAlternativeNameFilter.to_value));
+        ("ExtendedKeyUsage",
+          (Option.map x.extendedKeyUsage ~f:ExtendedKeyUsageName.to_value));
+        ("KeyUsage", (Option.map x.keyUsage ~f:KeyUsageName.to_value));
+        ("KeyAlgorithm",
+          (Option.map x.keyAlgorithm ~f:KeyAlgorithm.to_value));
+        ("SerialNumber",
+          (Option.map x.serialNumber ~f:SerialNumber.to_value));
+        ("NotAfter", (Option.map x.notAfter ~f:TimestampRange.to_value));
+        ("NotBefore", (Option.map x.notBefore ~f:TimestampRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notBefore =
+        (Option.map ~f:TimestampRange.of_xml)
+          (Xml.child xml_arg0 "NotBefore") in
+      let notAfter =
+        (Option.map ~f:TimestampRange.of_xml) (Xml.child xml_arg0 "NotAfter") in
+      let serialNumber =
+        (Option.map ~f:SerialNumber.of_xml)
+          (Xml.child xml_arg0 "SerialNumber") in
+      let keyAlgorithm =
+        (Option.map ~f:KeyAlgorithm.of_xml)
+          (Xml.child xml_arg0 "KeyAlgorithm") in
+      let keyUsage =
+        (Option.map ~f:KeyUsageName.of_xml) (Xml.child xml_arg0 "KeyUsage") in
+      let extendedKeyUsage =
+        (Option.map ~f:ExtendedKeyUsageName.of_xml)
+          (Xml.child xml_arg0 "ExtendedKeyUsage") in
+      let subjectAlternativeName =
+        (Option.map ~f:SubjectAlternativeNameFilter.of_xml)
+          (Xml.child xml_arg0 "SubjectAlternativeName") in
+      let subject =
+        (Option.map ~f:SubjectFilter.of_xml) (Xml.child xml_arg0 "Subject") in
+      make ?notBefore ?notAfter ?serialNumber ?keyAlgorithm ?keyUsage
+        ?extendedKeyUsage ?subjectAlternativeName ?subject ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notBefore = field_map json__ "NotBefore" TimestampRange.of_json in
+      let notAfter = field_map json__ "NotAfter" TimestampRange.of_json in
+      let serialNumber = field_map json__ "SerialNumber" SerialNumber.of_json in
+      let keyAlgorithm = field_map json__ "KeyAlgorithm" KeyAlgorithm.of_json in
+      let keyUsage = field_map json__ "KeyUsage" KeyUsageName.of_json in
+      let extendedKeyUsage =
+        field_map json__ "ExtendedKeyUsage" ExtendedKeyUsageName.of_json in
+      let subjectAlternativeName =
+        field_map json__ "SubjectAlternativeName"
+          SubjectAlternativeNameFilter.of_json in
+      let subject = field_map json__ "Subject" SubjectFilter.of_json in
+      make ?notBefore ?notAfter ?serialNumber ?keyAlgorithm ?keyUsage
+        ?extendedKeyUsage ?subjectAlternativeName ?subject ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Filters certificates by X.509 attributes."]
+module CertificateFilter =
+  struct
+    type nonrec t =
+      {
+      certificateArn: Arn.t option [@ocaml.doc "Filter by certificate ARN."];
+      x509AttributeFilter: X509AttributeFilter.t option
+        [@ocaml.doc "Filter by X.509 certificate attributes."];
+      acmCertificateMetadataFilter: AcmCertificateMetadataFilter.t option
+        [@ocaml.doc "Filter by ACM certificate metadata."]}
+    let make ?certificateArn =
+      fun ?x509AttributeFilter ->
+        fun ?acmCertificateMetadataFilter ->
+          fun () ->
+            {
+              certificateArn;
+              x509AttributeFilter;
+              acmCertificateMetadataFilter
+            }
+    let to_value x =
+      structure_to_value
+        [("CertificateArn", (Option.map x.certificateArn ~f:Arn.to_value));
+        ("X509AttributeFilter",
+          (Option.map x.x509AttributeFilter ~f:X509AttributeFilter.to_value));
+        ("AcmCertificateMetadataFilter",
+          (Option.map x.acmCertificateMetadataFilter
+             ~f:AcmCertificateMetadataFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let acmCertificateMetadataFilter =
+        (Option.map ~f:AcmCertificateMetadataFilter.of_xml)
+          (Xml.child xml_arg0 "AcmCertificateMetadataFilter") in
+      let x509AttributeFilter =
+        (Option.map ~f:X509AttributeFilter.of_xml)
+          (Xml.child xml_arg0 "X509AttributeFilter") in
+      let certificateArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CertificateArn") in
+      make ?acmCertificateMetadataFilter ?x509AttributeFilter ?certificateArn
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let acmCertificateMetadataFilter =
+        field_map json__ "AcmCertificateMetadataFilter"
+          AcmCertificateMetadataFilter.of_json in
+      let x509AttributeFilter =
+        field_map json__ "X509AttributeFilter" X509AttributeFilter.of_json in
+      let certificateArn = field_map json__ "CertificateArn" Arn.of_json in
+      make ?acmCertificateMetadataFilter ?x509AttributeFilter ?certificateArn
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines a filter for searching certificates by ARN, X.509 attributes, or ACM metadata."]
+module rec
+  CertificateFilterStatement:sig
+                               type nonrec t =
+                                 {
+                                 and_:
+                                   CertificateFilterStatementList.t option
+                                   [@ocaml.doc
+                                     "A list of filter statements that must all be true."];
+                                 or_: CertificateFilterStatementList.t option
+                                   [@ocaml.doc
+                                     "A list of filter statements where at least one must be true."];
+                                 not: CertificateFilterStatement.t option
+                                   [@ocaml.doc
+                                     "A filter statement that must not be true."];
+                                 filter: CertificateFilter.t option
+                                   [@ocaml.doc
+                                     "A single certificate filter."]}
+                               val make :
+                                 ?and_:CertificateFilterStatementList.t ->
+                                   ?or_:CertificateFilterStatementList.t ->
+                                     ?not:CertificateFilterStatement.t ->
+                                       ?filter:CertificateFilter.t ->
+                                         unit -> t
+                               val to_value : t -> Botodata.value
+                               val to_query : t -> Client.Query.t
+                               val of_xml : Xml.t -> t
+                               val of_json : Yojson.Safe.t -> t
+                               val to_json : t -> Yojson.Safe.t
+                             end =
+  struct
+    type nonrec t =
+      {
+      and_: CertificateFilterStatementList.t option
+        [@ocaml.doc "A list of filter statements that must all be true."];
+      or_: CertificateFilterStatementList.t option
+        [@ocaml.doc
+          "A list of filter statements where at least one must be true."];
+      not: CertificateFilterStatement.t option
+        [@ocaml.doc "A filter statement that must not be true."];
+      filter: CertificateFilter.t option
+        [@ocaml.doc "A single certificate filter."]}
+    let make ?and_ =
+      fun ?or_ ->
+        fun ?not -> fun ?filter -> fun () -> { and_; or_; not; filter }
+    let to_value x =
+      structure_to_value
+        [("And",
+           (Option.map x.and_ ~f:CertificateFilterStatementList.to_value));
+        ("Or", (Option.map x.or_ ~f:CertificateFilterStatementList.to_value));
+        ("Not", (Option.map x.not ~f:CertificateFilterStatement.to_value));
+        ("Filter", (Option.map x.filter ~f:CertificateFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filter =
+        (Option.map ~f:CertificateFilter.of_xml)
+          (Xml.child xml_arg0 "Filter") in
+      let not =
+        (Option.map ~f:CertificateFilterStatement.of_xml)
+          (Xml.child xml_arg0 "Not") in
+      let or_ =
+        (Option.map ~f:CertificateFilterStatementList.of_xml)
+          (Xml.child xml_arg0 "Or") in
+      let and_ =
+        (Option.map ~f:CertificateFilterStatementList.of_xml)
+          (Xml.child xml_arg0 "And") in
+      make ?filter ?not ?or_ ?and_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filter = field_map json__ "Filter" CertificateFilter.of_json in
+      let not = field_map json__ "Not" CertificateFilterStatement.of_json in
+      let or_ = field_map json__ "Or" CertificateFilterStatementList.of_json in
+      let and_ =
+        field_map json__ "And" CertificateFilterStatementList.of_json in
+      make ?filter ?not ?or_ ?and_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A filter statement used to search for certificates. Can contain AND, OR, NOT logical operators or a single filter."]
+ and
+  CertificateFilterStatementList:sig
+                                   type nonrec t =
+                                     CertificateFilterStatement.t list
+                                   val make :
+                                     CertificateFilterStatement.t list -> t
+                                   val to_value : t -> Botodata.value
+                                   val to_query : t -> Client.Query.t
+                                   val of_xml :
+                                     Xml.t ->
+                                       CertificateFilterStatement.t list
+                                   val of_json : Yojson.Safe.t -> t
+                                   val to_json : t -> Yojson.Safe.t
+                                   val to_header : t -> string
+                                 end =
+  struct
+    type nonrec t = CertificateFilterStatement.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:15) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CertificateFilterStatement.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CertificateFilterStatement.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CertificateFilterStatementList"
+        ~of_json:CertificateFilterStatement.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CertificateMetadata =
+  struct
+    type nonrec t =
+      {
+      acmCertificateMetadata: AcmCertificateMetadata.t option
+        [@ocaml.doc "Metadata for an ACM certificate."]}
+    let make ?acmCertificateMetadata = fun () -> { acmCertificateMetadata }
+    let to_value x =
+      structure_to_value
+        [("AcmCertificateMetadata",
+           (Option.map x.acmCertificateMetadata
+              ~f:AcmCertificateMetadata.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let acmCertificateMetadata =
+        (Option.map ~f:AcmCertificateMetadata.of_xml)
+          (Xml.child xml_arg0 "AcmCertificateMetadata") in
+      make ?acmCertificateMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let acmCertificateMetadata =
+        field_map json__ "AcmCertificateMetadata"
+          AcmCertificateMetadata.of_json in
+      make ?acmCertificateMetadata ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains metadata about a certificate. Currently supports ACM certificate metadata."]
+module KeyUsageNames =
+  struct
+    type nonrec t = KeyUsageName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KeyUsageName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KeyUsageName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KeyUsageNames" ~of_json:KeyUsageName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OtherName =
+  struct
+    type nonrec t =
+      {
+      objectIdentifier: String_.t option [@ocaml.doc "Specifies an OID."];
+      value: String_.t option [@ocaml.doc "Specifies an OID value."]}
+    let make ?objectIdentifier =
+      fun ?value -> fun () -> { objectIdentifier; value }
+    let to_value x =
+      structure_to_value
+        [("ObjectIdentifier",
+           (Option.map x.objectIdentifier ~f:String_.to_value));
+        ("Value", (Option.map x.value ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
+      let objectIdentifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ObjectIdentifier") in
+      make ?value ?objectIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let objectIdentifier =
+        field_map json__ "ObjectIdentifier" String_.of_json in
+      make ?value ?objectIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines a custom ASN.1 X.400 GeneralName using an object identifier (OID) and value. For more information, see NIST's definition of Object Identifier (OID)."]
+module DomainComponentList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DomainComponentList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CustomAttribute =
+  struct
+    type nonrec t =
+      {
+      objectIdentifier: String_.t option
+        [@ocaml.doc
+          "Specifies the object identifier (OID) of the attribute type of the relative distinguished name (RDN)."];
+      value: String_.t option
+        [@ocaml.doc
+          "Specifies the attribute value of relative distinguished name (RDN)."]}
+    let make ?objectIdentifier =
+      fun ?value -> fun () -> { objectIdentifier; value }
+    let to_value x =
+      structure_to_value
+        [("ObjectIdentifier",
+           (Option.map x.objectIdentifier ~f:String_.to_value));
+        ("Value", (Option.map x.value ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
+      let objectIdentifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ObjectIdentifier") in
+      make ?value ?objectIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let objectIdentifier =
+        field_map json__ "ObjectIdentifier" String_.of_json in
+      make ?value ?objectIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Defines the X.500 relative distinguished name (RDN)."]
+module CustomAttributeList =
+  struct
+    type nonrec t = CustomAttribute.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CustomAttribute.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CustomAttribute.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CustomAttributeList"
+        ~of_json:CustomAttribute.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DistinguishedName =
+  struct
+    type nonrec t =
+      {
+      commonName: String_.t option
+        [@ocaml.doc "The common name (CN) attribute."];
+      domainComponents: DomainComponentList.t option
+        [@ocaml.doc "The domain component attributes."];
+      country: String_.t option [@ocaml.doc "The country (C) attribute."];
+      customAttributes: CustomAttributeList.t option
+        [@ocaml.doc
+          "A list of custom attributes in the distinguished name. Each custom attribute contains an object identifier (OID) and its corresponding value."];
+      distinguishedNameQualifier: String_.t option
+        [@ocaml.doc "The distinguished name qualifier attribute."];
+      generationQualifier: String_.t option
+        [@ocaml.doc "The generation qualifier attribute."];
+      givenName: String_.t option [@ocaml.doc "The given name attribute."];
+      initials: String_.t option [@ocaml.doc "The initials attribute."];
+      locality: String_.t option [@ocaml.doc "The locality (L) attribute."];
+      organization: String_.t option
+        [@ocaml.doc "The organization (O) attribute."];
+      organizationalUnit: String_.t option
+        [@ocaml.doc "The organizational unit (OU) attribute."];
+      pseudonym: String_.t option [@ocaml.doc "The pseudonym attribute."];
+      serialNumber: String_.t option
+        [@ocaml.doc "The serial number attribute."];
+      state: String_.t option
+        [@ocaml.doc "The state or province (ST) attribute."];
+      surname: String_.t option [@ocaml.doc "The surname attribute."];
+      title: String_.t option [@ocaml.doc "The title attribute."]}
+    let make ?commonName =
+      fun ?domainComponents ->
+        fun ?country ->
+          fun ?customAttributes ->
+            fun ?distinguishedNameQualifier ->
+              fun ?generationQualifier ->
+                fun ?givenName ->
+                  fun ?initials ->
+                    fun ?locality ->
+                      fun ?organization ->
+                        fun ?organizationalUnit ->
+                          fun ?pseudonym ->
+                            fun ?serialNumber ->
+                              fun ?state ->
+                                fun ?surname ->
+                                  fun ?title ->
+                                    fun () ->
+                                      {
+                                        commonName;
+                                        domainComponents;
+                                        country;
+                                        customAttributes;
+                                        distinguishedNameQualifier;
+                                        generationQualifier;
+                                        givenName;
+                                        initials;
+                                        locality;
+                                        organization;
+                                        organizationalUnit;
+                                        pseudonym;
+                                        serialNumber;
+                                        state;
+                                        surname;
+                                        title
+                                      }
+    let to_value x =
+      structure_to_value
+        [("CommonName", (Option.map x.commonName ~f:String_.to_value));
+        ("DomainComponents",
+          (Option.map x.domainComponents ~f:DomainComponentList.to_value));
+        ("Country", (Option.map x.country ~f:String_.to_value));
+        ("CustomAttributes",
+          (Option.map x.customAttributes ~f:CustomAttributeList.to_value));
+        ("DistinguishedNameQualifier",
+          (Option.map x.distinguishedNameQualifier ~f:String_.to_value));
+        ("GenerationQualifier",
+          (Option.map x.generationQualifier ~f:String_.to_value));
+        ("GivenName", (Option.map x.givenName ~f:String_.to_value));
+        ("Initials", (Option.map x.initials ~f:String_.to_value));
+        ("Locality", (Option.map x.locality ~f:String_.to_value));
+        ("Organization", (Option.map x.organization ~f:String_.to_value));
+        ("OrganizationalUnit",
+          (Option.map x.organizationalUnit ~f:String_.to_value));
+        ("Pseudonym", (Option.map x.pseudonym ~f:String_.to_value));
+        ("SerialNumber", (Option.map x.serialNumber ~f:String_.to_value));
+        ("State", (Option.map x.state ~f:String_.to_value));
+        ("Surname", (Option.map x.surname ~f:String_.to_value));
+        ("Title", (Option.map x.title ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let title = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Title") in
+      let surname =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Surname") in
+      let state = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "State") in
+      let serialNumber =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SerialNumber") in
+      let pseudonym =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Pseudonym") in
+      let organizationalUnit =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "OrganizationalUnit") in
+      let organization =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Organization") in
+      let locality =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Locality") in
+      let initials =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Initials") in
+      let givenName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "GivenName") in
+      let generationQualifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "GenerationQualifier") in
+      let distinguishedNameQualifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "DistinguishedNameQualifier") in
+      let customAttributes =
+        (Option.map ~f:CustomAttributeList.of_xml)
+          (Xml.child xml_arg0 "CustomAttributes") in
+      let country =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Country") in
+      let domainComponents =
+        (Option.map ~f:DomainComponentList.of_xml)
+          (Xml.child xml_arg0 "DomainComponents") in
+      let commonName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CommonName") in
+      make ?title ?surname ?state ?serialNumber ?pseudonym
+        ?organizationalUnit ?organization ?locality ?initials ?givenName
+        ?generationQualifier ?distinguishedNameQualifier ?customAttributes
+        ?country ?domainComponents ?commonName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let title = field_map json__ "Title" String_.of_json in
+      let surname = field_map json__ "Surname" String_.of_json in
+      let state = field_map json__ "State" String_.of_json in
+      let serialNumber = field_map json__ "SerialNumber" String_.of_json in
+      let pseudonym = field_map json__ "Pseudonym" String_.of_json in
+      let organizationalUnit =
+        field_map json__ "OrganizationalUnit" String_.of_json in
+      let organization = field_map json__ "Organization" String_.of_json in
+      let locality = field_map json__ "Locality" String_.of_json in
+      let initials = field_map json__ "Initials" String_.of_json in
+      let givenName = field_map json__ "GivenName" String_.of_json in
+      let generationQualifier =
+        field_map json__ "GenerationQualifier" String_.of_json in
+      let distinguishedNameQualifier =
+        field_map json__ "DistinguishedNameQualifier" String_.of_json in
+      let customAttributes =
+        field_map json__ "CustomAttributes" CustomAttributeList.of_json in
+      let country = field_map json__ "Country" String_.of_json in
+      let domainComponents =
+        field_map json__ "DomainComponents" DomainComponentList.of_json in
+      let commonName = field_map json__ "CommonName" String_.of_json in
+      make ?title ?surname ?state ?serialNumber ?pseudonym
+        ?organizationalUnit ?organization ?locality ?initials ?givenName
+        ?generationQualifier ?distinguishedNameQualifier ?customAttributes
+        ?country ?domainComponents ?commonName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains X.500 distinguished name information."]
+module GeneralName =
+  struct
+    type nonrec t =
+      {
+      directoryName: DistinguishedName.t option
+        [@ocaml.doc
+          "Contains information about the certificate subject. The Subject field in the certificate identifies the entity that owns or controls the public key in the certificate. The entity can be a user, computer, device, or service. The Subject must contain an X.500 distinguished name (DN). A DN is a sequence of relative distinguished names (RDNs). The RDNs are separated by commas in the certificate."];
+      dnsName: String_.t option
+        [@ocaml.doc "Represents GeneralName as a DNS name."];
+      ipAddress: String_.t option
+        [@ocaml.doc "Represents GeneralName as an IPv4 or IPv6 address."];
+      otherName: OtherName.t option
+        [@ocaml.doc "Represents GeneralName using an OtherName object."];
+      registeredId: String_.t option
+        [@ocaml.doc "Represents GeneralName as an object identifier (OID)."];
+      rfc822Name: String_.t option
+        [@ocaml.doc "Represents GeneralName as an RFC 822 email address."];
+      uniformResourceIdentifier: String_.t option
+        [@ocaml.doc "Represents GeneralName as a URI."]}
+    let make ?directoryName =
+      fun ?dnsName ->
+        fun ?ipAddress ->
+          fun ?otherName ->
+            fun ?registeredId ->
+              fun ?rfc822Name ->
+                fun ?uniformResourceIdentifier ->
+                  fun () ->
+                    {
+                      directoryName;
+                      dnsName;
+                      ipAddress;
+                      otherName;
+                      registeredId;
+                      rfc822Name;
+                      uniformResourceIdentifier
+                    }
+    let to_value x =
+      structure_to_value
+        [("DirectoryName",
+           (Option.map x.directoryName ~f:DistinguishedName.to_value));
+        ("DnsName", (Option.map x.dnsName ~f:String_.to_value));
+        ("IpAddress", (Option.map x.ipAddress ~f:String_.to_value));
+        ("OtherName", (Option.map x.otherName ~f:OtherName.to_value));
+        ("RegisteredId", (Option.map x.registeredId ~f:String_.to_value));
+        ("Rfc822Name", (Option.map x.rfc822Name ~f:String_.to_value));
+        ("UniformResourceIdentifier",
+          (Option.map x.uniformResourceIdentifier ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let uniformResourceIdentifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "UniformResourceIdentifier") in
+      let rfc822Name =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Rfc822Name") in
+      let registeredId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RegisteredId") in
+      let otherName =
+        (Option.map ~f:OtherName.of_xml) (Xml.child xml_arg0 "OtherName") in
+      let ipAddress =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "IpAddress") in
+      let dnsName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DnsName") in
+      let directoryName =
+        (Option.map ~f:DistinguishedName.of_xml)
+          (Xml.child xml_arg0 "DirectoryName") in
+      make ?uniformResourceIdentifier ?rfc822Name ?registeredId ?otherName
+        ?ipAddress ?dnsName ?directoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let uniformResourceIdentifier =
+        field_map json__ "UniformResourceIdentifier" String_.of_json in
+      let rfc822Name = field_map json__ "Rfc822Name" String_.of_json in
+      let registeredId = field_map json__ "RegisteredId" String_.of_json in
+      let otherName = field_map json__ "OtherName" OtherName.of_json in
+      let ipAddress = field_map json__ "IpAddress" String_.of_json in
+      let dnsName = field_map json__ "DnsName" String_.of_json in
+      let directoryName =
+        field_map json__ "DirectoryName" DistinguishedName.of_json in
+      make ?uniformResourceIdentifier ?rfc822Name ?registeredId ?otherName
+        ?ipAddress ?dnsName ?directoryName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an ASN.1 X.400 GeneralName as defined in RFC 5280. Only one of the following naming options should be provided."]
+module GeneralNameList =
+  struct
+    type nonrec t = GeneralName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GeneralName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GeneralName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GeneralNameList" ~of_json:GeneralName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExtendedKeyUsageNames =
+  struct
+    type nonrec t = ExtendedKeyUsageName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExtendedKeyUsageName.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExtendedKeyUsageName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExtendedKeyUsageNames"
+        ~of_json:ExtendedKeyUsageName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module X509Attributes =
+  struct
+    type nonrec t =
+      {
+      issuer: DistinguishedName.t option
+        [@ocaml.doc "The distinguished name of the certificate issuer."];
+      subject: DistinguishedName.t option
+        [@ocaml.doc "The distinguished name of the certificate subject."];
+      subjectAlternativeNames: GeneralNameList.t option
+        [@ocaml.doc
+          "One or more domain names (subject alternative names) included in the certificate. This list contains the domain names that are bound to the public key that is contained in the certificate. The subject alternative names include the canonical domain name (CN) of the certificate and additional domain names that can be used to connect to the website."];
+      extendedKeyUsages: ExtendedKeyUsageNames.t option
+        [@ocaml.doc
+          "Contains a list of Extended Key Usage X.509 v3 extension objects. Each object specifies a purpose for which the certificate public key can be used and consists of a name and an object identifier (OID)."];
+      keyAlgorithm: KeyAlgorithm.t option
+        [@ocaml.doc
+          "The algorithm that was used to generate the public-private key pair."];
+      keyUsages: KeyUsageNames.t option
+        [@ocaml.doc
+          "A list of Key Usage X.509 v3 extension objects. Each object is a string value that identifies the purpose of the public key contained in the certificate. Possible extension values include DIGITAL_SIGNATURE, KEY_ENCHIPHERMENT, NON_REPUDIATION, and more."];
+      serialNumber: SerialNumber.t option
+        [@ocaml.doc
+          "The serial number assigned by the certificate authority."];
+      notAfter: TStamp.t option
+        [@ocaml.doc "The time after which the certificate is not valid."];
+      notBefore: TStamp.t option
+        [@ocaml.doc "The time before which the certificate is not valid."]}
+    let make ?issuer =
+      fun ?subject ->
+        fun ?subjectAlternativeNames ->
+          fun ?extendedKeyUsages ->
+            fun ?keyAlgorithm ->
+              fun ?keyUsages ->
+                fun ?serialNumber ->
+                  fun ?notAfter ->
+                    fun ?notBefore ->
+                      fun () ->
+                        {
+                          issuer;
+                          subject;
+                          subjectAlternativeNames;
+                          extendedKeyUsages;
+                          keyAlgorithm;
+                          keyUsages;
+                          serialNumber;
+                          notAfter;
+                          notBefore
+                        }
+    let to_value x =
+      structure_to_value
+        [("Issuer", (Option.map x.issuer ~f:DistinguishedName.to_value));
+        ("Subject", (Option.map x.subject ~f:DistinguishedName.to_value));
+        ("SubjectAlternativeNames",
+          (Option.map x.subjectAlternativeNames ~f:GeneralNameList.to_value));
+        ("ExtendedKeyUsages",
+          (Option.map x.extendedKeyUsages ~f:ExtendedKeyUsageNames.to_value));
+        ("KeyAlgorithm",
+          (Option.map x.keyAlgorithm ~f:KeyAlgorithm.to_value));
+        ("KeyUsages", (Option.map x.keyUsages ~f:KeyUsageNames.to_value));
+        ("SerialNumber",
+          (Option.map x.serialNumber ~f:SerialNumber.to_value));
+        ("NotAfter", (Option.map x.notAfter ~f:TStamp.to_value));
+        ("NotBefore", (Option.map x.notBefore ~f:TStamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notBefore =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "NotBefore") in
+      let notAfter =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "NotAfter") in
+      let serialNumber =
+        (Option.map ~f:SerialNumber.of_xml)
+          (Xml.child xml_arg0 "SerialNumber") in
+      let keyUsages =
+        (Option.map ~f:KeyUsageNames.of_xml) (Xml.child xml_arg0 "KeyUsages") in
+      let keyAlgorithm =
+        (Option.map ~f:KeyAlgorithm.of_xml)
+          (Xml.child xml_arg0 "KeyAlgorithm") in
+      let extendedKeyUsages =
+        (Option.map ~f:ExtendedKeyUsageNames.of_xml)
+          (Xml.child xml_arg0 "ExtendedKeyUsages") in
+      let subjectAlternativeNames =
+        (Option.map ~f:GeneralNameList.of_xml)
+          (Xml.child xml_arg0 "SubjectAlternativeNames") in
+      let subject =
+        (Option.map ~f:DistinguishedName.of_xml)
+          (Xml.child xml_arg0 "Subject") in
+      let issuer =
+        (Option.map ~f:DistinguishedName.of_xml)
+          (Xml.child xml_arg0 "Issuer") in
+      make ?notBefore ?notAfter ?serialNumber ?keyUsages ?keyAlgorithm
+        ?extendedKeyUsages ?subjectAlternativeNames ?subject ?issuer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notBefore = field_map json__ "NotBefore" TStamp.of_json in
+      let notAfter = field_map json__ "NotAfter" TStamp.of_json in
+      let serialNumber = field_map json__ "SerialNumber" SerialNumber.of_json in
+      let keyUsages = field_map json__ "KeyUsages" KeyUsageNames.of_json in
+      let keyAlgorithm = field_map json__ "KeyAlgorithm" KeyAlgorithm.of_json in
+      let extendedKeyUsages =
+        field_map json__ "ExtendedKeyUsages" ExtendedKeyUsageNames.of_json in
+      let subjectAlternativeNames =
+        field_map json__ "SubjectAlternativeNames" GeneralNameList.of_json in
+      let subject = field_map json__ "Subject" DistinguishedName.of_json in
+      let issuer = field_map json__ "Issuer" DistinguishedName.of_json in
+      make ?notBefore ?notAfter ?serialNumber ?keyUsages ?keyAlgorithm
+        ?extendedKeyUsages ?subjectAlternativeNames ?subject ?issuer ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains X.509 certificate attributes extracted from the certificate."]
+module CertificateSearchResult =
+  struct
+    type nonrec t =
+      {
+      certificateArn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the certificate."];
+      x509Attributes: X509Attributes.t option
+        [@ocaml.doc
+          "X.509 certificate attributes such as subject, issuer, and validity period."];
+      certificateMetadata: CertificateMetadata.t option
+        [@ocaml.doc "ACM-specific metadata about the certificate."]}
+    let make ?certificateArn =
+      fun ?x509Attributes ->
+        fun ?certificateMetadata ->
+          fun () -> { certificateArn; x509Attributes; certificateMetadata }
+    let to_value x =
+      structure_to_value
+        [("CertificateArn", (Option.map x.certificateArn ~f:Arn.to_value));
+        ("X509Attributes",
+          (Option.map x.x509Attributes ~f:X509Attributes.to_value));
+        ("CertificateMetadata",
+          (Option.map x.certificateMetadata ~f:CertificateMetadata.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateMetadata =
+        (Option.map ~f:CertificateMetadata.of_xml)
+          (Xml.child xml_arg0 "CertificateMetadata") in
+      let x509Attributes =
+        (Option.map ~f:X509Attributes.of_xml)
+          (Xml.child xml_arg0 "X509Attributes") in
+      let certificateArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CertificateArn") in
+      make ?certificateMetadata ?x509Attributes ?certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateMetadata =
+        field_map json__ "CertificateMetadata" CertificateMetadata.of_json in
+      let x509Attributes =
+        field_map json__ "X509Attributes" X509Attributes.of_json in
+      let certificateArn = field_map json__ "CertificateArn" Arn.of_json in
+      make ?certificateMetadata ?x509Attributes ?certificateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about a certificate returned by the SearchCertificates action. This structure includes the certificate ARN, X.509 attributes, and ACM metadata."]
+module CertificateSearchResultList =
+  struct
+    type nonrec t = CertificateSearchResult.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CertificateSearchResult.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CertificateSearchResult.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CertificateSearchResultList"
+        ~of_json:CertificateSearchResult.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CertificateStatuses =
+  struct
+    type nonrec t = CertificateStatus.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CertificateStatus.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CertificateStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CertificateStatuses"
+        ~of_json:CertificateStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CertificateSummary =
+  struct
+    type nonrec t =
+      {
+      certificateArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the certificate. This is of the form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."];
+      domainName: DomainNameString.t option
+        [@ocaml.doc
+          "Fully qualified domain name (FQDN), such as www.example.com or example.com, for the certificate."];
+      subjectAlternativeNameSummaries: DomainList.t option
+        [@ocaml.doc
+          "One or more domain names (subject alternative names) included in the certificate. This list contains the domain names that are bound to the public key that is contained in the certificate. The subject alternative names include the canonical domain name (CN) of the certificate and additional domain names that can be used to connect to the website. When called by ListCertificates, this parameter will only return the first 100 subject alternative names included in the certificate. To display the full list of subject alternative names, use DescribeCertificate."];
+      hasAdditionalSubjectAlternativeNames: NullableBoolean.t option
+        [@ocaml.doc
+          "When called by ListCertificates, indicates whether the full list of subject alternative names has been included in the response. If false, the response includes all of the subject alternative names included in the certificate. If true, the response only includes the first 100 subject alternative names included in the certificate. To display the full list of subject alternative names, use DescribeCertificate."];
+      status: CertificateStatus.t option
+        [@ocaml.doc
+          "The status of the certificate. A certificate enters status PENDING_VALIDATION upon being requested, unless it fails for any of the reasons given in the troubleshooting topic Certificate request fails. ACM makes repeated attempts to validate a certificate for 72 hours and then times out. If a certificate shows status FAILED or VALIDATION_TIMED_OUT, delete the request, correct the issue with DNS validation or Email validation, and try again. If validation succeeds, the certificate enters status ISSUED."];
+      type_: CertificateType.t option
+        [@ocaml.doc
+          "The source of the certificate. For certificates provided by ACM, this value is AMAZON_ISSUED. For certificates that you imported with ImportCertificate, this value is IMPORTED. ACM does not provide managed renewal for imported certificates. For more information about the differences between certificates that you import and those that ACM provides, see Importing Certificates in the Certificate Manager User Guide."];
+      keyAlgorithm: KeyAlgorithm.t option
+        [@ocaml.doc
+          "The algorithm that was used to generate the public-private key pair."];
+      keyUsages: KeyUsageNames.t option
+        [@ocaml.doc
+          "A list of Key Usage X.509 v3 extension objects. Each object is a string value that identifies the purpose of the public key contained in the certificate. Possible extension values include DIGITAL_SIGNATURE, KEY_ENCHIPHERMENT, NON_REPUDIATION, and more."];
+      extendedKeyUsages: ExtendedKeyUsageNames.t option
+        [@ocaml.doc
+          "Contains a list of Extended Key Usage X.509 v3 extension objects. Each object specifies a purpose for which the certificate public key can be used and consists of a name and an object identifier (OID)."];
+      exportOption: CertificateExport.t option
+        [@ocaml.doc "Indicates if export is enabled for the certificate."];
+      inUse: NullableBoolean.t option
+        [@ocaml.doc
+          "Indicates whether the certificate is currently in use by any Amazon Web Services resources."];
+      exported: NullableBoolean.t option
+        [@ocaml.doc
+          "Indicates whether the certificate has been exported. This value exists only when the certificate type is PRIVATE."];
+      renewalEligibility: RenewalEligibility.t option
+        [@ocaml.doc
+          "Specifies whether the certificate is eligible for renewal. At this time, only exported private certificates can be renewed with the RenewCertificate command."];
+      notBefore: TStamp.t option
+        [@ocaml.doc "The time before which the certificate is not valid."];
+      notAfter: TStamp.t option
+        [@ocaml.doc "The time after which the certificate is not valid."];
+      createdAt: TStamp.t option
+        [@ocaml.doc "The time at which the certificate was requested."];
+      issuedAt: TStamp.t option
+        [@ocaml.doc
+          "The time at which the certificate was issued. This value exists only when the certificate type is AMAZON_ISSUED."];
+      importedAt: TStamp.t option
+        [@ocaml.doc
+          "The date and time when the certificate was imported. This value exists only when the certificate type is IMPORTED."];
+      revokedAt: TStamp.t option
+        [@ocaml.doc
+          "The time at which the certificate was revoked. This value exists only when the certificate status is REVOKED."];
+      managedBy: CertificateManagedBy.t option
+        [@ocaml.doc
+          "Identifies the Amazon Web Services service that manages the certificate issued by ACM."]}
+    let make ?certificateArn =
+      fun ?domainName ->
+        fun ?subjectAlternativeNameSummaries ->
+          fun ?hasAdditionalSubjectAlternativeNames ->
+            fun ?status ->
+              fun ?type_ ->
+                fun ?keyAlgorithm ->
+                  fun ?keyUsages ->
+                    fun ?extendedKeyUsages ->
+                      fun ?exportOption ->
+                        fun ?inUse ->
+                          fun ?exported ->
+                            fun ?renewalEligibility ->
+                              fun ?notBefore ->
+                                fun ?notAfter ->
+                                  fun ?createdAt ->
+                                    fun ?issuedAt ->
+                                      fun ?importedAt ->
+                                        fun ?revokedAt ->
+                                          fun ?managedBy ->
+                                            fun () ->
+                                              {
+                                                certificateArn;
+                                                domainName;
+                                                subjectAlternativeNameSummaries;
+                                                hasAdditionalSubjectAlternativeNames;
+                                                status;
+                                                type_;
+                                                keyAlgorithm;
+                                                keyUsages;
+                                                extendedKeyUsages;
+                                                exportOption;
+                                                inUse;
+                                                exported;
+                                                renewalEligibility;
+                                                notBefore;
+                                                notAfter;
+                                                createdAt;
+                                                issuedAt;
+                                                importedAt;
+                                                revokedAt;
+                                                managedBy
+                                              }
+    let to_value x =
+      structure_to_value
+        [("CertificateArn", (Option.map x.certificateArn ~f:Arn.to_value));
+        ("DomainName",
+          (Option.map x.domainName ~f:DomainNameString.to_value));
+        ("SubjectAlternativeNameSummaries",
+          (Option.map x.subjectAlternativeNameSummaries
+             ~f:DomainList.to_value));
+        ("HasAdditionalSubjectAlternativeNames",
+          (Option.map x.hasAdditionalSubjectAlternativeNames
+             ~f:NullableBoolean.to_value));
+        ("Status", (Option.map x.status ~f:CertificateStatus.to_value));
+        ("Type", (Option.map x.type_ ~f:CertificateType.to_value));
+        ("KeyAlgorithm",
+          (Option.map x.keyAlgorithm ~f:KeyAlgorithm.to_value));
+        ("KeyUsages", (Option.map x.keyUsages ~f:KeyUsageNames.to_value));
+        ("ExtendedKeyUsages",
+          (Option.map x.extendedKeyUsages ~f:ExtendedKeyUsageNames.to_value));
+        ("ExportOption",
+          (Option.map x.exportOption ~f:CertificateExport.to_value));
+        ("InUse", (Option.map x.inUse ~f:NullableBoolean.to_value));
+        ("Exported", (Option.map x.exported ~f:NullableBoolean.to_value));
+        ("RenewalEligibility",
+          (Option.map x.renewalEligibility ~f:RenewalEligibility.to_value));
+        ("NotBefore", (Option.map x.notBefore ~f:TStamp.to_value));
+        ("NotAfter", (Option.map x.notAfter ~f:TStamp.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:TStamp.to_value));
+        ("IssuedAt", (Option.map x.issuedAt ~f:TStamp.to_value));
+        ("ImportedAt", (Option.map x.importedAt ~f:TStamp.to_value));
+        ("RevokedAt", (Option.map x.revokedAt ~f:TStamp.to_value));
+        ("ManagedBy",
+          (Option.map x.managedBy ~f:CertificateManagedBy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let managedBy =
+        (Option.map ~f:CertificateManagedBy.of_xml)
+          (Xml.child xml_arg0 "ManagedBy") in
+      let revokedAt =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "RevokedAt") in
+      let importedAt =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "ImportedAt") in
+      let issuedAt =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "IssuedAt") in
+      let createdAt =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let notAfter =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "NotAfter") in
+      let notBefore =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "NotBefore") in
+      let renewalEligibility =
+        (Option.map ~f:RenewalEligibility.of_xml)
+          (Xml.child xml_arg0 "RenewalEligibility") in
+      let exported =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "Exported") in
+      let inUse =
+        (Option.map ~f:NullableBoolean.of_xml) (Xml.child xml_arg0 "InUse") in
+      let exportOption =
+        (Option.map ~f:CertificateExport.of_xml)
+          (Xml.child xml_arg0 "ExportOption") in
+      let extendedKeyUsages =
+        (Option.map ~f:ExtendedKeyUsageNames.of_xml)
+          (Xml.child xml_arg0 "ExtendedKeyUsages") in
+      let keyUsages =
+        (Option.map ~f:KeyUsageNames.of_xml) (Xml.child xml_arg0 "KeyUsages") in
+      let keyAlgorithm =
+        (Option.map ~f:KeyAlgorithm.of_xml)
+          (Xml.child xml_arg0 "KeyAlgorithm") in
+      let type_ =
+        (Option.map ~f:CertificateType.of_xml) (Xml.child xml_arg0 "Type") in
+      let status =
+        (Option.map ~f:CertificateStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let hasAdditionalSubjectAlternativeNames =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "HasAdditionalSubjectAlternativeNames") in
+      let subjectAlternativeNameSummaries =
+        (Option.map ~f:DomainList.of_xml)
+          (Xml.child xml_arg0 "SubjectAlternativeNameSummaries") in
+      let domainName =
+        (Option.map ~f:DomainNameString.of_xml)
+          (Xml.child xml_arg0 "DomainName") in
+      let certificateArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CertificateArn") in
+      make ?managedBy ?revokedAt ?importedAt ?issuedAt ?createdAt ?notAfter
+        ?notBefore ?renewalEligibility ?exported ?inUse ?exportOption
+        ?extendedKeyUsages ?keyUsages ?keyAlgorithm ?type_ ?status
+        ?hasAdditionalSubjectAlternativeNames
+        ?subjectAlternativeNameSummaries ?domainName ?certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let managedBy =
+        field_map json__ "ManagedBy" CertificateManagedBy.of_json in
+      let revokedAt = field_map json__ "RevokedAt" TStamp.of_json in
+      let importedAt = field_map json__ "ImportedAt" TStamp.of_json in
+      let issuedAt = field_map json__ "IssuedAt" TStamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" TStamp.of_json in
+      let notAfter = field_map json__ "NotAfter" TStamp.of_json in
+      let notBefore = field_map json__ "NotBefore" TStamp.of_json in
+      let renewalEligibility =
+        field_map json__ "RenewalEligibility" RenewalEligibility.of_json in
+      let exported = field_map json__ "Exported" NullableBoolean.of_json in
+      let inUse = field_map json__ "InUse" NullableBoolean.of_json in
+      let exportOption =
+        field_map json__ "ExportOption" CertificateExport.of_json in
+      let extendedKeyUsages =
+        field_map json__ "ExtendedKeyUsages" ExtendedKeyUsageNames.of_json in
+      let keyUsages = field_map json__ "KeyUsages" KeyUsageNames.of_json in
+      let keyAlgorithm = field_map json__ "KeyAlgorithm" KeyAlgorithm.of_json in
+      let type_ = field_map json__ "Type" CertificateType.of_json in
+      let status = field_map json__ "Status" CertificateStatus.of_json in
+      let hasAdditionalSubjectAlternativeNames =
+        field_map json__ "HasAdditionalSubjectAlternativeNames"
+          NullableBoolean.of_json in
+      let subjectAlternativeNameSummaries =
+        field_map json__ "SubjectAlternativeNameSummaries" DomainList.of_json in
+      let domainName = field_map json__ "DomainName" DomainNameString.of_json in
+      let certificateArn = field_map json__ "CertificateArn" Arn.of_json in
+      make ?managedBy ?revokedAt ?importedAt ?issuedAt ?createdAt ?notAfter
+        ?notBefore ?renewalEligibility ?exported ?inUse ?exportOption
+        ?extendedKeyUsages ?keyUsages ?keyAlgorithm ?type_ ?status
+        ?hasAdditionalSubjectAlternativeNames
+        ?subjectAlternativeNameSummaries ?domainName ?certificateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This structure is returned in the response object of ListCertificates action."]
+module CertificateSummaryList =
+  struct
+    type nonrec t = CertificateSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CertificateSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CertificateSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CertificateSummaryList"
+        ~of_json:CertificateSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ConflictException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You are trying to update a resource or configuration that is already being created or updated. Wait for the previous operation to finish and try again."]
+module CoralAvailabilityThrottledResource =
+  struct
+    type nonrec t = string
+    let context_ = "CoralAvailabilityThrottledResource"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"CoralAvailabilityThrottledResource" j
+    let to_json = simple_to_json to_value
+  end
+module CoralAvailabilityThrottlingReason =
+  struct
+    type nonrec t = string
+    let context_ = "CoralAvailabilityThrottlingReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"CoralAvailabilityThrottlingReason" j
+    let to_json = simple_to_json to_value
+  end
+module DeleteCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      certificateArn: Arn.t
+        [@ocaml.doc
+          "String that contains the ARN of the ACM certificate to be deleted. This must be of the form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."]}
+    let context_ = "DeleteCertificateRequest"
+    let make ~certificateArn = fun () -> { certificateArn }
+    let to_value x =
+      structure_to_value
+        [("CertificateArn", (Some (Arn.to_value x.certificateArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
+      make ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateArn = field_map_exn json__ "CertificateArn" Arn.of_json in
+      make ~certificateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a certificate and its associated private key. If this action succeeds, the certificate is not available for use by Amazon Web Services services integrated with ACM. Deleting a certificate is eventually consistent. The may be a short delay before the certificate no longer appears in the list that can be displayed by calling the ListCertificates action or be retrieved by calling the GetCertificate action. You cannot delete an ACM certificate that is being used by another Amazon Web Services service. To delete a certificate that is in use, you must first remove the certificate association using the console or the CLI for the associated service. Deleting a certificate issued by a private certificate authority (CA) has no effect on the CA. You will continue to be charged for the CA until it is deleted. For more information, see Deleting Your Private CA in the Private Certificate Authority User Guide. Deleting a certificate issued by a private certificate authority (CA) has no effect on the CA. You will continue to be charged for the CA until it is deleted. For more information, see Deleting your private CA in the Amazon Web Services Private Certificate Authority User Guide."]
+module DescribeCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      certificateArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the ACM certificate. The ARN must have the following form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."]}
+    let context_ = "DescribeCertificateRequest"
+    let make ~certificateArn = fun () -> { certificateArn }
+    let to_value x =
+      structure_to_value
+        [("CertificateArn", (Some (Arn.to_value x.certificateArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
+      make ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateArn = field_map_exn json__ "CertificateArn" Arn.of_json in
+      make ~certificateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns detailed metadata about the specified ACM certificate. If you have just created a certificate using the RequestCertificate action, there is a delay of several seconds before you can retrieve information about it."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified certificate cannot be found in the caller's account or the caller's account cannot be found."]
+module InvalidArnException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The requested Amazon Resource Name (ARN) does not refer to an existing resource."]
+module DescribeCertificateResponse =
+  struct
+    type nonrec t =
+      {
+      certificate: CertificateDetail.t option
+        [@ocaml.doc "Metadata about an ACM certificate."]}
+    type nonrec error =
+      [ `InvalidArnException of InvalidArnException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?certificate = fun () -> { certificate }
+    let error_of_json name json =
+      match name with
+      | "InvalidArnException" ->
+          `InvalidArnException (InvalidArnException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArnException" ->
+          `InvalidArnException (InvalidArnException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArnException e ->
+          `Assoc
+            [("error", (`String "InvalidArnException"));
+            ("details", (InvalidArnException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Certificate",
+           (Option.map x.certificate ~f:CertificateDetail.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificate =
+        (Option.map ~f:CertificateDetail.of_xml)
+          (Xml.child xml_arg0 "Certificate") in
+      make ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificate =
+        field_map json__ "Certificate" CertificateDetail.of_json in
+      make ?certificate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns detailed metadata about the specified ACM certificate. If you have just created a certificate using the RequestCertificate action, there is a delay of several seconds before you can retrieve information about it."]
+module DomainValidationOption =
+  struct
+    type nonrec t =
+      {
+      domainName: DomainNameString.t
+        [@ocaml.doc
+          "A fully qualified domain name (FQDN) in the certificate request."];
+      validationDomain: DomainNameString.t
+        [@ocaml.doc
+          "The domain name that you want ACM to use to send you validation emails. This domain name is the suffix of the email addresses that you want ACM to use. This must be the same as the DomainName value or a superdomain of the DomainName value. For example, if you request a certificate for testing.example.com, you can specify example.com for this value. In that case, ACM sends domain validation emails to the following five addresses: admin\\@example.com administrator\\@example.com hostmaster\\@example.com postmaster\\@example.com webmaster\\@example.com"]}
+    let context_ = "DomainValidationOption"
+    let make ~domainName =
+      fun ~validationDomain -> fun () -> { domainName; validationDomain }
+    let to_value x =
+      structure_to_value
+        [("DomainName", (Some (DomainNameString.to_value x.domainName)));
+        ("ValidationDomain",
+          (Some (DomainNameString.to_value x.validationDomain)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let validationDomain =
+        DomainNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ValidationDomain") in
+      let domainName =
+        DomainNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      make ~validationDomain ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let validationDomain =
+        field_map_exn json__ "ValidationDomain" DomainNameString.of_json in
+      let domainName =
+        field_map_exn json__ "DomainName" DomainNameString.of_json in
+      make ~validationDomain ~domainName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the domain names that you want ACM to use to send you emails that enable you to validate domain ownership."]
+module DomainValidationOptionList =
+  struct
+    type nonrec t = DomainValidationOption.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DomainValidationOption.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DomainValidationOption.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DomainValidationOptionList"
+        ~of_json:DomainValidationOption.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PositiveInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PositiveInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ExpiryEventsConfiguration =
+  struct
+    type nonrec t =
+      {
+      daysBeforeExpiry: PositiveInteger.t option
+        [@ocaml.doc
+          "Specifies the number of days prior to certificate expiration when ACM starts generating EventBridge events. ACM sends one event per day per certificate until the certificate expires. By default, accounts receive events starting 45 days before certificate expiration."]}
+    let make ?daysBeforeExpiry = fun () -> { daysBeforeExpiry }
+    let to_value x =
+      structure_to_value
+        [("DaysBeforeExpiry",
+           (Option.map x.daysBeforeExpiry ~f:PositiveInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let daysBeforeExpiry =
+        (Option.map ~f:PositiveInteger.of_xml)
+          (Xml.child xml_arg0 "DaysBeforeExpiry") in
+      make ?daysBeforeExpiry ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let daysBeforeExpiry =
+        field_map json__ "DaysBeforeExpiry" PositiveInteger.of_json in
+      make ?daysBeforeExpiry ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object containing expiration events options associated with an Amazon Web Services account."]
+module PassphraseBlob =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module ExportCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      certificateArn: Arn.t
+        [@ocaml.doc
+          "An Amazon Resource Name (ARN) of the issued certificate. This must be of the form: arn:aws:acm:region:account:certificate/12345678-1234-1234-1234-123456789012"];
+      passphrase: PassphraseBlob.t
+        [@ocaml.doc
+          "Passphrase to associate with the encrypted exported private key. When creating your passphrase, you can use any ASCII character except #, $, or %. If you want to later decrypt the private key, you must have the passphrase. You can use the following OpenSSL command to decrypt a private key. After entering the command, you are prompted for the passphrase. openssl rsa -in encrypted_key.pem -out decrypted_key.pem"]}
+    let context_ = "ExportCertificateRequest"
+    let make ~certificateArn =
+      fun ~passphrase -> fun () -> { certificateArn; passphrase }
+    let to_value x =
+      structure_to_value
+        [("CertificateArn", (Some (Arn.to_value x.certificateArn)));
+        ("Passphrase", (Some (PassphraseBlob.to_value x.passphrase)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let passphrase =
+        PassphraseBlob.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Passphrase") in
+      let certificateArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
+      make ~passphrase ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let passphrase =
+        field_map_exn json__ "Passphrase" PassphraseBlob.of_json in
+      let certificateArn = field_map_exn json__ "CertificateArn" Arn.of_json in
+      make ~passphrase ~certificateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Exports a private certificate issued by a private certificate authority (CA) or a public certificate for use anywhere. The exported file contains the certificate, the certificate chain, and the encrypted private key associated with the public key that is embedded in the certificate. For security, you must assign a passphrase for the private key when exporting it. For information about exporting and formatting a certificate using the ACM console or CLI, see Export a private certificate and Export a public certificate. ACM public certificates created prior to June 17, 2025 cannot be exported."]
+module ThrottlingReason =
+  struct
+    type nonrec t =
+      {
+      reason: CoralAvailabilityThrottlingReason.t option
+        [@ocaml.doc "A description of why a request was throttled."];
+      resource: CoralAvailabilityThrottledResource.t option
+        [@ocaml.doc "The resource that causes the request to be throttled."]}
+    let make ?reason = fun ?resource -> fun () -> { reason; resource }
+    let to_value x =
+      structure_to_value
+        [("reason",
+           (Option.map x.reason ~f:CoralAvailabilityThrottlingReason.to_value));
+        ("resource",
+          (Option.map x.resource
+             ~f:CoralAvailabilityThrottledResource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resource =
+        (Option.map ~f:CoralAvailabilityThrottledResource.of_xml)
+          (Xml.child xml_arg0 "resource") in
+      let reason =
+        (Option.map ~f:CoralAvailabilityThrottlingReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
+      make ?resource ?reason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resource =
+        field_map json__ "resource"
+          CoralAvailabilityThrottledResource.of_json in
+      let reason =
+        field_map json__ "reason" CoralAvailabilityThrottlingReason.of_json in
+      make ?resource ?reason ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A description of why a request was throttled."]
+module ThrottlingReasonList =
+  struct
+    type nonrec t = ThrottlingReason.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ThrottlingReason.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ThrottlingReason.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ThrottlingReasonList"
+        ~of_json:ThrottlingReason.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ThrottlingException =
+  struct
+    type nonrec t =
+      {
+      message: AvailabilityErrorMessage.t option ;
+      throttlingReasons: ThrottlingReasonList.t option
+        [@ocaml.doc "One or more reasons why the request was throttled."]}
+    let make ?message =
+      fun ?throttlingReasons -> fun () -> { message; throttlingReasons }
+    let to_value x =
+      structure_to_value
+        [("message",
+           (Option.map x.message ~f:AvailabilityErrorMessage.to_value));
+        ("throttlingReasons",
+          (Option.map x.throttlingReasons ~f:ThrottlingReasonList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let throttlingReasons =
+        (Option.map ~f:ThrottlingReasonList.of_xml)
+          (Xml.child xml_arg0 "throttlingReasons") in
+      let message =
+        (Option.map ~f:AvailabilityErrorMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?throttlingReasons ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let throttlingReasons =
+        field_map json__ "throttlingReasons" ThrottlingReasonList.of_json in
+      let message =
+        field_map json__ "message" AvailabilityErrorMessage.of_json in
+      make ?throttlingReasons ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request was denied because it exceeded a quota."]
+module RequestInProgressException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The certificate request is in process and the certificate in your account has not yet been issued."]
+module PrivateKey =
+  struct
+    type nonrec t = string
+    let context_ = "PrivateKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:524288) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"-{5}BEGIN PRIVATE KEY-{5}\\u000D?\\u000A([A-Za-z0-9/+]{64}\\u000D?\\u000A)*[A-Za-z0-9/+]{1,64}={0,2}\\u000D?\\u000A-{5}END PRIVATE KEY-{5}(\\u000D?\\u000A)?")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PrivateKey" j
+    let to_json = simple_to_json to_value
+  end
+module ExportCertificateResponse =
+  struct
+    type nonrec t =
+      {
+      certificate: CertificateBody.t option
+        [@ocaml.doc "The base64 PEM-encoded certificate."];
+      certificateChain: CertificateChain.t option
+        [@ocaml.doc
+          "The base64 PEM-encoded certificate chain. This does not include the certificate that you are exporting."];
+      privateKey: PrivateKey.t option
+        [@ocaml.doc
+          "The encrypted private key associated with the public key in the certificate. The key is output in PKCS #8 format and is base64 PEM-encoded."]}
+    type nonrec error =
+      [ `InvalidArnException of InvalidArnException.t 
+      | `RequestInProgressException of RequestInProgressException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?certificate =
+      fun ?certificateChain ->
+        fun ?privateKey ->
+          fun () -> { certificate; certificateChain; privateKey }
+    let error_of_json name json =
+      match name with
+      | "InvalidArnException" ->
+          `InvalidArnException (InvalidArnException.of_json json)
+      | "RequestInProgressException" ->
+          `RequestInProgressException
+            (RequestInProgressException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArnException" ->
+          `InvalidArnException (InvalidArnException.of_xml xml)
+      | "RequestInProgressException" ->
+          `RequestInProgressException (RequestInProgressException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArnException e ->
+          `Assoc
+            [("error", (`String "InvalidArnException"));
+            ("details", (InvalidArnException.to_json e))]
+      | `RequestInProgressException e ->
+          `Assoc
+            [("error", (`String "RequestInProgressException"));
+            ("details", (RequestInProgressException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Certificate",
+           (Option.map x.certificate ~f:CertificateBody.to_value));
+        ("CertificateChain",
+          (Option.map x.certificateChain ~f:CertificateChain.to_value));
+        ("PrivateKey", (Option.map x.privateKey ~f:PrivateKey.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let privateKey =
+        (Option.map ~f:PrivateKey.of_xml) (Xml.child xml_arg0 "PrivateKey") in
+      let certificateChain =
+        (Option.map ~f:CertificateChain.of_xml)
+          (Xml.child xml_arg0 "CertificateChain") in
+      let certificate =
+        (Option.map ~f:CertificateBody.of_xml)
+          (Xml.child xml_arg0 "Certificate") in
+      make ?privateKey ?certificateChain ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let privateKey = field_map json__ "PrivateKey" PrivateKey.of_json in
+      let certificateChain =
+        field_map json__ "CertificateChain" CertificateChain.of_json in
+      let certificate =
+        field_map json__ "Certificate" CertificateBody.of_json in
+      make ?privateKey ?certificateChain ?certificate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Exports a private certificate issued by a private certificate authority (CA) or a public certificate for use anywhere. The exported file contains the certificate, the certificate chain, and the encrypted private key associated with the public key that is embedded in the certificate. For security, you must assign a passphrase for the private key when exporting it. For information about exporting and formatting a certificate using the ACM console or CLI, see Export a private certificate and Export a public certificate. ACM public certificates created prior to June 17, 2025 cannot be exported."]
+module ExtendedKeyUsageFilterList =
+  struct
+    type nonrec t = ExtendedKeyUsageName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExtendedKeyUsageName.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExtendedKeyUsageName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExtendedKeyUsageFilterList"
+        ~of_json:ExtendedKeyUsageName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KeyUsageFilterList =
+  struct
+    type nonrec t = KeyUsageName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KeyUsageName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KeyUsageName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KeyUsageFilterList" ~of_json:KeyUsageName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KeyAlgorithmList =
+  struct
+    type nonrec t = KeyAlgorithm.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KeyAlgorithm.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KeyAlgorithm.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KeyAlgorithmList" ~of_json:KeyAlgorithm.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Filters =
+  struct
+    type nonrec t =
+      {
+      extendedKeyUsage: ExtendedKeyUsageFilterList.t option
+        [@ocaml.doc "Specify one or more ExtendedKeyUsage extension values."];
+      keyUsage: KeyUsageFilterList.t option
+        [@ocaml.doc "Specify one or more KeyUsage extension values."];
+      keyTypes: KeyAlgorithmList.t option
+        [@ocaml.doc
+          "Specify one or more algorithms that can be used to generate key pairs. Default filtering returns only RSA_1024 and RSA_2048 certificates that have at least one domain. To return other certificate types, provide the desired type signatures in a comma-separated list. For example, \"keyTypes\": \\[\"RSA_2048\",\"RSA_4096\"\\] returns both RSA_2048 and RSA_4096 certificates."];
+      exportOption: CertificateExport.t option
+        [@ocaml.doc
+          "Specify ENABLED or DISABLED to identify certificates that can be exported."];
+      managedBy: CertificateManagedBy.t option
+        [@ocaml.doc
+          "Identifies the Amazon Web Services service that manages the certificate issued by ACM."]}
+    let make ?extendedKeyUsage =
+      fun ?keyUsage ->
+        fun ?keyTypes ->
+          fun ?exportOption ->
+            fun ?managedBy ->
+              fun () ->
+                {
+                  extendedKeyUsage;
+                  keyUsage;
+                  keyTypes;
+                  exportOption;
+                  managedBy
+                }
+    let to_value x =
+      structure_to_value
+        [("extendedKeyUsage",
+           (Option.map x.extendedKeyUsage
+              ~f:ExtendedKeyUsageFilterList.to_value));
+        ("keyUsage", (Option.map x.keyUsage ~f:KeyUsageFilterList.to_value));
+        ("keyTypes", (Option.map x.keyTypes ~f:KeyAlgorithmList.to_value));
+        ("exportOption",
+          (Option.map x.exportOption ~f:CertificateExport.to_value));
+        ("managedBy",
+          (Option.map x.managedBy ~f:CertificateManagedBy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let managedBy =
+        (Option.map ~f:CertificateManagedBy.of_xml)
+          (Xml.child xml_arg0 "managedBy") in
+      let exportOption =
+        (Option.map ~f:CertificateExport.of_xml)
+          (Xml.child xml_arg0 "exportOption") in
+      let keyTypes =
+        (Option.map ~f:KeyAlgorithmList.of_xml)
+          (Xml.child xml_arg0 "keyTypes") in
+      let keyUsage =
+        (Option.map ~f:KeyUsageFilterList.of_xml)
+          (Xml.child xml_arg0 "keyUsage") in
+      let extendedKeyUsage =
+        (Option.map ~f:ExtendedKeyUsageFilterList.of_xml)
+          (Xml.child xml_arg0 "extendedKeyUsage") in
+      make ?managedBy ?exportOption ?keyTypes ?keyUsage ?extendedKeyUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let managedBy =
+        field_map json__ "managedBy" CertificateManagedBy.of_json in
+      let exportOption =
+        field_map json__ "exportOption" CertificateExport.of_json in
+      let keyTypes = field_map json__ "keyTypes" KeyAlgorithmList.of_json in
+      let keyUsage = field_map json__ "keyUsage" KeyUsageFilterList.of_json in
+      let extendedKeyUsage =
+        field_map json__ "extendedKeyUsage"
+          ExtendedKeyUsageFilterList.of_json in
+      make ?managedBy ?exportOption ?keyTypes ?keyUsage ?extendedKeyUsage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This structure can be used in the ListCertificates action to filter the output of the certificate list."]
+module GetAccountConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      expiryEvents: ExpiryEventsConfiguration.t option
+        [@ocaml.doc
+          "Expiration events configuration options associated with the Amazon Web Services account."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?expiryEvents = fun () -> { expiryEvents }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ExpiryEvents",
+           (Option.map x.expiryEvents ~f:ExpiryEventsConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expiryEvents =
+        (Option.map ~f:ExpiryEventsConfiguration.of_xml)
+          (Xml.child xml_arg0 "ExpiryEvents") in
+      make ?expiryEvents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expiryEvents =
+        field_map json__ "ExpiryEvents" ExpiryEventsConfiguration.of_json in
+      make ?expiryEvents ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the account configuration options associated with an Amazon Web Services account."]
+module GetCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      certificateArn: Arn.t
+        [@ocaml.doc
+          "String that contains a certificate ARN in the following format: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."]}
+    let context_ = "GetCertificateRequest"
+    let make ~certificateArn = fun () -> { certificateArn }
+    let to_value x =
+      structure_to_value
+        [("CertificateArn", (Some (Arn.to_value x.certificateArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
+      make ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateArn = field_map_exn json__ "CertificateArn" Arn.of_json in
+      make ~certificateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a certificate and its certificate chain. The certificate may be either a public or private certificate issued using the ACM RequestCertificate action, or a certificate imported into ACM using the ImportCertificate action. The chain consists of the certificate of the issuing CA and the intermediate certificates of any other subordinate CAs. All of the certificates are base64 encoded. You can use OpenSSL to decode the certificates and inspect individual fields."]
+module GetCertificateResponse =
+  struct
+    type nonrec t =
+      {
+      certificate: CertificateBody.t option
+        [@ocaml.doc
+          "The ACM-issued certificate corresponding to the ARN specified as input."];
+      certificateChain: CertificateChain.t option
+        [@ocaml.doc
+          "Certificates forming the requested certificate's chain of trust. The chain consists of the certificate of the issuing CA and the intermediate certificates of any other subordinate CAs."]}
+    type nonrec error =
+      [ `InvalidArnException of InvalidArnException.t 
+      | `RequestInProgressException of RequestInProgressException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?certificate =
+      fun ?certificateChain -> fun () -> { certificate; certificateChain }
+    let error_of_json name json =
+      match name with
+      | "InvalidArnException" ->
+          `InvalidArnException (InvalidArnException.of_json json)
+      | "RequestInProgressException" ->
+          `RequestInProgressException
+            (RequestInProgressException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArnException" ->
+          `InvalidArnException (InvalidArnException.of_xml xml)
+      | "RequestInProgressException" ->
+          `RequestInProgressException (RequestInProgressException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArnException e ->
+          `Assoc
+            [("error", (`String "InvalidArnException"));
+            ("details", (InvalidArnException.to_json e))]
+      | `RequestInProgressException e ->
+          `Assoc
+            [("error", (`String "RequestInProgressException"));
+            ("details", (RequestInProgressException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Certificate",
+           (Option.map x.certificate ~f:CertificateBody.to_value));
+        ("CertificateChain",
+          (Option.map x.certificateChain ~f:CertificateChain.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateChain =
+        (Option.map ~f:CertificateChain.of_xml)
+          (Xml.child xml_arg0 "CertificateChain") in
+      let certificate =
+        (Option.map ~f:CertificateBody.of_xml)
+          (Xml.child xml_arg0 "Certificate") in
+      make ?certificateChain ?certificate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateChain =
+        field_map json__ "CertificateChain" CertificateChain.of_json in
+      let certificate =
+        field_map json__ "Certificate" CertificateBody.of_json in
+      make ?certificateChain ?certificate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a certificate and its certificate chain. The certificate may be either a public or private certificate issued using the ACM RequestCertificate action, or a certificate imported into ACM using the ImportCertificate action. The chain consists of the certificate of the issuing CA and the intermediate certificates of any other subordinate CAs. All of the certificates are base64 encoded. You can use OpenSSL to decode the certificates and inspect individual fields."]
+module IdempotencyToken =
+  struct
+    type nonrec t = string
+    let context_ = "IdempotencyToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:"\\w+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdempotencyToken" j
+    let to_json = simple_to_json to_value
+  end
+module PrivateKeyBlob =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module ImportCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      certificateArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an imported certificate to replace. To import a new certificate, omit this field."];
+      certificate: CertificateBodyBlob.t
+        [@ocaml.doc "The certificate to import."];
+      privateKey: PrivateKeyBlob.t
+        [@ocaml.doc
+          "The private key that matches the public key in the certificate."];
+      certificateChain: CertificateChainBlob.t option
+        [@ocaml.doc "The PEM encoded certificate chain."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "One or more resource tags to associate with the imported certificate. Note: You cannot apply tags when reimporting a certificate."]}
+    let context_ = "ImportCertificateRequest"
+    let make ?certificateArn =
+      fun ?certificateChain ->
+        fun ?tags ->
+          fun ~certificate ->
+            fun ~privateKey ->
+              fun () ->
+                {
+                  certificateArn;
+                  certificateChain;
+                  tags;
+                  certificate;
+                  privateKey
+                }
+    let to_value x =
+      structure_to_value
+        [("CertificateArn", (Option.map x.certificateArn ~f:Arn.to_value));
+        ("Certificate", (Some (CertificateBodyBlob.to_value x.certificate)));
+        ("PrivateKey", (Some (PrivateKeyBlob.to_value x.privateKey)));
+        ("CertificateChain",
+          (Option.map x.certificateChain ~f:CertificateChainBlob.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let certificateChain =
+        (Option.map ~f:CertificateChainBlob.of_xml)
+          (Xml.child xml_arg0 "CertificateChain") in
+      let privateKey =
+        PrivateKeyBlob.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PrivateKey") in
+      let certificate =
+        CertificateBodyBlob.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Certificate") in
+      let certificateArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CertificateArn") in
+      make ?tags ?certificateChain ~privateKey ~certificate ?certificateArn
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let certificateChain =
+        field_map json__ "CertificateChain" CertificateChainBlob.of_json in
+      let privateKey =
+        field_map_exn json__ "PrivateKey" PrivateKeyBlob.of_json in
+      let certificate =
+        field_map_exn json__ "Certificate" CertificateBodyBlob.of_json in
+      let certificateArn = field_map json__ "CertificateArn" Arn.of_json in
+      make ?tags ?certificateChain ~privateKey ~certificate ?certificateArn
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Imports a certificate into Certificate Manager (ACM) to use with services that are integrated with ACM. Note that integrated services allow only certificate types and keys they support to be associated with their resources. Further, their support differs depending on whether the certificate is imported into IAM or into ACM. For more information, see the documentation for each service. For more information about importing certificates into ACM, see Importing Certificates in the Certificate Manager User Guide. ACM does not provide managed renewal for certificates that you import. Note the following guidelines when importing third party certificates: You must enter the private key that matches the certificate you are importing. The private key must be unencrypted. You cannot import a private key that is protected by a password or a passphrase. The private key must be no larger than 5 KB (5,120 bytes). The certificate, private key, and certificate chain must be PEM-encoded. The current time must be between the Not Before and Not After certificate fields. The Issuer field must not be empty. The OCSP authority URL, if present, must not exceed 1000 characters. To import a new certificate, omit the CertificateArn argument. Include this argument only when you want to replace a previously imported certificate. When you import a certificate by using the CLI, you must specify the certificate, the certificate chain, and the private key by their file names preceded by fileb://. For example, you can specify a certificate saved in the C:\\temp folder as fileb://C:\\temp\\certificate_to_import.pem. If you are making an HTTP or HTTPS Query request, include these arguments as BLOBs. When you import a certificate by using an SDK, you must specify the certificate, the certificate chain, and the private key files in the manner required by the programming language you're using. The cryptographic algorithm of an imported certificate must match the algorithm of the signing CA. For example, if the signing CA key type is RSA, then the certificate key type must also be RSA. This operation returns the Amazon Resource Name (ARN) of the imported certificate."]
+module TooManyTagsException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request contains too many tags. Try the request again with fewer tags."]
+module TagPolicyException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A specified tag did not comply with an existing tag policy and was rejected."]
+module LimitExceededException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An ACM quota has been exceeded."]
+module InvalidTagException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "One or both of the values that make up the key-value pair is not valid. For example, you cannot specify a tag value that begins with aws:."]
+module InvalidParameterException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An input parameter was invalid."]
+module ImportCertificateResponse =
+  struct
+    type nonrec t =
+      {
+      certificateArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the imported certificate."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InvalidArnException of InvalidArnException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidTagException of InvalidTagException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TagPolicyException of TagPolicyException.t 
+      | `TooManyTagsException of TooManyTagsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?certificateArn = fun () -> { certificateArn }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InvalidArnException" ->
+          `InvalidArnException (InvalidArnException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidTagException" ->
+          `InvalidTagException (InvalidTagException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TagPolicyException" ->
+          `TagPolicyException (TagPolicyException.of_json json)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InvalidArnException" ->
+          `InvalidArnException (InvalidArnException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidTagException" ->
+          `InvalidTagException (InvalidTagException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TagPolicyException" ->
+          `TagPolicyException (TagPolicyException.of_xml xml)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InvalidArnException e ->
+          `Assoc
+            [("error", (`String "InvalidArnException"));
+            ("details", (InvalidArnException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidTagException e ->
+          `Assoc
+            [("error", (`String "InvalidTagException"));
+            ("details", (InvalidTagException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TagPolicyException e ->
+          `Assoc
+            [("error", (`String "TagPolicyException"));
+            ("details", (TagPolicyException.to_json e))]
+      | `TooManyTagsException e ->
+          `Assoc
+            [("error", (`String "TooManyTagsException"));
+            ("details", (TooManyTagsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CertificateArn", (Option.map x.certificateArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CertificateArn") in
+      make ?certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateArn = field_map json__ "CertificateArn" Arn.of_json in
+      make ?certificateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Imports a certificate into Certificate Manager (ACM) to use with services that are integrated with ACM. Note that integrated services allow only certificate types and keys they support to be associated with their resources. Further, their support differs depending on whether the certificate is imported into IAM or into ACM. For more information, see the documentation for each service. For more information about importing certificates into ACM, see Importing Certificates in the Certificate Manager User Guide. ACM does not provide managed renewal for certificates that you import. Note the following guidelines when importing third party certificates: You must enter the private key that matches the certificate you are importing. The private key must be unencrypted. You cannot import a private key that is protected by a password or a passphrase. The private key must be no larger than 5 KB (5,120 bytes). The certificate, private key, and certificate chain must be PEM-encoded. The current time must be between the Not Before and Not After certificate fields. The Issuer field must not be empty. The OCSP authority URL, if present, must not exceed 1000 characters. To import a new certificate, omit the CertificateArn argument. Include this argument only when you want to replace a previously imported certificate. When you import a certificate by using the CLI, you must specify the certificate, the certificate chain, and the private key by their file names preceded by fileb://. For example, you can specify a certificate saved in the C:\\temp folder as fileb://C:\\temp\\certificate_to_import.pem. If you are making an HTTP or HTTPS Query request, include these arguments as BLOBs. When you import a certificate by using an SDK, you must specify the certificate, the certificate chain, and the private key files in the manner required by the programming language you're using. The cryptographic algorithm of an imported certificate must match the algorithm of the signing CA. For example, if the signing CA key type is RSA, then the certificate key type must also be RSA. This operation returns the Amazon Resource Name (ARN) of the imported certificate."]
+module InvalidArgsException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "One or more of request parameters specified is not valid."]
+module InvalidDomainValidationOptionsException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "One or more values in the DomainValidationOption structure is incorrect."]
+module InvalidStateException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Processing has reached an invalid state."]
+module SortOrder =
+  struct
+    type nonrec t =
+      | ASCENDING 
+      | DESCENDING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ASCENDING -> "ASCENDING"
+      | DESCENDING -> "DESCENDING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ASCENDING" -> ASCENDING
+      | "DESCENDING" -> DESCENDING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SortOrder" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SortOrder" j)
+    let to_json = simple_to_json to_value
+  end
+module SortBy =
+  struct
+    type nonrec t =
+      | CREATED_AT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | CREATED_AT -> "CREATED_AT" | Non_static_id s -> s
+    let of_string =
+      function | "CREATED_AT" -> CREATED_AT | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SortBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SortBy" j)
+    let to_json = simple_to_json to_value
+  end
+module NextToken =
+  struct
+    type nonrec t = string
+    let context_ = "NextToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:10000) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u00FF]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NextToken" j
+    let to_json = simple_to_json to_value
+  end
+module MaxItems =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for MaxItems" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListCertificatesRequest =
+  struct
+    type nonrec t =
+      {
+      certificateStatuses: CertificateStatuses.t option
+        [@ocaml.doc "Filter the certificate list by status value."];
+      includes: Filters.t option
+        [@ocaml.doc
+          "Filter the certificate list. For more information, see the Filters structure."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Use this parameter only when paginating results and only in a subsequent request after you receive a response with truncated results. Set it to the value of NextToken from the response you just received."];
+      maxItems: MaxItems.t option
+        [@ocaml.doc
+          "Use this parameter when paginating results to specify the maximum number of items to return in the response. If additional items exist beyond the number you specify, the NextToken element is sent in the response. Use this NextToken value in a subsequent request to retrieve additional items."];
+      sortBy: SortBy.t option
+        [@ocaml.doc
+          "Specifies the field to sort results by. If you specify SortBy, you must also specify SortOrder."];
+      sortOrder: SortOrder.t option
+        [@ocaml.doc
+          "Specifies the order of sorted results. If you specify SortOrder, you must also specify SortBy."]}
+    let make ?certificateStatuses =
+      fun ?includes ->
+        fun ?nextToken ->
+          fun ?maxItems ->
+            fun ?sortBy ->
+              fun ?sortOrder ->
+                fun () ->
+                  {
+                    certificateStatuses;
+                    includes;
+                    nextToken;
+                    maxItems;
+                    sortBy;
+                    sortOrder
+                  }
+    let to_value x =
+      structure_to_value
+        [("CertificateStatuses",
+           (Option.map x.certificateStatuses ~f:CertificateStatuses.to_value));
+        ("Includes", (Option.map x.includes ~f:Filters.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxItems", (Option.map x.maxItems ~f:MaxItems.to_value));
+        ("SortBy", (Option.map x.sortBy ~f:SortBy.to_value));
+        ("SortOrder", (Option.map x.sortOrder ~f:SortOrder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sortOrder =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "SortOrder") in
+      let sortBy =
+        (Option.map ~f:SortBy.of_xml) (Xml.child xml_arg0 "SortBy") in
+      let maxItems =
+        (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let includes =
+        (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Includes") in
+      let certificateStatuses =
+        (Option.map ~f:CertificateStatuses.of_xml)
+          (Xml.child xml_arg0 "CertificateStatuses") in
+      make ?sortOrder ?sortBy ?maxItems ?nextToken ?includes
+        ?certificateStatuses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" SortBy.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let includes = field_map json__ "Includes" Filters.of_json in
+      let certificateStatuses =
+        field_map json__ "CertificateStatuses" CertificateStatuses.of_json in
+      make ?sortOrder ?sortBy ?maxItems ?nextToken ?includes
+        ?certificateStatuses ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of certificate ARNs and domain names. You can request that only certificates that match a specific status be listed. You can also filter by specific attributes of the certificate. Default filtering returns only RSA_2048 certificates. For more information, see Filters."]
+module ValidationExceptionMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ValidationExceptionMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValidationExceptionMessage" j
+    let to_json = simple_to_json to_value
+  end
 module ValidationException =
   struct
     type nonrec t = {
@@ -2179,113 +4840,419 @@ module ValidationException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "message" ValidationExceptionMessage.of_json in
+        field_map json__ "message" ValidationExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The supplied input failed to satisfy constraints of an Amazon Web Services service."]
-module UpdateCertificateOptionsRequest =
+module ListCertificatesResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "When the list is truncated, this value is present and contains the value to use for the NextToken parameter in a subsequent pagination request."];
+      certificateSummaryList: CertificateSummaryList.t option
+        [@ocaml.doc "A list of ACM certificates."]}
+    type nonrec error =
+      [ `InvalidArgsException of InvalidArgsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?certificateSummaryList ->
+        fun () -> { nextToken; certificateSummaryList }
+    let error_of_json name json =
+      match name with
+      | "InvalidArgsException" ->
+          `InvalidArgsException (InvalidArgsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArgsException" ->
+          `InvalidArgsException (InvalidArgsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArgsException e ->
+          `Assoc
+            [("error", (`String "InvalidArgsException"));
+            ("details", (InvalidArgsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("CertificateSummaryList",
+          (Option.map x.certificateSummaryList
+             ~f:CertificateSummaryList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateSummaryList =
+        (Option.map ~f:CertificateSummaryList.of_xml)
+          (Xml.child xml_arg0 "CertificateSummaryList") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?certificateSummaryList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateSummaryList =
+        field_map json__ "CertificateSummaryList"
+          CertificateSummaryList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?certificateSummaryList ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of certificate ARNs and domain names. You can request that only certificates that match a specific status be listed. You can also filter by specific attributes of the certificate. Default filtering returns only RSA_2048 certificates. For more information, see Filters."]
+module ListTagsForCertificateRequest =
   struct
     type nonrec t =
       {
       certificateArn: Arn.t
         [@ocaml.doc
-          "ARN of the requested certificate to update. This must be of the form: arn:aws:acm:us-east-1:account:certificate/12345678-1234-1234-1234-123456789012"];
-      options: CertificateOptions.t
+          "String that contains the ARN of the ACM certificate for which you want to list the tags. This must have the following form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."]}
+    let context_ = "ListTagsForCertificateRequest"
+    let make ~certificateArn = fun () -> { certificateArn }
+    let to_value x =
+      structure_to_value
+        [("CertificateArn", (Some (Arn.to_value x.certificateArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
+      make ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateArn = field_map_exn json__ "CertificateArn" Arn.of_json in
+      make ~certificateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the tags that have been applied to the ACM certificate. Use the certificate's Amazon Resource Name (ARN) to specify the certificate. To add a tag to an ACM certificate, use the AddTagsToCertificate action. To delete a tag, use the RemoveTagsFromCertificate action."]
+module ListTagsForCertificateResponse =
+  struct
+    type nonrec t =
+      {
+      tags: TagList.t option
+        [@ocaml.doc "The key-value pairs that define the applied tags."]}
+    type nonrec error =
+      [ `InvalidArnException of InvalidArnException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun () -> { tags }
+    let error_of_json name json =
+      match name with
+      | "InvalidArnException" ->
+          `InvalidArnException (InvalidArnException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArnException" ->
+          `InvalidArnException (InvalidArnException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArnException e ->
+          `Assoc
+            [("error", (`String "InvalidArnException"));
+            ("details", (InvalidArnException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the tags that have been applied to the ACM certificate. Use the certificate's Amazon Resource Name (ARN) to specify the certificate. To add a tag to an ACM certificate, use the AddTagsToCertificate action. To delete a tag, use the RemoveTagsFromCertificate action."]
+module PcaArn =
+  struct
+    type nonrec t = string
+    let context_ = "PcaArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[\\w+=/,.@-]+:acm-pca:[\\w+=/,.@-]*:[0-9]+:[\\w+=,.@-]+(/[\\w+=,.@-]+)*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PcaArn" j
+    let to_json = simple_to_json to_value
+  end
+module PutAccountConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      expiryEvents: ExpiryEventsConfiguration.t option
         [@ocaml.doc
-          "Use to update the options for your certificate. Currently, you can specify whether to add your certificate to a transparency log. Certificate transparency makes it possible to detect SSL/TLS certificates that have been mistakenly or maliciously issued. Certificates that have not been logged typically produce an error message in a browser."]}
-    let context_ = "UpdateCertificateOptionsRequest"
+          "Specifies expiration events associated with an account."];
+      idempotencyToken: IdempotencyToken.t
+        [@ocaml.doc
+          "Customer-chosen string used to distinguish between calls to PutAccountConfiguration. Idempotency tokens time out after one hour. If you call PutAccountConfiguration multiple times with the same unexpired idempotency token, ACM treats it as the same request and returns the original result. If you change the idempotency token for each call, ACM treats each call as a new request."]}
+    let context_ = "PutAccountConfigurationRequest"
+    let make ?expiryEvents =
+      fun ~idempotencyToken -> fun () -> { expiryEvents; idempotencyToken }
+    let to_value x =
+      structure_to_value
+        [("ExpiryEvents",
+           (Option.map x.expiryEvents ~f:ExpiryEventsConfiguration.to_value));
+        ("IdempotencyToken",
+          (Some (IdempotencyToken.to_value x.idempotencyToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let idempotencyToken =
+        IdempotencyToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdempotencyToken") in
+      let expiryEvents =
+        (Option.map ~f:ExpiryEventsConfiguration.of_xml)
+          (Xml.child xml_arg0 "ExpiryEvents") in
+      make ~idempotencyToken ?expiryEvents ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let idempotencyToken =
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let expiryEvents =
+        field_map json__ "ExpiryEvents" ExpiryEventsConfiguration.of_json in
+      make ~idempotencyToken ?expiryEvents ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds or modifies account-level configurations in ACM. The supported configuration option is DaysBeforeExpiry. This option specifies the number of days prior to certificate expiration when ACM starts generating EventBridge events. ACM sends one event per day per certificate until the certificate expires. By default, accounts receive events starting 45 days before certificate expiration."]
+module RemoveTagsFromCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      certificateArn: Arn.t
+        [@ocaml.doc
+          "String that contains the ARN of the ACM Certificate with one or more tags that you want to remove. This must be of the form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."];
+      tags: TagList.t
+        [@ocaml.doc "The key-value pair that defines the tag to remove."]}
+    let context_ = "RemoveTagsFromCertificateRequest"
     let make ~certificateArn =
-      fun ~options -> fun () -> { certificateArn; options }
+      fun ~tags -> fun () -> { certificateArn; tags }
     let to_value x =
       structure_to_value
         [("CertificateArn", (Some (Arn.to_value x.certificateArn)));
-        ("Options", (Some (CertificateOptions.to_value x.options)))]
+        ("Tags", (Some (TagList.to_value x.tags)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags =
+        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let certificateArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
+      make ~tags ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let certificateArn = field_map_exn json__ "CertificateArn" Arn.of_json in
+      make ~tags ~certificateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Remove one or more tags from an ACM certificate. A tag consists of a key-value pair. If you do not specify the value portion of the tag when calling this function, the tag will be removed regardless of value. If you specify a value, the tag is removed only if it is associated with the specified value. To add tags to a certificate, use the AddTagsToCertificate action. To view all of the tags that have been applied to a specific ACM certificate, use the ListTagsForCertificate action."]
+module RenewCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      certificateArn: Arn.t
+        [@ocaml.doc
+          "String that contains the ARN of the ACM certificate to be renewed. This must be of the form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."]}
+    let context_ = "RenewCertificateRequest"
+    let make ~certificateArn = fun () -> { certificateArn }
+    let to_value x =
+      structure_to_value
+        [("CertificateArn", (Some (Arn.to_value x.certificateArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
+      make ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateArn = field_map_exn json__ "CertificateArn" Arn.of_json in
+      make ~certificateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Renews an eligible ACM certificate. In order to renew your Amazon Web Services Private CA certificates with ACM, you must first grant the ACM service principal permission to do so. For more information, see Testing Managed Renewal in the ACM User Guide."]
+module RequestCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      domainName: DomainNameString.t
+        [@ocaml.doc
+          "Fully qualified domain name (FQDN), such as www.example.com, that you want to secure with an ACM certificate. Use an asterisk (*) to create a wildcard certificate that protects several sites in the same domain. For example, *.example.com protects www.example.com, site.example.com, and images.example.com. In compliance with RFC 5280, the length of the domain name (technically, the Common Name) that you provide cannot exceed 64 octets (characters), including periods. To add a longer domain name, specify it in the Subject Alternative Name field, which supports names up to 253 octets in length."];
+      validationMethod: ValidationMethod.t option
+        [@ocaml.doc
+          "The method you want to use if you are requesting a public certificate to validate that you own or control domain. You can validate with DNS or validate with email. We recommend that you use DNS validation."];
+      subjectAlternativeNames: DomainList.t option
+        [@ocaml.doc
+          "Additional FQDNs to be included in the Subject Alternative Name extension of the ACM certificate. For example, add the name www.example.net to a certificate for which the DomainName field is www.example.com if users can reach your site by using either name. The maximum number of domain names that you can add to an ACM certificate is 100. However, the initial quota is 10 domain names. If you need more than 10 names, you must request a quota increase. For more information, see Quotas. The maximum length of a SAN DNS name is 253 octets. The name is made up of multiple labels separated by periods. No label can be longer than 63 octets. Consider the following examples: (63 octets).(63 octets).(63 octets).(61 octets) is legal because the total length is 253 octets (63+1+63+1+63+1+61) and no label exceeds 63 octets. (64 octets).(63 octets).(63 octets).(61 octets) is not legal because the total length exceeds 253 octets (64+1+63+1+63+1+61) and the first label exceeds 63 octets. (63 octets).(63 octets).(63 octets).(62 octets) is not legal because the total length of the DNS name (63+1+63+1+63+1+62) exceeds 253 octets."];
+      idempotencyToken: IdempotencyToken.t option
+        [@ocaml.doc
+          "Customer chosen string that can be used to distinguish between calls to RequestCertificate. Idempotency tokens time out after one hour. Therefore, if you call RequestCertificate multiple times with the same idempotency token within one hour, ACM recognizes that you are requesting only one certificate and will issue only one. If you change the idempotency token for each call, ACM recognizes that you are requesting multiple certificates."];
+      domainValidationOptions: DomainValidationOptionList.t option
+        [@ocaml.doc
+          "The domain name that you want ACM to use to send you emails so that you can validate domain ownership."];
+      options: CertificateOptions.t option
+        [@ocaml.doc
+          "You can use this parameter to specify whether to add the certificate to a certificate transparency log and export your certificate. Certificate transparency makes it possible to detect SSL/TLS certificates that have been mistakenly or maliciously issued. Certificates that have not been logged typically produce an error message in a browser. For more information, see Opting Out of Certificate Transparency Logging. You can export public ACM certificates to use with Amazon Web Services services as well as outside the Amazon Web Services Cloud. For more information, see Certificate Manager exportable public certificate."];
+      certificateAuthorityArn: PcaArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the private certificate authority (CA) that will be used to issue the certificate. If you do not provide an ARN and you are trying to request a private certificate, ACM will attempt to issue a public certificate. For more information about private CAs, see the Amazon Web Services Private Certificate Authority user guide. The ARN must have the following form: arn:aws:acm-pca:region:account:certificate-authority/12345678-1234-1234-1234-123456789012"];
+      tags: TagList.t option
+        [@ocaml.doc
+          "One or more resource tags to associate with the certificate."];
+      keyAlgorithm: KeyAlgorithm.t option
+        [@ocaml.doc
+          "Specifies the algorithm of the public and private key pair that your certificate uses to encrypt data. RSA is the default key algorithm for ACM certificates. Elliptic Curve Digital Signature Algorithm (ECDSA) keys are smaller, offering security comparable to RSA keys but with greater computing efficiency. However, ECDSA is not supported by all network clients. Some Amazon Web Services services may require RSA keys, or only support ECDSA keys of a particular size, while others allow the use of either RSA and ECDSA keys to ensure that compatibility is not broken. Check the requirements for the Amazon Web Services service where you plan to deploy your certificate. For more information about selecting an algorithm, see Key algorithms. Algorithms supported for an ACM certificate request include: RSA_2048 EC_prime256v1 EC_secp384r1 Other listed algorithms are for imported certificates only. When you request a private PKI certificate signed by a CA from Amazon Web Services Private CA, the specified signing algorithm family (RSA or ECDSA) must match the algorithm family of the CA's secret key. Default: RSA_2048"];
+      managedBy: CertificateManagedBy.t option
+        [@ocaml.doc
+          "Identifies the Amazon Web Services service that manages the certificate issued by ACM."]}
+    let context_ = "RequestCertificateRequest"
+    let make ?validationMethod =
+      fun ?subjectAlternativeNames ->
+        fun ?idempotencyToken ->
+          fun ?domainValidationOptions ->
+            fun ?options ->
+              fun ?certificateAuthorityArn ->
+                fun ?tags ->
+                  fun ?keyAlgorithm ->
+                    fun ?managedBy ->
+                      fun ~domainName ->
+                        fun () ->
+                          {
+                            validationMethod;
+                            subjectAlternativeNames;
+                            idempotencyToken;
+                            domainValidationOptions;
+                            options;
+                            certificateAuthorityArn;
+                            tags;
+                            keyAlgorithm;
+                            managedBy;
+                            domainName
+                          }
+    let to_value x =
+      structure_to_value
+        [("DomainName", (Some (DomainNameString.to_value x.domainName)));
+        ("ValidationMethod",
+          (Option.map x.validationMethod ~f:ValidationMethod.to_value));
+        ("SubjectAlternativeNames",
+          (Option.map x.subjectAlternativeNames ~f:DomainList.to_value));
+        ("IdempotencyToken",
+          (Option.map x.idempotencyToken ~f:IdempotencyToken.to_value));
+        ("DomainValidationOptions",
+          (Option.map x.domainValidationOptions
+             ~f:DomainValidationOptionList.to_value));
+        ("Options", (Option.map x.options ~f:CertificateOptions.to_value));
+        ("CertificateAuthorityArn",
+          (Option.map x.certificateAuthorityArn ~f:PcaArn.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("KeyAlgorithm",
+          (Option.map x.keyAlgorithm ~f:KeyAlgorithm.to_value));
+        ("ManagedBy",
+          (Option.map x.managedBy ~f:CertificateManagedBy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let managedBy =
+        (Option.map ~f:CertificateManagedBy.of_xml)
+          (Xml.child xml_arg0 "ManagedBy") in
+      let keyAlgorithm =
+        (Option.map ~f:KeyAlgorithm.of_xml)
+          (Xml.child xml_arg0 "KeyAlgorithm") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let certificateAuthorityArn =
+        (Option.map ~f:PcaArn.of_xml)
+          (Xml.child xml_arg0 "CertificateAuthorityArn") in
       let options =
-        CertificateOptions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
-      let certificateArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
-      make ~options ~certificateArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let options = field_map_exn json "Options" CertificateOptions.of_json in
-      let certificateArn = field_map_exn json "CertificateArn" Arn.of_json in
-      make ~options ~certificateArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updates a certificate. Currently, you can use this function to specify whether to opt in to or out of recording your certificate in a certificate transparency log. For more information, see Opting Out of Certificate Transparency Logging."]
-module ResourceInUseException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The certificate is in use by another Amazon Web Services service in the caller's account. Remove the association and try again."]
-module ResendValidationEmailRequest =
-  struct
-    type nonrec t =
-      {
-      certificateArn: Arn.t
-        [@ocaml.doc
-          "String that contains the ARN of the requested certificate. The certificate ARN is generated and returned by the RequestCertificate action as soon as the request is made. By default, using this parameter causes email to be sent to all top-level domains you specified in the certificate request. The ARN must be of the form: arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"];
-      domain: DomainNameString.t
-        [@ocaml.doc
-          "The fully qualified domain name (FQDN) of the certificate that needs to be validated."];
-      validationDomain: DomainNameString.t
-        [@ocaml.doc
-          "The base validation domain that will act as the suffix of the email addresses that are used to send the emails. This must be the same as the Domain value or a superdomain of the Domain value. For example, if you requested a certificate for site.subdomain.example.com and specify a ValidationDomain of subdomain.example.com, ACM sends email to the domain registrant, technical contact, and administrative contact in WHOIS and the following five addresses: admin\\@subdomain.example.com administrator\\@subdomain.example.com hostmaster\\@subdomain.example.com postmaster\\@subdomain.example.com webmaster\\@subdomain.example.com"]}
-    let context_ = "ResendValidationEmailRequest"
-    let make ~certificateArn =
-      fun ~domain ->
-        fun ~validationDomain ->
-          fun () -> { certificateArn; domain; validationDomain }
-    let to_value x =
-      structure_to_value
-        [("CertificateArn", (Some (Arn.to_value x.certificateArn)));
-        ("Domain", (Some (DomainNameString.to_value x.domain)));
-        ("ValidationDomain",
-          (Some (DomainNameString.to_value x.validationDomain)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let validationDomain =
+        (Option.map ~f:CertificateOptions.of_xml)
+          (Xml.child xml_arg0 "Options") in
+      let domainValidationOptions =
+        (Option.map ~f:DomainValidationOptionList.of_xml)
+          (Xml.child xml_arg0 "DomainValidationOptions") in
+      let idempotencyToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "IdempotencyToken") in
+      let subjectAlternativeNames =
+        (Option.map ~f:DomainList.of_xml)
+          (Xml.child xml_arg0 "SubjectAlternativeNames") in
+      let validationMethod =
+        (Option.map ~f:ValidationMethod.of_xml)
+          (Xml.child xml_arg0 "ValidationMethod") in
+      let domainName =
         DomainNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ValidationDomain") in
-      let domain =
-        DomainNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
-      let certificateArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
-      make ~validationDomain ~domain ~certificateArn ()
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      make ?managedBy ?keyAlgorithm ?tags ?certificateAuthorityArn ?options
+        ?domainValidationOptions ?idempotencyToken ?subjectAlternativeNames
+        ?validationMethod ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let validationDomain =
-        field_map_exn json "ValidationDomain" DomainNameString.of_json in
-      let domain = field_map_exn json "Domain" DomainNameString.of_json in
-      let certificateArn = field_map_exn json "CertificateArn" Arn.of_json in
-      make ~validationDomain ~domain ~certificateArn ()
+    let of_json json__ =
+      let managedBy =
+        field_map json__ "ManagedBy" CertificateManagedBy.of_json in
+      let keyAlgorithm = field_map json__ "KeyAlgorithm" KeyAlgorithm.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let certificateAuthorityArn =
+        field_map json__ "CertificateAuthorityArn" PcaArn.of_json in
+      let options = field_map json__ "Options" CertificateOptions.of_json in
+      let domainValidationOptions =
+        field_map json__ "DomainValidationOptions"
+          DomainValidationOptionList.of_json in
+      let idempotencyToken =
+        field_map json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let subjectAlternativeNames =
+        field_map json__ "SubjectAlternativeNames" DomainList.of_json in
+      let validationMethod =
+        field_map json__ "ValidationMethod" ValidationMethod.of_json in
+      let domainName =
+        field_map_exn json__ "DomainName" DomainNameString.of_json in
+      make ?managedBy ?keyAlgorithm ?tags ?certificateAuthorityArn ?options
+        ?domainValidationOptions ?idempotencyToken ?subjectAlternativeNames
+        ?validationMethod ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Resends the email that requests domain ownership validation. The domain owner or an authorized representative must approve the ACM certificate before it can be issued. The certificate can be approved by clicking a link in the mail to navigate to the Amazon certificate approval website and then clicking I Approve. However, the validation email can be blocked by spam filters. Therefore, if you do not receive the original mail, you can request that the mail be resent within 72 hours of requesting the ACM certificate. If more than 72 hours have elapsed since your original request or since your last attempt to resend validation mail, you must request a new certificate. For more information about setting up your contact email addresses, see Configure Email for your Domain."]
+       "Requests an ACM certificate for use with other Amazon Web Services services. To request an ACM certificate, you must specify a fully qualified domain name (FQDN) in the DomainName parameter. You can also specify additional FQDNs in the SubjectAlternativeNames parameter. If you are requesting a private certificate, domain validation is not required. If you are requesting a public certificate, each domain name that you specify must be validated to verify that you own or control the domain. You can use DNS validation or email validation. We recommend that you use DNS validation. ACM behavior differs from the RFC 6125 specification of the certificate validation process. ACM first checks for a Subject Alternative Name, and, if it finds one, ignores the common name (CN). After successful completion of the RequestCertificate action, there is a delay of several seconds before you can retrieve information about the new certificate."]
 module RequestCertificateResponse =
   struct
     type nonrec t =
@@ -2387,415 +5354,59 @@ module RequestCertificateResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CertificateArn") in
       make ?certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateArn = field_map json "CertificateArn" Arn.of_json in
+    let of_json json__ =
+      let certificateArn = field_map json__ "CertificateArn" Arn.of_json in
       make ?certificateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Requests an ACM certificate for use with other Amazon Web Services services. To request an ACM certificate, you must specify a fully qualified domain name (FQDN) in the DomainName parameter. You can also specify additional FQDNs in the SubjectAlternativeNames parameter. If you are requesting a private certificate, domain validation is not required. If you are requesting a public certificate, each domain name that you specify must be validated to verify that you own or control the domain. You can use DNS validation or email validation. We recommend that you use DNS validation. ACM issues public certificates after receiving approval from the domain owner. ACM behavior differs from the https://tools.ietf.org/html/rfc6125#appendix-B.2RFC 6125 specification of the certificate validation process. first checks for a subject alternative name, and, if it finds one, ignores the common name (CN)"]
-module RequestCertificateRequest =
-  struct
-    type nonrec t =
-      {
-      domainName: DomainNameString.t
-        [@ocaml.doc
-          "Fully qualified domain name (FQDN), such as www.example.com, that you want to secure with an ACM certificate. Use an asterisk (*) to create a wildcard certificate that protects several sites in the same domain. For example, *.example.com protects www.example.com, site.example.com, and images.example.com. The first domain name you enter cannot exceed 64 octets, including periods. Each subsequent Subject Alternative Name (SAN), however, can be up to 253 octets in length."];
-      validationMethod: ValidationMethod.t option
-        [@ocaml.doc
-          "The method you want to use if you are requesting a public certificate to validate that you own or control domain. You can validate with DNS or validate with email. We recommend that you use DNS validation."];
-      subjectAlternativeNames: DomainList.t option
-        [@ocaml.doc
-          "Additional FQDNs to be included in the Subject Alternative Name extension of the ACM certificate. For example, add the name www.example.net to a certificate for which the DomainName field is www.example.com if users can reach your site by using either name. The maximum number of domain names that you can add to an ACM certificate is 100. However, the initial quota is 10 domain names. If you need more than 10 names, you must request a quota increase. For more information, see Quotas. The maximum length of a SAN DNS name is 253 octets. The name is made up of multiple labels separated by periods. No label can be longer than 63 octets. Consider the following examples: (63 octets).(63 octets).(63 octets).(61 octets) is legal because the total length is 253 octets (63+1+63+1+63+1+61) and no label exceeds 63 octets. (64 octets).(63 octets).(63 octets).(61 octets) is not legal because the total length exceeds 253 octets (64+1+63+1+63+1+61) and the first label exceeds 63 octets. (63 octets).(63 octets).(63 octets).(62 octets) is not legal because the total length of the DNS name (63+1+63+1+63+1+62) exceeds 253 octets."];
-      idempotencyToken: IdempotencyToken.t option
-        [@ocaml.doc
-          "Customer chosen string that can be used to distinguish between calls to RequestCertificate. Idempotency tokens time out after one hour. Therefore, if you call RequestCertificate multiple times with the same idempotency token within one hour, ACM recognizes that you are requesting only one certificate and will issue only one. If you change the idempotency token for each call, ACM recognizes that you are requesting multiple certificates."];
-      domainValidationOptions: DomainValidationOptionList.t option
-        [@ocaml.doc
-          "The domain name that you want ACM to use to send you emails so that you can validate domain ownership."];
-      options: CertificateOptions.t option
-        [@ocaml.doc
-          "Currently, you can use this parameter to specify whether to add the certificate to a certificate transparency log. Certificate transparency makes it possible to detect SSL/TLS certificates that have been mistakenly or maliciously issued. Certificates that have not been logged typically produce an error message in a browser. For more information, see Opting Out of Certificate Transparency Logging."];
-      certificateAuthorityArn: Arn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the private certificate authority (CA) that will be used to issue the certificate. If you do not provide an ARN and you are trying to request a private certificate, ACM will attempt to issue a public certificate. For more information about private CAs, see the Amazon Web Services Certificate Manager Private Certificate Authority (PCA) user guide. The ARN must have the following form: arn:aws:acm-pca:region:account:certificate-authority/12345678-1234-1234-1234-123456789012"];
-      tags: TagList.t option
-        [@ocaml.doc
-          "One or more resource tags to associate with the certificate."]}
-    let context_ = "RequestCertificateRequest"
-    let make ?validationMethod =
-      fun ?subjectAlternativeNames ->
-        fun ?idempotencyToken ->
-          fun ?domainValidationOptions ->
-            fun ?options ->
-              fun ?certificateAuthorityArn ->
-                fun ?tags ->
-                  fun ~domainName ->
-                    fun () ->
-                      {
-                        validationMethod;
-                        subjectAlternativeNames;
-                        idempotencyToken;
-                        domainValidationOptions;
-                        options;
-                        certificateAuthorityArn;
-                        tags;
-                        domainName
-                      }
-    let to_value x =
-      structure_to_value
-        [("DomainName", (Some (DomainNameString.to_value x.domainName)));
-        ("ValidationMethod",
-          (Option.map x.validationMethod ~f:ValidationMethod.to_value));
-        ("SubjectAlternativeNames",
-          (Option.map x.subjectAlternativeNames ~f:DomainList.to_value));
-        ("IdempotencyToken",
-          (Option.map x.idempotencyToken ~f:IdempotencyToken.to_value));
-        ("DomainValidationOptions",
-          (Option.map x.domainValidationOptions
-             ~f:DomainValidationOptionList.to_value));
-        ("Options", (Option.map x.options ~f:CertificateOptions.to_value));
-        ("CertificateAuthorityArn",
-          (Option.map x.certificateAuthorityArn ~f:Arn.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
-      let certificateAuthorityArn =
-        (Option.map ~f:Arn.of_xml)
-          (Xml.child xml_arg0 "CertificateAuthorityArn") in
-      let options =
-        (Option.map ~f:CertificateOptions.of_xml)
-          (Xml.child xml_arg0 "Options") in
-      let domainValidationOptions =
-        (Option.map ~f:DomainValidationOptionList.of_xml)
-          (Xml.child xml_arg0 "DomainValidationOptions") in
-      let idempotencyToken =
-        (Option.map ~f:IdempotencyToken.of_xml)
-          (Xml.child xml_arg0 "IdempotencyToken") in
-      let subjectAlternativeNames =
-        (Option.map ~f:DomainList.of_xml)
-          (Xml.child xml_arg0 "SubjectAlternativeNames") in
-      let validationMethod =
-        (Option.map ~f:ValidationMethod.of_xml)
-          (Xml.child xml_arg0 "ValidationMethod") in
-      let domainName =
-        DomainNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
-      make ?tags ?certificateAuthorityArn ?options ?domainValidationOptions
-        ?idempotencyToken ?subjectAlternativeNames ?validationMethod
-        ~domainName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let certificateAuthorityArn =
-        field_map json "CertificateAuthorityArn" Arn.of_json in
-      let options = field_map json "Options" CertificateOptions.of_json in
-      let domainValidationOptions =
-        field_map json "DomainValidationOptions"
-          DomainValidationOptionList.of_json in
-      let idempotencyToken =
-        field_map json "IdempotencyToken" IdempotencyToken.of_json in
-      let subjectAlternativeNames =
-        field_map json "SubjectAlternativeNames" DomainList.of_json in
-      let validationMethod =
-        field_map json "ValidationMethod" ValidationMethod.of_json in
-      let domainName =
-        field_map_exn json "DomainName" DomainNameString.of_json in
-      make ?tags ?certificateAuthorityArn ?options ?domainValidationOptions
-        ?idempotencyToken ?subjectAlternativeNames ?validationMethod
-        ~domainName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Requests an ACM certificate for use with other Amazon Web Services services. To request an ACM certificate, you must specify a fully qualified domain name (FQDN) in the DomainName parameter. You can also specify additional FQDNs in the SubjectAlternativeNames parameter. If you are requesting a private certificate, domain validation is not required. If you are requesting a public certificate, each domain name that you specify must be validated to verify that you own or control the domain. You can use DNS validation or email validation. We recommend that you use DNS validation. ACM issues public certificates after receiving approval from the domain owner. ACM behavior differs from the https://tools.ietf.org/html/rfc6125#appendix-B.2RFC 6125 specification of the certificate validation process. first checks for a subject alternative name, and, if it finds one, ignores the common name (CN)"]
-module RenewCertificateRequest =
+       "Requests an ACM certificate for use with other Amazon Web Services services. To request an ACM certificate, you must specify a fully qualified domain name (FQDN) in the DomainName parameter. You can also specify additional FQDNs in the SubjectAlternativeNames parameter. If you are requesting a private certificate, domain validation is not required. If you are requesting a public certificate, each domain name that you specify must be validated to verify that you own or control the domain. You can use DNS validation or email validation. We recommend that you use DNS validation. ACM behavior differs from the RFC 6125 specification of the certificate validation process. ACM first checks for a Subject Alternative Name, and, if it finds one, ignores the common name (CN). After successful completion of the RequestCertificate action, there is a delay of several seconds before you can retrieve information about the new certificate."]
+module ResendValidationEmailRequest =
   struct
     type nonrec t =
       {
       certificateArn: Arn.t
         [@ocaml.doc
-          "String that contains the ARN of the ACM certificate to be renewed. This must be of the form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."]}
-    let context_ = "RenewCertificateRequest"
-    let make ~certificateArn = fun () -> { certificateArn }
-    let to_value x =
-      structure_to_value
-        [("CertificateArn", (Some (Arn.to_value x.certificateArn)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let certificateArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
-      make ~certificateArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateArn = field_map_exn json "CertificateArn" Arn.of_json in
-      make ~certificateArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Renews an eligible ACM certificate. At this time, only exported private certificates can be renewed with this operation. In order to renew your ACM PCA certificates with ACM, you must first grant the ACM service principal permission to do so. For more information, see Testing Managed Renewal in the ACM User Guide."]
-module RemoveTagsFromCertificateRequest =
-  struct
-    type nonrec t =
-      {
-      certificateArn: Arn.t
+          "String that contains the ARN of the requested certificate. The certificate ARN is generated and returned by the RequestCertificate action as soon as the request is made. By default, using this parameter causes email to be sent to all top-level domains you specified in the certificate request. The ARN must be of the form: arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"];
+      domain: DomainNameString.t
         [@ocaml.doc
-          "String that contains the ARN of the ACM Certificate with one or more tags that you want to remove. This must be of the form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."];
-      tags: TagList.t
-        [@ocaml.doc "The key-value pair that defines the tag to remove."]}
-    let context_ = "RemoveTagsFromCertificateRequest"
+          "The fully qualified domain name (FQDN) of the certificate that needs to be validated."];
+      validationDomain: DomainNameString.t
+        [@ocaml.doc
+          "The base validation domain that will act as the suffix of the email addresses that are used to send the emails. This must be the same as the Domain value or a superdomain of the Domain value. For example, if you requested a certificate for site.subdomain.example.com and specify a ValidationDomain of subdomain.example.com, ACM sends email to the the following five addresses: admin\\@subdomain.example.com administrator\\@subdomain.example.com hostmaster\\@subdomain.example.com postmaster\\@subdomain.example.com webmaster\\@subdomain.example.com"]}
+    let context_ = "ResendValidationEmailRequest"
     let make ~certificateArn =
-      fun ~tags -> fun () -> { certificateArn; tags }
+      fun ~domain ->
+        fun ~validationDomain ->
+          fun () -> { certificateArn; domain; validationDomain }
     let to_value x =
       structure_to_value
         [("CertificateArn", (Some (Arn.to_value x.certificateArn)));
-        ("Tags", (Some (TagList.to_value x.tags)))]
+        ("Domain", (Some (DomainNameString.to_value x.domain)));
+        ("ValidationDomain",
+          (Some (DomainNameString.to_value x.validationDomain)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags =
-        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let validationDomain =
+        DomainNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ValidationDomain") in
+      let domain =
+        DomainNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
       let certificateArn =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
-      make ~tags ~certificateArn ()
+      make ~validationDomain ~domain ~certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let certificateArn = field_map_exn json "CertificateArn" Arn.of_json in
-      make ~tags ~certificateArn ()
+    let of_json json__ =
+      let validationDomain =
+        field_map_exn json__ "ValidationDomain" DomainNameString.of_json in
+      let domain = field_map_exn json__ "Domain" DomainNameString.of_json in
+      let certificateArn = field_map_exn json__ "CertificateArn" Arn.of_json in
+      make ~validationDomain ~domain ~certificateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Remove one or more tags from an ACM certificate. A tag consists of a key-value pair. If you do not specify the value portion of the tag when calling this function, the tag will be removed regardless of value. If you specify a value, the tag is removed only if it is associated with the specified value. To add tags to a certificate, use the AddTagsToCertificate action. To view all of the tags that have been applied to a specific ACM certificate, use the ListTagsForCertificate action."]
-module PutAccountConfigurationRequest =
-  struct
-    type nonrec t =
-      {
-      expiryEvents: ExpiryEventsConfiguration.t option
-        [@ocaml.doc
-          "Specifies expiration events associated with an account."];
-      idempotencyToken: IdempotencyToken.t
-        [@ocaml.doc
-          "Customer-chosen string used to distinguish between calls to PutAccountConfiguration. Idempotency tokens time out after one hour. If you call PutAccountConfiguration multiple times with the same unexpired idempotency token, ACM treats it as the same request and returns the original result. If you change the idempotency token for each call, ACM treats each call as a new request."]}
-    let context_ = "PutAccountConfigurationRequest"
-    let make ?expiryEvents =
-      fun ~idempotencyToken -> fun () -> { expiryEvents; idempotencyToken }
-    let to_value x =
-      structure_to_value
-        [("ExpiryEvents",
-           (Option.map x.expiryEvents ~f:ExpiryEventsConfiguration.to_value));
-        ("IdempotencyToken",
-          (Some (IdempotencyToken.to_value x.idempotencyToken)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let idempotencyToken =
-        IdempotencyToken.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IdempotencyToken") in
-      let expiryEvents =
-        (Option.map ~f:ExpiryEventsConfiguration.of_xml)
-          (Xml.child xml_arg0 "ExpiryEvents") in
-      make ~idempotencyToken ?expiryEvents ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
-      let expiryEvents =
-        field_map json "ExpiryEvents" ExpiryEventsConfiguration.of_json in
-      make ~idempotencyToken ?expiryEvents ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Adds or modifies account-level configurations in ACM. The supported configuration option is DaysBeforeExpiry. This option specifies the number of days prior to certificate expiration when ACM starts generating EventBridge events. ACM sends one event per day per certificate until the certificate expires. By default, accounts receive events starting 45 days before certificate expiration."]
-module ListTagsForCertificateResponse =
-  struct
-    type nonrec t =
-      {
-      tags: TagList.t option
-        [@ocaml.doc "The key-value pairs that define the applied tags."]}
-    type nonrec error =
-      [ `InvalidArnException of InvalidArnException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?tags = fun () -> { tags }
-    let error_of_json name json =
-      match name with
-      | "InvalidArnException" ->
-          `InvalidArnException (InvalidArnException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InvalidArnException" ->
-          `InvalidArnException (InvalidArnException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InvalidArnException e ->
-          `Assoc
-            [("error", (`String "InvalidArnException"));
-            ("details", (InvalidArnException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value [("Tags", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
-      make ?tags ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Lists the tags that have been applied to the ACM certificate. Use the certificate's Amazon Resource Name (ARN) to specify the certificate. To add a tag to an ACM certificate, use the AddTagsToCertificate action. To delete a tag, use the RemoveTagsFromCertificate action."]
-module ListTagsForCertificateRequest =
-  struct
-    type nonrec t =
-      {
-      certificateArn: Arn.t
-        [@ocaml.doc
-          "String that contains the ARN of the ACM certificate for which you want to list the tags. This must have the following form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."]}
-    let context_ = "ListTagsForCertificateRequest"
-    let make ~certificateArn = fun () -> { certificateArn }
-    let to_value x =
-      structure_to_value
-        [("CertificateArn", (Some (Arn.to_value x.certificateArn)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let certificateArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
-      make ~certificateArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateArn = field_map_exn json "CertificateArn" Arn.of_json in
-      make ~certificateArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Lists the tags that have been applied to the ACM certificate. Use the certificate's Amazon Resource Name (ARN) to specify the certificate. To add a tag to an ACM certificate, use the AddTagsToCertificate action. To delete a tag, use the RemoveTagsFromCertificate action."]
-module ListCertificatesResponse =
-  struct
-    type nonrec t =
-      {
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "When the list is truncated, this value is present and contains the value to use for the NextToken parameter in a subsequent pagination request."];
-      certificateSummaryList: CertificateSummaryList.t option
-        [@ocaml.doc "A list of ACM certificates."]}
-    type nonrec error =
-      [ `InvalidArgsException of InvalidArgsException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?nextToken =
-      fun ?certificateSummaryList ->
-        fun () -> { nextToken; certificateSummaryList }
-    let error_of_json name json =
-      match name with
-      | "InvalidArgsException" ->
-          `InvalidArgsException (InvalidArgsException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InvalidArgsException" ->
-          `InvalidArgsException (InvalidArgsException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InvalidArgsException e ->
-          `Assoc
-            [("error", (`String "InvalidArgsException"));
-            ("details", (InvalidArgsException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("CertificateSummaryList",
-          (Option.map x.certificateSummaryList
-             ~f:CertificateSummaryList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let certificateSummaryList =
-        (Option.map ~f:CertificateSummaryList.of_xml)
-          (Xml.child xml_arg0 "CertificateSummaryList") in
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?certificateSummaryList ?nextToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateSummaryList =
-        field_map json "CertificateSummaryList"
-          CertificateSummaryList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      make ?certificateSummaryList ?nextToken ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieves a list of certificate ARNs and domain names. You can request that only certificates that match a specific status be listed. You can also filter by specific attributes of the certificate. Default filtering returns only RSA_2048 certificates. For more information, see Filters."]
-module ListCertificatesRequest =
-  struct
-    type nonrec t =
-      {
-      certificateStatuses: CertificateStatuses.t option
-        [@ocaml.doc "Filter the certificate list by status value."];
-      includes: Filters.t option
-        [@ocaml.doc
-          "Filter the certificate list. For more information, see the Filters structure."];
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "Use this parameter only when paginating results and only in a subsequent request after you receive a response with truncated results. Set it to the value of NextToken from the response you just received."];
-      maxItems: MaxItems.t option
-        [@ocaml.doc
-          "Use this parameter when paginating results to specify the maximum number of items to return in the response. If additional items exist beyond the number you specify, the NextToken element is sent in the response. Use this NextToken value in a subsequent request to retrieve additional items."]}
-    let make ?certificateStatuses =
-      fun ?includes ->
-        fun ?nextToken ->
-          fun ?maxItems ->
-            fun () -> { certificateStatuses; includes; nextToken; maxItems }
-    let to_value x =
-      structure_to_value
-        [("CertificateStatuses",
-           (Option.map x.certificateStatuses ~f:CertificateStatuses.to_value));
-        ("Includes", (Option.map x.includes ~f:Filters.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("MaxItems", (Option.map x.maxItems ~f:MaxItems.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let maxItems =
-        (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let includes =
-        (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Includes") in
-      let certificateStatuses =
-        (Option.map ~f:CertificateStatuses.of_xml)
-          (Xml.child xml_arg0 "CertificateStatuses") in
-      make ?maxItems ?nextToken ?includes ?certificateStatuses ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let includes = field_map json "Includes" Filters.of_json in
-      let certificateStatuses =
-        field_map json "CertificateStatuses" CertificateStatuses.of_json in
-      make ?maxItems ?nextToken ?includes ?certificateStatuses ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieves a list of certificate ARNs and domain names. You can request that only certificates that match a specific status be listed. You can also filter by specific attributes of the certificate. Default filtering returns only RSA_2048 certificates. For more information, see Filters."]
-module InvalidStateException =
+       "Resends the email that requests domain ownership validation. The domain owner or an authorized representative must approve the ACM certificate before it can be issued. The certificate can be approved by clicking a link in the mail to navigate to the Amazon certificate approval website and then clicking I Approve. However, the validation email can be blocked by spam filters. Therefore, if you do not receive the original mail, you can request that the mail be resent within 72 hours of requesting the ACM certificate. If more than 72 hours have elapsed since your original request or since your last attempt to resend validation mail, you must request a new certificate. For more information about setting up your contact email addresses, see Configure Email for your Domain."]
+module ResourceInUseException =
   struct
     type nonrec t = {
       message: String_.t option }
@@ -2809,95 +5420,122 @@ module InvalidStateException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Processing has reached an invalid state."]
-module ImportCertificateResponse =
+  end[@@ocaml.doc
+       "The certificate is in use by another Amazon Web Services service in the caller's account. Remove the association and try again."]
+module RevokeCertificateRequest =
+  struct
+    type nonrec t =
+      {
+      certificateArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the public or private certificate that will be revoked. The ARN must have the following form: arn:aws:acm:region:account:certificate/12345678-1234-1234-1234-123456789012"];
+      revocationReason: RevocationReason.t
+        [@ocaml.doc "Specifies why you revoked the certificate."]}
+    let context_ = "RevokeCertificateRequest"
+    let make ~certificateArn =
+      fun ~revocationReason -> fun () -> { certificateArn; revocationReason }
+    let to_value x =
+      structure_to_value
+        [("CertificateArn", (Some (Arn.to_value x.certificateArn)));
+        ("RevocationReason",
+          (Some (RevocationReason.to_value x.revocationReason)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revocationReason =
+        RevocationReason.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RevocationReason") in
+      let certificateArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
+      make ~revocationReason ~certificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revocationReason =
+        field_map_exn json__ "RevocationReason" RevocationReason.of_json in
+      let certificateArn = field_map_exn json__ "CertificateArn" Arn.of_json in
+      make ~revocationReason ~certificateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Revokes a public ACM certificate. You can only revoke certificates that have been previously exported. Once a certificate is revoked, you cannot reuse the certificate. Revoking a certificate is permanent."]
+module RevokeCertificateResponse =
   struct
     type nonrec t =
       {
       certificateArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the imported certificate."]}
+          "The Amazon Resource Name (ARN) of the public or private certificate that was revoked."]}
     type nonrec error =
-      [ `InvalidArnException of InvalidArnException.t 
-      | `InvalidParameterException of InvalidParameterException.t 
-      | `InvalidTagException of InvalidTagException.t 
-      | `LimitExceededException of LimitExceededException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InvalidArnException of InvalidArnException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `TagPolicyException of TagPolicyException.t 
-      | `TooManyTagsException of TooManyTagsException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?certificateArn = fun () -> { certificateArn }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InvalidArnException" ->
           `InvalidArnException (InvalidArnException.of_json json)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_json json)
-      | "InvalidTagException" ->
-          `InvalidTagException (InvalidTagException.of_json json)
-      | "LimitExceededException" ->
-          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | "TagPolicyException" ->
-          `TagPolicyException (TagPolicyException.of_json json)
-      | "TooManyTagsException" ->
-          `TooManyTagsException (TooManyTagsException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InvalidArnException" ->
           `InvalidArnException (InvalidArnException.of_xml xml)
-      | "InvalidParameterException" ->
-          `InvalidParameterException (InvalidParameterException.of_xml xml)
-      | "InvalidTagException" ->
-          `InvalidTagException (InvalidTagException.of_xml xml)
-      | "LimitExceededException" ->
-          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | "TagPolicyException" ->
-          `TagPolicyException (TagPolicyException.of_xml xml)
-      | "TooManyTagsException" ->
-          `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InvalidArnException e ->
           `Assoc
             [("error", (`String "InvalidArnException"));
             ("details", (InvalidArnException.to_json e))]
-      | `InvalidParameterException e ->
+      | `ResourceInUseException e ->
           `Assoc
-            [("error", (`String "InvalidParameterException"));
-            ("details", (InvalidParameterException.to_json e))]
-      | `InvalidTagException e ->
-          `Assoc
-            [("error", (`String "InvalidTagException"));
-            ("details", (InvalidTagException.to_json e))]
-      | `LimitExceededException e ->
-          `Assoc
-            [("error", (`String "LimitExceededException"));
-            ("details", (LimitExceededException.to_json e))]
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
-      | `TagPolicyException e ->
+      | `ThrottlingException e ->
           `Assoc
-            [("error", (`String "TagPolicyException"));
-            ("details", (TagPolicyException.to_json e))]
-      | `TooManyTagsException e ->
-          `Assoc
-            [("error", (`String "TooManyTagsException"));
-            ("details", (TooManyTagsException.to_json e))]
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2912,206 +5550,225 @@ module ImportCertificateResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CertificateArn") in
       make ?certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateArn = field_map json "CertificateArn" Arn.of_json in
+    let of_json json__ =
+      let certificateArn = field_map json__ "CertificateArn" Arn.of_json in
       make ?certificateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Imports a certificate into Amazon Web Services Certificate Manager (ACM) to use with services that are integrated with ACM. Note that integrated services allow only certificate types and keys they support to be associated with their resources. Further, their support differs depending on whether the certificate is imported into IAM or into ACM. For more information, see the documentation for each service. For more information about importing certificates into ACM, see Importing Certificates in the Amazon Web Services Certificate Manager User Guide. ACM does not provide managed renewal for certificates that you import. Note the following guidelines when importing third party certificates: You must enter the private key that matches the certificate you are importing. The private key must be unencrypted. You cannot import a private key that is protected by a password or a passphrase. The private key must be no larger than 5 KB (5,120 bytes). If the certificate you are importing is not self-signed, you must enter its certificate chain. If a certificate chain is included, the issuer must be the subject of one of the certificates in the chain. The certificate, private key, and certificate chain must be PEM-encoded. The current time must be between the Not Before and Not After certificate fields. The Issuer field must not be empty. The OCSP authority URL, if present, must not exceed 1000 characters. To import a new certificate, omit the CertificateArn argument. Include this argument only when you want to replace a previously imported certificate. When you import a certificate by using the CLI, you must specify the certificate, the certificate chain, and the private key by their file names preceded by fileb://. For example, you can specify a certificate saved in the C:\\temp folder as fileb://C:\\temp\\certificate_to_import.pem. If you are making an HTTP or HTTPS Query request, include these arguments as BLOBs. When you import a certificate by using an SDK, you must specify the certificate, the certificate chain, and the private key files in the manner required by the programming language you're using. The cryptographic algorithm of an imported certificate must match the algorithm of the signing CA. For example, if the signing CA key type is RSA, then the certificate key type must also be RSA. This operation returns the Amazon Resource Name (ARN) of the imported certificate."]
-module ImportCertificateRequest =
+       "Revokes a public ACM certificate. You can only revoke certificates that have been previously exported. Once a certificate is revoked, you cannot reuse the certificate. Revoking a certificate is permanent."]
+module SearchMaxResults =
   struct
-    type nonrec t =
-      {
-      certificateArn: Arn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of an imported certificate to replace. To import a new certificate, omit this field."];
-      certificate: CertificateBodyBlob.t
-        [@ocaml.doc "The certificate to import."];
-      privateKey: PrivateKeyBlob.t
-        [@ocaml.doc
-          "The private key that matches the public key in the certificate."];
-      certificateChain: CertificateChainBlob.t option
-        [@ocaml.doc "The PEM encoded certificate chain."];
-      tags: TagList.t option
-        [@ocaml.doc
-          "One or more resource tags to associate with the imported certificate. Note: You cannot apply tags when reimporting a certificate."]}
-    let context_ = "ImportCertificateRequest"
-    let make ?certificateArn =
-      fun ?certificateChain ->
-        fun ?tags ->
-          fun ~certificate ->
-            fun ~privateKey ->
-              fun () ->
-                {
-                  certificateArn;
-                  certificateChain;
-                  tags;
-                  certificate;
-                  privateKey
-                }
-    let to_value x =
-      structure_to_value
-        [("CertificateArn", (Option.map x.certificateArn ~f:Arn.to_value));
-        ("Certificate", (Some (CertificateBodyBlob.to_value x.certificate)));
-        ("PrivateKey", (Some (PrivateKeyBlob.to_value x.privateKey)));
-        ("CertificateChain",
-          (Option.map x.certificateChain ~f:CertificateChainBlob.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:500) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
-      let certificateChain =
-        (Option.map ~f:CertificateChainBlob.of_xml)
-          (Xml.child xml_arg0 "CertificateChain") in
-      let privateKey =
-        PrivateKeyBlob.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PrivateKey") in
-      let certificate =
-        CertificateBodyBlob.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Certificate") in
-      let certificateArn =
-        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CertificateArn") in
-      make ?tags ?certificateChain ~privateKey ~certificate ?certificateArn
-        ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let certificateChain =
-        field_map json "CertificateChain" CertificateChainBlob.of_json in
-      let privateKey = field_map_exn json "PrivateKey" PrivateKeyBlob.of_json in
-      let certificate =
-        field_map_exn json "Certificate" CertificateBodyBlob.of_json in
-      let certificateArn = field_map json "CertificateArn" Arn.of_json in
-      make ?tags ?certificateChain ~privateKey ~certificate ?certificateArn
-        ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Imports a certificate into Amazon Web Services Certificate Manager (ACM) to use with services that are integrated with ACM. Note that integrated services allow only certificate types and keys they support to be associated with their resources. Further, their support differs depending on whether the certificate is imported into IAM or into ACM. For more information, see the documentation for each service. For more information about importing certificates into ACM, see Importing Certificates in the Amazon Web Services Certificate Manager User Guide. ACM does not provide managed renewal for certificates that you import. Note the following guidelines when importing third party certificates: You must enter the private key that matches the certificate you are importing. The private key must be unencrypted. You cannot import a private key that is protected by a password or a passphrase. The private key must be no larger than 5 KB (5,120 bytes). If the certificate you are importing is not self-signed, you must enter its certificate chain. If a certificate chain is included, the issuer must be the subject of one of the certificates in the chain. The certificate, private key, and certificate chain must be PEM-encoded. The current time must be between the Not Before and Not After certificate fields. The Issuer field must not be empty. The OCSP authority URL, if present, must not exceed 1000 characters. To import a new certificate, omit the CertificateArn argument. Include this argument only when you want to replace a previously imported certificate. When you import a certificate by using the CLI, you must specify the certificate, the certificate chain, and the private key by their file names preceded by fileb://. For example, you can specify a certificate saved in the C:\\temp folder as fileb://C:\\temp\\certificate_to_import.pem. If you are making an HTTP or HTTPS Query request, include these arguments as BLOBs. When you import a certificate by using an SDK, you must specify the certificate, the certificate chain, and the private key files in the manner required by the programming language you're using. The cryptographic algorithm of an imported certificate must match the algorithm of the signing CA. For example, if the signing CA key type is RSA, then the certificate key type must also be RSA. This operation returns the Amazon Resource Name (ARN) of the imported certificate."]
-module GetCertificateResponse =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SearchMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SearchCertificatesSortOrder =
   struct
     type nonrec t =
-      {
-      certificate: CertificateBody.t option
-        [@ocaml.doc
-          "The ACM-issued certificate corresponding to the ARN specified as input."];
-      certificateChain: CertificateChain.t option
-        [@ocaml.doc
-          "Certificates forming the requested certificate's chain of trust. The chain consists of the certificate of the issuing CA and the intermediate certificates of any other subordinate CAs."]}
-    type nonrec error =
-      [ `InvalidArnException of InvalidArnException.t 
-      | `RequestInProgressException of RequestInProgressException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?certificate =
-      fun ?certificateChain -> fun () -> { certificate; certificateChain }
-    let error_of_json name json =
-      match name with
-      | "InvalidArnException" ->
-          `InvalidArnException (InvalidArnException.of_json json)
-      | "RequestInProgressException" ->
-          `RequestInProgressException
-            (RequestInProgressException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InvalidArnException" ->
-          `InvalidArnException (InvalidArnException.of_xml xml)
-      | "RequestInProgressException" ->
-          `RequestInProgressException (RequestInProgressException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
+      | ASCENDING 
+      | DESCENDING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
       function
-      | `InvalidArnException e ->
-          `Assoc
-            [("error", (`String "InvalidArnException"));
-            ("details", (InvalidArnException.to_json e))]
-      | `RequestInProgressException e ->
-          `Assoc
-            [("error", (`String "RequestInProgressException"));
-            ("details", (RequestInProgressException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Certificate",
-           (Option.map x.certificate ~f:CertificateBody.to_value));
-        ("CertificateChain",
-          (Option.map x.certificateChain ~f:CertificateChain.to_value))]
+      | ASCENDING -> "ASCENDING"
+      | DESCENDING -> "DESCENDING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ASCENDING" -> ASCENDING
+      | "DESCENDING" -> DESCENDING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      let certificateChain =
-        (Option.map ~f:CertificateChain.of_xml)
-          (Xml.child xml_arg0 "CertificateChain") in
-      let certificate =
-        (Option.map ~f:CertificateBody.of_xml)
-          (Xml.child xml_arg0 "Certificate") in
-      make ?certificateChain ?certificate ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateChain =
-        field_map json "CertificateChain" CertificateChain.of_json in
-      let certificate = field_map json "Certificate" CertificateBody.of_json in
-      make ?certificateChain ?certificate ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieves an Amazon-issued certificate and its certificate chain. The chain consists of the certificate of the issuing CA and the intermediate certificates of any other subordinate CAs. All of the certificates are base64 encoded. You can use OpenSSL to decode the certificates and inspect individual fields."]
-module GetCertificateRequest =
+      of_string
+        (string_of_xml ~kind:"enumeration SearchCertificatesSortOrder"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SearchCertificatesSortOrder" j)
+    let to_json = simple_to_json to_value
+  end
+module SearchCertificatesSortBy =
+  struct
+    type nonrec t =
+      | CREATED_AT 
+      | NOT_AFTER 
+      | STATUS 
+      | RENEWAL_STATUS 
+      | EXPORTED 
+      | IN_USE 
+      | NOT_BEFORE 
+      | KEY_ALGORITHM 
+      | TYPE 
+      | CERTIFICATE_ARN 
+      | COMMON_NAME 
+      | REVOKED_AT 
+      | RENEWAL_ELIGIBILITY 
+      | ISSUED_AT 
+      | MANAGED_BY 
+      | EXPORT_OPTION 
+      | VALIDATION_METHOD 
+      | IMPORTED_AT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATED_AT -> "CREATED_AT"
+      | NOT_AFTER -> "NOT_AFTER"
+      | STATUS -> "STATUS"
+      | RENEWAL_STATUS -> "RENEWAL_STATUS"
+      | EXPORTED -> "EXPORTED"
+      | IN_USE -> "IN_USE"
+      | NOT_BEFORE -> "NOT_BEFORE"
+      | KEY_ALGORITHM -> "KEY_ALGORITHM"
+      | TYPE -> "TYPE"
+      | CERTIFICATE_ARN -> "CERTIFICATE_ARN"
+      | COMMON_NAME -> "COMMON_NAME"
+      | REVOKED_AT -> "REVOKED_AT"
+      | RENEWAL_ELIGIBILITY -> "RENEWAL_ELIGIBILITY"
+      | ISSUED_AT -> "ISSUED_AT"
+      | MANAGED_BY -> "MANAGED_BY"
+      | EXPORT_OPTION -> "EXPORT_OPTION"
+      | VALIDATION_METHOD -> "VALIDATION_METHOD"
+      | IMPORTED_AT -> "IMPORTED_AT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATED_AT" -> CREATED_AT
+      | "NOT_AFTER" -> NOT_AFTER
+      | "STATUS" -> STATUS
+      | "RENEWAL_STATUS" -> RENEWAL_STATUS
+      | "EXPORTED" -> EXPORTED
+      | "IN_USE" -> IN_USE
+      | "NOT_BEFORE" -> NOT_BEFORE
+      | "KEY_ALGORITHM" -> KEY_ALGORITHM
+      | "TYPE" -> TYPE
+      | "CERTIFICATE_ARN" -> CERTIFICATE_ARN
+      | "COMMON_NAME" -> COMMON_NAME
+      | "REVOKED_AT" -> REVOKED_AT
+      | "RENEWAL_ELIGIBILITY" -> RENEWAL_ELIGIBILITY
+      | "ISSUED_AT" -> ISSUED_AT
+      | "MANAGED_BY" -> MANAGED_BY
+      | "EXPORT_OPTION" -> EXPORT_OPTION
+      | "VALIDATION_METHOD" -> VALIDATION_METHOD
+      | "IMPORTED_AT" -> IMPORTED_AT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SearchCertificatesSortBy" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SearchCertificatesSortBy" j)
+    let to_json = simple_to_json to_value
+  end
+module SearchCertificatesRequest =
   struct
     type nonrec t =
       {
-      certificateArn: Arn.t
+      filterStatement: CertificateFilterStatement.t option
         [@ocaml.doc
-          "String that contains a certificate ARN in the following format: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."]}
-    let context_ = "GetCertificateRequest"
-    let make ~certificateArn = fun () -> { certificateArn }
+          "A filter statement that defines the search criteria. You can combine multiple filters using AND, OR, and NOT logical operators to create complex queries."];
+      maxResults: SearchMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in the response. Default is 100."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Use this parameter only when paginating results and only in a subsequent request after you receive a response with truncated results. Set it to the value of NextToken from the response you just received."];
+      sortBy: SearchCertificatesSortBy.t option
+        [@ocaml.doc
+          "Specifies the field to sort results by. Valid values are CREATED_AT, NOT_AFTER, STATUS, RENEWAL_STATUS, EXPORTED, IN_USE, NOT_BEFORE, KEY_ALGORITHM, TYPE, CERTIFICATE_ARN, COMMON_NAME, REVOKED_AT, RENEWAL_ELIGIBILITY, ISSUED_AT, MANAGED_BY, EXPORT_OPTION, VALIDATION_METHOD, and IMPORTED_AT."];
+      sortOrder: SearchCertificatesSortOrder.t option
+        [@ocaml.doc
+          "Specifies the order of sorted results. Valid values are ASCENDING or DESCENDING."]}
+    let make ?filterStatement =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?sortBy ->
+            fun ?sortOrder ->
+              fun () ->
+                { filterStatement; maxResults; nextToken; sortBy; sortOrder }
     let to_value x =
       structure_to_value
-        [("CertificateArn", (Some (Arn.to_value x.certificateArn)))]
+        [("FilterStatement",
+           (Option.map x.filterStatement
+              ~f:CertificateFilterStatement.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:SearchMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("SortBy",
+          (Option.map x.sortBy ~f:SearchCertificatesSortBy.to_value));
+        ("SortOrder",
+          (Option.map x.sortOrder ~f:SearchCertificatesSortOrder.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let certificateArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
-      make ~certificateArn ()
+      let sortOrder =
+        (Option.map ~f:SearchCertificatesSortOrder.of_xml)
+          (Xml.child xml_arg0 "SortOrder") in
+      let sortBy =
+        (Option.map ~f:SearchCertificatesSortBy.of_xml)
+          (Xml.child xml_arg0 "SortBy") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:SearchMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let filterStatement =
+        (Option.map ~f:CertificateFilterStatement.of_xml)
+          (Xml.child xml_arg0 "FilterStatement") in
+      make ?sortOrder ?sortBy ?nextToken ?maxResults ?filterStatement ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateArn = field_map_exn json "CertificateArn" Arn.of_json in
-      make ~certificateArn ()
+    let of_json json__ =
+      let sortOrder =
+        field_map json__ "SortOrder" SearchCertificatesSortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" SearchCertificatesSortBy.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" SearchMaxResults.of_json in
+      let filterStatement =
+        field_map json__ "FilterStatement" CertificateFilterStatement.of_json in
+      make ?sortOrder ?sortBy ?nextToken ?maxResults ?filterStatement ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves an Amazon-issued certificate and its certificate chain. The chain consists of the certificate of the issuing CA and the intermediate certificates of any other subordinate CAs. All of the certificates are base64 encoded. You can use OpenSSL to decode the certificates and inspect individual fields."]
-module GetAccountConfigurationResponse =
+       "Retrieves a list of certificates matching search criteria. You can filter certificates by X.509 attributes and ACM specific properties like certificate status, type and renewal eligibility. This operation provides more flexible filtering than ListCertificates by supporting complex filter statements."]
+module SearchCertificatesResponse =
   struct
     type nonrec t =
       {
-      expiryEvents: ExpiryEventsConfiguration.t option
+      results: CertificateSearchResultList.t option
         [@ocaml.doc
-          "Expiration events configuration options associated with the Amazon Web Services account."]}
+          "A list of certificate search results containing certificate ARNs, X.509 attributes, and ACM metadata."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "When the list is truncated, this value is present and contains the value to use for the NextToken parameter in a subsequent pagination request."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?expiryEvents = fun () -> { expiryEvents }
+    let make ?results = fun ?nextToken -> fun () -> { results; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3121,6 +5778,8 @@ module GetAccountConfigurationResponse =
           `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3133,6 +5792,10 @@ module GetAccountConfigurationResponse =
           `Assoc
             [("error", (`String "ThrottlingException"));
             ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3140,307 +5803,57 @@ module GetAccountConfigurationResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ExpiryEvents",
-           (Option.map x.expiryEvents ~f:ExpiryEventsConfiguration.to_value))]
+        [("Results",
+           (Option.map x.results ~f:CertificateSearchResultList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let expiryEvents =
-        (Option.map ~f:ExpiryEventsConfiguration.of_xml)
-          (Xml.child xml_arg0 "ExpiryEvents") in
-      make ?expiryEvents ()
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let results =
+        (Option.map ~f:CertificateSearchResultList.of_xml)
+          (Xml.child xml_arg0 "Results") in
+      make ?nextToken ?results ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expiryEvents =
-        field_map json "ExpiryEvents" ExpiryEventsConfiguration.of_json in
-      make ?expiryEvents ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let results =
+        field_map json__ "Results" CertificateSearchResultList.of_json in
+      make ?nextToken ?results ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the account configuration options associated with an Amazon Web Services account."]
-module ExportCertificateResponse =
-  struct
-    type nonrec t =
-      {
-      certificate: CertificateBody.t option
-        [@ocaml.doc "The base64 PEM-encoded certificate."];
-      certificateChain: CertificateChain.t option
-        [@ocaml.doc
-          "The base64 PEM-encoded certificate chain. This does not include the certificate that you are exporting."];
-      privateKey: PrivateKey.t option
-        [@ocaml.doc
-          "The encrypted private key associated with the public key in the certificate. The key is output in PKCS #8 format and is base64 PEM-encoded."]}
-    type nonrec error =
-      [ `InvalidArnException of InvalidArnException.t 
-      | `RequestInProgressException of RequestInProgressException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?certificate =
-      fun ?certificateChain ->
-        fun ?privateKey ->
-          fun () -> { certificate; certificateChain; privateKey }
-    let error_of_json name json =
-      match name with
-      | "InvalidArnException" ->
-          `InvalidArnException (InvalidArnException.of_json json)
-      | "RequestInProgressException" ->
-          `RequestInProgressException
-            (RequestInProgressException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InvalidArnException" ->
-          `InvalidArnException (InvalidArnException.of_xml xml)
-      | "RequestInProgressException" ->
-          `RequestInProgressException (RequestInProgressException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InvalidArnException e ->
-          `Assoc
-            [("error", (`String "InvalidArnException"));
-            ("details", (InvalidArnException.to_json e))]
-      | `RequestInProgressException e ->
-          `Assoc
-            [("error", (`String "RequestInProgressException"));
-            ("details", (RequestInProgressException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Certificate",
-           (Option.map x.certificate ~f:CertificateBody.to_value));
-        ("CertificateChain",
-          (Option.map x.certificateChain ~f:CertificateChain.to_value));
-        ("PrivateKey", (Option.map x.privateKey ~f:PrivateKey.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let privateKey =
-        (Option.map ~f:PrivateKey.of_xml) (Xml.child xml_arg0 "PrivateKey") in
-      let certificateChain =
-        (Option.map ~f:CertificateChain.of_xml)
-          (Xml.child xml_arg0 "CertificateChain") in
-      let certificate =
-        (Option.map ~f:CertificateBody.of_xml)
-          (Xml.child xml_arg0 "Certificate") in
-      make ?privateKey ?certificateChain ?certificate ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let privateKey = field_map json "PrivateKey" PrivateKey.of_json in
-      let certificateChain =
-        field_map json "CertificateChain" CertificateChain.of_json in
-      let certificate = field_map json "Certificate" CertificateBody.of_json in
-      make ?privateKey ?certificateChain ?certificate ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Exports a private certificate issued by a private certificate authority (CA) for use anywhere. The exported file contains the certificate, the certificate chain, and the encrypted private 2048-bit RSA key associated with the public key that is embedded in the certificate. For security, you must assign a passphrase for the private key when exporting it. For information about exporting and formatting a certificate using the ACM console or CLI, see Export a Private Certificate."]
-module ExportCertificateRequest =
+       "Retrieves a list of certificates matching search criteria. You can filter certificates by X.509 attributes and ACM specific properties like certificate status, type and renewal eligibility. This operation provides more flexible filtering than ListCertificates by supporting complex filter statements."]
+module UpdateCertificateOptionsRequest =
   struct
     type nonrec t =
       {
       certificateArn: Arn.t
         [@ocaml.doc
-          "An Amazon Resource Name (ARN) of the issued certificate. This must be of the form: arn:aws:acm:region:account:certificate/12345678-1234-1234-1234-123456789012"];
-      passphrase: PassphraseBlob.t
+          "ARN of the requested certificate to update. This must be of the form: arn:aws:acm:us-east-1:account:certificate/12345678-1234-1234-1234-123456789012"];
+      options: CertificateOptions.t
         [@ocaml.doc
-          "Passphrase to associate with the encrypted exported private key. If you want to later decrypt the private key, you must have the passphrase. You can use the following OpenSSL command to decrypt a private key: openssl rsa -in encrypted_key.pem -out decrypted_key.pem"]}
-    let context_ = "ExportCertificateRequest"
+          "Use to update the options for your certificate. Currently, you can specify whether to add your certificate to a transparency log or export your certificate. Certificate transparency makes it possible to detect SSL/TLS certificates that have been mistakenly or maliciously issued. Certificates that have not been logged typically produce an error message in a browser."]}
+    let context_ = "UpdateCertificateOptionsRequest"
     let make ~certificateArn =
-      fun ~passphrase -> fun () -> { certificateArn; passphrase }
+      fun ~options -> fun () -> { certificateArn; options }
     let to_value x =
       structure_to_value
         [("CertificateArn", (Some (Arn.to_value x.certificateArn)));
-        ("Passphrase", (Some (PassphraseBlob.to_value x.passphrase)))]
+        ("Options", (Some (CertificateOptions.to_value x.options)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let passphrase =
-        PassphraseBlob.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Passphrase") in
+      let options =
+        CertificateOptions.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
       let certificateArn =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
-      make ~passphrase ~certificateArn ()
+      make ~options ~certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let passphrase = field_map_exn json "Passphrase" PassphraseBlob.of_json in
-      let certificateArn = field_map_exn json "CertificateArn" Arn.of_json in
-      make ~passphrase ~certificateArn ()
+    let of_json json__ =
+      let options = field_map_exn json__ "Options" CertificateOptions.of_json in
+      let certificateArn = field_map_exn json__ "CertificateArn" Arn.of_json in
+      make ~options ~certificateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Exports a private certificate issued by a private certificate authority (CA) for use anywhere. The exported file contains the certificate, the certificate chain, and the encrypted private 2048-bit RSA key associated with the public key that is embedded in the certificate. For security, you must assign a passphrase for the private key when exporting it. For information about exporting and formatting a certificate using the ACM console or CLI, see Export a Private Certificate."]
-module DescribeCertificateResponse =
-  struct
-    type nonrec t =
-      {
-      certificate: CertificateDetail.t option
-        [@ocaml.doc "Metadata about an ACM certificate."]}
-    type nonrec error =
-      [ `InvalidArnException of InvalidArnException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?certificate = fun () -> { certificate }
-    let error_of_json name json =
-      match name with
-      | "InvalidArnException" ->
-          `InvalidArnException (InvalidArnException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InvalidArnException" ->
-          `InvalidArnException (InvalidArnException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InvalidArnException e ->
-          `Assoc
-            [("error", (`String "InvalidArnException"));
-            ("details", (InvalidArnException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Certificate",
-           (Option.map x.certificate ~f:CertificateDetail.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let certificate =
-        (Option.map ~f:CertificateDetail.of_xml)
-          (Xml.child xml_arg0 "Certificate") in
-      make ?certificate ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificate =
-        field_map json "Certificate" CertificateDetail.of_json in
-      make ?certificate ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns detailed metadata about the specified ACM certificate."]
-module DescribeCertificateRequest =
-  struct
-    type nonrec t =
-      {
-      certificateArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the ACM certificate. The ARN must have the following form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."]}
-    let context_ = "DescribeCertificateRequest"
-    let make ~certificateArn = fun () -> { certificateArn }
-    let to_value x =
-      structure_to_value
-        [("CertificateArn", (Some (Arn.to_value x.certificateArn)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let certificateArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
-      make ~certificateArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateArn = field_map_exn json "CertificateArn" Arn.of_json in
-      make ~certificateArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returns detailed metadata about the specified ACM certificate."]
-module DeleteCertificateRequest =
-  struct
-    type nonrec t =
-      {
-      certificateArn: Arn.t
-        [@ocaml.doc
-          "String that contains the ARN of the ACM certificate to be deleted. This must be of the form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."]}
-    let context_ = "DeleteCertificateRequest"
-    let make ~certificateArn = fun () -> { certificateArn }
-    let to_value x =
-      structure_to_value
-        [("CertificateArn", (Some (Arn.to_value x.certificateArn)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let certificateArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
-      make ~certificateArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateArn = field_map_exn json "CertificateArn" Arn.of_json in
-      make ~certificateArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Deletes a certificate and its associated private key. If this action succeeds, the certificate no longer appears in the list that can be displayed by calling the ListCertificates action or be retrieved by calling the GetCertificate action. The certificate will not be available for use by Amazon Web Services services integrated with ACM. You cannot delete an ACM certificate that is being used by another Amazon Web Services service. To delete a certificate that is in use, the certificate association must first be removed."]
-module ConflictException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You are trying to update a resource or configuration that is already being created or updated. Wait for the previous operation to finish and try again."]
-module AddTagsToCertificateRequest =
-  struct
-    type nonrec t =
-      {
-      certificateArn: Arn.t
-        [@ocaml.doc
-          "String that contains the ARN of the ACM certificate to which the tag is to be applied. This must be of the form: arn:aws:acm:region:123456789012:certificate/12345678-1234-1234-1234-123456789012 For more information about ARNs, see Amazon Resource Names (ARNs)."];
-      tags: TagList.t
-        [@ocaml.doc
-          "The key-value pair that defines the tag. The tag value is optional."]}
-    let context_ = "AddTagsToCertificateRequest"
-    let make ~certificateArn =
-      fun ~tags -> fun () -> { certificateArn; tags }
-    let to_value x =
-      structure_to_value
-        [("CertificateArn", (Some (Arn.to_value x.certificateArn)));
-        ("Tags", (Some (TagList.to_value x.tags)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags =
-        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      let certificateArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CertificateArn") in
-      make ~tags ~certificateArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let certificateArn = field_map_exn json "CertificateArn" Arn.of_json in
-      make ~tags ~certificateArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Adds one or more tags to an ACM certificate. Tags are labels that you can use to identify and organize your Amazon Web Services resources. Each tag consists of a key and an optional value. You specify the certificate on input by its Amazon Resource Name (ARN). You specify the tag by using a key-value pair. You can apply a tag to just one certificate if you want to identify a specific characteristic of that certificate, or you can apply the same tag to multiple certificates if you want to filter for a common relationship among those certificates. Similarly, you can apply the same tag to multiple resources if you want to specify a relationship among those resources. For example, you can add the same tag to an ACM certificate and an Elastic Load Balancing load balancer to indicate that they are both used by the same website. For more information, see Tagging ACM certificates. To remove one or more tags, use the RemoveTagsFromCertificate action. To view all of the tags that have been applied to the certificate, use the ListTagsForCertificate action."]
+       "Updates a certificate. You can use this function to specify whether to opt in to or out of recording your certificate in a certificate transparency log and exporting. For more information, see Opting Out of Certificate Transparency Logging and Certificate Manager Exportable Managed Certificates."]

@@ -194,6 +194,12 @@ val failover_d_b_cluster :
     ?cfg:Awso.Cfg.t ->
       FailoverDBClusterMessage.t ->
         (FailoverDBClusterResult.t, FailoverDBClusterResult.error) Result.t
+val failover_global_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      FailoverGlobalClusterMessage.t ->
+        (FailoverGlobalClusterResult.t, FailoverGlobalClusterResult.error)
+          Result.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -288,3 +294,9 @@ val stop_d_b_cluster :
     ?cfg:Awso.Cfg.t ->
       StopDBClusterMessage.t ->
         (StopDBClusterResult.t, StopDBClusterResult.error) Result.t
+val switchover_global_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SwitchoverGlobalClusterMessage.t ->
+        (SwitchoverGlobalClusterResult.t,
+          SwitchoverGlobalClusterResult.error) Result.t

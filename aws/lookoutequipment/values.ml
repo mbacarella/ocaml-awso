@@ -25,6 +25,50 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module S3Bucket =
+  struct
+    type nonrec t = string
+    let context_ = "S3Bucket"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Bucket" j
+    let to_json = simple_to_json to_value
+  end
+module S3Prefix =
+  struct
+    type nonrec t = string
+    let context_ = "S3Prefix"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(^$)|([\\u0009\\u000A\\u000D\\u0020-\\u00FF]{1,1023}/$)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Prefix" j
+    let to_json = simple_to_json to_value
+  end
 module ComponentTimestampDelimiter =
   struct
     type nonrec t = string
@@ -63,48 +107,156 @@ module FileNameTimestampFormat =
     let of_json j = string_of_json ~kind:"FileNameTimestampFormat" j
     let to_json = simple_to_json to_value
   end
-module S3Bucket =
+module KeyPattern =
   struct
     type nonrec t = string
-    let context_ = "S3Bucket"
+    let context_ = "KeyPattern"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:3) >>=
-             (fun () ->
-                (check_string_max i ~max:63) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9]$")));
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"S3Bucket" j
+    let of_json j = string_of_json ~kind:"KeyPattern" j
     let to_json = simple_to_json to_value
   end
-module S3Prefix =
+module Integer =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module StatisticalIssueStatus =
+  struct
+    type nonrec t =
+      | POTENTIAL_ISSUE_DETECTED 
+      | NO_ISSUE_DETECTED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | POTENTIAL_ISSUE_DETECTED -> "POTENTIAL_ISSUE_DETECTED"
+      | NO_ISSUE_DETECTED -> "NO_ISSUE_DETECTED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "POTENTIAL_ISSUE_DETECTED" -> POTENTIAL_ISSUE_DETECTED
+      | "NO_ISSUE_DETECTED" -> NO_ISSUE_DETECTED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration StatisticalIssueStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"StatisticalIssueStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module Float_ =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module Monotonicity =
+  struct
+    type nonrec t =
+      | DECREASING 
+      | INCREASING 
+      | STATIC 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DECREASING -> "DECREASING"
+      | INCREASING -> "INCREASING"
+      | STATIC -> "STATIC"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DECREASING" -> DECREASING
+      | "INCREASING" -> INCREASING
+      | "STATIC" -> STATIC
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Monotonicity" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Monotonicity" j)
+    let to_json = simple_to_json to_value
+  end
+module ModelDiagnosticsS3OutputConfiguration =
+  struct
+    type nonrec t =
+      {
+      bucket: S3Bucket.t
+        [@ocaml.doc
+          "The name of the Amazon S3 bucket where the pointwise model diagnostics are located. You must be the owner of the Amazon S3 bucket."];
+      prefix: S3Prefix.t option
+        [@ocaml.doc
+          "The Amazon S3 prefix for the location of the pointwise model diagnostics. The prefix specifies the folder and evaluation result file name. (bucket). When you call CreateModel or UpdateModel, specify the path within the bucket that you want Lookout for Equipment to save the model to. During training, Lookout for Equipment creates the model evaluation model as a compressed JSON file with the name model_diagnostics_results.json.gz. When you call DescribeModel or DescribeModelVersion, prefix contains the file path and filename of the model evaluation file."]}
+    let context_ = "ModelDiagnosticsS3OutputConfiguration"
+    let make ?prefix = fun ~bucket -> fun () -> { prefix; bucket }
+    let to_value x =
+      structure_to_value
+        [("Bucket", (Some (S3Bucket.to_value x.bucket)));
+        ("Prefix", (Option.map x.prefix ~f:S3Prefix.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prefix =
+        (Option.map ~f:S3Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
+      let bucket =
+        S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
+      make ?prefix ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prefix = field_map json__ "Prefix" S3Prefix.of_json in
+      let bucket = field_map_exn json__ "Bucket" S3Bucket.of_json in
+      make ?prefix ~bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon S3 location for the pointwise model diagnostics for an Amazon Lookout for Equipment model."]
+module NameOrArn =
   struct
     type nonrec t = string
-    let context_ = "S3Prefix"
+    let context_ = "NameOrArn"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:0) >>=
+          ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:1024) >>=
+                (check_string_max i ~max:2048) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"(^$)|([\\P{M}\\p{M}]{1,1023}/$)")));
+                       ~pattern:"^[A-Za-z0-9][A-Za-z0-9:_/+=,@.-]{0,2048}$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"S3Prefix" j
+    let of_json j = string_of_json ~kind:"NameOrArn" j
     let to_json = simple_to_json to_value
   end
 module InferenceInputNameConfiguration =
@@ -137,12 +289,12 @@ module InferenceInputNameConfiguration =
           (Xml.child xml_arg0 "TimestampFormat") in
       make ?componentTimestampDelimiter ?timestampFormat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let componentTimestampDelimiter =
-        field_map json "ComponentTimestampDelimiter"
+        field_map json__ "ComponentTimestampDelimiter"
           ComponentTimestampDelimiter.of_json in
       let timestampFormat =
-        field_map json "TimestampFormat" FileNameTimestampFormat.of_json in
+        field_map json__ "TimestampFormat" FileNameTimestampFormat.of_json in
       make ?componentTimestampDelimiter ?timestampFormat ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -171,9 +323,9 @@ module InferenceS3InputConfiguration =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?prefix ~bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefix = field_map json "Prefix" S3Prefix.of_json in
-      let bucket = field_map_exn json "Bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let prefix = field_map json__ "Prefix" S3Prefix.of_json in
+      let bucket = field_map_exn json__ "Bucket" S3Bucket.of_json in
       make ?prefix ~bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -219,35 +371,13 @@ module InferenceS3OutputConfiguration =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
       make ?prefix ~bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefix = field_map json "Prefix" S3Prefix.of_json in
-      let bucket = field_map_exn json "Bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let prefix = field_map json__ "Prefix" S3Prefix.of_json in
+      let bucket = field_map_exn json__ "Bucket" S3Bucket.of_json in
       make ?prefix ~bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies configuration information for the output results from the inference, including output S3 location."]
-module NameOrArn =
-  struct
-    type nonrec t = string
-    let context_ = "NameOrArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:2048) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^[A-Za-z0-9][A-Za-z0-9:_/+=,@.-]{0,2048}$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NameOrArn" j
-    let to_json = simple_to_json to_value
-  end
 module S3Key =
   struct
     type nonrec t = string
@@ -278,25 +408,34 @@ module IngestionS3InputConfiguration =
           "The name of the S3 bucket used for the input data for the data ingestion."];
       prefix: S3Prefix.t option
         [@ocaml.doc
-          "The prefix for the S3 location being used for the input data for the data ingestion."]}
+          "The prefix for the S3 location being used for the input data for the data ingestion."];
+      keyPattern: KeyPattern.t option
+        [@ocaml.doc
+          "The pattern for matching the Amazon S3 files that will be used for ingestion. If the schema was created previously without any KeyPattern, then the default KeyPattern \\{prefix\\}/\\{component_name\\}/* is used to download files from Amazon S3 according to the schema. This field is required when ingestion is being done for the first time. Valid Values: \\{prefix\\}/\\{component_name\\}_* | \\{prefix\\}/\\{component_name\\}/* | \\{prefix\\}/\\{component_name\\}\\[DELIMITER\\]* (Allowed delimiters : space, dot, underscore, hyphen)"]}
     let context_ = "IngestionS3InputConfiguration"
-    let make ?prefix = fun ~bucket -> fun () -> { prefix; bucket }
+    let make ?prefix =
+      fun ?keyPattern ->
+        fun ~bucket -> fun () -> { prefix; keyPattern; bucket }
     let to_value x =
       structure_to_value
         [("Bucket", (Some (S3Bucket.to_value x.bucket)));
-        ("Prefix", (Option.map x.prefix ~f:S3Prefix.to_value))]
+        ("Prefix", (Option.map x.prefix ~f:S3Prefix.to_value));
+        ("KeyPattern", (Option.map x.keyPattern ~f:KeyPattern.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let keyPattern =
+        (Option.map ~f:KeyPattern.of_xml) (Xml.child xml_arg0 "KeyPattern") in
       let prefix =
         (Option.map ~f:S3Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
       let bucket =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
-      make ?prefix ~bucket ()
+      make ?keyPattern ?prefix ~bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefix = field_map json "Prefix" S3Prefix.of_json in
-      let bucket = field_map_exn json "Bucket" S3Bucket.of_json in
-      make ?prefix ~bucket ()
+    let of_json json__ =
+      let keyPattern = field_map json__ "KeyPattern" KeyPattern.of_json in
+      let prefix = field_map json__ "Prefix" S3Prefix.of_json in
+      let bucket = field_map_exn json__ "Bucket" S3Bucket.of_json in
+      make ?keyPattern ?prefix ~bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies S3 configuration information for the input data for the data ingestion job."]
@@ -341,32 +480,57 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
-module DatasetArn =
+module Boolean =
   struct
-    type nonrec t = string
-    let context_ = "DatasetArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:20) >>=
-             (fun () ->
-                (check_string_max i ~max:2048) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"arn:aws(-[^:]+)?:lookoutequipment:[a-zA-Z0-9\\-]*:[0-9]{12}:dataset\\/.+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DatasetArn" j
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
-module DatasetName =
+module CategoricalValues =
+  struct
+    type nonrec t =
+      {
+      status: StatisticalIssueStatus.t option
+        [@ocaml.doc
+          "Indicates whether there is a potential data issue related to categorical values."];
+      numberOfCategory: Integer.t option
+        [@ocaml.doc "Indicates the number of categories in the data."]}
+    let make ?status =
+      fun ?numberOfCategory -> fun () -> { status; numberOfCategory }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:StatisticalIssueStatus.to_value));
+        ("NumberOfCategory",
+          (Option.map x.numberOfCategory ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let numberOfCategory =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "NumberOfCategory") in
+      let status =
+        (Option.map ~f:StatisticalIssueStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?numberOfCategory ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let numberOfCategory =
+        field_map json__ "NumberOfCategory" Integer.of_json in
+      let status = field_map json__ "Status" StatisticalIssueStatus.of_json in
+      make ?numberOfCategory ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Entity that comprises information on categorical values in data."]
+module ComponentName =
   struct
     type nonrec t = string
-    let context_ = "DatasetName"
+    let context_ = "ComponentName"
     let make i =
       let open Result in
         ok_or_failwith
@@ -374,14 +538,199 @@ module DatasetName =
              (fun () ->
                 (check_string_max i ~max:200) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^[0-9a-zA-Z_-]{1,200}$")));
+                     check_pattern i ~pattern:"^[0-9a-zA-Z._\\-]{1,200}$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DatasetName" j
+    let of_json j = string_of_json ~kind:"ComponentName" j
+    let to_json = simple_to_json to_value
+  end
+module CountPercent =
+  struct
+    type nonrec t =
+      {
+      count: Integer.t option
+        [@ocaml.doc
+          "Indicates the count of occurences of the given statistic."];
+      percentage: Float_.t option
+        [@ocaml.doc
+          "Indicates the percentage of occurances of the given statistic."]}
+    let make ?count = fun ?percentage -> fun () -> { count; percentage }
+    let to_value x =
+      structure_to_value
+        [("Count", (Option.map x.count ~f:Integer.to_value));
+        ("Percentage", (Option.map x.percentage ~f:Float_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let percentage =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Percentage") in
+      let count = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Count") in
+      make ?percentage ?count ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let percentage = field_map json__ "Percentage" Float_.of_json in
+      let count = field_map json__ "Count" Integer.of_json in
+      make ?percentage ?count ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Entity that comprises information of count and percentage."]
+module LargeTimestampGaps =
+  struct
+    type nonrec t =
+      {
+      status: StatisticalIssueStatus.t option
+        [@ocaml.doc
+          "Indicates whether there is a potential data issue related to large gaps in timestamps."];
+      numberOfLargeTimestampGaps: Integer.t option
+        [@ocaml.doc
+          "Indicates the number of large timestamp gaps, if there are any."];
+      maxTimestampGapInDays: Integer.t option
+        [@ocaml.doc
+          "Indicates the size of the largest timestamp gap, in days."]}
+    let make ?status =
+      fun ?numberOfLargeTimestampGaps ->
+        fun ?maxTimestampGapInDays ->
+          fun () ->
+            { status; numberOfLargeTimestampGaps; maxTimestampGapInDays }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:StatisticalIssueStatus.to_value));
+        ("NumberOfLargeTimestampGaps",
+          (Option.map x.numberOfLargeTimestampGaps ~f:Integer.to_value));
+        ("MaxTimestampGapInDays",
+          (Option.map x.maxTimestampGapInDays ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxTimestampGapInDays =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "MaxTimestampGapInDays") in
+      let numberOfLargeTimestampGaps =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "NumberOfLargeTimestampGaps") in
+      let status =
+        (Option.map ~f:StatisticalIssueStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?maxTimestampGapInDays ?numberOfLargeTimestampGaps ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxTimestampGapInDays =
+        field_map json__ "MaxTimestampGapInDays" Integer.of_json in
+      let numberOfLargeTimestampGaps =
+        field_map json__ "NumberOfLargeTimestampGaps" Integer.of_json in
+      let status = field_map json__ "Status" StatisticalIssueStatus.of_json in
+      make ?maxTimestampGapInDays ?numberOfLargeTimestampGaps ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Entity that comprises information on large gaps between consecutive timestamps in data."]
+module MonotonicValues =
+  struct
+    type nonrec t =
+      {
+      status: StatisticalIssueStatus.t option
+        [@ocaml.doc
+          "Indicates whether there is a potential data issue related to having monotonic values."];
+      monotonicity: Monotonicity.t option
+        [@ocaml.doc
+          "Indicates the monotonicity of values. Can be INCREASING, DECREASING, or STATIC."]}
+    let make ?status =
+      fun ?monotonicity -> fun () -> { status; monotonicity }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:StatisticalIssueStatus.to_value));
+        ("Monotonicity",
+          (Option.map x.monotonicity ~f:Monotonicity.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let monotonicity =
+        (Option.map ~f:Monotonicity.of_xml)
+          (Xml.child xml_arg0 "Monotonicity") in
+      let status =
+        (Option.map ~f:StatisticalIssueStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?monotonicity ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let monotonicity = field_map json__ "Monotonicity" Monotonicity.of_json in
+      let status = field_map json__ "Status" StatisticalIssueStatus.of_json in
+      make ?monotonicity ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Entity that comprises information on monotonic values in the data."]
+module MultipleOperatingModes =
+  struct
+    type nonrec t =
+      {
+      status: StatisticalIssueStatus.t option
+        [@ocaml.doc
+          "Indicates whether there is a potential data issue related to having multiple operating modes."]}
+    let make ?status = fun () -> { status }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:StatisticalIssueStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:StatisticalIssueStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" StatisticalIssueStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Entity that comprises information on operating modes in data."]
+module SensorName =
+  struct
+    type nonrec t = string
+    let context_ = "SensorName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[0-9a-zA-Z:#$.\\-_]{1,200}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SensorName" j
+    let to_json = simple_to_json to_value
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module LookbackWindow =
+  struct
+    type nonrec t = string
+    let context_ = "LookbackWindow"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"^P180D$|^P360D$|^P540D$|^P720D$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LookbackWindow" j
     let to_json = simple_to_json to_value
   end
 module ModelArn =
@@ -427,12 +776,178 @@ module ModelName =
     let of_json j = string_of_json ~kind:"ModelName" j
     let to_json = simple_to_json to_value
   end
+module RetrainingFrequency =
+  struct
+    type nonrec t = string
+    let context_ = "RetrainingFrequency"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:10) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^P(\\dY)?(\\d{1,2}M)?(\\d{1,3}D)?$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RetrainingFrequency" j
+    let to_json = simple_to_json to_value
+  end
+module RetrainingSchedulerStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | RUNNING 
+      | STOPPING 
+      | STOPPED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | RUNNING -> "RUNNING"
+      | STOPPING -> "STOPPING"
+      | STOPPED -> "STOPPED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "RUNNING" -> RUNNING
+      | "STOPPING" -> STOPPING
+      | "STOPPED" -> STOPPED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RetrainingSchedulerStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RetrainingSchedulerStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module DatasetArn =
+  struct
+    type nonrec t = string
+    let context_ = "DatasetArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws(-[^:]+)?:lookoutequipment:[a-zA-Z0-9\\-]*:[0-9]{12}:dataset\\/[0-9a-zA-Z_-]{1,200}\\/.+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DatasetArn" j
+    let to_json = simple_to_json to_value
+  end
+module DatasetName =
+  struct
+    type nonrec t = string
+    let context_ = "DatasetName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[0-9a-zA-Z_-]{1,200}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DatasetName" j
+    let to_json = simple_to_json to_value
+  end
+module ModelDiagnosticsOutputConfiguration =
+  struct
+    type nonrec t =
+      {
+      s3OutputConfiguration: ModelDiagnosticsS3OutputConfiguration.t
+        [@ocaml.doc
+          "The Amazon S3 location for the pointwise model diagnostics."];
+      kmsKeyId: NameOrArn.t option
+        [@ocaml.doc
+          "The Amazon Web Services Key Management Service (KMS) key identifier to encrypt the pointwise model diagnostics files."]}
+    let context_ = "ModelDiagnosticsOutputConfiguration"
+    let make ?kmsKeyId =
+      fun ~s3OutputConfiguration ->
+        fun () -> { kmsKeyId; s3OutputConfiguration }
+    let to_value x =
+      structure_to_value
+        [("S3OutputConfiguration",
+           (Some
+              (ModelDiagnosticsS3OutputConfiguration.to_value
+                 x.s3OutputConfiguration)));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:NameOrArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKeyId =
+        (Option.map ~f:NameOrArn.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let s3OutputConfiguration =
+        ModelDiagnosticsS3OutputConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "S3OutputConfiguration") in
+      make ?kmsKeyId ~s3OutputConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" NameOrArn.of_json in
+      let s3OutputConfiguration =
+        field_map_exn json__ "S3OutputConfiguration"
+          ModelDiagnosticsS3OutputConfiguration.of_json in
+      make ?kmsKeyId ~s3OutputConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Output configuration information for the pointwise model diagnostics for an Amazon Lookout for Equipment model."]
+module ModelQuality =
+  struct
+    type nonrec t =
+      | QUALITY_THRESHOLD_MET 
+      | CANNOT_DETERMINE_QUALITY 
+      | POOR_QUALITY_DETECTED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | QUALITY_THRESHOLD_MET -> "QUALITY_THRESHOLD_MET"
+      | CANNOT_DETERMINE_QUALITY -> "CANNOT_DETERMINE_QUALITY"
+      | POOR_QUALITY_DETECTED -> "POOR_QUALITY_DETECTED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "QUALITY_THRESHOLD_MET" -> QUALITY_THRESHOLD_MET
+      | "CANNOT_DETERMINE_QUALITY" -> CANNOT_DETERMINE_QUALITY
+      | "POOR_QUALITY_DETECTED" -> POOR_QUALITY_DETECTED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ModelQuality" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ModelQuality" j)
+    let to_json = simple_to_json to_value
+  end
 module ModelStatus =
   struct
     type nonrec t =
       | IN_PROGRESS 
       | SUCCESS 
       | FAILED 
+      | IMPORT_IN_PROGRESS 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -440,12 +955,14 @@ module ModelStatus =
       | IN_PROGRESS -> "IN_PROGRESS"
       | SUCCESS -> "SUCCESS"
       | FAILED -> "FAILED"
+      | IMPORT_IN_PROGRESS -> "IMPORT_IN_PROGRESS"
       | Non_static_id s -> s
     let of_string =
       function
       | "IN_PROGRESS" -> IN_PROGRESS
       | "SUCCESS" -> SUCCESS
       | "FAILED" -> FAILED
+      | "IMPORT_IN_PROGRESS" -> IMPORT_IN_PROGRESS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -455,16 +972,234 @@ module ModelStatus =
     let of_json j = of_string (string_of_json ~kind:"ModelStatus" j)
     let to_json = simple_to_json to_value
   end
-module Timestamp =
+module ModelVersion =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:1L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module ModelVersionArn =
   struct
     type nonrec t = string
-    let make i = i
+    let context_ = "ModelVersionArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws(-[^:]+)?:lookoutequipment:[a-zA-Z0-9\\-]*:[0-9]{12}:model\\/[0-9a-zA-Z_-]{1,200}\\/.+\\/model-version\\/[0-9]{1,}$")));
+        i
     let of_string x = x
-    let to_value x = `Timestamp x
+    let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ModelVersionArn" j
+    let to_json = simple_to_json to_value
+  end
+module ModelVersionStatus =
+  struct
+    type nonrec t =
+      | IN_PROGRESS 
+      | SUCCESS 
+      | FAILED 
+      | IMPORT_IN_PROGRESS 
+      | CANCELED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | SUCCESS -> "SUCCESS"
+      | FAILED -> "FAILED"
+      | IMPORT_IN_PROGRESS -> "IMPORT_IN_PROGRESS"
+      | CANCELED -> "CANCELED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "SUCCESS" -> SUCCESS
+      | "FAILED" -> FAILED
+      | "IMPORT_IN_PROGRESS" -> IMPORT_IN_PROGRESS
+      | "CANCELED" -> CANCELED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ModelVersionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ModelVersionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ModelVersionSourceType =
+  struct
+    type nonrec t =
+      | TRAINING 
+      | RETRAINING 
+      | IMPORT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TRAINING -> "TRAINING"
+      | RETRAINING -> "RETRAINING"
+      | IMPORT -> "IMPORT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TRAINING" -> TRAINING
+      | "RETRAINING" -> RETRAINING
+      | "IMPORT" -> IMPORT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ModelVersionSourceType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ModelVersionSourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module Equipment =
+  struct
+    type nonrec t = string
+    let context_ = "Equipment"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\P{M}\\p{M}]{1,200}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Equipment" j
+    let to_json = simple_to_json to_value
+  end
+module FaultCode =
+  struct
+    type nonrec t = string
+    let context_ = "FaultCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\P{M}\\p{M}]{1,100}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FaultCode" j
+    let to_json = simple_to_json to_value
+  end
+module LabelGroupArn =
+  struct
+    type nonrec t = string
+    let context_ = "LabelGroupArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws(-[^:]+)?:lookoutequipment:[a-zA-Z0-9\\-]*:[0-9]{12}:label-group\\/.+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LabelGroupArn" j
+    let to_json = simple_to_json to_value
+  end
+module LabelGroupName =
+  struct
+    type nonrec t = string
+    let context_ = "LabelGroupName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[0-9a-zA-Z_-]{1,200}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LabelGroupName" j
+    let to_json = simple_to_json to_value
+  end
+module LabelId =
+  struct
+    type nonrec t = string
+    let context_ = "LabelId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:32) >>=
+             (fun () -> check_pattern i ~pattern:"[A-Fa-f0-9]{0,32}"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LabelId" j
+    let to_json = simple_to_json to_value
+  end
+module LabelRating =
+  struct
+    type nonrec t =
+      | ANOMALY 
+      | NO_ANOMALY 
+      | NEUTRAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ANOMALY -> "ANOMALY"
+      | NO_ANOMALY -> "NO_ANOMALY"
+      | NEUTRAL -> "NEUTRAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ANOMALY" -> ANOMALY
+      | "NO_ANOMALY" -> NO_ANOMALY
+      | "NEUTRAL" -> NEUTRAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LabelRating" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LabelRating" j)
     let to_json = simple_to_json to_value
   end
 module DataDelayOffsetInMinutes =
@@ -596,6 +1331,33 @@ module InferenceSchedulerStatus =
       of_string (string_of_json ~kind:"InferenceSchedulerStatus" j)
     let to_json = simple_to_json to_value
   end
+module LatestInferenceResult =
+  struct
+    type nonrec t =
+      | ANOMALOUS 
+      | NORMAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ANOMALOUS -> "ANOMALOUS"
+      | NORMAL -> "NORMAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ANOMALOUS" -> ANOMALOUS
+      | "NORMAL" -> NORMAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LatestInferenceResult" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LatestInferenceResult" j)
+    let to_json = simple_to_json to_value
+  end
 module BoundedLengthString =
   struct
     type nonrec t = string
@@ -653,10 +1415,10 @@ module InferenceInputConfiguration =
       {
       s3InputConfiguration: InferenceS3InputConfiguration.t option
         [@ocaml.doc
-          "Specifies configuration information for the input data for the inference, including S3 location of input data.."];
+          "Specifies configuration information for the input data for the inference, including Amazon S3 location of input data."];
       inputTimeZoneOffset: TimeZoneOffset.t option
         [@ocaml.doc
-          "Indicates the difference between your time zone and Greenwich Mean Time (GMT)."];
+          "Indicates the difference between your time zone and Coordinated Universal Time (UTC)."];
       inferenceInputNameConfiguration:
         InferenceInputNameConfiguration.t option
         [@ocaml.doc
@@ -694,20 +1456,20 @@ module InferenceInputConfiguration =
       make ?inferenceInputNameConfiguration ?inputTimeZoneOffset
         ?s3InputConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inferenceInputNameConfiguration =
-        field_map json "InferenceInputNameConfiguration"
+        field_map json__ "InferenceInputNameConfiguration"
           InferenceInputNameConfiguration.of_json in
       let inputTimeZoneOffset =
-        field_map json "InputTimeZoneOffset" TimeZoneOffset.of_json in
+        field_map json__ "InputTimeZoneOffset" TimeZoneOffset.of_json in
       let s3InputConfiguration =
-        field_map json "S3InputConfiguration"
+        field_map json__ "S3InputConfiguration"
           InferenceS3InputConfiguration.of_json in
       make ?inferenceInputNameConfiguration ?inputTimeZoneOffset
         ?s3InputConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies configuration information for the input data for the inference, including S3 location of input data.."]
+       "Specifies configuration information for the input data for the inference, including Amazon S3 location of input data.."]
 module InferenceOutputConfiguration =
   struct
     type nonrec t =
@@ -717,7 +1479,7 @@ module InferenceOutputConfiguration =
           "Specifies configuration information for the output results from for the inference, output S3 location."];
       kmsKeyId: NameOrArn.t option
         [@ocaml.doc
-          "The ID number for the AWS KMS key used to encrypt the inference output."]}
+          "The ID number for the KMS key key used to encrypt the inference output."]}
     let context_ = "InferenceOutputConfiguration"
     let make ?kmsKeyId =
       fun ~s3OutputConfiguration ->
@@ -738,10 +1500,10 @@ module InferenceOutputConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "S3OutputConfiguration") in
       make ?kmsKeyId ~s3OutputConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map json "KmsKeyId" NameOrArn.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" NameOrArn.of_json in
       let s3OutputConfiguration =
-        field_map_exn json "S3OutputConfiguration"
+        field_map_exn json__ "S3OutputConfiguration"
           InferenceS3OutputConfiguration.of_json in
       make ?kmsKeyId ~s3OutputConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -751,35 +1513,68 @@ module S3Object =
   struct
     type nonrec t =
       {
-      bucket: S3Bucket.t [@ocaml.doc "The name of the specific S3 bucket."];
-      key: S3Key.t
+      bucket: S3Bucket.t option
+        [@ocaml.doc "The name of the specific S3 bucket."];
+      key: S3Key.t option
         [@ocaml.doc
-          "The AWS Key Management Service (AWS KMS) key being used to encrypt the S3 object. Without this key, data in the bucket is not accessible."]}
-    let context_ = "S3Object"
-    let make ~bucket = fun ~key -> fun () -> { bucket; key }
+          "The Amazon Web Services Key Management Service (KMS key) key being used to encrypt the S3 object. Without this key, data in the bucket is not accessible."]}
+    let make ?bucket = fun ?key -> fun () -> { bucket; key }
     let to_value x =
       structure_to_value
-        [("Bucket", (Some (S3Bucket.to_value x.bucket)));
-        ("Key", (Some (S3Key.to_value x.key)))]
+        [("Bucket", (Option.map x.bucket ~f:S3Bucket.to_value));
+        ("Key", (Option.map x.key ~f:S3Key.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let key = S3Key.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      let key = (Option.map ~f:S3Key.of_xml) (Xml.child xml_arg0 "Key") in
       let bucket =
-        S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
-      make ~key ~bucket ()
+        (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "Bucket") in
+      make ?key ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let key = field_map_exn json "Key" S3Key.of_json in
-      let bucket = field_map_exn json "Bucket" S3Bucket.of_json in
-      make ~key ~bucket ()
+    let of_json json__ =
+      let key = field_map json__ "Key" S3Key.of_json in
+      let bucket = field_map json__ "Bucket" S3Bucket.of_json in
+      make ?key ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about an S3 bucket."]
+module EventDurationInSeconds =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module ModelMetrics =
+  struct
+    type nonrec t = string
+    let context_ = "ModelMetrics"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ModelMetrics" j
+    let to_json = simple_to_json to_value
+  end
 module DatasetStatus =
   struct
     type nonrec t =
       | CREATED 
       | INGESTION_IN_PROGRESS 
       | ACTIVE 
+      | IMPORT_IN_PROGRESS 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -787,12 +1582,14 @@ module DatasetStatus =
       | CREATED -> "CREATED"
       | INGESTION_IN_PROGRESS -> "INGESTION_IN_PROGRESS"
       | ACTIVE -> "ACTIVE"
+      | IMPORT_IN_PROGRESS -> "IMPORT_IN_PROGRESS"
       | Non_static_id s -> s
     let of_string =
       function
       | "CREATED" -> CREATED
       | "INGESTION_IN_PROGRESS" -> INGESTION_IN_PROGRESS
       | "ACTIVE" -> ACTIVE
+      | "IMPORT_IN_PROGRESS" -> IMPORT_IN_PROGRESS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -823,9 +1620,9 @@ module IngestionInputConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "S3InputConfiguration") in
       make ~s3InputConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3InputConfiguration =
-        field_map_exn json "S3InputConfiguration"
+        field_map_exn json__ "S3InputConfiguration"
           IngestionS3InputConfiguration.of_json in
       make ~s3InputConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -855,6 +1652,7 @@ module IngestionJobStatus =
       | IN_PROGRESS 
       | SUCCESS 
       | FAILED 
+      | IMPORT_IN_PROGRESS 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -862,12 +1660,14 @@ module IngestionJobStatus =
       | IN_PROGRESS -> "IN_PROGRESS"
       | SUCCESS -> "SUCCESS"
       | FAILED -> "FAILED"
+      | IMPORT_IN_PROGRESS -> "IMPORT_IN_PROGRESS"
       | Non_static_id s -> s
     let of_string =
       function
       | "IN_PROGRESS" -> IN_PROGRESS
       | "SUCCESS" -> SUCCESS
       | "FAILED" -> FAILED
+      | "IMPORT_IN_PROGRESS" -> IMPORT_IN_PROGRESS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -878,6 +1678,87 @@ module IngestionJobStatus =
     let of_json j = of_string (string_of_json ~kind:"IngestionJobStatus" j)
     let to_json = simple_to_json to_value
   end
+module MissingCompleteSensorData =
+  struct
+    type nonrec t =
+      {
+      affectedSensorCount: Integer.t option
+        [@ocaml.doc
+          "Indicates the number of sensors that have data missing completely."]}
+    let make ?affectedSensorCount = fun () -> { affectedSensorCount }
+    let to_value x =
+      structure_to_value
+        [("AffectedSensorCount",
+           (Option.map x.affectedSensorCount ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let affectedSensorCount =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "AffectedSensorCount") in
+      make ?affectedSensorCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let affectedSensorCount =
+        field_map json__ "AffectedSensorCount" Integer.of_json in
+      make ?affectedSensorCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Entity that comprises information on sensors that have sensor data completely missing."]
+module SensorsWithShortDateRange =
+  struct
+    type nonrec t =
+      {
+      affectedSensorCount: Integer.t option
+        [@ocaml.doc
+          "Indicates the number of sensors that have less than 14 days of data."]}
+    let make ?affectedSensorCount = fun () -> { affectedSensorCount }
+    let to_value x =
+      structure_to_value
+        [("AffectedSensorCount",
+           (Option.map x.affectedSensorCount ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let affectedSensorCount =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "AffectedSensorCount") in
+      make ?affectedSensorCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let affectedSensorCount =
+        field_map json__ "AffectedSensorCount" Integer.of_json in
+      make ?affectedSensorCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Entity that comprises information on sensors that have shorter date range."]
+module LabelsS3InputConfiguration =
+  struct
+    type nonrec t =
+      {
+      bucket: S3Bucket.t
+        [@ocaml.doc "The name of the S3 bucket holding the label data."];
+      prefix: S3Prefix.t option
+        [@ocaml.doc "The prefix for the S3 bucket used for the label data."]}
+    let context_ = "LabelsS3InputConfiguration"
+    let make ?prefix = fun ~bucket -> fun () -> { prefix; bucket }
+    let to_value x =
+      structure_to_value
+        [("Bucket", (Some (S3Bucket.to_value x.bucket)));
+        ("Prefix", (Option.map x.prefix ~f:S3Prefix.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prefix =
+        (Option.map ~f:S3Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
+      let bucket =
+        S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
+      make ?prefix ~bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prefix = field_map json__ "Prefix" S3Prefix.of_json in
+      let bucket = field_map_exn json__ "Bucket" S3Bucket.of_json in
+      make ?prefix ~bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The location information (prefix and bucket name) for the s3 location being used for label data."]
 module Tag =
   struct
     type nonrec t =
@@ -898,44 +1779,343 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A tag is a key-value pair that can be added to a resource as metadata."]
+module SensorStatisticsSummary =
+  struct
+    type nonrec t =
+      {
+      componentName: ComponentName.t option
+        [@ocaml.doc
+          "Name of the component to which the particular sensor belongs for which the statistics belong to."];
+      sensorName: SensorName.t option
+        [@ocaml.doc "Name of the sensor that the statistics belong to."];
+      dataExists: Boolean.t option
+        [@ocaml.doc
+          "Parameter that indicates whether data exists for the sensor that the statistics belong to."];
+      missingValues: CountPercent.t option
+        [@ocaml.doc
+          "Parameter that describes the total number of, and percentage of, values that are missing for the sensor that the statistics belong to."];
+      invalidValues: CountPercent.t option
+        [@ocaml.doc
+          "Parameter that describes the total number of, and percentage of, values that are invalid for the sensor that the statistics belong to."];
+      invalidDateEntries: CountPercent.t option
+        [@ocaml.doc
+          "Parameter that describes the total number of invalid date entries associated with the sensor that the statistics belong to."];
+      duplicateTimestamps: CountPercent.t option
+        [@ocaml.doc
+          "Parameter that describes the total number of duplicate timestamp records associated with the sensor that the statistics belong to."];
+      categoricalValues: CategoricalValues.t option
+        [@ocaml.doc
+          "Parameter that describes potential risk about whether data associated with the sensor is categorical."];
+      multipleOperatingModes: MultipleOperatingModes.t option
+        [@ocaml.doc
+          "Parameter that describes potential risk about whether data associated with the sensor has more than one operating mode."];
+      largeTimestampGaps: LargeTimestampGaps.t option
+        [@ocaml.doc
+          "Parameter that describes potential risk about whether data associated with the sensor contains one or more large gaps between consecutive timestamps."];
+      monotonicValues: MonotonicValues.t option
+        [@ocaml.doc
+          "Parameter that describes potential risk about whether data associated with the sensor is mostly monotonic."];
+      dataStartTime: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the time reference to indicate the beginning of valid data associated with the sensor that the statistics belong to."];
+      dataEndTime: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the time reference to indicate the end of valid data associated with the sensor that the statistics belong to."]}
+    let make ?componentName =
+      fun ?sensorName ->
+        fun ?dataExists ->
+          fun ?missingValues ->
+            fun ?invalidValues ->
+              fun ?invalidDateEntries ->
+                fun ?duplicateTimestamps ->
+                  fun ?categoricalValues ->
+                    fun ?multipleOperatingModes ->
+                      fun ?largeTimestampGaps ->
+                        fun ?monotonicValues ->
+                          fun ?dataStartTime ->
+                            fun ?dataEndTime ->
+                              fun () ->
+                                {
+                                  componentName;
+                                  sensorName;
+                                  dataExists;
+                                  missingValues;
+                                  invalidValues;
+                                  invalidDateEntries;
+                                  duplicateTimestamps;
+                                  categoricalValues;
+                                  multipleOperatingModes;
+                                  largeTimestampGaps;
+                                  monotonicValues;
+                                  dataStartTime;
+                                  dataEndTime
+                                }
+    let to_value x =
+      structure_to_value
+        [("ComponentName",
+           (Option.map x.componentName ~f:ComponentName.to_value));
+        ("SensorName", (Option.map x.sensorName ~f:SensorName.to_value));
+        ("DataExists", (Option.map x.dataExists ~f:Boolean.to_value));
+        ("MissingValues",
+          (Option.map x.missingValues ~f:CountPercent.to_value));
+        ("InvalidValues",
+          (Option.map x.invalidValues ~f:CountPercent.to_value));
+        ("InvalidDateEntries",
+          (Option.map x.invalidDateEntries ~f:CountPercent.to_value));
+        ("DuplicateTimestamps",
+          (Option.map x.duplicateTimestamps ~f:CountPercent.to_value));
+        ("CategoricalValues",
+          (Option.map x.categoricalValues ~f:CategoricalValues.to_value));
+        ("MultipleOperatingModes",
+          (Option.map x.multipleOperatingModes
+             ~f:MultipleOperatingModes.to_value));
+        ("LargeTimestampGaps",
+          (Option.map x.largeTimestampGaps ~f:LargeTimestampGaps.to_value));
+        ("MonotonicValues",
+          (Option.map x.monotonicValues ~f:MonotonicValues.to_value));
+        ("DataStartTime", (Option.map x.dataStartTime ~f:Timestamp.to_value));
+        ("DataEndTime", (Option.map x.dataEndTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataEndTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DataEndTime") in
+      let dataStartTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DataStartTime") in
+      let monotonicValues =
+        (Option.map ~f:MonotonicValues.of_xml)
+          (Xml.child xml_arg0 "MonotonicValues") in
+      let largeTimestampGaps =
+        (Option.map ~f:LargeTimestampGaps.of_xml)
+          (Xml.child xml_arg0 "LargeTimestampGaps") in
+      let multipleOperatingModes =
+        (Option.map ~f:MultipleOperatingModes.of_xml)
+          (Xml.child xml_arg0 "MultipleOperatingModes") in
+      let categoricalValues =
+        (Option.map ~f:CategoricalValues.of_xml)
+          (Xml.child xml_arg0 "CategoricalValues") in
+      let duplicateTimestamps =
+        (Option.map ~f:CountPercent.of_xml)
+          (Xml.child xml_arg0 "DuplicateTimestamps") in
+      let invalidDateEntries =
+        (Option.map ~f:CountPercent.of_xml)
+          (Xml.child xml_arg0 "InvalidDateEntries") in
+      let invalidValues =
+        (Option.map ~f:CountPercent.of_xml)
+          (Xml.child xml_arg0 "InvalidValues") in
+      let missingValues =
+        (Option.map ~f:CountPercent.of_xml)
+          (Xml.child xml_arg0 "MissingValues") in
+      let dataExists =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DataExists") in
+      let sensorName =
+        (Option.map ~f:SensorName.of_xml) (Xml.child xml_arg0 "SensorName") in
+      let componentName =
+        (Option.map ~f:ComponentName.of_xml)
+          (Xml.child xml_arg0 "ComponentName") in
+      make ?dataEndTime ?dataStartTime ?monotonicValues ?largeTimestampGaps
+        ?multipleOperatingModes ?categoricalValues ?duplicateTimestamps
+        ?invalidDateEntries ?invalidValues ?missingValues ?dataExists
+        ?sensorName ?componentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataEndTime = field_map json__ "DataEndTime" Timestamp.of_json in
+      let dataStartTime = field_map json__ "DataStartTime" Timestamp.of_json in
+      let monotonicValues =
+        field_map json__ "MonotonicValues" MonotonicValues.of_json in
+      let largeTimestampGaps =
+        field_map json__ "LargeTimestampGaps" LargeTimestampGaps.of_json in
+      let multipleOperatingModes =
+        field_map json__ "MultipleOperatingModes"
+          MultipleOperatingModes.of_json in
+      let categoricalValues =
+        field_map json__ "CategoricalValues" CategoricalValues.of_json in
+      let duplicateTimestamps =
+        field_map json__ "DuplicateTimestamps" CountPercent.of_json in
+      let invalidDateEntries =
+        field_map json__ "InvalidDateEntries" CountPercent.of_json in
+      let invalidValues =
+        field_map json__ "InvalidValues" CountPercent.of_json in
+      let missingValues =
+        field_map json__ "MissingValues" CountPercent.of_json in
+      let dataExists = field_map json__ "DataExists" Boolean.of_json in
+      let sensorName = field_map json__ "SensorName" SensorName.of_json in
+      let componentName =
+        field_map json__ "ComponentName" ComponentName.of_json in
+      make ?dataEndTime ?dataStartTime ?monotonicValues ?largeTimestampGaps
+        ?multipleOperatingModes ?categoricalValues ?duplicateTimestamps
+        ?invalidDateEntries ?invalidValues ?missingValues ?dataExists
+        ?sensorName ?componentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary of ingestion statistics like whether data exists, number of missing values, number of invalid values and so on related to the particular sensor."]
+module RetrainingSchedulerSummary =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t option
+        [@ocaml.doc
+          "The name of the model that the retraining scheduler is attached to."];
+      modelArn: ModelArn.t option
+        [@ocaml.doc
+          "The ARN of the model that the retraining scheduler is attached to."];
+      status: RetrainingSchedulerStatus.t option
+        [@ocaml.doc "The status of the retraining scheduler."];
+      retrainingStartDate: Timestamp.t option
+        [@ocaml.doc
+          "The start date for the retraining scheduler. Lookout for Equipment truncates the time you provide to the nearest UTC day."];
+      retrainingFrequency: RetrainingFrequency.t option
+        [@ocaml.doc
+          "The frequency at which the model retraining is set. This follows the ISO 8601 guidelines."];
+      lookbackWindow: LookbackWindow.t option
+        [@ocaml.doc "The number of past days of data used for retraining."]}
+    let make ?modelName =
+      fun ?modelArn ->
+        fun ?status ->
+          fun ?retrainingStartDate ->
+            fun ?retrainingFrequency ->
+              fun ?lookbackWindow ->
+                fun () ->
+                  {
+                    modelName;
+                    modelArn;
+                    status;
+                    retrainingStartDate;
+                    retrainingFrequency;
+                    lookbackWindow
+                  }
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
+        ("ModelArn", (Option.map x.modelArn ~f:ModelArn.to_value));
+        ("Status",
+          (Option.map x.status ~f:RetrainingSchedulerStatus.to_value));
+        ("RetrainingStartDate",
+          (Option.map x.retrainingStartDate ~f:Timestamp.to_value));
+        ("RetrainingFrequency",
+          (Option.map x.retrainingFrequency ~f:RetrainingFrequency.to_value));
+        ("LookbackWindow",
+          (Option.map x.lookbackWindow ~f:LookbackWindow.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lookbackWindow =
+        (Option.map ~f:LookbackWindow.of_xml)
+          (Xml.child xml_arg0 "LookbackWindow") in
+      let retrainingFrequency =
+        (Option.map ~f:RetrainingFrequency.of_xml)
+          (Xml.child xml_arg0 "RetrainingFrequency") in
+      let retrainingStartDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "RetrainingStartDate") in
+      let status =
+        (Option.map ~f:RetrainingSchedulerStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let modelArn =
+        (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
+      let modelName =
+        (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
+      make ?lookbackWindow ?retrainingFrequency ?retrainingStartDate ?status
+        ?modelArn ?modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lookbackWindow =
+        field_map json__ "LookbackWindow" LookbackWindow.of_json in
+      let retrainingFrequency =
+        field_map json__ "RetrainingFrequency" RetrainingFrequency.of_json in
+      let retrainingStartDate =
+        field_map json__ "RetrainingStartDate" Timestamp.of_json in
+      let status =
+        field_map json__ "Status" RetrainingSchedulerStatus.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      make ?lookbackWindow ?retrainingFrequency ?retrainingStartDate ?status
+        ?modelArn ?modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about the specified retraining scheduler, including model name, status, start date, frequency, and lookback window."]
 module ModelSummary =
   struct
     type nonrec t =
       {
-      modelName: ModelName.t option [@ocaml.doc "The name of the ML model."];
+      modelName: ModelName.t option
+        [@ocaml.doc "The name of the machine learning model."];
       modelArn: ModelArn.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the ML model."];
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the machine learning model."];
       datasetName: DatasetName.t option
-        [@ocaml.doc "The name of the dataset being used for the ML model."];
+        [@ocaml.doc
+          "The name of the dataset being used for the machine learning model."];
       datasetArn: DatasetArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the dataset used to create the model."];
       status: ModelStatus.t option
-        [@ocaml.doc "Indicates the status of the ML model."];
+        [@ocaml.doc "Indicates the status of the machine learning model."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "The time at which the specific model was created."]}
+        [@ocaml.doc "The time at which the specific model was created."];
+      activeModelVersion: ModelVersion.t option
+        [@ocaml.doc
+          "The model version that the inference scheduler uses to run an inference execution."];
+      activeModelVersionArn: ModelVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the model version that is set as active. The active model version is the model version that the inference scheduler uses to run an inference execution."];
+      latestScheduledRetrainingStatus: ModelVersionStatus.t option
+        [@ocaml.doc
+          "Indicates the status of the most recent scheduled retraining run."];
+      latestScheduledRetrainingModelVersion: ModelVersion.t option
+        [@ocaml.doc
+          "Indicates the most recent model version that was generated by retraining."];
+      latestScheduledRetrainingStartTime: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the start time of the most recent scheduled retraining run."];
+      nextScheduledRetrainingStartDate: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the date that the next scheduled retraining run will start on. Lookout for Equipment truncates the time you provide to the nearest UTC day."];
+      retrainingSchedulerStatus: RetrainingSchedulerStatus.t option
+        [@ocaml.doc "Indicates the status of the retraining scheduler."];
+      modelDiagnosticsOutputConfiguration:
+        ModelDiagnosticsOutputConfiguration.t option ;
+      modelQuality: ModelQuality.t option
+        [@ocaml.doc
+          "Provides a quality assessment for a model that uses labels. If Lookout for Equipment determines that the model quality is poor based on training metrics, the value is POOR_QUALITY_DETECTED. Otherwise, the value is QUALITY_THRESHOLD_MET. If the model is unlabeled, the model quality can't be assessed and the value of ModelQuality is CANNOT_DETERMINE_QUALITY. In this situation, you can get a model quality assessment by adding labels to the input dataset and retraining the model. For information about using labels with your models, see Understanding labeling. For information about improving the quality of a model, see Best practices with Amazon Lookout for Equipment."]}
     let make ?modelName =
       fun ?modelArn ->
         fun ?datasetName ->
           fun ?datasetArn ->
             fun ?status ->
               fun ?createdAt ->
-                fun () ->
-                  {
-                    modelName;
-                    modelArn;
-                    datasetName;
-                    datasetArn;
-                    status;
-                    createdAt
-                  }
+                fun ?activeModelVersion ->
+                  fun ?activeModelVersionArn ->
+                    fun ?latestScheduledRetrainingStatus ->
+                      fun ?latestScheduledRetrainingModelVersion ->
+                        fun ?latestScheduledRetrainingStartTime ->
+                          fun ?nextScheduledRetrainingStartDate ->
+                            fun ?retrainingSchedulerStatus ->
+                              fun ?modelDiagnosticsOutputConfiguration ->
+                                fun ?modelQuality ->
+                                  fun () ->
+                                    {
+                                      modelName;
+                                      modelArn;
+                                      datasetName;
+                                      datasetArn;
+                                      status;
+                                      createdAt;
+                                      activeModelVersion;
+                                      activeModelVersionArn;
+                                      latestScheduledRetrainingStatus;
+                                      latestScheduledRetrainingModelVersion;
+                                      latestScheduledRetrainingStartTime;
+                                      nextScheduledRetrainingStartDate;
+                                      retrainingSchedulerStatus;
+                                      modelDiagnosticsOutputConfiguration;
+                                      modelQuality
+                                    }
     let to_value x =
       structure_to_value
         [("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
@@ -943,9 +2123,60 @@ module ModelSummary =
         ("DatasetName", (Option.map x.datasetName ~f:DatasetName.to_value));
         ("DatasetArn", (Option.map x.datasetArn ~f:DatasetArn.to_value));
         ("Status", (Option.map x.status ~f:ModelStatus.to_value));
-        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value))]
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("ActiveModelVersion",
+          (Option.map x.activeModelVersion ~f:ModelVersion.to_value));
+        ("ActiveModelVersionArn",
+          (Option.map x.activeModelVersionArn ~f:ModelVersionArn.to_value));
+        ("LatestScheduledRetrainingStatus",
+          (Option.map x.latestScheduledRetrainingStatus
+             ~f:ModelVersionStatus.to_value));
+        ("LatestScheduledRetrainingModelVersion",
+          (Option.map x.latestScheduledRetrainingModelVersion
+             ~f:ModelVersion.to_value));
+        ("LatestScheduledRetrainingStartTime",
+          (Option.map x.latestScheduledRetrainingStartTime
+             ~f:Timestamp.to_value));
+        ("NextScheduledRetrainingStartDate",
+          (Option.map x.nextScheduledRetrainingStartDate
+             ~f:Timestamp.to_value));
+        ("RetrainingSchedulerStatus",
+          (Option.map x.retrainingSchedulerStatus
+             ~f:RetrainingSchedulerStatus.to_value));
+        ("ModelDiagnosticsOutputConfiguration",
+          (Option.map x.modelDiagnosticsOutputConfiguration
+             ~f:ModelDiagnosticsOutputConfiguration.to_value));
+        ("ModelQuality",
+          (Option.map x.modelQuality ~f:ModelQuality.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let modelQuality =
+        (Option.map ~f:ModelQuality.of_xml)
+          (Xml.child xml_arg0 "ModelQuality") in
+      let modelDiagnosticsOutputConfiguration =
+        (Option.map ~f:ModelDiagnosticsOutputConfiguration.of_xml)
+          (Xml.child xml_arg0 "ModelDiagnosticsOutputConfiguration") in
+      let retrainingSchedulerStatus =
+        (Option.map ~f:RetrainingSchedulerStatus.of_xml)
+          (Xml.child xml_arg0 "RetrainingSchedulerStatus") in
+      let nextScheduledRetrainingStartDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "NextScheduledRetrainingStartDate") in
+      let latestScheduledRetrainingStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LatestScheduledRetrainingStartTime") in
+      let latestScheduledRetrainingModelVersion =
+        (Option.map ~f:ModelVersion.of_xml)
+          (Xml.child xml_arg0 "LatestScheduledRetrainingModelVersion") in
+      let latestScheduledRetrainingStatus =
+        (Option.map ~f:ModelVersionStatus.of_xml)
+          (Xml.child xml_arg0 "LatestScheduledRetrainingStatus") in
+      let activeModelVersionArn =
+        (Option.map ~f:ModelVersionArn.of_xml)
+          (Xml.child xml_arg0 "ActiveModelVersionArn") in
+      let activeModelVersion =
+        (Option.map ~f:ModelVersion.of_xml)
+          (Xml.child xml_arg0 "ActiveModelVersion") in
       let createdAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       let status =
@@ -958,31 +2189,308 @@ module ModelSummary =
         (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
       let modelName =
         (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
-      make ?createdAt ?status ?datasetArn ?datasetName ?modelArn ?modelName
-        ()
+      make ?modelQuality ?modelDiagnosticsOutputConfiguration
+        ?retrainingSchedulerStatus ?nextScheduledRetrainingStartDate
+        ?latestScheduledRetrainingStartTime
+        ?latestScheduledRetrainingModelVersion
+        ?latestScheduledRetrainingStatus ?activeModelVersionArn
+        ?activeModelVersion ?createdAt ?status ?datasetArn ?datasetName
+        ?modelArn ?modelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let status = field_map json "Status" ModelStatus.of_json in
-      let datasetArn = field_map json "DatasetArn" DatasetArn.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
-      let modelArn = field_map json "ModelArn" ModelArn.of_json in
-      let modelName = field_map json "ModelName" ModelName.of_json in
-      make ?createdAt ?status ?datasetArn ?datasetName ?modelArn ?modelName
-        ()
+    let of_json json__ =
+      let modelQuality = field_map json__ "ModelQuality" ModelQuality.of_json in
+      let modelDiagnosticsOutputConfiguration =
+        field_map json__ "ModelDiagnosticsOutputConfiguration"
+          ModelDiagnosticsOutputConfiguration.of_json in
+      let retrainingSchedulerStatus =
+        field_map json__ "RetrainingSchedulerStatus"
+          RetrainingSchedulerStatus.of_json in
+      let nextScheduledRetrainingStartDate =
+        field_map json__ "NextScheduledRetrainingStartDate" Timestamp.of_json in
+      let latestScheduledRetrainingStartTime =
+        field_map json__ "LatestScheduledRetrainingStartTime"
+          Timestamp.of_json in
+      let latestScheduledRetrainingModelVersion =
+        field_map json__ "LatestScheduledRetrainingModelVersion"
+          ModelVersion.of_json in
+      let latestScheduledRetrainingStatus =
+        field_map json__ "LatestScheduledRetrainingStatus"
+          ModelVersionStatus.of_json in
+      let activeModelVersionArn =
+        field_map json__ "ActiveModelVersionArn" ModelVersionArn.of_json in
+      let activeModelVersion =
+        field_map json__ "ActiveModelVersion" ModelVersion.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" ModelStatus.of_json in
+      let datasetArn = field_map json__ "DatasetArn" DatasetArn.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      make ?modelQuality ?modelDiagnosticsOutputConfiguration
+        ?retrainingSchedulerStatus ?nextScheduledRetrainingStartDate
+        ?latestScheduledRetrainingStartTime
+        ?latestScheduledRetrainingModelVersion
+        ?latestScheduledRetrainingStatus ?activeModelVersionArn
+        ?activeModelVersion ?createdAt ?status ?datasetArn ?datasetName
+        ?modelArn ?modelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about the specified ML model, including dataset and model names and ARNs, as well as status."]
+       "Provides information about the specified machine learning model, including dataset and model names and ARNs, as well as status."]
+module ModelVersionSummary =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t option
+        [@ocaml.doc
+          "The name of the model that this model version is a version of."];
+      modelArn: ModelArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the model that this model version is a version of."];
+      modelVersion: ModelVersion.t option
+        [@ocaml.doc "The version of the model."];
+      modelVersionArn: ModelVersionArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the model version."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The time when this model version was created."];
+      status: ModelVersionStatus.t option
+        [@ocaml.doc "The current status of the model version."];
+      sourceType: ModelVersionSourceType.t option
+        [@ocaml.doc "Indicates how this model version was generated."];
+      modelQuality: ModelQuality.t option
+        [@ocaml.doc
+          "Provides a quality assessment for a model that uses labels. If Lookout for Equipment determines that the model quality is poor based on training metrics, the value is POOR_QUALITY_DETECTED. Otherwise, the value is QUALITY_THRESHOLD_MET. If the model is unlabeled, the model quality can't be assessed and the value of ModelQuality is CANNOT_DETERMINE_QUALITY. In this situation, you can get a model quality assessment by adding labels to the input dataset and retraining the model. For information about improving the quality of a model, see Best practices with Amazon Lookout for Equipment."]}
+    let make ?modelName =
+      fun ?modelArn ->
+        fun ?modelVersion ->
+          fun ?modelVersionArn ->
+            fun ?createdAt ->
+              fun ?status ->
+                fun ?sourceType ->
+                  fun ?modelQuality ->
+                    fun () ->
+                      {
+                        modelName;
+                        modelArn;
+                        modelVersion;
+                        modelVersionArn;
+                        createdAt;
+                        status;
+                        sourceType;
+                        modelQuality
+                      }
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
+        ("ModelArn", (Option.map x.modelArn ~f:ModelArn.to_value));
+        ("ModelVersion",
+          (Option.map x.modelVersion ~f:ModelVersion.to_value));
+        ("ModelVersionArn",
+          (Option.map x.modelVersionArn ~f:ModelVersionArn.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("Status", (Option.map x.status ~f:ModelVersionStatus.to_value));
+        ("SourceType",
+          (Option.map x.sourceType ~f:ModelVersionSourceType.to_value));
+        ("ModelQuality",
+          (Option.map x.modelQuality ~f:ModelQuality.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modelQuality =
+        (Option.map ~f:ModelQuality.of_xml)
+          (Xml.child xml_arg0 "ModelQuality") in
+      let sourceType =
+        (Option.map ~f:ModelVersionSourceType.of_xml)
+          (Xml.child xml_arg0 "SourceType") in
+      let status =
+        (Option.map ~f:ModelVersionStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let modelVersionArn =
+        (Option.map ~f:ModelVersionArn.of_xml)
+          (Xml.child xml_arg0 "ModelVersionArn") in
+      let modelVersion =
+        (Option.map ~f:ModelVersion.of_xml)
+          (Xml.child xml_arg0 "ModelVersion") in
+      let modelArn =
+        (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
+      let modelName =
+        (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
+      make ?modelQuality ?sourceType ?status ?createdAt ?modelVersionArn
+        ?modelVersion ?modelArn ?modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modelQuality = field_map json__ "ModelQuality" ModelQuality.of_json in
+      let sourceType =
+        field_map json__ "SourceType" ModelVersionSourceType.of_json in
+      let status = field_map json__ "Status" ModelVersionStatus.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let modelVersionArn =
+        field_map json__ "ModelVersionArn" ModelVersionArn.of_json in
+      let modelVersion = field_map json__ "ModelVersion" ModelVersion.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      make ?modelQuality ?sourceType ?status ?createdAt ?modelVersionArn
+        ?modelVersion ?modelArn ?modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains information about the specific model version."]
+module LabelSummary =
+  struct
+    type nonrec t =
+      {
+      labelGroupName: LabelGroupName.t option
+        [@ocaml.doc "The name of the label group."];
+      labelId: LabelId.t option [@ocaml.doc "The ID of the label."];
+      labelGroupArn: LabelGroupArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the label group."];
+      startTime: Timestamp.t option
+        [@ocaml.doc "The timestamp indicating the start of the label."];
+      endTime: Timestamp.t option
+        [@ocaml.doc "The timestamp indicating the end of the label."];
+      rating: LabelRating.t option
+        [@ocaml.doc
+          "Indicates whether a labeled event represents an anomaly."];
+      faultCode: FaultCode.t option
+        [@ocaml.doc
+          "Indicates the type of anomaly associated with the label. Data in this field will be retained for service usage. Follow best practices for the security of your data."];
+      equipment: Equipment.t option
+        [@ocaml.doc
+          "Indicates that a label pertains to a particular piece of equipment."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The time at which the label was created."]}
+    let make ?labelGroupName =
+      fun ?labelId ->
+        fun ?labelGroupArn ->
+          fun ?startTime ->
+            fun ?endTime ->
+              fun ?rating ->
+                fun ?faultCode ->
+                  fun ?equipment ->
+                    fun ?createdAt ->
+                      fun () ->
+                        {
+                          labelGroupName;
+                          labelId;
+                          labelGroupArn;
+                          startTime;
+                          endTime;
+                          rating;
+                          faultCode;
+                          equipment;
+                          createdAt
+                        }
+    let to_value x =
+      structure_to_value
+        [("LabelGroupName",
+           (Option.map x.labelGroupName ~f:LabelGroupName.to_value));
+        ("LabelId", (Option.map x.labelId ~f:LabelId.to_value));
+        ("LabelGroupArn",
+          (Option.map x.labelGroupArn ~f:LabelGroupArn.to_value));
+        ("StartTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("EndTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("Rating", (Option.map x.rating ~f:LabelRating.to_value));
+        ("FaultCode", (Option.map x.faultCode ~f:FaultCode.to_value));
+        ("Equipment", (Option.map x.equipment ~f:Equipment.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let equipment =
+        (Option.map ~f:Equipment.of_xml) (Xml.child xml_arg0 "Equipment") in
+      let faultCode =
+        (Option.map ~f:FaultCode.of_xml) (Xml.child xml_arg0 "FaultCode") in
+      let rating =
+        (Option.map ~f:LabelRating.of_xml) (Xml.child xml_arg0 "Rating") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let labelGroupArn =
+        (Option.map ~f:LabelGroupArn.of_xml)
+          (Xml.child xml_arg0 "LabelGroupArn") in
+      let labelId =
+        (Option.map ~f:LabelId.of_xml) (Xml.child xml_arg0 "LabelId") in
+      let labelGroupName =
+        (Option.map ~f:LabelGroupName.of_xml)
+          (Xml.child xml_arg0 "LabelGroupName") in
+      make ?createdAt ?equipment ?faultCode ?rating ?endTime ?startTime
+        ?labelGroupArn ?labelId ?labelGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let equipment = field_map json__ "Equipment" Equipment.of_json in
+      let faultCode = field_map json__ "FaultCode" FaultCode.of_json in
+      let rating = field_map json__ "Rating" LabelRating.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map json__ "StartTime" Timestamp.of_json in
+      let labelGroupArn =
+        field_map json__ "LabelGroupArn" LabelGroupArn.of_json in
+      let labelId = field_map json__ "LabelId" LabelId.of_json in
+      let labelGroupName =
+        field_map json__ "LabelGroupName" LabelGroupName.of_json in
+      make ?createdAt ?equipment ?faultCode ?rating ?endTime ?startTime
+        ?labelGroupArn ?labelId ?labelGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the label."]
+module LabelGroupSummary =
+  struct
+    type nonrec t =
+      {
+      labelGroupName: LabelGroupName.t option
+        [@ocaml.doc "The name of the label group."];
+      labelGroupArn: LabelGroupArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the label group."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The time at which the label group was created."];
+      updatedAt: Timestamp.t option
+        [@ocaml.doc "The time at which the label group was updated."]}
+    let make ?labelGroupName =
+      fun ?labelGroupArn ->
+        fun ?createdAt ->
+          fun ?updatedAt ->
+            fun () -> { labelGroupName; labelGroupArn; createdAt; updatedAt }
+    let to_value x =
+      structure_to_value
+        [("LabelGroupName",
+           (Option.map x.labelGroupName ~f:LabelGroupName.to_value));
+        ("LabelGroupArn",
+          (Option.map x.labelGroupArn ~f:LabelGroupArn.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let labelGroupArn =
+        (Option.map ~f:LabelGroupArn.of_xml)
+          (Xml.child xml_arg0 "LabelGroupArn") in
+      let labelGroupName =
+        (Option.map ~f:LabelGroupName.of_xml)
+          (Xml.child xml_arg0 "LabelGroupName") in
+      make ?updatedAt ?createdAt ?labelGroupArn ?labelGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let labelGroupArn =
+        field_map json__ "LabelGroupArn" LabelGroupArn.of_json in
+      let labelGroupName =
+        field_map json__ "LabelGroupName" LabelGroupName.of_json in
+      make ?updatedAt ?createdAt ?labelGroupArn ?labelGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains information about the label group."]
 module InferenceSchedulerSummary =
   struct
     type nonrec t =
       {
       modelName: ModelName.t option
         [@ocaml.doc
-          "The name of the ML model used for the inference scheduler."];
+          "The name of the machine learning model used for the inference scheduler."];
       modelArn: ModelArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the ML model used by the inference scheduler."];
+          "The Amazon Resource Name (ARN) of the machine learning model used by the inference scheduler."];
       inferenceSchedulerName: InferenceSchedulerName.t option
         [@ocaml.doc "The name of the inference scheduler."];
       inferenceSchedulerArn: InferenceSchedulerArn.t option
@@ -995,7 +2503,10 @@ module InferenceSchedulerSummary =
           "A period of time (in minutes) by which inference on the data is delayed after the data starts. For instance, if an offset delay time of five minutes was selected, inference will not begin on the data until the first data measurement after the five minute mark. For example, if five minutes is selected, the inference scheduler will wake up at the configured frequency with the additional five minute delay time to check the customer S3 bucket. The customer can upload data at the same frequency and they don't need to stop and restart the scheduler when uploading new data."];
       dataUploadFrequency: DataUploadFrequency.t option
         [@ocaml.doc
-          "How often data is uploaded to the source S3 bucket for the input data. This value is the length of time between data uploads. For instance, if you select 5 minutes, Amazon Lookout for Equipment will upload the real-time data to the source bucket once every 5 minutes. This frequency also determines how often Amazon Lookout for Equipment starts a scheduled inference on your data. In this example, it starts once every 5 minutes."]}
+          "How often data is uploaded to the source S3 bucket for the input data. This value is the length of time between data uploads. For instance, if you select 5 minutes, Amazon Lookout for Equipment will upload the real-time data to the source bucket once every 5 minutes. This frequency also determines how often Amazon Lookout for Equipment starts a scheduled inference on your data. In this example, it starts once every 5 minutes."];
+      latestInferenceResult: LatestInferenceResult.t option
+        [@ocaml.doc
+          "Indicates whether the latest execution for the inference scheduler was Anomalous (anomalous events found) or Normal (no anomalous events found)."]}
     let make ?modelName =
       fun ?modelArn ->
         fun ?inferenceSchedulerName ->
@@ -1003,16 +2514,18 @@ module InferenceSchedulerSummary =
             fun ?status ->
               fun ?dataDelayOffsetInMinutes ->
                 fun ?dataUploadFrequency ->
-                  fun () ->
-                    {
-                      modelName;
-                      modelArn;
-                      inferenceSchedulerName;
-                      inferenceSchedulerArn;
-                      status;
-                      dataDelayOffsetInMinutes;
-                      dataUploadFrequency
-                    }
+                  fun ?latestInferenceResult ->
+                    fun () ->
+                      {
+                        modelName;
+                        modelArn;
+                        inferenceSchedulerName;
+                        inferenceSchedulerArn;
+                        status;
+                        dataDelayOffsetInMinutes;
+                        dataUploadFrequency;
+                        latestInferenceResult
+                      }
     let to_value x =
       structure_to_value
         [("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
@@ -1029,9 +2542,15 @@ module InferenceSchedulerSummary =
           (Option.map x.dataDelayOffsetInMinutes
              ~f:DataDelayOffsetInMinutes.to_value));
         ("DataUploadFrequency",
-          (Option.map x.dataUploadFrequency ~f:DataUploadFrequency.to_value))]
+          (Option.map x.dataUploadFrequency ~f:DataUploadFrequency.to_value));
+        ("LatestInferenceResult",
+          (Option.map x.latestInferenceResult
+             ~f:LatestInferenceResult.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let latestInferenceResult =
+        (Option.map ~f:LatestInferenceResult.of_xml)
+          (Xml.child xml_arg0 "LatestInferenceResult") in
       let dataUploadFrequency =
         (Option.map ~f:DataUploadFrequency.of_xml)
           (Xml.child xml_arg0 "DataUploadFrequency") in
@@ -1051,27 +2570,31 @@ module InferenceSchedulerSummary =
         (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
       let modelName =
         (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
-      make ?dataUploadFrequency ?dataDelayOffsetInMinutes ?status
-        ?inferenceSchedulerArn ?inferenceSchedulerName ?modelArn ?modelName
-        ()
+      make ?latestInferenceResult ?dataUploadFrequency
+        ?dataDelayOffsetInMinutes ?status ?inferenceSchedulerArn
+        ?inferenceSchedulerName ?modelArn ?modelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let latestInferenceResult =
+        field_map json__ "LatestInferenceResult"
+          LatestInferenceResult.of_json in
       let dataUploadFrequency =
-        field_map json "DataUploadFrequency" DataUploadFrequency.of_json in
+        field_map json__ "DataUploadFrequency" DataUploadFrequency.of_json in
       let dataDelayOffsetInMinutes =
-        field_map json "DataDelayOffsetInMinutes"
+        field_map json__ "DataDelayOffsetInMinutes"
           DataDelayOffsetInMinutes.of_json in
-      let status = field_map json "Status" InferenceSchedulerStatus.of_json in
+      let status = field_map json__ "Status" InferenceSchedulerStatus.of_json in
       let inferenceSchedulerArn =
-        field_map json "InferenceSchedulerArn" InferenceSchedulerArn.of_json in
+        field_map json__ "InferenceSchedulerArn"
+          InferenceSchedulerArn.of_json in
       let inferenceSchedulerName =
-        field_map json "InferenceSchedulerName"
+        field_map json__ "InferenceSchedulerName"
           InferenceSchedulerName.of_json in
-      let modelArn = field_map json "ModelArn" ModelArn.of_json in
-      let modelName = field_map json "ModelName" ModelName.of_json in
-      make ?dataUploadFrequency ?dataDelayOffsetInMinutes ?status
-        ?inferenceSchedulerArn ?inferenceSchedulerName ?modelArn ?modelName
-        ()
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      make ?latestInferenceResult ?dataUploadFrequency
+        ?dataDelayOffsetInMinutes ?status ?inferenceSchedulerArn
+        ?inferenceSchedulerName ?modelArn ?modelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about the specific inference scheduler, including data delay offset, model name and ARN, status, and so on."]
@@ -1081,10 +2604,10 @@ module InferenceExecutionSummary =
       {
       modelName: ModelName.t option
         [@ocaml.doc
-          "The name of the ML model being used for the inference execution."];
+          "The name of the machine learning model being used for the inference execution."];
       modelArn: ModelArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the ML model used for the inference execution."];
+          "The Amazon Resource Name (ARN) of the machine learning model used for the inference execution."];
       inferenceSchedulerName: InferenceSchedulerName.t option
         [@ocaml.doc
           "The name of the inference scheduler being used for the inference execution."];
@@ -1105,13 +2628,20 @@ module InferenceExecutionSummary =
           "Specifies configuration information for the input data for the inference scheduler, including delimiter, format, and dataset location."];
       dataOutputConfiguration: InferenceOutputConfiguration.t option
         [@ocaml.doc
-          "Specifies configuration information for the output results from for the inference execution, including the output S3 location."];
-      customerResultObject: S3Object.t option ;
+          "Specifies configuration information for the output results from for the inference execution, including the output Amazon S3 location."];
+      customerResultObject: S3Object.t option
+        [@ocaml.doc
+          "The S3 object that the inference execution results were uploaded to."];
       status: InferenceExecutionStatus.t option
         [@ocaml.doc "Indicates the status of the inference execution."];
       failedReason: BoundedLengthString.t option
         [@ocaml.doc
-          "Specifies the reason for failure when an inference execution has failed."]}
+          "Specifies the reason for failure when an inference execution has failed."];
+      modelVersion: ModelVersion.t option
+        [@ocaml.doc "The model version used for the inference execution."];
+      modelVersionArn: ModelVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the model version used for the inference execution."]}
     let make ?modelName =
       fun ?modelArn ->
         fun ?inferenceSchedulerName ->
@@ -1124,21 +2654,25 @@ module InferenceExecutionSummary =
                       fun ?customerResultObject ->
                         fun ?status ->
                           fun ?failedReason ->
-                            fun () ->
-                              {
-                                modelName;
-                                modelArn;
-                                inferenceSchedulerName;
-                                inferenceSchedulerArn;
-                                scheduledStartTime;
-                                dataStartTime;
-                                dataEndTime;
-                                dataInputConfiguration;
-                                dataOutputConfiguration;
-                                customerResultObject;
-                                status;
-                                failedReason
-                              }
+                            fun ?modelVersion ->
+                              fun ?modelVersionArn ->
+                                fun () ->
+                                  {
+                                    modelName;
+                                    modelArn;
+                                    inferenceSchedulerName;
+                                    inferenceSchedulerArn;
+                                    scheduledStartTime;
+                                    dataStartTime;
+                                    dataEndTime;
+                                    dataInputConfiguration;
+                                    dataOutputConfiguration;
+                                    customerResultObject;
+                                    status;
+                                    failedReason;
+                                    modelVersion;
+                                    modelVersionArn
+                                  }
     let to_value x =
       structure_to_value
         [("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
@@ -1164,9 +2698,19 @@ module InferenceExecutionSummary =
         ("Status",
           (Option.map x.status ~f:InferenceExecutionStatus.to_value));
         ("FailedReason",
-          (Option.map x.failedReason ~f:BoundedLengthString.to_value))]
+          (Option.map x.failedReason ~f:BoundedLengthString.to_value));
+        ("ModelVersion",
+          (Option.map x.modelVersion ~f:ModelVersion.to_value));
+        ("ModelVersionArn",
+          (Option.map x.modelVersionArn ~f:ModelVersionArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let modelVersionArn =
+        (Option.map ~f:ModelVersionArn.of_xml)
+          (Xml.child xml_arg0 "ModelVersionArn") in
+      let modelVersion =
+        (Option.map ~f:ModelVersion.of_xml)
+          (Xml.child xml_arg0 "ModelVersion") in
       let failedReason =
         (Option.map ~f:BoundedLengthString.of_xml)
           (Xml.child xml_arg0 "FailedReason") in
@@ -1199,41 +2743,137 @@ module InferenceExecutionSummary =
         (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
       let modelName =
         (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
-      make ?failedReason ?status ?customerResultObject
-        ?dataOutputConfiguration ?dataInputConfiguration ?dataEndTime
-        ?dataStartTime ?scheduledStartTime ?inferenceSchedulerArn
-        ?inferenceSchedulerName ?modelArn ?modelName ()
+      make ?modelVersionArn ?modelVersion ?failedReason ?status
+        ?customerResultObject ?dataOutputConfiguration
+        ?dataInputConfiguration ?dataEndTime ?dataStartTime
+        ?scheduledStartTime ?inferenceSchedulerArn ?inferenceSchedulerName
+        ?modelArn ?modelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let modelVersionArn =
+        field_map json__ "ModelVersionArn" ModelVersionArn.of_json in
+      let modelVersion = field_map json__ "ModelVersion" ModelVersion.of_json in
       let failedReason =
-        field_map json "FailedReason" BoundedLengthString.of_json in
-      let status = field_map json "Status" InferenceExecutionStatus.of_json in
+        field_map json__ "FailedReason" BoundedLengthString.of_json in
+      let status = field_map json__ "Status" InferenceExecutionStatus.of_json in
       let customerResultObject =
-        field_map json "CustomerResultObject" S3Object.of_json in
+        field_map json__ "CustomerResultObject" S3Object.of_json in
       let dataOutputConfiguration =
-        field_map json "DataOutputConfiguration"
+        field_map json__ "DataOutputConfiguration"
           InferenceOutputConfiguration.of_json in
       let dataInputConfiguration =
-        field_map json "DataInputConfiguration"
+        field_map json__ "DataInputConfiguration"
           InferenceInputConfiguration.of_json in
-      let dataEndTime = field_map json "DataEndTime" Timestamp.of_json in
-      let dataStartTime = field_map json "DataStartTime" Timestamp.of_json in
+      let dataEndTime = field_map json__ "DataEndTime" Timestamp.of_json in
+      let dataStartTime = field_map json__ "DataStartTime" Timestamp.of_json in
       let scheduledStartTime =
-        field_map json "ScheduledStartTime" Timestamp.of_json in
+        field_map json__ "ScheduledStartTime" Timestamp.of_json in
       let inferenceSchedulerArn =
-        field_map json "InferenceSchedulerArn" InferenceSchedulerArn.of_json in
+        field_map json__ "InferenceSchedulerArn"
+          InferenceSchedulerArn.of_json in
       let inferenceSchedulerName =
-        field_map json "InferenceSchedulerName"
+        field_map json__ "InferenceSchedulerName"
           InferenceSchedulerName.of_json in
-      let modelArn = field_map json "ModelArn" ModelArn.of_json in
-      let modelName = field_map json "ModelName" ModelName.of_json in
-      make ?failedReason ?status ?customerResultObject
-        ?dataOutputConfiguration ?dataInputConfiguration ?dataEndTime
-        ?dataStartTime ?scheduledStartTime ?inferenceSchedulerArn
-        ?inferenceSchedulerName ?modelArn ?modelName ()
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      make ?modelVersionArn ?modelVersion ?failedReason ?status
+        ?customerResultObject ?dataOutputConfiguration
+        ?dataInputConfiguration ?dataEndTime ?dataStartTime
+        ?scheduledStartTime ?inferenceSchedulerArn ?inferenceSchedulerName
+        ?modelArn ?modelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about the specific inference execution, including input and output data configuration, inference scheduling information, status, and so on."]
+module InferenceEventSummary =
+  struct
+    type nonrec t =
+      {
+      inferenceSchedulerArn: InferenceSchedulerArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the inference scheduler being used for the inference event."];
+      inferenceSchedulerName: InferenceSchedulerName.t option
+        [@ocaml.doc
+          "The name of the inference scheduler being used for the inference events."];
+      eventStartTime: Timestamp.t option
+        [@ocaml.doc "Indicates the starting time of an inference event."];
+      eventEndTime: Timestamp.t option
+        [@ocaml.doc "Indicates the ending time of an inference event."];
+      diagnostics: ModelMetrics.t option
+        [@ocaml.doc
+          "An array which specifies the names and values of all sensors contributing to an inference event."];
+      eventDurationInSeconds: EventDurationInSeconds.t option
+        [@ocaml.doc "Indicates the size of an inference event in seconds."]}
+    let make ?inferenceSchedulerArn =
+      fun ?inferenceSchedulerName ->
+        fun ?eventStartTime ->
+          fun ?eventEndTime ->
+            fun ?diagnostics ->
+              fun ?eventDurationInSeconds ->
+                fun () ->
+                  {
+                    inferenceSchedulerArn;
+                    inferenceSchedulerName;
+                    eventStartTime;
+                    eventEndTime;
+                    diagnostics;
+                    eventDurationInSeconds
+                  }
+    let to_value x =
+      structure_to_value
+        [("InferenceSchedulerArn",
+           (Option.map x.inferenceSchedulerArn
+              ~f:InferenceSchedulerArn.to_value));
+        ("InferenceSchedulerName",
+          (Option.map x.inferenceSchedulerName
+             ~f:InferenceSchedulerName.to_value));
+        ("EventStartTime",
+          (Option.map x.eventStartTime ~f:Timestamp.to_value));
+        ("EventEndTime", (Option.map x.eventEndTime ~f:Timestamp.to_value));
+        ("Diagnostics", (Option.map x.diagnostics ~f:ModelMetrics.to_value));
+        ("EventDurationInSeconds",
+          (Option.map x.eventDurationInSeconds
+             ~f:EventDurationInSeconds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventDurationInSeconds =
+        (Option.map ~f:EventDurationInSeconds.of_xml)
+          (Xml.child xml_arg0 "EventDurationInSeconds") in
+      let diagnostics =
+        (Option.map ~f:ModelMetrics.of_xml)
+          (Xml.child xml_arg0 "Diagnostics") in
+      let eventEndTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EventEndTime") in
+      let eventStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "EventStartTime") in
+      let inferenceSchedulerName =
+        (Option.map ~f:InferenceSchedulerName.of_xml)
+          (Xml.child xml_arg0 "InferenceSchedulerName") in
+      let inferenceSchedulerArn =
+        (Option.map ~f:InferenceSchedulerArn.of_xml)
+          (Xml.child xml_arg0 "InferenceSchedulerArn") in
+      make ?eventDurationInSeconds ?diagnostics ?eventEndTime ?eventStartTime
+        ?inferenceSchedulerName ?inferenceSchedulerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventDurationInSeconds =
+        field_map json__ "EventDurationInSeconds"
+          EventDurationInSeconds.of_json in
+      let diagnostics = field_map json__ "Diagnostics" ModelMetrics.of_json in
+      let eventEndTime = field_map json__ "EventEndTime" Timestamp.of_json in
+      let eventStartTime =
+        field_map json__ "EventStartTime" Timestamp.of_json in
+      let inferenceSchedulerName =
+        field_map json__ "InferenceSchedulerName"
+          InferenceSchedulerName.of_json in
+      let inferenceSchedulerArn =
+        field_map json__ "InferenceSchedulerArn"
+          InferenceSchedulerArn.of_json in
+      make ?eventDurationInSeconds ?diagnostics ?eventEndTime ?eventStartTime
+        ?inferenceSchedulerName ?inferenceSchedulerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the specific inference event, including start and end time, diagnostics information, event duration and so on."]
 module DatasetSummary =
   struct
     type nonrec t =
@@ -1271,11 +2911,11 @@ module DatasetSummary =
         (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "DatasetName") in
       make ?createdAt ?status ?datasetArn ?datasetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let status = field_map json "Status" DatasetStatus.of_json in
-      let datasetArn = field_map json "DatasetArn" DatasetArn.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
+    let of_json json__ =
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" DatasetStatus.of_json in
+      let datasetArn = field_map json__ "DatasetArn" DatasetArn.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
       make ?createdAt ?status ?datasetArn ?datasetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1294,7 +2934,7 @@ module DataIngestionJobSummary =
           "The Amazon Resource Name (ARN) of the dataset used in the data ingestion job."];
       ingestionInputConfiguration: IngestionInputConfiguration.t option
         [@ocaml.doc
-          "Specifies information for the input data for the data inference job, including data S3 location parameters."];
+          "Specifies information for the input data for the data inference job, including data Amazon S3 location parameters."];
       status: IngestionJobStatus.t option
         [@ocaml.doc "Indicates the status of the data ingestion job."]}
     let make ?jobId =
@@ -1336,14 +2976,14 @@ module DataIngestionJobSummary =
       make ?status ?ingestionInputConfiguration ?datasetArn ?datasetName
         ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" IngestionJobStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" IngestionJobStatus.of_json in
       let ingestionInputConfiguration =
-        field_map json "IngestionInputConfiguration"
+        field_map json__ "IngestionInputConfiguration"
           IngestionInputConfiguration.of_json in
-      let datasetArn = field_map json "DatasetArn" DatasetArn.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
-      let jobId = field_map json "JobId" IngestionJobId.of_json in
+      let datasetArn = field_map json__ "DatasetArn" DatasetArn.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      let jobId = field_map json__ "JobId" IngestionJobId.of_json in
       make ?status ?ingestionInputConfiguration ?datasetArn ?datasetName
         ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -1402,35 +3042,206 @@ module TargetSamplingRate =
     let of_json j = of_string (string_of_json ~kind:"TargetSamplingRate" j)
     let to_json = simple_to_json to_value
   end
-module LabelsS3InputConfiguration =
+module DuplicateTimestamps =
   struct
     type nonrec t =
       {
-      bucket: S3Bucket.t
-        [@ocaml.doc "The name of the S3 bucket holding the label data."];
-      prefix: S3Prefix.t option
-        [@ocaml.doc "The prefix for the S3 bucket used for the label data."]}
-    let context_ = "LabelsS3InputConfiguration"
-    let make ?prefix = fun ~bucket -> fun () -> { prefix; bucket }
+      totalNumberOfDuplicateTimestamps: Integer.t option
+        [@ocaml.doc "Indicates the total number of duplicate timestamps."]}
+    let make ?totalNumberOfDuplicateTimestamps =
+      fun () -> { totalNumberOfDuplicateTimestamps }
     let to_value x =
       structure_to_value
-        [("Bucket", (Some (S3Bucket.to_value x.bucket)));
-        ("Prefix", (Option.map x.prefix ~f:S3Prefix.to_value))]
+        [("TotalNumberOfDuplicateTimestamps",
+           (Option.map x.totalNumberOfDuplicateTimestamps ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let prefix =
-        (Option.map ~f:S3Prefix.of_xml) (Xml.child xml_arg0 "Prefix") in
-      let bucket =
-        S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bucket") in
-      make ?prefix ~bucket ()
+      let totalNumberOfDuplicateTimestamps =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "TotalNumberOfDuplicateTimestamps") in
+      make ?totalNumberOfDuplicateTimestamps ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefix = field_map json "Prefix" S3Prefix.of_json in
-      let bucket = field_map_exn json "Bucket" S3Bucket.of_json in
-      make ?prefix ~bucket ()
+    let of_json json__ =
+      let totalNumberOfDuplicateTimestamps =
+        field_map json__ "TotalNumberOfDuplicateTimestamps" Integer.of_json in
+      make ?totalNumberOfDuplicateTimestamps ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The location information (prefix and bucket name) for the s3 location being used for label data."]
+       "Entity that comprises information abount duplicate timestamps in the dataset."]
+module InsufficientSensorData =
+  struct
+    type nonrec t =
+      {
+      missingCompleteSensorData: MissingCompleteSensorData.t option
+        [@ocaml.doc
+          "Parameter that describes the total number of sensors that have data completely missing for it."];
+      sensorsWithShortDateRange: SensorsWithShortDateRange.t option
+        [@ocaml.doc
+          "Parameter that describes the total number of sensors that have a short date range of less than 14 days of data overall."]}
+    let make ?missingCompleteSensorData =
+      fun ?sensorsWithShortDateRange ->
+        fun () -> { missingCompleteSensorData; sensorsWithShortDateRange }
+    let to_value x =
+      structure_to_value
+        [("MissingCompleteSensorData",
+           (Option.map x.missingCompleteSensorData
+              ~f:MissingCompleteSensorData.to_value));
+        ("SensorsWithShortDateRange",
+          (Option.map x.sensorsWithShortDateRange
+             ~f:SensorsWithShortDateRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sensorsWithShortDateRange =
+        (Option.map ~f:SensorsWithShortDateRange.of_xml)
+          (Xml.child xml_arg0 "SensorsWithShortDateRange") in
+      let missingCompleteSensorData =
+        (Option.map ~f:MissingCompleteSensorData.of_xml)
+          (Xml.child xml_arg0 "MissingCompleteSensorData") in
+      make ?sensorsWithShortDateRange ?missingCompleteSensorData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sensorsWithShortDateRange =
+        field_map json__ "SensorsWithShortDateRange"
+          SensorsWithShortDateRange.of_json in
+      let missingCompleteSensorData =
+        field_map json__ "MissingCompleteSensorData"
+          MissingCompleteSensorData.of_json in
+      make ?sensorsWithShortDateRange ?missingCompleteSensorData ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Entity that comprises aggregated information on sensors having insufficient data."]
+module InvalidSensorData =
+  struct
+    type nonrec t =
+      {
+      affectedSensorCount: Integer.t option
+        [@ocaml.doc
+          "Indicates the number of sensors that have at least some invalid values."];
+      totalNumberOfInvalidValues: Integer.t option
+        [@ocaml.doc
+          "Indicates the total number of invalid values across all the sensors."]}
+    let make ?affectedSensorCount =
+      fun ?totalNumberOfInvalidValues ->
+        fun () -> { affectedSensorCount; totalNumberOfInvalidValues }
+    let to_value x =
+      structure_to_value
+        [("AffectedSensorCount",
+           (Option.map x.affectedSensorCount ~f:Integer.to_value));
+        ("TotalNumberOfInvalidValues",
+          (Option.map x.totalNumberOfInvalidValues ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalNumberOfInvalidValues =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "TotalNumberOfInvalidValues") in
+      let affectedSensorCount =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "AffectedSensorCount") in
+      make ?totalNumberOfInvalidValues ?affectedSensorCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalNumberOfInvalidValues =
+        field_map json__ "TotalNumberOfInvalidValues" Integer.of_json in
+      let affectedSensorCount =
+        field_map json__ "AffectedSensorCount" Integer.of_json in
+      make ?totalNumberOfInvalidValues ?affectedSensorCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Entity that comprises aggregated information on sensors having insufficient data."]
+module MissingSensorData =
+  struct
+    type nonrec t =
+      {
+      affectedSensorCount: Integer.t option
+        [@ocaml.doc
+          "Indicates the number of sensors that have atleast some data missing."];
+      totalNumberOfMissingValues: Integer.t option
+        [@ocaml.doc
+          "Indicates the total number of missing values across all the sensors."]}
+    let make ?affectedSensorCount =
+      fun ?totalNumberOfMissingValues ->
+        fun () -> { affectedSensorCount; totalNumberOfMissingValues }
+    let to_value x =
+      structure_to_value
+        [("AffectedSensorCount",
+           (Option.map x.affectedSensorCount ~f:Integer.to_value));
+        ("TotalNumberOfMissingValues",
+          (Option.map x.totalNumberOfMissingValues ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalNumberOfMissingValues =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "TotalNumberOfMissingValues") in
+      let affectedSensorCount =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "AffectedSensorCount") in
+      make ?totalNumberOfMissingValues ?affectedSensorCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalNumberOfMissingValues =
+        field_map json__ "TotalNumberOfMissingValues" Integer.of_json in
+      let affectedSensorCount =
+        field_map json__ "AffectedSensorCount" Integer.of_json in
+      make ?totalNumberOfMissingValues ?affectedSensorCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Entity that comprises aggregated information on sensors having missing data."]
+module UnsupportedTimestamps =
+  struct
+    type nonrec t =
+      {
+      totalNumberOfUnsupportedTimestamps: Integer.t option
+        [@ocaml.doc
+          "Indicates the total number of unsupported timestamps across the ingested data."]}
+    let make ?totalNumberOfUnsupportedTimestamps =
+      fun () -> { totalNumberOfUnsupportedTimestamps }
+    let to_value x =
+      structure_to_value
+        [("TotalNumberOfUnsupportedTimestamps",
+           (Option.map x.totalNumberOfUnsupportedTimestamps
+              ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalNumberOfUnsupportedTimestamps =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "TotalNumberOfUnsupportedTimestamps") in
+      make ?totalNumberOfUnsupportedTimestamps ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalNumberOfUnsupportedTimestamps =
+        field_map json__ "TotalNumberOfUnsupportedTimestamps" Integer.of_json in
+      make ?totalNumberOfUnsupportedTimestamps ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Entity that comprises information abount unsupported timestamps in the dataset."]
+module ListOfDiscardedFiles =
+  struct
+    type nonrec t = S3Object.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:0); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:S3Object.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:S3Object.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListOfDiscardedFiles" ~of_json:S3Object.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module InlineDataSchema =
   struct
     type nonrec t = string
@@ -1447,6 +3258,31 @@ module InlineDataSchema =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"InlineDataSchema" j
+    let to_json = simple_to_json to_value
+  end
+module ModelPromoteMode =
+  struct
+    type nonrec t =
+      | MANAGED 
+      | MANUAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MANAGED -> "MANAGED"
+      | MANUAL -> "MANUAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MANAGED" -> MANAGED
+      | "MANUAL" -> MANUAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ModelPromoteMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ModelPromoteMode" j)
     let to_json = simple_to_json to_value
   end
 module IamRoleArn =
@@ -1470,6 +3306,76 @@ module IamRoleArn =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"IamRoleArn" j
     let to_json = simple_to_json to_value
+  end
+module LabelsInputConfiguration =
+  struct
+    type nonrec t =
+      {
+      s3InputConfiguration: LabelsS3InputConfiguration.t option
+        [@ocaml.doc
+          "Contains location information for the S3 location being used for label data."];
+      labelGroupName: LabelGroupName.t option
+        [@ocaml.doc "The name of the label group to be used for label data."]}
+    let make ?s3InputConfiguration =
+      fun ?labelGroupName ->
+        fun () -> { s3InputConfiguration; labelGroupName }
+    let to_value x =
+      structure_to_value
+        [("S3InputConfiguration",
+           (Option.map x.s3InputConfiguration
+              ~f:LabelsS3InputConfiguration.to_value));
+        ("LabelGroupName",
+          (Option.map x.labelGroupName ~f:LabelGroupName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelGroupName =
+        (Option.map ~f:LabelGroupName.of_xml)
+          (Xml.child xml_arg0 "LabelGroupName") in
+      let s3InputConfiguration =
+        (Option.map ~f:LabelsS3InputConfiguration.of_xml)
+          (Xml.child xml_arg0 "S3InputConfiguration") in
+      make ?labelGroupName ?s3InputConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelGroupName =
+        field_map json__ "LabelGroupName" LabelGroupName.of_json in
+      let s3InputConfiguration =
+        field_map json__ "S3InputConfiguration"
+          LabelsS3InputConfiguration.of_json in
+      make ?labelGroupName ?s3InputConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the configuration information for the S3 location being used to hold label data."]
+module FaultCodes =
+  struct
+    type nonrec t = FaultCode.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FaultCode.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FaultCode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FaultCodes" ~of_json:FaultCode.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module InferenceSchedulerIdentifier =
   struct
@@ -1495,112 +3401,128 @@ module InferenceSchedulerIdentifier =
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: BoundedLengthString.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: BoundedLengthString.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (BoundedLengthString.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:BoundedLengthString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        BoundedLengthString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:BoundedLengthString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" BoundedLengthString.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" BoundedLengthString.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request could not be completed because you do not have access to the resource."]
-module InternalServerException =
+module ConflictException =
   struct
     type nonrec t = {
-      message: BoundedLengthString.t }
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+      message: BoundedLengthString.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (BoundedLengthString.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:BoundedLengthString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        BoundedLengthString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:BoundedLengthString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" BoundedLengthString.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" BoundedLengthString.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request could not be completed due to a conflict with the current state of the target resource."]
+module InternalServerException =
+  struct
+    type nonrec t = {
+      message: BoundedLengthString.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:BoundedLengthString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:BoundedLengthString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" BoundedLengthString.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Processing of the request has failed because of an unknown error, exception or failure."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
-      message: BoundedLengthString.t }
-    let context_ = "ResourceNotFoundException"
-    let make ~message = fun () -> { message }
+      message: BoundedLengthString.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (BoundedLengthString.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:BoundedLengthString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        BoundedLengthString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:BoundedLengthString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" BoundedLengthString.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" BoundedLengthString.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The resource requested could not be found. Verify the resource ID and retry your request."]
 module ThrottlingException =
   struct
     type nonrec t = {
-      message: BoundedLengthString.t }
-    let context_ = "ThrottlingException"
-    let make ~message = fun () -> { message }
+      message: BoundedLengthString.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (BoundedLengthString.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:BoundedLengthString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        BoundedLengthString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:BoundedLengthString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" BoundedLengthString.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" BoundedLengthString.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
 module ValidationException =
   struct
     type nonrec t = {
-      message: BoundedLengthString.t }
-    let context_ = "ValidationException"
-    let make ~message = fun () -> { message }
+      message: BoundedLengthString.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (BoundedLengthString.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:BoundedLengthString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        BoundedLengthString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:BoundedLengthString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" BoundedLengthString.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" BoundedLengthString.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The input fails to satisfy constraints specified by Amazon Lookout for Equipment or a related AWS service that's being utilized."]
+       "The input fails to satisfy constraints specified by Amazon Lookout for Equipment or a related Amazon Web Services service that's being utilized."]
 module AmazonResourceArn =
   struct
     type nonrec t = string
@@ -1628,6 +3550,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1650,22 +3575,21 @@ module TagKeyList =
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
-      message: BoundedLengthString.t }
-    let context_ = "ServiceQuotaExceededException"
-    let make ~message = fun () -> { message }
+      message: BoundedLengthString.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (BoundedLengthString.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:BoundedLengthString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        BoundedLengthString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:BoundedLengthString.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" BoundedLengthString.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" BoundedLengthString.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Resource limitations have been exceeded."]
 module TagList =
@@ -1677,6 +3601,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1696,28 +3623,6 @@ module TagList =
     let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ConflictException =
-  struct
-    type nonrec t = {
-      message: BoundedLengthString.t }
-    let context_ = "ConflictException"
-    let make ~message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Some (BoundedLengthString.to_value x.message)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        BoundedLengthString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" BoundedLengthString.of_json in
-      make ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The request could not be completed due to a conflict with the current state of the target resource."]
 module DatasetIdentifier =
   struct
     type nonrec t = string
@@ -1759,10 +3664,169 @@ module IdempotenceToken =
     let of_json j = string_of_json ~kind:"IdempotenceToken" j
     let to_json = simple_to_json to_value
   end
+module PolicyRevisionId =
+  struct
+    type nonrec t = string
+    let context_ = "PolicyRevisionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_pattern i ~pattern:"[0-9A-Fa-f]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PolicyRevisionId" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceArn =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws(-[^:]+)?:lookoutequipment:[a-zA-Z0-9\\-]*:[0-9]{12}:.+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceArn" j
+    let to_json = simple_to_json to_value
+  end
+module Policy =
+  struct
+    type nonrec t = string
+    let context_ = "Policy"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:20000) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u00FF]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Policy" j
+    let to_json = simple_to_json to_value
+  end
+module NextToken =
+  struct
+    type nonrec t = string
+    let context_ = "NextToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:8192) >>=
+             (fun () -> check_pattern i ~pattern:"\\p{ASCII}{0,8192}"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NextToken" j
+    let to_json = simple_to_json to_value
+  end
+module SensorStatisticsSummaries =
+  struct
+    type nonrec t = SensorStatisticsSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SensorStatisticsSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SensorStatisticsSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SensorStatisticsSummaries"
+        ~of_json:SensorStatisticsSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:500) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RetrainingSchedulerSummaries =
+  struct
+    type nonrec t = RetrainingSchedulerSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RetrainingSchedulerSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RetrainingSchedulerSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RetrainingSchedulerSummaries"
+        ~of_json:RetrainingSchedulerSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ModelSummaries =
   struct
     type nonrec t = ModelSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ModelSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1783,46 +3847,97 @@ module ModelSummaries =
       list_of_json ~kind:"ModelSummaries" ~of_json:ModelSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module NextToken =
+module ModelVersionSummaries =
   struct
-    type nonrec t = string
-    let context_ = "NextToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:8192) >>=
-             (fun () -> check_pattern i ~pattern:"\\p{ASCII}{0,8192}"));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = ModelVersionSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ModelVersionSummary.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NextToken" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ModelVersionSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ModelVersionSummaries"
+        ~of_json:ModelVersionSummary.of_json j
+    let to_json v = composed_to_json to_value v
   end
-module MaxResults =
+module LabelSummaries =
   struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:500) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t = LabelSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LabelSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LabelSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LabelSummaries" ~of_json:LabelSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LabelGroupSummaries =
+  struct
+    type nonrec t = LabelGroupSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LabelGroupSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LabelGroupSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LabelGroupSummaries"
+        ~of_json:LabelGroupSummary.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module InferenceSchedulerSummaries =
   struct
     type nonrec t = InferenceSchedulerSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InferenceSchedulerSummary.to_value)) |>
         (fun x -> `List x)
@@ -1849,6 +3964,9 @@ module InferenceExecutionSummaries =
   struct
     type nonrec t = InferenceExecutionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InferenceExecutionSummary.to_value)) |>
         (fun x -> `List x)
@@ -1871,10 +3989,42 @@ module InferenceExecutionSummaries =
         ~of_json:InferenceExecutionSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InferenceEventSummaries =
+  struct
+    type nonrec t = InferenceEventSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InferenceEventSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InferenceEventSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InferenceEventSummaries"
+        ~of_json:InferenceEventSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DatasetSummaries =
   struct
     type nonrec t = DatasetSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatasetSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1899,6 +4049,9 @@ module DataIngestionJobSummaries =
   struct
     type nonrec t = DataIngestionJobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataIngestionJobSummary.to_value)) |>
         (fun x -> `List x)
@@ -1921,6 +4074,90 @@ module DataIngestionJobSummaries =
         ~of_json:DataIngestionJobSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InferenceDataImportStrategy =
+  struct
+    type nonrec t =
+      | NO_IMPORT 
+      | ADD_WHEN_EMPTY 
+      | OVERWRITE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NO_IMPORT -> "NO_IMPORT"
+      | ADD_WHEN_EMPTY -> "ADD_WHEN_EMPTY"
+      | OVERWRITE -> "OVERWRITE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NO_IMPORT" -> NO_IMPORT
+      | "ADD_WHEN_EMPTY" -> ADD_WHEN_EMPTY
+      | "OVERWRITE" -> OVERWRITE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InferenceDataImportStrategy"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InferenceDataImportStrategy" j)
+    let to_json = simple_to_json to_value
+  end
+module AutoPromotionResult =
+  struct
+    type nonrec t =
+      | MODEL_PROMOTED 
+      | MODEL_NOT_PROMOTED 
+      | RETRAINING_INTERNAL_ERROR 
+      | RETRAINING_CUSTOMER_ERROR 
+      | RETRAINING_CANCELLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MODEL_PROMOTED -> "MODEL_PROMOTED"
+      | MODEL_NOT_PROMOTED -> "MODEL_NOT_PROMOTED"
+      | RETRAINING_INTERNAL_ERROR -> "RETRAINING_INTERNAL_ERROR"
+      | RETRAINING_CUSTOMER_ERROR -> "RETRAINING_CUSTOMER_ERROR"
+      | RETRAINING_CANCELLED -> "RETRAINING_CANCELLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MODEL_PROMOTED" -> MODEL_PROMOTED
+      | "MODEL_NOT_PROMOTED" -> MODEL_NOT_PROMOTED
+      | "RETRAINING_INTERNAL_ERROR" -> RETRAINING_INTERNAL_ERROR
+      | "RETRAINING_CUSTOMER_ERROR" -> RETRAINING_CUSTOMER_ERROR
+      | "RETRAINING_CANCELLED" -> RETRAINING_CANCELLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AutoPromotionResult" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AutoPromotionResult" j)
+    let to_json = simple_to_json to_value
+  end
+module AutoPromotionResultReason =
+  struct
+    type nonrec t = string
+    let context_ = "AutoPromotionResultReason"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AutoPromotionResultReason" j
+    let to_json = simple_to_json to_value
+  end
 module DataPreProcessingConfiguration =
   struct
     type nonrec t =
@@ -1940,13 +4177,27 @@ module DataPreProcessingConfiguration =
           (Xml.child xml_arg0 "TargetSamplingRate") in
       make ?targetSamplingRate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetSamplingRate =
-        field_map json "TargetSamplingRate" TargetSamplingRate.of_json in
+        field_map json__ "TargetSamplingRate" TargetSamplingRate.of_json in
       make ?targetSamplingRate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration is the TargetSamplingRate, which is the sampling rate of the data after post processing by Amazon Lookout for Equipment. For example, if you provide data that has been collected at a 1 second level and you want the system to resample the data at a 1 minute rate before training, the TargetSamplingRate is 1 minute. When providing a value for the TargetSamplingRate, you must attach the prefix \"PT\" to the rate you want. The value for a 1 second rate is therefore PT1S, the value for a 15 minute rate is PT15M, and the value for a 1 hour rate is PT1H"]
+module DataSizeInBytes =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module KmsKeyArn =
   struct
     type nonrec t = string
@@ -1969,52 +4220,6 @@ module KmsKeyArn =
     let of_json j = string_of_json ~kind:"KmsKeyArn" j
     let to_json = simple_to_json to_value
   end
-module LabelsInputConfiguration =
-  struct
-    type nonrec t =
-      {
-      s3InputConfiguration: LabelsS3InputConfiguration.t
-        [@ocaml.doc
-          "Contains location information for the S3 location being used for label data."]}
-    let context_ = "LabelsInputConfiguration"
-    let make ~s3InputConfiguration = fun () -> { s3InputConfiguration }
-    let to_value x =
-      structure_to_value
-        [("S3InputConfiguration",
-           (Some (LabelsS3InputConfiguration.to_value x.s3InputConfiguration)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let s3InputConfiguration =
-        LabelsS3InputConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "S3InputConfiguration") in
-      make ~s3InputConfiguration ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3InputConfiguration =
-        field_map_exn json "S3InputConfiguration"
-          LabelsS3InputConfiguration.of_json in
-      make ~s3InputConfiguration ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains the configuration information for the S3 location being used to hold label data."]
-module ModelMetrics =
-  struct
-    type nonrec t = string
-    let context_ = "ModelMetrics"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:50000) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ModelMetrics" j
-    let to_json = simple_to_json to_value
-  end
 module OffCondition =
   struct
     type nonrec t = string
@@ -2033,10 +4238,167 @@ module OffCondition =
     let of_json j = string_of_json ~kind:"OffCondition" j
     let to_json = simple_to_json to_value
   end
+module Comments =
+  struct
+    type nonrec t = string
+    let context_ = "Comments"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2560) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[\\P{M}\\p{M}]{1,2560}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Comments" j
+    let to_json = simple_to_json to_value
+  end
+module DataQualitySummary =
+  struct
+    type nonrec t =
+      {
+      insufficientSensorData: InsufficientSensorData.t option
+        [@ocaml.doc
+          "Parameter that gives information about insufficient data for sensors in the dataset. This includes information about those sensors that have complete data missing and those with a short date range."];
+      missingSensorData: MissingSensorData.t option
+        [@ocaml.doc
+          "Parameter that gives information about data that is missing over all the sensors in the input data."];
+      invalidSensorData: InvalidSensorData.t option
+        [@ocaml.doc
+          "Parameter that gives information about data that is invalid over all the sensors in the input data."];
+      unsupportedTimestamps: UnsupportedTimestamps.t option
+        [@ocaml.doc
+          "Parameter that gives information about unsupported timestamps in the input data."];
+      duplicateTimestamps: DuplicateTimestamps.t option
+        [@ocaml.doc
+          "Parameter that gives information about duplicate timestamps in the input data."]}
+    let make ?insufficientSensorData =
+      fun ?missingSensorData ->
+        fun ?invalidSensorData ->
+          fun ?unsupportedTimestamps ->
+            fun ?duplicateTimestamps ->
+              fun () ->
+                {
+                  insufficientSensorData;
+                  missingSensorData;
+                  invalidSensorData;
+                  unsupportedTimestamps;
+                  duplicateTimestamps
+                }
+    let to_value x =
+      structure_to_value
+        [("InsufficientSensorData",
+           (Option.map x.insufficientSensorData
+              ~f:InsufficientSensorData.to_value));
+        ("MissingSensorData",
+          (Option.map x.missingSensorData ~f:MissingSensorData.to_value));
+        ("InvalidSensorData",
+          (Option.map x.invalidSensorData ~f:InvalidSensorData.to_value));
+        ("UnsupportedTimestamps",
+          (Option.map x.unsupportedTimestamps
+             ~f:UnsupportedTimestamps.to_value));
+        ("DuplicateTimestamps",
+          (Option.map x.duplicateTimestamps ~f:DuplicateTimestamps.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let duplicateTimestamps =
+        (Option.map ~f:DuplicateTimestamps.of_xml)
+          (Xml.child xml_arg0 "DuplicateTimestamps") in
+      let unsupportedTimestamps =
+        (Option.map ~f:UnsupportedTimestamps.of_xml)
+          (Xml.child xml_arg0 "UnsupportedTimestamps") in
+      let invalidSensorData =
+        (Option.map ~f:InvalidSensorData.of_xml)
+          (Xml.child xml_arg0 "InvalidSensorData") in
+      let missingSensorData =
+        (Option.map ~f:MissingSensorData.of_xml)
+          (Xml.child xml_arg0 "MissingSensorData") in
+      let insufficientSensorData =
+        (Option.map ~f:InsufficientSensorData.of_xml)
+          (Xml.child xml_arg0 "InsufficientSensorData") in
+      make ?duplicateTimestamps ?unsupportedTimestamps ?invalidSensorData
+        ?missingSensorData ?insufficientSensorData ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let duplicateTimestamps =
+        field_map json__ "DuplicateTimestamps" DuplicateTimestamps.of_json in
+      let unsupportedTimestamps =
+        field_map json__ "UnsupportedTimestamps"
+          UnsupportedTimestamps.of_json in
+      let invalidSensorData =
+        field_map json__ "InvalidSensorData" InvalidSensorData.of_json in
+      let missingSensorData =
+        field_map json__ "MissingSensorData" MissingSensorData.of_json in
+      let insufficientSensorData =
+        field_map json__ "InsufficientSensorData"
+          InsufficientSensorData.of_json in
+      make ?duplicateTimestamps ?unsupportedTimestamps ?invalidSensorData
+        ?missingSensorData ?insufficientSensorData ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "DataQualitySummary gives aggregated statistics over all the sensors about a completed ingestion job. It primarily gives more information about statistics over different incorrect data like MissingCompleteSensorData, MissingSensorData, UnsupportedDateFormats, InsufficientSensorData, DuplicateTimeStamps."]
+module IngestedFilesSummary =
+  struct
+    type nonrec t =
+      {
+      totalNumberOfFiles: Integer.t option
+        [@ocaml.doc
+          "Indicates the total number of files that were submitted for ingestion."];
+      ingestedNumberOfFiles: Integer.t option
+        [@ocaml.doc
+          "Indicates the number of files that were successfully ingested."];
+      discardedFiles: ListOfDiscardedFiles.t option
+        [@ocaml.doc
+          "Indicates the number of files that were discarded. A file could be discarded because its format is invalid (for example, a jpg or pdf) or not readable."]}
+    let make ?totalNumberOfFiles =
+      fun ?ingestedNumberOfFiles ->
+        fun ?discardedFiles ->
+          fun () ->
+            { totalNumberOfFiles; ingestedNumberOfFiles; discardedFiles }
+    let to_value x =
+      structure_to_value
+        [("TotalNumberOfFiles",
+           (Option.map x.totalNumberOfFiles ~f:Integer.to_value));
+        ("IngestedNumberOfFiles",
+          (Option.map x.ingestedNumberOfFiles ~f:Integer.to_value));
+        ("DiscardedFiles",
+          (Option.map x.discardedFiles ~f:ListOfDiscardedFiles.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let discardedFiles =
+        (Option.map ~f:ListOfDiscardedFiles.of_xml)
+          (Xml.child xml_arg0 "DiscardedFiles") in
+      let ingestedNumberOfFiles =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "IngestedNumberOfFiles") in
+      let totalNumberOfFiles =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "TotalNumberOfFiles") in
+      make ?discardedFiles ?ingestedNumberOfFiles ?totalNumberOfFiles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let discardedFiles =
+        field_map json__ "DiscardedFiles" ListOfDiscardedFiles.of_json in
+      let ingestedNumberOfFiles =
+        field_map json__ "IngestedNumberOfFiles" Integer.of_json in
+      let totalNumberOfFiles =
+        field_map json__ "TotalNumberOfFiles" Integer.of_json in
+      make ?discardedFiles ?ingestedNumberOfFiles ?totalNumberOfFiles ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gives statistics about how many files have been ingested, and which files have not been ingested, for a particular ingestion job."]
 module DatasetSchema =
   struct
-    type nonrec t = {
-      inlineDataSchema: InlineDataSchema.t option }
+    type nonrec t =
+      {
+      inlineDataSchema: InlineDataSchema.t option
+        [@ocaml.doc "The data schema used within the given dataset."]}
     let make ?inlineDataSchema = fun () -> { inlineDataSchema }
     let to_value x =
       structure_to_value
@@ -2049,13 +4411,187 @@ module DatasetSchema =
           (Xml.child xml_arg0 "InlineDataSchema") in
       make ?inlineDataSchema ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inlineDataSchema =
-        field_map json "InlineDataSchema" InlineDataSchema.of_json in
+        field_map json__ "InlineDataSchema" InlineDataSchema.of_json in
       make ?inlineDataSchema ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about the data schema used with the given dataset."]
+module UpdateRetrainingSchedulerRequest =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t
+        [@ocaml.doc
+          "The name of the model whose retraining scheduler you want to update."];
+      retrainingStartDate: Timestamp.t option
+        [@ocaml.doc
+          "The start date for the retraining scheduler. Lookout for Equipment truncates the time you provide to the nearest UTC day."];
+      retrainingFrequency: RetrainingFrequency.t option
+        [@ocaml.doc
+          "This parameter uses the ISO 8601 standard to set the frequency at which you want retraining to occur in terms of Years, Months, and/or Days (note: other parameters like Time are not currently supported). The minimum value is 30 days (P30D) and the maximum value is 1 year (P1Y). For example, the following values are valid: P3M15D \226\128\147 Every 3 months and 15 days P2M \226\128\147 Every 2 months P150D \226\128\147 Every 150 days"];
+      lookbackWindow: LookbackWindow.t option
+        [@ocaml.doc
+          "The number of past days of data that will be used for retraining."];
+      promoteMode: ModelPromoteMode.t option
+        [@ocaml.doc
+          "Indicates how the service will use new models. In MANAGED mode, new models will automatically be used for inference if they have better performance than the current model. In MANUAL mode, the new models will not be used until they are manually activated."]}
+    let context_ = "UpdateRetrainingSchedulerRequest"
+    let make ?retrainingStartDate =
+      fun ?retrainingFrequency ->
+        fun ?lookbackWindow ->
+          fun ?promoteMode ->
+            fun ~modelName ->
+              fun () ->
+                {
+                  retrainingStartDate;
+                  retrainingFrequency;
+                  lookbackWindow;
+                  promoteMode;
+                  modelName
+                }
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Some (ModelName.to_value x.modelName)));
+        ("RetrainingStartDate",
+          (Option.map x.retrainingStartDate ~f:Timestamp.to_value));
+        ("RetrainingFrequency",
+          (Option.map x.retrainingFrequency ~f:RetrainingFrequency.to_value));
+        ("LookbackWindow",
+          (Option.map x.lookbackWindow ~f:LookbackWindow.to_value));
+        ("PromoteMode",
+          (Option.map x.promoteMode ~f:ModelPromoteMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let promoteMode =
+        (Option.map ~f:ModelPromoteMode.of_xml)
+          (Xml.child xml_arg0 "PromoteMode") in
+      let lookbackWindow =
+        (Option.map ~f:LookbackWindow.of_xml)
+          (Xml.child xml_arg0 "LookbackWindow") in
+      let retrainingFrequency =
+        (Option.map ~f:RetrainingFrequency.of_xml)
+          (Xml.child xml_arg0 "RetrainingFrequency") in
+      let retrainingStartDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "RetrainingStartDate") in
+      let modelName =
+        ModelName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
+      make ?promoteMode ?lookbackWindow ?retrainingFrequency
+        ?retrainingStartDate ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let promoteMode =
+        field_map json__ "PromoteMode" ModelPromoteMode.of_json in
+      let lookbackWindow =
+        field_map json__ "LookbackWindow" LookbackWindow.of_json in
+      let retrainingFrequency =
+        field_map json__ "RetrainingFrequency" RetrainingFrequency.of_json in
+      let retrainingStartDate =
+        field_map json__ "RetrainingStartDate" Timestamp.of_json in
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
+      make ?promoteMode ?lookbackWindow ?retrainingFrequency
+        ?retrainingStartDate ~modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a retraining scheduler."]
+module UpdateModelRequest =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t [@ocaml.doc "The name of the model to update."];
+      labelsInputConfiguration: LabelsInputConfiguration.t option ;
+      roleArn: IamRoleArn.t option
+        [@ocaml.doc "The ARN of the model to update."];
+      modelDiagnosticsOutputConfiguration:
+        ModelDiagnosticsOutputConfiguration.t option
+        [@ocaml.doc
+          "The Amazon S3 location where you want Amazon Lookout for Equipment to save the pointwise model diagnostics for the model. You must also specify the RoleArn request parameter."]}
+    let context_ = "UpdateModelRequest"
+    let make ?labelsInputConfiguration =
+      fun ?roleArn ->
+        fun ?modelDiagnosticsOutputConfiguration ->
+          fun ~modelName ->
+            fun () ->
+              {
+                labelsInputConfiguration;
+                roleArn;
+                modelDiagnosticsOutputConfiguration;
+                modelName
+              }
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Some (ModelName.to_value x.modelName)));
+        ("LabelsInputConfiguration",
+          (Option.map x.labelsInputConfiguration
+             ~f:LabelsInputConfiguration.to_value));
+        ("RoleArn", (Option.map x.roleArn ~f:IamRoleArn.to_value));
+        ("ModelDiagnosticsOutputConfiguration",
+          (Option.map x.modelDiagnosticsOutputConfiguration
+             ~f:ModelDiagnosticsOutputConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modelDiagnosticsOutputConfiguration =
+        (Option.map ~f:ModelDiagnosticsOutputConfiguration.of_xml)
+          (Xml.child xml_arg0 "ModelDiagnosticsOutputConfiguration") in
+      let roleArn =
+        (Option.map ~f:IamRoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
+      let labelsInputConfiguration =
+        (Option.map ~f:LabelsInputConfiguration.of_xml)
+          (Xml.child xml_arg0 "LabelsInputConfiguration") in
+      let modelName =
+        ModelName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
+      make ?modelDiagnosticsOutputConfiguration ?roleArn
+        ?labelsInputConfiguration ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modelDiagnosticsOutputConfiguration =
+        field_map json__ "ModelDiagnosticsOutputConfiguration"
+          ModelDiagnosticsOutputConfiguration.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
+      let labelsInputConfiguration =
+        field_map json__ "LabelsInputConfiguration"
+          LabelsInputConfiguration.of_json in
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
+      make ?modelDiagnosticsOutputConfiguration ?roleArn
+        ?labelsInputConfiguration ~modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a model in the account."]
+module UpdateLabelGroupRequest =
+  struct
+    type nonrec t =
+      {
+      labelGroupName: LabelGroupName.t
+        [@ocaml.doc "The name of the label group to be updated."];
+      faultCodes: FaultCodes.t option
+        [@ocaml.doc
+          "Updates the code indicating the type of anomaly associated with the label. Data in this field will be retained for service usage. Follow best practices for the security of your data."]}
+    let context_ = "UpdateLabelGroupRequest"
+    let make ?faultCodes =
+      fun ~labelGroupName -> fun () -> { faultCodes; labelGroupName }
+    let to_value x =
+      structure_to_value
+        [("LabelGroupName",
+           (Some (LabelGroupName.to_value x.labelGroupName)));
+        ("FaultCodes", (Option.map x.faultCodes ~f:FaultCodes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let faultCodes =
+        (Option.map ~f:FaultCodes.of_xml) (Xml.child xml_arg0 "FaultCodes") in
+      let labelGroupName =
+        LabelGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LabelGroupName") in
+      make ?faultCodes ~labelGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let faultCodes = field_map json__ "FaultCodes" FaultCodes.of_json in
+      let labelGroupName =
+        field_map_exn json__ "LabelGroupName" LabelGroupName.of_json in
+      make ?faultCodes ~labelGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the label group."]
 module UpdateInferenceSchedulerRequest =
   struct
     type nonrec t =
@@ -2133,27 +4669,220 @@ module UpdateInferenceSchedulerRequest =
         ?dataUploadFrequency ?dataDelayOffsetInMinutes
         ~inferenceSchedulerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" IamRoleArn.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
       let dataOutputConfiguration =
-        field_map json "DataOutputConfiguration"
+        field_map json__ "DataOutputConfiguration"
           InferenceOutputConfiguration.of_json in
       let dataInputConfiguration =
-        field_map json "DataInputConfiguration"
+        field_map json__ "DataInputConfiguration"
           InferenceInputConfiguration.of_json in
       let dataUploadFrequency =
-        field_map json "DataUploadFrequency" DataUploadFrequency.of_json in
+        field_map json__ "DataUploadFrequency" DataUploadFrequency.of_json in
       let dataDelayOffsetInMinutes =
-        field_map json "DataDelayOffsetInMinutes"
+        field_map json__ "DataDelayOffsetInMinutes"
           DataDelayOffsetInMinutes.of_json in
       let inferenceSchedulerName =
-        field_map_exn json "InferenceSchedulerName"
+        field_map_exn json__ "InferenceSchedulerName"
           InferenceSchedulerIdentifier.of_json in
       make ?roleArn ?dataOutputConfiguration ?dataInputConfiguration
         ?dataUploadFrequency ?dataDelayOffsetInMinutes
         ~inferenceSchedulerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an inference scheduler."]
+module UpdateActiveModelVersionResponse =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t option
+        [@ocaml.doc
+          "The name of the machine learning model for which the active model version was set."];
+      modelArn: ModelArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the machine learning model for which the active model version was set."];
+      currentActiveVersion: ModelVersion.t option
+        [@ocaml.doc
+          "The version that is currently active of the machine learning model for which the active model version was set."];
+      previousActiveVersion: ModelVersion.t option
+        [@ocaml.doc
+          "The previous version that was active of the machine learning model for which the active model version was set."];
+      currentActiveVersionArn: ModelVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the machine learning model version that is the current active model version."];
+      previousActiveVersionArn: ModelVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the machine learning model version that was the previous active model version."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?modelName =
+      fun ?modelArn ->
+        fun ?currentActiveVersion ->
+          fun ?previousActiveVersion ->
+            fun ?currentActiveVersionArn ->
+              fun ?previousActiveVersionArn ->
+                fun () ->
+                  {
+                    modelName;
+                    modelArn;
+                    currentActiveVersion;
+                    previousActiveVersion;
+                    currentActiveVersionArn;
+                    previousActiveVersionArn
+                  }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
+        ("ModelArn", (Option.map x.modelArn ~f:ModelArn.to_value));
+        ("CurrentActiveVersion",
+          (Option.map x.currentActiveVersion ~f:ModelVersion.to_value));
+        ("PreviousActiveVersion",
+          (Option.map x.previousActiveVersion ~f:ModelVersion.to_value));
+        ("CurrentActiveVersionArn",
+          (Option.map x.currentActiveVersionArn ~f:ModelVersionArn.to_value));
+        ("PreviousActiveVersionArn",
+          (Option.map x.previousActiveVersionArn ~f:ModelVersionArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let previousActiveVersionArn =
+        (Option.map ~f:ModelVersionArn.of_xml)
+          (Xml.child xml_arg0 "PreviousActiveVersionArn") in
+      let currentActiveVersionArn =
+        (Option.map ~f:ModelVersionArn.of_xml)
+          (Xml.child xml_arg0 "CurrentActiveVersionArn") in
+      let previousActiveVersion =
+        (Option.map ~f:ModelVersion.of_xml)
+          (Xml.child xml_arg0 "PreviousActiveVersion") in
+      let currentActiveVersion =
+        (Option.map ~f:ModelVersion.of_xml)
+          (Xml.child xml_arg0 "CurrentActiveVersion") in
+      let modelArn =
+        (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
+      let modelName =
+        (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
+      make ?previousActiveVersionArn ?currentActiveVersionArn
+        ?previousActiveVersion ?currentActiveVersion ?modelArn ?modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let previousActiveVersionArn =
+        field_map json__ "PreviousActiveVersionArn" ModelVersionArn.of_json in
+      let currentActiveVersionArn =
+        field_map json__ "CurrentActiveVersionArn" ModelVersionArn.of_json in
+      let previousActiveVersion =
+        field_map json__ "PreviousActiveVersion" ModelVersion.of_json in
+      let currentActiveVersion =
+        field_map json__ "CurrentActiveVersion" ModelVersion.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      make ?previousActiveVersionArn ?currentActiveVersionArn
+        ?previousActiveVersion ?currentActiveVersion ?modelArn ?modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the active model version for a given machine learning model."]
+module UpdateActiveModelVersionRequest =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t
+        [@ocaml.doc
+          "The name of the machine learning model for which the active model version is being set."];
+      modelVersion: ModelVersion.t
+        [@ocaml.doc
+          "The version of the machine learning model for which the active model version is being set."]}
+    let context_ = "UpdateActiveModelVersionRequest"
+    let make ~modelName =
+      fun ~modelVersion -> fun () -> { modelName; modelVersion }
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Some (ModelName.to_value x.modelName)));
+        ("ModelVersion", (Some (ModelVersion.to_value x.modelVersion)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modelVersion =
+        ModelVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ModelVersion") in
+      let modelName =
+        ModelName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
+      make ~modelVersion ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modelVersion =
+        field_map_exn json__ "ModelVersion" ModelVersion.of_json in
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
+      make ~modelVersion ~modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the active model version for a given machine learning model."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -2257,10 +4986,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceArn.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2377,24 +5106,160 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceArn.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Associates a given tag to a resource in your account. A tag is a key-value pair which can be added to an Amazon Lookout for Equipment resource as metadata. Tags can be used for organizing your resources as well as helping you to search and filter by tag. Multiple tags can be added to a resource, either when you create it, or later. Up to 50 tags can be associated with each resource."]
+module StopRetrainingSchedulerResponse =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t option
+        [@ocaml.doc
+          "The name of the model whose retraining scheduler is being stopped."];
+      modelArn: ModelArn.t option
+        [@ocaml.doc
+          "The ARN of the model whose retraining scheduler is being stopped."];
+      status: RetrainingSchedulerStatus.t option
+        [@ocaml.doc "The status of the retraining scheduler."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?modelName =
+      fun ?modelArn ->
+        fun ?status -> fun () -> { modelName; modelArn; status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
+        ("ModelArn", (Option.map x.modelArn ~f:ModelArn.to_value));
+        ("Status",
+          (Option.map x.status ~f:RetrainingSchedulerStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:RetrainingSchedulerStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let modelArn =
+        (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
+      let modelName =
+        (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
+      make ?status ?modelArn ?modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "Status" RetrainingSchedulerStatus.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      make ?status ?modelArn ?modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Stops a retraining scheduler."]
+module StopRetrainingSchedulerRequest =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t
+        [@ocaml.doc
+          "The name of the model whose retraining scheduler you want to stop."]}
+    let context_ = "StopRetrainingSchedulerRequest"
+    let make ~modelName = fun () -> { modelName }
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Some (ModelName.to_value x.modelName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modelName =
+        ModelName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
+      make ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
+      make ~modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Stops a retraining scheduler."]
 module StopInferenceSchedulerResponse =
   struct
     type nonrec t =
       {
       modelArn: ModelArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the ML model used by the inference scheduler being stopped."];
+          "The Amazon Resource Name (ARN) of the machine learning model used by the inference scheduler being stopped."];
       modelName: ModelName.t option
         [@ocaml.doc
-          "The name of the ML model used by the inference scheduler being stopped."];
+          "The name of the machine learning model used by the inference scheduler being stopped."];
       inferenceSchedulerName: InferenceSchedulerName.t option
         [@ocaml.doc "The name of the inference scheduler being stopped."];
       inferenceSchedulerArn: InferenceSchedulerArn.t option
@@ -2517,15 +5382,16 @@ module StopInferenceSchedulerResponse =
       make ?status ?inferenceSchedulerArn ?inferenceSchedulerName ?modelName
         ?modelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" InferenceSchedulerStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" InferenceSchedulerStatus.of_json in
       let inferenceSchedulerArn =
-        field_map json "InferenceSchedulerArn" InferenceSchedulerArn.of_json in
+        field_map json__ "InferenceSchedulerArn"
+          InferenceSchedulerArn.of_json in
       let inferenceSchedulerName =
-        field_map json "InferenceSchedulerName"
+        field_map json__ "InferenceSchedulerName"
           InferenceSchedulerName.of_json in
-      let modelName = field_map json "ModelName" ModelName.of_json in
-      let modelArn = field_map json "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
       make ?status ?inferenceSchedulerArn ?inferenceSchedulerName ?modelName
         ?modelArn ()
     let to_json v = composed_to_json to_value v
@@ -2550,23 +5416,159 @@ module StopInferenceSchedulerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InferenceSchedulerName") in
       make ~inferenceSchedulerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inferenceSchedulerName =
-        field_map_exn json "InferenceSchedulerName"
+        field_map_exn json__ "InferenceSchedulerName"
           InferenceSchedulerIdentifier.of_json in
       make ~inferenceSchedulerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops an inference scheduler."]
+module StartRetrainingSchedulerResponse =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t option
+        [@ocaml.doc
+          "The name of the model whose retraining scheduler is being started."];
+      modelArn: ModelArn.t option
+        [@ocaml.doc
+          "The ARN of the model whose retraining scheduler is being started."];
+      status: RetrainingSchedulerStatus.t option
+        [@ocaml.doc "The status of the retraining scheduler."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?modelName =
+      fun ?modelArn ->
+        fun ?status -> fun () -> { modelName; modelArn; status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
+        ("ModelArn", (Option.map x.modelArn ~f:ModelArn.to_value));
+        ("Status",
+          (Option.map x.status ~f:RetrainingSchedulerStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:RetrainingSchedulerStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let modelArn =
+        (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
+      let modelName =
+        (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
+      make ?status ?modelArn ?modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "Status" RetrainingSchedulerStatus.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      make ?status ?modelArn ?modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Starts a retraining scheduler."]
+module StartRetrainingSchedulerRequest =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t
+        [@ocaml.doc
+          "The name of the model whose retraining scheduler you want to start."]}
+    let context_ = "StartRetrainingSchedulerRequest"
+    let make ~modelName = fun () -> { modelName }
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Some (ModelName.to_value x.modelName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modelName =
+        ModelName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
+      make ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
+      make ~modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Starts a retraining scheduler."]
 module StartInferenceSchedulerResponse =
   struct
     type nonrec t =
       {
       modelArn: ModelArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the ML model being used by the inference scheduler."];
+          "The Amazon Resource Name (ARN) of the machine learning model being used by the inference scheduler."];
       modelName: ModelName.t option
         [@ocaml.doc
-          "The name of the ML model being used by the inference scheduler."];
+          "The name of the machine learning model being used by the inference scheduler."];
       inferenceSchedulerName: InferenceSchedulerName.t option
         [@ocaml.doc "The name of the inference scheduler being started."];
       inferenceSchedulerArn: InferenceSchedulerArn.t option
@@ -2689,15 +5691,16 @@ module StartInferenceSchedulerResponse =
       make ?status ?inferenceSchedulerArn ?inferenceSchedulerName ?modelName
         ?modelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" InferenceSchedulerStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" InferenceSchedulerStatus.of_json in
       let inferenceSchedulerArn =
-        field_map json "InferenceSchedulerArn" InferenceSchedulerArn.of_json in
+        field_map json__ "InferenceSchedulerArn"
+          InferenceSchedulerArn.of_json in
       let inferenceSchedulerName =
-        field_map json "InferenceSchedulerName"
+        field_map json__ "InferenceSchedulerName"
           InferenceSchedulerName.of_json in
-      let modelName = field_map json "ModelName" ModelName.of_json in
-      let modelArn = field_map json "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
       make ?status ?inferenceSchedulerArn ?inferenceSchedulerName ?modelName
         ?modelArn ()
     let to_json v = composed_to_json to_value v
@@ -2722,9 +5725,9 @@ module StartInferenceSchedulerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InferenceSchedulerName") in
       make ~inferenceSchedulerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inferenceSchedulerName =
-        field_map_exn json "InferenceSchedulerName"
+        field_map_exn json__ "InferenceSchedulerName"
           InferenceSchedulerIdentifier.of_json in
       make ~inferenceSchedulerName ()
     let to_json v = composed_to_json to_value v
@@ -2835,9 +5838,9 @@ module StartDataIngestionJobResponse =
         (Option.map ~f:IngestionJobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?status ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" IngestionJobStatus.of_json in
-      let jobId = field_map json "JobId" IngestionJobId.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" IngestionJobStatus.of_json in
+      let jobId = field_map json__ "JobId" IngestionJobId.of_json in
       make ?status ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2896,19 +5899,192 @@ module StartDataIngestionJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetName") in
       make ~clientToken ~roleArn ~ingestionInputConfiguration ~datasetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientToken =
-        field_map_exn json "ClientToken" IdempotenceToken.of_json in
-      let roleArn = field_map_exn json "RoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "ClientToken" IdempotenceToken.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" IamRoleArn.of_json in
       let ingestionInputConfiguration =
-        field_map_exn json "IngestionInputConfiguration"
+        field_map_exn json__ "IngestionInputConfiguration"
           IngestionInputConfiguration.of_json in
       let datasetName =
-        field_map_exn json "DatasetName" DatasetIdentifier.of_json in
+        field_map_exn json__ "DatasetName" DatasetIdentifier.of_json in
       make ~clientToken ~roleArn ~ingestionInputConfiguration ~datasetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts a data ingestion job. Amazon Lookout for Equipment returns the job status."]
+module PutResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource for which the policy was created."];
+      policyRevisionId: PolicyRevisionId.t option
+        [@ocaml.doc
+          "A unique identifier for a revision of the resource policy."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceArn =
+      fun ?policyRevisionId -> fun () -> { resourceArn; policyRevisionId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("PolicyRevisionId",
+          (Option.map x.policyRevisionId ~f:PolicyRevisionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyRevisionId =
+        (Option.map ~f:PolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "PolicyRevisionId") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?policyRevisionId ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyRevisionId =
+        field_map json__ "PolicyRevisionId" PolicyRevisionId.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      make ?policyRevisionId ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a resource control policy for a given resource."]
+module PutResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource for which the policy is being created."];
+      resourcePolicy: Policy.t
+        [@ocaml.doc "The JSON-formatted resource policy to create."];
+      policyRevisionId: PolicyRevisionId.t option
+        [@ocaml.doc
+          "A unique identifier for a revision of the resource policy."];
+      clientToken: IdempotenceToken.t
+        [@ocaml.doc
+          "A unique identifier for the request. If you do not set the client request token, Amazon Lookout for Equipment generates one."]}
+    let context_ = "PutResourcePolicyRequest"
+    let make ?policyRevisionId =
+      fun ~resourceArn ->
+        fun ~resourcePolicy ->
+          fun ~clientToken ->
+            fun () ->
+              { policyRevisionId; resourceArn; resourcePolicy; clientToken }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)));
+        ("ResourcePolicy", (Some (Policy.to_value x.resourcePolicy)));
+        ("PolicyRevisionId",
+          (Option.map x.policyRevisionId ~f:PolicyRevisionId.to_value));
+        ("ClientToken", (Some (IdempotenceToken.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        IdempotenceToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+      let policyRevisionId =
+        (Option.map ~f:PolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "PolicyRevisionId") in
+      let resourcePolicy =
+        Policy.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourcePolicy") in
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~clientToken ?policyRevisionId ~resourcePolicy ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "ClientToken" IdempotenceToken.of_json in
+      let policyRevisionId =
+        field_map json__ "PolicyRevisionId" PolicyRevisionId.of_json in
+      let resourcePolicy =
+        field_map_exn json__ "ResourcePolicy" Policy.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ~clientToken ?policyRevisionId ~resourcePolicy ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a resource control policy for a given resource."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -2986,8 +6162,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all the tags for a specified resource, including key and value."]
@@ -3010,20 +6186,317 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceArn.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all the tags for a specified resource, including key and value."]
+module ListSensorStatisticsResponse =
+  struct
+    type nonrec t =
+      {
+      sensorStatisticsSummaries: SensorStatisticsSummaries.t option
+        [@ocaml.doc
+          "Provides ingestion-based statistics regarding the specified sensor with respect to various validation types, such as whether data exists, the number and percentage of missing values, and the number and percentage of duplicate timestamps."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An opaque pagination token indicating where to continue the listing of sensor statistics."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sensorStatisticsSummaries =
+      fun ?nextToken -> fun () -> { sensorStatisticsSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SensorStatisticsSummaries",
+           (Option.map x.sensorStatisticsSummaries
+              ~f:SensorStatisticsSummaries.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let sensorStatisticsSummaries =
+        (Option.map ~f:SensorStatisticsSummaries.of_xml)
+          (Xml.child xml_arg0 "SensorStatisticsSummaries") in
+      make ?nextToken ?sensorStatisticsSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let sensorStatisticsSummaries =
+        field_map json__ "SensorStatisticsSummaries"
+          SensorStatisticsSummaries.of_json in
+      make ?nextToken ?sensorStatisticsSummaries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists statistics about the data collected for each of the sensors that have been successfully ingested in the particular dataset. Can also be used to retreive Sensor Statistics for a previous ingestion job."]
+module ListSensorStatisticsRequest =
+  struct
+    type nonrec t =
+      {
+      datasetName: DatasetName.t
+        [@ocaml.doc
+          "The name of the dataset associated with the list of Sensor Statistics."];
+      ingestionJobId: IngestionJobId.t option
+        [@ocaml.doc
+          "The ingestion job id associated with the list of Sensor Statistics. To get sensor statistics for a particular ingestion job id, both dataset name and ingestion job id must be submitted as inputs."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "Specifies the maximum number of sensors for which to retrieve statistics."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An opaque pagination token indicating where to continue the listing of sensor statistics."]}
+    let context_ = "ListSensorStatisticsRequest"
+    let make ?ingestionJobId =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~datasetName ->
+            fun () -> { ingestionJobId; maxResults; nextToken; datasetName }
+    let to_value x =
+      structure_to_value
+        [("DatasetName", (Some (DatasetName.to_value x.datasetName)));
+        ("IngestionJobId",
+          (Option.map x.ingestionJobId ~f:IngestionJobId.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let ingestionJobId =
+        (Option.map ~f:IngestionJobId.of_xml)
+          (Xml.child xml_arg0 "IngestionJobId") in
+      let datasetName =
+        DatasetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DatasetName") in
+      make ?nextToken ?maxResults ?ingestionJobId ~datasetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let ingestionJobId =
+        field_map json__ "IngestionJobId" IngestionJobId.of_json in
+      let datasetName =
+        field_map_exn json__ "DatasetName" DatasetName.of_json in
+      make ?nextToken ?maxResults ?ingestionJobId ~datasetName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists statistics about the data collected for each of the sensors that have been successfully ingested in the particular dataset. Can also be used to retreive Sensor Statistics for a previous ingestion job."]
+module ListRetrainingSchedulersResponse =
+  struct
+    type nonrec t =
+      {
+      retrainingSchedulerSummaries: RetrainingSchedulerSummaries.t option
+        [@ocaml.doc
+          "Provides information on the specified retraining scheduler, including the model name, model ARN, status, and start date."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the number of results exceeds the maximum, this pagination token is returned. Use this token in the request to show the next page of retraining schedulers."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?retrainingSchedulerSummaries =
+      fun ?nextToken -> fun () -> { retrainingSchedulerSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RetrainingSchedulerSummaries",
+           (Option.map x.retrainingSchedulerSummaries
+              ~f:RetrainingSchedulerSummaries.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let retrainingSchedulerSummaries =
+        (Option.map ~f:RetrainingSchedulerSummaries.of_xml)
+          (Xml.child xml_arg0 "RetrainingSchedulerSummaries") in
+      make ?nextToken ?retrainingSchedulerSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let retrainingSchedulerSummaries =
+        field_map json__ "RetrainingSchedulerSummaries"
+          RetrainingSchedulerSummaries.of_json in
+      make ?nextToken ?retrainingSchedulerSummaries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all retraining schedulers in your account, filtering by model name prefix and status."]
+module ListRetrainingSchedulersRequest =
+  struct
+    type nonrec t =
+      {
+      modelNameBeginsWith: ModelName.t option
+        [@ocaml.doc
+          "Specify this field to only list retraining schedulers whose machine learning models begin with the value you specify."];
+      status: RetrainingSchedulerStatus.t option
+        [@ocaml.doc
+          "Specify this field to only list retraining schedulers whose status matches the value you specify."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the number of results exceeds the maximum, a pagination token is returned. Use the token in the request to show the next page of retraining schedulers."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "Specifies the maximum number of retraining schedulers to list."]}
+    let make ?modelNameBeginsWith =
+      fun ?status ->
+        fun ?nextToken ->
+          fun ?maxResults ->
+            fun () -> { modelNameBeginsWith; status; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("ModelNameBeginsWith",
+           (Option.map x.modelNameBeginsWith ~f:ModelName.to_value));
+        ("Status",
+          (Option.map x.status ~f:RetrainingSchedulerStatus.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let status =
+        (Option.map ~f:RetrainingSchedulerStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let modelNameBeginsWith =
+        (Option.map ~f:ModelName.of_xml)
+          (Xml.child xml_arg0 "ModelNameBeginsWith") in
+      make ?maxResults ?nextToken ?status ?modelNameBeginsWith ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let status =
+        field_map json__ "Status" RetrainingSchedulerStatus.of_json in
+      let modelNameBeginsWith =
+        field_map json__ "ModelNameBeginsWith" ModelName.of_json in
+      make ?maxResults ?nextToken ?status ?modelNameBeginsWith ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all retraining schedulers in your account, filtering by model name prefix and status."]
 module ListModelsResponse =
   struct
     type nonrec t =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "An opaque pagination token indicating where to continue the listing of ML models."];
+          "An opaque pagination token indicating where to continue the listing of machine learning models."];
       modelSummaries: ModelSummaries.t option
         [@ocaml.doc
           "Provides information on the specified model, including created time, model and dataset ARNs, and status."]}
@@ -3097,10 +6570,10 @@ module ListModelsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?modelSummaries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let modelSummaries =
-        field_map json "ModelSummaries" ModelSummaries.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ModelSummaries" ModelSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?modelSummaries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3111,16 +6584,18 @@ module ListModelsRequest =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "An opaque pagination token indicating where to continue the listing of ML models."];
+          "An opaque pagination token indicating where to continue the listing of machine learning models."];
       maxResults: MaxResults.t option
-        [@ocaml.doc "Specifies the maximum number of ML models to list."];
-      status: ModelStatus.t option [@ocaml.doc "The status of the ML model."];
+        [@ocaml.doc
+          "Specifies the maximum number of machine learning models to list."];
+      status: ModelStatus.t option
+        [@ocaml.doc "The status of the machine learning model."];
       modelNameBeginsWith: ModelName.t option
         [@ocaml.doc
-          "The beginning of the name of the ML models being listed."];
+          "The beginning of the name of the machine learning models being listed."];
       datasetNameBeginsWith: DatasetName.t option
         [@ocaml.doc
-          "The beginning of the name of the dataset of the ML models to be listed."]}
+          "The beginning of the name of the dataset of the machine learning models to be listed."]}
     let make ?nextToken =
       fun ?maxResults ->
         fun ?status ->
@@ -3160,19 +6635,544 @@ module ListModelsRequest =
       make ?datasetNameBeginsWith ?modelNameBeginsWith ?status ?maxResults
         ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetNameBeginsWith =
-        field_map json "DatasetNameBeginsWith" DatasetName.of_json in
+        field_map json__ "DatasetNameBeginsWith" DatasetName.of_json in
       let modelNameBeginsWith =
-        field_map json "ModelNameBeginsWith" ModelName.of_json in
-      let status = field_map json "Status" ModelStatus.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ModelNameBeginsWith" ModelName.of_json in
+      let status = field_map json__ "Status" ModelStatus.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?datasetNameBeginsWith ?modelNameBeginsWith ?status ?maxResults
         ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Generates a list of all models in the account, including model name and ARN, dataset, and status."]
+module ListModelVersionsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the total number of results exceeds the limit that the response can display, the response returns an opaque pagination token indicating where to continue the listing of machine learning model versions. Use this token in the NextToken field in the request to list the next page of results."];
+      modelVersionSummaries: ModelVersionSummaries.t option
+        [@ocaml.doc
+          "Provides information on the specified model version, including the created time, model and dataset ARNs, and status. If you don't supply the ModelName request parameter, or if you supply the name of a model that doesn't exist, ListModelVersions returns an empty array in ModelVersionSummaries."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?modelVersionSummaries ->
+        fun () -> { nextToken; modelVersionSummaries }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("ModelVersionSummaries",
+          (Option.map x.modelVersionSummaries
+             ~f:ModelVersionSummaries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modelVersionSummaries =
+        (Option.map ~f:ModelVersionSummaries.of_xml)
+          (Xml.child xml_arg0 "ModelVersionSummaries") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?modelVersionSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modelVersionSummaries =
+        field_map json__ "ModelVersionSummaries"
+          ModelVersionSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?modelVersionSummaries ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Generates a list of all model versions for a given model, including the model version, model version ARN, and status. To list a subset of versions, use the MaxModelVersion and MinModelVersion fields."]
+module ListModelVersionsRequest =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t
+        [@ocaml.doc
+          "Then name of the machine learning model for which the model versions are to be listed."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the total number of results exceeds the limit that the response can display, the response returns an opaque pagination token indicating where to continue the listing of machine learning model versions. Use this token in the NextToken field in the request to list the next page of results."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "Specifies the maximum number of machine learning model versions to list."];
+      status: ModelVersionStatus.t option
+        [@ocaml.doc
+          "Filter the results based on the current status of the model version."];
+      sourceType: ModelVersionSourceType.t option
+        [@ocaml.doc
+          "Filter the results based on the way the model version was generated."];
+      createdAtEndTime: Timestamp.t option
+        [@ocaml.doc
+          "Filter results to return all the model versions created before this time."];
+      createdAtStartTime: Timestamp.t option
+        [@ocaml.doc
+          "Filter results to return all the model versions created after this time."];
+      maxModelVersion: ModelVersion.t option
+        [@ocaml.doc
+          "Specifies the highest version of the model to return in the list."];
+      minModelVersion: ModelVersion.t option
+        [@ocaml.doc
+          "Specifies the lowest version of the model to return in the list."]}
+    let context_ = "ListModelVersionsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?status ->
+          fun ?sourceType ->
+            fun ?createdAtEndTime ->
+              fun ?createdAtStartTime ->
+                fun ?maxModelVersion ->
+                  fun ?minModelVersion ->
+                    fun ~modelName ->
+                      fun () ->
+                        {
+                          nextToken;
+                          maxResults;
+                          status;
+                          sourceType;
+                          createdAtEndTime;
+                          createdAtStartTime;
+                          maxModelVersion;
+                          minModelVersion;
+                          modelName
+                        }
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Some (ModelName.to_value x.modelName)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("Status", (Option.map x.status ~f:ModelVersionStatus.to_value));
+        ("SourceType",
+          (Option.map x.sourceType ~f:ModelVersionSourceType.to_value));
+        ("CreatedAtEndTime",
+          (Option.map x.createdAtEndTime ~f:Timestamp.to_value));
+        ("CreatedAtStartTime",
+          (Option.map x.createdAtStartTime ~f:Timestamp.to_value));
+        ("MaxModelVersion",
+          (Option.map x.maxModelVersion ~f:ModelVersion.to_value));
+        ("MinModelVersion",
+          (Option.map x.minModelVersion ~f:ModelVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let minModelVersion =
+        (Option.map ~f:ModelVersion.of_xml)
+          (Xml.child xml_arg0 "MinModelVersion") in
+      let maxModelVersion =
+        (Option.map ~f:ModelVersion.of_xml)
+          (Xml.child xml_arg0 "MaxModelVersion") in
+      let createdAtStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreatedAtStartTime") in
+      let createdAtEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreatedAtEndTime") in
+      let sourceType =
+        (Option.map ~f:ModelVersionSourceType.of_xml)
+          (Xml.child xml_arg0 "SourceType") in
+      let status =
+        (Option.map ~f:ModelVersionStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let modelName =
+        ModelName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
+      make ?minModelVersion ?maxModelVersion ?createdAtStartTime
+        ?createdAtEndTime ?sourceType ?status ?maxResults ?nextToken
+        ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let minModelVersion =
+        field_map json__ "MinModelVersion" ModelVersion.of_json in
+      let maxModelVersion =
+        field_map json__ "MaxModelVersion" ModelVersion.of_json in
+      let createdAtStartTime =
+        field_map json__ "CreatedAtStartTime" Timestamp.of_json in
+      let createdAtEndTime =
+        field_map json__ "CreatedAtEndTime" Timestamp.of_json in
+      let sourceType =
+        field_map json__ "SourceType" ModelVersionSourceType.of_json in
+      let status = field_map json__ "Status" ModelVersionStatus.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
+      make ?minModelVersion ?maxModelVersion ?createdAtStartTime
+        ?createdAtEndTime ?sourceType ?status ?maxResults ?nextToken
+        ~modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Generates a list of all model versions for a given model, including the model version, model version ARN, and status. To list a subset of versions, use the MaxModelVersion and MinModelVersion fields."]
+module ListLabelsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An opaque pagination token indicating where to continue the listing of datasets."];
+      labelSummaries: LabelSummaries.t option
+        [@ocaml.doc
+          "A summary of the items in the label group. If you don't supply the LabelGroupName request parameter, or if you supply the name of a label group that doesn't exist, ListLabels returns an empty array in LabelSummaries."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?labelSummaries -> fun () -> { nextToken; labelSummaries }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("LabelSummaries",
+          (Option.map x.labelSummaries ~f:LabelSummaries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelSummaries =
+        (Option.map ~f:LabelSummaries.of_xml)
+          (Xml.child xml_arg0 "LabelSummaries") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?labelSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelSummaries =
+        field_map json__ "LabelSummaries" LabelSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?labelSummaries ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides a list of labels."]
+module ListLabelsRequest =
+  struct
+    type nonrec t =
+      {
+      labelGroupName: LabelGroupName.t
+        [@ocaml.doc "Returns the name of the label group."];
+      intervalStartTime: Timestamp.t option
+        [@ocaml.doc
+          "Returns all the labels with a end time equal to or later than the start time given."];
+      intervalEndTime: Timestamp.t option
+        [@ocaml.doc
+          "Returns all labels with a start time earlier than the end time given."];
+      faultCode: FaultCode.t option
+        [@ocaml.doc "Returns labels with a particular fault code."];
+      equipment: Equipment.t option
+        [@ocaml.doc
+          "Lists the labels that pertain to a particular piece of equipment."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An opaque pagination token indicating where to continue the listing of label groups."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "Specifies the maximum number of labels to list."]}
+    let context_ = "ListLabelsRequest"
+    let make ?intervalStartTime =
+      fun ?intervalEndTime ->
+        fun ?faultCode ->
+          fun ?equipment ->
+            fun ?nextToken ->
+              fun ?maxResults ->
+                fun ~labelGroupName ->
+                  fun () ->
+                    {
+                      intervalStartTime;
+                      intervalEndTime;
+                      faultCode;
+                      equipment;
+                      nextToken;
+                      maxResults;
+                      labelGroupName
+                    }
+    let to_value x =
+      structure_to_value
+        [("LabelGroupName",
+           (Some (LabelGroupName.to_value x.labelGroupName)));
+        ("IntervalStartTime",
+          (Option.map x.intervalStartTime ~f:Timestamp.to_value));
+        ("IntervalEndTime",
+          (Option.map x.intervalEndTime ~f:Timestamp.to_value));
+        ("FaultCode", (Option.map x.faultCode ~f:FaultCode.to_value));
+        ("Equipment", (Option.map x.equipment ~f:Equipment.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let equipment =
+        (Option.map ~f:Equipment.of_xml) (Xml.child xml_arg0 "Equipment") in
+      let faultCode =
+        (Option.map ~f:FaultCode.of_xml) (Xml.child xml_arg0 "FaultCode") in
+      let intervalEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "IntervalEndTime") in
+      let intervalStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "IntervalStartTime") in
+      let labelGroupName =
+        LabelGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LabelGroupName") in
+      make ?maxResults ?nextToken ?equipment ?faultCode ?intervalEndTime
+        ?intervalStartTime ~labelGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let equipment = field_map json__ "Equipment" Equipment.of_json in
+      let faultCode = field_map json__ "FaultCode" FaultCode.of_json in
+      let intervalEndTime =
+        field_map json__ "IntervalEndTime" Timestamp.of_json in
+      let intervalStartTime =
+        field_map json__ "IntervalStartTime" Timestamp.of_json in
+      let labelGroupName =
+        field_map_exn json__ "LabelGroupName" LabelGroupName.of_json in
+      make ?maxResults ?nextToken ?equipment ?faultCode ?intervalEndTime
+        ?intervalStartTime ~labelGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides a list of labels."]
+module ListLabelGroupsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An opaque pagination token indicating where to continue the listing of label groups."];
+      labelGroupSummaries: LabelGroupSummaries.t option
+        [@ocaml.doc "A summary of the label groups."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?labelGroupSummaries ->
+        fun () -> { nextToken; labelGroupSummaries }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("LabelGroupSummaries",
+          (Option.map x.labelGroupSummaries ~f:LabelGroupSummaries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelGroupSummaries =
+        (Option.map ~f:LabelGroupSummaries.of_xml)
+          (Xml.child xml_arg0 "LabelGroupSummaries") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?labelGroupSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelGroupSummaries =
+        field_map json__ "LabelGroupSummaries" LabelGroupSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?labelGroupSummaries ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of the label groups."]
+module ListLabelGroupsRequest =
+  struct
+    type nonrec t =
+      {
+      labelGroupNameBeginsWith: LabelGroupName.t option
+        [@ocaml.doc
+          "The beginning of the name of the label groups to be listed."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An opaque pagination token indicating where to continue the listing of label groups."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "Specifies the maximum number of label groups to list."]}
+    let make ?labelGroupNameBeginsWith =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun () -> { labelGroupNameBeginsWith; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("LabelGroupNameBeginsWith",
+           (Option.map x.labelGroupNameBeginsWith ~f:LabelGroupName.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let labelGroupNameBeginsWith =
+        (Option.map ~f:LabelGroupName.of_xml)
+          (Xml.child xml_arg0 "LabelGroupNameBeginsWith") in
+      make ?maxResults ?nextToken ?labelGroupNameBeginsWith ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let labelGroupNameBeginsWith =
+        field_map json__ "LabelGroupNameBeginsWith" LabelGroupName.of_json in
+      make ?maxResults ?nextToken ?labelGroupNameBeginsWith ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of the label groups."]
 module ListInferenceSchedulersResponse =
   struct
     type nonrec t =
@@ -3255,11 +7255,11 @@ module ListInferenceSchedulersResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?inferenceSchedulerSummaries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inferenceSchedulerSummaries =
-        field_map json "InferenceSchedulerSummaries"
+        field_map json__ "InferenceSchedulerSummaries"
           InferenceSchedulerSummaries.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?inferenceSchedulerSummaries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3279,18 +7279,23 @@ module ListInferenceSchedulersRequest =
           "The beginning of the name of the inference schedulers to be listed."];
       modelName: ModelName.t option
         [@ocaml.doc
-          "The name of the ML model used by the inference scheduler to be listed."]}
+          "The name of the machine learning model used by the inference scheduler to be listed."];
+      status: InferenceSchedulerStatus.t option
+        [@ocaml.doc
+          "Specifies the current status of the inference schedulers."]}
     let make ?nextToken =
       fun ?maxResults ->
         fun ?inferenceSchedulerNameBeginsWith ->
           fun ?modelName ->
-            fun () ->
-              {
-                nextToken;
-                maxResults;
-                inferenceSchedulerNameBeginsWith;
-                modelName
-              }
+            fun ?status ->
+              fun () ->
+                {
+                  nextToken;
+                  maxResults;
+                  inferenceSchedulerNameBeginsWith;
+                  modelName;
+                  status
+                }
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
@@ -3298,9 +7303,14 @@ module ListInferenceSchedulersRequest =
         ("InferenceSchedulerNameBeginsWith",
           (Option.map x.inferenceSchedulerNameBeginsWith
              ~f:InferenceSchedulerIdentifier.to_value));
-        ("ModelName", (Option.map x.modelName ~f:ModelName.to_value))]
+        ("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
+        ("Status",
+          (Option.map x.status ~f:InferenceSchedulerStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:InferenceSchedulerStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
       let modelName =
         (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
       let inferenceSchedulerNameBeginsWith =
@@ -3310,17 +7320,18 @@ module ListInferenceSchedulersRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?modelName ?inferenceSchedulerNameBeginsWith ?maxResults
+      make ?status ?modelName ?inferenceSchedulerNameBeginsWith ?maxResults
         ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelName = field_map json "ModelName" ModelName.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" InferenceSchedulerStatus.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
       let inferenceSchedulerNameBeginsWith =
-        field_map json "InferenceSchedulerNameBeginsWith"
+        field_map json__ "InferenceSchedulerNameBeginsWith"
           InferenceSchedulerIdentifier.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      make ?modelName ?inferenceSchedulerNameBeginsWith ?maxResults
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?status ?modelName ?inferenceSchedulerNameBeginsWith ?maxResults
         ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3334,7 +7345,7 @@ module ListInferenceExecutionsResponse =
           "An opaque pagination token indicating where to continue the listing of inference executions."];
       inferenceExecutionSummaries: InferenceExecutionSummaries.t option
         [@ocaml.doc
-          "Provides an array of information about the individual inference executions returned from the ListInferenceExecutions operation, including model used, inference scheduler, data configuration, and so on."]}
+          "Provides an array of information about the individual inference executions returned from the ListInferenceExecutions operation, including model used, inference scheduler, data configuration, and so on. If you don't supply the InferenceSchedulerName request parameter, or if you supply the name of an inference scheduler that doesn't exist, ListInferenceExecutions returns an empty array in InferenceExecutionSummaries."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -3416,11 +7427,11 @@ module ListInferenceExecutionsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?inferenceExecutionSummaries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inferenceExecutionSummaries =
-        field_map json "InferenceExecutionSummaries"
+        field_map json__ "InferenceExecutionSummaries"
           InferenceExecutionSummaries.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?inferenceExecutionSummaries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3496,22 +7507,198 @@ module ListInferenceExecutionsRequest =
       make ?status ?dataEndTimeBefore ?dataStartTimeAfter
         ~inferenceSchedulerName ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" InferenceExecutionStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" InferenceExecutionStatus.of_json in
       let dataEndTimeBefore =
-        field_map json "DataEndTimeBefore" Timestamp.of_json in
+        field_map json__ "DataEndTimeBefore" Timestamp.of_json in
       let dataStartTimeAfter =
-        field_map json "DataStartTimeAfter" Timestamp.of_json in
+        field_map json__ "DataStartTimeAfter" Timestamp.of_json in
       let inferenceSchedulerName =
-        field_map_exn json "InferenceSchedulerName"
+        field_map_exn json__ "InferenceSchedulerName"
           InferenceSchedulerIdentifier.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?status ?dataEndTimeBefore ?dataStartTimeAfter
         ~inferenceSchedulerName ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all inference executions that have been performed by the specified inference scheduler."]
+module ListInferenceEventsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An opaque pagination token indicating where to continue the listing of inference executions."];
+      inferenceEventSummaries: InferenceEventSummaries.t option
+        [@ocaml.doc
+          "Provides an array of information about the individual inference events returned from the ListInferenceEvents operation, including scheduler used, event start time, event end time, diagnostics, and so on."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?inferenceEventSummaries ->
+        fun () -> { nextToken; inferenceEventSummaries }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("InferenceEventSummaries",
+          (Option.map x.inferenceEventSummaries
+             ~f:InferenceEventSummaries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let inferenceEventSummaries =
+        (Option.map ~f:InferenceEventSummaries.of_xml)
+          (Xml.child xml_arg0 "InferenceEventSummaries") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?inferenceEventSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let inferenceEventSummaries =
+        field_map json__ "InferenceEventSummaries"
+          InferenceEventSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?inferenceEventSummaries ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all inference events that have been found for the specified inference scheduler."]
+module ListInferenceEventsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An opaque pagination token indicating where to continue the listing of inference events."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "Specifies the maximum number of inference events to list."];
+      inferenceSchedulerName: InferenceSchedulerIdentifier.t
+        [@ocaml.doc
+          "The name of the inference scheduler for the inference events listed."];
+      intervalStartTime: Timestamp.t
+        [@ocaml.doc
+          "Lookout for Equipment will return all the inference events with an end time equal to or greater than the start time given."];
+      intervalEndTime: Timestamp.t
+        [@ocaml.doc
+          "Returns all the inference events with an end start time equal to or greater than less than the end time given."]}
+    let context_ = "ListInferenceEventsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~inferenceSchedulerName ->
+          fun ~intervalStartTime ->
+            fun ~intervalEndTime ->
+              fun () ->
+                {
+                  nextToken;
+                  maxResults;
+                  inferenceSchedulerName;
+                  intervalStartTime;
+                  intervalEndTime
+                }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("InferenceSchedulerName",
+          (Some
+             (InferenceSchedulerIdentifier.to_value x.inferenceSchedulerName)));
+        ("IntervalStartTime",
+          (Some (Timestamp.to_value x.intervalStartTime)));
+        ("IntervalEndTime", (Some (Timestamp.to_value x.intervalEndTime)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let intervalEndTime =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IntervalEndTime") in
+      let intervalStartTime =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IntervalStartTime") in
+      let inferenceSchedulerName =
+        InferenceSchedulerIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InferenceSchedulerName") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ~intervalEndTime ~intervalStartTime ~inferenceSchedulerName
+        ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let intervalEndTime =
+        field_map_exn json__ "IntervalEndTime" Timestamp.of_json in
+      let intervalStartTime =
+        field_map_exn json__ "IntervalStartTime" Timestamp.of_json in
+      let inferenceSchedulerName =
+        field_map_exn json__ "InferenceSchedulerName"
+          InferenceSchedulerIdentifier.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ~intervalEndTime ~intervalStartTime ~inferenceSchedulerName
+        ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all inference events that have been found for the specified inference scheduler."]
 module ListDatasetsResponse =
   struct
     type nonrec t =
@@ -3592,10 +7779,10 @@ module ListDatasetsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?datasetSummaries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetSummaries =
-        field_map json "DatasetSummaries" DatasetSummaries.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "DatasetSummaries" DatasetSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?datasetSummaries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3633,11 +7820,11 @@ module ListDatasetsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?datasetNameBeginsWith ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetNameBeginsWith =
-        field_map json "DatasetNameBeginsWith" DatasetName.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "DatasetNameBeginsWith" DatasetName.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?datasetNameBeginsWith ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3724,11 +7911,11 @@ module ListDataIngestionJobsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?dataIngestionJobSummaries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataIngestionJobSummaries =
-        field_map json "DataIngestionJobSummaries"
+        field_map json__ "DataIngestionJobSummaries"
           DataIngestionJobSummaries.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?dataIngestionJobSummaries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3772,30 +7959,1392 @@ module ListDataIngestionJobsRequest =
         (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "DatasetName") in
       make ?status ?maxResults ?nextToken ?datasetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" IngestionJobStatus.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" IngestionJobStatus.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
       make ?status ?maxResults ?nextToken ?datasetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides a list of all data ingestion jobs, including dataset name and ARN, S3 location of the input data, status, and so on."]
+module ImportModelVersionResponse =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t option
+        [@ocaml.doc "The name for the machine learning model."];
+      modelArn: ModelArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the model being created."];
+      modelVersionArn: ModelVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the model version being created."];
+      modelVersion: ModelVersion.t option
+        [@ocaml.doc "The version of the model being created."];
+      status: ModelVersionStatus.t option
+        [@ocaml.doc "The status of the ImportModelVersion operation."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?modelName =
+      fun ?modelArn ->
+        fun ?modelVersionArn ->
+          fun ?modelVersion ->
+            fun ?status ->
+              fun () ->
+                { modelName; modelArn; modelVersionArn; modelVersion; status
+                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
+        ("ModelArn", (Option.map x.modelArn ~f:ModelArn.to_value));
+        ("ModelVersionArn",
+          (Option.map x.modelVersionArn ~f:ModelVersionArn.to_value));
+        ("ModelVersion",
+          (Option.map x.modelVersion ~f:ModelVersion.to_value));
+        ("Status", (Option.map x.status ~f:ModelVersionStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:ModelVersionStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let modelVersion =
+        (Option.map ~f:ModelVersion.of_xml)
+          (Xml.child xml_arg0 "ModelVersion") in
+      let modelVersionArn =
+        (Option.map ~f:ModelVersionArn.of_xml)
+          (Xml.child xml_arg0 "ModelVersionArn") in
+      let modelArn =
+        (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
+      let modelName =
+        (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
+      make ?status ?modelVersion ?modelVersionArn ?modelArn ?modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" ModelVersionStatus.of_json in
+      let modelVersion = field_map json__ "ModelVersion" ModelVersion.of_json in
+      let modelVersionArn =
+        field_map json__ "ModelVersionArn" ModelVersionArn.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      make ?status ?modelVersion ?modelVersionArn ?modelArn ?modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Imports a model that has been trained successfully."]
+module ImportModelVersionRequest =
+  struct
+    type nonrec t =
+      {
+      sourceModelVersionArn: ModelVersionArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the model version to import."];
+      modelName: ModelName.t option
+        [@ocaml.doc
+          "The name for the machine learning model to be created. If the model already exists, Amazon Lookout for Equipment creates a new version. If you do not specify this field, it is filled with the name of the source model."];
+      datasetName: DatasetIdentifier.t
+        [@ocaml.doc
+          "The name of the dataset for the machine learning model being imported."];
+      labelsInputConfiguration: LabelsInputConfiguration.t option ;
+      clientToken: IdempotenceToken.t
+        [@ocaml.doc
+          "A unique identifier for the request. If you do not set the client request token, Amazon Lookout for Equipment generates one."];
+      roleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of a role with permission to access the data source being used to create the machine learning model."];
+      serverSideKmsKeyId: NameOrArn.t option
+        [@ocaml.doc
+          "Provides the identifier of the KMS key key used to encrypt model data by Amazon Lookout for Equipment."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The tags associated with the machine learning model to be created."];
+      inferenceDataImportStrategy: InferenceDataImportStrategy.t option
+        [@ocaml.doc
+          "Indicates how to import the accumulated inference data when a model version is imported. The possible values are as follows: NO_IMPORT \226\128\147 Don't import the data. ADD_WHEN_EMPTY \226\128\147 Only import the data from the source model if there is no existing data in the target model. OVERWRITE \226\128\147 Import the data from the source model and overwrite the existing data in the target model."]}
+    let context_ = "ImportModelVersionRequest"
+    let make ?modelName =
+      fun ?labelsInputConfiguration ->
+        fun ?roleArn ->
+          fun ?serverSideKmsKeyId ->
+            fun ?tags ->
+              fun ?inferenceDataImportStrategy ->
+                fun ~sourceModelVersionArn ->
+                  fun ~datasetName ->
+                    fun ~clientToken ->
+                      fun () ->
+                        {
+                          modelName;
+                          labelsInputConfiguration;
+                          roleArn;
+                          serverSideKmsKeyId;
+                          tags;
+                          inferenceDataImportStrategy;
+                          sourceModelVersionArn;
+                          datasetName;
+                          clientToken
+                        }
+    let to_value x =
+      structure_to_value
+        [("SourceModelVersionArn",
+           (Some (ModelVersionArn.to_value x.sourceModelVersionArn)));
+        ("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
+        ("DatasetName", (Some (DatasetIdentifier.to_value x.datasetName)));
+        ("LabelsInputConfiguration",
+          (Option.map x.labelsInputConfiguration
+             ~f:LabelsInputConfiguration.to_value));
+        ("ClientToken", (Some (IdempotenceToken.to_value x.clientToken)));
+        ("RoleArn", (Option.map x.roleArn ~f:IamRoleArn.to_value));
+        ("ServerSideKmsKeyId",
+          (Option.map x.serverSideKmsKeyId ~f:NameOrArn.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("InferenceDataImportStrategy",
+          (Option.map x.inferenceDataImportStrategy
+             ~f:InferenceDataImportStrategy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let inferenceDataImportStrategy =
+        (Option.map ~f:InferenceDataImportStrategy.of_xml)
+          (Xml.child xml_arg0 "InferenceDataImportStrategy") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let serverSideKmsKeyId =
+        (Option.map ~f:NameOrArn.of_xml)
+          (Xml.child xml_arg0 "ServerSideKmsKeyId") in
+      let roleArn =
+        (Option.map ~f:IamRoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
+      let clientToken =
+        IdempotenceToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+      let labelsInputConfiguration =
+        (Option.map ~f:LabelsInputConfiguration.of_xml)
+          (Xml.child xml_arg0 "LabelsInputConfiguration") in
+      let datasetName =
+        DatasetIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DatasetName") in
+      let modelName =
+        (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
+      let sourceModelVersionArn =
+        ModelVersionArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceModelVersionArn") in
+      make ?inferenceDataImportStrategy ?tags ?serverSideKmsKeyId ?roleArn
+        ~clientToken ?labelsInputConfiguration ~datasetName ?modelName
+        ~sourceModelVersionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let inferenceDataImportStrategy =
+        field_map json__ "InferenceDataImportStrategy"
+          InferenceDataImportStrategy.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let serverSideKmsKeyId =
+        field_map json__ "ServerSideKmsKeyId" NameOrArn.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" IdempotenceToken.of_json in
+      let labelsInputConfiguration =
+        field_map json__ "LabelsInputConfiguration"
+          LabelsInputConfiguration.of_json in
+      let datasetName =
+        field_map_exn json__ "DatasetName" DatasetIdentifier.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      let sourceModelVersionArn =
+        field_map_exn json__ "SourceModelVersionArn" ModelVersionArn.of_json in
+      make ?inferenceDataImportStrategy ?tags ?serverSideKmsKeyId ?roleArn
+        ~clientToken ?labelsInputConfiguration ~datasetName ?modelName
+        ~sourceModelVersionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Imports a model that has been trained successfully."]
+module ImportDatasetResponse =
+  struct
+    type nonrec t =
+      {
+      datasetName: DatasetName.t option
+        [@ocaml.doc "The name of the created machine learning dataset."];
+      datasetArn: DatasetArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the dataset that was imported."];
+      status: DatasetStatus.t option
+        [@ocaml.doc "The status of the ImportDataset operation."];
+      jobId: IngestionJobId.t option
+        [@ocaml.doc
+          "A unique identifier for the job of importing the dataset."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?datasetName =
+      fun ?datasetArn ->
+        fun ?status ->
+          fun ?jobId -> fun () -> { datasetName; datasetArn; status; jobId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DatasetName", (Option.map x.datasetName ~f:DatasetName.to_value));
+        ("DatasetArn", (Option.map x.datasetArn ~f:DatasetArn.to_value));
+        ("Status", (Option.map x.status ~f:DatasetStatus.to_value));
+        ("JobId", (Option.map x.jobId ~f:IngestionJobId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobId =
+        (Option.map ~f:IngestionJobId.of_xml) (Xml.child xml_arg0 "JobId") in
+      let status =
+        (Option.map ~f:DatasetStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let datasetArn =
+        (Option.map ~f:DatasetArn.of_xml) (Xml.child xml_arg0 "DatasetArn") in
+      let datasetName =
+        (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "DatasetName") in
+      make ?jobId ?status ?datasetArn ?datasetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" IngestionJobId.of_json in
+      let status = field_map json__ "Status" DatasetStatus.of_json in
+      let datasetArn = field_map json__ "DatasetArn" DatasetArn.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      make ?jobId ?status ?datasetArn ?datasetName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Imports a dataset."]
+module ImportDatasetRequest =
+  struct
+    type nonrec t =
+      {
+      sourceDatasetArn: DatasetArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the dataset to import."];
+      datasetName: DatasetName.t option
+        [@ocaml.doc
+          "The name of the machine learning dataset to be created. If the dataset already exists, Amazon Lookout for Equipment overwrites the existing dataset. If you don't specify this field, it is filled with the name of the source dataset."];
+      clientToken: IdempotenceToken.t
+        [@ocaml.doc
+          "A unique identifier for the request. If you do not set the client request token, Amazon Lookout for Equipment generates one."];
+      serverSideKmsKeyId: NameOrArn.t option
+        [@ocaml.doc
+          "Provides the identifier of the KMS key key used to encrypt model data by Amazon Lookout for Equipment."];
+      tags: TagList.t option
+        [@ocaml.doc "Any tags associated with the dataset to be created."]}
+    let context_ = "ImportDatasetRequest"
+    let make ?datasetName =
+      fun ?serverSideKmsKeyId ->
+        fun ?tags ->
+          fun ~sourceDatasetArn ->
+            fun ~clientToken ->
+              fun () ->
+                {
+                  datasetName;
+                  serverSideKmsKeyId;
+                  tags;
+                  sourceDatasetArn;
+                  clientToken
+                }
+    let to_value x =
+      structure_to_value
+        [("SourceDatasetArn",
+           (Some (DatasetArn.to_value x.sourceDatasetArn)));
+        ("DatasetName", (Option.map x.datasetName ~f:DatasetName.to_value));
+        ("ClientToken", (Some (IdempotenceToken.to_value x.clientToken)));
+        ("ServerSideKmsKeyId",
+          (Option.map x.serverSideKmsKeyId ~f:NameOrArn.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let serverSideKmsKeyId =
+        (Option.map ~f:NameOrArn.of_xml)
+          (Xml.child xml_arg0 "ServerSideKmsKeyId") in
+      let clientToken =
+        IdempotenceToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+      let datasetName =
+        (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "DatasetName") in
+      let sourceDatasetArn =
+        DatasetArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceDatasetArn") in
+      make ?tags ?serverSideKmsKeyId ~clientToken ?datasetName
+        ~sourceDatasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let serverSideKmsKeyId =
+        field_map json__ "ServerSideKmsKeyId" NameOrArn.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" IdempotenceToken.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      let sourceDatasetArn =
+        field_map_exn json__ "SourceDatasetArn" DatasetArn.of_json in
+      make ?tags ?serverSideKmsKeyId ~clientToken ?datasetName
+        ~sourceDatasetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Imports a dataset."]
+module DescribeRetrainingSchedulerResponse =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t option
+        [@ocaml.doc
+          "The name of the model that the retraining scheduler is attached to."];
+      modelArn: ModelArn.t option
+        [@ocaml.doc
+          "The ARN of the model that the retraining scheduler is attached to."];
+      retrainingStartDate: Timestamp.t option
+        [@ocaml.doc
+          "The start date for the retraining scheduler. Lookout for Equipment truncates the time you provide to the nearest UTC day."];
+      retrainingFrequency: RetrainingFrequency.t option
+        [@ocaml.doc
+          "The frequency at which the model retraining is set. This follows the ISO 8601 guidelines."];
+      lookbackWindow: LookbackWindow.t option
+        [@ocaml.doc "The number of past days of data used for retraining."];
+      status: RetrainingSchedulerStatus.t option
+        [@ocaml.doc "The status of the retraining scheduler."];
+      promoteMode: ModelPromoteMode.t option
+        [@ocaml.doc
+          "Indicates how the service uses new models. In MANAGED mode, new models are used for inference if they have better performance than the current model. In MANUAL mode, the new models are not used until they are manually activated."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the time and date at which the retraining scheduler was created."];
+      updatedAt: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the time and date at which the retraining scheduler was updated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?modelName =
+      fun ?modelArn ->
+        fun ?retrainingStartDate ->
+          fun ?retrainingFrequency ->
+            fun ?lookbackWindow ->
+              fun ?status ->
+                fun ?promoteMode ->
+                  fun ?createdAt ->
+                    fun ?updatedAt ->
+                      fun () ->
+                        {
+                          modelName;
+                          modelArn;
+                          retrainingStartDate;
+                          retrainingFrequency;
+                          lookbackWindow;
+                          status;
+                          promoteMode;
+                          createdAt;
+                          updatedAt
+                        }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
+        ("ModelArn", (Option.map x.modelArn ~f:ModelArn.to_value));
+        ("RetrainingStartDate",
+          (Option.map x.retrainingStartDate ~f:Timestamp.to_value));
+        ("RetrainingFrequency",
+          (Option.map x.retrainingFrequency ~f:RetrainingFrequency.to_value));
+        ("LookbackWindow",
+          (Option.map x.lookbackWindow ~f:LookbackWindow.to_value));
+        ("Status",
+          (Option.map x.status ~f:RetrainingSchedulerStatus.to_value));
+        ("PromoteMode",
+          (Option.map x.promoteMode ~f:ModelPromoteMode.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let promoteMode =
+        (Option.map ~f:ModelPromoteMode.of_xml)
+          (Xml.child xml_arg0 "PromoteMode") in
+      let status =
+        (Option.map ~f:RetrainingSchedulerStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let lookbackWindow =
+        (Option.map ~f:LookbackWindow.of_xml)
+          (Xml.child xml_arg0 "LookbackWindow") in
+      let retrainingFrequency =
+        (Option.map ~f:RetrainingFrequency.of_xml)
+          (Xml.child xml_arg0 "RetrainingFrequency") in
+      let retrainingStartDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "RetrainingStartDate") in
+      let modelArn =
+        (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
+      let modelName =
+        (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
+      make ?updatedAt ?createdAt ?promoteMode ?status ?lookbackWindow
+        ?retrainingFrequency ?retrainingStartDate ?modelArn ?modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let promoteMode =
+        field_map json__ "PromoteMode" ModelPromoteMode.of_json in
+      let status =
+        field_map json__ "Status" RetrainingSchedulerStatus.of_json in
+      let lookbackWindow =
+        field_map json__ "LookbackWindow" LookbackWindow.of_json in
+      let retrainingFrequency =
+        field_map json__ "RetrainingFrequency" RetrainingFrequency.of_json in
+      let retrainingStartDate =
+        field_map json__ "RetrainingStartDate" Timestamp.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      make ?updatedAt ?createdAt ?promoteMode ?status ?lookbackWindow
+        ?retrainingFrequency ?retrainingStartDate ?modelArn ?modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a description of the retraining scheduler, including information such as the model name and retraining parameters."]
+module DescribeRetrainingSchedulerRequest =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t
+        [@ocaml.doc
+          "The name of the model that the retraining scheduler is attached to."]}
+    let context_ = "DescribeRetrainingSchedulerRequest"
+    let make ~modelName = fun () -> { modelName }
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Some (ModelName.to_value x.modelName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modelName =
+        ModelName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
+      make ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
+      make ~modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a description of the retraining scheduler, including information such as the model name and retraining parameters."]
+module DescribeResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      policyRevisionId: PolicyRevisionId.t option
+        [@ocaml.doc
+          "A unique identifier for a revision of the resource policy."];
+      resourcePolicy: Policy.t option
+        [@ocaml.doc "The resource policy in a JSON-formatted string."];
+      creationTime: Timestamp.t option
+        [@ocaml.doc "The time when the resource policy was created."];
+      lastModifiedTime: Timestamp.t option
+        [@ocaml.doc "The time when the resource policy was last modified."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policyRevisionId =
+      fun ?resourcePolicy ->
+        fun ?creationTime ->
+          fun ?lastModifiedTime ->
+            fun () ->
+              {
+                policyRevisionId;
+                resourcePolicy;
+                creationTime;
+                lastModifiedTime
+              }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PolicyRevisionId",
+           (Option.map x.policyRevisionId ~f:PolicyRevisionId.to_value));
+        ("ResourcePolicy", (Option.map x.resourcePolicy ~f:Policy.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let creationTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let resourcePolicy =
+        (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "ResourcePolicy") in
+      let policyRevisionId =
+        (Option.map ~f:PolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "PolicyRevisionId") in
+      make ?lastModifiedTime ?creationTime ?resourcePolicy ?policyRevisionId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Timestamp.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let resourcePolicy = field_map json__ "ResourcePolicy" Policy.of_json in
+      let policyRevisionId =
+        field_map json__ "PolicyRevisionId" PolicyRevisionId.of_json in
+      make ?lastModifiedTime ?creationTime ?resourcePolicy ?policyRevisionId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the details of a resource policy attached to a resource."]
+module DescribeResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource that is associated with the resource policy."]}
+    let context_ = "DescribeResourcePolicyRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the details of a resource policy attached to a resource."]
+module DescribeModelVersionResponse =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t option
+        [@ocaml.doc
+          "The name of the machine learning model that this version belongs to."];
+      modelArn: ModelArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the parent machine learning model that this version belong to."];
+      modelVersion: ModelVersion.t option
+        [@ocaml.doc "The version of the machine learning model."];
+      modelVersionArn: ModelVersionArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the model version."];
+      status: ModelVersionStatus.t option
+        [@ocaml.doc "The current status of the model version."];
+      sourceType: ModelVersionSourceType.t option
+        [@ocaml.doc
+          "Indicates whether this model version was created by training or by importing."];
+      datasetName: DatasetName.t option
+        [@ocaml.doc
+          "The name of the dataset used to train the model version."];
+      datasetArn: DatasetArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the dataset used to train the model version."];
+      schema: InlineDataSchema.t option
+        [@ocaml.doc
+          "The schema of the data used to train the model version."];
+      labelsInputConfiguration: LabelsInputConfiguration.t option ;
+      trainingDataStartTime: Timestamp.t option
+        [@ocaml.doc
+          "The date on which the training data began being gathered. If you imported the version, this is the date that the training data in the source version began being gathered."];
+      trainingDataEndTime: Timestamp.t option
+        [@ocaml.doc
+          "The date on which the training data finished being gathered. If you imported the version, this is the date that the training data in the source version finished being gathered."];
+      evaluationDataStartTime: Timestamp.t option
+        [@ocaml.doc
+          "The date on which the data in the evaluation set began being gathered. If you imported the version, this is the date that the evaluation set data in the source version began being gathered."];
+      evaluationDataEndTime: Timestamp.t option
+        [@ocaml.doc
+          "The date on which the data in the evaluation set began being gathered. If you imported the version, this is the date that the evaluation set data in the source version finished being gathered."];
+      roleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the role that was used to train the model version."];
+      dataPreProcessingConfiguration: DataPreProcessingConfiguration.t option ;
+      trainingExecutionStartTime: Timestamp.t option
+        [@ocaml.doc "The time when the training of the version began."];
+      trainingExecutionEndTime: Timestamp.t option
+        [@ocaml.doc "The time when the training of the version completed."];
+      failedReason: BoundedLengthString.t option
+        [@ocaml.doc
+          "The failure message if the training of the model version failed."];
+      modelMetrics: ModelMetrics.t option
+        [@ocaml.doc
+          "Shows an aggregated summary, in JSON format, of the model's performance within the evaluation time range. These metrics are created when evaluating the model."];
+      lastUpdatedTime: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the last time the machine learning model version was updated."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the time and date at which the machine learning model version was created."];
+      serverSideKmsKeyId: KmsKeyArn.t option
+        [@ocaml.doc
+          "The identifier of the KMS key key used to encrypt model version data by Amazon Lookout for Equipment."];
+      offCondition: OffCondition.t option
+        [@ocaml.doc
+          "Indicates that the asset associated with this sensor has been shut off. As long as this condition is met, Lookout for Equipment will not use data from this asset for training, evaluation, or inference."];
+      sourceModelVersionArn: ModelVersionArn.t option
+        [@ocaml.doc
+          "If model version was imported, then this field is the arn of the source model version."];
+      importJobStartTime: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the import job began. This field appears if the model version was imported."];
+      importJobEndTime: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the import job completed. This field appears if the model version was imported."];
+      importedDataSizeInBytes: DataSizeInBytes.t option
+        [@ocaml.doc
+          "The size in bytes of the imported data. This field appears if the model version was imported."];
+      priorModelMetrics: ModelMetrics.t option
+        [@ocaml.doc
+          "If the model version was retrained, this field shows a summary of the performance of the prior model on the new training range. You can use the information in this JSON-formatted object to compare the new model version and the prior model version."];
+      retrainingAvailableDataInDays: Integer.t option
+        [@ocaml.doc
+          "Indicates the number of days of data used in the most recent scheduled retraining run."];
+      autoPromotionResult: AutoPromotionResult.t option
+        [@ocaml.doc
+          "Indicates whether the model version was promoted to be the active version after retraining or if there was an error with or cancellation of the retraining."];
+      autoPromotionResultReason: AutoPromotionResultReason.t option
+        [@ocaml.doc
+          "Indicates the reason for the AutoPromotionResult. For example, a model might not be promoted if its performance was worse than the active version, if there was an error during training, or if the retraining scheduler was using MANUAL promote mode. The model will be promoted in MANAGED promote mode if the performance is better than the previous model."];
+      modelDiagnosticsOutputConfiguration:
+        ModelDiagnosticsOutputConfiguration.t option
+        [@ocaml.doc
+          "The Amazon S3 location where Amazon Lookout for Equipment saves the pointwise model diagnostics for the model version."];
+      modelDiagnosticsResultsObject: S3Object.t option
+        [@ocaml.doc
+          "The Amazon S3 output prefix for where Lookout for Equipment saves the pointwise model diagnostics for the model version."];
+      modelQuality: ModelQuality.t option
+        [@ocaml.doc
+          "Provides a quality assessment for a model that uses labels. If Lookout for Equipment determines that the model quality is poor based on training metrics, the value is POOR_QUALITY_DETECTED. Otherwise, the value is QUALITY_THRESHOLD_MET. If the model is unlabeled, the model quality can't be assessed and the value of ModelQuality is CANNOT_DETERMINE_QUALITY. In this situation, you can get a model quality assessment by adding labels to the input dataset and retraining the model. For information about using labels with your models, see Understanding labeling. For information about improving the quality of a model, see Best practices with Amazon Lookout for Equipment."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?modelName =
+      fun ?modelArn ->
+        fun ?modelVersion ->
+          fun ?modelVersionArn ->
+            fun ?status ->
+              fun ?sourceType ->
+                fun ?datasetName ->
+                  fun ?datasetArn ->
+                    fun ?schema ->
+                      fun ?labelsInputConfiguration ->
+                        fun ?trainingDataStartTime ->
+                          fun ?trainingDataEndTime ->
+                            fun ?evaluationDataStartTime ->
+                              fun ?evaluationDataEndTime ->
+                                fun ?roleArn ->
+                                  fun ?dataPreProcessingConfiguration ->
+                                    fun ?trainingExecutionStartTime ->
+                                      fun ?trainingExecutionEndTime ->
+                                        fun ?failedReason ->
+                                          fun ?modelMetrics ->
+                                            fun ?lastUpdatedTime ->
+                                              fun ?createdAt ->
+                                                fun ?serverSideKmsKeyId ->
+                                                  fun ?offCondition ->
+                                                    fun
+                                                      ?sourceModelVersionArn
+                                                      ->
+                                                      fun ?importJobStartTime
+                                                        ->
+                                                        fun ?importJobEndTime
+                                                          ->
+                                                          fun
+                                                            ?importedDataSizeInBytes
+                                                            ->
+                                                            fun
+                                                              ?priorModelMetrics
+                                                              ->
+                                                              fun
+                                                                ?retrainingAvailableDataInDays
+                                                                ->
+                                                                fun
+                                                                  ?autoPromotionResult
+                                                                  ->
+                                                                  fun
+                                                                    ?autoPromotionResultReason
+                                                                    ->
+                                                                    fun
+                                                                    ?modelDiagnosticsOutputConfiguration
+                                                                    ->
+                                                                    fun
+                                                                    ?modelDiagnosticsResultsObject
+                                                                    ->
+                                                                    fun
+                                                                    ?modelQuality
+                                                                    ->
+                                                                    fun () ->
+                                                                    {
+                                                                    modelName;
+                                                                    modelArn;
+                                                                    modelVersion;
+                                                                    modelVersionArn;
+                                                                    status;
+                                                                    sourceType;
+                                                                    datasetName;
+                                                                    datasetArn;
+                                                                    schema;
+                                                                    labelsInputConfiguration;
+                                                                    trainingDataStartTime;
+                                                                    trainingDataEndTime;
+                                                                    evaluationDataStartTime;
+                                                                    evaluationDataEndTime;
+                                                                    roleArn;
+                                                                    dataPreProcessingConfiguration;
+                                                                    trainingExecutionStartTime;
+                                                                    trainingExecutionEndTime;
+                                                                    failedReason;
+                                                                    modelMetrics;
+                                                                    lastUpdatedTime;
+                                                                    createdAt;
+                                                                    serverSideKmsKeyId;
+                                                                    offCondition;
+                                                                    sourceModelVersionArn;
+                                                                    importJobStartTime;
+                                                                    importJobEndTime;
+                                                                    importedDataSizeInBytes;
+                                                                    priorModelMetrics;
+                                                                    retrainingAvailableDataInDays;
+                                                                    autoPromotionResult;
+                                                                    autoPromotionResultReason;
+                                                                    modelDiagnosticsOutputConfiguration;
+                                                                    modelDiagnosticsResultsObject;
+                                                                    modelQuality
+                                                                    }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
+        ("ModelArn", (Option.map x.modelArn ~f:ModelArn.to_value));
+        ("ModelVersion",
+          (Option.map x.modelVersion ~f:ModelVersion.to_value));
+        ("ModelVersionArn",
+          (Option.map x.modelVersionArn ~f:ModelVersionArn.to_value));
+        ("Status", (Option.map x.status ~f:ModelVersionStatus.to_value));
+        ("SourceType",
+          (Option.map x.sourceType ~f:ModelVersionSourceType.to_value));
+        ("DatasetName", (Option.map x.datasetName ~f:DatasetName.to_value));
+        ("DatasetArn", (Option.map x.datasetArn ~f:DatasetArn.to_value));
+        ("Schema", (Option.map x.schema ~f:InlineDataSchema.to_value));
+        ("LabelsInputConfiguration",
+          (Option.map x.labelsInputConfiguration
+             ~f:LabelsInputConfiguration.to_value));
+        ("TrainingDataStartTime",
+          (Option.map x.trainingDataStartTime ~f:Timestamp.to_value));
+        ("TrainingDataEndTime",
+          (Option.map x.trainingDataEndTime ~f:Timestamp.to_value));
+        ("EvaluationDataStartTime",
+          (Option.map x.evaluationDataStartTime ~f:Timestamp.to_value));
+        ("EvaluationDataEndTime",
+          (Option.map x.evaluationDataEndTime ~f:Timestamp.to_value));
+        ("RoleArn", (Option.map x.roleArn ~f:IamRoleArn.to_value));
+        ("DataPreProcessingConfiguration",
+          (Option.map x.dataPreProcessingConfiguration
+             ~f:DataPreProcessingConfiguration.to_value));
+        ("TrainingExecutionStartTime",
+          (Option.map x.trainingExecutionStartTime ~f:Timestamp.to_value));
+        ("TrainingExecutionEndTime",
+          (Option.map x.trainingExecutionEndTime ~f:Timestamp.to_value));
+        ("FailedReason",
+          (Option.map x.failedReason ~f:BoundedLengthString.to_value));
+        ("ModelMetrics",
+          (Option.map x.modelMetrics ~f:ModelMetrics.to_value));
+        ("LastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:Timestamp.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("ServerSideKmsKeyId",
+          (Option.map x.serverSideKmsKeyId ~f:KmsKeyArn.to_value));
+        ("OffCondition",
+          (Option.map x.offCondition ~f:OffCondition.to_value));
+        ("SourceModelVersionArn",
+          (Option.map x.sourceModelVersionArn ~f:ModelVersionArn.to_value));
+        ("ImportJobStartTime",
+          (Option.map x.importJobStartTime ~f:Timestamp.to_value));
+        ("ImportJobEndTime",
+          (Option.map x.importJobEndTime ~f:Timestamp.to_value));
+        ("ImportedDataSizeInBytes",
+          (Option.map x.importedDataSizeInBytes ~f:DataSizeInBytes.to_value));
+        ("PriorModelMetrics",
+          (Option.map x.priorModelMetrics ~f:ModelMetrics.to_value));
+        ("RetrainingAvailableDataInDays",
+          (Option.map x.retrainingAvailableDataInDays ~f:Integer.to_value));
+        ("AutoPromotionResult",
+          (Option.map x.autoPromotionResult ~f:AutoPromotionResult.to_value));
+        ("AutoPromotionResultReason",
+          (Option.map x.autoPromotionResultReason
+             ~f:AutoPromotionResultReason.to_value));
+        ("ModelDiagnosticsOutputConfiguration",
+          (Option.map x.modelDiagnosticsOutputConfiguration
+             ~f:ModelDiagnosticsOutputConfiguration.to_value));
+        ("ModelDiagnosticsResultsObject",
+          (Option.map x.modelDiagnosticsResultsObject ~f:S3Object.to_value));
+        ("ModelQuality",
+          (Option.map x.modelQuality ~f:ModelQuality.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modelQuality =
+        (Option.map ~f:ModelQuality.of_xml)
+          (Xml.child xml_arg0 "ModelQuality") in
+      let modelDiagnosticsResultsObject =
+        (Option.map ~f:S3Object.of_xml)
+          (Xml.child xml_arg0 "ModelDiagnosticsResultsObject") in
+      let modelDiagnosticsOutputConfiguration =
+        (Option.map ~f:ModelDiagnosticsOutputConfiguration.of_xml)
+          (Xml.child xml_arg0 "ModelDiagnosticsOutputConfiguration") in
+      let autoPromotionResultReason =
+        (Option.map ~f:AutoPromotionResultReason.of_xml)
+          (Xml.child xml_arg0 "AutoPromotionResultReason") in
+      let autoPromotionResult =
+        (Option.map ~f:AutoPromotionResult.of_xml)
+          (Xml.child xml_arg0 "AutoPromotionResult") in
+      let retrainingAvailableDataInDays =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "RetrainingAvailableDataInDays") in
+      let priorModelMetrics =
+        (Option.map ~f:ModelMetrics.of_xml)
+          (Xml.child xml_arg0 "PriorModelMetrics") in
+      let importedDataSizeInBytes =
+        (Option.map ~f:DataSizeInBytes.of_xml)
+          (Xml.child xml_arg0 "ImportedDataSizeInBytes") in
+      let importJobEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "ImportJobEndTime") in
+      let importJobStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "ImportJobStartTime") in
+      let sourceModelVersionArn =
+        (Option.map ~f:ModelVersionArn.of_xml)
+          (Xml.child xml_arg0 "SourceModelVersionArn") in
+      let offCondition =
+        (Option.map ~f:OffCondition.of_xml)
+          (Xml.child xml_arg0 "OffCondition") in
+      let serverSideKmsKeyId =
+        (Option.map ~f:KmsKeyArn.of_xml)
+          (Xml.child xml_arg0 "ServerSideKmsKeyId") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let lastUpdatedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTime") in
+      let modelMetrics =
+        (Option.map ~f:ModelMetrics.of_xml)
+          (Xml.child xml_arg0 "ModelMetrics") in
+      let failedReason =
+        (Option.map ~f:BoundedLengthString.of_xml)
+          (Xml.child xml_arg0 "FailedReason") in
+      let trainingExecutionEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "TrainingExecutionEndTime") in
+      let trainingExecutionStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "TrainingExecutionStartTime") in
+      let dataPreProcessingConfiguration =
+        (Option.map ~f:DataPreProcessingConfiguration.of_xml)
+          (Xml.child xml_arg0 "DataPreProcessingConfiguration") in
+      let roleArn =
+        (Option.map ~f:IamRoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
+      let evaluationDataEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "EvaluationDataEndTime") in
+      let evaluationDataStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "EvaluationDataStartTime") in
+      let trainingDataEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "TrainingDataEndTime") in
+      let trainingDataStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "TrainingDataStartTime") in
+      let labelsInputConfiguration =
+        (Option.map ~f:LabelsInputConfiguration.of_xml)
+          (Xml.child xml_arg0 "LabelsInputConfiguration") in
+      let schema =
+        (Option.map ~f:InlineDataSchema.of_xml) (Xml.child xml_arg0 "Schema") in
+      let datasetArn =
+        (Option.map ~f:DatasetArn.of_xml) (Xml.child xml_arg0 "DatasetArn") in
+      let datasetName =
+        (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "DatasetName") in
+      let sourceType =
+        (Option.map ~f:ModelVersionSourceType.of_xml)
+          (Xml.child xml_arg0 "SourceType") in
+      let status =
+        (Option.map ~f:ModelVersionStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let modelVersionArn =
+        (Option.map ~f:ModelVersionArn.of_xml)
+          (Xml.child xml_arg0 "ModelVersionArn") in
+      let modelVersion =
+        (Option.map ~f:ModelVersion.of_xml)
+          (Xml.child xml_arg0 "ModelVersion") in
+      let modelArn =
+        (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
+      let modelName =
+        (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
+      make ?modelQuality ?modelDiagnosticsResultsObject
+        ?modelDiagnosticsOutputConfiguration ?autoPromotionResultReason
+        ?autoPromotionResult ?retrainingAvailableDataInDays
+        ?priorModelMetrics ?importedDataSizeInBytes ?importJobEndTime
+        ?importJobStartTime ?sourceModelVersionArn ?offCondition
+        ?serverSideKmsKeyId ?createdAt ?lastUpdatedTime ?modelMetrics
+        ?failedReason ?trainingExecutionEndTime ?trainingExecutionStartTime
+        ?dataPreProcessingConfiguration ?roleArn ?evaluationDataEndTime
+        ?evaluationDataStartTime ?trainingDataEndTime ?trainingDataStartTime
+        ?labelsInputConfiguration ?schema ?datasetArn ?datasetName
+        ?sourceType ?status ?modelVersionArn ?modelVersion ?modelArn
+        ?modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modelQuality = field_map json__ "ModelQuality" ModelQuality.of_json in
+      let modelDiagnosticsResultsObject =
+        field_map json__ "ModelDiagnosticsResultsObject" S3Object.of_json in
+      let modelDiagnosticsOutputConfiguration =
+        field_map json__ "ModelDiagnosticsOutputConfiguration"
+          ModelDiagnosticsOutputConfiguration.of_json in
+      let autoPromotionResultReason =
+        field_map json__ "AutoPromotionResultReason"
+          AutoPromotionResultReason.of_json in
+      let autoPromotionResult =
+        field_map json__ "AutoPromotionResult" AutoPromotionResult.of_json in
+      let retrainingAvailableDataInDays =
+        field_map json__ "RetrainingAvailableDataInDays" Integer.of_json in
+      let priorModelMetrics =
+        field_map json__ "PriorModelMetrics" ModelMetrics.of_json in
+      let importedDataSizeInBytes =
+        field_map json__ "ImportedDataSizeInBytes" DataSizeInBytes.of_json in
+      let importJobEndTime =
+        field_map json__ "ImportJobEndTime" Timestamp.of_json in
+      let importJobStartTime =
+        field_map json__ "ImportJobStartTime" Timestamp.of_json in
+      let sourceModelVersionArn =
+        field_map json__ "SourceModelVersionArn" ModelVersionArn.of_json in
+      let offCondition = field_map json__ "OffCondition" OffCondition.of_json in
+      let serverSideKmsKeyId =
+        field_map json__ "ServerSideKmsKeyId" KmsKeyArn.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let lastUpdatedTime =
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let modelMetrics = field_map json__ "ModelMetrics" ModelMetrics.of_json in
+      let failedReason =
+        field_map json__ "FailedReason" BoundedLengthString.of_json in
+      let trainingExecutionEndTime =
+        field_map json__ "TrainingExecutionEndTime" Timestamp.of_json in
+      let trainingExecutionStartTime =
+        field_map json__ "TrainingExecutionStartTime" Timestamp.of_json in
+      let dataPreProcessingConfiguration =
+        field_map json__ "DataPreProcessingConfiguration"
+          DataPreProcessingConfiguration.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
+      let evaluationDataEndTime =
+        field_map json__ "EvaluationDataEndTime" Timestamp.of_json in
+      let evaluationDataStartTime =
+        field_map json__ "EvaluationDataStartTime" Timestamp.of_json in
+      let trainingDataEndTime =
+        field_map json__ "TrainingDataEndTime" Timestamp.of_json in
+      let trainingDataStartTime =
+        field_map json__ "TrainingDataStartTime" Timestamp.of_json in
+      let labelsInputConfiguration =
+        field_map json__ "LabelsInputConfiguration"
+          LabelsInputConfiguration.of_json in
+      let schema = field_map json__ "Schema" InlineDataSchema.of_json in
+      let datasetArn = field_map json__ "DatasetArn" DatasetArn.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      let sourceType =
+        field_map json__ "SourceType" ModelVersionSourceType.of_json in
+      let status = field_map json__ "Status" ModelVersionStatus.of_json in
+      let modelVersionArn =
+        field_map json__ "ModelVersionArn" ModelVersionArn.of_json in
+      let modelVersion = field_map json__ "ModelVersion" ModelVersion.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      make ?modelQuality ?modelDiagnosticsResultsObject
+        ?modelDiagnosticsOutputConfiguration ?autoPromotionResultReason
+        ?autoPromotionResult ?retrainingAvailableDataInDays
+        ?priorModelMetrics ?importedDataSizeInBytes ?importJobEndTime
+        ?importJobStartTime ?sourceModelVersionArn ?offCondition
+        ?serverSideKmsKeyId ?createdAt ?lastUpdatedTime ?modelMetrics
+        ?failedReason ?trainingExecutionEndTime ?trainingExecutionStartTime
+        ?dataPreProcessingConfiguration ?roleArn ?evaluationDataEndTime
+        ?evaluationDataStartTime ?trainingDataEndTime ?trainingDataStartTime
+        ?labelsInputConfiguration ?schema ?datasetArn ?datasetName
+        ?sourceType ?status ?modelVersionArn ?modelVersion ?modelArn
+        ?modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about a specific machine learning model version."]
+module DescribeModelVersionRequest =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t
+        [@ocaml.doc
+          "The name of the machine learning model that this version belongs to."];
+      modelVersion: ModelVersion.t
+        [@ocaml.doc "The version of the machine learning model."]}
+    let context_ = "DescribeModelVersionRequest"
+    let make ~modelName =
+      fun ~modelVersion -> fun () -> { modelName; modelVersion }
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Some (ModelName.to_value x.modelName)));
+        ("ModelVersion", (Some (ModelVersion.to_value x.modelVersion)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modelVersion =
+        ModelVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ModelVersion") in
+      let modelName =
+        ModelName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
+      make ~modelVersion ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modelVersion =
+        field_map_exn json__ "ModelVersion" ModelVersion.of_json in
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
+      make ~modelVersion ~modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about a specific machine learning model version."]
 module DescribeModelResponse =
   struct
     type nonrec t =
       {
       modelName: ModelName.t option
-        [@ocaml.doc "The name of the ML model being described."];
+        [@ocaml.doc
+          "The name of the machine learning model being described."];
       modelArn: ModelArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the ML model being described."];
+          "The Amazon Resource Name (ARN) of the machine learning model being described."];
       datasetName: DatasetName.t option
         [@ocaml.doc
-          "The name of the dataset being used by the ML being described."];
+          "The name of the dataset being used by the machine learning being described."];
       datasetArn: DatasetArn.t option
         [@ocaml.doc
-          "The Amazon Resouce Name (ARN) of the dataset used to create the ML model being described."];
+          "The Amazon Resouce Name (ARN) of the dataset used to create the machine learning model being described."];
       schema: InlineDataSchema.t option
         [@ocaml.doc
           "A JSON description of the data that is in each time series dataset, including names, column names, and data types."];
@@ -3804,19 +9353,19 @@ module DescribeModelResponse =
           "Specifies configuration information about the labels input, including its S3 location."];
       trainingDataStartTime: Timestamp.t option
         [@ocaml.doc
-          "Indicates the time reference in the dataset that was used to begin the subset of training data for the ML model."];
+          "Indicates the time reference in the dataset that was used to begin the subset of training data for the machine learning model."];
       trainingDataEndTime: Timestamp.t option
         [@ocaml.doc
-          "Indicates the time reference in the dataset that was used to end the subset of training data for the ML model."];
+          "Indicates the time reference in the dataset that was used to end the subset of training data for the machine learning model."];
       evaluationDataStartTime: Timestamp.t option
         [@ocaml.doc
-          "Indicates the time reference in the dataset that was used to begin the subset of evaluation data for the ML model."];
+          "Indicates the time reference in the dataset that was used to begin the subset of evaluation data for the machine learning model."];
       evaluationDataEndTime: Timestamp.t option
         [@ocaml.doc
-          "Indicates the time reference in the dataset that was used to end the subset of evaluation data for the ML model."];
+          "Indicates the time reference in the dataset that was used to end the subset of evaluation data for the machine learning model."];
       roleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a role with permission to access the data source for the ML model being described."];
+          "The Amazon Resource Name (ARN) of a role with permission to access the data source for the machine learning model being described."];
       dataPreProcessingConfiguration: DataPreProcessingConfiguration.t option
         [@ocaml.doc
           "The configuration is the TargetSamplingRate, which is the sampling rate of the data after post processing by Amazon Lookout for Equipment. For example, if you provide data that has been collected at a 1 second level and you want the system to resample the data at a 1 minute rate before training, the TargetSamplingRate is 1 minute. When providing a value for the TargetSamplingRate, you must attach the prefix \"PT\" to the rate you want. The value for a 1 second rate is therefore PT1S, the value for a 15 minute rate is PT15M, and the value for a 1 hour rate is PT1H"];
@@ -3825,28 +9374,90 @@ module DescribeModelResponse =
           "Specifies the current status of the model being described. Status describes the status of the most recent action of the model."];
       trainingExecutionStartTime: Timestamp.t option
         [@ocaml.doc
-          "Indicates the time at which the training of the ML model began."];
+          "Indicates the time at which the training of the machine learning model began."];
       trainingExecutionEndTime: Timestamp.t option
         [@ocaml.doc
-          "Indicates the time at which the training of the ML model was completed."];
+          "Indicates the time at which the training of the machine learning model was completed."];
       failedReason: BoundedLengthString.t option
         [@ocaml.doc
-          "If the training of the ML model failed, this indicates the reason for that failure."];
+          "If the training of the machine learning model failed, this indicates the reason for that failure."];
       modelMetrics: ModelMetrics.t option
         [@ocaml.doc
           "The Model Metrics show an aggregated summary of the model's performance within the evaluation time range. This is the JSON content of the metrics created when evaluating the model."];
       lastUpdatedTime: Timestamp.t option
         [@ocaml.doc
-          "Indicates the last time the ML model was updated. The type of update is not specified."];
+          "Indicates the last time the machine learning model was updated. The type of update is not specified."];
       createdAt: Timestamp.t option
         [@ocaml.doc
-          "Indicates the time and date at which the ML model was created."];
+          "Indicates the time and date at which the machine learning model was created."];
       serverSideKmsKeyId: KmsKeyArn.t option
         [@ocaml.doc
           "Provides the identifier of the KMS key used to encrypt model data by Amazon Lookout for Equipment."];
       offCondition: OffCondition.t option
         [@ocaml.doc
-          "Indicates that the asset associated with this sensor has been shut off. As long as this condition is met, Lookout for Equipment will not use data from this asset for training, evaluation, or inference."]}
+          "Indicates that the asset associated with this sensor has been shut off. As long as this condition is met, Lookout for Equipment will not use data from this asset for training, evaluation, or inference."];
+      sourceModelVersionArn: ModelVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the source model version. This field appears if the active model version was imported."];
+      importJobStartTime: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the import job was started. This field appears if the active model version was imported."];
+      importJobEndTime: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the import job was completed. This field appears if the active model version was imported."];
+      activeModelVersion: ModelVersion.t option
+        [@ocaml.doc
+          "The name of the model version used by the inference schedular when running a scheduled inference execution."];
+      activeModelVersionArn: ModelVersionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the model version used by the inference scheduler when running a scheduled inference execution."];
+      modelVersionActivatedAt: Timestamp.t option
+        [@ocaml.doc "The date the active model version was activated."];
+      previousActiveModelVersion: ModelVersion.t option
+        [@ocaml.doc
+          "The model version that was set as the active model version prior to the current active model version."];
+      previousActiveModelVersionArn: ModelVersionArn.t option
+        [@ocaml.doc
+          "The ARN of the model version that was set as the active model version prior to the current active model version."];
+      previousModelVersionActivatedAt: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the previous active model version was activated."];
+      priorModelMetrics: ModelMetrics.t option
+        [@ocaml.doc
+          "If the model version was retrained, this field shows a summary of the performance of the prior model on the new training range. You can use the information in this JSON-formatted object to compare the new model version and the prior model version."];
+      latestScheduledRetrainingFailedReason: BoundedLengthString.t option
+        [@ocaml.doc
+          "If the model version was generated by retraining and the training failed, this indicates the reason for that failure."];
+      latestScheduledRetrainingStatus: ModelVersionStatus.t option
+        [@ocaml.doc
+          "Indicates the status of the most recent scheduled retraining run."];
+      latestScheduledRetrainingModelVersion: ModelVersion.t option
+        [@ocaml.doc
+          "Indicates the most recent model version that was generated by retraining."];
+      latestScheduledRetrainingStartTime: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the start time of the most recent scheduled retraining run."];
+      latestScheduledRetrainingAvailableDataInDays: Integer.t option
+        [@ocaml.doc
+          "Indicates the number of days of data used in the most recent scheduled retraining run."];
+      nextScheduledRetrainingStartDate: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the date and time that the next scheduled retraining run will start on. Lookout for Equipment truncates the time you provide to the nearest UTC day."];
+      accumulatedInferenceDataStartTime: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the start time of the inference data that has been accumulated."];
+      accumulatedInferenceDataEndTime: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the end time of the inference data that has been accumulated."];
+      retrainingSchedulerStatus: RetrainingSchedulerStatus.t option
+        [@ocaml.doc "Indicates the status of the retraining scheduler."];
+      modelDiagnosticsOutputConfiguration:
+        ModelDiagnosticsOutputConfiguration.t option
+        [@ocaml.doc
+          "Configuration information for the model's pointwise model diagnostics."];
+      modelQuality: ModelQuality.t option
+        [@ocaml.doc
+          "Provides a quality assessment for a model that uses labels. If Lookout for Equipment determines that the model quality is poor based on training metrics, the value is POOR_QUALITY_DETECTED. Otherwise, the value is QUALITY_THRESHOLD_MET. If the model is unlabeled, the model quality can't be assessed and the value of ModelQuality is CANNOT_DETERMINE_QUALITY. In this situation, you can get a model quality assessment by adding labels to the input dataset and retraining the model. For information about using labels with your models, see Understanding labeling. For information about improving the quality of a model, see Best practices with Amazon Lookout for Equipment."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -3875,30 +9486,107 @@ module DescribeModelResponse =
                                         fun ?createdAt ->
                                           fun ?serverSideKmsKeyId ->
                                             fun ?offCondition ->
-                                              fun () ->
-                                                {
-                                                  modelName;
-                                                  modelArn;
-                                                  datasetName;
-                                                  datasetArn;
-                                                  schema;
-                                                  labelsInputConfiguration;
-                                                  trainingDataStartTime;
-                                                  trainingDataEndTime;
-                                                  evaluationDataStartTime;
-                                                  evaluationDataEndTime;
-                                                  roleArn;
-                                                  dataPreProcessingConfiguration;
-                                                  status;
-                                                  trainingExecutionStartTime;
-                                                  trainingExecutionEndTime;
-                                                  failedReason;
-                                                  modelMetrics;
-                                                  lastUpdatedTime;
-                                                  createdAt;
-                                                  serverSideKmsKeyId;
-                                                  offCondition
-                                                }
+                                              fun ?sourceModelVersionArn ->
+                                                fun ?importJobStartTime ->
+                                                  fun ?importJobEndTime ->
+                                                    fun ?activeModelVersion
+                                                      ->
+                                                      fun
+                                                        ?activeModelVersionArn
+                                                        ->
+                                                        fun
+                                                          ?modelVersionActivatedAt
+                                                          ->
+                                                          fun
+                                                            ?previousActiveModelVersion
+                                                            ->
+                                                            fun
+                                                              ?previousActiveModelVersionArn
+                                                              ->
+                                                              fun
+                                                                ?previousModelVersionActivatedAt
+                                                                ->
+                                                                fun
+                                                                  ?priorModelMetrics
+                                                                  ->
+                                                                  fun
+                                                                    ?latestScheduledRetrainingFailedReason
+                                                                    ->
+                                                                    fun
+                                                                    ?latestScheduledRetrainingStatus
+                                                                    ->
+                                                                    fun
+                                                                    ?latestScheduledRetrainingModelVersion
+                                                                    ->
+                                                                    fun
+                                                                    ?latestScheduledRetrainingStartTime
+                                                                    ->
+                                                                    fun
+                                                                    ?latestScheduledRetrainingAvailableDataInDays
+                                                                    ->
+                                                                    fun
+                                                                    ?nextScheduledRetrainingStartDate
+                                                                    ->
+                                                                    fun
+                                                                    ?accumulatedInferenceDataStartTime
+                                                                    ->
+                                                                    fun
+                                                                    ?accumulatedInferenceDataEndTime
+                                                                    ->
+                                                                    fun
+                                                                    ?retrainingSchedulerStatus
+                                                                    ->
+                                                                    fun
+                                                                    ?modelDiagnosticsOutputConfiguration
+                                                                    ->
+                                                                    fun
+                                                                    ?modelQuality
+                                                                    ->
+                                                                    fun () ->
+                                                                    {
+                                                                    modelName;
+                                                                    modelArn;
+                                                                    datasetName;
+                                                                    datasetArn;
+                                                                    schema;
+                                                                    labelsInputConfiguration;
+                                                                    trainingDataStartTime;
+                                                                    trainingDataEndTime;
+                                                                    evaluationDataStartTime;
+                                                                    evaluationDataEndTime;
+                                                                    roleArn;
+                                                                    dataPreProcessingConfiguration;
+                                                                    status;
+                                                                    trainingExecutionStartTime;
+                                                                    trainingExecutionEndTime;
+                                                                    failedReason;
+                                                                    modelMetrics;
+                                                                    lastUpdatedTime;
+                                                                    createdAt;
+                                                                    serverSideKmsKeyId;
+                                                                    offCondition;
+                                                                    sourceModelVersionArn;
+                                                                    importJobStartTime;
+                                                                    importJobEndTime;
+                                                                    activeModelVersion;
+                                                                    activeModelVersionArn;
+                                                                    modelVersionActivatedAt;
+                                                                    previousActiveModelVersion;
+                                                                    previousActiveModelVersionArn;
+                                                                    previousModelVersionActivatedAt;
+                                                                    priorModelMetrics;
+                                                                    latestScheduledRetrainingFailedReason;
+                                                                    latestScheduledRetrainingStatus;
+                                                                    latestScheduledRetrainingModelVersion;
+                                                                    latestScheduledRetrainingStartTime;
+                                                                    latestScheduledRetrainingAvailableDataInDays;
+                                                                    nextScheduledRetrainingStartDate;
+                                                                    accumulatedInferenceDataStartTime;
+                                                                    accumulatedInferenceDataEndTime;
+                                                                    retrainingSchedulerStatus;
+                                                                    modelDiagnosticsOutputConfiguration;
+                                                                    modelQuality
+                                                                    }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3992,9 +9680,124 @@ module DescribeModelResponse =
         ("ServerSideKmsKeyId",
           (Option.map x.serverSideKmsKeyId ~f:KmsKeyArn.to_value));
         ("OffCondition",
-          (Option.map x.offCondition ~f:OffCondition.to_value))]
+          (Option.map x.offCondition ~f:OffCondition.to_value));
+        ("SourceModelVersionArn",
+          (Option.map x.sourceModelVersionArn ~f:ModelVersionArn.to_value));
+        ("ImportJobStartTime",
+          (Option.map x.importJobStartTime ~f:Timestamp.to_value));
+        ("ImportJobEndTime",
+          (Option.map x.importJobEndTime ~f:Timestamp.to_value));
+        ("ActiveModelVersion",
+          (Option.map x.activeModelVersion ~f:ModelVersion.to_value));
+        ("ActiveModelVersionArn",
+          (Option.map x.activeModelVersionArn ~f:ModelVersionArn.to_value));
+        ("ModelVersionActivatedAt",
+          (Option.map x.modelVersionActivatedAt ~f:Timestamp.to_value));
+        ("PreviousActiveModelVersion",
+          (Option.map x.previousActiveModelVersion ~f:ModelVersion.to_value));
+        ("PreviousActiveModelVersionArn",
+          (Option.map x.previousActiveModelVersionArn
+             ~f:ModelVersionArn.to_value));
+        ("PreviousModelVersionActivatedAt",
+          (Option.map x.previousModelVersionActivatedAt ~f:Timestamp.to_value));
+        ("PriorModelMetrics",
+          (Option.map x.priorModelMetrics ~f:ModelMetrics.to_value));
+        ("LatestScheduledRetrainingFailedReason",
+          (Option.map x.latestScheduledRetrainingFailedReason
+             ~f:BoundedLengthString.to_value));
+        ("LatestScheduledRetrainingStatus",
+          (Option.map x.latestScheduledRetrainingStatus
+             ~f:ModelVersionStatus.to_value));
+        ("LatestScheduledRetrainingModelVersion",
+          (Option.map x.latestScheduledRetrainingModelVersion
+             ~f:ModelVersion.to_value));
+        ("LatestScheduledRetrainingStartTime",
+          (Option.map x.latestScheduledRetrainingStartTime
+             ~f:Timestamp.to_value));
+        ("LatestScheduledRetrainingAvailableDataInDays",
+          (Option.map x.latestScheduledRetrainingAvailableDataInDays
+             ~f:Integer.to_value));
+        ("NextScheduledRetrainingStartDate",
+          (Option.map x.nextScheduledRetrainingStartDate
+             ~f:Timestamp.to_value));
+        ("AccumulatedInferenceDataStartTime",
+          (Option.map x.accumulatedInferenceDataStartTime
+             ~f:Timestamp.to_value));
+        ("AccumulatedInferenceDataEndTime",
+          (Option.map x.accumulatedInferenceDataEndTime ~f:Timestamp.to_value));
+        ("RetrainingSchedulerStatus",
+          (Option.map x.retrainingSchedulerStatus
+             ~f:RetrainingSchedulerStatus.to_value));
+        ("ModelDiagnosticsOutputConfiguration",
+          (Option.map x.modelDiagnosticsOutputConfiguration
+             ~f:ModelDiagnosticsOutputConfiguration.to_value));
+        ("ModelQuality",
+          (Option.map x.modelQuality ~f:ModelQuality.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let modelQuality =
+        (Option.map ~f:ModelQuality.of_xml)
+          (Xml.child xml_arg0 "ModelQuality") in
+      let modelDiagnosticsOutputConfiguration =
+        (Option.map ~f:ModelDiagnosticsOutputConfiguration.of_xml)
+          (Xml.child xml_arg0 "ModelDiagnosticsOutputConfiguration") in
+      let retrainingSchedulerStatus =
+        (Option.map ~f:RetrainingSchedulerStatus.of_xml)
+          (Xml.child xml_arg0 "RetrainingSchedulerStatus") in
+      let accumulatedInferenceDataEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "AccumulatedInferenceDataEndTime") in
+      let accumulatedInferenceDataStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "AccumulatedInferenceDataStartTime") in
+      let nextScheduledRetrainingStartDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "NextScheduledRetrainingStartDate") in
+      let latestScheduledRetrainingAvailableDataInDays =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "LatestScheduledRetrainingAvailableDataInDays") in
+      let latestScheduledRetrainingStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LatestScheduledRetrainingStartTime") in
+      let latestScheduledRetrainingModelVersion =
+        (Option.map ~f:ModelVersion.of_xml)
+          (Xml.child xml_arg0 "LatestScheduledRetrainingModelVersion") in
+      let latestScheduledRetrainingStatus =
+        (Option.map ~f:ModelVersionStatus.of_xml)
+          (Xml.child xml_arg0 "LatestScheduledRetrainingStatus") in
+      let latestScheduledRetrainingFailedReason =
+        (Option.map ~f:BoundedLengthString.of_xml)
+          (Xml.child xml_arg0 "LatestScheduledRetrainingFailedReason") in
+      let priorModelMetrics =
+        (Option.map ~f:ModelMetrics.of_xml)
+          (Xml.child xml_arg0 "PriorModelMetrics") in
+      let previousModelVersionActivatedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "PreviousModelVersionActivatedAt") in
+      let previousActiveModelVersionArn =
+        (Option.map ~f:ModelVersionArn.of_xml)
+          (Xml.child xml_arg0 "PreviousActiveModelVersionArn") in
+      let previousActiveModelVersion =
+        (Option.map ~f:ModelVersion.of_xml)
+          (Xml.child xml_arg0 "PreviousActiveModelVersion") in
+      let modelVersionActivatedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "ModelVersionActivatedAt") in
+      let activeModelVersionArn =
+        (Option.map ~f:ModelVersionArn.of_xml)
+          (Xml.child xml_arg0 "ActiveModelVersionArn") in
+      let activeModelVersion =
+        (Option.map ~f:ModelVersion.of_xml)
+          (Xml.child xml_arg0 "ActiveModelVersion") in
+      let importJobEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "ImportJobEndTime") in
+      let importJobStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "ImportJobStartTime") in
+      let sourceModelVersionArn =
+        (Option.map ~f:ModelVersionArn.of_xml)
+          (Xml.child xml_arg0 "SourceModelVersionArn") in
       let offCondition =
         (Option.map ~f:OffCondition.of_xml)
           (Xml.child xml_arg0 "OffCondition") in
@@ -4050,63 +9853,138 @@ module DescribeModelResponse =
         (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
       let modelName =
         (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
-      make ?offCondition ?serverSideKmsKeyId ?createdAt ?lastUpdatedTime
-        ?modelMetrics ?failedReason ?trainingExecutionEndTime
-        ?trainingExecutionStartTime ?status ?dataPreProcessingConfiguration
-        ?roleArn ?evaluationDataEndTime ?evaluationDataStartTime
-        ?trainingDataEndTime ?trainingDataStartTime ?labelsInputConfiguration
-        ?schema ?datasetArn ?datasetName ?modelArn ?modelName ()
+      make ?modelQuality ?modelDiagnosticsOutputConfiguration
+        ?retrainingSchedulerStatus ?accumulatedInferenceDataEndTime
+        ?accumulatedInferenceDataStartTime ?nextScheduledRetrainingStartDate
+        ?latestScheduledRetrainingAvailableDataInDays
+        ?latestScheduledRetrainingStartTime
+        ?latestScheduledRetrainingModelVersion
+        ?latestScheduledRetrainingStatus
+        ?latestScheduledRetrainingFailedReason ?priorModelMetrics
+        ?previousModelVersionActivatedAt ?previousActiveModelVersionArn
+        ?previousActiveModelVersion ?modelVersionActivatedAt
+        ?activeModelVersionArn ?activeModelVersion ?importJobEndTime
+        ?importJobStartTime ?sourceModelVersionArn ?offCondition
+        ?serverSideKmsKeyId ?createdAt ?lastUpdatedTime ?modelMetrics
+        ?failedReason ?trainingExecutionEndTime ?trainingExecutionStartTime
+        ?status ?dataPreProcessingConfiguration ?roleArn
+        ?evaluationDataEndTime ?evaluationDataStartTime ?trainingDataEndTime
+        ?trainingDataStartTime ?labelsInputConfiguration ?schema ?datasetArn
+        ?datasetName ?modelArn ?modelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let offCondition = field_map json "OffCondition" OffCondition.of_json in
+    let of_json json__ =
+      let modelQuality = field_map json__ "ModelQuality" ModelQuality.of_json in
+      let modelDiagnosticsOutputConfiguration =
+        field_map json__ "ModelDiagnosticsOutputConfiguration"
+          ModelDiagnosticsOutputConfiguration.of_json in
+      let retrainingSchedulerStatus =
+        field_map json__ "RetrainingSchedulerStatus"
+          RetrainingSchedulerStatus.of_json in
+      let accumulatedInferenceDataEndTime =
+        field_map json__ "AccumulatedInferenceDataEndTime" Timestamp.of_json in
+      let accumulatedInferenceDataStartTime =
+        field_map json__ "AccumulatedInferenceDataStartTime"
+          Timestamp.of_json in
+      let nextScheduledRetrainingStartDate =
+        field_map json__ "NextScheduledRetrainingStartDate" Timestamp.of_json in
+      let latestScheduledRetrainingAvailableDataInDays =
+        field_map json__ "LatestScheduledRetrainingAvailableDataInDays"
+          Integer.of_json in
+      let latestScheduledRetrainingStartTime =
+        field_map json__ "LatestScheduledRetrainingStartTime"
+          Timestamp.of_json in
+      let latestScheduledRetrainingModelVersion =
+        field_map json__ "LatestScheduledRetrainingModelVersion"
+          ModelVersion.of_json in
+      let latestScheduledRetrainingStatus =
+        field_map json__ "LatestScheduledRetrainingStatus"
+          ModelVersionStatus.of_json in
+      let latestScheduledRetrainingFailedReason =
+        field_map json__ "LatestScheduledRetrainingFailedReason"
+          BoundedLengthString.of_json in
+      let priorModelMetrics =
+        field_map json__ "PriorModelMetrics" ModelMetrics.of_json in
+      let previousModelVersionActivatedAt =
+        field_map json__ "PreviousModelVersionActivatedAt" Timestamp.of_json in
+      let previousActiveModelVersionArn =
+        field_map json__ "PreviousActiveModelVersionArn"
+          ModelVersionArn.of_json in
+      let previousActiveModelVersion =
+        field_map json__ "PreviousActiveModelVersion" ModelVersion.of_json in
+      let modelVersionActivatedAt =
+        field_map json__ "ModelVersionActivatedAt" Timestamp.of_json in
+      let activeModelVersionArn =
+        field_map json__ "ActiveModelVersionArn" ModelVersionArn.of_json in
+      let activeModelVersion =
+        field_map json__ "ActiveModelVersion" ModelVersion.of_json in
+      let importJobEndTime =
+        field_map json__ "ImportJobEndTime" Timestamp.of_json in
+      let importJobStartTime =
+        field_map json__ "ImportJobStartTime" Timestamp.of_json in
+      let sourceModelVersionArn =
+        field_map json__ "SourceModelVersionArn" ModelVersionArn.of_json in
+      let offCondition = field_map json__ "OffCondition" OffCondition.of_json in
       let serverSideKmsKeyId =
-        field_map json "ServerSideKmsKeyId" KmsKeyArn.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+        field_map json__ "ServerSideKmsKeyId" KmsKeyArn.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" Timestamp.of_json in
-      let modelMetrics = field_map json "ModelMetrics" ModelMetrics.of_json in
+        field_map json__ "LastUpdatedTime" Timestamp.of_json in
+      let modelMetrics = field_map json__ "ModelMetrics" ModelMetrics.of_json in
       let failedReason =
-        field_map json "FailedReason" BoundedLengthString.of_json in
+        field_map json__ "FailedReason" BoundedLengthString.of_json in
       let trainingExecutionEndTime =
-        field_map json "TrainingExecutionEndTime" Timestamp.of_json in
+        field_map json__ "TrainingExecutionEndTime" Timestamp.of_json in
       let trainingExecutionStartTime =
-        field_map json "TrainingExecutionStartTime" Timestamp.of_json in
-      let status = field_map json "Status" ModelStatus.of_json in
+        field_map json__ "TrainingExecutionStartTime" Timestamp.of_json in
+      let status = field_map json__ "Status" ModelStatus.of_json in
       let dataPreProcessingConfiguration =
-        field_map json "DataPreProcessingConfiguration"
+        field_map json__ "DataPreProcessingConfiguration"
           DataPreProcessingConfiguration.of_json in
-      let roleArn = field_map json "RoleArn" IamRoleArn.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
       let evaluationDataEndTime =
-        field_map json "EvaluationDataEndTime" Timestamp.of_json in
+        field_map json__ "EvaluationDataEndTime" Timestamp.of_json in
       let evaluationDataStartTime =
-        field_map json "EvaluationDataStartTime" Timestamp.of_json in
+        field_map json__ "EvaluationDataStartTime" Timestamp.of_json in
       let trainingDataEndTime =
-        field_map json "TrainingDataEndTime" Timestamp.of_json in
+        field_map json__ "TrainingDataEndTime" Timestamp.of_json in
       let trainingDataStartTime =
-        field_map json "TrainingDataStartTime" Timestamp.of_json in
+        field_map json__ "TrainingDataStartTime" Timestamp.of_json in
       let labelsInputConfiguration =
-        field_map json "LabelsInputConfiguration"
+        field_map json__ "LabelsInputConfiguration"
           LabelsInputConfiguration.of_json in
-      let schema = field_map json "Schema" InlineDataSchema.of_json in
-      let datasetArn = field_map json "DatasetArn" DatasetArn.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
-      let modelArn = field_map json "ModelArn" ModelArn.of_json in
-      let modelName = field_map json "ModelName" ModelName.of_json in
-      make ?offCondition ?serverSideKmsKeyId ?createdAt ?lastUpdatedTime
-        ?modelMetrics ?failedReason ?trainingExecutionEndTime
-        ?trainingExecutionStartTime ?status ?dataPreProcessingConfiguration
-        ?roleArn ?evaluationDataEndTime ?evaluationDataStartTime
-        ?trainingDataEndTime ?trainingDataStartTime ?labelsInputConfiguration
-        ?schema ?datasetArn ?datasetName ?modelArn ?modelName ()
+      let schema = field_map json__ "Schema" InlineDataSchema.of_json in
+      let datasetArn = field_map json__ "DatasetArn" DatasetArn.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      make ?modelQuality ?modelDiagnosticsOutputConfiguration
+        ?retrainingSchedulerStatus ?accumulatedInferenceDataEndTime
+        ?accumulatedInferenceDataStartTime ?nextScheduledRetrainingStartDate
+        ?latestScheduledRetrainingAvailableDataInDays
+        ?latestScheduledRetrainingStartTime
+        ?latestScheduledRetrainingModelVersion
+        ?latestScheduledRetrainingStatus
+        ?latestScheduledRetrainingFailedReason ?priorModelMetrics
+        ?previousModelVersionActivatedAt ?previousActiveModelVersionArn
+        ?previousActiveModelVersion ?modelVersionActivatedAt
+        ?activeModelVersionArn ?activeModelVersion ?importJobEndTime
+        ?importJobStartTime ?sourceModelVersionArn ?offCondition
+        ?serverSideKmsKeyId ?createdAt ?lastUpdatedTime ?modelMetrics
+        ?failedReason ?trainingExecutionEndTime ?trainingExecutionStartTime
+        ?status ?dataPreProcessingConfiguration ?roleArn
+        ?evaluationDataEndTime ?evaluationDataStartTime ?trainingDataEndTime
+        ?trainingDataStartTime ?labelsInputConfiguration ?schema ?datasetArn
+        ?datasetName ?modelArn ?modelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a JSON containing the overall information about a specific ML model, including model name and ARN, dataset, training and evaluation information, status, and so on."]
+       "Provides a JSON containing the overall information about a specific machine learning model, including model name and ARN, dataset, training and evaluation information, status, and so on."]
 module DescribeModelRequest =
   struct
     type nonrec t =
       {
       modelName: ModelName.t
-        [@ocaml.doc "The name of the ML model to be described."]}
+        [@ocaml.doc
+          "The name of the machine learning model to be described."]}
     let context_ = "DescribeModelRequest"
     let make ~modelName = fun () -> { modelName }
     let to_value x =
@@ -4119,22 +9997,379 @@ module DescribeModelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
       make ~modelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelName = field_map_exn json "ModelName" ModelName.of_json in
+    let of_json json__ =
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
       make ~modelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a JSON containing the overall information about a specific ML model, including model name and ARN, dataset, training and evaluation information, status, and so on."]
+       "Provides a JSON containing the overall information about a specific machine learning model, including model name and ARN, dataset, training and evaluation information, status, and so on."]
+module DescribeLabelResponse =
+  struct
+    type nonrec t =
+      {
+      labelGroupName: LabelGroupName.t option
+        [@ocaml.doc "The name of the requested label group."];
+      labelGroupArn: LabelGroupArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the requested label group."];
+      labelId: LabelId.t option [@ocaml.doc "The ID of the requested label."];
+      startTime: Timestamp.t option
+        [@ocaml.doc "The start time of the requested label."];
+      endTime: Timestamp.t option
+        [@ocaml.doc "The end time of the requested label."];
+      rating: LabelRating.t option
+        [@ocaml.doc
+          "Indicates whether a labeled event represents an anomaly."];
+      faultCode: FaultCode.t option
+        [@ocaml.doc
+          "Indicates the type of anomaly associated with the label. Data in this field will be retained for service usage. Follow best practices for the security of your data."];
+      notes: Comments.t option
+        [@ocaml.doc
+          "Metadata providing additional information about the label. Data in this field will be retained for service usage. Follow best practices for the security of your data."];
+      equipment: Equipment.t option
+        [@ocaml.doc
+          "Indicates that a label pertains to a particular piece of equipment."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The time at which the label was created."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?labelGroupName =
+      fun ?labelGroupArn ->
+        fun ?labelId ->
+          fun ?startTime ->
+            fun ?endTime ->
+              fun ?rating ->
+                fun ?faultCode ->
+                  fun ?notes ->
+                    fun ?equipment ->
+                      fun ?createdAt ->
+                        fun () ->
+                          {
+                            labelGroupName;
+                            labelGroupArn;
+                            labelId;
+                            startTime;
+                            endTime;
+                            rating;
+                            faultCode;
+                            notes;
+                            equipment;
+                            createdAt
+                          }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LabelGroupName",
+           (Option.map x.labelGroupName ~f:LabelGroupName.to_value));
+        ("LabelGroupArn",
+          (Option.map x.labelGroupArn ~f:LabelGroupArn.to_value));
+        ("LabelId", (Option.map x.labelId ~f:LabelId.to_value));
+        ("StartTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("EndTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("Rating", (Option.map x.rating ~f:LabelRating.to_value));
+        ("FaultCode", (Option.map x.faultCode ~f:FaultCode.to_value));
+        ("Notes", (Option.map x.notes ~f:Comments.to_value));
+        ("Equipment", (Option.map x.equipment ~f:Equipment.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let equipment =
+        (Option.map ~f:Equipment.of_xml) (Xml.child xml_arg0 "Equipment") in
+      let notes =
+        (Option.map ~f:Comments.of_xml) (Xml.child xml_arg0 "Notes") in
+      let faultCode =
+        (Option.map ~f:FaultCode.of_xml) (Xml.child xml_arg0 "FaultCode") in
+      let rating =
+        (Option.map ~f:LabelRating.of_xml) (Xml.child xml_arg0 "Rating") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let labelId =
+        (Option.map ~f:LabelId.of_xml) (Xml.child xml_arg0 "LabelId") in
+      let labelGroupArn =
+        (Option.map ~f:LabelGroupArn.of_xml)
+          (Xml.child xml_arg0 "LabelGroupArn") in
+      let labelGroupName =
+        (Option.map ~f:LabelGroupName.of_xml)
+          (Xml.child xml_arg0 "LabelGroupName") in
+      make ?createdAt ?equipment ?notes ?faultCode ?rating ?endTime
+        ?startTime ?labelId ?labelGroupArn ?labelGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let equipment = field_map json__ "Equipment" Equipment.of_json in
+      let notes = field_map json__ "Notes" Comments.of_json in
+      let faultCode = field_map json__ "FaultCode" FaultCode.of_json in
+      let rating = field_map json__ "Rating" LabelRating.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map json__ "StartTime" Timestamp.of_json in
+      let labelId = field_map json__ "LabelId" LabelId.of_json in
+      let labelGroupArn =
+        field_map json__ "LabelGroupArn" LabelGroupArn.of_json in
+      let labelGroupName =
+        field_map json__ "LabelGroupName" LabelGroupName.of_json in
+      make ?createdAt ?equipment ?notes ?faultCode ?rating ?endTime
+        ?startTime ?labelId ?labelGroupArn ?labelGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns the name of the label."]
+module DescribeLabelRequest =
+  struct
+    type nonrec t =
+      {
+      labelGroupName: LabelGroupName.t
+        [@ocaml.doc "Returns the name of the group containing the label."];
+      labelId: LabelId.t [@ocaml.doc "Returns the ID of the label."]}
+    let context_ = "DescribeLabelRequest"
+    let make ~labelGroupName =
+      fun ~labelId -> fun () -> { labelGroupName; labelId }
+    let to_value x =
+      structure_to_value
+        [("LabelGroupName",
+           (Some (LabelGroupName.to_value x.labelGroupName)));
+        ("LabelId", (Some (LabelId.to_value x.labelId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelId =
+        LabelId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LabelId") in
+      let labelGroupName =
+        LabelGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LabelGroupName") in
+      make ~labelId ~labelGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelId = field_map_exn json__ "LabelId" LabelId.of_json in
+      let labelGroupName =
+        field_map_exn json__ "LabelGroupName" LabelGroupName.of_json in
+      make ~labelId ~labelGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns the name of the label."]
+module DescribeLabelGroupResponse =
+  struct
+    type nonrec t =
+      {
+      labelGroupName: LabelGroupName.t option
+        [@ocaml.doc "The name of the label group."];
+      labelGroupArn: LabelGroupArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the label group."];
+      faultCodes: FaultCodes.t option
+        [@ocaml.doc
+          "Codes indicating the type of anomaly associated with the labels in the lagbel group."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The time at which the label group was created."];
+      updatedAt: Timestamp.t option
+        [@ocaml.doc "The time at which the label group was updated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?labelGroupName =
+      fun ?labelGroupArn ->
+        fun ?faultCodes ->
+          fun ?createdAt ->
+            fun ?updatedAt ->
+              fun () ->
+                {
+                  labelGroupName;
+                  labelGroupArn;
+                  faultCodes;
+                  createdAt;
+                  updatedAt
+                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LabelGroupName",
+           (Option.map x.labelGroupName ~f:LabelGroupName.to_value));
+        ("LabelGroupArn",
+          (Option.map x.labelGroupArn ~f:LabelGroupArn.to_value));
+        ("FaultCodes", (Option.map x.faultCodes ~f:FaultCodes.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let faultCodes =
+        (Option.map ~f:FaultCodes.of_xml) (Xml.child xml_arg0 "FaultCodes") in
+      let labelGroupArn =
+        (Option.map ~f:LabelGroupArn.of_xml)
+          (Xml.child xml_arg0 "LabelGroupArn") in
+      let labelGroupName =
+        (Option.map ~f:LabelGroupName.of_xml)
+          (Xml.child xml_arg0 "LabelGroupName") in
+      make ?updatedAt ?createdAt ?faultCodes ?labelGroupArn ?labelGroupName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let faultCodes = field_map json__ "FaultCodes" FaultCodes.of_json in
+      let labelGroupArn =
+        field_map json__ "LabelGroupArn" LabelGroupArn.of_json in
+      let labelGroupName =
+        field_map json__ "LabelGroupName" LabelGroupName.of_json in
+      make ?updatedAt ?createdAt ?faultCodes ?labelGroupArn ?labelGroupName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about the label group."]
+module DescribeLabelGroupRequest =
+  struct
+    type nonrec t =
+      {
+      labelGroupName: LabelGroupName.t
+        [@ocaml.doc "Returns the name of the label group."]}
+    let context_ = "DescribeLabelGroupRequest"
+    let make ~labelGroupName = fun () -> { labelGroupName }
+    let to_value x =
+      structure_to_value
+        [("LabelGroupName",
+           (Some (LabelGroupName.to_value x.labelGroupName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelGroupName =
+        LabelGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LabelGroupName") in
+      make ~labelGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelGroupName =
+        field_map_exn json__ "LabelGroupName" LabelGroupName.of_json in
+      make ~labelGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about the label group."]
 module DescribeInferenceSchedulerResponse =
   struct
     type nonrec t =
       {
       modelArn: ModelArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the ML model of the inference scheduler being described."];
+          "The Amazon Resource Name (ARN) of the machine learning model of the inference scheduler being described."];
       modelName: ModelName.t option
         [@ocaml.doc
-          "The name of the ML model of the inference scheduler being described."];
+          "The name of the machine learning model of the inference scheduler being described."];
       inferenceSchedulerName: InferenceSchedulerName.t option
         [@ocaml.doc "The name of the inference scheduler being described."];
       inferenceSchedulerArn: InferenceSchedulerArn.t option
@@ -4165,7 +10400,10 @@ module DescribeInferenceSchedulerResponse =
           "The Amazon Resource Name (ARN) of a role with permission to access the data source for the inference scheduler being described."];
       serverSideKmsKeyId: KmsKeyArn.t option
         [@ocaml.doc
-          "Provides the identifier of the KMS key used to encrypt inference scheduler data by Amazon Lookout for Equipment."]}
+          "Provides the identifier of the KMS key used to encrypt inference scheduler data by Amazon Lookout for Equipment."];
+      latestInferenceResult: LatestInferenceResult.t option
+        [@ocaml.doc
+          "Indicates whether the latest execution for the inference scheduler was Anomalous (anomalous events found) or Normal (no anomalous events found)."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -4186,22 +10424,24 @@ module DescribeInferenceSchedulerResponse =
                         fun ?dataOutputConfiguration ->
                           fun ?roleArn ->
                             fun ?serverSideKmsKeyId ->
-                              fun () ->
-                                {
-                                  modelArn;
-                                  modelName;
-                                  inferenceSchedulerName;
-                                  inferenceSchedulerArn;
-                                  status;
-                                  dataDelayOffsetInMinutes;
-                                  dataUploadFrequency;
-                                  createdAt;
-                                  updatedAt;
-                                  dataInputConfiguration;
-                                  dataOutputConfiguration;
-                                  roleArn;
-                                  serverSideKmsKeyId
-                                }
+                              fun ?latestInferenceResult ->
+                                fun () ->
+                                  {
+                                    modelArn;
+                                    modelName;
+                                    inferenceSchedulerName;
+                                    inferenceSchedulerArn;
+                                    status;
+                                    dataDelayOffsetInMinutes;
+                                    dataUploadFrequency;
+                                    createdAt;
+                                    updatedAt;
+                                    dataInputConfiguration;
+                                    dataOutputConfiguration;
+                                    roleArn;
+                                    serverSideKmsKeyId;
+                                    latestInferenceResult
+                                  }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4285,9 +10525,15 @@ module DescribeInferenceSchedulerResponse =
              ~f:InferenceOutputConfiguration.to_value));
         ("RoleArn", (Option.map x.roleArn ~f:IamRoleArn.to_value));
         ("ServerSideKmsKeyId",
-          (Option.map x.serverSideKmsKeyId ~f:KmsKeyArn.to_value))]
+          (Option.map x.serverSideKmsKeyId ~f:KmsKeyArn.to_value));
+        ("LatestInferenceResult",
+          (Option.map x.latestInferenceResult
+             ~f:LatestInferenceResult.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let latestInferenceResult =
+        (Option.map ~f:LatestInferenceResult.of_xml)
+          (Xml.child xml_arg0 "LatestInferenceResult") in
       let serverSideKmsKeyId =
         (Option.map ~f:KmsKeyArn.of_xml)
           (Xml.child xml_arg0 "ServerSideKmsKeyId") in
@@ -4322,40 +10568,46 @@ module DescribeInferenceSchedulerResponse =
         (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
       let modelArn =
         (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
-      make ?serverSideKmsKeyId ?roleArn ?dataOutputConfiguration
-        ?dataInputConfiguration ?updatedAt ?createdAt ?dataUploadFrequency
-        ?dataDelayOffsetInMinutes ?status ?inferenceSchedulerArn
-        ?inferenceSchedulerName ?modelName ?modelArn ()
+      make ?latestInferenceResult ?serverSideKmsKeyId ?roleArn
+        ?dataOutputConfiguration ?dataInputConfiguration ?updatedAt
+        ?createdAt ?dataUploadFrequency ?dataDelayOffsetInMinutes ?status
+        ?inferenceSchedulerArn ?inferenceSchedulerName ?modelName ?modelArn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let latestInferenceResult =
+        field_map json__ "LatestInferenceResult"
+          LatestInferenceResult.of_json in
       let serverSideKmsKeyId =
-        field_map json "ServerSideKmsKeyId" KmsKeyArn.of_json in
-      let roleArn = field_map json "RoleArn" IamRoleArn.of_json in
+        field_map json__ "ServerSideKmsKeyId" KmsKeyArn.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
       let dataOutputConfiguration =
-        field_map json "DataOutputConfiguration"
+        field_map json__ "DataOutputConfiguration"
           InferenceOutputConfiguration.of_json in
       let dataInputConfiguration =
-        field_map json "DataInputConfiguration"
+        field_map json__ "DataInputConfiguration"
           InferenceInputConfiguration.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
       let dataUploadFrequency =
-        field_map json "DataUploadFrequency" DataUploadFrequency.of_json in
+        field_map json__ "DataUploadFrequency" DataUploadFrequency.of_json in
       let dataDelayOffsetInMinutes =
-        field_map json "DataDelayOffsetInMinutes"
+        field_map json__ "DataDelayOffsetInMinutes"
           DataDelayOffsetInMinutes.of_json in
-      let status = field_map json "Status" InferenceSchedulerStatus.of_json in
+      let status = field_map json__ "Status" InferenceSchedulerStatus.of_json in
       let inferenceSchedulerArn =
-        field_map json "InferenceSchedulerArn" InferenceSchedulerArn.of_json in
+        field_map json__ "InferenceSchedulerArn"
+          InferenceSchedulerArn.of_json in
       let inferenceSchedulerName =
-        field_map json "InferenceSchedulerName"
+        field_map json__ "InferenceSchedulerName"
           InferenceSchedulerName.of_json in
-      let modelName = field_map json "ModelName" ModelName.of_json in
-      let modelArn = field_map json "ModelArn" ModelArn.of_json in
-      make ?serverSideKmsKeyId ?roleArn ?dataOutputConfiguration
-        ?dataInputConfiguration ?updatedAt ?createdAt ?dataUploadFrequency
-        ?dataDelayOffsetInMinutes ?status ?inferenceSchedulerArn
-        ?inferenceSchedulerName ?modelName ?modelArn ()
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      make ?latestInferenceResult ?serverSideKmsKeyId ?roleArn
+        ?dataOutputConfiguration ?dataInputConfiguration ?updatedAt
+        ?createdAt ?dataUploadFrequency ?dataDelayOffsetInMinutes ?status
+        ?inferenceSchedulerArn ?inferenceSchedulerName ?modelName ?modelArn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies information about the inference scheduler being used, including name, model, status, and associated metadata"]
@@ -4379,9 +10631,9 @@ module DescribeInferenceSchedulerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InferenceSchedulerName") in
       make ~inferenceSchedulerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inferenceSchedulerName =
-        field_map_exn json "InferenceSchedulerName"
+        field_map_exn json__ "InferenceSchedulerName"
           InferenceSchedulerIdentifier.of_json in
       make ~inferenceSchedulerName ()
     let to_json v = composed_to_json to_value v
@@ -4398,7 +10650,7 @@ module DescribeDatasetResponse =
           "The Amazon Resource Name (ARN) of the dataset being described."];
       createdAt: Timestamp.t option
         [@ocaml.doc
-          "Specifies the time the dataset was created in Amazon Lookout for Equipment."];
+          "Specifies the time the dataset was created in Lookout for Equipment."];
       lastUpdatedAt: Timestamp.t option
         [@ocaml.doc
           "Specifies the time the dataset was last updated, if it was."];
@@ -4412,7 +10664,25 @@ module DescribeDatasetResponse =
           "Provides the identifier of the KMS key used to encrypt dataset data by Amazon Lookout for Equipment."];
       ingestionInputConfiguration: IngestionInputConfiguration.t option
         [@ocaml.doc
-          "Specifies the S3 location configuration for the data input for the data ingestion job."]}
+          "Specifies the S3 location configuration for the data input for the data ingestion job."];
+      dataQualitySummary: DataQualitySummary.t option
+        [@ocaml.doc
+          "Gives statistics associated with the given dataset for the latest successful associated ingestion job id. These statistics primarily relate to quantifying incorrect data such as MissingCompleteSensorData, MissingSensorData, UnsupportedDateFormats, InsufficientSensorData, and DuplicateTimeStamps."];
+      ingestedFilesSummary: IngestedFilesSummary.t option
+        [@ocaml.doc
+          "IngestedFilesSummary associated with the given dataset for the latest successful associated ingestion job id."];
+      roleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role that you are using for this the data ingestion job."];
+      dataStartTime: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the earliest timestamp corresponding to data that was successfully ingested during the most recent ingestion of this particular dataset."];
+      dataEndTime: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the latest timestamp corresponding to data that was successfully ingested during the most recent ingestion of this particular dataset."];
+      sourceDatasetArn: DatasetArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the source dataset from which the current data being described was imported from."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -4428,17 +10698,29 @@ module DescribeDatasetResponse =
               fun ?schema ->
                 fun ?serverSideKmsKeyId ->
                   fun ?ingestionInputConfiguration ->
-                    fun () ->
-                      {
-                        datasetName;
-                        datasetArn;
-                        createdAt;
-                        lastUpdatedAt;
-                        status;
-                        schema;
-                        serverSideKmsKeyId;
-                        ingestionInputConfiguration
-                      }
+                    fun ?dataQualitySummary ->
+                      fun ?ingestedFilesSummary ->
+                        fun ?roleArn ->
+                          fun ?dataStartTime ->
+                            fun ?dataEndTime ->
+                              fun ?sourceDatasetArn ->
+                                fun () ->
+                                  {
+                                    datasetName;
+                                    datasetArn;
+                                    createdAt;
+                                    lastUpdatedAt;
+                                    status;
+                                    schema;
+                                    serverSideKmsKeyId;
+                                    ingestionInputConfiguration;
+                                    dataQualitySummary;
+                                    ingestedFilesSummary;
+                                    roleArn;
+                                    dataStartTime;
+                                    dataEndTime;
+                                    sourceDatasetArn
+                                  }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4507,9 +10789,33 @@ module DescribeDatasetResponse =
           (Option.map x.serverSideKmsKeyId ~f:KmsKeyArn.to_value));
         ("IngestionInputConfiguration",
           (Option.map x.ingestionInputConfiguration
-             ~f:IngestionInputConfiguration.to_value))]
+             ~f:IngestionInputConfiguration.to_value));
+        ("DataQualitySummary",
+          (Option.map x.dataQualitySummary ~f:DataQualitySummary.to_value));
+        ("IngestedFilesSummary",
+          (Option.map x.ingestedFilesSummary ~f:IngestedFilesSummary.to_value));
+        ("RoleArn", (Option.map x.roleArn ~f:IamRoleArn.to_value));
+        ("DataStartTime", (Option.map x.dataStartTime ~f:Timestamp.to_value));
+        ("DataEndTime", (Option.map x.dataEndTime ~f:Timestamp.to_value));
+        ("SourceDatasetArn",
+          (Option.map x.sourceDatasetArn ~f:DatasetArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceDatasetArn =
+        (Option.map ~f:DatasetArn.of_xml)
+          (Xml.child xml_arg0 "SourceDatasetArn") in
+      let dataEndTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DataEndTime") in
+      let dataStartTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DataStartTime") in
+      let roleArn =
+        (Option.map ~f:IamRoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
+      let ingestedFilesSummary =
+        (Option.map ~f:IngestedFilesSummary.of_xml)
+          (Xml.child xml_arg0 "IngestedFilesSummary") in
+      let dataQualitySummary =
+        (Option.map ~f:DataQualitySummary.of_xml)
+          (Xml.child xml_arg0 "DataQualitySummary") in
       let ingestionInputConfiguration =
         (Option.map ~f:IngestionInputConfiguration.of_xml)
           (Xml.child xml_arg0 "IngestionInputConfiguration") in
@@ -4528,26 +10834,39 @@ module DescribeDatasetResponse =
         (Option.map ~f:DatasetArn.of_xml) (Xml.child xml_arg0 "DatasetArn") in
       let datasetName =
         (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "DatasetName") in
-      make ?ingestionInputConfiguration ?serverSideKmsKeyId ?schema ?status
+      make ?sourceDatasetArn ?dataEndTime ?dataStartTime ?roleArn
+        ?ingestedFilesSummary ?dataQualitySummary
+        ?ingestionInputConfiguration ?serverSideKmsKeyId ?schema ?status
         ?lastUpdatedAt ?createdAt ?datasetArn ?datasetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let sourceDatasetArn =
+        field_map json__ "SourceDatasetArn" DatasetArn.of_json in
+      let dataEndTime = field_map json__ "DataEndTime" Timestamp.of_json in
+      let dataStartTime = field_map json__ "DataStartTime" Timestamp.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
+      let ingestedFilesSummary =
+        field_map json__ "IngestedFilesSummary" IngestedFilesSummary.of_json in
+      let dataQualitySummary =
+        field_map json__ "DataQualitySummary" DataQualitySummary.of_json in
       let ingestionInputConfiguration =
-        field_map json "IngestionInputConfiguration"
+        field_map json__ "IngestionInputConfiguration"
           IngestionInputConfiguration.of_json in
       let serverSideKmsKeyId =
-        field_map json "ServerSideKmsKeyId" KmsKeyArn.of_json in
-      let schema = field_map json "Schema" InlineDataSchema.of_json in
-      let status = field_map json "Status" DatasetStatus.of_json in
-      let lastUpdatedAt = field_map json "LastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let datasetArn = field_map json "DatasetArn" DatasetArn.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
-      make ?ingestionInputConfiguration ?serverSideKmsKeyId ?schema ?status
+        field_map json__ "ServerSideKmsKeyId" KmsKeyArn.of_json in
+      let schema = field_map json__ "Schema" InlineDataSchema.of_json in
+      let status = field_map json__ "Status" DatasetStatus.of_json in
+      let lastUpdatedAt = field_map json__ "LastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let datasetArn = field_map json__ "DatasetArn" DatasetArn.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
+      make ?sourceDatasetArn ?dataEndTime ?dataStartTime ?roleArn
+        ?ingestedFilesSummary ?dataQualitySummary
+        ?ingestionInputConfiguration ?serverSideKmsKeyId ?schema ?status
         ?lastUpdatedAt ?createdAt ?datasetArn ?datasetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a JSON description of the data that is in each time series dataset, including names, column names, and data types."]
+       "Provides a JSON description of the data in each time series dataset, including names, column names, and data types."]
 module DescribeDatasetRequest =
   struct
     type nonrec t =
@@ -4566,13 +10885,13 @@ module DescribeDatasetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetName") in
       make ~datasetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetName =
-        field_map_exn json "DatasetName" DatasetIdentifier.of_json in
+        field_map_exn json__ "DatasetName" DatasetIdentifier.of_json in
       make ~datasetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a JSON description of the data that is in each time series dataset, including names, column names, and data types."]
+       "Provides a JSON description of the data in each time series dataset, including names, column names, and data types."]
 module DescribeDataIngestionJobResponse =
   struct
     type nonrec t =
@@ -4595,7 +10914,25 @@ module DescribeDataIngestionJobResponse =
           "Indicates the status of the DataIngestionJob operation."];
       failedReason: BoundedLengthString.t option
         [@ocaml.doc
-          "Specifies the reason for failure when a data ingestion job has failed."]}
+          "Specifies the reason for failure when a data ingestion job has failed."];
+      dataQualitySummary: DataQualitySummary.t option
+        [@ocaml.doc
+          "Gives statistics about a completed ingestion job. These statistics primarily relate to quantifying incorrect data such as MissingCompleteSensorData, MissingSensorData, UnsupportedDateFormats, InsufficientSensorData, and DuplicateTimeStamps."];
+      ingestedFilesSummary: IngestedFilesSummary.t option ;
+      statusDetail: BoundedLengthString.t option
+        [@ocaml.doc
+          "Provides details about status of the ingestion job that is currently in progress."];
+      ingestedDataSize: DataSizeInBytes.t option
+        [@ocaml.doc "Indicates the size of the ingested dataset."];
+      dataStartTime: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the earliest timestamp corresponding to data that was successfully ingested during this specific ingestion job."];
+      dataEndTime: Timestamp.t option
+        [@ocaml.doc
+          "Indicates the latest timestamp corresponding to data that was successfully ingested during this specific ingestion job."];
+      sourceDatasetArn: DatasetArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the source dataset from which the data used for the data ingestion job was imported from."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -4610,16 +10947,30 @@ module DescribeDataIngestionJobResponse =
             fun ?createdAt ->
               fun ?status ->
                 fun ?failedReason ->
-                  fun () ->
-                    {
-                      jobId;
-                      datasetArn;
-                      ingestionInputConfiguration;
-                      roleArn;
-                      createdAt;
-                      status;
-                      failedReason
-                    }
+                  fun ?dataQualitySummary ->
+                    fun ?ingestedFilesSummary ->
+                      fun ?statusDetail ->
+                        fun ?ingestedDataSize ->
+                          fun ?dataStartTime ->
+                            fun ?dataEndTime ->
+                              fun ?sourceDatasetArn ->
+                                fun () ->
+                                  {
+                                    jobId;
+                                    datasetArn;
+                                    ingestionInputConfiguration;
+                                    roleArn;
+                                    createdAt;
+                                    status;
+                                    failedReason;
+                                    dataQualitySummary;
+                                    ingestedFilesSummary;
+                                    statusDetail;
+                                    ingestedDataSize;
+                                    dataStartTime;
+                                    dataEndTime;
+                                    sourceDatasetArn
+                                  }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4687,9 +11038,40 @@ module DescribeDataIngestionJobResponse =
         ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("Status", (Option.map x.status ~f:IngestionJobStatus.to_value));
         ("FailedReason",
-          (Option.map x.failedReason ~f:BoundedLengthString.to_value))]
+          (Option.map x.failedReason ~f:BoundedLengthString.to_value));
+        ("DataQualitySummary",
+          (Option.map x.dataQualitySummary ~f:DataQualitySummary.to_value));
+        ("IngestedFilesSummary",
+          (Option.map x.ingestedFilesSummary ~f:IngestedFilesSummary.to_value));
+        ("StatusDetail",
+          (Option.map x.statusDetail ~f:BoundedLengthString.to_value));
+        ("IngestedDataSize",
+          (Option.map x.ingestedDataSize ~f:DataSizeInBytes.to_value));
+        ("DataStartTime", (Option.map x.dataStartTime ~f:Timestamp.to_value));
+        ("DataEndTime", (Option.map x.dataEndTime ~f:Timestamp.to_value));
+        ("SourceDatasetArn",
+          (Option.map x.sourceDatasetArn ~f:DatasetArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceDatasetArn =
+        (Option.map ~f:DatasetArn.of_xml)
+          (Xml.child xml_arg0 "SourceDatasetArn") in
+      let dataEndTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DataEndTime") in
+      let dataStartTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DataStartTime") in
+      let ingestedDataSize =
+        (Option.map ~f:DataSizeInBytes.of_xml)
+          (Xml.child xml_arg0 "IngestedDataSize") in
+      let statusDetail =
+        (Option.map ~f:BoundedLengthString.of_xml)
+          (Xml.child xml_arg0 "StatusDetail") in
+      let ingestedFilesSummary =
+        (Option.map ~f:IngestedFilesSummary.of_xml)
+          (Xml.child xml_arg0 "IngestedFilesSummary") in
+      let dataQualitySummary =
+        (Option.map ~f:DataQualitySummary.of_xml)
+          (Xml.child xml_arg0 "DataQualitySummary") in
       let failedReason =
         (Option.map ~f:BoundedLengthString.of_xml)
           (Xml.child xml_arg0 "FailedReason") in
@@ -4707,25 +11089,41 @@ module DescribeDataIngestionJobResponse =
         (Option.map ~f:DatasetArn.of_xml) (Xml.child xml_arg0 "DatasetArn") in
       let jobId =
         (Option.map ~f:IngestionJobId.of_xml) (Xml.child xml_arg0 "JobId") in
-      make ?failedReason ?status ?createdAt ?roleArn
-        ?ingestionInputConfiguration ?datasetArn ?jobId ()
+      make ?sourceDatasetArn ?dataEndTime ?dataStartTime ?ingestedDataSize
+        ?statusDetail ?ingestedFilesSummary ?dataQualitySummary ?failedReason
+        ?status ?createdAt ?roleArn ?ingestionInputConfiguration ?datasetArn
+        ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let sourceDatasetArn =
+        field_map json__ "SourceDatasetArn" DatasetArn.of_json in
+      let dataEndTime = field_map json__ "DataEndTime" Timestamp.of_json in
+      let dataStartTime = field_map json__ "DataStartTime" Timestamp.of_json in
+      let ingestedDataSize =
+        field_map json__ "IngestedDataSize" DataSizeInBytes.of_json in
+      let statusDetail =
+        field_map json__ "StatusDetail" BoundedLengthString.of_json in
+      let ingestedFilesSummary =
+        field_map json__ "IngestedFilesSummary" IngestedFilesSummary.of_json in
+      let dataQualitySummary =
+        field_map json__ "DataQualitySummary" DataQualitySummary.of_json in
       let failedReason =
-        field_map json "FailedReason" BoundedLengthString.of_json in
-      let status = field_map json "Status" IngestionJobStatus.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let roleArn = field_map json "RoleArn" IamRoleArn.of_json in
+        field_map json__ "FailedReason" BoundedLengthString.of_json in
+      let status = field_map json__ "Status" IngestionJobStatus.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
       let ingestionInputConfiguration =
-        field_map json "IngestionInputConfiguration"
+        field_map json__ "IngestionInputConfiguration"
           IngestionInputConfiguration.of_json in
-      let datasetArn = field_map json "DatasetArn" DatasetArn.of_json in
-      let jobId = field_map json "JobId" IngestionJobId.of_json in
-      make ?failedReason ?status ?createdAt ?roleArn
-        ?ingestionInputConfiguration ?datasetArn ?jobId ()
+      let datasetArn = field_map json__ "DatasetArn" DatasetArn.of_json in
+      let jobId = field_map json__ "JobId" IngestionJobId.of_json in
+      make ?sourceDatasetArn ?dataEndTime ?dataStartTime ?ingestedDataSize
+        ?statusDetail ?ingestedFilesSummary ?dataQualitySummary ?failedReason
+        ?status ?createdAt ?roleArn ?ingestionInputConfiguration ?datasetArn
+        ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information on a specific data ingestion job such as creation time, dataset ARN, status, and so on."]
+       "Provides information on a specific data ingestion job such as creation time, dataset ARN, and status."]
 module DescribeDataIngestionJobRequest =
   struct
     type nonrec t =
@@ -4744,18 +11142,68 @@ module DescribeDataIngestionJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" IngestionJobId.of_json in
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" IngestionJobId.of_json in
       make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information on a specific data ingestion job such as creation time, dataset ARN, status, and so on."]
+       "Provides information on a specific data ingestion job such as creation time, dataset ARN, and status."]
+module DeleteRetrainingSchedulerRequest =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t
+        [@ocaml.doc
+          "The name of the model whose retraining scheduler you want to delete."]}
+    let context_ = "DeleteRetrainingSchedulerRequest"
+    let make ~modelName = fun () -> { modelName }
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Some (ModelName.to_value x.modelName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let modelName =
+        ModelName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
+      make ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
+      make ~modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a retraining scheduler from a model. The retraining scheduler must be in the STOPPED status."]
+module DeleteResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource for which the resource policy should be deleted."]}
+    let context_ = "DeleteResourcePolicyRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the resource policy attached to the resource."]
 module DeleteModelRequest =
   struct
     type nonrec t =
       {
       modelName: ModelName.t
-        [@ocaml.doc "The name of the ML model to be deleted."]}
+        [@ocaml.doc "The name of the machine learning model to be deleted."]}
     let context_ = "DeleteModelRequest"
     let make ~modelName = fun () -> { modelName }
     let to_value x =
@@ -4768,12 +11216,71 @@ module DeleteModelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
       make ~modelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelName = field_map_exn json "ModelName" ModelName.of_json in
+    let of_json json__ =
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
       make ~modelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an ML model currently available for Amazon Lookout for Equipment. This will prevent it from being used with an inference scheduler, even one that is already set up."]
+       "Deletes a machine learning model currently available for Amazon Lookout for Equipment. This will prevent it from being used with an inference scheduler, even one that is already set up."]
+module DeleteLabelRequest =
+  struct
+    type nonrec t =
+      {
+      labelGroupName: LabelGroupName.t
+        [@ocaml.doc
+          "The name of the label group that contains the label that you want to delete. Data in this field will be retained for service usage. Follow best practices for the security of your data."];
+      labelId: LabelId.t
+        [@ocaml.doc "The ID of the label that you want to delete."]}
+    let context_ = "DeleteLabelRequest"
+    let make ~labelGroupName =
+      fun ~labelId -> fun () -> { labelGroupName; labelId }
+    let to_value x =
+      structure_to_value
+        [("LabelGroupName",
+           (Some (LabelGroupName.to_value x.labelGroupName)));
+        ("LabelId", (Some (LabelId.to_value x.labelId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelId =
+        LabelId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LabelId") in
+      let labelGroupName =
+        LabelGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LabelGroupName") in
+      make ~labelId ~labelGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelId = field_map_exn json__ "LabelId" LabelId.of_json in
+      let labelGroupName =
+        field_map_exn json__ "LabelGroupName" LabelGroupName.of_json in
+      make ~labelId ~labelGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a label."]
+module DeleteLabelGroupRequest =
+  struct
+    type nonrec t =
+      {
+      labelGroupName: LabelGroupName.t
+        [@ocaml.doc
+          "The name of the label group that you want to delete. Data in this field will be retained for service usage. Follow best practices for the security of your data."]}
+    let context_ = "DeleteLabelGroupRequest"
+    let make ~labelGroupName = fun () -> { labelGroupName }
+    let to_value x =
+      structure_to_value
+        [("LabelGroupName",
+           (Some (LabelGroupName.to_value x.labelGroupName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelGroupName =
+        LabelGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LabelGroupName") in
+      make ~labelGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelGroupName =
+        field_map_exn json__ "LabelGroupName" LabelGroupName.of_json in
+      make ~labelGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a group of labels."]
 module DeleteInferenceSchedulerRequest =
   struct
     type nonrec t =
@@ -4794,14 +11301,14 @@ module DeleteInferenceSchedulerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InferenceSchedulerName") in
       make ~inferenceSchedulerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inferenceSchedulerName =
-        field_map_exn json "InferenceSchedulerName"
+        field_map_exn json__ "InferenceSchedulerName"
           InferenceSchedulerIdentifier.of_json in
       make ~inferenceSchedulerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an inference scheduler that has been set up. Already processed output results are not affected."]
+       "Deletes an inference scheduler that has been set up. Prior inference results will not be deleted."]
 module DeleteDatasetRequest =
   struct
     type nonrec t =
@@ -4820,13 +11327,214 @@ module DeleteDatasetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetName") in
       make ~datasetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetName =
-        field_map_exn json "DatasetName" DatasetIdentifier.of_json in
+        field_map_exn json__ "DatasetName" DatasetIdentifier.of_json in
       make ~datasetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a dataset and associated artifacts. The operation will check to see if any inference scheduler or data ingestion job is currently using the dataset, and if there isn't, the dataset, its metadata, and any associated data stored in S3 will be deleted. This does not affect any models that used this dataset for training and evaluation, but does prevent it from being used in the future."]
+module CreateRetrainingSchedulerResponse =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t option
+        [@ocaml.doc
+          "The name of the model that you added the retraining scheduler to."];
+      modelArn: ModelArn.t option
+        [@ocaml.doc
+          "The ARN of the model that you added the retraining scheduler to."];
+      status: RetrainingSchedulerStatus.t option
+        [@ocaml.doc "The status of the retraining scheduler."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?modelName =
+      fun ?modelArn ->
+        fun ?status -> fun () -> { modelName; modelArn; status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
+        ("ModelArn", (Option.map x.modelArn ~f:ModelArn.to_value));
+        ("Status",
+          (Option.map x.status ~f:RetrainingSchedulerStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:RetrainingSchedulerStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let modelArn =
+        (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
+      let modelName =
+        (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
+      make ?status ?modelArn ?modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "Status" RetrainingSchedulerStatus.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      make ?status ?modelArn ?modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a retraining scheduler on the specified model."]
+module CreateRetrainingSchedulerRequest =
+  struct
+    type nonrec t =
+      {
+      modelName: ModelName.t
+        [@ocaml.doc
+          "The name of the model to add the retraining scheduler to."];
+      retrainingStartDate: Timestamp.t option
+        [@ocaml.doc
+          "The start date for the retraining scheduler. Lookout for Equipment truncates the time you provide to the nearest UTC day."];
+      retrainingFrequency: RetrainingFrequency.t
+        [@ocaml.doc
+          "This parameter uses the ISO 8601 standard to set the frequency at which you want retraining to occur in terms of Years, Months, and/or Days (note: other parameters like Time are not currently supported). The minimum value is 30 days (P30D) and the maximum value is 1 year (P1Y). For example, the following values are valid: P3M15D \226\128\147 Every 3 months and 15 days P2M \226\128\147 Every 2 months P150D \226\128\147 Every 150 days"];
+      lookbackWindow: LookbackWindow.t
+        [@ocaml.doc
+          "The number of past days of data that will be used for retraining."];
+      promoteMode: ModelPromoteMode.t option
+        [@ocaml.doc
+          "Indicates how the service will use new models. In MANAGED mode, new models will automatically be used for inference if they have better performance than the current model. In MANUAL mode, the new models will not be used until they are manually activated."];
+      clientToken: IdempotenceToken.t
+        [@ocaml.doc
+          "A unique identifier for the request. If you do not set the client request token, Amazon Lookout for Equipment generates one."]}
+    let context_ = "CreateRetrainingSchedulerRequest"
+    let make ?retrainingStartDate =
+      fun ?promoteMode ->
+        fun ~modelName ->
+          fun ~retrainingFrequency ->
+            fun ~lookbackWindow ->
+              fun ~clientToken ->
+                fun () ->
+                  {
+                    retrainingStartDate;
+                    promoteMode;
+                    modelName;
+                    retrainingFrequency;
+                    lookbackWindow;
+                    clientToken
+                  }
+    let to_value x =
+      structure_to_value
+        [("ModelName", (Some (ModelName.to_value x.modelName)));
+        ("RetrainingStartDate",
+          (Option.map x.retrainingStartDate ~f:Timestamp.to_value));
+        ("RetrainingFrequency",
+          (Some (RetrainingFrequency.to_value x.retrainingFrequency)));
+        ("LookbackWindow", (Some (LookbackWindow.to_value x.lookbackWindow)));
+        ("PromoteMode",
+          (Option.map x.promoteMode ~f:ModelPromoteMode.to_value));
+        ("ClientToken", (Some (IdempotenceToken.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        IdempotenceToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+      let promoteMode =
+        (Option.map ~f:ModelPromoteMode.of_xml)
+          (Xml.child xml_arg0 "PromoteMode") in
+      let lookbackWindow =
+        LookbackWindow.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LookbackWindow") in
+      let retrainingFrequency =
+        RetrainingFrequency.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RetrainingFrequency") in
+      let retrainingStartDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "RetrainingStartDate") in
+      let modelName =
+        ModelName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
+      make ~clientToken ?promoteMode ~lookbackWindow ~retrainingFrequency
+        ?retrainingStartDate ~modelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "ClientToken" IdempotenceToken.of_json in
+      let promoteMode =
+        field_map json__ "PromoteMode" ModelPromoteMode.of_json in
+      let lookbackWindow =
+        field_map_exn json__ "LookbackWindow" LookbackWindow.of_json in
+      let retrainingFrequency =
+        field_map_exn json__ "RetrainingFrequency"
+          RetrainingFrequency.of_json in
+      let retrainingStartDate =
+        field_map json__ "RetrainingStartDate" Timestamp.of_json in
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
+      make ~clientToken ?promoteMode ~lookbackWindow ~retrainingFrequency
+        ?retrainingStartDate ~modelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a retraining scheduler on the specified model."]
 module CreateModelResponse =
   struct
     type nonrec t =
@@ -4932,45 +11640,46 @@ module CreateModelResponse =
         (Option.map ~f:ModelArn.of_xml) (Xml.child xml_arg0 "ModelArn") in
       make ?status ?modelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ModelStatus.of_json in
-      let modelArn = field_map json "ModelArn" ModelArn.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ModelStatus.of_json in
+      let modelArn = field_map json__ "ModelArn" ModelArn.of_json in
       make ?status ?modelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an ML model for data inference. A machine-learning (ML) model is a mathematical model that finds patterns in your data. In Amazon Lookout for Equipment, the model learns the patterns of normal behavior and detects abnormal behavior that could be potential equipment failure (or maintenance events). The models are made by analyzing normal data and abnormalities in machine behavior that have already occurred. Your model is trained using a portion of the data from your dataset and uses that data to learn patterns of normal behavior and abnormal patterns that lead to equipment failure. Another portion of the data is used to evaluate the model's accuracy."]
+       "Creates a machine learning model for data inference. A machine-learning (ML) model is a mathematical model that finds patterns in your data. In Amazon Lookout for Equipment, the model learns the patterns of normal behavior and detects abnormal behavior that could be potential equipment failure (or maintenance events). The models are made by analyzing normal data and abnormalities in machine behavior that have already occurred. Your model is trained using a portion of the data from your dataset and uses that data to learn patterns of normal behavior and abnormal patterns that lead to equipment failure. Another portion of the data is used to evaluate the model's accuracy."]
 module CreateModelRequest =
   struct
     type nonrec t =
       {
       modelName: ModelName.t
-        [@ocaml.doc "The name for the ML model to be created."];
+        [@ocaml.doc "The name for the machine learning model to be created."];
       datasetName: DatasetIdentifier.t
         [@ocaml.doc
-          "The name of the dataset for the ML model being created."];
+          "The name of the dataset for the machine learning model being created."];
       datasetSchema: DatasetSchema.t option
-        [@ocaml.doc "The data schema for the ML model being created."];
+        [@ocaml.doc
+          "The data schema for the machine learning model being created."];
       labelsInputConfiguration: LabelsInputConfiguration.t option
         [@ocaml.doc
-          "The input configuration for the labels being used for the ML model that's being created."];
+          "The input configuration for the labels being used for the machine learning model that's being created."];
       clientToken: IdempotenceToken.t
         [@ocaml.doc
           "A unique identifier for the request. If you do not set the client request token, Amazon Lookout for Equipment generates one."];
       trainingDataStartTime: Timestamp.t option
         [@ocaml.doc
-          "Indicates the time reference in the dataset that should be used to begin the subset of training data for the ML model."];
+          "Indicates the time reference in the dataset that should be used to begin the subset of training data for the machine learning model."];
       trainingDataEndTime: Timestamp.t option
         [@ocaml.doc
-          "Indicates the time reference in the dataset that should be used to end the subset of training data for the ML model."];
+          "Indicates the time reference in the dataset that should be used to end the subset of training data for the machine learning model."];
       evaluationDataStartTime: Timestamp.t option
         [@ocaml.doc
-          "Indicates the time reference in the dataset that should be used to begin the subset of evaluation data for the ML model."];
+          "Indicates the time reference in the dataset that should be used to begin the subset of evaluation data for the machine learning model."];
       evaluationDataEndTime: Timestamp.t option
         [@ocaml.doc
-          "Indicates the time reference in the dataset that should be used to end the subset of evaluation data for the ML model."];
+          "Indicates the time reference in the dataset that should be used to end the subset of evaluation data for the machine learning model."];
       roleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a role with permission to access the data source being used to create the ML model."];
+          "The Amazon Resource Name (ARN) of a role with permission to access the data source being used to create the machine learning model."];
       dataPreProcessingConfiguration: DataPreProcessingConfiguration.t option
         [@ocaml.doc
           "The configuration is the TargetSamplingRate, which is the sampling rate of the data after post processing by Amazon Lookout for Equipment. For example, if you provide data that has been collected at a 1 second level and you want the system to resample the data at a 1 minute rate before training, the TargetSamplingRate is 1 minute. When providing a value for the TargetSamplingRate, you must attach the prefix \"PT\" to the rate you want. The value for a 1 second rate is therefore PT1S, the value for a 15 minute rate is PT15M, and the value for a 1 hour rate is PT1H"];
@@ -4978,10 +11687,15 @@ module CreateModelRequest =
         [@ocaml.doc
           "Provides the identifier of the KMS key used to encrypt model data by Amazon Lookout for Equipment."];
       tags: TagList.t option
-        [@ocaml.doc "Any tags associated with the ML model being created."];
+        [@ocaml.doc
+          "Any tags associated with the machine learning model being created."];
       offCondition: OffCondition.t option
         [@ocaml.doc
-          "Indicates that the asset associated with this sensor has been shut off. As long as this condition is met, Lookout for Equipment will not use data from this asset for training, evaluation, or inference."]}
+          "Indicates that the asset associated with this sensor has been shut off. As long as this condition is met, Lookout for Equipment will not use data from this asset for training, evaluation, or inference."];
+      modelDiagnosticsOutputConfiguration:
+        ModelDiagnosticsOutputConfiguration.t option
+        [@ocaml.doc
+          "The Amazon S3 location where you want Amazon Lookout for Equipment to save the pointwise model diagnostics. You must also specify the RoleArn request parameter."]}
     let context_ = "CreateModelRequest"
     let make ?datasetSchema =
       fun ?labelsInputConfiguration ->
@@ -4994,26 +11708,28 @@ module CreateModelRequest =
                     fun ?serverSideKmsKeyId ->
                       fun ?tags ->
                         fun ?offCondition ->
-                          fun ~modelName ->
-                            fun ~datasetName ->
-                              fun ~clientToken ->
-                                fun () ->
-                                  {
-                                    datasetSchema;
-                                    labelsInputConfiguration;
-                                    trainingDataStartTime;
-                                    trainingDataEndTime;
-                                    evaluationDataStartTime;
-                                    evaluationDataEndTime;
-                                    roleArn;
-                                    dataPreProcessingConfiguration;
-                                    serverSideKmsKeyId;
-                                    tags;
-                                    offCondition;
-                                    modelName;
-                                    datasetName;
-                                    clientToken
-                                  }
+                          fun ?modelDiagnosticsOutputConfiguration ->
+                            fun ~modelName ->
+                              fun ~datasetName ->
+                                fun ~clientToken ->
+                                  fun () ->
+                                    {
+                                      datasetSchema;
+                                      labelsInputConfiguration;
+                                      trainingDataStartTime;
+                                      trainingDataEndTime;
+                                      evaluationDataStartTime;
+                                      evaluationDataEndTime;
+                                      roleArn;
+                                      dataPreProcessingConfiguration;
+                                      serverSideKmsKeyId;
+                                      tags;
+                                      offCondition;
+                                      modelDiagnosticsOutputConfiguration;
+                                      modelName;
+                                      datasetName;
+                                      clientToken
+                                    }
     let to_value x =
       structure_to_value
         [("ModelName", (Some (ModelName.to_value x.modelName)));
@@ -5040,9 +11756,15 @@ module CreateModelRequest =
           (Option.map x.serverSideKmsKeyId ~f:NameOrArn.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("OffCondition",
-          (Option.map x.offCondition ~f:OffCondition.to_value))]
+          (Option.map x.offCondition ~f:OffCondition.to_value));
+        ("ModelDiagnosticsOutputConfiguration",
+          (Option.map x.modelDiagnosticsOutputConfiguration
+             ~f:ModelDiagnosticsOutputConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let modelDiagnosticsOutputConfiguration =
+        (Option.map ~f:ModelDiagnosticsOutputConfiguration.of_xml)
+          (Xml.child xml_arg0 "ModelDiagnosticsOutputConfiguration") in
       let offCondition =
         (Option.map ~f:OffCondition.of_xml)
           (Xml.child xml_arg0 "OffCondition") in
@@ -5082,47 +11804,412 @@ module CreateModelRequest =
       let modelName =
         ModelName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ModelName") in
-      make ?offCondition ?tags ?serverSideKmsKeyId
-        ?dataPreProcessingConfiguration ?roleArn ?evaluationDataEndTime
-        ?evaluationDataStartTime ?trainingDataEndTime ?trainingDataStartTime
-        ~clientToken ?labelsInputConfiguration ?datasetSchema ~datasetName
-        ~modelName ()
+      make ?modelDiagnosticsOutputConfiguration ?offCondition ?tags
+        ?serverSideKmsKeyId ?dataPreProcessingConfiguration ?roleArn
+        ?evaluationDataEndTime ?evaluationDataStartTime ?trainingDataEndTime
+        ?trainingDataStartTime ~clientToken ?labelsInputConfiguration
+        ?datasetSchema ~datasetName ~modelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let offCondition = field_map json "OffCondition" OffCondition.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let modelDiagnosticsOutputConfiguration =
+        field_map json__ "ModelDiagnosticsOutputConfiguration"
+          ModelDiagnosticsOutputConfiguration.of_json in
+      let offCondition = field_map json__ "OffCondition" OffCondition.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let serverSideKmsKeyId =
-        field_map json "ServerSideKmsKeyId" NameOrArn.of_json in
+        field_map json__ "ServerSideKmsKeyId" NameOrArn.of_json in
       let dataPreProcessingConfiguration =
-        field_map json "DataPreProcessingConfiguration"
+        field_map json__ "DataPreProcessingConfiguration"
           DataPreProcessingConfiguration.of_json in
-      let roleArn = field_map json "RoleArn" IamRoleArn.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
       let evaluationDataEndTime =
-        field_map json "EvaluationDataEndTime" Timestamp.of_json in
+        field_map json__ "EvaluationDataEndTime" Timestamp.of_json in
       let evaluationDataStartTime =
-        field_map json "EvaluationDataStartTime" Timestamp.of_json in
+        field_map json__ "EvaluationDataStartTime" Timestamp.of_json in
       let trainingDataEndTime =
-        field_map json "TrainingDataEndTime" Timestamp.of_json in
+        field_map json__ "TrainingDataEndTime" Timestamp.of_json in
       let trainingDataStartTime =
-        field_map json "TrainingDataStartTime" Timestamp.of_json in
+        field_map json__ "TrainingDataStartTime" Timestamp.of_json in
       let clientToken =
-        field_map_exn json "ClientToken" IdempotenceToken.of_json in
+        field_map_exn json__ "ClientToken" IdempotenceToken.of_json in
       let labelsInputConfiguration =
-        field_map json "LabelsInputConfiguration"
+        field_map json__ "LabelsInputConfiguration"
           LabelsInputConfiguration.of_json in
       let datasetSchema =
-        field_map json "DatasetSchema" DatasetSchema.of_json in
+        field_map json__ "DatasetSchema" DatasetSchema.of_json in
       let datasetName =
-        field_map_exn json "DatasetName" DatasetIdentifier.of_json in
-      let modelName = field_map_exn json "ModelName" ModelName.of_json in
-      make ?offCondition ?tags ?serverSideKmsKeyId
-        ?dataPreProcessingConfiguration ?roleArn ?evaluationDataEndTime
-        ?evaluationDataStartTime ?trainingDataEndTime ?trainingDataStartTime
-        ~clientToken ?labelsInputConfiguration ?datasetSchema ~datasetName
-        ~modelName ()
+        field_map_exn json__ "DatasetName" DatasetIdentifier.of_json in
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
+      make ?modelDiagnosticsOutputConfiguration ?offCondition ?tags
+        ?serverSideKmsKeyId ?dataPreProcessingConfiguration ?roleArn
+        ?evaluationDataEndTime ?evaluationDataStartTime ?trainingDataEndTime
+        ?trainingDataStartTime ~clientToken ?labelsInputConfiguration
+        ?datasetSchema ~datasetName ~modelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an ML model for data inference. A machine-learning (ML) model is a mathematical model that finds patterns in your data. In Amazon Lookout for Equipment, the model learns the patterns of normal behavior and detects abnormal behavior that could be potential equipment failure (or maintenance events). The models are made by analyzing normal data and abnormalities in machine behavior that have already occurred. Your model is trained using a portion of the data from your dataset and uses that data to learn patterns of normal behavior and abnormal patterns that lead to equipment failure. Another portion of the data is used to evaluate the model's accuracy."]
+       "Creates a machine learning model for data inference. A machine-learning (ML) model is a mathematical model that finds patterns in your data. In Amazon Lookout for Equipment, the model learns the patterns of normal behavior and detects abnormal behavior that could be potential equipment failure (or maintenance events). The models are made by analyzing normal data and abnormalities in machine behavior that have already occurred. Your model is trained using a portion of the data from your dataset and uses that data to learn patterns of normal behavior and abnormal patterns that lead to equipment failure. Another portion of the data is used to evaluate the model's accuracy."]
+module CreateLabelResponse =
+  struct
+    type nonrec t =
+      {
+      labelId: LabelId.t option
+        [@ocaml.doc "The ID of the label that you have created."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?labelId = fun () -> { labelId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LabelId", (Option.map x.labelId ~f:LabelId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelId =
+        (Option.map ~f:LabelId.of_xml) (Xml.child xml_arg0 "LabelId") in
+      make ?labelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelId = field_map json__ "LabelId" LabelId.of_json in
+      make ?labelId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a label for an event."]
+module CreateLabelRequest =
+  struct
+    type nonrec t =
+      {
+      labelGroupName: LabelGroupName.t
+        [@ocaml.doc
+          "The name of a group of labels. Data in this field will be retained for service usage. Follow best practices for the security of your data."];
+      startTime: Timestamp.t
+        [@ocaml.doc "The start time of the labeled event."];
+      endTime: Timestamp.t [@ocaml.doc "The end time of the labeled event."];
+      rating: LabelRating.t
+        [@ocaml.doc
+          "Indicates whether a labeled event represents an anomaly."];
+      faultCode: FaultCode.t option
+        [@ocaml.doc
+          "Provides additional information about the label. The fault code must be defined in the FaultCodes attribute of the label group. Data in this field will be retained for service usage. Follow best practices for the security of your data."];
+      notes: Comments.t option
+        [@ocaml.doc
+          "Metadata providing additional information about the label. Data in this field will be retained for service usage. Follow best practices for the security of your data."];
+      equipment: Equipment.t option
+        [@ocaml.doc
+          "Indicates that a label pertains to a particular piece of equipment. Data in this field will be retained for service usage. Follow best practices for the security of your data."];
+      clientToken: IdempotenceToken.t
+        [@ocaml.doc
+          "A unique identifier for the request to create a label. If you do not set the client request token, Lookout for Equipment generates one."]}
+    let context_ = "CreateLabelRequest"
+    let make ?faultCode =
+      fun ?notes ->
+        fun ?equipment ->
+          fun ~labelGroupName ->
+            fun ~startTime ->
+              fun ~endTime ->
+                fun ~rating ->
+                  fun ~clientToken ->
+                    fun () ->
+                      {
+                        faultCode;
+                        notes;
+                        equipment;
+                        labelGroupName;
+                        startTime;
+                        endTime;
+                        rating;
+                        clientToken
+                      }
+    let to_value x =
+      structure_to_value
+        [("LabelGroupName",
+           (Some (LabelGroupName.to_value x.labelGroupName)));
+        ("StartTime", (Some (Timestamp.to_value x.startTime)));
+        ("EndTime", (Some (Timestamp.to_value x.endTime)));
+        ("Rating", (Some (LabelRating.to_value x.rating)));
+        ("FaultCode", (Option.map x.faultCode ~f:FaultCode.to_value));
+        ("Notes", (Option.map x.notes ~f:Comments.to_value));
+        ("Equipment", (Option.map x.equipment ~f:Equipment.to_value));
+        ("ClientToken", (Some (IdempotenceToken.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        IdempotenceToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+      let equipment =
+        (Option.map ~f:Equipment.of_xml) (Xml.child xml_arg0 "Equipment") in
+      let notes =
+        (Option.map ~f:Comments.of_xml) (Xml.child xml_arg0 "Notes") in
+      let faultCode =
+        (Option.map ~f:FaultCode.of_xml) (Xml.child xml_arg0 "FaultCode") in
+      let rating =
+        LabelRating.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Rating") in
+      let endTime =
+        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "EndTime") in
+      let startTime =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
+      let labelGroupName =
+        LabelGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LabelGroupName") in
+      make ~clientToken ?equipment ?notes ?faultCode ~rating ~endTime
+        ~startTime ~labelGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "ClientToken" IdempotenceToken.of_json in
+      let equipment = field_map json__ "Equipment" Equipment.of_json in
+      let notes = field_map json__ "Notes" Comments.of_json in
+      let faultCode = field_map json__ "FaultCode" FaultCode.of_json in
+      let rating = field_map_exn json__ "Rating" LabelRating.of_json in
+      let endTime = field_map_exn json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "StartTime" Timestamp.of_json in
+      let labelGroupName =
+        field_map_exn json__ "LabelGroupName" LabelGroupName.of_json in
+      make ~clientToken ?equipment ?notes ?faultCode ~rating ~endTime
+        ~startTime ~labelGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a label for an event."]
+module CreateLabelGroupResponse =
+  struct
+    type nonrec t =
+      {
+      labelGroupName: LabelGroupName.t option
+        [@ocaml.doc
+          "The name of the label group that you have created. Data in this field will be retained for service usage. Follow best practices for the security of your data."];
+      labelGroupArn: LabelGroupArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the label group that you have created."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?labelGroupName =
+      fun ?labelGroupArn -> fun () -> { labelGroupName; labelGroupArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LabelGroupName",
+           (Option.map x.labelGroupName ~f:LabelGroupName.to_value));
+        ("LabelGroupArn",
+          (Option.map x.labelGroupArn ~f:LabelGroupArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let labelGroupArn =
+        (Option.map ~f:LabelGroupArn.of_xml)
+          (Xml.child xml_arg0 "LabelGroupArn") in
+      let labelGroupName =
+        (Option.map ~f:LabelGroupName.of_xml)
+          (Xml.child xml_arg0 "LabelGroupName") in
+      make ?labelGroupArn ?labelGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let labelGroupArn =
+        field_map json__ "LabelGroupArn" LabelGroupArn.of_json in
+      let labelGroupName =
+        field_map json__ "LabelGroupName" LabelGroupName.of_json in
+      make ?labelGroupArn ?labelGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a group of labels."]
+module CreateLabelGroupRequest =
+  struct
+    type nonrec t =
+      {
+      labelGroupName: LabelGroupName.t
+        [@ocaml.doc
+          "Names a group of labels. Data in this field will be retained for service usage. Follow best practices for the security of your data."];
+      faultCodes: FaultCodes.t option
+        [@ocaml.doc
+          "The acceptable fault codes (indicating the type of anomaly associated with the label) that can be used with this label group. Data in this field will be retained for service usage. Follow best practices for the security of your data."];
+      clientToken: IdempotenceToken.t
+        [@ocaml.doc
+          "A unique identifier for the request to create a label group. If you do not set the client request token, Lookout for Equipment generates one."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Tags that provide metadata about the label group you are creating. Data in this field will be retained for service usage. Follow best practices for the security of your data."]}
+    let context_ = "CreateLabelGroupRequest"
+    let make ?faultCodes =
+      fun ?tags ->
+        fun ~labelGroupName ->
+          fun ~clientToken ->
+            fun () -> { faultCodes; tags; labelGroupName; clientToken }
+    let to_value x =
+      structure_to_value
+        [("LabelGroupName",
+           (Some (LabelGroupName.to_value x.labelGroupName)));
+        ("FaultCodes", (Option.map x.faultCodes ~f:FaultCodes.to_value));
+        ("ClientToken", (Some (IdempotenceToken.to_value x.clientToken)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let clientToken =
+        IdempotenceToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+      let faultCodes =
+        (Option.map ~f:FaultCodes.of_xml) (Xml.child xml_arg0 "FaultCodes") in
+      let labelGroupName =
+        LabelGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LabelGroupName") in
+      make ?tags ~clientToken ?faultCodes ~labelGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" IdempotenceToken.of_json in
+      let faultCodes = field_map json__ "FaultCodes" FaultCodes.of_json in
+      let labelGroupName =
+        field_map_exn json__ "LabelGroupName" LabelGroupName.of_json in
+      make ?tags ~clientToken ?faultCodes ~labelGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a group of labels."]
 module CreateInferenceSchedulerResponse =
   struct
     type nonrec t =
@@ -5134,7 +12221,10 @@ module CreateInferenceSchedulerResponse =
         [@ocaml.doc "The name of inference scheduler being created."];
       status: InferenceSchedulerStatus.t option
         [@ocaml.doc
-          "Indicates the status of the CreateInferenceScheduler operation."]}
+          "Indicates the status of the CreateInferenceScheduler operation."];
+      modelQuality: ModelQuality.t option
+        [@ocaml.doc
+          "Provides a quality assessment for a model that uses labels. If Lookout for Equipment determines that the model quality is poor based on training metrics, the value is POOR_QUALITY_DETECTED. Otherwise, the value is QUALITY_THRESHOLD_MET. If the model is unlabeled, the model quality can't be assessed and the value of ModelQuality is CANNOT_DETERMINE_QUALITY. In this situation, you can get a model quality assessment by adding labels to the input dataset and retraining the model. For information about using labels with your models, see Understanding labeling. For information about improving the quality of a model, see Best practices with Amazon Lookout for Equipment."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -5147,7 +12237,14 @@ module CreateInferenceSchedulerResponse =
     let make ?inferenceSchedulerArn =
       fun ?inferenceSchedulerName ->
         fun ?status ->
-          fun () -> { inferenceSchedulerArn; inferenceSchedulerName; status }
+          fun ?modelQuality ->
+            fun () ->
+              {
+                inferenceSchedulerArn;
+                inferenceSchedulerName;
+                status;
+                modelQuality
+              }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5231,9 +12328,14 @@ module CreateInferenceSchedulerResponse =
           (Option.map x.inferenceSchedulerName
              ~f:InferenceSchedulerName.to_value));
         ("Status",
-          (Option.map x.status ~f:InferenceSchedulerStatus.to_value))]
+          (Option.map x.status ~f:InferenceSchedulerStatus.to_value));
+        ("ModelQuality",
+          (Option.map x.modelQuality ~f:ModelQuality.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let modelQuality =
+        (Option.map ~f:ModelQuality.of_xml)
+          (Xml.child xml_arg0 "ModelQuality") in
       let status =
         (Option.map ~f:InferenceSchedulerStatus.of_xml)
           (Xml.child xml_arg0 "Status") in
@@ -5243,16 +12345,20 @@ module CreateInferenceSchedulerResponse =
       let inferenceSchedulerArn =
         (Option.map ~f:InferenceSchedulerArn.of_xml)
           (Xml.child xml_arg0 "InferenceSchedulerArn") in
-      make ?status ?inferenceSchedulerName ?inferenceSchedulerArn ()
+      make ?modelQuality ?status ?inferenceSchedulerName
+        ?inferenceSchedulerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" InferenceSchedulerStatus.of_json in
+    let of_json json__ =
+      let modelQuality = field_map json__ "ModelQuality" ModelQuality.of_json in
+      let status = field_map json__ "Status" InferenceSchedulerStatus.of_json in
       let inferenceSchedulerName =
-        field_map json "InferenceSchedulerName"
+        field_map json__ "InferenceSchedulerName"
           InferenceSchedulerName.of_json in
       let inferenceSchedulerArn =
-        field_map json "InferenceSchedulerArn" InferenceSchedulerArn.of_json in
-      make ?status ?inferenceSchedulerName ?inferenceSchedulerArn ()
+        field_map json__ "InferenceSchedulerArn"
+          InferenceSchedulerArn.of_json in
+      make ?modelQuality ?status ?inferenceSchedulerName
+        ?inferenceSchedulerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a scheduled inference. Scheduling an inference is setting up a continuous real-time inference plan to analyze new measurement data. When setting up the schedule, you provide an S3 bucket location for the input data, assign it a delimiter between separate entries in the data, set an offset delay if desired, and set the frequency of inferencing. You must also provide an S3 bucket location for the output data."]
@@ -5262,15 +12368,15 @@ module CreateInferenceSchedulerRequest =
       {
       modelName: ModelName.t
         [@ocaml.doc
-          "The name of the previously trained ML model being used to create the inference scheduler."];
+          "The name of the previously trained machine learning model being used to create the inference scheduler."];
       inferenceSchedulerName: InferenceSchedulerName.t
         [@ocaml.doc "The name of the inference scheduler being created."];
       dataDelayOffsetInMinutes: DataDelayOffsetInMinutes.t option
         [@ocaml.doc
-          "A period of time (in minutes) by which inference on the data is delayed after the data starts. For instance, if you select an offset delay time of five minutes, inference will not begin on the data until the first data measurement after the five minute mark. For example, if five minutes is selected, the inference scheduler will wake up at the configured frequency with the additional five minute delay time to check the customer S3 bucket. The customer can upload data at the same frequency and they don't need to stop and restart the scheduler when uploading new data."];
+          "The interval (in minutes) of planned delay at the start of each inference segment. For example, if inference is set to run every ten minutes, the delay is set to five minutes and the time is 09:08. The inference scheduler will wake up at the configured interval (which, without a delay configured, would be 09:10) plus the additional five minute delay time (so 09:15) to check your Amazon S3 bucket. The delay provides a buffer for you to upload data at the same frequency, so that you don't have to stop and restart the scheduler when uploading new data. For more information, see Understanding the inference process."];
       dataUploadFrequency: DataUploadFrequency.t
         [@ocaml.doc
-          "How often data is uploaded to the source S3 bucket for the input data. The value chosen is the length of time between data uploads. For instance, if you select 5 minutes, Amazon Lookout for Equipment will upload the real-time data to the source bucket once every 5 minutes. This frequency also determines how often Amazon Lookout for Equipment starts a scheduled inference on your data. In this example, it starts once every 5 minutes."];
+          "How often data is uploaded to the source Amazon S3 bucket for the input data. The value chosen is the length of time between data uploads. For instance, if you select 5 minutes, Amazon Lookout for Equipment will upload the real-time data to the source bucket once every 5 minutes. This frequency also determines how often Amazon Lookout for Equipment runs inference on your data. For more information, see Understanding the inference process."];
       dataInputConfiguration: InferenceInputConfiguration.t
         [@ocaml.doc
           "Specifies configuration information for the input data for the inference scheduler, including delimiter, format, and dataset location."];
@@ -5367,28 +12473,29 @@ module CreateInferenceSchedulerRequest =
         ~dataOutputConfiguration ~dataInputConfiguration ~dataUploadFrequency
         ?dataDelayOffsetInMinutes ~inferenceSchedulerName ~modelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let clientToken =
-        field_map_exn json "ClientToken" IdempotenceToken.of_json in
+        field_map_exn json__ "ClientToken" IdempotenceToken.of_json in
       let serverSideKmsKeyId =
-        field_map json "ServerSideKmsKeyId" NameOrArn.of_json in
-      let roleArn = field_map_exn json "RoleArn" IamRoleArn.of_json in
+        field_map json__ "ServerSideKmsKeyId" NameOrArn.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" IamRoleArn.of_json in
       let dataOutputConfiguration =
-        field_map_exn json "DataOutputConfiguration"
+        field_map_exn json__ "DataOutputConfiguration"
           InferenceOutputConfiguration.of_json in
       let dataInputConfiguration =
-        field_map_exn json "DataInputConfiguration"
+        field_map_exn json__ "DataInputConfiguration"
           InferenceInputConfiguration.of_json in
       let dataUploadFrequency =
-        field_map_exn json "DataUploadFrequency" DataUploadFrequency.of_json in
+        field_map_exn json__ "DataUploadFrequency"
+          DataUploadFrequency.of_json in
       let dataDelayOffsetInMinutes =
-        field_map json "DataDelayOffsetInMinutes"
+        field_map json__ "DataDelayOffsetInMinutes"
           DataDelayOffsetInMinutes.of_json in
       let inferenceSchedulerName =
-        field_map_exn json "InferenceSchedulerName"
+        field_map_exn json__ "InferenceSchedulerName"
           InferenceSchedulerName.of_json in
-      let modelName = field_map_exn json "ModelName" ModelName.of_json in
+      let modelName = field_map_exn json__ "ModelName" ModelName.of_json in
       make ?tags ~clientToken ?serverSideKmsKeyId ~roleArn
         ~dataOutputConfiguration ~dataInputConfiguration ~dataUploadFrequency
         ?dataDelayOffsetInMinutes ~inferenceSchedulerName ~modelName ()
@@ -5498,21 +12605,21 @@ module CreateDatasetResponse =
         (Option.map ~f:DatasetName.of_xml) (Xml.child xml_arg0 "DatasetName") in
       make ?status ?datasetArn ?datasetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" DatasetStatus.of_json in
-      let datasetArn = field_map json "DatasetArn" DatasetArn.of_json in
-      let datasetName = field_map json "DatasetName" DatasetName.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" DatasetStatus.of_json in
+      let datasetArn = field_map json__ "DatasetArn" DatasetArn.of_json in
+      let datasetName = field_map json__ "DatasetName" DatasetName.of_json in
       make ?status ?datasetArn ?datasetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a container for a collection of data being ingested for analysis. The dataset contains the metadata describing where the data is and what the data actually looks like. In other words, it contains the location of the data source, the data schema, and other information. A dataset also contains any tags associated with the ingested data."]
+       "Creates a container for a collection of data being ingested for analysis. The dataset contains the metadata describing where the data is and what the data actually looks like. For example, it contains the location of the data source, the data schema, and other information. A dataset also contains any tags associated with the ingested data."]
 module CreateDatasetRequest =
   struct
     type nonrec t =
       {
       datasetName: DatasetName.t
         [@ocaml.doc "The name of the dataset being created."];
-      datasetSchema: DatasetSchema.t
+      datasetSchema: DatasetSchema.t option
         [@ocaml.doc
           "A JSON description of the data that is in each time series dataset, including names, column names, and data types."];
       serverSideKmsKeyId: NameOrArn.t option
@@ -5525,23 +12632,24 @@ module CreateDatasetRequest =
         [@ocaml.doc
           "Any tags associated with the ingested data described in the dataset."]}
     let context_ = "CreateDatasetRequest"
-    let make ?serverSideKmsKeyId =
-      fun ?tags ->
-        fun ~datasetName ->
-          fun ~datasetSchema ->
+    let make ?datasetSchema =
+      fun ?serverSideKmsKeyId ->
+        fun ?tags ->
+          fun ~datasetName ->
             fun ~clientToken ->
               fun () ->
                 {
+                  datasetSchema;
                   serverSideKmsKeyId;
                   tags;
                   datasetName;
-                  datasetSchema;
                   clientToken
                 }
     let to_value x =
       structure_to_value
         [("DatasetName", (Some (DatasetName.to_value x.datasetName)));
-        ("DatasetSchema", (Some (DatasetSchema.to_value x.datasetSchema)));
+        ("DatasetSchema",
+          (Option.map x.datasetSchema ~f:DatasetSchema.to_value));
         ("ServerSideKmsKeyId",
           (Option.map x.serverSideKmsKeyId ~f:NameOrArn.to_value));
         ("ClientToken", (Some (IdempotenceToken.to_value x.clientToken)));
@@ -5556,25 +12664,26 @@ module CreateDatasetRequest =
         (Option.map ~f:NameOrArn.of_xml)
           (Xml.child xml_arg0 "ServerSideKmsKeyId") in
       let datasetSchema =
-        DatasetSchema.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DatasetSchema") in
+        (Option.map ~f:DatasetSchema.of_xml)
+          (Xml.child xml_arg0 "DatasetSchema") in
       let datasetName =
         DatasetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatasetName") in
-      make ?tags ~clientToken ?serverSideKmsKeyId ~datasetSchema ~datasetName
+      make ?tags ~clientToken ?serverSideKmsKeyId ?datasetSchema ~datasetName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let clientToken =
-        field_map_exn json "ClientToken" IdempotenceToken.of_json in
+        field_map_exn json__ "ClientToken" IdempotenceToken.of_json in
       let serverSideKmsKeyId =
-        field_map json "ServerSideKmsKeyId" NameOrArn.of_json in
+        field_map json__ "ServerSideKmsKeyId" NameOrArn.of_json in
       let datasetSchema =
-        field_map_exn json "DatasetSchema" DatasetSchema.of_json in
-      let datasetName = field_map_exn json "DatasetName" DatasetName.of_json in
-      make ?tags ~clientToken ?serverSideKmsKeyId ~datasetSchema ~datasetName
+        field_map json__ "DatasetSchema" DatasetSchema.of_json in
+      let datasetName =
+        field_map_exn json__ "DatasetName" DatasetName.of_json in
+      make ?tags ~clientToken ?serverSideKmsKeyId ?datasetSchema ~datasetName
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a container for a collection of data being ingested for analysis. The dataset contains the metadata describing where the data is and what the data actually looks like. In other words, it contains the location of the data source, the data schema, and other information. A dataset also contains any tags associated with the ingested data."]
+       "Creates a container for a collection of data being ingested for analysis. The dataset contains the metadata describing where the data is and what the data actually looks like. For example, it contains the location of the data source, the data schema, and other information. A dataset also contains any tags associated with the ingested data."]

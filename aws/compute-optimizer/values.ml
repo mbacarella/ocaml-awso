@@ -24,6 +24,62 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module NullableMemory =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NullableMemory" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module NullableMemoryReservation =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NullableMemoryReservation"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module GpuCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for GpuCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module GpuMemorySizeInMiB =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for GpuMemorySizeInMiB" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module FindingReasonCode =
   struct
     type nonrec t =
@@ -51,6 +107,166 @@ module FindingReasonCode =
     let to_json = simple_to_json to_value
   end
 module SummaryValue =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module MetricValue =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module RDSDBMetricName =
+  struct
+    type nonrec t =
+      | CPU 
+      | Memory 
+      | EBSVolumeStorageSpaceUtilization 
+      | NetworkReceiveThroughput 
+      | NetworkTransmitThroughput 
+      | EBSVolumeReadIOPS 
+      | EBSVolumeWriteIOPS 
+      | EBSVolumeReadThroughput 
+      | EBSVolumeWriteThroughput 
+      | DatabaseConnections 
+      | StorageNetworkReceiveThroughput 
+      | StorageNetworkTransmitThroughput 
+      | AuroraMemoryHealthState 
+      | AuroraMemoryNumDeclinedSql 
+      | AuroraMemoryNumKillConnTotal 
+      | AuroraMemoryNumKillQueryTotal 
+      | ReadIOPSEphemeralStorage 
+      | WriteIOPSEphemeralStorage 
+      | VolumeReadIOPs 
+      | VolumeBytesUsed 
+      | VolumeWriteIOPs 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CPU -> "CPU"
+      | Memory -> "Memory"
+      | EBSVolumeStorageSpaceUtilization ->
+          "EBSVolumeStorageSpaceUtilization"
+      | NetworkReceiveThroughput -> "NetworkReceiveThroughput"
+      | NetworkTransmitThroughput -> "NetworkTransmitThroughput"
+      | EBSVolumeReadIOPS -> "EBSVolumeReadIOPS"
+      | EBSVolumeWriteIOPS -> "EBSVolumeWriteIOPS"
+      | EBSVolumeReadThroughput -> "EBSVolumeReadThroughput"
+      | EBSVolumeWriteThroughput -> "EBSVolumeWriteThroughput"
+      | DatabaseConnections -> "DatabaseConnections"
+      | StorageNetworkReceiveThroughput -> "StorageNetworkReceiveThroughput"
+      | StorageNetworkTransmitThroughput ->
+          "StorageNetworkTransmitThroughput"
+      | AuroraMemoryHealthState -> "AuroraMemoryHealthState"
+      | AuroraMemoryNumDeclinedSql -> "AuroraMemoryNumDeclinedSql"
+      | AuroraMemoryNumKillConnTotal -> "AuroraMemoryNumKillConnTotal"
+      | AuroraMemoryNumKillQueryTotal -> "AuroraMemoryNumKillQueryTotal"
+      | ReadIOPSEphemeralStorage -> "ReadIOPSEphemeralStorage"
+      | WriteIOPSEphemeralStorage -> "WriteIOPSEphemeralStorage"
+      | VolumeReadIOPs -> "VolumeReadIOPs"
+      | VolumeBytesUsed -> "VolumeBytesUsed"
+      | VolumeWriteIOPs -> "VolumeWriteIOPs"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CPU" -> CPU
+      | "Memory" -> Memory
+      | "EBSVolumeStorageSpaceUtilization" ->
+          EBSVolumeStorageSpaceUtilization
+      | "NetworkReceiveThroughput" -> NetworkReceiveThroughput
+      | "NetworkTransmitThroughput" -> NetworkTransmitThroughput
+      | "EBSVolumeReadIOPS" -> EBSVolumeReadIOPS
+      | "EBSVolumeWriteIOPS" -> EBSVolumeWriteIOPS
+      | "EBSVolumeReadThroughput" -> EBSVolumeReadThroughput
+      | "EBSVolumeWriteThroughput" -> EBSVolumeWriteThroughput
+      | "DatabaseConnections" -> DatabaseConnections
+      | "StorageNetworkReceiveThroughput" -> StorageNetworkReceiveThroughput
+      | "StorageNetworkTransmitThroughput" ->
+          StorageNetworkTransmitThroughput
+      | "AuroraMemoryHealthState" -> AuroraMemoryHealthState
+      | "AuroraMemoryNumDeclinedSql" -> AuroraMemoryNumDeclinedSql
+      | "AuroraMemoryNumKillConnTotal" -> AuroraMemoryNumKillConnTotal
+      | "AuroraMemoryNumKillQueryTotal" -> AuroraMemoryNumKillQueryTotal
+      | "ReadIOPSEphemeralStorage" -> ReadIOPSEphemeralStorage
+      | "WriteIOPSEphemeralStorage" -> WriteIOPSEphemeralStorage
+      | "VolumeReadIOPs" -> VolumeReadIOPs
+      | "VolumeBytesUsed" -> VolumeBytesUsed
+      | "VolumeWriteIOPs" -> VolumeWriteIOPs
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RDSDBMetricName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RDSDBMetricName" j)
+    let to_json = simple_to_json to_value
+  end
+module RDSDBMetricStatistic =
+  struct
+    type nonrec t =
+      | Maximum 
+      | Minimum 
+      | Average 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Maximum -> "Maximum"
+      | Minimum -> "Minimum"
+      | Average -> "Average"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Maximum" -> Maximum
+      | "Minimum" -> Minimum
+      | "Average" -> Average
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RDSDBMetricStatistic" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RDSDBMetricStatistic" j)
+    let to_json = simple_to_json to_value
+  end
+module Currency =
+  struct
+    type nonrec t =
+      | USD 
+      | CNY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | USD -> "USD" | CNY -> "CNY" | Non_static_id s -> s
+    let of_string =
+      function | "USD" -> USD | "CNY" -> CNY | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Currency" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Currency" j)
+    let to_json = simple_to_json to_value
+  end
+module Value =
   struct
     type nonrec t = float
     let make i = i
@@ -114,39 +330,114 @@ module LambdaFunctionMemoryMetricStatistic =
         (string_of_json ~kind:"LambdaFunctionMemoryMetricStatistic" j)
     let to_json = simple_to_json to_value
   end
-module MetricValue =
+module ContainerName =
   struct
-    type nonrec t = float
+    type nonrec t = string
+    let context_ = "ContainerName"
     let make i = i
-    let of_string = Float.of_string
-    let to_value x = `Double x
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
-    let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
-    let of_json j = float_of_json ~kind:"a double" j
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ContainerName" j
     let to_json = simple_to_json to_value
   end
-module Currency =
+module MemorySizeConfiguration =
   struct
     type nonrec t =
-      | USD 
-      | CNY 
+      {
+      memory: NullableMemory.t option
+        [@ocaml.doc "The amount of memory in the container."];
+      memoryReservation: NullableMemoryReservation.t option
+        [@ocaml.doc "The limit of memory reserve for the container."]}
+    let make ?memory =
+      fun ?memoryReservation -> fun () -> { memory; memoryReservation }
+    let to_value x =
+      structure_to_value
+        [("memory", (Option.map x.memory ~f:NullableMemory.to_value));
+        ("memoryReservation",
+          (Option.map x.memoryReservation
+             ~f:NullableMemoryReservation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let memoryReservation =
+        (Option.map ~f:NullableMemoryReservation.of_xml)
+          (Xml.child xml_arg0 "memoryReservation") in
+      let memory =
+        (Option.map ~f:NullableMemory.of_xml) (Xml.child xml_arg0 "memory") in
+      make ?memoryReservation ?memory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let memoryReservation =
+        field_map json__ "memoryReservation"
+          NullableMemoryReservation.of_json in
+      let memory = field_map json__ "memory" NullableMemory.of_json in
+      make ?memoryReservation ?memory ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The memory size configurations of a container."]
+module NullableCpu =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NullableCpu" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ECSServiceMetricName =
+  struct
+    type nonrec t =
+      | Cpu 
+      | Memory 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | USD -> "USD" | CNY -> "CNY" | Non_static_id s -> s
+      function | Cpu -> "Cpu" | Memory -> "Memory" | Non_static_id s -> s
     let of_string =
-      function | "USD" -> USD | "CNY" -> CNY | x -> Non_static_id x
+      function | "Cpu" -> Cpu | "Memory" -> Memory | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration Currency" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"Currency" j)
+      of_string
+        (string_of_xml ~kind:"enumeration ECSServiceMetricName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ECSServiceMetricName" j)
     let to_json = simple_to_json to_value
   end
-module Value =
+module ECSServiceMetricStatistic =
+  struct
+    type nonrec t =
+      | Maximum 
+      | Average 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Maximum -> "Maximum"
+      | Average -> "Average"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Maximum" -> Maximum
+      | "Average" -> Average
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ECSServiceMetricStatistic" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ECSServiceMetricStatistic" j)
+    let to_json = simple_to_json to_value
+  end
+module LowerBoundValue =
   struct
     type nonrec t = float
     let make i = i
@@ -159,6 +450,129 @@ module Value =
     let of_json j = float_of_json ~kind:"a double" j
     let to_json = simple_to_json to_value
   end
+module UpperBoundValue =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module PreferredResourceValue =
+  struct
+    type nonrec t = string
+    let context_ = "PreferredResourceValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PreferredResourceValue" j
+    let to_json = simple_to_json to_value
+  end
+module CustomizableMetricHeadroom =
+  struct
+    type nonrec t =
+      | PERCENT_30 
+      | PERCENT_20 
+      | PERCENT_10 
+      | PERCENT_0 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PERCENT_30 -> "PERCENT_30"
+      | PERCENT_20 -> "PERCENT_20"
+      | PERCENT_10 -> "PERCENT_10"
+      | PERCENT_0 -> "PERCENT_0"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PERCENT_30" -> PERCENT_30
+      | "PERCENT_20" -> PERCENT_20
+      | "PERCENT_10" -> PERCENT_10
+      | "PERCENT_0" -> PERCENT_0
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CustomizableMetricHeadroom"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CustomizableMetricHeadroom" j)
+    let to_json = simple_to_json to_value
+  end
+module CustomizableMetricThreshold =
+  struct
+    type nonrec t =
+      | P90 
+      | P95 
+      | P99_5 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | P90 -> "P90"
+      | P95 -> "P95"
+      | P99_5 -> "P99_5"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "P90" -> P90
+      | "P95" -> P95
+      | "P99_5" -> P99_5
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CustomizableMetricThreshold"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CustomizableMetricThreshold" j)
+    let to_json = simple_to_json to_value
+  end
+module Gpu =
+  struct
+    type nonrec t =
+      {
+      gpuCount: GpuCount.t option
+        [@ocaml.doc "The number of GPUs for the instance type."];
+      gpuMemorySizeInMiB: GpuMemorySizeInMiB.t option
+        [@ocaml.doc
+          "The total size of the memory for the GPU accelerators for the instance type, in MiB."]}
+    let make ?gpuCount =
+      fun ?gpuMemorySizeInMiB -> fun () -> { gpuCount; gpuMemorySizeInMiB }
+    let to_value x =
+      structure_to_value
+        [("gpuCount", (Option.map x.gpuCount ~f:GpuCount.to_value));
+        ("gpuMemorySizeInMiB",
+          (Option.map x.gpuMemorySizeInMiB ~f:GpuMemorySizeInMiB.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let gpuMemorySizeInMiB =
+        (Option.map ~f:GpuMemorySizeInMiB.of_xml)
+          (Xml.child xml_arg0 "gpuMemorySizeInMiB") in
+      let gpuCount =
+        (Option.map ~f:GpuCount.of_xml) (Xml.child xml_arg0 "gpuCount") in
+      make ?gpuMemorySizeInMiB ?gpuCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let gpuMemorySizeInMiB =
+        field_map json__ "gpuMemorySizeInMiB" GpuMemorySizeInMiB.of_json in
+      let gpuCount = field_map json__ "gpuCount" GpuCount.of_json in
+      make ?gpuMemorySizeInMiB ?gpuCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the GPU accelerators for the instance type."]
 module MetricName =
   struct
     type nonrec t =
@@ -176,6 +590,8 @@ module MetricName =
       | NETWORK_OUT_BYTES_PER_SECOND 
       | NETWORK_PACKETS_IN_PER_SECOND 
       | NETWORK_PACKETS_OUT_PER_SECOND 
+      | GPU_PERCENTAGE 
+      | GPU_MEMORY_PERCENTAGE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -194,6 +610,8 @@ module MetricName =
       | NETWORK_OUT_BYTES_PER_SECOND -> "NETWORK_OUT_BYTES_PER_SECOND"
       | NETWORK_PACKETS_IN_PER_SECOND -> "NETWORK_PACKETS_IN_PER_SECOND"
       | NETWORK_PACKETS_OUT_PER_SECOND -> "NETWORK_PACKETS_OUT_PER_SECOND"
+      | GPU_PERCENTAGE -> "GPU_PERCENTAGE"
+      | GPU_MEMORY_PERCENTAGE -> "GPU_MEMORY_PERCENTAGE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -211,6 +629,8 @@ module MetricName =
       | "NETWORK_OUT_BYTES_PER_SECOND" -> NETWORK_OUT_BYTES_PER_SECOND
       | "NETWORK_PACKETS_IN_PER_SECOND" -> NETWORK_PACKETS_IN_PER_SECOND
       | "NETWORK_PACKETS_OUT_PER_SECOND" -> NETWORK_PACKETS_OUT_PER_SECOND
+      | "GPU_PERCENTAGE" -> GPU_PERCENTAGE
+      | "GPU_MEMORY_PERCENTAGE" -> GPU_MEMORY_PERCENTAGE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -245,6 +665,66 @@ module MetricStatistic =
     let of_json j = of_string (string_of_json ~kind:"MetricStatistic" j)
     let to_json = simple_to_json to_value
   end
+module MixedInstanceType =
+  struct
+    type nonrec t = string
+    let context_ = "MixedInstanceType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MixedInstanceType" j
+    let to_json = simple_to_json to_value
+  end
+module InferredWorkloadType =
+  struct
+    type nonrec t =
+      | AmazonEmr 
+      | ApacheCassandra 
+      | ApacheHadoop 
+      | Memcached 
+      | Nginx 
+      | PostgreSql 
+      | Redis 
+      | Kafka 
+      | SQLServer 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AmazonEmr -> "AmazonEmr"
+      | ApacheCassandra -> "ApacheCassandra"
+      | ApacheHadoop -> "ApacheHadoop"
+      | Memcached -> "Memcached"
+      | Nginx -> "Nginx"
+      | PostgreSql -> "PostgreSql"
+      | Redis -> "Redis"
+      | Kafka -> "Kafka"
+      | SQLServer -> "SQLServer"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AmazonEmr" -> AmazonEmr
+      | "ApacheCassandra" -> ApacheCassandra
+      | "ApacheHadoop" -> ApacheHadoop
+      | "Memcached" -> Memcached
+      | "Nginx" -> Nginx
+      | "PostgreSql" -> PostgreSql
+      | "Redis" -> Redis
+      | "Kafka" -> Kafka
+      | "SQLServer" -> SQLServer
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InferredWorkloadType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InferredWorkloadType" j)
+    let to_json = simple_to_json to_value
+  end
 module ReasonCodeSummary =
   struct
     type nonrec t =
@@ -266,12 +746,266 @@ module ReasonCodeSummary =
         (Option.map ~f:FindingReasonCode.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" SummaryValue.of_json in
-      let name = field_map json "name" FindingReasonCode.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" SummaryValue.of_json in
+      let name = field_map json__ "name" FindingReasonCode.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary of a finding reason code."]
+module RDSDBUtilizationMetric =
+  struct
+    type nonrec t =
+      {
+      name: RDSDBMetricName.t option
+        [@ocaml.doc "The name of the utilization metric."];
+      statistic: RDSDBMetricStatistic.t option
+        [@ocaml.doc
+          "The statistic of the utilization metric. The Compute Optimizer API, Command Line Interface (CLI), and SDKs return utilization metrics using only the Maximum statistic, which is the highest value observed during the specified period. The Compute Optimizer console displays graphs for some utilization metrics using the Average statistic, which is the value of Sum / SampleCount during the specified period. For more information, see Viewing resource recommendations in the Compute Optimizer User Guide. You can also get averaged utilization metric data for your resources using Amazon CloudWatch. For more information, see the Amazon CloudWatch User Guide."];
+      value: MetricValue.t option
+        [@ocaml.doc "The value of the utilization metric."]}
+    let make ?name =
+      fun ?statistic -> fun ?value -> fun () -> { name; statistic; value }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:RDSDBMetricName.to_value));
+        ("statistic",
+          (Option.map x.statistic ~f:RDSDBMetricStatistic.to_value));
+        ("value", (Option.map x.value ~f:MetricValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:MetricValue.of_xml) (Xml.child xml_arg0 "value") in
+      let statistic =
+        (Option.map ~f:RDSDBMetricStatistic.of_xml)
+          (Xml.child xml_arg0 "statistic") in
+      let name =
+        (Option.map ~f:RDSDBMetricName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?value ?statistic ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" MetricValue.of_json in
+      let statistic =
+        field_map json__ "statistic" RDSDBMetricStatistic.of_json in
+      let name = field_map json__ "name" RDSDBMetricName.of_json in
+      make ?value ?statistic ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the utilization metric of an Amazon Aurora and RDS database. To determine the performance difference between your current DB instance and the recommended option, compare the utilization metric data of your service against its projected utilization metric data."]
+module RDSInstanceEstimatedMonthlySavings =
+  struct
+    type nonrec t =
+      {
+      currency: Currency.t option
+        [@ocaml.doc "The currency of the estimated monthly savings."];
+      value: Value.t option
+        [@ocaml.doc
+          "The value of the estimated monthly savings for DB instances."]}
+    let make ?currency = fun ?value -> fun () -> { currency; value }
+    let to_value x =
+      structure_to_value
+        [("currency", (Option.map x.currency ~f:Currency.to_value));
+        ("value", (Option.map x.value ~f:Value.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "value") in
+      let currency =
+        (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "currency") in
+      make ?value ?currency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" Value.of_json in
+      let currency = field_map json__ "currency" Currency.of_json in
+      make ?value ?currency ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the estimated monthly savings possible for DB instances by adopting Compute Optimizer recommendations. This is based on DB instance pricing after applying Savings Plans discounts."]
+module SavingsOpportunityPercentage =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module EstimatedMonthlySavings =
+  struct
+    type nonrec t =
+      {
+      currency: Currency.t option
+        [@ocaml.doc "The currency of the estimated monthly savings."];
+      value: Value.t option
+        [@ocaml.doc "The value of the estimated monthly savings."]}
+    let make ?currency = fun ?value -> fun () -> { currency; value }
+    let to_value x =
+      structure_to_value
+        [("currency", (Option.map x.currency ~f:Currency.to_value));
+        ("value", (Option.map x.value ~f:Value.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "value") in
+      let currency =
+        (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "currency") in
+      make ?value ?currency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" Value.of_json in
+      let currency = field_map json__ "currency" Currency.of_json in
+      make ?value ?currency ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the estimated monthly savings amount possible, based on On-Demand instance pricing, by adopting Compute Optimizer recommendations for a given resource. For more information, see Estimated monthly savings and savings opportunities in the Compute Optimizer User Guide."]
+module AllocatedStorage =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for AllocatedStorage" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module NullableIOPS =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NullableIOPS" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module NullableMaxAllocatedStorage =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NullableMaxAllocatedStorage"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module NullableStorageThroughput =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NullableStorageThroughput"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module StorageType =
+  struct
+    type nonrec t = string
+    let context_ = "StorageType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StorageType" j
+    let to_json = simple_to_json to_value
+  end
+module RDSStorageEstimatedMonthlySavings =
+  struct
+    type nonrec t =
+      {
+      currency: Currency.t option
+        [@ocaml.doc "The currency of the estimated monthly savings."];
+      value: Value.t option
+        [@ocaml.doc
+          "The value of the estimated monthly savings for DB instance storage."]}
+    let make ?currency = fun ?value -> fun () -> { currency; value }
+    let to_value x =
+      structure_to_value
+        [("currency", (Option.map x.currency ~f:Currency.to_value));
+        ("value", (Option.map x.value ~f:Value.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "value") in
+      let currency =
+        (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "currency") in
+      make ?value ?currency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" Value.of_json in
+      let currency = field_map json__ "currency" Currency.of_json in
+      make ?value ?currency ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the estimated monthly savings possible for DB instance storage by adopting Compute Optimizer recommendations. This is based on DB instance pricing after applying Savings Plans discounts."]
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module MetricProviderArn =
+  struct
+    type nonrec t = string
+    let context_ = "MetricProviderArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MetricProviderArn" j
+    let to_json = simple_to_json to_value
+  end
+module MetricSourceProvider =
+  struct
+    type nonrec t =
+      | CloudWatchApplicationInsights 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CloudWatchApplicationInsights -> "CloudWatchApplicationInsights"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CloudWatchApplicationInsights" -> CloudWatchApplicationInsights
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MetricSourceProvider" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MetricSourceProvider" j)
+    let to_json = simple_to_json to_value
+  end
 module LambdaFunctionMemoryProjectedMetric =
   struct
     type nonrec t =
@@ -304,17 +1038,18 @@ module LambdaFunctionMemoryProjectedMetric =
           (Xml.child xml_arg0 "name") in
       make ?value ?statistic ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" MetricValue.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" MetricValue.of_json in
       let statistic =
-        field_map json "statistic"
+        field_map json__ "statistic"
           LambdaFunctionMemoryMetricStatistic.of_json in
-      let name = field_map json "name" LambdaFunctionMemoryMetricName.of_json in
+      let name =
+        field_map json__ "name" LambdaFunctionMemoryMetricName.of_json in
       make ?value ?statistic ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a projected utilization metric of an Lambda function recommendation option."]
-module EstimatedMonthlySavings =
+module LambdaEstimatedMonthlySavings =
   struct
     type nonrec t =
       {
@@ -334,38 +1069,313 @@ module EstimatedMonthlySavings =
         (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "currency") in
       make ?value ?currency ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" Value.of_json in
-      let currency = field_map json "currency" Currency.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" Value.of_json in
+      let currency = field_map json__ "currency" Currency.of_json in
       make ?value ?currency ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the estimated monthly savings amount possible, based on On-Demand instance pricing, by adopting Compute Optimizer recommendations for a given resource. For more information, see Estimated monthly savings and savings opportunities in the Compute Optimizer User Guide."]
-module SavingsOpportunityPercentage =
+       "Describes the estimated monthly savings possible for Lambda functions by adopting Compute Optimizer recommendations. This is based on Lambda functions pricing after applying Savings Plans discounts."]
+module ContainerRecommendation =
   struct
-    type nonrec t = float
-    let make i = i
-    let of_string = Float.of_string
-    let to_value x = `Double x
+    type nonrec t =
+      {
+      containerName: ContainerName.t option
+        [@ocaml.doc "The name of the container."];
+      memorySizeConfiguration: MemorySizeConfiguration.t option
+        [@ocaml.doc
+          "The recommended memory size configurations for the container."];
+      cpu: NullableCpu.t option
+        [@ocaml.doc
+          "The recommended number of CPU units reserved for the container."]}
+    let make ?containerName =
+      fun ?memorySizeConfiguration ->
+        fun ?cpu -> fun () -> { containerName; memorySizeConfiguration; cpu }
+    let to_value x =
+      structure_to_value
+        [("containerName",
+           (Option.map x.containerName ~f:ContainerName.to_value));
+        ("memorySizeConfiguration",
+          (Option.map x.memorySizeConfiguration
+             ~f:MemorySizeConfiguration.to_value));
+        ("cpu", (Option.map x.cpu ~f:NullableCpu.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
     let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
-    let of_json j = float_of_json ~kind:"a double" j
-    let to_json = simple_to_json to_value
-  end
-module Timestamp =
+      let cpu = (Option.map ~f:NullableCpu.of_xml) (Xml.child xml_arg0 "cpu") in
+      let memorySizeConfiguration =
+        (Option.map ~f:MemorySizeConfiguration.of_xml)
+          (Xml.child xml_arg0 "memorySizeConfiguration") in
+      let containerName =
+        (Option.map ~f:ContainerName.of_xml)
+          (Xml.child xml_arg0 "containerName") in
+      make ?cpu ?memorySizeConfiguration ?containerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cpu = field_map json__ "cpu" NullableCpu.of_json in
+      let memorySizeConfiguration =
+        field_map json__ "memorySizeConfiguration"
+          MemorySizeConfiguration.of_json in
+      let containerName =
+        field_map json__ "containerName" ContainerName.of_json in
+      make ?cpu ?memorySizeConfiguration ?containerName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The CPU and memory recommendations for a container within the tasks of your Amazon ECS service."]
+module ECSEstimatedMonthlySavings =
   struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
+    type nonrec t =
+      {
+      currency: Currency.t option
+        [@ocaml.doc "The currency of the estimated monthly savings."];
+      value: Value.t option
+        [@ocaml.doc
+          "The value of the estimated monthly savings for Amazon ECS services."]}
+    let make ?currency = fun ?value -> fun () -> { currency; value }
+    let to_value x =
+      structure_to_value
+        [("currency", (Option.map x.currency ~f:Currency.to_value));
+        ("value", (Option.map x.value ~f:Value.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "value") in
+      let currency =
+        (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "currency") in
+      make ?value ?currency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" Value.of_json in
+      let currency = field_map json__ "currency" Currency.of_json in
+      make ?value ?currency ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the estimated monthly savings possible for Amazon ECS services by adopting Compute Optimizer recommendations. This is based on Amazon ECS service pricing after applying Savings Plans discounts."]
+module ECSServiceProjectedUtilizationMetric =
+  struct
+    type nonrec t =
+      {
+      name: ECSServiceMetricName.t option
+        [@ocaml.doc
+          "The name of the projected utilization metric. The following utilization metrics are available: Cpu \226\128\148 The percentage of allocated compute units that are currently in use on the service tasks. Memory \226\128\148 The percentage of memory that's currently in use on the service tasks."];
+      statistic: ECSServiceMetricStatistic.t option
+        [@ocaml.doc
+          "The statistic of the projected utilization metric. The Compute Optimizer API, Command Line Interface (CLI), and SDKs return utilization metrics using only the Maximum statistic, which is the highest value observed during the specified period. The Compute Optimizer console displays graphs for some utilization metrics using the Average statistic, which is the value of Sum / SampleCount during the specified period. For more information, see Viewing resource recommendations in the Compute Optimizer User Guide. You can also get averaged utilization metric data for your resources using Amazon CloudWatch. For more information, see the Amazon CloudWatch User Guide."];
+      lowerBoundValue: LowerBoundValue.t option
+        [@ocaml.doc
+          "The lower bound values for the projected utilization metrics."];
+      upperBoundValue: UpperBoundValue.t option
+        [@ocaml.doc
+          "The upper bound values for the projected utilization metrics."]}
+    let make ?name =
+      fun ?statistic ->
+        fun ?lowerBoundValue ->
+          fun ?upperBoundValue ->
+            fun () -> { name; statistic; lowerBoundValue; upperBoundValue }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:ECSServiceMetricName.to_value));
+        ("statistic",
+          (Option.map x.statistic ~f:ECSServiceMetricStatistic.to_value));
+        ("lowerBoundValue",
+          (Option.map x.lowerBoundValue ~f:LowerBoundValue.to_value));
+        ("upperBoundValue",
+          (Option.map x.upperBoundValue ~f:UpperBoundValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let upperBoundValue =
+        (Option.map ~f:UpperBoundValue.of_xml)
+          (Xml.child xml_arg0 "upperBoundValue") in
+      let lowerBoundValue =
+        (Option.map ~f:LowerBoundValue.of_xml)
+          (Xml.child xml_arg0 "lowerBoundValue") in
+      let statistic =
+        (Option.map ~f:ECSServiceMetricStatistic.of_xml)
+          (Xml.child xml_arg0 "statistic") in
+      let name =
+        (Option.map ~f:ECSServiceMetricName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?upperBoundValue ?lowerBoundValue ?statistic ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let upperBoundValue =
+        field_map json__ "upperBoundValue" UpperBoundValue.of_json in
+      let lowerBoundValue =
+        field_map json__ "lowerBoundValue" LowerBoundValue.of_json in
+      let statistic =
+        field_map json__ "statistic" ECSServiceMetricStatistic.of_json in
+      let name = field_map json__ "name" ECSServiceMetricName.of_json in
+      make ?upperBoundValue ?lowerBoundValue ?statistic ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the projected utilization metrics of an Amazon ECS service recommendation option. To determine the performance difference between your current Amazon ECS service and the recommended option, compare the utilization metric data of your service against its projected utilization metric data."]
+module PreferredResourceName =
+  struct
+    type nonrec t =
+      | Ec2InstanceTypes 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Ec2InstanceTypes -> "Ec2InstanceTypes"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Ec2InstanceTypes" -> Ec2InstanceTypes
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PreferredResourceName" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PreferredResourceName" j)
     let to_json = simple_to_json to_value
   end
+module PreferredResourceValues =
+  struct
+    type nonrec t = PreferredResourceValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PreferredResourceValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PreferredResourceValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PreferredResourceValues"
+        ~of_json:PreferredResourceValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CustomizableMetricName =
+  struct
+    type nonrec t =
+      | CpuUtilization 
+      | MemoryUtilization 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CpuUtilization -> "CpuUtilization"
+      | MemoryUtilization -> "MemoryUtilization"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CpuUtilization" -> CpuUtilization
+      | "MemoryUtilization" -> MemoryUtilization
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CustomizableMetricName" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CustomizableMetricName" j)
+    let to_json = simple_to_json to_value
+  end
+module CustomizableMetricParameters =
+  struct
+    type nonrec t =
+      {
+      threshold: CustomizableMetricThreshold.t option
+        [@ocaml.doc
+          "The threshold value used for the specified metric parameter. You can only specify the threshold value for CPU utilization."];
+      headroom: CustomizableMetricHeadroom.t option
+        [@ocaml.doc
+          "The headroom value in percentage used for the specified metric parameter. The following lists the valid values for CPU and memory utilization. CPU utilization: PERCENT_30 | PERCENT_20 | PERCENT_0 Memory utilization: PERCENT_30 | PERCENT_20 | PERCENT_10"]}
+    let make ?threshold = fun ?headroom -> fun () -> { threshold; headroom }
+    let to_value x =
+      structure_to_value
+        [("threshold",
+           (Option.map x.threshold ~f:CustomizableMetricThreshold.to_value));
+        ("headroom",
+          (Option.map x.headroom ~f:CustomizableMetricHeadroom.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let headroom =
+        (Option.map ~f:CustomizableMetricHeadroom.of_xml)
+          (Xml.child xml_arg0 "headroom") in
+      let threshold =
+        (Option.map ~f:CustomizableMetricThreshold.of_xml)
+          (Xml.child xml_arg0 "threshold") in
+      make ?headroom ?threshold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let headroom =
+        field_map json__ "headroom" CustomizableMetricHeadroom.of_json in
+      let threshold =
+        field_map json__ "threshold" CustomizableMetricThreshold.of_json in
+      make ?headroom ?threshold ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the various metric parameters that can be customized, such as threshold and headroom."]
+module Gpus =
+  struct
+    type nonrec t = Gpu.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Gpu.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Gpu.of_xml)
+    let of_json j = list_of_json ~kind:"Gpus" ~of_json:Gpu.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InstanceEstimatedMonthlySavings =
+  struct
+    type nonrec t =
+      {
+      currency: Currency.t option
+        [@ocaml.doc "The currency of the estimated monthly savings."];
+      value: Value.t option
+        [@ocaml.doc "The value of the estimated monthly savings."]}
+    let make ?currency = fun ?value -> fun () -> { currency; value }
+    let to_value x =
+      structure_to_value
+        [("currency", (Option.map x.currency ~f:Currency.to_value));
+        ("value", (Option.map x.value ~f:Value.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "value") in
+      let currency =
+        (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "currency") in
+      make ?value ?currency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" Value.of_json in
+      let currency = field_map json__ "currency" Currency.of_json in
+      make ?value ?currency ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that describes the estimated monthly savings possible by adopting Compute Optimizer\226\128\153s Amazon EC2 instance recommendations. This is based on the Savings Plans and Reserved Instances pricing discounts."]
 module PlatformDifference =
   struct
     type nonrec t =
@@ -410,7 +1420,7 @@ module UtilizationMetric =
       {
       name: MetricName.t option
         [@ocaml.doc
-          "The name of the utilization metric. The following utilization metrics are available: Cpu - The percentage of allocated EC2 compute units that are currently in use on the instance. This metric identifies the processing power required to run an application on the instance. Depending on the instance type, tools in your operating system can show a lower percentage than CloudWatch when the instance is not allocated a full processor core. Units: Percent Memory - The percentage of memory that is currently in use on the instance. This metric identifies the amount of memory required to run an application on the instance. Units: Percent The Memory metric is returned only for resources that have the unified CloudWatch agent installed on them. For more information, see Enabling Memory Utilization with the CloudWatch Agent. EBS_READ_OPS_PER_SECOND - The completed read operations from all EBS volumes attached to the instance in a specified period of time. Unit: Count EBS_WRITE_OPS_PER_SECOND - The completed write operations to all EBS volumes attached to the instance in a specified period of time. Unit: Count EBS_READ_BYTES_PER_SECOND - The bytes read from all EBS volumes attached to the instance in a specified period of time. Unit: Bytes EBS_WRITE_BYTES_PER_SECOND - The bytes written to all EBS volumes attached to the instance in a specified period of time. Unit: Bytes DISK_READ_OPS_PER_SECOND - The completed read operations from all instance store volumes available to the instance in a specified period of time. If there are no instance store volumes, either the value is 0 or the metric is not reported. DISK_WRITE_OPS_PER_SECOND - The completed write operations from all instance store volumes available to the instance in a specified period of time. If there are no instance store volumes, either the value is 0 or the metric is not reported. DISK_READ_BYTES_PER_SECOND - The bytes read from all instance store volumes available to the instance. This metric is used to determine the volume of the data the application reads from the disk of the instance. This can be used to determine the speed of the application. If there are no instance store volumes, either the value is 0 or the metric is not reported. DISK_WRITE_BYTES_PER_SECOND - The bytes written to all instance store volumes available to the instance. This metric is used to determine the volume of the data the application writes onto the disk of the instance. This can be used to determine the speed of the application. If there are no instance store volumes, either the value is 0 or the metric is not reported. NETWORK_IN_BYTES_PER_SECOND - The number of bytes received by the instance on all network interfaces. This metric identifies the volume of incoming network traffic to a single instance. NETWORK_OUT_BYTES_PER_SECOND - The number of bytes sent out by the instance on all network interfaces. This metric identifies the volume of outgoing network traffic from a single instance. NETWORK_PACKETS_IN_PER_SECOND - The number of packets received by the instance on all network interfaces. This metric identifies the volume of incoming traffic in terms of the number of packets on a single instance. NETWORK_PACKETS_OUT_PER_SECOND - The number of packets sent out by the instance on all network interfaces. This metric identifies the volume of outgoing traffic in terms of the number of packets on a single instance."];
+          "The name of the utilization metric. The following utilization metrics are available: Cpu - The percentage of allocated EC2 compute units that are currently in use on the instance. This metric identifies the processing power required to run an application on the instance. Depending on the instance type, tools in your operating system can show a lower percentage than CloudWatch when the instance is not allocated a full processor core. Units: Percent Memory - The percentage of memory that is currently in use on the instance. This metric identifies the amount of memory required to run an application on the instance. Units: Percent The Memory metric is returned only for resources that have the unified CloudWatch agent installed on them. For more information, see Enabling Memory Utilization with the CloudWatch Agent. GPU - The percentage of allocated GPUs that currently run on the instance. GPU_MEMORY - The percentage of total GPU memory that currently runs on the instance. The GPU and GPU_MEMORY metrics are only returned for resources with the unified CloudWatch Agent installed on them. For more information, see Enabling NVIDIA GPU utilization with the CloudWatch Agent. EBS_READ_OPS_PER_SECOND - The completed read operations from all EBS volumes attached to the instance in a specified period of time. Unit: Count EBS_WRITE_OPS_PER_SECOND - The completed write operations to all EBS volumes attached to the instance in a specified period of time. Unit: Count EBS_READ_BYTES_PER_SECOND - The bytes read from all EBS volumes attached to the instance in a specified period of time. Unit: Bytes EBS_WRITE_BYTES_PER_SECOND - The bytes written to all EBS volumes attached to the instance in a specified period of time. Unit: Bytes DISK_READ_OPS_PER_SECOND - The completed read operations from all instance store volumes available to the instance in a specified period of time. If there are no instance store volumes, either the value is 0 or the metric is not reported. DISK_WRITE_OPS_PER_SECOND - The completed write operations from all instance store volumes available to the instance in a specified period of time. If there are no instance store volumes, either the value is 0 or the metric is not reported. DISK_READ_BYTES_PER_SECOND - The bytes read from all instance store volumes available to the instance. This metric is used to determine the volume of the data the application reads from the disk of the instance. This can be used to determine the speed of the application. If there are no instance store volumes, either the value is 0 or the metric is not reported. DISK_WRITE_BYTES_PER_SECOND - The bytes written to all instance store volumes available to the instance. This metric is used to determine the volume of the data the application writes onto the disk of the instance. This can be used to determine the speed of the application. If there are no instance store volumes, either the value is 0 or the metric is not reported. NETWORK_IN_BYTES_PER_SECOND - The number of bytes received by the instance on all network interfaces. This metric identifies the volume of incoming network traffic to a single instance. NETWORK_OUT_BYTES_PER_SECOND - The number of bytes sent out by the instance on all network interfaces. This metric identifies the volume of outgoing network traffic from a single instance. NETWORK_PACKETS_IN_PER_SECOND - The number of packets received by the instance on all network interfaces. This metric identifies the volume of incoming traffic in terms of the number of packets on a single instance. NETWORK_PACKETS_OUT_PER_SECOND - The number of packets sent out by the instance on all network interfaces. This metric identifies the volume of outgoing traffic in terms of the number of packets on a single instance."];
       statistic: MetricStatistic.t option
         [@ocaml.doc
           "The statistic of the utilization metric. The Compute Optimizer API, Command Line Interface (CLI), and SDKs return utilization metrics using only the Maximum statistic, which is the highest value observed during the specified period. The Compute Optimizer console displays graphs for some utilization metrics using the Average statistic, which is the value of Sum / SampleCount during the specified period. For more information, see Viewing resource recommendations in the Compute Optimizer User Guide. You can also get averaged utilization metric data for your resources using Amazon CloudWatch. For more information, see the Amazon CloudWatch User Guide."];
@@ -434,14 +1444,54 @@ module UtilizationMetric =
         (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?statistic ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" MetricValue.of_json in
-      let statistic = field_map json "statistic" MetricStatistic.of_json in
-      let name = field_map json "name" MetricName.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" MetricValue.of_json in
+      let statistic = field_map json__ "statistic" MetricStatistic.of_json in
+      let name = field_map json__ "name" MetricName.of_json in
       make ?value ?statistic ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a utilization metric of a resource, such as an Amazon EC2 instance. Compare the utilization metric data of your resource against its projected utilization metric data to determine the performance difference between your current resource and the recommended option."]
+module EBSEstimatedMonthlySavings =
+  struct
+    type nonrec t =
+      {
+      currency: Currency.t option
+        [@ocaml.doc "The currency of the estimated monthly savings."];
+      value: Value.t option
+        [@ocaml.doc "The value of the estimated monthly savings."]}
+    let make ?currency = fun ?value -> fun () -> { currency; value }
+    let to_value x =
+      structure_to_value
+        [("currency", (Option.map x.currency ~f:Currency.to_value));
+        ("value", (Option.map x.value ~f:Value.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "value") in
+      let currency =
+        (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "currency") in
+      make ?value ?currency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" Value.of_json in
+      let currency = field_map json__ "currency" Currency.of_json in
+      make ?value ?currency ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that describes the estimated monthly savings possible by adopting Compute Optimizer\226\128\153s Amazon EBS volume recommendations. This includes any applicable discounts."]
+module RootVolume =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module VolumeBaselineIOPS =
   struct
     type nonrec t = int
@@ -526,6 +1576,57 @@ module VolumeType =
     let of_json j = string_of_json ~kind:"VolumeType" j
     let to_json = simple_to_json to_value
   end
+module AllocationStrategy =
+  struct
+    type nonrec t =
+      | Prioritized 
+      | LowestPrice 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Prioritized -> "Prioritized"
+      | LowestPrice -> "LowestPrice"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Prioritized" -> Prioritized
+      | "LowestPrice" -> LowestPrice
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AllocationStrategy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AllocationStrategy" j)
+    let to_json = simple_to_json to_value
+  end
+module AsgType =
+  struct
+    type nonrec t =
+      | SingleInstanceType 
+      | MixedInstanceTypes 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SingleInstanceType -> "SingleInstanceType"
+      | MixedInstanceTypes -> "MixedInstanceTypes"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SingleInstanceType" -> SingleInstanceType
+      | "MixedInstanceTypes" -> MixedInstanceTypes
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AsgType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AsgType" j)
+    let to_json = simple_to_json to_value
+  end
 module DesiredCapacity =
   struct
     type nonrec t = int
@@ -538,19 +1639,6 @@ module DesiredCapacity =
       Int.of_string
         (string_of_xml ~kind:"an integer for DesiredCapacity" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module InstanceType =
-  struct
-    type nonrec t = string
-    let context_ = "InstanceType"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"InstanceType" j
     let to_json = simple_to_json to_value
   end
 module MaxSize =
@@ -578,6 +1666,144 @@ module MinSize =
       Int.of_string (string_of_xml ~kind:"an integer for MinSize" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
+  end
+module MixedInstanceTypes =
+  struct
+    type nonrec t = MixedInstanceType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MixedInstanceType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MixedInstanceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MixedInstanceTypes"
+        ~of_json:MixedInstanceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NullableEstimatedInstanceHourReductionPercentage =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module NullableInstanceType =
+  struct
+    type nonrec t = string
+    let context_ = "NullableInstanceType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NullableInstanceType" j
+    let to_json = simple_to_json to_value
+  end
+module AutoScalingGroupEstimatedMonthlySavings =
+  struct
+    type nonrec t =
+      {
+      currency: Currency.t option
+        [@ocaml.doc "The currency of the estimated monthly savings."];
+      value: Value.t option
+        [@ocaml.doc "The value of the estimated monthly savings."]}
+    let make ?currency = fun ?value -> fun () -> { currency; value }
+    let to_value x =
+      structure_to_value
+        [("currency", (Option.map x.currency ~f:Currency.to_value));
+        ("value", (Option.map x.value ~f:Value.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "value") in
+      let currency =
+        (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "currency") in
+      make ?value ?currency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" Value.of_json in
+      let currency = field_map json__ "currency" Currency.of_json in
+      make ?value ?currency ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that describes the estimated monthly savings possible by adopting Compute Optimizer\226\128\153s Auto Scaling group recommendations. This is based on the Savings Plans and Reserved Instances discounts."]
+module IdleFinding =
+  struct
+    type nonrec t =
+      | Idle 
+      | Unattached 
+      | Unused 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Idle -> "Idle"
+      | Unattached -> "Unattached"
+      | Unused -> "Unused"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Idle" -> Idle
+      | "Unattached" -> Unattached
+      | "Unused" -> Unused
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IdleFinding" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IdleFinding" j)
+    let to_json = simple_to_json to_value
+  end
+module InferredWorkloadTypes =
+  struct
+    type nonrec t = InferredWorkloadType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InferredWorkloadType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InferredWorkloadType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InferredWorkloadTypes"
+        ~of_json:InferredWorkloadType.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module Finding =
   struct
@@ -614,6 +1840,9 @@ module ReasonCodeSummaries =
   struct
     type nonrec t = ReasonCodeSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReasonCodeSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -635,10 +1864,593 @@ module ReasonCodeSummaries =
         ~of_json:ReasonCodeSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DBInstanceClass =
+  struct
+    type nonrec t = string
+    let context_ = "DBInstanceClass"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DBInstanceClass" j
+    let to_json = simple_to_json to_value
+  end
+module PerformanceRisk =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:4.) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module RDSDBProjectedUtilizationMetrics =
+  struct
+    type nonrec t = RDSDBUtilizationMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RDSDBUtilizationMetric.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RDSDBUtilizationMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RDSDBProjectedUtilizationMetrics"
+        ~of_json:RDSDBUtilizationMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RDSInstanceSavingsOpportunityAfterDiscounts =
+  struct
+    type nonrec t =
+      {
+      savingsOpportunityPercentage: SavingsOpportunityPercentage.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible as a percentage of monthly cost by adopting Compute Optimizer\226\128\153s DB instance recommendations. This includes any applicable Savings Plans discounts."];
+      estimatedMonthlySavings: RDSInstanceEstimatedMonthlySavings.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible by adopting Compute Optimizer\226\128\153s DB instance recommendations. This includes any applicable Savings Plans discounts."]}
+    let make ?savingsOpportunityPercentage =
+      fun ?estimatedMonthlySavings ->
+        fun () -> { savingsOpportunityPercentage; estimatedMonthlySavings }
+    let to_value x =
+      structure_to_value
+        [("savingsOpportunityPercentage",
+           (Option.map x.savingsOpportunityPercentage
+              ~f:SavingsOpportunityPercentage.to_value));
+        ("estimatedMonthlySavings",
+          (Option.map x.estimatedMonthlySavings
+             ~f:RDSInstanceEstimatedMonthlySavings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedMonthlySavings =
+        (Option.map ~f:RDSInstanceEstimatedMonthlySavings.of_xml)
+          (Xml.child xml_arg0 "estimatedMonthlySavings") in
+      let savingsOpportunityPercentage =
+        (Option.map ~f:SavingsOpportunityPercentage.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityPercentage") in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedMonthlySavings =
+        field_map json__ "estimatedMonthlySavings"
+          RDSInstanceEstimatedMonthlySavings.of_json in
+      let savingsOpportunityPercentage =
+        field_map json__ "savingsOpportunityPercentage"
+          SavingsOpportunityPercentage.of_json in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings opportunity for DB instance recommendations after applying Savings Plans discounts. Savings opportunity represents the estimated monthly savings after applying Savings Plans discounts. You can achieve this by implementing a given Compute Optimizer recommendation."]
+module Rank =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Rank" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SavingsOpportunity =
+  struct
+    type nonrec t =
+      {
+      savingsOpportunityPercentage: SavingsOpportunityPercentage.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible as a percentage of monthly cost by adopting Compute Optimizer recommendations for a given resource."];
+      estimatedMonthlySavings: EstimatedMonthlySavings.t option
+        [@ocaml.doc
+          "An object that describes the estimated monthly savings amount possible by adopting Compute Optimizer recommendations for a given resource. This is based on the On-Demand instance pricing.."]}
+    let make ?savingsOpportunityPercentage =
+      fun ?estimatedMonthlySavings ->
+        fun () -> { savingsOpportunityPercentage; estimatedMonthlySavings }
+    let to_value x =
+      structure_to_value
+        [("savingsOpportunityPercentage",
+           (Option.map x.savingsOpportunityPercentage
+              ~f:SavingsOpportunityPercentage.to_value));
+        ("estimatedMonthlySavings",
+          (Option.map x.estimatedMonthlySavings
+             ~f:EstimatedMonthlySavings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedMonthlySavings =
+        (Option.map ~f:EstimatedMonthlySavings.of_xml)
+          (Xml.child xml_arg0 "estimatedMonthlySavings") in
+      let savingsOpportunityPercentage =
+        (Option.map ~f:SavingsOpportunityPercentage.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityPercentage") in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedMonthlySavings =
+        field_map json__ "estimatedMonthlySavings"
+          EstimatedMonthlySavings.of_json in
+      let savingsOpportunityPercentage =
+        field_map json__ "savingsOpportunityPercentage"
+          SavingsOpportunityPercentage.of_json in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings opportunity for recommendations of a given resource type or for the recommendation option of an individual resource. Savings opportunity represents the estimated monthly savings you can achieve by implementing a given Compute Optimizer recommendation. Savings opportunity data requires that you opt in to Cost Explorer, as well as activate Receive Amazon EC2 resource recommendations in the Cost Explorer preferences page. That creates a connection between Cost Explorer and Compute Optimizer. With this connection, Cost Explorer generates savings estimates considering the price of existing resources, the price of recommended resources, and historical usage data. Estimated monthly savings reflects the projected dollar savings associated with each of the recommendations generated. For more information, see Enabling Cost Explorer and Optimizing your cost with Rightsizing Recommendations in the Cost Management User Guide."]
+module DBStorageConfiguration =
+  struct
+    type nonrec t =
+      {
+      storageType: StorageType.t option
+        [@ocaml.doc "The type of DB storage."];
+      allocatedStorage: AllocatedStorage.t option
+        [@ocaml.doc "The size of the DB storage in gigabytes (GB)."];
+      iops: NullableIOPS.t option
+        [@ocaml.doc "The provisioned IOPs of the DB storage."];
+      maxAllocatedStorage: NullableMaxAllocatedStorage.t option
+        [@ocaml.doc
+          "The maximum limit in gibibytes (GiB) to which Amazon RDS can automatically scale the storage of the DB instance."];
+      storageThroughput: NullableStorageThroughput.t option
+        [@ocaml.doc "The storage throughput of the DB storage."]}
+    let make ?storageType =
+      fun ?allocatedStorage ->
+        fun ?iops ->
+          fun ?maxAllocatedStorage ->
+            fun ?storageThroughput ->
+              fun () ->
+                {
+                  storageType;
+                  allocatedStorage;
+                  iops;
+                  maxAllocatedStorage;
+                  storageThroughput
+                }
+    let to_value x =
+      structure_to_value
+        [("storageType", (Option.map x.storageType ~f:StorageType.to_value));
+        ("allocatedStorage",
+          (Option.map x.allocatedStorage ~f:AllocatedStorage.to_value));
+        ("iops", (Option.map x.iops ~f:NullableIOPS.to_value));
+        ("maxAllocatedStorage",
+          (Option.map x.maxAllocatedStorage
+             ~f:NullableMaxAllocatedStorage.to_value));
+        ("storageThroughput",
+          (Option.map x.storageThroughput
+             ~f:NullableStorageThroughput.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let storageThroughput =
+        (Option.map ~f:NullableStorageThroughput.of_xml)
+          (Xml.child xml_arg0 "storageThroughput") in
+      let maxAllocatedStorage =
+        (Option.map ~f:NullableMaxAllocatedStorage.of_xml)
+          (Xml.child xml_arg0 "maxAllocatedStorage") in
+      let iops =
+        (Option.map ~f:NullableIOPS.of_xml) (Xml.child xml_arg0 "iops") in
+      let allocatedStorage =
+        (Option.map ~f:AllocatedStorage.of_xml)
+          (Xml.child xml_arg0 "allocatedStorage") in
+      let storageType =
+        (Option.map ~f:StorageType.of_xml) (Xml.child xml_arg0 "storageType") in
+      make ?storageThroughput ?maxAllocatedStorage ?iops ?allocatedStorage
+        ?storageType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let storageThroughput =
+        field_map json__ "storageThroughput"
+          NullableStorageThroughput.of_json in
+      let maxAllocatedStorage =
+        field_map json__ "maxAllocatedStorage"
+          NullableMaxAllocatedStorage.of_json in
+      let iops = field_map json__ "iops" NullableIOPS.of_json in
+      let allocatedStorage =
+        field_map json__ "allocatedStorage" AllocatedStorage.of_json in
+      let storageType = field_map json__ "storageType" StorageType.of_json in
+      make ?storageThroughput ?maxAllocatedStorage ?iops ?allocatedStorage
+        ?storageType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration of the recommended RDS storage."]
+module RDSEstimatedMonthlyVolumeIOPsCostVariation =
+  struct
+    type nonrec t =
+      | None 
+      | Low 
+      | Medium 
+      | High 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | None -> "None"
+      | Low -> "Low"
+      | Medium -> "Medium"
+      | High -> "High"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "None" -> None
+      | "Low" -> Low
+      | "Medium" -> Medium
+      | "High" -> High
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration RDSEstimatedMonthlyVolumeIOPsCostVariation"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"RDSEstimatedMonthlyVolumeIOPsCostVariation" j)
+    let to_json = simple_to_json to_value
+  end
+module RDSStorageSavingsOpportunityAfterDiscounts =
+  struct
+    type nonrec t =
+      {
+      savingsOpportunityPercentage: SavingsOpportunityPercentage.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible as a percentage of monthly cost by adopting Compute Optimizer\226\128\153s DB instance storage recommendations. This includes any applicable Savings Plans discounts."];
+      estimatedMonthlySavings: RDSStorageEstimatedMonthlySavings.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible by adopting Compute Optimizer\226\128\153s DB instance storage recommendations. This includes any applicable Savings Plans discounts."]}
+    let make ?savingsOpportunityPercentage =
+      fun ?estimatedMonthlySavings ->
+        fun () -> { savingsOpportunityPercentage; estimatedMonthlySavings }
+    let to_value x =
+      structure_to_value
+        [("savingsOpportunityPercentage",
+           (Option.map x.savingsOpportunityPercentage
+              ~f:SavingsOpportunityPercentage.to_value));
+        ("estimatedMonthlySavings",
+          (Option.map x.estimatedMonthlySavings
+             ~f:RDSStorageEstimatedMonthlySavings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedMonthlySavings =
+        (Option.map ~f:RDSStorageEstimatedMonthlySavings.of_xml)
+          (Xml.child xml_arg0 "estimatedMonthlySavings") in
+      let savingsOpportunityPercentage =
+        (Option.map ~f:SavingsOpportunityPercentage.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityPercentage") in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedMonthlySavings =
+        field_map json__ "estimatedMonthlySavings"
+          RDSStorageEstimatedMonthlySavings.of_json in
+      let savingsOpportunityPercentage =
+        field_map json__ "savingsOpportunityPercentage"
+          SavingsOpportunityPercentage.of_json in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings opportunity for Amazon RDS storage recommendations after applying Savings Plans discounts. Savings opportunity represents the estimated monthly savings after applying Savings Plans discounts. You can achieve this by implementing a given Compute Optimizer recommendation."]
+module CpuVendorArchitecture =
+  struct
+    type nonrec t =
+      | AWS_ARM64 
+      | CURRENT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWS_ARM64 -> "AWS_ARM64"
+      | CURRENT -> "CURRENT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWS_ARM64" -> AWS_ARM64
+      | "CURRENT" -> CURRENT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CpuVendorArchitecture" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CpuVendorArchitecture" j)
+    let to_json = simple_to_json to_value
+  end
+module RDSSavingsEstimationModeSource =
+  struct
+    type nonrec t =
+      | PublicPricing 
+      | CostExplorerRightsizing 
+      | CostOptimizationHub 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PublicPricing -> "PublicPricing"
+      | CostExplorerRightsizing -> "CostExplorerRightsizing"
+      | CostOptimizationHub -> "CostOptimizationHub"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PublicPricing" -> PublicPricing
+      | "CostExplorerRightsizing" -> CostExplorerRightsizing
+      | "CostOptimizationHub" -> CostOptimizationHub
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RDSSavingsEstimationModeSource"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RDSSavingsEstimationModeSource" j)
+    let to_json = simple_to_json to_value
+  end
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module MetricValues =
+  struct
+    type nonrec t = MetricValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricValues" ~of_json:MetricValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Timestamps =
+  struct
+    type nonrec t = Timestamp.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Timestamp.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Timestamp.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Timestamps" ~of_json:Timestamp.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricSource =
+  struct
+    type nonrec t =
+      {
+      provider: MetricSourceProvider.t option
+        [@ocaml.doc "The name of the metric source provider."];
+      providerArn: MetricProviderArn.t option
+        [@ocaml.doc "The ARN of the metric source provider."]}
+    let make ?provider =
+      fun ?providerArn -> fun () -> { provider; providerArn }
+    let to_value x =
+      structure_to_value
+        [("provider",
+           (Option.map x.provider ~f:MetricSourceProvider.to_value));
+        ("providerArn",
+          (Option.map x.providerArn ~f:MetricProviderArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let providerArn =
+        (Option.map ~f:MetricProviderArn.of_xml)
+          (Xml.child xml_arg0 "providerArn") in
+      let provider =
+        (Option.map ~f:MetricSourceProvider.of_xml)
+          (Xml.child xml_arg0 "provider") in
+      make ?providerArn ?provider ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let providerArn =
+        field_map json__ "providerArn" MetricProviderArn.of_json in
+      let provider = field_map json__ "provider" MetricSourceProvider.of_json in
+      make ?providerArn ?provider ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The list of metric sources required to generate recommendations for commercial software licenses."]
+module LicenseEdition =
+  struct
+    type nonrec t =
+      | Enterprise 
+      | Standard 
+      | Free 
+      | NoLicenseEditionFound 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Enterprise -> "Enterprise"
+      | Standard -> "Standard"
+      | Free -> "Free"
+      | NoLicenseEditionFound -> "NoLicenseEditionFound"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Enterprise" -> Enterprise
+      | "Standard" -> Standard
+      | "Free" -> Free
+      | "NoLicenseEditionFound" -> NoLicenseEditionFound
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LicenseEdition" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LicenseEdition" j)
+    let to_json = simple_to_json to_value
+  end
+module LicenseModel =
+  struct
+    type nonrec t =
+      | LicenseIncluded 
+      | BringYourOwnLicense 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | LicenseIncluded -> "LicenseIncluded"
+      | BringYourOwnLicense -> "BringYourOwnLicense"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "LicenseIncluded" -> LicenseIncluded
+      | "BringYourOwnLicense" -> BringYourOwnLicense
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LicenseModel" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LicenseModel" j)
+    let to_json = simple_to_json to_value
+  end
+module OperatingSystem =
+  struct
+    type nonrec t = string
+    let context_ = "OperatingSystem"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OperatingSystem" j
+    let to_json = simple_to_json to_value
+  end
+module LambdaSavingsEstimationModeSource =
+  struct
+    type nonrec t =
+      | PublicPricing 
+      | CostExplorerRightsizing 
+      | CostOptimizationHub 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PublicPricing -> "PublicPricing"
+      | CostExplorerRightsizing -> "CostExplorerRightsizing"
+      | CostOptimizationHub -> "CostOptimizationHub"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PublicPricing" -> PublicPricing
+      | "CostExplorerRightsizing" -> CostExplorerRightsizing
+      | "CostOptimizationHub" -> CostOptimizationHub
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LambdaSavingsEstimationModeSource"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LambdaSavingsEstimationModeSource" j)
+    let to_json = simple_to_json to_value
+  end
 module LambdaFunctionMemoryProjectedMetrics =
   struct
     type nonrec t = LambdaFunctionMemoryProjectedMetric.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LambdaFunctionMemoryProjectedMetric.to_value)) |>
         (fun x -> `List x)
@@ -662,6 +2474,48 @@ module LambdaFunctionMemoryProjectedMetrics =
         ~of_json:LambdaFunctionMemoryProjectedMetric.of_json j
     let to_json v = composed_to_json to_value v
   end
+module LambdaSavingsOpportunityAfterDiscounts =
+  struct
+    type nonrec t =
+      {
+      savingsOpportunityPercentage: SavingsOpportunityPercentage.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible as a percentage of monthly cost by adopting Compute Optimizer\226\128\153s Lambda function recommendations. This includes any applicable Savings Plans discounts."];
+      estimatedMonthlySavings: LambdaEstimatedMonthlySavings.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible by adopting Compute Optimizer\226\128\153s Lambda function recommendations. This includes any applicable Savings Plans discounts."]}
+    let make ?savingsOpportunityPercentage =
+      fun ?estimatedMonthlySavings ->
+        fun () -> { savingsOpportunityPercentage; estimatedMonthlySavings }
+    let to_value x =
+      structure_to_value
+        [("savingsOpportunityPercentage",
+           (Option.map x.savingsOpportunityPercentage
+              ~f:SavingsOpportunityPercentage.to_value));
+        ("estimatedMonthlySavings",
+          (Option.map x.estimatedMonthlySavings
+             ~f:LambdaEstimatedMonthlySavings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedMonthlySavings =
+        (Option.map ~f:LambdaEstimatedMonthlySavings.of_xml)
+          (Xml.child xml_arg0 "estimatedMonthlySavings") in
+      let savingsOpportunityPercentage =
+        (Option.map ~f:SavingsOpportunityPercentage.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityPercentage") in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedMonthlySavings =
+        field_map json__ "estimatedMonthlySavings"
+          LambdaEstimatedMonthlySavings.of_json in
+      let savingsOpportunityPercentage =
+        field_map json__ "savingsOpportunityPercentage"
+          SavingsOpportunityPercentage.of_json in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings opportunity for Lambda functions recommendations after applying Savings Plans discounts. Savings opportunity represents the estimated monthly savings after applying Savings Plans discounts. You can achieve this by implementing a given Compute Optimizer recommendation."]
 module MemorySize =
   struct
     type nonrec t = int
@@ -676,61 +2530,6 @@ module MemorySize =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module Rank =
-  struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for Rank" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module SavingsOpportunity =
-  struct
-    type nonrec t =
-      {
-      savingsOpportunityPercentage: SavingsOpportunityPercentage.t option
-        [@ocaml.doc
-          "The estimated monthly savings possible as a percentage of monthly cost by adopting Compute Optimizer recommendations for a given resource."];
-      estimatedMonthlySavings: EstimatedMonthlySavings.t option
-        [@ocaml.doc
-          "An object that describes the estimated monthly savings amount possible, based on On-Demand instance pricing, by adopting Compute Optimizer recommendations for a given resource."]}
-    let make ?savingsOpportunityPercentage =
-      fun ?estimatedMonthlySavings ->
-        fun () -> { savingsOpportunityPercentage; estimatedMonthlySavings }
-    let to_value x =
-      structure_to_value
-        [("savingsOpportunityPercentage",
-           (Option.map x.savingsOpportunityPercentage
-              ~f:SavingsOpportunityPercentage.to_value));
-        ("estimatedMonthlySavings",
-          (Option.map x.estimatedMonthlySavings
-             ~f:EstimatedMonthlySavings.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let estimatedMonthlySavings =
-        (Option.map ~f:EstimatedMonthlySavings.of_xml)
-          (Xml.child xml_arg0 "estimatedMonthlySavings") in
-      let savingsOpportunityPercentage =
-        (Option.map ~f:SavingsOpportunityPercentage.of_xml)
-          (Xml.child xml_arg0 "savingsOpportunityPercentage") in
-      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let estimatedMonthlySavings =
-        field_map json "estimatedMonthlySavings"
-          EstimatedMonthlySavings.of_json in
-      let savingsOpportunityPercentage =
-        field_map json "savingsOpportunityPercentage"
-          SavingsOpportunityPercentage.of_json in
-      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes the savings opportunity for recommendations of a given resource type or for the recommendation option of an individual resource. Savings opportunity represents the estimated monthly savings you can achieve by implementing a given Compute Optimizer recommendation. Savings opportunity data requires that you opt in to Cost Explorer, as well as activate Receive Amazon EC2 resource recommendations in the Cost Explorer preferences page. That creates a connection between Cost Explorer and Compute Optimizer. With this connection, Cost Explorer generates savings estimates considering the price of existing resources, the price of recommended resources, and historical usage data. Estimated monthly savings reflects the projected dollar savings associated with each of the recommendations generated. For more information, see Enabling Cost Explorer and Optimizing your cost with Rightsizing Recommendations in the Cost Management User Guide."]
 module LambdaFunctionMetricName =
   struct
     type nonrec t =
@@ -786,79 +2585,472 @@ module LambdaFunctionMetricStatistic =
       of_string (string_of_json ~kind:"LambdaFunctionMetricStatistic" j)
     let to_json = simple_to_json to_value
   end
-module MetricValues =
-  struct
-    type nonrec t = MetricValue.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:MetricValue.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:MetricValue.of_xml)
-    let of_json j =
-      list_of_json ~kind:"MetricValues" ~of_json:MetricValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module Timestamps =
-  struct
-    type nonrec t = Timestamp.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Timestamp.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Timestamp.of_xml)
-    let of_json j =
-      list_of_json ~kind:"Timestamps" ~of_json:Timestamp.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module CpuVendorArchitecture =
+module IdleMetricName =
   struct
     type nonrec t =
-      | AWS_ARM64 
-      | CURRENT 
+      | CPU 
+      | Memory 
+      | NetworkOutBytesPerSecond 
+      | NetworkInBytesPerSecond 
+      | DatabaseConnections 
+      | EBSVolumeReadIOPS 
+      | EBSVolumeWriteIOPS 
+      | VolumeReadOpsPerSecond 
+      | VolumeWriteOpsPerSecond 
+      | ActiveConnectionCount 
+      | PacketsInFromSource 
+      | PacketsInFromDestination 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | AWS_ARM64 -> "AWS_ARM64"
-      | CURRENT -> "CURRENT"
+      | CPU -> "CPU"
+      | Memory -> "Memory"
+      | NetworkOutBytesPerSecond -> "NetworkOutBytesPerSecond"
+      | NetworkInBytesPerSecond -> "NetworkInBytesPerSecond"
+      | DatabaseConnections -> "DatabaseConnections"
+      | EBSVolumeReadIOPS -> "EBSVolumeReadIOPS"
+      | EBSVolumeWriteIOPS -> "EBSVolumeWriteIOPS"
+      | VolumeReadOpsPerSecond -> "VolumeReadOpsPerSecond"
+      | VolumeWriteOpsPerSecond -> "VolumeWriteOpsPerSecond"
+      | ActiveConnectionCount -> "ActiveConnectionCount"
+      | PacketsInFromSource -> "PacketsInFromSource"
+      | PacketsInFromDestination -> "PacketsInFromDestination"
       | Non_static_id s -> s
     let of_string =
       function
-      | "AWS_ARM64" -> AWS_ARM64
-      | "CURRENT" -> CURRENT
+      | "CPU" -> CPU
+      | "Memory" -> Memory
+      | "NetworkOutBytesPerSecond" -> NetworkOutBytesPerSecond
+      | "NetworkInBytesPerSecond" -> NetworkInBytesPerSecond
+      | "DatabaseConnections" -> DatabaseConnections
+      | "EBSVolumeReadIOPS" -> EBSVolumeReadIOPS
+      | "EBSVolumeWriteIOPS" -> EBSVolumeWriteIOPS
+      | "VolumeReadOpsPerSecond" -> VolumeReadOpsPerSecond
+      | "VolumeWriteOpsPerSecond" -> VolumeWriteOpsPerSecond
+      | "ActiveConnectionCount" -> ActiveConnectionCount
+      | "PacketsInFromSource" -> PacketsInFromSource
+      | "PacketsInFromDestination" -> PacketsInFromDestination
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IdleMetricName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IdleMetricName" j)
+    let to_json = simple_to_json to_value
+  end
+module ECSSavingsEstimationModeSource =
+  struct
+    type nonrec t =
+      | PublicPricing 
+      | CostExplorerRightsizing 
+      | CostOptimizationHub 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PublicPricing -> "PublicPricing"
+      | CostExplorerRightsizing -> "CostExplorerRightsizing"
+      | CostOptimizationHub -> "CostOptimizationHub"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PublicPricing" -> PublicPricing
+      | "CostExplorerRightsizing" -> CostExplorerRightsizing
+      | "CostOptimizationHub" -> CostOptimizationHub
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
       of_string
-        (string_of_xml ~kind:"enumeration CpuVendorArchitecture" xml_arg0)
+        (string_of_xml ~kind:"enumeration ECSSavingsEstimationModeSource"
+           xml_arg0)
     let of_json j =
-      of_string (string_of_json ~kind:"CpuVendorArchitecture" j)
+      of_string (string_of_json ~kind:"ECSSavingsEstimationModeSource" j)
+    let to_json = simple_to_json to_value
+  end
+module ContainerRecommendations =
+  struct
+    type nonrec t = ContainerRecommendation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ContainerRecommendation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ContainerRecommendation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ContainerRecommendations"
+        ~of_json:ContainerRecommendation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ECSSavingsOpportunityAfterDiscounts =
+  struct
+    type nonrec t =
+      {
+      savingsOpportunityPercentage: SavingsOpportunityPercentage.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible as a percentage of monthly cost by adopting Compute Optimizer\226\128\153s Amazon ECS service recommendations. This includes any applicable Savings Plans discounts."];
+      estimatedMonthlySavings: ECSEstimatedMonthlySavings.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible by adopting Compute Optimizer\226\128\153s Amazon ECS service recommendations. This includes any applicable Savings Plans discounts."]}
+    let make ?savingsOpportunityPercentage =
+      fun ?estimatedMonthlySavings ->
+        fun () -> { savingsOpportunityPercentage; estimatedMonthlySavings }
+    let to_value x =
+      structure_to_value
+        [("savingsOpportunityPercentage",
+           (Option.map x.savingsOpportunityPercentage
+              ~f:SavingsOpportunityPercentage.to_value));
+        ("estimatedMonthlySavings",
+          (Option.map x.estimatedMonthlySavings
+             ~f:ECSEstimatedMonthlySavings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedMonthlySavings =
+        (Option.map ~f:ECSEstimatedMonthlySavings.of_xml)
+          (Xml.child xml_arg0 "estimatedMonthlySavings") in
+      let savingsOpportunityPercentage =
+        (Option.map ~f:SavingsOpportunityPercentage.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityPercentage") in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedMonthlySavings =
+        field_map json__ "estimatedMonthlySavings"
+          ECSEstimatedMonthlySavings.of_json in
+      let savingsOpportunityPercentage =
+        field_map json__ "savingsOpportunityPercentage"
+          SavingsOpportunityPercentage.of_json in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings opportunity for Amazon ECS service recommendations after applying Savings Plans discounts. Savings opportunity represents the estimated monthly savings after applying Savings Plans discounts. You can achieve this by implementing a given Compute Optimizer recommendation."]
+module ECSServiceProjectedUtilizationMetrics =
+  struct
+    type nonrec t = ECSServiceProjectedUtilizationMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ECSServiceProjectedUtilizationMetric.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ECSServiceProjectedUtilizationMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ECSServiceProjectedUtilizationMetrics"
+        ~of_json:ECSServiceProjectedUtilizationMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ContainerConfiguration =
+  struct
+    type nonrec t =
+      {
+      containerName: ContainerName.t option
+        [@ocaml.doc "The name of the container."];
+      memorySizeConfiguration: MemorySizeConfiguration.t option
+        [@ocaml.doc "The memory size configurations for the container."];
+      cpu: NullableCpu.t option
+        [@ocaml.doc "The number of CPU units reserved for the container."]}
+    let make ?containerName =
+      fun ?memorySizeConfiguration ->
+        fun ?cpu -> fun () -> { containerName; memorySizeConfiguration; cpu }
+    let to_value x =
+      structure_to_value
+        [("containerName",
+           (Option.map x.containerName ~f:ContainerName.to_value));
+        ("memorySizeConfiguration",
+          (Option.map x.memorySizeConfiguration
+             ~f:MemorySizeConfiguration.to_value));
+        ("cpu", (Option.map x.cpu ~f:NullableCpu.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cpu = (Option.map ~f:NullableCpu.of_xml) (Xml.child xml_arg0 "cpu") in
+      let memorySizeConfiguration =
+        (Option.map ~f:MemorySizeConfiguration.of_xml)
+          (Xml.child xml_arg0 "memorySizeConfiguration") in
+      let containerName =
+        (Option.map ~f:ContainerName.of_xml)
+          (Xml.child xml_arg0 "containerName") in
+      make ?cpu ?memorySizeConfiguration ?containerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cpu = field_map json__ "cpu" NullableCpu.of_json in
+      let memorySizeConfiguration =
+        field_map json__ "memorySizeConfiguration"
+          MemorySizeConfiguration.of_json in
+      let containerName =
+        field_map json__ "containerName" ContainerName.of_json in
+      make ?cpu ?memorySizeConfiguration ?containerName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the container configurations within the tasks of your Amazon ECS service."]
+module EffectivePreferredResource =
+  struct
+    type nonrec t =
+      {
+      name: PreferredResourceName.t option
+        [@ocaml.doc "The name of the preferred resource list."];
+      includeList: PreferredResourceValues.t option
+        [@ocaml.doc
+          "The list of preferred resource values that you want considered as rightsizing recommendation candidates."];
+      effectiveIncludeList: PreferredResourceValues.t option
+        [@ocaml.doc
+          "The expanded version of your preferred resource's include list."];
+      excludeList: PreferredResourceValues.t option
+        [@ocaml.doc
+          "The list of preferred resources values that you want excluded from rightsizing recommendation candidates."]}
+    let make ?name =
+      fun ?includeList ->
+        fun ?effectiveIncludeList ->
+          fun ?excludeList ->
+            fun () ->
+              { name; includeList; effectiveIncludeList; excludeList }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:PreferredResourceName.to_value));
+        ("includeList",
+          (Option.map x.includeList ~f:PreferredResourceValues.to_value));
+        ("effectiveIncludeList",
+          (Option.map x.effectiveIncludeList
+             ~f:PreferredResourceValues.to_value));
+        ("excludeList",
+          (Option.map x.excludeList ~f:PreferredResourceValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludeList =
+        (Option.map ~f:PreferredResourceValues.of_xml)
+          (Xml.child xml_arg0 "excludeList") in
+      let effectiveIncludeList =
+        (Option.map ~f:PreferredResourceValues.of_xml)
+          (Xml.child xml_arg0 "effectiveIncludeList") in
+      let includeList =
+        (Option.map ~f:PreferredResourceValues.of_xml)
+          (Xml.child xml_arg0 "includeList") in
+      let name =
+        (Option.map ~f:PreferredResourceName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?excludeList ?effectiveIncludeList ?includeList ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludeList =
+        field_map json__ "excludeList" PreferredResourceValues.of_json in
+      let effectiveIncludeList =
+        field_map json__ "effectiveIncludeList"
+          PreferredResourceValues.of_json in
+      let includeList =
+        field_map json__ "includeList" PreferredResourceValues.of_json in
+      let name = field_map json__ "name" PreferredResourceName.of_json in
+      make ?excludeList ?effectiveIncludeList ?includeList ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the effective preferred resources that Compute Optimizer considers as rightsizing recommendation candidates. Compute Optimizer only supports Amazon EC2 instance types."]
+module ExternalMetricsSource =
+  struct
+    type nonrec t =
+      | Datadog 
+      | Dynatrace 
+      | NewRelic 
+      | Instana 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Datadog -> "Datadog"
+      | Dynatrace -> "Dynatrace"
+      | NewRelic -> "NewRelic"
+      | Instana -> "Instana"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Datadog" -> Datadog
+      | "Dynatrace" -> Dynatrace
+      | "NewRelic" -> NewRelic
+      | "Instana" -> Instana
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExternalMetricsSource" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ExternalMetricsSource" j)
+    let to_json = simple_to_json to_value
+  end
+module InstanceSavingsEstimationModeSource =
+  struct
+    type nonrec t =
+      | PublicPricing 
+      | CostExplorerRightsizing 
+      | CostOptimizationHub 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PublicPricing -> "PublicPricing"
+      | CostExplorerRightsizing -> "CostExplorerRightsizing"
+      | CostOptimizationHub -> "CostOptimizationHub"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PublicPricing" -> PublicPricing
+      | "CostExplorerRightsizing" -> CostExplorerRightsizing
+      | "CostOptimizationHub" -> CostOptimizationHub
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration InstanceSavingsEstimationModeSource" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"InstanceSavingsEstimationModeSource" j)
+    let to_json = simple_to_json to_value
+  end
+module UtilizationPreference =
+  struct
+    type nonrec t =
+      {
+      metricName: CustomizableMetricName.t option
+        [@ocaml.doc
+          "The name of the resource utilization metric name to customize."];
+      metricParameters: CustomizableMetricParameters.t option
+        [@ocaml.doc
+          "The parameters to set when customizing the resource utilization thresholds."]}
+    let make ?metricName =
+      fun ?metricParameters -> fun () -> { metricName; metricParameters }
+    let to_value x =
+      structure_to_value
+        [("metricName",
+           (Option.map x.metricName ~f:CustomizableMetricName.to_value));
+        ("metricParameters",
+          (Option.map x.metricParameters
+             ~f:CustomizableMetricParameters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricParameters =
+        (Option.map ~f:CustomizableMetricParameters.of_xml)
+          (Xml.child xml_arg0 "metricParameters") in
+      let metricName =
+        (Option.map ~f:CustomizableMetricName.of_xml)
+          (Xml.child xml_arg0 "metricName") in
+      make ?metricParameters ?metricName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricParameters =
+        field_map json__ "metricParameters"
+          CustomizableMetricParameters.of_json in
+      let metricName =
+        field_map json__ "metricName" CustomizableMetricName.of_json in
+      make ?metricParameters ?metricName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The preference to control the resource\226\128\153s CPU utilization threshold, CPU utilization headroom, and memory utilization headroom. This preference is only available for the Amazon EC2 instance resource type."]
+module GpuInfo =
+  struct
+    type nonrec t =
+      {
+      gpus: Gpus.t option
+        [@ocaml.doc "Describes the GPU accelerators for the instance type."]}
+    let make ?gpus = fun () -> { gpus }
+    let to_value x =
+      structure_to_value [("gpus", (Option.map x.gpus ~f:Gpus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let gpus = (Option.map ~f:Gpus.of_xml) (Xml.child xml_arg0 "gpus") in
+      make ?gpus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let gpus = field_map json__ "gpus" Gpus.of_json in make ?gpus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the GPU accelerator settings for the instance type."]
+module InstanceSavingsOpportunityAfterDiscounts =
+  struct
+    type nonrec t =
+      {
+      savingsOpportunityPercentage: SavingsOpportunityPercentage.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible as a percentage of monthly cost after applying the Savings Plans and Reserved Instances discounts. This saving can be achieved by adopting Compute Optimizer\226\128\153s EC2 instance recommendations."];
+      estimatedMonthlySavings: InstanceEstimatedMonthlySavings.t option
+        [@ocaml.doc
+          "An object that describes the estimated monthly savings possible by adopting Compute Optimizer\226\128\153s Amazon EC2 instance recommendations. This is based on pricing after applying the Savings Plans and Reserved Instances discounts."]}
+    let make ?savingsOpportunityPercentage =
+      fun ?estimatedMonthlySavings ->
+        fun () -> { savingsOpportunityPercentage; estimatedMonthlySavings }
+    let to_value x =
+      structure_to_value
+        [("savingsOpportunityPercentage",
+           (Option.map x.savingsOpportunityPercentage
+              ~f:SavingsOpportunityPercentage.to_value));
+        ("estimatedMonthlySavings",
+          (Option.map x.estimatedMonthlySavings
+             ~f:InstanceEstimatedMonthlySavings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedMonthlySavings =
+        (Option.map ~f:InstanceEstimatedMonthlySavings.of_xml)
+          (Xml.child xml_arg0 "estimatedMonthlySavings") in
+      let savingsOpportunityPercentage =
+        (Option.map ~f:SavingsOpportunityPercentage.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityPercentage") in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedMonthlySavings =
+        field_map json__ "estimatedMonthlySavings"
+          InstanceEstimatedMonthlySavings.of_json in
+      let savingsOpportunityPercentage =
+        field_map json__ "savingsOpportunityPercentage"
+          SavingsOpportunityPercentage.of_json in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings opportunity for instance recommendations after applying the Savings Plans and Reserved Instances discounts. Savings opportunity after discounts represents the estimated monthly savings you can achieve by implementing Compute Optimizer recommendations."]
+module InstanceType =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceType" j
     let to_json = simple_to_json to_value
   end
 module MigrationEffort =
@@ -892,28 +3084,13 @@ module MigrationEffort =
     let of_json j = of_string (string_of_json ~kind:"MigrationEffort" j)
     let to_json = simple_to_json to_value
   end
-module PerformanceRisk =
-  struct
-    type nonrec t = float
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_float_min i ~min:4.) >>=
-             (fun () -> check_float_min i ~min:0.));
-        i
-    let of_string = Float.of_string
-    let to_value x = `Double x
-    let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
-    let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
-    let of_json j = float_of_json ~kind:"a double" j
-    let to_json = simple_to_json to_value
-  end
 module PlatformDifferences =
   struct
     type nonrec t = PlatformDifference.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PlatformDifference.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -939,6 +3116,9 @@ module ProjectedUtilizationMetrics =
   struct
     type nonrec t = UtilizationMetric.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UtilizationMetric.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -980,6 +3160,12 @@ module RecommendationSourceType =
       | AutoScalingGroup 
       | EbsVolume 
       | LambdaFunction 
+      | EcsService 
+      | License 
+      | RdsDBInstance 
+      | RdsDBInstanceStorage 
+      | AuroraDBClusterStorage 
+      | NatGateway 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -988,6 +3174,12 @@ module RecommendationSourceType =
       | AutoScalingGroup -> "AutoScalingGroup"
       | EbsVolume -> "EbsVolume"
       | LambdaFunction -> "LambdaFunction"
+      | EcsService -> "EcsService"
+      | License -> "License"
+      | RdsDBInstance -> "RdsDBInstance"
+      | RdsDBInstanceStorage -> "RdsDBInstanceStorage"
+      | AuroraDBClusterStorage -> "AuroraDBClusterStorage"
+      | NatGateway -> "NatGateway"
       | Non_static_id s -> s
     let of_string =
       function
@@ -995,6 +3187,12 @@ module RecommendationSourceType =
       | "AutoScalingGroup" -> AutoScalingGroup
       | "EbsVolume" -> EbsVolume
       | "LambdaFunction" -> LambdaFunction
+      | "EcsService" -> EcsService
+      | "License" -> License
+      | "RdsDBInstance" -> RdsDBInstance
+      | "RdsDBInstanceStorage" -> RdsDBInstanceStorage
+      | "AuroraDBClusterStorage" -> AuroraDBClusterStorage
+      | "NatGateway" -> NatGateway
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1004,6 +3202,37 @@ module RecommendationSourceType =
         (string_of_xml ~kind:"enumeration RecommendationSourceType" xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"RecommendationSourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module EBSSavingsEstimationModeSource =
+  struct
+    type nonrec t =
+      | PublicPricing 
+      | CostExplorerRightsizing 
+      | CostOptimizationHub 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PublicPricing -> "PublicPricing"
+      | CostExplorerRightsizing -> "CostExplorerRightsizing"
+      | CostOptimizationHub -> "CostOptimizationHub"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PublicPricing" -> PublicPricing
+      | "CostExplorerRightsizing" -> CostExplorerRightsizing
+      | "CostOptimizationHub" -> CostOptimizationHub
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EBSSavingsEstimationModeSource"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EBSSavingsEstimationModeSource" j)
     let to_json = simple_to_json to_value
   end
 module EBSMetricName =
@@ -1037,13 +3266,55 @@ module EBSMetricName =
     let of_json j = of_string (string_of_json ~kind:"EBSMetricName" j)
     let to_json = simple_to_json to_value
   end
+module EBSSavingsOpportunityAfterDiscounts =
+  struct
+    type nonrec t =
+      {
+      savingsOpportunityPercentage: SavingsOpportunityPercentage.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible as a percentage of monthly cost after applying the specific discounts. This saving can be achieved by adopting Compute Optimizer\226\128\153s Amazon EBS volume recommendations."];
+      estimatedMonthlySavings: EBSEstimatedMonthlySavings.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible as a percentage of monthly cost by adopting Compute Optimizer\226\128\153s Amazon EBS volume recommendations. This saving includes any applicable discounts."]}
+    let make ?savingsOpportunityPercentage =
+      fun ?estimatedMonthlySavings ->
+        fun () -> { savingsOpportunityPercentage; estimatedMonthlySavings }
+    let to_value x =
+      structure_to_value
+        [("savingsOpportunityPercentage",
+           (Option.map x.savingsOpportunityPercentage
+              ~f:SavingsOpportunityPercentage.to_value));
+        ("estimatedMonthlySavings",
+          (Option.map x.estimatedMonthlySavings
+             ~f:EBSEstimatedMonthlySavings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedMonthlySavings =
+        (Option.map ~f:EBSEstimatedMonthlySavings.of_xml)
+          (Xml.child xml_arg0 "estimatedMonthlySavings") in
+      let savingsOpportunityPercentage =
+        (Option.map ~f:SavingsOpportunityPercentage.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityPercentage") in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedMonthlySavings =
+        field_map json__ "estimatedMonthlySavings"
+          EBSEstimatedMonthlySavings.of_json in
+      let savingsOpportunityPercentage =
+        field_map json__ "savingsOpportunityPercentage"
+          SavingsOpportunityPercentage.of_json in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings opportunity for Amazon EBS volume recommendations after applying specific discounts."]
 module VolumeConfiguration =
   struct
     type nonrec t =
       {
       volumeType: VolumeType.t option
         [@ocaml.doc
-          "The volume type. This can be gp2 for General Purpose SSD, io1 or io2 for Provisioned IOPS SSD, st1 for Throughput Optimized HDD, sc1 for Cold HDD, or standard for Magnetic volumes."];
+          "The volume type. The volume types can be the following: General Purpose SSD gp2 and gp3 Provisioned IOPS SSD io1, io2, and io2 Block Express Throughput Optimized HDD st1 Cold HDD sc1 Magnetic volumes standard"];
       volumeSize: VolumeSize.t option
         [@ocaml.doc "The size of the volume, in GiB."];
       volumeBaselineIOPS: VolumeBaselineIOPS.t option
@@ -1053,22 +3324,27 @@ module VolumeConfiguration =
       volumeBaselineThroughput: VolumeBaselineThroughput.t option
         [@ocaml.doc "The baseline throughput of the volume."];
       volumeBurstThroughput: VolumeBurstThroughput.t option
-        [@ocaml.doc "The burst throughput of the volume."]}
+        [@ocaml.doc "The burst throughput of the volume."];
+      rootVolume: RootVolume.t option
+        [@ocaml.doc
+          "Contains the image used to boot the instance during launch."]}
     let make ?volumeType =
       fun ?volumeSize ->
         fun ?volumeBaselineIOPS ->
           fun ?volumeBurstIOPS ->
             fun ?volumeBaselineThroughput ->
               fun ?volumeBurstThroughput ->
-                fun () ->
-                  {
-                    volumeType;
-                    volumeSize;
-                    volumeBaselineIOPS;
-                    volumeBurstIOPS;
-                    volumeBaselineThroughput;
-                    volumeBurstThroughput
-                  }
+                fun ?rootVolume ->
+                  fun () ->
+                    {
+                      volumeType;
+                      volumeSize;
+                      volumeBaselineIOPS;
+                      volumeBurstIOPS;
+                      volumeBaselineThroughput;
+                      volumeBurstThroughput;
+                      rootVolume
+                    }
     let to_value x =
       structure_to_value
         [("volumeType", (Option.map x.volumeType ~f:VolumeType.to_value));
@@ -1082,9 +3358,12 @@ module VolumeConfiguration =
              ~f:VolumeBaselineThroughput.to_value));
         ("volumeBurstThroughput",
           (Option.map x.volumeBurstThroughput
-             ~f:VolumeBurstThroughput.to_value))]
+             ~f:VolumeBurstThroughput.to_value));
+        ("rootVolume", (Option.map x.rootVolume ~f:RootVolume.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let rootVolume =
+        (Option.map ~f:RootVolume.of_xml) (Xml.child xml_arg0 "rootVolume") in
       let volumeBurstThroughput =
         (Option.map ~f:VolumeBurstThroughput.of_xml)
           (Xml.child xml_arg0 "volumeBurstThroughput") in
@@ -1101,23 +3380,25 @@ module VolumeConfiguration =
         (Option.map ~f:VolumeSize.of_xml) (Xml.child xml_arg0 "volumeSize") in
       let volumeType =
         (Option.map ~f:VolumeType.of_xml) (Xml.child xml_arg0 "volumeType") in
-      make ?volumeBurstThroughput ?volumeBaselineThroughput ?volumeBurstIOPS
-        ?volumeBaselineIOPS ?volumeSize ?volumeType ()
+      make ?rootVolume ?volumeBurstThroughput ?volumeBaselineThroughput
+        ?volumeBurstIOPS ?volumeBaselineIOPS ?volumeSize ?volumeType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let rootVolume = field_map json__ "rootVolume" RootVolume.of_json in
       let volumeBurstThroughput =
-        field_map json "volumeBurstThroughput" VolumeBurstThroughput.of_json in
+        field_map json__ "volumeBurstThroughput"
+          VolumeBurstThroughput.of_json in
       let volumeBaselineThroughput =
-        field_map json "volumeBaselineThroughput"
+        field_map json__ "volumeBaselineThroughput"
           VolumeBaselineThroughput.of_json in
       let volumeBurstIOPS =
-        field_map json "volumeBurstIOPS" VolumeBurstIOPS.of_json in
+        field_map json__ "volumeBurstIOPS" VolumeBurstIOPS.of_json in
       let volumeBaselineIOPS =
-        field_map json "volumeBaselineIOPS" VolumeBaselineIOPS.of_json in
-      let volumeSize = field_map json "volumeSize" VolumeSize.of_json in
-      let volumeType = field_map json "volumeType" VolumeType.of_json in
-      make ?volumeBurstThroughput ?volumeBaselineThroughput ?volumeBurstIOPS
-        ?volumeBaselineIOPS ?volumeSize ?volumeType ()
+        field_map json__ "volumeBaselineIOPS" VolumeBaselineIOPS.of_json in
+      let volumeSize = field_map json__ "volumeSize" VolumeSize.of_json in
+      let volumeType = field_map json__ "volumeType" VolumeType.of_json in
+      make ?rootVolume ?volumeBurstThroughput ?volumeBaselineThroughput
+        ?volumeBurstIOPS ?volumeBaselineIOPS ?volumeSize ?volumeType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the configuration of an Amazon Elastic Block Store (Amazon EBS) volume."]
@@ -1127,20 +3408,47 @@ module AutoScalingGroupConfiguration =
       {
       desiredCapacity: DesiredCapacity.t option
         [@ocaml.doc
-          "The desired capacity, or number of instances, for the Auto Scaling group."];
+          "The desired capacity, or number of instances, for the EC2 Auto Scaling group."];
       minSize: MinSize.t option
         [@ocaml.doc
-          "The minimum size, or minimum number of instances, for the Auto Scaling group."];
+          "The minimum size, or minimum number of instances, for the EC2 Auto Scaling group."];
       maxSize: MaxSize.t option
         [@ocaml.doc
-          "The maximum size, or maximum number of instances, for the Auto Scaling group."];
-      instanceType: InstanceType.t option
-        [@ocaml.doc "The instance type for the Auto Scaling group."]}
+          "The maximum size, or maximum number of instances, for the EC2 Auto Scaling group."];
+      instanceType: NullableInstanceType.t option
+        [@ocaml.doc "The instance type for the EC2 Auto Scaling group."];
+      allocationStrategy: AllocationStrategy.t option
+        [@ocaml.doc
+          "Describes the allocation strategy that the EC2 Auto Scaling group uses. This field is only available for EC2 Auto Scaling groups with mixed instance types."];
+      estimatedInstanceHourReductionPercentage:
+        NullableEstimatedInstanceHourReductionPercentage.t option
+        [@ocaml.doc
+          "Describes the projected percentage reduction in instance hours after adopting the recommended configuration. This field is only available for EC2 Auto Scaling groups with scaling policies."];
+      type_: AsgType.t option
+        [@ocaml.doc
+          "Describes whether the EC2 Auto Scaling group has a single instance type or a mixed instance type configuration."];
+      mixedInstanceTypes: MixedInstanceTypes.t option
+        [@ocaml.doc
+          "List the instance types within an EC2 Auto Scaling group that has mixed instance types."]}
     let make ?desiredCapacity =
       fun ?minSize ->
         fun ?maxSize ->
           fun ?instanceType ->
-            fun () -> { desiredCapacity; minSize; maxSize; instanceType }
+            fun ?allocationStrategy ->
+              fun ?estimatedInstanceHourReductionPercentage ->
+                fun ?type_ ->
+                  fun ?mixedInstanceTypes ->
+                    fun () ->
+                      {
+                        desiredCapacity;
+                        minSize;
+                        maxSize;
+                        instanceType;
+                        allocationStrategy;
+                        estimatedInstanceHourReductionPercentage;
+                        type_;
+                        mixedInstanceTypes
+                      }
     let to_value x =
       structure_to_value
         [("desiredCapacity",
@@ -1148,11 +3456,30 @@ module AutoScalingGroupConfiguration =
         ("minSize", (Option.map x.minSize ~f:MinSize.to_value));
         ("maxSize", (Option.map x.maxSize ~f:MaxSize.to_value));
         ("instanceType",
-          (Option.map x.instanceType ~f:InstanceType.to_value))]
+          (Option.map x.instanceType ~f:NullableInstanceType.to_value));
+        ("allocationStrategy",
+          (Option.map x.allocationStrategy ~f:AllocationStrategy.to_value));
+        ("estimatedInstanceHourReductionPercentage",
+          (Option.map x.estimatedInstanceHourReductionPercentage
+             ~f:NullableEstimatedInstanceHourReductionPercentage.to_value));
+        ("type", (Option.map x.type_ ~f:AsgType.to_value));
+        ("mixedInstanceTypes",
+          (Option.map x.mixedInstanceTypes ~f:MixedInstanceTypes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let mixedInstanceTypes =
+        (Option.map ~f:MixedInstanceTypes.of_xml)
+          (Xml.child xml_arg0 "mixedInstanceTypes") in
+      let type_ = (Option.map ~f:AsgType.of_xml) (Xml.child xml_arg0 "type") in
+      let estimatedInstanceHourReductionPercentage =
+        (Option.map
+           ~f:NullableEstimatedInstanceHourReductionPercentage.of_xml)
+          (Xml.child xml_arg0 "estimatedInstanceHourReductionPercentage") in
+      let allocationStrategy =
+        (Option.map ~f:AllocationStrategy.of_xml)
+          (Xml.child xml_arg0 "allocationStrategy") in
       let instanceType =
-        (Option.map ~f:InstanceType.of_xml)
+        (Option.map ~f:NullableInstanceType.of_xml)
           (Xml.child xml_arg0 "instanceType") in
       let maxSize =
         (Option.map ~f:MaxSize.of_xml) (Xml.child xml_arg0 "maxSize") in
@@ -1161,17 +3488,74 @@ module AutoScalingGroupConfiguration =
       let desiredCapacity =
         (Option.map ~f:DesiredCapacity.of_xml)
           (Xml.child xml_arg0 "desiredCapacity") in
-      make ?instanceType ?maxSize ?minSize ?desiredCapacity ()
+      make ?mixedInstanceTypes ?type_
+        ?estimatedInstanceHourReductionPercentage ?allocationStrategy
+        ?instanceType ?maxSize ?minSize ?desiredCapacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceType = field_map json "instanceType" InstanceType.of_json in
-      let maxSize = field_map json "maxSize" MaxSize.of_json in
-      let minSize = field_map json "minSize" MinSize.of_json in
+    let of_json json__ =
+      let mixedInstanceTypes =
+        field_map json__ "mixedInstanceTypes" MixedInstanceTypes.of_json in
+      let type_ = field_map json__ "type" AsgType.of_json in
+      let estimatedInstanceHourReductionPercentage =
+        field_map json__ "estimatedInstanceHourReductionPercentage"
+          NullableEstimatedInstanceHourReductionPercentage.of_json in
+      let allocationStrategy =
+        field_map json__ "allocationStrategy" AllocationStrategy.of_json in
+      let instanceType =
+        field_map json__ "instanceType" NullableInstanceType.of_json in
+      let maxSize = field_map json__ "maxSize" MaxSize.of_json in
+      let minSize = field_map json__ "minSize" MinSize.of_json in
       let desiredCapacity =
-        field_map json "desiredCapacity" DesiredCapacity.of_json in
-      make ?instanceType ?maxSize ?minSize ?desiredCapacity ()
+        field_map json__ "desiredCapacity" DesiredCapacity.of_json in
+      make ?mixedInstanceTypes ?type_
+        ?estimatedInstanceHourReductionPercentage ?allocationStrategy
+        ?instanceType ?maxSize ?minSize ?desiredCapacity ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the configuration of an Auto Scaling group."]
+  end[@@ocaml.doc
+       "Describes the configuration of an EC2 Auto Scaling group."]
+module AutoScalingGroupSavingsOpportunityAfterDiscounts =
+  struct
+    type nonrec t =
+      {
+      savingsOpportunityPercentage: SavingsOpportunityPercentage.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible as a percentage of monthly cost after applying the Savings Plans and Reserved Instances discounts. This saving can be achieved by adopting Compute Optimizer\226\128\153s Auto Scaling group recommendations."];
+      estimatedMonthlySavings:
+        AutoScalingGroupEstimatedMonthlySavings.t option
+        [@ocaml.doc
+          "An object that describes the estimated monthly savings possible by adopting Compute Optimizer\226\128\153s Auto Scaling group recommendations. This is based on the Savings Plans and Reserved Instances pricing discounts."]}
+    let make ?savingsOpportunityPercentage =
+      fun ?estimatedMonthlySavings ->
+        fun () -> { savingsOpportunityPercentage; estimatedMonthlySavings }
+    let to_value x =
+      structure_to_value
+        [("savingsOpportunityPercentage",
+           (Option.map x.savingsOpportunityPercentage
+              ~f:SavingsOpportunityPercentage.to_value));
+        ("estimatedMonthlySavings",
+          (Option.map x.estimatedMonthlySavings
+             ~f:AutoScalingGroupEstimatedMonthlySavings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedMonthlySavings =
+        (Option.map ~f:AutoScalingGroupEstimatedMonthlySavings.of_xml)
+          (Xml.child xml_arg0 "estimatedMonthlySavings") in
+      let savingsOpportunityPercentage =
+        (Option.map ~f:SavingsOpportunityPercentage.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityPercentage") in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedMonthlySavings =
+        field_map json__ "estimatedMonthlySavings"
+          AutoScalingGroupEstimatedMonthlySavings.of_json in
+      let savingsOpportunityPercentage =
+        field_map json__ "savingsOpportunityPercentage"
+          SavingsOpportunityPercentage.of_json in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings opportunity for Auto Scaling group recommendations after applying the Savings Plans and Reserved Instances discounts. Savings opportunity represents the estimated monthly savings you can achieve by implementing Compute Optimizer recommendations."]
 module DestinationBucket =
   struct
     type nonrec t = string
@@ -1263,6 +3647,75 @@ module VeryLow =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
+module IdleSummary =
+  struct
+    type nonrec t =
+      {
+      name: IdleFinding.t option
+        [@ocaml.doc "The name of the finding group for the idle resources."];
+      value: SummaryValue.t option
+        [@ocaml.doc "The count of idle resources in the finding group."]}
+    let make ?name = fun ?value -> fun () -> { name; value }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:IdleFinding.to_value));
+        ("value", (Option.map x.value ~f:SummaryValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:SummaryValue.of_xml) (Xml.child xml_arg0 "value") in
+      let name =
+        (Option.map ~f:IdleFinding.of_xml) (Xml.child xml_arg0 "name") in
+      make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" SummaryValue.of_json in
+      let name = field_map json__ "name" IdleFinding.of_json in
+      make ?value ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the findings summary of the idle resources."]
+module InferredWorkloadSaving =
+  struct
+    type nonrec t =
+      {
+      inferredWorkloadTypes: InferredWorkloadTypes.t option
+        [@ocaml.doc
+          "The applications that might be running on the instance as inferred by Compute Optimizer. Compute Optimizer can infer if one of the following applications might be running on the instance: AmazonEmr - Infers that Amazon EMR might be running on the instance. ApacheCassandra - Infers that Apache Cassandra might be running on the instance. ApacheHadoop - Infers that Apache Hadoop might be running on the instance. Memcached - Infers that Memcached might be running on the instance. NGINX - Infers that NGINX might be running on the instance. PostgreSql - Infers that PostgreSQL might be running on the instance. Redis - Infers that Redis might be running on the instance. Kafka - Infers that Kafka might be running on the instance. SQLServer - Infers that SQLServer might be running on the instance."];
+      estimatedMonthlySavings: EstimatedMonthlySavings.t option
+        [@ocaml.doc
+          "An object that describes the estimated monthly savings amount possible by adopting Compute Optimizer recommendations for a given resource. This is based on the On-Demand instance pricing."]}
+    let make ?inferredWorkloadTypes =
+      fun ?estimatedMonthlySavings ->
+        fun () -> { inferredWorkloadTypes; estimatedMonthlySavings }
+    let to_value x =
+      structure_to_value
+        [("inferredWorkloadTypes",
+           (Option.map x.inferredWorkloadTypes
+              ~f:InferredWorkloadTypes.to_value));
+        ("estimatedMonthlySavings",
+          (Option.map x.estimatedMonthlySavings
+             ~f:EstimatedMonthlySavings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedMonthlySavings =
+        (Option.map ~f:EstimatedMonthlySavings.of_xml)
+          (Xml.child xml_arg0 "estimatedMonthlySavings") in
+      let inferredWorkloadTypes =
+        (Option.map ~f:InferredWorkloadTypes.of_xml)
+          (Xml.child xml_arg0 "inferredWorkloadTypes") in
+      make ?estimatedMonthlySavings ?inferredWorkloadTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedMonthlySavings =
+        field_map json__ "estimatedMonthlySavings"
+          EstimatedMonthlySavings.of_json in
+      let inferredWorkloadTypes =
+        field_map json__ "inferredWorkloadTypes"
+          InferredWorkloadTypes.of_json in
+      make ?estimatedMonthlySavings ?inferredWorkloadTypes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The estimated monthly savings after you adjust the configurations of your instances running on the inferred workload types to the recommended configurations. If the inferredWorkloadTypes list contains multiple entries, then the savings are the sum of the monthly savings from instances that run the exact combination of the inferred workload types."]
 module Summary =
   struct
     type nonrec t =
@@ -1294,11 +3747,11 @@ module Summary =
       let name = (Option.map ~f:Finding.of_xml) (Xml.child xml_arg0 "name") in
       make ?reasonCodeSummaries ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reasonCodeSummaries =
-        field_map json "reasonCodeSummaries" ReasonCodeSummaries.of_json in
-      let value = field_map json "value" SummaryValue.of_json in
-      let name = field_map json "name" Finding.of_json in
+        field_map json__ "reasonCodeSummaries" ReasonCodeSummaries.of_json in
+      let value = field_map json__ "value" SummaryValue.of_json in
+      let name = field_map json__ "name" Finding.of_json in
       make ?reasonCodeSummaries ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary of a recommendation."]
@@ -1343,6 +3796,699 @@ module ScopeValue =
     let of_json j = string_of_json ~kind:"ScopeValue" j
     let to_json = simple_to_json to_value
   end
+module RDSDBInstanceRecommendationOption =
+  struct
+    type nonrec t =
+      {
+      dbInstanceClass: DBInstanceClass.t option
+        [@ocaml.doc
+          "Describes the DB instance class recommendation option for your Amazon Aurora or RDS database."];
+      projectedUtilizationMetrics: RDSDBProjectedUtilizationMetrics.t option
+        [@ocaml.doc
+          "An array of objects that describe the projected utilization metrics of the DB instance recommendation option."];
+      performanceRisk: PerformanceRisk.t option
+        [@ocaml.doc
+          "The performance risk of the DB instance recommendation option."];
+      rank: Rank.t option
+        [@ocaml.doc
+          "The rank identifier of the DB instance recommendation option."];
+      savingsOpportunity: SavingsOpportunity.t option ;
+      savingsOpportunityAfterDiscounts:
+        RDSInstanceSavingsOpportunityAfterDiscounts.t option
+        [@ocaml.doc
+          "Describes the savings opportunity for Amazon Aurora and RDS database recommendations or for the recommendation option. Savings opportunity represents the estimated monthly savings after applying Savings Plans discounts. You can achieve this by implementing a given Compute Optimizer recommendation."]}
+    let make ?dbInstanceClass =
+      fun ?projectedUtilizationMetrics ->
+        fun ?performanceRisk ->
+          fun ?rank ->
+            fun ?savingsOpportunity ->
+              fun ?savingsOpportunityAfterDiscounts ->
+                fun () ->
+                  {
+                    dbInstanceClass;
+                    projectedUtilizationMetrics;
+                    performanceRisk;
+                    rank;
+                    savingsOpportunity;
+                    savingsOpportunityAfterDiscounts
+                  }
+    let to_value x =
+      structure_to_value
+        [("dbInstanceClass",
+           (Option.map x.dbInstanceClass ~f:DBInstanceClass.to_value));
+        ("projectedUtilizationMetrics",
+          (Option.map x.projectedUtilizationMetrics
+             ~f:RDSDBProjectedUtilizationMetrics.to_value));
+        ("performanceRisk",
+          (Option.map x.performanceRisk ~f:PerformanceRisk.to_value));
+        ("rank", (Option.map x.rank ~f:Rank.to_value));
+        ("savingsOpportunity",
+          (Option.map x.savingsOpportunity ~f:SavingsOpportunity.to_value));
+        ("savingsOpportunityAfterDiscounts",
+          (Option.map x.savingsOpportunityAfterDiscounts
+             ~f:RDSInstanceSavingsOpportunityAfterDiscounts.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let savingsOpportunityAfterDiscounts =
+        (Option.map ~f:RDSInstanceSavingsOpportunityAfterDiscounts.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityAfterDiscounts") in
+      let savingsOpportunity =
+        (Option.map ~f:SavingsOpportunity.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunity") in
+      let rank = (Option.map ~f:Rank.of_xml) (Xml.child xml_arg0 "rank") in
+      let performanceRisk =
+        (Option.map ~f:PerformanceRisk.of_xml)
+          (Xml.child xml_arg0 "performanceRisk") in
+      let projectedUtilizationMetrics =
+        (Option.map ~f:RDSDBProjectedUtilizationMetrics.of_xml)
+          (Xml.child xml_arg0 "projectedUtilizationMetrics") in
+      let dbInstanceClass =
+        (Option.map ~f:DBInstanceClass.of_xml)
+          (Xml.child xml_arg0 "dbInstanceClass") in
+      make ?savingsOpportunityAfterDiscounts ?savingsOpportunity ?rank
+        ?performanceRisk ?projectedUtilizationMetrics ?dbInstanceClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let savingsOpportunityAfterDiscounts =
+        field_map json__ "savingsOpportunityAfterDiscounts"
+          RDSInstanceSavingsOpportunityAfterDiscounts.of_json in
+      let savingsOpportunity =
+        field_map json__ "savingsOpportunity" SavingsOpportunity.of_json in
+      let rank = field_map json__ "rank" Rank.of_json in
+      let performanceRisk =
+        field_map json__ "performanceRisk" PerformanceRisk.of_json in
+      let projectedUtilizationMetrics =
+        field_map json__ "projectedUtilizationMetrics"
+          RDSDBProjectedUtilizationMetrics.of_json in
+      let dbInstanceClass =
+        field_map json__ "dbInstanceClass" DBInstanceClass.of_json in
+      make ?savingsOpportunityAfterDiscounts ?savingsOpportunity ?rank
+        ?performanceRisk ?projectedUtilizationMetrics ?dbInstanceClass ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the recommendation options for a DB instance."]
+module RDSDBStorageRecommendationOption =
+  struct
+    type nonrec t =
+      {
+      storageConfiguration: DBStorageConfiguration.t option
+        [@ocaml.doc "The recommended storage configuration."];
+      rank: Rank.t option
+        [@ocaml.doc
+          "The rank identifier of the DB storage recommendation option."];
+      savingsOpportunity: SavingsOpportunity.t option ;
+      savingsOpportunityAfterDiscounts:
+        RDSStorageSavingsOpportunityAfterDiscounts.t option
+        [@ocaml.doc
+          "Describes the savings opportunity for DB storage recommendations or for the recommendation option. Savings opportunity represents the estimated monthly savings after applying Savings Plans discounts. You can achieve this by implementing a given Compute Optimizer recommendation."];
+      estimatedMonthlyVolumeIOPsCostVariation:
+        RDSEstimatedMonthlyVolumeIOPsCostVariation.t option
+        [@ocaml.doc
+          "The projected level of variation in monthly I/O costs for the DB storage recommendation option."]}
+    let make ?storageConfiguration =
+      fun ?rank ->
+        fun ?savingsOpportunity ->
+          fun ?savingsOpportunityAfterDiscounts ->
+            fun ?estimatedMonthlyVolumeIOPsCostVariation ->
+              fun () ->
+                {
+                  storageConfiguration;
+                  rank;
+                  savingsOpportunity;
+                  savingsOpportunityAfterDiscounts;
+                  estimatedMonthlyVolumeIOPsCostVariation
+                }
+    let to_value x =
+      structure_to_value
+        [("storageConfiguration",
+           (Option.map x.storageConfiguration
+              ~f:DBStorageConfiguration.to_value));
+        ("rank", (Option.map x.rank ~f:Rank.to_value));
+        ("savingsOpportunity",
+          (Option.map x.savingsOpportunity ~f:SavingsOpportunity.to_value));
+        ("savingsOpportunityAfterDiscounts",
+          (Option.map x.savingsOpportunityAfterDiscounts
+             ~f:RDSStorageSavingsOpportunityAfterDiscounts.to_value));
+        ("estimatedMonthlyVolumeIOPsCostVariation",
+          (Option.map x.estimatedMonthlyVolumeIOPsCostVariation
+             ~f:RDSEstimatedMonthlyVolumeIOPsCostVariation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedMonthlyVolumeIOPsCostVariation =
+        (Option.map ~f:RDSEstimatedMonthlyVolumeIOPsCostVariation.of_xml)
+          (Xml.child xml_arg0 "estimatedMonthlyVolumeIOPsCostVariation") in
+      let savingsOpportunityAfterDiscounts =
+        (Option.map ~f:RDSStorageSavingsOpportunityAfterDiscounts.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityAfterDiscounts") in
+      let savingsOpportunity =
+        (Option.map ~f:SavingsOpportunity.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunity") in
+      let rank = (Option.map ~f:Rank.of_xml) (Xml.child xml_arg0 "rank") in
+      let storageConfiguration =
+        (Option.map ~f:DBStorageConfiguration.of_xml)
+          (Xml.child xml_arg0 "storageConfiguration") in
+      make ?estimatedMonthlyVolumeIOPsCostVariation
+        ?savingsOpportunityAfterDiscounts ?savingsOpportunity ?rank
+        ?storageConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedMonthlyVolumeIOPsCostVariation =
+        field_map json__ "estimatedMonthlyVolumeIOPsCostVariation"
+          RDSEstimatedMonthlyVolumeIOPsCostVariation.of_json in
+      let savingsOpportunityAfterDiscounts =
+        field_map json__ "savingsOpportunityAfterDiscounts"
+          RDSStorageSavingsOpportunityAfterDiscounts.of_json in
+      let savingsOpportunity =
+        field_map json__ "savingsOpportunity" SavingsOpportunity.of_json in
+      let rank = field_map json__ "rank" Rank.of_json in
+      let storageConfiguration =
+        field_map json__ "storageConfiguration"
+          DBStorageConfiguration.of_json in
+      make ?estimatedMonthlyVolumeIOPsCostVariation
+        ?savingsOpportunityAfterDiscounts ?savingsOpportunity ?rank
+        ?storageConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the recommendation options for DB storage."]
+module CpuVendorArchitectures =
+  struct
+    type nonrec t = CpuVendorArchitecture.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CpuVendorArchitecture.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CpuVendorArchitecture.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CpuVendorArchitectures"
+        ~of_json:CpuVendorArchitecture.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EnhancedInfrastructureMetrics =
+  struct
+    type nonrec t =
+      | Active 
+      | Inactive 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Active -> "Active"
+      | Inactive -> "Inactive"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Active" -> Active
+      | "Inactive" -> Inactive
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EnhancedInfrastructureMetrics"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EnhancedInfrastructureMetrics" j)
+    let to_json = simple_to_json to_value
+  end
+module LookBackPeriodPreference =
+  struct
+    type nonrec t =
+      | DAYS_14 
+      | DAYS_32 
+      | DAYS_93 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DAYS_14 -> "DAYS_14"
+      | DAYS_32 -> "DAYS_32"
+      | DAYS_93 -> "DAYS_93"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DAYS_14" -> DAYS_14
+      | "DAYS_32" -> DAYS_32
+      | "DAYS_93" -> DAYS_93
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LookBackPeriodPreference" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LookBackPeriodPreference" j)
+    let to_json = simple_to_json to_value
+  end
+module RDSSavingsEstimationMode =
+  struct
+    type nonrec t =
+      {
+      source: RDSSavingsEstimationModeSource.t option
+        [@ocaml.doc
+          "Describes the source for calculating the savings opportunity for DB instances."]}
+    let make ?source = fun () -> { source }
+    let to_value x =
+      structure_to_value
+        [("source",
+           (Option.map x.source ~f:RDSSavingsEstimationModeSource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let source =
+        (Option.map ~f:RDSSavingsEstimationModeSource.of_xml)
+          (Xml.child xml_arg0 "source") in
+      make ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let source =
+        field_map json__ "source" RDSSavingsEstimationModeSource.of_json in
+      make ?source ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings estimation mode used for calculating savings opportunity for DB instances."]
+module RDSInstanceFindingReasonCode =
+  struct
+    type nonrec t =
+      | CPUOverprovisioned 
+      | NetworkBandwidthOverprovisioned 
+      | EBSIOPSOverprovisioned 
+      | EBSIOPSUnderprovisioned 
+      | EBSThroughputOverprovisioned 
+      | CPUUnderprovisioned 
+      | NetworkBandwidthUnderprovisioned 
+      | EBSThroughputUnderprovisioned 
+      | NewGenerationDBInstanceClassAvailable 
+      | NewEngineVersionAvailable 
+      | DBClusterWriterUnderprovisioned 
+      | MemoryUnderprovisioned 
+      | InstanceStorageReadIOPSUnderprovisioned 
+      | InstanceStorageWriteIOPSUnderprovisioned 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CPUOverprovisioned -> "CPUOverprovisioned"
+      | NetworkBandwidthOverprovisioned -> "NetworkBandwidthOverprovisioned"
+      | EBSIOPSOverprovisioned -> "EBSIOPSOverprovisioned"
+      | EBSIOPSUnderprovisioned -> "EBSIOPSUnderprovisioned"
+      | EBSThroughputOverprovisioned -> "EBSThroughputOverprovisioned"
+      | CPUUnderprovisioned -> "CPUUnderprovisioned"
+      | NetworkBandwidthUnderprovisioned ->
+          "NetworkBandwidthUnderprovisioned"
+      | EBSThroughputUnderprovisioned -> "EBSThroughputUnderprovisioned"
+      | NewGenerationDBInstanceClassAvailable ->
+          "NewGenerationDBInstanceClassAvailable"
+      | NewEngineVersionAvailable -> "NewEngineVersionAvailable"
+      | DBClusterWriterUnderprovisioned -> "DBClusterWriterUnderprovisioned"
+      | MemoryUnderprovisioned -> "MemoryUnderprovisioned"
+      | InstanceStorageReadIOPSUnderprovisioned ->
+          "InstanceStorageReadIOPSUnderprovisioned"
+      | InstanceStorageWriteIOPSUnderprovisioned ->
+          "InstanceStorageWriteIOPSUnderprovisioned"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CPUOverprovisioned" -> CPUOverprovisioned
+      | "NetworkBandwidthOverprovisioned" -> NetworkBandwidthOverprovisioned
+      | "EBSIOPSOverprovisioned" -> EBSIOPSOverprovisioned
+      | "EBSIOPSUnderprovisioned" -> EBSIOPSUnderprovisioned
+      | "EBSThroughputOverprovisioned" -> EBSThroughputOverprovisioned
+      | "CPUUnderprovisioned" -> CPUUnderprovisioned
+      | "NetworkBandwidthUnderprovisioned" ->
+          NetworkBandwidthUnderprovisioned
+      | "EBSThroughputUnderprovisioned" -> EBSThroughputUnderprovisioned
+      | "NewGenerationDBInstanceClassAvailable" ->
+          NewGenerationDBInstanceClassAvailable
+      | "NewEngineVersionAvailable" -> NewEngineVersionAvailable
+      | "DBClusterWriterUnderprovisioned" -> DBClusterWriterUnderprovisioned
+      | "MemoryUnderprovisioned" -> MemoryUnderprovisioned
+      | "InstanceStorageReadIOPSUnderprovisioned" ->
+          InstanceStorageReadIOPSUnderprovisioned
+      | "InstanceStorageWriteIOPSUnderprovisioned" ->
+          InstanceStorageWriteIOPSUnderprovisioned
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RDSInstanceFindingReasonCode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RDSInstanceFindingReasonCode" j)
+    let to_json = simple_to_json to_value
+  end
+module RDSStorageFindingReasonCode =
+  struct
+    type nonrec t =
+      | EBSVolumeAllocatedStorageUnderprovisioned 
+      | EBSVolumeThroughputUnderprovisioned 
+      | EBSVolumeIOPSOverprovisioned 
+      | EBSVolumeThroughputOverprovisioned 
+      | NewGenerationStorageTypeAvailable 
+      | DBClusterStorageOptionAvailable 
+      | DBClusterStorageSavingsAvailable 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EBSVolumeAllocatedStorageUnderprovisioned ->
+          "EBSVolumeAllocatedStorageUnderprovisioned"
+      | EBSVolumeThroughputUnderprovisioned ->
+          "EBSVolumeThroughputUnderprovisioned"
+      | EBSVolumeIOPSOverprovisioned -> "EBSVolumeIOPSOverprovisioned"
+      | EBSVolumeThroughputOverprovisioned ->
+          "EBSVolumeThroughputOverprovisioned"
+      | NewGenerationStorageTypeAvailable ->
+          "NewGenerationStorageTypeAvailable"
+      | DBClusterStorageOptionAvailable -> "DBClusterStorageOptionAvailable"
+      | DBClusterStorageSavingsAvailable ->
+          "DBClusterStorageSavingsAvailable"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EBSVolumeAllocatedStorageUnderprovisioned" ->
+          EBSVolumeAllocatedStorageUnderprovisioned
+      | "EBSVolumeThroughputUnderprovisioned" ->
+          EBSVolumeThroughputUnderprovisioned
+      | "EBSVolumeIOPSOverprovisioned" -> EBSVolumeIOPSOverprovisioned
+      | "EBSVolumeThroughputOverprovisioned" ->
+          EBSVolumeThroughputOverprovisioned
+      | "NewGenerationStorageTypeAvailable" ->
+          NewGenerationStorageTypeAvailable
+      | "DBClusterStorageOptionAvailable" -> DBClusterStorageOptionAvailable
+      | "DBClusterStorageSavingsAvailable" ->
+          DBClusterStorageSavingsAvailable
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RDSStorageFindingReasonCode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RDSStorageFindingReasonCode" j)
+    let to_json = simple_to_json to_value
+  end
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t option
+        [@ocaml.doc
+          "One part of a key-value pair that makes up a tag. A key is a general label that acts like a category for more specific tag values."];
+      value: TagValue.t option
+        [@ocaml.doc
+          "One part of a key-value pair that make up a tag. A value acts as a descriptor within a tag category (key). The value can be empty or null."]}
+    let make ?key = fun ?value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("key", (Option.map x.key ~f:TagKey.to_value));
+        ("value", (Option.map x.value ~f:TagValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "value") in
+      let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "key") in
+      make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" TagValue.of_json in
+      let key = field_map json__ "key" TagKey.of_json in make ?value ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A list of tag key and value pairs that you define."]
+module FilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "FilterValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module RDSDatabaseProjectedMetric =
+  struct
+    type nonrec t =
+      {
+      name: RDSDBMetricName.t option
+        [@ocaml.doc "The name of the projected metric."];
+      timestamps: Timestamps.t option
+        [@ocaml.doc "The timestamps of the projected metric."];
+      values: MetricValues.t option
+        [@ocaml.doc "The values for the projected metric."]}
+    let make ?name =
+      fun ?timestamps ->
+        fun ?values -> fun () -> { name; timestamps; values }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:RDSDBMetricName.to_value));
+        ("timestamps", (Option.map x.timestamps ~f:Timestamps.to_value));
+        ("values", (Option.map x.values ~f:MetricValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:MetricValues.of_xml) (Xml.child xml_arg0 "values") in
+      let timestamps =
+        (Option.map ~f:Timestamps.of_xml) (Xml.child xml_arg0 "timestamps") in
+      let name =
+        (Option.map ~f:RDSDBMetricName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?values ?timestamps ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values = field_map json__ "values" MetricValues.of_json in
+      let timestamps = field_map json__ "timestamps" Timestamps.of_json in
+      let name = field_map json__ "name" RDSDBMetricName.of_json in
+      make ?values ?timestamps ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the projected metrics of an Amazon Aurora and RDS database recommendation option. To determine the performance difference between your current Amazon Aurora and RDS database and the recommended option, compare the metric data of your service against its projected metric data."]
+module LicenseName =
+  struct
+    type nonrec t =
+      | SQLServer 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | SQLServer -> "SQLServer" | Non_static_id s -> s
+    let of_string =
+      function | "SQLServer" -> SQLServer | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LicenseName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LicenseName" j)
+    let to_json = simple_to_json to_value
+  end
+module LicenseVersion =
+  struct
+    type nonrec t = string
+    let context_ = "LicenseVersion"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LicenseVersion" j
+    let to_json = simple_to_json to_value
+  end
+module MetricsSource =
+  struct
+    type nonrec t = MetricSource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricSource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricSource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricsSource" ~of_json:MetricSource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NumberOfCores =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NumberOfCores" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LicenseFindingReasonCode =
+  struct
+    type nonrec t =
+      | InvalidCloudWatchApplicationInsightsSetup 
+      | CloudWatchApplicationInsightsError 
+      | LicenseOverprovisioned 
+      | Optimized 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | InvalidCloudWatchApplicationInsightsSetup ->
+          "InvalidCloudWatchApplicationInsightsSetup"
+      | CloudWatchApplicationInsightsError ->
+          "CloudWatchApplicationInsightsError"
+      | LicenseOverprovisioned -> "LicenseOverprovisioned"
+      | Optimized -> "Optimized"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "InvalidCloudWatchApplicationInsightsSetup" ->
+          InvalidCloudWatchApplicationInsightsSetup
+      | "CloudWatchApplicationInsightsError" ->
+          CloudWatchApplicationInsightsError
+      | "LicenseOverprovisioned" -> LicenseOverprovisioned
+      | "Optimized" -> Optimized
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LicenseFindingReasonCode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LicenseFindingReasonCode" j)
+    let to_json = simple_to_json to_value
+  end
+module LicenseRecommendationOption =
+  struct
+    type nonrec t =
+      {
+      rank: Rank.t option
+        [@ocaml.doc
+          "The rank of the license recommendation option. The top recommendation option is ranked as 1."];
+      operatingSystem: OperatingSystem.t option
+        [@ocaml.doc
+          "The operating system of a license recommendation option."];
+      licenseEdition: LicenseEdition.t option
+        [@ocaml.doc
+          "The recommended edition of the license for the application that runs on the instance."];
+      licenseModel: LicenseModel.t option
+        [@ocaml.doc
+          "The recommended license type associated with the instance."];
+      savingsOpportunity: SavingsOpportunity.t option }
+    let make ?rank =
+      fun ?operatingSystem ->
+        fun ?licenseEdition ->
+          fun ?licenseModel ->
+            fun ?savingsOpportunity ->
+              fun () ->
+                {
+                  rank;
+                  operatingSystem;
+                  licenseEdition;
+                  licenseModel;
+                  savingsOpportunity
+                }
+    let to_value x =
+      structure_to_value
+        [("rank", (Option.map x.rank ~f:Rank.to_value));
+        ("operatingSystem",
+          (Option.map x.operatingSystem ~f:OperatingSystem.to_value));
+        ("licenseEdition",
+          (Option.map x.licenseEdition ~f:LicenseEdition.to_value));
+        ("licenseModel",
+          (Option.map x.licenseModel ~f:LicenseModel.to_value));
+        ("savingsOpportunity",
+          (Option.map x.savingsOpportunity ~f:SavingsOpportunity.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let savingsOpportunity =
+        (Option.map ~f:SavingsOpportunity.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunity") in
+      let licenseModel =
+        (Option.map ~f:LicenseModel.of_xml)
+          (Xml.child xml_arg0 "licenseModel") in
+      let licenseEdition =
+        (Option.map ~f:LicenseEdition.of_xml)
+          (Xml.child xml_arg0 "licenseEdition") in
+      let operatingSystem =
+        (Option.map ~f:OperatingSystem.of_xml)
+          (Xml.child xml_arg0 "operatingSystem") in
+      let rank = (Option.map ~f:Rank.of_xml) (Xml.child xml_arg0 "rank") in
+      make ?savingsOpportunity ?licenseModel ?licenseEdition ?operatingSystem
+        ?rank ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let savingsOpportunity =
+        field_map json__ "savingsOpportunity" SavingsOpportunity.of_json in
+      let licenseModel = field_map json__ "licenseModel" LicenseModel.of_json in
+      let licenseEdition =
+        field_map json__ "licenseEdition" LicenseEdition.of_json in
+      let operatingSystem =
+        field_map json__ "operatingSystem" OperatingSystem.of_json in
+      let rank = field_map json__ "rank" Rank.of_json in
+      make ?savingsOpportunity ?licenseModel ?licenseEdition ?operatingSystem
+        ?rank ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the recommendation options for licenses."]
+module LambdaSavingsEstimationMode =
+  struct
+    type nonrec t =
+      {
+      source: LambdaSavingsEstimationModeSource.t option
+        [@ocaml.doc
+          "Describes the source for calculation of savings opportunity for Lambda functions."]}
+    let make ?source = fun () -> { source }
+    let to_value x =
+      structure_to_value
+        [("source",
+           (Option.map x.source ~f:LambdaSavingsEstimationModeSource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let source =
+        (Option.map ~f:LambdaSavingsEstimationModeSource.of_xml)
+          (Xml.child xml_arg0 "source") in
+      make ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let source =
+        field_map json__ "source" LambdaSavingsEstimationModeSource.of_json in
+      make ?source ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings estimation used for calculating savings opportunity for Lambda functions."]
 module LambdaFunctionMemoryRecommendationOption =
   struct
     type nonrec t =
@@ -1359,18 +4505,24 @@ module LambdaFunctionMemoryRecommendationOption =
           "An array of objects that describe the projected utilization metrics of the function recommendation option."];
       savingsOpportunity: SavingsOpportunity.t option
         [@ocaml.doc
-          "An object that describes the savings opportunity for the Lambda function recommendation option. Savings opportunity includes the estimated monthly savings amount and percentage."]}
+          "An object that describes the savings opportunity for the Lambda function recommendation option. Savings opportunity includes the estimated monthly savings amount and percentage."];
+      savingsOpportunityAfterDiscounts:
+        LambdaSavingsOpportunityAfterDiscounts.t option
+        [@ocaml.doc
+          "An object that describes the savings opportunity for the Lambda recommendation option which includes Saving Plans discounts. Savings opportunity includes the estimated monthly savings and percentage."]}
     let make ?rank =
       fun ?memorySize ->
         fun ?projectedUtilizationMetrics ->
           fun ?savingsOpportunity ->
-            fun () ->
-              {
-                rank;
-                memorySize;
-                projectedUtilizationMetrics;
-                savingsOpportunity
-              }
+            fun ?savingsOpportunityAfterDiscounts ->
+              fun () ->
+                {
+                  rank;
+                  memorySize;
+                  projectedUtilizationMetrics;
+                  savingsOpportunity;
+                  savingsOpportunityAfterDiscounts
+                }
     let to_value x =
       structure_to_value
         [("rank", (Option.map x.rank ~f:Rank.to_value));
@@ -1379,9 +4531,15 @@ module LambdaFunctionMemoryRecommendationOption =
           (Option.map x.projectedUtilizationMetrics
              ~f:LambdaFunctionMemoryProjectedMetrics.to_value));
         ("savingsOpportunity",
-          (Option.map x.savingsOpportunity ~f:SavingsOpportunity.to_value))]
+          (Option.map x.savingsOpportunity ~f:SavingsOpportunity.to_value));
+        ("savingsOpportunityAfterDiscounts",
+          (Option.map x.savingsOpportunityAfterDiscounts
+             ~f:LambdaSavingsOpportunityAfterDiscounts.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let savingsOpportunityAfterDiscounts =
+        (Option.map ~f:LambdaSavingsOpportunityAfterDiscounts.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityAfterDiscounts") in
       let savingsOpportunity =
         (Option.map ~f:SavingsOpportunity.of_xml)
           (Xml.child xml_arg0 "savingsOpportunity") in
@@ -1391,19 +4549,22 @@ module LambdaFunctionMemoryRecommendationOption =
       let memorySize =
         (Option.map ~f:MemorySize.of_xml) (Xml.child xml_arg0 "memorySize") in
       let rank = (Option.map ~f:Rank.of_xml) (Xml.child xml_arg0 "rank") in
-      make ?savingsOpportunity ?projectedUtilizationMetrics ?memorySize ?rank
-        ()
+      make ?savingsOpportunityAfterDiscounts ?savingsOpportunity
+        ?projectedUtilizationMetrics ?memorySize ?rank ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let savingsOpportunityAfterDiscounts =
+        field_map json__ "savingsOpportunityAfterDiscounts"
+          LambdaSavingsOpportunityAfterDiscounts.of_json in
       let savingsOpportunity =
-        field_map json "savingsOpportunity" SavingsOpportunity.of_json in
+        field_map json__ "savingsOpportunity" SavingsOpportunity.of_json in
       let projectedUtilizationMetrics =
-        field_map json "projectedUtilizationMetrics"
+        field_map json__ "projectedUtilizationMetrics"
           LambdaFunctionMemoryProjectedMetrics.of_json in
-      let memorySize = field_map json "memorySize" MemorySize.of_json in
-      let rank = field_map json "rank" Rank.of_json in
-      make ?savingsOpportunity ?projectedUtilizationMetrics ?memorySize ?rank
-        ()
+      let memorySize = field_map json__ "memorySize" MemorySize.of_json in
+      let rank = field_map json__ "rank" Rank.of_json in
+      make ?savingsOpportunityAfterDiscounts ?savingsOpportunity
+        ?projectedUtilizationMetrics ?memorySize ?rank ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a recommendation option for an Lambda function."]
@@ -1476,34 +4637,401 @@ module LambdaFunctionUtilizationMetric =
           (Xml.child xml_arg0 "name") in
       make ?value ?statistic ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" MetricValue.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" MetricValue.of_json in
       let statistic =
-        field_map json "statistic" LambdaFunctionMetricStatistic.of_json in
-      let name = field_map json "name" LambdaFunctionMetricName.of_json in
+        field_map json__ "statistic" LambdaFunctionMetricStatistic.of_json in
+      let name = field_map json__ "name" LambdaFunctionMetricName.of_json in
       make ?value ?statistic ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a utilization metric of an Lambda function."]
-module FilterValue =
+module IdleEstimatedMonthlySavings =
+  struct
+    type nonrec t =
+      {
+      currency: Currency.t option
+        [@ocaml.doc "The currency of the estimated monthly savings."];
+      value: Value.t option
+        [@ocaml.doc
+          "The value of the estimated monthly savings for Idle resources."]}
+    let make ?currency = fun ?value -> fun () -> { currency; value }
+    let to_value x =
+      structure_to_value
+        [("currency", (Option.map x.currency ~f:Currency.to_value));
+        ("value", (Option.map x.value ~f:Value.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "value") in
+      let currency =
+        (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "currency") in
+      make ?value ?currency ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" Value.of_json in
+      let currency = field_map json__ "currency" Currency.of_json in
+      make ?value ?currency ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the estimated monthly savings possible for idle resources by adopting Compute Optimizer recommendations."]
+module IdleUtilizationMetric =
+  struct
+    type nonrec t =
+      {
+      name: IdleMetricName.t option
+        [@ocaml.doc "The name of the utilization metric."];
+      statistic: MetricStatistic.t option
+        [@ocaml.doc
+          "The statistic of the utilization metric. The Compute Optimizer API, Command Line Interface (CLI), and SDKs return utilization metrics using only the Maximum statistic, which is the highest value observed during the specified period. The Compute Optimizer console displays graphs for some utilization metrics using the Average statistic, which is the value of Sum / SampleCount during the specified period. For more information, see Viewing resource recommendations in the Compute Optimizer User Guide. You can also get averaged utilization metric data for your resources using Amazon CloudWatch. For more information, see the Amazon CloudWatch User Guide."];
+      value: MetricValue.t option
+        [@ocaml.doc "The value of the utilization metric."]}
+    let make ?name =
+      fun ?statistic -> fun ?value -> fun () -> { name; statistic; value }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:IdleMetricName.to_value));
+        ("statistic", (Option.map x.statistic ~f:MetricStatistic.to_value));
+        ("value", (Option.map x.value ~f:MetricValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:MetricValue.of_xml) (Xml.child xml_arg0 "value") in
+      let statistic =
+        (Option.map ~f:MetricStatistic.of_xml)
+          (Xml.child xml_arg0 "statistic") in
+      let name =
+        (Option.map ~f:IdleMetricName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?value ?statistic ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" MetricValue.of_json in
+      let statistic = field_map json__ "statistic" MetricStatistic.of_json in
+      let name = field_map json__ "name" IdleMetricName.of_json in
+      make ?value ?statistic ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the utilization metric of an idle resource."]
+module ECSSavingsEstimationMode =
+  struct
+    type nonrec t =
+      {
+      source: ECSSavingsEstimationModeSource.t option
+        [@ocaml.doc
+          "Describes the source for calculating the savings opportunity for Amazon ECS services."]}
+    let make ?source = fun () -> { source }
+    let to_value x =
+      structure_to_value
+        [("source",
+           (Option.map x.source ~f:ECSSavingsEstimationModeSource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let source =
+        (Option.map ~f:ECSSavingsEstimationModeSource.of_xml)
+          (Xml.child xml_arg0 "source") in
+      make ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let source =
+        field_map json__ "source" ECSSavingsEstimationModeSource.of_json in
+      make ?source ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings estimation mode used for calculating savings opportunity for Amazon ECS services."]
+module ECSServiceRecommendationFindingReasonCode =
+  struct
+    type nonrec t =
+      | MemoryOverprovisioned 
+      | MemoryUnderprovisioned 
+      | CPUOverprovisioned 
+      | CPUUnderprovisioned 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MemoryOverprovisioned -> "MemoryOverprovisioned"
+      | MemoryUnderprovisioned -> "MemoryUnderprovisioned"
+      | CPUOverprovisioned -> "CPUOverprovisioned"
+      | CPUUnderprovisioned -> "CPUUnderprovisioned"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MemoryOverprovisioned" -> MemoryOverprovisioned
+      | "MemoryUnderprovisioned" -> MemoryUnderprovisioned
+      | "CPUOverprovisioned" -> CPUOverprovisioned
+      | "CPUUnderprovisioned" -> CPUUnderprovisioned
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration ECSServiceRecommendationFindingReasonCode"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"ECSServiceRecommendationFindingReasonCode" j)
+    let to_json = simple_to_json to_value
+  end
+module ECSServiceRecommendationOption =
+  struct
+    type nonrec t =
+      {
+      memory: NullableMemory.t option
+        [@ocaml.doc
+          "The memory size of the Amazon ECS service recommendation option."];
+      cpu: NullableCpu.t option
+        [@ocaml.doc
+          "The CPU size of the Amazon ECS service recommendation option."];
+      savingsOpportunity: SavingsOpportunity.t option ;
+      savingsOpportunityAfterDiscounts:
+        ECSSavingsOpportunityAfterDiscounts.t option
+        [@ocaml.doc
+          "Describes the savings opportunity for Amazon ECS service recommendations or for the recommendation option. Savings opportunity represents the estimated monthly savings after applying Savings Plans discounts. You can achieve this by implementing a given Compute Optimizer recommendation."];
+      projectedUtilizationMetrics:
+        ECSServiceProjectedUtilizationMetrics.t option
+        [@ocaml.doc
+          "An array of objects that describe the projected utilization metrics of the Amazon ECS service recommendation option."];
+      containerRecommendations: ContainerRecommendations.t option
+        [@ocaml.doc
+          "The CPU and memory size recommendations for the containers within the task of your Amazon ECS service."]}
+    let make ?memory =
+      fun ?cpu ->
+        fun ?savingsOpportunity ->
+          fun ?savingsOpportunityAfterDiscounts ->
+            fun ?projectedUtilizationMetrics ->
+              fun ?containerRecommendations ->
+                fun () ->
+                  {
+                    memory;
+                    cpu;
+                    savingsOpportunity;
+                    savingsOpportunityAfterDiscounts;
+                    projectedUtilizationMetrics;
+                    containerRecommendations
+                  }
+    let to_value x =
+      structure_to_value
+        [("memory", (Option.map x.memory ~f:NullableMemory.to_value));
+        ("cpu", (Option.map x.cpu ~f:NullableCpu.to_value));
+        ("savingsOpportunity",
+          (Option.map x.savingsOpportunity ~f:SavingsOpportunity.to_value));
+        ("savingsOpportunityAfterDiscounts",
+          (Option.map x.savingsOpportunityAfterDiscounts
+             ~f:ECSSavingsOpportunityAfterDiscounts.to_value));
+        ("projectedUtilizationMetrics",
+          (Option.map x.projectedUtilizationMetrics
+             ~f:ECSServiceProjectedUtilizationMetrics.to_value));
+        ("containerRecommendations",
+          (Option.map x.containerRecommendations
+             ~f:ContainerRecommendations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let containerRecommendations =
+        (Option.map ~f:ContainerRecommendations.of_xml)
+          (Xml.child xml_arg0 "containerRecommendations") in
+      let projectedUtilizationMetrics =
+        (Option.map ~f:ECSServiceProjectedUtilizationMetrics.of_xml)
+          (Xml.child xml_arg0 "projectedUtilizationMetrics") in
+      let savingsOpportunityAfterDiscounts =
+        (Option.map ~f:ECSSavingsOpportunityAfterDiscounts.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityAfterDiscounts") in
+      let savingsOpportunity =
+        (Option.map ~f:SavingsOpportunity.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunity") in
+      let cpu = (Option.map ~f:NullableCpu.of_xml) (Xml.child xml_arg0 "cpu") in
+      let memory =
+        (Option.map ~f:NullableMemory.of_xml) (Xml.child xml_arg0 "memory") in
+      make ?containerRecommendations ?projectedUtilizationMetrics
+        ?savingsOpportunityAfterDiscounts ?savingsOpportunity ?cpu ?memory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let containerRecommendations =
+        field_map json__ "containerRecommendations"
+          ContainerRecommendations.of_json in
+      let projectedUtilizationMetrics =
+        field_map json__ "projectedUtilizationMetrics"
+          ECSServiceProjectedUtilizationMetrics.of_json in
+      let savingsOpportunityAfterDiscounts =
+        field_map json__ "savingsOpportunityAfterDiscounts"
+          ECSSavingsOpportunityAfterDiscounts.of_json in
+      let savingsOpportunity =
+        field_map json__ "savingsOpportunity" SavingsOpportunity.of_json in
+      let cpu = field_map json__ "cpu" NullableCpu.of_json in
+      let memory = field_map json__ "memory" NullableMemory.of_json in
+      make ?containerRecommendations ?projectedUtilizationMetrics
+        ?savingsOpportunityAfterDiscounts ?savingsOpportunity ?cpu ?memory ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the recommendation options for an Amazon ECS service."]
+module ECSServiceUtilizationMetric =
+  struct
+    type nonrec t =
+      {
+      name: ECSServiceMetricName.t option
+        [@ocaml.doc
+          "The name of the utilization metric. The following utilization metrics are available: Cpu \226\128\148 The amount of CPU capacity that's used in the service. Memory \226\128\148 The amount of memory that's used in the service."];
+      statistic: ECSServiceMetricStatistic.t option
+        [@ocaml.doc
+          "The statistic of the utilization metric. The Compute Optimizer API, Command Line Interface (CLI), and SDKs return utilization metrics using only the Maximum statistic, which is the highest value observed during the specified period. The Compute Optimizer console displays graphs for some utilization metrics using the Average statistic, which is the value of Sum / SampleCount during the specified period. For more information, see Viewing resource recommendations in the Compute Optimizer User Guide. You can also get averaged utilization metric data for your resources using Amazon CloudWatch. For more information, see the Amazon CloudWatch User Guide."];
+      value: MetricValue.t option
+        [@ocaml.doc "The value of the utilization metric."]}
+    let make ?name =
+      fun ?statistic -> fun ?value -> fun () -> { name; statistic; value }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:ECSServiceMetricName.to_value));
+        ("statistic",
+          (Option.map x.statistic ~f:ECSServiceMetricStatistic.to_value));
+        ("value", (Option.map x.value ~f:MetricValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:MetricValue.of_xml) (Xml.child xml_arg0 "value") in
+      let statistic =
+        (Option.map ~f:ECSServiceMetricStatistic.of_xml)
+          (Xml.child xml_arg0 "statistic") in
+      let name =
+        (Option.map ~f:ECSServiceMetricName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?value ?statistic ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" MetricValue.of_json in
+      let statistic =
+        field_map json__ "statistic" ECSServiceMetricStatistic.of_json in
+      let name = field_map json__ "name" ECSServiceMetricName.of_json in
+      make ?value ?statistic ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the utilization metric of an Amazon ECS service. To determine the performance difference between your current Amazon ECS service and the recommended option, compare the utilization metric data of your service against its projected utilization metric data."]
+module AutoScalingConfiguration =
+  struct
+    type nonrec t =
+      | TargetTrackingScalingCpu 
+      | TargetTrackingScalingMemory 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TargetTrackingScalingCpu -> "TargetTrackingScalingCpu"
+      | TargetTrackingScalingMemory -> "TargetTrackingScalingMemory"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TargetTrackingScalingCpu" -> TargetTrackingScalingCpu
+      | "TargetTrackingScalingMemory" -> TargetTrackingScalingMemory
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AutoScalingConfiguration" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AutoScalingConfiguration" j)
+    let to_json = simple_to_json to_value
+  end
+module ContainerConfigurations =
+  struct
+    type nonrec t = ContainerConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ContainerConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ContainerConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ContainerConfigurations"
+        ~of_json:ContainerConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TaskDefinitionArn =
   struct
     type nonrec t = string
-    let context_ = "FilterValue"
+    let context_ = "TaskDefinitionArn"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FilterValue" j
+    let of_json j = string_of_json ~kind:"TaskDefinitionArn" j
     let to_json = simple_to_json to_value
   end
+module ECSServiceProjectedMetric =
+  struct
+    type nonrec t =
+      {
+      name: ECSServiceMetricName.t option
+        [@ocaml.doc
+          "The name of the projected metric. The following metrics are available: Cpu \226\128\148 The percentage of allocated compute units that are currently in use on the service tasks. Memory \226\128\148 The percentage of memory that's currently in use on the service tasks."];
+      timestamps: Timestamps.t option
+        [@ocaml.doc "The timestamps of the projected metric."];
+      upperBoundValues: MetricValues.t option
+        [@ocaml.doc "The upper bound values for the projected metric."];
+      lowerBoundValues: MetricValues.t option
+        [@ocaml.doc "The lower bound values for the projected metric."]}
+    let make ?name =
+      fun ?timestamps ->
+        fun ?upperBoundValues ->
+          fun ?lowerBoundValues ->
+            fun () ->
+              { name; timestamps; upperBoundValues; lowerBoundValues }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:ECSServiceMetricName.to_value));
+        ("timestamps", (Option.map x.timestamps ~f:Timestamps.to_value));
+        ("upperBoundValues",
+          (Option.map x.upperBoundValues ~f:MetricValues.to_value));
+        ("lowerBoundValues",
+          (Option.map x.lowerBoundValues ~f:MetricValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lowerBoundValues =
+        (Option.map ~f:MetricValues.of_xml)
+          (Xml.child xml_arg0 "lowerBoundValues") in
+      let upperBoundValues =
+        (Option.map ~f:MetricValues.of_xml)
+          (Xml.child xml_arg0 "upperBoundValues") in
+      let timestamps =
+        (Option.map ~f:Timestamps.of_xml) (Xml.child xml_arg0 "timestamps") in
+      let name =
+        (Option.map ~f:ECSServiceMetricName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?lowerBoundValues ?upperBoundValues ?timestamps ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lowerBoundValues =
+        field_map json__ "lowerBoundValues" MetricValues.of_json in
+      let upperBoundValues =
+        field_map json__ "upperBoundValues" MetricValues.of_json in
+      let timestamps = field_map json__ "timestamps" Timestamps.of_json in
+      let name = field_map json__ "name" ECSServiceMetricName.of_json in
+      make ?lowerBoundValues ?upperBoundValues ?timestamps ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the projected metrics of an Amazon ECS service recommendation option. To determine the performance difference between your current Amazon ECS service and the recommended option, compare the metric data of your service against its projected metric data."]
 module ProjectedMetric =
   struct
     type nonrec t =
       {
       name: MetricName.t option
         [@ocaml.doc
-          "The name of the projected utilization metric. The following projected utilization metrics are returned: Cpu - The projected percentage of allocated EC2 compute units that would be in use on the recommendation option had you used that resource during the analyzed period. This metric identifies the processing power required to run an application on the recommendation option. Depending on the instance type, tools in your operating system can show a lower percentage than CloudWatch when the instance is not allocated a full processor core. Units: Percent Memory - The percentage of memory that would be in use on the recommendation option had you used that resource during the analyzed period. This metric identifies the amount of memory required to run an application on the recommendation option. Units: Percent The Memory metric is returned only for resources that have the unified CloudWatch agent installed on them. For more information, see Enabling Memory Utilization with the CloudWatch Agent."];
+          "The name of the projected utilization metric. The following projected utilization metrics are returned: Cpu - The projected percentage of allocated EC2 compute units that would be in use on the recommendation option had you used that resource during the analyzed period. This metric identifies the processing power required to run an application on the recommendation option. Depending on the instance type, tools in your operating system can show a lower percentage than CloudWatch when the instance is not allocated a full processor core. Memory - The percentage of memory that would be in use on the recommendation option had you used that resource during the analyzed period. This metric identifies the amount of memory required to run an application on the recommendation option. Units: Percent The Memory metric is only returned for resources with the unified CloudWatch agent installed on them. For more information, see Enabling Memory Utilization with the CloudWatch Agent. GPU - The projected percentage of allocated GPUs if you adjust your configurations to Compute Optimizer's recommendation option. GPU_MEMORY - The projected percentage of total GPU memory if you adjust your configurations to Compute Optimizer's recommendation option. The GPU and GPU_MEMORY metrics are only returned for resources with the unified CloudWatch Agent installed on them. For more information, see Enabling NVIDIA GPU utilization with the CloudWatch Agent."];
       timestamps: Timestamps.t option
         [@ocaml.doc "The timestamps of the projected utilization metric."];
       values: MetricValues.t option
@@ -1526,20 +5054,23 @@ module ProjectedMetric =
         (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "name") in
       make ?values ?timestamps ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" MetricValues.of_json in
-      let timestamps = field_map json "timestamps" Timestamps.of_json in
-      let name = field_map json "name" MetricName.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" MetricValues.of_json in
+      let timestamps = field_map json__ "timestamps" Timestamps.of_json in
+      let name = field_map json__ "name" MetricName.of_json in
       make ?values ?timestamps ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a projected utilization metric of a recommendation option, such as an Amazon EC2 instance. This represents the projected utilization of a recommendation option had you used that resource during the analyzed period. Compare the utilization metric data of your resource against its projected utilization metric data to determine the performance difference between your current resource and the recommended option. The Cpu and Memory metrics are the only projected utilization metrics returned when you run the GetEC2RecommendationProjectedMetrics action. Additionally, the Memory metric is returned only for resources that have the unified CloudWatch agent installed on them. For more information, see Enabling Memory Utilization with the CloudWatch Agent."]
-module CpuVendorArchitectures =
+       "Describes a projected utilization metric of a recommendation option, such as an Amazon EC2 instance. This represents the projected utilization of a recommendation option had you used that resource during the analyzed period. Compare the utilization metric data of your resource against its projected utilization metric data to determine the performance difference between your current resource and the recommended option. The Cpu, Memory, GPU, and GPU_MEMORY metrics are the only projected utilization metrics returned when you run the GetEC2RecommendationProjectedMetrics action. Additionally, these metrics are only returned for resources with the unified CloudWatch agent installed on them. For more information, see Enabling Memory Utilization with the CloudWatch Agent and Enabling NVIDIA GPU utilization with the CloudWatch Agent."]
+module EffectivePreferredResources =
   struct
-    type nonrec t = CpuVendorArchitecture.t list
+    type nonrec t = EffectivePreferredResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:CpuVendorArchitecture.to_value)) |>
+      (xs |> (List.map ~f:EffectivePreferredResource.to_value)) |>
         (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
@@ -1554,40 +5085,36 @@ module CpuVendorArchitectures =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:CpuVendorArchitecture.of_xml)
+                     | _ -> true))) ~f:EffectivePreferredResource.of_xml)
     let of_json j =
-      list_of_json ~kind:"CpuVendorArchitectures"
-        ~of_json:CpuVendorArchitecture.of_json j
+      list_of_json ~kind:"EffectivePreferredResources"
+        ~of_json:EffectivePreferredResource.of_json j
     let to_json v = composed_to_json to_value v
   end
-module EnhancedInfrastructureMetrics =
+module ExternalMetricsPreference =
   struct
     type nonrec t =
-      | Active 
-      | Inactive 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | Active -> "Active"
-      | Inactive -> "Inactive"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "Active" -> Active
-      | "Inactive" -> Inactive
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+      {
+      source: ExternalMetricsSource.t option
+        [@ocaml.doc
+          "Contains the source options for external metrics preferences."]}
+    let make ?source = fun () -> { source }
+    let to_value x =
+      structure_to_value
+        [("source", (Option.map x.source ~f:ExternalMetricsSource.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration EnhancedInfrastructureMetrics"
-           xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"EnhancedInfrastructureMetrics" j)
-    let to_json = simple_to_json to_value
-  end
+      let source =
+        (Option.map ~f:ExternalMetricsSource.of_xml)
+          (Xml.child xml_arg0 "source") in
+      make ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let source = field_map json__ "source" ExternalMetricsSource.of_json in
+      make ?source ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the external metrics preferences for EC2 rightsizing recommendations."]
 module InferredWorkloadTypesPreference =
   struct
     type nonrec t =
@@ -1616,45 +5143,124 @@ module InferredWorkloadTypesPreference =
       of_string (string_of_json ~kind:"InferredWorkloadTypesPreference" j)
     let to_json = simple_to_json to_value
   end
-module InferredWorkloadType =
+module InstanceSavingsEstimationMode =
   struct
     type nonrec t =
-      | AmazonEmr 
-      | ApacheCassandra 
-      | ApacheHadoop 
-      | Memcached 
-      | Nginx 
-      | PostgreSql 
-      | Redis 
+      {
+      source: InstanceSavingsEstimationModeSource.t option
+        [@ocaml.doc
+          "Describes the source for calculating the savings opportunity for Amazon EC2 instances."]}
+    let make ?source = fun () -> { source }
+    let to_value x =
+      structure_to_value
+        [("source",
+           (Option.map x.source
+              ~f:InstanceSavingsEstimationModeSource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let source =
+        (Option.map ~f:InstanceSavingsEstimationModeSource.of_xml)
+          (Xml.child xml_arg0 "source") in
+      make ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let source =
+        field_map json__ "source" InstanceSavingsEstimationModeSource.of_json in
+      make ?source ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings estimation mode used for calculating savings opportunity for Amazon EC2 instances."]
+module UtilizationPreferences =
+  struct
+    type nonrec t = UtilizationPreference.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UtilizationPreference.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UtilizationPreference.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UtilizationPreferences"
+        ~of_json:UtilizationPreference.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExternalMetricStatusCode =
+  struct
+    type nonrec t =
+      | NO_EXTERNAL_METRIC_SET 
+      | INTEGRATION_SUCCESS 
+      | DATADOG_INTEGRATION_ERROR 
+      | DYNATRACE_INTEGRATION_ERROR 
+      | NEWRELIC_INTEGRATION_ERROR 
+      | INSTANA_INTEGRATION_ERROR 
+      | INSUFFICIENT_DATADOG_METRICS 
+      | INSUFFICIENT_DYNATRACE_METRICS 
+      | INSUFFICIENT_NEWRELIC_METRICS 
+      | INSUFFICIENT_INSTANA_METRICS 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | AmazonEmr -> "AmazonEmr"
-      | ApacheCassandra -> "ApacheCassandra"
-      | ApacheHadoop -> "ApacheHadoop"
-      | Memcached -> "Memcached"
-      | Nginx -> "Nginx"
-      | PostgreSql -> "PostgreSql"
-      | Redis -> "Redis"
+      | NO_EXTERNAL_METRIC_SET -> "NO_EXTERNAL_METRIC_SET"
+      | INTEGRATION_SUCCESS -> "INTEGRATION_SUCCESS"
+      | DATADOG_INTEGRATION_ERROR -> "DATADOG_INTEGRATION_ERROR"
+      | DYNATRACE_INTEGRATION_ERROR -> "DYNATRACE_INTEGRATION_ERROR"
+      | NEWRELIC_INTEGRATION_ERROR -> "NEWRELIC_INTEGRATION_ERROR"
+      | INSTANA_INTEGRATION_ERROR -> "INSTANA_INTEGRATION_ERROR"
+      | INSUFFICIENT_DATADOG_METRICS -> "INSUFFICIENT_DATADOG_METRICS"
+      | INSUFFICIENT_DYNATRACE_METRICS -> "INSUFFICIENT_DYNATRACE_METRICS"
+      | INSUFFICIENT_NEWRELIC_METRICS -> "INSUFFICIENT_NEWRELIC_METRICS"
+      | INSUFFICIENT_INSTANA_METRICS -> "INSUFFICIENT_INSTANA_METRICS"
       | Non_static_id s -> s
     let of_string =
       function
-      | "AmazonEmr" -> AmazonEmr
-      | "ApacheCassandra" -> ApacheCassandra
-      | "ApacheHadoop" -> ApacheHadoop
-      | "Memcached" -> Memcached
-      | "Nginx" -> Nginx
-      | "PostgreSql" -> PostgreSql
-      | "Redis" -> Redis
+      | "NO_EXTERNAL_METRIC_SET" -> NO_EXTERNAL_METRIC_SET
+      | "INTEGRATION_SUCCESS" -> INTEGRATION_SUCCESS
+      | "DATADOG_INTEGRATION_ERROR" -> DATADOG_INTEGRATION_ERROR
+      | "DYNATRACE_INTEGRATION_ERROR" -> DYNATRACE_INTEGRATION_ERROR
+      | "NEWRELIC_INTEGRATION_ERROR" -> NEWRELIC_INTEGRATION_ERROR
+      | "INSTANA_INTEGRATION_ERROR" -> INSTANA_INTEGRATION_ERROR
+      | "INSUFFICIENT_DATADOG_METRICS" -> INSUFFICIENT_DATADOG_METRICS
+      | "INSUFFICIENT_DYNATRACE_METRICS" -> INSUFFICIENT_DYNATRACE_METRICS
+      | "INSUFFICIENT_NEWRELIC_METRICS" -> INSUFFICIENT_NEWRELIC_METRICS
+      | "INSUFFICIENT_INSTANA_METRICS" -> INSUFFICIENT_INSTANA_METRICS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
       of_string
-        (string_of_xml ~kind:"enumeration InferredWorkloadType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"InferredWorkloadType" j)
+        (string_of_xml ~kind:"enumeration ExternalMetricStatusCode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ExternalMetricStatusCode" j)
+    let to_json = simple_to_json to_value
+  end
+module ExternalMetricStatusReason =
+  struct
+    type nonrec t = string
+    let context_ = "ExternalMetricStatusReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExternalMetricStatusReason" j
     let to_json = simple_to_json to_value
   end
 module InstanceRecommendationFindingReasonCode =
@@ -1676,6 +5282,10 @@ module InstanceRecommendationFindingReasonCode =
       | DiskIOPSUnderprovisioned 
       | DiskThroughputOverprovisioned 
       | DiskThroughputUnderprovisioned 
+      | GPUUnderprovisioned 
+      | GPUOverprovisioned 
+      | GPUMemoryUnderprovisioned 
+      | GPUMemoryOverprovisioned 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1697,6 +5307,10 @@ module InstanceRecommendationFindingReasonCode =
       | DiskIOPSUnderprovisioned -> "DiskIOPSUnderprovisioned"
       | DiskThroughputOverprovisioned -> "DiskThroughputOverprovisioned"
       | DiskThroughputUnderprovisioned -> "DiskThroughputUnderprovisioned"
+      | GPUUnderprovisioned -> "GPUUnderprovisioned"
+      | GPUOverprovisioned -> "GPUOverprovisioned"
+      | GPUMemoryUnderprovisioned -> "GPUMemoryUnderprovisioned"
+      | GPUMemoryOverprovisioned -> "GPUMemoryOverprovisioned"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1717,6 +5331,10 @@ module InstanceRecommendationFindingReasonCode =
       | "DiskIOPSUnderprovisioned" -> DiskIOPSUnderprovisioned
       | "DiskThroughputOverprovisioned" -> DiskThroughputOverprovisioned
       | "DiskThroughputUnderprovisioned" -> DiskThroughputUnderprovisioned
+      | "GPUUnderprovisioned" -> GPUUnderprovisioned
+      | "GPUOverprovisioned" -> GPUOverprovisioned
+      | "GPUMemoryUnderprovisioned" -> GPUMemoryUnderprovisioned
+      | "GPUMemoryOverprovisioned" -> GPUMemoryOverprovisioned
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1737,6 +5355,9 @@ module InstanceRecommendationOption =
       {
       instanceType: InstanceType.t option
         [@ocaml.doc "The instance type of the instance recommendation."];
+      instanceGpuInfo: GpuInfo.t option
+        [@ocaml.doc
+          "Describes the GPU accelerator settings for the recommended instance type."];
       projectedUtilizationMetrics: ProjectedUtilizationMetrics.t option
         [@ocaml.doc
           "An array of objects that describe the projected utilization metrics of the instance recommendation option. The Cpu and Memory metrics are the only projected utilization metrics returned. Additionally, the Memory metric is returned only for resources that have the unified CloudWatch agent installed on them. For more information, see Enabling Memory Utilization with the CloudWatch Agent."];
@@ -1752,30 +5373,40 @@ module InstanceRecommendationOption =
       savingsOpportunity: SavingsOpportunity.t option
         [@ocaml.doc
           "An object that describes the savings opportunity for the instance recommendation option. Savings opportunity includes the estimated monthly savings amount and percentage."];
+      savingsOpportunityAfterDiscounts:
+        InstanceSavingsOpportunityAfterDiscounts.t option
+        [@ocaml.doc
+          "An object that describes the savings opportunity for the instance recommendation option that includes Savings Plans and Reserved Instances discounts. Savings opportunity includes the estimated monthly savings and percentage."];
       migrationEffort: MigrationEffort.t option
         [@ocaml.doc
           "The level of effort required to migrate from the current instance type to the recommended instance type. For example, the migration effort is Low if Amazon EMR is the inferred workload type and an Amazon Web Services Graviton instance type is recommended. The migration effort is Medium if a workload type couldn't be inferred but an Amazon Web Services Graviton instance type is recommended. The migration effort is VeryLow if both the current and recommended instance types are of the same CPU architecture."]}
     let make ?instanceType =
-      fun ?projectedUtilizationMetrics ->
-        fun ?platformDifferences ->
-          fun ?performanceRisk ->
-            fun ?rank ->
-              fun ?savingsOpportunity ->
-                fun ?migrationEffort ->
-                  fun () ->
-                    {
-                      instanceType;
-                      projectedUtilizationMetrics;
-                      platformDifferences;
-                      performanceRisk;
-                      rank;
-                      savingsOpportunity;
-                      migrationEffort
-                    }
+      fun ?instanceGpuInfo ->
+        fun ?projectedUtilizationMetrics ->
+          fun ?platformDifferences ->
+            fun ?performanceRisk ->
+              fun ?rank ->
+                fun ?savingsOpportunity ->
+                  fun ?savingsOpportunityAfterDiscounts ->
+                    fun ?migrationEffort ->
+                      fun () ->
+                        {
+                          instanceType;
+                          instanceGpuInfo;
+                          projectedUtilizationMetrics;
+                          platformDifferences;
+                          performanceRisk;
+                          rank;
+                          savingsOpportunity;
+                          savingsOpportunityAfterDiscounts;
+                          migrationEffort
+                        }
     let to_value x =
       structure_to_value
         [("instanceType",
            (Option.map x.instanceType ~f:InstanceType.to_value));
+        ("instanceGpuInfo",
+          (Option.map x.instanceGpuInfo ~f:GpuInfo.to_value));
         ("projectedUtilizationMetrics",
           (Option.map x.projectedUtilizationMetrics
              ~f:ProjectedUtilizationMetrics.to_value));
@@ -1786,6 +5417,9 @@ module InstanceRecommendationOption =
         ("rank", (Option.map x.rank ~f:Rank.to_value));
         ("savingsOpportunity",
           (Option.map x.savingsOpportunity ~f:SavingsOpportunity.to_value));
+        ("savingsOpportunityAfterDiscounts",
+          (Option.map x.savingsOpportunityAfterDiscounts
+             ~f:InstanceSavingsOpportunityAfterDiscounts.to_value));
         ("migrationEffort",
           (Option.map x.migrationEffort ~f:MigrationEffort.to_value))]
     let to_query v = to_query to_value v
@@ -1793,6 +5427,9 @@ module InstanceRecommendationOption =
       let migrationEffort =
         (Option.map ~f:MigrationEffort.of_xml)
           (Xml.child xml_arg0 "migrationEffort") in
+      let savingsOpportunityAfterDiscounts =
+        (Option.map ~f:InstanceSavingsOpportunityAfterDiscounts.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityAfterDiscounts") in
       let savingsOpportunity =
         (Option.map ~f:SavingsOpportunity.of_xml)
           (Xml.child xml_arg0 "savingsOpportunity") in
@@ -1806,28 +5443,37 @@ module InstanceRecommendationOption =
       let projectedUtilizationMetrics =
         (Option.map ~f:ProjectedUtilizationMetrics.of_xml)
           (Xml.child xml_arg0 "projectedUtilizationMetrics") in
+      let instanceGpuInfo =
+        (Option.map ~f:GpuInfo.of_xml) (Xml.child xml_arg0 "instanceGpuInfo") in
       let instanceType =
         (Option.map ~f:InstanceType.of_xml)
           (Xml.child xml_arg0 "instanceType") in
-      make ?migrationEffort ?savingsOpportunity ?rank ?performanceRisk
-        ?platformDifferences ?projectedUtilizationMetrics ?instanceType ()
+      make ?migrationEffort ?savingsOpportunityAfterDiscounts
+        ?savingsOpportunity ?rank ?performanceRisk ?platformDifferences
+        ?projectedUtilizationMetrics ?instanceGpuInfo ?instanceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let migrationEffort =
-        field_map json "migrationEffort" MigrationEffort.of_json in
+        field_map json__ "migrationEffort" MigrationEffort.of_json in
+      let savingsOpportunityAfterDiscounts =
+        field_map json__ "savingsOpportunityAfterDiscounts"
+          InstanceSavingsOpportunityAfterDiscounts.of_json in
       let savingsOpportunity =
-        field_map json "savingsOpportunity" SavingsOpportunity.of_json in
-      let rank = field_map json "rank" Rank.of_json in
+        field_map json__ "savingsOpportunity" SavingsOpportunity.of_json in
+      let rank = field_map json__ "rank" Rank.of_json in
       let performanceRisk =
-        field_map json "performanceRisk" PerformanceRisk.of_json in
+        field_map json__ "performanceRisk" PerformanceRisk.of_json in
       let platformDifferences =
-        field_map json "platformDifferences" PlatformDifferences.of_json in
+        field_map json__ "platformDifferences" PlatformDifferences.of_json in
       let projectedUtilizationMetrics =
-        field_map json "projectedUtilizationMetrics"
+        field_map json__ "projectedUtilizationMetrics"
           ProjectedUtilizationMetrics.of_json in
-      let instanceType = field_map json "instanceType" InstanceType.of_json in
-      make ?migrationEffort ?savingsOpportunity ?rank ?performanceRisk
-        ?platformDifferences ?projectedUtilizationMetrics ?instanceType ()
+      let instanceGpuInfo =
+        field_map json__ "instanceGpuInfo" GpuInfo.of_json in
+      let instanceType = field_map json__ "instanceType" InstanceType.of_json in
+      make ?migrationEffort ?savingsOpportunityAfterDiscounts
+        ?savingsOpportunity ?rank ?performanceRisk ?platformDifferences
+        ?projectedUtilizationMetrics ?instanceGpuInfo ?instanceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a recommendation option for an Amazon EC2 instance."]
@@ -1861,17 +5507,43 @@ module RecommendationSource =
           (Xml.child xml_arg0 "recommendationSourceArn") in
       make ?recommendationSourceType ?recommendationSourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationSourceType =
-        field_map json "recommendationSourceType"
+        field_map json__ "recommendationSourceType"
           RecommendationSourceType.of_json in
       let recommendationSourceArn =
-        field_map json "recommendationSourceArn"
+        field_map json__ "recommendationSourceArn"
           RecommendationSourceArn.of_json in
       make ?recommendationSourceType ?recommendationSourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the source of a recommendation, such as an Amazon EC2 instance or Auto Scaling group."]
+module EBSSavingsEstimationMode =
+  struct
+    type nonrec t =
+      {
+      source: EBSSavingsEstimationModeSource.t option
+        [@ocaml.doc
+          "Describes the source for calculating the savings opportunity for Amazon EBS volumes."]}
+    let make ?source = fun () -> { source }
+    let to_value x =
+      structure_to_value
+        [("source",
+           (Option.map x.source ~f:EBSSavingsEstimationModeSource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let source =
+        (Option.map ~f:EBSSavingsEstimationModeSource.of_xml)
+          (Xml.child xml_arg0 "source") in
+      make ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let source =
+        field_map json__ "source" EBSSavingsEstimationModeSource.of_json in
+      make ?source ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings estimation mode used for calculating savings opportunity for Amazon EBS volumes."]
 module EBSUtilizationMetric =
   struct
     type nonrec t =
@@ -1902,10 +5574,10 @@ module EBSUtilizationMetric =
         (Option.map ~f:EBSMetricName.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?statistic ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" MetricValue.of_json in
-      let statistic = field_map json "statistic" MetricStatistic.of_json in
-      let name = field_map json "name" EBSMetricName.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" MetricValue.of_json in
+      let statistic = field_map json__ "statistic" MetricStatistic.of_json in
+      let name = field_map json__ "name" EBSMetricName.of_json in
       make ?value ?statistic ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1925,13 +5597,24 @@ module VolumeRecommendationOption =
           "The rank of the volume recommendation option. The top recommendation option is ranked as 1."];
       savingsOpportunity: SavingsOpportunity.t option
         [@ocaml.doc
-          "An object that describes the savings opportunity for the EBS volume recommendation option. Savings opportunity includes the estimated monthly savings amount and percentage."]}
+          "An object that describes the savings opportunity for the EBS volume recommendation option. Savings opportunity includes the estimated monthly savings amount and percentage."];
+      savingsOpportunityAfterDiscounts:
+        EBSSavingsOpportunityAfterDiscounts.t option
+        [@ocaml.doc
+          "An object that describes the savings opportunity for the Amazon EBS volume recommendation option with specific discounts. Savings opportunity includes the estimated monthly savings and percentage."]}
     let make ?configuration =
       fun ?performanceRisk ->
         fun ?rank ->
           fun ?savingsOpportunity ->
-            fun () ->
-              { configuration; performanceRisk; rank; savingsOpportunity }
+            fun ?savingsOpportunityAfterDiscounts ->
+              fun () ->
+                {
+                  configuration;
+                  performanceRisk;
+                  rank;
+                  savingsOpportunity;
+                  savingsOpportunityAfterDiscounts
+                }
     let to_value x =
       structure_to_value
         [("configuration",
@@ -1940,9 +5623,15 @@ module VolumeRecommendationOption =
           (Option.map x.performanceRisk ~f:PerformanceRisk.to_value));
         ("rank", (Option.map x.rank ~f:Rank.to_value));
         ("savingsOpportunity",
-          (Option.map x.savingsOpportunity ~f:SavingsOpportunity.to_value))]
+          (Option.map x.savingsOpportunity ~f:SavingsOpportunity.to_value));
+        ("savingsOpportunityAfterDiscounts",
+          (Option.map x.savingsOpportunityAfterDiscounts
+             ~f:EBSSavingsOpportunityAfterDiscounts.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let savingsOpportunityAfterDiscounts =
+        (Option.map ~f:EBSSavingsOpportunityAfterDiscounts.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityAfterDiscounts") in
       let savingsOpportunity =
         (Option.map ~f:SavingsOpportunity.of_xml)
           (Xml.child xml_arg0 "savingsOpportunity") in
@@ -1953,17 +5642,22 @@ module VolumeRecommendationOption =
       let configuration =
         (Option.map ~f:VolumeConfiguration.of_xml)
           (Xml.child xml_arg0 "configuration") in
-      make ?savingsOpportunity ?rank ?performanceRisk ?configuration ()
+      make ?savingsOpportunityAfterDiscounts ?savingsOpportunity ?rank
+        ?performanceRisk ?configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let savingsOpportunityAfterDiscounts =
+        field_map json__ "savingsOpportunityAfterDiscounts"
+          EBSSavingsOpportunityAfterDiscounts.of_json in
       let savingsOpportunity =
-        field_map json "savingsOpportunity" SavingsOpportunity.of_json in
-      let rank = field_map json "rank" Rank.of_json in
+        field_map json__ "savingsOpportunity" SavingsOpportunity.of_json in
+      let rank = field_map json__ "rank" Rank.of_json in
       let performanceRisk =
-        field_map json "performanceRisk" PerformanceRisk.of_json in
+        field_map json__ "performanceRisk" PerformanceRisk.of_json in
       let configuration =
-        field_map json "configuration" VolumeConfiguration.of_json in
-      make ?savingsOpportunity ?rank ?performanceRisk ?configuration ()
+        field_map json__ "configuration" VolumeConfiguration.of_json in
+      make ?savingsOpportunityAfterDiscounts ?savingsOpportunity ?rank
+        ?performanceRisk ?configuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a recommendation option for an Amazon Elastic Block Store (Amazon EBS) instance."]
@@ -1974,6 +5668,9 @@ module AutoScalingGroupRecommendationOption =
       configuration: AutoScalingGroupConfiguration.t option
         [@ocaml.doc
           "An array of objects that describe an Auto Scaling group configuration."];
+      instanceGpuInfo: GpuInfo.t option
+        [@ocaml.doc
+          "Describes the GPU accelerator settings for the recommended instance type of the Auto Scaling group."];
       projectedUtilizationMetrics: ProjectedUtilizationMetrics.t option
         [@ocaml.doc
           "An array of objects that describe the projected utilization metrics of the Auto Scaling group recommendation option. The Cpu and Memory metrics are the only projected utilization metrics returned. Additionally, the Memory metric is returned only for resources that have the unified CloudWatch agent installed on them. For more information, see Enabling Memory Utilization with the CloudWatch Agent."];
@@ -1986,29 +5683,39 @@ module AutoScalingGroupRecommendationOption =
       savingsOpportunity: SavingsOpportunity.t option
         [@ocaml.doc
           "An object that describes the savings opportunity for the Auto Scaling group recommendation option. Savings opportunity includes the estimated monthly savings amount and percentage."];
+      savingsOpportunityAfterDiscounts:
+        AutoScalingGroupSavingsOpportunityAfterDiscounts.t option
+        [@ocaml.doc
+          "An object that describes the savings opportunity for the Auto Scaling group recommendation option that includes Savings Plans and Reserved Instances discounts. Savings opportunity includes the estimated monthly savings and percentage."];
       migrationEffort: MigrationEffort.t option
         [@ocaml.doc
           "The level of effort required to migrate from the current instance type to the recommended instance type. For example, the migration effort is Low if Amazon EMR is the inferred workload type and an Amazon Web Services Graviton instance type is recommended. The migration effort is Medium if a workload type couldn't be inferred but an Amazon Web Services Graviton instance type is recommended. The migration effort is VeryLow if both the current and recommended instance types are of the same CPU architecture."]}
     let make ?configuration =
-      fun ?projectedUtilizationMetrics ->
-        fun ?performanceRisk ->
-          fun ?rank ->
-            fun ?savingsOpportunity ->
-              fun ?migrationEffort ->
-                fun () ->
-                  {
-                    configuration;
-                    projectedUtilizationMetrics;
-                    performanceRisk;
-                    rank;
-                    savingsOpportunity;
-                    migrationEffort
-                  }
+      fun ?instanceGpuInfo ->
+        fun ?projectedUtilizationMetrics ->
+          fun ?performanceRisk ->
+            fun ?rank ->
+              fun ?savingsOpportunity ->
+                fun ?savingsOpportunityAfterDiscounts ->
+                  fun ?migrationEffort ->
+                    fun () ->
+                      {
+                        configuration;
+                        instanceGpuInfo;
+                        projectedUtilizationMetrics;
+                        performanceRisk;
+                        rank;
+                        savingsOpportunity;
+                        savingsOpportunityAfterDiscounts;
+                        migrationEffort
+                      }
     let to_value x =
       structure_to_value
         [("configuration",
            (Option.map x.configuration
               ~f:AutoScalingGroupConfiguration.to_value));
+        ("instanceGpuInfo",
+          (Option.map x.instanceGpuInfo ~f:GpuInfo.to_value));
         ("projectedUtilizationMetrics",
           (Option.map x.projectedUtilizationMetrics
              ~f:ProjectedUtilizationMetrics.to_value));
@@ -2017,6 +5724,9 @@ module AutoScalingGroupRecommendationOption =
         ("rank", (Option.map x.rank ~f:Rank.to_value));
         ("savingsOpportunity",
           (Option.map x.savingsOpportunity ~f:SavingsOpportunity.to_value));
+        ("savingsOpportunityAfterDiscounts",
+          (Option.map x.savingsOpportunityAfterDiscounts
+             ~f:AutoScalingGroupSavingsOpportunityAfterDiscounts.to_value));
         ("migrationEffort",
           (Option.map x.migrationEffort ~f:MigrationEffort.to_value))]
     let to_query v = to_query to_value v
@@ -2024,6 +5734,10 @@ module AutoScalingGroupRecommendationOption =
       let migrationEffort =
         (Option.map ~f:MigrationEffort.of_xml)
           (Xml.child xml_arg0 "migrationEffort") in
+      let savingsOpportunityAfterDiscounts =
+        (Option.map
+           ~f:AutoScalingGroupSavingsOpportunityAfterDiscounts.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityAfterDiscounts") in
       let savingsOpportunity =
         (Option.map ~f:SavingsOpportunity.of_xml)
           (Xml.child xml_arg0 "savingsOpportunity") in
@@ -2034,27 +5748,37 @@ module AutoScalingGroupRecommendationOption =
       let projectedUtilizationMetrics =
         (Option.map ~f:ProjectedUtilizationMetrics.of_xml)
           (Xml.child xml_arg0 "projectedUtilizationMetrics") in
+      let instanceGpuInfo =
+        (Option.map ~f:GpuInfo.of_xml) (Xml.child xml_arg0 "instanceGpuInfo") in
       let configuration =
         (Option.map ~f:AutoScalingGroupConfiguration.of_xml)
           (Xml.child xml_arg0 "configuration") in
-      make ?migrationEffort ?savingsOpportunity ?rank ?performanceRisk
-        ?projectedUtilizationMetrics ?configuration ()
+      make ?migrationEffort ?savingsOpportunityAfterDiscounts
+        ?savingsOpportunity ?rank ?performanceRisk
+        ?projectedUtilizationMetrics ?instanceGpuInfo ?configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let migrationEffort =
-        field_map json "migrationEffort" MigrationEffort.of_json in
+        field_map json__ "migrationEffort" MigrationEffort.of_json in
+      let savingsOpportunityAfterDiscounts =
+        field_map json__ "savingsOpportunityAfterDiscounts"
+          AutoScalingGroupSavingsOpportunityAfterDiscounts.of_json in
       let savingsOpportunity =
-        field_map json "savingsOpportunity" SavingsOpportunity.of_json in
-      let rank = field_map json "rank" Rank.of_json in
+        field_map json__ "savingsOpportunity" SavingsOpportunity.of_json in
+      let rank = field_map json__ "rank" Rank.of_json in
       let performanceRisk =
-        field_map json "performanceRisk" PerformanceRisk.of_json in
+        field_map json__ "performanceRisk" PerformanceRisk.of_json in
       let projectedUtilizationMetrics =
-        field_map json "projectedUtilizationMetrics"
+        field_map json__ "projectedUtilizationMetrics"
           ProjectedUtilizationMetrics.of_json in
+      let instanceGpuInfo =
+        field_map json__ "instanceGpuInfo" GpuInfo.of_json in
       let configuration =
-        field_map json "configuration" AutoScalingGroupConfiguration.of_json in
-      make ?migrationEffort ?savingsOpportunity ?rank ?performanceRisk
-        ?projectedUtilizationMetrics ?configuration ()
+        field_map json__ "configuration"
+          AutoScalingGroupConfiguration.of_json in
+      make ?migrationEffort ?savingsOpportunityAfterDiscounts
+        ?savingsOpportunity ?rank ?performanceRisk
+        ?projectedUtilizationMetrics ?instanceGpuInfo ?configuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a recommendation option for an Auto Scaling group."]
@@ -2089,10 +5813,10 @@ module S3Destination =
           (Xml.child xml_arg0 "bucket") in
       make ?metadataKey ?key ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadataKey = field_map json "metadataKey" MetadataKey.of_json in
-      let key = field_map json "key" DestinationKey.of_json in
-      let bucket = field_map json "bucket" DestinationBucket.of_json in
+    let of_json json__ =
+      let metadataKey = field_map json__ "metadataKey" MetadataKey.of_json in
+      let key = field_map json__ "key" DestinationKey.of_json in
+      let bucket = field_map json__ "bucket" DestinationBucket.of_json in
       make ?metadataKey ?key ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2145,19 +5869,78 @@ module CurrentPerformanceRiskRatings =
       let high = (Option.map ~f:High.of_xml) (Xml.child xml_arg0 "high") in
       make ?veryLow ?low ?medium ?high ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let veryLow = field_map json "veryLow" VeryLow.of_json in
-      let low = field_map json "low" Low.of_json in
-      let medium = field_map json "medium" Medium.of_json in
-      let high = field_map json "high" High.of_json in
+    let of_json json__ =
+      let veryLow = field_map json__ "veryLow" VeryLow.of_json in
+      let low = field_map json__ "low" Low.of_json in
+      let medium = field_map json__ "medium" Medium.of_json in
+      let high = field_map json__ "high" High.of_json in
       make ?veryLow ?low ?medium ?high ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the performance risk ratings for a given resource type. Resources with a high or medium rating are at risk of not meeting the performance needs of their workloads, while resources with a low rating are performing well in their workloads."]
+module IdleSummaries =
+  struct
+    type nonrec t = IdleSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IdleSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IdleSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IdleSummaries" ~of_json:IdleSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InferredWorkloadSavings =
+  struct
+    type nonrec t = InferredWorkloadSaving.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InferredWorkloadSaving.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InferredWorkloadSaving.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InferredWorkloadSavings"
+        ~of_json:InferredWorkloadSaving.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Summaries =
   struct
     type nonrec t = Summary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Summary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2185,6 +5968,11 @@ module ResourceType =
       | EbsVolume 
       | LambdaFunction 
       | NotApplicable 
+      | EcsService 
+      | License 
+      | RdsDBInstance 
+      | AuroraDBClusterStorage 
+      | Idle 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2194,6 +5982,11 @@ module ResourceType =
       | EbsVolume -> "EbsVolume"
       | LambdaFunction -> "LambdaFunction"
       | NotApplicable -> "NotApplicable"
+      | EcsService -> "EcsService"
+      | License -> "License"
+      | RdsDBInstance -> "RdsDBInstance"
+      | AuroraDBClusterStorage -> "AuroraDBClusterStorage"
+      | Idle -> "Idle"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2202,6 +5995,11 @@ module ResourceType =
       | "EbsVolume" -> EbsVolume
       | "LambdaFunction" -> LambdaFunction
       | "NotApplicable" -> NotApplicable
+      | "EcsService" -> EcsService
+      | "License" -> License
+      | "RdsDBInstance" -> RdsDBInstance
+      | "AuroraDBClusterStorage" -> AuroraDBClusterStorage
+      | "Idle" -> Idle
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2209,6 +6007,33 @@ module ResourceType =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration ResourceType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module SavingsEstimationMode =
+  struct
+    type nonrec t =
+      | AfterDiscounts 
+      | BeforeDiscounts 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AfterDiscounts -> "AfterDiscounts"
+      | BeforeDiscounts -> "BeforeDiscounts"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AfterDiscounts" -> AfterDiscounts
+      | "BeforeDiscounts" -> BeforeDiscounts
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SavingsEstimationMode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SavingsEstimationMode" j)
     let to_json = simple_to_json to_value
   end
 module Scope =
@@ -2233,13 +6058,848 @@ module Scope =
       let name = (Option.map ~f:ScopeName.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" ScopeValue.of_json in
-      let name = field_map json "name" ScopeName.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" ScopeValue.of_json in
+      let name = field_map json__ "name" ScopeName.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the scope of a recommendation preference. Recommendation preferences can be created at the organization level (for management accounts of an organization only), account level, and resource level. For more information, see Activating enhanced infrastructure metrics in the Compute Optimizer User Guide. You cannot create recommendation preferences for Auto Scaling groups at the organization and account levels. You can create recommendation preferences for Auto Scaling groups only at the resource level by specifying a scope name of ResourceArn and a scope value of the Auto Scaling group Amazon Resource Name (ARN). This will configure the preference for all instances that are part of the specified Auto Scaling group. You also cannot create recommendation preferences at the resource level for instances that are part of an Auto Scaling group. You can create recommendation preferences at the resource level only for standalone instances."]
+module Code =
+  struct
+    type nonrec t = string
+    let context_ = "Code"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Code" j
+    let to_json = simple_to_json to_value
+  end
+module Identifier =
+  struct
+    type nonrec t = string
+    let context_ = "Identifier"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Identifier" j
+    let to_json = simple_to_json to_value
+  end
+module Message =
+  struct
+    type nonrec t = string
+    let context_ = "Message"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Message" j
+    let to_json = simple_to_json to_value
+  end
+module CurrentDBInstanceClass =
+  struct
+    type nonrec t = string
+    let context_ = "CurrentDBInstanceClass"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CurrentDBInstanceClass" j
+    let to_json = simple_to_json to_value
+  end
+module DBClusterIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "DBClusterIdentifier"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DBClusterIdentifier" j
+    let to_json = simple_to_json to_value
+  end
+module Engine =
+  struct
+    type nonrec t = string
+    let context_ = "Engine"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Engine" j
+    let to_json = simple_to_json to_value
+  end
+module EngineVersion =
+  struct
+    type nonrec t = string
+    let context_ = "EngineVersion"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EngineVersion" j
+    let to_json = simple_to_json to_value
+  end
+module Idle =
+  struct
+    type nonrec t =
+      | True 
+      | False 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | True -> "True" | False -> "False" | Non_static_id s -> s
+    let of_string =
+      function | "True" -> True | "False" -> False | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Idle" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Idle" j)
+    let to_json = simple_to_json to_value
+  end
+module LastRefreshTimestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module LookBackPeriodInDays =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module PromotionTier =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PromotionTier" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RDSCurrentInstancePerformanceRisk =
+  struct
+    type nonrec t =
+      | VeryLow 
+      | Low 
+      | Medium 
+      | High 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | VeryLow -> "VeryLow"
+      | Low -> "Low"
+      | Medium -> "Medium"
+      | High -> "High"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "VeryLow" -> VeryLow
+      | "Low" -> Low
+      | "Medium" -> Medium
+      | "High" -> High
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RDSCurrentInstancePerformanceRisk"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RDSCurrentInstancePerformanceRisk" j)
+    let to_json = simple_to_json to_value
+  end
+module RDSDBInstanceRecommendationOptions =
+  struct
+    type nonrec t = RDSDBInstanceRecommendationOption.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RDSDBInstanceRecommendationOption.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:RDSDBInstanceRecommendationOption.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RDSDBInstanceRecommendationOptions"
+        ~of_json:RDSDBInstanceRecommendationOption.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RDSDBStorageRecommendationOptions =
+  struct
+    type nonrec t = RDSDBStorageRecommendationOption.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RDSDBStorageRecommendationOption.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:RDSDBStorageRecommendationOption.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RDSDBStorageRecommendationOptions"
+        ~of_json:RDSDBStorageRecommendationOption.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RDSDBUtilizationMetrics =
+  struct
+    type nonrec t = RDSDBUtilizationMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RDSDBUtilizationMetric.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RDSDBUtilizationMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RDSDBUtilizationMetrics"
+        ~of_json:RDSDBUtilizationMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RDSEffectiveRecommendationPreferences =
+  struct
+    type nonrec t =
+      {
+      cpuVendorArchitectures: CpuVendorArchitectures.t option
+        [@ocaml.doc
+          "Describes the CPU vendor and architecture for DB instance recommendations."];
+      enhancedInfrastructureMetrics: EnhancedInfrastructureMetrics.t option
+        [@ocaml.doc
+          "Describes the activation status of the enhanced infrastructure metrics preference. A status of Active confirms that the preference is applied in the latest recommendation refresh, and a status of Inactive confirms that it's not yet applied to recommendations. For more information, see Enhanced infrastructure metrics in the Compute Optimizer User Guide."];
+      lookBackPeriod: LookBackPeriodPreference.t option
+        [@ocaml.doc
+          "The number of days the utilization metrics of the DB instance are analyzed."];
+      savingsEstimationMode: RDSSavingsEstimationMode.t option
+        [@ocaml.doc
+          "Describes the savings estimation mode preference applied for calculating savings opportunity for DB instances."]}
+    let make ?cpuVendorArchitectures =
+      fun ?enhancedInfrastructureMetrics ->
+        fun ?lookBackPeriod ->
+          fun ?savingsEstimationMode ->
+            fun () ->
+              {
+                cpuVendorArchitectures;
+                enhancedInfrastructureMetrics;
+                lookBackPeriod;
+                savingsEstimationMode
+              }
+    let to_value x =
+      structure_to_value
+        [("cpuVendorArchitectures",
+           (Option.map x.cpuVendorArchitectures
+              ~f:CpuVendorArchitectures.to_value));
+        ("enhancedInfrastructureMetrics",
+          (Option.map x.enhancedInfrastructureMetrics
+             ~f:EnhancedInfrastructureMetrics.to_value));
+        ("lookBackPeriod",
+          (Option.map x.lookBackPeriod ~f:LookBackPeriodPreference.to_value));
+        ("savingsEstimationMode",
+          (Option.map x.savingsEstimationMode
+             ~f:RDSSavingsEstimationMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let savingsEstimationMode =
+        (Option.map ~f:RDSSavingsEstimationMode.of_xml)
+          (Xml.child xml_arg0 "savingsEstimationMode") in
+      let lookBackPeriod =
+        (Option.map ~f:LookBackPeriodPreference.of_xml)
+          (Xml.child xml_arg0 "lookBackPeriod") in
+      let enhancedInfrastructureMetrics =
+        (Option.map ~f:EnhancedInfrastructureMetrics.of_xml)
+          (Xml.child xml_arg0 "enhancedInfrastructureMetrics") in
+      let cpuVendorArchitectures =
+        (Option.map ~f:CpuVendorArchitectures.of_xml)
+          (Xml.child xml_arg0 "cpuVendorArchitectures") in
+      make ?savingsEstimationMode ?lookBackPeriod
+        ?enhancedInfrastructureMetrics ?cpuVendorArchitectures ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let savingsEstimationMode =
+        field_map json__ "savingsEstimationMode"
+          RDSSavingsEstimationMode.of_json in
+      let lookBackPeriod =
+        field_map json__ "lookBackPeriod" LookBackPeriodPreference.of_json in
+      let enhancedInfrastructureMetrics =
+        field_map json__ "enhancedInfrastructureMetrics"
+          EnhancedInfrastructureMetrics.of_json in
+      let cpuVendorArchitectures =
+        field_map json__ "cpuVendorArchitectures"
+          CpuVendorArchitectures.of_json in
+      make ?savingsEstimationMode ?lookBackPeriod
+        ?enhancedInfrastructureMetrics ?cpuVendorArchitectures ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the effective recommendation preferences for Amazon Aurora and RDS databases."]
+module RDSInstanceFinding =
+  struct
+    type nonrec t =
+      | Optimized 
+      | Underprovisioned 
+      | Overprovisioned 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Optimized -> "Optimized"
+      | Underprovisioned -> "Underprovisioned"
+      | Overprovisioned -> "Overprovisioned"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Optimized" -> Optimized
+      | "Underprovisioned" -> Underprovisioned
+      | "Overprovisioned" -> Overprovisioned
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RDSInstanceFinding" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RDSInstanceFinding" j)
+    let to_json = simple_to_json to_value
+  end
+module RDSInstanceFindingReasonCodes =
+  struct
+    type nonrec t = RDSInstanceFindingReasonCode.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RDSInstanceFindingReasonCode.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RDSInstanceFindingReasonCode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RDSInstanceFindingReasonCodes"
+        ~of_json:RDSInstanceFindingReasonCode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RDSStorageFinding =
+  struct
+    type nonrec t =
+      | Optimized 
+      | Underprovisioned 
+      | Overprovisioned 
+      | NotOptimized 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Optimized -> "Optimized"
+      | Underprovisioned -> "Underprovisioned"
+      | Overprovisioned -> "Overprovisioned"
+      | NotOptimized -> "NotOptimized"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Optimized" -> Optimized
+      | "Underprovisioned" -> Underprovisioned
+      | "Overprovisioned" -> Overprovisioned
+      | "NotOptimized" -> NotOptimized
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RDSStorageFinding" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RDSStorageFinding" j)
+    let to_json = simple_to_json to_value
+  end
+module RDSStorageFindingReasonCodes =
+  struct
+    type nonrec t = RDSStorageFindingReasonCode.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RDSStorageFindingReasonCode.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RDSStorageFindingReasonCode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RDSStorageFindingReasonCodes"
+        ~of_json:RDSStorageFindingReasonCode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceArn =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceArn" j
+    let to_json = simple_to_json to_value
+  end
+module Tags =
+  struct
+    type nonrec t = Tag.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"Tags" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FilterValues =
+  struct
+    type nonrec t = FilterValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FilterValues" ~of_json:FilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RDSDBRecommendationFilterName =
+  struct
+    type nonrec t =
+      | InstanceFinding 
+      | InstanceFindingReasonCode 
+      | StorageFinding 
+      | StorageFindingReasonCode 
+      | Idle 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | InstanceFinding -> "InstanceFinding"
+      | InstanceFindingReasonCode -> "InstanceFindingReasonCode"
+      | StorageFinding -> "StorageFinding"
+      | StorageFindingReasonCode -> "StorageFindingReasonCode"
+      | Idle -> "Idle"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "InstanceFinding" -> InstanceFinding
+      | "InstanceFindingReasonCode" -> InstanceFindingReasonCode
+      | "StorageFinding" -> StorageFinding
+      | "StorageFindingReasonCode" -> StorageFindingReasonCode
+      | "Idle" -> Idle
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RDSDBRecommendationFilterName"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RDSDBRecommendationFilterName" j)
+    let to_json = simple_to_json to_value
+  end
+module RDSDatabaseProjectedMetrics =
+  struct
+    type nonrec t = RDSDatabaseProjectedMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RDSDatabaseProjectedMetric.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RDSDatabaseProjectedMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RDSDatabaseProjectedMetrics"
+        ~of_json:RDSDatabaseProjectedMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RecommendedDBInstanceClass =
+  struct
+    type nonrec t = string
+    let context_ = "RecommendedDBInstanceClass"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RecommendedDBInstanceClass" j
+    let to_json = simple_to_json to_value
+  end
+module LicenseConfiguration =
+  struct
+    type nonrec t =
+      {
+      numberOfCores: NumberOfCores.t option
+        [@ocaml.doc
+          "The current number of cores associated with the instance."];
+      instanceType: InstanceType.t option
+        [@ocaml.doc "The instance type used in the license."];
+      operatingSystem: OperatingSystem.t option
+        [@ocaml.doc "The operating system of the instance."];
+      licenseEdition: LicenseEdition.t option
+        [@ocaml.doc
+          "The edition of the license for the application that runs on the instance."];
+      licenseName: LicenseName.t option
+        [@ocaml.doc
+          "The name of the license for the application that runs on the instance."];
+      licenseModel: LicenseModel.t option
+        [@ocaml.doc "The license type associated with the instance."];
+      licenseVersion: LicenseVersion.t option
+        [@ocaml.doc
+          "The version of the license for the application that runs on the instance."];
+      metricsSource: MetricsSource.t option
+        [@ocaml.doc
+          "The list of metric sources required to generate recommendations for commercial software licenses."]}
+    let make ?numberOfCores =
+      fun ?instanceType ->
+        fun ?operatingSystem ->
+          fun ?licenseEdition ->
+            fun ?licenseName ->
+              fun ?licenseModel ->
+                fun ?licenseVersion ->
+                  fun ?metricsSource ->
+                    fun () ->
+                      {
+                        numberOfCores;
+                        instanceType;
+                        operatingSystem;
+                        licenseEdition;
+                        licenseName;
+                        licenseModel;
+                        licenseVersion;
+                        metricsSource
+                      }
+    let to_value x =
+      structure_to_value
+        [("numberOfCores",
+           (Option.map x.numberOfCores ~f:NumberOfCores.to_value));
+        ("instanceType",
+          (Option.map x.instanceType ~f:InstanceType.to_value));
+        ("operatingSystem",
+          (Option.map x.operatingSystem ~f:OperatingSystem.to_value));
+        ("licenseEdition",
+          (Option.map x.licenseEdition ~f:LicenseEdition.to_value));
+        ("licenseName", (Option.map x.licenseName ~f:LicenseName.to_value));
+        ("licenseModel",
+          (Option.map x.licenseModel ~f:LicenseModel.to_value));
+        ("licenseVersion",
+          (Option.map x.licenseVersion ~f:LicenseVersion.to_value));
+        ("metricsSource",
+          (Option.map x.metricsSource ~f:MetricsSource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricsSource =
+        (Option.map ~f:MetricsSource.of_xml)
+          (Xml.child xml_arg0 "metricsSource") in
+      let licenseVersion =
+        (Option.map ~f:LicenseVersion.of_xml)
+          (Xml.child xml_arg0 "licenseVersion") in
+      let licenseModel =
+        (Option.map ~f:LicenseModel.of_xml)
+          (Xml.child xml_arg0 "licenseModel") in
+      let licenseName =
+        (Option.map ~f:LicenseName.of_xml) (Xml.child xml_arg0 "licenseName") in
+      let licenseEdition =
+        (Option.map ~f:LicenseEdition.of_xml)
+          (Xml.child xml_arg0 "licenseEdition") in
+      let operatingSystem =
+        (Option.map ~f:OperatingSystem.of_xml)
+          (Xml.child xml_arg0 "operatingSystem") in
+      let instanceType =
+        (Option.map ~f:InstanceType.of_xml)
+          (Xml.child xml_arg0 "instanceType") in
+      let numberOfCores =
+        (Option.map ~f:NumberOfCores.of_xml)
+          (Xml.child xml_arg0 "numberOfCores") in
+      make ?metricsSource ?licenseVersion ?licenseModel ?licenseName
+        ?licenseEdition ?operatingSystem ?instanceType ?numberOfCores ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricsSource =
+        field_map json__ "metricsSource" MetricsSource.of_json in
+      let licenseVersion =
+        field_map json__ "licenseVersion" LicenseVersion.of_json in
+      let licenseModel = field_map json__ "licenseModel" LicenseModel.of_json in
+      let licenseName = field_map json__ "licenseName" LicenseName.of_json in
+      let licenseEdition =
+        field_map json__ "licenseEdition" LicenseEdition.of_json in
+      let operatingSystem =
+        field_map json__ "operatingSystem" OperatingSystem.of_json in
+      let instanceType = field_map json__ "instanceType" InstanceType.of_json in
+      let numberOfCores =
+        field_map json__ "numberOfCores" NumberOfCores.of_json in
+      make ?metricsSource ?licenseVersion ?licenseModel ?licenseName
+        ?licenseEdition ?operatingSystem ?instanceType ?numberOfCores ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration of a license for an Amazon EC2 instance."]
+module LicenseFinding =
+  struct
+    type nonrec t =
+      | InsufficientMetrics 
+      | Optimized 
+      | NotOptimized 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | InsufficientMetrics -> "InsufficientMetrics"
+      | Optimized -> "Optimized"
+      | NotOptimized -> "NotOptimized"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "InsufficientMetrics" -> InsufficientMetrics
+      | "Optimized" -> Optimized
+      | "NotOptimized" -> NotOptimized
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LicenseFinding" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LicenseFinding" j)
+    let to_json = simple_to_json to_value
+  end
+module LicenseFindingReasonCodes =
+  struct
+    type nonrec t = LicenseFindingReasonCode.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LicenseFindingReasonCode.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LicenseFindingReasonCode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LicenseFindingReasonCodes"
+        ~of_json:LicenseFindingReasonCode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LicenseRecommendationOptions =
+  struct
+    type nonrec t = LicenseRecommendationOption.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LicenseRecommendationOption.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LicenseRecommendationOption.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LicenseRecommendationOptions"
+        ~of_json:LicenseRecommendationOption.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LicenseRecommendationFilterName =
+  struct
+    type nonrec t =
+      | Finding 
+      | FindingReasonCode 
+      | LicenseName 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Finding -> "Finding"
+      | FindingReasonCode -> "FindingReasonCode"
+      | LicenseName -> "LicenseName"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Finding" -> Finding
+      | "FindingReasonCode" -> FindingReasonCode
+      | "LicenseName" -> LicenseName
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LicenseRecommendationFilterName"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LicenseRecommendationFilterName" j)
+    let to_json = simple_to_json to_value
+  end
 module CurrentPerformanceRisk =
   struct
     type nonrec t =
@@ -2299,10 +6959,41 @@ module FunctionVersion =
     let of_json j = string_of_json ~kind:"FunctionVersion" j
     let to_json = simple_to_json to_value
   end
+module LambdaEffectiveRecommendationPreferences =
+  struct
+    type nonrec t =
+      {
+      savingsEstimationMode: LambdaSavingsEstimationMode.t option
+        [@ocaml.doc
+          "Describes the savings estimation mode applied for calculating savings opportunity for Lambda functions."]}
+    let make ?savingsEstimationMode = fun () -> { savingsEstimationMode }
+    let to_value x =
+      structure_to_value
+        [("savingsEstimationMode",
+           (Option.map x.savingsEstimationMode
+              ~f:LambdaSavingsEstimationMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let savingsEstimationMode =
+        (Option.map ~f:LambdaSavingsEstimationMode.of_xml)
+          (Xml.child xml_arg0 "savingsEstimationMode") in
+      make ?savingsEstimationMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let savingsEstimationMode =
+        field_map json__ "savingsEstimationMode"
+          LambdaSavingsEstimationMode.of_json in
+      make ?savingsEstimationMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the effective recommendation preferences for Lambda functions."]
 module LambdaFunctionMemoryRecommendationOptions =
   struct
     type nonrec t = LambdaFunctionMemoryRecommendationOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LambdaFunctionMemoryRecommendationOption.to_value))
         |> (fun x -> `List x)
@@ -2362,6 +7053,9 @@ module LambdaFunctionRecommendationFindingReasonCodes =
   struct
     type nonrec t = LambdaFunctionRecommendationFindingReasonCode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:LambdaFunctionRecommendationFindingReasonCode.to_value))
@@ -2390,6 +7084,9 @@ module LambdaFunctionUtilizationMetrics =
   struct
     type nonrec t = LambdaFunctionUtilizationMetric.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LambdaFunctionUtilizationMetric.to_value)) |>
         (fun x -> `List x)
@@ -2412,31 +7109,6 @@ module LambdaFunctionUtilizationMetrics =
         ~of_json:LambdaFunctionUtilizationMetric.of_json j
     let to_json v = composed_to_json to_value v
   end
-module LastRefreshTimestamp =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
-module LookBackPeriodInDays =
-  struct
-    type nonrec t = float
-    let make i = i
-    let of_string = Float.of_string
-    let to_value x = `Double x
-    let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
-    let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
-    let of_json j = float_of_json ~kind:"a double" j
-    let to_json = simple_to_json to_value
-  end
 module NumberOfInvocations =
   struct
     type nonrec t = Int64.t
@@ -2449,30 +7121,6 @@ module NumberOfInvocations =
       Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
-  end
-module FilterValues =
-  struct
-    type nonrec t = FilterValue.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:FilterValue.of_xml)
-    let of_json j =
-      list_of_json ~kind:"FilterValues" ~of_json:FilterValue.of_json j
-    let to_json v = composed_to_json to_value v
   end
 module LambdaFunctionRecommendationFilterName =
   struct
@@ -2502,6 +7150,213 @@ module LambdaFunctionRecommendationFilterName =
     let of_json j =
       of_string
         (string_of_json ~kind:"LambdaFunctionRecommendationFilterName" j)
+    let to_json = simple_to_json to_value
+  end
+module IdleRecommendationResourceType =
+  struct
+    type nonrec t =
+      | EC2Instance 
+      | AutoScalingGroup 
+      | EBSVolume 
+      | ECSService 
+      | RDSDBInstance 
+      | NatGateway 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EC2Instance -> "EC2Instance"
+      | AutoScalingGroup -> "AutoScalingGroup"
+      | EBSVolume -> "EBSVolume"
+      | ECSService -> "ECSService"
+      | RDSDBInstance -> "RDSDBInstance"
+      | NatGateway -> "NatGateway"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EC2Instance" -> EC2Instance
+      | "AutoScalingGroup" -> AutoScalingGroup
+      | "EBSVolume" -> EBSVolume
+      | "ECSService" -> ECSService
+      | "RDSDBInstance" -> RDSDBInstance
+      | "NatGateway" -> NatGateway
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IdleRecommendationResourceType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"IdleRecommendationResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module IdleFindingDescription =
+  struct
+    type nonrec t = string
+    let context_ = "IdleFindingDescription"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdleFindingDescription" j
+    let to_json = simple_to_json to_value
+  end
+module IdleSavingsOpportunity =
+  struct
+    type nonrec t =
+      {
+      savingsOpportunityPercentage: SavingsOpportunityPercentage.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible as a percentage of monthly cost by adopting Compute Optimizer's idle resource recommendations."];
+      estimatedMonthlySavings: IdleEstimatedMonthlySavings.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible by adopting Compute Optimizer's idle resource recommendations."]}
+    let make ?savingsOpportunityPercentage =
+      fun ?estimatedMonthlySavings ->
+        fun () -> { savingsOpportunityPercentage; estimatedMonthlySavings }
+    let to_value x =
+      structure_to_value
+        [("savingsOpportunityPercentage",
+           (Option.map x.savingsOpportunityPercentage
+              ~f:SavingsOpportunityPercentage.to_value));
+        ("estimatedMonthlySavings",
+          (Option.map x.estimatedMonthlySavings
+             ~f:IdleEstimatedMonthlySavings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedMonthlySavings =
+        (Option.map ~f:IdleEstimatedMonthlySavings.of_xml)
+          (Xml.child xml_arg0 "estimatedMonthlySavings") in
+      let savingsOpportunityPercentage =
+        (Option.map ~f:SavingsOpportunityPercentage.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityPercentage") in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedMonthlySavings =
+        field_map json__ "estimatedMonthlySavings"
+          IdleEstimatedMonthlySavings.of_json in
+      let savingsOpportunityPercentage =
+        field_map json__ "savingsOpportunityPercentage"
+          SavingsOpportunityPercentage.of_json in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings opportunity for idle resource recommendations."]
+module IdleSavingsOpportunityAfterDiscounts =
+  struct
+    type nonrec t =
+      {
+      savingsOpportunityPercentage: SavingsOpportunityPercentage.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible as a percentage of monthly cost by adopting Compute Optimizer's idle resource recommendations. This includes any applicable discounts."];
+      estimatedMonthlySavings: IdleEstimatedMonthlySavings.t option
+        [@ocaml.doc
+          "The estimated monthly savings possible by adopting Compute Optimizer's idle resource recommendations. This includes any applicable discounts."]}
+    let make ?savingsOpportunityPercentage =
+      fun ?estimatedMonthlySavings ->
+        fun () -> { savingsOpportunityPercentage; estimatedMonthlySavings }
+    let to_value x =
+      structure_to_value
+        [("savingsOpportunityPercentage",
+           (Option.map x.savingsOpportunityPercentage
+              ~f:SavingsOpportunityPercentage.to_value));
+        ("estimatedMonthlySavings",
+          (Option.map x.estimatedMonthlySavings
+             ~f:IdleEstimatedMonthlySavings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedMonthlySavings =
+        (Option.map ~f:IdleEstimatedMonthlySavings.of_xml)
+          (Xml.child xml_arg0 "estimatedMonthlySavings") in
+      let savingsOpportunityPercentage =
+        (Option.map ~f:SavingsOpportunityPercentage.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityPercentage") in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedMonthlySavings =
+        field_map json__ "estimatedMonthlySavings"
+          IdleEstimatedMonthlySavings.of_json in
+      let savingsOpportunityPercentage =
+        field_map json__ "savingsOpportunityPercentage"
+          SavingsOpportunityPercentage.of_json in
+      make ?estimatedMonthlySavings ?savingsOpportunityPercentage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the savings opportunity for idle resource recommendations after applying discounts. Savings opportunity represents the estimated monthly savings after applying discounts. You can achieve this by implementing a given Compute Optimizer recommendation."]
+module IdleUtilizationMetrics =
+  struct
+    type nonrec t = IdleUtilizationMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IdleUtilizationMetric.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IdleUtilizationMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IdleUtilizationMetrics"
+        ~of_json:IdleUtilizationMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceId =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceId" j
+    let to_json = simple_to_json to_value
+  end
+module IdleRecommendationFilterName =
+  struct
+    type nonrec t =
+      | Finding 
+      | ResourceType 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Finding -> "Finding"
+      | ResourceType -> "ResourceType"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Finding" -> Finding
+      | "ResourceType" -> ResourceType
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IdleRecommendationFilterName"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"IdleRecommendationFilterName" j)
     let to_json = simple_to_json to_value
   end
 module LastUpdatedTimestamp =
@@ -2577,10 +7432,340 @@ module EnrollmentFilterName =
     let of_json j = of_string (string_of_json ~kind:"EnrollmentFilterName" j)
     let to_json = simple_to_json to_value
   end
+module ECSEffectiveRecommendationPreferences =
+  struct
+    type nonrec t =
+      {
+      savingsEstimationMode: ECSSavingsEstimationMode.t option
+        [@ocaml.doc
+          "Describes the savings estimation mode preference applied for calculating savings opportunity for Amazon ECS services."]}
+    let make ?savingsEstimationMode = fun () -> { savingsEstimationMode }
+    let to_value x =
+      structure_to_value
+        [("savingsEstimationMode",
+           (Option.map x.savingsEstimationMode
+              ~f:ECSSavingsEstimationMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let savingsEstimationMode =
+        (Option.map ~f:ECSSavingsEstimationMode.of_xml)
+          (Xml.child xml_arg0 "savingsEstimationMode") in
+      make ?savingsEstimationMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let savingsEstimationMode =
+        field_map json__ "savingsEstimationMode"
+          ECSSavingsEstimationMode.of_json in
+      make ?savingsEstimationMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the effective recommendation preferences for Amazon ECS services."]
+module ECSServiceLaunchType =
+  struct
+    type nonrec t =
+      | EC2 
+      | Fargate 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | EC2 -> "EC2" | Fargate -> "Fargate" | Non_static_id s -> s
+    let of_string =
+      function | "EC2" -> EC2 | "Fargate" -> Fargate | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ECSServiceLaunchType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ECSServiceLaunchType" j)
+    let to_json = simple_to_json to_value
+  end
+module ECSServiceRecommendationFinding =
+  struct
+    type nonrec t =
+      | Optimized 
+      | Underprovisioned 
+      | Overprovisioned 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Optimized -> "Optimized"
+      | Underprovisioned -> "Underprovisioned"
+      | Overprovisioned -> "Overprovisioned"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Optimized" -> Optimized
+      | "Underprovisioned" -> Underprovisioned
+      | "Overprovisioned" -> Overprovisioned
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ECSServiceRecommendationFinding"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ECSServiceRecommendationFinding" j)
+    let to_json = simple_to_json to_value
+  end
+module ECSServiceRecommendationFindingReasonCodes =
+  struct
+    type nonrec t = ECSServiceRecommendationFindingReasonCode.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ECSServiceRecommendationFindingReasonCode.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ECSServiceRecommendationFindingReasonCode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ECSServiceRecommendationFindingReasonCodes"
+        ~of_json:ECSServiceRecommendationFindingReasonCode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ECSServiceRecommendationOptions =
+  struct
+    type nonrec t = ECSServiceRecommendationOption.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ECSServiceRecommendationOption.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ECSServiceRecommendationOption.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ECSServiceRecommendationOptions"
+        ~of_json:ECSServiceRecommendationOption.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ECSServiceUtilizationMetrics =
+  struct
+    type nonrec t = ECSServiceUtilizationMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ECSServiceUtilizationMetric.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ECSServiceUtilizationMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ECSServiceUtilizationMetrics"
+        ~of_json:ECSServiceUtilizationMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceArn =
+  struct
+    type nonrec t = string
+    let context_ = "ServiceArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServiceArn" j
+    let to_json = simple_to_json to_value
+  end
+module ServiceConfiguration =
+  struct
+    type nonrec t =
+      {
+      memory: NullableMemory.t option
+        [@ocaml.doc
+          "The amount of memory used by the tasks in the Amazon ECS service."];
+      cpu: NullableCpu.t option
+        [@ocaml.doc
+          "The number of CPU units used by the tasks in the Amazon ECS service."];
+      containerConfigurations: ContainerConfigurations.t option
+        [@ocaml.doc
+          "The container configurations within a task of an Amazon ECS service."];
+      autoScalingConfiguration: AutoScalingConfiguration.t option
+        [@ocaml.doc
+          "Describes the Auto Scaling configuration methods for an Amazon ECS service. This affects the generated recommendations. For example, if Auto Scaling is configured on a service\226\128\153s CPU, then Compute Optimizer doesn\226\128\153t generate CPU size recommendations. The Auto Scaling configuration methods include: TARGET_TRACKING_SCALING_CPU \226\128\148 If the Amazon ECS service is configured to use target scaling on CPU, Compute Optimizer doesn't generate CPU recommendations. TARGET_TRACKING_SCALING_MEMORY \226\128\148 If the Amazon ECS service is configured to use target scaling on memory, Compute Optimizer doesn't generate memory recommendations. For more information about step scaling and target scaling, see Step scaling policies for Application Auto Scaling and Target tracking scaling policies for Application Auto Scaling in the Application Auto Scaling User Guide."];
+      taskDefinitionArn: TaskDefinitionArn.t option
+        [@ocaml.doc
+          "The task definition ARN used by the tasks in the Amazon ECS service."]}
+    let make ?memory =
+      fun ?cpu ->
+        fun ?containerConfigurations ->
+          fun ?autoScalingConfiguration ->
+            fun ?taskDefinitionArn ->
+              fun () ->
+                {
+                  memory;
+                  cpu;
+                  containerConfigurations;
+                  autoScalingConfiguration;
+                  taskDefinitionArn
+                }
+    let to_value x =
+      structure_to_value
+        [("memory", (Option.map x.memory ~f:NullableMemory.to_value));
+        ("cpu", (Option.map x.cpu ~f:NullableCpu.to_value));
+        ("containerConfigurations",
+          (Option.map x.containerConfigurations
+             ~f:ContainerConfigurations.to_value));
+        ("autoScalingConfiguration",
+          (Option.map x.autoScalingConfiguration
+             ~f:AutoScalingConfiguration.to_value));
+        ("taskDefinitionArn",
+          (Option.map x.taskDefinitionArn ~f:TaskDefinitionArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskDefinitionArn =
+        (Option.map ~f:TaskDefinitionArn.of_xml)
+          (Xml.child xml_arg0 "taskDefinitionArn") in
+      let autoScalingConfiguration =
+        (Option.map ~f:AutoScalingConfiguration.of_xml)
+          (Xml.child xml_arg0 "autoScalingConfiguration") in
+      let containerConfigurations =
+        (Option.map ~f:ContainerConfigurations.of_xml)
+          (Xml.child xml_arg0 "containerConfigurations") in
+      let cpu = (Option.map ~f:NullableCpu.of_xml) (Xml.child xml_arg0 "cpu") in
+      let memory =
+        (Option.map ~f:NullableMemory.of_xml) (Xml.child xml_arg0 "memory") in
+      make ?taskDefinitionArn ?autoScalingConfiguration
+        ?containerConfigurations ?cpu ?memory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskDefinitionArn =
+        field_map json__ "taskDefinitionArn" TaskDefinitionArn.of_json in
+      let autoScalingConfiguration =
+        field_map json__ "autoScalingConfiguration"
+          AutoScalingConfiguration.of_json in
+      let containerConfigurations =
+        field_map json__ "containerConfigurations"
+          ContainerConfigurations.of_json in
+      let cpu = field_map json__ "cpu" NullableCpu.of_json in
+      let memory = field_map json__ "memory" NullableMemory.of_json in
+      make ?taskDefinitionArn ?autoScalingConfiguration
+        ?containerConfigurations ?cpu ?memory ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon ECS service configurations used for recommendations."]
+module ECSServiceRecommendationFilterName =
+  struct
+    type nonrec t =
+      | Finding 
+      | FindingReasonCode 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Finding -> "Finding"
+      | FindingReasonCode -> "FindingReasonCode"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Finding" -> Finding
+      | "FindingReasonCode" -> FindingReasonCode
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ECSServiceRecommendationFilterName"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ECSServiceRecommendationFilterName" j)
+    let to_json = simple_to_json to_value
+  end
+module CpuSize =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for CpuSize" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ECSServiceProjectedMetrics =
+  struct
+    type nonrec t = ECSServiceProjectedMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ECSServiceProjectedMetric.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ECSServiceProjectedMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ECSServiceProjectedMetrics"
+        ~of_json:ECSServiceProjectedMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ProjectedMetrics =
   struct
     type nonrec t = ProjectedMetric.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProjectedMetric.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2615,45 +7800,6 @@ module RecommendedInstanceType =
     let of_json j = string_of_json ~kind:"RecommendedInstanceType" j
     let to_json = simple_to_json to_value
   end
-module Code =
-  struct
-    type nonrec t = string
-    let context_ = "Code"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Code" j
-    let to_json = simple_to_json to_value
-  end
-module Identifier =
-  struct
-    type nonrec t = string
-    let context_ = "Identifier"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Identifier" j
-    let to_json = simple_to_json to_value
-  end
-module Message =
-  struct
-    type nonrec t = string
-    let context_ = "Message"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Message" j
-    let to_json = simple_to_json to_value
-  end
 module CurrentInstanceType =
   struct
     type nonrec t = string
@@ -2673,22 +7819,47 @@ module EffectiveRecommendationPreferences =
       {
       cpuVendorArchitectures: CpuVendorArchitectures.t option
         [@ocaml.doc
-          "Describes the CPU vendor and architecture for an instance or Auto Scaling group recommendations. For example, when you specify AWS_ARM64 with: A GetEC2InstanceRecommendations or GetAutoScalingGroupRecommendations request, Compute Optimizer returns recommendations that consist of Graviton2 instance types only. A GetEC2RecommendationProjectedMetrics request, Compute Optimizer returns projected utilization metrics for Graviton2 instance type recommendations only. A ExportEC2InstanceRecommendations or ExportAutoScalingGroupRecommendations request, Compute Optimizer exports recommendations that consist of Graviton2 instance types only."];
+          "Describes the CPU vendor and architecture for an instance or Auto Scaling group recommendations. For example, when you specify AWS_ARM64 with: A GetEC2InstanceRecommendations or GetAutoScalingGroupRecommendations request, Compute Optimizer returns recommendations that consist of Graviton instance types only. A GetEC2RecommendationProjectedMetrics request, Compute Optimizer returns projected utilization metrics for Graviton instance type recommendations only. A ExportEC2InstanceRecommendations or ExportAutoScalingGroupRecommendations request, Compute Optimizer exports recommendations that consist of Graviton instance types only."];
       enhancedInfrastructureMetrics: EnhancedInfrastructureMetrics.t option
         [@ocaml.doc
           "Describes the activation status of the enhanced infrastructure metrics preference. A status of Active confirms that the preference is applied in the latest recommendation refresh, and a status of Inactive confirms that it's not yet applied to recommendations. For more information, see Enhanced infrastructure metrics in the Compute Optimizer User Guide."];
       inferredWorkloadTypes: InferredWorkloadTypesPreference.t option
         [@ocaml.doc
-          "Describes the activation status of the inferred workload types preference. A status of Active confirms that the preference is applied in the latest recommendation refresh. A status of Inactive confirms that it's not yet applied to recommendations."]}
+          "Describes the activation status of the inferred workload types preference. A status of Active confirms that the preference is applied in the latest recommendation refresh. A status of Inactive confirms that it's not yet applied to recommendations."];
+      externalMetricsPreference: ExternalMetricsPreference.t option
+        [@ocaml.doc
+          "An object that describes the external metrics recommendation preference. If the preference is applied in the latest recommendation refresh, an object with a valid source value appears in the response. If the preference isn't applied to the recommendations already, then this object doesn't appear in the response."];
+      lookBackPeriod: LookBackPeriodPreference.t option
+        [@ocaml.doc
+          "The number of days the utilization metrics of the Amazon Web Services resource are analyzed."];
+      utilizationPreferences: UtilizationPreferences.t option
+        [@ocaml.doc
+          "The resource\226\128\153s CPU and memory utilization preferences, such as threshold and headroom, that are used to generate rightsizing recommendations. This preference is only available for the Amazon EC2 instance resource type."];
+      preferredResources: EffectivePreferredResources.t option
+        [@ocaml.doc
+          "The resource type values that are considered as candidates when generating rightsizing recommendations."];
+      savingsEstimationMode: InstanceSavingsEstimationMode.t option
+        [@ocaml.doc
+          "Describes the savings estimation mode applied for calculating savings opportunity for a resource."]}
     let make ?cpuVendorArchitectures =
       fun ?enhancedInfrastructureMetrics ->
         fun ?inferredWorkloadTypes ->
-          fun () ->
-            {
-              cpuVendorArchitectures;
-              enhancedInfrastructureMetrics;
-              inferredWorkloadTypes
-            }
+          fun ?externalMetricsPreference ->
+            fun ?lookBackPeriod ->
+              fun ?utilizationPreferences ->
+                fun ?preferredResources ->
+                  fun ?savingsEstimationMode ->
+                    fun () ->
+                      {
+                        cpuVendorArchitectures;
+                        enhancedInfrastructureMetrics;
+                        inferredWorkloadTypes;
+                        externalMetricsPreference;
+                        lookBackPeriod;
+                        utilizationPreferences;
+                        preferredResources;
+                        savingsEstimationMode
+                      }
     let to_value x =
       structure_to_value
         [("cpuVendorArchitectures",
@@ -2699,9 +7870,38 @@ module EffectiveRecommendationPreferences =
              ~f:EnhancedInfrastructureMetrics.to_value));
         ("inferredWorkloadTypes",
           (Option.map x.inferredWorkloadTypes
-             ~f:InferredWorkloadTypesPreference.to_value))]
+             ~f:InferredWorkloadTypesPreference.to_value));
+        ("externalMetricsPreference",
+          (Option.map x.externalMetricsPreference
+             ~f:ExternalMetricsPreference.to_value));
+        ("lookBackPeriod",
+          (Option.map x.lookBackPeriod ~f:LookBackPeriodPreference.to_value));
+        ("utilizationPreferences",
+          (Option.map x.utilizationPreferences
+             ~f:UtilizationPreferences.to_value));
+        ("preferredResources",
+          (Option.map x.preferredResources
+             ~f:EffectivePreferredResources.to_value));
+        ("savingsEstimationMode",
+          (Option.map x.savingsEstimationMode
+             ~f:InstanceSavingsEstimationMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let savingsEstimationMode =
+        (Option.map ~f:InstanceSavingsEstimationMode.of_xml)
+          (Xml.child xml_arg0 "savingsEstimationMode") in
+      let preferredResources =
+        (Option.map ~f:EffectivePreferredResources.of_xml)
+          (Xml.child xml_arg0 "preferredResources") in
+      let utilizationPreferences =
+        (Option.map ~f:UtilizationPreferences.of_xml)
+          (Xml.child xml_arg0 "utilizationPreferences") in
+      let lookBackPeriod =
+        (Option.map ~f:LookBackPeriodPreference.of_xml)
+          (Xml.child xml_arg0 "lookBackPeriod") in
+      let externalMetricsPreference =
+        (Option.map ~f:ExternalMetricsPreference.of_xml)
+          (Xml.child xml_arg0 "externalMetricsPreference") in
       let inferredWorkloadTypes =
         (Option.map ~f:InferredWorkloadTypesPreference.of_xml)
           (Xml.child xml_arg0 "inferredWorkloadTypes") in
@@ -2711,50 +7911,77 @@ module EffectiveRecommendationPreferences =
       let cpuVendorArchitectures =
         (Option.map ~f:CpuVendorArchitectures.of_xml)
           (Xml.child xml_arg0 "cpuVendorArchitectures") in
-      make ?inferredWorkloadTypes ?enhancedInfrastructureMetrics
-        ?cpuVendorArchitectures ()
+      make ?savingsEstimationMode ?preferredResources ?utilizationPreferences
+        ?lookBackPeriod ?externalMetricsPreference ?inferredWorkloadTypes
+        ?enhancedInfrastructureMetrics ?cpuVendorArchitectures ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let savingsEstimationMode =
+        field_map json__ "savingsEstimationMode"
+          InstanceSavingsEstimationMode.of_json in
+      let preferredResources =
+        field_map json__ "preferredResources"
+          EffectivePreferredResources.of_json in
+      let utilizationPreferences =
+        field_map json__ "utilizationPreferences"
+          UtilizationPreferences.of_json in
+      let lookBackPeriod =
+        field_map json__ "lookBackPeriod" LookBackPeriodPreference.of_json in
+      let externalMetricsPreference =
+        field_map json__ "externalMetricsPreference"
+          ExternalMetricsPreference.of_json in
       let inferredWorkloadTypes =
-        field_map json "inferredWorkloadTypes"
+        field_map json__ "inferredWorkloadTypes"
           InferredWorkloadTypesPreference.of_json in
       let enhancedInfrastructureMetrics =
-        field_map json "enhancedInfrastructureMetrics"
+        field_map json__ "enhancedInfrastructureMetrics"
           EnhancedInfrastructureMetrics.of_json in
       let cpuVendorArchitectures =
-        field_map json "cpuVendorArchitectures"
+        field_map json__ "cpuVendorArchitectures"
           CpuVendorArchitectures.of_json in
-      make ?inferredWorkloadTypes ?enhancedInfrastructureMetrics
-        ?cpuVendorArchitectures ()
+      make ?savingsEstimationMode ?preferredResources ?utilizationPreferences
+        ?lookBackPeriod ?externalMetricsPreference ?inferredWorkloadTypes
+        ?enhancedInfrastructureMetrics ?cpuVendorArchitectures ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the effective recommendation preferences for a resource."]
-module InferredWorkloadTypes =
+module ExternalMetricStatus =
   struct
-    type nonrec t = InferredWorkloadType.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:InferredWorkloadType.to_value)) |>
-        (fun x -> `List x)
+    type nonrec t =
+      {
+      statusCode: ExternalMetricStatusCode.t option
+        [@ocaml.doc
+          "The status code for Compute Optimizer's integration with an external metrics provider."];
+      statusReason: ExternalMetricStatusReason.t option
+        [@ocaml.doc
+          "The reason for Compute Optimizer's integration status with your external metric provider."]}
+    let make ?statusCode =
+      fun ?statusReason -> fun () -> { statusCode; statusReason }
+    let to_value x =
+      structure_to_value
+        [("statusCode",
+           (Option.map x.statusCode ~f:ExternalMetricStatusCode.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:ExternalMetricStatusReason.to_value))]
     let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:InferredWorkloadType.of_xml)
-    let of_json j =
-      list_of_json ~kind:"InferredWorkloadTypes"
-        ~of_json:InferredWorkloadType.of_json j
+    let of_xml xml_arg0 =
+      let statusReason =
+        (Option.map ~f:ExternalMetricStatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let statusCode =
+        (Option.map ~f:ExternalMetricStatusCode.of_xml)
+          (Xml.child xml_arg0 "statusCode") in
+      make ?statusReason ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusReason =
+        field_map json__ "statusReason" ExternalMetricStatusReason.of_json in
+      let statusCode =
+        field_map json__ "statusCode" ExternalMetricStatusCode.of_json in
+      make ?statusReason ?statusCode ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "Describes Compute Optimizer's integration status with your chosen external metric provider. For example, Datadog."]
 module InstanceArn =
   struct
     type nonrec t = string
@@ -2766,6 +7993,25 @@ module InstanceArn =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"InstanceArn" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceIdle =
+  struct
+    type nonrec t =
+      | True 
+      | False 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | True -> "True" | False -> "False" | Non_static_id s -> s
+    let of_string =
+      function | "True" -> True | "False" -> False | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration InstanceIdle" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InstanceIdle" j)
     let to_json = simple_to_json to_value
   end
 module InstanceName =
@@ -2785,6 +8031,9 @@ module InstanceRecommendationFindingReasonCodes =
   struct
     type nonrec t = InstanceRecommendationFindingReasonCode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceRecommendationFindingReasonCode.to_value))
         |> (fun x -> `List x)
@@ -2808,10 +8057,50 @@ module InstanceRecommendationFindingReasonCodes =
         ~of_json:InstanceRecommendationFindingReasonCode.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InstanceState =
+  struct
+    type nonrec t =
+      | Pending 
+      | Running 
+      | Shutting_down 
+      | Terminated 
+      | Stopping 
+      | Stopped 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Running -> "running"
+      | Shutting_down -> "shutting-down"
+      | Terminated -> "terminated"
+      | Stopping -> "stopping"
+      | Stopped -> "stopped"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "running" -> Running
+      | "shutting-down" -> Shutting_down
+      | "terminated" -> Terminated
+      | "stopping" -> Stopping
+      | "stopped" -> Stopped
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration InstanceState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InstanceState" j)
+    let to_json = simple_to_json to_value
+  end
 module RecommendationOptions =
   struct
     type nonrec t = InstanceRecommendationOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceRecommendationOption.to_value)) |>
         (fun x -> `List x)
@@ -2838,6 +8127,9 @@ module RecommendationSources =
   struct
     type nonrec t = RecommendationSource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationSource.to_value)) |>
         (fun x -> `List x)
@@ -2864,6 +8156,9 @@ module UtilizationMetrics =
   struct
     type nonrec t = UtilizationMetric.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UtilizationMetric.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2891,6 +8186,7 @@ module FilterName =
       | Finding 
       | FindingReasonCodes 
       | RecommendationSourceType 
+      | InferredWorkloadTypes 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2898,12 +8194,14 @@ module FilterName =
       | Finding -> "Finding"
       | FindingReasonCodes -> "FindingReasonCodes"
       | RecommendationSourceType -> "RecommendationSourceType"
+      | InferredWorkloadTypes -> "InferredWorkloadTypes"
       | Non_static_id s -> s
     let of_string =
       function
       | "Finding" -> Finding
       | "FindingReasonCodes" -> FindingReasonCodes
       | "RecommendationSourceType" -> RecommendationSourceType
+      | "InferredWorkloadTypes" -> InferredWorkloadTypes
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2913,6 +8211,34 @@ module FilterName =
     let of_json j = of_string (string_of_json ~kind:"FilterName" j)
     let to_json = simple_to_json to_value
   end
+module EBSEffectiveRecommendationPreferences =
+  struct
+    type nonrec t =
+      {
+      savingsEstimationMode: EBSSavingsEstimationMode.t option
+        [@ocaml.doc
+          "Describes the savings estimation mode preference applied for calculating savings opportunity for Amazon EBS volumes."]}
+    let make ?savingsEstimationMode = fun () -> { savingsEstimationMode }
+    let to_value x =
+      structure_to_value
+        [("savingsEstimationMode",
+           (Option.map x.savingsEstimationMode
+              ~f:EBSSavingsEstimationMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let savingsEstimationMode =
+        (Option.map ~f:EBSSavingsEstimationMode.of_xml)
+          (Xml.child xml_arg0 "savingsEstimationMode") in
+      make ?savingsEstimationMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let savingsEstimationMode =
+        field_map json__ "savingsEstimationMode"
+          EBSSavingsEstimationMode.of_json in
+      make ?savingsEstimationMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the effective recommendation preferences for Amazon EBS volumes."]
 module EBSFinding =
   struct
     type nonrec t =
@@ -2942,6 +8268,9 @@ module EBSUtilizationMetrics =
   struct
     type nonrec t = EBSUtilizationMetric.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EBSUtilizationMetric.to_value)) |>
         (fun x -> `List x)
@@ -2981,6 +8310,9 @@ module VolumeRecommendationOptions =
   struct
     type nonrec t = VolumeRecommendationOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VolumeRecommendationOption.to_value)) |>
         (fun x -> `List x)
@@ -3049,6 +8381,9 @@ module AutoScalingGroupRecommendationOptions =
   struct
     type nonrec t = AutoScalingGroupRecommendationOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoScalingGroupRecommendationOption.to_value)) |>
         (fun x -> `List x)
@@ -3100,8 +8435,8 @@ module ExportDestination =
       let s3 = (Option.map ~f:S3Destination.of_xml) (Xml.child xml_arg0 "s3") in
       make ?s3 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3 = field_map json "s3" S3Destination.of_json in make ?s3 ()
+    let of_json json__ =
+      let s3 = field_map json__ "s3" S3Destination.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the destination of the recommendations export and metadata files."]
@@ -3200,6 +8535,52 @@ module ErrorMessage =
     let of_json j = string_of_json ~kind:"ErrorMessage" j
     let to_json = simple_to_json to_value
   end
+module PreferredResource =
+  struct
+    type nonrec t =
+      {
+      name: PreferredResourceName.t option
+        [@ocaml.doc
+          "The type of preferred resource to customize. Compute Optimizer only supports the customization of Ec2InstanceTypes."];
+      includeList: PreferredResourceValues.t option
+        [@ocaml.doc
+          "The preferred resource type values to include in the recommendation candidates. You can specify the exact resource type value, such as m5.large, or use wild card expressions, such as m5. If this isn\226\128\153t specified, all supported resources are included by default. You can specify up to 1000 values in this list."];
+      excludeList: PreferredResourceValues.t option
+        [@ocaml.doc
+          "The preferred resource type values to exclude from the recommendation candidates. If this isn\226\128\153t specified, all supported resources are included by default. You can specify up to 1000 values in this list."]}
+    let make ?name =
+      fun ?includeList ->
+        fun ?excludeList -> fun () -> { name; includeList; excludeList }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:PreferredResourceName.to_value));
+        ("includeList",
+          (Option.map x.includeList ~f:PreferredResourceValues.to_value));
+        ("excludeList",
+          (Option.map x.excludeList ~f:PreferredResourceValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludeList =
+        (Option.map ~f:PreferredResourceValues.of_xml)
+          (Xml.child xml_arg0 "excludeList") in
+      let includeList =
+        (Option.map ~f:PreferredResourceValues.of_xml)
+          (Xml.child xml_arg0 "includeList") in
+      let name =
+        (Option.map ~f:PreferredResourceName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?excludeList ?includeList ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludeList =
+        field_map json__ "excludeList" PreferredResourceValues.of_json in
+      let includeList =
+        field_map json__ "includeList" PreferredResourceValues.of_json in
+      let name = field_map json__ "name" PreferredResourceName.of_json in
+      make ?excludeList ?includeList ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The preference to control which resource type values are considered when generating rightsizing recommendations. You can specify this preference as a combination of include and exclude lists. You must specify either an includeList or excludeList. If the preference is an empty set of resource type values, an error occurs. For more information, see Rightsizing recommendation preferences in the Compute Optimizer User Guide. This preference is only available for the Amazon EC2 instance and Auto Scaling group resource types. Compute Optimizer only supports the customization of Ec2InstanceTypes."]
 module RecommendationSummary =
   struct
     type nonrec t =
@@ -3207,6 +8588,8 @@ module RecommendationSummary =
       summaries: Summaries.t option
         [@ocaml.doc
           "An array of objects that describe a recommendation summary."];
+      idleSummaries: IdleSummaries.t option
+        [@ocaml.doc "Describes the findings summary of the idle resources."];
       recommendationResourceType: RecommendationSourceType.t option
         [@ocaml.doc
           "The resource type that the recommendation summary applies to."];
@@ -3216,39 +8599,71 @@ module RecommendationSummary =
       savingsOpportunity: SavingsOpportunity.t option
         [@ocaml.doc
           "An object that describes the savings opportunity for a given resource type. Savings opportunity includes the estimated monthly savings amount and percentage."];
+      idleSavingsOpportunity: SavingsOpportunity.t option ;
+      aggregatedSavingsOpportunity: SavingsOpportunity.t option ;
       currentPerformanceRiskRatings: CurrentPerformanceRiskRatings.t option
         [@ocaml.doc
-          "An object that describes the performance risk ratings for a given resource type."]}
+          "An object that describes the performance risk ratings for a given resource type."];
+      inferredWorkloadSavings: InferredWorkloadSavings.t option
+        [@ocaml.doc
+          "An array of objects that describes the estimated monthly saving amounts for the instances running on the specified inferredWorkloadTypes. The array contains the top five savings opportunites for the instances that run inferred workload types."]}
     let make ?summaries =
-      fun ?recommendationResourceType ->
-        fun ?accountId ->
-          fun ?savingsOpportunity ->
-            fun ?currentPerformanceRiskRatings ->
-              fun () ->
-                {
-                  summaries;
-                  recommendationResourceType;
-                  accountId;
-                  savingsOpportunity;
-                  currentPerformanceRiskRatings
-                }
+      fun ?idleSummaries ->
+        fun ?recommendationResourceType ->
+          fun ?accountId ->
+            fun ?savingsOpportunity ->
+              fun ?idleSavingsOpportunity ->
+                fun ?aggregatedSavingsOpportunity ->
+                  fun ?currentPerformanceRiskRatings ->
+                    fun ?inferredWorkloadSavings ->
+                      fun () ->
+                        {
+                          summaries;
+                          idleSummaries;
+                          recommendationResourceType;
+                          accountId;
+                          savingsOpportunity;
+                          idleSavingsOpportunity;
+                          aggregatedSavingsOpportunity;
+                          currentPerformanceRiskRatings;
+                          inferredWorkloadSavings
+                        }
     let to_value x =
       structure_to_value
         [("summaries", (Option.map x.summaries ~f:Summaries.to_value));
+        ("idleSummaries",
+          (Option.map x.idleSummaries ~f:IdleSummaries.to_value));
         ("recommendationResourceType",
           (Option.map x.recommendationResourceType
              ~f:RecommendationSourceType.to_value));
         ("accountId", (Option.map x.accountId ~f:AccountId.to_value));
         ("savingsOpportunity",
           (Option.map x.savingsOpportunity ~f:SavingsOpportunity.to_value));
+        ("idleSavingsOpportunity",
+          (Option.map x.idleSavingsOpportunity ~f:SavingsOpportunity.to_value));
+        ("aggregatedSavingsOpportunity",
+          (Option.map x.aggregatedSavingsOpportunity
+             ~f:SavingsOpportunity.to_value));
         ("currentPerformanceRiskRatings",
           (Option.map x.currentPerformanceRiskRatings
-             ~f:CurrentPerformanceRiskRatings.to_value))]
+             ~f:CurrentPerformanceRiskRatings.to_value));
+        ("inferredWorkloadSavings",
+          (Option.map x.inferredWorkloadSavings
+             ~f:InferredWorkloadSavings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let inferredWorkloadSavings =
+        (Option.map ~f:InferredWorkloadSavings.of_xml)
+          (Xml.child xml_arg0 "inferredWorkloadSavings") in
       let currentPerformanceRiskRatings =
         (Option.map ~f:CurrentPerformanceRiskRatings.of_xml)
           (Xml.child xml_arg0 "currentPerformanceRiskRatings") in
+      let aggregatedSavingsOpportunity =
+        (Option.map ~f:SavingsOpportunity.of_xml)
+          (Xml.child xml_arg0 "aggregatedSavingsOpportunity") in
+      let idleSavingsOpportunity =
+        (Option.map ~f:SavingsOpportunity.of_xml)
+          (Xml.child xml_arg0 "idleSavingsOpportunity") in
       let savingsOpportunity =
         (Option.map ~f:SavingsOpportunity.of_xml)
           (Xml.child xml_arg0 "savingsOpportunity") in
@@ -3257,24 +8672,41 @@ module RecommendationSummary =
       let recommendationResourceType =
         (Option.map ~f:RecommendationSourceType.of_xml)
           (Xml.child xml_arg0 "recommendationResourceType") in
+      let idleSummaries =
+        (Option.map ~f:IdleSummaries.of_xml)
+          (Xml.child xml_arg0 "idleSummaries") in
       let summaries =
         (Option.map ~f:Summaries.of_xml) (Xml.child xml_arg0 "summaries") in
-      make ?currentPerformanceRiskRatings ?savingsOpportunity ?accountId
-        ?recommendationResourceType ?summaries ()
+      make ?inferredWorkloadSavings ?currentPerformanceRiskRatings
+        ?aggregatedSavingsOpportunity ?idleSavingsOpportunity
+        ?savingsOpportunity ?accountId ?recommendationResourceType
+        ?idleSummaries ?summaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let inferredWorkloadSavings =
+        field_map json__ "inferredWorkloadSavings"
+          InferredWorkloadSavings.of_json in
       let currentPerformanceRiskRatings =
-        field_map json "currentPerformanceRiskRatings"
+        field_map json__ "currentPerformanceRiskRatings"
           CurrentPerformanceRiskRatings.of_json in
+      let aggregatedSavingsOpportunity =
+        field_map json__ "aggregatedSavingsOpportunity"
+          SavingsOpportunity.of_json in
+      let idleSavingsOpportunity =
+        field_map json__ "idleSavingsOpportunity" SavingsOpportunity.of_json in
       let savingsOpportunity =
-        field_map json "savingsOpportunity" SavingsOpportunity.of_json in
-      let accountId = field_map json "accountId" AccountId.of_json in
+        field_map json__ "savingsOpportunity" SavingsOpportunity.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       let recommendationResourceType =
-        field_map json "recommendationResourceType"
+        field_map json__ "recommendationResourceType"
           RecommendationSourceType.of_json in
-      let summaries = field_map json "summaries" Summaries.of_json in
-      make ?currentPerformanceRiskRatings ?savingsOpportunity ?accountId
-        ?recommendationResourceType ?summaries ()
+      let idleSummaries =
+        field_map json__ "idleSummaries" IdleSummaries.of_json in
+      let summaries = field_map json__ "summaries" Summaries.of_json in
+      make ?inferredWorkloadSavings ?currentPerformanceRiskRatings
+        ?aggregatedSavingsOpportunity ?idleSavingsOpportunity
+        ?savingsOpportunity ?accountId ?recommendationResourceType
+        ?idleSummaries ?summaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary of a recommendation."]
 module RecommendationPreferencesDetail =
@@ -3289,21 +8721,46 @@ module RecommendationPreferencesDetail =
           "The target resource type of the recommendation preference to create. The Ec2Instance option encompasses standalone instances and instances that are part of Auto Scaling groups. The AutoScalingGroup option encompasses only instances that are part of an Auto Scaling group."];
       enhancedInfrastructureMetrics: EnhancedInfrastructureMetrics.t option
         [@ocaml.doc
-          "The status of the enhanced infrastructure metrics recommendation preference. A status of Active confirms that the preference is applied in the latest recommendation refresh, and a status of Inactive confirms that it's not yet applied to recommendations. For more information, see Enhanced infrastructure metrics in the Compute Optimizer User Guide."];
+          "The status of the enhanced infrastructure metrics recommendation preference. When the recommendations page is refreshed, a status of Active confirms that the preference is applied to the recommendations, and a status of Inactive confirms that the preference isn't yet applied to recommendations. For more information, see Enhanced infrastructure metrics in the Compute Optimizer User Guide."];
       inferredWorkloadTypes: InferredWorkloadTypesPreference.t option
         [@ocaml.doc
-          "The status of the inferred workload types recommendation preference. A status of Active confirms that the preference is applied in the latest recommendation refresh. A status of Inactive confirms that it's not yet applied to recommendations."]}
+          "The status of the inferred workload types recommendation preference. When the recommendations page is refreshed, a status of Active confirms that the preference is applied to the recommendations, and a status of Inactive confirms that the preference isn't yet applied to recommendations."];
+      externalMetricsPreference: ExternalMetricsPreference.t option
+        [@ocaml.doc
+          "An object that describes the external metrics recommendation preference. If the preference is applied in the latest recommendation refresh, an object with a valid source value appears in the response. If the preference isn't applied to the recommendations already, then this object doesn't appear in the response."];
+      lookBackPeriod: LookBackPeriodPreference.t option
+        [@ocaml.doc
+          "The preference to control the number of days the utilization metrics of the Amazon Web Services resource are analyzed. If the preference isn\226\128\153t set, this object is null."];
+      utilizationPreferences: UtilizationPreferences.t option
+        [@ocaml.doc
+          "The preference to control the resource\226\128\153s CPU utilization threshold, CPU utilization headroom, and memory utilization headroom. If the preference isn\226\128\153t set, this object is null. This preference is only available for the Amazon EC2 instance resource type."];
+      preferredResources: EffectivePreferredResources.t option
+        [@ocaml.doc
+          "The preference to control which resource type values are considered when generating rightsizing recommendations. This object resolves any wildcard expressions and returns the effective list of candidate resource type values. If the preference isn\226\128\153t set, this object is null."];
+      savingsEstimationMode: SavingsEstimationMode.t option
+        [@ocaml.doc
+          "Describes the savings estimation mode used for calculating savings opportunity. Only the account manager or delegated administrator of your organization can activate this preference."]}
     let make ?scope =
       fun ?resourceType ->
         fun ?enhancedInfrastructureMetrics ->
           fun ?inferredWorkloadTypes ->
-            fun () ->
-              {
-                scope;
-                resourceType;
-                enhancedInfrastructureMetrics;
-                inferredWorkloadTypes
-              }
+            fun ?externalMetricsPreference ->
+              fun ?lookBackPeriod ->
+                fun ?utilizationPreferences ->
+                  fun ?preferredResources ->
+                    fun ?savingsEstimationMode ->
+                      fun () ->
+                        {
+                          scope;
+                          resourceType;
+                          enhancedInfrastructureMetrics;
+                          inferredWorkloadTypes;
+                          externalMetricsPreference;
+                          lookBackPeriod;
+                          utilizationPreferences;
+                          preferredResources;
+                          savingsEstimationMode
+                        }
     let to_value x =
       structure_to_value
         [("scope", (Option.map x.scope ~f:Scope.to_value));
@@ -3314,9 +8771,38 @@ module RecommendationPreferencesDetail =
              ~f:EnhancedInfrastructureMetrics.to_value));
         ("inferredWorkloadTypes",
           (Option.map x.inferredWorkloadTypes
-             ~f:InferredWorkloadTypesPreference.to_value))]
+             ~f:InferredWorkloadTypesPreference.to_value));
+        ("externalMetricsPreference",
+          (Option.map x.externalMetricsPreference
+             ~f:ExternalMetricsPreference.to_value));
+        ("lookBackPeriod",
+          (Option.map x.lookBackPeriod ~f:LookBackPeriodPreference.to_value));
+        ("utilizationPreferences",
+          (Option.map x.utilizationPreferences
+             ~f:UtilizationPreferences.to_value));
+        ("preferredResources",
+          (Option.map x.preferredResources
+             ~f:EffectivePreferredResources.to_value));
+        ("savingsEstimationMode",
+          (Option.map x.savingsEstimationMode
+             ~f:SavingsEstimationMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let savingsEstimationMode =
+        (Option.map ~f:SavingsEstimationMode.of_xml)
+          (Xml.child xml_arg0 "savingsEstimationMode") in
+      let preferredResources =
+        (Option.map ~f:EffectivePreferredResources.of_xml)
+          (Xml.child xml_arg0 "preferredResources") in
+      let utilizationPreferences =
+        (Option.map ~f:UtilizationPreferences.of_xml)
+          (Xml.child xml_arg0 "utilizationPreferences") in
+      let lookBackPeriod =
+        (Option.map ~f:LookBackPeriodPreference.of_xml)
+          (Xml.child xml_arg0 "lookBackPeriod") in
+      let externalMetricsPreference =
+        (Option.map ~f:ExternalMetricsPreference.of_xml)
+          (Xml.child xml_arg0 "externalMetricsPreference") in
       let inferredWorkloadTypes =
         (Option.map ~f:InferredWorkloadTypesPreference.of_xml)
           (Xml.child xml_arg0 "inferredWorkloadTypes") in
@@ -3327,22 +8813,605 @@ module RecommendationPreferencesDetail =
         (Option.map ~f:ResourceType.of_xml)
           (Xml.child xml_arg0 "resourceType") in
       let scope = (Option.map ~f:Scope.of_xml) (Xml.child xml_arg0 "scope") in
-      make ?inferredWorkloadTypes ?enhancedInfrastructureMetrics
-        ?resourceType ?scope ()
+      make ?savingsEstimationMode ?preferredResources ?utilizationPreferences
+        ?lookBackPeriod ?externalMetricsPreference ?inferredWorkloadTypes
+        ?enhancedInfrastructureMetrics ?resourceType ?scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let savingsEstimationMode =
+        field_map json__ "savingsEstimationMode"
+          SavingsEstimationMode.of_json in
+      let preferredResources =
+        field_map json__ "preferredResources"
+          EffectivePreferredResources.of_json in
+      let utilizationPreferences =
+        field_map json__ "utilizationPreferences"
+          UtilizationPreferences.of_json in
+      let lookBackPeriod =
+        field_map json__ "lookBackPeriod" LookBackPeriodPreference.of_json in
+      let externalMetricsPreference =
+        field_map json__ "externalMetricsPreference"
+          ExternalMetricsPreference.of_json in
       let inferredWorkloadTypes =
-        field_map json "inferredWorkloadTypes"
+        field_map json__ "inferredWorkloadTypes"
           InferredWorkloadTypesPreference.of_json in
       let enhancedInfrastructureMetrics =
-        field_map json "enhancedInfrastructureMetrics"
+        field_map json__ "enhancedInfrastructureMetrics"
           EnhancedInfrastructureMetrics.of_json in
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
-      let scope = field_map json "scope" Scope.of_json in
-      make ?inferredWorkloadTypes ?enhancedInfrastructureMetrics
-        ?resourceType ?scope ()
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let scope = field_map json__ "scope" Scope.of_json in
+      make ?savingsEstimationMode ?preferredResources ?utilizationPreferences
+        ?lookBackPeriod ?externalMetricsPreference ?inferredWorkloadTypes
+        ?enhancedInfrastructureMetrics ?resourceType ?scope ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a recommendation preference."]
+module GetRecommendationError =
+  struct
+    type nonrec t =
+      {
+      identifier: Identifier.t option [@ocaml.doc "The ID of the error."];
+      code: Code.t option [@ocaml.doc "The error code."];
+      message: Message.t option
+        [@ocaml.doc "The message, or reason, for the error."]}
+    let make ?identifier =
+      fun ?code -> fun ?message -> fun () -> { identifier; code; message }
+    let to_value x =
+      structure_to_value
+        [("identifier", (Option.map x.identifier ~f:Identifier.to_value));
+        ("code", (Option.map x.code ~f:Code.to_value));
+        ("message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
+      let code = (Option.map ~f:Code.of_xml) (Xml.child xml_arg0 "code") in
+      let identifier =
+        (Option.map ~f:Identifier.of_xml) (Xml.child xml_arg0 "identifier") in
+      make ?message ?code ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
+      let code = field_map json__ "code" Code.of_json in
+      let identifier = field_map json__ "identifier" Identifier.of_json in
+      make ?message ?code ?identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an error experienced when getting recommendations. For example, an error is returned if you request recommendations for an unsupported Auto Scaling group, or if you request recommendations for an instance of an unsupported instance family."]
+module RDSDBRecommendation =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc
+          "The ARN of the current Amazon Aurora or RDS database. The following is the format of the ARN: arn:aws:rds:\\{region\\}:\\{accountId\\}:db:\\{resourceName\\}"];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the Amazon Aurora or RDS database."];
+      engine: Engine.t option [@ocaml.doc "The engine of the DB instance."];
+      engineVersion: EngineVersion.t option
+        [@ocaml.doc "The database engine version."];
+      promotionTier: PromotionTier.t option
+        [@ocaml.doc "The promotion tier for the Aurora instance."];
+      currentDBInstanceClass: CurrentDBInstanceClass.t option
+        [@ocaml.doc
+          "The DB instance class of the current Aurora or RDS DB instance."];
+      currentStorageConfiguration: DBStorageConfiguration.t option
+        [@ocaml.doc "The configuration of the current DB storage."];
+      dbClusterIdentifier: DBClusterIdentifier.t option
+        [@ocaml.doc "The identifier for DB cluster."];
+      idle: Idle.t option
+        [@ocaml.doc "This indicates if the DB instance is idle or not."];
+      instanceFinding: RDSInstanceFinding.t option
+        [@ocaml.doc
+          "The finding classification of an Amazon Aurora and RDS DB instance. For more information about finding classifications, see Finding classifications for Aurora and RDS databases in the Compute Optimizer User Guide."];
+      storageFinding: RDSStorageFinding.t option
+        [@ocaml.doc
+          "The finding classification of Amazon RDS DB instance storage. For more information about finding classifications, see Finding classifications for Aurora and RDS databases in the Compute Optimizer User Guide."];
+      instanceFindingReasonCodes: RDSInstanceFindingReasonCodes.t option
+        [@ocaml.doc
+          "The reason for the finding classification of a DB instance."];
+      currentInstancePerformanceRisk:
+        RDSCurrentInstancePerformanceRisk.t option
+        [@ocaml.doc "The performance risk for the current DB instance."];
+      currentStorageEstimatedMonthlyVolumeIOPsCostVariation:
+        RDSEstimatedMonthlyVolumeIOPsCostVariation.t option
+        [@ocaml.doc
+          "The level of variation in monthly I/O costs for the current DB storage configuration."];
+      storageFindingReasonCodes: RDSStorageFindingReasonCodes.t option
+        [@ocaml.doc
+          "The reason for the finding classification of RDS DB instance storage."];
+      instanceRecommendationOptions:
+        RDSDBInstanceRecommendationOptions.t option
+        [@ocaml.doc
+          "An array of objects that describe the recommendation options for the RDS DB instance."];
+      storageRecommendationOptions:
+        RDSDBStorageRecommendationOptions.t option
+        [@ocaml.doc
+          "An array of objects that describe the recommendation options for DB instance storage."];
+      utilizationMetrics: RDSDBUtilizationMetrics.t option
+        [@ocaml.doc
+          "An array of objects that describe the utilization metrics of the DB instance."];
+      effectiveRecommendationPreferences:
+        RDSEffectiveRecommendationPreferences.t option
+        [@ocaml.doc
+          "Describes the effective recommendation preferences for DB instances."];
+      lookbackPeriodInDays: LookBackPeriodInDays.t option
+        [@ocaml.doc
+          "The number of days the DB instance utilization metrics were analyzed."];
+      lastRefreshTimestamp: LastRefreshTimestamp.t option
+        [@ocaml.doc
+          "The timestamp of when the DB instance recommendation was last generated."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "A list of tags assigned to your DB instance recommendations."]}
+    let make ?resourceArn =
+      fun ?accountId ->
+        fun ?engine ->
+          fun ?engineVersion ->
+            fun ?promotionTier ->
+              fun ?currentDBInstanceClass ->
+                fun ?currentStorageConfiguration ->
+                  fun ?dbClusterIdentifier ->
+                    fun ?idle ->
+                      fun ?instanceFinding ->
+                        fun ?storageFinding ->
+                          fun ?instanceFindingReasonCodes ->
+                            fun ?currentInstancePerformanceRisk ->
+                              fun
+                                ?currentStorageEstimatedMonthlyVolumeIOPsCostVariation
+                                ->
+                                fun ?storageFindingReasonCodes ->
+                                  fun ?instanceRecommendationOptions ->
+                                    fun ?storageRecommendationOptions ->
+                                      fun ?utilizationMetrics ->
+                                        fun
+                                          ?effectiveRecommendationPreferences
+                                          ->
+                                          fun ?lookbackPeriodInDays ->
+                                            fun ?lastRefreshTimestamp ->
+                                              fun ?tags ->
+                                                fun () ->
+                                                  {
+                                                    resourceArn;
+                                                    accountId;
+                                                    engine;
+                                                    engineVersion;
+                                                    promotionTier;
+                                                    currentDBInstanceClass;
+                                                    currentStorageConfiguration;
+                                                    dbClusterIdentifier;
+                                                    idle;
+                                                    instanceFinding;
+                                                    storageFinding;
+                                                    instanceFindingReasonCodes;
+                                                    currentInstancePerformanceRisk;
+                                                    currentStorageEstimatedMonthlyVolumeIOPsCostVariation;
+                                                    storageFindingReasonCodes;
+                                                    instanceRecommendationOptions;
+                                                    storageRecommendationOptions;
+                                                    utilizationMetrics;
+                                                    effectiveRecommendationPreferences;
+                                                    lookbackPeriodInDays;
+                                                    lastRefreshTimestamp;
+                                                    tags
+                                                  }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("accountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("engine", (Option.map x.engine ~f:Engine.to_value));
+        ("engineVersion",
+          (Option.map x.engineVersion ~f:EngineVersion.to_value));
+        ("promotionTier",
+          (Option.map x.promotionTier ~f:PromotionTier.to_value));
+        ("currentDBInstanceClass",
+          (Option.map x.currentDBInstanceClass
+             ~f:CurrentDBInstanceClass.to_value));
+        ("currentStorageConfiguration",
+          (Option.map x.currentStorageConfiguration
+             ~f:DBStorageConfiguration.to_value));
+        ("dbClusterIdentifier",
+          (Option.map x.dbClusterIdentifier ~f:DBClusterIdentifier.to_value));
+        ("idle", (Option.map x.idle ~f:Idle.to_value));
+        ("instanceFinding",
+          (Option.map x.instanceFinding ~f:RDSInstanceFinding.to_value));
+        ("storageFinding",
+          (Option.map x.storageFinding ~f:RDSStorageFinding.to_value));
+        ("instanceFindingReasonCodes",
+          (Option.map x.instanceFindingReasonCodes
+             ~f:RDSInstanceFindingReasonCodes.to_value));
+        ("currentInstancePerformanceRisk",
+          (Option.map x.currentInstancePerformanceRisk
+             ~f:RDSCurrentInstancePerformanceRisk.to_value));
+        ("currentStorageEstimatedMonthlyVolumeIOPsCostVariation",
+          (Option.map x.currentStorageEstimatedMonthlyVolumeIOPsCostVariation
+             ~f:RDSEstimatedMonthlyVolumeIOPsCostVariation.to_value));
+        ("storageFindingReasonCodes",
+          (Option.map x.storageFindingReasonCodes
+             ~f:RDSStorageFindingReasonCodes.to_value));
+        ("instanceRecommendationOptions",
+          (Option.map x.instanceRecommendationOptions
+             ~f:RDSDBInstanceRecommendationOptions.to_value));
+        ("storageRecommendationOptions",
+          (Option.map x.storageRecommendationOptions
+             ~f:RDSDBStorageRecommendationOptions.to_value));
+        ("utilizationMetrics",
+          (Option.map x.utilizationMetrics
+             ~f:RDSDBUtilizationMetrics.to_value));
+        ("effectiveRecommendationPreferences",
+          (Option.map x.effectiveRecommendationPreferences
+             ~f:RDSEffectiveRecommendationPreferences.to_value));
+        ("lookbackPeriodInDays",
+          (Option.map x.lookbackPeriodInDays ~f:LookBackPeriodInDays.to_value));
+        ("lastRefreshTimestamp",
+          (Option.map x.lastRefreshTimestamp ~f:LastRefreshTimestamp.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let lastRefreshTimestamp =
+        (Option.map ~f:LastRefreshTimestamp.of_xml)
+          (Xml.child xml_arg0 "lastRefreshTimestamp") in
+      let lookbackPeriodInDays =
+        (Option.map ~f:LookBackPeriodInDays.of_xml)
+          (Xml.child xml_arg0 "lookbackPeriodInDays") in
+      let effectiveRecommendationPreferences =
+        (Option.map ~f:RDSEffectiveRecommendationPreferences.of_xml)
+          (Xml.child xml_arg0 "effectiveRecommendationPreferences") in
+      let utilizationMetrics =
+        (Option.map ~f:RDSDBUtilizationMetrics.of_xml)
+          (Xml.child xml_arg0 "utilizationMetrics") in
+      let storageRecommendationOptions =
+        (Option.map ~f:RDSDBStorageRecommendationOptions.of_xml)
+          (Xml.child xml_arg0 "storageRecommendationOptions") in
+      let instanceRecommendationOptions =
+        (Option.map ~f:RDSDBInstanceRecommendationOptions.of_xml)
+          (Xml.child xml_arg0 "instanceRecommendationOptions") in
+      let storageFindingReasonCodes =
+        (Option.map ~f:RDSStorageFindingReasonCodes.of_xml)
+          (Xml.child xml_arg0 "storageFindingReasonCodes") in
+      let currentStorageEstimatedMonthlyVolumeIOPsCostVariation =
+        (Option.map ~f:RDSEstimatedMonthlyVolumeIOPsCostVariation.of_xml)
+          (Xml.child xml_arg0
+             "currentStorageEstimatedMonthlyVolumeIOPsCostVariation") in
+      let currentInstancePerformanceRisk =
+        (Option.map ~f:RDSCurrentInstancePerformanceRisk.of_xml)
+          (Xml.child xml_arg0 "currentInstancePerformanceRisk") in
+      let instanceFindingReasonCodes =
+        (Option.map ~f:RDSInstanceFindingReasonCodes.of_xml)
+          (Xml.child xml_arg0 "instanceFindingReasonCodes") in
+      let storageFinding =
+        (Option.map ~f:RDSStorageFinding.of_xml)
+          (Xml.child xml_arg0 "storageFinding") in
+      let instanceFinding =
+        (Option.map ~f:RDSInstanceFinding.of_xml)
+          (Xml.child xml_arg0 "instanceFinding") in
+      let idle = (Option.map ~f:Idle.of_xml) (Xml.child xml_arg0 "idle") in
+      let dbClusterIdentifier =
+        (Option.map ~f:DBClusterIdentifier.of_xml)
+          (Xml.child xml_arg0 "dbClusterIdentifier") in
+      let currentStorageConfiguration =
+        (Option.map ~f:DBStorageConfiguration.of_xml)
+          (Xml.child xml_arg0 "currentStorageConfiguration") in
+      let currentDBInstanceClass =
+        (Option.map ~f:CurrentDBInstanceClass.of_xml)
+          (Xml.child xml_arg0 "currentDBInstanceClass") in
+      let promotionTier =
+        (Option.map ~f:PromotionTier.of_xml)
+          (Xml.child xml_arg0 "promotionTier") in
+      let engineVersion =
+        (Option.map ~f:EngineVersion.of_xml)
+          (Xml.child xml_arg0 "engineVersion") in
+      let engine =
+        (Option.map ~f:Engine.of_xml) (Xml.child xml_arg0 "engine") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      make ?tags ?lastRefreshTimestamp ?lookbackPeriodInDays
+        ?effectiveRecommendationPreferences ?utilizationMetrics
+        ?storageRecommendationOptions ?instanceRecommendationOptions
+        ?storageFindingReasonCodes
+        ?currentStorageEstimatedMonthlyVolumeIOPsCostVariation
+        ?currentInstancePerformanceRisk ?instanceFindingReasonCodes
+        ?storageFinding ?instanceFinding ?idle ?dbClusterIdentifier
+        ?currentStorageConfiguration ?currentDBInstanceClass ?promotionTier
+        ?engineVersion ?engine ?accountId ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let lastRefreshTimestamp =
+        field_map json__ "lastRefreshTimestamp" LastRefreshTimestamp.of_json in
+      let lookbackPeriodInDays =
+        field_map json__ "lookbackPeriodInDays" LookBackPeriodInDays.of_json in
+      let effectiveRecommendationPreferences =
+        field_map json__ "effectiveRecommendationPreferences"
+          RDSEffectiveRecommendationPreferences.of_json in
+      let utilizationMetrics =
+        field_map json__ "utilizationMetrics" RDSDBUtilizationMetrics.of_json in
+      let storageRecommendationOptions =
+        field_map json__ "storageRecommendationOptions"
+          RDSDBStorageRecommendationOptions.of_json in
+      let instanceRecommendationOptions =
+        field_map json__ "instanceRecommendationOptions"
+          RDSDBInstanceRecommendationOptions.of_json in
+      let storageFindingReasonCodes =
+        field_map json__ "storageFindingReasonCodes"
+          RDSStorageFindingReasonCodes.of_json in
+      let currentStorageEstimatedMonthlyVolumeIOPsCostVariation =
+        field_map json__
+          "currentStorageEstimatedMonthlyVolumeIOPsCostVariation"
+          RDSEstimatedMonthlyVolumeIOPsCostVariation.of_json in
+      let currentInstancePerformanceRisk =
+        field_map json__ "currentInstancePerformanceRisk"
+          RDSCurrentInstancePerformanceRisk.of_json in
+      let instanceFindingReasonCodes =
+        field_map json__ "instanceFindingReasonCodes"
+          RDSInstanceFindingReasonCodes.of_json in
+      let storageFinding =
+        field_map json__ "storageFinding" RDSStorageFinding.of_json in
+      let instanceFinding =
+        field_map json__ "instanceFinding" RDSInstanceFinding.of_json in
+      let idle = field_map json__ "idle" Idle.of_json in
+      let dbClusterIdentifier =
+        field_map json__ "dbClusterIdentifier" DBClusterIdentifier.of_json in
+      let currentStorageConfiguration =
+        field_map json__ "currentStorageConfiguration"
+          DBStorageConfiguration.of_json in
+      let currentDBInstanceClass =
+        field_map json__ "currentDBInstanceClass"
+          CurrentDBInstanceClass.of_json in
+      let promotionTier =
+        field_map json__ "promotionTier" PromotionTier.of_json in
+      let engineVersion =
+        field_map json__ "engineVersion" EngineVersion.of_json in
+      let engine = field_map json__ "engine" Engine.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
+      let resourceArn = field_map json__ "resourceArn" ResourceArn.of_json in
+      make ?tags ?lastRefreshTimestamp ?lookbackPeriodInDays
+        ?effectiveRecommendationPreferences ?utilizationMetrics
+        ?storageRecommendationOptions ?instanceRecommendationOptions
+        ?storageFindingReasonCodes
+        ?currentStorageEstimatedMonthlyVolumeIOPsCostVariation
+        ?currentInstancePerformanceRisk ?instanceFindingReasonCodes
+        ?storageFinding ?instanceFinding ?idle ?dbClusterIdentifier
+        ?currentStorageConfiguration ?currentDBInstanceClass ?promotionTier
+        ?engineVersion ?engine ?accountId ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an Amazon Aurora and RDS database recommendation."]
+module RDSDBRecommendationFilter =
+  struct
+    type nonrec t =
+      {
+      name: RDSDBRecommendationFilterName.t option
+        [@ocaml.doc
+          "The name of the filter. Specify Finding to return recommendations with a specific finding classification. You can filter your DB instance recommendations by tag:key and tag-key tags. A tag:key is a key and value combination of a tag assigned to your DB instance recommendations. Use the tag key in the filter name and the tag value as the filter value. For example, to find all DB instance recommendations that have a tag with the key of Owner and the value of TeamA, specify tag:Owner for the filter name and TeamA for the filter value. A tag-key is the key of a tag assigned to your DB instance recommendations. Use this filter to find all of your DB instance recommendations that have a tag with a specific key. This doesn\226\128\153t consider the tag value. For example, you can find your DB instance recommendations with a tag key value of Owner or without any tag keys assigned."];
+      values: FilterValues.t option [@ocaml.doc "The value of the filter."]}
+    let make ?name = fun ?values -> fun () -> { name; values }
+    let to_value x =
+      structure_to_value
+        [("name",
+           (Option.map x.name ~f:RDSDBRecommendationFilterName.to_value));
+        ("values", (Option.map x.values ~f:FilterValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:FilterValues.of_xml) (Xml.child xml_arg0 "values") in
+      let name =
+        (Option.map ~f:RDSDBRecommendationFilterName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values = field_map json__ "values" FilterValues.of_json in
+      let name =
+        field_map json__ "name" RDSDBRecommendationFilterName.of_json in
+      make ?values ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a filter that returns a more specific list of DB instance recommendations. Use this filter with the GetECSServiceRecommendations action."]
+module RDSDatabaseRecommendedOptionProjectedMetric =
+  struct
+    type nonrec t =
+      {
+      recommendedDBInstanceClass: RecommendedDBInstanceClass.t option
+        [@ocaml.doc
+          "The recommended DB instance class for the Amazon Aurora or RDS database."];
+      rank: Rank.t option
+        [@ocaml.doc
+          "The rank identifier of the Amazon Aurora or RDS DB instance recommendation option."];
+      projectedMetrics: RDSDatabaseProjectedMetrics.t option
+        [@ocaml.doc
+          "An array of objects that describe the projected metric."]}
+    let make ?recommendedDBInstanceClass =
+      fun ?rank ->
+        fun ?projectedMetrics ->
+          fun () -> { recommendedDBInstanceClass; rank; projectedMetrics }
+    let to_value x =
+      structure_to_value
+        [("recommendedDBInstanceClass",
+           (Option.map x.recommendedDBInstanceClass
+              ~f:RecommendedDBInstanceClass.to_value));
+        ("rank", (Option.map x.rank ~f:Rank.to_value));
+        ("projectedMetrics",
+          (Option.map x.projectedMetrics
+             ~f:RDSDatabaseProjectedMetrics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let projectedMetrics =
+        (Option.map ~f:RDSDatabaseProjectedMetrics.of_xml)
+          (Xml.child xml_arg0 "projectedMetrics") in
+      let rank = (Option.map ~f:Rank.of_xml) (Xml.child xml_arg0 "rank") in
+      let recommendedDBInstanceClass =
+        (Option.map ~f:RecommendedDBInstanceClass.of_xml)
+          (Xml.child xml_arg0 "recommendedDBInstanceClass") in
+      make ?projectedMetrics ?rank ?recommendedDBInstanceClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let projectedMetrics =
+        field_map json__ "projectedMetrics"
+          RDSDatabaseProjectedMetrics.of_json in
+      let rank = field_map json__ "rank" Rank.of_json in
+      let recommendedDBInstanceClass =
+        field_map json__ "recommendedDBInstanceClass"
+          RecommendedDBInstanceClass.of_json in
+      make ?projectedMetrics ?rank ?recommendedDBInstanceClass ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the projected metrics of an Amazon Aurora and RDS database recommendation option. To determine the performance difference between your current Amazon Aurora and RDS database and the recommended option, compare the metric data of your service against its projected metric data."]
+module LicenseRecommendation =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc "The ARN that identifies the Amazon EC2 instance."];
+      accountId: AccountId.t option
+        [@ocaml.doc "The Amazon Web Services account ID of the license."];
+      currentLicenseConfiguration: LicenseConfiguration.t option
+        [@ocaml.doc
+          "An object that describes the current configuration of an instance that runs on a license."];
+      lookbackPeriodInDays: LookBackPeriodInDays.t option
+        [@ocaml.doc
+          "The number of days for which utilization metrics were analyzed for an instance that runs on a license."];
+      lastRefreshTimestamp: LastRefreshTimestamp.t option
+        [@ocaml.doc
+          "The timestamp of when the license recommendation was last generated."];
+      finding: LicenseFinding.t option
+        [@ocaml.doc
+          "The finding classification for an instance that runs on a license. Findings include: InsufficentMetrics \226\128\148 When Compute Optimizer detects that your CloudWatch Application Insights isn't enabled or is enabled with insufficient permissions. NotOptimized \226\128\148 When Compute Optimizer detects that your EC2 infrastructure isn't using any of the SQL server license features you're paying for, a license is considered not optimized. Optimized \226\128\148 When Compute Optimizer detects that all specifications of your license meet the performance requirements of your workload."];
+      findingReasonCodes: LicenseFindingReasonCodes.t option
+        [@ocaml.doc
+          "The reason for the finding classification for an instance that runs on a license. Finding reason codes include: Optimized \226\128\148 All specifications of your license meet the performance requirements of your workload. LicenseOverprovisioned \226\128\148 A license is considered over-provisioned when your license can be downgraded while still meeting the performance requirements of your workload. InvalidCloudwatchApplicationInsights \226\128\148 CloudWatch Application Insights isn't configured properly. CloudwatchApplicationInsightsError \226\128\148 There is a CloudWatch Application Insights error."];
+      licenseRecommendationOptions: LicenseRecommendationOptions.t option
+        [@ocaml.doc
+          "An array of objects that describe the license recommendation options."];
+      tags: Tags.t option
+        [@ocaml.doc "A list of tags assigned to an EC2 instance."]}
+    let make ?resourceArn =
+      fun ?accountId ->
+        fun ?currentLicenseConfiguration ->
+          fun ?lookbackPeriodInDays ->
+            fun ?lastRefreshTimestamp ->
+              fun ?finding ->
+                fun ?findingReasonCodes ->
+                  fun ?licenseRecommendationOptions ->
+                    fun ?tags ->
+                      fun () ->
+                        {
+                          resourceArn;
+                          accountId;
+                          currentLicenseConfiguration;
+                          lookbackPeriodInDays;
+                          lastRefreshTimestamp;
+                          finding;
+                          findingReasonCodes;
+                          licenseRecommendationOptions;
+                          tags
+                        }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("accountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("currentLicenseConfiguration",
+          (Option.map x.currentLicenseConfiguration
+             ~f:LicenseConfiguration.to_value));
+        ("lookbackPeriodInDays",
+          (Option.map x.lookbackPeriodInDays ~f:LookBackPeriodInDays.to_value));
+        ("lastRefreshTimestamp",
+          (Option.map x.lastRefreshTimestamp ~f:LastRefreshTimestamp.to_value));
+        ("finding", (Option.map x.finding ~f:LicenseFinding.to_value));
+        ("findingReasonCodes",
+          (Option.map x.findingReasonCodes
+             ~f:LicenseFindingReasonCodes.to_value));
+        ("licenseRecommendationOptions",
+          (Option.map x.licenseRecommendationOptions
+             ~f:LicenseRecommendationOptions.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let licenseRecommendationOptions =
+        (Option.map ~f:LicenseRecommendationOptions.of_xml)
+          (Xml.child xml_arg0 "licenseRecommendationOptions") in
+      let findingReasonCodes =
+        (Option.map ~f:LicenseFindingReasonCodes.of_xml)
+          (Xml.child xml_arg0 "findingReasonCodes") in
+      let finding =
+        (Option.map ~f:LicenseFinding.of_xml) (Xml.child xml_arg0 "finding") in
+      let lastRefreshTimestamp =
+        (Option.map ~f:LastRefreshTimestamp.of_xml)
+          (Xml.child xml_arg0 "lastRefreshTimestamp") in
+      let lookbackPeriodInDays =
+        (Option.map ~f:LookBackPeriodInDays.of_xml)
+          (Xml.child xml_arg0 "lookbackPeriodInDays") in
+      let currentLicenseConfiguration =
+        (Option.map ~f:LicenseConfiguration.of_xml)
+          (Xml.child xml_arg0 "currentLicenseConfiguration") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      make ?tags ?licenseRecommendationOptions ?findingReasonCodes ?finding
+        ?lastRefreshTimestamp ?lookbackPeriodInDays
+        ?currentLicenseConfiguration ?accountId ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let licenseRecommendationOptions =
+        field_map json__ "licenseRecommendationOptions"
+          LicenseRecommendationOptions.of_json in
+      let findingReasonCodes =
+        field_map json__ "findingReasonCodes"
+          LicenseFindingReasonCodes.of_json in
+      let finding = field_map json__ "finding" LicenseFinding.of_json in
+      let lastRefreshTimestamp =
+        field_map json__ "lastRefreshTimestamp" LastRefreshTimestamp.of_json in
+      let lookbackPeriodInDays =
+        field_map json__ "lookbackPeriodInDays" LookBackPeriodInDays.of_json in
+      let currentLicenseConfiguration =
+        field_map json__ "currentLicenseConfiguration"
+          LicenseConfiguration.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
+      let resourceArn = field_map json__ "resourceArn" ResourceArn.of_json in
+      make ?tags ?licenseRecommendationOptions ?findingReasonCodes ?finding
+        ?lastRefreshTimestamp ?lookbackPeriodInDays
+        ?currentLicenseConfiguration ?accountId ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a license recommendation for an EC2 instance."]
+module LicenseRecommendationFilter =
+  struct
+    type nonrec t =
+      {
+      name: LicenseRecommendationFilterName.t option
+        [@ocaml.doc
+          "The name of the filter. Specify Finding to return recommendations with a specific finding classification. Specify FindingReasonCode to return recommendations with a specific finding reason code. You can filter your license recommendations by tag:key and tag-key tags. A tag:key is a key and value combination of a tag assigned to your license recommendations. Use the tag key in the filter name and the tag value as the filter value. For example, to find all license recommendations that have a tag with the key of Owner and the value of TeamA, specify tag:Owner for the filter name and TeamA for the filter value. A tag-key is the key of a tag assigned to your license recommendations. Use this filter to find all of your license recommendations that have a tag with a specific key. This doesn\226\128\153t consider the tag value. For example, you can find your license recommendations with a tag key value of Owner or without any tag keys assigned."];
+      values: FilterValues.t option
+        [@ocaml.doc
+          "The value of the filter. The valid values for this parameter are as follows, depending on what you specify for the name parameter: If you specify the name parameter as Finding, then specify Optimized, NotOptimized, or InsufficentMetrics. If you specify the name parameter as FindingReasonCode, then specify Optimized, LicenseOverprovisioned, InvalidCloudwatchApplicationInsights, or CloudwatchApplicationInsightsError."]}
+    let make ?name = fun ?values -> fun () -> { name; values }
+    let to_value x =
+      structure_to_value
+        [("name",
+           (Option.map x.name ~f:LicenseRecommendationFilterName.to_value));
+        ("values", (Option.map x.values ~f:FilterValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:FilterValues.of_xml) (Xml.child xml_arg0 "values") in
+      let name =
+        (Option.map ~f:LicenseRecommendationFilterName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values = field_map json__ "values" FilterValues.of_json in
+      let name =
+        field_map json__ "name" LicenseRecommendationFilterName.of_json in
+      make ?values ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a filter that returns a more specific list of license recommendations. Use this filter with the GetLicenseRecommendation action."]
 module LambdaFunctionRecommendation =
   struct
     type nonrec t =
@@ -3382,7 +9451,14 @@ module LambdaFunctionRecommendation =
           "An array of objects that describe the memory configuration recommendation options for the function."];
       currentPerformanceRisk: CurrentPerformanceRisk.t option
         [@ocaml.doc
-          "The risk of the current Lambda function not meeting the performance needs of its workloads. The higher the risk, the more likely the current Lambda function requires more memory."]}
+          "The risk of the current Lambda function not meeting the performance needs of its workloads. The higher the risk, the more likely the current Lambda function requires more memory."];
+      effectiveRecommendationPreferences:
+        LambdaEffectiveRecommendationPreferences.t option
+        [@ocaml.doc
+          "Describes the effective recommendation preferences for Lambda functions."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "A list of tags assigned to your Lambda function recommendations."]}
     let make ?functionArn =
       fun ?functionVersion ->
         fun ?accountId ->
@@ -3395,21 +9471,25 @@ module LambdaFunctionRecommendation =
                       fun ?findingReasonCodes ->
                         fun ?memorySizeRecommendationOptions ->
                           fun ?currentPerformanceRisk ->
-                            fun () ->
-                              {
-                                functionArn;
-                                functionVersion;
-                                accountId;
-                                currentMemorySize;
-                                numberOfInvocations;
-                                utilizationMetrics;
-                                lookbackPeriodInDays;
-                                lastRefreshTimestamp;
-                                finding;
-                                findingReasonCodes;
-                                memorySizeRecommendationOptions;
-                                currentPerformanceRisk
-                              }
+                            fun ?effectiveRecommendationPreferences ->
+                              fun ?tags ->
+                                fun () ->
+                                  {
+                                    functionArn;
+                                    functionVersion;
+                                    accountId;
+                                    currentMemorySize;
+                                    numberOfInvocations;
+                                    utilizationMetrics;
+                                    lookbackPeriodInDays;
+                                    lastRefreshTimestamp;
+                                    finding;
+                                    findingReasonCodes;
+                                    memorySizeRecommendationOptions;
+                                    currentPerformanceRisk;
+                                    effectiveRecommendationPreferences;
+                                    tags
+                                  }
     let to_value x =
       structure_to_value
         [("functionArn", (Option.map x.functionArn ~f:FunctionArn.to_value));
@@ -3438,9 +9518,17 @@ module LambdaFunctionRecommendation =
              ~f:LambdaFunctionMemoryRecommendationOptions.to_value));
         ("currentPerformanceRisk",
           (Option.map x.currentPerformanceRisk
-             ~f:CurrentPerformanceRisk.to_value))]
+             ~f:CurrentPerformanceRisk.to_value));
+        ("effectiveRecommendationPreferences",
+          (Option.map x.effectiveRecommendationPreferences
+             ~f:LambdaEffectiveRecommendationPreferences.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let effectiveRecommendationPreferences =
+        (Option.map ~f:LambdaEffectiveRecommendationPreferences.of_xml)
+          (Xml.child xml_arg0 "effectiveRecommendationPreferences") in
       let currentPerformanceRisk =
         (Option.map ~f:CurrentPerformanceRisk.of_xml)
           (Xml.child xml_arg0 "currentPerformanceRisk") in
@@ -3475,42 +9563,49 @@ module LambdaFunctionRecommendation =
           (Xml.child xml_arg0 "functionVersion") in
       let functionArn =
         (Option.map ~f:FunctionArn.of_xml) (Xml.child xml_arg0 "functionArn") in
-      make ?currentPerformanceRisk ?memorySizeRecommendationOptions
-        ?findingReasonCodes ?finding ?lastRefreshTimestamp
-        ?lookbackPeriodInDays ?utilizationMetrics ?numberOfInvocations
-        ?currentMemorySize ?accountId ?functionVersion ?functionArn ()
+      make ?tags ?effectiveRecommendationPreferences ?currentPerformanceRisk
+        ?memorySizeRecommendationOptions ?findingReasonCodes ?finding
+        ?lastRefreshTimestamp ?lookbackPeriodInDays ?utilizationMetrics
+        ?numberOfInvocations ?currentMemorySize ?accountId ?functionVersion
+        ?functionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let effectiveRecommendationPreferences =
+        field_map json__ "effectiveRecommendationPreferences"
+          LambdaEffectiveRecommendationPreferences.of_json in
       let currentPerformanceRisk =
-        field_map json "currentPerformanceRisk"
+        field_map json__ "currentPerformanceRisk"
           CurrentPerformanceRisk.of_json in
       let memorySizeRecommendationOptions =
-        field_map json "memorySizeRecommendationOptions"
+        field_map json__ "memorySizeRecommendationOptions"
           LambdaFunctionMemoryRecommendationOptions.of_json in
       let findingReasonCodes =
-        field_map json "findingReasonCodes"
+        field_map json__ "findingReasonCodes"
           LambdaFunctionRecommendationFindingReasonCodes.of_json in
       let finding =
-        field_map json "finding" LambdaFunctionRecommendationFinding.of_json in
+        field_map json__ "finding"
+          LambdaFunctionRecommendationFinding.of_json in
       let lastRefreshTimestamp =
-        field_map json "lastRefreshTimestamp" LastRefreshTimestamp.of_json in
+        field_map json__ "lastRefreshTimestamp" LastRefreshTimestamp.of_json in
       let lookbackPeriodInDays =
-        field_map json "lookbackPeriodInDays" LookBackPeriodInDays.of_json in
+        field_map json__ "lookbackPeriodInDays" LookBackPeriodInDays.of_json in
       let utilizationMetrics =
-        field_map json "utilizationMetrics"
+        field_map json__ "utilizationMetrics"
           LambdaFunctionUtilizationMetrics.of_json in
       let numberOfInvocations =
-        field_map json "numberOfInvocations" NumberOfInvocations.of_json in
+        field_map json__ "numberOfInvocations" NumberOfInvocations.of_json in
       let currentMemorySize =
-        field_map json "currentMemorySize" MemorySize.of_json in
-      let accountId = field_map json "accountId" AccountId.of_json in
+        field_map json__ "currentMemorySize" MemorySize.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       let functionVersion =
-        field_map json "functionVersion" FunctionVersion.of_json in
-      let functionArn = field_map json "functionArn" FunctionArn.of_json in
-      make ?currentPerformanceRisk ?memorySizeRecommendationOptions
-        ?findingReasonCodes ?finding ?lastRefreshTimestamp
-        ?lookbackPeriodInDays ?utilizationMetrics ?numberOfInvocations
-        ?currentMemorySize ?accountId ?functionVersion ?functionArn ()
+        field_map json__ "functionVersion" FunctionVersion.of_json in
+      let functionArn = field_map json__ "functionArn" FunctionArn.of_json in
+      make ?tags ?effectiveRecommendationPreferences ?currentPerformanceRisk
+        ?memorySizeRecommendationOptions ?findingReasonCodes ?finding
+        ?lastRefreshTimestamp ?lookbackPeriodInDays ?utilizationMetrics
+        ?numberOfInvocations ?currentMemorySize ?accountId ?functionVersion
+        ?functionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an Lambda function recommendation."]
 module LambdaFunctionRecommendationFilter =
@@ -3519,7 +9614,7 @@ module LambdaFunctionRecommendationFilter =
       {
       name: LambdaFunctionRecommendationFilterName.t option
         [@ocaml.doc
-          "The name of the filter. Specify Finding to return recommendations with a specific finding classification (for example, NotOptimized). Specify FindingReasonCode to return recommendations with a specific finding reason code (for example, MemoryUnderprovisioned)."];
+          "The name of the filter. Specify Finding to return recommendations with a specific finding classification (for example, NotOptimized). Specify FindingReasonCode to return recommendations with a specific finding reason code (for example, MemoryUnderprovisioned). You can filter your Lambda function recommendations by tag:key and tag-key tags. A tag:key is a key and value combination of a tag assigned to your Lambda function recommendations. Use the tag key in the filter name and the tag value as the filter value. For example, to find all Lambda function recommendations that have a tag with the key of Owner and the value of TeamA, specify tag:Owner for the filter name and TeamA for the filter value. A tag-key is the key of a tag assigned to your Lambda function recommendations. Use this filter to find all of your Lambda function recommendations that have a tag with a specific key. This doesn\226\128\153t consider the tag value. For example, you can find your Lambda function recommendations with a tag key value of Owner or without any tag keys assigned."];
       values: FilterValues.t option
         [@ocaml.doc
           "The value of the filter. The valid values for this parameter are as follows, depending on what you specify for the name parameter: Specify Optimized, NotOptimized, or Unavailable if you specify the name parameter as Finding. Specify MemoryOverprovisioned, MemoryUnderprovisioned, InsufficientData, or Inconclusive if you specify the name parameter as FindingReasonCode."]}
@@ -3539,14 +9634,284 @@ module LambdaFunctionRecommendationFilter =
           (Xml.child xml_arg0 "name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" FilterValues.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" FilterValues.of_json in
       let name =
-        field_map json "name" LambdaFunctionRecommendationFilterName.of_json in
+        field_map json__ "name"
+          LambdaFunctionRecommendationFilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a filter that returns a more specific list of Lambda function recommendations. Use this filter with the GetLambdaFunctionRecommendations action. You can use EBSFilter with the GetEBSVolumeRecommendations action, JobFilter with the DescribeRecommendationExportJobs action, and Filter with the GetAutoScalingGroupRecommendations and GetEC2InstanceRecommendations actions."]
+module IdleRecommendationError =
+  struct
+    type nonrec t =
+      {
+      identifier: Identifier.t option [@ocaml.doc "The ID of the error."];
+      code: Code.t option [@ocaml.doc "The error code."];
+      message: Message.t option [@ocaml.doc "The error message."];
+      resourceType: IdleRecommendationResourceType.t option
+        [@ocaml.doc "The type of resource associated with the error."]}
+    let make ?identifier =
+      fun ?code ->
+        fun ?message ->
+          fun ?resourceType ->
+            fun () -> { identifier; code; message; resourceType }
+    let to_value x =
+      structure_to_value
+        [("identifier", (Option.map x.identifier ~f:Identifier.to_value));
+        ("code", (Option.map x.code ~f:Code.to_value));
+        ("message", (Option.map x.message ~f:Message.to_value));
+        ("resourceType",
+          (Option.map x.resourceType
+             ~f:IdleRecommendationResourceType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        (Option.map ~f:IdleRecommendationResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
+      let code = (Option.map ~f:Code.of_xml) (Xml.child xml_arg0 "code") in
+      let identifier =
+        (Option.map ~f:Identifier.of_xml) (Xml.child xml_arg0 "identifier") in
+      make ?resourceType ?message ?code ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType =
+        field_map json__ "resourceType"
+          IdleRecommendationResourceType.of_json in
+      let message = field_map json__ "message" Message.of_json in
+      let code = field_map json__ "code" Code.of_json in
+      let identifier = field_map json__ "identifier" Identifier.of_json in
+      make ?resourceType ?message ?code ?identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns of list of resources that doesn't have idle recommendations."]
+module IdleRecommendation =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc "The ARN of the current idle resource."];
+      resourceId: ResourceId.t option
+        [@ocaml.doc "The unique identifier for the resource."];
+      resourceType: IdleRecommendationResourceType.t option
+        [@ocaml.doc "The type of resource that is idle."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the idle resource."];
+      finding: IdleFinding.t option
+        [@ocaml.doc "The finding classification of an idle resource."];
+      findingDescription: IdleFindingDescription.t option
+        [@ocaml.doc "A summary of the findings for the resource."];
+      savingsOpportunity: IdleSavingsOpportunity.t option
+        [@ocaml.doc "The savings opportunity for the idle resource."];
+      savingsOpportunityAfterDiscounts:
+        IdleSavingsOpportunityAfterDiscounts.t option
+        [@ocaml.doc
+          "The savings opportunity for the idle resource after any applying discounts."];
+      utilizationMetrics: IdleUtilizationMetrics.t option
+        [@ocaml.doc
+          "An array of objects that describe the utilization metrics of the idle resource."];
+      lookBackPeriodInDays: LookBackPeriodInDays.t option
+        [@ocaml.doc
+          "The number of days the idle resource utilization metrics were analyzed."];
+      lastRefreshTimestamp: LastRefreshTimestamp.t option
+        [@ocaml.doc
+          "The timestamp of when the idle resource recommendation was last generated."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "A list of tags assigned to your idle resource recommendations."]}
+    let make ?resourceArn =
+      fun ?resourceId ->
+        fun ?resourceType ->
+          fun ?accountId ->
+            fun ?finding ->
+              fun ?findingDescription ->
+                fun ?savingsOpportunity ->
+                  fun ?savingsOpportunityAfterDiscounts ->
+                    fun ?utilizationMetrics ->
+                      fun ?lookBackPeriodInDays ->
+                        fun ?lastRefreshTimestamp ->
+                          fun ?tags ->
+                            fun () ->
+                              {
+                                resourceArn;
+                                resourceId;
+                                resourceType;
+                                accountId;
+                                finding;
+                                findingDescription;
+                                savingsOpportunity;
+                                savingsOpportunityAfterDiscounts;
+                                utilizationMetrics;
+                                lookBackPeriodInDays;
+                                lastRefreshTimestamp;
+                                tags
+                              }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:ResourceId.to_value));
+        ("resourceType",
+          (Option.map x.resourceType
+             ~f:IdleRecommendationResourceType.to_value));
+        ("accountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("finding", (Option.map x.finding ~f:IdleFinding.to_value));
+        ("findingDescription",
+          (Option.map x.findingDescription ~f:IdleFindingDescription.to_value));
+        ("savingsOpportunity",
+          (Option.map x.savingsOpportunity ~f:IdleSavingsOpportunity.to_value));
+        ("savingsOpportunityAfterDiscounts",
+          (Option.map x.savingsOpportunityAfterDiscounts
+             ~f:IdleSavingsOpportunityAfterDiscounts.to_value));
+        ("utilizationMetrics",
+          (Option.map x.utilizationMetrics ~f:IdleUtilizationMetrics.to_value));
+        ("lookBackPeriodInDays",
+          (Option.map x.lookBackPeriodInDays ~f:LookBackPeriodInDays.to_value));
+        ("lastRefreshTimestamp",
+          (Option.map x.lastRefreshTimestamp ~f:LastRefreshTimestamp.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let lastRefreshTimestamp =
+        (Option.map ~f:LastRefreshTimestamp.of_xml)
+          (Xml.child xml_arg0 "lastRefreshTimestamp") in
+      let lookBackPeriodInDays =
+        (Option.map ~f:LookBackPeriodInDays.of_xml)
+          (Xml.child xml_arg0 "lookBackPeriodInDays") in
+      let utilizationMetrics =
+        (Option.map ~f:IdleUtilizationMetrics.of_xml)
+          (Xml.child xml_arg0 "utilizationMetrics") in
+      let savingsOpportunityAfterDiscounts =
+        (Option.map ~f:IdleSavingsOpportunityAfterDiscounts.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunityAfterDiscounts") in
+      let savingsOpportunity =
+        (Option.map ~f:IdleSavingsOpportunity.of_xml)
+          (Xml.child xml_arg0 "savingsOpportunity") in
+      let findingDescription =
+        (Option.map ~f:IdleFindingDescription.of_xml)
+          (Xml.child xml_arg0 "findingDescription") in
+      let finding =
+        (Option.map ~f:IdleFinding.of_xml) (Xml.child xml_arg0 "finding") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
+      let resourceType =
+        (Option.map ~f:IdleRecommendationResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let resourceId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "resourceId") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      make ?tags ?lastRefreshTimestamp ?lookBackPeriodInDays
+        ?utilizationMetrics ?savingsOpportunityAfterDiscounts
+        ?savingsOpportunity ?findingDescription ?finding ?accountId
+        ?resourceType ?resourceId ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let lastRefreshTimestamp =
+        field_map json__ "lastRefreshTimestamp" LastRefreshTimestamp.of_json in
+      let lookBackPeriodInDays =
+        field_map json__ "lookBackPeriodInDays" LookBackPeriodInDays.of_json in
+      let utilizationMetrics =
+        field_map json__ "utilizationMetrics" IdleUtilizationMetrics.of_json in
+      let savingsOpportunityAfterDiscounts =
+        field_map json__ "savingsOpportunityAfterDiscounts"
+          IdleSavingsOpportunityAfterDiscounts.of_json in
+      let savingsOpportunity =
+        field_map json__ "savingsOpportunity" IdleSavingsOpportunity.of_json in
+      let findingDescription =
+        field_map json__ "findingDescription" IdleFindingDescription.of_json in
+      let finding = field_map json__ "finding" IdleFinding.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
+      let resourceType =
+        field_map json__ "resourceType"
+          IdleRecommendationResourceType.of_json in
+      let resourceId = field_map json__ "resourceId" ResourceId.of_json in
+      let resourceArn = field_map json__ "resourceArn" ResourceArn.of_json in
+      make ?tags ?lastRefreshTimestamp ?lookBackPeriodInDays
+        ?utilizationMetrics ?savingsOpportunityAfterDiscounts
+        ?savingsOpportunity ?findingDescription ?finding ?accountId
+        ?resourceType ?resourceId ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an Idle resource recommendation."]
+module IdleRecommendationFilter =
+  struct
+    type nonrec t =
+      {
+      name: IdleRecommendationFilterName.t option
+        [@ocaml.doc
+          "The name of the filter. Specify Finding to return recommendations with a specific finding classification. You can filter your idle resource recommendations by tag:key and tag-key tags. A tag:key is a key and value combination of a tag assigned to your idle resource recommendations. Use the tag key in the filter name and the tag value as the filter value. For example, to find all idle resource service recommendations that have a tag with the key of Owner and the value of TeamA, specify tag:Owner for the filter name and TeamA for the filter value. A tag-key is the key of a tag assigned to your idle resource recommendations. Use this filter to find all of your idle resource recommendations that have a tag with a specific key. This doesn\226\128\153t consider the tag value. For example, you can find your idle resource service recommendations with a tag key value of Owner or without any tag keys assigned."];
+      values: FilterValues.t option [@ocaml.doc "The value of the filter."]}
+    let make ?name = fun ?values -> fun () -> { name; values }
+    let to_value x =
+      structure_to_value
+        [("name",
+           (Option.map x.name ~f:IdleRecommendationFilterName.to_value));
+        ("values", (Option.map x.values ~f:FilterValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:FilterValues.of_xml) (Xml.child xml_arg0 "values") in
+      let name =
+        (Option.map ~f:IdleRecommendationFilterName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values = field_map json__ "values" FilterValues.of_json in
+      let name = field_map json__ "name" IdleRecommendationFilterName.of_json in
+      make ?values ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a filter that returns a more specific list of idle resource recommendations."]
+module Dimension =
+  struct
+    type nonrec t =
+      | SavingsValue 
+      | SavingsValueAfterDiscount 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SavingsValue -> "SavingsValue"
+      | SavingsValueAfterDiscount -> "SavingsValueAfterDiscount"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SavingsValue" -> SavingsValue
+      | "SavingsValueAfterDiscount" -> SavingsValueAfterDiscount
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Dimension" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Dimension" j)
+    let to_json = simple_to_json to_value
+  end
+module Order =
+  struct
+    type nonrec t =
+      | Asc 
+      | Desc 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Asc -> "Asc" | Desc -> "Desc" | Non_static_id s -> s
+    let of_string =
+      function | "Asc" -> Asc | "Desc" -> Desc | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Order" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Order" j)
+    let to_json = simple_to_json to_value
+  end
 module AccountEnrollmentStatus =
   struct
     type nonrec t =
@@ -3588,12 +9953,12 @@ module AccountEnrollmentStatus =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?lastUpdatedTimestamp ?statusReason ?status ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedTimestamp =
-        field_map json "lastUpdatedTimestamp" LastUpdatedTimestamp.of_json in
-      let statusReason = field_map json "statusReason" StatusReason.of_json in
-      let status = field_map json "status" Status.of_json in
-      let accountId = field_map json "accountId" AccountId.of_json in
+        field_map json__ "lastUpdatedTimestamp" LastUpdatedTimestamp.of_json in
+      let statusReason = field_map json__ "statusReason" StatusReason.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       make ?lastUpdatedTimestamp ?statusReason ?status ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3622,13 +9987,280 @@ module EnrollmentFilter =
           (Xml.child xml_arg0 "name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" FilterValues.of_json in
-      let name = field_map json "name" EnrollmentFilterName.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" FilterValues.of_json in
+      let name = field_map json__ "name" EnrollmentFilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a filter that returns a more specific list of account enrollment statuses. Use this filter with the GetEnrollmentStatusesForOrganization action."]
+module ECSServiceRecommendation =
+  struct
+    type nonrec t =
+      {
+      serviceArn: ServiceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the current Amazon ECS service. The following is the format of the ARN: arn:aws:ecs:region:aws_account_id:service/cluster-name/service-name"];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the Amazon ECS service."];
+      currentServiceConfiguration: ServiceConfiguration.t option
+        [@ocaml.doc "The configuration of the current Amazon ECS service."];
+      utilizationMetrics: ECSServiceUtilizationMetrics.t option
+        [@ocaml.doc
+          "An array of objects that describe the utilization metrics of the Amazon ECS service."];
+      lookbackPeriodInDays: LookBackPeriodInDays.t option
+        [@ocaml.doc
+          "The number of days the Amazon ECS service utilization metrics were analyzed."];
+      launchType: ECSServiceLaunchType.t option
+        [@ocaml.doc
+          "The launch type the Amazon ECS service is using. Compute Optimizer only supports the Fargate launch type."];
+      lastRefreshTimestamp: LastRefreshTimestamp.t option
+        [@ocaml.doc
+          "The timestamp of when the Amazon ECS service recommendation was last generated."];
+      finding: ECSServiceRecommendationFinding.t option
+        [@ocaml.doc
+          "The finding classification of an Amazon ECS service. Findings for Amazon ECS services include: Underprovisioned \226\128\148 When Compute Optimizer detects that there\226\128\153s not enough memory or CPU, an Amazon ECS service is considered under-provisioned. An under-provisioned service might result in poor application performance. Overprovisioned \226\128\148 When Compute Optimizer detects that there\226\128\153s excessive memory or CPU, an Amazon ECS service is considered over-provisioned. An over-provisioned service might result in additional infrastructure costs. Optimized \226\128\148 When both the CPU and memory of your Amazon ECS service meet the performance requirements of your workload, the service is considered optimized."];
+      findingReasonCodes: ECSServiceRecommendationFindingReasonCodes.t option
+        [@ocaml.doc
+          "The reason for the finding classification of an Amazon ECS service. Finding reason codes for Amazon ECS services include: CPUUnderprovisioned \226\128\148 The service CPU configuration can be sized up to enhance the performance of your workload. This is identified by analyzing the CPUUtilization metric of the current service during the look-back period. CPUOverprovisioned \226\128\148 The service CPU configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the CPUUtilization metric of the current service during the look-back period. MemoryUnderprovisioned \226\128\148 The service memory configuration can be sized up to enhance the performance of your workload. This is identified by analyzing the MemoryUtilization metric of the current service during the look-back period. MemoryOverprovisioned \226\128\148 The service memory configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the MemoryUtilization metric of the current service during the look-back period."];
+      serviceRecommendationOptions: ECSServiceRecommendationOptions.t option
+        [@ocaml.doc
+          "An array of objects that describe the recommendation options for the Amazon ECS service."];
+      currentPerformanceRisk: CurrentPerformanceRisk.t option
+        [@ocaml.doc
+          "The risk of the current Amazon ECS service not meeting the performance needs of its workloads. The higher the risk, the more likely the current service can't meet the performance requirements of its workload."];
+      effectiveRecommendationPreferences:
+        ECSEffectiveRecommendationPreferences.t option
+        [@ocaml.doc
+          "Describes the effective recommendation preferences for Amazon ECS services."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "A list of tags assigned to your Amazon ECS service recommendations."]}
+    let make ?serviceArn =
+      fun ?accountId ->
+        fun ?currentServiceConfiguration ->
+          fun ?utilizationMetrics ->
+            fun ?lookbackPeriodInDays ->
+              fun ?launchType ->
+                fun ?lastRefreshTimestamp ->
+                  fun ?finding ->
+                    fun ?findingReasonCodes ->
+                      fun ?serviceRecommendationOptions ->
+                        fun ?currentPerformanceRisk ->
+                          fun ?effectiveRecommendationPreferences ->
+                            fun ?tags ->
+                              fun () ->
+                                {
+                                  serviceArn;
+                                  accountId;
+                                  currentServiceConfiguration;
+                                  utilizationMetrics;
+                                  lookbackPeriodInDays;
+                                  launchType;
+                                  lastRefreshTimestamp;
+                                  finding;
+                                  findingReasonCodes;
+                                  serviceRecommendationOptions;
+                                  currentPerformanceRisk;
+                                  effectiveRecommendationPreferences;
+                                  tags
+                                }
+    let to_value x =
+      structure_to_value
+        [("serviceArn", (Option.map x.serviceArn ~f:ServiceArn.to_value));
+        ("accountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("currentServiceConfiguration",
+          (Option.map x.currentServiceConfiguration
+             ~f:ServiceConfiguration.to_value));
+        ("utilizationMetrics",
+          (Option.map x.utilizationMetrics
+             ~f:ECSServiceUtilizationMetrics.to_value));
+        ("lookbackPeriodInDays",
+          (Option.map x.lookbackPeriodInDays ~f:LookBackPeriodInDays.to_value));
+        ("launchType",
+          (Option.map x.launchType ~f:ECSServiceLaunchType.to_value));
+        ("lastRefreshTimestamp",
+          (Option.map x.lastRefreshTimestamp ~f:LastRefreshTimestamp.to_value));
+        ("finding",
+          (Option.map x.finding ~f:ECSServiceRecommendationFinding.to_value));
+        ("findingReasonCodes",
+          (Option.map x.findingReasonCodes
+             ~f:ECSServiceRecommendationFindingReasonCodes.to_value));
+        ("serviceRecommendationOptions",
+          (Option.map x.serviceRecommendationOptions
+             ~f:ECSServiceRecommendationOptions.to_value));
+        ("currentPerformanceRisk",
+          (Option.map x.currentPerformanceRisk
+             ~f:CurrentPerformanceRisk.to_value));
+        ("effectiveRecommendationPreferences",
+          (Option.map x.effectiveRecommendationPreferences
+             ~f:ECSEffectiveRecommendationPreferences.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let effectiveRecommendationPreferences =
+        (Option.map ~f:ECSEffectiveRecommendationPreferences.of_xml)
+          (Xml.child xml_arg0 "effectiveRecommendationPreferences") in
+      let currentPerformanceRisk =
+        (Option.map ~f:CurrentPerformanceRisk.of_xml)
+          (Xml.child xml_arg0 "currentPerformanceRisk") in
+      let serviceRecommendationOptions =
+        (Option.map ~f:ECSServiceRecommendationOptions.of_xml)
+          (Xml.child xml_arg0 "serviceRecommendationOptions") in
+      let findingReasonCodes =
+        (Option.map ~f:ECSServiceRecommendationFindingReasonCodes.of_xml)
+          (Xml.child xml_arg0 "findingReasonCodes") in
+      let finding =
+        (Option.map ~f:ECSServiceRecommendationFinding.of_xml)
+          (Xml.child xml_arg0 "finding") in
+      let lastRefreshTimestamp =
+        (Option.map ~f:LastRefreshTimestamp.of_xml)
+          (Xml.child xml_arg0 "lastRefreshTimestamp") in
+      let launchType =
+        (Option.map ~f:ECSServiceLaunchType.of_xml)
+          (Xml.child xml_arg0 "launchType") in
+      let lookbackPeriodInDays =
+        (Option.map ~f:LookBackPeriodInDays.of_xml)
+          (Xml.child xml_arg0 "lookbackPeriodInDays") in
+      let utilizationMetrics =
+        (Option.map ~f:ECSServiceUtilizationMetrics.of_xml)
+          (Xml.child xml_arg0 "utilizationMetrics") in
+      let currentServiceConfiguration =
+        (Option.map ~f:ServiceConfiguration.of_xml)
+          (Xml.child xml_arg0 "currentServiceConfiguration") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
+      let serviceArn =
+        (Option.map ~f:ServiceArn.of_xml) (Xml.child xml_arg0 "serviceArn") in
+      make ?tags ?effectiveRecommendationPreferences ?currentPerformanceRisk
+        ?serviceRecommendationOptions ?findingReasonCodes ?finding
+        ?lastRefreshTimestamp ?launchType ?lookbackPeriodInDays
+        ?utilizationMetrics ?currentServiceConfiguration ?accountId
+        ?serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let effectiveRecommendationPreferences =
+        field_map json__ "effectiveRecommendationPreferences"
+          ECSEffectiveRecommendationPreferences.of_json in
+      let currentPerformanceRisk =
+        field_map json__ "currentPerformanceRisk"
+          CurrentPerformanceRisk.of_json in
+      let serviceRecommendationOptions =
+        field_map json__ "serviceRecommendationOptions"
+          ECSServiceRecommendationOptions.of_json in
+      let findingReasonCodes =
+        field_map json__ "findingReasonCodes"
+          ECSServiceRecommendationFindingReasonCodes.of_json in
+      let finding =
+        field_map json__ "finding" ECSServiceRecommendationFinding.of_json in
+      let lastRefreshTimestamp =
+        field_map json__ "lastRefreshTimestamp" LastRefreshTimestamp.of_json in
+      let launchType =
+        field_map json__ "launchType" ECSServiceLaunchType.of_json in
+      let lookbackPeriodInDays =
+        field_map json__ "lookbackPeriodInDays" LookBackPeriodInDays.of_json in
+      let utilizationMetrics =
+        field_map json__ "utilizationMetrics"
+          ECSServiceUtilizationMetrics.of_json in
+      let currentServiceConfiguration =
+        field_map json__ "currentServiceConfiguration"
+          ServiceConfiguration.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
+      let serviceArn = field_map json__ "serviceArn" ServiceArn.of_json in
+      make ?tags ?effectiveRecommendationPreferences ?currentPerformanceRisk
+        ?serviceRecommendationOptions ?findingReasonCodes ?finding
+        ?lastRefreshTimestamp ?launchType ?lookbackPeriodInDays
+        ?utilizationMetrics ?currentServiceConfiguration ?accountId
+        ?serviceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an Amazon ECS service recommendation."]
+module ECSServiceRecommendationFilter =
+  struct
+    type nonrec t =
+      {
+      name: ECSServiceRecommendationFilterName.t option
+        [@ocaml.doc
+          "The name of the filter. Specify Finding to return recommendations with a specific finding classification. Specify FindingReasonCode to return recommendations with a specific finding reason code. You can filter your Amazon ECS service recommendations by tag:key and tag-key tags. A tag:key is a key and value combination of a tag assigned to your Amazon ECS service recommendations. Use the tag key in the filter name and the tag value as the filter value. For example, to find all Amazon ECS service recommendations that have a tag with the key of Owner and the value of TeamA, specify tag:Owner for the filter name and TeamA for the filter value. A tag-key is the key of a tag assigned to your Amazon ECS service recommendations. Use this filter to find all of your Amazon ECS service recommendations that have a tag with a specific key. This doesn\226\128\153t consider the tag value. For example, you can find your Amazon ECS service recommendations with a tag key value of Owner or without any tag keys assigned."];
+      values: FilterValues.t option
+        [@ocaml.doc
+          "The value of the filter. The valid values for this parameter are as follows: If you specify the name parameter as Finding, specify Optimized, Underprovisioned, or Overprovisioned. If you specify the name parameter as FindingReasonCode, specify CPUUnderprovisioned, CPUOverprovisioned, MemoryUnderprovisioned, or MemoryOverprovisioned."]}
+    let make ?name = fun ?values -> fun () -> { name; values }
+    let to_value x =
+      structure_to_value
+        [("name",
+           (Option.map x.name ~f:ECSServiceRecommendationFilterName.to_value));
+        ("values", (Option.map x.values ~f:FilterValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:FilterValues.of_xml) (Xml.child xml_arg0 "values") in
+      let name =
+        (Option.map ~f:ECSServiceRecommendationFilterName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values = field_map json__ "values" FilterValues.of_json in
+      let name =
+        field_map json__ "name" ECSServiceRecommendationFilterName.of_json in
+      make ?values ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a filter that returns a more specific list of Amazon ECS service recommendations. Use this filter with the GetECSServiceRecommendations action."]
+module ECSServiceRecommendedOptionProjectedMetric =
+  struct
+    type nonrec t =
+      {
+      recommendedCpuUnits: CpuSize.t option
+        [@ocaml.doc "The recommended CPU size for the Amazon ECS service."];
+      recommendedMemorySize: MemorySize.t option
+        [@ocaml.doc
+          "The recommended memory size for the Amazon ECS service."];
+      projectedMetrics: ECSServiceProjectedMetrics.t option
+        [@ocaml.doc
+          "An array of objects that describe the projected metric."]}
+    let make ?recommendedCpuUnits =
+      fun ?recommendedMemorySize ->
+        fun ?projectedMetrics ->
+          fun () ->
+            { recommendedCpuUnits; recommendedMemorySize; projectedMetrics }
+    let to_value x =
+      structure_to_value
+        [("recommendedCpuUnits",
+           (Option.map x.recommendedCpuUnits ~f:CpuSize.to_value));
+        ("recommendedMemorySize",
+          (Option.map x.recommendedMemorySize ~f:MemorySize.to_value));
+        ("projectedMetrics",
+          (Option.map x.projectedMetrics
+             ~f:ECSServiceProjectedMetrics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let projectedMetrics =
+        (Option.map ~f:ECSServiceProjectedMetrics.of_xml)
+          (Xml.child xml_arg0 "projectedMetrics") in
+      let recommendedMemorySize =
+        (Option.map ~f:MemorySize.of_xml)
+          (Xml.child xml_arg0 "recommendedMemorySize") in
+      let recommendedCpuUnits =
+        (Option.map ~f:CpuSize.of_xml)
+          (Xml.child xml_arg0 "recommendedCpuUnits") in
+      make ?projectedMetrics ?recommendedMemorySize ?recommendedCpuUnits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let projectedMetrics =
+        field_map json__ "projectedMetrics"
+          ECSServiceProjectedMetrics.of_json in
+      let recommendedMemorySize =
+        field_map json__ "recommendedMemorySize" MemorySize.of_json in
+      let recommendedCpuUnits =
+        field_map json__ "recommendedCpuUnits" CpuSize.of_json in
+      make ?projectedMetrics ?recommendedMemorySize ?recommendedCpuUnits ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the projected metrics of an Amazon ECS service recommendation option. To determine the performance difference between your current Amazon ECS service and the recommended option, compare the metric data of your service against its projected metric data."]
 module RecommendedOptionProjectedMetric =
   struct
     type nonrec t =
@@ -3664,49 +10296,17 @@ module RecommendedOptionProjectedMetric =
           (Xml.child xml_arg0 "recommendedInstanceType") in
       make ?projectedMetrics ?rank ?recommendedInstanceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let projectedMetrics =
-        field_map json "projectedMetrics" ProjectedMetrics.of_json in
-      let rank = field_map json "rank" Rank.of_json in
+        field_map json__ "projectedMetrics" ProjectedMetrics.of_json in
+      let rank = field_map json__ "rank" Rank.of_json in
       let recommendedInstanceType =
-        field_map json "recommendedInstanceType"
+        field_map json__ "recommendedInstanceType"
           RecommendedInstanceType.of_json in
       make ?projectedMetrics ?rank ?recommendedInstanceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a projected utilization metric of a recommendation option. The Cpu and Memory metrics are the only projected utilization metrics returned when you run the GetEC2RecommendationProjectedMetrics action. Additionally, the Memory metric is returned only for resources that have the unified CloudWatch agent installed on them. For more information, see Enabling Memory Utilization with the CloudWatch Agent."]
-module GetRecommendationError =
-  struct
-    type nonrec t =
-      {
-      identifier: Identifier.t option [@ocaml.doc "The ID of the error."];
-      code: Code.t option [@ocaml.doc "The error code."];
-      message: Message.t option
-        [@ocaml.doc "The message, or reason, for the error."]}
-    let make ?identifier =
-      fun ?code -> fun ?message -> fun () -> { identifier; code; message }
-    let to_value x =
-      structure_to_value
-        [("identifier", (Option.map x.identifier ~f:Identifier.to_value));
-        ("code", (Option.map x.code ~f:Code.to_value));
-        ("message", (Option.map x.message ~f:Message.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
-      let code = (Option.map ~f:Code.of_xml) (Xml.child xml_arg0 "code") in
-      let identifier =
-        (Option.map ~f:Identifier.of_xml) (Xml.child xml_arg0 "identifier") in
-      make ?message ?code ?identifier ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" Message.of_json in
-      let code = field_map json "code" Code.of_json in
-      let identifier = field_map json "identifier" Identifier.of_json in
-      make ?message ?code ?identifier ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes an error experienced when getting recommendations. For example, an error is returned if you request recommendations for an unsupported Auto Scaling group, or if you request recommendations for an instance of an unsupported instance family."]
 module InstanceRecommendation =
   struct
     type nonrec t =
@@ -3722,10 +10322,10 @@ module InstanceRecommendation =
         [@ocaml.doc "The instance type of the current instance."];
       finding: Finding.t option
         [@ocaml.doc
-          "The finding classification of the instance. Findings for instances include: Underprovisioned \226\128\148An instance is considered under-provisioned when at least one specification of your instance, such as CPU, memory, or network, does not meet the performance requirements of your workload. Under-provisioned instances may lead to poor application performance. Overprovisioned \226\128\148An instance is considered over-provisioned when at least one specification of your instance, such as CPU, memory, or network, can be sized down while still meeting the performance requirements of your workload, and no specification is under-provisioned. Over-provisioned instances may lead to unnecessary infrastructure cost. Optimized \226\128\148An instance is considered optimized when all specifications of your instance, such as CPU, memory, and network, meet the performance requirements of your workload and is not over provisioned. For optimized resources, Compute Optimizer might recommend a new generation instance type."];
+          "The finding classification of the instance. Findings for instances include: Underprovisioned \226\128\148An instance is considered under-provisioned when at least one specification of your instance, such as CPU, memory, or network, does not meet the performance requirements of your workload. Under-provisioned instances may lead to poor application performance. Overprovisioned \226\128\148An instance is considered over-provisioned when at least one specification of your instance, such as CPU, memory, or network, can be sized down while still meeting the performance requirements of your workload, and no specification is under-provisioned. Over-provisioned instances may lead to unnecessary infrastructure cost. Optimized \226\128\148An instance is considered optimized when all specifications of your instance, such as CPU, memory, and network, meet the performance requirements of your workload and is not over provisioned. For optimized resources, Compute Optimizer might recommend a new generation instance type. The valid values in your API responses appear as OVER_PROVISIONED, UNDER_PROVISIONED, or OPTIMIZED."];
       findingReasonCodes: InstanceRecommendationFindingReasonCodes.t option
         [@ocaml.doc
-          "The reason for the finding classification of the instance. Finding reason codes for instances include: CPUOverprovisioned \226\128\148 The instance\226\128\153s CPU configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the CPUUtilization metric of the current instance during the look-back period. CPUUnderprovisioned \226\128\148 The instance\226\128\153s CPU configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better CPU performance. This is identified by analyzing the CPUUtilization metric of the current instance during the look-back period. MemoryOverprovisioned \226\128\148 The instance\226\128\153s memory configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the memory utilization metric of the current instance during the look-back period. MemoryUnderprovisioned \226\128\148 The instance\226\128\153s memory configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better memory performance. This is identified by analyzing the memory utilization metric of the current instance during the look-back period. Memory utilization is analyzed only for resources that have the unified CloudWatch agent installed on them. For more information, see Enabling memory utilization with the Amazon CloudWatch Agent in the Compute Optimizer User Guide. On Linux instances, Compute Optimizer analyses the mem_used_percent metric in the CWAgent namespace, or the legacy MemoryUtilization metric in the System/Linux namespace. On Windows instances, Compute Optimizer analyses the Memory % Committed Bytes In Use metric in the CWAgent namespace. EBSThroughputOverprovisioned \226\128\148 The instance\226\128\153s EBS throughput configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the VolumeReadOps and VolumeWriteOps metrics of EBS volumes attached to the current instance during the look-back period. EBSThroughputUnderprovisioned \226\128\148 The instance\226\128\153s EBS throughput configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better EBS throughput performance. This is identified by analyzing the VolumeReadOps and VolumeWriteOps metrics of EBS volumes attached to the current instance during the look-back period. EBSIOPSOverprovisioned \226\128\148 The instance\226\128\153s EBS IOPS configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the VolumeReadBytes and VolumeWriteBytes metric of EBS volumes attached to the current instance during the look-back period. EBSIOPSUnderprovisioned \226\128\148 The instance\226\128\153s EBS IOPS configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better EBS IOPS performance. This is identified by analyzing the VolumeReadBytes and VolumeWriteBytes metric of EBS volumes attached to the current instance during the look-back period. NetworkBandwidthOverprovisioned \226\128\148 The instance\226\128\153s network bandwidth configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the NetworkIn and NetworkOut metrics of the current instance during the look-back period. NetworkBandwidthUnderprovisioned \226\128\148 The instance\226\128\153s network bandwidth configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better network bandwidth performance. This is identified by analyzing the NetworkIn and NetworkOut metrics of the current instance during the look-back period. This finding reason happens when the NetworkIn or NetworkOut performance of an instance is impacted. NetworkPPSOverprovisioned \226\128\148 The instance\226\128\153s network PPS (packets per second) configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the NetworkPacketsIn and NetworkPacketsIn metrics of the current instance during the look-back period. NetworkPPSUnderprovisioned \226\128\148 The instance\226\128\153s network PPS (packets per second) configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better network PPS performance. This is identified by analyzing the NetworkPacketsIn and NetworkPacketsIn metrics of the current instance during the look-back period. DiskIOPSOverprovisioned \226\128\148 The instance\226\128\153s disk IOPS configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the DiskReadOps and DiskWriteOps metrics of the current instance during the look-back period. DiskIOPSUnderprovisioned \226\128\148 The instance\226\128\153s disk IOPS configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better disk IOPS performance. This is identified by analyzing the DiskReadOps and DiskWriteOps metrics of the current instance during the look-back period. DiskThroughputOverprovisioned \226\128\148 The instance\226\128\153s disk throughput configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the DiskReadBytes and DiskWriteBytes metrics of the current instance during the look-back period. DiskThroughputUnderprovisioned \226\128\148 The instance\226\128\153s disk throughput configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better disk throughput performance. This is identified by analyzing the DiskReadBytes and DiskWriteBytes metrics of the current instance during the look-back period. For more information about instance metrics, see List the available CloudWatch metrics for your instances in the Amazon Elastic Compute Cloud User Guide. For more information about EBS volume metrics, see Amazon CloudWatch metrics for Amazon EBS in the Amazon Elastic Compute Cloud User Guide."];
+          "The reason for the finding classification of the instance. Finding reason codes for instances include: CPUOverprovisioned \226\128\148 The instance\226\128\153s CPU configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the CPUUtilization metric of the current instance during the look-back period. CPUUnderprovisioned \226\128\148 The instance\226\128\153s CPU configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better CPU performance. This is identified by analyzing the CPUUtilization metric of the current instance during the look-back period. MemoryOverprovisioned \226\128\148 The instance\226\128\153s memory configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the memory utilization metric of the current instance during the look-back period. MemoryUnderprovisioned \226\128\148 The instance\226\128\153s memory configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better memory performance. This is identified by analyzing the memory utilization metric of the current instance during the look-back period. Memory utilization is analyzed only for resources that have the unified CloudWatch agent installed on them. For more information, see Enabling memory utilization with the Amazon CloudWatch Agent in the Compute Optimizer User Guide. On Linux instances, Compute Optimizer analyses the mem_used_percent metric in the CWAgent namespace, or the legacy MemoryUtilization metric in the System/Linux namespace. On Windows instances, Compute Optimizer analyses the Memory % Committed Bytes In Use metric in the CWAgent namespace. EBSThroughputOverprovisioned \226\128\148 The instance\226\128\153s EBS throughput configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the VolumeReadBytes and VolumeWriteBytes metrics of EBS volumes attached to the current instance during the look-back period. EBSThroughputUnderprovisioned \226\128\148 The instance\226\128\153s EBS throughput configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better EBS throughput performance. This is identified by analyzing the VolumeReadBytes and VolumeWriteBytes metrics of EBS volumes attached to the current instance during the look-back period. EBSIOPSOverprovisioned \226\128\148 The instance\226\128\153s EBS IOPS configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the VolumeReadOps and VolumeWriteOps metric of EBS volumes attached to the current instance during the look-back period. EBSIOPSUnderprovisioned \226\128\148 The instance\226\128\153s EBS IOPS configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better EBS IOPS performance. This is identified by analyzing the VolumeReadOps and VolumeWriteOps metric of EBS volumes attached to the current instance during the look-back period. NetworkBandwidthOverprovisioned \226\128\148 The instance\226\128\153s network bandwidth configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the NetworkIn and NetworkOut metrics of the current instance during the look-back period. NetworkBandwidthUnderprovisioned \226\128\148 The instance\226\128\153s network bandwidth configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better network bandwidth performance. This is identified by analyzing the NetworkIn and NetworkOut metrics of the current instance during the look-back period. This finding reason happens when the NetworkIn or NetworkOut performance of an instance is impacted. NetworkPPSOverprovisioned \226\128\148 The instance\226\128\153s network PPS (packets per second) configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the NetworkPacketsIn and NetworkPacketsIn metrics of the current instance during the look-back period. NetworkPPSUnderprovisioned \226\128\148 The instance\226\128\153s network PPS (packets per second) configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better network PPS performance. This is identified by analyzing the NetworkPacketsIn and NetworkPacketsIn metrics of the current instance during the look-back period. DiskIOPSOverprovisioned \226\128\148 The instance\226\128\153s disk IOPS configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the DiskReadOps and DiskWriteOps metrics of the current instance during the look-back period. DiskIOPSUnderprovisioned \226\128\148 The instance\226\128\153s disk IOPS configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better disk IOPS performance. This is identified by analyzing the DiskReadOps and DiskWriteOps metrics of the current instance during the look-back period. DiskThroughputOverprovisioned \226\128\148 The instance\226\128\153s disk throughput configuration can be sized down while still meeting the performance requirements of your workload. This is identified by analyzing the DiskReadBytes and DiskWriteBytes metrics of the current instance during the look-back period. DiskThroughputUnderprovisioned \226\128\148 The instance\226\128\153s disk throughput configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better disk throughput performance. This is identified by analyzing the DiskReadBytes and DiskWriteBytes metrics of the current instance during the look-back period. For more information about instance metrics, see List the available CloudWatch metrics for your instances in the Amazon Elastic Compute Cloud User Guide. For more information about EBS volume metrics, see Amazon CloudWatch metrics for Amazon EBS in the Amazon Elastic Compute Cloud User Guide."];
       utilizationMetrics: UtilizationMetrics.t option
         [@ocaml.doc
           "An array of objects that describe the utilization metrics of the instance."];
@@ -3750,7 +10350,21 @@ module InstanceRecommendation =
           "An object that describes the effective recommendation preferences for the instance."];
       inferredWorkloadTypes: InferredWorkloadTypes.t option
         [@ocaml.doc
-          "The applications that might be running on the instance as inferred by Compute Optimizer. Compute Optimizer can infer if one of the following applications might be running on the instance: AmazonEmr - Infers that Amazon EMR might be running on the instance. ApacheCassandra - Infers that Apache Cassandra might be running on the instance. ApacheHadoop - Infers that Apache Hadoop might be running on the instance. Memcached - Infers that Memcached might be running on the instance. NGINX - Infers that NGINX might be running on the instance. PostgreSql - Infers that PostgreSQL might be running on the instance. Redis - Infers that Redis might be running on the instance."]}
+          "The applications that might be running on the instance as inferred by Compute Optimizer. Compute Optimizer can infer if one of the following applications might be running on the instance: AmazonEmr - Infers that Amazon EMR might be running on the instance. ApacheCassandra - Infers that Apache Cassandra might be running on the instance. ApacheHadoop - Infers that Apache Hadoop might be running on the instance. Memcached - Infers that Memcached might be running on the instance. NGINX - Infers that NGINX might be running on the instance. PostgreSql - Infers that PostgreSQL might be running on the instance. Redis - Infers that Redis might be running on the instance. Kafka - Infers that Kafka might be running on the instance. SQLServer - Infers that SQLServer might be running on the instance."];
+      instanceState: InstanceState.t option
+        [@ocaml.doc
+          "The state of the instance when the recommendation was generated."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "A list of tags assigned to your Amazon EC2 instance recommendations."];
+      externalMetricStatus: ExternalMetricStatus.t option
+        [@ocaml.doc
+          "An object that describes Compute Optimizer's integration status with your external metrics provider."];
+      currentInstanceGpuInfo: GpuInfo.t option
+        [@ocaml.doc
+          "Describes the GPU accelerator settings for the current instance type."];
+      idle: InstanceIdle.t option
+        [@ocaml.doc "Describes if an Amazon EC2 instance is idle."]}
     let make ?instanceArn =
       fun ?accountId ->
         fun ?instanceName ->
@@ -3765,23 +10379,33 @@ module InstanceRecommendation =
                           fun ?currentPerformanceRisk ->
                             fun ?effectiveRecommendationPreferences ->
                               fun ?inferredWorkloadTypes ->
-                                fun () ->
-                                  {
-                                    instanceArn;
-                                    accountId;
-                                    instanceName;
-                                    currentInstanceType;
-                                    finding;
-                                    findingReasonCodes;
-                                    utilizationMetrics;
-                                    lookBackPeriodInDays;
-                                    recommendationOptions;
-                                    recommendationSources;
-                                    lastRefreshTimestamp;
-                                    currentPerformanceRisk;
-                                    effectiveRecommendationPreferences;
-                                    inferredWorkloadTypes
-                                  }
+                                fun ?instanceState ->
+                                  fun ?tags ->
+                                    fun ?externalMetricStatus ->
+                                      fun ?currentInstanceGpuInfo ->
+                                        fun ?idle ->
+                                          fun () ->
+                                            {
+                                              instanceArn;
+                                              accountId;
+                                              instanceName;
+                                              currentInstanceType;
+                                              finding;
+                                              findingReasonCodes;
+                                              utilizationMetrics;
+                                              lookBackPeriodInDays;
+                                              recommendationOptions;
+                                              recommendationSources;
+                                              lastRefreshTimestamp;
+                                              currentPerformanceRisk;
+                                              effectiveRecommendationPreferences;
+                                              inferredWorkloadTypes;
+                                              instanceState;
+                                              tags;
+                                              externalMetricStatus;
+                                              currentInstanceGpuInfo;
+                                              idle
+                                            }
     let to_value x =
       structure_to_value
         [("instanceArn", (Option.map x.instanceArn ~f:InstanceArn.to_value));
@@ -3814,9 +10438,29 @@ module InstanceRecommendation =
              ~f:EffectiveRecommendationPreferences.to_value));
         ("inferredWorkloadTypes",
           (Option.map x.inferredWorkloadTypes
-             ~f:InferredWorkloadTypes.to_value))]
+             ~f:InferredWorkloadTypes.to_value));
+        ("instanceState",
+          (Option.map x.instanceState ~f:InstanceState.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value));
+        ("externalMetricStatus",
+          (Option.map x.externalMetricStatus ~f:ExternalMetricStatus.to_value));
+        ("currentInstanceGpuInfo",
+          (Option.map x.currentInstanceGpuInfo ~f:GpuInfo.to_value));
+        ("idle", (Option.map x.idle ~f:InstanceIdle.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let idle =
+        (Option.map ~f:InstanceIdle.of_xml) (Xml.child xml_arg0 "idle") in
+      let currentInstanceGpuInfo =
+        (Option.map ~f:GpuInfo.of_xml)
+          (Xml.child xml_arg0 "currentInstanceGpuInfo") in
+      let externalMetricStatus =
+        (Option.map ~f:ExternalMetricStatus.of_xml)
+          (Xml.child xml_arg0 "externalMetricStatus") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let instanceState =
+        (Option.map ~f:InstanceState.of_xml)
+          (Xml.child xml_arg0 "instanceState") in
       let inferredWorkloadTypes =
         (Option.map ~f:InferredWorkloadTypes.of_xml)
           (Xml.child xml_arg0 "inferredWorkloadTypes") in
@@ -3856,45 +10500,60 @@ module InstanceRecommendation =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
       let instanceArn =
         (Option.map ~f:InstanceArn.of_xml) (Xml.child xml_arg0 "instanceArn") in
-      make ?inferredWorkloadTypes ?effectiveRecommendationPreferences
-        ?currentPerformanceRisk ?lastRefreshTimestamp ?recommendationSources
-        ?recommendationOptions ?lookBackPeriodInDays ?utilizationMetrics
-        ?findingReasonCodes ?finding ?currentInstanceType ?instanceName
-        ?accountId ?instanceArn ()
+      make ?idle ?currentInstanceGpuInfo ?externalMetricStatus ?tags
+        ?instanceState ?inferredWorkloadTypes
+        ?effectiveRecommendationPreferences ?currentPerformanceRisk
+        ?lastRefreshTimestamp ?recommendationSources ?recommendationOptions
+        ?lookBackPeriodInDays ?utilizationMetrics ?findingReasonCodes
+        ?finding ?currentInstanceType ?instanceName ?accountId ?instanceArn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let idle = field_map json__ "idle" InstanceIdle.of_json in
+      let currentInstanceGpuInfo =
+        field_map json__ "currentInstanceGpuInfo" GpuInfo.of_json in
+      let externalMetricStatus =
+        field_map json__ "externalMetricStatus" ExternalMetricStatus.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let instanceState =
+        field_map json__ "instanceState" InstanceState.of_json in
       let inferredWorkloadTypes =
-        field_map json "inferredWorkloadTypes" InferredWorkloadTypes.of_json in
+        field_map json__ "inferredWorkloadTypes"
+          InferredWorkloadTypes.of_json in
       let effectiveRecommendationPreferences =
-        field_map json "effectiveRecommendationPreferences"
+        field_map json__ "effectiveRecommendationPreferences"
           EffectiveRecommendationPreferences.of_json in
       let currentPerformanceRisk =
-        field_map json "currentPerformanceRisk"
+        field_map json__ "currentPerformanceRisk"
           CurrentPerformanceRisk.of_json in
       let lastRefreshTimestamp =
-        field_map json "lastRefreshTimestamp" LastRefreshTimestamp.of_json in
+        field_map json__ "lastRefreshTimestamp" LastRefreshTimestamp.of_json in
       let recommendationSources =
-        field_map json "recommendationSources" RecommendationSources.of_json in
+        field_map json__ "recommendationSources"
+          RecommendationSources.of_json in
       let recommendationOptions =
-        field_map json "recommendationOptions" RecommendationOptions.of_json in
+        field_map json__ "recommendationOptions"
+          RecommendationOptions.of_json in
       let lookBackPeriodInDays =
-        field_map json "lookBackPeriodInDays" LookBackPeriodInDays.of_json in
+        field_map json__ "lookBackPeriodInDays" LookBackPeriodInDays.of_json in
       let utilizationMetrics =
-        field_map json "utilizationMetrics" UtilizationMetrics.of_json in
+        field_map json__ "utilizationMetrics" UtilizationMetrics.of_json in
       let findingReasonCodes =
-        field_map json "findingReasonCodes"
+        field_map json__ "findingReasonCodes"
           InstanceRecommendationFindingReasonCodes.of_json in
-      let finding = field_map json "finding" Finding.of_json in
+      let finding = field_map json__ "finding" Finding.of_json in
       let currentInstanceType =
-        field_map json "currentInstanceType" CurrentInstanceType.of_json in
-      let instanceName = field_map json "instanceName" InstanceName.of_json in
-      let accountId = field_map json "accountId" AccountId.of_json in
-      let instanceArn = field_map json "instanceArn" InstanceArn.of_json in
-      make ?inferredWorkloadTypes ?effectiveRecommendationPreferences
-        ?currentPerformanceRisk ?lastRefreshTimestamp ?recommendationSources
-        ?recommendationOptions ?lookBackPeriodInDays ?utilizationMetrics
-        ?findingReasonCodes ?finding ?currentInstanceType ?instanceName
-        ?accountId ?instanceArn ()
+        field_map json__ "currentInstanceType" CurrentInstanceType.of_json in
+      let instanceName = field_map json__ "instanceName" InstanceName.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
+      let instanceArn = field_map json__ "instanceArn" InstanceArn.of_json in
+      make ?idle ?currentInstanceGpuInfo ?externalMetricStatus ?tags
+        ?instanceState ?inferredWorkloadTypes
+        ?effectiveRecommendationPreferences ?currentPerformanceRisk
+        ?lastRefreshTimestamp ?recommendationSources ?recommendationOptions
+        ?lookBackPeriodInDays ?utilizationMetrics ?findingReasonCodes
+        ?finding ?currentInstanceType ?instanceName ?accountId ?instanceArn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an Amazon EC2 instance recommendation."]
 module Filter =
@@ -3903,7 +10562,7 @@ module Filter =
       {
       name: FilterName.t option
         [@ocaml.doc
-          "The name of the filter. Specify Finding to return recommendations with a specific finding classification (for example, Underprovisioned). Specify RecommendationSourceType to return recommendations of a specific resource type (for example, Ec2Instance). Specify FindingReasonCodes to return recommendations with a specific finding reason code (for example, CPUUnderprovisioned)."];
+          "The name of the filter. Specify Finding to return recommendations with a specific finding classification. For example, Underprovisioned. Specify RecommendationSourceType to return recommendations of a specific resource type. For example, Ec2Instance. Specify FindingReasonCodes to return recommendations with a specific finding reason code. For example, CPUUnderprovisioned. Specify InferredWorkloadTypes to return recommendations of a specific inferred workload. For example, Redis. You can filter your EC2 instance recommendations by tag:key and tag-key tags. A tag:key is a key and value combination of a tag assigned to your recommendations. Use the tag key in the filter name and the tag value as the filter value. For example, to find all recommendations that have a tag with the key of Owner and the value of TeamA, specify tag:Owner for the filter name and TeamA for the filter value. A tag-key is the key of a tag assigned to your recommendations. Use this filter to find all of your recommendations that have a tag with a specific key. This doesn\226\128\153t consider the tag value. For example, you can find your recommendations with a tag key value of Owner or without any tag keys assigned."];
       values: FilterValues.t option
         [@ocaml.doc
           "The value of the filter. The valid values for this parameter are as follows, depending on what you specify for the name parameter and the resource type that you wish to filter results for: Specify Optimized or NotOptimized if you specify the name parameter as Finding and you want to filter results for Auto Scaling groups. Specify Underprovisioned, Overprovisioned, or Optimized if you specify the name parameter as Finding and you want to filter results for EC2 instances. Specify Ec2Instance or AutoScalingGroup if you specify the name parameter as RecommendationSourceType. Specify one of the following options if you specify the name parameter as FindingReasonCodes: CPUOverprovisioned \226\128\148 The instance\226\128\153s CPU configuration can be sized down while still meeting the performance requirements of your workload. CPUUnderprovisioned \226\128\148 The instance\226\128\153s CPU configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better CPU performance. MemoryOverprovisioned \226\128\148 The instance\226\128\153s memory configuration can be sized down while still meeting the performance requirements of your workload. MemoryUnderprovisioned \226\128\148 The instance\226\128\153s memory configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better memory performance. EBSThroughputOverprovisioned \226\128\148 The instance\226\128\153s EBS throughput configuration can be sized down while still meeting the performance requirements of your workload. EBSThroughputUnderprovisioned \226\128\148 The instance\226\128\153s EBS throughput configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better EBS throughput performance. EBSIOPSOverprovisioned \226\128\148 The instance\226\128\153s EBS IOPS configuration can be sized down while still meeting the performance requirements of your workload. EBSIOPSUnderprovisioned \226\128\148 The instance\226\128\153s EBS IOPS configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better EBS IOPS performance. NetworkBandwidthOverprovisioned \226\128\148 The instance\226\128\153s network bandwidth configuration can be sized down while still meeting the performance requirements of your workload. NetworkBandwidthUnderprovisioned \226\128\148 The instance\226\128\153s network bandwidth configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better network bandwidth performance. This finding reason happens when the NetworkIn or NetworkOut performance of an instance is impacted. NetworkPPSOverprovisioned \226\128\148 The instance\226\128\153s network PPS (packets per second) configuration can be sized down while still meeting the performance requirements of your workload. NetworkPPSUnderprovisioned \226\128\148 The instance\226\128\153s network PPS (packets per second) configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better network PPS performance. DiskIOPSOverprovisioned \226\128\148 The instance\226\128\153s disk IOPS configuration can be sized down while still meeting the performance requirements of your workload. DiskIOPSUnderprovisioned \226\128\148 The instance\226\128\153s disk IOPS configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better disk IOPS performance. DiskThroughputOverprovisioned \226\128\148 The instance\226\128\153s disk throughput configuration can be sized down while still meeting the performance requirements of your workload. DiskThroughputUnderprovisioned \226\128\148 The instance\226\128\153s disk throughput configuration doesn't meet the performance requirements of your workload and there is an alternative instance type that provides better disk throughput performance."]}
@@ -3920,9 +10579,9 @@ module Filter =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" FilterValues.of_json in
-      let name = field_map json "name" FilterName.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" FilterValues.of_json in
+      let name = field_map json__ "name" FilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3955,7 +10614,14 @@ module VolumeRecommendation =
           "The timestamp of when the volume recommendation was last generated."];
       currentPerformanceRisk: CurrentPerformanceRisk.t option
         [@ocaml.doc
-          "The risk of the current EBS volume not meeting the performance needs of its workloads. The higher the risk, the more likely the current EBS volume doesn't have sufficient capacity."]}
+          "The risk of the current EBS volume not meeting the performance needs of its workloads. The higher the risk, the more likely the current EBS volume doesn't have sufficient capacity."];
+      effectiveRecommendationPreferences:
+        EBSEffectiveRecommendationPreferences.t option
+        [@ocaml.doc
+          "Describes the effective recommendation preferences for Amazon EBS volume."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "A list of tags assigned to your Amazon EBS volume recommendations."]}
     let make ?volumeArn =
       fun ?accountId ->
         fun ?currentConfiguration ->
@@ -3965,18 +10631,22 @@ module VolumeRecommendation =
                 fun ?volumeRecommendationOptions ->
                   fun ?lastRefreshTimestamp ->
                     fun ?currentPerformanceRisk ->
-                      fun () ->
-                        {
-                          volumeArn;
-                          accountId;
-                          currentConfiguration;
-                          finding;
-                          utilizationMetrics;
-                          lookBackPeriodInDays;
-                          volumeRecommendationOptions;
-                          lastRefreshTimestamp;
-                          currentPerformanceRisk
-                        }
+                      fun ?effectiveRecommendationPreferences ->
+                        fun ?tags ->
+                          fun () ->
+                            {
+                              volumeArn;
+                              accountId;
+                              currentConfiguration;
+                              finding;
+                              utilizationMetrics;
+                              lookBackPeriodInDays;
+                              volumeRecommendationOptions;
+                              lastRefreshTimestamp;
+                              currentPerformanceRisk;
+                              effectiveRecommendationPreferences;
+                              tags
+                            }
     let to_value x =
       structure_to_value
         [("volumeArn", (Option.map x.volumeArn ~f:VolumeArn.to_value));
@@ -3995,9 +10665,17 @@ module VolumeRecommendation =
           (Option.map x.lastRefreshTimestamp ~f:LastRefreshTimestamp.to_value));
         ("currentPerformanceRisk",
           (Option.map x.currentPerformanceRisk
-             ~f:CurrentPerformanceRisk.to_value))]
+             ~f:CurrentPerformanceRisk.to_value));
+        ("effectiveRecommendationPreferences",
+          (Option.map x.effectiveRecommendationPreferences
+             ~f:EBSEffectiveRecommendationPreferences.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let effectiveRecommendationPreferences =
+        (Option.map ~f:EBSEffectiveRecommendationPreferences.of_xml)
+          (Xml.child xml_arg0 "effectiveRecommendationPreferences") in
       let currentPerformanceRisk =
         (Option.map ~f:CurrentPerformanceRisk.of_xml)
           (Xml.child xml_arg0 "currentPerformanceRisk") in
@@ -4022,33 +10700,37 @@ module VolumeRecommendation =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
       let volumeArn =
         (Option.map ~f:VolumeArn.of_xml) (Xml.child xml_arg0 "volumeArn") in
-      make ?currentPerformanceRisk ?lastRefreshTimestamp
-        ?volumeRecommendationOptions ?lookBackPeriodInDays
-        ?utilizationMetrics ?finding ?currentConfiguration ?accountId
-        ?volumeArn ()
+      make ?tags ?effectiveRecommendationPreferences ?currentPerformanceRisk
+        ?lastRefreshTimestamp ?volumeRecommendationOptions
+        ?lookBackPeriodInDays ?utilizationMetrics ?finding
+        ?currentConfiguration ?accountId ?volumeArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let effectiveRecommendationPreferences =
+        field_map json__ "effectiveRecommendationPreferences"
+          EBSEffectiveRecommendationPreferences.of_json in
       let currentPerformanceRisk =
-        field_map json "currentPerformanceRisk"
+        field_map json__ "currentPerformanceRisk"
           CurrentPerformanceRisk.of_json in
       let lastRefreshTimestamp =
-        field_map json "lastRefreshTimestamp" LastRefreshTimestamp.of_json in
+        field_map json__ "lastRefreshTimestamp" LastRefreshTimestamp.of_json in
       let volumeRecommendationOptions =
-        field_map json "volumeRecommendationOptions"
+        field_map json__ "volumeRecommendationOptions"
           VolumeRecommendationOptions.of_json in
       let lookBackPeriodInDays =
-        field_map json "lookBackPeriodInDays" LookBackPeriodInDays.of_json in
+        field_map json__ "lookBackPeriodInDays" LookBackPeriodInDays.of_json in
       let utilizationMetrics =
-        field_map json "utilizationMetrics" EBSUtilizationMetrics.of_json in
-      let finding = field_map json "finding" EBSFinding.of_json in
+        field_map json__ "utilizationMetrics" EBSUtilizationMetrics.of_json in
+      let finding = field_map json__ "finding" EBSFinding.of_json in
       let currentConfiguration =
-        field_map json "currentConfiguration" VolumeConfiguration.of_json in
-      let accountId = field_map json "accountId" AccountId.of_json in
-      let volumeArn = field_map json "volumeArn" VolumeArn.of_json in
-      make ?currentPerformanceRisk ?lastRefreshTimestamp
-        ?volumeRecommendationOptions ?lookBackPeriodInDays
-        ?utilizationMetrics ?finding ?currentConfiguration ?accountId
-        ?volumeArn ()
+        field_map json__ "currentConfiguration" VolumeConfiguration.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
+      let volumeArn = field_map json__ "volumeArn" VolumeArn.of_json in
+      make ?tags ?effectiveRecommendationPreferences ?currentPerformanceRisk
+        ?lastRefreshTimestamp ?volumeRecommendationOptions
+        ?lookBackPeriodInDays ?utilizationMetrics ?finding
+        ?currentConfiguration ?accountId ?volumeArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes an Amazon Elastic Block Store (Amazon EBS) volume recommendation."]
@@ -4058,7 +10740,7 @@ module EBSFilter =
       {
       name: EBSFilterName.t option
         [@ocaml.doc
-          "The name of the filter. Specify Finding to return recommendations with a specific finding classification (for example, NotOptimized)."];
+          "The name of the filter. Specify Finding to return recommendations with a specific finding classification (for example, NotOptimized). You can filter your Amazon EBS volume recommendations by tag:key and tag-key tags. A tag:key is a key and value combination of a tag assigned to your Amazon EBS volume recommendations. Use the tag key in the filter name and the tag value as the filter value. For example, to find all Amazon EBS volume recommendations that have a tag with the key of Owner and the value of TeamA, specify tag:Owner for the filter name and TeamA for the filter value. A tag-key is the key of a tag assigned to your Amazon EBS volume recommendations. Use this filter to find all of your Amazon EBS volume recommendations that have a tag with a specific key. This doesn\226\128\153t consider the tag value. For example, you can find your Amazon EBS volume recommendations with a tag key value of Owner or without any tag keys assigned."];
       values: FilterValues.t option
         [@ocaml.doc
           "The value of the filter. The valid values are Optimized, or NotOptimized."]}
@@ -4075,9 +10757,9 @@ module EBSFilter =
         (Option.map ~f:EBSFilterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" FilterValues.of_json in
-      let name = field_map json "name" EBSFilterName.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" FilterValues.of_json in
+      let name = field_map json__ "name" EBSFilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4106,6 +10788,9 @@ module AutoScalingGroupRecommendation =
       currentConfiguration: AutoScalingGroupConfiguration.t option
         [@ocaml.doc
           "An array of objects that describe the current configuration of the Auto Scaling group."];
+      currentInstanceGpuInfo: GpuInfo.t option
+        [@ocaml.doc
+          "Describes the GPU accelerator settings for the current instance type of the Auto Scaling group."];
       recommendationOptions: AutoScalingGroupRecommendationOptions.t option
         [@ocaml.doc
           "An array of objects that describe the recommendation options for the Auto Scaling group."];
@@ -4121,7 +10806,7 @@ module AutoScalingGroupRecommendation =
           "An object that describes the effective recommendation preferences for the Auto Scaling group."];
       inferredWorkloadTypes: InferredWorkloadTypes.t option
         [@ocaml.doc
-          "The applications that might be running on the instances in the Auto Scaling group as inferred by Compute Optimizer. Compute Optimizer can infer if one of the following applications might be running on the instances: AmazonEmr - Infers that Amazon EMR might be running on the instances. ApacheCassandra - Infers that Apache Cassandra might be running on the instances. ApacheHadoop - Infers that Apache Hadoop might be running on the instances. Memcached - Infers that Memcached might be running on the instances. NGINX - Infers that NGINX might be running on the instances. PostgreSql - Infers that PostgreSQL might be running on the instances. Redis - Infers that Redis might be running on the instances."]}
+          "The applications that might be running on the instances in the Auto Scaling group as inferred by Compute Optimizer. Compute Optimizer can infer if one of the following applications might be running on the instances: AmazonEmr - Infers that Amazon EMR might be running on the instances. ApacheCassandra - Infers that Apache Cassandra might be running on the instances. ApacheHadoop - Infers that Apache Hadoop might be running on the instances. Memcached - Infers that Memcached might be running on the instances. NGINX - Infers that NGINX might be running on the instances. PostgreSql - Infers that PostgreSQL might be running on the instances. Redis - Infers that Redis might be running on the instances. Kafka - Infers that Kafka might be running on the instance. SQLServer - Infers that SQLServer might be running on the instance."]}
     let make ?accountId =
       fun ?autoScalingGroupArn ->
         fun ?autoScalingGroupName ->
@@ -4129,26 +10814,28 @@ module AutoScalingGroupRecommendation =
             fun ?utilizationMetrics ->
               fun ?lookBackPeriodInDays ->
                 fun ?currentConfiguration ->
-                  fun ?recommendationOptions ->
-                    fun ?lastRefreshTimestamp ->
-                      fun ?currentPerformanceRisk ->
-                        fun ?effectiveRecommendationPreferences ->
-                          fun ?inferredWorkloadTypes ->
-                            fun () ->
-                              {
-                                accountId;
-                                autoScalingGroupArn;
-                                autoScalingGroupName;
-                                finding;
-                                utilizationMetrics;
-                                lookBackPeriodInDays;
-                                currentConfiguration;
-                                recommendationOptions;
-                                lastRefreshTimestamp;
-                                currentPerformanceRisk;
-                                effectiveRecommendationPreferences;
-                                inferredWorkloadTypes
-                              }
+                  fun ?currentInstanceGpuInfo ->
+                    fun ?recommendationOptions ->
+                      fun ?lastRefreshTimestamp ->
+                        fun ?currentPerformanceRisk ->
+                          fun ?effectiveRecommendationPreferences ->
+                            fun ?inferredWorkloadTypes ->
+                              fun () ->
+                                {
+                                  accountId;
+                                  autoScalingGroupArn;
+                                  autoScalingGroupName;
+                                  finding;
+                                  utilizationMetrics;
+                                  lookBackPeriodInDays;
+                                  currentConfiguration;
+                                  currentInstanceGpuInfo;
+                                  recommendationOptions;
+                                  lastRefreshTimestamp;
+                                  currentPerformanceRisk;
+                                  effectiveRecommendationPreferences;
+                                  inferredWorkloadTypes
+                                }
     let to_value x =
       structure_to_value
         [("accountId", (Option.map x.accountId ~f:AccountId.to_value));
@@ -4164,6 +10851,8 @@ module AutoScalingGroupRecommendation =
         ("currentConfiguration",
           (Option.map x.currentConfiguration
              ~f:AutoScalingGroupConfiguration.to_value));
+        ("currentInstanceGpuInfo",
+          (Option.map x.currentInstanceGpuInfo ~f:GpuInfo.to_value));
         ("recommendationOptions",
           (Option.map x.recommendationOptions
              ~f:AutoScalingGroupRecommendationOptions.to_value));
@@ -4195,6 +10884,9 @@ module AutoScalingGroupRecommendation =
       let recommendationOptions =
         (Option.map ~f:AutoScalingGroupRecommendationOptions.of_xml)
           (Xml.child xml_arg0 "recommendationOptions") in
+      let currentInstanceGpuInfo =
+        (Option.map ~f:GpuInfo.of_xml)
+          (Xml.child xml_arg0 "currentInstanceGpuInfo") in
       let currentConfiguration =
         (Option.map ~f:AutoScalingGroupConfiguration.of_xml)
           (Xml.child xml_arg0 "currentConfiguration") in
@@ -4216,42 +10908,599 @@ module AutoScalingGroupRecommendation =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?inferredWorkloadTypes ?effectiveRecommendationPreferences
         ?currentPerformanceRisk ?lastRefreshTimestamp ?recommendationOptions
-        ?currentConfiguration ?lookBackPeriodInDays ?utilizationMetrics
-        ?finding ?autoScalingGroupName ?autoScalingGroupArn ?accountId ()
+        ?currentInstanceGpuInfo ?currentConfiguration ?lookBackPeriodInDays
+        ?utilizationMetrics ?finding ?autoScalingGroupName
+        ?autoScalingGroupArn ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inferredWorkloadTypes =
-        field_map json "inferredWorkloadTypes" InferredWorkloadTypes.of_json in
+        field_map json__ "inferredWorkloadTypes"
+          InferredWorkloadTypes.of_json in
       let effectiveRecommendationPreferences =
-        field_map json "effectiveRecommendationPreferences"
+        field_map json__ "effectiveRecommendationPreferences"
           EffectiveRecommendationPreferences.of_json in
       let currentPerformanceRisk =
-        field_map json "currentPerformanceRisk"
+        field_map json__ "currentPerformanceRisk"
           CurrentPerformanceRisk.of_json in
       let lastRefreshTimestamp =
-        field_map json "lastRefreshTimestamp" LastRefreshTimestamp.of_json in
+        field_map json__ "lastRefreshTimestamp" LastRefreshTimestamp.of_json in
       let recommendationOptions =
-        field_map json "recommendationOptions"
+        field_map json__ "recommendationOptions"
           AutoScalingGroupRecommendationOptions.of_json in
+      let currentInstanceGpuInfo =
+        field_map json__ "currentInstanceGpuInfo" GpuInfo.of_json in
       let currentConfiguration =
-        field_map json "currentConfiguration"
+        field_map json__ "currentConfiguration"
           AutoScalingGroupConfiguration.of_json in
       let lookBackPeriodInDays =
-        field_map json "lookBackPeriodInDays" LookBackPeriodInDays.of_json in
+        field_map json__ "lookBackPeriodInDays" LookBackPeriodInDays.of_json in
       let utilizationMetrics =
-        field_map json "utilizationMetrics" UtilizationMetrics.of_json in
-      let finding = field_map json "finding" Finding.of_json in
+        field_map json__ "utilizationMetrics" UtilizationMetrics.of_json in
+      let finding = field_map json__ "finding" Finding.of_json in
       let autoScalingGroupName =
-        field_map json "autoScalingGroupName" AutoScalingGroupName.of_json in
+        field_map json__ "autoScalingGroupName" AutoScalingGroupName.of_json in
       let autoScalingGroupArn =
-        field_map json "autoScalingGroupArn" AutoScalingGroupArn.of_json in
-      let accountId = field_map json "accountId" AccountId.of_json in
+        field_map json__ "autoScalingGroupArn" AutoScalingGroupArn.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
       make ?inferredWorkloadTypes ?effectiveRecommendationPreferences
         ?currentPerformanceRisk ?lastRefreshTimestamp ?recommendationOptions
-        ?currentConfiguration ?lookBackPeriodInDays ?utilizationMetrics
-        ?finding ?autoScalingGroupName ?autoScalingGroupArn ?accountId ()
+        ?currentInstanceGpuInfo ?currentConfiguration ?lookBackPeriodInDays
+        ?utilizationMetrics ?finding ?autoScalingGroupName
+        ?autoScalingGroupArn ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an Auto Scaling group recommendation."]
+module ExportableRDSDBField =
+  struct
+    type nonrec t =
+      | ResourceArn 
+      | AccountId 
+      | Engine 
+      | EngineVersion 
+      | Idle 
+      | MultiAZDBInstance 
+      | ClusterWriter 
+      | CurrentDBInstanceClass 
+      | CurrentStorageConfigurationStorageType 
+      | CurrentStorageConfigurationAllocatedStorage 
+      | CurrentStorageConfigurationMaxAllocatedStorage 
+      | CurrentStorageConfigurationIOPS 
+      | CurrentStorageConfigurationStorageThroughput 
+      | CurrentStorageEstimatedMonthlyVolumeIOPsCostVariation 
+      | CurrentInstanceOnDemandHourlyPrice 
+      | CurrentStorageOnDemandMonthlyPrice 
+      | LookbackPeriodInDays 
+      | CurrentStorageEstimatedClusterInstanceOnDemandMonthlyCost 
+      | CurrentStorageEstimatedClusterStorageOnDemandMonthlyCost 
+      | CurrentStorageEstimatedClusterStorageIOOnDemandMonthlyCost 
+      | CurrentInstancePerformanceRisk 
+      | UtilizationMetricsCpuMaximum 
+      | UtilizationMetricsMemoryMaximum 
+      | UtilizationMetricsEBSVolumeStorageSpaceUtilizationMaximum 
+      | UtilizationMetricsNetworkReceiveThroughputMaximum 
+      | UtilizationMetricsNetworkTransmitThroughputMaximum 
+      | UtilizationMetricsEBSVolumeReadIOPSMaximum 
+      | UtilizationMetricsEBSVolumeWriteIOPSMaximum 
+      | UtilizationMetricsEBSVolumeReadThroughputMaximum 
+      | UtilizationMetricsEBSVolumeWriteThroughputMaximum 
+      | UtilizationMetricsDatabaseConnectionsMaximum 
+      | UtilizationMetricsStorageNetworkReceiveThroughputMaximum 
+      | UtilizationMetricsStorageNetworkTransmitThroughputMaximum 
+      | UtilizationMetricsAuroraMemoryHealthStateMaximum 
+      | UtilizationMetricsAuroraMemoryNumDeclinedSqlTotalMaximum 
+      | UtilizationMetricsAuroraMemoryNumKillConnTotalMaximum 
+      | UtilizationMetricsAuroraMemoryNumKillQueryTotalMaximum 
+      | UtilizationMetricsReadIOPSEphemeralStorageMaximum 
+      | UtilizationMetricsWriteIOPSEphemeralStorageMaximum 
+      | UtilizationMetricsVolumeBytesUsedAverage 
+      | UtilizationMetricsVolumeReadIOPsAverage 
+      | UtilizationMetricsVolumeWriteIOPsAverage 
+      | InstanceFinding 
+      | InstanceFindingReasonCodes 
+      | StorageFinding 
+      | StorageFindingReasonCodes 
+      | InstanceRecommendationOptionsDBInstanceClass 
+      | InstanceRecommendationOptionsRank 
+      | InstanceRecommendationOptionsPerformanceRisk 
+      | InstanceRecommendationOptionsProjectedUtilizationMetricsCpuMaximum 
+      | StorageRecommendationOptionsStorageType 
+      | StorageRecommendationOptionsAllocatedStorage 
+      | StorageRecommendationOptionsMaxAllocatedStorage 
+      | StorageRecommendationOptionsIOPS 
+      | StorageRecommendationOptionsStorageThroughput 
+      | StorageRecommendationOptionsRank 
+      | StorageRecommendationOptionsEstimatedMonthlyVolumeIOPsCostVariation 
+      | InstanceRecommendationOptionsInstanceOnDemandHourlyPrice 
+      | InstanceRecommendationOptionsSavingsOpportunityPercentage 
+      | InstanceRecommendationOptionsEstimatedMonthlySavingsCurrency 
+      | InstanceRecommendationOptionsEstimatedMonthlySavingsValue 
+      |
+      InstanceRecommendationOptionsSavingsOpportunityAfterDiscountsPercentage
+      
+      |
+      InstanceRecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts
+      
+      |
+      InstanceRecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts
+      
+      | StorageRecommendationOptionsOnDemandMonthlyPrice 
+      |
+      StorageRecommendationOptionsEstimatedClusterInstanceOnDemandMonthlyCost
+      
+      |
+      StorageRecommendationOptionsEstimatedClusterStorageOnDemandMonthlyCost
+      
+      |
+      StorageRecommendationOptionsEstimatedClusterStorageIOOnDemandMonthlyCost
+      
+      | StorageRecommendationOptionsSavingsOpportunityPercentage 
+      | StorageRecommendationOptionsEstimatedMonthlySavingsCurrency 
+      | StorageRecommendationOptionsEstimatedMonthlySavingsValue 
+      |
+      StorageRecommendationOptionsSavingsOpportunityAfterDiscountsPercentage
+      
+      |
+      StorageRecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts
+      
+      |
+      StorageRecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts
+      
+      | EffectiveRecommendationPreferencesCpuVendorArchitectures 
+      | EffectiveRecommendationPreferencesEnhancedInfrastructureMetrics 
+      | EffectiveRecommendationPreferencesLookBackPeriod 
+      | EffectiveRecommendationPreferencesSavingsEstimationMode 
+      | LastRefreshTimestamp 
+      | Tags 
+      | DBClusterIdentifier 
+      | PromotionTier 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ResourceArn -> "ResourceArn"
+      | AccountId -> "AccountId"
+      | Engine -> "Engine"
+      | EngineVersion -> "EngineVersion"
+      | Idle -> "Idle"
+      | MultiAZDBInstance -> "MultiAZDBInstance"
+      | ClusterWriter -> "ClusterWriter"
+      | CurrentDBInstanceClass -> "CurrentDBInstanceClass"
+      | CurrentStorageConfigurationStorageType ->
+          "CurrentStorageConfigurationStorageType"
+      | CurrentStorageConfigurationAllocatedStorage ->
+          "CurrentStorageConfigurationAllocatedStorage"
+      | CurrentStorageConfigurationMaxAllocatedStorage ->
+          "CurrentStorageConfigurationMaxAllocatedStorage"
+      | CurrentStorageConfigurationIOPS -> "CurrentStorageConfigurationIOPS"
+      | CurrentStorageConfigurationStorageThroughput ->
+          "CurrentStorageConfigurationStorageThroughput"
+      | CurrentStorageEstimatedMonthlyVolumeIOPsCostVariation ->
+          "CurrentStorageEstimatedMonthlyVolumeIOPsCostVariation"
+      | CurrentInstanceOnDemandHourlyPrice ->
+          "CurrentInstanceOnDemandHourlyPrice"
+      | CurrentStorageOnDemandMonthlyPrice ->
+          "CurrentStorageOnDemandMonthlyPrice"
+      | LookbackPeriodInDays -> "LookbackPeriodInDays"
+      | CurrentStorageEstimatedClusterInstanceOnDemandMonthlyCost ->
+          "CurrentStorageEstimatedClusterInstanceOnDemandMonthlyCost"
+      | CurrentStorageEstimatedClusterStorageOnDemandMonthlyCost ->
+          "CurrentStorageEstimatedClusterStorageOnDemandMonthlyCost"
+      | CurrentStorageEstimatedClusterStorageIOOnDemandMonthlyCost ->
+          "CurrentStorageEstimatedClusterStorageIOOnDemandMonthlyCost"
+      | CurrentInstancePerformanceRisk -> "CurrentInstancePerformanceRisk"
+      | UtilizationMetricsCpuMaximum -> "UtilizationMetricsCpuMaximum"
+      | UtilizationMetricsMemoryMaximum -> "UtilizationMetricsMemoryMaximum"
+      | UtilizationMetricsEBSVolumeStorageSpaceUtilizationMaximum ->
+          "UtilizationMetricsEBSVolumeStorageSpaceUtilizationMaximum"
+      | UtilizationMetricsNetworkReceiveThroughputMaximum ->
+          "UtilizationMetricsNetworkReceiveThroughputMaximum"
+      | UtilizationMetricsNetworkTransmitThroughputMaximum ->
+          "UtilizationMetricsNetworkTransmitThroughputMaximum"
+      | UtilizationMetricsEBSVolumeReadIOPSMaximum ->
+          "UtilizationMetricsEBSVolumeReadIOPSMaximum"
+      | UtilizationMetricsEBSVolumeWriteIOPSMaximum ->
+          "UtilizationMetricsEBSVolumeWriteIOPSMaximum"
+      | UtilizationMetricsEBSVolumeReadThroughputMaximum ->
+          "UtilizationMetricsEBSVolumeReadThroughputMaximum"
+      | UtilizationMetricsEBSVolumeWriteThroughputMaximum ->
+          "UtilizationMetricsEBSVolumeWriteThroughputMaximum"
+      | UtilizationMetricsDatabaseConnectionsMaximum ->
+          "UtilizationMetricsDatabaseConnectionsMaximum"
+      | UtilizationMetricsStorageNetworkReceiveThroughputMaximum ->
+          "UtilizationMetricsStorageNetworkReceiveThroughputMaximum"
+      | UtilizationMetricsStorageNetworkTransmitThroughputMaximum ->
+          "UtilizationMetricsStorageNetworkTransmitThroughputMaximum"
+      | UtilizationMetricsAuroraMemoryHealthStateMaximum ->
+          "UtilizationMetricsAuroraMemoryHealthStateMaximum"
+      | UtilizationMetricsAuroraMemoryNumDeclinedSqlTotalMaximum ->
+          "UtilizationMetricsAuroraMemoryNumDeclinedSqlTotalMaximum"
+      | UtilizationMetricsAuroraMemoryNumKillConnTotalMaximum ->
+          "UtilizationMetricsAuroraMemoryNumKillConnTotalMaximum"
+      | UtilizationMetricsAuroraMemoryNumKillQueryTotalMaximum ->
+          "UtilizationMetricsAuroraMemoryNumKillQueryTotalMaximum"
+      | UtilizationMetricsReadIOPSEphemeralStorageMaximum ->
+          "UtilizationMetricsReadIOPSEphemeralStorageMaximum"
+      | UtilizationMetricsWriteIOPSEphemeralStorageMaximum ->
+          "UtilizationMetricsWriteIOPSEphemeralStorageMaximum"
+      | UtilizationMetricsVolumeBytesUsedAverage ->
+          "UtilizationMetricsVolumeBytesUsedAverage"
+      | UtilizationMetricsVolumeReadIOPsAverage ->
+          "UtilizationMetricsVolumeReadIOPsAverage"
+      | UtilizationMetricsVolumeWriteIOPsAverage ->
+          "UtilizationMetricsVolumeWriteIOPsAverage"
+      | InstanceFinding -> "InstanceFinding"
+      | InstanceFindingReasonCodes -> "InstanceFindingReasonCodes"
+      | StorageFinding -> "StorageFinding"
+      | StorageFindingReasonCodes -> "StorageFindingReasonCodes"
+      | InstanceRecommendationOptionsDBInstanceClass ->
+          "InstanceRecommendationOptionsDBInstanceClass"
+      | InstanceRecommendationOptionsRank ->
+          "InstanceRecommendationOptionsRank"
+      | InstanceRecommendationOptionsPerformanceRisk ->
+          "InstanceRecommendationOptionsPerformanceRisk"
+      | InstanceRecommendationOptionsProjectedUtilizationMetricsCpuMaximum ->
+          "InstanceRecommendationOptionsProjectedUtilizationMetricsCpuMaximum"
+      | StorageRecommendationOptionsStorageType ->
+          "StorageRecommendationOptionsStorageType"
+      | StorageRecommendationOptionsAllocatedStorage ->
+          "StorageRecommendationOptionsAllocatedStorage"
+      | StorageRecommendationOptionsMaxAllocatedStorage ->
+          "StorageRecommendationOptionsMaxAllocatedStorage"
+      | StorageRecommendationOptionsIOPS ->
+          "StorageRecommendationOptionsIOPS"
+      | StorageRecommendationOptionsStorageThroughput ->
+          "StorageRecommendationOptionsStorageThroughput"
+      | StorageRecommendationOptionsRank ->
+          "StorageRecommendationOptionsRank"
+      | StorageRecommendationOptionsEstimatedMonthlyVolumeIOPsCostVariation
+          ->
+          "StorageRecommendationOptionsEstimatedMonthlyVolumeIOPsCostVariation"
+      | InstanceRecommendationOptionsInstanceOnDemandHourlyPrice ->
+          "InstanceRecommendationOptionsInstanceOnDemandHourlyPrice"
+      | InstanceRecommendationOptionsSavingsOpportunityPercentage ->
+          "InstanceRecommendationOptionsSavingsOpportunityPercentage"
+      | InstanceRecommendationOptionsEstimatedMonthlySavingsCurrency ->
+          "InstanceRecommendationOptionsEstimatedMonthlySavingsCurrency"
+      | InstanceRecommendationOptionsEstimatedMonthlySavingsValue ->
+          "InstanceRecommendationOptionsEstimatedMonthlySavingsValue"
+      | InstanceRecommendationOptionsSavingsOpportunityAfterDiscountsPercentage
+          ->
+          "InstanceRecommendationOptionsSavingsOpportunityAfterDiscountsPercentage"
+      | InstanceRecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts
+          ->
+          "InstanceRecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+      | InstanceRecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts
+          ->
+          "InstanceRecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts"
+      | StorageRecommendationOptionsOnDemandMonthlyPrice ->
+          "StorageRecommendationOptionsOnDemandMonthlyPrice"
+      | StorageRecommendationOptionsEstimatedClusterInstanceOnDemandMonthlyCost
+          ->
+          "StorageRecommendationOptionsEstimatedClusterInstanceOnDemandMonthlyCost"
+      | StorageRecommendationOptionsEstimatedClusterStorageOnDemandMonthlyCost
+          ->
+          "StorageRecommendationOptionsEstimatedClusterStorageOnDemandMonthlyCost"
+      | StorageRecommendationOptionsEstimatedClusterStorageIOOnDemandMonthlyCost
+          ->
+          "StorageRecommendationOptionsEstimatedClusterStorageIOOnDemandMonthlyCost"
+      | StorageRecommendationOptionsSavingsOpportunityPercentage ->
+          "StorageRecommendationOptionsSavingsOpportunityPercentage"
+      | StorageRecommendationOptionsEstimatedMonthlySavingsCurrency ->
+          "StorageRecommendationOptionsEstimatedMonthlySavingsCurrency"
+      | StorageRecommendationOptionsEstimatedMonthlySavingsValue ->
+          "StorageRecommendationOptionsEstimatedMonthlySavingsValue"
+      | StorageRecommendationOptionsSavingsOpportunityAfterDiscountsPercentage
+          ->
+          "StorageRecommendationOptionsSavingsOpportunityAfterDiscountsPercentage"
+      | StorageRecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts
+          ->
+          "StorageRecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+      | StorageRecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts
+          ->
+          "StorageRecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts"
+      | EffectiveRecommendationPreferencesCpuVendorArchitectures ->
+          "EffectiveRecommendationPreferencesCpuVendorArchitectures"
+      | EffectiveRecommendationPreferencesEnhancedInfrastructureMetrics ->
+          "EffectiveRecommendationPreferencesEnhancedInfrastructureMetrics"
+      | EffectiveRecommendationPreferencesLookBackPeriod ->
+          "EffectiveRecommendationPreferencesLookBackPeriod"
+      | EffectiveRecommendationPreferencesSavingsEstimationMode ->
+          "EffectiveRecommendationPreferencesSavingsEstimationMode"
+      | LastRefreshTimestamp -> "LastRefreshTimestamp"
+      | Tags -> "Tags"
+      | DBClusterIdentifier -> "DBClusterIdentifier"
+      | PromotionTier -> "PromotionTier"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ResourceArn" -> ResourceArn
+      | "AccountId" -> AccountId
+      | "Engine" -> Engine
+      | "EngineVersion" -> EngineVersion
+      | "Idle" -> Idle
+      | "MultiAZDBInstance" -> MultiAZDBInstance
+      | "ClusterWriter" -> ClusterWriter
+      | "CurrentDBInstanceClass" -> CurrentDBInstanceClass
+      | "CurrentStorageConfigurationStorageType" ->
+          CurrentStorageConfigurationStorageType
+      | "CurrentStorageConfigurationAllocatedStorage" ->
+          CurrentStorageConfigurationAllocatedStorage
+      | "CurrentStorageConfigurationMaxAllocatedStorage" ->
+          CurrentStorageConfigurationMaxAllocatedStorage
+      | "CurrentStorageConfigurationIOPS" -> CurrentStorageConfigurationIOPS
+      | "CurrentStorageConfigurationStorageThroughput" ->
+          CurrentStorageConfigurationStorageThroughput
+      | "CurrentStorageEstimatedMonthlyVolumeIOPsCostVariation" ->
+          CurrentStorageEstimatedMonthlyVolumeIOPsCostVariation
+      | "CurrentInstanceOnDemandHourlyPrice" ->
+          CurrentInstanceOnDemandHourlyPrice
+      | "CurrentStorageOnDemandMonthlyPrice" ->
+          CurrentStorageOnDemandMonthlyPrice
+      | "LookbackPeriodInDays" -> LookbackPeriodInDays
+      | "CurrentStorageEstimatedClusterInstanceOnDemandMonthlyCost" ->
+          CurrentStorageEstimatedClusterInstanceOnDemandMonthlyCost
+      | "CurrentStorageEstimatedClusterStorageOnDemandMonthlyCost" ->
+          CurrentStorageEstimatedClusterStorageOnDemandMonthlyCost
+      | "CurrentStorageEstimatedClusterStorageIOOnDemandMonthlyCost" ->
+          CurrentStorageEstimatedClusterStorageIOOnDemandMonthlyCost
+      | "CurrentInstancePerformanceRisk" -> CurrentInstancePerformanceRisk
+      | "UtilizationMetricsCpuMaximum" -> UtilizationMetricsCpuMaximum
+      | "UtilizationMetricsMemoryMaximum" -> UtilizationMetricsMemoryMaximum
+      | "UtilizationMetricsEBSVolumeStorageSpaceUtilizationMaximum" ->
+          UtilizationMetricsEBSVolumeStorageSpaceUtilizationMaximum
+      | "UtilizationMetricsNetworkReceiveThroughputMaximum" ->
+          UtilizationMetricsNetworkReceiveThroughputMaximum
+      | "UtilizationMetricsNetworkTransmitThroughputMaximum" ->
+          UtilizationMetricsNetworkTransmitThroughputMaximum
+      | "UtilizationMetricsEBSVolumeReadIOPSMaximum" ->
+          UtilizationMetricsEBSVolumeReadIOPSMaximum
+      | "UtilizationMetricsEBSVolumeWriteIOPSMaximum" ->
+          UtilizationMetricsEBSVolumeWriteIOPSMaximum
+      | "UtilizationMetricsEBSVolumeReadThroughputMaximum" ->
+          UtilizationMetricsEBSVolumeReadThroughputMaximum
+      | "UtilizationMetricsEBSVolumeWriteThroughputMaximum" ->
+          UtilizationMetricsEBSVolumeWriteThroughputMaximum
+      | "UtilizationMetricsDatabaseConnectionsMaximum" ->
+          UtilizationMetricsDatabaseConnectionsMaximum
+      | "UtilizationMetricsStorageNetworkReceiveThroughputMaximum" ->
+          UtilizationMetricsStorageNetworkReceiveThroughputMaximum
+      | "UtilizationMetricsStorageNetworkTransmitThroughputMaximum" ->
+          UtilizationMetricsStorageNetworkTransmitThroughputMaximum
+      | "UtilizationMetricsAuroraMemoryHealthStateMaximum" ->
+          UtilizationMetricsAuroraMemoryHealthStateMaximum
+      | "UtilizationMetricsAuroraMemoryNumDeclinedSqlTotalMaximum" ->
+          UtilizationMetricsAuroraMemoryNumDeclinedSqlTotalMaximum
+      | "UtilizationMetricsAuroraMemoryNumKillConnTotalMaximum" ->
+          UtilizationMetricsAuroraMemoryNumKillConnTotalMaximum
+      | "UtilizationMetricsAuroraMemoryNumKillQueryTotalMaximum" ->
+          UtilizationMetricsAuroraMemoryNumKillQueryTotalMaximum
+      | "UtilizationMetricsReadIOPSEphemeralStorageMaximum" ->
+          UtilizationMetricsReadIOPSEphemeralStorageMaximum
+      | "UtilizationMetricsWriteIOPSEphemeralStorageMaximum" ->
+          UtilizationMetricsWriteIOPSEphemeralStorageMaximum
+      | "UtilizationMetricsVolumeBytesUsedAverage" ->
+          UtilizationMetricsVolumeBytesUsedAverage
+      | "UtilizationMetricsVolumeReadIOPsAverage" ->
+          UtilizationMetricsVolumeReadIOPsAverage
+      | "UtilizationMetricsVolumeWriteIOPsAverage" ->
+          UtilizationMetricsVolumeWriteIOPsAverage
+      | "InstanceFinding" -> InstanceFinding
+      | "InstanceFindingReasonCodes" -> InstanceFindingReasonCodes
+      | "StorageFinding" -> StorageFinding
+      | "StorageFindingReasonCodes" -> StorageFindingReasonCodes
+      | "InstanceRecommendationOptionsDBInstanceClass" ->
+          InstanceRecommendationOptionsDBInstanceClass
+      | "InstanceRecommendationOptionsRank" ->
+          InstanceRecommendationOptionsRank
+      | "InstanceRecommendationOptionsPerformanceRisk" ->
+          InstanceRecommendationOptionsPerformanceRisk
+      | "InstanceRecommendationOptionsProjectedUtilizationMetricsCpuMaximum"
+          ->
+          InstanceRecommendationOptionsProjectedUtilizationMetricsCpuMaximum
+      | "StorageRecommendationOptionsStorageType" ->
+          StorageRecommendationOptionsStorageType
+      | "StorageRecommendationOptionsAllocatedStorage" ->
+          StorageRecommendationOptionsAllocatedStorage
+      | "StorageRecommendationOptionsMaxAllocatedStorage" ->
+          StorageRecommendationOptionsMaxAllocatedStorage
+      | "StorageRecommendationOptionsIOPS" ->
+          StorageRecommendationOptionsIOPS
+      | "StorageRecommendationOptionsStorageThroughput" ->
+          StorageRecommendationOptionsStorageThroughput
+      | "StorageRecommendationOptionsRank" ->
+          StorageRecommendationOptionsRank
+      | "StorageRecommendationOptionsEstimatedMonthlyVolumeIOPsCostVariation"
+          ->
+          StorageRecommendationOptionsEstimatedMonthlyVolumeIOPsCostVariation
+      | "InstanceRecommendationOptionsInstanceOnDemandHourlyPrice" ->
+          InstanceRecommendationOptionsInstanceOnDemandHourlyPrice
+      | "InstanceRecommendationOptionsSavingsOpportunityPercentage" ->
+          InstanceRecommendationOptionsSavingsOpportunityPercentage
+      | "InstanceRecommendationOptionsEstimatedMonthlySavingsCurrency" ->
+          InstanceRecommendationOptionsEstimatedMonthlySavingsCurrency
+      | "InstanceRecommendationOptionsEstimatedMonthlySavingsValue" ->
+          InstanceRecommendationOptionsEstimatedMonthlySavingsValue
+      | "InstanceRecommendationOptionsSavingsOpportunityAfterDiscountsPercentage"
+          ->
+          InstanceRecommendationOptionsSavingsOpportunityAfterDiscountsPercentage
+      | "InstanceRecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+          ->
+          InstanceRecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts
+      | "InstanceRecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts"
+          ->
+          InstanceRecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts
+      | "StorageRecommendationOptionsOnDemandMonthlyPrice" ->
+          StorageRecommendationOptionsOnDemandMonthlyPrice
+      | "StorageRecommendationOptionsEstimatedClusterInstanceOnDemandMonthlyCost"
+          ->
+          StorageRecommendationOptionsEstimatedClusterInstanceOnDemandMonthlyCost
+      | "StorageRecommendationOptionsEstimatedClusterStorageOnDemandMonthlyCost"
+          ->
+          StorageRecommendationOptionsEstimatedClusterStorageOnDemandMonthlyCost
+      | "StorageRecommendationOptionsEstimatedClusterStorageIOOnDemandMonthlyCost"
+          ->
+          StorageRecommendationOptionsEstimatedClusterStorageIOOnDemandMonthlyCost
+      | "StorageRecommendationOptionsSavingsOpportunityPercentage" ->
+          StorageRecommendationOptionsSavingsOpportunityPercentage
+      | "StorageRecommendationOptionsEstimatedMonthlySavingsCurrency" ->
+          StorageRecommendationOptionsEstimatedMonthlySavingsCurrency
+      | "StorageRecommendationOptionsEstimatedMonthlySavingsValue" ->
+          StorageRecommendationOptionsEstimatedMonthlySavingsValue
+      | "StorageRecommendationOptionsSavingsOpportunityAfterDiscountsPercentage"
+          ->
+          StorageRecommendationOptionsSavingsOpportunityAfterDiscountsPercentage
+      | "StorageRecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+          ->
+          StorageRecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts
+      | "StorageRecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts"
+          ->
+          StorageRecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts
+      | "EffectiveRecommendationPreferencesCpuVendorArchitectures" ->
+          EffectiveRecommendationPreferencesCpuVendorArchitectures
+      | "EffectiveRecommendationPreferencesEnhancedInfrastructureMetrics" ->
+          EffectiveRecommendationPreferencesEnhancedInfrastructureMetrics
+      | "EffectiveRecommendationPreferencesLookBackPeriod" ->
+          EffectiveRecommendationPreferencesLookBackPeriod
+      | "EffectiveRecommendationPreferencesSavingsEstimationMode" ->
+          EffectiveRecommendationPreferencesSavingsEstimationMode
+      | "LastRefreshTimestamp" -> LastRefreshTimestamp
+      | "Tags" -> Tags
+      | "DBClusterIdentifier" -> DBClusterIdentifier
+      | "PromotionTier" -> PromotionTier
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExportableRDSDBField" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExportableRDSDBField" j)
+    let to_json = simple_to_json to_value
+  end
+module DestinationKeyPrefix =
+  struct
+    type nonrec t = string
+    let context_ = "DestinationKeyPrefix"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DestinationKeyPrefix" j
+    let to_json = simple_to_json to_value
+  end
+module ExportableLicenseField =
+  struct
+    type nonrec t =
+      | AccountId 
+      | ResourceArn 
+      | LookbackPeriodInDays 
+      | LastRefreshTimestamp 
+      | Finding 
+      | FindingReasonCodes 
+      | CurrentLicenseConfigurationNumberOfCores 
+      | CurrentLicenseConfigurationInstanceType 
+      | CurrentLicenseConfigurationOperatingSystem 
+      | CurrentLicenseConfigurationLicenseName 
+      | CurrentLicenseConfigurationLicenseEdition 
+      | CurrentLicenseConfigurationLicenseModel 
+      | CurrentLicenseConfigurationLicenseVersion 
+      | CurrentLicenseConfigurationMetricsSource 
+      | RecommendationOptionsOperatingSystem 
+      | RecommendationOptionsLicenseEdition 
+      | RecommendationOptionsLicenseModel 
+      | RecommendationOptionsSavingsOpportunityPercentage 
+      | RecommendationOptionsEstimatedMonthlySavingsCurrency 
+      | RecommendationOptionsEstimatedMonthlySavingsValue 
+      | Tags 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AccountId -> "AccountId"
+      | ResourceArn -> "ResourceArn"
+      | LookbackPeriodInDays -> "LookbackPeriodInDays"
+      | LastRefreshTimestamp -> "LastRefreshTimestamp"
+      | Finding -> "Finding"
+      | FindingReasonCodes -> "FindingReasonCodes"
+      | CurrentLicenseConfigurationNumberOfCores ->
+          "CurrentLicenseConfigurationNumberOfCores"
+      | CurrentLicenseConfigurationInstanceType ->
+          "CurrentLicenseConfigurationInstanceType"
+      | CurrentLicenseConfigurationOperatingSystem ->
+          "CurrentLicenseConfigurationOperatingSystem"
+      | CurrentLicenseConfigurationLicenseName ->
+          "CurrentLicenseConfigurationLicenseName"
+      | CurrentLicenseConfigurationLicenseEdition ->
+          "CurrentLicenseConfigurationLicenseEdition"
+      | CurrentLicenseConfigurationLicenseModel ->
+          "CurrentLicenseConfigurationLicenseModel"
+      | CurrentLicenseConfigurationLicenseVersion ->
+          "CurrentLicenseConfigurationLicenseVersion"
+      | CurrentLicenseConfigurationMetricsSource ->
+          "CurrentLicenseConfigurationMetricsSource"
+      | RecommendationOptionsOperatingSystem ->
+          "RecommendationOptionsOperatingSystem"
+      | RecommendationOptionsLicenseEdition ->
+          "RecommendationOptionsLicenseEdition"
+      | RecommendationOptionsLicenseModel ->
+          "RecommendationOptionsLicenseModel"
+      | RecommendationOptionsSavingsOpportunityPercentage ->
+          "RecommendationOptionsSavingsOpportunityPercentage"
+      | RecommendationOptionsEstimatedMonthlySavingsCurrency ->
+          "RecommendationOptionsEstimatedMonthlySavingsCurrency"
+      | RecommendationOptionsEstimatedMonthlySavingsValue ->
+          "RecommendationOptionsEstimatedMonthlySavingsValue"
+      | Tags -> "Tags"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AccountId" -> AccountId
+      | "ResourceArn" -> ResourceArn
+      | "LookbackPeriodInDays" -> LookbackPeriodInDays
+      | "LastRefreshTimestamp" -> LastRefreshTimestamp
+      | "Finding" -> Finding
+      | "FindingReasonCodes" -> FindingReasonCodes
+      | "CurrentLicenseConfigurationNumberOfCores" ->
+          CurrentLicenseConfigurationNumberOfCores
+      | "CurrentLicenseConfigurationInstanceType" ->
+          CurrentLicenseConfigurationInstanceType
+      | "CurrentLicenseConfigurationOperatingSystem" ->
+          CurrentLicenseConfigurationOperatingSystem
+      | "CurrentLicenseConfigurationLicenseName" ->
+          CurrentLicenseConfigurationLicenseName
+      | "CurrentLicenseConfigurationLicenseEdition" ->
+          CurrentLicenseConfigurationLicenseEdition
+      | "CurrentLicenseConfigurationLicenseModel" ->
+          CurrentLicenseConfigurationLicenseModel
+      | "CurrentLicenseConfigurationLicenseVersion" ->
+          CurrentLicenseConfigurationLicenseVersion
+      | "CurrentLicenseConfigurationMetricsSource" ->
+          CurrentLicenseConfigurationMetricsSource
+      | "RecommendationOptionsOperatingSystem" ->
+          RecommendationOptionsOperatingSystem
+      | "RecommendationOptionsLicenseEdition" ->
+          RecommendationOptionsLicenseEdition
+      | "RecommendationOptionsLicenseModel" ->
+          RecommendationOptionsLicenseModel
+      | "RecommendationOptionsSavingsOpportunityPercentage" ->
+          RecommendationOptionsSavingsOpportunityPercentage
+      | "RecommendationOptionsEstimatedMonthlySavingsCurrency" ->
+          RecommendationOptionsEstimatedMonthlySavingsCurrency
+      | "RecommendationOptionsEstimatedMonthlySavingsValue" ->
+          RecommendationOptionsEstimatedMonthlySavingsValue
+      | "Tags" -> Tags
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExportableLicenseField" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ExportableLicenseField" j)
+    let to_json = simple_to_json to_value
+  end
 module ExportableLambdaFunctionField =
   struct
     type nonrec t =
@@ -4281,6 +11530,11 @@ module ExportableLambdaFunctionField =
       | RecommendationOptionsSavingsOpportunityPercentage 
       | RecommendationOptionsEstimatedMonthlySavingsCurrency 
       | RecommendationOptionsEstimatedMonthlySavingsValue 
+      | Tags 
+      | EffectiveRecommendationPreferencesSavingsEstimationMode 
+      | RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage 
+      | RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts 
+      | RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -4320,6 +11574,15 @@ module ExportableLambdaFunctionField =
           "RecommendationOptionsEstimatedMonthlySavingsCurrency"
       | RecommendationOptionsEstimatedMonthlySavingsValue ->
           "RecommendationOptionsEstimatedMonthlySavingsValue"
+      | Tags -> "Tags"
+      | EffectiveRecommendationPreferencesSavingsEstimationMode ->
+          "EffectiveRecommendationPreferencesSavingsEstimationMode"
+      | RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage ->
+          "RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage"
+      | RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts ->
+          "RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+      | RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts ->
+          "RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts"
       | Non_static_id s -> s
     let of_string =
       function
@@ -4360,6 +11623,16 @@ module ExportableLambdaFunctionField =
           RecommendationOptionsEstimatedMonthlySavingsCurrency
       | "RecommendationOptionsEstimatedMonthlySavingsValue" ->
           RecommendationOptionsEstimatedMonthlySavingsValue
+      | "Tags" -> Tags
+      | "EffectiveRecommendationPreferencesSavingsEstimationMode" ->
+          EffectiveRecommendationPreferencesSavingsEstimationMode
+      | "RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage" ->
+          RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage
+      | "RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+          ->
+          RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts
+      | "RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts" ->
+          RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4372,17 +11645,247 @@ module ExportableLambdaFunctionField =
       of_string (string_of_json ~kind:"ExportableLambdaFunctionField" j)
     let to_json = simple_to_json to_value
   end
-module DestinationKeyPrefix =
+module ExportableIdleField =
   struct
-    type nonrec t = string
-    let context_ = "DestinationKeyPrefix"
+    type nonrec t =
+      | AccountId 
+      | ResourceArn 
+      | ResourceId 
+      | ResourceType 
+      | LastRefreshTimestamp 
+      | LookbackPeriodInDays 
+      | SavingsOpportunity 
+      | SavingsOpportunityAfterDiscount 
+      | UtilizationMetricsCpuMaximum 
+      | UtilizationMetricsMemoryMaximum 
+      | UtilizationMetricsNetworkOutBytesPerSecondMaximum 
+      | UtilizationMetricsNetworkInBytesPerSecondMaximum 
+      | UtilizationMetricsDatabaseConnectionsMaximum 
+      | UtilizationMetricsEBSVolumeReadIOPSMaximum 
+      | UtilizationMetricsEBSVolumeWriteIOPSMaximum 
+      | UtilizationMetricsVolumeReadOpsPerSecondMaximum 
+      | UtilizationMetricsVolumeWriteOpsPerSecondMaximum 
+      | UtilizationMetricsActiveConnectionCountMaximum 
+      | UtilizationMetricsPacketsInFromSourceMaximum 
+      | UtilizationMetricsPacketsInFromDestinationMaximum 
+      | Finding 
+      | FindingDescription 
+      | Tags 
+      | Non_static_id of string 
     let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    let to_string =
+      function
+      | AccountId -> "AccountId"
+      | ResourceArn -> "ResourceArn"
+      | ResourceId -> "ResourceId"
+      | ResourceType -> "ResourceType"
+      | LastRefreshTimestamp -> "LastRefreshTimestamp"
+      | LookbackPeriodInDays -> "LookbackPeriodInDays"
+      | SavingsOpportunity -> "SavingsOpportunity"
+      | SavingsOpportunityAfterDiscount -> "SavingsOpportunityAfterDiscount"
+      | UtilizationMetricsCpuMaximum -> "UtilizationMetricsCpuMaximum"
+      | UtilizationMetricsMemoryMaximum -> "UtilizationMetricsMemoryMaximum"
+      | UtilizationMetricsNetworkOutBytesPerSecondMaximum ->
+          "UtilizationMetricsNetworkOutBytesPerSecondMaximum"
+      | UtilizationMetricsNetworkInBytesPerSecondMaximum ->
+          "UtilizationMetricsNetworkInBytesPerSecondMaximum"
+      | UtilizationMetricsDatabaseConnectionsMaximum ->
+          "UtilizationMetricsDatabaseConnectionsMaximum"
+      | UtilizationMetricsEBSVolumeReadIOPSMaximum ->
+          "UtilizationMetricsEBSVolumeReadIOPSMaximum"
+      | UtilizationMetricsEBSVolumeWriteIOPSMaximum ->
+          "UtilizationMetricsEBSVolumeWriteIOPSMaximum"
+      | UtilizationMetricsVolumeReadOpsPerSecondMaximum ->
+          "UtilizationMetricsVolumeReadOpsPerSecondMaximum"
+      | UtilizationMetricsVolumeWriteOpsPerSecondMaximum ->
+          "UtilizationMetricsVolumeWriteOpsPerSecondMaximum"
+      | UtilizationMetricsActiveConnectionCountMaximum ->
+          "UtilizationMetricsActiveConnectionCountMaximum"
+      | UtilizationMetricsPacketsInFromSourceMaximum ->
+          "UtilizationMetricsPacketsInFromSourceMaximum"
+      | UtilizationMetricsPacketsInFromDestinationMaximum ->
+          "UtilizationMetricsPacketsInFromDestinationMaximum"
+      | Finding -> "Finding"
+      | FindingDescription -> "FindingDescription"
+      | Tags -> "Tags"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AccountId" -> AccountId
+      | "ResourceArn" -> ResourceArn
+      | "ResourceId" -> ResourceId
+      | "ResourceType" -> ResourceType
+      | "LastRefreshTimestamp" -> LastRefreshTimestamp
+      | "LookbackPeriodInDays" -> LookbackPeriodInDays
+      | "SavingsOpportunity" -> SavingsOpportunity
+      | "SavingsOpportunityAfterDiscount" -> SavingsOpportunityAfterDiscount
+      | "UtilizationMetricsCpuMaximum" -> UtilizationMetricsCpuMaximum
+      | "UtilizationMetricsMemoryMaximum" -> UtilizationMetricsMemoryMaximum
+      | "UtilizationMetricsNetworkOutBytesPerSecondMaximum" ->
+          UtilizationMetricsNetworkOutBytesPerSecondMaximum
+      | "UtilizationMetricsNetworkInBytesPerSecondMaximum" ->
+          UtilizationMetricsNetworkInBytesPerSecondMaximum
+      | "UtilizationMetricsDatabaseConnectionsMaximum" ->
+          UtilizationMetricsDatabaseConnectionsMaximum
+      | "UtilizationMetricsEBSVolumeReadIOPSMaximum" ->
+          UtilizationMetricsEBSVolumeReadIOPSMaximum
+      | "UtilizationMetricsEBSVolumeWriteIOPSMaximum" ->
+          UtilizationMetricsEBSVolumeWriteIOPSMaximum
+      | "UtilizationMetricsVolumeReadOpsPerSecondMaximum" ->
+          UtilizationMetricsVolumeReadOpsPerSecondMaximum
+      | "UtilizationMetricsVolumeWriteOpsPerSecondMaximum" ->
+          UtilizationMetricsVolumeWriteOpsPerSecondMaximum
+      | "UtilizationMetricsActiveConnectionCountMaximum" ->
+          UtilizationMetricsActiveConnectionCountMaximum
+      | "UtilizationMetricsPacketsInFromSourceMaximum" ->
+          UtilizationMetricsPacketsInFromSourceMaximum
+      | "UtilizationMetricsPacketsInFromDestinationMaximum" ->
+          UtilizationMetricsPacketsInFromDestinationMaximum
+      | "Finding" -> Finding
+      | "FindingDescription" -> FindingDescription
+      | "Tags" -> Tags
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DestinationKeyPrefix" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExportableIdleField" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExportableIdleField" j)
+    let to_json = simple_to_json to_value
+  end
+module ExportableECSServiceField =
+  struct
+    type nonrec t =
+      | AccountId 
+      | ServiceArn 
+      | LookbackPeriodInDays 
+      | LastRefreshTimestamp 
+      | LaunchType 
+      | CurrentPerformanceRisk 
+      | CurrentServiceConfigurationMemory 
+      | CurrentServiceConfigurationCpu 
+      | CurrentServiceConfigurationTaskDefinitionArn 
+      | CurrentServiceConfigurationAutoScalingConfiguration 
+      | CurrentServiceContainerConfigurations 
+      | UtilizationMetricsCpuMaximum 
+      | UtilizationMetricsMemoryMaximum 
+      | Finding 
+      | FindingReasonCodes 
+      | RecommendationOptionsMemory 
+      | RecommendationOptionsCpu 
+      | RecommendationOptionsSavingsOpportunityPercentage 
+      | RecommendationOptionsEstimatedMonthlySavingsCurrency 
+      | RecommendationOptionsEstimatedMonthlySavingsValue 
+      | RecommendationOptionsContainerRecommendations 
+      | RecommendationOptionsProjectedUtilizationMetricsCpuMaximum 
+      | RecommendationOptionsProjectedUtilizationMetricsMemoryMaximum 
+      | Tags 
+      | EffectiveRecommendationPreferencesSavingsEstimationMode 
+      | RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage 
+      | RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts 
+      | RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AccountId -> "AccountId"
+      | ServiceArn -> "ServiceArn"
+      | LookbackPeriodInDays -> "LookbackPeriodInDays"
+      | LastRefreshTimestamp -> "LastRefreshTimestamp"
+      | LaunchType -> "LaunchType"
+      | CurrentPerformanceRisk -> "CurrentPerformanceRisk"
+      | CurrentServiceConfigurationMemory ->
+          "CurrentServiceConfigurationMemory"
+      | CurrentServiceConfigurationCpu -> "CurrentServiceConfigurationCpu"
+      | CurrentServiceConfigurationTaskDefinitionArn ->
+          "CurrentServiceConfigurationTaskDefinitionArn"
+      | CurrentServiceConfigurationAutoScalingConfiguration ->
+          "CurrentServiceConfigurationAutoScalingConfiguration"
+      | CurrentServiceContainerConfigurations ->
+          "CurrentServiceContainerConfigurations"
+      | UtilizationMetricsCpuMaximum -> "UtilizationMetricsCpuMaximum"
+      | UtilizationMetricsMemoryMaximum -> "UtilizationMetricsMemoryMaximum"
+      | Finding -> "Finding"
+      | FindingReasonCodes -> "FindingReasonCodes"
+      | RecommendationOptionsMemory -> "RecommendationOptionsMemory"
+      | RecommendationOptionsCpu -> "RecommendationOptionsCpu"
+      | RecommendationOptionsSavingsOpportunityPercentage ->
+          "RecommendationOptionsSavingsOpportunityPercentage"
+      | RecommendationOptionsEstimatedMonthlySavingsCurrency ->
+          "RecommendationOptionsEstimatedMonthlySavingsCurrency"
+      | RecommendationOptionsEstimatedMonthlySavingsValue ->
+          "RecommendationOptionsEstimatedMonthlySavingsValue"
+      | RecommendationOptionsContainerRecommendations ->
+          "RecommendationOptionsContainerRecommendations"
+      | RecommendationOptionsProjectedUtilizationMetricsCpuMaximum ->
+          "RecommendationOptionsProjectedUtilizationMetricsCpuMaximum"
+      | RecommendationOptionsProjectedUtilizationMetricsMemoryMaximum ->
+          "RecommendationOptionsProjectedUtilizationMetricsMemoryMaximum"
+      | Tags -> "Tags"
+      | EffectiveRecommendationPreferencesSavingsEstimationMode ->
+          "EffectiveRecommendationPreferencesSavingsEstimationMode"
+      | RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage ->
+          "RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage"
+      | RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts ->
+          "RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+      | RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts ->
+          "RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AccountId" -> AccountId
+      | "ServiceArn" -> ServiceArn
+      | "LookbackPeriodInDays" -> LookbackPeriodInDays
+      | "LastRefreshTimestamp" -> LastRefreshTimestamp
+      | "LaunchType" -> LaunchType
+      | "CurrentPerformanceRisk" -> CurrentPerformanceRisk
+      | "CurrentServiceConfigurationMemory" ->
+          CurrentServiceConfigurationMemory
+      | "CurrentServiceConfigurationCpu" -> CurrentServiceConfigurationCpu
+      | "CurrentServiceConfigurationTaskDefinitionArn" ->
+          CurrentServiceConfigurationTaskDefinitionArn
+      | "CurrentServiceConfigurationAutoScalingConfiguration" ->
+          CurrentServiceConfigurationAutoScalingConfiguration
+      | "CurrentServiceContainerConfigurations" ->
+          CurrentServiceContainerConfigurations
+      | "UtilizationMetricsCpuMaximum" -> UtilizationMetricsCpuMaximum
+      | "UtilizationMetricsMemoryMaximum" -> UtilizationMetricsMemoryMaximum
+      | "Finding" -> Finding
+      | "FindingReasonCodes" -> FindingReasonCodes
+      | "RecommendationOptionsMemory" -> RecommendationOptionsMemory
+      | "RecommendationOptionsCpu" -> RecommendationOptionsCpu
+      | "RecommendationOptionsSavingsOpportunityPercentage" ->
+          RecommendationOptionsSavingsOpportunityPercentage
+      | "RecommendationOptionsEstimatedMonthlySavingsCurrency" ->
+          RecommendationOptionsEstimatedMonthlySavingsCurrency
+      | "RecommendationOptionsEstimatedMonthlySavingsValue" ->
+          RecommendationOptionsEstimatedMonthlySavingsValue
+      | "RecommendationOptionsContainerRecommendations" ->
+          RecommendationOptionsContainerRecommendations
+      | "RecommendationOptionsProjectedUtilizationMetricsCpuMaximum" ->
+          RecommendationOptionsProjectedUtilizationMetricsCpuMaximum
+      | "RecommendationOptionsProjectedUtilizationMetricsMemoryMaximum" ->
+          RecommendationOptionsProjectedUtilizationMetricsMemoryMaximum
+      | "Tags" -> Tags
+      | "EffectiveRecommendationPreferencesSavingsEstimationMode" ->
+          EffectiveRecommendationPreferencesSavingsEstimationMode
+      | "RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage" ->
+          RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage
+      | "RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+          ->
+          RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts
+      | "RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts" ->
+          RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExportableECSServiceField" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ExportableECSServiceField" j)
     let to_json = simple_to_json to_value
   end
 module ExportableInstanceField =
@@ -4440,6 +11943,28 @@ module ExportableInstanceField =
       | EffectiveRecommendationPreferencesInferredWorkloadTypes 
       | InferredWorkloadTypes 
       | RecommendationOptionsMigrationEffort 
+      | EffectiveRecommendationPreferencesExternalMetricsSource 
+      | Tags 
+      | InstanceState 
+      | ExternalMetricStatusCode 
+      | ExternalMetricStatusReason 
+      | CurrentInstanceGpuInfo 
+      | RecommendationOptionsInstanceGpuInfo 
+      | UtilizationMetricsGpuPercentageMaximum 
+      | UtilizationMetricsGpuMemoryPercentageMaximum 
+      | RecommendationOptionsProjectedUtilizationMetricsGpuPercentageMaximum
+      
+      |
+      RecommendationOptionsProjectedUtilizationMetricsGpuMemoryPercentageMaximum
+      
+      | Idle 
+      | EffectiveRecommendationPreferencesPreferredResources 
+      | EffectiveRecommendationPreferencesLookBackPeriod 
+      | EffectiveRecommendationPreferencesUtilizationPreferences 
+      | EffectiveRecommendationPreferencesSavingsEstimationMode 
+      | RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage 
+      | RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts 
+      | RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -4527,6 +12052,40 @@ module ExportableInstanceField =
       | InferredWorkloadTypes -> "InferredWorkloadTypes"
       | RecommendationOptionsMigrationEffort ->
           "RecommendationOptionsMigrationEffort"
+      | EffectiveRecommendationPreferencesExternalMetricsSource ->
+          "EffectiveRecommendationPreferencesExternalMetricsSource"
+      | Tags -> "Tags"
+      | InstanceState -> "InstanceState"
+      | ExternalMetricStatusCode -> "ExternalMetricStatusCode"
+      | ExternalMetricStatusReason -> "ExternalMetricStatusReason"
+      | CurrentInstanceGpuInfo -> "CurrentInstanceGpuInfo"
+      | RecommendationOptionsInstanceGpuInfo ->
+          "RecommendationOptionsInstanceGpuInfo"
+      | UtilizationMetricsGpuPercentageMaximum ->
+          "UtilizationMetricsGpuPercentageMaximum"
+      | UtilizationMetricsGpuMemoryPercentageMaximum ->
+          "UtilizationMetricsGpuMemoryPercentageMaximum"
+      | RecommendationOptionsProjectedUtilizationMetricsGpuPercentageMaximum
+          ->
+          "RecommendationOptionsProjectedUtilizationMetricsGpuPercentageMaximum"
+      | RecommendationOptionsProjectedUtilizationMetricsGpuMemoryPercentageMaximum
+          ->
+          "RecommendationOptionsProjectedUtilizationMetricsGpuMemoryPercentageMaximum"
+      | Idle -> "Idle"
+      | EffectiveRecommendationPreferencesPreferredResources ->
+          "EffectiveRecommendationPreferencesPreferredResources"
+      | EffectiveRecommendationPreferencesLookBackPeriod ->
+          "EffectiveRecommendationPreferencesLookBackPeriod"
+      | EffectiveRecommendationPreferencesUtilizationPreferences ->
+          "EffectiveRecommendationPreferencesUtilizationPreferences"
+      | EffectiveRecommendationPreferencesSavingsEstimationMode ->
+          "EffectiveRecommendationPreferencesSavingsEstimationMode"
+      | RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage ->
+          "RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage"
+      | RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts ->
+          "RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+      | RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts ->
+          "RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts"
       | Non_static_id s -> s
     let of_string =
       function
@@ -4613,6 +12172,41 @@ module ExportableInstanceField =
       | "InferredWorkloadTypes" -> InferredWorkloadTypes
       | "RecommendationOptionsMigrationEffort" ->
           RecommendationOptionsMigrationEffort
+      | "EffectiveRecommendationPreferencesExternalMetricsSource" ->
+          EffectiveRecommendationPreferencesExternalMetricsSource
+      | "Tags" -> Tags
+      | "InstanceState" -> InstanceState
+      | "ExternalMetricStatusCode" -> ExternalMetricStatusCode
+      | "ExternalMetricStatusReason" -> ExternalMetricStatusReason
+      | "CurrentInstanceGpuInfo" -> CurrentInstanceGpuInfo
+      | "RecommendationOptionsInstanceGpuInfo" ->
+          RecommendationOptionsInstanceGpuInfo
+      | "UtilizationMetricsGpuPercentageMaximum" ->
+          UtilizationMetricsGpuPercentageMaximum
+      | "UtilizationMetricsGpuMemoryPercentageMaximum" ->
+          UtilizationMetricsGpuMemoryPercentageMaximum
+      | "RecommendationOptionsProjectedUtilizationMetricsGpuPercentageMaximum"
+          ->
+          RecommendationOptionsProjectedUtilizationMetricsGpuPercentageMaximum
+      | "RecommendationOptionsProjectedUtilizationMetricsGpuMemoryPercentageMaximum"
+          ->
+          RecommendationOptionsProjectedUtilizationMetricsGpuMemoryPercentageMaximum
+      | "Idle" -> Idle
+      | "EffectiveRecommendationPreferencesPreferredResources" ->
+          EffectiveRecommendationPreferencesPreferredResources
+      | "EffectiveRecommendationPreferencesLookBackPeriod" ->
+          EffectiveRecommendationPreferencesLookBackPeriod
+      | "EffectiveRecommendationPreferencesUtilizationPreferences" ->
+          EffectiveRecommendationPreferencesUtilizationPreferences
+      | "EffectiveRecommendationPreferencesSavingsEstimationMode" ->
+          EffectiveRecommendationPreferencesSavingsEstimationMode
+      | "RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage" ->
+          RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage
+      | "RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+          ->
+          RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts
+      | "RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts" ->
+          RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4655,6 +12249,13 @@ module ExportableVolumeField =
       | RecommendationOptionsSavingsOpportunityPercentage 
       | RecommendationOptionsEstimatedMonthlySavingsCurrency 
       | RecommendationOptionsEstimatedMonthlySavingsValue 
+      | Tags 
+      | RootVolume 
+      | CurrentConfigurationRootVolume 
+      | EffectiveRecommendationPreferencesSavingsEstimationMode 
+      | RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage 
+      | RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts 
+      | RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -4706,6 +12307,17 @@ module ExportableVolumeField =
           "RecommendationOptionsEstimatedMonthlySavingsCurrency"
       | RecommendationOptionsEstimatedMonthlySavingsValue ->
           "RecommendationOptionsEstimatedMonthlySavingsValue"
+      | Tags -> "Tags"
+      | RootVolume -> "RootVolume"
+      | CurrentConfigurationRootVolume -> "CurrentConfigurationRootVolume"
+      | EffectiveRecommendationPreferencesSavingsEstimationMode ->
+          "EffectiveRecommendationPreferencesSavingsEstimationMode"
+      | RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage ->
+          "RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage"
+      | RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts ->
+          "RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+      | RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts ->
+          "RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts"
       | Non_static_id s -> s
     let of_string =
       function
@@ -4756,6 +12368,18 @@ module ExportableVolumeField =
           RecommendationOptionsEstimatedMonthlySavingsCurrency
       | "RecommendationOptionsEstimatedMonthlySavingsValue" ->
           RecommendationOptionsEstimatedMonthlySavingsValue
+      | "Tags" -> Tags
+      | "RootVolume" -> RootVolume
+      | "CurrentConfigurationRootVolume" -> CurrentConfigurationRootVolume
+      | "EffectiveRecommendationPreferencesSavingsEstimationMode" ->
+          EffectiveRecommendationPreferencesSavingsEstimationMode
+      | "RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage" ->
+          RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage
+      | "RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+          ->
+          RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts
+      | "RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts" ->
+          RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4793,6 +12417,9 @@ module ExportableAutoScalingGroupField =
       | CurrentConfigurationDesiredCapacity 
       | CurrentConfigurationMinSize 
       | CurrentConfigurationMaxSize 
+      | CurrentConfigurationAllocationStrategy 
+      | CurrentConfigurationMixedInstanceTypes 
+      | CurrentConfigurationType 
       | CurrentOnDemandPrice 
       | CurrentStandardOneYearNoUpfrontReservedPrice 
       | CurrentStandardThreeYearNoUpfrontReservedPrice 
@@ -4804,6 +12431,12 @@ module ExportableAutoScalingGroupField =
       | RecommendationOptionsConfigurationDesiredCapacity 
       | RecommendationOptionsConfigurationMinSize 
       | RecommendationOptionsConfigurationMaxSize 
+      |
+      RecommendationOptionsConfigurationEstimatedInstanceHourReductionPercentage
+      
+      | RecommendationOptionsConfigurationAllocationStrategy 
+      | RecommendationOptionsConfigurationMixedInstanceTypes 
+      | RecommendationOptionsConfigurationType 
       | RecommendationOptionsProjectedUtilizationMetricsCpuMaximum 
       | RecommendationOptionsProjectedUtilizationMetricsMemoryMaximum 
       | RecommendationOptionsPerformanceRisk 
@@ -4822,8 +12455,23 @@ module ExportableAutoScalingGroupField =
       | EffectiveRecommendationPreferencesCpuVendorArchitectures 
       | EffectiveRecommendationPreferencesEnhancedInfrastructureMetrics 
       | EffectiveRecommendationPreferencesInferredWorkloadTypes 
+      | EffectiveRecommendationPreferencesPreferredResources 
+      | EffectiveRecommendationPreferencesLookBackPeriod 
       | InferredWorkloadTypes 
       | RecommendationOptionsMigrationEffort 
+      | CurrentInstanceGpuInfo 
+      | RecommendationOptionsInstanceGpuInfo 
+      | UtilizationMetricsGpuPercentageMaximum 
+      | UtilizationMetricsGpuMemoryPercentageMaximum 
+      | RecommendationOptionsProjectedUtilizationMetricsGpuPercentageMaximum
+      
+      |
+      RecommendationOptionsProjectedUtilizationMetricsGpuMemoryPercentageMaximum
+      
+      | EffectiveRecommendationPreferencesSavingsEstimationMode 
+      | RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage 
+      | RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts 
+      | RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -4865,6 +12513,11 @@ module ExportableAutoScalingGroupField =
           "CurrentConfigurationDesiredCapacity"
       | CurrentConfigurationMinSize -> "CurrentConfigurationMinSize"
       | CurrentConfigurationMaxSize -> "CurrentConfigurationMaxSize"
+      | CurrentConfigurationAllocationStrategy ->
+          "CurrentConfigurationAllocationStrategy"
+      | CurrentConfigurationMixedInstanceTypes ->
+          "CurrentConfigurationMixedInstanceTypes"
+      | CurrentConfigurationType -> "CurrentConfigurationType"
       | CurrentOnDemandPrice -> "CurrentOnDemandPrice"
       | CurrentStandardOneYearNoUpfrontReservedPrice ->
           "CurrentStandardOneYearNoUpfrontReservedPrice"
@@ -4882,6 +12535,15 @@ module ExportableAutoScalingGroupField =
           "RecommendationOptionsConfigurationMinSize"
       | RecommendationOptionsConfigurationMaxSize ->
           "RecommendationOptionsConfigurationMaxSize"
+      | RecommendationOptionsConfigurationEstimatedInstanceHourReductionPercentage
+          ->
+          "RecommendationOptionsConfigurationEstimatedInstanceHourReductionPercentage"
+      | RecommendationOptionsConfigurationAllocationStrategy ->
+          "RecommendationOptionsConfigurationAllocationStrategy"
+      | RecommendationOptionsConfigurationMixedInstanceTypes ->
+          "RecommendationOptionsConfigurationMixedInstanceTypes"
+      | RecommendationOptionsConfigurationType ->
+          "RecommendationOptionsConfigurationType"
       | RecommendationOptionsProjectedUtilizationMetricsCpuMaximum ->
           "RecommendationOptionsProjectedUtilizationMetricsCpuMaximum"
       | RecommendationOptionsProjectedUtilizationMetricsMemoryMaximum ->
@@ -4912,9 +12574,34 @@ module ExportableAutoScalingGroupField =
           "EffectiveRecommendationPreferencesEnhancedInfrastructureMetrics"
       | EffectiveRecommendationPreferencesInferredWorkloadTypes ->
           "EffectiveRecommendationPreferencesInferredWorkloadTypes"
+      | EffectiveRecommendationPreferencesPreferredResources ->
+          "EffectiveRecommendationPreferencesPreferredResources"
+      | EffectiveRecommendationPreferencesLookBackPeriod ->
+          "EffectiveRecommendationPreferencesLookBackPeriod"
       | InferredWorkloadTypes -> "InferredWorkloadTypes"
       | RecommendationOptionsMigrationEffort ->
           "RecommendationOptionsMigrationEffort"
+      | CurrentInstanceGpuInfo -> "CurrentInstanceGpuInfo"
+      | RecommendationOptionsInstanceGpuInfo ->
+          "RecommendationOptionsInstanceGpuInfo"
+      | UtilizationMetricsGpuPercentageMaximum ->
+          "UtilizationMetricsGpuPercentageMaximum"
+      | UtilizationMetricsGpuMemoryPercentageMaximum ->
+          "UtilizationMetricsGpuMemoryPercentageMaximum"
+      | RecommendationOptionsProjectedUtilizationMetricsGpuPercentageMaximum
+          ->
+          "RecommendationOptionsProjectedUtilizationMetricsGpuPercentageMaximum"
+      | RecommendationOptionsProjectedUtilizationMetricsGpuMemoryPercentageMaximum
+          ->
+          "RecommendationOptionsProjectedUtilizationMetricsGpuMemoryPercentageMaximum"
+      | EffectiveRecommendationPreferencesSavingsEstimationMode ->
+          "EffectiveRecommendationPreferencesSavingsEstimationMode"
+      | RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage ->
+          "RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage"
+      | RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts ->
+          "RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+      | RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts ->
+          "RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts"
       | Non_static_id s -> s
     let of_string =
       function
@@ -4955,6 +12642,11 @@ module ExportableAutoScalingGroupField =
           CurrentConfigurationDesiredCapacity
       | "CurrentConfigurationMinSize" -> CurrentConfigurationMinSize
       | "CurrentConfigurationMaxSize" -> CurrentConfigurationMaxSize
+      | "CurrentConfigurationAllocationStrategy" ->
+          CurrentConfigurationAllocationStrategy
+      | "CurrentConfigurationMixedInstanceTypes" ->
+          CurrentConfigurationMixedInstanceTypes
+      | "CurrentConfigurationType" -> CurrentConfigurationType
       | "CurrentOnDemandPrice" -> CurrentOnDemandPrice
       | "CurrentStandardOneYearNoUpfrontReservedPrice" ->
           CurrentStandardOneYearNoUpfrontReservedPrice
@@ -4972,6 +12664,15 @@ module ExportableAutoScalingGroupField =
           RecommendationOptionsConfigurationMinSize
       | "RecommendationOptionsConfigurationMaxSize" ->
           RecommendationOptionsConfigurationMaxSize
+      | "RecommendationOptionsConfigurationEstimatedInstanceHourReductionPercentage"
+          ->
+          RecommendationOptionsConfigurationEstimatedInstanceHourReductionPercentage
+      | "RecommendationOptionsConfigurationAllocationStrategy" ->
+          RecommendationOptionsConfigurationAllocationStrategy
+      | "RecommendationOptionsConfigurationMixedInstanceTypes" ->
+          RecommendationOptionsConfigurationMixedInstanceTypes
+      | "RecommendationOptionsConfigurationType" ->
+          RecommendationOptionsConfigurationType
       | "RecommendationOptionsProjectedUtilizationMetricsCpuMaximum" ->
           RecommendationOptionsProjectedUtilizationMetricsCpuMaximum
       | "RecommendationOptionsProjectedUtilizationMetricsMemoryMaximum" ->
@@ -5002,9 +12703,35 @@ module ExportableAutoScalingGroupField =
           EffectiveRecommendationPreferencesEnhancedInfrastructureMetrics
       | "EffectiveRecommendationPreferencesInferredWorkloadTypes" ->
           EffectiveRecommendationPreferencesInferredWorkloadTypes
+      | "EffectiveRecommendationPreferencesPreferredResources" ->
+          EffectiveRecommendationPreferencesPreferredResources
+      | "EffectiveRecommendationPreferencesLookBackPeriod" ->
+          EffectiveRecommendationPreferencesLookBackPeriod
       | "InferredWorkloadTypes" -> InferredWorkloadTypes
       | "RecommendationOptionsMigrationEffort" ->
           RecommendationOptionsMigrationEffort
+      | "CurrentInstanceGpuInfo" -> CurrentInstanceGpuInfo
+      | "RecommendationOptionsInstanceGpuInfo" ->
+          RecommendationOptionsInstanceGpuInfo
+      | "UtilizationMetricsGpuPercentageMaximum" ->
+          UtilizationMetricsGpuPercentageMaximum
+      | "UtilizationMetricsGpuMemoryPercentageMaximum" ->
+          UtilizationMetricsGpuMemoryPercentageMaximum
+      | "RecommendationOptionsProjectedUtilizationMetricsGpuPercentageMaximum"
+          ->
+          RecommendationOptionsProjectedUtilizationMetricsGpuPercentageMaximum
+      | "RecommendationOptionsProjectedUtilizationMetricsGpuMemoryPercentageMaximum"
+          ->
+          RecommendationOptionsProjectedUtilizationMetricsGpuMemoryPercentageMaximum
+      | "EffectiveRecommendationPreferencesSavingsEstimationMode" ->
+          EffectiveRecommendationPreferencesSavingsEstimationMode
+      | "RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage" ->
+          RecommendationOptionsSavingsOpportunityAfterDiscountsPercentage
+      | "RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts"
+          ->
+          RecommendationOptionsEstimatedMonthlySavingsCurrencyAfterDiscounts
+      | "RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts" ->
+          RecommendationOptionsEstimatedMonthlySavingsValueAfterDiscounts
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -5089,18 +12816,18 @@ module RecommendationExportJob =
       make ?failureReason ?lastUpdatedTimestamp ?creationTimestamp ?status
         ?resourceType ?destination ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
       let lastUpdatedTimestamp =
-        field_map json "lastUpdatedTimestamp" LastUpdatedTimestamp.of_json in
+        field_map json__ "lastUpdatedTimestamp" LastUpdatedTimestamp.of_json in
       let creationTimestamp =
-        field_map json "creationTimestamp" CreationTimestamp.of_json in
-      let status = field_map json "status" JobStatus.of_json in
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
+        field_map json__ "creationTimestamp" CreationTimestamp.of_json in
+      let status = field_map json__ "status" JobStatus.of_json in
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
       let destination =
-        field_map json "destination" ExportDestination.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
+        field_map json__ "destination" ExportDestination.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
       make ?failureReason ?lastUpdatedTimestamp ?creationTimestamp ?status
         ?resourceType ?destination ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -5129,9 +12856,9 @@ module JobFilter =
         (Option.map ~f:JobFilterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" FilterValues.of_json in
-      let name = field_map json "name" JobFilterName.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" FilterValues.of_json in
+      let name = field_map json__ "name" JobFilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5141,17 +12868,29 @@ module RecommendationPreferenceName =
     type nonrec t =
       | EnhancedInfrastructureMetrics 
       | InferredWorkloadTypes 
+      | ExternalMetricsPreference 
+      | LookBackPeriodPreference 
+      | PreferredResources 
+      | UtilizationPreferences 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | EnhancedInfrastructureMetrics -> "EnhancedInfrastructureMetrics"
       | InferredWorkloadTypes -> "InferredWorkloadTypes"
+      | ExternalMetricsPreference -> "ExternalMetricsPreference"
+      | LookBackPeriodPreference -> "LookBackPeriodPreference"
+      | PreferredResources -> "PreferredResources"
+      | UtilizationPreferences -> "UtilizationPreferences"
       | Non_static_id s -> s
     let of_string =
       function
       | "EnhancedInfrastructureMetrics" -> EnhancedInfrastructureMetrics
       | "InferredWorkloadTypes" -> InferredWorkloadTypes
+      | "ExternalMetricsPreference" -> ExternalMetricsPreference
+      | "LookBackPeriodPreference" -> LookBackPeriodPreference
+      | "PreferredResources" -> PreferredResources
+      | "UtilizationPreferences" -> UtilizationPreferences
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -5178,8 +12917,8 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5198,8 +12937,8 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal error has occurred. Try your call again."]
@@ -5217,8 +12956,8 @@ module InvalidParameterValueException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5237,8 +12976,8 @@ module MissingAuthenticationToken =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5257,8 +12996,8 @@ module ServiceUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5266,22 +13005,20 @@ module ServiceUnavailableException =
 module ThrottlingException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "ThrottlingException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (ErrorMessage.to_value x.message)))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
 module IncludeMemberAccounts =
@@ -5311,8 +13048,8 @@ module OptInRequiredException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The account is not opted in to Compute Optimizer."]
@@ -5330,12 +13067,40 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A resource that is required for the action doesn't exist."]
+module PreferredResources =
+  struct
+    type nonrec t = PreferredResource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PreferredResource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PreferredResource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PreferredResources"
+        ~of_json:PreferredResource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module NextToken =
   struct
     type nonrec t = string
@@ -5353,6 +13118,9 @@ module RecommendationSummaries =
   struct
     type nonrec t = RecommendationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationSummary.to_value)) |>
         (fun x -> `List x)
@@ -5379,6 +13147,9 @@ module AccountIds =
   struct
     type nonrec t = AccountId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5402,7 +13173,11 @@ module AccountIds =
 module MaxResults =
   struct
     type nonrec t = int
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:0));
+        i
     let of_string = Int.of_string
     let to_value x = `Integer x
     let to_query v = to_query to_value v
@@ -5417,6 +13192,9 @@ module RecommendationPreferencesDetails =
   struct
     type nonrec t = RecommendationPreferencesDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationPreferencesDetail.to_value)) |>
         (fun x -> `List x)
@@ -5439,10 +13217,257 @@ module RecommendationPreferencesDetails =
         ~of_json:RecommendationPreferencesDetail.of_json j
     let to_json v = composed_to_json to_value v
   end
+module GetRecommendationErrors =
+  struct
+    type nonrec t = GetRecommendationError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GetRecommendationError.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GetRecommendationError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GetRecommendationErrors"
+        ~of_json:GetRecommendationError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RDSDBRecommendations =
+  struct
+    type nonrec t = RDSDBRecommendation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RDSDBRecommendation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RDSDBRecommendation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RDSDBRecommendations"
+        ~of_json:RDSDBRecommendation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RDSDBRecommendationFilters =
+  struct
+    type nonrec t = RDSDBRecommendationFilter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RDSDBRecommendationFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RDSDBRecommendationFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RDSDBRecommendationFilters"
+        ~of_json:RDSDBRecommendationFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RecommendationPreferences =
+  struct
+    type nonrec t =
+      {
+      cpuVendorArchitectures: CpuVendorArchitectures.t option
+        [@ocaml.doc
+          "Specifies the CPU vendor and architecture for Amazon EC2 instance and Auto Scaling group recommendations. For example, when you specify AWS_ARM64 with: A GetEC2InstanceRecommendations or GetAutoScalingGroupRecommendations request, Compute Optimizer returns recommendations that consist of Graviton instance types only. A GetEC2RecommendationProjectedMetrics request, Compute Optimizer returns projected utilization metrics for Graviton instance type recommendations only. A ExportEC2InstanceRecommendations or ExportAutoScalingGroupRecommendations request, Compute Optimizer exports recommendations that consist of Graviton instance types only."]}
+    let make ?cpuVendorArchitectures = fun () -> { cpuVendorArchitectures }
+    let to_value x =
+      structure_to_value
+        [("cpuVendorArchitectures",
+           (Option.map x.cpuVendorArchitectures
+              ~f:CpuVendorArchitectures.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cpuVendorArchitectures =
+        (Option.map ~f:CpuVendorArchitectures.of_xml)
+          (Xml.child xml_arg0 "cpuVendorArchitectures") in
+      make ?cpuVendorArchitectures ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cpuVendorArchitectures =
+        field_map json__ "cpuVendorArchitectures"
+          CpuVendorArchitectures.of_json in
+      make ?cpuVendorArchitectures ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the recommendation preferences to return in the response of a GetAutoScalingGroupRecommendations, GetEC2InstanceRecommendations, GetEC2RecommendationProjectedMetrics, GetRDSDatabaseRecommendations, and GetRDSDatabaseRecommendationProjectedMetrics request."]
+module ResourceArns =
+  struct
+    type nonrec t = ResourceArn.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceArns" ~of_json:ResourceArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RDSDatabaseRecommendedOptionProjectedMetrics =
+  struct
+    type nonrec t = RDSDatabaseRecommendedOptionProjectedMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:RDSDatabaseRecommendedOptionProjectedMetric.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:RDSDatabaseRecommendedOptionProjectedMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RDSDatabaseRecommendedOptionProjectedMetrics"
+        ~of_json:RDSDatabaseRecommendedOptionProjectedMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Period =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Period" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LicenseRecommendations =
+  struct
+    type nonrec t = LicenseRecommendation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LicenseRecommendation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LicenseRecommendation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LicenseRecommendations"
+        ~of_json:LicenseRecommendation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LicenseRecommendationFilters =
+  struct
+    type nonrec t = LicenseRecommendationFilter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LicenseRecommendationFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LicenseRecommendationFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LicenseRecommendationFilters"
+        ~of_json:LicenseRecommendationFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module LambdaFunctionRecommendations =
   struct
     type nonrec t = LambdaFunctionRecommendation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LambdaFunctionRecommendation.to_value)) |>
         (fun x -> `List x)
@@ -5479,8 +13504,8 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request exceeds a limit of the service."]
@@ -5488,6 +13513,9 @@ module FunctionArns =
   struct
     type nonrec t = FunctionArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FunctionArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5512,6 +13540,9 @@ module LambdaFunctionRecommendationFilters =
   struct
     type nonrec t = LambdaFunctionRecommendationFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LambdaFunctionRecommendationFilter.to_value)) |>
         (fun x -> `List x)
@@ -5535,10 +13566,143 @@ module LambdaFunctionRecommendationFilters =
         ~of_json:LambdaFunctionRecommendationFilter.of_json j
     let to_json v = composed_to_json to_value v
   end
+module IdleRecommendationErrors =
+  struct
+    type nonrec t = IdleRecommendationError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IdleRecommendationError.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IdleRecommendationError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IdleRecommendationErrors"
+        ~of_json:IdleRecommendationError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IdleRecommendations =
+  struct
+    type nonrec t = IdleRecommendation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IdleRecommendation.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IdleRecommendation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IdleRecommendations"
+        ~of_json:IdleRecommendation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IdleMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for IdleMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module IdleRecommendationFilters =
+  struct
+    type nonrec t = IdleRecommendationFilter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IdleRecommendationFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IdleRecommendationFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IdleRecommendationFilters"
+        ~of_json:IdleRecommendationFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OrderBy =
+  struct
+    type nonrec t =
+      {
+      dimension: Dimension.t option
+        [@ocaml.doc "The dimension values to sort the recommendations."];
+      order: Order.t option
+        [@ocaml.doc "The order to sort the recommendations."]}
+    let make ?dimension = fun ?order -> fun () -> { dimension; order }
+    let to_value x =
+      structure_to_value
+        [("dimension", (Option.map x.dimension ~f:Dimension.to_value));
+        ("order", (Option.map x.order ~f:Order.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let order = (Option.map ~f:Order.of_xml) (Xml.child xml_arg0 "order") in
+      let dimension =
+        (Option.map ~f:Dimension.of_xml) (Xml.child xml_arg0 "dimension") in
+      make ?order ?dimension ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let order = field_map json__ "order" Order.of_json in
+      let dimension = field_map json__ "dimension" Dimension.of_json in
+      make ?order ?dimension ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes how the recommendations are ordered."]
 module AccountEnrollmentStatuses =
   struct
     type nonrec t = AccountEnrollmentStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountEnrollmentStatus.to_value)) |>
         (fun x -> `List x)
@@ -5565,6 +13729,9 @@ module EnrollmentFilters =
   struct
     type nonrec t = EnrollmentFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnrollmentFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5614,23 +13781,129 @@ module NumberOfMemberAccountsOptedIn =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module ResourceArn =
+module ECSServiceRecommendations =
   struct
-    type nonrec t = string
-    let context_ = "ResourceArn"
+    type nonrec t = ECSServiceRecommendation.t list
     let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ECSServiceRecommendation.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ResourceArn" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ECSServiceRecommendation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ECSServiceRecommendations"
+        ~of_json:ECSServiceRecommendation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ECSServiceRecommendationFilters =
+  struct
+    type nonrec t = ECSServiceRecommendationFilter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ECSServiceRecommendationFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ECSServiceRecommendationFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ECSServiceRecommendationFilters"
+        ~of_json:ECSServiceRecommendationFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceArns =
+  struct
+    type nonrec t = ServiceArn.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceArns" ~of_json:ServiceArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ECSServiceRecommendedOptionProjectedMetrics =
+  struct
+    type nonrec t = ECSServiceRecommendedOptionProjectedMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:ECSServiceRecommendedOptionProjectedMetric.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ECSServiceRecommendedOptionProjectedMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ECSServiceRecommendedOptionProjectedMetrics"
+        ~of_json:ECSServiceRecommendedOptionProjectedMetric.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module RecommendedOptionProjectedMetrics =
   struct
     type nonrec t = RecommendedOptionProjectedMetric.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendedOptionProjectedMetric.to_value)) |>
         (fun x -> `List x)
@@ -5654,77 +13927,13 @@ module RecommendedOptionProjectedMetrics =
         ~of_json:RecommendedOptionProjectedMetric.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Period =
-  struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for Period" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module RecommendationPreferences =
-  struct
-    type nonrec t =
-      {
-      cpuVendorArchitectures: CpuVendorArchitectures.t option
-        [@ocaml.doc
-          "Specifies the CPU vendor and architecture for Amazon EC2 instance and Auto Scaling group recommendations. For example, when you specify AWS_ARM64 with: A GetEC2InstanceRecommendations or GetAutoScalingGroupRecommendations request, Compute Optimizer returns recommendations that consist of Graviton2 instance types only. A GetEC2RecommendationProjectedMetrics request, Compute Optimizer returns projected utilization metrics for Graviton2 instance type recommendations only. A ExportEC2InstanceRecommendations or ExportAutoScalingGroupRecommendations request, Compute Optimizer exports recommendations that consist of Graviton2 instance types only."]}
-    let make ?cpuVendorArchitectures = fun () -> { cpuVendorArchitectures }
-    let to_value x =
-      structure_to_value
-        [("cpuVendorArchitectures",
-           (Option.map x.cpuVendorArchitectures
-              ~f:CpuVendorArchitectures.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let cpuVendorArchitectures =
-        (Option.map ~f:CpuVendorArchitectures.of_xml)
-          (Xml.child xml_arg0 "cpuVendorArchitectures") in
-      make ?cpuVendorArchitectures ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cpuVendorArchitectures =
-        field_map json "cpuVendorArchitectures"
-          CpuVendorArchitectures.of_json in
-      make ?cpuVendorArchitectures ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes the recommendation preferences to return in the response of a GetAutoScalingGroupRecommendations, GetEC2InstanceRecommendations, and GetEC2RecommendationProjectedMetrics request."]
-module GetRecommendationErrors =
-  struct
-    type nonrec t = GetRecommendationError.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:GetRecommendationError.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:GetRecommendationError.of_xml)
-    let of_json j =
-      list_of_json ~kind:"GetRecommendationErrors"
-        ~of_json:GetRecommendationError.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module InstanceRecommendations =
   struct
     type nonrec t = InstanceRecommendation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceRecommendation.to_value)) |>
         (fun x -> `List x)
@@ -5751,6 +13960,9 @@ module Filters =
   struct
     type nonrec t = Filter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5774,6 +13986,9 @@ module InstanceArns =
   struct
     type nonrec t = InstanceArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5798,6 +14013,9 @@ module VolumeRecommendations =
   struct
     type nonrec t = VolumeRecommendation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VolumeRecommendation.to_value)) |>
         (fun x -> `List x)
@@ -5824,6 +14042,9 @@ module EBSFilters =
   struct
     type nonrec t = EBSFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EBSFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5848,6 +14069,9 @@ module VolumeArns =
   struct
     type nonrec t = VolumeArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VolumeArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5872,6 +14096,9 @@ module AutoScalingGroupRecommendations =
   struct
     type nonrec t = AutoScalingGroupRecommendation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoScalingGroupRecommendation.to_value)) |>
         (fun x -> `List x)
@@ -5898,6 +14125,9 @@ module AutoScalingGroupArns =
   struct
     type nonrec t = AutoScalingGroupArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoScalingGroupArn.to_value)) |>
         (fun x -> `List x)
@@ -5920,12 +14150,15 @@ module AutoScalingGroupArns =
         ~of_json:AutoScalingGroupArn.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ExportableLambdaFunctionFields =
+module ExportableRDSDBFields =
   struct
-    type nonrec t = ExportableLambdaFunctionField.t list
+    type nonrec t = ExportableRDSDBField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:ExportableLambdaFunctionField.to_value)) |>
+      (xs |> (List.map ~f:ExportableRDSDBField.to_value)) |>
         (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
@@ -5940,10 +14173,10 @@ module ExportableLambdaFunctionFields =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:ExportableLambdaFunctionField.of_xml)
+                     | _ -> true))) ~f:ExportableRDSDBField.of_xml)
     let of_json j =
-      list_of_json ~kind:"ExportableLambdaFunctionFields"
-        ~of_json:ExportableLambdaFunctionField.of_json j
+      list_of_json ~kind:"ExportableRDSDBFields"
+        ~of_json:ExportableRDSDBField.of_json j
     let to_json v = composed_to_json to_value v
   end
 module FileFormat =
@@ -5987,17 +14220,137 @@ module S3DestinationConfig =
           (Xml.child xml_arg0 "bucket") in
       make ?keyPrefix ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyPrefix = field_map json "keyPrefix" DestinationKeyPrefix.of_json in
-      let bucket = field_map json "bucket" DestinationBucket.of_json in
+    let of_json json__ =
+      let keyPrefix =
+        field_map json__ "keyPrefix" DestinationKeyPrefix.of_json in
+      let bucket = field_map json__ "bucket" DestinationBucket.of_json in
       make ?keyPrefix ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the destination Amazon Simple Storage Service (Amazon S3) bucket name and key prefix for a recommendations export job. You must create the destination Amazon S3 bucket for your recommendations export before you create the export job. Compute Optimizer does not create the S3 bucket for you. After you create the S3 bucket, ensure that it has the required permission policy to allow Compute Optimizer to write the export file to it. If you plan to specify an object prefix when you create the export job, you must include the object prefix in the policy that you add to the S3 bucket. For more information, see Amazon S3 Bucket Policy for Compute Optimizer in the Compute Optimizer User Guide."]
+module ExportableLicenseFields =
+  struct
+    type nonrec t = ExportableLicenseField.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExportableLicenseField.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExportableLicenseField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExportableLicenseFields"
+        ~of_json:ExportableLicenseField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExportableLambdaFunctionFields =
+  struct
+    type nonrec t = ExportableLambdaFunctionField.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExportableLambdaFunctionField.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExportableLambdaFunctionField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExportableLambdaFunctionFields"
+        ~of_json:ExportableLambdaFunctionField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExportableIdleFields =
+  struct
+    type nonrec t = ExportableIdleField.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExportableIdleField.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExportableIdleField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExportableIdleFields"
+        ~of_json:ExportableIdleField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExportableECSServiceFields =
+  struct
+    type nonrec t = ExportableECSServiceField.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExportableECSServiceField.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExportableECSServiceField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExportableECSServiceFields"
+        ~of_json:ExportableECSServiceField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ExportableInstanceFields =
   struct
     type nonrec t = ExportableInstanceField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExportableInstanceField.to_value)) |>
         (fun x -> `List x)
@@ -6024,6 +14377,9 @@ module ExportableVolumeFields =
   struct
     type nonrec t = ExportableVolumeField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExportableVolumeField.to_value)) |>
         (fun x -> `List x)
@@ -6050,6 +14406,9 @@ module ExportableAutoScalingGroupFields =
   struct
     type nonrec t = ExportableAutoScalingGroupField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExportableAutoScalingGroupField.to_value)) |>
         (fun x -> `List x)
@@ -6076,6 +14435,9 @@ module RecommendationExportJobs =
   struct
     type nonrec t = RecommendationExportJob.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationExportJob.to_value)) |>
         (fun x -> `List x)
@@ -6102,6 +14464,9 @@ module JobFilters =
   struct
     type nonrec t = JobFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6126,6 +14491,9 @@ module JobIds =
   struct
     type nonrec t = JobId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6149,6 +14517,9 @@ module RecommendationPreferenceNames =
   struct
     type nonrec t = RecommendationPreferenceName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationPreferenceName.to_value)) |>
         (fun x -> `List x)
@@ -6273,9 +14644,9 @@ module UpdateEnrollmentStatusResponse =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
       make ?statusReason ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusReason = field_map json "statusReason" StatusReason.of_json in
-      let status = field_map json "status" Status.of_json in
+    let of_json json__ =
+      let statusReason = field_map json__ "statusReason" StatusReason.of_json in
+      let status = field_map json__ "status" Status.of_json in
       make ?statusReason ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6308,10 +14679,11 @@ module UpdateEnrollmentStatusRequest =
         Status.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ?includeMemberAccounts ~status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeMemberAccounts =
-        field_map json "includeMemberAccounts" IncludeMemberAccounts.of_json in
-      let status = field_map_exn json "status" Status.of_json in
+        field_map json__ "includeMemberAccounts"
+          IncludeMemberAccounts.of_json in
+      let status = field_map_exn json__ "status" Status.of_json in
       make ?includeMemberAccounts ~status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6439,19 +14811,44 @@ module PutRecommendationPreferencesRequest =
           "The status of the enhanced infrastructure metrics recommendation preference to create or update. Specify the Active status to activate the preference, or specify Inactive to deactivate the preference. For more information, see Enhanced infrastructure metrics in the Compute Optimizer User Guide."];
       inferredWorkloadTypes: InferredWorkloadTypesPreference.t option
         [@ocaml.doc
-          "The status of the inferred workload types recommendation preference to create or update. The inferred workload type feature is active by default. To deactivate it, create a recommendation preference. Specify the Inactive status to deactivate the feature, or specify Active to activate it. For more information, see Inferred workload types in the Compute Optimizer User Guide."]}
+          "The status of the inferred workload types recommendation preference to create or update. The inferred workload type feature is active by default. To deactivate it, create a recommendation preference. Specify the Inactive status to deactivate the feature, or specify Active to activate it. For more information, see Inferred workload types in the Compute Optimizer User Guide."];
+      externalMetricsPreference: ExternalMetricsPreference.t option
+        [@ocaml.doc
+          "The provider of the external metrics recommendation preference to create or update. Specify a valid provider in the source field to activate the preference. To delete this preference, see the DeleteRecommendationPreferences action. This preference can only be set for the Ec2Instance resource type. For more information, see External metrics ingestion in the Compute Optimizer User Guide."];
+      lookBackPeriod: LookBackPeriodPreference.t option
+        [@ocaml.doc
+          "The preference to control the number of days the utilization metrics of the Amazon Web Services resource are analyzed. When this preference isn't specified, we use the default value DAYS_14. You can only set this preference for the Amazon EC2 instance and Auto Scaling group resource types. Amazon EC2 instance lookback preferences can be set at the organization, account, and resource levels. Auto Scaling group lookback preferences can only be set at the resource level."];
+      utilizationPreferences: UtilizationPreferences.t option
+        [@ocaml.doc
+          "The preference to control the resource\226\128\153s CPU utilization threshold, CPU utilization headroom, and memory utilization headroom. When this preference isn't specified, we use the following default values. CPU utilization: P99_5 for threshold PERCENT_20 for headroom Memory utilization: PERCENT_20 for headroom You can only set CPU and memory utilization preferences for the Amazon EC2 instance resource type. The threshold setting isn\226\128\153t available for memory utilization."];
+      preferredResources: PreferredResources.t option
+        [@ocaml.doc
+          "The preference to control which resource type values are considered when generating rightsizing recommendations. You can specify this preference as a combination of include and exclude lists. You must specify either an includeList or excludeList. If the preference is an empty set of resource type values, an error occurs. You can only set this preference for the Amazon EC2 instance and Auto Scaling group resource types."];
+      savingsEstimationMode: SavingsEstimationMode.t option
+        [@ocaml.doc
+          "The status of the savings estimation mode preference to create or update. Specify the AfterDiscounts status to activate the preference, or specify BeforeDiscounts to deactivate the preference. Only the account manager or delegated administrator of your organization can activate this preference. For more information, see Savings estimation mode in the Compute Optimizer User Guide."]}
     let context_ = "PutRecommendationPreferencesRequest"
     let make ?scope =
       fun ?enhancedInfrastructureMetrics ->
         fun ?inferredWorkloadTypes ->
-          fun ~resourceType ->
-            fun () ->
-              {
-                scope;
-                enhancedInfrastructureMetrics;
-                inferredWorkloadTypes;
-                resourceType
-              }
+          fun ?externalMetricsPreference ->
+            fun ?lookBackPeriod ->
+              fun ?utilizationPreferences ->
+                fun ?preferredResources ->
+                  fun ?savingsEstimationMode ->
+                    fun ~resourceType ->
+                      fun () ->
+                        {
+                          scope;
+                          enhancedInfrastructureMetrics;
+                          inferredWorkloadTypes;
+                          externalMetricsPreference;
+                          lookBackPeriod;
+                          utilizationPreferences;
+                          preferredResources;
+                          savingsEstimationMode;
+                          resourceType
+                        }
     let to_value x =
       structure_to_value
         [("resourceType", (Some (ResourceType.to_value x.resourceType)));
@@ -6461,9 +14858,37 @@ module PutRecommendationPreferencesRequest =
              ~f:EnhancedInfrastructureMetrics.to_value));
         ("inferredWorkloadTypes",
           (Option.map x.inferredWorkloadTypes
-             ~f:InferredWorkloadTypesPreference.to_value))]
+             ~f:InferredWorkloadTypesPreference.to_value));
+        ("externalMetricsPreference",
+          (Option.map x.externalMetricsPreference
+             ~f:ExternalMetricsPreference.to_value));
+        ("lookBackPeriod",
+          (Option.map x.lookBackPeriod ~f:LookBackPeriodPreference.to_value));
+        ("utilizationPreferences",
+          (Option.map x.utilizationPreferences
+             ~f:UtilizationPreferences.to_value));
+        ("preferredResources",
+          (Option.map x.preferredResources ~f:PreferredResources.to_value));
+        ("savingsEstimationMode",
+          (Option.map x.savingsEstimationMode
+             ~f:SavingsEstimationMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let savingsEstimationMode =
+        (Option.map ~f:SavingsEstimationMode.of_xml)
+          (Xml.child xml_arg0 "savingsEstimationMode") in
+      let preferredResources =
+        (Option.map ~f:PreferredResources.of_xml)
+          (Xml.child xml_arg0 "preferredResources") in
+      let utilizationPreferences =
+        (Option.map ~f:UtilizationPreferences.of_xml)
+          (Xml.child xml_arg0 "utilizationPreferences") in
+      let lookBackPeriod =
+        (Option.map ~f:LookBackPeriodPreference.of_xml)
+          (Xml.child xml_arg0 "lookBackPeriod") in
+      let externalMetricsPreference =
+        (Option.map ~f:ExternalMetricsPreference.of_xml)
+          (Xml.child xml_arg0 "externalMetricsPreference") in
       let inferredWorkloadTypes =
         (Option.map ~f:InferredWorkloadTypesPreference.of_xml)
           (Xml.child xml_arg0 "inferredWorkloadTypes") in
@@ -6474,21 +14899,36 @@ module PutRecommendationPreferencesRequest =
       let resourceType =
         ResourceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      make ?inferredWorkloadTypes ?enhancedInfrastructureMetrics ?scope
-        ~resourceType ()
+      make ?savingsEstimationMode ?preferredResources ?utilizationPreferences
+        ?lookBackPeriod ?externalMetricsPreference ?inferredWorkloadTypes
+        ?enhancedInfrastructureMetrics ?scope ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let savingsEstimationMode =
+        field_map json__ "savingsEstimationMode"
+          SavingsEstimationMode.of_json in
+      let preferredResources =
+        field_map json__ "preferredResources" PreferredResources.of_json in
+      let utilizationPreferences =
+        field_map json__ "utilizationPreferences"
+          UtilizationPreferences.of_json in
+      let lookBackPeriod =
+        field_map json__ "lookBackPeriod" LookBackPeriodPreference.of_json in
+      let externalMetricsPreference =
+        field_map json__ "externalMetricsPreference"
+          ExternalMetricsPreference.of_json in
       let inferredWorkloadTypes =
-        field_map json "inferredWorkloadTypes"
+        field_map json__ "inferredWorkloadTypes"
           InferredWorkloadTypesPreference.of_json in
       let enhancedInfrastructureMetrics =
-        field_map json "enhancedInfrastructureMetrics"
+        field_map json__ "enhancedInfrastructureMetrics"
           EnhancedInfrastructureMetrics.of_json in
-      let scope = field_map json "scope" Scope.of_json in
+      let scope = field_map json__ "scope" Scope.of_json in
       let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
-      make ?inferredWorkloadTypes ?enhancedInfrastructureMetrics ?scope
-        ~resourceType ()
+        field_map_exn json__ "resourceType" ResourceType.of_json in
+      make ?savingsEstimationMode ?preferredResources ?utilizationPreferences
+        ?lookBackPeriod ?externalMetricsPreference ?inferredWorkloadTypes
+        ?enhancedInfrastructureMetrics ?scope ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new recommendation preference or updates an existing recommendation preference, such as enhanced infrastructure metrics. For more information, see Activating enhanced infrastructure metrics in the Compute Optimizer User Guide."]
@@ -6605,15 +15045,15 @@ module GetRecommendationSummariesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?recommendationSummaries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationSummaries =
-        field_map json "recommendationSummaries"
+        field_map json__ "recommendationSummaries"
           RecommendationSummaries.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?recommendationSummaries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the optimization findings for an account. It returns the number of: Amazon EC2 instances in an account that are Underprovisioned, Overprovisioned, or Optimized. Auto Scaling groups in an account that are NotOptimized, or Optimized. Amazon EBS volumes in an account that are NotOptimized, or Optimized. Lambda functions in an account that are NotOptimized, or Optimized."]
+       "Returns the optimization findings for an account. It returns the number of: Amazon EC2 instances in an account that are Underprovisioned, Overprovisioned, or Optimized. EC2Auto Scaling groups in an account that are NotOptimized, or Optimized. Amazon EBS volumes in an account that are NotOptimized, or Optimized. Lambda functions in an account that are NotOptimized, or Optimized. Amazon ECS services in an account that are Underprovisioned, Overprovisioned, or Optimized. Commercial software licenses in an account that are InsufficientMetrics, NotOptimized or Optimized. Amazon Aurora and Amazon RDS databases in an account that are Underprovisioned, Overprovisioned, Optimized, or NotOptimized."]
 module GetRecommendationSummariesRequest =
   struct
     type nonrec t =
@@ -6645,14 +15085,14 @@ module GetRecommendationSummariesRequest =
         (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
       make ?maxResults ?nextToken ?accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let accountIds = field_map json "accountIds" AccountIds.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
       make ?maxResults ?nextToken ?accountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the optimization findings for an account. It returns the number of: Amazon EC2 instances in an account that are Underprovisioned, Overprovisioned, or Optimized. Auto Scaling groups in an account that are NotOptimized, or Optimized. Amazon EBS volumes in an account that are NotOptimized, or Optimized. Lambda functions in an account that are NotOptimized, or Optimized."]
+       "Returns the optimization findings for an account. It returns the number of: Amazon EC2 instances in an account that are Underprovisioned, Overprovisioned, or Optimized. EC2Auto Scaling groups in an account that are NotOptimized, or Optimized. Amazon EBS volumes in an account that are NotOptimized, or Optimized. Lambda functions in an account that are NotOptimized, or Optimized. Amazon ECS services in an account that are Underprovisioned, Overprovisioned, or Optimized. Commercial software licenses in an account that are InsufficientMetrics, NotOptimized or Optimized. Amazon Aurora and Amazon RDS databases in an account that are Underprovisioned, Overprovisioned, Optimized, or NotOptimized."]
 module GetRecommendationPreferencesResponse =
   struct
     type nonrec t =
@@ -6777,11 +15217,11 @@ module GetRecommendationPreferencesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?recommendationPreferencesDetails ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationPreferencesDetails =
-        field_map json "recommendationPreferencesDetails"
+        field_map json__ "recommendationPreferencesDetails"
           RecommendationPreferencesDetails.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?recommendationPreferencesDetails ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6826,16 +15266,645 @@ module GetRecommendationPreferencesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ?maxResults ?nextToken ?scope ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let scope = field_map json "scope" Scope.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let scope = field_map json__ "scope" Scope.of_json in
       let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+        field_map_exn json__ "resourceType" ResourceType.of_json in
       make ?maxResults ?nextToken ?scope ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns existing recommendation preferences, such as enhanced infrastructure metrics. Use the scope parameter to specify which preferences to return. You can specify to return preferences for an organization, a specific account ID, or a specific EC2 instance or Auto Scaling group Amazon Resource Name (ARN). For more information, see Activating enhanced infrastructure metrics in the Compute Optimizer User Guide."]
+module GetRDSDatabaseRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to advance to the next page of Amazon Aurora and RDS database recommendations."];
+      rdsDBRecommendations: RDSDBRecommendations.t option
+        [@ocaml.doc
+          "An array of objects that describe the Amazon Aurora and RDS database recommendations."];
+      errors: GetRecommendationErrors.t option
+        [@ocaml.doc
+          "An array of objects that describe errors of the request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MissingAuthenticationToken of MissingAuthenticationToken.t 
+      | `OptInRequiredException of OptInRequiredException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?rdsDBRecommendations ->
+        fun ?errors -> fun () -> { nextToken; rdsDBRecommendations; errors }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken
+            (MissingAuthenticationToken.of_json json)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken (MissingAuthenticationToken.of_xml xml)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MissingAuthenticationToken e ->
+          `Assoc
+            [("error", (`String "MissingAuthenticationToken"));
+            ("details", (MissingAuthenticationToken.to_json e))]
+      | `OptInRequiredException e ->
+          `Assoc
+            [("error", (`String "OptInRequiredException"));
+            ("details", (OptInRequiredException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("rdsDBRecommendations",
+          (Option.map x.rdsDBRecommendations ~f:RDSDBRecommendations.to_value));
+        ("errors", (Option.map x.errors ~f:GetRecommendationErrors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:GetRecommendationErrors.of_xml)
+          (Xml.child xml_arg0 "errors") in
+      let rdsDBRecommendations =
+        (Option.map ~f:RDSDBRecommendations.of_xml)
+          (Xml.child xml_arg0 "rdsDBRecommendations") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?errors ?rdsDBRecommendations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors = field_map json__ "errors" GetRecommendationErrors.of_json in
+      let rdsDBRecommendations =
+        field_map json__ "rdsDBRecommendations" RDSDBRecommendations.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?errors ?rdsDBRecommendations ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns Amazon Aurora and RDS database recommendations. Compute Optimizer generates recommendations for Amazon Aurora and RDS databases that meet a specific set of requirements. For more information, see the Supported resources and requirements in the Compute Optimizer User Guide."]
+module GetRDSDatabaseRecommendationsRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArns: ResourceArns.t option
+        [@ocaml.doc
+          "The ARN that identifies the Amazon Aurora or RDS database. The following is the format of the ARN: arn:aws:rds:\\{region\\}:\\{accountId\\}:db:\\{resourceName\\} The following is the format of a DB Cluster ARN: arn:aws:rds:\\{region\\}:\\{accountId\\}:cluster:\\{resourceName\\}"];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to advance to the next page of Amazon Aurora and RDS database recommendations."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of Amazon Aurora and RDS database recommendations to return with a single request. To retrieve the remaining results, make another request with the returned nextToken value."];
+      filters: RDSDBRecommendationFilters.t option
+        [@ocaml.doc
+          "An array of objects to specify a filter that returns a more specific list of Amazon Aurora and RDS database recommendations."];
+      accountIds: AccountIds.t option
+        [@ocaml.doc
+          "Return the Amazon Aurora and RDS database recommendations to the specified Amazon Web Services account IDs. If your account is the management account or the delegated administrator of an organization, use this parameter to return the Amazon Aurora and RDS database recommendations to specific member accounts. You can only specify one account ID per request."];
+      recommendationPreferences: RecommendationPreferences.t option }
+    let make ?resourceArns =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ?filters ->
+            fun ?accountIds ->
+              fun ?recommendationPreferences ->
+                fun () ->
+                  {
+                    resourceArns;
+                    nextToken;
+                    maxResults;
+                    filters;
+                    accountIds;
+                    recommendationPreferences
+                  }
+    let to_value x =
+      structure_to_value
+        [("resourceArns",
+           (Option.map x.resourceArns ~f:ResourceArns.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("filters",
+          (Option.map x.filters ~f:RDSDBRecommendationFilters.to_value));
+        ("accountIds", (Option.map x.accountIds ~f:AccountIds.to_value));
+        ("recommendationPreferences",
+          (Option.map x.recommendationPreferences
+             ~f:RecommendationPreferences.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommendationPreferences =
+        (Option.map ~f:RecommendationPreferences.of_xml)
+          (Xml.child xml_arg0 "recommendationPreferences") in
+      let accountIds =
+        (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
+      let filters =
+        (Option.map ~f:RDSDBRecommendationFilters.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let resourceArns =
+        (Option.map ~f:ResourceArns.of_xml)
+          (Xml.child xml_arg0 "resourceArns") in
+      make ?recommendationPreferences ?accountIds ?filters ?maxResults
+        ?nextToken ?resourceArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommendationPreferences =
+        field_map json__ "recommendationPreferences"
+          RecommendationPreferences.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
+      let filters =
+        field_map json__ "filters" RDSDBRecommendationFilters.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let resourceArns = field_map json__ "resourceArns" ResourceArns.of_json in
+      make ?recommendationPreferences ?accountIds ?filters ?maxResults
+        ?nextToken ?resourceArns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns Amazon Aurora and RDS database recommendations. Compute Optimizer generates recommendations for Amazon Aurora and RDS databases that meet a specific set of requirements. For more information, see the Supported resources and requirements in the Compute Optimizer User Guide."]
+module GetRDSDatabaseRecommendationProjectedMetricsResponse =
+  struct
+    type nonrec t =
+      {
+      recommendedOptionProjectedMetrics:
+        RDSDatabaseRecommendedOptionProjectedMetrics.t option
+        [@ocaml.doc
+          "An array of objects that describes the projected metrics."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MissingAuthenticationToken of MissingAuthenticationToken.t 
+      | `OptInRequiredException of OptInRequiredException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?recommendedOptionProjectedMetrics =
+      fun () -> { recommendedOptionProjectedMetrics }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken
+            (MissingAuthenticationToken.of_json json)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken (MissingAuthenticationToken.of_xml xml)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MissingAuthenticationToken e ->
+          `Assoc
+            [("error", (`String "MissingAuthenticationToken"));
+            ("details", (MissingAuthenticationToken.to_json e))]
+      | `OptInRequiredException e ->
+          `Assoc
+            [("error", (`String "OptInRequiredException"));
+            ("details", (OptInRequiredException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("recommendedOptionProjectedMetrics",
+           (Option.map x.recommendedOptionProjectedMetrics
+              ~f:RDSDatabaseRecommendedOptionProjectedMetrics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommendedOptionProjectedMetrics =
+        (Option.map ~f:RDSDatabaseRecommendedOptionProjectedMetrics.of_xml)
+          (Xml.child xml_arg0 "recommendedOptionProjectedMetrics") in
+      make ?recommendedOptionProjectedMetrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommendedOptionProjectedMetrics =
+        field_map json__ "recommendedOptionProjectedMetrics"
+          RDSDatabaseRecommendedOptionProjectedMetrics.of_json in
+      make ?recommendedOptionProjectedMetrics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the projected metrics of Aurora and RDS database recommendations."]
+module GetRDSDatabaseRecommendationProjectedMetricsRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t
+        [@ocaml.doc
+          "The ARN that identifies the Amazon Aurora or RDS database. The following is the format of the ARN: arn:aws:rds:\\{region\\}:\\{accountId\\}:db:\\{resourceName\\}"];
+      stat: MetricStatistic.t
+        [@ocaml.doc "The statistic of the projected metrics."];
+      period: Period.t
+        [@ocaml.doc
+          "The granularity, in seconds, of the projected metrics data points."];
+      startTime: Timestamp.t
+        [@ocaml.doc
+          "The timestamp of the first projected metrics data point to return."];
+      endTime: Timestamp.t
+        [@ocaml.doc
+          "The timestamp of the last projected metrics data point to return."];
+      recommendationPreferences: RecommendationPreferences.t option }
+    let context_ = "GetRDSDatabaseRecommendationProjectedMetricsRequest"
+    let make ?recommendationPreferences =
+      fun ~resourceArn ->
+        fun ~stat ->
+          fun ~period ->
+            fun ~startTime ->
+              fun ~endTime ->
+                fun () ->
+                  {
+                    recommendationPreferences;
+                    resourceArn;
+                    stat;
+                    period;
+                    startTime;
+                    endTime
+                  }
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Some (ResourceArn.to_value x.resourceArn)));
+        ("stat", (Some (MetricStatistic.to_value x.stat)));
+        ("period", (Some (Period.to_value x.period)));
+        ("startTime", (Some (Timestamp.to_value x.startTime)));
+        ("endTime", (Some (Timestamp.to_value x.endTime)));
+        ("recommendationPreferences",
+          (Option.map x.recommendationPreferences
+             ~f:RecommendationPreferences.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommendationPreferences =
+        (Option.map ~f:RecommendationPreferences.of_xml)
+          (Xml.child xml_arg0 "recommendationPreferences") in
+      let endTime =
+        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
+      let startTime =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
+      let period =
+        Period.of_xml (Xml.child_exn ~context:context_ xml_arg0 "period") in
+      let stat =
+        MetricStatistic.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stat") in
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ?recommendationPreferences ~endTime ~startTime ~period ~stat
+        ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommendationPreferences =
+        field_map json__ "recommendationPreferences"
+          RecommendationPreferences.of_json in
+      let endTime = field_map_exn json__ "endTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "startTime" Timestamp.of_json in
+      let period = field_map_exn json__ "period" Period.of_json in
+      let stat = field_map_exn json__ "stat" MetricStatistic.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
+      make ?recommendationPreferences ~endTime ~startTime ~period ~stat
+        ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the projected metrics of Aurora and RDS database recommendations."]
+module GetLicenseRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use to advance to the next page of license recommendations."];
+      licenseRecommendations: LicenseRecommendations.t option
+        [@ocaml.doc
+          "An array of objects that describe license recommendations."];
+      errors: GetRecommendationErrors.t option
+        [@ocaml.doc
+          "An array of objects that describe errors of the request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MissingAuthenticationToken of MissingAuthenticationToken.t 
+      | `OptInRequiredException of OptInRequiredException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?licenseRecommendations ->
+        fun ?errors ->
+          fun () -> { nextToken; licenseRecommendations; errors }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken
+            (MissingAuthenticationToken.of_json json)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken (MissingAuthenticationToken.of_xml xml)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MissingAuthenticationToken e ->
+          `Assoc
+            [("error", (`String "MissingAuthenticationToken"));
+            ("details", (MissingAuthenticationToken.to_json e))]
+      | `OptInRequiredException e ->
+          `Assoc
+            [("error", (`String "OptInRequiredException"));
+            ("details", (OptInRequiredException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("licenseRecommendations",
+          (Option.map x.licenseRecommendations
+             ~f:LicenseRecommendations.to_value));
+        ("errors", (Option.map x.errors ~f:GetRecommendationErrors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:GetRecommendationErrors.of_xml)
+          (Xml.child xml_arg0 "errors") in
+      let licenseRecommendations =
+        (Option.map ~f:LicenseRecommendations.of_xml)
+          (Xml.child xml_arg0 "licenseRecommendations") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?errors ?licenseRecommendations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors = field_map json__ "errors" GetRecommendationErrors.of_json in
+      let licenseRecommendations =
+        field_map json__ "licenseRecommendations"
+          LicenseRecommendations.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?errors ?licenseRecommendations ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns license recommendations for Amazon EC2 instances that run on a specific license. Compute Optimizer generates recommendations for licenses that meet a specific set of requirements. For more information, see the Supported resources and requirements in the Compute Optimizer User Guide."]
+module GetLicenseRecommendationsRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArns: ResourceArns.t option
+        [@ocaml.doc
+          "The ARN that identifies the Amazon EC2 instance. The following is the format of the ARN: arn:aws:ec2:region:aws_account_id:instance/instance-id"];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to advance to the next page of license recommendations."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of license recommendations to return with a single request. To retrieve the remaining results, make another request with the returned nextToken value."];
+      filters: LicenseRecommendationFilters.t option
+        [@ocaml.doc
+          "An array of objects to specify a filter that returns a more specific list of license recommendations."];
+      accountIds: AccountIds.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account for which to return license recommendations. If your account is the management account of an organization, use this parameter to specify the member account for which you want to return license recommendations. Only one account ID can be specified per request."]}
+    let make ?resourceArns =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ?filters ->
+            fun ?accountIds ->
+              fun () ->
+                { resourceArns; nextToken; maxResults; filters; accountIds }
+    let to_value x =
+      structure_to_value
+        [("resourceArns",
+           (Option.map x.resourceArns ~f:ResourceArns.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("filters",
+          (Option.map x.filters ~f:LicenseRecommendationFilters.to_value));
+        ("accountIds", (Option.map x.accountIds ~f:AccountIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountIds =
+        (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
+      let filters =
+        (Option.map ~f:LicenseRecommendationFilters.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let resourceArns =
+        (Option.map ~f:ResourceArns.of_xml)
+          (Xml.child xml_arg0 "resourceArns") in
+      make ?accountIds ?filters ?maxResults ?nextToken ?resourceArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
+      let filters =
+        field_map json__ "filters" LicenseRecommendationFilters.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let resourceArns = field_map json__ "resourceArns" ResourceArns.of_json in
+      make ?accountIds ?filters ?maxResults ?nextToken ?resourceArns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns license recommendations for Amazon EC2 instances that run on a specific license. Compute Optimizer generates recommendations for licenses that meet a specific set of requirements. For more information, see the Supported resources and requirements in the Compute Optimizer User Guide."]
 module GetLambdaFunctionRecommendationsResponse =
   struct
     type nonrec t =
@@ -6959,11 +16028,11 @@ module GetLambdaFunctionRecommendationsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?lambdaFunctionRecommendations ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lambdaFunctionRecommendations =
-        field_map json "lambdaFunctionRecommendations"
+        field_map json__ "lambdaFunctionRecommendations"
           LambdaFunctionRecommendations.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?lambdaFunctionRecommendations ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7020,17 +16089,235 @@ module GetLambdaFunctionRecommendationsRequest =
           (Xml.child xml_arg0 "functionArns") in
       make ?maxResults ?nextToken ?filters ?accountIds ?functionArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let filters =
-        field_map json "filters" LambdaFunctionRecommendationFilters.of_json in
-      let accountIds = field_map json "accountIds" AccountIds.of_json in
-      let functionArns = field_map json "functionArns" FunctionArns.of_json in
+        field_map json__ "filters"
+          LambdaFunctionRecommendationFilters.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
+      let functionArns = field_map json__ "functionArns" FunctionArns.of_json in
       make ?maxResults ?nextToken ?filters ?accountIds ?functionArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns Lambda function recommendations. Compute Optimizer generates recommendations for functions that meet a specific set of requirements. For more information, see the Supported resources and requirements in the Compute Optimizer User Guide."]
+module GetIdleRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to advance to the next page of idle resource recommendations."];
+      idleRecommendations: IdleRecommendations.t option
+        [@ocaml.doc
+          "An array of objects that describe the idle resource recommendations."];
+      errors: IdleRecommendationErrors.t option
+        [@ocaml.doc
+          "An array of objects that describe errors of the request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MissingAuthenticationToken of MissingAuthenticationToken.t 
+      | `OptInRequiredException of OptInRequiredException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?idleRecommendations ->
+        fun ?errors -> fun () -> { nextToken; idleRecommendations; errors }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken
+            (MissingAuthenticationToken.of_json json)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken (MissingAuthenticationToken.of_xml xml)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MissingAuthenticationToken e ->
+          `Assoc
+            [("error", (`String "MissingAuthenticationToken"));
+            ("details", (MissingAuthenticationToken.to_json e))]
+      | `OptInRequiredException e ->
+          `Assoc
+            [("error", (`String "OptInRequiredException"));
+            ("details", (OptInRequiredException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("idleRecommendations",
+          (Option.map x.idleRecommendations ~f:IdleRecommendations.to_value));
+        ("errors",
+          (Option.map x.errors ~f:IdleRecommendationErrors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:IdleRecommendationErrors.of_xml)
+          (Xml.child xml_arg0 "errors") in
+      let idleRecommendations =
+        (Option.map ~f:IdleRecommendations.of_xml)
+          (Xml.child xml_arg0 "idleRecommendations") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?errors ?idleRecommendations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors = field_map json__ "errors" IdleRecommendationErrors.of_json in
+      let idleRecommendations =
+        field_map json__ "idleRecommendations" IdleRecommendations.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?errors ?idleRecommendations ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns idle resource recommendations. Compute Optimizer generates recommendations for idle resources that meet a specific set of requirements. For more information, see Resource requirements in the Compute Optimizer User Guide"]
+module GetIdleRecommendationsRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArns: ResourceArns.t option
+        [@ocaml.doc "The ARN that identifies the idle resource."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to advance to the next page of idle resource recommendations."];
+      maxResults: IdleMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of idle resource recommendations to return with a single request. To retrieve the remaining results, make another request with the returned nextToken value."];
+      filters: IdleRecommendationFilters.t option
+        [@ocaml.doc
+          "An array of objects to specify a filter that returns a more specific list of idle resource recommendations."];
+      accountIds: AccountIds.t option
+        [@ocaml.doc
+          "Return the idle resource recommendations to the specified Amazon Web Services account IDs. If your account is the management account or the delegated administrator of an organization, use this parameter to return the idle resource recommendations to specific member accounts. You can only specify one account ID per request."];
+      orderBy: OrderBy.t option
+        [@ocaml.doc "The order to sort the idle resource recommendations."]}
+    let make ?resourceArns =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ?filters ->
+            fun ?accountIds ->
+              fun ?orderBy ->
+                fun () ->
+                  {
+                    resourceArns;
+                    nextToken;
+                    maxResults;
+                    filters;
+                    accountIds;
+                    orderBy
+                  }
+    let to_value x =
+      structure_to_value
+        [("resourceArns",
+           (Option.map x.resourceArns ~f:ResourceArns.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:IdleMaxResults.to_value));
+        ("filters",
+          (Option.map x.filters ~f:IdleRecommendationFilters.to_value));
+        ("accountIds", (Option.map x.accountIds ~f:AccountIds.to_value));
+        ("orderBy", (Option.map x.orderBy ~f:OrderBy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let orderBy =
+        (Option.map ~f:OrderBy.of_xml) (Xml.child xml_arg0 "orderBy") in
+      let accountIds =
+        (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
+      let filters =
+        (Option.map ~f:IdleRecommendationFilters.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      let maxResults =
+        (Option.map ~f:IdleMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let resourceArns =
+        (Option.map ~f:ResourceArns.of_xml)
+          (Xml.child xml_arg0 "resourceArns") in
+      make ?orderBy ?accountIds ?filters ?maxResults ?nextToken ?resourceArns
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let orderBy = field_map json__ "orderBy" OrderBy.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
+      let filters =
+        field_map json__ "filters" IdleRecommendationFilters.of_json in
+      let maxResults = field_map json__ "maxResults" IdleMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let resourceArns = field_map json__ "resourceArns" ResourceArns.of_json in
+      make ?orderBy ?accountIds ?filters ?maxResults ?nextToken ?resourceArns
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns idle resource recommendations. Compute Optimizer generates recommendations for idle resources that meet a specific set of requirements. For more information, see Resource requirements in the Compute Optimizer User Guide"]
 module GetEnrollmentStatusesForOrganizationResponse =
   struct
     type nonrec t =
@@ -7135,10 +16422,10 @@ module GetEnrollmentStatusesForOrganizationResponse =
           (Xml.child xml_arg0 "accountEnrollmentStatuses") in
       make ?nextToken ?accountEnrollmentStatuses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let accountEnrollmentStatuses =
-        field_map json "accountEnrollmentStatuses"
+        field_map json__ "accountEnrollmentStatuses"
           AccountEnrollmentStatuses.of_json in
       make ?nextToken ?accountEnrollmentStatuses ()
     let to_json v = composed_to_json to_value v
@@ -7176,10 +16463,10 @@ module GetEnrollmentStatusesForOrganizationRequest =
           (Xml.child xml_arg0 "filters") in
       make ?maxResults ?nextToken ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let filters = field_map json "filters" EnrollmentFilters.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let filters = field_map json__ "filters" EnrollmentFilters.of_json in
       make ?maxResults ?nextToken ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7324,17 +16611,17 @@ module GetEnrollmentStatusResponse =
       make ?numberOfMemberAccountsOptedIn ?lastUpdatedTimestamp
         ?memberAccountsEnrolled ?statusReason ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let numberOfMemberAccountsOptedIn =
-        field_map json "numberOfMemberAccountsOptedIn"
+        field_map json__ "numberOfMemberAccountsOptedIn"
           NumberOfMemberAccountsOptedIn.of_json in
       let lastUpdatedTimestamp =
-        field_map json "lastUpdatedTimestamp" LastUpdatedTimestamp.of_json in
+        field_map json__ "lastUpdatedTimestamp" LastUpdatedTimestamp.of_json in
       let memberAccountsEnrolled =
-        field_map json "memberAccountsEnrolled"
+        field_map json__ "memberAccountsEnrolled"
           MemberAccountsEnrolled.of_json in
-      let statusReason = field_map json "statusReason" StatusReason.of_json in
-      let status = field_map json "status" Status.of_json in
+      let statusReason = field_map json__ "statusReason" StatusReason.of_json in
+      let status = field_map json__ "status" Status.of_json in
       make ?numberOfMemberAccountsOptedIn ?lastUpdatedTimestamp
         ?memberAccountsEnrolled ?statusReason ?status ()
     let to_json v = composed_to_json to_value v
@@ -7359,7 +16646,19 @@ module GetEffectiveRecommendationPreferencesResponse =
       {
       enhancedInfrastructureMetrics: EnhancedInfrastructureMetrics.t option
         [@ocaml.doc
-          "The status of the enhanced infrastructure metrics recommendation preference. Considers all applicable preferences that you might have set at the resource, account, and organization level. A status of Active confirms that the preference is applied in the latest recommendation refresh, and a status of Inactive confirms that it's not yet applied to recommendations. To validate whether the preference is applied to your last generated set of recommendations, review the effectiveRecommendationPreferences value in the response of the GetAutoScalingGroupRecommendations and GetEC2InstanceRecommendations actions. For more information, see Enhanced infrastructure metrics in the Compute Optimizer User Guide."]}
+          "The status of the enhanced infrastructure metrics recommendation preference. Considers all applicable preferences that you might have set at the resource, account, and organization level. A status of Active confirms that the preference is applied in the latest recommendation refresh, and a status of Inactive confirms that it's not yet applied to recommendations. To validate whether the preference is applied to your last generated set of recommendations, review the effectiveRecommendationPreferences value in the response of the GetAutoScalingGroupRecommendations and GetEC2InstanceRecommendations actions. For more information, see Enhanced infrastructure metrics in the Compute Optimizer User Guide."];
+      externalMetricsPreference: ExternalMetricsPreference.t option
+        [@ocaml.doc
+          "The provider of the external metrics recommendation preference. Considers all applicable preferences that you might have set at the account and organization level. If the preference is applied in the latest recommendation refresh, an object with a valid source value appears in the response. If the preference isn't applied to the recommendations already, then this object doesn't appear in the response. To validate whether the preference is applied to your last generated set of recommendations, review the effectiveRecommendationPreferences value in the response of the GetEC2InstanceRecommendations actions. For more information, see Enhanced infrastructure metrics in the Compute Optimizer User Guide."];
+      lookBackPeriod: LookBackPeriodPreference.t option
+        [@ocaml.doc
+          "The number of days the utilization metrics of the Amazon Web Services resource are analyzed. To validate that the preference is applied to your last generated set of recommendations, review the effectiveRecommendationPreferences value in the response of the GetAutoScalingGroupRecommendations or GetEC2InstanceRecommendations actions."];
+      utilizationPreferences: UtilizationPreferences.t option
+        [@ocaml.doc
+          "The resource\226\128\153s CPU and memory utilization preferences, such as threshold and headroom, that were used to generate rightsizing recommendations. It considers all applicable preferences that you set at the resource, account, and organization level. To validate that the preference is applied to your last generated set of recommendations, review the effectiveRecommendationPreferences value in the response of the GetAutoScalingGroupRecommendations or GetEC2InstanceRecommendations actions."];
+      preferredResources: EffectivePreferredResources.t option
+        [@ocaml.doc
+          "The resource type values that are considered as candidates when generating rightsizing recommendations. This object resolves any wildcard expressions and returns the effective list of candidate resource type values. It also considers all applicable preferences that you set at the resource, account, and organization level. To validate that the preference is applied to your last generated set of recommendations, review the effectiveRecommendationPreferences value in the response of the GetAutoScalingGroupRecommendations or GetEC2InstanceRecommendations actions."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -7371,7 +16670,18 @@ module GetEffectiveRecommendationPreferencesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?enhancedInfrastructureMetrics =
-      fun () -> { enhancedInfrastructureMetrics }
+      fun ?externalMetricsPreference ->
+        fun ?lookBackPeriod ->
+          fun ?utilizationPreferences ->
+            fun ?preferredResources ->
+              fun () ->
+                {
+                  enhancedInfrastructureMetrics;
+                  externalMetricsPreference;
+                  lookBackPeriod;
+                  utilizationPreferences;
+                  preferredResources
+                }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7461,19 +16771,55 @@ module GetEffectiveRecommendationPreferencesResponse =
       structure_to_value
         [("enhancedInfrastructureMetrics",
            (Option.map x.enhancedInfrastructureMetrics
-              ~f:EnhancedInfrastructureMetrics.to_value))]
+              ~f:EnhancedInfrastructureMetrics.to_value));
+        ("externalMetricsPreference",
+          (Option.map x.externalMetricsPreference
+             ~f:ExternalMetricsPreference.to_value));
+        ("lookBackPeriod",
+          (Option.map x.lookBackPeriod ~f:LookBackPeriodPreference.to_value));
+        ("utilizationPreferences",
+          (Option.map x.utilizationPreferences
+             ~f:UtilizationPreferences.to_value));
+        ("preferredResources",
+          (Option.map x.preferredResources
+             ~f:EffectivePreferredResources.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let preferredResources =
+        (Option.map ~f:EffectivePreferredResources.of_xml)
+          (Xml.child xml_arg0 "preferredResources") in
+      let utilizationPreferences =
+        (Option.map ~f:UtilizationPreferences.of_xml)
+          (Xml.child xml_arg0 "utilizationPreferences") in
+      let lookBackPeriod =
+        (Option.map ~f:LookBackPeriodPreference.of_xml)
+          (Xml.child xml_arg0 "lookBackPeriod") in
+      let externalMetricsPreference =
+        (Option.map ~f:ExternalMetricsPreference.of_xml)
+          (Xml.child xml_arg0 "externalMetricsPreference") in
       let enhancedInfrastructureMetrics =
         (Option.map ~f:EnhancedInfrastructureMetrics.of_xml)
           (Xml.child xml_arg0 "enhancedInfrastructureMetrics") in
-      make ?enhancedInfrastructureMetrics ()
+      make ?preferredResources ?utilizationPreferences ?lookBackPeriod
+        ?externalMetricsPreference ?enhancedInfrastructureMetrics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let preferredResources =
+        field_map json__ "preferredResources"
+          EffectivePreferredResources.of_json in
+      let utilizationPreferences =
+        field_map json__ "utilizationPreferences"
+          UtilizationPreferences.of_json in
+      let lookBackPeriod =
+        field_map json__ "lookBackPeriod" LookBackPeriodPreference.of_json in
+      let externalMetricsPreference =
+        field_map json__ "externalMetricsPreference"
+          ExternalMetricsPreference.of_json in
       let enhancedInfrastructureMetrics =
-        field_map json "enhancedInfrastructureMetrics"
+        field_map json__ "enhancedInfrastructureMetrics"
           EnhancedInfrastructureMetrics.of_json in
-      make ?enhancedInfrastructureMetrics ()
+      make ?preferredResources ?utilizationPreferences ?lookBackPeriod
+        ?externalMetricsPreference ?enhancedInfrastructureMetrics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the recommendation preferences that are in effect for a given resource, such as enhanced infrastructure metrics. Considers all applicable preferences that you might have set at the resource, account, and organization level. When you create a recommendation preference, you can set its status to Active or Inactive. Use this action to view the recommendation preferences that are in effect, or Active."]
@@ -7496,12 +16842,398 @@ module GetEffectiveRecommendationPreferencesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the recommendation preferences that are in effect for a given resource, such as enhanced infrastructure metrics. Considers all applicable preferences that you might have set at the resource, account, and organization level. When you create a recommendation preference, you can set its status to Active or Inactive. Use this action to view the recommendation preferences that are in effect, or Active."]
+module GetECSServiceRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to advance to the next page of Amazon ECS service recommendations."];
+      ecsServiceRecommendations: ECSServiceRecommendations.t option
+        [@ocaml.doc
+          "An array of objects that describe the Amazon ECS service recommendations."];
+      errors: GetRecommendationErrors.t option
+        [@ocaml.doc
+          "An array of objects that describe errors of the request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MissingAuthenticationToken of MissingAuthenticationToken.t 
+      | `OptInRequiredException of OptInRequiredException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?ecsServiceRecommendations ->
+        fun ?errors ->
+          fun () -> { nextToken; ecsServiceRecommendations; errors }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken
+            (MissingAuthenticationToken.of_json json)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken (MissingAuthenticationToken.of_xml xml)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MissingAuthenticationToken e ->
+          `Assoc
+            [("error", (`String "MissingAuthenticationToken"));
+            ("details", (MissingAuthenticationToken.to_json e))]
+      | `OptInRequiredException e ->
+          `Assoc
+            [("error", (`String "OptInRequiredException"));
+            ("details", (OptInRequiredException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("ecsServiceRecommendations",
+          (Option.map x.ecsServiceRecommendations
+             ~f:ECSServiceRecommendations.to_value));
+        ("errors", (Option.map x.errors ~f:GetRecommendationErrors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:GetRecommendationErrors.of_xml)
+          (Xml.child xml_arg0 "errors") in
+      let ecsServiceRecommendations =
+        (Option.map ~f:ECSServiceRecommendations.of_xml)
+          (Xml.child xml_arg0 "ecsServiceRecommendations") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?errors ?ecsServiceRecommendations ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors = field_map json__ "errors" GetRecommendationErrors.of_json in
+      let ecsServiceRecommendations =
+        field_map json__ "ecsServiceRecommendations"
+          ECSServiceRecommendations.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?errors ?ecsServiceRecommendations ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns Amazon ECS service recommendations. Compute Optimizer generates recommendations for Amazon ECS services on Fargate that meet a specific set of requirements. For more information, see the Supported resources and requirements in the Compute Optimizer User Guide."]
+module GetECSServiceRecommendationsRequest =
+  struct
+    type nonrec t =
+      {
+      serviceArns: ServiceArns.t option
+        [@ocaml.doc
+          "The ARN that identifies the Amazon ECS service. The following is the format of the ARN: arn:aws:ecs:region:aws_account_id:service/cluster-name/service-name"];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to advance to the next page of Amazon ECS service recommendations."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of Amazon ECS service recommendations to return with a single request. To retrieve the remaining results, make another request with the returned nextToken value."];
+      filters: ECSServiceRecommendationFilters.t option
+        [@ocaml.doc
+          "An array of objects to specify a filter that returns a more specific list of Amazon ECS service recommendations."];
+      accountIds: AccountIds.t option
+        [@ocaml.doc
+          "Return the Amazon ECS service recommendations to the specified Amazon Web Services account IDs. If your account is the management account or the delegated administrator of an organization, use this parameter to return the Amazon ECS service recommendations to specific member accounts. You can only specify one account ID per request."]}
+    let make ?serviceArns =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ?filters ->
+            fun ?accountIds ->
+              fun () ->
+                { serviceArns; nextToken; maxResults; filters; accountIds }
+    let to_value x =
+      structure_to_value
+        [("serviceArns", (Option.map x.serviceArns ~f:ServiceArns.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("filters",
+          (Option.map x.filters ~f:ECSServiceRecommendationFilters.to_value));
+        ("accountIds", (Option.map x.accountIds ~f:AccountIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountIds =
+        (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
+      let filters =
+        (Option.map ~f:ECSServiceRecommendationFilters.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let serviceArns =
+        (Option.map ~f:ServiceArns.of_xml) (Xml.child xml_arg0 "serviceArns") in
+      make ?accountIds ?filters ?maxResults ?nextToken ?serviceArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
+      let filters =
+        field_map json__ "filters" ECSServiceRecommendationFilters.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let serviceArns = field_map json__ "serviceArns" ServiceArns.of_json in
+      make ?accountIds ?filters ?maxResults ?nextToken ?serviceArns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns Amazon ECS service recommendations. Compute Optimizer generates recommendations for Amazon ECS services on Fargate that meet a specific set of requirements. For more information, see the Supported resources and requirements in the Compute Optimizer User Guide."]
+module GetECSServiceRecommendationProjectedMetricsResponse =
+  struct
+    type nonrec t =
+      {
+      recommendedOptionProjectedMetrics:
+        ECSServiceRecommendedOptionProjectedMetrics.t option
+        [@ocaml.doc
+          "An array of objects that describes the projected metrics."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `MissingAuthenticationToken of MissingAuthenticationToken.t 
+      | `OptInRequiredException of OptInRequiredException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?recommendedOptionProjectedMetrics =
+      fun () -> { recommendedOptionProjectedMetrics }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken
+            (MissingAuthenticationToken.of_json json)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken (MissingAuthenticationToken.of_xml xml)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `MissingAuthenticationToken e ->
+          `Assoc
+            [("error", (`String "MissingAuthenticationToken"));
+            ("details", (MissingAuthenticationToken.to_json e))]
+      | `OptInRequiredException e ->
+          `Assoc
+            [("error", (`String "OptInRequiredException"));
+            ("details", (OptInRequiredException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("recommendedOptionProjectedMetrics",
+           (Option.map x.recommendedOptionProjectedMetrics
+              ~f:ECSServiceRecommendedOptionProjectedMetrics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommendedOptionProjectedMetrics =
+        (Option.map ~f:ECSServiceRecommendedOptionProjectedMetrics.of_xml)
+          (Xml.child xml_arg0 "recommendedOptionProjectedMetrics") in
+      make ?recommendedOptionProjectedMetrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommendedOptionProjectedMetrics =
+        field_map json__ "recommendedOptionProjectedMetrics"
+          ECSServiceRecommendedOptionProjectedMetrics.of_json in
+      make ?recommendedOptionProjectedMetrics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the projected metrics of Amazon ECS service recommendations."]
+module GetECSServiceRecommendationProjectedMetricsRequest =
+  struct
+    type nonrec t =
+      {
+      serviceArn: ServiceArn.t
+        [@ocaml.doc
+          "The ARN that identifies the Amazon ECS service. The following is the format of the ARN: arn:aws:ecs:region:aws_account_id:service/cluster-name/service-name"];
+      stat: MetricStatistic.t
+        [@ocaml.doc "The statistic of the projected metrics."];
+      period: Period.t
+        [@ocaml.doc
+          "The granularity, in seconds, of the projected metrics data points."];
+      startTime: Timestamp.t
+        [@ocaml.doc
+          "The timestamp of the first projected metrics data point to return."];
+      endTime: Timestamp.t
+        [@ocaml.doc
+          "The timestamp of the last projected metrics data point to return."]}
+    let context_ = "GetECSServiceRecommendationProjectedMetricsRequest"
+    let make ~serviceArn =
+      fun ~stat ->
+        fun ~period ->
+          fun ~startTime ->
+            fun ~endTime ->
+              fun () -> { serviceArn; stat; period; startTime; endTime }
+    let to_value x =
+      structure_to_value
+        [("serviceArn", (Some (ServiceArn.to_value x.serviceArn)));
+        ("stat", (Some (MetricStatistic.to_value x.stat)));
+        ("period", (Some (Period.to_value x.period)));
+        ("startTime", (Some (Timestamp.to_value x.startTime)));
+        ("endTime", (Some (Timestamp.to_value x.endTime)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
+      let startTime =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "startTime") in
+      let period =
+        Period.of_xml (Xml.child_exn ~context:context_ xml_arg0 "period") in
+      let stat =
+        MetricStatistic.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "stat") in
+      let serviceArn =
+        ServiceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceArn") in
+      make ~endTime ~startTime ~period ~stat ~serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map_exn json__ "endTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "startTime" Timestamp.of_json in
+      let period = field_map_exn json__ "period" Period.of_json in
+      let stat = field_map_exn json__ "stat" MetricStatistic.of_json in
+      let serviceArn = field_map_exn json__ "serviceArn" ServiceArn.of_json in
+      make ~endTime ~startTime ~period ~stat ~serviceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the projected metrics of Amazon ECS service recommendations."]
 module GetEC2RecommendationProjectedMetricsResponse =
   struct
     type nonrec t =
@@ -7618,9 +17350,9 @@ module GetEC2RecommendationProjectedMetricsResponse =
           (Xml.child xml_arg0 "recommendedOptionProjectedMetrics") in
       make ?recommendedOptionProjectedMetrics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendedOptionProjectedMetrics =
-        field_map json "recommendedOptionProjectedMetrics"
+        field_map json__ "recommendedOptionProjectedMetrics"
           RecommendedOptionProjectedMetrics.of_json in
       make ?recommendedOptionProjectedMetrics ()
     let to_json v = composed_to_json to_value v
@@ -7694,15 +17426,16 @@ module GetEC2RecommendationProjectedMetricsRequest =
       make ?recommendationPreferences ~endTime ~startTime ~period ~stat
         ~instanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationPreferences =
-        field_map json "recommendationPreferences"
+        field_map json__ "recommendationPreferences"
           RecommendationPreferences.of_json in
-      let endTime = field_map_exn json "endTime" Timestamp.of_json in
-      let startTime = field_map_exn json "startTime" Timestamp.of_json in
-      let period = field_map_exn json "period" Period.of_json in
-      let stat = field_map_exn json "stat" MetricStatistic.of_json in
-      let instanceArn = field_map_exn json "instanceArn" InstanceArn.of_json in
+      let endTime = field_map_exn json__ "endTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "startTime" Timestamp.of_json in
+      let period = field_map_exn json__ "period" Period.of_json in
+      let stat = field_map_exn json__ "stat" MetricStatistic.of_json in
+      let instanceArn =
+        field_map_exn json__ "instanceArn" InstanceArn.of_json in
       make ?recommendationPreferences ~endTime ~startTime ~period ~stat
         ~instanceArn ()
     let to_json v = composed_to_json to_value v
@@ -7839,12 +17572,12 @@ module GetEC2InstanceRecommendationsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?errors ?instanceRecommendations ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors = field_map json "errors" GetRecommendationErrors.of_json in
+    let of_json json__ =
+      let errors = field_map json__ "errors" GetRecommendationErrors.of_json in
       let instanceRecommendations =
-        field_map json "instanceRecommendations"
+        field_map json__ "instanceRecommendations"
           InstanceRecommendations.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?errors ?instanceRecommendations ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7916,15 +17649,15 @@ module GetEC2InstanceRecommendationsRequest =
       make ?recommendationPreferences ?accountIds ?filters ?maxResults
         ?nextToken ?instanceArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationPreferences =
-        field_map json "recommendationPreferences"
+        field_map json__ "recommendationPreferences"
           RecommendationPreferences.of_json in
-      let accountIds = field_map json "accountIds" AccountIds.of_json in
-      let filters = field_map json "filters" Filters.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let instanceArns = field_map json "instanceArns" InstanceArns.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
+      let filters = field_map json__ "filters" Filters.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let instanceArns = field_map json__ "instanceArns" InstanceArns.of_json in
       make ?recommendationPreferences ?accountIds ?filters ?maxResults
         ?nextToken ?instanceArns ()
     let to_json v = composed_to_json to_value v
@@ -8060,11 +17793,12 @@ module GetEBSVolumeRecommendationsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?errors ?volumeRecommendations ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors = field_map json "errors" GetRecommendationErrors.of_json in
+    let of_json json__ =
+      let errors = field_map json__ "errors" GetRecommendationErrors.of_json in
       let volumeRecommendations =
-        field_map json "volumeRecommendations" VolumeRecommendations.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+        field_map json__ "volumeRecommendations"
+          VolumeRecommendations.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?errors ?volumeRecommendations ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8116,12 +17850,12 @@ module GetEBSVolumeRecommendationsRequest =
         (Option.map ~f:VolumeArns.of_xml) (Xml.child xml_arg0 "volumeArns") in
       make ?accountIds ?filters ?maxResults ?nextToken ?volumeArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountIds = field_map json "accountIds" AccountIds.of_json in
-      let filters = field_map json "filters" EBSFilters.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let volumeArns = field_map json "volumeArns" VolumeArns.of_json in
+    let of_json json__ =
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
+      let filters = field_map json__ "filters" EBSFilters.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let volumeArns = field_map json__ "volumeArns" VolumeArns.of_json in
       make ?accountIds ?filters ?maxResults ?nextToken ?volumeArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8258,12 +17992,12 @@ module GetAutoScalingGroupRecommendationsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?errors ?autoScalingGroupRecommendations ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors = field_map json "errors" GetRecommendationErrors.of_json in
+    let of_json json__ =
+      let errors = field_map json__ "errors" GetRecommendationErrors.of_json in
       let autoScalingGroupRecommendations =
-        field_map json "autoScalingGroupRecommendations"
+        field_map json__ "autoScalingGroupRecommendations"
           AutoScalingGroupRecommendations.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?errors ?autoScalingGroupRecommendations ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8335,21 +18069,461 @@ module GetAutoScalingGroupRecommendationsRequest =
       make ?recommendationPreferences ?filters ?maxResults ?nextToken
         ?autoScalingGroupArns ?accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationPreferences =
-        field_map json "recommendationPreferences"
+        field_map json__ "recommendationPreferences"
           RecommendationPreferences.of_json in
-      let filters = field_map json "filters" Filters.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+      let filters = field_map json__ "filters" Filters.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let autoScalingGroupArns =
-        field_map json "autoScalingGroupArns" AutoScalingGroupArns.of_json in
-      let accountIds = field_map json "accountIds" AccountIds.of_json in
+        field_map json__ "autoScalingGroupArns" AutoScalingGroupArns.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
       make ?recommendationPreferences ?filters ?maxResults ?nextToken
         ?autoScalingGroupArns ?accountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns Auto Scaling group recommendations. Compute Optimizer generates recommendations for Amazon EC2 Auto Scaling groups that meet a specific set of requirements. For more information, see the Supported resources and requirements in the Compute Optimizer User Guide."]
+module ExportRDSDatabaseRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      jobId: JobId.t option
+        [@ocaml.doc
+          "The identification number of the export job. To view the status of an export job, use the DescribeRecommendationExportJobs action and specify the job ID."];
+      s3Destination: S3Destination.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `MissingAuthenticationToken of MissingAuthenticationToken.t 
+      | `OptInRequiredException of OptInRequiredException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobId =
+      fun ?s3Destination -> fun () -> { jobId; s3Destination }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken
+            (MissingAuthenticationToken.of_json json)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken (MissingAuthenticationToken.of_xml xml)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `MissingAuthenticationToken e ->
+          `Assoc
+            [("error", (`String "MissingAuthenticationToken"));
+            ("details", (MissingAuthenticationToken.to_json e))]
+      | `OptInRequiredException e ->
+          `Assoc
+            [("error", (`String "OptInRequiredException"));
+            ("details", (OptInRequiredException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("jobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("s3Destination",
+          (Option.map x.s3Destination ~f:S3Destination.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Destination =
+        (Option.map ~f:S3Destination.of_xml)
+          (Xml.child xml_arg0 "s3Destination") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
+      make ?s3Destination ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Destination =
+        field_map json__ "s3Destination" S3Destination.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
+      make ?s3Destination ?jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Export optimization recommendations for your Amazon Aurora and Amazon Relational Database Service (Amazon RDS) databases. Recommendations are exported in a comma-separated values (CSV) file, and its metadata in a JavaScript Object Notation (JSON) file, to an existing Amazon Simple Storage Service (Amazon S3) bucket that you specify. For more information, see Exporting Recommendations in the Compute Optimizer User Guide. You can have only one Amazon Aurora or RDS export job in progress per Amazon Web Services Region."]
+module ExportRDSDatabaseRecommendationsRequest =
+  struct
+    type nonrec t =
+      {
+      accountIds: AccountIds.t option
+        [@ocaml.doc
+          "The Amazon Web Services account IDs for the export Amazon Aurora and RDS database recommendations. If your account is the management account or the delegated administrator of an organization, use this parameter to specify the member account you want to export recommendations to. This parameter can't be specified together with the include member accounts parameter. The parameters are mutually exclusive. If this parameter or the include member accounts parameter is omitted, the recommendations for member accounts aren't included in the export. You can specify multiple account IDs per request."];
+      filters: RDSDBRecommendationFilters.t option
+        [@ocaml.doc
+          "An array of objects to specify a filter that exports a more specific set of Amazon Aurora and RDS recommendations."];
+      fieldsToExport: ExportableRDSDBFields.t option
+        [@ocaml.doc
+          "The recommendations data to include in the export file. For more information about the fields that can be exported, see Exported files in the Compute Optimizer User Guide."];
+      s3DestinationConfig: S3DestinationConfig.t ;
+      fileFormat: FileFormat.t option
+        [@ocaml.doc
+          "The format of the export file. The CSV file is the only export file format currently supported."];
+      includeMemberAccounts: IncludeMemberAccounts.t option
+        [@ocaml.doc
+          "If your account is the management account or the delegated administrator of an organization, this parameter indicates whether to include recommendations for resources in all member accounts of the organization. The member accounts must also be opted in to Compute Optimizer, and trusted access for Compute Optimizer must be enabled in the organization account. For more information, see Compute Optimizer and Amazon Web Services Organizations trusted access in the Compute Optimizer User Guide. If this parameter is omitted, recommendations for member accounts of the organization aren't included in the export file. If this parameter or the account ID parameter is omitted, recommendations for member accounts aren't included in the export."];
+      recommendationPreferences: RecommendationPreferences.t option }
+    let context_ = "ExportRDSDatabaseRecommendationsRequest"
+    let make ?accountIds =
+      fun ?filters ->
+        fun ?fieldsToExport ->
+          fun ?fileFormat ->
+            fun ?includeMemberAccounts ->
+              fun ?recommendationPreferences ->
+                fun ~s3DestinationConfig ->
+                  fun () ->
+                    {
+                      accountIds;
+                      filters;
+                      fieldsToExport;
+                      fileFormat;
+                      includeMemberAccounts;
+                      recommendationPreferences;
+                      s3DestinationConfig
+                    }
+    let to_value x =
+      structure_to_value
+        [("accountIds", (Option.map x.accountIds ~f:AccountIds.to_value));
+        ("filters",
+          (Option.map x.filters ~f:RDSDBRecommendationFilters.to_value));
+        ("fieldsToExport",
+          (Option.map x.fieldsToExport ~f:ExportableRDSDBFields.to_value));
+        ("s3DestinationConfig",
+          (Some (S3DestinationConfig.to_value x.s3DestinationConfig)));
+        ("fileFormat", (Option.map x.fileFormat ~f:FileFormat.to_value));
+        ("includeMemberAccounts",
+          (Option.map x.includeMemberAccounts
+             ~f:IncludeMemberAccounts.to_value));
+        ("recommendationPreferences",
+          (Option.map x.recommendationPreferences
+             ~f:RecommendationPreferences.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommendationPreferences =
+        (Option.map ~f:RecommendationPreferences.of_xml)
+          (Xml.child xml_arg0 "recommendationPreferences") in
+      let includeMemberAccounts =
+        (Option.map ~f:IncludeMemberAccounts.of_xml)
+          (Xml.child xml_arg0 "includeMemberAccounts") in
+      let fileFormat =
+        (Option.map ~f:FileFormat.of_xml) (Xml.child xml_arg0 "fileFormat") in
+      let s3DestinationConfig =
+        S3DestinationConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "s3DestinationConfig") in
+      let fieldsToExport =
+        (Option.map ~f:ExportableRDSDBFields.of_xml)
+          (Xml.child xml_arg0 "fieldsToExport") in
+      let filters =
+        (Option.map ~f:RDSDBRecommendationFilters.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      let accountIds =
+        (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
+      make ?recommendationPreferences ?includeMemberAccounts ?fileFormat
+        ~s3DestinationConfig ?fieldsToExport ?filters ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommendationPreferences =
+        field_map json__ "recommendationPreferences"
+          RecommendationPreferences.of_json in
+      let includeMemberAccounts =
+        field_map json__ "includeMemberAccounts"
+          IncludeMemberAccounts.of_json in
+      let fileFormat = field_map json__ "fileFormat" FileFormat.of_json in
+      let s3DestinationConfig =
+        field_map_exn json__ "s3DestinationConfig"
+          S3DestinationConfig.of_json in
+      let fieldsToExport =
+        field_map json__ "fieldsToExport" ExportableRDSDBFields.of_json in
+      let filters =
+        field_map json__ "filters" RDSDBRecommendationFilters.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
+      make ?recommendationPreferences ?includeMemberAccounts ?fileFormat
+        ~s3DestinationConfig ?fieldsToExport ?filters ?accountIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Export optimization recommendations for your Amazon Aurora and Amazon Relational Database Service (Amazon RDS) databases. Recommendations are exported in a comma-separated values (CSV) file, and its metadata in a JavaScript Object Notation (JSON) file, to an existing Amazon Simple Storage Service (Amazon S3) bucket that you specify. For more information, see Exporting Recommendations in the Compute Optimizer User Guide. You can have only one Amazon Aurora or RDS export job in progress per Amazon Web Services Region."]
+module ExportLicenseRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      jobId: JobId.t option
+        [@ocaml.doc
+          "The identification number of the export job. To view the status of an export job, use the DescribeRecommendationExportJobs action and specify the job ID."];
+      s3Destination: S3Destination.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `MissingAuthenticationToken of MissingAuthenticationToken.t 
+      | `OptInRequiredException of OptInRequiredException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobId =
+      fun ?s3Destination -> fun () -> { jobId; s3Destination }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken
+            (MissingAuthenticationToken.of_json json)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken (MissingAuthenticationToken.of_xml xml)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `MissingAuthenticationToken e ->
+          `Assoc
+            [("error", (`String "MissingAuthenticationToken"));
+            ("details", (MissingAuthenticationToken.to_json e))]
+      | `OptInRequiredException e ->
+          `Assoc
+            [("error", (`String "OptInRequiredException"));
+            ("details", (OptInRequiredException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("jobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("s3Destination",
+          (Option.map x.s3Destination ~f:S3Destination.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Destination =
+        (Option.map ~f:S3Destination.of_xml)
+          (Xml.child xml_arg0 "s3Destination") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
+      make ?s3Destination ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Destination =
+        field_map json__ "s3Destination" S3Destination.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
+      make ?s3Destination ?jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Export optimization recommendations for your licenses. Recommendations are exported in a comma-separated values (CSV) file, and its metadata in a JavaScript Object Notation (JSON) file, to an existing Amazon Simple Storage Service (Amazon S3) bucket that you specify. For more information, see Exporting Recommendations in the Compute Optimizer User Guide. You can have only one license export job in progress per Amazon Web Services Region."]
+module ExportLicenseRecommendationsRequest =
+  struct
+    type nonrec t =
+      {
+      accountIds: AccountIds.t option
+        [@ocaml.doc
+          "The IDs of the Amazon Web Services accounts for which to export license recommendations. If your account is the management account of an organization, use this parameter to specify the member account for which you want to export recommendations. This parameter can't be specified together with the include member accounts parameter. The parameters are mutually exclusive. If this parameter is omitted, recommendations for member accounts aren't included in the export. You can specify multiple account IDs per request."];
+      filters: LicenseRecommendationFilters.t option
+        [@ocaml.doc
+          "An array of objects to specify a filter that exports a more specific set of license recommendations."];
+      fieldsToExport: ExportableLicenseFields.t option
+        [@ocaml.doc
+          "The recommendations data to include in the export file. For more information about the fields that can be exported, see Exported files in the Compute Optimizer User Guide."];
+      s3DestinationConfig: S3DestinationConfig.t ;
+      fileFormat: FileFormat.t option
+        [@ocaml.doc
+          "The format of the export file. A CSV file is the only export format currently supported."];
+      includeMemberAccounts: IncludeMemberAccounts.t option
+        [@ocaml.doc
+          "Indicates whether to include recommendations for resources in all member accounts of the organization if your account is the management account of an organization. The member accounts must also be opted in to Compute Optimizer, and trusted access for Compute Optimizer must be enabled in the organization account. For more information, see Compute Optimizer and Amazon Web Services Organizations trusted access in the Compute Optimizer User Guide. If this parameter is omitted, recommendations for member accounts of the organization aren't included in the export file . This parameter cannot be specified together with the account IDs parameter. The parameters are mutually exclusive."]}
+    let context_ = "ExportLicenseRecommendationsRequest"
+    let make ?accountIds =
+      fun ?filters ->
+        fun ?fieldsToExport ->
+          fun ?fileFormat ->
+            fun ?includeMemberAccounts ->
+              fun ~s3DestinationConfig ->
+                fun () ->
+                  {
+                    accountIds;
+                    filters;
+                    fieldsToExport;
+                    fileFormat;
+                    includeMemberAccounts;
+                    s3DestinationConfig
+                  }
+    let to_value x =
+      structure_to_value
+        [("accountIds", (Option.map x.accountIds ~f:AccountIds.to_value));
+        ("filters",
+          (Option.map x.filters ~f:LicenseRecommendationFilters.to_value));
+        ("fieldsToExport",
+          (Option.map x.fieldsToExport ~f:ExportableLicenseFields.to_value));
+        ("s3DestinationConfig",
+          (Some (S3DestinationConfig.to_value x.s3DestinationConfig)));
+        ("fileFormat", (Option.map x.fileFormat ~f:FileFormat.to_value));
+        ("includeMemberAccounts",
+          (Option.map x.includeMemberAccounts
+             ~f:IncludeMemberAccounts.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let includeMemberAccounts =
+        (Option.map ~f:IncludeMemberAccounts.of_xml)
+          (Xml.child xml_arg0 "includeMemberAccounts") in
+      let fileFormat =
+        (Option.map ~f:FileFormat.of_xml) (Xml.child xml_arg0 "fileFormat") in
+      let s3DestinationConfig =
+        S3DestinationConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "s3DestinationConfig") in
+      let fieldsToExport =
+        (Option.map ~f:ExportableLicenseFields.of_xml)
+          (Xml.child xml_arg0 "fieldsToExport") in
+      let filters =
+        (Option.map ~f:LicenseRecommendationFilters.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      let accountIds =
+        (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
+      make ?includeMemberAccounts ?fileFormat ~s3DestinationConfig
+        ?fieldsToExport ?filters ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let includeMemberAccounts =
+        field_map json__ "includeMemberAccounts"
+          IncludeMemberAccounts.of_json in
+      let fileFormat = field_map json__ "fileFormat" FileFormat.of_json in
+      let s3DestinationConfig =
+        field_map_exn json__ "s3DestinationConfig"
+          S3DestinationConfig.of_json in
+      let fieldsToExport =
+        field_map json__ "fieldsToExport" ExportableLicenseFields.of_json in
+      let filters =
+        field_map json__ "filters" LicenseRecommendationFilters.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
+      make ?includeMemberAccounts ?fileFormat ~s3DestinationConfig
+        ?fieldsToExport ?filters ?accountIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Export optimization recommendations for your licenses. Recommendations are exported in a comma-separated values (CSV) file, and its metadata in a JavaScript Object Notation (JSON) file, to an existing Amazon Simple Storage Service (Amazon S3) bucket that you specify. For more information, see Exporting Recommendations in the Compute Optimizer User Guide. You can have only one license export job in progress per Amazon Web Services Region."]
 module ExportLambdaFunctionRecommendationsResponse =
   struct
     type nonrec t =
@@ -8468,10 +18642,10 @@ module ExportLambdaFunctionRecommendationsResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?s3Destination ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3Destination =
-        field_map json "s3Destination" S3Destination.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
+        field_map json__ "s3Destination" S3Destination.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
       make ?s3Destination ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8548,23 +18722,454 @@ module ExportLambdaFunctionRecommendationsRequest =
       make ?includeMemberAccounts ?fileFormat ~s3DestinationConfig
         ?fieldsToExport ?filters ?accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeMemberAccounts =
-        field_map json "includeMemberAccounts" IncludeMemberAccounts.of_json in
-      let fileFormat = field_map json "fileFormat" FileFormat.of_json in
+        field_map json__ "includeMemberAccounts"
+          IncludeMemberAccounts.of_json in
+      let fileFormat = field_map json__ "fileFormat" FileFormat.of_json in
       let s3DestinationConfig =
-        field_map_exn json "s3DestinationConfig" S3DestinationConfig.of_json in
+        field_map_exn json__ "s3DestinationConfig"
+          S3DestinationConfig.of_json in
       let fieldsToExport =
-        field_map json "fieldsToExport"
+        field_map json__ "fieldsToExport"
           ExportableLambdaFunctionFields.of_json in
       let filters =
-        field_map json "filters" LambdaFunctionRecommendationFilters.of_json in
-      let accountIds = field_map json "accountIds" AccountIds.of_json in
+        field_map json__ "filters"
+          LambdaFunctionRecommendationFilters.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
       make ?includeMemberAccounts ?fileFormat ~s3DestinationConfig
         ?fieldsToExport ?filters ?accountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Exports optimization recommendations for Lambda functions. Recommendations are exported in a comma-separated values (.csv) file, and its metadata in a JavaScript Object Notation (JSON) (.json) file, to an existing Amazon Simple Storage Service (Amazon S3) bucket that you specify. For more information, see Exporting Recommendations in the Compute Optimizer User Guide. You can have only one Lambda function export job in progress per Amazon Web Services Region."]
+module ExportIdleRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      jobId: JobId.t option
+        [@ocaml.doc
+          "The identification number of the export job. To view the status of an export job, use the DescribeRecommendationExportJobs action and specify the job ID."];
+      s3Destination: S3Destination.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `MissingAuthenticationToken of MissingAuthenticationToken.t 
+      | `OptInRequiredException of OptInRequiredException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobId =
+      fun ?s3Destination -> fun () -> { jobId; s3Destination }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken
+            (MissingAuthenticationToken.of_json json)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken (MissingAuthenticationToken.of_xml xml)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `MissingAuthenticationToken e ->
+          `Assoc
+            [("error", (`String "MissingAuthenticationToken"));
+            ("details", (MissingAuthenticationToken.to_json e))]
+      | `OptInRequiredException e ->
+          `Assoc
+            [("error", (`String "OptInRequiredException"));
+            ("details", (OptInRequiredException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("jobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("s3Destination",
+          (Option.map x.s3Destination ~f:S3Destination.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Destination =
+        (Option.map ~f:S3Destination.of_xml)
+          (Xml.child xml_arg0 "s3Destination") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
+      make ?s3Destination ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Destination =
+        field_map json__ "s3Destination" S3Destination.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
+      make ?s3Destination ?jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Export optimization recommendations for your idle resources. Recommendations are exported in a comma-separated values (CSV) file, and its metadata in a JavaScript Object Notation (JSON) file, to an existing Amazon Simple Storage Service (Amazon S3) bucket that you specify. For more information, see Exporting Recommendations in the Compute Optimizer User Guide. You can have only one idle resource export job in progress per Amazon Web Services Region."]
+module ExportIdleRecommendationsRequest =
+  struct
+    type nonrec t =
+      {
+      accountIds: AccountIds.t option
+        [@ocaml.doc
+          "The Amazon Web Services account IDs for the export idle resource recommendations. If your account is the management account or the delegated administrator of an organization, use this parameter to specify the member account you want to export recommendations to. This parameter can't be specified together with the include member accounts parameter. The parameters are mutually exclusive. If this parameter or the include member accounts parameter is omitted, the recommendations for member accounts aren't included in the export. You can specify multiple account IDs per request."];
+      filters: IdleRecommendationFilters.t option
+        [@ocaml.doc
+          "An array of objects to specify a filter that exports a more specific set of idle resource recommendations."];
+      fieldsToExport: ExportableIdleFields.t option
+        [@ocaml.doc
+          "The recommendations data to include in the export file. For more information about the fields that can be exported, see Exported files in the Compute Optimizer User Guide."];
+      s3DestinationConfig: S3DestinationConfig.t ;
+      fileFormat: FileFormat.t option
+        [@ocaml.doc
+          "The format of the export file. The CSV file is the only export file format currently supported."];
+      includeMemberAccounts: IncludeMemberAccounts.t option
+        [@ocaml.doc
+          "If your account is the management account or the delegated administrator of an organization, this parameter indicates whether to include recommendations for resources in all member accounts of the organization. The member accounts must also be opted in to Compute Optimizer, and trusted access for Compute Optimizer must be enabled in the organization account. For more information, see Compute Optimizer and Amazon Web Services Organizations trusted access in the Compute Optimizer User Guide. If this parameter is omitted, recommendations for member accounts of the organization aren't included in the export file. If this parameter or the account ID parameter is omitted, recommendations for member accounts aren't included in the export."]}
+    let context_ = "ExportIdleRecommendationsRequest"
+    let make ?accountIds =
+      fun ?filters ->
+        fun ?fieldsToExport ->
+          fun ?fileFormat ->
+            fun ?includeMemberAccounts ->
+              fun ~s3DestinationConfig ->
+                fun () ->
+                  {
+                    accountIds;
+                    filters;
+                    fieldsToExport;
+                    fileFormat;
+                    includeMemberAccounts;
+                    s3DestinationConfig
+                  }
+    let to_value x =
+      structure_to_value
+        [("accountIds", (Option.map x.accountIds ~f:AccountIds.to_value));
+        ("filters",
+          (Option.map x.filters ~f:IdleRecommendationFilters.to_value));
+        ("fieldsToExport",
+          (Option.map x.fieldsToExport ~f:ExportableIdleFields.to_value));
+        ("s3DestinationConfig",
+          (Some (S3DestinationConfig.to_value x.s3DestinationConfig)));
+        ("fileFormat", (Option.map x.fileFormat ~f:FileFormat.to_value));
+        ("includeMemberAccounts",
+          (Option.map x.includeMemberAccounts
+             ~f:IncludeMemberAccounts.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let includeMemberAccounts =
+        (Option.map ~f:IncludeMemberAccounts.of_xml)
+          (Xml.child xml_arg0 "includeMemberAccounts") in
+      let fileFormat =
+        (Option.map ~f:FileFormat.of_xml) (Xml.child xml_arg0 "fileFormat") in
+      let s3DestinationConfig =
+        S3DestinationConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "s3DestinationConfig") in
+      let fieldsToExport =
+        (Option.map ~f:ExportableIdleFields.of_xml)
+          (Xml.child xml_arg0 "fieldsToExport") in
+      let filters =
+        (Option.map ~f:IdleRecommendationFilters.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      let accountIds =
+        (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
+      make ?includeMemberAccounts ?fileFormat ~s3DestinationConfig
+        ?fieldsToExport ?filters ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let includeMemberAccounts =
+        field_map json__ "includeMemberAccounts"
+          IncludeMemberAccounts.of_json in
+      let fileFormat = field_map json__ "fileFormat" FileFormat.of_json in
+      let s3DestinationConfig =
+        field_map_exn json__ "s3DestinationConfig"
+          S3DestinationConfig.of_json in
+      let fieldsToExport =
+        field_map json__ "fieldsToExport" ExportableIdleFields.of_json in
+      let filters =
+        field_map json__ "filters" IdleRecommendationFilters.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
+      make ?includeMemberAccounts ?fileFormat ~s3DestinationConfig
+        ?fieldsToExport ?filters ?accountIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Export optimization recommendations for your idle resources. Recommendations are exported in a comma-separated values (CSV) file, and its metadata in a JavaScript Object Notation (JSON) file, to an existing Amazon Simple Storage Service (Amazon S3) bucket that you specify. For more information, see Exporting Recommendations in the Compute Optimizer User Guide. You can have only one idle resource export job in progress per Amazon Web Services Region."]
+module ExportECSServiceRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      jobId: JobId.t option
+        [@ocaml.doc
+          "The identification number of the export job. To view the status of an export job, use the DescribeRecommendationExportJobs action and specify the job ID."];
+      s3Destination: S3Destination.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `MissingAuthenticationToken of MissingAuthenticationToken.t 
+      | `OptInRequiredException of OptInRequiredException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobId =
+      fun ?s3Destination -> fun () -> { jobId; s3Destination }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken
+            (MissingAuthenticationToken.of_json json)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "MissingAuthenticationToken" ->
+          `MissingAuthenticationToken (MissingAuthenticationToken.of_xml xml)
+      | "OptInRequiredException" ->
+          `OptInRequiredException (OptInRequiredException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `MissingAuthenticationToken e ->
+          `Assoc
+            [("error", (`String "MissingAuthenticationToken"));
+            ("details", (MissingAuthenticationToken.to_json e))]
+      | `OptInRequiredException e ->
+          `Assoc
+            [("error", (`String "OptInRequiredException"));
+            ("details", (OptInRequiredException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("jobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("s3Destination",
+          (Option.map x.s3Destination ~f:S3Destination.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Destination =
+        (Option.map ~f:S3Destination.of_xml)
+          (Xml.child xml_arg0 "s3Destination") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
+      make ?s3Destination ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Destination =
+        field_map json__ "s3Destination" S3Destination.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
+      make ?s3Destination ?jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Exports optimization recommendations for Amazon ECS services on Fargate. Recommendations are exported in a CSV file, and its metadata in a JSON file, to an existing Amazon Simple Storage Service (Amazon S3) bucket that you specify. For more information, see Exporting Recommendations in the Compute Optimizer User Guide. You can only have one Amazon ECS service export job in progress per Amazon Web Services Region."]
+module ExportECSServiceRecommendationsRequest =
+  struct
+    type nonrec t =
+      {
+      accountIds: AccountIds.t option
+        [@ocaml.doc
+          "The Amazon Web Services account IDs for the export Amazon ECS service recommendations. If your account is the management account or the delegated administrator of an organization, use this parameter to specify the member account you want to export recommendations to. This parameter can't be specified together with the include member accounts parameter. The parameters are mutually exclusive. If this parameter or the include member accounts parameter is omitted, the recommendations for member accounts aren't included in the export. You can specify multiple account IDs per request."];
+      filters: ECSServiceRecommendationFilters.t option
+        [@ocaml.doc
+          "An array of objects to specify a filter that exports a more specific set of Amazon ECS service recommendations."];
+      fieldsToExport: ExportableECSServiceFields.t option
+        [@ocaml.doc
+          "The recommendations data to include in the export file. For more information about the fields that can be exported, see Exported files in the Compute Optimizer User Guide."];
+      s3DestinationConfig: S3DestinationConfig.t ;
+      fileFormat: FileFormat.t option
+        [@ocaml.doc
+          "The format of the export file. The CSV file is the only export file format currently supported."];
+      includeMemberAccounts: IncludeMemberAccounts.t option
+        [@ocaml.doc
+          "If your account is the management account or the delegated administrator of an organization, this parameter indicates whether to include recommendations for resources in all member accounts of the organization. The member accounts must also be opted in to Compute Optimizer, and trusted access for Compute Optimizer must be enabled in the organization account. For more information, see Compute Optimizer and Amazon Web Services Organizations trusted access in the Compute Optimizer User Guide. If this parameter is omitted, recommendations for member accounts of the organization aren't included in the export file. If this parameter or the account ID parameter is omitted, recommendations for member accounts aren't included in the export."]}
+    let context_ = "ExportECSServiceRecommendationsRequest"
+    let make ?accountIds =
+      fun ?filters ->
+        fun ?fieldsToExport ->
+          fun ?fileFormat ->
+            fun ?includeMemberAccounts ->
+              fun ~s3DestinationConfig ->
+                fun () ->
+                  {
+                    accountIds;
+                    filters;
+                    fieldsToExport;
+                    fileFormat;
+                    includeMemberAccounts;
+                    s3DestinationConfig
+                  }
+    let to_value x =
+      structure_to_value
+        [("accountIds", (Option.map x.accountIds ~f:AccountIds.to_value));
+        ("filters",
+          (Option.map x.filters ~f:ECSServiceRecommendationFilters.to_value));
+        ("fieldsToExport",
+          (Option.map x.fieldsToExport ~f:ExportableECSServiceFields.to_value));
+        ("s3DestinationConfig",
+          (Some (S3DestinationConfig.to_value x.s3DestinationConfig)));
+        ("fileFormat", (Option.map x.fileFormat ~f:FileFormat.to_value));
+        ("includeMemberAccounts",
+          (Option.map x.includeMemberAccounts
+             ~f:IncludeMemberAccounts.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let includeMemberAccounts =
+        (Option.map ~f:IncludeMemberAccounts.of_xml)
+          (Xml.child xml_arg0 "includeMemberAccounts") in
+      let fileFormat =
+        (Option.map ~f:FileFormat.of_xml) (Xml.child xml_arg0 "fileFormat") in
+      let s3DestinationConfig =
+        S3DestinationConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "s3DestinationConfig") in
+      let fieldsToExport =
+        (Option.map ~f:ExportableECSServiceFields.of_xml)
+          (Xml.child xml_arg0 "fieldsToExport") in
+      let filters =
+        (Option.map ~f:ECSServiceRecommendationFilters.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      let accountIds =
+        (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "accountIds") in
+      make ?includeMemberAccounts ?fileFormat ~s3DestinationConfig
+        ?fieldsToExport ?filters ?accountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let includeMemberAccounts =
+        field_map json__ "includeMemberAccounts"
+          IncludeMemberAccounts.of_json in
+      let fileFormat = field_map json__ "fileFormat" FileFormat.of_json in
+      let s3DestinationConfig =
+        field_map_exn json__ "s3DestinationConfig"
+          S3DestinationConfig.of_json in
+      let fieldsToExport =
+        field_map json__ "fieldsToExport" ExportableECSServiceFields.of_json in
+      let filters =
+        field_map json__ "filters" ECSServiceRecommendationFilters.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
+      make ?includeMemberAccounts ?fileFormat ~s3DestinationConfig
+        ?fieldsToExport ?filters ?accountIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Exports optimization recommendations for Amazon ECS services on Fargate. Recommendations are exported in a CSV file, and its metadata in a JSON file, to an existing Amazon Simple Storage Service (Amazon S3) bucket that you specify. For more information, see Exporting Recommendations in the Compute Optimizer User Guide. You can only have one Amazon ECS service export job in progress per Amazon Web Services Region."]
 module ExportEC2InstanceRecommendationsResponse =
   struct
     type nonrec t =
@@ -8685,10 +19290,10 @@ module ExportEC2InstanceRecommendationsResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?s3Destination ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3Destination =
-        field_map json "s3Destination" S3Destination.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
+        field_map json__ "s3Destination" S3Destination.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
       make ?s3Destination ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8774,19 +19379,21 @@ module ExportEC2InstanceRecommendationsRequest =
       make ?recommendationPreferences ?includeMemberAccounts ?fileFormat
         ~s3DestinationConfig ?fieldsToExport ?filters ?accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationPreferences =
-        field_map json "recommendationPreferences"
+        field_map json__ "recommendationPreferences"
           RecommendationPreferences.of_json in
       let includeMemberAccounts =
-        field_map json "includeMemberAccounts" IncludeMemberAccounts.of_json in
-      let fileFormat = field_map json "fileFormat" FileFormat.of_json in
+        field_map json__ "includeMemberAccounts"
+          IncludeMemberAccounts.of_json in
+      let fileFormat = field_map json__ "fileFormat" FileFormat.of_json in
       let s3DestinationConfig =
-        field_map_exn json "s3DestinationConfig" S3DestinationConfig.of_json in
+        field_map_exn json__ "s3DestinationConfig"
+          S3DestinationConfig.of_json in
       let fieldsToExport =
-        field_map json "fieldsToExport" ExportableInstanceFields.of_json in
-      let filters = field_map json "filters" Filters.of_json in
-      let accountIds = field_map json "accountIds" AccountIds.of_json in
+        field_map json__ "fieldsToExport" ExportableInstanceFields.of_json in
+      let filters = field_map json__ "filters" Filters.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
       make ?recommendationPreferences ?includeMemberAccounts ?fileFormat
         ~s3DestinationConfig ?fieldsToExport ?filters ?accountIds ()
     let to_json v = composed_to_json to_value v
@@ -8910,10 +19517,10 @@ module ExportEBSVolumeRecommendationsResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?s3Destination ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3Destination =
-        field_map json "s3Destination" S3Destination.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
+        field_map json__ "s3Destination" S3Destination.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
       make ?s3Destination ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8986,16 +19593,18 @@ module ExportEBSVolumeRecommendationsRequest =
       make ?includeMemberAccounts ?fileFormat ~s3DestinationConfig
         ?fieldsToExport ?filters ?accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeMemberAccounts =
-        field_map json "includeMemberAccounts" IncludeMemberAccounts.of_json in
-      let fileFormat = field_map json "fileFormat" FileFormat.of_json in
+        field_map json__ "includeMemberAccounts"
+          IncludeMemberAccounts.of_json in
+      let fileFormat = field_map json__ "fileFormat" FileFormat.of_json in
       let s3DestinationConfig =
-        field_map_exn json "s3DestinationConfig" S3DestinationConfig.of_json in
+        field_map_exn json__ "s3DestinationConfig"
+          S3DestinationConfig.of_json in
       let fieldsToExport =
-        field_map json "fieldsToExport" ExportableVolumeFields.of_json in
-      let filters = field_map json "filters" EBSFilters.of_json in
-      let accountIds = field_map json "accountIds" AccountIds.of_json in
+        field_map json__ "fieldsToExport" ExportableVolumeFields.of_json in
+      let filters = field_map json__ "filters" EBSFilters.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
       make ?includeMemberAccounts ?fileFormat ~s3DestinationConfig
         ?fieldsToExport ?filters ?accountIds ()
     let to_json v = composed_to_json to_value v
@@ -9121,10 +19730,10 @@ module ExportAutoScalingGroupRecommendationsResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?s3Destination ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3Destination =
-        field_map json "s3Destination" S3Destination.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
+        field_map json__ "s3Destination" S3Destination.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
       make ?s3Destination ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9211,20 +19820,22 @@ module ExportAutoScalingGroupRecommendationsRequest =
       make ?recommendationPreferences ?includeMemberAccounts ?fileFormat
         ~s3DestinationConfig ?fieldsToExport ?filters ?accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationPreferences =
-        field_map json "recommendationPreferences"
+        field_map json__ "recommendationPreferences"
           RecommendationPreferences.of_json in
       let includeMemberAccounts =
-        field_map json "includeMemberAccounts" IncludeMemberAccounts.of_json in
-      let fileFormat = field_map json "fileFormat" FileFormat.of_json in
+        field_map json__ "includeMemberAccounts"
+          IncludeMemberAccounts.of_json in
+      let fileFormat = field_map json__ "fileFormat" FileFormat.of_json in
       let s3DestinationConfig =
-        field_map_exn json "s3DestinationConfig" S3DestinationConfig.of_json in
+        field_map_exn json__ "s3DestinationConfig"
+          S3DestinationConfig.of_json in
       let fieldsToExport =
-        field_map json "fieldsToExport"
+        field_map json__ "fieldsToExport"
           ExportableAutoScalingGroupFields.of_json in
-      let filters = field_map json "filters" Filters.of_json in
-      let accountIds = field_map json "accountIds" AccountIds.of_json in
+      let filters = field_map json__ "filters" Filters.of_json in
+      let accountIds = field_map json__ "accountIds" AccountIds.of_json in
       make ?recommendationPreferences ?includeMemberAccounts ?fileFormat
         ~s3DestinationConfig ?fieldsToExport ?filters ?accountIds ()
     let to_json v = composed_to_json to_value v
@@ -9352,10 +19963,10 @@ module DescribeRecommendationExportJobsResponse =
           (Xml.child xml_arg0 "recommendationExportJobs") in
       make ?nextToken ?recommendationExportJobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let recommendationExportJobs =
-        field_map json "recommendationExportJobs"
+        field_map json__ "recommendationExportJobs"
           RecommendationExportJobs.of_json in
       make ?nextToken ?recommendationExportJobs ()
     let to_json v = composed_to_json to_value v
@@ -9399,11 +20010,11 @@ module DescribeRecommendationExportJobsRequest =
         (Option.map ~f:JobIds.of_xml) (Xml.child xml_arg0 "jobIds") in
       make ?maxResults ?nextToken ?filters ?jobIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let filters = field_map json "filters" JobFilters.of_json in
-      let jobIds = field_map json "jobIds" JobIds.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let filters = field_map json__ "filters" JobFilters.of_json in
+      let jobIds = field_map json__ "jobIds" JobIds.of_json in
       make ?maxResults ?nextToken ?filters ?jobIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9527,8 +20138,7 @@ module DeleteRecommendationPreferencesRequest =
         [@ocaml.doc
           "An object that describes the scope of the recommendation preference to delete. You can delete recommendation preferences that are created at the organization level (for management accounts of an organization only), account level, and resource level. For more information, see Activating enhanced infrastructure metrics in the Compute Optimizer User Guide."];
       recommendationPreferenceNames: RecommendationPreferenceNames.t
-        [@ocaml.doc
-          "The name of the recommendation preference to delete. Enhanced infrastructure metrics (EnhancedInfrastructureMetrics) is the only feature that can be activated through preferences. Therefore, it is also the only recommendation preference that can be deleted."]}
+        [@ocaml.doc "The name of the recommendation preference to delete."]}
     let context_ = "DeleteRecommendationPreferencesRequest"
     let make ?scope =
       fun ~resourceType ->
@@ -9554,13 +20164,13 @@ module DeleteRecommendationPreferencesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ~recommendationPreferenceNames ?scope ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationPreferenceNames =
-        field_map_exn json "recommendationPreferenceNames"
+        field_map_exn json__ "recommendationPreferenceNames"
           RecommendationPreferenceNames.of_json in
-      let scope = field_map json "scope" Scope.of_json in
+      let scope = field_map json__ "scope" Scope.of_json in
       let resourceType =
-        field_map_exn json "resourceType" ResourceType.of_json in
+        field_map_exn json__ "resourceType" ResourceType.of_json in
       make ~recommendationPreferenceNames ?scope ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

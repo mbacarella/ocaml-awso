@@ -16,6 +16,8 @@ type ('i, 'o, 'e) t =
   CreateBatchPredictionJobResult.t, CreateBatchPredictionJobResult.error) t 
   | CreateDetectorVersion: (CreateDetectorVersionRequest.t,
   CreateDetectorVersionResult.t, CreateDetectorVersionResult.error) t 
+  | CreateList: (CreateListRequest.t, CreateListResult.t,
+  CreateListResult.error) t 
   | CreateModel: (CreateModelRequest.t, CreateModelResult.t,
   CreateModelResult.error) t 
   | CreateModelVersion: (CreateModelVersionRequest.t,
@@ -44,6 +46,8 @@ type ('i, 'o, 'e) t =
   DeleteExternalModelResult.t, DeleteExternalModelResult.error) t 
   | DeleteLabel: (DeleteLabelRequest.t, DeleteLabelResult.t,
   DeleteLabelResult.error) t 
+  | DeleteList: (DeleteListRequest.t, DeleteListResult.t,
+  DeleteListResult.error) t 
   | DeleteModel: (DeleteModelRequest.t, DeleteModelResult.t,
   DeleteModelResult.error) t 
   | DeleteModelVersion: (DeleteModelVersionRequest.t,
@@ -86,6 +90,10 @@ type ('i, 'o, 'e) t =
   GetKMSEncryptionKeyResult.error) t 
   | GetLabels: (GetLabelsRequest.t, GetLabelsResult.t, GetLabelsResult.error)
   t 
+  | GetListElements: (GetListElementsRequest.t, GetListElementsResult.t,
+  GetListElementsResult.error) t 
+  | GetListsMetadata: (GetListsMetadataRequest.t, GetListsMetadataResult.t,
+  GetListsMetadataResult.error) t 
   | GetModelVersion: (GetModelVersionRequest.t, GetModelVersionResult.t,
   GetModelVersionResult.error) t 
   | GetModels: (GetModelsRequest.t, GetModelsResult.t, GetModelsResult.error)
@@ -128,6 +136,8 @@ type ('i, 'o, 'e) t =
   UpdateDetectorVersionStatusResult.error) t 
   | UpdateEventLabel: (UpdateEventLabelRequest.t, UpdateEventLabelResult.t,
   UpdateEventLabelResult.error) t 
+  | UpdateList: (UpdateListRequest.t, UpdateListResult.t,
+  UpdateListResult.error) t 
   | UpdateModel: (UpdateModelRequest.t, UpdateModelResult.t,
   UpdateModelResult.error) t 
   | UpdateModelVersion: (UpdateModelVersionRequest.t,
@@ -149,6 +159,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateBatchImportJob -> `POST
   | CreateBatchPredictionJob -> `POST
   | CreateDetectorVersion -> `POST
+  | CreateList -> `POST
   | CreateModel -> `POST
   | CreateModelVersion -> `POST
   | CreateRule -> `POST
@@ -163,6 +174,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteEventsByEventType -> `POST
   | DeleteExternalModel -> `POST
   | DeleteLabel -> `POST
+  | DeleteList -> `POST
   | DeleteModel -> `POST
   | DeleteModelVersion -> `POST
   | DeleteOutcome -> `POST
@@ -183,6 +195,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetExternalModels -> `POST
   | GetKMSEncryptionKey -> `POST
   | GetLabels -> `POST
+  | GetListElements -> `POST
+  | GetListsMetadata -> `POST
   | GetModelVersion -> `POST
   | GetModels -> `POST
   | GetOutcomes -> `POST
@@ -204,6 +218,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateDetectorVersionMetadata -> `POST
   | UpdateDetectorVersionStatus -> `POST
   | UpdateEventLabel -> `POST
+  | UpdateList -> `POST
   | UpdateModel -> `POST
   | UpdateModelVersion -> `POST
   | UpdateModelVersionStatus -> `POST
@@ -220,6 +235,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateBatchImportJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateBatchPredictionJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateDetectorVersion -> (Format.kasprintf Uri.of_string) "/"
+      | CreateList -> (Format.kasprintf Uri.of_string) "/"
       | CreateModel -> (Format.kasprintf Uri.of_string) "/"
       | CreateModelVersion -> (Format.kasprintf Uri.of_string) "/"
       | CreateRule -> (Format.kasprintf Uri.of_string) "/"
@@ -234,6 +250,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteEventsByEventType -> (Format.kasprintf Uri.of_string) "/"
       | DeleteExternalModel -> (Format.kasprintf Uri.of_string) "/"
       | DeleteLabel -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteList -> (Format.kasprintf Uri.of_string) "/"
       | DeleteModel -> (Format.kasprintf Uri.of_string) "/"
       | DeleteModelVersion -> (Format.kasprintf Uri.of_string) "/"
       | DeleteOutcome -> (Format.kasprintf Uri.of_string) "/"
@@ -255,6 +272,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetExternalModels -> (Format.kasprintf Uri.of_string) "/"
       | GetKMSEncryptionKey -> (Format.kasprintf Uri.of_string) "/"
       | GetLabels -> (Format.kasprintf Uri.of_string) "/"
+      | GetListElements -> (Format.kasprintf Uri.of_string) "/"
+      | GetListsMetadata -> (Format.kasprintf Uri.of_string) "/"
       | GetModelVersion -> (Format.kasprintf Uri.of_string) "/"
       | GetModels -> (Format.kasprintf Uri.of_string) "/"
       | GetOutcomes -> (Format.kasprintf Uri.of_string) "/"
@@ -276,6 +295,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateDetectorVersionMetadata -> (Format.kasprintf Uri.of_string) "/"
       | UpdateDetectorVersionStatus -> (Format.kasprintf Uri.of_string) "/"
       | UpdateEventLabel -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateList -> (Format.kasprintf Uri.of_string) "/"
       | UpdateModel -> (Format.kasprintf Uri.of_string) "/"
       | UpdateModelVersion -> (Format.kasprintf Uri.of_string) "/"
       | UpdateModelVersionStatus -> (Format.kasprintf Uri.of_string) "/"
@@ -342,6 +362,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSHawksNestServiceFacade.CreateDetectorVersion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateList ->
+      let json = CreateListRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSHawksNestServiceFacade.CreateList")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateModel ->
       let json = CreateModelRequest.to_json req in
@@ -456,6 +484,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSHawksNestServiceFacade.DeleteLabel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteList ->
+      let json = DeleteListRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSHawksNestServiceFacade.DeleteList")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteModel ->
       let json = DeleteModelRequest.to_json req in
@@ -619,6 +655,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSHawksNestServiceFacade.GetLabels")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetListElements ->
+      let json = GetListElementsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSHawksNestServiceFacade.GetListElements")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetListsMetadata ->
+      let json = GetListsMetadataRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSHawksNestServiceFacade.GetListsMetadata")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetModelVersion ->
       let json = GetModelVersionRequest.to_json req in
@@ -790,6 +842,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSHawksNestServiceFacade.UpdateEventLabel")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateList ->
+      let json = UpdateListRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSHawksNestServiceFacade.UpdateList")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateModel ->
       let json = UpdateModelRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -919,6 +979,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateDetectorVersionResult.error_of_json))
+  | CreateList ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateListResult.of_json json)
+      else Error (parse_aws_error (Some CreateListResult.error_of_json))
   | CreateModel ->
       if is_success
       then
@@ -1016,6 +1082,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteLabelResult.of_json json)
       else Error (parse_aws_error (Some DeleteLabelResult.error_of_json))
+  | DeleteList ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteListResult.of_json json)
+      else Error (parse_aws_error (Some DeleteListResult.error_of_json))
   | DeleteModel ->
       if is_success
       then
@@ -1154,6 +1226,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetLabelsResult.of_json json)
       else Error (parse_aws_error (Some GetLabelsResult.error_of_json))
+  | GetListElements ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetListElementsResult.of_json json)
+      else Error (parse_aws_error (Some GetListElementsResult.error_of_json))
+  | GetListsMetadata ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetListsMetadataResult.of_json json)
+      else
+        Error (parse_aws_error (Some GetListsMetadataResult.error_of_json))
   | GetModelVersion ->
       if is_success
       then
@@ -1296,6 +1381,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateEventLabelResult.of_json json)
       else
         Error (parse_aws_error (Some UpdateEventLabelResult.error_of_json))
+  | UpdateList ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateListResult.of_json json)
+      else Error (parse_aws_error (Some UpdateListResult.error_of_json))
   | UpdateModel ->
       if is_success
       then

@@ -6,6 +6,12 @@ val batch_acknowledge_alarm :
       BatchAcknowledgeAlarmRequest.t ->
         (BatchAcknowledgeAlarmResponse.t,
           BatchAcknowledgeAlarmResponse.error) Result.t Lwt.t
+val batch_delete_detector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchDeleteDetectorRequest.t ->
+        (BatchDeleteDetectorResponse.t, BatchDeleteDetectorResponse.error)
+          Result.t Lwt.t
 val batch_disable_alarm :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

@@ -201,14 +201,14 @@ module Item =
       let name = (Option.map ~f:ItemName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?contentLength ?contentType ?lastModified ?eTag ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contentLength =
-        field_map json "ContentLength" NonNegativeLong.of_json in
-      let contentType = field_map json "ContentType" ContentType.of_json in
-      let lastModified = field_map json "LastModified" TimeStamp.of_json in
-      let eTag = field_map json "ETag" ETag.of_json in
-      let type_ = field_map json "Type" ItemType.of_json in
-      let name = field_map json "Name" ItemName.of_json in
+        field_map json__ "ContentLength" NonNegativeLong.of_json in
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
+      let lastModified = field_map json__ "LastModified" TimeStamp.of_json in
+      let eTag = field_map json__ "ETag" ETag.of_json in
+      let type_ = field_map json__ "Type" ItemType.of_json in
+      let name = field_map json__ "Name" ItemName.of_json in
       make ?contentLength ?contentType ?lastModified ?eTag ?type_ ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A metadata entry for a folder or object."]
@@ -226,8 +226,8 @@ module ContainerNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -246,8 +246,8 @@ module InternalServerError =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service is temporarily unavailable."]
@@ -364,6 +364,9 @@ module ItemList =
   struct
     type nonrec t = Item.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Item.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -465,8 +468,8 @@ module ObjectNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -485,8 +488,8 @@ module RequestedRangeNotSatisfiableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested content range is not valid."]
@@ -590,10 +593,10 @@ module PutObjectResponse =
           (Xml.child xml_arg0 "ContentSHA256") in
       make ?storageClass ?eTag ?contentSHA256 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let storageClass = field_map json "StorageClass" StorageClass.of_json in
-      let eTag = field_map json "ETag" ETag.of_json in
-      let contentSHA256 = field_map json "ContentSHA256" SHA256Hash.of_json in
+    let of_json json__ =
+      let storageClass = field_map json__ "StorageClass" StorageClass.of_json in
+      let eTag = field_map json__ "ETag" ETag.of_json in
+      let contentSHA256 = field_map json__ "ContentSHA256" SHA256Hash.of_json in
       make ?storageClass ?eTag ?contentSHA256 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -688,15 +691,15 @@ module PutObjectRequest =
       make ?uploadAvailability ?storageClass ?cacheControl ?contentType ~path
         ~body ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let uploadAvailability =
-        field_map json "UploadAvailability" UploadAvailability.of_json in
-      let storageClass = field_map json "StorageClass" StorageClass.of_json in
+        field_map json__ "UploadAvailability" UploadAvailability.of_json in
+      let storageClass = field_map json__ "StorageClass" StorageClass.of_json in
       let cacheControl =
-        field_map json "CacheControl" StringPrimitive.of_json in
-      let contentType = field_map json "ContentType" ContentType.of_json in
-      let path = field_map_exn json "Path" PathNaming.of_json in
-      let body = field_map_exn json "Body" PayloadBlob.of_json in
+        field_map json__ "CacheControl" StringPrimitive.of_json in
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
+      let path = field_map_exn json__ "Path" PathNaming.of_json in
+      let body = field_map_exn json__ "Body" PayloadBlob.of_json in
       make ?uploadAvailability ?storageClass ?cacheControl ?contentType ~path
         ~body ()
     let to_json v = composed_to_json to_value v
@@ -763,9 +766,9 @@ module ListItemsResponse =
         (Option.map ~f:ItemList.of_xml) (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let items = field_map json "Items" ItemList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let items = field_map json__ "Items" ItemList.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -802,10 +805,10 @@ module ListItemsRequest =
         (Option.map ~f:ListPathNaming.of_xml) (Xml.child xml_arg0 "Path") in
       make ?nextToken ?maxResults ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" ListLimit.of_json in
-      let path = field_map json "Path" ListPathNaming.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" ListLimit.of_json in
+      let path = field_map json__ "Path" ListPathNaming.of_json in
       make ?nextToken ?maxResults ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -829,7 +832,7 @@ module GetObjectResponse =
           "The ETag that represents a unique instance of the object."];
       lastModified: TimeStamp.t option
         [@ocaml.doc "The date and time that the object was last modified."];
-      statusCode: StatusCode.t
+      statusCode: StatusCode.t option
         [@ocaml.doc
           "The HTML status code of the request. Status codes ranging from 200 to 299 indicate success. All other status codes indicate the type of error that occurred."]}
     type nonrec error =
@@ -839,7 +842,6 @@ module GetObjectResponse =
       | `RequestedRangeNotSatisfiableException of
           RequestedRangeNotSatisfiableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetObjectResponse"
     let make ?body =
       fun ?cacheControl ->
         fun ?contentRange ->
@@ -847,7 +849,7 @@ module GetObjectResponse =
             fun ?contentType ->
               fun ?eTag ->
                 fun ?lastModified ->
-                  fun ~statusCode ->
+                  fun ?statusCode ->
                     fun () ->
                       {
                         body;
@@ -934,9 +936,9 @@ module GetObjectResponse =
             ?lastModified:(Option.map
                              ((List.Assoc.find ~equal:String.Caseless.equal)
                                 xs "Last-Modified") ~f:TimeStamp.of_string)
-            ~statusCode:(StatusCode.of_string
-                           ((List.Assoc.find_exn ~equal:String.Caseless.equal)
-                              xs "statuscode")) ())
+            ?statusCode:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "statuscode") ~f:StatusCode.of_string) ())
       [@warning "-27"])
     let to_value x =
       structure_to_value
@@ -950,12 +952,11 @@ module GetObjectResponse =
         ("Content-Type", (Option.map x.contentType ~f:ContentType.to_value));
         ("ETag", (Option.map x.eTag ~f:ETag.to_value));
         ("Last-Modified", (Option.map x.lastModified ~f:TimeStamp.to_value));
-        ("StatusCode", (Some (StatusCode.to_value x.statusCode)))]
+        ("StatusCode", (Option.map x.statusCode ~f:StatusCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let statusCode =
-        StatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StatusCode") in
+        (Option.map ~f:StatusCode.of_xml) (Xml.child xml_arg0 "StatusCode") in
       let lastModified =
         (Option.map ~f:TimeStamp.of_xml) (Xml.child xml_arg0 "Last-Modified") in
       let eTag = (Option.map ~f:ETag.of_xml) (Xml.child xml_arg0 "ETag") in
@@ -973,22 +974,22 @@ module GetObjectResponse =
           (Xml.child xml_arg0 "Cache-Control") in
       let body =
         (Option.map ~f:PayloadBlob.of_xml) (Xml.child xml_arg0 "Body") in
-      make ~statusCode ?lastModified ?eTag ?contentType ?contentLength
+      make ?statusCode ?lastModified ?eTag ?contentType ?contentLength
         ?contentRange ?cacheControl ?body ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusCode = field_map_exn json "StatusCode" StatusCode.of_json in
-      let lastModified = field_map json "LastModified" TimeStamp.of_json in
-      let eTag = field_map json "ETag" ETag.of_json in
-      let contentType = field_map json "ContentType" ContentType.of_json in
+    let of_json json__ =
+      let statusCode = field_map json__ "StatusCode" StatusCode.of_json in
+      let lastModified = field_map json__ "LastModified" TimeStamp.of_json in
+      let eTag = field_map json__ "ETag" ETag.of_json in
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
       let contentLength =
-        field_map json "ContentLength" NonNegativeLong.of_json in
+        field_map json__ "ContentLength" NonNegativeLong.of_json in
       let contentRange =
-        field_map json "ContentRange" ContentRangePattern.of_json in
+        field_map json__ "ContentRange" ContentRangePattern.of_json in
       let cacheControl =
-        field_map json "CacheControl" StringPrimitive.of_json in
-      let body = field_map json "Body" PayloadBlob.of_json in
-      make ~statusCode ?lastModified ?eTag ?contentType ?contentLength
+        field_map json__ "CacheControl" StringPrimitive.of_json in
+      let body = field_map json__ "Body" PayloadBlob.of_json in
+      make ?statusCode ?lastModified ?eTag ?contentType ?contentLength
         ?contentRange ?cacheControl ?body ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1017,9 +1018,9 @@ module GetObjectRequest =
         PathNaming.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
       make ?range ~path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let range = field_map json "Range" RangePattern.of_json in
-      let path = field_map_exn json "Path" PathNaming.of_json in
+    let of_json json__ =
+      let range = field_map json__ "Range" RangePattern.of_json in
+      let path = field_map_exn json__ "Path" PathNaming.of_json in
       make ?range ~path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1146,14 +1147,14 @@ module DescribeObjectResponse =
       let eTag = (Option.map ~f:ETag.of_xml) (Xml.child xml_arg0 "ETag") in
       make ?lastModified ?cacheControl ?contentLength ?contentType ?eTag ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastModified = field_map json "LastModified" TimeStamp.of_json in
+    let of_json json__ =
+      let lastModified = field_map json__ "LastModified" TimeStamp.of_json in
       let cacheControl =
-        field_map json "CacheControl" StringPrimitive.of_json in
+        field_map json__ "CacheControl" StringPrimitive.of_json in
       let contentLength =
-        field_map json "ContentLength" NonNegativeLong.of_json in
-      let contentType = field_map json "ContentType" ContentType.of_json in
-      let eTag = field_map json "ETag" ETag.of_json in
+        field_map json__ "ContentLength" NonNegativeLong.of_json in
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
+      let eTag = field_map json__ "ETag" ETag.of_json in
       make ?lastModified ?cacheControl ?contentLength ?contentType ?eTag ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the headers for an object at the specified path."]
@@ -1174,8 +1175,8 @@ module DescribeObjectRequest =
         PathNaming.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
       make ~path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let path = field_map_exn json "Path" PathNaming.of_json in
+    let of_json json__ =
+      let path = field_map_exn json__ "Path" PathNaming.of_json in
       make ~path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the headers for an object at the specified path."]
@@ -1254,8 +1255,8 @@ module DeleteObjectRequest =
         PathNaming.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
       make ~path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let path = field_map_exn json "Path" PathNaming.of_json in
+    let of_json json__ =
+      let path = field_map_exn json__ "Path" PathNaming.of_json in
       make ~path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an object at the specified path."]

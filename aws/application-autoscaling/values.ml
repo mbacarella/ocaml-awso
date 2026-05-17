@@ -24,6 +24,696 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module PredictiveScalingMetricDimensionName =
+  struct
+    type nonrec t = string
+    let context_ = "PredictiveScalingMetricDimensionName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"PredictiveScalingMetricDimensionName" j
+    let to_json = simple_to_json to_value
+  end
+module PredictiveScalingMetricDimensionValue =
+  struct
+    type nonrec t = string
+    let context_ = "PredictiveScalingMetricDimensionValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"PredictiveScalingMetricDimensionValue" j
+    let to_json = simple_to_json to_value
+  end
+module PredictiveScalingMetricDimension =
+  struct
+    type nonrec t =
+      {
+      name: PredictiveScalingMetricDimensionName.t
+        [@ocaml.doc "The name of the dimension."];
+      value: PredictiveScalingMetricDimensionValue.t
+        [@ocaml.doc "The value of the dimension."]}
+    let context_ = "PredictiveScalingMetricDimension"
+    let make ~name = fun ~value -> fun () -> { name; value }
+    let to_value x =
+      structure_to_value
+        [("Name",
+           (Some (PredictiveScalingMetricDimensionName.to_value x.name)));
+        ("Value",
+          (Some (PredictiveScalingMetricDimensionValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        PredictiveScalingMetricDimensionValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let name =
+        PredictiveScalingMetricDimensionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value =
+        field_map_exn json__ "Value"
+          PredictiveScalingMetricDimensionValue.of_json in
+      let name =
+        field_map_exn json__ "Name"
+          PredictiveScalingMetricDimensionName.of_json in
+      make ~value ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the dimension of a metric."]
+module PredictiveScalingMetricDimensions =
+  struct
+    type nonrec t = PredictiveScalingMetricDimension.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PredictiveScalingMetricDimension.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:PredictiveScalingMetricDimension.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PredictiveScalingMetricDimensions"
+        ~of_json:PredictiveScalingMetricDimension.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PredictiveScalingMetricName =
+  struct
+    type nonrec t = string
+    let context_ = "PredictiveScalingMetricName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PredictiveScalingMetricName" j
+    let to_json = simple_to_json to_value
+  end
+module PredictiveScalingMetricNamespace =
+  struct
+    type nonrec t = string
+    let context_ = "PredictiveScalingMetricNamespace"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PredictiveScalingMetricNamespace" j
+    let to_json = simple_to_json to_value
+  end
+module TargetTrackingMetricDimensionName =
+  struct
+    type nonrec t = string
+    let context_ = "TargetTrackingMetricDimensionName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"TargetTrackingMetricDimensionName" j
+    let to_json = simple_to_json to_value
+  end
+module TargetTrackingMetricDimensionValue =
+  struct
+    type nonrec t = string
+    let context_ = "TargetTrackingMetricDimensionValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"TargetTrackingMetricDimensionValue" j
+    let to_json = simple_to_json to_value
+  end
+module PredictiveScalingMetric =
+  struct
+    type nonrec t =
+      {
+      dimensions: PredictiveScalingMetricDimensions.t option
+        [@ocaml.doc "Describes the dimensions of the metric."];
+      metricName: PredictiveScalingMetricName.t option
+        [@ocaml.doc "The name of the metric."];
+      namespace: PredictiveScalingMetricNamespace.t option
+        [@ocaml.doc "The namespace of the metric."]}
+    let make ?dimensions =
+      fun ?metricName ->
+        fun ?namespace -> fun () -> { dimensions; metricName; namespace }
+    let to_value x =
+      structure_to_value
+        [("Dimensions",
+           (Option.map x.dimensions
+              ~f:PredictiveScalingMetricDimensions.to_value));
+        ("MetricName",
+          (Option.map x.metricName ~f:PredictiveScalingMetricName.to_value));
+        ("Namespace",
+          (Option.map x.namespace
+             ~f:PredictiveScalingMetricNamespace.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namespace =
+        (Option.map ~f:PredictiveScalingMetricNamespace.of_xml)
+          (Xml.child xml_arg0 "Namespace") in
+      let metricName =
+        (Option.map ~f:PredictiveScalingMetricName.of_xml)
+          (Xml.child xml_arg0 "MetricName") in
+      let dimensions =
+        (Option.map ~f:PredictiveScalingMetricDimensions.of_xml)
+          (Xml.child xml_arg0 "Dimensions") in
+      make ?namespace ?metricName ?dimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namespace =
+        field_map json__ "Namespace" PredictiveScalingMetricNamespace.of_json in
+      let metricName =
+        field_map json__ "MetricName" PredictiveScalingMetricName.of_json in
+      let dimensions =
+        field_map json__ "Dimensions"
+          PredictiveScalingMetricDimensions.of_json in
+      make ?namespace ?metricName ?dimensions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the scaling metric."]
+module PredictiveScalingMetricUnit =
+  struct
+    type nonrec t = string
+    let context_ = "PredictiveScalingMetricUnit"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1023) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PredictiveScalingMetricUnit" j
+    let to_json = simple_to_json to_value
+  end
+module XmlString =
+  struct
+    type nonrec t = string
+    let context_ = "XmlString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"XmlString" j
+    let to_json = simple_to_json to_value
+  end
+module TargetTrackingMetricDimension =
+  struct
+    type nonrec t =
+      {
+      name: TargetTrackingMetricDimensionName.t
+        [@ocaml.doc "The name of the dimension."];
+      value: TargetTrackingMetricDimensionValue.t
+        [@ocaml.doc "The value of the dimension."]}
+    let context_ = "TargetTrackingMetricDimension"
+    let make ~name = fun ~value -> fun () -> { name; value }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (TargetTrackingMetricDimensionName.to_value x.name)));
+        ("Value",
+          (Some (TargetTrackingMetricDimensionValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TargetTrackingMetricDimensionValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let name =
+        TargetTrackingMetricDimensionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value =
+        field_map_exn json__ "Value"
+          TargetTrackingMetricDimensionValue.of_json in
+      let name =
+        field_map_exn json__ "Name" TargetTrackingMetricDimensionName.of_json in
+      make ~value ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the dimension of a metric."]
+module Expression =
+  struct
+    type nonrec t = string
+    let context_ = "Expression"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Expression" j
+    let to_json = simple_to_json to_value
+  end
+module Id =
+  struct
+    type nonrec t = string
+    let context_ = "Id"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Id" j
+    let to_json = simple_to_json to_value
+  end
+module PredictiveScalingMetricStat =
+  struct
+    type nonrec t =
+      {
+      metric: PredictiveScalingMetric.t
+        [@ocaml.doc
+          "The CloudWatch metric to return, including the metric name, namespace, and dimensions. To get the exact metric name, namespace, and dimensions, inspect the Metric object that is returned by a call to ListMetrics."];
+      stat: XmlString.t
+        [@ocaml.doc
+          "The statistic to return. It can include any CloudWatch statistic or extended statistic. For a list of valid values, see the table in Statistics in the Amazon CloudWatch User Guide. The most commonly used metrics for predictive scaling are Average and Sum."];
+      unit: PredictiveScalingMetricUnit.t option
+        [@ocaml.doc
+          "The unit to use for the returned data points. For a complete list of the units that CloudWatch supports, see the MetricDatum data type in the Amazon CloudWatch API Reference."]}
+    let context_ = "PredictiveScalingMetricStat"
+    let make ?unit =
+      fun ~metric -> fun ~stat -> fun () -> { unit; metric; stat }
+    let to_value x =
+      structure_to_value
+        [("Metric", (Some (PredictiveScalingMetric.to_value x.metric)));
+        ("Stat", (Some (XmlString.to_value x.stat)));
+        ("Unit", (Option.map x.unit ~f:PredictiveScalingMetricUnit.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unit =
+        (Option.map ~f:PredictiveScalingMetricUnit.of_xml)
+          (Xml.child xml_arg0 "Unit") in
+      let stat =
+        XmlString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Stat") in
+      let metric =
+        PredictiveScalingMetric.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
+      make ?unit ~stat ~metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unit = field_map json__ "Unit" PredictiveScalingMetricUnit.of_json in
+      let stat = field_map_exn json__ "Stat" XmlString.of_json in
+      let metric =
+        field_map_exn json__ "Metric" PredictiveScalingMetric.of_json in
+      make ?unit ~stat ~metric ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This structure defines the CloudWatch metric to return, along with the statistic and unit."]
+module ReturnData =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module TargetTrackingMetricDimensions =
+  struct
+    type nonrec t = TargetTrackingMetricDimension.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TargetTrackingMetricDimension.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TargetTrackingMetricDimension.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TargetTrackingMetricDimensions"
+        ~of_json:TargetTrackingMetricDimension.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TargetTrackingMetricName =
+  struct
+    type nonrec t = string
+    let context_ = "TargetTrackingMetricName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TargetTrackingMetricName" j
+    let to_json = simple_to_json to_value
+  end
+module TargetTrackingMetricNamespace =
+  struct
+    type nonrec t = string
+    let context_ = "TargetTrackingMetricNamespace"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TargetTrackingMetricNamespace" j
+    let to_json = simple_to_json to_value
+  end
+module PredictiveScalingMetricDataQuery =
+  struct
+    type nonrec t =
+      {
+      id: Id.t
+        [@ocaml.doc
+          "A short name that identifies the object's results in the response. This name must be unique among all MetricDataQuery objects specified for a single scaling policy. If you are performing math expressions on this set of data, this name represents that data and can serve as a variable in the mathematical expression. The valid characters are letters, numbers, and underscores. The first character must be a lowercase letter."];
+      expression: Expression.t option
+        [@ocaml.doc
+          "The math expression to perform on the returned data, if this object is performing a math expression. This expression can use the Id of the other metrics to refer to those metrics, and can also use the Id of other expressions to use the result of those expressions. Conditional: Within each MetricDataQuery object, you must specify either Expression or MetricStat, but not both."];
+      metricStat: PredictiveScalingMetricStat.t option
+        [@ocaml.doc
+          "Information about the metric data to return. Conditional: Within each MetricDataQuery object, you must specify either Expression or MetricStat, but not both."];
+      label: XmlString.t option
+        [@ocaml.doc
+          "A human-readable label for this metric or expression. This is especially useful if this is a math expression, so that you know what the value represents."];
+      returnData: ReturnData.t option
+        [@ocaml.doc
+          "Indicates whether to return the timestamps and raw data values of this metric. If you use any math expressions, specify true for this value for only the final math expression that the metric specification is based on. You must specify false for ReturnData for all the other metrics and expressions used in the metric specification. If you are only retrieving metrics and not performing any math expressions, do not specify anything for ReturnData. This sets it to its default (true)."]}
+    let context_ = "PredictiveScalingMetricDataQuery"
+    let make ?expression =
+      fun ?metricStat ->
+        fun ?label ->
+          fun ?returnData ->
+            fun ~id ->
+              fun () -> { expression; metricStat; label; returnData; id }
+    let to_value x =
+      structure_to_value
+        [("Id", (Some (Id.to_value x.id)));
+        ("Expression", (Option.map x.expression ~f:Expression.to_value));
+        ("MetricStat",
+          (Option.map x.metricStat ~f:PredictiveScalingMetricStat.to_value));
+        ("Label", (Option.map x.label ~f:XmlString.to_value));
+        ("ReturnData", (Option.map x.returnData ~f:ReturnData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let returnData =
+        (Option.map ~f:ReturnData.of_xml) (Xml.child xml_arg0 "ReturnData") in
+      let label =
+        (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "Label") in
+      let metricStat =
+        (Option.map ~f:PredictiveScalingMetricStat.of_xml)
+          (Xml.child xml_arg0 "MetricStat") in
+      let expression =
+        (Option.map ~f:Expression.of_xml) (Xml.child xml_arg0 "Expression") in
+      let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ?returnData ?label ?metricStat ?expression ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let returnData = field_map json__ "ReturnData" ReturnData.of_json in
+      let label = field_map json__ "Label" XmlString.of_json in
+      let metricStat =
+        field_map json__ "MetricStat" PredictiveScalingMetricStat.of_json in
+      let expression = field_map json__ "Expression" Expression.of_json in
+      let id = field_map_exn json__ "Id" Id.of_json in
+      make ?returnData ?label ?metricStat ?expression ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The metric data to return. Also defines whether this call is returning data for one metric only, or whether it is performing a math expression on the values of returned metric statistics to create a new time series. A time series is a series of data points, each of which is associated with a timestamp."]
+module TargetTrackingMetric =
+  struct
+    type nonrec t =
+      {
+      dimensions: TargetTrackingMetricDimensions.t option
+        [@ocaml.doc
+          "The dimensions for the metric. For the list of available dimensions, see the Amazon Web Services documentation available from the table in Amazon Web Services services that publish CloudWatch metrics in the Amazon CloudWatch User Guide. Conditional: If you published your metric with dimensions, you must specify the same dimensions in your scaling policy."];
+      metricName: TargetTrackingMetricName.t option
+        [@ocaml.doc "The name of the metric."];
+      namespace: TargetTrackingMetricNamespace.t option
+        [@ocaml.doc
+          "The namespace of the metric. For more information, see the table in Amazon Web Services services that publish CloudWatch metrics in the Amazon CloudWatch User Guide."]}
+    let make ?dimensions =
+      fun ?metricName ->
+        fun ?namespace -> fun () -> { dimensions; metricName; namespace }
+    let to_value x =
+      structure_to_value
+        [("Dimensions",
+           (Option.map x.dimensions
+              ~f:TargetTrackingMetricDimensions.to_value));
+        ("MetricName",
+          (Option.map x.metricName ~f:TargetTrackingMetricName.to_value));
+        ("Namespace",
+          (Option.map x.namespace ~f:TargetTrackingMetricNamespace.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namespace =
+        (Option.map ~f:TargetTrackingMetricNamespace.of_xml)
+          (Xml.child xml_arg0 "Namespace") in
+      let metricName =
+        (Option.map ~f:TargetTrackingMetricName.of_xml)
+          (Xml.child xml_arg0 "MetricName") in
+      let dimensions =
+        (Option.map ~f:TargetTrackingMetricDimensions.of_xml)
+          (Xml.child xml_arg0 "Dimensions") in
+      make ?namespace ?metricName ?dimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namespace =
+        field_map json__ "Namespace" TargetTrackingMetricNamespace.of_json in
+      let metricName =
+        field_map json__ "MetricName" TargetTrackingMetricName.of_json in
+      let dimensions =
+        field_map json__ "Dimensions" TargetTrackingMetricDimensions.of_json in
+      make ?namespace ?metricName ?dimensions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a specific metric. Metric is a property of the TargetTrackingMetricStat object."]
+module TargetTrackingMetricUnit =
+  struct
+    type nonrec t = string
+    let context_ = "TargetTrackingMetricUnit"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1023) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TargetTrackingMetricUnit" j
+    let to_json = simple_to_json to_value
+  end
+module PredictiveScalingMetricDataQueries =
+  struct
+    type nonrec t = PredictiveScalingMetricDataQuery.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PredictiveScalingMetricDataQuery.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:PredictiveScalingMetricDataQuery.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PredictiveScalingMetricDataQueries"
+        ~of_json:PredictiveScalingMetricDataQuery.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PredictiveScalingMetricType =
+  struct
+    type nonrec t = string
+    let context_ = "PredictiveScalingMetricType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PredictiveScalingMetricType" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceLabel =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceLabel"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1023) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceLabel" j
+    let to_json = simple_to_json to_value
+  end
 module MetricDimensionName =
   struct
     type nonrec t = string
@@ -50,6 +740,47 @@ module MetricDimensionValue =
     let of_json j = string_of_json ~kind:"MetricDimensionValue" j
     let to_json = simple_to_json to_value
   end
+module TargetTrackingMetricStat =
+  struct
+    type nonrec t =
+      {
+      metric: TargetTrackingMetric.t
+        [@ocaml.doc
+          "The CloudWatch metric to return, including the metric name, namespace, and dimensions. To get the exact metric name, namespace, and dimensions, inspect the Metric object that is returned by a call to ListMetrics."];
+      stat: XmlString.t
+        [@ocaml.doc
+          "The statistic to return. It can include any CloudWatch statistic or extended statistic. For a list of valid values, see the table in Statistics in the Amazon CloudWatch User Guide. The most commonly used metric for scaling is Average."];
+      unit: TargetTrackingMetricUnit.t option
+        [@ocaml.doc
+          "The unit to use for the returned data points. For a complete list of the units that CloudWatch supports, see the MetricDatum data type in the Amazon CloudWatch API Reference."]}
+    let context_ = "TargetTrackingMetricStat"
+    let make ?unit =
+      fun ~metric -> fun ~stat -> fun () -> { unit; metric; stat }
+    let to_value x =
+      structure_to_value
+        [("Metric", (Some (TargetTrackingMetric.to_value x.metric)));
+        ("Stat", (Some (XmlString.to_value x.stat)));
+        ("Unit", (Option.map x.unit ~f:TargetTrackingMetricUnit.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unit =
+        (Option.map ~f:TargetTrackingMetricUnit.of_xml)
+          (Xml.child xml_arg0 "Unit") in
+      let stat =
+        XmlString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Stat") in
+      let metric =
+        TargetTrackingMetric.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
+      make ?unit ~stat ~metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unit = field_map json__ "Unit" TargetTrackingMetricUnit.of_json in
+      let stat = field_map_exn json__ "Stat" XmlString.of_json in
+      let metric = field_map_exn json__ "Metric" TargetTrackingMetric.of_json in
+      make ?unit ~stat ~metric ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This structure defines the CloudWatch metric to return, along with the statistic and unit. For more information about the CloudWatch terminology below, see Amazon CloudWatch concepts in the Amazon CloudWatch User Guide."]
 module MetricScale =
   struct
     type nonrec t = float
@@ -63,6 +794,156 @@ module MetricScale =
     let of_json j = float_of_json ~kind:"a double" j
     let to_json = simple_to_json to_value
   end
+module PredictiveScalingCustomizedMetricSpecification =
+  struct
+    type nonrec t =
+      {
+      metricDataQueries: PredictiveScalingMetricDataQueries.t
+        [@ocaml.doc
+          "One or more metric data queries to provide data points for a metric specification."]}
+    let context_ = "PredictiveScalingCustomizedMetricSpecification"
+    let make ~metricDataQueries = fun () -> { metricDataQueries }
+    let to_value x =
+      structure_to_value
+        [("MetricDataQueries",
+           (Some
+              (PredictiveScalingMetricDataQueries.to_value
+                 x.metricDataQueries)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricDataQueries =
+        PredictiveScalingMetricDataQueries.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MetricDataQueries") in
+      make ~metricDataQueries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricDataQueries =
+        field_map_exn json__ "MetricDataQueries"
+          PredictiveScalingMetricDataQueries.of_json in
+      make ~metricDataQueries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a CloudWatch metric of your choosing for a predictive scaling policy."]
+module PredictiveScalingPredefinedLoadMetricSpecification =
+  struct
+    type nonrec t =
+      {
+      predefinedMetricType: PredictiveScalingMetricType.t
+        [@ocaml.doc "The metric type."];
+      resourceLabel: ResourceLabel.t option
+        [@ocaml.doc "A label that uniquely identifies a target group."]}
+    let context_ = "PredictiveScalingPredefinedLoadMetricSpecification"
+    let make ?resourceLabel =
+      fun ~predefinedMetricType ->
+        fun () -> { resourceLabel; predefinedMetricType }
+    let to_value x =
+      structure_to_value
+        [("PredefinedMetricType",
+           (Some
+              (PredictiveScalingMetricType.to_value x.predefinedMetricType)));
+        ("ResourceLabel",
+          (Option.map x.resourceLabel ~f:ResourceLabel.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceLabel =
+        (Option.map ~f:ResourceLabel.of_xml)
+          (Xml.child xml_arg0 "ResourceLabel") in
+      let predefinedMetricType =
+        PredictiveScalingMetricType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PredefinedMetricType") in
+      make ?resourceLabel ~predefinedMetricType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceLabel =
+        field_map json__ "ResourceLabel" ResourceLabel.of_json in
+      let predefinedMetricType =
+        field_map_exn json__ "PredefinedMetricType"
+          PredictiveScalingMetricType.of_json in
+      make ?resourceLabel ~predefinedMetricType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a load metric for a predictive scaling policy. When returned in the output of DescribePolicies, it indicates that a predictive scaling policy uses individually specified load and scaling metrics instead of a metric pair. The following predefined metrics are available for predictive scaling: ECSServiceAverageCPUUtilization ECSServiceAverageMemoryUtilization ECSServiceCPUUtilization ECSServiceMemoryUtilization ECSServiceTotalCPUUtilization ECSServiceTotalMemoryUtilization ALBRequestCount ALBRequestCountPerTarget TotalALBRequestCount"]
+module PredictiveScalingPredefinedMetricPairSpecification =
+  struct
+    type nonrec t =
+      {
+      predefinedMetricType: PredictiveScalingMetricType.t
+        [@ocaml.doc
+          "Indicates which metrics to use. There are two different types of metrics for each metric type: one is a load metric and one is a scaling metric."];
+      resourceLabel: ResourceLabel.t option
+        [@ocaml.doc
+          "A label that uniquely identifies a specific target group from which to determine the total and average request count."]}
+    let context_ = "PredictiveScalingPredefinedMetricPairSpecification"
+    let make ?resourceLabel =
+      fun ~predefinedMetricType ->
+        fun () -> { resourceLabel; predefinedMetricType }
+    let to_value x =
+      structure_to_value
+        [("PredefinedMetricType",
+           (Some
+              (PredictiveScalingMetricType.to_value x.predefinedMetricType)));
+        ("ResourceLabel",
+          (Option.map x.resourceLabel ~f:ResourceLabel.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceLabel =
+        (Option.map ~f:ResourceLabel.of_xml)
+          (Xml.child xml_arg0 "ResourceLabel") in
+      let predefinedMetricType =
+        PredictiveScalingMetricType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PredefinedMetricType") in
+      make ?resourceLabel ~predefinedMetricType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceLabel =
+        field_map json__ "ResourceLabel" ResourceLabel.of_json in
+      let predefinedMetricType =
+        field_map_exn json__ "PredefinedMetricType"
+          PredictiveScalingMetricType.of_json in
+      make ?resourceLabel ~predefinedMetricType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a metric pair for a predictive scaling policy. The following predefined metrics are available for predictive scaling: ECSServiceAverageCPUUtilization ECSServiceAverageMemoryUtilization ECSServiceCPUUtilization ECSServiceMemoryUtilization ECSServiceTotalCPUUtilization ECSServiceTotalMemoryUtilization ALBRequestCount ALBRequestCountPerTarget TotalALBRequestCount"]
+module PredictiveScalingPredefinedScalingMetricSpecification =
+  struct
+    type nonrec t =
+      {
+      predefinedMetricType: PredictiveScalingMetricType.t
+        [@ocaml.doc "The metric type."];
+      resourceLabel: ResourceLabel.t option
+        [@ocaml.doc
+          "A label that uniquely identifies a specific target group from which to determine the average request count."]}
+    let context_ = "PredictiveScalingPredefinedScalingMetricSpecification"
+    let make ?resourceLabel =
+      fun ~predefinedMetricType ->
+        fun () -> { resourceLabel; predefinedMetricType }
+    let to_value x =
+      structure_to_value
+        [("PredefinedMetricType",
+           (Some
+              (PredictiveScalingMetricType.to_value x.predefinedMetricType)));
+        ("ResourceLabel",
+          (Option.map x.resourceLabel ~f:ResourceLabel.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceLabel =
+        (Option.map ~f:ResourceLabel.of_xml)
+          (Xml.child xml_arg0 "ResourceLabel") in
+      let predefinedMetricType =
+        PredictiveScalingMetricType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PredefinedMetricType") in
+      make ?resourceLabel ~predefinedMetricType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceLabel =
+        field_map json__ "ResourceLabel" ResourceLabel.of_json in
+      let predefinedMetricType =
+        field_map_exn json__ "PredefinedMetricType"
+          PredictiveScalingMetricType.of_json in
+      make ?resourceLabel ~predefinedMetricType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a scaling metric for a predictive scaling policy. When returned in the output of DescribePolicies, it indicates that a predictive scaling policy uses individually specified load and scaling metrics instead of a metric pair. The following predefined metrics are available for predictive scaling: ECSServiceAverageCPUUtilization ECSServiceAverageMemoryUtilization ECSServiceCPUUtilization ECSServiceMemoryUtilization ECSServiceTotalCPUUtilization ECSServiceTotalMemoryUtilization ALBRequestCount ALBRequestCountPerTarget TotalALBRequestCount"]
 module ScalingAdjustment =
   struct
     type nonrec t = int
@@ -100,13 +981,72 @@ module MetricDimension =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" MetricDimensionValue.of_json in
-      let name = field_map_exn json "Name" MetricDimensionName.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" MetricDimensionValue.of_json in
+      let name = field_map_exn json__ "Name" MetricDimensionName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the dimension names and values associated with a metric."]
+module TargetTrackingMetricDataQuery =
+  struct
+    type nonrec t =
+      {
+      expression: Expression.t option
+        [@ocaml.doc
+          "The math expression to perform on the returned data, if this object is performing a math expression. This expression can use the Id of the other metrics to refer to those metrics, and can also use the Id of other expressions to use the result of those expressions. Conditional: Within each TargetTrackingMetricDataQuery object, you must specify either Expression or MetricStat, but not both."];
+      id: Id.t
+        [@ocaml.doc
+          "A short name that identifies the object's results in the response. This name must be unique among all MetricDataQuery objects specified for a single scaling policy. If you are performing math expressions on this set of data, this name represents that data and can serve as a variable in the mathematical expression. The valid characters are letters, numbers, and underscores. The first character must be a lowercase letter."];
+      label: XmlString.t option
+        [@ocaml.doc
+          "A human-readable label for this metric or expression. This is especially useful if this is a math expression, so that you know what the value represents."];
+      metricStat: TargetTrackingMetricStat.t option
+        [@ocaml.doc
+          "Information about the metric data to return. Conditional: Within each MetricDataQuery object, you must specify either Expression or MetricStat, but not both."];
+      returnData: ReturnData.t option
+        [@ocaml.doc
+          "Indicates whether to return the timestamps and raw data values of this metric. If you use any math expressions, specify true for this value for only the final math expression that the metric specification is based on. You must specify false for ReturnData for all the other metrics and expressions used in the metric specification. If you are only retrieving metrics and not performing any math expressions, do not specify anything for ReturnData. This sets it to its default (true)."]}
+    let context_ = "TargetTrackingMetricDataQuery"
+    let make ?expression =
+      fun ?label ->
+        fun ?metricStat ->
+          fun ?returnData ->
+            fun ~id ->
+              fun () -> { expression; label; metricStat; returnData; id }
+    let to_value x =
+      structure_to_value
+        [("Expression", (Option.map x.expression ~f:Expression.to_value));
+        ("Id", (Some (Id.to_value x.id)));
+        ("Label", (Option.map x.label ~f:XmlString.to_value));
+        ("MetricStat",
+          (Option.map x.metricStat ~f:TargetTrackingMetricStat.to_value));
+        ("ReturnData", (Option.map x.returnData ~f:ReturnData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let returnData =
+        (Option.map ~f:ReturnData.of_xml) (Xml.child xml_arg0 "ReturnData") in
+      let metricStat =
+        (Option.map ~f:TargetTrackingMetricStat.of_xml)
+          (Xml.child xml_arg0 "MetricStat") in
+      let label =
+        (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "Label") in
+      let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let expression =
+        (Option.map ~f:Expression.of_xml) (Xml.child xml_arg0 "Expression") in
+      make ?returnData ?metricStat ?label ~id ?expression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let returnData = field_map json__ "ReturnData" ReturnData.of_json in
+      let metricStat =
+        field_map json__ "MetricStat" TargetTrackingMetricStat.of_json in
+      let label = field_map json__ "Label" XmlString.of_json in
+      let id = field_map_exn json__ "Id" Id.of_json in
+      let expression = field_map json__ "Expression" Expression.of_json in
+      make ?returnData ?metricStat ?label ~id ?expression ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The metric data to return. Also defines whether this call is returning data for one metric only, or whether it is performing a math expression on the values of returned metric statistics to create a new time series. A time series is a series of data points, each of which is associated with a timestamp. For more information and examples, see Create a target tracking scaling policy for Application Auto Scaling using metric math in the Application Auto Scaling User Guide."]
 module ResourceId =
   struct
     type nonrec t = string
@@ -125,19 +1065,146 @@ module ResourceId =
     let of_json j = string_of_json ~kind:"ResourceId" j
     let to_json = simple_to_json to_value
   end
+module PredictiveScalingMetricSpecification =
+  struct
+    type nonrec t =
+      {
+      targetValue: MetricScale.t
+        [@ocaml.doc "Specifies the target utilization."];
+      predefinedMetricPairSpecification:
+        PredictiveScalingPredefinedMetricPairSpecification.t option
+        [@ocaml.doc
+          "The predefined metric pair specification that determines the appropriate scaling metric and load metric to use."];
+      predefinedScalingMetricSpecification:
+        PredictiveScalingPredefinedScalingMetricSpecification.t option
+        [@ocaml.doc "The predefined scaling metric specification."];
+      predefinedLoadMetricSpecification:
+        PredictiveScalingPredefinedLoadMetricSpecification.t option
+        [@ocaml.doc "The predefined load metric specification."];
+      customizedScalingMetricSpecification:
+        PredictiveScalingCustomizedMetricSpecification.t option
+        [@ocaml.doc "The customized scaling metric specification."];
+      customizedLoadMetricSpecification:
+        PredictiveScalingCustomizedMetricSpecification.t option
+        [@ocaml.doc "The customized load metric specification."];
+      customizedCapacityMetricSpecification:
+        PredictiveScalingCustomizedMetricSpecification.t option
+        [@ocaml.doc "The customized capacity metric specification."]}
+    let context_ = "PredictiveScalingMetricSpecification"
+    let make ?predefinedMetricPairSpecification =
+      fun ?predefinedScalingMetricSpecification ->
+        fun ?predefinedLoadMetricSpecification ->
+          fun ?customizedScalingMetricSpecification ->
+            fun ?customizedLoadMetricSpecification ->
+              fun ?customizedCapacityMetricSpecification ->
+                fun ~targetValue ->
+                  fun () ->
+                    {
+                      predefinedMetricPairSpecification;
+                      predefinedScalingMetricSpecification;
+                      predefinedLoadMetricSpecification;
+                      customizedScalingMetricSpecification;
+                      customizedLoadMetricSpecification;
+                      customizedCapacityMetricSpecification;
+                      targetValue
+                    }
+    let to_value x =
+      structure_to_value
+        [("TargetValue", (Some (MetricScale.to_value x.targetValue)));
+        ("PredefinedMetricPairSpecification",
+          (Option.map x.predefinedMetricPairSpecification
+             ~f:PredictiveScalingPredefinedMetricPairSpecification.to_value));
+        ("PredefinedScalingMetricSpecification",
+          (Option.map x.predefinedScalingMetricSpecification
+             ~f:PredictiveScalingPredefinedScalingMetricSpecification.to_value));
+        ("PredefinedLoadMetricSpecification",
+          (Option.map x.predefinedLoadMetricSpecification
+             ~f:PredictiveScalingPredefinedLoadMetricSpecification.to_value));
+        ("CustomizedScalingMetricSpecification",
+          (Option.map x.customizedScalingMetricSpecification
+             ~f:PredictiveScalingCustomizedMetricSpecification.to_value));
+        ("CustomizedLoadMetricSpecification",
+          (Option.map x.customizedLoadMetricSpecification
+             ~f:PredictiveScalingCustomizedMetricSpecification.to_value));
+        ("CustomizedCapacityMetricSpecification",
+          (Option.map x.customizedCapacityMetricSpecification
+             ~f:PredictiveScalingCustomizedMetricSpecification.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customizedCapacityMetricSpecification =
+        (Option.map ~f:PredictiveScalingCustomizedMetricSpecification.of_xml)
+          (Xml.child xml_arg0 "CustomizedCapacityMetricSpecification") in
+      let customizedLoadMetricSpecification =
+        (Option.map ~f:PredictiveScalingCustomizedMetricSpecification.of_xml)
+          (Xml.child xml_arg0 "CustomizedLoadMetricSpecification") in
+      let customizedScalingMetricSpecification =
+        (Option.map ~f:PredictiveScalingCustomizedMetricSpecification.of_xml)
+          (Xml.child xml_arg0 "CustomizedScalingMetricSpecification") in
+      let predefinedLoadMetricSpecification =
+        (Option.map
+           ~f:PredictiveScalingPredefinedLoadMetricSpecification.of_xml)
+          (Xml.child xml_arg0 "PredefinedLoadMetricSpecification") in
+      let predefinedScalingMetricSpecification =
+        (Option.map
+           ~f:PredictiveScalingPredefinedScalingMetricSpecification.of_xml)
+          (Xml.child xml_arg0 "PredefinedScalingMetricSpecification") in
+      let predefinedMetricPairSpecification =
+        (Option.map
+           ~f:PredictiveScalingPredefinedMetricPairSpecification.of_xml)
+          (Xml.child xml_arg0 "PredefinedMetricPairSpecification") in
+      let targetValue =
+        MetricScale.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetValue") in
+      make ?customizedCapacityMetricSpecification
+        ?customizedLoadMetricSpecification
+        ?customizedScalingMetricSpecification
+        ?predefinedLoadMetricSpecification
+        ?predefinedScalingMetricSpecification
+        ?predefinedMetricPairSpecification ~targetValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customizedCapacityMetricSpecification =
+        field_map json__ "CustomizedCapacityMetricSpecification"
+          PredictiveScalingCustomizedMetricSpecification.of_json in
+      let customizedLoadMetricSpecification =
+        field_map json__ "CustomizedLoadMetricSpecification"
+          PredictiveScalingCustomizedMetricSpecification.of_json in
+      let customizedScalingMetricSpecification =
+        field_map json__ "CustomizedScalingMetricSpecification"
+          PredictiveScalingCustomizedMetricSpecification.of_json in
+      let predefinedLoadMetricSpecification =
+        field_map json__ "PredefinedLoadMetricSpecification"
+          PredictiveScalingPredefinedLoadMetricSpecification.of_json in
+      let predefinedScalingMetricSpecification =
+        field_map json__ "PredefinedScalingMetricSpecification"
+          PredictiveScalingPredefinedScalingMetricSpecification.of_json in
+      let predefinedMetricPairSpecification =
+        field_map json__ "PredefinedMetricPairSpecification"
+          PredictiveScalingPredefinedMetricPairSpecification.of_json in
+      let targetValue =
+        field_map_exn json__ "TargetValue" MetricScale.of_json in
+      make ?customizedCapacityMetricSpecification
+        ?customizedLoadMetricSpecification
+        ?customizedScalingMetricSpecification
+        ?predefinedLoadMetricSpecification
+        ?predefinedScalingMetricSpecification
+        ?predefinedMetricPairSpecification ~targetValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This structure specifies the metrics and target utilization settings for a predictive scaling policy. You must specify either a metric pair, or a load metric and a scaling metric individually. Specifying a metric pair instead of individual metrics provides a simpler way to configure metrics for a scaling policy. You choose the metric pair, and the policy automatically knows the correct sum and average statistics to use for the load metric and the scaling metric."]
 module StepAdjustment =
   struct
     type nonrec t =
       {
       metricIntervalLowerBound: MetricScale.t option
         [@ocaml.doc
-          "The lower bound for the difference between the alarm threshold and the CloudWatch metric. If the metric value is above the breach threshold, the lower bound is inclusive (the metric must be greater than or equal to the threshold plus the lower bound). Otherwise, it is exclusive (the metric must be greater than the threshold plus the lower bound). A null value indicates negative infinity."];
+          "The lower bound for the difference between the alarm threshold and the CloudWatch metric. If the metric value is above the breach threshold, the lower bound is inclusive (the metric must be greater than or equal to the threshold plus the lower bound). Otherwise, it's exclusive (the metric must be greater than the threshold plus the lower bound). A null value indicates negative infinity."];
       metricIntervalUpperBound: MetricScale.t option
         [@ocaml.doc
-          "The upper bound for the difference between the alarm threshold and the CloudWatch metric. If the metric value is above the breach threshold, the upper bound is exclusive (the metric must be less than the threshold plus the upper bound). Otherwise, it is inclusive (the metric must be less than or equal to the threshold plus the upper bound). A null value indicates positive infinity. The upper bound must be greater than the lower bound."];
+          "The upper bound for the difference between the alarm threshold and the CloudWatch metric. If the metric value is above the breach threshold, the upper bound is exclusive (the metric must be less than the threshold plus the upper bound). Otherwise, it's inclusive (the metric must be less than or equal to the threshold plus the upper bound). A null value indicates positive infinity. The upper bound must be greater than the lower bound."];
       scalingAdjustment: ScalingAdjustment.t
         [@ocaml.doc
-          "The amount by which to scale, based on the specified adjustment type. A positive value adds to the current capacity while a negative number removes from the current capacity. For exact capacity, you must specify a positive value."]}
+          "The amount by which to scale, based on the specified adjustment type. A positive value adds to the current capacity while a negative number removes from the current capacity. For exact capacity, you must specify a non-negative value."]}
     let context_ = "StepAdjustment"
     let make ?metricIntervalLowerBound =
       fun ?metricIntervalUpperBound ->
@@ -170,22 +1237,25 @@ module StepAdjustment =
       make ~scalingAdjustment ?metricIntervalUpperBound
         ?metricIntervalLowerBound ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalingAdjustment =
-        field_map_exn json "ScalingAdjustment" ScalingAdjustment.of_json in
+        field_map_exn json__ "ScalingAdjustment" ScalingAdjustment.of_json in
       let metricIntervalUpperBound =
-        field_map json "MetricIntervalUpperBound" MetricScale.of_json in
+        field_map json__ "MetricIntervalUpperBound" MetricScale.of_json in
       let metricIntervalLowerBound =
-        field_map json "MetricIntervalLowerBound" MetricScale.of_json in
+        field_map json__ "MetricIntervalLowerBound" MetricScale.of_json in
       make ~scalingAdjustment ?metricIntervalUpperBound
         ?metricIntervalLowerBound ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a step adjustment for a StepScalingPolicyConfiguration. Describes an adjustment based on the difference between the value of the aggregated CloudWatch metric and the breach threshold that you've defined for the alarm. For the following examples, suppose that you have an alarm with a breach threshold of 50: To trigger the adjustment when the metric is greater than or equal to 50 and less than 60, specify a lower bound of 0 and an upper bound of 10. To trigger the adjustment when the metric is greater than 40 and less than or equal to 50, specify a lower bound of -10 and an upper bound of 0. There are a few rules for the step adjustments for your step policy: The ranges of your step adjustments can't overlap or have a gap. At most one step adjustment can have a null lower bound. If one step adjustment has a negative lower bound, then there must be a step adjustment with a null lower bound. At most one step adjustment can have a null upper bound. If one step adjustment has a positive upper bound, then there must be a step adjustment with a null upper bound. The upper and lower bound can't be null in the same step adjustment."]
+       "Represents a step adjustment for a StepScalingPolicyConfiguration. Describes an adjustment based on the difference between the value of the aggregated CloudWatch metric and the breach threshold that you've defined for the alarm. For the following examples, suppose that you have an alarm with a breach threshold of 50: To initiate the adjustment when the metric is greater than or equal to 50 and less than 60, specify a lower bound of 0 and an upper bound of 10. To initiate the adjustment when the metric is greater than 40 and less than or equal to 50, specify a lower bound of -10 and an upper bound of 0. There are a few rules for the step adjustments for your step policy: The ranges of your step adjustments can't overlap or have a gap. At most one step adjustment can have a null lower bound. If one step adjustment has a negative lower bound, then there must be a step adjustment with a null lower bound. At most one step adjustment can have a null upper bound. If one step adjustment has a positive upper bound, then there must be a step adjustment with a null upper bound. The upper and lower bound can't be null in the same step adjustment."]
 module MetricDimensions =
   struct
     type nonrec t = MetricDimension.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricDimension.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -280,6 +1350,35 @@ module MetricUnit =
     let of_json j = string_of_json ~kind:"MetricUnit" j
     let to_json = simple_to_json to_value
   end
+module TargetTrackingMetricDataQueries =
+  struct
+    type nonrec t = TargetTrackingMetricDataQuery.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TargetTrackingMetricDataQuery.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TargetTrackingMetricDataQuery.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TargetTrackingMetricDataQueries"
+        ~of_json:TargetTrackingMetricDataQuery.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module MetricType =
   struct
     type nonrec t =
@@ -300,10 +1399,18 @@ module MetricType =
       | CassandraReadCapacityUtilization 
       | CassandraWriteCapacityUtilization 
       | KafkaBrokerStorageUtilization 
+      | ElastiCacheEngineCPUUtilization 
+      | ElastiCacheDatabaseMemoryUsagePercentage 
       | ElastiCachePrimaryEngineCPUUtilization 
       | ElastiCacheReplicaEngineCPUUtilization 
       | ElastiCacheDatabaseMemoryUsageCountedForEvictPercentage 
       | NeptuneReaderAverageCPUUtilization 
+      | SageMakerVariantProvisionedConcurrencyUtilization 
+      | ElastiCacheDatabaseCapacityUsageCountedForEvictPercentage 
+      | SageMakerInferenceComponentInvocationsPerCopy 
+      | WorkSpacesAverageUserSessionsCapacityUtilization 
+      | SageMakerInferenceComponentConcurrentRequestsPerCopyHighResolution 
+      | SageMakerVariantConcurrentRequestsPerModelHighResolution 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -336,6 +1443,9 @@ module MetricType =
       | CassandraWriteCapacityUtilization ->
           "CassandraWriteCapacityUtilization"
       | KafkaBrokerStorageUtilization -> "KafkaBrokerStorageUtilization"
+      | ElastiCacheEngineCPUUtilization -> "ElastiCacheEngineCPUUtilization"
+      | ElastiCacheDatabaseMemoryUsagePercentage ->
+          "ElastiCacheDatabaseMemoryUsagePercentage"
       | ElastiCachePrimaryEngineCPUUtilization ->
           "ElastiCachePrimaryEngineCPUUtilization"
       | ElastiCacheReplicaEngineCPUUtilization ->
@@ -344,6 +1454,18 @@ module MetricType =
           "ElastiCacheDatabaseMemoryUsageCountedForEvictPercentage"
       | NeptuneReaderAverageCPUUtilization ->
           "NeptuneReaderAverageCPUUtilization"
+      | SageMakerVariantProvisionedConcurrencyUtilization ->
+          "SageMakerVariantProvisionedConcurrencyUtilization"
+      | ElastiCacheDatabaseCapacityUsageCountedForEvictPercentage ->
+          "ElastiCacheDatabaseCapacityUsageCountedForEvictPercentage"
+      | SageMakerInferenceComponentInvocationsPerCopy ->
+          "SageMakerInferenceComponentInvocationsPerCopy"
+      | WorkSpacesAverageUserSessionsCapacityUtilization ->
+          "WorkSpacesAverageUserSessionsCapacityUtilization"
+      | SageMakerInferenceComponentConcurrentRequestsPerCopyHighResolution ->
+          "SageMakerInferenceComponentConcurrentRequestsPerCopyHighResolution"
+      | SageMakerVariantConcurrentRequestsPerModelHighResolution ->
+          "SageMakerVariantConcurrentRequestsPerModelHighResolution"
       | Non_static_id s -> s
     let of_string =
       function
@@ -375,6 +1497,9 @@ module MetricType =
       | "CassandraWriteCapacityUtilization" ->
           CassandraWriteCapacityUtilization
       | "KafkaBrokerStorageUtilization" -> KafkaBrokerStorageUtilization
+      | "ElastiCacheEngineCPUUtilization" -> ElastiCacheEngineCPUUtilization
+      | "ElastiCacheDatabaseMemoryUsagePercentage" ->
+          ElastiCacheDatabaseMemoryUsagePercentage
       | "ElastiCachePrimaryEngineCPUUtilization" ->
           ElastiCachePrimaryEngineCPUUtilization
       | "ElastiCacheReplicaEngineCPUUtilization" ->
@@ -383,6 +1508,19 @@ module MetricType =
           ElastiCacheDatabaseMemoryUsageCountedForEvictPercentage
       | "NeptuneReaderAverageCPUUtilization" ->
           NeptuneReaderAverageCPUUtilization
+      | "SageMakerVariantProvisionedConcurrencyUtilization" ->
+          SageMakerVariantProvisionedConcurrencyUtilization
+      | "ElastiCacheDatabaseCapacityUsageCountedForEvictPercentage" ->
+          ElastiCacheDatabaseCapacityUsageCountedForEvictPercentage
+      | "SageMakerInferenceComponentInvocationsPerCopy" ->
+          SageMakerInferenceComponentInvocationsPerCopy
+      | "WorkSpacesAverageUserSessionsCapacityUtilization" ->
+          WorkSpacesAverageUserSessionsCapacityUtilization
+      | "SageMakerInferenceComponentConcurrentRequestsPerCopyHighResolution"
+          ->
+          SageMakerInferenceComponentConcurrentRequestsPerCopyHighResolution
+      | "SageMakerVariantConcurrentRequestsPerModelHighResolution" ->
+          SageMakerVariantConcurrentRequestsPerModelHighResolution
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -390,24 +1528,6 @@ module MetricType =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration MetricType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"MetricType" j)
-    let to_json = simple_to_json to_value
-  end
-module ResourceLabel =
-  struct
-    type nonrec t = string
-    let context_ = "ResourceLabel"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1023) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ResourceLabel" j
     let to_json = simple_to_json to_value
   end
 module ResourceCapacity =
@@ -424,36 +1544,171 @@ module ResourceCapacity =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module TimestampType =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
 module Alarm =
   struct
     type nonrec t =
       {
-      alarmName: ResourceId.t [@ocaml.doc "The name of the alarm."];
-      alarmARN: ResourceId.t
+      alarmName: ResourceId.t option [@ocaml.doc "The name of the alarm."];
+      alarmARN: ResourceId.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the alarm."]}
-    let context_ = "Alarm"
-    let make ~alarmName = fun ~alarmARN -> fun () -> { alarmName; alarmARN }
+    let make ?alarmName = fun ?alarmARN -> fun () -> { alarmName; alarmARN }
     let to_value x =
       structure_to_value
-        [("AlarmName", (Some (ResourceId.to_value x.alarmName)));
-        ("AlarmARN", (Some (ResourceId.to_value x.alarmARN)))]
+        [("AlarmName", (Option.map x.alarmName ~f:ResourceId.to_value));
+        ("AlarmARN", (Option.map x.alarmARN ~f:ResourceId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let alarmARN =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AlarmARN") in
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "AlarmARN") in
       let alarmName =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AlarmName") in
-      make ~alarmARN ~alarmName ()
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "AlarmName") in
+      make ?alarmARN ?alarmName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alarmARN = field_map_exn json "AlarmARN" ResourceId.of_json in
-      let alarmName = field_map_exn json "AlarmName" ResourceId.of_json in
-      make ~alarmARN ~alarmName ()
+    let of_json json__ =
+      let alarmARN = field_map json__ "AlarmARN" ResourceId.of_json in
+      let alarmName = field_map json__ "AlarmName" ResourceId.of_json in
+      make ?alarmARN ?alarmName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a CloudWatch alarm associated with a scaling policy."]
+module PredictiveScalingMaxCapacityBreachBehavior =
+  struct
+    type nonrec t =
+      | HonorMaxCapacity 
+      | IncreaseMaxCapacity 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HonorMaxCapacity -> "HonorMaxCapacity"
+      | IncreaseMaxCapacity -> "IncreaseMaxCapacity"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HonorMaxCapacity" -> HonorMaxCapacity
+      | "IncreaseMaxCapacity" -> IncreaseMaxCapacity
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration PredictiveScalingMaxCapacityBreachBehavior"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"PredictiveScalingMaxCapacityBreachBehavior" j)
+    let to_json = simple_to_json to_value
+  end
+module PredictiveScalingMaxCapacityBuffer =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for PredictiveScalingMaxCapacityBuffer" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PredictiveScalingMetricSpecifications =
+  struct
+    type nonrec t = PredictiveScalingMetricSpecification.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PredictiveScalingMetricSpecification.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:PredictiveScalingMetricSpecification.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PredictiveScalingMetricSpecifications"
+        ~of_json:PredictiveScalingMetricSpecification.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PredictiveScalingMode =
+  struct
+    type nonrec t =
+      | ForecastOnly 
+      | ForecastAndScale 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ForecastOnly -> "ForecastOnly"
+      | ForecastAndScale -> "ForecastAndScale"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ForecastOnly" -> ForecastOnly
+      | "ForecastAndScale" -> ForecastAndScale
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PredictiveScalingMode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PredictiveScalingMode" j)
+    let to_json = simple_to_json to_value
+  end
+module PredictiveScalingSchedulingBufferTime =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:3600) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for PredictiveScalingSchedulingBufferTime"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module AdjustmentType =
   struct
     type nonrec t =
@@ -543,6 +1798,9 @@ module StepAdjustments =
   struct
     type nonrec t = StepAdjustment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StepAdjustment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -567,59 +1825,79 @@ module CustomizedMetricSpecification =
   struct
     type nonrec t =
       {
-      metricName: MetricName.t [@ocaml.doc "The name of the metric."];
-      namespace: MetricNamespace.t
+      metricName: MetricName.t option
+        [@ocaml.doc
+          "The name of the metric. To get the exact metric name, namespace, and dimensions, inspect the Metric object that's returned by a call to ListMetrics."];
+      namespace: MetricNamespace.t option
         [@ocaml.doc "The namespace of the metric."];
       dimensions: MetricDimensions.t option
         [@ocaml.doc
           "The dimensions of the metric. Conditional: If you published your metric with dimensions, you must specify the same dimensions in your scaling policy."];
-      statistic: MetricStatistic.t
+      statistic: MetricStatistic.t option
         [@ocaml.doc "The statistic of the metric."];
-      unit: MetricUnit.t option [@ocaml.doc "The unit of the metric."]}
-    let context_ = "CustomizedMetricSpecification"
-    let make ?dimensions =
-      fun ?unit ->
-        fun ~metricName ->
-          fun ~namespace ->
-            fun ~statistic ->
-              fun () ->
-                { dimensions; unit; metricName; namespace; statistic }
+      unit: MetricUnit.t option
+        [@ocaml.doc
+          "The unit of the metric. For a complete list of the units that CloudWatch supports, see the MetricDatum data type in the Amazon CloudWatch API Reference."];
+      metrics: TargetTrackingMetricDataQueries.t option
+        [@ocaml.doc
+          "The metrics to include in the target tracking scaling policy, as a metric data query. This can include both raw metric and metric math expressions."]}
+    let make ?metricName =
+      fun ?namespace ->
+        fun ?dimensions ->
+          fun ?statistic ->
+            fun ?unit ->
+              fun ?metrics ->
+                fun () ->
+                  {
+                    metricName;
+                    namespace;
+                    dimensions;
+                    statistic;
+                    unit;
+                    metrics
+                  }
     let to_value x =
       structure_to_value
-        [("MetricName", (Some (MetricName.to_value x.metricName)));
-        ("Namespace", (Some (MetricNamespace.to_value x.namespace)));
+        [("MetricName", (Option.map x.metricName ~f:MetricName.to_value));
+        ("Namespace", (Option.map x.namespace ~f:MetricNamespace.to_value));
         ("Dimensions",
           (Option.map x.dimensions ~f:MetricDimensions.to_value));
-        ("Statistic", (Some (MetricStatistic.to_value x.statistic)));
-        ("Unit", (Option.map x.unit ~f:MetricUnit.to_value))]
+        ("Statistic", (Option.map x.statistic ~f:MetricStatistic.to_value));
+        ("Unit", (Option.map x.unit ~f:MetricUnit.to_value));
+        ("Metrics",
+          (Option.map x.metrics ~f:TargetTrackingMetricDataQueries.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let metrics =
+        (Option.map ~f:TargetTrackingMetricDataQueries.of_xml)
+          (Xml.child xml_arg0 "Metrics") in
       let unit =
         (Option.map ~f:MetricUnit.of_xml) (Xml.child xml_arg0 "Unit") in
       let statistic =
-        MetricStatistic.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Statistic") in
+        (Option.map ~f:MetricStatistic.of_xml)
+          (Xml.child xml_arg0 "Statistic") in
       let dimensions =
         (Option.map ~f:MetricDimensions.of_xml)
           (Xml.child xml_arg0 "Dimensions") in
       let namespace =
-        MetricNamespace.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
+        (Option.map ~f:MetricNamespace.of_xml)
+          (Xml.child xml_arg0 "Namespace") in
       let metricName =
-        MetricName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MetricName") in
-      make ?unit ~statistic ?dimensions ~namespace ~metricName ()
+        (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "MetricName") in
+      make ?metrics ?unit ?statistic ?dimensions ?namespace ?metricName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" MetricUnit.of_json in
-      let statistic = field_map_exn json "Statistic" MetricStatistic.of_json in
-      let dimensions = field_map json "Dimensions" MetricDimensions.of_json in
-      let namespace = field_map_exn json "Namespace" MetricNamespace.of_json in
-      let metricName = field_map_exn json "MetricName" MetricName.of_json in
-      make ?unit ~statistic ?dimensions ~namespace ~metricName ()
+    let of_json json__ =
+      let metrics =
+        field_map json__ "Metrics" TargetTrackingMetricDataQueries.of_json in
+      let unit = field_map json__ "Unit" MetricUnit.of_json in
+      let statistic = field_map json__ "Statistic" MetricStatistic.of_json in
+      let dimensions = field_map json__ "Dimensions" MetricDimensions.of_json in
+      let namespace = field_map json__ "Namespace" MetricNamespace.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
+      make ?metrics ?unit ?statistic ?dimensions ?namespace ?metricName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a CloudWatch metric of your choosing for a target tracking scaling policy to use with Application Auto Scaling. For information about the available metrics for a service, see Amazon Web Services Services That Publish CloudWatch Metrics in the Amazon CloudWatch User Guide. To create your customized metric specification: Add values for each required parameter from CloudWatch. You can use an existing metric, or a new metric that you create. To use your own metric, you must first publish the metric to CloudWatch. For more information, see Publish Custom Metrics in the Amazon CloudWatch User Guide. Choose a metric that changes proportionally with capacity. The value of the metric should increase or decrease in inverse proportion to the number of capacity units. That is, the value of the metric should decrease when capacity increases, and increase when capacity decreases. For more information about CloudWatch, see Amazon CloudWatch Concepts."]
+       "Represents a CloudWatch metric of your choosing for a target tracking scaling policy to use with Application Auto Scaling. For information about the available metrics for a service, see Amazon Web Services services that publish CloudWatch metrics in the Amazon CloudWatch User Guide. To create your customized metric specification: Add values for each required parameter from CloudWatch. You can use an existing metric, or a new metric that you create. To use your own metric, you must first publish the metric to CloudWatch. For more information, see Publish custom metrics in the Amazon CloudWatch User Guide. Choose a metric that changes proportionally with capacity. The value of the metric should increase or decrease in inverse proportion to the number of capacity units. That is, the value of the metric should decrease when capacity increases, and increase when capacity decreases. For more information about the CloudWatch terminology below, see Amazon CloudWatch concepts in the Amazon CloudWatch User Guide."]
 module DisableScaleIn =
   struct
     type nonrec t = bool
@@ -639,10 +1917,10 @@ module PredefinedMetricSpecification =
       {
       predefinedMetricType: MetricType.t
         [@ocaml.doc
-          "The metric type. The ALBRequestCountPerTarget metric type applies only to Spot Fleet requests and ECS services."];
+          "The metric type. The ALBRequestCountPerTarget metric type applies only to Spot Fleets and ECS services."];
       resourceLabel: ResourceLabel.t option
         [@ocaml.doc
-          "Identifies the resource associated with the metric type. You can't specify a resource label unless the metric type is ALBRequestCountPerTarget and there is a target group attached to the Spot Fleet request or ECS service. You create the resource label by appending the final portion of the load balancer ARN and the final portion of the target group ARN into a single value, separated by a forward slash (/). The format of the resource label is: app/my-alb/778d41231b141a0f/targetgroup/my-alb-target-group/943f017f100becff. Where: app/<load-balancer-name>/<load-balancer-id> is the final portion of the load balancer ARN targetgroup/<target-group-name>/<target-group-id> is the final portion of the target group ARN. To find the ARN for an Application Load Balancer, use the DescribeLoadBalancers API operation. To find the ARN for the target group, use the DescribeTargetGroups API operation."]}
+          "Identifies the resource associated with the metric type. You can't specify a resource label unless the metric type is ALBRequestCountPerTarget and there is a target group attached to the Spot Fleet or ECS service. You create the resource label by appending the final portion of the load balancer ARN and the final portion of the target group ARN into a single value, separated by a forward slash (/). The format of the resource label is: app/my-alb/778d41231b141a0f/targetgroup/my-alb-target-group/943f017f100becff. Where: app/<load-balancer-name>/<load-balancer-id> is the final portion of the load balancer ARN targetgroup/<target-group-name>/<target-group-id> is the final portion of the target group ARN. To find the ARN for an Application Load Balancer, use the DescribeLoadBalancers API operation. To find the ARN for the target group, use the DescribeTargetGroups API operation."]}
     let context_ = "PredefinedMetricSpecification"
     let make ?resourceLabel =
       fun ~predefinedMetricType ->
@@ -663,15 +1941,68 @@ module PredefinedMetricSpecification =
           (Xml.child_exn ~context:context_ xml_arg0 "PredefinedMetricType") in
       make ?resourceLabel ~predefinedMetricType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceLabel =
-        field_map json "ResourceLabel" ResourceLabel.of_json in
+        field_map json__ "ResourceLabel" ResourceLabel.of_json in
       let predefinedMetricType =
-        field_map_exn json "PredefinedMetricType" MetricType.of_json in
+        field_map_exn json__ "PredefinedMetricType" MetricType.of_json in
       make ?resourceLabel ~predefinedMetricType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a predefined metric for a target tracking scaling policy to use with Application Auto Scaling. Only the Amazon Web Services that you're using send metrics to Amazon CloudWatch. To determine whether a desired metric already exists by looking up its namespace and dimension using the CloudWatch metrics dashboard in the console, follow the procedure in Building dashboards with CloudWatch in the Application Auto Scaling User Guide."]
+       "Represents a predefined metric for a target tracking scaling policy to use with Application Auto Scaling. For more information, Predefined metrics for target tracking scaling policies in the Application Auto Scaling User Guide."]
+module NotScaledReason =
+  struct
+    type nonrec t =
+      {
+      code: XmlString.t option
+        [@ocaml.doc
+          "A code that represents the reason for not scaling. Valid values: AutoScalingAnticipatedFlapping TargetServicePutResourceAsUnscalable AlreadyAtMaxCapacity AlreadyAtMinCapacity AlreadyAtDesiredCapacity"];
+      maxCapacity: ResourceCapacity.t option
+        [@ocaml.doc "The maximum capacity."];
+      minCapacity: ResourceCapacity.t option
+        [@ocaml.doc "The minimum capacity."];
+      currentCapacity: ResourceCapacity.t option
+        [@ocaml.doc "The current capacity."]}
+    let make ?code =
+      fun ?maxCapacity ->
+        fun ?minCapacity ->
+          fun ?currentCapacity ->
+            fun () -> { code; maxCapacity; minCapacity; currentCapacity }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:XmlString.to_value));
+        ("MaxCapacity",
+          (Option.map x.maxCapacity ~f:ResourceCapacity.to_value));
+        ("MinCapacity",
+          (Option.map x.minCapacity ~f:ResourceCapacity.to_value));
+        ("CurrentCapacity",
+          (Option.map x.currentCapacity ~f:ResourceCapacity.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let currentCapacity =
+        (Option.map ~f:ResourceCapacity.of_xml)
+          (Xml.child xml_arg0 "CurrentCapacity") in
+      let minCapacity =
+        (Option.map ~f:ResourceCapacity.of_xml)
+          (Xml.child xml_arg0 "MinCapacity") in
+      let maxCapacity =
+        (Option.map ~f:ResourceCapacity.of_xml)
+          (Xml.child xml_arg0 "MaxCapacity") in
+      let code = (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?currentCapacity ?minCapacity ?maxCapacity ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let currentCapacity =
+        field_map json__ "CurrentCapacity" ResourceCapacity.of_json in
+      let minCapacity =
+        field_map json__ "MinCapacity" ResourceCapacity.of_json in
+      let maxCapacity =
+        field_map json__ "MaxCapacity" ResourceCapacity.of_json in
+      let code = field_map json__ "Code" XmlString.of_json in
+      make ?currentCapacity ?minCapacity ?maxCapacity ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the reason for an activity that isn't scaled (not scaled activity), in machine-readable format. For help interpreting the not scaled reason details, see Scaling activities for Application Auto Scaling in the Application Auto Scaling User Guide."]
 module ScalingSuspended =
   struct
     type nonrec t = bool
@@ -684,6 +2015,62 @@ module ScalingSuspended =
       Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
+  end
+module PredictiveScalingForecastTimestamps =
+  struct
+    type nonrec t = TimestampType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TimestampType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TimestampType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PredictiveScalingForecastTimestamps"
+        ~of_json:TimestampType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PredictiveScalingForecastValues =
+  struct
+    type nonrec t = MetricScale.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricScale.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricScale.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PredictiveScalingForecastValues"
+        ~of_json:MetricScale.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module ResourceIdMaxLen1600 =
   struct
@@ -727,9 +2114,13 @@ module ScalableDimension =
       | Cassandra_table_ReadCapacityUnits 
       | Cassandra_table_WriteCapacityUnits 
       | Kafka_broker_storage_VolumeSize 
+      | Elasticache_cache_cluster_Nodes 
       | Elasticache_replication_group_NodeGroups 
       | Elasticache_replication_group_Replicas 
       | Neptune_cluster_ReadReplicaCount 
+      | Sagemaker_variant_DesiredProvisionedConcurrency 
+      | Sagemaker_inference_component_DesiredCopyCount 
+      | Workspaces_workspacespool_DesiredUserSessions 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -764,12 +2155,19 @@ module ScalableDimension =
       | Cassandra_table_WriteCapacityUnits ->
           "cassandra:table:WriteCapacityUnits"
       | Kafka_broker_storage_VolumeSize -> "kafka:broker-storage:VolumeSize"
+      | Elasticache_cache_cluster_Nodes -> "elasticache:cache-cluster:Nodes"
       | Elasticache_replication_group_NodeGroups ->
           "elasticache:replication-group:NodeGroups"
       | Elasticache_replication_group_Replicas ->
           "elasticache:replication-group:Replicas"
       | Neptune_cluster_ReadReplicaCount ->
           "neptune:cluster:ReadReplicaCount"
+      | Sagemaker_variant_DesiredProvisionedConcurrency ->
+          "sagemaker:variant:DesiredProvisionedConcurrency"
+      | Sagemaker_inference_component_DesiredCopyCount ->
+          "sagemaker:inference-component:DesiredCopyCount"
+      | Workspaces_workspacespool_DesiredUserSessions ->
+          "workspaces:workspacespool:DesiredUserSessions"
       | Non_static_id s -> s
     let of_string =
       function
@@ -803,12 +2201,19 @@ module ScalableDimension =
       | "cassandra:table:WriteCapacityUnits" ->
           Cassandra_table_WriteCapacityUnits
       | "kafka:broker-storage:VolumeSize" -> Kafka_broker_storage_VolumeSize
+      | "elasticache:cache-cluster:Nodes" -> Elasticache_cache_cluster_Nodes
       | "elasticache:replication-group:NodeGroups" ->
           Elasticache_replication_group_NodeGroups
       | "elasticache:replication-group:Replicas" ->
           Elasticache_replication_group_Replicas
       | "neptune:cluster:ReadReplicaCount" ->
           Neptune_cluster_ReadReplicaCount
+      | "sagemaker:variant:DesiredProvisionedConcurrency" ->
+          Sagemaker_variant_DesiredProvisionedConcurrency
+      | "sagemaker:inference-component:DesiredCopyCount" ->
+          Sagemaker_inference_component_DesiredCopyCount
+      | "workspaces:workspacespool:DesiredUserSessions" ->
+          Workspaces_workspacespool_DesiredUserSessions
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -825,10 +2230,10 @@ module ScalableTargetAction =
       {
       minCapacity: ResourceCapacity.t option
         [@ocaml.doc
-          "The minimum capacity. For certain resources, the minimum value allowed is 0. This includes Lambda provisioned concurrency, Spot Fleet, ECS services, Aurora DB clusters, EMR clusters, and custom resources. For all other resources, the minimum value allowed is 1."];
+          "The minimum capacity. When the scheduled action runs, the resource will have at least this much capacity, but it might have more depending on other settings, such as the target utilization level of a target tracking scaling policy."];
       maxCapacity: ResourceCapacity.t option
         [@ocaml.doc
-          "The maximum capacity. Although you can specify a large maximum capacity, note that service quotas may impose lower limits. Each service has its own default quotas for the maximum capacity of the resource. If you want to specify a higher limit, you can request an increase. For more information, consult the documentation for that service. For information about the default quotas for each service, see Service Endpoints and Quotas in the Amazon Web Services General Reference."]}
+          "The maximum capacity. Although you can specify a large maximum capacity, note that service quotas may impose lower limits. Each service has its own default quotas for the maximum capacity of the resource. If you want to specify a higher limit, you can request an increase. For more information, consult the documentation for that service. For information about the default quotas for each service, see Service endpoints and quotas in the Amazon Web Services General Reference."]}
     let make ?minCapacity =
       fun ?maxCapacity -> fun () -> { minCapacity; maxCapacity }
     let to_value x =
@@ -847,9 +2252,11 @@ module ScalableTargetAction =
           (Xml.child xml_arg0 "MinCapacity") in
       make ?maxCapacity ?minCapacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxCapacity = field_map json "MaxCapacity" ResourceCapacity.of_json in
-      let minCapacity = field_map json "MinCapacity" ResourceCapacity.of_json in
+    let of_json json__ =
+      let maxCapacity =
+        field_map json__ "MaxCapacity" ResourceCapacity.of_json in
+      let minCapacity =
+        field_map json__ "MinCapacity" ResourceCapacity.of_json in
       make ?maxCapacity ?minCapacity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -893,6 +2300,7 @@ module ServiceNamespace =
       | Kafka 
       | Elasticache 
       | Neptune 
+      | Workspaces 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -911,6 +2319,7 @@ module ServiceNamespace =
       | Kafka -> "kafka"
       | Elasticache -> "elasticache"
       | Neptune -> "neptune"
+      | Workspaces -> "workspaces"
       | Non_static_id s -> s
     let of_string =
       function
@@ -928,6 +2337,7 @@ module ServiceNamespace =
       | "kafka" -> Kafka
       | "elasticache" -> Elasticache
       | "neptune" -> Neptune
+      | "workspaces" -> Workspaces
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -937,22 +2347,13 @@ module ServiceNamespace =
     let of_json j = of_string (string_of_json ~kind:"ServiceNamespace" j)
     let to_json = simple_to_json to_value
   end
-module TimestampType =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
 module Alarms =
   struct
     type nonrec t = Alarm.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Alarm.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -997,17 +2398,20 @@ module PolicyType =
     type nonrec t =
       | StepScaling 
       | TargetTrackingScaling 
+      | PredictiveScaling 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | StepScaling -> "StepScaling"
       | TargetTrackingScaling -> "TargetTrackingScaling"
+      | PredictiveScaling -> "PredictiveScaling"
       | Non_static_id s -> s
     let of_string =
       function
       | "StepScaling" -> StepScaling
       | "TargetTrackingScaling" -> TargetTrackingScaling
+      | "PredictiveScaling" -> PredictiveScaling
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1017,6 +2421,95 @@ module PolicyType =
     let of_json j = of_string (string_of_json ~kind:"PolicyType" j)
     let to_json = simple_to_json to_value
   end
+module PredictiveScalingPolicyConfiguration =
+  struct
+    type nonrec t =
+      {
+      metricSpecifications: PredictiveScalingMetricSpecifications.t
+        [@ocaml.doc
+          "This structure includes the metrics and target utilization to use for predictive scaling. This is an array, but we currently only support a single metric specification. That is, you can specify a target value and a single metric pair, or a target value and one scaling metric and one load metric."];
+      mode: PredictiveScalingMode.t option
+        [@ocaml.doc
+          "The predictive scaling mode. Defaults to ForecastOnly if not specified."];
+      schedulingBufferTime: PredictiveScalingSchedulingBufferTime.t option
+        [@ocaml.doc
+          "The amount of time, in seconds, that the start time can be advanced. The value must be less than the forecast interval duration of 3600 seconds (60 minutes). Defaults to 300 seconds if not specified."];
+      maxCapacityBreachBehavior:
+        PredictiveScalingMaxCapacityBreachBehavior.t option
+        [@ocaml.doc
+          "Defines the behavior that should be applied if the forecast capacity approaches or exceeds the maximum capacity. Defaults to HonorMaxCapacity if not specified."];
+      maxCapacityBuffer: PredictiveScalingMaxCapacityBuffer.t option
+        [@ocaml.doc
+          "The size of the capacity buffer to use when the forecast capacity is close to or exceeds the maximum capacity. The value is specified as a percentage relative to the forecast capacity. For example, if the buffer is 10, this means a 10 percent buffer, such that if the forecast capacity is 50, and the maximum capacity is 40, then the effective maximum capacity is 55. Required if the MaxCapacityBreachBehavior property is set to IncreaseMaxCapacity, and cannot be used otherwise."]}
+    let context_ = "PredictiveScalingPolicyConfiguration"
+    let make ?mode =
+      fun ?schedulingBufferTime ->
+        fun ?maxCapacityBreachBehavior ->
+          fun ?maxCapacityBuffer ->
+            fun ~metricSpecifications ->
+              fun () ->
+                {
+                  mode;
+                  schedulingBufferTime;
+                  maxCapacityBreachBehavior;
+                  maxCapacityBuffer;
+                  metricSpecifications
+                }
+    let to_value x =
+      structure_to_value
+        [("MetricSpecifications",
+           (Some
+              (PredictiveScalingMetricSpecifications.to_value
+                 x.metricSpecifications)));
+        ("Mode", (Option.map x.mode ~f:PredictiveScalingMode.to_value));
+        ("SchedulingBufferTime",
+          (Option.map x.schedulingBufferTime
+             ~f:PredictiveScalingSchedulingBufferTime.to_value));
+        ("MaxCapacityBreachBehavior",
+          (Option.map x.maxCapacityBreachBehavior
+             ~f:PredictiveScalingMaxCapacityBreachBehavior.to_value));
+        ("MaxCapacityBuffer",
+          (Option.map x.maxCapacityBuffer
+             ~f:PredictiveScalingMaxCapacityBuffer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxCapacityBuffer =
+        (Option.map ~f:PredictiveScalingMaxCapacityBuffer.of_xml)
+          (Xml.child xml_arg0 "MaxCapacityBuffer") in
+      let maxCapacityBreachBehavior =
+        (Option.map ~f:PredictiveScalingMaxCapacityBreachBehavior.of_xml)
+          (Xml.child xml_arg0 "MaxCapacityBreachBehavior") in
+      let schedulingBufferTime =
+        (Option.map ~f:PredictiveScalingSchedulingBufferTime.of_xml)
+          (Xml.child xml_arg0 "SchedulingBufferTime") in
+      let mode =
+        (Option.map ~f:PredictiveScalingMode.of_xml)
+          (Xml.child xml_arg0 "Mode") in
+      let metricSpecifications =
+        PredictiveScalingMetricSpecifications.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MetricSpecifications") in
+      make ?maxCapacityBuffer ?maxCapacityBreachBehavior
+        ?schedulingBufferTime ?mode ~metricSpecifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxCapacityBuffer =
+        field_map json__ "MaxCapacityBuffer"
+          PredictiveScalingMaxCapacityBuffer.of_json in
+      let maxCapacityBreachBehavior =
+        field_map json__ "MaxCapacityBreachBehavior"
+          PredictiveScalingMaxCapacityBreachBehavior.of_json in
+      let schedulingBufferTime =
+        field_map json__ "SchedulingBufferTime"
+          PredictiveScalingSchedulingBufferTime.of_json in
+      let mode = field_map json__ "Mode" PredictiveScalingMode.of_json in
+      let metricSpecifications =
+        field_map_exn json__ "MetricSpecifications"
+          PredictiveScalingMetricSpecifications.of_json in
+      make ?maxCapacityBuffer ?maxCapacityBreachBehavior
+        ?schedulingBufferTime ?mode ~metricSpecifications ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a predictive scaling policy configuration. Predictive scaling is supported on Amazon ECS services."]
 module StepScalingPolicyConfiguration =
   struct
     type nonrec t =
@@ -1032,7 +2525,7 @@ module StepScalingPolicyConfiguration =
           "The minimum value to scale by when the adjustment type is PercentChangeInCapacity. For example, suppose that you create a step scaling policy to scale out an Amazon ECS service by 25 percent and you specify a MinAdjustmentMagnitude of 2. If the service has 4 tasks and the scaling policy is performed, 25 percent of 4 is 1. However, because you specified a MinAdjustmentMagnitude of 2, Application Auto Scaling scales out the service by 2 tasks."];
       cooldown: Cooldown.t option
         [@ocaml.doc
-          "The amount of time, in seconds, to wait for a previous scaling activity to take effect. With scale-out policies, the intention is to continuously (but not excessively) scale out. After Application Auto Scaling successfully scales out using a step scaling policy, it starts to calculate the cooldown time. The scaling policy won't increase the desired capacity again unless either a larger scale out is triggered or the cooldown period ends. While the cooldown period is in effect, capacity added by the initiating scale-out activity is calculated as part of the desired capacity for the next scale-out activity. For example, when an alarm triggers a step scaling policy to increase the capacity by 2, the scaling activity completes successfully, and a cooldown period starts. If the alarm triggers again during the cooldown period but at a more aggressive step adjustment of 3, the previous increase of 2 is considered part of the current capacity. Therefore, only 1 is added to the capacity. With scale-in policies, the intention is to scale in conservatively to protect your application\226\128\153s availability, so scale-in activities are blocked until the cooldown period has expired. However, if another alarm triggers a scale-out activity during the cooldown period after a scale-in activity, Application Auto Scaling scales out the target immediately. In this case, the cooldown period for the scale-in activity stops and doesn't complete. Application Auto Scaling provides a default value of 600 for Amazon ElastiCache replication groups and a default value of 300 for the following scalable targets: AppStream 2.0 fleets Aurora DB clusters ECS services EMR clusters Neptune clusters SageMaker endpoint variants Spot Fleets Custom resources For all other scalable targets, the default value is 0: Amazon Comprehend document classification and entity recognizer endpoints DynamoDB tables and global secondary indexes Amazon Keyspaces tables Lambda provisioned concurrency Amazon MSK broker storage"];
+          "The amount of time, in seconds, to wait for a previous scaling activity to take effect. If not specified, the default value is 300. For more information, see Cooldown period in the Application Auto Scaling User Guide."];
       metricAggregationType: MetricAggregationType.t option
         [@ocaml.doc
           "The aggregation type for the CloudWatch metrics. Valid values are Minimum, Maximum, and Average. If the aggregation type is null, the value is treated as Average."]}
@@ -1081,29 +2574,30 @@ module StepScalingPolicyConfiguration =
       make ?metricAggregationType ?cooldown ?minAdjustmentMagnitude
         ?stepAdjustments ?adjustmentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricAggregationType =
-        field_map json "MetricAggregationType" MetricAggregationType.of_json in
-      let cooldown = field_map json "Cooldown" Cooldown.of_json in
+        field_map json__ "MetricAggregationType"
+          MetricAggregationType.of_json in
+      let cooldown = field_map json__ "Cooldown" Cooldown.of_json in
       let minAdjustmentMagnitude =
-        field_map json "MinAdjustmentMagnitude"
+        field_map json__ "MinAdjustmentMagnitude"
           MinAdjustmentMagnitude.of_json in
       let stepAdjustments =
-        field_map json "StepAdjustments" StepAdjustments.of_json in
+        field_map json__ "StepAdjustments" StepAdjustments.of_json in
       let adjustmentType =
-        field_map json "AdjustmentType" AdjustmentType.of_json in
+        field_map json__ "AdjustmentType" AdjustmentType.of_json in
       make ?metricAggregationType ?cooldown ?minAdjustmentMagnitude
         ?stepAdjustments ?adjustmentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a step scaling policy configuration to use with Application Auto Scaling."]
+       "Represents a step scaling policy configuration to use with Application Auto Scaling. For more information, see Step scaling policies in the Application Auto Scaling User Guide."]
 module TargetTrackingScalingPolicyConfiguration =
   struct
     type nonrec t =
       {
       targetValue: MetricScale.t
         [@ocaml.doc
-          "The target value for the metric. Although this property accepts numbers of type Double, it won't accept values that are either too small or too large. Values must be in the range of -2^360 to 2^360. The value must be a valid number based on the choice of metric. For example, if the metric is CPU utilization, then the target value is a percent value that represents how much of the CPU can be used before scaling out."];
+          "The target value for the metric. Although this property accepts numbers of type Double, it won't accept values that are either too small or too large. Values must be in the range of -2^360 to 2^360. The value must be a valid number based on the choice of metric. For example, if the metric is CPU utilization, then the target value is a percent value that represents how much of the CPU can be used before scaling out. If the scaling policy specifies the ALBRequestCountPerTarget predefined metric, specify the target utilization as the optimal average request count per target during any one-minute interval."];
       predefinedMetricSpecification: PredefinedMetricSpecification.t option
         [@ocaml.doc
           "A predefined metric. You can specify either a predefined metric or a customized metric."];
@@ -1112,10 +2606,10 @@ module TargetTrackingScalingPolicyConfiguration =
           "A customized metric. You can specify either a predefined metric or a customized metric."];
       scaleOutCooldown: Cooldown.t option
         [@ocaml.doc
-          "The amount of time, in seconds, to wait for a previous scale-out activity to take effect. With the scale-out cooldown period, the intention is to continuously (but not excessively) scale out. After Application Auto Scaling successfully scales out using a target tracking scaling policy, it starts to calculate the cooldown time. The scaling policy won't increase the desired capacity again unless either a larger scale out is triggered or the cooldown period ends. While the cooldown period is in effect, the capacity added by the initiating scale-out activity is calculated as part of the desired capacity for the next scale-out activity. Application Auto Scaling provides a default value of 600 for Amazon ElastiCache replication groups and a default value of 300 for the following scalable targets: AppStream 2.0 fleets Aurora DB clusters ECS services EMR clusters Neptune clusters SageMaker endpoint variants Spot Fleets Custom resources For all other scalable targets, the default value is 0: Amazon Comprehend document classification and entity recognizer endpoints DynamoDB tables and global secondary indexes Amazon Keyspaces tables Lambda provisioned concurrency Amazon MSK broker storage"];
+          "The amount of time, in seconds, to wait for a previous scale-out activity to take effect. For more information and for default values, see Define cooldown periods in the Application Auto Scaling User Guide."];
       scaleInCooldown: Cooldown.t option
         [@ocaml.doc
-          "The amount of time, in seconds, after a scale-in activity completes before another scale-in activity can start. With the scale-in cooldown period, the intention is to scale in conservatively to protect your application\226\128\153s availability, so scale-in activities are blocked until the cooldown period has expired. However, if another alarm triggers a scale-out activity during the scale-in cooldown period, Application Auto Scaling scales out the target immediately. In this case, the scale-in cooldown period stops and doesn't complete. Application Auto Scaling provides a default value of 600 for Amazon ElastiCache replication groups and a default value of 300 for the following scalable targets: AppStream 2.0 fleets Aurora DB clusters ECS services EMR clusters Neptune clusters SageMaker endpoint variants Spot Fleets Custom resources For all other scalable targets, the default value is 0: Amazon Comprehend document classification and entity recognizer endpoints DynamoDB tables and global secondary indexes Amazon Keyspaces tables Lambda provisioned concurrency Amazon MSK broker storage"];
+          "The amount of time, in seconds, after a scale-in activity completes before another scale-in activity can start. For more information and for default values, see Define cooldown periods in the Application Auto Scaling User Guide."];
       disableScaleIn: DisableScaleIn.t option
         [@ocaml.doc
           "Indicates whether scale in by the target tracking scaling policy is disabled. If the value is true, scale in is disabled and the target tracking scaling policy won't remove capacity from the scalable target. Otherwise, scale in is enabled and the target tracking scaling policy can remove capacity from the scalable target. The default value is false."]}
@@ -1174,25 +2668,55 @@ module TargetTrackingScalingPolicyConfiguration =
         ?customizedMetricSpecification ?predefinedMetricSpecification
         ~targetValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let disableScaleIn =
-        field_map json "DisableScaleIn" DisableScaleIn.of_json in
-      let scaleInCooldown = field_map json "ScaleInCooldown" Cooldown.of_json in
+        field_map json__ "DisableScaleIn" DisableScaleIn.of_json in
+      let scaleInCooldown =
+        field_map json__ "ScaleInCooldown" Cooldown.of_json in
       let scaleOutCooldown =
-        field_map json "ScaleOutCooldown" Cooldown.of_json in
+        field_map json__ "ScaleOutCooldown" Cooldown.of_json in
       let customizedMetricSpecification =
-        field_map json "CustomizedMetricSpecification"
+        field_map json__ "CustomizedMetricSpecification"
           CustomizedMetricSpecification.of_json in
       let predefinedMetricSpecification =
-        field_map json "PredefinedMetricSpecification"
+        field_map json__ "PredefinedMetricSpecification"
           PredefinedMetricSpecification.of_json in
-      let targetValue = field_map_exn json "TargetValue" MetricScale.of_json in
+      let targetValue =
+        field_map_exn json__ "TargetValue" MetricScale.of_json in
       make ?disableScaleIn ?scaleInCooldown ?scaleOutCooldown
         ?customizedMetricSpecification ?predefinedMetricSpecification
         ~targetValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a target tracking scaling policy configuration to use with Application Auto Scaling."]
+       "Represents a target tracking scaling policy configuration to use with Application Auto Scaling. For more information, see Target tracking scaling policies in the Application Auto Scaling User Guide."]
+module NotScaledReasons =
+  struct
+    type nonrec t = NotScaledReason.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NotScaledReason.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NotScaledReason.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NotScaledReasons" ~of_json:NotScaledReason.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module ScalingActivityStatusCode =
   struct
     type nonrec t =
@@ -1230,24 +2754,6 @@ module ScalingActivityStatusCode =
         (string_of_xml ~kind:"enumeration ScalingActivityStatusCode" xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"ScalingActivityStatusCode" j)
-    let to_json = simple_to_json to_value
-  end
-module XmlString =
-  struct
-    type nonrec t = string
-    let context_ = "XmlString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i
-             ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDC00-\\uDBFF\\uDFFF\\r\\n\\t]*");
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"XmlString" j
     let to_json = simple_to_json to_value
   end
 module SuspendedState =
@@ -1297,18 +2803,54 @@ module SuspendedState =
       make ?scheduledScalingSuspended ?dynamicScalingOutSuspended
         ?dynamicScalingInSuspended ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledScalingSuspended =
-        field_map json "ScheduledScalingSuspended" ScalingSuspended.of_json in
+        field_map json__ "ScheduledScalingSuspended" ScalingSuspended.of_json in
       let dynamicScalingOutSuspended =
-        field_map json "DynamicScalingOutSuspended" ScalingSuspended.of_json in
+        field_map json__ "DynamicScalingOutSuspended"
+          ScalingSuspended.of_json in
       let dynamicScalingInSuspended =
-        field_map json "DynamicScalingInSuspended" ScalingSuspended.of_json in
+        field_map json__ "DynamicScalingInSuspended" ScalingSuspended.of_json in
       make ?scheduledScalingSuspended ?dynamicScalingOutSuspended
         ?dynamicScalingInSuspended ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies whether the scaling activities for a scalable target are in a suspended state."]
+module AmazonResourceName =
+  struct
+    type nonrec t = string
+    let context_ = "AmazonResourceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1011) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:.+:application-autoscaling:.+:[0-9]+:scalable-target\\/[a-zA-Z0-9-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AmazonResourceName" j
+    let to_json = simple_to_json to_value
+  end
+module ExceptionMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ExceptionMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExceptionMessage" j
+    let to_json = simple_to_json to_value
+  end
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -1322,30 +2864,116 @@ module ErrorMessage =
     let of_json j = string_of_json ~kind:"ErrorMessage" j
     let to_json = simple_to_json to_value
   end
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module LoadForecast =
+  struct
+    type nonrec t =
+      {
+      timestamps: PredictiveScalingForecastTimestamps.t option
+        [@ocaml.doc "The timestamps for the data points, in UTC format."];
+      values: PredictiveScalingForecastValues.t option
+        [@ocaml.doc "The values of the data points."];
+      metricSpecification: PredictiveScalingMetricSpecification.t option
+        [@ocaml.doc "The metric specification for the load forecast."]}
+    let make ?timestamps =
+      fun ?values ->
+        fun ?metricSpecification ->
+          fun () -> { timestamps; values; metricSpecification }
+    let to_value x =
+      structure_to_value
+        [("Timestamps",
+           (Option.map x.timestamps
+              ~f:PredictiveScalingForecastTimestamps.to_value));
+        ("Values",
+          (Option.map x.values ~f:PredictiveScalingForecastValues.to_value));
+        ("MetricSpecification",
+          (Option.map x.metricSpecification
+             ~f:PredictiveScalingMetricSpecification.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricSpecification =
+        (Option.map ~f:PredictiveScalingMetricSpecification.of_xml)
+          (Xml.child xml_arg0 "MetricSpecification") in
+      let values =
+        (Option.map ~f:PredictiveScalingForecastValues.of_xml)
+          (Xml.child xml_arg0 "Values") in
+      let timestamps =
+        (Option.map ~f:PredictiveScalingForecastTimestamps.of_xml)
+          (Xml.child xml_arg0 "Timestamps") in
+      make ?metricSpecification ?values ?timestamps ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricSpecification =
+        field_map json__ "MetricSpecification"
+          PredictiveScalingMetricSpecification.of_json in
+      let values =
+        field_map json__ "Values" PredictiveScalingForecastValues.of_json in
+      let timestamps =
+        field_map json__ "Timestamps"
+          PredictiveScalingForecastTimestamps.of_json in
+      make ?metricSpecification ?values ?timestamps ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A GetPredictiveScalingForecast call returns the load forecast for a predictive scaling policy. This structure includes the data points for that load forecast, along with the timestamps of those data points and the metric specification."]
 module ScheduledAction =
   struct
     type nonrec t =
       {
-      scheduledActionName: ScheduledActionName.t
+      scheduledActionName: ScheduledActionName.t option
         [@ocaml.doc "The name of the scheduled action."];
-      scheduledActionARN: ResourceIdMaxLen1600.t
+      scheduledActionARN: ResourceIdMaxLen1600.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the scheduled action."];
-      serviceNamespace: ServiceNamespace.t
+      serviceNamespace: ServiceNamespace.t option
         [@ocaml.doc
           "The namespace of the Amazon Web Services service that provides the resource, or a custom-resource."];
-      schedule: ResourceIdMaxLen1600.t
+      schedule: ResourceIdMaxLen1600.t option
         [@ocaml.doc
-          "The schedule for this action. The following formats are supported: At expressions - \"at(yyyy-mm-ddThh:mm:ss)\" Rate expressions - \"rate(value unit)\" Cron expressions - \"cron(fields)\" At expressions are useful for one-time schedules. Cron expressions are useful for scheduled actions that run periodically at a specified date and time, and rate expressions are useful for scheduled actions that run at a regular interval. At and cron expressions use Universal Coordinated Time (UTC) by default. The cron format consists of six fields separated by white spaces: \\[Minutes\\] \\[Hours\\] \\[Day_of_Month\\] \\[Month\\] \\[Day_of_Week\\] \\[Year\\]. For rate expressions, value is a positive integer and unit is minute | minutes | hour | hours | day | days. For more information and examples, see Example scheduled actions for Application Auto Scaling in the Application Auto Scaling User Guide."];
+          "The schedule for this action. The following formats are supported: At expressions - \"at(yyyy-mm-ddThh:mm:ss)\" Rate expressions - \"rate(value unit)\" Cron expressions - \"cron(fields)\" At expressions are useful for one-time schedules. Cron expressions are useful for scheduled actions that run periodically at a specified date and time, and rate expressions are useful for scheduled actions that run at a regular interval. At and cron expressions use Universal Coordinated Time (UTC) by default. The cron format consists of six fields separated by white spaces: \\[Minutes\\] \\[Hours\\] \\[Day_of_Month\\] \\[Month\\] \\[Day_of_Week\\] \\[Year\\]. For rate expressions, value is a positive integer and unit is minute | minutes | hour | hours | day | days. For more information, see Schedule recurring scaling actions using cron expressions in the Application Auto Scaling User Guide."];
       timezone: ResourceIdMaxLen1600.t option
         [@ocaml.doc
           "The time zone used when referring to the date and time of a scheduled action, when the scheduled action uses an at or cron expression."];
-      resourceId: ResourceIdMaxLen1600.t
+      resourceId: ResourceIdMaxLen1600.t option
         [@ocaml.doc
-          "The identifier of the resource associated with the scaling policy. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
+          "The identifier of the resource associated with the scaling policy. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
       scalableDimension: ScalableDimension.t option
         [@ocaml.doc
-          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."];
+          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."];
       startTime: TimestampType.t option
         [@ocaml.doc
           "The date and time that the action is scheduled to begin, in UTC."];
@@ -1355,59 +2983,61 @@ module ScheduledAction =
       scalableTargetAction: ScalableTargetAction.t option
         [@ocaml.doc
           "The new minimum and maximum capacity. You can set both values or just one. At the scheduled time, if the current capacity is below the minimum capacity, Application Auto Scaling scales out to the minimum capacity. If the current capacity is above the maximum capacity, Application Auto Scaling scales in to the maximum capacity."];
-      creationTime: TimestampType.t
+      creationTime: TimestampType.t option
         [@ocaml.doc
           "The date and time that the scheduled action was created."]}
-    let context_ = "ScheduledAction"
-    let make ?timezone =
-      fun ?scalableDimension ->
-        fun ?startTime ->
-          fun ?endTime ->
-            fun ?scalableTargetAction ->
-              fun ~scheduledActionName ->
-                fun ~scheduledActionARN ->
-                  fun ~serviceNamespace ->
-                    fun ~schedule ->
-                      fun ~resourceId ->
-                        fun ~creationTime ->
+    let make ?scheduledActionName =
+      fun ?scheduledActionARN ->
+        fun ?serviceNamespace ->
+          fun ?schedule ->
+            fun ?timezone ->
+              fun ?resourceId ->
+                fun ?scalableDimension ->
+                  fun ?startTime ->
+                    fun ?endTime ->
+                      fun ?scalableTargetAction ->
+                        fun ?creationTime ->
                           fun () ->
                             {
-                              timezone;
-                              scalableDimension;
-                              startTime;
-                              endTime;
-                              scalableTargetAction;
                               scheduledActionName;
                               scheduledActionARN;
                               serviceNamespace;
                               schedule;
+                              timezone;
                               resourceId;
+                              scalableDimension;
+                              startTime;
+                              endTime;
+                              scalableTargetAction;
                               creationTime
                             }
     let to_value x =
       structure_to_value
         [("ScheduledActionName",
-           (Some (ScheduledActionName.to_value x.scheduledActionName)));
+           (Option.map x.scheduledActionName ~f:ScheduledActionName.to_value));
         ("ScheduledActionARN",
-          (Some (ResourceIdMaxLen1600.to_value x.scheduledActionARN)));
+          (Option.map x.scheduledActionARN ~f:ResourceIdMaxLen1600.to_value));
         ("ServiceNamespace",
-          (Some (ServiceNamespace.to_value x.serviceNamespace)));
-        ("Schedule", (Some (ResourceIdMaxLen1600.to_value x.schedule)));
+          (Option.map x.serviceNamespace ~f:ServiceNamespace.to_value));
+        ("Schedule",
+          (Option.map x.schedule ~f:ResourceIdMaxLen1600.to_value));
         ("Timezone",
           (Option.map x.timezone ~f:ResourceIdMaxLen1600.to_value));
-        ("ResourceId", (Some (ResourceIdMaxLen1600.to_value x.resourceId)));
+        ("ResourceId",
+          (Option.map x.resourceId ~f:ResourceIdMaxLen1600.to_value));
         ("ScalableDimension",
           (Option.map x.scalableDimension ~f:ScalableDimension.to_value));
         ("StartTime", (Option.map x.startTime ~f:TimestampType.to_value));
         ("EndTime", (Option.map x.endTime ~f:TimestampType.to_value));
         ("ScalableTargetAction",
           (Option.map x.scalableTargetAction ~f:ScalableTargetAction.to_value));
-        ("CreationTime", (Some (TimestampType.to_value x.creationTime)))]
+        ("CreationTime",
+          (Option.map x.creationTime ~f:TimestampType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let creationTime =
-        TimestampType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationTime") in
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
       let scalableTargetAction =
         (Option.map ~f:ScalableTargetAction.of_xml)
           (Xml.child xml_arg0 "ScalableTargetAction") in
@@ -1419,129 +3049,144 @@ module ScheduledAction =
         (Option.map ~f:ScalableDimension.of_xml)
           (Xml.child xml_arg0 "ScalableDimension") in
       let resourceId =
-        ResourceIdMaxLen1600.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:ResourceIdMaxLen1600.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
       let timezone =
         (Option.map ~f:ResourceIdMaxLen1600.of_xml)
           (Xml.child xml_arg0 "Timezone") in
       let schedule =
-        ResourceIdMaxLen1600.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Schedule") in
+        (Option.map ~f:ResourceIdMaxLen1600.of_xml)
+          (Xml.child xml_arg0 "Schedule") in
       let serviceNamespace =
-        ServiceNamespace.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
+        (Option.map ~f:ServiceNamespace.of_xml)
+          (Xml.child xml_arg0 "ServiceNamespace") in
       let scheduledActionARN =
-        ResourceIdMaxLen1600.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScheduledActionARN") in
+        (Option.map ~f:ResourceIdMaxLen1600.of_xml)
+          (Xml.child xml_arg0 "ScheduledActionARN") in
       let scheduledActionName =
-        ScheduledActionName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScheduledActionName") in
-      make ~creationTime ?scalableTargetAction ?endTime ?startTime
-        ?scalableDimension ~resourceId ?timezone ~schedule ~serviceNamespace
-        ~scheduledActionARN ~scheduledActionName ()
+        (Option.map ~f:ScheduledActionName.of_xml)
+          (Xml.child xml_arg0 "ScheduledActionName") in
+      make ?creationTime ?scalableTargetAction ?endTime ?startTime
+        ?scalableDimension ?resourceId ?timezone ?schedule ?serviceNamespace
+        ?scheduledActionARN ?scheduledActionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let creationTime =
-        field_map_exn json "CreationTime" TimestampType.of_json in
+        field_map json__ "CreationTime" TimestampType.of_json in
       let scalableTargetAction =
-        field_map json "ScalableTargetAction" ScalableTargetAction.of_json in
-      let endTime = field_map json "EndTime" TimestampType.of_json in
-      let startTime = field_map json "StartTime" TimestampType.of_json in
+        field_map json__ "ScalableTargetAction" ScalableTargetAction.of_json in
+      let endTime = field_map json__ "EndTime" TimestampType.of_json in
+      let startTime = field_map json__ "StartTime" TimestampType.of_json in
       let scalableDimension =
-        field_map json "ScalableDimension" ScalableDimension.of_json in
+        field_map json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ResourceIdMaxLen1600.of_json in
-      let timezone = field_map json "Timezone" ResourceIdMaxLen1600.of_json in
-      let schedule =
-        field_map_exn json "Schedule" ResourceIdMaxLen1600.of_json in
+        field_map json__ "ResourceId" ResourceIdMaxLen1600.of_json in
+      let timezone = field_map json__ "Timezone" ResourceIdMaxLen1600.of_json in
+      let schedule = field_map json__ "Schedule" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
+        field_map json__ "ServiceNamespace" ServiceNamespace.of_json in
       let scheduledActionARN =
-        field_map_exn json "ScheduledActionARN" ResourceIdMaxLen1600.of_json in
+        field_map json__ "ScheduledActionARN" ResourceIdMaxLen1600.of_json in
       let scheduledActionName =
-        field_map_exn json "ScheduledActionName" ScheduledActionName.of_json in
-      make ~creationTime ?scalableTargetAction ?endTime ?startTime
-        ?scalableDimension ~resourceId ?timezone ~schedule ~serviceNamespace
-        ~scheduledActionARN ~scheduledActionName ()
+        field_map json__ "ScheduledActionName" ScheduledActionName.of_json in
+      make ?creationTime ?scalableTargetAction ?endTime ?startTime
+        ?scalableDimension ?resourceId ?timezone ?schedule ?serviceNamespace
+        ?scheduledActionARN ?scheduledActionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a scheduled action."]
 module ScalingPolicy =
   struct
     type nonrec t =
       {
-      policyARN: ResourceIdMaxLen1600.t
+      policyARN: ResourceIdMaxLen1600.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the scaling policy."];
-      policyName: PolicyName.t [@ocaml.doc "The name of the scaling policy."];
-      serviceNamespace: ServiceNamespace.t
+      policyName: PolicyName.t option
+        [@ocaml.doc "The name of the scaling policy."];
+      serviceNamespace: ServiceNamespace.t option
         [@ocaml.doc
           "The namespace of the Amazon Web Services service that provides the resource, or a custom-resource."];
-      resourceId: ResourceIdMaxLen1600.t
+      resourceId: ResourceIdMaxLen1600.t option
         [@ocaml.doc
-          "The identifier of the resource associated with the scaling policy. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
-      scalableDimension: ScalableDimension.t
+          "The identifier of the resource associated with the scaling policy. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
+      scalableDimension: ScalableDimension.t option
         [@ocaml.doc
-          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."];
-      policyType: PolicyType.t [@ocaml.doc "The scaling policy type."];
+          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."];
+      policyType: PolicyType.t option
+        [@ocaml.doc
+          "The scaling policy type. The following policy types are supported: TargetTrackingScaling\226\128\148Not supported for Amazon EMR StepScaling\226\128\148Not supported for DynamoDB, Amazon Comprehend, Lambda, Amazon Keyspaces, Amazon MSK, Amazon ElastiCache, or Neptune. PredictiveScaling\226\128\148Only supported for Amazon ECS"];
       stepScalingPolicyConfiguration: StepScalingPolicyConfiguration.t option
         [@ocaml.doc "A step scaling policy."];
       targetTrackingScalingPolicyConfiguration:
         TargetTrackingScalingPolicyConfiguration.t option
         [@ocaml.doc "A target tracking scaling policy."];
+      predictiveScalingPolicyConfiguration:
+        PredictiveScalingPolicyConfiguration.t option
+        [@ocaml.doc "The predictive scaling policy configuration."];
       alarms: Alarms.t option
         [@ocaml.doc
           "The CloudWatch alarms associated with the scaling policy."];
-      creationTime: TimestampType.t
+      creationTime: TimestampType.t option
         [@ocaml.doc
           "The Unix timestamp for when the scaling policy was created."]}
-    let context_ = "ScalingPolicy"
-    let make ?stepScalingPolicyConfiguration =
-      fun ?targetTrackingScalingPolicyConfiguration ->
-        fun ?alarms ->
-          fun ~policyARN ->
-            fun ~policyName ->
-              fun ~serviceNamespace ->
-                fun ~resourceId ->
-                  fun ~scalableDimension ->
-                    fun ~policyType ->
-                      fun ~creationTime ->
-                        fun () ->
-                          {
-                            stepScalingPolicyConfiguration;
-                            targetTrackingScalingPolicyConfiguration;
-                            alarms;
-                            policyARN;
-                            policyName;
-                            serviceNamespace;
-                            resourceId;
-                            scalableDimension;
-                            policyType;
-                            creationTime
-                          }
+    let make ?policyARN =
+      fun ?policyName ->
+        fun ?serviceNamespace ->
+          fun ?resourceId ->
+            fun ?scalableDimension ->
+              fun ?policyType ->
+                fun ?stepScalingPolicyConfiguration ->
+                  fun ?targetTrackingScalingPolicyConfiguration ->
+                    fun ?predictiveScalingPolicyConfiguration ->
+                      fun ?alarms ->
+                        fun ?creationTime ->
+                          fun () ->
+                            {
+                              policyARN;
+                              policyName;
+                              serviceNamespace;
+                              resourceId;
+                              scalableDimension;
+                              policyType;
+                              stepScalingPolicyConfiguration;
+                              targetTrackingScalingPolicyConfiguration;
+                              predictiveScalingPolicyConfiguration;
+                              alarms;
+                              creationTime
+                            }
     let to_value x =
       structure_to_value
-        [("PolicyARN", (Some (ResourceIdMaxLen1600.to_value x.policyARN)));
-        ("PolicyName", (Some (PolicyName.to_value x.policyName)));
+        [("PolicyARN",
+           (Option.map x.policyARN ~f:ResourceIdMaxLen1600.to_value));
+        ("PolicyName", (Option.map x.policyName ~f:PolicyName.to_value));
         ("ServiceNamespace",
-          (Some (ServiceNamespace.to_value x.serviceNamespace)));
-        ("ResourceId", (Some (ResourceIdMaxLen1600.to_value x.resourceId)));
+          (Option.map x.serviceNamespace ~f:ServiceNamespace.to_value));
+        ("ResourceId",
+          (Option.map x.resourceId ~f:ResourceIdMaxLen1600.to_value));
         ("ScalableDimension",
-          (Some (ScalableDimension.to_value x.scalableDimension)));
-        ("PolicyType", (Some (PolicyType.to_value x.policyType)));
+          (Option.map x.scalableDimension ~f:ScalableDimension.to_value));
+        ("PolicyType", (Option.map x.policyType ~f:PolicyType.to_value));
         ("StepScalingPolicyConfiguration",
           (Option.map x.stepScalingPolicyConfiguration
              ~f:StepScalingPolicyConfiguration.to_value));
         ("TargetTrackingScalingPolicyConfiguration",
           (Option.map x.targetTrackingScalingPolicyConfiguration
              ~f:TargetTrackingScalingPolicyConfiguration.to_value));
+        ("PredictiveScalingPolicyConfiguration",
+          (Option.map x.predictiveScalingPolicyConfiguration
+             ~f:PredictiveScalingPolicyConfiguration.to_value));
         ("Alarms", (Option.map x.alarms ~f:Alarms.to_value));
-        ("CreationTime", (Some (TimestampType.to_value x.creationTime)))]
+        ("CreationTime",
+          (Option.map x.creationTime ~f:TimestampType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let creationTime =
-        TimestampType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationTime") in
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
       let alarms =
         (Option.map ~f:Alarms.of_xml) (Xml.child xml_arg0 "Alarms") in
+      let predictiveScalingPolicyConfiguration =
+        (Option.map ~f:PredictiveScalingPolicyConfiguration.of_xml)
+          (Xml.child xml_arg0 "PredictiveScalingPolicyConfiguration") in
       let targetTrackingScalingPolicyConfiguration =
         (Option.map ~f:TargetTrackingScalingPolicyConfiguration.of_xml)
           (Xml.child xml_arg0 "TargetTrackingScalingPolicyConfiguration") in
@@ -1549,293 +3194,480 @@ module ScalingPolicy =
         (Option.map ~f:StepScalingPolicyConfiguration.of_xml)
           (Xml.child xml_arg0 "StepScalingPolicyConfiguration") in
       let policyType =
-        PolicyType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyType") in
+        (Option.map ~f:PolicyType.of_xml) (Xml.child xml_arg0 "PolicyType") in
       let scalableDimension =
-        ScalableDimension.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScalableDimension") in
+        (Option.map ~f:ScalableDimension.of_xml)
+          (Xml.child xml_arg0 "ScalableDimension") in
       let resourceId =
-        ResourceIdMaxLen1600.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:ResourceIdMaxLen1600.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
       let serviceNamespace =
-        ServiceNamespace.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
+        (Option.map ~f:ServiceNamespace.of_xml)
+          (Xml.child xml_arg0 "ServiceNamespace") in
       let policyName =
-        PolicyName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
+        (Option.map ~f:PolicyName.of_xml) (Xml.child xml_arg0 "PolicyName") in
       let policyARN =
-        ResourceIdMaxLen1600.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyARN") in
-      make ~creationTime ?alarms ?targetTrackingScalingPolicyConfiguration
-        ?stepScalingPolicyConfiguration ~policyType ~scalableDimension
-        ~resourceId ~serviceNamespace ~policyName ~policyARN ()
+        (Option.map ~f:ResourceIdMaxLen1600.of_xml)
+          (Xml.child xml_arg0 "PolicyARN") in
+      make ?creationTime ?alarms ?predictiveScalingPolicyConfiguration
+        ?targetTrackingScalingPolicyConfiguration
+        ?stepScalingPolicyConfiguration ?policyType ?scalableDimension
+        ?resourceId ?serviceNamespace ?policyName ?policyARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let creationTime =
-        field_map_exn json "CreationTime" TimestampType.of_json in
-      let alarms = field_map json "Alarms" Alarms.of_json in
+        field_map json__ "CreationTime" TimestampType.of_json in
+      let alarms = field_map json__ "Alarms" Alarms.of_json in
+      let predictiveScalingPolicyConfiguration =
+        field_map json__ "PredictiveScalingPolicyConfiguration"
+          PredictiveScalingPolicyConfiguration.of_json in
       let targetTrackingScalingPolicyConfiguration =
-        field_map json "TargetTrackingScalingPolicyConfiguration"
+        field_map json__ "TargetTrackingScalingPolicyConfiguration"
           TargetTrackingScalingPolicyConfiguration.of_json in
       let stepScalingPolicyConfiguration =
-        field_map json "StepScalingPolicyConfiguration"
+        field_map json__ "StepScalingPolicyConfiguration"
           StepScalingPolicyConfiguration.of_json in
-      let policyType = field_map_exn json "PolicyType" PolicyType.of_json in
+      let policyType = field_map json__ "PolicyType" PolicyType.of_json in
       let scalableDimension =
-        field_map_exn json "ScalableDimension" ScalableDimension.of_json in
+        field_map json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
+        field_map json__ "ServiceNamespace" ServiceNamespace.of_json in
+      let policyName = field_map json__ "PolicyName" PolicyName.of_json in
       let policyARN =
-        field_map_exn json "PolicyARN" ResourceIdMaxLen1600.of_json in
-      make ~creationTime ?alarms ?targetTrackingScalingPolicyConfiguration
-        ?stepScalingPolicyConfiguration ~policyType ~scalableDimension
-        ~resourceId ~serviceNamespace ~policyName ~policyARN ()
+        field_map json__ "PolicyARN" ResourceIdMaxLen1600.of_json in
+      make ?creationTime ?alarms ?predictiveScalingPolicyConfiguration
+        ?targetTrackingScalingPolicyConfiguration
+        ?stepScalingPolicyConfiguration ?policyType ?scalableDimension
+        ?resourceId ?serviceNamespace ?policyName ?policyARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a scaling policy to use with Application Auto Scaling. For more information about configuring scaling policies for a specific service, see Getting started with Application Auto Scaling in the Application Auto Scaling User Guide."]
+       "Represents a scaling policy to use with Application Auto Scaling. For more information about configuring scaling policies for a specific service, see Amazon Web Services services that you can use with Application Auto Scaling in the Application Auto Scaling User Guide."]
 module ScalingActivity =
   struct
     type nonrec t =
       {
-      activityId: ResourceId.t
+      activityId: ResourceId.t option
         [@ocaml.doc "The unique identifier of the scaling activity."];
-      serviceNamespace: ServiceNamespace.t
+      serviceNamespace: ServiceNamespace.t option
         [@ocaml.doc
           "The namespace of the Amazon Web Services service that provides the resource, or a custom-resource."];
-      resourceId: ResourceIdMaxLen1600.t
+      resourceId: ResourceIdMaxLen1600.t option
         [@ocaml.doc
-          "The identifier of the resource associated with the scaling activity. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
-      scalableDimension: ScalableDimension.t
+          "The identifier of the resource associated with the scaling activity. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
+      scalableDimension: ScalableDimension.t option
         [@ocaml.doc
-          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."];
-      description: XmlString.t
+          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."];
+      description: XmlString.t option
         [@ocaml.doc
           "A simple description of what action the scaling activity intends to accomplish."];
-      cause: XmlString.t
+      cause: XmlString.t option
         [@ocaml.doc
           "A simple description of what caused the scaling activity to happen."];
-      startTime: TimestampType.t
+      startTime: TimestampType.t option
         [@ocaml.doc
           "The Unix timestamp for when the scaling activity began."];
       endTime: TimestampType.t option
         [@ocaml.doc
           "The Unix timestamp for when the scaling activity ended."];
-      statusCode: ScalingActivityStatusCode.t
+      statusCode: ScalingActivityStatusCode.t option
         [@ocaml.doc "Indicates the status of the scaling activity."];
       statusMessage: XmlString.t option
         [@ocaml.doc
           "A simple message about the current status of the scaling activity."];
       details: XmlString.t option
-        [@ocaml.doc "The details about the scaling activity."]}
-    let context_ = "ScalingActivity"
-    let make ?endTime =
-      fun ?statusMessage ->
-        fun ?details ->
-          fun ~activityId ->
-            fun ~serviceNamespace ->
-              fun ~resourceId ->
-                fun ~scalableDimension ->
-                  fun ~description ->
-                    fun ~cause ->
-                      fun ~startTime ->
-                        fun ~statusCode ->
-                          fun () ->
-                            {
-                              endTime;
-                              statusMessage;
-                              details;
-                              activityId;
-                              serviceNamespace;
-                              resourceId;
-                              scalableDimension;
-                              description;
-                              cause;
-                              startTime;
-                              statusCode
-                            }
+        [@ocaml.doc "The details about the scaling activity."];
+      notScaledReasons: NotScaledReasons.t option
+        [@ocaml.doc
+          "Machine-readable data that describes the reason for a not scaled activity. Only available when DescribeScalingActivities includes not scaled activities."]}
+    let make ?activityId =
+      fun ?serviceNamespace ->
+        fun ?resourceId ->
+          fun ?scalableDimension ->
+            fun ?description ->
+              fun ?cause ->
+                fun ?startTime ->
+                  fun ?endTime ->
+                    fun ?statusCode ->
+                      fun ?statusMessage ->
+                        fun ?details ->
+                          fun ?notScaledReasons ->
+                            fun () ->
+                              {
+                                activityId;
+                                serviceNamespace;
+                                resourceId;
+                                scalableDimension;
+                                description;
+                                cause;
+                                startTime;
+                                endTime;
+                                statusCode;
+                                statusMessage;
+                                details;
+                                notScaledReasons
+                              }
     let to_value x =
       structure_to_value
-        [("ActivityId", (Some (ResourceId.to_value x.activityId)));
+        [("ActivityId", (Option.map x.activityId ~f:ResourceId.to_value));
         ("ServiceNamespace",
-          (Some (ServiceNamespace.to_value x.serviceNamespace)));
-        ("ResourceId", (Some (ResourceIdMaxLen1600.to_value x.resourceId)));
+          (Option.map x.serviceNamespace ~f:ServiceNamespace.to_value));
+        ("ResourceId",
+          (Option.map x.resourceId ~f:ResourceIdMaxLen1600.to_value));
         ("ScalableDimension",
-          (Some (ScalableDimension.to_value x.scalableDimension)));
-        ("Description", (Some (XmlString.to_value x.description)));
-        ("Cause", (Some (XmlString.to_value x.cause)));
-        ("StartTime", (Some (TimestampType.to_value x.startTime)));
+          (Option.map x.scalableDimension ~f:ScalableDimension.to_value));
+        ("Description", (Option.map x.description ~f:XmlString.to_value));
+        ("Cause", (Option.map x.cause ~f:XmlString.to_value));
+        ("StartTime", (Option.map x.startTime ~f:TimestampType.to_value));
         ("EndTime", (Option.map x.endTime ~f:TimestampType.to_value));
         ("StatusCode",
-          (Some (ScalingActivityStatusCode.to_value x.statusCode)));
+          (Option.map x.statusCode ~f:ScalingActivityStatusCode.to_value));
         ("StatusMessage", (Option.map x.statusMessage ~f:XmlString.to_value));
-        ("Details", (Option.map x.details ~f:XmlString.to_value))]
+        ("Details", (Option.map x.details ~f:XmlString.to_value));
+        ("NotScaledReasons",
+          (Option.map x.notScaledReasons ~f:NotScaledReasons.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let notScaledReasons =
+        (Option.map ~f:NotScaledReasons.of_xml)
+          (Xml.child xml_arg0 "NotScaledReasons") in
       let details =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "Details") in
       let statusMessage =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "StatusMessage") in
       let statusCode =
-        ScalingActivityStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StatusCode") in
+        (Option.map ~f:ScalingActivityStatusCode.of_xml)
+          (Xml.child xml_arg0 "StatusCode") in
       let endTime =
         (Option.map ~f:TimestampType.of_xml) (Xml.child xml_arg0 "EndTime") in
       let startTime =
-        TimestampType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
+        (Option.map ~f:TimestampType.of_xml) (Xml.child xml_arg0 "StartTime") in
       let cause =
-        XmlString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Cause") in
+        (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "Cause") in
       let description =
-        XmlString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
+        (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "Description") in
       let scalableDimension =
-        ScalableDimension.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScalableDimension") in
+        (Option.map ~f:ScalableDimension.of_xml)
+          (Xml.child xml_arg0 "ScalableDimension") in
       let resourceId =
-        ResourceIdMaxLen1600.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:ResourceIdMaxLen1600.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
       let serviceNamespace =
-        ServiceNamespace.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
+        (Option.map ~f:ServiceNamespace.of_xml)
+          (Xml.child xml_arg0 "ServiceNamespace") in
       let activityId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ActivityId") in
-      make ?details ?statusMessage ~statusCode ?endTime ~startTime ~cause
-        ~description ~scalableDimension ~resourceId ~serviceNamespace
-        ~activityId ()
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ActivityId") in
+      make ?notScaledReasons ?details ?statusMessage ?statusCode ?endTime
+        ?startTime ?cause ?description ?scalableDimension ?resourceId
+        ?serviceNamespace ?activityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "Details" XmlString.of_json in
-      let statusMessage = field_map json "StatusMessage" XmlString.of_json in
+    let of_json json__ =
+      let notScaledReasons =
+        field_map json__ "NotScaledReasons" NotScaledReasons.of_json in
+      let details = field_map json__ "Details" XmlString.of_json in
+      let statusMessage = field_map json__ "StatusMessage" XmlString.of_json in
       let statusCode =
-        field_map_exn json "StatusCode" ScalingActivityStatusCode.of_json in
-      let endTime = field_map json "EndTime" TimestampType.of_json in
-      let startTime = field_map_exn json "StartTime" TimestampType.of_json in
-      let cause = field_map_exn json "Cause" XmlString.of_json in
-      let description = field_map_exn json "Description" XmlString.of_json in
+        field_map json__ "StatusCode" ScalingActivityStatusCode.of_json in
+      let endTime = field_map json__ "EndTime" TimestampType.of_json in
+      let startTime = field_map json__ "StartTime" TimestampType.of_json in
+      let cause = field_map json__ "Cause" XmlString.of_json in
+      let description = field_map json__ "Description" XmlString.of_json in
       let scalableDimension =
-        field_map_exn json "ScalableDimension" ScalableDimension.of_json in
+        field_map json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
-      let activityId = field_map_exn json "ActivityId" ResourceId.of_json in
-      make ?details ?statusMessage ~statusCode ?endTime ~startTime ~cause
-        ~description ~scalableDimension ~resourceId ~serviceNamespace
-        ~activityId ()
+        field_map json__ "ServiceNamespace" ServiceNamespace.of_json in
+      let activityId = field_map json__ "ActivityId" ResourceId.of_json in
+      make ?notScaledReasons ?details ?statusMessage ?statusCode ?endTime
+        ?startTime ?cause ?description ?scalableDimension ?resourceId
+        ?serviceNamespace ?activityId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a scaling activity."]
 module ScalableTarget =
   struct
     type nonrec t =
       {
-      serviceNamespace: ServiceNamespace.t
+      serviceNamespace: ServiceNamespace.t option
         [@ocaml.doc
           "The namespace of the Amazon Web Services service that provides the resource, or a custom-resource."];
-      resourceId: ResourceIdMaxLen1600.t
+      resourceId: ResourceIdMaxLen1600.t option
         [@ocaml.doc
-          "The identifier of the resource associated with the scalable target. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
-      scalableDimension: ScalableDimension.t
+          "The identifier of the resource associated with the scalable target. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
+      scalableDimension: ScalableDimension.t option
         [@ocaml.doc
-          "The scalable dimension associated with the scalable target. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."];
-      minCapacity: ResourceCapacity.t
+          "The scalable dimension associated with the scalable target. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."];
+      minCapacity: ResourceCapacity.t option
         [@ocaml.doc
           "The minimum value to scale to in response to a scale-in activity."];
-      maxCapacity: ResourceCapacity.t
+      maxCapacity: ResourceCapacity.t option
         [@ocaml.doc
           "The maximum value to scale to in response to a scale-out activity."];
-      roleARN: ResourceIdMaxLen1600.t
+      predictedCapacity: ResourceCapacity.t option
+        [@ocaml.doc "The predicted capacity of the scalable target."];
+      roleARN: ResourceIdMaxLen1600.t option
         [@ocaml.doc
           "The ARN of an IAM role that allows Application Auto Scaling to modify the scalable target on your behalf."];
-      creationTime: TimestampType.t
+      creationTime: TimestampType.t option
         [@ocaml.doc
           "The Unix timestamp for when the scalable target was created."];
-      suspendedState: SuspendedState.t option }
-    let context_ = "ScalableTarget"
-    let make ?suspendedState =
-      fun ~serviceNamespace ->
-        fun ~resourceId ->
-          fun ~scalableDimension ->
-            fun ~minCapacity ->
-              fun ~maxCapacity ->
-                fun ~roleARN ->
-                  fun ~creationTime ->
-                    fun () ->
-                      {
-                        suspendedState;
-                        serviceNamespace;
-                        resourceId;
-                        scalableDimension;
-                        minCapacity;
-                        maxCapacity;
-                        roleARN;
-                        creationTime
-                      }
+      suspendedState: SuspendedState.t option
+        [@ocaml.doc
+          "Specifies whether the scaling activities for a scalable target are in a suspended state."];
+      scalableTargetARN: XmlString.t option
+        [@ocaml.doc "The ARN of the scalable target."]}
+    let make ?serviceNamespace =
+      fun ?resourceId ->
+        fun ?scalableDimension ->
+          fun ?minCapacity ->
+            fun ?maxCapacity ->
+              fun ?predictedCapacity ->
+                fun ?roleARN ->
+                  fun ?creationTime ->
+                    fun ?suspendedState ->
+                      fun ?scalableTargetARN ->
+                        fun () ->
+                          {
+                            serviceNamespace;
+                            resourceId;
+                            scalableDimension;
+                            minCapacity;
+                            maxCapacity;
+                            predictedCapacity;
+                            roleARN;
+                            creationTime;
+                            suspendedState;
+                            scalableTargetARN
+                          }
     let to_value x =
       structure_to_value
         [("ServiceNamespace",
-           (Some (ServiceNamespace.to_value x.serviceNamespace)));
-        ("ResourceId", (Some (ResourceIdMaxLen1600.to_value x.resourceId)));
+           (Option.map x.serviceNamespace ~f:ServiceNamespace.to_value));
+        ("ResourceId",
+          (Option.map x.resourceId ~f:ResourceIdMaxLen1600.to_value));
         ("ScalableDimension",
-          (Some (ScalableDimension.to_value x.scalableDimension)));
-        ("MinCapacity", (Some (ResourceCapacity.to_value x.minCapacity)));
-        ("MaxCapacity", (Some (ResourceCapacity.to_value x.maxCapacity)));
-        ("RoleARN", (Some (ResourceIdMaxLen1600.to_value x.roleARN)));
-        ("CreationTime", (Some (TimestampType.to_value x.creationTime)));
+          (Option.map x.scalableDimension ~f:ScalableDimension.to_value));
+        ("MinCapacity",
+          (Option.map x.minCapacity ~f:ResourceCapacity.to_value));
+        ("MaxCapacity",
+          (Option.map x.maxCapacity ~f:ResourceCapacity.to_value));
+        ("PredictedCapacity",
+          (Option.map x.predictedCapacity ~f:ResourceCapacity.to_value));
+        ("RoleARN", (Option.map x.roleARN ~f:ResourceIdMaxLen1600.to_value));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:TimestampType.to_value));
         ("SuspendedState",
-          (Option.map x.suspendedState ~f:SuspendedState.to_value))]
+          (Option.map x.suspendedState ~f:SuspendedState.to_value));
+        ("ScalableTargetARN",
+          (Option.map x.scalableTargetARN ~f:XmlString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let scalableTargetARN =
+        (Option.map ~f:XmlString.of_xml)
+          (Xml.child xml_arg0 "ScalableTargetARN") in
       let suspendedState =
         (Option.map ~f:SuspendedState.of_xml)
           (Xml.child xml_arg0 "SuspendedState") in
       let creationTime =
-        TimestampType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationTime") in
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
       let roleARN =
-        ResourceIdMaxLen1600.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
+        (Option.map ~f:ResourceIdMaxLen1600.of_xml)
+          (Xml.child xml_arg0 "RoleARN") in
+      let predictedCapacity =
+        (Option.map ~f:ResourceCapacity.of_xml)
+          (Xml.child xml_arg0 "PredictedCapacity") in
       let maxCapacity =
-        ResourceCapacity.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxCapacity") in
+        (Option.map ~f:ResourceCapacity.of_xml)
+          (Xml.child xml_arg0 "MaxCapacity") in
       let minCapacity =
-        ResourceCapacity.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MinCapacity") in
+        (Option.map ~f:ResourceCapacity.of_xml)
+          (Xml.child xml_arg0 "MinCapacity") in
       let scalableDimension =
-        ScalableDimension.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScalableDimension") in
+        (Option.map ~f:ScalableDimension.of_xml)
+          (Xml.child xml_arg0 "ScalableDimension") in
       let resourceId =
-        ResourceIdMaxLen1600.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:ResourceIdMaxLen1600.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
       let serviceNamespace =
-        ServiceNamespace.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
-      make ?suspendedState ~creationTime ~roleARN ~maxCapacity ~minCapacity
-        ~scalableDimension ~resourceId ~serviceNamespace ()
+        (Option.map ~f:ServiceNamespace.of_xml)
+          (Xml.child xml_arg0 "ServiceNamespace") in
+      make ?scalableTargetARN ?suspendedState ?creationTime ?roleARN
+        ?predictedCapacity ?maxCapacity ?minCapacity ?scalableDimension
+        ?resourceId ?serviceNamespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let scalableTargetARN =
+        field_map json__ "ScalableTargetARN" XmlString.of_json in
       let suspendedState =
-        field_map json "SuspendedState" SuspendedState.of_json in
+        field_map json__ "SuspendedState" SuspendedState.of_json in
       let creationTime =
-        field_map_exn json "CreationTime" TimestampType.of_json in
-      let roleARN = field_map_exn json "RoleARN" ResourceIdMaxLen1600.of_json in
+        field_map json__ "CreationTime" TimestampType.of_json in
+      let roleARN = field_map json__ "RoleARN" ResourceIdMaxLen1600.of_json in
+      let predictedCapacity =
+        field_map json__ "PredictedCapacity" ResourceCapacity.of_json in
       let maxCapacity =
-        field_map_exn json "MaxCapacity" ResourceCapacity.of_json in
+        field_map json__ "MaxCapacity" ResourceCapacity.of_json in
       let minCapacity =
-        field_map_exn json "MinCapacity" ResourceCapacity.of_json in
+        field_map json__ "MinCapacity" ResourceCapacity.of_json in
       let scalableDimension =
-        field_map_exn json "ScalableDimension" ScalableDimension.of_json in
+        field_map json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
-      make ?suspendedState ~creationTime ~roleARN ~maxCapacity ~minCapacity
-        ~scalableDimension ~resourceId ~serviceNamespace ()
+        field_map json__ "ServiceNamespace" ServiceNamespace.of_json in
+      make ?scalableTargetARN ?suspendedState ?creationTime ?roleARN
+        ?predictedCapacity ?maxCapacity ?minCapacity ?scalableDimension
+        ?resourceId ?serviceNamespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a scalable target."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      resourceName: AmazonResourceName.t option
+        [@ocaml.doc
+          "The name of the Application Auto Scaling resource. This value is an Amazon Resource Name (ARN)."]}
+    let make ?message =
+      fun ?resourceName -> fun () -> { message; resourceName }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("ResourceName",
+          (Option.map x.resourceName ~f:AmazonResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceName =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "ResourceName") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceName =
+        field_map json__ "ResourceName" AmazonResourceName.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?resourceName ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified resource doesn't exist."]
+module ValidationException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An exception was thrown for a validation issue. Review the available parameters for the API request."]
+module TagKeyList =
+  struct
+    type nonrec t = TagKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TooManyTagsException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      resourceName: AmazonResourceName.t option
+        [@ocaml.doc
+          "The name of the Application Auto Scaling resource. This value is an Amazon Resource Name (ARN)."]}
+    let make ?message =
+      fun ?resourceName -> fun () -> { message; resourceName }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("ResourceName",
+          (Option.map x.resourceName ~f:AmazonResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceName =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "ResourceName") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?resourceName ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceName =
+        field_map json__ "ResourceName" AmazonResourceName.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?resourceName ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request contains too many tags. Try the request again with fewer tags."]
+module TagMap =
+  struct
+    type nonrec t = (TagKey.t * TagValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((TagKey.of_string chopped),
+                              (TagValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (TagKey.to_value x) |>
+                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:TagKey.of_string
+        ~of_json:TagValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ConcurrentUpdateException =
   struct
     type nonrec t = {
@@ -1850,8 +3682,8 @@ module ConcurrentUpdateException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1870,8 +3702,8 @@ module InternalServiceException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service encountered an internal error."]
@@ -1889,32 +3721,12 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A per-account resource limit is exceeded. For more information, see Application Auto Scaling service quotas."]
-module ValidationException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An exception was thrown for a validation issue. Review the available parameters for the API request."]
 module ObjectNotFoundException =
   struct
     type nonrec t = {
@@ -1929,8 +3741,8 @@ module ObjectNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1949,12 +3761,75 @@ module FailedResourceAccessException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Failed access to resources caused an exception. This exception is thrown when Application Auto Scaling is unable to retrieve the alarms associated with a scaling policy due to a client error, for example, if the role ARN specified for a scalable target does not have permission to call the CloudWatch DescribeAlarms on your behalf."]
+module CapacityForecast =
+  struct
+    type nonrec t =
+      {
+      timestamps: PredictiveScalingForecastTimestamps.t option
+        [@ocaml.doc "The timestamps for the data points, in UTC format."];
+      values: PredictiveScalingForecastValues.t option
+        [@ocaml.doc "The values of the data points."]}
+    let make ?timestamps = fun ?values -> fun () -> { timestamps; values }
+    let to_value x =
+      structure_to_value
+        [("Timestamps",
+           (Option.map x.timestamps
+              ~f:PredictiveScalingForecastTimestamps.to_value));
+        ("Values",
+          (Option.map x.values ~f:PredictiveScalingForecastValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:PredictiveScalingForecastValues.of_xml)
+          (Xml.child xml_arg0 "Values") in
+      let timestamps =
+        (Option.map ~f:PredictiveScalingForecastTimestamps.of_xml)
+          (Xml.child xml_arg0 "Timestamps") in
+      make ?values ?timestamps ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map json__ "Values" PredictiveScalingForecastValues.of_json in
+      let timestamps =
+        field_map json__ "Timestamps"
+          PredictiveScalingForecastTimestamps.of_json in
+      make ?values ?timestamps ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A GetPredictiveScalingForecast call returns the capacity forecast for a predictive scaling policy. This structure includes the data points for that capacity forecast, along with the timestamps of those data points."]
+module LoadForecasts =
+  struct
+    type nonrec t = LoadForecast.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LoadForecast.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LoadForecast.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LoadForecasts" ~of_json:LoadForecast.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module InvalidNextTokenException =
   struct
     type nonrec t = {
@@ -1969,8 +3844,8 @@ module InvalidNextTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The next token supplied was invalid."]
@@ -1978,6 +3853,9 @@ module ScheduledActions =
   struct
     type nonrec t = ScheduledAction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduledAction.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2018,6 +3896,9 @@ module ResourceIdsMaxLen1600 =
     type nonrec t = ResourceIdMaxLen1600.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceIdMaxLen1600.to_value)) |>
         (fun x -> `List x)
@@ -2044,6 +3925,9 @@ module ScalingPolicies =
   struct
     type nonrec t = ScalingPolicy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScalingPolicy.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2068,6 +3952,9 @@ module ScalingActivities =
   struct
     type nonrec t = ScalingActivity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScalingActivity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2089,10 +3976,26 @@ module ScalingActivities =
         j
     let to_json v = composed_to_json to_value v
   end
+module IncludeNotScaledActivities =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module ScalableTargets =
   struct
     type nonrec t = ScalableTarget.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScalableTarget.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2113,16 +4016,194 @@ module ScalableTargets =
       list_of_json ~kind:"ScalableTargets" ~of_json:ScalableTarget.of_json j
     let to_json v = composed_to_json to_value v
   end
-module RegisterScalableTargetResponse =
+module UntagResourceResponse =
   struct
     type nonrec t = unit
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes tags from an Application Auto Scaling scalable target. To delete a tag, specify the tag key and the Application Auto Scaling scalable target."]
+module UntagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc
+          "Identifies the Application Auto Scaling scalable target from which to remove tags. For example: arn:aws:application-autoscaling:us-east-1:123456789012:scalable-target/1234abcd56ab78cd901ef1234567890ab123 To get the ARN for a scalable target, use DescribeScalableTargets."];
+      tagKeys: TagKeyList.t
+        [@ocaml.doc
+          "One or more tag keys. Specify only the tag keys, not the tag values."]}
+    let context_ = "UntagResourceRequest"
+    let make ~resourceARN =
+      fun ~tagKeys -> fun () -> { resourceARN; tagKeys }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("TagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagKeys =
+        TagKeyList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~tagKeys ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes tags from an Application Auto Scaling scalable target. To delete a tag, specify the tag key and the Application Auto Scaling scalable target."]
+module TagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyTagsException of TooManyTagsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyTagsException e ->
+          `Assoc
+            [("error", (`String "TooManyTagsException"));
+            ("details", (TooManyTagsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds or edits tags on an Application Auto Scaling scalable target. Each tag consists of a tag key and a tag value, which are both case-sensitive strings. To add a tag, specify a new tag key and a tag value. To edit a tag, specify an existing tag key and a new tag value. You can use this operation to tag an Application Auto Scaling scalable target, but you cannot tag a scaling policy or scheduled action. You can also add tags to an Application Auto Scaling scalable target while creating it (RegisterScalableTarget). For general information about tags, including the format and syntax, see Tagging your Amazon Web Services resources in the Amazon Web Services General Reference. Use tags to control access to a scalable target. For more information, see Tagging support for Application Auto Scaling in the Application Auto Scaling User Guide."]
+module TagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc
+          "Identifies the Application Auto Scaling scalable target that you want to apply tags to. For example: arn:aws:application-autoscaling:us-east-1:123456789012:scalable-target/1234abcd56ab78cd901ef1234567890ab123 To get the ARN for a scalable target, use DescribeScalableTargets."];
+      tags: TagMap.t
+        [@ocaml.doc
+          "The tags assigned to the resource. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a tag key and a tag value. You cannot have more than one tag on an Application Auto Scaling scalable target with the same tag key. If you specify an existing tag key with a different tag value, Application Auto Scaling replaces the current tag value with the specified one. For information about the rules that apply to tag keys and tag values, see User-defined tag restrictions in the Amazon Web Services Billing User Guide."]}
+    let context_ = "TagResourceRequest"
+    let make ~resourceARN = fun ~tags -> fun () -> { resourceARN; tags }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("Tags", (Some (TagMap.to_value x.tags)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        TagMap.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~tags ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds or edits tags on an Application Auto Scaling scalable target. Each tag consists of a tag key and a tag value, which are both case-sensitive strings. To add a tag, specify a new tag key and a tag value. To edit a tag, specify an existing tag key and a new tag value. You can use this operation to tag an Application Auto Scaling scalable target, but you cannot tag a scaling policy or scheduled action. You can also add tags to an Application Auto Scaling scalable target while creating it (RegisterScalableTarget). For general information about tags, including the format and syntax, see Tagging your Amazon Web Services resources in the Amazon Web Services General Reference. Use tags to control access to a scalable target. For more information, see Tagging support for Application Auto Scaling in the Application Auto Scaling User Guide."]
+module RegisterScalableTargetResponse =
+  struct
+    type nonrec t =
+      {
+      scalableTargetARN: XmlString.t option
+        [@ocaml.doc "The ARN of the scalable target."]}
     type nonrec error =
       [ `ConcurrentUpdateException of ConcurrentUpdateException.t 
       | `InternalServiceException of InternalServiceException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
+    let make ?scalableTargetARN = fun () -> { scalableTargetARN }
     let error_of_json name json =
       match name with
       | "ConcurrentUpdateException" ->
@@ -2171,15 +4252,24 @@ module RegisterScalableTargetResponse =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    let to_value x =
+      structure_to_value
+        [("ScalableTargetARN",
+           (Option.map x.scalableTargetARN ~f:XmlString.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let scalableTargetARN =
+        (Option.map ~f:XmlString.of_xml)
+          (Xml.child xml_arg0 "ScalableTargetARN") in
+      make ?scalableTargetARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let scalableTargetARN =
+        field_map json__ "ScalableTargetARN" XmlString.of_json in
+      make ?scalableTargetARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers or updates a scalable target. A scalable target is a resource that Application Auto Scaling can scale out and scale in. Scalable targets are uniquely identified by the combination of resource ID, scalable dimension, and namespace. When you register a new scalable target, you must specify values for minimum and maximum capacity. Current capacity will be adjusted within the specified range when scaling starts. Application Auto Scaling scaling policies will not scale capacity to values that are outside of this range. After you register a scalable target, you do not need to register it again to use other Application Auto Scaling operations. To see which resources have been registered, use DescribeScalableTargets. You can also view the scaling policies for a service namespace by using DescribeScalableTargets. If you no longer need a scalable target, you can deregister it by using DeregisterScalableTarget. To update a scalable target, specify the parameters that you want to change. Include the parameters that identify the scalable target: resource ID, scalable dimension, and namespace. Any parameters that you don't specify are not changed by this update request. If you call the RegisterScalableTarget API to update an existing scalable target, Application Auto Scaling retrieves the current capacity of the resource. If it is below the minimum capacity or above the maximum capacity, Application Auto Scaling adjusts the capacity of the scalable target to place it within these bounds, even if you don't include the MinCapacity or MaxCapacity request parameters."]
+       "Registers or updates a scalable target, which is the resource that you want to scale. Scalable targets are uniquely identified by the combination of resource ID, scalable dimension, and namespace, which represents some capacity dimension of the underlying service. When you register a new scalable target, you must specify values for the minimum and maximum capacity. If the specified resource is not active in the target service, this operation does not change the resource's current capacity. Otherwise, it changes the resource's current capacity to a value that is inside of this range. If you add a scaling policy, current capacity is adjustable within the specified range when scaling starts. Application Auto Scaling scaling policies will not scale capacity to values that are outside of the minimum and maximum range. After you register a scalable target, you do not need to register it again to use other Application Auto Scaling operations. To see which resources have been registered, use DescribeScalableTargets. You can also view the scaling policies for a service namespace by using DescribeScalableTargets. If you no longer need a scalable target, you can deregister it by using DeregisterScalableTarget. To update a scalable target, specify the parameters that you want to change. Include the parameters that identify the scalable target: resource ID, scalable dimension, and namespace. Any parameters that you don't specify are not changed by this update request. If you call the RegisterScalableTarget API operation to create a scalable target, there might be a brief delay until the operation achieves eventual consistency. You might become aware of this brief delay if you get unexpected errors when performing sequential operations. The typical strategy is to retry the request, and some Amazon Web Services SDKs include automatic backoff and retry logic. If you call the RegisterScalableTarget API operation to update an existing scalable target, Application Auto Scaling retrieves the current capacity of the resource. If it's below the minimum capacity or above the maximum capacity, Application Auto Scaling adjusts the capacity of the scalable target to place it within these bounds, even if you don't include the MinCapacity or MaxCapacity request parameters."]
 module RegisterScalableTargetRequest =
   struct
     type nonrec t =
@@ -2189,40 +4279,45 @@ module RegisterScalableTargetRequest =
           "The namespace of the Amazon Web Services service that provides the resource. For a resource provided by your own application or service, use custom-resource instead."];
       resourceId: ResourceIdMaxLen1600.t
         [@ocaml.doc
-          "The identifier of the resource that is associated with the scalable target. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
+          "The identifier of the resource that is associated with the scalable target. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
       scalableDimension: ScalableDimension.t
         [@ocaml.doc
-          "The scalable dimension associated with the scalable target. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."];
+          "The scalable dimension associated with the scalable target. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."];
       minCapacity: ResourceCapacity.t option
         [@ocaml.doc
-          "The minimum value that you plan to scale in to. When a scaling policy is in effect, Application Auto Scaling can scale in (contract) as needed to the minimum capacity limit in response to changing demand. This property is required when registering a new scalable target. For certain resources, the minimum value allowed is 0. This includes Lambda provisioned concurrency, Spot Fleet, ECS services, Aurora DB clusters, EMR clusters, and custom resources. For all other resources, the minimum value allowed is 1."];
+          "The minimum value that you plan to scale in to. When a scaling policy is in effect, Application Auto Scaling can scale in (contract) as needed to the minimum capacity limit in response to changing demand. This property is required when registering a new scalable target. For the following resources, the minimum value allowed is 0. AppStream 2.0 fleets Aurora DB clusters ECS services EMR clusters Lambda provisioned concurrency SageMaker endpoint variants SageMaker inference components SageMaker serverless endpoint provisioned concurrency Spot Fleets custom resources It's strongly recommended that you specify a value greater than 0. A value greater than 0 means that data points are continuously reported to CloudWatch that scaling policies can use to scale on a metric like average CPU utilization. For all other resources, the minimum allowed value depends on the type of resource that you are using. If you provide a value that is lower than what a resource can accept, an error occurs. In which case, the error message will provide the minimum value that the resource can accept."];
       maxCapacity: ResourceCapacity.t option
         [@ocaml.doc
-          "The maximum value that you plan to scale out to. When a scaling policy is in effect, Application Auto Scaling can scale out (expand) as needed to the maximum capacity limit in response to changing demand. This property is required when registering a new scalable target. Although you can specify a large maximum capacity, note that service quotas may impose lower limits. Each service has its own default quotas for the maximum capacity of the resource. If you want to specify a higher limit, you can request an increase. For more information, consult the documentation for that service. For information about the default quotas for each service, see Service Endpoints and Quotas in the Amazon Web Services General Reference."];
+          "The maximum value that you plan to scale out to. When a scaling policy is in effect, Application Auto Scaling can scale out (expand) as needed to the maximum capacity limit in response to changing demand. This property is required when registering a new scalable target. Although you can specify a large maximum capacity, note that service quotas might impose lower limits. Each service has its own default quotas for the maximum capacity of the resource. If you want to specify a higher limit, you can request an increase. For more information, consult the documentation for that service. For information about the default quotas for each service, see Service endpoints and quotas in the Amazon Web Services General Reference."];
       roleARN: ResourceIdMaxLen1600.t option
         [@ocaml.doc
-          "This parameter is required for services that do not support service-linked roles (such as Amazon EMR), and it must specify the ARN of an IAM role that allows Application Auto Scaling to modify the scalable target on your behalf. If the service supports service-linked roles, Application Auto Scaling uses a service-linked role, which it creates if it does not yet exist. For more information, see Application Auto Scaling IAM roles."];
+          "This parameter is required for services that do not support service-linked roles (such as Amazon EMR), and it must specify the ARN of an IAM role that allows Application Auto Scaling to modify the scalable target on your behalf. If the service supports service-linked roles, Application Auto Scaling uses a service-linked role, which it creates if it does not yet exist. For more information, see How Application Auto Scaling works with IAM."];
       suspendedState: SuspendedState.t option
         [@ocaml.doc
-          "An embedded object that contains attributes and attribute values that are used to suspend and resume automatic scaling. Setting the value of an attribute to true suspends the specified scaling activities. Setting it to false (default) resumes the specified scaling activities. Suspension Outcomes For DynamicScalingInSuspended, while a suspension is in effect, all scale-in activities that are triggered by a scaling policy are suspended. For DynamicScalingOutSuspended, while a suspension is in effect, all scale-out activities that are triggered by a scaling policy are suspended. For ScheduledScalingSuspended, while a suspension is in effect, all scaling activities that involve scheduled actions are suspended. For more information, see Suspending and resuming scaling in the Application Auto Scaling User Guide."]}
+          "An embedded object that contains attributes and attribute values that are used to suspend and resume automatic scaling. Setting the value of an attribute to true suspends the specified scaling activities. Setting it to false (default) resumes the specified scaling activities. Suspension Outcomes For DynamicScalingInSuspended, while a suspension is in effect, all scale-in activities that are triggered by a scaling policy are suspended. For DynamicScalingOutSuspended, while a suspension is in effect, all scale-out activities that are triggered by a scaling policy are suspended. For ScheduledScalingSuspended, while a suspension is in effect, all scaling activities that involve scheduled actions are suspended. For more information, see Suspend and resume scaling in the Application Auto Scaling User Guide."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Assigns one or more tags to the scalable target. Use this parameter to tag the scalable target when it is created. To tag an existing scalable target, use the TagResource operation. Each tag consists of a tag key and a tag value. Both the tag key and the tag value are required. You cannot have more than one tag on a scalable target with the same tag key. Use tags to control access to a scalable target. For more information, see Tagging support for Application Auto Scaling in the Application Auto Scaling User Guide."]}
     let context_ = "RegisterScalableTargetRequest"
     let make ?minCapacity =
       fun ?maxCapacity ->
         fun ?roleARN ->
           fun ?suspendedState ->
-            fun ~serviceNamespace ->
-              fun ~resourceId ->
-                fun ~scalableDimension ->
-                  fun () ->
-                    {
-                      minCapacity;
-                      maxCapacity;
-                      roleARN;
-                      suspendedState;
-                      serviceNamespace;
-                      resourceId;
-                      scalableDimension
-                    }
+            fun ?tags ->
+              fun ~serviceNamespace ->
+                fun ~resourceId ->
+                  fun ~scalableDimension ->
+                    fun () ->
+                      {
+                        minCapacity;
+                        maxCapacity;
+                        roleARN;
+                        suspendedState;
+                        tags;
+                        serviceNamespace;
+                        resourceId;
+                        scalableDimension
+                      }
     let to_value x =
       structure_to_value
         [("ServiceNamespace",
@@ -2236,9 +4331,11 @@ module RegisterScalableTargetRequest =
           (Option.map x.maxCapacity ~f:ResourceCapacity.to_value));
         ("RoleARN", (Option.map x.roleARN ~f:ResourceIdMaxLen1600.to_value));
         ("SuspendedState",
-          (Option.map x.suspendedState ~f:SuspendedState.to_value))]
+          (Option.map x.suspendedState ~f:SuspendedState.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let suspendedState =
         (Option.map ~f:SuspendedState.of_xml)
           (Xml.child xml_arg0 "SuspendedState") in
@@ -2260,26 +4357,29 @@ module RegisterScalableTargetRequest =
       let serviceNamespace =
         ServiceNamespace.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
-      make ?suspendedState ?roleARN ?maxCapacity ?minCapacity
+      make ?tags ?suspendedState ?roleARN ?maxCapacity ?minCapacity
         ~scalableDimension ~resourceId ~serviceNamespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let suspendedState =
-        field_map json "SuspendedState" SuspendedState.of_json in
-      let roleARN = field_map json "RoleARN" ResourceIdMaxLen1600.of_json in
-      let maxCapacity = field_map json "MaxCapacity" ResourceCapacity.of_json in
-      let minCapacity = field_map json "MinCapacity" ResourceCapacity.of_json in
+        field_map json__ "SuspendedState" SuspendedState.of_json in
+      let roleARN = field_map json__ "RoleARN" ResourceIdMaxLen1600.of_json in
+      let maxCapacity =
+        field_map json__ "MaxCapacity" ResourceCapacity.of_json in
+      let minCapacity =
+        field_map json__ "MinCapacity" ResourceCapacity.of_json in
       let scalableDimension =
-        field_map_exn json "ScalableDimension" ScalableDimension.of_json in
+        field_map_exn json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map_exn json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
-      make ?suspendedState ?roleARN ?maxCapacity ?minCapacity
+        field_map_exn json__ "ServiceNamespace" ServiceNamespace.of_json in
+      make ?tags ?suspendedState ?roleARN ?maxCapacity ?minCapacity
         ~scalableDimension ~resourceId ~serviceNamespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers or updates a scalable target. A scalable target is a resource that Application Auto Scaling can scale out and scale in. Scalable targets are uniquely identified by the combination of resource ID, scalable dimension, and namespace. When you register a new scalable target, you must specify values for minimum and maximum capacity. Current capacity will be adjusted within the specified range when scaling starts. Application Auto Scaling scaling policies will not scale capacity to values that are outside of this range. After you register a scalable target, you do not need to register it again to use other Application Auto Scaling operations. To see which resources have been registered, use DescribeScalableTargets. You can also view the scaling policies for a service namespace by using DescribeScalableTargets. If you no longer need a scalable target, you can deregister it by using DeregisterScalableTarget. To update a scalable target, specify the parameters that you want to change. Include the parameters that identify the scalable target: resource ID, scalable dimension, and namespace. Any parameters that you don't specify are not changed by this update request. If you call the RegisterScalableTarget API to update an existing scalable target, Application Auto Scaling retrieves the current capacity of the resource. If it is below the minimum capacity or above the maximum capacity, Application Auto Scaling adjusts the capacity of the scalable target to place it within these bounds, even if you don't include the MinCapacity or MaxCapacity request parameters."]
+       "Registers or updates a scalable target, which is the resource that you want to scale. Scalable targets are uniquely identified by the combination of resource ID, scalable dimension, and namespace, which represents some capacity dimension of the underlying service. When you register a new scalable target, you must specify values for the minimum and maximum capacity. If the specified resource is not active in the target service, this operation does not change the resource's current capacity. Otherwise, it changes the resource's current capacity to a value that is inside of this range. If you add a scaling policy, current capacity is adjustable within the specified range when scaling starts. Application Auto Scaling scaling policies will not scale capacity to values that are outside of the minimum and maximum range. After you register a scalable target, you do not need to register it again to use other Application Auto Scaling operations. To see which resources have been registered, use DescribeScalableTargets. You can also view the scaling policies for a service namespace by using DescribeScalableTargets. If you no longer need a scalable target, you can deregister it by using DeregisterScalableTarget. To update a scalable target, specify the parameters that you want to change. Include the parameters that identify the scalable target: resource ID, scalable dimension, and namespace. Any parameters that you don't specify are not changed by this update request. If you call the RegisterScalableTarget API operation to create a scalable target, there might be a brief delay until the operation achieves eventual consistency. You might become aware of this brief delay if you get unexpected errors when performing sequential operations. The typical strategy is to retry the request, and some Amazon Web Services SDKs include automatic backoff and retry logic. If you call the RegisterScalableTarget API operation to update an existing scalable target, Application Auto Scaling retrieves the current capacity of the resource. If it's below the minimum capacity or above the maximum capacity, Application Auto Scaling adjusts the capacity of the scalable target to place it within these bounds, even if you don't include the MinCapacity or MaxCapacity request parameters."]
 module PutScheduledActionResponse =
   struct
     type nonrec t = unit
@@ -2355,7 +4455,7 @@ module PutScheduledActionResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a scheduled action for an Application Auto Scaling scalable target. Each scalable target is identified by a service namespace, resource ID, and scalable dimension. A scheduled action applies to the scalable target identified by those three attributes. You cannot create a scheduled action until you have registered the resource as a scalable target. When start and end times are specified with a recurring schedule using a cron expression or rates, they form the boundaries for when the recurring action starts and stops. To update a scheduled action, specify the parameters that you want to change. If you don't specify start and end times, the old values are deleted. For more information, see Scheduled scaling in the Application Auto Scaling User Guide. If a scalable target is deregistered, the scalable target is no longer available to run scheduled actions. Any scheduled actions that were specified for the scalable target are deleted."]
+       "Creates or updates a scheduled action for an Application Auto Scaling scalable target. Each scalable target is identified by a service namespace, resource ID, and scalable dimension. A scheduled action applies to the scalable target identified by those three attributes. You cannot create a scheduled action until you have registered the resource as a scalable target. When you specify start and end times with a recurring schedule using a cron expression or rates, they form the boundaries for when the recurring action starts and stops. To update a scheduled action, specify the parameters that you want to change. If you don't specify start and end times, the old values are deleted. For more information, see Scheduled scaling in the Application Auto Scaling User Guide. If a scalable target is deregistered, the scalable target is no longer available to run scheduled actions. Any scheduled actions that were specified for the scalable target are deleted."]
 module PutScheduledActionRequest =
   struct
     type nonrec t =
@@ -2365,7 +4465,7 @@ module PutScheduledActionRequest =
           "The namespace of the Amazon Web Services service that provides the resource. For a resource provided by your own application or service, use custom-resource instead."];
       schedule: ResourceIdMaxLen1600.t option
         [@ocaml.doc
-          "The schedule for this action. The following formats are supported: At expressions - \"at(yyyy-mm-ddThh:mm:ss)\" Rate expressions - \"rate(value unit)\" Cron expressions - \"cron(fields)\" At expressions are useful for one-time schedules. Cron expressions are useful for scheduled actions that run periodically at a specified date and time, and rate expressions are useful for scheduled actions that run at a regular interval. At and cron expressions use Universal Coordinated Time (UTC) by default. The cron format consists of six fields separated by white spaces: \\[Minutes\\] \\[Hours\\] \\[Day_of_Month\\] \\[Month\\] \\[Day_of_Week\\] \\[Year\\]. For rate expressions, value is a positive integer and unit is minute | minutes | hour | hours | day | days. For more information and examples, see Example scheduled actions for Application Auto Scaling in the Application Auto Scaling User Guide."];
+          "The schedule for this action. The following formats are supported: At expressions - \"at(yyyy-mm-ddThh:mm:ss)\" Rate expressions - \"rate(value unit)\" Cron expressions - \"cron(fields)\" At expressions are useful for one-time schedules. Cron expressions are useful for scheduled actions that run periodically at a specified date and time, and rate expressions are useful for scheduled actions that run at a regular interval. At and cron expressions use Universal Coordinated Time (UTC) by default. The cron format consists of six fields separated by white spaces: \\[Minutes\\] \\[Hours\\] \\[Day_of_Month\\] \\[Month\\] \\[Day_of_Week\\] \\[Year\\]. For rate expressions, value is a positive integer and unit is minute | minutes | hour | hours | day | days. For more information, see Schedule recurring scaling actions using cron expressions in the Application Auto Scaling User Guide."];
       timezone: ResourceIdMaxLen1600.t option
         [@ocaml.doc
           "Specifies the time zone used when setting a scheduled action by using an at or cron expression. If a time zone is not provided, UTC is used by default. Valid values are the canonical names of the IANA time zones supported by Joda-Time (such as Etc/GMT+9 or Pacific/Tahiti). For more information, see https://www.joda.org/joda-time/timezones.html."];
@@ -2374,10 +4474,10 @@ module PutScheduledActionRequest =
           "The name of the scheduled action. This name must be unique among all other scheduled actions on the specified scalable target."];
       resourceId: ResourceIdMaxLen1600.t
         [@ocaml.doc
-          "The identifier of the resource associated with the scheduled action. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
+          "The identifier of the resource associated with the scheduled action. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
       scalableDimension: ScalableDimension.t
         [@ocaml.doc
-          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."];
+          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."];
       startTime: TimestampType.t option
         [@ocaml.doc
           "The date and time for this scheduled action to start, in UTC."];
@@ -2457,32 +4557,33 @@ module PutScheduledActionRequest =
         ~resourceId ~scheduledActionName ?timezone ?schedule
         ~serviceNamespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalableTargetAction =
-        field_map json "ScalableTargetAction" ScalableTargetAction.of_json in
-      let endTime = field_map json "EndTime" TimestampType.of_json in
-      let startTime = field_map json "StartTime" TimestampType.of_json in
+        field_map json__ "ScalableTargetAction" ScalableTargetAction.of_json in
+      let endTime = field_map json__ "EndTime" TimestampType.of_json in
+      let startTime = field_map json__ "StartTime" TimestampType.of_json in
       let scalableDimension =
-        field_map_exn json "ScalableDimension" ScalableDimension.of_json in
+        field_map_exn json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map_exn json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let scheduledActionName =
-        field_map_exn json "ScheduledActionName" ScheduledActionName.of_json in
-      let timezone = field_map json "Timezone" ResourceIdMaxLen1600.of_json in
-      let schedule = field_map json "Schedule" ResourceIdMaxLen1600.of_json in
+        field_map_exn json__ "ScheduledActionName"
+          ScheduledActionName.of_json in
+      let timezone = field_map json__ "Timezone" ResourceIdMaxLen1600.of_json in
+      let schedule = field_map json__ "Schedule" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
+        field_map_exn json__ "ServiceNamespace" ServiceNamespace.of_json in
       make ?scalableTargetAction ?endTime ?startTime ~scalableDimension
         ~resourceId ~scheduledActionName ?timezone ?schedule
         ~serviceNamespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a scheduled action for an Application Auto Scaling scalable target. Each scalable target is identified by a service namespace, resource ID, and scalable dimension. A scheduled action applies to the scalable target identified by those three attributes. You cannot create a scheduled action until you have registered the resource as a scalable target. When start and end times are specified with a recurring schedule using a cron expression or rates, they form the boundaries for when the recurring action starts and stops. To update a scheduled action, specify the parameters that you want to change. If you don't specify start and end times, the old values are deleted. For more information, see Scheduled scaling in the Application Auto Scaling User Guide. If a scalable target is deregistered, the scalable target is no longer available to run scheduled actions. Any scheduled actions that were specified for the scalable target are deleted."]
+       "Creates or updates a scheduled action for an Application Auto Scaling scalable target. Each scalable target is identified by a service namespace, resource ID, and scalable dimension. A scheduled action applies to the scalable target identified by those three attributes. You cannot create a scheduled action until you have registered the resource as a scalable target. When you specify start and end times with a recurring schedule using a cron expression or rates, they form the boundaries for when the recurring action starts and stops. To update a scheduled action, specify the parameters that you want to change. If you don't specify start and end times, the old values are deleted. For more information, see Scheduled scaling in the Application Auto Scaling User Guide. If a scalable target is deregistered, the scalable target is no longer available to run scheduled actions. Any scheduled actions that were specified for the scalable target are deleted."]
 module PutScalingPolicyResponse =
   struct
     type nonrec t =
       {
-      policyARN: ResourceIdMaxLen1600.t
+      policyARN: ResourceIdMaxLen1600.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the resulting scaling policy."];
       alarms: Alarms.t option
@@ -2496,8 +4597,7 @@ module PutScalingPolicyResponse =
       | `ObjectNotFoundException of ObjectNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PutScalingPolicyResponse"
-    let make ?alarms = fun ~policyARN -> fun () -> { alarms; policyARN }
+    let make ?policyARN = fun ?alarms -> fun () -> { policyARN; alarms }
     let error_of_json name json =
       match name with
       | "ConcurrentUpdateException" ->
@@ -2566,67 +4666,75 @@ module PutScalingPolicyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("PolicyARN", (Some (ResourceIdMaxLen1600.to_value x.policyARN)));
+        [("PolicyARN",
+           (Option.map x.policyARN ~f:ResourceIdMaxLen1600.to_value));
         ("Alarms", (Option.map x.alarms ~f:Alarms.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let alarms =
         (Option.map ~f:Alarms.of_xml) (Xml.child xml_arg0 "Alarms") in
       let policyARN =
-        ResourceIdMaxLen1600.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyARN") in
-      make ?alarms ~policyARN ()
+        (Option.map ~f:ResourceIdMaxLen1600.of_xml)
+          (Xml.child xml_arg0 "PolicyARN") in
+      make ?alarms ?policyARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alarms = field_map json "Alarms" Alarms.of_json in
+    let of_json json__ =
+      let alarms = field_map json__ "Alarms" Alarms.of_json in
       let policyARN =
-        field_map_exn json "PolicyARN" ResourceIdMaxLen1600.of_json in
-      make ?alarms ~policyARN ()
+        field_map json__ "PolicyARN" ResourceIdMaxLen1600.of_json in
+      make ?alarms ?policyARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a scaling policy for an Application Auto Scaling scalable target. Each scalable target is identified by a service namespace, resource ID, and scalable dimension. A scaling policy applies to the scalable target identified by those three attributes. You cannot create a scaling policy until you have registered the resource as a scalable target. Multiple scaling policies can be in force at the same time for the same scalable target. You can have one or more target tracking scaling policies, one or more step scaling policies, or both. However, there is a chance that multiple policies could conflict, instructing the scalable target to scale out or in at the same time. Application Auto Scaling gives precedence to the policy that provides the largest capacity for both scale out and scale in. For example, if one policy increases capacity by 3, another policy increases capacity by 200 percent, and the current capacity is 10, Application Auto Scaling uses the policy with the highest calculated capacity (200% of 10 = 20) and scales out to 30. We recommend caution, however, when using target tracking scaling policies with step scaling policies because conflicts between these policies can cause undesirable behavior. For example, if the step scaling policy initiates a scale-in activity before the target tracking policy is ready to scale in, the scale-in activity will not be blocked. After the scale-in activity completes, the target tracking policy could instruct the scalable target to scale out again. For more information, see Target tracking scaling policies and Step scaling policies in the Application Auto Scaling User Guide. If a scalable target is deregistered, the scalable target is no longer available to execute scaling policies. Any scaling policies that were specified for the scalable target are deleted."]
+       "Creates or updates a scaling policy for an Application Auto Scaling scalable target. Each scalable target is identified by a service namespace, resource ID, and scalable dimension. A scaling policy applies to the scalable target identified by those three attributes. You cannot create a scaling policy until you have registered the resource as a scalable target. Multiple scaling policies can be in force at the same time for the same scalable target. You can have one or more target tracking scaling policies, one or more step scaling policies, or both. However, there is a chance that multiple policies could conflict, instructing the scalable target to scale out or in at the same time. Application Auto Scaling gives precedence to the policy that provides the largest capacity for both scale out and scale in. For example, if one policy increases capacity by 3, another policy increases capacity by 200 percent, and the current capacity is 10, Application Auto Scaling uses the policy with the highest calculated capacity (200% of 10 = 20) and scales out to 30. We recommend caution, however, when using target tracking scaling policies with step scaling policies because conflicts between these policies can cause undesirable behavior. For example, if the step scaling policy initiates a scale-in activity before the target tracking policy is ready to scale in, the scale-in activity will not be blocked. After the scale-in activity completes, the target tracking policy could instruct the scalable target to scale out again. For more information, see Target tracking scaling policies, Step scaling policies, and Predictive scaling policies in the Application Auto Scaling User Guide. If a scalable target is deregistered, the scalable target is no longer available to use scaling policies. Any scaling policies that were specified for the scalable target are deleted."]
 module PutScalingPolicyRequest =
   struct
     type nonrec t =
       {
-      policyName: PolicyName.t [@ocaml.doc "The name of the scaling policy."];
+      policyName: PolicyName.t
+        [@ocaml.doc
+          "The name of the scaling policy. You cannot change the name of a scaling policy, but you can delete the original scaling policy and create a new scaling policy with the same settings and a different name."];
       serviceNamespace: ServiceNamespace.t
         [@ocaml.doc
           "The namespace of the Amazon Web Services service that provides the resource. For a resource provided by your own application or service, use custom-resource instead."];
       resourceId: ResourceIdMaxLen1600.t
         [@ocaml.doc
-          "The identifier of the resource associated with the scaling policy. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
+          "The identifier of the resource associated with the scaling policy. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
       scalableDimension: ScalableDimension.t
         [@ocaml.doc
-          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."];
+          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."];
       policyType: PolicyType.t option
         [@ocaml.doc
-          "The policy type. This parameter is required if you are creating a scaling policy. The following policy types are supported: TargetTrackingScaling\226\128\148Not supported for Amazon EMR StepScaling\226\128\148Not supported for DynamoDB, Amazon Comprehend, Lambda, Amazon Keyspaces, Amazon MSK, Amazon ElastiCache, or Neptune. For more information, see Target tracking scaling policies and Step scaling policies in the Application Auto Scaling User Guide."];
+          "The scaling policy type. This parameter is required if you are creating a scaling policy. The following policy types are supported: TargetTrackingScaling\226\128\148Not supported for Amazon EMR. StepScaling\226\128\148Not supported for DynamoDB, Amazon Comprehend, Lambda, Amazon Keyspaces, Amazon MSK, Amazon ElastiCache, or Neptune. PredictiveScaling\226\128\148Only supported for Amazon ECS. For more information, see Target tracking scaling policies, Step scaling policies, and Predictive scaling policies in the Application Auto Scaling User Guide."];
       stepScalingPolicyConfiguration: StepScalingPolicyConfiguration.t option
         [@ocaml.doc
           "A step scaling policy. This parameter is required if you are creating a policy and the policy type is StepScaling."];
       targetTrackingScalingPolicyConfiguration:
         TargetTrackingScalingPolicyConfiguration.t option
         [@ocaml.doc
-          "A target tracking scaling policy. Includes support for predefined or customized metrics. This parameter is required if you are creating a policy and the policy type is TargetTrackingScaling."]}
+          "A target tracking scaling policy. Includes support for predefined or customized metrics. This parameter is required if you are creating a policy and the policy type is TargetTrackingScaling."];
+      predictiveScalingPolicyConfiguration:
+        PredictiveScalingPolicyConfiguration.t option
+        [@ocaml.doc "The configuration of the predictive scaling policy."]}
     let context_ = "PutScalingPolicyRequest"
     let make ?policyType =
       fun ?stepScalingPolicyConfiguration ->
         fun ?targetTrackingScalingPolicyConfiguration ->
-          fun ~policyName ->
-            fun ~serviceNamespace ->
-              fun ~resourceId ->
-                fun ~scalableDimension ->
-                  fun () ->
-                    {
-                      policyType;
-                      stepScalingPolicyConfiguration;
-                      targetTrackingScalingPolicyConfiguration;
-                      policyName;
-                      serviceNamespace;
-                      resourceId;
-                      scalableDimension
-                    }
+          fun ?predictiveScalingPolicyConfiguration ->
+            fun ~policyName ->
+              fun ~serviceNamespace ->
+                fun ~resourceId ->
+                  fun ~scalableDimension ->
+                    fun () ->
+                      {
+                        policyType;
+                        stepScalingPolicyConfiguration;
+                        targetTrackingScalingPolicyConfiguration;
+                        predictiveScalingPolicyConfiguration;
+                        policyName;
+                        serviceNamespace;
+                        resourceId;
+                        scalableDimension
+                      }
     let to_value x =
       structure_to_value
         [("PolicyName", (Some (PolicyName.to_value x.policyName)));
@@ -2641,9 +4749,15 @@ module PutScalingPolicyRequest =
              ~f:StepScalingPolicyConfiguration.to_value));
         ("TargetTrackingScalingPolicyConfiguration",
           (Option.map x.targetTrackingScalingPolicyConfiguration
-             ~f:TargetTrackingScalingPolicyConfiguration.to_value))]
+             ~f:TargetTrackingScalingPolicyConfiguration.to_value));
+        ("PredictiveScalingPolicyConfiguration",
+          (Option.map x.predictiveScalingPolicyConfiguration
+             ~f:PredictiveScalingPolicyConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let predictiveScalingPolicyConfiguration =
+        (Option.map ~f:PredictiveScalingPolicyConfiguration.of_xml)
+          (Xml.child xml_arg0 "PredictiveScalingPolicyConfiguration") in
       let targetTrackingScalingPolicyConfiguration =
         (Option.map ~f:TargetTrackingScalingPolicyConfiguration.of_xml)
           (Xml.child xml_arg0 "TargetTrackingScalingPolicyConfiguration") in
@@ -2664,31 +4778,270 @@ module PutScalingPolicyRequest =
       let policyName =
         PolicyName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
-      make ?targetTrackingScalingPolicyConfiguration
+      make ?predictiveScalingPolicyConfiguration
+        ?targetTrackingScalingPolicyConfiguration
         ?stepScalingPolicyConfiguration ?policyType ~scalableDimension
         ~resourceId ~serviceNamespace ~policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let predictiveScalingPolicyConfiguration =
+        field_map json__ "PredictiveScalingPolicyConfiguration"
+          PredictiveScalingPolicyConfiguration.of_json in
       let targetTrackingScalingPolicyConfiguration =
-        field_map json "TargetTrackingScalingPolicyConfiguration"
+        field_map json__ "TargetTrackingScalingPolicyConfiguration"
           TargetTrackingScalingPolicyConfiguration.of_json in
       let stepScalingPolicyConfiguration =
-        field_map json "StepScalingPolicyConfiguration"
+        field_map json__ "StepScalingPolicyConfiguration"
           StepScalingPolicyConfiguration.of_json in
-      let policyType = field_map json "PolicyType" PolicyType.of_json in
+      let policyType = field_map json__ "PolicyType" PolicyType.of_json in
       let scalableDimension =
-        field_map_exn json "ScalableDimension" ScalableDimension.of_json in
+        field_map_exn json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map_exn json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
-      make ?targetTrackingScalingPolicyConfiguration
+        field_map_exn json__ "ServiceNamespace" ServiceNamespace.of_json in
+      let policyName = field_map_exn json__ "PolicyName" PolicyName.of_json in
+      make ?predictiveScalingPolicyConfiguration
+        ?targetTrackingScalingPolicyConfiguration
         ?stepScalingPolicyConfiguration ?policyType ~scalableDimension
         ~resourceId ~serviceNamespace ~policyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a scaling policy for an Application Auto Scaling scalable target. Each scalable target is identified by a service namespace, resource ID, and scalable dimension. A scaling policy applies to the scalable target identified by those three attributes. You cannot create a scaling policy until you have registered the resource as a scalable target. Multiple scaling policies can be in force at the same time for the same scalable target. You can have one or more target tracking scaling policies, one or more step scaling policies, or both. However, there is a chance that multiple policies could conflict, instructing the scalable target to scale out or in at the same time. Application Auto Scaling gives precedence to the policy that provides the largest capacity for both scale out and scale in. For example, if one policy increases capacity by 3, another policy increases capacity by 200 percent, and the current capacity is 10, Application Auto Scaling uses the policy with the highest calculated capacity (200% of 10 = 20) and scales out to 30. We recommend caution, however, when using target tracking scaling policies with step scaling policies because conflicts between these policies can cause undesirable behavior. For example, if the step scaling policy initiates a scale-in activity before the target tracking policy is ready to scale in, the scale-in activity will not be blocked. After the scale-in activity completes, the target tracking policy could instruct the scalable target to scale out again. For more information, see Target tracking scaling policies and Step scaling policies in the Application Auto Scaling User Guide. If a scalable target is deregistered, the scalable target is no longer available to execute scaling policies. Any scaling policies that were specified for the scalable target are deleted."]
+       "Creates or updates a scaling policy for an Application Auto Scaling scalable target. Each scalable target is identified by a service namespace, resource ID, and scalable dimension. A scaling policy applies to the scalable target identified by those three attributes. You cannot create a scaling policy until you have registered the resource as a scalable target. Multiple scaling policies can be in force at the same time for the same scalable target. You can have one or more target tracking scaling policies, one or more step scaling policies, or both. However, there is a chance that multiple policies could conflict, instructing the scalable target to scale out or in at the same time. Application Auto Scaling gives precedence to the policy that provides the largest capacity for both scale out and scale in. For example, if one policy increases capacity by 3, another policy increases capacity by 200 percent, and the current capacity is 10, Application Auto Scaling uses the policy with the highest calculated capacity (200% of 10 = 20) and scales out to 30. We recommend caution, however, when using target tracking scaling policies with step scaling policies because conflicts between these policies can cause undesirable behavior. For example, if the step scaling policy initiates a scale-in activity before the target tracking policy is ready to scale in, the scale-in activity will not be blocked. After the scale-in activity completes, the target tracking policy could instruct the scalable target to scale out again. For more information, see Target tracking scaling policies, Step scaling policies, and Predictive scaling policies in the Application Auto Scaling User Guide. If a scalable target is deregistered, the scalable target is no longer available to use scaling policies. Any scaling policies that were specified for the scalable target are deleted."]
+module ListTagsForResourceResponse =
+  struct
+    type nonrec t =
+      {
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A list of tags. Each tag consists of a tag key and a tag value."]}
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun () -> { tags }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns all the tags on the specified Application Auto Scaling scalable target. For general information about tags, including the format and syntax, see Tagging your Amazon Web Services resources in the Amazon Web Services General Reference."]
+module ListTagsForResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc
+          "Specify the ARN of the scalable target. For example: arn:aws:application-autoscaling:us-east-1:123456789012:scalable-target/1234abcd56ab78cd901ef1234567890ab123 To get the ARN for a scalable target, use DescribeScalableTargets."]}
+    let context_ = "ListTagsForResourceRequest"
+    let make ~resourceARN = fun () -> { resourceARN }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns all the tags on the specified Application Auto Scaling scalable target. For general information about tags, including the format and syntax, see Tagging your Amazon Web Services resources in the Amazon Web Services General Reference."]
+module GetPredictiveScalingForecastResponse =
+  struct
+    type nonrec t =
+      {
+      loadForecast: LoadForecasts.t option [@ocaml.doc "The load forecast."];
+      capacityForecast: CapacityForecast.t option
+        [@ocaml.doc "The capacity forecast."];
+      updateTime: TimestampType.t option
+        [@ocaml.doc "The time the forecast was made."]}
+    type nonrec error =
+      [ `InternalServiceException of InternalServiceException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?loadForecast =
+      fun ?capacityForecast ->
+        fun ?updateTime ->
+          fun () -> { loadForecast; capacityForecast; updateTime }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LoadForecast",
+           (Option.map x.loadForecast ~f:LoadForecasts.to_value));
+        ("CapacityForecast",
+          (Option.map x.capacityForecast ~f:CapacityForecast.to_value));
+        ("UpdateTime", (Option.map x.updateTime ~f:TimestampType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updateTime =
+        (Option.map ~f:TimestampType.of_xml)
+          (Xml.child xml_arg0 "UpdateTime") in
+      let capacityForecast =
+        (Option.map ~f:CapacityForecast.of_xml)
+          (Xml.child xml_arg0 "CapacityForecast") in
+      let loadForecast =
+        (Option.map ~f:LoadForecasts.of_xml)
+          (Xml.child xml_arg0 "LoadForecast") in
+      make ?updateTime ?capacityForecast ?loadForecast ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateTime = field_map json__ "UpdateTime" TimestampType.of_json in
+      let capacityForecast =
+        field_map json__ "CapacityForecast" CapacityForecast.of_json in
+      let loadForecast =
+        field_map json__ "LoadForecast" LoadForecasts.of_json in
+      make ?updateTime ?capacityForecast ?loadForecast ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the forecast data for a predictive scaling policy. Load forecasts are predictions of the hourly load values using historical load data from CloudWatch and an analysis of historical trends. Capacity forecasts are represented as predicted values for the minimum capacity that is needed on an hourly basis, based on the hourly load forecast. A minimum of 24 hours of data is required to create the initial forecasts. However, having a full 14 days of historical data results in more accurate forecasts."]
+module GetPredictiveScalingForecastRequest =
+  struct
+    type nonrec t =
+      {
+      serviceNamespace: ServiceNamespace.t
+        [@ocaml.doc
+          "The namespace of the Amazon Web Services service that provides the resource. For a resource provided by your own application or service, use custom-resource instead."];
+      resourceId: ResourceIdMaxLen1600.t
+        [@ocaml.doc "The identifier of the resource."];
+      scalableDimension: ScalableDimension.t
+        [@ocaml.doc "The scalable dimension."];
+      policyName: PolicyName.t [@ocaml.doc "The name of the policy."];
+      startTime: TimestampType.t
+        [@ocaml.doc
+          "The inclusive start time of the time range for the forecast data to get. At most, the date and time can be one year before the current date and time"];
+      endTime: TimestampType.t
+        [@ocaml.doc
+          "The exclusive end time of the time range for the forecast data to get. The maximum time duration between the start and end time is 30 days."]}
+    let context_ = "GetPredictiveScalingForecastRequest"
+    let make ~serviceNamespace =
+      fun ~resourceId ->
+        fun ~scalableDimension ->
+          fun ~policyName ->
+            fun ~startTime ->
+              fun ~endTime ->
+                fun () ->
+                  {
+                    serviceNamespace;
+                    resourceId;
+                    scalableDimension;
+                    policyName;
+                    startTime;
+                    endTime
+                  }
+    let to_value x =
+      structure_to_value
+        [("ServiceNamespace",
+           (Some (ServiceNamespace.to_value x.serviceNamespace)));
+        ("ResourceId", (Some (ResourceIdMaxLen1600.to_value x.resourceId)));
+        ("ScalableDimension",
+          (Some (ScalableDimension.to_value x.scalableDimension)));
+        ("PolicyName", (Some (PolicyName.to_value x.policyName)));
+        ("StartTime", (Some (TimestampType.to_value x.startTime)));
+        ("EndTime", (Some (TimestampType.to_value x.endTime)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        TimestampType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndTime") in
+      let startTime =
+        TimestampType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
+      let policyName =
+        PolicyName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
+      let scalableDimension =
+        ScalableDimension.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ScalableDimension") in
+      let resourceId =
+        ResourceIdMaxLen1600.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+      let serviceNamespace =
+        ServiceNamespace.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
+      make ~endTime ~startTime ~policyName ~scalableDimension ~resourceId
+        ~serviceNamespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map_exn json__ "EndTime" TimestampType.of_json in
+      let startTime = field_map_exn json__ "StartTime" TimestampType.of_json in
+      let policyName = field_map_exn json__ "PolicyName" PolicyName.of_json in
+      let scalableDimension =
+        field_map_exn json__ "ScalableDimension" ScalableDimension.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" ResourceIdMaxLen1600.of_json in
+      let serviceNamespace =
+        field_map_exn json__ "ServiceNamespace" ServiceNamespace.of_json in
+      make ~endTime ~startTime ~policyName ~scalableDimension ~resourceId
+        ~serviceNamespace ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the forecast data for a predictive scaling policy. Load forecasts are predictions of the hourly load values using historical load data from CloudWatch and an analysis of historical trends. Capacity forecasts are represented as predicted values for the minimum capacity that is needed on an hourly basis, based on the hourly load forecast. A minimum of 24 hours of data is required to create the initial forecasts. However, having a full 14 days of historical data results in more accurate forecasts."]
 module DescribeScheduledActionsResponse =
   struct
     type nonrec t =
@@ -2768,14 +5121,14 @@ module DescribeScheduledActionsResponse =
           (Xml.child xml_arg0 "ScheduledActions") in
       make ?nextToken ?scheduledActions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let scheduledActions =
-        field_map json "ScheduledActions" ScheduledActions.of_json in
+        field_map json__ "ScheduledActions" ScheduledActions.of_json in
       make ?nextToken ?scheduledActions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the Application Auto Scaling scheduled actions for the specified service namespace. You can filter the results using the ResourceId, ScalableDimension, and ScheduledActionNames parameters. For more information, see Scheduled scaling and Managing scheduled scaling in the Application Auto Scaling User Guide."]
+       "Describes the Application Auto Scaling scheduled actions for the specified service namespace. You can filter the results using the ResourceId, ScalableDimension, and ScheduledActionNames parameters. For more information, see Scheduled scaling in the Application Auto Scaling User Guide."]
 module DescribeScheduledActionsRequest =
   struct
     type nonrec t =
@@ -2787,10 +5140,10 @@ module DescribeScheduledActionsRequest =
           "The namespace of the Amazon Web Services service that provides the resource. For a resource provided by your own application or service, use custom-resource instead."];
       resourceId: ResourceIdMaxLen1600.t option
         [@ocaml.doc
-          "The identifier of the resource associated with the scheduled action. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
+          "The identifier of the resource associated with the scheduled action. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
       scalableDimension: ScalableDimension.t option
         [@ocaml.doc
-          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. If you specify a scalable dimension, you must also specify a resource ID. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."];
+          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. If you specify a scalable dimension, you must also specify a resource ID. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."];
       maxResults: MaxResults.t option
         [@ocaml.doc
           "The maximum number of scheduled action results. This value can be between 1 and 50. The default value is 50. If this parameter is used, the operation returns up to MaxResults results at a time, along with a NextToken value. To get the next set of results, include the NextToken value in a subsequent call. If this parameter is not used, the operation returns up to 50 results and a NextToken value, if applicable."];
@@ -2846,22 +5199,22 @@ module DescribeScheduledActionsRequest =
       make ?nextToken ?maxResults ?scalableDimension ?resourceId
         ~serviceNamespace ?scheduledActionNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let scalableDimension =
-        field_map json "ScalableDimension" ScalableDimension.of_json in
+        field_map json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
+        field_map_exn json__ "ServiceNamespace" ServiceNamespace.of_json in
       let scheduledActionNames =
-        field_map json "ScheduledActionNames" ResourceIdsMaxLen1600.of_json in
+        field_map json__ "ScheduledActionNames" ResourceIdsMaxLen1600.of_json in
       make ?nextToken ?maxResults ?scalableDimension ?resourceId
         ~serviceNamespace ?scheduledActionNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the Application Auto Scaling scheduled actions for the specified service namespace. You can filter the results using the ResourceId, ScalableDimension, and ScheduledActionNames parameters. For more information, see Scheduled scaling and Managing scheduled scaling in the Application Auto Scaling User Guide."]
+       "Describes the Application Auto Scaling scheduled actions for the specified service namespace. You can filter the results using the ResourceId, ScalableDimension, and ScheduledActionNames parameters. For more information, see Scheduled scaling in the Application Auto Scaling User Guide."]
 module DescribeScalingPoliciesResponse =
   struct
     type nonrec t =
@@ -2952,10 +5305,10 @@ module DescribeScalingPoliciesResponse =
           (Xml.child xml_arg0 "ScalingPolicies") in
       make ?nextToken ?scalingPolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let scalingPolicies =
-        field_map json "ScalingPolicies" ScalingPolicies.of_json in
+        field_map json__ "ScalingPolicies" ScalingPolicies.of_json in
       make ?nextToken ?scalingPolicies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2971,10 +5324,10 @@ module DescribeScalingPoliciesRequest =
           "The namespace of the Amazon Web Services service that provides the resource. For a resource provided by your own application or service, use custom-resource instead."];
       resourceId: ResourceIdMaxLen1600.t option
         [@ocaml.doc
-          "The identifier of the resource associated with the scaling policy. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
+          "The identifier of the resource associated with the scaling policy. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
       scalableDimension: ScalableDimension.t option
         [@ocaml.doc
-          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. If you specify a scalable dimension, you must also specify a resource ID. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."];
+          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. If you specify a scalable dimension, you must also specify a resource ID. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."];
       maxResults: MaxResults.t option
         [@ocaml.doc
           "The maximum number of scalable targets. This value can be between 1 and 10. The default value is 10. If this parameter is used, the operation returns up to MaxResults results at a time, along with a NextToken value. To get the next set of results, include the NextToken value in a subsequent call. If this parameter is not used, the operation returns up to 10 results and a NextToken value, if applicable."];
@@ -3029,17 +5382,17 @@ module DescribeScalingPoliciesRequest =
       make ?nextToken ?maxResults ?scalableDimension ?resourceId
         ~serviceNamespace ?policyNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let scalableDimension =
-        field_map json "ScalableDimension" ScalableDimension.of_json in
+        field_map json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
+        field_map_exn json__ "ServiceNamespace" ServiceNamespace.of_json in
       let policyNames =
-        field_map json "PolicyNames" ResourceIdsMaxLen1600.of_json in
+        field_map json__ "PolicyNames" ResourceIdsMaxLen1600.of_json in
       make ?nextToken ?maxResults ?scalableDimension ?resourceId
         ~serviceNamespace ?policyNames ()
     let to_json v = composed_to_json to_value v
@@ -3124,14 +5477,14 @@ module DescribeScalingActivitiesResponse =
           (Xml.child xml_arg0 "ScalingActivities") in
       make ?nextToken ?scalingActivities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let scalingActivities =
-        field_map json "ScalingActivities" ScalingActivities.of_json in
+        field_map json__ "ScalingActivities" ScalingActivities.of_json in
       make ?nextToken ?scalingActivities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides descriptive information about the scaling activities in the specified namespace from the previous six weeks. You can filter the results using ResourceId and ScalableDimension."]
+       "Provides descriptive information about the scaling activities in the specified namespace from the previous six weeks. You can filter the results using ResourceId and ScalableDimension. For information about viewing scaling activities using the Amazon Web Services CLI, see Scaling activities for Application Auto Scaling."]
 module DescribeScalingActivitiesRequest =
   struct
     type nonrec t =
@@ -3141,29 +5494,34 @@ module DescribeScalingActivitiesRequest =
           "The namespace of the Amazon Web Services service that provides the resource. For a resource provided by your own application or service, use custom-resource instead."];
       resourceId: ResourceIdMaxLen1600.t option
         [@ocaml.doc
-          "The identifier of the resource associated with the scaling activity. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
+          "The identifier of the resource associated with the scaling activity. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
       scalableDimension: ScalableDimension.t option
         [@ocaml.doc
-          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. If you specify a scalable dimension, you must also specify a resource ID. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."];
+          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. If you specify a scalable dimension, you must also specify a resource ID. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."];
       maxResults: MaxResults.t option
         [@ocaml.doc
           "The maximum number of scalable targets. This value can be between 1 and 50. The default value is 50. If this parameter is used, the operation returns up to MaxResults results at a time, along with a NextToken value. To get the next set of results, include the NextToken value in a subsequent call. If this parameter is not used, the operation returns up to 50 results and a NextToken value, if applicable."];
       nextToken: XmlString.t option
-        [@ocaml.doc "The token for the next set of results."]}
+        [@ocaml.doc "The token for the next set of results."];
+      includeNotScaledActivities: IncludeNotScaledActivities.t option
+        [@ocaml.doc
+          "Specifies whether to include activities that aren't scaled (not scaled activities) in the response. Not scaled activities are activities that aren't completed or started for various reasons, such as preventing infinite scaling loops. For help interpreting the not scaled reason details in the response, see Scaling activities for Application Auto Scaling."]}
     let context_ = "DescribeScalingActivitiesRequest"
     let make ?resourceId =
       fun ?scalableDimension ->
         fun ?maxResults ->
           fun ?nextToken ->
-            fun ~serviceNamespace ->
-              fun () ->
-                {
-                  resourceId;
-                  scalableDimension;
-                  maxResults;
-                  nextToken;
-                  serviceNamespace
-                }
+            fun ?includeNotScaledActivities ->
+              fun ~serviceNamespace ->
+                fun () ->
+                  {
+                    resourceId;
+                    scalableDimension;
+                    maxResults;
+                    nextToken;
+                    includeNotScaledActivities;
+                    serviceNamespace
+                  }
     let to_value x =
       structure_to_value
         [("ServiceNamespace",
@@ -3173,9 +5531,15 @@ module DescribeScalingActivitiesRequest =
         ("ScalableDimension",
           (Option.map x.scalableDimension ~f:ScalableDimension.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:XmlString.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:XmlString.to_value));
+        ("IncludeNotScaledActivities",
+          (Option.map x.includeNotScaledActivities
+             ~f:IncludeNotScaledActivities.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let includeNotScaledActivities =
+        (Option.map ~f:IncludeNotScaledActivities.of_xml)
+          (Xml.child xml_arg0 "IncludeNotScaledActivities") in
       let nextToken =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxResults =
@@ -3189,23 +5553,26 @@ module DescribeScalingActivitiesRequest =
       let serviceNamespace =
         ServiceNamespace.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
-      make ?nextToken ?maxResults ?scalableDimension ?resourceId
-        ~serviceNamespace ()
+      make ?includeNotScaledActivities ?nextToken ?maxResults
+        ?scalableDimension ?resourceId ~serviceNamespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let includeNotScaledActivities =
+        field_map json__ "IncludeNotScaledActivities"
+          IncludeNotScaledActivities.of_json in
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let scalableDimension =
-        field_map json "ScalableDimension" ScalableDimension.of_json in
+        field_map json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
-      make ?nextToken ?maxResults ?scalableDimension ?resourceId
-        ~serviceNamespace ()
+        field_map_exn json__ "ServiceNamespace" ServiceNamespace.of_json in
+      make ?includeNotScaledActivities ?nextToken ?maxResults
+        ?scalableDimension ?resourceId ~serviceNamespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides descriptive information about the scaling activities in the specified namespace from the previous six weeks. You can filter the results using ResourceId and ScalableDimension."]
+       "Provides descriptive information about the scaling activities in the specified namespace from the previous six weeks. You can filter the results using ResourceId and ScalableDimension. For information about viewing scaling activities using the Amazon Web Services CLI, see Scaling activities for Application Auto Scaling."]
 module DescribeScalableTargetsResponse =
   struct
     type nonrec t =
@@ -3286,10 +5653,10 @@ module DescribeScalableTargetsResponse =
           (Xml.child xml_arg0 "ScalableTargets") in
       make ?nextToken ?scalableTargets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
       let scalableTargets =
-        field_map json "ScalableTargets" ScalableTargets.of_json in
+        field_map json__ "ScalableTargets" ScalableTargets.of_json in
       make ?nextToken ?scalableTargets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3303,10 +5670,10 @@ module DescribeScalableTargetsRequest =
           "The namespace of the Amazon Web Services service that provides the resource. For a resource provided by your own application or service, use custom-resource instead."];
       resourceIds: ResourceIdsMaxLen1600.t option
         [@ocaml.doc
-          "The identifier of the resource associated with the scalable target. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
+          "The identifier of the resource associated with the scalable target. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
       scalableDimension: ScalableDimension.t option
         [@ocaml.doc
-          "The scalable dimension associated with the scalable target. This string consists of the service namespace, resource type, and scaling property. If you specify a scalable dimension, you must also specify a resource ID. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."];
+          "The scalable dimension associated with the scalable target. This string consists of the service namespace, resource type, and scaling property. If you specify a scalable dimension, you must also specify a resource ID. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."];
       maxResults: MaxResults.t option
         [@ocaml.doc
           "The maximum number of scalable targets. This value can be between 1 and 50. The default value is 50. If this parameter is used, the operation returns up to MaxResults results at a time, along with a NextToken value. To get the next set of results, include the NextToken value in a subsequent call. If this parameter is not used, the operation returns up to 50 results and a NextToken value, if applicable."];
@@ -3354,15 +5721,15 @@ module DescribeScalableTargetsRequest =
       make ?nextToken ?maxResults ?scalableDimension ?resourceIds
         ~serviceNamespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" XmlString.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" XmlString.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let scalableDimension =
-        field_map json "ScalableDimension" ScalableDimension.of_json in
+        field_map json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceIds =
-        field_map json "ResourceIds" ResourceIdsMaxLen1600.of_json in
+        field_map json__ "ResourceIds" ResourceIdsMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
+        field_map_exn json__ "ServiceNamespace" ServiceNamespace.of_json in
       make ?nextToken ?maxResults ?scalableDimension ?resourceIds
         ~serviceNamespace ()
     let to_json v = composed_to_json to_value v
@@ -3444,10 +5811,10 @@ module DeregisterScalableTargetRequest =
           "The namespace of the Amazon Web Services service that provides the resource. For a resource provided by your own application or service, use custom-resource instead."];
       resourceId: ResourceIdMaxLen1600.t
         [@ocaml.doc
-          "The identifier of the resource associated with the scalable target. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
+          "The identifier of the resource associated with the scalable target. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
       scalableDimension: ScalableDimension.t
         [@ocaml.doc
-          "The scalable dimension associated with the scalable target. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."]}
+          "The scalable dimension associated with the scalable target. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."]}
     let context_ = "DeregisterScalableTargetRequest"
     let make ~serviceNamespace =
       fun ~resourceId ->
@@ -3473,13 +5840,13 @@ module DeregisterScalableTargetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceNamespace") in
       make ~scalableDimension ~resourceId ~serviceNamespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalableDimension =
-        field_map_exn json "ScalableDimension" ScalableDimension.of_json in
+        field_map_exn json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map_exn json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
+        field_map_exn json__ "ServiceNamespace" ServiceNamespace.of_json in
       make ~scalableDimension ~resourceId ~serviceNamespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3562,10 +5929,10 @@ module DeleteScheduledActionRequest =
         [@ocaml.doc "The name of the scheduled action."];
       resourceId: ResourceIdMaxLen1600.t
         [@ocaml.doc
-          "The identifier of the resource associated with the scheduled action. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
+          "The identifier of the resource associated with the scheduled action. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
       scalableDimension: ScalableDimension.t
         [@ocaml.doc
-          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."]}
+          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."]}
     let context_ = "DeleteScheduledActionRequest"
     let make ~serviceNamespace =
       fun ~scheduledActionName ->
@@ -3604,15 +5971,16 @@ module DeleteScheduledActionRequest =
       make ~scalableDimension ~resourceId ~scheduledActionName
         ~serviceNamespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalableDimension =
-        field_map_exn json "ScalableDimension" ScalableDimension.of_json in
+        field_map_exn json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map_exn json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let scheduledActionName =
-        field_map_exn json "ScheduledActionName" ResourceIdMaxLen1600.of_json in
+        field_map_exn json__ "ScheduledActionName"
+          ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
+        field_map_exn json__ "ServiceNamespace" ServiceNamespace.of_json in
       make ~scalableDimension ~resourceId ~scheduledActionName
         ~serviceNamespace ()
     let to_json v = composed_to_json to_value v
@@ -3696,10 +6064,10 @@ module DeleteScalingPolicyRequest =
           "The namespace of the Amazon Web Services service that provides the resource. For a resource provided by your own application or service, use custom-resource instead."];
       resourceId: ResourceIdMaxLen1600.t
         [@ocaml.doc
-          "The identifier of the resource associated with the scalable target. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/default/sample-webapp. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster."];
+          "The identifier of the resource associated with the scalable target. This string consists of the resource type and unique identifier. ECS service - The resource type is service and the unique identifier is the cluster name and service name. Example: service/my-cluster/my-service. Spot Fleet - The resource type is spot-fleet-request and the unique identifier is the Spot Fleet request ID. Example: spot-fleet-request/sfr-73fbd2ce-aa30-494c-8788-1cee4EXAMPLE. EMR cluster - The resource type is instancegroup and the unique identifier is the cluster ID and instance group ID. Example: instancegroup/j-2EEZNYKUA1NTV/ig-1791Y4E1L8YI0. AppStream 2.0 fleet - The resource type is fleet and the unique identifier is the fleet name. Example: fleet/sample-fleet. DynamoDB table - The resource type is table and the unique identifier is the table name. Example: table/my-table. DynamoDB global secondary index - The resource type is index and the unique identifier is the index name. Example: table/my-table/index/my-table-index. Aurora DB cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:my-db-cluster. SageMaker endpoint variant - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. Custom resources are not supported with a resource type. This parameter must specify the OutputValue from the CloudFormation template stack used to access the resources. The unique identifier is defined by the service provider. More information is available in our GitHub repository. Amazon Comprehend document classification endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:document-classifier-endpoint/EXAMPLE. Amazon Comprehend entity recognizer endpoint - The resource type and unique identifier are specified using the endpoint ARN. Example: arn:aws:comprehend:us-west-2:123456789012:entity-recognizer-endpoint/EXAMPLE. Lambda provisioned concurrency - The resource type is function and the unique identifier is the function name with a function version or alias name suffix that is not $LATEST. Example: function:my-function:prod or function:my-function:1. Amazon Keyspaces table - The resource type is table and the unique identifier is the table name. Example: keyspace/mykeyspace/table/mytable. Amazon MSK cluster - The resource type and unique identifier are specified using the cluster ARN. Example: arn:aws:kafka:us-east-1:123456789012:cluster/demo-cluster-1/6357e0b2-0e6a-4b86-a0b4-70df934c2e31-5. Amazon ElastiCache replication group - The resource type is replication-group and the unique identifier is the replication group name. Example: replication-group/mycluster. Amazon ElastiCache cache cluster - The resource type is cache-cluster and the unique identifier is the cache cluster name. Example: cache-cluster/mycluster. Neptune cluster - The resource type is cluster and the unique identifier is the cluster name. Example: cluster:mycluster. SageMaker serverless endpoint - The resource type is variant and the unique identifier is the resource ID. Example: endpoint/my-end-point/variant/KMeansClustering. SageMaker inference component - The resource type is inference-component and the unique identifier is the resource ID. Example: inference-component/my-inference-component. Pool of WorkSpaces - The resource type is workspacespool and the unique identifier is the pool ID. Example: workspacespool/wspool-123456."];
       scalableDimension: ScalableDimension.t
         [@ocaml.doc
-          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The desired task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The desired capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for an SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster."]}
+          "The scalable dimension. This string consists of the service namespace, resource type, and scaling property. ecs:service:DesiredCount - The task count of an ECS service. elasticmapreduce:instancegroup:InstanceCount - The instance count of an EMR Instance Group. ec2:spot-fleet-request:TargetCapacity - The target capacity of a Spot Fleet. appstream:fleet:DesiredCapacity - The capacity of an AppStream 2.0 fleet. dynamodb:table:ReadCapacityUnits - The provisioned read capacity for a DynamoDB table. dynamodb:table:WriteCapacityUnits - The provisioned write capacity for a DynamoDB table. dynamodb:index:ReadCapacityUnits - The provisioned read capacity for a DynamoDB global secondary index. dynamodb:index:WriteCapacityUnits - The provisioned write capacity for a DynamoDB global secondary index. rds:cluster:ReadReplicaCount - The count of Aurora Replicas in an Aurora DB cluster. Available for Aurora MySQL-compatible edition and Aurora PostgreSQL-compatible edition. sagemaker:variant:DesiredInstanceCount - The number of EC2 instances for a SageMaker model endpoint variant. custom-resource:ResourceType:Property - The scalable dimension for a custom resource provided by your own application or service. comprehend:document-classifier-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend document classification endpoint. comprehend:entity-recognizer-endpoint:DesiredInferenceUnits - The number of inference units for an Amazon Comprehend entity recognizer endpoint. lambda:function:ProvisionedConcurrency - The provisioned concurrency for a Lambda function. cassandra:table:ReadCapacityUnits - The provisioned read capacity for an Amazon Keyspaces table. cassandra:table:WriteCapacityUnits - The provisioned write capacity for an Amazon Keyspaces table. kafka:broker-storage:VolumeSize - The provisioned volume size (in GiB) for brokers in an Amazon MSK cluster. elasticache:cache-cluster:Nodes - The number of nodes for an Amazon ElastiCache cache cluster. elasticache:replication-group:NodeGroups - The number of node groups for an Amazon ElastiCache replication group. elasticache:replication-group:Replicas - The number of replicas per node group for an Amazon ElastiCache replication group. neptune:cluster:ReadReplicaCount - The count of read replicas in an Amazon Neptune DB cluster. sagemaker:variant:DesiredProvisionedConcurrency - The provisioned concurrency for a SageMaker serverless endpoint. sagemaker:inference-component:DesiredCopyCount - The number of copies across an endpoint for a SageMaker inference component. workspaces:workspacespool:DesiredUserSessions - The number of user sessions for the WorkSpaces in the pool."]}
     let context_ = "DeleteScalingPolicyRequest"
     let make ~policyName =
       fun ~serviceNamespace ->
@@ -3731,15 +6099,15 @@ module DeleteScalingPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
       make ~scalableDimension ~resourceId ~serviceNamespace ~policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalableDimension =
-        field_map_exn json "ScalableDimension" ScalableDimension.of_json in
+        field_map_exn json__ "ScalableDimension" ScalableDimension.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ResourceIdMaxLen1600.of_json in
+        field_map_exn json__ "ResourceId" ResourceIdMaxLen1600.of_json in
       let serviceNamespace =
-        field_map_exn json "ServiceNamespace" ServiceNamespace.of_json in
+        field_map_exn json__ "ServiceNamespace" ServiceNamespace.of_json in
       let policyName =
-        field_map_exn json "PolicyName" ResourceIdMaxLen1600.of_json in
+        field_map_exn json__ "PolicyName" ResourceIdMaxLen1600.of_json in
       make ~scalableDimension ~resourceId ~serviceNamespace ~policyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

@@ -2,11 +2,16 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AssociateFraudster: (AssociateFraudsterRequest.t,
+  AssociateFraudsterResponse.t, AssociateFraudsterResponse.error) t 
   | CreateDomain: (CreateDomainRequest.t, CreateDomainResponse.t,
   CreateDomainResponse.error) t 
+  | CreateWatchlist: (CreateWatchlistRequest.t, CreateWatchlistResponse.t,
+  CreateWatchlistResponse.error) t 
   | DeleteDomain: (DeleteDomainRequest.t, unit, unit) t 
   | DeleteFraudster: (DeleteFraudsterRequest.t, unit, unit) t 
   | DeleteSpeaker: (DeleteSpeakerRequest.t, unit, unit) t 
+  | DeleteWatchlist: (DeleteWatchlistRequest.t, unit, unit) t 
   | DescribeDomain: (DescribeDomainRequest.t, DescribeDomainResponse.t,
   DescribeDomainResponse.error) t 
   | DescribeFraudster: (DescribeFraudsterRequest.t,
@@ -20,6 +25,10 @@ type ('i, 'o, 'e) t =
   | DescribeSpeakerEnrollmentJob: (DescribeSpeakerEnrollmentJobRequest.t,
   DescribeSpeakerEnrollmentJobResponse.t,
   DescribeSpeakerEnrollmentJobResponse.error) t 
+  | DescribeWatchlist: (DescribeWatchlistRequest.t,
+  DescribeWatchlistResponse.t, DescribeWatchlistResponse.error) t 
+  | DisassociateFraudster: (DisassociateFraudsterRequest.t,
+  DisassociateFraudsterResponse.t, DisassociateFraudsterResponse.error) t 
   | EvaluateSession: (EvaluateSessionRequest.t, EvaluateSessionResponse.t,
   EvaluateSessionResponse.error) t 
   | ListDomains: (ListDomainsRequest.t, ListDomainsResponse.t,
@@ -27,6 +36,8 @@ type ('i, 'o, 'e) t =
   | ListFraudsterRegistrationJobs: (ListFraudsterRegistrationJobsRequest.t,
   ListFraudsterRegistrationJobsResponse.t,
   ListFraudsterRegistrationJobsResponse.error) t 
+  | ListFraudsters: (ListFraudstersRequest.t, ListFraudstersResponse.t,
+  ListFraudstersResponse.error) t 
   | ListSpeakerEnrollmentJobs: (ListSpeakerEnrollmentJobsRequest.t,
   ListSpeakerEnrollmentJobsResponse.t,
   ListSpeakerEnrollmentJobsResponse.error) t 
@@ -34,6 +45,8 @@ type ('i, 'o, 'e) t =
   ListSpeakersResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListWatchlists: (ListWatchlistsRequest.t, ListWatchlistsResponse.t,
+  ListWatchlistsResponse.error) t 
   | OptOutSpeaker: (OptOutSpeakerRequest.t, OptOutSpeakerResponse.t,
   OptOutSpeakerResponse.error) t 
   | StartFraudsterRegistrationJob: (StartFraudsterRegistrationJobRequest.t,
@@ -48,57 +61,83 @@ type ('i, 'o, 'e) t =
   UntagResourceResponse.error) t 
   | UpdateDomain: (UpdateDomainRequest.t, UpdateDomainResponse.t,
   UpdateDomainResponse.error) t 
+  | UpdateWatchlist: (UpdateWatchlistRequest.t, UpdateWatchlistResponse.t,
+  UpdateWatchlistResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AssociateFraudster -> `POST
   | CreateDomain -> `POST
+  | CreateWatchlist -> `POST
   | DeleteDomain -> `POST
   | DeleteFraudster -> `POST
   | DeleteSpeaker -> `POST
+  | DeleteWatchlist -> `POST
   | DescribeDomain -> `POST
   | DescribeFraudster -> `POST
   | DescribeFraudsterRegistrationJob -> `POST
   | DescribeSpeaker -> `POST
   | DescribeSpeakerEnrollmentJob -> `POST
+  | DescribeWatchlist -> `POST
+  | DisassociateFraudster -> `POST
   | EvaluateSession -> `POST
   | ListDomains -> `POST
   | ListFraudsterRegistrationJobs -> `POST
+  | ListFraudsters -> `POST
   | ListSpeakerEnrollmentJobs -> `POST
   | ListSpeakers -> `POST
   | ListTagsForResource -> `POST
+  | ListWatchlists -> `POST
   | OptOutSpeaker -> `POST
   | StartFraudsterRegistrationJob -> `POST
   | StartSpeakerEnrollmentJob -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateDomain -> `POST
+  | UpdateWatchlist -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AssociateFraudster -> (Format.kasprintf Uri.of_string) "/"
       | CreateDomain -> (Format.kasprintf Uri.of_string) "/"
+      | CreateWatchlist -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDomain -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFraudster -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSpeaker -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteWatchlist -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDomain -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFraudster -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFraudsterRegistrationJob ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeSpeaker -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSpeakerEnrollmentJob -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeWatchlist -> (Format.kasprintf Uri.of_string) "/"
+      | DisassociateFraudster -> (Format.kasprintf Uri.of_string) "/"
       | EvaluateSession -> (Format.kasprintf Uri.of_string) "/"
       | ListDomains -> (Format.kasprintf Uri.of_string) "/"
       | ListFraudsterRegistrationJobs -> (Format.kasprintf Uri.of_string) "/"
+      | ListFraudsters -> (Format.kasprintf Uri.of_string) "/"
       | ListSpeakerEnrollmentJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListSpeakers -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | ListWatchlists -> (Format.kasprintf Uri.of_string) "/"
       | OptOutSpeaker -> (Format.kasprintf Uri.of_string) "/"
       | StartFraudsterRegistrationJob -> (Format.kasprintf Uri.of_string) "/"
       | StartSpeakerEnrollmentJob -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateDomain -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateDomain -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateWatchlist -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
+  | AssociateFraudster ->
+      let json = AssociateFraudsterRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "VoiceID.AssociateFraudster")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateDomain ->
       let json = CreateDomainRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -106,6 +145,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "VoiceID.CreateDomain")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateWatchlist ->
+      let json = CreateWatchlistRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "VoiceID.CreateWatchlist")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteDomain ->
       let json = DeleteDomainRequest.to_json req in
@@ -130,6 +177,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "VoiceID.DeleteSpeaker")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteWatchlist ->
+      let json = DeleteWatchlistRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "VoiceID.DeleteWatchlist")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeDomain ->
       let json = DescribeDomainRequest.to_json req in
@@ -171,6 +226,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "VoiceID.DescribeSpeakerEnrollmentJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeWatchlist ->
+      let json = DescribeWatchlistRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "VoiceID.DescribeWatchlist")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisassociateFraudster ->
+      let json = DisassociateFraudsterRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "VoiceID.DisassociateFraudster")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | EvaluateSession ->
       let json = EvaluateSessionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -195,6 +266,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "VoiceID.ListFraudsterRegistrationJobs")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListFraudsters ->
+      let json = ListFraudstersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "VoiceID.ListFraudsters")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListSpeakerEnrollmentJobs ->
       let json = ListSpeakerEnrollmentJobsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -218,6 +297,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "VoiceID.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListWatchlists ->
+      let json = ListWatchlistsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "VoiceID.ListWatchlists")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | OptOutSpeaker ->
       let json = OptOutSpeakerRequest.to_json req in
@@ -267,6 +354,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "VoiceID.UpdateDomain")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateWatchlist ->
+      let json = UpdateWatchlistRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "VoiceID.UpdateWatchlist")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -290,17 +385,34 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | AssociateFraudster ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateFraudsterResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some AssociateFraudsterResponse.error_of_json))
   | CreateDomain ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateDomainResponse.of_json json)
       else Error (parse_aws_error (Some CreateDomainResponse.error_of_json))
+  | CreateWatchlist ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateWatchlistResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateWatchlistResponse.error_of_json))
   | DeleteDomain ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteFraudster ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteSpeaker ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteWatchlist ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DescribeDomain ->
       if is_success
@@ -342,6 +454,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeSpeakerEnrollmentJobResponse.error_of_json))
+  | DescribeWatchlist ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeWatchlistResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeWatchlistResponse.error_of_json))
+  | DisassociateFraudster ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateFraudsterResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DisassociateFraudsterResponse.error_of_json))
   | EvaluateSession ->
       if is_success
       then
@@ -364,6 +492,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListFraudsterRegistrationJobsResponse.error_of_json))
+  | ListFraudsters ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListFraudstersResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListFraudstersResponse.error_of_json))
   | ListSpeakerEnrollmentJobs ->
       if is_success
       then
@@ -387,6 +522,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListWatchlists ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListWatchlistsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListWatchlistsResponse.error_of_json))
   | OptOutSpeaker ->
       if is_success
       then
@@ -429,3 +571,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateDomainResponse.of_json json)
       else Error (parse_aws_error (Some UpdateDomainResponse.error_of_json))
+  | UpdateWatchlist ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateWatchlistResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateWatchlistResponse.error_of_json))

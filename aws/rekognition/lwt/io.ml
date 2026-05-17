@@ -11,18 +11,26 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let associate_faces ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateFaces input
 let compare_faces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CompareFaces input
+let copy_project_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CopyProjectVersion input
 let create_collection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCollection input
 let create_dataset ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDataset input
+let create_face_liveness_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateFaceLivenessSession input
 let create_project ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateProject input
 let create_project_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateProjectVersion input
 let create_stream_processor ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateStreamProcessor input
+let create_user ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateUser input
 let delete_collection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCollection input
 let delete_dataset ?endpoint_url ?cfg input =
@@ -31,10 +39,14 @@ let delete_faces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFaces input
 let delete_project ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteProject input
+let delete_project_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteProjectPolicy input
 let delete_project_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteProjectVersion input
 let delete_stream_processor ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteStreamProcessor input
+let delete_user ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteUser input
 let describe_collection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCollection input
 let describe_dataset ?endpoint_url ?cfg input =
@@ -57,6 +69,8 @@ let detect_protective_equipment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetectProtectiveEquipment input
 let detect_text ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetectText input
+let disassociate_faces ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateFaces input
 let distribute_dataset_entries ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DistributeDatasetEntries input
 let get_celebrity_info ?endpoint_url ?cfg input =
@@ -67,10 +81,14 @@ let get_content_moderation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetContentModeration input
 let get_face_detection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFaceDetection input
+let get_face_liveness_session_results ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetFaceLivenessSessionResults input
 let get_face_search ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFaceSearch input
 let get_label_detection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLabelDetection input
+let get_media_analysis_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetMediaAnalysisJob input
 let get_person_tracking ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPersonTracking input
 let get_segment_detection ?endpoint_url ?cfg input =
@@ -87,16 +105,28 @@ let list_dataset_labels ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDatasetLabels input
 let list_faces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFaces input
+let list_media_analysis_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMediaAnalysisJobs input
+let list_project_policies ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListProjectPolicies input
 let list_stream_processors ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListStreamProcessors input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_users ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListUsers input
+let put_project_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutProjectPolicy input
 let recognize_celebrities ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RecognizeCelebrities input
 let search_faces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SearchFaces input
 let search_faces_by_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SearchFacesByImage input
+let search_users ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SearchUsers input
+let search_users_by_image ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SearchUsersByImage input
 let start_celebrity_recognition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartCelebrityRecognition input
 let start_content_moderation ?endpoint_url ?cfg input =
@@ -107,6 +137,8 @@ let start_face_search ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartFaceSearch input
 let start_label_detection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartLabelDetection input
+let start_media_analysis_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartMediaAnalysisJob input
 let start_person_tracking ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartPersonTracking input
 let start_project_version ?endpoint_url ?cfg input =
@@ -127,3 +159,5 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_dataset_entries ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDatasetEntries input
+let update_stream_processor ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateStreamProcessor input

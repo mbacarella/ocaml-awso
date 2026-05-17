@@ -38,19 +38,20 @@ let create_suite_definition =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and suiteDefinitionConfiguration =
-         flag "suite-definition-configuration" (optional json_arg)
-           ~doc:"JSON SuiteDefinitionConfiguration"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap" in
+         flag "suite-definition-configuration" (required json_arg)
+           ~doc:"JSON SuiteDefinitionConfiguration" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_suite_definition
            (Values.CreateSuiteDefinitionRequest.make
-              ?suiteDefinitionConfiguration:(Option.map
-                                               ~f:Values.SuiteDefinitionConfiguration.of_json
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?clientToken
+              ~suiteDefinitionConfiguration:(Values.SuiteDefinitionConfiguration.of_json
                                                suiteDefinitionConfiguration)
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ())
-           (Some Values.CreateSuiteDefinitionResponse.to_json)
+              ()) (Some Values.CreateSuiteDefinitionResponse.to_json)
            (Some Values.CreateSuiteDefinitionResponse.error_to_json)])
 let delete_suite_definition =
   Command.async ~summary:""
@@ -84,11 +85,21 @@ let get_endpoint =
          flag "thing-arn" (optional string) ~doc:"STRING AmazonResourceName"
        and certificateArn =
          flag "certificate-arn" (optional string)
-           ~doc:"STRING AmazonResourceName" in
+           ~doc:"STRING AmazonResourceName"
+       and deviceRoleArn =
+         flag "device-role-arn" (optional string)
+           ~doc:"STRING AmazonResourceName"
+       and authenticationMethod =
+         flag "authentication-method" (optional json_arg)
+           ~doc:"JSON AuthenticationMethod" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_endpoint
-           (Values.GetEndpointRequest.make ?thingArn ?certificateArn ())
+           (Values.GetEndpointRequest.make ?thingArn ?certificateArn
+              ?deviceRoleArn
+              ?authenticationMethod:(Option.map
+                                       ~f:Values.AuthenticationMethod.of_json
+                                       authenticationMethod) ())
            (Some Values.GetEndpointResponse.to_json)
            (Some Values.GetEndpointResponse.error_to_json)])
 let get_suite_definition =
@@ -231,21 +242,20 @@ let start_suite_run =
        and suiteDefinitionVersion =
          flag "suite-definition-version" (optional string)
            ~doc:"STRING SuiteDefinitionVersion"
-       and suiteRunConfiguration =
-         flag "suite-run-configuration" (optional json_arg)
-           ~doc:"JSON SuiteRunConfiguration"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and suiteDefinitionId =
-         flag "suite-definition-id" (required string) ~doc:"STRING UUID" in
+         flag "suite-definition-id" (required string) ~doc:"STRING UUID"
+       and suiteRunConfiguration =
+         flag "suite-run-configuration" (required json_arg)
+           ~doc:"JSON SuiteRunConfiguration" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_suite_run
            (Values.StartSuiteRunRequest.make ?suiteDefinitionVersion
-              ?suiteRunConfiguration:(Option.map
-                                        ~f:Values.SuiteRunConfiguration.of_json
-                                        suiteRunConfiguration)
               ?tags:(Option.map ~f:Values.TagMap.of_json tags)
-              ~suiteDefinitionId ())
+              ~suiteDefinitionId
+              ~suiteRunConfiguration:(Values.SuiteRunConfiguration.of_json
+                                        suiteRunConfiguration) ())
            (Some Values.StartSuiteRunResponse.to_json)
            (Some Values.StartSuiteRunResponse.error_to_json)])
 let stop_suite_run =
@@ -321,20 +331,18 @@ let update_suite_definition =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and suiteDefinitionConfiguration =
-         flag "suite-definition-configuration" (optional json_arg)
-           ~doc:"JSON SuiteDefinitionConfiguration"
        and suiteDefinitionId =
-         flag "suite-definition-id" (required string) ~doc:"STRING UUID" in
+         flag "suite-definition-id" (required string) ~doc:"STRING UUID"
+       and suiteDefinitionConfiguration =
+         flag "suite-definition-configuration" (required json_arg)
+           ~doc:"JSON SuiteDefinitionConfiguration" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_suite_definition
-           (Values.UpdateSuiteDefinitionRequest.make
-              ?suiteDefinitionConfiguration:(Option.map
-                                               ~f:Values.SuiteDefinitionConfiguration.of_json
+           (Values.UpdateSuiteDefinitionRequest.make ~suiteDefinitionId
+              ~suiteDefinitionConfiguration:(Values.SuiteDefinitionConfiguration.of_json
                                                suiteDefinitionConfiguration)
-              ~suiteDefinitionId ())
-           (Some Values.UpdateSuiteDefinitionResponse.to_json)
+              ()) (Some Values.UpdateSuiteDefinitionResponse.to_json)
            (Some Values.UpdateSuiteDefinitionResponse.error_to_json)])
 let main =
   Command.group

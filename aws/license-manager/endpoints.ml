@@ -16,6 +16,12 @@ type ('i, 'o, 'e) t =
   CreateGrantVersionResponse.t, CreateGrantVersionResponse.error) t 
   | CreateLicense: (CreateLicenseRequest.t, CreateLicenseResponse.t,
   CreateLicenseResponse.error) t 
+  | CreateLicenseAssetGroup: (CreateLicenseAssetGroupRequest.t,
+  CreateLicenseAssetGroupResponse.t, CreateLicenseAssetGroupResponse.error) t
+  
+  | CreateLicenseAssetRuleset: (CreateLicenseAssetRulesetRequest.t,
+  CreateLicenseAssetRulesetResponse.t,
+  CreateLicenseAssetRulesetResponse.error) t 
   | CreateLicenseConfiguration: (CreateLicenseConfigurationRequest.t,
   CreateLicenseConfigurationResponse.t,
   CreateLicenseConfigurationResponse.error) t 
@@ -35,6 +41,12 @@ type ('i, 'o, 'e) t =
   DeleteGrantResponse.error) t 
   | DeleteLicense: (DeleteLicenseRequest.t, DeleteLicenseResponse.t,
   DeleteLicenseResponse.error) t 
+  | DeleteLicenseAssetGroup: (DeleteLicenseAssetGroupRequest.t,
+  DeleteLicenseAssetGroupResponse.t, DeleteLicenseAssetGroupResponse.error) t
+  
+  | DeleteLicenseAssetRuleset: (DeleteLicenseAssetRulesetRequest.t,
+  DeleteLicenseAssetRulesetResponse.t,
+  DeleteLicenseAssetRulesetResponse.error) t 
   | DeleteLicenseConfiguration: (DeleteLicenseConfigurationRequest.t,
   DeleteLicenseConfigurationResponse.t,
   DeleteLicenseConfigurationResponse.error) t 
@@ -53,6 +65,10 @@ type ('i, 'o, 'e) t =
   t 
   | GetLicense: (GetLicenseRequest.t, GetLicenseResponse.t,
   GetLicenseResponse.error) t 
+  | GetLicenseAssetGroup: (GetLicenseAssetGroupRequest.t,
+  GetLicenseAssetGroupResponse.t, GetLicenseAssetGroupResponse.error) t 
+  | GetLicenseAssetRuleset: (GetLicenseAssetRulesetRequest.t,
+  GetLicenseAssetRulesetResponse.t, GetLicenseAssetRulesetResponse.error) t 
   | GetLicenseConfiguration: (GetLicenseConfigurationRequest.t,
   GetLicenseConfigurationResponse.t, GetLicenseConfigurationResponse.error) t
   
@@ -67,6 +83,9 @@ type ('i, 'o, 'e) t =
   GetLicenseUsageResponse.error) t 
   | GetServiceSettings: (GetServiceSettingsRequest.t,
   GetServiceSettingsResponse.t, GetServiceSettingsResponse.error) t 
+  | ListAssetsForLicenseAssetGroup: (ListAssetsForLicenseAssetGroupRequest.t,
+  ListAssetsForLicenseAssetGroupResponse.t,
+  ListAssetsForLicenseAssetGroupResponse.error) t 
   | ListAssociationsForLicenseConfiguration:
   (ListAssociationsForLicenseConfigurationRequest.t,
   ListAssociationsForLicenseConfigurationResponse.t,
@@ -77,9 +96,18 @@ type ('i, 'o, 'e) t =
   (ListFailuresForLicenseConfigurationOperationsRequest.t,
   ListFailuresForLicenseConfigurationOperationsResponse.t,
   ListFailuresForLicenseConfigurationOperationsResponse.error) t 
+  | ListLicenseAssetGroups: (ListLicenseAssetGroupsRequest.t,
+  ListLicenseAssetGroupsResponse.t, ListLicenseAssetGroupsResponse.error) t 
+  | ListLicenseAssetRulesets: (ListLicenseAssetRulesetsRequest.t,
+  ListLicenseAssetRulesetsResponse.t, ListLicenseAssetRulesetsResponse.error)
+  t 
   | ListLicenseConfigurations: (ListLicenseConfigurationsRequest.t,
   ListLicenseConfigurationsResponse.t,
   ListLicenseConfigurationsResponse.error) t 
+  | ListLicenseConfigurationsForOrganization:
+  (ListLicenseConfigurationsForOrganizationRequest.t,
+  ListLicenseConfigurationsForOrganizationResponse.t,
+  ListLicenseConfigurationsForOrganizationResponse.error) t 
   | ListLicenseConversionTasks: (ListLicenseConversionTasksRequest.t,
   ListLicenseConversionTasksResponse.t,
   ListLicenseConversionTasksResponse.error) t 
@@ -97,8 +125,16 @@ type ('i, 'o, 'e) t =
   ListLicensesResponse.error) t 
   | ListReceivedGrants: (ListReceivedGrantsRequest.t,
   ListReceivedGrantsResponse.t, ListReceivedGrantsResponse.error) t 
+  | ListReceivedGrantsForOrganization:
+  (ListReceivedGrantsForOrganizationRequest.t,
+  ListReceivedGrantsForOrganizationResponse.t,
+  ListReceivedGrantsForOrganizationResponse.error) t 
   | ListReceivedLicenses: (ListReceivedLicensesRequest.t,
   ListReceivedLicensesResponse.t, ListReceivedLicensesResponse.error) t 
+  | ListReceivedLicensesForOrganization:
+  (ListReceivedLicensesForOrganizationRequest.t,
+  ListReceivedLicensesForOrganizationResponse.t,
+  ListReceivedLicensesForOrganizationResponse.error) t 
   | ListResourceInventory: (ListResourceInventoryRequest.t,
   ListResourceInventoryResponse.t, ListResourceInventoryResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
@@ -115,6 +151,12 @@ type ('i, 'o, 'e) t =
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateLicenseAssetGroup: (UpdateLicenseAssetGroupRequest.t,
+  UpdateLicenseAssetGroupResponse.t, UpdateLicenseAssetGroupResponse.error) t
+  
+  | UpdateLicenseAssetRuleset: (UpdateLicenseAssetRulesetRequest.t,
+  UpdateLicenseAssetRulesetResponse.t,
+  UpdateLicenseAssetRulesetResponse.error) t 
   | UpdateLicenseConfiguration: (UpdateLicenseConfigurationRequest.t,
   UpdateLicenseConfigurationResponse.t,
   UpdateLicenseConfigurationResponse.error) t 
@@ -137,6 +179,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateGrant -> `POST
   | CreateGrantVersion -> `POST
   | CreateLicense -> `POST
+  | CreateLicenseAssetGroup -> `POST
+  | CreateLicenseAssetRuleset -> `POST
   | CreateLicenseConfiguration -> `POST
   | CreateLicenseConversionTaskForResource -> `POST
   | CreateLicenseManagerReportGenerator -> `POST
@@ -144,6 +188,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateToken -> `POST
   | DeleteGrant -> `POST
   | DeleteLicense -> `POST
+  | DeleteLicenseAssetGroup -> `POST
+  | DeleteLicenseAssetRuleset -> `POST
   | DeleteLicenseConfiguration -> `POST
   | DeleteLicenseManagerReportGenerator -> `POST
   | DeleteToken -> `POST
@@ -151,22 +197,30 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetAccessToken -> `POST
   | GetGrant -> `POST
   | GetLicense -> `POST
+  | GetLicenseAssetGroup -> `POST
+  | GetLicenseAssetRuleset -> `POST
   | GetLicenseConfiguration -> `POST
   | GetLicenseConversionTask -> `POST
   | GetLicenseManagerReportGenerator -> `POST
   | GetLicenseUsage -> `POST
   | GetServiceSettings -> `POST
+  | ListAssetsForLicenseAssetGroup -> `POST
   | ListAssociationsForLicenseConfiguration -> `POST
   | ListDistributedGrants -> `POST
   | ListFailuresForLicenseConfigurationOperations -> `POST
+  | ListLicenseAssetGroups -> `POST
+  | ListLicenseAssetRulesets -> `POST
   | ListLicenseConfigurations -> `POST
+  | ListLicenseConfigurationsForOrganization -> `POST
   | ListLicenseConversionTasks -> `POST
   | ListLicenseManagerReportGenerators -> `POST
   | ListLicenseSpecificationsForResource -> `POST
   | ListLicenseVersions -> `POST
   | ListLicenses -> `POST
   | ListReceivedGrants -> `POST
+  | ListReceivedGrantsForOrganization -> `POST
   | ListReceivedLicenses -> `POST
+  | ListReceivedLicensesForOrganization -> `POST
   | ListResourceInventory -> `POST
   | ListTagsForResource -> `POST
   | ListTokens -> `POST
@@ -174,6 +228,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | RejectGrant -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
+  | UpdateLicenseAssetGroup -> `POST
+  | UpdateLicenseAssetRuleset -> `POST
   | UpdateLicenseConfiguration -> `POST
   | UpdateLicenseManagerReportGenerator -> `POST
   | UpdateLicenseSpecificationsForResource -> `POST
@@ -188,6 +244,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateGrant -> (Format.kasprintf Uri.of_string) "/"
       | CreateGrantVersion -> (Format.kasprintf Uri.of_string) "/"
       | CreateLicense -> (Format.kasprintf Uri.of_string) "/"
+      | CreateLicenseAssetGroup -> (Format.kasprintf Uri.of_string) "/"
+      | CreateLicenseAssetRuleset -> (Format.kasprintf Uri.of_string) "/"
       | CreateLicenseConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | CreateLicenseConversionTaskForResource ->
           (Format.kasprintf Uri.of_string) "/"
@@ -197,6 +255,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateToken -> (Format.kasprintf Uri.of_string) "/"
       | DeleteGrant -> (Format.kasprintf Uri.of_string) "/"
       | DeleteLicense -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteLicenseAssetGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteLicenseAssetRuleset -> (Format.kasprintf Uri.of_string) "/"
       | DeleteLicenseConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | DeleteLicenseManagerReportGenerator ->
           (Format.kasprintf Uri.of_string) "/"
@@ -205,18 +265,26 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetAccessToken -> (Format.kasprintf Uri.of_string) "/"
       | GetGrant -> (Format.kasprintf Uri.of_string) "/"
       | GetLicense -> (Format.kasprintf Uri.of_string) "/"
+      | GetLicenseAssetGroup -> (Format.kasprintf Uri.of_string) "/"
+      | GetLicenseAssetRuleset -> (Format.kasprintf Uri.of_string) "/"
       | GetLicenseConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | GetLicenseConversionTask -> (Format.kasprintf Uri.of_string) "/"
       | GetLicenseManagerReportGenerator ->
           (Format.kasprintf Uri.of_string) "/"
       | GetLicenseUsage -> (Format.kasprintf Uri.of_string) "/"
       | GetServiceSettings -> (Format.kasprintf Uri.of_string) "/"
+      | ListAssetsForLicenseAssetGroup ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListAssociationsForLicenseConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | ListDistributedGrants -> (Format.kasprintf Uri.of_string) "/"
       | ListFailuresForLicenseConfigurationOperations ->
           (Format.kasprintf Uri.of_string) "/"
+      | ListLicenseAssetGroups -> (Format.kasprintf Uri.of_string) "/"
+      | ListLicenseAssetRulesets -> (Format.kasprintf Uri.of_string) "/"
       | ListLicenseConfigurations -> (Format.kasprintf Uri.of_string) "/"
+      | ListLicenseConfigurationsForOrganization ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListLicenseConversionTasks -> (Format.kasprintf Uri.of_string) "/"
       | ListLicenseManagerReportGenerators ->
           (Format.kasprintf Uri.of_string) "/"
@@ -225,7 +293,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListLicenseVersions -> (Format.kasprintf Uri.of_string) "/"
       | ListLicenses -> (Format.kasprintf Uri.of_string) "/"
       | ListReceivedGrants -> (Format.kasprintf Uri.of_string) "/"
+      | ListReceivedGrantsForOrganization ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListReceivedLicenses -> (Format.kasprintf Uri.of_string) "/"
+      | ListReceivedLicensesForOrganization ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListResourceInventory -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListTokens -> (Format.kasprintf Uri.of_string) "/"
@@ -234,6 +306,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RejectGrant -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateLicenseAssetGroup -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateLicenseAssetRuleset -> (Format.kasprintf Uri.of_string) "/"
       | UpdateLicenseConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | UpdateLicenseManagerReportGenerator ->
           (Format.kasprintf Uri.of_string) "/"
@@ -299,6 +373,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSLicenseManager.CreateLicense")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateLicenseAssetGroup ->
+      let json = CreateLicenseAssetGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSLicenseManager.CreateLicenseAssetGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateLicenseAssetRuleset ->
+      let json = CreateLicenseAssetRulesetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSLicenseManager.CreateLicenseAssetRuleset")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateLicenseConfiguration ->
       let json = CreateLicenseConfigurationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -357,6 +447,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSLicenseManager.DeleteLicense")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteLicenseAssetGroup ->
+      let json = DeleteLicenseAssetGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSLicenseManager.DeleteLicenseAssetGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteLicenseAssetRuleset ->
+      let json = DeleteLicenseAssetRulesetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSLicenseManager.DeleteLicenseAssetRuleset")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteLicenseConfiguration ->
       let json = DeleteLicenseConfigurationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -414,6 +520,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSLicenseManager.GetLicense")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetLicenseAssetGroup ->
+      let json = GetLicenseAssetGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSLicenseManager.GetLicenseAssetGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetLicenseAssetRuleset ->
+      let json = GetLicenseAssetRulesetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSLicenseManager.GetLicenseAssetRuleset")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetLicenseConfiguration ->
       let json = GetLicenseConfigurationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -455,6 +577,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSLicenseManager.GetServiceSettings")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAssetsForLicenseAssetGroup ->
+      let json = ListAssetsForLicenseAssetGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSLicenseManager.ListAssetsForLicenseAssetGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListAssociationsForLicenseConfiguration ->
       let json = ListAssociationsForLicenseConfigurationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -482,6 +613,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSLicenseManager.ListFailuresForLicenseConfigurationOperations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListLicenseAssetGroups ->
+      let json = ListLicenseAssetGroupsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSLicenseManager.ListLicenseAssetGroups")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListLicenseAssetRulesets ->
+      let json = ListLicenseAssetRulesetsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSLicenseManager.ListLicenseAssetRulesets")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListLicenseConfigurations ->
       let json = ListLicenseConfigurationsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -489,6 +636,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSLicenseManager.ListLicenseConfigurations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListLicenseConfigurationsForOrganization ->
+      let json = ListLicenseConfigurationsForOrganizationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSLicenseManager.ListLicenseConfigurationsForOrganization")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListLicenseConversionTasks ->
       let json = ListLicenseConversionTasksRequest.to_json req in
@@ -540,6 +696,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSLicenseManager.ListReceivedGrants")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListReceivedGrantsForOrganization ->
+      let json = ListReceivedGrantsForOrganizationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSLicenseManager.ListReceivedGrantsForOrganization")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListReceivedLicenses ->
       let json = ListReceivedLicensesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -547,6 +712,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSLicenseManager.ListReceivedLicenses")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListReceivedLicensesForOrganization ->
+      let json = ListReceivedLicensesForOrganizationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSLicenseManager.ListReceivedLicensesForOrganization")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListResourceInventory ->
       let json = ListResourceInventoryRequest.to_json req in
@@ -604,6 +778,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSLicenseManager.UntagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateLicenseAssetGroup ->
+      let json = UpdateLicenseAssetGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSLicenseManager.UpdateLicenseAssetGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateLicenseAssetRuleset ->
+      let json = UpdateLicenseAssetRulesetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSLicenseManager.UpdateLicenseAssetRuleset")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateLicenseConfiguration ->
       let json = UpdateLicenseConfigurationRequest.to_json req in
@@ -710,6 +900,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateLicenseResponse.of_json json)
       else Error (parse_aws_error (Some CreateLicenseResponse.error_of_json))
+  | CreateLicenseAssetGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLicenseAssetGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateLicenseAssetGroupResponse.error_of_json))
+  | CreateLicenseAssetRuleset ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateLicenseAssetRulesetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateLicenseAssetRulesetResponse.error_of_json))
   | CreateLicenseConfiguration ->
       if is_success
       then
@@ -764,6 +972,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteLicenseResponse.of_json json)
       else Error (parse_aws_error (Some DeleteLicenseResponse.error_of_json))
+  | DeleteLicenseAssetGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteLicenseAssetGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteLicenseAssetGroupResponse.error_of_json))
+  | DeleteLicenseAssetRuleset ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteLicenseAssetRulesetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteLicenseAssetRulesetResponse.error_of_json))
   | DeleteLicenseConfiguration ->
       if is_success
       then
@@ -816,6 +1042,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetLicenseResponse.of_json json)
       else Error (parse_aws_error (Some GetLicenseResponse.error_of_json))
+  | GetLicenseAssetGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLicenseAssetGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetLicenseAssetGroupResponse.error_of_json))
+  | GetLicenseAssetRuleset ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLicenseAssetRulesetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetLicenseAssetRulesetResponse.error_of_json))
   | GetLicenseConfiguration ->
       if is_success
       then
@@ -858,6 +1101,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetServiceSettingsResponse.error_of_json))
+  | ListAssetsForLicenseAssetGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAssetsForLicenseAssetGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAssetsForLicenseAssetGroupResponse.error_of_json))
   | ListAssociationsForLicenseConfiguration ->
       if is_success
       then
@@ -887,6 +1139,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 ListFailuresForLicenseConfigurationOperationsResponse.error_of_json))
+  | ListLicenseAssetGroups ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLicenseAssetGroupsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListLicenseAssetGroupsResponse.error_of_json))
+  | ListLicenseAssetRulesets ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLicenseAssetRulesetsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListLicenseAssetRulesetsResponse.error_of_json))
   | ListLicenseConfigurations ->
       if is_success
       then
@@ -896,6 +1166,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListLicenseConfigurationsResponse.error_of_json))
+  | ListLicenseConfigurationsForOrganization ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListLicenseConfigurationsForOrganizationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListLicenseConfigurationsForOrganizationResponse.error_of_json))
   | ListLicenseConversionTasks ->
       if is_success
       then
@@ -945,6 +1225,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListReceivedGrantsResponse.error_of_json))
+  | ListReceivedGrantsForOrganization ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListReceivedGrantsForOrganizationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListReceivedGrantsForOrganizationResponse.error_of_json))
   | ListReceivedLicenses ->
       if is_success
       then
@@ -953,6 +1242,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListReceivedLicensesResponse.error_of_json))
+  | ListReceivedLicensesForOrganization ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListReceivedLicensesForOrganizationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListReceivedLicensesForOrganizationResponse.error_of_json))
   | ListResourceInventory ->
       if is_success
       then
@@ -1002,6 +1300,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceResponse.of_json json)
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateLicenseAssetGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLicenseAssetGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateLicenseAssetGroupResponse.error_of_json))
+  | UpdateLicenseAssetRuleset ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateLicenseAssetRulesetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateLicenseAssetRulesetResponse.error_of_json))
   | UpdateLicenseConfiguration ->
       if is_success
       then

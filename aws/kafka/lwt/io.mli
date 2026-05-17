@@ -23,16 +23,56 @@ val create_configuration :
       CreateConfigurationRequest.t ->
         (CreateConfigurationResponse.t, CreateConfigurationResponse.error)
           Result.t Lwt.t
+val create_replicator :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateReplicatorRequest.t ->
+        (CreateReplicatorResponse.t, CreateReplicatorResponse.error) Result.t
+          Lwt.t
+val create_topic :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateTopicRequest.t ->
+        (CreateTopicResponse.t, CreateTopicResponse.error) Result.t Lwt.t
+val create_vpc_connection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateVpcConnectionRequest.t ->
+        (CreateVpcConnectionResponse.t, CreateVpcConnectionResponse.error)
+          Result.t Lwt.t
 val delete_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClusterRequest.t ->
         (DeleteClusterResponse.t, DeleteClusterResponse.error) Result.t Lwt.t
+val delete_cluster_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteClusterPolicyRequest.t ->
+        (DeleteClusterPolicyResponse.t, DeleteClusterPolicyResponse.error)
+          Result.t Lwt.t
 val delete_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConfigurationRequest.t ->
         (DeleteConfigurationResponse.t, DeleteConfigurationResponse.error)
+          Result.t Lwt.t
+val delete_replicator :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteReplicatorRequest.t ->
+        (DeleteReplicatorResponse.t, DeleteReplicatorResponse.error) Result.t
+          Lwt.t
+val delete_topic :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteTopicRequest.t ->
+        (DeleteTopicResponse.t, DeleteTopicResponse.error) Result.t Lwt.t
+val delete_vpc_connection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteVpcConnectionRequest.t ->
+        (DeleteVpcConnectionResponse.t, DeleteVpcConnectionResponse.error)
           Result.t Lwt.t
 val describe_cluster :
   ?endpoint_url:string ->
@@ -52,6 +92,12 @@ val describe_cluster_operation :
       DescribeClusterOperationRequest.t ->
         (DescribeClusterOperationResponse.t,
           DescribeClusterOperationResponse.error) Result.t Lwt.t
+val describe_cluster_operation_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeClusterOperationV2Request.t ->
+        (DescribeClusterOperationV2Response.t,
+          DescribeClusterOperationV2Response.error) Result.t Lwt.t
 val describe_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -64,6 +110,29 @@ val describe_configuration_revision :
       DescribeConfigurationRevisionRequest.t ->
         (DescribeConfigurationRevisionResponse.t,
           DescribeConfigurationRevisionResponse.error) Result.t Lwt.t
+val describe_replicator :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeReplicatorRequest.t ->
+        (DescribeReplicatorResponse.t, DescribeReplicatorResponse.error)
+          Result.t Lwt.t
+val describe_topic :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeTopicRequest.t ->
+        (DescribeTopicResponse.t, DescribeTopicResponse.error) Result.t Lwt.t
+val describe_topic_partitions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeTopicPartitionsRequest.t ->
+        (DescribeTopicPartitionsResponse.t,
+          DescribeTopicPartitionsResponse.error) Result.t Lwt.t
+val describe_vpc_connection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeVpcConnectionRequest.t ->
+        (DescribeVpcConnectionResponse.t,
+          DescribeVpcConnectionResponse.error) Result.t Lwt.t
 val batch_disassociate_scram_secret :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -82,12 +151,24 @@ val get_compatible_kafka_versions :
       GetCompatibleKafkaVersionsRequest.t ->
         (GetCompatibleKafkaVersionsResponse.t,
           GetCompatibleKafkaVersionsResponse.error) Result.t Lwt.t
+val get_cluster_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetClusterPolicyRequest.t ->
+        (GetClusterPolicyResponse.t, GetClusterPolicyResponse.error) Result.t
+          Lwt.t
 val list_cluster_operations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListClusterOperationsRequest.t ->
         (ListClusterOperationsResponse.t,
           ListClusterOperationsResponse.error) Result.t Lwt.t
+val list_cluster_operations_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListClusterOperationsV2Request.t ->
+        (ListClusterOperationsV2Response.t,
+          ListClusterOperationsV2Response.error) Result.t Lwt.t
 val list_clusters :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -122,6 +203,12 @@ val list_nodes :
     ?cfg:Awso.Cfg.t ->
       ListNodesRequest.t ->
         (ListNodesResponse.t, ListNodesResponse.error) Result.t Lwt.t
+val list_replicators :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListReplicatorsRequest.t ->
+        (ListReplicatorsResponse.t, ListReplicatorsResponse.error) Result.t
+          Lwt.t
 val list_scram_secrets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -134,6 +221,35 @@ val list_tags_for_resource :
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Lwt.t
+val list_client_vpc_connections :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListClientVpcConnectionsRequest.t ->
+        (ListClientVpcConnectionsResponse.t,
+          ListClientVpcConnectionsResponse.error) Result.t Lwt.t
+val list_topics :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTopicsRequest.t ->
+        (ListTopicsResponse.t, ListTopicsResponse.error) Result.t Lwt.t
+val list_vpc_connections :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListVpcConnectionsRequest.t ->
+        (ListVpcConnectionsResponse.t, ListVpcConnectionsResponse.error)
+          Result.t Lwt.t
+val reject_client_vpc_connection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RejectClientVpcConnectionRequest.t ->
+        (RejectClientVpcConnectionResponse.t,
+          RejectClientVpcConnectionResponse.error) Result.t Lwt.t
+val put_cluster_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutClusterPolicyRequest.t ->
+        (PutClusterPolicyResponse.t, PutClusterPolicyResponse.error) Result.t
+          Lwt.t
 val reboot_broker :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -193,9 +309,31 @@ val update_monitoring :
       UpdateMonitoringRequest.t ->
         (UpdateMonitoringResponse.t, UpdateMonitoringResponse.error) Result.t
           Lwt.t
+val update_rebalancing :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateRebalancingRequest.t ->
+        (UpdateRebalancingResponse.t, UpdateRebalancingResponse.error)
+          Result.t Lwt.t
+val update_replication_info :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateReplicationInfoRequest.t ->
+        (UpdateReplicationInfoResponse.t,
+          UpdateReplicationInfoResponse.error) Result.t Lwt.t
 val update_security :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSecurityRequest.t ->
         (UpdateSecurityResponse.t, UpdateSecurityResponse.error) Result.t
           Lwt.t
+val update_storage :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateStorageRequest.t ->
+        (UpdateStorageResponse.t, UpdateStorageResponse.error) Result.t Lwt.t
+val update_topic :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateTopicRequest.t ->
+        (UpdateTopicResponse.t, UpdateTopicResponse.error) Result.t Lwt.t

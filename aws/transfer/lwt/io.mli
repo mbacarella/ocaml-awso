@@ -5,6 +5,23 @@ val create_access :
     ?cfg:Awso.Cfg.t ->
       CreateAccessRequest.t ->
         (CreateAccessResponse.t, CreateAccessResponse.error) Result.t Lwt.t
+val create_agreement :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAgreementRequest.t ->
+        (CreateAgreementResponse.t, CreateAgreementResponse.error) Result.t
+          Lwt.t
+val create_connector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateConnectorRequest.t ->
+        (CreateConnectorResponse.t, CreateConnectorResponse.error) Result.t
+          Lwt.t
+val create_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateProfileRequest.t ->
+        (CreateProfileResponse.t, CreateProfileResponse.error) Result.t Lwt.t
 val create_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -15,6 +32,11 @@ val create_user :
     ?cfg:Awso.Cfg.t ->
       CreateUserRequest.t ->
         (CreateUserResponse.t, CreateUserResponse.error) Result.t Lwt.t
+val create_web_app :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateWebAppRequest.t ->
+        (CreateWebAppResponse.t, CreateWebAppResponse.error) Result.t Lwt.t
 val create_workflow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -24,6 +46,24 @@ val create_workflow :
 val delete_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteAccessRequest.t -> (unit, unit) Result.t Lwt.t
+val delete_agreement :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAgreementRequest.t -> (unit, unit) Result.t Lwt.t
+val delete_certificate :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCertificateRequest.t -> (unit, unit) Result.t Lwt.t
+val delete_connector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteConnectorRequest.t -> (unit, unit) Result.t Lwt.t
+val delete_host_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteHostKeyRequest.t -> (unit, unit) Result.t Lwt.t
+val delete_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteProfileRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteServerRequest.t -> (unit, unit) Result.t Lwt.t
@@ -34,6 +74,13 @@ val delete_ssh_public_key :
 val delete_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteUserRequest.t -> (unit, unit) Result.t Lwt.t
+val delete_web_app :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> DeleteWebAppRequest.t -> (unit, unit) Result.t Lwt.t
+val delete_web_app_customization :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteWebAppCustomizationRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_workflow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteWorkflowRequest.t -> (unit, unit) Result.t Lwt.t
@@ -43,12 +90,42 @@ val describe_access :
       DescribeAccessRequest.t ->
         (DescribeAccessResponse.t, DescribeAccessResponse.error) Result.t
           Lwt.t
+val describe_agreement :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAgreementRequest.t ->
+        (DescribeAgreementResponse.t, DescribeAgreementResponse.error)
+          Result.t Lwt.t
+val describe_certificate :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeCertificateRequest.t ->
+        (DescribeCertificateResponse.t, DescribeCertificateResponse.error)
+          Result.t Lwt.t
+val describe_connector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeConnectorRequest.t ->
+        (DescribeConnectorResponse.t, DescribeConnectorResponse.error)
+          Result.t Lwt.t
 val describe_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeExecutionRequest.t ->
         (DescribeExecutionResponse.t, DescribeExecutionResponse.error)
           Result.t Lwt.t
+val describe_host_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeHostKeyRequest.t ->
+        (DescribeHostKeyResponse.t, DescribeHostKeyResponse.error) Result.t
+          Lwt.t
+val describe_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeProfileRequest.t ->
+        (DescribeProfileResponse.t, DescribeProfileResponse.error) Result.t
+          Lwt.t
 val describe_security_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -66,12 +143,35 @@ val describe_user :
     ?cfg:Awso.Cfg.t ->
       DescribeUserRequest.t ->
         (DescribeUserResponse.t, DescribeUserResponse.error) Result.t Lwt.t
+val describe_web_app :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeWebAppRequest.t ->
+        (DescribeWebAppResponse.t, DescribeWebAppResponse.error) Result.t
+          Lwt.t
+val describe_web_app_customization :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeWebAppCustomizationRequest.t ->
+        (DescribeWebAppCustomizationResponse.t,
+          DescribeWebAppCustomizationResponse.error) Result.t Lwt.t
 val describe_workflow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkflowRequest.t ->
         (DescribeWorkflowResponse.t, DescribeWorkflowResponse.error) Result.t
           Lwt.t
+val import_certificate :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ImportCertificateRequest.t ->
+        (ImportCertificateResponse.t, ImportCertificateResponse.error)
+          Result.t Lwt.t
+val import_host_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ImportHostKeyRequest.t ->
+        (ImportHostKeyResponse.t, ImportHostKeyResponse.error) Result.t Lwt.t
 val import_ssh_public_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -83,12 +183,46 @@ val list_accesses :
     ?cfg:Awso.Cfg.t ->
       ListAccessesRequest.t ->
         (ListAccessesResponse.t, ListAccessesResponse.error) Result.t Lwt.t
+val list_agreements :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAgreementsRequest.t ->
+        (ListAgreementsResponse.t, ListAgreementsResponse.error) Result.t
+          Lwt.t
+val list_certificates :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCertificatesRequest.t ->
+        (ListCertificatesResponse.t, ListCertificatesResponse.error) Result.t
+          Lwt.t
+val list_connectors :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListConnectorsRequest.t ->
+        (ListConnectorsResponse.t, ListConnectorsResponse.error) Result.t
+          Lwt.t
 val list_executions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListExecutionsRequest.t ->
         (ListExecutionsResponse.t, ListExecutionsResponse.error) Result.t
           Lwt.t
+val list_file_transfer_results :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListFileTransferResultsRequest.t ->
+        (ListFileTransferResultsResponse.t,
+          ListFileTransferResultsResponse.error) Result.t Lwt.t
+val list_host_keys :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListHostKeysRequest.t ->
+        (ListHostKeysResponse.t, ListHostKeysResponse.error) Result.t Lwt.t
+val list_profiles :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListProfilesRequest.t ->
+        (ListProfilesResponse.t, ListProfilesResponse.error) Result.t Lwt.t
 val list_security_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -111,6 +245,11 @@ val list_users :
     ?cfg:Awso.Cfg.t ->
       ListUsersRequest.t ->
         (ListUsersResponse.t, ListUsersResponse.error) Result.t Lwt.t
+val list_web_apps :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListWebAppsRequest.t ->
+        (ListWebAppsResponse.t, ListWebAppsResponse.error) Result.t Lwt.t
 val list_workflows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -122,6 +261,30 @@ val send_workflow_step_state :
       SendWorkflowStepStateRequest.t ->
         (SendWorkflowStepStateResponse.t,
           SendWorkflowStepStateResponse.error) Result.t Lwt.t
+val start_directory_listing :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartDirectoryListingRequest.t ->
+        (StartDirectoryListingResponse.t,
+          StartDirectoryListingResponse.error) Result.t Lwt.t
+val start_file_transfer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartFileTransferRequest.t ->
+        (StartFileTransferResponse.t, StartFileTransferResponse.error)
+          Result.t Lwt.t
+val start_remote_delete :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartRemoteDeleteRequest.t ->
+        (StartRemoteDeleteResponse.t, StartRemoteDeleteResponse.error)
+          Result.t Lwt.t
+val start_remote_move :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartRemoteMoveRequest.t ->
+        (StartRemoteMoveResponse.t, StartRemoteMoveResponse.error) Result.t
+          Lwt.t
 val start_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> StartServerRequest.t -> (unit, unit) Result.t Lwt.t
@@ -131,6 +294,12 @@ val stop_server :
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t Lwt.t
+val test_connection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TestConnectionRequest.t ->
+        (TestConnectionResponse.t, TestConnectionResponse.error) Result.t
+          Lwt.t
 val test_identity_provider :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -145,6 +314,34 @@ val update_access :
     ?cfg:Awso.Cfg.t ->
       UpdateAccessRequest.t ->
         (UpdateAccessResponse.t, UpdateAccessResponse.error) Result.t Lwt.t
+val update_agreement :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAgreementRequest.t ->
+        (UpdateAgreementResponse.t, UpdateAgreementResponse.error) Result.t
+          Lwt.t
+val update_certificate :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateCertificateRequest.t ->
+        (UpdateCertificateResponse.t, UpdateCertificateResponse.error)
+          Result.t Lwt.t
+val update_connector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateConnectorRequest.t ->
+        (UpdateConnectorResponse.t, UpdateConnectorResponse.error) Result.t
+          Lwt.t
+val update_host_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateHostKeyRequest.t ->
+        (UpdateHostKeyResponse.t, UpdateHostKeyResponse.error) Result.t Lwt.t
+val update_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateProfileRequest.t ->
+        (UpdateProfileResponse.t, UpdateProfileResponse.error) Result.t Lwt.t
 val update_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -155,3 +352,14 @@ val update_user :
     ?cfg:Awso.Cfg.t ->
       UpdateUserRequest.t ->
         (UpdateUserResponse.t, UpdateUserResponse.error) Result.t Lwt.t
+val update_web_app :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateWebAppRequest.t ->
+        (UpdateWebAppResponse.t, UpdateWebAppResponse.error) Result.t Lwt.t
+val update_web_app_customization :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateWebAppCustomizationRequest.t ->
+        (UpdateWebAppCustomizationResponse.t,
+          UpdateWebAppCustomizationResponse.error) Result.t Lwt.t

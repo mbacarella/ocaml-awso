@@ -198,6 +198,9 @@ module ServiceList =
     type nonrec t = Service.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Service.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -258,9 +261,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" TagValue.of_json in
-      let key = field_map_exn json "key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "value" TagValue.of_json in
+      let key = field_map_exn json__ "key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -303,8 +306,7 @@ module TunnelSummary =
       tunnelId: TunnelId.t option
         [@ocaml.doc "The unique alpha-numeric identifier for the tunnel."];
       tunnelArn: TunnelArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name of the tunnel. The tunnel ARN format is arn:aws:tunnel:<region>:<account-id>:tunnel/<tunnel-id>"];
+        [@ocaml.doc "The Amazon Resource Name of the tunnel."];
       status: TunnelStatus.t option
         [@ocaml.doc
           "The status of a tunnel. Valid values are: Open and Closed."];
@@ -354,13 +356,13 @@ module TunnelSummary =
       make ?lastUpdatedAt ?createdAt ?description ?status ?tunnelArn
         ?tunnelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdatedAt = field_map json "lastUpdatedAt" DateType.of_json in
-      let createdAt = field_map json "createdAt" DateType.of_json in
-      let description = field_map json "description" Description.of_json in
-      let status = field_map json "status" TunnelStatus.of_json in
-      let tunnelArn = field_map json "tunnelArn" TunnelArn.of_json in
-      let tunnelId = field_map json "tunnelId" TunnelId.of_json in
+    let of_json json__ =
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" DateType.of_json in
+      let createdAt = field_map json__ "createdAt" DateType.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let status = field_map json__ "status" TunnelStatus.of_json in
+      let tunnelArn = field_map json__ "tunnelArn" TunnelArn.of_json in
+      let tunnelId = field_map json__ "tunnelId" TunnelId.of_json in
       make ?lastUpdatedAt ?createdAt ?description ?status ?tunnelArn
         ?tunnelId ()
     let to_json v = composed_to_json to_value v
@@ -388,9 +390,9 @@ module ConnectionState =
         (Option.map ~f:ConnectionStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?lastUpdatedAt ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdatedAt = field_map json "lastUpdatedAt" DateType.of_json in
-      let status = field_map json "status" ConnectionStatus.of_json in
+    let of_json json__ =
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" DateType.of_json in
+      let status = field_map json__ "status" ConnectionStatus.of_json in
       make ?lastUpdatedAt ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The state of a connection."]
@@ -403,7 +405,7 @@ module DestinationConfig =
           "The name of the IoT thing to which you want to connect."];
       services: ServiceList.t
         [@ocaml.doc
-          "A list of service names that identity the target application. The AWS IoT client running on the destination device reads this value and uses it to look up a port or an IP address and a port. The AWS IoT client instantiates the local proxy which uses this information to connect to the destination application."]}
+          "A list of service names that identify the target application. The IoT client running on the destination device reads this value and uses it to look up a port or an IP address and a port. The IoT client instantiates the local proxy, which uses this information to connect to the destination application."]}
     let context_ = "DestinationConfig"
     let make ?thingName = fun ~services -> fun () -> { thingName; services }
     let to_value x =
@@ -419,9 +421,9 @@ module DestinationConfig =
         (Option.map ~f:ThingName.of_xml) (Xml.child xml_arg0 "thingName") in
       make ~services ?thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let services = field_map_exn json "services" ServiceList.of_json in
-      let thingName = field_map json "thingName" ThingName.of_json in
+    let of_json json__ =
+      let services = field_map_exn json__ "services" ServiceList.of_json in
+      let thingName = field_map json__ "thingName" ThingName.of_json in
       make ~services ?thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The destination configuration."]
@@ -434,6 +436,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -473,9 +478,9 @@ module TimeoutConfig =
           (Xml.child xml_arg0 "maxLifetimeTimeoutMinutes") in
       make ?maxLifetimeTimeoutMinutes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxLifetimeTimeoutMinutes =
-        field_map json "maxLifetimeTimeoutMinutes" TimeoutInMin.of_json in
+        field_map json__ "maxLifetimeTimeoutMinutes" TimeoutInMin.of_json in
       make ?maxLifetimeTimeoutMinutes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Tunnel timeout configuration."]
@@ -493,8 +498,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -526,6 +531,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -558,6 +566,34 @@ module ClientAccessToken =
     let of_json j = string_of_json ~kind:"ClientAccessToken" j
     let to_json = simple_to_json to_value
   end
+module ClientMode =
+  struct
+    type nonrec t =
+      | SOURCE 
+      | DESTINATION 
+      | ALL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SOURCE -> "SOURCE"
+      | DESTINATION -> "DESTINATION"
+      | ALL -> "ALL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SOURCE" -> SOURCE
+      | "DESTINATION" -> DESTINATION
+      | "ALL" -> ALL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ClientMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ClientMode" j)
+    let to_json = simple_to_json to_value
+  end
 module LimitExceededException =
   struct
     type nonrec t = {
@@ -572,8 +608,8 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Thrown when a tunnel limit is exceeded."]
@@ -596,6 +632,9 @@ module TunnelSummaryList =
   struct
     type nonrec t = TunnelSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TunnelSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -641,8 +680,7 @@ module Tunnel =
       tunnelId: TunnelId.t option
         [@ocaml.doc "A unique alpha-numeric ID that identifies a tunnel."];
       tunnelArn: TunnelArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a tunnel. The tunnel ARN format is arn:aws:tunnel:<region>:<account-id>:tunnel/<tunnel-id>"];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of a tunnel."];
       status: TunnelStatus.t option
         [@ocaml.doc
           "The status of a tunnel. Valid values are: Open and Closed."];
@@ -738,22 +776,22 @@ module Tunnel =
         ?description ?destinationConnectionState ?sourceConnectionState
         ?status ?tunnelArn ?tunnelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdatedAt = field_map json "lastUpdatedAt" DateType.of_json in
-      let createdAt = field_map json "createdAt" DateType.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" DateType.of_json in
+      let createdAt = field_map json__ "createdAt" DateType.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let timeoutConfig =
-        field_map json "timeoutConfig" TimeoutConfig.of_json in
+        field_map json__ "timeoutConfig" TimeoutConfig.of_json in
       let destinationConfig =
-        field_map json "destinationConfig" DestinationConfig.of_json in
-      let description = field_map json "description" Description.of_json in
+        field_map json__ "destinationConfig" DestinationConfig.of_json in
+      let description = field_map json__ "description" Description.of_json in
       let destinationConnectionState =
-        field_map json "destinationConnectionState" ConnectionState.of_json in
+        field_map json__ "destinationConnectionState" ConnectionState.of_json in
       let sourceConnectionState =
-        field_map json "sourceConnectionState" ConnectionState.of_json in
-      let status = field_map json "status" TunnelStatus.of_json in
-      let tunnelArn = field_map json "tunnelArn" TunnelArn.of_json in
-      let tunnelId = field_map json "tunnelId" TunnelId.of_json in
+        field_map json__ "sourceConnectionState" ConnectionState.of_json in
+      let status = field_map json__ "status" TunnelStatus.of_json in
+      let tunnelArn = field_map json__ "tunnelArn" TunnelArn.of_json in
+      let tunnelId = field_map json__ "tunnelId" TunnelId.of_json in
       make ?lastUpdatedAt ?createdAt ?tags ?timeoutConfig ?destinationConfig
         ?description ?destinationConnectionState ?sourceConnectionState
         ?status ?tunnelArn ?tunnelId ()
@@ -835,10 +873,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "resourceArn" AmazonResourceName.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from a resource."]
@@ -903,13 +941,128 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagList.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "resourceArn" AmazonResourceName.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A resource tag."]
+module RotateTunnelAccessTokenResponse =
+  struct
+    type nonrec t =
+      {
+      tunnelArn: TunnelArn.t option
+        [@ocaml.doc "The Amazon Resource Name for the tunnel."];
+      sourceAccessToken: ClientAccessToken.t option
+        [@ocaml.doc
+          "The client access token that the source local proxy uses to connect to IoT Secure Tunneling."];
+      destinationAccessToken: ClientAccessToken.t option
+        [@ocaml.doc
+          "The client access token that the destination local proxy uses to connect to IoT Secure Tunneling."]}
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tunnelArn =
+      fun ?sourceAccessToken ->
+        fun ?destinationAccessToken ->
+          fun () -> { tunnelArn; sourceAccessToken; destinationAccessToken }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("tunnelArn", (Option.map x.tunnelArn ~f:TunnelArn.to_value));
+        ("sourceAccessToken",
+          (Option.map x.sourceAccessToken ~f:ClientAccessToken.to_value));
+        ("destinationAccessToken",
+          (Option.map x.destinationAccessToken ~f:ClientAccessToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destinationAccessToken =
+        (Option.map ~f:ClientAccessToken.of_xml)
+          (Xml.child xml_arg0 "destinationAccessToken") in
+      let sourceAccessToken =
+        (Option.map ~f:ClientAccessToken.of_xml)
+          (Xml.child xml_arg0 "sourceAccessToken") in
+      let tunnelArn =
+        (Option.map ~f:TunnelArn.of_xml) (Xml.child xml_arg0 "tunnelArn") in
+      make ?destinationAccessToken ?sourceAccessToken ?tunnelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destinationAccessToken =
+        field_map json__ "destinationAccessToken" ClientAccessToken.of_json in
+      let sourceAccessToken =
+        field_map json__ "sourceAccessToken" ClientAccessToken.of_json in
+      let tunnelArn = field_map json__ "tunnelArn" TunnelArn.of_json in
+      make ?destinationAccessToken ?sourceAccessToken ?tunnelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Revokes the current client access token (CAT) and returns new CAT for clients to use when reconnecting to secure tunneling to access the same tunnel. Requires permission to access the RotateTunnelAccessToken action. Rotating the CAT doesn't extend the tunnel duration. For example, say the tunnel duration is 12 hours and the tunnel has already been open for 4 hours. When you rotate the access tokens, the new tokens that are generated can only be used for the remaining 8 hours."]
+module RotateTunnelAccessTokenRequest =
+  struct
+    type nonrec t =
+      {
+      tunnelId: TunnelId.t
+        [@ocaml.doc
+          "The tunnel for which you want to rotate the access tokens."];
+      clientMode: ClientMode.t
+        [@ocaml.doc
+          "The mode of the client that will use the client token, which can be either the source or destination, or both source and destination."];
+      destinationConfig: DestinationConfig.t option }
+    let context_ = "RotateTunnelAccessTokenRequest"
+    let make ?destinationConfig =
+      fun ~tunnelId ->
+        fun ~clientMode ->
+          fun () -> { destinationConfig; tunnelId; clientMode }
+    let to_value x =
+      structure_to_value
+        [("tunnelId", (Some (TunnelId.to_value x.tunnelId)));
+        ("clientMode", (Some (ClientMode.to_value x.clientMode)));
+        ("destinationConfig",
+          (Option.map x.destinationConfig ~f:DestinationConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destinationConfig =
+        (Option.map ~f:DestinationConfig.of_xml)
+          (Xml.child xml_arg0 "destinationConfig") in
+      let clientMode =
+        ClientMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientMode") in
+      let tunnelId =
+        TunnelId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tunnelId") in
+      make ?destinationConfig ~clientMode ~tunnelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destinationConfig =
+        field_map json__ "destinationConfig" DestinationConfig.of_json in
+      let clientMode = field_map_exn json__ "clientMode" ClientMode.of_json in
+      let tunnelId = field_map_exn json__ "tunnelId" TunnelId.of_json in
+      make ?destinationConfig ~clientMode ~tunnelId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Revokes the current client access token (CAT) and returns new CAT for clients to use when reconnecting to secure tunneling to access the same tunnel. Requires permission to access the RotateTunnelAccessToken action. Rotating the CAT doesn't extend the tunnel duration. For example, say the tunnel duration is 12 hours and the tunnel has already been open for 4 hours. When you rotate the access tokens, the new tokens that are generated can only be used for the remaining 8 hours."]
 module OpenTunnelResponse =
   struct
     type nonrec t =
@@ -917,14 +1070,13 @@ module OpenTunnelResponse =
       tunnelId: TunnelId.t option
         [@ocaml.doc "A unique alpha-numeric tunnel ID."];
       tunnelArn: TunnelArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name for the tunnel. The tunnel ARN format is arn:aws:tunnel:<region>:<account-id>:tunnel/<tunnel-id>"];
+        [@ocaml.doc "The Amazon Resource Name for the tunnel."];
       sourceAccessToken: ClientAccessToken.t option
         [@ocaml.doc
-          "The access token the source local proxy uses to connect to AWS IoT Secure Tunneling."];
+          "The access token the source local proxy uses to connect to IoT Secure Tunneling."];
       destinationAccessToken: ClientAccessToken.t option
         [@ocaml.doc
-          "The access token the destination local proxy uses to connect to AWS IoT Secure Tunneling."]}
+          "The access token the destination local proxy uses to connect to IoT Secure Tunneling."]}
     type nonrec error =
       [ `LimitExceededException of LimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -985,17 +1137,17 @@ module OpenTunnelResponse =
         (Option.map ~f:TunnelId.of_xml) (Xml.child xml_arg0 "tunnelId") in
       make ?destinationAccessToken ?sourceAccessToken ?tunnelArn ?tunnelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationAccessToken =
-        field_map json "destinationAccessToken" ClientAccessToken.of_json in
+        field_map json__ "destinationAccessToken" ClientAccessToken.of_json in
       let sourceAccessToken =
-        field_map json "sourceAccessToken" ClientAccessToken.of_json in
-      let tunnelArn = field_map json "tunnelArn" TunnelArn.of_json in
-      let tunnelId = field_map json "tunnelId" TunnelId.of_json in
+        field_map json__ "sourceAccessToken" ClientAccessToken.of_json in
+      let tunnelArn = field_map json__ "tunnelArn" TunnelArn.of_json in
+      let tunnelId = field_map json__ "tunnelId" TunnelId.of_json in
       make ?destinationAccessToken ?sourceAccessToken ?tunnelArn ?tunnelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new tunnel, and returns two client access tokens for clients to use to connect to the AWS IoT Secure Tunneling proxy server."]
+       "Creates a new tunnel, and returns two client access tokens for clients to use to connect to the IoT Secure Tunneling proxy server. Requires permission to access the OpenTunnel action."]
 module OpenTunnelRequest =
   struct
     type nonrec t =
@@ -1034,25 +1186,27 @@ module OpenTunnelRequest =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       make ?timeoutConfig ?destinationConfig ?tags ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timeoutConfig =
-        field_map json "timeoutConfig" TimeoutConfig.of_json in
+        field_map json__ "timeoutConfig" TimeoutConfig.of_json in
       let destinationConfig =
-        field_map json "destinationConfig" DestinationConfig.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let description = field_map json "description" Description.of_json in
+        field_map json__ "destinationConfig" DestinationConfig.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let description = field_map json__ "description" Description.of_json in
       make ?timeoutConfig ?destinationConfig ?tags ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new tunnel, and returns two client access tokens for clients to use to connect to the AWS IoT Secure Tunneling proxy server."]
+       "Creates a new tunnel, and returns two client access tokens for clients to use to connect to the IoT Secure Tunneling proxy server. Requires permission to access the OpenTunnel action."]
 module ListTunnelsResponse =
   struct
     type nonrec t =
       {
       tunnelSummaries: TunnelSummaryList.t option
-        [@ocaml.doc "A short description of the tunnels in an AWS account."];
+        [@ocaml.doc
+          "A short description of the tunnels in an Amazon Web Services account."];
       nextToken: NextToken.t option
-        [@ocaml.doc "A token to used to retrieve the next set of results."]}
+        [@ocaml.doc
+          "The token to use to get the next set of results, or null if there are no additional results."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?tunnelSummaries =
@@ -1087,14 +1241,14 @@ module ListTunnelsResponse =
           (Xml.child xml_arg0 "tunnelSummaries") in
       make ?nextToken ?tunnelSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let tunnelSummaries =
-        field_map json "tunnelSummaries" TunnelSummaryList.of_json in
+        field_map json__ "tunnelSummaries" TunnelSummaryList.of_json in
       make ?nextToken ?tunnelSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List all tunnels for an AWS account. Tunnels are listed by creation time in descending order, newer tunnels will be listed before older tunnels."]
+       "List all tunnels for an Amazon Web Services account. Tunnels are listed by creation time in descending order, newer tunnels will be listed before older tunnels. Requires permission to access the ListTunnels action."]
 module ListTunnelsRequest =
   struct
     type nonrec t =
@@ -1105,7 +1259,8 @@ module ListTunnelsRequest =
       maxResults: MaxResults.t option
         [@ocaml.doc "The maximum number of results to return at once."];
       nextToken: NextToken.t option
-        [@ocaml.doc "A token to retrieve the next set of results."]}
+        [@ocaml.doc
+          "To retrieve the next set of results, the nextToken value from a previous response; otherwise null to receive the first set of results."]}
     let make ?thingName =
       fun ?maxResults ->
         fun ?nextToken -> fun () -> { thingName; maxResults; nextToken }
@@ -1124,14 +1279,14 @@ module ListTunnelsRequest =
         (Option.map ~f:ThingName.of_xml) (Xml.child xml_arg0 "thingName") in
       make ?nextToken ?maxResults ?thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let thingName = field_map json "thingName" ThingName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let thingName = field_map json__ "thingName" ThingName.of_json in
       make ?nextToken ?maxResults ?thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List all tunnels for an AWS account. Tunnels are listed by creation time in descending order, newer tunnels will be listed before older tunnels."]
+       "List all tunnels for an Amazon Web Services account. Tunnels are listed by creation time in descending order, newer tunnels will be listed before older tunnels. Requires permission to access the ListTunnels action."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -1173,8 +1328,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
 module ListTagsForResourceRequest =
@@ -1194,9 +1349,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "resourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "resourceArn" AmazonResourceName.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
@@ -1242,11 +1397,12 @@ module DescribeTunnelResponse =
         (Option.map ~f:Tunnel.of_xml) (Xml.child xml_arg0 "tunnel") in
       make ?tunnel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tunnel = field_map json "tunnel" Tunnel.of_json in make ?tunnel ()
+    let of_json json__ =
+      let tunnel = field_map json__ "tunnel" Tunnel.of_json in
+      make ?tunnel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about a tunnel identified by the unique tunnel id."]
+       "Gets information about a tunnel identified by the unique tunnel id. Requires permission to access the DescribeTunnel action."]
 module DescribeTunnelRequest =
   struct
     type nonrec t =
@@ -1263,12 +1419,12 @@ module DescribeTunnelRequest =
         TunnelId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tunnelId") in
       make ~tunnelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tunnelId = field_map_exn json "tunnelId" TunnelId.of_json in
+    let of_json json__ =
+      let tunnelId = field_map_exn json__ "tunnelId" TunnelId.of_json in
       make ~tunnelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about a tunnel identified by the unique tunnel id."]
+       "Gets information about a tunnel identified by the unique tunnel id. Requires permission to access the DescribeTunnel action."]
 module CloseTunnelResponse =
   struct
     type nonrec t = unit
@@ -1308,7 +1464,7 @@ module CloseTunnelResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Closes a tunnel identified by the unique tunnel id. When a CloseTunnel request is received, we close the WebSocket connections between the client and proxy server so no data can be transmitted."]
+       "Closes a tunnel identified by the unique tunnel id. When a CloseTunnel request is received, we close the WebSocket connections between the client and proxy server so no data can be transmitted. Requires permission to access the CloseTunnel action."]
 module CloseTunnelRequest =
   struct
     type nonrec t =
@@ -1316,7 +1472,7 @@ module CloseTunnelRequest =
       tunnelId: TunnelId.t [@ocaml.doc "The ID of the tunnel to close."];
       delete: DeleteFlag.t option
         [@ocaml.doc
-          "When set to true, AWS IoT Secure Tunneling deletes the tunnel data immediately."]}
+          "When set to true, IoT Secure Tunneling deletes the tunnel data immediately."]}
     let context_ = "CloseTunnelRequest"
     let make ?delete = fun ~tunnelId -> fun () -> { delete; tunnelId }
     let to_value x =
@@ -1331,10 +1487,10 @@ module CloseTunnelRequest =
         TunnelId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tunnelId") in
       make ?delete ~tunnelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let delete = field_map json "delete" DeleteFlag.of_json in
-      let tunnelId = field_map_exn json "tunnelId" TunnelId.of_json in
+    let of_json json__ =
+      let delete = field_map json__ "delete" DeleteFlag.of_json in
+      let tunnelId = field_map_exn json__ "tunnelId" TunnelId.of_json in
       make ?delete ~tunnelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Closes a tunnel identified by the unique tunnel id. When a CloseTunnel request is received, we close the WebSocket connections between the client and proxy server so no data can be transmitted."]
+       "Closes a tunnel identified by the unique tunnel id. When a CloseTunnel request is received, we close the WebSocket connections between the client and proxy server so no data can be transmitted. Requires permission to access the CloseTunnel action."]

@@ -6,6 +6,11 @@ val add_custom_routing_endpoints :
       AddCustomRoutingEndpointsRequest.t ->
         (AddCustomRoutingEndpointsResponse.t,
           AddCustomRoutingEndpointsResponse.error) Result.t
+val add_endpoints :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AddEndpointsRequest.t ->
+        (AddEndpointsResponse.t, AddEndpointsResponse.error) Result.t
 val advertise_byoip_cidr :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -22,6 +27,12 @@ val create_accelerator :
       CreateAcceleratorRequest.t ->
         (CreateAcceleratorResponse.t, CreateAcceleratorResponse.error)
           Result.t
+val create_cross_account_attachment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCrossAccountAttachmentRequest.t ->
+        (CreateCrossAccountAttachmentResponse.t,
+          CreateCrossAccountAttachmentResponse.error) Result.t
 val create_custom_routing_accelerator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -54,6 +65,10 @@ val create_listener :
 val delete_accelerator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteAcceleratorRequest.t -> (unit, unit) Result.t
+val delete_cross_account_attachment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCrossAccountAttachmentRequest.t -> (unit, unit) Result.t
 val delete_custom_routing_accelerator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -94,6 +109,12 @@ val describe_accelerator_attributes :
       DescribeAcceleratorAttributesRequest.t ->
         (DescribeAcceleratorAttributesResponse.t,
           DescribeAcceleratorAttributesResponse.error) Result.t
+val describe_cross_account_attachment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeCrossAccountAttachmentRequest.t ->
+        (DescribeCrossAccountAttachmentResponse.t,
+          DescribeCrossAccountAttachmentResponse.error) Result.t
 val describe_custom_routing_accelerator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -139,6 +160,24 @@ val list_byoip_cidrs :
     ?cfg:Awso.Cfg.t ->
       ListByoipCidrsRequest.t ->
         (ListByoipCidrsResponse.t, ListByoipCidrsResponse.error) Result.t
+val list_cross_account_attachments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCrossAccountAttachmentsRequest.t ->
+        (ListCrossAccountAttachmentsResponse.t,
+          ListCrossAccountAttachmentsResponse.error) Result.t
+val list_cross_account_resource_accounts :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCrossAccountResourceAccountsRequest.t ->
+        (ListCrossAccountResourceAccountsResponse.t,
+          ListCrossAccountResourceAccountsResponse.error) Result.t
+val list_cross_account_resources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCrossAccountResourcesRequest.t ->
+        (ListCrossAccountResourcesResponse.t,
+          ListCrossAccountResourcesResponse.error) Result.t
 val list_custom_routing_accelerators :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -196,6 +235,9 @@ val remove_custom_routing_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RemoveCustomRoutingEndpointsRequest.t -> (unit, unit) Result.t
+val remove_endpoints :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> RemoveEndpointsRequest.t -> (unit, unit) Result.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -218,6 +260,12 @@ val update_accelerator_attributes :
       UpdateAcceleratorAttributesRequest.t ->
         (UpdateAcceleratorAttributesResponse.t,
           UpdateAcceleratorAttributesResponse.error) Result.t
+val update_cross_account_attachment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateCrossAccountAttachmentRequest.t ->
+        (UpdateCrossAccountAttachmentResponse.t,
+          UpdateCrossAccountAttachmentResponse.error) Result.t
 val update_custom_routing_accelerator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

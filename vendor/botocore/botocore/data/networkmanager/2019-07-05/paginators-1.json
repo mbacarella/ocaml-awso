@@ -113,6 +113,36 @@
       "output_token": "NextToken",
       "limit_key": "MaxResults",
       "result_key": "CoreNetworks"
+    },
+    "GetCoreNetworkChangeEvents": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "CoreNetworkChangeEvents"
+    },
+    "ListPeerings": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "Peerings"
+    },
+    "ListAttachmentRoutingPolicyAssociations": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "AttachmentRoutingPolicyAssociations"
+    },
+    "ListCoreNetworkPrefixListAssociations": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "PrefixListAssociations"
+    },
+    "ListCoreNetworkRoutingInformation": {
+      "input_token": "NextToken",
+      "output_token": "NextToken",
+      "limit_key": "MaxResults",
+      "result_key": "CoreNetworkRoutingInformation"
     }
   }
 }

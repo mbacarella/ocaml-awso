@@ -40,11 +40,11 @@ let associate_assets =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
-       and assetId = flag "asset-id" (required string) ~doc:"STRING ID"
+       and assetId = flag "asset-id" (required string) ~doc:"STRING CustomID"
        and hierarchyId =
-         flag "hierarchy-id" (required string) ~doc:"STRING ID"
+         flag "hierarchy-id" (required string) ~doc:"STRING CustomID"
        and childAssetId =
-         flag "child-asset-id" (required string) ~doc:"STRING ID" in
+         flag "child-asset-id" (required string) ~doc:"STRING CustomID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.associate_assets
@@ -63,8 +63,9 @@ let associate_time_series_to_asset_property =
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and alias = flag "alias" (required string) ~doc:"STRING PropertyAlias"
-       and assetId = flag "asset-id" (required string) ~doc:"STRING ID"
-       and propertyId = flag "property-id" (required string) ~doc:"STRING ID" in
+       and assetId = flag "asset-id" (required string) ~doc:"STRING CustomID"
+       and propertyId =
+         flag "property-id" (required string) ~doc:"STRING CustomID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.associate_time_series_to_asset_property
@@ -112,6 +113,84 @@ let batch_disassociate_project_assets =
               ~projectId ~assetIds:(Values.IDs.of_json assetIds) ())
            (Some Values.BatchDisassociateProjectAssetsResponse.to_json)
            (Some Values.BatchDisassociateProjectAssetsResponse.error_to_json)])
+let batch_get_asset_property_aggregates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT BatchGetAssetPropertyAggregatesMaxResults"
+       and entries =
+         flag "entries" (required json_arg)
+           ~doc:"JSON BatchGetAssetPropertyAggregatesEntries" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_asset_property_aggregates
+           (Values.BatchGetAssetPropertyAggregatesRequest.make ?nextToken
+              ?maxResults
+              ~entries:(Values.BatchGetAssetPropertyAggregatesEntries.of_json
+                          entries) ())
+           (Some Values.BatchGetAssetPropertyAggregatesResponse.to_json)
+           (Some Values.BatchGetAssetPropertyAggregatesResponse.error_to_json)])
+let batch_get_asset_property_value =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and entries =
+         flag "entries" (required json_arg)
+           ~doc:"JSON BatchGetAssetPropertyValueEntries" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_asset_property_value
+           (Values.BatchGetAssetPropertyValueRequest.make ?nextToken
+              ~entries:(Values.BatchGetAssetPropertyValueEntries.of_json
+                          entries) ())
+           (Some Values.BatchGetAssetPropertyValueResponse.to_json)
+           (Some Values.BatchGetAssetPropertyValueResponse.error_to_json)])
+let batch_get_asset_property_value_history =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT BatchGetAssetPropertyValueHistoryMaxResults"
+       and entries =
+         flag "entries" (required json_arg)
+           ~doc:"JSON BatchGetAssetPropertyValueHistoryEntries" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_asset_property_value_history
+           (Values.BatchGetAssetPropertyValueHistoryRequest.make ?nextToken
+              ?maxResults
+              ~entries:(Values.BatchGetAssetPropertyValueHistoryEntries.of_json
+                          entries) ())
+           (Some Values.BatchGetAssetPropertyValueHistoryResponse.to_json)
+           (Some
+              Values.BatchGetAssetPropertyValueHistoryResponse.error_to_json)])
 let batch_put_asset_property_value =
   Command.async ~summary:""
     ([%map_open.Command
@@ -122,6 +201,9 @@ let batch_put_asset_property_value =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and enablePartialEntryProcessing =
+         flag "enable-partial-entry-processing" (optional bool)
+           ~doc:"BOOL BooleanValue"
        and entries =
          flag "entries" (required json_arg)
            ~doc:"JSON PutAssetPropertyValueEntries" in
@@ -129,6 +211,7 @@ let batch_put_asset_property_value =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.batch_put_asset_property_value
            (Values.BatchPutAssetPropertyValueRequest.make
+              ?enablePartialEntryProcessing
               ~entries:(Values.PutAssetPropertyValueEntries.of_json entries)
               ()) (Some Values.BatchPutAssetPropertyValueResponse.to_json)
            (Some Values.BatchPutAssetPropertyValueResponse.error_to_json)])
@@ -177,18 +260,24 @@ let create_asset =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and assetId = flag "asset-id" (optional string) ~doc:"STRING ID"
+       and assetExternalId =
+         flag "asset-external-id" (optional string) ~doc:"STRING ExternalId"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and assetDescription =
+         flag "asset-description" (optional string) ~doc:"STRING Description"
        and assetName = flag "asset-name" (required string) ~doc:"STRING Name"
        and assetModelId =
-         flag "asset-model-id" (required string) ~doc:"STRING ID" in
+         flag "asset-model-id" (required string) ~doc:"STRING CustomID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_asset
-           (Values.CreateAssetRequest.make ?clientToken
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~assetName
-              ~assetModelId ()) (Some Values.CreateAssetResponse.to_json)
+           (Values.CreateAssetRequest.make ?assetId ?assetExternalId
+              ?clientToken ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?assetDescription ~assetName ~assetModelId ())
+           (Some Values.CreateAssetResponse.to_json)
            (Some Values.CreateAssetResponse.error_to_json)])
 let create_asset_model =
   Command.async ~summary:""
@@ -200,6 +289,14 @@ let create_asset_model =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and assetModelType =
+         flag "asset-model-type" (optional json_arg)
+           ~doc:"JSON AssetModelType"
+       and assetModelId =
+         flag "asset-model-id" (optional string) ~doc:"STRING ID"
+       and assetModelExternalId =
+         flag "asset-model-external-id" (optional string)
+           ~doc:"STRING ExternalId"
        and assetModelDescription =
          flag "asset-model-description" (optional string)
            ~doc:"STRING Description"
@@ -220,7 +317,10 @@ let create_asset_model =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_asset_model
-           (Values.CreateAssetModelRequest.make ?assetModelDescription
+           (Values.CreateAssetModelRequest.make
+              ?assetModelType:(Option.map ~f:Values.AssetModelType.of_json
+                                 assetModelType) ?assetModelId
+              ?assetModelExternalId ?assetModelDescription
               ?assetModelProperties:(Option.map
                                        ~f:Values.AssetModelPropertyDefinitions.of_json
                                        assetModelProperties)
@@ -234,6 +334,144 @@ let create_asset_model =
               ~assetModelName ())
            (Some Values.CreateAssetModelResponse.to_json)
            (Some Values.CreateAssetModelResponse.error_to_json)])
+let create_asset_model_composite_model =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and assetModelCompositeModelExternalId =
+         flag "asset-model-composite-model-external-id" (optional string)
+           ~doc:"STRING ExternalId"
+       and parentAssetModelCompositeModelId =
+         flag "parent-asset-model-composite-model-id" (optional string)
+           ~doc:"STRING CustomID"
+       and assetModelCompositeModelId =
+         flag "asset-model-composite-model-id" (optional string)
+           ~doc:"STRING ID"
+       and assetModelCompositeModelDescription =
+         flag "asset-model-composite-model-description" (optional string)
+           ~doc:"STRING Description"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and composedAssetModelId =
+         flag "composed-asset-model-id" (optional string)
+           ~doc:"STRING CustomID"
+       and assetModelCompositeModelProperties =
+         flag "asset-model-composite-model-properties" (optional json_arg)
+           ~doc:"JSON AssetModelPropertyDefinitions"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING ETag"
+       and ifNoneMatch =
+         flag "if-none-match" (optional string) ~doc:"STRING SelectAll"
+       and matchForVersionType =
+         flag "match-for-version-type" (optional json_arg)
+           ~doc:"JSON AssetModelVersionType"
+       and assetModelId =
+         flag "asset-model-id" (required string) ~doc:"STRING CustomID"
+       and assetModelCompositeModelName =
+         flag "asset-model-composite-model-name" (required string)
+           ~doc:"STRING Name"
+       and assetModelCompositeModelType =
+         flag "asset-model-composite-model-type" (required string)
+           ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_asset_model_composite_model
+           (Values.CreateAssetModelCompositeModelRequest.make
+              ?assetModelCompositeModelExternalId
+              ?parentAssetModelCompositeModelId ?assetModelCompositeModelId
+              ?assetModelCompositeModelDescription ?clientToken
+              ?composedAssetModelId
+              ?assetModelCompositeModelProperties:(Option.map
+                                                     ~f:Values.AssetModelPropertyDefinitions.of_json
+                                                     assetModelCompositeModelProperties)
+              ?ifMatch ?ifNoneMatch
+              ?matchForVersionType:(Option.map
+                                      ~f:Values.AssetModelVersionType.of_json
+                                      matchForVersionType) ~assetModelId
+              ~assetModelCompositeModelName ~assetModelCompositeModelType ())
+           (Some Values.CreateAssetModelCompositeModelResponse.to_json)
+           (Some Values.CreateAssetModelCompositeModelResponse.error_to_json)])
+let create_bulk_import_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and adaptiveIngestion =
+         flag "adaptive-ingestion" (optional bool)
+           ~doc:"BOOL AdaptiveIngestion"
+       and deleteFilesAfterImport =
+         flag "delete-files-after-import" (optional bool)
+           ~doc:"BOOL DeleteFilesAfterImport"
+       and jobName = flag "job-name" (required string) ~doc:"STRING Name"
+       and jobRoleArn =
+         flag "job-role-arn" (required string) ~doc:"STRING ARN"
+       and files = flag "files" (required json_arg) ~doc:"JSON Files"
+       and errorReportLocation =
+         flag "error-report-location" (required json_arg)
+           ~doc:"JSON ErrorReportLocation"
+       and jobConfiguration =
+         flag "job-configuration" (required json_arg)
+           ~doc:"JSON JobConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_bulk_import_job
+           (Values.CreateBulkImportJobRequest.make ?adaptiveIngestion
+              ?deleteFilesAfterImport ~jobName ~jobRoleArn
+              ~files:(Values.Files.of_json files)
+              ~errorReportLocation:(Values.ErrorReportLocation.of_json
+                                      errorReportLocation)
+              ~jobConfiguration:(Values.JobConfiguration.of_json
+                                   jobConfiguration) ())
+           (Some Values.CreateBulkImportJobResponse.to_json)
+           (Some Values.CreateBulkImportJobResponse.error_to_json)])
+let create_computation_model =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and computationModelDescription =
+         flag "computation-model-description" (optional string)
+           ~doc:"STRING RestrictedDescription"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and computationModelName =
+         flag "computation-model-name" (required string)
+           ~doc:"STRING RestrictedName"
+       and computationModelConfiguration =
+         flag "computation-model-configuration" (required json_arg)
+           ~doc:"JSON ComputationModelConfiguration"
+       and computationModelDataBinding =
+         flag "computation-model-data-binding" (required json_arg)
+           ~doc:"JSON ComputationModelDataBinding" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_computation_model
+           (Values.CreateComputationModelRequest.make
+              ?computationModelDescription ?clientToken
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ~computationModelName
+              ~computationModelConfiguration:(Values.ComputationModelConfiguration.of_json
+                                                computationModelConfiguration)
+              ~computationModelDataBinding:(Values.ComputationModelDataBinding.of_json
+                                              computationModelDataBinding) ())
+           (Some Values.CreateComputationModelResponse.to_json)
+           (Some Values.CreateComputationModelResponse.error_to_json)])
 let create_dashboard =
   Command.async ~summary:""
     ([%map_open.Command
@@ -264,6 +502,36 @@ let create_dashboard =
               ~projectId ~dashboardName ~dashboardDefinition ())
            (Some Values.CreateDashboardResponse.to_json)
            (Some Values.CreateDashboardResponse.error_to_json)])
+let create_dataset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and datasetId = flag "dataset-id" (optional string) ~doc:"STRING ID"
+       and datasetDescription =
+         flag "dataset-description" (optional string)
+           ~doc:"STRING RestrictedDescription"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and datasetName =
+         flag "dataset-name" (required string) ~doc:"STRING RestrictedName"
+       and datasetSource =
+         flag "dataset-source" (required json_arg) ~doc:"JSON DatasetSource" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_dataset
+           (Values.CreateDatasetRequest.make ?datasetId ?datasetDescription
+              ?clientToken ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ~datasetName
+              ~datasetSource:(Values.DatasetSource.of_json datasetSource) ())
+           (Some Values.CreateDatasetResponse.to_json)
+           (Some Values.CreateDatasetResponse.error_to_json)])
 let create_gateway =
   Command.async ~summary:""
     ([%map_open.Command
@@ -274,16 +542,19 @@ let create_gateway =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and gatewayVersion =
+         flag "gateway-version" (optional string)
+           ~doc:"STRING GatewayVersion"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and gatewayName =
-         flag "gateway-name" (required string) ~doc:"STRING Name"
+         flag "gateway-name" (required string) ~doc:"STRING GatewayName"
        and gatewayPlatform =
          flag "gateway-platform" (required json_arg)
            ~doc:"JSON GatewayPlatform" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_gateway
-           (Values.CreateGatewayRequest.make
+           (Values.CreateGatewayRequest.make ?gatewayVersion
               ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~gatewayName
               ~gatewayPlatform:(Values.GatewayPlatform.of_json
                                   gatewayPlatform) ())
@@ -314,11 +585,16 @@ let create_portal =
          flag "notification-sender-email" (optional string)
            ~doc:"STRING Email"
        and alarms = flag "alarms" (optional json_arg) ~doc:"JSON Alarms"
+       and portalType =
+         flag "portal-type" (optional json_arg) ~doc:"JSON PortalType"
+       and portalTypeConfiguration =
+         flag "portal-type-configuration" (optional json_arg)
+           ~doc:"JSON PortalTypeConfiguration"
        and portalName =
          flag "portal-name" (required string) ~doc:"STRING Name"
        and portalContactEmail =
          flag "portal-contact-email" (required string) ~doc:"STRING Email"
-       and roleArn = flag "role-arn" (required string) ~doc:"STRING ARN" in
+       and roleArn = flag "role-arn" (required string) ~doc:"STRING IamArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_portal
@@ -329,6 +605,10 @@ let create_portal =
               ?portalAuthMode:(Option.map ~f:Values.AuthMode.of_json
                                  portalAuthMode) ?notificationSenderEmail
               ?alarms:(Option.map ~f:Values.Alarms.of_json alarms)
+              ?portalType:(Option.map ~f:Values.PortalType.of_json portalType)
+              ?portalTypeConfiguration:(Option.map
+                                          ~f:Values.PortalTypeConfiguration.of_json
+                                          portalTypeConfiguration)
               ~portalName ~portalContactEmail ~roleArn ())
            (Some Values.CreatePortalResponse.to_json)
            (Some Values.CreatePortalResponse.error_to_json)])
@@ -391,7 +671,7 @@ let delete_asset =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
-       and assetId = flag "asset-id" (required string) ~doc:"STRING ID" in
+       and assetId = flag "asset-id" (required string) ~doc:"STRING CustomID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_asset
@@ -410,14 +690,104 @@ let delete_asset_model =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING ETag"
+       and ifNoneMatch =
+         flag "if-none-match" (optional string) ~doc:"STRING SelectAll"
+       and matchForVersionType =
+         flag "match-for-version-type" (optional json_arg)
+           ~doc:"JSON AssetModelVersionType"
        and assetModelId =
-         flag "asset-model-id" (required string) ~doc:"STRING ID" in
+         flag "asset-model-id" (required string) ~doc:"STRING CustomID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_asset_model
-           (Values.DeleteAssetModelRequest.make ?clientToken ~assetModelId ())
+           (Values.DeleteAssetModelRequest.make ?clientToken ?ifMatch
+              ?ifNoneMatch
+              ?matchForVersionType:(Option.map
+                                      ~f:Values.AssetModelVersionType.of_json
+                                      matchForVersionType) ~assetModelId ())
            (Some Values.DeleteAssetModelResponse.to_json)
            (Some Values.DeleteAssetModelResponse.error_to_json)])
+let delete_asset_model_composite_model =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING ETag"
+       and ifNoneMatch =
+         flag "if-none-match" (optional string) ~doc:"STRING SelectAll"
+       and matchForVersionType =
+         flag "match-for-version-type" (optional json_arg)
+           ~doc:"JSON AssetModelVersionType"
+       and assetModelId =
+         flag "asset-model-id" (required string) ~doc:"STRING CustomID"
+       and assetModelCompositeModelId =
+         flag "asset-model-composite-model-id" (required string)
+           ~doc:"STRING CustomID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_asset_model_composite_model
+           (Values.DeleteAssetModelCompositeModelRequest.make ?clientToken
+              ?ifMatch ?ifNoneMatch
+              ?matchForVersionType:(Option.map
+                                      ~f:Values.AssetModelVersionType.of_json
+                                      matchForVersionType) ~assetModelId
+              ~assetModelCompositeModelId ())
+           (Some Values.DeleteAssetModelCompositeModelResponse.to_json)
+           (Some Values.DeleteAssetModelCompositeModelResponse.error_to_json)])
+let delete_asset_model_interface_relationship =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and assetModelId =
+         flag "asset-model-id" (required string) ~doc:"STRING CustomID"
+       and interfaceAssetModelId =
+         flag "interface-asset-model-id" (required string)
+           ~doc:"STRING CustomID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_asset_model_interface_relationship
+           (Values.DeleteAssetModelInterfaceRelationshipRequest.make
+              ?clientToken ~assetModelId ~interfaceAssetModelId ())
+           (Some Values.DeleteAssetModelInterfaceRelationshipResponse.to_json)
+           (Some
+              Values.DeleteAssetModelInterfaceRelationshipResponse.error_to_json)])
+let delete_computation_model =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and computationModelId =
+         flag "computation-model-id" (required string) ~doc:"STRING ID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_computation_model
+           (Values.DeleteComputationModelRequest.make ?clientToken
+              ~computationModelId ())
+           (Some Values.DeleteComputationModelResponse.to_json)
+           (Some Values.DeleteComputationModelResponse.error_to_json)])
 let delete_dashboard =
   Command.async ~summary:""
     ([%map_open.Command
@@ -438,6 +808,25 @@ let delete_dashboard =
            (Values.DeleteDashboardRequest.make ?clientToken ~dashboardId ())
            (Some Values.DeleteDashboardResponse.to_json)
            (Some Values.DeleteDashboardResponse.error_to_json)])
+let delete_dataset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and datasetId = flag "dataset-id" (required string) ~doc:"STRING ID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_dataset
+           (Values.DeleteDatasetRequest.make ?clientToken ~datasetId ())
+           (Some Values.DeleteDatasetResponse.to_json)
+           (Some Values.DeleteDatasetResponse.error_to_json)])
 let delete_gateway =
   Command.async ~summary:""
     ([%map_open.Command
@@ -502,8 +891,9 @@ let delete_time_series =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and alias = flag "alias" (optional string) ~doc:"STRING PropertyAlias"
-       and assetId = flag "asset-id" (optional string) ~doc:"STRING ID"
-       and propertyId = flag "property-id" (optional string) ~doc:"STRING ID"
+       and assetId = flag "asset-id" (optional string) ~doc:"STRING CustomID"
+       and propertyId =
+         flag "property-id" (optional string) ~doc:"STRING CustomID"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken" in
        fun () ->
@@ -529,6 +919,23 @@ let describe_access_policy =
            (Values.DescribeAccessPolicyRequest.make ~accessPolicyId ())
            (Some Values.DescribeAccessPolicyResponse.to_json)
            (Some Values.DescribeAccessPolicyResponse.error_to_json)])
+let describe_action =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and actionId = flag "action-id" (required string) ~doc:"STRING ID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_action
+           (Values.DescribeActionRequest.make ~actionId ())
+           (Some Values.DescribeActionResponse.to_json)
+           (Some Values.DescribeActionResponse.error_to_json)])
 let describe_asset =
   Command.async ~summary:""
     ([%map_open.Command
@@ -539,12 +946,37 @@ let describe_asset =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and assetId = flag "asset-id" (required string) ~doc:"STRING ID" in
+       and excludeProperties =
+         flag "exclude-properties" (optional bool)
+           ~doc:"BOOL ExcludeProperties"
+       and assetId = flag "asset-id" (required string) ~doc:"STRING CustomID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.describe_asset (Values.DescribeAssetRequest.make ~assetId ())
+           Io.describe_asset
+           (Values.DescribeAssetRequest.make ?excludeProperties ~assetId ())
            (Some Values.DescribeAssetResponse.to_json)
            (Some Values.DescribeAssetResponse.error_to_json)])
+let describe_asset_composite_model =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and assetId = flag "asset-id" (required string) ~doc:"STRING CustomID"
+       and assetCompositeModelId =
+         flag "asset-composite-model-id" (required string)
+           ~doc:"STRING CustomID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_asset_composite_model
+           (Values.DescribeAssetCompositeModelRequest.make ~assetId
+              ~assetCompositeModelId ())
+           (Some Values.DescribeAssetCompositeModelResponse.to_json)
+           (Some Values.DescribeAssetCompositeModelResponse.error_to_json)])
 let describe_asset_model =
   Command.async ~summary:""
     ([%map_open.Command
@@ -555,14 +987,71 @@ let describe_asset_model =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and excludeProperties =
+         flag "exclude-properties" (optional bool)
+           ~doc:"BOOL ExcludeProperties"
+       and assetModelVersion =
+         flag "asset-model-version" (optional string)
+           ~doc:"STRING AssetModelVersionFilter"
        and assetModelId =
-         flag "asset-model-id" (required string) ~doc:"STRING ID" in
+         flag "asset-model-id" (required string) ~doc:"STRING CustomID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_asset_model
-           (Values.DescribeAssetModelRequest.make ~assetModelId ())
+           (Values.DescribeAssetModelRequest.make ?excludeProperties
+              ?assetModelVersion ~assetModelId ())
            (Some Values.DescribeAssetModelResponse.to_json)
            (Some Values.DescribeAssetModelResponse.error_to_json)])
+let describe_asset_model_composite_model =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and assetModelVersion =
+         flag "asset-model-version" (optional string)
+           ~doc:"STRING AssetModelVersionFilter"
+       and assetModelId =
+         flag "asset-model-id" (required string) ~doc:"STRING CustomID"
+       and assetModelCompositeModelId =
+         flag "asset-model-composite-model-id" (required string)
+           ~doc:"STRING CustomID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_asset_model_composite_model
+           (Values.DescribeAssetModelCompositeModelRequest.make
+              ?assetModelVersion ~assetModelId ~assetModelCompositeModelId ())
+           (Some Values.DescribeAssetModelCompositeModelResponse.to_json)
+           (Some
+              Values.DescribeAssetModelCompositeModelResponse.error_to_json)])
+let describe_asset_model_interface_relationship =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and assetModelId =
+         flag "asset-model-id" (required string) ~doc:"STRING CustomID"
+       and interfaceAssetModelId =
+         flag "interface-asset-model-id" (required string)
+           ~doc:"STRING CustomID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_asset_model_interface_relationship
+           (Values.DescribeAssetModelInterfaceRelationshipRequest.make
+              ~assetModelId ~interfaceAssetModelId ())
+           (Some
+              Values.DescribeAssetModelInterfaceRelationshipResponse.to_json)
+           (Some
+              Values.DescribeAssetModelInterfaceRelationshipResponse.error_to_json)])
 let describe_asset_property =
   Command.async ~summary:""
     ([%map_open.Command
@@ -573,14 +1062,83 @@ let describe_asset_property =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and assetId = flag "asset-id" (required string) ~doc:"STRING ID"
-       and propertyId = flag "property-id" (required string) ~doc:"STRING ID" in
+       and assetId = flag "asset-id" (required string) ~doc:"STRING CustomID"
+       and propertyId =
+         flag "property-id" (required string) ~doc:"STRING CustomID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_asset_property
            (Values.DescribeAssetPropertyRequest.make ~assetId ~propertyId ())
            (Some Values.DescribeAssetPropertyResponse.to_json)
            (Some Values.DescribeAssetPropertyResponse.error_to_json)])
+let describe_bulk_import_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobId = flag "job-id" (required string) ~doc:"STRING ID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_bulk_import_job
+           (Values.DescribeBulkImportJobRequest.make ~jobId ())
+           (Some Values.DescribeBulkImportJobResponse.to_json)
+           (Some Values.DescribeBulkImportJobResponse.error_to_json)])
+let describe_computation_model =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and computationModelVersion =
+         flag "computation-model-version" (optional string)
+           ~doc:"STRING ComputationModelVersionFilter"
+       and computationModelId =
+         flag "computation-model-id" (required string) ~doc:"STRING ID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_computation_model
+           (Values.DescribeComputationModelRequest.make
+              ?computationModelVersion ~computationModelId ())
+           (Some Values.DescribeComputationModelResponse.to_json)
+           (Some Values.DescribeComputationModelResponse.error_to_json)])
+let describe_computation_model_execution_summary =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resolveToResourceType =
+         flag "resolve-to-resource-type" (optional json_arg)
+           ~doc:"JSON ResolveToResourceType"
+       and resolveToResourceId =
+         flag "resolve-to-resource-id" (optional string) ~doc:"STRING ID"
+       and computationModelId =
+         flag "computation-model-id" (required string) ~doc:"STRING ID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_computation_model_execution_summary
+           (Values.DescribeComputationModelExecutionSummaryRequest.make
+              ?resolveToResourceType:(Option.map
+                                        ~f:Values.ResolveToResourceType.of_json
+                                        resolveToResourceType)
+              ?resolveToResourceId ~computationModelId ())
+           (Some
+              Values.DescribeComputationModelExecutionSummaryResponse.to_json)
+           (Some
+              Values.DescribeComputationModelExecutionSummaryResponse.error_to_json)])
 let describe_dashboard =
   Command.async ~summary:""
     ([%map_open.Command
@@ -599,6 +1157,23 @@ let describe_dashboard =
            (Values.DescribeDashboardRequest.make ~dashboardId ())
            (Some Values.DescribeDashboardResponse.to_json)
            (Some Values.DescribeDashboardResponse.error_to_json)])
+let describe_dataset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and datasetId = flag "dataset-id" (required string) ~doc:"STRING ID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_dataset
+           (Values.DescribeDatasetRequest.make ~datasetId ())
+           (Some Values.DescribeDatasetResponse.to_json)
+           (Some Values.DescribeDatasetResponse.error_to_json)])
 let describe_default_encryption_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -618,6 +1193,24 @@ let describe_default_encryption_configuration =
               Values.DescribeDefaultEncryptionConfigurationResponse.to_json)
            (Some
               Values.DescribeDefaultEncryptionConfigurationResponse.error_to_json)])
+let describe_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and executionId =
+         flag "execution-id" (required string) ~doc:"STRING ID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_execution
+           (Values.DescribeExecutionRequest.make ~executionId ())
+           (Some Values.DescribeExecutionResponse.to_json)
+           (Some Values.DescribeExecutionResponse.error_to_json)])
 let describe_gateway =
   Command.async ~summary:""
     ([%map_open.Command
@@ -737,8 +1330,9 @@ let describe_time_series =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and alias = flag "alias" (optional string) ~doc:"STRING PropertyAlias"
-       and assetId = flag "asset-id" (optional string) ~doc:"STRING ID"
-       and propertyId = flag "property-id" (optional string) ~doc:"STRING ID" in
+       and assetId = flag "asset-id" (optional string) ~doc:"STRING CustomID"
+       and propertyId =
+         flag "property-id" (optional string) ~doc:"STRING CustomID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_time_series
@@ -757,11 +1351,11 @@ let disassociate_assets =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
-       and assetId = flag "asset-id" (required string) ~doc:"STRING ID"
+       and assetId = flag "asset-id" (required string) ~doc:"STRING CustomID"
        and hierarchyId =
-         flag "hierarchy-id" (required string) ~doc:"STRING ID"
+         flag "hierarchy-id" (required string) ~doc:"STRING CustomID"
        and childAssetId =
-         flag "child-asset-id" (required string) ~doc:"STRING ID" in
+         flag "child-asset-id" (required string) ~doc:"STRING CustomID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.disassociate_assets
@@ -780,13 +1374,72 @@ let disassociate_time_series_from_asset_property =
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and alias = flag "alias" (required string) ~doc:"STRING PropertyAlias"
-       and assetId = flag "asset-id" (required string) ~doc:"STRING ID"
-       and propertyId = flag "property-id" (required string) ~doc:"STRING ID" in
+       and assetId = flag "asset-id" (required string) ~doc:"STRING CustomID"
+       and propertyId =
+         flag "property-id" (required string) ~doc:"STRING CustomID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.disassociate_time_series_from_asset_property
            (Values.DisassociateTimeSeriesFromAssetPropertyRequest.make
               ?clientToken ~alias ~assetId ~propertyId ()) None None])
+let execute_action =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and resolveTo =
+         flag "resolve-to" (optional json_arg) ~doc:"JSON ResolveTo"
+       and targetResource =
+         flag "target-resource" (required json_arg)
+           ~doc:"JSON TargetResource"
+       and actionDefinitionId =
+         flag "action-definition-id" (required string) ~doc:"STRING ID"
+       and actionPayload =
+         flag "action-payload" (required json_arg) ~doc:"JSON ActionPayload" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.execute_action
+           (Values.ExecuteActionRequest.make ?clientToken
+              ?resolveTo:(Option.map ~f:Values.ResolveTo.of_json resolveTo)
+              ~targetResource:(Values.TargetResource.of_json targetResource)
+              ~actionDefinitionId
+              ~actionPayload:(Values.ActionPayload.of_json actionPayload) ())
+           (Some Values.ExecuteActionResponse.to_json)
+           (Some Values.ExecuteActionResponse.error_to_json)])
+let execute_query =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING ExecuteQueryNextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ExecuteQueryMaxResults"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and queryStatement =
+         flag "query-statement" (required string)
+           ~doc:"STRING QueryStatement" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.execute_query
+           (Values.ExecuteQueryRequest.make ?nextToken ?maxResults
+              ?clientToken ~queryStatement ())
+           (Some Values.ExecuteQueryResponse.to_json)
+           (Some Values.ExecuteQueryResponse.error_to_json)])
 let get_asset_property_aggregates =
   Command.async ~summary:""
     ([%map_open.Command
@@ -809,7 +1462,8 @@ let get_asset_property_aggregates =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults"
+         flag "max-results" (optional int)
+           ~doc:"INT GetAssetPropertyValueAggregatesMaxResults"
        and aggregateTypes =
          flag "aggregate-types" (required json_arg)
            ~doc:"JSON AggregateTypes"
@@ -880,7 +1534,8 @@ let get_asset_property_value_history =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+         flag "max-results" (optional int)
+           ~doc:"INT GetAssetPropertyValueHistoryMaxResults" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_asset_property_value_history
@@ -952,6 +1607,29 @@ let get_interpolated_asset_property_values =
            (Some Values.GetInterpolatedAssetPropertyValuesResponse.to_json)
            (Some
               Values.GetInterpolatedAssetPropertyValuesResponse.error_to_json)])
+let invoke_assistant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and conversationId =
+         flag "conversation-id" (optional string)
+           ~doc:"STRING ConversationId"
+       and enableTrace =
+         flag "enable-trace" (optional bool) ~doc:"BOOL PrimitiveBoolean"
+       and message =
+         flag "message" (required string) ~doc:"STRING MessageInput" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.invoke_assistant
+           (Values.InvokeAssistantRequest.make ?conversationId ?enableTrace
+              ~message ()) (Some Values.InvokeAssistantResponse.to_json)
+           (Some Values.InvokeAssistantResponse.error_to_json)])
 let list_access_policies =
   Command.async ~summary:""
     ([%map_open.Command
@@ -969,7 +1647,7 @@ let list_access_policies =
        and resourceType =
          flag "resource-type" (optional json_arg) ~doc:"JSON ResourceType"
        and resourceId = flag "resource-id" (optional string) ~doc:"STRING ID"
-       and iamArn = flag "iam-arn" (optional string) ~doc:"STRING ARN"
+       and iamArn = flag "iam-arn" (optional string) ~doc:"STRING IamArn"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
@@ -985,7 +1663,7 @@ let list_access_policies =
               ?maxResults ())
            (Some Values.ListAccessPoliciesResponse.to_json)
            (Some Values.ListAccessPoliciesResponse.error_to_json)])
-let list_asset_models =
+let list_actions =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -998,13 +1676,143 @@ let list_asset_models =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and resolveToResourceType =
+         flag "resolve-to-resource-type" (optional json_arg)
+           ~doc:"JSON ResolveToResourceType"
+       and resolveToResourceId =
+         flag "resolve-to-resource-id" (optional string) ~doc:"STRING ID"
+       and targetResourceType =
+         flag "target-resource-type" (required json_arg)
+           ~doc:"JSON TargetResourceType"
+       and targetResourceId =
+         flag "target-resource-id" (required string) ~doc:"STRING ID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_actions
+           (Values.ListActionsRequest.make ?nextToken ?maxResults
+              ?resolveToResourceType:(Option.map
+                                        ~f:Values.ResolveToResourceType.of_json
+                                        resolveToResourceType)
+              ?resolveToResourceId
+              ~targetResourceType:(Values.TargetResourceType.of_json
+                                     targetResourceType) ~targetResourceId ())
+           (Some Values.ListActionsResponse.to_json)
+           (Some Values.ListActionsResponse.error_to_json)])
+let list_asset_model_composite_models =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and assetModelVersion =
+         flag "asset-model-version" (optional string)
+           ~doc:"STRING AssetModelVersionFilter"
+       and assetModelId =
+         flag "asset-model-id" (required string) ~doc:"STRING CustomID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_asset_model_composite_models
+           (Values.ListAssetModelCompositeModelsRequest.make ?nextToken
+              ?maxResults ?assetModelVersion ~assetModelId ())
+           (Some Values.ListAssetModelCompositeModelsResponse.to_json)
+           (Some Values.ListAssetModelCompositeModelsResponse.error_to_json)])
+let list_asset_model_properties =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON ListAssetModelPropertiesFilter"
+       and assetModelVersion =
+         flag "asset-model-version" (optional string)
+           ~doc:"STRING AssetModelVersionFilter"
+       and assetModelId =
+         flag "asset-model-id" (required string) ~doc:"STRING CustomID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_asset_model_properties
+           (Values.ListAssetModelPropertiesRequest.make ?nextToken
+              ?maxResults
+              ?filter:(Option.map
+                         ~f:Values.ListAssetModelPropertiesFilter.of_json
+                         filter) ?assetModelVersion ~assetModelId ())
+           (Some Values.ListAssetModelPropertiesResponse.to_json)
+           (Some Values.ListAssetModelPropertiesResponse.error_to_json)])
+let list_asset_models =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and assetModelTypes =
+         flag "asset-model-types" (optional json_arg)
+           ~doc:"JSON ListAssetModelsTypeFilter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and assetModelVersion =
+         flag "asset-model-version" (optional string)
+           ~doc:"STRING AssetModelVersionFilter" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_asset_models
-           (Values.ListAssetModelsRequest.make ?nextToken ?maxResults ())
+           (Values.ListAssetModelsRequest.make
+              ?assetModelTypes:(Option.map
+                                  ~f:Values.ListAssetModelsTypeFilter.of_json
+                                  assetModelTypes) ?nextToken ?maxResults
+              ?assetModelVersion ())
            (Some Values.ListAssetModelsResponse.to_json)
            (Some Values.ListAssetModelsResponse.error_to_json)])
+let list_asset_properties =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON ListAssetPropertiesFilter"
+       and assetId = flag "asset-id" (required string) ~doc:"STRING CustomID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_asset_properties
+           (Values.ListAssetPropertiesRequest.make ?nextToken ?maxResults
+              ?filter:(Option.map ~f:Values.ListAssetPropertiesFilter.of_json
+                         filter) ~assetId ())
+           (Some Values.ListAssetPropertiesResponse.to_json)
+           (Some Values.ListAssetPropertiesResponse.error_to_json)])
 let list_asset_relationships =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1019,7 +1827,7 @@ let list_asset_relationships =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
-       and assetId = flag "asset-id" (required string) ~doc:"STRING ID"
+       and assetId = flag "asset-id" (required string) ~doc:"STRING CustomID"
        and traversalType =
          flag "traversal-type" (required json_arg) ~doc:"JSON TraversalType" in
        fun () ->
@@ -1045,7 +1853,7 @@ let list_assets =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and assetModelId =
-         flag "asset-model-id" (optional string) ~doc:"STRING ID"
+         flag "asset-model-id" (optional string) ~doc:"STRING CustomID"
        and filter =
          flag "filter" (optional json_arg) ~doc:"JSON ListAssetsFilter" in
        fun () ->
@@ -1067,7 +1875,7 @@ let list_associated_assets =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and hierarchyId =
-         flag "hierarchy-id" (optional string) ~doc:"STRING ID"
+         flag "hierarchy-id" (optional string) ~doc:"STRING CustomID"
        and traversalDirection =
          flag "traversal-direction" (optional json_arg)
            ~doc:"JSON TraversalDirection"
@@ -1075,7 +1883,7 @@ let list_associated_assets =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
-       and assetId = flag "asset-id" (required string) ~doc:"STRING ID" in
+       and assetId = flag "asset-id" (required string) ~doc:"STRING CustomID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_associated_assets
@@ -1086,6 +1894,133 @@ let list_associated_assets =
               ?maxResults ~assetId ())
            (Some Values.ListAssociatedAssetsResponse.to_json)
            (Some Values.ListAssociatedAssetsResponse.error_to_json)])
+let list_bulk_import_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON ListBulkImportJobsFilter" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_bulk_import_jobs
+           (Values.ListBulkImportJobsRequest.make ?nextToken ?maxResults
+              ?filter:(Option.map ~f:Values.ListBulkImportJobsFilter.of_json
+                         filter) ())
+           (Some Values.ListBulkImportJobsResponse.to_json)
+           (Some Values.ListBulkImportJobsResponse.error_to_json)])
+let list_composition_relationships =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and assetModelId =
+         flag "asset-model-id" (required string) ~doc:"STRING ID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_composition_relationships
+           (Values.ListCompositionRelationshipsRequest.make ?nextToken
+              ?maxResults ~assetModelId ())
+           (Some Values.ListCompositionRelationshipsResponse.to_json)
+           (Some Values.ListCompositionRelationshipsResponse.error_to_json)])
+let list_computation_model_data_binding_usages =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and dataBindingValueFilter =
+         flag "data-binding-value-filter" (required json_arg)
+           ~doc:"JSON DataBindingValueFilter" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_computation_model_data_binding_usages
+           (Values.ListComputationModelDataBindingUsagesRequest.make
+              ?nextToken ?maxResults
+              ~dataBindingValueFilter:(Values.DataBindingValueFilter.of_json
+                                         dataBindingValueFilter) ())
+           (Some Values.ListComputationModelDataBindingUsagesResponse.to_json)
+           (Some
+              Values.ListComputationModelDataBindingUsagesResponse.error_to_json)])
+let list_computation_model_resolve_to_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and computationModelId =
+         flag "computation-model-id" (required string) ~doc:"STRING ID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_computation_model_resolve_to_resources
+           (Values.ListComputationModelResolveToResourcesRequest.make
+              ?nextToken ?maxResults ~computationModelId ())
+           (Some
+              Values.ListComputationModelResolveToResourcesResponse.to_json)
+           (Some
+              Values.ListComputationModelResolveToResourcesResponse.error_to_json)])
+let list_computation_models =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and computationModelType =
+         flag "computation-model-type" (optional json_arg)
+           ~doc:"JSON ComputationModelType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_computation_models
+           (Values.ListComputationModelsRequest.make
+              ?computationModelType:(Option.map
+                                       ~f:Values.ComputationModelType.of_json
+                                       computationModelType) ?nextToken
+              ?maxResults ())
+           (Some Values.ListComputationModelsResponse.to_json)
+           (Some Values.ListComputationModelsResponse.error_to_json)])
 let list_dashboards =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1107,6 +2042,67 @@ let list_dashboards =
            (Values.ListDashboardsRequest.make ?nextToken ?maxResults
               ~projectId ()) (Some Values.ListDashboardsResponse.to_json)
            (Some Values.ListDashboardsResponse.error_to_json)])
+let list_datasets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and sourceType =
+         flag "source-type" (required json_arg) ~doc:"JSON DatasetSourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_datasets
+           (Values.ListDatasetsRequest.make ?nextToken ?maxResults
+              ~sourceType:(Values.DatasetSourceType.of_json sourceType) ())
+           (Some Values.ListDatasetsResponse.to_json)
+           (Some Values.ListDatasetsResponse.error_to_json)])
+let list_executions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resolveToResourceType =
+         flag "resolve-to-resource-type" (optional json_arg)
+           ~doc:"JSON ResolveToResourceType"
+       and resolveToResourceId =
+         flag "resolve-to-resource-id" (optional string) ~doc:"STRING ID"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and actionType =
+         flag "action-type" (optional string) ~doc:"STRING Name"
+       and targetResourceType =
+         flag "target-resource-type" (required json_arg)
+           ~doc:"JSON TargetResourceType"
+       and targetResourceId =
+         flag "target-resource-id" (required string) ~doc:"STRING ID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_executions
+           (Values.ListExecutionsRequest.make
+              ?resolveToResourceType:(Option.map
+                                        ~f:Values.ResolveToResourceType.of_json
+                                        resolveToResourceType)
+              ?resolveToResourceId ?nextToken ?maxResults ?actionType
+              ~targetResourceType:(Values.TargetResourceType.of_json
+                                     targetResourceType) ~targetResourceId ())
+           (Some Values.ListExecutionsResponse.to_json)
+           (Some Values.ListExecutionsResponse.error_to_json)])
 let list_gateways =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1127,6 +2123,30 @@ let list_gateways =
            (Values.ListGatewaysRequest.make ?nextToken ?maxResults ())
            (Some Values.ListGatewaysResponse.to_json)
            (Some Values.ListGatewaysResponse.error_to_json)])
+let list_interface_relationships =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and interfaceAssetModelId =
+         flag "interface-asset-model-id" (required string)
+           ~doc:"STRING CustomID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_interface_relationships
+           (Values.ListInterfaceRelationshipsRequest.make ?nextToken
+              ?maxResults ~interfaceAssetModelId ())
+           (Some Values.ListInterfaceRelationshipsResponse.to_json)
+           (Some Values.ListInterfaceRelationshipsResponse.error_to_json)])
 let list_portals =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1222,7 +2242,7 @@ let list_time_series =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
-       and assetId = flag "asset-id" (optional string) ~doc:"STRING ID"
+       and assetId = flag "asset-id" (optional string) ~doc:"STRING CustomID"
        and aliasPrefix =
          flag "alias-prefix" (optional string) ~doc:"STRING PropertyAlias"
        and timeSeriesType =
@@ -1238,6 +2258,37 @@ let list_time_series =
                                  timeSeriesType) ())
            (Some Values.ListTimeSeriesResponse.to_json)
            (Some Values.ListTimeSeriesResponse.error_to_json)])
+let put_asset_model_interface_relationship =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and assetModelId =
+         flag "asset-model-id" (required string) ~doc:"STRING CustomID"
+       and interfaceAssetModelId =
+         flag "interface-asset-model-id" (required string)
+           ~doc:"STRING CustomID"
+       and propertyMappingConfiguration =
+         flag "property-mapping-configuration" (required json_arg)
+           ~doc:"JSON PropertyMappingConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_asset_model_interface_relationship
+           (Values.PutAssetModelInterfaceRelationshipRequest.make
+              ?clientToken ~assetModelId ~interfaceAssetModelId
+              ~propertyMappingConfiguration:(Values.PropertyMappingConfiguration.of_json
+                                               propertyMappingConfiguration)
+              ())
+           (Some Values.PutAssetModelInterfaceRelationshipResponse.to_json)
+           (Some
+              Values.PutAssetModelInterfaceRelationshipResponse.error_to_json)])
 let put_default_encryption_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1301,6 +2352,14 @@ let put_storage_configuration =
        and retentionPeriod =
          flag "retention-period" (optional json_arg)
            ~doc:"JSON RetentionPeriod"
+       and warmTier =
+         flag "warm-tier" (optional json_arg) ~doc:"JSON WarmTierState"
+       and warmTierRetentionPeriod =
+         flag "warm-tier-retention-period" (optional json_arg)
+           ~doc:"JSON WarmTierRetentionPeriod"
+       and disallowIngestNullNaN =
+         flag "disallow-ingest-null-na-n" (optional bool)
+           ~doc:"BOOL DisallowIngestNullNaN"
        and storageType =
          flag "storage-type" (required json_arg) ~doc:"JSON StorageType" in
        fun () ->
@@ -1315,6 +2374,11 @@ let put_storage_configuration =
                                            disassociatedDataStorage)
               ?retentionPeriod:(Option.map ~f:Values.RetentionPeriod.of_json
                                   retentionPeriod)
+              ?warmTier:(Option.map ~f:Values.WarmTierState.of_json warmTier)
+              ?warmTierRetentionPeriod:(Option.map
+                                          ~f:Values.WarmTierRetentionPeriod.of_json
+                                          warmTierRetentionPeriod)
+              ?disallowIngestNullNaN
               ~storageType:(Values.StorageType.of_json storageType) ())
            (Some Values.PutStorageConfigurationResponse.to_json)
            (Some Values.PutStorageConfigurationResponse.error_to_json)])
@@ -1407,15 +2471,20 @@ let update_asset =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and assetExternalId =
+         flag "asset-external-id" (optional string) ~doc:"STRING ExternalId"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
-       and assetId = flag "asset-id" (required string) ~doc:"STRING ID"
+       and assetDescription =
+         flag "asset-description" (optional string) ~doc:"STRING Description"
+       and assetId = flag "asset-id" (required string) ~doc:"STRING CustomID"
        and assetName = flag "asset-name" (required string) ~doc:"STRING Name" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_asset
-           (Values.UpdateAssetRequest.make ?clientToken ~assetId ~assetName
-              ()) (Some Values.UpdateAssetResponse.to_json)
+           (Values.UpdateAssetRequest.make ?assetExternalId ?clientToken
+              ?assetDescription ~assetId ~assetName ())
+           (Some Values.UpdateAssetResponse.to_json)
            (Some Values.UpdateAssetResponse.error_to_json)])
 let update_asset_model =
   Command.async ~summary:""
@@ -1427,6 +2496,9 @@ let update_asset_model =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and assetModelExternalId =
+         flag "asset-model-external-id" (optional string)
+           ~doc:"STRING ExternalId"
        and assetModelDescription =
          flag "asset-model-description" (optional string)
            ~doc:"STRING Description"
@@ -1441,14 +2513,21 @@ let update_asset_model =
            ~doc:"JSON AssetModelCompositeModels"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING ETag"
+       and ifNoneMatch =
+         flag "if-none-match" (optional string) ~doc:"STRING SelectAll"
+       and matchForVersionType =
+         flag "match-for-version-type" (optional json_arg)
+           ~doc:"JSON AssetModelVersionType"
        and assetModelId =
-         flag "asset-model-id" (required string) ~doc:"STRING ID"
+         flag "asset-model-id" (required string) ~doc:"STRING CustomID"
        and assetModelName =
          flag "asset-model-name" (required string) ~doc:"STRING Name" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_asset_model
-           (Values.UpdateAssetModelRequest.make ?assetModelDescription
+           (Values.UpdateAssetModelRequest.make ?assetModelExternalId
+              ?assetModelDescription
               ?assetModelProperties:(Option.map
                                        ~f:Values.AssetModelProperties.of_json
                                        assetModelProperties)
@@ -1458,9 +2537,64 @@ let update_asset_model =
               ?assetModelCompositeModels:(Option.map
                                             ~f:Values.AssetModelCompositeModels.of_json
                                             assetModelCompositeModels)
-              ?clientToken ~assetModelId ~assetModelName ())
+              ?clientToken ?ifMatch ?ifNoneMatch
+              ?matchForVersionType:(Option.map
+                                      ~f:Values.AssetModelVersionType.of_json
+                                      matchForVersionType) ~assetModelId
+              ~assetModelName ())
            (Some Values.UpdateAssetModelResponse.to_json)
            (Some Values.UpdateAssetModelResponse.error_to_json)])
+let update_asset_model_composite_model =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and assetModelCompositeModelExternalId =
+         flag "asset-model-composite-model-external-id" (optional string)
+           ~doc:"STRING ExternalId"
+       and assetModelCompositeModelDescription =
+         flag "asset-model-composite-model-description" (optional string)
+           ~doc:"STRING Description"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and assetModelCompositeModelProperties =
+         flag "asset-model-composite-model-properties" (optional json_arg)
+           ~doc:"JSON AssetModelProperties"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING ETag"
+       and ifNoneMatch =
+         flag "if-none-match" (optional string) ~doc:"STRING SelectAll"
+       and matchForVersionType =
+         flag "match-for-version-type" (optional json_arg)
+           ~doc:"JSON AssetModelVersionType"
+       and assetModelId =
+         flag "asset-model-id" (required string) ~doc:"STRING CustomID"
+       and assetModelCompositeModelId =
+         flag "asset-model-composite-model-id" (required string)
+           ~doc:"STRING CustomID"
+       and assetModelCompositeModelName =
+         flag "asset-model-composite-model-name" (required string)
+           ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_asset_model_composite_model
+           (Values.UpdateAssetModelCompositeModelRequest.make
+              ?assetModelCompositeModelExternalId
+              ?assetModelCompositeModelDescription ?clientToken
+              ?assetModelCompositeModelProperties:(Option.map
+                                                     ~f:Values.AssetModelProperties.of_json
+                                                     assetModelCompositeModelProperties)
+              ?ifMatch ?ifNoneMatch
+              ?matchForVersionType:(Option.map
+                                      ~f:Values.AssetModelVersionType.of_json
+                                      matchForVersionType) ~assetModelId
+              ~assetModelCompositeModelId ~assetModelCompositeModelName ())
+           (Some Values.UpdateAssetModelCompositeModelResponse.to_json)
+           (Some Values.UpdateAssetModelCompositeModelResponse.error_to_json)])
 let update_asset_property =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1478,8 +2612,11 @@ let update_asset_property =
            ~doc:"JSON PropertyNotificationState"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
-       and assetId = flag "asset-id" (required string) ~doc:"STRING ID"
-       and propertyId = flag "property-id" (required string) ~doc:"STRING ID" in
+       and propertyUnit =
+         flag "property-unit" (optional string) ~doc:"STRING PropertyUnit"
+       and assetId = flag "asset-id" (required string) ~doc:"STRING CustomID"
+       and propertyId =
+         flag "property-id" (required string) ~doc:"STRING CustomID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_asset_property
@@ -1487,7 +2624,45 @@ let update_asset_property =
               ?propertyNotificationState:(Option.map
                                             ~f:Values.PropertyNotificationState.of_json
                                             propertyNotificationState)
-              ?clientToken ~assetId ~propertyId ()) None None])
+              ?clientToken ?propertyUnit ~assetId ~propertyId ()) None None])
+let update_computation_model =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and computationModelDescription =
+         flag "computation-model-description" (optional string)
+           ~doc:"STRING RestrictedDescription"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and computationModelId =
+         flag "computation-model-id" (required string) ~doc:"STRING ID"
+       and computationModelName =
+         flag "computation-model-name" (required string)
+           ~doc:"STRING RestrictedName"
+       and computationModelConfiguration =
+         flag "computation-model-configuration" (required json_arg)
+           ~doc:"JSON ComputationModelConfiguration"
+       and computationModelDataBinding =
+         flag "computation-model-data-binding" (required json_arg)
+           ~doc:"JSON ComputationModelDataBinding" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_computation_model
+           (Values.UpdateComputationModelRequest.make
+              ?computationModelDescription ?clientToken ~computationModelId
+              ~computationModelName
+              ~computationModelConfiguration:(Values.ComputationModelConfiguration.of_json
+                                                computationModelConfiguration)
+              ~computationModelDataBinding:(Values.ComputationModelDataBinding.of_json
+                                              computationModelDataBinding) ())
+           (Some Values.UpdateComputationModelResponse.to_json)
+           (Some Values.UpdateComputationModelResponse.error_to_json)])
 let update_dashboard =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1517,6 +2692,34 @@ let update_dashboard =
               ?clientToken ~dashboardId ~dashboardName ~dashboardDefinition
               ()) (Some Values.UpdateDashboardResponse.to_json)
            (Some Values.UpdateDashboardResponse.error_to_json)])
+let update_dataset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and datasetDescription =
+         flag "dataset-description" (optional string)
+           ~doc:"STRING RestrictedDescription"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and datasetId = flag "dataset-id" (required string) ~doc:"STRING ID"
+       and datasetName =
+         flag "dataset-name" (required string) ~doc:"STRING RestrictedName"
+       and datasetSource =
+         flag "dataset-source" (required json_arg) ~doc:"JSON DatasetSource" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_dataset
+           (Values.UpdateDatasetRequest.make ?datasetDescription ?clientToken
+              ~datasetId ~datasetName
+              ~datasetSource:(Values.DatasetSource.of_json datasetSource) ())
+           (Some Values.UpdateDatasetResponse.to_json)
+           (Some Values.UpdateDatasetResponse.error_to_json)])
 let update_gateway =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1529,7 +2732,7 @@ let update_gateway =
            ~doc:"URL override endpoint url"
        and gatewayId = flag "gateway-id" (required string) ~doc:"STRING ID"
        and gatewayName =
-         flag "gateway-name" (required string) ~doc:"STRING Name" in
+         flag "gateway-name" (required string) ~doc:"STRING GatewayName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_gateway
@@ -1581,12 +2784,17 @@ let update_portal =
          flag "notification-sender-email" (optional string)
            ~doc:"STRING Email"
        and alarms = flag "alarms" (optional json_arg) ~doc:"JSON Alarms"
+       and portalType =
+         flag "portal-type" (optional json_arg) ~doc:"JSON PortalType"
+       and portalTypeConfiguration =
+         flag "portal-type-configuration" (optional json_arg)
+           ~doc:"JSON PortalTypeConfiguration"
        and portalId = flag "portal-id" (required string) ~doc:"STRING ID"
        and portalName =
          flag "portal-name" (required string) ~doc:"STRING Name"
        and portalContactEmail =
          flag "portal-contact-email" (required string) ~doc:"STRING Email"
-       and roleArn = flag "role-arn" (required string) ~doc:"STRING ARN" in
+       and roleArn = flag "role-arn" (required string) ~doc:"STRING IamArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_portal
@@ -1594,7 +2802,11 @@ let update_portal =
               ?portalLogoImage:(Option.map ~f:Values.Image.of_json
                                   portalLogoImage) ?clientToken
               ?notificationSenderEmail
-              ?alarms:(Option.map ~f:Values.Alarms.of_json alarms) ~portalId
+              ?alarms:(Option.map ~f:Values.Alarms.of_json alarms)
+              ?portalType:(Option.map ~f:Values.PortalType.of_json portalType)
+              ?portalTypeConfiguration:(Option.map
+                                          ~f:Values.PortalTypeConfiguration.of_json
+                                          portalTypeConfiguration) ~portalId
               ~portalName ~portalContactEmail ~roleArn ())
            (Some Values.UpdatePortalResponse.to_json)
            (Some Values.UpdatePortalResponse.error_to_json)])
@@ -1631,29 +2843,57 @@ let main =
       associate_time_series_to_asset_property);
     ("batch-associate-project-assets", batch_associate_project_assets);
     ("batch-disassociate-project-assets", batch_disassociate_project_assets);
+    ("batch-get-asset-property-aggregates",
+      batch_get_asset_property_aggregates);
+    ("batch-get-asset-property-value", batch_get_asset_property_value);
+    ("batch-get-asset-property-value-history",
+      batch_get_asset_property_value_history);
     ("batch-put-asset-property-value", batch_put_asset_property_value);
     ("create-access-policy", create_access_policy);
     ("create-asset", create_asset);
     ("create-asset-model", create_asset_model);
+    ("create-asset-model-composite-model",
+      create_asset_model_composite_model);
+    ("create-bulk-import-job", create_bulk_import_job);
+    ("create-computation-model", create_computation_model);
     ("create-dashboard", create_dashboard);
+    ("create-dataset", create_dataset);
     ("create-gateway", create_gateway);
     ("create-portal", create_portal);
     ("create-project", create_project);
     ("delete-access-policy", delete_access_policy);
     ("delete-asset", delete_asset);
     ("delete-asset-model", delete_asset_model);
+    ("delete-asset-model-composite-model",
+      delete_asset_model_composite_model);
+    ("delete-asset-model-interface-relationship",
+      delete_asset_model_interface_relationship);
+    ("delete-computation-model", delete_computation_model);
     ("delete-dashboard", delete_dashboard);
+    ("delete-dataset", delete_dataset);
     ("delete-gateway", delete_gateway);
     ("delete-portal", delete_portal);
     ("delete-project", delete_project);
     ("delete-time-series", delete_time_series);
     ("describe-access-policy", describe_access_policy);
+    ("describe-action", describe_action);
     ("describe-asset", describe_asset);
+    ("describe-asset-composite-model", describe_asset_composite_model);
     ("describe-asset-model", describe_asset_model);
+    ("describe-asset-model-composite-model",
+      describe_asset_model_composite_model);
+    ("describe-asset-model-interface-relationship",
+      describe_asset_model_interface_relationship);
     ("describe-asset-property", describe_asset_property);
+    ("describe-bulk-import-job", describe_bulk_import_job);
+    ("describe-computation-model", describe_computation_model);
+    ("describe-computation-model-execution-summary",
+      describe_computation_model_execution_summary);
     ("describe-dashboard", describe_dashboard);
+    ("describe-dataset", describe_dataset);
     ("describe-default-encryption-configuration",
       describe_default_encryption_configuration);
+    ("describe-execution", describe_execution);
     ("describe-gateway", describe_gateway);
     ("describe-gateway-capability-configuration",
       describe_gateway_capability_configuration);
@@ -1665,23 +2905,42 @@ let main =
     ("disassociate-assets", disassociate_assets);
     ("disassociate-time-series-from-asset-property",
       disassociate_time_series_from_asset_property);
+    ("execute-action", execute_action);
+    ("execute-query", execute_query);
     ("get-asset-property-aggregates", get_asset_property_aggregates);
     ("get-asset-property-value", get_asset_property_value);
     ("get-asset-property-value-history", get_asset_property_value_history);
     ("get-interpolated-asset-property-values",
       get_interpolated_asset_property_values);
+    ("invoke-assistant", invoke_assistant);
     ("list-access-policies", list_access_policies);
+    ("list-actions", list_actions);
+    ("list-asset-model-composite-models", list_asset_model_composite_models);
+    ("list-asset-model-properties", list_asset_model_properties);
     ("list-asset-models", list_asset_models);
+    ("list-asset-properties", list_asset_properties);
     ("list-asset-relationships", list_asset_relationships);
     ("list-assets", list_assets);
     ("list-associated-assets", list_associated_assets);
+    ("list-bulk-import-jobs", list_bulk_import_jobs);
+    ("list-composition-relationships", list_composition_relationships);
+    ("list-computation-model-data-binding-usages",
+      list_computation_model_data_binding_usages);
+    ("list-computation-model-resolve-to-resources",
+      list_computation_model_resolve_to_resources);
+    ("list-computation-models", list_computation_models);
     ("list-dashboards", list_dashboards);
+    ("list-datasets", list_datasets);
+    ("list-executions", list_executions);
     ("list-gateways", list_gateways);
+    ("list-interface-relationships", list_interface_relationships);
     ("list-portals", list_portals);
     ("list-project-assets", list_project_assets);
     ("list-projects", list_projects);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-time-series", list_time_series);
+    ("put-asset-model-interface-relationship",
+      put_asset_model_interface_relationship);
     ("put-default-encryption-configuration",
       put_default_encryption_configuration);
     ("put-logging-options", put_logging_options);
@@ -1691,8 +2950,12 @@ let main =
     ("update-access-policy", update_access_policy);
     ("update-asset", update_asset);
     ("update-asset-model", update_asset_model);
+    ("update-asset-model-composite-model",
+      update_asset_model_composite_model);
     ("update-asset-property", update_asset_property);
+    ("update-computation-model", update_computation_model);
     ("update-dashboard", update_dashboard);
+    ("update-dataset", update_dataset);
     ("update-gateway", update_gateway);
     ("update-gateway-capability-configuration",
       update_gateway_capability_configuration);

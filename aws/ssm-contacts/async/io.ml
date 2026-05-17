@@ -19,12 +19,20 @@ let create_contact ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateContact input
 let create_contact_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateContactChannel input
+let create_rotation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRotation input
+let create_rotation_override ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRotationOverride input
 let deactivate_contact_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeactivateContactChannel input
 let delete_contact ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteContact input
 let delete_contact_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteContactChannel input
+let delete_rotation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteRotation input
+let delete_rotation_override ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteRotationOverride input
 let describe_engagement ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEngagement input
 let describe_page ?endpoint_url ?cfg input =
@@ -35,6 +43,10 @@ let get_contact_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetContactChannel input
 let get_contact_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetContactPolicy input
+let get_rotation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRotation input
+let get_rotation_override ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRotationOverride input
 let list_contact_channels ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListContactChannels input
 let list_contacts ?endpoint_url ?cfg input =
@@ -43,10 +55,20 @@ let list_engagements ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEngagements input
 let list_page_receipts ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPageReceipts input
+let list_page_resolutions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPageResolutions input
 let list_pages_by_contact ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPagesByContact input
 let list_pages_by_engagement ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPagesByEngagement input
+let list_preview_rotation_shifts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPreviewRotationShifts input
+let list_rotation_overrides ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRotationOverrides input
+let list_rotation_shifts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRotationShifts input
+let list_rotations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRotations input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let put_contact_policy ?endpoint_url ?cfg input =
@@ -65,3 +87,5 @@ let update_contact ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateContact input
 let update_contact_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateContactChannel input
+let update_rotation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateRotation input

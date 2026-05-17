@@ -4,6 +4,8 @@ open Values
 type ('i, 'o, 'e) t =
   | BatchCreateAttendee: (BatchCreateAttendeeRequest.t,
   BatchCreateAttendeeResponse.t, BatchCreateAttendeeResponse.error) t 
+  | BatchUpdateAttendeeCapabilitiesExcept:
+  (BatchUpdateAttendeeCapabilitiesExceptRequest.t, unit, unit) t 
   | CreateAttendee: (CreateAttendeeRequest.t, CreateAttendeeResponse.t,
   CreateAttendeeResponse.error) t 
   | CreateMeeting: (CreateMeetingRequest.t, CreateMeetingResponse.t,
@@ -19,13 +21,23 @@ type ('i, 'o, 'e) t =
   GetMeetingResponse.error) t 
   | ListAttendees: (ListAttendeesRequest.t, ListAttendeesResponse.t,
   ListAttendeesResponse.error) t 
+  | ListTagsForResource: (ListTagsForResourceRequest.t,
+  ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | StartMeetingTranscription: (StartMeetingTranscriptionRequest.t, unit,
   unit) t 
   | StopMeetingTranscription: (StopMeetingTranscriptionRequest.t, unit, 
   unit) t 
+  | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
+  TagResourceResponse.error) t 
+  | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
+  UntagResourceResponse.error) t 
+  | UpdateAttendeeCapabilities: (UpdateAttendeeCapabilitiesRequest.t,
+  UpdateAttendeeCapabilitiesResponse.t,
+  UpdateAttendeeCapabilitiesResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | BatchCreateAttendee -> `POST
+  | BatchUpdateAttendeeCapabilitiesExcept -> `PUT
   | CreateAttendee -> `POST
   | CreateMeeting -> `POST
   | CreateMeetingWithAttendees -> `POST
@@ -34,8 +46,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetAttendee -> `GET
   | GetMeeting -> `GET
   | ListAttendees -> `GET
+  | ListTagsForResource -> `GET
   | StartMeetingTranscription -> `POST
   | StopMeetingTranscription -> `POST
+  | TagResource -> `POST
+  | UntagResource -> `POST
+  | UpdateAttendeeCapabilities -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -43,6 +59,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/meetings/%s/attendees?operation=batch-create"
             (GuidString.to_header x.BatchCreateAttendeeRequest.meetingId)
+      | BatchUpdateAttendeeCapabilitiesExcept ->
+          (Format.kasprintf Uri.of_string)
+            "/meetings/%s/attendees/capabilities?operation=batch-update-except"
+            (GuidString.to_header
+               x.BatchUpdateAttendeeCapabilitiesExceptRequest.meetingId)
       | CreateAttendee ->
           (Format.kasprintf Uri.of_string) "/meetings/%s/attendees"
             (GuidString.to_header x.CreateAttendeeRequest.meetingId)
@@ -75,6 +96,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("max-results", (ResultMax.to_header v)))
                  x.maxResults])
+      | ListTagsForResource ->
+          Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/tags")
+            (List.filter_opt
+               [Some ("arn", (AmazonResourceName.to_header x.resourceARN))])
       | StartMeetingTranscription ->
           (Format.kasprintf Uri.of_string)
             "/meetings/%s/transcription?operation=start"
@@ -83,7 +108,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | StopMeetingTranscription ->
           (Format.kasprintf Uri.of_string)
             "/meetings/%s/transcription?operation=stop"
-            (GuidString.to_header x.StopMeetingTranscriptionRequest.meetingId))
+            (GuidString.to_header x.StopMeetingTranscriptionRequest.meetingId)
+      | TagResource ->
+          (Format.kasprintf Uri.of_string) "/tags?operation=tag-resource"
+      | UntagResource ->
+          (Format.kasprintf Uri.of_string) "/tags?operation=untag-resource"
+      | UpdateAttendeeCapabilities ->
+          (Format.kasprintf Uri.of_string)
+            "/meetings/%s/attendees/%s/capabilities"
+            (GuidString.to_header
+               x.UpdateAttendeeCapabilitiesRequest.meetingId)
+            (GuidString.to_header
+               x.UpdateAttendeeCapabilitiesRequest.attendeeId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -108,6 +144,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchUpdateAttendeeCapabilitiesExcept ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | CreateAttendee ->
       let (headers, body) =
         let headers =
@@ -120,7 +158,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("ExternalUserId",
                            (ExternalUserId.to_value
-                              req.CreateAttendeeRequest.externalUserId))])
+                              req.CreateAttendeeRequest.externalUserId));
+                      Option.map req.CreateAttendeeRequest.capabilities
+                        ~f:(fun x ->
+                              ("Capabilities",
+                                (AttendeeCapabilities.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -164,7 +206,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateMeetingRequest.primaryMeetingId
                         ~f:(fun x ->
                               ("PrimaryMeetingId",
-                                (PrimaryMeetingId.to_value x)))])
+                                (PrimaryMeetingId.to_value x)));
+                      Option.map req.CreateMeetingRequest.tenantIds
+                        ~f:(fun x -> ("TenantIds", (TenantIdList.to_value x)));
+                      Option.map req.CreateMeetingRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map
+                        req.CreateMeetingRequest.mediaPlacementNetworkType
+                        ~f:(fun x ->
+                              ("MediaPlacementNetworkType",
+                                (MediaPlacementNetworkType.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -215,7 +266,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateMeetingWithAttendeesRequest.primaryMeetingId
                         ~f:(fun x ->
                               ("PrimaryMeetingId",
-                                (PrimaryMeetingId.to_value x)))])
+                                (PrimaryMeetingId.to_value x)));
+                      Option.map
+                        req.CreateMeetingWithAttendeesRequest.tenantIds
+                        ~f:(fun x -> ("TenantIds", (TenantIdList.to_value x)));
+                      Option.map req.CreateMeetingWithAttendeesRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map
+                        req.CreateMeetingWithAttendeesRequest.mediaPlacementNetworkType
+                        ~f:(fun x ->
+                              ("MediaPlacementNetworkType",
+                                (MediaPlacementNetworkType.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -232,6 +293,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAttendees ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | StartMeetingTranscription ->
@@ -257,6 +321,55 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | StopMeetingTranscription ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | TagResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ResourceARN",
+                           (AmazonResourceName.to_value
+                              req.TagResourceRequest.resourceARN));
+                      Some
+                        ("Tags",
+                          (TagList.to_value req.TagResourceRequest.tags))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UntagResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ResourceARN",
+                           (AmazonResourceName.to_value
+                              req.UntagResourceRequest.resourceARN));
+                      Some
+                        ("TagKeys",
+                          (TagKeyList.to_value
+                             req.UntagResourceRequest.tagKeys))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateAttendeeCapabilities ->
+      Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -311,6 +424,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some BatchCreateAttendeeResponse.error_of_json))
+  | BatchUpdateAttendeeCapabilitiesExcept ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CreateAttendee ->
       if is_success
       then Ok (CreateAttendeeResponse.of_json (response_to_json resp))
@@ -345,7 +460,36 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListAttendeesResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListAttendeesResponse.error_of_json))
+  | ListTagsForResource ->
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | StartMeetingTranscription ->
       if is_success then Ok () else Error (parse_aws_error None)
   | StopMeetingTranscription ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | TagResource ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | UntagResource ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateAttendeeCapabilities ->
+      if is_success
+      then
+        Ok
+          (UpdateAttendeeCapabilitiesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAttendeeCapabilitiesResponse.error_of_json))

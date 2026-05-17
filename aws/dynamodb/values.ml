@@ -25,6 +25,35 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module ApproximateCreationDateTimePrecision =
+  struct
+    type nonrec t =
+      | MILLISECOND 
+      | MICROSECOND 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MILLISECOND -> "MILLISECOND"
+      | MICROSECOND -> "MICROSECOND"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MILLISECOND" -> MILLISECOND
+      | "MICROSECOND" -> MICROSECOND
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration ApproximateCreationDateTimePrecision" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"ApproximateCreationDateTimePrecision" j)
+    let to_json = simple_to_json to_value
+  end
 module ArchivalReason =
   struct
     type nonrec t = string
@@ -105,12 +134,12 @@ module ArchivalSummary =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "ArchivalDateTime") in
       make ?archivalBackupArn ?archivalReason ?archivalDateTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let archivalBackupArn =
-        field_map json "ArchivalBackupArn" BackupArn.of_json in
+        field_map json__ "ArchivalBackupArn" BackupArn.of_json in
       let archivalReason =
-        field_map json "ArchivalReason" ArchivalReason.of_json in
-      let archivalDateTime = field_map json "ArchivalDateTime" Date.of_json in
+        field_map json__ "ArchivalReason" ArchivalReason.of_json in
+      let archivalDateTime = field_map json__ "ArchivalDateTime" Date.of_json in
       make ?archivalBackupArn ?archivalReason ?archivalDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details of a table archival operation."]
@@ -209,19 +238,22 @@ module AttributeDefinition =
           (Xml.child_exn ~context:context_ xml_arg0 "AttributeName") in
       make ~attributeType ~attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeType =
-        field_map_exn json "AttributeType" ScalarAttributeType.of_json in
+        field_map_exn json__ "AttributeType" ScalarAttributeType.of_json in
       let attributeName =
-        field_map_exn json "AttributeName" KeySchemaAttributeName.of_json in
+        field_map_exn json__ "AttributeName" KeySchemaAttributeName.of_json in
       make ~attributeType ~attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents an attribute for describing the key schema for the table and indexes."]
+       "Represents an attribute for describing the schema for the table and indexes."]
 module AttributeDefinitions =
   struct
     type nonrec t = AttributeDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeDefinition.to_value)) |>
         (fun x -> `List x)
@@ -261,6 +293,9 @@ module StringSetAttributeValue =
   struct
     type nonrec t = StringAttributeValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringAttributeValue.to_value)) |>
         (fun x -> `List x)
@@ -300,6 +335,9 @@ module NumberSetAttributeValue =
   struct
     type nonrec t = NumberAttributeValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NumberAttributeValue.to_value)) |>
         (fun x -> `List x)
@@ -378,6 +416,9 @@ module BinarySetAttributeValue =
   struct
     type nonrec t = BinaryAttributeValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BinaryAttributeValue.to_value)) |>
         (fun x -> `List x)
@@ -427,7 +468,7 @@ module rec
                          "An attribute of type Map. For example: \"M\": \\{\"Name\": \\{\"S\": \"Joe\"\\}, \"Age\": \\{\"N\": \"35\"\\}\\}"];
                      l: ListAttributeValue.t option
                        [@ocaml.doc
-                         "An attribute of type List. For example: \"L\": \\[ \\{\"S\": \"Cookies\"\\} , \\{\"S\": \"Coffee\"\\}, \\{\"N\", \"3.14159\"\\}\\]"];
+                         "An attribute of type List. For example: \"L\": \\[ \\{\"S\": \"Cookies\"\\} , \\{\"S\": \"Coffee\"\\}, \\{\"N\": \"3.14159\"\\}\\]"];
                      nULL: NullAttributeValue.t option
                        [@ocaml.doc
                          "An attribute of type Null. For example: \"NULL\": true"];
@@ -478,7 +519,7 @@ module rec
           "An attribute of type Map. For example: \"M\": \\{\"Name\": \\{\"S\": \"Joe\"\\}, \"Age\": \\{\"N\": \"35\"\\}\\}"];
       l: ListAttributeValue.t option
         [@ocaml.doc
-          "An attribute of type List. For example: \"L\": \\[ \\{\"S\": \"Cookies\"\\} , \\{\"S\": \"Coffee\"\\}, \\{\"N\", \"3.14159\"\\}\\]"];
+          "An attribute of type List. For example: \"L\": \\[ \\{\"S\": \"Cookies\"\\} , \\{\"S\": \"Coffee\"\\}, \\{\"N\": \"3.14159\"\\}\\]"];
       nULL: NullAttributeValue.t option
         [@ocaml.doc "An attribute of type Null. For example: \"NULL\": true"];
       bOOL: BooleanAttributeValue.t option
@@ -535,17 +576,17 @@ module rec
         (Option.map ~f:StringAttributeValue.of_xml) (Xml.child xml_arg0 "S") in
       make ?bOOL ?nULL ?l ?m ?bS ?nS ?sS ?b ?n ?s ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bOOL = field_map json "BOOL" BooleanAttributeValue.of_json in
-      let nULL = field_map json "NULL" NullAttributeValue.of_json in
-      let l = field_map json "L" ListAttributeValue.of_json in
-      let m = field_map json "M" MapAttributeValue.of_json in
-      let bS = field_map json "BS" BinarySetAttributeValue.of_json in
-      let nS = field_map json "NS" NumberSetAttributeValue.of_json in
-      let sS = field_map json "SS" StringSetAttributeValue.of_json in
-      let b = field_map json "B" BinaryAttributeValue.of_json in
-      let n = field_map json "N" NumberAttributeValue.of_json in
-      let s = field_map json "S" StringAttributeValue.of_json in
+    let of_json json__ =
+      let bOOL = field_map json__ "BOOL" BooleanAttributeValue.of_json in
+      let nULL = field_map json__ "NULL" NullAttributeValue.of_json in
+      let l = field_map json__ "L" ListAttributeValue.of_json in
+      let m = field_map json__ "M" MapAttributeValue.of_json in
+      let bS = field_map json__ "BS" BinarySetAttributeValue.of_json in
+      let nS = field_map json__ "NS" NumberSetAttributeValue.of_json in
+      let sS = field_map json__ "SS" StringSetAttributeValue.of_json in
+      let b = field_map json__ "B" BinaryAttributeValue.of_json in
+      let n = field_map json__ "N" NumberAttributeValue.of_json in
+      let s = field_map json__ "S" StringAttributeValue.of_json in
       make ?bOOL ?nULL ?l ?m ?bS ?nS ?sS ?b ?n ?s ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -564,6 +605,9 @@ module rec
   struct
     type nonrec t = AttributeValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -599,6 +643,7 @@ module rec
                              (string, string) List.Assoc.t ->
                                (AttributeName.t, AttributeValue.t)
                                  List.Assoc.t
+                           val to_header : t -> string
                          end =
        struct
          type nonrec t = (AttributeName.t * AttributeValue.t) list
@@ -623,6 +668,8 @@ module rec
                             (AttributeValue.to_value y) |> (fun y -> (x, y))))))
              |> (fun x -> `Map x)
          let to_query v = to_query to_value v
+         let to_header _ =
+           failwithf "to_header is not implemented for Map_shape objects" ()
          let of_xml _ =
            failwith
              "of_xml_converter_of_shape: Map_shape case not implemented"
@@ -655,6 +702,8 @@ module AttributeMap =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -667,6 +716,9 @@ module AttributeNameList =
     type nonrec t = AttributeName.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -696,7 +748,7 @@ module AttributeValueUpdate =
           "Represents the data for an attribute. Each attribute value is described as a name-value pair. The name is the data type, and the value is the data itself. For more information, see Data Types in the Amazon DynamoDB Developer Guide."];
       action: AttributeAction.t option
         [@ocaml.doc
-          "Specifies how to perform the update. Valid values are PUT (default), DELETE, and ADD. The behavior depends on whether the specified primary key already exists in the table. If an item with the specified Key is found in the table: PUT - Adds the specified attribute to the item. If the attribute already exists, it is replaced by the new value. DELETE - If no value is specified, the attribute and its value are removed from the item. The data type of the specified value must match the existing value's data type. If a set of values is specified, then those values are subtracted from the old set. For example, if the attribute value was the set \\[a,b,c\\] and the DELETE action specified \\[a,c\\], then the final attribute value would be \\[b\\]. Specifying an empty set is an error. ADD - If the attribute does not already exist, then the attribute and its values are added to the item. If the attribute does exist, then the behavior of ADD depends on the data type of the attribute: If the existing attribute is a number, and if Value is also a number, then the Value is mathematically added to the existing attribute. If Value is a negative number, then it is subtracted from the existing attribute. If you use ADD to increment or decrement a number value for an item that doesn't exist before the update, DynamoDB uses 0 as the initial value. In addition, if you use ADD to update an existing item, and intend to increment or decrement an attribute value which does not yet exist, DynamoDB uses 0 as the initial value. For example, suppose that the item you want to update does not yet have an attribute named itemcount, but you decide to ADD the number 3 to this attribute anyway, even though it currently does not exist. DynamoDB will create the itemcount attribute, set its initial value to 0, and finally add 3 to it. The result will be a new itemcount attribute in the item, with a value of 3. If the existing data type is a set, and if the Value is also a set, then the Value is added to the existing set. (This is a set operation, not mathematical addition.) For example, if the attribute value was the set \\[1,2\\], and the ADD action specified \\[3\\], then the final attribute value would be \\[1,2,3\\]. An error occurs if an Add action is specified for a set attribute and the attribute type specified does not match the existing set type. Both sets must have the same primitive data type. For example, if the existing data type is a set of strings, the Value must also be a set of strings. The same holds true for number sets and binary sets. This action is only valid for an existing attribute whose data type is number or is a set. Do not use ADD for any other data types. If no item with the specified Key is found: PUT - DynamoDB creates a new item with the specified primary key, and then adds the attribute. DELETE - Nothing happens; there is no attribute to delete. ADD - DynamoDB creates an item with the supplied primary key and number (or set of numbers) for the attribute value. The only data types allowed are number and number set; no other data types can be specified."]}
+          "Specifies how to perform the update. Valid values are PUT (default), DELETE, and ADD. The behavior depends on whether the specified primary key already exists in the table. If an item with the specified Key is found in the table: PUT - Adds the specified attribute to the item. If the attribute already exists, it is replaced by the new value. DELETE - If no value is specified, the attribute and its value are removed from the item. The data type of the specified value must match the existing value's data type. If a set of values is specified, then those values are subtracted from the old set. For example, if the attribute value was the set \\[a,b,c\\] and the DELETE action specified \\[a,c\\], then the final attribute value would be \\[b\\]. Specifying an empty set is an error. ADD - If the attribute does not already exist, then the attribute and its values are added to the item. If the attribute does exist, then the behavior of ADD depends on the data type of the attribute: If the existing attribute is a number, and if Value is also a number, then the Value is mathematically added to the existing attribute. If Value is a negative number, then it is subtracted from the existing attribute. If you use ADD to increment or decrement a number value for an item that doesn't exist before the update, DynamoDB uses 0 as the initial value. In addition, if you use ADD to update an existing item, and intend to increment or decrement an attribute value which does not yet exist, DynamoDB uses 0 as the initial value. For example, suppose that the item you want to update does not yet have an attribute named itemcount, but you decide to ADD the number 3 to this attribute anyway, even though it currently does not exist. DynamoDB will create the itemcount attribute, set its initial value to 0, and finally add 3 to it. The result will be a new itemcount attribute in the item, with a value of 3. If the existing data type is a set, and if the Value is also a set, then the Value is added to the existing set. (This is a set operation, not mathematical addition.) For example, if the attribute value was the set \\[1,2\\], and the ADD action specified \\[3\\], then the final attribute value would be \\[1,2,3\\]. An error occurs if an Add action is specified for a set attribute and the attribute type specified does not match the existing set type. Both sets must have the same primitive data type. For example, if the existing data type is a set of strings, the Value must also be a set of strings. The same holds true for number sets and binary sets. This action is only valid for an existing attribute whose data type is number or is a set. Do not use ADD for any other data types. If no item with the specified Key is found: PUT - DynamoDB creates a new item with the specified primary key, and then adds the attribute. DELETE - Nothing happens; there is no attribute to delete. ADD - DynamoDB creates a new item with the supplied primary key and number (or set) for the attribute value. The only data types allowed are number, number set, string set or binary set."]}
     let make ?value = fun ?action -> fun () -> { value; action }
     let to_value x =
       structure_to_value
@@ -710,9 +762,9 @@ module AttributeValueUpdate =
         (Option.map ~f:AttributeValue.of_xml) (Xml.child xml_arg0 "Value") in
       make ?action ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map json "Action" AttributeAction.of_json in
-      let value = field_map json "Value" AttributeValue.of_json in
+    let of_json json__ =
+      let action = field_map json__ "Action" AttributeAction.of_json in
+      let value = field_map json__ "Value" AttributeValue.of_json in
       make ?action ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -741,6 +793,8 @@ module AttributeUpdates =
                        (AttributeValueUpdate.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -752,6 +806,9 @@ module AttributeValueList =
   struct
     type nonrec t = AttributeValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -787,7 +844,7 @@ module IntegerObject =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module Double =
+module DoubleObject =
   struct
     type nonrec t = float
     let make i = i
@@ -826,15 +883,13 @@ module AutoScalingTargetTrackingScalingPolicyConfigurationDescription =
       scaleOutCooldown: IntegerObject.t option
         [@ocaml.doc
           "The amount of time, in seconds, after a scale out activity completes before another scale out activity can start. While the cooldown period is in effect, the capacity that has been added by the previous scale out event that initiated the cooldown is calculated as part of the desired capacity for the next scale out. You should continuously (but not excessively) scale out."];
-      targetValue: Double.t
+      targetValue: DoubleObject.t option
         [@ocaml.doc
           "The target value for the metric. The range is 8.515920e-109 to 1.174271e+108 (Base 10) or 2e-360 to 2e360 (Base 2)."]}
-    let context_ =
-      "AutoScalingTargetTrackingScalingPolicyConfigurationDescription"
     let make ?disableScaleIn =
       fun ?scaleInCooldown ->
         fun ?scaleOutCooldown ->
-          fun ~targetValue ->
+          fun ?targetValue ->
             fun () ->
               {
                 disableScaleIn;
@@ -850,12 +905,12 @@ module AutoScalingTargetTrackingScalingPolicyConfigurationDescription =
           (Option.map x.scaleInCooldown ~f:IntegerObject.to_value));
         ("ScaleOutCooldown",
           (Option.map x.scaleOutCooldown ~f:IntegerObject.to_value));
-        ("TargetValue", (Some (Double.to_value x.targetValue)))]
+        ("TargetValue", (Option.map x.targetValue ~f:DoubleObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let targetValue =
-        Double.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TargetValue") in
+        (Option.map ~f:DoubleObject.of_xml)
+          (Xml.child xml_arg0 "TargetValue") in
       let scaleOutCooldown =
         (Option.map ~f:IntegerObject.of_xml)
           (Xml.child xml_arg0 "ScaleOutCooldown") in
@@ -865,17 +920,17 @@ module AutoScalingTargetTrackingScalingPolicyConfigurationDescription =
       let disableScaleIn =
         (Option.map ~f:BooleanObject.of_xml)
           (Xml.child xml_arg0 "DisableScaleIn") in
-      make ~targetValue ?scaleOutCooldown ?scaleInCooldown ?disableScaleIn ()
+      make ?targetValue ?scaleOutCooldown ?scaleInCooldown ?disableScaleIn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetValue = field_map_exn json "TargetValue" Double.of_json in
+    let of_json json__ =
+      let targetValue = field_map json__ "TargetValue" DoubleObject.of_json in
       let scaleOutCooldown =
-        field_map json "ScaleOutCooldown" IntegerObject.of_json in
+        field_map json__ "ScaleOutCooldown" IntegerObject.of_json in
       let scaleInCooldown =
-        field_map json "ScaleInCooldown" IntegerObject.of_json in
+        field_map json__ "ScaleInCooldown" IntegerObject.of_json in
       let disableScaleIn =
-        field_map json "DisableScaleIn" BooleanObject.of_json in
-      make ~targetValue ?scaleOutCooldown ?scaleInCooldown ?disableScaleIn ()
+        field_map json__ "DisableScaleIn" BooleanObject.of_json in
+      make ?targetValue ?scaleOutCooldown ?scaleInCooldown ?disableScaleIn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the properties of a target tracking scaling policy."]
@@ -931,12 +986,12 @@ module AutoScalingPolicyDescription =
           (Xml.child xml_arg0 "PolicyName") in
       make ?targetTrackingScalingPolicyConfiguration ?policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetTrackingScalingPolicyConfiguration =
-        field_map json "TargetTrackingScalingPolicyConfiguration"
+        field_map json__ "TargetTrackingScalingPolicyConfiguration"
           AutoScalingTargetTrackingScalingPolicyConfigurationDescription.of_json in
       let policyName =
-        field_map json "PolicyName" AutoScalingPolicyName.of_json in
+        field_map json__ "PolicyName" AutoScalingPolicyName.of_json in
       make ?targetTrackingScalingPolicyConfiguration ?policyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the properties of the scaling policy."]
@@ -944,6 +999,9 @@ module AutoScalingPolicyDescriptionList =
   struct
     type nonrec t = AutoScalingPolicyDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoScalingPolicyDescription.to_value)) |>
         (fun x -> `List x)
@@ -979,7 +1037,7 @@ module AutoScalingTargetTrackingScalingPolicyConfigurationUpdate =
       scaleOutCooldown: IntegerObject.t option
         [@ocaml.doc
           "The amount of time, in seconds, after a scale out activity completes before another scale out activity can start. While the cooldown period is in effect, the capacity that has been added by the previous scale out event that initiated the cooldown is calculated as part of the desired capacity for the next scale out. You should continuously (but not excessively) scale out."];
-      targetValue: Double.t
+      targetValue: DoubleObject.t
         [@ocaml.doc
           "The target value for the metric. The range is 8.515920e-109 to 1.174271e+108 (Base 10) or 2e-360 to 2e360 (Base 2)."]}
     let context_ =
@@ -1003,11 +1061,11 @@ module AutoScalingTargetTrackingScalingPolicyConfigurationUpdate =
           (Option.map x.scaleInCooldown ~f:IntegerObject.to_value));
         ("ScaleOutCooldown",
           (Option.map x.scaleOutCooldown ~f:IntegerObject.to_value));
-        ("TargetValue", (Some (Double.to_value x.targetValue)))]
+        ("TargetValue", (Some (DoubleObject.to_value x.targetValue)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let targetValue =
-        Double.of_xml
+        DoubleObject.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetValue") in
       let scaleOutCooldown =
         (Option.map ~f:IntegerObject.of_xml)
@@ -1020,14 +1078,15 @@ module AutoScalingTargetTrackingScalingPolicyConfigurationUpdate =
           (Xml.child xml_arg0 "DisableScaleIn") in
       make ~targetValue ?scaleOutCooldown ?scaleInCooldown ?disableScaleIn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetValue = field_map_exn json "TargetValue" Double.of_json in
+    let of_json json__ =
+      let targetValue =
+        field_map_exn json__ "TargetValue" DoubleObject.of_json in
       let scaleOutCooldown =
-        field_map json "ScaleOutCooldown" IntegerObject.of_json in
+        field_map json__ "ScaleOutCooldown" IntegerObject.of_json in
       let scaleInCooldown =
-        field_map json "ScaleInCooldown" IntegerObject.of_json in
+        field_map json__ "ScaleInCooldown" IntegerObject.of_json in
       let disableScaleIn =
-        field_map json "DisableScaleIn" BooleanObject.of_json in
+        field_map json__ "DisableScaleIn" BooleanObject.of_json in
       make ~targetValue ?scaleOutCooldown ?scaleInCooldown ?disableScaleIn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1065,12 +1124,12 @@ module AutoScalingPolicyUpdate =
           (Xml.child xml_arg0 "PolicyName") in
       make ~targetTrackingScalingPolicyConfiguration ?policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetTrackingScalingPolicyConfiguration =
-        field_map_exn json "TargetTrackingScalingPolicyConfiguration"
+        field_map_exn json__ "TargetTrackingScalingPolicyConfiguration"
           AutoScalingTargetTrackingScalingPolicyConfigurationUpdate.of_json in
       let policyName =
-        field_map json "PolicyName" AutoScalingPolicyName.of_json in
+        field_map json__ "PolicyName" AutoScalingPolicyName.of_json in
       make ~targetTrackingScalingPolicyConfiguration ?policyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the auto scaling policy to be modified."]
@@ -1186,18 +1245,18 @@ module AutoScalingSettingsDescription =
       make ?scalingPolicies ?autoScalingRoleArn ?autoScalingDisabled
         ?maximumUnits ?minimumUnits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalingPolicies =
-        field_map json "ScalingPolicies"
+        field_map json__ "ScalingPolicies"
           AutoScalingPolicyDescriptionList.of_json in
       let autoScalingRoleArn =
-        field_map json "AutoScalingRoleArn" String_.of_json in
+        field_map json__ "AutoScalingRoleArn" String_.of_json in
       let autoScalingDisabled =
-        field_map json "AutoScalingDisabled" BooleanObject.of_json in
+        field_map json__ "AutoScalingDisabled" BooleanObject.of_json in
       let maximumUnits =
-        field_map json "MaximumUnits" PositiveLongObject.of_json in
+        field_map json__ "MaximumUnits" PositiveLongObject.of_json in
       let minimumUnits =
-        field_map json "MinimumUnits" PositiveLongObject.of_json in
+        field_map json__ "MinimumUnits" PositiveLongObject.of_json in
       make ?scalingPolicies ?autoScalingRoleArn ?autoScalingDisabled
         ?maximumUnits ?minimumUnits ()
     let to_json v = composed_to_json to_value v
@@ -1267,22 +1326,36 @@ module AutoScalingSettingsUpdate =
       make ?scalingPolicyUpdate ?autoScalingRoleArn ?autoScalingDisabled
         ?maximumUnits ?minimumUnits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scalingPolicyUpdate =
-        field_map json "ScalingPolicyUpdate" AutoScalingPolicyUpdate.of_json in
+        field_map json__ "ScalingPolicyUpdate"
+          AutoScalingPolicyUpdate.of_json in
       let autoScalingRoleArn =
-        field_map json "AutoScalingRoleArn" AutoScalingRoleArn.of_json in
+        field_map json__ "AutoScalingRoleArn" AutoScalingRoleArn.of_json in
       let autoScalingDisabled =
-        field_map json "AutoScalingDisabled" BooleanObject.of_json in
+        field_map json__ "AutoScalingDisabled" BooleanObject.of_json in
       let maximumUnits =
-        field_map json "MaximumUnits" PositiveLongObject.of_json in
+        field_map json__ "MaximumUnits" PositiveLongObject.of_json in
       let minimumUnits =
-        field_map json "MinimumUnits" PositiveLongObject.of_json in
+        field_map json__ "MinimumUnits" PositiveLongObject.of_json in
       make ?scalingPolicyUpdate ?autoScalingRoleArn ?autoScalingDisabled
         ?maximumUnits ?minimumUnits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the auto scaling settings to be modified for a global table or global secondary index."]
+module AvailabilityErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "AvailabilityErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AvailabilityErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
 module Backfilling =
   struct
     type nonrec t = bool
@@ -1383,11 +1456,11 @@ module TimeToLiveDescription =
           (Xml.child xml_arg0 "TimeToLiveStatus") in
       make ?attributeName ?timeToLiveStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeName =
-        field_map json "AttributeName" TimeToLiveAttributeName.of_json in
+        field_map json__ "AttributeName" TimeToLiveAttributeName.of_json in
       let timeToLiveStatus =
-        field_map json "TimeToLiveStatus" TimeToLiveStatus.of_json in
+        field_map json__ "TimeToLiveStatus" TimeToLiveStatus.of_json in
       make ?attributeName ?timeToLiveStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1464,11 +1537,11 @@ module StreamSpecification =
           (Xml.child_exn ~context:context_ xml_arg0 "StreamEnabled") in
       make ?streamViewType ~streamEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamViewType =
-        field_map json "StreamViewType" StreamViewType.of_json in
+        field_map json__ "StreamViewType" StreamViewType.of_json in
       let streamEnabled =
-        field_map_exn json "StreamEnabled" StreamEnabled.of_json in
+        field_map_exn json__ "StreamEnabled" StreamEnabled.of_json in
       make ?streamViewType ~streamEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1588,13 +1661,13 @@ module SSEDescription =
       make ?inaccessibleEncryptionDateTime ?kMSMasterKeyArn ?sSEType ?status
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inaccessibleEncryptionDateTime =
-        field_map json "InaccessibleEncryptionDateTime" Date.of_json in
+        field_map json__ "InaccessibleEncryptionDateTime" Date.of_json in
       let kMSMasterKeyArn =
-        field_map json "KMSMasterKeyArn" KMSMasterKeyArn.of_json in
-      let sSEType = field_map json "SSEType" SSEType.of_json in
-      let status = field_map json "Status" SSEStatus.of_json in
+        field_map json__ "KMSMasterKeyArn" KMSMasterKeyArn.of_json in
+      let sSEType = field_map json__ "SSEType" SSEType.of_json in
+      let status = field_map json__ "Status" SSEStatus.of_json in
       make ?inaccessibleEncryptionDateTime ?kMSMasterKeyArn ?sSEType ?status
         ()
     let to_json v = composed_to_json to_value v
@@ -1654,6 +1727,9 @@ module NonKeyAttributeNameList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonKeyAttributeName.to_value)) |>
         (fun x -> `List x)
@@ -1682,10 +1758,10 @@ module Projection =
       {
       projectionType: ProjectionType.t option
         [@ocaml.doc
-          "The set of attributes that are projected into the index: KEYS_ONLY - Only the index and primary keys are projected into the index. INCLUDE - In addition to the attributes described in KEYS_ONLY, the secondary index will include other non-key attributes that you specify. ALL - All of the table attributes are projected into the index."];
+          "The set of attributes that are projected into the index: KEYS_ONLY - Only the index and primary keys are projected into the index. INCLUDE - In addition to the attributes described in KEYS_ONLY, the secondary index will include other non-key attributes that you specify. ALL - All of the table attributes are projected into the index. When using the DynamoDB console, ALL is selected by default."];
       nonKeyAttributes: NonKeyAttributeNameList.t option
         [@ocaml.doc
-          "Represents the non-key attribute names which will be projected into the index. For local secondary indexes, the total count of NonKeyAttributes summed across all of the local secondary indexes, must not exceed 20. If you project the same attribute into two different indexes, this counts as two distinct attributes when determining the total."]}
+          "Represents the non-key attribute names which will be projected into the index. For global and local secondary indexes, the total count of NonKeyAttributes summed across all of the secondary indexes, must not exceed 100. If you project the same attribute into two different indexes, this counts as two distinct attributes when determining the total. This limit only applies when you specify the ProjectionType of INCLUDE. You still can specify the ProjectionType of ALL to project all attributes from the source table, even if the table has more than 100 attributes."]}
     let make ?projectionType =
       fun ?nonKeyAttributes -> fun () -> { projectionType; nonKeyAttributes }
     let to_value x =
@@ -1704,11 +1780,11 @@ module Projection =
           (Xml.child xml_arg0 "ProjectionType") in
       make ?nonKeyAttributes ?projectionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nonKeyAttributes =
-        field_map json "NonKeyAttributes" NonKeyAttributeNameList.of_json in
+        field_map json__ "NonKeyAttributes" NonKeyAttributeNameList.of_json in
       let projectionType =
-        field_map json "ProjectionType" ProjectionType.of_json in
+        field_map json__ "ProjectionType" ProjectionType.of_json in
       make ?nonKeyAttributes ?projectionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1758,10 +1834,10 @@ module KeySchemaElement =
           (Xml.child_exn ~context:context_ xml_arg0 "AttributeName") in
       make ~keyType ~attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyType = field_map_exn json "KeyType" KeyType.of_json in
+    let of_json json__ =
+      let keyType = field_map_exn json__ "KeyType" KeyType.of_json in
       let attributeName =
-        field_map_exn json "AttributeName" KeySchemaAttributeName.of_json in
+        field_map_exn json__ "AttributeName" KeySchemaAttributeName.of_json in
       make ~keyType ~attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1770,10 +1846,10 @@ module KeySchema =
   struct
     type nonrec t = KeySchemaElement.t list
     let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
-        i
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeySchemaElement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1844,10 +1920,10 @@ module LocalSecondaryIndexInfo =
         (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
       make ?projection ?keySchema ?indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let projection = field_map json "Projection" Projection.of_json in
-      let keySchema = field_map json "KeySchema" KeySchema.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
+    let of_json json__ =
+      let projection = field_map json__ "Projection" Projection.of_json in
+      let keySchema = field_map json__ "KeySchema" KeySchema.of_json in
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
       make ?projection ?keySchema ?indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1856,6 +1932,9 @@ module LocalSecondaryIndexes =
   struct
     type nonrec t = LocalSecondaryIndexInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocalSecondaryIndexInfo.to_value)) |>
         (fun x -> `List x)
@@ -1908,15 +1987,66 @@ module ProvisionedThroughput =
           (Xml.child_exn ~context:context_ xml_arg0 "ReadCapacityUnits") in
       make ~writeCapacityUnits ~readCapacityUnits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let writeCapacityUnits =
-        field_map_exn json "WriteCapacityUnits" PositiveLongObject.of_json in
+        field_map_exn json__ "WriteCapacityUnits" PositiveLongObject.of_json in
       let readCapacityUnits =
-        field_map_exn json "ReadCapacityUnits" PositiveLongObject.of_json in
+        field_map_exn json__ "ReadCapacityUnits" PositiveLongObject.of_json in
       make ~writeCapacityUnits ~readCapacityUnits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents the provisioned throughput settings for a specified table or index. The settings can be modified using the UpdateTable operation. For current minimum and maximum provisioned throughput values, see Service, Account, and Table Quotas in the Amazon DynamoDB Developer Guide."]
+       "Represents the provisioned throughput settings for the specified global secondary index. You must use ProvisionedThroughput or OnDemandThroughput based on your table\226\128\153s capacity mode. For current minimum and maximum provisioned throughput values, see Service, Account, and Table Quotas in the Amazon DynamoDB Developer Guide."]
+module LongObject =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module OnDemandThroughput =
+  struct
+    type nonrec t =
+      {
+      maxReadRequestUnits: LongObject.t option
+        [@ocaml.doc
+          "Maximum number of read request units for the specified table. To specify a maximum OnDemandThroughput on your table, set the value of MaxReadRequestUnits as greater than or equal to 1. To remove the maximum OnDemandThroughput that is currently set on your table, set the value of MaxReadRequestUnits to -1."];
+      maxWriteRequestUnits: LongObject.t option
+        [@ocaml.doc
+          "Maximum number of write request units for the specified table. To specify a maximum OnDemandThroughput on your table, set the value of MaxWriteRequestUnits as greater than or equal to 1. To remove the maximum OnDemandThroughput that is currently set on your table, set the value of MaxWriteRequestUnits to -1."]}
+    let make ?maxReadRequestUnits =
+      fun ?maxWriteRequestUnits ->
+        fun () -> { maxReadRequestUnits; maxWriteRequestUnits }
+    let to_value x =
+      structure_to_value
+        [("MaxReadRequestUnits",
+           (Option.map x.maxReadRequestUnits ~f:LongObject.to_value));
+        ("MaxWriteRequestUnits",
+          (Option.map x.maxWriteRequestUnits ~f:LongObject.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxWriteRequestUnits =
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "MaxWriteRequestUnits") in
+      let maxReadRequestUnits =
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "MaxReadRequestUnits") in
+      make ?maxWriteRequestUnits ?maxReadRequestUnits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxWriteRequestUnits =
+        field_map json__ "MaxWriteRequestUnits" LongObject.of_json in
+      let maxReadRequestUnits =
+        field_map json__ "MaxReadRequestUnits" LongObject.of_json in
+      make ?maxWriteRequestUnits ?maxReadRequestUnits ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the maximum number of read and write units for the specified on-demand table. If you use this parameter, you must specify MaxReadRequestUnits, MaxWriteRequestUnits, or both."]
 module GlobalSecondaryIndexInfo =
   struct
     type nonrec t =
@@ -1931,13 +2061,21 @@ module GlobalSecondaryIndexInfo =
           "Represents attributes that are copied (projected) from the table into the global secondary index. These are in addition to the primary key attributes and index key attributes, which are automatically projected."];
       provisionedThroughput: ProvisionedThroughput.t option
         [@ocaml.doc
-          "Represents the provisioned throughput settings for the specified global secondary index."]}
+          "Represents the provisioned throughput settings for the specified global secondary index."];
+      onDemandThroughput: OnDemandThroughput.t option }
     let make ?indexName =
       fun ?keySchema ->
         fun ?projection ->
           fun ?provisionedThroughput ->
-            fun () ->
-              { indexName; keySchema; projection; provisionedThroughput }
+            fun ?onDemandThroughput ->
+              fun () ->
+                {
+                  indexName;
+                  keySchema;
+                  projection;
+                  provisionedThroughput;
+                  onDemandThroughput
+                }
     let to_value x =
       structure_to_value
         [("IndexName", (Option.map x.indexName ~f:IndexName.to_value));
@@ -1945,9 +2083,14 @@ module GlobalSecondaryIndexInfo =
         ("Projection", (Option.map x.projection ~f:Projection.to_value));
         ("ProvisionedThroughput",
           (Option.map x.provisionedThroughput
-             ~f:ProvisionedThroughput.to_value))]
+             ~f:ProvisionedThroughput.to_value));
+        ("OnDemandThroughput",
+          (Option.map x.onDemandThroughput ~f:OnDemandThroughput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let onDemandThroughput =
+        (Option.map ~f:OnDemandThroughput.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughput") in
       let provisionedThroughput =
         (Option.map ~f:ProvisionedThroughput.of_xml)
           (Xml.child xml_arg0 "ProvisionedThroughput") in
@@ -1957,15 +2100,20 @@ module GlobalSecondaryIndexInfo =
         (Option.map ~f:KeySchema.of_xml) (Xml.child xml_arg0 "KeySchema") in
       let indexName =
         (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
-      make ?provisionedThroughput ?projection ?keySchema ?indexName ()
+      make ?onDemandThroughput ?provisionedThroughput ?projection ?keySchema
+        ?indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let onDemandThroughput =
+        field_map json__ "OnDemandThroughput" OnDemandThroughput.of_json in
       let provisionedThroughput =
-        field_map json "ProvisionedThroughput" ProvisionedThroughput.of_json in
-      let projection = field_map json "Projection" Projection.of_json in
-      let keySchema = field_map json "KeySchema" KeySchema.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
-      make ?provisionedThroughput ?projection ?keySchema ?indexName ()
+        field_map json__ "ProvisionedThroughput"
+          ProvisionedThroughput.of_json in
+      let projection = field_map json__ "Projection" Projection.of_json in
+      let keySchema = field_map json__ "KeySchema" KeySchema.of_json in
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
+      make ?onDemandThroughput ?provisionedThroughput ?projection ?keySchema
+        ?indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the properties of a global secondary index for the table when the backup was created."]
@@ -1973,6 +2121,9 @@ module GlobalSecondaryIndexes =
   struct
     type nonrec t = GlobalSecondaryIndexInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlobalSecondaryIndexInfo.to_value)) |>
         (fun x -> `List x)
@@ -2062,18 +2213,20 @@ module SourceTableFeatureDetails =
       make ?sSEDescription ?timeToLiveDescription ?streamDescription
         ?globalSecondaryIndexes ?localSecondaryIndexes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sSEDescription =
-        field_map json "SSEDescription" SSEDescription.of_json in
+        field_map json__ "SSEDescription" SSEDescription.of_json in
       let timeToLiveDescription =
-        field_map json "TimeToLiveDescription" TimeToLiveDescription.of_json in
+        field_map json__ "TimeToLiveDescription"
+          TimeToLiveDescription.of_json in
       let streamDescription =
-        field_map json "StreamDescription" StreamSpecification.of_json in
+        field_map json__ "StreamDescription" StreamSpecification.of_json in
       let globalSecondaryIndexes =
-        field_map json "GlobalSecondaryIndexes"
+        field_map json__ "GlobalSecondaryIndexes"
           GlobalSecondaryIndexes.of_json in
       let localSecondaryIndexes =
-        field_map json "LocalSecondaryIndexes" LocalSecondaryIndexes.of_json in
+        field_map json__ "LocalSecondaryIndexes"
+          LocalSecondaryIndexes.of_json in
       make ?sSEDescription ?timeToLiveDescription ?streamDescription
         ?globalSecondaryIndexes ?localSecondaryIndexes ()
     let to_json v = composed_to_json to_value v
@@ -2133,26 +2286,18 @@ module TableArn =
   struct
     type nonrec t = string
     let context_ = "TableArn"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TableArn" j
-    let to_json = simple_to_json to_value
-  end
-module Long =
-  struct
-    type nonrec t = Int64.t
-    let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
-    let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
 module ItemCount =
@@ -2198,62 +2343,69 @@ module SourceTableDetails =
   struct
     type nonrec t =
       {
-      tableName: TableName.t
+      tableName: TableName.t option
         [@ocaml.doc
           "The name of the table for which the backup was created."];
-      tableId: TableId.t
+      tableId: TableId.t option
         [@ocaml.doc
           "Unique identifier for the table for which the backup was created."];
       tableArn: TableArn.t option
         [@ocaml.doc "ARN of the table for which backup was created."];
-      tableSizeBytes: Long.t option
+      tableSizeBytes: LongObject.t option
         [@ocaml.doc
           "Size of the table in bytes. Note that this is an approximate value."];
-      keySchema: KeySchema.t [@ocaml.doc "Schema of the table."];
-      tableCreationDateTime: TableCreationDateTime.t
+      keySchema: KeySchema.t option [@ocaml.doc "Schema of the table."];
+      tableCreationDateTime: TableCreationDateTime.t option
         [@ocaml.doc "Time when the source table was created."];
-      provisionedThroughput: ProvisionedThroughput.t
+      provisionedThroughput: ProvisionedThroughput.t option
         [@ocaml.doc
           "Read IOPs and Write IOPS on the table when the backup was created."];
+      onDemandThroughput: OnDemandThroughput.t option ;
       itemCount: ItemCount.t option
         [@ocaml.doc
           "Number of items in the table. Note that this is an approximate value."];
       billingMode: BillingMode.t option
         [@ocaml.doc
           "Controls how you are charged for read and write throughput and how you manage capacity. This setting can be changed later. PROVISIONED - Sets the read/write capacity mode to PROVISIONED. We recommend using PROVISIONED for predictable workloads. PAY_PER_REQUEST - Sets the read/write capacity mode to PAY_PER_REQUEST. We recommend using PAY_PER_REQUEST for unpredictable workloads."]}
-    let context_ = "SourceTableDetails"
-    let make ?tableArn =
-      fun ?tableSizeBytes ->
-        fun ?itemCount ->
-          fun ?billingMode ->
-            fun ~tableName ->
-              fun ~tableId ->
-                fun ~keySchema ->
-                  fun ~tableCreationDateTime ->
-                    fun ~provisionedThroughput ->
-                      fun () ->
-                        {
-                          tableArn;
-                          tableSizeBytes;
-                          itemCount;
-                          billingMode;
-                          tableName;
-                          tableId;
-                          keySchema;
-                          tableCreationDateTime;
-                          provisionedThroughput
-                        }
+    let make ?tableName =
+      fun ?tableId ->
+        fun ?tableArn ->
+          fun ?tableSizeBytes ->
+            fun ?keySchema ->
+              fun ?tableCreationDateTime ->
+                fun ?provisionedThroughput ->
+                  fun ?onDemandThroughput ->
+                    fun ?itemCount ->
+                      fun ?billingMode ->
+                        fun () ->
+                          {
+                            tableName;
+                            tableId;
+                            tableArn;
+                            tableSizeBytes;
+                            keySchema;
+                            tableCreationDateTime;
+                            provisionedThroughput;
+                            onDemandThroughput;
+                            itemCount;
+                            billingMode
+                          }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)));
-        ("TableId", (Some (TableId.to_value x.tableId)));
+        [("TableName", (Option.map x.tableName ~f:TableName.to_value));
+        ("TableId", (Option.map x.tableId ~f:TableId.to_value));
         ("TableArn", (Option.map x.tableArn ~f:TableArn.to_value));
-        ("TableSizeBytes", (Option.map x.tableSizeBytes ~f:Long.to_value));
-        ("KeySchema", (Some (KeySchema.to_value x.keySchema)));
+        ("TableSizeBytes",
+          (Option.map x.tableSizeBytes ~f:LongObject.to_value));
+        ("KeySchema", (Option.map x.keySchema ~f:KeySchema.to_value));
         ("TableCreationDateTime",
-          (Some (TableCreationDateTime.to_value x.tableCreationDateTime)));
+          (Option.map x.tableCreationDateTime
+             ~f:TableCreationDateTime.to_value));
         ("ProvisionedThroughput",
-          (Some (ProvisionedThroughput.to_value x.provisionedThroughput)));
+          (Option.map x.provisionedThroughput
+             ~f:ProvisionedThroughput.to_value));
+        ("OnDemandThroughput",
+          (Option.map x.onDemandThroughput ~f:OnDemandThroughput.to_value));
         ("ItemCount", (Option.map x.itemCount ~f:ItemCount.to_value));
         ("BillingMode", (Option.map x.billingMode ~f:BillingMode.to_value))]
     let to_query v = to_query to_value v
@@ -2262,45 +2414,50 @@ module SourceTableDetails =
         (Option.map ~f:BillingMode.of_xml) (Xml.child xml_arg0 "BillingMode") in
       let itemCount =
         (Option.map ~f:ItemCount.of_xml) (Xml.child xml_arg0 "ItemCount") in
+      let onDemandThroughput =
+        (Option.map ~f:OnDemandThroughput.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughput") in
       let provisionedThroughput =
-        ProvisionedThroughput.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProvisionedThroughput") in
+        (Option.map ~f:ProvisionedThroughput.of_xml)
+          (Xml.child xml_arg0 "ProvisionedThroughput") in
       let tableCreationDateTime =
-        TableCreationDateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TableCreationDateTime") in
+        (Option.map ~f:TableCreationDateTime.of_xml)
+          (Xml.child xml_arg0 "TableCreationDateTime") in
       let keySchema =
-        KeySchema.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "KeySchema") in
+        (Option.map ~f:KeySchema.of_xml) (Xml.child xml_arg0 "KeySchema") in
       let tableSizeBytes =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "TableSizeBytes") in
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "TableSizeBytes") in
       let tableArn =
         (Option.map ~f:TableArn.of_xml) (Xml.child xml_arg0 "TableArn") in
       let tableId =
-        TableId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TableId") in
+        (Option.map ~f:TableId.of_xml) (Xml.child xml_arg0 "TableId") in
       let tableName =
-        TableName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
-      make ?billingMode ?itemCount ~provisionedThroughput
-        ~tableCreationDateTime ~keySchema ?tableSizeBytes ?tableArn ~tableId
-        ~tableName ()
+        (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "TableName") in
+      make ?billingMode ?itemCount ?onDemandThroughput ?provisionedThroughput
+        ?tableCreationDateTime ?keySchema ?tableSizeBytes ?tableArn ?tableId
+        ?tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let billingMode = field_map json "BillingMode" BillingMode.of_json in
-      let itemCount = field_map json "ItemCount" ItemCount.of_json in
+    let of_json json__ =
+      let billingMode = field_map json__ "BillingMode" BillingMode.of_json in
+      let itemCount = field_map json__ "ItemCount" ItemCount.of_json in
+      let onDemandThroughput =
+        field_map json__ "OnDemandThroughput" OnDemandThroughput.of_json in
       let provisionedThroughput =
-        field_map_exn json "ProvisionedThroughput"
+        field_map json__ "ProvisionedThroughput"
           ProvisionedThroughput.of_json in
       let tableCreationDateTime =
-        field_map_exn json "TableCreationDateTime"
+        field_map json__ "TableCreationDateTime"
           TableCreationDateTime.of_json in
-      let keySchema = field_map_exn json "KeySchema" KeySchema.of_json in
-      let tableSizeBytes = field_map json "TableSizeBytes" Long.of_json in
-      let tableArn = field_map json "TableArn" TableArn.of_json in
-      let tableId = field_map_exn json "TableId" TableId.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
-      make ?billingMode ?itemCount ~provisionedThroughput
-        ~tableCreationDateTime ~keySchema ?tableSizeBytes ?tableArn ~tableId
-        ~tableName ()
+      let keySchema = field_map json__ "KeySchema" KeySchema.of_json in
+      let tableSizeBytes =
+        field_map json__ "TableSizeBytes" LongObject.of_json in
+      let tableArn = field_map json__ "TableArn" TableArn.of_json in
+      let tableId = field_map json__ "TableId" TableId.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
+      make ?billingMode ?itemCount ?onDemandThroughput ?provisionedThroughput
+        ?tableCreationDateTime ?keySchema ?tableSizeBytes ?tableArn ?tableId
+        ?tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the details of the table when the backup was created."]
@@ -2398,50 +2555,54 @@ module BackupDetails =
   struct
     type nonrec t =
       {
-      backupArn: BackupArn.t [@ocaml.doc "ARN associated with the backup."];
-      backupName: BackupName.t [@ocaml.doc "Name of the requested backup."];
+      backupArn: BackupArn.t option
+        [@ocaml.doc "ARN associated with the backup."];
+      backupName: BackupName.t option
+        [@ocaml.doc "Name of the requested backup."];
       backupSizeBytes: BackupSizeBytes.t option
-        [@ocaml.doc "Size of the backup in bytes."];
-      backupStatus: BackupStatus.t
+        [@ocaml.doc
+          "Size of the backup in bytes. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value."];
+      backupStatus: BackupStatus.t option
         [@ocaml.doc
           "Backup can be in one of the following states: CREATING, ACTIVE, DELETED."];
-      backupType: BackupType.t
+      backupType: BackupType.t option
         [@ocaml.doc
           "BackupType: USER - You create and manage these using the on-demand backup feature. SYSTEM - If you delete a table with point-in-time recovery enabled, a SYSTEM backup is automatically created and is retained for 35 days (at no additional cost). System backups allow you to restore the deleted table to the state it was in just before the point of deletion. AWS_BACKUP - On-demand backup created by you from Backup service."];
-      backupCreationDateTime: BackupCreationDateTime.t
+      backupCreationDateTime: BackupCreationDateTime.t option
         [@ocaml.doc
           "Time at which the backup was created. This is the request time of the backup."];
       backupExpiryDateTime: Date.t option
         [@ocaml.doc
           "Time at which the automatic on-demand backup created by DynamoDB will expire. This SYSTEM on-demand backup expires automatically 35 days after its creation."]}
-    let context_ = "BackupDetails"
-    let make ?backupSizeBytes =
-      fun ?backupExpiryDateTime ->
-        fun ~backupArn ->
-          fun ~backupName ->
-            fun ~backupStatus ->
-              fun ~backupType ->
-                fun ~backupCreationDateTime ->
+    let make ?backupArn =
+      fun ?backupName ->
+        fun ?backupSizeBytes ->
+          fun ?backupStatus ->
+            fun ?backupType ->
+              fun ?backupCreationDateTime ->
+                fun ?backupExpiryDateTime ->
                   fun () ->
                     {
-                      backupSizeBytes;
-                      backupExpiryDateTime;
                       backupArn;
                       backupName;
+                      backupSizeBytes;
                       backupStatus;
                       backupType;
-                      backupCreationDateTime
+                      backupCreationDateTime;
+                      backupExpiryDateTime
                     }
     let to_value x =
       structure_to_value
-        [("BackupArn", (Some (BackupArn.to_value x.backupArn)));
-        ("BackupName", (Some (BackupName.to_value x.backupName)));
+        [("BackupArn", (Option.map x.backupArn ~f:BackupArn.to_value));
+        ("BackupName", (Option.map x.backupName ~f:BackupName.to_value));
         ("BackupSizeBytes",
           (Option.map x.backupSizeBytes ~f:BackupSizeBytes.to_value));
-        ("BackupStatus", (Some (BackupStatus.to_value x.backupStatus)));
-        ("BackupType", (Some (BackupType.to_value x.backupType)));
+        ("BackupStatus",
+          (Option.map x.backupStatus ~f:BackupStatus.to_value));
+        ("BackupType", (Option.map x.backupType ~f:BackupType.to_value));
         ("BackupCreationDateTime",
-          (Some (BackupCreationDateTime.to_value x.backupCreationDateTime)));
+          (Option.map x.backupCreationDateTime
+             ~f:BackupCreationDateTime.to_value));
         ("BackupExpiryDateTime",
           (Option.map x.backupExpiryDateTime ~f:Date.to_value))]
     let to_query v = to_query to_value v
@@ -2450,41 +2611,37 @@ module BackupDetails =
         (Option.map ~f:Date.of_xml)
           (Xml.child xml_arg0 "BackupExpiryDateTime") in
       let backupCreationDateTime =
-        BackupCreationDateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BackupCreationDateTime") in
+        (Option.map ~f:BackupCreationDateTime.of_xml)
+          (Xml.child xml_arg0 "BackupCreationDateTime") in
       let backupType =
-        BackupType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BackupType") in
+        (Option.map ~f:BackupType.of_xml) (Xml.child xml_arg0 "BackupType") in
       let backupStatus =
-        BackupStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BackupStatus") in
+        (Option.map ~f:BackupStatus.of_xml)
+          (Xml.child xml_arg0 "BackupStatus") in
       let backupSizeBytes =
         (Option.map ~f:BackupSizeBytes.of_xml)
           (Xml.child xml_arg0 "BackupSizeBytes") in
       let backupName =
-        BackupName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BackupName") in
+        (Option.map ~f:BackupName.of_xml) (Xml.child xml_arg0 "BackupName") in
       let backupArn =
-        BackupArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BackupArn") in
-      make ?backupExpiryDateTime ~backupCreationDateTime ~backupType
-        ~backupStatus ?backupSizeBytes ~backupName ~backupArn ()
+        (Option.map ~f:BackupArn.of_xml) (Xml.child xml_arg0 "BackupArn") in
+      make ?backupExpiryDateTime ?backupCreationDateTime ?backupType
+        ?backupStatus ?backupSizeBytes ?backupName ?backupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backupExpiryDateTime =
-        field_map json "BackupExpiryDateTime" Date.of_json in
+        field_map json__ "BackupExpiryDateTime" Date.of_json in
       let backupCreationDateTime =
-        field_map_exn json "BackupCreationDateTime"
+        field_map json__ "BackupCreationDateTime"
           BackupCreationDateTime.of_json in
-      let backupType = field_map_exn json "BackupType" BackupType.of_json in
-      let backupStatus =
-        field_map_exn json "BackupStatus" BackupStatus.of_json in
+      let backupType = field_map json__ "BackupType" BackupType.of_json in
+      let backupStatus = field_map json__ "BackupStatus" BackupStatus.of_json in
       let backupSizeBytes =
-        field_map json "BackupSizeBytes" BackupSizeBytes.of_json in
-      let backupName = field_map_exn json "BackupName" BackupName.of_json in
-      let backupArn = field_map_exn json "BackupArn" BackupArn.of_json in
-      make ?backupExpiryDateTime ~backupCreationDateTime ~backupType
-        ~backupStatus ?backupSizeBytes ~backupName ~backupArn ()
+        field_map json__ "BackupSizeBytes" BackupSizeBytes.of_json in
+      let backupName = field_map json__ "BackupName" BackupName.of_json in
+      let backupArn = field_map json__ "BackupArn" BackupArn.of_json in
+      make ?backupExpiryDateTime ?backupCreationDateTime ?backupType
+        ?backupStatus ?backupSizeBytes ?backupName ?backupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the details of the backup created for the table."]
@@ -2528,14 +2685,14 @@ module BackupDescription =
           (Xml.child xml_arg0 "BackupDetails") in
       make ?sourceTableFeatureDetails ?sourceTableDetails ?backupDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceTableFeatureDetails =
-        field_map json "SourceTableFeatureDetails"
+        field_map json__ "SourceTableFeatureDetails"
           SourceTableFeatureDetails.of_json in
       let sourceTableDetails =
-        field_map json "SourceTableDetails" SourceTableDetails.of_json in
+        field_map json__ "SourceTableDetails" SourceTableDetails.of_json in
       let backupDetails =
-        field_map json "BackupDetails" BackupDetails.of_json in
+        field_map json__ "BackupDetails" BackupDetails.of_json in
       make ?sourceTableFeatureDetails ?sourceTableDetails ?backupDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2567,8 +2724,8 @@ module BackupInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2587,8 +2744,8 @@ module BackupNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Backup not found for the given BackupARN."]
@@ -2688,21 +2845,21 @@ module BackupSummary =
         ?backupCreationDateTime ?backupName ?backupArn ?tableArn ?tableId
         ?tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backupSizeBytes =
-        field_map json "BackupSizeBytes" BackupSizeBytes.of_json in
-      let backupType = field_map json "BackupType" BackupType.of_json in
-      let backupStatus = field_map json "BackupStatus" BackupStatus.of_json in
+        field_map json__ "BackupSizeBytes" BackupSizeBytes.of_json in
+      let backupType = field_map json__ "BackupType" BackupType.of_json in
+      let backupStatus = field_map json__ "BackupStatus" BackupStatus.of_json in
       let backupExpiryDateTime =
-        field_map json "BackupExpiryDateTime" Date.of_json in
+        field_map json__ "BackupExpiryDateTime" Date.of_json in
       let backupCreationDateTime =
-        field_map json "BackupCreationDateTime"
+        field_map json__ "BackupCreationDateTime"
           BackupCreationDateTime.of_json in
-      let backupName = field_map json "BackupName" BackupName.of_json in
-      let backupArn = field_map json "BackupArn" BackupArn.of_json in
-      let tableArn = field_map json "TableArn" TableArn.of_json in
-      let tableId = field_map json "TableId" TableId.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
+      let backupName = field_map json__ "BackupName" BackupName.of_json in
+      let backupArn = field_map json__ "BackupArn" BackupArn.of_json in
+      let tableArn = field_map json__ "TableArn" TableArn.of_json in
+      let tableId = field_map json__ "TableId" TableId.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
       make ?backupSizeBytes ?backupType ?backupStatus ?backupExpiryDateTime
         ?backupCreationDateTime ?backupName ?backupArn ?tableArn ?tableId
         ?tableName ()
@@ -2712,6 +2869,9 @@ module BackupSummaries =
   struct
     type nonrec t = BackupSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BackupSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2811,11 +2971,37 @@ module ReturnConsumedCapacity =
       of_string (string_of_json ~kind:"ReturnConsumedCapacity" j)
     let to_json = simple_to_json to_value
   end
+module ReturnValuesOnConditionCheckFailure =
+  struct
+    type nonrec t =
+      | ALL_OLD 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ALL_OLD -> "ALL_OLD" | NONE -> "NONE" | Non_static_id s -> s
+    let of_string =
+      function | "ALL_OLD" -> ALL_OLD | "NONE" -> NONE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration ReturnValuesOnConditionCheckFailure" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"ReturnValuesOnConditionCheckFailure" j)
+    let to_json = simple_to_json to_value
+  end
 module PreparedStatementParameters =
   struct
     type nonrec t = AttributeValue.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2877,20 +3063,38 @@ module BatchStatementRequest =
         [@ocaml.doc
           "The parameters associated with a PartiQL statement in the batch request."];
       consistentRead: ConsistentRead.t option
-        [@ocaml.doc "The read consistency of the PartiQL batch request."]}
+        [@ocaml.doc "The read consistency of the PartiQL batch request."];
+      returnValuesOnConditionCheckFailure:
+        ReturnValuesOnConditionCheckFailure.t option
+        [@ocaml.doc
+          "An optional parameter that returns the item attributes for a PartiQL batch request operation that failed a condition check. There is no additional cost associated with requesting a return value aside from the small network and processing overhead of receiving a larger response. No read capacity units are consumed."]}
     let context_ = "BatchStatementRequest"
     let make ?parameters =
       fun ?consistentRead ->
-        fun ~statement -> fun () -> { parameters; consistentRead; statement }
+        fun ?returnValuesOnConditionCheckFailure ->
+          fun ~statement ->
+            fun () ->
+              {
+                parameters;
+                consistentRead;
+                returnValuesOnConditionCheckFailure;
+                statement
+              }
     let to_value x =
       structure_to_value
         [("Statement", (Some (PartiQLStatement.to_value x.statement)));
         ("Parameters",
           (Option.map x.parameters ~f:PreparedStatementParameters.to_value));
         ("ConsistentRead",
-          (Option.map x.consistentRead ~f:ConsistentRead.to_value))]
+          (Option.map x.consistentRead ~f:ConsistentRead.to_value));
+        ("ReturnValuesOnConditionCheckFailure",
+          (Option.map x.returnValuesOnConditionCheckFailure
+             ~f:ReturnValuesOnConditionCheckFailure.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let returnValuesOnConditionCheckFailure =
+        (Option.map ~f:ReturnValuesOnConditionCheckFailure.of_xml)
+          (Xml.child xml_arg0 "ReturnValuesOnConditionCheckFailure") in
       let consistentRead =
         (Option.map ~f:ConsistentRead.of_xml)
           (Xml.child xml_arg0 "ConsistentRead") in
@@ -2900,15 +3104,21 @@ module BatchStatementRequest =
       let statement =
         PartiQLStatement.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Statement") in
-      make ?consistentRead ?parameters ~statement ()
+      make ?returnValuesOnConditionCheckFailure ?consistentRead ?parameters
+        ~statement ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let returnValuesOnConditionCheckFailure =
+        field_map json__ "ReturnValuesOnConditionCheckFailure"
+          ReturnValuesOnConditionCheckFailure.of_json in
       let consistentRead =
-        field_map json "ConsistentRead" ConsistentRead.of_json in
+        field_map json__ "ConsistentRead" ConsistentRead.of_json in
       let parameters =
-        field_map json "Parameters" PreparedStatementParameters.of_json in
-      let statement = field_map_exn json "Statement" PartiQLStatement.of_json in
-      make ?consistentRead ?parameters ~statement ()
+        field_map json__ "Parameters" PreparedStatementParameters.of_json in
+      let statement =
+        field_map_exn json__ "Statement" PartiQLStatement.of_json in
+      make ?returnValuesOnConditionCheckFailure ?consistentRead ?parameters
+        ~statement ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A PartiQL batch statement request."]
 module PartiQLBatchRequest =
@@ -2919,6 +3129,9 @@ module PartiQLBatchRequest =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchStatementRequest.to_value)) |>
         (fun x -> `List x)
@@ -2968,36 +3181,167 @@ module BatchExecuteStatementInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Statements") in
       make ?returnConsumedCapacity ~statements ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let returnConsumedCapacity =
-        field_map json "ReturnConsumedCapacity"
+        field_map json__ "ReturnConsumedCapacity"
           ReturnConsumedCapacity.of_json in
       let statements =
-        field_map_exn json "Statements" PartiQLBatchRequest.of_json in
+        field_map_exn json__ "Statements" PartiQLBatchRequest.of_json in
       make ?returnConsumedCapacity ~statements ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This operation allows you to perform batch reads or writes on data stored in DynamoDB, using PartiQL. The entire batch must consist of either read statements or write statements, you cannot mix both in one batch."]
-module RequestLimitExceeded =
+       "This operation allows you to perform batch reads or writes on data stored in DynamoDB, using PartiQL. Each read statement in a BatchExecuteStatement must specify an equality condition on all key attributes. This enforces that each SELECT statement in a batch returns at most a single item. For more information, see Running batch operations with PartiQL for DynamoDB . The entire batch must consist of either read statements or write statements, you cannot mix both in one batch. A HTTP 200 response does not mean that all statements in the BatchExecuteStatement succeeded. Error details for individual statements can be found under the Error field of the BatchStatementResponse for each statement."]
+module Resource =
   struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
+    type nonrec t = string
+    let context_ = "Resource"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Resource" j
+    let to_json = simple_to_json to_value
+  end
+module Reason =
+  struct
+    type nonrec t = string
+    let context_ = "Reason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Reason" j
+    let to_json = simple_to_json to_value
+  end
+module ThrottlingReason =
+  struct
+    type nonrec t =
+      {
+      reason: Reason.t option
+        [@ocaml.doc
+          "The reason for throttling. The throttling reason follows a specific format: ResourceType+OperationType+LimitType: Resource Type (What is being throttled): Table or Index Operation Type (What kind of operation): Read or Write Limit Type (Why the throttling occurred): ProvisionedThroughputExceeded: The request rate is exceeding the provisioned throughput capacity (read or write capacity units) configured for a table or a global secondary index (GSI) in provisioned capacity mode. AccountLimitExceeded: The request rate has caused a table or global secondary index (GSI) in on-demand mode to exceed the per-table account-level service quotas for read/write throughput in the current Amazon Web Services Region. KeyRangeThroughputExceeded: The request rate directed at a specific partition key value has exceeded the internal partition-level throughput limits, indicating uneven access patterns across the table's or GSI's key space. MaxOnDemandThroughputExceeded: The request rate has exceeded the configured maximum throughput limits set for a table or index in on-demand capacity mode. Examples of complete throttling reasons: TableReadProvisionedThroughputExceeded IndexWriteAccountLimitExceeded This helps identify exactly what resource is being throttled, what type of operation caused it, and why the throttling occurred."];
+      resource: Resource.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the DynamoDB table or index that experienced the throttling event."]}
+    let make ?reason = fun ?resource -> fun () -> { reason; resource }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("reason", (Option.map x.reason ~f:Reason.to_value));
+        ("resource", (Option.map x.resource ~f:Resource.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
+      let resource =
+        (Option.map ~f:Resource.of_xml) (Xml.child xml_arg0 "resource") in
+      let reason =
+        (Option.map ~f:Reason.of_xml) (Xml.child xml_arg0 "reason") in
+      make ?resource ?reason ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
+    let of_json json__ =
+      let resource = field_map json__ "resource" Resource.of_json in
+      let reason = field_map json__ "reason" Reason.of_json in
+      make ?resource ?reason ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Throughput exceeds the current throughput quota for your account. Please contact Amazon Web Services Support to request a quota increase."]
+       "Represents the specific reason why a DynamoDB request was throttled and the ARN of the impacted resource. This helps identify exactly what resource is being throttled, what type of operation caused it, and why the throttling occurred."]
+module ThrottlingReasonList =
+  struct
+    type nonrec t = ThrottlingReason.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ThrottlingReason.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ThrottlingReason.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ThrottlingReasonList"
+        ~of_json:ThrottlingReason.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ThrottlingException =
+  struct
+    type nonrec t =
+      {
+      message: AvailabilityErrorMessage.t option ;
+      throttlingReasons: ThrottlingReasonList.t option
+        [@ocaml.doc
+          "A list of ThrottlingReason that provide detailed diagnostic information about why the request was throttled."]}
+    let make ?message =
+      fun ?throttlingReasons -> fun () -> { message; throttlingReasons }
+    let to_value x =
+      structure_to_value
+        [("message",
+           (Option.map x.message ~f:AvailabilityErrorMessage.to_value));
+        ("throttlingReasons",
+          (Option.map x.throttlingReasons ~f:ThrottlingReasonList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let throttlingReasons =
+        (Option.map ~f:ThrottlingReasonList.of_xml)
+          (Xml.child xml_arg0 "throttlingReasons") in
+      let message =
+        (Option.map ~f:AvailabilityErrorMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?throttlingReasons ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let throttlingReasons =
+        field_map json__ "throttlingReasons" ThrottlingReasonList.of_json in
+      let message =
+        field_map json__ "message" AvailabilityErrorMessage.of_json in
+      make ?throttlingReasons ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was denied due to request throttling. For detailed information about why the request was throttled and the ARN of the impacted resource, find the ThrottlingReason field in the returned exception."]
+module RequestLimitExceeded =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      throttlingReasons: ThrottlingReasonList.t option
+        [@ocaml.doc
+          "A list of ThrottlingReason that provide detailed diagnostic information about why the request was throttled."]}
+    let make ?message =
+      fun ?throttlingReasons -> fun () -> { message; throttlingReasons }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("ThrottlingReasons",
+          (Option.map x.throttlingReasons ~f:ThrottlingReasonList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let throttlingReasons =
+        (Option.map ~f:ThrottlingReasonList.of_xml)
+          (Xml.child xml_arg0 "ThrottlingReasons") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?throttlingReasons ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let throttlingReasons =
+        field_map json__ "ThrottlingReasons" ThrottlingReasonList.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?throttlingReasons ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Throughput exceeds the current throughput quota for your account. For detailed information about why the request was throttled and the ARN of the impacted resource, find the ThrottlingReason field in the returned exception. Contact Amazon Web Services Support to request a quota increase."]
 module BatchStatementErrorCodeEnum =
   struct
     type nonrec t =
@@ -3062,26 +3406,34 @@ module BatchStatementError =
           "The error code associated with the failed PartiQL batch statement."];
       message: String_.t option
         [@ocaml.doc
-          "The error message associated with the PartiQL batch resposne."]}
-    let make ?code = fun ?message -> fun () -> { code; message }
+          "The error message associated with the PartiQL batch response."];
+      item: AttributeMap.t option
+        [@ocaml.doc
+          "The item which caused the condition check to fail. This will be set if ReturnValuesOnConditionCheckFailure is specified as ALL_OLD."]}
+    let make ?code =
+      fun ?message -> fun ?item -> fun () -> { code; message; item }
     let to_value x =
       structure_to_value
         [("Code",
            (Option.map x.code ~f:BatchStatementErrorCodeEnum.to_value));
-        ("Message", (Option.map x.message ~f:String_.to_value))]
+        ("Message", (Option.map x.message ~f:String_.to_value));
+        ("Item", (Option.map x.item ~f:AttributeMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let item =
+        (Option.map ~f:AttributeMap.of_xml) (Xml.child xml_arg0 "Item") in
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let code =
         (Option.map ~f:BatchStatementErrorCodeEnum.of_xml)
           (Xml.child xml_arg0 "Code") in
-      make ?message ?code ()
+      make ?item ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" BatchStatementErrorCodeEnum.of_json in
-      make ?message ?code ()
+    let of_json json__ =
+      let item = field_map json__ "Item" AttributeMap.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" BatchStatementErrorCodeEnum.of_json in
+      make ?item ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An error associated with a statement in a PartiQL batch that was run."]
@@ -3116,10 +3468,10 @@ module BatchStatementResponse =
           (Xml.child xml_arg0 "Error") in
       make ?item ?tableName ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let item = field_map json "Item" AttributeMap.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
-      let error = field_map json "Error" BatchStatementError.of_json in
+    let of_json json__ =
+      let item = field_map json__ "Item" AttributeMap.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
+      let error = field_map json__ "Error" BatchStatementError.of_json in
       make ?item ?tableName ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A PartiQL batch statement response.."]
@@ -3127,6 +3479,9 @@ module PartiQLBatchResponse =
   struct
     type nonrec t = BatchStatementResponse.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchStatementResponse.to_value)) |>
         (fun x -> `List x)
@@ -3166,8 +3521,8 @@ module InternalServerError =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An error occurred on the server side."]
@@ -3222,13 +3577,13 @@ module Capacity =
           (Xml.child xml_arg0 "ReadCapacityUnits") in
       make ?capacityUnits ?writeCapacityUnits ?readCapacityUnits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let capacityUnits =
-        field_map json "CapacityUnits" ConsumedCapacityUnits.of_json in
+        field_map json__ "CapacityUnits" ConsumedCapacityUnits.of_json in
       let writeCapacityUnits =
-        field_map json "WriteCapacityUnits" ConsumedCapacityUnits.of_json in
+        field_map json__ "WriteCapacityUnits" ConsumedCapacityUnits.of_json in
       let readCapacityUnits =
-        field_map json "ReadCapacityUnits" ConsumedCapacityUnits.of_json in
+        field_map json__ "ReadCapacityUnits" ConsumedCapacityUnits.of_json in
       make ?capacityUnits ?writeCapacityUnits ?readCapacityUnits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3256,6 +3611,8 @@ module SecondaryIndexesCapacityMap =
                     (fun x -> (Capacity.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3267,9 +3624,9 @@ module ConsumedCapacity =
   struct
     type nonrec t =
       {
-      tableName: TableName.t option
+      tableName: TableArn.t option
         [@ocaml.doc
-          "The name of the table that was affected by the operation."];
+          "The name of the table that was affected by the operation. If you had specified the Amazon Resource Name (ARN) of a table in the input, you'll see the table ARN in the response."];
       capacityUnits: ConsumedCapacityUnits.t option
         [@ocaml.doc
           "The total number of capacity units consumed by the operation."];
@@ -3307,7 +3664,7 @@ module ConsumedCapacity =
                     }
     let to_value x =
       structure_to_value
-        [("TableName", (Option.map x.tableName ~f:TableName.to_value));
+        [("TableName", (Option.map x.tableName ~f:TableArn.to_value));
         ("CapacityUnits",
           (Option.map x.capacityUnits ~f:ConsumedCapacityUnits.to_value));
         ("ReadCapacityUnits",
@@ -3341,34 +3698,37 @@ module ConsumedCapacity =
         (Option.map ~f:ConsumedCapacityUnits.of_xml)
           (Xml.child xml_arg0 "CapacityUnits") in
       let tableName =
-        (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "TableName") in
+        (Option.map ~f:TableArn.of_xml) (Xml.child xml_arg0 "TableName") in
       make ?globalSecondaryIndexes ?localSecondaryIndexes ?table
         ?writeCapacityUnits ?readCapacityUnits ?capacityUnits ?tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalSecondaryIndexes =
-        field_map json "GlobalSecondaryIndexes"
+        field_map json__ "GlobalSecondaryIndexes"
           SecondaryIndexesCapacityMap.of_json in
       let localSecondaryIndexes =
-        field_map json "LocalSecondaryIndexes"
+        field_map json__ "LocalSecondaryIndexes"
           SecondaryIndexesCapacityMap.of_json in
-      let table = field_map json "Table" Capacity.of_json in
+      let table = field_map json__ "Table" Capacity.of_json in
       let writeCapacityUnits =
-        field_map json "WriteCapacityUnits" ConsumedCapacityUnits.of_json in
+        field_map json__ "WriteCapacityUnits" ConsumedCapacityUnits.of_json in
       let readCapacityUnits =
-        field_map json "ReadCapacityUnits" ConsumedCapacityUnits.of_json in
+        field_map json__ "ReadCapacityUnits" ConsumedCapacityUnits.of_json in
       let capacityUnits =
-        field_map json "CapacityUnits" ConsumedCapacityUnits.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
+        field_map json__ "CapacityUnits" ConsumedCapacityUnits.of_json in
+      let tableName = field_map json__ "TableName" TableArn.of_json in
       make ?globalSecondaryIndexes ?localSecondaryIndexes ?table
         ?writeCapacityUnits ?readCapacityUnits ?capacityUnits ?tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The capacity units consumed by an operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the request asked for it. For more information, see Provisioned Throughput in the Amazon DynamoDB Developer Guide."]
+       "The capacity units consumed by an operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the request asked for it. For more information, see Provisioned capacity mode in the Amazon DynamoDB Developer Guide."]
 module ConsumedCapacityMultiple =
   struct
     type nonrec t = ConsumedCapacity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConsumedCapacity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3395,13 +3755,15 @@ module BatchExecuteStatementOutput =
     type nonrec t =
       {
       responses: PartiQLBatchResponse.t option
-        [@ocaml.doc "The response to each PartiQL statement in the batch."];
+        [@ocaml.doc
+          "The response to each PartiQL statement in the batch. The values of the list are ordered according to the ordering of the request statements."];
       consumedCapacity: ConsumedCapacityMultiple.t option
         [@ocaml.doc
           "The capacity units consumed by the entire operation. The values of the list are ordered according to the ordering of the statements."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?responses =
       fun ?consumedCapacity -> fun () -> { responses; consumedCapacity }
@@ -3411,6 +3773,8 @@ module BatchExecuteStatementOutput =
           `InternalServerError (InternalServerError.of_json json)
       | "RequestLimitExceeded" ->
           `RequestLimitExceeded (RequestLimitExceeded.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3420,6 +3784,8 @@ module BatchExecuteStatementOutput =
           `InternalServerError (InternalServerError.of_xml xml)
       | "RequestLimitExceeded" ->
           `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3432,6 +3798,10 @@ module BatchExecuteStatementOutput =
           `Assoc
             [("error", (`String "RequestLimitExceeded"));
             ("details", (RequestLimitExceeded.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3453,14 +3823,15 @@ module BatchExecuteStatementOutput =
           (Xml.child xml_arg0 "Responses") in
       make ?consumedCapacity ?responses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumedCapacity =
-        field_map json "ConsumedCapacity" ConsumedCapacityMultiple.of_json in
-      let responses = field_map json "Responses" PartiQLBatchResponse.of_json in
+        field_map json__ "ConsumedCapacity" ConsumedCapacityMultiple.of_json in
+      let responses =
+        field_map json__ "Responses" PartiQLBatchResponse.of_json in
       make ?consumedCapacity ?responses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This operation allows you to perform batch reads or writes on data stored in DynamoDB, using PartiQL. The entire batch must consist of either read statements or write statements, you cannot mix both in one batch."]
+       "This operation allows you to perform batch reads or writes on data stored in DynamoDB, using PartiQL. Each read statement in a BatchExecuteStatement must specify an equality condition on all key attributes. This enforces that each SELECT statement in a batch returns at most a single item. For more information, see Running batch operations with PartiQL for DynamoDB . The entire batch must consist of either read statements or write statements, you cannot mix both in one batch. A HTTP 200 response does not mean that all statements in the BatchExecuteStatement succeeded. Error details for individual statements can be found under the Error field of the BatchStatementResponse for each statement."]
 module ProjectionExpression =
   struct
     type nonrec t = string
@@ -3498,6 +3869,8 @@ module Key =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3514,6 +3887,9 @@ module KeyList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Key.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3568,6 +3944,8 @@ module ExpressionAttributeNameMap =
                     (fun x -> (AttributeName.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3639,17 +4017,17 @@ module KeysAndAttributes =
       make ?expressionAttributeNames ?projectionExpression ?consistentRead
         ?attributesToGet ~keys ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expressionAttributeNames =
-        field_map json "ExpressionAttributeNames"
+        field_map json__ "ExpressionAttributeNames"
           ExpressionAttributeNameMap.of_json in
       let projectionExpression =
-        field_map json "ProjectionExpression" ProjectionExpression.of_json in
+        field_map json__ "ProjectionExpression" ProjectionExpression.of_json in
       let consistentRead =
-        field_map json "ConsistentRead" ConsistentRead.of_json in
+        field_map json__ "ConsistentRead" ConsistentRead.of_json in
       let attributesToGet =
-        field_map json "AttributesToGet" AttributeNameList.of_json in
-      let keys = field_map_exn json "Keys" KeyList.of_json in
+        field_map json__ "AttributesToGet" AttributeNameList.of_json in
+      let keys = field_map_exn json__ "Keys" KeyList.of_json in
       make ?expressionAttributeNames ?projectionExpression ?consistentRead
         ?attributesToGet ~keys ()
     let to_json v = composed_to_json to_value v
@@ -3657,7 +4035,7 @@ module KeysAndAttributes =
        "Represents a set of primary keys and, for each key, the attributes to retrieve from the table. For each primary key, you must provide all of the key attributes. For example, with a simple primary key, you only need to provide the partition key. For a composite primary key, you must provide both the partition key and the sort key."]
 module BatchGetRequestMap =
   struct
-    type nonrec t = (TableName.t * KeysAndAttributes.t) list
+    type nonrec t = (TableArn.t * KeysAndAttributes.t) list
     let make i =
       let open Result in
         ok_or_failwith
@@ -3674,20 +4052,22 @@ module BatchGetRequestMap =
                             let (_ : string) = v in
                             let (_ : string) = chopped in
                             failwith
-                              "no of_header for complex types TableName KeysAndAttributes"))))
+                              "no of_header for complex types TableArn KeysAndAttributes"))))
     let to_value xs =
       (xs |>
          (List.map
             ~f:(fun (x, y) ->
-                  (TableName.to_value x) |>
+                  (TableArn.to_value x) |>
                     (fun x ->
                        (KeysAndAttributes.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
-      object_of_json ~key_of_string:TableName.of_string
+      object_of_json ~key_of_string:TableArn.of_string
         ~of_json:KeysAndAttributes.of_json j
     let to_json v = composed_to_json to_value v
   end
@@ -3697,7 +4077,7 @@ module BatchGetItemInput =
       {
       requestItems: BatchGetRequestMap.t
         [@ocaml.doc
-          "A map of one or more table names and, for each table, a map that describes one or more items to retrieve from that table. Each table name can be used only once per BatchGetItem request. Each element in the map of items to retrieve consists of the following: ConsistentRead - If true, a strongly consistent read is used; if false (the default), an eventually consistent read is used. ExpressionAttributeNames - One or more substitution tokens for attribute names in the ProjectionExpression parameter. The following are some use cases for using ExpressionAttributeNames: To access an attribute whose name conflicts with a DynamoDB reserved word. To create a placeholder for repeating occurrences of an attribute name in an expression. To prevent special characters in an attribute name from being misinterpreted in an expression. Use the # character in an expression to dereference an attribute name. For example, consider the following attribute name: Percentile The name of this attribute conflicts with a reserved word, so it cannot be used directly in an expression. (For the complete list of reserved words, see Reserved Words in the Amazon DynamoDB Developer Guide). To work around this, you could specify the following for ExpressionAttributeNames: \\{\"#P\":\"Percentile\"\\} You could then use this substitution in an expression, as in this example: #P = :val Tokens that begin with the : character are expression attribute values, which are placeholders for the actual value at runtime. For more information about expression attribute names, see Accessing Item Attributes in the Amazon DynamoDB Developer Guide. Keys - An array of primary key attribute values that define specific items in the table. For each primary key, you must provide all of the key attributes. For example, with a simple primary key, you only need to provide the partition key value. For a composite key, you must provide both the partition key value and the sort key value. ProjectionExpression - A string that identifies one or more attributes to retrieve from the table. These attributes can include scalars, sets, or elements of a JSON document. The attributes in the expression must be separated by commas. If no attribute names are specified, then all attributes are returned. If any of the requested attributes are not found, they do not appear in the result. For more information, see Accessing Item Attributes in the Amazon DynamoDB Developer Guide. AttributesToGet - This is a legacy parameter. Use ProjectionExpression instead. For more information, see AttributesToGet in the Amazon DynamoDB Developer Guide."];
+          "A map of one or more table names or table ARNs and, for each table, a map that describes one or more items to retrieve from that table. Each table name or ARN can be used only once per BatchGetItem request. Each element in the map of items to retrieve consists of the following: ConsistentRead - If true, a strongly consistent read is used; if false (the default), an eventually consistent read is used. ExpressionAttributeNames - One or more substitution tokens for attribute names in the ProjectionExpression parameter. The following are some use cases for using ExpressionAttributeNames: To access an attribute whose name conflicts with a DynamoDB reserved word. To create a placeholder for repeating occurrences of an attribute name in an expression. To prevent special characters in an attribute name from being misinterpreted in an expression. Use the # character in an expression to dereference an attribute name. For example, consider the following attribute name: Percentile The name of this attribute conflicts with a reserved word, so it cannot be used directly in an expression. (For the complete list of reserved words, see Reserved Words in the Amazon DynamoDB Developer Guide). To work around this, you could specify the following for ExpressionAttributeNames: \\{\"#P\":\"Percentile\"\\} You could then use this substitution in an expression, as in this example: #P = :val Tokens that begin with the : character are expression attribute values, which are placeholders for the actual value at runtime. For more information about expression attribute names, see Accessing Item Attributes in the Amazon DynamoDB Developer Guide. Keys - An array of primary key attribute values that define specific items in the table. For each primary key, you must provide all of the key attributes. For example, with a simple primary key, you only need to provide the partition key value. For a composite key, you must provide both the partition key value and the sort key value. ProjectionExpression - A string that identifies one or more attributes to retrieve from the table. These attributes can include scalars, sets, or elements of a JSON document. The attributes in the expression must be separated by commas. If no attribute names are specified, then all attributes are returned. If any of the requested attributes are not found, they do not appear in the result. For more information, see Accessing Item Attributes in the Amazon DynamoDB Developer Guide. AttributesToGet - This is a legacy parameter. Use ProjectionExpression instead. For more information, see AttributesToGet in the Amazon DynamoDB Developer Guide."];
       returnConsumedCapacity: ReturnConsumedCapacity.t option }
     let context_ = "BatchGetItemInput"
     let make ?returnConsumedCapacity =
@@ -3719,12 +4099,12 @@ module BatchGetItemInput =
           (Xml.child_exn ~context:context_ xml_arg0 "RequestItems") in
       make ?returnConsumedCapacity ~requestItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let returnConsumedCapacity =
-        field_map json "ReturnConsumedCapacity"
+        field_map json__ "ReturnConsumedCapacity"
           ReturnConsumedCapacity.of_json in
       let requestItems =
-        field_map_exn json "RequestItems" BatchGetRequestMap.of_json in
+        field_map_exn json__ "RequestItems" BatchGetRequestMap.of_json in
       make ?returnConsumedCapacity ~requestItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a BatchGetItem operation."]
@@ -3744,8 +4124,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3756,27 +4136,41 @@ module ProvisionedThroughputExceededException =
       {
       message: ErrorMessage.t option
         [@ocaml.doc
-          "You exceeded your maximum allowed provisioned throughput."]}
-    let make ?message = fun () -> { message }
+          "You exceeded your maximum allowed provisioned throughput."];
+      throttlingReasons: ThrottlingReasonList.t option
+        [@ocaml.doc
+          "A list of ThrottlingReason that provide detailed diagnostic information about why the request was throttled."]}
+    let make ?message =
+      fun ?throttlingReasons -> fun () -> { message; throttlingReasons }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("ThrottlingReasons",
+          (Option.map x.throttlingReasons ~f:ThrottlingReasonList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let throttlingReasons =
+        (Option.map ~f:ThrottlingReasonList.of_xml)
+          (Xml.child xml_arg0 "ThrottlingReasons") in
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
+      make ?throttlingReasons ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
+    let of_json json__ =
+      let throttlingReasons =
+        field_map json__ "ThrottlingReasons" ThrottlingReasonList.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?throttlingReasons ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Your request rate is too high. The Amazon Web Services SDKs for DynamoDB automatically retry requests that receive this exception. Your request is eventually successful, unless your retry queue is too large to finish. Reduce the frequency of requests and use exponential backoff. For more information, go to Error Retries and Exponential Backoff in the Amazon DynamoDB Developer Guide."]
+       "The request was denied due to request throttling. For detailed information about why the request was throttled and the ARN of the impacted resource, find the ThrottlingReason field in the returned exception. The Amazon Web Services SDKs for DynamoDB automatically retry requests that receive this exception. Your request is eventually successful, unless your retry queue is too large to finish. Reduce the frequency of requests and use exponential backoff. For more information, go to Error Retries and Exponential Backoff in the Amazon DynamoDB Developer Guide."]
 module ItemList =
   struct
     type nonrec t = AttributeMap.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeMap.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3799,7 +4193,7 @@ module ItemList =
   end
 module BatchGetResponseMap =
   struct
-    type nonrec t = (TableName.t * ItemList.t) list
+    type nonrec t = (TableArn.t * ItemList.t) list
     let make i = i
     let of_header xs =
       make
@@ -3811,19 +4205,21 @@ module BatchGetResponseMap =
                             let (_ : string) = v in
                             let (_ : string) = chopped in
                             failwith
-                              "no of_header for complex types TableName ItemList"))))
+                              "no of_header for complex types TableArn ItemList"))))
     let to_value xs =
       (xs |>
          (List.map
             ~f:(fun (x, y) ->
-                  (TableName.to_value x) |>
+                  (TableArn.to_value x) |>
                     (fun x -> (ItemList.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
-      object_of_json ~key_of_string:TableName.of_string
+      object_of_json ~key_of_string:TableArn.of_string
         ~of_json:ItemList.of_json j
     let to_json v = composed_to_json to_value v
   end
@@ -3833,7 +4229,7 @@ module BatchGetItemOutput =
       {
       responses: BatchGetResponseMap.t option
         [@ocaml.doc
-          "A map of table name to a list of items. Each object in Responses consists of a table name, along with a map of attribute data consisting of the data type and attribute value."];
+          "A map of table name or table ARN to a list of items. Each object in Responses consists of a table name or ARN, along with a map of attribute data consisting of the data type and attribute value."];
       unprocessedKeys: BatchGetRequestMap.t option
         [@ocaml.doc
           "A map of tables and their respective keys that were not processed with the current response. The UnprocessedKeys value is in the same form as RequestItems, so the value can be provided directly to a subsequent BatchGetItem operation. For more information, see RequestItems in the Request Parameters section. Each element consists of: Keys - An array of primary key attribute values that define specific items in the table. ProjectionExpression - One or more attributes to be retrieved from the table or index. By default, all attributes are returned. If a requested attribute is not found, it does not appear in the result. ConsistentRead - The consistency of a read operation. If set to true, then a strongly consistent read is used; otherwise, an eventually consistent read is used. If there are no unprocessed keys remaining, the response contains an empty UnprocessedKeys map."];
@@ -3846,6 +4242,7 @@ module BatchGetItemOutput =
           ProvisionedThroughputExceededException.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?responses =
       fun ?unprocessedKeys ->
@@ -3862,6 +4259,8 @@ module BatchGetItemOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3876,6 +4275,8 @@ module BatchGetItemOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3896,6 +4297,10 @@ module BatchGetItemOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3922,12 +4327,13 @@ module BatchGetItemOutput =
           (Xml.child xml_arg0 "Responses") in
       make ?consumedCapacity ?unprocessedKeys ?responses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumedCapacity =
-        field_map json "ConsumedCapacity" ConsumedCapacityMultiple.of_json in
+        field_map json__ "ConsumedCapacity" ConsumedCapacityMultiple.of_json in
       let unprocessedKeys =
-        field_map json "UnprocessedKeys" BatchGetRequestMap.of_json in
-      let responses = field_map json "Responses" BatchGetResponseMap.of_json in
+        field_map json__ "UnprocessedKeys" BatchGetRequestMap.of_json in
+      let responses =
+        field_map json__ "Responses" BatchGetResponseMap.of_json in
       make ?consumedCapacity ?unprocessedKeys ?responses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a BatchGetItem operation."]
@@ -3977,6 +4383,8 @@ module PutItemInputAttributeMap =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4003,8 +4411,8 @@ module PutRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Item") in
       make ~item ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let item = field_map_exn json "Item" PutItemInputAttributeMap.of_json in
+    let of_json json__ =
+      let item = field_map_exn json__ "Item" PutItemInputAttributeMap.of_json in
       make ~item ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4025,8 +4433,8 @@ module DeleteRequest =
       let key = Key.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let key = field_map_exn json "Key" Key.of_json in make ~key ()
+    let of_json json__ =
+      let key = field_map_exn json__ "Key" Key.of_json in make ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a request to perform a DeleteItem operation on an item."]
@@ -4054,10 +4462,10 @@ module WriteRequest =
         (Option.map ~f:PutRequest.of_xml) (Xml.child xml_arg0 "PutRequest") in
       make ?deleteRequest ?putRequest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deleteRequest =
-        field_map json "DeleteRequest" DeleteRequest.of_json in
-      let putRequest = field_map json "PutRequest" PutRequest.of_json in
+        field_map json__ "DeleteRequest" DeleteRequest.of_json in
+      let putRequest = field_map json__ "PutRequest" PutRequest.of_json in
       make ?deleteRequest ?putRequest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4070,6 +4478,9 @@ module WriteRequests =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WriteRequest.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4092,7 +4503,7 @@ module WriteRequests =
   end
 module BatchWriteItemRequestMap =
   struct
-    type nonrec t = (TableName.t * WriteRequests.t) list
+    type nonrec t = (TableArn.t * WriteRequests.t) list
     let make i =
       let open Result in
         ok_or_failwith
@@ -4108,19 +4519,21 @@ module BatchWriteItemRequestMap =
                             let (_ : string) = v in
                             let (_ : string) = chopped in
                             failwith
-                              "no of_header for complex types TableName WriteRequests"))))
+                              "no of_header for complex types TableArn WriteRequests"))))
     let to_value xs =
       (xs |>
          (List.map
             ~f:(fun (x, y) ->
-                  (TableName.to_value x) |>
+                  (TableArn.to_value x) |>
                     (fun x -> (WriteRequests.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
-      object_of_json ~key_of_string:TableName.of_string
+      object_of_json ~key_of_string:TableArn.of_string
         ~of_json:WriteRequests.of_json j
     let to_json v = composed_to_json to_value v
   end
@@ -4130,7 +4543,7 @@ module BatchWriteItemInput =
       {
       requestItems: BatchWriteItemRequestMap.t
         [@ocaml.doc
-          "A map of one or more table names and, for each table, a list of operations to be performed (DeleteRequest or PutRequest). Each element in the map consists of the following: DeleteRequest - Perform a DeleteItem operation on the specified item. The item to be deleted is identified by a Key subelement: Key - A map of primary key attribute values that uniquely identify the item. Each entry in this map consists of an attribute name and an attribute value. For each primary key, you must provide all of the key attributes. For example, with a simple primary key, you only need to provide a value for the partition key. For a composite primary key, you must provide values for both the partition key and the sort key. PutRequest - Perform a PutItem operation on the specified item. The item to be put is identified by an Item subelement: Item - A map of attributes and their values. Each entry in this map consists of an attribute name and an attribute value. Attribute values must not be null; string and binary type attributes must have lengths greater than zero; and set type attributes must not be empty. Requests that contain empty values are rejected with a ValidationException exception. If you specify any attributes that are part of an index key, then the data types for those attributes must match those of the schema in the table's attribute definition."];
+          "A map of one or more table names or table ARNs and, for each table, a list of operations to be performed (DeleteRequest or PutRequest). Each element in the map consists of the following: DeleteRequest - Perform a DeleteItem operation on the specified item. The item to be deleted is identified by a Key subelement: Key - A map of primary key attribute values that uniquely identify the item. Each entry in this map consists of an attribute name and an attribute value. For each primary key, you must provide all of the key attributes. For example, with a simple primary key, you only need to provide a value for the partition key. For a composite primary key, you must provide values for both the partition key and the sort key. PutRequest - Perform a PutItem operation on the specified item. The item to be put is identified by an Item subelement: Item - A map of attributes and their values. Each entry in this map consists of an attribute name and an attribute value. Attribute values must not be null; string and binary type attributes must have lengths greater than zero; and set type attributes must not be empty. Requests that contain empty values are rejected with a ValidationException exception. If you specify any attributes that are part of an index key, then the data types for those attributes must match those of the schema in the table's attribute definition."];
       returnConsumedCapacity: ReturnConsumedCapacity.t option ;
       returnItemCollectionMetrics: ReturnItemCollectionMetrics.t option
         [@ocaml.doc
@@ -4169,19 +4582,39 @@ module BatchWriteItemInput =
       make ?returnItemCollectionMetrics ?returnConsumedCapacity ~requestItems
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let returnItemCollectionMetrics =
-        field_map json "ReturnItemCollectionMetrics"
+        field_map json__ "ReturnItemCollectionMetrics"
           ReturnItemCollectionMetrics.of_json in
       let returnConsumedCapacity =
-        field_map json "ReturnConsumedCapacity"
+        field_map json__ "ReturnConsumedCapacity"
           ReturnConsumedCapacity.of_json in
       let requestItems =
-        field_map_exn json "RequestItems" BatchWriteItemRequestMap.of_json in
+        field_map_exn json__ "RequestItems" BatchWriteItemRequestMap.of_json in
       make ?returnItemCollectionMetrics ?returnConsumedCapacity ~requestItems
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a BatchWriteItem operation."]
+module ReplicatedWriteConflictException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request was rejected because one or more items in the request are being modified by a request in another Region."]
 module ItemCollectionSizeLimitExceededException =
   struct
     type nonrec t =
@@ -4199,8 +4632,8 @@ module ItemCollectionSizeLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4222,6 +4655,9 @@ module ItemCollectionSizeEstimateRange =
   struct
     type nonrec t = ItemCollectionSizeEstimateBound.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ItemCollectionSizeEstimateBound.to_value)) |>
         (fun x -> `List x)
@@ -4268,6 +4704,8 @@ module ItemCollectionKeyAttributeMap =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4306,12 +4744,12 @@ module ItemCollectionMetrics =
           (Xml.child xml_arg0 "ItemCollectionKey") in
       make ?sizeEstimateRangeGB ?itemCollectionKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sizeEstimateRangeGB =
-        field_map json "SizeEstimateRangeGB"
+        field_map json__ "SizeEstimateRangeGB"
           ItemCollectionSizeEstimateRange.of_json in
       let itemCollectionKey =
-        field_map json "ItemCollectionKey"
+        field_map json__ "ItemCollectionKey"
           ItemCollectionKeyAttributeMap.of_json in
       make ?sizeEstimateRangeGB ?itemCollectionKey ()
     let to_json v = composed_to_json to_value v
@@ -4321,6 +4759,9 @@ module ItemCollectionMetricsMultiple =
   struct
     type nonrec t = ItemCollectionMetrics.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ItemCollectionMetrics.to_value)) |>
         (fun x -> `List x)
@@ -4345,7 +4786,7 @@ module ItemCollectionMetricsMultiple =
   end
 module ItemCollectionMetricsPerTable =
   struct
-    type nonrec t = (TableName.t * ItemCollectionMetricsMultiple.t) list
+    type nonrec t = (TableArn.t * ItemCollectionMetricsMultiple.t) list
     let make i = i
     let of_header xs =
       make
@@ -4357,21 +4798,23 @@ module ItemCollectionMetricsPerTable =
                             let (_ : string) = v in
                             let (_ : string) = chopped in
                             failwith
-                              "no of_header for complex types TableName ItemCollectionMetricsMultiple"))))
+                              "no of_header for complex types TableArn ItemCollectionMetricsMultiple"))))
     let to_value xs =
       (xs |>
          (List.map
             ~f:(fun (x, y) ->
-                  (TableName.to_value x) |>
+                  (TableArn.to_value x) |>
                     (fun x ->
                        (ItemCollectionMetricsMultiple.to_value y) |>
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
-      object_of_json ~key_of_string:TableName.of_string
+      object_of_json ~key_of_string:TableArn.of_string
         ~of_json:ItemCollectionMetricsMultiple.of_json j
     let to_json v = composed_to_json to_value v
   end
@@ -4381,7 +4824,7 @@ module BatchWriteItemOutput =
       {
       unprocessedItems: BatchWriteItemRequestMap.t option
         [@ocaml.doc
-          "A map of tables and requests against those tables that were not processed. The UnprocessedItems value is in the same form as RequestItems, so you can provide this value directly to a subsequent BatchGetItem operation. For more information, see RequestItems in the Request Parameters section. Each UnprocessedItems entry consists of a table name and, for that table, a list of operations to perform (DeleteRequest or PutRequest). DeleteRequest - Perform a DeleteItem operation on the specified item. The item to be deleted is identified by a Key subelement: Key - A map of primary key attribute values that uniquely identify the item. Each entry in this map consists of an attribute name and an attribute value. PutRequest - Perform a PutItem operation on the specified item. The item to be put is identified by an Item subelement: Item - A map of attributes and their values. Each entry in this map consists of an attribute name and an attribute value. Attribute values must not be null; string and binary type attributes must have lengths greater than zero; and set type attributes must not be empty. Requests that contain empty values will be rejected with a ValidationException exception. If you specify any attributes that are part of an index key, then the data types for those attributes must match those of the schema in the table's attribute definition. If there are no unprocessed items remaining, the response contains an empty UnprocessedItems map."];
+          "A map of tables and requests against those tables that were not processed. The UnprocessedItems value is in the same form as RequestItems, so you can provide this value directly to a subsequent BatchWriteItem operation. For more information, see RequestItems in the Request Parameters section. Each UnprocessedItems entry consists of a table name or table ARN and, for that table, a list of operations to perform (DeleteRequest or PutRequest). DeleteRequest - Perform a DeleteItem operation on the specified item. The item to be deleted is identified by a Key subelement: Key - A map of primary key attribute values that uniquely identify the item. Each entry in this map consists of an attribute name and an attribute value. PutRequest - Perform a PutItem operation on the specified item. The item to be put is identified by an Item subelement: Item - A map of attributes and their values. Each entry in this map consists of an attribute name and an attribute value. Attribute values must not be null; string and binary type attributes must have lengths greater than zero; and set type attributes must not be empty. Requests that contain empty values will be rejected with a ValidationException exception. If you specify any attributes that are part of an index key, then the data types for those attributes must match those of the schema in the table's attribute definition. If there are no unprocessed items remaining, the response contains an empty UnprocessedItems map."];
       itemCollectionMetrics: ItemCollectionMetricsPerTable.t option
         [@ocaml.doc
           "A list of tables that were processed by BatchWriteItem and, for each table, information about any item collections that were affected by individual DeleteItem or PutItem operations. Each entry consists of the following subelements: ItemCollectionKey - The partition key value of the item collection. This is the same as the partition key value of the item. SizeEstimateRangeGB - An estimate of item collection size, expressed in GB. This is a two-element array containing a lower bound and an upper bound for the estimate. The estimate includes the size of all the items in the table, plus the size of all attributes projected into all of the local secondary indexes on the table. Use this estimate to measure whether a local secondary index is approaching its size limit. The estimate is subject to change over time; therefore, do not rely on the precision or accuracy of the estimate."];
@@ -4394,8 +4837,11 @@ module BatchWriteItemOutput =
           ItemCollectionSizeLimitExceededException.t 
       | `ProvisionedThroughputExceededException of
           ProvisionedThroughputExceededException.t 
+      | `ReplicatedWriteConflictException of
+          ReplicatedWriteConflictException.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?unprocessedItems =
       fun ?itemCollectionMetrics ->
@@ -4412,10 +4858,15 @@ module BatchWriteItemOutput =
       | "ProvisionedThroughputExceededException" ->
           `ProvisionedThroughputExceededException
             (ProvisionedThroughputExceededException.of_json json)
+      | "ReplicatedWriteConflictException" ->
+          `ReplicatedWriteConflictException
+            (ReplicatedWriteConflictException.of_json json)
       | "RequestLimitExceeded" ->
           `RequestLimitExceeded (RequestLimitExceeded.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4429,10 +4880,15 @@ module BatchWriteItemOutput =
       | "ProvisionedThroughputExceededException" ->
           `ProvisionedThroughputExceededException
             (ProvisionedThroughputExceededException.of_xml xml)
+      | "ReplicatedWriteConflictException" ->
+          `ReplicatedWriteConflictException
+            (ReplicatedWriteConflictException.of_xml xml)
       | "RequestLimitExceeded" ->
           `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4449,6 +4905,10 @@ module BatchWriteItemOutput =
           `Assoc
             [("error", (`String "ProvisionedThroughputExceededException"));
             ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ReplicatedWriteConflictException e ->
+          `Assoc
+            [("error", (`String "ReplicatedWriteConflictException"));
+            ("details", (ReplicatedWriteConflictException.to_json e))]
       | `RequestLimitExceeded e ->
           `Assoc
             [("error", (`String "RequestLimitExceeded"));
@@ -4457,6 +4917,10 @@ module BatchWriteItemOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4485,14 +4949,14 @@ module BatchWriteItemOutput =
           (Xml.child xml_arg0 "UnprocessedItems") in
       make ?consumedCapacity ?itemCollectionMetrics ?unprocessedItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumedCapacity =
-        field_map json "ConsumedCapacity" ConsumedCapacityMultiple.of_json in
+        field_map json__ "ConsumedCapacity" ConsumedCapacityMultiple.of_json in
       let itemCollectionMetrics =
-        field_map json "ItemCollectionMetrics"
+        field_map json__ "ItemCollectionMetrics"
           ItemCollectionMetricsPerTable.of_json in
       let unprocessedItems =
-        field_map json "UnprocessedItems" BatchWriteItemRequestMap.of_json in
+        field_map json__ "UnprocessedItems" BatchWriteItemRequestMap.of_json in
       make ?consumedCapacity ?itemCollectionMetrics ?unprocessedItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a BatchWriteItem operation."]
@@ -4537,13 +5001,14 @@ module BillingModeSummary =
         (Option.map ~f:BillingMode.of_xml) (Xml.child xml_arg0 "BillingMode") in
       make ?lastUpdateToPayPerRequestDateTime ?billingMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdateToPayPerRequestDateTime =
-        field_map json "LastUpdateToPayPerRequestDateTime" Date.of_json in
-      let billingMode = field_map json "BillingMode" BillingMode.of_json in
+        field_map json__ "LastUpdateToPayPerRequestDateTime" Date.of_json in
+      let billingMode = field_map json__ "BillingMode" BillingMode.of_json in
       make ?lastUpdateToPayPerRequestDateTime ?billingMode ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains the details for the read/write capacity mode."]
+  end[@@ocaml.doc
+       "Contains the details for the read/write capacity mode. This page talks about PROVISIONED and PAY_PER_REQUEST billing modes. For more information about these modes, see Read/write capacity mode. You may need to switch to on-demand mode at least once in order to return a BillingModeSummary response."]
 module Code =
   struct
     type nonrec t = string
@@ -4585,10 +5050,10 @@ module CancellationReason =
         (Option.map ~f:AttributeMap.of_xml) (Xml.child xml_arg0 "Item") in
       make ?message ?code ?item ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let code = field_map json "Code" Code.of_json in
-      let item = field_map json "Item" AttributeMap.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let code = field_map json__ "Code" Code.of_json in
+      let item = field_map json__ "Item" AttributeMap.of_json in
       make ?message ?code ?item ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4599,8 +5064,12 @@ module CancellationReasonList =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CancellationReason.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4644,13 +5113,33 @@ module ClientToken =
   struct
     type nonrec t = string
     let context_ = "ClientToken"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^[^\\$]+$"); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
+  end
+module CloudWatchLogGroupArn =
+  struct
+    type nonrec t = string
+    let context_ = "CloudWatchLogGroupArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CloudWatchLogGroupArn" j
     let to_json = simple_to_json to_value
   end
 module ComparisonOperator =
@@ -4742,38 +5231,15 @@ module Condition =
           (Xml.child xml_arg0 "AttributeValueList") in
       make ~comparisonOperator ?attributeValueList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let comparisonOperator =
-        field_map_exn json "ComparisonOperator" ComparisonOperator.of_json in
+        field_map_exn json__ "ComparisonOperator" ComparisonOperator.of_json in
       let attributeValueList =
-        field_map json "AttributeValueList" AttributeValueList.of_json in
+        field_map json__ "AttributeValueList" AttributeValueList.of_json in
       make ~comparisonOperator ?attributeValueList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the selection criteria for a Query or Scan operation: For a Query operation, Condition is used for specifying the KeyConditions to use when querying a table or an index. For KeyConditions, only the following comparison operators are supported: EQ | LE | LT | GE | GT | BEGINS_WITH | BETWEEN Condition is also used in a QueryFilter, which evaluates the query results and returns only the desired values. For a Scan operation, Condition is used in a ScanFilter, which evaluates the scan results and returns only the desired values."]
-module ReturnValuesOnConditionCheckFailure =
-  struct
-    type nonrec t =
-      | ALL_OLD 
-      | NONE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | ALL_OLD -> "ALL_OLD" | NONE -> "NONE" | Non_static_id s -> s
-    let of_string =
-      function | "ALL_OLD" -> ALL_OLD | "NONE" -> NONE | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml
-           ~kind:"enumeration ReturnValuesOnConditionCheckFailure" xml_arg0)
-    let of_json j =
-      of_string
-        (string_of_json ~kind:"ReturnValuesOnConditionCheckFailure" j)
-    let to_json = simple_to_json to_value
-  end
 module ExpressionAttributeValueVariable =
   struct
     type nonrec t = string
@@ -4812,6 +5278,8 @@ module ExpressionAttributeValueMap =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4840,17 +5308,18 @@ module ConditionCheck =
       key: Key.t
         [@ocaml.doc
           "The primary key of the item to be checked. Each element consists of an attribute name and a value for that attribute."];
-      tableName: TableName.t
-        [@ocaml.doc "Name of the table for the check item request."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "Name of the table for the check item request. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       conditionExpression: ConditionExpression.t
         [@ocaml.doc
-          "A condition that must be satisfied in order for a conditional update to succeed."];
+          "A condition that must be satisfied in order for a conditional update to succeed. For more information, see Condition expressions in the Amazon DynamoDB Developer Guide."];
       expressionAttributeNames: ExpressionAttributeNameMap.t option
         [@ocaml.doc
-          "One or more substitution tokens for attribute names in an expression."];
+          "One or more substitution tokens for attribute names in an expression. For more information, see Expression attribute names in the Amazon DynamoDB Developer Guide."];
       expressionAttributeValues: ExpressionAttributeValueMap.t option
         [@ocaml.doc
-          "One or more values that can be substituted in an expression."];
+          "One or more values that can be substituted in an expression. For more information, see Condition expressions in the Amazon DynamoDB Developer Guide."];
       returnValuesOnConditionCheckFailure:
         ReturnValuesOnConditionCheckFailure.t option
         [@ocaml.doc
@@ -4874,7 +5343,7 @@ module ConditionCheck =
     let to_value x =
       structure_to_value
         [("Key", (Some (Key.to_value x.key)));
-        ("TableName", (Some (TableName.to_value x.tableName)));
+        ("TableName", (Some (TableArn.to_value x.tableName)));
         ("ConditionExpression",
           (Some (ConditionExpression.to_value x.conditionExpression)));
         ("ExpressionAttributeNames",
@@ -4901,26 +5370,27 @@ module ConditionCheck =
         ConditionExpression.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConditionExpression") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       let key = Key.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?returnValuesOnConditionCheckFailure ?expressionAttributeValues
         ?expressionAttributeNames ~conditionExpression ~tableName ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let returnValuesOnConditionCheckFailure =
-        field_map json "ReturnValuesOnConditionCheckFailure"
+        field_map json__ "ReturnValuesOnConditionCheckFailure"
           ReturnValuesOnConditionCheckFailure.of_json in
       let expressionAttributeValues =
-        field_map json "ExpressionAttributeValues"
+        field_map json__ "ExpressionAttributeValues"
           ExpressionAttributeValueMap.of_json in
       let expressionAttributeNames =
-        field_map json "ExpressionAttributeNames"
+        field_map json__ "ExpressionAttributeNames"
           ExpressionAttributeNameMap.of_json in
       let conditionExpression =
-        field_map_exn json "ConditionExpression" ConditionExpression.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
-      let key = field_map_exn json "Key" Key.of_json in
+        field_map_exn json__ "ConditionExpression"
+          ConditionExpression.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
+      let key = field_map_exn json__ "Key" Key.of_json in
       make ?returnValuesOnConditionCheckFailure ?expressionAttributeValues
         ?expressionAttributeNames ~conditionExpression ~tableName ~key ()
     let to_json v = composed_to_json to_value v
@@ -4931,23 +5401,29 @@ module ConditionalCheckFailedException =
     type nonrec t =
       {
       message: ErrorMessage.t option
-        [@ocaml.doc "The conditional request failed."]}
-    let make ?message = fun () -> { message }
+        [@ocaml.doc "The conditional request failed."];
+      item: AttributeMap.t option
+        [@ocaml.doc "Item which caused the ConditionalCheckFailedException."]}
+    let make ?message = fun ?item -> fun () -> { message; item }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("Item", (Option.map x.item ~f:AttributeMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let item =
+        (Option.map ~f:AttributeMap.of_xml) (Xml.child xml_arg0 "Item") in
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
+      make ?item ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
+    let of_json json__ =
+      let item = field_map json__ "Item" AttributeMap.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?item ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A condition specified in the operation could not be evaluated."]
+       "A condition specified in the operation failed to be evaluated."]
 module ConditionalOperator =
   struct
     type nonrec t =
@@ -4966,6 +5442,37 @@ module ConditionalOperator =
       of_string
         (string_of_xml ~kind:"enumeration ConditionalOperator" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"ConditionalOperator" j)
+    let to_json = simple_to_json to_value
+  end
+module ConfirmRemoveSelfResourceAccess =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module RecoveryPeriodInDays =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:35) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RecoveryPeriodInDays" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module PointInTimeRecoveryStatus =
@@ -5002,6 +5509,9 @@ module PointInTimeRecoveryDescription =
       pointInTimeRecoveryStatus: PointInTimeRecoveryStatus.t option
         [@ocaml.doc
           "The current state of point in time recovery: ENABLED - Point in time recovery is enabled. DISABLED - Point in time recovery is disabled."];
+      recoveryPeriodInDays: RecoveryPeriodInDays.t option
+        [@ocaml.doc
+          "The number of preceding days for which continuous backups are taken and maintained. Your table data is only recoverable to any point-in-time from within the configured recovery period. This parameter is optional."];
       earliestRestorableDateTime: Date.t option
         [@ocaml.doc
           "Specifies the earliest point in time you can restore your table to. You can restore your table to any point in time during the last 35 days."];
@@ -5009,19 +5519,23 @@ module PointInTimeRecoveryDescription =
         [@ocaml.doc
           "LatestRestorableDateTime is typically 5 minutes before the current time."]}
     let make ?pointInTimeRecoveryStatus =
-      fun ?earliestRestorableDateTime ->
-        fun ?latestRestorableDateTime ->
-          fun () ->
-            {
-              pointInTimeRecoveryStatus;
-              earliestRestorableDateTime;
-              latestRestorableDateTime
-            }
+      fun ?recoveryPeriodInDays ->
+        fun ?earliestRestorableDateTime ->
+          fun ?latestRestorableDateTime ->
+            fun () ->
+              {
+                pointInTimeRecoveryStatus;
+                recoveryPeriodInDays;
+                earliestRestorableDateTime;
+                latestRestorableDateTime
+              }
     let to_value x =
       structure_to_value
         [("PointInTimeRecoveryStatus",
            (Option.map x.pointInTimeRecoveryStatus
               ~f:PointInTimeRecoveryStatus.to_value));
+        ("RecoveryPeriodInDays",
+          (Option.map x.recoveryPeriodInDays ~f:RecoveryPeriodInDays.to_value));
         ("EarliestRestorableDateTime",
           (Option.map x.earliestRestorableDateTime ~f:Date.to_value));
         ("LatestRestorableDateTime",
@@ -5034,22 +5548,27 @@ module PointInTimeRecoveryDescription =
       let earliestRestorableDateTime =
         (Option.map ~f:Date.of_xml)
           (Xml.child xml_arg0 "EarliestRestorableDateTime") in
+      let recoveryPeriodInDays =
+        (Option.map ~f:RecoveryPeriodInDays.of_xml)
+          (Xml.child xml_arg0 "RecoveryPeriodInDays") in
       let pointInTimeRecoveryStatus =
         (Option.map ~f:PointInTimeRecoveryStatus.of_xml)
           (Xml.child xml_arg0 "PointInTimeRecoveryStatus") in
       make ?latestRestorableDateTime ?earliestRestorableDateTime
-        ?pointInTimeRecoveryStatus ()
+        ?recoveryPeriodInDays ?pointInTimeRecoveryStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let latestRestorableDateTime =
-        field_map json "LatestRestorableDateTime" Date.of_json in
+        field_map json__ "LatestRestorableDateTime" Date.of_json in
       let earliestRestorableDateTime =
-        field_map json "EarliestRestorableDateTime" Date.of_json in
+        field_map json__ "EarliestRestorableDateTime" Date.of_json in
+      let recoveryPeriodInDays =
+        field_map json__ "RecoveryPeriodInDays" RecoveryPeriodInDays.of_json in
       let pointInTimeRecoveryStatus =
-        field_map json "PointInTimeRecoveryStatus"
+        field_map json__ "PointInTimeRecoveryStatus"
           PointInTimeRecoveryStatus.of_json in
       make ?latestRestorableDateTime ?earliestRestorableDateTime
-        ?pointInTimeRecoveryStatus ()
+        ?recoveryPeriodInDays ?pointInTimeRecoveryStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The description of the point in time settings applied to the table."]
@@ -5084,20 +5603,20 @@ module ContinuousBackupsDescription =
   struct
     type nonrec t =
       {
-      continuousBackupsStatus: ContinuousBackupsStatus.t
+      continuousBackupsStatus: ContinuousBackupsStatus.t option
         [@ocaml.doc
           "ContinuousBackupsStatus can be one of the following states: ENABLED, DISABLED"];
       pointInTimeRecoveryDescription: PointInTimeRecoveryDescription.t option
         [@ocaml.doc
           "The description of the point in time recovery settings applied to the table."]}
-    let context_ = "ContinuousBackupsDescription"
-    let make ?pointInTimeRecoveryDescription =
-      fun ~continuousBackupsStatus ->
-        fun () -> { pointInTimeRecoveryDescription; continuousBackupsStatus }
+    let make ?continuousBackupsStatus =
+      fun ?pointInTimeRecoveryDescription ->
+        fun () -> { continuousBackupsStatus; pointInTimeRecoveryDescription }
     let to_value x =
       structure_to_value
         [("ContinuousBackupsStatus",
-           (Some (ContinuousBackupsStatus.to_value x.continuousBackupsStatus)));
+           (Option.map x.continuousBackupsStatus
+              ~f:ContinuousBackupsStatus.to_value));
         ("PointInTimeRecoveryDescription",
           (Option.map x.pointInTimeRecoveryDescription
              ~f:PointInTimeRecoveryDescription.to_value))]
@@ -5107,18 +5626,18 @@ module ContinuousBackupsDescription =
         (Option.map ~f:PointInTimeRecoveryDescription.of_xml)
           (Xml.child xml_arg0 "PointInTimeRecoveryDescription") in
       let continuousBackupsStatus =
-        ContinuousBackupsStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ContinuousBackupsStatus") in
-      make ?pointInTimeRecoveryDescription ~continuousBackupsStatus ()
+        (Option.map ~f:ContinuousBackupsStatus.of_xml)
+          (Xml.child xml_arg0 "ContinuousBackupsStatus") in
+      make ?pointInTimeRecoveryDescription ?continuousBackupsStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pointInTimeRecoveryDescription =
-        field_map json "PointInTimeRecoveryDescription"
+        field_map json__ "PointInTimeRecoveryDescription"
           PointInTimeRecoveryDescription.of_json in
       let continuousBackupsStatus =
-        field_map_exn json "ContinuousBackupsStatus"
+        field_map json__ "ContinuousBackupsStatus"
           ContinuousBackupsStatus.of_json in
-      make ?pointInTimeRecoveryDescription ~continuousBackupsStatus ()
+      make ?pointInTimeRecoveryDescription ?continuousBackupsStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the continuous backups and point in time recovery settings on the table."]
@@ -5136,8 +5655,8 @@ module ContinuousBackupsUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Backups have not yet been enabled for this table."]
@@ -5168,6 +5687,33 @@ module ContributorInsightsAction =
       of_string (string_of_json ~kind:"ContributorInsightsAction" j)
     let to_json = simple_to_json to_value
   end
+module ContributorInsightsMode =
+  struct
+    type nonrec t =
+      | ACCESSED_AND_THROTTLED_KEYS 
+      | THROTTLED_KEYS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACCESSED_AND_THROTTLED_KEYS -> "ACCESSED_AND_THROTTLED_KEYS"
+      | THROTTLED_KEYS -> "THROTTLED_KEYS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACCESSED_AND_THROTTLED_KEYS" -> ACCESSED_AND_THROTTLED_KEYS
+      | "THROTTLED_KEYS" -> THROTTLED_KEYS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ContributorInsightsMode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ContributorInsightsMode" j)
+    let to_json = simple_to_json to_value
+  end
 module ContributorInsightsRule =
   struct
     type nonrec t = string
@@ -5190,6 +5736,9 @@ module ContributorInsightsRuleList =
   struct
     type nonrec t = ContributorInsightsRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContributorInsightsRule.to_value)) |>
         (fun x -> `List x)
@@ -5258,20 +5807,36 @@ module ContributorInsightsSummary =
         [@ocaml.doc "Name of the index associated with the summary, if any."];
       contributorInsightsStatus: ContributorInsightsStatus.t option
         [@ocaml.doc
-          "Describes the current status for contributor insights for the given table and index, if applicable."]}
+          "Describes the current status for contributor insights for the given table and index, if applicable."];
+      contributorInsightsMode: ContributorInsightsMode.t option
+        [@ocaml.doc
+          "Indicates the current mode of CloudWatch Contributor Insights, specifying whether it tracks all access and throttled events or throttled events only for the DynamoDB table or index."]}
     let make ?tableName =
       fun ?indexName ->
         fun ?contributorInsightsStatus ->
-          fun () -> { tableName; indexName; contributorInsightsStatus }
+          fun ?contributorInsightsMode ->
+            fun () ->
+              {
+                tableName;
+                indexName;
+                contributorInsightsStatus;
+                contributorInsightsMode
+              }
     let to_value x =
       structure_to_value
         [("TableName", (Option.map x.tableName ~f:TableName.to_value));
         ("IndexName", (Option.map x.indexName ~f:IndexName.to_value));
         ("ContributorInsightsStatus",
           (Option.map x.contributorInsightsStatus
-             ~f:ContributorInsightsStatus.to_value))]
+             ~f:ContributorInsightsStatus.to_value));
+        ("ContributorInsightsMode",
+          (Option.map x.contributorInsightsMode
+             ~f:ContributorInsightsMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let contributorInsightsMode =
+        (Option.map ~f:ContributorInsightsMode.of_xml)
+          (Xml.child xml_arg0 "ContributorInsightsMode") in
       let contributorInsightsStatus =
         (Option.map ~f:ContributorInsightsStatus.of_xml)
           (Xml.child xml_arg0 "ContributorInsightsStatus") in
@@ -5279,21 +5844,29 @@ module ContributorInsightsSummary =
         (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
       let tableName =
         (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "TableName") in
-      make ?contributorInsightsStatus ?indexName ?tableName ()
+      make ?contributorInsightsMode ?contributorInsightsStatus ?indexName
+        ?tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let contributorInsightsMode =
+        field_map json__ "ContributorInsightsMode"
+          ContributorInsightsMode.of_json in
       let contributorInsightsStatus =
-        field_map json "ContributorInsightsStatus"
+        field_map json__ "ContributorInsightsStatus"
           ContributorInsightsStatus.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
-      make ?contributorInsightsStatus ?indexName ?tableName ()
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
+      make ?contributorInsightsMode ?contributorInsightsStatus ?indexName
+        ?tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a Contributor Insights summary entry."]
 module ContributorInsightsSummaries =
   struct
     type nonrec t = ContributorInsightsSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContributorInsightsSummary.to_value)) |>
         (fun x -> `List x)
@@ -5320,14 +5893,16 @@ module CreateBackupInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t [@ocaml.doc "The name of the table."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       backupName: BackupName.t [@ocaml.doc "Specified name for the backup."]}
     let context_ = "CreateBackupInput"
     let make ~tableName =
       fun ~backupName -> fun () -> { tableName; backupName }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)));
+        [("TableName", (Some (TableArn.to_value x.tableName)));
         ("BackupName", (Some (BackupName.to_value x.backupName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -5335,13 +5910,13 @@ module CreateBackupInput =
         BackupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "BackupName") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ~backupName ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backupName = field_map_exn json "BackupName" BackupName.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+    let of_json json__ =
+      let backupName = field_map_exn json__ "BackupName" BackupName.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       make ~backupName ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5360,12 +5935,12 @@ module TableNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A source table with the name TableName does not currently exist within the subscriber's account."]
+       "A source table with the name TableName does not currently exist within the subscriber's account or the subscriber is operating in the wrong Amazon Web Services Region."]
 module TableInUseException =
   struct
     type nonrec t = {
@@ -5380,8 +5955,8 @@ module TableInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5402,12 +5977,12 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "There is no limit to the number of daily on-demand backups that can be taken. Up to 50 simultaneous table operations are allowed per account. These operations include CreateTable, UpdateTable, DeleteTable,UpdateTimeToLive, RestoreTableFromBackup, and RestoreTableToPointInTime. The only exception is when you are creating a table with one or more secondary indexes. You can have up to 25 such requests running at a time; however, if the table or index specifications are complex, DynamoDB might temporarily reduce the number of concurrent operations. There is a soft account quota of 256 tables."]
+       "There is no limit to the number of daily on-demand backups that can be taken. For most purposes, up to 500 simultaneous table operations are allowed per account. These operations include CreateTable, UpdateTable, DeleteTable,UpdateTimeToLive, RestoreTableFromBackup, and RestoreTableToPointInTime. When you are creating a table with one or more secondary indexes, you can have up to 250 such requests running at a time. However, if the table or index specifications are complex, then DynamoDB might temporarily reduce the number of concurrent operations. When importing into DynamoDB, up to 50 simultaneous import table operations are allowed per account. There is a soft account quota of 2,500 tables. GetRecords was called with a value of more than 1000 for the limit request parameter. More than 2 processes are reading from the same streams shard at the same time. Exceeding this limit may result in request throttling."]
 module CreateBackupOutput =
   struct
     type nonrec t =
@@ -5502,13 +6077,51 @@ module CreateBackupOutput =
           (Xml.child xml_arg0 "BackupDetails") in
       make ?backupDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backupDetails =
-        field_map json "BackupDetails" BackupDetails.of_json in
+        field_map json__ "BackupDetails" BackupDetails.of_json in
       make ?backupDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a backup for an existing table. Each time you create an on-demand backup, the entire table data is backed up. There is no limit to the number of on-demand backups that can be taken. When you create an on-demand backup, a time marker of the request is cataloged, and the backup is created asynchronously, by applying all changes until the time of the request to the last full table snapshot. Backup requests are processed instantaneously and become available for restore within minutes. You can call CreateBackup at a maximum rate of 50 times per second. All backups in DynamoDB work without consuming any provisioned throughput on the table. If you submit a backup request on 2018-12-14 at 14:25:00, the backup is guaranteed to contain all data committed to the table up to 14:24:00, and data committed after 14:26:00 will not be. The backup might contain data modifications made between 14:24:00 and 14:26:00. On-demand backup does not support causal consistency. Along with data, the following are also included on the backups: Global secondary indexes (GSIs) Local secondary indexes (LSIs) Streams Provisioned read and write capacity"]
+module WarmThroughput =
+  struct
+    type nonrec t =
+      {
+      readUnitsPerSecond: LongObject.t option
+        [@ocaml.doc
+          "Represents the number of read operations your base table can instantaneously support."];
+      writeUnitsPerSecond: LongObject.t option
+        [@ocaml.doc
+          "Represents the number of write operations your base table can instantaneously support."]}
+    let make ?readUnitsPerSecond =
+      fun ?writeUnitsPerSecond ->
+        fun () -> { readUnitsPerSecond; writeUnitsPerSecond }
+    let to_value x =
+      structure_to_value
+        [("ReadUnitsPerSecond",
+           (Option.map x.readUnitsPerSecond ~f:LongObject.to_value));
+        ("WriteUnitsPerSecond",
+          (Option.map x.writeUnitsPerSecond ~f:LongObject.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let writeUnitsPerSecond =
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "WriteUnitsPerSecond") in
+      let readUnitsPerSecond =
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "ReadUnitsPerSecond") in
+      make ?writeUnitsPerSecond ?readUnitsPerSecond ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let writeUnitsPerSecond =
+        field_map json__ "WriteUnitsPerSecond" LongObject.of_json in
+      let readUnitsPerSecond =
+        field_map json__ "ReadUnitsPerSecond" LongObject.of_json in
+      make ?writeUnitsPerSecond ?readUnitsPerSecond ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides visibility into the number of read and write operations your table or secondary index can instantaneously support. The settings can be modified using the UpdateTable operation to meet the throughput requirements of an upcoming peak event."]
 module CreateGlobalSecondaryIndexAction =
   struct
     type nonrec t =
@@ -5516,20 +6129,36 @@ module CreateGlobalSecondaryIndexAction =
       indexName: IndexName.t
         [@ocaml.doc "The name of the global secondary index to be created."];
       keySchema: KeySchema.t
-        [@ocaml.doc "The key schema for the global secondary index."];
+        [@ocaml.doc
+          "The key schema for the global secondary index. Global secondary index supports up to 4 partition and up to 4 sort keys."];
       projection: Projection.t
         [@ocaml.doc
           "Represents attributes that are copied (projected) from the table into an index. These are in addition to the primary key attributes and index key attributes, which are automatically projected."];
       provisionedThroughput: ProvisionedThroughput.t option
         [@ocaml.doc
-          "Represents the provisioned throughput settings for the specified global secondary index. For current minimum and maximum provisioned throughput values, see Service, Account, and Table Quotas in the Amazon DynamoDB Developer Guide."]}
+          "Represents the provisioned throughput settings for the specified global secondary index. For current minimum and maximum provisioned throughput values, see Service, Account, and Table Quotas in the Amazon DynamoDB Developer Guide."];
+      onDemandThroughput: OnDemandThroughput.t option
+        [@ocaml.doc
+          "The maximum number of read and write units for the global secondary index being created. If you use this parameter, you must specify MaxReadRequestUnits, MaxWriteRequestUnits, or both. You must use either OnDemand Throughput or ProvisionedThroughput based on your table's capacity mode."];
+      warmThroughput: WarmThroughput.t option
+        [@ocaml.doc
+          "Represents the warm throughput value (in read units per second and write units per second) when creating a secondary index."]}
     let context_ = "CreateGlobalSecondaryIndexAction"
     let make ?provisionedThroughput =
-      fun ~indexName ->
-        fun ~keySchema ->
-          fun ~projection ->
-            fun () ->
-              { provisionedThroughput; indexName; keySchema; projection }
+      fun ?onDemandThroughput ->
+        fun ?warmThroughput ->
+          fun ~indexName ->
+            fun ~keySchema ->
+              fun ~projection ->
+                fun () ->
+                  {
+                    provisionedThroughput;
+                    onDemandThroughput;
+                    warmThroughput;
+                    indexName;
+                    keySchema;
+                    projection
+                  }
     let to_value x =
       structure_to_value
         [("IndexName", (Some (IndexName.to_value x.indexName)));
@@ -5537,9 +6166,19 @@ module CreateGlobalSecondaryIndexAction =
         ("Projection", (Some (Projection.to_value x.projection)));
         ("ProvisionedThroughput",
           (Option.map x.provisionedThroughput
-             ~f:ProvisionedThroughput.to_value))]
+             ~f:ProvisionedThroughput.to_value));
+        ("OnDemandThroughput",
+          (Option.map x.onDemandThroughput ~f:OnDemandThroughput.to_value));
+        ("WarmThroughput",
+          (Option.map x.warmThroughput ~f:WarmThroughput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let warmThroughput =
+        (Option.map ~f:WarmThroughput.of_xml)
+          (Xml.child xml_arg0 "WarmThroughput") in
+      let onDemandThroughput =
+        (Option.map ~f:OnDemandThroughput.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughput") in
       let provisionedThroughput =
         (Option.map ~f:ProvisionedThroughput.of_xml)
           (Xml.child xml_arg0 "ProvisionedThroughput") in
@@ -5552,15 +6191,22 @@ module CreateGlobalSecondaryIndexAction =
       let indexName =
         IndexName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
-      make ?provisionedThroughput ~projection ~keySchema ~indexName ()
+      make ?warmThroughput ?onDemandThroughput ?provisionedThroughput
+        ~projection ~keySchema ~indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let warmThroughput =
+        field_map json__ "WarmThroughput" WarmThroughput.of_json in
+      let onDemandThroughput =
+        field_map json__ "OnDemandThroughput" OnDemandThroughput.of_json in
       let provisionedThroughput =
-        field_map json "ProvisionedThroughput" ProvisionedThroughput.of_json in
-      let projection = field_map_exn json "Projection" Projection.of_json in
-      let keySchema = field_map_exn json "KeySchema" KeySchema.of_json in
-      let indexName = field_map_exn json "IndexName" IndexName.of_json in
-      make ?provisionedThroughput ~projection ~keySchema ~indexName ()
+        field_map json__ "ProvisionedThroughput"
+          ProvisionedThroughput.of_json in
+      let projection = field_map_exn json__ "Projection" Projection.of_json in
+      let keySchema = field_map_exn json__ "KeySchema" KeySchema.of_json in
+      let indexName = field_map_exn json__ "IndexName" IndexName.of_json in
+      make ?warmThroughput ?onDemandThroughput ?provisionedThroughput
+        ~projection ~keySchema ~indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a new global secondary index to be added to an existing table."]
@@ -5593,8 +6239,8 @@ module Replica =
         (Option.map ~f:RegionName.of_xml) (Xml.child xml_arg0 "RegionName") in
       make ?regionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regionName = field_map json "RegionName" RegionName.of_json in
+    let of_json json__ =
+      let regionName = field_map json__ "RegionName" RegionName.of_json in
       make ?regionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the properties of a replica."]
@@ -5602,6 +6248,9 @@ module ReplicaList =
   struct
     type nonrec t = Replica.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Replica.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5649,15 +6298,105 @@ module CreateGlobalTableInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GlobalTableName") in
       make ~replicationGroup ~globalTableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroup =
-        field_map_exn json "ReplicationGroup" ReplicaList.of_json in
+        field_map_exn json__ "ReplicationGroup" ReplicaList.of_json in
       let globalTableName =
-        field_map_exn json "GlobalTableName" TableName.of_json in
+        field_map_exn json__ "GlobalTableName" TableName.of_json in
       make ~replicationGroup ~globalTableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a global table from an existing table. A global table creates a replication relationship between two or more DynamoDB tables with the same table name in the provided Regions. This operation only applies to Version 2017.11.29 of global tables. If you want to add a new replica table to a global table, each of the following conditions must be true: The table must have the same primary key as all of the other replicas. The table must have the same name as all of the other replicas. The table must have DynamoDB Streams enabled, with the stream containing both the new and the old images of the item. None of the replica tables in the global table can contain any data. If global secondary indexes are specified, then the following conditions must also be met: The global secondary indexes must have the same name. The global secondary indexes must have the same hash key and sort key (if present). If local secondary indexes are specified, then the following conditions must also be met: The local secondary indexes must have the same name. The local secondary indexes must have the same hash key and sort key (if present). Write capacity settings should be set consistently across your replica tables and secondary indexes. DynamoDB strongly recommends enabling auto scaling to manage the write capacity settings for all of your global tables replicas and indexes. If you prefer to manage write capacity settings manually, you should provision equal replicated write capacity units to your replica tables. You should also provision equal replicated write capacity units to matching secondary indexes across your global table."]
+       "Creates a global table from an existing table. A global table creates a replication relationship between two or more DynamoDB tables with the same table name in the provided Regions. This documentation is for version 2017.11.29 (Legacy) of global tables, which should be avoided for new global tables. Customers should use Global Tables version 2019.11.21 (Current) when possible, because it provides greater flexibility, higher efficiency, and consumes less write capacity than 2017.11.29 (Legacy). To determine which version you're using, see Determining the global table version you are using. To update existing global tables from version 2017.11.29 (Legacy) to version 2019.11.21 (Current), see Upgrading global tables. If you want to add a new replica table to a global table, each of the following conditions must be true: The table must have the same primary key as all of the other replicas. The table must have the same name as all of the other replicas. The table must have DynamoDB Streams enabled, with the stream containing both the new and the old images of the item. None of the replica tables in the global table can contain any data. If global secondary indexes are specified, then the following conditions must also be met: The global secondary indexes must have the same name. The global secondary indexes must have the same hash key and sort key (if present). If local secondary indexes are specified, then the following conditions must also be met: The local secondary indexes must have the same name. The local secondary indexes must have the same hash key and sort key (if present). Write capacity settings should be set consistently across your replica tables and secondary indexes. DynamoDB strongly recommends enabling auto scaling to manage the write capacity settings for all of your global tables replicas and indexes. If you prefer to manage write capacity settings manually, you should provision equal replicated write capacity units to your replica tables. You should also provision equal replicated write capacity units to matching secondary indexes across your global table."]
+module TableStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | UPDATING 
+      | DELETING 
+      | ACTIVE 
+      | INACCESSIBLE_ENCRYPTION_CREDENTIALS 
+      | ARCHIVING 
+      | ARCHIVED 
+      | REPLICATION_NOT_AUTHORIZED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | ACTIVE -> "ACTIVE"
+      | INACCESSIBLE_ENCRYPTION_CREDENTIALS ->
+          "INACCESSIBLE_ENCRYPTION_CREDENTIALS"
+      | ARCHIVING -> "ARCHIVING"
+      | ARCHIVED -> "ARCHIVED"
+      | REPLICATION_NOT_AUTHORIZED -> "REPLICATION_NOT_AUTHORIZED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | "ACTIVE" -> ACTIVE
+      | "INACCESSIBLE_ENCRYPTION_CREDENTIALS" ->
+          INACCESSIBLE_ENCRYPTION_CREDENTIALS
+      | "ARCHIVING" -> ARCHIVING
+      | "ARCHIVED" -> ARCHIVED
+      | "REPLICATION_NOT_AUTHORIZED" -> REPLICATION_NOT_AUTHORIZED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TableStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TableStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module TableWarmThroughputDescription =
+  struct
+    type nonrec t =
+      {
+      readUnitsPerSecond: PositiveLongObject.t option
+        [@ocaml.doc
+          "Represents the base table's warm throughput value in read units per second."];
+      writeUnitsPerSecond: PositiveLongObject.t option
+        [@ocaml.doc
+          "Represents the base table's warm throughput value in write units per second."];
+      status: TableStatus.t option
+        [@ocaml.doc "Represents warm throughput value of the base table."]}
+    let make ?readUnitsPerSecond =
+      fun ?writeUnitsPerSecond ->
+        fun ?status ->
+          fun () -> { readUnitsPerSecond; writeUnitsPerSecond; status }
+    let to_value x =
+      structure_to_value
+        [("ReadUnitsPerSecond",
+           (Option.map x.readUnitsPerSecond ~f:PositiveLongObject.to_value));
+        ("WriteUnitsPerSecond",
+          (Option.map x.writeUnitsPerSecond ~f:PositiveLongObject.to_value));
+        ("Status", (Option.map x.status ~f:TableStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:TableStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let writeUnitsPerSecond =
+        (Option.map ~f:PositiveLongObject.of_xml)
+          (Xml.child xml_arg0 "WriteUnitsPerSecond") in
+      let readUnitsPerSecond =
+        (Option.map ~f:PositiveLongObject.of_xml)
+          (Xml.child xml_arg0 "ReadUnitsPerSecond") in
+      make ?status ?writeUnitsPerSecond ?readUnitsPerSecond ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" TableStatus.of_json in
+      let writeUnitsPerSecond =
+        field_map json__ "WriteUnitsPerSecond" PositiveLongObject.of_json in
+      let readUnitsPerSecond =
+        field_map json__ "ReadUnitsPerSecond" PositiveLongObject.of_json in
+      make ?status ?writeUnitsPerSecond ?readUnitsPerSecond ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the warm throughput value (in read units per second and write units per second) of the table. Warm throughput is applicable for DynamoDB Standard-IA tables and specifies the minimum provisioned capacity maintained for immediate data access."]
 module TableClass =
   struct
     type nonrec t =
@@ -5708,10 +6447,10 @@ module TableClassSummary =
         (Option.map ~f:TableClass.of_xml) (Xml.child xml_arg0 "TableClass") in
       make ?lastUpdateDateTime ?tableClass ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdateDateTime =
-        field_map json "LastUpdateDateTime" Date.of_json in
-      let tableClass = field_map json "TableClass" TableClass.of_json in
+        field_map json__ "LastUpdateDateTime" Date.of_json in
+      let tableClass = field_map json__ "TableClass" TableClass.of_json in
       make ?lastUpdateDateTime ?tableClass ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details of the table class."]
@@ -5751,6 +6490,9 @@ module ReplicaStatus =
       | ACTIVE 
       | REGION_DISABLED 
       | INACCESSIBLE_ENCRYPTION_CREDENTIALS 
+      | ARCHIVING 
+      | ARCHIVED 
+      | REPLICATION_NOT_AUTHORIZED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -5763,6 +6505,9 @@ module ReplicaStatus =
       | REGION_DISABLED -> "REGION_DISABLED"
       | INACCESSIBLE_ENCRYPTION_CREDENTIALS ->
           "INACCESSIBLE_ENCRYPTION_CREDENTIALS"
+      | ARCHIVING -> "ARCHIVING"
+      | ARCHIVED -> "ARCHIVED"
+      | REPLICATION_NOT_AUTHORIZED -> "REPLICATION_NOT_AUTHORIZED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -5774,6 +6519,9 @@ module ReplicaStatus =
       | "REGION_DISABLED" -> REGION_DISABLED
       | "INACCESSIBLE_ENCRYPTION_CREDENTIALS" ->
           INACCESSIBLE_ENCRYPTION_CREDENTIALS
+      | "ARCHIVING" -> ARCHIVING
+      | "ARCHIVED" -> ARCHIVED
+      | "REPLICATION_NOT_AUTHORIZED" -> REPLICATION_NOT_AUTHORIZED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -5802,13 +6550,116 @@ module ProvisionedThroughputOverride =
           (Xml.child xml_arg0 "ReadCapacityUnits") in
       make ?readCapacityUnits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let readCapacityUnits =
-        field_map json "ReadCapacityUnits" PositiveLongObject.of_json in
+        field_map json__ "ReadCapacityUnits" PositiveLongObject.of_json in
       make ?readCapacityUnits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Replica-specific provisioned throughput settings. If not specified, uses the source table's provisioned throughput settings."]
+module OnDemandThroughputOverride =
+  struct
+    type nonrec t =
+      {
+      maxReadRequestUnits: LongObject.t option
+        [@ocaml.doc
+          "Maximum number of read request units for the specified replica table."]}
+    let make ?maxReadRequestUnits = fun () -> { maxReadRequestUnits }
+    let to_value x =
+      structure_to_value
+        [("MaxReadRequestUnits",
+           (Option.map x.maxReadRequestUnits ~f:LongObject.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxReadRequestUnits =
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "MaxReadRequestUnits") in
+      make ?maxReadRequestUnits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxReadRequestUnits =
+        field_map json__ "MaxReadRequestUnits" LongObject.of_json in
+      make ?maxReadRequestUnits ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Overrides the on-demand throughput settings for this replica table. If you don't specify a value for this parameter, it uses the source table's on-demand throughput settings."]
+module IndexStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | UPDATING 
+      | DELETING 
+      | ACTIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | ACTIVE -> "ACTIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | "ACTIVE" -> ACTIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IndexStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IndexStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module GlobalSecondaryIndexWarmThroughputDescription =
+  struct
+    type nonrec t =
+      {
+      readUnitsPerSecond: PositiveLongObject.t option
+        [@ocaml.doc
+          "Represents warm throughput read units per second value for a global secondary index."];
+      writeUnitsPerSecond: PositiveLongObject.t option
+        [@ocaml.doc
+          "Represents warm throughput write units per second value for a global secondary index."];
+      status: IndexStatus.t option
+        [@ocaml.doc
+          "Represents the warm throughput status being created or updated on a global secondary index. The status can only be UPDATING or ACTIVE."]}
+    let make ?readUnitsPerSecond =
+      fun ?writeUnitsPerSecond ->
+        fun ?status ->
+          fun () -> { readUnitsPerSecond; writeUnitsPerSecond; status }
+    let to_value x =
+      structure_to_value
+        [("ReadUnitsPerSecond",
+           (Option.map x.readUnitsPerSecond ~f:PositiveLongObject.to_value));
+        ("WriteUnitsPerSecond",
+          (Option.map x.writeUnitsPerSecond ~f:PositiveLongObject.to_value));
+        ("Status", (Option.map x.status ~f:IndexStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:IndexStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let writeUnitsPerSecond =
+        (Option.map ~f:PositiveLongObject.of_xml)
+          (Xml.child xml_arg0 "WriteUnitsPerSecond") in
+      let readUnitsPerSecond =
+        (Option.map ~f:PositiveLongObject.of_xml)
+          (Xml.child xml_arg0 "ReadUnitsPerSecond") in
+      make ?status ?writeUnitsPerSecond ?readUnitsPerSecond ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" IndexStatus.of_json in
+      let writeUnitsPerSecond =
+        field_map json__ "WriteUnitsPerSecond" PositiveLongObject.of_json in
+      let readUnitsPerSecond =
+        field_map json__ "ReadUnitsPerSecond" PositiveLongObject.of_json in
+      make ?status ?writeUnitsPerSecond ?readUnitsPerSecond ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The description of the warm throughput value on a global secondary index."]
 module ReplicaGlobalSecondaryIndexDescription =
   struct
     type nonrec t =
@@ -5817,31 +6668,65 @@ module ReplicaGlobalSecondaryIndexDescription =
         [@ocaml.doc "The name of the global secondary index."];
       provisionedThroughputOverride: ProvisionedThroughputOverride.t option
         [@ocaml.doc
-          "If not described, uses the source table GSI's read capacity settings."]}
+          "If not described, uses the source table GSI's read capacity settings."];
+      onDemandThroughputOverride: OnDemandThroughputOverride.t option
+        [@ocaml.doc
+          "Overrides the maximum on-demand throughput for the specified global secondary index in the specified replica table."];
+      warmThroughput: GlobalSecondaryIndexWarmThroughputDescription.t option
+        [@ocaml.doc
+          "Represents the warm throughput of the global secondary index for this replica."]}
     let make ?indexName =
       fun ?provisionedThroughputOverride ->
-        fun () -> { indexName; provisionedThroughputOverride }
+        fun ?onDemandThroughputOverride ->
+          fun ?warmThroughput ->
+            fun () ->
+              {
+                indexName;
+                provisionedThroughputOverride;
+                onDemandThroughputOverride;
+                warmThroughput
+              }
     let to_value x =
       structure_to_value
         [("IndexName", (Option.map x.indexName ~f:IndexName.to_value));
         ("ProvisionedThroughputOverride",
           (Option.map x.provisionedThroughputOverride
-             ~f:ProvisionedThroughputOverride.to_value))]
+             ~f:ProvisionedThroughputOverride.to_value));
+        ("OnDemandThroughputOverride",
+          (Option.map x.onDemandThroughputOverride
+             ~f:OnDemandThroughputOverride.to_value));
+        ("WarmThroughput",
+          (Option.map x.warmThroughput
+             ~f:GlobalSecondaryIndexWarmThroughputDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let warmThroughput =
+        (Option.map ~f:GlobalSecondaryIndexWarmThroughputDescription.of_xml)
+          (Xml.child xml_arg0 "WarmThroughput") in
+      let onDemandThroughputOverride =
+        (Option.map ~f:OnDemandThroughputOverride.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughputOverride") in
       let provisionedThroughputOverride =
         (Option.map ~f:ProvisionedThroughputOverride.of_xml)
           (Xml.child xml_arg0 "ProvisionedThroughputOverride") in
       let indexName =
         (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
-      make ?provisionedThroughputOverride ?indexName ()
+      make ?warmThroughput ?onDemandThroughputOverride
+        ?provisionedThroughputOverride ?indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let warmThroughput =
+        field_map json__ "WarmThroughput"
+          GlobalSecondaryIndexWarmThroughputDescription.of_json in
+      let onDemandThroughputOverride =
+        field_map json__ "OnDemandThroughputOverride"
+          OnDemandThroughputOverride.of_json in
       let provisionedThroughputOverride =
-        field_map json "ProvisionedThroughputOverride"
+        field_map json__ "ProvisionedThroughputOverride"
           ProvisionedThroughputOverride.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
-      make ?provisionedThroughputOverride ?indexName ()
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
+      make ?warmThroughput ?onDemandThroughputOverride
+        ?provisionedThroughputOverride ?indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the properties of a replica global secondary index."]
@@ -5849,6 +6734,9 @@ module ReplicaGlobalSecondaryIndexDescriptionList =
   struct
     type nonrec t = ReplicaGlobalSecondaryIndexDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicaGlobalSecondaryIndexDescription.to_value))
         |> (fun x -> `List x)
@@ -5885,6 +6773,37 @@ module KMSMasterKeyId =
     let of_json j = string_of_json ~kind:"KMSMasterKeyId" j
     let to_json = simple_to_json to_value
   end
+module GlobalTableSettingsReplicationMode =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | ENABLED_WITH_OVERRIDES 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | ENABLED_WITH_OVERRIDES -> "ENABLED_WITH_OVERRIDES"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | "ENABLED_WITH_OVERRIDES" -> ENABLED_WITH_OVERRIDES
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration GlobalTableSettingsReplicationMode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"GlobalTableSettingsReplicationMode" j)
+    let to_json = simple_to_json to_value
+  end
 module ReplicaDescription =
   struct
     type nonrec t =
@@ -5893,6 +6812,9 @@ module ReplicaDescription =
       replicaStatus: ReplicaStatus.t option
         [@ocaml.doc
           "The current state of the replica: CREATING - The replica is being created. UPDATING - The replica is being updated. DELETING - The replica is being deleted. ACTIVE - The replica is ready for use. REGION_DISABLED - The replica is inaccessible because the Amazon Web Services Region has been disabled. If the Amazon Web Services Region remains inaccessible for more than 20 hours, DynamoDB will remove this replica from the replication group. The replica will not be deleted and replication will stop from and to this region. INACCESSIBLE_ENCRYPTION_CREDENTIALS - The KMS key used to encrypt the table is inaccessible. If the KMS key remains inaccessible for more than 20 hours, DynamoDB will remove this replica from the replication group. The replica will not be deleted and replication will stop from and to this region."];
+      replicaArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the global table replica."];
       replicaStatusDescription: ReplicaStatusDescription.t option
         [@ocaml.doc "Detailed information about the replica status."];
       replicaStatusPercentProgress: ReplicaStatusPercentProgress.t option
@@ -5904,39 +6826,57 @@ module ReplicaDescription =
       provisionedThroughputOverride: ProvisionedThroughputOverride.t option
         [@ocaml.doc
           "Replica-specific provisioned throughput. If not described, uses the source table's provisioned throughput settings."];
+      onDemandThroughputOverride: OnDemandThroughputOverride.t option
+        [@ocaml.doc
+          "Overrides the maximum on-demand throughput settings for the specified replica table."];
+      warmThroughput: TableWarmThroughputDescription.t option
+        [@ocaml.doc "Represents the warm throughput value for this replica."];
       globalSecondaryIndexes:
         ReplicaGlobalSecondaryIndexDescriptionList.t option
         [@ocaml.doc "Replica-specific global secondary index settings."];
       replicaInaccessibleDateTime: Date.t option
         [@ocaml.doc
           "The time at which the replica was first detected as inaccessible. To determine cause of inaccessibility check the ReplicaStatus property."];
-      replicaTableClassSummary: TableClassSummary.t option }
+      replicaTableClassSummary: TableClassSummary.t option ;
+      globalTableSettingsReplicationMode:
+        GlobalTableSettingsReplicationMode.t option
+        [@ocaml.doc
+          "Indicates one of the settings synchronization modes for the global table replica: ENABLED: Indicates that the settings synchronization mode for the global table replica is enabled. DISABLED: Indicates that the settings synchronization mode for the global table replica is disabled. ENABLED_WITH_OVERRIDES: This mode is set by default for a same account global table. Indicates that certain global table settings can be overridden."]}
     let make ?regionName =
       fun ?replicaStatus ->
-        fun ?replicaStatusDescription ->
-          fun ?replicaStatusPercentProgress ->
-            fun ?kMSMasterKeyId ->
-              fun ?provisionedThroughputOverride ->
-                fun ?globalSecondaryIndexes ->
-                  fun ?replicaInaccessibleDateTime ->
-                    fun ?replicaTableClassSummary ->
-                      fun () ->
-                        {
-                          regionName;
-                          replicaStatus;
-                          replicaStatusDescription;
-                          replicaStatusPercentProgress;
-                          kMSMasterKeyId;
-                          provisionedThroughputOverride;
-                          globalSecondaryIndexes;
-                          replicaInaccessibleDateTime;
-                          replicaTableClassSummary
-                        }
+        fun ?replicaArn ->
+          fun ?replicaStatusDescription ->
+            fun ?replicaStatusPercentProgress ->
+              fun ?kMSMasterKeyId ->
+                fun ?provisionedThroughputOverride ->
+                  fun ?onDemandThroughputOverride ->
+                    fun ?warmThroughput ->
+                      fun ?globalSecondaryIndexes ->
+                        fun ?replicaInaccessibleDateTime ->
+                          fun ?replicaTableClassSummary ->
+                            fun ?globalTableSettingsReplicationMode ->
+                              fun () ->
+                                {
+                                  regionName;
+                                  replicaStatus;
+                                  replicaArn;
+                                  replicaStatusDescription;
+                                  replicaStatusPercentProgress;
+                                  kMSMasterKeyId;
+                                  provisionedThroughputOverride;
+                                  onDemandThroughputOverride;
+                                  warmThroughput;
+                                  globalSecondaryIndexes;
+                                  replicaInaccessibleDateTime;
+                                  replicaTableClassSummary;
+                                  globalTableSettingsReplicationMode
+                                }
     let to_value x =
       structure_to_value
         [("RegionName", (Option.map x.regionName ~f:RegionName.to_value));
         ("ReplicaStatus",
           (Option.map x.replicaStatus ~f:ReplicaStatus.to_value));
+        ("ReplicaArn", (Option.map x.replicaArn ~f:String_.to_value));
         ("ReplicaStatusDescription",
           (Option.map x.replicaStatusDescription
              ~f:ReplicaStatusDescription.to_value));
@@ -5948,6 +6888,12 @@ module ReplicaDescription =
         ("ProvisionedThroughputOverride",
           (Option.map x.provisionedThroughputOverride
              ~f:ProvisionedThroughputOverride.to_value));
+        ("OnDemandThroughputOverride",
+          (Option.map x.onDemandThroughputOverride
+             ~f:OnDemandThroughputOverride.to_value));
+        ("WarmThroughput",
+          (Option.map x.warmThroughput
+             ~f:TableWarmThroughputDescription.to_value));
         ("GlobalSecondaryIndexes",
           (Option.map x.globalSecondaryIndexes
              ~f:ReplicaGlobalSecondaryIndexDescriptionList.to_value));
@@ -5955,9 +6901,15 @@ module ReplicaDescription =
           (Option.map x.replicaInaccessibleDateTime ~f:Date.to_value));
         ("ReplicaTableClassSummary",
           (Option.map x.replicaTableClassSummary
-             ~f:TableClassSummary.to_value))]
+             ~f:TableClassSummary.to_value));
+        ("GlobalTableSettingsReplicationMode",
+          (Option.map x.globalTableSettingsReplicationMode
+             ~f:GlobalTableSettingsReplicationMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let globalTableSettingsReplicationMode =
+        (Option.map ~f:GlobalTableSettingsReplicationMode.of_xml)
+          (Xml.child xml_arg0 "GlobalTableSettingsReplicationMode") in
       let replicaTableClassSummary =
         (Option.map ~f:TableClassSummary.of_xml)
           (Xml.child xml_arg0 "ReplicaTableClassSummary") in
@@ -5967,6 +6919,12 @@ module ReplicaDescription =
       let globalSecondaryIndexes =
         (Option.map ~f:ReplicaGlobalSecondaryIndexDescriptionList.of_xml)
           (Xml.child xml_arg0 "GlobalSecondaryIndexes") in
+      let warmThroughput =
+        (Option.map ~f:TableWarmThroughputDescription.of_xml)
+          (Xml.child xml_arg0 "WarmThroughput") in
+      let onDemandThroughputOverride =
+        (Option.map ~f:OnDemandThroughputOverride.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughputOverride") in
       let provisionedThroughputOverride =
         (Option.map ~f:ProvisionedThroughputOverride.of_xml)
           (Xml.child xml_arg0 "ProvisionedThroughputOverride") in
@@ -5979,48 +6937,65 @@ module ReplicaDescription =
       let replicaStatusDescription =
         (Option.map ~f:ReplicaStatusDescription.of_xml)
           (Xml.child xml_arg0 "ReplicaStatusDescription") in
+      let replicaArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ReplicaArn") in
       let replicaStatus =
         (Option.map ~f:ReplicaStatus.of_xml)
           (Xml.child xml_arg0 "ReplicaStatus") in
       let regionName =
         (Option.map ~f:RegionName.of_xml) (Xml.child xml_arg0 "RegionName") in
-      make ?replicaTableClassSummary ?replicaInaccessibleDateTime
-        ?globalSecondaryIndexes ?provisionedThroughputOverride
+      make ?globalTableSettingsReplicationMode ?replicaTableClassSummary
+        ?replicaInaccessibleDateTime ?globalSecondaryIndexes ?warmThroughput
+        ?onDemandThroughputOverride ?provisionedThroughputOverride
         ?kMSMasterKeyId ?replicaStatusPercentProgress
-        ?replicaStatusDescription ?replicaStatus ?regionName ()
+        ?replicaStatusDescription ?replicaArn ?replicaStatus ?regionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let globalTableSettingsReplicationMode =
+        field_map json__ "GlobalTableSettingsReplicationMode"
+          GlobalTableSettingsReplicationMode.of_json in
       let replicaTableClassSummary =
-        field_map json "ReplicaTableClassSummary" TableClassSummary.of_json in
+        field_map json__ "ReplicaTableClassSummary" TableClassSummary.of_json in
       let replicaInaccessibleDateTime =
-        field_map json "ReplicaInaccessibleDateTime" Date.of_json in
+        field_map json__ "ReplicaInaccessibleDateTime" Date.of_json in
       let globalSecondaryIndexes =
-        field_map json "GlobalSecondaryIndexes"
+        field_map json__ "GlobalSecondaryIndexes"
           ReplicaGlobalSecondaryIndexDescriptionList.of_json in
+      let warmThroughput =
+        field_map json__ "WarmThroughput"
+          TableWarmThroughputDescription.of_json in
+      let onDemandThroughputOverride =
+        field_map json__ "OnDemandThroughputOverride"
+          OnDemandThroughputOverride.of_json in
       let provisionedThroughputOverride =
-        field_map json "ProvisionedThroughputOverride"
+        field_map json__ "ProvisionedThroughputOverride"
           ProvisionedThroughputOverride.of_json in
       let kMSMasterKeyId =
-        field_map json "KMSMasterKeyId" KMSMasterKeyId.of_json in
+        field_map json__ "KMSMasterKeyId" KMSMasterKeyId.of_json in
       let replicaStatusPercentProgress =
-        field_map json "ReplicaStatusPercentProgress"
+        field_map json__ "ReplicaStatusPercentProgress"
           ReplicaStatusPercentProgress.of_json in
       let replicaStatusDescription =
-        field_map json "ReplicaStatusDescription"
+        field_map json__ "ReplicaStatusDescription"
           ReplicaStatusDescription.of_json in
+      let replicaArn = field_map json__ "ReplicaArn" String_.of_json in
       let replicaStatus =
-        field_map json "ReplicaStatus" ReplicaStatus.of_json in
-      let regionName = field_map json "RegionName" RegionName.of_json in
-      make ?replicaTableClassSummary ?replicaInaccessibleDateTime
-        ?globalSecondaryIndexes ?provisionedThroughputOverride
+        field_map json__ "ReplicaStatus" ReplicaStatus.of_json in
+      let regionName = field_map json__ "RegionName" RegionName.of_json in
+      make ?globalTableSettingsReplicationMode ?replicaTableClassSummary
+        ?replicaInaccessibleDateTime ?globalSecondaryIndexes ?warmThroughput
+        ?onDemandThroughputOverride ?provisionedThroughputOverride
         ?kMSMasterKeyId ?replicaStatusPercentProgress
-        ?replicaStatusDescription ?replicaStatus ?regionName ()
+        ?replicaStatusDescription ?replicaArn ?replicaStatus ?regionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the details of the replica."]
 module ReplicaDescriptionList =
   struct
     type nonrec t = ReplicaDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicaDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6146,16 +7121,16 @@ module GlobalTableDescription =
       make ?globalTableName ?globalTableStatus ?creationDateTime
         ?globalTableArn ?replicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalTableName =
-        field_map json "GlobalTableName" TableName.of_json in
+        field_map json__ "GlobalTableName" TableName.of_json in
       let globalTableStatus =
-        field_map json "GlobalTableStatus" GlobalTableStatus.of_json in
-      let creationDateTime = field_map json "CreationDateTime" Date.of_json in
+        field_map json__ "GlobalTableStatus" GlobalTableStatus.of_json in
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
       let globalTableArn =
-        field_map json "GlobalTableArn" GlobalTableArnString.of_json in
+        field_map json__ "GlobalTableArn" GlobalTableArnString.of_json in
       let replicationGroup =
-        field_map json "ReplicationGroup" ReplicaDescriptionList.of_json in
+        field_map json__ "ReplicationGroup" ReplicaDescriptionList.of_json in
       make ?globalTableName ?globalTableStatus ?creationDateTime
         ?globalTableArn ?replicationGroup ()
     let to_json v = composed_to_json to_value v
@@ -6174,8 +7149,8 @@ module GlobalTableAlreadyExistsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified global table already exists."]
@@ -6256,14 +7231,39 @@ module CreateGlobalTableOutput =
           (Xml.child xml_arg0 "GlobalTableDescription") in
       make ?globalTableDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalTableDescription =
-        field_map json "GlobalTableDescription"
+        field_map json__ "GlobalTableDescription"
           GlobalTableDescription.of_json in
       make ?globalTableDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a global table from an existing table. A global table creates a replication relationship between two or more DynamoDB tables with the same table name in the provided Regions. This operation only applies to Version 2017.11.29 of global tables. If you want to add a new replica table to a global table, each of the following conditions must be true: The table must have the same primary key as all of the other replicas. The table must have the same name as all of the other replicas. The table must have DynamoDB Streams enabled, with the stream containing both the new and the old images of the item. None of the replica tables in the global table can contain any data. If global secondary indexes are specified, then the following conditions must also be met: The global secondary indexes must have the same name. The global secondary indexes must have the same hash key and sort key (if present). If local secondary indexes are specified, then the following conditions must also be met: The local secondary indexes must have the same name. The local secondary indexes must have the same hash key and sort key (if present). Write capacity settings should be set consistently across your replica tables and secondary indexes. DynamoDB strongly recommends enabling auto scaling to manage the write capacity settings for all of your global tables replicas and indexes. If you prefer to manage write capacity settings manually, you should provision equal replicated write capacity units to your replica tables. You should also provision equal replicated write capacity units to matching secondary indexes across your global table."]
+       "Creates a global table from an existing table. A global table creates a replication relationship between two or more DynamoDB tables with the same table name in the provided Regions. This documentation is for version 2017.11.29 (Legacy) of global tables, which should be avoided for new global tables. Customers should use Global Tables version 2019.11.21 (Current) when possible, because it provides greater flexibility, higher efficiency, and consumes less write capacity than 2017.11.29 (Legacy). To determine which version you're using, see Determining the global table version you are using. To update existing global tables from version 2017.11.29 (Legacy) to version 2019.11.21 (Current), see Upgrading global tables. If you want to add a new replica table to a global table, each of the following conditions must be true: The table must have the same primary key as all of the other replicas. The table must have the same name as all of the other replicas. The table must have DynamoDB Streams enabled, with the stream containing both the new and the old images of the item. None of the replica tables in the global table can contain any data. If global secondary indexes are specified, then the following conditions must also be met: The global secondary indexes must have the same name. The global secondary indexes must have the same hash key and sort key (if present). If local secondary indexes are specified, then the following conditions must also be met: The local secondary indexes must have the same name. The local secondary indexes must have the same hash key and sort key (if present). Write capacity settings should be set consistently across your replica tables and secondary indexes. DynamoDB strongly recommends enabling auto scaling to manage the write capacity settings for all of your global tables replicas and indexes. If you prefer to manage write capacity settings manually, you should provision equal replicated write capacity units to your replica tables. You should also provision equal replicated write capacity units to matching secondary indexes across your global table."]
+module CreateGlobalTableWitnessGroupMemberAction =
+  struct
+    type nonrec t =
+      {
+      regionName: RegionName.t
+        [@ocaml.doc
+          "The Amazon Web Services Region name to be added as a witness Region for the MRSC global table. The witness must be in a different Region than the replicas and within the same Region set: US Region set: US East (N. Virginia), US East (Ohio), US West (Oregon) EU Region set: Europe (Ireland), Europe (London), Europe (Paris), Europe (Frankfurt) AP Region set: Asia Pacific (Tokyo), Asia Pacific (Seoul), Asia Pacific (Osaka)"]}
+    let context_ = "CreateGlobalTableWitnessGroupMemberAction"
+    let make ~regionName = fun () -> { regionName }
+    let to_value x =
+      structure_to_value
+        [("RegionName", (Some (RegionName.to_value x.regionName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let regionName =
+        RegionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RegionName") in
+      make ~regionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let regionName = field_map_exn json__ "RegionName" RegionName.of_json in
+      make ~regionName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the action to add a new witness Region to a MRSC global table. A MRSC global table can be configured with either three replicas, or with two replicas and one witness."]
 module CreateReplicaAction =
   struct
     type nonrec t =
@@ -6282,8 +7282,8 @@ module CreateReplicaAction =
           (Xml.child_exn ~context:context_ xml_arg0 "RegionName") in
       make ~regionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regionName = field_map_exn json "RegionName" RegionName.of_json in
+    let of_json json__ =
+      let regionName = field_map_exn json__ "RegionName" RegionName.of_json in
       make ~regionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a replica to be added."]
@@ -6295,33 +7295,53 @@ module ReplicaGlobalSecondaryIndex =
         [@ocaml.doc "The name of the global secondary index."];
       provisionedThroughputOverride: ProvisionedThroughputOverride.t option
         [@ocaml.doc
-          "Replica table GSI-specific provisioned throughput. If not specified, uses the source table GSI's read capacity settings."]}
+          "Replica table GSI-specific provisioned throughput. If not specified, uses the source table GSI's read capacity settings."];
+      onDemandThroughputOverride: OnDemandThroughputOverride.t option
+        [@ocaml.doc
+          "Overrides the maximum on-demand throughput settings for the specified global secondary index in the specified replica table."]}
     let context_ = "ReplicaGlobalSecondaryIndex"
     let make ?provisionedThroughputOverride =
-      fun ~indexName ->
-        fun () -> { provisionedThroughputOverride; indexName }
+      fun ?onDemandThroughputOverride ->
+        fun ~indexName ->
+          fun () ->
+            {
+              provisionedThroughputOverride;
+              onDemandThroughputOverride;
+              indexName
+            }
     let to_value x =
       structure_to_value
         [("IndexName", (Some (IndexName.to_value x.indexName)));
         ("ProvisionedThroughputOverride",
           (Option.map x.provisionedThroughputOverride
-             ~f:ProvisionedThroughputOverride.to_value))]
+             ~f:ProvisionedThroughputOverride.to_value));
+        ("OnDemandThroughputOverride",
+          (Option.map x.onDemandThroughputOverride
+             ~f:OnDemandThroughputOverride.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let onDemandThroughputOverride =
+        (Option.map ~f:OnDemandThroughputOverride.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughputOverride") in
       let provisionedThroughputOverride =
         (Option.map ~f:ProvisionedThroughputOverride.of_xml)
           (Xml.child xml_arg0 "ProvisionedThroughputOverride") in
       let indexName =
         IndexName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
-      make ?provisionedThroughputOverride ~indexName ()
+      make ?onDemandThroughputOverride ?provisionedThroughputOverride
+        ~indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let onDemandThroughputOverride =
+        field_map json__ "OnDemandThroughputOverride"
+          OnDemandThroughputOverride.of_json in
       let provisionedThroughputOverride =
-        field_map json "ProvisionedThroughputOverride"
+        field_map json__ "ProvisionedThroughputOverride"
           ProvisionedThroughputOverride.of_json in
-      let indexName = field_map_exn json "IndexName" IndexName.of_json in
-      make ?provisionedThroughputOverride ~indexName ()
+      let indexName = field_map_exn json__ "IndexName" IndexName.of_json in
+      make ?onDemandThroughputOverride ?provisionedThroughputOverride
+        ~indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the properties of a replica global secondary index."]
@@ -6330,6 +7350,9 @@ module ReplicaGlobalSecondaryIndexList =
     type nonrec t = ReplicaGlobalSecondaryIndex.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicaGlobalSecondaryIndex.to_value)) |>
         (fun x -> `List x)
@@ -6364,6 +7387,9 @@ module CreateReplicationGroupMemberAction =
       provisionedThroughputOverride: ProvisionedThroughputOverride.t option
         [@ocaml.doc
           "Replica-specific provisioned throughput. If not specified, uses the source table's provisioned throughput settings."];
+      onDemandThroughputOverride: OnDemandThroughputOverride.t option
+        [@ocaml.doc
+          "The maximum on-demand throughput settings for the specified replica table being created. You can only modify MaxReadRequestUnits, because you can't modify MaxWriteRequestUnits for individual replica tables."];
       globalSecondaryIndexes: ReplicaGlobalSecondaryIndexList.t option
         [@ocaml.doc "Replica-specific global secondary index settings."];
       tableClassOverride: TableClass.t option
@@ -6372,17 +7398,19 @@ module CreateReplicationGroupMemberAction =
     let context_ = "CreateReplicationGroupMemberAction"
     let make ?kMSMasterKeyId =
       fun ?provisionedThroughputOverride ->
-        fun ?globalSecondaryIndexes ->
-          fun ?tableClassOverride ->
-            fun ~regionName ->
-              fun () ->
-                {
-                  kMSMasterKeyId;
-                  provisionedThroughputOverride;
-                  globalSecondaryIndexes;
-                  tableClassOverride;
-                  regionName
-                }
+        fun ?onDemandThroughputOverride ->
+          fun ?globalSecondaryIndexes ->
+            fun ?tableClassOverride ->
+              fun ~regionName ->
+                fun () ->
+                  {
+                    kMSMasterKeyId;
+                    provisionedThroughputOverride;
+                    onDemandThroughputOverride;
+                    globalSecondaryIndexes;
+                    tableClassOverride;
+                    regionName
+                  }
     let to_value x =
       structure_to_value
         [("RegionName", (Some (RegionName.to_value x.regionName)));
@@ -6391,6 +7419,9 @@ module CreateReplicationGroupMemberAction =
         ("ProvisionedThroughputOverride",
           (Option.map x.provisionedThroughputOverride
              ~f:ProvisionedThroughputOverride.to_value));
+        ("OnDemandThroughputOverride",
+          (Option.map x.onDemandThroughputOverride
+             ~f:OnDemandThroughputOverride.to_value));
         ("GlobalSecondaryIndexes",
           (Option.map x.globalSecondaryIndexes
              ~f:ReplicaGlobalSecondaryIndexList.to_value));
@@ -6404,6 +7435,9 @@ module CreateReplicationGroupMemberAction =
       let globalSecondaryIndexes =
         (Option.map ~f:ReplicaGlobalSecondaryIndexList.of_xml)
           (Xml.child xml_arg0 "GlobalSecondaryIndexes") in
+      let onDemandThroughputOverride =
+        (Option.map ~f:OnDemandThroughputOverride.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughputOverride") in
       let provisionedThroughputOverride =
         (Option.map ~f:ProvisionedThroughputOverride.of_xml)
           (Xml.child xml_arg0 "ProvisionedThroughputOverride") in
@@ -6414,22 +7448,27 @@ module CreateReplicationGroupMemberAction =
         RegionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RegionName") in
       make ?tableClassOverride ?globalSecondaryIndexes
-        ?provisionedThroughputOverride ?kMSMasterKeyId ~regionName ()
+        ?onDemandThroughputOverride ?provisionedThroughputOverride
+        ?kMSMasterKeyId ~regionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tableClassOverride =
-        field_map json "TableClassOverride" TableClass.of_json in
+        field_map json__ "TableClassOverride" TableClass.of_json in
       let globalSecondaryIndexes =
-        field_map json "GlobalSecondaryIndexes"
+        field_map json__ "GlobalSecondaryIndexes"
           ReplicaGlobalSecondaryIndexList.of_json in
+      let onDemandThroughputOverride =
+        field_map json__ "OnDemandThroughputOverride"
+          OnDemandThroughputOverride.of_json in
       let provisionedThroughputOverride =
-        field_map json "ProvisionedThroughputOverride"
+        field_map json__ "ProvisionedThroughputOverride"
           ProvisionedThroughputOverride.of_json in
       let kMSMasterKeyId =
-        field_map json "KMSMasterKeyId" KMSMasterKeyId.of_json in
-      let regionName = field_map_exn json "RegionName" RegionName.of_json in
+        field_map json__ "KMSMasterKeyId" KMSMasterKeyId.of_json in
+      let regionName = field_map_exn json__ "RegionName" RegionName.of_json in
       make ?tableClassOverride ?globalSecondaryIndexes
-        ?provisionedThroughputOverride ?kMSMasterKeyId ~regionName ()
+        ?onDemandThroughputOverride ?provisionedThroughputOverride
+        ?kMSMasterKeyId ~regionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a replica to be created."]
 module TagValueString =
@@ -6493,9 +7532,9 @@ module Tag =
         TagKeyString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValueString.of_json in
-      let key = field_map_exn json "Key" TagKeyString.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValueString.of_json in
+      let key = field_map_exn json__ "Key" TagKeyString.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6504,6 +7543,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6569,15 +7611,28 @@ module SSESpecification =
         (Option.map ~f:SSEEnabled.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?kMSMasterKeyId ?sSEType ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let kMSMasterKeyId =
-        field_map json "KMSMasterKeyId" KMSMasterKeyId.of_json in
-      let sSEType = field_map json "SSEType" SSEType.of_json in
-      let enabled = field_map json "Enabled" SSEEnabled.of_json in
+        field_map json__ "KMSMasterKeyId" KMSMasterKeyId.of_json in
+      let sSEType = field_map json__ "SSEType" SSEType.of_json in
+      let enabled = field_map json__ "Enabled" SSEEnabled.of_json in
       make ?kMSMasterKeyId ?sSEType ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the settings used to enable server-side encryption."]
+module ResourcePolicy =
+  struct
+    type nonrec t = string
+    let context_ = "ResourcePolicy"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourcePolicy" j
+    let to_json = simple_to_json to_value
+  end
 module LocalSecondaryIndex =
   struct
     type nonrec t =
@@ -6613,10 +7668,10 @@ module LocalSecondaryIndex =
           (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
       make ~projection ~keySchema ~indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let projection = field_map_exn json "Projection" Projection.of_json in
-      let keySchema = field_map_exn json "KeySchema" KeySchema.of_json in
-      let indexName = field_map_exn json "IndexName" IndexName.of_json in
+    let of_json json__ =
+      let projection = field_map_exn json__ "Projection" Projection.of_json in
+      let keySchema = field_map_exn json__ "KeySchema" KeySchema.of_json in
+      let indexName = field_map_exn json__ "IndexName" IndexName.of_json in
       make ~projection ~keySchema ~indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the properties of a local secondary index."]
@@ -6624,6 +7679,9 @@ module LocalSecondaryIndexList =
   struct
     type nonrec t = LocalSecondaryIndex.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocalSecondaryIndex.to_value)) |>
         (fun x -> `List x)
@@ -6661,14 +7719,29 @@ module GlobalSecondaryIndex =
           "Represents attributes that are copied (projected) from the table into the global secondary index. These are in addition to the primary key attributes and index key attributes, which are automatically projected."];
       provisionedThroughput: ProvisionedThroughput.t option
         [@ocaml.doc
-          "Represents the provisioned throughput settings for the specified global secondary index. For current minimum and maximum provisioned throughput values, see Service, Account, and Table Quotas in the Amazon DynamoDB Developer Guide."]}
+          "Represents the provisioned throughput settings for the specified global secondary index. You must use either OnDemandThroughput or ProvisionedThroughput based on your table's capacity mode. For current minimum and maximum provisioned throughput values, see Service, Account, and Table Quotas in the Amazon DynamoDB Developer Guide."];
+      onDemandThroughput: OnDemandThroughput.t option
+        [@ocaml.doc
+          "The maximum number of read and write units for the specified global secondary index. If you use this parameter, you must specify MaxReadRequestUnits, MaxWriteRequestUnits, or both. You must use either OnDemandThroughput or ProvisionedThroughput based on your table's capacity mode."];
+      warmThroughput: WarmThroughput.t option
+        [@ocaml.doc
+          "Represents the warm throughput value (in read units per second and write units per second) for the specified secondary index. If you use this parameter, you must specify ReadUnitsPerSecond, WriteUnitsPerSecond, or both."]}
     let context_ = "GlobalSecondaryIndex"
     let make ?provisionedThroughput =
-      fun ~indexName ->
-        fun ~keySchema ->
-          fun ~projection ->
-            fun () ->
-              { provisionedThroughput; indexName; keySchema; projection }
+      fun ?onDemandThroughput ->
+        fun ?warmThroughput ->
+          fun ~indexName ->
+            fun ~keySchema ->
+              fun ~projection ->
+                fun () ->
+                  {
+                    provisionedThroughput;
+                    onDemandThroughput;
+                    warmThroughput;
+                    indexName;
+                    keySchema;
+                    projection
+                  }
     let to_value x =
       structure_to_value
         [("IndexName", (Some (IndexName.to_value x.indexName)));
@@ -6676,9 +7749,19 @@ module GlobalSecondaryIndex =
         ("Projection", (Some (Projection.to_value x.projection)));
         ("ProvisionedThroughput",
           (Option.map x.provisionedThroughput
-             ~f:ProvisionedThroughput.to_value))]
+             ~f:ProvisionedThroughput.to_value));
+        ("OnDemandThroughput",
+          (Option.map x.onDemandThroughput ~f:OnDemandThroughput.to_value));
+        ("WarmThroughput",
+          (Option.map x.warmThroughput ~f:WarmThroughput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let warmThroughput =
+        (Option.map ~f:WarmThroughput.of_xml)
+          (Xml.child xml_arg0 "WarmThroughput") in
+      let onDemandThroughput =
+        (Option.map ~f:OnDemandThroughput.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughput") in
       let provisionedThroughput =
         (Option.map ~f:ProvisionedThroughput.of_xml)
           (Xml.child xml_arg0 "ProvisionedThroughput") in
@@ -6691,21 +7774,31 @@ module GlobalSecondaryIndex =
       let indexName =
         IndexName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
-      make ?provisionedThroughput ~projection ~keySchema ~indexName ()
+      make ?warmThroughput ?onDemandThroughput ?provisionedThroughput
+        ~projection ~keySchema ~indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let warmThroughput =
+        field_map json__ "WarmThroughput" WarmThroughput.of_json in
+      let onDemandThroughput =
+        field_map json__ "OnDemandThroughput" OnDemandThroughput.of_json in
       let provisionedThroughput =
-        field_map json "ProvisionedThroughput" ProvisionedThroughput.of_json in
-      let projection = field_map_exn json "Projection" Projection.of_json in
-      let keySchema = field_map_exn json "KeySchema" KeySchema.of_json in
-      let indexName = field_map_exn json "IndexName" IndexName.of_json in
-      make ?provisionedThroughput ~projection ~keySchema ~indexName ()
+        field_map json__ "ProvisionedThroughput"
+          ProvisionedThroughput.of_json in
+      let projection = field_map_exn json__ "Projection" Projection.of_json in
+      let keySchema = field_map_exn json__ "KeySchema" KeySchema.of_json in
+      let indexName = field_map_exn json__ "IndexName" IndexName.of_json in
+      make ?warmThroughput ?onDemandThroughput ?provisionedThroughput
+        ~projection ~keySchema ~indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the properties of a global secondary index."]
 module GlobalSecondaryIndexList =
   struct
     type nonrec t = GlobalSecondaryIndex.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlobalSecondaryIndex.to_value)) |>
         (fun x -> `List x)
@@ -6728,26 +7821,41 @@ module GlobalSecondaryIndexList =
         ~of_json:GlobalSecondaryIndex.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DeletionProtectionEnabled =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module CreateTableInput =
   struct
     type nonrec t =
       {
-      attributeDefinitions: AttributeDefinitions.t
+      attributeDefinitions: AttributeDefinitions.t option
         [@ocaml.doc
           "An array of attributes that describe the key schema for the table and indexes."];
-      tableName: TableName.t [@ocaml.doc "The name of the table to create."];
-      keySchema: KeySchema.t
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table to create. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
+      keySchema: KeySchema.t option
         [@ocaml.doc
           "Specifies the attributes that make up the primary key for a table or an index. The attributes in KeySchema must also be defined in the AttributeDefinitions array. For more information, see Data Model in the Amazon DynamoDB Developer Guide. Each KeySchemaElement in the array is composed of: AttributeName - The name of this key attribute. KeyType - The role that the key attribute will assume: HASH - partition key RANGE - sort key The partition key of an item is also known as its hash attribute. The term \"hash attribute\" derives from the DynamoDB usage of an internal hash function to evenly distribute data items across partitions, based on their partition key values. The sort key of an item is also known as its range attribute. The term \"range attribute\" derives from the way DynamoDB stores items with the same partition key physically close together, in sorted order by the sort key value. For a simple primary key (partition key), you must provide exactly one element with a KeyType of HASH. For a composite primary key (partition key and sort key), you must provide exactly two elements, in this order: The first element must have a KeyType of HASH, and the second element must have a KeyType of RANGE. For more information, see Working with Tables in the Amazon DynamoDB Developer Guide."];
       localSecondaryIndexes: LocalSecondaryIndexList.t option
         [@ocaml.doc
-          "One or more local secondary indexes (the maximum is 5) to be created on the table. Each index is scoped to a given partition key value. There is a 10 GB size limit per partition key value; otherwise, the size of a local secondary index is unconstrained. Each local secondary index in the array includes the following: IndexName - The name of the local secondary index. Must be unique only for this table. KeySchema - Specifies the key schema for the local secondary index. The key schema must begin with the same partition key as the table. Projection - Specifies attributes that are copied (projected) from the table into the index. These are in addition to the primary key attributes and index key attributes, which are automatically projected. Each attribute specification is composed of: ProjectionType - One of the following: KEYS_ONLY - Only the index and primary keys are projected into the index. INCLUDE - Only the specified table attributes are projected into the index. The list of projected attributes is in NonKeyAttributes. ALL - All of the table attributes are projected into the index. NonKeyAttributes - A list of one or more non-key attribute names that are projected into the secondary index. The total count of attributes provided in NonKeyAttributes, summed across all of the secondary indexes, must not exceed 100. If you project the same attribute into two different indexes, this counts as two distinct attributes when determining the total."];
+          "One or more local secondary indexes (the maximum is 5) to be created on the table. Each index is scoped to a given partition key value. There is a 10 GB size limit per partition key value; otherwise, the size of a local secondary index is unconstrained. Each local secondary index in the array includes the following: IndexName - The name of the local secondary index. Must be unique only for this table. KeySchema - Specifies the key schema for the local secondary index. The key schema must begin with the same partition key as the table. Projection - Specifies attributes that are copied (projected) from the table into the index. These are in addition to the primary key attributes and index key attributes, which are automatically projected. Each attribute specification is composed of: ProjectionType - One of the following: KEYS_ONLY - Only the index and primary keys are projected into the index. INCLUDE - Only the specified table attributes are projected into the index. The list of projected attributes is in NonKeyAttributes. ALL - All of the table attributes are projected into the index. NonKeyAttributes - A list of one or more non-key attribute names that are projected into the secondary index. The total count of attributes provided in NonKeyAttributes, summed across all of the secondary indexes, must not exceed 100. If you project the same attribute into two different indexes, this counts as two distinct attributes when determining the total. This limit only applies when you specify the ProjectionType of INCLUDE. You still can specify the ProjectionType of ALL to project all attributes from the source table, even if the table has more than 100 attributes."];
       globalSecondaryIndexes: GlobalSecondaryIndexList.t option
         [@ocaml.doc
-          "One or more global secondary indexes (the maximum is 20) to be created on the table. Each global secondary index in the array includes the following: IndexName - The name of the global secondary index. Must be unique only for this table. KeySchema - Specifies the key schema for the global secondary index. Projection - Specifies attributes that are copied (projected) from the table into the index. These are in addition to the primary key attributes and index key attributes, which are automatically projected. Each attribute specification is composed of: ProjectionType - One of the following: KEYS_ONLY - Only the index and primary keys are projected into the index. INCLUDE - Only the specified table attributes are projected into the index. The list of projected attributes is in NonKeyAttributes. ALL - All of the table attributes are projected into the index. NonKeyAttributes - A list of one or more non-key attribute names that are projected into the secondary index. The total count of attributes provided in NonKeyAttributes, summed across all of the secondary indexes, must not exceed 100. If you project the same attribute into two different indexes, this counts as two distinct attributes when determining the total. ProvisionedThroughput - The provisioned throughput settings for the global secondary index, consisting of read and write capacity units."];
+          "One or more global secondary indexes (the maximum is 20) to be created on the table. Each global secondary index in the array includes the following: IndexName - The name of the global secondary index. Must be unique only for this table. KeySchema - Specifies the key schema for the global secondary index. Each global secondary index supports up to 4 partition keys and up to 4 sort keys. Projection - Specifies attributes that are copied (projected) from the table into the index. These are in addition to the primary key attributes and index key attributes, which are automatically projected. Each attribute specification is composed of: ProjectionType - One of the following: KEYS_ONLY - Only the index and primary keys are projected into the index. INCLUDE - Only the specified table attributes are projected into the index. The list of projected attributes is in NonKeyAttributes. ALL - All of the table attributes are projected into the index. NonKeyAttributes - A list of one or more non-key attribute names that are projected into the secondary index. The total count of attributes provided in NonKeyAttributes, summed across all of the secondary indexes, must not exceed 100. If you project the same attribute into two different indexes, this counts as two distinct attributes when determining the total. This limit only applies when you specify the ProjectionType of INCLUDE. You still can specify the ProjectionType of ALL to project all attributes from the source table, even if the table has more than 100 attributes. ProvisionedThroughput - The provisioned throughput settings for the global secondary index, consisting of read and write capacity units."];
       billingMode: BillingMode.t option
         [@ocaml.doc
-          "Controls how you are charged for read and write throughput and how you manage capacity. This setting can be changed later. PROVISIONED - We recommend using PROVISIONED for predictable workloads. PROVISIONED sets the billing mode to Provisioned Mode. PAY_PER_REQUEST - We recommend using PAY_PER_REQUEST for unpredictable workloads. PAY_PER_REQUEST sets the billing mode to On-Demand Mode."];
+          "Controls how you are charged for read and write throughput and how you manage capacity. This setting can be changed later. PAY_PER_REQUEST - We recommend using PAY_PER_REQUEST for most DynamoDB workloads. PAY_PER_REQUEST sets the billing mode to On-demand capacity mode. PROVISIONED - We recommend using PROVISIONED for steady workloads with predictable growth where capacity requirements can be reliably forecasted. PROVISIONED sets the billing mode to Provisioned capacity mode."];
       provisionedThroughput: ProvisionedThroughput.t option
         [@ocaml.doc
           "Represents the provisioned throughput settings for a specified table or index. The settings can be modified using the UpdateTable operation. If you set BillingMode as PROVISIONED, you must specify this property. If you set BillingMode as PAY_PER_REQUEST, you cannot specify this property. For current minimum and maximum provisioned throughput values, see Service, Account, and Table Quotas in the Amazon DynamoDB Developer Guide."];
@@ -6762,39 +7870,71 @@ module CreateTableInput =
           "A list of key-value pairs to label the table. For more information, see Tagging for DynamoDB."];
       tableClass: TableClass.t option
         [@ocaml.doc
-          "The table class of the new table. Valid values are STANDARD and STANDARD_INFREQUENT_ACCESS."]}
+          "The table class of the new table. Valid values are STANDARD and STANDARD_INFREQUENT_ACCESS."];
+      deletionProtectionEnabled: DeletionProtectionEnabled.t option
+        [@ocaml.doc
+          "Indicates whether deletion protection is to be enabled (true) or disabled (false) on the table."];
+      warmThroughput: WarmThroughput.t option
+        [@ocaml.doc
+          "Represents the warm throughput (in read units per second and write units per second) for creating a table."];
+      resourcePolicy: ResourcePolicy.t option
+        [@ocaml.doc
+          "An Amazon Web Services resource-based policy document in JSON format that will be attached to the table. When you attach a resource-based policy while creating a table, the policy application is strongly consistent. The maximum size supported for a resource-based policy document is 20 KB. DynamoDB counts whitespaces when calculating the size of a policy against this limit. For a full list of all considerations that apply for resource-based policies, see Resource-based policy considerations. You need to specify the CreateTable and PutResourcePolicy IAM actions for authorizing a user to create a table with a resource-based policy."];
+      onDemandThroughput: OnDemandThroughput.t option
+        [@ocaml.doc
+          "Sets the maximum number of read and write units for the specified table in on-demand capacity mode. If you use this parameter, you must specify MaxReadRequestUnits, MaxWriteRequestUnits, or both."];
+      globalTableSourceArn: TableArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the source table used for the creation of a multi-account global table."];
+      globalTableSettingsReplicationMode:
+        GlobalTableSettingsReplicationMode.t option
+        [@ocaml.doc
+          "Controls the settings synchronization mode for the global table. For multi-account global tables, this parameter is required and the only supported value is ENABLED. For same-account global tables, this parameter is set to ENABLED_WITH_OVERRIDES."]}
     let context_ = "CreateTableInput"
-    let make ?localSecondaryIndexes =
-      fun ?globalSecondaryIndexes ->
-        fun ?billingMode ->
-          fun ?provisionedThroughput ->
-            fun ?streamSpecification ->
-              fun ?sSESpecification ->
-                fun ?tags ->
-                  fun ?tableClass ->
-                    fun ~attributeDefinitions ->
-                      fun ~tableName ->
-                        fun ~keySchema ->
-                          fun () ->
-                            {
-                              localSecondaryIndexes;
-                              globalSecondaryIndexes;
-                              billingMode;
-                              provisionedThroughput;
-                              streamSpecification;
-                              sSESpecification;
-                              tags;
-                              tableClass;
-                              attributeDefinitions;
-                              tableName;
-                              keySchema
-                            }
+    let make ?attributeDefinitions =
+      fun ?keySchema ->
+        fun ?localSecondaryIndexes ->
+          fun ?globalSecondaryIndexes ->
+            fun ?billingMode ->
+              fun ?provisionedThroughput ->
+                fun ?streamSpecification ->
+                  fun ?sSESpecification ->
+                    fun ?tags ->
+                      fun ?tableClass ->
+                        fun ?deletionProtectionEnabled ->
+                          fun ?warmThroughput ->
+                            fun ?resourcePolicy ->
+                              fun ?onDemandThroughput ->
+                                fun ?globalTableSourceArn ->
+                                  fun ?globalTableSettingsReplicationMode ->
+                                    fun ~tableName ->
+                                      fun () ->
+                                        {
+                                          attributeDefinitions;
+                                          keySchema;
+                                          localSecondaryIndexes;
+                                          globalSecondaryIndexes;
+                                          billingMode;
+                                          provisionedThroughput;
+                                          streamSpecification;
+                                          sSESpecification;
+                                          tags;
+                                          tableClass;
+                                          deletionProtectionEnabled;
+                                          warmThroughput;
+                                          resourcePolicy;
+                                          onDemandThroughput;
+                                          globalTableSourceArn;
+                                          globalTableSettingsReplicationMode;
+                                          tableName
+                                        }
     let to_value x =
       structure_to_value
         [("AttributeDefinitions",
-           (Some (AttributeDefinitions.to_value x.attributeDefinitions)));
-        ("TableName", (Some (TableName.to_value x.tableName)));
-        ("KeySchema", (Some (KeySchema.to_value x.keySchema)));
+           (Option.map x.attributeDefinitions
+              ~f:AttributeDefinitions.to_value));
+        ("TableName", (Some (TableArn.to_value x.tableName)));
+        ("KeySchema", (Option.map x.keySchema ~f:KeySchema.to_value));
         ("LocalSecondaryIndexes",
           (Option.map x.localSecondaryIndexes
              ~f:LocalSecondaryIndexList.to_value));
@@ -6810,9 +7950,41 @@ module CreateTableInput =
         ("SSESpecification",
           (Option.map x.sSESpecification ~f:SSESpecification.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
-        ("TableClass", (Option.map x.tableClass ~f:TableClass.to_value))]
+        ("TableClass", (Option.map x.tableClass ~f:TableClass.to_value));
+        ("DeletionProtectionEnabled",
+          (Option.map x.deletionProtectionEnabled
+             ~f:DeletionProtectionEnabled.to_value));
+        ("WarmThroughput",
+          (Option.map x.warmThroughput ~f:WarmThroughput.to_value));
+        ("ResourcePolicy",
+          (Option.map x.resourcePolicy ~f:ResourcePolicy.to_value));
+        ("OnDemandThroughput",
+          (Option.map x.onDemandThroughput ~f:OnDemandThroughput.to_value));
+        ("GlobalTableSourceArn",
+          (Option.map x.globalTableSourceArn ~f:TableArn.to_value));
+        ("GlobalTableSettingsReplicationMode",
+          (Option.map x.globalTableSettingsReplicationMode
+             ~f:GlobalTableSettingsReplicationMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let globalTableSettingsReplicationMode =
+        (Option.map ~f:GlobalTableSettingsReplicationMode.of_xml)
+          (Xml.child xml_arg0 "GlobalTableSettingsReplicationMode") in
+      let globalTableSourceArn =
+        (Option.map ~f:TableArn.of_xml)
+          (Xml.child xml_arg0 "GlobalTableSourceArn") in
+      let onDemandThroughput =
+        (Option.map ~f:OnDemandThroughput.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughput") in
+      let resourcePolicy =
+        (Option.map ~f:ResourcePolicy.of_xml)
+          (Xml.child xml_arg0 "ResourcePolicy") in
+      let warmThroughput =
+        (Option.map ~f:WarmThroughput.of_xml)
+          (Xml.child xml_arg0 "WarmThroughput") in
+      let deletionProtectionEnabled =
+        (Option.map ~f:DeletionProtectionEnabled.of_xml)
+          (Xml.child xml_arg0 "DeletionProtectionEnabled") in
       let tableClass =
         (Option.map ~f:TableClass.of_xml) (Xml.child xml_arg0 "TableClass") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
@@ -6834,86 +8006,63 @@ module CreateTableInput =
         (Option.map ~f:LocalSecondaryIndexList.of_xml)
           (Xml.child xml_arg0 "LocalSecondaryIndexes") in
       let keySchema =
-        KeySchema.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "KeySchema") in
+        (Option.map ~f:KeySchema.of_xml) (Xml.child xml_arg0 "KeySchema") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       let attributeDefinitions =
-        AttributeDefinitions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AttributeDefinitions") in
-      make ?tableClass ?tags ?sSESpecification ?streamSpecification
-        ?provisionedThroughput ?billingMode ?globalSecondaryIndexes
-        ?localSecondaryIndexes ~keySchema ~tableName ~attributeDefinitions ()
+        (Option.map ~f:AttributeDefinitions.of_xml)
+          (Xml.child xml_arg0 "AttributeDefinitions") in
+      make ?globalTableSettingsReplicationMode ?globalTableSourceArn
+        ?onDemandThroughput ?resourcePolicy ?warmThroughput
+        ?deletionProtectionEnabled ?tableClass ?tags ?sSESpecification
+        ?streamSpecification ?provisionedThroughput ?billingMode
+        ?globalSecondaryIndexes ?localSecondaryIndexes ?keySchema ~tableName
+        ?attributeDefinitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableClass = field_map json "TableClass" TableClass.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let globalTableSettingsReplicationMode =
+        field_map json__ "GlobalTableSettingsReplicationMode"
+          GlobalTableSettingsReplicationMode.of_json in
+      let globalTableSourceArn =
+        field_map json__ "GlobalTableSourceArn" TableArn.of_json in
+      let onDemandThroughput =
+        field_map json__ "OnDemandThroughput" OnDemandThroughput.of_json in
+      let resourcePolicy =
+        field_map json__ "ResourcePolicy" ResourcePolicy.of_json in
+      let warmThroughput =
+        field_map json__ "WarmThroughput" WarmThroughput.of_json in
+      let deletionProtectionEnabled =
+        field_map json__ "DeletionProtectionEnabled"
+          DeletionProtectionEnabled.of_json in
+      let tableClass = field_map json__ "TableClass" TableClass.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let sSESpecification =
-        field_map json "SSESpecification" SSESpecification.of_json in
+        field_map json__ "SSESpecification" SSESpecification.of_json in
       let streamSpecification =
-        field_map json "StreamSpecification" StreamSpecification.of_json in
+        field_map json__ "StreamSpecification" StreamSpecification.of_json in
       let provisionedThroughput =
-        field_map json "ProvisionedThroughput" ProvisionedThroughput.of_json in
-      let billingMode = field_map json "BillingMode" BillingMode.of_json in
+        field_map json__ "ProvisionedThroughput"
+          ProvisionedThroughput.of_json in
+      let billingMode = field_map json__ "BillingMode" BillingMode.of_json in
       let globalSecondaryIndexes =
-        field_map json "GlobalSecondaryIndexes"
+        field_map json__ "GlobalSecondaryIndexes"
           GlobalSecondaryIndexList.of_json in
       let localSecondaryIndexes =
-        field_map json "LocalSecondaryIndexes"
+        field_map json__ "LocalSecondaryIndexes"
           LocalSecondaryIndexList.of_json in
-      let keySchema = field_map_exn json "KeySchema" KeySchema.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+      let keySchema = field_map json__ "KeySchema" KeySchema.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       let attributeDefinitions =
-        field_map_exn json "AttributeDefinitions"
-          AttributeDefinitions.of_json in
-      make ?tableClass ?tags ?sSESpecification ?streamSpecification
-        ?provisionedThroughput ?billingMode ?globalSecondaryIndexes
-        ?localSecondaryIndexes ~keySchema ~tableName ~attributeDefinitions ()
+        field_map json__ "AttributeDefinitions" AttributeDefinitions.of_json in
+      make ?globalTableSettingsReplicationMode ?globalTableSourceArn
+        ?onDemandThroughput ?resourcePolicy ?warmThroughput
+        ?deletionProtectionEnabled ?tableClass ?tags ?sSESpecification
+        ?streamSpecification ?provisionedThroughput ?billingMode
+        ?globalSecondaryIndexes ?localSecondaryIndexes ?keySchema ~tableName
+        ?attributeDefinitions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a CreateTable operation."]
-module TableStatus =
-  struct
-    type nonrec t =
-      | CREATING 
-      | UPDATING 
-      | DELETING 
-      | ACTIVE 
-      | INACCESSIBLE_ENCRYPTION_CREDENTIALS 
-      | ARCHIVING 
-      | ARCHIVED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | CREATING -> "CREATING"
-      | UPDATING -> "UPDATING"
-      | DELETING -> "DELETING"
-      | ACTIVE -> "ACTIVE"
-      | INACCESSIBLE_ENCRYPTION_CREDENTIALS ->
-          "INACCESSIBLE_ENCRYPTION_CREDENTIALS"
-      | ARCHIVING -> "ARCHIVING"
-      | ARCHIVED -> "ARCHIVED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "CREATING" -> CREATING
-      | "UPDATING" -> UPDATING
-      | "DELETING" -> DELETING
-      | "ACTIVE" -> ACTIVE
-      | "INACCESSIBLE_ENCRYPTION_CREDENTIALS" ->
-          INACCESSIBLE_ENCRYPTION_CREDENTIALS
-      | "ARCHIVING" -> ARCHIVING
-      | "ARCHIVED" -> ARCHIVED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration TableStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"TableStatus" j)
-    let to_json = simple_to_json to_value
-  end
 module StreamArn =
   struct
     type nonrec t = string
@@ -6955,15 +8104,14 @@ module RestoreSummary =
       sourceTableArn: TableArn.t option
         [@ocaml.doc
           "The ARN of the source table of the backup that is being restored."];
-      restoreDateTime: Date.t
+      restoreDateTime: Date.t option
         [@ocaml.doc "Point in time or source backup time."];
-      restoreInProgress: RestoreInProgress.t
+      restoreInProgress: RestoreInProgress.t option
         [@ocaml.doc "Indicates if a restore is in progress or not."]}
-    let context_ = "RestoreSummary"
     let make ?sourceBackupArn =
       fun ?sourceTableArn ->
-        fun ~restoreDateTime ->
-          fun ~restoreInProgress ->
+        fun ?restoreDateTime ->
+          fun ?restoreInProgress ->
             fun () ->
               {
                 sourceBackupArn;
@@ -6977,33 +8125,32 @@ module RestoreSummary =
            (Option.map x.sourceBackupArn ~f:BackupArn.to_value));
         ("SourceTableArn",
           (Option.map x.sourceTableArn ~f:TableArn.to_value));
-        ("RestoreDateTime", (Some (Date.to_value x.restoreDateTime)));
+        ("RestoreDateTime", (Option.map x.restoreDateTime ~f:Date.to_value));
         ("RestoreInProgress",
-          (Some (RestoreInProgress.to_value x.restoreInProgress)))]
+          (Option.map x.restoreInProgress ~f:RestoreInProgress.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let restoreInProgress =
-        RestoreInProgress.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RestoreInProgress") in
+        (Option.map ~f:RestoreInProgress.of_xml)
+          (Xml.child xml_arg0 "RestoreInProgress") in
       let restoreDateTime =
-        Date.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RestoreDateTime") in
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "RestoreDateTime") in
       let sourceTableArn =
         (Option.map ~f:TableArn.of_xml) (Xml.child xml_arg0 "SourceTableArn") in
       let sourceBackupArn =
         (Option.map ~f:BackupArn.of_xml)
           (Xml.child xml_arg0 "SourceBackupArn") in
-      make ~restoreInProgress ~restoreDateTime ?sourceTableArn
+      make ?restoreInProgress ?restoreDateTime ?sourceTableArn
         ?sourceBackupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let restoreInProgress =
-        field_map_exn json "RestoreInProgress" RestoreInProgress.of_json in
-      let restoreDateTime = field_map_exn json "RestoreDateTime" Date.of_json in
-      let sourceTableArn = field_map json "SourceTableArn" TableArn.of_json in
+        field_map json__ "RestoreInProgress" RestoreInProgress.of_json in
+      let restoreDateTime = field_map json__ "RestoreDateTime" Date.of_json in
+      let sourceTableArn = field_map json__ "SourceTableArn" TableArn.of_json in
       let sourceBackupArn =
-        field_map json "SourceBackupArn" BackupArn.of_json in
-      make ~restoreInProgress ~restoreDateTime ?sourceTableArn
+        field_map json__ "SourceBackupArn" BackupArn.of_json in
+      make ?restoreInProgress ?restoreDateTime ?sourceTableArn
         ?sourceBackupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details for the restore."]
@@ -7085,22 +8232,49 @@ module ProvisionedThroughputDescription =
       make ?writeCapacityUnits ?readCapacityUnits ?numberOfDecreasesToday
         ?lastDecreaseDateTime ?lastIncreaseDateTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let writeCapacityUnits =
-        field_map json "WriteCapacityUnits" NonNegativeLongObject.of_json in
+        field_map json__ "WriteCapacityUnits" NonNegativeLongObject.of_json in
       let readCapacityUnits =
-        field_map json "ReadCapacityUnits" NonNegativeLongObject.of_json in
+        field_map json__ "ReadCapacityUnits" NonNegativeLongObject.of_json in
       let numberOfDecreasesToday =
-        field_map json "NumberOfDecreasesToday" PositiveLongObject.of_json in
+        field_map json__ "NumberOfDecreasesToday" PositiveLongObject.of_json in
       let lastDecreaseDateTime =
-        field_map json "LastDecreaseDateTime" Date.of_json in
+        field_map json__ "LastDecreaseDateTime" Date.of_json in
       let lastIncreaseDateTime =
-        field_map json "LastIncreaseDateTime" Date.of_json in
+        field_map json__ "LastIncreaseDateTime" Date.of_json in
       make ?writeCapacityUnits ?readCapacityUnits ?numberOfDecreasesToday
         ?lastDecreaseDateTime ?lastIncreaseDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the provisioned throughput settings for the table, consisting of read and write capacity units, along with data about increases and decreases."]
+module MultiRegionConsistency =
+  struct
+    type nonrec t =
+      | EVENTUAL 
+      | STRONG 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EVENTUAL -> "EVENTUAL"
+      | STRONG -> "STRONG"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EVENTUAL" -> EVENTUAL
+      | "STRONG" -> STRONG
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MultiRegionConsistency" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MultiRegionConsistency" j)
+    let to_json = simple_to_json to_value
+  end
 module LocalSecondaryIndexDescription =
   struct
     type nonrec t =
@@ -7113,10 +8287,10 @@ module LocalSecondaryIndexDescription =
       projection: Projection.t option
         [@ocaml.doc
           "Represents attributes that are copied (projected) from the table into the global secondary index. These are in addition to the primary key attributes and index key attributes, which are automatically projected."];
-      indexSizeBytes: Long.t option
+      indexSizeBytes: LongObject.t option
         [@ocaml.doc
           "The total size of the specified index, in bytes. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value."];
-      itemCount: Long.t option
+      itemCount: LongObject.t option
         [@ocaml.doc
           "The number of items in the specified index. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value."];
       indexArn: String_.t option
@@ -7142,17 +8316,19 @@ module LocalSecondaryIndexDescription =
         [("IndexName", (Option.map x.indexName ~f:IndexName.to_value));
         ("KeySchema", (Option.map x.keySchema ~f:KeySchema.to_value));
         ("Projection", (Option.map x.projection ~f:Projection.to_value));
-        ("IndexSizeBytes", (Option.map x.indexSizeBytes ~f:Long.to_value));
-        ("ItemCount", (Option.map x.itemCount ~f:Long.to_value));
+        ("IndexSizeBytes",
+          (Option.map x.indexSizeBytes ~f:LongObject.to_value));
+        ("ItemCount", (Option.map x.itemCount ~f:LongObject.to_value));
         ("IndexArn", (Option.map x.indexArn ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let indexArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "IndexArn") in
       let itemCount =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "ItemCount") in
+        (Option.map ~f:LongObject.of_xml) (Xml.child xml_arg0 "ItemCount") in
       let indexSizeBytes =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "IndexSizeBytes") in
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "IndexSizeBytes") in
       let projection =
         (Option.map ~f:Projection.of_xml) (Xml.child xml_arg0 "Projection") in
       let keySchema =
@@ -7162,13 +8338,14 @@ module LocalSecondaryIndexDescription =
       make ?indexArn ?itemCount ?indexSizeBytes ?projection ?keySchema
         ?indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexArn = field_map json "IndexArn" String_.of_json in
-      let itemCount = field_map json "ItemCount" Long.of_json in
-      let indexSizeBytes = field_map json "IndexSizeBytes" Long.of_json in
-      let projection = field_map json "Projection" Projection.of_json in
-      let keySchema = field_map json "KeySchema" KeySchema.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
+    let of_json json__ =
+      let indexArn = field_map json__ "IndexArn" String_.of_json in
+      let itemCount = field_map json__ "ItemCount" LongObject.of_json in
+      let indexSizeBytes =
+        field_map json__ "IndexSizeBytes" LongObject.of_json in
+      let projection = field_map json__ "Projection" Projection.of_json in
+      let keySchema = field_map json__ "KeySchema" KeySchema.of_json in
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
       make ?indexArn ?itemCount ?indexSizeBytes ?projection ?keySchema
         ?indexName ()
     let to_json v = composed_to_json to_value v
@@ -7177,6 +8354,9 @@ module LocalSecondaryIndexDescriptionList =
   struct
     type nonrec t = LocalSecondaryIndexDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LocalSecondaryIndexDescription.to_value)) |>
         (fun x -> `List x)
@@ -7199,11 +8379,10 @@ module LocalSecondaryIndexDescriptionList =
         ~of_json:LocalSecondaryIndexDescription.of_json j
     let to_json v = composed_to_json to_value v
   end
-module IndexStatus =
+module WitnessStatus =
   struct
     type nonrec t =
       | CREATING 
-      | UPDATING 
       | DELETING 
       | ACTIVE 
       | Non_static_id of string 
@@ -7211,14 +8390,12 @@ module IndexStatus =
     let to_string =
       function
       | CREATING -> "CREATING"
-      | UPDATING -> "UPDATING"
       | DELETING -> "DELETING"
       | ACTIVE -> "ACTIVE"
       | Non_static_id s -> s
     let of_string =
       function
       | "CREATING" -> CREATING
-      | "UPDATING" -> UPDATING
       | "DELETING" -> DELETING
       | "ACTIVE" -> ACTIVE
       | x -> Non_static_id x
@@ -7226,9 +8403,72 @@ module IndexStatus =
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration IndexStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"IndexStatus" j)
+      of_string (string_of_xml ~kind:"enumeration WitnessStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"WitnessStatus" j)
     let to_json = simple_to_json to_value
+  end
+module GlobalTableWitnessDescription =
+  struct
+    type nonrec t =
+      {
+      regionName: RegionName.t option
+        [@ocaml.doc
+          "The name of the Amazon Web Services Region that serves as a witness for the MRSC global table."];
+      witnessStatus: WitnessStatus.t option
+        [@ocaml.doc
+          "The current status of the witness Region in the MRSC global table."]}
+    let make ?regionName =
+      fun ?witnessStatus -> fun () -> { regionName; witnessStatus }
+    let to_value x =
+      structure_to_value
+        [("RegionName", (Option.map x.regionName ~f:RegionName.to_value));
+        ("WitnessStatus",
+          (Option.map x.witnessStatus ~f:WitnessStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let witnessStatus =
+        (Option.map ~f:WitnessStatus.of_xml)
+          (Xml.child xml_arg0 "WitnessStatus") in
+      let regionName =
+        (Option.map ~f:RegionName.of_xml) (Xml.child xml_arg0 "RegionName") in
+      make ?witnessStatus ?regionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let witnessStatus =
+        field_map json__ "WitnessStatus" WitnessStatus.of_json in
+      let regionName = field_map json__ "RegionName" RegionName.of_json in
+      make ?witnessStatus ?regionName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the properties of a witness Region in a MRSC global table."]
+module GlobalTableWitnessDescriptionList =
+  struct
+    type nonrec t = GlobalTableWitnessDescription.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GlobalTableWitnessDescription.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GlobalTableWitnessDescription.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GlobalTableWitnessDescriptionList"
+        ~of_json:GlobalTableWitnessDescription.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module GlobalSecondaryIndexDescription =
   struct
@@ -7251,15 +8491,21 @@ module GlobalSecondaryIndexDescription =
       provisionedThroughput: ProvisionedThroughputDescription.t option
         [@ocaml.doc
           "Represents the provisioned throughput settings for the specified global secondary index. For current minimum and maximum provisioned throughput values, see Service, Account, and Table Quotas in the Amazon DynamoDB Developer Guide."];
-      indexSizeBytes: Long.t option
+      indexSizeBytes: LongObject.t option
         [@ocaml.doc
           "The total size of the specified index, in bytes. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value."];
-      itemCount: Long.t option
+      itemCount: LongObject.t option
         [@ocaml.doc
           "The number of items in the specified index. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value."];
       indexArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that uniquely identifies the index."]}
+          "The Amazon Resource Name (ARN) that uniquely identifies the index."];
+      onDemandThroughput: OnDemandThroughput.t option
+        [@ocaml.doc
+          "The maximum number of read and write units for the specified global secondary index. If you use this parameter, you must specify MaxReadRequestUnits, MaxWriteRequestUnits, or both."];
+      warmThroughput: GlobalSecondaryIndexWarmThroughputDescription.t option
+        [@ocaml.doc
+          "Represents the warm throughput value (in read units per second and write units per second) for the specified secondary index."]}
     let make ?indexName =
       fun ?keySchema ->
         fun ?projection ->
@@ -7269,18 +8515,22 @@ module GlobalSecondaryIndexDescription =
                 fun ?indexSizeBytes ->
                   fun ?itemCount ->
                     fun ?indexArn ->
-                      fun () ->
-                        {
-                          indexName;
-                          keySchema;
-                          projection;
-                          indexStatus;
-                          backfilling;
-                          provisionedThroughput;
-                          indexSizeBytes;
-                          itemCount;
-                          indexArn
-                        }
+                      fun ?onDemandThroughput ->
+                        fun ?warmThroughput ->
+                          fun () ->
+                            {
+                              indexName;
+                              keySchema;
+                              projection;
+                              indexStatus;
+                              backfilling;
+                              provisionedThroughput;
+                              indexSizeBytes;
+                              itemCount;
+                              indexArn;
+                              onDemandThroughput;
+                              warmThroughput
+                            }
     let to_value x =
       structure_to_value
         [("IndexName", (Option.map x.indexName ~f:IndexName.to_value));
@@ -7291,17 +8541,30 @@ module GlobalSecondaryIndexDescription =
         ("ProvisionedThroughput",
           (Option.map x.provisionedThroughput
              ~f:ProvisionedThroughputDescription.to_value));
-        ("IndexSizeBytes", (Option.map x.indexSizeBytes ~f:Long.to_value));
-        ("ItemCount", (Option.map x.itemCount ~f:Long.to_value));
-        ("IndexArn", (Option.map x.indexArn ~f:String_.to_value))]
+        ("IndexSizeBytes",
+          (Option.map x.indexSizeBytes ~f:LongObject.to_value));
+        ("ItemCount", (Option.map x.itemCount ~f:LongObject.to_value));
+        ("IndexArn", (Option.map x.indexArn ~f:String_.to_value));
+        ("OnDemandThroughput",
+          (Option.map x.onDemandThroughput ~f:OnDemandThroughput.to_value));
+        ("WarmThroughput",
+          (Option.map x.warmThroughput
+             ~f:GlobalSecondaryIndexWarmThroughputDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let warmThroughput =
+        (Option.map ~f:GlobalSecondaryIndexWarmThroughputDescription.of_xml)
+          (Xml.child xml_arg0 "WarmThroughput") in
+      let onDemandThroughput =
+        (Option.map ~f:OnDemandThroughput.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughput") in
       let indexArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "IndexArn") in
       let itemCount =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "ItemCount") in
+        (Option.map ~f:LongObject.of_xml) (Xml.child xml_arg0 "ItemCount") in
       let indexSizeBytes =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "IndexSizeBytes") in
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "IndexSizeBytes") in
       let provisionedThroughput =
         (Option.map ~f:ProvisionedThroughputDescription.of_xml)
           (Xml.child xml_arg0 "ProvisionedThroughput") in
@@ -7315,29 +8578,40 @@ module GlobalSecondaryIndexDescription =
         (Option.map ~f:KeySchema.of_xml) (Xml.child xml_arg0 "KeySchema") in
       let indexName =
         (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
-      make ?indexArn ?itemCount ?indexSizeBytes ?provisionedThroughput
-        ?backfilling ?indexStatus ?projection ?keySchema ?indexName ()
+      make ?warmThroughput ?onDemandThroughput ?indexArn ?itemCount
+        ?indexSizeBytes ?provisionedThroughput ?backfilling ?indexStatus
+        ?projection ?keySchema ?indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexArn = field_map json "IndexArn" String_.of_json in
-      let itemCount = field_map json "ItemCount" Long.of_json in
-      let indexSizeBytes = field_map json "IndexSizeBytes" Long.of_json in
+    let of_json json__ =
+      let warmThroughput =
+        field_map json__ "WarmThroughput"
+          GlobalSecondaryIndexWarmThroughputDescription.of_json in
+      let onDemandThroughput =
+        field_map json__ "OnDemandThroughput" OnDemandThroughput.of_json in
+      let indexArn = field_map json__ "IndexArn" String_.of_json in
+      let itemCount = field_map json__ "ItemCount" LongObject.of_json in
+      let indexSizeBytes =
+        field_map json__ "IndexSizeBytes" LongObject.of_json in
       let provisionedThroughput =
-        field_map json "ProvisionedThroughput"
+        field_map json__ "ProvisionedThroughput"
           ProvisionedThroughputDescription.of_json in
-      let backfilling = field_map json "Backfilling" Backfilling.of_json in
-      let indexStatus = field_map json "IndexStatus" IndexStatus.of_json in
-      let projection = field_map json "Projection" Projection.of_json in
-      let keySchema = field_map json "KeySchema" KeySchema.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
-      make ?indexArn ?itemCount ?indexSizeBytes ?provisionedThroughput
-        ?backfilling ?indexStatus ?projection ?keySchema ?indexName ()
+      let backfilling = field_map json__ "Backfilling" Backfilling.of_json in
+      let indexStatus = field_map json__ "IndexStatus" IndexStatus.of_json in
+      let projection = field_map json__ "Projection" Projection.of_json in
+      let keySchema = field_map json__ "KeySchema" KeySchema.of_json in
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
+      make ?warmThroughput ?onDemandThroughput ?indexArn ?itemCount
+        ?indexSizeBytes ?provisionedThroughput ?backfilling ?indexStatus
+        ?projection ?keySchema ?indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the properties of a global secondary index."]
 module GlobalSecondaryIndexDescriptionList =
   struct
     type nonrec t = GlobalSecondaryIndexDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlobalSecondaryIndexDescription.to_value)) |>
         (fun x -> `List x)
@@ -7373,17 +8647,17 @@ module TableDescription =
           "The primary key structure for the table. Each KeySchemaElement consists of: AttributeName - The name of the attribute. KeyType - The role of the attribute: HASH - partition key RANGE - sort key The partition key of an item is also known as its hash attribute. The term \"hash attribute\" derives from DynamoDB's usage of an internal hash function to evenly distribute data items across partitions, based on their partition key values. The sort key of an item is also known as its range attribute. The term \"range attribute\" derives from the way DynamoDB stores items with the same partition key physically close together, in sorted order by the sort key value. For more information about primary keys, see Primary Key in the Amazon DynamoDB Developer Guide."];
       tableStatus: TableStatus.t option
         [@ocaml.doc
-          "The current state of the table: CREATING - The table is being created. UPDATING - The table is being updated. DELETING - The table is being deleted. ACTIVE - The table is ready for use. INACCESSIBLE_ENCRYPTION_CREDENTIALS - The KMS key used to encrypt the table in inaccessible. Table operations may fail due to failure to use the KMS key. DynamoDB will initiate the table archival process when a table's KMS key remains inaccessible for more than seven days. ARCHIVING - The table is being archived. Operations are not allowed until archival is complete. ARCHIVED - The table has been archived. See the ArchivalReason for more information."];
+          "The current state of the table: CREATING - The table is being created. UPDATING - The table/index configuration is being updated. The table/index remains available for data operations when UPDATING. DELETING - The table is being deleted. ACTIVE - The table is ready for use. INACCESSIBLE_ENCRYPTION_CREDENTIALS - The KMS key used to encrypt the table in inaccessible. Table operations may fail due to failure to use the KMS key. DynamoDB will initiate the table archival process when a table's KMS key remains inaccessible for more than seven days. ARCHIVING - The table is being archived. Operations are not allowed until archival is complete. ARCHIVED - The table has been archived. See the ArchivalReason for more information."];
       creationDateTime: Date.t option
         [@ocaml.doc
           "The date and time when the table was created, in UNIX epoch time format."];
       provisionedThroughput: ProvisionedThroughputDescription.t option
         [@ocaml.doc
           "The provisioned throughput settings for the table, consisting of read and write capacity units, along with data about increases and decreases."];
-      tableSizeBytes: Long.t option
+      tableSizeBytes: LongObject.t option
         [@ocaml.doc
           "The total size of the specified table, in bytes. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value."];
-      itemCount: Long.t option
+      itemCount: LongObject.t option
         [@ocaml.doc
           "The number of items in the specified table. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value."];
       tableArn: String_.t option
@@ -7396,10 +8670,10 @@ module TableDescription =
         [@ocaml.doc "Contains the details for the read/write capacity mode."];
       localSecondaryIndexes: LocalSecondaryIndexDescriptionList.t option
         [@ocaml.doc
-          "Represents one or more local secondary indexes on the table. Each index is scoped to a given partition key value. Tables with one or more local secondary indexes are subject to an item collection size limit, where the amount of data within a given item collection cannot exceed 10 GB. Each element is composed of: IndexName - The name of the local secondary index. KeySchema - Specifies the complete index key schema. The attribute names in the key schema must be between 1 and 255 characters (inclusive). The key schema must begin with the same partition key as the table. Projection - Specifies attributes that are copied (projected) from the table into the index. These are in addition to the primary key attributes and index key attributes, which are automatically projected. Each attribute specification is composed of: ProjectionType - One of the following: KEYS_ONLY - Only the index and primary keys are projected into the index. INCLUDE - Only the specified table attributes are projected into the index. The list of projected attributes is in NonKeyAttributes. ALL - All of the table attributes are projected into the index. NonKeyAttributes - A list of one or more non-key attribute names that are projected into the secondary index. The total count of attributes provided in NonKeyAttributes, summed across all of the secondary indexes, must not exceed 20. If you project the same attribute into two different indexes, this counts as two distinct attributes when determining the total. IndexSizeBytes - Represents the total size of the index, in bytes. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value. ItemCount - Represents the number of items in the index. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value. If the table is in the DELETING state, no information about indexes will be returned."];
+          "Represents one or more local secondary indexes on the table. Each index is scoped to a given partition key value. Tables with one or more local secondary indexes are subject to an item collection size limit, where the amount of data within a given item collection cannot exceed 10 GB. Each element is composed of: IndexName - The name of the local secondary index. KeySchema - Specifies the complete index key schema. The attribute names in the key schema must be between 1 and 255 characters (inclusive). The key schema must begin with the same partition key as the table. Projection - Specifies attributes that are copied (projected) from the table into the index. These are in addition to the primary key attributes and index key attributes, which are automatically projected. Each attribute specification is composed of: ProjectionType - One of the following: KEYS_ONLY - Only the index and primary keys are projected into the index. INCLUDE - Only the specified table attributes are projected into the index. The list of projected attributes is in NonKeyAttributes. ALL - All of the table attributes are projected into the index. NonKeyAttributes - A list of one or more non-key attribute names that are projected into the secondary index. The total count of attributes provided in NonKeyAttributes, summed across all of the secondary indexes, must not exceed 100. If you project the same attribute into two different indexes, this counts as two distinct attributes when determining the total. This limit only applies when you specify the ProjectionType of INCLUDE. You still can specify the ProjectionType of ALL to project all attributes from the source table, even if the table has more than 100 attributes. IndexSizeBytes - Represents the total size of the index, in bytes. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value. ItemCount - Represents the number of items in the index. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value. If the table is in the DELETING state, no information about indexes will be returned."];
       globalSecondaryIndexes: GlobalSecondaryIndexDescriptionList.t option
         [@ocaml.doc
-          "The global secondary indexes, if any, on the table. Each index is scoped to a given partition key value. Each element is composed of: Backfilling - If true, then the index is currently in the backfilling phase. Backfilling occurs only when a new global secondary index is added to the table. It is the process by which DynamoDB populates the new index with data from the table. (This attribute does not appear for indexes that were created during a CreateTable operation.) You can delete an index that is being created during the Backfilling phase when IndexStatus is set to CREATING and Backfilling is true. You can't delete the index that is being created when IndexStatus is set to CREATING and Backfilling is false. (This attribute does not appear for indexes that were created during a CreateTable operation.) IndexName - The name of the global secondary index. IndexSizeBytes - The total size of the global secondary index, in bytes. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value. IndexStatus - The current status of the global secondary index: CREATING - The index is being created. UPDATING - The index is being updated. DELETING - The index is being deleted. ACTIVE - The index is ready for use. ItemCount - The number of items in the global secondary index. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value. KeySchema - Specifies the complete index key schema. The attribute names in the key schema must be between 1 and 255 characters (inclusive). The key schema must begin with the same partition key as the table. Projection - Specifies attributes that are copied (projected) from the table into the index. These are in addition to the primary key attributes and index key attributes, which are automatically projected. Each attribute specification is composed of: ProjectionType - One of the following: KEYS_ONLY - Only the index and primary keys are projected into the index. INCLUDE - In addition to the attributes described in KEYS_ONLY, the secondary index will include other non-key attributes that you specify. ALL - All of the table attributes are projected into the index. NonKeyAttributes - A list of one or more non-key attribute names that are projected into the secondary index. The total count of attributes provided in NonKeyAttributes, summed across all of the secondary indexes, must not exceed 20. If you project the same attribute into two different indexes, this counts as two distinct attributes when determining the total. ProvisionedThroughput - The provisioned throughput settings for the global secondary index, consisting of read and write capacity units, along with data about increases and decreases. If the table is in the DELETING state, no information about indexes will be returned."];
+          "The global secondary indexes, if any, on the table. Each index is scoped to a given partition key value. Each element is composed of: Backfilling - If true, then the index is currently in the backfilling phase. Backfilling occurs only when a new global secondary index is added to the table. It is the process by which DynamoDB populates the new index with data from the table. (This attribute does not appear for indexes that were created during a CreateTable operation.) You can delete an index that is being created during the Backfilling phase when IndexStatus is set to CREATING and Backfilling is true. You can't delete the index that is being created when IndexStatus is set to CREATING and Backfilling is false. (This attribute does not appear for indexes that were created during a CreateTable operation.) IndexName - The name of the global secondary index. IndexSizeBytes - The total size of the global secondary index, in bytes. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value. IndexStatus - The current status of the global secondary index: CREATING - The index is being created. UPDATING - The index is being updated. DELETING - The index is being deleted. ACTIVE - The index is ready for use. ItemCount - The number of items in the global secondary index. DynamoDB updates this value approximately every six hours. Recent changes might not be reflected in this value. KeySchema - Specifies the complete index key schema. The attribute names in the key schema must be between 1 and 255 characters (inclusive). The key schema must begin with the same partition key as the table. Projection - Specifies attributes that are copied (projected) from the table into the index. These are in addition to the primary key attributes and index key attributes, which are automatically projected. Each attribute specification is composed of: ProjectionType - One of the following: KEYS_ONLY - Only the index and primary keys are projected into the index. INCLUDE - In addition to the attributes described in KEYS_ONLY, the secondary index will include other non-key attributes that you specify. ALL - All of the table attributes are projected into the index. NonKeyAttributes - A list of one or more non-key attribute names that are projected into the secondary index. The total count of attributes provided in NonKeyAttributes, summed across all of the secondary indexes, must not exceed 100. If you project the same attribute into two different indexes, this counts as two distinct attributes when determining the total. This limit only applies when you specify the ProjectionType of INCLUDE. You still can specify the ProjectionType of ALL to project all attributes from the source table, even if the table has more than 100 attributes. ProvisionedThroughput - The provisioned throughput settings for the global secondary index, consisting of read and write capacity units, along with data about increases and decreases. If the table is in the DELETING state, no information about indexes will be returned."];
       streamSpecification: StreamSpecification.t option
         [@ocaml.doc
           "The current DynamoDB Streams configuration for the table."];
@@ -7414,6 +8688,13 @@ module TableDescription =
           "Represents the version of global tables in use, if the table is replicated across Amazon Web Services Regions."];
       replicas: ReplicaDescriptionList.t option
         [@ocaml.doc "Represents replicas of the table."];
+      globalTableWitnesses: GlobalTableWitnessDescriptionList.t option
+        [@ocaml.doc
+          "The witness Region and its current status in the MRSC global table. Only one witness Region can be configured per MRSC global table."];
+      globalTableSettingsReplicationMode:
+        GlobalTableSettingsReplicationMode.t option
+        [@ocaml.doc
+          "Indicates one of the settings synchronization modes for the global table: ENABLED: Indicates that the settings synchronization mode for the global table is enabled. DISABLED: Indicates that the settings synchronization mode for the global table is disabled. ENABLED_WITH_OVERRIDES: This mode is set by default for a same account global table. Indicates that certain global table settings can be overridden."];
       restoreSummary: RestoreSummary.t option
         [@ocaml.doc "Contains details for the restore."];
       sSEDescription: SSEDescription.t option
@@ -7422,7 +8703,18 @@ module TableDescription =
       archivalSummary: ArchivalSummary.t option
         [@ocaml.doc "Contains information about the table archive."];
       tableClassSummary: TableClassSummary.t option
-        [@ocaml.doc "Contains details of the table class."]}
+        [@ocaml.doc "Contains details of the table class."];
+      deletionProtectionEnabled: DeletionProtectionEnabled.t option
+        [@ocaml.doc
+          "Indicates whether deletion protection is enabled (true) or disabled (false) on the table."];
+      onDemandThroughput: OnDemandThroughput.t option
+        [@ocaml.doc
+          "The maximum number of read and write units for the specified on-demand table. If you use this parameter, you must specify MaxReadRequestUnits, MaxWriteRequestUnits, or both."];
+      warmThroughput: TableWarmThroughputDescription.t option
+        [@ocaml.doc "Describes the warm throughput value of the base table."];
+      multiRegionConsistency: MultiRegionConsistency.t option
+        [@ocaml.doc
+          "Indicates one of the following consistency modes for a global table: EVENTUAL: Indicates that the global table is configured for multi-Region eventual consistency (MREC). STRONG: Indicates that the global table is configured for multi-Region strong consistency (MRSC). If you don't specify this field, the global table consistency mode defaults to EVENTUAL. For more information about global tables consistency modes, see Consistency modes in DynamoDB developer guide."]}
     let make ?attributeDefinitions =
       fun ?tableName ->
         fun ?keySchema ->
@@ -7441,35 +8733,55 @@ module TableDescription =
                                   fun ?latestStreamArn ->
                                     fun ?globalTableVersion ->
                                       fun ?replicas ->
-                                        fun ?restoreSummary ->
-                                          fun ?sSEDescription ->
-                                            fun ?archivalSummary ->
-                                              fun ?tableClassSummary ->
-                                                fun () ->
-                                                  {
-                                                    attributeDefinitions;
-                                                    tableName;
-                                                    keySchema;
-                                                    tableStatus;
-                                                    creationDateTime;
-                                                    provisionedThroughput;
-                                                    tableSizeBytes;
-                                                    itemCount;
-                                                    tableArn;
-                                                    tableId;
-                                                    billingModeSummary;
-                                                    localSecondaryIndexes;
-                                                    globalSecondaryIndexes;
-                                                    streamSpecification;
-                                                    latestStreamLabel;
-                                                    latestStreamArn;
-                                                    globalTableVersion;
-                                                    replicas;
-                                                    restoreSummary;
-                                                    sSEDescription;
-                                                    archivalSummary;
-                                                    tableClassSummary
-                                                  }
+                                        fun ?globalTableWitnesses ->
+                                          fun
+                                            ?globalTableSettingsReplicationMode
+                                            ->
+                                            fun ?restoreSummary ->
+                                              fun ?sSEDescription ->
+                                                fun ?archivalSummary ->
+                                                  fun ?tableClassSummary ->
+                                                    fun
+                                                      ?deletionProtectionEnabled
+                                                      ->
+                                                      fun ?onDemandThroughput
+                                                        ->
+                                                        fun ?warmThroughput
+                                                          ->
+                                                          fun
+                                                            ?multiRegionConsistency
+                                                            ->
+                                                            fun () ->
+                                                              {
+                                                                attributeDefinitions;
+                                                                tableName;
+                                                                keySchema;
+                                                                tableStatus;
+                                                                creationDateTime;
+                                                                provisionedThroughput;
+                                                                tableSizeBytes;
+                                                                itemCount;
+                                                                tableArn;
+                                                                tableId;
+                                                                billingModeSummary;
+                                                                localSecondaryIndexes;
+                                                                globalSecondaryIndexes;
+                                                                streamSpecification;
+                                                                latestStreamLabel;
+                                                                latestStreamArn;
+                                                                globalTableVersion;
+                                                                replicas;
+                                                                globalTableWitnesses;
+                                                                globalTableSettingsReplicationMode;
+                                                                restoreSummary;
+                                                                sSEDescription;
+                                                                archivalSummary;
+                                                                tableClassSummary;
+                                                                deletionProtectionEnabled;
+                                                                onDemandThroughput;
+                                                                warmThroughput;
+                                                                multiRegionConsistency
+                                                              }
     let to_value x =
       structure_to_value
         [("AttributeDefinitions",
@@ -7483,8 +8795,9 @@ module TableDescription =
         ("ProvisionedThroughput",
           (Option.map x.provisionedThroughput
              ~f:ProvisionedThroughputDescription.to_value));
-        ("TableSizeBytes", (Option.map x.tableSizeBytes ~f:Long.to_value));
-        ("ItemCount", (Option.map x.itemCount ~f:Long.to_value));
+        ("TableSizeBytes",
+          (Option.map x.tableSizeBytes ~f:LongObject.to_value));
+        ("ItemCount", (Option.map x.itemCount ~f:LongObject.to_value));
         ("TableArn", (Option.map x.tableArn ~f:String_.to_value));
         ("TableId", (Option.map x.tableId ~f:TableId.to_value));
         ("BillingModeSummary",
@@ -7505,6 +8818,12 @@ module TableDescription =
           (Option.map x.globalTableVersion ~f:String_.to_value));
         ("Replicas",
           (Option.map x.replicas ~f:ReplicaDescriptionList.to_value));
+        ("GlobalTableWitnesses",
+          (Option.map x.globalTableWitnesses
+             ~f:GlobalTableWitnessDescriptionList.to_value));
+        ("GlobalTableSettingsReplicationMode",
+          (Option.map x.globalTableSettingsReplicationMode
+             ~f:GlobalTableSettingsReplicationMode.to_value));
         ("RestoreSummary",
           (Option.map x.restoreSummary ~f:RestoreSummary.to_value));
         ("SSEDescription",
@@ -7512,9 +8831,32 @@ module TableDescription =
         ("ArchivalSummary",
           (Option.map x.archivalSummary ~f:ArchivalSummary.to_value));
         ("TableClassSummary",
-          (Option.map x.tableClassSummary ~f:TableClassSummary.to_value))]
+          (Option.map x.tableClassSummary ~f:TableClassSummary.to_value));
+        ("DeletionProtectionEnabled",
+          (Option.map x.deletionProtectionEnabled
+             ~f:DeletionProtectionEnabled.to_value));
+        ("OnDemandThroughput",
+          (Option.map x.onDemandThroughput ~f:OnDemandThroughput.to_value));
+        ("WarmThroughput",
+          (Option.map x.warmThroughput
+             ~f:TableWarmThroughputDescription.to_value));
+        ("MultiRegionConsistency",
+          (Option.map x.multiRegionConsistency
+             ~f:MultiRegionConsistency.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let multiRegionConsistency =
+        (Option.map ~f:MultiRegionConsistency.of_xml)
+          (Xml.child xml_arg0 "MultiRegionConsistency") in
+      let warmThroughput =
+        (Option.map ~f:TableWarmThroughputDescription.of_xml)
+          (Xml.child xml_arg0 "WarmThroughput") in
+      let onDemandThroughput =
+        (Option.map ~f:OnDemandThroughput.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughput") in
+      let deletionProtectionEnabled =
+        (Option.map ~f:DeletionProtectionEnabled.of_xml)
+          (Xml.child xml_arg0 "DeletionProtectionEnabled") in
       let tableClassSummary =
         (Option.map ~f:TableClassSummary.of_xml)
           (Xml.child xml_arg0 "TableClassSummary") in
@@ -7527,6 +8869,12 @@ module TableDescription =
       let restoreSummary =
         (Option.map ~f:RestoreSummary.of_xml)
           (Xml.child xml_arg0 "RestoreSummary") in
+      let globalTableSettingsReplicationMode =
+        (Option.map ~f:GlobalTableSettingsReplicationMode.of_xml)
+          (Xml.child xml_arg0 "GlobalTableSettingsReplicationMode") in
+      let globalTableWitnesses =
+        (Option.map ~f:GlobalTableWitnessDescriptionList.of_xml)
+          (Xml.child xml_arg0 "GlobalTableWitnesses") in
       let replicas =
         (Option.map ~f:ReplicaDescriptionList.of_xml)
           (Xml.child xml_arg0 "Replicas") in
@@ -7556,9 +8904,10 @@ module TableDescription =
       let tableArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TableArn") in
       let itemCount =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "ItemCount") in
+        (Option.map ~f:LongObject.of_xml) (Xml.child xml_arg0 "ItemCount") in
       let tableSizeBytes =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "TableSizeBytes") in
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "TableSizeBytes") in
       let provisionedThroughput =
         (Option.map ~f:ProvisionedThroughputDescription.of_xml)
           (Xml.child xml_arg0 "ProvisionedThroughput") in
@@ -7573,54 +8922,77 @@ module TableDescription =
       let attributeDefinitions =
         (Option.map ~f:AttributeDefinitions.of_xml)
           (Xml.child xml_arg0 "AttributeDefinitions") in
-      make ?tableClassSummary ?archivalSummary ?sSEDescription
-        ?restoreSummary ?replicas ?globalTableVersion ?latestStreamArn
+      make ?multiRegionConsistency ?warmThroughput ?onDemandThroughput
+        ?deletionProtectionEnabled ?tableClassSummary ?archivalSummary
+        ?sSEDescription ?restoreSummary ?globalTableSettingsReplicationMode
+        ?globalTableWitnesses ?replicas ?globalTableVersion ?latestStreamArn
         ?latestStreamLabel ?streamSpecification ?globalSecondaryIndexes
         ?localSecondaryIndexes ?billingModeSummary ?tableId ?tableArn
         ?itemCount ?tableSizeBytes ?provisionedThroughput ?creationDateTime
         ?tableStatus ?keySchema ?tableName ?attributeDefinitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let multiRegionConsistency =
+        field_map json__ "MultiRegionConsistency"
+          MultiRegionConsistency.of_json in
+      let warmThroughput =
+        field_map json__ "WarmThroughput"
+          TableWarmThroughputDescription.of_json in
+      let onDemandThroughput =
+        field_map json__ "OnDemandThroughput" OnDemandThroughput.of_json in
+      let deletionProtectionEnabled =
+        field_map json__ "DeletionProtectionEnabled"
+          DeletionProtectionEnabled.of_json in
       let tableClassSummary =
-        field_map json "TableClassSummary" TableClassSummary.of_json in
+        field_map json__ "TableClassSummary" TableClassSummary.of_json in
       let archivalSummary =
-        field_map json "ArchivalSummary" ArchivalSummary.of_json in
+        field_map json__ "ArchivalSummary" ArchivalSummary.of_json in
       let sSEDescription =
-        field_map json "SSEDescription" SSEDescription.of_json in
+        field_map json__ "SSEDescription" SSEDescription.of_json in
       let restoreSummary =
-        field_map json "RestoreSummary" RestoreSummary.of_json in
-      let replicas = field_map json "Replicas" ReplicaDescriptionList.of_json in
+        field_map json__ "RestoreSummary" RestoreSummary.of_json in
+      let globalTableSettingsReplicationMode =
+        field_map json__ "GlobalTableSettingsReplicationMode"
+          GlobalTableSettingsReplicationMode.of_json in
+      let globalTableWitnesses =
+        field_map json__ "GlobalTableWitnesses"
+          GlobalTableWitnessDescriptionList.of_json in
+      let replicas =
+        field_map json__ "Replicas" ReplicaDescriptionList.of_json in
       let globalTableVersion =
-        field_map json "GlobalTableVersion" String_.of_json in
+        field_map json__ "GlobalTableVersion" String_.of_json in
       let latestStreamArn =
-        field_map json "LatestStreamArn" StreamArn.of_json in
+        field_map json__ "LatestStreamArn" StreamArn.of_json in
       let latestStreamLabel =
-        field_map json "LatestStreamLabel" String_.of_json in
+        field_map json__ "LatestStreamLabel" String_.of_json in
       let streamSpecification =
-        field_map json "StreamSpecification" StreamSpecification.of_json in
+        field_map json__ "StreamSpecification" StreamSpecification.of_json in
       let globalSecondaryIndexes =
-        field_map json "GlobalSecondaryIndexes"
+        field_map json__ "GlobalSecondaryIndexes"
           GlobalSecondaryIndexDescriptionList.of_json in
       let localSecondaryIndexes =
-        field_map json "LocalSecondaryIndexes"
+        field_map json__ "LocalSecondaryIndexes"
           LocalSecondaryIndexDescriptionList.of_json in
       let billingModeSummary =
-        field_map json "BillingModeSummary" BillingModeSummary.of_json in
-      let tableId = field_map json "TableId" TableId.of_json in
-      let tableArn = field_map json "TableArn" String_.of_json in
-      let itemCount = field_map json "ItemCount" Long.of_json in
-      let tableSizeBytes = field_map json "TableSizeBytes" Long.of_json in
+        field_map json__ "BillingModeSummary" BillingModeSummary.of_json in
+      let tableId = field_map json__ "TableId" TableId.of_json in
+      let tableArn = field_map json__ "TableArn" String_.of_json in
+      let itemCount = field_map json__ "ItemCount" LongObject.of_json in
+      let tableSizeBytes =
+        field_map json__ "TableSizeBytes" LongObject.of_json in
       let provisionedThroughput =
-        field_map json "ProvisionedThroughput"
+        field_map json__ "ProvisionedThroughput"
           ProvisionedThroughputDescription.of_json in
-      let creationDateTime = field_map json "CreationDateTime" Date.of_json in
-      let tableStatus = field_map json "TableStatus" TableStatus.of_json in
-      let keySchema = field_map json "KeySchema" KeySchema.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
+      let tableStatus = field_map json__ "TableStatus" TableStatus.of_json in
+      let keySchema = field_map json__ "KeySchema" KeySchema.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
       let attributeDefinitions =
-        field_map json "AttributeDefinitions" AttributeDefinitions.of_json in
-      make ?tableClassSummary ?archivalSummary ?sSEDescription
-        ?restoreSummary ?replicas ?globalTableVersion ?latestStreamArn
+        field_map json__ "AttributeDefinitions" AttributeDefinitions.of_json in
+      make ?multiRegionConsistency ?warmThroughput ?onDemandThroughput
+        ?deletionProtectionEnabled ?tableClassSummary ?archivalSummary
+        ?sSEDescription ?restoreSummary ?globalTableSettingsReplicationMode
+        ?globalTableWitnesses ?replicas ?globalTableVersion ?latestStreamArn
         ?latestStreamLabel ?streamSpecification ?globalSecondaryIndexes
         ?localSecondaryIndexes ?billingModeSummary ?tableId ?tableArn
         ?itemCount ?tableSizeBytes ?provisionedThroughput ?creationDateTime
@@ -7644,12 +9016,12 @@ module ResourceInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The operation conflicts with the resource's availability. For example, you attempted to recreate an existing table, or tried to delete a table currently in the CREATING state."]
+       "The operation conflicts with the resource's availability. For example: You attempted to recreate an existing table. You tried to delete a table currently in the CREATING state. You tried to update a resource that was already being updated. When appropriate, wait for the ongoing update to complete and attempt the request again."]
 module CreateTableOutput =
   struct
     type nonrec t =
@@ -7713,12 +9085,117 @@ module CreateTableOutput =
           (Xml.child xml_arg0 "TableDescription") in
       make ?tableDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tableDescription =
-        field_map json "TableDescription" TableDescription.of_json in
+        field_map json__ "TableDescription" TableDescription.of_json in
       make ?tableDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a CreateTable operation."]
+module CsvDelimiter =
+  struct
+    type nonrec t = string
+    let context_ = "CsvDelimiter"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1) >>=
+                  (fun () -> check_pattern i ~pattern:"[,;:|\\t ]")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CsvDelimiter" j
+    let to_json = simple_to_json to_value
+  end
+module CsvHeader =
+  struct
+    type nonrec t = string
+    let context_ = "CsvHeader"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:65536) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\x20-\\x21\\x23-\\x2B\\x2D-\\x7E]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CsvHeader" j
+    let to_json = simple_to_json to_value
+  end
+module CsvHeaderList =
+  struct
+    type nonrec t = CsvHeader.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:255) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CsvHeader.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CsvHeader.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CsvHeaderList" ~of_json:CsvHeader.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CsvOptions =
+  struct
+    type nonrec t =
+      {
+      delimiter: CsvDelimiter.t option
+        [@ocaml.doc
+          "The delimiter used for separating items in the CSV file being imported."];
+      headerList: CsvHeaderList.t option
+        [@ocaml.doc
+          "List of the headers used to specify a common header for all source CSV files being imported. If this field is specified then the first line of each CSV file is treated as data instead of the header. If this field is not specified the the first line of each CSV file is treated as the header."]}
+    let make ?delimiter =
+      fun ?headerList -> fun () -> { delimiter; headerList }
+    let to_value x =
+      structure_to_value
+        [("Delimiter", (Option.map x.delimiter ~f:CsvDelimiter.to_value));
+        ("HeaderList", (Option.map x.headerList ~f:CsvHeaderList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let headerList =
+        (Option.map ~f:CsvHeaderList.of_xml)
+          (Xml.child xml_arg0 "HeaderList") in
+      let delimiter =
+        (Option.map ~f:CsvDelimiter.of_xml) (Xml.child xml_arg0 "Delimiter") in
+      make ?headerList ?delimiter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let headerList = field_map json__ "HeaderList" CsvHeaderList.of_json in
+      let delimiter = field_map json__ "Delimiter" CsvDelimiter.of_json in
+      make ?headerList ?delimiter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Processing options for the CSV file being imported."]
 module Delete =
   struct
     type nonrec t =
@@ -7726,9 +9203,9 @@ module Delete =
       key: Key.t
         [@ocaml.doc
           "The primary key of the item to be deleted. Each element consists of an attribute name and a value for that attribute."];
-      tableName: TableName.t
+      tableName: TableArn.t
         [@ocaml.doc
-          "Name of the table in which the item to be deleted resides."];
+          "Name of the table in which the item to be deleted resides. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       conditionExpression: ConditionExpression.t option
         [@ocaml.doc
           "A condition that must be satisfied in order for a conditional delete to succeed."];
@@ -7761,7 +9238,7 @@ module Delete =
     let to_value x =
       structure_to_value
         [("Key", (Some (Key.to_value x.key)));
-        ("TableName", (Some (TableName.to_value x.tableName)));
+        ("TableName", (Some (TableArn.to_value x.tableName)));
         ("ConditionExpression",
           (Option.map x.conditionExpression ~f:ConditionExpression.to_value));
         ("ExpressionAttributeNames",
@@ -7788,26 +9265,26 @@ module Delete =
         (Option.map ~f:ConditionExpression.of_xml)
           (Xml.child xml_arg0 "ConditionExpression") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       let key = Key.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?returnValuesOnConditionCheckFailure ?expressionAttributeValues
         ?expressionAttributeNames ?conditionExpression ~tableName ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let returnValuesOnConditionCheckFailure =
-        field_map json "ReturnValuesOnConditionCheckFailure"
+        field_map json__ "ReturnValuesOnConditionCheckFailure"
           ReturnValuesOnConditionCheckFailure.of_json in
       let expressionAttributeValues =
-        field_map json "ExpressionAttributeValues"
+        field_map json__ "ExpressionAttributeValues"
           ExpressionAttributeValueMap.of_json in
       let expressionAttributeNames =
-        field_map json "ExpressionAttributeNames"
+        field_map json__ "ExpressionAttributeNames"
           ExpressionAttributeNameMap.of_json in
       let conditionExpression =
-        field_map json "ConditionExpression" ConditionExpression.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
-      let key = field_map_exn json "Key" Key.of_json in
+        field_map json__ "ConditionExpression" ConditionExpression.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
+      let key = field_map_exn json__ "Key" Key.of_json in
       make ?returnValuesOnConditionCheckFailure ?expressionAttributeValues
         ?expressionAttributeNames ?conditionExpression ~tableName ~key ()
     let to_json v = composed_to_json to_value v
@@ -7830,8 +9307,8 @@ module DeleteBackupInput =
           (Xml.child_exn ~context:context_ xml_arg0 "BackupArn") in
       make ~backupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backupArn = field_map_exn json "BackupArn" BackupArn.of_json in
+    let of_json json__ =
+      let backupArn = field_map_exn json__ "BackupArn" BackupArn.of_json in
       make ~backupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7909,9 +9386,9 @@ module DeleteBackupOutput =
           (Xml.child xml_arg0 "BackupDescription") in
       make ?backupDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backupDescription =
-        field_map json "BackupDescription" BackupDescription.of_json in
+        field_map json__ "BackupDescription" BackupDescription.of_json in
       make ?backupDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7934,12 +9411,37 @@ module DeleteGlobalSecondaryIndexAction =
           (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
       make ~indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexName = field_map_exn json "IndexName" IndexName.of_json in
+    let of_json json__ =
+      let indexName = field_map_exn json__ "IndexName" IndexName.of_json in
       make ~indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a global secondary index to be deleted from an existing table."]
+module DeleteGlobalTableWitnessGroupMemberAction =
+  struct
+    type nonrec t =
+      {
+      regionName: RegionName.t
+        [@ocaml.doc
+          "The witness Region name to be removed from the MRSC global table."]}
+    let context_ = "DeleteGlobalTableWitnessGroupMemberAction"
+    let make ~regionName = fun () -> { regionName }
+    let to_value x =
+      structure_to_value
+        [("RegionName", (Some (RegionName.to_value x.regionName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let regionName =
+        RegionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RegionName") in
+      make ~regionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let regionName = field_map_exn json__ "RegionName" RegionName.of_json in
+      make ~regionName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the action to remove a witness Region from a MRSC global table. You cannot delete a single witness from a MRSC global table - you must delete both a replica and the witness together. The deletion of both a witness and replica converts the remaining replica to a single-Region DynamoDB table."]
 module ReturnValue =
   struct
     type nonrec t =
@@ -8018,13 +9520,13 @@ module ExpectedAttributeValue =
         (Option.map ~f:AttributeValue.of_xml) (Xml.child xml_arg0 "Value") in
       make ?attributeValueList ?comparisonOperator ?exists ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeValueList =
-        field_map json "AttributeValueList" AttributeValueList.of_json in
+        field_map json__ "AttributeValueList" AttributeValueList.of_json in
       let comparisonOperator =
-        field_map json "ComparisonOperator" ComparisonOperator.of_json in
-      let exists = field_map json "Exists" BooleanObject.of_json in
-      let value = field_map json "Value" AttributeValue.of_json in
+        field_map json__ "ComparisonOperator" ComparisonOperator.of_json in
+      let exists = field_map json__ "Exists" BooleanObject.of_json in
+      let value = field_map json__ "Value" AttributeValue.of_json in
       make ?attributeValueList ?comparisonOperator ?exists ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8054,6 +9556,8 @@ module ExpectedAttributeMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -8065,11 +9569,12 @@ module DeleteItemInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t
-        [@ocaml.doc "The name of the table from which to delete the item."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table from which to delete the item. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       key: Key.t
         [@ocaml.doc
-          "A map of attribute names to AttributeValue objects, representing the primary key of the item to delete. For the primary key, you must provide all of the attributes. For example, with a simple primary key, you only need to provide a value for the partition key. For a composite primary key, you must provide values for both the partition key and the sort key."];
+          "A map of attribute names to AttributeValue objects, representing the primary key of the item to delete. For the primary key, you must provide all of the key attributes. For example, with a simple primary key, you only need to provide a value for the partition key. For a composite primary key, you must provide values for both the partition key and the sort key."];
       expected: ExpectedAttributeMap.t option
         [@ocaml.doc
           "This is a legacy parameter. Use ConditionExpression instead. For more information, see Expected in the Amazon DynamoDB Developer Guide."];
@@ -8078,7 +9583,7 @@ module DeleteItemInput =
           "This is a legacy parameter. Use ConditionExpression instead. For more information, see ConditionalOperator in the Amazon DynamoDB Developer Guide."];
       returnValues: ReturnValue.t option
         [@ocaml.doc
-          "Use ReturnValues if you want to get the item attributes as they appeared before they were deleted. For DeleteItem, the valid values are: NONE - If ReturnValues is not specified, or if its value is NONE, then nothing is returned. (This setting is the default for ReturnValues.) ALL_OLD - The content of the old item is returned. The ReturnValues parameter is used by several DynamoDB operations; however, DeleteItem does not recognize any values other than NONE or ALL_OLD."];
+          "Use ReturnValues if you want to get the item attributes as they appeared before they were deleted. For DeleteItem, the valid values are: NONE - If ReturnValues is not specified, or if its value is NONE, then nothing is returned. (This setting is the default for ReturnValues.) ALL_OLD - The content of the old item is returned. There is no additional cost associated with requesting a return value aside from the small network and processing overhead of receiving a larger response. No read capacity units are consumed. The ReturnValues parameter is used by several DynamoDB operations; however, DeleteItem does not recognize any values other than NONE or ALL_OLD."];
       returnConsumedCapacity: ReturnConsumedCapacity.t option ;
       returnItemCollectionMetrics: ReturnItemCollectionMetrics.t option
         [@ocaml.doc
@@ -8091,7 +9596,11 @@ module DeleteItemInput =
           "One or more substitution tokens for attribute names in an expression. The following are some use cases for using ExpressionAttributeNames: To access an attribute whose name conflicts with a DynamoDB reserved word. To create a placeholder for repeating occurrences of an attribute name in an expression. To prevent special characters in an attribute name from being misinterpreted in an expression. Use the # character in an expression to dereference an attribute name. For example, consider the following attribute name: Percentile The name of this attribute conflicts with a reserved word, so it cannot be used directly in an expression. (For the complete list of reserved words, see Reserved Words in the Amazon DynamoDB Developer Guide). To work around this, you could specify the following for ExpressionAttributeNames: \\{\"#P\":\"Percentile\"\\} You could then use this substitution in an expression, as in this example: #P = :val Tokens that begin with the : character are expression attribute values, which are placeholders for the actual value at runtime. For more information on expression attribute names, see Specifying Item Attributes in the Amazon DynamoDB Developer Guide."];
       expressionAttributeValues: ExpressionAttributeValueMap.t option
         [@ocaml.doc
-          "One or more values that can be substituted in an expression. Use the : (colon) character in an expression to dereference an attribute value. For example, suppose that you wanted to check whether the value of the ProductStatus attribute was one of the following: Available | Backordered | Discontinued You would first need to specify ExpressionAttributeValues as follows: \\{ \":avail\":\\{\"S\":\"Available\"\\}, \":back\":\\{\"S\":\"Backordered\"\\}, \":disc\":\\{\"S\":\"Discontinued\"\\} \\} You could then use these values in an expression, such as this: ProductStatus IN (:avail, :back, :disc) For more information on expression attribute values, see Condition Expressions in the Amazon DynamoDB Developer Guide."]}
+          "One or more values that can be substituted in an expression. Use the : (colon) character in an expression to dereference an attribute value. For example, suppose that you wanted to check whether the value of the ProductStatus attribute was one of the following: Available | Backordered | Discontinued You would first need to specify ExpressionAttributeValues as follows: \\{ \":avail\":\\{\"S\":\"Available\"\\}, \":back\":\\{\"S\":\"Backordered\"\\}, \":disc\":\\{\"S\":\"Discontinued\"\\} \\} You could then use these values in an expression, such as this: ProductStatus IN (:avail, :back, :disc) For more information on expression attribute values, see Condition Expressions in the Amazon DynamoDB Developer Guide."];
+      returnValuesOnConditionCheckFailure:
+        ReturnValuesOnConditionCheckFailure.t option
+        [@ocaml.doc
+          "An optional parameter that returns the item attributes for a DeleteItem operation that failed a condition check. There is no additional cost associated with requesting a return value aside from the small network and processing overhead of receiving a larger response. No read capacity units are consumed."]}
     let context_ = "DeleteItemInput"
     let make ?expected =
       fun ?conditionalOperator ->
@@ -8101,24 +9610,26 @@ module DeleteItemInput =
               fun ?conditionExpression ->
                 fun ?expressionAttributeNames ->
                   fun ?expressionAttributeValues ->
-                    fun ~tableName ->
-                      fun ~key ->
-                        fun () ->
-                          {
-                            expected;
-                            conditionalOperator;
-                            returnValues;
-                            returnConsumedCapacity;
-                            returnItemCollectionMetrics;
-                            conditionExpression;
-                            expressionAttributeNames;
-                            expressionAttributeValues;
-                            tableName;
-                            key
-                          }
+                    fun ?returnValuesOnConditionCheckFailure ->
+                      fun ~tableName ->
+                        fun ~key ->
+                          fun () ->
+                            {
+                              expected;
+                              conditionalOperator;
+                              returnValues;
+                              returnConsumedCapacity;
+                              returnItemCollectionMetrics;
+                              conditionExpression;
+                              expressionAttributeNames;
+                              expressionAttributeValues;
+                              returnValuesOnConditionCheckFailure;
+                              tableName;
+                              key
+                            }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)));
+        [("TableName", (Some (TableArn.to_value x.tableName)));
         ("Key", (Some (Key.to_value x.key)));
         ("Expected",
           (Option.map x.expected ~f:ExpectedAttributeMap.to_value));
@@ -8138,9 +9649,15 @@ module DeleteItemInput =
              ~f:ExpressionAttributeNameMap.to_value));
         ("ExpressionAttributeValues",
           (Option.map x.expressionAttributeValues
-             ~f:ExpressionAttributeValueMap.to_value))]
+             ~f:ExpressionAttributeValueMap.to_value));
+        ("ReturnValuesOnConditionCheckFailure",
+          (Option.map x.returnValuesOnConditionCheckFailure
+             ~f:ReturnValuesOnConditionCheckFailure.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let returnValuesOnConditionCheckFailure =
+        (Option.map ~f:ReturnValuesOnConditionCheckFailure.of_xml)
+          (Xml.child xml_arg0 "ReturnValuesOnConditionCheckFailure") in
       let expressionAttributeValues =
         (Option.map ~f:ExpressionAttributeValueMap.of_xml)
           (Xml.child xml_arg0 "ExpressionAttributeValues") in
@@ -8167,38 +9684,41 @@ module DeleteItemInput =
           (Xml.child xml_arg0 "Expected") in
       let key = Key.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
-      make ?expressionAttributeValues ?expressionAttributeNames
-        ?conditionExpression ?returnItemCollectionMetrics
-        ?returnConsumedCapacity ?returnValues ?conditionalOperator ?expected
-        ~key ~tableName ()
+      make ?returnValuesOnConditionCheckFailure ?expressionAttributeValues
+        ?expressionAttributeNames ?conditionExpression
+        ?returnItemCollectionMetrics ?returnConsumedCapacity ?returnValues
+        ?conditionalOperator ?expected ~key ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let returnValuesOnConditionCheckFailure =
+        field_map json__ "ReturnValuesOnConditionCheckFailure"
+          ReturnValuesOnConditionCheckFailure.of_json in
       let expressionAttributeValues =
-        field_map json "ExpressionAttributeValues"
+        field_map json__ "ExpressionAttributeValues"
           ExpressionAttributeValueMap.of_json in
       let expressionAttributeNames =
-        field_map json "ExpressionAttributeNames"
+        field_map json__ "ExpressionAttributeNames"
           ExpressionAttributeNameMap.of_json in
       let conditionExpression =
-        field_map json "ConditionExpression" ConditionExpression.of_json in
+        field_map json__ "ConditionExpression" ConditionExpression.of_json in
       let returnItemCollectionMetrics =
-        field_map json "ReturnItemCollectionMetrics"
+        field_map json__ "ReturnItemCollectionMetrics"
           ReturnItemCollectionMetrics.of_json in
       let returnConsumedCapacity =
-        field_map json "ReturnConsumedCapacity"
+        field_map json__ "ReturnConsumedCapacity"
           ReturnConsumedCapacity.of_json in
-      let returnValues = field_map json "ReturnValues" ReturnValue.of_json in
+      let returnValues = field_map json__ "ReturnValues" ReturnValue.of_json in
       let conditionalOperator =
-        field_map json "ConditionalOperator" ConditionalOperator.of_json in
-      let expected = field_map json "Expected" ExpectedAttributeMap.of_json in
-      let key = field_map_exn json "Key" Key.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
-      make ?expressionAttributeValues ?expressionAttributeNames
-        ?conditionExpression ?returnItemCollectionMetrics
-        ?returnConsumedCapacity ?returnValues ?conditionalOperator ?expected
-        ~key ~tableName ()
+        field_map json__ "ConditionalOperator" ConditionalOperator.of_json in
+      let expected = field_map json__ "Expected" ExpectedAttributeMap.of_json in
+      let key = field_map_exn json__ "Key" Key.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
+      make ?returnValuesOnConditionCheckFailure ?expressionAttributeValues
+        ?expressionAttributeNames ?conditionExpression
+        ?returnItemCollectionMetrics ?returnConsumedCapacity ?returnValues
+        ?conditionalOperator ?expected ~key ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a DeleteItem operation."]
 module TransactionConflictException =
@@ -8215,8 +9735,8 @@ module TransactionConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8230,7 +9750,7 @@ module DeleteItemOutput =
           "A map of attribute names to AttributeValue objects, representing the item as it appeared before the DeleteItem operation. This map appears in the response only if ReturnValues was specified as ALL_OLD in the request."];
       consumedCapacity: ConsumedCapacity.t option
         [@ocaml.doc
-          "The capacity units consumed by the DeleteItem operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the ReturnConsumedCapacity parameter was specified. For more information, see Provisioned Mode in the Amazon DynamoDB Developer Guide."];
+          "The capacity units consumed by the DeleteItem operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the ReturnConsumedCapacity parameter was specified. For more information, see Provisioned capacity mode in the Amazon DynamoDB Developer Guide."];
       itemCollectionMetrics: ItemCollectionMetrics.t option
         [@ocaml.doc
           "Information about item collections, if any, that were affected by the DeleteItem operation. ItemCollectionMetrics is only returned if the ReturnItemCollectionMetrics parameter was specified. If the table does not have any local secondary indexes, this information is not returned in the response. Each ItemCollectionMetrics element consists of: ItemCollectionKey - The partition key value of the item collection. This is the same as the partition key value of the item itself. SizeEstimateRangeGB - An estimate of item collection size, in gigabytes. This value is a two-element array containing a lower bound and an upper bound for the estimate. The estimate includes the size of all the items in the table, plus the size of all attributes projected into all of the local secondary indexes on that table. Use this estimate to measure whether a local secondary index is approaching its size limit. The estimate is subject to change over time; therefore, do not rely on the precision or accuracy of the estimate."]}
@@ -8242,8 +9762,11 @@ module DeleteItemOutput =
           ItemCollectionSizeLimitExceededException.t 
       | `ProvisionedThroughputExceededException of
           ProvisionedThroughputExceededException.t 
+      | `ReplicatedWriteConflictException of
+          ReplicatedWriteConflictException.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TransactionConflictException of TransactionConflictException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?attributes =
@@ -8263,10 +9786,15 @@ module DeleteItemOutput =
       | "ProvisionedThroughputExceededException" ->
           `ProvisionedThroughputExceededException
             (ProvisionedThroughputExceededException.of_json json)
+      | "ReplicatedWriteConflictException" ->
+          `ReplicatedWriteConflictException
+            (ReplicatedWriteConflictException.of_json json)
       | "RequestLimitExceeded" ->
           `RequestLimitExceeded (RequestLimitExceeded.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TransactionConflictException" ->
           `TransactionConflictException
             (TransactionConflictException.of_json json)
@@ -8286,10 +9814,15 @@ module DeleteItemOutput =
       | "ProvisionedThroughputExceededException" ->
           `ProvisionedThroughputExceededException
             (ProvisionedThroughputExceededException.of_xml xml)
+      | "ReplicatedWriteConflictException" ->
+          `ReplicatedWriteConflictException
+            (ReplicatedWriteConflictException.of_xml xml)
       | "RequestLimitExceeded" ->
           `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TransactionConflictException" ->
           `TransactionConflictException
             (TransactionConflictException.of_xml xml)
@@ -8313,6 +9846,10 @@ module DeleteItemOutput =
           `Assoc
             [("error", (`String "ProvisionedThroughputExceededException"));
             ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ReplicatedWriteConflictException e ->
+          `Assoc
+            [("error", (`String "ReplicatedWriteConflictException"));
+            ("details", (ReplicatedWriteConflictException.to_json e))]
       | `RequestLimitExceeded e ->
           `Assoc
             [("error", (`String "RequestLimitExceeded"));
@@ -8321,6 +9858,10 @@ module DeleteItemOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TransactionConflictException e ->
           `Assoc
             [("error", (`String "TransactionConflictException"));
@@ -8350,12 +9891,13 @@ module DeleteItemOutput =
         (Option.map ~f:AttributeMap.of_xml) (Xml.child xml_arg0 "Attributes") in
       make ?itemCollectionMetrics ?consumedCapacity ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let itemCollectionMetrics =
-        field_map json "ItemCollectionMetrics" ItemCollectionMetrics.of_json in
+        field_map json__ "ItemCollectionMetrics"
+          ItemCollectionMetrics.of_json in
       let consumedCapacity =
-        field_map json "ConsumedCapacity" ConsumedCapacity.of_json in
-      let attributes = field_map json "Attributes" AttributeMap.of_json in
+        field_map json__ "ConsumedCapacity" ConsumedCapacity.of_json in
+      let attributes = field_map json__ "Attributes" AttributeMap.of_json in
       make ?itemCollectionMetrics ?consumedCapacity ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a DeleteItem operation."]
@@ -8377,8 +9919,8 @@ module DeleteReplicaAction =
           (Xml.child_exn ~context:context_ xml_arg0 "RegionName") in
       make ~regionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regionName = field_map_exn json "RegionName" RegionName.of_json in
+    let of_json json__ =
+      let regionName = field_map_exn json__ "RegionName" RegionName.of_json in
       make ~regionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a replica to be removed."]
@@ -8400,30 +9942,213 @@ module DeleteReplicationGroupMemberAction =
           (Xml.child_exn ~context:context_ xml_arg0 "RegionName") in
       make ~regionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regionName = field_map_exn json "RegionName" RegionName.of_json in
+    let of_json json__ =
+      let regionName = field_map_exn json__ "RegionName" RegionName.of_json in
       make ~regionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a replica to be deleted."]
+module ResourceArnString =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceArnString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1283) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceArnString" j
+    let to_json = simple_to_json to_value
+  end
+module PolicyRevisionId =
+  struct
+    type nonrec t = string
+    let context_ = "PolicyRevisionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PolicyRevisionId" j
+    let to_json = simple_to_json to_value
+  end
+module DeleteResourcePolicyInput =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArnString.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the DynamoDB resource from which the policy will be removed. The resources you can specify include tables and streams. If you remove the policy of a table, it will also remove the permissions for the table's indexes defined in that policy document. This is because index permissions are defined in the table's policy."];
+      expectedRevisionId: PolicyRevisionId.t option
+        [@ocaml.doc
+          "A string value that you can use to conditionally delete your policy. When you provide an expected revision ID, if the revision ID of the existing policy on the resource doesn't match or if there's no policy attached to the resource, the request will fail and return a PolicyNotFoundException."]}
+    let context_ = "DeleteResourcePolicyInput"
+    let make ?expectedRevisionId =
+      fun ~resourceArn -> fun () -> { expectedRevisionId; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArnString.to_value x.resourceArn)));
+        ("ExpectedRevisionId",
+          (Option.map x.expectedRevisionId ~f:PolicyRevisionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expectedRevisionId =
+        (Option.map ~f:PolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "ExpectedRevisionId") in
+      let resourceArn =
+        ResourceArnString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ?expectedRevisionId ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expectedRevisionId =
+        field_map json__ "ExpectedRevisionId" PolicyRevisionId.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
+      make ?expectedRevisionId ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the resource-based policy attached to the resource, which can be a table or stream. DeleteResourcePolicy is an idempotent operation; running it multiple times on the same resource doesn't result in an error response, unless you specify an ExpectedRevisionId, which will then return a PolicyNotFoundException. To make sure that you don't inadvertently lock yourself out of your own resources, the root principal in your Amazon Web Services account can perform DeleteResourcePolicy requests, even if your resource-based policy explicitly denies the root principal's access. DeleteResourcePolicy is an asynchronous operation. If you issue a GetResourcePolicy request immediately after running the DeleteResourcePolicy request, DynamoDB might still return the deleted policy. This is because the policy for your resource might not have been deleted yet. Wait for a few seconds, and then try the GetResourcePolicy request again."]
+module PolicyNotFoundException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation tried to access a nonexistent resource-based policy. If you specified an ExpectedRevisionId, it's possible that a policy is present for the resource but its revision ID didn't match the expected value."]
+module DeleteResourcePolicyOutput =
+  struct
+    type nonrec t =
+      {
+      revisionId: PolicyRevisionId.t option
+        [@ocaml.doc
+          "A unique string that represents the revision ID of the policy. If you're comparing revision IDs, make sure to always use string comparison logic. This value will be empty if you make a request against a resource without a policy."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `PolicyNotFoundException of PolicyNotFoundException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?revisionId = fun () -> { revisionId }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "PolicyNotFoundException" ->
+          `PolicyNotFoundException (PolicyNotFoundException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "PolicyNotFoundException" ->
+          `PolicyNotFoundException (PolicyNotFoundException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `PolicyNotFoundException e ->
+          `Assoc
+            [("error", (`String "PolicyNotFoundException"));
+            ("details", (PolicyNotFoundException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RevisionId",
+           (Option.map x.revisionId ~f:PolicyRevisionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revisionId =
+        (Option.map ~f:PolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "RevisionId") in
+      make ?revisionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revisionId = field_map json__ "RevisionId" PolicyRevisionId.of_json in
+      make ?revisionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the resource-based policy attached to the resource, which can be a table or stream. DeleteResourcePolicy is an idempotent operation; running it multiple times on the same resource doesn't result in an error response, unless you specify an ExpectedRevisionId, which will then return a PolicyNotFoundException. To make sure that you don't inadvertently lock yourself out of your own resources, the root principal in your Amazon Web Services account can perform DeleteResourcePolicy requests, even if your resource-based policy explicitly denies the root principal's access. DeleteResourcePolicy is an asynchronous operation. If you issue a GetResourcePolicy request immediately after running the DeleteResourcePolicy request, DynamoDB might still return the deleted policy. This is because the policy for your resource might not have been deleted yet. Wait for a few seconds, and then try the GetResourcePolicy request again."]
 module DeleteTableInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t [@ocaml.doc "The name of the table to delete."]}
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table to delete. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."]}
     let context_ = "DeleteTableInput"
     let make ~tableName = fun () -> { tableName }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)))]
+        [("TableName", (Some (TableArn.to_value x.tableName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+    let of_json json__ =
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       make ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a DeleteTable operation."]
@@ -8499,9 +10224,9 @@ module DeleteTableOutput =
           (Xml.child xml_arg0 "TableDescription") in
       make ?tableDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tableDescription =
-        field_map json "TableDescription" TableDescription.of_json in
+        field_map json__ "TableDescription" TableDescription.of_json in
       make ?tableDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a DeleteTable operation."]
@@ -8524,8 +10249,8 @@ module DescribeBackupInput =
           (Xml.child_exn ~context:context_ xml_arg0 "BackupArn") in
       make ~backupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backupArn = field_map_exn json "BackupArn" BackupArn.of_json in
+    let of_json json__ =
+      let backupArn = field_map_exn json__ "BackupArn" BackupArn.of_json in
       make ~backupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8585,9 +10310,9 @@ module DescribeBackupOutput =
           (Xml.child xml_arg0 "BackupDescription") in
       make ?backupDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backupDescription =
-        field_map json "BackupDescription" BackupDescription.of_json in
+        field_map json__ "BackupDescription" BackupDescription.of_json in
       make ?backupDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8596,27 +10321,27 @@ module DescribeContinuousBackupsInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t
+      tableName: TableArn.t
         [@ocaml.doc
-          "Name of the table for which the customer wants to check the continuous backups and point in time recovery settings."]}
+          "Name of the table for which the customer wants to check the continuous backups and point in time recovery settings. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."]}
     let context_ = "DescribeContinuousBackupsInput"
     let make ~tableName = fun () -> { tableName }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)))]
+        [("TableName", (Some (TableArn.to_value x.tableName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+    let of_json json__ =
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       make ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Checks the status of continuous backups and point in time recovery on the specified table. Continuous backups are ENABLED on all tables at table creation. If point in time recovery is enabled, PointInTimeRecoveryStatus will be set to ENABLED. After continuous backups and point in time recovery are enabled, you can restore to any point in time within EarliestRestorableDateTime and LatestRestorableDateTime. LatestRestorableDateTime is typically 5 minutes before the current time. You can restore your table to any point in time during the last 35 days. You can call DescribeContinuousBackups at a maximum rate of 10 times per second."]
+       "Checks the status of continuous backups and point in time recovery on the specified table. Continuous backups are ENABLED on all tables at table creation. If point in time recovery is enabled, PointInTimeRecoveryStatus will be set to ENABLED. After continuous backups and point in time recovery are enabled, you can restore to any point in time within EarliestRestorableDateTime and LatestRestorableDateTime. LatestRestorableDateTime is typically 5 minutes before the current time. You can restore your table to any point in time in the last 35 days. You can set the recovery period to any value between 1 and 35 days. You can call DescribeContinuousBackups at a maximum rate of 10 times per second."]
 module DescribeContinuousBackupsOutput =
   struct
     type nonrec t =
@@ -8674,20 +10399,21 @@ module DescribeContinuousBackupsOutput =
           (Xml.child xml_arg0 "ContinuousBackupsDescription") in
       make ?continuousBackupsDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let continuousBackupsDescription =
-        field_map json "ContinuousBackupsDescription"
+        field_map json__ "ContinuousBackupsDescription"
           ContinuousBackupsDescription.of_json in
       make ?continuousBackupsDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Checks the status of continuous backups and point in time recovery on the specified table. Continuous backups are ENABLED on all tables at table creation. If point in time recovery is enabled, PointInTimeRecoveryStatus will be set to ENABLED. After continuous backups and point in time recovery are enabled, you can restore to any point in time within EarliestRestorableDateTime and LatestRestorableDateTime. LatestRestorableDateTime is typically 5 minutes before the current time. You can restore your table to any point in time during the last 35 days. You can call DescribeContinuousBackups at a maximum rate of 10 times per second."]
+       "Checks the status of continuous backups and point in time recovery on the specified table. Continuous backups are ENABLED on all tables at table creation. If point in time recovery is enabled, PointInTimeRecoveryStatus will be set to ENABLED. After continuous backups and point in time recovery are enabled, you can restore to any point in time within EarliestRestorableDateTime and LatestRestorableDateTime. LatestRestorableDateTime is typically 5 minutes before the current time. You can restore your table to any point in time in the last 35 days. You can set the recovery period to any value between 1 and 35 days. You can call DescribeContinuousBackups at a maximum rate of 10 times per second."]
 module DescribeContributorInsightsInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t
-        [@ocaml.doc "The name of the table to describe."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table to describe. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       indexName: IndexName.t option
         [@ocaml.doc
           "The name of the global secondary index to describe, if applicable."]}
@@ -8696,24 +10422,24 @@ module DescribeContributorInsightsInput =
       fun ~tableName -> fun () -> { indexName; tableName }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)));
+        [("TableName", (Some (TableArn.to_value x.tableName)));
         ("IndexName", (Option.map x.indexName ~f:IndexName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let indexName =
         (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ?indexName ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let indexName = field_map json "IndexName" IndexName.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+    let of_json json__ =
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       make ?indexName ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about contributor insights, for a given table or global secondary index."]
+       "Returns information about contributor insights for a given table or global secondary index."]
 module LastUpdateDateTime =
   struct
     type nonrec t = string
@@ -8778,11 +10504,11 @@ module FailureException =
           (Xml.child xml_arg0 "ExceptionName") in
       make ?exceptionDescription ?exceptionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exceptionDescription =
-        field_map json "ExceptionDescription" ExceptionDescription.of_json in
+        field_map json__ "ExceptionDescription" ExceptionDescription.of_json in
       let exceptionName =
-        field_map json "ExceptionName" ExceptionName.of_json in
+        field_map json__ "ExceptionName" ExceptionName.of_json in
       make ?exceptionDescription ?exceptionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a failure a contributor insights operation."]
@@ -8804,7 +10530,10 @@ module DescribeContributorInsightsOutput =
         [@ocaml.doc "Timestamp of the last time the status was changed."];
       failureException: FailureException.t option
         [@ocaml.doc
-          "Returns information about the last failure that was encountered. The most common exceptions for a FAILED status are: LimitExceededException - Per-account Amazon CloudWatch Contributor Insights rule limit reached. Please disable Contributor Insights for other tables/indexes OR disable Contributor Insights rules before retrying. AccessDeniedException - Amazon CloudWatch Contributor Insights rules cannot be modified due to insufficient permissions. AccessDeniedException - Failed to create service-linked role for Contributor Insights due to insufficient permissions. InternalServerError - Failed to create Amazon CloudWatch Contributor Insights rules. Please retry request."]}
+          "Returns information about the last failure that was encountered. The most common exceptions for a FAILED status are: LimitExceededException - Per-account Amazon CloudWatch Contributor Insights rule limit reached. Please disable Contributor Insights for other tables/indexes OR disable Contributor Insights rules before retrying. AccessDeniedException - Amazon CloudWatch Contributor Insights rules cannot be modified due to insufficient permissions. AccessDeniedException - Failed to create service-linked role for Contributor Insights due to insufficient permissions. InternalServerError - Failed to create Amazon CloudWatch Contributor Insights rules. Please retry request."];
+      contributorInsightsMode: ContributorInsightsMode.t option
+        [@ocaml.doc
+          "The mode of CloudWatch Contributor Insights for DynamoDB that determines which events are emitted. Can be set to track all access and throttled events or throttled events only."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -8815,15 +10544,17 @@ module DescribeContributorInsightsOutput =
           fun ?contributorInsightsStatus ->
             fun ?lastUpdateDateTime ->
               fun ?failureException ->
-                fun () ->
-                  {
-                    tableName;
-                    indexName;
-                    contributorInsightsRuleList;
-                    contributorInsightsStatus;
-                    lastUpdateDateTime;
-                    failureException
-                  }
+                fun ?contributorInsightsMode ->
+                  fun () ->
+                    {
+                      tableName;
+                      indexName;
+                      contributorInsightsRuleList;
+                      contributorInsightsStatus;
+                      lastUpdateDateTime;
+                      failureException;
+                      contributorInsightsMode
+                    }
     let error_of_json name json =
       match name with
       | "InternalServerError" ->
@@ -8869,9 +10600,15 @@ module DescribeContributorInsightsOutput =
         ("LastUpdateDateTime",
           (Option.map x.lastUpdateDateTime ~f:LastUpdateDateTime.to_value));
         ("FailureException",
-          (Option.map x.failureException ~f:FailureException.to_value))]
+          (Option.map x.failureException ~f:FailureException.to_value));
+        ("ContributorInsightsMode",
+          (Option.map x.contributorInsightsMode
+             ~f:ContributorInsightsMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let contributorInsightsMode =
+        (Option.map ~f:ContributorInsightsMode.of_xml)
+          (Xml.child xml_arg0 "ContributorInsightsMode") in
       let failureException =
         (Option.map ~f:FailureException.of_xml)
           (Xml.child xml_arg0 "FailureException") in
@@ -8888,27 +10625,32 @@ module DescribeContributorInsightsOutput =
         (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
       let tableName =
         (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "TableName") in
-      make ?failureException ?lastUpdateDateTime ?contributorInsightsStatus
-        ?contributorInsightsRuleList ?indexName ?tableName ()
+      make ?contributorInsightsMode ?failureException ?lastUpdateDateTime
+        ?contributorInsightsStatus ?contributorInsightsRuleList ?indexName
+        ?tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let contributorInsightsMode =
+        field_map json__ "ContributorInsightsMode"
+          ContributorInsightsMode.of_json in
       let failureException =
-        field_map json "FailureException" FailureException.of_json in
+        field_map json__ "FailureException" FailureException.of_json in
       let lastUpdateDateTime =
-        field_map json "LastUpdateDateTime" LastUpdateDateTime.of_json in
+        field_map json__ "LastUpdateDateTime" LastUpdateDateTime.of_json in
       let contributorInsightsStatus =
-        field_map json "ContributorInsightsStatus"
+        field_map json__ "ContributorInsightsStatus"
           ContributorInsightsStatus.of_json in
       let contributorInsightsRuleList =
-        field_map json "ContributorInsightsRuleList"
+        field_map json__ "ContributorInsightsRuleList"
           ContributorInsightsRuleList.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
-      make ?failureException ?lastUpdateDateTime ?contributorInsightsStatus
-        ?contributorInsightsRuleList ?indexName ?tableName ()
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
+      make ?contributorInsightsMode ?failureException ?lastUpdateDateTime
+        ?contributorInsightsStatus ?contributorInsightsRuleList ?indexName
+        ?tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about contributor insights, for a given table or global secondary index."]
+       "Returns information about contributor insights for a given table or global secondary index."]
 module DescribeEndpointsRequest =
   struct
     type nonrec t = unit
@@ -8920,43 +10662,59 @@ module DescribeEndpointsRequest =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns the regional endpoint information."]
+  end[@@ocaml.doc
+       "Returns the regional endpoint information. For more information on policy permissions, please see Internetwork traffic privacy."]
+module Long =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module Endpoint =
   struct
     type nonrec t =
       {
-      address: String_.t [@ocaml.doc "IP address of the endpoint."];
-      cachePeriodInMinutes: Long.t
+      address: String_.t option [@ocaml.doc "IP address of the endpoint."];
+      cachePeriodInMinutes: Long.t option
         [@ocaml.doc "Endpoint cache time to live (TTL) value."]}
-    let context_ = "Endpoint"
-    let make ~address =
-      fun ~cachePeriodInMinutes ->
+    let make ?address =
+      fun ?cachePeriodInMinutes ->
         fun () -> { address; cachePeriodInMinutes }
     let to_value x =
       structure_to_value
-        [("Address", (Some (String_.to_value x.address)));
+        [("Address", (Option.map x.address ~f:String_.to_value));
         ("CachePeriodInMinutes",
-          (Some (Long.to_value x.cachePeriodInMinutes)))]
+          (Option.map x.cachePeriodInMinutes ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let cachePeriodInMinutes =
-        Long.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CachePeriodInMinutes") in
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "CachePeriodInMinutes") in
       let address =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Address") in
-      make ~cachePeriodInMinutes ~address ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Address") in
+      make ?cachePeriodInMinutes ?address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cachePeriodInMinutes =
-        field_map_exn json "CachePeriodInMinutes" Long.of_json in
-      let address = field_map_exn json "Address" String_.of_json in
-      make ~cachePeriodInMinutes ~address ()
+        field_map json__ "CachePeriodInMinutes" Long.of_json in
+      let address = field_map json__ "Address" String_.of_json in
+      make ?cachePeriodInMinutes ?address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An endpoint information details."]
 module Endpoints =
   struct
     type nonrec t = Endpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Endpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8981,11 +10739,10 @@ module DescribeEndpointsResponse =
   struct
     type nonrec t =
       {
-      endpoints: Endpoints.t [@ocaml.doc "List of endpoints."]}
+      endpoints: Endpoints.t option [@ocaml.doc "List of endpoints."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeEndpointsResponse"
-    let make ~endpoints = fun () -> { endpoints }
+    let make ?endpoints = fun () -> { endpoints }
     let error_of_json name json =
       match name with
       | name ->
@@ -9004,19 +10761,19 @@ module DescribeEndpointsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Endpoints", (Some (Endpoints.to_value x.endpoints)))]
+        [("Endpoints", (Option.map x.endpoints ~f:Endpoints.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let endpoints =
-        Endpoints.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Endpoints") in
-      make ~endpoints ()
+        (Option.map ~f:Endpoints.of_xml) (Xml.child xml_arg0 "Endpoints") in
+      make ?endpoints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpoints = field_map_exn json "Endpoints" Endpoints.of_json in
-      make ~endpoints ()
+    let of_json json__ =
+      let endpoints = field_map json__ "Endpoints" Endpoints.of_json in
+      make ?endpoints ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns the regional endpoint information."]
+  end[@@ocaml.doc
+       "Returns the regional endpoint information. For more information on policy permissions, please see Internetwork traffic privacy."]
 module ExportArn =
   struct
     type nonrec t = string
@@ -9054,8 +10811,8 @@ module DescribeExportInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ExportArn") in
       make ~exportArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let exportArn = field_map_exn json "ExportArn" ExportArn.of_json in
+    let of_json json__ =
+      let exportArn = field_map_exn json__ "ExportArn" ExportArn.of_json in
       make ~exportArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an existing table export."]
@@ -9073,8 +10830,8 @@ module ExportNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified export was not found."]
@@ -9119,7 +10876,8 @@ module S3Prefix =
   struct
     type nonrec t = string
     let context_ = "S3Prefix"
-    let make i = i
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:1024); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -9132,7 +10890,9 @@ module S3BucketOwner =
   struct
     type nonrec t = string
     let context_ = "S3BucketOwner"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"[0-9]{12}"); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -9145,7 +10905,14 @@ module S3Bucket =
   struct
     type nonrec t = string
     let context_ = "S3Bucket"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^[a-z0-9A-Z]+[\\.\\-\\w]*[a-z0-9A-Z]+$"));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -9154,6 +10921,103 @@ module S3Bucket =
     let of_json j = string_of_json ~kind:"S3Bucket" j
     let to_json = simple_to_json to_value
   end
+module ExportViewType =
+  struct
+    type nonrec t =
+      | NEW_IMAGE 
+      | NEW_AND_OLD_IMAGES 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NEW_IMAGE -> "NEW_IMAGE"
+      | NEW_AND_OLD_IMAGES -> "NEW_AND_OLD_IMAGES"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NEW_IMAGE" -> NEW_IMAGE
+      | "NEW_AND_OLD_IMAGES" -> NEW_AND_OLD_IMAGES
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ExportViewType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExportViewType" j)
+    let to_json = simple_to_json to_value
+  end
+module ExportToTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module ExportFromTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module IncrementalExportSpecification =
+  struct
+    type nonrec t =
+      {
+      exportFromTime: ExportFromTime.t option
+        [@ocaml.doc
+          "Time in the past which provides the inclusive start range for the export table's data, counted in seconds from the start of the Unix epoch. The incremental export will reflect the table's state including and after this point in time."];
+      exportToTime: ExportToTime.t option
+        [@ocaml.doc
+          "Time in the past which provides the exclusive end range for the export table's data, counted in seconds from the start of the Unix epoch. The incremental export will reflect the table's state just prior to this point in time. If this is not provided, the latest time with data available will be used."];
+      exportViewType: ExportViewType.t option
+        [@ocaml.doc
+          "The view type that was chosen for the export. Valid values are NEW_AND_OLD_IMAGES and NEW_IMAGES. The default value is NEW_AND_OLD_IMAGES."]}
+    let make ?exportFromTime =
+      fun ?exportToTime ->
+        fun ?exportViewType ->
+          fun () -> { exportFromTime; exportToTime; exportViewType }
+    let to_value x =
+      structure_to_value
+        [("ExportFromTime",
+           (Option.map x.exportFromTime ~f:ExportFromTime.to_value));
+        ("ExportToTime",
+          (Option.map x.exportToTime ~f:ExportToTime.to_value));
+        ("ExportViewType",
+          (Option.map x.exportViewType ~f:ExportViewType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exportViewType =
+        (Option.map ~f:ExportViewType.of_xml)
+          (Xml.child xml_arg0 "ExportViewType") in
+      let exportToTime =
+        (Option.map ~f:ExportToTime.of_xml)
+          (Xml.child xml_arg0 "ExportToTime") in
+      let exportFromTime =
+        (Option.map ~f:ExportFromTime.of_xml)
+          (Xml.child xml_arg0 "ExportFromTime") in
+      make ?exportViewType ?exportToTime ?exportFromTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exportViewType =
+        field_map json__ "ExportViewType" ExportViewType.of_json in
+      let exportToTime = field_map json__ "ExportToTime" ExportToTime.of_json in
+      let exportFromTime =
+        field_map json__ "ExportFromTime" ExportFromTime.of_json in
+      make ?exportViewType ?exportToTime ?exportFromTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Optional object containing the parameters specific to an incremental export."]
 module FailureMessage =
   struct
     type nonrec t = string
@@ -9178,6 +11042,31 @@ module FailureCode =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"FailureCode" j
+    let to_json = simple_to_json to_value
+  end
+module ExportType =
+  struct
+    type nonrec t =
+      | FULL_EXPORT 
+      | INCREMENTAL_EXPORT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FULL_EXPORT -> "FULL_EXPORT"
+      | INCREMENTAL_EXPORT -> "INCREMENTAL_EXPORT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FULL_EXPORT" -> FULL_EXPORT
+      | "INCREMENTAL_EXPORT" -> INCREMENTAL_EXPORT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ExportType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExportType" j)
     let to_json = simple_to_json to_value
   end
 module ExportTime =
@@ -9332,7 +11221,13 @@ module ExportDescription =
       billedSizeBytes: BilledSizeBytes.t option
         [@ocaml.doc "The billable size of the table export."];
       itemCount: ItemCount.t option
-        [@ocaml.doc "The number of items exported."]}
+        [@ocaml.doc "The number of items exported."];
+      exportType: ExportType.t option
+        [@ocaml.doc
+          "The type of export that was performed. Valid values are FULL_EXPORT or INCREMENTAL_EXPORT."];
+      incrementalExportSpecification: IncrementalExportSpecification.t option
+        [@ocaml.doc
+          "Optional object containing the parameters specific to an incremental export."]}
     let make ?exportArn =
       fun ?exportStatus ->
         fun ?startTime ->
@@ -9352,28 +11247,34 @@ module ExportDescription =
                                     fun ?exportFormat ->
                                       fun ?billedSizeBytes ->
                                         fun ?itemCount ->
-                                          fun () ->
-                                            {
-                                              exportArn;
-                                              exportStatus;
-                                              startTime;
-                                              endTime;
-                                              exportManifest;
-                                              tableArn;
-                                              tableId;
-                                              exportTime;
-                                              clientToken;
-                                              s3Bucket;
-                                              s3BucketOwner;
-                                              s3Prefix;
-                                              s3SseAlgorithm;
-                                              s3SseKmsKeyId;
-                                              failureCode;
-                                              failureMessage;
-                                              exportFormat;
-                                              billedSizeBytes;
-                                              itemCount
-                                            }
+                                          fun ?exportType ->
+                                            fun
+                                              ?incrementalExportSpecification
+                                              ->
+                                              fun () ->
+                                                {
+                                                  exportArn;
+                                                  exportStatus;
+                                                  startTime;
+                                                  endTime;
+                                                  exportManifest;
+                                                  tableArn;
+                                                  tableId;
+                                                  exportTime;
+                                                  clientToken;
+                                                  s3Bucket;
+                                                  s3BucketOwner;
+                                                  s3Prefix;
+                                                  s3SseAlgorithm;
+                                                  s3SseKmsKeyId;
+                                                  failureCode;
+                                                  failureMessage;
+                                                  exportFormat;
+                                                  billedSizeBytes;
+                                                  itemCount;
+                                                  exportType;
+                                                  incrementalExportSpecification
+                                                }
     let to_value x =
       structure_to_value
         [("ExportArn", (Option.map x.exportArn ~f:ExportArn.to_value));
@@ -9402,9 +11303,18 @@ module ExportDescription =
           (Option.map x.exportFormat ~f:ExportFormat.to_value));
         ("BilledSizeBytes",
           (Option.map x.billedSizeBytes ~f:BilledSizeBytes.to_value));
-        ("ItemCount", (Option.map x.itemCount ~f:ItemCount.to_value))]
+        ("ItemCount", (Option.map x.itemCount ~f:ItemCount.to_value));
+        ("ExportType", (Option.map x.exportType ~f:ExportType.to_value));
+        ("IncrementalExportSpecification",
+          (Option.map x.incrementalExportSpecification
+             ~f:IncrementalExportSpecification.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let incrementalExportSpecification =
+        (Option.map ~f:IncrementalExportSpecification.of_xml)
+          (Xml.child xml_arg0 "IncrementalExportSpecification") in
+      let exportType =
+        (Option.map ~f:ExportType.of_xml) (Xml.child xml_arg0 "ExportType") in
       let itemCount =
         (Option.map ~f:ItemCount.of_xml) (Xml.child xml_arg0 "ItemCount") in
       let billedSizeBytes =
@@ -9452,41 +11362,47 @@ module ExportDescription =
           (Xml.child xml_arg0 "ExportStatus") in
       let exportArn =
         (Option.map ~f:ExportArn.of_xml) (Xml.child xml_arg0 "ExportArn") in
-      make ?itemCount ?billedSizeBytes ?exportFormat ?failureMessage
-        ?failureCode ?s3SseKmsKeyId ?s3SseAlgorithm ?s3Prefix ?s3BucketOwner
-        ?s3Bucket ?clientToken ?exportTime ?tableId ?tableArn ?exportManifest
-        ?endTime ?startTime ?exportStatus ?exportArn ()
+      make ?incrementalExportSpecification ?exportType ?itemCount
+        ?billedSizeBytes ?exportFormat ?failureMessage ?failureCode
+        ?s3SseKmsKeyId ?s3SseAlgorithm ?s3Prefix ?s3BucketOwner ?s3Bucket
+        ?clientToken ?exportTime ?tableId ?tableArn ?exportManifest ?endTime
+        ?startTime ?exportStatus ?exportArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let itemCount = field_map json "ItemCount" ItemCount.of_json in
+    let of_json json__ =
+      let incrementalExportSpecification =
+        field_map json__ "IncrementalExportSpecification"
+          IncrementalExportSpecification.of_json in
+      let exportType = field_map json__ "ExportType" ExportType.of_json in
+      let itemCount = field_map json__ "ItemCount" ItemCount.of_json in
       let billedSizeBytes =
-        field_map json "BilledSizeBytes" BilledSizeBytes.of_json in
-      let exportFormat = field_map json "ExportFormat" ExportFormat.of_json in
+        field_map json__ "BilledSizeBytes" BilledSizeBytes.of_json in
+      let exportFormat = field_map json__ "ExportFormat" ExportFormat.of_json in
       let failureMessage =
-        field_map json "FailureMessage" FailureMessage.of_json in
-      let failureCode = field_map json "FailureCode" FailureCode.of_json in
+        field_map json__ "FailureMessage" FailureMessage.of_json in
+      let failureCode = field_map json__ "FailureCode" FailureCode.of_json in
       let s3SseKmsKeyId =
-        field_map json "S3SseKmsKeyId" S3SseKmsKeyId.of_json in
+        field_map json__ "S3SseKmsKeyId" S3SseKmsKeyId.of_json in
       let s3SseAlgorithm =
-        field_map json "S3SseAlgorithm" S3SseAlgorithm.of_json in
-      let s3Prefix = field_map json "S3Prefix" S3Prefix.of_json in
+        field_map json__ "S3SseAlgorithm" S3SseAlgorithm.of_json in
+      let s3Prefix = field_map json__ "S3Prefix" S3Prefix.of_json in
       let s3BucketOwner =
-        field_map json "S3BucketOwner" S3BucketOwner.of_json in
-      let s3Bucket = field_map json "S3Bucket" S3Bucket.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      let exportTime = field_map json "ExportTime" ExportTime.of_json in
-      let tableId = field_map json "TableId" TableId.of_json in
-      let tableArn = field_map json "TableArn" TableArn.of_json in
+        field_map json__ "S3BucketOwner" S3BucketOwner.of_json in
+      let s3Bucket = field_map json__ "S3Bucket" S3Bucket.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let exportTime = field_map json__ "ExportTime" ExportTime.of_json in
+      let tableId = field_map json__ "TableId" TableId.of_json in
+      let tableArn = field_map json__ "TableArn" TableArn.of_json in
       let exportManifest =
-        field_map json "ExportManifest" ExportManifest.of_json in
-      let endTime = field_map json "EndTime" ExportEndTime.of_json in
-      let startTime = field_map json "StartTime" ExportStartTime.of_json in
-      let exportStatus = field_map json "ExportStatus" ExportStatus.of_json in
-      let exportArn = field_map json "ExportArn" ExportArn.of_json in
-      make ?itemCount ?billedSizeBytes ?exportFormat ?failureMessage
-        ?failureCode ?s3SseKmsKeyId ?s3SseAlgorithm ?s3Prefix ?s3BucketOwner
-        ?s3Bucket ?clientToken ?exportTime ?tableId ?tableArn ?exportManifest
-        ?endTime ?startTime ?exportStatus ?exportArn ()
+        field_map json__ "ExportManifest" ExportManifest.of_json in
+      let endTime = field_map json__ "EndTime" ExportEndTime.of_json in
+      let startTime = field_map json__ "StartTime" ExportStartTime.of_json in
+      let exportStatus = field_map json__ "ExportStatus" ExportStatus.of_json in
+      let exportArn = field_map json__ "ExportArn" ExportArn.of_json in
+      make ?incrementalExportSpecification ?exportType ?itemCount
+        ?billedSizeBytes ?exportFormat ?failureMessage ?failureCode
+        ?s3SseKmsKeyId ?s3SseAlgorithm ?s3Prefix ?s3BucketOwner ?s3Bucket
+        ?clientToken ?exportTime ?tableId ?tableArn ?exportManifest ?endTime
+        ?startTime ?exportStatus ?exportArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the properties of the exported table."]
 module DescribeExportOutput =
@@ -9552,9 +11468,9 @@ module DescribeExportOutput =
           (Xml.child xml_arg0 "ExportDescription") in
       make ?exportDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exportDescription =
-        field_map json "ExportDescription" ExportDescription.of_json in
+        field_map json__ "ExportDescription" ExportDescription.of_json in
       make ?exportDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an existing table export."]
@@ -9576,13 +11492,13 @@ module DescribeGlobalTableInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GlobalTableName") in
       make ~globalTableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalTableName =
-        field_map_exn json "GlobalTableName" TableName.of_json in
+        field_map_exn json__ "GlobalTableName" TableName.of_json in
       make ~globalTableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the specified global table. This operation only applies to Version 2017.11.29 of global tables. If you are using global tables Version 2019.11.21 you can use DescribeTable instead."]
+       "Returns information about the specified global table. This documentation is for version 2017.11.29 (Legacy) of global tables, which should be avoided for new global tables. Customers should use Global Tables version 2019.11.21 (Current) when possible, because it provides greater flexibility, higher efficiency, and consumes less write capacity than 2017.11.29 (Legacy). To determine which version you're using, see Determining the global table version you are using. To update existing global tables from version 2017.11.29 (Legacy) to version 2019.11.21 (Current), see Upgrading global tables."]
 module GlobalTableNotFoundException =
   struct
     type nonrec t = {
@@ -9597,8 +11513,8 @@ module GlobalTableNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified global table does not exist."]
@@ -9659,14 +11575,14 @@ module DescribeGlobalTableOutput =
           (Xml.child xml_arg0 "GlobalTableDescription") in
       make ?globalTableDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalTableDescription =
-        field_map json "GlobalTableDescription"
+        field_map json__ "GlobalTableDescription"
           GlobalTableDescription.of_json in
       make ?globalTableDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the specified global table. This operation only applies to Version 2017.11.29 of global tables. If you are using global tables Version 2019.11.21 you can use DescribeTable instead."]
+       "Returns information about the specified global table. This documentation is for version 2017.11.29 (Legacy) of global tables, which should be avoided for new global tables. Customers should use Global Tables version 2019.11.21 (Current) when possible, because it provides greater flexibility, higher efficiency, and consumes less write capacity than 2017.11.29 (Legacy). To determine which version you're using, see Determining the global table version you are using. To update existing global tables from version 2017.11.29 (Legacy) to version 2019.11.21 (Current), see Upgrading global tables."]
 module DescribeGlobalTableSettingsInput =
   struct
     type nonrec t =
@@ -9685,18 +11601,18 @@ module DescribeGlobalTableSettingsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GlobalTableName") in
       make ~globalTableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalTableName =
-        field_map_exn json "GlobalTableName" TableName.of_json in
+        field_map_exn json__ "GlobalTableName" TableName.of_json in
       make ~globalTableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes Region-specific settings for a global table. This operation only applies to Version 2017.11.29 of global tables."]
+       "Describes Region-specific settings for a global table. This documentation is for version 2017.11.29 (Legacy) of global tables, which should be avoided for new global tables. Customers should use Global Tables version 2019.11.21 (Current) when possible, because it provides greater flexibility, higher efficiency, and consumes less write capacity than 2017.11.29 (Legacy). To determine which version you're using, see Determining the global table version you are using. To update existing global tables from version 2017.11.29 (Legacy) to version 2019.11.21 (Current), see Upgrading global tables."]
 module ReplicaGlobalSecondaryIndexSettingsDescription =
   struct
     type nonrec t =
       {
-      indexName: IndexName.t
+      indexName: IndexName.t option
         [@ocaml.doc
           "The name of the global secondary index. The name must be unique among all other indexes on this table."];
       indexStatus: IndexStatus.t option
@@ -9716,25 +11632,24 @@ module ReplicaGlobalSecondaryIndexSettingsDescription =
         AutoScalingSettingsDescription.t option
         [@ocaml.doc
           "Auto scaling settings for a global secondary index replica's write capacity units."]}
-    let context_ = "ReplicaGlobalSecondaryIndexSettingsDescription"
-    let make ?indexStatus =
-      fun ?provisionedReadCapacityUnits ->
-        fun ?provisionedReadCapacityAutoScalingSettings ->
-          fun ?provisionedWriteCapacityUnits ->
-            fun ?provisionedWriteCapacityAutoScalingSettings ->
-              fun ~indexName ->
+    let make ?indexName =
+      fun ?indexStatus ->
+        fun ?provisionedReadCapacityUnits ->
+          fun ?provisionedReadCapacityAutoScalingSettings ->
+            fun ?provisionedWriteCapacityUnits ->
+              fun ?provisionedWriteCapacityAutoScalingSettings ->
                 fun () ->
                   {
+                    indexName;
                     indexStatus;
                     provisionedReadCapacityUnits;
                     provisionedReadCapacityAutoScalingSettings;
                     provisionedWriteCapacityUnits;
-                    provisionedWriteCapacityAutoScalingSettings;
-                    indexName
+                    provisionedWriteCapacityAutoScalingSettings
                   }
     let to_value x =
       structure_to_value
-        [("IndexName", (Some (IndexName.to_value x.indexName)));
+        [("IndexName", (Option.map x.indexName ~f:IndexName.to_value));
         ("IndexStatus", (Option.map x.indexStatus ~f:IndexStatus.to_value));
         ("ProvisionedReadCapacityUnits",
           (Option.map x.provisionedReadCapacityUnits
@@ -9765,38 +11680,40 @@ module ReplicaGlobalSecondaryIndexSettingsDescription =
       let indexStatus =
         (Option.map ~f:IndexStatus.of_xml) (Xml.child xml_arg0 "IndexStatus") in
       let indexName =
-        IndexName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
+        (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
       make ?provisionedWriteCapacityAutoScalingSettings
         ?provisionedWriteCapacityUnits
         ?provisionedReadCapacityAutoScalingSettings
-        ?provisionedReadCapacityUnits ?indexStatus ~indexName ()
+        ?provisionedReadCapacityUnits ?indexStatus ?indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedWriteCapacityAutoScalingSettings =
-        field_map json "ProvisionedWriteCapacityAutoScalingSettings"
+        field_map json__ "ProvisionedWriteCapacityAutoScalingSettings"
           AutoScalingSettingsDescription.of_json in
       let provisionedWriteCapacityUnits =
-        field_map json "ProvisionedWriteCapacityUnits"
+        field_map json__ "ProvisionedWriteCapacityUnits"
           PositiveLongObject.of_json in
       let provisionedReadCapacityAutoScalingSettings =
-        field_map json "ProvisionedReadCapacityAutoScalingSettings"
+        field_map json__ "ProvisionedReadCapacityAutoScalingSettings"
           AutoScalingSettingsDescription.of_json in
       let provisionedReadCapacityUnits =
-        field_map json "ProvisionedReadCapacityUnits"
+        field_map json__ "ProvisionedReadCapacityUnits"
           PositiveLongObject.of_json in
-      let indexStatus = field_map json "IndexStatus" IndexStatus.of_json in
-      let indexName = field_map_exn json "IndexName" IndexName.of_json in
+      let indexStatus = field_map json__ "IndexStatus" IndexStatus.of_json in
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
       make ?provisionedWriteCapacityAutoScalingSettings
         ?provisionedWriteCapacityUnits
         ?provisionedReadCapacityAutoScalingSettings
-        ?provisionedReadCapacityUnits ?indexStatus ~indexName ()
+        ?provisionedReadCapacityUnits ?indexStatus ?indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the properties of a global secondary index."]
 module ReplicaGlobalSecondaryIndexSettingsDescriptionList =
   struct
     type nonrec t = ReplicaGlobalSecondaryIndexSettingsDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:ReplicaGlobalSecondaryIndexSettingsDescription.to_value))
@@ -9825,7 +11742,8 @@ module ReplicaSettingsDescription =
   struct
     type nonrec t =
       {
-      regionName: RegionName.t [@ocaml.doc "The Region name of the replica."];
+      regionName: RegionName.t option
+        [@ocaml.doc "The Region name of the replica."];
       replicaStatus: ReplicaStatus.t option
         [@ocaml.doc
           "The current state of the Region: CREATING - The Region is being created. UPDATING - The Region is being updated. DELETING - The Region is being deleted. ACTIVE - The Region is ready for use."];
@@ -9850,18 +11768,18 @@ module ReplicaSettingsDescription =
         [@ocaml.doc
           "Replica global secondary index settings for the global table."];
       replicaTableClassSummary: TableClassSummary.t option }
-    let context_ = "ReplicaSettingsDescription"
-    let make ?replicaStatus =
-      fun ?replicaBillingModeSummary ->
-        fun ?replicaProvisionedReadCapacityUnits ->
-          fun ?replicaProvisionedReadCapacityAutoScalingSettings ->
-            fun ?replicaProvisionedWriteCapacityUnits ->
-              fun ?replicaProvisionedWriteCapacityAutoScalingSettings ->
-                fun ?replicaGlobalSecondaryIndexSettings ->
-                  fun ?replicaTableClassSummary ->
-                    fun ~regionName ->
+    let make ?regionName =
+      fun ?replicaStatus ->
+        fun ?replicaBillingModeSummary ->
+          fun ?replicaProvisionedReadCapacityUnits ->
+            fun ?replicaProvisionedReadCapacityAutoScalingSettings ->
+              fun ?replicaProvisionedWriteCapacityUnits ->
+                fun ?replicaProvisionedWriteCapacityAutoScalingSettings ->
+                  fun ?replicaGlobalSecondaryIndexSettings ->
+                    fun ?replicaTableClassSummary ->
                       fun () ->
                         {
+                          regionName;
                           replicaStatus;
                           replicaBillingModeSummary;
                           replicaProvisionedReadCapacityUnits;
@@ -9869,12 +11787,11 @@ module ReplicaSettingsDescription =
                           replicaProvisionedWriteCapacityUnits;
                           replicaProvisionedWriteCapacityAutoScalingSettings;
                           replicaGlobalSecondaryIndexSettings;
-                          replicaTableClassSummary;
-                          regionName
+                          replicaTableClassSummary
                         }
     let to_value x =
       structure_to_value
-        [("RegionName", (Some (RegionName.to_value x.regionName)));
+        [("RegionName", (Option.map x.regionName ~f:RegionName.to_value));
         ("ReplicaStatus",
           (Option.map x.replicaStatus ~f:ReplicaStatus.to_value));
         ("ReplicaBillingModeSummary",
@@ -9928,50 +11845,53 @@ module ReplicaSettingsDescription =
         (Option.map ~f:ReplicaStatus.of_xml)
           (Xml.child xml_arg0 "ReplicaStatus") in
       let regionName =
-        RegionName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RegionName") in
+        (Option.map ~f:RegionName.of_xml) (Xml.child xml_arg0 "RegionName") in
       make ?replicaTableClassSummary ?replicaGlobalSecondaryIndexSettings
         ?replicaProvisionedWriteCapacityAutoScalingSettings
         ?replicaProvisionedWriteCapacityUnits
         ?replicaProvisionedReadCapacityAutoScalingSettings
         ?replicaProvisionedReadCapacityUnits ?replicaBillingModeSummary
-        ?replicaStatus ~regionName ()
+        ?replicaStatus ?regionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicaTableClassSummary =
-        field_map json "ReplicaTableClassSummary" TableClassSummary.of_json in
+        field_map json__ "ReplicaTableClassSummary" TableClassSummary.of_json in
       let replicaGlobalSecondaryIndexSettings =
-        field_map json "ReplicaGlobalSecondaryIndexSettings"
+        field_map json__ "ReplicaGlobalSecondaryIndexSettings"
           ReplicaGlobalSecondaryIndexSettingsDescriptionList.of_json in
       let replicaProvisionedWriteCapacityAutoScalingSettings =
-        field_map json "ReplicaProvisionedWriteCapacityAutoScalingSettings"
+        field_map json__ "ReplicaProvisionedWriteCapacityAutoScalingSettings"
           AutoScalingSettingsDescription.of_json in
       let replicaProvisionedWriteCapacityUnits =
-        field_map json "ReplicaProvisionedWriteCapacityUnits"
+        field_map json__ "ReplicaProvisionedWriteCapacityUnits"
           NonNegativeLongObject.of_json in
       let replicaProvisionedReadCapacityAutoScalingSettings =
-        field_map json "ReplicaProvisionedReadCapacityAutoScalingSettings"
+        field_map json__ "ReplicaProvisionedReadCapacityAutoScalingSettings"
           AutoScalingSettingsDescription.of_json in
       let replicaProvisionedReadCapacityUnits =
-        field_map json "ReplicaProvisionedReadCapacityUnits"
+        field_map json__ "ReplicaProvisionedReadCapacityUnits"
           NonNegativeLongObject.of_json in
       let replicaBillingModeSummary =
-        field_map json "ReplicaBillingModeSummary" BillingModeSummary.of_json in
+        field_map json__ "ReplicaBillingModeSummary"
+          BillingModeSummary.of_json in
       let replicaStatus =
-        field_map json "ReplicaStatus" ReplicaStatus.of_json in
-      let regionName = field_map_exn json "RegionName" RegionName.of_json in
+        field_map json__ "ReplicaStatus" ReplicaStatus.of_json in
+      let regionName = field_map json__ "RegionName" RegionName.of_json in
       make ?replicaTableClassSummary ?replicaGlobalSecondaryIndexSettings
         ?replicaProvisionedWriteCapacityAutoScalingSettings
         ?replicaProvisionedWriteCapacityUnits
         ?replicaProvisionedReadCapacityAutoScalingSettings
         ?replicaProvisionedReadCapacityUnits ?replicaBillingModeSummary
-        ?replicaStatus ~regionName ()
+        ?replicaStatus ?regionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the properties of a replica."]
 module ReplicaSettingsDescriptionList =
   struct
     type nonrec t = ReplicaSettingsDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicaSettingsDescription.to_value)) |>
         (fun x -> `List x)
@@ -10059,36 +11979,710 @@ module DescribeGlobalTableSettingsOutput =
           (Xml.child xml_arg0 "GlobalTableName") in
       make ?replicaSettings ?globalTableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicaSettings =
-        field_map json "ReplicaSettings"
+        field_map json__ "ReplicaSettings"
           ReplicaSettingsDescriptionList.of_json in
       let globalTableName =
-        field_map json "GlobalTableName" TableName.of_json in
+        field_map json__ "GlobalTableName" TableName.of_json in
       make ?replicaSettings ?globalTableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes Region-specific settings for a global table. This operation only applies to Version 2017.11.29 of global tables."]
-module DescribeKinesisStreamingDestinationInput =
+       "Describes Region-specific settings for a global table. This documentation is for version 2017.11.29 (Legacy) of global tables, which should be avoided for new global tables. Customers should use Global Tables version 2019.11.21 (Current) when possible, because it provides greater flexibility, higher efficiency, and consumes less write capacity than 2017.11.29 (Legacy). To determine which version you're using, see Determining the global table version you are using. To update existing global tables from version 2017.11.29 (Legacy) to version 2019.11.21 (Current), see Upgrading global tables."]
+module ImportArn =
+  struct
+    type nonrec t = string
+    let context_ = "ImportArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:37));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImportArn" j
+    let to_json = simple_to_json to_value
+  end
+module DescribeImportInput =
+  struct
+    type nonrec t =
+      {
+      importArn: ImportArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) associated with the table you're importing to."]}
+    let context_ = "DescribeImportInput"
+    let make ~importArn = fun () -> { importArn }
+    let to_value x =
+      structure_to_value
+        [("ImportArn", (Some (ImportArn.to_value x.importArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let importArn =
+        ImportArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ImportArn") in
+      make ~importArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let importArn = field_map_exn json__ "ImportArn" ImportArn.of_json in
+      make ~importArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents the properties of the import."]
+module TableCreationParameters =
   struct
     type nonrec t =
       {
       tableName: TableName.t
-        [@ocaml.doc "The name of the table being described."]}
+        [@ocaml.doc
+          "The name of the table created as part of the import operation."];
+      attributeDefinitions: AttributeDefinitions.t
+        [@ocaml.doc
+          "The attributes of the table created as part of the import operation."];
+      keySchema: KeySchema.t
+        [@ocaml.doc
+          "The primary key and option sort key of the table created as part of the import operation."];
+      billingMode: BillingMode.t option
+        [@ocaml.doc
+          "The billing mode for provisioning the table created as part of the import operation."];
+      provisionedThroughput: ProvisionedThroughput.t option ;
+      onDemandThroughput: OnDemandThroughput.t option ;
+      sSESpecification: SSESpecification.t option ;
+      globalSecondaryIndexes: GlobalSecondaryIndexList.t option
+        [@ocaml.doc
+          "The Global Secondary Indexes (GSI) of the table to be created as part of the import operation."]}
+    let context_ = "TableCreationParameters"
+    let make ?billingMode =
+      fun ?provisionedThroughput ->
+        fun ?onDemandThroughput ->
+          fun ?sSESpecification ->
+            fun ?globalSecondaryIndexes ->
+              fun ~tableName ->
+                fun ~attributeDefinitions ->
+                  fun ~keySchema ->
+                    fun () ->
+                      {
+                        billingMode;
+                        provisionedThroughput;
+                        onDemandThroughput;
+                        sSESpecification;
+                        globalSecondaryIndexes;
+                        tableName;
+                        attributeDefinitions;
+                        keySchema
+                      }
+    let to_value x =
+      structure_to_value
+        [("TableName", (Some (TableName.to_value x.tableName)));
+        ("AttributeDefinitions",
+          (Some (AttributeDefinitions.to_value x.attributeDefinitions)));
+        ("KeySchema", (Some (KeySchema.to_value x.keySchema)));
+        ("BillingMode", (Option.map x.billingMode ~f:BillingMode.to_value));
+        ("ProvisionedThroughput",
+          (Option.map x.provisionedThroughput
+             ~f:ProvisionedThroughput.to_value));
+        ("OnDemandThroughput",
+          (Option.map x.onDemandThroughput ~f:OnDemandThroughput.to_value));
+        ("SSESpecification",
+          (Option.map x.sSESpecification ~f:SSESpecification.to_value));
+        ("GlobalSecondaryIndexes",
+          (Option.map x.globalSecondaryIndexes
+             ~f:GlobalSecondaryIndexList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let globalSecondaryIndexes =
+        (Option.map ~f:GlobalSecondaryIndexList.of_xml)
+          (Xml.child xml_arg0 "GlobalSecondaryIndexes") in
+      let sSESpecification =
+        (Option.map ~f:SSESpecification.of_xml)
+          (Xml.child xml_arg0 "SSESpecification") in
+      let onDemandThroughput =
+        (Option.map ~f:OnDemandThroughput.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughput") in
+      let provisionedThroughput =
+        (Option.map ~f:ProvisionedThroughput.of_xml)
+          (Xml.child xml_arg0 "ProvisionedThroughput") in
+      let billingMode =
+        (Option.map ~f:BillingMode.of_xml) (Xml.child xml_arg0 "BillingMode") in
+      let keySchema =
+        KeySchema.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "KeySchema") in
+      let attributeDefinitions =
+        AttributeDefinitions.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttributeDefinitions") in
+      let tableName =
+        TableName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
+      make ?globalSecondaryIndexes ?sSESpecification ?onDemandThroughput
+        ?provisionedThroughput ?billingMode ~keySchema ~attributeDefinitions
+        ~tableName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let globalSecondaryIndexes =
+        field_map json__ "GlobalSecondaryIndexes"
+          GlobalSecondaryIndexList.of_json in
+      let sSESpecification =
+        field_map json__ "SSESpecification" SSESpecification.of_json in
+      let onDemandThroughput =
+        field_map json__ "OnDemandThroughput" OnDemandThroughput.of_json in
+      let provisionedThroughput =
+        field_map json__ "ProvisionedThroughput"
+          ProvisionedThroughput.of_json in
+      let billingMode = field_map json__ "BillingMode" BillingMode.of_json in
+      let keySchema = field_map_exn json__ "KeySchema" KeySchema.of_json in
+      let attributeDefinitions =
+        field_map_exn json__ "AttributeDefinitions"
+          AttributeDefinitions.of_json in
+      let tableName = field_map_exn json__ "TableName" TableName.of_json in
+      make ?globalSecondaryIndexes ?sSESpecification ?onDemandThroughput
+        ?provisionedThroughput ?billingMode ~keySchema ~attributeDefinitions
+        ~tableName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The parameters for the table created as part of the import operation."]
+module S3BucketSource =
+  struct
+    type nonrec t =
+      {
+      s3BucketOwner: S3BucketOwner.t option
+        [@ocaml.doc
+          "The account number of the S3 bucket that is being imported from. If the bucket is owned by the requester this is optional."];
+      s3Bucket: S3Bucket.t
+        [@ocaml.doc "The S3 bucket that is being imported from."];
+      s3KeyPrefix: S3Prefix.t option
+        [@ocaml.doc
+          "The key prefix shared by all S3 Objects that are being imported."]}
+    let context_ = "S3BucketSource"
+    let make ?s3BucketOwner =
+      fun ?s3KeyPrefix ->
+        fun ~s3Bucket -> fun () -> { s3BucketOwner; s3KeyPrefix; s3Bucket }
+    let to_value x =
+      structure_to_value
+        [("S3BucketOwner",
+           (Option.map x.s3BucketOwner ~f:S3BucketOwner.to_value));
+        ("S3Bucket", (Some (S3Bucket.to_value x.s3Bucket)));
+        ("S3KeyPrefix", (Option.map x.s3KeyPrefix ~f:S3Prefix.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3KeyPrefix =
+        (Option.map ~f:S3Prefix.of_xml) (Xml.child xml_arg0 "S3KeyPrefix") in
+      let s3Bucket =
+        S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
+      let s3BucketOwner =
+        (Option.map ~f:S3BucketOwner.of_xml)
+          (Xml.child xml_arg0 "S3BucketOwner") in
+      make ?s3KeyPrefix ~s3Bucket ?s3BucketOwner ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3KeyPrefix = field_map json__ "S3KeyPrefix" S3Prefix.of_json in
+      let s3Bucket = field_map_exn json__ "S3Bucket" S3Bucket.of_json in
+      let s3BucketOwner =
+        field_map json__ "S3BucketOwner" S3BucketOwner.of_json in
+      make ?s3KeyPrefix ~s3Bucket ?s3BucketOwner ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The S3 bucket that is being imported from."]
+module ProcessedItemCount =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module InputFormatOptions =
+  struct
+    type nonrec t =
+      {
+      csv: CsvOptions.t option
+        [@ocaml.doc
+          "The options for imported source files in CSV format. The values are Delimiter and HeaderList."]}
+    let make ?csv = fun () -> { csv }
+    let to_value x =
+      structure_to_value [("Csv", (Option.map x.csv ~f:CsvOptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let csv = (Option.map ~f:CsvOptions.of_xml) (Xml.child xml_arg0 "Csv") in
+      make ?csv ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let csv = field_map json__ "Csv" CsvOptions.of_json in make ?csv ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The format options for the data that was imported into the target table. There is one value, CsvOption."]
+module InputFormat =
+  struct
+    type nonrec t =
+      | DYNAMODB_JSON 
+      | ION 
+      | CSV 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DYNAMODB_JSON -> "DYNAMODB_JSON"
+      | ION -> "ION"
+      | CSV -> "CSV"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DYNAMODB_JSON" -> DYNAMODB_JSON
+      | "ION" -> ION
+      | "CSV" -> CSV
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration InputFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InputFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module InputCompressionType =
+  struct
+    type nonrec t =
+      | GZIP 
+      | ZSTD 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | GZIP -> "GZIP"
+      | ZSTD -> "ZSTD"
+      | NONE -> "NONE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GZIP" -> GZIP
+      | "ZSTD" -> ZSTD
+      | "NONE" -> NONE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InputCompressionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InputCompressionType" j)
+    let to_json = simple_to_json to_value
+  end
+module ImportedItemCount =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module ImportStatus =
+  struct
+    type nonrec t =
+      | IN_PROGRESS 
+      | COMPLETED 
+      | CANCELLING 
+      | CANCELLED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | COMPLETED -> "COMPLETED"
+      | CANCELLING -> "CANCELLING"
+      | CANCELLED -> "CANCELLED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "COMPLETED" -> COMPLETED
+      | "CANCELLING" -> CANCELLING
+      | "CANCELLED" -> CANCELLED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ImportStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImportStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ImportStartTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module ImportEndTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module ErrorCount =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module ImportTableDescription =
+  struct
+    type nonrec t =
+      {
+      importArn: ImportArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) corresponding to the import request."];
+      importStatus: ImportStatus.t option
+        [@ocaml.doc "The status of the import."];
+      tableArn: TableArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the table being imported into."];
+      tableId: TableId.t option
+        [@ocaml.doc
+          "The table id corresponding to the table created by import table process."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "The client token that was provided for the import task. Reusing the client token on retry makes a call to ImportTable idempotent."];
+      s3BucketSource: S3BucketSource.t option
+        [@ocaml.doc
+          "Values for the S3 bucket the source file is imported from. Includes bucket name (required), key prefix (optional) and bucket account owner ID (optional)."];
+      errorCount: ErrorCount.t option
+        [@ocaml.doc
+          "The number of errors occurred on importing the source file into the target table."];
+      cloudWatchLogGroupArn: CloudWatchLogGroupArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the Cloudwatch Log Group associated with the target table."];
+      inputFormat: InputFormat.t option
+        [@ocaml.doc
+          "The format of the source data going into the target table."];
+      inputFormatOptions: InputFormatOptions.t option
+        [@ocaml.doc
+          "The format options for the data that was imported into the target table. There is one value, CsvOption."];
+      inputCompressionType: InputCompressionType.t option
+        [@ocaml.doc
+          "The compression options for the data that has been imported into the target table. The values are NONE, GZIP, or ZSTD."];
+      tableCreationParameters: TableCreationParameters.t option
+        [@ocaml.doc
+          "The parameters for the new table that is being imported into."];
+      startTime: ImportStartTime.t option
+        [@ocaml.doc "The time when this import task started."];
+      endTime: ImportEndTime.t option
+        [@ocaml.doc
+          "The time at which the creation of the table associated with this import task completed."];
+      processedSizeBytes: LongObject.t option
+        [@ocaml.doc
+          "The total size of data processed from the source file, in Bytes."];
+      processedItemCount: ProcessedItemCount.t option
+        [@ocaml.doc
+          "The total number of items processed from the source file."];
+      importedItemCount: ImportedItemCount.t option
+        [@ocaml.doc
+          "The number of items successfully imported into the new table."];
+      failureCode: FailureCode.t option
+        [@ocaml.doc
+          "The error code corresponding to the failure that the import job ran into during execution."];
+      failureMessage: FailureMessage.t option
+        [@ocaml.doc
+          "The error message corresponding to the failure that the import job ran into during execution."]}
+    let make ?importArn =
+      fun ?importStatus ->
+        fun ?tableArn ->
+          fun ?tableId ->
+            fun ?clientToken ->
+              fun ?s3BucketSource ->
+                fun ?errorCount ->
+                  fun ?cloudWatchLogGroupArn ->
+                    fun ?inputFormat ->
+                      fun ?inputFormatOptions ->
+                        fun ?inputCompressionType ->
+                          fun ?tableCreationParameters ->
+                            fun ?startTime ->
+                              fun ?endTime ->
+                                fun ?processedSizeBytes ->
+                                  fun ?processedItemCount ->
+                                    fun ?importedItemCount ->
+                                      fun ?failureCode ->
+                                        fun ?failureMessage ->
+                                          fun () ->
+                                            {
+                                              importArn;
+                                              importStatus;
+                                              tableArn;
+                                              tableId;
+                                              clientToken;
+                                              s3BucketSource;
+                                              errorCount;
+                                              cloudWatchLogGroupArn;
+                                              inputFormat;
+                                              inputFormatOptions;
+                                              inputCompressionType;
+                                              tableCreationParameters;
+                                              startTime;
+                                              endTime;
+                                              processedSizeBytes;
+                                              processedItemCount;
+                                              importedItemCount;
+                                              failureCode;
+                                              failureMessage
+                                            }
+    let to_value x =
+      structure_to_value
+        [("ImportArn", (Option.map x.importArn ~f:ImportArn.to_value));
+        ("ImportStatus",
+          (Option.map x.importStatus ~f:ImportStatus.to_value));
+        ("TableArn", (Option.map x.tableArn ~f:TableArn.to_value));
+        ("TableId", (Option.map x.tableId ~f:TableId.to_value));
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("S3BucketSource",
+          (Option.map x.s3BucketSource ~f:S3BucketSource.to_value));
+        ("ErrorCount", (Option.map x.errorCount ~f:ErrorCount.to_value));
+        ("CloudWatchLogGroupArn",
+          (Option.map x.cloudWatchLogGroupArn
+             ~f:CloudWatchLogGroupArn.to_value));
+        ("InputFormat", (Option.map x.inputFormat ~f:InputFormat.to_value));
+        ("InputFormatOptions",
+          (Option.map x.inputFormatOptions ~f:InputFormatOptions.to_value));
+        ("InputCompressionType",
+          (Option.map x.inputCompressionType ~f:InputCompressionType.to_value));
+        ("TableCreationParameters",
+          (Option.map x.tableCreationParameters
+             ~f:TableCreationParameters.to_value));
+        ("StartTime", (Option.map x.startTime ~f:ImportStartTime.to_value));
+        ("EndTime", (Option.map x.endTime ~f:ImportEndTime.to_value));
+        ("ProcessedSizeBytes",
+          (Option.map x.processedSizeBytes ~f:LongObject.to_value));
+        ("ProcessedItemCount",
+          (Option.map x.processedItemCount ~f:ProcessedItemCount.to_value));
+        ("ImportedItemCount",
+          (Option.map x.importedItemCount ~f:ImportedItemCount.to_value));
+        ("FailureCode", (Option.map x.failureCode ~f:FailureCode.to_value));
+        ("FailureMessage",
+          (Option.map x.failureMessage ~f:FailureMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureMessage =
+        (Option.map ~f:FailureMessage.of_xml)
+          (Xml.child xml_arg0 "FailureMessage") in
+      let failureCode =
+        (Option.map ~f:FailureCode.of_xml) (Xml.child xml_arg0 "FailureCode") in
+      let importedItemCount =
+        (Option.map ~f:ImportedItemCount.of_xml)
+          (Xml.child xml_arg0 "ImportedItemCount") in
+      let processedItemCount =
+        (Option.map ~f:ProcessedItemCount.of_xml)
+          (Xml.child xml_arg0 "ProcessedItemCount") in
+      let processedSizeBytes =
+        (Option.map ~f:LongObject.of_xml)
+          (Xml.child xml_arg0 "ProcessedSizeBytes") in
+      let endTime =
+        (Option.map ~f:ImportEndTime.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:ImportStartTime.of_xml)
+          (Xml.child xml_arg0 "StartTime") in
+      let tableCreationParameters =
+        (Option.map ~f:TableCreationParameters.of_xml)
+          (Xml.child xml_arg0 "TableCreationParameters") in
+      let inputCompressionType =
+        (Option.map ~f:InputCompressionType.of_xml)
+          (Xml.child xml_arg0 "InputCompressionType") in
+      let inputFormatOptions =
+        (Option.map ~f:InputFormatOptions.of_xml)
+          (Xml.child xml_arg0 "InputFormatOptions") in
+      let inputFormat =
+        (Option.map ~f:InputFormat.of_xml) (Xml.child xml_arg0 "InputFormat") in
+      let cloudWatchLogGroupArn =
+        (Option.map ~f:CloudWatchLogGroupArn.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLogGroupArn") in
+      let errorCount =
+        (Option.map ~f:ErrorCount.of_xml) (Xml.child xml_arg0 "ErrorCount") in
+      let s3BucketSource =
+        (Option.map ~f:S3BucketSource.of_xml)
+          (Xml.child xml_arg0 "S3BucketSource") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
+      let tableId =
+        (Option.map ~f:TableId.of_xml) (Xml.child xml_arg0 "TableId") in
+      let tableArn =
+        (Option.map ~f:TableArn.of_xml) (Xml.child xml_arg0 "TableArn") in
+      let importStatus =
+        (Option.map ~f:ImportStatus.of_xml)
+          (Xml.child xml_arg0 "ImportStatus") in
+      let importArn =
+        (Option.map ~f:ImportArn.of_xml) (Xml.child xml_arg0 "ImportArn") in
+      make ?failureMessage ?failureCode ?importedItemCount
+        ?processedItemCount ?processedSizeBytes ?endTime ?startTime
+        ?tableCreationParameters ?inputCompressionType ?inputFormatOptions
+        ?inputFormat ?cloudWatchLogGroupArn ?errorCount ?s3BucketSource
+        ?clientToken ?tableId ?tableArn ?importStatus ?importArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureMessage =
+        field_map json__ "FailureMessage" FailureMessage.of_json in
+      let failureCode = field_map json__ "FailureCode" FailureCode.of_json in
+      let importedItemCount =
+        field_map json__ "ImportedItemCount" ImportedItemCount.of_json in
+      let processedItemCount =
+        field_map json__ "ProcessedItemCount" ProcessedItemCount.of_json in
+      let processedSizeBytes =
+        field_map json__ "ProcessedSizeBytes" LongObject.of_json in
+      let endTime = field_map json__ "EndTime" ImportEndTime.of_json in
+      let startTime = field_map json__ "StartTime" ImportStartTime.of_json in
+      let tableCreationParameters =
+        field_map json__ "TableCreationParameters"
+          TableCreationParameters.of_json in
+      let inputCompressionType =
+        field_map json__ "InputCompressionType" InputCompressionType.of_json in
+      let inputFormatOptions =
+        field_map json__ "InputFormatOptions" InputFormatOptions.of_json in
+      let inputFormat = field_map json__ "InputFormat" InputFormat.of_json in
+      let cloudWatchLogGroupArn =
+        field_map json__ "CloudWatchLogGroupArn"
+          CloudWatchLogGroupArn.of_json in
+      let errorCount = field_map json__ "ErrorCount" ErrorCount.of_json in
+      let s3BucketSource =
+        field_map json__ "S3BucketSource" S3BucketSource.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let tableId = field_map json__ "TableId" TableId.of_json in
+      let tableArn = field_map json__ "TableArn" TableArn.of_json in
+      let importStatus = field_map json__ "ImportStatus" ImportStatus.of_json in
+      let importArn = field_map json__ "ImportArn" ImportArn.of_json in
+      make ?failureMessage ?failureCode ?importedItemCount
+        ?processedItemCount ?processedSizeBytes ?endTime ?startTime
+        ?tableCreationParameters ?inputCompressionType ?inputFormatOptions
+        ?inputFormat ?cloudWatchLogGroupArn ?errorCount ?s3BucketSource
+        ?clientToken ?tableId ?tableArn ?importStatus ?importArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the properties of the table being imported into."]
+module ImportNotFoundException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified import was not found."]
+module DescribeImportOutput =
+  struct
+    type nonrec t =
+      {
+      importTableDescription: ImportTableDescription.t option
+        [@ocaml.doc
+          "Represents the properties of the table created for the import, and parameters of the import. The import parameters include import status, how many items were processed, and how many errors were encountered."]}
+    type nonrec error =
+      [ `ImportNotFoundException of ImportNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?importTableDescription = fun () -> { importTableDescription }
+    let error_of_json name json =
+      match name with
+      | "ImportNotFoundException" ->
+          `ImportNotFoundException (ImportNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ImportNotFoundException" ->
+          `ImportNotFoundException (ImportNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ImportNotFoundException e ->
+          `Assoc
+            [("error", (`String "ImportNotFoundException"));
+            ("details", (ImportNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ImportTableDescription",
+           (Option.map x.importTableDescription
+              ~f:ImportTableDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let importTableDescription =
+        (Option.map ~f:ImportTableDescription.of_xml)
+          (Xml.child xml_arg0 "ImportTableDescription") in
+      make ?importTableDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let importTableDescription =
+        field_map json__ "ImportTableDescription"
+          ImportTableDescription.of_json in
+      make ?importTableDescription ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents the properties of the import."]
+module DescribeKinesisStreamingDestinationInput =
+  struct
+    type nonrec t =
+      {
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table being described. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."]}
     let context_ = "DescribeKinesisStreamingDestinationInput"
     let make ~tableName = fun () -> { tableName }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)))]
+        [("TableName", (Some (TableArn.to_value x.tableName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+    let of_json json__ =
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       make ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10101,6 +12695,7 @@ module DestinationStatus =
       | DISABLING 
       | DISABLED 
       | ENABLE_FAILED 
+      | UPDATING 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -10110,6 +12705,7 @@ module DestinationStatus =
       | DISABLING -> "DISABLING"
       | DISABLED -> "DISABLED"
       | ENABLE_FAILED -> "ENABLE_FAILED"
+      | UPDATING -> "UPDATING"
       | Non_static_id s -> s
     let of_string =
       function
@@ -10118,6 +12714,7 @@ module DestinationStatus =
       | "DISABLING" -> DISABLING
       | "DISABLED" -> DISABLED
       | "ENABLE_FAILED" -> ENABLE_FAILED
+      | "UPDATING" -> UPDATING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -10138,21 +12735,37 @@ module KinesisDataStreamDestination =
         [@ocaml.doc "The current status of replication."];
       destinationStatusDescription: String_.t option
         [@ocaml.doc
-          "The human-readable string that corresponds to the replica status."]}
+          "The human-readable string that corresponds to the replica status."];
+      approximateCreationDateTimePrecision:
+        ApproximateCreationDateTimePrecision.t option
+        [@ocaml.doc
+          "The precision of the Kinesis data stream timestamp. The values are either MILLISECOND or MICROSECOND."]}
     let make ?streamArn =
       fun ?destinationStatus ->
         fun ?destinationStatusDescription ->
-          fun () ->
-            { streamArn; destinationStatus; destinationStatusDescription }
+          fun ?approximateCreationDateTimePrecision ->
+            fun () ->
+              {
+                streamArn;
+                destinationStatus;
+                destinationStatusDescription;
+                approximateCreationDateTimePrecision
+              }
     let to_value x =
       structure_to_value
         [("StreamArn", (Option.map x.streamArn ~f:StreamArn.to_value));
         ("DestinationStatus",
           (Option.map x.destinationStatus ~f:DestinationStatus.to_value));
         ("DestinationStatusDescription",
-          (Option.map x.destinationStatusDescription ~f:String_.to_value))]
+          (Option.map x.destinationStatusDescription ~f:String_.to_value));
+        ("ApproximateCreationDateTimePrecision",
+          (Option.map x.approximateCreationDateTimePrecision
+             ~f:ApproximateCreationDateTimePrecision.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let approximateCreationDateTimePrecision =
+        (Option.map ~f:ApproximateCreationDateTimePrecision.of_xml)
+          (Xml.child xml_arg0 "ApproximateCreationDateTimePrecision") in
       let destinationStatusDescription =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DestinationStatusDescription") in
@@ -10161,21 +12774,29 @@ module KinesisDataStreamDestination =
           (Xml.child xml_arg0 "DestinationStatus") in
       let streamArn =
         (Option.map ~f:StreamArn.of_xml) (Xml.child xml_arg0 "StreamArn") in
-      make ?destinationStatusDescription ?destinationStatus ?streamArn ()
+      make ?approximateCreationDateTimePrecision
+        ?destinationStatusDescription ?destinationStatus ?streamArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let approximateCreationDateTimePrecision =
+        field_map json__ "ApproximateCreationDateTimePrecision"
+          ApproximateCreationDateTimePrecision.of_json in
       let destinationStatusDescription =
-        field_map json "DestinationStatusDescription" String_.of_json in
+        field_map json__ "DestinationStatusDescription" String_.of_json in
       let destinationStatus =
-        field_map json "DestinationStatus" DestinationStatus.of_json in
-      let streamArn = field_map json "StreamArn" StreamArn.of_json in
-      make ?destinationStatusDescription ?destinationStatus ?streamArn ()
+        field_map json__ "DestinationStatus" DestinationStatus.of_json in
+      let streamArn = field_map json__ "StreamArn" StreamArn.of_json in
+      make ?approximateCreationDateTimePrecision
+        ?destinationStatusDescription ?destinationStatus ?streamArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a Kinesis data stream destination."]
 module KinesisDataStreamDestinations =
   struct
     type nonrec t = KinesisDataStreamDestination.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KinesisDataStreamDestination.to_value)) |>
         (fun x -> `List x)
@@ -10261,11 +12882,11 @@ module DescribeKinesisStreamingDestinationOutput =
         (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "TableName") in
       make ?kinesisDataStreamDestinations ?tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let kinesisDataStreamDestinations =
-        field_map json "KinesisDataStreamDestinations"
+        field_map json__ "KinesisDataStreamDestinations"
           KinesisDataStreamDestinations.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
       make ?kinesisDataStreamDestinations ?tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10368,17 +12989,18 @@ module DescribeLimitsOutput =
       make ?tableMaxWriteCapacityUnits ?tableMaxReadCapacityUnits
         ?accountMaxWriteCapacityUnits ?accountMaxReadCapacityUnits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tableMaxWriteCapacityUnits =
-        field_map json "TableMaxWriteCapacityUnits"
+        field_map json__ "TableMaxWriteCapacityUnits"
           PositiveLongObject.of_json in
       let tableMaxReadCapacityUnits =
-        field_map json "TableMaxReadCapacityUnits" PositiveLongObject.of_json in
+        field_map json__ "TableMaxReadCapacityUnits"
+          PositiveLongObject.of_json in
       let accountMaxWriteCapacityUnits =
-        field_map json "AccountMaxWriteCapacityUnits"
+        field_map json__ "AccountMaxWriteCapacityUnits"
           PositiveLongObject.of_json in
       let accountMaxReadCapacityUnits =
-        field_map json "AccountMaxReadCapacityUnits"
+        field_map json__ "AccountMaxReadCapacityUnits"
           PositiveLongObject.of_json in
       make ?tableMaxWriteCapacityUnits ?tableMaxReadCapacityUnits
         ?accountMaxWriteCapacityUnits ?accountMaxReadCapacityUnits ()
@@ -10388,22 +13010,23 @@ module DescribeTableInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t
-        [@ocaml.doc "The name of the table to describe."]}
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table to describe. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."]}
     let context_ = "DescribeTableInput"
     let make ~tableName = fun () -> { tableName }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)))]
+        [("TableName", (Some (TableArn.to_value x.tableName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+    let of_json json__ =
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       make ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a DescribeTable operation."]
@@ -10459,8 +13082,8 @@ module DescribeTableOutput =
         (Option.map ~f:TableDescription.of_xml) (Xml.child xml_arg0 "Table") in
       make ?table ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let table = field_map json "Table" TableDescription.of_json in
+    let of_json json__ =
+      let table = field_map json__ "Table" TableDescription.of_json in
       make ?table ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a DescribeTable operation."]
@@ -10468,25 +13091,27 @@ module DescribeTableReplicaAutoScalingInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t [@ocaml.doc "The name of the table."]}
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."]}
     let context_ = "DescribeTableReplicaAutoScalingInput"
     let make ~tableName = fun () -> { tableName }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)))]
+        [("TableName", (Some (TableArn.to_value x.tableName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+    let of_json json__ =
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       make ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes auto scaling settings across replicas of the global table at once. This operation only applies to Version 2019.11.21 of global tables."]
+       "Describes auto scaling settings across replicas of the global table at once."]
 module ReplicaGlobalSecondaryIndexAutoScalingDescription =
   struct
     type nonrec t =
@@ -10495,7 +13120,7 @@ module ReplicaGlobalSecondaryIndexAutoScalingDescription =
         [@ocaml.doc "The name of the global secondary index."];
       indexStatus: IndexStatus.t option
         [@ocaml.doc
-          "The current state of the replica global secondary index: CREATING - The index is being created. UPDATING - The index is being updated. DELETING - The index is being deleted. ACTIVE - The index is ready for use."];
+          "The current state of the replica global secondary index: CREATING - The index is being created. UPDATING - The table/index configuration is being updated. The table/index remains available for data operations when UPDATING DELETING - The index is being deleted. ACTIVE - The index is ready for use."];
       provisionedReadCapacityAutoScalingSettings:
         AutoScalingSettingsDescription.t option ;
       provisionedWriteCapacityAutoScalingSettings:
@@ -10537,15 +13162,15 @@ module ReplicaGlobalSecondaryIndexAutoScalingDescription =
         ?provisionedReadCapacityAutoScalingSettings ?indexStatus ?indexName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedWriteCapacityAutoScalingSettings =
-        field_map json "ProvisionedWriteCapacityAutoScalingSettings"
+        field_map json__ "ProvisionedWriteCapacityAutoScalingSettings"
           AutoScalingSettingsDescription.of_json in
       let provisionedReadCapacityAutoScalingSettings =
-        field_map json "ProvisionedReadCapacityAutoScalingSettings"
+        field_map json__ "ProvisionedReadCapacityAutoScalingSettings"
           AutoScalingSettingsDescription.of_json in
-      let indexStatus = field_map json "IndexStatus" IndexStatus.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
+      let indexStatus = field_map json__ "IndexStatus" IndexStatus.of_json in
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
       make ?provisionedWriteCapacityAutoScalingSettings
         ?provisionedReadCapacityAutoScalingSettings ?indexStatus ?indexName
         ()
@@ -10556,6 +13181,9 @@ module ReplicaGlobalSecondaryIndexAutoScalingDescriptionList =
   struct
     type nonrec t = ReplicaGlobalSecondaryIndexAutoScalingDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map
@@ -10649,19 +13277,19 @@ module ReplicaAutoScalingDescription =
         ?replicaProvisionedReadCapacityAutoScalingSettings
         ?globalSecondaryIndexes ?regionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicaStatus =
-        field_map json "ReplicaStatus" ReplicaStatus.of_json in
+        field_map json__ "ReplicaStatus" ReplicaStatus.of_json in
       let replicaProvisionedWriteCapacityAutoScalingSettings =
-        field_map json "ReplicaProvisionedWriteCapacityAutoScalingSettings"
+        field_map json__ "ReplicaProvisionedWriteCapacityAutoScalingSettings"
           AutoScalingSettingsDescription.of_json in
       let replicaProvisionedReadCapacityAutoScalingSettings =
-        field_map json "ReplicaProvisionedReadCapacityAutoScalingSettings"
+        field_map json__ "ReplicaProvisionedReadCapacityAutoScalingSettings"
           AutoScalingSettingsDescription.of_json in
       let globalSecondaryIndexes =
-        field_map json "GlobalSecondaryIndexes"
+        field_map json__ "GlobalSecondaryIndexes"
           ReplicaGlobalSecondaryIndexAutoScalingDescriptionList.of_json in
-      let regionName = field_map json "RegionName" RegionName.of_json in
+      let regionName = field_map json__ "RegionName" RegionName.of_json in
       make ?replicaStatus ?replicaProvisionedWriteCapacityAutoScalingSettings
         ?replicaProvisionedReadCapacityAutoScalingSettings
         ?globalSecondaryIndexes ?regionName ()
@@ -10671,6 +13299,9 @@ module ReplicaAutoScalingDescriptionList =
   struct
     type nonrec t = ReplicaAutoScalingDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicaAutoScalingDescription.to_value)) |>
         (fun x -> `List x)
@@ -10724,11 +13355,11 @@ module TableAutoScalingDescription =
         (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "TableName") in
       make ?replicas ?tableStatus ?tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicas =
-        field_map json "Replicas" ReplicaAutoScalingDescriptionList.of_json in
-      let tableStatus = field_map json "TableStatus" TableStatus.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
+        field_map json__ "Replicas" ReplicaAutoScalingDescriptionList.of_json in
+      let tableStatus = field_map json__ "TableStatus" TableStatus.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
       make ?replicas ?tableStatus ?tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10789,34 +13420,35 @@ module DescribeTableReplicaAutoScalingOutput =
           (Xml.child xml_arg0 "TableAutoScalingDescription") in
       make ?tableAutoScalingDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tableAutoScalingDescription =
-        field_map json "TableAutoScalingDescription"
+        field_map json__ "TableAutoScalingDescription"
           TableAutoScalingDescription.of_json in
       make ?tableAutoScalingDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes auto scaling settings across replicas of the global table at once. This operation only applies to Version 2019.11.21 of global tables."]
+       "Describes auto scaling settings across replicas of the global table at once."]
 module DescribeTimeToLiveInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t
-        [@ocaml.doc "The name of the table to be described."]}
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table to be described. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."]}
     let context_ = "DescribeTimeToLiveInput"
     let make ~tableName = fun () -> { tableName }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)))]
+        [("TableName", (Some (TableArn.to_value x.tableName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+    let of_json json__ =
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       make ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10874,9 +13506,10 @@ module DescribeTimeToLiveOutput =
           (Xml.child xml_arg0 "TimeToLiveDescription") in
       make ?timeToLiveDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timeToLiveDescription =
-        field_map json "TimeToLiveDescription" TimeToLiveDescription.of_json in
+        field_map json__ "TimeToLiveDescription"
+          TimeToLiveDescription.of_json in
       make ?timeToLiveDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10895,12 +13528,41 @@ module DuplicateItemException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "There was an attempt to insert an item with the same primary key as an item that already exists in the DynamoDB table."]
+module EnableKinesisStreamingConfiguration =
+  struct
+    type nonrec t =
+      {
+      approximateCreationDateTimePrecision:
+        ApproximateCreationDateTimePrecision.t option
+        [@ocaml.doc
+          "Toggle for the precision of Kinesis data stream timestamp. The values are either MILLISECOND or MICROSECOND."]}
+    let make ?approximateCreationDateTimePrecision =
+      fun () -> { approximateCreationDateTimePrecision }
+    let to_value x =
+      structure_to_value
+        [("ApproximateCreationDateTimePrecision",
+           (Option.map x.approximateCreationDateTimePrecision
+              ~f:ApproximateCreationDateTimePrecision.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let approximateCreationDateTimePrecision =
+        (Option.map ~f:ApproximateCreationDateTimePrecision.of_xml)
+          (Xml.child xml_arg0 "ApproximateCreationDateTimePrecision") in
+      make ?approximateCreationDateTimePrecision ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let approximateCreationDateTimePrecision =
+        field_map json__ "ApproximateCreationDateTimePrecision"
+          ApproximateCreationDateTimePrecision.of_json in
+      make ?approximateCreationDateTimePrecision ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Enables setting the configuration for Kinesis Streaming."]
 module PositiveIntegerObject =
   struct
     type nonrec t = int
@@ -10952,23 +13614,29 @@ module ExecuteStatementInput =
       returnConsumedCapacity: ReturnConsumedCapacity.t option ;
       limit: PositiveIntegerObject.t option
         [@ocaml.doc
-          "The maximum number of items to evaluate (not necessarily the number of matching items). If DynamoDB processes the number of items up to the limit while processing the results, it stops the operation and returns the matching values up to that point, along with a key in LastEvaluatedKey to apply in a subsequent operation so you can pick up where you left off. Also, if the processed dataset size exceeds 1 MB before DynamoDB reaches this limit, it stops the operation and returns the matching values up to the limit, and a key in LastEvaluatedKey to apply in a subsequent operation to continue the operation."]}
+          "The maximum number of items to evaluate (not necessarily the number of matching items). If DynamoDB processes the number of items up to the limit while processing the results, it stops the operation and returns the matching values up to that point, along with a key in LastEvaluatedKey to apply in a subsequent operation so you can pick up where you left off. Also, if the processed dataset size exceeds 1 MB before DynamoDB reaches this limit, it stops the operation and returns the matching values up to the limit, and a key in LastEvaluatedKey to apply in a subsequent operation to continue the operation."];
+      returnValuesOnConditionCheckFailure:
+        ReturnValuesOnConditionCheckFailure.t option
+        [@ocaml.doc
+          "An optional parameter that returns the item attributes for an ExecuteStatement operation that failed a condition check. There is no additional cost associated with requesting a return value aside from the small network and processing overhead of receiving a larger response. No read capacity units are consumed."]}
     let context_ = "ExecuteStatementInput"
     let make ?parameters =
       fun ?consistentRead ->
         fun ?nextToken ->
           fun ?returnConsumedCapacity ->
             fun ?limit ->
-              fun ~statement ->
-                fun () ->
-                  {
-                    parameters;
-                    consistentRead;
-                    nextToken;
-                    returnConsumedCapacity;
-                    limit;
-                    statement
-                  }
+              fun ?returnValuesOnConditionCheckFailure ->
+                fun ~statement ->
+                  fun () ->
+                    {
+                      parameters;
+                      consistentRead;
+                      nextToken;
+                      returnConsumedCapacity;
+                      limit;
+                      returnValuesOnConditionCheckFailure;
+                      statement
+                    }
     let to_value x =
       structure_to_value
         [("Statement", (Some (PartiQLStatement.to_value x.statement)));
@@ -10980,9 +13648,15 @@ module ExecuteStatementInput =
         ("ReturnConsumedCapacity",
           (Option.map x.returnConsumedCapacity
              ~f:ReturnConsumedCapacity.to_value));
-        ("Limit", (Option.map x.limit ~f:PositiveIntegerObject.to_value))]
+        ("Limit", (Option.map x.limit ~f:PositiveIntegerObject.to_value));
+        ("ReturnValuesOnConditionCheckFailure",
+          (Option.map x.returnValuesOnConditionCheckFailure
+             ~f:ReturnValuesOnConditionCheckFailure.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let returnValuesOnConditionCheckFailure =
+        (Option.map ~f:ReturnValuesOnConditionCheckFailure.of_xml)
+          (Xml.child xml_arg0 "ReturnValuesOnConditionCheckFailure") in
       let limit =
         (Option.map ~f:PositiveIntegerObject.of_xml)
           (Xml.child xml_arg0 "Limit") in
@@ -11001,25 +13675,31 @@ module ExecuteStatementInput =
       let statement =
         PartiQLStatement.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Statement") in
-      make ?limit ?returnConsumedCapacity ?nextToken ?consistentRead
-        ?parameters ~statement ()
+      make ?returnValuesOnConditionCheckFailure ?limit
+        ?returnConsumedCapacity ?nextToken ?consistentRead ?parameters
+        ~statement ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PositiveIntegerObject.of_json in
+    let of_json json__ =
+      let returnValuesOnConditionCheckFailure =
+        field_map json__ "ReturnValuesOnConditionCheckFailure"
+          ReturnValuesOnConditionCheckFailure.of_json in
+      let limit = field_map json__ "Limit" PositiveIntegerObject.of_json in
       let returnConsumedCapacity =
-        field_map json "ReturnConsumedCapacity"
+        field_map json__ "ReturnConsumedCapacity"
           ReturnConsumedCapacity.of_json in
-      let nextToken = field_map json "NextToken" PartiQLNextToken.of_json in
+      let nextToken = field_map json__ "NextToken" PartiQLNextToken.of_json in
       let consistentRead =
-        field_map json "ConsistentRead" ConsistentRead.of_json in
+        field_map json__ "ConsistentRead" ConsistentRead.of_json in
       let parameters =
-        field_map json "Parameters" PreparedStatementParameters.of_json in
-      let statement = field_map_exn json "Statement" PartiQLStatement.of_json in
-      make ?limit ?returnConsumedCapacity ?nextToken ?consistentRead
-        ?parameters ~statement ()
+        field_map json__ "Parameters" PreparedStatementParameters.of_json in
+      let statement =
+        field_map_exn json__ "Statement" PartiQLStatement.of_json in
+      make ?returnValuesOnConditionCheckFailure ?limit
+        ?returnConsumedCapacity ?nextToken ?consistentRead ?parameters
+        ~statement ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This operation allows you to perform reads and singleton writes on data stored in DynamoDB, using PartiQL. For PartiQL reads (SELECT statement), if the total number of processed items exceeds the maximum dataset size limit of 1 MB, the read stops and results are returned to the user as a LastEvaluatedKey value to continue the read in a subsequent operation. If the filter criteria in WHERE clause does not match any data, the read will return an empty result set. A single SELECT statement response can return up to the maximum number of items (if using the Limit parameter) or a maximum of 1 MB of data (and then apply any filtering to the results using WHERE clause). If LastEvaluatedKey is present in the response, you need to paginate the result set."]
+       "This operation allows you to perform reads and singleton writes on data stored in DynamoDB, using PartiQL. For PartiQL reads (SELECT statement), if the total number of processed items exceeds the maximum dataset size limit of 1 MB, the read stops and results are returned to the user as a LastEvaluatedKey value to continue the read in a subsequent operation. If the filter criteria in WHERE clause does not match any data, the read will return an empty result set. A single SELECT statement response can return up to the maximum number of items (if using the Limit parameter) or a maximum of 1 MB of data (and then apply any filtering to the results using WHERE clause). If LastEvaluatedKey is present in the response, you need to paginate the result set. If NextToken is present, you need to paginate the result set and include NextToken."]
 module ExecuteStatementOutput =
   struct
     type nonrec t =
@@ -11045,6 +13725,7 @@ module ExecuteStatementOutput =
           ProvisionedThroughputExceededException.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TransactionConflictException of TransactionConflictException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?items =
@@ -11072,6 +13753,8 @@ module ExecuteStatementOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TransactionConflictException" ->
           `TransactionConflictException
             (TransactionConflictException.of_json json)
@@ -11097,6 +13780,8 @@ module ExecuteStatementOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TransactionConflictException" ->
           `TransactionConflictException
             (TransactionConflictException.of_xml xml)
@@ -11132,6 +13817,10 @@ module ExecuteStatementOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TransactionConflictException e ->
           `Assoc
             [("error", (`String "TransactionConflictException"));
@@ -11162,57 +13851,78 @@ module ExecuteStatementOutput =
         (Option.map ~f:ItemList.of_xml) (Xml.child xml_arg0 "Items") in
       make ?lastEvaluatedKey ?consumedCapacity ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastEvaluatedKey = field_map json "LastEvaluatedKey" Key.of_json in
+    let of_json json__ =
+      let lastEvaluatedKey = field_map json__ "LastEvaluatedKey" Key.of_json in
       let consumedCapacity =
-        field_map json "ConsumedCapacity" ConsumedCapacity.of_json in
-      let nextToken = field_map json "NextToken" PartiQLNextToken.of_json in
-      let items = field_map json "Items" ItemList.of_json in
+        field_map json__ "ConsumedCapacity" ConsumedCapacity.of_json in
+      let nextToken = field_map json__ "NextToken" PartiQLNextToken.of_json in
+      let items = field_map json__ "Items" ItemList.of_json in
       make ?lastEvaluatedKey ?consumedCapacity ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This operation allows you to perform reads and singleton writes on data stored in DynamoDB, using PartiQL. For PartiQL reads (SELECT statement), if the total number of processed items exceeds the maximum dataset size limit of 1 MB, the read stops and results are returned to the user as a LastEvaluatedKey value to continue the read in a subsequent operation. If the filter criteria in WHERE clause does not match any data, the read will return an empty result set. A single SELECT statement response can return up to the maximum number of items (if using the Limit parameter) or a maximum of 1 MB of data (and then apply any filtering to the results using WHERE clause). If LastEvaluatedKey is present in the response, you need to paginate the result set."]
+       "This operation allows you to perform reads and singleton writes on data stored in DynamoDB, using PartiQL. For PartiQL reads (SELECT statement), if the total number of processed items exceeds the maximum dataset size limit of 1 MB, the read stops and results are returned to the user as a LastEvaluatedKey value to continue the read in a subsequent operation. If the filter criteria in WHERE clause does not match any data, the read will return an empty result set. A single SELECT statement response can return up to the maximum number of items (if using the Limit parameter) or a maximum of 1 MB of data (and then apply any filtering to the results using WHERE clause). If LastEvaluatedKey is present in the response, you need to paginate the result set. If NextToken is present, you need to paginate the result set and include NextToken."]
 module ParameterizedStatement =
   struct
     type nonrec t =
       {
       statement: PartiQLStatement.t
-        [@ocaml.doc "A PartiQL statment that uses parameters."];
+        [@ocaml.doc "A PartiQL statement that uses parameters."];
       parameters: PreparedStatementParameters.t option
-        [@ocaml.doc "The parameter values."]}
+        [@ocaml.doc "The parameter values."];
+      returnValuesOnConditionCheckFailure:
+        ReturnValuesOnConditionCheckFailure.t option
+        [@ocaml.doc
+          "An optional parameter that returns the item attributes for a PartiQL ParameterizedStatement operation that failed a condition check. There is no additional cost associated with requesting a return value aside from the small network and processing overhead of receiving a larger response. No read capacity units are consumed."]}
     let context_ = "ParameterizedStatement"
     let make ?parameters =
-      fun ~statement -> fun () -> { parameters; statement }
+      fun ?returnValuesOnConditionCheckFailure ->
+        fun ~statement ->
+          fun () ->
+            { parameters; returnValuesOnConditionCheckFailure; statement }
     let to_value x =
       structure_to_value
         [("Statement", (Some (PartiQLStatement.to_value x.statement)));
         ("Parameters",
-          (Option.map x.parameters ~f:PreparedStatementParameters.to_value))]
+          (Option.map x.parameters ~f:PreparedStatementParameters.to_value));
+        ("ReturnValuesOnConditionCheckFailure",
+          (Option.map x.returnValuesOnConditionCheckFailure
+             ~f:ReturnValuesOnConditionCheckFailure.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let returnValuesOnConditionCheckFailure =
+        (Option.map ~f:ReturnValuesOnConditionCheckFailure.of_xml)
+          (Xml.child xml_arg0 "ReturnValuesOnConditionCheckFailure") in
       let parameters =
         (Option.map ~f:PreparedStatementParameters.of_xml)
           (Xml.child xml_arg0 "Parameters") in
       let statement =
         PartiQLStatement.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Statement") in
-      make ?parameters ~statement ()
+      make ?returnValuesOnConditionCheckFailure ?parameters ~statement ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let returnValuesOnConditionCheckFailure =
+        field_map json__ "ReturnValuesOnConditionCheckFailure"
+          ReturnValuesOnConditionCheckFailure.of_json in
       let parameters =
-        field_map json "Parameters" PreparedStatementParameters.of_json in
-      let statement = field_map_exn json "Statement" PartiQLStatement.of_json in
-      make ?parameters ~statement ()
+        field_map json__ "Parameters" PreparedStatementParameters.of_json in
+      let statement =
+        field_map_exn json__ "Statement" PartiQLStatement.of_json in
+      make ?returnValuesOnConditionCheckFailure ?parameters ~statement ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Represents a PartiQL statment that uses parameters."]
+  end[@@ocaml.doc "Represents a PartiQL statement that uses parameters."]
 module ParameterizedStatements =
   struct
     type nonrec t = ParameterizedStatement.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterizedStatement.to_value)) |>
         (fun x -> `List x)
@@ -11277,14 +13987,14 @@ module ExecuteTransactionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TransactStatements") in
       make ?returnConsumedCapacity ?clientRequestToken ~transactStatements ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let returnConsumedCapacity =
-        field_map json "ReturnConsumedCapacity"
+        field_map json__ "ReturnConsumedCapacity"
           ReturnConsumedCapacity.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let transactStatements =
-        field_map_exn json "TransactStatements"
+        field_map_exn json__ "TransactStatements"
           ParameterizedStatements.of_json in
       make ?returnConsumedCapacity ?clientRequestToken ~transactStatements ()
     let to_json v = composed_to_json to_value v
@@ -11304,12 +14014,12 @@ module TransactionInProgressException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The transaction with the given request token is already in progress."]
+       "The transaction with the given request token is already in progress. Recommended Settings This is a general recommendation for handling the TransactionInProgressException. These settings help ensure that the client retries will trigger completion of the ongoing TransactWriteItems request. Set clientExecutionTimeout to a value that allows at least one retry to be processed after 5 seconds have elapsed since the first attempt for the TransactWriteItems operation. Set socketTimeout to a value a little lower than the requestTimeout setting. requestTimeout should be set based on the time taken for the individual retries of a single HTTP request for your use case, but setting it to 1 second or higher should work well to reduce chances of retries and TransactionInProgressException errors. Use exponential backoff when retrying and tune backoff if needed. Assuming default retry policy, example timeout settings based on the guidelines above are as follows: Example timeline: 0-1000 first attempt 1000-1500 first sleep/delay (default retry policy uses 500 ms as base delay for 4xx errors) 1500-2500 second attempt 2500-3500 second sleep/delay (500 * 2, exponential backoff) 3500-4500 third attempt 4500-6500 third sleep/delay (500 * 2^2) 6500-7500 fourth attempt (this can trigger inline recovery since 5 seconds have elapsed since the first attempt reached TC)"]
 module TransactionCanceledException =
   struct
     type nonrec t =
@@ -11334,14 +14044,14 @@ module TransactionCanceledException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?cancellationReasons ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cancellationReasons =
-        field_map json "CancellationReasons" CancellationReasonList.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+        field_map json__ "CancellationReasons" CancellationReasonList.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?cancellationReasons ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The entire transaction request was canceled. DynamoDB cancels a TransactWriteItems request under the following circumstances: A condition in one of the condition expressions is not met. A table in the TransactWriteItems request is in a different account or region. More than one action in the TransactWriteItems operation targets the same item. There is insufficient provisioned capacity for the transaction to be completed. An item size becomes too large (larger than 400 KB), or a local secondary index (LSI) becomes too large, or a similar validation error occurs because of changes made by the transaction. There is a user error, such as an invalid data format. DynamoDB cancels a TransactGetItems request under the following circumstances: There is an ongoing TransactGetItems operation that conflicts with a concurrent PutItem, UpdateItem, DeleteItem or TransactWriteItems request. In this case the TransactGetItems operation fails with a TransactionCanceledException. A table in the TransactGetItems request is in a different account or region. There is insufficient provisioned capacity for the transaction to be completed. There is a user error, such as an invalid data format. If using Java, DynamoDB lists the cancellation reasons on the CancellationReasons property. This property is not set for other languages. Transaction cancellation reasons are ordered in the order of requested items, if an item has no error it will have NONE code and Null message. Cancellation reason codes and possible error messages: No Errors: Code: NONE Message: null Conditional Check Failed: Code: ConditionalCheckFailed Message: The conditional request failed. Item Collection Size Limit Exceeded: Code: ItemCollectionSizeLimitExceeded Message: Collection size exceeded. Transaction Conflict: Code: TransactionConflict Message: Transaction is ongoing for the item. Provisioned Throughput Exceeded: Code: ProvisionedThroughputExceeded Messages: The level of configured provisioned throughput for the table was exceeded. Consider increasing your provisioning level with the UpdateTable API. This Message is received when provisioned throughput is exceeded is on a provisioned DynamoDB table. The level of configured provisioned throughput for one or more global secondary indexes of the table was exceeded. Consider increasing your provisioning level for the under-provisioned global secondary indexes with the UpdateTable API. This message is returned when provisioned throughput is exceeded is on a provisioned GSI. Throttling Error: Code: ThrottlingError Messages: Throughput exceeds the current capacity of your table or index. DynamoDB is automatically scaling your table or index so please try again shortly. If exceptions persist, check if you have a hot key: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-partition-key-design.html. This message is returned when writes get throttled on an On-Demand table as DynamoDB is automatically scaling the table. Throughput exceeds the current capacity for one or more global secondary indexes. DynamoDB is automatically scaling your index so please try again shortly. This message is returned when when writes get throttled on an On-Demand GSI as DynamoDB is automatically scaling the GSI. Validation Error: Code: ValidationError Messages: One or more parameter values were invalid. The update expression attempted to update the secondary index key beyond allowed size limits. The update expression attempted to update the secondary index key to unsupported type. An operand in the update expression has an incorrect data type. Item size to update has exceeded the maximum allowed size. Number overflow. Attempting to store a number with magnitude larger than supported range. Type mismatch for attribute to update. Nesting Levels have exceeded supported limits. The document path provided in the update expression is invalid for update. The provided expression refers to an attribute that does not exist in the item."]
+       "The entire transaction request was canceled. DynamoDB cancels a TransactWriteItems request under the following circumstances: A condition in one of the condition expressions is not met. A table in the TransactWriteItems request is in a different account or region. More than one action in the TransactWriteItems operation targets the same item. There is insufficient provisioned capacity for the transaction to be completed. An item size becomes too large (larger than 400 KB), or a local secondary index (LSI) becomes too large, or a similar validation error occurs because of changes made by the transaction. There is a user error, such as an invalid data format. There is an ongoing TransactWriteItems operation that conflicts with a concurrent TransactWriteItems request. In this case the TransactWriteItems operation fails with a TransactionCanceledException. DynamoDB cancels a TransactGetItems request under the following circumstances: There is an ongoing TransactGetItems operation that conflicts with a concurrent PutItem, UpdateItem, DeleteItem or TransactWriteItems request. In this case the TransactGetItems operation fails with a TransactionCanceledException. A table in the TransactGetItems request is in a different account or region. There is insufficient provisioned capacity for the transaction to be completed. There is a user error, such as an invalid data format. DynamoDB lists the cancellation reasons on the CancellationReasons property. Transaction cancellation reasons are ordered in the order of requested items, if an item has no error it will have None code and Null message. Cancellation reason codes and possible error messages: No Errors: Code: None Message: null Conditional Check Failed: Code: ConditionalCheckFailed Message: The conditional request failed. Item Collection Size Limit Exceeded: Code: ItemCollectionSizeLimitExceeded Message: Collection size exceeded. Transaction Conflict: Code: TransactionConflict Message: Transaction is ongoing for the item. Provisioned Throughput Exceeded: Code: ProvisionedThroughputExceeded Messages: The level of configured provisioned throughput for the table was exceeded. Consider increasing your provisioning level with the UpdateTable API. This Message is received when provisioned throughput is exceeded is on a provisioned DynamoDB table. The level of configured provisioned throughput for one or more global secondary indexes of the table was exceeded. Consider increasing your provisioning level for the under-provisioned global secondary indexes with the UpdateTable API. This message is returned when provisioned throughput is exceeded is on a provisioned GSI. Throttling Error: Code: ThrottlingError Messages: Throughput exceeds the current capacity of your table or index. DynamoDB is automatically scaling your table or index so please try again shortly. If exceptions persist, check if you have a hot key: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-partition-key-design.html. This message is returned when writes get throttled on an On-Demand table as DynamoDB is automatically scaling the table. Throughput exceeds the current capacity for one or more global secondary indexes. DynamoDB is automatically scaling your index so please try again shortly. This message is returned when writes get throttled on an On-Demand GSI as DynamoDB is automatically scaling the GSI. Validation Error: Code: ValidationError Messages: One or more parameter values were invalid. The update expression attempted to update the secondary index key beyond allowed size limits. The update expression attempted to update the secondary index key to unsupported type. An operand in the update expression has an incorrect data type. Item size to update has exceeded the maximum allowed size. Number overflow. Attempting to store a number with magnitude larger than supported range. Type mismatch for attribute to update. Nesting Levels have exceeded supported limits. The document path provided in the update expression is invalid for update. The provided expression refers to an attribute that does not exist in the item."]
 module ItemResponse =
   struct
     type nonrec t =
@@ -11359,8 +14069,9 @@ module ItemResponse =
         (Option.map ~f:AttributeMap.of_xml) (Xml.child xml_arg0 "Item") in
       make ?item ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let item = field_map json "Item" AttributeMap.of_json in make ?item ()
+    let of_json json__ =
+      let item = field_map json__ "Item" AttributeMap.of_json in
+      make ?item ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details for the requested item."]
 module ItemResponseList =
@@ -11369,8 +14080,12 @@ module ItemResponseList =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ItemResponse.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11405,8 +14120,8 @@ module IdempotentParameterMismatchException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11429,6 +14144,7 @@ module ExecuteTransactionOutput =
           ProvisionedThroughputExceededException.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TransactionCanceledException of TransactionCanceledException.t 
       | `TransactionInProgressException of TransactionInProgressException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -11448,6 +14164,8 @@ module ExecuteTransactionOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TransactionCanceledException" ->
           `TransactionCanceledException
             (TransactionCanceledException.of_json json)
@@ -11471,6 +14189,8 @@ module ExecuteTransactionOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TransactionCanceledException" ->
           `TransactionCanceledException
             (TransactionCanceledException.of_xml xml)
@@ -11501,6 +14221,10 @@ module ExecuteTransactionOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TransactionCanceledException e ->
           `Assoc
             [("error", (`String "TransactionCanceledException"));
@@ -11529,10 +14253,10 @@ module ExecuteTransactionOutput =
           (Xml.child xml_arg0 "Responses") in
       make ?consumedCapacity ?responses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumedCapacity =
-        field_map json "ConsumedCapacity" ConsumedCapacityMultiple.of_json in
-      let responses = field_map json "Responses" ItemResponseList.of_json in
+        field_map json__ "ConsumedCapacity" ConsumedCapacityMultiple.of_json in
+      let responses = field_map json__ "Responses" ItemResponseList.of_json in
       make ?consumedCapacity ?responses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11551,8 +14275,8 @@ module ExportConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11578,33 +14302,44 @@ module ExportSummary =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the export."];
       exportStatus: ExportStatus.t option
         [@ocaml.doc
-          "Export can be in one of the following states: IN_PROGRESS, COMPLETED, or FAILED."]}
+          "Export can be in one of the following states: IN_PROGRESS, COMPLETED, or FAILED."];
+      exportType: ExportType.t option
+        [@ocaml.doc
+          "The type of export that was performed. Valid values are FULL_EXPORT or INCREMENTAL_EXPORT."]}
     let make ?exportArn =
-      fun ?exportStatus -> fun () -> { exportArn; exportStatus }
+      fun ?exportStatus ->
+        fun ?exportType -> fun () -> { exportArn; exportStatus; exportType }
     let to_value x =
       structure_to_value
         [("ExportArn", (Option.map x.exportArn ~f:ExportArn.to_value));
         ("ExportStatus",
-          (Option.map x.exportStatus ~f:ExportStatus.to_value))]
+          (Option.map x.exportStatus ~f:ExportStatus.to_value));
+        ("ExportType", (Option.map x.exportType ~f:ExportType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let exportType =
+        (Option.map ~f:ExportType.of_xml) (Xml.child xml_arg0 "ExportType") in
       let exportStatus =
         (Option.map ~f:ExportStatus.of_xml)
           (Xml.child xml_arg0 "ExportStatus") in
       let exportArn =
         (Option.map ~f:ExportArn.of_xml) (Xml.child xml_arg0 "ExportArn") in
-      make ?exportStatus ?exportArn ()
+      make ?exportType ?exportStatus ?exportArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let exportStatus = field_map json "ExportStatus" ExportStatus.of_json in
-      let exportArn = field_map json "ExportArn" ExportArn.of_json in
-      make ?exportStatus ?exportArn ()
+    let of_json json__ =
+      let exportType = field_map json__ "ExportType" ExportType.of_json in
+      let exportStatus = field_map json__ "ExportStatus" ExportStatus.of_json in
+      let exportArn = field_map json__ "ExportArn" ExportArn.of_json in
+      make ?exportType ?exportStatus ?exportArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about an export task."]
 module ExportSummaries =
   struct
     type nonrec t = ExportSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExportSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11634,16 +14369,16 @@ module ExportTableToPointInTimeInput =
           "The Amazon Resource Name (ARN) associated with the table to export."];
       exportTime: ExportTime.t option
         [@ocaml.doc
-          "Time in the past from which to export table data. The table export will be a snapshot of the table's state at this point in time."];
+          "Time in the past from which to export table data, counted in seconds from the start of the Unix epoch. The table export will be a snapshot of the table's state at this point in time."];
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "Providing a ClientToken makes the call to ExportTableToPointInTimeInput idempotent, meaning that multiple identical calls have the same effect as one single call. A client token is valid for 8 hours after the first request that uses it is completed. After 8 hours, any request with the same client token is treated as a new request. Do not resubmit the same request with the same client token for more than 8 hours, or the result might not be idempotent. If you submit a request with the same client token but a change in other parameters within the 8-hour idempotency window, DynamoDB returns an IdempotentParameterMismatch exception."];
+          "Providing a ClientToken makes the call to ExportTableToPointInTimeInput idempotent, meaning that multiple identical calls have the same effect as one single call. A client token is valid for 8 hours after the first request that uses it is completed. After 8 hours, any request with the same client token is treated as a new request. Do not resubmit the same request with the same client token for more than 8 hours, or the result might not be idempotent. If you submit a request with the same client token but a change in other parameters within the 8-hour idempotency window, DynamoDB returns an ExportConflictException."];
       s3Bucket: S3Bucket.t
         [@ocaml.doc
           "The name of the Amazon S3 bucket to export the snapshot to."];
       s3BucketOwner: S3BucketOwner.t option
         [@ocaml.doc
-          "The ID of the Amazon Web Services account that owns the bucket the export will be stored in."];
+          "The ID of the Amazon Web Services account that owns the bucket the export will be stored in. S3BucketOwner is a required parameter when exporting to a S3 bucket in another account."];
       s3Prefix: S3Prefix.t option
         [@ocaml.doc
           "The Amazon S3 bucket prefix to use as the file name and path of the exported snapshot."];
@@ -11655,7 +14390,13 @@ module ExportTableToPointInTimeInput =
           "The ID of the KMS managed key used to encrypt the S3 bucket where export data will be stored (if applicable)."];
       exportFormat: ExportFormat.t option
         [@ocaml.doc
-          "The format for the exported data. Valid values for ExportFormat are DYNAMODB_JSON or ION."]}
+          "The format for the exported data. Valid values for ExportFormat are DYNAMODB_JSON or ION."];
+      exportType: ExportType.t option
+        [@ocaml.doc
+          "Choice of whether to execute as a full export or incremental export. Valid values are FULL_EXPORT or INCREMENTAL_EXPORT. The default value is FULL_EXPORT. If INCREMENTAL_EXPORT is provided, the IncrementalExportSpecification must also be used."];
+      incrementalExportSpecification: IncrementalExportSpecification.t option
+        [@ocaml.doc
+          "Optional object containing the parameters specific to an incremental export."]}
     let context_ = "ExportTableToPointInTimeInput"
     let make ?exportTime =
       fun ?clientToken ->
@@ -11664,20 +14405,24 @@ module ExportTableToPointInTimeInput =
             fun ?s3SseAlgorithm ->
               fun ?s3SseKmsKeyId ->
                 fun ?exportFormat ->
-                  fun ~tableArn ->
-                    fun ~s3Bucket ->
-                      fun () ->
-                        {
-                          exportTime;
-                          clientToken;
-                          s3BucketOwner;
-                          s3Prefix;
-                          s3SseAlgorithm;
-                          s3SseKmsKeyId;
-                          exportFormat;
-                          tableArn;
-                          s3Bucket
-                        }
+                  fun ?exportType ->
+                    fun ?incrementalExportSpecification ->
+                      fun ~tableArn ->
+                        fun ~s3Bucket ->
+                          fun () ->
+                            {
+                              exportTime;
+                              clientToken;
+                              s3BucketOwner;
+                              s3Prefix;
+                              s3SseAlgorithm;
+                              s3SseKmsKeyId;
+                              exportFormat;
+                              exportType;
+                              incrementalExportSpecification;
+                              tableArn;
+                              s3Bucket
+                            }
     let to_value x =
       structure_to_value
         [("TableArn", (Some (TableArn.to_value x.tableArn)));
@@ -11692,9 +14437,18 @@ module ExportTableToPointInTimeInput =
         ("S3SseKmsKeyId",
           (Option.map x.s3SseKmsKeyId ~f:S3SseKmsKeyId.to_value));
         ("ExportFormat",
-          (Option.map x.exportFormat ~f:ExportFormat.to_value))]
+          (Option.map x.exportFormat ~f:ExportFormat.to_value));
+        ("ExportType", (Option.map x.exportType ~f:ExportType.to_value));
+        ("IncrementalExportSpecification",
+          (Option.map x.incrementalExportSpecification
+             ~f:IncrementalExportSpecification.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let incrementalExportSpecification =
+        (Option.map ~f:IncrementalExportSpecification.of_xml)
+          (Xml.child xml_arg0 "IncrementalExportSpecification") in
+      let exportType =
+        (Option.map ~f:ExportType.of_xml) (Xml.child xml_arg0 "ExportType") in
       let exportFormat =
         (Option.map ~f:ExportFormat.of_xml)
           (Xml.child xml_arg0 "ExportFormat") in
@@ -11717,24 +14471,30 @@ module ExportTableToPointInTimeInput =
         (Option.map ~f:ExportTime.of_xml) (Xml.child xml_arg0 "ExportTime") in
       let tableArn =
         TableArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TableArn") in
-      make ?exportFormat ?s3SseKmsKeyId ?s3SseAlgorithm ?s3Prefix
-        ?s3BucketOwner ~s3Bucket ?clientToken ?exportTime ~tableArn ()
+      make ?incrementalExportSpecification ?exportType ?exportFormat
+        ?s3SseKmsKeyId ?s3SseAlgorithm ?s3Prefix ?s3BucketOwner ~s3Bucket
+        ?clientToken ?exportTime ~tableArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let exportFormat = field_map json "ExportFormat" ExportFormat.of_json in
+    let of_json json__ =
+      let incrementalExportSpecification =
+        field_map json__ "IncrementalExportSpecification"
+          IncrementalExportSpecification.of_json in
+      let exportType = field_map json__ "ExportType" ExportType.of_json in
+      let exportFormat = field_map json__ "ExportFormat" ExportFormat.of_json in
       let s3SseKmsKeyId =
-        field_map json "S3SseKmsKeyId" S3SseKmsKeyId.of_json in
+        field_map json__ "S3SseKmsKeyId" S3SseKmsKeyId.of_json in
       let s3SseAlgorithm =
-        field_map json "S3SseAlgorithm" S3SseAlgorithm.of_json in
-      let s3Prefix = field_map json "S3Prefix" S3Prefix.of_json in
+        field_map json__ "S3SseAlgorithm" S3SseAlgorithm.of_json in
+      let s3Prefix = field_map json__ "S3Prefix" S3Prefix.of_json in
       let s3BucketOwner =
-        field_map json "S3BucketOwner" S3BucketOwner.of_json in
-      let s3Bucket = field_map_exn json "S3Bucket" S3Bucket.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      let exportTime = field_map json "ExportTime" ExportTime.of_json in
-      let tableArn = field_map_exn json "TableArn" TableArn.of_json in
-      make ?exportFormat ?s3SseKmsKeyId ?s3SseAlgorithm ?s3Prefix
-        ?s3BucketOwner ~s3Bucket ?clientToken ?exportTime ~tableArn ()
+        field_map json__ "S3BucketOwner" S3BucketOwner.of_json in
+      let s3Bucket = field_map_exn json__ "S3Bucket" S3Bucket.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let exportTime = field_map json__ "ExportTime" ExportTime.of_json in
+      let tableArn = field_map_exn json__ "TableArn" TableArn.of_json in
+      make ?incrementalExportSpecification ?exportType ?exportFormat
+        ?s3SseKmsKeyId ?s3SseAlgorithm ?s3Prefix ?s3BucketOwner ~s3Bucket
+        ?clientToken ?exportTime ~tableArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Exports table data to an S3 bucket. The table must have point in time recovery enabled, and you can export data from any time within the point in time recovery window."]
@@ -11752,8 +14512,8 @@ module PointInTimeRecoveryUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11772,8 +14532,8 @@ module InvalidExportTimeException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11872,9 +14632,9 @@ module ExportTableToPointInTimeOutput =
           (Xml.child xml_arg0 "ExportDescription") in
       make ?exportDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exportDescription =
-        field_map json "ExportDescription" ExportDescription.of_json in
+        field_map json__ "ExportDescription" ExportDescription.of_json in
       make ?exportDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11902,6 +14662,8 @@ module FilterConditionMap =
                     (fun x -> (Condition.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -11916,9 +14678,9 @@ module Get =
       key: Key.t
         [@ocaml.doc
           "A map of attribute names to AttributeValue objects that specifies the primary key of the item to retrieve."];
-      tableName: TableName.t
+      tableName: TableArn.t
         [@ocaml.doc
-          "The name of the table from which to retrieve the specified item."];
+          "The name of the table from which to retrieve the specified item. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       projectionExpression: ProjectionExpression.t option
         [@ocaml.doc
           "A string that identifies one or more attributes of the specified item to retrieve from the table. The attributes in the expression must be separated by commas. If no attribute names are specified, then all attributes of the specified item are returned. If any of the requested attributes are not found, they do not appear in the result."];
@@ -11940,7 +14702,7 @@ module Get =
     let to_value x =
       structure_to_value
         [("Key", (Some (Key.to_value x.key)));
-        ("TableName", (Some (TableName.to_value x.tableName)));
+        ("TableName", (Some (TableArn.to_value x.tableName)));
         ("ProjectionExpression",
           (Option.map x.projectionExpression ~f:ProjectionExpression.to_value));
         ("ExpressionAttributeNames",
@@ -11955,19 +14717,19 @@ module Get =
         (Option.map ~f:ProjectionExpression.of_xml)
           (Xml.child xml_arg0 "ProjectionExpression") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       let key = Key.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?expressionAttributeNames ?projectionExpression ~tableName ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expressionAttributeNames =
-        field_map json "ExpressionAttributeNames"
+        field_map json__ "ExpressionAttributeNames"
           ExpressionAttributeNameMap.of_json in
       let projectionExpression =
-        field_map json "ProjectionExpression" ProjectionExpression.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
-      let key = field_map_exn json "Key" Key.of_json in
+        field_map json__ "ProjectionExpression" ProjectionExpression.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
+      let key = field_map_exn json__ "Key" Key.of_json in
       make ?expressionAttributeNames ?projectionExpression ~tableName ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11976,8 +14738,9 @@ module GetItemInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t
-        [@ocaml.doc "The name of the table containing the requested item."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table containing the requested item. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       key: Key.t
         [@ocaml.doc
           "A map of attribute names to AttributeValue objects, representing the primary key of the item to retrieve. For the primary key, you must provide all of the attributes. For example, with a simple primary key, you only need to provide a value for the partition key. For a composite primary key, you must provide values for both the partition key and the sort key."];
@@ -12014,7 +14777,7 @@ module GetItemInput =
                     }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)));
+        [("TableName", (Some (TableArn.to_value x.tableName)));
         ("Key", (Some (Key.to_value x.key)));
         ("AttributesToGet",
           (Option.map x.attributesToGet ~f:AttributeNameList.to_value));
@@ -12047,27 +14810,27 @@ module GetItemInput =
           (Xml.child xml_arg0 "AttributesToGet") in
       let key = Key.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ?expressionAttributeNames ?projectionExpression
         ?returnConsumedCapacity ?consistentRead ?attributesToGet ~key
         ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expressionAttributeNames =
-        field_map json "ExpressionAttributeNames"
+        field_map json__ "ExpressionAttributeNames"
           ExpressionAttributeNameMap.of_json in
       let projectionExpression =
-        field_map json "ProjectionExpression" ProjectionExpression.of_json in
+        field_map json__ "ProjectionExpression" ProjectionExpression.of_json in
       let returnConsumedCapacity =
-        field_map json "ReturnConsumedCapacity"
+        field_map json__ "ReturnConsumedCapacity"
           ReturnConsumedCapacity.of_json in
       let consistentRead =
-        field_map json "ConsistentRead" ConsistentRead.of_json in
+        field_map json__ "ConsistentRead" ConsistentRead.of_json in
       let attributesToGet =
-        field_map json "AttributesToGet" AttributeNameList.of_json in
-      let key = field_map_exn json "Key" Key.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+        field_map json__ "AttributesToGet" AttributeNameList.of_json in
+      let key = field_map_exn json__ "Key" Key.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       make ?expressionAttributeNames ?projectionExpression
         ?returnConsumedCapacity ?consistentRead ?attributesToGet ~key
         ~tableName ()
@@ -12082,13 +14845,14 @@ module GetItemOutput =
           "A map of attribute names to AttributeValue objects, as specified by ProjectionExpression."];
       consumedCapacity: ConsumedCapacity.t option
         [@ocaml.doc
-          "The capacity units consumed by the GetItem operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the ReturnConsumedCapacity parameter was specified. For more information, see Read/Write Capacity Mode in the Amazon DynamoDB Developer Guide."]}
+          "The capacity units consumed by the GetItem operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the ReturnConsumedCapacity parameter was specified. For more information, see Capacity unit consumption for read operations in the Amazon DynamoDB Developer Guide."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `ProvisionedThroughputExceededException of
           ProvisionedThroughputExceededException.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?item =
       fun ?consumedCapacity -> fun () -> { item; consumedCapacity }
@@ -12103,6 +14867,8 @@ module GetItemOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -12117,6 +14883,8 @@ module GetItemOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -12137,6 +14905,10 @@ module GetItemOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -12156,13 +14928,116 @@ module GetItemOutput =
         (Option.map ~f:AttributeMap.of_xml) (Xml.child xml_arg0 "Item") in
       make ?consumedCapacity ?item ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumedCapacity =
-        field_map json "ConsumedCapacity" ConsumedCapacity.of_json in
-      let item = field_map json "Item" AttributeMap.of_json in
+        field_map json__ "ConsumedCapacity" ConsumedCapacity.of_json in
+      let item = field_map json__ "Item" AttributeMap.of_json in
       make ?consumedCapacity ?item ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a GetItem operation."]
+module GetResourcePolicyInput =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArnString.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the DynamoDB resource to which the policy is attached. The resources you can specify include tables and streams."]}
+    let context_ = "GetResourcePolicyInput"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArnString.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ResourceArnString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the resource-based policy document attached to the resource, which can be a table or stream, in JSON format. GetResourcePolicy follows an eventually consistent model. The following list describes the outcomes when you issue the GetResourcePolicy request immediately after issuing another request: If you issue a GetResourcePolicy request immediately after a PutResourcePolicy request, DynamoDB might return a PolicyNotFoundException. If you issue a GetResourcePolicyrequest immediately after a DeleteResourcePolicy request, DynamoDB might return the policy that was present before the deletion request. If you issue a GetResourcePolicy request immediately after a CreateTable request, which includes a resource-based policy, DynamoDB might return a ResourceNotFoundException or a PolicyNotFoundException. Because GetResourcePolicy uses an eventually consistent query, the metadata for your policy or table might not be available at that moment. Wait for a few seconds, and then retry the GetResourcePolicy request. After a GetResourcePolicy request returns a policy created using the PutResourcePolicy request, the policy will be applied in the authorization of requests to the resource. Because this process is eventually consistent, it will take some time to apply the policy to all requests to a resource. Policies that you attach while creating a table using the CreateTable request will always be applied to all requests for that table."]
+module GetResourcePolicyOutput =
+  struct
+    type nonrec t =
+      {
+      policy: ResourcePolicy.t option
+        [@ocaml.doc
+          "The resource-based policy document attached to the resource, which can be a table or stream, in JSON format."];
+      revisionId: PolicyRevisionId.t option
+        [@ocaml.doc
+          "A unique string that represents the revision ID of the policy. If you're comparing revision IDs, make sure to always use string comparison logic."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `PolicyNotFoundException of PolicyNotFoundException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policy = fun ?revisionId -> fun () -> { policy; revisionId }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "PolicyNotFoundException" ->
+          `PolicyNotFoundException (PolicyNotFoundException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "PolicyNotFoundException" ->
+          `PolicyNotFoundException (PolicyNotFoundException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `PolicyNotFoundException e ->
+          `Assoc
+            [("error", (`String "PolicyNotFoundException"));
+            ("details", (PolicyNotFoundException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Policy", (Option.map x.policy ~f:ResourcePolicy.to_value));
+        ("RevisionId",
+          (Option.map x.revisionId ~f:PolicyRevisionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revisionId =
+        (Option.map ~f:PolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "RevisionId") in
+      let policy =
+        (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "Policy") in
+      make ?revisionId ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revisionId = field_map json__ "RevisionId" PolicyRevisionId.of_json in
+      let policy = field_map json__ "Policy" ResourcePolicy.of_json in
+      make ?revisionId ?policy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the resource-based policy document attached to the resource, which can be a table or stream, in JSON format. GetResourcePolicy follows an eventually consistent model. The following list describes the outcomes when you issue the GetResourcePolicy request immediately after issuing another request: If you issue a GetResourcePolicy request immediately after a PutResourcePolicy request, DynamoDB might return a PolicyNotFoundException. If you issue a GetResourcePolicyrequest immediately after a DeleteResourcePolicy request, DynamoDB might return the policy that was present before the deletion request. If you issue a GetResourcePolicy request immediately after a CreateTable request, which includes a resource-based policy, DynamoDB might return a ResourceNotFoundException or a PolicyNotFoundException. Because GetResourcePolicy uses an eventually consistent query, the metadata for your policy or table might not be available at that moment. Wait for a few seconds, and then retry the GetResourcePolicy request. After a GetResourcePolicy request returns a policy created using the PutResourcePolicy request, the policy will be applied in the authorization of requests to the resource. Because this process is eventually consistent, it will take some time to apply the policy to all requests to a resource. Policies that you attach while creating a table using the CreateTable request will always be applied to all requests for that table."]
 module GlobalSecondaryIndexAutoScalingUpdate =
   struct
     type nonrec t =
@@ -12189,11 +15064,11 @@ module GlobalSecondaryIndexAutoScalingUpdate =
         (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
       make ?provisionedWriteCapacityAutoScalingUpdate ?indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedWriteCapacityAutoScalingUpdate =
-        field_map json "ProvisionedWriteCapacityAutoScalingUpdate"
+        field_map json__ "ProvisionedWriteCapacityAutoScalingUpdate"
           AutoScalingSettingsUpdate.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
       make ?provisionedWriteCapacityAutoScalingUpdate ?indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12203,6 +15078,9 @@ module GlobalSecondaryIndexAutoScalingUpdateList =
     type nonrec t = GlobalSecondaryIndexAutoScalingUpdate.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlobalSecondaryIndexAutoScalingUpdate.to_value)) |>
         (fun x -> `List x)
@@ -12232,34 +15110,65 @@ module UpdateGlobalSecondaryIndexAction =
       {
       indexName: IndexName.t
         [@ocaml.doc "The name of the global secondary index to be updated."];
-      provisionedThroughput: ProvisionedThroughput.t
+      provisionedThroughput: ProvisionedThroughput.t option
         [@ocaml.doc
-          "Represents the provisioned throughput settings for the specified global secondary index. For current minimum and maximum provisioned throughput values, see Service, Account, and Table Quotas in the Amazon DynamoDB Developer Guide."]}
+          "Represents the provisioned throughput settings for the specified global secondary index. For current minimum and maximum provisioned throughput values, see Service, Account, and Table Quotas in the Amazon DynamoDB Developer Guide."];
+      onDemandThroughput: OnDemandThroughput.t option
+        [@ocaml.doc
+          "Updates the maximum number of read and write units for the specified global secondary index. If you use this parameter, you must specify MaxReadRequestUnits, MaxWriteRequestUnits, or both."];
+      warmThroughput: WarmThroughput.t option
+        [@ocaml.doc
+          "Represents the warm throughput value of the new provisioned throughput settings to be applied to a global secondary index."]}
     let context_ = "UpdateGlobalSecondaryIndexAction"
-    let make ~indexName =
-      fun ~provisionedThroughput ->
-        fun () -> { indexName; provisionedThroughput }
+    let make ?provisionedThroughput =
+      fun ?onDemandThroughput ->
+        fun ?warmThroughput ->
+          fun ~indexName ->
+            fun () ->
+              {
+                provisionedThroughput;
+                onDemandThroughput;
+                warmThroughput;
+                indexName
+              }
     let to_value x =
       structure_to_value
         [("IndexName", (Some (IndexName.to_value x.indexName)));
         ("ProvisionedThroughput",
-          (Some (ProvisionedThroughput.to_value x.provisionedThroughput)))]
+          (Option.map x.provisionedThroughput
+             ~f:ProvisionedThroughput.to_value));
+        ("OnDemandThroughput",
+          (Option.map x.onDemandThroughput ~f:OnDemandThroughput.to_value));
+        ("WarmThroughput",
+          (Option.map x.warmThroughput ~f:WarmThroughput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let warmThroughput =
+        (Option.map ~f:WarmThroughput.of_xml)
+          (Xml.child xml_arg0 "WarmThroughput") in
+      let onDemandThroughput =
+        (Option.map ~f:OnDemandThroughput.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughput") in
       let provisionedThroughput =
-        ProvisionedThroughput.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProvisionedThroughput") in
+        (Option.map ~f:ProvisionedThroughput.of_xml)
+          (Xml.child xml_arg0 "ProvisionedThroughput") in
       let indexName =
         IndexName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IndexName") in
-      make ~provisionedThroughput ~indexName ()
+      make ?warmThroughput ?onDemandThroughput ?provisionedThroughput
+        ~indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let warmThroughput =
+        field_map json__ "WarmThroughput" WarmThroughput.of_json in
+      let onDemandThroughput =
+        field_map json__ "OnDemandThroughput" OnDemandThroughput.of_json in
       let provisionedThroughput =
-        field_map_exn json "ProvisionedThroughput"
+        field_map json__ "ProvisionedThroughput"
           ProvisionedThroughput.of_json in
-      let indexName = field_map_exn json "IndexName" IndexName.of_json in
-      make ~provisionedThroughput ~indexName ()
+      let indexName = field_map_exn json__ "IndexName" IndexName.of_json in
+      make ?warmThroughput ?onDemandThroughput ?provisionedThroughput
+        ~indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the new provisioned throughput settings to be applied to a global secondary index."]
@@ -12299,13 +15208,13 @@ module GlobalSecondaryIndexUpdate =
           (Xml.child xml_arg0 "Update") in
       make ?delete ?create ?update ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let delete =
-        field_map json "Delete" DeleteGlobalSecondaryIndexAction.of_json in
+        field_map json__ "Delete" DeleteGlobalSecondaryIndexAction.of_json in
       let create =
-        field_map json "Create" CreateGlobalSecondaryIndexAction.of_json in
+        field_map json__ "Create" CreateGlobalSecondaryIndexAction.of_json in
       let update =
-        field_map json "Update" UpdateGlobalSecondaryIndexAction.of_json in
+        field_map json__ "Update" UpdateGlobalSecondaryIndexAction.of_json in
       make ?delete ?create ?update ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12314,6 +15223,9 @@ module GlobalSecondaryIndexUpdateList =
   struct
     type nonrec t = GlobalSecondaryIndexUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlobalSecondaryIndexUpdate.to_value)) |>
         (fun x -> `List x)
@@ -12363,11 +15275,11 @@ module GlobalTable =
           (Xml.child xml_arg0 "GlobalTableName") in
       make ?replicationGroup ?globalTableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroup =
-        field_map json "ReplicationGroup" ReplicaList.of_json in
+        field_map json__ "ReplicationGroup" ReplicaList.of_json in
       let globalTableName =
-        field_map json "GlobalTableName" TableName.of_json in
+        field_map json__ "GlobalTableName" TableName.of_json in
       make ?replicationGroup ?globalTableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the properties of a global table."]
@@ -12419,14 +15331,14 @@ module GlobalTableGlobalSecondaryIndexSettingsUpdate =
       make ?provisionedWriteCapacityAutoScalingSettingsUpdate
         ?provisionedWriteCapacityUnits ~indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedWriteCapacityAutoScalingSettingsUpdate =
-        field_map json "ProvisionedWriteCapacityAutoScalingSettingsUpdate"
+        field_map json__ "ProvisionedWriteCapacityAutoScalingSettingsUpdate"
           AutoScalingSettingsUpdate.of_json in
       let provisionedWriteCapacityUnits =
-        field_map json "ProvisionedWriteCapacityUnits"
+        field_map json__ "ProvisionedWriteCapacityUnits"
           PositiveLongObject.of_json in
-      let indexName = field_map_exn json "IndexName" IndexName.of_json in
+      let indexName = field_map_exn json__ "IndexName" IndexName.of_json in
       make ?provisionedWriteCapacityAutoScalingSettingsUpdate
         ?provisionedWriteCapacityUnits ~indexName ()
     let to_json v = composed_to_json to_value v
@@ -12440,6 +15352,9 @@ module GlobalTableGlobalSecondaryIndexSettingsUpdateList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:GlobalTableGlobalSecondaryIndexSettingsUpdate.to_value))
@@ -12468,6 +15383,9 @@ module GlobalTableList =
   struct
     type nonrec t = GlobalTable.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlobalTable.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -12488,6 +15406,405 @@ module GlobalTableList =
       list_of_json ~kind:"GlobalTableList" ~of_json:GlobalTable.of_json j
     let to_json v = composed_to_json to_value v
   end
+module GlobalTableWitnessGroupUpdate =
+  struct
+    type nonrec t =
+      {
+      create: CreateGlobalTableWitnessGroupMemberAction.t option
+        [@ocaml.doc
+          "Specifies a witness Region to be added to a new MRSC global table. The witness must be added when creating the MRSC global table."];
+      delete: DeleteGlobalTableWitnessGroupMemberAction.t option
+        [@ocaml.doc
+          "Specifies a witness Region to be removed from an existing global table. Must be done in conjunction with removing a replica. The deletion of both a witness and replica converts the remaining replica to a single-Region DynamoDB table."]}
+    let make ?create = fun ?delete -> fun () -> { create; delete }
+    let to_value x =
+      structure_to_value
+        [("Create",
+           (Option.map x.create
+              ~f:CreateGlobalTableWitnessGroupMemberAction.to_value));
+        ("Delete",
+          (Option.map x.delete
+             ~f:DeleteGlobalTableWitnessGroupMemberAction.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let delete =
+        (Option.map ~f:DeleteGlobalTableWitnessGroupMemberAction.of_xml)
+          (Xml.child xml_arg0 "Delete") in
+      let create =
+        (Option.map ~f:CreateGlobalTableWitnessGroupMemberAction.of_xml)
+          (Xml.child xml_arg0 "Create") in
+      make ?delete ?create ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let delete =
+        field_map json__ "Delete"
+          DeleteGlobalTableWitnessGroupMemberAction.of_json in
+      let create =
+        field_map json__ "Create"
+          CreateGlobalTableWitnessGroupMemberAction.of_json in
+      make ?delete ?create ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents one of the following: A new witness to be added to a new global table. An existing witness to be removed from an existing global table. You can configure one witness per MRSC global table."]
+module GlobalTableWitnessGroupUpdateList =
+  struct
+    type nonrec t = GlobalTableWitnessGroupUpdate.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GlobalTableWitnessGroupUpdate.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GlobalTableWitnessGroupUpdate.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GlobalTableWitnessGroupUpdateList"
+        ~of_json:GlobalTableWitnessGroupUpdate.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ImportConflictException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "There was a conflict when importing from the specified S3 source. This can occur when the current import conflicts with a previous import request that had the same client token."]
+module ImportNextToken =
+  struct
+    type nonrec t = string
+    let context_ = "ImportNextToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:112) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"([0-9a-f]{16})+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImportNextToken" j
+    let to_json = simple_to_json to_value
+  end
+module ImportSummary =
+  struct
+    type nonrec t =
+      {
+      importArn: ImportArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) corresponding to the import request."];
+      importStatus: ImportStatus.t option
+        [@ocaml.doc "The status of the import operation."];
+      tableArn: TableArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the table being imported into."];
+      s3BucketSource: S3BucketSource.t option
+        [@ocaml.doc
+          "The path and S3 bucket of the source file that is being imported. This includes the S3Bucket (required), S3KeyPrefix (optional) and S3BucketOwner (optional if the bucket is owned by the requester)."];
+      cloudWatchLogGroupArn: CloudWatchLogGroupArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) of the Cloudwatch Log Group associated with this import task."];
+      inputFormat: InputFormat.t option
+        [@ocaml.doc
+          "The format of the source data. Valid values are CSV, DYNAMODB_JSON or ION."];
+      startTime: ImportStartTime.t option
+        [@ocaml.doc "The time at which this import task began."];
+      endTime: ImportEndTime.t option
+        [@ocaml.doc
+          "The time at which this import task ended. (Does this include the successful complete creation of the table it was imported to?)"]}
+    let make ?importArn =
+      fun ?importStatus ->
+        fun ?tableArn ->
+          fun ?s3BucketSource ->
+            fun ?cloudWatchLogGroupArn ->
+              fun ?inputFormat ->
+                fun ?startTime ->
+                  fun ?endTime ->
+                    fun () ->
+                      {
+                        importArn;
+                        importStatus;
+                        tableArn;
+                        s3BucketSource;
+                        cloudWatchLogGroupArn;
+                        inputFormat;
+                        startTime;
+                        endTime
+                      }
+    let to_value x =
+      structure_to_value
+        [("ImportArn", (Option.map x.importArn ~f:ImportArn.to_value));
+        ("ImportStatus",
+          (Option.map x.importStatus ~f:ImportStatus.to_value));
+        ("TableArn", (Option.map x.tableArn ~f:TableArn.to_value));
+        ("S3BucketSource",
+          (Option.map x.s3BucketSource ~f:S3BucketSource.to_value));
+        ("CloudWatchLogGroupArn",
+          (Option.map x.cloudWatchLogGroupArn
+             ~f:CloudWatchLogGroupArn.to_value));
+        ("InputFormat", (Option.map x.inputFormat ~f:InputFormat.to_value));
+        ("StartTime", (Option.map x.startTime ~f:ImportStartTime.to_value));
+        ("EndTime", (Option.map x.endTime ~f:ImportEndTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:ImportEndTime.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:ImportStartTime.of_xml)
+          (Xml.child xml_arg0 "StartTime") in
+      let inputFormat =
+        (Option.map ~f:InputFormat.of_xml) (Xml.child xml_arg0 "InputFormat") in
+      let cloudWatchLogGroupArn =
+        (Option.map ~f:CloudWatchLogGroupArn.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLogGroupArn") in
+      let s3BucketSource =
+        (Option.map ~f:S3BucketSource.of_xml)
+          (Xml.child xml_arg0 "S3BucketSource") in
+      let tableArn =
+        (Option.map ~f:TableArn.of_xml) (Xml.child xml_arg0 "TableArn") in
+      let importStatus =
+        (Option.map ~f:ImportStatus.of_xml)
+          (Xml.child xml_arg0 "ImportStatus") in
+      let importArn =
+        (Option.map ~f:ImportArn.of_xml) (Xml.child xml_arg0 "ImportArn") in
+      make ?endTime ?startTime ?inputFormat ?cloudWatchLogGroupArn
+        ?s3BucketSource ?tableArn ?importStatus ?importArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" ImportEndTime.of_json in
+      let startTime = field_map json__ "StartTime" ImportStartTime.of_json in
+      let inputFormat = field_map json__ "InputFormat" InputFormat.of_json in
+      let cloudWatchLogGroupArn =
+        field_map json__ "CloudWatchLogGroupArn"
+          CloudWatchLogGroupArn.of_json in
+      let s3BucketSource =
+        field_map json__ "S3BucketSource" S3BucketSource.of_json in
+      let tableArn = field_map json__ "TableArn" TableArn.of_json in
+      let importStatus = field_map json__ "ImportStatus" ImportStatus.of_json in
+      let importArn = field_map json__ "ImportArn" ImportArn.of_json in
+      make ?endTime ?startTime ?inputFormat ?cloudWatchLogGroupArn
+        ?s3BucketSource ?tableArn ?importStatus ?importArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary information about the source file for the import."]
+module ImportSummaryList =
+  struct
+    type nonrec t = ImportSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImportSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImportSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImportSummaryList" ~of_json:ImportSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ImportTableInput =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "Providing a ClientToken makes the call to ImportTableInput idempotent, meaning that multiple identical calls have the same effect as one single call. A client token is valid for 8 hours after the first request that uses it is completed. After 8 hours, any request with the same client token is treated as a new request. Do not resubmit the same request with the same client token for more than 8 hours, or the result might not be idempotent. If you submit a request with the same client token but a change in other parameters within the 8-hour idempotency window, DynamoDB returns an IdempotentParameterMismatch exception."];
+      s3BucketSource: S3BucketSource.t
+        [@ocaml.doc "The S3 bucket that provides the source for the import."];
+      inputFormat: InputFormat.t
+        [@ocaml.doc
+          "The format of the source data. Valid values for ImportFormat are CSV, DYNAMODB_JSON or ION."];
+      inputFormatOptions: InputFormatOptions.t option
+        [@ocaml.doc
+          "Additional properties that specify how the input is formatted,"];
+      inputCompressionType: InputCompressionType.t option
+        [@ocaml.doc
+          "Type of compression to be used on the input coming from the imported table."];
+      tableCreationParameters: TableCreationParameters.t
+        [@ocaml.doc "Parameters for the table to import the data into."]}
+    let context_ = "ImportTableInput"
+    let make ?clientToken =
+      fun ?inputFormatOptions ->
+        fun ?inputCompressionType ->
+          fun ~s3BucketSource ->
+            fun ~inputFormat ->
+              fun ~tableCreationParameters ->
+                fun () ->
+                  {
+                    clientToken;
+                    inputFormatOptions;
+                    inputCompressionType;
+                    s3BucketSource;
+                    inputFormat;
+                    tableCreationParameters
+                  }
+    let to_value x =
+      structure_to_value
+        [("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("S3BucketSource", (Some (S3BucketSource.to_value x.s3BucketSource)));
+        ("InputFormat", (Some (InputFormat.to_value x.inputFormat)));
+        ("InputFormatOptions",
+          (Option.map x.inputFormatOptions ~f:InputFormatOptions.to_value));
+        ("InputCompressionType",
+          (Option.map x.inputCompressionType ~f:InputCompressionType.to_value));
+        ("TableCreationParameters",
+          (Some (TableCreationParameters.to_value x.tableCreationParameters)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tableCreationParameters =
+        TableCreationParameters.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TableCreationParameters") in
+      let inputCompressionType =
+        (Option.map ~f:InputCompressionType.of_xml)
+          (Xml.child xml_arg0 "InputCompressionType") in
+      let inputFormatOptions =
+        (Option.map ~f:InputFormatOptions.of_xml)
+          (Xml.child xml_arg0 "InputFormatOptions") in
+      let inputFormat =
+        InputFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InputFormat") in
+      let s3BucketSource =
+        S3BucketSource.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "S3BucketSource") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
+      make ~tableCreationParameters ?inputCompressionType ?inputFormatOptions
+        ~inputFormat ~s3BucketSource ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tableCreationParameters =
+        field_map_exn json__ "TableCreationParameters"
+          TableCreationParameters.of_json in
+      let inputCompressionType =
+        field_map json__ "InputCompressionType" InputCompressionType.of_json in
+      let inputFormatOptions =
+        field_map json__ "InputFormatOptions" InputFormatOptions.of_json in
+      let inputFormat =
+        field_map_exn json__ "InputFormat" InputFormat.of_json in
+      let s3BucketSource =
+        field_map_exn json__ "S3BucketSource" S3BucketSource.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      make ~tableCreationParameters ?inputCompressionType ?inputFormatOptions
+        ~inputFormat ~s3BucketSource ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Imports table data from an S3 bucket."]
+module ImportTableOutput =
+  struct
+    type nonrec t =
+      {
+      importTableDescription: ImportTableDescription.t option
+        [@ocaml.doc
+          "Represents the properties of the table created for the import, and parameters of the import. The import parameters include import status, how many items were processed, and how many errors were encountered."]}
+    type nonrec error =
+      [ `ImportConflictException of ImportConflictException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?importTableDescription = fun () -> { importTableDescription }
+    let error_of_json name json =
+      match name with
+      | "ImportConflictException" ->
+          `ImportConflictException (ImportConflictException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ImportConflictException" ->
+          `ImportConflictException (ImportConflictException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ImportConflictException e ->
+          `Assoc
+            [("error", (`String "ImportConflictException"));
+            ("details", (ImportConflictException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ImportTableDescription",
+           (Option.map x.importTableDescription
+              ~f:ImportTableDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let importTableDescription =
+        (Option.map ~f:ImportTableDescription.of_xml)
+          (Xml.child xml_arg0 "ImportTableDescription") in
+      make ?importTableDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let importTableDescription =
+        field_map json__ "ImportTableDescription"
+          ImportTableDescription.of_json in
+      make ?importTableDescription ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Imports table data from an S3 bucket."]
 module IndexNotFoundException =
   struct
     type nonrec t = {
@@ -12502,8 +15819,8 @@ module IndexNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The operation tried to access a nonexistent index."]
@@ -12534,8 +15851,8 @@ module InvalidRestoreTimeException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12563,6 +15880,8 @@ module KeyConditions =
                     (fun x -> (Condition.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -12587,30 +15906,48 @@ module KinesisStreamingDestinationInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t [@ocaml.doc "The name of the DynamoDB table."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the DynamoDB table. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       streamArn: StreamArn.t
-        [@ocaml.doc "The ARN for a Kinesis data stream."]}
+        [@ocaml.doc "The ARN for a Kinesis data stream."];
+      enableKinesisStreamingConfiguration:
+        EnableKinesisStreamingConfiguration.t option
+        [@ocaml.doc
+          "The source for the Kinesis streaming information that is being enabled."]}
     let context_ = "KinesisStreamingDestinationInput"
-    let make ~tableName =
-      fun ~streamArn -> fun () -> { tableName; streamArn }
+    let make ?enableKinesisStreamingConfiguration =
+      fun ~tableName ->
+        fun ~streamArn ->
+          fun () ->
+            { enableKinesisStreamingConfiguration; tableName; streamArn }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)));
-        ("StreamArn", (Some (StreamArn.to_value x.streamArn)))]
+        [("TableName", (Some (TableArn.to_value x.tableName)));
+        ("StreamArn", (Some (StreamArn.to_value x.streamArn)));
+        ("EnableKinesisStreamingConfiguration",
+          (Option.map x.enableKinesisStreamingConfiguration
+             ~f:EnableKinesisStreamingConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let enableKinesisStreamingConfiguration =
+        (Option.map ~f:EnableKinesisStreamingConfiguration.of_xml)
+          (Xml.child xml_arg0 "EnableKinesisStreamingConfiguration") in
       let streamArn =
         StreamArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamArn") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
-      make ~streamArn ~tableName ()
+      make ?enableKinesisStreamingConfiguration ~streamArn ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamArn = field_map_exn json "StreamArn" StreamArn.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
-      make ~streamArn ~tableName ()
+    let of_json json__ =
+      let enableKinesisStreamingConfiguration =
+        field_map json__ "EnableKinesisStreamingConfiguration"
+          EnableKinesisStreamingConfiguration.of_json in
+      let streamArn = field_map_exn json__ "StreamArn" StreamArn.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
+      make ?enableKinesisStreamingConfiguration ~streamArn ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stops replication from the DynamoDB table to the Kinesis data stream. This is done without deleting either of the resources."]
@@ -12623,7 +15960,11 @@ module KinesisStreamingDestinationOutput =
       streamArn: StreamArn.t option
         [@ocaml.doc "The ARN for the specific Kinesis data stream."];
       destinationStatus: DestinationStatus.t option
-        [@ocaml.doc "The current status of the replication."]}
+        [@ocaml.doc "The current status of the replication."];
+      enableKinesisStreamingConfiguration:
+        EnableKinesisStreamingConfiguration.t option
+        [@ocaml.doc
+          "The destination for the Kinesis streaming information that is being enabled."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `LimitExceededException of LimitExceededException.t 
@@ -12633,7 +15974,14 @@ module KinesisStreamingDestinationOutput =
     let make ?tableName =
       fun ?streamArn ->
         fun ?destinationStatus ->
-          fun () -> { tableName; streamArn; destinationStatus }
+          fun ?enableKinesisStreamingConfiguration ->
+            fun () ->
+              {
+                tableName;
+                streamArn;
+                destinationStatus;
+                enableKinesisStreamingConfiguration
+              }
     let error_of_json name json =
       match name with
       | "InternalServerError" ->
@@ -12687,9 +16035,15 @@ module KinesisStreamingDestinationOutput =
         [("TableName", (Option.map x.tableName ~f:TableName.to_value));
         ("StreamArn", (Option.map x.streamArn ~f:StreamArn.to_value));
         ("DestinationStatus",
-          (Option.map x.destinationStatus ~f:DestinationStatus.to_value))]
+          (Option.map x.destinationStatus ~f:DestinationStatus.to_value));
+        ("EnableKinesisStreamingConfiguration",
+          (Option.map x.enableKinesisStreamingConfiguration
+             ~f:EnableKinesisStreamingConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let enableKinesisStreamingConfiguration =
+        (Option.map ~f:EnableKinesisStreamingConfiguration.of_xml)
+          (Xml.child xml_arg0 "EnableKinesisStreamingConfiguration") in
       let destinationStatus =
         (Option.map ~f:DestinationStatus.of_xml)
           (Xml.child xml_arg0 "DestinationStatus") in
@@ -12697,14 +16051,19 @@ module KinesisStreamingDestinationOutput =
         (Option.map ~f:StreamArn.of_xml) (Xml.child xml_arg0 "StreamArn") in
       let tableName =
         (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "TableName") in
-      make ?destinationStatus ?streamArn ?tableName ()
+      make ?enableKinesisStreamingConfiguration ?destinationStatus ?streamArn
+        ?tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let enableKinesisStreamingConfiguration =
+        field_map json__ "EnableKinesisStreamingConfiguration"
+          EnableKinesisStreamingConfiguration.of_json in
       let destinationStatus =
-        field_map json "DestinationStatus" DestinationStatus.of_json in
-      let streamArn = field_map json "StreamArn" StreamArn.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
-      make ?destinationStatus ?streamArn ?tableName ()
+        field_map json__ "DestinationStatus" DestinationStatus.of_json in
+      let streamArn = field_map json__ "StreamArn" StreamArn.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
+      make ?enableKinesisStreamingConfiguration ?destinationStatus ?streamArn
+        ?tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stops replication from the DynamoDB table to the Kinesis data stream. This is done without deleting either of the resources."]
@@ -12736,9 +16095,9 @@ module ListBackupsInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t option
+      tableName: TableArn.t option
         [@ocaml.doc
-          "The backups from the table specified by TableName are listed."];
+          "Lists the backups from the table specified in TableName. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       limit: BackupsInputLimit.t option
         [@ocaml.doc "Maximum number of backups to return at once."];
       timeRangeLowerBound: TimeRangeLowerBound.t option
@@ -12752,7 +16111,7 @@ module ListBackupsInput =
           "LastEvaluatedBackupArn is the Amazon Resource Name (ARN) of the backup last evaluated when the current page of results was returned, inclusive of the current page of results. This value may be specified as the ExclusiveStartBackupArn of a new ListBackups operation in order to fetch the next page of results."];
       backupType: BackupTypeFilter.t option
         [@ocaml.doc
-          "The backups from the table specified by BackupType are listed. Where BackupType can be: USER - On-demand backup created by you. SYSTEM - On-demand backup automatically created by DynamoDB. ALL - All types of on-demand backups (USER and SYSTEM)."]}
+          "The backups from the table specified by BackupType are listed. Where BackupType can be: USER - On-demand backup created by you. (The default setting if no other backup types are specified.) SYSTEM - On-demand backup automatically created by DynamoDB. ALL - All types of on-demand backups (USER and SYSTEM)."]}
     let make ?tableName =
       fun ?limit ->
         fun ?timeRangeLowerBound ->
@@ -12770,7 +16129,7 @@ module ListBackupsInput =
                   }
     let to_value x =
       structure_to_value
-        [("TableName", (Option.map x.tableName ~f:TableName.to_value));
+        [("TableName", (Option.map x.tableName ~f:TableArn.to_value));
         ("Limit", (Option.map x.limit ~f:BackupsInputLimit.to_value));
         ("TimeRangeLowerBound",
           (Option.map x.timeRangeLowerBound ~f:TimeRangeLowerBound.to_value));
@@ -12797,25 +16156,25 @@ module ListBackupsInput =
       let limit =
         (Option.map ~f:BackupsInputLimit.of_xml) (Xml.child xml_arg0 "Limit") in
       let tableName =
-        (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "TableName") in
+        (Option.map ~f:TableArn.of_xml) (Xml.child xml_arg0 "TableName") in
       make ?backupType ?exclusiveStartBackupArn ?timeRangeUpperBound
         ?timeRangeLowerBound ?limit ?tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backupType = field_map json "BackupType" BackupTypeFilter.of_json in
+    let of_json json__ =
+      let backupType = field_map json__ "BackupType" BackupTypeFilter.of_json in
       let exclusiveStartBackupArn =
-        field_map json "ExclusiveStartBackupArn" BackupArn.of_json in
+        field_map json__ "ExclusiveStartBackupArn" BackupArn.of_json in
       let timeRangeUpperBound =
-        field_map json "TimeRangeUpperBound" TimeRangeUpperBound.of_json in
+        field_map json__ "TimeRangeUpperBound" TimeRangeUpperBound.of_json in
       let timeRangeLowerBound =
-        field_map json "TimeRangeLowerBound" TimeRangeLowerBound.of_json in
-      let limit = field_map json "Limit" BackupsInputLimit.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
+        field_map json__ "TimeRangeLowerBound" TimeRangeLowerBound.of_json in
+      let limit = field_map json__ "Limit" BackupsInputLimit.of_json in
+      let tableName = field_map json__ "TableName" TableArn.of_json in
       make ?backupType ?exclusiveStartBackupArn ?timeRangeUpperBound
         ?timeRangeLowerBound ?limit ?tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List backups associated with an Amazon Web Services account. To list backups for a given table, specify TableName. ListBackups returns a paginated list of results with at most 1 MB worth of items in a page. You can also specify a maximum number of entries to be returned in a page. In the request, start time is inclusive, but end time is exclusive. Note that these boundaries are for the time at which the original backup was requested. You can call ListBackups a maximum of five times per second."]
+       "List DynamoDB backups that are associated with an Amazon Web Services account and weren't made with Amazon Web Services Backup. To list these backups for a given table, specify TableName. ListBackups returns a paginated list of results with at most 1 MB worth of items in a page. You can also specify a maximum number of entries to be returned in a page. In the request, start time is inclusive, but end time is exclusive. Note that these boundaries are for the time at which the original backup was requested. You can call ListBackups a maximum of five times per second. If you want to retrieve the complete list of backups made with Amazon Web Services Backup, use the Amazon Web Services Backup list API."]
 module ListBackupsOutput =
   struct
     type nonrec t =
@@ -12871,15 +16230,15 @@ module ListBackupsOutput =
           (Xml.child xml_arg0 "BackupSummaries") in
       make ?lastEvaluatedBackupArn ?backupSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastEvaluatedBackupArn =
-        field_map json "LastEvaluatedBackupArn" BackupArn.of_json in
+        field_map json__ "LastEvaluatedBackupArn" BackupArn.of_json in
       let backupSummaries =
-        field_map json "BackupSummaries" BackupSummaries.of_json in
+        field_map json__ "BackupSummaries" BackupSummaries.of_json in
       make ?lastEvaluatedBackupArn ?backupSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List backups associated with an Amazon Web Services account. To list backups for a given table, specify TableName. ListBackups returns a paginated list of results with at most 1 MB worth of items in a page. You can also specify a maximum number of entries to be returned in a page. In the request, start time is inclusive, but end time is exclusive. Note that these boundaries are for the time at which the original backup was requested. You can call ListBackups a maximum of five times per second."]
+       "List DynamoDB backups that are associated with an Amazon Web Services account and weren't made with Amazon Web Services Backup. To list these backups for a given table, specify TableName. ListBackups returns a paginated list of results with at most 1 MB worth of items in a page. You can also specify a maximum number of entries to be returned in a page. In the request, start time is inclusive, but end time is exclusive. Note that these boundaries are for the time at which the original backup was requested. You can call ListBackups a maximum of five times per second. If you want to retrieve the complete list of backups made with Amazon Web Services Backup, use the Amazon Web Services Backup list API."]
 module NextTokenString =
   struct
     type nonrec t = string
@@ -12913,7 +16272,9 @@ module ListContributorInsightsInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t option [@ocaml.doc "The name of the table."];
+      tableName: TableArn.t option
+        [@ocaml.doc
+          "The name of the table. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       nextToken: NextTokenString.t option
         [@ocaml.doc "A token to for the desired page, if there is one."];
       maxResults: ListContributorInsightsLimit.t option
@@ -12923,7 +16284,7 @@ module ListContributorInsightsInput =
         fun ?maxResults -> fun () -> { tableName; nextToken; maxResults }
     let to_value x =
       structure_to_value
-        [("TableName", (Option.map x.tableName ~f:TableName.to_value));
+        [("TableName", (Option.map x.tableName ~f:TableArn.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextTokenString.to_value));
         ("MaxResults",
           (Option.map x.maxResults ~f:ListContributorInsightsLimit.to_value))]
@@ -12936,14 +16297,14 @@ module ListContributorInsightsInput =
         (Option.map ~f:NextTokenString.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       let tableName =
-        (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "TableName") in
+        (Option.map ~f:TableArn.of_xml) (Xml.child xml_arg0 "TableName") in
       make ?maxResults ?nextToken ?tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" ListContributorInsightsLimit.of_json in
-      let nextToken = field_map json "NextToken" NextTokenString.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
+        field_map json__ "MaxResults" ListContributorInsightsLimit.of_json in
+      let nextToken = field_map json__ "NextToken" NextTokenString.of_json in
+      let tableName = field_map json__ "TableName" TableArn.of_json in
       make ?maxResults ?nextToken ?tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13010,10 +16371,10 @@ module ListContributorInsightsOutput =
           (Xml.child xml_arg0 "ContributorInsightsSummaries") in
       make ?nextToken ?contributorInsightsSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextTokenString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextTokenString.of_json in
       let contributorInsightsSummaries =
-        field_map json "ContributorInsightsSummaries"
+        field_map json__ "ContributorInsightsSummaries"
           ContributorInsightsSummaries.of_json in
       make ?nextToken ?contributorInsightsSummaries ()
     let to_json v = composed_to_json to_value v
@@ -13070,14 +16431,15 @@ module ListExportsInput =
         (Option.map ~f:TableArn.of_xml) (Xml.child xml_arg0 "TableArn") in
       make ?nextToken ?maxResults ?tableArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" ExportNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" ExportNextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ListExportsMaxLimit.of_json in
-      let tableArn = field_map json "TableArn" TableArn.of_json in
+        field_map json__ "MaxResults" ListExportsMaxLimit.of_json in
+      let tableArn = field_map json__ "TableArn" TableArn.of_json in
       make ?nextToken ?maxResults ?tableArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists completed exports within the past 90 days."]
+  end[@@ocaml.doc
+       "Lists completed exports within the past 90 days, in reverse alphanumeric order of ExportArn."]
 module ListExportsOutput =
   struct
     type nonrec t =
@@ -13140,13 +16502,14 @@ module ListExportsOutput =
           (Xml.child xml_arg0 "ExportSummaries") in
       make ?nextToken ?exportSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" ExportNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" ExportNextToken.of_json in
       let exportSummaries =
-        field_map json "ExportSummaries" ExportSummaries.of_json in
+        field_map json__ "ExportSummaries" ExportSummaries.of_json in
       make ?nextToken ?exportSummaries ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists completed exports within the past 90 days."]
+  end[@@ocaml.doc
+       "Lists completed exports within the past 90 days, in reverse alphanumeric order of ExportArn."]
 module ListGlobalTablesInput =
   struct
     type nonrec t =
@@ -13181,15 +16544,15 @@ module ListGlobalTablesInput =
           (Xml.child xml_arg0 "ExclusiveStartGlobalTableName") in
       make ?regionName ?limit ?exclusiveStartGlobalTableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regionName = field_map json "RegionName" RegionName.of_json in
-      let limit = field_map json "Limit" PositiveIntegerObject.of_json in
+    let of_json json__ =
+      let regionName = field_map json__ "RegionName" RegionName.of_json in
+      let limit = field_map json__ "Limit" PositiveIntegerObject.of_json in
       let exclusiveStartGlobalTableName =
-        field_map json "ExclusiveStartGlobalTableName" TableName.of_json in
+        field_map json__ "ExclusiveStartGlobalTableName" TableName.of_json in
       make ?regionName ?limit ?exclusiveStartGlobalTableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all global tables that have a replica in the specified Region. This operation only applies to Version 2017.11.29 of global tables."]
+       "Lists all global tables that have a replica in the specified Region. This documentation is for version 2017.11.29 (Legacy) of global tables, which should be avoided for new global tables. Customers should use Global Tables version 2019.11.21 (Current) when possible, because it provides greater flexibility, higher efficiency, and consumes less write capacity than 2017.11.29 (Legacy). To determine which version you're using, see Determining the global table version you are using. To update existing global tables from version 2017.11.29 (Legacy) to version 2019.11.21 (Current), see Upgrading global tables."]
 module ListGlobalTablesOutput =
   struct
     type nonrec t =
@@ -13244,15 +16607,133 @@ module ListGlobalTablesOutput =
           (Xml.child xml_arg0 "GlobalTables") in
       make ?lastEvaluatedGlobalTableName ?globalTables ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastEvaluatedGlobalTableName =
-        field_map json "LastEvaluatedGlobalTableName" TableName.of_json in
+        field_map json__ "LastEvaluatedGlobalTableName" TableName.of_json in
       let globalTables =
-        field_map json "GlobalTables" GlobalTableList.of_json in
+        field_map json__ "GlobalTables" GlobalTableList.of_json in
       make ?lastEvaluatedGlobalTableName ?globalTables ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all global tables that have a replica in the specified Region. This operation only applies to Version 2017.11.29 of global tables."]
+       "Lists all global tables that have a replica in the specified Region. This documentation is for version 2017.11.29 (Legacy) of global tables, which should be avoided for new global tables. Customers should use Global Tables version 2019.11.21 (Current) when possible, because it provides greater flexibility, higher efficiency, and consumes less write capacity than 2017.11.29 (Legacy). To determine which version you're using, see Determining the global table version you are using. To update existing global tables from version 2017.11.29 (Legacy) to version 2019.11.21 (Current), see Upgrading global tables."]
+module ListImportsMaxLimit =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:25) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListImportsMaxLimit" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListImportsInput =
+  struct
+    type nonrec t =
+      {
+      tableArn: TableArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) associated with the table that was imported to."];
+      pageSize: ListImportsMaxLimit.t option
+        [@ocaml.doc
+          "The number of ImportSummary objects returned in a single page."];
+      nextToken: ImportNextToken.t option
+        [@ocaml.doc
+          "An optional string that, if supplied, must be copied from the output of a previous call to ListImports. When provided in this manner, the API fetches the next page of results."]}
+    let make ?tableArn =
+      fun ?pageSize ->
+        fun ?nextToken -> fun () -> { tableArn; pageSize; nextToken }
+    let to_value x =
+      structure_to_value
+        [("TableArn", (Option.map x.tableArn ~f:TableArn.to_value));
+        ("PageSize", (Option.map x.pageSize ~f:ListImportsMaxLimit.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:ImportNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:ImportNextToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let pageSize =
+        (Option.map ~f:ListImportsMaxLimit.of_xml)
+          (Xml.child xml_arg0 "PageSize") in
+      let tableArn =
+        (Option.map ~f:TableArn.of_xml) (Xml.child xml_arg0 "TableArn") in
+      make ?nextToken ?pageSize ?tableArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" ImportNextToken.of_json in
+      let pageSize = field_map json__ "PageSize" ListImportsMaxLimit.of_json in
+      let tableArn = field_map json__ "TableArn" TableArn.of_json in
+      make ?nextToken ?pageSize ?tableArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists completed imports within the past 90 days."]
+module ListImportsOutput =
+  struct
+    type nonrec t =
+      {
+      importSummaryList: ImportSummaryList.t option
+        [@ocaml.doc "A list of ImportSummary objects."];
+      nextToken: ImportNextToken.t option
+        [@ocaml.doc
+          "If this value is returned, there are additional results to be displayed. To retrieve them, call ListImports again, with NextToken set to this value."]}
+    type nonrec error =
+      [ `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?importSummaryList =
+      fun ?nextToken -> fun () -> { importSummaryList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ImportSummaryList",
+           (Option.map x.importSummaryList ~f:ImportSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:ImportNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:ImportNextToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let importSummaryList =
+        (Option.map ~f:ImportSummaryList.of_xml)
+          (Xml.child xml_arg0 "ImportSummaryList") in
+      make ?nextToken ?importSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" ImportNextToken.of_json in
+      let importSummaryList =
+        field_map json__ "ImportSummaryList" ImportSummaryList.of_json in
+      make ?nextToken ?importSummaryList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists completed imports within the past 90 days."]
 module ListTablesInputLimit =
   struct
     type nonrec t = int
@@ -13298,10 +16779,10 @@ module ListTablesInput =
           (Xml.child xml_arg0 "ExclusiveStartTableName") in
       make ?limit ?exclusiveStartTableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" ListTablesInputLimit.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" ListTablesInputLimit.of_json in
       let exclusiveStartTableName =
-        field_map json "ExclusiveStartTableName" TableName.of_json in
+        field_map json__ "ExclusiveStartTableName" TableName.of_json in
       make ?limit ?exclusiveStartTableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a ListTables operation."]
@@ -13309,6 +16790,9 @@ module TableNameList =
   struct
     type nonrec t = TableName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TableName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -13384,31 +16868,13 @@ module ListTablesOutput =
           (Xml.child xml_arg0 "TableNames") in
       make ?lastEvaluatedTableName ?tableNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastEvaluatedTableName =
-        field_map json "LastEvaluatedTableName" TableName.of_json in
-      let tableNames = field_map json "TableNames" TableNameList.of_json in
+        field_map json__ "LastEvaluatedTableName" TableName.of_json in
+      let tableNames = field_map json__ "TableNames" TableNameList.of_json in
       make ?lastEvaluatedTableName ?tableNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a ListTables operation."]
-module ResourceArnString =
-  struct
-    type nonrec t = string
-    let context_ = "ResourceArnString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1283) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ResourceArnString" j
-    let to_json = simple_to_json to_value
-  end
 module ListTagsOfResourceInput =
   struct
     type nonrec t =
@@ -13436,10 +16902,10 @@ module ListTagsOfResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?nextToken ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextTokenString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextTokenString.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" ResourceArnString.of_json in
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
       make ?nextToken ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13503,9 +16969,9 @@ module ListTagsOfResourceOutput =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextTokenString.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextTokenString.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13516,26 +16982,38 @@ module PointInTimeRecoverySpecification =
       {
       pointInTimeRecoveryEnabled: BooleanObject.t
         [@ocaml.doc
-          "Indicates whether point in time recovery is enabled (true) or disabled (false) on the table."]}
+          "Indicates whether point in time recovery is enabled (true) or disabled (false) on the table."];
+      recoveryPeriodInDays: RecoveryPeriodInDays.t option
+        [@ocaml.doc
+          "The number of preceding days for which continuous backups are taken and maintained. Your table data is only recoverable to any point-in-time from within the configured recovery period. This parameter is optional. If no value is provided, the value will default to 35."]}
     let context_ = "PointInTimeRecoverySpecification"
-    let make ~pointInTimeRecoveryEnabled =
-      fun () -> { pointInTimeRecoveryEnabled }
+    let make ?recoveryPeriodInDays =
+      fun ~pointInTimeRecoveryEnabled ->
+        fun () -> { recoveryPeriodInDays; pointInTimeRecoveryEnabled }
     let to_value x =
       structure_to_value
         [("PointInTimeRecoveryEnabled",
-           (Some (BooleanObject.to_value x.pointInTimeRecoveryEnabled)))]
+           (Some (BooleanObject.to_value x.pointInTimeRecoveryEnabled)));
+        ("RecoveryPeriodInDays",
+          (Option.map x.recoveryPeriodInDays ~f:RecoveryPeriodInDays.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let recoveryPeriodInDays =
+        (Option.map ~f:RecoveryPeriodInDays.of_xml)
+          (Xml.child xml_arg0 "RecoveryPeriodInDays") in
       let pointInTimeRecoveryEnabled =
         BooleanObject.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
              "PointInTimeRecoveryEnabled") in
-      make ~pointInTimeRecoveryEnabled ()
+      make ?recoveryPeriodInDays ~pointInTimeRecoveryEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let recoveryPeriodInDays =
+        field_map json__ "RecoveryPeriodInDays" RecoveryPeriodInDays.of_json in
       let pointInTimeRecoveryEnabled =
-        field_map_exn json "PointInTimeRecoveryEnabled" BooleanObject.of_json in
-      make ~pointInTimeRecoveryEnabled ()
+        field_map_exn json__ "PointInTimeRecoveryEnabled"
+          BooleanObject.of_json in
+      make ?recoveryPeriodInDays ~pointInTimeRecoveryEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the settings used to enable point in time recovery."]
@@ -13546,8 +17024,9 @@ module Put =
       item: PutItemInputAttributeMap.t
         [@ocaml.doc
           "A map of attribute name to attribute values, representing the primary key of the item to be written by PutItem. All of the table's primary key attributes must be specified, and their data types must match those of the table's key schema. If any attributes are present in the item that are part of an index key schema for the table, their types must match the index key schema."];
-      tableName: TableName.t
-        [@ocaml.doc "Name of the table in which to write the item."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "Name of the table in which to write the item. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       conditionExpression: ConditionExpression.t option
         [@ocaml.doc
           "A condition that must be satisfied in order for a conditional update to succeed."];
@@ -13580,7 +17059,7 @@ module Put =
     let to_value x =
       structure_to_value
         [("Item", (Some (PutItemInputAttributeMap.to_value x.item)));
-        ("TableName", (Some (TableName.to_value x.tableName)));
+        ("TableName", (Some (TableArn.to_value x.tableName)));
         ("ConditionExpression",
           (Option.map x.conditionExpression ~f:ConditionExpression.to_value));
         ("ExpressionAttributeNames",
@@ -13607,7 +17086,7 @@ module Put =
         (Option.map ~f:ConditionExpression.of_xml)
           (Xml.child xml_arg0 "ConditionExpression") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       let item =
         PutItemInputAttributeMap.of_xml
@@ -13615,20 +17094,20 @@ module Put =
       make ?returnValuesOnConditionCheckFailure ?expressionAttributeValues
         ?expressionAttributeNames ?conditionExpression ~tableName ~item ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let returnValuesOnConditionCheckFailure =
-        field_map json "ReturnValuesOnConditionCheckFailure"
+        field_map json__ "ReturnValuesOnConditionCheckFailure"
           ReturnValuesOnConditionCheckFailure.of_json in
       let expressionAttributeValues =
-        field_map json "ExpressionAttributeValues"
+        field_map json__ "ExpressionAttributeValues"
           ExpressionAttributeValueMap.of_json in
       let expressionAttributeNames =
-        field_map json "ExpressionAttributeNames"
+        field_map json__ "ExpressionAttributeNames"
           ExpressionAttributeNameMap.of_json in
       let conditionExpression =
-        field_map json "ConditionExpression" ConditionExpression.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
-      let item = field_map_exn json "Item" PutItemInputAttributeMap.of_json in
+        field_map json__ "ConditionExpression" ConditionExpression.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
+      let item = field_map_exn json__ "Item" PutItemInputAttributeMap.of_json in
       make ?returnValuesOnConditionCheckFailure ?expressionAttributeValues
         ?expressionAttributeNames ?conditionExpression ~tableName ~item ()
     let to_json v = composed_to_json to_value v
@@ -13637,8 +17116,9 @@ module PutItemInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t
-        [@ocaml.doc "The name of the table to contain the item."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table to contain the item. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       item: PutItemInputAttributeMap.t
         [@ocaml.doc
           "A map of attribute name/value pairs, one for each attribute. Only the primary key attributes are required; you can optionally provide other attribute name-value pairs for the item. You must provide all of the attributes for the primary key. For example, with a simple primary key, you only need to provide a value for the partition key. For a composite primary key, you must provide both values for both the partition key and the sort key. If you specify any attributes that are part of an index key, then the data types for those attributes must match those of the schema in the table's attribute definition. Empty String and Binary attribute values are allowed. Attribute values of type String and Binary must have a length greater than zero if the attribute is used as a key attribute for a table or index. For more information about primary keys, see Primary Key in the Amazon DynamoDB Developer Guide. Each element in the Item map is an AttributeValue object."];
@@ -13647,7 +17127,7 @@ module PutItemInput =
           "This is a legacy parameter. Use ConditionExpression instead. For more information, see Expected in the Amazon DynamoDB Developer Guide."];
       returnValues: ReturnValue.t option
         [@ocaml.doc
-          "Use ReturnValues if you want to get the item attributes as they appeared before they were updated with the PutItem request. For PutItem, the valid values are: NONE - If ReturnValues is not specified, or if its value is NONE, then nothing is returned. (This setting is the default for ReturnValues.) ALL_OLD - If PutItem overwrote an attribute name-value pair, then the content of the old item is returned. The values returned are strongly consistent. The ReturnValues parameter is used by several DynamoDB operations; however, PutItem does not recognize any values other than NONE or ALL_OLD."];
+          "Use ReturnValues if you want to get the item attributes as they appeared before they were updated with the PutItem request. For PutItem, the valid values are: NONE - If ReturnValues is not specified, or if its value is NONE, then nothing is returned. (This setting is the default for ReturnValues.) ALL_OLD - If PutItem overwrote an attribute name-value pair, then the content of the old item is returned. The values returned are strongly consistent. There is no additional cost associated with requesting a return value aside from the small network and processing overhead of receiving a larger response. No read capacity units are consumed. The ReturnValues parameter is used by several DynamoDB operations; however, PutItem does not recognize any values other than NONE or ALL_OLD."];
       returnConsumedCapacity: ReturnConsumedCapacity.t option ;
       returnItemCollectionMetrics: ReturnItemCollectionMetrics.t option
         [@ocaml.doc
@@ -13663,7 +17143,11 @@ module PutItemInput =
           "One or more substitution tokens for attribute names in an expression. The following are some use cases for using ExpressionAttributeNames: To access an attribute whose name conflicts with a DynamoDB reserved word. To create a placeholder for repeating occurrences of an attribute name in an expression. To prevent special characters in an attribute name from being misinterpreted in an expression. Use the # character in an expression to dereference an attribute name. For example, consider the following attribute name: Percentile The name of this attribute conflicts with a reserved word, so it cannot be used directly in an expression. (For the complete list of reserved words, see Reserved Words in the Amazon DynamoDB Developer Guide). To work around this, you could specify the following for ExpressionAttributeNames: \\{\"#P\":\"Percentile\"\\} You could then use this substitution in an expression, as in this example: #P = :val Tokens that begin with the : character are expression attribute values, which are placeholders for the actual value at runtime. For more information on expression attribute names, see Specifying Item Attributes in the Amazon DynamoDB Developer Guide."];
       expressionAttributeValues: ExpressionAttributeValueMap.t option
         [@ocaml.doc
-          "One or more values that can be substituted in an expression. Use the : (colon) character in an expression to dereference an attribute value. For example, suppose that you wanted to check whether the value of the ProductStatus attribute was one of the following: Available | Backordered | Discontinued You would first need to specify ExpressionAttributeValues as follows: \\{ \":avail\":\\{\"S\":\"Available\"\\}, \":back\":\\{\"S\":\"Backordered\"\\}, \":disc\":\\{\"S\":\"Discontinued\"\\} \\} You could then use these values in an expression, such as this: ProductStatus IN (:avail, :back, :disc) For more information on expression attribute values, see Condition Expressions in the Amazon DynamoDB Developer Guide."]}
+          "One or more values that can be substituted in an expression. Use the : (colon) character in an expression to dereference an attribute value. For example, suppose that you wanted to check whether the value of the ProductStatus attribute was one of the following: Available | Backordered | Discontinued You would first need to specify ExpressionAttributeValues as follows: \\{ \":avail\":\\{\"S\":\"Available\"\\}, \":back\":\\{\"S\":\"Backordered\"\\}, \":disc\":\\{\"S\":\"Discontinued\"\\} \\} You could then use these values in an expression, such as this: ProductStatus IN (:avail, :back, :disc) For more information on expression attribute values, see Condition Expressions in the Amazon DynamoDB Developer Guide."];
+      returnValuesOnConditionCheckFailure:
+        ReturnValuesOnConditionCheckFailure.t option
+        [@ocaml.doc
+          "An optional parameter that returns the item attributes for a PutItem operation that failed a condition check. There is no additional cost associated with requesting a return value aside from the small network and processing overhead of receiving a larger response. No read capacity units are consumed."]}
     let context_ = "PutItemInput"
     let make ?expected =
       fun ?returnValues ->
@@ -13673,24 +17157,26 @@ module PutItemInput =
               fun ?conditionExpression ->
                 fun ?expressionAttributeNames ->
                   fun ?expressionAttributeValues ->
-                    fun ~tableName ->
-                      fun ~item ->
-                        fun () ->
-                          {
-                            expected;
-                            returnValues;
-                            returnConsumedCapacity;
-                            returnItemCollectionMetrics;
-                            conditionalOperator;
-                            conditionExpression;
-                            expressionAttributeNames;
-                            expressionAttributeValues;
-                            tableName;
-                            item
-                          }
+                    fun ?returnValuesOnConditionCheckFailure ->
+                      fun ~tableName ->
+                        fun ~item ->
+                          fun () ->
+                            {
+                              expected;
+                              returnValues;
+                              returnConsumedCapacity;
+                              returnItemCollectionMetrics;
+                              conditionalOperator;
+                              conditionExpression;
+                              expressionAttributeNames;
+                              expressionAttributeValues;
+                              returnValuesOnConditionCheckFailure;
+                              tableName;
+                              item
+                            }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)));
+        [("TableName", (Some (TableArn.to_value x.tableName)));
         ("Item", (Some (PutItemInputAttributeMap.to_value x.item)));
         ("Expected",
           (Option.map x.expected ~f:ExpectedAttributeMap.to_value));
@@ -13710,9 +17196,15 @@ module PutItemInput =
              ~f:ExpressionAttributeNameMap.to_value));
         ("ExpressionAttributeValues",
           (Option.map x.expressionAttributeValues
-             ~f:ExpressionAttributeValueMap.to_value))]
+             ~f:ExpressionAttributeValueMap.to_value));
+        ("ReturnValuesOnConditionCheckFailure",
+          (Option.map x.returnValuesOnConditionCheckFailure
+             ~f:ReturnValuesOnConditionCheckFailure.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let returnValuesOnConditionCheckFailure =
+        (Option.map ~f:ReturnValuesOnConditionCheckFailure.of_xml)
+          (Xml.child xml_arg0 "ReturnValuesOnConditionCheckFailure") in
       let expressionAttributeValues =
         (Option.map ~f:ExpressionAttributeValueMap.of_xml)
           (Xml.child xml_arg0 "ExpressionAttributeValues") in
@@ -13741,36 +17233,39 @@ module PutItemInput =
         PutItemInputAttributeMap.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Item") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
-      make ?expressionAttributeValues ?expressionAttributeNames
-        ?conditionExpression ?conditionalOperator
+      make ?returnValuesOnConditionCheckFailure ?expressionAttributeValues
+        ?expressionAttributeNames ?conditionExpression ?conditionalOperator
         ?returnItemCollectionMetrics ?returnConsumedCapacity ?returnValues
         ?expected ~item ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let returnValuesOnConditionCheckFailure =
+        field_map json__ "ReturnValuesOnConditionCheckFailure"
+          ReturnValuesOnConditionCheckFailure.of_json in
       let expressionAttributeValues =
-        field_map json "ExpressionAttributeValues"
+        field_map json__ "ExpressionAttributeValues"
           ExpressionAttributeValueMap.of_json in
       let expressionAttributeNames =
-        field_map json "ExpressionAttributeNames"
+        field_map json__ "ExpressionAttributeNames"
           ExpressionAttributeNameMap.of_json in
       let conditionExpression =
-        field_map json "ConditionExpression" ConditionExpression.of_json in
+        field_map json__ "ConditionExpression" ConditionExpression.of_json in
       let conditionalOperator =
-        field_map json "ConditionalOperator" ConditionalOperator.of_json in
+        field_map json__ "ConditionalOperator" ConditionalOperator.of_json in
       let returnItemCollectionMetrics =
-        field_map json "ReturnItemCollectionMetrics"
+        field_map json__ "ReturnItemCollectionMetrics"
           ReturnItemCollectionMetrics.of_json in
       let returnConsumedCapacity =
-        field_map json "ReturnConsumedCapacity"
+        field_map json__ "ReturnConsumedCapacity"
           ReturnConsumedCapacity.of_json in
-      let returnValues = field_map json "ReturnValues" ReturnValue.of_json in
-      let expected = field_map json "Expected" ExpectedAttributeMap.of_json in
-      let item = field_map_exn json "Item" PutItemInputAttributeMap.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
-      make ?expressionAttributeValues ?expressionAttributeNames
-        ?conditionExpression ?conditionalOperator
+      let returnValues = field_map json__ "ReturnValues" ReturnValue.of_json in
+      let expected = field_map json__ "Expected" ExpectedAttributeMap.of_json in
+      let item = field_map_exn json__ "Item" PutItemInputAttributeMap.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
+      make ?returnValuesOnConditionCheckFailure ?expressionAttributeValues
+        ?expressionAttributeNames ?conditionExpression ?conditionalOperator
         ?returnItemCollectionMetrics ?returnConsumedCapacity ?returnValues
         ?expected ~item ~tableName ()
     let to_json v = composed_to_json to_value v
@@ -13784,7 +17279,7 @@ module PutItemOutput =
           "The attribute values as they appeared before the PutItem operation, but only if ReturnValues is specified as ALL_OLD in the request. Each element consists of an attribute name and an attribute value."];
       consumedCapacity: ConsumedCapacity.t option
         [@ocaml.doc
-          "The capacity units consumed by the PutItem operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the ReturnConsumedCapacity parameter was specified. For more information, see Read/Write Capacity Mode in the Amazon DynamoDB Developer Guide."];
+          "The capacity units consumed by the PutItem operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the ReturnConsumedCapacity parameter was specified. For more information, see Capacity unity consumption for write operations in the Amazon DynamoDB Developer Guide."];
       itemCollectionMetrics: ItemCollectionMetrics.t option
         [@ocaml.doc
           "Information about item collections, if any, that were affected by the PutItem operation. ItemCollectionMetrics is only returned if the ReturnItemCollectionMetrics parameter was specified. If the table does not have any local secondary indexes, this information is not returned in the response. Each ItemCollectionMetrics element consists of: ItemCollectionKey - The partition key value of the item collection. This is the same as the partition key value of the item itself. SizeEstimateRangeGB - An estimate of item collection size, in gigabytes. This value is a two-element array containing a lower bound and an upper bound for the estimate. The estimate includes the size of all the items in the table, plus the size of all attributes projected into all of the local secondary indexes on that table. Use this estimate to measure whether a local secondary index is approaching its size limit. The estimate is subject to change over time; therefore, do not rely on the precision or accuracy of the estimate."]}
@@ -13796,8 +17291,11 @@ module PutItemOutput =
           ItemCollectionSizeLimitExceededException.t 
       | `ProvisionedThroughputExceededException of
           ProvisionedThroughputExceededException.t 
+      | `ReplicatedWriteConflictException of
+          ReplicatedWriteConflictException.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TransactionConflictException of TransactionConflictException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?attributes =
@@ -13817,10 +17315,15 @@ module PutItemOutput =
       | "ProvisionedThroughputExceededException" ->
           `ProvisionedThroughputExceededException
             (ProvisionedThroughputExceededException.of_json json)
+      | "ReplicatedWriteConflictException" ->
+          `ReplicatedWriteConflictException
+            (ReplicatedWriteConflictException.of_json json)
       | "RequestLimitExceeded" ->
           `RequestLimitExceeded (RequestLimitExceeded.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TransactionConflictException" ->
           `TransactionConflictException
             (TransactionConflictException.of_json json)
@@ -13840,10 +17343,15 @@ module PutItemOutput =
       | "ProvisionedThroughputExceededException" ->
           `ProvisionedThroughputExceededException
             (ProvisionedThroughputExceededException.of_xml xml)
+      | "ReplicatedWriteConflictException" ->
+          `ReplicatedWriteConflictException
+            (ReplicatedWriteConflictException.of_xml xml)
       | "RequestLimitExceeded" ->
           `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TransactionConflictException" ->
           `TransactionConflictException
             (TransactionConflictException.of_xml xml)
@@ -13867,6 +17375,10 @@ module PutItemOutput =
           `Assoc
             [("error", (`String "ProvisionedThroughputExceededException"));
             ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ReplicatedWriteConflictException e ->
+          `Assoc
+            [("error", (`String "ReplicatedWriteConflictException"));
+            ("details", (ReplicatedWriteConflictException.to_json e))]
       | `RequestLimitExceeded e ->
           `Assoc
             [("error", (`String "RequestLimitExceeded"));
@@ -13875,6 +17387,10 @@ module PutItemOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TransactionConflictException e ->
           `Assoc
             [("error", (`String "TransactionConflictException"));
@@ -13904,15 +17420,173 @@ module PutItemOutput =
         (Option.map ~f:AttributeMap.of_xml) (Xml.child xml_arg0 "Attributes") in
       make ?itemCollectionMetrics ?consumedCapacity ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let itemCollectionMetrics =
-        field_map json "ItemCollectionMetrics" ItemCollectionMetrics.of_json in
+        field_map json__ "ItemCollectionMetrics"
+          ItemCollectionMetrics.of_json in
       let consumedCapacity =
-        field_map json "ConsumedCapacity" ConsumedCapacity.of_json in
-      let attributes = field_map json "Attributes" AttributeMap.of_json in
+        field_map json__ "ConsumedCapacity" ConsumedCapacity.of_json in
+      let attributes = field_map json__ "Attributes" AttributeMap.of_json in
       make ?itemCollectionMetrics ?consumedCapacity ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a PutItem operation."]
+module PutResourcePolicyInput =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArnString.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the DynamoDB resource to which the policy will be attached. The resources you can specify include tables and streams. You can control index permissions using the base table's policy. To specify the same permission level for your table and its indexes, you can provide both the table and index Amazon Resource Name (ARN)s in the Resource field of a given Statement in your policy document. Alternatively, to specify different permissions for your table, indexes, or both, you can define multiple Statement fields in your policy document."];
+      policy: ResourcePolicy.t
+        [@ocaml.doc
+          "An Amazon Web Services resource-based policy document in JSON format. The maximum size supported for a resource-based policy document is 20 KB. DynamoDB counts whitespaces when calculating the size of a policy against this limit. Within a resource-based policy, if the action for a DynamoDB service-linked role (SLR) to replicate data for a global table is denied, adding or deleting a replica will fail with an error. For a full list of all considerations that apply while attaching a resource-based policy, see Resource-based policy considerations."];
+      expectedRevisionId: PolicyRevisionId.t option
+        [@ocaml.doc
+          "A string value that you can use to conditionally update your policy. You can provide the revision ID of your existing policy to make mutating requests against that policy. When you provide an expected revision ID, if the revision ID of the existing policy on the resource doesn't match or if there's no policy attached to the resource, your request will be rejected with a PolicyNotFoundException. To conditionally attach a policy when no policy exists for the resource, specify NO_POLICY for the revision ID."];
+      confirmRemoveSelfResourceAccess:
+        ConfirmRemoveSelfResourceAccess.t option
+        [@ocaml.doc
+          "Set this parameter to true to confirm that you want to remove your permissions to change the policy of this resource in the future."]}
+    let context_ = "PutResourcePolicyInput"
+    let make ?expectedRevisionId =
+      fun ?confirmRemoveSelfResourceAccess ->
+        fun ~resourceArn ->
+          fun ~policy ->
+            fun () ->
+              {
+                expectedRevisionId;
+                confirmRemoveSelfResourceAccess;
+                resourceArn;
+                policy
+              }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArnString.to_value x.resourceArn)));
+        ("Policy", (Some (ResourcePolicy.to_value x.policy)));
+        ("ExpectedRevisionId",
+          (Option.map x.expectedRevisionId ~f:PolicyRevisionId.to_value));
+        ("ConfirmRemoveSelfResourceAccess",
+          (Option.map x.confirmRemoveSelfResourceAccess
+             ~f:ConfirmRemoveSelfResourceAccess.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let confirmRemoveSelfResourceAccess =
+        (Option.map ~f:ConfirmRemoveSelfResourceAccess.of_xml)
+          (Xml.child xml_arg0 "ConfirmRemoveSelfResourceAccess") in
+      let expectedRevisionId =
+        (Option.map ~f:PolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "ExpectedRevisionId") in
+      let policy =
+        ResourcePolicy.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
+      let resourceArn =
+        ResourceArnString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ?confirmRemoveSelfResourceAccess ?expectedRevisionId ~policy
+        ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let confirmRemoveSelfResourceAccess =
+        field_map json__ "ConfirmRemoveSelfResourceAccess"
+          ConfirmRemoveSelfResourceAccess.of_json in
+      let expectedRevisionId =
+        field_map json__ "ExpectedRevisionId" PolicyRevisionId.of_json in
+      let policy = field_map_exn json__ "Policy" ResourcePolicy.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
+      make ?confirmRemoveSelfResourceAccess ?expectedRevisionId ~policy
+        ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Attaches a resource-based policy document to the resource, which can be a table or stream. When you attach a resource-based policy using this API, the policy application is eventually consistent . PutResourcePolicy is an idempotent operation; running it multiple times on the same resource using the same policy document will return the same revision ID. If you specify an ExpectedRevisionId that doesn't match the current policy's RevisionId, the PolicyNotFoundException will be returned. PutResourcePolicy is an asynchronous operation. If you issue a GetResourcePolicy request immediately after a PutResourcePolicy request, DynamoDB might return your previous policy, if there was one, or return the PolicyNotFoundException. This is because GetResourcePolicy uses an eventually consistent query, and the metadata for your policy or table might not be available at that moment. Wait for a few seconds, and then try the GetResourcePolicy request again."]
+module PutResourcePolicyOutput =
+  struct
+    type nonrec t =
+      {
+      revisionId: PolicyRevisionId.t option
+        [@ocaml.doc
+          "A unique string that represents the revision ID of the policy. If you're comparing revision IDs, make sure to always use string comparison logic."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `PolicyNotFoundException of PolicyNotFoundException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?revisionId = fun () -> { revisionId }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "PolicyNotFoundException" ->
+          `PolicyNotFoundException (PolicyNotFoundException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "PolicyNotFoundException" ->
+          `PolicyNotFoundException (PolicyNotFoundException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `PolicyNotFoundException e ->
+          `Assoc
+            [("error", (`String "PolicyNotFoundException"));
+            ("details", (PolicyNotFoundException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RevisionId",
+           (Option.map x.revisionId ~f:PolicyRevisionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revisionId =
+        (Option.map ~f:PolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "RevisionId") in
+      make ?revisionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revisionId = field_map json__ "RevisionId" PolicyRevisionId.of_json in
+      make ?revisionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Attaches a resource-based policy document to the resource, which can be a table or stream. When you attach a resource-based policy using this API, the policy application is eventually consistent . PutResourcePolicy is an idempotent operation; running it multiple times on the same resource using the same policy document will return the same revision ID. If you specify an ExpectedRevisionId that doesn't match the current policy's RevisionId, the PolicyNotFoundException will be returned. PutResourcePolicy is an asynchronous operation. If you issue a GetResourcePolicy request immediately after a PutResourcePolicy request, DynamoDB might return your previous policy, if there was one, or return the PolicyNotFoundException. This is because GetResourcePolicy uses an eventually consistent query, and the metadata for your policy or table might not be available at that moment. Wait for a few seconds, and then try the GetResourcePolicy request again."]
 module Select =
   struct
     type nonrec t =
@@ -13948,14 +17622,15 @@ module QueryInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t
-        [@ocaml.doc "The name of the table containing the requested items."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table containing the requested items. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       indexName: IndexName.t option
         [@ocaml.doc
           "The name of an index to query. This index can be any local secondary index or global secondary index on the table. Note that if you use the IndexName parameter, you must also provide TableName."];
       select: Select.t option
         [@ocaml.doc
-          "The attributes to be returned in the result. You can retrieve all item attributes, specific item attributes, the count of matching items, or in the case of an index, some or all of the attributes projected into the index. ALL_ATTRIBUTES - Returns all of the item attributes from the specified table or index. If you query a local secondary index, then for each matching item in the index, DynamoDB fetches the entire item from the parent table. If the index is configured to project all item attributes, then all of the data can be obtained from the local secondary index, and no fetching is required. ALL_PROJECTED_ATTRIBUTES - Allowed only when querying an index. Retrieves all attributes that have been projected into the index. If the index is configured to project all attributes, this return value is equivalent to specifying ALL_ATTRIBUTES. COUNT - Returns the number of matching items, rather than the matching items themselves. SPECIFIC_ATTRIBUTES - Returns only the attributes listed in AttributesToGet. This return value is equivalent to specifying AttributesToGet without specifying any value for Select. If you query or scan a local secondary index and request only attributes that are projected into that index, the operation will read only the index and not the table. If any of the requested attributes are not projected into the local secondary index, DynamoDB fetches each of these attributes from the parent table. This extra fetching incurs additional throughput cost and latency. If you query or scan a global secondary index, you can only request attributes that are projected into the index. Global secondary index queries cannot fetch attributes from the parent table. If neither Select nor AttributesToGet are specified, DynamoDB defaults to ALL_ATTRIBUTES when accessing a table, and ALL_PROJECTED_ATTRIBUTES when accessing an index. You cannot use both Select and AttributesToGet together in a single request, unless the value for Select is SPECIFIC_ATTRIBUTES. (This usage is equivalent to specifying AttributesToGet without any value for Select.) If you use the ProjectionExpression parameter, then the value for Select can only be SPECIFIC_ATTRIBUTES. Any other value for Select will return an error."];
+          "The attributes to be returned in the result. You can retrieve all item attributes, specific item attributes, the count of matching items, or in the case of an index, some or all of the attributes projected into the index. ALL_ATTRIBUTES - Returns all of the item attributes from the specified table or index. If you query a local secondary index, then for each matching item in the index, DynamoDB fetches the entire item from the parent table. If the index is configured to project all item attributes, then all of the data can be obtained from the local secondary index, and no fetching is required. ALL_PROJECTED_ATTRIBUTES - Allowed only when querying an index. Retrieves all attributes that have been projected into the index. If the index is configured to project all attributes, this return value is equivalent to specifying ALL_ATTRIBUTES. COUNT - Returns the number of matching items, rather than the matching items themselves. Note that this uses the same quantity of read capacity units as getting the items, and is subject to the same item size calculations. SPECIFIC_ATTRIBUTES - Returns only the attributes listed in ProjectionExpression. This return value is equivalent to specifying ProjectionExpression without specifying any value for Select. If you query or scan a local secondary index and request only attributes that are projected into that index, the operation will read only the index and not the table. If any of the requested attributes are not projected into the local secondary index, DynamoDB fetches each of these attributes from the parent table. This extra fetching incurs additional throughput cost and latency. If you query or scan a global secondary index, you can only request attributes that are projected into the index. Global secondary index queries cannot fetch attributes from the parent table. If neither Select nor ProjectionExpression are specified, DynamoDB defaults to ALL_ATTRIBUTES when accessing a table, and ALL_PROJECTED_ATTRIBUTES when accessing an index. You cannot use both Select and ProjectionExpression together in a single request, unless the value for Select is SPECIFIC_ATTRIBUTES. (This usage is equivalent to specifying ProjectionExpression without any value for Select.) If you use the ProjectionExpression parameter, then the value for Select can only be SPECIFIC_ATTRIBUTES. Any other value for Select will return an error."];
       attributesToGet: AttributeNameList.t option
         [@ocaml.doc
           "This is a legacy parameter. Use ProjectionExpression instead. For more information, see AttributesToGet in the Amazon DynamoDB Developer Guide."];
@@ -14036,7 +17711,7 @@ module QueryInput =
                                         }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)));
+        [("TableName", (Some (TableArn.to_value x.tableName)));
         ("IndexName", (Option.map x.indexName ~f:IndexName.to_value));
         ("Select", (Option.map x.select ~f:Select.to_value));
         ("AttributesToGet",
@@ -14117,7 +17792,7 @@ module QueryInput =
       let indexName =
         (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ?expressionAttributeValues ?expressionAttributeNames
         ?keyConditionExpression ?filterExpression ?projectionExpression
@@ -14125,39 +17800,40 @@ module QueryInput =
         ?conditionalOperator ?queryFilter ?keyConditions ?consistentRead
         ?limit ?attributesToGet ?select ?indexName ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expressionAttributeValues =
-        field_map json "ExpressionAttributeValues"
+        field_map json__ "ExpressionAttributeValues"
           ExpressionAttributeValueMap.of_json in
       let expressionAttributeNames =
-        field_map json "ExpressionAttributeNames"
+        field_map json__ "ExpressionAttributeNames"
           ExpressionAttributeNameMap.of_json in
       let keyConditionExpression =
-        field_map json "KeyConditionExpression" KeyExpression.of_json in
+        field_map json__ "KeyConditionExpression" KeyExpression.of_json in
       let filterExpression =
-        field_map json "FilterExpression" ConditionExpression.of_json in
+        field_map json__ "FilterExpression" ConditionExpression.of_json in
       let projectionExpression =
-        field_map json "ProjectionExpression" ProjectionExpression.of_json in
+        field_map json__ "ProjectionExpression" ProjectionExpression.of_json in
       let returnConsumedCapacity =
-        field_map json "ReturnConsumedCapacity"
+        field_map json__ "ReturnConsumedCapacity"
           ReturnConsumedCapacity.of_json in
-      let exclusiveStartKey = field_map json "ExclusiveStartKey" Key.of_json in
+      let exclusiveStartKey =
+        field_map json__ "ExclusiveStartKey" Key.of_json in
       let scanIndexForward =
-        field_map json "ScanIndexForward" BooleanObject.of_json in
+        field_map json__ "ScanIndexForward" BooleanObject.of_json in
       let conditionalOperator =
-        field_map json "ConditionalOperator" ConditionalOperator.of_json in
+        field_map json__ "ConditionalOperator" ConditionalOperator.of_json in
       let queryFilter =
-        field_map json "QueryFilter" FilterConditionMap.of_json in
+        field_map json__ "QueryFilter" FilterConditionMap.of_json in
       let keyConditions =
-        field_map json "KeyConditions" KeyConditions.of_json in
+        field_map json__ "KeyConditions" KeyConditions.of_json in
       let consistentRead =
-        field_map json "ConsistentRead" ConsistentRead.of_json in
-      let limit = field_map json "Limit" PositiveIntegerObject.of_json in
+        field_map json__ "ConsistentRead" ConsistentRead.of_json in
+      let limit = field_map json__ "Limit" PositiveIntegerObject.of_json in
       let attributesToGet =
-        field_map json "AttributesToGet" AttributeNameList.of_json in
-      let select = field_map json "Select" Select.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+        field_map json__ "AttributesToGet" AttributeNameList.of_json in
+      let select = field_map json__ "Select" Select.of_json in
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       make ?expressionAttributeValues ?expressionAttributeNames
         ?keyConditionExpression ?filterExpression ?projectionExpression
         ?returnConsumedCapacity ?exclusiveStartKey ?scanIndexForward
@@ -14183,13 +17859,14 @@ module QueryOutput =
           "The primary key of the item where the operation stopped, inclusive of the previous result set. Use this value to start a new operation, excluding this value in the new request. If LastEvaluatedKey is empty, then the \"last page\" of results has been processed and there is no more data to be retrieved. If LastEvaluatedKey is not empty, it does not necessarily mean that there is more data in the result set. The only way to know when you have reached the end of the result set is when LastEvaluatedKey is empty."];
       consumedCapacity: ConsumedCapacity.t option
         [@ocaml.doc
-          "The capacity units consumed by the Query operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the ReturnConsumedCapacity parameter was specified. For more information, see Provisioned Throughput in the Amazon DynamoDB Developer Guide."]}
+          "The capacity units consumed by the Query operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the ReturnConsumedCapacity parameter was specified. For more information, see Capacity unit consumption for read operations in the Amazon DynamoDB Developer Guide."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `ProvisionedThroughputExceededException of
           ProvisionedThroughputExceededException.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?items =
       fun ?count ->
@@ -14215,6 +17892,8 @@ module QueryOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -14229,6 +17908,8 @@ module QueryOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -14249,6 +17930,10 @@ module QueryOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -14276,13 +17961,13 @@ module QueryOutput =
         (Option.map ~f:ItemList.of_xml) (Xml.child xml_arg0 "Items") in
       make ?consumedCapacity ?lastEvaluatedKey ?scannedCount ?count ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumedCapacity =
-        field_map json "ConsumedCapacity" ConsumedCapacity.of_json in
-      let lastEvaluatedKey = field_map json "LastEvaluatedKey" Key.of_json in
-      let scannedCount = field_map json "ScannedCount" Integer.of_json in
-      let count = field_map json "Count" Integer.of_json in
-      let items = field_map json "Items" ItemList.of_json in
+        field_map json__ "ConsumedCapacity" ConsumedCapacity.of_json in
+      let lastEvaluatedKey = field_map json__ "LastEvaluatedKey" Key.of_json in
+      let scannedCount = field_map json__ "ScannedCount" Integer.of_json in
+      let count = field_map json__ "Count" Integer.of_json in
+      let items = field_map json__ "Items" ItemList.of_json in
       make ?consumedCapacity ?lastEvaluatedKey ?scannedCount ?count ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a Query operation."]
@@ -14300,8 +17985,8 @@ module ReplicaAlreadyExistsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14332,11 +18017,11 @@ module ReplicaGlobalSecondaryIndexAutoScalingUpdate =
         (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
       make ?provisionedReadCapacityAutoScalingUpdate ?indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedReadCapacityAutoScalingUpdate =
-        field_map json "ProvisionedReadCapacityAutoScalingUpdate"
+        field_map json__ "ProvisionedReadCapacityAutoScalingUpdate"
           AutoScalingSettingsUpdate.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
       make ?provisionedReadCapacityAutoScalingUpdate ?indexName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14345,6 +18030,9 @@ module ReplicaGlobalSecondaryIndexAutoScalingUpdateList =
   struct
     type nonrec t = ReplicaGlobalSecondaryIndexAutoScalingUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:ReplicaGlobalSecondaryIndexAutoScalingUpdate.to_value))
@@ -14416,14 +18104,14 @@ module ReplicaAutoScalingUpdate =
       make ?replicaProvisionedReadCapacityAutoScalingUpdate
         ?replicaGlobalSecondaryIndexUpdates ~regionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicaProvisionedReadCapacityAutoScalingUpdate =
-        field_map json "ReplicaProvisionedReadCapacityAutoScalingUpdate"
+        field_map json__ "ReplicaProvisionedReadCapacityAutoScalingUpdate"
           AutoScalingSettingsUpdate.of_json in
       let replicaGlobalSecondaryIndexUpdates =
-        field_map json "ReplicaGlobalSecondaryIndexUpdates"
+        field_map json__ "ReplicaGlobalSecondaryIndexUpdates"
           ReplicaGlobalSecondaryIndexAutoScalingUpdateList.of_json in
-      let regionName = field_map_exn json "RegionName" RegionName.of_json in
+      let regionName = field_map_exn json__ "RegionName" RegionName.of_json in
       make ?replicaProvisionedReadCapacityAutoScalingUpdate
         ?replicaGlobalSecondaryIndexUpdates ~regionName ()
     let to_json v = composed_to_json to_value v
@@ -14434,6 +18122,9 @@ module ReplicaAutoScalingUpdateList =
     type nonrec t = ReplicaAutoScalingUpdate.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicaAutoScalingUpdate.to_value)) |>
         (fun x -> `List x)
@@ -14504,14 +18195,14 @@ module ReplicaGlobalSecondaryIndexSettingsUpdate =
       make ?provisionedReadCapacityAutoScalingSettingsUpdate
         ?provisionedReadCapacityUnits ~indexName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedReadCapacityAutoScalingSettingsUpdate =
-        field_map json "ProvisionedReadCapacityAutoScalingSettingsUpdate"
+        field_map json__ "ProvisionedReadCapacityAutoScalingSettingsUpdate"
           AutoScalingSettingsUpdate.of_json in
       let provisionedReadCapacityUnits =
-        field_map json "ProvisionedReadCapacityUnits"
+        field_map json__ "ProvisionedReadCapacityUnits"
           PositiveLongObject.of_json in
-      let indexName = field_map_exn json "IndexName" IndexName.of_json in
+      let indexName = field_map_exn json__ "IndexName" IndexName.of_json in
       make ?provisionedReadCapacityAutoScalingSettingsUpdate
         ?provisionedReadCapacityUnits ~indexName ()
     let to_json v = composed_to_json to_value v
@@ -14525,6 +18216,9 @@ module ReplicaGlobalSecondaryIndexSettingsUpdateList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicaGlobalSecondaryIndexSettingsUpdate.to_value))
         |> (fun x -> `List x)
@@ -14562,8 +18256,8 @@ module ReplicaNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14639,20 +18333,20 @@ module ReplicaSettingsUpdate =
         ?replicaProvisionedReadCapacityAutoScalingSettingsUpdate
         ?replicaProvisionedReadCapacityUnits ~regionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicaTableClass =
-        field_map json "ReplicaTableClass" TableClass.of_json in
+        field_map json__ "ReplicaTableClass" TableClass.of_json in
       let replicaGlobalSecondaryIndexSettingsUpdate =
-        field_map json "ReplicaGlobalSecondaryIndexSettingsUpdate"
+        field_map json__ "ReplicaGlobalSecondaryIndexSettingsUpdate"
           ReplicaGlobalSecondaryIndexSettingsUpdateList.of_json in
       let replicaProvisionedReadCapacityAutoScalingSettingsUpdate =
-        field_map json
+        field_map json__
           "ReplicaProvisionedReadCapacityAutoScalingSettingsUpdate"
           AutoScalingSettingsUpdate.of_json in
       let replicaProvisionedReadCapacityUnits =
-        field_map json "ReplicaProvisionedReadCapacityUnits"
+        field_map json__ "ReplicaProvisionedReadCapacityUnits"
           PositiveLongObject.of_json in
-      let regionName = field_map_exn json "RegionName" RegionName.of_json in
+      let regionName = field_map_exn json__ "RegionName" RegionName.of_json in
       make ?replicaTableClass ?replicaGlobalSecondaryIndexSettingsUpdate
         ?replicaProvisionedReadCapacityAutoScalingSettingsUpdate
         ?replicaProvisionedReadCapacityUnits ~regionName ()
@@ -14667,6 +18361,9 @@ module ReplicaSettingsUpdateList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicaSettingsUpdate.to_value)) |>
         (fun x -> `List x)
@@ -14713,9 +18410,9 @@ module ReplicaUpdate =
           (Xml.child xml_arg0 "Create") in
       make ?delete ?create ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let delete = field_map json "Delete" DeleteReplicaAction.of_json in
-      let create = field_map json "Create" CreateReplicaAction.of_json in
+    let of_json json__ =
+      let delete = field_map json__ "Delete" DeleteReplicaAction.of_json in
+      let create = field_map json__ "Create" CreateReplicaAction.of_json in
       make ?delete ?create ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14724,6 +18421,9 @@ module ReplicaUpdateList =
   struct
     type nonrec t = ReplicaUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicaUpdate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -14756,6 +18456,9 @@ module UpdateReplicationGroupMemberAction =
       provisionedThroughputOverride: ProvisionedThroughputOverride.t option
         [@ocaml.doc
           "Replica-specific provisioned throughput. If not specified, uses the source table's provisioned throughput settings."];
+      onDemandThroughputOverride: OnDemandThroughputOverride.t option
+        [@ocaml.doc
+          "Overrides the maximum on-demand throughput for the replica table."];
       globalSecondaryIndexes: ReplicaGlobalSecondaryIndexList.t option
         [@ocaml.doc "Replica-specific global secondary index settings."];
       tableClassOverride: TableClass.t option
@@ -14764,17 +18467,19 @@ module UpdateReplicationGroupMemberAction =
     let context_ = "UpdateReplicationGroupMemberAction"
     let make ?kMSMasterKeyId =
       fun ?provisionedThroughputOverride ->
-        fun ?globalSecondaryIndexes ->
-          fun ?tableClassOverride ->
-            fun ~regionName ->
-              fun () ->
-                {
-                  kMSMasterKeyId;
-                  provisionedThroughputOverride;
-                  globalSecondaryIndexes;
-                  tableClassOverride;
-                  regionName
-                }
+        fun ?onDemandThroughputOverride ->
+          fun ?globalSecondaryIndexes ->
+            fun ?tableClassOverride ->
+              fun ~regionName ->
+                fun () ->
+                  {
+                    kMSMasterKeyId;
+                    provisionedThroughputOverride;
+                    onDemandThroughputOverride;
+                    globalSecondaryIndexes;
+                    tableClassOverride;
+                    regionName
+                  }
     let to_value x =
       structure_to_value
         [("RegionName", (Some (RegionName.to_value x.regionName)));
@@ -14783,6 +18488,9 @@ module UpdateReplicationGroupMemberAction =
         ("ProvisionedThroughputOverride",
           (Option.map x.provisionedThroughputOverride
              ~f:ProvisionedThroughputOverride.to_value));
+        ("OnDemandThroughputOverride",
+          (Option.map x.onDemandThroughputOverride
+             ~f:OnDemandThroughputOverride.to_value));
         ("GlobalSecondaryIndexes",
           (Option.map x.globalSecondaryIndexes
              ~f:ReplicaGlobalSecondaryIndexList.to_value));
@@ -14796,6 +18504,9 @@ module UpdateReplicationGroupMemberAction =
       let globalSecondaryIndexes =
         (Option.map ~f:ReplicaGlobalSecondaryIndexList.of_xml)
           (Xml.child xml_arg0 "GlobalSecondaryIndexes") in
+      let onDemandThroughputOverride =
+        (Option.map ~f:OnDemandThroughputOverride.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughputOverride") in
       let provisionedThroughputOverride =
         (Option.map ~f:ProvisionedThroughputOverride.of_xml)
           (Xml.child xml_arg0 "ProvisionedThroughputOverride") in
@@ -14806,22 +18517,27 @@ module UpdateReplicationGroupMemberAction =
         RegionName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RegionName") in
       make ?tableClassOverride ?globalSecondaryIndexes
-        ?provisionedThroughputOverride ?kMSMasterKeyId ~regionName ()
+        ?onDemandThroughputOverride ?provisionedThroughputOverride
+        ?kMSMasterKeyId ~regionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tableClassOverride =
-        field_map json "TableClassOverride" TableClass.of_json in
+        field_map json__ "TableClassOverride" TableClass.of_json in
       let globalSecondaryIndexes =
-        field_map json "GlobalSecondaryIndexes"
+        field_map json__ "GlobalSecondaryIndexes"
           ReplicaGlobalSecondaryIndexList.of_json in
+      let onDemandThroughputOverride =
+        field_map json__ "OnDemandThroughputOverride"
+          OnDemandThroughputOverride.of_json in
       let provisionedThroughputOverride =
-        field_map json "ProvisionedThroughputOverride"
+        field_map json__ "ProvisionedThroughputOverride"
           ProvisionedThroughputOverride.of_json in
       let kMSMasterKeyId =
-        field_map json "KMSMasterKeyId" KMSMasterKeyId.of_json in
-      let regionName = field_map_exn json "RegionName" RegionName.of_json in
+        field_map json__ "KMSMasterKeyId" KMSMasterKeyId.of_json in
+      let regionName = field_map_exn json__ "RegionName" RegionName.of_json in
       make ?tableClassOverride ?globalSecondaryIndexes
-        ?provisionedThroughputOverride ?kMSMasterKeyId ~regionName ()
+        ?onDemandThroughputOverride ?provisionedThroughputOverride
+        ?kMSMasterKeyId ~regionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a replica to be modified."]
 module ReplicationGroupUpdate =
@@ -14861,22 +18577,25 @@ module ReplicationGroupUpdate =
           (Xml.child xml_arg0 "Create") in
       make ?delete ?update ?create ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let delete =
-        field_map json "Delete" DeleteReplicationGroupMemberAction.of_json in
+        field_map json__ "Delete" DeleteReplicationGroupMemberAction.of_json in
       let update =
-        field_map json "Update" UpdateReplicationGroupMemberAction.of_json in
+        field_map json__ "Update" UpdateReplicationGroupMemberAction.of_json in
       let create =
-        field_map json "Create" CreateReplicationGroupMemberAction.of_json in
+        field_map json__ "Create" CreateReplicationGroupMemberAction.of_json in
       make ?delete ?update ?create ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents one of the following: A new replica to be added to an existing regional table or global table. This request invokes the CreateTableReplica action in the destination Region. New parameters for an existing replica. This request invokes the UpdateTable action in the destination Region. An existing replica to be deleted. The request invokes the DeleteTableReplica action in the destination Region, deleting the replica and all if its items in the destination Region."]
+       "Represents one of the following: A new replica to be added to an existing regional table or global table. This request invokes the CreateTableReplica action in the destination Region. New parameters for an existing replica. This request invokes the UpdateTable action in the destination Region. An existing replica to be deleted. The request invokes the DeleteTableReplica action in the destination Region, deleting the replica and all if its items in the destination Region. When you manually remove a table or global table replica, you do not automatically remove any associated scalable targets, scaling policies, or CloudWatch alarms."]
 module ReplicationGroupUpdateList =
   struct
     type nonrec t = ReplicationGroupUpdate.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicationGroupUpdate.to_value)) |>
         (fun x -> `List x)
@@ -14920,6 +18639,7 @@ module RestoreTableFromBackupInput =
       provisionedThroughputOverride: ProvisionedThroughput.t option
         [@ocaml.doc
           "Provisioned throughput settings for the restored table."];
+      onDemandThroughputOverride: OnDemandThroughput.t option ;
       sSESpecificationOverride: SSESpecification.t option
         [@ocaml.doc
           "The new server-side encryption settings for the restored table."]}
@@ -14928,19 +18648,21 @@ module RestoreTableFromBackupInput =
       fun ?globalSecondaryIndexOverride ->
         fun ?localSecondaryIndexOverride ->
           fun ?provisionedThroughputOverride ->
-            fun ?sSESpecificationOverride ->
-              fun ~targetTableName ->
-                fun ~backupArn ->
-                  fun () ->
-                    {
-                      billingModeOverride;
-                      globalSecondaryIndexOverride;
-                      localSecondaryIndexOverride;
-                      provisionedThroughputOverride;
-                      sSESpecificationOverride;
-                      targetTableName;
-                      backupArn
-                    }
+            fun ?onDemandThroughputOverride ->
+              fun ?sSESpecificationOverride ->
+                fun ~targetTableName ->
+                  fun ~backupArn ->
+                    fun () ->
+                      {
+                        billingModeOverride;
+                        globalSecondaryIndexOverride;
+                        localSecondaryIndexOverride;
+                        provisionedThroughputOverride;
+                        onDemandThroughputOverride;
+                        sSESpecificationOverride;
+                        targetTableName;
+                        backupArn
+                      }
     let to_value x =
       structure_to_value
         [("TargetTableName", (Some (TableName.to_value x.targetTableName)));
@@ -14956,6 +18678,9 @@ module RestoreTableFromBackupInput =
         ("ProvisionedThroughputOverride",
           (Option.map x.provisionedThroughputOverride
              ~f:ProvisionedThroughput.to_value));
+        ("OnDemandThroughputOverride",
+          (Option.map x.onDemandThroughputOverride
+             ~f:OnDemandThroughput.to_value));
         ("SSESpecificationOverride",
           (Option.map x.sSESpecificationOverride ~f:SSESpecification.to_value))]
     let to_query v = to_query to_value v
@@ -14963,6 +18688,9 @@ module RestoreTableFromBackupInput =
       let sSESpecificationOverride =
         (Option.map ~f:SSESpecification.of_xml)
           (Xml.child xml_arg0 "SSESpecificationOverride") in
+      let onDemandThroughputOverride =
+        (Option.map ~f:OnDemandThroughput.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughputOverride") in
       let provisionedThroughputOverride =
         (Option.map ~f:ProvisionedThroughput.of_xml)
           (Xml.child xml_arg0 "ProvisionedThroughputOverride") in
@@ -14981,33 +18709,38 @@ module RestoreTableFromBackupInput =
       let targetTableName =
         TableName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetTableName") in
-      make ?sSESpecificationOverride ?provisionedThroughputOverride
-        ?localSecondaryIndexOverride ?globalSecondaryIndexOverride
-        ?billingModeOverride ~backupArn ~targetTableName ()
+      make ?sSESpecificationOverride ?onDemandThroughputOverride
+        ?provisionedThroughputOverride ?localSecondaryIndexOverride
+        ?globalSecondaryIndexOverride ?billingModeOverride ~backupArn
+        ~targetTableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sSESpecificationOverride =
-        field_map json "SSESpecificationOverride" SSESpecification.of_json in
+        field_map json__ "SSESpecificationOverride" SSESpecification.of_json in
+      let onDemandThroughputOverride =
+        field_map json__ "OnDemandThroughputOverride"
+          OnDemandThroughput.of_json in
       let provisionedThroughputOverride =
-        field_map json "ProvisionedThroughputOverride"
+        field_map json__ "ProvisionedThroughputOverride"
           ProvisionedThroughput.of_json in
       let localSecondaryIndexOverride =
-        field_map json "LocalSecondaryIndexOverride"
+        field_map json__ "LocalSecondaryIndexOverride"
           LocalSecondaryIndexList.of_json in
       let globalSecondaryIndexOverride =
-        field_map json "GlobalSecondaryIndexOverride"
+        field_map json__ "GlobalSecondaryIndexOverride"
           GlobalSecondaryIndexList.of_json in
       let billingModeOverride =
-        field_map json "BillingModeOverride" BillingMode.of_json in
-      let backupArn = field_map_exn json "BackupArn" BackupArn.of_json in
+        field_map json__ "BillingModeOverride" BillingMode.of_json in
+      let backupArn = field_map_exn json__ "BackupArn" BackupArn.of_json in
       let targetTableName =
-        field_map_exn json "TargetTableName" TableName.of_json in
-      make ?sSESpecificationOverride ?provisionedThroughputOverride
-        ?localSecondaryIndexOverride ?globalSecondaryIndexOverride
-        ?billingModeOverride ~backupArn ~targetTableName ()
+        field_map_exn json__ "TargetTableName" TableName.of_json in
+      make ?sSESpecificationOverride ?onDemandThroughputOverride
+        ?provisionedThroughputOverride ?localSecondaryIndexOverride
+        ?globalSecondaryIndexOverride ?billingModeOverride ~backupArn
+        ~targetTableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new table from an existing backup. Any number of users can execute up to 4 concurrent restores (any type of restore) in a given account. You can call RestoreTableFromBackup at a maximum rate of 10 times per second. You must manually set up the following on the restored table: Auto scaling policies IAM policies Amazon CloudWatch metrics and alarms Tags Stream settings Time to Live (TTL) settings"]
+       "Creates a new table from an existing backup. Any number of users can execute up to 50 concurrent restores (any type of restore) in a given account. You can call RestoreTableFromBackup at a maximum rate of 10 times per second. You must manually set up the following on the restored table: Auto scaling policies IAM policies Amazon CloudWatch metrics and alarms Tags Stream settings Time to Live (TTL) settings"]
 module TableAlreadyExistsException =
   struct
     type nonrec t = {
@@ -15022,8 +18755,8 @@ module TableAlreadyExistsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A target table with the specified name already exists."]
@@ -15120,13 +18853,13 @@ module RestoreTableFromBackupOutput =
           (Xml.child xml_arg0 "TableDescription") in
       make ?tableDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tableDescription =
-        field_map json "TableDescription" TableDescription.of_json in
+        field_map json__ "TableDescription" TableDescription.of_json in
       make ?tableDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new table from an existing backup. Any number of users can execute up to 4 concurrent restores (any type of restore) in a given account. You can call RestoreTableFromBackup at a maximum rate of 10 times per second. You must manually set up the following on the restored table: Auto scaling policies IAM policies Amazon CloudWatch metrics and alarms Tags Stream settings Time to Live (TTL) settings"]
+       "Creates a new table from an existing backup. Any number of users can execute up to 50 concurrent restores (any type of restore) in a given account. You can call RestoreTableFromBackup at a maximum rate of 10 times per second. You must manually set up the following on the restored table: Auto scaling policies IAM policies Amazon CloudWatch metrics and alarms Tags Stream settings Time to Live (TTL) settings"]
 module RestoreTableToPointInTimeInput =
   struct
     type nonrec t =
@@ -15155,6 +18888,7 @@ module RestoreTableToPointInTimeInput =
       provisionedThroughputOverride: ProvisionedThroughput.t option
         [@ocaml.doc
           "Provisioned throughput settings for the restored table."];
+      onDemandThroughputOverride: OnDemandThroughput.t option ;
       sSESpecificationOverride: SSESpecification.t option
         [@ocaml.doc
           "The new server-side encryption settings for the restored table."]}
@@ -15167,21 +18901,23 @@ module RestoreTableToPointInTimeInput =
               fun ?globalSecondaryIndexOverride ->
                 fun ?localSecondaryIndexOverride ->
                   fun ?provisionedThroughputOverride ->
-                    fun ?sSESpecificationOverride ->
-                      fun ~targetTableName ->
-                        fun () ->
-                          {
-                            sourceTableArn;
-                            sourceTableName;
-                            useLatestRestorableTime;
-                            restoreDateTime;
-                            billingModeOverride;
-                            globalSecondaryIndexOverride;
-                            localSecondaryIndexOverride;
-                            provisionedThroughputOverride;
-                            sSESpecificationOverride;
-                            targetTableName
-                          }
+                    fun ?onDemandThroughputOverride ->
+                      fun ?sSESpecificationOverride ->
+                        fun ~targetTableName ->
+                          fun () ->
+                            {
+                              sourceTableArn;
+                              sourceTableName;
+                              useLatestRestorableTime;
+                              restoreDateTime;
+                              billingModeOverride;
+                              globalSecondaryIndexOverride;
+                              localSecondaryIndexOverride;
+                              provisionedThroughputOverride;
+                              onDemandThroughputOverride;
+                              sSESpecificationOverride;
+                              targetTableName
+                            }
     let to_value x =
       structure_to_value
         [("SourceTableArn",
@@ -15203,6 +18939,9 @@ module RestoreTableToPointInTimeInput =
         ("ProvisionedThroughputOverride",
           (Option.map x.provisionedThroughputOverride
              ~f:ProvisionedThroughput.to_value));
+        ("OnDemandThroughputOverride",
+          (Option.map x.onDemandThroughputOverride
+             ~f:OnDemandThroughput.to_value));
         ("SSESpecificationOverride",
           (Option.map x.sSESpecificationOverride ~f:SSESpecification.to_value))]
     let to_query v = to_query to_value v
@@ -15210,6 +18949,9 @@ module RestoreTableToPointInTimeInput =
       let sSESpecificationOverride =
         (Option.map ~f:SSESpecification.of_xml)
           (Xml.child xml_arg0 "SSESpecificationOverride") in
+      let onDemandThroughputOverride =
+        (Option.map ~f:OnDemandThroughput.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughputOverride") in
       let provisionedThroughputOverride =
         (Option.map ~f:ProvisionedThroughput.of_xml)
           (Xml.child xml_arg0 "ProvisionedThroughputOverride") in
@@ -15235,40 +18977,45 @@ module RestoreTableToPointInTimeInput =
           (Xml.child xml_arg0 "SourceTableName") in
       let sourceTableArn =
         (Option.map ~f:TableArn.of_xml) (Xml.child xml_arg0 "SourceTableArn") in
-      make ?sSESpecificationOverride ?provisionedThroughputOverride
-        ?localSecondaryIndexOverride ?globalSecondaryIndexOverride
-        ?billingModeOverride ?restoreDateTime ?useLatestRestorableTime
-        ~targetTableName ?sourceTableName ?sourceTableArn ()
+      make ?sSESpecificationOverride ?onDemandThroughputOverride
+        ?provisionedThroughputOverride ?localSecondaryIndexOverride
+        ?globalSecondaryIndexOverride ?billingModeOverride ?restoreDateTime
+        ?useLatestRestorableTime ~targetTableName ?sourceTableName
+        ?sourceTableArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sSESpecificationOverride =
-        field_map json "SSESpecificationOverride" SSESpecification.of_json in
+        field_map json__ "SSESpecificationOverride" SSESpecification.of_json in
+      let onDemandThroughputOverride =
+        field_map json__ "OnDemandThroughputOverride"
+          OnDemandThroughput.of_json in
       let provisionedThroughputOverride =
-        field_map json "ProvisionedThroughputOverride"
+        field_map json__ "ProvisionedThroughputOverride"
           ProvisionedThroughput.of_json in
       let localSecondaryIndexOverride =
-        field_map json "LocalSecondaryIndexOverride"
+        field_map json__ "LocalSecondaryIndexOverride"
           LocalSecondaryIndexList.of_json in
       let globalSecondaryIndexOverride =
-        field_map json "GlobalSecondaryIndexOverride"
+        field_map json__ "GlobalSecondaryIndexOverride"
           GlobalSecondaryIndexList.of_json in
       let billingModeOverride =
-        field_map json "BillingModeOverride" BillingMode.of_json in
-      let restoreDateTime = field_map json "RestoreDateTime" Date.of_json in
+        field_map json__ "BillingModeOverride" BillingMode.of_json in
+      let restoreDateTime = field_map json__ "RestoreDateTime" Date.of_json in
       let useLatestRestorableTime =
-        field_map json "UseLatestRestorableTime" BooleanObject.of_json in
+        field_map json__ "UseLatestRestorableTime" BooleanObject.of_json in
       let targetTableName =
-        field_map_exn json "TargetTableName" TableName.of_json in
+        field_map_exn json__ "TargetTableName" TableName.of_json in
       let sourceTableName =
-        field_map json "SourceTableName" TableName.of_json in
-      let sourceTableArn = field_map json "SourceTableArn" TableArn.of_json in
-      make ?sSESpecificationOverride ?provisionedThroughputOverride
-        ?localSecondaryIndexOverride ?globalSecondaryIndexOverride
-        ?billingModeOverride ?restoreDateTime ?useLatestRestorableTime
-        ~targetTableName ?sourceTableName ?sourceTableArn ()
+        field_map json__ "SourceTableName" TableName.of_json in
+      let sourceTableArn = field_map json__ "SourceTableArn" TableArn.of_json in
+      make ?sSESpecificationOverride ?onDemandThroughputOverride
+        ?provisionedThroughputOverride ?localSecondaryIndexOverride
+        ?globalSecondaryIndexOverride ?billingModeOverride ?restoreDateTime
+        ?useLatestRestorableTime ~targetTableName ?sourceTableName
+        ?sourceTableArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Restores the specified table to the specified point in time within EarliestRestorableDateTime and LatestRestorableDateTime. You can restore your table to any point in time during the last 35 days. Any number of users can execute up to 4 concurrent restores (any type of restore) in a given account. When you restore using point in time recovery, DynamoDB restores your table data to the state based on the selected date and time (day:hour:minute:second) to a new table. Along with data, the following are also included on the new restored table using point in time recovery: Global secondary indexes (GSIs) Local secondary indexes (LSIs) Provisioned read and write capacity Encryption settings All these settings come from the current settings of the source table at the time of restore. You must manually set up the following on the restored table: Auto scaling policies IAM policies Amazon CloudWatch metrics and alarms Tags Stream settings Time to Live (TTL) settings Point in time recovery settings"]
+       "Restores the specified table to the specified point in time within EarliestRestorableDateTime and LatestRestorableDateTime. You can restore your table to any point in time in the last 35 days. You can set the recovery period to any value between 1 and 35 days. Any number of users can execute up to 50 concurrent restores (any type of restore) in a given account. When you restore using point in time recovery, DynamoDB restores your table data to the state based on the selected date and time (day:hour:minute:second) to a new table. Along with data, the following are also included on the new restored table using point in time recovery: Global secondary indexes (GSIs) Local secondary indexes (LSIs) Provisioned read and write capacity Encryption settings All these settings come from the current settings of the source table at the time of restore. You must manually set up the following on the restored table: Auto scaling policies IAM policies Amazon CloudWatch metrics and alarms Tags Stream settings Time to Live (TTL) settings Point in time recovery settings"]
 module RestoreTableToPointInTimeOutput =
   struct
     type nonrec t =
@@ -15375,13 +19122,13 @@ module RestoreTableToPointInTimeOutput =
           (Xml.child xml_arg0 "TableDescription") in
       make ?tableDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tableDescription =
-        field_map json "TableDescription" TableDescription.of_json in
+        field_map json__ "TableDescription" TableDescription.of_json in
       make ?tableDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Restores the specified table to the specified point in time within EarliestRestorableDateTime and LatestRestorableDateTime. You can restore your table to any point in time during the last 35 days. Any number of users can execute up to 4 concurrent restores (any type of restore) in a given account. When you restore using point in time recovery, DynamoDB restores your table data to the state based on the selected date and time (day:hour:minute:second) to a new table. Along with data, the following are also included on the new restored table using point in time recovery: Global secondary indexes (GSIs) Local secondary indexes (LSIs) Provisioned read and write capacity Encryption settings All these settings come from the current settings of the source table at the time of restore. You must manually set up the following on the restored table: Auto scaling policies IAM policies Amazon CloudWatch metrics and alarms Tags Stream settings Time to Live (TTL) settings Point in time recovery settings"]
+       "Restores the specified table to the specified point in time within EarliestRestorableDateTime and LatestRestorableDateTime. You can restore your table to any point in time in the last 35 days. You can set the recovery period to any value between 1 and 35 days. Any number of users can execute up to 50 concurrent restores (any type of restore) in a given account. When you restore using point in time recovery, DynamoDB restores your table data to the state based on the selected date and time (day:hour:minute:second) to a new table. Along with data, the following are also included on the new restored table using point in time recovery: Global secondary indexes (GSIs) Local secondary indexes (LSIs) Provisioned read and write capacity Encryption settings All these settings come from the current settings of the source table at the time of restore. You must manually set up the following on the restored table: Auto scaling policies IAM policies Amazon CloudWatch metrics and alarms Tags Stream settings Time to Live (TTL) settings Point in time recovery settings"]
 module ScanTotalSegments =
   struct
     type nonrec t = int
@@ -15424,9 +19171,9 @@ module ScanInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t
+      tableName: TableArn.t
         [@ocaml.doc
-          "The name of the table containing the requested items; or, if you provide IndexName, the name of the table to which that index belongs."];
+          "The name of the table containing the requested items or if you provide IndexName, the name of the table to which that index belongs. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       indexName: IndexName.t option
         [@ocaml.doc
           "The name of a secondary index to scan. This index can be any local secondary index or global secondary index. Note that if you use the IndexName parameter, you must also provide TableName."];
@@ -15438,7 +19185,7 @@ module ScanInput =
           "The maximum number of items to evaluate (not necessarily the number of matching items). If DynamoDB processes the number of items up to the limit while processing the results, it stops the operation and returns the matching values up to that point, and a key in LastEvaluatedKey to apply in a subsequent operation, so that you can pick up where you left off. Also, if the processed dataset size exceeds 1 MB before DynamoDB reaches this limit, it stops the operation and returns the matching values up to the limit, and a key in LastEvaluatedKey to apply in a subsequent operation to continue the operation. For more information, see Working with Queries in the Amazon DynamoDB Developer Guide."];
       select: Select.t option
         [@ocaml.doc
-          "The attributes to be returned in the result. You can retrieve all item attributes, specific item attributes, the count of matching items, or in the case of an index, some or all of the attributes projected into the index. ALL_ATTRIBUTES - Returns all of the item attributes from the specified table or index. If you query a local secondary index, then for each matching item in the index, DynamoDB fetches the entire item from the parent table. If the index is configured to project all item attributes, then all of the data can be obtained from the local secondary index, and no fetching is required. ALL_PROJECTED_ATTRIBUTES - Allowed only when querying an index. Retrieves all attributes that have been projected into the index. If the index is configured to project all attributes, this return value is equivalent to specifying ALL_ATTRIBUTES. COUNT - Returns the number of matching items, rather than the matching items themselves. SPECIFIC_ATTRIBUTES - Returns only the attributes listed in AttributesToGet. This return value is equivalent to specifying AttributesToGet without specifying any value for Select. If you query or scan a local secondary index and request only attributes that are projected into that index, the operation reads only the index and not the table. If any of the requested attributes are not projected into the local secondary index, DynamoDB fetches each of these attributes from the parent table. This extra fetching incurs additional throughput cost and latency. If you query or scan a global secondary index, you can only request attributes that are projected into the index. Global secondary index queries cannot fetch attributes from the parent table. If neither Select nor AttributesToGet are specified, DynamoDB defaults to ALL_ATTRIBUTES when accessing a table, and ALL_PROJECTED_ATTRIBUTES when accessing an index. You cannot use both Select and AttributesToGet together in a single request, unless the value for Select is SPECIFIC_ATTRIBUTES. (This usage is equivalent to specifying AttributesToGet without any value for Select.) If you use the ProjectionExpression parameter, then the value for Select can only be SPECIFIC_ATTRIBUTES. Any other value for Select will return an error."];
+          "The attributes to be returned in the result. You can retrieve all item attributes, specific item attributes, the count of matching items, or in the case of an index, some or all of the attributes projected into the index. ALL_ATTRIBUTES - Returns all of the item attributes from the specified table or index. If you query a local secondary index, then for each matching item in the index, DynamoDB fetches the entire item from the parent table. If the index is configured to project all item attributes, then all of the data can be obtained from the local secondary index, and no fetching is required. ALL_PROJECTED_ATTRIBUTES - Allowed only when querying an index. Retrieves all attributes that have been projected into the index. If the index is configured to project all attributes, this return value is equivalent to specifying ALL_ATTRIBUTES. COUNT - Returns the number of matching items, rather than the matching items themselves. Note that this uses the same quantity of read capacity units as getting the items, and is subject to the same item size calculations. SPECIFIC_ATTRIBUTES - Returns only the attributes listed in ProjectionExpression. This return value is equivalent to specifying ProjectionExpression without specifying any value for Select. If you query or scan a local secondary index and request only attributes that are projected into that index, the operation reads only the index and not the table. If any of the requested attributes are not projected into the local secondary index, DynamoDB fetches each of these attributes from the parent table. This extra fetching incurs additional throughput cost and latency. If you query or scan a global secondary index, you can only request attributes that are projected into the index. Global secondary index queries cannot fetch attributes from the parent table. If neither Select nor ProjectionExpression are specified, DynamoDB defaults to ALL_ATTRIBUTES when accessing a table, and ALL_PROJECTED_ATTRIBUTES when accessing an index. You cannot use both Select and ProjectionExpression together in a single request, unless the value for Select is SPECIFIC_ATTRIBUTES. (This usage is equivalent to specifying ProjectionExpression without any value for Select.) If you use the ProjectionExpression parameter, then the value for Select can only be SPECIFIC_ATTRIBUTES. Any other value for Select will return an error."];
       scanFilter: FilterConditionMap.t option
         [@ocaml.doc
           "This is a legacy parameter. Use FilterExpression instead. For more information, see ScanFilter in the Amazon DynamoDB Developer Guide."];
@@ -15508,7 +19255,7 @@ module ScanInput =
                                       }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)));
+        [("TableName", (Some (TableArn.to_value x.tableName)));
         ("IndexName", (Option.map x.indexName ~f:IndexName.to_value));
         ("AttributesToGet",
           (Option.map x.attributesToGet ~f:AttributeNameList.to_value));
@@ -15582,7 +19329,7 @@ module ScanInput =
       let indexName =
         (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ?consistentRead ?expressionAttributeValues
         ?expressionAttributeNames ?filterExpression ?projectionExpression
@@ -15590,35 +19337,37 @@ module ScanInput =
         ?conditionalOperator ?scanFilter ?select ?limit ?attributesToGet
         ?indexName ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consistentRead =
-        field_map json "ConsistentRead" ConsistentRead.of_json in
+        field_map json__ "ConsistentRead" ConsistentRead.of_json in
       let expressionAttributeValues =
-        field_map json "ExpressionAttributeValues"
+        field_map json__ "ExpressionAttributeValues"
           ExpressionAttributeValueMap.of_json in
       let expressionAttributeNames =
-        field_map json "ExpressionAttributeNames"
+        field_map json__ "ExpressionAttributeNames"
           ExpressionAttributeNameMap.of_json in
       let filterExpression =
-        field_map json "FilterExpression" ConditionExpression.of_json in
+        field_map json__ "FilterExpression" ConditionExpression.of_json in
       let projectionExpression =
-        field_map json "ProjectionExpression" ProjectionExpression.of_json in
-      let segment = field_map json "Segment" ScanSegment.of_json in
+        field_map json__ "ProjectionExpression" ProjectionExpression.of_json in
+      let segment = field_map json__ "Segment" ScanSegment.of_json in
       let totalSegments =
-        field_map json "TotalSegments" ScanTotalSegments.of_json in
+        field_map json__ "TotalSegments" ScanTotalSegments.of_json in
       let returnConsumedCapacity =
-        field_map json "ReturnConsumedCapacity"
+        field_map json__ "ReturnConsumedCapacity"
           ReturnConsumedCapacity.of_json in
-      let exclusiveStartKey = field_map json "ExclusiveStartKey" Key.of_json in
+      let exclusiveStartKey =
+        field_map json__ "ExclusiveStartKey" Key.of_json in
       let conditionalOperator =
-        field_map json "ConditionalOperator" ConditionalOperator.of_json in
-      let scanFilter = field_map json "ScanFilter" FilterConditionMap.of_json in
-      let select = field_map json "Select" Select.of_json in
-      let limit = field_map json "Limit" PositiveIntegerObject.of_json in
+        field_map json__ "ConditionalOperator" ConditionalOperator.of_json in
+      let scanFilter =
+        field_map json__ "ScanFilter" FilterConditionMap.of_json in
+      let select = field_map json__ "Select" Select.of_json in
+      let limit = field_map json__ "Limit" PositiveIntegerObject.of_json in
       let attributesToGet =
-        field_map json "AttributesToGet" AttributeNameList.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+        field_map json__ "AttributesToGet" AttributeNameList.of_json in
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       make ?consistentRead ?expressionAttributeValues
         ?expressionAttributeNames ?filterExpression ?projectionExpression
         ?segment ?totalSegments ?returnConsumedCapacity ?exclusiveStartKey
@@ -15644,13 +19393,14 @@ module ScanOutput =
           "The primary key of the item where the operation stopped, inclusive of the previous result set. Use this value to start a new operation, excluding this value in the new request. If LastEvaluatedKey is empty, then the \"last page\" of results has been processed and there is no more data to be retrieved. If LastEvaluatedKey is not empty, it does not necessarily mean that there is more data in the result set. The only way to know when you have reached the end of the result set is when LastEvaluatedKey is empty."];
       consumedCapacity: ConsumedCapacity.t option
         [@ocaml.doc
-          "The capacity units consumed by the Scan operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the ReturnConsumedCapacity parameter was specified. For more information, see Provisioned Throughput in the Amazon DynamoDB Developer Guide."]}
+          "The capacity units consumed by the Scan operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the ReturnConsumedCapacity parameter was specified. For more information, see Capacity unit consumption for read operations in the Amazon DynamoDB Developer Guide."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `ProvisionedThroughputExceededException of
           ProvisionedThroughputExceededException.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?items =
       fun ?count ->
@@ -15676,6 +19426,8 @@ module ScanOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -15690,6 +19442,8 @@ module ScanOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -15710,6 +19464,10 @@ module ScanOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -15737,13 +19495,13 @@ module ScanOutput =
         (Option.map ~f:ItemList.of_xml) (Xml.child xml_arg0 "Items") in
       make ?consumedCapacity ?lastEvaluatedKey ?scannedCount ?count ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumedCapacity =
-        field_map json "ConsumedCapacity" ConsumedCapacity.of_json in
-      let lastEvaluatedKey = field_map json "LastEvaluatedKey" Key.of_json in
-      let scannedCount = field_map json "ScannedCount" Integer.of_json in
-      let count = field_map json "Count" Integer.of_json in
-      let items = field_map json "Items" ItemList.of_json in
+        field_map json__ "ConsumedCapacity" ConsumedCapacity.of_json in
+      let lastEvaluatedKey = field_map json__ "LastEvaluatedKey" Key.of_json in
+      let scannedCount = field_map json__ "ScannedCount" Integer.of_json in
+      let count = field_map json__ "Count" Integer.of_json in
+      let items = field_map json__ "Items" ItemList.of_json in
       make ?consumedCapacity ?lastEvaluatedKey ?scannedCount ?count ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a Scan operation."]
@@ -15751,6 +19509,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKeyString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKeyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -15796,14 +19557,14 @@ module TagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" ResourceArnString.of_json in
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associate a set of tags with an Amazon DynamoDB resource. You can then activate these user-defined tags so that they appear on the Billing and Cost Management console for cost allocation tracking. You can call TagResource up to five times per second, per account. For an overview on tagging DynamoDB resources, see Tagging for DynamoDB in the Amazon DynamoDB Developer Guide."]
+       "Associate a set of tags with an Amazon DynamoDB resource. You can then activate these user-defined tags so that they appear on the Billing and Cost Management console for cost allocation tracking. You can call TagResource up to five times per second, per account. TagResource is an asynchronous operation. If you issue a ListTagsOfResource request immediately after a TagResource request, DynamoDB might return your previous tag set, if there was one, or an empty tag set. This is because ListTagsOfResource uses an eventually consistent query, and the metadata for your tags or table might not be available at that moment. Wait for a few seconds, and then try the ListTagsOfResource request again. The application or removal of tags using TagResource and UntagResource APIs is eventually consistent. ListTagsOfResource API will only reflect the changes after a few seconds. For an overview on tagging DynamoDB resources, see Tagging for DynamoDB in the Amazon DynamoDB Developer Guide."]
 module TimeToLiveEnabled =
   struct
     type nonrec t = bool
@@ -15845,10 +19606,10 @@ module TimeToLiveSpecification =
           (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ~attributeName ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeName =
-        field_map_exn json "AttributeName" TimeToLiveAttributeName.of_json in
-      let enabled = field_map_exn json "Enabled" TimeToLiveEnabled.of_json in
+        field_map_exn json__ "AttributeName" TimeToLiveAttributeName.of_json in
+      let enabled = field_map_exn json__ "Enabled" TimeToLiveEnabled.of_json in
       make ~attributeName ~enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15869,8 +19630,8 @@ module TransactGetItem =
       let get = Get.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Get") in
       make ~get ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let get = field_map_exn json "Get" Get.of_json in make ~get ()
+    let of_json json__ =
+      let get = field_map_exn json__ "Get" Get.of_json in make ~get ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies an item to be retrieved as part of the transaction."]
@@ -15880,8 +19641,12 @@ module TransactGetItemList =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransactGetItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -15909,7 +19674,7 @@ module TransactGetItemsInput =
       {
       transactItems: TransactGetItemList.t
         [@ocaml.doc
-          "An ordered array of up to 25 TransactGetItem objects, each of which contains a Get structure."];
+          "An ordered array of up to 100 TransactGetItem objects, each of which contains a Get structure."];
       returnConsumedCapacity: ReturnConsumedCapacity.t option
         [@ocaml.doc
           "A value of TOTAL causes consumed capacity information to be returned, and a value of NONE prevents that information from being returned. No other value is valid."]}
@@ -15934,16 +19699,16 @@ module TransactGetItemsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TransactItems") in
       make ?returnConsumedCapacity ~transactItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let returnConsumedCapacity =
-        field_map json "ReturnConsumedCapacity"
+        field_map json__ "ReturnConsumedCapacity"
           ReturnConsumedCapacity.of_json in
       let transactItems =
-        field_map_exn json "TransactItems" TransactGetItemList.of_json in
+        field_map_exn json__ "TransactItems" TransactGetItemList.of_json in
       make ?returnConsumedCapacity ~transactItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "TransactGetItems is a synchronous operation that atomically retrieves multiple items from one or more tables (but not from indexes) in a single account and Region. A TransactGetItems call can contain up to 25 TransactGetItem objects, each of which contains a Get structure that specifies an item to retrieve from a table in the account and Region. A call to TransactGetItems cannot retrieve items from tables in more than one Amazon Web Services account or Region. The aggregate size of the items in the transaction cannot exceed 4 MB. DynamoDB rejects the entire TransactGetItems request if any of the following is true: A conflicting operation is in the process of updating an item to be read. There is insufficient provisioned capacity for the transaction to be completed. There is a user error, such as an invalid data format. The aggregate size of the items in the transaction cannot exceed 4 MB."]
+       "TransactGetItems is a synchronous operation that atomically retrieves multiple items from one or more tables (but not from indexes) in a single account and Region. A TransactGetItems call can contain up to 100 TransactGetItem objects, each of which contains a Get structure that specifies an item to retrieve from a table in the account and Region. A call to TransactGetItems cannot retrieve items from tables in more than one Amazon Web Services account or Region. The aggregate size of the items in the transaction cannot exceed 4 MB. DynamoDB rejects the entire TransactGetItems request if any of the following is true: A conflicting operation is in the process of updating an item to be read. There is insufficient provisioned capacity for the transaction to be completed. There is a user error, such as an invalid data format. The aggregate size of the items in the transaction exceeded 4 MB."]
 module TransactGetItemsOutput =
   struct
     type nonrec t =
@@ -15953,13 +19718,14 @@ module TransactGetItemsOutput =
           "If the ReturnConsumedCapacity value was TOTAL, this is an array of ConsumedCapacity objects, one for each table addressed by TransactGetItem objects in the TransactItems parameter. These ConsumedCapacity objects report the read-capacity units consumed by the TransactGetItems call in that table."];
       responses: ItemResponseList.t option
         [@ocaml.doc
-          "An ordered array of up to 25 ItemResponse objects, each of which corresponds to the TransactGetItem object in the same position in the TransactItems array. Each ItemResponse object contains a Map of the name-value pairs that are the projected attributes of the requested item. If a requested item could not be retrieved, the corresponding ItemResponse object is Null, or if the requested item has no projected attributes, the corresponding ItemResponse object is an empty Map."]}
+          "An ordered array of up to 100 ItemResponse objects, each of which corresponds to the TransactGetItem object in the same position in the TransactItems array. Each ItemResponse object contains a Map of the name-value pairs that are the projected attributes of the requested item. If a requested item could not be retrieved, the corresponding ItemResponse object is Null, or if the requested item has no projected attributes, the corresponding ItemResponse object is an empty Map."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `ProvisionedThroughputExceededException of
           ProvisionedThroughputExceededException.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TransactionCanceledException of TransactionCanceledException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?consumedCapacity =
@@ -15975,6 +19741,8 @@ module TransactGetItemsOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TransactionCanceledException" ->
           `TransactionCanceledException
             (TransactionCanceledException.of_json json)
@@ -15992,6 +19760,8 @@ module TransactGetItemsOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TransactionCanceledException" ->
           `TransactionCanceledException
             (TransactionCanceledException.of_xml xml)
@@ -16015,6 +19785,10 @@ module TransactGetItemsOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TransactionCanceledException e ->
           `Assoc
             [("error", (`String "TransactionCanceledException"));
@@ -16040,14 +19814,14 @@ module TransactGetItemsOutput =
           (Xml.child xml_arg0 "ConsumedCapacity") in
       make ?responses ?consumedCapacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let responses = field_map json "Responses" ItemResponseList.of_json in
+    let of_json json__ =
+      let responses = field_map json__ "Responses" ItemResponseList.of_json in
       let consumedCapacity =
-        field_map json "ConsumedCapacity" ConsumedCapacityMultiple.of_json in
+        field_map json__ "ConsumedCapacity" ConsumedCapacityMultiple.of_json in
       make ?responses ?consumedCapacity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "TransactGetItems is a synchronous operation that atomically retrieves multiple items from one or more tables (but not from indexes) in a single account and Region. A TransactGetItems call can contain up to 25 TransactGetItem objects, each of which contains a Get structure that specifies an item to retrieve from a table in the account and Region. A call to TransactGetItems cannot retrieve items from tables in more than one Amazon Web Services account or Region. The aggregate size of the items in the transaction cannot exceed 4 MB. DynamoDB rejects the entire TransactGetItems request if any of the following is true: A conflicting operation is in the process of updating an item to be read. There is insufficient provisioned capacity for the transaction to be completed. There is a user error, such as an invalid data format. The aggregate size of the items in the transaction cannot exceed 4 MB."]
+       "TransactGetItems is a synchronous operation that atomically retrieves multiple items from one or more tables (but not from indexes) in a single account and Region. A TransactGetItems call can contain up to 100 TransactGetItem objects, each of which contains a Get structure that specifies an item to retrieve from a table in the account and Region. A call to TransactGetItems cannot retrieve items from tables in more than one Amazon Web Services account or Region. The aggregate size of the items in the transaction cannot exceed 4 MB. DynamoDB rejects the entire TransactGetItems request if any of the following is true: A conflicting operation is in the process of updating an item to be read. There is insufficient provisioned capacity for the transaction to be completed. There is a user error, such as an invalid data format. The aggregate size of the items in the transaction exceeded 4 MB."]
 module UpdateExpression =
   struct
     type nonrec t = string
@@ -16071,8 +19845,9 @@ module Update =
       updateExpression: UpdateExpression.t
         [@ocaml.doc
           "An expression that defines one or more attributes to be updated, the action to be performed on them, and new value(s) for them."];
-      tableName: TableName.t
-        [@ocaml.doc "Name of the table for the UpdateItem request."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "Name of the table for the UpdateItem request. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       conditionExpression: ConditionExpression.t option
         [@ocaml.doc
           "A condition that must be satisfied in order for a conditional update to succeed."];
@@ -16085,7 +19860,7 @@ module Update =
       returnValuesOnConditionCheckFailure:
         ReturnValuesOnConditionCheckFailure.t option
         [@ocaml.doc
-          "Use ReturnValuesOnConditionCheckFailure to get the item attributes if the Update condition fails. For ReturnValuesOnConditionCheckFailure, the valid values are: NONE, ALL_OLD, UPDATED_OLD, ALL_NEW, UPDATED_NEW."]}
+          "Use ReturnValuesOnConditionCheckFailure to get the item attributes if the Update condition fails. For ReturnValuesOnConditionCheckFailure, the valid values are: NONE and ALL_OLD."]}
     let context_ = "Update"
     let make ?conditionExpression =
       fun ?expressionAttributeNames ->
@@ -16109,7 +19884,7 @@ module Update =
         [("Key", (Some (Key.to_value x.key)));
         ("UpdateExpression",
           (Some (UpdateExpression.to_value x.updateExpression)));
-        ("TableName", (Some (TableName.to_value x.tableName)));
+        ("TableName", (Some (TableArn.to_value x.tableName)));
         ("ConditionExpression",
           (Option.map x.conditionExpression ~f:ConditionExpression.to_value));
         ("ExpressionAttributeNames",
@@ -16136,7 +19911,7 @@ module Update =
         (Option.map ~f:ConditionExpression.of_xml)
           (Xml.child xml_arg0 "ConditionExpression") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       let updateExpression =
         UpdateExpression.of_xml
@@ -16146,22 +19921,22 @@ module Update =
         ?expressionAttributeNames ?conditionExpression ~tableName
         ~updateExpression ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let returnValuesOnConditionCheckFailure =
-        field_map json "ReturnValuesOnConditionCheckFailure"
+        field_map json__ "ReturnValuesOnConditionCheckFailure"
           ReturnValuesOnConditionCheckFailure.of_json in
       let expressionAttributeValues =
-        field_map json "ExpressionAttributeValues"
+        field_map json__ "ExpressionAttributeValues"
           ExpressionAttributeValueMap.of_json in
       let expressionAttributeNames =
-        field_map json "ExpressionAttributeNames"
+        field_map json__ "ExpressionAttributeNames"
           ExpressionAttributeNameMap.of_json in
       let conditionExpression =
-        field_map json "ConditionExpression" ConditionExpression.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+        field_map json__ "ConditionExpression" ConditionExpression.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       let updateExpression =
-        field_map_exn json "UpdateExpression" UpdateExpression.of_json in
-      let key = field_map_exn json "Key" Key.of_json in
+        field_map_exn json__ "UpdateExpression" UpdateExpression.of_json in
+      let key = field_map_exn json__ "Key" Key.of_json in
       make ?returnValuesOnConditionCheckFailure ?expressionAttributeValues
         ?expressionAttributeNames ?conditionExpression ~tableName
         ~updateExpression ~key ()
@@ -16202,12 +19977,12 @@ module TransactWriteItem =
           (Xml.child xml_arg0 "ConditionCheck") in
       make ?update ?delete ?put ?conditionCheck ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let update = field_map json "Update" Update.of_json in
-      let delete = field_map json "Delete" Delete.of_json in
-      let put = field_map json "Put" Put.of_json in
+    let of_json json__ =
+      let update = field_map json__ "Update" Update.of_json in
+      let delete = field_map json__ "Delete" Delete.of_json in
+      let put = field_map json__ "Put" Put.of_json in
       let conditionCheck =
-        field_map json "ConditionCheck" ConditionCheck.of_json in
+        field_map json__ "ConditionCheck" ConditionCheck.of_json in
       make ?update ?delete ?put ?conditionCheck ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16218,8 +19993,12 @@ module TransactWriteItemList =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TransactWriteItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -16247,14 +20026,14 @@ module TransactWriteItemsInput =
       {
       transactItems: TransactWriteItemList.t
         [@ocaml.doc
-          "An ordered array of up to 25 TransactWriteItem objects, each of which contains a ConditionCheck, Put, Update, or Delete object. These can operate on items in different tables, but the tables must reside in the same Amazon Web Services account and Region, and no two of them can operate on the same item."];
+          "An ordered array of up to 100 TransactWriteItem objects, each of which contains a ConditionCheck, Put, Update, or Delete object. These can operate on items in different tables, but the tables must reside in the same Amazon Web Services account and Region, and no two of them can operate on the same item."];
       returnConsumedCapacity: ReturnConsumedCapacity.t option ;
       returnItemCollectionMetrics: ReturnItemCollectionMetrics.t option
         [@ocaml.doc
           "Determines whether item collection metrics are returned. If set to SIZE, the response includes statistics about item collections (if any), that were modified during the operation and are returned in the response. If set to NONE (the default), no statistics are returned."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "Providing a ClientRequestToken makes the call to TransactWriteItems idempotent, meaning that multiple identical calls have the same effect as one single call. Although multiple identical calls using the same client request token produce the same result on the server (no side effects), the responses to the calls might not be the same. If the ReturnConsumedCapacity> parameter is set, then the initial TransactWriteItems call returns the amount of write capacity units consumed in making the changes. Subsequent TransactWriteItems calls with the same client token return the number of read capacity units consumed in reading the item. A client request token is valid for 10 minutes after the first request that uses it is completed. After 10 minutes, any request with the same client token is treated as a new request. Do not resubmit the same request with the same client token for more than 10 minutes, or the result might not be idempotent. If you submit a request with the same client token but a change in other parameters within the 10-minute idempotency window, DynamoDB returns an IdempotentParameterMismatch exception."]}
+          "Providing a ClientRequestToken makes the call to TransactWriteItems idempotent, meaning that multiple identical calls have the same effect as one single call. Although multiple identical calls using the same client request token produce the same result on the server (no side effects), the responses to the calls might not be the same. If the ReturnConsumedCapacity parameter is set, then the initial TransactWriteItems call returns the amount of write capacity units consumed in making the changes. Subsequent TransactWriteItems calls with the same client token return the number of read capacity units consumed in reading the item. A client request token is valid for 10 minutes after the first request that uses it is completed. After 10 minutes, any request with the same client token is treated as a new request. Do not resubmit the same request with the same client token for more than 10 minutes, or the result might not be idempotent. If you submit a request with the same client token but a change in other parameters within the 10-minute idempotency window, DynamoDB returns an IdempotentParameterMismatch exception."]}
     let context_ = "TransactWriteItemsInput"
     let make ?returnConsumedCapacity =
       fun ?returnItemCollectionMetrics ->
@@ -16296,22 +20075,22 @@ module TransactWriteItemsInput =
       make ?clientRequestToken ?returnItemCollectionMetrics
         ?returnConsumedCapacity ~transactItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let returnItemCollectionMetrics =
-        field_map json "ReturnItemCollectionMetrics"
+        field_map json__ "ReturnItemCollectionMetrics"
           ReturnItemCollectionMetrics.of_json in
       let returnConsumedCapacity =
-        field_map json "ReturnConsumedCapacity"
+        field_map json__ "ReturnConsumedCapacity"
           ReturnConsumedCapacity.of_json in
       let transactItems =
-        field_map_exn json "TransactItems" TransactWriteItemList.of_json in
+        field_map_exn json__ "TransactItems" TransactWriteItemList.of_json in
       make ?clientRequestToken ?returnItemCollectionMetrics
         ?returnConsumedCapacity ~transactItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "TransactWriteItems is a synchronous write operation that groups up to 25 action requests. These actions can target items in different tables, but not in different Amazon Web Services accounts or Regions, and no two actions can target the same item. For example, you cannot both ConditionCheck and Update the same item. The aggregate size of the items in the transaction cannot exceed 4 MB. The actions are completed atomically so that either all of them succeed, or all of them fail. They are defined by the following objects: Put \194\160\226\128\148 \194\160 Initiates a PutItem operation to write a new item. This structure specifies the primary key of the item to be written, the name of the table to write it in, an optional condition expression that must be satisfied for the write to succeed, a list of the item's attributes, and a field indicating whether to retrieve the item's attributes if the condition is not met. Update \194\160\226\128\148 \194\160 Initiates an UpdateItem operation to update an existing item. This structure specifies the primary key of the item to be updated, the name of the table where it resides, an optional condition expression that must be satisfied for the update to succeed, an expression that defines one or more attributes to be updated, and a field indicating whether to retrieve the item's attributes if the condition is not met. Delete \194\160\226\128\148 \194\160 Initiates a DeleteItem operation to delete an existing item. This structure specifies the primary key of the item to be deleted, the name of the table where it resides, an optional condition expression that must be satisfied for the deletion to succeed, and a field indicating whether to retrieve the item's attributes if the condition is not met. ConditionCheck \194\160\226\128\148 \194\160 Applies a condition to an item that is not being modified by the transaction. This structure specifies the primary key of the item to be checked, the name of the table where it resides, a condition expression that must be satisfied for the transaction to succeed, and a field indicating whether to retrieve the item's attributes if the condition is not met. DynamoDB rejects the entire TransactWriteItems request if any of the following is true: A condition in one of the condition expressions is not met. An ongoing operation is in the process of updating the same item. There is insufficient provisioned capacity for the transaction to be completed. An item size becomes too large (bigger than 400 KB), a local secondary index (LSI) becomes too large, or a similar validation error occurs because of changes made by the transaction. The aggregate size of the items in the transaction exceeds 4 MB. There is a user error, such as an invalid data format."]
+       "TransactWriteItems is a synchronous write operation that groups up to 100 action requests. These actions can target items in different tables, but not in different Amazon Web Services accounts or Regions, and no two actions can target the same item. For example, you cannot both ConditionCheck and Update the same item. The aggregate size of the items in the transaction cannot exceed 4 MB. The actions are completed atomically so that either all of them succeed, or all of them fail. They are defined by the following objects: Put \194\160\226\128\148 \194\160 Initiates a PutItem operation to write a new item. This structure specifies the primary key of the item to be written, the name of the table to write it in, an optional condition expression that must be satisfied for the write to succeed, a list of the item's attributes, and a field indicating whether to retrieve the item's attributes if the condition is not met. Update \194\160\226\128\148 \194\160 Initiates an UpdateItem operation to update an existing item. This structure specifies the primary key of the item to be updated, the name of the table where it resides, an optional condition expression that must be satisfied for the update to succeed, an expression that defines one or more attributes to be updated, and a field indicating whether to retrieve the item's attributes if the condition is not met. Delete \194\160\226\128\148 \194\160 Initiates a DeleteItem operation to delete an existing item. This structure specifies the primary key of the item to be deleted, the name of the table where it resides, an optional condition expression that must be satisfied for the deletion to succeed, and a field indicating whether to retrieve the item's attributes if the condition is not met. ConditionCheck \194\160\226\128\148 \194\160 Applies a condition to an item that is not being modified by the transaction. This structure specifies the primary key of the item to be checked, the name of the table where it resides, a condition expression that must be satisfied for the transaction to succeed, and a field indicating whether to retrieve the item's attributes if the condition is not met. DynamoDB rejects the entire TransactWriteItems request if any of the following is true: A condition in one of the condition expressions is not met. An ongoing operation is in the process of updating the same item. There is insufficient provisioned capacity for the transaction to be completed. An item size becomes too large (bigger than 400 KB), a local secondary index (LSI) becomes too large, or a similar validation error occurs because of changes made by the transaction. The aggregate size of the items in the transaction exceeds 4 MB. There is a user error, such as an invalid data format."]
 module TransactWriteItemsOutput =
   struct
     type nonrec t =
@@ -16331,6 +20110,7 @@ module TransactWriteItemsOutput =
           ProvisionedThroughputExceededException.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TransactionCanceledException of TransactionCanceledException.t 
       | `TransactionInProgressException of TransactionInProgressException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -16351,6 +20131,8 @@ module TransactWriteItemsOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TransactionCanceledException" ->
           `TransactionCanceledException
             (TransactionCanceledException.of_json json)
@@ -16374,6 +20156,8 @@ module TransactWriteItemsOutput =
           `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TransactionCanceledException" ->
           `TransactionCanceledException
             (TransactionCanceledException.of_xml xml)
@@ -16404,6 +20188,10 @@ module TransactWriteItemsOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TransactionCanceledException e ->
           `Assoc
             [("error", (`String "TransactionCanceledException"));
@@ -16435,16 +20223,16 @@ module TransactWriteItemsOutput =
           (Xml.child xml_arg0 "ConsumedCapacity") in
       make ?itemCollectionMetrics ?consumedCapacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let itemCollectionMetrics =
-        field_map json "ItemCollectionMetrics"
+        field_map json__ "ItemCollectionMetrics"
           ItemCollectionMetricsPerTable.of_json in
       let consumedCapacity =
-        field_map json "ConsumedCapacity" ConsumedCapacityMultiple.of_json in
+        field_map json__ "ConsumedCapacity" ConsumedCapacityMultiple.of_json in
       make ?itemCollectionMetrics ?consumedCapacity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "TransactWriteItems is a synchronous write operation that groups up to 25 action requests. These actions can target items in different tables, but not in different Amazon Web Services accounts or Regions, and no two actions can target the same item. For example, you cannot both ConditionCheck and Update the same item. The aggregate size of the items in the transaction cannot exceed 4 MB. The actions are completed atomically so that either all of them succeed, or all of them fail. They are defined by the following objects: Put \194\160\226\128\148 \194\160 Initiates a PutItem operation to write a new item. This structure specifies the primary key of the item to be written, the name of the table to write it in, an optional condition expression that must be satisfied for the write to succeed, a list of the item's attributes, and a field indicating whether to retrieve the item's attributes if the condition is not met. Update \194\160\226\128\148 \194\160 Initiates an UpdateItem operation to update an existing item. This structure specifies the primary key of the item to be updated, the name of the table where it resides, an optional condition expression that must be satisfied for the update to succeed, an expression that defines one or more attributes to be updated, and a field indicating whether to retrieve the item's attributes if the condition is not met. Delete \194\160\226\128\148 \194\160 Initiates a DeleteItem operation to delete an existing item. This structure specifies the primary key of the item to be deleted, the name of the table where it resides, an optional condition expression that must be satisfied for the deletion to succeed, and a field indicating whether to retrieve the item's attributes if the condition is not met. ConditionCheck \194\160\226\128\148 \194\160 Applies a condition to an item that is not being modified by the transaction. This structure specifies the primary key of the item to be checked, the name of the table where it resides, a condition expression that must be satisfied for the transaction to succeed, and a field indicating whether to retrieve the item's attributes if the condition is not met. DynamoDB rejects the entire TransactWriteItems request if any of the following is true: A condition in one of the condition expressions is not met. An ongoing operation is in the process of updating the same item. There is insufficient provisioned capacity for the transaction to be completed. An item size becomes too large (bigger than 400 KB), a local secondary index (LSI) becomes too large, or a similar validation error occurs because of changes made by the transaction. The aggregate size of the items in the transaction exceeds 4 MB. There is a user error, such as an invalid data format."]
+       "TransactWriteItems is a synchronous write operation that groups up to 100 action requests. These actions can target items in different tables, but not in different Amazon Web Services accounts or Regions, and no two actions can target the same item. For example, you cannot both ConditionCheck and Update the same item. The aggregate size of the items in the transaction cannot exceed 4 MB. The actions are completed atomically so that either all of them succeed, or all of them fail. They are defined by the following objects: Put \194\160\226\128\148 \194\160 Initiates a PutItem operation to write a new item. This structure specifies the primary key of the item to be written, the name of the table to write it in, an optional condition expression that must be satisfied for the write to succeed, a list of the item's attributes, and a field indicating whether to retrieve the item's attributes if the condition is not met. Update \194\160\226\128\148 \194\160 Initiates an UpdateItem operation to update an existing item. This structure specifies the primary key of the item to be updated, the name of the table where it resides, an optional condition expression that must be satisfied for the update to succeed, an expression that defines one or more attributes to be updated, and a field indicating whether to retrieve the item's attributes if the condition is not met. Delete \194\160\226\128\148 \194\160 Initiates a DeleteItem operation to delete an existing item. This structure specifies the primary key of the item to be deleted, the name of the table where it resides, an optional condition expression that must be satisfied for the deletion to succeed, and a field indicating whether to retrieve the item's attributes if the condition is not met. ConditionCheck \194\160\226\128\148 \194\160 Applies a condition to an item that is not being modified by the transaction. This structure specifies the primary key of the item to be checked, the name of the table where it resides, a condition expression that must be satisfied for the transaction to succeed, and a field indicating whether to retrieve the item's attributes if the condition is not met. DynamoDB rejects the entire TransactWriteItems request if any of the following is true: A condition in one of the condition expressions is not met. An ongoing operation is in the process of updating the same item. There is insufficient provisioned capacity for the transaction to be completed. An item size becomes too large (bigger than 400 KB), a local secondary index (LSI) becomes too large, or a similar validation error occurs because of changes made by the transaction. The aggregate size of the items in the transaction exceeds 4 MB. There is a user error, such as an invalid data format."]
 module UntagResourceInput =
   struct
     type nonrec t =
@@ -16472,19 +20260,21 @@ module UntagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" ResourceArnString.of_json in
+        field_map_exn json__ "ResourceArn" ResourceArnString.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the association of tags from an Amazon DynamoDB resource. You can call UntagResource up to five times per second, per account. For an overview on tagging DynamoDB resources, see Tagging for DynamoDB in the Amazon DynamoDB Developer Guide."]
+       "Removes the association of tags from an Amazon DynamoDB resource. You can call UntagResource up to five times per second, per account. UntagResource is an asynchronous operation. If you issue a ListTagsOfResource request immediately after an UntagResource request, DynamoDB might return your previous tag set, if there was one, or an empty tag set. This is because ListTagsOfResource uses an eventually consistent query, and the metadata for your tags or table might not be available at that moment. Wait for a few seconds, and then try the ListTagsOfResource request again. The application or removal of tags using TagResource and UntagResource APIs is eventually consistent. ListTagsOfResource API will only reflect the changes after a few seconds. For an overview on tagging DynamoDB resources, see Tagging for DynamoDB in the Amazon DynamoDB Developer Guide."]
 module UpdateContinuousBackupsInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t [@ocaml.doc "The name of the table."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       pointInTimeRecoverySpecification: PointInTimeRecoverySpecification.t
         [@ocaml.doc
           "Represents the settings used to enable point in time recovery."]}
@@ -16494,7 +20284,7 @@ module UpdateContinuousBackupsInput =
         fun () -> { tableName; pointInTimeRecoverySpecification }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)));
+        [("TableName", (Some (TableArn.to_value x.tableName)));
         ("PointInTimeRecoverySpecification",
           (Some
              (PointInTimeRecoverySpecification.to_value
@@ -16506,19 +20296,19 @@ module UpdateContinuousBackupsInput =
           (Xml.child_exn ~context:context_ xml_arg0
              "PointInTimeRecoverySpecification") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ~pointInTimeRecoverySpecification ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pointInTimeRecoverySpecification =
-        field_map_exn json "PointInTimeRecoverySpecification"
+        field_map_exn json__ "PointInTimeRecoverySpecification"
           PointInTimeRecoverySpecification.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       make ~pointInTimeRecoverySpecification ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "UpdateContinuousBackups enables or disables point in time recovery for the specified table. A successful UpdateContinuousBackups call returns the current ContinuousBackupsDescription. Continuous backups are ENABLED on all tables at table creation. If point in time recovery is enabled, PointInTimeRecoveryStatus will be set to ENABLED. Once continuous backups and point in time recovery are enabled, you can restore to any point in time within EarliestRestorableDateTime and LatestRestorableDateTime. LatestRestorableDateTime is typically 5 minutes before the current time. You can restore your table to any point in time during the last 35 days."]
+       "UpdateContinuousBackups enables or disables point in time recovery for the specified table. A successful UpdateContinuousBackups call returns the current ContinuousBackupsDescription. Continuous backups are ENABLED on all tables at table creation. If point in time recovery is enabled, PointInTimeRecoveryStatus will be set to ENABLED. Once continuous backups and point in time recovery are enabled, you can restore to any point in time within EarliestRestorableDateTime and LatestRestorableDateTime. LatestRestorableDateTime is typically 5 minutes before the current time. You can restore your table to any point in time in the last 35 days. You can set the RecoveryPeriodInDays to any value between 1 and 35 days."]
 module UpdateContinuousBackupsOutput =
   struct
     type nonrec t =
@@ -16589,37 +20379,55 @@ module UpdateContinuousBackupsOutput =
           (Xml.child xml_arg0 "ContinuousBackupsDescription") in
       make ?continuousBackupsDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let continuousBackupsDescription =
-        field_map json "ContinuousBackupsDescription"
+        field_map json__ "ContinuousBackupsDescription"
           ContinuousBackupsDescription.of_json in
       make ?continuousBackupsDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "UpdateContinuousBackups enables or disables point in time recovery for the specified table. A successful UpdateContinuousBackups call returns the current ContinuousBackupsDescription. Continuous backups are ENABLED on all tables at table creation. If point in time recovery is enabled, PointInTimeRecoveryStatus will be set to ENABLED. Once continuous backups and point in time recovery are enabled, you can restore to any point in time within EarliestRestorableDateTime and LatestRestorableDateTime. LatestRestorableDateTime is typically 5 minutes before the current time. You can restore your table to any point in time during the last 35 days."]
+       "UpdateContinuousBackups enables or disables point in time recovery for the specified table. A successful UpdateContinuousBackups call returns the current ContinuousBackupsDescription. Continuous backups are ENABLED on all tables at table creation. If point in time recovery is enabled, PointInTimeRecoveryStatus will be set to ENABLED. Once continuous backups and point in time recovery are enabled, you can restore to any point in time within EarliestRestorableDateTime and LatestRestorableDateTime. LatestRestorableDateTime is typically 5 minutes before the current time. You can restore your table to any point in time in the last 35 days. You can set the RecoveryPeriodInDays to any value between 1 and 35 days."]
 module UpdateContributorInsightsInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t [@ocaml.doc "The name of the table."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       indexName: IndexName.t option
         [@ocaml.doc "The global secondary index name, if applicable."];
       contributorInsightsAction: ContributorInsightsAction.t
-        [@ocaml.doc "Represents the contributor insights action."]}
+        [@ocaml.doc "Represents the contributor insights action."];
+      contributorInsightsMode: ContributorInsightsMode.t option
+        [@ocaml.doc
+          "Specifies whether to track all access and throttled events or throttled events only for the DynamoDB table or index."]}
     let context_ = "UpdateContributorInsightsInput"
     let make ?indexName =
-      fun ~tableName ->
-        fun ~contributorInsightsAction ->
-          fun () -> { indexName; tableName; contributorInsightsAction }
+      fun ?contributorInsightsMode ->
+        fun ~tableName ->
+          fun ~contributorInsightsAction ->
+            fun () ->
+              {
+                indexName;
+                contributorInsightsMode;
+                tableName;
+                contributorInsightsAction
+              }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)));
+        [("TableName", (Some (TableArn.to_value x.tableName)));
         ("IndexName", (Option.map x.indexName ~f:IndexName.to_value));
         ("ContributorInsightsAction",
           (Some
-             (ContributorInsightsAction.to_value x.contributorInsightsAction)))]
+             (ContributorInsightsAction.to_value x.contributorInsightsAction)));
+        ("ContributorInsightsMode",
+          (Option.map x.contributorInsightsMode
+             ~f:ContributorInsightsMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let contributorInsightsMode =
+        (Option.map ~f:ContributorInsightsMode.of_xml)
+          (Xml.child xml_arg0 "ContributorInsightsMode") in
       let contributorInsightsAction =
         ContributorInsightsAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
@@ -16627,17 +20435,22 @@ module UpdateContributorInsightsInput =
       let indexName =
         (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
-      make ~contributorInsightsAction ?indexName ~tableName ()
+      make ?contributorInsightsMode ~contributorInsightsAction ?indexName
+        ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let contributorInsightsMode =
+        field_map json__ "ContributorInsightsMode"
+          ContributorInsightsMode.of_json in
       let contributorInsightsAction =
-        field_map_exn json "ContributorInsightsAction"
+        field_map_exn json__ "ContributorInsightsAction"
           ContributorInsightsAction.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
-      make ~contributorInsightsAction ?indexName ~tableName ()
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
+      make ?contributorInsightsMode ~contributorInsightsAction ?indexName
+        ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the status for contributor insights for a specific table or index. CloudWatch Contributor Insights for DynamoDB graphs display the partition key and (if applicable) sort key of frequently accessed items and frequently throttled items in plaintext. If you require the use of Amazon Web Services Key Management Service (KMS) to encrypt this table\226\128\153s partition key and sort key data with an Amazon Web Services managed key or customer managed key, you should not enable CloudWatch Contributor Insights for DynamoDB for this table."]
@@ -16649,7 +20462,10 @@ module UpdateContributorInsightsOutput =
       indexName: IndexName.t option
         [@ocaml.doc "The name of the global secondary index, if applicable."];
       contributorInsightsStatus: ContributorInsightsStatus.t option
-        [@ocaml.doc "The status of contributor insights"]}
+        [@ocaml.doc "The status of contributor insights"];
+      contributorInsightsMode: ContributorInsightsMode.t option
+        [@ocaml.doc
+          "The updated mode of CloudWatch Contributor Insights that determines whether to monitor all access and throttled events or to track throttled events exclusively."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -16657,7 +20473,14 @@ module UpdateContributorInsightsOutput =
     let make ?tableName =
       fun ?indexName ->
         fun ?contributorInsightsStatus ->
-          fun () -> { tableName; indexName; contributorInsightsStatus }
+          fun ?contributorInsightsMode ->
+            fun () ->
+              {
+                tableName;
+                indexName;
+                contributorInsightsStatus;
+                contributorInsightsMode
+              }
     let error_of_json name json =
       match name with
       | "InternalServerError" ->
@@ -16696,9 +20519,15 @@ module UpdateContributorInsightsOutput =
         ("IndexName", (Option.map x.indexName ~f:IndexName.to_value));
         ("ContributorInsightsStatus",
           (Option.map x.contributorInsightsStatus
-             ~f:ContributorInsightsStatus.to_value))]
+             ~f:ContributorInsightsStatus.to_value));
+        ("ContributorInsightsMode",
+          (Option.map x.contributorInsightsMode
+             ~f:ContributorInsightsMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let contributorInsightsMode =
+        (Option.map ~f:ContributorInsightsMode.of_xml)
+          (Xml.child xml_arg0 "ContributorInsightsMode") in
       let contributorInsightsStatus =
         (Option.map ~f:ContributorInsightsStatus.of_xml)
           (Xml.child xml_arg0 "ContributorInsightsStatus") in
@@ -16706,15 +20535,20 @@ module UpdateContributorInsightsOutput =
         (Option.map ~f:IndexName.of_xml) (Xml.child xml_arg0 "IndexName") in
       let tableName =
         (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "TableName") in
-      make ?contributorInsightsStatus ?indexName ?tableName ()
+      make ?contributorInsightsMode ?contributorInsightsStatus ?indexName
+        ?tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let contributorInsightsMode =
+        field_map json__ "ContributorInsightsMode"
+          ContributorInsightsMode.of_json in
       let contributorInsightsStatus =
-        field_map json "ContributorInsightsStatus"
+        field_map json__ "ContributorInsightsStatus"
           ContributorInsightsStatus.of_json in
-      let indexName = field_map json "IndexName" IndexName.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
-      make ?contributorInsightsStatus ?indexName ?tableName ()
+      let indexName = field_map json__ "IndexName" IndexName.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
+      make ?contributorInsightsMode ?contributorInsightsStatus ?indexName
+        ?tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the status for contributor insights for a specific table or index. CloudWatch Contributor Insights for DynamoDB graphs display the partition key and (if applicable) sort key of frequently accessed items and frequently throttled items in plaintext. If you require the use of Amazon Web Services Key Management Service (KMS) to encrypt this table\226\128\153s partition key and sort key data with an Amazon Web Services managed key or customer managed key, you should not enable CloudWatch Contributor Insights for DynamoDB for this table."]
@@ -16744,15 +20578,15 @@ module UpdateGlobalTableInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GlobalTableName") in
       make ~replicaUpdates ~globalTableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicaUpdates =
-        field_map_exn json "ReplicaUpdates" ReplicaUpdateList.of_json in
+        field_map_exn json__ "ReplicaUpdates" ReplicaUpdateList.of_json in
       let globalTableName =
-        field_map_exn json "GlobalTableName" TableName.of_json in
+        field_map_exn json__ "GlobalTableName" TableName.of_json in
       make ~replicaUpdates ~globalTableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or removes replicas in the specified global table. The global table must already exist to be able to use this operation. Any replica to be added must be empty, have the same name as the global table, have the same key schema, have DynamoDB Streams enabled, and have the same provisioned and maximum write capacity units. Although you can use UpdateGlobalTable to add replicas and remove replicas in a single request, for simplicity we recommend that you issue separate requests for adding or removing replicas. If global secondary indexes are specified, then the following conditions must also be met: The global secondary indexes must have the same name. The global secondary indexes must have the same hash key and sort key (if present). The global secondary indexes must have the same provisioned and maximum write capacity units."]
+       "Adds or removes replicas in the specified global table. The global table must already exist to be able to use this operation. Any replica to be added must be empty, have the same name as the global table, have the same key schema, have DynamoDB Streams enabled, and have the same provisioned and maximum write capacity units. This documentation is for version 2017.11.29 (Legacy) of global tables, which should be avoided for new global tables. Customers should use Global Tables version 2019.11.21 (Current) when possible, because it provides greater flexibility, higher efficiency, and consumes less write capacity than 2017.11.29 (Legacy). To determine which version you're using, see Determining the global table version you are using. To update existing global tables from version 2017.11.29 (Legacy) to version 2019.11.21 (Current), see Upgrading global tables. If you are using global tables Version 2019.11.21 (Current) you can use UpdateTable instead. Although you can use UpdateGlobalTable to add replicas and remove replicas in a single request, for simplicity we recommend that you issue separate requests for adding or removing replicas. If global secondary indexes are specified, then the following conditions must also be met: The global secondary indexes must have the same name. The global secondary indexes must have the same hash key and sort key (if present). The global secondary indexes must have the same provisioned and maximum write capacity units."]
 module UpdateGlobalTableOutput =
   struct
     type nonrec t =
@@ -16839,14 +20673,14 @@ module UpdateGlobalTableOutput =
           (Xml.child xml_arg0 "GlobalTableDescription") in
       make ?globalTableDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalTableDescription =
-        field_map json "GlobalTableDescription"
+        field_map json__ "GlobalTableDescription"
           GlobalTableDescription.of_json in
       make ?globalTableDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or removes replicas in the specified global table. The global table must already exist to be able to use this operation. Any replica to be added must be empty, have the same name as the global table, have the same key schema, have DynamoDB Streams enabled, and have the same provisioned and maximum write capacity units. Although you can use UpdateGlobalTable to add replicas and remove replicas in a single request, for simplicity we recommend that you issue separate requests for adding or removing replicas. If global secondary indexes are specified, then the following conditions must also be met: The global secondary indexes must have the same name. The global secondary indexes must have the same hash key and sort key (if present). The global secondary indexes must have the same provisioned and maximum write capacity units."]
+       "Adds or removes replicas in the specified global table. The global table must already exist to be able to use this operation. Any replica to be added must be empty, have the same name as the global table, have the same key schema, have DynamoDB Streams enabled, and have the same provisioned and maximum write capacity units. This documentation is for version 2017.11.29 (Legacy) of global tables, which should be avoided for new global tables. Customers should use Global Tables version 2019.11.21 (Current) when possible, because it provides greater flexibility, higher efficiency, and consumes less write capacity than 2017.11.29 (Legacy). To determine which version you're using, see Determining the global table version you are using. To update existing global tables from version 2017.11.29 (Legacy) to version 2019.11.21 (Current), see Upgrading global tables. If you are using global tables Version 2019.11.21 (Current) you can use UpdateTable instead. Although you can use UpdateGlobalTable to add replicas and remove replicas in a single request, for simplicity we recommend that you issue separate requests for adding or removing replicas. If global secondary indexes are specified, then the following conditions must also be met: The global secondary indexes must have the same name. The global secondary indexes must have the same hash key and sort key (if present). The global secondary indexes must have the same provisioned and maximum write capacity units."]
 module UpdateGlobalTableSettingsInput =
   struct
     type nonrec t =
@@ -16855,7 +20689,7 @@ module UpdateGlobalTableSettingsInput =
         [@ocaml.doc "The name of the global table"];
       globalTableBillingMode: BillingMode.t option
         [@ocaml.doc
-          "The billing mode of the global table. If GlobalTableBillingMode is not specified, the global table defaults to PROVISIONED capacity billing mode. PROVISIONED - We recommend using PROVISIONED for predictable workloads. PROVISIONED sets the billing mode to Provisioned Mode. PAY_PER_REQUEST - We recommend using PAY_PER_REQUEST for unpredictable workloads. PAY_PER_REQUEST sets the billing mode to On-Demand Mode."];
+          "The billing mode of the global table. If GlobalTableBillingMode is not specified, the global table defaults to PROVISIONED capacity billing mode. PROVISIONED - We recommend using PROVISIONED for predictable workloads. PROVISIONED sets the billing mode to Provisioned capacity mode. PAY_PER_REQUEST - We recommend using PAY_PER_REQUEST for unpredictable workloads. PAY_PER_REQUEST sets the billing mode to On-demand capacity mode."];
       globalTableProvisionedWriteCapacityUnits: PositiveLongObject.t option
         [@ocaml.doc
           "The maximum number of writes consumed per second before DynamoDB returns a ThrottlingException."];
@@ -16932,31 +20766,32 @@ module UpdateGlobalTableSettingsInput =
         ?globalTableProvisionedWriteCapacityUnits ?globalTableBillingMode
         ~globalTableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicaSettingsUpdate =
-        field_map json "ReplicaSettingsUpdate"
+        field_map json__ "ReplicaSettingsUpdate"
           ReplicaSettingsUpdateList.of_json in
       let globalTableGlobalSecondaryIndexSettingsUpdate =
-        field_map json "GlobalTableGlobalSecondaryIndexSettingsUpdate"
+        field_map json__ "GlobalTableGlobalSecondaryIndexSettingsUpdate"
           GlobalTableGlobalSecondaryIndexSettingsUpdateList.of_json in
       let globalTableProvisionedWriteCapacityAutoScalingSettingsUpdate =
-        field_map json
+        field_map json__
           "GlobalTableProvisionedWriteCapacityAutoScalingSettingsUpdate"
           AutoScalingSettingsUpdate.of_json in
       let globalTableProvisionedWriteCapacityUnits =
-        field_map json "GlobalTableProvisionedWriteCapacityUnits"
+        field_map json__ "GlobalTableProvisionedWriteCapacityUnits"
           PositiveLongObject.of_json in
       let globalTableBillingMode =
-        field_map json "GlobalTableBillingMode" BillingMode.of_json in
+        field_map json__ "GlobalTableBillingMode" BillingMode.of_json in
       let globalTableName =
-        field_map_exn json "GlobalTableName" TableName.of_json in
+        field_map_exn json__ "GlobalTableName" TableName.of_json in
       make ?replicaSettingsUpdate
         ?globalTableGlobalSecondaryIndexSettingsUpdate
         ?globalTableProvisionedWriteCapacityAutoScalingSettingsUpdate
         ?globalTableProvisionedWriteCapacityUnits ?globalTableBillingMode
         ~globalTableName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates settings for a global table."]
+  end[@@ocaml.doc
+       "Updates settings for a global table. This documentation is for version 2017.11.29 (Legacy) of global tables, which should be avoided for new global tables. Customers should use Global Tables version 2019.11.21 (Current) when possible, because it provides greater flexibility, higher efficiency, and consumes less write capacity than 2017.11.29 (Legacy). To determine which version you're using, see Determining the global table version you are using. To update existing global tables from version 2017.11.29 (Legacy) to version 2019.11.21 (Current), see Upgrading global tables."]
 module UpdateGlobalTableSettingsOutput =
   struct
     type nonrec t =
@@ -17058,21 +20893,23 @@ module UpdateGlobalTableSettingsOutput =
           (Xml.child xml_arg0 "GlobalTableName") in
       make ?replicaSettings ?globalTableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicaSettings =
-        field_map json "ReplicaSettings"
+        field_map json__ "ReplicaSettings"
           ReplicaSettingsDescriptionList.of_json in
       let globalTableName =
-        field_map json "GlobalTableName" TableName.of_json in
+        field_map json__ "GlobalTableName" TableName.of_json in
       make ?replicaSettings ?globalTableName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates settings for a global table."]
+  end[@@ocaml.doc
+       "Updates settings for a global table. This documentation is for version 2017.11.29 (Legacy) of global tables, which should be avoided for new global tables. Customers should use Global Tables version 2019.11.21 (Current) when possible, because it provides greater flexibility, higher efficiency, and consumes less write capacity than 2017.11.29 (Legacy). To determine which version you're using, see Determining the global table version you are using. To update existing global tables from version 2017.11.29 (Legacy) to version 2019.11.21 (Current), see Upgrading global tables."]
 module UpdateItemInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t
-        [@ocaml.doc "The name of the table containing the item to update."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table containing the item to update. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       key: Key.t
         [@ocaml.doc
           "The primary key of the item to be updated. Each element consists of an attribute name and a value for that attribute. For the primary key, you must provide all of the attributes. For example, with a simple primary key, you only need to provide a value for the partition key. For a composite primary key, you must provide values for both the partition key and the sort key."];
@@ -17087,14 +20924,14 @@ module UpdateItemInput =
           "This is a legacy parameter. Use ConditionExpression instead. For more information, see ConditionalOperator in the Amazon DynamoDB Developer Guide."];
       returnValues: ReturnValue.t option
         [@ocaml.doc
-          "Use ReturnValues if you want to get the item attributes as they appear before or after they are updated. For UpdateItem, the valid values are: NONE - If ReturnValues is not specified, or if its value is NONE, then nothing is returned. (This setting is the default for ReturnValues.) ALL_OLD - Returns all of the attributes of the item, as they appeared before the UpdateItem operation. UPDATED_OLD - Returns only the updated attributes, as they appeared before the UpdateItem operation. ALL_NEW - Returns all of the attributes of the item, as they appear after the UpdateItem operation. UPDATED_NEW - Returns only the updated attributes, as they appear after the UpdateItem operation. There is no additional cost associated with requesting a return value aside from the small network and processing overhead of receiving a larger response. No read capacity units are consumed. The values returned are strongly consistent."];
+          "Use ReturnValues if you want to get the item attributes as they appear before or after they are successfully updated. For UpdateItem, the valid values are: NONE - If ReturnValues is not specified, or if its value is NONE, then nothing is returned. (This setting is the default for ReturnValues.) ALL_OLD - Returns all of the attributes of the item, as they appeared before the UpdateItem operation. UPDATED_OLD - Returns only the updated attributes, as they appeared before the UpdateItem operation. ALL_NEW - Returns all of the attributes of the item, as they appear after the UpdateItem operation. UPDATED_NEW - Returns only the updated attributes, as they appear after the UpdateItem operation. There is no additional cost associated with requesting a return value aside from the small network and processing overhead of receiving a larger response. No read capacity units are consumed. The values returned are strongly consistent."];
       returnConsumedCapacity: ReturnConsumedCapacity.t option ;
       returnItemCollectionMetrics: ReturnItemCollectionMetrics.t option
         [@ocaml.doc
           "Determines whether item collection metrics are returned. If set to SIZE, the response includes statistics about item collections, if any, that were modified during the operation are returned in the response. If set to NONE (the default), no statistics are returned."];
       updateExpression: UpdateExpression.t option
         [@ocaml.doc
-          "An expression that defines one or more attributes to be updated, the action to be performed on them, and new values for them. The following action values are available for UpdateExpression. SET - Adds one or more attributes and values to an item. If any of these attributes already exist, they are replaced by the new values. You can also use SET to add or subtract from an attribute that is of type Number. For example: SET myNum = myNum + :val SET supports the following functions: if_not_exists (path, operand) - if the item does not contain an attribute at the specified path, then if_not_exists evaluates to operand; otherwise, it evaluates to path. You can use this function to avoid overwriting an attribute that may already be present in the item. list_append (operand, operand) - evaluates to a list with a new element added to it. You can append the new element to the start or the end of the list by reversing the order of the operands. These function names are case-sensitive. REMOVE - Removes one or more attributes from an item. ADD - Adds the specified value to the item, if the attribute does not already exist. If the attribute does exist, then the behavior of ADD depends on the data type of the attribute: If the existing attribute is a number, and if Value is also a number, then Value is mathematically added to the existing attribute. If Value is a negative number, then it is subtracted from the existing attribute. If you use ADD to increment or decrement a number value for an item that doesn't exist before the update, DynamoDB uses 0 as the initial value. Similarly, if you use ADD for an existing item to increment or decrement an attribute value that doesn't exist before the update, DynamoDB uses 0 as the initial value. For example, suppose that the item you want to update doesn't have an attribute named itemcount, but you decide to ADD the number 3 to this attribute anyway. DynamoDB will create the itemcount attribute, set its initial value to 0, and finally add 3 to it. The result will be a new itemcount attribute in the item, with a value of 3. If the existing data type is a set and if Value is also a set, then Value is added to the existing set. For example, if the attribute value is the set \\[1,2\\], and the ADD action specified \\[3\\], then the final attribute value is \\[1,2,3\\]. An error occurs if an ADD action is specified for a set attribute and the attribute type specified does not match the existing set type. Both sets must have the same primitive data type. For example, if the existing data type is a set of strings, the Value must also be a set of strings. The ADD action only supports Number and set data types. In addition, ADD can only be used on top-level attributes, not nested attributes. DELETE - Deletes an element from a set. If a set of values is specified, then those values are subtracted from the old set. For example, if the attribute value was the set \\[a,b,c\\] and the DELETE action specifies \\[a,c\\], then the final attribute value is \\[b\\]. Specifying an empty set is an error. The DELETE action only supports set data types. In addition, DELETE can only be used on top-level attributes, not nested attributes. You can have many actions in a single expression, such as the following: SET a=:value1, b=:value2 DELETE :value3, :value4, :value5 For more information on update expressions, see Modifying Items and Attributes in the Amazon DynamoDB Developer Guide."];
+          "An expression that defines one or more attributes to be updated, the action to be performed on them, and new values for them. The following action values are available for UpdateExpression. SET - Adds one or more attributes and values to an item. If any of these attributes already exist, they are replaced by the new values. You can also use SET to add or subtract from an attribute that is of type Number. For example: SET myNum = myNum + :val SET supports the following functions: if_not_exists (path, operand) - if the item does not contain an attribute at the specified path, then if_not_exists evaluates to operand; otherwise, it evaluates to path. You can use this function to avoid overwriting an attribute that may already be present in the item. list_append (operand, operand) - evaluates to a list with a new element added to it. You can append the new element to the start or the end of the list by reversing the order of the operands. These function names are case-sensitive. REMOVE - Removes one or more attributes from an item. ADD - Adds the specified value to the item, if the attribute does not already exist. If the attribute does exist, then the behavior of ADD depends on the data type of the attribute: If the existing attribute is a number, and if Value is also a number, then Value is mathematically added to the existing attribute. If Value is a negative number, then it is subtracted from the existing attribute. If you use ADD to increment or decrement a number value for an item that doesn't exist before the update, DynamoDB uses 0 as the initial value. Similarly, if you use ADD for an existing item to increment or decrement an attribute value that doesn't exist before the update, DynamoDB uses 0 as the initial value. For example, suppose that the item you want to update doesn't have an attribute named itemcount, but you decide to ADD the number 3 to this attribute anyway. DynamoDB will create the itemcount attribute, set its initial value to 0, and finally add 3 to it. The result will be a new itemcount attribute in the item, with a value of 3. If the existing data type is a set and if Value is also a set, then Value is added to the existing set. For example, if the attribute value is the set \\[1,2\\], and the ADD action specified \\[3\\], then the final attribute value is \\[1,2,3\\]. An error occurs if an ADD action is specified for a set attribute and the attribute type specified does not match the existing set type. Both sets must have the same primitive data type. For example, if the existing data type is a set of strings, the Value must also be a set of strings. The ADD action only supports Number and set data types. DELETE - Deletes an element from a set. If a set of values is specified, then those values are subtracted from the old set. For example, if the attribute value was the set \\[a,b,c\\] and the DELETE action specifies \\[a,c\\], then the final attribute value is \\[b\\]. Specifying an empty set is an error. The DELETE action only supports set data types. You can have many actions in a single expression, such as the following: SET a=:value1, b=:value2 DELETE :value3, :value4, :value5 For more information on update expressions, see Modifying Items and Attributes in the Amazon DynamoDB Developer Guide."];
       conditionExpression: ConditionExpression.t option
         [@ocaml.doc
           "A condition that must be satisfied in order for a conditional update to succeed. An expression can contain any of the following: Functions: attribute_exists | attribute_not_exists | attribute_type | contains | begins_with | size These function names are case-sensitive. Comparison operators: = | <> | < | > | <= | >= | BETWEEN | IN Logical operators: AND | OR | NOT For more information about condition expressions, see Specifying Conditions in the Amazon DynamoDB Developer Guide."];
@@ -17103,7 +20940,11 @@ module UpdateItemInput =
           "One or more substitution tokens for attribute names in an expression. The following are some use cases for using ExpressionAttributeNames: To access an attribute whose name conflicts with a DynamoDB reserved word. To create a placeholder for repeating occurrences of an attribute name in an expression. To prevent special characters in an attribute name from being misinterpreted in an expression. Use the # character in an expression to dereference an attribute name. For example, consider the following attribute name: Percentile The name of this attribute conflicts with a reserved word, so it cannot be used directly in an expression. (For the complete list of reserved words, see Reserved Words in the Amazon DynamoDB Developer Guide.) To work around this, you could specify the following for ExpressionAttributeNames: \\{\"#P\":\"Percentile\"\\} You could then use this substitution in an expression, as in this example: #P = :val Tokens that begin with the : character are expression attribute values, which are placeholders for the actual value at runtime. For more information about expression attribute names, see Specifying Item Attributes in the Amazon DynamoDB Developer Guide."];
       expressionAttributeValues: ExpressionAttributeValueMap.t option
         [@ocaml.doc
-          "One or more values that can be substituted in an expression. Use the : (colon) character in an expression to dereference an attribute value. For example, suppose that you wanted to check whether the value of the ProductStatus attribute was one of the following: Available | Backordered | Discontinued You would first need to specify ExpressionAttributeValues as follows: \\{ \":avail\":\\{\"S\":\"Available\"\\}, \":back\":\\{\"S\":\"Backordered\"\\}, \":disc\":\\{\"S\":\"Discontinued\"\\} \\} You could then use these values in an expression, such as this: ProductStatus IN (:avail, :back, :disc) For more information on expression attribute values, see Condition Expressions in the Amazon DynamoDB Developer Guide."]}
+          "One or more values that can be substituted in an expression. Use the : (colon) character in an expression to dereference an attribute value. For example, suppose that you wanted to check whether the value of the ProductStatus attribute was one of the following: Available | Backordered | Discontinued You would first need to specify ExpressionAttributeValues as follows: \\{ \":avail\":\\{\"S\":\"Available\"\\}, \":back\":\\{\"S\":\"Backordered\"\\}, \":disc\":\\{\"S\":\"Discontinued\"\\} \\} You could then use these values in an expression, such as this: ProductStatus IN (:avail, :back, :disc) For more information on expression attribute values, see Condition Expressions in the Amazon DynamoDB Developer Guide."];
+      returnValuesOnConditionCheckFailure:
+        ReturnValuesOnConditionCheckFailure.t option
+        [@ocaml.doc
+          "An optional parameter that returns the item attributes for an UpdateItem operation that failed a condition check. There is no additional cost associated with requesting a return value aside from the small network and processing overhead of receiving a larger response. No read capacity units are consumed."]}
     let context_ = "UpdateItemInput"
     let make ?attributeUpdates =
       fun ?expected ->
@@ -17115,26 +20956,28 @@ module UpdateItemInput =
                   fun ?conditionExpression ->
                     fun ?expressionAttributeNames ->
                       fun ?expressionAttributeValues ->
-                        fun ~tableName ->
-                          fun ~key ->
-                            fun () ->
-                              {
-                                attributeUpdates;
-                                expected;
-                                conditionalOperator;
-                                returnValues;
-                                returnConsumedCapacity;
-                                returnItemCollectionMetrics;
-                                updateExpression;
-                                conditionExpression;
-                                expressionAttributeNames;
-                                expressionAttributeValues;
-                                tableName;
-                                key
-                              }
+                        fun ?returnValuesOnConditionCheckFailure ->
+                          fun ~tableName ->
+                            fun ~key ->
+                              fun () ->
+                                {
+                                  attributeUpdates;
+                                  expected;
+                                  conditionalOperator;
+                                  returnValues;
+                                  returnConsumedCapacity;
+                                  returnItemCollectionMetrics;
+                                  updateExpression;
+                                  conditionExpression;
+                                  expressionAttributeNames;
+                                  expressionAttributeValues;
+                                  returnValuesOnConditionCheckFailure;
+                                  tableName;
+                                  key
+                                }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)));
+        [("TableName", (Some (TableArn.to_value x.tableName)));
         ("Key", (Some (Key.to_value x.key)));
         ("AttributeUpdates",
           (Option.map x.attributeUpdates ~f:AttributeUpdates.to_value));
@@ -17158,9 +21001,15 @@ module UpdateItemInput =
              ~f:ExpressionAttributeNameMap.to_value));
         ("ExpressionAttributeValues",
           (Option.map x.expressionAttributeValues
-             ~f:ExpressionAttributeValueMap.to_value))]
+             ~f:ExpressionAttributeValueMap.to_value));
+        ("ReturnValuesOnConditionCheckFailure",
+          (Option.map x.returnValuesOnConditionCheckFailure
+             ~f:ReturnValuesOnConditionCheckFailure.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let returnValuesOnConditionCheckFailure =
+        (Option.map ~f:ReturnValuesOnConditionCheckFailure.of_xml)
+          (Xml.child xml_arg0 "ReturnValuesOnConditionCheckFailure") in
       let expressionAttributeValues =
         (Option.map ~f:ExpressionAttributeValueMap.of_xml)
           (Xml.child xml_arg0 "ExpressionAttributeValues") in
@@ -17193,42 +21042,45 @@ module UpdateItemInput =
           (Xml.child xml_arg0 "AttributeUpdates") in
       let key = Key.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
-      make ?expressionAttributeValues ?expressionAttributeNames
-        ?conditionExpression ?updateExpression ?returnItemCollectionMetrics
-        ?returnConsumedCapacity ?returnValues ?conditionalOperator ?expected
-        ?attributeUpdates ~key ~tableName ()
+      make ?returnValuesOnConditionCheckFailure ?expressionAttributeValues
+        ?expressionAttributeNames ?conditionExpression ?updateExpression
+        ?returnItemCollectionMetrics ?returnConsumedCapacity ?returnValues
+        ?conditionalOperator ?expected ?attributeUpdates ~key ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let returnValuesOnConditionCheckFailure =
+        field_map json__ "ReturnValuesOnConditionCheckFailure"
+          ReturnValuesOnConditionCheckFailure.of_json in
       let expressionAttributeValues =
-        field_map json "ExpressionAttributeValues"
+        field_map json__ "ExpressionAttributeValues"
           ExpressionAttributeValueMap.of_json in
       let expressionAttributeNames =
-        field_map json "ExpressionAttributeNames"
+        field_map json__ "ExpressionAttributeNames"
           ExpressionAttributeNameMap.of_json in
       let conditionExpression =
-        field_map json "ConditionExpression" ConditionExpression.of_json in
+        field_map json__ "ConditionExpression" ConditionExpression.of_json in
       let updateExpression =
-        field_map json "UpdateExpression" UpdateExpression.of_json in
+        field_map json__ "UpdateExpression" UpdateExpression.of_json in
       let returnItemCollectionMetrics =
-        field_map json "ReturnItemCollectionMetrics"
+        field_map json__ "ReturnItemCollectionMetrics"
           ReturnItemCollectionMetrics.of_json in
       let returnConsumedCapacity =
-        field_map json "ReturnConsumedCapacity"
+        field_map json__ "ReturnConsumedCapacity"
           ReturnConsumedCapacity.of_json in
-      let returnValues = field_map json "ReturnValues" ReturnValue.of_json in
+      let returnValues = field_map json__ "ReturnValues" ReturnValue.of_json in
       let conditionalOperator =
-        field_map json "ConditionalOperator" ConditionalOperator.of_json in
-      let expected = field_map json "Expected" ExpectedAttributeMap.of_json in
+        field_map json__ "ConditionalOperator" ConditionalOperator.of_json in
+      let expected = field_map json__ "Expected" ExpectedAttributeMap.of_json in
       let attributeUpdates =
-        field_map json "AttributeUpdates" AttributeUpdates.of_json in
-      let key = field_map_exn json "Key" Key.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
-      make ?expressionAttributeValues ?expressionAttributeNames
-        ?conditionExpression ?updateExpression ?returnItemCollectionMetrics
-        ?returnConsumedCapacity ?returnValues ?conditionalOperator ?expected
-        ?attributeUpdates ~key ~tableName ()
+        field_map json__ "AttributeUpdates" AttributeUpdates.of_json in
+      let key = field_map_exn json__ "Key" Key.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
+      make ?returnValuesOnConditionCheckFailure ?expressionAttributeValues
+        ?expressionAttributeNames ?conditionExpression ?updateExpression
+        ?returnItemCollectionMetrics ?returnConsumedCapacity ?returnValues
+        ?conditionalOperator ?expected ?attributeUpdates ~key ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of an UpdateItem operation."]
 module UpdateItemOutput =
@@ -17237,10 +21089,10 @@ module UpdateItemOutput =
       {
       attributes: AttributeMap.t option
         [@ocaml.doc
-          "A map of attribute values as they appear before or after the UpdateItem operation, as determined by the ReturnValues parameter. The Attributes map is only present if ReturnValues was specified as something other than NONE in the request. Each element represents one attribute."];
+          "A map of attribute values as they appear before or after the UpdateItem operation, as determined by the ReturnValues parameter. The Attributes map is only present if the update was successful and ReturnValues was specified as something other than NONE in the request. Each element represents one attribute."];
       consumedCapacity: ConsumedCapacity.t option
         [@ocaml.doc
-          "The capacity units consumed by the UpdateItem operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the ReturnConsumedCapacity parameter was specified. For more information, see Provisioned Throughput in the Amazon DynamoDB Developer Guide."];
+          "The capacity units consumed by the UpdateItem operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the ReturnConsumedCapacity parameter was specified. For more information, see Capacity unity consumption for write operations in the Amazon DynamoDB Developer Guide."];
       itemCollectionMetrics: ItemCollectionMetrics.t option
         [@ocaml.doc
           "Information about item collections, if any, that were affected by the UpdateItem operation. ItemCollectionMetrics is only returned if the ReturnItemCollectionMetrics parameter was specified. If the table does not have any local secondary indexes, this information is not returned in the response. Each ItemCollectionMetrics element consists of: ItemCollectionKey - The partition key value of the item collection. This is the same as the partition key value of the item itself. SizeEstimateRangeGB - An estimate of item collection size, in gigabytes. This value is a two-element array containing a lower bound and an upper bound for the estimate. The estimate includes the size of all the items in the table, plus the size of all attributes projected into all of the local secondary indexes on that table. Use this estimate to measure whether a local secondary index is approaching its size limit. The estimate is subject to change over time; therefore, do not rely on the precision or accuracy of the estimate."]}
@@ -17252,8 +21104,11 @@ module UpdateItemOutput =
           ItemCollectionSizeLimitExceededException.t 
       | `ProvisionedThroughputExceededException of
           ProvisionedThroughputExceededException.t 
+      | `ReplicatedWriteConflictException of
+          ReplicatedWriteConflictException.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `TransactionConflictException of TransactionConflictException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?attributes =
@@ -17273,10 +21128,15 @@ module UpdateItemOutput =
       | "ProvisionedThroughputExceededException" ->
           `ProvisionedThroughputExceededException
             (ProvisionedThroughputExceededException.of_json json)
+      | "ReplicatedWriteConflictException" ->
+          `ReplicatedWriteConflictException
+            (ReplicatedWriteConflictException.of_json json)
       | "RequestLimitExceeded" ->
           `RequestLimitExceeded (RequestLimitExceeded.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "TransactionConflictException" ->
           `TransactionConflictException
             (TransactionConflictException.of_json json)
@@ -17296,10 +21156,15 @@ module UpdateItemOutput =
       | "ProvisionedThroughputExceededException" ->
           `ProvisionedThroughputExceededException
             (ProvisionedThroughputExceededException.of_xml xml)
+      | "ReplicatedWriteConflictException" ->
+          `ReplicatedWriteConflictException
+            (ReplicatedWriteConflictException.of_xml xml)
       | "RequestLimitExceeded" ->
           `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "TransactionConflictException" ->
           `TransactionConflictException
             (TransactionConflictException.of_xml xml)
@@ -17323,6 +21188,10 @@ module UpdateItemOutput =
           `Assoc
             [("error", (`String "ProvisionedThroughputExceededException"));
             ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ReplicatedWriteConflictException e ->
+          `Assoc
+            [("error", (`String "ReplicatedWriteConflictException"));
+            ("details", (ReplicatedWriteConflictException.to_json e))]
       | `RequestLimitExceeded e ->
           `Assoc
             [("error", (`String "RequestLimitExceeded"));
@@ -17331,6 +21200,10 @@ module UpdateItemOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `TransactionConflictException e ->
           `Assoc
             [("error", (`String "TransactionConflictException"));
@@ -17360,15 +21233,212 @@ module UpdateItemOutput =
         (Option.map ~f:AttributeMap.of_xml) (Xml.child xml_arg0 "Attributes") in
       make ?itemCollectionMetrics ?consumedCapacity ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let itemCollectionMetrics =
-        field_map json "ItemCollectionMetrics" ItemCollectionMetrics.of_json in
+        field_map json__ "ItemCollectionMetrics"
+          ItemCollectionMetrics.of_json in
       let consumedCapacity =
-        field_map json "ConsumedCapacity" ConsumedCapacity.of_json in
-      let attributes = field_map json "Attributes" AttributeMap.of_json in
+        field_map json__ "ConsumedCapacity" ConsumedCapacity.of_json in
+      let attributes = field_map json__ "Attributes" AttributeMap.of_json in
       make ?itemCollectionMetrics ?consumedCapacity ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of an UpdateItem operation."]
+module UpdateKinesisStreamingConfiguration =
+  struct
+    type nonrec t =
+      {
+      approximateCreationDateTimePrecision:
+        ApproximateCreationDateTimePrecision.t option
+        [@ocaml.doc
+          "Enables updating the precision of Kinesis data stream timestamp."]}
+    let make ?approximateCreationDateTimePrecision =
+      fun () -> { approximateCreationDateTimePrecision }
+    let to_value x =
+      structure_to_value
+        [("ApproximateCreationDateTimePrecision",
+           (Option.map x.approximateCreationDateTimePrecision
+              ~f:ApproximateCreationDateTimePrecision.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let approximateCreationDateTimePrecision =
+        (Option.map ~f:ApproximateCreationDateTimePrecision.of_xml)
+          (Xml.child xml_arg0 "ApproximateCreationDateTimePrecision") in
+      make ?approximateCreationDateTimePrecision ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let approximateCreationDateTimePrecision =
+        field_map json__ "ApproximateCreationDateTimePrecision"
+          ApproximateCreationDateTimePrecision.of_json in
+      make ?approximateCreationDateTimePrecision ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables updating the configuration for Kinesis Streaming."]
+module UpdateKinesisStreamingDestinationInput =
+  struct
+    type nonrec t =
+      {
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The table name for the Kinesis streaming destination input. You can also provide the ARN of the table in this parameter."];
+      streamArn: StreamArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the Kinesis stream input."];
+      updateKinesisStreamingConfiguration:
+        UpdateKinesisStreamingConfiguration.t option
+        [@ocaml.doc
+          "The command to update the Kinesis stream configuration."]}
+    let context_ = "UpdateKinesisStreamingDestinationInput"
+    let make ?updateKinesisStreamingConfiguration =
+      fun ~tableName ->
+        fun ~streamArn ->
+          fun () ->
+            { updateKinesisStreamingConfiguration; tableName; streamArn }
+    let to_value x =
+      structure_to_value
+        [("TableName", (Some (TableArn.to_value x.tableName)));
+        ("StreamArn", (Some (StreamArn.to_value x.streamArn)));
+        ("UpdateKinesisStreamingConfiguration",
+          (Option.map x.updateKinesisStreamingConfiguration
+             ~f:UpdateKinesisStreamingConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updateKinesisStreamingConfiguration =
+        (Option.map ~f:UpdateKinesisStreamingConfiguration.of_xml)
+          (Xml.child xml_arg0 "UpdateKinesisStreamingConfiguration") in
+      let streamArn =
+        StreamArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StreamArn") in
+      let tableName =
+        TableArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
+      make ?updateKinesisStreamingConfiguration ~streamArn ~tableName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateKinesisStreamingConfiguration =
+        field_map json__ "UpdateKinesisStreamingConfiguration"
+          UpdateKinesisStreamingConfiguration.of_json in
+      let streamArn = field_map_exn json__ "StreamArn" StreamArn.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
+      make ?updateKinesisStreamingConfiguration ~streamArn ~tableName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The command to update the Kinesis stream destination."]
+module UpdateKinesisStreamingDestinationOutput =
+  struct
+    type nonrec t =
+      {
+      tableName: TableName.t option
+        [@ocaml.doc
+          "The table name for the Kinesis streaming destination output."];
+      streamArn: StreamArn.t option
+        [@ocaml.doc "The ARN for the Kinesis stream input."];
+      destinationStatus: DestinationStatus.t option
+        [@ocaml.doc
+          "The status of the attempt to update the Kinesis streaming destination output."];
+      updateKinesisStreamingConfiguration:
+        UpdateKinesisStreamingConfiguration.t option
+        [@ocaml.doc
+          "The command to update the Kinesis streaming destination configuration."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tableName =
+      fun ?streamArn ->
+        fun ?destinationStatus ->
+          fun ?updateKinesisStreamingConfiguration ->
+            fun () ->
+              {
+                tableName;
+                streamArn;
+                destinationStatus;
+                updateKinesisStreamingConfiguration
+              }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TableName", (Option.map x.tableName ~f:TableName.to_value));
+        ("StreamArn", (Option.map x.streamArn ~f:StreamArn.to_value));
+        ("DestinationStatus",
+          (Option.map x.destinationStatus ~f:DestinationStatus.to_value));
+        ("UpdateKinesisStreamingConfiguration",
+          (Option.map x.updateKinesisStreamingConfiguration
+             ~f:UpdateKinesisStreamingConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updateKinesisStreamingConfiguration =
+        (Option.map ~f:UpdateKinesisStreamingConfiguration.of_xml)
+          (Xml.child xml_arg0 "UpdateKinesisStreamingConfiguration") in
+      let destinationStatus =
+        (Option.map ~f:DestinationStatus.of_xml)
+          (Xml.child xml_arg0 "DestinationStatus") in
+      let streamArn =
+        (Option.map ~f:StreamArn.of_xml) (Xml.child xml_arg0 "StreamArn") in
+      let tableName =
+        (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "TableName") in
+      make ?updateKinesisStreamingConfiguration ?destinationStatus ?streamArn
+        ?tableName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateKinesisStreamingConfiguration =
+        field_map json__ "UpdateKinesisStreamingConfiguration"
+          UpdateKinesisStreamingConfiguration.of_json in
+      let destinationStatus =
+        field_map json__ "DestinationStatus" DestinationStatus.of_json in
+      let streamArn = field_map json__ "StreamArn" StreamArn.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
+      make ?updateKinesisStreamingConfiguration ?destinationStatus ?streamArn
+        ?tableName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The command to update the Kinesis stream destination."]
 module UpdateTableInput =
   struct
     type nonrec t =
@@ -17376,11 +21446,12 @@ module UpdateTableInput =
       attributeDefinitions: AttributeDefinitions.t option
         [@ocaml.doc
           "An array of attributes that describe the key schema for the table and indexes. If you are adding a new global secondary index to the table, AttributeDefinitions must include the key element(s) of the new index."];
-      tableName: TableName.t
-        [@ocaml.doc "The name of the table to be updated."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table to be updated. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       billingMode: BillingMode.t option
         [@ocaml.doc
-          "Controls how you are charged for read and write throughput and how you manage capacity. When switching from pay-per-request to provisioned capacity, initial provisioned capacity values must be set. The initial provisioned capacity values are estimated based on the consumed read and write capacity of your table and global secondary indexes over the past 30 minutes. PROVISIONED - We recommend using PROVISIONED for predictable workloads. PROVISIONED sets the billing mode to Provisioned Mode. PAY_PER_REQUEST - We recommend using PAY_PER_REQUEST for unpredictable workloads. PAY_PER_REQUEST sets the billing mode to On-Demand Mode."];
+          "Controls how you are charged for read and write throughput and how you manage capacity. When switching from pay-per-request to provisioned capacity, initial provisioned capacity values must be set. The initial provisioned capacity values are estimated based on the consumed read and write capacity of your table and global secondary indexes over the past 30 minutes. PAY_PER_REQUEST - We recommend using PAY_PER_REQUEST for most DynamoDB workloads. PAY_PER_REQUEST sets the billing mode to On-demand capacity mode. PROVISIONED - We recommend using PROVISIONED for steady workloads with predictable growth where capacity requirements can be reliably forecasted. PROVISIONED sets the billing mode to Provisioned capacity mode."];
       provisionedThroughput: ProvisionedThroughput.t option
         [@ocaml.doc
           "The new provisioned throughput settings for the specified table or index."];
@@ -17389,16 +21460,35 @@ module UpdateTableInput =
           "An array of one or more global secondary indexes for the table. For each index in the array, you can request one action: Create - add a new global secondary index to the table. Update - modify the provisioned throughput settings of an existing global secondary index. Delete - remove a global secondary index from the table. You can create or delete only one global secondary index per UpdateTable operation. For more information, see Managing Global Secondary Indexes in the Amazon DynamoDB Developer Guide."];
       streamSpecification: StreamSpecification.t option
         [@ocaml.doc
-          "Represents the DynamoDB Streams configuration for the table. You receive a ResourceInUseException if you try to enable a stream on a table that already has a stream, or if you try to disable a stream on a table that doesn't have a stream."];
+          "Represents the DynamoDB Streams configuration for the table. You receive a ValidationException if you try to enable a stream on a table that already has a stream, or if you try to disable a stream on a table that doesn't have a stream."];
       sSESpecification: SSESpecification.t option
         [@ocaml.doc
           "The new server-side encryption settings for the specified table."];
       replicaUpdates: ReplicationGroupUpdateList.t option
         [@ocaml.doc
-          "A list of replica update actions (create, delete, or update) for the table. This property only applies to Version 2019.11.21 of global tables."];
+          "A list of replica update actions (create, delete, or update) for the table."];
       tableClass: TableClass.t option
         [@ocaml.doc
-          "The table class of the table to be updated. Valid values are STANDARD and STANDARD_INFREQUENT_ACCESS."]}
+          "The table class of the table to be updated. Valid values are STANDARD and STANDARD_INFREQUENT_ACCESS."];
+      deletionProtectionEnabled: DeletionProtectionEnabled.t option
+        [@ocaml.doc
+          "Indicates whether deletion protection is to be enabled (true) or disabled (false) on the table."];
+      multiRegionConsistency: MultiRegionConsistency.t option
+        [@ocaml.doc
+          "Specifies the consistency mode for a new global table. This parameter is only valid when you create a global table by specifying one or more Create actions in the ReplicaUpdates action list. You can specify one of the following consistency modes: EVENTUAL: Configures a new global table for multi-Region eventual consistency (MREC). This is the default consistency mode for global tables. STRONG: Configures a new global table for multi-Region strong consistency (MRSC). If you don't specify this field, the global table consistency mode defaults to EVENTUAL. For more information about global tables consistency modes, see Consistency modes in DynamoDB developer guide."];
+      globalTableWitnessUpdates: GlobalTableWitnessGroupUpdateList.t option
+        [@ocaml.doc
+          "A list of witness updates for a MRSC global table. A witness provides a cost-effective alternative to a full replica in a MRSC global table by maintaining replicated change data written to global table replicas. You cannot perform read or write operations on a witness. For each witness, you can request one action: Create - add a new witness to the global table. Delete - remove a witness from the global table. You can create or delete only one witness per UpdateTable operation. For more information, see Multi-Region strong consistency (MRSC) in the Amazon DynamoDB Developer Guide"];
+      onDemandThroughput: OnDemandThroughput.t option
+        [@ocaml.doc
+          "Updates the maximum number of read and write units for the specified table in on-demand capacity mode. If you use this parameter, you must specify MaxReadRequestUnits, MaxWriteRequestUnits, or both."];
+      warmThroughput: WarmThroughput.t option
+        [@ocaml.doc
+          "Represents the warm throughput (in read units per second and write units per second) for updating a table."];
+      globalTableSettingsReplicationMode:
+        GlobalTableSettingsReplicationMode.t option
+        [@ocaml.doc
+          "Controls the settings replication mode for a global table replica. This attribute can be defined using UpdateTable operation only on a regional table with values: ENABLED: Defines settings replication on a regional table to be used as a source table for creating Multi-Account Global Table. DISABLED: Remove settings replication on a regional table. Settings replication needs to be defined to ENABLED again in order to create a Multi-Account Global Table using this table."]}
     let context_ = "UpdateTableInput"
     let make ?attributeDefinitions =
       fun ?billingMode ->
@@ -17408,25 +21498,37 @@ module UpdateTableInput =
               fun ?sSESpecification ->
                 fun ?replicaUpdates ->
                   fun ?tableClass ->
-                    fun ~tableName ->
-                      fun () ->
-                        {
-                          attributeDefinitions;
-                          billingMode;
-                          provisionedThroughput;
-                          globalSecondaryIndexUpdates;
-                          streamSpecification;
-                          sSESpecification;
-                          replicaUpdates;
-                          tableClass;
-                          tableName
-                        }
+                    fun ?deletionProtectionEnabled ->
+                      fun ?multiRegionConsistency ->
+                        fun ?globalTableWitnessUpdates ->
+                          fun ?onDemandThroughput ->
+                            fun ?warmThroughput ->
+                              fun ?globalTableSettingsReplicationMode ->
+                                fun ~tableName ->
+                                  fun () ->
+                                    {
+                                      attributeDefinitions;
+                                      billingMode;
+                                      provisionedThroughput;
+                                      globalSecondaryIndexUpdates;
+                                      streamSpecification;
+                                      sSESpecification;
+                                      replicaUpdates;
+                                      tableClass;
+                                      deletionProtectionEnabled;
+                                      multiRegionConsistency;
+                                      globalTableWitnessUpdates;
+                                      onDemandThroughput;
+                                      warmThroughput;
+                                      globalTableSettingsReplicationMode;
+                                      tableName
+                                    }
     let to_value x =
       structure_to_value
         [("AttributeDefinitions",
            (Option.map x.attributeDefinitions
               ~f:AttributeDefinitions.to_value));
-        ("TableName", (Some (TableName.to_value x.tableName)));
+        ("TableName", (Some (TableArn.to_value x.tableName)));
         ("BillingMode", (Option.map x.billingMode ~f:BillingMode.to_value));
         ("ProvisionedThroughput",
           (Option.map x.provisionedThroughput
@@ -17440,9 +21542,43 @@ module UpdateTableInput =
           (Option.map x.sSESpecification ~f:SSESpecification.to_value));
         ("ReplicaUpdates",
           (Option.map x.replicaUpdates ~f:ReplicationGroupUpdateList.to_value));
-        ("TableClass", (Option.map x.tableClass ~f:TableClass.to_value))]
+        ("TableClass", (Option.map x.tableClass ~f:TableClass.to_value));
+        ("DeletionProtectionEnabled",
+          (Option.map x.deletionProtectionEnabled
+             ~f:DeletionProtectionEnabled.to_value));
+        ("MultiRegionConsistency",
+          (Option.map x.multiRegionConsistency
+             ~f:MultiRegionConsistency.to_value));
+        ("GlobalTableWitnessUpdates",
+          (Option.map x.globalTableWitnessUpdates
+             ~f:GlobalTableWitnessGroupUpdateList.to_value));
+        ("OnDemandThroughput",
+          (Option.map x.onDemandThroughput ~f:OnDemandThroughput.to_value));
+        ("WarmThroughput",
+          (Option.map x.warmThroughput ~f:WarmThroughput.to_value));
+        ("GlobalTableSettingsReplicationMode",
+          (Option.map x.globalTableSettingsReplicationMode
+             ~f:GlobalTableSettingsReplicationMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let globalTableSettingsReplicationMode =
+        (Option.map ~f:GlobalTableSettingsReplicationMode.of_xml)
+          (Xml.child xml_arg0 "GlobalTableSettingsReplicationMode") in
+      let warmThroughput =
+        (Option.map ~f:WarmThroughput.of_xml)
+          (Xml.child xml_arg0 "WarmThroughput") in
+      let onDemandThroughput =
+        (Option.map ~f:OnDemandThroughput.of_xml)
+          (Xml.child xml_arg0 "OnDemandThroughput") in
+      let globalTableWitnessUpdates =
+        (Option.map ~f:GlobalTableWitnessGroupUpdateList.of_xml)
+          (Xml.child xml_arg0 "GlobalTableWitnessUpdates") in
+      let multiRegionConsistency =
+        (Option.map ~f:MultiRegionConsistency.of_xml)
+          (Xml.child xml_arg0 "MultiRegionConsistency") in
+      let deletionProtectionEnabled =
+        (Option.map ~f:DeletionProtectionEnabled.of_xml)
+          (Xml.child xml_arg0 "DeletionProtectionEnabled") in
       let tableClass =
         (Option.map ~f:TableClass.of_xml) (Xml.child xml_arg0 "TableClass") in
       let replicaUpdates =
@@ -17463,33 +21599,56 @@ module UpdateTableInput =
       let billingMode =
         (Option.map ~f:BillingMode.of_xml) (Xml.child xml_arg0 "BillingMode") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       let attributeDefinitions =
         (Option.map ~f:AttributeDefinitions.of_xml)
           (Xml.child xml_arg0 "AttributeDefinitions") in
-      make ?tableClass ?replicaUpdates ?sSESpecification ?streamSpecification
+      make ?globalTableSettingsReplicationMode ?warmThroughput
+        ?onDemandThroughput ?globalTableWitnessUpdates
+        ?multiRegionConsistency ?deletionProtectionEnabled ?tableClass
+        ?replicaUpdates ?sSESpecification ?streamSpecification
         ?globalSecondaryIndexUpdates ?provisionedThroughput ?billingMode
         ~tableName ?attributeDefinitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableClass = field_map json "TableClass" TableClass.of_json in
+    let of_json json__ =
+      let globalTableSettingsReplicationMode =
+        field_map json__ "GlobalTableSettingsReplicationMode"
+          GlobalTableSettingsReplicationMode.of_json in
+      let warmThroughput =
+        field_map json__ "WarmThroughput" WarmThroughput.of_json in
+      let onDemandThroughput =
+        field_map json__ "OnDemandThroughput" OnDemandThroughput.of_json in
+      let globalTableWitnessUpdates =
+        field_map json__ "GlobalTableWitnessUpdates"
+          GlobalTableWitnessGroupUpdateList.of_json in
+      let multiRegionConsistency =
+        field_map json__ "MultiRegionConsistency"
+          MultiRegionConsistency.of_json in
+      let deletionProtectionEnabled =
+        field_map json__ "DeletionProtectionEnabled"
+          DeletionProtectionEnabled.of_json in
+      let tableClass = field_map json__ "TableClass" TableClass.of_json in
       let replicaUpdates =
-        field_map json "ReplicaUpdates" ReplicationGroupUpdateList.of_json in
+        field_map json__ "ReplicaUpdates" ReplicationGroupUpdateList.of_json in
       let sSESpecification =
-        field_map json "SSESpecification" SSESpecification.of_json in
+        field_map json__ "SSESpecification" SSESpecification.of_json in
       let streamSpecification =
-        field_map json "StreamSpecification" StreamSpecification.of_json in
+        field_map json__ "StreamSpecification" StreamSpecification.of_json in
       let globalSecondaryIndexUpdates =
-        field_map json "GlobalSecondaryIndexUpdates"
+        field_map json__ "GlobalSecondaryIndexUpdates"
           GlobalSecondaryIndexUpdateList.of_json in
       let provisionedThroughput =
-        field_map json "ProvisionedThroughput" ProvisionedThroughput.of_json in
-      let billingMode = field_map json "BillingMode" BillingMode.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+        field_map json__ "ProvisionedThroughput"
+          ProvisionedThroughput.of_json in
+      let billingMode = field_map json__ "BillingMode" BillingMode.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       let attributeDefinitions =
-        field_map json "AttributeDefinitions" AttributeDefinitions.of_json in
-      make ?tableClass ?replicaUpdates ?sSESpecification ?streamSpecification
+        field_map json__ "AttributeDefinitions" AttributeDefinitions.of_json in
+      make ?globalTableSettingsReplicationMode ?warmThroughput
+        ?onDemandThroughput ?globalTableWitnessUpdates
+        ?multiRegionConsistency ?deletionProtectionEnabled ?tableClass
+        ?replicaUpdates ?sSESpecification ?streamSpecification
         ?globalSecondaryIndexUpdates ?provisionedThroughput ?billingMode
         ~tableName ?attributeDefinitions ()
     let to_json v = composed_to_json to_value v
@@ -17566,9 +21725,9 @@ module UpdateTableOutput =
           (Xml.child xml_arg0 "TableDescription") in
       make ?tableDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tableDescription =
-        field_map json "TableDescription" TableDescription.of_json in
+        field_map json__ "TableDescription" TableDescription.of_json in
       make ?tableDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of an UpdateTable operation."]
@@ -17580,8 +21739,9 @@ module UpdateTableReplicaAutoScalingInput =
         GlobalSecondaryIndexAutoScalingUpdateList.t option
         [@ocaml.doc
           "Represents the auto scaling settings of the global secondary indexes of the replica to be updated."];
-      tableName: TableName.t
-        [@ocaml.doc "The name of the global table to be updated."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the global table to be updated. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       provisionedWriteCapacityAutoScalingUpdate:
         AutoScalingSettingsUpdate.t option ;
       replicaUpdates: ReplicaAutoScalingUpdateList.t option
@@ -17604,7 +21764,7 @@ module UpdateTableReplicaAutoScalingInput =
         [("GlobalSecondaryIndexUpdates",
            (Option.map x.globalSecondaryIndexUpdates
               ~f:GlobalSecondaryIndexAutoScalingUpdateList.to_value));
-        ("TableName", (Some (TableName.to_value x.tableName)));
+        ("TableName", (Some (TableArn.to_value x.tableName)));
         ("ProvisionedWriteCapacityAutoScalingUpdate",
           (Option.map x.provisionedWriteCapacityAutoScalingUpdate
              ~f:AutoScalingSettingsUpdate.to_value));
@@ -17620,7 +21780,7 @@ module UpdateTableReplicaAutoScalingInput =
         (Option.map ~f:AutoScalingSettingsUpdate.of_xml)
           (Xml.child xml_arg0 "ProvisionedWriteCapacityAutoScalingUpdate") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       let globalSecondaryIndexUpdates =
         (Option.map ~f:GlobalSecondaryIndexAutoScalingUpdateList.of_xml)
@@ -17628,21 +21788,22 @@ module UpdateTableReplicaAutoScalingInput =
       make ?replicaUpdates ?provisionedWriteCapacityAutoScalingUpdate
         ~tableName ?globalSecondaryIndexUpdates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicaUpdates =
-        field_map json "ReplicaUpdates" ReplicaAutoScalingUpdateList.of_json in
+        field_map json__ "ReplicaUpdates"
+          ReplicaAutoScalingUpdateList.of_json in
       let provisionedWriteCapacityAutoScalingUpdate =
-        field_map json "ProvisionedWriteCapacityAutoScalingUpdate"
+        field_map json__ "ProvisionedWriteCapacityAutoScalingUpdate"
           AutoScalingSettingsUpdate.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       let globalSecondaryIndexUpdates =
-        field_map json "GlobalSecondaryIndexUpdates"
+        field_map json__ "GlobalSecondaryIndexUpdates"
           GlobalSecondaryIndexAutoScalingUpdateList.of_json in
       make ?replicaUpdates ?provisionedWriteCapacityAutoScalingUpdate
         ~tableName ?globalSecondaryIndexUpdates ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates auto scaling settings on your global tables at once. This operation only applies to Version 2019.11.21 of global tables."]
+       "Updates auto scaling settings on your global tables at once."]
 module UpdateTableReplicaAutoScalingOutput =
   struct
     type nonrec t =
@@ -17718,20 +21879,21 @@ module UpdateTableReplicaAutoScalingOutput =
           (Xml.child xml_arg0 "TableAutoScalingDescription") in
       make ?tableAutoScalingDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tableAutoScalingDescription =
-        field_map json "TableAutoScalingDescription"
+        field_map json__ "TableAutoScalingDescription"
           TableAutoScalingDescription.of_json in
       make ?tableAutoScalingDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates auto scaling settings on your global tables at once. This operation only applies to Version 2019.11.21 of global tables."]
+       "Updates auto scaling settings on your global tables at once."]
 module UpdateTimeToLiveInput =
   struct
     type nonrec t =
       {
-      tableName: TableName.t
-        [@ocaml.doc "The name of the table to be configured."];
+      tableName: TableArn.t
+        [@ocaml.doc
+          "The name of the table to be configured. You can also provide the Amazon Resource Name (ARN) of the table in this parameter."];
       timeToLiveSpecification: TimeToLiveSpecification.t
         [@ocaml.doc
           "Represents the settings used to enable or disable Time to Live for the specified table."]}
@@ -17741,7 +21903,7 @@ module UpdateTimeToLiveInput =
         fun () -> { tableName; timeToLiveSpecification }
     let to_value x =
       structure_to_value
-        [("TableName", (Some (TableName.to_value x.tableName)));
+        [("TableName", (Some (TableArn.to_value x.tableName)));
         ("TimeToLiveSpecification",
           (Some (TimeToLiveSpecification.to_value x.timeToLiveSpecification)))]
     let to_query v = to_query to_value v
@@ -17750,15 +21912,15 @@ module UpdateTimeToLiveInput =
         TimeToLiveSpecification.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TimeToLiveSpecification") in
       let tableName =
-        TableName.of_xml
+        TableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ~timeToLiveSpecification ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timeToLiveSpecification =
-        field_map_exn json "TimeToLiveSpecification"
+        field_map_exn json__ "TimeToLiveSpecification"
           TimeToLiveSpecification.of_json in
-      let tableName = field_map_exn json "TableName" TableName.of_json in
+      let tableName = field_map_exn json__ "TableName" TableArn.of_json in
       make ~timeToLiveSpecification ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of an UpdateTimeToLive operation."]
@@ -17836,9 +21998,9 @@ module UpdateTimeToLiveOutput =
           (Xml.child xml_arg0 "TimeToLiveSpecification") in
       make ?timeToLiveSpecification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timeToLiveSpecification =
-        field_map json "TimeToLiveSpecification"
+        field_map json__ "TimeToLiveSpecification"
           TimeToLiveSpecification.of_json in
       make ?timeToLiveSpecification ()
     let to_json v = composed_to_json to_value v

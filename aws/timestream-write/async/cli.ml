@@ -28,6 +28,52 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let create_batch_load_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and dataModelConfiguration =
+         flag "data-model-configuration" (optional json_arg)
+           ~doc:"JSON DataModelConfiguration"
+       and recordVersion =
+         flag "record-version" (optional json_arg) ~doc:"JSON RecordVersion"
+       and dataSourceConfiguration =
+         flag "data-source-configuration" (required json_arg)
+           ~doc:"JSON DataSourceConfiguration"
+       and reportConfiguration =
+         flag "report-configuration" (required json_arg)
+           ~doc:"JSON ReportConfiguration"
+       and targetDatabaseName =
+         flag "target-database-name" (required string)
+           ~doc:"STRING ResourceCreateAPIName"
+       and targetTableName =
+         flag "target-table-name" (required string)
+           ~doc:"STRING ResourceCreateAPIName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_batch_load_task
+           (Values.CreateBatchLoadTaskRequest.make ?clientToken
+              ?dataModelConfiguration:(Option.map
+                                         ~f:Values.DataModelConfiguration.of_json
+                                         dataModelConfiguration)
+              ?recordVersion:(Option.map ~f:Values.RecordVersion.of_json
+                                recordVersion)
+              ~dataSourceConfiguration:(Values.DataSourceConfiguration.of_json
+                                          dataSourceConfiguration)
+              ~reportConfiguration:(Values.ReportConfiguration.of_json
+                                      reportConfiguration)
+              ~targetDatabaseName ~targetTableName ())
+           (Some Values.CreateBatchLoadTaskResponse.to_json)
+           (Some Values.CreateBatchLoadTaskResponse.error_to_json)])
 let create_database =
   Command.async ~summary:""
     ([%map_open.Command
@@ -68,6 +114,7 @@ let create_table =
        and magneticStoreWriteProperties =
          flag "magnetic-store-write-properties" (optional json_arg)
            ~doc:"JSON MagneticStoreWriteProperties"
+       and schema = flag "schema" (optional json_arg) ~doc:"JSON Schema"
        and databaseName =
          flag "database-name" (required string)
            ~doc:"STRING ResourceCreateAPIName"
@@ -85,6 +132,7 @@ let create_table =
               ?magneticStoreWriteProperties:(Option.map
                                                ~f:Values.MagneticStoreWriteProperties.of_json
                                                magneticStoreWriteProperties)
+              ?schema:(Option.map ~f:Values.Schema.of_json schema)
               ~databaseName ~tableName ())
            (Some Values.CreateTableResponse.to_json)
            (Some Values.CreateTableResponse.error_to_json)])
@@ -123,6 +171,24 @@ let delete_table =
            Io.delete_table
            (Values.DeleteTableRequest.make ~databaseName ~tableName ()) None
            None])
+let describe_batch_load_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and taskId =
+         flag "task-id" (required string) ~doc:"STRING BatchLoadTaskId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_batch_load_task
+           (Values.DescribeBatchLoadTaskRequest.make ~taskId ())
+           (Some Values.DescribeBatchLoadTaskResponse.to_json)
+           (Some Values.DescribeBatchLoadTaskResponse.error_to_json)])
 let describe_database =
   Command.async ~summary:""
     ([%map_open.Command
@@ -177,6 +243,30 @@ let describe_table =
            (Values.DescribeTableRequest.make ~databaseName ~tableName ())
            (Some Values.DescribeTableResponse.to_json)
            (Some Values.DescribeTableResponse.error_to_json)])
+let list_batch_load_tasks =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PageLimit"
+       and taskStatus =
+         flag "task-status" (optional json_arg) ~doc:"JSON BatchLoadStatus" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_batch_load_tasks
+           (Values.ListBatchLoadTasksRequest.make ?nextToken ?maxResults
+              ?taskStatus:(Option.map ~f:Values.BatchLoadStatus.of_json
+                             taskStatus) ())
+           (Some Values.ListBatchLoadTasksResponse.to_json)
+           (Some Values.ListBatchLoadTasksResponse.error_to_json)])
 let list_databases =
   Command.async ~summary:""
     ([%map_open.Command
@@ -238,6 +328,24 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceARN ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let resume_batch_load_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and taskId =
+         flag "task-id" (required string) ~doc:"STRING BatchLoadTaskId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.resume_batch_load_task
+           (Values.ResumeBatchLoadTaskRequest.make ~taskId ())
+           (Some Values.ResumeBatchLoadTaskResponse.to_json)
+           (Some Values.ResumeBatchLoadTaskResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -317,6 +425,7 @@ let update_table =
        and magneticStoreWriteProperties =
          flag "magnetic-store-write-properties" (optional json_arg)
            ~doc:"JSON MagneticStoreWriteProperties"
+       and schema = flag "schema" (optional json_arg) ~doc:"JSON Schema"
        and databaseName =
          flag "database-name" (required string) ~doc:"STRING ResourceName"
        and tableName =
@@ -331,6 +440,7 @@ let update_table =
               ?magneticStoreWriteProperties:(Option.map
                                                ~f:Values.MagneticStoreWriteProperties.of_json
                                                magneticStoreWriteProperties)
+              ?schema:(Option.map ~f:Values.Schema.of_json schema)
               ~databaseName ~tableName ())
            (Some Values.UpdateTableResponse.to_json)
            (Some Values.UpdateTableResponse.error_to_json)])
@@ -363,16 +473,20 @@ let write_records =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-database", create_database);
+    [("create-batch-load-task", create_batch_load_task);
+    ("create-database", create_database);
     ("create-table", create_table);
     ("delete-database", delete_database);
     ("delete-table", delete_table);
+    ("describe-batch-load-task", describe_batch_load_task);
     ("describe-database", describe_database);
     ("describe-endpoints", describe_endpoints);
     ("describe-table", describe_table);
+    ("list-batch-load-tasks", list_batch_load_tasks);
     ("list-databases", list_databases);
     ("list-tables", list_tables);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("resume-batch-load-task", resume_batch_load_task);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-database", update_database);

@@ -24,7 +24,7 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
-module Float =
+module Float_ =
   struct
     type nonrec t = float
     let make i = i
@@ -41,43 +41,69 @@ module Point =
   struct
     type nonrec t =
       {
-      x: Float.t option
+      x: Float_.t option
         [@ocaml.doc
           "The value of the X coordinate for a point on a Polygon."];
-      y: Float.t option
+      y: Float_.t option
         [@ocaml.doc
           "The value of the Y coordinate for a point on a Polygon."]}
     let make ?x = fun ?y -> fun () -> { x; y }
     let to_value x =
       structure_to_value
-        [("X", (Option.map x.x ~f:Float.to_value));
-        ("Y", (Option.map x.y ~f:Float.to_value))]
+        [("X", (Option.map x.x ~f:Float_.to_value));
+        ("Y", (Option.map x.y ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let y = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Y") in
-      let x = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "X") in
+      let y = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Y") in
+      let x = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "X") in
       make ?y ?x ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let y = field_map json "Y" Float.of_json in
-      let x = field_map json "X" Float.of_json in make ?y ?x ()
+    let of_json json__ =
+      let y = field_map json__ "Y" Float_.of_json in
+      let x = field_map json__ "X" Float_.of_json in make ?y ?x ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The X and Y coordinates of a point on a document page. The X and Y values that are returned are ratios of the overall document page size. For example, if the input document is 700 x 200 and the operation returns X=0.5 and Y=0.25, then the point is at the (350,50) pixel coordinate on the document page. An array of Point objects, Polygon, is returned by DetectDocumentText. Polygon represents a fine-grained polygon around detected text. For more information, see Geometry in the Amazon Textract Developer Guide."]
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module Angle =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
 module BoundingBox =
   struct
     type nonrec t =
       {
-      width: Float.t option
+      width: Float_.t option
         [@ocaml.doc
           "The width of the bounding box as a ratio of the overall document page width."];
-      height: Float.t option
+      height: Float_.t option
         [@ocaml.doc
           "The height of the bounding box as a ratio of the overall document page height."];
-      left: Float.t option
+      left: Float_.t option
         [@ocaml.doc
           "The left coordinate of the bounding box as a ratio of overall document page width."];
-      top: Float.t option
+      top: Float_.t option
         [@ocaml.doc
           "The top coordinate of the bounding box as a ratio of overall document page height."]}
     let make ?width =
@@ -85,23 +111,24 @@ module BoundingBox =
         fun ?left -> fun ?top -> fun () -> { width; height; left; top }
     let to_value x =
       structure_to_value
-        [("Width", (Option.map x.width ~f:Float.to_value));
-        ("Height", (Option.map x.height ~f:Float.to_value));
-        ("Left", (Option.map x.left ~f:Float.to_value));
-        ("Top", (Option.map x.top ~f:Float.to_value))]
+        [("Width", (Option.map x.width ~f:Float_.to_value));
+        ("Height", (Option.map x.height ~f:Float_.to_value));
+        ("Left", (Option.map x.left ~f:Float_.to_value));
+        ("Top", (Option.map x.top ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let top = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Top") in
-      let left = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Left") in
-      let height = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Height") in
-      let width = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Width") in
+      let top = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Top") in
+      let left = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Left") in
+      let height =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Height") in
+      let width = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Width") in
       make ?top ?left ?height ?width ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let top = field_map json "Top" Float.of_json in
-      let left = field_map json "Left" Float.of_json in
-      let height = field_map json "Height" Float.of_json in
-      let width = field_map json "Width" Float.of_json in
+    let of_json json__ =
+      let top = field_map json__ "Top" Float_.of_json in
+      let left = field_map json__ "Left" Float_.of_json in
+      let height = field_map json__ "Height" Float_.of_json in
+      let width = field_map json__ "Width" Float_.of_json in
       make ?top ?left ?height ?width ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -110,6 +137,9 @@ module Polygon =
   struct
     type nonrec t = Point.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Point.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -129,37 +159,33 @@ module Polygon =
     let of_json j = list_of_json ~kind:"Polygon" ~of_json:Point.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Geometry =
+module StringList =
   struct
-    type nonrec t =
-      {
-      boundingBox: BoundingBox.t option
-        [@ocaml.doc
-          "An axis-aligned coarse representation of the location of the recognized item on the document page."];
-      polygon: Polygon.t option
-        [@ocaml.doc
-          "Within the bounding box, a fine-grained polygon around the recognized item."]}
-    let make ?boundingBox =
-      fun ?polygon -> fun () -> { boundingBox; polygon }
-    let to_value x =
-      structure_to_value
-        [("BoundingBox", (Option.map x.boundingBox ~f:BoundingBox.to_value));
-        ("Polygon", (Option.map x.polygon ~f:Polygon.to_value))]
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let polygon =
-        (Option.map ~f:Polygon.of_xml) (Xml.child xml_arg0 "Polygon") in
-      let boundingBox =
-        (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
-      make ?polygon ?boundingBox ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let polygon = field_map json "Polygon" Polygon.of_json in
-      let boundingBox = field_map json "BoundingBox" BoundingBox.of_json in
-      make ?polygon ?boundingBox ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StringList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about where the following items are located on a document page: detected page, text, key-value pairs, tables, table cells, and selection elements."]
+  end
 module Percent =
   struct
     type nonrec t = float
@@ -178,19 +204,102 @@ module Percent =
     let of_json j = float_of_json ~kind:"a float" j
     let to_json = simple_to_json to_value
   end
-module String_ =
+module Geometry =
   struct
-    type nonrec t = string
-    let context_ = "String"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      boundingBox: BoundingBox.t option
+        [@ocaml.doc
+          "An axis-aligned coarse representation of the location of the recognized item on the document page."];
+      polygon: Polygon.t option
+        [@ocaml.doc
+          "Within the bounding box, a fine-grained polygon around the recognized item."];
+      rotationAngle: Angle.t option
+        [@ocaml.doc
+          "Provides a numerical value corresponding to the rotation of the text."]}
+    let make ?boundingBox =
+      fun ?polygon ->
+        fun ?rotationAngle ->
+          fun () -> { boundingBox; polygon; rotationAngle }
+    let to_value x =
+      structure_to_value
+        [("BoundingBox", (Option.map x.boundingBox ~f:BoundingBox.to_value));
+        ("Polygon", (Option.map x.polygon ~f:Polygon.to_value));
+        ("RotationAngle", (Option.map x.rotationAngle ~f:Angle.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let rotationAngle =
+        (Option.map ~f:Angle.of_xml) (Xml.child xml_arg0 "RotationAngle") in
+      let polygon =
+        (Option.map ~f:Polygon.of_xml) (Xml.child xml_arg0 "Polygon") in
+      let boundingBox =
+        (Option.map ~f:BoundingBox.of_xml) (Xml.child xml_arg0 "BoundingBox") in
+      make ?rotationAngle ?polygon ?boundingBox ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rotationAngle = field_map json__ "RotationAngle" Angle.of_json in
+      let polygon = field_map json__ "Polygon" Polygon.of_json in
+      let boundingBox = field_map json__ "BoundingBox" BoundingBox.of_json in
+      make ?rotationAngle ?polygon ?boundingBox ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about where the following items are located on a document page: detected page, text, key-value pairs, tables, table cells, and selection elements."]
+module ExpenseGroupProperty =
+  struct
+    type nonrec t =
+      {
+      types: StringList.t option
+        [@ocaml.doc
+          "Informs you on whether the expense group is a name or an address."];
+      id: String_.t option
+        [@ocaml.doc
+          "Provides a group Id number, which will be the same for each in the group."]}
+    let make ?types = fun ?id -> fun () -> { types; id }
+    let to_value x =
+      structure_to_value
+        [("Types", (Option.map x.types ~f:StringList.to_value));
+        ("Id", (Option.map x.id ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
+      let types =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "Types") in
+      make ?id ?types ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map json__ "Id" String_.of_json in
+      let types = field_map json__ "Types" StringList.of_json in
+      make ?id ?types ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Shows the group that a certain key belongs to. This helps differentiate between names and addresses for different organizations, that can be hard to determine via JSON response."]
+module ExpenseCurrency =
+  struct
+    type nonrec t =
+      {
+      code: String_.t option
+        [@ocaml.doc
+          "Currency code for detected currency. the current supported codes are: USD EUR GBP CAD INR JPY CHF AUD CNY BZR SEK HKD"];
+      confidence: Percent.t option
+        [@ocaml.doc "Percentage confideence in the detected currency."]}
+    let make ?code = fun ?confidence -> fun () -> { code; confidence }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:String_.to_value));
+        ("Confidence", (Option.map x.confidence ~f:Percent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let confidence =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
+      let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?confidence ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let code = field_map json__ "Code" String_.of_json in
+      make ?confidence ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns the kind of currency detected."]
 module ExpenseDetection =
   struct
     type nonrec t =
@@ -217,14 +326,43 @@ module ExpenseDetection =
       let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
       make ?confidence ?geometry ?text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let geometry = field_map json "Geometry" Geometry.of_json in
-      let text = field_map json "Text" String_.of_json in
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let geometry = field_map json__ "Geometry" Geometry.of_json in
+      let text = field_map json__ "Text" String_.of_json in
       make ?confidence ?geometry ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object used to store information about the Value or Label detected by Amazon Textract."]
+module ExpenseGroupPropertyList =
+  struct
+    type nonrec t = ExpenseGroupProperty.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExpenseGroupProperty.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExpenseGroupProperty.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExpenseGroupPropertyList"
+        ~of_json:ExpenseGroupProperty.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ExpenseType =
   struct
     type nonrec t =
@@ -245,9 +383,9 @@ module ExpenseType =
       let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
       make ?confidence ?text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let text = field_map json "Text" String_.of_json in
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let text = field_map json__ "Text" String_.of_json in
       make ?confidence ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -266,6 +404,21 @@ module UInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module NonEmptyString =
+  struct
+    type nonrec t = string
+    let context_ = "NonEmptyString"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:".*\\S.*"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NonEmptyString" j
+    let to_json = simple_to_json to_value
+  end
 module ExpenseField =
   struct
     type nonrec t =
@@ -279,12 +432,28 @@ module ExpenseField =
         [@ocaml.doc
           "The value of a detected element. Present in explicit and implicit elements."];
       pageNumber: UInteger.t option
-        [@ocaml.doc "The page number the value was detected on."]}
+        [@ocaml.doc "The page number the value was detected on."];
+      currency: ExpenseCurrency.t option
+        [@ocaml.doc
+          "Shows the kind of currency, both the code and confidence associated with any monatary value detected."];
+      groupProperties: ExpenseGroupPropertyList.t option
+        [@ocaml.doc
+          "Shows which group a response object belongs to, such as whether an address line belongs to the vendor's address or the recipent's address."]}
     let make ?type_ =
       fun ?labelDetection ->
         fun ?valueDetection ->
           fun ?pageNumber ->
-            fun () -> { type_; labelDetection; valueDetection; pageNumber }
+            fun ?currency ->
+              fun ?groupProperties ->
+                fun () ->
+                  {
+                    type_;
+                    labelDetection;
+                    valueDetection;
+                    pageNumber;
+                    currency;
+                    groupProperties
+                  }
     let to_value x =
       structure_to_value
         [("Type", (Option.map x.type_ ~f:ExpenseType.to_value));
@@ -292,9 +461,18 @@ module ExpenseField =
           (Option.map x.labelDetection ~f:ExpenseDetection.to_value));
         ("ValueDetection",
           (Option.map x.valueDetection ~f:ExpenseDetection.to_value));
-        ("PageNumber", (Option.map x.pageNumber ~f:UInteger.to_value))]
+        ("PageNumber", (Option.map x.pageNumber ~f:UInteger.to_value));
+        ("Currency", (Option.map x.currency ~f:ExpenseCurrency.to_value));
+        ("GroupProperties",
+          (Option.map x.groupProperties ~f:ExpenseGroupPropertyList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let groupProperties =
+        (Option.map ~f:ExpenseGroupPropertyList.of_xml)
+          (Xml.child xml_arg0 "GroupProperties") in
+      let currency =
+        (Option.map ~f:ExpenseCurrency.of_xml)
+          (Xml.child xml_arg0 "Currency") in
       let pageNumber =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "PageNumber") in
       let valueDetection =
@@ -305,23 +483,124 @@ module ExpenseField =
           (Xml.child xml_arg0 "LabelDetection") in
       let type_ =
         (Option.map ~f:ExpenseType.of_xml) (Xml.child xml_arg0 "Type") in
-      make ?pageNumber ?valueDetection ?labelDetection ?type_ ()
+      make ?groupProperties ?currency ?pageNumber ?valueDetection
+        ?labelDetection ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageNumber = field_map json "PageNumber" UInteger.of_json in
+    let of_json json__ =
+      let groupProperties =
+        field_map json__ "GroupProperties" ExpenseGroupPropertyList.of_json in
+      let currency = field_map json__ "Currency" ExpenseCurrency.of_json in
+      let pageNumber = field_map json__ "PageNumber" UInteger.of_json in
       let valueDetection =
-        field_map json "ValueDetection" ExpenseDetection.of_json in
+        field_map json__ "ValueDetection" ExpenseDetection.of_json in
       let labelDetection =
-        field_map json "LabelDetection" ExpenseDetection.of_json in
-      let type_ = field_map json "Type" ExpenseType.of_json in
-      make ?pageNumber ?valueDetection ?labelDetection ?type_ ()
+        field_map json__ "LabelDetection" ExpenseDetection.of_json in
+      let type_ = field_map json__ "Type" ExpenseType.of_json in
+      make ?groupProperties ?currency ?pageNumber ?valueDetection
+        ?labelDetection ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Breakdown of detected information, seperated into the catagories Type, LabelDetection, and ValueDetection"]
+module QueryPage =
+  struct
+    type nonrec t = string
+    let context_ = "QueryPage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:9) >>=
+                  (fun () -> check_pattern i ~pattern:"^[0-9\\*\\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryPage" j
+    let to_json = simple_to_json to_value
+  end
+module IdList =
+  struct
+    type nonrec t = NonEmptyString.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NonEmptyString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IdList" ~of_json:NonEmptyString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RelationshipType =
+  struct
+    type nonrec t =
+      | VALUE 
+      | CHILD 
+      | COMPLEX_FEATURES 
+      | MERGED_CELL 
+      | TITLE 
+      | ANSWER 
+      | TABLE 
+      | TABLE_TITLE 
+      | TABLE_FOOTER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | VALUE -> "VALUE"
+      | CHILD -> "CHILD"
+      | COMPLEX_FEATURES -> "COMPLEX_FEATURES"
+      | MERGED_CELL -> "MERGED_CELL"
+      | TITLE -> "TITLE"
+      | ANSWER -> "ANSWER"
+      | TABLE -> "TABLE"
+      | TABLE_TITLE -> "TABLE_TITLE"
+      | TABLE_FOOTER -> "TABLE_FOOTER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "VALUE" -> VALUE
+      | "CHILD" -> CHILD
+      | "COMPLEX_FEATURES" -> COMPLEX_FEATURES
+      | "MERGED_CELL" -> MERGED_CELL
+      | "TITLE" -> TITLE
+      | "ANSWER" -> ANSWER
+      | "TABLE" -> TABLE
+      | "TABLE_TITLE" -> TABLE_TITLE
+      | "TABLE_FOOTER" -> TABLE_FOOTER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RelationshipType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RelationshipType" j)
+    let to_json = simple_to_json to_value
+  end
 module ExpenseFieldList =
   struct
     type nonrec t = ExpenseField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExpenseField.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -358,6 +637,156 @@ module ValueType =
     let of_json j = of_string (string_of_json ~kind:"ValueType" j)
     let to_json = simple_to_json to_value
   end
+module SelectionStatus =
+  struct
+    type nonrec t =
+      | SELECTED 
+      | NOT_SELECTED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SELECTED -> "SELECTED"
+      | NOT_SELECTED -> "NOT_SELECTED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SELECTED" -> SELECTED
+      | "NOT_SELECTED" -> NOT_SELECTED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SelectionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SelectionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module EntityType =
+  struct
+    type nonrec t =
+      | KEY 
+      | VALUE 
+      | COLUMN_HEADER 
+      | TABLE_TITLE 
+      | TABLE_FOOTER 
+      | TABLE_SECTION_TITLE 
+      | TABLE_SUMMARY 
+      | STRUCTURED_TABLE 
+      | SEMI_STRUCTURED_TABLE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | KEY -> "KEY"
+      | VALUE -> "VALUE"
+      | COLUMN_HEADER -> "COLUMN_HEADER"
+      | TABLE_TITLE -> "TABLE_TITLE"
+      | TABLE_FOOTER -> "TABLE_FOOTER"
+      | TABLE_SECTION_TITLE -> "TABLE_SECTION_TITLE"
+      | TABLE_SUMMARY -> "TABLE_SUMMARY"
+      | STRUCTURED_TABLE -> "STRUCTURED_TABLE"
+      | SEMI_STRUCTURED_TABLE -> "SEMI_STRUCTURED_TABLE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "KEY" -> KEY
+      | "VALUE" -> VALUE
+      | "COLUMN_HEADER" -> COLUMN_HEADER
+      | "TABLE_TITLE" -> TABLE_TITLE
+      | "TABLE_FOOTER" -> TABLE_FOOTER
+      | "TABLE_SECTION_TITLE" -> TABLE_SECTION_TITLE
+      | "TABLE_SUMMARY" -> TABLE_SUMMARY
+      | "STRUCTURED_TABLE" -> STRUCTURED_TABLE
+      | "SEMI_STRUCTURED_TABLE" -> SEMI_STRUCTURED_TABLE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EntityType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EntityType" j)
+    let to_json = simple_to_json to_value
+  end
+module QueryInput =
+  struct
+    type nonrec t = string
+    let context_ = "QueryInput"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9\\s!\"\\#\\$%'&\\(\\)\\*\\+\\,\\-\\./:;=\\?@\\[\\\\\\]\\^_`\\{\\|\\}~><]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryInput" j
+    let to_json = simple_to_json to_value
+  end
+module QueryPages =
+  struct
+    type nonrec t = QueryPage.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QueryPage.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QueryPage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QueryPages" ~of_json:QueryPage.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Relationship =
+  struct
+    type nonrec t =
+      {
+      type_: RelationshipType.t option
+        [@ocaml.doc
+          "The type of relationship between the blocks in the IDs array and the current block. The following list describes the relationship types that can be returned. VALUE - A list that contains the ID of the VALUE block that's associated with the KEY of a key-value pair. CHILD - A list of IDs that identify blocks found within the current block object. For example, WORD blocks have a CHILD relationship to the LINE block type. MERGED_CELL - A list of IDs that identify each of the MERGED_CELL block types in a table. ANSWER - A list that contains the ID of the QUERY_RESULT block that\226\128\153s associated with the corresponding QUERY block. TABLE - A list of IDs that identify associated TABLE block types. TABLE_TITLE - A list that contains the ID for the TABLE_TITLE block type in a table. TABLE_FOOTER - A list of IDs that identify the TABLE_FOOTER block types in a table."];
+      ids: IdList.t option
+        [@ocaml.doc
+          "An array of IDs for related blocks. You can get the type of the relationship from the Type element."]}
+    let make ?type_ = fun ?ids -> fun () -> { type_; ids }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:RelationshipType.to_value));
+        ("Ids", (Option.map x.ids ~f:IdList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ids = (Option.map ~f:IdList.of_xml) (Xml.child xml_arg0 "Ids") in
+      let type_ =
+        (Option.map ~f:RelationshipType.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?ids ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ids = field_map json__ "Ids" IdList.of_json in
+      let type_ = field_map json__ "Type" RelationshipType.of_json in
+      make ?ids ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about how blocks are related to each other. A Block object contains 0 or more Relation objects in a list, Relationships. For more information, see Block. The Type element provides the type of the relationship for all blocks in the IDs array."]
 module LineItemFields =
   struct
     type nonrec t =
@@ -377,28 +806,13 @@ module LineItemFields =
           (Xml.child xml_arg0 "LineItemExpenseFields") in
       make ?lineItemExpenseFields ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lineItemExpenseFields =
-        field_map json "LineItemExpenseFields" ExpenseFieldList.of_json in
+        field_map json__ "LineItemExpenseFields" ExpenseFieldList.of_json in
       make ?lineItemExpenseFields ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that holds information about the different lines found in a document's tables."]
-module NonEmptyString =
-  struct
-    type nonrec t = string
-    let context_ = "NonEmptyString"
-    let make i =
-      let open Result in
-        ok_or_failwith (check_pattern i ~pattern:".*\\S.*"); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NonEmptyString" j
-    let to_json = simple_to_json to_value
-  end
 module NormalizedValue =
   struct
     type nonrec t =
@@ -421,17 +835,275 @@ module NormalizedValue =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
       make ?valueType ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let valueType = field_map json "ValueType" ValueType.of_json in
-      let value = field_map json "Value" String_.of_json in
+    let of_json json__ =
+      let valueType = field_map json__ "ValueType" ValueType.of_json in
+      let value = field_map json__ "Value" String_.of_json in
       make ?valueType ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information relating to dates in a document, including the type of value, and the value."]
+module LendingDetection =
+  struct
+    type nonrec t =
+      {
+      text: String_.t option
+        [@ocaml.doc
+          "The text extracted for a detected value in a lending document."];
+      selectionStatus: SelectionStatus.t option
+        [@ocaml.doc
+          "The selection status of a selection element, such as an option button or check box."];
+      geometry: Geometry.t option ;
+      confidence: Percent.t option
+        [@ocaml.doc
+          "The confidence level for the text of a detected value in a lending document."]}
+    let make ?text =
+      fun ?selectionStatus ->
+        fun ?geometry ->
+          fun ?confidence ->
+            fun () -> { text; selectionStatus; geometry; confidence }
+    let to_value x =
+      structure_to_value
+        [("Text", (Option.map x.text ~f:String_.to_value));
+        ("SelectionStatus",
+          (Option.map x.selectionStatus ~f:SelectionStatus.to_value));
+        ("Geometry", (Option.map x.geometry ~f:Geometry.to_value));
+        ("Confidence", (Option.map x.confidence ~f:Percent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let confidence =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
+      let geometry =
+        (Option.map ~f:Geometry.of_xml) (Xml.child xml_arg0 "Geometry") in
+      let selectionStatus =
+        (Option.map ~f:SelectionStatus.of_xml)
+          (Xml.child xml_arg0 "SelectionStatus") in
+      let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
+      make ?confidence ?geometry ?selectionStatus ?text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let geometry = field_map json__ "Geometry" Geometry.of_json in
+      let selectionStatus =
+        field_map json__ "SelectionStatus" SelectionStatus.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      make ?confidence ?geometry ?selectionStatus ?text ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The results extracted for a lending document."]
+module BlockType =
+  struct
+    type nonrec t =
+      | KEY_VALUE_SET 
+      | PAGE 
+      | LINE 
+      | WORD 
+      | TABLE 
+      | CELL 
+      | SELECTION_ELEMENT 
+      | MERGED_CELL 
+      | TITLE 
+      | QUERY 
+      | QUERY_RESULT 
+      | SIGNATURE 
+      | TABLE_TITLE 
+      | TABLE_FOOTER 
+      | LAYOUT_TEXT 
+      | LAYOUT_TITLE 
+      | LAYOUT_HEADER 
+      | LAYOUT_FOOTER 
+      | LAYOUT_SECTION_HEADER 
+      | LAYOUT_PAGE_NUMBER 
+      | LAYOUT_LIST 
+      | LAYOUT_FIGURE 
+      | LAYOUT_TABLE 
+      | LAYOUT_KEY_VALUE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | KEY_VALUE_SET -> "KEY_VALUE_SET"
+      | PAGE -> "PAGE"
+      | LINE -> "LINE"
+      | WORD -> "WORD"
+      | TABLE -> "TABLE"
+      | CELL -> "CELL"
+      | SELECTION_ELEMENT -> "SELECTION_ELEMENT"
+      | MERGED_CELL -> "MERGED_CELL"
+      | TITLE -> "TITLE"
+      | QUERY -> "QUERY"
+      | QUERY_RESULT -> "QUERY_RESULT"
+      | SIGNATURE -> "SIGNATURE"
+      | TABLE_TITLE -> "TABLE_TITLE"
+      | TABLE_FOOTER -> "TABLE_FOOTER"
+      | LAYOUT_TEXT -> "LAYOUT_TEXT"
+      | LAYOUT_TITLE -> "LAYOUT_TITLE"
+      | LAYOUT_HEADER -> "LAYOUT_HEADER"
+      | LAYOUT_FOOTER -> "LAYOUT_FOOTER"
+      | LAYOUT_SECTION_HEADER -> "LAYOUT_SECTION_HEADER"
+      | LAYOUT_PAGE_NUMBER -> "LAYOUT_PAGE_NUMBER"
+      | LAYOUT_LIST -> "LAYOUT_LIST"
+      | LAYOUT_FIGURE -> "LAYOUT_FIGURE"
+      | LAYOUT_TABLE -> "LAYOUT_TABLE"
+      | LAYOUT_KEY_VALUE -> "LAYOUT_KEY_VALUE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "KEY_VALUE_SET" -> KEY_VALUE_SET
+      | "PAGE" -> PAGE
+      | "LINE" -> LINE
+      | "WORD" -> WORD
+      | "TABLE" -> TABLE
+      | "CELL" -> CELL
+      | "SELECTION_ELEMENT" -> SELECTION_ELEMENT
+      | "MERGED_CELL" -> MERGED_CELL
+      | "TITLE" -> TITLE
+      | "QUERY" -> QUERY
+      | "QUERY_RESULT" -> QUERY_RESULT
+      | "SIGNATURE" -> SIGNATURE
+      | "TABLE_TITLE" -> TABLE_TITLE
+      | "TABLE_FOOTER" -> TABLE_FOOTER
+      | "LAYOUT_TEXT" -> LAYOUT_TEXT
+      | "LAYOUT_TITLE" -> LAYOUT_TITLE
+      | "LAYOUT_HEADER" -> LAYOUT_HEADER
+      | "LAYOUT_FOOTER" -> LAYOUT_FOOTER
+      | "LAYOUT_SECTION_HEADER" -> LAYOUT_SECTION_HEADER
+      | "LAYOUT_PAGE_NUMBER" -> LAYOUT_PAGE_NUMBER
+      | "LAYOUT_LIST" -> LAYOUT_LIST
+      | "LAYOUT_FIGURE" -> LAYOUT_FIGURE
+      | "LAYOUT_TABLE" -> LAYOUT_TABLE
+      | "LAYOUT_KEY_VALUE" -> LAYOUT_KEY_VALUE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration BlockType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BlockType" j)
+    let to_json = simple_to_json to_value
+  end
+module EntityTypes =
+  struct
+    type nonrec t = EntityType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EntityType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EntityType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EntityTypes" ~of_json:EntityType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Query =
+  struct
+    type nonrec t =
+      {
+      text: QueryInput.t
+        [@ocaml.doc
+          "Question that Amazon Textract will apply to the document. An example would be \"What is the customer's SSN?\""];
+      alias: QueryInput.t option
+        [@ocaml.doc "Alias attached to the query, for ease of location."];
+      pages: QueryPages.t option
+        [@ocaml.doc
+          "Pages is a parameter that the user inputs to specify which pages to apply a query to. The following is a list of rules for using this parameter. If a page is not specified, it is set to \\[\"1\"\\] by default. The following characters are allowed in the parameter's string: 0 1 2 3 4 5 6 7 8 9 - *. No whitespace is allowed. When using * to indicate all pages, it must be the only element in the list. You can use page intervals, such as \\[\226\128\1561-3\226\128\157, \226\128\1561-1\226\128\157, \226\128\1564-*\226\128\157\\]. Where * indicates last page of document. Specified pages must be greater than 0 and less than or equal to the number of pages in the document."]}
+    let context_ = "Query"
+    let make ?alias =
+      fun ?pages -> fun ~text -> fun () -> { alias; pages; text }
+    let to_value x =
+      structure_to_value
+        [("Text", (Some (QueryInput.to_value x.text)));
+        ("Alias", (Option.map x.alias ~f:QueryInput.to_value));
+        ("Pages", (Option.map x.pages ~f:QueryPages.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pages =
+        (Option.map ~f:QueryPages.of_xml) (Xml.child xml_arg0 "Pages") in
+      let alias =
+        (Option.map ~f:QueryInput.of_xml) (Xml.child xml_arg0 "Alias") in
+      let text =
+        QueryInput.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Text") in
+      make ?pages ?alias ~text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pages = field_map json__ "Pages" QueryPages.of_json in
+      let alias = field_map json__ "Alias" QueryInput.of_json in
+      let text = field_map_exn json__ "Text" QueryInput.of_json in
+      make ?pages ?alias ~text ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Each query contains the question you want to ask in the Text and the alias you want to associate."]
+module RelationshipList =
+  struct
+    type nonrec t = Relationship.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Relationship.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Relationship.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RelationshipList" ~of_json:Relationship.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TextType =
+  struct
+    type nonrec t =
+      | HANDWRITING 
+      | PRINTED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HANDWRITING -> "HANDWRITING"
+      | PRINTED -> "PRINTED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HANDWRITING" -> HANDWRITING
+      | "PRINTED" -> PRINTED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TextType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TextType" j)
+    let to_json = simple_to_json to_value
+  end
 module LineItemList =
   struct
     type nonrec t = LineItemFields.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LineItemFields.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -452,12 +1124,55 @@ module LineItemList =
       list_of_json ~kind:"LineItemList" ~of_json:LineItemFields.of_json j
     let to_json v = composed_to_json to_value v
   end
-module IdList =
+module AnalyzeIDDetections =
   struct
-    type nonrec t = NonEmptyString.t list
+    type nonrec t =
+      {
+      text: String_.t option
+        [@ocaml.doc
+          "Text of either the normalized field or value associated with it."];
+      normalizedValue: NormalizedValue.t option
+        [@ocaml.doc
+          "Only returned for dates, returns the type of value detected and the date written in a more machine readable way."];
+      confidence: Percent.t option
+        [@ocaml.doc "The confidence score of the detected text."]}
+    let make ?text =
+      fun ?normalizedValue ->
+        fun ?confidence -> fun () -> { text; normalizedValue; confidence }
+    let to_value x =
+      structure_to_value
+        [("Text", (Option.map x.text ~f:String_.to_value));
+        ("NormalizedValue",
+          (Option.map x.normalizedValue ~f:NormalizedValue.to_value));
+        ("Confidence", (Option.map x.confidence ~f:Percent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let confidence =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
+      let normalizedValue =
+        (Option.map ~f:NormalizedValue.of_xml)
+          (Xml.child xml_arg0 "NormalizedValue") in
+      let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
+      make ?confidence ?normalizedValue ?text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let normalizedValue =
+        field_map json__ "NormalizedValue" NormalizedValue.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      make ?confidence ?normalizedValue ?text ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Used to contain the information detected by an AnalyzeID operation."]
+module LendingDetectionList =
+  struct
+    type nonrec t = LendingDetection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:LendingDetection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -471,87 +1186,170 @@ module IdList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:NonEmptyString.of_xml)
+                     | _ -> true))) ~f:LendingDetection.of_xml)
     let of_json j =
-      list_of_json ~kind:"IdList" ~of_json:NonEmptyString.of_json j
+      list_of_json ~kind:"LendingDetectionList"
+        ~of_json:LendingDetection.of_json j
     let to_json v = composed_to_json to_value v
   end
-module RelationshipType =
-  struct
-    type nonrec t =
-      | VALUE 
-      | CHILD 
-      | COMPLEX_FEATURES 
-      | MERGED_CELL 
-      | TITLE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | VALUE -> "VALUE"
-      | CHILD -> "CHILD"
-      | COMPLEX_FEATURES -> "COMPLEX_FEATURES"
-      | MERGED_CELL -> "MERGED_CELL"
-      | TITLE -> "TITLE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "VALUE" -> VALUE
-      | "CHILD" -> CHILD
-      | "COMPLEX_FEATURES" -> COMPLEX_FEATURES
-      | "MERGED_CELL" -> MERGED_CELL
-      | "TITLE" -> TITLE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration RelationshipType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"RelationshipType" j)
-    let to_json = simple_to_json to_value
-  end
-module AnalyzeIDDetections =
+module Block =
   struct
     type nonrec t =
       {
-      text: String_.t
+      blockType: BlockType.t option
         [@ocaml.doc
-          "Text of either the normalized field or value associated with it."];
-      normalizedValue: NormalizedValue.t option
-        [@ocaml.doc
-          "Only returned for dates, returns the type of value detected and the date written in a more machine readable way."];
+          "The type of text item that's recognized. In operations for text detection, the following types are returned: PAGE - Contains a list of the LINE Block objects that are detected on a document page. WORD - A word detected on a document page. A word is one or more ISO basic Latin script characters that aren't separated by spaces. LINE - A string of space-delimited, contiguous words that are detected on a document page. In text analysis operations, the following types are returned: PAGE - Contains a list of child Block objects that are detected on a document page. KEY_VALUE_SET - Stores the KEY and VALUE Block objects for linked text that's detected on a document page. Use the EntityType field to determine if a KEY_VALUE_SET object is a KEY Block object or a VALUE Block object. WORD - A word that's detected on a document page. A word is one or more ISO basic Latin script characters that aren't separated by spaces. LINE - A string of tab-delimited, contiguous words that are detected on a document page. TABLE - A table that's detected on a document page. A table is grid-based information with two or more rows or columns, with a cell span of one row and one column each. TABLE_TITLE - The title of a table. A title is typically a line of text above or below a table, or embedded as the first row of a table. TABLE_FOOTER - The footer associated with a table. A footer is typically a line or lines of text below a table or embedded as the last row of a table. CELL - A cell within a detected table. The cell is the parent of the block that contains the text in the cell. MERGED_CELL - A cell in a table whose content spans more than one row or column. The Relationships array for this cell contain data from individual cells. SELECTION_ELEMENT - A selection element such as an option button (radio button) or a check box that's detected on a document page. Use the value of SelectionStatus to determine the status of the selection element. SIGNATURE - The location and confidence score of a signature detected on a document page. Can be returned as part of a Key-Value pair or a detected cell. QUERY - A question asked during the call of AnalyzeDocument. Contains an alias and an ID that attaches it to its answer. QUERY_RESULT - A response to a question asked during the call of analyze document. Comes with an alias and ID for ease of locating in a response. Also contains location and confidence score. The following BlockTypes are only returned for Amazon Textract Layout. LAYOUT_TITLE - The main title of the document. LAYOUT_HEADER - Text located in the top margin of the document. LAYOUT_FOOTER - Text located in the bottom margin of the document. LAYOUT_SECTION_HEADER - The titles of sections within a document. LAYOUT_PAGE_NUMBER - The page number of the documents. LAYOUT_LIST - Any information grouped together in list form. LAYOUT_FIGURE - Indicates the location of an image in a document. LAYOUT_TABLE - Indicates the location of a table in the document. LAYOUT_KEY_VALUE - Indicates the location of form key-values in a document. LAYOUT_TEXT - Text that is present typically as a part of paragraphs in documents."];
       confidence: Percent.t option
-        [@ocaml.doc "The confidence score of the detected text."]}
-    let context_ = "AnalyzeIDDetections"
-    let make ?normalizedValue =
+        [@ocaml.doc
+          "The confidence score that Amazon Textract has in the accuracy of the recognized text and the accuracy of the geometry points around the recognized text."];
+      text: String_.t option
+        [@ocaml.doc
+          "The word or line of text that's recognized by Amazon Textract."];
+      textType: TextType.t option
+        [@ocaml.doc
+          "The kind of text that Amazon Textract has detected. Can check for handwritten text and printed text."];
+      rowIndex: UInteger.t option
+        [@ocaml.doc
+          "The row in which a table cell is located. The first row position is 1. RowIndex isn't returned by DetectDocumentText and GetDocumentTextDetection."];
+      columnIndex: UInteger.t option
+        [@ocaml.doc
+          "The column in which a table cell appears. The first column position is 1. ColumnIndex isn't returned by DetectDocumentText and GetDocumentTextDetection."];
+      rowSpan: UInteger.t option
+        [@ocaml.doc
+          "The number of rows that a table cell spans. RowSpan isn't returned by DetectDocumentText and GetDocumentTextDetection."];
+      columnSpan: UInteger.t option
+        [@ocaml.doc
+          "The number of columns that a table cell spans. ColumnSpan isn't returned by DetectDocumentText and GetDocumentTextDetection."];
+      geometry: Geometry.t option
+        [@ocaml.doc
+          "The location of the recognized text on the image. It includes an axis-aligned, coarse bounding box that surrounds the text, and a finer-grain polygon for more accurate spatial information."];
+      id: NonEmptyString.t option
+        [@ocaml.doc
+          "The identifier for the recognized text. The identifier is only unique for a single operation."];
+      relationships: RelationshipList.t option
+        [@ocaml.doc
+          "A list of relationship objects that describe how blocks are related to each other. For example, a LINE block object contains a CHILD relationship type with the WORD blocks that make up the line of text. There aren't Relationship objects in the list for relationships that don't exist, such as when the current block has no child blocks."];
+      entityTypes: EntityTypes.t option
+        [@ocaml.doc
+          "The type of entity. The following entity types can be returned by FORMS analysis: KEY - An identifier for a field on the document. VALUE - The field text. The following entity types can be returned by TABLES analysis: COLUMN_HEADER - Identifies a cell that is a header of a column. TABLE_TITLE - Identifies a cell that is a title within the table. TABLE_SECTION_TITLE - Identifies a cell that is a title of a section within a table. A section title is a cell that typically spans an entire row above a section. TABLE_FOOTER - Identifies a cell that is a footer of a table. TABLE_SUMMARY - Identifies a summary cell of a table. A summary cell can be a row of a table or an additional, smaller table that contains summary information for another table. STRUCTURED_TABLE - Identifies a table with column headers where the content of each row corresponds to the headers. SEMI_STRUCTURED_TABLE - Identifies a non-structured table. EntityTypes isn't returned by DetectDocumentText and GetDocumentTextDetection."];
+      selectionStatus: SelectionStatus.t option
+        [@ocaml.doc
+          "The selection status of a selection element, such as an option button or check box."];
+      page: UInteger.t option
+        [@ocaml.doc
+          "The page on which a block was detected. Page is returned by synchronous and asynchronous operations. Page values greater than 1 are only returned for multipage documents that are in PDF or TIFF format. A scanned image (JPEG/PNG) provided to an asynchronous operation, even if it contains multiple document pages, is considered a single-page document. This means that for scanned images the value of Page is always 1."];
+      query: Query.t option }
+    let make ?blockType =
       fun ?confidence ->
-        fun ~text -> fun () -> { normalizedValue; confidence; text }
+        fun ?text ->
+          fun ?textType ->
+            fun ?rowIndex ->
+              fun ?columnIndex ->
+                fun ?rowSpan ->
+                  fun ?columnSpan ->
+                    fun ?geometry ->
+                      fun ?id ->
+                        fun ?relationships ->
+                          fun ?entityTypes ->
+                            fun ?selectionStatus ->
+                              fun ?page ->
+                                fun ?query ->
+                                  fun () ->
+                                    {
+                                      blockType;
+                                      confidence;
+                                      text;
+                                      textType;
+                                      rowIndex;
+                                      columnIndex;
+                                      rowSpan;
+                                      columnSpan;
+                                      geometry;
+                                      id;
+                                      relationships;
+                                      entityTypes;
+                                      selectionStatus;
+                                      page;
+                                      query
+                                    }
     let to_value x =
       structure_to_value
-        [("Text", (Some (String_.to_value x.text)));
-        ("NormalizedValue",
-          (Option.map x.normalizedValue ~f:NormalizedValue.to_value));
-        ("Confidence", (Option.map x.confidence ~f:Percent.to_value))]
+        [("BlockType", (Option.map x.blockType ~f:BlockType.to_value));
+        ("Confidence", (Option.map x.confidence ~f:Percent.to_value));
+        ("Text", (Option.map x.text ~f:String_.to_value));
+        ("TextType", (Option.map x.textType ~f:TextType.to_value));
+        ("RowIndex", (Option.map x.rowIndex ~f:UInteger.to_value));
+        ("ColumnIndex", (Option.map x.columnIndex ~f:UInteger.to_value));
+        ("RowSpan", (Option.map x.rowSpan ~f:UInteger.to_value));
+        ("ColumnSpan", (Option.map x.columnSpan ~f:UInteger.to_value));
+        ("Geometry", (Option.map x.geometry ~f:Geometry.to_value));
+        ("Id", (Option.map x.id ~f:NonEmptyString.to_value));
+        ("Relationships",
+          (Option.map x.relationships ~f:RelationshipList.to_value));
+        ("EntityTypes", (Option.map x.entityTypes ~f:EntityTypes.to_value));
+        ("SelectionStatus",
+          (Option.map x.selectionStatus ~f:SelectionStatus.to_value));
+        ("Page", (Option.map x.page ~f:UInteger.to_value));
+        ("Query", (Option.map x.query ~f:Query.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let query = (Option.map ~f:Query.of_xml) (Xml.child xml_arg0 "Query") in
+      let page = (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "Page") in
+      let selectionStatus =
+        (Option.map ~f:SelectionStatus.of_xml)
+          (Xml.child xml_arg0 "SelectionStatus") in
+      let entityTypes =
+        (Option.map ~f:EntityTypes.of_xml) (Xml.child xml_arg0 "EntityTypes") in
+      let relationships =
+        (Option.map ~f:RelationshipList.of_xml)
+          (Xml.child xml_arg0 "Relationships") in
+      let id =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Id") in
+      let geometry =
+        (Option.map ~f:Geometry.of_xml) (Xml.child xml_arg0 "Geometry") in
+      let columnSpan =
+        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "ColumnSpan") in
+      let rowSpan =
+        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "RowSpan") in
+      let columnIndex =
+        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "ColumnIndex") in
+      let rowIndex =
+        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "RowIndex") in
+      let textType =
+        (Option.map ~f:TextType.of_xml) (Xml.child xml_arg0 "TextType") in
+      let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
       let confidence =
         (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
-      let normalizedValue =
-        (Option.map ~f:NormalizedValue.of_xml)
-          (Xml.child xml_arg0 "NormalizedValue") in
-      let text =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Text") in
-      make ?confidence ?normalizedValue ~text ()
+      let blockType =
+        (Option.map ~f:BlockType.of_xml) (Xml.child xml_arg0 "BlockType") in
+      make ?query ?page ?selectionStatus ?entityTypes ?relationships ?id
+        ?geometry ?columnSpan ?rowSpan ?columnIndex ?rowIndex ?textType ?text
+        ?confidence ?blockType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let normalizedValue =
-        field_map json "NormalizedValue" NormalizedValue.of_json in
-      let text = field_map_exn json "Text" String_.of_json in
-      make ?confidence ?normalizedValue ~text ()
+    let of_json json__ =
+      let query = field_map json__ "Query" Query.of_json in
+      let page = field_map json__ "Page" UInteger.of_json in
+      let selectionStatus =
+        field_map json__ "SelectionStatus" SelectionStatus.of_json in
+      let entityTypes = field_map json__ "EntityTypes" EntityTypes.of_json in
+      let relationships =
+        field_map json__ "Relationships" RelationshipList.of_json in
+      let id = field_map json__ "Id" NonEmptyString.of_json in
+      let geometry = field_map json__ "Geometry" Geometry.of_json in
+      let columnSpan = field_map json__ "ColumnSpan" UInteger.of_json in
+      let rowSpan = field_map json__ "RowSpan" UInteger.of_json in
+      let columnIndex = field_map json__ "ColumnIndex" UInteger.of_json in
+      let rowIndex = field_map json__ "RowIndex" UInteger.of_json in
+      let textType = field_map json__ "TextType" TextType.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let blockType = field_map json__ "BlockType" BlockType.of_json in
+      make ?query ?page ?selectionStatus ?entityTypes ?relationships ?id
+        ?geometry ?columnSpan ?rowSpan ?columnIndex ?rowIndex ?textType ?text
+        ?confidence ?blockType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used to contain the information detected by an AnalyzeID operation."]
+       "A Block represents items that are recognized in a document within a group of pixels close to each other. The information returned in a Block object depends on the type of operation. In text detection for documents (for example DetectDocumentText), you get information about the detected words and lines of text. In text analysis (for example AnalyzeDocument), you can also get information about the fields, tables, and selection elements that are detected in the document. An array of Block objects is returned by both synchronous and asynchronous operations. In synchronous operations, such as DetectDocumentText, the array of Block objects is the entire set of results. In asynchronous operations, such as GetDocumentAnalysis, the array is returned over one or more responses. For more information, see How Amazon Textract Works."]
 module LineItemGroup =
   struct
     type nonrec t =
@@ -578,71 +1376,14 @@ module LineItemGroup =
           (Xml.child xml_arg0 "LineItemGroupIndex") in
       make ?lineItems ?lineItemGroupIndex ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lineItems = field_map json "LineItems" LineItemList.of_json in
+    let of_json json__ =
+      let lineItems = field_map json__ "LineItems" LineItemList.of_json in
       let lineItemGroupIndex =
-        field_map json "LineItemGroupIndex" UInteger.of_json in
+        field_map json__ "LineItemGroupIndex" UInteger.of_json in
       make ?lineItems ?lineItemGroupIndex ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A grouping of tables which contain LineItems, with each table identified by the table's LineItemGroupIndex."]
-module EntityType =
-  struct
-    type nonrec t =
-      | KEY 
-      | VALUE 
-      | COLUMN_HEADER 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | KEY -> "KEY"
-      | VALUE -> "VALUE"
-      | COLUMN_HEADER -> "COLUMN_HEADER"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "KEY" -> KEY
-      | "VALUE" -> VALUE
-      | "COLUMN_HEADER" -> COLUMN_HEADER
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration EntityType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"EntityType" j)
-    let to_json = simple_to_json to_value
-  end
-module Relationship =
-  struct
-    type nonrec t =
-      {
-      type_: RelationshipType.t option
-        [@ocaml.doc
-          "The type of relationship that the blocks in the IDs array have with the current block. The relationship can be VALUE or CHILD. A relationship of type VALUE is a list that contains the ID of the VALUE block that's associated with the KEY of a key-value pair. A relationship of type CHILD is a list of IDs that identify WORD blocks in the case of lines Cell blocks in the case of Tables, and WORD blocks in the case of Selection Elements."];
-      ids: IdList.t option
-        [@ocaml.doc
-          "An array of IDs for related blocks. You can get the type of the relationship from the Type element."]}
-    let make ?type_ = fun ?ids -> fun () -> { type_; ids }
-    let to_value x =
-      structure_to_value
-        [("Type", (Option.map x.type_ ~f:RelationshipType.to_value));
-        ("Ids", (Option.map x.ids ~f:IdList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let ids = (Option.map ~f:IdList.of_xml) (Xml.child xml_arg0 "Ids") in
-      let type_ =
-        (Option.map ~f:RelationshipType.of_xml) (Xml.child xml_arg0 "Type") in
-      make ?ids ?type_ ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ids = field_map json "Ids" IdList.of_json in
-      let type_ = field_map json "Type" RelationshipType.of_json in
-      make ?ids ?type_ ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about how blocks are related to each other. A Block object contains 0 or more Relation objects in a list, Relationships. For more information, see Block. The Type element provides the type of the relationship for all blocks in the IDs array."]
 module IdentityDocumentField =
   struct
     type nonrec t =
@@ -666,14 +1407,752 @@ module IdentityDocumentField =
           (Xml.child xml_arg0 "Type") in
       make ?valueDetection ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let valueDetection =
-        field_map json "ValueDetection" AnalyzeIDDetections.of_json in
-      let type_ = field_map json "Type" AnalyzeIDDetections.of_json in
+        field_map json__ "ValueDetection" AnalyzeIDDetections.of_json in
+      let type_ = field_map json__ "Type" AnalyzeIDDetections.of_json in
       make ?valueDetection ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Structure containing both the normalized type of the extracted information and the text associated with it. These are extracted as Type and Value respectively."]
+module LendingField =
+  struct
+    type nonrec t =
+      {
+      type_: String_.t option
+        [@ocaml.doc "The type of the lending document."];
+      keyDetection: LendingDetection.t option ;
+      valueDetections: LendingDetectionList.t option
+        [@ocaml.doc "An array of LendingDetection objects."]}
+    let make ?type_ =
+      fun ?keyDetection ->
+        fun ?valueDetections ->
+          fun () -> { type_; keyDetection; valueDetections }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:String_.to_value));
+        ("KeyDetection",
+          (Option.map x.keyDetection ~f:LendingDetection.to_value));
+        ("ValueDetections",
+          (Option.map x.valueDetections ~f:LendingDetectionList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueDetections =
+        (Option.map ~f:LendingDetectionList.of_xml)
+          (Xml.child xml_arg0 "ValueDetections") in
+      let keyDetection =
+        (Option.map ~f:LendingDetection.of_xml)
+          (Xml.child xml_arg0 "KeyDetection") in
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?valueDetections ?keyDetection ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueDetections =
+        field_map json__ "ValueDetections" LendingDetectionList.of_json in
+      let keyDetection =
+        field_map json__ "KeyDetection" LendingDetection.of_json in
+      let type_ = field_map json__ "Type" String_.of_json in
+      make ?valueDetections ?keyDetection ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Holds the normalized key-value pairs returned by AnalyzeDocument, including the document type, detected text, and geometry."]
+module SignatureDetection =
+  struct
+    type nonrec t =
+      {
+      confidence: Percent.t option
+        [@ocaml.doc
+          "The confidence, from 0 to 100, in the predicted values for a detected signature."];
+      geometry: Geometry.t option }
+    let make ?confidence =
+      fun ?geometry -> fun () -> { confidence; geometry }
+    let to_value x =
+      structure_to_value
+        [("Confidence", (Option.map x.confidence ~f:Percent.to_value));
+        ("Geometry", (Option.map x.geometry ~f:Geometry.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let geometry =
+        (Option.map ~f:Geometry.of_xml) (Xml.child xml_arg0 "Geometry") in
+      let confidence =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
+      make ?geometry ?confidence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let geometry = field_map json__ "Geometry" Geometry.of_json in
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      make ?geometry ?confidence ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information regarding a detected signature on a page."]
+module PageList =
+  struct
+    type nonrec t = UInteger.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UInteger.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UInteger.of_xml)
+    let of_json j = list_of_json ~kind:"PageList" ~of_json:UInteger.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BlockList =
+  struct
+    type nonrec t = Block.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Block.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Block.of_xml)
+    let of_json j = list_of_json ~kind:"BlockList" ~of_json:Block.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LineItemGroupList =
+  struct
+    type nonrec t = LineItemGroup.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LineItemGroup.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LineItemGroup.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LineItemGroupList" ~of_json:LineItemGroup.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IdentityDocumentFieldList =
+  struct
+    type nonrec t = IdentityDocumentField.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IdentityDocumentField.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IdentityDocumentField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IdentityDocumentFieldList"
+        ~of_json:IdentityDocumentField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LendingFieldList =
+  struct
+    type nonrec t = LendingField.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LendingField.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LendingField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LendingFieldList" ~of_json:LendingField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SignatureDetectionList =
+  struct
+    type nonrec t = SignatureDetection.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SignatureDetection.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SignatureDetection.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SignatureDetectionList"
+        ~of_json:SignatureDetection.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AdapterPage =
+  struct
+    type nonrec t = string
+    let context_ = "AdapterPage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:9) >>=
+                  (fun () -> check_pattern i ~pattern:"^[0-9\\*\\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AdapterPage" j
+    let to_json = simple_to_json to_value
+  end
+module DetectedSignature =
+  struct
+    type nonrec t =
+      {
+      page: UInteger.t option
+        [@ocaml.doc "The page a detected signature was found on."]}
+    let make ?page = fun () -> { page }
+    let to_value x =
+      structure_to_value [("Page", (Option.map x.page ~f:UInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let page = (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "Page") in
+      make ?page ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let page = field_map json__ "Page" UInteger.of_json in make ?page ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that holds information regarding a detected signature on a page."]
+module SplitDocument =
+  struct
+    type nonrec t =
+      {
+      index: UInteger.t option
+        [@ocaml.doc
+          "The index for a given document in a DocumentGroup of a specific Type."];
+      pages: PageList.t option
+        [@ocaml.doc
+          "An array of page numbers for a for a given document, ordered by logical boundary."]}
+    let make ?index = fun ?pages -> fun () -> { index; pages }
+    let to_value x =
+      structure_to_value
+        [("Index", (Option.map x.index ~f:UInteger.to_value));
+        ("Pages", (Option.map x.pages ~f:PageList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pages =
+        (Option.map ~f:PageList.of_xml) (Xml.child xml_arg0 "Pages") in
+      let index =
+        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "Index") in
+      make ?pages ?index ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pages = field_map json__ "Pages" PageList.of_json in
+      let index = field_map json__ "Index" UInteger.of_json in
+      make ?pages ?index ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the pages of a document, defined by logical boundary."]
+module UndetectedSignature =
+  struct
+    type nonrec t =
+      {
+      page: UInteger.t option
+        [@ocaml.doc "The page where a signature was expected but not found."]}
+    let make ?page = fun () -> { page }
+    let to_value x =
+      structure_to_value [("Page", (Option.map x.page ~f:UInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let page = (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "Page") in
+      make ?page ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let page = field_map json__ "Page" UInteger.of_json in make ?page ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure containing information about an undetected signature on a page where it was expected but not found."]
+module ExpenseDocument =
+  struct
+    type nonrec t =
+      {
+      expenseIndex: UInteger.t option
+        [@ocaml.doc
+          "Denotes which invoice or receipt in the document the information is coming from. First document will be 1, the second 2, and so on."];
+      summaryFields: ExpenseFieldList.t option
+        [@ocaml.doc
+          "Any information found outside of a table by Amazon Textract."];
+      lineItemGroups: LineItemGroupList.t option
+        [@ocaml.doc
+          "Information detected on each table of a document, seperated into LineItems."];
+      blocks: BlockList.t option
+        [@ocaml.doc
+          "This is a block object, the same as reported when DetectDocumentText is run on a document. It provides word level recognition of text."]}
+    let make ?expenseIndex =
+      fun ?summaryFields ->
+        fun ?lineItemGroups ->
+          fun ?blocks ->
+            fun () -> { expenseIndex; summaryFields; lineItemGroups; blocks }
+    let to_value x =
+      structure_to_value
+        [("ExpenseIndex", (Option.map x.expenseIndex ~f:UInteger.to_value));
+        ("SummaryFields",
+          (Option.map x.summaryFields ~f:ExpenseFieldList.to_value));
+        ("LineItemGroups",
+          (Option.map x.lineItemGroups ~f:LineItemGroupList.to_value));
+        ("Blocks", (Option.map x.blocks ~f:BlockList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let blocks =
+        (Option.map ~f:BlockList.of_xml) (Xml.child xml_arg0 "Blocks") in
+      let lineItemGroups =
+        (Option.map ~f:LineItemGroupList.of_xml)
+          (Xml.child xml_arg0 "LineItemGroups") in
+      let summaryFields =
+        (Option.map ~f:ExpenseFieldList.of_xml)
+          (Xml.child xml_arg0 "SummaryFields") in
+      let expenseIndex =
+        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "ExpenseIndex") in
+      make ?blocks ?lineItemGroups ?summaryFields ?expenseIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let blocks = field_map json__ "Blocks" BlockList.of_json in
+      let lineItemGroups =
+        field_map json__ "LineItemGroups" LineItemGroupList.of_json in
+      let summaryFields =
+        field_map json__ "SummaryFields" ExpenseFieldList.of_json in
+      let expenseIndex = field_map json__ "ExpenseIndex" UInteger.of_json in
+      make ?blocks ?lineItemGroups ?summaryFields ?expenseIndex ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure holding all the information returned by AnalyzeExpense"]
+module IdentityDocument =
+  struct
+    type nonrec t =
+      {
+      documentIndex: UInteger.t option
+        [@ocaml.doc
+          "Denotes the placement of a document in the IdentityDocument list. The first document is marked 1, the second 2 and so on."];
+      identityDocumentFields: IdentityDocumentFieldList.t option
+        [@ocaml.doc
+          "The structure used to record information extracted from identity documents. Contains both normalized field and value of the extracted text."];
+      blocks: BlockList.t option
+        [@ocaml.doc
+          "Individual word recognition, as returned by document detection."]}
+    let make ?documentIndex =
+      fun ?identityDocumentFields ->
+        fun ?blocks ->
+          fun () -> { documentIndex; identityDocumentFields; blocks }
+    let to_value x =
+      structure_to_value
+        [("DocumentIndex", (Option.map x.documentIndex ~f:UInteger.to_value));
+        ("IdentityDocumentFields",
+          (Option.map x.identityDocumentFields
+             ~f:IdentityDocumentFieldList.to_value));
+        ("Blocks", (Option.map x.blocks ~f:BlockList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let blocks =
+        (Option.map ~f:BlockList.of_xml) (Xml.child xml_arg0 "Blocks") in
+      let identityDocumentFields =
+        (Option.map ~f:IdentityDocumentFieldList.of_xml)
+          (Xml.child xml_arg0 "IdentityDocumentFields") in
+      let documentIndex =
+        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "DocumentIndex") in
+      make ?blocks ?identityDocumentFields ?documentIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let blocks = field_map json__ "Blocks" BlockList.of_json in
+      let identityDocumentFields =
+        field_map json__ "IdentityDocumentFields"
+          IdentityDocumentFieldList.of_json in
+      let documentIndex = field_map json__ "DocumentIndex" UInteger.of_json in
+      make ?blocks ?identityDocumentFields ?documentIndex ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure that lists each document processed in an AnalyzeID operation."]
+module LendingDocument =
+  struct
+    type nonrec t =
+      {
+      lendingFields: LendingFieldList.t option
+        [@ocaml.doc "An array of LendingField objects."];
+      signatureDetections: SignatureDetectionList.t option
+        [@ocaml.doc "A list of signatures detected in a lending document."]}
+    let make ?lendingFields =
+      fun ?signatureDetections ->
+        fun () -> { lendingFields; signatureDetections }
+    let to_value x =
+      structure_to_value
+        [("LendingFields",
+           (Option.map x.lendingFields ~f:LendingFieldList.to_value));
+        ("SignatureDetections",
+          (Option.map x.signatureDetections
+             ~f:SignatureDetectionList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let signatureDetections =
+        (Option.map ~f:SignatureDetectionList.of_xml)
+          (Xml.child xml_arg0 "SignatureDetections") in
+      let lendingFields =
+        (Option.map ~f:LendingFieldList.of_xml)
+          (Xml.child xml_arg0 "LendingFields") in
+      make ?signatureDetections ?lendingFields ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let signatureDetections =
+        field_map json__ "SignatureDetections" SignatureDetectionList.of_json in
+      let lendingFields =
+        field_map json__ "LendingFields" LendingFieldList.of_json in
+      make ?signatureDetections ?lendingFields ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Holds the structured data returned by AnalyzeDocument for lending documents."]
+module Prediction =
+  struct
+    type nonrec t =
+      {
+      value: NonEmptyString.t option
+        [@ocaml.doc "The predicted value of a detected object."];
+      confidence: Percent.t option
+        [@ocaml.doc "Amazon Textract's confidence in its predicted value."]}
+    let make ?value = fun ?confidence -> fun () -> { value; confidence }
+    let to_value x =
+      structure_to_value
+        [("Value", (Option.map x.value ~f:NonEmptyString.to_value));
+        ("Confidence", (Option.map x.confidence ~f:Percent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let confidence =
+        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
+      let value =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Value") in
+      make ?confidence ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let confidence = field_map json__ "Confidence" Percent.of_json in
+      let value = field_map json__ "Value" NonEmptyString.of_json in
+      make ?confidence ?value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information regarding predicted values returned by Amazon Textract operations, including the predicted value and the confidence in the predicted value."]
+module AdapterId =
+  struct
+    type nonrec t = string
+    let context_ = "AdapterId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1011) >>=
+             (fun () -> check_string_min i ~min:12));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AdapterId" j
+    let to_json = simple_to_json to_value
+  end
+module AdapterPages =
+  struct
+    type nonrec t = AdapterPage.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AdapterPage.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AdapterPage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AdapterPages" ~of_json:AdapterPage.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AdapterVersion =
+  struct
+    type nonrec t = string
+    let context_ = "AdapterVersion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AdapterVersion" j
+    let to_json = simple_to_json to_value
+  end
+module FeatureType =
+  struct
+    type nonrec t =
+      | TABLES 
+      | FORMS 
+      | QUERIES 
+      | SIGNATURES 
+      | LAYOUT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TABLES -> "TABLES"
+      | FORMS -> "FORMS"
+      | QUERIES -> "QUERIES"
+      | SIGNATURES -> "SIGNATURES"
+      | LAYOUT -> "LAYOUT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TABLES" -> TABLES
+      | "FORMS" -> FORMS
+      | "QUERIES" -> QUERIES
+      | "SIGNATURES" -> SIGNATURES
+      | "LAYOUT" -> LAYOUT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FeatureType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FeatureType" j)
+    let to_json = simple_to_json to_value
+  end
+module DetectedSignatureList =
+  struct
+    type nonrec t = DetectedSignature.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DetectedSignature.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DetectedSignature.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DetectedSignatureList"
+        ~of_json:DetectedSignature.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SplitDocumentList =
+  struct
+    type nonrec t = SplitDocument.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SplitDocument.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SplitDocument.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SplitDocumentList" ~of_json:SplitDocument.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UndetectedSignatureList =
+  struct
+    type nonrec t = UndetectedSignature.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UndetectedSignature.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UndetectedSignature.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UndetectedSignatureList"
+        ~of_json:UndetectedSignature.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Extraction =
+  struct
+    type nonrec t =
+      {
+      lendingDocument: LendingDocument.t option
+        [@ocaml.doc
+          "Holds the structured data returned by AnalyzeDocument for lending documents."];
+      expenseDocument: ExpenseDocument.t option ;
+      identityDocument: IdentityDocument.t option }
+    let make ?lendingDocument =
+      fun ?expenseDocument ->
+        fun ?identityDocument ->
+          fun () -> { lendingDocument; expenseDocument; identityDocument }
+    let to_value x =
+      structure_to_value
+        [("LendingDocument",
+           (Option.map x.lendingDocument ~f:LendingDocument.to_value));
+        ("ExpenseDocument",
+          (Option.map x.expenseDocument ~f:ExpenseDocument.to_value));
+        ("IdentityDocument",
+          (Option.map x.identityDocument ~f:IdentityDocument.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityDocument =
+        (Option.map ~f:IdentityDocument.of_xml)
+          (Xml.child xml_arg0 "IdentityDocument") in
+      let expenseDocument =
+        (Option.map ~f:ExpenseDocument.of_xml)
+          (Xml.child xml_arg0 "ExpenseDocument") in
+      let lendingDocument =
+        (Option.map ~f:LendingDocument.of_xml)
+          (Xml.child xml_arg0 "LendingDocument") in
+      make ?identityDocument ?expenseDocument ?lendingDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityDocument =
+        field_map json__ "IdentityDocument" IdentityDocument.of_json in
+      let expenseDocument =
+        field_map json__ "ExpenseDocument" ExpenseDocument.of_json in
+      let lendingDocument =
+        field_map json__ "LendingDocument" LendingDocument.of_json in
+      make ?identityDocument ?expenseDocument ?lendingDocument ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information extracted by an analysis operation after using StartLendingAnalysis."]
+module PredictionList =
+  struct
+    type nonrec t = Prediction.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Prediction.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Prediction.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PredictionList" ~of_json:Prediction.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module S3Bucket =
   struct
     type nonrec t = string
@@ -762,12 +2241,87 @@ module ContentClassifier =
     let of_json j = of_string (string_of_json ~kind:"ContentClassifier" j)
     let to_json = simple_to_json to_value
   end
-module LineItemGroupList =
+module Adapter =
   struct
-    type nonrec t = LineItemGroup.t list
+    type nonrec t =
+      {
+      adapterId: AdapterId.t
+        [@ocaml.doc "A unique identifier for the adapter resource."];
+      pages: AdapterPages.t option
+        [@ocaml.doc
+          "Pages is a parameter that the user inputs to specify which pages to apply an adapter to. The following is a list of rules for using this parameter. If a page is not specified, it is set to \\[\"1\"\\] by default. The following characters are allowed in the parameter's string: 0 1 2 3 4 5 6 7 8 9 - *. No whitespace is allowed. When using * to indicate all pages, it must be the only element in the list. You can use page intervals, such as \\[\"1-3\", \"1-1\", \"4-*\"\\]. Where * indicates last page of document. Specified pages must be greater than 0 and less than or equal to the number of pages in the document."];
+      version: AdapterVersion.t
+        [@ocaml.doc "A string that identifies the version of the adapter."]}
+    let context_ = "Adapter"
+    let make ?pages =
+      fun ~adapterId ->
+        fun ~version -> fun () -> { pages; adapterId; version }
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Some (AdapterId.to_value x.adapterId)));
+        ("Pages", (Option.map x.pages ~f:AdapterPages.to_value));
+        ("Version", (Some (AdapterVersion.to_value x.version)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let version =
+        AdapterVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Version") in
+      let pages =
+        (Option.map ~f:AdapterPages.of_xml) (Xml.child xml_arg0 "Pages") in
+      let adapterId =
+        AdapterId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AdapterId") in
+      make ~version ?pages ~adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map_exn json__ "Version" AdapterVersion.of_json in
+      let pages = field_map json__ "Pages" AdapterPages.of_json in
+      let adapterId = field_map_exn json__ "AdapterId" AdapterId.of_json in
+      make ~version ?pages ~adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An adapter selected for use when analyzing documents. Contains an adapter ID and a version number. Contains information on pages selected for analysis when analyzing documents asychronously."]
+module AdapterName =
+  struct
+    type nonrec t = string
+    let context_ = "AdapterName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9-_]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AdapterName" j
+    let to_json = simple_to_json to_value
+  end
+module DateTime =
+  struct
+    type nonrec t = string
     let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module FeatureTypes =
+  struct
+    type nonrec t = FeatureType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:LineItemGroup.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:FeatureType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -781,11 +2335,135 @@ module LineItemGroupList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:LineItemGroup.of_xml)
+                     | _ -> true))) ~f:FeatureType.of_xml)
     let of_json j =
-      list_of_json ~kind:"LineItemGroupList" ~of_json:LineItemGroup.of_json j
+      list_of_json ~kind:"FeatureTypes" ~of_json:FeatureType.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AdapterVersionStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | AT_RISK 
+      | DEPRECATED 
+      | CREATION_ERROR 
+      | CREATION_IN_PROGRESS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | AT_RISK -> "AT_RISK"
+      | DEPRECATED -> "DEPRECATED"
+      | CREATION_ERROR -> "CREATION_ERROR"
+      | CREATION_IN_PROGRESS -> "CREATION_IN_PROGRESS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "AT_RISK" -> AT_RISK
+      | "DEPRECATED" -> DEPRECATED
+      | "CREATION_ERROR" -> CREATION_ERROR
+      | "CREATION_IN_PROGRESS" -> CREATION_IN_PROGRESS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AdapterVersionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AdapterVersionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module AdapterVersionStatusMessage =
+  struct
+    type nonrec t = string
+    let context_ = "AdapterVersionStatusMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9\\s!\"\\#\\$%'&\\(\\)\\*\\+\\,\\-\\./:;=\\?@\\[\\\\\\]\\^_`\\{\\|\\}~><]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AdapterVersionStatusMessage" j
+    let to_json = simple_to_json to_value
+  end
+module DocumentGroup =
+  struct
+    type nonrec t =
+      {
+      type_: NonEmptyString.t option
+        [@ocaml.doc
+          "The type of document that Amazon Textract has detected. See Analyze Lending Response Objects for a list of all types returned by Textract."];
+      splitDocuments: SplitDocumentList.t option
+        [@ocaml.doc
+          "An array that contains information about the pages of a document, defined by logical boundary."];
+      detectedSignatures: DetectedSignatureList.t option
+        [@ocaml.doc
+          "A list of the detected signatures found in a document group."];
+      undetectedSignatures: UndetectedSignatureList.t option
+        [@ocaml.doc
+          "A list of any expected signatures not found in a document group."]}
+    let make ?type_ =
+      fun ?splitDocuments ->
+        fun ?detectedSignatures ->
+          fun ?undetectedSignatures ->
+            fun () ->
+              {
+                type_;
+                splitDocuments;
+                detectedSignatures;
+                undetectedSignatures
+              }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:NonEmptyString.to_value));
+        ("SplitDocuments",
+          (Option.map x.splitDocuments ~f:SplitDocumentList.to_value));
+        ("DetectedSignatures",
+          (Option.map x.detectedSignatures ~f:DetectedSignatureList.to_value));
+        ("UndetectedSignatures",
+          (Option.map x.undetectedSignatures
+             ~f:UndetectedSignatureList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let undetectedSignatures =
+        (Option.map ~f:UndetectedSignatureList.of_xml)
+          (Xml.child xml_arg0 "UndetectedSignatures") in
+      let detectedSignatures =
+        (Option.map ~f:DetectedSignatureList.of_xml)
+          (Xml.child xml_arg0 "DetectedSignatures") in
+      let splitDocuments =
+        (Option.map ~f:SplitDocumentList.of_xml)
+          (Xml.child xml_arg0 "SplitDocuments") in
+      let type_ =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?undetectedSignatures ?detectedSignatures ?splitDocuments ?type_
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let undetectedSignatures =
+        field_map json__ "UndetectedSignatures"
+          UndetectedSignatureList.of_json in
+      let detectedSignatures =
+        field_map json__ "DetectedSignatures" DetectedSignatureList.of_json in
+      let splitDocuments =
+        field_map json__ "SplitDocuments" SplitDocumentList.of_json in
+      let type_ = field_map json__ "Type" NonEmptyString.of_json in
+      make ?undetectedSignatures ?detectedSignatures ?splitDocuments ?type_
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary information about documents grouped by the same document type."]
 module ErrorCode =
   struct
     type nonrec t = string
@@ -803,6 +2481,9 @@ module Pages =
   struct
     type nonrec t = UInteger.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UInteger.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -822,58 +2503,15 @@ module Pages =
     let of_json j = list_of_json ~kind:"Pages" ~of_json:UInteger.of_json j
     let to_json v = composed_to_json to_value v
   end
-module BlockType =
+module ExtractionList =
   struct
-    type nonrec t =
-      | KEY_VALUE_SET 
-      | PAGE 
-      | LINE 
-      | WORD 
-      | TABLE 
-      | CELL 
-      | SELECTION_ELEMENT 
-      | MERGED_CELL 
-      | TITLE 
-      | Non_static_id of string 
+    type nonrec t = Extraction.t list
     let make i = i
-    let to_string =
-      function
-      | KEY_VALUE_SET -> "KEY_VALUE_SET"
-      | PAGE -> "PAGE"
-      | LINE -> "LINE"
-      | WORD -> "WORD"
-      | TABLE -> "TABLE"
-      | CELL -> "CELL"
-      | SELECTION_ELEMENT -> "SELECTION_ELEMENT"
-      | MERGED_CELL -> "MERGED_CELL"
-      | TITLE -> "TITLE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "KEY_VALUE_SET" -> KEY_VALUE_SET
-      | "PAGE" -> PAGE
-      | "LINE" -> LINE
-      | "WORD" -> WORD
-      | "TABLE" -> TABLE
-      | "CELL" -> CELL
-      | "SELECTION_ELEMENT" -> SELECTION_ELEMENT
-      | "MERGED_CELL" -> MERGED_CELL
-      | "TITLE" -> TITLE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration BlockType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"BlockType" j)
-    let to_json = simple_to_json to_value
-  end
-module EntityTypes =
-  struct
-    type nonrec t = EntityType.t list
-    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:EntityType.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:Extraction.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -887,111 +2525,79 @@ module EntityTypes =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:EntityType.of_xml)
+                     | _ -> true))) ~f:Extraction.of_xml)
     let of_json j =
-      list_of_json ~kind:"EntityTypes" ~of_json:EntityType.of_json j
+      list_of_json ~kind:"ExtractionList" ~of_json:Extraction.of_json j
     let to_json v = composed_to_json to_value v
   end
-module RelationshipList =
-  struct
-    type nonrec t = Relationship.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Relationship.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Relationship.of_xml)
-    let of_json j =
-      list_of_json ~kind:"RelationshipList" ~of_json:Relationship.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module SelectionStatus =
+module PageClassification =
   struct
     type nonrec t =
-      | SELECTED 
-      | NOT_SELECTED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | SELECTED -> "SELECTED"
-      | NOT_SELECTED -> "NOT_SELECTED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "SELECTED" -> SELECTED
-      | "NOT_SELECTED" -> NOT_SELECTED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+      {
+      pageType: PredictionList.t option
+        [@ocaml.doc
+          "The class, or document type, assigned to a detected Page object. The class, or document type, assigned to a detected Page object."];
+      pageNumber: PredictionList.t option
+        [@ocaml.doc
+          "The page number the value was detected on, relative to Amazon Textract's starting position."]}
+    let make ?pageType =
+      fun ?pageNumber -> fun () -> { pageType; pageNumber }
+    let to_value x =
+      structure_to_value
+        [("PageType", (Option.map x.pageType ~f:PredictionList.to_value));
+        ("PageNumber", (Option.map x.pageNumber ~f:PredictionList.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration SelectionStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"SelectionStatus" j)
-    let to_json = simple_to_json to_value
-  end
-module TextType =
+      let pageNumber =
+        (Option.map ~f:PredictionList.of_xml)
+          (Xml.child xml_arg0 "PageNumber") in
+      let pageType =
+        (Option.map ~f:PredictionList.of_xml) (Xml.child xml_arg0 "PageType") in
+      make ?pageNumber ?pageType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pageNumber = field_map json__ "PageNumber" PredictionList.of_json in
+      let pageType = field_map json__ "PageType" PredictionList.of_json in
+      make ?pageNumber ?pageType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The class assigned to a Page object detected in an input document. Contains information regarding the predicted type/class of a document's page and the page number that the Page object was detected on."]
+module EvaluationMetric =
   struct
     type nonrec t =
-      | HANDWRITING 
-      | PRINTED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | HANDWRITING -> "HANDWRITING"
-      | PRINTED -> "PRINTED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "HANDWRITING" -> HANDWRITING
-      | "PRINTED" -> PRINTED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+      {
+      f1Score: Float_.t option
+        [@ocaml.doc "The F1 score for an adapter version."];
+      precision: Float_.t option
+        [@ocaml.doc "The Precision score for an adapter version."];
+      recall: Float_.t option
+        [@ocaml.doc "The Recall score for an adapter version."]}
+    let make ?f1Score =
+      fun ?precision ->
+        fun ?recall -> fun () -> { f1Score; precision; recall }
+    let to_value x =
+      structure_to_value
+        [("F1Score", (Option.map x.f1Score ~f:Float_.to_value));
+        ("Precision", (Option.map x.precision ~f:Float_.to_value));
+        ("Recall", (Option.map x.recall ~f:Float_.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration TextType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"TextType" j)
-    let to_json = simple_to_json to_value
-  end
-module IdentityDocumentFieldList =
-  struct
-    type nonrec t = IdentityDocumentField.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:IdentityDocumentField.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:IdentityDocumentField.of_xml)
-    let of_json j =
-      list_of_json ~kind:"IdentityDocumentFieldList"
-        ~of_json:IdentityDocumentField.of_json j
+      let recall =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Recall") in
+      let precision =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Precision") in
+      let f1Score =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "F1Score") in
+      make ?recall ?precision ?f1Score ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recall = field_map json__ "Recall" Float_.of_json in
+      let precision = field_map json__ "Precision" Float_.of_json in
+      let f1Score = field_map json__ "F1Score" Float_.of_json in
+      make ?recall ?precision ?f1Score ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The evaluation metrics (F1 score, Precision, and Recall) for an adapter version."]
 module ImageBlob =
   struct
     type nonrec t = string
@@ -1013,7 +2619,7 @@ module S3Object =
           "The name of the S3 bucket. Note that the # character is not valid in the file name."];
       name: S3ObjectName.t option
         [@ocaml.doc
-          "The file name of the input document. Synchronous operations can use image files that are in JPEG or PNG format. Asynchronous operations also support PDF and TIFF format files."];
+          "The file name of the input document. Image files may be in PDF, TIFF, JPEG, or PNG format."];
       version: S3ObjectVersion.t option
         [@ocaml.doc
           "If the bucket has versioning enabled, you can specify the object version."]}
@@ -1034,10 +2640,10 @@ module S3Object =
         (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "Bucket") in
       make ?version ?name ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" S3ObjectVersion.of_json in
-      let name = field_map json "Name" S3ObjectName.of_json in
-      let bucket = field_map json "Bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" S3ObjectVersion.of_json in
+      let name = field_map json__ "Name" S3ObjectName.of_json in
+      let bucket = field_map json__ "Bucket" S3Bucket.of_json in
       make ?version ?name ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1060,6 +2666,9 @@ module ContentClassifiers =
     type nonrec t = ContentClassifier.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:256); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContentClassifier.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1080,6 +2689,50 @@ module ContentClassifiers =
       list_of_json ~kind:"ContentClassifiers"
         ~of_json:ContentClassifier.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?!aws:)[\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
   end
 module RoleArn =
   struct
@@ -1125,71 +2778,247 @@ module SNSTopicArn =
     let of_json j = string_of_json ~kind:"SNSTopicArn" j
     let to_json = simple_to_json to_value
   end
-module FeatureType =
+module Adapters =
   struct
-    type nonrec t =
-      | TABLES 
-      | FORMS 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | TABLES -> "TABLES" | FORMS -> "FORMS" | Non_static_id s -> s
-    let of_string =
-      function | "TABLES" -> TABLES | "FORMS" -> FORMS | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+    type nonrec t = Adapter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Adapter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration FeatureType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"FeatureType" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Adapter.of_xml)
+    let of_json j = list_of_json ~kind:"Adapters" ~of_json:Adapter.of_json j
+    let to_json v = composed_to_json to_value v
   end
-module ExpenseDocument =
+module Queries =
+  struct
+    type nonrec t = Query.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Query.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Query.of_xml)
+    let of_json j = list_of_json ~kind:"Queries" ~of_json:Query.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AdapterOverview =
   struct
     type nonrec t =
       {
-      expenseIndex: UInteger.t option
-        [@ocaml.doc
-          "Denotes which invoice or receipt in the document the information is coming from. First document will be 1, the second 2, and so on."];
-      summaryFields: ExpenseFieldList.t option
-        [@ocaml.doc
-          "Any information found outside of a table by Amazon Textract."];
-      lineItemGroups: LineItemGroupList.t option
-        [@ocaml.doc
-          "Information detected on each table of a document, seperated into LineItems."]}
-    let make ?expenseIndex =
-      fun ?summaryFields ->
-        fun ?lineItemGroups ->
-          fun () -> { expenseIndex; summaryFields; lineItemGroups }
+      adapterId: AdapterId.t option
+        [@ocaml.doc "A unique identifier for the adapter resource."];
+      adapterName: AdapterName.t option
+        [@ocaml.doc "A string naming the adapter resource."];
+      creationTime: DateTime.t option
+        [@ocaml.doc "The date and time that the adapter was created."];
+      featureTypes: FeatureTypes.t option
+        [@ocaml.doc "The feature types that the adapter is operating on."]}
+    let make ?adapterId =
+      fun ?adapterName ->
+        fun ?creationTime ->
+          fun ?featureTypes ->
+            fun () -> { adapterId; adapterName; creationTime; featureTypes }
     let to_value x =
       structure_to_value
-        [("ExpenseIndex", (Option.map x.expenseIndex ~f:UInteger.to_value));
-        ("SummaryFields",
-          (Option.map x.summaryFields ~f:ExpenseFieldList.to_value));
-        ("LineItemGroups",
-          (Option.map x.lineItemGroups ~f:LineItemGroupList.to_value))]
+        [("AdapterId", (Option.map x.adapterId ~f:AdapterId.to_value));
+        ("AdapterName", (Option.map x.adapterName ~f:AdapterName.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:DateTime.to_value));
+        ("FeatureTypes",
+          (Option.map x.featureTypes ~f:FeatureTypes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let lineItemGroups =
-        (Option.map ~f:LineItemGroupList.of_xml)
-          (Xml.child xml_arg0 "LineItemGroups") in
-      let summaryFields =
-        (Option.map ~f:ExpenseFieldList.of_xml)
-          (Xml.child xml_arg0 "SummaryFields") in
-      let expenseIndex =
-        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "ExpenseIndex") in
-      make ?lineItemGroups ?summaryFields ?expenseIndex ()
+      let featureTypes =
+        (Option.map ~f:FeatureTypes.of_xml)
+          (Xml.child xml_arg0 "FeatureTypes") in
+      let creationTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let adapterName =
+        (Option.map ~f:AdapterName.of_xml) (Xml.child xml_arg0 "AdapterName") in
+      let adapterId =
+        (Option.map ~f:AdapterId.of_xml) (Xml.child xml_arg0 "AdapterId") in
+      make ?featureTypes ?creationTime ?adapterName ?adapterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lineItemGroups =
-        field_map json "LineItemGroups" LineItemGroupList.of_json in
-      let summaryFields =
-        field_map json "SummaryFields" ExpenseFieldList.of_json in
-      let expenseIndex = field_map json "ExpenseIndex" UInteger.of_json in
-      make ?lineItemGroups ?summaryFields ?expenseIndex ()
+    let of_json json__ =
+      let featureTypes = field_map json__ "FeatureTypes" FeatureTypes.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
+      let adapterName = field_map json__ "AdapterName" AdapterName.of_json in
+      let adapterId = field_map json__ "AdapterId" AdapterId.of_json in
+      make ?featureTypes ?creationTime ?adapterName ?adapterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The structure holding all the information returned by AnalyzeExpense"]
+       "Contains information on the adapter, including the adapter ID, Name, Creation time, and feature types."]
+module AdapterVersionOverview =
+  struct
+    type nonrec t =
+      {
+      adapterId: AdapterId.t option
+        [@ocaml.doc
+          "A unique identifier for the adapter associated with a given adapter version."];
+      adapterVersion: AdapterVersion.t option
+        [@ocaml.doc "An identified for a given adapter version."];
+      creationTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time that a given adapter version was created."];
+      featureTypes: FeatureTypes.t option
+        [@ocaml.doc
+          "The feature types that the adapter version is operating on."];
+      status: AdapterVersionStatus.t option
+        [@ocaml.doc
+          "Contains information on the status of a given adapter version."];
+      statusMessage: AdapterVersionStatusMessage.t option
+        [@ocaml.doc
+          "A message explaining the status of a given adapter vesion."]}
+    let make ?adapterId =
+      fun ?adapterVersion ->
+        fun ?creationTime ->
+          fun ?featureTypes ->
+            fun ?status ->
+              fun ?statusMessage ->
+                fun () ->
+                  {
+                    adapterId;
+                    adapterVersion;
+                    creationTime;
+                    featureTypes;
+                    status;
+                    statusMessage
+                  }
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Option.map x.adapterId ~f:AdapterId.to_value));
+        ("AdapterVersion",
+          (Option.map x.adapterVersion ~f:AdapterVersion.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:DateTime.to_value));
+        ("FeatureTypes",
+          (Option.map x.featureTypes ~f:FeatureTypes.to_value));
+        ("Status", (Option.map x.status ~f:AdapterVersionStatus.to_value));
+        ("StatusMessage",
+          (Option.map x.statusMessage ~f:AdapterVersionStatusMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusMessage =
+        (Option.map ~f:AdapterVersionStatusMessage.of_xml)
+          (Xml.child xml_arg0 "StatusMessage") in
+      let status =
+        (Option.map ~f:AdapterVersionStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let featureTypes =
+        (Option.map ~f:FeatureTypes.of_xml)
+          (Xml.child xml_arg0 "FeatureTypes") in
+      let creationTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let adapterVersion =
+        (Option.map ~f:AdapterVersion.of_xml)
+          (Xml.child xml_arg0 "AdapterVersion") in
+      let adapterId =
+        (Option.map ~f:AdapterId.of_xml) (Xml.child xml_arg0 "AdapterId") in
+      make ?statusMessage ?status ?featureTypes ?creationTime ?adapterVersion
+        ?adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusMessage =
+        field_map json__ "StatusMessage" AdapterVersionStatusMessage.of_json in
+      let status = field_map json__ "Status" AdapterVersionStatus.of_json in
+      let featureTypes = field_map json__ "FeatureTypes" FeatureTypes.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
+      let adapterVersion =
+        field_map json__ "AdapterVersion" AdapterVersion.of_json in
+      let adapterId = field_map json__ "AdapterId" AdapterId.of_json in
+      make ?statusMessage ?status ?featureTypes ?creationTime ?adapterVersion
+        ?adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary info for an adapter version. Contains information on the AdapterId, AdapterVersion, CreationTime, FeatureTypes, and Status."]
+module DocumentGroupList =
+  struct
+    type nonrec t = DocumentGroup.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DocumentGroup.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DocumentGroup.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DocumentGroupList" ~of_json:DocumentGroup.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UndetectedDocumentTypeList =
+  struct
+    type nonrec t = NonEmptyString.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NonEmptyString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UndetectedDocumentTypeList"
+        ~of_json:NonEmptyString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Warning =
   struct
     type nonrec t =
@@ -1210,202 +3039,100 @@ module Warning =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?pages ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pages = field_map json "Pages" Pages.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let pages = field_map json__ "Pages" Pages.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
       make ?pages ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A warning about an issue that occurred during asynchronous text analysis (StartDocumentAnalysis) or asynchronous document text detection (StartDocumentTextDetection)."]
-module Block =
+module LendingResult =
   struct
     type nonrec t =
       {
-      blockType: BlockType.t option
-        [@ocaml.doc
-          "The type of text item that's recognized. In operations for text detection, the following types are returned: PAGE - Contains a list of the LINE Block objects that are detected on a document page. WORD - A word detected on a document page. A word is one or more ISO basic Latin script characters that aren't separated by spaces. LINE - A string of tab-delimited, contiguous words that are detected on a document page. In text analysis operations, the following types are returned: PAGE - Contains a list of child Block objects that are detected on a document page. KEY_VALUE_SET - Stores the KEY and VALUE Block objects for linked text that's detected on a document page. Use the EntityType field to determine if a KEY_VALUE_SET object is a KEY Block object or a VALUE Block object. WORD - A word that's detected on a document page. A word is one or more ISO basic Latin script characters that aren't separated by spaces. LINE - A string of tab-delimited, contiguous words that are detected on a document page. TABLE - A table that's detected on a document page. A table is grid-based information with two or more rows or columns, with a cell span of one row and one column each. CELL - A cell within a detected table. The cell is the parent of the block that contains the text in the cell. SELECTION_ELEMENT - A selection element such as an option button (radio button) or a check box that's detected on a document page. Use the value of SelectionStatus to determine the status of the selection element."];
-      confidence: Percent.t option
-        [@ocaml.doc
-          "The confidence score that Amazon Textract has in the accuracy of the recognized text and the accuracy of the geometry points around the recognized text."];
-      text: String_.t option
-        [@ocaml.doc
-          "The word or line of text that's recognized by Amazon Textract."];
-      textType: TextType.t option
-        [@ocaml.doc
-          "The kind of text that Amazon Textract has detected. Can check for handwritten text and printed text."];
-      rowIndex: UInteger.t option
-        [@ocaml.doc
-          "The row in which a table cell is located. The first row position is 1. RowIndex isn't returned by DetectDocumentText and GetDocumentTextDetection."];
-      columnIndex: UInteger.t option
-        [@ocaml.doc
-          "The column in which a table cell appears. The first column position is 1. ColumnIndex isn't returned by DetectDocumentText and GetDocumentTextDetection."];
-      rowSpan: UInteger.t option
-        [@ocaml.doc
-          "The number of rows that a table cell spans. Currently this value is always 1, even if the number of rows spanned is greater than 1. RowSpan isn't returned by DetectDocumentText and GetDocumentTextDetection."];
-      columnSpan: UInteger.t option
-        [@ocaml.doc
-          "The number of columns that a table cell spans. Currently this value is always 1, even if the number of columns spanned is greater than 1. ColumnSpan isn't returned by DetectDocumentText and GetDocumentTextDetection."];
-      geometry: Geometry.t option
-        [@ocaml.doc
-          "The location of the recognized text on the image. It includes an axis-aligned, coarse bounding box that surrounds the text, and a finer-grain polygon for more accurate spatial information."];
-      id: NonEmptyString.t option
-        [@ocaml.doc
-          "The identifier for the recognized text. The identifier is only unique for a single operation."];
-      relationships: RelationshipList.t option
-        [@ocaml.doc
-          "A list of child blocks of the current block. For example, a LINE object has child blocks for each WORD block that's part of the line of text. There aren't Relationship objects in the list for relationships that don't exist, such as when the current block has no child blocks. The list size can be the following: 0 - The block has no child blocks. 1 - The block has child blocks."];
-      entityTypes: EntityTypes.t option
-        [@ocaml.doc
-          "The type of entity. The following can be returned: KEY - An identifier for a field on the document. VALUE - The field text. EntityTypes isn't returned by DetectDocumentText and GetDocumentTextDetection."];
-      selectionStatus: SelectionStatus.t option
-        [@ocaml.doc
-          "The selection status of a selection element, such as an option button or check box."];
       page: UInteger.t option
         [@ocaml.doc
-          "The page on which a block was detected. Page is returned by asynchronous operations. Page values greater than 1 are only returned for multipage documents that are in PDF or TIFF format. A scanned image (JPEG/PNG), even if it contains multiple document pages, is considered to be a single-page document. The value of Page is always 1. Synchronous operations don't return Page because every input document is considered to be a single-page document."]}
-    let make ?blockType =
-      fun ?confidence ->
-        fun ?text ->
-          fun ?textType ->
-            fun ?rowIndex ->
-              fun ?columnIndex ->
-                fun ?rowSpan ->
-                  fun ?columnSpan ->
-                    fun ?geometry ->
-                      fun ?id ->
-                        fun ?relationships ->
-                          fun ?entityTypes ->
-                            fun ?selectionStatus ->
-                              fun ?page ->
-                                fun () ->
-                                  {
-                                    blockType;
-                                    confidence;
-                                    text;
-                                    textType;
-                                    rowIndex;
-                                    columnIndex;
-                                    rowSpan;
-                                    columnSpan;
-                                    geometry;
-                                    id;
-                                    relationships;
-                                    entityTypes;
-                                    selectionStatus;
-                                    page
-                                  }
+          "The page number for a page, with regard to whole submission."];
+      pageClassification: PageClassification.t option
+        [@ocaml.doc "The classifier result for a given page."];
+      extractions: ExtractionList.t option
+        [@ocaml.doc
+          "An array of Extraction to hold structured data. e.g. normalized key value pairs instead of raw OCR detections ."]}
+    let make ?page =
+      fun ?pageClassification ->
+        fun ?extractions ->
+          fun () -> { page; pageClassification; extractions }
     let to_value x =
       structure_to_value
-        [("BlockType", (Option.map x.blockType ~f:BlockType.to_value));
-        ("Confidence", (Option.map x.confidence ~f:Percent.to_value));
-        ("Text", (Option.map x.text ~f:String_.to_value));
-        ("TextType", (Option.map x.textType ~f:TextType.to_value));
-        ("RowIndex", (Option.map x.rowIndex ~f:UInteger.to_value));
-        ("ColumnIndex", (Option.map x.columnIndex ~f:UInteger.to_value));
-        ("RowSpan", (Option.map x.rowSpan ~f:UInteger.to_value));
-        ("ColumnSpan", (Option.map x.columnSpan ~f:UInteger.to_value));
-        ("Geometry", (Option.map x.geometry ~f:Geometry.to_value));
-        ("Id", (Option.map x.id ~f:NonEmptyString.to_value));
-        ("Relationships",
-          (Option.map x.relationships ~f:RelationshipList.to_value));
-        ("EntityTypes", (Option.map x.entityTypes ~f:EntityTypes.to_value));
-        ("SelectionStatus",
-          (Option.map x.selectionStatus ~f:SelectionStatus.to_value));
-        ("Page", (Option.map x.page ~f:UInteger.to_value))]
+        [("Page", (Option.map x.page ~f:UInteger.to_value));
+        ("PageClassification",
+          (Option.map x.pageClassification ~f:PageClassification.to_value));
+        ("Extractions",
+          (Option.map x.extractions ~f:ExtractionList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let extractions =
+        (Option.map ~f:ExtractionList.of_xml)
+          (Xml.child xml_arg0 "Extractions") in
+      let pageClassification =
+        (Option.map ~f:PageClassification.of_xml)
+          (Xml.child xml_arg0 "PageClassification") in
       let page = (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "Page") in
-      let selectionStatus =
-        (Option.map ~f:SelectionStatus.of_xml)
-          (Xml.child xml_arg0 "SelectionStatus") in
-      let entityTypes =
-        (Option.map ~f:EntityTypes.of_xml) (Xml.child xml_arg0 "EntityTypes") in
-      let relationships =
-        (Option.map ~f:RelationshipList.of_xml)
-          (Xml.child xml_arg0 "Relationships") in
-      let id =
-        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Id") in
-      let geometry =
-        (Option.map ~f:Geometry.of_xml) (Xml.child xml_arg0 "Geometry") in
-      let columnSpan =
-        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "ColumnSpan") in
-      let rowSpan =
-        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "RowSpan") in
-      let columnIndex =
-        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "ColumnIndex") in
-      let rowIndex =
-        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "RowIndex") in
-      let textType =
-        (Option.map ~f:TextType.of_xml) (Xml.child xml_arg0 "TextType") in
-      let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
-      let confidence =
-        (Option.map ~f:Percent.of_xml) (Xml.child xml_arg0 "Confidence") in
-      let blockType =
-        (Option.map ~f:BlockType.of_xml) (Xml.child xml_arg0 "BlockType") in
-      make ?page ?selectionStatus ?entityTypes ?relationships ?id ?geometry
-        ?columnSpan ?rowSpan ?columnIndex ?rowIndex ?textType ?text
-        ?confidence ?blockType ()
+      make ?extractions ?pageClassification ?page ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let page = field_map json "Page" UInteger.of_json in
-      let selectionStatus =
-        field_map json "SelectionStatus" SelectionStatus.of_json in
-      let entityTypes = field_map json "EntityTypes" EntityTypes.of_json in
-      let relationships =
-        field_map json "Relationships" RelationshipList.of_json in
-      let id = field_map json "Id" NonEmptyString.of_json in
-      let geometry = field_map json "Geometry" Geometry.of_json in
-      let columnSpan = field_map json "ColumnSpan" UInteger.of_json in
-      let rowSpan = field_map json "RowSpan" UInteger.of_json in
-      let columnIndex = field_map json "ColumnIndex" UInteger.of_json in
-      let rowIndex = field_map json "RowIndex" UInteger.of_json in
-      let textType = field_map json "TextType" TextType.of_json in
-      let text = field_map json "Text" String_.of_json in
-      let confidence = field_map json "Confidence" Percent.of_json in
-      let blockType = field_map json "BlockType" BlockType.of_json in
-      make ?page ?selectionStatus ?entityTypes ?relationships ?id ?geometry
-        ?columnSpan ?rowSpan ?columnIndex ?rowIndex ?textType ?text
-        ?confidence ?blockType ()
+    let of_json json__ =
+      let extractions = field_map json__ "Extractions" ExtractionList.of_json in
+      let pageClassification =
+        field_map json__ "PageClassification" PageClassification.of_json in
+      let page = field_map json__ "Page" UInteger.of_json in
+      make ?extractions ?pageClassification ?page ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A Block represents items that are recognized in a document within a group of pixels close to each other. The information returned in a Block object depends on the type of operation. In text detection for documents (for example DetectDocumentText), you get information about the detected words and lines of text. In text analysis (for example AnalyzeDocument), you can also get information about the fields, tables, and selection elements that are detected in the document. An array of Block objects is returned by both synchronous and asynchronous operations. In synchronous operations, such as DetectDocumentText, the array of Block objects is the entire set of results. In asynchronous operations, such as GetDocumentAnalysis, the array is returned over one or more responses. For more information, see How Amazon Textract Works."]
-module IdentityDocument =
+       "Contains the detections for each page analyzed through the Analyze Lending API."]
+module AdapterVersionEvaluationMetric =
   struct
     type nonrec t =
       {
-      documentIndex: UInteger.t option
+      baseline: EvaluationMetric.t option
         [@ocaml.doc
-          "Denotes the placement of a document in the IdentityDocument list. The first document is marked 1, the second 2 and so on."];
-      identityDocumentFields: IdentityDocumentFieldList.t option
+          "The F1 score, precision, and recall metrics for the baseline model."];
+      adapterVersion: EvaluationMetric.t option
         [@ocaml.doc
-          "The structure used to record information extracted from identity documents. Contains both normalized field and value of the extracted text."]}
-    let make ?documentIndex =
-      fun ?identityDocumentFields ->
-        fun () -> { documentIndex; identityDocumentFields }
+          "The F1 score, precision, and recall metrics for the baseline model."];
+      featureType: FeatureType.t option
+        [@ocaml.doc
+          "Indicates the feature type being analyzed by a given adapter version."]}
+    let make ?baseline =
+      fun ?adapterVersion ->
+        fun ?featureType ->
+          fun () -> { baseline; adapterVersion; featureType }
     let to_value x =
       structure_to_value
-        [("DocumentIndex", (Option.map x.documentIndex ~f:UInteger.to_value));
-        ("IdentityDocumentFields",
-          (Option.map x.identityDocumentFields
-             ~f:IdentityDocumentFieldList.to_value))]
+        [("Baseline", (Option.map x.baseline ~f:EvaluationMetric.to_value));
+        ("AdapterVersion",
+          (Option.map x.adapterVersion ~f:EvaluationMetric.to_value));
+        ("FeatureType", (Option.map x.featureType ~f:FeatureType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let identityDocumentFields =
-        (Option.map ~f:IdentityDocumentFieldList.of_xml)
-          (Xml.child xml_arg0 "IdentityDocumentFields") in
-      let documentIndex =
-        (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "DocumentIndex") in
-      make ?identityDocumentFields ?documentIndex ()
+      let featureType =
+        (Option.map ~f:FeatureType.of_xml) (Xml.child xml_arg0 "FeatureType") in
+      let adapterVersion =
+        (Option.map ~f:EvaluationMetric.of_xml)
+          (Xml.child xml_arg0 "AdapterVersion") in
+      let baseline =
+        (Option.map ~f:EvaluationMetric.of_xml)
+          (Xml.child xml_arg0 "Baseline") in
+      make ?featureType ?adapterVersion ?baseline ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identityDocumentFields =
-        field_map json "IdentityDocumentFields"
-          IdentityDocumentFieldList.of_json in
-      let documentIndex = field_map json "DocumentIndex" UInteger.of_json in
-      make ?identityDocumentFields ?documentIndex ()
+    let of_json json__ =
+      let featureType = field_map json__ "FeatureType" FeatureType.of_json in
+      let adapterVersion =
+        field_map json__ "AdapterVersion" EvaluationMetric.of_json in
+      let baseline = field_map json__ "Baseline" EvaluationMetric.of_json in
+      make ?featureType ?adapterVersion ?baseline ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The structure that lists each document processed in an AnalyzeID operation."]
+       "Contains information on the metrics used to evalute the peformance of a given adapter version. Includes data for baseline model performance and individual adapter version perfromance."]
 module Document =
   struct
     type nonrec t =
@@ -1429,9 +3156,9 @@ module Document =
         (Option.map ~f:ImageBlob.of_xml) (Xml.child xml_arg0 "Bytes") in
       make ?s3Object ?bytes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Object = field_map json "S3Object" S3Object.of_json in
-      let bytes = field_map json "Bytes" ImageBlob.of_json in
+    let of_json json__ =
+      let s3Object = field_map json__ "S3Object" S3Object.of_json in
+      let bytes = field_map json__ "Bytes" ImageBlob.of_json in
       make ?s3Object ?bytes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1456,6 +3183,9 @@ module HumanLoopActivationReasons =
     type nonrec t = HumanLoopActivationReason.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HumanLoopActivationReason.to_value)) |>
         (fun x -> `List x)
@@ -1525,9 +3255,9 @@ module HumanLoopDataAttributes =
           (Xml.child xml_arg0 "ContentClassifiers") in
       make ?contentClassifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contentClassifiers =
-        field_map json "ContentClassifiers" ContentClassifiers.of_json in
+        field_map json__ "ContentClassifiers" ContentClassifiers.of_json in
       make ?contentClassifiers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1566,6 +3296,241 @@ module AccessDeniedException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You aren't authorized to perform the action. Use the Amazon Resource Name (ARN) of an authorized user or IAM role to perform the operation."]
+module AdapterDescription =
+  struct
+    type nonrec t = string
+    let context_ = "AdapterDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9\\s!\"\\#\\$%'&\\(\\)\\*\\+\\,\\-\\./:;=\\?@\\[\\\\\\]\\^_`\\{\\|\\}~><]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AdapterDescription" j
+    let to_json = simple_to_json to_value
+  end
+module AutoUpdate =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AutoUpdate" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AutoUpdate" j)
+    let to_json = simple_to_json to_value
+  end
+module ConflictException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updating or deleting a resource can cause an inconsistent state."]
+module InternalServerError =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Amazon Textract experienced a service issue. Try your call again."]
+module InvalidParameterException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An input parameter violated a constraint. For example, in synchronous operations, an InvalidParameterException exception occurs when neither of the S3Object or Bytes values are supplied in the Document request parameter. Validate your parameter before calling the API operation again."]
+module ProvisionedThroughputExceededException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The number of requests exceeded your throughput limit. If you want to increase this limit, contact Amazon Textract."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returned when an operation tried to access a nonexistent resource."]
+module ThrottlingException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Amazon Textract is temporarily unable to process the request. Try your call again."]
+module ValidationException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates that a request was not valid. Check request for proper formatting."]
+module AmazonResourceName =
+  struct
+    type nonrec t = string
+    let context_ = "AmazonResourceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1011) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AmazonResourceName" j
+    let to_json = simple_to_json to_value
+  end
+module TagKeyList =
+  struct
+    type nonrec t = TagKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returned when a request cannot be completed as it would exceed a maximum service quota."]
+module TagMap =
+  struct
+    type nonrec t = (TagKey.t * TagValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((TagKey.of_string chopped),
+                              (TagValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (TagKey.to_value x) |>
+                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:TagKey.of_string
+        ~of_json:TagValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module BadDocumentException =
   struct
     type nonrec t = unit
@@ -1605,19 +3570,6 @@ module IdempotentParameterMismatchException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A ClientRequestToken input parameter was reused with an operation, but at least one of the other input parameters is different from the previous call to the operation."]
-module InternalServerError =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Amazon Textract experienced a service issue. Try your call again."]
 module InvalidKMSKeyException =
   struct
     type nonrec t = unit
@@ -1631,19 +3583,6 @@ module InvalidKMSKeyException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Indicates you do not have decrypt permissions with the KMS key entered, or the KMS key was entered incorrectly."]
-module InvalidParameterException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An input parameter violated a constraint. For example, in synchronous operations, an InvalidParameterException exception occurs when neither of the S3Object or Bytes values are supplied in the Document request parameter. Validate your parameter before calling the API operation again."]
 module InvalidS3ObjectException =
   struct
     type nonrec t = unit
@@ -1690,32 +3629,6 @@ module LimitExceededException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An Amazon Textract service limit was exceeded. For example, if you start too many asynchronous jobs concurrently, calls to start operations (StartDocumentTextDetection, for example) raise a LimitExceededException exception (HTTP status code: 400) until the number of concurrently running jobs is below the Amazon Textract service limit."]
-module ProvisionedThroughputExceededException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The number of requests exceeded your throughput limit. If you want to increase this limit, contact Amazon Textract."]
-module ThrottlingException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Amazon Textract is temporarily unable to process the request. Try your call again."]
 module UnsupportedDocumentException =
   struct
     type nonrec t = unit
@@ -1728,7 +3641,7 @@ module UnsupportedDocumentException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The format of the input document isn't supported. Documents for synchronous operations can be in PNG or JPEG format only. Documents for asynchronous operations can be in PDF format."]
+       "The format of the input document isn't supported. Documents for operations can be in PNG, JPEG, PDF, or TIFF format."]
 module ClientRequestToken =
   struct
     type nonrec t = string
@@ -1765,12 +3678,12 @@ module DocumentLocation =
         (Option.map ~f:S3Object.of_xml) (Xml.child xml_arg0 "S3Object") in
       make ?s3Object ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Object = field_map json "S3Object" S3Object.of_json in
+    let of_json json__ =
+      let s3Object = field_map json__ "S3Object" S3Object.of_json in
       make ?s3Object ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Amazon S3 bucket that contains the document to be processed. It's used by asynchronous operations such as StartDocumentTextDetection. The input document can be an image file in JPEG or PNG format. It can also be a file in PDF format."]
+       "The Amazon S3 bucket that contains the document to be processed. It's used by asynchronous operations. The input document can be an image file in JPEG or PNG format. It can also be a file in PDF format."]
 module JobTag =
   struct
     type nonrec t = string
@@ -1839,13 +3752,14 @@ module NotificationChannel =
           (Xml.child_exn ~context:context_ xml_arg0 "SNSTopicArn") in
       make ~roleArn ~sNSTopicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
-      let sNSTopicArn = field_map_exn json "SNSTopicArn" SNSTopicArn.of_json in
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "RoleArn" RoleArn.of_json in
+      let sNSTopicArn =
+        field_map_exn json__ "SNSTopicArn" SNSTopicArn.of_json in
       make ~roleArn ~sNSTopicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Amazon Simple Notification Service (Amazon SNS) topic to which Amazon Textract publishes the completion status of an asynchronous document operation, such as StartDocumentTextDetection."]
+       "The Amazon Simple Notification Service (Amazon SNS) topic to which Amazon Textract publishes the completion status of an asynchronous document operation."]
 module OutputConfig =
   struct
     type nonrec t =
@@ -1869,19 +3783,65 @@ module OutputConfig =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
       make ?s3Prefix ~s3Bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Prefix = field_map json "S3Prefix" S3ObjectName.of_json in
-      let s3Bucket = field_map_exn json "S3Bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let s3Prefix = field_map json__ "S3Prefix" S3ObjectName.of_json in
+      let s3Bucket = field_map_exn json__ "S3Bucket" S3Bucket.of_json in
       make ?s3Prefix ~s3Bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sets whether or not your output will go to a user created bucket. Used to set the name of the bucket, and the prefix on the output file. OutputConfig is an optional parameter which lets you adjust where your output will be placed. By default, Amazon Textract will store the results internally and can only be accessed by the Get API operations. With OutputConfig enabled, you can set the name of the bucket the output will be sent to and the file prefix of the results where you can download your results. Additionally, you can set the KMSKeyID parameter to a customer master key (CMK) to encrypt your output. Without this parameter set Amazon Textract will encrypt server-side using the AWS managed CMK for Amazon S3. Decryption of Customer Content is necessary for processing of the documents by Amazon Textract. If your account is opted out under an AI services opt out policy then all unencrypted Customer Content is immediately and permanently deleted after the Customer Content has been processed by the service. No copy of of the output is retained by Amazon Textract. For information about how to opt out, see Managing AI services opt-out policy. For more information on data privacy, see the Data Privacy FAQ."]
-module FeatureTypes =
+       "Sets whether or not your output will go to a user created bucket. Used to set the name of the bucket, and the prefix on the output file. OutputConfig is an optional parameter which lets you adjust where your output will be placed. By default, Amazon Textract will store the results internally and can only be accessed by the Get API operations. With OutputConfig enabled, you can set the name of the bucket the output will be sent to the file prefix of the results where you can download your results. Additionally, you can set the KMSKeyID parameter to a customer master key (CMK) to encrypt your output. Without this parameter set Amazon Textract will encrypt server-side using the AWS managed CMK for Amazon S3. Decryption of Customer Content is necessary for processing of the documents by Amazon Textract. If your account is opted out under an AI services opt out policy then all unencrypted Customer Content is immediately and permanently deleted after the Customer Content has been processed by the service. No copy of of the output is retained by Amazon Textract. For information about how to opt out, see Managing AI services opt-out policy. For more information on data privacy, see the Data Privacy FAQ."]
+module AdaptersConfig =
   struct
-    type nonrec t = FeatureType.t list
+    type nonrec t =
+      {
+      adapters: Adapters.t
+        [@ocaml.doc
+          "A list of adapters to be used when analyzing the specified document."]}
+    let context_ = "AdaptersConfig"
+    let make ~adapters = fun () -> { adapters }
+    let to_value x =
+      structure_to_value
+        [("Adapters", (Some (Adapters.to_value x.adapters)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adapters =
+        Adapters.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Adapters") in
+      make ~adapters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adapters = field_map_exn json__ "Adapters" Adapters.of_json in
+      make ~adapters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about adapters used when analyzing a document, with each adapter specified using an AdapterId and version"]
+module QueriesConfig =
+  struct
+    type nonrec t = {
+      queries: Queries.t }
+    let context_ = "QueriesConfig"
+    let make ~queries = fun () -> { queries }
+    let to_value x =
+      structure_to_value [("Queries", (Some (Queries.to_value x.queries)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queries =
+        Queries.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Queries") in
+      make ~queries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queries = field_map_exn json__ "Queries" Queries.of_json in
+      make ~queries ()
+    let to_json v = composed_to_json to_value v
+  end
+module AdapterList =
+  struct
+    type nonrec t = AdapterOverview.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:FeatureType.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:AdapterOverview.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -1895,9 +3855,73 @@ module FeatureTypes =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:FeatureType.of_xml)
+                     | _ -> true))) ~f:AdapterOverview.of_xml)
     let of_json j =
-      list_of_json ~kind:"FeatureTypes" ~of_json:FeatureType.of_json j
+      list_of_json ~kind:"AdapterList" ~of_json:AdapterOverview.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PaginationToken =
+  struct
+    type nonrec t = string
+    let context_ = "PaginationToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PaginationToken" j
+    let to_json = simple_to_json to_value
+  end
+module MaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AdapterVersionList =
+  struct
+    type nonrec t = AdapterVersionOverview.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AdapterVersionOverview.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AdapterVersionOverview.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AdapterVersionList"
+        ~of_json:AdapterVersionOverview.of_json j
     let to_json v = composed_to_json to_value v
   end
 module DocumentMetadata =
@@ -1916,35 +3940,10 @@ module DocumentMetadata =
         (Option.map ~f:UInteger.of_xml) (Xml.child xml_arg0 "Pages") in
       make ?pages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pages = field_map json "Pages" UInteger.of_json in make ?pages ()
+    let of_json json__ =
+      let pages = field_map json__ "Pages" UInteger.of_json in make ?pages ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the input document."]
-module ExpenseDocumentList =
-  struct
-    type nonrec t = ExpenseDocument.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:ExpenseDocument.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ExpenseDocument.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ExpenseDocumentList"
-        ~of_json:ExpenseDocument.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module InvalidJobIdException =
   struct
     type nonrec t = unit
@@ -1957,7 +3956,7 @@ module InvalidJobIdException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An invalid job identifier was passed to GetDocumentAnalysis or to GetDocumentAnalysis."]
+       "An invalid job identifier was passed to an asynchronous analysis operation."]
 module JobStatus =
   struct
     type nonrec t =
@@ -1989,26 +3988,44 @@ module JobStatus =
     let of_json j = of_string (string_of_json ~kind:"JobStatus" j)
     let to_json = simple_to_json to_value
   end
-module PaginationToken =
+module LendingSummary =
   struct
-    type nonrec t = string
-    let context_ = "PaginationToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:255) >>=
-                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      documentGroups: DocumentGroupList.t option
+        [@ocaml.doc "Contains an array of all DocumentGroup objects."];
+      undetectedDocumentTypes: UndetectedDocumentTypeList.t option
+        [@ocaml.doc "UndetectedDocumentTypes."]}
+    let make ?documentGroups =
+      fun ?undetectedDocumentTypes ->
+        fun () -> { documentGroups; undetectedDocumentTypes }
+    let to_value x =
+      structure_to_value
+        [("DocumentGroups",
+           (Option.map x.documentGroups ~f:DocumentGroupList.to_value));
+        ("UndetectedDocumentTypes",
+          (Option.map x.undetectedDocumentTypes
+             ~f:UndetectedDocumentTypeList.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"PaginationToken" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let undetectedDocumentTypes =
+        (Option.map ~f:UndetectedDocumentTypeList.of_xml)
+          (Xml.child xml_arg0 "UndetectedDocumentTypes") in
+      let documentGroups =
+        (Option.map ~f:DocumentGroupList.of_xml)
+          (Xml.child xml_arg0 "DocumentGroups") in
+      make ?undetectedDocumentTypes ?documentGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let undetectedDocumentTypes =
+        field_map json__ "UndetectedDocumentTypes"
+          UndetectedDocumentTypeList.of_json in
+      let documentGroups =
+        field_map json__ "DocumentGroups" DocumentGroupList.of_json in
+      make ?undetectedDocumentTypes ?documentGroups ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information regarding DocumentGroups and UndetectedDocumentTypes."]
 module StatusMessage =
   struct
     type nonrec t = string
@@ -2026,6 +4043,9 @@ module Warnings =
   struct
     type nonrec t = Warning.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Warning.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2045,27 +4065,15 @@ module Warnings =
     let of_json j = list_of_json ~kind:"Warnings" ~of_json:Warning.of_json j
     let to_json v = composed_to_json to_value v
   end
-module MaxResults =
+module LendingResultList =
   struct
-    type nonrec t = int
-    let make i =
-      let open Result in ok_or_failwith (check_int_min i ~min:1); i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module BlockList =
-  struct
-    type nonrec t = Block.t list
+    type nonrec t = LendingResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:Block.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:LendingResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -2079,14 +4087,98 @@ module BlockList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:Block.of_xml)
-    let of_json j = list_of_json ~kind:"BlockList" ~of_json:Block.of_json j
+                     | _ -> true))) ~f:LendingResult.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LendingResultList" ~of_json:LendingResult.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExpenseDocumentList =
+  struct
+    type nonrec t = ExpenseDocument.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExpenseDocument.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExpenseDocument.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExpenseDocumentList"
+        ~of_json:ExpenseDocument.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AdapterVersionDatasetConfig =
+  struct
+    type nonrec t = {
+      manifestS3Object: S3Object.t option }
+    let make ?manifestS3Object = fun () -> { manifestS3Object }
+    let to_value x =
+      structure_to_value
+        [("ManifestS3Object",
+           (Option.map x.manifestS3Object ~f:S3Object.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let manifestS3Object =
+        (Option.map ~f:S3Object.of_xml)
+          (Xml.child xml_arg0 "ManifestS3Object") in
+      make ?manifestS3Object ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let manifestS3Object =
+        field_map json__ "ManifestS3Object" S3Object.of_json in
+      make ?manifestS3Object ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The dataset configuration options for a given version of an adapter. Can include an Amazon S3 bucket if specified."]
+module AdapterVersionEvaluationMetrics =
+  struct
+    type nonrec t = AdapterVersionEvaluationMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AdapterVersionEvaluationMetric.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AdapterVersionEvaluationMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AdapterVersionEvaluationMetrics"
+        ~of_json:AdapterVersionEvaluationMetric.of_json j
     let to_json v = composed_to_json to_value v
   end
 module IdentityDocumentList =
   struct
     type nonrec t = IdentityDocument.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IdentityDocument.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2116,6 +4208,9 @@ module DocumentPages =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Document.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2183,14 +4278,14 @@ module HumanLoopActivationOutput =
       make ?humanLoopActivationConditionsEvaluationResults
         ?humanLoopActivationReasons ?humanLoopArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let humanLoopActivationConditionsEvaluationResults =
-        field_map json "HumanLoopActivationConditionsEvaluationResults"
+        field_map json__ "HumanLoopActivationConditionsEvaluationResults"
           HumanLoopActivationConditionsEvaluationResults.of_json in
       let humanLoopActivationReasons =
-        field_map json "HumanLoopActivationReasons"
+        field_map json__ "HumanLoopActivationReasons"
           HumanLoopActivationReasons.of_json in
-      let humanLoopArn = field_map json "HumanLoopArn" HumanLoopArn.of_json in
+      let humanLoopArn = field_map json__ "HumanLoopArn" HumanLoopArn.of_json in
       make ?humanLoopActivationConditionsEvaluationResults
         ?humanLoopActivationReasons ?humanLoopArn ()
     let to_json v = composed_to_json to_value v
@@ -2222,10 +4317,10 @@ module HumanLoopQuotaExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
       make ?serviceCode ?quotaCode ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map json "ServiceCode" String_.of_json in
-      let quotaCode = field_map json "QuotaCode" String_.of_json in
-      let resourceType = field_map json "ResourceType" String_.of_json in
+    let of_json json__ =
+      let serviceCode = field_map json__ "ServiceCode" String_.of_json in
+      let quotaCode = field_map json__ "QuotaCode" String_.of_json in
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
       make ?serviceCode ?quotaCode ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2266,17 +4361,745 @@ module HumanLoopConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "HumanLoopName") in
       make ?dataAttributes ~flowDefinitionArn ~humanLoopName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataAttributes =
-        field_map json "DataAttributes" HumanLoopDataAttributes.of_json in
+        field_map json__ "DataAttributes" HumanLoopDataAttributes.of_json in
       let flowDefinitionArn =
-        field_map_exn json "FlowDefinitionArn" FlowDefinitionArn.of_json in
+        field_map_exn json__ "FlowDefinitionArn" FlowDefinitionArn.of_json in
       let humanLoopName =
-        field_map_exn json "HumanLoopName" HumanLoopName.of_json in
+        field_map_exn json__ "HumanLoopName" HumanLoopName.of_json in
       make ?dataAttributes ~flowDefinitionArn ~humanLoopName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Sets up the human review workflow the document will be sent to if one of the conditions is met. You can also set certain attributes of the image before review."]
+module UpdateAdapterResponse =
+  struct
+    type nonrec t =
+      {
+      adapterId: AdapterId.t option
+        [@ocaml.doc
+          "A string containing a unique ID for the adapter that has been updated."];
+      adapterName: AdapterName.t option
+        [@ocaml.doc
+          "A string containing the name of the adapter that has been updated."];
+      creationTime: DateTime.t option
+        [@ocaml.doc
+          "An object specifying the creation time of the the adapter that has been updated."];
+      description: AdapterDescription.t option
+        [@ocaml.doc
+          "A string containing the description of the adapter that has been updated."];
+      featureTypes: FeatureTypes.t option
+        [@ocaml.doc
+          "List of the targeted feature types for the updated adapter."];
+      autoUpdate: AutoUpdate.t option
+        [@ocaml.doc
+          "The auto-update status of the adapter that has been updated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adapterId =
+      fun ?adapterName ->
+        fun ?creationTime ->
+          fun ?description ->
+            fun ?featureTypes ->
+              fun ?autoUpdate ->
+                fun () ->
+                  {
+                    adapterId;
+                    adapterName;
+                    creationTime;
+                    description;
+                    featureTypes;
+                    autoUpdate
+                  }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Option.map x.adapterId ~f:AdapterId.to_value));
+        ("AdapterName", (Option.map x.adapterName ~f:AdapterName.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:DateTime.to_value));
+        ("Description",
+          (Option.map x.description ~f:AdapterDescription.to_value));
+        ("FeatureTypes",
+          (Option.map x.featureTypes ~f:FeatureTypes.to_value));
+        ("AutoUpdate", (Option.map x.autoUpdate ~f:AutoUpdate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let autoUpdate =
+        (Option.map ~f:AutoUpdate.of_xml) (Xml.child xml_arg0 "AutoUpdate") in
+      let featureTypes =
+        (Option.map ~f:FeatureTypes.of_xml)
+          (Xml.child xml_arg0 "FeatureTypes") in
+      let description =
+        (Option.map ~f:AdapterDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let creationTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let adapterName =
+        (Option.map ~f:AdapterName.of_xml) (Xml.child xml_arg0 "AdapterName") in
+      let adapterId =
+        (Option.map ~f:AdapterId.of_xml) (Xml.child xml_arg0 "AdapterId") in
+      make ?autoUpdate ?featureTypes ?description ?creationTime ?adapterName
+        ?adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let autoUpdate = field_map json__ "AutoUpdate" AutoUpdate.of_json in
+      let featureTypes = field_map json__ "FeatureTypes" FeatureTypes.of_json in
+      let description =
+        field_map json__ "Description" AdapterDescription.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
+      let adapterName = field_map json__ "AdapterName" AdapterName.of_json in
+      let adapterId = field_map json__ "AdapterId" AdapterId.of_json in
+      make ?autoUpdate ?featureTypes ?description ?creationTime ?adapterName
+        ?adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update the configuration for an adapter. FeatureTypes configurations cannot be updated. At least one new parameter must be specified as an argument."]
+module UpdateAdapterRequest =
+  struct
+    type nonrec t =
+      {
+      adapterId: AdapterId.t
+        [@ocaml.doc
+          "A string containing a unique ID for the adapter that will be updated."];
+      description: AdapterDescription.t option
+        [@ocaml.doc "The new description to be applied to the adapter."];
+      adapterName: AdapterName.t option
+        [@ocaml.doc "The new name to be applied to the adapter."];
+      autoUpdate: AutoUpdate.t option
+        [@ocaml.doc
+          "The new auto-update status to be applied to the adapter."]}
+    let context_ = "UpdateAdapterRequest"
+    let make ?description =
+      fun ?adapterName ->
+        fun ?autoUpdate ->
+          fun ~adapterId ->
+            fun () -> { description; adapterName; autoUpdate; adapterId }
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Some (AdapterId.to_value x.adapterId)));
+        ("Description",
+          (Option.map x.description ~f:AdapterDescription.to_value));
+        ("AdapterName", (Option.map x.adapterName ~f:AdapterName.to_value));
+        ("AutoUpdate", (Option.map x.autoUpdate ~f:AutoUpdate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let autoUpdate =
+        (Option.map ~f:AutoUpdate.of_xml) (Xml.child xml_arg0 "AutoUpdate") in
+      let adapterName =
+        (Option.map ~f:AdapterName.of_xml) (Xml.child xml_arg0 "AdapterName") in
+      let description =
+        (Option.map ~f:AdapterDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let adapterId =
+        AdapterId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AdapterId") in
+      make ?autoUpdate ?adapterName ?description ~adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let autoUpdate = field_map json__ "AutoUpdate" AutoUpdate.of_json in
+      let adapterName = field_map json__ "AdapterName" AdapterName.of_json in
+      let description =
+        field_map json__ "Description" AdapterDescription.of_json in
+      let adapterId = field_map_exn json__ "AdapterId" AdapterId.of_json in
+      make ?autoUpdate ?adapterName ?description ~adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update the configuration for an adapter. FeatureTypes configurations cannot be updated. At least one new parameter must be specified as an argument."]
+module UntagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes any tags with the specified keys from the specified resource."]
+module UntagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that specifies the resource to be untagged."];
+      tagKeys: TagKeyList.t
+        [@ocaml.doc
+          "Specifies the tags to be removed from the resource specified by the ResourceARN."]}
+    let context_ = "UntagResourceRequest"
+    let make ~resourceARN =
+      fun ~tagKeys -> fun () -> { resourceARN; tagKeys }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("TagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagKeys =
+        TagKeyList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~tagKeys ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~tagKeys ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes any tags with the specified keys from the specified resource."]
+module TagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Adds one or more tags to the specified resource."]
+module TagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that specifies the resource to be tagged."];
+      tags: TagMap.t
+        [@ocaml.doc
+          "A set of tags (key-value pairs) that you want to assign to the resource."]}
+    let context_ = "TagResourceRequest"
+    let make ~resourceARN = fun ~tags -> fun () -> { resourceARN; tags }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("Tags", (Some (TagMap.to_value x.tags)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        TagMap.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~tags ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~tags ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Adds one or more tags to the specified resource."]
+module StartLendingAnalysisResponse =
+  struct
+    type nonrec t =
+      {
+      jobId: JobId.t option
+        [@ocaml.doc
+          "A unique identifier for the lending or text-detection job. The JobId is returned from StartLendingAnalysis. A JobId value is only valid for 7 days."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `BadDocumentException of BadDocumentException.t 
+      | `DocumentTooLargeException of DocumentTooLargeException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidKMSKeyException of InvalidKMSKeyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidS3ObjectException of InvalidS3ObjectException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnsupportedDocumentException of UnsupportedDocumentException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobId = fun () -> { jobId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "BadDocumentException" ->
+          `BadDocumentException (BadDocumentException.of_json json)
+      | "DocumentTooLargeException" ->
+          `DocumentTooLargeException (DocumentTooLargeException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidKMSKeyException" ->
+          `InvalidKMSKeyException (InvalidKMSKeyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidS3ObjectException" ->
+          `InvalidS3ObjectException (InvalidS3ObjectException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnsupportedDocumentException" ->
+          `UnsupportedDocumentException
+            (UnsupportedDocumentException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "BadDocumentException" ->
+          `BadDocumentException (BadDocumentException.of_xml xml)
+      | "DocumentTooLargeException" ->
+          `DocumentTooLargeException (DocumentTooLargeException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidKMSKeyException" ->
+          `InvalidKMSKeyException (InvalidKMSKeyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidS3ObjectException" ->
+          `InvalidS3ObjectException (InvalidS3ObjectException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnsupportedDocumentException" ->
+          `UnsupportedDocumentException
+            (UnsupportedDocumentException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `BadDocumentException e ->
+          `Assoc
+            [("error", (`String "BadDocumentException"));
+            ("details", (BadDocumentException.to_json e))]
+      | `DocumentTooLargeException e ->
+          `Assoc
+            [("error", (`String "DocumentTooLargeException"));
+            ("details", (DocumentTooLargeException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidKMSKeyException e ->
+          `Assoc
+            [("error", (`String "InvalidKMSKeyException"));
+            ("details", (InvalidKMSKeyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidS3ObjectException e ->
+          `Assoc
+            [("error", (`String "InvalidS3ObjectException"));
+            ("details", (InvalidS3ObjectException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnsupportedDocumentException e ->
+          `Assoc
+            [("error", (`String "UnsupportedDocumentException"));
+            ("details", (UnsupportedDocumentException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("JobId", (Option.map x.jobId ~f:JobId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
+      make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts the classification and analysis of an input document. StartLendingAnalysis initiates the classification and analysis of a packet of lending documents. StartLendingAnalysis operates on a document file located in an Amazon S3 bucket. StartLendingAnalysis can analyze text in documents that are in one of the following formats: JPEG, PNG, TIFF, PDF. Use DocumentLocation to specify the bucket name and the file name of the document. StartLendingAnalysis returns a job identifier (JobId) that you use to get the results of the operation. When the text analysis is finished, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that you specify in NotificationChannel. To get the results of the text analysis operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If the status is SUCCEEDED you can call either GetLendingAnalysis or GetLendingAnalysisSummary and provide the JobId to obtain the results of the analysis. If using OutputConfig to specify an Amazon S3 bucket, the output will be contained within the specified prefix in a directory labeled with the job-id. In the directory there are 3 sub-directories: detailedResponse (contains the GetLendingAnalysis response) summaryResponse (for the GetLendingAnalysisSummary response) splitDocuments (documents split across logical boundaries)"]
+module StartLendingAnalysisRequest =
+  struct
+    type nonrec t =
+      {
+      documentLocation: DocumentLocation.t ;
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "The idempotent token that you use to identify the start request. If you use the same token with multiple StartLendingAnalysis requests, the same JobId is returned. Use ClientRequestToken to prevent the same job from being accidentally started more than once. For more information, see Calling Amazon Textract Asynchronous Operations."];
+      jobTag: JobTag.t option
+        [@ocaml.doc
+          "An identifier that you specify to be included in the completion notification published to the Amazon SNS topic. For example, you can use JobTag to identify the type of document that the completion notification corresponds to (such as a tax form or a receipt)."];
+      notificationChannel: NotificationChannel.t option ;
+      outputConfig: OutputConfig.t option ;
+      kMSKeyId: KMSKeyId.t option
+        [@ocaml.doc
+          "The KMS key used to encrypt the inference results. This can be in either Key ID or Key Alias format. When a KMS key is provided, the KMS key will be used for server-side encryption of the objects in the customer bucket. When this parameter is not enabled, the result will be encrypted server side, using SSE-S3."]}
+    let context_ = "StartLendingAnalysisRequest"
+    let make ?clientRequestToken =
+      fun ?jobTag ->
+        fun ?notificationChannel ->
+          fun ?outputConfig ->
+            fun ?kMSKeyId ->
+              fun ~documentLocation ->
+                fun () ->
+                  {
+                    clientRequestToken;
+                    jobTag;
+                    notificationChannel;
+                    outputConfig;
+                    kMSKeyId;
+                    documentLocation
+                  }
+    let to_value x =
+      structure_to_value
+        [("DocumentLocation",
+           (Some (DocumentLocation.to_value x.documentLocation)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("JobTag", (Option.map x.jobTag ~f:JobTag.to_value));
+        ("NotificationChannel",
+          (Option.map x.notificationChannel ~f:NotificationChannel.to_value));
+        ("OutputConfig",
+          (Option.map x.outputConfig ~f:OutputConfig.to_value));
+        ("KMSKeyId", (Option.map x.kMSKeyId ~f:KMSKeyId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kMSKeyId =
+        (Option.map ~f:KMSKeyId.of_xml) (Xml.child xml_arg0 "KMSKeyId") in
+      let outputConfig =
+        (Option.map ~f:OutputConfig.of_xml)
+          (Xml.child xml_arg0 "OutputConfig") in
+      let notificationChannel =
+        (Option.map ~f:NotificationChannel.of_xml)
+          (Xml.child xml_arg0 "NotificationChannel") in
+      let jobTag =
+        (Option.map ~f:JobTag.of_xml) (Xml.child xml_arg0 "JobTag") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let documentLocation =
+        DocumentLocation.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DocumentLocation") in
+      make ?kMSKeyId ?outputConfig ?notificationChannel ?jobTag
+        ?clientRequestToken ~documentLocation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kMSKeyId = field_map json__ "KMSKeyId" KMSKeyId.of_json in
+      let outputConfig = field_map json__ "OutputConfig" OutputConfig.of_json in
+      let notificationChannel =
+        field_map json__ "NotificationChannel" NotificationChannel.of_json in
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let documentLocation =
+        field_map_exn json__ "DocumentLocation" DocumentLocation.of_json in
+      make ?kMSKeyId ?outputConfig ?notificationChannel ?jobTag
+        ?clientRequestToken ~documentLocation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts the classification and analysis of an input document. StartLendingAnalysis initiates the classification and analysis of a packet of lending documents. StartLendingAnalysis operates on a document file located in an Amazon S3 bucket. StartLendingAnalysis can analyze text in documents that are in one of the following formats: JPEG, PNG, TIFF, PDF. Use DocumentLocation to specify the bucket name and the file name of the document. StartLendingAnalysis returns a job identifier (JobId) that you use to get the results of the operation. When the text analysis is finished, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that you specify in NotificationChannel. To get the results of the text analysis operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If the status is SUCCEEDED you can call either GetLendingAnalysis or GetLendingAnalysisSummary and provide the JobId to obtain the results of the analysis. If using OutputConfig to specify an Amazon S3 bucket, the output will be contained within the specified prefix in a directory labeled with the job-id. In the directory there are 3 sub-directories: detailedResponse (contains the GetLendingAnalysis response) summaryResponse (for the GetLendingAnalysisSummary response) splitDocuments (documents split across logical boundaries)"]
 module StartExpenseAnalysisResponse =
   struct
     type nonrec t =
@@ -2426,8 +5249,8 @@ module StartExpenseAnalysisResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts the asynchronous analysis of invoices or receipts for data like contact information, items purchased, and vendor names. StartExpenseAnalysis can analyze text in documents that are in JPEG, PNG, and PDF format. The documents must be stored in an Amazon S3 bucket. Use the DocumentLocation parameter to specify the name of your S3 bucket and the name of the document in that bucket. StartExpenseAnalysis returns a job identifier (JobId) that you will provide to GetExpenseAnalysis to retrieve the results of the operation. When the analysis of the input invoices/receipts is finished, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that you provide to the NotificationChannel. To obtain the results of the invoice and receipt analysis operation, ensure that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetExpenseAnalysis, and pass the job identifier (JobId) that was returned by your call to StartExpenseAnalysis. For more information, see Analyzing Invoices and Receipts."]
@@ -2501,16 +5324,16 @@ module StartExpenseAnalysisRequest =
       make ?kMSKeyId ?outputConfig ?notificationChannel ?jobTag
         ?clientRequestToken ~documentLocation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kMSKeyId = field_map json "KMSKeyId" KMSKeyId.of_json in
-      let outputConfig = field_map json "OutputConfig" OutputConfig.of_json in
+    let of_json json__ =
+      let kMSKeyId = field_map json__ "KMSKeyId" KMSKeyId.of_json in
+      let outputConfig = field_map json__ "OutputConfig" OutputConfig.of_json in
       let notificationChannel =
-        field_map json "NotificationChannel" NotificationChannel.of_json in
-      let jobTag = field_map json "JobTag" JobTag.of_json in
+        field_map json__ "NotificationChannel" NotificationChannel.of_json in
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let documentLocation =
-        field_map_exn json "DocumentLocation" DocumentLocation.of_json in
+        field_map_exn json__ "DocumentLocation" DocumentLocation.of_json in
       make ?kMSKeyId ?outputConfig ?notificationChannel ?jobTag
         ?clientRequestToken ~documentLocation ()
     let to_json v = composed_to_json to_value v
@@ -2665,11 +5488,11 @@ module StartDocumentTextDetectionResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts the asynchronous detection of text in a document. Amazon Textract can detect lines of text and the words that make up a line of text. StartDocumentTextDetection can analyze text in documents that are in JPEG, PNG, TIFF, and PDF format. The documents are stored in an Amazon S3 bucket. Use DocumentLocation to specify the bucket name and file name of the document. StartTextDetection returns a job identifier (JobId) that you use to get the results of the operation. When text detection is finished, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that you specify in NotificationChannel. To get the results of the text detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetDocumentTextDetection, and pass the job identifier (JobId) from the initial call to StartDocumentTextDetection. For more information, see Document Text Detection."]
+       "Starts the asynchronous detection of text in a document. Amazon Textract can detect lines of text and the words that make up a line of text. StartDocumentTextDetection can analyze text in documents that are in JPEG, PNG, TIFF, and PDF format. The documents are stored in an Amazon S3 bucket. Use DocumentLocation to specify the bucket name and file name of the document. StartDocumentTextDetection returns a job identifier (JobId) that you use to get the results of the operation. When text detection is finished, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that you specify in NotificationChannel. To get the results of the text detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetDocumentTextDetection, and pass the job identifier (JobId) from the initial call to StartDocumentTextDetection. For more information, see Document Text Detection."]
 module StartDocumentTextDetectionRequest =
   struct
     type nonrec t =
@@ -2740,21 +5563,21 @@ module StartDocumentTextDetectionRequest =
       make ?kMSKeyId ?outputConfig ?notificationChannel ?jobTag
         ?clientRequestToken ~documentLocation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kMSKeyId = field_map json "KMSKeyId" KMSKeyId.of_json in
-      let outputConfig = field_map json "OutputConfig" OutputConfig.of_json in
+    let of_json json__ =
+      let kMSKeyId = field_map json__ "KMSKeyId" KMSKeyId.of_json in
+      let outputConfig = field_map json__ "OutputConfig" OutputConfig.of_json in
       let notificationChannel =
-        field_map json "NotificationChannel" NotificationChannel.of_json in
-      let jobTag = field_map json "JobTag" JobTag.of_json in
+        field_map json__ "NotificationChannel" NotificationChannel.of_json in
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let documentLocation =
-        field_map_exn json "DocumentLocation" DocumentLocation.of_json in
+        field_map_exn json__ "DocumentLocation" DocumentLocation.of_json in
       make ?kMSKeyId ?outputConfig ?notificationChannel ?jobTag
         ?clientRequestToken ~documentLocation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts the asynchronous detection of text in a document. Amazon Textract can detect lines of text and the words that make up a line of text. StartDocumentTextDetection can analyze text in documents that are in JPEG, PNG, TIFF, and PDF format. The documents are stored in an Amazon S3 bucket. Use DocumentLocation to specify the bucket name and file name of the document. StartTextDetection returns a job identifier (JobId) that you use to get the results of the operation. When text detection is finished, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that you specify in NotificationChannel. To get the results of the text detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetDocumentTextDetection, and pass the job identifier (JobId) from the initial call to StartDocumentTextDetection. For more information, see Document Text Detection."]
+       "Starts the asynchronous detection of text in a document. Amazon Textract can detect lines of text and the words that make up a line of text. StartDocumentTextDetection can analyze text in documents that are in JPEG, PNG, TIFF, and PDF format. The documents are stored in an Amazon S3 bucket. Use DocumentLocation to specify the bucket name and file name of the document. StartDocumentTextDetection returns a job identifier (JobId) that you use to get the results of the operation. When text detection is finished, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that you specify in NotificationChannel. To get the results of the text detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetDocumentTextDetection, and pass the job identifier (JobId) from the initial call to StartDocumentTextDetection. For more information, see Document Text Detection."]
 module StartDocumentAnalysisResponse =
   struct
     type nonrec t =
@@ -2904,8 +5727,8 @@ module StartDocumentAnalysisResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts the asynchronous analysis of an input document for relationships between detected items such as key-value pairs, tables, and selection elements. StartDocumentAnalysis can analyze text in documents that are in JPEG, PNG, TIFF, and PDF format. The documents are stored in an Amazon S3 bucket. Use DocumentLocation to specify the bucket name and file name of the document. StartDocumentAnalysis returns a job identifier (JobId) that you use to get the results of the operation. When text analysis is finished, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that you specify in NotificationChannel. To get the results of the text analysis operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetDocumentAnalysis, and pass the job identifier (JobId) from the initial call to StartDocumentAnalysis. For more information, see Document Text Analysis."]
@@ -2932,25 +5755,33 @@ module StartDocumentAnalysisRequest =
           "Sets if the output will go to a customer defined bucket. By default, Amazon Textract will save the results internally to be accessed by the GetDocumentAnalysis operation."];
       kMSKeyId: KMSKeyId.t option
         [@ocaml.doc
-          "The KMS key used to encrypt the inference results. This can be in either Key ID or Key Alias format. When a KMS key is provided, the KMS key will be used for server-side encryption of the objects in the customer bucket. When this parameter is not enabled, the result will be encrypted server side,using SSE-S3."]}
+          "The KMS key used to encrypt the inference results. This can be in either Key ID or Key Alias format. When a KMS key is provided, the KMS key will be used for server-side encryption of the objects in the customer bucket. When this parameter is not enabled, the result will be encrypted server side,using SSE-S3."];
+      queriesConfig: QueriesConfig.t option ;
+      adaptersConfig: AdaptersConfig.t option
+        [@ocaml.doc
+          "Specifies the adapter to be used when analyzing a document."]}
     let context_ = "StartDocumentAnalysisRequest"
     let make ?clientRequestToken =
       fun ?jobTag ->
         fun ?notificationChannel ->
           fun ?outputConfig ->
             fun ?kMSKeyId ->
-              fun ~documentLocation ->
-                fun ~featureTypes ->
-                  fun () ->
-                    {
-                      clientRequestToken;
-                      jobTag;
-                      notificationChannel;
-                      outputConfig;
-                      kMSKeyId;
-                      documentLocation;
-                      featureTypes
-                    }
+              fun ?queriesConfig ->
+                fun ?adaptersConfig ->
+                  fun ~documentLocation ->
+                    fun ~featureTypes ->
+                      fun () ->
+                        {
+                          clientRequestToken;
+                          jobTag;
+                          notificationChannel;
+                          outputConfig;
+                          kMSKeyId;
+                          queriesConfig;
+                          adaptersConfig;
+                          documentLocation;
+                          featureTypes
+                        }
     let to_value x =
       structure_to_value
         [("DocumentLocation",
@@ -2963,9 +5794,19 @@ module StartDocumentAnalysisRequest =
           (Option.map x.notificationChannel ~f:NotificationChannel.to_value));
         ("OutputConfig",
           (Option.map x.outputConfig ~f:OutputConfig.to_value));
-        ("KMSKeyId", (Option.map x.kMSKeyId ~f:KMSKeyId.to_value))]
+        ("KMSKeyId", (Option.map x.kMSKeyId ~f:KMSKeyId.to_value));
+        ("QueriesConfig",
+          (Option.map x.queriesConfig ~f:QueriesConfig.to_value));
+        ("AdaptersConfig",
+          (Option.map x.adaptersConfig ~f:AdaptersConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let adaptersConfig =
+        (Option.map ~f:AdaptersConfig.of_xml)
+          (Xml.child xml_arg0 "AdaptersConfig") in
+      let queriesConfig =
+        (Option.map ~f:QueriesConfig.of_xml)
+          (Xml.child xml_arg0 "QueriesConfig") in
       let kMSKeyId =
         (Option.map ~f:KMSKeyId.of_xml) (Xml.child xml_arg0 "KMSKeyId") in
       let outputConfig =
@@ -2985,26 +5826,933 @@ module StartDocumentAnalysisRequest =
       let documentLocation =
         DocumentLocation.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DocumentLocation") in
-      make ?kMSKeyId ?outputConfig ?notificationChannel ?jobTag
-        ?clientRequestToken ~featureTypes ~documentLocation ()
+      make ?adaptersConfig ?queriesConfig ?kMSKeyId ?outputConfig
+        ?notificationChannel ?jobTag ?clientRequestToken ~featureTypes
+        ~documentLocation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kMSKeyId = field_map json "KMSKeyId" KMSKeyId.of_json in
-      let outputConfig = field_map json "OutputConfig" OutputConfig.of_json in
+    let of_json json__ =
+      let adaptersConfig =
+        field_map json__ "AdaptersConfig" AdaptersConfig.of_json in
+      let queriesConfig =
+        field_map json__ "QueriesConfig" QueriesConfig.of_json in
+      let kMSKeyId = field_map json__ "KMSKeyId" KMSKeyId.of_json in
+      let outputConfig = field_map json__ "OutputConfig" OutputConfig.of_json in
       let notificationChannel =
-        field_map json "NotificationChannel" NotificationChannel.of_json in
-      let jobTag = field_map json "JobTag" JobTag.of_json in
+        field_map json__ "NotificationChannel" NotificationChannel.of_json in
+      let jobTag = field_map json__ "JobTag" JobTag.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let featureTypes =
-        field_map_exn json "FeatureTypes" FeatureTypes.of_json in
+        field_map_exn json__ "FeatureTypes" FeatureTypes.of_json in
       let documentLocation =
-        field_map_exn json "DocumentLocation" DocumentLocation.of_json in
-      make ?kMSKeyId ?outputConfig ?notificationChannel ?jobTag
-        ?clientRequestToken ~featureTypes ~documentLocation ()
+        field_map_exn json__ "DocumentLocation" DocumentLocation.of_json in
+      make ?adaptersConfig ?queriesConfig ?kMSKeyId ?outputConfig
+        ?notificationChannel ?jobTag ?clientRequestToken ~featureTypes
+        ~documentLocation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts the asynchronous analysis of an input document for relationships between detected items such as key-value pairs, tables, and selection elements. StartDocumentAnalysis can analyze text in documents that are in JPEG, PNG, TIFF, and PDF format. The documents are stored in an Amazon S3 bucket. Use DocumentLocation to specify the bucket name and file name of the document. StartDocumentAnalysis returns a job identifier (JobId) that you use to get the results of the operation. When text analysis is finished, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that you specify in NotificationChannel. To get the results of the text analysis operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetDocumentAnalysis, and pass the job identifier (JobId) from the initial call to StartDocumentAnalysis. For more information, see Document Text Analysis."]
+module ListTagsForResourceResponse =
+  struct
+    type nonrec t =
+      {
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A set of tags (key-value pairs) that are part of the requested resource."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun () -> { tags }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all tags for an Amazon Textract resource."]
+module ListTagsForResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that specifies the resource to list tags for."]}
+    let context_ = "ListTagsForResourceRequest"
+    let make ~resourceARN = fun () -> { resourceARN }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      make ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all tags for an Amazon Textract resource."]
+module ListAdaptersResponse =
+  struct
+    type nonrec t =
+      {
+      adapters: AdapterList.t option
+        [@ocaml.doc
+          "A list of adapters that matches the filtering criteria specified when calling ListAdapters."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "Identifies the next page of results to return when listing adapters."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adapters = fun ?nextToken -> fun () -> { adapters; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Adapters", (Option.map x.adapters ~f:AdapterList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let adapters =
+        (Option.map ~f:AdapterList.of_xml) (Xml.child xml_arg0 "Adapters") in
+      make ?nextToken ?adapters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let adapters = field_map json__ "Adapters" AdapterList.of_json in
+      make ?nextToken ?adapters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all adapters that match the specified filtration criteria."]
+module ListAdaptersRequest =
+  struct
+    type nonrec t =
+      {
+      afterCreationTime: DateTime.t option
+        [@ocaml.doc
+          "Specifies the lower bound for the ListAdapters operation. Ensures ListAdapters returns only adapters created after the specified creation time."];
+      beforeCreationTime: DateTime.t option
+        [@ocaml.doc
+          "Specifies the upper bound for the ListAdapters operation. Ensures ListAdapters returns only adapters created before the specified creation time."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return when listing adapters."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "Identifies the next page of results to return when listing adapters."]}
+    let make ?afterCreationTime =
+      fun ?beforeCreationTime ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun () ->
+              { afterCreationTime; beforeCreationTime; maxResults; nextToken
+              }
+    let to_value x =
+      structure_to_value
+        [("AfterCreationTime",
+           (Option.map x.afterCreationTime ~f:DateTime.to_value));
+        ("BeforeCreationTime",
+          (Option.map x.beforeCreationTime ~f:DateTime.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let beforeCreationTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "BeforeCreationTime") in
+      let afterCreationTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "AfterCreationTime") in
+      make ?nextToken ?maxResults ?beforeCreationTime ?afterCreationTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let beforeCreationTime =
+        field_map json__ "BeforeCreationTime" DateTime.of_json in
+      let afterCreationTime =
+        field_map json__ "AfterCreationTime" DateTime.of_json in
+      make ?nextToken ?maxResults ?beforeCreationTime ?afterCreationTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all adapters that match the specified filtration criteria."]
+module ListAdapterVersionsResponse =
+  struct
+    type nonrec t =
+      {
+      adapterVersions: AdapterVersionList.t option
+        [@ocaml.doc
+          "Adapter versions that match the filtering criteria specified when calling ListAdapters."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "Identifies the next page of results to return when listing adapter versions."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adapterVersions =
+      fun ?nextToken -> fun () -> { adapterVersions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AdapterVersions",
+           (Option.map x.adapterVersions ~f:AdapterVersionList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let adapterVersions =
+        (Option.map ~f:AdapterVersionList.of_xml)
+          (Xml.child xml_arg0 "AdapterVersions") in
+      make ?nextToken ?adapterVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let adapterVersions =
+        field_map json__ "AdapterVersions" AdapterVersionList.of_json in
+      make ?nextToken ?adapterVersions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List all version of an adapter that meet the specified filtration criteria."]
+module ListAdapterVersionsRequest =
+  struct
+    type nonrec t =
+      {
+      adapterId: AdapterId.t option
+        [@ocaml.doc
+          "A string containing a unique ID for the adapter to match for when listing adapter versions."];
+      afterCreationTime: DateTime.t option
+        [@ocaml.doc
+          "Specifies the lower bound for the ListAdapterVersions operation. Ensures ListAdapterVersions returns only adapter versions created after the specified creation time."];
+      beforeCreationTime: DateTime.t option
+        [@ocaml.doc
+          "Specifies the upper bound for the ListAdapterVersions operation. Ensures ListAdapterVersions returns only adapter versions created after the specified creation time."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return when listing adapter versions."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "Identifies the next page of results to return when listing adapter versions."]}
+    let make ?adapterId =
+      fun ?afterCreationTime ->
+        fun ?beforeCreationTime ->
+          fun ?maxResults ->
+            fun ?nextToken ->
+              fun () ->
+                {
+                  adapterId;
+                  afterCreationTime;
+                  beforeCreationTime;
+                  maxResults;
+                  nextToken
+                }
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Option.map x.adapterId ~f:AdapterId.to_value));
+        ("AfterCreationTime",
+          (Option.map x.afterCreationTime ~f:DateTime.to_value));
+        ("BeforeCreationTime",
+          (Option.map x.beforeCreationTime ~f:DateTime.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let beforeCreationTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "BeforeCreationTime") in
+      let afterCreationTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "AfterCreationTime") in
+      let adapterId =
+        (Option.map ~f:AdapterId.of_xml) (Xml.child xml_arg0 "AdapterId") in
+      make ?nextToken ?maxResults ?beforeCreationTime ?afterCreationTime
+        ?adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let beforeCreationTime =
+        field_map json__ "BeforeCreationTime" DateTime.of_json in
+      let afterCreationTime =
+        field_map json__ "AfterCreationTime" DateTime.of_json in
+      let adapterId = field_map json__ "AdapterId" AdapterId.of_json in
+      make ?nextToken ?maxResults ?beforeCreationTime ?afterCreationTime
+        ?adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List all version of an adapter that meet the specified filtration criteria."]
+module GetLendingAnalysisSummaryResponse =
+  struct
+    type nonrec t =
+      {
+      documentMetadata: DocumentMetadata.t option ;
+      jobStatus: JobStatus.t option
+        [@ocaml.doc "The current status of the lending analysis job."];
+      summary: LendingSummary.t option
+        [@ocaml.doc
+          "Contains summary information for documents grouped by type."];
+      warnings: Warnings.t option
+        [@ocaml.doc
+          "A list of warnings that occurred during the lending analysis operation."];
+      statusMessage: StatusMessage.t option
+        [@ocaml.doc
+          "Returns if the lending analysis could not be completed. Contains explanation for what error occurred."];
+      analyzeLendingModelVersion: String_.t option
+        [@ocaml.doc "The current model version of the Analyze Lending API."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidJobIdException of InvalidJobIdException.t 
+      | `InvalidKMSKeyException of InvalidKMSKeyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidS3ObjectException of InvalidS3ObjectException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?documentMetadata =
+      fun ?jobStatus ->
+        fun ?summary ->
+          fun ?warnings ->
+            fun ?statusMessage ->
+              fun ?analyzeLendingModelVersion ->
+                fun () ->
+                  {
+                    documentMetadata;
+                    jobStatus;
+                    summary;
+                    warnings;
+                    statusMessage;
+                    analyzeLendingModelVersion
+                  }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidJobIdException" ->
+          `InvalidJobIdException (InvalidJobIdException.of_json json)
+      | "InvalidKMSKeyException" ->
+          `InvalidKMSKeyException (InvalidKMSKeyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidS3ObjectException" ->
+          `InvalidS3ObjectException (InvalidS3ObjectException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidJobIdException" ->
+          `InvalidJobIdException (InvalidJobIdException.of_xml xml)
+      | "InvalidKMSKeyException" ->
+          `InvalidKMSKeyException (InvalidKMSKeyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidS3ObjectException" ->
+          `InvalidS3ObjectException (InvalidS3ObjectException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidJobIdException e ->
+          `Assoc
+            [("error", (`String "InvalidJobIdException"));
+            ("details", (InvalidJobIdException.to_json e))]
+      | `InvalidKMSKeyException e ->
+          `Assoc
+            [("error", (`String "InvalidKMSKeyException"));
+            ("details", (InvalidKMSKeyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidS3ObjectException e ->
+          `Assoc
+            [("error", (`String "InvalidS3ObjectException"));
+            ("details", (InvalidS3ObjectException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DocumentMetadata",
+           (Option.map x.documentMetadata ~f:DocumentMetadata.to_value));
+        ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value));
+        ("Summary", (Option.map x.summary ~f:LendingSummary.to_value));
+        ("Warnings", (Option.map x.warnings ~f:Warnings.to_value));
+        ("StatusMessage",
+          (Option.map x.statusMessage ~f:StatusMessage.to_value));
+        ("AnalyzeLendingModelVersion",
+          (Option.map x.analyzeLendingModelVersion ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let analyzeLendingModelVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "AnalyzeLendingModelVersion") in
+      let statusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "StatusMessage") in
+      let warnings =
+        (Option.map ~f:Warnings.of_xml) (Xml.child xml_arg0 "Warnings") in
+      let summary =
+        (Option.map ~f:LendingSummary.of_xml) (Xml.child xml_arg0 "Summary") in
+      let jobStatus =
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
+      let documentMetadata =
+        (Option.map ~f:DocumentMetadata.of_xml)
+          (Xml.child xml_arg0 "DocumentMetadata") in
+      make ?analyzeLendingModelVersion ?statusMessage ?warnings ?summary
+        ?jobStatus ?documentMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let analyzeLendingModelVersion =
+        field_map json__ "AnalyzeLendingModelVersion" String_.of_json in
+      let statusMessage =
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let warnings = field_map json__ "Warnings" Warnings.of_json in
+      let summary = field_map json__ "Summary" LendingSummary.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let documentMetadata =
+        field_map json__ "DocumentMetadata" DocumentMetadata.of_json in
+      make ?analyzeLendingModelVersion ?statusMessage ?warnings ?summary
+        ?jobStatus ?documentMetadata ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets summarized results for the StartLendingAnalysis operation, which analyzes text in a lending document. The returned summary consists of information about documents grouped together by a common document type. Information like detected signatures, page numbers, and split documents is returned with respect to the type of grouped document. You start asynchronous text analysis by calling StartLendingAnalysis, which returns a job identifier (JobId). When the text analysis operation finishes, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that's registered in the initial call to StartLendingAnalysis. To get the results of the text analysis operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetLendingAnalysisSummary, and pass the job identifier (JobId) from the initial call to StartLendingAnalysis."]
+module GetLendingAnalysisSummaryRequest =
+  struct
+    type nonrec t =
+      {
+      jobId: JobId.t
+        [@ocaml.doc
+          "A unique identifier for the lending or text-detection job. The JobId is returned from StartLendingAnalysis. A JobId value is only valid for 7 days."]}
+    let context_ = "GetLendingAnalysisSummaryRequest"
+    let make ~jobId = fun () -> { jobId }
+    let to_value x =
+      structure_to_value [("JobId", (Some (JobId.to_value x.jobId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobId =
+        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
+      make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets summarized results for the StartLendingAnalysis operation, which analyzes text in a lending document. The returned summary consists of information about documents grouped together by a common document type. Information like detected signatures, page numbers, and split documents is returned with respect to the type of grouped document. You start asynchronous text analysis by calling StartLendingAnalysis, which returns a job identifier (JobId). When the text analysis operation finishes, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that's registered in the initial call to StartLendingAnalysis. To get the results of the text analysis operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetLendingAnalysisSummary, and pass the job identifier (JobId) from the initial call to StartLendingAnalysis."]
+module GetLendingAnalysisResponse =
+  struct
+    type nonrec t =
+      {
+      documentMetadata: DocumentMetadata.t option ;
+      jobStatus: JobStatus.t option
+        [@ocaml.doc "The current status of the lending analysis job."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "If the response is truncated, Amazon Textract returns this token. You can use this token in the subsequent request to retrieve the next set of lending results."];
+      results: LendingResultList.t option
+        [@ocaml.doc
+          "Holds the information returned by one of AmazonTextract's document analysis operations for the pinstripe."];
+      warnings: Warnings.t option
+        [@ocaml.doc
+          "A list of warnings that occurred during the lending analysis operation."];
+      statusMessage: StatusMessage.t option
+        [@ocaml.doc
+          "Returns if the lending analysis job could not be completed. Contains explanation for what error occurred."];
+      analyzeLendingModelVersion: String_.t option
+        [@ocaml.doc "The current model version of the Analyze Lending API."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidJobIdException of InvalidJobIdException.t 
+      | `InvalidKMSKeyException of InvalidKMSKeyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidS3ObjectException of InvalidS3ObjectException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?documentMetadata =
+      fun ?jobStatus ->
+        fun ?nextToken ->
+          fun ?results ->
+            fun ?warnings ->
+              fun ?statusMessage ->
+                fun ?analyzeLendingModelVersion ->
+                  fun () ->
+                    {
+                      documentMetadata;
+                      jobStatus;
+                      nextToken;
+                      results;
+                      warnings;
+                      statusMessage;
+                      analyzeLendingModelVersion
+                    }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidJobIdException" ->
+          `InvalidJobIdException (InvalidJobIdException.of_json json)
+      | "InvalidKMSKeyException" ->
+          `InvalidKMSKeyException (InvalidKMSKeyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidS3ObjectException" ->
+          `InvalidS3ObjectException (InvalidS3ObjectException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidJobIdException" ->
+          `InvalidJobIdException (InvalidJobIdException.of_xml xml)
+      | "InvalidKMSKeyException" ->
+          `InvalidKMSKeyException (InvalidKMSKeyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidS3ObjectException" ->
+          `InvalidS3ObjectException (InvalidS3ObjectException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidJobIdException e ->
+          `Assoc
+            [("error", (`String "InvalidJobIdException"));
+            ("details", (InvalidJobIdException.to_json e))]
+      | `InvalidKMSKeyException e ->
+          `Assoc
+            [("error", (`String "InvalidKMSKeyException"));
+            ("details", (InvalidKMSKeyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidS3ObjectException e ->
+          `Assoc
+            [("error", (`String "InvalidS3ObjectException"));
+            ("details", (InvalidS3ObjectException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DocumentMetadata",
+           (Option.map x.documentMetadata ~f:DocumentMetadata.to_value));
+        ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("Results", (Option.map x.results ~f:LendingResultList.to_value));
+        ("Warnings", (Option.map x.warnings ~f:Warnings.to_value));
+        ("StatusMessage",
+          (Option.map x.statusMessage ~f:StatusMessage.to_value));
+        ("AnalyzeLendingModelVersion",
+          (Option.map x.analyzeLendingModelVersion ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let analyzeLendingModelVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "AnalyzeLendingModelVersion") in
+      let statusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "StatusMessage") in
+      let warnings =
+        (Option.map ~f:Warnings.of_xml) (Xml.child xml_arg0 "Warnings") in
+      let results =
+        (Option.map ~f:LendingResultList.of_xml)
+          (Xml.child xml_arg0 "Results") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let jobStatus =
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
+      let documentMetadata =
+        (Option.map ~f:DocumentMetadata.of_xml)
+          (Xml.child xml_arg0 "DocumentMetadata") in
+      make ?analyzeLendingModelVersion ?statusMessage ?warnings ?results
+        ?nextToken ?jobStatus ?documentMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let analyzeLendingModelVersion =
+        field_map json__ "AnalyzeLendingModelVersion" String_.of_json in
+      let statusMessage =
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let warnings = field_map json__ "Warnings" Warnings.of_json in
+      let results = field_map json__ "Results" LendingResultList.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let documentMetadata =
+        field_map json__ "DocumentMetadata" DocumentMetadata.of_json in
+      make ?analyzeLendingModelVersion ?statusMessage ?warnings ?results
+        ?nextToken ?jobStatus ?documentMetadata ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the results for an Amazon Textract asynchronous operation that analyzes text in a lending document. You start asynchronous text analysis by calling StartLendingAnalysis, which returns a job identifier (JobId). When the text analysis operation finishes, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that's registered in the initial call to StartLendingAnalysis. To get the results of the text analysis operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetLendingAnalysis, and pass the job identifier (JobId) from the initial call to StartLendingAnalysis."]
+module GetLendingAnalysisRequest =
+  struct
+    type nonrec t =
+      {
+      jobId: JobId.t
+        [@ocaml.doc
+          "A unique identifier for the lending or text-detection job. The JobId is returned from StartLendingAnalysis. A JobId value is only valid for 7 days."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return per paginated call. The largest value that you can specify is 30. If you specify a value greater than 30, a maximum of 30 results is returned. The default value is 30."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "If the previous response was incomplete, Amazon Textract returns a pagination token in the response. You can use this pagination token to retrieve the next set of lending results."]}
+    let context_ = "GetLendingAnalysisRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~jobId -> fun () -> { maxResults; nextToken; jobId }
+    let to_value x =
+      structure_to_value
+        [("JobId", (Some (JobId.to_value x.jobId)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let jobId =
+        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
+      make ?nextToken ?maxResults ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ?nextToken ?maxResults ~jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the results for an Amazon Textract asynchronous operation that analyzes text in a lending document. You start asynchronous text analysis by calling StartLendingAnalysis, which returns a job identifier (JobId). When the text analysis operation finishes, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that's registered in the initial call to StartLendingAnalysis. To get the results of the text analysis operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetLendingAnalysis, and pass the job identifier (JobId) from the initial call to StartLendingAnalysis."]
 module GetExpenseAnalysisResponse =
   struct
     type nonrec t =
@@ -3174,18 +6922,18 @@ module GetExpenseAnalysisResponse =
       make ?analyzeExpenseModelVersion ?statusMessage ?warnings
         ?expenseDocuments ?nextToken ?jobStatus ?documentMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let analyzeExpenseModelVersion =
-        field_map json "AnalyzeExpenseModelVersion" String_.of_json in
+        field_map json__ "AnalyzeExpenseModelVersion" String_.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let warnings = field_map json "Warnings" Warnings.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let warnings = field_map json__ "Warnings" Warnings.of_json in
       let expenseDocuments =
-        field_map json "ExpenseDocuments" ExpenseDocumentList.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
+        field_map json__ "ExpenseDocuments" ExpenseDocumentList.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
       let documentMetadata =
-        field_map json "DocumentMetadata" DocumentMetadata.of_json in
+        field_map json__ "DocumentMetadata" DocumentMetadata.of_json in
       make ?analyzeExpenseModelVersion ?statusMessage ?warnings
         ?expenseDocuments ?nextToken ?jobStatus ?documentMetadata ()
     let to_json v = composed_to_json to_value v
@@ -3224,10 +6972,10 @@ module GetExpenseAnalysisRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?nextToken ?maxResults ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
       make ?nextToken ?maxResults ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3398,17 +7146,17 @@ module GetDocumentTextDetectionResponse =
       make ?detectDocumentTextModelVersion ?statusMessage ?warnings ?blocks
         ?nextToken ?jobStatus ?documentMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let detectDocumentTextModelVersion =
-        field_map json "DetectDocumentTextModelVersion" String_.of_json in
+        field_map json__ "DetectDocumentTextModelVersion" String_.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let warnings = field_map json "Warnings" Warnings.of_json in
-      let blocks = field_map json "Blocks" BlockList.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let warnings = field_map json__ "Warnings" Warnings.of_json in
+      let blocks = field_map json__ "Blocks" BlockList.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
       let documentMetadata =
-        field_map json "DocumentMetadata" DocumentMetadata.of_json in
+        field_map json__ "DocumentMetadata" DocumentMetadata.of_json in
       make ?detectDocumentTextModelVersion ?statusMessage ?warnings ?blocks
         ?nextToken ?jobStatus ?documentMetadata ()
     let to_json v = composed_to_json to_value v
@@ -3447,10 +7195,10 @@ module GetDocumentTextDetectionRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?nextToken ?maxResults ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
       make ?nextToken ?maxResults ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3621,22 +7369,22 @@ module GetDocumentAnalysisResponse =
       make ?analyzeDocumentModelVersion ?statusMessage ?warnings ?blocks
         ?nextToken ?jobStatus ?documentMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let analyzeDocumentModelVersion =
-        field_map json "AnalyzeDocumentModelVersion" String_.of_json in
+        field_map json__ "AnalyzeDocumentModelVersion" String_.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let warnings = field_map json "Warnings" Warnings.of_json in
-      let blocks = field_map json "Blocks" BlockList.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let warnings = field_map json__ "Warnings" Warnings.of_json in
+      let blocks = field_map json__ "Blocks" BlockList.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
       let documentMetadata =
-        field_map json "DocumentMetadata" DocumentMetadata.of_json in
+        field_map json__ "DocumentMetadata" DocumentMetadata.of_json in
       make ?analyzeDocumentModelVersion ?statusMessage ?warnings ?blocks
         ?nextToken ?jobStatus ?documentMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the results for an Amazon Textract asynchronous operation that analyzes text in a document. You start asynchronous text analysis by calling StartDocumentAnalysis, which returns a job identifier (JobId). When the text analysis operation finishes, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that's registered in the initial call to StartDocumentAnalysis. To get the results of the text-detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetDocumentAnalysis, and pass the job identifier (JobId) from the initial call to StartDocumentAnalysis. GetDocumentAnalysis returns an array of Block objects. The following types of information are returned: Form data (key-value pairs). The related information is returned in two Block objects, each of type KEY_VALUE_SET: a KEY Block object and a VALUE Block object. For example, Name: Ana Silva Carolina contains a key and value. Name: is the key. Ana Silva Carolina is the value. Table and table cell data. A TABLE Block object contains information about a detected table. A CELL Block object is returned for each cell in a table. Lines and words of text. A LINE Block object contains one or more WORD Block objects. All lines and words that are detected in the document are returned (including text that doesn't have a relationship with the value of the StartDocumentAnalysis FeatureTypes input parameter). Selection elements such as check boxes and option buttons (radio buttons) can be detected in form data and in tables. A SELECTION_ELEMENT Block object contains information about a selection element, including the selection status. Use the MaxResults parameter to limit the number of blocks that are returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetDocumentAnalysis, and populate the NextToken request parameter with the token value that's returned from the previous call to GetDocumentAnalysis. For more information, see Document Text Analysis."]
+       "Gets the results for an Amazon Textract asynchronous operation that analyzes text in a document. You start asynchronous text analysis by calling StartDocumentAnalysis, which returns a job identifier (JobId). When the text analysis operation finishes, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that's registered in the initial call to StartDocumentAnalysis. To get the results of the text-detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetDocumentAnalysis, and pass the job identifier (JobId) from the initial call to StartDocumentAnalysis. GetDocumentAnalysis returns an array of Block objects. The following types of information are returned: Form data (key-value pairs). The related information is returned in two Block objects, each of type KEY_VALUE_SET: a KEY Block object and a VALUE Block object. For example, Name: Ana Silva Carolina contains a key and value. Name: is the key. Ana Silva Carolina is the value. Table and table cell data. A TABLE Block object contains information about a detected table. A CELL Block object is returned for each cell in a table. Lines and words of text. A LINE Block object contains one or more WORD Block objects. All lines and words that are detected in the document are returned (including text that doesn't have a relationship with the value of the StartDocumentAnalysis FeatureTypes input parameter). Query. A QUERY Block object contains the query text, alias and link to the associated Query results block object. Query Results. A QUERY_RESULT Block object contains the answer to the query and an ID that connects it to the query asked. This Block also contains a confidence score. While processing a document with queries, look out for INVALID_REQUEST_PARAMETERS output. This indicates that either the per page query limit has been exceeded or that the operation is trying to query a page in the document which doesn\226\128\153t exist. Selection elements such as check boxes and option buttons (radio buttons) can be detected in form data and in tables. A SELECTION_ELEMENT Block object contains information about a selection element, including the selection status. Use the MaxResults parameter to limit the number of blocks that are returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetDocumentAnalysis, and populate the NextToken request parameter with the token value that's returned from the previous call to GetDocumentAnalysis. For more information, see Document Text Analysis."]
 module GetDocumentAnalysisRequest =
   struct
     type nonrec t =
@@ -3670,14 +7418,462 @@ module GetDocumentAnalysisRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?nextToken ?maxResults ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
       make ?nextToken ?maxResults ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the results for an Amazon Textract asynchronous operation that analyzes text in a document. You start asynchronous text analysis by calling StartDocumentAnalysis, which returns a job identifier (JobId). When the text analysis operation finishes, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that's registered in the initial call to StartDocumentAnalysis. To get the results of the text-detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetDocumentAnalysis, and pass the job identifier (JobId) from the initial call to StartDocumentAnalysis. GetDocumentAnalysis returns an array of Block objects. The following types of information are returned: Form data (key-value pairs). The related information is returned in two Block objects, each of type KEY_VALUE_SET: a KEY Block object and a VALUE Block object. For example, Name: Ana Silva Carolina contains a key and value. Name: is the key. Ana Silva Carolina is the value. Table and table cell data. A TABLE Block object contains information about a detected table. A CELL Block object is returned for each cell in a table. Lines and words of text. A LINE Block object contains one or more WORD Block objects. All lines and words that are detected in the document are returned (including text that doesn't have a relationship with the value of the StartDocumentAnalysis FeatureTypes input parameter). Selection elements such as check boxes and option buttons (radio buttons) can be detected in form data and in tables. A SELECTION_ELEMENT Block object contains information about a selection element, including the selection status. Use the MaxResults parameter to limit the number of blocks that are returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetDocumentAnalysis, and populate the NextToken request parameter with the token value that's returned from the previous call to GetDocumentAnalysis. For more information, see Document Text Analysis."]
+       "Gets the results for an Amazon Textract asynchronous operation that analyzes text in a document. You start asynchronous text analysis by calling StartDocumentAnalysis, which returns a job identifier (JobId). When the text analysis operation finishes, Amazon Textract publishes a completion status to the Amazon Simple Notification Service (Amazon SNS) topic that's registered in the initial call to StartDocumentAnalysis. To get the results of the text-detection operation, first check that the status value published to the Amazon SNS topic is SUCCEEDED. If so, call GetDocumentAnalysis, and pass the job identifier (JobId) from the initial call to StartDocumentAnalysis. GetDocumentAnalysis returns an array of Block objects. The following types of information are returned: Form data (key-value pairs). The related information is returned in two Block objects, each of type KEY_VALUE_SET: a KEY Block object and a VALUE Block object. For example, Name: Ana Silva Carolina contains a key and value. Name: is the key. Ana Silva Carolina is the value. Table and table cell data. A TABLE Block object contains information about a detected table. A CELL Block object is returned for each cell in a table. Lines and words of text. A LINE Block object contains one or more WORD Block objects. All lines and words that are detected in the document are returned (including text that doesn't have a relationship with the value of the StartDocumentAnalysis FeatureTypes input parameter). Query. A QUERY Block object contains the query text, alias and link to the associated Query results block object. Query Results. A QUERY_RESULT Block object contains the answer to the query and an ID that connects it to the query asked. This Block also contains a confidence score. While processing a document with queries, look out for INVALID_REQUEST_PARAMETERS output. This indicates that either the per page query limit has been exceeded or that the operation is trying to query a page in the document which doesn\226\128\153t exist. Selection elements such as check boxes and option buttons (radio buttons) can be detected in form data and in tables. A SELECTION_ELEMENT Block object contains information about a selection element, including the selection status. Use the MaxResults parameter to limit the number of blocks that are returned. If there are more results than specified in MaxResults, the value of NextToken in the operation response contains a pagination token for getting the next set of results. To get the next page of results, call GetDocumentAnalysis, and populate the NextToken request parameter with the token value that's returned from the previous call to GetDocumentAnalysis. For more information, see Document Text Analysis."]
+module GetAdapterVersionResponse =
+  struct
+    type nonrec t =
+      {
+      adapterId: AdapterId.t option
+        [@ocaml.doc
+          "A string containing a unique ID for the adapter version being retrieved."];
+      adapterVersion: AdapterVersion.t option
+        [@ocaml.doc
+          "A string containing the adapter version that has been retrieved."];
+      creationTime: DateTime.t option
+        [@ocaml.doc "The time that the adapter version was created."];
+      featureTypes: FeatureTypes.t option
+        [@ocaml.doc
+          "List of the targeted feature types for the requested adapter version."];
+      status: AdapterVersionStatus.t option
+        [@ocaml.doc
+          "The status of the adapter version that has been requested."];
+      statusMessage: AdapterVersionStatusMessage.t option
+        [@ocaml.doc
+          "A message that describes the status of the requested adapter version."];
+      datasetConfig: AdapterVersionDatasetConfig.t option
+        [@ocaml.doc
+          "Specifies a dataset used to train a new adapter version. Takes a ManifestS3Objec as the value."];
+      kMSKeyId: KMSKeyId.t option
+        [@ocaml.doc
+          "The identifier for your AWS Key Management Service key (AWS KMS key). Used to encrypt your documents."];
+      outputConfig: OutputConfig.t option ;
+      evaluationMetrics: AdapterVersionEvaluationMetrics.t option
+        [@ocaml.doc
+          "The evaluation metrics (F1 score, Precision, and Recall) for the requested version, grouped by baseline metrics and adapter version."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A set of tags (key-value pairs) that are associated with the adapter version."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adapterId =
+      fun ?adapterVersion ->
+        fun ?creationTime ->
+          fun ?featureTypes ->
+            fun ?status ->
+              fun ?statusMessage ->
+                fun ?datasetConfig ->
+                  fun ?kMSKeyId ->
+                    fun ?outputConfig ->
+                      fun ?evaluationMetrics ->
+                        fun ?tags ->
+                          fun () ->
+                            {
+                              adapterId;
+                              adapterVersion;
+                              creationTime;
+                              featureTypes;
+                              status;
+                              statusMessage;
+                              datasetConfig;
+                              kMSKeyId;
+                              outputConfig;
+                              evaluationMetrics;
+                              tags
+                            }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Option.map x.adapterId ~f:AdapterId.to_value));
+        ("AdapterVersion",
+          (Option.map x.adapterVersion ~f:AdapterVersion.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:DateTime.to_value));
+        ("FeatureTypes",
+          (Option.map x.featureTypes ~f:FeatureTypes.to_value));
+        ("Status", (Option.map x.status ~f:AdapterVersionStatus.to_value));
+        ("StatusMessage",
+          (Option.map x.statusMessage ~f:AdapterVersionStatusMessage.to_value));
+        ("DatasetConfig",
+          (Option.map x.datasetConfig ~f:AdapterVersionDatasetConfig.to_value));
+        ("KMSKeyId", (Option.map x.kMSKeyId ~f:KMSKeyId.to_value));
+        ("OutputConfig",
+          (Option.map x.outputConfig ~f:OutputConfig.to_value));
+        ("EvaluationMetrics",
+          (Option.map x.evaluationMetrics
+             ~f:AdapterVersionEvaluationMetrics.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let evaluationMetrics =
+        (Option.map ~f:AdapterVersionEvaluationMetrics.of_xml)
+          (Xml.child xml_arg0 "EvaluationMetrics") in
+      let outputConfig =
+        (Option.map ~f:OutputConfig.of_xml)
+          (Xml.child xml_arg0 "OutputConfig") in
+      let kMSKeyId =
+        (Option.map ~f:KMSKeyId.of_xml) (Xml.child xml_arg0 "KMSKeyId") in
+      let datasetConfig =
+        (Option.map ~f:AdapterVersionDatasetConfig.of_xml)
+          (Xml.child xml_arg0 "DatasetConfig") in
+      let statusMessage =
+        (Option.map ~f:AdapterVersionStatusMessage.of_xml)
+          (Xml.child xml_arg0 "StatusMessage") in
+      let status =
+        (Option.map ~f:AdapterVersionStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let featureTypes =
+        (Option.map ~f:FeatureTypes.of_xml)
+          (Xml.child xml_arg0 "FeatureTypes") in
+      let creationTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let adapterVersion =
+        (Option.map ~f:AdapterVersion.of_xml)
+          (Xml.child xml_arg0 "AdapterVersion") in
+      let adapterId =
+        (Option.map ~f:AdapterId.of_xml) (Xml.child xml_arg0 "AdapterId") in
+      make ?tags ?evaluationMetrics ?outputConfig ?kMSKeyId ?datasetConfig
+        ?statusMessage ?status ?featureTypes ?creationTime ?adapterVersion
+        ?adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let evaluationMetrics =
+        field_map json__ "EvaluationMetrics"
+          AdapterVersionEvaluationMetrics.of_json in
+      let outputConfig = field_map json__ "OutputConfig" OutputConfig.of_json in
+      let kMSKeyId = field_map json__ "KMSKeyId" KMSKeyId.of_json in
+      let datasetConfig =
+        field_map json__ "DatasetConfig" AdapterVersionDatasetConfig.of_json in
+      let statusMessage =
+        field_map json__ "StatusMessage" AdapterVersionStatusMessage.of_json in
+      let status = field_map json__ "Status" AdapterVersionStatus.of_json in
+      let featureTypes = field_map json__ "FeatureTypes" FeatureTypes.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
+      let adapterVersion =
+        field_map json__ "AdapterVersion" AdapterVersion.of_json in
+      let adapterId = field_map json__ "AdapterId" AdapterId.of_json in
+      make ?tags ?evaluationMetrics ?outputConfig ?kMSKeyId ?datasetConfig
+        ?statusMessage ?status ?featureTypes ?creationTime ?adapterVersion
+        ?adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets configuration information for the specified adapter version, including: AdapterId, AdapterVersion, FeatureTypes, Status, StatusMessage, DatasetConfig, KMSKeyId, OutputConfig, Tags and EvaluationMetrics."]
+module GetAdapterVersionRequest =
+  struct
+    type nonrec t =
+      {
+      adapterId: AdapterId.t
+        [@ocaml.doc
+          "A string specifying a unique ID for the adapter version you want to retrieve information for."];
+      adapterVersion: AdapterVersion.t
+        [@ocaml.doc
+          "A string specifying the adapter version you want to retrieve information for."]}
+    let context_ = "GetAdapterVersionRequest"
+    let make ~adapterId =
+      fun ~adapterVersion -> fun () -> { adapterId; adapterVersion }
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Some (AdapterId.to_value x.adapterId)));
+        ("AdapterVersion", (Some (AdapterVersion.to_value x.adapterVersion)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adapterVersion =
+        AdapterVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AdapterVersion") in
+      let adapterId =
+        AdapterId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AdapterId") in
+      make ~adapterVersion ~adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adapterVersion =
+        field_map_exn json__ "AdapterVersion" AdapterVersion.of_json in
+      let adapterId = field_map_exn json__ "AdapterId" AdapterId.of_json in
+      make ~adapterVersion ~adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets configuration information for the specified adapter version, including: AdapterId, AdapterVersion, FeatureTypes, Status, StatusMessage, DatasetConfig, KMSKeyId, OutputConfig, Tags and EvaluationMetrics."]
+module GetAdapterResponse =
+  struct
+    type nonrec t =
+      {
+      adapterId: AdapterId.t option
+        [@ocaml.doc
+          "A string identifying the adapter that information has been retrieved for."];
+      adapterName: AdapterName.t option
+        [@ocaml.doc "The name of the requested adapter."];
+      creationTime: DateTime.t option
+        [@ocaml.doc
+          "The date and time the requested adapter was created at."];
+      description: AdapterDescription.t option
+        [@ocaml.doc "The description for the requested adapter."];
+      featureTypes: FeatureTypes.t option
+        [@ocaml.doc
+          "List of the targeted feature types for the requested adapter."];
+      autoUpdate: AutoUpdate.t option
+        [@ocaml.doc
+          "Binary value indicating if the adapter is being automatically updated or not."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A set of tags (key-value pairs) associated with the adapter that has been retrieved."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adapterId =
+      fun ?adapterName ->
+        fun ?creationTime ->
+          fun ?description ->
+            fun ?featureTypes ->
+              fun ?autoUpdate ->
+                fun ?tags ->
+                  fun () ->
+                    {
+                      adapterId;
+                      adapterName;
+                      creationTime;
+                      description;
+                      featureTypes;
+                      autoUpdate;
+                      tags
+                    }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Option.map x.adapterId ~f:AdapterId.to_value));
+        ("AdapterName", (Option.map x.adapterName ~f:AdapterName.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:DateTime.to_value));
+        ("Description",
+          (Option.map x.description ~f:AdapterDescription.to_value));
+        ("FeatureTypes",
+          (Option.map x.featureTypes ~f:FeatureTypes.to_value));
+        ("AutoUpdate", (Option.map x.autoUpdate ~f:AutoUpdate.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let autoUpdate =
+        (Option.map ~f:AutoUpdate.of_xml) (Xml.child xml_arg0 "AutoUpdate") in
+      let featureTypes =
+        (Option.map ~f:FeatureTypes.of_xml)
+          (Xml.child xml_arg0 "FeatureTypes") in
+      let description =
+        (Option.map ~f:AdapterDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let creationTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let adapterName =
+        (Option.map ~f:AdapterName.of_xml) (Xml.child xml_arg0 "AdapterName") in
+      let adapterId =
+        (Option.map ~f:AdapterId.of_xml) (Xml.child xml_arg0 "AdapterId") in
+      make ?tags ?autoUpdate ?featureTypes ?description ?creationTime
+        ?adapterName ?adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let autoUpdate = field_map json__ "AutoUpdate" AutoUpdate.of_json in
+      let featureTypes = field_map json__ "FeatureTypes" FeatureTypes.of_json in
+      let description =
+        field_map json__ "Description" AdapterDescription.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
+      let adapterName = field_map json__ "AdapterName" AdapterName.of_json in
+      let adapterId = field_map json__ "AdapterId" AdapterId.of_json in
+      make ?tags ?autoUpdate ?featureTypes ?description ?creationTime
+        ?adapterName ?adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets configuration information for an adapter specified by an AdapterId, returning information on AdapterName, Description, CreationTime, AutoUpdate status, and FeatureTypes."]
+module GetAdapterRequest =
+  struct
+    type nonrec t =
+      {
+      adapterId: AdapterId.t
+        [@ocaml.doc "A string containing a unique ID for the adapter."]}
+    let context_ = "GetAdapterRequest"
+    let make ~adapterId = fun () -> { adapterId }
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Some (AdapterId.to_value x.adapterId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adapterId =
+        AdapterId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AdapterId") in
+      make ~adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adapterId = field_map_exn json__ "AdapterId" AdapterId.of_json in
+      make ~adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets configuration information for an adapter specified by an AdapterId, returning information on AdapterName, Description, CreationTime, AutoUpdate status, and FeatureTypes."]
 module DetectDocumentTextResponse =
   struct
     type nonrec t =
@@ -3817,16 +8013,16 @@ module DetectDocumentTextResponse =
           (Xml.child xml_arg0 "DocumentMetadata") in
       make ?detectDocumentTextModelVersion ?blocks ?documentMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let detectDocumentTextModelVersion =
-        field_map json "DetectDocumentTextModelVersion" String_.of_json in
-      let blocks = field_map json "Blocks" BlockList.of_json in
+        field_map json__ "DetectDocumentTextModelVersion" String_.of_json in
+      let blocks = field_map json__ "Blocks" BlockList.of_json in
       let documentMetadata =
-        field_map json "DocumentMetadata" DocumentMetadata.of_json in
+        field_map json__ "DocumentMetadata" DocumentMetadata.of_json in
       make ?detectDocumentTextModelVersion ?blocks ?documentMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects text in the input document. Amazon Textract can detect lines of text and the words that make up a line of text. The input document must be an image in JPEG or PNG format. DetectDocumentText returns the detected text in an array of Block objects. Each document page has as an associated Block of type PAGE. Each PAGE Block object is the parent of LINE Block objects that represent the lines of detected text on a page. A LINE Block object is a parent for each word that makes up the line. Words are represented by Block objects of type WORD. DetectDocumentText is a synchronous operation. To analyze documents asynchronously, use StartDocumentTextDetection. For more information, see Document Text Detection."]
+       "Detects text in the input document. Amazon Textract can detect lines of text and the words that make up a line of text. The input document must be in one of the following image formats: JPEG, PNG, PDF, or TIFF. DetectDocumentText returns the detected text in an array of Block objects. Each document page has as an associated Block of type PAGE. Each PAGE Block object is the parent of LINE Block objects that represent the lines of detected text on a page. A LINE Block object is a parent for each word that makes up the line. Words are represented by Block objects of type WORD. DetectDocumentText is a synchronous operation. To analyze documents asynchronously, use StartDocumentTextDetection. For more information, see Document Text Detection."]
 module DetectDocumentTextRequest =
   struct
     type nonrec t =
@@ -3845,12 +8041,762 @@ module DetectDocumentTextRequest =
         Document.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Document") in
       make ~document ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let document = field_map_exn json "Document" Document.of_json in
+    let of_json json__ =
+      let document = field_map_exn json__ "Document" Document.of_json in
       make ~document ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Detects text in the input document. Amazon Textract can detect lines of text and the words that make up a line of text. The input document must be an image in JPEG or PNG format. DetectDocumentText returns the detected text in an array of Block objects. Each document page has as an associated Block of type PAGE. Each PAGE Block object is the parent of LINE Block objects that represent the lines of detected text on a page. A LINE Block object is a parent for each word that makes up the line. Words are represented by Block objects of type WORD. DetectDocumentText is a synchronous operation. To analyze documents asynchronously, use StartDocumentTextDetection. For more information, see Document Text Detection."]
+       "Detects text in the input document. Amazon Textract can detect lines of text and the words that make up a line of text. The input document must be in one of the following image formats: JPEG, PNG, PDF, or TIFF. DetectDocumentText returns the detected text in an array of Block objects. Each document page has as an associated Block of type PAGE. Each PAGE Block object is the parent of LINE Block objects that represent the lines of detected text on a page. A LINE Block object is a parent for each word that makes up the line. Words are represented by Block objects of type WORD. DetectDocumentText is a synchronous operation. To analyze documents asynchronously, use StartDocumentTextDetection. For more information, see Document Text Detection."]
+module DeleteAdapterVersionResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an Amazon Textract adapter version. Requires that you specify both an AdapterId and a AdapterVersion. Deletes the adapter version specified by the AdapterId and the AdapterVersion."]
+module DeleteAdapterVersionRequest =
+  struct
+    type nonrec t =
+      {
+      adapterId: AdapterId.t
+        [@ocaml.doc
+          "A string containing a unique ID for the adapter version that will be deleted."];
+      adapterVersion: AdapterVersion.t
+        [@ocaml.doc "Specifies the adapter version to be deleted."]}
+    let context_ = "DeleteAdapterVersionRequest"
+    let make ~adapterId =
+      fun ~adapterVersion -> fun () -> { adapterId; adapterVersion }
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Some (AdapterId.to_value x.adapterId)));
+        ("AdapterVersion", (Some (AdapterVersion.to_value x.adapterVersion)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adapterVersion =
+        AdapterVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AdapterVersion") in
+      let adapterId =
+        AdapterId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AdapterId") in
+      make ~adapterVersion ~adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adapterVersion =
+        field_map_exn json__ "AdapterVersion" AdapterVersion.of_json in
+      let adapterId = field_map_exn json__ "AdapterId" AdapterId.of_json in
+      make ~adapterVersion ~adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an Amazon Textract adapter version. Requires that you specify both an AdapterId and a AdapterVersion. Deletes the adapter version specified by the AdapterId and the AdapterVersion."]
+module DeleteAdapterResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an Amazon Textract adapter. Takes an AdapterId and deletes the adapter specified by the ID."]
+module DeleteAdapterRequest =
+  struct
+    type nonrec t =
+      {
+      adapterId: AdapterId.t
+        [@ocaml.doc
+          "A string containing a unique ID for the adapter to be deleted."]}
+    let context_ = "DeleteAdapterRequest"
+    let make ~adapterId = fun () -> { adapterId }
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Some (AdapterId.to_value x.adapterId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adapterId =
+        AdapterId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AdapterId") in
+      make ~adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adapterId = field_map_exn json__ "AdapterId" AdapterId.of_json in
+      make ~adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an Amazon Textract adapter. Takes an AdapterId and deletes the adapter specified by the ID."]
+module CreateAdapterVersionResponse =
+  struct
+    type nonrec t =
+      {
+      adapterId: AdapterId.t option
+        [@ocaml.doc
+          "A string containing the unique ID for the adapter that has received a new version."];
+      adapterVersion: AdapterVersion.t option
+        [@ocaml.doc "A string describing the new version of the adapter."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidKMSKeyException of InvalidKMSKeyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidS3ObjectException of InvalidS3ObjectException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adapterId =
+      fun ?adapterVersion -> fun () -> { adapterId; adapterVersion }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidKMSKeyException" ->
+          `InvalidKMSKeyException (InvalidKMSKeyException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidS3ObjectException" ->
+          `InvalidS3ObjectException (InvalidS3ObjectException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidKMSKeyException" ->
+          `InvalidKMSKeyException (InvalidKMSKeyException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidS3ObjectException" ->
+          `InvalidS3ObjectException (InvalidS3ObjectException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidKMSKeyException e ->
+          `Assoc
+            [("error", (`String "InvalidKMSKeyException"));
+            ("details", (InvalidKMSKeyException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidS3ObjectException e ->
+          `Assoc
+            [("error", (`String "InvalidS3ObjectException"));
+            ("details", (InvalidS3ObjectException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Option.map x.adapterId ~f:AdapterId.to_value));
+        ("AdapterVersion",
+          (Option.map x.adapterVersion ~f:AdapterVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adapterVersion =
+        (Option.map ~f:AdapterVersion.of_xml)
+          (Xml.child xml_arg0 "AdapterVersion") in
+      let adapterId =
+        (Option.map ~f:AdapterId.of_xml) (Xml.child xml_arg0 "AdapterId") in
+      make ?adapterVersion ?adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adapterVersion =
+        field_map json__ "AdapterVersion" AdapterVersion.of_json in
+      let adapterId = field_map json__ "AdapterId" AdapterId.of_json in
+      make ?adapterVersion ?adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new version of an adapter. Operates on a provided AdapterId and a specified dataset provided via the DatasetConfig argument. Requires that you specify an Amazon S3 bucket with the OutputConfig argument. You can provide an optional KMSKeyId, an optional ClientRequestToken, and optional tags."]
+module CreateAdapterVersionRequest =
+  struct
+    type nonrec t =
+      {
+      adapterId: AdapterId.t
+        [@ocaml.doc
+          "A string containing a unique ID for the adapter that will receive a new version."];
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "Idempotent token is used to recognize the request. If the same token is used with multiple CreateAdapterVersion requests, the same session is returned. This token is employed to avoid unintentionally creating the same session multiple times."];
+      datasetConfig: AdapterVersionDatasetConfig.t
+        [@ocaml.doc
+          "Specifies a dataset used to train a new adapter version. Takes a ManifestS3Object as the value."];
+      kMSKeyId: KMSKeyId.t option
+        [@ocaml.doc
+          "The identifier for your AWS Key Management Service key (AWS KMS key). Used to encrypt your documents."];
+      outputConfig: OutputConfig.t ;
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A set of tags (key-value pairs) that you want to attach to the adapter version."]}
+    let context_ = "CreateAdapterVersionRequest"
+    let make ?clientRequestToken =
+      fun ?kMSKeyId ->
+        fun ?tags ->
+          fun ~adapterId ->
+            fun ~datasetConfig ->
+              fun ~outputConfig ->
+                fun () ->
+                  {
+                    clientRequestToken;
+                    kMSKeyId;
+                    tags;
+                    adapterId;
+                    datasetConfig;
+                    outputConfig
+                  }
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Some (AdapterId.to_value x.adapterId)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("DatasetConfig",
+          (Some (AdapterVersionDatasetConfig.to_value x.datasetConfig)));
+        ("KMSKeyId", (Option.map x.kMSKeyId ~f:KMSKeyId.to_value));
+        ("OutputConfig", (Some (OutputConfig.to_value x.outputConfig)));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let outputConfig =
+        OutputConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutputConfig") in
+      let kMSKeyId =
+        (Option.map ~f:KMSKeyId.of_xml) (Xml.child xml_arg0 "KMSKeyId") in
+      let datasetConfig =
+        AdapterVersionDatasetConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DatasetConfig") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let adapterId =
+        AdapterId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AdapterId") in
+      make ?tags ~outputConfig ?kMSKeyId ~datasetConfig ?clientRequestToken
+        ~adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let outputConfig =
+        field_map_exn json__ "OutputConfig" OutputConfig.of_json in
+      let kMSKeyId = field_map json__ "KMSKeyId" KMSKeyId.of_json in
+      let datasetConfig =
+        field_map_exn json__ "DatasetConfig"
+          AdapterVersionDatasetConfig.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let adapterId = field_map_exn json__ "AdapterId" AdapterId.of_json in
+      make ?tags ~outputConfig ?kMSKeyId ~datasetConfig ?clientRequestToken
+        ~adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new version of an adapter. Operates on a provided AdapterId and a specified dataset provided via the DatasetConfig argument. Requires that you specify an Amazon S3 bucket with the OutputConfig argument. You can provide an optional KMSKeyId, an optional ClientRequestToken, and optional tags."]
+module CreateAdapterResponse =
+  struct
+    type nonrec t =
+      {
+      adapterId: AdapterId.t option
+        [@ocaml.doc
+          "A string containing the unique ID for the adapter that has been created."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `IdempotentParameterMismatchException of
+          IdempotentParameterMismatchException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ProvisionedThroughputExceededException of
+          ProvisionedThroughputExceededException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adapterId = fun () -> { adapterId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "IdempotentParameterMismatchException" ->
+          `IdempotentParameterMismatchException
+            (IdempotentParameterMismatchException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ProvisionedThroughputExceededException" ->
+          `ProvisionedThroughputExceededException
+            (ProvisionedThroughputExceededException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `IdempotentParameterMismatchException e ->
+          `Assoc
+            [("error", (`String "IdempotentParameterMismatchException"));
+            ("details", (IdempotentParameterMismatchException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ProvisionedThroughputExceededException e ->
+          `Assoc
+            [("error", (`String "ProvisionedThroughputExceededException"));
+            ("details", (ProvisionedThroughputExceededException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AdapterId", (Option.map x.adapterId ~f:AdapterId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adapterId =
+        (Option.map ~f:AdapterId.of_xml) (Xml.child xml_arg0 "AdapterId") in
+      make ?adapterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adapterId = field_map json__ "AdapterId" AdapterId.of_json in
+      make ?adapterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an adapter, which can be fine-tuned for enhanced performance on user provided documents. Takes an AdapterName and FeatureType. Currently the only supported feature type is QUERIES. You can also provide a Description, Tags, and a ClientRequestToken. You can choose whether or not the adapter should be AutoUpdated with the AutoUpdate argument. By default, AutoUpdate is set to DISABLED."]
+module CreateAdapterRequest =
+  struct
+    type nonrec t =
+      {
+      adapterName: AdapterName.t
+        [@ocaml.doc "The name to be assigned to the adapter being created."];
+      clientRequestToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "Idempotent token is used to recognize the request. If the same token is used with multiple CreateAdapter requests, the same session is returned. This token is employed to avoid unintentionally creating the same session multiple times."];
+      description: AdapterDescription.t option
+        [@ocaml.doc
+          "The description to be assigned to the adapter being created."];
+      featureTypes: FeatureTypes.t
+        [@ocaml.doc
+          "The type of feature that the adapter is being trained on. Currrenly, supported feature types are: QUERIES"];
+      autoUpdate: AutoUpdate.t option
+        [@ocaml.doc
+          "Controls whether or not the adapter should automatically update."];
+      tags: TagMap.t option
+        [@ocaml.doc "A list of tags to be added to the adapter."]}
+    let context_ = "CreateAdapterRequest"
+    let make ?clientRequestToken =
+      fun ?description ->
+        fun ?autoUpdate ->
+          fun ?tags ->
+            fun ~adapterName ->
+              fun ~featureTypes ->
+                fun () ->
+                  {
+                    clientRequestToken;
+                    description;
+                    autoUpdate;
+                    tags;
+                    adapterName;
+                    featureTypes
+                  }
+    let to_value x =
+      structure_to_value
+        [("AdapterName", (Some (AdapterName.to_value x.adapterName)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("Description",
+          (Option.map x.description ~f:AdapterDescription.to_value));
+        ("FeatureTypes", (Some (FeatureTypes.to_value x.featureTypes)));
+        ("AutoUpdate", (Option.map x.autoUpdate ~f:AutoUpdate.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let autoUpdate =
+        (Option.map ~f:AutoUpdate.of_xml) (Xml.child xml_arg0 "AutoUpdate") in
+      let featureTypes =
+        FeatureTypes.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FeatureTypes") in
+      let description =
+        (Option.map ~f:AdapterDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let adapterName =
+        AdapterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AdapterName") in
+      make ?tags ?autoUpdate ~featureTypes ?description ?clientRequestToken
+        ~adapterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let autoUpdate = field_map json__ "AutoUpdate" AutoUpdate.of_json in
+      let featureTypes =
+        field_map_exn json__ "FeatureTypes" FeatureTypes.of_json in
+      let description =
+        field_map json__ "Description" AdapterDescription.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let adapterName =
+        field_map_exn json__ "AdapterName" AdapterName.of_json in
+      make ?tags ?autoUpdate ~featureTypes ?description ?clientRequestToken
+        ~adapterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an adapter, which can be fine-tuned for enhanced performance on user provided documents. Takes an AdapterName and FeatureType. Currently the only supported feature type is QUERIES. You can also provide a Description, Tags, and a ClientRequestToken. You can choose whether or not the adapter should be AutoUpdated with the AutoUpdate argument. By default, AutoUpdate is set to DISABLED."]
 module AnalyzeIDResponse =
   struct
     type nonrec t =
@@ -3992,17 +8938,17 @@ module AnalyzeIDResponse =
           (Xml.child xml_arg0 "IdentityDocuments") in
       make ?analyzeIDModelVersion ?documentMetadata ?identityDocuments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let analyzeIDModelVersion =
-        field_map json "AnalyzeIDModelVersion" String_.of_json in
+        field_map json__ "AnalyzeIDModelVersion" String_.of_json in
       let documentMetadata =
-        field_map json "DocumentMetadata" DocumentMetadata.of_json in
+        field_map json__ "DocumentMetadata" DocumentMetadata.of_json in
       let identityDocuments =
-        field_map json "IdentityDocuments" IdentityDocumentList.of_json in
+        field_map json__ "IdentityDocuments" IdentityDocumentList.of_json in
       make ?analyzeIDModelVersion ?documentMetadata ?identityDocuments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Analyzes identity documents for relevant information. This information is extracted and returned as IdentityDocumentFields, which records both the normalized field and value of the extracted text."]
+       "Analyzes identity documents for relevant information. This information is extracted and returned as IdentityDocumentFields, which records both the normalized field and value of the extracted text. Unlike other Amazon Textract operations, AnalyzeID doesn't return any Geometry data."]
 module AnalyzeIDRequest =
   struct
     type nonrec t =
@@ -4021,13 +8967,13 @@ module AnalyzeIDRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DocumentPages") in
       make ~documentPages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let documentPages =
-        field_map_exn json "DocumentPages" DocumentPages.of_json in
+        field_map_exn json__ "DocumentPages" DocumentPages.of_json in
       make ~documentPages ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Analyzes identity documents for relevant information. This information is extracted and returned as IdentityDocumentFields, which records both the normalized field and value of the extracted text."]
+       "Analyzes identity documents for relevant information. This information is extracted and returned as IdentityDocumentFields, which records both the normalized field and value of the extracted text. Unlike other Amazon Textract operations, AnalyzeID doesn't return any Geometry data."]
 module AnalyzeExpenseResponse =
   struct
     type nonrec t =
@@ -4158,15 +9104,15 @@ module AnalyzeExpenseResponse =
           (Xml.child xml_arg0 "DocumentMetadata") in
       make ?expenseDocuments ?documentMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expenseDocuments =
-        field_map json "ExpenseDocuments" ExpenseDocumentList.of_json in
+        field_map json__ "ExpenseDocuments" ExpenseDocumentList.of_json in
       let documentMetadata =
-        field_map json "DocumentMetadata" DocumentMetadata.of_json in
+        field_map json__ "DocumentMetadata" DocumentMetadata.of_json in
       make ?expenseDocuments ?documentMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "AnalyzeExpense synchronously analyzes an input document for financially related relationships between text. Information is returned as ExpenseDocuments and seperated as follows. LineItemGroups- A data set containing LineItems which store information about the lines of text, such as an item purchased and its price on a receipt. SummaryFields- Contains all other information a receipt, such as header information or the vendors name."]
+       "AnalyzeExpense synchronously analyzes an input document for financially related relationships between text. Information is returned as ExpenseDocuments and seperated as follows: LineItemGroups- A data set containing LineItems which store information about the lines of text, such as an item purchased and its price on a receipt. SummaryFields- Contains all other information a receipt, such as header information or the vendors name."]
 module AnalyzeExpenseRequest =
   struct
     type nonrec t = {
@@ -4182,12 +9128,12 @@ module AnalyzeExpenseRequest =
         Document.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Document") in
       make ~document ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let document = field_map_exn json "Document" Document.of_json in
+    let of_json json__ =
+      let document = field_map_exn json__ "Document" Document.of_json in
       make ~document ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "AnalyzeExpense synchronously analyzes an input document for financially related relationships between text. Information is returned as ExpenseDocuments and seperated as follows. LineItemGroups- A data set containing LineItems which store information about the lines of text, such as an item purchased and its price on a receipt. SummaryFields- Contains all other information a receipt, such as header information or the vendors name."]
+       "AnalyzeExpense synchronously analyzes an input document for financially related relationships between text. Information is returned as ExpenseDocuments and seperated as follows: LineItemGroups- A data set containing LineItems which store information about the lines of text, such as an item purchased and its price on a receipt. SummaryFields- Contains all other information a receipt, such as header information or the vendors name."]
 module AnalyzeDocumentResponse =
   struct
     type nonrec t =
@@ -4354,46 +9300,71 @@ module AnalyzeDocumentResponse =
       make ?analyzeDocumentModelVersion ?humanLoopActivationOutput ?blocks
         ?documentMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let analyzeDocumentModelVersion =
-        field_map json "AnalyzeDocumentModelVersion" String_.of_json in
+        field_map json__ "AnalyzeDocumentModelVersion" String_.of_json in
       let humanLoopActivationOutput =
-        field_map json "HumanLoopActivationOutput"
+        field_map json__ "HumanLoopActivationOutput"
           HumanLoopActivationOutput.of_json in
-      let blocks = field_map json "Blocks" BlockList.of_json in
+      let blocks = field_map json__ "Blocks" BlockList.of_json in
       let documentMetadata =
-        field_map json "DocumentMetadata" DocumentMetadata.of_json in
+        field_map json__ "DocumentMetadata" DocumentMetadata.of_json in
       make ?analyzeDocumentModelVersion ?humanLoopActivationOutput ?blocks
         ?documentMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Analyzes an input document for relationships between detected items. The types of information returned are as follows: Form data (key-value pairs). The related information is returned in two Block objects, each of type KEY_VALUE_SET: a KEY Block object and a VALUE Block object. For example, Name: Ana Silva Carolina contains a key and value. Name: is the key. Ana Silva Carolina is the value. Table and table cell data. A TABLE Block object contains information about a detected table. A CELL Block object is returned for each cell in a table. Lines and words of text. A LINE Block object contains one or more WORD Block objects. All lines and words that are detected in the document are returned (including text that doesn't have a relationship with the value of FeatureTypes). Selection elements such as check boxes and option buttons (radio buttons) can be detected in form data and in tables. A SELECTION_ELEMENT Block object contains information about a selection element, including the selection status. You can choose which type of analysis to perform by specifying the FeatureTypes list. The output is returned in a list of Block objects. AnalyzeDocument is a synchronous operation. To analyze documents asynchronously, use StartDocumentAnalysis. For more information, see Document Text Analysis."]
+       "Analyzes an input document for relationships between detected items. The types of information returned are as follows: Form data (key-value pairs). The related information is returned in two Block objects, each of type KEY_VALUE_SET: a KEY Block object and a VALUE Block object. For example, Name: Ana Silva Carolina contains a key and value. Name: is the key. Ana Silva Carolina is the value. Table and table cell data. A TABLE Block object contains information about a detected table. A CELL Block object is returned for each cell in a table. Lines and words of text. A LINE Block object contains one or more WORD Block objects. All lines and words that are detected in the document are returned (including text that doesn't have a relationship with the value of FeatureTypes). Signatures. A SIGNATURE Block object contains the location information of a signature in a document. If used in conjunction with forms or tables, a signature can be given a Key-Value pairing or be detected in the cell of a table. Query. A QUERY Block object contains the query text, alias and link to the associated Query results block object. Query Result. A QUERY_RESULT Block object contains the answer to the query and an ID that connects it to the query asked. This Block also contains a confidence score. Selection elements such as check boxes and option buttons (radio buttons) can be detected in form data and in tables. A SELECTION_ELEMENT Block object contains information about a selection element, including the selection status. You can choose which type of analysis to perform by specifying the FeatureTypes list. The output is returned in a list of Block objects. AnalyzeDocument is a synchronous operation. To analyze documents asynchronously, use StartDocumentAnalysis. For more information, see Document Text Analysis."]
 module AnalyzeDocumentRequest =
   struct
     type nonrec t =
       {
       document: Document.t
         [@ocaml.doc
-          "The input document as base64-encoded bytes or an Amazon S3 object. If you use the AWS CLI to call Amazon Textract operations, you can't pass image bytes. The document must be an image in JPEG or PNG format. If you're using an AWS SDK to call Amazon Textract, you might not need to base64-encode image bytes that are passed using the Bytes field."];
+          "The input document as base64-encoded bytes or an Amazon S3 object. If you use the AWS CLI to call Amazon Textract operations, you can't pass image bytes. The document must be an image in JPEG, PNG, PDF, or TIFF format. If you're using an AWS SDK to call Amazon Textract, you might not need to base64-encode image bytes that are passed using the Bytes field."];
       featureTypes: FeatureTypes.t
         [@ocaml.doc
-          "A list of the types of analysis to perform. Add TABLES to the list to return information about the tables that are detected in the input document. Add FORMS to return detected form data. To perform both types of analysis, add TABLES and FORMS to FeatureTypes. All lines and words detected in the document are included in the response (including text that isn't related to the value of FeatureTypes)."];
+          "A list of the types of analysis to perform. Add TABLES to the list to return information about the tables that are detected in the input document. Add FORMS to return detected form data. Add SIGNATURES to return the locations of detected signatures. Add LAYOUT to the list to return information about the layout of the document. All lines and words detected in the document are included in the response (including text that isn't related to the value of FeatureTypes)."];
       humanLoopConfig: HumanLoopConfig.t option
         [@ocaml.doc
-          "Sets the configuration for the human in the loop workflow for analyzing documents."]}
+          "Sets the configuration for the human in the loop workflow for analyzing documents."];
+      queriesConfig: QueriesConfig.t option
+        [@ocaml.doc
+          "Contains Queries and the alias for those Queries, as determined by the input."];
+      adaptersConfig: AdaptersConfig.t option
+        [@ocaml.doc
+          "Specifies the adapter to be used when analyzing a document."]}
     let context_ = "AnalyzeDocumentRequest"
     let make ?humanLoopConfig =
-      fun ~document ->
-        fun ~featureTypes ->
-          fun () -> { humanLoopConfig; document; featureTypes }
+      fun ?queriesConfig ->
+        fun ?adaptersConfig ->
+          fun ~document ->
+            fun ~featureTypes ->
+              fun () ->
+                {
+                  humanLoopConfig;
+                  queriesConfig;
+                  adaptersConfig;
+                  document;
+                  featureTypes
+                }
     let to_value x =
       structure_to_value
         [("Document", (Some (Document.to_value x.document)));
         ("FeatureTypes", (Some (FeatureTypes.to_value x.featureTypes)));
         ("HumanLoopConfig",
-          (Option.map x.humanLoopConfig ~f:HumanLoopConfig.to_value))]
+          (Option.map x.humanLoopConfig ~f:HumanLoopConfig.to_value));
+        ("QueriesConfig",
+          (Option.map x.queriesConfig ~f:QueriesConfig.to_value));
+        ("AdaptersConfig",
+          (Option.map x.adaptersConfig ~f:AdaptersConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let adaptersConfig =
+        (Option.map ~f:AdaptersConfig.of_xml)
+          (Xml.child xml_arg0 "AdaptersConfig") in
+      let queriesConfig =
+        (Option.map ~f:QueriesConfig.of_xml)
+          (Xml.child xml_arg0 "QueriesConfig") in
       let humanLoopConfig =
         (Option.map ~f:HumanLoopConfig.of_xml)
           (Xml.child xml_arg0 "HumanLoopConfig") in
@@ -4402,15 +9373,21 @@ module AnalyzeDocumentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FeatureTypes") in
       let document =
         Document.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Document") in
-      make ?humanLoopConfig ~featureTypes ~document ()
+      make ?adaptersConfig ?queriesConfig ?humanLoopConfig ~featureTypes
+        ~document ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let adaptersConfig =
+        field_map json__ "AdaptersConfig" AdaptersConfig.of_json in
+      let queriesConfig =
+        field_map json__ "QueriesConfig" QueriesConfig.of_json in
       let humanLoopConfig =
-        field_map json "HumanLoopConfig" HumanLoopConfig.of_json in
+        field_map json__ "HumanLoopConfig" HumanLoopConfig.of_json in
       let featureTypes =
-        field_map_exn json "FeatureTypes" FeatureTypes.of_json in
-      let document = field_map_exn json "Document" Document.of_json in
-      make ?humanLoopConfig ~featureTypes ~document ()
+        field_map_exn json__ "FeatureTypes" FeatureTypes.of_json in
+      let document = field_map_exn json__ "Document" Document.of_json in
+      make ?adaptersConfig ?queriesConfig ?humanLoopConfig ~featureTypes
+        ~document ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Analyzes an input document for relationships between detected items. The types of information returned are as follows: Form data (key-value pairs). The related information is returned in two Block objects, each of type KEY_VALUE_SET: a KEY Block object and a VALUE Block object. For example, Name: Ana Silva Carolina contains a key and value. Name: is the key. Ana Silva Carolina is the value. Table and table cell data. A TABLE Block object contains information about a detected table. A CELL Block object is returned for each cell in a table. Lines and words of text. A LINE Block object contains one or more WORD Block objects. All lines and words that are detected in the document are returned (including text that doesn't have a relationship with the value of FeatureTypes). Selection elements such as check boxes and option buttons (radio buttons) can be detected in form data and in tables. A SELECTION_ELEMENT Block object contains information about a selection element, including the selection status. You can choose which type of analysis to perform by specifying the FeatureTypes list. The output is returned in a list of Block objects. AnalyzeDocument is a synchronous operation. To analyze documents asynchronously, use StartDocumentAnalysis. For more information, see Document Text Analysis."]
+       "Analyzes an input document for relationships between detected items. The types of information returned are as follows: Form data (key-value pairs). The related information is returned in two Block objects, each of type KEY_VALUE_SET: a KEY Block object and a VALUE Block object. For example, Name: Ana Silva Carolina contains a key and value. Name: is the key. Ana Silva Carolina is the value. Table and table cell data. A TABLE Block object contains information about a detected table. A CELL Block object is returned for each cell in a table. Lines and words of text. A LINE Block object contains one or more WORD Block objects. All lines and words that are detected in the document are returned (including text that doesn't have a relationship with the value of FeatureTypes). Signatures. A SIGNATURE Block object contains the location information of a signature in a document. If used in conjunction with forms or tables, a signature can be given a Key-Value pairing or be detected in the cell of a table. Query. A QUERY Block object contains the query text, alias and link to the associated Query results block object. Query Result. A QUERY_RESULT Block object contains the answer to the query and an ID that connects it to the query asked. This Block also contains a confidence score. Selection elements such as check boxes and option buttons (radio buttons) can be detected in form data and in tables. A SELECTION_ELEMENT Block object contains information about a selection element, including the selection status. You can choose which type of analysis to perform by specifying the FeatureTypes list. The output is returned in a list of Block objects. AnalyzeDocument is a synchronous operation. To analyze documents asynchronously, use StartDocumentAnalysis. For more information, see Document Text Analysis."]

@@ -24,6 +24,114 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module MacAddress =
+  struct
+    type nonrec t = string
+    let context_ = "MacAddress"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:17) >>=
+             (fun () ->
+                (check_string_max i ~max:17) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MacAddress" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceTypeCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:9999) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for InstanceTypeCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module InstanceTypeName =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceTypeName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-z0-9\\-]+\\.[a-z0-9\\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceTypeName" j
+    let to_json = simple_to_json to_value
+  end
+module AssetId =
+  struct
+    type nonrec t = string
+    let context_ = "AssetId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:"^(\\w+)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssetId" j
+    let to_json = simple_to_json to_value
+  end
+module MacAddressList =
+  struct
+    type nonrec t = MacAddress.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MacAddress.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MacAddress.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MacAddressList" ~of_json:MacAddress.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Family =
   struct
     type nonrec t = string
@@ -34,7 +142,7 @@ module Family =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:10) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-z0-9]+")));
+                  (fun () -> check_pattern i ~pattern:"^[a-z0-9]+$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -68,6 +176,144 @@ module Quantity =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Quantity" j
+    let to_json = simple_to_json to_value
+  end
+module AssetInstanceTypeCapacity =
+  struct
+    type nonrec t =
+      {
+      instanceType: InstanceTypeName.t option
+        [@ocaml.doc "The type of instance."];
+      count: InstanceTypeCount.t option
+        [@ocaml.doc "The number of each instance type."]}
+    let make ?instanceType = fun ?count -> fun () -> { instanceType; count }
+    let to_value x =
+      structure_to_value
+        [("InstanceType",
+           (Option.map x.instanceType ~f:InstanceTypeName.to_value));
+        ("Count", (Option.map x.count ~f:InstanceTypeCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let count =
+        (Option.map ~f:InstanceTypeCount.of_xml) (Xml.child xml_arg0 "Count") in
+      let instanceType =
+        (Option.map ~f:InstanceTypeName.of_xml)
+          (Xml.child xml_arg0 "InstanceType") in
+      make ?count ?instanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let count = field_map json__ "Count" InstanceTypeCount.of_json in
+      let instanceType =
+        field_map json__ "InstanceType" InstanceTypeName.of_json in
+      make ?count ?instanceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The capacity for each instance type."]
+module InstanceFamilyName =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceFamilyName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?:.{1,200}/)?(?:[a-z0-9-_A-Z])+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceFamilyName" j
+    let to_json = simple_to_json to_value
+  end
+module LineItemAssetInformation =
+  struct
+    type nonrec t =
+      {
+      assetId: AssetId.t option
+        [@ocaml.doc
+          "The ID of the asset. An Outpost asset can be a single server within an Outposts rack or an Outposts server configuration."];
+      macAddressList: MacAddressList.t option
+        [@ocaml.doc "The MAC addresses of the asset."]}
+    let make ?assetId =
+      fun ?macAddressList -> fun () -> { assetId; macAddressList }
+    let to_value x =
+      structure_to_value
+        [("AssetId", (Option.map x.assetId ~f:AssetId.to_value));
+        ("MacAddressList",
+          (Option.map x.macAddressList ~f:MacAddressList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let macAddressList =
+        (Option.map ~f:MacAddressList.of_xml)
+          (Xml.child xml_arg0 "MacAddressList") in
+      let assetId =
+        (Option.map ~f:AssetId.of_xml) (Xml.child xml_arg0 "AssetId") in
+      make ?macAddressList ?assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let macAddressList =
+        field_map json__ "MacAddressList" MacAddressList.of_json in
+      let assetId = field_map json__ "AssetId" AssetId.of_json in
+      make ?macAddressList ?assetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a line item asset."]
+module ShipmentCarrier =
+  struct
+    type nonrec t =
+      | DHL 
+      | DBS 
+      | FEDEX 
+      | UPS 
+      | EXPEDITORS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DHL -> "DHL"
+      | DBS -> "DBS"
+      | FEDEX -> "FEDEX"
+      | UPS -> "UPS"
+      | EXPEDITORS -> "EXPEDITORS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DHL" -> DHL
+      | "DBS" -> DBS
+      | "FEDEX" -> FEDEX
+      | "UPS" -> UPS
+      | "EXPEDITORS" -> EXPEDITORS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ShipmentCarrier" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ShipmentCarrier" j)
+    let to_json = simple_to_json to_value
+  end
+module TrackingId =
+  struct
+    type nonrec t = string
+    let context_ = "TrackingId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:6) >>=
+             (fun () ->
+                (check_string_max i ~max:42) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TrackingId" j
     let to_json = simple_to_json to_value
   end
 module FiberOpticCableType =
@@ -197,6 +443,7 @@ module PowerConnector =
       | IEC309 
       | AH530P7W 
       | AH532P6W 
+      | CS8365C 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -205,6 +452,7 @@ module PowerConnector =
       | IEC309 -> "IEC309"
       | AH530P7W -> "AH530P7W"
       | AH532P6W -> "AH532P6W"
+      | CS8365C -> "CS8365C"
       | Non_static_id s -> s
     let of_string =
       function
@@ -212,6 +460,7 @@ module PowerConnector =
       | "IEC309" -> IEC309
       | "AH530P7W" -> AH530P7W
       | "AH532P6W" -> AH532P6W
+      | "CS8365C" -> CS8365C
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -227,6 +476,7 @@ module PowerDrawKva =
       | POWER_5_KVA 
       | POWER_10_KVA 
       | POWER_15_KVA 
+      | POWER_30_KVA 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -234,12 +484,14 @@ module PowerDrawKva =
       | POWER_5_KVA -> "POWER_5_KVA"
       | POWER_10_KVA -> "POWER_10_KVA"
       | POWER_15_KVA -> "POWER_15_KVA"
+      | POWER_30_KVA -> "POWER_30_KVA"
       | Non_static_id s -> s
     let of_string =
       function
       | "POWER_5_KVA" -> POWER_5_KVA
       | "POWER_10_KVA" -> POWER_10_KVA
       | "POWER_15_KVA" -> POWER_15_KVA
+      | "POWER_30_KVA" -> POWER_30_KVA
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -422,10 +674,7 @@ module LineItemQuantity =
   struct
     type nonrec t = int
     let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:20) >>= (fun () -> check_int_min i ~min:1));
-        i
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
     let of_string = Int.of_string
     let to_value x = `Integer x
     let to_query v = to_query to_value v
@@ -447,6 +696,7 @@ module LineItemStatus =
       | INSTALLED 
       | ERROR 
       | CANCELLED 
+      | REPLACED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -459,6 +709,7 @@ module LineItemStatus =
       | INSTALLED -> "INSTALLED"
       | ERROR -> "ERROR"
       | CANCELLED -> "CANCELLED"
+      | REPLACED -> "REPLACED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -470,6 +721,7 @@ module LineItemStatus =
       | "INSTALLED" -> INSTALLED
       | "ERROR" -> ERROR
       | "CANCELLED" -> CANCELLED
+      | "REPLACED" -> REPLACED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -506,10 +758,10 @@ module EC2Capacity =
         (Option.map ~f:Family.of_xml) (Xml.child xml_arg0 "Family") in
       make ?quantity ?maxSize ?family ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let quantity = field_map json "Quantity" Quantity.of_json in
-      let maxSize = field_map json "MaxSize" MaxSize.of_json in
-      let family = field_map json "Family" Family.of_json in
+    let of_json json__ =
+      let quantity = field_map json__ "Quantity" Quantity.of_json in
+      let maxSize = field_map json__ "MaxSize" MaxSize.of_json in
+      let family = field_map json__ "Family" Family.of_json in
       make ?quantity ?maxSize ?family ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about EC2 capacity."]
@@ -547,6 +799,264 @@ module SupportedUplinkGbps =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module RackElevation =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:99.) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module AssetInstanceCapacityList =
+  struct
+    type nonrec t = AssetInstanceTypeCapacity.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssetInstanceTypeCapacity.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssetInstanceTypeCapacity.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssetInstanceCapacityList"
+        ~of_json:AssetInstanceTypeCapacity.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ComputeAssetState =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | ISOLATED 
+      | RETIRING 
+      | INSTALLING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | ISOLATED -> "ISOLATED"
+      | RETIRING -> "RETIRING"
+      | INSTALLING -> "INSTALLING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "ISOLATED" -> ISOLATED
+      | "RETIRING" -> RETIRING
+      | "INSTALLING" -> INSTALLING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ComputeAssetState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ComputeAssetState" j)
+    let to_json = simple_to_json to_value
+  end
+module HostId =
+  struct
+    type nonrec t = string
+    let context_ = "HostId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"^[A-Za-z0-9-]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HostId" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceFamilies =
+  struct
+    type nonrec t = InstanceFamilyName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstanceFamilyName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstanceFamilyName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstanceFamilies"
+        ~of_json:InstanceFamilyName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VCPUCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for VCPUCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module NullableFloat =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module PaymentOption =
+  struct
+    type nonrec t =
+      | ALL_UPFRONT 
+      | NO_UPFRONT 
+      | PARTIAL_UPFRONT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALL_UPFRONT -> "ALL_UPFRONT"
+      | NO_UPFRONT -> "NO_UPFRONT"
+      | PARTIAL_UPFRONT -> "PARTIAL_UPFRONT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALL_UPFRONT" -> ALL_UPFRONT
+      | "NO_UPFRONT" -> NO_UPFRONT
+      | "PARTIAL_UPFRONT" -> PARTIAL_UPFRONT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PaymentOption" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PaymentOption" j)
+    let to_json = simple_to_json to_value
+  end
+module PaymentTerm =
+  struct
+    type nonrec t =
+      | THREE_YEARS 
+      | ONE_YEAR 
+      | FIVE_YEARS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | THREE_YEARS -> "THREE_YEARS"
+      | ONE_YEAR -> "ONE_YEAR"
+      | FIVE_YEARS -> "FIVE_YEARS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "THREE_YEARS" -> THREE_YEARS
+      | "ONE_YEAR" -> ONE_YEAR
+      | "FIVE_YEARS" -> FIVE_YEARS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PaymentTerm" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PaymentTerm" j)
+    let to_json = simple_to_json to_value
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\S \\n]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module LineItemAssetInformationList =
+  struct
+    type nonrec t = LineItemAssetInformation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LineItemAssetInformation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LineItemAssetInformation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LineItemAssetInformationList"
+        ~of_json:LineItemAssetInformation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module LineItemId =
   struct
     type nonrec t = string
@@ -562,6 +1072,61 @@ module LineItemId =
     let of_json j = string_of_json ~kind:"LineItemId" j
     let to_json = simple_to_json to_value
   end
+module OrderId =
+  struct
+    type nonrec t = string
+    let context_ = "OrderId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () -> check_pattern i ~pattern:"oo-[a-f0-9]{17}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OrderId" j
+    let to_json = simple_to_json to_value
+  end
+module ShipmentInformation =
+  struct
+    type nonrec t =
+      {
+      shipmentTrackingNumber: TrackingId.t option
+        [@ocaml.doc "The tracking number of the shipment."];
+      shipmentCarrier: ShipmentCarrier.t option
+        [@ocaml.doc "The carrier of the shipment."]}
+    let make ?shipmentTrackingNumber =
+      fun ?shipmentCarrier ->
+        fun () -> { shipmentTrackingNumber; shipmentCarrier }
+    let to_value x =
+      structure_to_value
+        [("ShipmentTrackingNumber",
+           (Option.map x.shipmentTrackingNumber ~f:TrackingId.to_value));
+        ("ShipmentCarrier",
+          (Option.map x.shipmentCarrier ~f:ShipmentCarrier.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let shipmentCarrier =
+        (Option.map ~f:ShipmentCarrier.of_xml)
+          (Xml.child xml_arg0 "ShipmentCarrier") in
+      let shipmentTrackingNumber =
+        (Option.map ~f:TrackingId.of_xml)
+          (Xml.child xml_arg0 "ShipmentTrackingNumber") in
+      make ?shipmentCarrier ?shipmentTrackingNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let shipmentCarrier =
+        field_map json__ "ShipmentCarrier" ShipmentCarrier.of_json in
+      let shipmentTrackingNumber =
+        field_map json__ "ShipmentTrackingNumber" TrackingId.of_json in
+      make ?shipmentCarrier ?shipmentTrackingNumber ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a line item shipment."]
 module SkuCode =
   struct
     type nonrec t = string
@@ -580,6 +1145,43 @@ module SkuCode =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"SkuCode" j
+    let to_json = simple_to_json to_value
+  end
+module AWSServiceName =
+  struct
+    type nonrec t =
+      | AWS 
+      | EC2 
+      | ELASTICACHE 
+      | ELB 
+      | RDS 
+      | ROUTE53 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWS -> "AWS"
+      | EC2 -> "EC2"
+      | ELASTICACHE -> "ELASTICACHE"
+      | ELB -> "ELB"
+      | RDS -> "RDS"
+      | ROUTE53 -> "ROUTE53"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWS" -> AWS
+      | "EC2" -> EC2
+      | "ELASTICACHE" -> ELASTICACHE
+      | "ELB" -> ELB
+      | "RDS" -> RDS
+      | "ROUTE53" -> ROUTE53
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AWSServiceName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AWSServiceName" j)
     let to_json = simple_to_json to_value
   end
 module AccountId =
@@ -603,6 +1205,26 @@ module AccountId =
     let of_json j = string_of_json ~kind:"AccountId" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "The ID of the Amazon Web Services account."]
+module InstanceId =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:11) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:"^i-[0-9a-z]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceId" j
+    let to_json = simple_to_json to_value
+  end
 module City =
   struct
     type nonrec t = string
@@ -739,22 +1361,22 @@ module RackPhysicalProperties =
         ?uplinkCount ?uplinkGbps ?powerFeedDrop ?powerConnector ?powerPhase
         ?powerDrawKva ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maximumSupportedWeightLbs =
-        field_map json "MaximumSupportedWeightLbs"
+        field_map json__ "MaximumSupportedWeightLbs"
           MaximumSupportedWeightLbs.of_json in
       let opticalStandard =
-        field_map json "OpticalStandard" OpticalStandard.of_json in
+        field_map json__ "OpticalStandard" OpticalStandard.of_json in
       let fiberOpticCableType =
-        field_map json "FiberOpticCableType" FiberOpticCableType.of_json in
-      let uplinkCount = field_map json "UplinkCount" UplinkCount.of_json in
-      let uplinkGbps = field_map json "UplinkGbps" UplinkGbps.of_json in
+        field_map json__ "FiberOpticCableType" FiberOpticCableType.of_json in
+      let uplinkCount = field_map json__ "UplinkCount" UplinkCount.of_json in
+      let uplinkGbps = field_map json__ "UplinkGbps" UplinkGbps.of_json in
       let powerFeedDrop =
-        field_map json "PowerFeedDrop" PowerFeedDrop.of_json in
+        field_map json__ "PowerFeedDrop" PowerFeedDrop.of_json in
       let powerConnector =
-        field_map json "PowerConnector" PowerConnector.of_json in
-      let powerPhase = field_map json "PowerPhase" PowerPhase.of_json in
-      let powerDrawKva = field_map json "PowerDrawKva" PowerDrawKva.of_json in
+        field_map json__ "PowerConnector" PowerConnector.of_json in
+      let powerPhase = field_map json__ "PowerPhase" PowerPhase.of_json in
+      let powerDrawKva = field_map json__ "PowerDrawKva" PowerDrawKva.of_json in
       make ?maximumSupportedWeightLbs ?opticalStandard ?fiberOpticCableType
         ?uplinkCount ?uplinkGbps ?powerFeedDrop ?powerConnector ?powerPhase
         ?powerDrawKva ()
@@ -911,6 +1533,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1142,32 +1766,14 @@ module LineItemStatusCounts =
                        (LineItemQuantity.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:LineItemStatus.of_string
         ~of_json:LineItemQuantity.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module OrderId =
-  struct
-    type nonrec t = string
-    let context_ = "OrderId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:20) >>=
-                  (fun () -> check_pattern i ~pattern:"oo-[a-f0-9]{17}$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"OrderId" j
-    let to_json = simple_to_json to_value
   end
 module OrderStatus =
   struct
@@ -1180,6 +1786,7 @@ module OrderStatus =
       | CANCELLED 
       | PREPARING 
       | IN_PROGRESS 
+      | DELIVERED 
       | COMPLETED 
       | ERROR 
       | Non_static_id of string 
@@ -1194,6 +1801,7 @@ module OrderStatus =
       | CANCELLED -> "CANCELLED"
       | PREPARING -> "PREPARING"
       | IN_PROGRESS -> "IN_PROGRESS"
+      | DELIVERED -> "DELIVERED"
       | COMPLETED -> "COMPLETED"
       | ERROR -> "ERROR"
       | Non_static_id s -> s
@@ -1207,6 +1815,7 @@ module OrderStatus =
       | "CANCELLED" -> CANCELLED
       | "PREPARING" -> PREPARING
       | "IN_PROGRESS" -> IN_PROGRESS
+      | "DELIVERED" -> DELIVERED
       | "COMPLETED" -> COMPLETED
       | "ERROR" -> ERROR
       | x -> Non_static_id x
@@ -1320,6 +1929,9 @@ module EC2CapacityListDefinition =
   struct
     type nonrec t = EC2Capacity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EC2Capacity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1345,6 +1957,9 @@ module SupportedStorageList =
   struct
     type nonrec t = SupportedStorageEnum.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SupportedStorageEnum.to_value)) |>
         (fun x -> `List x)
@@ -1371,6 +1986,9 @@ module SupportedUplinkGbpsListDefinition =
   struct
     type nonrec t = SupportedUplinkGbps.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SupportedUplinkGbps.to_value)) |>
         (fun x -> `List x)
@@ -1393,6 +2011,313 @@ module SupportedUplinkGbpsListDefinition =
         ~of_json:SupportedUplinkGbps.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CapacityTaskId =
+  struct
+    type nonrec t = string
+    let context_ = "CapacityTaskId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:21) >>=
+             (fun () ->
+                (check_string_max i ~max:21) >>=
+                  (fun () -> check_pattern i ~pattern:"^cap-[a-f0-9]{17}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CapacityTaskId" j
+    let to_json = simple_to_json to_value
+  end
+module CapacityTaskStatus =
+  struct
+    type nonrec t =
+      | REQUESTED 
+      | IN_PROGRESS 
+      | FAILED 
+      | COMPLETED 
+      | WAITING_FOR_EVACUATION 
+      | CANCELLATION_IN_PROGRESS 
+      | CANCELLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | REQUESTED -> "REQUESTED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | FAILED -> "FAILED"
+      | COMPLETED -> "COMPLETED"
+      | WAITING_FOR_EVACUATION -> "WAITING_FOR_EVACUATION"
+      | CANCELLATION_IN_PROGRESS -> "CANCELLATION_IN_PROGRESS"
+      | CANCELLED -> "CANCELLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "REQUESTED" -> REQUESTED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "FAILED" -> FAILED
+      | "COMPLETED" -> COMPLETED
+      | "WAITING_FOR_EVACUATION" -> WAITING_FOR_EVACUATION
+      | "CANCELLATION_IN_PROGRESS" -> CANCELLATION_IN_PROGRESS
+      | "CANCELLED" -> CANCELLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CapacityTaskStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CapacityTaskStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module AssetLocation =
+  struct
+    type nonrec t =
+      {
+      rackElevation: RackElevation.t option
+        [@ocaml.doc
+          "The position of an asset in a rack measured in rack units."]}
+    let make ?rackElevation = fun () -> { rackElevation }
+    let to_value x =
+      structure_to_value
+        [("RackElevation",
+           (Option.map x.rackElevation ~f:RackElevation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rackElevation =
+        (Option.map ~f:RackElevation.of_xml)
+          (Xml.child xml_arg0 "RackElevation") in
+      make ?rackElevation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rackElevation =
+        field_map json__ "RackElevation" RackElevation.of_json in
+      make ?rackElevation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the position of the asset in a rack."]
+module AssetType =
+  struct
+    type nonrec t =
+      | COMPUTE 
+      | STORAGE 
+      | POWERSHELF 
+      | SWITCH 
+      | NETWORKING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | COMPUTE -> "COMPUTE"
+      | STORAGE -> "STORAGE"
+      | POWERSHELF -> "POWERSHELF"
+      | SWITCH -> "SWITCH"
+      | NETWORKING -> "NETWORKING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "COMPUTE" -> COMPUTE
+      | "STORAGE" -> STORAGE
+      | "POWERSHELF" -> POWERSHELF
+      | "SWITCH" -> SWITCH
+      | "NETWORKING" -> NETWORKING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AssetType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AssetType" j)
+    let to_json = simple_to_json to_value
+  end
+module ComputeAttributes =
+  struct
+    type nonrec t =
+      {
+      hostId: HostId.t option
+        [@ocaml.doc "The host ID of the Dedicated Host on the asset."];
+      state: ComputeAssetState.t option
+        [@ocaml.doc
+          "The state. ACTIVE - The asset is available and can provide capacity for new compute resources. ISOLATED - The asset is undergoing maintenance and can't provide capacity for new compute resources. Existing compute resources on the asset are not affected. RETIRING - The underlying hardware for the asset is degraded. Capacity for new compute resources is reduced. Amazon Web Services sends notifications for resources that must be stopped before the asset can be replaced. INSTALLING - The asset is being installed and can't yet provide capacity for new compute resources."];
+      instanceFamilies: InstanceFamilies.t option
+        [@ocaml.doc
+          "A list of the names of instance families that are currently associated with a given asset."];
+      instanceTypeCapacities: AssetInstanceCapacityList.t option
+        [@ocaml.doc
+          "The instance type capacities configured for this asset. This can be changed through a capacity task."];
+      maxVcpus: VCPUCount.t option
+        [@ocaml.doc
+          "The maximum number of vCPUs possible for the specified asset."]}
+    let make ?hostId =
+      fun ?state ->
+        fun ?instanceFamilies ->
+          fun ?instanceTypeCapacities ->
+            fun ?maxVcpus ->
+              fun () ->
+                {
+                  hostId;
+                  state;
+                  instanceFamilies;
+                  instanceTypeCapacities;
+                  maxVcpus
+                }
+    let to_value x =
+      structure_to_value
+        [("HostId", (Option.map x.hostId ~f:HostId.to_value));
+        ("State", (Option.map x.state ~f:ComputeAssetState.to_value));
+        ("InstanceFamilies",
+          (Option.map x.instanceFamilies ~f:InstanceFamilies.to_value));
+        ("InstanceTypeCapacities",
+          (Option.map x.instanceTypeCapacities
+             ~f:AssetInstanceCapacityList.to_value));
+        ("MaxVcpus", (Option.map x.maxVcpus ~f:VCPUCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxVcpus =
+        (Option.map ~f:VCPUCount.of_xml) (Xml.child xml_arg0 "MaxVcpus") in
+      let instanceTypeCapacities =
+        (Option.map ~f:AssetInstanceCapacityList.of_xml)
+          (Xml.child xml_arg0 "InstanceTypeCapacities") in
+      let instanceFamilies =
+        (Option.map ~f:InstanceFamilies.of_xml)
+          (Xml.child xml_arg0 "InstanceFamilies") in
+      let state =
+        (Option.map ~f:ComputeAssetState.of_xml) (Xml.child xml_arg0 "State") in
+      let hostId =
+        (Option.map ~f:HostId.of_xml) (Xml.child xml_arg0 "HostId") in
+      make ?maxVcpus ?instanceTypeCapacities ?instanceFamilies ?state ?hostId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxVcpus = field_map json__ "MaxVcpus" VCPUCount.of_json in
+      let instanceTypeCapacities =
+        field_map json__ "InstanceTypeCapacities"
+          AssetInstanceCapacityList.of_json in
+      let instanceFamilies =
+        field_map json__ "InstanceFamilies" InstanceFamilies.of_json in
+      let state = field_map json__ "State" ComputeAssetState.of_json in
+      let hostId = field_map json__ "HostId" HostId.of_json in
+      make ?maxVcpus ?instanceTypeCapacities ?instanceFamilies ?state ?hostId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about compute hardware assets."]
+module RackId =
+  struct
+    type nonrec t = string
+    let context_ = "RackId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:5) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\S \\n]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RackId" j
+    let to_json = simple_to_json to_value
+  end
+module OutpostInstanceType =
+  struct
+    type nonrec t = string
+    let context_ = "OutpostInstanceType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:30) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-z0-9\\-\\.]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OutpostInstanceType" j
+    let to_json = simple_to_json to_value
+  end
+module QuotePricingType =
+  struct
+    type nonrec t =
+      | SUBSCRIPTION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | SUBSCRIPTION -> "SUBSCRIPTION" | Non_static_id s -> s
+    let of_string =
+      function | "SUBSCRIPTION" -> SUBSCRIPTION | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration QuotePricingType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QuotePricingType" j)
+    let to_json = simple_to_json to_value
+  end
+module SubscriptionPricingDetails =
+  struct
+    type nonrec t =
+      {
+      paymentOption: PaymentOption.t option
+        [@ocaml.doc "The payment option."];
+      paymentTerm: PaymentTerm.t option [@ocaml.doc "The payment term."];
+      upfrontPrice: NullableFloat.t option [@ocaml.doc "The upfront price."];
+      monthlyRecurringPrice: NullableFloat.t option
+        [@ocaml.doc "The monthly recurring price."]}
+    let make ?paymentOption =
+      fun ?paymentTerm ->
+        fun ?upfrontPrice ->
+          fun ?monthlyRecurringPrice ->
+            fun () ->
+              {
+                paymentOption;
+                paymentTerm;
+                upfrontPrice;
+                monthlyRecurringPrice
+              }
+    let to_value x =
+      structure_to_value
+        [("PaymentOption",
+           (Option.map x.paymentOption ~f:PaymentOption.to_value));
+        ("PaymentTerm", (Option.map x.paymentTerm ~f:PaymentTerm.to_value));
+        ("UpfrontPrice",
+          (Option.map x.upfrontPrice ~f:NullableFloat.to_value));
+        ("MonthlyRecurringPrice",
+          (Option.map x.monthlyRecurringPrice ~f:NullableFloat.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let monthlyRecurringPrice =
+        (Option.map ~f:NullableFloat.of_xml)
+          (Xml.child xml_arg0 "MonthlyRecurringPrice") in
+      let upfrontPrice =
+        (Option.map ~f:NullableFloat.of_xml)
+          (Xml.child xml_arg0 "UpfrontPrice") in
+      let paymentTerm =
+        (Option.map ~f:PaymentTerm.of_xml) (Xml.child xml_arg0 "PaymentTerm") in
+      let paymentOption =
+        (Option.map ~f:PaymentOption.of_xml)
+          (Xml.child xml_arg0 "PaymentOption") in
+      make ?monthlyRecurringPrice ?upfrontPrice ?paymentTerm ?paymentOption
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let monthlyRecurringPrice =
+        field_map json__ "MonthlyRecurringPrice" NullableFloat.of_json in
+      let upfrontPrice =
+        field_map json__ "UpfrontPrice" NullableFloat.of_json in
+      let paymentTerm = field_map json__ "PaymentTerm" PaymentTerm.of_json in
+      let paymentOption =
+        field_map json__ "PaymentOption" PaymentOption.of_json in
+      make ?monthlyRecurringPrice ?upfrontPrice ?paymentTerm ?paymentOption
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The pricing details for a subscription."]
 module InstanceType =
   struct
     type nonrec t = string[@@ocaml.doc "The instance type."]
@@ -1406,6 +2331,106 @@ module InstanceType =
     let of_json j = string_of_json ~kind:"InstanceType" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "The instance type."]
+module NullableDouble =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module OrderIdList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OrderIdList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SubscriptionStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | PENDING 
+      | INACTIVE 
+      | CANCELLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | PENDING -> "PENDING"
+      | INACTIVE -> "INACTIVE"
+      | CANCELLED -> "CANCELLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "PENDING" -> PENDING
+      | "INACTIVE" -> INACTIVE
+      | "CANCELLED" -> CANCELLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SubscriptionStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SubscriptionStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module SubscriptionType =
+  struct
+    type nonrec t =
+      | ORIGINAL 
+      | RENEWAL 
+      | CAPACITY_INCREASE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ORIGINAL -> "ORIGINAL"
+      | RENEWAL -> "RENEWAL"
+      | CAPACITY_INCREASE -> "CAPACITY_INCREASE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ORIGINAL" -> ORIGINAL
+      | "RENEWAL" -> RENEWAL
+      | "CAPACITY_INCREASE" -> CAPACITY_INCREASE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SubscriptionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SubscriptionType" j)
+    let to_json = simple_to_json to_value
+  end
 module LineItem =
   struct
     type nonrec t =
@@ -1416,20 +2441,62 @@ module LineItem =
       quantity: LineItemQuantity.t option
         [@ocaml.doc "The quantity of the line item."];
       status: LineItemStatus.t option
-        [@ocaml.doc "The status of the line item."]}
+        [@ocaml.doc "The status of the line item."];
+      shipmentInformation: ShipmentInformation.t option
+        [@ocaml.doc "Information about a line item shipment."];
+      assetInformationList: LineItemAssetInformationList.t option
+        [@ocaml.doc "Information about assets."];
+      previousLineItemId: LineItemId.t option
+        [@ocaml.doc "The ID of the previous line item."];
+      previousOrderId: OrderId.t option
+        [@ocaml.doc "The ID of the previous order."]}
     let make ?catalogItemId =
       fun ?lineItemId ->
         fun ?quantity ->
           fun ?status ->
-            fun () -> { catalogItemId; lineItemId; quantity; status }
+            fun ?shipmentInformation ->
+              fun ?assetInformationList ->
+                fun ?previousLineItemId ->
+                  fun ?previousOrderId ->
+                    fun () ->
+                      {
+                        catalogItemId;
+                        lineItemId;
+                        quantity;
+                        status;
+                        shipmentInformation;
+                        assetInformationList;
+                        previousLineItemId;
+                        previousOrderId
+                      }
     let to_value x =
       structure_to_value
         [("CatalogItemId", (Option.map x.catalogItemId ~f:SkuCode.to_value));
         ("LineItemId", (Option.map x.lineItemId ~f:LineItemId.to_value));
         ("Quantity", (Option.map x.quantity ~f:LineItemQuantity.to_value));
-        ("Status", (Option.map x.status ~f:LineItemStatus.to_value))]
+        ("Status", (Option.map x.status ~f:LineItemStatus.to_value));
+        ("ShipmentInformation",
+          (Option.map x.shipmentInformation ~f:ShipmentInformation.to_value));
+        ("AssetInformationList",
+          (Option.map x.assetInformationList
+             ~f:LineItemAssetInformationList.to_value));
+        ("PreviousLineItemId",
+          (Option.map x.previousLineItemId ~f:LineItemId.to_value));
+        ("PreviousOrderId",
+          (Option.map x.previousOrderId ~f:OrderId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let previousOrderId =
+        (Option.map ~f:OrderId.of_xml) (Xml.child xml_arg0 "PreviousOrderId") in
+      let previousLineItemId =
+        (Option.map ~f:LineItemId.of_xml)
+          (Xml.child xml_arg0 "PreviousLineItemId") in
+      let assetInformationList =
+        (Option.map ~f:LineItemAssetInformationList.of_xml)
+          (Xml.child xml_arg0 "AssetInformationList") in
+      let shipmentInformation =
+        (Option.map ~f:ShipmentInformation.of_xml)
+          (Xml.child xml_arg0 "ShipmentInformation") in
       let status =
         (Option.map ~f:LineItemStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let quantity =
@@ -1439,16 +2506,49 @@ module LineItem =
         (Option.map ~f:LineItemId.of_xml) (Xml.child xml_arg0 "LineItemId") in
       let catalogItemId =
         (Option.map ~f:SkuCode.of_xml) (Xml.child xml_arg0 "CatalogItemId") in
-      make ?status ?quantity ?lineItemId ?catalogItemId ()
+      make ?previousOrderId ?previousLineItemId ?assetInformationList
+        ?shipmentInformation ?status ?quantity ?lineItemId ?catalogItemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" LineItemStatus.of_json in
-      let quantity = field_map json "Quantity" LineItemQuantity.of_json in
-      let lineItemId = field_map json "LineItemId" LineItemId.of_json in
-      let catalogItemId = field_map json "CatalogItemId" SkuCode.of_json in
-      make ?status ?quantity ?lineItemId ?catalogItemId ()
+    let of_json json__ =
+      let previousOrderId =
+        field_map json__ "PreviousOrderId" OrderId.of_json in
+      let previousLineItemId =
+        field_map json__ "PreviousLineItemId" LineItemId.of_json in
+      let assetInformationList =
+        field_map json__ "AssetInformationList"
+          LineItemAssetInformationList.of_json in
+      let shipmentInformation =
+        field_map json__ "ShipmentInformation" ShipmentInformation.of_json in
+      let status = field_map json__ "Status" LineItemStatus.of_json in
+      let quantity = field_map json__ "Quantity" LineItemQuantity.of_json in
+      let lineItemId = field_map json__ "LineItemId" LineItemId.of_json in
+      let catalogItemId = field_map json__ "CatalogItemId" SkuCode.of_json in
+      make ?previousOrderId ?previousLineItemId ?assetInformationList
+        ?shipmentInformation ?status ?quantity ?lineItemId ?catalogItemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a line item."]
+module CIDR =
+  struct
+    type nonrec t = string
+    let context_ = "CIDR"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:9) >>=
+             (fun () ->
+                (check_string_max i ~max:18) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([0-9]{1,3}\\.){3}[0-9]{1,3}/[0-9]{1,2}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CIDR" j
+    let to_json = simple_to_json to_value
+  end
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -1492,26 +2592,6 @@ module ResourceType =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration ResourceType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
-    let to_json = simple_to_json to_value
-  end
-module String_ =
-  struct
-    type nonrec t = string
-    let context_ = "String"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1000) >>=
-                  (fun () -> check_pattern i ~pattern:"^[\\S \\n]+$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
 module AddressLine1 =
@@ -1674,6 +2754,218 @@ module PostalCode =
     let of_json j = string_of_json ~kind:"PostalCode" j
     let to_json = simple_to_json to_value
   end
+module BlockingResourceType =
+  struct
+    type nonrec t =
+      | EC2_INSTANCE 
+      | OUTPOST_RAM_SHARE 
+      | LGW_ROUTING_DOMAIN 
+      | LGW_ROUTE_TABLE 
+      | LGW_VIRTUAL_INTERFACE_GROUP 
+      | OUTPOST_ORDER_CANCELLABLE 
+      | OUTPOST_ORDER_INTERVENTION_REQUIRED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EC2_INSTANCE -> "EC2_INSTANCE"
+      | OUTPOST_RAM_SHARE -> "OUTPOST_RAM_SHARE"
+      | LGW_ROUTING_DOMAIN -> "LGW_ROUTING_DOMAIN"
+      | LGW_ROUTE_TABLE -> "LGW_ROUTE_TABLE"
+      | LGW_VIRTUAL_INTERFACE_GROUP -> "LGW_VIRTUAL_INTERFACE_GROUP"
+      | OUTPOST_ORDER_CANCELLABLE -> "OUTPOST_ORDER_CANCELLABLE"
+      | OUTPOST_ORDER_INTERVENTION_REQUIRED ->
+          "OUTPOST_ORDER_INTERVENTION_REQUIRED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EC2_INSTANCE" -> EC2_INSTANCE
+      | "OUTPOST_RAM_SHARE" -> OUTPOST_RAM_SHARE
+      | "LGW_ROUTING_DOMAIN" -> LGW_ROUTING_DOMAIN
+      | "LGW_ROUTE_TABLE" -> LGW_ROUTE_TABLE
+      | "LGW_VIRTUAL_INTERFACE_GROUP" -> LGW_VIRTUAL_INTERFACE_GROUP
+      | "OUTPOST_ORDER_CANCELLABLE" -> OUTPOST_ORDER_CANCELLABLE
+      | "OUTPOST_ORDER_INTERVENTION_REQUIRED" ->
+          OUTPOST_ORDER_INTERVENTION_REQUIRED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration BlockingResourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BlockingResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityTaskFailureType =
+  struct
+    type nonrec t =
+      | UNSUPPORTED_CAPACITY_CONFIGURATION 
+      | UNEXPECTED_ASSET_STATE 
+      | BLOCKING_INSTANCES_NOT_EVACUATED 
+      | INTERNAL_SERVER_ERROR 
+      | RESOURCE_NOT_FOUND 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UNSUPPORTED_CAPACITY_CONFIGURATION ->
+          "UNSUPPORTED_CAPACITY_CONFIGURATION"
+      | UNEXPECTED_ASSET_STATE -> "UNEXPECTED_ASSET_STATE"
+      | BLOCKING_INSTANCES_NOT_EVACUATED ->
+          "BLOCKING_INSTANCES_NOT_EVACUATED"
+      | INTERNAL_SERVER_ERROR -> "INTERNAL_SERVER_ERROR"
+      | RESOURCE_NOT_FOUND -> "RESOURCE_NOT_FOUND"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UNSUPPORTED_CAPACITY_CONFIGURATION" ->
+          UNSUPPORTED_CAPACITY_CONFIGURATION
+      | "UNEXPECTED_ASSET_STATE" -> UNEXPECTED_ASSET_STATE
+      | "BLOCKING_INSTANCES_NOT_EVACUATED" ->
+          BLOCKING_INSTANCES_NOT_EVACUATED
+      | "INTERNAL_SERVER_ERROR" -> INTERNAL_SERVER_ERROR
+      | "RESOURCE_NOT_FOUND" -> RESOURCE_NOT_FOUND
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CapacityTaskFailureType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CapacityTaskFailureType" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityTaskStatusReason =
+  struct
+    type nonrec t = string
+    let context_ = "CapacityTaskStatusReason"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:128); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CapacityTaskStatusReason" j
+    let to_json = simple_to_json to_value
+  end
+module AWSServiceNameList =
+  struct
+    type nonrec t = AWSServiceName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AWSServiceName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AWSServiceName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AWSServiceNameList" ~of_json:AWSServiceName.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module AccountIdList =
+  struct
+    type nonrec t = AccountId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AccountId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccountIdList" ~of_json:AccountId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InstanceIdList =
+  struct
+    type nonrec t = InstanceId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstanceId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstanceId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstanceIdList" ~of_json:InstanceId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InstanceTypeCapacity =
+  struct
+    type nonrec t =
+      {
+      instanceType: InstanceTypeName.t
+        [@ocaml.doc "The instance type of the hosts."];
+      count: InstanceTypeCount.t
+        [@ocaml.doc
+          "The number of instances for the specified instance type."]}
+    let context_ = "InstanceTypeCapacity"
+    let make ~instanceType = fun ~count -> fun () -> { instanceType; count }
+    let to_value x =
+      structure_to_value
+        [("InstanceType", (Some (InstanceTypeName.to_value x.instanceType)));
+        ("Count", (Some (InstanceTypeCount.to_value x.count)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let count =
+        InstanceTypeCount.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Count") in
+      let instanceType =
+        InstanceTypeName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InstanceType") in
+      make ~count ~instanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let count = field_map_exn json__ "Count" InstanceTypeCount.of_json in
+      let instanceType =
+        field_map_exn json__ "InstanceType" InstanceTypeName.of_json in
+      make ~count ~instanceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The instance type that you specify determines the combination of CPU, memory, storage, and networking capacity."]
 module Site =
   struct
     type nonrec t =
@@ -1772,23 +3064,25 @@ module Site =
         ?operatingAddressStateOrRegion ?operatingAddressCountryCode ?notes
         ?siteArn ?tags ?description ?name ?accountId ?siteId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rackPhysicalProperties =
-        field_map json "RackPhysicalProperties"
+        field_map json__ "RackPhysicalProperties"
           RackPhysicalProperties.of_json in
       let operatingAddressCity =
-        field_map json "OperatingAddressCity" City.of_json in
+        field_map json__ "OperatingAddressCity" City.of_json in
       let operatingAddressStateOrRegion =
-        field_map json "OperatingAddressStateOrRegion" StateOrRegion.of_json in
+        field_map json__ "OperatingAddressStateOrRegion"
+          StateOrRegion.of_json in
       let operatingAddressCountryCode =
-        field_map json "OperatingAddressCountryCode" CountryCode.of_json in
-      let notes = field_map json "Notes" SiteNotes.of_json in
-      let siteArn = field_map json "SiteArn" SiteArn.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let description = field_map json "Description" SiteDescription.of_json in
-      let name = field_map json "Name" SiteName.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      let siteId = field_map json "SiteId" SiteId.of_json in
+        field_map json__ "OperatingAddressCountryCode" CountryCode.of_json in
+      let notes = field_map json__ "Notes" SiteNotes.of_json in
+      let siteArn = field_map json__ "SiteArn" SiteArn.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let description =
+        field_map json__ "Description" SiteDescription.of_json in
+      let name = field_map json__ "Name" SiteName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let siteId = field_map json__ "SiteId" SiteId.of_json in
       make ?rackPhysicalProperties ?operatingAddressCity
         ?operatingAddressStateOrRegion ?operatingAddressCountryCode ?notes
         ?siteArn ?tags ?description ?name ?accountId ?siteId ()
@@ -1892,24 +3186,25 @@ module Outpost =
         ?availabilityZone ?lifeCycleStatus ?description ?name ?siteId
         ?outpostArn ?ownerId ?outpostId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supportedHardwareType =
-        field_map json "SupportedHardwareType" SupportedHardwareType.of_json in
-      let siteArn = field_map json "SiteArn" SiteArn.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
+        field_map json__ "SupportedHardwareType"
+          SupportedHardwareType.of_json in
+      let siteArn = field_map json__ "SiteArn" SiteArn.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let availabilityZoneId =
-        field_map json "AvailabilityZoneId" AvailabilityZoneId.of_json in
+        field_map json__ "AvailabilityZoneId" AvailabilityZoneId.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" AvailabilityZone.of_json in
+        field_map json__ "AvailabilityZone" AvailabilityZone.of_json in
       let lifeCycleStatus =
-        field_map json "LifeCycleStatus" LifeCycleStatus.of_json in
+        field_map json__ "LifeCycleStatus" LifeCycleStatus.of_json in
       let description =
-        field_map json "Description" OutpostDescription.of_json in
-      let name = field_map json "Name" OutpostName.of_json in
-      let siteId = field_map json "SiteId" SiteId.of_json in
-      let outpostArn = field_map json "OutpostArn" OutpostArn.of_json in
-      let ownerId = field_map json "OwnerId" OwnerId.of_json in
-      let outpostId = field_map json "OutpostId" OutpostId.of_json in
+        field_map json__ "Description" OutpostDescription.of_json in
+      let name = field_map json__ "Name" OutpostName.of_json in
+      let siteId = field_map json__ "SiteId" SiteId.of_json in
+      let outpostArn = field_map json__ "OutpostArn" OutpostArn.of_json in
+      let ownerId = field_map json__ "OwnerId" OwnerId.of_json in
+      let outpostId = field_map json__ "OutpostId" OutpostId.of_json in
       make ?supportedHardwareType ?siteArn ?tags ?availabilityZoneId
         ?availabilityZone ?lifeCycleStatus ?description ?name ?siteId
         ?outpostArn ?ownerId ?outpostId ()
@@ -1928,9 +3223,9 @@ module OrderSummary =
       lineItemCountsByStatus: LineItemStatusCounts.t option
         [@ocaml.doc "The status of all line items in the order."];
       orderSubmissionDate: ISO8601Timestamp.t option
-        [@ocaml.doc "Submission date for the order."];
+        [@ocaml.doc "The submission date for the order."];
       orderFulfilledDate: ISO8601Timestamp.t option
-        [@ocaml.doc "Fulfilment date for the order."]}
+        [@ocaml.doc "The fulfilment date for the order."]}
     let make ?outpostId =
       fun ?orderId ->
         fun ?orderType ->
@@ -1983,17 +3278,18 @@ module OrderSummary =
       make ?orderFulfilledDate ?orderSubmissionDate ?lineItemCountsByStatus
         ?status ?orderType ?orderId ?outpostId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let orderFulfilledDate =
-        field_map json "OrderFulfilledDate" ISO8601Timestamp.of_json in
+        field_map json__ "OrderFulfilledDate" ISO8601Timestamp.of_json in
       let orderSubmissionDate =
-        field_map json "OrderSubmissionDate" ISO8601Timestamp.of_json in
+        field_map json__ "OrderSubmissionDate" ISO8601Timestamp.of_json in
       let lineItemCountsByStatus =
-        field_map json "LineItemCountsByStatus" LineItemStatusCounts.of_json in
-      let status = field_map json "Status" OrderStatus.of_json in
-      let orderType = field_map json "OrderType" OrderType.of_json in
-      let orderId = field_map json "OrderId" OrderId.of_json in
-      let outpostId = field_map json "OutpostId" OutpostIdOnly.of_json in
+        field_map json__ "LineItemCountsByStatus"
+          LineItemStatusCounts.of_json in
+      let status = field_map json__ "Status" OrderStatus.of_json in
+      let orderType = field_map json__ "OrderType" OrderType.of_json in
+      let orderId = field_map json__ "OrderId" OrderId.of_json in
+      let outpostId = field_map json__ "OutpostId" OutpostIdOnly.of_json in
       make ?orderFulfilledDate ?orderSubmissionDate ?lineItemCountsByStatus
         ?status ?orderType ?orderId ?outpostId ()
     let to_json v = composed_to_json to_value v
@@ -2074,18 +3370,20 @@ module CatalogItem =
       make ?supportedStorage ?supportedUplinkGbps ?weightLbs ?powerKva
         ?eC2Capacities ?itemStatus ?catalogItemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supportedStorage =
-        field_map json "SupportedStorage" SupportedStorageList.of_json in
+        field_map json__ "SupportedStorage" SupportedStorageList.of_json in
       let supportedUplinkGbps =
-        field_map json "SupportedUplinkGbps"
+        field_map json__ "SupportedUplinkGbps"
           SupportedUplinkGbpsListDefinition.of_json in
-      let weightLbs = field_map json "WeightLbs" CatalogItemWeightLbs.of_json in
-      let powerKva = field_map json "PowerKva" CatalogItemPowerKva.of_json in
+      let weightLbs =
+        field_map json__ "WeightLbs" CatalogItemWeightLbs.of_json in
+      let powerKva = field_map json__ "PowerKva" CatalogItemPowerKva.of_json in
       let eC2Capacities =
-        field_map json "EC2Capacities" EC2CapacityListDefinition.of_json in
-      let itemStatus = field_map json "ItemStatus" CatalogItemStatus.of_json in
-      let catalogItemId = field_map json "CatalogItemId" SkuCode.of_json in
+        field_map json__ "EC2Capacities" EC2CapacityListDefinition.of_json in
+      let itemStatus =
+        field_map json__ "ItemStatus" CatalogItemStatus.of_json in
+      let catalogItemId = field_map json__ "CatalogItemId" SkuCode.of_json in
       make ?supportedStorage ?supportedUplinkGbps ?weightLbs ?powerKva
         ?eC2Capacities ?itemStatus ?catalogItemId ()
     let to_json v = composed_to_json to_value v
@@ -2109,31 +3407,481 @@ module CatalogItemClass =
     let of_json j = of_string (string_of_json ~kind:"CatalogItemClass" j)
     let to_json = simple_to_json to_value
   end
+module CapacityTaskSummary =
+  struct
+    type nonrec t =
+      {
+      capacityTaskId: CapacityTaskId.t option
+        [@ocaml.doc "The ID of the specified capacity task."];
+      outpostId: OutpostId.t option
+        [@ocaml.doc
+          "The ID of the Outpost associated with the specified capacity task."];
+      orderId: OrderId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services Outposts order of the host associated with the capacity task."];
+      assetId: AssetId.t option
+        [@ocaml.doc
+          "The ID of the asset. An Outpost asset can be a single server within an Outposts rack or an Outposts server configuration."];
+      capacityTaskStatus: CapacityTaskStatus.t option
+        [@ocaml.doc "The status of the capacity task."];
+      creationDate: ISO8601Timestamp.t option
+        [@ocaml.doc "The date that the specified capacity task was created."];
+      completionDate: ISO8601Timestamp.t option
+        [@ocaml.doc
+          "The date that the specified capacity task successfully ran."];
+      lastModifiedDate: ISO8601Timestamp.t option
+        [@ocaml.doc
+          "The date that the specified capacity was last modified."]}
+    let make ?capacityTaskId =
+      fun ?outpostId ->
+        fun ?orderId ->
+          fun ?assetId ->
+            fun ?capacityTaskStatus ->
+              fun ?creationDate ->
+                fun ?completionDate ->
+                  fun ?lastModifiedDate ->
+                    fun () ->
+                      {
+                        capacityTaskId;
+                        outpostId;
+                        orderId;
+                        assetId;
+                        capacityTaskStatus;
+                        creationDate;
+                        completionDate;
+                        lastModifiedDate
+                      }
+    let to_value x =
+      structure_to_value
+        [("CapacityTaskId",
+           (Option.map x.capacityTaskId ~f:CapacityTaskId.to_value));
+        ("OutpostId", (Option.map x.outpostId ~f:OutpostId.to_value));
+        ("OrderId", (Option.map x.orderId ~f:OrderId.to_value));
+        ("AssetId", (Option.map x.assetId ~f:AssetId.to_value));
+        ("CapacityTaskStatus",
+          (Option.map x.capacityTaskStatus ~f:CapacityTaskStatus.to_value));
+        ("CreationDate",
+          (Option.map x.creationDate ~f:ISO8601Timestamp.to_value));
+        ("CompletionDate",
+          (Option.map x.completionDate ~f:ISO8601Timestamp.to_value));
+        ("LastModifiedDate",
+          (Option.map x.lastModifiedDate ~f:ISO8601Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedDate =
+        (Option.map ~f:ISO8601Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModifiedDate") in
+      let completionDate =
+        (Option.map ~f:ISO8601Timestamp.of_xml)
+          (Xml.child xml_arg0 "CompletionDate") in
+      let creationDate =
+        (Option.map ~f:ISO8601Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreationDate") in
+      let capacityTaskStatus =
+        (Option.map ~f:CapacityTaskStatus.of_xml)
+          (Xml.child xml_arg0 "CapacityTaskStatus") in
+      let assetId =
+        (Option.map ~f:AssetId.of_xml) (Xml.child xml_arg0 "AssetId") in
+      let orderId =
+        (Option.map ~f:OrderId.of_xml) (Xml.child xml_arg0 "OrderId") in
+      let outpostId =
+        (Option.map ~f:OutpostId.of_xml) (Xml.child xml_arg0 "OutpostId") in
+      let capacityTaskId =
+        (Option.map ~f:CapacityTaskId.of_xml)
+          (Xml.child xml_arg0 "CapacityTaskId") in
+      make ?lastModifiedDate ?completionDate ?creationDate
+        ?capacityTaskStatus ?assetId ?orderId ?outpostId ?capacityTaskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedDate =
+        field_map json__ "LastModifiedDate" ISO8601Timestamp.of_json in
+      let completionDate =
+        field_map json__ "CompletionDate" ISO8601Timestamp.of_json in
+      let creationDate =
+        field_map json__ "CreationDate" ISO8601Timestamp.of_json in
+      let capacityTaskStatus =
+        field_map json__ "CapacityTaskStatus" CapacityTaskStatus.of_json in
+      let assetId = field_map json__ "AssetId" AssetId.of_json in
+      let orderId = field_map json__ "OrderId" OrderId.of_json in
+      let outpostId = field_map json__ "OutpostId" OutpostId.of_json in
+      let capacityTaskId =
+        field_map json__ "CapacityTaskId" CapacityTaskId.of_json in
+      make ?lastModifiedDate ?completionDate ?creationDate
+        ?capacityTaskStatus ?assetId ?orderId ?outpostId ?capacityTaskId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The summary of the capacity task."]
+module BlockingInstance =
+  struct
+    type nonrec t =
+      {
+      instanceId: InstanceId.t option
+        [@ocaml.doc "The ID of the blocking instance."];
+      accountId: AccountId.t option ;
+      awsServiceName: AWSServiceName.t option
+        [@ocaml.doc
+          "The Amazon Web Services service name that owns the specified blocking instance."]}
+    let make ?instanceId =
+      fun ?accountId ->
+        fun ?awsServiceName ->
+          fun () -> { instanceId; accountId; awsServiceName }
+    let to_value x =
+      structure_to_value
+        [("InstanceId", (Option.map x.instanceId ~f:InstanceId.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("AwsServiceName",
+          (Option.map x.awsServiceName ~f:AWSServiceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let awsServiceName =
+        (Option.map ~f:AWSServiceName.of_xml)
+          (Xml.child xml_arg0 "AwsServiceName") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let instanceId =
+        (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
+      make ?awsServiceName ?accountId ?instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let awsServiceName =
+        field_map json__ "AwsServiceName" AWSServiceName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
+      make ?awsServiceName ?accountId ?instanceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A running Amazon EC2 instance that can be stopped to free up capacity needed to run the capacity task."]
+module AssetInfo =
+  struct
+    type nonrec t =
+      {
+      assetId: AssetId.t option
+        [@ocaml.doc
+          "The ID of the asset. An Outpost asset can be a single server within an Outposts rack or an Outposts server configuration."];
+      rackId: RackId.t option [@ocaml.doc "The rack ID of the asset."];
+      assetType: AssetType.t option [@ocaml.doc "The type of the asset."];
+      computeAttributes: ComputeAttributes.t option
+        [@ocaml.doc "Information about compute hardware assets."];
+      assetLocation: AssetLocation.t option
+        [@ocaml.doc "The position of an asset in a rack."]}
+    let make ?assetId =
+      fun ?rackId ->
+        fun ?assetType ->
+          fun ?computeAttributes ->
+            fun ?assetLocation ->
+              fun () ->
+                {
+                  assetId;
+                  rackId;
+                  assetType;
+                  computeAttributes;
+                  assetLocation
+                }
+    let to_value x =
+      structure_to_value
+        [("AssetId", (Option.map x.assetId ~f:AssetId.to_value));
+        ("RackId", (Option.map x.rackId ~f:RackId.to_value));
+        ("AssetType", (Option.map x.assetType ~f:AssetType.to_value));
+        ("ComputeAttributes",
+          (Option.map x.computeAttributes ~f:ComputeAttributes.to_value));
+        ("AssetLocation",
+          (Option.map x.assetLocation ~f:AssetLocation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let assetLocation =
+        (Option.map ~f:AssetLocation.of_xml)
+          (Xml.child xml_arg0 "AssetLocation") in
+      let computeAttributes =
+        (Option.map ~f:ComputeAttributes.of_xml)
+          (Xml.child xml_arg0 "ComputeAttributes") in
+      let assetType =
+        (Option.map ~f:AssetType.of_xml) (Xml.child xml_arg0 "AssetType") in
+      let rackId =
+        (Option.map ~f:RackId.of_xml) (Xml.child xml_arg0 "RackId") in
+      let assetId =
+        (Option.map ~f:AssetId.of_xml) (Xml.child xml_arg0 "AssetId") in
+      make ?assetLocation ?computeAttributes ?assetType ?rackId ?assetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let assetLocation =
+        field_map json__ "AssetLocation" AssetLocation.of_json in
+      let computeAttributes =
+        field_map json__ "ComputeAttributes" ComputeAttributes.of_json in
+      let assetType = field_map json__ "AssetType" AssetType.of_json in
+      let rackId = field_map json__ "RackId" RackId.of_json in
+      let assetId = field_map json__ "AssetId" AssetId.of_json in
+      make ?assetLocation ?computeAttributes ?assetType ?rackId ?assetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about hardware assets."]
+module AssetState =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | RETIRING 
+      | ISOLATED 
+      | INSTALLING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | RETIRING -> "RETIRING"
+      | ISOLATED -> "ISOLATED"
+      | INSTALLING -> "INSTALLING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "RETIRING" -> RETIRING
+      | "ISOLATED" -> ISOLATED
+      | "INSTALLING" -> INSTALLING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AssetState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AssetState" j)
+    let to_json = simple_to_json to_value
+  end
+module AssetInstance =
+  struct
+    type nonrec t =
+      {
+      instanceId: InstanceId.t option [@ocaml.doc "The ID of the instance."];
+      instanceType: OutpostInstanceType.t option
+        [@ocaml.doc "The type of instance."];
+      assetId: AssetId.t option
+        [@ocaml.doc
+          "The ID of the asset. An Outpost asset can be a single server within an Outposts rack or an Outposts server configuration."];
+      accountId: AccountId.t option ;
+      awsServiceName: AWSServiceName.t option
+        [@ocaml.doc "The Amazon Web Services service name of the instance."]}
+    let make ?instanceId =
+      fun ?instanceType ->
+        fun ?assetId ->
+          fun ?accountId ->
+            fun ?awsServiceName ->
+              fun () ->
+                {
+                  instanceId;
+                  instanceType;
+                  assetId;
+                  accountId;
+                  awsServiceName
+                }
+    let to_value x =
+      structure_to_value
+        [("InstanceId", (Option.map x.instanceId ~f:InstanceId.to_value));
+        ("InstanceType",
+          (Option.map x.instanceType ~f:OutpostInstanceType.to_value));
+        ("AssetId", (Option.map x.assetId ~f:AssetId.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("AwsServiceName",
+          (Option.map x.awsServiceName ~f:AWSServiceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let awsServiceName =
+        (Option.map ~f:AWSServiceName.of_xml)
+          (Xml.child xml_arg0 "AwsServiceName") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let assetId =
+        (Option.map ~f:AssetId.of_xml) (Xml.child xml_arg0 "AssetId") in
+      let instanceType =
+        (Option.map ~f:OutpostInstanceType.of_xml)
+          (Xml.child xml_arg0 "InstanceType") in
+      let instanceId =
+        (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
+      make ?awsServiceName ?accountId ?assetId ?instanceType ?instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let awsServiceName =
+        field_map json__ "AwsServiceName" AWSServiceName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let assetId = field_map json__ "AssetId" AssetId.of_json in
+      let instanceType =
+        field_map json__ "InstanceType" OutpostInstanceType.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
+      make ?awsServiceName ?accountId ?assetId ?instanceType ?instanceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An Amazon EC2 instance."]
+module PricingOption =
+  struct
+    type nonrec t =
+      {
+      pricingType: QuotePricingType.t option
+        [@ocaml.doc "The type of pricing model."];
+      subscriptionPricingDetails: SubscriptionPricingDetails.t option
+        [@ocaml.doc
+          "The subscription pricing details for this pricing option."]}
+    let make ?pricingType =
+      fun ?subscriptionPricingDetails ->
+        fun () -> { pricingType; subscriptionPricingDetails }
+    let to_value x =
+      structure_to_value
+        [("PricingType",
+           (Option.map x.pricingType ~f:QuotePricingType.to_value));
+        ("SubscriptionPricingDetails",
+          (Option.map x.subscriptionPricingDetails
+             ~f:SubscriptionPricingDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subscriptionPricingDetails =
+        (Option.map ~f:SubscriptionPricingDetails.of_xml)
+          (Xml.child xml_arg0 "SubscriptionPricingDetails") in
+      let pricingType =
+        (Option.map ~f:QuotePricingType.of_xml)
+          (Xml.child xml_arg0 "PricingType") in
+      make ?subscriptionPricingDetails ?pricingType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subscriptionPricingDetails =
+        field_map json__ "SubscriptionPricingDetails"
+          SubscriptionPricingDetails.of_json in
+      let pricingType =
+        field_map json__ "PricingType" QuotePricingType.of_json in
+      make ?subscriptionPricingDetails ?pricingType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A pricing option for the specified Outpost."]
 module InstanceTypeItem =
   struct
-    type nonrec t = {
-      instanceType: InstanceType.t option }
-    let make ?instanceType = fun () -> { instanceType }
+    type nonrec t =
+      {
+      instanceType: InstanceType.t option ;
+      vCPUs: VCPUCount.t option
+        [@ocaml.doc "The number of default VCPUs in an instance type."]}
+    let make ?instanceType = fun ?vCPUs -> fun () -> { instanceType; vCPUs }
     let to_value x =
       structure_to_value
         [("InstanceType",
-           (Option.map x.instanceType ~f:InstanceType.to_value))]
+           (Option.map x.instanceType ~f:InstanceType.to_value));
+        ("VCPUs", (Option.map x.vCPUs ~f:VCPUCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let vCPUs =
+        (Option.map ~f:VCPUCount.of_xml) (Xml.child xml_arg0 "VCPUs") in
       let instanceType =
         (Option.map ~f:InstanceType.of_xml)
           (Xml.child xml_arg0 "InstanceType") in
-      make ?instanceType ()
+      make ?vCPUs ?instanceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceType = field_map json "InstanceType" InstanceType.of_json in
-      make ?instanceType ()
+    let of_json json__ =
+      let vCPUs = field_map json__ "VCPUs" VCPUCount.of_json in
+      let instanceType = field_map json__ "InstanceType" InstanceType.of_json in
+      make ?vCPUs ?instanceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an instance type."]
+module Subscription =
+  struct
+    type nonrec t =
+      {
+      subscriptionId: String_.t option
+        [@ocaml.doc
+          "The ID of the subscription that appears on the Amazon Web Services Billing Center console."];
+      subscriptionType: SubscriptionType.t option
+        [@ocaml.doc
+          "The type of subscription which can be one of the following: ORIGINAL - The first order on the Amazon Web Services Outposts. RENEWAL - Renewal requests, both month to month and longer term. CAPACITY_INCREASE - Capacity scaling orders."];
+      subscriptionStatus: SubscriptionStatus.t option
+        [@ocaml.doc
+          "The status of subscription which can be one of the following: INACTIVE - Subscription requests that are inactive. ACTIVE - Subscription requests that are in progress and have an end date in the future. PENDING - Subscription has been created but billing has not yet commenced because the subscription begin date has not been reached. CANCELLED - Subscription requests that are cancelled."];
+      orderIds: OrderIdList.t option
+        [@ocaml.doc "The order ID for your subscription."];
+      beginDate: ISO8601Timestamp.t option
+        [@ocaml.doc "The date your subscription starts."];
+      endDate: ISO8601Timestamp.t option
+        [@ocaml.doc "The date your subscription ends."];
+      monthlyRecurringPrice: NullableDouble.t option
+        [@ocaml.doc
+          "The amount you are billed each month in the subscription period."];
+      upfrontPrice: NullableDouble.t option
+        [@ocaml.doc
+          "The amount billed when the subscription is created. This is a one-time charge."]}
+    let make ?subscriptionId =
+      fun ?subscriptionType ->
+        fun ?subscriptionStatus ->
+          fun ?orderIds ->
+            fun ?beginDate ->
+              fun ?endDate ->
+                fun ?monthlyRecurringPrice ->
+                  fun ?upfrontPrice ->
+                    fun () ->
+                      {
+                        subscriptionId;
+                        subscriptionType;
+                        subscriptionStatus;
+                        orderIds;
+                        beginDate;
+                        endDate;
+                        monthlyRecurringPrice;
+                        upfrontPrice
+                      }
+    let to_value x =
+      structure_to_value
+        [("SubscriptionId",
+           (Option.map x.subscriptionId ~f:String_.to_value));
+        ("SubscriptionType",
+          (Option.map x.subscriptionType ~f:SubscriptionType.to_value));
+        ("SubscriptionStatus",
+          (Option.map x.subscriptionStatus ~f:SubscriptionStatus.to_value));
+        ("OrderIds", (Option.map x.orderIds ~f:OrderIdList.to_value));
+        ("BeginDate", (Option.map x.beginDate ~f:ISO8601Timestamp.to_value));
+        ("EndDate", (Option.map x.endDate ~f:ISO8601Timestamp.to_value));
+        ("MonthlyRecurringPrice",
+          (Option.map x.monthlyRecurringPrice ~f:NullableDouble.to_value));
+        ("UpfrontPrice",
+          (Option.map x.upfrontPrice ~f:NullableDouble.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let upfrontPrice =
+        (Option.map ~f:NullableDouble.of_xml)
+          (Xml.child xml_arg0 "UpfrontPrice") in
+      let monthlyRecurringPrice =
+        (Option.map ~f:NullableDouble.of_xml)
+          (Xml.child xml_arg0 "MonthlyRecurringPrice") in
+      let endDate =
+        (Option.map ~f:ISO8601Timestamp.of_xml)
+          (Xml.child xml_arg0 "EndDate") in
+      let beginDate =
+        (Option.map ~f:ISO8601Timestamp.of_xml)
+          (Xml.child xml_arg0 "BeginDate") in
+      let orderIds =
+        (Option.map ~f:OrderIdList.of_xml) (Xml.child xml_arg0 "OrderIds") in
+      let subscriptionStatus =
+        (Option.map ~f:SubscriptionStatus.of_xml)
+          (Xml.child xml_arg0 "SubscriptionStatus") in
+      let subscriptionType =
+        (Option.map ~f:SubscriptionType.of_xml)
+          (Xml.child xml_arg0 "SubscriptionType") in
+      let subscriptionId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SubscriptionId") in
+      make ?upfrontPrice ?monthlyRecurringPrice ?endDate ?beginDate ?orderIds
+        ?subscriptionStatus ?subscriptionType ?subscriptionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let upfrontPrice =
+        field_map json__ "UpfrontPrice" NullableDouble.of_json in
+      let monthlyRecurringPrice =
+        field_map json__ "MonthlyRecurringPrice" NullableDouble.of_json in
+      let endDate = field_map json__ "EndDate" ISO8601Timestamp.of_json in
+      let beginDate = field_map json__ "BeginDate" ISO8601Timestamp.of_json in
+      let orderIds = field_map json__ "OrderIds" OrderIdList.of_json in
+      let subscriptionStatus =
+        field_map json__ "SubscriptionStatus" SubscriptionStatus.of_json in
+      let subscriptionType =
+        field_map json__ "SubscriptionType" SubscriptionType.of_json in
+      let subscriptionId = field_map json__ "SubscriptionId" String_.of_json in
+      make ?upfrontPrice ?monthlyRecurringPrice ?endDate ?beginDate ?orderIds
+        ?subscriptionStatus ?subscriptionType ?subscriptionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about your Amazon Web Services Outposts subscriptions."]
 module LineItemListDefinition =
   struct
     type nonrec t = LineItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LineItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2154,32 +3902,72 @@ module LineItemListDefinition =
       list_of_json ~kind:"LineItemListDefinition" ~of_json:LineItem.of_json j
     let to_json v = composed_to_json to_value v
   end
-module PaymentOption =
+module CIDRList =
   struct
-    type nonrec t =
-      | ALL_UPFRONT 
-      | NO_UPFRONT 
-      | PARTIAL_UPFRONT 
-      | Non_static_id of string 
+    type nonrec t = CIDR.t list
     let make i = i
-    let to_string =
-      function
-      | ALL_UPFRONT -> "ALL_UPFRONT"
-      | NO_UPFRONT -> "NO_UPFRONT"
-      | PARTIAL_UPFRONT -> "PARTIAL_UPFRONT"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ALL_UPFRONT" -> ALL_UPFRONT
-      | "NO_UPFRONT" -> NO_UPFRONT
-      | "PARTIAL_UPFRONT" -> PARTIAL_UPFRONT
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CIDR.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration PaymentOption" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"PaymentOption" j)
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CIDR.of_xml)
+    let of_json j = list_of_json ~kind:"CIDRList" ~of_json:CIDR.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServerEndpoint =
+  struct
+    type nonrec t = string
+    let context_ = "ServerEndpoint"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:9) >>=
+             (fun () ->
+                (check_string_max i ~max:21) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([0-9]{1,3}\\.){3}[0-9]{1,3}:[0-9]{1,5}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServerEndpoint" j
+    let to_json = simple_to_json to_value
+  end
+module WireGuardPublicKey =
+  struct
+    type nonrec t = string
+    let context_ = "WireGuardPublicKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:44) >>=
+             (fun () ->
+                (check_string_max i ~max:44) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9/+]{43}=$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WireGuardPublicKey" j
     let to_json = simple_to_json to_value
   end
 module LineItemRequest =
@@ -2205,9 +3993,9 @@ module LineItemRequest =
         (Option.map ~f:SkuCode.of_xml) (Xml.child xml_arg0 "CatalogItemId") in
       make ?quantity ?catalogItemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let quantity = field_map json "Quantity" LineItemQuantity.of_json in
-      let catalogItemId = field_map json "CatalogItemId" SkuCode.of_json in
+    let of_json json__ =
+      let quantity = field_map json__ "Quantity" LineItemQuantity.of_json in
+      let catalogItemId = field_map json__ "CatalogItemId" SkuCode.of_json in
       make ?quantity ?catalogItemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a line item request."]
@@ -2225,8 +4013,8 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You do not have permission to perform this operation."]
@@ -2259,10 +4047,10 @@ module ConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2281,8 +4069,8 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal error has occurred."]
@@ -2300,8 +4088,8 @@ module NotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified request is not valid."]
@@ -2319,8 +4107,8 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A parameter is not valid."]
@@ -2328,9 +4116,8 @@ module Address =
   struct
     type nonrec t =
       {
-      contactName: ContactName.t option
-        [@ocaml.doc "The name of the contact."];
-      contactPhoneNumber: ContactPhoneNumber.t option
+      contactName: ContactName.t [@ocaml.doc "The name of the contact."];
+      contactPhoneNumber: ContactPhoneNumber.t
         [@ocaml.doc "The phone number of the contact."];
       addressLine1: AddressLine1.t
         [@ocaml.doc "The first line of the address."];
@@ -2350,12 +4137,12 @@ module Address =
       municipality: Municipality.t option
         [@ocaml.doc "The municipality for the address."]}
     let context_ = "Address"
-    let make ?contactName =
-      fun ?contactPhoneNumber ->
-        fun ?addressLine2 ->
-          fun ?addressLine3 ->
-            fun ?districtOrCounty ->
-              fun ?municipality ->
+    let make ?addressLine2 =
+      fun ?addressLine3 ->
+        fun ?districtOrCounty ->
+          fun ?municipality ->
+            fun ~contactName ->
+              fun ~contactPhoneNumber ->
                 fun ~addressLine1 ->
                   fun ~city ->
                     fun ~stateOrRegion ->
@@ -2363,12 +4150,12 @@ module Address =
                         fun ~countryCode ->
                           fun () ->
                             {
-                              contactName;
-                              contactPhoneNumber;
                               addressLine2;
                               addressLine3;
                               districtOrCounty;
                               municipality;
+                              contactName;
+                              contactPhoneNumber;
                               addressLine1;
                               city;
                               stateOrRegion;
@@ -2377,9 +4164,9 @@ module Address =
                             }
     let to_value x =
       structure_to_value
-        [("ContactName", (Option.map x.contactName ~f:ContactName.to_value));
+        [("ContactName", (Some (ContactName.to_value x.contactName)));
         ("ContactPhoneNumber",
-          (Option.map x.contactPhoneNumber ~f:ContactPhoneNumber.to_value));
+          (Some (ContactPhoneNumber.to_value x.contactPhoneNumber)));
         ("AddressLine1", (Some (AddressLine1.to_value x.addressLine1)));
         ("AddressLine2",
           (Option.map x.addressLine2 ~f:AddressLine2.to_value));
@@ -2422,33 +4209,36 @@ module Address =
         AddressLine1.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AddressLine1") in
       let contactPhoneNumber =
-        (Option.map ~f:ContactPhoneNumber.of_xml)
-          (Xml.child xml_arg0 "ContactPhoneNumber") in
+        ContactPhoneNumber.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ContactPhoneNumber") in
       let contactName =
-        (Option.map ~f:ContactName.of_xml) (Xml.child xml_arg0 "ContactName") in
+        ContactName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ContactName") in
       make ?municipality ~countryCode ~postalCode ?districtOrCounty
         ~stateOrRegion ~city ?addressLine3 ?addressLine2 ~addressLine1
-        ?contactPhoneNumber ?contactName ()
+        ~contactPhoneNumber ~contactName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let municipality = field_map json "Municipality" Municipality.of_json in
-      let countryCode = field_map_exn json "CountryCode" CountryCode.of_json in
-      let postalCode = field_map_exn json "PostalCode" PostalCode.of_json in
+    let of_json json__ =
+      let municipality = field_map json__ "Municipality" Municipality.of_json in
+      let countryCode =
+        field_map_exn json__ "CountryCode" CountryCode.of_json in
+      let postalCode = field_map_exn json__ "PostalCode" PostalCode.of_json in
       let districtOrCounty =
-        field_map json "DistrictOrCounty" DistrictOrCounty.of_json in
+        field_map json__ "DistrictOrCounty" DistrictOrCounty.of_json in
       let stateOrRegion =
-        field_map_exn json "StateOrRegion" StateOrRegion.of_json in
-      let city = field_map_exn json "City" City.of_json in
-      let addressLine3 = field_map json "AddressLine3" AddressLine3.of_json in
-      let addressLine2 = field_map json "AddressLine2" AddressLine2.of_json in
+        field_map_exn json__ "StateOrRegion" StateOrRegion.of_json in
+      let city = field_map_exn json__ "City" City.of_json in
+      let addressLine3 = field_map json__ "AddressLine3" AddressLine3.of_json in
+      let addressLine2 = field_map json__ "AddressLine2" AddressLine2.of_json in
       let addressLine1 =
-        field_map_exn json "AddressLine1" AddressLine1.of_json in
+        field_map_exn json__ "AddressLine1" AddressLine1.of_json in
       let contactPhoneNumber =
-        field_map json "ContactPhoneNumber" ContactPhoneNumber.of_json in
-      let contactName = field_map json "ContactName" ContactName.of_json in
+        field_map_exn json__ "ContactPhoneNumber" ContactPhoneNumber.of_json in
+      let contactName =
+        field_map_exn json__ "ContactName" ContactName.of_json in
       make ?municipality ~countryCode ~postalCode ?districtOrCounty
         ~stateOrRegion ~city ?addressLine3 ?addressLine2 ~addressLine1
-        ?contactPhoneNumber ?contactName ()
+        ~contactPhoneNumber ~contactName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an address."]
 module AddressType =
@@ -2504,6 +4294,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2523,6 +4316,344 @@ module TagKeyList =
     let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
+module BlockingResourceTypeList =
+  struct
+    type nonrec t = BlockingResourceType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BlockingResourceType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BlockingResourceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BlockingResourceTypeList"
+        ~of_json:BlockingResourceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DecommissionRequestStatus =
+  struct
+    type nonrec t =
+      | SKIPPED 
+      | BLOCKED 
+      | REQUESTED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SKIPPED -> "SKIPPED"
+      | BLOCKED -> "BLOCKED"
+      | REQUESTED -> "REQUESTED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SKIPPED" -> SKIPPED
+      | "BLOCKED" -> BLOCKED
+      | "REQUESTED" -> REQUESTED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DecommissionRequestStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DecommissionRequestStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module OutpostIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "OutpostIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:180) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(arn:aws([a-z-]+)?:outposts:[a-z\\d-]+:\\d{12}:outpost/)?op-[a-f0-9]{17}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OutpostIdentifier" j
+    let to_json = simple_to_json to_value
+  end
+module ValidateOnly =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ConnectionId =
+  struct
+    type nonrec t = string
+    let context_ = "ConnectionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9+/=]{1,1024}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ConnectionId" j
+    let to_json = simple_to_json to_value
+  end
+module UnderlayIpAddress =
+  struct
+    type nonrec t = string
+    let context_ = "UnderlayIpAddress"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:7) >>=
+             (fun () ->
+                (check_string_max i ~max:15) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([0-9]{1,3}\\.){3}[0-9]{1,3}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UnderlayIpAddress" j
+    let to_json = simple_to_json to_value
+  end
+module DeviceSerialNumber =
+  struct
+    type nonrec t = string
+    let context_ = "DeviceSerialNumber"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:"^(\\w+)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeviceSerialNumber" j
+    let to_json = simple_to_json to_value
+  end
+module NetworkInterfaceDeviceIndex =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NetworkInterfaceDeviceIndex"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityTaskFailure =
+  struct
+    type nonrec t =
+      {
+      reason: CapacityTaskStatusReason.t option
+        [@ocaml.doc "The reason that the specified capacity task failed."];
+      type_: CapacityTaskFailureType.t option
+        [@ocaml.doc "The type of failure."]}
+    let make ?reason = fun ?type_ -> fun () -> { reason; type_ }
+    let to_value x =
+      structure_to_value
+        [("Reason",
+           (Option.map x.reason ~f:CapacityTaskStatusReason.to_value));
+        ("Type", (Option.map x.type_ ~f:CapacityTaskFailureType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:CapacityTaskFailureType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let reason =
+        (Option.map ~f:CapacityTaskStatusReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
+      make ?type_ ?reason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" CapacityTaskFailureType.of_json in
+      let reason = field_map json__ "Reason" CapacityTaskStatusReason.of_json in
+      make ?type_ ?reason ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The capacity tasks that failed."]
+module DryRun =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module InstancesToExclude =
+  struct
+    type nonrec t =
+      {
+      instances: InstanceIdList.t option
+        [@ocaml.doc
+          "List of user-specified instances that must not be stopped."];
+      accountIds: AccountIdList.t option
+        [@ocaml.doc
+          "IDs of the accounts that own each instance that must not be stopped."];
+      services: AWSServiceNameList.t option
+        [@ocaml.doc
+          "Names of the services that own each instance that must not be stopped in order to free up the capacity needed to run the capacity task."]}
+    let make ?instances =
+      fun ?accountIds ->
+        fun ?services -> fun () -> { instances; accountIds; services }
+    let to_value x =
+      structure_to_value
+        [("Instances", (Option.map x.instances ~f:InstanceIdList.to_value));
+        ("AccountIds", (Option.map x.accountIds ~f:AccountIdList.to_value));
+        ("Services", (Option.map x.services ~f:AWSServiceNameList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let services =
+        (Option.map ~f:AWSServiceNameList.of_xml)
+          (Xml.child xml_arg0 "Services") in
+      let accountIds =
+        (Option.map ~f:AccountIdList.of_xml)
+          (Xml.child xml_arg0 "AccountIds") in
+      let instances =
+        (Option.map ~f:InstanceIdList.of_xml)
+          (Xml.child xml_arg0 "Instances") in
+      make ?services ?accountIds ?instances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let services = field_map json__ "Services" AWSServiceNameList.of_json in
+      let accountIds = field_map json__ "AccountIds" AccountIdList.of_json in
+      let instances = field_map json__ "Instances" InstanceIdList.of_json in
+      make ?services ?accountIds ?instances ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "User-specified instances that must not be stopped. These instances will not appear in the list of instances that Amazon Web Services recommends to stop in order to free up capacity."]
+module RequestedInstancePools =
+  struct
+    type nonrec t = InstanceTypeCapacity.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InstanceTypeCapacity.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InstanceTypeCapacity.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RequestedInstancePools"
+        ~of_json:InstanceTypeCapacity.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TaskActionOnBlockingInstances =
+  struct
+    type nonrec t =
+      | WAIT_FOR_EVACUATION 
+      | FAIL_TASK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | WAIT_FOR_EVACUATION -> "WAIT_FOR_EVACUATION"
+      | FAIL_TASK -> "FAIL_TASK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "WAIT_FOR_EVACUATION" -> WAIT_FOR_EVACUATION
+      | "FAIL_TASK" -> FAIL_TASK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TaskActionOnBlockingInstances"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TaskActionOnBlockingInstances" j)
+    let to_json = simple_to_json to_value
+  end
+module AssetIdInput =
+  struct
+    type nonrec t = string
+    let context_ = "AssetIdInput"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:10) >>=
+             (fun () ->
+                (check_string_max i ~max:10) >>=
+                  (fun () -> check_pattern i ~pattern:"\\d{10}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssetIdInput" j
+    let to_json = simple_to_json to_value
+  end
 module Token =
   struct
     type nonrec t = string[@@ocaml.doc "The pagination token."]
@@ -2532,7 +4663,7 @@ module Token =
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:1005) >>=
+                (check_string_max i ~max:2048) >>=
                   (fun () -> check_pattern i ~pattern:"^(\\d+)##(\\S+)$")));
         i
     let of_string x = x
@@ -2547,6 +4678,9 @@ module SiteListDefinition =
   struct
     type nonrec t = Site.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Site.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2571,6 +4705,9 @@ module CityList =
   struct
     type nonrec t = City.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:City.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2594,6 +4731,9 @@ module CountryCodeList =
   struct
     type nonrec t = CountryCode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CountryCode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2636,6 +4776,9 @@ module StateOrRegionList =
   struct
     type nonrec t = StateOrRegion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StateOrRegion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2660,6 +4803,9 @@ module OutpostListDefinition =
   struct
     type nonrec t = Outpost.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Outpost.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2688,6 +4834,9 @@ module AvailabilityZoneIdList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AvailabilityZoneId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2717,6 +4866,9 @@ module AvailabilityZoneList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AvailabilityZone.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2746,6 +4898,9 @@ module LifeCycleStatusList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LifeCycleStatus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2771,6 +4926,9 @@ module OrderSummaryListDefinition =
   struct
     type nonrec t = OrderSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrderSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2792,32 +4950,13 @@ module OrderSummaryListDefinition =
         ~of_json:OrderSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module OutpostIdentifier =
-  struct
-    type nonrec t = string
-    let context_ = "OutpostIdentifier"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:180) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^(arn:aws([a-z-]+)?:outposts:[a-z\\d-]+:\\d{12}:outpost/)?op-[a-f0-9]{17}$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"OutpostIdentifier" j
-    let to_json = simple_to_json to_value
-  end
 module CatalogItemListDefinition =
   struct
     type nonrec t = CatalogItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CatalogItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2843,6 +4982,9 @@ module CatalogItemClassList =
   struct
     type nonrec t = CatalogItemClass.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CatalogItemClass.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2868,6 +5010,9 @@ module EC2FamilyList =
   struct
     type nonrec t = Family.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Family.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2888,10 +5033,348 @@ module EC2FamilyList =
       list_of_json ~kind:"EC2FamilyList" ~of_json:Family.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CapacityTaskList =
+  struct
+    type nonrec t = CapacityTaskSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityTaskSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityTaskSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityTaskList"
+        ~of_json:CapacityTaskSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CapacityTaskStatusList =
+  struct
+    type nonrec t = CapacityTaskStatus.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityTaskStatus.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityTaskStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityTaskStatusList"
+        ~of_json:CapacityTaskStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BlockingInstancesList =
+  struct
+    type nonrec t = BlockingInstance.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BlockingInstance.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BlockingInstance.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BlockingInstancesList"
+        ~of_json:BlockingInstance.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AssetListDefinition =
+  struct
+    type nonrec t = AssetInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssetInfo.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssetInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssetListDefinition" ~of_json:AssetInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AssetTypeList =
+  struct
+    type nonrec t = AssetType.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssetType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssetType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssetTypeList" ~of_json:AssetType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module HostIdList =
+  struct
+    type nonrec t = HostId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:HostId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:HostId.of_xml)
+    let of_json j = list_of_json ~kind:"HostIdList" ~of_json:HostId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module StatusList =
+  struct
+    type nonrec t = AssetState.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssetState.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssetState.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StatusList" ~of_json:AssetState.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AssetInstanceList =
+  struct
+    type nonrec t = AssetInstance.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssetInstance.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssetInstance.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssetInstanceList" ~of_json:AssetInstance.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AssetIdList =
+  struct
+    type nonrec t = AssetId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssetId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssetId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssetIdList" ~of_json:AssetId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OutpostInstanceTypeList =
+  struct
+    type nonrec t = OutpostInstanceType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OutpostInstanceType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OutpostInstanceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OutpostInstanceTypeList"
+        ~of_json:OutpostInstanceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PricingOptionList =
+  struct
+    type nonrec t = PricingOption.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PricingOption.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PricingOption.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PricingOptionList" ~of_json:PricingOption.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PricingResult =
+  struct
+    type nonrec t =
+      | PRICED 
+      | UNABLE_TO_PRICE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PRICED -> "PRICED"
+      | UNABLE_TO_PRICE -> "UNABLE_TO_PRICE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PRICED" -> PRICED
+      | "UNABLE_TO_PRICE" -> UNABLE_TO_PRICE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PricingResult" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PricingResult" j)
+    let to_json = simple_to_json to_value
+  end
 module InstanceTypeListDefinition =
   struct
     type nonrec t = InstanceTypeItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceTypeItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2913,6 +5396,33 @@ module InstanceTypeListDefinition =
         ~of_json:InstanceTypeItem.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SubscriptionList =
+  struct
+    type nonrec t = Subscription.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Subscription.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Subscription.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SubscriptionList" ~of_json:Subscription.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Order =
   struct
     type nonrec t =
@@ -2922,7 +5432,7 @@ module Order =
       orderId: OrderId.t option [@ocaml.doc "The ID of the order."];
       status: OrderStatus.t option
         [@ocaml.doc
-          "The status of the order. PREPARING - Order is received and being prepared. IN_PROGRESS - Order is either being built, shipped, or installed. To get more details, see the LineItem status. COMPLETED - Order is complete. CANCELLED - Order is cancelled. ERROR - Customer should contact support. The following status are deprecated: RECEIVED, PENDING, PROCESSING, INSTALLING, and FULFILLED."];
+          "The status of the order. PREPARING - Order is received and being prepared. IN_PROGRESS - Order is either being built or shipped. To get more details, see the line item status. DELIVERED - Order was delivered to the Outpost site. COMPLETED - Order is complete. CANCELLED - Order is cancelled. ERROR - Customer should contact support. The following status are deprecated: RECEIVED, PENDING, PROCESSING, INSTALLING, and FULFILLED."];
       lineItems: LineItemListDefinition.t option
         [@ocaml.doc "The line items for the order"];
       paymentOption: PaymentOption.t option
@@ -2930,7 +5440,9 @@ module Order =
       orderSubmissionDate: ISO8601Timestamp.t option
         [@ocaml.doc "The submission date for the order."];
       orderFulfilledDate: ISO8601Timestamp.t option
-        [@ocaml.doc "The fulfillment date of the order."]}
+        [@ocaml.doc "The fulfillment date of the order."];
+      paymentTerm: PaymentTerm.t option [@ocaml.doc "The payment term."];
+      orderType: OrderType.t option [@ocaml.doc "The type of order."]}
     let make ?outpostId =
       fun ?orderId ->
         fun ?status ->
@@ -2938,16 +5450,20 @@ module Order =
             fun ?paymentOption ->
               fun ?orderSubmissionDate ->
                 fun ?orderFulfilledDate ->
-                  fun () ->
-                    {
-                      outpostId;
-                      orderId;
-                      status;
-                      lineItems;
-                      paymentOption;
-                      orderSubmissionDate;
-                      orderFulfilledDate
-                    }
+                  fun ?paymentTerm ->
+                    fun ?orderType ->
+                      fun () ->
+                        {
+                          outpostId;
+                          orderId;
+                          status;
+                          lineItems;
+                          paymentOption;
+                          orderSubmissionDate;
+                          orderFulfilledDate;
+                          paymentTerm;
+                          orderType
+                        }
     let to_value x =
       structure_to_value
         [("OutpostId", (Option.map x.outpostId ~f:OutpostIdOnly.to_value));
@@ -2960,9 +5476,15 @@ module Order =
         ("OrderSubmissionDate",
           (Option.map x.orderSubmissionDate ~f:ISO8601Timestamp.to_value));
         ("OrderFulfilledDate",
-          (Option.map x.orderFulfilledDate ~f:ISO8601Timestamp.to_value))]
+          (Option.map x.orderFulfilledDate ~f:ISO8601Timestamp.to_value));
+        ("PaymentTerm", (Option.map x.paymentTerm ~f:PaymentTerm.to_value));
+        ("OrderType", (Option.map x.orderType ~f:OrderType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let orderType =
+        (Option.map ~f:OrderType.of_xml) (Xml.child xml_arg0 "OrderType") in
+      let paymentTerm =
+        (Option.map ~f:PaymentTerm.of_xml) (Xml.child xml_arg0 "PaymentTerm") in
       let orderFulfilledDate =
         (Option.map ~f:ISO8601Timestamp.of_xml)
           (Xml.child xml_arg0 "OrderFulfilledDate") in
@@ -2981,25 +5503,108 @@ module Order =
         (Option.map ~f:OrderId.of_xml) (Xml.child xml_arg0 "OrderId") in
       let outpostId =
         (Option.map ~f:OutpostIdOnly.of_xml) (Xml.child xml_arg0 "OutpostId") in
-      make ?orderFulfilledDate ?orderSubmissionDate ?paymentOption ?lineItems
-        ?status ?orderId ?outpostId ()
+      make ?orderType ?paymentTerm ?orderFulfilledDate ?orderSubmissionDate
+        ?paymentOption ?lineItems ?status ?orderId ?outpostId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let orderType = field_map json__ "OrderType" OrderType.of_json in
+      let paymentTerm = field_map json__ "PaymentTerm" PaymentTerm.of_json in
       let orderFulfilledDate =
-        field_map json "OrderFulfilledDate" ISO8601Timestamp.of_json in
+        field_map json__ "OrderFulfilledDate" ISO8601Timestamp.of_json in
       let orderSubmissionDate =
-        field_map json "OrderSubmissionDate" ISO8601Timestamp.of_json in
+        field_map json__ "OrderSubmissionDate" ISO8601Timestamp.of_json in
       let paymentOption =
-        field_map json "PaymentOption" PaymentOption.of_json in
+        field_map json__ "PaymentOption" PaymentOption.of_json in
       let lineItems =
-        field_map json "LineItems" LineItemListDefinition.of_json in
-      let status = field_map json "Status" OrderStatus.of_json in
-      let orderId = field_map json "OrderId" OrderId.of_json in
-      let outpostId = field_map json "OutpostId" OutpostIdOnly.of_json in
-      make ?orderFulfilledDate ?orderSubmissionDate ?paymentOption ?lineItems
-        ?status ?orderId ?outpostId ()
+        field_map json__ "LineItems" LineItemListDefinition.of_json in
+      let status = field_map json__ "Status" OrderStatus.of_json in
+      let orderId = field_map json__ "OrderId" OrderId.of_json in
+      let outpostId = field_map json__ "OutpostId" OutpostIdOnly.of_json in
+      make ?orderType ?paymentTerm ?orderFulfilledDate ?orderSubmissionDate
+        ?paymentOption ?lineItems ?status ?orderId ?outpostId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an order."]
+module ConnectionDetails =
+  struct
+    type nonrec t =
+      {
+      clientPublicKey: WireGuardPublicKey.t option
+        [@ocaml.doc "The public key of the client."];
+      serverPublicKey: WireGuardPublicKey.t option
+        [@ocaml.doc "The public key of the server."];
+      serverEndpoint: ServerEndpoint.t option
+        [@ocaml.doc "The endpoint for the server."];
+      clientTunnelAddress: CIDR.t option
+        [@ocaml.doc "The client tunnel address."];
+      serverTunnelAddress: CIDR.t option
+        [@ocaml.doc "The server tunnel address."];
+      allowedIps: CIDRList.t option [@ocaml.doc "The allowed IP addresses."]}
+    let make ?clientPublicKey =
+      fun ?serverPublicKey ->
+        fun ?serverEndpoint ->
+          fun ?clientTunnelAddress ->
+            fun ?serverTunnelAddress ->
+              fun ?allowedIps ->
+                fun () ->
+                  {
+                    clientPublicKey;
+                    serverPublicKey;
+                    serverEndpoint;
+                    clientTunnelAddress;
+                    serverTunnelAddress;
+                    allowedIps
+                  }
+    let to_value x =
+      structure_to_value
+        [("ClientPublicKey",
+           (Option.map x.clientPublicKey ~f:WireGuardPublicKey.to_value));
+        ("ServerPublicKey",
+          (Option.map x.serverPublicKey ~f:WireGuardPublicKey.to_value));
+        ("ServerEndpoint",
+          (Option.map x.serverEndpoint ~f:ServerEndpoint.to_value));
+        ("ClientTunnelAddress",
+          (Option.map x.clientTunnelAddress ~f:CIDR.to_value));
+        ("ServerTunnelAddress",
+          (Option.map x.serverTunnelAddress ~f:CIDR.to_value));
+        ("AllowedIps", (Option.map x.allowedIps ~f:CIDRList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let allowedIps =
+        (Option.map ~f:CIDRList.of_xml) (Xml.child xml_arg0 "AllowedIps") in
+      let serverTunnelAddress =
+        (Option.map ~f:CIDR.of_xml)
+          (Xml.child xml_arg0 "ServerTunnelAddress") in
+      let clientTunnelAddress =
+        (Option.map ~f:CIDR.of_xml)
+          (Xml.child xml_arg0 "ClientTunnelAddress") in
+      let serverEndpoint =
+        (Option.map ~f:ServerEndpoint.of_xml)
+          (Xml.child xml_arg0 "ServerEndpoint") in
+      let serverPublicKey =
+        (Option.map ~f:WireGuardPublicKey.of_xml)
+          (Xml.child xml_arg0 "ServerPublicKey") in
+      let clientPublicKey =
+        (Option.map ~f:WireGuardPublicKey.of_xml)
+          (Xml.child xml_arg0 "ClientPublicKey") in
+      make ?allowedIps ?serverTunnelAddress ?clientTunnelAddress
+        ?serverEndpoint ?serverPublicKey ?clientPublicKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let allowedIps = field_map json__ "AllowedIps" CIDRList.of_json in
+      let serverTunnelAddress =
+        field_map json__ "ServerTunnelAddress" CIDR.of_json in
+      let clientTunnelAddress =
+        field_map json__ "ClientTunnelAddress" CIDR.of_json in
+      let serverEndpoint =
+        field_map json__ "ServerEndpoint" ServerEndpoint.of_json in
+      let serverPublicKey =
+        field_map json__ "ServerPublicKey" WireGuardPublicKey.of_json in
+      let clientPublicKey =
+        field_map json__ "ClientPublicKey" WireGuardPublicKey.of_json in
+      make ?allowedIps ?serverTunnelAddress ?clientTunnelAddress
+        ?serverEndpoint ?serverPublicKey ?clientPublicKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a connection."]
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
@@ -3014,11 +5619,31 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You have exceeded a service quota."]
+module AutoFillIdempotencyToken =
+  struct
+    type nonrec t = string
+    let context_ = "AutoFillIdempotencyToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AutoFillIdempotencyToken" j
+    let to_json = simple_to_json to_value
+  end
 module LineItemRequestListDefinition =
   struct
     type nonrec t = LineItemRequest.t list
@@ -3027,6 +5652,9 @@ module LineItemRequestListDefinition =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LineItemRequest.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3047,24 +5675,6 @@ module LineItemRequestListDefinition =
       list_of_json ~kind:"LineItemRequestListDefinition"
         ~of_json:LineItemRequest.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module PaymentTerm =
-  struct
-    type nonrec t =
-      | THREE_YEARS 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | THREE_YEARS -> "THREE_YEARS" | Non_static_id s -> s
-    let of_string =
-      function | "THREE_YEARS" -> THREE_YEARS | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration PaymentTerm" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"PaymentTerm" j)
-    let to_json = simple_to_json to_value
   end
 module UpdateSiteRackPhysicalPropertiesOutput =
   struct
@@ -3141,8 +5751,8 @@ module UpdateSiteRackPhysicalPropertiesOutput =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let site = field_map json "Site" Site.of_json in make ?site ()
+    let of_json json__ =
+      let site = field_map json__ "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Update the physical and logistical details for a rack at a site. For more information about hardware requirements for racks, see Network readiness checklist in the Amazon Web Services Outposts User Guide. To update a rack at a site with an order of IN_PROGRESS, you must wait for the order to complete or cancel the order."]
@@ -3154,31 +5764,31 @@ module UpdateSiteRackPhysicalPropertiesInput =
         [@ocaml.doc "The ID or the Amazon Resource Name (ARN) of the site."];
       powerDrawKva: PowerDrawKva.t option
         [@ocaml.doc
-          "Specify in kVA the power draw available at the hardware placement position for the rack."];
+          "The power draw, in kVA, available at the hardware placement position for the rack."];
       powerPhase: PowerPhase.t option
         [@ocaml.doc
-          "Specify the power option that you can provide for hardware. Single-phase AC feed: 200 V to 277 V, 50 Hz or 60 Hz Three-phase AC feed: 346 V to 480 V, 50 Hz or 60 Hz"];
+          "The power option that you can provide for hardware. Single-phase AC feed: 200 V to 277 V, 50 Hz or 60 Hz Three-phase AC feed: 346 V to 480 V, 50 Hz or 60 Hz"];
       powerConnector: PowerConnector.t option
         [@ocaml.doc
-          "Specify the power connector that Amazon Web Services should plan to provide for connections to the hardware. Note the correlation between PowerPhase and PowerConnector. Single-phase AC feed L6-30P \226\128\147 (common in US); 30A; single phase IEC309 (blue) \226\128\147 P+N+E, 6hr; 32 A; single phase Three-phase AC feed AH530P7W (red) \226\128\147 3P+N+E, 7hr; 30A; three phase AH532P6W (red) \226\128\147 3P+N+E, 6hr; 32A; three phase"];
+          "The power connector that Amazon Web Services should plan to provide for connections to the hardware. Note the correlation between PowerPhase and PowerConnector. Single-phase AC feed L6-30P \226\128\147 (common in US); 30A; single phase IEC309 (blue) \226\128\147 P+N+E, 6hr; 32 A; single phase Three-phase AC feed AH530P7W (red) \226\128\147 3P+N+E, 7hr; 30A; three phase AH532P6W (red) \226\128\147 3P+N+E, 6hr; 32A; three phase CS8365C \226\128\147 (common in US); 3P+E, 50A; three phase"];
       powerFeedDrop: PowerFeedDrop.t option
         [@ocaml.doc
-          "Specify whether the power feed comes above or below the rack."];
+          "Indicates whether the power feed comes above or below the rack."];
       uplinkGbps: UplinkGbps.t option
         [@ocaml.doc
-          "Specify the uplink speed the rack should support for the connection to the Region."];
+          "The uplink speed the rack should support for the connection to the Region."];
       uplinkCount: UplinkCount.t option
         [@ocaml.doc
           "Racks come with two Outpost network devices. Depending on the supported uplink speed at the site, the Outpost network devices provide a variable number of uplinks. Specify the number of uplinks for each Outpost network device that you intend to use to connect the rack to your network. Note the correlation between UplinkGbps and UplinkCount. 1Gbps - Uplinks available: 1, 2, 4, 6, 8 10Gbps - Uplinks available: 1, 2, 4, 8, 12, 16 40 and 100 Gbps- Uplinks available: 1, 2, 4"];
       fiberOpticCableType: FiberOpticCableType.t option
         [@ocaml.doc
-          "Specify the type of fiber that you will use to attach the Outpost to your network."];
+          "The type of fiber that you will use to attach the Outpost to your network."];
       opticalStandard: OpticalStandard.t option
         [@ocaml.doc
-          "Specify the type of optical standard that you will use to attach the Outpost to your network. This field is dependent on uplink speed, fiber type, and distance to the upstream device. For more information about networking requirements for racks, see Network in the Amazon Web Services Outposts User Guide. OPTIC_10GBASE_SR: 10GBASE-SR OPTIC_10GBASE_IR: 10GBASE-IR OPTIC_10GBASE_LR: 10GBASE-LR OPTIC_40GBASE_SR: 40GBASE-SR OPTIC_40GBASE_ESR: 40GBASE-ESR OPTIC_40GBASE_IR4_LR4L: 40GBASE-IR (LR4L) OPTIC_40GBASE_LR4: 40GBASE-LR4 OPTIC_100GBASE_SR4: 100GBASE-SR4 OPTIC_100GBASE_CWDM4: 100GBASE-CWDM4 OPTIC_100GBASE_LR4: 100GBASE-LR4 OPTIC_100G_PSM4_MSA: 100G PSM4 MSA OPTIC_1000BASE_LX: 1000Base-LX OPTIC_1000BASE_SX : 1000Base-SX"];
+          "The type of optical standard that you will use to attach the Outpost to your network. This field is dependent on uplink speed, fiber type, and distance to the upstream device. For more information about networking requirements for racks, see Network in the Amazon Web Services Outposts User Guide. OPTIC_10GBASE_SR: 10GBASE-SR OPTIC_10GBASE_IR: 10GBASE-IR OPTIC_10GBASE_LR: 10GBASE-LR OPTIC_40GBASE_SR: 40GBASE-SR OPTIC_40GBASE_ESR: 40GBASE-ESR OPTIC_40GBASE_IR4_LR4L: 40GBASE-IR (LR4L) OPTIC_40GBASE_LR4: 40GBASE-LR4 OPTIC_100GBASE_SR4: 100GBASE-SR4 OPTIC_100GBASE_CWDM4: 100GBASE-CWDM4 OPTIC_100GBASE_LR4: 100GBASE-LR4 OPTIC_100G_PSM4_MSA: 100G PSM4 MSA OPTIC_1000BASE_LX: 1000Base-LX OPTIC_1000BASE_SX : 1000Base-SX"];
       maximumSupportedWeightLbs: MaximumSupportedWeightLbs.t option
         [@ocaml.doc
-          "Specify the maximum rack weight that this site can support. NO_LIMIT is over 2000lbs."]}
+          "The maximum rack weight that this site can support. NO_LIMIT is over 2000lbs."]}
     let context_ = "UpdateSiteRackPhysicalPropertiesInput"
     let make ?powerDrawKva =
       fun ?powerPhase ->
@@ -3254,23 +5864,23 @@ module UpdateSiteRackPhysicalPropertiesInput =
         ?uplinkCount ?uplinkGbps ?powerFeedDrop ?powerConnector ?powerPhase
         ?powerDrawKva ~siteId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maximumSupportedWeightLbs =
-        field_map json "MaximumSupportedWeightLbs"
+        field_map json__ "MaximumSupportedWeightLbs"
           MaximumSupportedWeightLbs.of_json in
       let opticalStandard =
-        field_map json "OpticalStandard" OpticalStandard.of_json in
+        field_map json__ "OpticalStandard" OpticalStandard.of_json in
       let fiberOpticCableType =
-        field_map json "FiberOpticCableType" FiberOpticCableType.of_json in
-      let uplinkCount = field_map json "UplinkCount" UplinkCount.of_json in
-      let uplinkGbps = field_map json "UplinkGbps" UplinkGbps.of_json in
+        field_map json__ "FiberOpticCableType" FiberOpticCableType.of_json in
+      let uplinkCount = field_map json__ "UplinkCount" UplinkCount.of_json in
+      let uplinkGbps = field_map json__ "UplinkGbps" UplinkGbps.of_json in
       let powerFeedDrop =
-        field_map json "PowerFeedDrop" PowerFeedDrop.of_json in
+        field_map json__ "PowerFeedDrop" PowerFeedDrop.of_json in
       let powerConnector =
-        field_map json "PowerConnector" PowerConnector.of_json in
-      let powerPhase = field_map json "PowerPhase" PowerPhase.of_json in
-      let powerDrawKva = field_map json "PowerDrawKva" PowerDrawKva.of_json in
-      let siteId = field_map_exn json "SiteId" SiteId.of_json in
+        field_map json__ "PowerConnector" PowerConnector.of_json in
+      let powerPhase = field_map json__ "PowerPhase" PowerPhase.of_json in
+      let powerDrawKva = field_map json__ "PowerDrawKva" PowerDrawKva.of_json in
+      let siteId = field_map_exn json__ "SiteId" SiteId.of_json in
       make ?maximumSupportedWeightLbs ?opticalStandard ?fiberOpticCableType
         ?uplinkCount ?uplinkGbps ?powerFeedDrop ?powerConnector ?powerPhase
         ?powerDrawKva ~siteId ()
@@ -3352,10 +5962,10 @@ module UpdateSiteOutput =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let site = field_map json "Site" Site.of_json in make ?site ()
+    let of_json json__ =
+      let site = field_map json__ "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the site."]
+  end[@@ocaml.doc "Updates the specified site."]
 module UpdateSiteInput =
   struct
     type nonrec t =
@@ -3389,14 +5999,15 @@ module UpdateSiteInput =
         SiteId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SiteId") in
       make ?notes ?description ?name ~siteId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let notes = field_map json "Notes" SiteNotes.of_json in
-      let description = field_map json "Description" SiteDescription.of_json in
-      let name = field_map json "Name" SiteName.of_json in
-      let siteId = field_map_exn json "SiteId" SiteId.of_json in
+    let of_json json__ =
+      let notes = field_map json__ "Notes" SiteNotes.of_json in
+      let description =
+        field_map json__ "Description" SiteDescription.of_json in
+      let name = field_map json__ "Name" SiteName.of_json in
+      let siteId = field_map_exn json__ "SiteId" SiteId.of_json in
       make ?notes ?description ?name ~siteId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the site."]
+  end[@@ocaml.doc "Updates the specified site."]
 module UpdateSiteAddressOutput =
   struct
     type nonrec t =
@@ -3481,13 +6092,13 @@ module UpdateSiteAddressOutput =
         (Option.map ~f:AddressType.of_xml) (Xml.child xml_arg0 "AddressType") in
       make ?address ?addressType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let address = field_map json "Address" Address.of_json in
-      let addressType = field_map json "AddressType" AddressType.of_json in
+    let of_json json__ =
+      let address = field_map json__ "Address" Address.of_json in
+      let addressType = field_map json__ "AddressType" AddressType.of_json in
       make ?address ?addressType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the site address. To update a site address with an order IN_PROGRESS, you must wait for the order to complete or cancel the order. You can update the operating address before you place an order at the site, or after all Outposts that belong to the site have been deactivated."]
+       "Updates the address of the specified site. You can't update a site address if there is an order in progress. You must wait for the order to complete or cancel the order. You can update the operating address before you place an order at the site, or after all Outposts that belong to the site have been deactivated."]
 module UpdateSiteAddressInput =
   struct
     type nonrec t =
@@ -3516,14 +6127,15 @@ module UpdateSiteAddressInput =
         SiteId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SiteId") in
       make ~address ~addressType ~siteId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let address = field_map_exn json "Address" Address.of_json in
-      let addressType = field_map_exn json "AddressType" AddressType.of_json in
-      let siteId = field_map_exn json "SiteId" SiteId.of_json in
+    let of_json json__ =
+      let address = field_map_exn json__ "Address" Address.of_json in
+      let addressType =
+        field_map_exn json__ "AddressType" AddressType.of_json in
+      let siteId = field_map_exn json__ "SiteId" SiteId.of_json in
       make ~address ~addressType ~siteId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the site address. To update a site address with an order IN_PROGRESS, you must wait for the order to complete or cancel the order. You can update the operating address before you place an order at the site, or after all Outposts that belong to the site have been deactivated."]
+       "Updates the address of the specified site. You can't update a site address if there is an order in progress. You must wait for the order to complete or cancel the order. You can update the operating address before you place an order at the site, or after all Outposts that belong to the site have been deactivated."]
 module UpdateOutpostOutput =
   struct
     type nonrec t = {
@@ -3601,8 +6213,8 @@ module UpdateOutpostOutput =
         (Option.map ~f:Outpost.of_xml) (Xml.child xml_arg0 "Outpost") in
       make ?outpost ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outpost = field_map json "Outpost" Outpost.of_json in
+    let of_json json__ =
+      let outpost = field_map json__ "Outpost" Outpost.of_json in
       make ?outpost ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an Outpost."]
@@ -3610,9 +6222,7 @@ module UpdateOutpostInput =
   struct
     type nonrec t =
       {
-      outpostId: OutpostId.t
-        [@ocaml.doc
-          "The ID or the Amazon Resource Name (ARN) of the Outpost."];
+      outpostId: OutpostId.t [@ocaml.doc "The ID or ARN of the Outpost."];
       name: OutpostName.t option ;
       description: OutpostDescription.t option ;
       supportedHardwareType: SupportedHardwareType.t option
@@ -3647,13 +6257,14 @@ module UpdateOutpostInput =
           (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
       make ?supportedHardwareType ?description ?name ~outpostId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supportedHardwareType =
-        field_map json "SupportedHardwareType" SupportedHardwareType.of_json in
+        field_map json__ "SupportedHardwareType"
+          SupportedHardwareType.of_json in
       let description =
-        field_map json "Description" OutpostDescription.of_json in
-      let name = field_map json "Name" OutpostName.of_json in
-      let outpostId = field_map_exn json "OutpostId" OutpostId.of_json in
+        field_map json__ "Description" OutpostDescription.of_json in
+      let name = field_map json__ "Name" OutpostName.of_json in
+      let outpostId = field_map_exn json__ "OutpostId" OutpostId.of_json in
       make ?supportedHardwareType ?description ?name ~outpostId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an Outpost."]
@@ -3737,9 +6348,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from the specified resource."]
@@ -3821,12 +6432,630 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds tags to the specified resource."]
+module StartOutpostDecommissionOutput =
+  struct
+    type nonrec t =
+      {
+      status: DecommissionRequestStatus.t option
+        [@ocaml.doc "The status of the decommission request."];
+      blockingResourceTypes: BlockingResourceTypeList.t option
+        [@ocaml.doc
+          "The resources still associated with the Outpost that you are decommissioning."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status =
+      fun ?blockingResourceTypes ->
+        fun () -> { status; blockingResourceTypes }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Status",
+           (Option.map x.status ~f:DecommissionRequestStatus.to_value));
+        ("BlockingResourceTypes",
+          (Option.map x.blockingResourceTypes
+             ~f:BlockingResourceTypeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let blockingResourceTypes =
+        (Option.map ~f:BlockingResourceTypeList.of_xml)
+          (Xml.child xml_arg0 "BlockingResourceTypes") in
+      let status =
+        (Option.map ~f:DecommissionRequestStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?blockingResourceTypes ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let blockingResourceTypes =
+        field_map json__ "BlockingResourceTypes"
+          BlockingResourceTypeList.of_json in
+      let status =
+        field_map json__ "Status" DecommissionRequestStatus.of_json in
+      make ?blockingResourceTypes ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts the decommission process to return the Outposts racks or servers."]
+module StartOutpostDecommissionInput =
+  struct
+    type nonrec t =
+      {
+      outpostIdentifier: OutpostIdentifier.t
+        [@ocaml.doc
+          "The ID or ARN of the Outpost that you want to decommission."];
+      validateOnly: ValidateOnly.t option
+        [@ocaml.doc
+          "Validates the request without starting the decommission process."]}
+    let context_ = "StartOutpostDecommissionInput"
+    let make ?validateOnly =
+      fun ~outpostIdentifier -> fun () -> { validateOnly; outpostIdentifier }
+    let to_value x =
+      structure_to_value
+        [("OutpostId",
+           (Some (OutpostIdentifier.to_value x.outpostIdentifier)));
+        ("ValidateOnly",
+          (Option.map x.validateOnly ~f:ValidateOnly.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let validateOnly =
+        (Option.map ~f:ValidateOnly.of_xml)
+          (Xml.child xml_arg0 "ValidateOnly") in
+      let outpostIdentifier =
+        OutpostIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
+      make ?validateOnly ~outpostIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let validateOnly = field_map json__ "ValidateOnly" ValidateOnly.of_json in
+      let outpostIdentifier =
+        field_map_exn json__ "OutpostIdentifier" OutpostIdentifier.of_json in
+      make ?validateOnly ~outpostIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts the decommission process to return the Outposts racks or servers."]
+module StartConnectionResponse =
+  struct
+    type nonrec t =
+      {
+      connectionId: ConnectionId.t option
+        [@ocaml.doc "The ID of the connection."];
+      underlayIpAddress: UnderlayIpAddress.t option
+        [@ocaml.doc "The underlay IP address."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?connectionId =
+      fun ?underlayIpAddress -> fun () -> { connectionId; underlayIpAddress }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ConnectionId",
+           (Option.map x.connectionId ~f:ConnectionId.to_value));
+        ("UnderlayIpAddress",
+          (Option.map x.underlayIpAddress ~f:UnderlayIpAddress.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let underlayIpAddress =
+        (Option.map ~f:UnderlayIpAddress.of_xml)
+          (Xml.child xml_arg0 "UnderlayIpAddress") in
+      let connectionId =
+        (Option.map ~f:ConnectionId.of_xml)
+          (Xml.child xml_arg0 "ConnectionId") in
+      make ?underlayIpAddress ?connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let underlayIpAddress =
+        field_map json__ "UnderlayIpAddress" UnderlayIpAddress.of_json in
+      let connectionId = field_map json__ "ConnectionId" ConnectionId.of_json in
+      make ?underlayIpAddress ?connectionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Amazon Web Services uses this action to install Outpost servers. Starts the connection required for Outpost server installation. Use CloudTrail to monitor this action or Amazon Web Services managed policy for Amazon Web Services Outposts to secure it. For more information, see Amazon Web Services managed policies for Amazon Web Services Outposts and Logging Amazon Web Services Outposts API calls with Amazon Web Services CloudTrail in the Amazon Web Services Outposts User Guide."]
+module StartConnectionRequest =
+  struct
+    type nonrec t =
+      {
+      deviceSerialNumber: DeviceSerialNumber.t option
+        [@ocaml.doc "The serial number of the dongle."];
+      assetId: AssetId.t [@ocaml.doc "The ID of the Outpost server."];
+      clientPublicKey: WireGuardPublicKey.t
+        [@ocaml.doc "The public key of the client."];
+      networkInterfaceDeviceIndex: NetworkInterfaceDeviceIndex.t
+        [@ocaml.doc
+          "The device index of the network interface on the Outpost server."]}
+    let context_ = "StartConnectionRequest"
+    let make ?deviceSerialNumber =
+      fun ~assetId ->
+        fun ~clientPublicKey ->
+          fun ~networkInterfaceDeviceIndex ->
+            fun () ->
+              {
+                deviceSerialNumber;
+                assetId;
+                clientPublicKey;
+                networkInterfaceDeviceIndex
+              }
+    let to_value x =
+      structure_to_value
+        [("DeviceSerialNumber",
+           (Option.map x.deviceSerialNumber ~f:DeviceSerialNumber.to_value));
+        ("AssetId", (Some (AssetId.to_value x.assetId)));
+        ("ClientPublicKey",
+          (Some (WireGuardPublicKey.to_value x.clientPublicKey)));
+        ("NetworkInterfaceDeviceIndex",
+          (Some
+             (NetworkInterfaceDeviceIndex.to_value
+                x.networkInterfaceDeviceIndex)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkInterfaceDeviceIndex =
+        NetworkInterfaceDeviceIndex.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "NetworkInterfaceDeviceIndex") in
+      let clientPublicKey =
+        WireGuardPublicKey.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientPublicKey") in
+      let assetId =
+        AssetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AssetId") in
+      let deviceSerialNumber =
+        (Option.map ~f:DeviceSerialNumber.of_xml)
+          (Xml.child xml_arg0 "DeviceSerialNumber") in
+      make ~networkInterfaceDeviceIndex ~clientPublicKey ~assetId
+        ?deviceSerialNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkInterfaceDeviceIndex =
+        field_map_exn json__ "NetworkInterfaceDeviceIndex"
+          NetworkInterfaceDeviceIndex.of_json in
+      let clientPublicKey =
+        field_map_exn json__ "ClientPublicKey" WireGuardPublicKey.of_json in
+      let assetId = field_map_exn json__ "AssetId" AssetId.of_json in
+      let deviceSerialNumber =
+        field_map json__ "DeviceSerialNumber" DeviceSerialNumber.of_json in
+      make ~networkInterfaceDeviceIndex ~clientPublicKey ~assetId
+        ?deviceSerialNumber ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Amazon Web Services uses this action to install Outpost servers. Starts the connection required for Outpost server installation. Use CloudTrail to monitor this action or Amazon Web Services managed policy for Amazon Web Services Outposts to secure it. For more information, see Amazon Web Services managed policies for Amazon Web Services Outposts and Logging Amazon Web Services Outposts API calls with Amazon Web Services CloudTrail in the Amazon Web Services Outposts User Guide."]
+module StartCapacityTaskOutput =
+  struct
+    type nonrec t =
+      {
+      capacityTaskId: CapacityTaskId.t option
+        [@ocaml.doc "ID of the capacity task that you want to start."];
+      outpostId: OutpostId.t option
+        [@ocaml.doc "ID of the Outpost associated with the capacity task."];
+      orderId: OrderId.t option
+        [@ocaml.doc
+          "ID of the Amazon Web Services Outposts order of the host associated with the capacity task."];
+      assetId: AssetId.t option
+        [@ocaml.doc
+          "The ID of the asset. An Outpost asset can be a single server within an Outposts rack or an Outposts server configuration."];
+      requestedInstancePools: RequestedInstancePools.t option
+        [@ocaml.doc
+          "List of the instance pools requested in the specified capacity task."];
+      instancesToExclude: InstancesToExclude.t option
+        [@ocaml.doc
+          "User-specified instances that must not be stopped in order to free up the capacity needed to run the capacity task."];
+      dryRun: DryRun.t option
+        [@ocaml.doc
+          "Results of the dry run showing if the specified capacity task is above or below the available instance capacity."];
+      capacityTaskStatus: CapacityTaskStatus.t option
+        [@ocaml.doc "Status of the specified capacity task."];
+      failed: CapacityTaskFailure.t option
+        [@ocaml.doc "Reason that the specified capacity task failed."];
+      creationDate: ISO8601Timestamp.t option
+        [@ocaml.doc "Date that the specified capacity task was created."];
+      completionDate: ISO8601Timestamp.t option
+        [@ocaml.doc
+          "Date that the specified capacity task ran successfully."];
+      lastModifiedDate: ISO8601Timestamp.t option
+        [@ocaml.doc
+          "Date that the specified capacity task was last modified."];
+      taskActionOnBlockingInstances: TaskActionOnBlockingInstances.t option
+        [@ocaml.doc
+          "User-specified option in case an instance is blocking the capacity task from running. WAIT_FOR_EVACUATION - Checks every 10 minutes over 48 hours to determine if instances have stopped and capacity is available to complete the task. FAIL_TASK - The capacity task fails."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?capacityTaskId =
+      fun ?outpostId ->
+        fun ?orderId ->
+          fun ?assetId ->
+            fun ?requestedInstancePools ->
+              fun ?instancesToExclude ->
+                fun ?dryRun ->
+                  fun ?capacityTaskStatus ->
+                    fun ?failed ->
+                      fun ?creationDate ->
+                        fun ?completionDate ->
+                          fun ?lastModifiedDate ->
+                            fun ?taskActionOnBlockingInstances ->
+                              fun () ->
+                                {
+                                  capacityTaskId;
+                                  outpostId;
+                                  orderId;
+                                  assetId;
+                                  requestedInstancePools;
+                                  instancesToExclude;
+                                  dryRun;
+                                  capacityTaskStatus;
+                                  failed;
+                                  creationDate;
+                                  completionDate;
+                                  lastModifiedDate;
+                                  taskActionOnBlockingInstances
+                                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CapacityTaskId",
+           (Option.map x.capacityTaskId ~f:CapacityTaskId.to_value));
+        ("OutpostId", (Option.map x.outpostId ~f:OutpostId.to_value));
+        ("OrderId", (Option.map x.orderId ~f:OrderId.to_value));
+        ("AssetId", (Option.map x.assetId ~f:AssetId.to_value));
+        ("RequestedInstancePools",
+          (Option.map x.requestedInstancePools
+             ~f:RequestedInstancePools.to_value));
+        ("InstancesToExclude",
+          (Option.map x.instancesToExclude ~f:InstancesToExclude.to_value));
+        ("DryRun", (Option.map x.dryRun ~f:DryRun.to_value));
+        ("CapacityTaskStatus",
+          (Option.map x.capacityTaskStatus ~f:CapacityTaskStatus.to_value));
+        ("Failed", (Option.map x.failed ~f:CapacityTaskFailure.to_value));
+        ("CreationDate",
+          (Option.map x.creationDate ~f:ISO8601Timestamp.to_value));
+        ("CompletionDate",
+          (Option.map x.completionDate ~f:ISO8601Timestamp.to_value));
+        ("LastModifiedDate",
+          (Option.map x.lastModifiedDate ~f:ISO8601Timestamp.to_value));
+        ("TaskActionOnBlockingInstances",
+          (Option.map x.taskActionOnBlockingInstances
+             ~f:TaskActionOnBlockingInstances.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskActionOnBlockingInstances =
+        (Option.map ~f:TaskActionOnBlockingInstances.of_xml)
+          (Xml.child xml_arg0 "TaskActionOnBlockingInstances") in
+      let lastModifiedDate =
+        (Option.map ~f:ISO8601Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModifiedDate") in
+      let completionDate =
+        (Option.map ~f:ISO8601Timestamp.of_xml)
+          (Xml.child xml_arg0 "CompletionDate") in
+      let creationDate =
+        (Option.map ~f:ISO8601Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreationDate") in
+      let failed =
+        (Option.map ~f:CapacityTaskFailure.of_xml)
+          (Xml.child xml_arg0 "Failed") in
+      let capacityTaskStatus =
+        (Option.map ~f:CapacityTaskStatus.of_xml)
+          (Xml.child xml_arg0 "CapacityTaskStatus") in
+      let dryRun =
+        (Option.map ~f:DryRun.of_xml) (Xml.child xml_arg0 "DryRun") in
+      let instancesToExclude =
+        (Option.map ~f:InstancesToExclude.of_xml)
+          (Xml.child xml_arg0 "InstancesToExclude") in
+      let requestedInstancePools =
+        (Option.map ~f:RequestedInstancePools.of_xml)
+          (Xml.child xml_arg0 "RequestedInstancePools") in
+      let assetId =
+        (Option.map ~f:AssetId.of_xml) (Xml.child xml_arg0 "AssetId") in
+      let orderId =
+        (Option.map ~f:OrderId.of_xml) (Xml.child xml_arg0 "OrderId") in
+      let outpostId =
+        (Option.map ~f:OutpostId.of_xml) (Xml.child xml_arg0 "OutpostId") in
+      let capacityTaskId =
+        (Option.map ~f:CapacityTaskId.of_xml)
+          (Xml.child xml_arg0 "CapacityTaskId") in
+      make ?taskActionOnBlockingInstances ?lastModifiedDate ?completionDate
+        ?creationDate ?failed ?capacityTaskStatus ?dryRun ?instancesToExclude
+        ?requestedInstancePools ?assetId ?orderId ?outpostId ?capacityTaskId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskActionOnBlockingInstances =
+        field_map json__ "TaskActionOnBlockingInstances"
+          TaskActionOnBlockingInstances.of_json in
+      let lastModifiedDate =
+        field_map json__ "LastModifiedDate" ISO8601Timestamp.of_json in
+      let completionDate =
+        field_map json__ "CompletionDate" ISO8601Timestamp.of_json in
+      let creationDate =
+        field_map json__ "CreationDate" ISO8601Timestamp.of_json in
+      let failed = field_map json__ "Failed" CapacityTaskFailure.of_json in
+      let capacityTaskStatus =
+        field_map json__ "CapacityTaskStatus" CapacityTaskStatus.of_json in
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
+      let instancesToExclude =
+        field_map json__ "InstancesToExclude" InstancesToExclude.of_json in
+      let requestedInstancePools =
+        field_map json__ "RequestedInstancePools"
+          RequestedInstancePools.of_json in
+      let assetId = field_map json__ "AssetId" AssetId.of_json in
+      let orderId = field_map json__ "OrderId" OrderId.of_json in
+      let outpostId = field_map json__ "OutpostId" OutpostId.of_json in
+      let capacityTaskId =
+        field_map json__ "CapacityTaskId" CapacityTaskId.of_json in
+      make ?taskActionOnBlockingInstances ?lastModifiedDate ?completionDate
+        ?creationDate ?failed ?capacityTaskStatus ?dryRun ?instancesToExclude
+        ?requestedInstancePools ?assetId ?orderId ?outpostId ?capacityTaskId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts the specified capacity task. You can have one active capacity task for each order and each Outpost."]
+module StartCapacityTaskInput =
+  struct
+    type nonrec t =
+      {
+      outpostIdentifier: OutpostIdentifier.t
+        [@ocaml.doc
+          "The ID or ARN of the Outposts associated with the specified capacity task."];
+      orderId: OrderId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services Outposts order associated with the specified capacity task."];
+      assetId: AssetIdInput.t option
+        [@ocaml.doc
+          "The ID of the Outpost asset. An Outpost asset can be a single server within an Outposts rack or an Outposts server configuration."];
+      instancePools: RequestedInstancePools.t
+        [@ocaml.doc "The instance pools specified in the capacity task."];
+      instancesToExclude: InstancesToExclude.t option
+        [@ocaml.doc
+          "List of user-specified running instances that must not be stopped in order to free up the capacity needed to run the capacity task."];
+      dryRun: DryRun.t option
+        [@ocaml.doc
+          "You can request a dry run to determine if the instance type and instance size changes is above or below available instance capacity. Requesting a dry run does not make any changes to your plan."];
+      taskActionOnBlockingInstances: TaskActionOnBlockingInstances.t option
+        [@ocaml.doc
+          "Specify one of the following options in case an instance is blocking the capacity task from running. WAIT_FOR_EVACUATION - Checks every 10 minutes over 48 hours to determine if instances have stopped and capacity is available to complete the task. FAIL_TASK - The capacity task fails."]}
+    let context_ = "StartCapacityTaskInput"
+    let make ?orderId =
+      fun ?assetId ->
+        fun ?instancesToExclude ->
+          fun ?dryRun ->
+            fun ?taskActionOnBlockingInstances ->
+              fun ~outpostIdentifier ->
+                fun ~instancePools ->
+                  fun () ->
+                    {
+                      orderId;
+                      assetId;
+                      instancesToExclude;
+                      dryRun;
+                      taskActionOnBlockingInstances;
+                      outpostIdentifier;
+                      instancePools
+                    }
+    let to_value x =
+      structure_to_value
+        [("OutpostId",
+           (Some (OutpostIdentifier.to_value x.outpostIdentifier)));
+        ("OrderId", (Option.map x.orderId ~f:OrderId.to_value));
+        ("AssetId", (Option.map x.assetId ~f:AssetIdInput.to_value));
+        ("InstancePools",
+          (Some (RequestedInstancePools.to_value x.instancePools)));
+        ("InstancesToExclude",
+          (Option.map x.instancesToExclude ~f:InstancesToExclude.to_value));
+        ("DryRun", (Option.map x.dryRun ~f:DryRun.to_value));
+        ("TaskActionOnBlockingInstances",
+          (Option.map x.taskActionOnBlockingInstances
+             ~f:TaskActionOnBlockingInstances.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskActionOnBlockingInstances =
+        (Option.map ~f:TaskActionOnBlockingInstances.of_xml)
+          (Xml.child xml_arg0 "TaskActionOnBlockingInstances") in
+      let dryRun =
+        (Option.map ~f:DryRun.of_xml) (Xml.child xml_arg0 "DryRun") in
+      let instancesToExclude =
+        (Option.map ~f:InstancesToExclude.of_xml)
+          (Xml.child xml_arg0 "InstancesToExclude") in
+      let instancePools =
+        RequestedInstancePools.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InstancePools") in
+      let assetId =
+        (Option.map ~f:AssetIdInput.of_xml) (Xml.child xml_arg0 "AssetId") in
+      let orderId =
+        (Option.map ~f:OrderId.of_xml) (Xml.child xml_arg0 "OrderId") in
+      let outpostIdentifier =
+        OutpostIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
+      make ?taskActionOnBlockingInstances ?dryRun ?instancesToExclude
+        ~instancePools ?assetId ?orderId ~outpostIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskActionOnBlockingInstances =
+        field_map json__ "TaskActionOnBlockingInstances"
+          TaskActionOnBlockingInstances.of_json in
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
+      let instancesToExclude =
+        field_map json__ "InstancesToExclude" InstancesToExclude.of_json in
+      let instancePools =
+        field_map_exn json__ "InstancePools" RequestedInstancePools.of_json in
+      let assetId = field_map json__ "AssetId" AssetIdInput.of_json in
+      let orderId = field_map json__ "OrderId" OrderId.of_json in
+      let outpostIdentifier =
+        field_map_exn json__ "OutpostIdentifier" OutpostIdentifier.of_json in
+      make ?taskActionOnBlockingInstances ?dryRun ?instancesToExclude
+        ~instancePools ?assetId ?orderId ~outpostIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts the specified capacity task. You can have one active capacity task for each order and each Outpost."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t = {
@@ -3884,8 +7113,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
 module ListTagsForResourceRequest =
@@ -3905,8 +7134,8 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
@@ -3975,13 +7204,13 @@ module ListSitesOutput =
           (Xml.child xml_arg0 "Sites") in
       make ?nextToken ?sites ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let sites = field_map json "Sites" SiteListDefinition.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let sites = field_map json__ "Sites" SiteListDefinition.of_json in
       make ?nextToken ?sites ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a list of the Outpost sites for your Amazon Web Services account. Add operating address filters to your request to return a more specific list of results. Use filters to match site city, country code, or state/region of the operating address. If you specify multiple filters, the filters are joined with an AND, and the request returns only results that match all of the specified filters."]
+       "Lists the Outpost sites for your Amazon Web Services account. Use filters to return specific results. Use filters to return specific results. If you specify multiple filters, the results include only the resources that match all of the specified filters. For a filter where you can specify multiple values, the results include items that match any of the values that you specify for the filter."]
 module ListSitesInput =
   struct
     type nonrec t =
@@ -3989,14 +7218,11 @@ module ListSitesInput =
       nextToken: Token.t option ;
       maxResults: MaxResults1000.t option ;
       operatingAddressCountryCodeFilter: CountryCodeList.t option
-        [@ocaml.doc
-          "A filter for the country code of the Outpost site. Filter values are case sensitive. If you specify multiple values for a filter, the values are joined with an OR, and the request returns all results that match any of the specified values."];
+        [@ocaml.doc "Filters the results by country code."];
       operatingAddressStateOrRegionFilter: StateOrRegionList.t option
-        [@ocaml.doc
-          "A filter for the state/region of the Outpost site. Filter values are case sensitive. If you specify multiple values for a filter, the values are joined with an OR, and the request returns all results that match any of the specified values."];
+        [@ocaml.doc "Filters the results by state or region."];
       operatingAddressCityFilter: CityList.t option
-        [@ocaml.doc
-          "A filter for the city of the Outpost site. Filter values are case sensitive. If you specify multiple values for a filter, the values are joined with an OR, and the request returns all results that match any of the specified values."]}
+        [@ocaml.doc "Filters the results by city."]}
     let make ?nextToken =
       fun ?maxResults ->
         fun ?operatingAddressCountryCodeFilter ->
@@ -4041,22 +7267,22 @@ module ListSitesInput =
       make ?operatingAddressCityFilter ?operatingAddressStateOrRegionFilter
         ?operatingAddressCountryCodeFilter ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let operatingAddressCityFilter =
-        field_map json "OperatingAddressCityFilter" CityList.of_json in
+        field_map json__ "OperatingAddressCityFilter" CityList.of_json in
       let operatingAddressStateOrRegionFilter =
-        field_map json "OperatingAddressStateOrRegionFilter"
+        field_map json__ "OperatingAddressStateOrRegionFilter"
           StateOrRegionList.of_json in
       let operatingAddressCountryCodeFilter =
-        field_map json "OperatingAddressCountryCodeFilter"
+        field_map json__ "OperatingAddressCountryCodeFilter"
           CountryCodeList.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults1000.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults1000.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?operatingAddressCityFilter ?operatingAddressStateOrRegionFilter
         ?operatingAddressCountryCodeFilter ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a list of the Outpost sites for your Amazon Web Services account. Add operating address filters to your request to return a more specific list of results. Use filters to match site city, country code, or state/region of the operating address. If you specify multiple filters, the filters are joined with an AND, and the request returns only results that match all of the specified filters."]
+       "Lists the Outpost sites for your Amazon Web Services account. Use filters to return specific results. Use filters to return specific results. If you specify multiple filters, the results include only the resources that match all of the specified filters. For a filter where you can specify multiple values, the results include items that match any of the values that you specify for the filter."]
 module ListOutpostsOutput =
   struct
     type nonrec t =
@@ -4123,13 +7349,14 @@ module ListOutpostsOutput =
           (Xml.child xml_arg0 "Outposts") in
       make ?nextToken ?outposts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let outposts = field_map json "Outposts" OutpostListDefinition.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let outposts =
+        field_map json__ "Outposts" OutpostListDefinition.of_json in
       make ?nextToken ?outposts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a list of the Outposts for your Amazon Web Services account. Add filters to your request to return a more specific list of results. Use filters to match an Outpost lifecycle status, Availability Zone (us-east-1a), and AZ ID (use1-az1). If you specify multiple filters, the filters are joined with an AND, and the request returns only results that match all of the specified filters."]
+       "Lists the Outposts for your Amazon Web Services account. Use filters to return specific results. If you specify multiple filters, the results include only the resources that match all of the specified filters. For a filter where you can specify multiple values, the results include items that match any of the values that you specify for the filter."]
 module ListOutpostsInput =
   struct
     type nonrec t =
@@ -4137,14 +7364,12 @@ module ListOutpostsInput =
       nextToken: Token.t option ;
       maxResults: MaxResults1000.t option ;
       lifeCycleStatusFilter: LifeCycleStatusList.t option
-        [@ocaml.doc
-          "A filter for the lifecycle status of the Outpost. Filter values are case sensitive. If you specify multiple values for a filter, the values are joined with an OR, and the request returns all results that match any of the specified values."];
+        [@ocaml.doc "Filters the results by the lifecycle status."];
       availabilityZoneFilter: AvailabilityZoneList.t option
         [@ocaml.doc
-          "A filter for the Availability Zone (us-east-1a) of the Outpost. Filter values are case sensitive. If you specify multiple values for a filter, the values are joined with an OR, and the request returns all results that match any of the specified values."];
+          "Filters the results by Availability Zone (for example, us-east-1a)."];
       availabilityZoneIdFilter: AvailabilityZoneIdList.t option
-        [@ocaml.doc
-          "A filter for the AZ IDs (use1-az1) of the Outpost. Filter values are case sensitive. If you specify multiple values for a filter, the values are joined with an OR, and the request returns all results that match any of the specified values."]}
+        [@ocaml.doc "Filters the results by AZ ID (for example, use1-az1)."]}
     let make ?nextToken =
       fun ?maxResults ->
         fun ?lifeCycleStatusFilter ->
@@ -4189,21 +7414,22 @@ module ListOutpostsInput =
       make ?availabilityZoneIdFilter ?availabilityZoneFilter
         ?lifeCycleStatusFilter ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availabilityZoneIdFilter =
-        field_map json "AvailabilityZoneIdFilter"
+        field_map json__ "AvailabilityZoneIdFilter"
           AvailabilityZoneIdList.of_json in
       let availabilityZoneFilter =
-        field_map json "AvailabilityZoneFilter" AvailabilityZoneList.of_json in
+        field_map json__ "AvailabilityZoneFilter"
+          AvailabilityZoneList.of_json in
       let lifeCycleStatusFilter =
-        field_map json "LifeCycleStatusFilter" LifeCycleStatusList.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults1000.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+        field_map json__ "LifeCycleStatusFilter" LifeCycleStatusList.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults1000.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?availabilityZoneIdFilter ?availabilityZoneFilter
         ?lifeCycleStatusFilter ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a list of the Outposts for your Amazon Web Services account. Add filters to your request to return a more specific list of results. Use filters to match an Outpost lifecycle status, Availability Zone (us-east-1a), and AZ ID (use1-az1). If you specify multiple filters, the filters are joined with an AND, and the request returns only results that match all of the specified filters."]
+       "Lists the Outposts for your Amazon Web Services account. Use filters to return specific results. If you specify multiple filters, the results include only the resources that match all of the specified filters. For a filter where you can specify multiple values, the results include items that match any of the values that you specify for the filter."]
 module ListOrdersOutput =
   struct
     type nonrec t =
@@ -4280,13 +7506,14 @@ module ListOrdersOutput =
           (Xml.child xml_arg0 "Orders") in
       make ?nextToken ?orders ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let orders = field_map json "Orders" OrderSummaryListDefinition.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let orders =
+        field_map json__ "Orders" OrderSummaryListDefinition.of_json in
       make ?nextToken ?orders ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a list of the Outpost orders for your Amazon Web Services account. You can filter your request by Outpost to return a more specific list of results."]
+       "Lists the Outpost orders for your Amazon Web Services account."]
 module ListOrdersInput =
   struct
     type nonrec t =
@@ -4319,15 +7546,15 @@ module ListOrdersInput =
           (Xml.child xml_arg0 "OutpostIdentifierFilter") in
       make ?maxResults ?nextToken ?outpostIdentifierFilter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults1000.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults1000.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let outpostIdentifierFilter =
-        field_map json "OutpostIdentifierFilter" OutpostIdentifier.of_json in
+        field_map json__ "OutpostIdentifierFilter" OutpostIdentifier.of_json in
       make ?maxResults ?nextToken ?outpostIdentifierFilter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a list of the Outpost orders for your Amazon Web Services account. You can filter your request by Outpost to return a more specific list of results."]
+       "Lists the Outpost orders for your Amazon Web Services account."]
 module ListCatalogItemsOutput =
   struct
     type nonrec t =
@@ -4336,7 +7563,8 @@ module ListCatalogItemsOutput =
         [@ocaml.doc "Information about the catalog items."];
       nextToken: Token.t option }
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `NotFoundException of NotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -4344,6 +7572,8 @@ module ListCatalogItemsOutput =
       fun ?nextToken -> fun () -> { catalogItems; nextToken }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "NotFoundException" ->
@@ -4355,6 +7585,8 @@ module ListCatalogItemsOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "NotFoundException" ->
@@ -4365,6 +7597,10 @@ module ListCatalogItemsOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -4396,14 +7632,14 @@ module ListCatalogItemsOutput =
           (Xml.child xml_arg0 "CatalogItems") in
       make ?nextToken ?catalogItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let catalogItems =
-        field_map json "CatalogItems" CatalogItemListDefinition.of_json in
+        field_map json__ "CatalogItems" CatalogItemListDefinition.of_json in
       make ?nextToken ?catalogItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Use to create a list of every item in the catalog. Add filters to your request to return a more specific list of results. Use filters to match an item class, storage option, or EC2 family. If you specify multiple filters, the filters are joined with an AND, and the request returns only results that match all of the specified filters."]
+       "Lists the items in the catalog. Use filters to return specific results. If you specify multiple filters, the results include only the resources that match all of the specified filters. For a filter where you can specify multiple values, the results include items that match any of the values that you specify for the filter."]
 module ListCatalogItemsInput =
   struct
     type nonrec t =
@@ -4411,14 +7647,11 @@ module ListCatalogItemsInput =
       nextToken: Token.t option ;
       maxResults: MaxResults1000.t option ;
       itemClassFilter: CatalogItemClassList.t option
-        [@ocaml.doc
-          "A filter for the class of items in the catalog. Filter values are case sensitive. If you specify multiple values for a filter, the values are joined with an OR, and the request returns all results that match any of the specified values."];
+        [@ocaml.doc "Filters the results by item class."];
       supportedStorageFilter: SupportedStorageList.t option
-        [@ocaml.doc
-          "A filter for the storage options of items in the catalog. Filter values are case sensitive. If you specify multiple values for a filter, the values are joined with an OR, and the request returns all results that match any of the specified values."];
+        [@ocaml.doc "Filters the results by storage option."];
       eC2FamilyFilter: EC2FamilyList.t option
-        [@ocaml.doc
-          "A filter for EC2 family options for items in the catalog. Filter values are case sensitive. If you specify multiple values for a filter, the values are joined with an OR, and the request returns all results that match any of the specified values."]}
+        [@ocaml.doc "Filters the results by EC2 family (for example, M5)."]}
     let make ?nextToken =
       fun ?maxResults ->
         fun ?itemClassFilter ->
@@ -4462,20 +7695,642 @@ module ListCatalogItemsInput =
       make ?eC2FamilyFilter ?supportedStorageFilter ?itemClassFilter
         ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eC2FamilyFilter =
-        field_map json "EC2FamilyFilter" EC2FamilyList.of_json in
+        field_map json__ "EC2FamilyFilter" EC2FamilyList.of_json in
       let supportedStorageFilter =
-        field_map json "SupportedStorageFilter" SupportedStorageList.of_json in
+        field_map json__ "SupportedStorageFilter"
+          SupportedStorageList.of_json in
       let itemClassFilter =
-        field_map json "ItemClassFilter" CatalogItemClassList.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults1000.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+        field_map json__ "ItemClassFilter" CatalogItemClassList.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults1000.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?eC2FamilyFilter ?supportedStorageFilter ?itemClassFilter
         ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Use to create a list of every item in the catalog. Add filters to your request to return a more specific list of results. Use filters to match an item class, storage option, or EC2 family. If you specify multiple filters, the filters are joined with an AND, and the request returns only results that match all of the specified filters."]
+       "Lists the items in the catalog. Use filters to return specific results. If you specify multiple filters, the results include only the resources that match all of the specified filters. For a filter where you can specify multiple values, the results include items that match any of the values that you specify for the filter."]
+module ListCapacityTasksOutput =
+  struct
+    type nonrec t =
+      {
+      capacityTasks: CapacityTaskList.t option
+        [@ocaml.doc "Lists all the capacity tasks."];
+      nextToken: Token.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?capacityTasks =
+      fun ?nextToken -> fun () -> { capacityTasks; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CapacityTasks",
+           (Option.map x.capacityTasks ~f:CapacityTaskList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let capacityTasks =
+        (Option.map ~f:CapacityTaskList.of_xml)
+          (Xml.child xml_arg0 "CapacityTasks") in
+      make ?nextToken ?capacityTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let capacityTasks =
+        field_map json__ "CapacityTasks" CapacityTaskList.of_json in
+      make ?nextToken ?capacityTasks ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the capacity tasks for your Amazon Web Services account. Use filters to return specific results. If you specify multiple filters, the results include only the resources that match all of the specified filters. For a filter where you can specify multiple values, the results include items that match any of the values that you specify for the filter."]
+module ListCapacityTasksInput =
+  struct
+    type nonrec t =
+      {
+      outpostIdentifierFilter: OutpostIdentifier.t option
+        [@ocaml.doc
+          "Filters the results by an Outpost ID or an Outpost ARN."];
+      maxResults: MaxResults1000.t option ;
+      nextToken: Token.t option ;
+      capacityTaskStatusFilter: CapacityTaskStatusList.t option
+        [@ocaml.doc
+          "A list of statuses. For example, REQUESTED or WAITING_FOR_EVACUATION."]}
+    let make ?outpostIdentifierFilter =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?capacityTaskStatusFilter ->
+            fun () ->
+              {
+                outpostIdentifierFilter;
+                maxResults;
+                nextToken;
+                capacityTaskStatusFilter
+              }
+    let to_value x =
+      structure_to_value
+        [("OutpostIdentifierFilter",
+           (Option.map x.outpostIdentifierFilter
+              ~f:OutpostIdentifier.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults1000.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("CapacityTaskStatusFilter",
+          (Option.map x.capacityTaskStatusFilter
+             ~f:CapacityTaskStatusList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityTaskStatusFilter =
+        (Option.map ~f:CapacityTaskStatusList.of_xml)
+          (Xml.child xml_arg0 "CapacityTaskStatusFilter") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults1000.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let outpostIdentifierFilter =
+        (Option.map ~f:OutpostIdentifier.of_xml)
+          (Xml.child xml_arg0 "OutpostIdentifierFilter") in
+      make ?capacityTaskStatusFilter ?nextToken ?maxResults
+        ?outpostIdentifierFilter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityTaskStatusFilter =
+        field_map json__ "CapacityTaskStatusFilter"
+          CapacityTaskStatusList.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults1000.of_json in
+      let outpostIdentifierFilter =
+        field_map json__ "OutpostIdentifierFilter" OutpostIdentifier.of_json in
+      make ?capacityTaskStatusFilter ?nextToken ?maxResults
+        ?outpostIdentifierFilter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the capacity tasks for your Amazon Web Services account. Use filters to return specific results. If you specify multiple filters, the results include only the resources that match all of the specified filters. For a filter where you can specify multiple values, the results include items that match any of the values that you specify for the filter."]
+module ListBlockingInstancesForCapacityTaskOutput =
+  struct
+    type nonrec t =
+      {
+      blockingInstances: BlockingInstancesList.t option
+        [@ocaml.doc
+          "A list of all running Amazon EC2 instances on the Outpost. Stopping one or more of these instances can free up the capacity needed to run the capacity task."];
+      nextToken: Token.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?blockingInstances =
+      fun ?nextToken -> fun () -> { blockingInstances; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("BlockingInstances",
+           (Option.map x.blockingInstances ~f:BlockingInstancesList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let blockingInstances =
+        (Option.map ~f:BlockingInstancesList.of_xml)
+          (Xml.child xml_arg0 "BlockingInstances") in
+      make ?nextToken ?blockingInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let blockingInstances =
+        field_map json__ "BlockingInstances" BlockingInstancesList.of_json in
+      make ?nextToken ?blockingInstances ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list of Amazon EC2 instances running on the Outpost and belonging to the account that initiated the capacity task. Use this list to specify the instances you cannot stop to free up capacity to run the capacity task."]
+module ListBlockingInstancesForCapacityTaskInput =
+  struct
+    type nonrec t =
+      {
+      outpostIdentifier: OutpostIdentifier.t
+        [@ocaml.doc
+          "The ID or ARN of the Outpost associated with the specified capacity task."];
+      capacityTaskId: CapacityTaskId.t
+        [@ocaml.doc "The ID of the capacity task."];
+      maxResults: MaxResults1000.t option ;
+      nextToken: Token.t option }
+    let context_ = "ListBlockingInstancesForCapacityTaskInput"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~outpostIdentifier ->
+          fun ~capacityTaskId ->
+            fun () ->
+              { maxResults; nextToken; outpostIdentifier; capacityTaskId }
+    let to_value x =
+      structure_to_value
+        [("OutpostId",
+           (Some (OutpostIdentifier.to_value x.outpostIdentifier)));
+        ("CapacityTaskId", (Some (CapacityTaskId.to_value x.capacityTaskId)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults1000.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults1000.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let capacityTaskId =
+        CapacityTaskId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CapacityTaskId") in
+      let outpostIdentifier =
+        OutpostIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
+      make ?nextToken ?maxResults ~capacityTaskId ~outpostIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults1000.of_json in
+      let capacityTaskId =
+        field_map_exn json__ "CapacityTaskId" CapacityTaskId.of_json in
+      let outpostIdentifier =
+        field_map_exn json__ "OutpostIdentifier" OutpostIdentifier.of_json in
+      make ?nextToken ?maxResults ~capacityTaskId ~outpostIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list of Amazon EC2 instances running on the Outpost and belonging to the account that initiated the capacity task. Use this list to specify the instances you cannot stop to free up capacity to run the capacity task."]
+module ListAssetsOutput =
+  struct
+    type nonrec t =
+      {
+      assets: AssetListDefinition.t option
+        [@ocaml.doc "Information about the hardware assets."];
+      nextToken: Token.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?assets = fun ?nextToken -> fun () -> { assets; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Assets", (Option.map x.assets ~f:AssetListDefinition.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let assets =
+        (Option.map ~f:AssetListDefinition.of_xml)
+          (Xml.child xml_arg0 "Assets") in
+      make ?nextToken ?assets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let assets = field_map json__ "Assets" AssetListDefinition.of_json in
+      make ?nextToken ?assets ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the hardware assets for the specified Outpost. Use filters to return specific results. If you specify multiple filters, the results include only the resources that match all of the specified filters. For a filter where you can specify multiple values, the results include items that match any of the values that you specify for the filter."]
+module ListAssetsInput =
+  struct
+    type nonrec t =
+      {
+      outpostIdentifier: OutpostIdentifier.t
+        [@ocaml.doc
+          "The ID or the Amazon Resource Name (ARN) of the Outpost."];
+      hostIdFilter: HostIdList.t option
+        [@ocaml.doc
+          "Filters the results by the host ID of a Dedicated Host."];
+      maxResults: MaxResults1000.t option ;
+      nextToken: Token.t option ;
+      statusFilter: StatusList.t option
+        [@ocaml.doc "Filters the results by state."];
+      assetTypeFilter: AssetTypeList.t option
+        [@ocaml.doc
+          "Filters the results by asset type. COMPUTE - Server asset used for customer compute STORAGE - Server asset used by storage services POWERSHELF - Powershelf assets SWITCH - Switch assets NETWORKING - Asset managed by Amazon Web Services for networking purposes"]}
+    let context_ = "ListAssetsInput"
+    let make ?hostIdFilter =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?statusFilter ->
+            fun ?assetTypeFilter ->
+              fun ~outpostIdentifier ->
+                fun () ->
+                  {
+                    hostIdFilter;
+                    maxResults;
+                    nextToken;
+                    statusFilter;
+                    assetTypeFilter;
+                    outpostIdentifier
+                  }
+    let to_value x =
+      structure_to_value
+        [("OutpostId",
+           (Some (OutpostIdentifier.to_value x.outpostIdentifier)));
+        ("HostIdFilter", (Option.map x.hostIdFilter ~f:HostIdList.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults1000.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("StatusFilter", (Option.map x.statusFilter ~f:StatusList.to_value));
+        ("AssetTypeFilter",
+          (Option.map x.assetTypeFilter ~f:AssetTypeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let assetTypeFilter =
+        (Option.map ~f:AssetTypeList.of_xml)
+          (Xml.child xml_arg0 "AssetTypeFilter") in
+      let statusFilter =
+        (Option.map ~f:StatusList.of_xml) (Xml.child xml_arg0 "StatusFilter") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults1000.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let hostIdFilter =
+        (Option.map ~f:HostIdList.of_xml) (Xml.child xml_arg0 "HostIdFilter") in
+      let outpostIdentifier =
+        OutpostIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
+      make ?assetTypeFilter ?statusFilter ?nextToken ?maxResults
+        ?hostIdFilter ~outpostIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let assetTypeFilter =
+        field_map json__ "AssetTypeFilter" AssetTypeList.of_json in
+      let statusFilter = field_map json__ "StatusFilter" StatusList.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults1000.of_json in
+      let hostIdFilter = field_map json__ "HostIdFilter" HostIdList.of_json in
+      let outpostIdentifier =
+        field_map_exn json__ "OutpostIdentifier" OutpostIdentifier.of_json in
+      make ?assetTypeFilter ?statusFilter ?nextToken ?maxResults
+        ?hostIdFilter ~outpostIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the hardware assets for the specified Outpost. Use filters to return specific results. If you specify multiple filters, the results include only the resources that match all of the specified filters. For a filter where you can specify multiple values, the results include items that match any of the values that you specify for the filter."]
+module ListAssetInstancesOutput =
+  struct
+    type nonrec t =
+      {
+      assetInstances: AssetInstanceList.t option
+        [@ocaml.doc
+          "List of instances owned by all accounts on the Outpost. Does not include Amazon EBS or Amazon S3 instances."];
+      nextToken: Token.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?assetInstances =
+      fun ?nextToken -> fun () -> { assetInstances; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AssetInstances",
+           (Option.map x.assetInstances ~f:AssetInstanceList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let assetInstances =
+        (Option.map ~f:AssetInstanceList.of_xml)
+          (Xml.child xml_arg0 "AssetInstances") in
+      make ?nextToken ?assetInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let assetInstances =
+        field_map json__ "AssetInstances" AssetInstanceList.of_json in
+      make ?nextToken ?assetInstances ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list of Amazon EC2 instances, belonging to all accounts, running on the specified Outpost. Does not include Amazon EBS or Amazon S3 instances."]
+module ListAssetInstancesInput =
+  struct
+    type nonrec t =
+      {
+      outpostIdentifier: OutpostIdentifier.t
+        [@ocaml.doc "The ID of the Outpost."];
+      assetIdFilter: AssetIdList.t option
+        [@ocaml.doc "Filters the results by asset ID."];
+      instanceTypeFilter: OutpostInstanceTypeList.t option
+        [@ocaml.doc "Filters the results by instance ID."];
+      accountIdFilter: AccountIdList.t option
+        [@ocaml.doc "Filters the results by account ID."];
+      awsServiceFilter: AWSServiceNameList.t option
+        [@ocaml.doc "Filters the results by Amazon Web Services service."];
+      maxResults: MaxResults1000.t option ;
+      nextToken: Token.t option }
+    let context_ = "ListAssetInstancesInput"
+    let make ?assetIdFilter =
+      fun ?instanceTypeFilter ->
+        fun ?accountIdFilter ->
+          fun ?awsServiceFilter ->
+            fun ?maxResults ->
+              fun ?nextToken ->
+                fun ~outpostIdentifier ->
+                  fun () ->
+                    {
+                      assetIdFilter;
+                      instanceTypeFilter;
+                      accountIdFilter;
+                      awsServiceFilter;
+                      maxResults;
+                      nextToken;
+                      outpostIdentifier
+                    }
+    let to_value x =
+      structure_to_value
+        [("OutpostId",
+           (Some (OutpostIdentifier.to_value x.outpostIdentifier)));
+        ("AssetIdFilter",
+          (Option.map x.assetIdFilter ~f:AssetIdList.to_value));
+        ("InstanceTypeFilter",
+          (Option.map x.instanceTypeFilter
+             ~f:OutpostInstanceTypeList.to_value));
+        ("AccountIdFilter",
+          (Option.map x.accountIdFilter ~f:AccountIdList.to_value));
+        ("AwsServiceFilter",
+          (Option.map x.awsServiceFilter ~f:AWSServiceNameList.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults1000.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults1000.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let awsServiceFilter =
+        (Option.map ~f:AWSServiceNameList.of_xml)
+          (Xml.child xml_arg0 "AwsServiceFilter") in
+      let accountIdFilter =
+        (Option.map ~f:AccountIdList.of_xml)
+          (Xml.child xml_arg0 "AccountIdFilter") in
+      let instanceTypeFilter =
+        (Option.map ~f:OutpostInstanceTypeList.of_xml)
+          (Xml.child xml_arg0 "InstanceTypeFilter") in
+      let assetIdFilter =
+        (Option.map ~f:AssetIdList.of_xml)
+          (Xml.child xml_arg0 "AssetIdFilter") in
+      let outpostIdentifier =
+        OutpostIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
+      make ?nextToken ?maxResults ?awsServiceFilter ?accountIdFilter
+        ?instanceTypeFilter ?assetIdFilter ~outpostIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults1000.of_json in
+      let awsServiceFilter =
+        field_map json__ "AwsServiceFilter" AWSServiceNameList.of_json in
+      let accountIdFilter =
+        field_map json__ "AccountIdFilter" AccountIdList.of_json in
+      let instanceTypeFilter =
+        field_map json__ "InstanceTypeFilter" OutpostInstanceTypeList.of_json in
+      let assetIdFilter =
+        field_map json__ "AssetIdFilter" AssetIdList.of_json in
+      let outpostIdentifier =
+        field_map_exn json__ "OutpostIdentifier" OutpostIdentifier.of_json in
+      make ?nextToken ?maxResults ?awsServiceFilter ?accountIdFilter
+        ?instanceTypeFilter ?assetIdFilter ~outpostIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list of Amazon EC2 instances, belonging to all accounts, running on the specified Outpost. Does not include Amazon EBS or Amazon S3 instances."]
 module GetSiteOutput =
   struct
     type nonrec t = {
@@ -4542,8 +8397,8 @@ module GetSiteOutput =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let site = field_map json "Site" Site.of_json in make ?site ()
+    let of_json json__ =
+      let site = field_map json__ "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified Outpost site."]
 module GetSiteInput =
@@ -4562,8 +8417,8 @@ module GetSiteInput =
         SiteId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SiteId") in
       make ~siteId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let siteId = field_map_exn json "SiteId" SiteId.of_json in
+    let of_json json__ =
+      let siteId = field_map_exn json__ "SiteId" SiteId.of_json in
       make ~siteId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified Outpost site."]
@@ -4647,13 +8502,13 @@ module GetSiteAddressOutput =
         (Option.map ~f:SiteId.of_xml) (Xml.child xml_arg0 "SiteId") in
       make ?address ?addressType ?siteId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let address = field_map json "Address" Address.of_json in
-      let addressType = field_map json "AddressType" AddressType.of_json in
-      let siteId = field_map json "SiteId" SiteId.of_json in
+    let of_json json__ =
+      let address = field_map json__ "Address" Address.of_json in
+      let addressType = field_map json__ "AddressType" AddressType.of_json in
+      let siteId = field_map json__ "SiteId" SiteId.of_json in
       make ?address ?addressType ?siteId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets the site address."]
+  end[@@ocaml.doc "Gets the site address of the specified site."]
 module GetSiteAddressInput =
   struct
     type nonrec t =
@@ -4677,12 +8532,269 @@ module GetSiteAddressInput =
         SiteId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SiteId") in
       make ~addressType ~siteId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let addressType = field_map_exn json "AddressType" AddressType.of_json in
-      let siteId = field_map_exn json "SiteId" SiteId.of_json in
+    let of_json json__ =
+      let addressType =
+        field_map_exn json__ "AddressType" AddressType.of_json in
+      let siteId = field_map_exn json__ "SiteId" SiteId.of_json in
       make ~addressType ~siteId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets the site address."]
+  end[@@ocaml.doc "Gets the site address of the specified site."]
+module GetRenewalPricingOutput =
+  struct
+    type nonrec t =
+      {
+      pricingResult: PricingResult.t option
+        [@ocaml.doc "The result of the pricing request."];
+      pricingOptions: PricingOptionList.t option
+        [@ocaml.doc "The pricing options for the specified Outpost."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?pricingResult =
+      fun ?pricingOptions -> fun () -> { pricingResult; pricingOptions }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PricingResult",
+           (Option.map x.pricingResult ~f:PricingResult.to_value));
+        ("PricingOptions",
+          (Option.map x.pricingOptions ~f:PricingOptionList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pricingOptions =
+        (Option.map ~f:PricingOptionList.of_xml)
+          (Xml.child xml_arg0 "PricingOptions") in
+      let pricingResult =
+        (Option.map ~f:PricingResult.of_xml)
+          (Xml.child xml_arg0 "PricingResult") in
+      make ?pricingOptions ?pricingResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pricingOptions =
+        field_map json__ "PricingOptions" PricingOptionList.of_json in
+      let pricingResult =
+        field_map json__ "PricingResult" PricingResult.of_json in
+      make ?pricingOptions ?pricingResult ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets all available renewal pricing options for the specified Outpost."]
+module GetRenewalPricingInput =
+  struct
+    type nonrec t =
+      {
+      outpostIdentifier: OutpostIdentifier.t
+        [@ocaml.doc "The ID or ARN of the Outpost."]}
+    let context_ = "GetRenewalPricingInput"
+    let make ~outpostIdentifier = fun () -> { outpostIdentifier }
+    let to_value x =
+      structure_to_value
+        [("OutpostIdentifier",
+           (Some (OutpostIdentifier.to_value x.outpostIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outpostIdentifier =
+        OutpostIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutpostIdentifier") in
+      make ~outpostIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outpostIdentifier =
+        field_map_exn json__ "OutpostIdentifier" OutpostIdentifier.of_json in
+      make ~outpostIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets all available renewal pricing options for the specified Outpost."]
+module GetOutpostSupportedInstanceTypesOutput =
+  struct
+    type nonrec t =
+      {
+      instanceTypes: InstanceTypeListDefinition.t option ;
+      nextToken: Token.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?instanceTypes =
+      fun ?nextToken -> fun () -> { instanceTypes; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("InstanceTypes",
+           (Option.map x.instanceTypes ~f:InstanceTypeListDefinition.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let instanceTypes =
+        (Option.map ~f:InstanceTypeListDefinition.of_xml)
+          (Xml.child xml_arg0 "InstanceTypes") in
+      make ?nextToken ?instanceTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let instanceTypes =
+        field_map json__ "InstanceTypes" InstanceTypeListDefinition.of_json in
+      make ?nextToken ?instanceTypes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the instance types that an Outpost can support in InstanceTypeCapacity. This will generally include instance types that are not currently configured and therefore cannot be launched with the current Outpost capacity configuration."]
+module GetOutpostSupportedInstanceTypesInput =
+  struct
+    type nonrec t =
+      {
+      outpostIdentifier: OutpostIdentifier.t
+        [@ocaml.doc "The ID or ARN of the Outpost."];
+      orderId: OrderId.t option
+        [@ocaml.doc "The ID for the Amazon Web Services Outposts order."];
+      assetId: AssetIdInput.t option
+        [@ocaml.doc
+          "The ID of the Outpost asset. An Outpost asset can be a single server within an Outposts rack or an Outposts server configuration."];
+      maxResults: MaxResults1000.t option ;
+      nextToken: Token.t option }
+    let context_ = "GetOutpostSupportedInstanceTypesInput"
+    let make ?orderId =
+      fun ?assetId ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun ~outpostIdentifier ->
+              fun () ->
+                { orderId; assetId; maxResults; nextToken; outpostIdentifier
+                }
+    let to_value x =
+      structure_to_value
+        [("OutpostId",
+           (Some (OutpostIdentifier.to_value x.outpostIdentifier)));
+        ("OrderId", (Option.map x.orderId ~f:OrderId.to_value));
+        ("AssetId", (Option.map x.assetId ~f:AssetIdInput.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults1000.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults1000.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let assetId =
+        (Option.map ~f:AssetIdInput.of_xml) (Xml.child xml_arg0 "AssetId") in
+      let orderId =
+        (Option.map ~f:OrderId.of_xml) (Xml.child xml_arg0 "OrderId") in
+      let outpostIdentifier =
+        OutpostIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
+      make ?nextToken ?maxResults ?assetId ?orderId ~outpostIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults1000.of_json in
+      let assetId = field_map json__ "AssetId" AssetIdInput.of_json in
+      let orderId = field_map json__ "OrderId" OrderId.of_json in
+      let outpostIdentifier =
+        field_map_exn json__ "OutpostIdentifier" OutpostIdentifier.of_json in
+      make ?nextToken ?maxResults ?assetId ?orderId ~outpostIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the instance types that an Outpost can support in InstanceTypeCapacity. This will generally include instance types that are not currently configured and therefore cannot be launched with the current Outpost capacity configuration."]
 module GetOutpostOutput =
   struct
     type nonrec t = {
@@ -4751,8 +8863,8 @@ module GetOutpostOutput =
         (Option.map ~f:Outpost.of_xml) (Xml.child xml_arg0 "Outpost") in
       make ?outpost ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outpost = field_map json "Outpost" Outpost.of_json in
+    let of_json json__ =
+      let outpost = field_map json__ "Outpost" Outpost.of_json in
       make ?outpost ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified Outpost."]
@@ -4843,22 +8955,20 @@ module GetOutpostInstanceTypesOutput =
           (Xml.child xml_arg0 "InstanceTypes") in
       make ?outpostArn ?outpostId ?nextToken ?instanceTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outpostArn = field_map json "OutpostArn" OutpostArn.of_json in
-      let outpostId = field_map json "OutpostId" OutpostId.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let outpostArn = field_map json__ "OutpostArn" OutpostArn.of_json in
+      let outpostId = field_map json__ "OutpostId" OutpostId.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let instanceTypes =
-        field_map json "InstanceTypes" InstanceTypeListDefinition.of_json in
+        field_map json__ "InstanceTypes" InstanceTypeListDefinition.of_json in
       make ?outpostArn ?outpostId ?nextToken ?instanceTypes ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the instance types for the specified Outpost."]
+  end[@@ocaml.doc "Gets the instance types for the specified Outpost."]
 module GetOutpostInstanceTypesInput =
   struct
     type nonrec t =
       {
-      outpostId: OutpostId.t
-        [@ocaml.doc
-          "The ID or the Amazon Resource Name (ARN) of the Outpost."];
+      outpostId: OutpostId.t [@ocaml.doc "The ID or ARN of the Outpost."];
       nextToken: Token.t option ;
       maxResults: MaxResults1000.t option }
     let context_ = "GetOutpostInstanceTypesInput"
@@ -4882,20 +8992,18 @@ module GetOutpostInstanceTypesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
       make ?maxResults ?nextToken ~outpostId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults1000.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let outpostId = field_map_exn json "OutpostId" OutpostId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults1000.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let outpostId = field_map_exn json__ "OutpostId" OutpostId.of_json in
       make ?maxResults ?nextToken ~outpostId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the instance types for the specified Outpost."]
+  end[@@ocaml.doc "Gets the instance types for the specified Outpost."]
 module GetOutpostInput =
   struct
     type nonrec t =
       {
-      outpostId: OutpostId.t
-        [@ocaml.doc
-          "The ID or the Amazon Resource Name (ARN) of the Outpost."]}
+      outpostId: OutpostId.t [@ocaml.doc "The ID or ARN of the Outpost."]}
     let context_ = "GetOutpostInput"
     let make ~outpostId = fun () -> { outpostId }
     let to_value x =
@@ -4908,11 +9016,163 @@ module GetOutpostInput =
           (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
       make ~outpostId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outpostId = field_map_exn json "OutpostId" OutpostId.of_json in
+    let of_json json__ =
+      let outpostId = field_map_exn json__ "OutpostId" OutpostId.of_json in
       make ~outpostId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified Outpost."]
+module GetOutpostBillingInformationOutput =
+  struct
+    type nonrec t =
+      {
+      nextToken: Token.t option ;
+      subscriptions: SubscriptionList.t option
+        [@ocaml.doc "The subscription details for the specified Outpost."];
+      contractEndDate: String_.t option
+        [@ocaml.doc
+          "The date the current contract term ends for the specified Outpost. You must start the renewal or decommission process at least 5 business days before the current term for your Amazon Web Services Outposts ends. Failing to complete these steps at least 5 business days before the current term ends might result in unanticipated charges."];
+      paymentTerm: PaymentTerm.t option [@ocaml.doc "The payment term."];
+      paymentOption: PaymentOption.t option
+        [@ocaml.doc "The payment option."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?subscriptions ->
+        fun ?contractEndDate ->
+          fun ?paymentTerm ->
+            fun ?paymentOption ->
+              fun () ->
+                {
+                  nextToken;
+                  subscriptions;
+                  contractEndDate;
+                  paymentTerm;
+                  paymentOption
+                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("Subscriptions",
+          (Option.map x.subscriptions ~f:SubscriptionList.to_value));
+        ("ContractEndDate",
+          (Option.map x.contractEndDate ~f:String_.to_value));
+        ("PaymentTerm", (Option.map x.paymentTerm ~f:PaymentTerm.to_value));
+        ("PaymentOption",
+          (Option.map x.paymentOption ~f:PaymentOption.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let paymentOption =
+        (Option.map ~f:PaymentOption.of_xml)
+          (Xml.child xml_arg0 "PaymentOption") in
+      let paymentTerm =
+        (Option.map ~f:PaymentTerm.of_xml) (Xml.child xml_arg0 "PaymentTerm") in
+      let contractEndDate =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ContractEndDate") in
+      let subscriptions =
+        (Option.map ~f:SubscriptionList.of_xml)
+          (Xml.child xml_arg0 "Subscriptions") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?paymentOption ?paymentTerm ?contractEndDate ?subscriptions
+        ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let paymentOption =
+        field_map json__ "PaymentOption" PaymentOption.of_json in
+      let paymentTerm = field_map json__ "PaymentTerm" PaymentTerm.of_json in
+      let contractEndDate =
+        field_map json__ "ContractEndDate" String_.of_json in
+      let subscriptions =
+        field_map json__ "Subscriptions" SubscriptionList.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?paymentOption ?paymentTerm ?contractEndDate ?subscriptions
+        ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets current and historical billing information about the specified Outpost."]
+module GetOutpostBillingInformationInput =
+  struct
+    type nonrec t =
+      {
+      nextToken: Token.t option ;
+      maxResults: MaxResults1000.t option ;
+      outpostIdentifier: OutpostIdentifier.t
+        [@ocaml.doc "The ID or ARN of the Outpost."]}
+    let context_ = "GetOutpostBillingInformationInput"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~outpostIdentifier ->
+          fun () -> { nextToken; maxResults; outpostIdentifier }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults1000.to_value));
+        ("OutpostIdentifier",
+          (Some (OutpostIdentifier.to_value x.outpostIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outpostIdentifier =
+        OutpostIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutpostIdentifier") in
+      let maxResults =
+        (Option.map ~f:MaxResults1000.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ~outpostIdentifier ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outpostIdentifier =
+        field_map_exn json__ "OutpostIdentifier" OutpostIdentifier.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults1000.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ~outpostIdentifier ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets current and historical billing information about the specified Outpost."]
 module GetOrderOutput =
   struct
     type nonrec t = {
@@ -4970,10 +9230,10 @@ module GetOrderOutput =
       let order = (Option.map ~f:Order.of_xml) (Xml.child xml_arg0 "Order") in
       make ?order ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let order = field_map json "Order" Order.of_json in make ?order ()
+    let of_json json__ =
+      let order = field_map json__ "Order" Order.of_json in make ?order ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets an order."]
+  end[@@ocaml.doc "Gets information about the specified order."]
 module GetOrderInput =
   struct
     type nonrec t = {
@@ -4988,25 +9248,31 @@ module GetOrderInput =
         OrderId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OrderId") in
       make ~orderId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orderId = field_map_exn json "OrderId" OrderId.of_json in
+    let of_json json__ =
+      let orderId = field_map_exn json__ "OrderId" OrderId.of_json in
       make ~orderId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets an order."]
-module GetCatalogItemOutput =
+  end[@@ocaml.doc "Gets information about the specified order."]
+module GetConnectionResponse =
   struct
     type nonrec t =
       {
-      catalogItem: CatalogItem.t option
-        [@ocaml.doc "Information about this catalog item."]}
+      connectionId: ConnectionId.t option
+        [@ocaml.doc "The ID of the connection."];
+      connectionDetails: ConnectionDetails.t option
+        [@ocaml.doc "Information about the connection."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `NotFoundException of NotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?catalogItem = fun () -> { catalogItem }
+    let make ?connectionId =
+      fun ?connectionDetails -> fun () -> { connectionId; connectionDetails }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "NotFoundException" ->
@@ -5018,6 +9284,8 @@ module GetCatalogItemOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "NotFoundException" ->
@@ -5028,6 +9296,119 @@ module GetCatalogItemOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ConnectionId",
+           (Option.map x.connectionId ~f:ConnectionId.to_value));
+        ("ConnectionDetails",
+          (Option.map x.connectionDetails ~f:ConnectionDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectionDetails =
+        (Option.map ~f:ConnectionDetails.of_xml)
+          (Xml.child xml_arg0 "ConnectionDetails") in
+      let connectionId =
+        (Option.map ~f:ConnectionId.of_xml)
+          (Xml.child xml_arg0 "ConnectionId") in
+      make ?connectionDetails ?connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectionDetails =
+        field_map json__ "ConnectionDetails" ConnectionDetails.of_json in
+      let connectionId = field_map json__ "ConnectionId" ConnectionId.of_json in
+      make ?connectionDetails ?connectionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Amazon Web Services uses this action to install Outpost servers. Gets information about the specified connection. Use CloudTrail to monitor this action or Amazon Web Services managed policy for Amazon Web Services Outposts to secure it. For more information, see Amazon Web Services managed policies for Amazon Web Services Outposts and Logging Amazon Web Services Outposts API calls with Amazon Web Services CloudTrail in the Amazon Web Services Outposts User Guide."]
+module GetConnectionRequest =
+  struct
+    type nonrec t =
+      {
+      connectionId: ConnectionId.t [@ocaml.doc "The ID of the connection."]}
+    let context_ = "GetConnectionRequest"
+    let make ~connectionId = fun () -> { connectionId }
+    let to_value x =
+      structure_to_value
+        [("ConnectionId", (Some (ConnectionId.to_value x.connectionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectionId =
+        ConnectionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConnectionId") in
+      make ~connectionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectionId =
+        field_map_exn json__ "ConnectionId" ConnectionId.of_json in
+      make ~connectionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Amazon Web Services uses this action to install Outpost servers. Gets information about the specified connection. Use CloudTrail to monitor this action or Amazon Web Services managed policy for Amazon Web Services Outposts to secure it. For more information, see Amazon Web Services managed policies for Amazon Web Services Outposts and Logging Amazon Web Services Outposts API calls with Amazon Web Services CloudTrail in the Amazon Web Services Outposts User Guide."]
+module GetCatalogItemOutput =
+  struct
+    type nonrec t =
+      {
+      catalogItem: CatalogItem.t option
+        [@ocaml.doc "Information about this catalog item."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?catalogItem = fun () -> { catalogItem }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -5054,11 +9435,11 @@ module GetCatalogItemOutput =
         (Option.map ~f:CatalogItem.of_xml) (Xml.child xml_arg0 "CatalogItem") in
       make ?catalogItem ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let catalogItem = field_map json "CatalogItem" CatalogItem.of_json in
+    let of_json json__ =
+      let catalogItem = field_map json__ "CatalogItem" CatalogItem.of_json in
       make ?catalogItem ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about a catalog item."]
+  end[@@ocaml.doc "Gets information about the specified catalog item."]
 module GetCatalogItemInput =
   struct
     type nonrec t =
@@ -5076,11 +9457,266 @@ module GetCatalogItemInput =
           (Xml.child_exn ~context:context_ xml_arg0 "CatalogItemId") in
       make ~catalogItemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let catalogItemId = field_map_exn json "CatalogItemId" SkuCode.of_json in
+    let of_json json__ =
+      let catalogItemId =
+        field_map_exn json__ "CatalogItemId" SkuCode.of_json in
       make ~catalogItemId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about a catalog item."]
+  end[@@ocaml.doc "Gets information about the specified catalog item."]
+module GetCapacityTaskOutput =
+  struct
+    type nonrec t =
+      {
+      capacityTaskId: CapacityTaskId.t option
+        [@ocaml.doc "ID of the capacity task."];
+      outpostId: OutpostId.t option
+        [@ocaml.doc
+          "ID of the Outpost associated with the specified capacity task."];
+      orderId: OrderId.t option
+        [@ocaml.doc
+          "ID of the Amazon Web Services Outposts order associated with the specified capacity task."];
+      assetId: AssetId.t option
+        [@ocaml.doc
+          "The ID of the Outpost asset. An Outpost asset can be a single server within an Outposts rack or an Outposts server configuration."];
+      requestedInstancePools: RequestedInstancePools.t option
+        [@ocaml.doc "List of instance pools requested in the capacity task."];
+      instancesToExclude: InstancesToExclude.t option
+        [@ocaml.doc
+          "Instances that the user specified they cannot stop in order to free up the capacity needed to run the capacity task."];
+      dryRun: DryRun.t option
+        [@ocaml.doc
+          "Performs a dry run to determine if you are above or below instance capacity."];
+      capacityTaskStatus: CapacityTaskStatus.t option
+        [@ocaml.doc
+          "Status of the capacity task. A capacity task can have one of the following statuses: REQUESTED - The capacity task was created and is awaiting the next step by Amazon Web Services Outposts. IN_PROGRESS - The capacity task is running and cannot be cancelled. FAILED - The capacity task could not be completed. COMPLETED - The capacity task has completed successfully. WAITING_FOR_EVACUATION - The capacity task requires capacity to run. You must stop the recommended EC2 running instances to free up capacity for the task to run. CANCELLATION_IN_PROGRESS - The capacity task has been cancelled and is in the process of cleaning up resources. CANCELLED - The capacity task is cancelled."];
+      failed: CapacityTaskFailure.t option
+        [@ocaml.doc "Reason why the capacity task failed."];
+      creationDate: ISO8601Timestamp.t option
+        [@ocaml.doc "The date the capacity task was created."];
+      completionDate: ISO8601Timestamp.t option
+        [@ocaml.doc "The date the capacity task ran successfully."];
+      lastModifiedDate: ISO8601Timestamp.t option
+        [@ocaml.doc "The date the capacity task was last modified."];
+      taskActionOnBlockingInstances: TaskActionOnBlockingInstances.t option
+        [@ocaml.doc
+          "User-specified option in case an instance is blocking the capacity task from running. Shows one of the following options: WAIT_FOR_EVACUATION - Checks every 10 minutes over 48 hours to determine if instances have stopped and capacity is available to complete the task. FAIL_TASK - The capacity task fails."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?capacityTaskId =
+      fun ?outpostId ->
+        fun ?orderId ->
+          fun ?assetId ->
+            fun ?requestedInstancePools ->
+              fun ?instancesToExclude ->
+                fun ?dryRun ->
+                  fun ?capacityTaskStatus ->
+                    fun ?failed ->
+                      fun ?creationDate ->
+                        fun ?completionDate ->
+                          fun ?lastModifiedDate ->
+                            fun ?taskActionOnBlockingInstances ->
+                              fun () ->
+                                {
+                                  capacityTaskId;
+                                  outpostId;
+                                  orderId;
+                                  assetId;
+                                  requestedInstancePools;
+                                  instancesToExclude;
+                                  dryRun;
+                                  capacityTaskStatus;
+                                  failed;
+                                  creationDate;
+                                  completionDate;
+                                  lastModifiedDate;
+                                  taskActionOnBlockingInstances
+                                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CapacityTaskId",
+           (Option.map x.capacityTaskId ~f:CapacityTaskId.to_value));
+        ("OutpostId", (Option.map x.outpostId ~f:OutpostId.to_value));
+        ("OrderId", (Option.map x.orderId ~f:OrderId.to_value));
+        ("AssetId", (Option.map x.assetId ~f:AssetId.to_value));
+        ("RequestedInstancePools",
+          (Option.map x.requestedInstancePools
+             ~f:RequestedInstancePools.to_value));
+        ("InstancesToExclude",
+          (Option.map x.instancesToExclude ~f:InstancesToExclude.to_value));
+        ("DryRun", (Option.map x.dryRun ~f:DryRun.to_value));
+        ("CapacityTaskStatus",
+          (Option.map x.capacityTaskStatus ~f:CapacityTaskStatus.to_value));
+        ("Failed", (Option.map x.failed ~f:CapacityTaskFailure.to_value));
+        ("CreationDate",
+          (Option.map x.creationDate ~f:ISO8601Timestamp.to_value));
+        ("CompletionDate",
+          (Option.map x.completionDate ~f:ISO8601Timestamp.to_value));
+        ("LastModifiedDate",
+          (Option.map x.lastModifiedDate ~f:ISO8601Timestamp.to_value));
+        ("TaskActionOnBlockingInstances",
+          (Option.map x.taskActionOnBlockingInstances
+             ~f:TaskActionOnBlockingInstances.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskActionOnBlockingInstances =
+        (Option.map ~f:TaskActionOnBlockingInstances.of_xml)
+          (Xml.child xml_arg0 "TaskActionOnBlockingInstances") in
+      let lastModifiedDate =
+        (Option.map ~f:ISO8601Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastModifiedDate") in
+      let completionDate =
+        (Option.map ~f:ISO8601Timestamp.of_xml)
+          (Xml.child xml_arg0 "CompletionDate") in
+      let creationDate =
+        (Option.map ~f:ISO8601Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreationDate") in
+      let failed =
+        (Option.map ~f:CapacityTaskFailure.of_xml)
+          (Xml.child xml_arg0 "Failed") in
+      let capacityTaskStatus =
+        (Option.map ~f:CapacityTaskStatus.of_xml)
+          (Xml.child xml_arg0 "CapacityTaskStatus") in
+      let dryRun =
+        (Option.map ~f:DryRun.of_xml) (Xml.child xml_arg0 "DryRun") in
+      let instancesToExclude =
+        (Option.map ~f:InstancesToExclude.of_xml)
+          (Xml.child xml_arg0 "InstancesToExclude") in
+      let requestedInstancePools =
+        (Option.map ~f:RequestedInstancePools.of_xml)
+          (Xml.child xml_arg0 "RequestedInstancePools") in
+      let assetId =
+        (Option.map ~f:AssetId.of_xml) (Xml.child xml_arg0 "AssetId") in
+      let orderId =
+        (Option.map ~f:OrderId.of_xml) (Xml.child xml_arg0 "OrderId") in
+      let outpostId =
+        (Option.map ~f:OutpostId.of_xml) (Xml.child xml_arg0 "OutpostId") in
+      let capacityTaskId =
+        (Option.map ~f:CapacityTaskId.of_xml)
+          (Xml.child xml_arg0 "CapacityTaskId") in
+      make ?taskActionOnBlockingInstances ?lastModifiedDate ?completionDate
+        ?creationDate ?failed ?capacityTaskStatus ?dryRun ?instancesToExclude
+        ?requestedInstancePools ?assetId ?orderId ?outpostId ?capacityTaskId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskActionOnBlockingInstances =
+        field_map json__ "TaskActionOnBlockingInstances"
+          TaskActionOnBlockingInstances.of_json in
+      let lastModifiedDate =
+        field_map json__ "LastModifiedDate" ISO8601Timestamp.of_json in
+      let completionDate =
+        field_map json__ "CompletionDate" ISO8601Timestamp.of_json in
+      let creationDate =
+        field_map json__ "CreationDate" ISO8601Timestamp.of_json in
+      let failed = field_map json__ "Failed" CapacityTaskFailure.of_json in
+      let capacityTaskStatus =
+        field_map json__ "CapacityTaskStatus" CapacityTaskStatus.of_json in
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
+      let instancesToExclude =
+        field_map json__ "InstancesToExclude" InstancesToExclude.of_json in
+      let requestedInstancePools =
+        field_map json__ "RequestedInstancePools"
+          RequestedInstancePools.of_json in
+      let assetId = field_map json__ "AssetId" AssetId.of_json in
+      let orderId = field_map json__ "OrderId" OrderId.of_json in
+      let outpostId = field_map json__ "OutpostId" OutpostId.of_json in
+      let capacityTaskId =
+        field_map json__ "CapacityTaskId" CapacityTaskId.of_json in
+      make ?taskActionOnBlockingInstances ?lastModifiedDate ?completionDate
+        ?creationDate ?failed ?capacityTaskStatus ?dryRun ?instancesToExclude
+        ?requestedInstancePools ?assetId ?orderId ?outpostId ?capacityTaskId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets details of the specified capacity task."]
+module GetCapacityTaskInput =
+  struct
+    type nonrec t =
+      {
+      capacityTaskId: CapacityTaskId.t
+        [@ocaml.doc "ID of the capacity task."];
+      outpostIdentifier: OutpostIdentifier.t
+        [@ocaml.doc
+          "ID or ARN of the Outpost associated with the specified capacity task."]}
+    let context_ = "GetCapacityTaskInput"
+    let make ~capacityTaskId =
+      fun ~outpostIdentifier ->
+        fun () -> { capacityTaskId; outpostIdentifier }
+    let to_value x =
+      structure_to_value
+        [("CapacityTaskId",
+           (Some (CapacityTaskId.to_value x.capacityTaskId)));
+        ("OutpostId",
+          (Some (OutpostIdentifier.to_value x.outpostIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outpostIdentifier =
+        OutpostIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
+      let capacityTaskId =
+        CapacityTaskId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CapacityTaskId") in
+      make ~outpostIdentifier ~capacityTaskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outpostIdentifier =
+        field_map_exn json__ "OutpostIdentifier" OutpostIdentifier.of_json in
+      let capacityTaskId =
+        field_map_exn json__ "CapacityTaskId" CapacityTaskId.of_json in
+      make ~outpostIdentifier ~capacityTaskId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets details of the specified capacity task."]
 module DeleteSiteOutput =
   struct
     type nonrec t = unit
@@ -5155,7 +9791,7 @@ module DeleteSiteOutput =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes the site."]
+  end[@@ocaml.doc "Deletes the specified site."]
 module DeleteSiteInput =
   struct
     type nonrec t =
@@ -5172,11 +9808,11 @@ module DeleteSiteInput =
         SiteId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SiteId") in
       make ~siteId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let siteId = field_map_exn json "SiteId" SiteId.of_json in
+    let of_json json__ =
+      let siteId = field_map_exn json__ "SiteId" SiteId.of_json in
       make ~siteId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes the site."]
+  end[@@ocaml.doc "Deletes the specified site."]
 module DeleteOutpostOutput =
   struct
     type nonrec t = unit
@@ -5251,14 +9887,12 @@ module DeleteOutpostOutput =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes the Outpost."]
+  end[@@ocaml.doc "Deletes the specified Outpost."]
 module DeleteOutpostInput =
   struct
     type nonrec t =
       {
-      outpostId: OutpostId.t
-        [@ocaml.doc
-          "The ID or the Amazon Resource Name (ARN) of the Outpost."]}
+      outpostId: OutpostId.t [@ocaml.doc "The ID or ARN of the Outpost."]}
     let context_ = "DeleteOutpostInput"
     let make ~outpostId = fun () -> { outpostId }
     let to_value x =
@@ -5271,11 +9905,11 @@ module DeleteOutpostInput =
           (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
       make ~outpostId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outpostId = field_map_exn json "OutpostId" OutpostId.of_json in
+    let of_json json__ =
+      let outpostId = field_map_exn json__ "OutpostId" OutpostId.of_json in
       make ~outpostId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes the Outpost."]
+  end[@@ocaml.doc "Deletes the specified Outpost."]
 module CreateSiteOutput =
   struct
     type nonrec t = {
@@ -5353,8 +9987,8 @@ module CreateSiteOutput =
       let site = (Option.map ~f:Site.of_xml) (Xml.child xml_arg0 "Site") in
       make ?site ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let site = field_map json "Site" Site.of_json in make ?site ()
+    let of_json json__ =
+      let site = field_map json__ "Site" Site.of_json in make ?site ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a site for an Outpost."]
 module CreateSiteInput =
@@ -5429,21 +10063,197 @@ module CreateSiteInput =
       make ?rackPhysicalProperties ?shippingAddress ?operatingAddress ?tags
         ?notes ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rackPhysicalProperties =
-        field_map json "RackPhysicalProperties"
+        field_map json__ "RackPhysicalProperties"
           RackPhysicalProperties.of_json in
-      let shippingAddress = field_map json "ShippingAddress" Address.of_json in
+      let shippingAddress =
+        field_map json__ "ShippingAddress" Address.of_json in
       let operatingAddress =
-        field_map json "OperatingAddress" Address.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let notes = field_map json "Notes" SiteNotes.of_json in
-      let description = field_map json "Description" SiteDescription.of_json in
-      let name = field_map_exn json "Name" SiteName.of_json in
+        field_map json__ "OperatingAddress" Address.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let notes = field_map json__ "Notes" SiteNotes.of_json in
+      let description =
+        field_map json__ "Description" SiteDescription.of_json in
+      let name = field_map_exn json__ "Name" SiteName.of_json in
       make ?rackPhysicalProperties ?shippingAddress ?operatingAddress ?tags
         ?notes ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a site for an Outpost."]
+module CreateRenewalOutput =
+  struct
+    type nonrec t =
+      {
+      paymentOption: PaymentOption.t option
+        [@ocaml.doc "The payment option."];
+      paymentTerm: PaymentTerm.t option [@ocaml.doc "The payment term."];
+      outpostId: OutpostIdOnly.t option [@ocaml.doc "The ID of the Outpost."];
+      upfrontPrice: NullableFloat.t option
+        [@ocaml.doc "The upfront price of the renewal."];
+      monthlyRecurringPrice: NullableFloat.t option
+        [@ocaml.doc "The monthly recurring price of the renewal."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?paymentOption =
+      fun ?paymentTerm ->
+        fun ?outpostId ->
+          fun ?upfrontPrice ->
+            fun ?monthlyRecurringPrice ->
+              fun () ->
+                {
+                  paymentOption;
+                  paymentTerm;
+                  outpostId;
+                  upfrontPrice;
+                  monthlyRecurringPrice
+                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PaymentOption",
+           (Option.map x.paymentOption ~f:PaymentOption.to_value));
+        ("PaymentTerm", (Option.map x.paymentTerm ~f:PaymentTerm.to_value));
+        ("OutpostId", (Option.map x.outpostId ~f:OutpostIdOnly.to_value));
+        ("UpfrontPrice",
+          (Option.map x.upfrontPrice ~f:NullableFloat.to_value));
+        ("MonthlyRecurringPrice",
+          (Option.map x.monthlyRecurringPrice ~f:NullableFloat.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let monthlyRecurringPrice =
+        (Option.map ~f:NullableFloat.of_xml)
+          (Xml.child xml_arg0 "MonthlyRecurringPrice") in
+      let upfrontPrice =
+        (Option.map ~f:NullableFloat.of_xml)
+          (Xml.child xml_arg0 "UpfrontPrice") in
+      let outpostId =
+        (Option.map ~f:OutpostIdOnly.of_xml) (Xml.child xml_arg0 "OutpostId") in
+      let paymentTerm =
+        (Option.map ~f:PaymentTerm.of_xml) (Xml.child xml_arg0 "PaymentTerm") in
+      let paymentOption =
+        (Option.map ~f:PaymentOption.of_xml)
+          (Xml.child xml_arg0 "PaymentOption") in
+      make ?monthlyRecurringPrice ?upfrontPrice ?outpostId ?paymentTerm
+        ?paymentOption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let monthlyRecurringPrice =
+        field_map json__ "MonthlyRecurringPrice" NullableFloat.of_json in
+      let upfrontPrice =
+        field_map json__ "UpfrontPrice" NullableFloat.of_json in
+      let outpostId = field_map json__ "OutpostId" OutpostIdOnly.of_json in
+      let paymentTerm = field_map json__ "PaymentTerm" PaymentTerm.of_json in
+      let paymentOption =
+        field_map json__ "PaymentOption" PaymentOption.of_json in
+      make ?monthlyRecurringPrice ?upfrontPrice ?outpostId ?paymentTerm
+        ?paymentOption ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a renewal contract for the specified Outpost."]
+module CreateRenewalInput =
+  struct
+    type nonrec t =
+      {
+      paymentOption: PaymentOption.t [@ocaml.doc "The payment option."];
+      paymentTerm: PaymentTerm.t [@ocaml.doc "The payment term."];
+      outpostIdentifier: OutpostIdentifier.t
+        [@ocaml.doc "The ID or ARN of the Outpost."];
+      clientToken: AutoFillIdempotencyToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+    let context_ = "CreateRenewalInput"
+    let make ?clientToken =
+      fun ~paymentOption ->
+        fun ~paymentTerm ->
+          fun ~outpostIdentifier ->
+            fun () ->
+              { clientToken; paymentOption; paymentTerm; outpostIdentifier }
+    let to_value x =
+      structure_to_value
+        [("PaymentOption", (Some (PaymentOption.to_value x.paymentOption)));
+        ("PaymentTerm", (Some (PaymentTerm.to_value x.paymentTerm)));
+        ("OutpostIdentifier",
+          (Some (OutpostIdentifier.to_value x.outpostIdentifier)));
+        ("ClientToken",
+          (Option.map x.clientToken ~f:AutoFillIdempotencyToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:AutoFillIdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "ClientToken") in
+      let outpostIdentifier =
+        OutpostIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutpostIdentifier") in
+      let paymentTerm =
+        PaymentTerm.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PaymentTerm") in
+      let paymentOption =
+        PaymentOption.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PaymentOption") in
+      make ?clientToken ~outpostIdentifier ~paymentTerm ~paymentOption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "ClientToken" AutoFillIdempotencyToken.of_json in
+      let outpostIdentifier =
+        field_map_exn json__ "OutpostIdentifier" OutpostIdentifier.of_json in
+      let paymentTerm =
+        field_map_exn json__ "PaymentTerm" PaymentTerm.of_json in
+      let paymentOption =
+        field_map_exn json__ "PaymentOption" PaymentOption.of_json in
+      make ?clientToken ~outpostIdentifier ~paymentTerm ~paymentOption ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a renewal contract for the specified Outpost."]
 module CreateOutpostOutput =
   struct
     type nonrec t = {
@@ -5532,12 +10342,12 @@ module CreateOutpostOutput =
         (Option.map ~f:Outpost.of_xml) (Xml.child xml_arg0 "Outpost") in
       make ?outpost ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outpost = field_map json "Outpost" Outpost.of_json in
+    let of_json json__ =
+      let outpost = field_map json__ "Outpost" Outpost.of_json in
       make ?outpost ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Outpost. You can specify AvailabilityZone or AvailabilityZoneId."]
+       "Creates an Outpost. You can specify either an Availability one or an AZ ID."]
 module CreateOutpostInput =
   struct
     type nonrec t =
@@ -5605,23 +10415,24 @@ module CreateOutpostInput =
       make ?supportedHardwareType ?tags ?availabilityZoneId ?availabilityZone
         ~siteId ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supportedHardwareType =
-        field_map json "SupportedHardwareType" SupportedHardwareType.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
+        field_map json__ "SupportedHardwareType"
+          SupportedHardwareType.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let availabilityZoneId =
-        field_map json "AvailabilityZoneId" AvailabilityZoneId.of_json in
+        field_map json__ "AvailabilityZoneId" AvailabilityZoneId.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" AvailabilityZone.of_json in
-      let siteId = field_map_exn json "SiteId" SiteId.of_json in
+        field_map json__ "AvailabilityZone" AvailabilityZone.of_json in
+      let siteId = field_map_exn json__ "SiteId" SiteId.of_json in
       let description =
-        field_map json "Description" OutpostDescription.of_json in
-      let name = field_map_exn json "Name" OutpostName.of_json in
+        field_map json__ "Description" OutpostDescription.of_json in
+      let name = field_map_exn json__ "Name" OutpostName.of_json in
       make ?supportedHardwareType ?tags ?availabilityZoneId ?availabilityZone
         ~siteId ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Outpost. You can specify AvailabilityZone or AvailabilityZoneId."]
+       "Creates an Outpost. You can specify either an Availability one or an AZ ID."]
 module CreateOrderOutput =
   struct
     type nonrec t =
@@ -5709,8 +10520,8 @@ module CreateOrderOutput =
       let order = (Option.map ~f:Order.of_xml) (Xml.child xml_arg0 "Order") in
       make ?order ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let order = field_map json "Order" Order.of_json in make ?order ()
+    let of_json json__ =
+      let order = field_map json__ "Order" Order.of_json in make ?order ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an order for an Outpost."]
 module CreateOrderInput =
@@ -5720,25 +10531,23 @@ module CreateOrderInput =
       outpostIdentifier: OutpostIdentifier.t
         [@ocaml.doc
           "The ID or the Amazon Resource Name (ARN) of the Outpost."];
-      lineItems: LineItemRequestListDefinition.t
+      lineItems: LineItemRequestListDefinition.t option
         [@ocaml.doc "The line items that make up the order."];
-      paymentOption: PaymentOption.t
-        [@ocaml.doc "The payment option for the order."];
-      paymentTerm: PaymentTerm.t option
-        [@ocaml.doc "The payment terms for the order."]}
+      paymentOption: PaymentOption.t [@ocaml.doc "The payment option."];
+      paymentTerm: PaymentTerm.t option [@ocaml.doc "The payment terms."]}
     let context_ = "CreateOrderInput"
-    let make ?paymentTerm =
-      fun ~outpostIdentifier ->
-        fun ~lineItems ->
+    let make ?lineItems =
+      fun ?paymentTerm ->
+        fun ~outpostIdentifier ->
           fun ~paymentOption ->
             fun () ->
-              { paymentTerm; outpostIdentifier; lineItems; paymentOption }
+              { lineItems; paymentTerm; outpostIdentifier; paymentOption }
     let to_value x =
       structure_to_value
         [("OutpostIdentifier",
            (Some (OutpostIdentifier.to_value x.outpostIdentifier)));
         ("LineItems",
-          (Some (LineItemRequestListDefinition.to_value x.lineItems)));
+          (Option.map x.lineItems ~f:LineItemRequestListDefinition.to_value));
         ("PaymentOption", (Some (PaymentOption.to_value x.paymentOption)));
         ("PaymentTerm", (Option.map x.paymentTerm ~f:PaymentTerm.to_value))]
     let to_query v = to_query to_value v
@@ -5749,22 +10558,22 @@ module CreateOrderInput =
         PaymentOption.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PaymentOption") in
       let lineItems =
-        LineItemRequestListDefinition.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LineItems") in
+        (Option.map ~f:LineItemRequestListDefinition.of_xml)
+          (Xml.child xml_arg0 "LineItems") in
       let outpostIdentifier =
         OutpostIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OutpostIdentifier") in
-      make ?paymentTerm ~paymentOption ~lineItems ~outpostIdentifier ()
+      make ?paymentTerm ~paymentOption ?lineItems ~outpostIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let paymentTerm = field_map json "PaymentTerm" PaymentTerm.of_json in
+    let of_json json__ =
+      let paymentTerm = field_map json__ "PaymentTerm" PaymentTerm.of_json in
       let paymentOption =
-        field_map_exn json "PaymentOption" PaymentOption.of_json in
+        field_map_exn json__ "PaymentOption" PaymentOption.of_json in
       let lineItems =
-        field_map_exn json "LineItems" LineItemRequestListDefinition.of_json in
+        field_map json__ "LineItems" LineItemRequestListDefinition.of_json in
       let outpostIdentifier =
-        field_map_exn json "OutpostIdentifier" OutpostIdentifier.of_json in
-      make ?paymentTerm ~paymentOption ~lineItems ~outpostIdentifier ()
+        field_map_exn json__ "OutpostIdentifier" OutpostIdentifier.of_json in
+      make ?paymentTerm ~paymentOption ?lineItems ~outpostIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an order for an Outpost."]
 module CancelOrderOutput =
@@ -5841,12 +10650,11 @@ module CancelOrderOutput =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Cancels an order for an Outpost."]
+  end[@@ocaml.doc "Cancels the specified order for an Outpost."]
 module CancelOrderInput =
   struct
-    type nonrec t =
-      {
-      orderId: OrderId.t [@ocaml.doc "The ID of the order to cancel."]}
+    type nonrec t = {
+      orderId: OrderId.t [@ocaml.doc "The ID of the order."]}
     let context_ = "CancelOrderInput"
     let make ~orderId = fun () -> { orderId }
     let to_value x =
@@ -5857,8 +10665,120 @@ module CancelOrderInput =
         OrderId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OrderId") in
       make ~orderId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orderId = field_map_exn json "OrderId" OrderId.of_json in
+    let of_json json__ =
+      let orderId = field_map_exn json__ "OrderId" OrderId.of_json in
       make ~orderId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Cancels an order for an Outpost."]
+  end[@@ocaml.doc "Cancels the specified order for an Outpost."]
+module CancelCapacityTaskOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Cancels the capacity task."]
+module CancelCapacityTaskInput =
+  struct
+    type nonrec t =
+      {
+      capacityTaskId: CapacityTaskId.t
+        [@ocaml.doc "ID of the capacity task that you want to cancel."];
+      outpostIdentifier: OutpostIdentifier.t
+        [@ocaml.doc
+          "ID or ARN of the Outpost associated with the capacity task that you want to cancel."]}
+    let context_ = "CancelCapacityTaskInput"
+    let make ~capacityTaskId =
+      fun ~outpostIdentifier ->
+        fun () -> { capacityTaskId; outpostIdentifier }
+    let to_value x =
+      structure_to_value
+        [("CapacityTaskId",
+           (Some (CapacityTaskId.to_value x.capacityTaskId)));
+        ("OutpostId",
+          (Some (OutpostIdentifier.to_value x.outpostIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outpostIdentifier =
+        OutpostIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutpostId") in
+      let capacityTaskId =
+        CapacityTaskId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CapacityTaskId") in
+      make ~outpostIdentifier ~capacityTaskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outpostIdentifier =
+        field_map_exn json__ "OutpostIdentifier" OutpostIdentifier.of_json in
+      let capacityTaskId =
+        field_map_exn json__ "CapacityTaskId" CapacityTaskId.of_json in
+      make ~outpostIdentifier ~capacityTaskId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Cancels the capacity task."]

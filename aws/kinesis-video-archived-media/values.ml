@@ -69,6 +69,49 @@ module Timestamp =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module ImageContent =
+  struct
+    type nonrec t = string
+    let context_ = "ImageContent"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:6291456) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImageContent" j
+    let to_json = simple_to_json to_value
+  end
+module ImageError =
+  struct
+    type nonrec t =
+      | NO_MEDIA 
+      | MEDIA_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NO_MEDIA -> "NO_MEDIA"
+      | MEDIA_ERROR -> "MEDIA_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NO_MEDIA" -> NO_MEDIA
+      | "MEDIA_ERROR" -> MEDIA_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ImageError" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImageError" j)
+    let to_json = simple_to_json to_value
+  end
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -97,7 +140,7 @@ module Fragment =
           "The timestamp from the producer corresponding to the fragment."];
       serverTimestamp: Timestamp.t option
         [@ocaml.doc
-          "The timestamp from the AWS server corresponding to the fragment."];
+          "The timestamp from the Amazon Web Services server corresponding to the fragment."];
       fragmentLengthInMilliseconds: Long.t option
         [@ocaml.doc
           "The playback duration or other time value associated with the fragment."]}
@@ -146,17 +189,17 @@ module Fragment =
       make ?fragmentLengthInMilliseconds ?serverTimestamp ?producerTimestamp
         ?fragmentSizeInBytes ?fragmentNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fragmentLengthInMilliseconds =
-        field_map json "FragmentLengthInMilliseconds" Long.of_json in
+        field_map json__ "FragmentLengthInMilliseconds" Long.of_json in
       let serverTimestamp =
-        field_map json "ServerTimestamp" Timestamp.of_json in
+        field_map json__ "ServerTimestamp" Timestamp.of_json in
       let producerTimestamp =
-        field_map json "ProducerTimestamp" Timestamp.of_json in
+        field_map json__ "ProducerTimestamp" Timestamp.of_json in
       let fragmentSizeInBytes =
-        field_map json "FragmentSizeInBytes" Long.of_json in
+        field_map json__ "FragmentSizeInBytes" Long.of_json in
       let fragmentNumber =
-        field_map json "FragmentNumber" FragmentNumberString.of_json in
+        field_map json__ "FragmentNumber" FragmentNumberString.of_json in
       make ?fragmentLengthInMilliseconds ?serverTimestamp ?producerTimestamp
         ?fragmentSizeInBytes ?fragmentNumber ()
     let to_json v = composed_to_json to_value v
@@ -215,13 +258,93 @@ module TimestampRange =
           (Xml.child_exn ~context:context_ xml_arg0 "StartTimestamp") in
       make ~endTimestamp ~startTimestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTimestamp = field_map_exn json "EndTimestamp" Timestamp.of_json in
+    let of_json json__ =
+      let endTimestamp =
+        field_map_exn json__ "EndTimestamp" Timestamp.of_json in
       let startTimestamp =
-        field_map_exn json "StartTimestamp" Timestamp.of_json in
+        field_map_exn json__ "StartTimestamp" Timestamp.of_json in
       make ~endTimestamp ~startTimestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The range of timestamps for which to return fragments."]
+module Image =
+  struct
+    type nonrec t =
+      {
+      timeStamp: Timestamp.t option
+        [@ocaml.doc
+          "An attribute of the Image object that is used to extract an image from the video stream. This field is used to manage gaps on images or to better understand the pagination window."];
+      error: ImageError.t option
+        [@ocaml.doc
+          "The error message shown when the image for the provided timestamp was not extracted due to a non-tryable error. An error will be returned if: There is no media that exists for the specified Timestamp. The media for the specified time does not allow an image to be extracted. In this case the media is audio only, or the incorrect media has been ingested."];
+      imageContent: ImageContent.t option
+        [@ocaml.doc
+          "An attribute of the Image object that is Base64 encoded."]}
+    let make ?timeStamp =
+      fun ?error ->
+        fun ?imageContent -> fun () -> { timeStamp; error; imageContent }
+    let to_value x =
+      structure_to_value
+        [("TimeStamp", (Option.map x.timeStamp ~f:Timestamp.to_value));
+        ("Error", (Option.map x.error ~f:ImageError.to_value));
+        ("ImageContent",
+          (Option.map x.imageContent ~f:ImageContent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let imageContent =
+        (Option.map ~f:ImageContent.of_xml)
+          (Xml.child xml_arg0 "ImageContent") in
+      let error =
+        (Option.map ~f:ImageError.of_xml) (Xml.child xml_arg0 "Error") in
+      let timeStamp =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "TimeStamp") in
+      make ?imageContent ?error ?timeStamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let imageContent = field_map json__ "ImageContent" ImageContent.of_json in
+      let error = field_map json__ "Error" ImageError.of_json in
+      let timeStamp = field_map json__ "TimeStamp" Timestamp.of_json in
+      make ?imageContent ?error ?timeStamp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains the Timestamp, Error, and ImageContent."]
+module FormatConfigKey =
+  struct
+    type nonrec t =
+      | JPEGQuality 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | JPEGQuality -> "JPEGQuality" | Non_static_id s -> s
+    let of_string =
+      function | "JPEGQuality" -> JPEGQuality | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FormatConfigKey" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FormatConfigKey" j)
+    let to_json = simple_to_json to_value
+  end
+module FormatConfigValue =
+  struct
+    type nonrec t = string
+    let context_ = "FormatConfigValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z_0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FormatConfigValue" j
+    let to_json = simple_to_json to_value
+  end
 module HLSFragmentSelectorType =
   struct
     type nonrec t =
@@ -275,9 +398,10 @@ module HLSTimestampRange =
           (Xml.child xml_arg0 "StartTimestamp") in
       make ?endTimestamp ?startTimestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTimestamp = field_map json "EndTimestamp" Timestamp.of_json in
-      let startTimestamp = field_map json "StartTimestamp" Timestamp.of_json in
+    let of_json json__ =
+      let endTimestamp = field_map json__ "EndTimestamp" Timestamp.of_json in
+      let startTimestamp =
+        field_map json__ "StartTimestamp" Timestamp.of_json in
       make ?endTimestamp ?startTimestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -335,9 +459,10 @@ module DASHTimestampRange =
           (Xml.child xml_arg0 "StartTimestamp") in
       make ?endTimestamp ?startTimestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTimestamp = field_map json "EndTimestamp" Timestamp.of_json in
-      let startTimestamp = field_map json "StartTimestamp" Timestamp.of_json in
+    let of_json json__ =
+      let endTimestamp = field_map json__ "EndTimestamp" Timestamp.of_json in
+      let startTimestamp =
+        field_map json__ "StartTimestamp" Timestamp.of_json in
       make ?endTimestamp ?startTimestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -396,10 +521,11 @@ module ClipTimestampRange =
           (Xml.child_exn ~context:context_ xml_arg0 "StartTimestamp") in
       make ~endTimestamp ~startTimestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTimestamp = field_map_exn json "EndTimestamp" Timestamp.of_json in
+    let of_json json__ =
+      let endTimestamp =
+        field_map_exn json__ "EndTimestamp" Timestamp.of_json in
       let startTimestamp =
-        field_map_exn json "StartTimestamp" Timestamp.of_json in
+        field_map_exn json__ "StartTimestamp" Timestamp.of_json in
       make ~endTimestamp ~startTimestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The range of timestamps for which to return fragments."]
@@ -417,8 +543,8 @@ module ClientLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -427,6 +553,9 @@ module FragmentList =
   struct
     type nonrec t = Fragment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Fragment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -461,8 +590,8 @@ module InvalidArgumentException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -501,8 +630,8 @@ module NotAuthorizedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -521,12 +650,12 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "GetMedia throws this error when Kinesis Video Streams can't find the stream that you specified. GetHLSStreamingSessionURL and GetDASHStreamingSessionURL throw this error if a session with a PlaybackMode of ON_DEMAND or LIVE_REPLAYis requested for a stream that has no fragments within the requested time range, or if a session with a PlaybackMode of LIVE is requested for a stream that has no fragments within the last 30 seconds."]
+       "GetImages will throw this error when Kinesis Video Streams can't find the stream that you specified. GetHLSStreamingSessionURL and GetDASHStreamingSessionURL throw this error if a session with a PlaybackMode of ON_DEMAND or LIVE_REPLAYis requested for a stream that has no fragments within the requested time range, or if a session with a PlaybackMode of LIVE is requested for a stream that has no fragments within the last 30 seconds."]
 module FragmentSelector =
   struct
     type nonrec t =
@@ -555,11 +684,11 @@ module FragmentSelector =
           (Xml.child_exn ~context:context_ xml_arg0 "FragmentSelectorType") in
       make ~timestampRange ~fragmentSelectorType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timestampRange =
-        field_map_exn json "TimestampRange" TimestampRange.of_json in
+        field_map_exn json__ "TimestampRange" TimestampRange.of_json in
       let fragmentSelectorType =
-        field_map_exn json "FragmentSelectorType"
+        field_map_exn json__ "FragmentSelectorType"
           FragmentSelectorType.of_json in
       make ~timestampRange ~fragmentSelectorType ()
     let to_json v = composed_to_json to_value v
@@ -666,6 +795,9 @@ module FragmentNumberList =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FragmentNumberString.to_value)) |>
         (fun x -> `List x)
@@ -687,6 +819,200 @@ module FragmentNumberList =
       list_of_json ~kind:"FragmentNumberList"
         ~of_json:FragmentNumberString.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module Images =
+  struct
+    type nonrec t = Image.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Image.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Image.of_xml)
+    let of_json j = list_of_json ~kind:"Images" ~of_json:Image.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NoDataRetentionException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "GetImages was requested for a stream that does not retain data (that is, has a DataRetentionInHours of 0)."]
+module Format_ =
+  struct
+    type nonrec t =
+      | JPEG 
+      | PNG 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | JPEG -> "JPEG" | PNG -> "PNG" | Non_static_id s -> s
+    let of_string =
+      function | "JPEG" -> JPEG | "PNG" -> PNG | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Format" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Format" j)
+    let to_json = simple_to_json to_value
+  end
+module FormatConfig =
+  struct
+    type nonrec t = (FormatConfigKey.t * FormatConfigValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((FormatConfigKey.of_string chopped),
+                              (FormatConfigValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (FormatConfigKey.to_value x) |>
+                    (fun x ->
+                       (FormatConfigValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:FormatConfigKey.of_string
+        ~of_json:FormatConfigValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GetImagesMaxResults =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int64_max i ~max:100L) >>=
+             (fun () -> check_int64_min i ~min:1L));
+        i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module HeightPixels =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:2160) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for HeightPixels" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageSelectorType =
+  struct
+    type nonrec t =
+      | PRODUCER_TIMESTAMP 
+      | SERVER_TIMESTAMP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PRODUCER_TIMESTAMP -> "PRODUCER_TIMESTAMP"
+      | SERVER_TIMESTAMP -> "SERVER_TIMESTAMP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PRODUCER_TIMESTAMP" -> PRODUCER_TIMESTAMP
+      | "SERVER_TIMESTAMP" -> SERVER_TIMESTAMP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ImageSelectorType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImageSelectorType" j)
+    let to_json = simple_to_json to_value
+  end
+module SamplingInterval =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SamplingInterval" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module WidthPixels =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:3840) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for WidthPixels" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
   end
 module HLSStreamingSessionURL =
   struct
@@ -715,8 +1041,8 @@ module InvalidCodecPrivateDataException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -735,32 +1061,12 @@ module MissingCodecPrivateDataException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "No codec private data was found in at least one of tracks of the video stream."]
-module NoDataRetentionException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A streaming session was requested for a stream that does not retain data (that is, has a DataRetentionInHours of 0)."]
 module UnsupportedStreamMediaTypeException =
   struct
     type nonrec t = {
@@ -775,8 +1081,8 @@ module UnsupportedStreamMediaTypeException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -905,11 +1211,12 @@ module HLSFragmentSelector =
           (Xml.child xml_arg0 "FragmentSelectorType") in
       make ?timestampRange ?fragmentSelectorType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timestampRange =
-        field_map json "TimestampRange" HLSTimestampRange.of_json in
+        field_map json__ "TimestampRange" HLSTimestampRange.of_json in
       let fragmentSelectorType =
-        field_map json "FragmentSelectorType" HLSFragmentSelectorType.of_json in
+        field_map json__ "FragmentSelectorType"
+          HLSFragmentSelectorType.of_json in
       make ?timestampRange ?fragmentSelectorType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1046,11 +1353,11 @@ module DASHFragmentSelector =
           (Xml.child xml_arg0 "FragmentSelectorType") in
       make ?timestampRange ?fragmentSelectorType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timestampRange =
-        field_map json "TimestampRange" DASHTimestampRange.of_json in
+        field_map json__ "TimestampRange" DASHTimestampRange.of_json in
       let fragmentSelectorType =
-        field_map json "FragmentSelectorType"
+        field_map json__ "FragmentSelectorType"
           DASHFragmentSelectorType.of_json in
       make ?timestampRange ?fragmentSelectorType ()
     let to_json v = composed_to_json to_value v
@@ -1116,8 +1423,8 @@ module InvalidMediaFrameException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1151,11 +1458,11 @@ module ClipFragmentSelector =
           (Xml.child_exn ~context:context_ xml_arg0 "FragmentSelectorType") in
       make ~timestampRange ~fragmentSelectorType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timestampRange =
-        field_map_exn json "TimestampRange" ClipTimestampRange.of_json in
+        field_map_exn json__ "TimestampRange" ClipTimestampRange.of_json in
       let fragmentSelectorType =
-        field_map_exn json "FragmentSelectorType"
+        field_map_exn json__ "FragmentSelectorType"
           ClipFragmentSelectorType.of_json in
       make ~timestampRange ~fragmentSelectorType ()
     let to_json v = composed_to_json to_value v
@@ -1241,13 +1548,13 @@ module ListFragmentsOutput =
         (Option.map ~f:FragmentList.of_xml) (Xml.child xml_arg0 "Fragments") in
       make ?nextToken ?fragments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let fragments = field_map json "Fragments" FragmentList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let fragments = field_map json__ "Fragments" FragmentList.of_json in
       make ?nextToken ?fragments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of Fragment objects from the specified stream and timestamp range within the archived data. Listing fragments is eventually consistent. This means that even if the producer receives an acknowledgment that a fragment is persisted, the result might not be returned immediately from a request to ListFragments. However, results are typically available in less than one second. You must first call the GetDataEndpoint API to get an endpoint. Then send the ListFragments requests to this endpoint using the --endpoint-url parameter. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to AWS, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
+       "Returns a list of Fragment objects from the specified stream and timestamp range within the archived data. Listing fragments is eventually consistent. This means that even if the producer receives an acknowledgment that a fragment is persisted, the result might not be returned immediately from a request to ListFragments. However, results are typically available in less than one second. You must first call the GetDataEndpoint API to get an endpoint. Then send the ListFragments requests to this endpoint using the --endpoint-url parameter. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to Amazon Web Services, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
 module ListFragmentsInput =
   struct
     type nonrec t =
@@ -1266,7 +1573,7 @@ module ListFragmentsInput =
           "A token to specify where to start paginating. This is the ListFragmentsOutput$NextToken from a previously truncated response."];
       fragmentSelector: FragmentSelector.t option
         [@ocaml.doc
-          "Describes the timestamp range and timestamp origin for the range of fragments to return."]}
+          "Describes the timestamp range and timestamp origin for the range of fragments to return. This is only required when the NextToken isn't passed in the API."]}
     let make ?streamName =
       fun ?streamARN ->
         fun ?maxResults ->
@@ -1305,18 +1612,18 @@ module ListFragmentsInput =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ?fragmentSelector ?nextToken ?maxResults ?streamARN ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fragmentSelector =
-        field_map json "FragmentSelector" FragmentSelector.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "FragmentSelector" FragmentSelector.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ListFragmentsMaxResults.of_json in
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
+        field_map json__ "MaxResults" ListFragmentsMaxResults.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
       make ?fragmentSelector ?nextToken ?maxResults ?streamARN ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of Fragment objects from the specified stream and timestamp range within the archived data. Listing fragments is eventually consistent. This means that even if the producer receives an acknowledgment that a fragment is persisted, the result might not be returned immediately from a request to ListFragments. However, results are typically available in less than one second. You must first call the GetDataEndpoint API to get an endpoint. Then send the ListFragments requests to this endpoint using the --endpoint-url parameter. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to AWS, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
+       "Returns a list of Fragment objects from the specified stream and timestamp range within the archived data. Listing fragments is eventually consistent. This means that even if the producer receives an acknowledgment that a fragment is persisted, the result might not be returned immediately from a request to ListFragments. However, results are typically available in less than one second. You must first call the GetDataEndpoint API to get an endpoint. Then send the ListFragments requests to this endpoint using the --endpoint-url parameter. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to Amazon Web Services, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
 module GetMediaForFragmentListOutput =
   struct
     type nonrec t =
@@ -1325,7 +1632,7 @@ module GetMediaForFragmentListOutput =
         [@ocaml.doc "The content type of the requested media."];
       payload: Payload.t option
         [@ocaml.doc
-          "The payload that Kinesis Video Streams returns is a sequence of chunks from the specified stream. For information about the chunks, see PutMedia. The chunks that Kinesis Video Streams returns in the GetMediaForFragmentList call also include the following additional Matroska (MKV) tags: AWS_KINESISVIDEO_FRAGMENT_NUMBER - Fragment number returned in the chunk. AWS_KINESISVIDEO_SERVER_SIDE_TIMESTAMP - Server-side timestamp of the fragment. AWS_KINESISVIDEO_PRODUCER_SIDE_TIMESTAMP - Producer-side timestamp of the fragment. The following tags will be included if an exception occurs: AWS_KINESISVIDEO_FRAGMENT_NUMBER - The number of the fragment that threw the exception AWS_KINESISVIDEO_EXCEPTION_ERROR_CODE - The integer code of the exception AWS_KINESISVIDEO_EXCEPTION_MESSAGE - A text description of the exception"]}
+          "The payload that Kinesis Video Streams returns is a sequence of chunks from the specified stream. For information about the chunks, see PutMedia. The chunks that Kinesis Video Streams returns in the GetMediaForFragmentList call also include the following additional Matroska (MKV) tags: AWS_KINESISVIDEO_FRAGMENT_NUMBER - Fragment number returned in the chunk. AWS_KINESISVIDEO_SERVER_SIDE_TIMESTAMP - Server-side timestamp of the fragment. AWS_KINESISVIDEO_PRODUCER_SIDE_TIMESTAMP - Producer-side timestamp of the fragment. The following tags will be included if an exception occurs: AWS_KINESISVIDEO_FRAGMENT_NUMBER - The number of the fragment that threw the exception AWS_KINESISVIDEO_EXCEPTION_ERROR_CODE - The integer code of the AWS_KINESISVIDEO_EXCEPTION_MESSAGE - A text description of the exception"]}
     type nonrec error =
       [ `ClientLimitExceededException of ClientLimitExceededException.t 
       | `InvalidArgumentException of InvalidArgumentException.t 
@@ -1405,13 +1712,13 @@ module GetMediaForFragmentListOutput =
           (Xml.child xml_arg0 "Content-Type") in
       make ?payload ?contentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let payload = field_map json "Payload" Payload.of_json in
-      let contentType = field_map json "ContentType" ContentType.of_json in
+    let of_json json__ =
+      let payload = field_map json__ "Payload" Payload.of_json in
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
       make ?payload ?contentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets media for a list of fragments (specified by fragment number) from the archived data in an Amazon Kinesis video stream. You must first call the GetDataEndpoint API to get an endpoint. Then send the GetMediaForFragmentList requests to this endpoint using the --endpoint-url parameter. For limits, see Kinesis Video Streams Limits. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to AWS, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
+       "Gets media for a list of fragments (specified by fragment number) from the archived data in an Amazon Kinesis video stream. You must first call the GetDataEndpoint API to get an endpoint. Then send the GetMediaForFragmentList requests to this endpoint using the --endpoint-url parameter. For limits, see Kinesis Video Streams Limits. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to Amazon Web Services, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
 module GetMediaForFragmentListInput =
   struct
     type nonrec t =
@@ -1445,15 +1752,257 @@ module GetMediaForFragmentListInput =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ~fragments ?streamARN ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fragments =
-        field_map_exn json "Fragments" FragmentNumberList.of_json in
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
+        field_map_exn json__ "Fragments" FragmentNumberList.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
       make ~fragments ?streamARN ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets media for a list of fragments (specified by fragment number) from the archived data in an Amazon Kinesis video stream. You must first call the GetDataEndpoint API to get an endpoint. Then send the GetMediaForFragmentList requests to this endpoint using the --endpoint-url parameter. For limits, see Kinesis Video Streams Limits. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to AWS, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
+       "Gets media for a list of fragments (specified by fragment number) from the archived data in an Amazon Kinesis video stream. You must first call the GetDataEndpoint API to get an endpoint. Then send the GetMediaForFragmentList requests to this endpoint using the --endpoint-url parameter. For limits, see Kinesis Video Streams Limits. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to Amazon Web Services, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
+module GetImagesOutput =
+  struct
+    type nonrec t =
+      {
+      images: Images.t option
+        [@ocaml.doc
+          "The list of images generated from the video stream. If there is no media available for the given timestamp, the NO_MEDIA error will be listed in the output. If an error occurs while the image is being generated, the MEDIA_ERROR will be listed in the output as the cause of the missing image."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The encrypted token that was used in the request to get more images."]}
+    type nonrec error =
+      [ `ClientLimitExceededException of ClientLimitExceededException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NoDataRetentionException of NoDataRetentionException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?images = fun ?nextToken -> fun () -> { images; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NoDataRetentionException" ->
+          `NoDataRetentionException (NoDataRetentionException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientLimitExceededException" ->
+          `ClientLimitExceededException
+            (ClientLimitExceededException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NoDataRetentionException" ->
+          `NoDataRetentionException (NoDataRetentionException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ClientLimitExceededException"));
+            ("details", (ClientLimitExceededException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NoDataRetentionException e ->
+          `Assoc
+            [("error", (`String "NoDataRetentionException"));
+            ("details", (NoDataRetentionException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Images", (Option.map x.images ~f:Images.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let images =
+        (Option.map ~f:Images.of_xml) (Xml.child xml_arg0 "Images") in
+      make ?nextToken ?images ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let images = field_map json__ "Images" Images.of_json in
+      make ?nextToken ?images ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of images corresponding to each timestamp for a given time range, sampling interval, and image format configuration."]
+module GetImagesInput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option
+        [@ocaml.doc
+          "The name of the stream from which to retrieve the images. You must specify either the StreamName or the StreamARN."];
+      streamARN: ResourceARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the stream from which to retrieve the images. You must specify either the StreamName or the StreamARN."];
+      imageSelectorType: ImageSelectorType.t
+        [@ocaml.doc
+          "The origin of the Server or Producer timestamps to use to generate the images."];
+      startTimestamp: Timestamp.t
+        [@ocaml.doc
+          "The starting point from which the images should be generated. This StartTimestamp must be within an inclusive range of timestamps for an image to be returned."];
+      endTimestamp: Timestamp.t
+        [@ocaml.doc
+          "The end timestamp for the range of images to be generated. If the time range between StartTimestamp and EndTimestamp is more than 300 seconds above StartTimestamp, you will receive an IllegalArgumentException."];
+      samplingInterval: SamplingInterval.t option
+        [@ocaml.doc
+          "The time interval in milliseconds (ms) at which the images need to be generated from the stream. The minimum value that can be provided is 200 ms (5 images per second). If the timestamp range is less than the sampling interval, the image from the startTimestamp will be returned if available."];
+      format: Format_.t
+        [@ocaml.doc "The format that will be used to encode the image."];
+      formatConfig: FormatConfig.t option
+        [@ocaml.doc
+          "The list of a key-value pair structure that contains extra parameters that can be applied when the image is generated. The FormatConfig key is the JPEGQuality, which indicates the JPEG quality key to be used to generate the image. The FormatConfig value accepts ints from 1 to 100. If the value is 1, the image will be generated with less quality and the best compression. If the value is 100, the image will be generated with the best quality and less compression. If no value is provided, the default value of the JPEGQuality key will be set to 80."];
+      widthPixels: WidthPixels.t option
+        [@ocaml.doc
+          "The width of the output image that is used in conjunction with the HeightPixels parameter. When both WidthPixels and HeightPixels parameters are provided, the image will be stretched to fit the specified aspect ratio. If only the WidthPixels parameter is provided or if only the HeightPixels is provided, a ValidationException will be thrown. If neither parameter is provided, the original image size from the stream will be returned."];
+      heightPixels: HeightPixels.t option
+        [@ocaml.doc
+          "The height of the output image that is used in conjunction with the WidthPixels parameter. When both HeightPixels and WidthPixels parameters are provided, the image will be stretched to fit the specified aspect ratio. If only the HeightPixels parameter is provided, its original aspect ratio will be used to calculate the WidthPixels ratio. If neither parameter is provided, the original image size will be returned."];
+      maxResults: GetImagesMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of images to be returned by the API. The default limit is 25 images per API response. Providing a MaxResults greater than this value will result in a page size of 25. Any additional results will be paginated."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that specifies where to start paginating the next set of Images. This is the GetImages:NextToken from a previously truncated response."]}
+    let context_ = "GetImagesInput"
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?samplingInterval ->
+          fun ?formatConfig ->
+            fun ?widthPixels ->
+              fun ?heightPixels ->
+                fun ?maxResults ->
+                  fun ?nextToken ->
+                    fun ~imageSelectorType ->
+                      fun ~startTimestamp ->
+                        fun ~endTimestamp ->
+                          fun ~format ->
+                            fun () ->
+                              {
+                                streamName;
+                                streamARN;
+                                samplingInterval;
+                                formatConfig;
+                                widthPixels;
+                                heightPixels;
+                                maxResults;
+                                nextToken;
+                                imageSelectorType;
+                                startTimestamp;
+                                endTimestamp;
+                                format
+                              }
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:ResourceARN.to_value));
+        ("ImageSelectorType",
+          (Some (ImageSelectorType.to_value x.imageSelectorType)));
+        ("StartTimestamp", (Some (Timestamp.to_value x.startTimestamp)));
+        ("EndTimestamp", (Some (Timestamp.to_value x.endTimestamp)));
+        ("SamplingInterval",
+          (Option.map x.samplingInterval ~f:SamplingInterval.to_value));
+        ("Format", (Some (Format_.to_value x.format)));
+        ("FormatConfig",
+          (Option.map x.formatConfig ~f:FormatConfig.to_value));
+        ("WidthPixels", (Option.map x.widthPixels ~f:WidthPixels.to_value));
+        ("HeightPixels",
+          (Option.map x.heightPixels ~f:HeightPixels.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:GetImagesMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:GetImagesMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let heightPixels =
+        (Option.map ~f:HeightPixels.of_xml)
+          (Xml.child xml_arg0 "HeightPixels") in
+      let widthPixels =
+        (Option.map ~f:WidthPixels.of_xml) (Xml.child xml_arg0 "WidthPixels") in
+      let formatConfig =
+        (Option.map ~f:FormatConfig.of_xml)
+          (Xml.child xml_arg0 "FormatConfig") in
+      let format =
+        Format_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Format") in
+      let samplingInterval =
+        (Option.map ~f:SamplingInterval.of_xml)
+          (Xml.child xml_arg0 "SamplingInterval") in
+      let endTimestamp =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndTimestamp") in
+      let startTimestamp =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StartTimestamp") in
+      let imageSelectorType =
+        ImageSelectorType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ImageSelectorType") in
+      let streamARN =
+        (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?nextToken ?maxResults ?heightPixels ?widthPixels ?formatConfig
+        ~format ?samplingInterval ~endTimestamp ~startTimestamp
+        ~imageSelectorType ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" GetImagesMaxResults.of_json in
+      let heightPixels = field_map json__ "HeightPixels" HeightPixels.of_json in
+      let widthPixels = field_map json__ "WidthPixels" WidthPixels.of_json in
+      let formatConfig = field_map json__ "FormatConfig" FormatConfig.of_json in
+      let format = field_map_exn json__ "Format" Format_.of_json in
+      let samplingInterval =
+        field_map json__ "SamplingInterval" SamplingInterval.of_json in
+      let endTimestamp =
+        field_map_exn json__ "EndTimestamp" Timestamp.of_json in
+      let startTimestamp =
+        field_map_exn json__ "StartTimestamp" Timestamp.of_json in
+      let imageSelectorType =
+        field_map_exn json__ "ImageSelectorType" ImageSelectorType.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?nextToken ?maxResults ?heightPixels ?widthPixels ?formatConfig
+        ~format ?samplingInterval ~endTimestamp ~startTimestamp
+        ~imageSelectorType ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of images corresponding to each timestamp for a given time range, sampling interval, and image format configuration."]
 module GetHLSStreamingSessionURLOutput =
   struct
     type nonrec t =
@@ -1575,14 +2124,14 @@ module GetHLSStreamingSessionURLOutput =
           (Xml.child xml_arg0 "HLSStreamingSessionURL") in
       make ?hLSStreamingSessionURL ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hLSStreamingSessionURL =
-        field_map json "HLSStreamingSessionURL"
+        field_map json__ "HLSStreamingSessionURL"
           HLSStreamingSessionURL.of_json in
       make ?hLSStreamingSessionURL ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves an HTTP Live Streaming (HLS) URL for the stream. You can then open the URL in a browser or media player to view the stream contents. Both the StreamName and the StreamARN parameters are optional, but you must specify either the StreamName or the StreamARN when invoking this API operation. An Amazon Kinesis video stream has the following requirements for providing data through HLS: The media must contain h.264 or h.265 encoded video and, optionally, AAC encoded audio. Specifically, the codec ID of track 1 should be V_MPEG/ISO/AVC (for h.264) or V_MPEG/ISO/HEVC (for h.265). Optionally, the codec ID of track 2 should be A_AAC. Data retention must be greater than 0. The video track of each fragment must contain codec private data in the Advanced Video Coding (AVC) for H.264 format or HEVC for H.265 format (MPEG-4 specification ISO/IEC 14496-15). For information about adapting stream data to a given format, see NAL Adaptation Flags. The audio track (if present) of each fragment must contain codec private data in the AAC format (AAC specification ISO/IEC 13818-7). Kinesis Video Streams HLS sessions contain fragments in the fragmented MPEG-4 form (also called fMP4 or CMAF) or the MPEG-2 form (also called TS chunks, which the HLS specification also supports). For more information about HLS fragment types, see the HLS specification. The following procedure shows how to use HLS with Kinesis Video Streams: Get an endpoint using GetDataEndpoint, specifying GET_HLS_STREAMING_SESSION_URL for the APIName parameter. Retrieve the HLS URL using GetHLSStreamingSessionURL. Kinesis Video Streams creates an HLS streaming session to be used for accessing content in a stream using the HLS protocol. GetHLSStreamingSessionURL returns an authenticated URL (that includes an encrypted session token) for the session's HLS master playlist (the root resource needed for streaming with HLS). Don't share or store this token where an unauthorized entity could access it. The token provides access to the content of the stream. Safeguard the token with the same measures that you would use with your AWS credentials. The media that is made available through the playlist consists only of the requested stream, time range, and format. No other media data (such as frames outside the requested window or alternate bitrates) is made available. Provide the URL (containing the encrypted session token) for the HLS master playlist to a media player that supports the HLS protocol. Kinesis Video Streams makes the HLS media playlist, initialization fragment, and media fragments available through the master playlist URL. The initialization fragment contains the codec private data for the stream, and other data needed to set up the video or audio decoder and renderer. The media fragments contain H.264-encoded video frames or AAC-encoded audio samples. The media player receives the authenticated URL and requests stream metadata and media data normally. When the media player requests data, it calls the following actions: GetHLSMasterPlaylist: Retrieves an HLS master playlist, which contains a URL for the GetHLSMediaPlaylist action for each track, and additional metadata for the media player, including estimated bitrate and resolution. GetHLSMediaPlaylist: Retrieves an HLS media playlist, which contains a URL to access the MP4 initialization fragment with the GetMP4InitFragment action, and URLs to access the MP4 media fragments with the GetMP4MediaFragment actions. The HLS media playlist also contains metadata about the stream that the player needs to play it, such as whether the PlaybackMode is LIVE or ON_DEMAND. The HLS media playlist is typically static for sessions with a PlaybackType of ON_DEMAND. The HLS media playlist is continually updated with new fragments for sessions with a PlaybackType of LIVE. There is a distinct HLS media playlist for the video track and the audio track (if applicable) that contains MP4 media URLs for the specific track. GetMP4InitFragment: Retrieves the MP4 initialization fragment. The media player typically loads the initialization fragment before loading any media fragments. This fragment contains the \"fytp\" and \"moov\" MP4 atoms, and the child atoms that are needed to initialize the media player decoder. The initialization fragment does not correspond to a fragment in a Kinesis video stream. It contains only the codec private data for the stream and respective track, which the media player needs to decode the media frames. GetMP4MediaFragment: Retrieves MP4 media fragments. These fragments contain the \"moof\" and \"mdat\" MP4 atoms and their child atoms, containing the encoded fragment's media frames and their timestamps. After the first media fragment is made available in a streaming session, any fragments that don't contain the same codec private data cause an error to be returned when those different media fragments are loaded. Therefore, the codec private data should not change between fragments in a session. This also means that the session fails if the fragments in a stream change from having only video to having both audio and video. Data retrieved with this action is billable. See Pricing for details. GetTSFragment: Retrieves MPEG TS fragments containing both initialization and media data for all tracks in the stream. If the ContainerFormat is MPEG_TS, this API is used instead of GetMP4InitFragment and GetMP4MediaFragment to retrieve stream media. Data retrieved with this action is billable. For more information, see Kinesis Video Streams pricing. A streaming session URL must not be shared between players. The service might throttle a session if multiple media players are sharing it. For connection limits, see Kinesis Video Streams Limits. You can monitor the amount of data that the media player consumes by monitoring the GetMP4MediaFragment.OutgoingBytes Amazon CloudWatch metric. For information about using CloudWatch to monitor Kinesis Video Streams, see Monitoring Kinesis Video Streams. For pricing information, see Amazon Kinesis Video Streams Pricing and AWS Pricing. Charges for both HLS sessions and outgoing AWS data apply. For more information about HLS, see HTTP Live Streaming on the Apple Developer site. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to AWS, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
+       "Retrieves an HTTP Live Streaming (HLS) URL for the stream. You can then open the URL in a browser or media player to view the stream contents. Both the StreamName and the StreamARN parameters are optional, but you must specify either the StreamName or the StreamARN when invoking this API operation. An Amazon Kinesis video stream has the following requirements for providing data through HLS: For streaming video, the media must contain H.264 or H.265 encoded video and, optionally, AAC encoded audio. Specifically, the codec ID of track 1 should be V_MPEG/ISO/AVC (for H.264) or V_MPEG/ISO/HEVC (for H.265). Optionally, the codec ID of track 2 should be A_AAC. For audio only streaming, the codec ID of track 1 should be A_AAC. Data retention must be greater than 0. The video track of each fragment must contain codec private data in the Advanced Video Coding (AVC) for H.264 format or HEVC for H.265 format (MPEG-4 specification ISO/IEC 14496-15). For information about adapting stream data to a given format, see NAL Adaptation Flags. The audio track (if present) of each fragment must contain codec private data in the AAC format (AAC specification ISO/IEC 13818-7). Kinesis Video Streams HLS sessions contain fragments in the fragmented MPEG-4 form (also called fMP4 or CMAF) or the MPEG-2 form (also called TS chunks, which the HLS specification also supports). For more information about HLS fragment types, see the HLS specification. The following procedure shows how to use HLS with Kinesis Video Streams: Get an endpoint using GetDataEndpoint, specifying GET_HLS_STREAMING_SESSION_URL for the APIName parameter. Retrieve the HLS URL using GetHLSStreamingSessionURL. Kinesis Video Streams creates an HLS streaming session to be used for accessing content in a stream using the HLS protocol. GetHLSStreamingSessionURL returns an authenticated URL (that includes an encrypted session token) for the session's HLS master playlist (the root resource needed for streaming with HLS). Don't share or store this token where an unauthorized entity could access it. The token provides access to the content of the stream. Safeguard the token with the same measures that you would use with your Amazon Web Services credentials. The media that is made available through the playlist consists only of the requested stream, time range, and format. No other media data (such as frames outside the requested window or alternate bitrates) is made available. Provide the URL (containing the encrypted session token) for the HLS master playlist to a media player that supports the HLS protocol. Kinesis Video Streams makes the HLS media playlist, initialization fragment, and media fragments available through the master playlist URL. The initialization fragment contains the codec private data for the stream, and other data needed to set up the video or audio decoder and renderer. The media fragments contain H.264-encoded video frames or AAC-encoded audio samples. The media player receives the authenticated URL and requests stream metadata and media data normally. When the media player requests data, it calls the following actions: GetHLSMasterPlaylist: Retrieves an HLS master playlist, which contains a URL for the GetHLSMediaPlaylist action for each track, and additional metadata for the media player, including estimated bitrate and resolution. GetHLSMediaPlaylist: Retrieves an HLS media playlist, which contains a URL to access the MP4 initialization fragment with the GetMP4InitFragment action, and URLs to access the MP4 media fragments with the GetMP4MediaFragment actions. The HLS media playlist also contains metadata about the stream that the player needs to play it, such as whether the PlaybackMode is LIVE or ON_DEMAND. The HLS media playlist is typically static for sessions with a PlaybackType of ON_DEMAND. The HLS media playlist is continually updated with new fragments for sessions with a PlaybackType of LIVE. There is a distinct HLS media playlist for the video track and the audio track (if applicable) that contains MP4 media URLs for the specific track. GetMP4InitFragment: Retrieves the MP4 initialization fragment. The media player typically loads the initialization fragment before loading any media fragments. This fragment contains the \"fytp\" and \"moov\" MP4 atoms, and the child atoms that are needed to initialize the media player decoder. The initialization fragment does not correspond to a fragment in a Kinesis video stream. It contains only the codec private data for the stream and respective track, which the media player needs to decode the media frames. GetMP4MediaFragment: Retrieves MP4 media fragments. These fragments contain the \"moof\" and \"mdat\" MP4 atoms and their child atoms, containing the encoded fragment's media frames and their timestamps. For the HLS streaming session, in-track codec private data (CPD) changes are supported. After the first media fragment is made available in a streaming session, fragments can contain CPD changes for each track. Therefore, the fragments in a session can have a different resolution, bit rate, or other information in the CPD without interrupting playback. However, any change made in the track number or track codec format can return an error when those different media fragments are loaded. For example, streaming will fail if the fragments in the stream change from having only video to having both audio and video, or if an AAC audio track is changed to an ALAW audio track. For each streaming session, only 500 CPD changes are allowed. Data retrieved with this action is billable. For information, see Pricing. GetTSFragment: Retrieves MPEG TS fragments containing both initialization and media data for all tracks in the stream. If the ContainerFormat is MPEG_TS, this API is used instead of GetMP4InitFragment and GetMP4MediaFragment to retrieve stream media. Data retrieved with this action is billable. For more information, see Kinesis Video Streams pricing. A streaming session URL must not be shared between players. The service might throttle a session if multiple media players are sharing it. For connection limits, see Kinesis Video Streams Limits. You can monitor the amount of data that the media player consumes by monitoring the GetMP4MediaFragment.OutgoingBytes Amazon CloudWatch metric. For information about using CloudWatch to monitor Kinesis Video Streams, see Monitoring Kinesis Video Streams. For pricing information, see Amazon Kinesis Video Streams Pricing and Amazon Web Services Pricing. Charges for both HLS sessions and outgoing Amazon Web Services data apply. For more information about HLS, see HTTP Live Streaming on the Apple Developer site. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to Amazon Web Services, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
 module GetHLSStreamingSessionURLInput =
   struct
     type nonrec t =
@@ -1684,30 +2233,30 @@ module GetHLSStreamingSessionURLInput =
         ?displayFragmentTimestamp ?discontinuityMode ?containerFormat
         ?hLSFragmentSelector ?playbackMode ?streamARN ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxMediaPlaylistFragmentResults =
-        field_map json "MaxMediaPlaylistFragmentResults"
+        field_map json__ "MaxMediaPlaylistFragmentResults"
           HLSMaxResults.of_json in
-      let expires = field_map json "Expires" Expires.of_json in
+      let expires = field_map json__ "Expires" Expires.of_json in
       let displayFragmentTimestamp =
-        field_map json "DisplayFragmentTimestamp"
+        field_map json__ "DisplayFragmentTimestamp"
           HLSDisplayFragmentTimestamp.of_json in
       let discontinuityMode =
-        field_map json "DiscontinuityMode" HLSDiscontinuityMode.of_json in
+        field_map json__ "DiscontinuityMode" HLSDiscontinuityMode.of_json in
       let containerFormat =
-        field_map json "ContainerFormat" ContainerFormat.of_json in
+        field_map json__ "ContainerFormat" ContainerFormat.of_json in
       let hLSFragmentSelector =
-        field_map json "HLSFragmentSelector" HLSFragmentSelector.of_json in
+        field_map json__ "HLSFragmentSelector" HLSFragmentSelector.of_json in
       let playbackMode =
-        field_map json "PlaybackMode" HLSPlaybackMode.of_json in
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
+        field_map json__ "PlaybackMode" HLSPlaybackMode.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
       make ?maxMediaPlaylistFragmentResults ?expires
         ?displayFragmentTimestamp ?discontinuityMode ?containerFormat
         ?hLSFragmentSelector ?playbackMode ?streamARN ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves an HTTP Live Streaming (HLS) URL for the stream. You can then open the URL in a browser or media player to view the stream contents. Both the StreamName and the StreamARN parameters are optional, but you must specify either the StreamName or the StreamARN when invoking this API operation. An Amazon Kinesis video stream has the following requirements for providing data through HLS: The media must contain h.264 or h.265 encoded video and, optionally, AAC encoded audio. Specifically, the codec ID of track 1 should be V_MPEG/ISO/AVC (for h.264) or V_MPEG/ISO/HEVC (for h.265). Optionally, the codec ID of track 2 should be A_AAC. Data retention must be greater than 0. The video track of each fragment must contain codec private data in the Advanced Video Coding (AVC) for H.264 format or HEVC for H.265 format (MPEG-4 specification ISO/IEC 14496-15). For information about adapting stream data to a given format, see NAL Adaptation Flags. The audio track (if present) of each fragment must contain codec private data in the AAC format (AAC specification ISO/IEC 13818-7). Kinesis Video Streams HLS sessions contain fragments in the fragmented MPEG-4 form (also called fMP4 or CMAF) or the MPEG-2 form (also called TS chunks, which the HLS specification also supports). For more information about HLS fragment types, see the HLS specification. The following procedure shows how to use HLS with Kinesis Video Streams: Get an endpoint using GetDataEndpoint, specifying GET_HLS_STREAMING_SESSION_URL for the APIName parameter. Retrieve the HLS URL using GetHLSStreamingSessionURL. Kinesis Video Streams creates an HLS streaming session to be used for accessing content in a stream using the HLS protocol. GetHLSStreamingSessionURL returns an authenticated URL (that includes an encrypted session token) for the session's HLS master playlist (the root resource needed for streaming with HLS). Don't share or store this token where an unauthorized entity could access it. The token provides access to the content of the stream. Safeguard the token with the same measures that you would use with your AWS credentials. The media that is made available through the playlist consists only of the requested stream, time range, and format. No other media data (such as frames outside the requested window or alternate bitrates) is made available. Provide the URL (containing the encrypted session token) for the HLS master playlist to a media player that supports the HLS protocol. Kinesis Video Streams makes the HLS media playlist, initialization fragment, and media fragments available through the master playlist URL. The initialization fragment contains the codec private data for the stream, and other data needed to set up the video or audio decoder and renderer. The media fragments contain H.264-encoded video frames or AAC-encoded audio samples. The media player receives the authenticated URL and requests stream metadata and media data normally. When the media player requests data, it calls the following actions: GetHLSMasterPlaylist: Retrieves an HLS master playlist, which contains a URL for the GetHLSMediaPlaylist action for each track, and additional metadata for the media player, including estimated bitrate and resolution. GetHLSMediaPlaylist: Retrieves an HLS media playlist, which contains a URL to access the MP4 initialization fragment with the GetMP4InitFragment action, and URLs to access the MP4 media fragments with the GetMP4MediaFragment actions. The HLS media playlist also contains metadata about the stream that the player needs to play it, such as whether the PlaybackMode is LIVE or ON_DEMAND. The HLS media playlist is typically static for sessions with a PlaybackType of ON_DEMAND. The HLS media playlist is continually updated with new fragments for sessions with a PlaybackType of LIVE. There is a distinct HLS media playlist for the video track and the audio track (if applicable) that contains MP4 media URLs for the specific track. GetMP4InitFragment: Retrieves the MP4 initialization fragment. The media player typically loads the initialization fragment before loading any media fragments. This fragment contains the \"fytp\" and \"moov\" MP4 atoms, and the child atoms that are needed to initialize the media player decoder. The initialization fragment does not correspond to a fragment in a Kinesis video stream. It contains only the codec private data for the stream and respective track, which the media player needs to decode the media frames. GetMP4MediaFragment: Retrieves MP4 media fragments. These fragments contain the \"moof\" and \"mdat\" MP4 atoms and their child atoms, containing the encoded fragment's media frames and their timestamps. After the first media fragment is made available in a streaming session, any fragments that don't contain the same codec private data cause an error to be returned when those different media fragments are loaded. Therefore, the codec private data should not change between fragments in a session. This also means that the session fails if the fragments in a stream change from having only video to having both audio and video. Data retrieved with this action is billable. See Pricing for details. GetTSFragment: Retrieves MPEG TS fragments containing both initialization and media data for all tracks in the stream. If the ContainerFormat is MPEG_TS, this API is used instead of GetMP4InitFragment and GetMP4MediaFragment to retrieve stream media. Data retrieved with this action is billable. For more information, see Kinesis Video Streams pricing. A streaming session URL must not be shared between players. The service might throttle a session if multiple media players are sharing it. For connection limits, see Kinesis Video Streams Limits. You can monitor the amount of data that the media player consumes by monitoring the GetMP4MediaFragment.OutgoingBytes Amazon CloudWatch metric. For information about using CloudWatch to monitor Kinesis Video Streams, see Monitoring Kinesis Video Streams. For pricing information, see Amazon Kinesis Video Streams Pricing and AWS Pricing. Charges for both HLS sessions and outgoing AWS data apply. For more information about HLS, see HTTP Live Streaming on the Apple Developer site. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to AWS, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
+       "Retrieves an HTTP Live Streaming (HLS) URL for the stream. You can then open the URL in a browser or media player to view the stream contents. Both the StreamName and the StreamARN parameters are optional, but you must specify either the StreamName or the StreamARN when invoking this API operation. An Amazon Kinesis video stream has the following requirements for providing data through HLS: For streaming video, the media must contain H.264 or H.265 encoded video and, optionally, AAC encoded audio. Specifically, the codec ID of track 1 should be V_MPEG/ISO/AVC (for H.264) or V_MPEG/ISO/HEVC (for H.265). Optionally, the codec ID of track 2 should be A_AAC. For audio only streaming, the codec ID of track 1 should be A_AAC. Data retention must be greater than 0. The video track of each fragment must contain codec private data in the Advanced Video Coding (AVC) for H.264 format or HEVC for H.265 format (MPEG-4 specification ISO/IEC 14496-15). For information about adapting stream data to a given format, see NAL Adaptation Flags. The audio track (if present) of each fragment must contain codec private data in the AAC format (AAC specification ISO/IEC 13818-7). Kinesis Video Streams HLS sessions contain fragments in the fragmented MPEG-4 form (also called fMP4 or CMAF) or the MPEG-2 form (also called TS chunks, which the HLS specification also supports). For more information about HLS fragment types, see the HLS specification. The following procedure shows how to use HLS with Kinesis Video Streams: Get an endpoint using GetDataEndpoint, specifying GET_HLS_STREAMING_SESSION_URL for the APIName parameter. Retrieve the HLS URL using GetHLSStreamingSessionURL. Kinesis Video Streams creates an HLS streaming session to be used for accessing content in a stream using the HLS protocol. GetHLSStreamingSessionURL returns an authenticated URL (that includes an encrypted session token) for the session's HLS master playlist (the root resource needed for streaming with HLS). Don't share or store this token where an unauthorized entity could access it. The token provides access to the content of the stream. Safeguard the token with the same measures that you would use with your Amazon Web Services credentials. The media that is made available through the playlist consists only of the requested stream, time range, and format. No other media data (such as frames outside the requested window or alternate bitrates) is made available. Provide the URL (containing the encrypted session token) for the HLS master playlist to a media player that supports the HLS protocol. Kinesis Video Streams makes the HLS media playlist, initialization fragment, and media fragments available through the master playlist URL. The initialization fragment contains the codec private data for the stream, and other data needed to set up the video or audio decoder and renderer. The media fragments contain H.264-encoded video frames or AAC-encoded audio samples. The media player receives the authenticated URL and requests stream metadata and media data normally. When the media player requests data, it calls the following actions: GetHLSMasterPlaylist: Retrieves an HLS master playlist, which contains a URL for the GetHLSMediaPlaylist action for each track, and additional metadata for the media player, including estimated bitrate and resolution. GetHLSMediaPlaylist: Retrieves an HLS media playlist, which contains a URL to access the MP4 initialization fragment with the GetMP4InitFragment action, and URLs to access the MP4 media fragments with the GetMP4MediaFragment actions. The HLS media playlist also contains metadata about the stream that the player needs to play it, such as whether the PlaybackMode is LIVE or ON_DEMAND. The HLS media playlist is typically static for sessions with a PlaybackType of ON_DEMAND. The HLS media playlist is continually updated with new fragments for sessions with a PlaybackType of LIVE. There is a distinct HLS media playlist for the video track and the audio track (if applicable) that contains MP4 media URLs for the specific track. GetMP4InitFragment: Retrieves the MP4 initialization fragment. The media player typically loads the initialization fragment before loading any media fragments. This fragment contains the \"fytp\" and \"moov\" MP4 atoms, and the child atoms that are needed to initialize the media player decoder. The initialization fragment does not correspond to a fragment in a Kinesis video stream. It contains only the codec private data for the stream and respective track, which the media player needs to decode the media frames. GetMP4MediaFragment: Retrieves MP4 media fragments. These fragments contain the \"moof\" and \"mdat\" MP4 atoms and their child atoms, containing the encoded fragment's media frames and their timestamps. For the HLS streaming session, in-track codec private data (CPD) changes are supported. After the first media fragment is made available in a streaming session, fragments can contain CPD changes for each track. Therefore, the fragments in a session can have a different resolution, bit rate, or other information in the CPD without interrupting playback. However, any change made in the track number or track codec format can return an error when those different media fragments are loaded. For example, streaming will fail if the fragments in the stream change from having only video to having both audio and video, or if an AAC audio track is changed to an ALAW audio track. For each streaming session, only 500 CPD changes are allowed. Data retrieved with this action is billable. For information, see Pricing. GetTSFragment: Retrieves MPEG TS fragments containing both initialization and media data for all tracks in the stream. If the ContainerFormat is MPEG_TS, this API is used instead of GetMP4InitFragment and GetMP4MediaFragment to retrieve stream media. Data retrieved with this action is billable. For more information, see Kinesis Video Streams pricing. A streaming session URL must not be shared between players. The service might throttle a session if multiple media players are sharing it. For connection limits, see Kinesis Video Streams Limits. You can monitor the amount of data that the media player consumes by monitoring the GetMP4MediaFragment.OutgoingBytes Amazon CloudWatch metric. For information about using CloudWatch to monitor Kinesis Video Streams, see Monitoring Kinesis Video Streams. For pricing information, see Amazon Kinesis Video Streams Pricing and Amazon Web Services Pricing. Charges for both HLS sessions and outgoing Amazon Web Services data apply. For more information about HLS, see HTTP Live Streaming on the Apple Developer site. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to Amazon Web Services, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
 module GetDASHStreamingSessionURLOutput =
   struct
     type nonrec t =
@@ -1829,14 +2378,14 @@ module GetDASHStreamingSessionURLOutput =
           (Xml.child xml_arg0 "DASHStreamingSessionURL") in
       make ?dASHStreamingSessionURL ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dASHStreamingSessionURL =
-        field_map json "DASHStreamingSessionURL"
+        field_map json__ "DASHStreamingSessionURL"
           DASHStreamingSessionURL.of_json in
       make ?dASHStreamingSessionURL ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves an MPEG Dynamic Adaptive Streaming over HTTP (DASH) URL for the stream. You can then open the URL in a media player to view the stream contents. Both the StreamName and the StreamARN parameters are optional, but you must specify either the StreamName or the StreamARN when invoking this API operation. An Amazon Kinesis video stream has the following requirements for providing data through MPEG-DASH: The media must contain h.264 or h.265 encoded video and, optionally, AAC or G.711 encoded audio. Specifically, the codec ID of track 1 should be V_MPEG/ISO/AVC (for h.264) or V_MPEGH/ISO/HEVC (for H.265). Optionally, the codec ID of track 2 should be A_AAC (for AAC) or A_MS/ACM (for G.711). Data retention must be greater than 0. The video track of each fragment must contain codec private data in the Advanced Video Coding (AVC) for H.264 format and HEVC for H.265 format. For more information, see MPEG-4 specification ISO/IEC 14496-15. For information about adapting stream data to a given format, see NAL Adaptation Flags. The audio track (if present) of each fragment must contain codec private data in the AAC format (AAC specification ISO/IEC 13818-7) or the MS Wave format. The following procedure shows how to use MPEG-DASH with Kinesis Video Streams: Get an endpoint using GetDataEndpoint, specifying GET_DASH_STREAMING_SESSION_URL for the APIName parameter. Retrieve the MPEG-DASH URL using GetDASHStreamingSessionURL. Kinesis Video Streams creates an MPEG-DASH streaming session to be used for accessing content in a stream using the MPEG-DASH protocol. GetDASHStreamingSessionURL returns an authenticated URL (that includes an encrypted session token) for the session's MPEG-DASH manifest (the root resource needed for streaming with MPEG-DASH). Don't share or store this token where an unauthorized entity can access it. The token provides access to the content of the stream. Safeguard the token with the same measures that you use with your AWS credentials. The media that is made available through the manifest consists only of the requested stream, time range, and format. No other media data (such as frames outside the requested window or alternate bitrates) is made available. Provide the URL (containing the encrypted session token) for the MPEG-DASH manifest to a media player that supports the MPEG-DASH protocol. Kinesis Video Streams makes the initialization fragment and media fragments available through the manifest URL. The initialization fragment contains the codec private data for the stream, and other data needed to set up the video or audio decoder and renderer. The media fragments contain encoded video frames or encoded audio samples. The media player receives the authenticated URL and requests stream metadata and media data normally. When the media player requests data, it calls the following actions: GetDASHManifest: Retrieves an MPEG DASH manifest, which contains the metadata for the media that you want to playback. GetMP4InitFragment: Retrieves the MP4 initialization fragment. The media player typically loads the initialization fragment before loading any media fragments. This fragment contains the \"fytp\" and \"moov\" MP4 atoms, and the child atoms that are needed to initialize the media player decoder. The initialization fragment does not correspond to a fragment in a Kinesis video stream. It contains only the codec private data for the stream and respective track, which the media player needs to decode the media frames. GetMP4MediaFragment: Retrieves MP4 media fragments. These fragments contain the \"moof\" and \"mdat\" MP4 atoms and their child atoms, containing the encoded fragment's media frames and their timestamps. After the first media fragment is made available in a streaming session, any fragments that don't contain the same codec private data cause an error to be returned when those different media fragments are loaded. Therefore, the codec private data should not change between fragments in a session. This also means that the session fails if the fragments in a stream change from having only video to having both audio and video. Data retrieved with this action is billable. See Pricing for details. For restrictions that apply to MPEG-DASH sessions, see Kinesis Video Streams Limits. You can monitor the amount of data that the media player consumes by monitoring the GetMP4MediaFragment.OutgoingBytes Amazon CloudWatch metric. For information about using CloudWatch to monitor Kinesis Video Streams, see Monitoring Kinesis Video Streams. For pricing information, see Amazon Kinesis Video Streams Pricing and AWS Pricing. Charges for both HLS sessions and outgoing AWS data apply. For more information about HLS, see HTTP Live Streaming on the Apple Developer site. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to AWS, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
+       "Retrieves an MPEG Dynamic Adaptive Streaming over HTTP (DASH) URL for the stream. You can then open the URL in a media player to view the stream contents. Both the StreamName and the StreamARN parameters are optional, but you must specify either the StreamName or the StreamARN when invoking this API operation. An Amazon Kinesis video stream has the following requirements for providing data through MPEG-DASH: The media must contain h.264 or h.265 encoded video and, optionally, AAC or G.711 encoded audio. Specifically, the codec ID of track 1 should be V_MPEG/ISO/AVC (for h.264) or V_MPEGH/ISO/HEVC (for H.265). Optionally, the codec ID of track 2 should be A_AAC (for AAC) or A_MS/ACM (for G.711). Data retention must be greater than 0. The video track of each fragment must contain codec private data in the Advanced Video Coding (AVC) for H.264 format and HEVC for H.265 format. For more information, see MPEG-4 specification ISO/IEC 14496-15. For information about adapting stream data to a given format, see NAL Adaptation Flags. The audio track (if present) of each fragment must contain codec private data in the AAC format (AAC specification ISO/IEC 13818-7) or the MS Wave format. The following procedure shows how to use MPEG-DASH with Kinesis Video Streams: Get an endpoint using GetDataEndpoint, specifying GET_DASH_STREAMING_SESSION_URL for the APIName parameter. Retrieve the MPEG-DASH URL using GetDASHStreamingSessionURL. Kinesis Video Streams creates an MPEG-DASH streaming session to be used for accessing content in a stream using the MPEG-DASH protocol. GetDASHStreamingSessionURL returns an authenticated URL (that includes an encrypted session token) for the session's MPEG-DASH manifest (the root resource needed for streaming with MPEG-DASH). Don't share or store this token where an unauthorized entity can access it. The token provides access to the content of the stream. Safeguard the token with the same measures that you use with your Amazon Web Services credentials. The media that is made available through the manifest consists only of the requested stream, time range, and format. No other media data (such as frames outside the requested window or alternate bitrates) is made available. Provide the URL (containing the encrypted session token) for the MPEG-DASH manifest to a media player that supports the MPEG-DASH protocol. Kinesis Video Streams makes the initialization fragment and media fragments available through the manifest URL. The initialization fragment contains the codec private data for the stream, and other data needed to set up the video or audio decoder and renderer. The media fragments contain encoded video frames or encoded audio samples. The media player receives the authenticated URL and requests stream metadata and media data normally. When the media player requests data, it calls the following actions: GetDASHManifest: Retrieves an MPEG DASH manifest, which contains the metadata for the media that you want to playback. GetMP4InitFragment: Retrieves the MP4 initialization fragment. The media player typically loads the initialization fragment before loading any media fragments. This fragment contains the \"fytp\" and \"moov\" MP4 atoms, and the child atoms that are needed to initialize the media player decoder. The initialization fragment does not correspond to a fragment in a Kinesis video stream. It contains only the codec private data for the stream and respective track, which the media player needs to decode the media frames. GetMP4MediaFragment: Retrieves MP4 media fragments. These fragments contain the \"moof\" and \"mdat\" MP4 atoms and their child atoms, containing the encoded fragment's media frames and their timestamps. After the first media fragment is made available in a streaming session, any fragments that don't contain the same codec private data cause an error to be returned when those different media fragments are loaded. Therefore, the codec private data should not change between fragments in a session. This also means that the session fails if the fragments in a stream change from having only video to having both audio and video. Data retrieved with this action is billable. See Pricing for details. For restrictions that apply to MPEG-DASH sessions, see Kinesis Video Streams Limits. You can monitor the amount of data that the media player consumes by monitoring the GetMP4MediaFragment.OutgoingBytes Amazon CloudWatch metric. For information about using CloudWatch to monitor Kinesis Video Streams, see Monitoring Kinesis Video Streams. For pricing information, see Amazon Kinesis Video Streams Pricing and Amazon Web Services Pricing. Charges for both HLS sessions and outgoing Amazon Web Services data apply. For more information about HLS, see HTTP Live Streaming on the Apple Developer site. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to Amazon Web Services the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
 module GetDASHStreamingSessionURLInput =
   struct
     type nonrec t =
@@ -1928,28 +2477,28 @@ module GetDASHStreamingSessionURLInput =
         ?displayFragmentNumber ?displayFragmentTimestamp ?playbackMode
         ?streamARN ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxManifestFragmentResults =
-        field_map json "MaxManifestFragmentResults" DASHMaxResults.of_json in
-      let expires = field_map json "Expires" Expires.of_json in
+        field_map json__ "MaxManifestFragmentResults" DASHMaxResults.of_json in
+      let expires = field_map json__ "Expires" Expires.of_json in
       let dASHFragmentSelector =
-        field_map json "DASHFragmentSelector" DASHFragmentSelector.of_json in
+        field_map json__ "DASHFragmentSelector" DASHFragmentSelector.of_json in
       let displayFragmentNumber =
-        field_map json "DisplayFragmentNumber"
+        field_map json__ "DisplayFragmentNumber"
           DASHDisplayFragmentNumber.of_json in
       let displayFragmentTimestamp =
-        field_map json "DisplayFragmentTimestamp"
+        field_map json__ "DisplayFragmentTimestamp"
           DASHDisplayFragmentTimestamp.of_json in
       let playbackMode =
-        field_map json "PlaybackMode" DASHPlaybackMode.of_json in
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
+        field_map json__ "PlaybackMode" DASHPlaybackMode.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
       make ?maxManifestFragmentResults ?expires ?dASHFragmentSelector
         ?displayFragmentNumber ?displayFragmentTimestamp ?playbackMode
         ?streamARN ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves an MPEG Dynamic Adaptive Streaming over HTTP (DASH) URL for the stream. You can then open the URL in a media player to view the stream contents. Both the StreamName and the StreamARN parameters are optional, but you must specify either the StreamName or the StreamARN when invoking this API operation. An Amazon Kinesis video stream has the following requirements for providing data through MPEG-DASH: The media must contain h.264 or h.265 encoded video and, optionally, AAC or G.711 encoded audio. Specifically, the codec ID of track 1 should be V_MPEG/ISO/AVC (for h.264) or V_MPEGH/ISO/HEVC (for H.265). Optionally, the codec ID of track 2 should be A_AAC (for AAC) or A_MS/ACM (for G.711). Data retention must be greater than 0. The video track of each fragment must contain codec private data in the Advanced Video Coding (AVC) for H.264 format and HEVC for H.265 format. For more information, see MPEG-4 specification ISO/IEC 14496-15. For information about adapting stream data to a given format, see NAL Adaptation Flags. The audio track (if present) of each fragment must contain codec private data in the AAC format (AAC specification ISO/IEC 13818-7) or the MS Wave format. The following procedure shows how to use MPEG-DASH with Kinesis Video Streams: Get an endpoint using GetDataEndpoint, specifying GET_DASH_STREAMING_SESSION_URL for the APIName parameter. Retrieve the MPEG-DASH URL using GetDASHStreamingSessionURL. Kinesis Video Streams creates an MPEG-DASH streaming session to be used for accessing content in a stream using the MPEG-DASH protocol. GetDASHStreamingSessionURL returns an authenticated URL (that includes an encrypted session token) for the session's MPEG-DASH manifest (the root resource needed for streaming with MPEG-DASH). Don't share or store this token where an unauthorized entity can access it. The token provides access to the content of the stream. Safeguard the token with the same measures that you use with your AWS credentials. The media that is made available through the manifest consists only of the requested stream, time range, and format. No other media data (such as frames outside the requested window or alternate bitrates) is made available. Provide the URL (containing the encrypted session token) for the MPEG-DASH manifest to a media player that supports the MPEG-DASH protocol. Kinesis Video Streams makes the initialization fragment and media fragments available through the manifest URL. The initialization fragment contains the codec private data for the stream, and other data needed to set up the video or audio decoder and renderer. The media fragments contain encoded video frames or encoded audio samples. The media player receives the authenticated URL and requests stream metadata and media data normally. When the media player requests data, it calls the following actions: GetDASHManifest: Retrieves an MPEG DASH manifest, which contains the metadata for the media that you want to playback. GetMP4InitFragment: Retrieves the MP4 initialization fragment. The media player typically loads the initialization fragment before loading any media fragments. This fragment contains the \"fytp\" and \"moov\" MP4 atoms, and the child atoms that are needed to initialize the media player decoder. The initialization fragment does not correspond to a fragment in a Kinesis video stream. It contains only the codec private data for the stream and respective track, which the media player needs to decode the media frames. GetMP4MediaFragment: Retrieves MP4 media fragments. These fragments contain the \"moof\" and \"mdat\" MP4 atoms and their child atoms, containing the encoded fragment's media frames and their timestamps. After the first media fragment is made available in a streaming session, any fragments that don't contain the same codec private data cause an error to be returned when those different media fragments are loaded. Therefore, the codec private data should not change between fragments in a session. This also means that the session fails if the fragments in a stream change from having only video to having both audio and video. Data retrieved with this action is billable. See Pricing for details. For restrictions that apply to MPEG-DASH sessions, see Kinesis Video Streams Limits. You can monitor the amount of data that the media player consumes by monitoring the GetMP4MediaFragment.OutgoingBytes Amazon CloudWatch metric. For information about using CloudWatch to monitor Kinesis Video Streams, see Monitoring Kinesis Video Streams. For pricing information, see Amazon Kinesis Video Streams Pricing and AWS Pricing. Charges for both HLS sessions and outgoing AWS data apply. For more information about HLS, see HTTP Live Streaming on the Apple Developer site. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to AWS, the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
+       "Retrieves an MPEG Dynamic Adaptive Streaming over HTTP (DASH) URL for the stream. You can then open the URL in a media player to view the stream contents. Both the StreamName and the StreamARN parameters are optional, but you must specify either the StreamName or the StreamARN when invoking this API operation. An Amazon Kinesis video stream has the following requirements for providing data through MPEG-DASH: The media must contain h.264 or h.265 encoded video and, optionally, AAC or G.711 encoded audio. Specifically, the codec ID of track 1 should be V_MPEG/ISO/AVC (for h.264) or V_MPEGH/ISO/HEVC (for H.265). Optionally, the codec ID of track 2 should be A_AAC (for AAC) or A_MS/ACM (for G.711). Data retention must be greater than 0. The video track of each fragment must contain codec private data in the Advanced Video Coding (AVC) for H.264 format and HEVC for H.265 format. For more information, see MPEG-4 specification ISO/IEC 14496-15. For information about adapting stream data to a given format, see NAL Adaptation Flags. The audio track (if present) of each fragment must contain codec private data in the AAC format (AAC specification ISO/IEC 13818-7) or the MS Wave format. The following procedure shows how to use MPEG-DASH with Kinesis Video Streams: Get an endpoint using GetDataEndpoint, specifying GET_DASH_STREAMING_SESSION_URL for the APIName parameter. Retrieve the MPEG-DASH URL using GetDASHStreamingSessionURL. Kinesis Video Streams creates an MPEG-DASH streaming session to be used for accessing content in a stream using the MPEG-DASH protocol. GetDASHStreamingSessionURL returns an authenticated URL (that includes an encrypted session token) for the session's MPEG-DASH manifest (the root resource needed for streaming with MPEG-DASH). Don't share or store this token where an unauthorized entity can access it. The token provides access to the content of the stream. Safeguard the token with the same measures that you use with your Amazon Web Services credentials. The media that is made available through the manifest consists only of the requested stream, time range, and format. No other media data (such as frames outside the requested window or alternate bitrates) is made available. Provide the URL (containing the encrypted session token) for the MPEG-DASH manifest to a media player that supports the MPEG-DASH protocol. Kinesis Video Streams makes the initialization fragment and media fragments available through the manifest URL. The initialization fragment contains the codec private data for the stream, and other data needed to set up the video or audio decoder and renderer. The media fragments contain encoded video frames or encoded audio samples. The media player receives the authenticated URL and requests stream metadata and media data normally. When the media player requests data, it calls the following actions: GetDASHManifest: Retrieves an MPEG DASH manifest, which contains the metadata for the media that you want to playback. GetMP4InitFragment: Retrieves the MP4 initialization fragment. The media player typically loads the initialization fragment before loading any media fragments. This fragment contains the \"fytp\" and \"moov\" MP4 atoms, and the child atoms that are needed to initialize the media player decoder. The initialization fragment does not correspond to a fragment in a Kinesis video stream. It contains only the codec private data for the stream and respective track, which the media player needs to decode the media frames. GetMP4MediaFragment: Retrieves MP4 media fragments. These fragments contain the \"moof\" and \"mdat\" MP4 atoms and their child atoms, containing the encoded fragment's media frames and their timestamps. After the first media fragment is made available in a streaming session, any fragments that don't contain the same codec private data cause an error to be returned when those different media fragments are loaded. Therefore, the codec private data should not change between fragments in a session. This also means that the session fails if the fragments in a stream change from having only video to having both audio and video. Data retrieved with this action is billable. See Pricing for details. For restrictions that apply to MPEG-DASH sessions, see Kinesis Video Streams Limits. You can monitor the amount of data that the media player consumes by monitoring the GetMP4MediaFragment.OutgoingBytes Amazon CloudWatch metric. For information about using CloudWatch to monitor Kinesis Video Streams, see Monitoring Kinesis Video Streams. For pricing information, see Amazon Kinesis Video Streams Pricing and Amazon Web Services Pricing. Charges for both HLS sessions and outgoing Amazon Web Services data apply. For more information about HLS, see HTTP Live Streaming on the Apple Developer site. If an error is thrown after invoking a Kinesis Video Streams archived media API, in addition to the HTTP status code and the response body, it includes the following pieces of information: x-amz-ErrorType HTTP header \226\128\147 contains a more specific error type in addition to what the HTTP status code provides. x-amz-RequestId HTTP header \226\128\147 if you want to report an issue to Amazon Web Services the support team can better diagnose the problem if given the Request Id. Both the HTTP status code and the ErrorType header can be utilized to make programmatic decisions about whether errors are retry-able and under what conditions, as well as provide information on what actions the client programmer might need to take in order to successfully try again. For more information, see the Errors section at the bottom of this topic, as well as Common Errors."]
 module GetClipOutput =
   struct
     type nonrec t =
@@ -2093,13 +2642,13 @@ module GetClipOutput =
           (Xml.child xml_arg0 "Content-Type") in
       make ?payload ?contentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let payload = field_map json "Payload" Payload.of_json in
-      let contentType = field_map json "ContentType" ContentType.of_json in
+    let of_json json__ =
+      let payload = field_map json__ "Payload" Payload.of_json in
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
       make ?payload ?contentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Downloads an MP4 file (clip) containing the archived, on-demand media from the specified video stream over the specified time range. Both the StreamName and the StreamARN parameters are optional, but you must specify either the StreamName or the StreamARN when invoking this API operation. As a prerequisite to using GetCLip API, you must obtain an endpoint using GetDataEndpoint, specifying GET_CLIP for the APIName parameter. An Amazon Kinesis video stream has the following requirements for providing data through MP4: The media must contain h.264 or h.265 encoded video and, optionally, AAC or G.711 encoded audio. Specifically, the codec ID of track 1 should be V_MPEG/ISO/AVC (for h.264) or V_MPEGH/ISO/HEVC (for H.265). Optionally, the codec ID of track 2 should be A_AAC (for AAC) or A_MS/ACM (for G.711). Data retention must be greater than 0. The video track of each fragment must contain codec private data in the Advanced Video Coding (AVC) for H.264 format and HEVC for H.265 format. For more information, see MPEG-4 specification ISO/IEC 14496-15. For information about adapting stream data to a given format, see NAL Adaptation Flags. The audio track (if present) of each fragment must contain codec private data in the AAC format (AAC specification ISO/IEC 13818-7) or the MS Wave format. You can monitor the amount of outgoing data by monitoring the GetClip.OutgoingBytes Amazon CloudWatch metric. For information about using CloudWatch to monitor Kinesis Video Streams, see Monitoring Kinesis Video Streams. For pricing information, see Amazon Kinesis Video Streams Pricing and AWS Pricing. Charges for outgoing AWS data apply."]
+       "Downloads an MP4 file (clip) containing the archived, on-demand media from the specified video stream over the specified time range. Both the StreamName and the StreamARN parameters are optional, but you must specify either the StreamName or the StreamARN when invoking this API operation. As a prerequisite to using GetCLip API, you must obtain an endpoint using GetDataEndpoint, specifying GET_CLIP for the APIName parameter. An Amazon Kinesis video stream has the following requirements for providing data through MP4: The media must contain h.264 or h.265 encoded video and, optionally, AAC or G.711 encoded audio. Specifically, the codec ID of track 1 should be V_MPEG/ISO/AVC (for h.264) or V_MPEGH/ISO/HEVC (for H.265). Optionally, the codec ID of track 2 should be A_AAC (for AAC) or A_MS/ACM (for G.711). Data retention must be greater than 0. The video track of each fragment must contain codec private data in the Advanced Video Coding (AVC) for H.264 format and HEVC for H.265 format. For more information, see MPEG-4 specification ISO/IEC 14496-15. For information about adapting stream data to a given format, see NAL Adaptation Flags. The audio track (if present) of each fragment must contain codec private data in the AAC format (AAC specification ISO/IEC 13818-7) or the MS Wave format. You can monitor the amount of outgoing data by monitoring the GetClip.OutgoingBytes Amazon CloudWatch metric. For information about using CloudWatch to monitor Kinesis Video Streams, see Monitoring Kinesis Video Streams. For pricing information, see Amazon Kinesis Video Streams Pricing and Amazon Web Services Pricing. Charges for outgoing Amazon Web Services data apply."]
 module GetClipInput =
   struct
     type nonrec t =
@@ -2135,13 +2684,13 @@ module GetClipInput =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ~clipFragmentSelector ?streamARN ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clipFragmentSelector =
-        field_map_exn json "ClipFragmentSelector"
+        field_map_exn json__ "ClipFragmentSelector"
           ClipFragmentSelector.of_json in
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
       make ~clipFragmentSelector ?streamARN ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Downloads an MP4 file (clip) containing the archived, on-demand media from the specified video stream over the specified time range. Both the StreamName and the StreamARN parameters are optional, but you must specify either the StreamName or the StreamARN when invoking this API operation. As a prerequisite to using GetCLip API, you must obtain an endpoint using GetDataEndpoint, specifying GET_CLIP for the APIName parameter. An Amazon Kinesis video stream has the following requirements for providing data through MP4: The media must contain h.264 or h.265 encoded video and, optionally, AAC or G.711 encoded audio. Specifically, the codec ID of track 1 should be V_MPEG/ISO/AVC (for h.264) or V_MPEGH/ISO/HEVC (for H.265). Optionally, the codec ID of track 2 should be A_AAC (for AAC) or A_MS/ACM (for G.711). Data retention must be greater than 0. The video track of each fragment must contain codec private data in the Advanced Video Coding (AVC) for H.264 format and HEVC for H.265 format. For more information, see MPEG-4 specification ISO/IEC 14496-15. For information about adapting stream data to a given format, see NAL Adaptation Flags. The audio track (if present) of each fragment must contain codec private data in the AAC format (AAC specification ISO/IEC 13818-7) or the MS Wave format. You can monitor the amount of outgoing data by monitoring the GetClip.OutgoingBytes Amazon CloudWatch metric. For information about using CloudWatch to monitor Kinesis Video Streams, see Monitoring Kinesis Video Streams. For pricing information, see Amazon Kinesis Video Streams Pricing and AWS Pricing. Charges for outgoing AWS data apply."]
+       "Downloads an MP4 file (clip) containing the archived, on-demand media from the specified video stream over the specified time range. Both the StreamName and the StreamARN parameters are optional, but you must specify either the StreamName or the StreamARN when invoking this API operation. As a prerequisite to using GetCLip API, you must obtain an endpoint using GetDataEndpoint, specifying GET_CLIP for the APIName parameter. An Amazon Kinesis video stream has the following requirements for providing data through MP4: The media must contain h.264 or h.265 encoded video and, optionally, AAC or G.711 encoded audio. Specifically, the codec ID of track 1 should be V_MPEG/ISO/AVC (for h.264) or V_MPEGH/ISO/HEVC (for H.265). Optionally, the codec ID of track 2 should be A_AAC (for AAC) or A_MS/ACM (for G.711). Data retention must be greater than 0. The video track of each fragment must contain codec private data in the Advanced Video Coding (AVC) for H.264 format and HEVC for H.265 format. For more information, see MPEG-4 specification ISO/IEC 14496-15. For information about adapting stream data to a given format, see NAL Adaptation Flags. The audio track (if present) of each fragment must contain codec private data in the AAC format (AAC specification ISO/IEC 13818-7) or the MS Wave format. You can monitor the amount of outgoing data by monitoring the GetClip.OutgoingBytes Amazon CloudWatch metric. For information about using CloudWatch to monitor Kinesis Video Streams, see Monitoring Kinesis Video Streams. For pricing information, see Amazon Kinesis Video Streams Pricing and Amazon Web Services Pricing. Charges for outgoing Amazon Web Services data apply."]

@@ -2,18 +2,33 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | CreateApplication: (CreateApplicationRequest.t,
+  CreateApplicationResponse.t, CreateApplicationResponse.error) t 
   | CreateDataIntegration: (CreateDataIntegrationRequest.t,
   CreateDataIntegrationResponse.t, CreateDataIntegrationResponse.error) t 
+  | CreateDataIntegrationAssociation:
+  (CreateDataIntegrationAssociationRequest.t,
+  CreateDataIntegrationAssociationResponse.t,
+  CreateDataIntegrationAssociationResponse.error) t 
   | CreateEventIntegration: (CreateEventIntegrationRequest.t,
   CreateEventIntegrationResponse.t, CreateEventIntegrationResponse.error) t 
+  | DeleteApplication: (DeleteApplicationRequest.t,
+  DeleteApplicationResponse.t, DeleteApplicationResponse.error) t 
   | DeleteDataIntegration: (DeleteDataIntegrationRequest.t,
   DeleteDataIntegrationResponse.t, DeleteDataIntegrationResponse.error) t 
   | DeleteEventIntegration: (DeleteEventIntegrationRequest.t,
   DeleteEventIntegrationResponse.t, DeleteEventIntegrationResponse.error) t 
+  | GetApplication: (GetApplicationRequest.t, GetApplicationResponse.t,
+  GetApplicationResponse.error) t 
   | GetDataIntegration: (GetDataIntegrationRequest.t,
   GetDataIntegrationResponse.t, GetDataIntegrationResponse.error) t 
   | GetEventIntegration: (GetEventIntegrationRequest.t,
   GetEventIntegrationResponse.t, GetEventIntegrationResponse.error) t 
+  | ListApplicationAssociations: (ListApplicationAssociationsRequest.t,
+  ListApplicationAssociationsResponse.t,
+  ListApplicationAssociationsResponse.error) t 
+  | ListApplications: (ListApplicationsRequest.t, ListApplicationsResponse.t,
+  ListApplicationsResponse.error) t 
   | ListDataIntegrationAssociations:
   (ListDataIntegrationAssociationsRequest.t,
   ListDataIntegrationAssociationsResponse.t,
@@ -32,18 +47,30 @@ type ('i, 'o, 'e) t =
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateApplication: (UpdateApplicationRequest.t,
+  UpdateApplicationResponse.t, UpdateApplicationResponse.error) t 
   | UpdateDataIntegration: (UpdateDataIntegrationRequest.t,
   UpdateDataIntegrationResponse.t, UpdateDataIntegrationResponse.error) t 
+  | UpdateDataIntegrationAssociation:
+  (UpdateDataIntegrationAssociationRequest.t,
+  UpdateDataIntegrationAssociationResponse.t,
+  UpdateDataIntegrationAssociationResponse.error) t 
   | UpdateEventIntegration: (UpdateEventIntegrationRequest.t,
   UpdateEventIntegrationResponse.t, UpdateEventIntegrationResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | CreateApplication -> `POST
   | CreateDataIntegration -> `POST
+  | CreateDataIntegrationAssociation -> `POST
   | CreateEventIntegration -> `POST
+  | DeleteApplication -> `DELETE
   | DeleteDataIntegration -> `DELETE
   | DeleteEventIntegration -> `DELETE
+  | GetApplication -> `GET
   | GetDataIntegration -> `GET
   | GetEventIntegration -> `GET
+  | ListApplicationAssociations -> `GET
+  | ListApplications -> `GET
   | ListDataIntegrationAssociations -> `GET
   | ListDataIntegrations -> `GET
   | ListEventIntegrationAssociations -> `GET
@@ -51,15 +78,26 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListTagsForResource -> `GET
   | TagResource -> `POST
   | UntagResource -> `DELETE
+  | UpdateApplication -> `PATCH
   | UpdateDataIntegration -> `PATCH
+  | UpdateDataIntegrationAssociation -> `PATCH
   | UpdateEventIntegration -> `PATCH
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | CreateApplication -> (Format.kasprintf Uri.of_string) "/applications"
       | CreateDataIntegration ->
           (Format.kasprintf Uri.of_string) "/dataIntegrations"
+      | CreateDataIntegrationAssociation ->
+          (Format.kasprintf Uri.of_string)
+            "/dataIntegrations/%s/associations"
+            (Identifier.to_header
+               x.CreateDataIntegrationAssociationRequest.dataIntegrationIdentifier)
       | CreateEventIntegration ->
           (Format.kasprintf Uri.of_string) "/eventIntegrations"
+      | DeleteApplication ->
+          (Format.kasprintf Uri.of_string) "/applications/%s"
+            (ArnOrUUID.to_header x.DeleteApplicationRequest.arn)
       | DeleteDataIntegration ->
           (Format.kasprintf Uri.of_string) "/dataIntegrations/%s"
             (Identifier.to_header
@@ -67,12 +105,41 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteEventIntegration ->
           (Format.kasprintf Uri.of_string) "/eventIntegrations/%s"
             (Name.to_header x.DeleteEventIntegrationRequest.name)
+      | GetApplication ->
+          (Format.kasprintf Uri.of_string) "/applications/%s"
+            (ArnOrUUID.to_header x.GetApplicationRequest.arn)
       | GetDataIntegration ->
           (Format.kasprintf Uri.of_string) "/dataIntegrations/%s"
             (Identifier.to_header x.GetDataIntegrationRequest.identifier)
       | GetEventIntegration ->
           (Format.kasprintf Uri.of_string) "/eventIntegrations/%s"
             (Name.to_header x.GetEventIntegrationRequest.name)
+      | ListApplicationAssociations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/applications/%s/associations"
+               (ArnOrUUID.to_header
+                  x.ListApplicationAssociationsRequest.applicationId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListApplications ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/applications")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("applicationType", (ApplicationType.to_header v)))
+                 x.applicationType])
       | ListDataIntegrationAssociations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -131,9 +198,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (Arn.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
+      | UpdateApplication ->
+          (Format.kasprintf Uri.of_string) "/applications/%s"
+            (ArnOrUUID.to_header x.UpdateApplicationRequest.arn)
       | UpdateDataIntegration ->
           (Format.kasprintf Uri.of_string) "/dataIntegrations/%s"
             (Identifier.to_header x.UpdateDataIntegrationRequest.identifier)
+      | UpdateDataIntegrationAssociation ->
+          (Format.kasprintf Uri.of_string)
+            "/dataIntegrations/%s/associations/%s"
+            (Identifier.to_header
+               x.UpdateDataIntegrationAssociationRequest.dataIntegrationIdentifier)
+            (Identifier.to_header
+               x.UpdateDataIntegrationAssociationRequest.dataIntegrationAssociationIdentifier)
       | UpdateEventIntegration ->
           (Format.kasprintf Uri.of_string) "/eventIntegrations/%s"
             (Name.to_header x.UpdateEventIntegrationRequest.name))
@@ -141,6 +218,71 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | CreateApplication ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (ApplicationName.to_value
+                              req.CreateApplicationRequest.name));
+                      Some
+                        ("Namespace",
+                          (ApplicationNamespace.to_value
+                             req.CreateApplicationRequest.namespace));
+                      Option.map req.CreateApplicationRequest.description
+                        ~f:(fun x ->
+                              ("Description", (Description.to_value x)));
+                      Some
+                        ("ApplicationSourceConfig",
+                          (ApplicationSourceConfig.to_value
+                             req.CreateApplicationRequest.applicationSourceConfig));
+                      Option.map req.CreateApplicationRequest.subscriptions
+                        ~f:(fun x ->
+                              ("Subscriptions",
+                                (SubscriptionList.to_value x)));
+                      Option.map req.CreateApplicationRequest.publications
+                        ~f:(fun x ->
+                              ("Publications", (PublicationList.to_value x)));
+                      Option.map req.CreateApplicationRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (IdempotencyToken.to_value x)));
+                      Option.map req.CreateApplicationRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)));
+                      Option.map req.CreateApplicationRequest.permissions
+                        ~f:(fun x ->
+                              ("Permissions", (PermissionList.to_value x)));
+                      Option.map req.CreateApplicationRequest.isService
+                        ~f:(fun x -> ("IsService", (Boolean.to_value x)));
+                      Option.map
+                        req.CreateApplicationRequest.initializationTimeout
+                        ~f:(fun x ->
+                              ("InitializationTimeout",
+                                (InitializationTimeout.to_value x)));
+                      Option.map
+                        req.CreateApplicationRequest.applicationConfig
+                        ~f:(fun x ->
+                              ("ApplicationConfig",
+                                (ApplicationConfig.to_value x)));
+                      Option.map req.CreateApplicationRequest.iframeConfig
+                        ~f:(fun x ->
+                              ("IframeConfig", (IframeConfig.to_value x)));
+                      Option.map req.CreateApplicationRequest.applicationType
+                        ~f:(fun x ->
+                              ("ApplicationType",
+                                (ApplicationType.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateDataIntegration ->
       let (headers, body) =
         let headers =
@@ -157,11 +299,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateDataIntegrationRequest.description
                         ~f:(fun x ->
                               ("Description", (Description.to_value x)));
-                      Option.map req.CreateDataIntegrationRequest.kmsKey
-                        ~f:(fun x -> ("KmsKey", (NonBlankString.to_value x)));
+                      Some
+                        ("KmsKey",
+                          (NonBlankString.to_value
+                             req.CreateDataIntegrationRequest.kmsKey));
                       Option.map req.CreateDataIntegrationRequest.sourceURI
-                        ~f:(fun x ->
-                              ("SourceURI", (NonBlankString.to_value x)));
+                        ~f:(fun x -> ("SourceURI", (SourceURI.to_value x)));
                       Option.map
                         req.CreateDataIntegrationRequest.scheduleConfig
                         ~f:(fun x ->
@@ -171,7 +314,59 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("Tags", (TagMap.to_value x)));
                       Option.map req.CreateDataIntegrationRequest.clientToken
                         ~f:(fun x ->
-                              ("ClientToken", (IdempotencyToken.to_value x)))])
+                              ("ClientToken", (IdempotencyToken.to_value x)));
+                      Option.map
+                        req.CreateDataIntegrationRequest.fileConfiguration
+                        ~f:(fun x ->
+                              ("FileConfiguration",
+                                (FileConfiguration.to_value x)));
+                      Option.map
+                        req.CreateDataIntegrationRequest.objectConfiguration
+                        ~f:(fun x ->
+                              ("ObjectConfiguration",
+                                (ObjectConfiguration.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateDataIntegrationAssociation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateDataIntegrationAssociationRequest.clientId
+                         ~f:(fun x -> ("ClientId", (ClientId.to_value x)));
+                      Option.map
+                        req.CreateDataIntegrationAssociationRequest.objectConfiguration
+                        ~f:(fun x ->
+                              ("ObjectConfiguration",
+                                (ObjectConfiguration.to_value x)));
+                      Option.map
+                        req.CreateDataIntegrationAssociationRequest.destinationURI
+                        ~f:(fun x ->
+                              ("DestinationURI", (DestinationURI.to_value x)));
+                      Option.map
+                        req.CreateDataIntegrationAssociationRequest.clientAssociationMetadata
+                        ~f:(fun x ->
+                              ("ClientAssociationMetadata",
+                                (ClientAssociationMetadata.to_value x)));
+                      Option.map
+                        req.CreateDataIntegrationAssociationRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (IdempotencyToken.to_value x)));
+                      Option.map
+                        req.CreateDataIntegrationAssociationRequest.executionConfiguration
+                        ~f:(fun x ->
+                              ("ExecutionConfiguration",
+                                (ExecutionConfiguration.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -217,13 +412,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteApplication -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDataIntegration -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteEventIntegration ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | GetApplication ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetDataIntegration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetEventIntegration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListApplicationAssociations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListApplications ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListDataIntegrationAssociations ->
@@ -261,7 +466,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateApplication -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDataIntegration -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateDataIntegrationAssociation ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateEventIntegration ->
       Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
@@ -312,12 +520,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | CreateApplication ->
+      if is_success
+      then Ok (CreateApplicationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateApplicationResponse.error_of_json))
   | CreateDataIntegration ->
       if is_success
       then Ok (CreateDataIntegrationResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some CreateDataIntegrationResponse.error_of_json))
+  | CreateDataIntegrationAssociation ->
+      if is_success
+      then
+        Ok
+          (CreateDataIntegrationAssociationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateDataIntegrationAssociationResponse.error_of_json))
   | CreateEventIntegration ->
       if is_success
       then
@@ -326,6 +550,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateEventIntegrationResponse.error_of_json))
+  | DeleteApplication ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteApplicationResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteApplicationResponse.error_of_json))
   | DeleteDataIntegration ->
       if is_success
       then
@@ -345,6 +578,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteEventIntegrationResponse.error_of_json))
+  | GetApplication ->
+      if is_success
+      then Ok (GetApplicationResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetApplicationResponse.error_of_json))
   | GetDataIntegration ->
       if is_success
       then Ok (GetDataIntegrationResponse.of_json (response_to_json resp))
@@ -357,6 +595,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetEventIntegrationResponse.error_of_json))
+  | ListApplicationAssociations ->
+      if is_success
+      then
+        Ok
+          (ListApplicationAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListApplicationAssociationsResponse.error_of_json))
+  | ListApplications ->
+      if is_success
+      then Ok (ListApplicationsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListApplicationsResponse.error_of_json))
   | ListDataIntegrationAssociations ->
       if is_success
       then
@@ -409,6 +662,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UntagResourceResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateApplication ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateApplicationResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateApplicationResponse.error_of_json))
   | UpdateDataIntegration ->
       if is_success
       then
@@ -418,6 +680,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateDataIntegrationResponse.error_of_json))
+  | UpdateDataIntegrationAssociation ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateDataIntegrationAssociationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDataIntegrationAssociationResponse.error_of_json))
   | UpdateEventIntegration ->
       if is_success
       then

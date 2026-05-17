@@ -34,7 +34,7 @@ module S3DestinationBucketName =
           ((check_string_min i ~min:3) >>=
              (fun () ->
                 (check_string_max i ~max:63) >>=
-                  (fun () -> check_pattern i ~pattern:"^[a-z0-9-.]+$")));
+                  (fun () -> check_pattern i ~pattern:"[a-z0-9-.]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -44,6 +44,117 @@ module S3DestinationBucketName =
     let of_json j = string_of_json ~kind:"S3DestinationBucketName" j
     let to_json = simple_to_json to_value
   end
+module MediaTailorPlaybackConfigurationArn =
+  struct
+    type nonrec t = string
+    let context_ = "MediaTailorPlaybackConfigurationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:mediatailor:[a-z0-9-]+:[0-9]+:playbackConfiguration/[a-zA-Z0-9-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"MediaTailorPlaybackConfigurationArn" j
+    let to_json = simple_to_json to_value
+  end
+module Integer =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module RenditionConfigurationRendition =
+  struct
+    type nonrec t =
+      | SD 
+      | HD 
+      | FULL_HD 
+      | LOWEST_RESOLUTION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SD -> "SD"
+      | HD -> "HD"
+      | FULL_HD -> "FULL_HD"
+      | LOWEST_RESOLUTION -> "LOWEST_RESOLUTION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SD" -> SD
+      | "HD" -> HD
+      | "FULL_HD" -> FULL_HD
+      | "LOWEST_RESOLUTION" -> LOWEST_RESOLUTION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RenditionConfigurationRendition"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RenditionConfigurationRendition" j)
+    let to_json = simple_to_json to_value
+  end
+module ThumbnailConfigurationStorage =
+  struct
+    type nonrec t =
+      | SEQUENTIAL 
+      | LATEST 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SEQUENTIAL -> "SEQUENTIAL"
+      | LATEST -> "LATEST"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SEQUENTIAL" -> SEQUENTIAL
+      | "LATEST" -> LATEST
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ThumbnailConfigurationStorage"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ThumbnailConfigurationStorage" j)
+    let to_json = simple_to_json to_value
+  end
 module TagKey =
   struct
     type nonrec t = string
@@ -51,8 +162,12 @@ module TagKey =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:128) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]+)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -69,8 +184,12 @@ module TagValue =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -100,37 +219,399 @@ module S3DestinationConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ~bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bucketName =
-        field_map_exn json "bucketName" S3DestinationBucketName.of_json in
+        field_map_exn json__ "bucketName" S3DestinationBucketName.of_json in
       make ~bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that describes an S3 location where recorded videos will be stored."]
-module Integer =
-  struct
-    type nonrec t = Int64.t
-    let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
-    let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
-    let to_json = simple_to_json to_value
-  end
-module String_ =
+module PlaybackRestrictionPolicyAllowedCountry =
   struct
     type nonrec t = string
-    let context_ = "String"
+    let context_ = "PlaybackRestrictionPolicyAllowedCountry"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2) >>=
+             (fun () -> check_string_min i ~min:2));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"PlaybackRestrictionPolicyAllowedCountry" j
+    let to_json = simple_to_json to_value
+  end
+module PlaybackRestrictionPolicyAllowedOrigin =
+  struct
+    type nonrec t = string
+    let context_ = "PlaybackRestrictionPolicyAllowedOrigin"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"PlaybackRestrictionPolicyAllowedOrigin" j
+    let to_json = simple_to_json to_value
+  end
+module MediaTailorPlaybackConfiguration =
+  struct
+    type nonrec t =
+      {
+      playbackConfigurationArn: MediaTailorPlaybackConfigurationArn.t option
+        [@ocaml.doc
+          "ARN of the customer-created EMT PlaybackConfiguration resource in the same region and account."]}
+    let make ?playbackConfigurationArn =
+      fun () -> { playbackConfigurationArn }
+    let to_value x =
+      structure_to_value
+        [("playbackConfigurationArn",
+           (Option.map x.playbackConfigurationArn
+              ~f:MediaTailorPlaybackConfigurationArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let playbackConfigurationArn =
+        (Option.map ~f:MediaTailorPlaybackConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "playbackConfigurationArn") in
+      make ?playbackConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let playbackConfigurationArn =
+        field_map json__ "playbackConfigurationArn"
+          MediaTailorPlaybackConfigurationArn.of_json in
+      make ?playbackConfigurationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object specifying a configuration for integration with an AWS Elemental MediaTailor (EMT)."]
+module IsMultitrackInputEnabled =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module MultitrackMaximumResolution =
+  struct
+    type nonrec t =
+      | SD 
+      | HD 
+      | FULL_HD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SD -> "SD"
+      | HD -> "HD"
+      | FULL_HD -> "FULL_HD"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SD" -> SD
+      | "HD" -> HD
+      | "FULL_HD" -> FULL_HD
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MultitrackMaximumResolution"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MultitrackMaximumResolution" j)
+    let to_json = simple_to_json to_value
+  end
+module MultitrackPolicy =
+  struct
+    type nonrec t =
+      | ALLOW 
+      | REQUIRE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALLOW -> "ALLOW"
+      | REQUIRE -> "REQUIRE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALLOW" -> ALLOW
+      | "REQUIRE" -> REQUIRE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MultitrackPolicy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MultitrackPolicy" j)
+    let to_json = simple_to_json to_value
+  end
+module SrtEndpoint =
+  struct
+    type nonrec t = string
+    let context_ = "SrtEndpoint"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
+    let of_json j = string_of_json ~kind:"SrtEndpoint" j
+    let to_json = simple_to_json to_value
+  end
+module SrtPassphrase =
+  struct
+    type nonrec t = string
+    let context_ = "SrtPassphrase"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SrtPassphrase" j
+    let to_json = simple_to_json to_value
+  end
+module AudioConfiguration =
+  struct
+    type nonrec t =
+      {
+      codec: String_.t option
+        [@ocaml.doc "Codec used for the audio encoding."];
+      targetBitrate: Integer.t option
+        [@ocaml.doc
+          "The expected ingest bitrate (bits per second). This is configured in the encoder."];
+      sampleRate: Integer.t option
+        [@ocaml.doc "Number of audio samples recorded per second."];
+      channels: Integer.t option [@ocaml.doc "Number of audio channels."];
+      track: String_.t option
+        [@ocaml.doc
+          "Name of the audio track (if the stream has an audio track). If multitrack is not enabled, this is Track0 (the sole track)."]}
+    let make ?codec =
+      fun ?targetBitrate ->
+        fun ?sampleRate ->
+          fun ?channels ->
+            fun ?track ->
+              fun () -> { codec; targetBitrate; sampleRate; channels; track }
+    let to_value x =
+      structure_to_value
+        [("codec", (Option.map x.codec ~f:String_.to_value));
+        ("targetBitrate", (Option.map x.targetBitrate ~f:Integer.to_value));
+        ("sampleRate", (Option.map x.sampleRate ~f:Integer.to_value));
+        ("channels", (Option.map x.channels ~f:Integer.to_value));
+        ("track", (Option.map x.track ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let track = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "track") in
+      let channels =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "channels") in
+      let sampleRate =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "sampleRate") in
+      let targetBitrate =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "targetBitrate") in
+      let codec = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "codec") in
+      make ?track ?channels ?sampleRate ?targetBitrate ?codec ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let track = field_map json__ "track" String_.of_json in
+      let channels = field_map json__ "channels" Integer.of_json in
+      let sampleRate = field_map json__ "sampleRate" Integer.of_json in
+      let targetBitrate = field_map json__ "targetBitrate" Integer.of_json in
+      let codec = field_map json__ "codec" String_.of_json in
+      make ?track ?channels ?sampleRate ?targetBitrate ?codec ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object specifying a stream\226\128\153s audio configuration, as set up by the broadcaster (usually in an encoder). This is part of the IngestConfigurations object and the deprecated IngestConfiguration object. It is used for monitoring stream health."]
+module VideoConfiguration =
+  struct
+    type nonrec t =
+      {
+      avcProfile: String_.t option
+        [@ocaml.doc
+          "(Deprecated) Indicates to the decoder the requirements for decoding the stream. For definitions of the valid values, see the H.264 specification. This is populated only when VideoConfiguration is part of the deprecated IngestConfiguration; otherwise, this is an empty string."];
+      avcLevel: String_.t option
+        [@ocaml.doc
+          "(Deprecated) Indicates the degree of required decoder performance for a profile. Normally this is set automatically by the encoder. For details, see the H.264 specification. This is populated only when VideoConfiguration is part of the deprecated IngestConfiguration; otherwise, this is an empty string."];
+      codec: String_.t option
+        [@ocaml.doc "Codec used for the video encoding."];
+      encoder: String_.t option
+        [@ocaml.doc "Software or hardware used to encode the video."];
+      targetBitrate: Integer.t option
+        [@ocaml.doc
+          "The expected ingest bitrate (bits per second). This is configured in the encoder."];
+      targetFramerate: Integer.t option
+        [@ocaml.doc
+          "The expected ingest framerate. This is configured in the encoder."];
+      videoHeight: Integer.t option
+        [@ocaml.doc "Video-resolution height in pixels."];
+      videoWidth: Integer.t option
+        [@ocaml.doc "Video-resolution width in pixels."];
+      level: String_.t option
+        [@ocaml.doc
+          "Indicates the degree of required decoder performance for a profile. Normally this is set automatically by the encoder. When an AVC codec is used, this field has the same value as avcLevel."];
+      track: String_.t option
+        [@ocaml.doc
+          "Name of the video track. If multitrack is not enabled, this is Track0 (the sole track)."];
+      profile: String_.t option
+        [@ocaml.doc
+          "Indicates to the decoder the requirements for decoding the stream. When an AVC codec is used, this field has the same value as avcProfile."]}
+    let make ?avcProfile =
+      fun ?avcLevel ->
+        fun ?codec ->
+          fun ?encoder ->
+            fun ?targetBitrate ->
+              fun ?targetFramerate ->
+                fun ?videoHeight ->
+                  fun ?videoWidth ->
+                    fun ?level ->
+                      fun ?track ->
+                        fun ?profile ->
+                          fun () ->
+                            {
+                              avcProfile;
+                              avcLevel;
+                              codec;
+                              encoder;
+                              targetBitrate;
+                              targetFramerate;
+                              videoHeight;
+                              videoWidth;
+                              level;
+                              track;
+                              profile
+                            }
+    let to_value x =
+      structure_to_value
+        [("avcProfile", (Option.map x.avcProfile ~f:String_.to_value));
+        ("avcLevel", (Option.map x.avcLevel ~f:String_.to_value));
+        ("codec", (Option.map x.codec ~f:String_.to_value));
+        ("encoder", (Option.map x.encoder ~f:String_.to_value));
+        ("targetBitrate", (Option.map x.targetBitrate ~f:Integer.to_value));
+        ("targetFramerate",
+          (Option.map x.targetFramerate ~f:Integer.to_value));
+        ("videoHeight", (Option.map x.videoHeight ~f:Integer.to_value));
+        ("videoWidth", (Option.map x.videoWidth ~f:Integer.to_value));
+        ("level", (Option.map x.level ~f:String_.to_value));
+        ("track", (Option.map x.track ~f:String_.to_value));
+        ("profile", (Option.map x.profile ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profile =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "profile") in
+      let track = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "track") in
+      let level = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "level") in
+      let videoWidth =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "videoWidth") in
+      let videoHeight =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "videoHeight") in
+      let targetFramerate =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "targetFramerate") in
+      let targetBitrate =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "targetBitrate") in
+      let encoder =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "encoder") in
+      let codec = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "codec") in
+      let avcLevel =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "avcLevel") in
+      let avcProfile =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "avcProfile") in
+      make ?profile ?track ?level ?videoWidth ?videoHeight ?targetFramerate
+        ?targetBitrate ?encoder ?codec ?avcLevel ?avcProfile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profile = field_map json__ "profile" String_.of_json in
+      let track = field_map json__ "track" String_.of_json in
+      let level = field_map json__ "level" String_.of_json in
+      let videoWidth = field_map json__ "videoWidth" Integer.of_json in
+      let videoHeight = field_map json__ "videoHeight" Integer.of_json in
+      let targetFramerate =
+        field_map json__ "targetFramerate" Integer.of_json in
+      let targetBitrate = field_map json__ "targetBitrate" Integer.of_json in
+      let encoder = field_map json__ "encoder" String_.of_json in
+      let codec = field_map json__ "codec" String_.of_json in
+      let avcLevel = field_map json__ "avcLevel" String_.of_json in
+      let avcProfile = field_map json__ "avcProfile" String_.of_json in
+      make ?profile ?track ?level ?videoWidth ?videoHeight ?targetFramerate
+        ?targetBitrate ?encoder ?codec ?avcLevel ?avcProfile ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object specifying a stream\226\128\153s video configuration, as set up by the broadcaster (usually in an encoder). This is part of the IngestConfigurations object and the deprecated IngestConfiguration object. It is used for monitoring stream health."]
+module RenditionConfigurationRenditionList =
+  struct
+    type nonrec t = RenditionConfigurationRendition.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RenditionConfigurationRendition.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RenditionConfigurationRendition.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RenditionConfigurationRenditionList"
+        ~of_json:RenditionConfigurationRendition.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RenditionConfigurationRenditionSelection =
+  struct
+    type nonrec t =
+      | ALL 
+      | NONE 
+      | CUSTOM 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALL -> "ALL"
+      | NONE -> "NONE"
+      | CUSTOM -> "CUSTOM"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALL" -> ALL
+      | "NONE" -> NONE
+      | "CUSTOM" -> CUSTOM
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration RenditionConfigurationRenditionSelection"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"RenditionConfigurationRenditionSelection" j)
     let to_json = simple_to_json to_value
   end
 module RecordingMode =
@@ -165,7 +646,7 @@ module TargetIntervalSeconds =
       let open Result in
         ok_or_failwith
           ((check_int64_max i ~max:60L) >>=
-             (fun () -> check_int64_min i ~min:5L));
+             (fun () -> check_int64_min i ~min:1L));
         i
     let of_string = Int64.of_string
     let to_value x = `Long x
@@ -175,6 +656,69 @@ module TargetIntervalSeconds =
       Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
+  end
+module ThumbnailConfigurationResolution =
+  struct
+    type nonrec t =
+      | SD 
+      | HD 
+      | FULL_HD 
+      | LOWEST_RESOLUTION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SD -> "SD"
+      | HD -> "HD"
+      | FULL_HD -> "FULL_HD"
+      | LOWEST_RESOLUTION -> "LOWEST_RESOLUTION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SD" -> SD
+      | "HD" -> HD
+      | "FULL_HD" -> FULL_HD
+      | "LOWEST_RESOLUTION" -> LOWEST_RESOLUTION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ThumbnailConfigurationResolution"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ThumbnailConfigurationResolution" j)
+    let to_json = simple_to_json to_value
+  end
+module ThumbnailConfigurationStorageList =
+  struct
+    type nonrec t = ThumbnailConfigurationStorage.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ThumbnailConfigurationStorage.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ThumbnailConfigurationStorage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ThumbnailConfigurationStorageList"
+        ~of_json:ThumbnailConfigurationStorage.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module Time =
   struct
@@ -200,7 +744,7 @@ module ChannelArn =
                 (check_string_max i ~max:128) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:aws:[is]vs:[a-z0-9-]+:[0-9]+:channel/[a-zA-Z0-9-]+$")));
+                       ~pattern:"arn:aws:ivs:[a-z0-9-]+:[0-9]+:channel/[a-zA-Z0-9-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -248,7 +792,7 @@ module StreamId =
           ((check_string_min i ~min:26) >>=
              (fun () ->
                 (check_string_max i ~max:26) >>=
-                  (fun () -> check_pattern i ~pattern:"^st-[a-zA-Z0-9]+$")));
+                  (fun () -> check_pattern i ~pattern:"st-[a-zA-Z0-9]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -327,7 +871,7 @@ module StreamKeyArn =
                 (check_string_max i ~max:128) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:aws:[is]vs:[a-z0-9-]+:[0-9]+:stream-key/[a-zA-Z0-9-]+$")));
+                       ~pattern:"arn:aws:ivs:[a-z0-9-]+:[0-9]+:stream-key/[a-zA-Z0-9-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -362,6 +906,8 @@ module Tags =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -387,8 +933,8 @@ module DestinationConfiguration =
           (Xml.child xml_arg0 "s3") in
       make ?s3 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3 = field_map json "s3" S3DestinationConfiguration.of_json in
+    let of_json json__ =
+      let s3 = field_map json__ "s3" S3DestinationConfiguration.of_json in
       make ?s3 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -405,7 +951,7 @@ module RecordingConfigurationArn =
                 (check_string_max i ~max:128) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:aws:ivs:[a-z0-9-]+:[0-9]+:recording-configuration/[a-zA-Z0-9-]+$")));
+                       ~pattern:"arn:aws:ivs:[a-z0-9-]+:[0-9]+:recording-configuration/[a-zA-Z0-9-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -425,7 +971,7 @@ module RecordingConfigurationName =
           ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9-_]*$")));
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9-_]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -466,6 +1012,121 @@ module RecordingConfigurationState =
       of_string (string_of_json ~kind:"RecordingConfigurationState" j)
     let to_json = simple_to_json to_value
   end
+module PlaybackRestrictionPolicyAllowedCountryList =
+  struct
+    type nonrec t = PlaybackRestrictionPolicyAllowedCountry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PlaybackRestrictionPolicyAllowedCountry.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:PlaybackRestrictionPolicyAllowedCountry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PlaybackRestrictionPolicyAllowedCountryList"
+        ~of_json:PlaybackRestrictionPolicyAllowedCountry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PlaybackRestrictionPolicyAllowedOriginList =
+  struct
+    type nonrec t = PlaybackRestrictionPolicyAllowedOrigin.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PlaybackRestrictionPolicyAllowedOrigin.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:PlaybackRestrictionPolicyAllowedOrigin.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PlaybackRestrictionPolicyAllowedOriginList"
+        ~of_json:PlaybackRestrictionPolicyAllowedOrigin.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PlaybackRestrictionPolicyArn =
+  struct
+    type nonrec t = string
+    let context_ = "PlaybackRestrictionPolicyArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:ivs:[a-z0-9-]+:[0-9]+:playback-restriction-policy/[a-zA-Z0-9-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PlaybackRestrictionPolicyArn" j
+    let to_json = simple_to_json to_value
+  end
+module PlaybackRestrictionPolicyEnableStrictOriginEnforcement =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module PlaybackRestrictionPolicyName =
+  struct
+    type nonrec t = string
+    let context_ = "PlaybackRestrictionPolicyName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9-_]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PlaybackRestrictionPolicyName" j
+    let to_json = simple_to_json to_value
+  end
 module PlaybackKeyPairArn =
   struct
     type nonrec t = string
@@ -478,7 +1139,7 @@ module PlaybackKeyPairArn =
                 (check_string_max i ~max:128) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:aws:[is]vs:[a-z0-9-]+:[0-9]+:playback-key/[a-zA-Z0-9-]+$")));
+                       ~pattern:"arn:aws:ivs:[a-z0-9-]+:[0-9]+:playback-key/[a-zA-Z0-9-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -498,7 +1159,7 @@ module PlaybackKeyPairName =
           ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9-_]*$")));
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9-_]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -506,6 +1167,28 @@ module PlaybackKeyPairName =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"PlaybackKeyPairName" j
+    let to_json = simple_to_json to_value
+  end
+module ChannelAdConfigurationArn =
+  struct
+    type nonrec t = string
+    let context_ = "ChannelAdConfigurationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^$|^arn:aws:ivs:[a-z0-9-]+:[0-9]+:ad-configuration/[a-zA-Z0-9-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ChannelAdConfigurationArn" j
     let to_json = simple_to_json to_value
   end
 module ChannelLatencyMode =
@@ -538,7 +1221,7 @@ module ChannelName =
           ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9-_]*$")));
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9-_]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -546,6 +1229,29 @@ module ChannelName =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ChannelName" j
+    let to_json = simple_to_json to_value
+  end
+module ChannelPlaybackRestrictionPolicyArn =
+  struct
+    type nonrec t = string
+    let context_ = "ChannelPlaybackRestrictionPolicyArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^$|^arn:aws:ivs:[a-z0-9-]+:[0-9]+:playback-restriction-policy/[a-zA-Z0-9-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ChannelPlaybackRestrictionPolicyArn" j
     let to_json = simple_to_json to_value
   end
 module ChannelRecordingConfigurationArn =
@@ -570,6 +1276,50 @@ module ChannelRecordingConfigurationArn =
     let of_json j = string_of_json ~kind:"ChannelRecordingConfigurationArn" j
     let to_json = simple_to_json to_value
   end
+module ChannelType =
+  struct
+    type nonrec t =
+      | BASIC 
+      | STANDARD 
+      | ADVANCED_SD 
+      | ADVANCED_HD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | BASIC -> "BASIC"
+      | STANDARD -> "STANDARD"
+      | ADVANCED_SD -> "ADVANCED_SD"
+      | ADVANCED_HD -> "ADVANCED_HD"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "BASIC" -> BASIC
+      | "STANDARD" -> STANDARD
+      | "ADVANCED_SD" -> ADVANCED_SD
+      | "ADVANCED_HD" -> ADVANCED_HD
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ChannelType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ChannelType" j)
+    let to_json = simple_to_json to_value
+  end
+module InsecureIngest =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module IsAuthorized =
   struct
     type nonrec t = bool
@@ -583,29 +1333,130 @@ module IsAuthorized =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
-module ChannelType =
+module TranscodePreset =
   struct
     type nonrec t =
-      | BASIC 
-      | STANDARD 
+      | HIGHER_BANDWIDTH_DELIVERY 
+      | CONSTRAINED_BANDWIDTH_DELIVERY 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | BASIC -> "BASIC"
-      | STANDARD -> "STANDARD"
+      | HIGHER_BANDWIDTH_DELIVERY -> "HIGHER_BANDWIDTH_DELIVERY"
+      | CONSTRAINED_BANDWIDTH_DELIVERY -> "CONSTRAINED_BANDWIDTH_DELIVERY"
       | Non_static_id s -> s
     let of_string =
       function
-      | "BASIC" -> BASIC
-      | "STANDARD" -> STANDARD
+      | "HIGHER_BANDWIDTH_DELIVERY" -> HIGHER_BANDWIDTH_DELIVERY
+      | "CONSTRAINED_BANDWIDTH_DELIVERY" -> CONSTRAINED_BANDWIDTH_DELIVERY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ChannelType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ChannelType" j)
+      of_string (string_of_xml ~kind:"enumeration TranscodePreset" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TranscodePreset" j)
+    let to_json = simple_to_json to_value
+  end
+module AdConfigurationArn =
+  struct
+    type nonrec t = string
+    let context_ = "AdConfigurationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:ivs:[a-z0-9-]+:[0-9]+:ad-configuration/[a-zA-Z0-9-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AdConfigurationArn" j
+    let to_json = simple_to_json to_value
+  end
+module AdConfigurationName =
+  struct
+    type nonrec t = string
+    let context_ = "AdConfigurationName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9-_]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AdConfigurationName" j
+    let to_json = simple_to_json to_value
+  end
+module MediaTailorPlaybackConfigurationsList =
+  struct
+    type nonrec t = MediaTailorPlaybackConfiguration.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MediaTailorPlaybackConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:MediaTailorPlaybackConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MediaTailorPlaybackConfigurationsList"
+        ~of_json:MediaTailorPlaybackConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ContainerFormat =
+  struct
+    type nonrec t =
+      | TS 
+      | FRAGMENTED_MP4 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TS -> "TS"
+      | FRAGMENTED_MP4 -> "FRAGMENTED_MP4"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TS" -> TS
+      | "FRAGMENTED_MP4" -> FRAGMENTED_MP4
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ContainerFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ContainerFormat" j)
     let to_json = simple_to_json to_value
   end
 module IngestEndpoint =
@@ -621,6 +1472,54 @@ module IngestEndpoint =
     let of_json j = string_of_json ~kind:"IngestEndpoint" j
     let to_json = simple_to_json to_value
   end
+module MultitrackInputConfiguration =
+  struct
+    type nonrec t =
+      {
+      enabled: IsMultitrackInputEnabled.t option
+        [@ocaml.doc
+          "Indicates whether multitrack input is enabled. Can be set to true only if channel type is STANDARD. Setting enabled to true with any other channel type will cause an exception. If true, then policy, maximumResolution, and containerFormat are required, and containerFormat must be set to FRAGMENTED_MP4. Default: false."];
+      policy: MultitrackPolicy.t option
+        [@ocaml.doc
+          "Indicates whether multitrack input is allowed or required. Required if enabled is true."];
+      maximumResolution: MultitrackMaximumResolution.t option
+        [@ocaml.doc
+          "Maximum resolution for multitrack input. Required if enabled is true."]}
+    let make ?enabled =
+      fun ?policy ->
+        fun ?maximumResolution ->
+          fun () -> { enabled; policy; maximumResolution }
+    let to_value x =
+      structure_to_value
+        [("enabled",
+           (Option.map x.enabled ~f:IsMultitrackInputEnabled.to_value));
+        ("policy", (Option.map x.policy ~f:MultitrackPolicy.to_value));
+        ("maximumResolution",
+          (Option.map x.maximumResolution
+             ~f:MultitrackMaximumResolution.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maximumResolution =
+        (Option.map ~f:MultitrackMaximumResolution.of_xml)
+          (Xml.child xml_arg0 "maximumResolution") in
+      let policy =
+        (Option.map ~f:MultitrackPolicy.of_xml) (Xml.child xml_arg0 "policy") in
+      let enabled =
+        (Option.map ~f:IsMultitrackInputEnabled.of_xml)
+          (Xml.child xml_arg0 "enabled") in
+      make ?maximumResolution ?policy ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maximumResolution =
+        field_map json__ "maximumResolution"
+          MultitrackMaximumResolution.of_json in
+      let policy = field_map json__ "policy" MultitrackPolicy.of_json in
+      let enabled =
+        field_map json__ "enabled" IsMultitrackInputEnabled.of_json in
+      make ?maximumResolution ?policy ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A complex type that specifies multitrack input configuration."]
 module PlaybackURL =
   struct
     type nonrec t = string
@@ -634,137 +1533,154 @@ module PlaybackURL =
     let of_json j = string_of_json ~kind:"PlaybackURL" j
     let to_json = simple_to_json to_value
   end
-module AudioConfiguration =
+module Srt =
   struct
     type nonrec t =
       {
-      channels: Integer.t option [@ocaml.doc "Number of audio channels."];
-      codec: String_.t option
-        [@ocaml.doc "Codec used for the audio encoding."];
-      sampleRate: Integer.t option
-        [@ocaml.doc "Number of audio samples recorded per second."];
-      targetBitrate: Integer.t option
+      endpoint: SrtEndpoint.t option
         [@ocaml.doc
-          "The expected ingest bitrate (bits per second). This is configured in the encoder."]}
-    let make ?channels =
-      fun ?codec ->
-        fun ?sampleRate ->
-          fun ?targetBitrate ->
-            fun () -> { channels; codec; sampleRate; targetBitrate }
+          "The endpoint to be used when streaming with IVS using the SRT protocol."];
+      passphrase: SrtPassphrase.t option
+        [@ocaml.doc
+          "Auto-generated passphrase to enable encryption. This field is applicable only if the end user has not enabled the insecureIngest option for the channel."]}
+    let make ?endpoint =
+      fun ?passphrase -> fun () -> { endpoint; passphrase }
     let to_value x =
       structure_to_value
-        [("channels", (Option.map x.channels ~f:Integer.to_value));
-        ("codec", (Option.map x.codec ~f:String_.to_value));
-        ("sampleRate", (Option.map x.sampleRate ~f:Integer.to_value));
-        ("targetBitrate", (Option.map x.targetBitrate ~f:Integer.to_value))]
+        [("endpoint", (Option.map x.endpoint ~f:SrtEndpoint.to_value));
+        ("passphrase", (Option.map x.passphrase ~f:SrtPassphrase.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let targetBitrate =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "targetBitrate") in
-      let sampleRate =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "sampleRate") in
-      let codec = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "codec") in
-      let channels =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "channels") in
-      make ?targetBitrate ?sampleRate ?codec ?channels ()
+      let passphrase =
+        (Option.map ~f:SrtPassphrase.of_xml)
+          (Xml.child xml_arg0 "passphrase") in
+      let endpoint =
+        (Option.map ~f:SrtEndpoint.of_xml) (Xml.child xml_arg0 "endpoint") in
+      make ?passphrase ?endpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetBitrate = field_map json "targetBitrate" Integer.of_json in
-      let sampleRate = field_map json "sampleRate" Integer.of_json in
-      let codec = field_map json "codec" String_.of_json in
-      let channels = field_map json "channels" Integer.of_json in
-      make ?targetBitrate ?sampleRate ?codec ?channels ()
+    let of_json json__ =
+      let passphrase = field_map json__ "passphrase" SrtPassphrase.of_json in
+      let endpoint = field_map json__ "endpoint" SrtEndpoint.of_json in
+      make ?passphrase ?endpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Object specifying a stream\226\128\153s audio configuration."]
-module VideoConfiguration =
+       "Specifies information needed to stream using the SRT protocol."]
+module AudioConfigurationList =
+  struct
+    type nonrec t = AudioConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AudioConfiguration.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AudioConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AudioConfigurationList"
+        ~of_json:AudioConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VideoConfigurationList =
+  struct
+    type nonrec t = VideoConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VideoConfiguration.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VideoConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VideoConfigurationList"
+        ~of_json:VideoConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RecordingReconnectWindowSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:300) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RecordingReconnectWindowSeconds"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RenditionConfiguration =
   struct
     type nonrec t =
       {
-      avcLevel: String_.t option
+      renditionSelection: RenditionConfigurationRenditionSelection.t option
         [@ocaml.doc
-          "Indicates the degree of required decoder performance for a profile. Normally this is set automatically by the encoder. For details, see the H.264 specification."];
-      avcProfile: String_.t option
+          "Indicates which set of renditions are recorded for a stream. For BASIC channels, the CUSTOM value has no effect. If CUSTOM is specified, a set of renditions must be specified in the renditions field. Default: ALL."];
+      renditions: RenditionConfigurationRenditionList.t option
         [@ocaml.doc
-          "Indicates to the decoder the requirements for decoding the stream. For definitions of the valid values, see the H.264 specification."];
-      codec: String_.t option
-        [@ocaml.doc "Codec used for the video encoding."];
-      encoder: String_.t option
-        [@ocaml.doc "Software or hardware used to encode the video."];
-      targetBitrate: Integer.t option
-        [@ocaml.doc
-          "The expected ingest bitrate (bits per second). This is configured in the encoder."];
-      targetFramerate: Integer.t option
-        [@ocaml.doc
-          "The expected ingest framerate. This is configured in the encoder."];
-      videoHeight: Integer.t option
-        [@ocaml.doc "Video-resolution height in pixels."];
-      videoWidth: Integer.t option
-        [@ocaml.doc "Video-resolution width in pixels."]}
-    let make ?avcLevel =
-      fun ?avcProfile ->
-        fun ?codec ->
-          fun ?encoder ->
-            fun ?targetBitrate ->
-              fun ?targetFramerate ->
-                fun ?videoHeight ->
-                  fun ?videoWidth ->
-                    fun () ->
-                      {
-                        avcLevel;
-                        avcProfile;
-                        codec;
-                        encoder;
-                        targetBitrate;
-                        targetFramerate;
-                        videoHeight;
-                        videoWidth
-                      }
+          "Indicates which renditions are recorded for a stream, if renditionSelection is CUSTOM; otherwise, this field is irrelevant. The selected renditions are recorded if they are available during the stream. If a selected rendition is unavailable, the best available rendition is recorded. For details on the resolution dimensions of each rendition, see Auto-Record to Amazon S3."]}
+    let make ?renditionSelection =
+      fun ?renditions -> fun () -> { renditionSelection; renditions }
     let to_value x =
       structure_to_value
-        [("avcLevel", (Option.map x.avcLevel ~f:String_.to_value));
-        ("avcProfile", (Option.map x.avcProfile ~f:String_.to_value));
-        ("codec", (Option.map x.codec ~f:String_.to_value));
-        ("encoder", (Option.map x.encoder ~f:String_.to_value));
-        ("targetBitrate", (Option.map x.targetBitrate ~f:Integer.to_value));
-        ("targetFramerate",
-          (Option.map x.targetFramerate ~f:Integer.to_value));
-        ("videoHeight", (Option.map x.videoHeight ~f:Integer.to_value));
-        ("videoWidth", (Option.map x.videoWidth ~f:Integer.to_value))]
+        [("renditionSelection",
+           (Option.map x.renditionSelection
+              ~f:RenditionConfigurationRenditionSelection.to_value));
+        ("renditions",
+          (Option.map x.renditions
+             ~f:RenditionConfigurationRenditionList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let videoWidth =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "videoWidth") in
-      let videoHeight =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "videoHeight") in
-      let targetFramerate =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "targetFramerate") in
-      let targetBitrate =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "targetBitrate") in
-      let encoder =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "encoder") in
-      let codec = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "codec") in
-      let avcProfile =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "avcProfile") in
-      let avcLevel =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "avcLevel") in
-      make ?videoWidth ?videoHeight ?targetFramerate ?targetBitrate ?encoder
-        ?codec ?avcProfile ?avcLevel ()
+      let renditions =
+        (Option.map ~f:RenditionConfigurationRenditionList.of_xml)
+          (Xml.child xml_arg0 "renditions") in
+      let renditionSelection =
+        (Option.map ~f:RenditionConfigurationRenditionSelection.of_xml)
+          (Xml.child xml_arg0 "renditionSelection") in
+      make ?renditions ?renditionSelection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let videoWidth = field_map json "videoWidth" Integer.of_json in
-      let videoHeight = field_map json "videoHeight" Integer.of_json in
-      let targetFramerate = field_map json "targetFramerate" Integer.of_json in
-      let targetBitrate = field_map json "targetBitrate" Integer.of_json in
-      let encoder = field_map json "encoder" String_.of_json in
-      let codec = field_map json "codec" String_.of_json in
-      let avcProfile = field_map json "avcProfile" String_.of_json in
-      let avcLevel = field_map json "avcLevel" String_.of_json in
-      make ?videoWidth ?videoHeight ?targetFramerate ?targetBitrate ?encoder
-        ?codec ?avcProfile ?avcLevel ()
+    let of_json json__ =
+      let renditions =
+        field_map json__ "renditions"
+          RenditionConfigurationRenditionList.of_json in
+      let renditionSelection =
+        field_map json__ "renditionSelection"
+          RenditionConfigurationRenditionSelection.of_json in
+      make ?renditions ?renditionSelection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Object specifying a stream\226\128\153s video configuration."]
+       "Object that describes which renditions should be recorded for a stream."]
 module ThumbnailConfiguration =
   struct
     type nonrec t =
@@ -773,33 +1689,59 @@ module ThumbnailConfiguration =
         [@ocaml.doc "Thumbnail recording mode. Default: INTERVAL."];
       targetIntervalSeconds: TargetIntervalSeconds.t option
         [@ocaml.doc
-          "The targeted thumbnail-generation interval in seconds. This is configurable (and required) only if recordingMode is INTERVAL. Default: 60. Important: Setting a value for targetIntervalSeconds does not guarantee that thumbnails are generated at the specified interval. For thumbnails to be generated at the targetIntervalSeconds interval, the IDR/Keyframe value for the input video must be less than the targetIntervalSeconds value. See Amazon IVS Streaming Configuration for information on setting IDR/Keyframe to the recommended value in video-encoder settings."]}
+          "The targeted thumbnail-generation interval in seconds. This is configurable (and required) only if recordingMode is INTERVAL. Default: 60. Important: For the BASIC channel type, or the STANDARD channel type with multitrack input, setting a value for targetIntervalSeconds does not guarantee that thumbnails are generated at the specified interval. For thumbnails to be generated at the targetIntervalSeconds interval, the IDR/Keyframe value for the input video must be less than the targetIntervalSeconds value. See Amazon IVS Streaming Configuration for information on setting IDR/Keyframe to the recommended value in video-encoder settings."];
+      resolution: ThumbnailConfigurationResolution.t option
+        [@ocaml.doc
+          "Indicates the desired resolution of recorded thumbnails. Thumbnails are recorded at the selected resolution if the corresponding rendition is available during the stream; otherwise, they are recorded at source resolution. For more information about resolution values and their corresponding height and width dimensions, see Auto-Record to Amazon S3. Default: Null (source resolution is returned)."];
+      storage: ThumbnailConfigurationStorageList.t option
+        [@ocaml.doc
+          "Indicates the format in which thumbnails are recorded. SEQUENTIAL records all generated thumbnails in a serial manner, to the media/thumbnails directory. LATEST saves the latest thumbnail in media/latest_thumbnail/thumb.jpg and overwrites it at the interval specified by targetIntervalSeconds. You can enable both SEQUENTIAL and LATEST. Default: SEQUENTIAL."]}
     let make ?recordingMode =
       fun ?targetIntervalSeconds ->
-        fun () -> { recordingMode; targetIntervalSeconds }
+        fun ?resolution ->
+          fun ?storage ->
+            fun () ->
+              { recordingMode; targetIntervalSeconds; resolution; storage }
     let to_value x =
       structure_to_value
         [("recordingMode",
            (Option.map x.recordingMode ~f:RecordingMode.to_value));
         ("targetIntervalSeconds",
           (Option.map x.targetIntervalSeconds
-             ~f:TargetIntervalSeconds.to_value))]
+             ~f:TargetIntervalSeconds.to_value));
+        ("resolution",
+          (Option.map x.resolution
+             ~f:ThumbnailConfigurationResolution.to_value));
+        ("storage",
+          (Option.map x.storage ~f:ThumbnailConfigurationStorageList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let storage =
+        (Option.map ~f:ThumbnailConfigurationStorageList.of_xml)
+          (Xml.child xml_arg0 "storage") in
+      let resolution =
+        (Option.map ~f:ThumbnailConfigurationResolution.of_xml)
+          (Xml.child xml_arg0 "resolution") in
       let targetIntervalSeconds =
         (Option.map ~f:TargetIntervalSeconds.of_xml)
           (Xml.child xml_arg0 "targetIntervalSeconds") in
       let recordingMode =
         (Option.map ~f:RecordingMode.of_xml)
           (Xml.child xml_arg0 "recordingMode") in
-      make ?targetIntervalSeconds ?recordingMode ()
+      make ?storage ?resolution ?targetIntervalSeconds ?recordingMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let storage =
+        field_map json__ "storage" ThumbnailConfigurationStorageList.of_json in
+      let resolution =
+        field_map json__ "resolution"
+          ThumbnailConfigurationResolution.of_json in
       let targetIntervalSeconds =
-        field_map json "targetIntervalSeconds" TargetIntervalSeconds.of_json in
+        field_map json__ "targetIntervalSeconds"
+          TargetIntervalSeconds.of_json in
       let recordingMode =
-        field_map json "recordingMode" RecordingMode.of_json in
-      make ?targetIntervalSeconds ?recordingMode ()
+        field_map json__ "recordingMode" RecordingMode.of_json in
+      make ?storage ?resolution ?targetIntervalSeconds ?recordingMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing a configuration of thumbnails for recorded video."]
@@ -807,56 +1749,60 @@ module StreamEvent =
   struct
     type nonrec t =
       {
-      eventTime: Time.t option
-        [@ocaml.doc
-          "UTC ISO-8601 formatted timestamp of when the event occurred."];
       name: String_.t option
         [@ocaml.doc "Name that identifies the stream event within a type."];
       type_: String_.t option
-        [@ocaml.doc "Logical group for certain events."]}
-    let make ?eventTime =
-      fun ?name -> fun ?type_ -> fun () -> { eventTime; name; type_ }
+        [@ocaml.doc "Logical group for certain events."];
+      eventTime: Time.t option
+        [@ocaml.doc
+          "Time when the event occurred. This is an ISO 8601 timestamp; note that this is returned as a string."];
+      code: String_.t option
+        [@ocaml.doc
+          "Provides additional details about the stream event. There are several values; the long descriptions are provided in the IVS console but not delivered through the IVS API or EventBridge. Multitrack-related codes are used only for certain Session Ended events. MultitrackInputNotAllowed \226\128\148 The broadcast client attempted to connect with multitrack input, but multitrack input was not enabled on the channel. Check your broadcast software settings or set MultitrackInputConfiguration.Policy to ALLOW or REQUIRE. MultitrackInputRequired \226\128\148 The broadcast client attempted to connect with single-track video, but multitrack input is required on this channel. Enable multitrack video in your broadcast software or configure the channel\226\128\153s MultitrackInputConfiguration.Policy to ALLOW. InvalidGetClientConfigurationStreamKey \226\128\148 The broadcast client attempted to connect with an invalid, expired, or corrupt stream key. GetClientConfigurationStreamKeyRequired \226\128\148 The broadcast client attempted to stream multitrack video without providing an authenticated stream key from GetClientConfiguration. InvalidMultitrackInputTrackCount \226\128\148 The multitrack input stream contained an invalid number of tracks. InvalidMultitrackInputVideoTrackMediaProperties \226\128\148 The multitrack input stream contained one or more tracks with an invalid codec, resolution, bitrate, or framerate. StreamTakeoverMediaMismatch \226\128\148 The broadcast client attempted to take over with different media properties (e.g., codec, resolution, or video track type) from the original stream. StreamTakeoverInvalidPriority \226\128\148 The broadcast client attempted a takeover with either a priority integer value equal to or lower than the original stream's value or a value outside the allowed range of 1 to 2,147,483,647. StreamTakeoverLimitBreached \226\128\148 The broadcast client reached the maximum allowed takeover attempts for this stream."]}
+    let make ?name =
+      fun ?type_ ->
+        fun ?eventTime ->
+          fun ?code -> fun () -> { name; type_; eventTime; code }
     let to_value x =
       structure_to_value
-        [("eventTime", (Option.map x.eventTime ~f:Time.to_value));
-        ("name", (Option.map x.name ~f:String_.to_value));
-        ("type", (Option.map x.type_ ~f:String_.to_value))]
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("type", (Option.map x.type_ ~f:String_.to_value));
+        ("eventTime", (Option.map x.eventTime ~f:Time.to_value));
+        ("code", (Option.map x.code ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
-      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       let eventTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "eventTime") in
-      make ?type_ ?name ?eventTime ()
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?code ?eventTime ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" String_.of_json in
-      let name = field_map json "name" String_.of_json in
-      let eventTime = field_map json "eventTime" Time.of_json in
-      make ?type_ ?name ?eventTime ()
+    let of_json json__ =
+      let code = field_map json__ "code" String_.of_json in
+      let eventTime = field_map json__ "eventTime" Time.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?code ?eventTime ?type_ ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Object specifying a stream\226\128\153s events. For a list of events, see Using Amazon EventBridge with Amazon IVS."]
-module ResourceArn =
+module ViewerId =
   struct
     type nonrec t = string
-    let context_ = "ResourceArn"
+    let context_ = "ViewerId"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^arn:aws:[is]vs:[a-z0-9-]+:[0-9]+:[a-z-]/[a-zA-Z0-9-]+$")));
+          ((check_string_max i ~max:40) >>=
+             (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ResourceArn" j
+    let of_json j = string_of_json ~kind:"ViewerId" j
     let to_json = simple_to_json to_value
   end
 module ErrorCode =
@@ -885,6 +1831,43 @@ module ErrorMessage =
     let of_json j = string_of_json ~kind:"errorMessage" j
     let to_json = simple_to_json to_value
   end
+module ViewerSessionVersion =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ViewerSessionVersion" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceArn =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:ivs:[a-z0-9-]+:[0-9]+:[a-z-]/[a-zA-Z0-9-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceArn" j
+    let to_json = simple_to_json to_value
+  end
 module StreamKeyValue =
   struct
     type nonrec t = string
@@ -904,117 +1887,118 @@ module StreamSummary =
       {
       channelArn: ChannelArn.t option
         [@ocaml.doc "Channel ARN for the stream."];
-      health: StreamHealth.t option
-        [@ocaml.doc "The stream\226\128\153s health."];
-      startTime: StreamStartTime.t option
-        [@ocaml.doc
-          "Time of the stream\226\128\153s start. This is an ISO 8601 timestamp returned as a string."];
-      state: StreamState.t option
-        [@ocaml.doc "The stream\226\128\153s state."];
       streamId: StreamId.t option
         [@ocaml.doc
           "Unique identifier for a live or previously live stream in the specified channel."];
+      state: StreamState.t option
+        [@ocaml.doc
+          "The stream\226\128\153s state. Do not rely on the OFFLINE state, as the API may not return it; instead, a \"NotBroadcasting\" error will indicate that the stream is not live."];
+      health: StreamHealth.t option
+        [@ocaml.doc "The stream\226\128\153s health."];
       viewerCount: StreamViewerCount.t option
         [@ocaml.doc
-          "A count of concurrent views of the stream. Typically, a new view appears in viewerCount within 15 seconds of when video playback starts and a view is removed from viewerCount within 1 minute of when video playback ends. A value of -1 indicates that the request timed out; in this case, retry."]}
+          "A count of concurrent views of the stream. Typically, a new view appears in viewerCount within 15 seconds of when video playback starts and a view is removed from viewerCount within 1 minute of when video playback ends. A value of -1 indicates that the request timed out; in this case, retry."];
+      startTime: StreamStartTime.t option
+        [@ocaml.doc
+          "Time of the stream\226\128\153s start. This is an ISO 8601 timestamp; note that this is returned as a string."]}
     let make ?channelArn =
-      fun ?health ->
-        fun ?startTime ->
-          fun ?state ->
-            fun ?streamId ->
-              fun ?viewerCount ->
+      fun ?streamId ->
+        fun ?state ->
+          fun ?health ->
+            fun ?viewerCount ->
+              fun ?startTime ->
                 fun () ->
                   {
                     channelArn;
-                    health;
-                    startTime;
-                    state;
                     streamId;
-                    viewerCount
+                    state;
+                    health;
+                    viewerCount;
+                    startTime
                   }
     let to_value x =
       structure_to_value
         [("channelArn", (Option.map x.channelArn ~f:ChannelArn.to_value));
-        ("health", (Option.map x.health ~f:StreamHealth.to_value));
-        ("startTime", (Option.map x.startTime ~f:StreamStartTime.to_value));
-        ("state", (Option.map x.state ~f:StreamState.to_value));
         ("streamId", (Option.map x.streamId ~f:StreamId.to_value));
+        ("state", (Option.map x.state ~f:StreamState.to_value));
+        ("health", (Option.map x.health ~f:StreamHealth.to_value));
         ("viewerCount",
-          (Option.map x.viewerCount ~f:StreamViewerCount.to_value))]
+          (Option.map x.viewerCount ~f:StreamViewerCount.to_value));
+        ("startTime", (Option.map x.startTime ~f:StreamStartTime.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let viewerCount =
-        (Option.map ~f:StreamViewerCount.of_xml)
-          (Xml.child xml_arg0 "viewerCount") in
-      let streamId =
-        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "streamId") in
-      let state =
-        (Option.map ~f:StreamState.of_xml) (Xml.child xml_arg0 "state") in
       let startTime =
         (Option.map ~f:StreamStartTime.of_xml)
           (Xml.child xml_arg0 "startTime") in
+      let viewerCount =
+        (Option.map ~f:StreamViewerCount.of_xml)
+          (Xml.child xml_arg0 "viewerCount") in
       let health =
         (Option.map ~f:StreamHealth.of_xml) (Xml.child xml_arg0 "health") in
+      let state =
+        (Option.map ~f:StreamState.of_xml) (Xml.child xml_arg0 "state") in
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "streamId") in
       let channelArn =
         (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "channelArn") in
-      make ?viewerCount ?streamId ?state ?startTime ?health ?channelArn ()
+      make ?startTime ?viewerCount ?health ?state ?streamId ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let startTime = field_map json__ "startTime" StreamStartTime.of_json in
       let viewerCount =
-        field_map json "viewerCount" StreamViewerCount.of_json in
-      let streamId = field_map json "streamId" StreamId.of_json in
-      let state = field_map json "state" StreamState.of_json in
-      let startTime = field_map json "startTime" StreamStartTime.of_json in
-      let health = field_map json "health" StreamHealth.of_json in
-      let channelArn = field_map json "channelArn" ChannelArn.of_json in
-      make ?viewerCount ?streamId ?state ?startTime ?health ?channelArn ()
+        field_map json__ "viewerCount" StreamViewerCount.of_json in
+      let health = field_map json__ "health" StreamHealth.of_json in
+      let state = field_map json__ "state" StreamState.of_json in
+      let streamId = field_map json__ "streamId" StreamId.of_json in
+      let channelArn = field_map json__ "channelArn" ChannelArn.of_json in
+      make ?startTime ?viewerCount ?health ?state ?streamId ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about a stream."]
 module StreamSessionSummary =
   struct
     type nonrec t =
       {
-      endTime: Time.t option
-        [@ocaml.doc
-          "UTC ISO-8601 formatted timestamp of when the channel went offline. For live streams, this is NULL."];
-      hasErrorEvent: Boolean.t option
-        [@ocaml.doc
-          "If true, this stream encountered a quota breach or failure."];
-      startTime: Time.t option
-        [@ocaml.doc
-          "UTC ISO-8601 formatted timestamp of when the channel went live."];
       streamId: StreamId.t option
         [@ocaml.doc
-          "Unique identifier for a live or previously live stream in the specified channel."]}
-    let make ?endTime =
-      fun ?hasErrorEvent ->
-        fun ?startTime ->
-          fun ?streamId ->
-            fun () -> { endTime; hasErrorEvent; startTime; streamId }
+          "Unique identifier for a live or previously live stream in the specified channel."];
+      startTime: Time.t option
+        [@ocaml.doc
+          "Time when the channel went live. This is an ISO 8601 timestamp; note that this is returned as a string."];
+      endTime: Time.t option
+        [@ocaml.doc
+          "Time when the channel went offline. This is an ISO 8601 timestamp; note that this is returned as a string. For live streams, this is NULL."];
+      hasErrorEvent: Boolean.t option
+        [@ocaml.doc
+          "If true, this stream encountered a quota breach or failure."]}
+    let make ?streamId =
+      fun ?startTime ->
+        fun ?endTime ->
+          fun ?hasErrorEvent ->
+            fun () -> { streamId; startTime; endTime; hasErrorEvent }
     let to_value x =
       structure_to_value
-        [("endTime", (Option.map x.endTime ~f:Time.to_value));
-        ("hasErrorEvent", (Option.map x.hasErrorEvent ~f:Boolean.to_value));
+        [("streamId", (Option.map x.streamId ~f:StreamId.to_value));
         ("startTime", (Option.map x.startTime ~f:Time.to_value));
-        ("streamId", (Option.map x.streamId ~f:StreamId.to_value))]
+        ("endTime", (Option.map x.endTime ~f:Time.to_value));
+        ("hasErrorEvent", (Option.map x.hasErrorEvent ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let streamId =
-        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "streamId") in
-      let startTime =
-        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "startTime") in
       let hasErrorEvent =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "hasErrorEvent") in
       let endTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "endTime") in
-      make ?streamId ?startTime ?hasErrorEvent ?endTime ()
+      let startTime =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "startTime") in
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "streamId") in
+      make ?hasErrorEvent ?endTime ?startTime ?streamId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamId = field_map json "streamId" StreamId.of_json in
-      let startTime = field_map json "startTime" Time.of_json in
-      let hasErrorEvent = field_map json "hasErrorEvent" Boolean.of_json in
-      let endTime = field_map json "endTime" Time.of_json in
-      make ?streamId ?startTime ?hasErrorEvent ?endTime ()
+    let of_json json__ =
+      let hasErrorEvent = field_map json__ "hasErrorEvent" Boolean.of_json in
+      let endTime = field_map json__ "endTime" Time.of_json in
+      let startTime = field_map json__ "startTime" Time.of_json in
+      let streamId = field_map json__ "streamId" StreamId.of_json in
+      make ?hasErrorEvent ?endTime ?startTime ?streamId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about a stream session."]
 module StreamKeySummary =
@@ -1026,7 +2010,7 @@ module StreamKeySummary =
         [@ocaml.doc "Channel ARN for the stream."];
       tags: Tags.t option
         [@ocaml.doc
-          "Array of 1-50 maps, each of the form string:string (key:value)."]}
+          "Tags attached to the resource. Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
     let make ?arn =
       fun ?channelArn -> fun ?tags -> fun () -> { arn; channelArn; tags }
     let to_value x =
@@ -1043,10 +2027,10 @@ module StreamKeySummary =
         (Option.map ~f:StreamKeyArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?channelArn ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let channelArn = field_map json "channelArn" ChannelArn.of_json in
-      let arn = field_map json "arn" StreamKeyArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let channelArn = field_map json__ "channelArn" ChannelArn.of_json in
+      let arn = field_map json__ "arn" StreamKeyArn.of_json in
       make ?tags ?channelArn ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about a stream key."]
@@ -1054,66 +2038,157 @@ module RecordingConfigurationSummary =
   struct
     type nonrec t =
       {
-      arn: RecordingConfigurationArn.t
+      arn: RecordingConfigurationArn.t option
         [@ocaml.doc "Recording-configuration ARN."];
-      destinationConfiguration: DestinationConfiguration.t
-        [@ocaml.doc
-          "A complex type that contains information about where recorded video will be stored."];
       name: RecordingConfigurationName.t option
         [@ocaml.doc
           "Recording-configuration name. The value does not need to be unique."];
-      state: RecordingConfigurationState.t
+      destinationConfiguration: DestinationConfiguration.t option
+        [@ocaml.doc
+          "A complex type that contains information about where recorded video will be stored."];
+      state: RecordingConfigurationState.t option
         [@ocaml.doc
           "Indicates the current state of the recording configuration. When the state is ACTIVE, the configuration is ready for recording a channel stream."];
       tags: Tags.t option
         [@ocaml.doc
-          "Array of 1-50 maps, each of the form string:string (key:value)."]}
-    let context_ = "RecordingConfigurationSummary"
-    let make ?name =
-      fun ?tags ->
-        fun ~arn ->
-          fun ~destinationConfiguration ->
-            fun ~state ->
-              fun () -> { name; tags; arn; destinationConfiguration; state }
+          "Tags attached to the resource. Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?destinationConfiguration ->
+          fun ?state ->
+            fun ?tags ->
+              fun () -> { arn; name; destinationConfiguration; state; tags }
     let to_value x =
       structure_to_value
-        [("arn", (Some (RecordingConfigurationArn.to_value x.arn)));
-        ("destinationConfiguration",
-          (Some
-             (DestinationConfiguration.to_value x.destinationConfiguration)));
+        [("arn", (Option.map x.arn ~f:RecordingConfigurationArn.to_value));
         ("name", (Option.map x.name ~f:RecordingConfigurationName.to_value));
-        ("state", (Some (RecordingConfigurationState.to_value x.state)));
+        ("destinationConfiguration",
+          (Option.map x.destinationConfiguration
+             ~f:DestinationConfiguration.to_value));
+        ("state",
+          (Option.map x.state ~f:RecordingConfigurationState.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let state =
-        RecordingConfigurationState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "state") in
+        (Option.map ~f:RecordingConfigurationState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let destinationConfiguration =
+        (Option.map ~f:DestinationConfiguration.of_xml)
+          (Xml.child xml_arg0 "destinationConfiguration") in
       let name =
         (Option.map ~f:RecordingConfigurationName.of_xml)
           (Xml.child xml_arg0 "name") in
-      let destinationConfiguration =
-        DestinationConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "destinationConfiguration") in
       let arn =
-        RecordingConfigurationArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?tags ~state ?name ~destinationConfiguration ~arn ()
+        (Option.map ~f:RecordingConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?tags ?state ?destinationConfiguration ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
       let state =
-        field_map_exn json "state" RecordingConfigurationState.of_json in
-      let name = field_map json "name" RecordingConfigurationName.of_json in
+        field_map json__ "state" RecordingConfigurationState.of_json in
       let destinationConfiguration =
-        field_map_exn json "destinationConfiguration"
+        field_map json__ "destinationConfiguration"
           DestinationConfiguration.of_json in
-      let arn = field_map_exn json "arn" RecordingConfigurationArn.of_json in
-      make ?tags ~state ?name ~destinationConfiguration ~arn ()
+      let name = field_map json__ "name" RecordingConfigurationName.of_json in
+      let arn = field_map json__ "arn" RecordingConfigurationArn.of_json in
+      make ?tags ?state ?destinationConfiguration ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about a RecordingConfiguration."]
+module PlaybackRestrictionPolicySummary =
+  struct
+    type nonrec t =
+      {
+      arn: PlaybackRestrictionPolicyArn.t option
+        [@ocaml.doc "Playback-restriction-policy ARN"];
+      allowedCountries: PlaybackRestrictionPolicyAllowedCountryList.t option
+        [@ocaml.doc
+          "A list of country codes that control geoblocking restriction. Allowed values are the officially assigned ISO 3166-1 alpha-2 codes. Default: All countries (an empty array)."];
+      allowedOrigins: PlaybackRestrictionPolicyAllowedOriginList.t option
+        [@ocaml.doc
+          "A list of origin sites that control CORS restriction. Allowed values are the same as valid values of the Origin header defined at https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin. Default: All origins (an empty array)."];
+      enableStrictOriginEnforcement:
+        PlaybackRestrictionPolicyEnableStrictOriginEnforcement.t option
+        [@ocaml.doc
+          "Whether channel playback is constrained by origin site. Default: false."];
+      name: PlaybackRestrictionPolicyName.t option
+        [@ocaml.doc
+          "Playback-restriction-policy name. The value does not need to be unique."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Tags attached to the resource. Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
+    let make ?arn =
+      fun ?allowedCountries ->
+        fun ?allowedOrigins ->
+          fun ?enableStrictOriginEnforcement ->
+            fun ?name ->
+              fun ?tags ->
+                fun () ->
+                  {
+                    arn;
+                    allowedCountries;
+                    allowedOrigins;
+                    enableStrictOriginEnforcement;
+                    name;
+                    tags
+                  }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:PlaybackRestrictionPolicyArn.to_value));
+        ("allowedCountries",
+          (Option.map x.allowedCountries
+             ~f:PlaybackRestrictionPolicyAllowedCountryList.to_value));
+        ("allowedOrigins",
+          (Option.map x.allowedOrigins
+             ~f:PlaybackRestrictionPolicyAllowedOriginList.to_value));
+        ("enableStrictOriginEnforcement",
+          (Option.map x.enableStrictOriginEnforcement
+             ~f:PlaybackRestrictionPolicyEnableStrictOriginEnforcement.to_value));
+        ("name",
+          (Option.map x.name ~f:PlaybackRestrictionPolicyName.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let name =
+        (Option.map ~f:PlaybackRestrictionPolicyName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let enableStrictOriginEnforcement =
+        (Option.map
+           ~f:PlaybackRestrictionPolicyEnableStrictOriginEnforcement.of_xml)
+          (Xml.child xml_arg0 "enableStrictOriginEnforcement") in
+      let allowedOrigins =
+        (Option.map ~f:PlaybackRestrictionPolicyAllowedOriginList.of_xml)
+          (Xml.child xml_arg0 "allowedOrigins") in
+      let allowedCountries =
+        (Option.map ~f:PlaybackRestrictionPolicyAllowedCountryList.of_xml)
+          (Xml.child xml_arg0 "allowedCountries") in
+      let arn =
+        (Option.map ~f:PlaybackRestrictionPolicyArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?tags ?name ?enableStrictOriginEnforcement ?allowedOrigins
+        ?allowedCountries ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name =
+        field_map json__ "name" PlaybackRestrictionPolicyName.of_json in
+      let enableStrictOriginEnforcement =
+        field_map json__ "enableStrictOriginEnforcement"
+          PlaybackRestrictionPolicyEnableStrictOriginEnforcement.of_json in
+      let allowedOrigins =
+        field_map json__ "allowedOrigins"
+          PlaybackRestrictionPolicyAllowedOriginList.of_json in
+      let allowedCountries =
+        field_map json__ "allowedCountries"
+          PlaybackRestrictionPolicyAllowedCountryList.of_json in
+      let arn = field_map json__ "arn" PlaybackRestrictionPolicyArn.of_json in
+      make ?tags ?name ?enableStrictOriginEnforcement ?allowedOrigins
+        ?allowedCountries ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary information about a PlaybackRestrictionPolicy."]
 module PlaybackKeyPairSummary =
   struct
     type nonrec t =
@@ -1124,7 +2199,7 @@ module PlaybackKeyPairSummary =
           "Playback-key-pair name. The value does not need to be unique."];
       tags: Tags.t option
         [@ocaml.doc
-          "Array of 1-50 maps, each of the form string:string (key:value)."]}
+          "Tags attached to the resource. Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
     let make ?arn = fun ?name -> fun ?tags -> fun () -> { arn; name; tags }
     let to_value x =
       structure_to_value
@@ -1141,10 +2216,10 @@ module PlaybackKeyPairSummary =
         (Option.map ~f:PlaybackKeyPairArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "name" PlaybackKeyPairName.of_json in
-      let arn = field_map json "arn" PlaybackKeyPairArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "name" PlaybackKeyPairName.of_json in
+      let arn = field_map json__ "arn" PlaybackKeyPairArn.of_json in
       make ?tags ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about a playback key pair."]
@@ -1153,76 +2228,188 @@ module ChannelSummary =
     type nonrec t =
       {
       arn: ChannelArn.t option [@ocaml.doc "Channel ARN."];
+      name: ChannelName.t option [@ocaml.doc "Channel name."];
+      latencyMode: ChannelLatencyMode.t option
+        [@ocaml.doc
+          "Channel latency mode. Use NORMAL to broadcast and deliver live video up to Full HD. Use LOW for near-real-time interaction with viewers. Default: LOW."];
       authorized: IsAuthorized.t option
         [@ocaml.doc
           "Whether the channel is private (enabled for playback authorization). Default: false."];
-      latencyMode: ChannelLatencyMode.t option
-        [@ocaml.doc
-          "Channel latency mode. Use NORMAL to broadcast and deliver live video up to Full HD. Use LOW for near-real-time interaction with viewers. Default: LOW. (Note: In the Amazon IVS console, LOW and NORMAL correspond to Ultra-low and Standard, respectively.)"];
-      name: ChannelName.t option [@ocaml.doc "Channel name."];
       recordingConfigurationArn: ChannelRecordingConfigurationArn.t option
         [@ocaml.doc
-          "Recording-configuration ARN. A value other than an empty string indicates that recording is enabled. Default: \"\" (empty string, recording is disabled)."];
+          "Recording-configuration ARN. A valid ARN value here both specifies the ARN and enables recording. Default: \"\" (empty string, recording is disabled)."];
       tags: Tags.t option
         [@ocaml.doc
-          "Array of 1-50 maps, each of the form string:string (key:value)."]}
+          "Tags attached to the resource. Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."];
+      insecureIngest: InsecureIngest.t option
+        [@ocaml.doc
+          "Whether the channel allows insecure RTMP ingest. Default: false."];
+      type_: ChannelType.t option
+        [@ocaml.doc
+          "Channel type, which determines the allowable resolution and bitrate. If you exceed the allowable input resolution or bitrate, the stream probably will disconnect immediately. Default: STANDARD. For details, see Channel Types."];
+      preset: TranscodePreset.t option
+        [@ocaml.doc
+          "Optional transcode preset for the channel. This is selectable only for ADVANCED_HD and ADVANCED_SD channel types. For those channel types, the default preset is HIGHER_BANDWIDTH_DELIVERY. For other channel types (BASIC and STANDARD), preset is the empty string (\"\")."];
+      playbackRestrictionPolicyArn:
+        ChannelPlaybackRestrictionPolicyArn.t option
+        [@ocaml.doc
+          "Playback-restriction-policy ARN. A valid ARN value here both specifies the ARN and enables playback restriction. Default: \"\" (empty string, no playback restriction policy is applied)."];
+      adConfigurationArn: ChannelAdConfigurationArn.t option
+        [@ocaml.doc
+          "ARN of the ad configuration associated with the channel."]}
     let make ?arn =
-      fun ?authorized ->
+      fun ?name ->
         fun ?latencyMode ->
-          fun ?name ->
+          fun ?authorized ->
             fun ?recordingConfigurationArn ->
               fun ?tags ->
-                fun () ->
-                  {
-                    arn;
-                    authorized;
-                    latencyMode;
-                    name;
-                    recordingConfigurationArn;
-                    tags
-                  }
+                fun ?insecureIngest ->
+                  fun ?type_ ->
+                    fun ?preset ->
+                      fun ?playbackRestrictionPolicyArn ->
+                        fun ?adConfigurationArn ->
+                          fun () ->
+                            {
+                              arn;
+                              name;
+                              latencyMode;
+                              authorized;
+                              recordingConfigurationArn;
+                              tags;
+                              insecureIngest;
+                              type_;
+                              preset;
+                              playbackRestrictionPolicyArn;
+                              adConfigurationArn
+                            }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ChannelArn.to_value));
-        ("authorized", (Option.map x.authorized ~f:IsAuthorized.to_value));
+        ("name", (Option.map x.name ~f:ChannelName.to_value));
         ("latencyMode",
           (Option.map x.latencyMode ~f:ChannelLatencyMode.to_value));
-        ("name", (Option.map x.name ~f:ChannelName.to_value));
+        ("authorized", (Option.map x.authorized ~f:IsAuthorized.to_value));
         ("recordingConfigurationArn",
           (Option.map x.recordingConfigurationArn
              ~f:ChannelRecordingConfigurationArn.to_value));
-        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("tags", (Option.map x.tags ~f:Tags.to_value));
+        ("insecureIngest",
+          (Option.map x.insecureIngest ~f:InsecureIngest.to_value));
+        ("type", (Option.map x.type_ ~f:ChannelType.to_value));
+        ("preset", (Option.map x.preset ~f:TranscodePreset.to_value));
+        ("playbackRestrictionPolicyArn",
+          (Option.map x.playbackRestrictionPolicyArn
+             ~f:ChannelPlaybackRestrictionPolicyArn.to_value));
+        ("adConfigurationArn",
+          (Option.map x.adConfigurationArn
+             ~f:ChannelAdConfigurationArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let adConfigurationArn =
+        (Option.map ~f:ChannelAdConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "adConfigurationArn") in
+      let playbackRestrictionPolicyArn =
+        (Option.map ~f:ChannelPlaybackRestrictionPolicyArn.of_xml)
+          (Xml.child xml_arg0 "playbackRestrictionPolicyArn") in
+      let preset =
+        (Option.map ~f:TranscodePreset.of_xml) (Xml.child xml_arg0 "preset") in
+      let type_ =
+        (Option.map ~f:ChannelType.of_xml) (Xml.child xml_arg0 "type") in
+      let insecureIngest =
+        (Option.map ~f:InsecureIngest.of_xml)
+          (Xml.child xml_arg0 "insecureIngest") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let recordingConfigurationArn =
         (Option.map ~f:ChannelRecordingConfigurationArn.of_xml)
           (Xml.child xml_arg0 "recordingConfigurationArn") in
-      let name =
-        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "name") in
+      let authorized =
+        (Option.map ~f:IsAuthorized.of_xml) (Xml.child xml_arg0 "authorized") in
       let latencyMode =
         (Option.map ~f:ChannelLatencyMode.of_xml)
           (Xml.child xml_arg0 "latencyMode") in
-      let authorized =
-        (Option.map ~f:IsAuthorized.of_xml) (Xml.child xml_arg0 "authorized") in
+      let name =
+        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "name") in
       let arn = (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?recordingConfigurationArn ?name ?latencyMode ?authorized
-        ?arn ()
+      make ?adConfigurationArn ?playbackRestrictionPolicyArn ?preset ?type_
+        ?insecureIngest ?tags ?recordingConfigurationArn ?authorized
+        ?latencyMode ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let adConfigurationArn =
+        field_map json__ "adConfigurationArn"
+          ChannelAdConfigurationArn.of_json in
+      let playbackRestrictionPolicyArn =
+        field_map json__ "playbackRestrictionPolicyArn"
+          ChannelPlaybackRestrictionPolicyArn.of_json in
+      let preset = field_map json__ "preset" TranscodePreset.of_json in
+      let type_ = field_map json__ "type" ChannelType.of_json in
+      let insecureIngest =
+        field_map json__ "insecureIngest" InsecureIngest.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
       let recordingConfigurationArn =
-        field_map json "recordingConfigurationArn"
+        field_map json__ "recordingConfigurationArn"
           ChannelRecordingConfigurationArn.of_json in
-      let name = field_map json "name" ChannelName.of_json in
+      let authorized = field_map json__ "authorized" IsAuthorized.of_json in
       let latencyMode =
-        field_map json "latencyMode" ChannelLatencyMode.of_json in
-      let authorized = field_map json "authorized" IsAuthorized.of_json in
-      let arn = field_map json "arn" ChannelArn.of_json in
-      make ?tags ?recordingConfigurationArn ?name ?latencyMode ?authorized
-        ?arn ()
+        field_map json__ "latencyMode" ChannelLatencyMode.of_json in
+      let name = field_map json__ "name" ChannelName.of_json in
+      let arn = field_map json__ "arn" ChannelArn.of_json in
+      make ?adConfigurationArn ?playbackRestrictionPolicyArn ?preset ?type_
+        ?insecureIngest ?tags ?recordingConfigurationArn ?authorized
+        ?latencyMode ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about a channel."]
+module AdConfigurationSummary =
+  struct
+    type nonrec t =
+      {
+      arn: AdConfigurationArn.t option [@ocaml.doc "Ad configuration ARN."];
+      name: AdConfigurationName.t option
+        [@ocaml.doc
+          "Ad configuration name. Defaults to \226\128\156\226\128\157."];
+      mediaTailorPlaybackConfigurations:
+        MediaTailorPlaybackConfigurationsList.t option
+        [@ocaml.doc
+          "List of integration configurations with media tailor resources."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Tags attached to the resource. Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?mediaTailorPlaybackConfigurations ->
+          fun ?tags ->
+            fun () -> { arn; name; mediaTailorPlaybackConfigurations; tags }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:AdConfigurationArn.to_value));
+        ("name", (Option.map x.name ~f:AdConfigurationName.to_value));
+        ("mediaTailorPlaybackConfigurations",
+          (Option.map x.mediaTailorPlaybackConfigurations
+             ~f:MediaTailorPlaybackConfigurationsList.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let mediaTailorPlaybackConfigurations =
+        (Option.map ~f:MediaTailorPlaybackConfigurationsList.of_xml)
+          (Xml.child xml_arg0 "mediaTailorPlaybackConfigurations") in
+      let name =
+        (Option.map ~f:AdConfigurationName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let arn =
+        (Option.map ~f:AdConfigurationArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?tags ?mediaTailorPlaybackConfigurations ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let mediaTailorPlaybackConfigurations =
+        field_map json__ "mediaTailorPlaybackConfigurations"
+          MediaTailorPlaybackConfigurationsList.of_json in
+      let name = field_map json__ "name" AdConfigurationName.of_json in
+      let arn = field_map json__ "arn" AdConfigurationArn.of_json in
+      make ?tags ?mediaTailorPlaybackConfigurations ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary information about an ad configuration."]
 module PlaybackKeyPairFingerprint =
   struct
     type nonrec t = string
@@ -1241,219 +2428,375 @@ module Channel =
     type nonrec t =
       {
       arn: ChannelArn.t option [@ocaml.doc "Channel ARN."];
-      authorized: IsAuthorized.t option
+      name: ChannelName.t option [@ocaml.doc "Channel name."];
+      latencyMode: ChannelLatencyMode.t option
         [@ocaml.doc
-          "Whether the channel is private (enabled for playback authorization). Default: false."];
+          "Channel latency mode. Use NORMAL to broadcast and deliver live video up to Full HD. Use LOW for near-real-time interaction with viewers. Default: LOW."];
+      type_: ChannelType.t option
+        [@ocaml.doc
+          "Channel type, which determines the allowable resolution and bitrate. If you exceed the allowable input resolution or bitrate, the stream probably will disconnect immediately. Default: STANDARD. For details, see Channel Types."];
+      recordingConfigurationArn: ChannelRecordingConfigurationArn.t option
+        [@ocaml.doc
+          "Recording-configuration ARN. A valid ARN value here both specifies the ARN and enables recording. Default: \"\" (empty string, recording is disabled)."];
       ingestEndpoint: IngestEndpoint.t option
         [@ocaml.doc
           "Channel ingest endpoint, part of the definition of an ingest server, used when you set up streaming software."];
-      latencyMode: ChannelLatencyMode.t option
-        [@ocaml.doc
-          "Channel latency mode. Use NORMAL to broadcast and deliver live video up to Full HD. Use LOW for near-real-time interaction with viewers. Default: LOW. (Note: In the Amazon IVS console, LOW and NORMAL correspond to Ultra-low and Standard, respectively.)"];
-      name: ChannelName.t option [@ocaml.doc "Channel name."];
       playbackUrl: PlaybackURL.t option [@ocaml.doc "Channel playback URL."];
-      recordingConfigurationArn: ChannelRecordingConfigurationArn.t option
+      authorized: IsAuthorized.t option
         [@ocaml.doc
-          "Recording-configuration ARN. A value other than an empty string indicates that recording is enabled. Default: \"\" (empty string, recording is disabled)."];
+          "Whether the channel is private (enabled for playback authorization). Default: false."];
       tags: Tags.t option
         [@ocaml.doc
-          "Array of 1-50 maps, each of the form string:string (key:value)."];
-      type_: ChannelType.t option
+          "Tags attached to the resource. Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."];
+      insecureIngest: InsecureIngest.t option
         [@ocaml.doc
-          "Channel type, which determines the allowable resolution and bitrate. If you exceed the allowable resolution or bitrate, the stream probably will disconnect immediately. Default: STANDARD. Valid values: STANDARD: Multiple qualities are generated from the original input, to automatically give viewers the best experience for their devices and network conditions. Resolution can be up to 1080p and bitrate can be up to 8.5 Mbps. Audio is transcoded only for renditions 360p and below; above that, audio is passed through. BASIC: Amazon IVS delivers the original input to viewers. The viewer\226\128\153s video-quality choice is limited to the original input. Resolution can be up to 480p and bitrate can be up to 1.5 Mbps."]}
+          "Whether the channel allows insecure RTMP ingest. Default: false."];
+      preset: TranscodePreset.t option
+        [@ocaml.doc
+          "Optional transcode preset for the channel. This is selectable only for ADVANCED_HD and ADVANCED_SD channel types. For those channel types, the default preset is HIGHER_BANDWIDTH_DELIVERY. For other channel types (BASIC and STANDARD), preset is the empty string (\"\")."];
+      srt: Srt.t option
+        [@ocaml.doc
+          "Specifies the endpoint and optional passphrase for streaming with the SRT protocol."];
+      playbackRestrictionPolicyArn:
+        ChannelPlaybackRestrictionPolicyArn.t option
+        [@ocaml.doc
+          "Playback-restriction-policy ARN. A valid ARN value here both specifies the ARN and enables playback restriction. Default: \"\" (empty string, no playback restriction policy is applied)."];
+      multitrackInputConfiguration: MultitrackInputConfiguration.t option
+        [@ocaml.doc
+          "Object specifying multitrack input configuration. Default: no multitrack input configuration is specified."];
+      containerFormat: ContainerFormat.t option
+        [@ocaml.doc
+          "Indicates which content-packaging format is used (MPEG-TS or fMP4). If multitrackInputConfiguration is specified and enabled is true, then containerFormat is required and must be set to FRAGMENTED_MP4. Otherwise, containerFormat may be set to TS or FRAGMENTED_MP4. Default: TS."];
+      adConfigurationArn: ChannelAdConfigurationArn.t option
+        [@ocaml.doc
+          "ARN of the ad configuration associated with the channel."]}
     let make ?arn =
-      fun ?authorized ->
-        fun ?ingestEndpoint ->
-          fun ?latencyMode ->
-            fun ?name ->
-              fun ?playbackUrl ->
-                fun ?recordingConfigurationArn ->
-                  fun ?tags ->
-                    fun ?type_ ->
-                      fun () ->
-                        {
-                          arn;
-                          authorized;
-                          ingestEndpoint;
-                          latencyMode;
-                          name;
-                          playbackUrl;
-                          recordingConfigurationArn;
-                          tags;
-                          type_
-                        }
+      fun ?name ->
+        fun ?latencyMode ->
+          fun ?type_ ->
+            fun ?recordingConfigurationArn ->
+              fun ?ingestEndpoint ->
+                fun ?playbackUrl ->
+                  fun ?authorized ->
+                    fun ?tags ->
+                      fun ?insecureIngest ->
+                        fun ?preset ->
+                          fun ?srt ->
+                            fun ?playbackRestrictionPolicyArn ->
+                              fun ?multitrackInputConfiguration ->
+                                fun ?containerFormat ->
+                                  fun ?adConfigurationArn ->
+                                    fun () ->
+                                      {
+                                        arn;
+                                        name;
+                                        latencyMode;
+                                        type_;
+                                        recordingConfigurationArn;
+                                        ingestEndpoint;
+                                        playbackUrl;
+                                        authorized;
+                                        tags;
+                                        insecureIngest;
+                                        preset;
+                                        srt;
+                                        playbackRestrictionPolicyArn;
+                                        multitrackInputConfiguration;
+                                        containerFormat;
+                                        adConfigurationArn
+                                      }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:ChannelArn.to_value));
-        ("authorized", (Option.map x.authorized ~f:IsAuthorized.to_value));
-        ("ingestEndpoint",
-          (Option.map x.ingestEndpoint ~f:IngestEndpoint.to_value));
+        ("name", (Option.map x.name ~f:ChannelName.to_value));
         ("latencyMode",
           (Option.map x.latencyMode ~f:ChannelLatencyMode.to_value));
-        ("name", (Option.map x.name ~f:ChannelName.to_value));
-        ("playbackUrl", (Option.map x.playbackUrl ~f:PlaybackURL.to_value));
+        ("type", (Option.map x.type_ ~f:ChannelType.to_value));
         ("recordingConfigurationArn",
           (Option.map x.recordingConfigurationArn
              ~f:ChannelRecordingConfigurationArn.to_value));
+        ("ingestEndpoint",
+          (Option.map x.ingestEndpoint ~f:IngestEndpoint.to_value));
+        ("playbackUrl", (Option.map x.playbackUrl ~f:PlaybackURL.to_value));
+        ("authorized", (Option.map x.authorized ~f:IsAuthorized.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value));
-        ("type", (Option.map x.type_ ~f:ChannelType.to_value))]
+        ("insecureIngest",
+          (Option.map x.insecureIngest ~f:InsecureIngest.to_value));
+        ("preset", (Option.map x.preset ~f:TranscodePreset.to_value));
+        ("srt", (Option.map x.srt ~f:Srt.to_value));
+        ("playbackRestrictionPolicyArn",
+          (Option.map x.playbackRestrictionPolicyArn
+             ~f:ChannelPlaybackRestrictionPolicyArn.to_value));
+        ("multitrackInputConfiguration",
+          (Option.map x.multitrackInputConfiguration
+             ~f:MultitrackInputConfiguration.to_value));
+        ("containerFormat",
+          (Option.map x.containerFormat ~f:ContainerFormat.to_value));
+        ("adConfigurationArn",
+          (Option.map x.adConfigurationArn
+             ~f:ChannelAdConfigurationArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ =
-        (Option.map ~f:ChannelType.of_xml) (Xml.child xml_arg0 "type") in
+      let adConfigurationArn =
+        (Option.map ~f:ChannelAdConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "adConfigurationArn") in
+      let containerFormat =
+        (Option.map ~f:ContainerFormat.of_xml)
+          (Xml.child xml_arg0 "containerFormat") in
+      let multitrackInputConfiguration =
+        (Option.map ~f:MultitrackInputConfiguration.of_xml)
+          (Xml.child xml_arg0 "multitrackInputConfiguration") in
+      let playbackRestrictionPolicyArn =
+        (Option.map ~f:ChannelPlaybackRestrictionPolicyArn.of_xml)
+          (Xml.child xml_arg0 "playbackRestrictionPolicyArn") in
+      let srt = (Option.map ~f:Srt.of_xml) (Xml.child xml_arg0 "srt") in
+      let preset =
+        (Option.map ~f:TranscodePreset.of_xml) (Xml.child xml_arg0 "preset") in
+      let insecureIngest =
+        (Option.map ~f:InsecureIngest.of_xml)
+          (Xml.child xml_arg0 "insecureIngest") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
-      let recordingConfigurationArn =
-        (Option.map ~f:ChannelRecordingConfigurationArn.of_xml)
-          (Xml.child xml_arg0 "recordingConfigurationArn") in
+      let authorized =
+        (Option.map ~f:IsAuthorized.of_xml) (Xml.child xml_arg0 "authorized") in
       let playbackUrl =
         (Option.map ~f:PlaybackURL.of_xml) (Xml.child xml_arg0 "playbackUrl") in
-      let name =
-        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "name") in
-      let latencyMode =
-        (Option.map ~f:ChannelLatencyMode.of_xml)
-          (Xml.child xml_arg0 "latencyMode") in
       let ingestEndpoint =
         (Option.map ~f:IngestEndpoint.of_xml)
           (Xml.child xml_arg0 "ingestEndpoint") in
-      let authorized =
-        (Option.map ~f:IsAuthorized.of_xml) (Xml.child xml_arg0 "authorized") in
-      let arn = (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?type_ ?tags ?recordingConfigurationArn ?playbackUrl ?name
-        ?latencyMode ?ingestEndpoint ?authorized ?arn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" ChannelType.of_json in
-      let tags = field_map json "tags" Tags.of_json in
       let recordingConfigurationArn =
-        field_map json "recordingConfigurationArn"
-          ChannelRecordingConfigurationArn.of_json in
-      let playbackUrl = field_map json "playbackUrl" PlaybackURL.of_json in
-      let name = field_map json "name" ChannelName.of_json in
+        (Option.map ~f:ChannelRecordingConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "recordingConfigurationArn") in
+      let type_ =
+        (Option.map ~f:ChannelType.of_xml) (Xml.child xml_arg0 "type") in
       let latencyMode =
-        field_map json "latencyMode" ChannelLatencyMode.of_json in
+        (Option.map ~f:ChannelLatencyMode.of_xml)
+          (Xml.child xml_arg0 "latencyMode") in
+      let name =
+        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "name") in
+      let arn = (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?adConfigurationArn ?containerFormat ?multitrackInputConfiguration
+        ?playbackRestrictionPolicyArn ?srt ?preset ?insecureIngest ?tags
+        ?authorized ?playbackUrl ?ingestEndpoint ?recordingConfigurationArn
+        ?type_ ?latencyMode ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adConfigurationArn =
+        field_map json__ "adConfigurationArn"
+          ChannelAdConfigurationArn.of_json in
+      let containerFormat =
+        field_map json__ "containerFormat" ContainerFormat.of_json in
+      let multitrackInputConfiguration =
+        field_map json__ "multitrackInputConfiguration"
+          MultitrackInputConfiguration.of_json in
+      let playbackRestrictionPolicyArn =
+        field_map json__ "playbackRestrictionPolicyArn"
+          ChannelPlaybackRestrictionPolicyArn.of_json in
+      let srt = field_map json__ "srt" Srt.of_json in
+      let preset = field_map json__ "preset" TranscodePreset.of_json in
+      let insecureIngest =
+        field_map json__ "insecureIngest" InsecureIngest.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let authorized = field_map json__ "authorized" IsAuthorized.of_json in
+      let playbackUrl = field_map json__ "playbackUrl" PlaybackURL.of_json in
       let ingestEndpoint =
-        field_map json "ingestEndpoint" IngestEndpoint.of_json in
-      let authorized = field_map json "authorized" IsAuthorized.of_json in
-      let arn = field_map json "arn" ChannelArn.of_json in
-      make ?type_ ?tags ?recordingConfigurationArn ?playbackUrl ?name
-        ?latencyMode ?ingestEndpoint ?authorized ?arn ()
+        field_map json__ "ingestEndpoint" IngestEndpoint.of_json in
+      let recordingConfigurationArn =
+        field_map json__ "recordingConfigurationArn"
+          ChannelRecordingConfigurationArn.of_json in
+      let type_ = field_map json__ "type" ChannelType.of_json in
+      let latencyMode =
+        field_map json__ "latencyMode" ChannelLatencyMode.of_json in
+      let name = field_map json__ "name" ChannelName.of_json in
+      let arn = field_map json__ "arn" ChannelArn.of_json in
+      make ?adConfigurationArn ?containerFormat ?multitrackInputConfiguration
+        ?playbackRestrictionPolicyArn ?srt ?preset ?insecureIngest ?tags
+        ?authorized ?playbackUrl ?ingestEndpoint ?recordingConfigurationArn
+        ?type_ ?latencyMode ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Object specifying a channel."]
 module IngestConfiguration =
   struct
     type nonrec t =
       {
-      audio: AudioConfiguration.t option
-        [@ocaml.doc "Encoder settings for audio."];
       video: VideoConfiguration.t option
-        [@ocaml.doc "Encoder settings for video."]}
-    let make ?audio = fun ?video -> fun () -> { audio; video }
+        [@ocaml.doc "Encoder settings for video."];
+      audio: AudioConfiguration.t option
+        [@ocaml.doc "Encoder settings for audio."]}
+    let make ?video = fun ?audio -> fun () -> { video; audio }
     let to_value x =
       structure_to_value
-        [("audio", (Option.map x.audio ~f:AudioConfiguration.to_value));
-        ("video", (Option.map x.video ~f:VideoConfiguration.to_value))]
+        [("video", (Option.map x.video ~f:VideoConfiguration.to_value));
+        ("audio", (Option.map x.audio ~f:AudioConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let video =
-        (Option.map ~f:VideoConfiguration.of_xml)
-          (Xml.child xml_arg0 "video") in
       let audio =
         (Option.map ~f:AudioConfiguration.of_xml)
           (Xml.child xml_arg0 "audio") in
-      make ?video ?audio ()
+      let video =
+        (Option.map ~f:VideoConfiguration.of_xml)
+          (Xml.child xml_arg0 "video") in
+      make ?audio ?video ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let video = field_map json "video" VideoConfiguration.of_json in
-      let audio = field_map json "audio" AudioConfiguration.of_json in
-      make ?video ?audio ()
+    let of_json json__ =
+      let audio = field_map json__ "audio" AudioConfiguration.of_json in
+      let video = field_map json__ "video" VideoConfiguration.of_json in
+      make ?audio ?video ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Object specifying the ingest configuration set up by the broadcaster, usually in an encoder."]
+       "Object specifying the ingest configuration set up by the broadcaster, usually in an encoder. Note: IngestConfiguration is deprecated in favor of IngestConfigurations but retained to ensure backward compatibility. If multitrack is not enabled, IngestConfiguration and IngestConfigurations contain the same data, namely information about Track0 (the sole track). If multitrack is enabled, IngestConfiguration contains data for only the first track (Track0) and IngestConfigurations contains data for all tracks."]
+module IngestConfigurations =
+  struct
+    type nonrec t =
+      {
+      videoConfigurations: VideoConfigurationList.t option
+        [@ocaml.doc "Encoder settings for video"];
+      audioConfigurations: AudioConfigurationList.t option
+        [@ocaml.doc "Encoder settings for audio."]}
+    let make ?videoConfigurations =
+      fun ?audioConfigurations ->
+        fun () -> { videoConfigurations; audioConfigurations }
+    let to_value x =
+      structure_to_value
+        [("videoConfigurations",
+           (Option.map x.videoConfigurations
+              ~f:VideoConfigurationList.to_value));
+        ("audioConfigurations",
+          (Option.map x.audioConfigurations
+             ~f:AudioConfigurationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let audioConfigurations =
+        (Option.map ~f:AudioConfigurationList.of_xml)
+          (Xml.child xml_arg0 "audioConfigurations") in
+      let videoConfigurations =
+        (Option.map ~f:VideoConfigurationList.of_xml)
+          (Xml.child xml_arg0 "videoConfigurations") in
+      make ?audioConfigurations ?videoConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let audioConfigurations =
+        field_map json__ "audioConfigurations" AudioConfigurationList.of_json in
+      let videoConfigurations =
+        field_map json__ "videoConfigurations" VideoConfigurationList.of_json in
+      make ?audioConfigurations ?videoConfigurations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object specifying the ingest configuration set up by the broadcaster, usually in an encoder. Note: Use IngestConfigurations instead of IngestConfiguration (which is deprecated). If multitrack is not enabled, IngestConfiguration and IngestConfigurations contain the same data, namely information about Track0 (the sole track). If multitrack is enabled, IngestConfiguration contains data for only the first track (Track0) and IngestConfigurations contains data for all tracks."]
 module RecordingConfiguration =
   struct
     type nonrec t =
       {
-      arn: RecordingConfigurationArn.t
+      arn: RecordingConfigurationArn.t option
         [@ocaml.doc "Recording-configuration ARN."];
-      destinationConfiguration: DestinationConfiguration.t
-        [@ocaml.doc
-          "A complex type that contains information about where recorded video will be stored."];
       name: RecordingConfigurationName.t option
         [@ocaml.doc
           "Recording-configuration name. The value does not need to be unique."];
-      state: RecordingConfigurationState.t
+      destinationConfiguration: DestinationConfiguration.t option
+        [@ocaml.doc
+          "A complex type that contains information about where recorded video will be stored."];
+      state: RecordingConfigurationState.t option
         [@ocaml.doc
           "Indicates the current state of the recording configuration. When the state is ACTIVE, the configuration is ready for recording a channel stream."];
       tags: Tags.t option
         [@ocaml.doc
-          "Array of 1-50 maps, each of the form string:string (key:value)."];
+          "Tags attached to the resource. Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."];
       thumbnailConfiguration: ThumbnailConfiguration.t option
         [@ocaml.doc
-          "A complex type that allows you to enable/disable the recording of thumbnails for a live session and modify the interval at which thumbnails are generated for the live session."]}
-    let context_ = "RecordingConfiguration"
-    let make ?name =
-      fun ?tags ->
-        fun ?thumbnailConfiguration ->
-          fun ~arn ->
-            fun ~destinationConfiguration ->
-              fun ~state ->
-                fun () ->
-                  {
-                    name;
-                    tags;
-                    thumbnailConfiguration;
-                    arn;
-                    destinationConfiguration;
-                    state
-                  }
+          "A complex type that allows you to enable/disable the recording of thumbnails for a live session and modify the interval at which thumbnails are generated for the live session."];
+      recordingReconnectWindowSeconds:
+        RecordingReconnectWindowSeconds.t option
+        [@ocaml.doc
+          "If a broadcast disconnects and then reconnects within the specified interval, the multiple streams will be considered a single broadcast and merged together. Default: 0."];
+      renditionConfiguration: RenditionConfiguration.t option
+        [@ocaml.doc
+          "Object that describes which renditions should be recorded for a stream."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?destinationConfiguration ->
+          fun ?state ->
+            fun ?tags ->
+              fun ?thumbnailConfiguration ->
+                fun ?recordingReconnectWindowSeconds ->
+                  fun ?renditionConfiguration ->
+                    fun () ->
+                      {
+                        arn;
+                        name;
+                        destinationConfiguration;
+                        state;
+                        tags;
+                        thumbnailConfiguration;
+                        recordingReconnectWindowSeconds;
+                        renditionConfiguration
+                      }
     let to_value x =
       structure_to_value
-        [("arn", (Some (RecordingConfigurationArn.to_value x.arn)));
-        ("destinationConfiguration",
-          (Some
-             (DestinationConfiguration.to_value x.destinationConfiguration)));
+        [("arn", (Option.map x.arn ~f:RecordingConfigurationArn.to_value));
         ("name", (Option.map x.name ~f:RecordingConfigurationName.to_value));
-        ("state", (Some (RecordingConfigurationState.to_value x.state)));
+        ("destinationConfiguration",
+          (Option.map x.destinationConfiguration
+             ~f:DestinationConfiguration.to_value));
+        ("state",
+          (Option.map x.state ~f:RecordingConfigurationState.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value));
         ("thumbnailConfiguration",
           (Option.map x.thumbnailConfiguration
-             ~f:ThumbnailConfiguration.to_value))]
+             ~f:ThumbnailConfiguration.to_value));
+        ("recordingReconnectWindowSeconds",
+          (Option.map x.recordingReconnectWindowSeconds
+             ~f:RecordingReconnectWindowSeconds.to_value));
+        ("renditionConfiguration",
+          (Option.map x.renditionConfiguration
+             ~f:RenditionConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let renditionConfiguration =
+        (Option.map ~f:RenditionConfiguration.of_xml)
+          (Xml.child xml_arg0 "renditionConfiguration") in
+      let recordingReconnectWindowSeconds =
+        (Option.map ~f:RecordingReconnectWindowSeconds.of_xml)
+          (Xml.child xml_arg0 "recordingReconnectWindowSeconds") in
       let thumbnailConfiguration =
         (Option.map ~f:ThumbnailConfiguration.of_xml)
           (Xml.child xml_arg0 "thumbnailConfiguration") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let state =
-        RecordingConfigurationState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "state") in
+        (Option.map ~f:RecordingConfigurationState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let destinationConfiguration =
+        (Option.map ~f:DestinationConfiguration.of_xml)
+          (Xml.child xml_arg0 "destinationConfiguration") in
       let name =
         (Option.map ~f:RecordingConfigurationName.of_xml)
           (Xml.child xml_arg0 "name") in
-      let destinationConfiguration =
-        DestinationConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "destinationConfiguration") in
       let arn =
-        RecordingConfigurationArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?thumbnailConfiguration ?tags ~state ?name
-        ~destinationConfiguration ~arn ()
+        (Option.map ~f:RecordingConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?renditionConfiguration ?recordingReconnectWindowSeconds
+        ?thumbnailConfiguration ?tags ?state ?destinationConfiguration ?name
+        ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let renditionConfiguration =
+        field_map json__ "renditionConfiguration"
+          RenditionConfiguration.of_json in
+      let recordingReconnectWindowSeconds =
+        field_map json__ "recordingReconnectWindowSeconds"
+          RecordingReconnectWindowSeconds.of_json in
       let thumbnailConfiguration =
-        field_map json "thumbnailConfiguration"
+        field_map json__ "thumbnailConfiguration"
           ThumbnailConfiguration.of_json in
-      let tags = field_map json "tags" Tags.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
       let state =
-        field_map_exn json "state" RecordingConfigurationState.of_json in
-      let name = field_map json "name" RecordingConfigurationName.of_json in
+        field_map json__ "state" RecordingConfigurationState.of_json in
       let destinationConfiguration =
-        field_map_exn json "destinationConfiguration"
+        field_map json__ "destinationConfiguration"
           DestinationConfiguration.of_json in
-      let arn = field_map_exn json "arn" RecordingConfigurationArn.of_json in
-      make ?thumbnailConfiguration ?tags ~state ?name
-        ~destinationConfiguration ~arn ()
+      let name = field_map json__ "name" RecordingConfigurationName.of_json in
+      let arn = field_map json__ "arn" RecordingConfigurationArn.of_json in
+      make ?renditionConfiguration ?recordingReconnectWindowSeconds
+        ?thumbnailConfiguration ?tags ?state ?destinationConfiguration ?name
+        ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing a configuration to record a channel stream."]
@@ -1466,6 +2809,9 @@ module StreamEvents =
           ((check_list_max i ~max:500) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StreamEvent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1486,11 +2832,100 @@ module StreamEvents =
       list_of_json ~kind:"StreamEvents" ~of_json:StreamEvent.of_json j
     let to_json v = composed_to_json to_value v
   end
+module BatchStartViewerSessionRevocationError =
+  struct
+    type nonrec t =
+      {
+      channelArn: ChannelArn.t option [@ocaml.doc "Channel ARN."];
+      viewerId: ViewerId.t option
+        [@ocaml.doc "The ID of the viewer session to revoke."];
+      code: ErrorCode.t option [@ocaml.doc "Error code."];
+      message: ErrorMessage.t option
+        [@ocaml.doc "Error message, determined by the application."]}
+    let make ?channelArn =
+      fun ?viewerId ->
+        fun ?code ->
+          fun ?message -> fun () -> { channelArn; viewerId; code; message }
+    let to_value x =
+      structure_to_value
+        [("channelArn", (Option.map x.channelArn ~f:ChannelArn.to_value));
+        ("viewerId", (Option.map x.viewerId ~f:ViewerId.to_value));
+        ("code", (Option.map x.code ~f:ErrorCode.to_value));
+        ("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "code") in
+      let viewerId =
+        (Option.map ~f:ViewerId.of_xml) (Xml.child xml_arg0 "viewerId") in
+      let channelArn =
+        (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "channelArn") in
+      make ?message ?code ?viewerId ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let viewerId = field_map json__ "viewerId" ViewerId.of_json in
+      let channelArn = field_map json__ "channelArn" ChannelArn.of_json in
+      make ?message ?code ?viewerId ?channelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Error for a request in the batch for BatchStartViewerSessionRevocation. Each error is related to a specific channel-ARN and viewer-ID pair."]
+module BatchStartViewerSessionRevocationViewerSession =
+  struct
+    type nonrec t =
+      {
+      channelArn: ChannelArn.t
+        [@ocaml.doc
+          "The ARN of the channel associated with the viewer session to revoke."];
+      viewerId: ViewerId.t
+        [@ocaml.doc
+          "The ID of the viewer associated with the viewer session to revoke. Do not use this field for personally identifying, confidential, or sensitive information."];
+      viewerSessionVersionsLessThanOrEqualTo: ViewerSessionVersion.t option
+        [@ocaml.doc
+          "An optional filter on which versions of the viewer session to revoke. All versions less than or equal to the specified version will be revoked. Default: 0."]}
+    let context_ = "BatchStartViewerSessionRevocationViewerSession"
+    let make ?viewerSessionVersionsLessThanOrEqualTo =
+      fun ~channelArn ->
+        fun ~viewerId ->
+          fun () ->
+            { viewerSessionVersionsLessThanOrEqualTo; channelArn; viewerId }
+    let to_value x =
+      structure_to_value
+        [("channelArn", (Some (ChannelArn.to_value x.channelArn)));
+        ("viewerId", (Some (ViewerId.to_value x.viewerId)));
+        ("viewerSessionVersionsLessThanOrEqualTo",
+          (Option.map x.viewerSessionVersionsLessThanOrEqualTo
+             ~f:ViewerSessionVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let viewerSessionVersionsLessThanOrEqualTo =
+        (Option.map ~f:ViewerSessionVersion.of_xml)
+          (Xml.child xml_arg0 "viewerSessionVersionsLessThanOrEqualTo") in
+      let viewerId =
+        ViewerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "viewerId") in
+      let channelArn =
+        ChannelArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
+      make ?viewerSessionVersionsLessThanOrEqualTo ~viewerId ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let viewerSessionVersionsLessThanOrEqualTo =
+        field_map json__ "viewerSessionVersionsLessThanOrEqualTo"
+          ViewerSessionVersion.of_json in
+      let viewerId = field_map_exn json__ "viewerId" ViewerId.of_json in
+      let channelArn = field_map_exn json__ "channelArn" ChannelArn.of_json in
+      make ?viewerSessionVersionsLessThanOrEqualTo ~viewerId ~channelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A viewer session to revoke in the call to BatchStartViewerSessionRevocation."]
 module BatchError =
   struct
     type nonrec t =
       {
-      arn: ResourceArn.t option [@ocaml.doc "Channel ARN."];
+      arn: ResourceArn.t option
+        [@ocaml.doc "ARN of an IVS resource; e.g., channel."];
       code: ErrorCode.t option [@ocaml.doc "Error code."];
       message: ErrorMessage.t option
         [@ocaml.doc "Error message, determined by the application."]}
@@ -1509,10 +2944,10 @@ module BatchError =
       let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "arn") in
       make ?message ?code ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      let code = field_map json "code" ErrorCode.of_json in
-      let arn = field_map json "arn" ResourceArn.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let arn = field_map json__ "arn" ResourceArn.of_json in
       make ?message ?code ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1522,185 +2957,777 @@ module StreamKey =
     type nonrec t =
       {
       arn: StreamKeyArn.t option [@ocaml.doc "Stream-key ARN."];
+      value: StreamKeyValue.t option [@ocaml.doc "Stream-key value."];
       channelArn: ChannelArn.t option
         [@ocaml.doc "Channel ARN for the stream."];
       tags: Tags.t option
         [@ocaml.doc
-          "Array of 1-50 maps, each of the form string:string (key:value)."];
-      value: StreamKeyValue.t option [@ocaml.doc "Stream-key value."]}
+          "Tags attached to the resource. Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
     let make ?arn =
-      fun ?channelArn ->
-        fun ?tags -> fun ?value -> fun () -> { arn; channelArn; tags; value }
+      fun ?value ->
+        fun ?channelArn ->
+          fun ?tags -> fun () -> { arn; value; channelArn; tags }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:StreamKeyArn.to_value));
+        ("value", (Option.map x.value ~f:StreamKeyValue.to_value));
         ("channelArn", (Option.map x.channelArn ~f:ChannelArn.to_value));
-        ("tags", (Option.map x.tags ~f:Tags.to_value));
-        ("value", (Option.map x.value ~f:StreamKeyValue.to_value))]
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let value =
-        (Option.map ~f:StreamKeyValue.of_xml) (Xml.child xml_arg0 "value") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let channelArn =
         (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "channelArn") in
+      let value =
+        (Option.map ~f:StreamKeyValue.of_xml) (Xml.child xml_arg0 "value") in
       let arn =
         (Option.map ~f:StreamKeyArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?value ?tags ?channelArn ?arn ()
+      make ?tags ?channelArn ?value ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" StreamKeyValue.of_json in
-      let tags = field_map json "tags" Tags.of_json in
-      let channelArn = field_map json "channelArn" ChannelArn.of_json in
-      let arn = field_map json "arn" StreamKeyArn.of_json in
-      make ?value ?tags ?channelArn ?arn ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let channelArn = field_map json__ "channelArn" ChannelArn.of_json in
+      let value = field_map json__ "value" StreamKeyValue.of_json in
+      let arn = field_map json__ "arn" StreamKeyArn.of_json in
+      make ?tags ?channelArn ?value ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Object specifying a stream key."]
 module AccessDeniedException =
   struct
     type nonrec t =
       {
+      accessControlAllowOrigin: String_.t option ;
+      accessControlExposeHeaders: String_.t option ;
+      cacheControl: String_.t option ;
+      contentSecurityPolicy: String_.t option ;
+      strictTransportSecurity: String_.t option ;
+      xContentTypeOptions: String_.t option ;
+      xFrameOptions: String_.t option ;
+      xAmznErrorType: String_.t option ;
       exceptionMessage: ErrorMessage.t option
         [@ocaml.doc
           "User does not have sufficient access to perform this action."]}
-    let make ?exceptionMessage = fun () -> { exceptionMessage }
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?xAmznErrorType ->
+                    fun ?exceptionMessage ->
+                      fun () ->
+                        {
+                          accessControlAllowOrigin;
+                          accessControlExposeHeaders;
+                          cacheControl;
+                          contentSecurityPolicy;
+                          strictTransportSecurity;
+                          xContentTypeOptions;
+                          xFrameOptions;
+                          xAmznErrorType;
+                          exceptionMessage
+                        }
     let to_value x =
       structure_to_value
-        [("exceptionMessage",
-           (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("x-amzn-ErrorType",
+          (Option.map x.xAmznErrorType ~f:String_.to_value));
+        ("exceptionMessage",
+          (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let exceptionMessage =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
-      make ?exceptionMessage ()
+      let xAmznErrorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exceptionMessage =
-        field_map json "exceptionMessage" ErrorMessage.of_json in
-      make ?exceptionMessage ()
+        field_map json__ "exceptionMessage" ErrorMessage.of_json in
+      let xAmznErrorType = field_map json__ "xAmznErrorType" String_.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let to_json v = composed_to_json to_value v
   end
 module ConflictException =
   struct
     type nonrec t =
       {
+      accessControlAllowOrigin: String_.t option ;
+      accessControlExposeHeaders: String_.t option ;
+      cacheControl: String_.t option ;
+      contentSecurityPolicy: String_.t option ;
+      strictTransportSecurity: String_.t option ;
+      xContentTypeOptions: String_.t option ;
+      xFrameOptions: String_.t option ;
+      xAmznErrorType: String_.t option ;
       exceptionMessage: ErrorMessage.t option
         [@ocaml.doc
           "Updating or deleting a resource can cause an inconsistent state."]}
-    let make ?exceptionMessage = fun () -> { exceptionMessage }
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?xAmznErrorType ->
+                    fun ?exceptionMessage ->
+                      fun () ->
+                        {
+                          accessControlAllowOrigin;
+                          accessControlExposeHeaders;
+                          cacheControl;
+                          contentSecurityPolicy;
+                          strictTransportSecurity;
+                          xContentTypeOptions;
+                          xFrameOptions;
+                          xAmznErrorType;
+                          exceptionMessage
+                        }
     let to_value x =
       structure_to_value
-        [("exceptionMessage",
-           (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("x-amzn-ErrorType",
+          (Option.map x.xAmznErrorType ~f:String_.to_value));
+        ("exceptionMessage",
+          (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let exceptionMessage =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
-      make ?exceptionMessage ()
+      let xAmznErrorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exceptionMessage =
-        field_map json "exceptionMessage" ErrorMessage.of_json in
-      make ?exceptionMessage ()
+        field_map json__ "exceptionMessage" ErrorMessage.of_json in
+      let xAmznErrorType = field_map json__ "xAmznErrorType" String_.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let to_json v = composed_to_json to_value v
   end
 module PendingVerification =
   struct
     type nonrec t =
       {
+      accessControlAllowOrigin: String_.t option ;
+      accessControlExposeHeaders: String_.t option ;
+      cacheControl: String_.t option ;
+      contentSecurityPolicy: String_.t option ;
+      strictTransportSecurity: String_.t option ;
+      xContentTypeOptions: String_.t option ;
+      xFrameOptions: String_.t option ;
+      xAmznErrorType: String_.t option ;
       exceptionMessage: ErrorMessage.t option
         [@ocaml.doc "Your account is pending verification."]}
-    let make ?exceptionMessage = fun () -> { exceptionMessage }
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?xAmznErrorType ->
+                    fun ?exceptionMessage ->
+                      fun () ->
+                        {
+                          accessControlAllowOrigin;
+                          accessControlExposeHeaders;
+                          cacheControl;
+                          contentSecurityPolicy;
+                          strictTransportSecurity;
+                          xContentTypeOptions;
+                          xFrameOptions;
+                          xAmznErrorType;
+                          exceptionMessage
+                        }
     let to_value x =
       structure_to_value
-        [("exceptionMessage",
-           (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("x-amzn-ErrorType",
+          (Option.map x.xAmznErrorType ~f:String_.to_value));
+        ("exceptionMessage",
+          (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let exceptionMessage =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
-      make ?exceptionMessage ()
+      let xAmznErrorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exceptionMessage =
-        field_map json "exceptionMessage" ErrorMessage.of_json in
-      make ?exceptionMessage ()
+        field_map json__ "exceptionMessage" ErrorMessage.of_json in
+      let xAmznErrorType = field_map json__ "xAmznErrorType" String_.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let to_json v = composed_to_json to_value v
   end
+module PlaybackRestrictionPolicy =
+  struct
+    type nonrec t =
+      {
+      arn: PlaybackRestrictionPolicyArn.t option
+        [@ocaml.doc "Playback-restriction-policy ARN"];
+      allowedCountries: PlaybackRestrictionPolicyAllowedCountryList.t option
+        [@ocaml.doc
+          "A list of country codes that control geoblocking restriction. Allowed values are the officially assigned ISO 3166-1 alpha-2 codes. Default: All countries (an empty array)."];
+      allowedOrigins: PlaybackRestrictionPolicyAllowedOriginList.t option
+        [@ocaml.doc
+          "A list of origin sites that control CORS restriction. Allowed values are the same as valid values of the Origin header defined at https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin. Default: All origins (an empty array)."];
+      enableStrictOriginEnforcement:
+        PlaybackRestrictionPolicyEnableStrictOriginEnforcement.t option
+        [@ocaml.doc
+          "Whether channel playback is constrained by origin site. Default: false."];
+      name: PlaybackRestrictionPolicyName.t option
+        [@ocaml.doc
+          "Playback-restriction-policy name. The value does not need to be unique."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Tags attached to the resource. Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
+    let make ?arn =
+      fun ?allowedCountries ->
+        fun ?allowedOrigins ->
+          fun ?enableStrictOriginEnforcement ->
+            fun ?name ->
+              fun ?tags ->
+                fun () ->
+                  {
+                    arn;
+                    allowedCountries;
+                    allowedOrigins;
+                    enableStrictOriginEnforcement;
+                    name;
+                    tags
+                  }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:PlaybackRestrictionPolicyArn.to_value));
+        ("allowedCountries",
+          (Option.map x.allowedCountries
+             ~f:PlaybackRestrictionPolicyAllowedCountryList.to_value));
+        ("allowedOrigins",
+          (Option.map x.allowedOrigins
+             ~f:PlaybackRestrictionPolicyAllowedOriginList.to_value));
+        ("enableStrictOriginEnforcement",
+          (Option.map x.enableStrictOriginEnforcement
+             ~f:PlaybackRestrictionPolicyEnableStrictOriginEnforcement.to_value));
+        ("name",
+          (Option.map x.name ~f:PlaybackRestrictionPolicyName.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let name =
+        (Option.map ~f:PlaybackRestrictionPolicyName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let enableStrictOriginEnforcement =
+        (Option.map
+           ~f:PlaybackRestrictionPolicyEnableStrictOriginEnforcement.of_xml)
+          (Xml.child xml_arg0 "enableStrictOriginEnforcement") in
+      let allowedOrigins =
+        (Option.map ~f:PlaybackRestrictionPolicyAllowedOriginList.of_xml)
+          (Xml.child xml_arg0 "allowedOrigins") in
+      let allowedCountries =
+        (Option.map ~f:PlaybackRestrictionPolicyAllowedCountryList.of_xml)
+          (Xml.child xml_arg0 "allowedCountries") in
+      let arn =
+        (Option.map ~f:PlaybackRestrictionPolicyArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?tags ?name ?enableStrictOriginEnforcement ?allowedOrigins
+        ?allowedCountries ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name =
+        field_map json__ "name" PlaybackRestrictionPolicyName.of_json in
+      let enableStrictOriginEnforcement =
+        field_map json__ "enableStrictOriginEnforcement"
+          PlaybackRestrictionPolicyEnableStrictOriginEnforcement.of_json in
+      let allowedOrigins =
+        field_map json__ "allowedOrigins"
+          PlaybackRestrictionPolicyAllowedOriginList.of_json in
+      let allowedCountries =
+        field_map json__ "allowedCountries"
+          PlaybackRestrictionPolicyAllowedCountryList.of_json in
+      let arn = field_map json__ "arn" PlaybackRestrictionPolicyArn.of_json in
+      make ?tags ?name ?enableStrictOriginEnforcement ?allowedOrigins
+        ?allowedCountries ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object representing a policy to constrain playback by country and/or origin sites."]
 module ResourceNotFoundException =
   struct
     type nonrec t =
       {
+      accessControlAllowOrigin: String_.t option ;
+      accessControlExposeHeaders: String_.t option ;
+      cacheControl: String_.t option ;
+      contentSecurityPolicy: String_.t option ;
+      strictTransportSecurity: String_.t option ;
+      xContentTypeOptions: String_.t option ;
+      xFrameOptions: String_.t option ;
+      xAmznErrorType: String_.t option ;
       exceptionMessage: ErrorMessage.t option
         [@ocaml.doc "Request references a resource which does not exist."]}
-    let make ?exceptionMessage = fun () -> { exceptionMessage }
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?xAmznErrorType ->
+                    fun ?exceptionMessage ->
+                      fun () ->
+                        {
+                          accessControlAllowOrigin;
+                          accessControlExposeHeaders;
+                          cacheControl;
+                          contentSecurityPolicy;
+                          strictTransportSecurity;
+                          xContentTypeOptions;
+                          xFrameOptions;
+                          xAmznErrorType;
+                          exceptionMessage
+                        }
     let to_value x =
       structure_to_value
-        [("exceptionMessage",
-           (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("x-amzn-ErrorType",
+          (Option.map x.xAmznErrorType ~f:String_.to_value));
+        ("exceptionMessage",
+          (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let exceptionMessage =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
-      make ?exceptionMessage ()
+      let xAmznErrorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exceptionMessage =
-        field_map json "exceptionMessage" ErrorMessage.of_json in
-      make ?exceptionMessage ()
+        field_map json__ "exceptionMessage" ErrorMessage.of_json in
+      let xAmznErrorType = field_map json__ "xAmznErrorType" String_.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let to_json v = composed_to_json to_value v
   end
 module ValidationException =
   struct
     type nonrec t =
       {
+      accessControlAllowOrigin: String_.t option ;
+      accessControlExposeHeaders: String_.t option ;
+      cacheControl: String_.t option ;
+      contentSecurityPolicy: String_.t option ;
+      strictTransportSecurity: String_.t option ;
+      xContentTypeOptions: String_.t option ;
+      xFrameOptions: String_.t option ;
+      xAmznErrorType: String_.t option ;
       exceptionMessage: ErrorMessage.t option
         [@ocaml.doc
           "The input fails to satisfy the constraints specified by an Amazon Web Services service."]}
-    let make ?exceptionMessage = fun () -> { exceptionMessage }
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?xAmznErrorType ->
+                    fun ?exceptionMessage ->
+                      fun () ->
+                        {
+                          accessControlAllowOrigin;
+                          accessControlExposeHeaders;
+                          cacheControl;
+                          contentSecurityPolicy;
+                          strictTransportSecurity;
+                          xContentTypeOptions;
+                          xFrameOptions;
+                          xAmznErrorType;
+                          exceptionMessage
+                        }
     let to_value x =
       structure_to_value
-        [("exceptionMessage",
-           (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("x-amzn-ErrorType",
+          (Option.map x.xAmznErrorType ~f:String_.to_value));
+        ("exceptionMessage",
+          (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let exceptionMessage =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
-      make ?exceptionMessage ()
+      let xAmznErrorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exceptionMessage =
-        field_map json "exceptionMessage" ErrorMessage.of_json in
-      make ?exceptionMessage ()
+        field_map json__ "exceptionMessage" ErrorMessage.of_json in
+      let xAmznErrorType = field_map json__ "xAmznErrorType" String_.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let to_json v = composed_to_json to_value v
   end
 module InternalServerException =
   struct
     type nonrec t =
       {
+      accessControlAllowOrigin: String_.t option ;
+      accessControlExposeHeaders: String_.t option ;
+      cacheControl: String_.t option ;
+      contentSecurityPolicy: String_.t option ;
+      strictTransportSecurity: String_.t option ;
+      xContentTypeOptions: String_.t option ;
+      xFrameOptions: String_.t option ;
+      xAmznErrorType: String_.t option ;
       exceptionMessage: ErrorMessage.t option
         [@ocaml.doc "Unexpected error during processing of request."]}
-    let make ?exceptionMessage = fun () -> { exceptionMessage }
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?xAmznErrorType ->
+                    fun ?exceptionMessage ->
+                      fun () ->
+                        {
+                          accessControlAllowOrigin;
+                          accessControlExposeHeaders;
+                          cacheControl;
+                          contentSecurityPolicy;
+                          strictTransportSecurity;
+                          xContentTypeOptions;
+                          xFrameOptions;
+                          xAmznErrorType;
+                          exceptionMessage
+                        }
     let to_value x =
       structure_to_value
-        [("exceptionMessage",
-           (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("x-amzn-ErrorType",
+          (Option.map x.xAmznErrorType ~f:String_.to_value));
+        ("exceptionMessage",
+          (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let exceptionMessage =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
-      make ?exceptionMessage ()
+      let xAmznErrorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exceptionMessage =
-        field_map json "exceptionMessage" ErrorMessage.of_json in
-      make ?exceptionMessage ()
+        field_map json__ "exceptionMessage" ErrorMessage.of_json in
+      let xAmznErrorType = field_map json__ "xAmznErrorType" String_.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let to_json v = composed_to_json to_value v
   end
 module TagKeyList =
@@ -1711,6 +3738,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1734,48 +3764,321 @@ module ChannelNotBroadcasting =
   struct
     type nonrec t =
       {
+      accessControlAllowOrigin: String_.t option ;
+      accessControlExposeHeaders: String_.t option ;
+      cacheControl: String_.t option ;
+      contentSecurityPolicy: String_.t option ;
+      strictTransportSecurity: String_.t option ;
+      xContentTypeOptions: String_.t option ;
+      xFrameOptions: String_.t option ;
+      xAmznErrorType: String_.t option ;
       exceptionMessage: ErrorMessage.t option
         [@ocaml.doc "The stream is offline for the given channel ARN."]}
-    let make ?exceptionMessage = fun () -> { exceptionMessage }
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?xAmznErrorType ->
+                    fun ?exceptionMessage ->
+                      fun () ->
+                        {
+                          accessControlAllowOrigin;
+                          accessControlExposeHeaders;
+                          cacheControl;
+                          contentSecurityPolicy;
+                          strictTransportSecurity;
+                          xContentTypeOptions;
+                          xFrameOptions;
+                          xAmznErrorType;
+                          exceptionMessage
+                        }
     let to_value x =
       structure_to_value
-        [("exceptionMessage",
-           (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("x-amzn-ErrorType",
+          (Option.map x.xAmznErrorType ~f:String_.to_value));
+        ("exceptionMessage",
+          (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let exceptionMessage =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
-      make ?exceptionMessage ()
+      let xAmznErrorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exceptionMessage =
-        field_map json "exceptionMessage" ErrorMessage.of_json in
-      make ?exceptionMessage ()
+        field_map json__ "exceptionMessage" ErrorMessage.of_json in
+      let xAmznErrorType = field_map json__ "xAmznErrorType" String_.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let to_json v = composed_to_json to_value v
   end
 module StreamUnavailable =
   struct
     type nonrec t =
       {
+      accessControlAllowOrigin: String_.t option ;
+      accessControlExposeHeaders: String_.t option ;
+      cacheControl: String_.t option ;
+      contentSecurityPolicy: String_.t option ;
+      strictTransportSecurity: String_.t option ;
+      xContentTypeOptions: String_.t option ;
+      xFrameOptions: String_.t option ;
+      xAmznErrorType: String_.t option ;
       exceptionMessage: ErrorMessage.t option
         [@ocaml.doc "The stream is temporarily unavailable."]}
-    let make ?exceptionMessage = fun () -> { exceptionMessage }
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?xAmznErrorType ->
+                    fun ?exceptionMessage ->
+                      fun () ->
+                        {
+                          accessControlAllowOrigin;
+                          accessControlExposeHeaders;
+                          cacheControl;
+                          contentSecurityPolicy;
+                          strictTransportSecurity;
+                          xContentTypeOptions;
+                          xFrameOptions;
+                          xAmznErrorType;
+                          exceptionMessage
+                        }
     let to_value x =
       structure_to_value
-        [("exceptionMessage",
-           (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("x-amzn-ErrorType",
+          (Option.map x.xAmznErrorType ~f:String_.to_value));
+        ("exceptionMessage",
+          (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let exceptionMessage =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
-      make ?exceptionMessage ()
+      let xAmznErrorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exceptionMessage =
-        field_map json "exceptionMessage" ErrorMessage.of_json in
-      make ?exceptionMessage ()
+        field_map json__ "exceptionMessage" ErrorMessage.of_json in
+      let xAmznErrorType = field_map json__ "xAmznErrorType" String_.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
+    let to_json v = composed_to_json to_value v
+  end
+module ThrottlingException =
+  struct
+    type nonrec t =
+      {
+      accessControlAllowOrigin: String_.t option ;
+      accessControlExposeHeaders: String_.t option ;
+      cacheControl: String_.t option ;
+      contentSecurityPolicy: String_.t option ;
+      strictTransportSecurity: String_.t option ;
+      xContentTypeOptions: String_.t option ;
+      xFrameOptions: String_.t option ;
+      xAmznErrorType: String_.t option ;
+      exceptionMessage: ErrorMessage.t option
+        [@ocaml.doc "Request was denied due to request throttling."]}
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?xAmznErrorType ->
+                    fun ?exceptionMessage ->
+                      fun () ->
+                        {
+                          accessControlAllowOrigin;
+                          accessControlExposeHeaders;
+                          cacheControl;
+                          contentSecurityPolicy;
+                          strictTransportSecurity;
+                          xContentTypeOptions;
+                          xFrameOptions;
+                          xAmznErrorType;
+                          exceptionMessage
+                        }
+    let to_value x =
+      structure_to_value
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("x-amzn-ErrorType",
+          (Option.map x.xAmznErrorType ~f:String_.to_value));
+        ("exceptionMessage",
+          (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exceptionMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "exceptionMessage") in
+      let xAmznErrorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exceptionMessage =
+        field_map json__ "exceptionMessage" ErrorMessage.of_json in
+      let xAmznErrorType = field_map json__ "xAmznErrorType" String_.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let to_json v = composed_to_json to_value v
   end
 module StreamMetadata =
@@ -1799,8 +4102,10 @@ module PaginationToken =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9+/=_-]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1814,6 +4119,9 @@ module StreamList =
   struct
     type nonrec t = StreamSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StreamSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1840,7 +4148,7 @@ module MaxStreamResults =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -1868,8 +4176,8 @@ module StreamFilters =
         (Option.map ~f:StreamHealth.of_xml) (Xml.child xml_arg0 "health") in
       make ?health ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let health = field_map json "health" StreamHealth.of_json in
+    let of_json json__ =
+      let health = field_map json__ "health" StreamHealth.of_json in
       make ?health ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1878,6 +4186,9 @@ module StreamSessionList =
   struct
     type nonrec t = StreamSessionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StreamSessionSummary.to_value)) |>
         (fun x -> `List x)
@@ -1904,6 +4215,9 @@ module StreamKeyList =
   struct
     type nonrec t = StreamKeySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StreamKeySummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1946,6 +4260,9 @@ module RecordingConfigurationList =
   struct
     type nonrec t = RecordingConfigurationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecordingConfigurationSummary.to_value)) |>
         (fun x -> `List x)
@@ -1974,7 +4291,7 @@ module MaxRecordingConfigurationResults =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -1987,10 +4304,63 @@ module MaxRecordingConfigurationResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module PlaybackRestrictionPolicyList =
+  struct
+    type nonrec t = PlaybackRestrictionPolicySummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PlaybackRestrictionPolicySummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:PlaybackRestrictionPolicySummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PlaybackRestrictionPolicyList"
+        ~of_json:PlaybackRestrictionPolicySummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxPlaybackRestrictionPolicyResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for MaxPlaybackRestrictionPolicyResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module PlaybackKeyPairList =
   struct
     type nonrec t = PlaybackKeyPairSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PlaybackKeyPairSummary.to_value)) |>
         (fun x -> `List x)
@@ -2019,7 +4389,7 @@ module MaxPlaybackKeyPairResults =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -2036,6 +4406,9 @@ module ChannelList =
   struct
     type nonrec t = ChannelSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2062,7 +4435,7 @@ module MaxChannelResults =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -2074,49 +4447,136 @@ module MaxChannelResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module AdConfigurationList =
+  struct
+    type nonrec t = AdConfigurationSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AdConfigurationSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AdConfigurationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AdConfigurationList"
+        ~of_json:AdConfigurationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxAdConfigurationResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxAdConfigurationResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AdBreakId =
+  struct
+    type nonrec t = string
+    let context_ = "AdBreakId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AdBreakId" j
+    let to_json = simple_to_json to_value
+  end
+module AdDurationSeconds =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:300) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for AdDurationSeconds" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module PlaybackKeyPair =
   struct
     type nonrec t =
       {
       arn: PlaybackKeyPairArn.t option [@ocaml.doc "Key-pair ARN."];
-      fingerprint: PlaybackKeyPairFingerprint.t option
-        [@ocaml.doc "Key-pair identifier."];
       name: PlaybackKeyPairName.t option
         [@ocaml.doc
           "Playback-key-pair name. The value does not need to be unique."];
+      fingerprint: PlaybackKeyPairFingerprint.t option
+        [@ocaml.doc "Key-pair identifier."];
       tags: Tags.t option
         [@ocaml.doc
-          "Array of 1-50 maps, each of the form string:string (key:value)."]}
+          "Tags attached to the resource. Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
     let make ?arn =
-      fun ?fingerprint ->
-        fun ?name -> fun ?tags -> fun () -> { arn; fingerprint; name; tags }
+      fun ?name ->
+        fun ?fingerprint ->
+          fun ?tags -> fun () -> { arn; name; fingerprint; tags }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:PlaybackKeyPairArn.to_value));
+        ("name", (Option.map x.name ~f:PlaybackKeyPairName.to_value));
         ("fingerprint",
           (Option.map x.fingerprint ~f:PlaybackKeyPairFingerprint.to_value));
-        ("name", (Option.map x.name ~f:PlaybackKeyPairName.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
-      let name =
-        (Option.map ~f:PlaybackKeyPairName.of_xml)
-          (Xml.child xml_arg0 "name") in
       let fingerprint =
         (Option.map ~f:PlaybackKeyPairFingerprint.of_xml)
           (Xml.child xml_arg0 "fingerprint") in
+      let name =
+        (Option.map ~f:PlaybackKeyPairName.of_xml)
+          (Xml.child xml_arg0 "name") in
       let arn =
         (Option.map ~f:PlaybackKeyPairArn.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?tags ?name ?fingerprint ?arn ()
+      make ?tags ?fingerprint ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "name" PlaybackKeyPairName.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
       let fingerprint =
-        field_map json "fingerprint" PlaybackKeyPairFingerprint.of_json in
-      let arn = field_map json "arn" PlaybackKeyPairArn.of_json in
-      make ?tags ?name ?fingerprint ?arn ()
+        field_map json__ "fingerprint" PlaybackKeyPairFingerprint.of_json in
+      let name = field_map json__ "name" PlaybackKeyPairName.of_json in
+      let arn = field_map json__ "arn" PlaybackKeyPairArn.of_json in
+      make ?tags ?fingerprint ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A key pair used to sign and validate a playback authorization token."]
@@ -2124,24 +4584,107 @@ module ServiceQuotaExceededException =
   struct
     type nonrec t =
       {
+      accessControlAllowOrigin: String_.t option ;
+      accessControlExposeHeaders: String_.t option ;
+      cacheControl: String_.t option ;
+      contentSecurityPolicy: String_.t option ;
+      strictTransportSecurity: String_.t option ;
+      xContentTypeOptions: String_.t option ;
+      xFrameOptions: String_.t option ;
+      xAmznErrorType: String_.t option ;
       exceptionMessage: ErrorMessage.t option
         [@ocaml.doc "Request would cause a service quota to be exceeded."]}
-    let make ?exceptionMessage = fun () -> { exceptionMessage }
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?xAmznErrorType ->
+                    fun ?exceptionMessage ->
+                      fun () ->
+                        {
+                          accessControlAllowOrigin;
+                          accessControlExposeHeaders;
+                          cacheControl;
+                          contentSecurityPolicy;
+                          strictTransportSecurity;
+                          xContentTypeOptions;
+                          xFrameOptions;
+                          xAmznErrorType;
+                          exceptionMessage
+                        }
     let to_value x =
       structure_to_value
-        [("exceptionMessage",
-           (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("x-amzn-ErrorType",
+          (Option.map x.xAmznErrorType ~f:String_.to_value));
+        ("exceptionMessage",
+          (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let exceptionMessage =
         (Option.map ~f:ErrorMessage.of_xml)
           (Xml.child xml_arg0 "exceptionMessage") in
-      make ?exceptionMessage ()
+      let xAmznErrorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exceptionMessage =
-        field_map json "exceptionMessage" ErrorMessage.of_json in
-      make ?exceptionMessage ()
+        field_map json__ "exceptionMessage" ErrorMessage.of_json in
+      let xAmznErrorType = field_map json__ "xAmznErrorType" String_.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
     let to_json v = composed_to_json to_value v
   end
 module PlaybackPublicKeyMaterial =
@@ -2161,54 +4704,61 @@ module StreamSession =
   struct
     type nonrec t =
       {
-      channel: Channel.t option
-        [@ocaml.doc
-          "The properties of the channel at the time of going live."];
-      endTime: Time.t option
-        [@ocaml.doc
-          "UTC ISO-8601 formatted timestamp of when the channel went offline. For live streams, this is NULL."];
-      ingestConfiguration: IngestConfiguration.t option
-        [@ocaml.doc
-          "The properties of the incoming RTMP stream for the stream."];
-      recordingConfiguration: RecordingConfiguration.t option
-        [@ocaml.doc "The properties of recording the live stream."];
-      startTime: Time.t option
-        [@ocaml.doc
-          "UTC ISO-8601 formatted timestamp of when the channel went live."];
       streamId: StreamId.t option
         [@ocaml.doc
           "Unique identifier for a live or previously live stream in the specified channel."];
+      startTime: Time.t option
+        [@ocaml.doc
+          "Time when the channel went live. This is an ISO 8601 timestamp; note that this is returned as a string."];
+      endTime: Time.t option
+        [@ocaml.doc
+          "Time when the channel went offline. This is an ISO 8601 timestamp; note that this is returned as a string. For live streams, this is NULL."];
+      channel: Channel.t option
+        [@ocaml.doc
+          "The properties of the channel at the time of going live."];
+      ingestConfiguration: IngestConfiguration.t option
+        [@ocaml.doc
+          "The properties of the incoming RTMP stream. Note: ingestConfiguration is deprecated in favor of ingestConfigurations but retained to ensure backward compatibility. If multitrack is not enabled, ingestConfiguration and ingestConfigurations contain the same data, namely information about Track0 (the sole track). If multitrack is enabled, ingestConfiguration contains data for only the first track (Track0) and ingestConfigurations contains data for all tracks."];
+      ingestConfigurations: IngestConfigurations.t option
+        [@ocaml.doc
+          "The properties of the incoming RTMP stream. If multitrack is enabled, ingestConfigurations contains data for all tracks; otherwise, it contains data only for Track0 (the sole track)."];
+      recordingConfiguration: RecordingConfiguration.t option
+        [@ocaml.doc "The properties of recording the live stream."];
       truncatedEvents: StreamEvents.t option
         [@ocaml.doc
           "List of Amazon IVS events that the stream encountered. The list is sorted by most recent events and contains up to 500 events. For Amazon IVS events, see Using Amazon EventBridge with Amazon IVS."]}
-    let make ?channel =
-      fun ?endTime ->
-        fun ?ingestConfiguration ->
-          fun ?recordingConfiguration ->
-            fun ?startTime ->
-              fun ?streamId ->
-                fun ?truncatedEvents ->
-                  fun () ->
-                    {
-                      channel;
-                      endTime;
-                      ingestConfiguration;
-                      recordingConfiguration;
-                      startTime;
-                      streamId;
-                      truncatedEvents
-                    }
+    let make ?streamId =
+      fun ?startTime ->
+        fun ?endTime ->
+          fun ?channel ->
+            fun ?ingestConfiguration ->
+              fun ?ingestConfigurations ->
+                fun ?recordingConfiguration ->
+                  fun ?truncatedEvents ->
+                    fun () ->
+                      {
+                        streamId;
+                        startTime;
+                        endTime;
+                        channel;
+                        ingestConfiguration;
+                        ingestConfigurations;
+                        recordingConfiguration;
+                        truncatedEvents
+                      }
     let to_value x =
       structure_to_value
-        [("channel", (Option.map x.channel ~f:Channel.to_value));
+        [("streamId", (Option.map x.streamId ~f:StreamId.to_value));
+        ("startTime", (Option.map x.startTime ~f:Time.to_value));
         ("endTime", (Option.map x.endTime ~f:Time.to_value));
+        ("channel", (Option.map x.channel ~f:Channel.to_value));
         ("ingestConfiguration",
           (Option.map x.ingestConfiguration ~f:IngestConfiguration.to_value));
+        ("ingestConfigurations",
+          (Option.map x.ingestConfigurations ~f:IngestConfigurations.to_value));
         ("recordingConfiguration",
           (Option.map x.recordingConfiguration
              ~f:RecordingConfiguration.to_value));
-        ("startTime", (Option.map x.startTime ~f:Time.to_value));
-        ("streamId", (Option.map x.streamId ~f:StreamId.to_value));
         ("truncatedEvents",
           (Option.map x.truncatedEvents ~f:StreamEvents.to_value))]
     let to_query v = to_query to_value v
@@ -2216,37 +4766,42 @@ module StreamSession =
       let truncatedEvents =
         (Option.map ~f:StreamEvents.of_xml)
           (Xml.child xml_arg0 "truncatedEvents") in
-      let streamId =
-        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "streamId") in
-      let startTime =
-        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "startTime") in
       let recordingConfiguration =
         (Option.map ~f:RecordingConfiguration.of_xml)
           (Xml.child xml_arg0 "recordingConfiguration") in
+      let ingestConfigurations =
+        (Option.map ~f:IngestConfigurations.of_xml)
+          (Xml.child xml_arg0 "ingestConfigurations") in
       let ingestConfiguration =
         (Option.map ~f:IngestConfiguration.of_xml)
           (Xml.child xml_arg0 "ingestConfiguration") in
-      let endTime =
-        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "endTime") in
       let channel =
         (Option.map ~f:Channel.of_xml) (Xml.child xml_arg0 "channel") in
-      make ?truncatedEvents ?streamId ?startTime ?recordingConfiguration
-        ?ingestConfiguration ?endTime ?channel ()
+      let endTime =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "startTime") in
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "streamId") in
+      make ?truncatedEvents ?recordingConfiguration ?ingestConfigurations
+        ?ingestConfiguration ?channel ?endTime ?startTime ?streamId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let truncatedEvents =
-        field_map json "truncatedEvents" StreamEvents.of_json in
-      let streamId = field_map json "streamId" StreamId.of_json in
-      let startTime = field_map json "startTime" Time.of_json in
+        field_map json__ "truncatedEvents" StreamEvents.of_json in
       let recordingConfiguration =
-        field_map json "recordingConfiguration"
+        field_map json__ "recordingConfiguration"
           RecordingConfiguration.of_json in
+      let ingestConfigurations =
+        field_map json__ "ingestConfigurations" IngestConfigurations.of_json in
       let ingestConfiguration =
-        field_map json "ingestConfiguration" IngestConfiguration.of_json in
-      let endTime = field_map json "endTime" Time.of_json in
-      let channel = field_map json "channel" Channel.of_json in
-      make ?truncatedEvents ?streamId ?startTime ?recordingConfiguration
-        ?ingestConfiguration ?endTime ?channel ()
+        field_map json__ "ingestConfiguration" IngestConfiguration.of_json in
+      let channel = field_map json__ "channel" Channel.of_json in
+      let endTime = field_map json__ "endTime" Time.of_json in
+      let startTime = field_map json__ "startTime" Time.of_json in
+      let streamId = field_map json__ "streamId" StreamId.of_json in
+      make ?truncatedEvents ?recordingConfiguration ?ingestConfigurations
+        ?ingestConfiguration ?channel ?endTime ?startTime ?streamId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Object that captures the Amazon IVS configuration that the customer provisioned, the ingest configurations that the broadcaster used, and the most recent Amazon IVS stream events it encountered."]
@@ -2256,47 +4811,48 @@ module Stream =
       {
       channelArn: ChannelArn.t option
         [@ocaml.doc "Channel ARN for the stream."];
-      health: StreamHealth.t option
-        [@ocaml.doc "The stream\226\128\153s health."];
+      streamId: StreamId.t option
+        [@ocaml.doc
+          "Unique identifier for a live or previously live stream in the specified channel."];
       playbackUrl: PlaybackURL.t option
         [@ocaml.doc
           "URL of the master playlist, required by the video player to play the HLS stream."];
       startTime: StreamStartTime.t option
         [@ocaml.doc
-          "Time of the stream\226\128\153s start. This is an ISO 8601 timestamp returned as a string."];
+          "Time of the stream\226\128\153s start. This is an ISO 8601 timestamp; note that this is returned as a string."];
       state: StreamState.t option
-        [@ocaml.doc "The stream\226\128\153s state."];
-      streamId: StreamId.t option
         [@ocaml.doc
-          "Unique identifier for a live or previously live stream in the specified channel."];
+          "The stream\226\128\153s state. Do not rely on the OFFLINE state, as the API may not return it; instead, a \"NotBroadcasting\" error will indicate that the stream is not live."];
+      health: StreamHealth.t option
+        [@ocaml.doc "The stream\226\128\153s health."];
       viewerCount: StreamViewerCount.t option
         [@ocaml.doc
           "A count of concurrent views of the stream. Typically, a new view appears in viewerCount within 15 seconds of when video playback starts and a view is removed from viewerCount within 1 minute of when video playback ends. A value of -1 indicates that the request timed out; in this case, retry."]}
     let make ?channelArn =
-      fun ?health ->
+      fun ?streamId ->
         fun ?playbackUrl ->
           fun ?startTime ->
             fun ?state ->
-              fun ?streamId ->
+              fun ?health ->
                 fun ?viewerCount ->
                   fun () ->
                     {
                       channelArn;
-                      health;
+                      streamId;
                       playbackUrl;
                       startTime;
                       state;
-                      streamId;
+                      health;
                       viewerCount
                     }
     let to_value x =
       structure_to_value
         [("channelArn", (Option.map x.channelArn ~f:ChannelArn.to_value));
-        ("health", (Option.map x.health ~f:StreamHealth.to_value));
+        ("streamId", (Option.map x.streamId ~f:StreamId.to_value));
         ("playbackUrl", (Option.map x.playbackUrl ~f:PlaybackURL.to_value));
         ("startTime", (Option.map x.startTime ~f:StreamStartTime.to_value));
         ("state", (Option.map x.state ~f:StreamState.to_value));
-        ("streamId", (Option.map x.streamId ~f:StreamId.to_value));
+        ("health", (Option.map x.health ~f:StreamHealth.to_value));
         ("viewerCount",
           (Option.map x.viewerCount ~f:StreamViewerCount.to_value))]
     let to_query v = to_query to_value v
@@ -2304,8 +4860,8 @@ module Stream =
       let viewerCount =
         (Option.map ~f:StreamViewerCount.of_xml)
           (Xml.child xml_arg0 "viewerCount") in
-      let streamId =
-        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "streamId") in
+      let health =
+        (Option.map ~f:StreamHealth.of_xml) (Xml.child xml_arg0 "health") in
       let state =
         (Option.map ~f:StreamState.of_xml) (Xml.child xml_arg0 "state") in
       let startTime =
@@ -2313,31 +4869,151 @@ module Stream =
           (Xml.child xml_arg0 "startTime") in
       let playbackUrl =
         (Option.map ~f:PlaybackURL.of_xml) (Xml.child xml_arg0 "playbackUrl") in
-      let health =
-        (Option.map ~f:StreamHealth.of_xml) (Xml.child xml_arg0 "health") in
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "streamId") in
       let channelArn =
         (Option.map ~f:ChannelArn.of_xml) (Xml.child xml_arg0 "channelArn") in
-      make ?viewerCount ?streamId ?state ?startTime ?playbackUrl ?health
+      make ?viewerCount ?health ?state ?startTime ?playbackUrl ?streamId
         ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let viewerCount =
-        field_map json "viewerCount" StreamViewerCount.of_json in
-      let streamId = field_map json "streamId" StreamId.of_json in
-      let state = field_map json "state" StreamState.of_json in
-      let startTime = field_map json "startTime" StreamStartTime.of_json in
-      let playbackUrl = field_map json "playbackUrl" PlaybackURL.of_json in
-      let health = field_map json "health" StreamHealth.of_json in
-      let channelArn = field_map json "channelArn" ChannelArn.of_json in
-      make ?viewerCount ?streamId ?state ?startTime ?playbackUrl ?health
+        field_map json__ "viewerCount" StreamViewerCount.of_json in
+      let health = field_map json__ "health" StreamHealth.of_json in
+      let state = field_map json__ "state" StreamState.of_json in
+      let startTime = field_map json__ "startTime" StreamStartTime.of_json in
+      let playbackUrl = field_map json__ "playbackUrl" PlaybackURL.of_json in
+      let streamId = field_map json__ "streamId" StreamId.of_json in
+      let channelArn = field_map json__ "channelArn" ChannelArn.of_json in
+      make ?viewerCount ?health ?state ?startTime ?playbackUrl ?streamId
         ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies a live video stream that has been ingested and distributed."]
+module AdConfiguration =
+  struct
+    type nonrec t =
+      {
+      arn: AdConfigurationArn.t option [@ocaml.doc "Ad configuration ARN."];
+      name: AdConfigurationName.t option
+        [@ocaml.doc
+          "Ad configuration name. Defaults to \226\128\156\226\128\157."];
+      mediaTailorPlaybackConfigurations:
+        MediaTailorPlaybackConfigurationsList.t option
+        [@ocaml.doc
+          "List of integration configurations with media tailor resources."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Tags attached to the resource. Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?mediaTailorPlaybackConfigurations ->
+          fun ?tags ->
+            fun () -> { arn; name; mediaTailorPlaybackConfigurations; tags }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:AdConfigurationArn.to_value));
+        ("name", (Option.map x.name ~f:AdConfigurationName.to_value));
+        ("mediaTailorPlaybackConfigurations",
+          (Option.map x.mediaTailorPlaybackConfigurations
+             ~f:MediaTailorPlaybackConfigurationsList.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let mediaTailorPlaybackConfigurations =
+        (Option.map ~f:MediaTailorPlaybackConfigurationsList.of_xml)
+          (Xml.child xml_arg0 "mediaTailorPlaybackConfigurations") in
+      let name =
+        (Option.map ~f:AdConfigurationName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let arn =
+        (Option.map ~f:AdConfigurationArn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?tags ?mediaTailorPlaybackConfigurations ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let mediaTailorPlaybackConfigurations =
+        field_map json__ "mediaTailorPlaybackConfigurations"
+          MediaTailorPlaybackConfigurationsList.of_json in
+      let name = field_map json__ "name" AdConfigurationName.of_json in
+      let arn = field_map json__ "arn" AdConfigurationArn.of_json in
+      make ?tags ?mediaTailorPlaybackConfigurations ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object specifying a configuration for a server-side advertising insertion (which can be triggered with the operation)."]
+module BatchStartViewerSessionRevocationErrors =
+  struct
+    type nonrec t = BatchStartViewerSessionRevocationError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BatchStartViewerSessionRevocationError.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:BatchStartViewerSessionRevocationError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchStartViewerSessionRevocationErrors"
+        ~of_json:BatchStartViewerSessionRevocationError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BatchStartViewerSessionRevocationViewerSessionList =
+  struct
+    type nonrec t = BatchStartViewerSessionRevocationViewerSession.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:BatchStartViewerSessionRevocationViewerSession.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:BatchStartViewerSessionRevocationViewerSession.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchStartViewerSessionRevocationViewerSessionList"
+        ~of_json:BatchStartViewerSessionRevocationViewerSession.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module BatchErrors =
   struct
     type nonrec t = BatchError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchError.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2358,10 +5034,119 @@ module BatchErrors =
       list_of_json ~kind:"BatchErrors" ~of_json:BatchError.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ServiceUnavailable =
+  struct
+    type nonrec t =
+      {
+      accessControlAllowOrigin: String_.t option ;
+      accessControlExposeHeaders: String_.t option ;
+      cacheControl: String_.t option ;
+      contentSecurityPolicy: String_.t option ;
+      strictTransportSecurity: String_.t option ;
+      xContentTypeOptions: String_.t option ;
+      xFrameOptions: String_.t option ;
+      xAmznErrorType: String_.t option ;
+      exceptionMessage: ErrorMessage.t option }
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?xAmznErrorType ->
+                    fun ?exceptionMessage ->
+                      fun () ->
+                        {
+                          accessControlAllowOrigin;
+                          accessControlExposeHeaders;
+                          cacheControl;
+                          contentSecurityPolicy;
+                          strictTransportSecurity;
+                          xContentTypeOptions;
+                          xFrameOptions;
+                          xAmznErrorType;
+                          exceptionMessage
+                        }
+    let to_value x =
+      structure_to_value
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("x-amzn-ErrorType",
+          (Option.map x.xAmznErrorType ~f:String_.to_value));
+        ("exceptionMessage",
+          (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exceptionMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "exceptionMessage") in
+      let xAmznErrorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exceptionMessage =
+        field_map json__ "exceptionMessage" ErrorMessage.of_json in
+      let xAmznErrorType = field_map json__ "xAmznErrorType" String_.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?exceptionMessage ?xAmznErrorType ?xFrameOptions
+        ?xContentTypeOptions ?strictTransportSecurity ?contentSecurityPolicy
+        ?cacheControl ?accessControlExposeHeaders ?accessControlAllowOrigin
+        ()
+    let to_json v = composed_to_json to_value v
+  end
 module StreamKeys =
   struct
     type nonrec t = StreamKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StreamKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2390,6 +5175,9 @@ module StreamKeyArnList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StreamKeyArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2414,6 +5202,9 @@ module Channels =
   struct
     type nonrec t = Channel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Channel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2441,6 +5232,9 @@ module ChannelArnList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2461,10 +5255,188 @@ module ChannelArnList =
       list_of_json ~kind:"ChannelArnList" ~of_json:ChannelArn.of_json j
     let to_json v = composed_to_json to_value v
   end
+module UpdatePlaybackRestrictionPolicyResponse =
+  struct
+    type nonrec t =
+      {
+      playbackRestrictionPolicy: PlaybackRestrictionPolicy.t option
+        [@ocaml.doc "Object specifying the updated policy."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `PendingVerification of PendingVerification.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?playbackRestrictionPolicy =
+      fun () -> { playbackRestrictionPolicy }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `PendingVerification e ->
+          `Assoc
+            [("error", (`String "PendingVerification"));
+            ("details", (PendingVerification.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("playbackRestrictionPolicy",
+           (Option.map x.playbackRestrictionPolicy
+              ~f:PlaybackRestrictionPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let playbackRestrictionPolicy =
+        (Option.map ~f:PlaybackRestrictionPolicy.of_xml)
+          (Xml.child xml_arg0 "playbackRestrictionPolicy") in
+      make ?playbackRestrictionPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let playbackRestrictionPolicy =
+        field_map json__ "playbackRestrictionPolicy"
+          PlaybackRestrictionPolicy.of_json in
+      make ?playbackRestrictionPolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a specified playback restriction policy."]
+module UpdatePlaybackRestrictionPolicyRequest =
+  struct
+    type nonrec t =
+      {
+      arn: PlaybackRestrictionPolicyArn.t
+        [@ocaml.doc "ARN of the playback-restriction-policy to be updated."];
+      allowedCountries: PlaybackRestrictionPolicyAllowedCountryList.t option
+        [@ocaml.doc
+          "A list of country codes that control geoblocking restriction. Allowed values are the officially assigned ISO 3166-1 alpha-2 codes. Default: All countries (an empty array)."];
+      allowedOrigins: PlaybackRestrictionPolicyAllowedOriginList.t option
+        [@ocaml.doc
+          "A list of origin sites that control CORS restriction. Allowed values are the same as valid values of the Origin header defined at https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin. Default: All origins (an empty array)."];
+      enableStrictOriginEnforcement:
+        PlaybackRestrictionPolicyEnableStrictOriginEnforcement.t option
+        [@ocaml.doc
+          "Whether channel playback is constrained by origin site. Default: false."];
+      name: PlaybackRestrictionPolicyName.t option
+        [@ocaml.doc
+          "Playback-restriction-policy name. The value does not need to be unique."]}
+    let context_ = "UpdatePlaybackRestrictionPolicyRequest"
+    let make ?allowedCountries =
+      fun ?allowedOrigins ->
+        fun ?enableStrictOriginEnforcement ->
+          fun ?name ->
+            fun ~arn ->
+              fun () ->
+                {
+                  allowedCountries;
+                  allowedOrigins;
+                  enableStrictOriginEnforcement;
+                  name;
+                  arn
+                }
+    let to_value x =
+      structure_to_value
+        [("arn", (Some (PlaybackRestrictionPolicyArn.to_value x.arn)));
+        ("allowedCountries",
+          (Option.map x.allowedCountries
+             ~f:PlaybackRestrictionPolicyAllowedCountryList.to_value));
+        ("allowedOrigins",
+          (Option.map x.allowedOrigins
+             ~f:PlaybackRestrictionPolicyAllowedOriginList.to_value));
+        ("enableStrictOriginEnforcement",
+          (Option.map x.enableStrictOriginEnforcement
+             ~f:PlaybackRestrictionPolicyEnableStrictOriginEnforcement.to_value));
+        ("name",
+          (Option.map x.name ~f:PlaybackRestrictionPolicyName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:PlaybackRestrictionPolicyName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let enableStrictOriginEnforcement =
+        (Option.map
+           ~f:PlaybackRestrictionPolicyEnableStrictOriginEnforcement.of_xml)
+          (Xml.child xml_arg0 "enableStrictOriginEnforcement") in
+      let allowedOrigins =
+        (Option.map ~f:PlaybackRestrictionPolicyAllowedOriginList.of_xml)
+          (Xml.child xml_arg0 "allowedOrigins") in
+      let allowedCountries =
+        (Option.map ~f:PlaybackRestrictionPolicyAllowedCountryList.of_xml)
+          (Xml.child xml_arg0 "allowedCountries") in
+      let arn =
+        PlaybackRestrictionPolicyArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
+      make ?name ?enableStrictOriginEnforcement ?allowedOrigins
+        ?allowedCountries ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name =
+        field_map json__ "name" PlaybackRestrictionPolicyName.of_json in
+      let enableStrictOriginEnforcement =
+        field_map json__ "enableStrictOriginEnforcement"
+          PlaybackRestrictionPolicyEnableStrictOriginEnforcement.of_json in
+      let allowedOrigins =
+        field_map json__ "allowedOrigins"
+          PlaybackRestrictionPolicyAllowedOriginList.of_json in
+      let allowedCountries =
+        field_map json__ "allowedCountries"
+          PlaybackRestrictionPolicyAllowedCountryList.of_json in
+      let arn =
+        field_map_exn json__ "arn" PlaybackRestrictionPolicyArn.of_json in
+      make ?name ?enableStrictOriginEnforcement ?allowedOrigins
+        ?allowedCountries ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a specified playback restriction policy."]
 module UpdateChannelResponse =
   struct
-    type nonrec t = {
-      channel: Channel.t option }
+    type nonrec t =
+      {
+      channel: Channel.t option
+        [@ocaml.doc "Object specifying the updated channel."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -2538,91 +5510,168 @@ module UpdateChannelResponse =
         (Option.map ~f:Channel.of_xml) (Xml.child xml_arg0 "channel") in
       make ?channel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channel = field_map json "channel" Channel.of_json in
+    let of_json json__ =
+      let channel = field_map json__ "channel" Channel.of_json in
       make ?channel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a channel's configuration. This does not affect an ongoing stream of this channel. You must stop and restart the stream for the changes to take effect."]
+       "Updates a channel's configuration. Live channels cannot be updated. You must stop the ongoing stream, update the channel, and restart the stream for the changes to take effect."]
 module UpdateChannelRequest =
   struct
     type nonrec t =
       {
       arn: ChannelArn.t [@ocaml.doc "ARN of the channel to be updated."];
+      name: ChannelName.t option [@ocaml.doc "Channel name."];
+      latencyMode: ChannelLatencyMode.t option
+        [@ocaml.doc
+          "Channel latency mode. Use NORMAL to broadcast and deliver live video up to Full HD. Use LOW for near-real-time interaction with viewers."];
+      type_: ChannelType.t option
+        [@ocaml.doc
+          "Channel type, which determines the allowable resolution and bitrate. If you exceed the allowable input resolution or bitrate, the stream probably will disconnect immediately. Default: STANDARD. For details, see Channel Types."];
       authorized: Boolean.t option
         [@ocaml.doc
           "Whether the channel is private (enabled for playback authorization)."];
-      latencyMode: ChannelLatencyMode.t option
-        [@ocaml.doc
-          "Channel latency mode. Use NORMAL to broadcast and deliver live video up to Full HD. Use LOW for near-real-time interaction with viewers. (Note: In the Amazon IVS console, LOW and NORMAL correspond to Ultra-low and Standard, respectively.)"];
-      name: ChannelName.t option [@ocaml.doc "Channel name."];
       recordingConfigurationArn: ChannelRecordingConfigurationArn.t option
         [@ocaml.doc
-          "Recording-configuration ARN. If this is set to an empty string, recording is disabled. A value other than an empty string indicates that recording is enabled"];
-      type_: ChannelType.t option
+          "Recording-configuration ARN. A valid ARN value here both specifies the ARN and enables recording. If this is set to an empty string, recording is disabled."];
+      insecureIngest: Boolean.t option
         [@ocaml.doc
-          "Channel type, which determines the allowable resolution and bitrate. If you exceed the allowable resolution or bitrate, the stream probably will disconnect immediately. Valid values: STANDARD: Multiple qualities are generated from the original input, to automatically give viewers the best experience for their devices and network conditions. Resolution can be up to 1080p and bitrate can be up to 8.5 Mbps. Audio is transcoded only for renditions 360p and below; above that, audio is passed through. BASIC: Amazon IVS delivers the original input to viewers. The viewer\226\128\153s video-quality choice is limited to the original input. Resolution can be up to 480p and bitrate can be up to 1.5 Mbps."]}
+          "Whether the channel allows insecure RTMP and SRT ingest. Default: false."];
+      preset: TranscodePreset.t option
+        [@ocaml.doc
+          "Optional transcode preset for the channel. This is selectable only for ADVANCED_HD and ADVANCED_SD channel types. For those channel types, the default preset is HIGHER_BANDWIDTH_DELIVERY. For other channel types (BASIC and STANDARD), preset is the empty string (\"\")."];
+      playbackRestrictionPolicyArn:
+        ChannelPlaybackRestrictionPolicyArn.t option
+        [@ocaml.doc
+          "Playback-restriction-policy ARN. A valid ARN value here both specifies the ARN and enables playback restriction. If this is set to an empty string, playback restriction policy is disabled."];
+      multitrackInputConfiguration: MultitrackInputConfiguration.t option
+        [@ocaml.doc
+          "Object specifying multitrack input configuration. Default: no multitrack input configuration is specified."];
+      containerFormat: ContainerFormat.t option
+        [@ocaml.doc
+          "Indicates which content-packaging format is used (MPEG-TS or fMP4). If multitrackInputConfiguration is specified and enabled is true, then containerFormat is required and must be set to FRAGMENTED_MP4. Otherwise, containerFormat may be set to TS or FRAGMENTED_MP4. Default: TS."];
+      adConfigurationArn: ChannelAdConfigurationArn.t option
+        [@ocaml.doc
+          "ARN of the ad configuration associated with the channel."]}
     let context_ = "UpdateChannelRequest"
-    let make ?authorized =
+    let make ?name =
       fun ?latencyMode ->
-        fun ?name ->
-          fun ?recordingConfigurationArn ->
-            fun ?type_ ->
-              fun ~arn ->
-                fun () ->
-                  {
-                    authorized;
-                    latencyMode;
-                    name;
-                    recordingConfigurationArn;
-                    type_;
-                    arn
-                  }
+        fun ?type_ ->
+          fun ?authorized ->
+            fun ?recordingConfigurationArn ->
+              fun ?insecureIngest ->
+                fun ?preset ->
+                  fun ?playbackRestrictionPolicyArn ->
+                    fun ?multitrackInputConfiguration ->
+                      fun ?containerFormat ->
+                        fun ?adConfigurationArn ->
+                          fun ~arn ->
+                            fun () ->
+                              {
+                                name;
+                                latencyMode;
+                                type_;
+                                authorized;
+                                recordingConfigurationArn;
+                                insecureIngest;
+                                preset;
+                                playbackRestrictionPolicyArn;
+                                multitrackInputConfiguration;
+                                containerFormat;
+                                adConfigurationArn;
+                                arn
+                              }
     let to_value x =
       structure_to_value
         [("arn", (Some (ChannelArn.to_value x.arn)));
-        ("authorized", (Option.map x.authorized ~f:Boolean.to_value));
+        ("name", (Option.map x.name ~f:ChannelName.to_value));
         ("latencyMode",
           (Option.map x.latencyMode ~f:ChannelLatencyMode.to_value));
-        ("name", (Option.map x.name ~f:ChannelName.to_value));
+        ("type", (Option.map x.type_ ~f:ChannelType.to_value));
+        ("authorized", (Option.map x.authorized ~f:Boolean.to_value));
         ("recordingConfigurationArn",
           (Option.map x.recordingConfigurationArn
              ~f:ChannelRecordingConfigurationArn.to_value));
-        ("type", (Option.map x.type_ ~f:ChannelType.to_value))]
+        ("insecureIngest", (Option.map x.insecureIngest ~f:Boolean.to_value));
+        ("preset", (Option.map x.preset ~f:TranscodePreset.to_value));
+        ("playbackRestrictionPolicyArn",
+          (Option.map x.playbackRestrictionPolicyArn
+             ~f:ChannelPlaybackRestrictionPolicyArn.to_value));
+        ("multitrackInputConfiguration",
+          (Option.map x.multitrackInputConfiguration
+             ~f:MultitrackInputConfiguration.to_value));
+        ("containerFormat",
+          (Option.map x.containerFormat ~f:ContainerFormat.to_value));
+        ("adConfigurationArn",
+          (Option.map x.adConfigurationArn
+             ~f:ChannelAdConfigurationArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ =
-        (Option.map ~f:ChannelType.of_xml) (Xml.child xml_arg0 "type") in
+      let adConfigurationArn =
+        (Option.map ~f:ChannelAdConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "adConfigurationArn") in
+      let containerFormat =
+        (Option.map ~f:ContainerFormat.of_xml)
+          (Xml.child xml_arg0 "containerFormat") in
+      let multitrackInputConfiguration =
+        (Option.map ~f:MultitrackInputConfiguration.of_xml)
+          (Xml.child xml_arg0 "multitrackInputConfiguration") in
+      let playbackRestrictionPolicyArn =
+        (Option.map ~f:ChannelPlaybackRestrictionPolicyArn.of_xml)
+          (Xml.child xml_arg0 "playbackRestrictionPolicyArn") in
+      let preset =
+        (Option.map ~f:TranscodePreset.of_xml) (Xml.child xml_arg0 "preset") in
+      let insecureIngest =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "insecureIngest") in
       let recordingConfigurationArn =
         (Option.map ~f:ChannelRecordingConfigurationArn.of_xml)
           (Xml.child xml_arg0 "recordingConfigurationArn") in
-      let name =
-        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "name") in
+      let authorized =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "authorized") in
+      let type_ =
+        (Option.map ~f:ChannelType.of_xml) (Xml.child xml_arg0 "type") in
       let latencyMode =
         (Option.map ~f:ChannelLatencyMode.of_xml)
           (Xml.child xml_arg0 "latencyMode") in
-      let authorized =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "authorized") in
+      let name =
+        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "name") in
       let arn =
         ChannelArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?type_ ?recordingConfigurationArn ?name ?latencyMode ?authorized
-        ~arn ()
+      make ?adConfigurationArn ?containerFormat ?multitrackInputConfiguration
+        ?playbackRestrictionPolicyArn ?preset ?insecureIngest
+        ?recordingConfigurationArn ?authorized ?type_ ?latencyMode ?name ~arn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" ChannelType.of_json in
+    let of_json json__ =
+      let adConfigurationArn =
+        field_map json__ "adConfigurationArn"
+          ChannelAdConfigurationArn.of_json in
+      let containerFormat =
+        field_map json__ "containerFormat" ContainerFormat.of_json in
+      let multitrackInputConfiguration =
+        field_map json__ "multitrackInputConfiguration"
+          MultitrackInputConfiguration.of_json in
+      let playbackRestrictionPolicyArn =
+        field_map json__ "playbackRestrictionPolicyArn"
+          ChannelPlaybackRestrictionPolicyArn.of_json in
+      let preset = field_map json__ "preset" TranscodePreset.of_json in
+      let insecureIngest = field_map json__ "insecureIngest" Boolean.of_json in
       let recordingConfigurationArn =
-        field_map json "recordingConfigurationArn"
+        field_map json__ "recordingConfigurationArn"
           ChannelRecordingConfigurationArn.of_json in
-      let name = field_map json "name" ChannelName.of_json in
+      let authorized = field_map json__ "authorized" Boolean.of_json in
+      let type_ = field_map json__ "type" ChannelType.of_json in
       let latencyMode =
-        field_map json "latencyMode" ChannelLatencyMode.of_json in
-      let authorized = field_map json "authorized" Boolean.of_json in
-      let arn = field_map_exn json "arn" ChannelArn.of_json in
-      make ?type_ ?recordingConfigurationArn ?name ?latencyMode ?authorized
-        ~arn ()
+        field_map json__ "latencyMode" ChannelLatencyMode.of_json in
+      let name = field_map json__ "name" ChannelName.of_json in
+      let arn = field_map_exn json__ "arn" ChannelArn.of_json in
+      make ?adConfigurationArn ?containerFormat ?multitrackInputConfiguration
+        ?playbackRestrictionPolicyArn ?preset ?insecureIngest
+        ?recordingConfigurationArn ?authorized ?type_ ?latencyMode ?name ~arn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a channel's configuration. This does not affect an ongoing stream of this channel. You must stop and restart the stream for the changes to take effect."]
+       "Updates a channel's configuration. Live channels cannot be updated. You must stop the ongoing stream, update the channel, and restart the stream for the changes to take effect."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -2685,8 +5734,11 @@ module UntagResourceRequest =
     type nonrec t =
       {
       resourceArn: ResourceArn.t
-        [@ocaml.doc "ARN of the resource for which tags are to be removed."];
-      tagKeys: TagKeyList.t [@ocaml.doc "Array of tags to be removed."]}
+        [@ocaml.doc
+          "ARN of the resource for which tags are to be removed. The ARN must be URL-encoded."];
+      tagKeys: TagKeyList.t
+        [@ocaml.doc
+          "Array of tag keys (strings) for the tags to be removed. See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn =
       fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
@@ -2704,36 +5756,13 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from the resource with the specified ARN."]
-module ThrottlingException =
-  struct
-    type nonrec t =
-      {
-      exceptionMessage: ErrorMessage.t option
-        [@ocaml.doc "Request was denied due to request throttling."]}
-    let make ?exceptionMessage = fun () -> { exceptionMessage }
-    let to_value x =
-      structure_to_value
-        [("exceptionMessage",
-           (Option.map x.exceptionMessage ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let exceptionMessage =
-        (Option.map ~f:ErrorMessage.of_xml)
-          (Xml.child xml_arg0 "exceptionMessage") in
-      make ?exceptionMessage ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let exceptionMessage =
-        field_map json "exceptionMessage" ErrorMessage.of_json in
-      make ?exceptionMessage ()
-    let to_json v = composed_to_json to_value v
-  end
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -2798,8 +5827,10 @@ module TagResourceRequest =
       {
       resourceArn: ResourceArn.t
         [@ocaml.doc
-          "ARN of the resource for which tags are to be added or updated."];
-      tags: Tags.t [@ocaml.doc "Array of tags to be added or updated."]}
+          "ARN of the resource for which tags are to be added or updated. The ARN must be URL-encoded."];
+      tags: Tags.t
+        [@ocaml.doc
+          "Array of tags to be added or updated. Array of maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -2815,9 +5846,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" Tags.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" Tags.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2917,12 +5949,145 @@ module StopStreamRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelArn = field_map_exn json "channelArn" ChannelArn.of_json in
+    let of_json json__ =
+      let channelArn = field_map_exn json__ "channelArn" ChannelArn.of_json in
       make ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Disconnects the incoming RTMPS stream for the specified channel. Can be used in conjunction with DeleteStreamKey to prevent further streaming to a channel. Many streaming client-software libraries automatically reconnect a dropped RTMPS session, so to stop the stream permanently, you may want to first revoke the streamKey attached to the channel."]
+module StartViewerSessionRevocationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `PendingVerification of PendingVerification.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `PendingVerification e ->
+          `Assoc
+            [("error", (`String "PendingVerification"));
+            ("details", (PendingVerification.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts the process of revoking the viewer session associated with a specified channel ARN and viewer ID. Optionally, you can provide a version to revoke viewer sessions less than and including that version. For instructions on associating a viewer ID with a viewer session, see Setting Up Private Channels."]
+module StartViewerSessionRevocationRequest =
+  struct
+    type nonrec t =
+      {
+      channelArn: ChannelArn.t
+        [@ocaml.doc
+          "The ARN of the channel associated with the viewer session to revoke."];
+      viewerId: ViewerId.t
+        [@ocaml.doc
+          "The ID of the viewer associated with the viewer session to revoke. Do not use this field for personally identifying, confidential, or sensitive information."];
+      viewerSessionVersionsLessThanOrEqualTo: ViewerSessionVersion.t option
+        [@ocaml.doc
+          "An optional filter on which versions of the viewer session to revoke. All versions less than or equal to the specified version will be revoked. Default: 0."]}
+    let context_ = "StartViewerSessionRevocationRequest"
+    let make ?viewerSessionVersionsLessThanOrEqualTo =
+      fun ~channelArn ->
+        fun ~viewerId ->
+          fun () ->
+            { viewerSessionVersionsLessThanOrEqualTo; channelArn; viewerId }
+    let to_value x =
+      structure_to_value
+        [("channelArn", (Some (ChannelArn.to_value x.channelArn)));
+        ("viewerId", (Some (ViewerId.to_value x.viewerId)));
+        ("viewerSessionVersionsLessThanOrEqualTo",
+          (Option.map x.viewerSessionVersionsLessThanOrEqualTo
+             ~f:ViewerSessionVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let viewerSessionVersionsLessThanOrEqualTo =
+        (Option.map ~f:ViewerSessionVersion.of_xml)
+          (Xml.child xml_arg0 "viewerSessionVersionsLessThanOrEqualTo") in
+      let viewerId =
+        ViewerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "viewerId") in
+      let channelArn =
+        ChannelArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
+      make ?viewerSessionVersionsLessThanOrEqualTo ~viewerId ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let viewerSessionVersionsLessThanOrEqualTo =
+        field_map json__ "viewerSessionVersionsLessThanOrEqualTo"
+          ViewerSessionVersion.of_json in
+      let viewerId = field_map_exn json__ "viewerId" ViewerId.of_json in
+      let channelArn = field_map_exn json__ "channelArn" ChannelArn.of_json in
+      make ?viewerSessionVersionsLessThanOrEqualTo ~viewerId ~channelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts the process of revoking the viewer session associated with a specified channel ARN and viewer ID. Optionally, you can provide a version to revoke viewer sessions less than and including that version. For instructions on associating a viewer ID with a viewer session, see Setting Up Private Channels."]
 module PutMetadataRequest =
   struct
     type nonrec t =
@@ -2950,24 +6115,26 @@ module PutMetadataRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~metadata ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadata = field_map_exn json "metadata" StreamMetadata.of_json in
-      let channelArn = field_map_exn json "channelArn" ChannelArn.of_json in
+    let of_json json__ =
+      let metadata = field_map_exn json__ "metadata" StreamMetadata.of_json in
+      let channelArn = field_map_exn json__ "channelArn" ChannelArn.of_json in
       make ~metadata ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Inserts metadata into the active stream of the specified channel. At most 5 requests per second per channel are allowed, each with a maximum 1 KB payload. (If 5 TPS is not sufficient for your needs, we recommend batching your data into a single PutMetadata call.) At most 155 requests per second per account are allowed. Also see Embedding Metadata within a Video Stream in the Amazon IVS User Guide."]
 module ListTagsForResourceResponse =
   struct
-    type nonrec t = {
-      tags: Tags.t }
+    type nonrec t =
+      {
+      tags: Tags.t option
+        [@ocaml.doc
+          "Tags attached to the resource. Array of maps, each of the form string:string (key:value)."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsForResourceResponse"
-    let make ~tags = fun () -> { tags }
+    let make ?tags = fun () -> { tags }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -3009,15 +6176,14 @@ module ListTagsForResourceResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("tags", (Some (Tags.to_value x.tags)))]
+      structure_to_value [("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags =
-        Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
-      make ~tags ()
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" Tags.of_json in make ~tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about Amazon Web Services tags for the specified ARN."]
@@ -3026,7 +6192,8 @@ module ListTagsForResourceRequest =
     type nonrec t =
       {
       resourceArn: ResourceArn.t
-        [@ocaml.doc "The ARN of the resource to be retrieved."]}
+        [@ocaml.doc
+          "The ARN of the resource to be retrieved. The ARN must be URL-encoded."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -3039,8 +6206,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3049,16 +6217,15 @@ module ListStreamsResponse =
   struct
     type nonrec t =
       {
+      streams: StreamList.t option [@ocaml.doc "List of streams."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "If there are more streams than maxResults, use nextToken in the request to get the next set."];
-      streams: StreamList.t [@ocaml.doc "List of streams."]}
+          "If there are more streams than maxResults, use nextToken in the request to get the next set."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListStreamsResponse"
-    let make ?nextToken = fun ~streams -> fun () -> { nextToken; streams }
+    let make ?streams = fun ?nextToken -> fun () -> { streams; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3093,22 +6260,21 @@ module ListStreamsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("streams", (Some (StreamList.to_value x.streams)))]
+        [("streams", (Option.map x.streams ~f:StreamList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let streams =
-        StreamList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "streams") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~streams ?nextToken ()
+      let streams =
+        (Option.map ~f:StreamList.of_xml) (Xml.child xml_arg0 "streams") in
+      make ?nextToken ?streams ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streams = field_map_exn json "streams" StreamList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      make ~streams ?nextToken ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let streams = field_map json__ "streams" StreamList.of_json in
+      make ?nextToken ?streams ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets summary information about live streams in your account, in the Amazon Web Services region where the API request is processed."]
@@ -3119,37 +6285,37 @@ module ListStreamsRequest =
       filterBy: StreamFilters.t option
         [@ocaml.doc
           "Filters the stream list to match the specified criterion."];
-      maxResults: MaxStreamResults.t option
-        [@ocaml.doc "Maximum number of streams to return. Default: 50."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The first stream to retrieve. This is used for pagination; see the nextToken response field."]}
+          "The first stream to retrieve. This is used for pagination; see the nextToken response field."];
+      maxResults: MaxStreamResults.t option
+        [@ocaml.doc "Maximum number of streams to return. Default: 100."]}
     let make ?filterBy =
-      fun ?maxResults ->
-        fun ?nextToken -> fun () -> { filterBy; maxResults; nextToken }
+      fun ?nextToken ->
+        fun ?maxResults -> fun () -> { filterBy; nextToken; maxResults }
     let to_value x =
       structure_to_value
         [("filterBy", (Option.map x.filterBy ~f:StreamFilters.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("maxResults",
-          (Option.map x.maxResults ~f:MaxStreamResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+          (Option.map x.maxResults ~f:MaxStreamResults.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:PaginationToken.of_xml)
-          (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:MaxStreamResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
       let filterBy =
         (Option.map ~f:StreamFilters.of_xml) (Xml.child xml_arg0 "filterBy") in
-      make ?nextToken ?maxResults ?filterBy ()
+      make ?maxResults ?nextToken ?filterBy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxStreamResults.of_json in
-      let filterBy = field_map json "filterBy" StreamFilters.of_json in
-      make ?nextToken ?maxResults ?filterBy ()
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxStreamResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let filterBy = field_map json__ "filterBy" StreamFilters.of_json in
+      make ?maxResults ?nextToken ?filterBy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets summary information about live streams in your account, in the Amazon Web Services region where the API request is processed."]
@@ -3157,19 +6323,18 @@ module ListStreamSessionsResponse =
   struct
     type nonrec t =
       {
+      streamSessions: StreamSessionList.t option
+        [@ocaml.doc "List of stream sessions."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "If there are more streams than maxResults, use nextToken in the request to get the next set."];
-      streamSessions: StreamSessionList.t
-        [@ocaml.doc "List of stream sessions."]}
+          "If there are more streams than maxResults, use nextToken in the request to get the next set."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListStreamSessionsResponse"
-    let make ?nextToken =
-      fun ~streamSessions -> fun () -> { nextToken; streamSessions }
+    let make ?streamSessions =
+      fun ?nextToken -> fun () -> { streamSessions; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3212,24 +6377,24 @@ module ListStreamSessionsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("streamSessions",
-          (Some (StreamSessionList.to_value x.streamSessions)))]
+        [("streamSessions",
+           (Option.map x.streamSessions ~f:StreamSessionList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let streamSessions =
-        StreamSessionList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "streamSessions") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~streamSessions ?nextToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let streamSessions =
-        field_map_exn json "streamSessions" StreamSessionList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      make ~streamSessions ?nextToken ()
+        (Option.map ~f:StreamSessionList.of_xml)
+          (Xml.child xml_arg0 "streamSessions") in
+      make ?nextToken ?streamSessions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let streamSessions =
+        field_map json__ "streamSessions" StreamSessionList.of_json in
+      make ?nextToken ?streamSessions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets a summary of current and previous streams for a specified channel in your account, in the AWS region where the API request is processed."]
@@ -3239,39 +6404,39 @@ module ListStreamSessionsRequest =
       {
       channelArn: ChannelArn.t
         [@ocaml.doc "Channel ARN used to filter the list."];
-      maxResults: MaxStreamResults.t option
-        [@ocaml.doc "Maximum number of streams to return. Default: 50."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The first stream to retrieve. This is used for pagination; see the nextToken response field."]}
+          "The first stream to retrieve. This is used for pagination; see the nextToken response field."];
+      maxResults: MaxStreamResults.t option
+        [@ocaml.doc "Maximum number of streams to return. Default: 100."]}
     let context_ = "ListStreamSessionsRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~channelArn -> fun () -> { maxResults; nextToken; channelArn }
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~channelArn -> fun () -> { nextToken; maxResults; channelArn }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChannelArn.to_value x.channelArn)));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("maxResults",
-          (Option.map x.maxResults ~f:MaxStreamResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+          (Option.map x.maxResults ~f:MaxStreamResults.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:PaginationToken.of_xml)
-          (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:MaxStreamResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
       let channelArn =
         ChannelArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ?nextToken ?maxResults ~channelArn ()
+      make ?maxResults ?nextToken ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxStreamResults.of_json in
-      let channelArn = field_map_exn json "channelArn" ChannelArn.of_json in
-      make ?nextToken ?maxResults ~channelArn ()
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxStreamResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let channelArn = field_map_exn json__ "channelArn" ChannelArn.of_json in
+      make ?maxResults ?nextToken ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets a summary of current and previous streams for a specified channel in your account, in the AWS region where the API request is processed."]
@@ -3279,18 +6444,17 @@ module ListStreamKeysResponse =
   struct
     type nonrec t =
       {
+      streamKeys: StreamKeyList.t option [@ocaml.doc "List of stream keys."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "If there are more stream keys than maxResults, use nextToken in the request to get the next set."];
-      streamKeys: StreamKeyList.t [@ocaml.doc "List of stream keys."]}
+          "If there are more stream keys than maxResults, use nextToken in the request to get the next set."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListStreamKeysResponse"
-    let make ?nextToken =
-      fun ~streamKeys -> fun () -> { nextToken; streamKeys }
+    let make ?streamKeys =
+      fun ?nextToken -> fun () -> { streamKeys; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3333,22 +6497,22 @@ module ListStreamKeysResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("streamKeys", (Some (StreamKeyList.to_value x.streamKeys)))]
+        [("streamKeys", (Option.map x.streamKeys ~f:StreamKeyList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let streamKeys =
-        StreamKeyList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "streamKeys") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~streamKeys ?nextToken ()
+      let streamKeys =
+        (Option.map ~f:StreamKeyList.of_xml)
+          (Xml.child xml_arg0 "streamKeys") in
+      make ?nextToken ?streamKeys ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamKeys = field_map_exn json "streamKeys" StreamKeyList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      make ~streamKeys ?nextToken ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let streamKeys = field_map json__ "streamKeys" StreamKeyList.of_json in
+      make ?nextToken ?streamKeys ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets summary information about stream keys for the specified channel."]
@@ -3358,40 +6522,40 @@ module ListStreamKeysRequest =
       {
       channelArn: ChannelArn.t
         [@ocaml.doc "Channel ARN used to filter the list."];
-      maxResults: MaxStreamKeyResults.t option
-        [@ocaml.doc "Maximum number of streamKeys to return. Default: 50."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The first stream key to retrieve. This is used for pagination; see the nextToken response field."]}
+          "The first stream key to retrieve. This is used for pagination; see the nextToken response field."];
+      maxResults: MaxStreamKeyResults.t option
+        [@ocaml.doc "Maximum number of streamKeys to return. Default: 1."]}
     let context_ = "ListStreamKeysRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~channelArn -> fun () -> { maxResults; nextToken; channelArn }
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~channelArn -> fun () -> { nextToken; maxResults; channelArn }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChannelArn.to_value x.channelArn)));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("maxResults",
-          (Option.map x.maxResults ~f:MaxStreamKeyResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+          (Option.map x.maxResults ~f:MaxStreamKeyResults.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:PaginationToken.of_xml)
-          (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:MaxStreamKeyResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
       let channelArn =
         ChannelArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ?nextToken ?maxResults ~channelArn ()
+      make ?maxResults ?nextToken ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
       let maxResults =
-        field_map json "maxResults" MaxStreamKeyResults.of_json in
-      let channelArn = field_map_exn json "channelArn" ChannelArn.of_json in
-      make ?nextToken ?maxResults ~channelArn ()
+        field_map json__ "maxResults" MaxStreamKeyResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let channelArn = field_map_exn json__ "channelArn" ChannelArn.of_json in
+      make ?maxResults ?nextToken ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets summary information about stream keys for the specified channel."]
@@ -3399,20 +6563,18 @@ module ListRecordingConfigurationsResponse =
   struct
     type nonrec t =
       {
+      recordingConfigurations: RecordingConfigurationList.t option
+        [@ocaml.doc "List of the matching recording configurations."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "If there are more recording configurations than maxResults, use nextToken in the request to get the next set."];
-      recordingConfigurations: RecordingConfigurationList.t
-        [@ocaml.doc "List of the matching recording configurations."]}
+          "If there are more recording configurations than maxResults, use nextToken in the request to get the next set."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListRecordingConfigurationsResponse"
-    let make ?nextToken =
-      fun ~recordingConfigurations ->
-        fun () -> { nextToken; recordingConfigurations }
+    let make ?recordingConfigurations =
+      fun ?nextToken -> fun () -> { recordingConfigurations; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3455,26 +6617,26 @@ module ListRecordingConfigurationsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("recordingConfigurations",
-          (Some
-             (RecordingConfigurationList.to_value x.recordingConfigurations)))]
+        [("recordingConfigurations",
+           (Option.map x.recordingConfigurations
+              ~f:RecordingConfigurationList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let recordingConfigurations =
-        RecordingConfigurationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recordingConfigurations") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~recordingConfigurations ?nextToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let recordingConfigurations =
-        field_map_exn json "recordingConfigurations"
+        (Option.map ~f:RecordingConfigurationList.of_xml)
+          (Xml.child xml_arg0 "recordingConfigurations") in
+      make ?nextToken ?recordingConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let recordingConfigurations =
+        field_map json__ "recordingConfigurations"
           RecordingConfigurationList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      make ~recordingConfigurations ?nextToken ()
+      make ?nextToken ?recordingConfigurations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets summary information about all recording configurations in your account, in the Amazon Web Services region where the API request is processed."]
@@ -3482,43 +6644,171 @@ module ListRecordingConfigurationsRequest =
   struct
     type nonrec t =
       {
-      maxResults: MaxRecordingConfigurationResults.t option
-        [@ocaml.doc
-          "Maximum number of recording configurations to return. Default: 50."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The first recording configuration to retrieve. This is used for pagination; see the nextToken response field."]}
-    let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
+          "The first recording configuration to retrieve. This is used for pagination; see the nextToken response field."];
+      maxResults: MaxRecordingConfigurationResults.t option
+        [@ocaml.doc
+          "Maximum number of recording configurations to return. Default: your service quota or 100, whichever is smaller."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
       structure_to_value
-        [("maxResults",
-           (Option.map x.maxResults
-              ~f:MaxRecordingConfigurationResults.to_value));
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:MaxRecordingConfigurationResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxRecordingConfigurationResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "maxResults"
+          MaxRecordingConfigurationResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets summary information about all recording configurations in your account, in the Amazon Web Services region where the API request is processed."]
+module ListPlaybackRestrictionPoliciesResponse =
+  struct
+    type nonrec t =
+      {
+      playbackRestrictionPolicies: PlaybackRestrictionPolicyList.t option
+        [@ocaml.doc "List of the matching policies."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "If there are more channels than maxResults, use nextToken in the request to get the next set."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `PendingVerification of PendingVerification.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?playbackRestrictionPolicies =
+      fun ?nextToken -> fun () -> { playbackRestrictionPolicies; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `PendingVerification e ->
+          `Assoc
+            [("error", (`String "PendingVerification"));
+            ("details", (PendingVerification.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("playbackRestrictionPolicies",
+           (Option.map x.playbackRestrictionPolicies
+              ~f:PlaybackRestrictionPolicyList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      let maxResults =
-        (Option.map ~f:MaxRecordingConfigurationResults.of_xml)
-          (Xml.child xml_arg0 "maxResults") in
-      make ?nextToken ?maxResults ()
+      let playbackRestrictionPolicies =
+        (Option.map ~f:PlaybackRestrictionPolicyList.of_xml)
+          (Xml.child xml_arg0 "playbackRestrictionPolicies") in
+      make ?nextToken ?playbackRestrictionPolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults =
-        field_map json "maxResults" MaxRecordingConfigurationResults.of_json in
-      make ?nextToken ?maxResults ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let playbackRestrictionPolicies =
+        field_map json__ "playbackRestrictionPolicies"
+          PlaybackRestrictionPolicyList.of_json in
+      make ?nextToken ?playbackRestrictionPolicies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets summary information about all recording configurations in your account, in the Amazon Web Services region where the API request is processed."]
+       "Gets summary information about playback restriction policies."]
+module ListPlaybackRestrictionPoliciesRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The first policy to retrieve. This is used for pagination; see the nextToken response field."];
+      maxResults: MaxPlaybackRestrictionPolicyResults.t option
+        [@ocaml.doc "Maximum number of policies to return. Default: 1."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:MaxPlaybackRestrictionPolicyResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxPlaybackRestrictionPolicyResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "maxResults"
+          MaxPlaybackRestrictionPolicyResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets summary information about playback restriction policies."]
 module ListPlaybackKeyPairsResponse =
   struct
     type nonrec t =
       {
-      keyPairs: PlaybackKeyPairList.t [@ocaml.doc "List of key pairs."];
+      keyPairs: PlaybackKeyPairList.t option
+        [@ocaml.doc "List of key pairs."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "If there are more key pairs than maxResults, use nextToken in the request to get the next set."]}
@@ -3526,8 +6816,7 @@ module ListPlaybackKeyPairsResponse =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListPlaybackKeyPairsResponse"
-    let make ?nextToken = fun ~keyPairs -> fun () -> { nextToken; keyPairs }
+    let make ?keyPairs = fun ?nextToken -> fun () -> { keyPairs; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3562,7 +6851,8 @@ module ListPlaybackKeyPairsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("keyPairs", (Some (PlaybackKeyPairList.to_value x.keyPairs)));
+        [("keyPairs",
+           (Option.map x.keyPairs ~f:PlaybackKeyPairList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -3570,15 +6860,14 @@ module ListPlaybackKeyPairsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let keyPairs =
-        PlaybackKeyPairList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "keyPairs") in
-      make ?nextToken ~keyPairs ()
+        (Option.map ~f:PlaybackKeyPairList.of_xml)
+          (Xml.child xml_arg0 "keyPairs") in
+      make ?nextToken ?keyPairs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let keyPairs =
-        field_map_exn json "keyPairs" PlaybackKeyPairList.of_json in
-      make ?nextToken ~keyPairs ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let keyPairs = field_map json__ "keyPairs" PlaybackKeyPairList.of_json in
+      make ?nextToken ?keyPairs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets summary information about playback key pairs. For more information, see Setting Up Private Channels in the Amazon IVS User Guide."]
@@ -3586,33 +6875,34 @@ module ListPlaybackKeyPairsRequest =
   struct
     type nonrec t =
       {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The first key pair to retrieve. This is used for pagination; see the nextToken response field."];
       maxResults: MaxPlaybackKeyPairResults.t option
         [@ocaml.doc
-          "The first key pair to retrieve. This is used for pagination; see the nextToken response field. Default: 50."];
-      nextToken: PaginationToken.t option
-        [@ocaml.doc "Maximum number of key pairs to return."]}
-    let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
+          "Maximum number of key pairs to return. Default: your service quota or 100, whichever is smaller."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
     let to_value x =
       structure_to_value
-        [("maxResults",
-           (Option.map x.maxResults ~f:MaxPlaybackKeyPairResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:MaxPlaybackKeyPairResults.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:PaginationToken.of_xml)
-          (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:MaxPlaybackKeyPairResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
-      make ?nextToken ?maxResults ()
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
       let maxResults =
-        field_map json "maxResults" MaxPlaybackKeyPairResults.of_json in
-      make ?nextToken ?maxResults ()
+        field_map json__ "maxResults" MaxPlaybackKeyPairResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets summary information about playback key pairs. For more information, see Setting Up Private Channels in the Amazon IVS User Guide."]
@@ -3620,7 +6910,8 @@ module ListChannelsResponse =
   struct
     type nonrec t =
       {
-      channels: ChannelList.t [@ocaml.doc "List of the matching channels."];
+      channels: ChannelList.t option
+        [@ocaml.doc "List of the matching channels."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "If there are more channels than maxResults, use nextToken in the request to get the next set."]}
@@ -3629,8 +6920,7 @@ module ListChannelsResponse =
       | `ConflictException of ConflictException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListChannelsResponse"
-    let make ?nextToken = fun ~channels -> fun () -> { nextToken; channels }
+    let make ?channels = fun ?nextToken -> fun () -> { channels; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3673,7 +6963,7 @@ module ListChannelsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("channels", (Some (ChannelList.to_value x.channels)));
+        [("channels", (Option.map x.channels ~f:ChannelList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -3681,14 +6971,13 @@ module ListChannelsResponse =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let channels =
-        ChannelList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channels") in
-      make ?nextToken ~channels ()
+        (Option.map ~f:ChannelList.of_xml) (Xml.child xml_arg0 "channels") in
+      make ?nextToken ?channels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let channels = field_map_exn json "channels" ChannelList.of_json in
-      make ?nextToken ~channels ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let channels = field_map json__ "channels" ChannelList.of_json in
+      make ?nextToken ?channels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets summary information about all channels in your account, in the Amazon Web Services region where the API request is processed. This list can be filtered to match a specified name or recording-configuration ARN. Filters are mutually exclusive and cannot be used together. If you try to use both filters, you will get an error (409 ConflictException)."]
@@ -3702,22 +6991,33 @@ module ListChannelsRequest =
         ChannelRecordingConfigurationArn.t option
         [@ocaml.doc
           "Filters the channel list to match the specified recording-configuration ARN."];
-      maxResults: MaxChannelResults.t option
-        [@ocaml.doc "Maximum number of channels to return. Default: 50."];
+      filterByPlaybackRestrictionPolicyArn:
+        ChannelPlaybackRestrictionPolicyArn.t option
+        [@ocaml.doc
+          "Filters the channel list to match the specified policy."];
+      filterByAdConfigurationArn: ChannelAdConfigurationArn.t option
+        [@ocaml.doc
+          "Filters the channel list to match the specified ad configuration ARN."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The first channel to retrieve. This is used for pagination; see the nextToken response field."]}
+          "The first channel to retrieve. This is used for pagination; see the nextToken response field."];
+      maxResults: MaxChannelResults.t option
+        [@ocaml.doc "Maximum number of channels to return. Default: 100."]}
     let make ?filterByName =
       fun ?filterByRecordingConfigurationArn ->
-        fun ?maxResults ->
-          fun ?nextToken ->
-            fun () ->
-              {
-                filterByName;
-                filterByRecordingConfigurationArn;
-                maxResults;
-                nextToken
-              }
+        fun ?filterByPlaybackRestrictionPolicyArn ->
+          fun ?filterByAdConfigurationArn ->
+            fun ?nextToken ->
+              fun ?maxResults ->
+                fun () ->
+                  {
+                    filterByName;
+                    filterByRecordingConfigurationArn;
+                    filterByPlaybackRestrictionPolicyArn;
+                    filterByAdConfigurationArn;
+                    nextToken;
+                    maxResults
+                  }
     let to_value x =
       structure_to_value
         [("filterByName",
@@ -3725,38 +7025,312 @@ module ListChannelsRequest =
         ("filterByRecordingConfigurationArn",
           (Option.map x.filterByRecordingConfigurationArn
              ~f:ChannelRecordingConfigurationArn.to_value));
+        ("filterByPlaybackRestrictionPolicyArn",
+          (Option.map x.filterByPlaybackRestrictionPolicyArn
+             ~f:ChannelPlaybackRestrictionPolicyArn.to_value));
+        ("filterByAdConfigurationArn",
+          (Option.map x.filterByAdConfigurationArn
+             ~f:ChannelAdConfigurationArn.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("maxResults",
-          (Option.map x.maxResults ~f:MaxChannelResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+          (Option.map x.maxResults ~f:MaxChannelResults.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:PaginationToken.of_xml)
-          (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:MaxChannelResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let filterByAdConfigurationArn =
+        (Option.map ~f:ChannelAdConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "filterByAdConfigurationArn") in
+      let filterByPlaybackRestrictionPolicyArn =
+        (Option.map ~f:ChannelPlaybackRestrictionPolicyArn.of_xml)
+          (Xml.child xml_arg0 "filterByPlaybackRestrictionPolicyArn") in
       let filterByRecordingConfigurationArn =
         (Option.map ~f:ChannelRecordingConfigurationArn.of_xml)
           (Xml.child xml_arg0 "filterByRecordingConfigurationArn") in
       let filterByName =
         (Option.map ~f:ChannelName.of_xml)
           (Xml.child xml_arg0 "filterByName") in
-      make ?nextToken ?maxResults ?filterByRecordingConfigurationArn
-        ?filterByName ()
+      make ?maxResults ?nextToken ?filterByAdConfigurationArn
+        ?filterByPlaybackRestrictionPolicyArn
+        ?filterByRecordingConfigurationArn ?filterByName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxChannelResults.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "maxResults" MaxChannelResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let filterByAdConfigurationArn =
+        field_map json__ "filterByAdConfigurationArn"
+          ChannelAdConfigurationArn.of_json in
+      let filterByPlaybackRestrictionPolicyArn =
+        field_map json__ "filterByPlaybackRestrictionPolicyArn"
+          ChannelPlaybackRestrictionPolicyArn.of_json in
       let filterByRecordingConfigurationArn =
-        field_map json "filterByRecordingConfigurationArn"
+        field_map json__ "filterByRecordingConfigurationArn"
           ChannelRecordingConfigurationArn.of_json in
-      let filterByName = field_map json "filterByName" ChannelName.of_json in
-      make ?nextToken ?maxResults ?filterByRecordingConfigurationArn
-        ?filterByName ()
+      let filterByName = field_map json__ "filterByName" ChannelName.of_json in
+      make ?maxResults ?nextToken ?filterByAdConfigurationArn
+        ?filterByPlaybackRestrictionPolicyArn
+        ?filterByRecordingConfigurationArn ?filterByName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets summary information about all channels in your account, in the Amazon Web Services region where the API request is processed. This list can be filtered to match a specified name or recording-configuration ARN. Filters are mutually exclusive and cannot be used together. If you try to use both filters, you will get an error (409 ConflictException)."]
+module ListAdConfigurationsResponse =
+  struct
+    type nonrec t =
+      {
+      adConfigurations: AdConfigurationList.t option
+        [@ocaml.doc "List of the matching ad configurations."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "If there are more ad configurations than maxResults, use nextToken in the request to get the next set."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adConfigurations =
+      fun ?nextToken -> fun () -> { adConfigurations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("adConfigurations",
+           (Option.map x.adConfigurations ~f:AdConfigurationList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let adConfigurations =
+        (Option.map ~f:AdConfigurationList.of_xml)
+          (Xml.child xml_arg0 "adConfigurations") in
+      make ?nextToken ?adConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let adConfigurations =
+        field_map json__ "adConfigurations" AdConfigurationList.of_json in
+      make ?nextToken ?adConfigurations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets summary information about all ad configurations in your account, in the AWS region where the API request is processed."]
+module ListAdConfigurationsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The first ad configuration to retrieve. This is used for pagination; see the nextToken response field."];
+      maxResults: MaxAdConfigurationResults.t option
+        [@ocaml.doc
+          "Maximum number of ad configurations to return. Default: your service quota or 100, whichever is smaller."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:MaxAdConfigurationResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxAdConfigurationResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "maxResults" MaxAdConfigurationResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets summary information about all ad configurations in your account, in the AWS region where the API request is processed."]
+module InsertAdBreakResponse =
+  struct
+    type nonrec t =
+      {
+      adBreakId: AdBreakId.t option
+        [@ocaml.doc
+          "Unique identifier for the ad break that was inserted into the playlist."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ChannelNotBroadcasting of ChannelNotBroadcasting.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adBreakId = fun () -> { adBreakId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ChannelNotBroadcasting" ->
+          `ChannelNotBroadcasting (ChannelNotBroadcasting.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ChannelNotBroadcasting" ->
+          `ChannelNotBroadcasting (ChannelNotBroadcasting.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ChannelNotBroadcasting e ->
+          `Assoc
+            [("error", (`String "ChannelNotBroadcasting"));
+            ("details", (ChannelNotBroadcasting.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("adBreakId", (Option.map x.adBreakId ~f:AdBreakId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adBreakId =
+        (Option.map ~f:AdBreakId.of_xml) (Xml.child xml_arg0 "adBreakId") in
+      make ?adBreakId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adBreakId = field_map json__ "adBreakId" AdBreakId.of_json in
+      make ?adBreakId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Inserts an ad marker in the playlist for the specified channel and duration using the ad configuration associated with the channel. Note: AWS Elemental MediaTailor (EMT), the service that handles ad requests, provides CloudWatch metrics to help you monitor the success or failure of each InsertAdBreak operation. See Monitoring AWS Elemental MediaTailor with Amazon CloudWatch metrics in the AWS Elemental MediaTailor User Guide for details on available metrics."]
+module InsertAdBreakRequest =
+  struct
+    type nonrec t =
+      {
+      channelArn: ChannelArn.t
+        [@ocaml.doc
+          "ARN of the channel into which the ad break is inserted."];
+      durationSeconds: AdDurationSeconds.t
+        [@ocaml.doc "Maximum duration of the ad break, in seconds."]}
+    let context_ = "InsertAdBreakRequest"
+    let make ~channelArn =
+      fun ~durationSeconds -> fun () -> { channelArn; durationSeconds }
+    let to_value x =
+      structure_to_value
+        [("channelArn", (Some (ChannelArn.to_value x.channelArn)));
+        ("durationSeconds",
+          (Some (AdDurationSeconds.to_value x.durationSeconds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let durationSeconds =
+        AdDurationSeconds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "durationSeconds") in
+      let channelArn =
+        ChannelArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
+      make ~durationSeconds ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let durationSeconds =
+        field_map_exn json__ "durationSeconds" AdDurationSeconds.of_json in
+      let channelArn = field_map_exn json__ "channelArn" ChannelArn.of_json in
+      make ~durationSeconds ~channelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Inserts an ad marker in the playlist for the specified channel and duration using the ad configuration associated with the channel. Note: AWS Elemental MediaTailor (EMT), the service that handles ad requests, provides CloudWatch metrics to help you monitor the success or failure of each InsertAdBreak operation. See Monitoring AWS Elemental MediaTailor with Amazon CloudWatch metrics in the AWS Elemental MediaTailor User Guide for details on available metrics."]
 module ImportPlaybackKeyPairResponse =
   struct
     type nonrec t = {
@@ -3836,8 +7410,8 @@ module ImportPlaybackKeyPairResponse =
         (Option.map ~f:PlaybackKeyPair.of_xml) (Xml.child xml_arg0 "keyPair") in
       make ?keyPair ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyPair = field_map json "keyPair" PlaybackKeyPair.of_json in
+    let of_json json__ =
+      let keyPair = field_map json__ "keyPair" PlaybackKeyPair.of_json in
       make ?keyPair ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3846,42 +7420,42 @@ module ImportPlaybackKeyPairRequest =
   struct
     type nonrec t =
       {
+      publicKeyMaterial: PlaybackPublicKeyMaterial.t
+        [@ocaml.doc "The public portion of a customer-generated key pair."];
       name: PlaybackKeyPairName.t option
         [@ocaml.doc
           "Playback-key-pair name. The value does not need to be unique."];
-      publicKeyMaterial: PlaybackPublicKeyMaterial.t
-        [@ocaml.doc "The public portion of a customer-generated key pair."];
       tags: Tags.t option
         [@ocaml.doc
-          "Any tags provided with the request are added to the playback key pair tags."]}
+          "Any tags provided with the request are added to the playback key pair tags. See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
     let context_ = "ImportPlaybackKeyPairRequest"
     let make ?name =
       fun ?tags ->
         fun ~publicKeyMaterial -> fun () -> { name; tags; publicKeyMaterial }
     let to_value x =
       structure_to_value
-        [("name", (Option.map x.name ~f:PlaybackKeyPairName.to_value));
-        ("publicKeyMaterial",
-          (Some (PlaybackPublicKeyMaterial.to_value x.publicKeyMaterial)));
+        [("publicKeyMaterial",
+           (Some (PlaybackPublicKeyMaterial.to_value x.publicKeyMaterial)));
+        ("name", (Option.map x.name ~f:PlaybackKeyPairName.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
-      let publicKeyMaterial =
-        PlaybackPublicKeyMaterial.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "publicKeyMaterial") in
       let name =
         (Option.map ~f:PlaybackKeyPairName.of_xml)
           (Xml.child xml_arg0 "name") in
-      make ?tags ~publicKeyMaterial ?name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
       let publicKeyMaterial =
-        field_map_exn json "publicKeyMaterial"
+        PlaybackPublicKeyMaterial.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "publicKeyMaterial") in
+      make ?tags ?name ~publicKeyMaterial ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map json__ "name" PlaybackKeyPairName.of_json in
+      let publicKeyMaterial =
+        field_map_exn json__ "publicKeyMaterial"
           PlaybackPublicKeyMaterial.of_json in
-      let name = field_map json "name" PlaybackKeyPairName.of_json in
-      make ?tags ~publicKeyMaterial ?name ()
+      make ?tags ?name ~publicKeyMaterial ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Imports the public portion of a new key pair and returns its arn and fingerprint. The privateKey can then be used to generate viewer authorization tokens, to grant viewers access to private channels. For more information, see Setting Up Private Channels in the Amazon IVS User Guide."]
@@ -3948,9 +7522,9 @@ module GetStreamSessionResponse =
           (Xml.child xml_arg0 "streamSession") in
       make ?streamSession ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamSession =
-        field_map json "streamSession" StreamSession.of_json in
+        field_map json__ "streamSession" StreamSession.of_json in
       make ?streamSession ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets metadata on a specified stream."]
@@ -3978,9 +7552,9 @@ module GetStreamSessionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ?streamId ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamId = field_map json "streamId" StreamId.of_json in
-      let channelArn = field_map_exn json "channelArn" ChannelArn.of_json in
+    let of_json json__ =
+      let streamId = field_map json__ "streamId" StreamId.of_json in
+      let channelArn = field_map_exn json__ "channelArn" ChannelArn.of_json in
       make ?streamId ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets metadata on a specified stream."]
@@ -4052,8 +7626,9 @@ module GetStreamResponse =
         (Option.map ~f:Stream.of_xml) (Xml.child xml_arg0 "stream") in
       make ?stream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stream = field_map json "stream" Stream.of_json in make ?stream ()
+    let of_json json__ =
+      let stream = field_map json__ "stream" Stream.of_json in
+      make ?stream ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about the active (live) stream on a specified channel."]
@@ -4075,8 +7650,8 @@ module GetStreamRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelArn = field_map_exn json "channelArn" ChannelArn.of_json in
+    let of_json json__ =
+      let channelArn = field_map_exn json__ "channelArn" ChannelArn.of_json in
       make ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4140,8 +7715,8 @@ module GetStreamKeyResponse =
         (Option.map ~f:StreamKey.of_xml) (Xml.child xml_arg0 "streamKey") in
       make ?streamKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamKey = field_map json "streamKey" StreamKey.of_json in
+    let of_json json__ =
+      let streamKey = field_map json__ "streamKey" StreamKey.of_json in
       make ?streamKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets stream-key information for a specified ARN."]
@@ -4161,8 +7736,9 @@ module GetStreamKeyRequest =
         StreamKeyArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" StreamKeyArn.of_json in make ~arn ()
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" StreamKeyArn.of_json in
+      make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets stream-key information for a specified ARN."]
 module GetRecordingConfigurationResponse =
@@ -4237,9 +7813,9 @@ module GetRecordingConfigurationResponse =
           (Xml.child xml_arg0 "recordingConfiguration") in
       make ?recordingConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recordingConfiguration =
-        field_map json "recordingConfiguration"
+        field_map json__ "recordingConfiguration"
           RecordingConfiguration.of_json in
       make ?recordingConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -4262,11 +7838,115 @@ module GetRecordingConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" RecordingConfigurationArn.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" RecordingConfigurationArn.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the recording configuration for the specified ARN."]
+module GetPlaybackRestrictionPolicyResponse =
+  struct
+    type nonrec t =
+      {
+      playbackRestrictionPolicy: PlaybackRestrictionPolicy.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `PendingVerification of PendingVerification.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?playbackRestrictionPolicy =
+      fun () -> { playbackRestrictionPolicy }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `PendingVerification e ->
+          `Assoc
+            [("error", (`String "PendingVerification"));
+            ("details", (PendingVerification.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("playbackRestrictionPolicy",
+           (Option.map x.playbackRestrictionPolicy
+              ~f:PlaybackRestrictionPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let playbackRestrictionPolicy =
+        (Option.map ~f:PlaybackRestrictionPolicy.of_xml)
+          (Xml.child xml_arg0 "playbackRestrictionPolicy") in
+      make ?playbackRestrictionPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let playbackRestrictionPolicy =
+        field_map json__ "playbackRestrictionPolicy"
+          PlaybackRestrictionPolicy.of_json in
+      make ?playbackRestrictionPolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets the specified playback restriction policy."]
+module GetPlaybackRestrictionPolicyRequest =
+  struct
+    type nonrec t =
+      {
+      arn: PlaybackRestrictionPolicyArn.t
+        [@ocaml.doc "ARN of the playback restriction policy to be returned."]}
+    let context_ = "GetPlaybackRestrictionPolicyRequest"
+    let make ~arn = fun () -> { arn }
+    let to_value x =
+      structure_to_value
+        [("arn", (Some (PlaybackRestrictionPolicyArn.to_value x.arn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn =
+        PlaybackRestrictionPolicyArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
+      make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn =
+        field_map_exn json__ "arn" PlaybackRestrictionPolicyArn.of_json in
+      make ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets the specified playback restriction policy."]
 module GetPlaybackKeyPairResponse =
   struct
     type nonrec t = {
@@ -4326,8 +8006,8 @@ module GetPlaybackKeyPairResponse =
         (Option.map ~f:PlaybackKeyPair.of_xml) (Xml.child xml_arg0 "keyPair") in
       make ?keyPair ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyPair = field_map json "keyPair" PlaybackKeyPair.of_json in
+    let of_json json__ =
+      let keyPair = field_map json__ "keyPair" PlaybackKeyPair.of_json in
       make ?keyPair ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4350,8 +8030,8 @@ module GetPlaybackKeyPairRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" PlaybackKeyPairArn.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" PlaybackKeyPairArn.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4415,8 +8095,8 @@ module GetChannelResponse =
         (Option.map ~f:Channel.of_xml) (Xml.child xml_arg0 "channel") in
       make ?channel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channel = field_map json "channel" Channel.of_json in
+    let of_json json__ =
+      let channel = field_map json__ "channel" Channel.of_json in
       make ?channel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4438,11 +8118,112 @@ module GetChannelRequest =
         ChannelArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" ChannelArn.of_json in make ~arn ()
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" ChannelArn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the channel configuration for the specified channel ARN. See also BatchGetChannel."]
+module GetAdConfigurationResponse =
+  struct
+    type nonrec t = {
+      adConfiguration: AdConfiguration.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adConfiguration = fun () -> { adConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("adConfiguration",
+           (Option.map x.adConfiguration ~f:AdConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adConfiguration =
+        (Option.map ~f:AdConfiguration.of_xml)
+          (Xml.child xml_arg0 "adConfiguration") in
+      make ?adConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adConfiguration =
+        field_map json__ "adConfiguration" AdConfiguration.of_json in
+      make ?adConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the ad configuration represented by the specified ARN."]
+module GetAdConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      arn: AdConfigurationArn.t
+        [@ocaml.doc "ARN of the ad configuration to be retrieved."]}
+    let context_ = "GetAdConfigurationRequest"
+    let make ~arn = fun () -> { arn }
+    let to_value x =
+      structure_to_value
+        [("arn", (Some (AdConfigurationArn.to_value x.arn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn =
+        AdConfigurationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
+      make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" AdConfigurationArn.of_json in
+      make ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the ad configuration represented by the specified ARN."]
 module DeleteStreamKeyRequest =
   struct
     type nonrec t =
@@ -4458,8 +8239,9 @@ module DeleteStreamKeyRequest =
         StreamKeyArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" StreamKeyArn.of_json in make ~arn ()
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" StreamKeyArn.of_json in
+      make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the stream key for the specified ARN, so it can no longer be used to stream."]
@@ -4481,12 +8263,36 @@ module DeleteRecordingConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" RecordingConfigurationArn.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" RecordingConfigurationArn.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the recording configuration for the specified ARN. If you try to delete a recording configuration that is associated with a channel, you will get an error (409 ConflictException). To avoid this, for all channels that reference the recording configuration, first use UpdateChannel to set the recordingConfigurationArn field to an empty string, then use DeleteRecordingConfiguration."]
+module DeletePlaybackRestrictionPolicyRequest =
+  struct
+    type nonrec t =
+      {
+      arn: PlaybackRestrictionPolicyArn.t
+        [@ocaml.doc "ARN of the playback restriction policy to be deleted."]}
+    let context_ = "DeletePlaybackRestrictionPolicyRequest"
+    let make ~arn = fun () -> { arn }
+    let to_value x =
+      structure_to_value
+        [("arn", (Some (PlaybackRestrictionPolicyArn.to_value x.arn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn =
+        PlaybackRestrictionPolicyArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
+      make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn =
+        field_map_exn json__ "arn" PlaybackRestrictionPolicyArn.of_json in
+      make ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified playback restriction policy."]
 module DeletePlaybackKeyPairResponse =
   struct
     type nonrec t = unit
@@ -4572,8 +8378,8 @@ module DeletePlaybackKeyPairRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" PlaybackKeyPairArn.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" PlaybackKeyPairArn.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4593,11 +8399,34 @@ module DeleteChannelRequest =
         ChannelArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" ChannelArn.of_json in make ~arn ()
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" ChannelArn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified channel and its associated stream keys. If you try to delete a live channel, you will get an error (409 ConflictException). To delete a channel that is live, call StopStream, wait for the Amazon EventBridge \"Stream End\" event (to verify that the stream's state was changed from Live to Offline), then call DeleteChannel. (See Using EventBridge with Amazon IVS.)"]
+       "Deletes the specified channel and its associated stream keys. If you try to delete a live channel, you will get an error (409 ConflictException). To delete a channel that is live, call StopStream, wait for the Amazon EventBridge \"Stream End\" event (to verify that the stream's state is no longer Live), then call DeleteChannel. (See Using EventBridge with Amazon IVS.)"]
+module DeleteAdConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      arn: AdConfigurationArn.t
+        [@ocaml.doc "ARN of the ad configuration to be deleted."]}
+    let context_ = "DeleteAdConfigurationRequest"
+    let make ~arn = fun () -> { arn }
+    let to_value x =
+      structure_to_value
+        [("arn", (Some (AdConfigurationArn.to_value x.arn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn =
+        AdConfigurationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
+      make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" AdConfigurationArn.of_json in
+      make ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified ad configuration."]
 module CreateStreamKeyResponse =
   struct
     type nonrec t =
@@ -4680,8 +8509,8 @@ module CreateStreamKeyResponse =
         (Option.map ~f:StreamKey.of_xml) (Xml.child xml_arg0 "streamKey") in
       make ?streamKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamKey = field_map json "streamKey" StreamKey.of_json in
+    let of_json json__ =
+      let streamKey = field_map json__ "streamKey" StreamKey.of_json in
       make ?streamKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4694,7 +8523,7 @@ module CreateStreamKeyRequest =
         [@ocaml.doc "ARN of the channel for which to create the stream key."];
       tags: Tags.t option
         [@ocaml.doc
-          "Array of 1-50 maps, each of the form string:string (key:value)."]}
+          "Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
     let context_ = "CreateStreamKeyRequest"
     let make ?tags = fun ~channelArn -> fun () -> { tags; channelArn }
     let to_value x =
@@ -4709,9 +8538,9 @@ module CreateStreamKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ?tags ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let channelArn = field_map_exn json "channelArn" ChannelArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let channelArn = field_map_exn json__ "channelArn" ChannelArn.of_json in
       make ?tags ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4808,9 +8637,9 @@ module CreateRecordingConfigurationResponse =
           (Xml.child xml_arg0 "recordingConfiguration") in
       make ?recordingConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recordingConfiguration =
-        field_map json "recordingConfiguration"
+        field_map json__ "recordingConfiguration"
           RecordingConfiguration.of_json in
       make ?recordingConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -4820,64 +8649,275 @@ module CreateRecordingConfigurationRequest =
   struct
     type nonrec t =
       {
-      destinationConfiguration: DestinationConfiguration.t
-        [@ocaml.doc
-          "A complex type that contains a destination configuration for where recorded video will be stored."];
       name: RecordingConfigurationName.t option
         [@ocaml.doc
           "Recording-configuration name. The value does not need to be unique."];
+      destinationConfiguration: DestinationConfiguration.t
+        [@ocaml.doc
+          "A complex type that contains a destination configuration for where recorded video will be stored."];
       tags: Tags.t option
         [@ocaml.doc
-          "Array of 1-50 maps, each of the form string:string (key:value)."];
+          "Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."];
       thumbnailConfiguration: ThumbnailConfiguration.t option
         [@ocaml.doc
-          "A complex type that allows you to enable/disable the recording of thumbnails for a live session and modify the interval at which thumbnails are generated for the live session."]}
+          "A complex type that allows you to enable/disable the recording of thumbnails for a live session and modify the interval at which thumbnails are generated for the live session."];
+      recordingReconnectWindowSeconds:
+        RecordingReconnectWindowSeconds.t option
+        [@ocaml.doc
+          "If a broadcast disconnects and then reconnects within the specified interval, the multiple streams will be considered a single broadcast and merged together. Default: 0."];
+      renditionConfiguration: RenditionConfiguration.t option
+        [@ocaml.doc
+          "Object that describes which renditions should be recorded for a stream."]}
     let context_ = "CreateRecordingConfigurationRequest"
     let make ?name =
       fun ?tags ->
         fun ?thumbnailConfiguration ->
-          fun ~destinationConfiguration ->
-            fun () ->
-              { name; tags; thumbnailConfiguration; destinationConfiguration
-              }
+          fun ?recordingReconnectWindowSeconds ->
+            fun ?renditionConfiguration ->
+              fun ~destinationConfiguration ->
+                fun () ->
+                  {
+                    name;
+                    tags;
+                    thumbnailConfiguration;
+                    recordingReconnectWindowSeconds;
+                    renditionConfiguration;
+                    destinationConfiguration
+                  }
     let to_value x =
       structure_to_value
-        [("destinationConfiguration",
-           (Some
-              (DestinationConfiguration.to_value x.destinationConfiguration)));
-        ("name", (Option.map x.name ~f:RecordingConfigurationName.to_value));
+        [("name", (Option.map x.name ~f:RecordingConfigurationName.to_value));
+        ("destinationConfiguration",
+          (Some
+             (DestinationConfiguration.to_value x.destinationConfiguration)));
         ("tags", (Option.map x.tags ~f:Tags.to_value));
         ("thumbnailConfiguration",
           (Option.map x.thumbnailConfiguration
-             ~f:ThumbnailConfiguration.to_value))]
+             ~f:ThumbnailConfiguration.to_value));
+        ("recordingReconnectWindowSeconds",
+          (Option.map x.recordingReconnectWindowSeconds
+             ~f:RecordingReconnectWindowSeconds.to_value));
+        ("renditionConfiguration",
+          (Option.map x.renditionConfiguration
+             ~f:RenditionConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let renditionConfiguration =
+        (Option.map ~f:RenditionConfiguration.of_xml)
+          (Xml.child xml_arg0 "renditionConfiguration") in
+      let recordingReconnectWindowSeconds =
+        (Option.map ~f:RecordingReconnectWindowSeconds.of_xml)
+          (Xml.child xml_arg0 "recordingReconnectWindowSeconds") in
       let thumbnailConfiguration =
         (Option.map ~f:ThumbnailConfiguration.of_xml)
           (Xml.child xml_arg0 "thumbnailConfiguration") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
-      let name =
-        (Option.map ~f:RecordingConfigurationName.of_xml)
-          (Xml.child xml_arg0 "name") in
       let destinationConfiguration =
         DestinationConfiguration.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
              "destinationConfiguration") in
-      make ?thumbnailConfiguration ?tags ?name ~destinationConfiguration ()
+      let name =
+        (Option.map ~f:RecordingConfigurationName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?renditionConfiguration ?recordingReconnectWindowSeconds
+        ?thumbnailConfiguration ?tags ~destinationConfiguration ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let renditionConfiguration =
+        field_map json__ "renditionConfiguration"
+          RenditionConfiguration.of_json in
+      let recordingReconnectWindowSeconds =
+        field_map json__ "recordingReconnectWindowSeconds"
+          RecordingReconnectWindowSeconds.of_json in
       let thumbnailConfiguration =
-        field_map json "thumbnailConfiguration"
+        field_map json__ "thumbnailConfiguration"
           ThumbnailConfiguration.of_json in
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map json "name" RecordingConfigurationName.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
       let destinationConfiguration =
-        field_map_exn json "destinationConfiguration"
+        field_map_exn json__ "destinationConfiguration"
           DestinationConfiguration.of_json in
-      make ?thumbnailConfiguration ?tags ?name ~destinationConfiguration ()
+      let name = field_map json__ "name" RecordingConfigurationName.of_json in
+      make ?renditionConfiguration ?recordingReconnectWindowSeconds
+        ?thumbnailConfiguration ?tags ~destinationConfiguration ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new recording configuration, used to enable recording to Amazon S3. Known issue: In the us-east-1 region, if you use the Amazon Web Services CLI to create a recording configuration, it returns success even if the S3 bucket is in a different region. In this case, the state of the recording configuration is CREATE_FAILED (instead of ACTIVE). (In other regions, the CLI correctly returns failure if the bucket is in a different region.) Workaround: Ensure that your S3 bucket is in the same region as the recording configuration. If you create a recording configuration in a different region as your S3 bucket, delete that recording configuration and create a new one with an S3 bucket from the correct region."]
+module CreatePlaybackRestrictionPolicyResponse =
+  struct
+    type nonrec t =
+      {
+      playbackRestrictionPolicy: PlaybackRestrictionPolicy.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `PendingVerification of PendingVerification.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?playbackRestrictionPolicy =
+      fun () -> { playbackRestrictionPolicy }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `PendingVerification e ->
+          `Assoc
+            [("error", (`String "PendingVerification"));
+            ("details", (PendingVerification.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("playbackRestrictionPolicy",
+           (Option.map x.playbackRestrictionPolicy
+              ~f:PlaybackRestrictionPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let playbackRestrictionPolicy =
+        (Option.map ~f:PlaybackRestrictionPolicy.of_xml)
+          (Xml.child xml_arg0 "playbackRestrictionPolicy") in
+      make ?playbackRestrictionPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let playbackRestrictionPolicy =
+        field_map json__ "playbackRestrictionPolicy"
+          PlaybackRestrictionPolicy.of_json in
+      make ?playbackRestrictionPolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new playback restriction policy, for constraining playback by countries and/or origins."]
+module CreatePlaybackRestrictionPolicyRequest =
+  struct
+    type nonrec t =
+      {
+      allowedCountries: PlaybackRestrictionPolicyAllowedCountryList.t option
+        [@ocaml.doc
+          "A list of country codes that control geoblocking restriction. Allowed values are the officially assigned ISO 3166-1 alpha-2 codes. Default: All countries (an empty array)."];
+      allowedOrigins: PlaybackRestrictionPolicyAllowedOriginList.t option
+        [@ocaml.doc
+          "A list of origin sites that control CORS restriction. Allowed values are the same as valid values of the Origin header defined at https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin. Default: All origins (an empty array)."];
+      enableStrictOriginEnforcement:
+        PlaybackRestrictionPolicyEnableStrictOriginEnforcement.t option
+        [@ocaml.doc
+          "Whether channel playback is constrained by origin site. Default: false."];
+      name: PlaybackRestrictionPolicyName.t option
+        [@ocaml.doc
+          "Playback-restriction-policy name. The value does not need to be unique."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
+    let make ?allowedCountries =
+      fun ?allowedOrigins ->
+        fun ?enableStrictOriginEnforcement ->
+          fun ?name ->
+            fun ?tags ->
+              fun () ->
+                {
+                  allowedCountries;
+                  allowedOrigins;
+                  enableStrictOriginEnforcement;
+                  name;
+                  tags
+                }
+    let to_value x =
+      structure_to_value
+        [("allowedCountries",
+           (Option.map x.allowedCountries
+              ~f:PlaybackRestrictionPolicyAllowedCountryList.to_value));
+        ("allowedOrigins",
+          (Option.map x.allowedOrigins
+             ~f:PlaybackRestrictionPolicyAllowedOriginList.to_value));
+        ("enableStrictOriginEnforcement",
+          (Option.map x.enableStrictOriginEnforcement
+             ~f:PlaybackRestrictionPolicyEnableStrictOriginEnforcement.to_value));
+        ("name",
+          (Option.map x.name ~f:PlaybackRestrictionPolicyName.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let name =
+        (Option.map ~f:PlaybackRestrictionPolicyName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let enableStrictOriginEnforcement =
+        (Option.map
+           ~f:PlaybackRestrictionPolicyEnableStrictOriginEnforcement.of_xml)
+          (Xml.child xml_arg0 "enableStrictOriginEnforcement") in
+      let allowedOrigins =
+        (Option.map ~f:PlaybackRestrictionPolicyAllowedOriginList.of_xml)
+          (Xml.child xml_arg0 "allowedOrigins") in
+      let allowedCountries =
+        (Option.map ~f:PlaybackRestrictionPolicyAllowedCountryList.of_xml)
+          (Xml.child xml_arg0 "allowedCountries") in
+      make ?tags ?name ?enableStrictOriginEnforcement ?allowedOrigins
+        ?allowedCountries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name =
+        field_map json__ "name" PlaybackRestrictionPolicyName.of_json in
+      let enableStrictOriginEnforcement =
+        field_map json__ "enableStrictOriginEnforcement"
+          PlaybackRestrictionPolicyEnableStrictOriginEnforcement.of_json in
+      let allowedOrigins =
+        field_map json__ "allowedOrigins"
+          PlaybackRestrictionPolicyAllowedOriginList.of_json in
+      let allowedCountries =
+        field_map json__ "allowedCountries"
+          PlaybackRestrictionPolicyAllowedCountryList.of_json in
+      make ?tags ?name ?enableStrictOriginEnforcement ?allowedOrigins
+        ?allowedCountries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new playback restriction policy, for constraining playback by countries and/or origins."]
 module CreateChannelResponse =
   struct
     type nonrec t =
@@ -4962,9 +9002,9 @@ module CreateChannelResponse =
         (Option.map ~f:Channel.of_xml) (Xml.child xml_arg0 "channel") in
       make ?streamKey ?channel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamKey = field_map json "streamKey" StreamKey.of_json in
-      let channel = field_map json "channel" Channel.of_json in
+    let of_json json__ =
+      let streamKey = field_map json__ "streamKey" StreamKey.of_json in
+      let channel = field_map json__ "channel" Channel.of_json in
       make ?streamKey ?channel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4973,101 +9013,248 @@ module CreateChannelRequest =
   struct
     type nonrec t =
       {
+      name: ChannelName.t option [@ocaml.doc "Channel name."];
+      latencyMode: ChannelLatencyMode.t option
+        [@ocaml.doc
+          "Channel latency mode. Use NORMAL to broadcast and deliver live video up to Full HD. Use LOW for near-real-time interaction with viewers. Default: LOW."];
+      type_: ChannelType.t option
+        [@ocaml.doc
+          "Channel type, which determines the allowable resolution and bitrate. If you exceed the allowable input resolution or bitrate, the stream probably will disconnect immediately. Default: STANDARD. For details, see Channel Types."];
       authorized: Boolean.t option
         [@ocaml.doc
           "Whether the channel is private (enabled for playback authorization). Default: false."];
-      latencyMode: ChannelLatencyMode.t option
-        [@ocaml.doc
-          "Channel latency mode. Use NORMAL to broadcast and deliver live video up to Full HD. Use LOW for near-real-time interaction with viewers. (Note: In the Amazon IVS console, LOW and NORMAL correspond to Ultra-low and Standard, respectively.) Default: LOW."];
-      name: ChannelName.t option [@ocaml.doc "Channel name."];
       recordingConfigurationArn: ChannelRecordingConfigurationArn.t option
         [@ocaml.doc
-          "Recording-configuration ARN. Default: \"\" (empty string, recording is disabled)."];
+          "Recording-configuration ARN. A valid ARN value here both specifies the ARN and enables recording. Default: \"\" (empty string, recording is disabled)."];
       tags: Tags.t option
         [@ocaml.doc
-          "Array of 1-50 maps, each of the form string:string (key:value)."];
-      type_: ChannelType.t option
+          "Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."];
+      insecureIngest: Boolean.t option
         [@ocaml.doc
-          "Channel type, which determines the allowable resolution and bitrate. If you exceed the allowable resolution or bitrate, the stream probably will disconnect immediately. Default: STANDARD. Valid values: STANDARD: Multiple qualities are generated from the original input, to automatically give viewers the best experience for their devices and network conditions. Resolution can be up to 1080p and bitrate can be up to 8.5 Mbps. Audio is transcoded only for renditions 360p and below; above that, audio is passed through. BASIC: Amazon IVS delivers the original input to viewers. The viewer\226\128\153s video-quality choice is limited to the original input. Resolution can be up to 480p and bitrate can be up to 1.5 Mbps."]}
-    let make ?authorized =
+          "Whether the channel allows insecure RTMP and SRT ingest. Default: false."];
+      preset: TranscodePreset.t option
+        [@ocaml.doc
+          "Optional transcode preset for the channel. This is selectable only for ADVANCED_HD and ADVANCED_SD channel types. For those channel types, the default preset is HIGHER_BANDWIDTH_DELIVERY. For other channel types (BASIC and STANDARD), preset is the empty string (\"\")."];
+      playbackRestrictionPolicyArn:
+        ChannelPlaybackRestrictionPolicyArn.t option
+        [@ocaml.doc
+          "Playback-restriction-policy ARN. A valid ARN value here both specifies the ARN and enables playback restriction. Default: \"\" (empty string, no playback restriction policy is applied)."];
+      multitrackInputConfiguration: MultitrackInputConfiguration.t option
+        [@ocaml.doc
+          "Object specifying multitrack input configuration. Default: no multitrack input configuration is specified."];
+      containerFormat: ContainerFormat.t option
+        [@ocaml.doc
+          "Indicates which content-packaging format is used (MPEG-TS or fMP4). If multitrackInputConfiguration is specified and enabled is true, then containerFormat is required and must be set to FRAGMENTED_MP4. Otherwise, containerFormat may be set to TS or FRAGMENTED_MP4. Default: TS."];
+      adConfigurationArn: ChannelAdConfigurationArn.t option
+        [@ocaml.doc
+          "ARN of the ad configuration associated with the channel."]}
+    let make ?name =
       fun ?latencyMode ->
-        fun ?name ->
-          fun ?recordingConfigurationArn ->
-            fun ?tags ->
-              fun ?type_ ->
-                fun () ->
-                  {
-                    authorized;
-                    latencyMode;
-                    name;
-                    recordingConfigurationArn;
-                    tags;
-                    type_
-                  }
+        fun ?type_ ->
+          fun ?authorized ->
+            fun ?recordingConfigurationArn ->
+              fun ?tags ->
+                fun ?insecureIngest ->
+                  fun ?preset ->
+                    fun ?playbackRestrictionPolicyArn ->
+                      fun ?multitrackInputConfiguration ->
+                        fun ?containerFormat ->
+                          fun ?adConfigurationArn ->
+                            fun () ->
+                              {
+                                name;
+                                latencyMode;
+                                type_;
+                                authorized;
+                                recordingConfigurationArn;
+                                tags;
+                                insecureIngest;
+                                preset;
+                                playbackRestrictionPolicyArn;
+                                multitrackInputConfiguration;
+                                containerFormat;
+                                adConfigurationArn
+                              }
     let to_value x =
       structure_to_value
-        [("authorized", (Option.map x.authorized ~f:Boolean.to_value));
+        [("name", (Option.map x.name ~f:ChannelName.to_value));
         ("latencyMode",
           (Option.map x.latencyMode ~f:ChannelLatencyMode.to_value));
-        ("name", (Option.map x.name ~f:ChannelName.to_value));
+        ("type", (Option.map x.type_ ~f:ChannelType.to_value));
+        ("authorized", (Option.map x.authorized ~f:Boolean.to_value));
         ("recordingConfigurationArn",
           (Option.map x.recordingConfigurationArn
              ~f:ChannelRecordingConfigurationArn.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value));
-        ("type", (Option.map x.type_ ~f:ChannelType.to_value))]
+        ("insecureIngest", (Option.map x.insecureIngest ~f:Boolean.to_value));
+        ("preset", (Option.map x.preset ~f:TranscodePreset.to_value));
+        ("playbackRestrictionPolicyArn",
+          (Option.map x.playbackRestrictionPolicyArn
+             ~f:ChannelPlaybackRestrictionPolicyArn.to_value));
+        ("multitrackInputConfiguration",
+          (Option.map x.multitrackInputConfiguration
+             ~f:MultitrackInputConfiguration.to_value));
+        ("containerFormat",
+          (Option.map x.containerFormat ~f:ContainerFormat.to_value));
+        ("adConfigurationArn",
+          (Option.map x.adConfigurationArn
+             ~f:ChannelAdConfigurationArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ =
-        (Option.map ~f:ChannelType.of_xml) (Xml.child xml_arg0 "type") in
+      let adConfigurationArn =
+        (Option.map ~f:ChannelAdConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "adConfigurationArn") in
+      let containerFormat =
+        (Option.map ~f:ContainerFormat.of_xml)
+          (Xml.child xml_arg0 "containerFormat") in
+      let multitrackInputConfiguration =
+        (Option.map ~f:MultitrackInputConfiguration.of_xml)
+          (Xml.child xml_arg0 "multitrackInputConfiguration") in
+      let playbackRestrictionPolicyArn =
+        (Option.map ~f:ChannelPlaybackRestrictionPolicyArn.of_xml)
+          (Xml.child xml_arg0 "playbackRestrictionPolicyArn") in
+      let preset =
+        (Option.map ~f:TranscodePreset.of_xml) (Xml.child xml_arg0 "preset") in
+      let insecureIngest =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "insecureIngest") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let recordingConfigurationArn =
         (Option.map ~f:ChannelRecordingConfigurationArn.of_xml)
           (Xml.child xml_arg0 "recordingConfigurationArn") in
-      let name =
-        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "name") in
+      let authorized =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "authorized") in
+      let type_ =
+        (Option.map ~f:ChannelType.of_xml) (Xml.child xml_arg0 "type") in
       let latencyMode =
         (Option.map ~f:ChannelLatencyMode.of_xml)
           (Xml.child xml_arg0 "latencyMode") in
-      let authorized =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "authorized") in
-      make ?type_ ?tags ?recordingConfigurationArn ?name ?latencyMode
-        ?authorized ()
+      let name =
+        (Option.map ~f:ChannelName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?adConfigurationArn ?containerFormat ?multitrackInputConfiguration
+        ?playbackRestrictionPolicyArn ?preset ?insecureIngest ?tags
+        ?recordingConfigurationArn ?authorized ?type_ ?latencyMode ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" ChannelType.of_json in
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let adConfigurationArn =
+        field_map json__ "adConfigurationArn"
+          ChannelAdConfigurationArn.of_json in
+      let containerFormat =
+        field_map json__ "containerFormat" ContainerFormat.of_json in
+      let multitrackInputConfiguration =
+        field_map json__ "multitrackInputConfiguration"
+          MultitrackInputConfiguration.of_json in
+      let playbackRestrictionPolicyArn =
+        field_map json__ "playbackRestrictionPolicyArn"
+          ChannelPlaybackRestrictionPolicyArn.of_json in
+      let preset = field_map json__ "preset" TranscodePreset.of_json in
+      let insecureIngest = field_map json__ "insecureIngest" Boolean.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
       let recordingConfigurationArn =
-        field_map json "recordingConfigurationArn"
+        field_map json__ "recordingConfigurationArn"
           ChannelRecordingConfigurationArn.of_json in
-      let name = field_map json "name" ChannelName.of_json in
+      let authorized = field_map json__ "authorized" Boolean.of_json in
+      let type_ = field_map json__ "type" ChannelType.of_json in
       let latencyMode =
-        field_map json "latencyMode" ChannelLatencyMode.of_json in
-      let authorized = field_map json "authorized" Boolean.of_json in
-      make ?type_ ?tags ?recordingConfigurationArn ?name ?latencyMode
-        ?authorized ()
+        field_map json__ "latencyMode" ChannelLatencyMode.of_json in
+      let name = field_map json__ "name" ChannelName.of_json in
+      make ?adConfigurationArn ?containerFormat ?multitrackInputConfiguration
+        ?playbackRestrictionPolicyArn ?preset ?insecureIngest ?tags
+        ?recordingConfigurationArn ?authorized ?type_ ?latencyMode ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new channel and an associated stream key to start streaming."]
-module BatchGetStreamKeyResponse =
+module CreateAdConfigurationResponse =
   struct
-    type nonrec t =
-      {
-      errors: BatchErrors.t option ;
-      streamKeys: StreamKeys.t option }
+    type nonrec t = {
+      adConfiguration: AdConfiguration.t option }
     type nonrec error =
-      [ `Unknown_operation_error of (string * string option) ]
-    let make ?errors = fun ?streamKeys -> fun () -> { errors; streamKeys }
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `PendingVerification of PendingVerification.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adConfiguration = fun () -> { adConfiguration }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `PendingVerification e ->
+          `Assoc
+            [("error", (`String "PendingVerification"));
+            ("details", (PendingVerification.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5075,27 +9262,419 @@ module BatchGetStreamKeyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("errors", (Option.map x.errors ~f:BatchErrors.to_value));
-        ("streamKeys", (Option.map x.streamKeys ~f:StreamKeys.to_value))]
+        [("adConfiguration",
+           (Option.map x.adConfiguration ~f:AdConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let streamKeys =
-        (Option.map ~f:StreamKeys.of_xml) (Xml.child xml_arg0 "streamKeys") in
+      let adConfiguration =
+        (Option.map ~f:AdConfiguration.of_xml)
+          (Xml.child xml_arg0 "adConfiguration") in
+      make ?adConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adConfiguration =
+        field_map json__ "adConfiguration" AdConfiguration.of_json in
+      make ?adConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new ad configuration to be used for server-side ad insertion."]
+module CreateAdConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      name: AdConfigurationName.t option
+        [@ocaml.doc
+          "Ad configuration name. Defaults to \226\128\156\226\128\157."];
+      mediaTailorPlaybackConfigurations:
+        MediaTailorPlaybackConfigurationsList.t
+        [@ocaml.doc
+          "List of integration configurations with media tailor resources."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "Array of 1-50 maps, each of the form string:string (key:value). See Best practices and strategies in Tagging Amazon Web Services Resources and Tag Editor for details, including restrictions that apply to tags and \"Tag naming limits and requirements\"; Amazon IVS has no service-specific constraints beyond what is documented there."]}
+    let context_ = "CreateAdConfigurationRequest"
+    let make ?name =
+      fun ?tags ->
+        fun ~mediaTailorPlaybackConfigurations ->
+          fun () -> { name; tags; mediaTailorPlaybackConfigurations }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:AdConfigurationName.to_value));
+        ("mediaTailorPlaybackConfigurations",
+          (Some
+             (MediaTailorPlaybackConfigurationsList.to_value
+                x.mediaTailorPlaybackConfigurations)));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let mediaTailorPlaybackConfigurations =
+        MediaTailorPlaybackConfigurationsList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "mediaTailorPlaybackConfigurations") in
+      let name =
+        (Option.map ~f:AdConfigurationName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?tags ~mediaTailorPlaybackConfigurations ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let mediaTailorPlaybackConfigurations =
+        field_map_exn json__ "mediaTailorPlaybackConfigurations"
+          MediaTailorPlaybackConfigurationsList.of_json in
+      let name = field_map json__ "name" AdConfigurationName.of_json in
+      make ?tags ~mediaTailorPlaybackConfigurations ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new ad configuration to be used for server-side ad insertion."]
+module BatchStartViewerSessionRevocationResponse =
+  struct
+    type nonrec t =
+      {
+      accessControlAllowOrigin: String_.t option
+        [@ocaml.doc "See Access-Control-Allow-Origin in the MDN Web Docs."];
+      accessControlExposeHeaders: String_.t option
+        [@ocaml.doc "See Access-Control-Expose-Headers in the MDN Web Docs."];
+      cacheControl: String_.t option
+        [@ocaml.doc "See Cache-Control in the MDN Web Docs."];
+      contentSecurityPolicy: String_.t option
+        [@ocaml.doc "See Content-Security-Policy in the MDN Web Docs."];
+      strictTransportSecurity: String_.t option
+        [@ocaml.doc "See Strict-Transport-Security in the MDN Web Docs."];
+      xContentTypeOptions: String_.t option
+        [@ocaml.doc "See X-Content-Type-Options in the MDN Web Docs."];
+      xFrameOptions: String_.t option
+        [@ocaml.doc "See X-Frame-Options in the MDN Web Docs."];
+      errors: BatchStartViewerSessionRevocationErrors.t option
+        [@ocaml.doc
+          "Each error object is related to a specific channelArn and viewerId pair in the request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `PendingVerification of PendingVerification.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?errors ->
+                    fun () ->
+                      {
+                        accessControlAllowOrigin;
+                        accessControlExposeHeaders;
+                        cacheControl;
+                        contentSecurityPolicy;
+                        strictTransportSecurity;
+                        xContentTypeOptions;
+                        xFrameOptions;
+                        errors
+                      }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "PendingVerification" ->
+          `PendingVerification (PendingVerification.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `PendingVerification e ->
+          `Assoc
+            [("error", (`String "PendingVerification"));
+            ("details", (PendingVerification.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("errors",
+          (Option.map x.errors
+             ~f:BatchStartViewerSessionRevocationErrors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:BatchStartViewerSessionRevocationErrors.of_xml)
+          (Xml.child xml_arg0 "errors") in
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?errors ?xFrameOptions ?xContentTypeOptions
+        ?strictTransportSecurity ?contentSecurityPolicy ?cacheControl
+        ?accessControlExposeHeaders ?accessControlAllowOrigin ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors =
+        field_map json__ "errors"
+          BatchStartViewerSessionRevocationErrors.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?errors ?xFrameOptions ?xContentTypeOptions
+        ?strictTransportSecurity ?contentSecurityPolicy ?cacheControl
+        ?accessControlExposeHeaders ?accessControlAllowOrigin ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Performs StartViewerSessionRevocation on multiple channel ARN and viewer ID pairs simultaneously."]
+module BatchStartViewerSessionRevocationRequest =
+  struct
+    type nonrec t =
+      {
+      viewerSessions: BatchStartViewerSessionRevocationViewerSessionList.t
+        [@ocaml.doc
+          "Array of viewer sessions, one per channel-ARN and viewer-ID pair."]}
+    let context_ = "BatchStartViewerSessionRevocationRequest"
+    let make ~viewerSessions = fun () -> { viewerSessions }
+    let to_value x =
+      structure_to_value
+        [("viewerSessions",
+           (Some
+              (BatchStartViewerSessionRevocationViewerSessionList.to_value
+                 x.viewerSessions)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let viewerSessions =
+        BatchStartViewerSessionRevocationViewerSessionList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "viewerSessions") in
+      make ~viewerSessions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let viewerSessions =
+        field_map_exn json__ "viewerSessions"
+          BatchStartViewerSessionRevocationViewerSessionList.of_json in
+      make ~viewerSessions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Performs StartViewerSessionRevocation on multiple channel ARN and viewer ID pairs simultaneously."]
+module BatchGetStreamKeyResponse =
+  struct
+    type nonrec t =
+      {
+      accessControlAllowOrigin: String_.t option
+        [@ocaml.doc "See Access-Control-Allow-Origin in the MDN Web Docs."];
+      accessControlExposeHeaders: String_.t option
+        [@ocaml.doc "See Access-Control-Expose-Headers in the MDN Web Docs."];
+      cacheControl: String_.t option
+        [@ocaml.doc "See Cache-Control in the MDN Web Docs."];
+      contentSecurityPolicy: String_.t option
+        [@ocaml.doc "See Content-Security-Policy in the MDN Web Docs."];
+      strictTransportSecurity: String_.t option
+        [@ocaml.doc "See Strict-Transport-Security in the MDN Web Docs."];
+      xContentTypeOptions: String_.t option
+        [@ocaml.doc "See X-Content-Type-Options in the MDN Web Docs."];
+      xFrameOptions: String_.t option
+        [@ocaml.doc "See X-Frame-Options in the MDN Web Docs."];
+      streamKeys: StreamKeys.t option ;
+      errors: BatchErrors.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ServiceUnavailable of ServiceUnavailable.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?streamKeys ->
+                    fun ?errors ->
+                      fun () ->
+                        {
+                          accessControlAllowOrigin;
+                          accessControlExposeHeaders;
+                          cacheControl;
+                          contentSecurityPolicy;
+                          strictTransportSecurity;
+                          xContentTypeOptions;
+                          xFrameOptions;
+                          streamKeys;
+                          errors
+                        }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ServiceUnavailable" ->
+          `ServiceUnavailable (ServiceUnavailable.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ServiceUnavailable" ->
+          `ServiceUnavailable (ServiceUnavailable.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ServiceUnavailable e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailable"));
+            ("details", (ServiceUnavailable.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("streamKeys", (Option.map x.streamKeys ~f:StreamKeys.to_value));
+        ("errors", (Option.map x.errors ~f:BatchErrors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
       let errors =
         (Option.map ~f:BatchErrors.of_xml) (Xml.child xml_arg0 "errors") in
-      make ?streamKeys ?errors ()
+      let streamKeys =
+        (Option.map ~f:StreamKeys.of_xml) (Xml.child xml_arg0 "streamKeys") in
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?errors ?streamKeys ?xFrameOptions ?xContentTypeOptions
+        ?strictTransportSecurity ?contentSecurityPolicy ?cacheControl
+        ?accessControlExposeHeaders ?accessControlAllowOrigin ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamKeys = field_map json "streamKeys" StreamKeys.of_json in
-      let errors = field_map json "errors" BatchErrors.of_json in
-      make ?streamKeys ?errors ()
+    let of_json json__ =
+      let errors = field_map json__ "errors" BatchErrors.of_json in
+      let streamKeys = field_map json__ "streamKeys" StreamKeys.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?errors ?streamKeys ?xFrameOptions ?xContentTypeOptions
+        ?strictTransportSecurity ?contentSecurityPolicy ?cacheControl
+        ?accessControlExposeHeaders ?accessControlAllowOrigin ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Performs GetStreamKey on multiple ARNs simultaneously."]
 module BatchGetStreamKeyRequest =
   struct
     type nonrec t =
       {
-      arns: StreamKeyArnList.t [@ocaml.doc "Array of ARNs, one per channel."]}
+      arns: StreamKeyArnList.t
+        [@ocaml.doc "Array of ARNs, one per stream key."]}
     let context_ = "BatchGetStreamKeyRequest"
     let make ~arns = fun () -> { arns }
     let to_value x =
@@ -5108,8 +9687,8 @@ module BatchGetStreamKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "arns") in
       make ~arns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arns = field_map_exn json "arns" StreamKeyArnList.of_json in
+    let of_json json__ =
+      let arns = field_map_exn json__ "arns" StreamKeyArnList.of_json in
       make ~arns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Performs GetStreamKey on multiple ARNs simultaneously."]
@@ -5117,24 +9696,85 @@ module BatchGetChannelResponse =
   struct
     type nonrec t =
       {
+      accessControlAllowOrigin: String_.t option
+        [@ocaml.doc "See Access-Control-Allow-Origin in the MDN Web Docs."];
+      accessControlExposeHeaders: String_.t option
+        [@ocaml.doc "See Access-Control-Expose-Headers in the MDN Web Docs."];
+      cacheControl: String_.t option
+        [@ocaml.doc "See Cache-Control in the MDN Web Docs."];
+      contentSecurityPolicy: String_.t option
+        [@ocaml.doc "See Content-Security-Policy in the MDN Web Docs."];
+      strictTransportSecurity: String_.t option
+        [@ocaml.doc "See Strict-Transport-Security in the MDN Web Docs."];
+      xContentTypeOptions: String_.t option
+        [@ocaml.doc "See X-Content-Type-Options in the MDN Web Docs."];
+      xFrameOptions: String_.t option
+        [@ocaml.doc "See X-Frame-Options in the MDN Web Docs."];
       channels: Channels.t option ;
       errors: BatchErrors.t option
         [@ocaml.doc
           "Each error object is related to a specific ARN in the request."]}
     type nonrec error =
-      [ `Unknown_operation_error of (string * string option) ]
-    let make ?channels = fun ?errors -> fun () -> { channels; errors }
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ServiceUnavailable of ServiceUnavailable.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accessControlAllowOrigin =
+      fun ?accessControlExposeHeaders ->
+        fun ?cacheControl ->
+          fun ?contentSecurityPolicy ->
+            fun ?strictTransportSecurity ->
+              fun ?xContentTypeOptions ->
+                fun ?xFrameOptions ->
+                  fun ?channels ->
+                    fun ?errors ->
+                      fun () ->
+                        {
+                          accessControlAllowOrigin;
+                          accessControlExposeHeaders;
+                          cacheControl;
+                          contentSecurityPolicy;
+                          strictTransportSecurity;
+                          xContentTypeOptions;
+                          xFrameOptions;
+                          channels;
+                          errors
+                        }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ServiceUnavailable" ->
+          `ServiceUnavailable (ServiceUnavailable.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ServiceUnavailable" ->
+          `ServiceUnavailable (ServiceUnavailable.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ServiceUnavailable e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailable"));
+            ("details", (ServiceUnavailable.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5142,7 +9782,19 @@ module BatchGetChannelResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("channels", (Option.map x.channels ~f:Channels.to_value));
+        [("Access-Control-Allow-Origin",
+           (Option.map x.accessControlAllowOrigin ~f:String_.to_value));
+        ("Access-Control-Expose-Headers",
+          (Option.map x.accessControlExposeHeaders ~f:String_.to_value));
+        ("Cache-Control", (Option.map x.cacheControl ~f:String_.to_value));
+        ("Content-Security-Policy",
+          (Option.map x.contentSecurityPolicy ~f:String_.to_value));
+        ("Strict-Transport-Security",
+          (Option.map x.strictTransportSecurity ~f:String_.to_value));
+        ("X-Content-Type-Options",
+          (Option.map x.xContentTypeOptions ~f:String_.to_value));
+        ("X-Frame-Options", (Option.map x.xFrameOptions ~f:String_.to_value));
+        ("channels", (Option.map x.channels ~f:Channels.to_value));
         ("errors", (Option.map x.errors ~f:BatchErrors.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -5150,12 +9802,47 @@ module BatchGetChannelResponse =
         (Option.map ~f:BatchErrors.of_xml) (Xml.child xml_arg0 "errors") in
       let channels =
         (Option.map ~f:Channels.of_xml) (Xml.child xml_arg0 "channels") in
-      make ?errors ?channels ()
+      let xFrameOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "X-Frame-Options") in
+      let xContentTypeOptions =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "X-Content-Type-Options") in
+      let strictTransportSecurity =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Strict-Transport-Security") in
+      let contentSecurityPolicy =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Content-Security-Policy") in
+      let cacheControl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Cache-Control") in
+      let accessControlExposeHeaders =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Expose-Headers") in
+      let accessControlAllowOrigin =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "Access-Control-Allow-Origin") in
+      make ?errors ?channels ?xFrameOptions ?xContentTypeOptions
+        ?strictTransportSecurity ?contentSecurityPolicy ?cacheControl
+        ?accessControlExposeHeaders ?accessControlAllowOrigin ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors = field_map json "errors" BatchErrors.of_json in
-      let channels = field_map json "channels" Channels.of_json in
-      make ?errors ?channels ()
+    let of_json json__ =
+      let errors = field_map json__ "errors" BatchErrors.of_json in
+      let channels = field_map json__ "channels" Channels.of_json in
+      let xFrameOptions = field_map json__ "xFrameOptions" String_.of_json in
+      let xContentTypeOptions =
+        field_map json__ "xContentTypeOptions" String_.of_json in
+      let strictTransportSecurity =
+        field_map json__ "strictTransportSecurity" String_.of_json in
+      let contentSecurityPolicy =
+        field_map json__ "contentSecurityPolicy" String_.of_json in
+      let cacheControl = field_map json__ "cacheControl" String_.of_json in
+      let accessControlExposeHeaders =
+        field_map json__ "accessControlExposeHeaders" String_.of_json in
+      let accessControlAllowOrigin =
+        field_map json__ "accessControlAllowOrigin" String_.of_json in
+      make ?errors ?channels ?xFrameOptions ?xContentTypeOptions
+        ?strictTransportSecurity ?contentSecurityPolicy ?cacheControl
+        ?accessControlExposeHeaders ?accessControlAllowOrigin ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Performs GetChannel on multiple ARNs simultaneously."]
 module BatchGetChannelRequest =
@@ -5174,8 +9861,8 @@ module BatchGetChannelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "arns") in
       make ~arns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arns = field_map_exn json "arns" ChannelArnList.of_json in
+    let of_json json__ =
+      let arns = field_map_exn json__ "arns" ChannelArnList.of_json in
       make ~arns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Performs GetChannel on multiple ARNs simultaneously."]

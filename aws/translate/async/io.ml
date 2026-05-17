@@ -25,8 +25,12 @@ let get_terminology ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTerminology input
 let import_terminology ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ImportTerminology input
+let list_languages ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLanguages input
 let list_parallel_data ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListParallelData input
+let list_tags_for_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_terminologies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTerminologies input
 let list_text_translation_jobs ?endpoint_url ?cfg input =
@@ -35,7 +39,13 @@ let start_text_translation_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartTextTranslationJob input
 let stop_text_translation_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopTextTranslationJob input
+let tag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TagResource input
+let translate_document ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TranslateDocument input
 let translate_text ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TranslateText input
+let untag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_parallel_data ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateParallelData input

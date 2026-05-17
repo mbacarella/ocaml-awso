@@ -6,12 +6,30 @@ val batch_get_named_query :
       BatchGetNamedQueryInput.t ->
         (BatchGetNamedQueryOutput.t, BatchGetNamedQueryOutput.error) Result.t
           Lwt.t
+val batch_get_prepared_statement :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetPreparedStatementInput.t ->
+        (BatchGetPreparedStatementOutput.t,
+          BatchGetPreparedStatementOutput.error) Result.t Lwt.t
 val batch_get_query_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchGetQueryExecutionInput.t ->
         (BatchGetQueryExecutionOutput.t, BatchGetQueryExecutionOutput.error)
           Result.t Lwt.t
+val cancel_capacity_reservation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelCapacityReservationInput.t ->
+        (CancelCapacityReservationOutput.t,
+          CancelCapacityReservationOutput.error) Result.t Lwt.t
+val create_capacity_reservation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCapacityReservationInput.t ->
+        (CreateCapacityReservationOutput.t,
+          CreateCapacityReservationOutput.error) Result.t Lwt.t
 val create_data_catalog :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -24,17 +42,34 @@ val create_named_query :
       CreateNamedQueryInput.t ->
         (CreateNamedQueryOutput.t, CreateNamedQueryOutput.error) Result.t
           Lwt.t
+val create_notebook :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateNotebookInput.t ->
+        (CreateNotebookOutput.t, CreateNotebookOutput.error) Result.t Lwt.t
 val create_prepared_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePreparedStatementInput.t ->
         (CreatePreparedStatementOutput.t,
           CreatePreparedStatementOutput.error) Result.t Lwt.t
+val create_presigned_notebook_url :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreatePresignedNotebookUrlRequest.t ->
+        (CreatePresignedNotebookUrlResponse.t,
+          CreatePresignedNotebookUrlResponse.error) Result.t Lwt.t
 val create_work_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateWorkGroupInput.t ->
         (CreateWorkGroupOutput.t, CreateWorkGroupOutput.error) Result.t Lwt.t
+val delete_capacity_reservation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCapacityReservationInput.t ->
+        (DeleteCapacityReservationOutput.t,
+          DeleteCapacityReservationOutput.error) Result.t Lwt.t
 val delete_data_catalog :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -47,6 +82,11 @@ val delete_named_query :
       DeleteNamedQueryInput.t ->
         (DeleteNamedQueryOutput.t, DeleteNamedQueryOutput.error) Result.t
           Lwt.t
+val delete_notebook :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteNotebookInput.t ->
+        (DeleteNotebookOutput.t, DeleteNotebookOutput.error) Result.t Lwt.t
 val delete_prepared_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -58,6 +98,41 @@ val delete_work_group :
     ?cfg:Awso.Cfg.t ->
       DeleteWorkGroupInput.t ->
         (DeleteWorkGroupOutput.t, DeleteWorkGroupOutput.error) Result.t Lwt.t
+val export_notebook :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ExportNotebookInput.t ->
+        (ExportNotebookOutput.t, ExportNotebookOutput.error) Result.t Lwt.t
+val get_calculation_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCalculationExecutionRequest.t ->
+        (GetCalculationExecutionResponse.t,
+          GetCalculationExecutionResponse.error) Result.t Lwt.t
+val get_calculation_execution_code :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCalculationExecutionCodeRequest.t ->
+        (GetCalculationExecutionCodeResponse.t,
+          GetCalculationExecutionCodeResponse.error) Result.t Lwt.t
+val get_calculation_execution_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCalculationExecutionStatusRequest.t ->
+        (GetCalculationExecutionStatusResponse.t,
+          GetCalculationExecutionStatusResponse.error) Result.t Lwt.t
+val get_capacity_assignment_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCapacityAssignmentConfigurationInput.t ->
+        (GetCapacityAssignmentConfigurationOutput.t,
+          GetCapacityAssignmentConfigurationOutput.error) Result.t Lwt.t
+val get_capacity_reservation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCapacityReservationInput.t ->
+        (GetCapacityReservationOutput.t, GetCapacityReservationOutput.error)
+          Result.t Lwt.t
 val get_data_catalog :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -73,6 +148,12 @@ val get_named_query :
     ?cfg:Awso.Cfg.t ->
       GetNamedQueryInput.t ->
         (GetNamedQueryOutput.t, GetNamedQueryOutput.error) Result.t Lwt.t
+val get_notebook_metadata :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetNotebookMetadataInput.t ->
+        (GetNotebookMetadataOutput.t, GetNotebookMetadataOutput.error)
+          Result.t Lwt.t
 val get_prepared_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -90,6 +171,35 @@ val get_query_results :
     ?cfg:Awso.Cfg.t ->
       GetQueryResultsInput.t ->
         (GetQueryResultsOutput.t, GetQueryResultsOutput.error) Result.t Lwt.t
+val get_query_runtime_statistics :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetQueryRuntimeStatisticsInput.t ->
+        (GetQueryRuntimeStatisticsOutput.t,
+          GetQueryRuntimeStatisticsOutput.error) Result.t Lwt.t
+val get_resource_dashboard :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourceDashboardRequest.t ->
+        (GetResourceDashboardResponse.t, GetResourceDashboardResponse.error)
+          Result.t Lwt.t
+val get_session :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSessionRequest.t ->
+        (GetSessionResponse.t, GetSessionResponse.error) Result.t Lwt.t
+val get_session_endpoint :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSessionEndpointRequest.t ->
+        (GetSessionEndpointResponse.t, GetSessionEndpointResponse.error)
+          Result.t Lwt.t
+val get_session_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSessionStatusRequest.t ->
+        (GetSessionStatusResponse.t, GetSessionStatusResponse.error) Result.t
+          Lwt.t
 val get_table_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -101,6 +211,29 @@ val get_work_group :
     ?cfg:Awso.Cfg.t ->
       GetWorkGroupInput.t ->
         (GetWorkGroupOutput.t, GetWorkGroupOutput.error) Result.t Lwt.t
+val import_notebook :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ImportNotebookInput.t ->
+        (ImportNotebookOutput.t, ImportNotebookOutput.error) Result.t Lwt.t
+val list_application_d_p_u_sizes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListApplicationDPUSizesInput.t ->
+        (ListApplicationDPUSizesOutput.t,
+          ListApplicationDPUSizesOutput.error) Result.t Lwt.t
+val list_calculation_executions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCalculationExecutionsRequest.t ->
+        (ListCalculationExecutionsResponse.t,
+          ListCalculationExecutionsResponse.error) Result.t Lwt.t
+val list_capacity_reservations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCapacityReservationsInput.t ->
+        (ListCapacityReservationsOutput.t,
+          ListCapacityReservationsOutput.error) Result.t Lwt.t
 val list_data_catalogs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -118,12 +251,29 @@ val list_engine_versions :
       ListEngineVersionsInput.t ->
         (ListEngineVersionsOutput.t, ListEngineVersionsOutput.error) Result.t
           Lwt.t
+val list_executors :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListExecutorsRequest.t ->
+        (ListExecutorsResponse.t, ListExecutorsResponse.error) Result.t Lwt.t
 val list_named_queries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListNamedQueriesInput.t ->
         (ListNamedQueriesOutput.t, ListNamedQueriesOutput.error) Result.t
           Lwt.t
+val list_notebook_metadata :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListNotebookMetadataInput.t ->
+        (ListNotebookMetadataOutput.t, ListNotebookMetadataOutput.error)
+          Result.t Lwt.t
+val list_notebook_sessions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListNotebookSessionsRequest.t ->
+        (ListNotebookSessionsResponse.t, ListNotebookSessionsResponse.error)
+          Result.t Lwt.t
 val list_prepared_statements :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -136,6 +286,11 @@ val list_query_executions :
       ListQueryExecutionsInput.t ->
         (ListQueryExecutionsOutput.t, ListQueryExecutionsOutput.error)
           Result.t Lwt.t
+val list_sessions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSessionsRequest.t ->
+        (ListSessionsResponse.t, ListSessionsResponse.error) Result.t Lwt.t
 val list_table_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -153,12 +308,35 @@ val list_work_groups :
     ?cfg:Awso.Cfg.t ->
       ListWorkGroupsInput.t ->
         (ListWorkGroupsOutput.t, ListWorkGroupsOutput.error) Result.t Lwt.t
+val put_capacity_assignment_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutCapacityAssignmentConfigurationInput.t ->
+        (PutCapacityAssignmentConfigurationOutput.t,
+          PutCapacityAssignmentConfigurationOutput.error) Result.t Lwt.t
+val start_calculation_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartCalculationExecutionRequest.t ->
+        (StartCalculationExecutionResponse.t,
+          StartCalculationExecutionResponse.error) Result.t Lwt.t
 val start_query_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       StartQueryExecutionInput.t ->
         (StartQueryExecutionOutput.t, StartQueryExecutionOutput.error)
           Result.t Lwt.t
+val start_session :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartSessionRequest.t ->
+        (StartSessionResponse.t, StartSessionResponse.error) Result.t Lwt.t
+val stop_calculation_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopCalculationExecutionRequest.t ->
+        (StopCalculationExecutionResponse.t,
+          StopCalculationExecutionResponse.error) Result.t Lwt.t
 val stop_query_execution :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -170,11 +348,23 @@ val tag_resource :
     ?cfg:Awso.Cfg.t ->
       TagResourceInput.t ->
         (TagResourceOutput.t, TagResourceOutput.error) Result.t Lwt.t
+val terminate_session :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TerminateSessionRequest.t ->
+        (TerminateSessionResponse.t, TerminateSessionResponse.error) Result.t
+          Lwt.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceInput.t ->
         (UntagResourceOutput.t, UntagResourceOutput.error) Result.t Lwt.t
+val update_capacity_reservation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateCapacityReservationInput.t ->
+        (UpdateCapacityReservationOutput.t,
+          UpdateCapacityReservationOutput.error) Result.t Lwt.t
 val update_data_catalog :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -187,6 +377,17 @@ val update_named_query :
       UpdateNamedQueryInput.t ->
         (UpdateNamedQueryOutput.t, UpdateNamedQueryOutput.error) Result.t
           Lwt.t
+val update_notebook :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateNotebookInput.t ->
+        (UpdateNotebookOutput.t, UpdateNotebookOutput.error) Result.t Lwt.t
+val update_notebook_metadata :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateNotebookMetadataInput.t ->
+        (UpdateNotebookMetadataOutput.t, UpdateNotebookMetadataOutput.error)
+          Result.t Lwt.t
 val update_prepared_statement :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

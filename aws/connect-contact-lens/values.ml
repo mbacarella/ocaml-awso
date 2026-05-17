@@ -43,37 +43,37 @@ module PointOfInterest =
   struct
     type nonrec t =
       {
-      beginOffsetMillis: OffsetMillis.t
+      beginOffsetMillis: OffsetMillis.t option
         [@ocaml.doc
           "The beginning offset in milliseconds where the category rule was detected."];
-      endOffsetMillis: OffsetMillis.t
+      endOffsetMillis: OffsetMillis.t option
         [@ocaml.doc
           "The ending offset in milliseconds where the category rule was detected."]}
-    let context_ = "PointOfInterest"
-    let make ~beginOffsetMillis =
-      fun ~endOffsetMillis ->
+    let make ?beginOffsetMillis =
+      fun ?endOffsetMillis ->
         fun () -> { beginOffsetMillis; endOffsetMillis }
     let to_value x =
       structure_to_value
         [("BeginOffsetMillis",
-           (Some (OffsetMillis.to_value x.beginOffsetMillis)));
-        ("EndOffsetMillis", (Some (OffsetMillis.to_value x.endOffsetMillis)))]
+           (Option.map x.beginOffsetMillis ~f:OffsetMillis.to_value));
+        ("EndOffsetMillis",
+          (Option.map x.endOffsetMillis ~f:OffsetMillis.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let endOffsetMillis =
-        OffsetMillis.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EndOffsetMillis") in
+        (Option.map ~f:OffsetMillis.of_xml)
+          (Xml.child xml_arg0 "EndOffsetMillis") in
       let beginOffsetMillis =
-        OffsetMillis.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BeginOffsetMillis") in
-      make ~endOffsetMillis ~beginOffsetMillis ()
+        (Option.map ~f:OffsetMillis.of_xml)
+          (Xml.child xml_arg0 "BeginOffsetMillis") in
+      make ?endOffsetMillis ?beginOffsetMillis ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endOffsetMillis =
-        field_map_exn json "EndOffsetMillis" OffsetMillis.of_json in
+        field_map json__ "EndOffsetMillis" OffsetMillis.of_json in
       let beginOffsetMillis =
-        field_map_exn json "BeginOffsetMillis" OffsetMillis.of_json in
-      make ~endOffsetMillis ~beginOffsetMillis ()
+        field_map json__ "BeginOffsetMillis" OffsetMillis.of_json in
+      make ?endOffsetMillis ?beginOffsetMillis ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The section of the contact audio where that category rule was detected."]
@@ -100,6 +100,9 @@ module PointsOfInterest =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PointOfInterest.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -125,33 +128,34 @@ module CharacterOffsets =
   struct
     type nonrec t =
       {
-      beginOffsetChar: CharacterOffset.t
+      beginOffsetChar: CharacterOffset.t option
         [@ocaml.doc "The beginning of the issue."];
-      endOffsetChar: CharacterOffset.t [@ocaml.doc "The end of the issue."]}
-    let context_ = "CharacterOffsets"
-    let make ~beginOffsetChar =
-      fun ~endOffsetChar -> fun () -> { beginOffsetChar; endOffsetChar }
+      endOffsetChar: CharacterOffset.t option
+        [@ocaml.doc "The end of the issue."]}
+    let make ?beginOffsetChar =
+      fun ?endOffsetChar -> fun () -> { beginOffsetChar; endOffsetChar }
     let to_value x =
       structure_to_value
         [("BeginOffsetChar",
-           (Some (CharacterOffset.to_value x.beginOffsetChar)));
-        ("EndOffsetChar", (Some (CharacterOffset.to_value x.endOffsetChar)))]
+           (Option.map x.beginOffsetChar ~f:CharacterOffset.to_value));
+        ("EndOffsetChar",
+          (Option.map x.endOffsetChar ~f:CharacterOffset.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let endOffsetChar =
-        CharacterOffset.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EndOffsetChar") in
+        (Option.map ~f:CharacterOffset.of_xml)
+          (Xml.child xml_arg0 "EndOffsetChar") in
       let beginOffsetChar =
-        CharacterOffset.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BeginOffsetChar") in
-      make ~endOffsetChar ~beginOffsetChar ()
+        (Option.map ~f:CharacterOffset.of_xml)
+          (Xml.child xml_arg0 "BeginOffsetChar") in
+      make ?endOffsetChar ?beginOffsetChar ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endOffsetChar =
-        field_map_exn json "EndOffsetChar" CharacterOffset.of_json in
+        field_map json__ "EndOffsetChar" CharacterOffset.of_json in
       let beginOffsetChar =
-        field_map_exn json "BeginOffsetChar" CharacterOffset.of_json in
-      make ~endOffsetChar ~beginOffsetChar ()
+        field_map json__ "BeginOffsetChar" CharacterOffset.of_json in
+      make ?endOffsetChar ?beginOffsetChar ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For characters that were detected as issues, where they occur in the transcript."]
@@ -179,26 +183,25 @@ module CategoryDetails =
   struct
     type nonrec t =
       {
-      pointsOfInterest: PointsOfInterest.t
+      pointsOfInterest: PointsOfInterest.t option
         [@ocaml.doc
           "The section of audio where the category rule was detected."]}
-    let context_ = "CategoryDetails"
-    let make ~pointsOfInterest = fun () -> { pointsOfInterest }
+    let make ?pointsOfInterest = fun () -> { pointsOfInterest }
     let to_value x =
       structure_to_value
         [("PointsOfInterest",
-           (Some (PointsOfInterest.to_value x.pointsOfInterest)))]
+           (Option.map x.pointsOfInterest ~f:PointsOfInterest.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let pointsOfInterest =
-        PointsOfInterest.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PointsOfInterest") in
-      make ~pointsOfInterest ()
+        (Option.map ~f:PointsOfInterest.of_xml)
+          (Xml.child xml_arg0 "PointsOfInterest") in
+      make ?pointsOfInterest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pointsOfInterest =
-        field_map_exn json "PointsOfInterest" PointsOfInterest.of_json in
-      make ~pointsOfInterest ()
+        field_map json__ "PointsOfInterest" PointsOfInterest.of_json in
+      make ?pointsOfInterest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about the category rule that was matched."]
@@ -206,26 +209,25 @@ module IssueDetected =
   struct
     type nonrec t =
       {
-      characterOffsets: CharacterOffsets.t
+      characterOffsets: CharacterOffsets.t option
         [@ocaml.doc
           "The offset for when the issue was detected in the segment."]}
-    let context_ = "IssueDetected"
-    let make ~characterOffsets = fun () -> { characterOffsets }
+    let make ?characterOffsets = fun () -> { characterOffsets }
     let to_value x =
       structure_to_value
         [("CharacterOffsets",
-           (Some (CharacterOffsets.to_value x.characterOffsets)))]
+           (Option.map x.characterOffsets ~f:CharacterOffsets.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let characterOffsets =
-        CharacterOffsets.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CharacterOffsets") in
-      make ~characterOffsets ()
+        (Option.map ~f:CharacterOffsets.of_xml)
+          (Xml.child xml_arg0 "CharacterOffsets") in
+      make ?characterOffsets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let characterOffsets =
-        field_map_exn json "CharacterOffsets" CharacterOffsets.of_json in
-      make ~characterOffsets ()
+        field_map json__ "CharacterOffsets" CharacterOffsets.of_json in
+      make ?characterOffsets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Potential issues that are detected based on an artificial intelligence analysis of each turn in the conversation."]
@@ -238,6 +240,9 @@ module MatchedCategories =
           ((check_list_max i ~max:150) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CategoryName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -287,12 +292,98 @@ module MatchedDetails =
                        (CategoryDetails.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:CategoryName.of_string
         ~of_json:CategoryDetails.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module PostContactSummaryContent =
+  struct
+    type nonrec t = string
+    let context_ = "PostContactSummaryContent"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1762) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PostContactSummaryContent" j
+    let to_json = simple_to_json to_value
+  end
+module PostContactSummaryFailureCode =
+  struct
+    type nonrec t =
+      | QUOTA_EXCEEDED 
+      | INSUFFICIENT_CONVERSATION_CONTENT 
+      | FAILED_SAFETY_GUIDELINES 
+      | INVALID_ANALYSIS_CONFIGURATION 
+      | INTERNAL_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | QUOTA_EXCEEDED -> "QUOTA_EXCEEDED"
+      | INSUFFICIENT_CONVERSATION_CONTENT ->
+          "INSUFFICIENT_CONVERSATION_CONTENT"
+      | FAILED_SAFETY_GUIDELINES -> "FAILED_SAFETY_GUIDELINES"
+      | INVALID_ANALYSIS_CONFIGURATION -> "INVALID_ANALYSIS_CONFIGURATION"
+      | INTERNAL_ERROR -> "INTERNAL_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "QUOTA_EXCEEDED" -> QUOTA_EXCEEDED
+      | "INSUFFICIENT_CONVERSATION_CONTENT" ->
+          INSUFFICIENT_CONVERSATION_CONTENT
+      | "FAILED_SAFETY_GUIDELINES" -> FAILED_SAFETY_GUIDELINES
+      | "INVALID_ANALYSIS_CONFIGURATION" -> INVALID_ANALYSIS_CONFIGURATION
+      | "INTERNAL_ERROR" -> INTERNAL_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PostContactSummaryFailureCode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PostContactSummaryFailureCode" j)
+    let to_json = simple_to_json to_value
+  end
+module PostContactSummaryStatus =
+  struct
+    type nonrec t =
+      | FAILED 
+      | COMPLETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FAILED -> "FAILED"
+      | COMPLETED -> "COMPLETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FAILED" -> FAILED
+      | "COMPLETED" -> COMPLETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PostContactSummaryStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PostContactSummaryStatus" j)
+    let to_json = simple_to_json to_value
   end
 module IssuesDetected =
   struct
@@ -302,6 +393,9 @@ module IssuesDetected =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IssueDetected.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -432,93 +526,140 @@ module Categories =
   struct
     type nonrec t =
       {
-      matchedCategories: MatchedCategories.t
+      matchedCategories: MatchedCategories.t option
         [@ocaml.doc
           "The category rules that have been matched in the analyzed segment."];
-      matchedDetails: MatchedDetails.t
+      matchedDetails: MatchedDetails.t option
         [@ocaml.doc
           "The category rule that was matched and when it occurred in the transcript."]}
-    let context_ = "Categories"
-    let make ~matchedCategories =
-      fun ~matchedDetails -> fun () -> { matchedCategories; matchedDetails }
+    let make ?matchedCategories =
+      fun ?matchedDetails -> fun () -> { matchedCategories; matchedDetails }
     let to_value x =
       structure_to_value
         [("MatchedCategories",
-           (Some (MatchedCategories.to_value x.matchedCategories)));
-        ("MatchedDetails", (Some (MatchedDetails.to_value x.matchedDetails)))]
+           (Option.map x.matchedCategories ~f:MatchedCategories.to_value));
+        ("MatchedDetails",
+          (Option.map x.matchedDetails ~f:MatchedDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let matchedDetails =
-        MatchedDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MatchedDetails") in
+        (Option.map ~f:MatchedDetails.of_xml)
+          (Xml.child xml_arg0 "MatchedDetails") in
       let matchedCategories =
-        MatchedCategories.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MatchedCategories") in
-      make ~matchedDetails ~matchedCategories ()
+        (Option.map ~f:MatchedCategories.of_xml)
+          (Xml.child xml_arg0 "MatchedCategories") in
+      make ?matchedDetails ?matchedCategories ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let matchedDetails =
-        field_map_exn json "MatchedDetails" MatchedDetails.of_json in
+        field_map json__ "MatchedDetails" MatchedDetails.of_json in
       let matchedCategories =
-        field_map_exn json "MatchedCategories" MatchedCategories.of_json in
-      make ~matchedDetails ~matchedCategories ()
+        field_map json__ "MatchedCategories" MatchedCategories.of_json in
+      make ?matchedDetails ?matchedCategories ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the category rules that are used to automatically categorize contacts based on uttered keywords and phrases."]
+module PostContactSummary =
+  struct
+    type nonrec t =
+      {
+      content: PostContactSummaryContent.t option
+        [@ocaml.doc "The content of the summary."];
+      status: PostContactSummaryStatus.t option
+        [@ocaml.doc
+          "Whether the summary was successfully COMPLETED or FAILED to be generated."];
+      failureCode: PostContactSummaryFailureCode.t option
+        [@ocaml.doc
+          "If the summary failed to be generated, one of the following failure codes occurs: QUOTA_EXCEEDED: The number of concurrent analytics jobs reached your service quota. INSUFFICIENT_CONVERSATION_CONTENT: The conversation needs to have at least one turn from both the participants in order to generate the summary. FAILED_SAFETY_GUIDELINES: The generated summary cannot be provided because it failed to meet system safety guidelines. INVALID_ANALYSIS_CONFIGURATION: This code occurs when, for example, you're using a language that isn't supported by generative AI-powered post-contact summaries. INTERNAL_ERROR: Internal system error."]}
+    let make ?content =
+      fun ?status ->
+        fun ?failureCode -> fun () -> { content; status; failureCode }
+    let to_value x =
+      structure_to_value
+        [("Content",
+           (Option.map x.content ~f:PostContactSummaryContent.to_value));
+        ("Status",
+          (Option.map x.status ~f:PostContactSummaryStatus.to_value));
+        ("FailureCode",
+          (Option.map x.failureCode ~f:PostContactSummaryFailureCode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureCode =
+        (Option.map ~f:PostContactSummaryFailureCode.of_xml)
+          (Xml.child xml_arg0 "FailureCode") in
+      let status =
+        (Option.map ~f:PostContactSummaryStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let content =
+        (Option.map ~f:PostContactSummaryContent.of_xml)
+          (Xml.child xml_arg0 "Content") in
+      make ?failureCode ?status ?content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureCode =
+        field_map json__ "FailureCode" PostContactSummaryFailureCode.of_json in
+      let status = field_map json__ "Status" PostContactSummaryStatus.of_json in
+      let content =
+        field_map json__ "Content" PostContactSummaryContent.of_json in
+      make ?failureCode ?status ?content ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the post-contact summary."]
 module Transcript =
   struct
     type nonrec t =
       {
-      id: TranscriptId.t [@ocaml.doc "The identifier of the transcript."];
-      participantId: ParticipantId.t
-        [@ocaml.doc "The identifier of the participant."];
-      participantRole: ParticipantRole.t
+      id: TranscriptId.t option
+        [@ocaml.doc "The identifier of the transcript."];
+      participantId: ParticipantId.t option
+        [@ocaml.doc
+          "The identifier of the participant. Valid values are CUSTOMER or AGENT."];
+      participantRole: ParticipantRole.t option
         [@ocaml.doc
           "The role of participant. For example, is it a customer, agent, or system."];
-      content: TranscriptContent.t
+      content: TranscriptContent.t option
         [@ocaml.doc "The content of the transcript."];
-      beginOffsetMillis: OffsetMillis.t
+      beginOffsetMillis: OffsetMillis.t option
         [@ocaml.doc
           "The beginning offset in the contact for this transcript."];
-      endOffsetMillis: OffsetMillis.t
+      endOffsetMillis: OffsetMillis.t option
         [@ocaml.doc "The end offset in the contact for this transcript."];
-      sentiment: SentimentValue.t
-        [@ocaml.doc
-          "The sentiment of the detected for this piece of transcript."];
+      sentiment: SentimentValue.t option
+        [@ocaml.doc "The sentiment detected for this piece of transcript."];
       issuesDetected: IssuesDetected.t option
         [@ocaml.doc
           "List of positions where issues were detected on the transcript."]}
-    let context_ = "Transcript"
-    let make ?issuesDetected =
-      fun ~id ->
-        fun ~participantId ->
-          fun ~participantRole ->
-            fun ~content ->
-              fun ~beginOffsetMillis ->
-                fun ~endOffsetMillis ->
-                  fun ~sentiment ->
+    let make ?id =
+      fun ?participantId ->
+        fun ?participantRole ->
+          fun ?content ->
+            fun ?beginOffsetMillis ->
+              fun ?endOffsetMillis ->
+                fun ?sentiment ->
+                  fun ?issuesDetected ->
                     fun () ->
                       {
-                        issuesDetected;
                         id;
                         participantId;
                         participantRole;
                         content;
                         beginOffsetMillis;
                         endOffsetMillis;
-                        sentiment
+                        sentiment;
+                        issuesDetected
                       }
     let to_value x =
       structure_to_value
-        [("Id", (Some (TranscriptId.to_value x.id)));
-        ("ParticipantId", (Some (ParticipantId.to_value x.participantId)));
+        [("Id", (Option.map x.id ~f:TranscriptId.to_value));
+        ("ParticipantId",
+          (Option.map x.participantId ~f:ParticipantId.to_value));
         ("ParticipantRole",
-          (Some (ParticipantRole.to_value x.participantRole)));
-        ("Content", (Some (TranscriptContent.to_value x.content)));
+          (Option.map x.participantRole ~f:ParticipantRole.to_value));
+        ("Content", (Option.map x.content ~f:TranscriptContent.to_value));
         ("BeginOffsetMillis",
-          (Some (OffsetMillis.to_value x.beginOffsetMillis)));
-        ("EndOffsetMillis", (Some (OffsetMillis.to_value x.endOffsetMillis)));
-        ("Sentiment", (Some (SentimentValue.to_value x.sentiment)));
+          (Option.map x.beginOffsetMillis ~f:OffsetMillis.to_value));
+        ("EndOffsetMillis",
+          (Option.map x.endOffsetMillis ~f:OffsetMillis.to_value));
+        ("Sentiment", (Option.map x.sentiment ~f:SentimentValue.to_value));
         ("IssuesDetected",
           (Option.map x.issuesDetected ~f:IssuesDetected.to_value))]
     let to_query v = to_query to_value v
@@ -527,44 +668,43 @@ module Transcript =
         (Option.map ~f:IssuesDetected.of_xml)
           (Xml.child xml_arg0 "IssuesDetected") in
       let sentiment =
-        SentimentValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Sentiment") in
+        (Option.map ~f:SentimentValue.of_xml)
+          (Xml.child xml_arg0 "Sentiment") in
       let endOffsetMillis =
-        OffsetMillis.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EndOffsetMillis") in
+        (Option.map ~f:OffsetMillis.of_xml)
+          (Xml.child xml_arg0 "EndOffsetMillis") in
       let beginOffsetMillis =
-        OffsetMillis.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BeginOffsetMillis") in
+        (Option.map ~f:OffsetMillis.of_xml)
+          (Xml.child xml_arg0 "BeginOffsetMillis") in
       let content =
-        TranscriptContent.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Content") in
+        (Option.map ~f:TranscriptContent.of_xml)
+          (Xml.child xml_arg0 "Content") in
       let participantRole =
-        ParticipantRole.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ParticipantRole") in
+        (Option.map ~f:ParticipantRole.of_xml)
+          (Xml.child xml_arg0 "ParticipantRole") in
       let participantId =
-        ParticipantId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ParticipantId") in
-      let id =
-        TranscriptId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?issuesDetected ~sentiment ~endOffsetMillis ~beginOffsetMillis
-        ~content ~participantRole ~participantId ~id ()
+        (Option.map ~f:ParticipantId.of_xml)
+          (Xml.child xml_arg0 "ParticipantId") in
+      let id = (Option.map ~f:TranscriptId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?issuesDetected ?sentiment ?endOffsetMillis ?beginOffsetMillis
+        ?content ?participantRole ?participantId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let issuesDetected =
-        field_map json "IssuesDetected" IssuesDetected.of_json in
-      let sentiment = field_map_exn json "Sentiment" SentimentValue.of_json in
+        field_map json__ "IssuesDetected" IssuesDetected.of_json in
+      let sentiment = field_map json__ "Sentiment" SentimentValue.of_json in
       let endOffsetMillis =
-        field_map_exn json "EndOffsetMillis" OffsetMillis.of_json in
+        field_map json__ "EndOffsetMillis" OffsetMillis.of_json in
       let beginOffsetMillis =
-        field_map_exn json "BeginOffsetMillis" OffsetMillis.of_json in
-      let content = field_map_exn json "Content" TranscriptContent.of_json in
+        field_map json__ "BeginOffsetMillis" OffsetMillis.of_json in
+      let content = field_map json__ "Content" TranscriptContent.of_json in
       let participantRole =
-        field_map_exn json "ParticipantRole" ParticipantRole.of_json in
+        field_map json__ "ParticipantRole" ParticipantRole.of_json in
       let participantId =
-        field_map_exn json "ParticipantId" ParticipantId.of_json in
-      let id = field_map_exn json "Id" TranscriptId.of_json in
-      make ?issuesDetected ~sentiment ~endOffsetMillis ~beginOffsetMillis
-        ~content ~participantRole ~participantId ~id ()
+        field_map json__ "ParticipantId" ParticipantId.of_json in
+      let id = field_map json__ "Id" TranscriptId.of_json in
+      make ?issuesDetected ?sentiment ?endOffsetMillis ?beginOffsetMillis
+        ?content ?participantRole ?participantId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of messages in the session."]
 module Message =
@@ -586,44 +726,55 @@ module RealtimeContactAnalysisSegment =
       {
       transcript: Transcript.t option [@ocaml.doc "The analyzed transcript."];
       categories: Categories.t option
-        [@ocaml.doc "The matched category rules."]}
+        [@ocaml.doc "The matched category rules."];
+      postContactSummary: PostContactSummary.t option
+        [@ocaml.doc "Information about the post-contact summary."]}
     let make ?transcript =
-      fun ?categories -> fun () -> { transcript; categories }
+      fun ?categories ->
+        fun ?postContactSummary ->
+          fun () -> { transcript; categories; postContactSummary }
     let to_value x =
       structure_to_value
         [("Transcript", (Option.map x.transcript ~f:Transcript.to_value));
-        ("Categories", (Option.map x.categories ~f:Categories.to_value))]
+        ("Categories", (Option.map x.categories ~f:Categories.to_value));
+        ("PostContactSummary",
+          (Option.map x.postContactSummary ~f:PostContactSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let postContactSummary =
+        (Option.map ~f:PostContactSummary.of_xml)
+          (Xml.child xml_arg0 "PostContactSummary") in
       let categories =
         (Option.map ~f:Categories.of_xml) (Xml.child xml_arg0 "Categories") in
       let transcript =
         (Option.map ~f:Transcript.of_xml) (Xml.child xml_arg0 "Transcript") in
-      make ?categories ?transcript ()
+      make ?postContactSummary ?categories ?transcript ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let categories = field_map json "Categories" Categories.of_json in
-      let transcript = field_map json "Transcript" Transcript.of_json in
-      make ?categories ?transcript ()
+    let of_json json__ =
+      let postContactSummary =
+        field_map json__ "PostContactSummary" PostContactSummary.of_json in
+      let categories = field_map json__ "Categories" Categories.of_json in
+      let transcript = field_map json__ "Transcript" Transcript.of_json in
+      make ?postContactSummary ?categories ?transcript ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An analyzed segment for a real-time analysis session."]
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: Message.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: Message.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("Message", (Some (Message.to_value x.message)))]
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Message.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You do not have sufficient access to perform this action."]
@@ -641,8 +792,8 @@ module InternalServiceException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -661,8 +812,8 @@ module InvalidRequestException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request is not valid."]
@@ -695,6 +846,9 @@ module RealtimeContactAnalysisSegments =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RealtimeContactAnalysisSegment.to_value)) |>
         (fun x -> `List x)
@@ -731,28 +885,28 @@ module ResourceNotFoundException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource was not found."]
 module ThrottlingException =
   struct
     type nonrec t = {
-      message: Message.t }
-    let context_ = "ThrottlingException"
-    let make ~message = fun () -> { message }
+      message: Message.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("Message", (Some (Message.to_value x.message)))]
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Message.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The throttling limit has been exceeded."]
 module ContactId =
@@ -817,7 +971,7 @@ module ListRealtimeContactAnalysisSegmentsResponse =
   struct
     type nonrec t =
       {
-      segments: RealtimeContactAnalysisSegments.t
+      segments: RealtimeContactAnalysisSegments.t option
         [@ocaml.doc "An analyzed transcript or category."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -829,8 +983,7 @@ module ListRealtimeContactAnalysisSegmentsResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListRealtimeContactAnalysisSegmentsResponse"
-    let make ?nextToken = fun ~segments -> fun () -> { nextToken; segments }
+    let make ?segments = fun ?nextToken -> fun () -> { segments; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -890,22 +1043,22 @@ module ListRealtimeContactAnalysisSegmentsResponse =
     let to_value x =
       structure_to_value
         [("Segments",
-           (Some (RealtimeContactAnalysisSegments.to_value x.segments)));
+           (Option.map x.segments ~f:RealtimeContactAnalysisSegments.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let segments =
-        RealtimeContactAnalysisSegments.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Segments") in
-      make ?nextToken ~segments ()
+        (Option.map ~f:RealtimeContactAnalysisSegments.of_xml)
+          (Xml.child xml_arg0 "Segments") in
+      make ?nextToken ?segments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let segments =
-        field_map_exn json "Segments" RealtimeContactAnalysisSegments.of_json in
-      make ?nextToken ~segments ()
+        field_map json__ "Segments" RealtimeContactAnalysisSegments.of_json in
+      make ?nextToken ?segments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides a list of analysis segments for a real-time analysis session."]
@@ -917,7 +1070,7 @@ module ListRealtimeContactAnalysisSegmentsRequest =
         [@ocaml.doc "The identifier of the Amazon Connect instance."];
       contactId: ContactId.t [@ocaml.doc "The identifier of the contact."];
       maxResults: MaxResults.t option
-        [@ocaml.doc "The maximimum number of results to return per page."];
+        [@ocaml.doc "The maximum number of results to return per page."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."]}
@@ -947,11 +1100,11 @@ module ListRealtimeContactAnalysisSegmentsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       make ?nextToken ?maxResults ~contactId ~instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let contactId = field_map_exn json "ContactId" ContactId.of_json in
-      let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let contactId = field_map_exn json__ "ContactId" ContactId.of_json in
+      let instanceId = field_map_exn json__ "InstanceId" InstanceId.of_json in
       make ?nextToken ?maxResults ~contactId ~instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

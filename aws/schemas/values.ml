@@ -103,11 +103,11 @@ module SearchSchemaVersionSummary =
           (Xml.child xml_arg0 "CreatedDate") in
       make ?type_ ?schemaVersion ?createdDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" Type.of_json in
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" Type.of_json in
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
       let createdDate =
-        field_map json "CreatedDate" Zz__timestampIso8601.of_json in
+        field_map json__ "CreatedDate" Zz__timestampIso8601.of_json in
       make ?type_ ?schemaVersion ?createdDate ()
     let to_json v = composed_to_json to_value v
   end
@@ -115,6 +115,9 @@ module Zz__listOfSearchSchemaVersionSummary =
   struct
     type nonrec t = SearchSchemaVersionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SearchSchemaVersionSummary.to_value)) |>
         (fun x -> `List x)
@@ -158,6 +161,8 @@ module Tags =
                     (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -252,13 +257,13 @@ module SearchSchemaSummary =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "RegistryName") in
       make ?schemaVersions ?schemaName ?schemaArn ?registryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schemaVersions =
-        field_map json "SchemaVersions"
+        field_map json__ "SchemaVersions"
           Zz__listOfSearchSchemaVersionSummary.of_json in
-      let schemaName = field_map json "SchemaName" Zz__string.of_json in
-      let schemaArn = field_map json "SchemaArn" Zz__string.of_json in
-      let registryName = field_map json "RegistryName" Zz__string.of_json in
+      let schemaName = field_map json__ "SchemaName" Zz__string.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Zz__string.of_json in
+      let registryName = field_map json__ "RegistryName" Zz__string.of_json in
       make ?schemaVersions ?schemaName ?schemaArn ?registryName ()
     let to_json v = composed_to_json to_value v
   end
@@ -302,13 +307,13 @@ module SchemaSummary =
           (Xml.child xml_arg0 "LastModified") in
       make ?versionCount ?tags ?schemaName ?schemaArn ?lastModified ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let versionCount = field_map json "VersionCount" Zz__long.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let schemaName = field_map json "SchemaName" Zz__string.of_json in
-      let schemaArn = field_map json "SchemaArn" Zz__string.of_json in
+    let of_json json__ =
+      let versionCount = field_map json__ "VersionCount" Zz__long.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let schemaName = field_map json__ "SchemaName" Zz__string.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Zz__string.of_json in
       let lastModified =
-        field_map json "LastModified" Zz__timestampIso8601.of_json in
+        field_map json__ "LastModified" Zz__timestampIso8601.of_json in
       make ?versionCount ?tags ?schemaName ?schemaArn ?lastModified ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary of schema details."]
@@ -346,11 +351,11 @@ module SchemaVersionSummary =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "SchemaArn") in
       make ?type_ ?schemaVersion ?schemaName ?schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" Type.of_json in
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map json "SchemaName" Zz__string.of_json in
-      let schemaArn = field_map json "SchemaArn" Zz__string.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" Type.of_json in
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map json__ "SchemaName" Zz__string.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Zz__string.of_json in
       make ?type_ ?schemaVersion ?schemaName ?schemaArn ()
     let to_json v = composed_to_json to_value v
   end
@@ -380,10 +385,10 @@ module RegistrySummary =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "RegistryArn") in
       make ?tags ?registryName ?registryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let registryName = field_map json "RegistryName" Zz__string.of_json in
-      let registryArn = field_map json "RegistryArn" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let registryName = field_map json__ "RegistryName" Zz__string.of_json in
+      let registryArn = field_map json__ "RegistryArn" Zz__string.of_json in
       make ?tags ?registryName ?registryArn ()
     let to_json v = composed_to_json to_value v
   end
@@ -444,13 +449,13 @@ module DiscovererSummary =
       make ?tags ?crossAccount ?state ?sourceArn ?discovererId ?discovererArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let crossAccount = field_map json "CrossAccount" Zz__boolean.of_json in
-      let state = field_map json "State" DiscovererState.of_json in
-      let sourceArn = field_map json "SourceArn" Zz__string.of_json in
-      let discovererId = field_map json "DiscovererId" Zz__string.of_json in
-      let discovererArn = field_map json "DiscovererArn" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let crossAccount = field_map json__ "CrossAccount" Zz__boolean.of_json in
+      let state = field_map json__ "State" DiscovererState.of_json in
+      let sourceArn = field_map json__ "SourceArn" Zz__string.of_json in
+      let discovererId = field_map json__ "DiscovererId" Zz__string.of_json in
+      let discovererArn = field_map json__ "DiscovererArn" Zz__string.of_json in
       make ?tags ?crossAccount ?state ?sourceArn ?discovererId ?discovererArn
         ()
     let to_json v = composed_to_json to_value v
@@ -478,140 +483,130 @@ module BadRequestException =
   struct
     type nonrec t =
       {
-      code: Zz__string.t [@ocaml.doc "The error code."];
-      message: Zz__string.t
+      code: Zz__string.t option [@ocaml.doc "The error code."];
+      message: Zz__string.t option
         [@ocaml.doc "The message string of the error output."]}
-    let context_ = "BadRequestException"
-    let make ~code = fun ~message -> fun () -> { code; message }
+    let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
-        [("Code", (Some (Zz__string.to_value x.code)));
-        ("Message", (Some (Zz__string.to_value x.message)))]
+        [("Code", (Option.map x.code ~f:Zz__string.to_value));
+        ("Message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Message") in
       let code =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
-      make ~message ~code ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      let code = field_map_exn json "Code" Zz__string.of_json in
-      make ~message ~code ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let code = field_map json__ "Code" Zz__string.of_json in
+      make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end
 module ForbiddenException =
   struct
     type nonrec t =
       {
-      code: Zz__string.t [@ocaml.doc "The error code."];
-      message: Zz__string.t
+      code: Zz__string.t option [@ocaml.doc "The error code."];
+      message: Zz__string.t option
         [@ocaml.doc "The message string of the error output."]}
-    let context_ = "ForbiddenException"
-    let make ~code = fun ~message -> fun () -> { code; message }
+    let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
-        [("Code", (Some (Zz__string.to_value x.code)));
-        ("Message", (Some (Zz__string.to_value x.message)))]
+        [("Code", (Option.map x.code ~f:Zz__string.to_value));
+        ("Message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Message") in
       let code =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
-      make ~message ~code ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      let code = field_map_exn json "Code" Zz__string.of_json in
-      make ~message ~code ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let code = field_map json__ "Code" Zz__string.of_json in
+      make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end
 module InternalServerErrorException =
   struct
     type nonrec t =
       {
-      code: Zz__string.t [@ocaml.doc "The error code."];
-      message: Zz__string.t
+      code: Zz__string.t option [@ocaml.doc "The error code."];
+      message: Zz__string.t option
         [@ocaml.doc "The message string of the error output."]}
-    let context_ = "InternalServerErrorException"
-    let make ~code = fun ~message -> fun () -> { code; message }
+    let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
-        [("Code", (Some (Zz__string.to_value x.code)));
-        ("Message", (Some (Zz__string.to_value x.message)))]
+        [("Code", (Option.map x.code ~f:Zz__string.to_value));
+        ("Message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Message") in
       let code =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
-      make ~message ~code ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      let code = field_map_exn json "Code" Zz__string.of_json in
-      make ~message ~code ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let code = field_map json__ "Code" Zz__string.of_json in
+      make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end
 module NotFoundException =
   struct
     type nonrec t =
       {
-      code: Zz__string.t [@ocaml.doc "The error code."];
-      message: Zz__string.t
+      code: Zz__string.t option [@ocaml.doc "The error code."];
+      message: Zz__string.t option
         [@ocaml.doc "The message string of the error output."]}
-    let context_ = "NotFoundException"
-    let make ~code = fun ~message -> fun () -> { code; message }
+    let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
-        [("Code", (Some (Zz__string.to_value x.code)));
-        ("Message", (Some (Zz__string.to_value x.message)))]
+        [("Code", (Option.map x.code ~f:Zz__string.to_value));
+        ("Message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Message") in
       let code =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
-      make ~message ~code ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      let code = field_map_exn json "Code" Zz__string.of_json in
-      make ~message ~code ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let code = field_map json__ "Code" Zz__string.of_json in
+      make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end
 module ServiceUnavailableException =
   struct
     type nonrec t =
       {
-      code: Zz__string.t [@ocaml.doc "The error code."];
-      message: Zz__string.t
+      code: Zz__string.t option [@ocaml.doc "The error code."];
+      message: Zz__string.t option
         [@ocaml.doc "The message string of the error output."]}
-    let context_ = "ServiceUnavailableException"
-    let make ~code = fun ~message -> fun () -> { code; message }
+    let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
-        [("Code", (Some (Zz__string.to_value x.code)));
-        ("Message", (Some (Zz__string.to_value x.message)))]
+        [("Code", (Option.map x.code ~f:Zz__string.to_value));
+        ("Message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Message") in
       let code =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
-      make ~message ~code ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      let code = field_map_exn json "Code" Zz__string.of_json in
-      make ~message ~code ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let code = field_map json__ "Code" Zz__string.of_json in
+      make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end
 module Zz__stringMin0Max256 =
@@ -672,34 +667,35 @@ module UnauthorizedException =
   struct
     type nonrec t =
       {
-      code: Zz__string.t [@ocaml.doc "The error code."];
-      message: Zz__string.t
+      code: Zz__string.t option [@ocaml.doc "The error code."];
+      message: Zz__string.t option
         [@ocaml.doc "The message string of the error output."]}
-    let context_ = "UnauthorizedException"
-    let make ~code = fun ~message -> fun () -> { code; message }
+    let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
-        [("Code", (Some (Zz__string.to_value x.code)));
-        ("Message", (Some (Zz__string.to_value x.message)))]
+        [("Code", (Option.map x.code ~f:Zz__string.to_value));
+        ("Message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Message") in
       let code =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
-      make ~message ~code ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      let code = field_map_exn json "Code" Zz__string.of_json in
-      make ~message ~code ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let code = field_map json__ "Code" Zz__string.of_json in
+      make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end
 module Zz__listOf__string =
   struct
     type nonrec t = Zz__string.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__string.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -724,6 +720,9 @@ module Zz__listOfSearchSchemaSummary =
   struct
     type nonrec t = SearchSchemaSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SearchSchemaSummary.to_value)) |>
         (fun x -> `List x)
@@ -763,28 +762,26 @@ module PreconditionFailedException =
   struct
     type nonrec t =
       {
-      code: Zz__string.t [@ocaml.doc "The error code."];
-      message: Zz__string.t
+      code: Zz__string.t option [@ocaml.doc "The error code."];
+      message: Zz__string.t option
         [@ocaml.doc "The message string of the error output."]}
-    let context_ = "PreconditionFailedException"
-    let make ~code = fun ~message -> fun () -> { code; message }
+    let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
-        [("Code", (Some (Zz__string.to_value x.code)));
-        ("Message", (Some (Zz__string.to_value x.message)))]
+        [("Code", (Option.map x.code ~f:Zz__string.to_value));
+        ("Message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Message") in
       let code =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
-      make ~message ~code ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      let code = field_map_exn json "Code" Zz__string.of_json in
-      make ~message ~code ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let code = field_map json__ "Code" Zz__string.of_json in
+      make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end
 module CodeGenerationStatus =
@@ -820,62 +817,61 @@ module GoneException =
   struct
     type nonrec t =
       {
-      code: Zz__string.t [@ocaml.doc "The error code."];
-      message: Zz__string.t
+      code: Zz__string.t option [@ocaml.doc "The error code."];
+      message: Zz__string.t option
         [@ocaml.doc "The message string of the error output."]}
-    let context_ = "GoneException"
-    let make ~code = fun ~message -> fun () -> { code; message }
+    let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
-        [("Code", (Some (Zz__string.to_value x.code)));
-        ("Message", (Some (Zz__string.to_value x.message)))]
+        [("Code", (Option.map x.code ~f:Zz__string.to_value));
+        ("Message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Message") in
       let code =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
-      make ~message ~code ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      let code = field_map_exn json "Code" Zz__string.of_json in
-      make ~message ~code ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let code = field_map json__ "Code" Zz__string.of_json in
+      make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end
 module TooManyRequestsException =
   struct
     type nonrec t =
       {
-      code: Zz__string.t [@ocaml.doc "The error code."];
-      message: Zz__string.t
+      code: Zz__string.t option [@ocaml.doc "The error code."];
+      message: Zz__string.t option
         [@ocaml.doc "The message string of the error output."]}
-    let context_ = "TooManyRequestsException"
-    let make ~code = fun ~message -> fun () -> { code; message }
+    let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
-        [("Code", (Some (Zz__string.to_value x.code)));
-        ("Message", (Some (Zz__string.to_value x.message)))]
+        [("Code", (Option.map x.code ~f:Zz__string.to_value));
+        ("Message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Message") in
       let code =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
-      make ~message ~code ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      let code = field_map_exn json "Code" Zz__string.of_json in
-      make ~message ~code ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let code = field_map json__ "Code" Zz__string.of_json in
+      make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end
 module Zz__listOfSchemaSummary =
   struct
     type nonrec t = SchemaSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SchemaSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -901,6 +897,9 @@ module Zz__listOfSchemaVersionSummary =
   struct
     type nonrec t = SchemaVersionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SchemaVersionSummary.to_value)) |>
         (fun x -> `List x)
@@ -927,6 +926,9 @@ module Zz__listOfRegistrySummary =
   struct
     type nonrec t = RegistrySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RegistrySummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -952,6 +954,9 @@ module Zz__listOfDiscovererSummary =
   struct
     type nonrec t = DiscovererSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DiscovererSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -981,6 +986,9 @@ module Zz__listOfGetDiscoveredSchemaVersionItemInput =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GetDiscoveredSchemaVersionItemInput.to_value)) |>
         (fun x -> `List x)
@@ -1020,28 +1028,26 @@ module ConflictException =
   struct
     type nonrec t =
       {
-      code: Zz__string.t [@ocaml.doc "The error code."];
-      message: Zz__string.t
+      code: Zz__string.t option [@ocaml.doc "The error code."];
+      message: Zz__string.t option
         [@ocaml.doc "The message string of the error output."]}
-    let context_ = "ConflictException"
-    let make ~code = fun ~message -> fun () -> { code; message }
+    let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
-        [("Code", (Some (Zz__string.to_value x.code)));
-        ("Message", (Some (Zz__string.to_value x.message)))]
+        [("Code", (Option.map x.code ~f:Zz__string.to_value));
+        ("Message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Message") in
       let code =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
-      make ~message ~code ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      let code = field_map_exn json "Code" Zz__string.of_json in
-      make ~message ~code ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let code = field_map json__ "Code" Zz__string.of_json in
+      make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end
 module Zz__stringMin20Max1600 =
@@ -1262,17 +1268,17 @@ module UpdateSchemaResponse =
       make ?versionCreatedDate ?type_ ?tags ?schemaVersion ?schemaName
         ?schemaArn ?lastModified ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionCreatedDate =
-        field_map json "VersionCreatedDate" Zz__timestampIso8601.of_json in
-      let type_ = field_map json "Type" Zz__string.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map json "SchemaName" Zz__string.of_json in
-      let schemaArn = field_map json "SchemaArn" Zz__string.of_json in
+        field_map json__ "VersionCreatedDate" Zz__timestampIso8601.of_json in
+      let type_ = field_map json__ "Type" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map json__ "SchemaName" Zz__string.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Zz__string.of_json in
       let lastModified =
-        field_map json "LastModified" Zz__timestampIso8601.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+        field_map json__ "LastModified" Zz__timestampIso8601.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?versionCreatedDate ?type_ ?tags ?schemaVersion ?schemaName
         ?schemaArn ?lastModified ?description ()
     let to_json v = composed_to_json to_value v
@@ -1340,15 +1346,17 @@ module UpdateSchemaRequest =
       make ?type_ ~schemaName ~registryName ?description ?content
         ?clientTokenId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" Type.of_json in
-      let schemaName = field_map_exn json "SchemaName" Zz__string.of_json in
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" Type.of_json in
+      let schemaName = field_map_exn json__ "SchemaName" Zz__string.of_json in
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
       let description =
-        field_map json "Description" Zz__stringMin0Max256.of_json in
-      let content = field_map json "Content" Zz__stringMin1Max100000.of_json in
+        field_map json__ "Description" Zz__stringMin0Max256.of_json in
+      let content =
+        field_map json__ "Content" Zz__stringMin1Max100000.of_json in
       let clientTokenId =
-        field_map json "ClientTokenId" Zz__stringMin0Max36.of_json in
+        field_map json__ "ClientTokenId" Zz__stringMin0Max36.of_json in
       make ?type_ ~schemaName ~registryName ?description ?content
         ?clientTokenId ()
     let to_json v = composed_to_json to_value v
@@ -1394,13 +1402,14 @@ module UpdateSchemaInput =
           (Xml.child xml_arg0 "ClientTokenId") in
       make ?type_ ?description ?content ?clientTokenId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" Type.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" Type.of_json in
       let description =
-        field_map json "Description" Zz__stringMin0Max256.of_json in
-      let content = field_map json "Content" Zz__stringMin1Max100000.of_json in
+        field_map json__ "Description" Zz__stringMin0Max256.of_json in
+      let content =
+        field_map json__ "Content" Zz__stringMin1Max100000.of_json in
       let clientTokenId =
-        field_map json "ClientTokenId" Zz__stringMin0Max36.of_json in
+        field_map json__ "ClientTokenId" Zz__stringMin0Max36.of_json in
       make ?type_ ?description ?content ?clientTokenId ()
     let to_json v = composed_to_json to_value v
   end
@@ -1513,11 +1522,11 @@ module UpdateRegistryResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Description") in
       make ?tags ?registryName ?registryArn ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let registryName = field_map json "RegistryName" Zz__string.of_json in
-      let registryArn = field_map json "RegistryArn" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let registryName = field_map json__ "RegistryName" Zz__string.of_json in
+      let registryArn = field_map json__ "RegistryArn" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?tags ?registryName ?registryArn ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a registry."]
@@ -1546,10 +1555,11 @@ module UpdateRegistryRequest =
           (Xml.child xml_arg0 "Description") in
       make ~registryName ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
+    let of_json json__ =
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
       let description =
-        field_map json "Description" Zz__stringMin0Max256.of_json in
+        field_map json__ "Description" Zz__stringMin0Max256.of_json in
       make ~registryName ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the registry."]
@@ -1571,9 +1581,9 @@ module UpdateRegistryInput =
           (Xml.child xml_arg0 "Description") in
       make ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" Zz__stringMin0Max256.of_json in
+        field_map json__ "Description" Zz__stringMin0Max256.of_json in
       make ?description ()
     let to_json v = composed_to_json to_value v
   end
@@ -1717,14 +1727,14 @@ module UpdateDiscovererResponse =
       make ?tags ?crossAccount ?state ?sourceArn ?discovererId ?discovererArn
         ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let crossAccount = field_map json "CrossAccount" Zz__boolean.of_json in
-      let state = field_map json "State" DiscovererState.of_json in
-      let sourceArn = field_map json "SourceArn" Zz__string.of_json in
-      let discovererId = field_map json "DiscovererId" Zz__string.of_json in
-      let discovererArn = field_map json "DiscovererArn" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let crossAccount = field_map json__ "CrossAccount" Zz__boolean.of_json in
+      let state = field_map json__ "State" DiscovererState.of_json in
+      let sourceArn = field_map json__ "SourceArn" Zz__string.of_json in
+      let discovererId = field_map json__ "DiscovererId" Zz__string.of_json in
+      let discovererArn = field_map json__ "DiscovererArn" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?tags ?crossAccount ?state ?sourceArn ?discovererId ?discovererArn
         ?description ()
     let to_json v = composed_to_json to_value v
@@ -1763,11 +1773,12 @@ module UpdateDiscovererRequest =
           (Xml.child xml_arg0 "Description") in
       make ?crossAccount ~discovererId ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let crossAccount = field_map json "CrossAccount" Zz__boolean.of_json in
-      let discovererId = field_map_exn json "DiscovererId" Zz__string.of_json in
+    let of_json json__ =
+      let crossAccount = field_map json__ "CrossAccount" Zz__boolean.of_json in
+      let discovererId =
+        field_map_exn json__ "DiscovererId" Zz__string.of_json in
       let description =
-        field_map json "Description" Zz__stringMin0Max256.of_json in
+        field_map json__ "Description" Zz__stringMin0Max256.of_json in
       make ?crossAccount ~discovererId ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the discoverer"]
@@ -1797,10 +1808,10 @@ module UpdateDiscovererInput =
           (Xml.child xml_arg0 "Description") in
       make ?crossAccount ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let crossAccount = field_map json "CrossAccount" Zz__boolean.of_json in
+    let of_json json__ =
+      let crossAccount = field_map json__ "CrossAccount" Zz__boolean.of_json in
       let description =
-        field_map json "Description" Zz__stringMin0Max256.of_json in
+        field_map json__ "Description" Zz__stringMin0Max256.of_json in
       make ?crossAccount ?description ()
     let to_json v = composed_to_json to_value v
   end
@@ -1827,9 +1838,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" Zz__listOf__string.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" Zz__listOf__string.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a resource."]
@@ -1854,9 +1865,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end
@@ -1875,8 +1886,8 @@ module TagResourceInput =
         Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       make ~tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in make ~tags ()
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in make ~tags ()
     let to_json v = composed_to_json to_value v
   end
 module StopDiscovererResponse =
@@ -1976,9 +1987,9 @@ module StopDiscovererResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "DiscovererId") in
       make ?state ?discovererId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" DiscovererState.of_json in
-      let discovererId = field_map json "DiscovererId" Zz__string.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" DiscovererState.of_json in
+      let discovererId = field_map json__ "DiscovererId" Zz__string.of_json in
       make ?state ?discovererId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops the discoverer"]
@@ -1999,8 +2010,9 @@ module StopDiscovererRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "discovererId") in
       make ~discovererId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let discovererId = field_map_exn json "DiscovererId" Zz__string.of_json in
+    let of_json json__ =
+      let discovererId =
+        field_map_exn json__ "DiscovererId" Zz__string.of_json in
       make ~discovererId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops the discoverer"]
@@ -2101,9 +2113,9 @@ module StartDiscovererResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "DiscovererId") in
       make ?state ?discovererId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" DiscovererState.of_json in
-      let discovererId = field_map json "DiscovererId" Zz__string.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" DiscovererState.of_json in
+      let discovererId = field_map json__ "DiscovererId" Zz__string.of_json in
       make ?state ?discovererId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts the discoverer"]
@@ -2124,8 +2136,9 @@ module StartDiscovererRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "discovererId") in
       make ~discovererId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let discovererId = field_map_exn json "DiscovererId" Zz__string.of_json in
+    let of_json json__ =
+      let discovererId =
+        field_map_exn json__ "DiscovererId" Zz__string.of_json in
       make ~discovererId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts the discoverer"]
@@ -2220,10 +2233,10 @@ module SearchSchemasResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?schemas ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schemas =
-        field_map json "Schemas" Zz__listOfSearchSchemaSummary.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Schemas" Zz__listOfSearchSchemaSummary.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?schemas ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Search the schemas"]
@@ -2265,11 +2278,12 @@ module SearchSchemasRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "keywords") in
       make ~registryName ?nextToken ?limit ~keywords ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let limit = field_map json "Limit" Zz__integer.of_json in
-      let keywords = field_map_exn json "Keywords" Zz__string.of_json in
+    let of_json json__ =
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let limit = field_map json__ "Limit" Zz__integer.of_json in
+      let keywords = field_map_exn json__ "Keywords" Zz__string.of_json in
       make ~registryName ?nextToken ?limit ~keywords ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Search the schemas"]
@@ -2297,10 +2311,10 @@ module SearchSchemasOutput =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?schemas ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schemas =
-        field_map json "Schemas" Zz__listOfSearchSchemaSummary.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Schemas" Zz__listOfSearchSchemaSummary.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?schemas ?nextToken ()
     let to_json v = composed_to_json to_value v
   end
@@ -2375,17 +2389,17 @@ module SchemaOutput =
       make ?versionCreatedDate ?type_ ?tags ?schemaVersion ?schemaName
         ?schemaArn ?lastModified ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionCreatedDate =
-        field_map json "VersionCreatedDate" Zz__timestampIso8601.of_json in
-      let type_ = field_map json "Type" Zz__string.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map json "SchemaName" Zz__string.of_json in
-      let schemaArn = field_map json "SchemaArn" Zz__string.of_json in
+        field_map json__ "VersionCreatedDate" Zz__timestampIso8601.of_json in
+      let type_ = field_map json__ "Type" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map json__ "SchemaName" Zz__string.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Zz__string.of_json in
       let lastModified =
-        field_map json "LastModified" Zz__timestampIso8601.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+        field_map json__ "LastModified" Zz__timestampIso8601.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?versionCreatedDate ?type_ ?tags ?schemaVersion ?schemaName
         ?schemaArn ?lastModified ?description ()
     let to_json v = composed_to_json to_value v
@@ -2423,11 +2437,11 @@ module RegistryOutput =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Description") in
       make ?tags ?registryName ?registryArn ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let registryName = field_map json "RegistryName" Zz__string.of_json in
-      let registryArn = field_map json "RegistryArn" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let registryName = field_map json__ "RegistryName" Zz__string.of_json in
+      let registryArn = field_map json__ "RegistryArn" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?tags ?registryName ?registryArn ?description ()
     let to_json v = composed_to_json to_value v
   end
@@ -2538,9 +2552,9 @@ module PutResourcePolicyResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?revisionId ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionId = field_map json "RevisionId" Zz__string.of_json in
-      let policy = field_map json "Policy" Zz__string.of_json in
+    let of_json json__ =
+      let revisionId = field_map json__ "RevisionId" Zz__string.of_json in
+      let policy = field_map json__ "Policy" Zz__string.of_json in
       make ?revisionId ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The name of the policy."]
@@ -2572,10 +2586,10 @@ module PutResourcePolicyRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
       make ?revisionId ?registryName ~policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionId = field_map json "RevisionId" Zz__string.of_json in
-      let registryName = field_map json "RegistryName" Zz__string.of_json in
-      let policy = field_map_exn json "Policy" Zz__string.of_json in
+    let of_json json__ =
+      let revisionId = field_map json__ "RevisionId" Zz__string.of_json in
+      let registryName = field_map json__ "RegistryName" Zz__string.of_json in
+      let policy = field_map_exn json__ "Policy" Zz__string.of_json in
       make ?revisionId ?registryName ~policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The name of the policy."]
@@ -2599,9 +2613,9 @@ module PutResourcePolicyOutput =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?revisionId ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionId = field_map json "RevisionId" Zz__string.of_json in
-      let policy = field_map json "Policy" Zz__string.of_json in
+    let of_json json__ =
+      let revisionId = field_map json__ "RevisionId" Zz__string.of_json in
+      let policy = field_map json__ "Policy" Zz__string.of_json in
       make ?revisionId ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource-based policy."]
@@ -2626,9 +2640,9 @@ module PutResourcePolicyInput =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
       make ?revisionId ~policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionId = field_map json "RevisionId" Zz__string.of_json in
-      let policy = field_map_exn json "Policy" Zz__string.of_json in
+    let of_json json__ =
+      let revisionId = field_map json__ "RevisionId" Zz__string.of_json in
+      let policy = field_map_exn json__ "Policy" Zz__string.of_json in
       make ?revisionId ~policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2756,13 +2770,13 @@ module PutCodeBindingResponse =
           (Xml.child xml_arg0 "CreationDate") in
       make ?status ?schemaVersion ?lastModified ?creationDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" CodeGenerationStatus.of_json in
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" CodeGenerationStatus.of_json in
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
       let lastModified =
-        field_map json "LastModified" Zz__timestampIso8601.of_json in
+        field_map json__ "LastModified" Zz__timestampIso8601.of_json in
       let creationDate =
-        field_map json "CreationDate" Zz__timestampIso8601.of_json in
+        field_map json__ "CreationDate" Zz__timestampIso8601.of_json in
       make ?status ?schemaVersion ?lastModified ?creationDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Put code binding URI"]
@@ -2805,11 +2819,12 @@ module PutCodeBindingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "language") in
       make ?schemaVersion ~schemaName ~registryName ~language ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map_exn json "SchemaName" Zz__string.of_json in
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
-      let language = field_map_exn json "Language" Zz__string.of_json in
+    let of_json json__ =
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map_exn json__ "SchemaName" Zz__string.of_json in
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
+      let language = field_map_exn json__ "Language" Zz__string.of_json in
       make ?schemaVersion ~schemaName ~registryName ~language ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Put code binding URI"]
@@ -2881,8 +2896,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get tags for resource."]
 module ListTagsForResourceRequest =
@@ -2902,8 +2917,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get tags for resource."]
@@ -2919,8 +2934,8 @@ module ListTagsForResourceOutput =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end
 module ListSchemasResponse =
@@ -3014,9 +3029,10 @@ module ListSchemasResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?schemas ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemas = field_map json "Schemas" Zz__listOfSchemaSummary.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let schemas =
+        field_map json__ "Schemas" Zz__listOfSchemaSummary.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?schemas ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the schemas."]
@@ -3059,12 +3075,13 @@ module ListSchemasRequest =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "limit") in
       make ?schemaNamePrefix ~registryName ?nextToken ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schemaNamePrefix =
-        field_map json "SchemaNamePrefix" Zz__string.of_json in
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let limit = field_map json "Limit" Zz__integer.of_json in
+        field_map json__ "SchemaNamePrefix" Zz__string.of_json in
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let limit = field_map json__ "Limit" Zz__integer.of_json in
       make ?schemaNamePrefix ~registryName ?nextToken ?limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the schemas."]
@@ -3092,9 +3109,10 @@ module ListSchemasOutput =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?schemas ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemas = field_map json "Schemas" Zz__listOfSchemaSummary.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let schemas =
+        field_map json__ "Schemas" Zz__listOfSchemaSummary.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?schemas ?nextToken ()
     let to_json v = composed_to_json to_value v
   end
@@ -3200,11 +3218,11 @@ module ListSchemaVersionsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?schemaVersions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schemaVersions =
-        field_map json "SchemaVersions"
+        field_map json__ "SchemaVersions"
           Zz__listOfSchemaVersionSummary.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?schemaVersions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3245,11 +3263,12 @@ module ListSchemaVersionsRequest =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "limit") in
       make ~schemaName ~registryName ?nextToken ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaName = field_map_exn json "SchemaName" Zz__string.of_json in
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let limit = field_map json "Limit" Zz__integer.of_json in
+    let of_json json__ =
+      let schemaName = field_map_exn json__ "SchemaName" Zz__string.of_json in
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let limit = field_map json__ "Limit" Zz__integer.of_json in
       make ~schemaName ~registryName ?nextToken ?limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3280,11 +3299,11 @@ module ListSchemaVersionsOutput =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?schemaVersions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schemaVersions =
-        field_map json "SchemaVersions"
+        field_map json__ "SchemaVersions"
           Zz__listOfSchemaVersionSummary.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?schemaVersions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end
@@ -3380,10 +3399,10 @@ module ListRegistriesResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?registries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let registries =
-        field_map json "Registries" Zz__listOfRegistrySummary.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Registries" Zz__listOfRegistrySummary.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?registries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the registries."]
@@ -3426,12 +3445,12 @@ module ListRegistriesRequest =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "limit") in
       make ?scope ?registryNamePrefix ?nextToken ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let scope = field_map json "Scope" Zz__string.of_json in
+    let of_json json__ =
+      let scope = field_map json__ "Scope" Zz__string.of_json in
       let registryNamePrefix =
-        field_map json "RegistryNamePrefix" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let limit = field_map json "Limit" Zz__integer.of_json in
+        field_map json__ "RegistryNamePrefix" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let limit = field_map json__ "Limit" Zz__integer.of_json in
       make ?scope ?registryNamePrefix ?nextToken ?limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the registries."]
@@ -3460,10 +3479,10 @@ module ListRegistriesOutput =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?registries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let registries =
-        field_map json "Registries" Zz__listOfRegistrySummary.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Registries" Zz__listOfRegistrySummary.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?registries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the registries."]
@@ -3559,10 +3578,10 @@ module ListDiscoverersResponse =
           (Xml.child xml_arg0 "Discoverers") in
       make ?nextToken ?discoverers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let discoverers =
-        field_map json "Discoverers" Zz__listOfDiscovererSummary.of_json in
+        field_map json__ "Discoverers" Zz__listOfDiscovererSummary.of_json in
       make ?nextToken ?discoverers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the discoverers."]
@@ -3608,13 +3627,13 @@ module ListDiscoverersRequest =
           (Xml.child xml_arg0 "discovererIdPrefix") in
       make ?sourceArnPrefix ?nextToken ?limit ?discovererIdPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceArnPrefix =
-        field_map json "SourceArnPrefix" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let limit = field_map json "Limit" Zz__integer.of_json in
+        field_map json__ "SourceArnPrefix" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let limit = field_map json__ "Limit" Zz__integer.of_json in
       let discovererIdPrefix =
-        field_map json "DiscovererIdPrefix" Zz__string.of_json in
+        field_map json__ "DiscovererIdPrefix" Zz__string.of_json in
       make ?sourceArnPrefix ?nextToken ?limit ?discovererIdPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the discoverers."]
@@ -3643,10 +3662,10 @@ module ListDiscoverersOutput =
           (Xml.child xml_arg0 "Discoverers") in
       make ?nextToken ?discoverers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let discoverers =
-        field_map json "Discoverers" Zz__listOfDiscovererSummary.of_json in
+        field_map json__ "Discoverers" Zz__listOfDiscovererSummary.of_json in
       make ?nextToken ?discoverers ()
     let to_json v = composed_to_json to_value v
   end
@@ -3762,9 +3781,9 @@ module GetResourcePolicyResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?revisionId ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionId = field_map json "RevisionId" Zz__string.of_json in
-      let policy = field_map json "Policy" Zz__string.of_json in
+    let of_json json__ =
+      let revisionId = field_map json__ "RevisionId" Zz__string.of_json in
+      let policy = field_map json__ "Policy" Zz__string.of_json in
       make ?revisionId ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3785,8 +3804,8 @@ module GetResourcePolicyRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "registryName") in
       make ?registryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registryName = field_map json "RegistryName" Zz__string.of_json in
+    let of_json json__ =
+      let registryName = field_map json__ "RegistryName" Zz__string.of_json in
       make ?registryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3810,9 +3829,9 @@ module GetResourcePolicyOutput =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?revisionId ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionId = field_map json "RevisionId" Zz__string.of_json in
-      let policy = field_map json "Policy" Zz__string.of_json in
+    let of_json json__ =
+      let revisionId = field_map json__ "RevisionId" Zz__string.of_json in
+      let policy = field_map json__ "Policy" Zz__string.of_json in
       make ?revisionId ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the policy."]
@@ -3899,8 +3918,8 @@ module GetDiscoveredSchemaResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Content") in
       make ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map json "Content" Zz__string.of_json in
+    let of_json json__ =
+      let content = field_map json__ "Content" Zz__string.of_json in
       make ?content ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3931,10 +3950,10 @@ module GetDiscoveredSchemaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Events") in
       make ~type_ ~events ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" Type.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" Type.of_json in
       let events =
-        field_map_exn json "Events"
+        field_map_exn json__ "Events"
           Zz__listOfGetDiscoveredSchemaVersionItemInput.of_json in
       make ~type_ ~events ()
     let to_json v = composed_to_json to_value v
@@ -3956,8 +3975,8 @@ module GetDiscoveredSchemaOutput =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Content") in
       make ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map json "Content" Zz__string.of_json in
+    let of_json json__ =
+      let content = field_map json__ "Content" Zz__string.of_json in
       make ?content ()
     let to_json v = composed_to_json to_value v
   end
@@ -3987,10 +4006,10 @@ module GetDiscoveredSchemaInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Events") in
       make ~type_ ~events ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" Type.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" Type.of_json in
       let events =
-        field_map_exn json "Events"
+        field_map_exn json__ "Events"
           Zz__listOfGetDiscoveredSchemaVersionItemInput.of_json in
       make ~type_ ~events ()
     let to_json v = composed_to_json to_value v
@@ -4083,8 +4102,8 @@ module GetCodeBindingSourceResponse =
       let body = (Option.map ~f:Body.of_xml) (Xml.child xml_arg0 "Body") in
       make ?body ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let body = field_map json "Body" Body.of_json in make ?body ()
+    let of_json json__ =
+      let body = field_map json__ "Body" Body.of_json in make ?body ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get the code binding source URI."]
 module GetCodeBindingSourceRequest =
@@ -4126,11 +4145,12 @@ module GetCodeBindingSourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "language") in
       make ?schemaVersion ~schemaName ~registryName ~language ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map_exn json "SchemaName" Zz__string.of_json in
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
-      let language = field_map_exn json "Language" Zz__string.of_json in
+    let of_json json__ =
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map_exn json__ "SchemaName" Zz__string.of_json in
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
+      let language = field_map_exn json__ "Language" Zz__string.of_json in
       make ?schemaVersion ~schemaName ~registryName ~language ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get the code binding source URI."]
@@ -4271,12 +4291,12 @@ module ExportSchemaResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Content") in
       make ?type_ ?schemaVersion ?schemaName ?schemaArn ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" Zz__string.of_json in
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map json "SchemaName" Zz__string.of_json in
-      let schemaArn = field_map json "SchemaArn" Zz__string.of_json in
-      let content = field_map json "Content" Zz__string.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" Zz__string.of_json in
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map json__ "SchemaName" Zz__string.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Zz__string.of_json in
+      let content = field_map json__ "Content" Zz__string.of_json in
       make ?type_ ?schemaVersion ?schemaName ?schemaArn ?content ()
     let to_json v = composed_to_json to_value v
   end
@@ -4318,11 +4338,12 @@ module ExportSchemaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "registryName") in
       make ~type_ ?schemaVersion ~schemaName ~registryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" Zz__string.of_json in
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map_exn json "SchemaName" Zz__string.of_json in
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" Zz__string.of_json in
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map_exn json__ "SchemaName" Zz__string.of_json in
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
       make ~type_ ?schemaVersion ~schemaName ~registryName ()
     let to_json v = composed_to_json to_value v
   end
@@ -4365,12 +4386,12 @@ module ExportSchemaOutput =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Content") in
       make ?type_ ?schemaVersion ?schemaName ?schemaArn ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" Zz__string.of_json in
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map json "SchemaName" Zz__string.of_json in
-      let schemaArn = field_map json "SchemaArn" Zz__string.of_json in
-      let content = field_map json "Content" Zz__string.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" Zz__string.of_json in
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map json__ "SchemaName" Zz__string.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Zz__string.of_json in
+      let content = field_map json__ "Content" Zz__string.of_json in
       make ?type_ ?schemaVersion ?schemaName ?schemaArn ?content ()
     let to_json v = composed_to_json to_value v
   end
@@ -4396,9 +4417,9 @@ module ErrorOutput =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Code") in
       make ~message ~code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      let code = field_map_exn json "Code" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map_exn json__ "Message" Zz__string.of_json in
+      let code = field_map_exn json__ "Code" Zz__string.of_json in
       make ~message ~code ()
     let to_json v = composed_to_json to_value v
   end
@@ -4423,9 +4444,9 @@ module DiscovererStateOutput =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "DiscovererId") in
       make ?state ?discovererId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" DiscovererState.of_json in
-      let discovererId = field_map json "DiscovererId" Zz__string.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" DiscovererState.of_json in
+      let discovererId = field_map json__ "DiscovererId" Zz__string.of_json in
       make ?state ?discovererId ()
     let to_json v = composed_to_json to_value v
   end
@@ -4493,14 +4514,14 @@ module DiscovererOutput =
       make ?tags ?crossAccount ?state ?sourceArn ?discovererId ?discovererArn
         ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let crossAccount = field_map json "CrossAccount" Zz__boolean.of_json in
-      let state = field_map json "State" DiscovererState.of_json in
-      let sourceArn = field_map json "SourceArn" Zz__string.of_json in
-      let discovererId = field_map json "DiscovererId" Zz__string.of_json in
-      let discovererArn = field_map json "DiscovererArn" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let crossAccount = field_map json__ "CrossAccount" Zz__boolean.of_json in
+      let state = field_map json__ "State" DiscovererState.of_json in
+      let sourceArn = field_map json__ "SourceArn" Zz__string.of_json in
+      let discovererId = field_map json__ "DiscovererId" Zz__string.of_json in
+      let discovererArn = field_map json__ "DiscovererArn" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?tags ?crossAccount ?state ?sourceArn ?discovererId ?discovererArn
         ?description ()
     let to_json v = composed_to_json to_value v
@@ -4659,18 +4680,18 @@ module DescribeSchemaResponse =
       make ?versionCreatedDate ?type_ ?tags ?schemaVersion ?schemaName
         ?schemaArn ?lastModified ?description ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionCreatedDate =
-        field_map json "VersionCreatedDate" Zz__timestampIso8601.of_json in
-      let type_ = field_map json "Type" Zz__string.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map json "SchemaName" Zz__string.of_json in
-      let schemaArn = field_map json "SchemaArn" Zz__string.of_json in
+        field_map json__ "VersionCreatedDate" Zz__timestampIso8601.of_json in
+      let type_ = field_map json__ "Type" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map json__ "SchemaName" Zz__string.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Zz__string.of_json in
       let lastModified =
-        field_map json "LastModified" Zz__timestampIso8601.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let content = field_map json "Content" Zz__string.of_json in
+        field_map json__ "LastModified" Zz__timestampIso8601.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let content = field_map json__ "Content" Zz__string.of_json in
       make ?versionCreatedDate ?type_ ?tags ?schemaVersion ?schemaName
         ?schemaArn ?lastModified ?description ?content ()
     let to_json v = composed_to_json to_value v
@@ -4708,10 +4729,11 @@ module DescribeSchemaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "registryName") in
       make ?schemaVersion ~schemaName ~registryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map_exn json "SchemaName" Zz__string.of_json in
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
+    let of_json json__ =
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map_exn json__ "SchemaName" Zz__string.of_json in
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
       make ?schemaVersion ~schemaName ~registryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieve the schema definition."]
@@ -4793,18 +4815,18 @@ module DescribeSchemaOutput =
       make ?versionCreatedDate ?type_ ?tags ?schemaVersion ?schemaName
         ?schemaArn ?lastModified ?description ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionCreatedDate =
-        field_map json "VersionCreatedDate" Zz__timestampIso8601.of_json in
-      let type_ = field_map json "Type" Zz__string.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map json "SchemaName" Zz__string.of_json in
-      let schemaArn = field_map json "SchemaArn" Zz__string.of_json in
+        field_map json__ "VersionCreatedDate" Zz__timestampIso8601.of_json in
+      let type_ = field_map json__ "Type" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map json__ "SchemaName" Zz__string.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Zz__string.of_json in
       let lastModified =
-        field_map json "LastModified" Zz__timestampIso8601.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let content = field_map json "Content" Zz__string.of_json in
+        field_map json__ "LastModified" Zz__timestampIso8601.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let content = field_map json__ "Content" Zz__string.of_json in
       make ?versionCreatedDate ?type_ ?tags ?schemaVersion ?schemaName
         ?schemaArn ?lastModified ?description ?content ()
     let to_json v = composed_to_json to_value v
@@ -4918,11 +4940,11 @@ module DescribeRegistryResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Description") in
       make ?tags ?registryName ?registryArn ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let registryName = field_map json "RegistryName" Zz__string.of_json in
-      let registryArn = field_map json "RegistryArn" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let registryName = field_map json__ "RegistryName" Zz__string.of_json in
+      let registryArn = field_map json__ "RegistryArn" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?tags ?registryName ?registryArn ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the registry."]
@@ -4943,8 +4965,9 @@ module DescribeRegistryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "registryName") in
       make ~registryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
+    let of_json json__ =
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
       make ~registryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the registry."]
@@ -5088,14 +5111,14 @@ module DescribeDiscovererResponse =
       make ?tags ?crossAccount ?state ?sourceArn ?discovererId ?discovererArn
         ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let crossAccount = field_map json "CrossAccount" Zz__boolean.of_json in
-      let state = field_map json "State" DiscovererState.of_json in
-      let sourceArn = field_map json "SourceArn" Zz__string.of_json in
-      let discovererId = field_map json "DiscovererId" Zz__string.of_json in
-      let discovererArn = field_map json "DiscovererArn" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let crossAccount = field_map json__ "CrossAccount" Zz__boolean.of_json in
+      let state = field_map json__ "State" DiscovererState.of_json in
+      let sourceArn = field_map json__ "SourceArn" Zz__string.of_json in
+      let discovererId = field_map json__ "DiscovererId" Zz__string.of_json in
+      let discovererArn = field_map json__ "DiscovererArn" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?tags ?crossAccount ?state ?sourceArn ?discovererId ?discovererArn
         ?description ()
     let to_json v = composed_to_json to_value v
@@ -5117,8 +5140,9 @@ module DescribeDiscovererRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "discovererId") in
       make ~discovererId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let discovererId = field_map_exn json "DiscovererId" Zz__string.of_json in
+    let of_json json__ =
+      let discovererId =
+        field_map_exn json__ "DiscovererId" Zz__string.of_json in
       make ~discovererId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the discoverer."]
@@ -5238,13 +5262,13 @@ module DescribeCodeBindingResponse =
           (Xml.child xml_arg0 "CreationDate") in
       make ?status ?schemaVersion ?lastModified ?creationDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" CodeGenerationStatus.of_json in
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" CodeGenerationStatus.of_json in
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
       let lastModified =
-        field_map json "LastModified" Zz__timestampIso8601.of_json in
+        field_map json__ "LastModified" Zz__timestampIso8601.of_json in
       let creationDate =
-        field_map json "CreationDate" Zz__timestampIso8601.of_json in
+        field_map json__ "CreationDate" Zz__timestampIso8601.of_json in
       make ?status ?schemaVersion ?lastModified ?creationDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe the code binding URI."]
@@ -5287,11 +5311,12 @@ module DescribeCodeBindingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "language") in
       make ?schemaVersion ~schemaName ~registryName ~language ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map_exn json "SchemaName" Zz__string.of_json in
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
-      let language = field_map_exn json "Language" Zz__string.of_json in
+    let of_json json__ =
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map_exn json__ "SchemaName" Zz__string.of_json in
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
+      let language = field_map_exn json__ "Language" Zz__string.of_json in
       make ?schemaVersion ~schemaName ~registryName ~language ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe the code binding URI."]
@@ -5326,11 +5351,12 @@ module DeleteSchemaVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "registryName") in
       make ~schemaVersion ~schemaName ~registryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schemaVersion =
-        field_map_exn json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map_exn json "SchemaName" Zz__string.of_json in
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
+        field_map_exn json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map_exn json__ "SchemaName" Zz__string.of_json in
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
       make ~schemaVersion ~schemaName ~registryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete the schema version definition"]
@@ -5357,9 +5383,10 @@ module DeleteSchemaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "registryName") in
       make ~schemaName ~registryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaName = field_map_exn json "SchemaName" Zz__string.of_json in
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
+    let of_json json__ =
+      let schemaName = field_map_exn json__ "SchemaName" Zz__string.of_json in
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
       make ~schemaName ~registryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete a schema definition."]
@@ -5379,8 +5406,8 @@ module DeleteResourcePolicyRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "registryName") in
       make ?registryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registryName = field_map json "RegistryName" Zz__string.of_json in
+    let of_json json__ =
+      let registryName = field_map json__ "RegistryName" Zz__string.of_json in
       make ?registryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5402,8 +5429,9 @@ module DeleteRegistryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "registryName") in
       make ~registryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
+    let of_json json__ =
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
       make ~registryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a Registry."]
@@ -5424,8 +5452,9 @@ module DeleteDiscovererRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "discovererId") in
       make ~discovererId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let discovererId = field_map_exn json "DiscovererId" Zz__string.of_json in
+    let of_json json__ =
+      let discovererId =
+        field_map_exn json__ "DiscovererId" Zz__string.of_json in
       make ~discovererId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a discoverer."]
@@ -5558,17 +5587,17 @@ module CreateSchemaResponse =
       make ?versionCreatedDate ?type_ ?tags ?schemaVersion ?schemaName
         ?schemaArn ?lastModified ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionCreatedDate =
-        field_map json "VersionCreatedDate" Zz__timestampIso8601.of_json in
-      let type_ = field_map json "Type" Zz__string.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
-      let schemaName = field_map json "SchemaName" Zz__string.of_json in
-      let schemaArn = field_map json "SchemaArn" Zz__string.of_json in
+        field_map json__ "VersionCreatedDate" Zz__timestampIso8601.of_json in
+      let type_ = field_map json__ "Type" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
+      let schemaName = field_map json__ "SchemaName" Zz__string.of_json in
+      let schemaArn = field_map json__ "SchemaArn" Zz__string.of_json in
       let lastModified =
-        field_map json "LastModified" Zz__timestampIso8601.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+        field_map json__ "LastModified" Zz__timestampIso8601.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?versionCreatedDate ?type_ ?tags ?schemaVersion ?schemaName
         ?schemaArn ?lastModified ?description ()
     let to_json v = composed_to_json to_value v
@@ -5630,15 +5659,16 @@ module CreateSchemaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Content") in
       make ~type_ ?tags ~schemaName ~registryName ?description ~content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" Type.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let schemaName = field_map_exn json "SchemaName" Zz__string.of_json in
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" Type.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let schemaName = field_map_exn json__ "SchemaName" Zz__string.of_json in
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
       let description =
-        field_map json "Description" Zz__stringMin0Max256.of_json in
+        field_map json__ "Description" Zz__stringMin0Max256.of_json in
       let content =
-        field_map_exn json "Content" Zz__stringMin1Max100000.of_json in
+        field_map_exn json__ "Content" Zz__stringMin1Max100000.of_json in
       make ~type_ ?tags ~schemaName ~registryName ?description ~content ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5678,13 +5708,13 @@ module CreateSchemaInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Content") in
       make ~type_ ?tags ?description ~content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" Type.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" Type.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let description =
-        field_map json "Description" Zz__stringMin0Max256.of_json in
+        field_map json__ "Description" Zz__stringMin0Max256.of_json in
       let content =
-        field_map_exn json "Content" Zz__stringMin1Max100000.of_json in
+        field_map_exn json__ "Content" Zz__stringMin1Max100000.of_json in
       make ~type_ ?tags ?description ~content ()
     let to_json v = composed_to_json to_value v
   end
@@ -5797,11 +5827,11 @@ module CreateRegistryResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Description") in
       make ?tags ?registryName ?registryArn ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let registryName = field_map json "RegistryName" Zz__string.of_json in
-      let registryArn = field_map json "RegistryArn" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let registryName = field_map json__ "RegistryName" Zz__string.of_json in
+      let registryArn = field_map json__ "RegistryArn" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?tags ?registryName ?registryArn ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a registry."]
@@ -5834,11 +5864,12 @@ module CreateRegistryRequest =
           (Xml.child xml_arg0 "Description") in
       make ?tags ~registryName ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let registryName = field_map_exn json "RegistryName" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let registryName =
+        field_map_exn json__ "RegistryName" Zz__string.of_json in
       let description =
-        field_map json "Description" Zz__stringMin0Max256.of_json in
+        field_map json__ "Description" Zz__stringMin0Max256.of_json in
       make ?tags ~registryName ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a registry."]
@@ -5863,10 +5894,10 @@ module CreateRegistryInput =
           (Xml.child xml_arg0 "Description") in
       make ?tags ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let description =
-        field_map json "Description" Zz__stringMin0Max256.of_json in
+        field_map json__ "Description" Zz__stringMin0Max256.of_json in
       make ?tags ?description ()
     let to_json v = composed_to_json to_value v
   end
@@ -6010,14 +6041,14 @@ module CreateDiscovererResponse =
       make ?tags ?crossAccount ?state ?sourceArn ?discovererId ?discovererArn
         ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let crossAccount = field_map json "CrossAccount" Zz__boolean.of_json in
-      let state = field_map json "State" DiscovererState.of_json in
-      let sourceArn = field_map json "SourceArn" Zz__string.of_json in
-      let discovererId = field_map json "DiscovererId" Zz__string.of_json in
-      let discovererArn = field_map json "DiscovererArn" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let crossAccount = field_map json__ "CrossAccount" Zz__boolean.of_json in
+      let state = field_map json__ "State" DiscovererState.of_json in
+      let sourceArn = field_map json__ "SourceArn" Zz__string.of_json in
+      let discovererId = field_map json__ "DiscovererId" Zz__string.of_json in
+      let discovererArn = field_map json__ "DiscovererArn" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?tags ?crossAccount ?state ?sourceArn ?discovererId ?discovererArn
         ?description ()
     let to_json v = composed_to_json to_value v
@@ -6061,13 +6092,13 @@ module CreateDiscovererRequest =
           (Xml.child xml_arg0 "Description") in
       make ?tags ?crossAccount ~sourceArn ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let crossAccount = field_map json "CrossAccount" Zz__boolean.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let crossAccount = field_map json__ "CrossAccount" Zz__boolean.of_json in
       let sourceArn =
-        field_map_exn json "SourceArn" Zz__stringMin20Max1600.of_json in
+        field_map_exn json__ "SourceArn" Zz__stringMin20Max1600.of_json in
       let description =
-        field_map json "Description" Zz__stringMin0Max256.of_json in
+        field_map json__ "Description" Zz__stringMin0Max256.of_json in
       make ?tags ?crossAccount ~sourceArn ?description ()
     let to_json v = composed_to_json to_value v
   end
@@ -6110,13 +6141,13 @@ module CreateDiscovererInput =
           (Xml.child xml_arg0 "Description") in
       make ?tags ?crossAccount ~sourceArn ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let crossAccount = field_map json "CrossAccount" Zz__boolean.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let crossAccount = field_map json__ "CrossAccount" Zz__boolean.of_json in
       let sourceArn =
-        field_map_exn json "SourceArn" Zz__stringMin20Max1600.of_json in
+        field_map_exn json__ "SourceArn" Zz__stringMin20Max1600.of_json in
       let description =
-        field_map json "Description" Zz__stringMin0Max256.of_json in
+        field_map json__ "Description" Zz__stringMin0Max256.of_json in
       make ?tags ?crossAccount ~sourceArn ?description ()
     let to_json v = composed_to_json to_value v
   end
@@ -6162,13 +6193,13 @@ module CodeBindingOutput =
           (Xml.child xml_arg0 "CreationDate") in
       make ?status ?schemaVersion ?lastModified ?creationDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" CodeGenerationStatus.of_json in
-      let schemaVersion = field_map json "SchemaVersion" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" CodeGenerationStatus.of_json in
+      let schemaVersion = field_map json__ "SchemaVersion" Zz__string.of_json in
       let lastModified =
-        field_map json "LastModified" Zz__timestampIso8601.of_json in
+        field_map json__ "LastModified" Zz__timestampIso8601.of_json in
       let creationDate =
-        field_map json "CreationDate" Zz__timestampIso8601.of_json in
+        field_map json__ "CreationDate" Zz__timestampIso8601.of_json in
       make ?status ?schemaVersion ?lastModified ?creationDate ()
     let to_json v = composed_to_json to_value v
   end

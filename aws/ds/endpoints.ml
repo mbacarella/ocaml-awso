@@ -23,6 +23,8 @@ type ('i, 'o, 'e) t =
   t 
   | CreateDirectory: (CreateDirectoryRequest.t, CreateDirectoryResult.t,
   CreateDirectoryResult.error) t 
+  | CreateHybridAD: (CreateHybridADRequest.t, CreateHybridADResult.t,
+  CreateHybridADResult.error) t 
   | CreateLogSubscription: (CreateLogSubscriptionRequest.t,
   CreateLogSubscriptionResult.t, CreateLogSubscriptionResult.error) t 
   | CreateMicrosoftAD: (CreateMicrosoftADRequest.t,
@@ -31,6 +33,8 @@ type ('i, 'o, 'e) t =
   CreateSnapshotResult.error) t 
   | CreateTrust: (CreateTrustRequest.t, CreateTrustResult.t,
   CreateTrustResult.error) t 
+  | DeleteADAssessment: (DeleteADAssessmentRequest.t,
+  DeleteADAssessmentResult.t, DeleteADAssessmentResult.error) t 
   | DeleteConditionalForwarder: (DeleteConditionalForwarderRequest.t,
   DeleteConditionalForwarderResult.t, DeleteConditionalForwarderResult.error)
   t 
@@ -46,6 +50,11 @@ type ('i, 'o, 'e) t =
   DeregisterCertificateResult.t, DeregisterCertificateResult.error) t 
   | DeregisterEventTopic: (DeregisterEventTopicRequest.t,
   DeregisterEventTopicResult.t, DeregisterEventTopicResult.error) t 
+  | DescribeADAssessment: (DescribeADAssessmentRequest.t,
+  DescribeADAssessmentResult.t, DescribeADAssessmentResult.error) t 
+  | DescribeCAEnrollmentPolicy: (DescribeCAEnrollmentPolicyRequest.t,
+  DescribeCAEnrollmentPolicyResult.t, DescribeCAEnrollmentPolicyResult.error)
+  t 
   | DescribeCertificate: (DescribeCertificateRequest.t,
   DescribeCertificateResult.t, DescribeCertificateResult.error) t 
   | DescribeClientAuthenticationSettings:
@@ -57,15 +66,22 @@ type ('i, 'o, 'e) t =
   DescribeConditionalForwardersResult.error) t 
   | DescribeDirectories: (DescribeDirectoriesRequest.t,
   DescribeDirectoriesResult.t, DescribeDirectoriesResult.error) t 
+  | DescribeDirectoryDataAccess: (DescribeDirectoryDataAccessRequest.t,
+  DescribeDirectoryDataAccessResult.t,
+  DescribeDirectoryDataAccessResult.error) t 
   | DescribeDomainControllers: (DescribeDomainControllersRequest.t,
   DescribeDomainControllersResult.t, DescribeDomainControllersResult.error) t
   
   | DescribeEventTopics: (DescribeEventTopicsRequest.t,
   DescribeEventTopicsResult.t, DescribeEventTopicsResult.error) t 
+  | DescribeHybridADUpdate: (DescribeHybridADUpdateRequest.t,
+  DescribeHybridADUpdateResult.t, DescribeHybridADUpdateResult.error) t 
   | DescribeLDAPSSettings: (DescribeLDAPSSettingsRequest.t,
   DescribeLDAPSSettingsResult.t, DescribeLDAPSSettingsResult.error) t 
   | DescribeRegions: (DescribeRegionsRequest.t, DescribeRegionsResult.t,
   DescribeRegionsResult.error) t 
+  | DescribeSettings: (DescribeSettingsRequest.t, DescribeSettingsResult.t,
+  DescribeSettingsResult.error) t 
   | DescribeSharedDirectories: (DescribeSharedDirectoriesRequest.t,
   DescribeSharedDirectoriesResult.t, DescribeSharedDirectoriesResult.error) t
   
@@ -73,18 +89,31 @@ type ('i, 'o, 'e) t =
   DescribeSnapshotsResult.t, DescribeSnapshotsResult.error) t 
   | DescribeTrusts: (DescribeTrustsRequest.t, DescribeTrustsResult.t,
   DescribeTrustsResult.error) t 
+  | DescribeUpdateDirectory: (DescribeUpdateDirectoryRequest.t,
+  DescribeUpdateDirectoryResult.t, DescribeUpdateDirectoryResult.error) t 
+  | DisableCAEnrollmentPolicy: (DisableCAEnrollmentPolicyRequest.t,
+  DisableCAEnrollmentPolicyResult.t, DisableCAEnrollmentPolicyResult.error) t
+  
   | DisableClientAuthentication: (DisableClientAuthenticationRequest.t,
   DisableClientAuthenticationResult.t,
   DisableClientAuthenticationResult.error) t 
+  | DisableDirectoryDataAccess: (DisableDirectoryDataAccessRequest.t,
+  DisableDirectoryDataAccessResult.t, DisableDirectoryDataAccessResult.error)
+  t 
   | DisableLDAPS: (DisableLDAPSRequest.t, DisableLDAPSResult.t,
   DisableLDAPSResult.error) t 
   | DisableRadius: (DisableRadiusRequest.t, DisableRadiusResult.t,
   DisableRadiusResult.error) t 
   | DisableSso: (DisableSsoRequest.t, DisableSsoResult.t,
   DisableSsoResult.error) t 
+  | EnableCAEnrollmentPolicy: (EnableCAEnrollmentPolicyRequest.t,
+  EnableCAEnrollmentPolicyResult.t, EnableCAEnrollmentPolicyResult.error) t 
   | EnableClientAuthentication: (EnableClientAuthenticationRequest.t,
   EnableClientAuthenticationResult.t, EnableClientAuthenticationResult.error)
   t 
+  | EnableDirectoryDataAccess: (EnableDirectoryDataAccessRequest.t,
+  EnableDirectoryDataAccessResult.t, EnableDirectoryDataAccessResult.error) t
+  
   | EnableLDAPS: (EnableLDAPSRequest.t, EnableLDAPSResult.t,
   EnableLDAPSResult.error) t 
   | EnableRadius: (EnableRadiusRequest.t, EnableRadiusResult.t,
@@ -95,6 +124,8 @@ type ('i, 'o, 'e) t =
   GetDirectoryLimitsResult.t, GetDirectoryLimitsResult.error) t 
   | GetSnapshotLimits: (GetSnapshotLimitsRequest.t,
   GetSnapshotLimitsResult.t, GetSnapshotLimitsResult.error) t 
+  | ListADAssessments: (ListADAssessmentsRequest.t,
+  ListADAssessmentsResult.t, ListADAssessmentsResult.error) t 
   | ListCertificates: (ListCertificatesRequest.t, ListCertificatesResult.t,
   ListCertificatesResult.error) t 
   | ListIpRoutes: (ListIpRoutesRequest.t, ListIpRoutesResult.t,
@@ -123,6 +154,8 @@ type ('i, 'o, 'e) t =
   RestoreFromSnapshotResult.t, RestoreFromSnapshotResult.error) t 
   | ShareDirectory: (ShareDirectoryRequest.t, ShareDirectoryResult.t,
   ShareDirectoryResult.error) t 
+  | StartADAssessment: (StartADAssessmentRequest.t,
+  StartADAssessmentResult.t, StartADAssessmentResult.error) t 
   | StartSchemaExtension: (StartSchemaExtensionRequest.t,
   StartSchemaExtensionResult.t, StartSchemaExtensionResult.error) t 
   | UnshareDirectory: (UnshareDirectoryRequest.t, UnshareDirectoryResult.t,
@@ -130,12 +163,18 @@ type ('i, 'o, 'e) t =
   | UpdateConditionalForwarder: (UpdateConditionalForwarderRequest.t,
   UpdateConditionalForwarderResult.t, UpdateConditionalForwarderResult.error)
   t 
+  | UpdateDirectorySetup: (UpdateDirectorySetupRequest.t,
+  UpdateDirectorySetupResult.t, UpdateDirectorySetupResult.error) t 
+  | UpdateHybridAD: (UpdateHybridADRequest.t, UpdateHybridADResult.t,
+  UpdateHybridADResult.error) t 
   | UpdateNumberOfDomainControllers:
   (UpdateNumberOfDomainControllersRequest.t,
   UpdateNumberOfDomainControllersResult.t,
   UpdateNumberOfDomainControllersResult.error) t 
   | UpdateRadius: (UpdateRadiusRequest.t, UpdateRadiusResult.t,
   UpdateRadiusResult.error) t 
+  | UpdateSettings: (UpdateSettingsRequest.t, UpdateSettingsResult.t,
+  UpdateSettingsResult.error) t 
   | UpdateTrust: (UpdateTrustRequest.t, UpdateTrustResult.t,
   UpdateTrustResult.error) t 
   | VerifyTrust: (VerifyTrustRequest.t, VerifyTrustResult.t,
@@ -152,10 +191,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateComputer -> `POST
   | CreateConditionalForwarder -> `POST
   | CreateDirectory -> `POST
+  | CreateHybridAD -> `POST
   | CreateLogSubscription -> `POST
   | CreateMicrosoftAD -> `POST
   | CreateSnapshot -> `POST
   | CreateTrust -> `POST
+  | DeleteADAssessment -> `POST
   | DeleteConditionalForwarder -> `POST
   | DeleteDirectory -> `POST
   | DeleteLogSubscription -> `POST
@@ -163,27 +204,38 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteTrust -> `POST
   | DeregisterCertificate -> `POST
   | DeregisterEventTopic -> `POST
+  | DescribeADAssessment -> `POST
+  | DescribeCAEnrollmentPolicy -> `POST
   | DescribeCertificate -> `POST
   | DescribeClientAuthenticationSettings -> `POST
   | DescribeConditionalForwarders -> `POST
   | DescribeDirectories -> `POST
+  | DescribeDirectoryDataAccess -> `POST
   | DescribeDomainControllers -> `POST
   | DescribeEventTopics -> `POST
+  | DescribeHybridADUpdate -> `POST
   | DescribeLDAPSSettings -> `POST
   | DescribeRegions -> `POST
+  | DescribeSettings -> `POST
   | DescribeSharedDirectories -> `POST
   | DescribeSnapshots -> `POST
   | DescribeTrusts -> `POST
+  | DescribeUpdateDirectory -> `POST
+  | DisableCAEnrollmentPolicy -> `POST
   | DisableClientAuthentication -> `POST
+  | DisableDirectoryDataAccess -> `POST
   | DisableLDAPS -> `POST
   | DisableRadius -> `POST
   | DisableSso -> `POST
+  | EnableCAEnrollmentPolicy -> `POST
   | EnableClientAuthentication -> `POST
+  | EnableDirectoryDataAccess -> `POST
   | EnableLDAPS -> `POST
   | EnableRadius -> `POST
   | EnableSso -> `POST
   | GetDirectoryLimits -> `POST
   | GetSnapshotLimits -> `POST
+  | ListADAssessments -> `POST
   | ListCertificates -> `POST
   | ListIpRoutes -> `POST
   | ListLogSubscriptions -> `POST
@@ -198,11 +250,15 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ResetUserPassword -> `POST
   | RestoreFromSnapshot -> `POST
   | ShareDirectory -> `POST
+  | StartADAssessment -> `POST
   | StartSchemaExtension -> `POST
   | UnshareDirectory -> `POST
   | UpdateConditionalForwarder -> `POST
+  | UpdateDirectorySetup -> `POST
+  | UpdateHybridAD -> `POST
   | UpdateNumberOfDomainControllers -> `POST
   | UpdateRadius -> `POST
+  | UpdateSettings -> `POST
   | UpdateTrust -> `POST
   | VerifyTrust -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -218,10 +274,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateComputer -> (Format.kasprintf Uri.of_string) "/"
       | CreateConditionalForwarder -> (Format.kasprintf Uri.of_string) "/"
       | CreateDirectory -> (Format.kasprintf Uri.of_string) "/"
+      | CreateHybridAD -> (Format.kasprintf Uri.of_string) "/"
       | CreateLogSubscription -> (Format.kasprintf Uri.of_string) "/"
       | CreateMicrosoftAD -> (Format.kasprintf Uri.of_string) "/"
       | CreateSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | CreateTrust -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteADAssessment -> (Format.kasprintf Uri.of_string) "/"
       | DeleteConditionalForwarder -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDirectory -> (Format.kasprintf Uri.of_string) "/"
       | DeleteLogSubscription -> (Format.kasprintf Uri.of_string) "/"
@@ -229,28 +287,39 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteTrust -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterCertificate -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterEventTopic -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeADAssessment -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeCAEnrollmentPolicy -> (Format.kasprintf Uri.of_string) "/"
       | DescribeCertificate -> (Format.kasprintf Uri.of_string) "/"
       | DescribeClientAuthenticationSettings ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeConditionalForwarders -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDirectories -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDirectoryDataAccess -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDomainControllers -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEventTopics -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeHybridADUpdate -> (Format.kasprintf Uri.of_string) "/"
       | DescribeLDAPSSettings -> (Format.kasprintf Uri.of_string) "/"
       | DescribeRegions -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeSettings -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSharedDirectories -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSnapshots -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTrusts -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeUpdateDirectory -> (Format.kasprintf Uri.of_string) "/"
+      | DisableCAEnrollmentPolicy -> (Format.kasprintf Uri.of_string) "/"
       | DisableClientAuthentication -> (Format.kasprintf Uri.of_string) "/"
+      | DisableDirectoryDataAccess -> (Format.kasprintf Uri.of_string) "/"
       | DisableLDAPS -> (Format.kasprintf Uri.of_string) "/"
       | DisableRadius -> (Format.kasprintf Uri.of_string) "/"
       | DisableSso -> (Format.kasprintf Uri.of_string) "/"
+      | EnableCAEnrollmentPolicy -> (Format.kasprintf Uri.of_string) "/"
       | EnableClientAuthentication -> (Format.kasprintf Uri.of_string) "/"
+      | EnableDirectoryDataAccess -> (Format.kasprintf Uri.of_string) "/"
       | EnableLDAPS -> (Format.kasprintf Uri.of_string) "/"
       | EnableRadius -> (Format.kasprintf Uri.of_string) "/"
       | EnableSso -> (Format.kasprintf Uri.of_string) "/"
       | GetDirectoryLimits -> (Format.kasprintf Uri.of_string) "/"
       | GetSnapshotLimits -> (Format.kasprintf Uri.of_string) "/"
+      | ListADAssessments -> (Format.kasprintf Uri.of_string) "/"
       | ListCertificates -> (Format.kasprintf Uri.of_string) "/"
       | ListIpRoutes -> (Format.kasprintf Uri.of_string) "/"
       | ListLogSubscriptions -> (Format.kasprintf Uri.of_string) "/"
@@ -265,12 +334,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ResetUserPassword -> (Format.kasprintf Uri.of_string) "/"
       | RestoreFromSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | ShareDirectory -> (Format.kasprintf Uri.of_string) "/"
+      | StartADAssessment -> (Format.kasprintf Uri.of_string) "/"
       | StartSchemaExtension -> (Format.kasprintf Uri.of_string) "/"
       | UnshareDirectory -> (Format.kasprintf Uri.of_string) "/"
       | UpdateConditionalForwarder -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateDirectorySetup -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateHybridAD -> (Format.kasprintf Uri.of_string) "/"
       | UpdateNumberOfDomainControllers ->
           (Format.kasprintf Uri.of_string) "/"
       | UpdateRadius -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateSettings -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTrust -> (Format.kasprintf Uri.of_string) "/"
       | VerifyTrust -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
@@ -357,6 +430,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "DirectoryService_20150416.CreateDirectory")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateHybridAD ->
+      let json = CreateHybridADRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "DirectoryService_20150416.CreateHybridAD")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateLogSubscription ->
       let json = CreateLogSubscriptionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -388,6 +469,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "DirectoryService_20150416.CreateTrust")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteADAssessment ->
+      let json = DeleteADAssessmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "DirectoryService_20150416.DeleteADAssessment")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteConditionalForwarder ->
       let json = DeleteConditionalForwarderRequest.to_json req in
@@ -446,6 +535,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "DirectoryService_20150416.DeregisterEventTopic")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeADAssessment ->
+      let json = DescribeADAssessmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "DirectoryService_20150416.DescribeADAssessment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeCAEnrollmentPolicy ->
+      let json = DescribeCAEnrollmentPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "DirectoryService_20150416.DescribeCAEnrollmentPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeCertificate ->
       let json = DescribeCertificateRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -480,6 +586,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "DirectoryService_20150416.DescribeDirectories")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeDirectoryDataAccess ->
+      let json = DescribeDirectoryDataAccessRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "DirectoryService_20150416.DescribeDirectoryDataAccess")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeDomainControllers ->
       let json = DescribeDomainControllersRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -497,6 +612,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "DirectoryService_20150416.DescribeEventTopics")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeHybridADUpdate ->
+      let json = DescribeHybridADUpdateRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "DirectoryService_20150416.DescribeHybridADUpdate")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeLDAPSSettings ->
       let json = DescribeLDAPSSettingsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -512,6 +636,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "DirectoryService_20150416.DescribeRegions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeSettings ->
+      let json = DescribeSettingsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "DirectoryService_20150416.DescribeSettings")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeSharedDirectories ->
       let json = DescribeSharedDirectoriesRequest.to_json req in
@@ -538,6 +670,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "DirectoryService_20150416.DescribeTrusts")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeUpdateDirectory ->
+      let json = DescribeUpdateDirectoryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "DirectoryService_20150416.DescribeUpdateDirectory")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisableCAEnrollmentPolicy ->
+      let json = DisableCAEnrollmentPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "DirectoryService_20150416.DisableCAEnrollmentPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DisableClientAuthentication ->
       let json = DisableClientAuthenticationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -546,6 +696,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "DirectoryService_20150416.DisableClientAuthentication")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisableDirectoryDataAccess ->
+      let json = DisableDirectoryDataAccessRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "DirectoryService_20150416.DisableDirectoryDataAccess")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DisableLDAPS ->
       let json = DisableLDAPSRequest.to_json req in
@@ -571,6 +730,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "DirectoryService_20150416.DisableSso")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | EnableCAEnrollmentPolicy ->
+      let json = EnableCAEnrollmentPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "DirectoryService_20150416.EnableCAEnrollmentPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | EnableClientAuthentication ->
       let json = EnableClientAuthenticationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -579,6 +747,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "DirectoryService_20150416.EnableClientAuthentication")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | EnableDirectoryDataAccess ->
+      let json = EnableDirectoryDataAccessRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "DirectoryService_20150416.EnableDirectoryDataAccess")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | EnableLDAPS ->
       let json = EnableLDAPSRequest.to_json req in
@@ -619,6 +796,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "DirectoryService_20150416.GetSnapshotLimits")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListADAssessments ->
+      let json = ListADAssessmentsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "DirectoryService_20150416.ListADAssessments")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListCertificates ->
       let json = ListCertificatesRequest.to_json req in
@@ -733,6 +918,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "DirectoryService_20150416.ShareDirectory")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartADAssessment ->
+      let json = StartADAssessmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "DirectoryService_20150416.StartADAssessment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartSchemaExtension ->
       let json = StartSchemaExtensionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -758,6 +951,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "DirectoryService_20150416.UpdateConditionalForwarder")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateDirectorySetup ->
+      let json = UpdateDirectorySetupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "DirectoryService_20150416.UpdateDirectorySetup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateHybridAD ->
+      let json = UpdateHybridADRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "DirectoryService_20150416.UpdateHybridAD")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateNumberOfDomainControllers ->
       let json = UpdateNumberOfDomainControllersRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -774,6 +983,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "DirectoryService_20150416.UpdateRadius")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateSettings ->
+      let json = UpdateSettingsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "DirectoryService_20150416.UpdateSettings")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateTrust ->
       let json = UpdateTrustRequest.to_json req in
@@ -883,6 +1100,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateDirectoryResult.of_json json)
       else Error (parse_aws_error (Some CreateDirectoryResult.error_of_json))
+  | CreateHybridAD ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateHybridADResult.of_json json)
+      else Error (parse_aws_error (Some CreateHybridADResult.error_of_json))
   | CreateLogSubscription ->
       if is_success
       then
@@ -910,6 +1133,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateTrustResult.of_json json)
       else Error (parse_aws_error (Some CreateTrustResult.error_of_json))
+  | DeleteADAssessment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteADAssessmentResult.of_json json)
+      else
+        Error (parse_aws_error (Some DeleteADAssessmentResult.error_of_json))
   | DeleteConditionalForwarder ->
       if is_success
       then
@@ -961,6 +1191,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeregisterEventTopicResult.error_of_json))
+  | DescribeADAssessment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeADAssessmentResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeADAssessmentResult.error_of_json))
+  | DescribeCAEnrollmentPolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeCAEnrollmentPolicyResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCAEnrollmentPolicyResult.error_of_json))
   | DescribeCertificate ->
       if is_success
       then
@@ -995,6 +1242,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeDirectoriesResult.error_of_json))
+  | DescribeDirectoryDataAccess ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeDirectoryDataAccessResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDirectoryDataAccessResult.error_of_json))
   | DescribeDomainControllers ->
       if is_success
       then
@@ -1012,6 +1268,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeEventTopicsResult.error_of_json))
+  | DescribeHybridADUpdate ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeHybridADUpdateResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeHybridADUpdateResult.error_of_json))
   | DescribeLDAPSSettings ->
       if is_success
       then
@@ -1026,6 +1290,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeRegionsResult.of_json json)
       else Error (parse_aws_error (Some DescribeRegionsResult.error_of_json))
+  | DescribeSettings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeSettingsResult.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeSettingsResult.error_of_json))
   | DescribeSharedDirectories ->
       if is_success
       then
@@ -1048,6 +1319,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeTrustsResult.of_json json)
       else Error (parse_aws_error (Some DescribeTrustsResult.error_of_json))
+  | DescribeUpdateDirectory ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeUpdateDirectoryResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeUpdateDirectoryResult.error_of_json))
+  | DisableCAEnrollmentPolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisableCAEnrollmentPolicyResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisableCAEnrollmentPolicyResult.error_of_json))
   | DisableClientAuthentication ->
       if is_success
       then
@@ -1057,6 +1345,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisableClientAuthenticationResult.error_of_json))
+  | DisableDirectoryDataAccess ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisableDirectoryDataAccessResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisableDirectoryDataAccessResult.error_of_json))
   | DisableLDAPS ->
       if is_success
       then
@@ -1075,6 +1372,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DisableSsoResult.of_json json)
       else Error (parse_aws_error (Some DisableSsoResult.error_of_json))
+  | EnableCAEnrollmentPolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (EnableCAEnrollmentPolicyResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some EnableCAEnrollmentPolicyResult.error_of_json))
   | EnableClientAuthentication ->
       if is_success
       then
@@ -1084,6 +1390,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some EnableClientAuthenticationResult.error_of_json))
+  | EnableDirectoryDataAccess ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (EnableDirectoryDataAccessResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some EnableDirectoryDataAccessResult.error_of_json))
   | EnableLDAPS ->
       if is_success
       then
@@ -1116,6 +1431,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetSnapshotLimitsResult.of_json json)
       else
         Error (parse_aws_error (Some GetSnapshotLimitsResult.error_of_json))
+  | ListADAssessments ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListADAssessmentsResult.of_json json)
+      else
+        Error (parse_aws_error (Some ListADAssessmentsResult.error_of_json))
   | ListCertificates ->
       if is_success
       then
@@ -1217,6 +1539,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ShareDirectoryResult.of_json json)
       else Error (parse_aws_error (Some ShareDirectoryResult.error_of_json))
+  | StartADAssessment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartADAssessmentResult.of_json json)
+      else
+        Error (parse_aws_error (Some StartADAssessmentResult.error_of_json))
   | StartSchemaExtension ->
       if is_success
       then
@@ -1241,6 +1570,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateConditionalForwarderResult.error_of_json))
+  | UpdateDirectorySetup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateDirectorySetupResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateDirectorySetupResult.error_of_json))
+  | UpdateHybridAD ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateHybridADResult.of_json json)
+      else Error (parse_aws_error (Some UpdateHybridADResult.error_of_json))
   | UpdateNumberOfDomainControllers ->
       if is_success
       then
@@ -1256,6 +1599,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateRadiusResult.of_json json)
       else Error (parse_aws_error (Some UpdateRadiusResult.error_of_json))
+  | UpdateSettings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateSettingsResult.of_json json)
+      else Error (parse_aws_error (Some UpdateSettingsResult.error_of_json))
   | UpdateTrust ->
       if is_success
       then

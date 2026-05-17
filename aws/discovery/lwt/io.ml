@@ -14,6 +14,8 @@ let eval ?endpoint_url ?cfg endpoint input =
 let associate_configuration_items_to_application ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateConfigurationItemsToApplication
     input
+let batch_delete_agents ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchDeleteAgents input
 let batch_delete_import_data ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchDeleteImportData input
 let create_application ?endpoint_url ?cfg input =
@@ -26,6 +28,9 @@ let delete_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTags input
 let describe_agents ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAgents input
+let describe_batch_delete_configuration_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeBatchDeleteConfigurationTask
+    input
 let describe_configurations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeConfigurations input
 let describe_continuous_exports ?endpoint_url ?cfg input =
@@ -50,6 +55,8 @@ let list_configurations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListConfigurations input
 let list_server_neighbors ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListServerNeighbors input
+let start_batch_delete_configuration_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartBatchDeleteConfigurationTask input
 let start_continuous_export ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartContinuousExport input
 let start_data_collection_by_agent_ids ?endpoint_url ?cfg input =

@@ -4,12 +4,80 @@ open Values
 type ('i, 'o, 'e) t =
   | CreateEnvironment: (CreateEnvironmentRequest.t,
   CreateEnvironmentResponse.t, CreateEnvironmentResponse.error) t 
+  | CreateKxChangeset: (CreateKxChangesetRequest.t,
+  CreateKxChangesetResponse.t, CreateKxChangesetResponse.error) t 
+  | CreateKxCluster: (CreateKxClusterRequest.t, CreateKxClusterResponse.t,
+  CreateKxClusterResponse.error) t 
+  | CreateKxDatabase: (CreateKxDatabaseRequest.t, CreateKxDatabaseResponse.t,
+  CreateKxDatabaseResponse.error) t 
+  | CreateKxDataview: (CreateKxDataviewRequest.t, CreateKxDataviewResponse.t,
+  CreateKxDataviewResponse.error) t 
+  | CreateKxEnvironment: (CreateKxEnvironmentRequest.t,
+  CreateKxEnvironmentResponse.t, CreateKxEnvironmentResponse.error) t 
+  | CreateKxScalingGroup: (CreateKxScalingGroupRequest.t,
+  CreateKxScalingGroupResponse.t, CreateKxScalingGroupResponse.error) t 
+  | CreateKxUser: (CreateKxUserRequest.t, CreateKxUserResponse.t,
+  CreateKxUserResponse.error) t 
+  | CreateKxVolume: (CreateKxVolumeRequest.t, CreateKxVolumeResponse.t,
+  CreateKxVolumeResponse.error) t 
   | DeleteEnvironment: (DeleteEnvironmentRequest.t,
   DeleteEnvironmentResponse.t, DeleteEnvironmentResponse.error) t 
+  | DeleteKxCluster: (DeleteKxClusterRequest.t, DeleteKxClusterResponse.t,
+  DeleteKxClusterResponse.error) t 
+  | DeleteKxClusterNode: (DeleteKxClusterNodeRequest.t,
+  DeleteKxClusterNodeResponse.t, DeleteKxClusterNodeResponse.error) t 
+  | DeleteKxDatabase: (DeleteKxDatabaseRequest.t, DeleteKxDatabaseResponse.t,
+  DeleteKxDatabaseResponse.error) t 
+  | DeleteKxDataview: (DeleteKxDataviewRequest.t, DeleteKxDataviewResponse.t,
+  DeleteKxDataviewResponse.error) t 
+  | DeleteKxEnvironment: (DeleteKxEnvironmentRequest.t,
+  DeleteKxEnvironmentResponse.t, DeleteKxEnvironmentResponse.error) t 
+  | DeleteKxScalingGroup: (DeleteKxScalingGroupRequest.t,
+  DeleteKxScalingGroupResponse.t, DeleteKxScalingGroupResponse.error) t 
+  | DeleteKxUser: (DeleteKxUserRequest.t, DeleteKxUserResponse.t,
+  DeleteKxUserResponse.error) t 
+  | DeleteKxVolume: (DeleteKxVolumeRequest.t, DeleteKxVolumeResponse.t,
+  DeleteKxVolumeResponse.error) t 
   | GetEnvironment: (GetEnvironmentRequest.t, GetEnvironmentResponse.t,
   GetEnvironmentResponse.error) t 
+  | GetKxChangeset: (GetKxChangesetRequest.t, GetKxChangesetResponse.t,
+  GetKxChangesetResponse.error) t 
+  | GetKxCluster: (GetKxClusterRequest.t, GetKxClusterResponse.t,
+  GetKxClusterResponse.error) t 
+  | GetKxConnectionString: (GetKxConnectionStringRequest.t,
+  GetKxConnectionStringResponse.t, GetKxConnectionStringResponse.error) t 
+  | GetKxDatabase: (GetKxDatabaseRequest.t, GetKxDatabaseResponse.t,
+  GetKxDatabaseResponse.error) t 
+  | GetKxDataview: (GetKxDataviewRequest.t, GetKxDataviewResponse.t,
+  GetKxDataviewResponse.error) t 
+  | GetKxEnvironment: (GetKxEnvironmentRequest.t, GetKxEnvironmentResponse.t,
+  GetKxEnvironmentResponse.error) t 
+  | GetKxScalingGroup: (GetKxScalingGroupRequest.t,
+  GetKxScalingGroupResponse.t, GetKxScalingGroupResponse.error) t 
+  | GetKxUser: (GetKxUserRequest.t, GetKxUserResponse.t,
+  GetKxUserResponse.error) t 
+  | GetKxVolume: (GetKxVolumeRequest.t, GetKxVolumeResponse.t,
+  GetKxVolumeResponse.error) t 
   | ListEnvironments: (ListEnvironmentsRequest.t, ListEnvironmentsResponse.t,
   ListEnvironmentsResponse.error) t 
+  | ListKxChangesets: (ListKxChangesetsRequest.t, ListKxChangesetsResponse.t,
+  ListKxChangesetsResponse.error) t 
+  | ListKxClusterNodes: (ListKxClusterNodesRequest.t,
+  ListKxClusterNodesResponse.t, ListKxClusterNodesResponse.error) t 
+  | ListKxClusters: (ListKxClustersRequest.t, ListKxClustersResponse.t,
+  ListKxClustersResponse.error) t 
+  | ListKxDatabases: (ListKxDatabasesRequest.t, ListKxDatabasesResponse.t,
+  ListKxDatabasesResponse.error) t 
+  | ListKxDataviews: (ListKxDataviewsRequest.t, ListKxDataviewsResponse.t,
+  ListKxDataviewsResponse.error) t 
+  | ListKxEnvironments: (ListKxEnvironmentsRequest.t,
+  ListKxEnvironmentsResponse.t, ListKxEnvironmentsResponse.error) t 
+  | ListKxScalingGroups: (ListKxScalingGroupsRequest.t,
+  ListKxScalingGroupsResponse.t, ListKxScalingGroupsResponse.error) t 
+  | ListKxUsers: (ListKxUsersRequest.t, ListKxUsersResponse.t,
+  ListKxUsersResponse.error) t 
+  | ListKxVolumes: (ListKxVolumesRequest.t, ListKxVolumesResponse.t,
+  ListKxVolumesResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
@@ -18,26 +86,249 @@ type ('i, 'o, 'e) t =
   UntagResourceResponse.error) t 
   | UpdateEnvironment: (UpdateEnvironmentRequest.t,
   UpdateEnvironmentResponse.t, UpdateEnvironmentResponse.error) t 
+  | UpdateKxClusterCodeConfiguration:
+  (UpdateKxClusterCodeConfigurationRequest.t,
+  UpdateKxClusterCodeConfigurationResponse.t,
+  UpdateKxClusterCodeConfigurationResponse.error) t 
+  | UpdateKxClusterDatabases: (UpdateKxClusterDatabasesRequest.t,
+  UpdateKxClusterDatabasesResponse.t, UpdateKxClusterDatabasesResponse.error)
+  t 
+  | UpdateKxDatabase: (UpdateKxDatabaseRequest.t, UpdateKxDatabaseResponse.t,
+  UpdateKxDatabaseResponse.error) t 
+  | UpdateKxDataview: (UpdateKxDataviewRequest.t, UpdateKxDataviewResponse.t,
+  UpdateKxDataviewResponse.error) t 
+  | UpdateKxEnvironment: (UpdateKxEnvironmentRequest.t,
+  UpdateKxEnvironmentResponse.t, UpdateKxEnvironmentResponse.error) t 
+  | UpdateKxEnvironmentNetwork: (UpdateKxEnvironmentNetworkRequest.t,
+  UpdateKxEnvironmentNetworkResponse.t,
+  UpdateKxEnvironmentNetworkResponse.error) t 
+  | UpdateKxUser: (UpdateKxUserRequest.t, UpdateKxUserResponse.t,
+  UpdateKxUserResponse.error) t 
+  | UpdateKxVolume: (UpdateKxVolumeRequest.t, UpdateKxVolumeResponse.t,
+  UpdateKxVolumeResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateEnvironment -> `POST
+  | CreateKxChangeset -> `POST
+  | CreateKxCluster -> `POST
+  | CreateKxDatabase -> `POST
+  | CreateKxDataview -> `POST
+  | CreateKxEnvironment -> `POST
+  | CreateKxScalingGroup -> `POST
+  | CreateKxUser -> `POST
+  | CreateKxVolume -> `POST
   | DeleteEnvironment -> `DELETE
+  | DeleteKxCluster -> `DELETE
+  | DeleteKxClusterNode -> `DELETE
+  | DeleteKxDatabase -> `DELETE
+  | DeleteKxDataview -> `DELETE
+  | DeleteKxEnvironment -> `DELETE
+  | DeleteKxScalingGroup -> `DELETE
+  | DeleteKxUser -> `DELETE
+  | DeleteKxVolume -> `DELETE
   | GetEnvironment -> `GET
+  | GetKxChangeset -> `GET
+  | GetKxCluster -> `GET
+  | GetKxConnectionString -> `GET
+  | GetKxDatabase -> `GET
+  | GetKxDataview -> `GET
+  | GetKxEnvironment -> `GET
+  | GetKxScalingGroup -> `GET
+  | GetKxUser -> `GET
+  | GetKxVolume -> `GET
   | ListEnvironments -> `GET
+  | ListKxChangesets -> `GET
+  | ListKxClusterNodes -> `GET
+  | ListKxClusters -> `GET
+  | ListKxDatabases -> `GET
+  | ListKxDataviews -> `GET
+  | ListKxEnvironments -> `GET
+  | ListKxScalingGroups -> `GET
+  | ListKxUsers -> `GET
+  | ListKxVolumes -> `GET
   | ListTagsForResource -> `GET
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateEnvironment -> `PUT
+  | UpdateKxClusterCodeConfiguration -> `PUT
+  | UpdateKxClusterDatabases -> `PUT
+  | UpdateKxDatabase -> `PUT
+  | UpdateKxDataview -> `PUT
+  | UpdateKxEnvironment -> `PUT
+  | UpdateKxEnvironmentNetwork -> `PUT
+  | UpdateKxUser -> `PUT
+  | UpdateKxVolume -> `PATCH
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CreateEnvironment -> (Format.kasprintf Uri.of_string) "/environment"
+      | CreateKxChangeset ->
+          (Format.kasprintf Uri.of_string)
+            "/kx/environments/%s/databases/%s/changesets"
+            (EnvironmentId.to_header x.CreateKxChangesetRequest.environmentId)
+            (DatabaseName.to_header x.CreateKxChangesetRequest.databaseName)
+      | CreateKxCluster ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s/clusters"
+            (KxEnvironmentId.to_header x.CreateKxClusterRequest.environmentId)
+      | CreateKxDatabase ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s/databases"
+            (EnvironmentId.to_header x.CreateKxDatabaseRequest.environmentId)
+      | CreateKxDataview ->
+          (Format.kasprintf Uri.of_string)
+            "/kx/environments/%s/databases/%s/dataviews"
+            (EnvironmentId.to_header x.CreateKxDataviewRequest.environmentId)
+            (DatabaseName.to_header x.CreateKxDataviewRequest.databaseName)
+      | CreateKxEnvironment ->
+          (Format.kasprintf Uri.of_string) "/kx/environments"
+      | CreateKxScalingGroup ->
+          (Format.kasprintf Uri.of_string)
+            "/kx/environments/%s/scalingGroups"
+            (KxEnvironmentId.to_header
+               x.CreateKxScalingGroupRequest.environmentId)
+      | CreateKxUser ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s/users"
+            (IdType.to_header x.CreateKxUserRequest.environmentId)
+      | CreateKxVolume ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s/kxvolumes"
+            (KxEnvironmentId.to_header x.CreateKxVolumeRequest.environmentId)
       | DeleteEnvironment ->
           (Format.kasprintf Uri.of_string) "/environment/%s"
             (IdType.to_header x.DeleteEnvironmentRequest.environmentId)
+      | DeleteKxCluster ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/kx/environments/%s/clusters/%s"
+               (KxEnvironmentId.to_header
+                  x.DeleteKxClusterRequest.environmentId)
+               (KxClusterName.to_header x.DeleteKxClusterRequest.clusterName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("clientToken", (ClientTokenString.to_header v)))
+                  x.clientToken])
+      | DeleteKxClusterNode ->
+          (Format.kasprintf Uri.of_string)
+            "/kx/environments/%s/clusters/%s/nodes/%s"
+            (KxEnvironmentId.to_header
+               x.DeleteKxClusterNodeRequest.environmentId)
+            (KxClusterName.to_header x.DeleteKxClusterNodeRequest.clusterName)
+            (KxClusterNodeIdString.to_header
+               x.DeleteKxClusterNodeRequest.nodeId)
+      | DeleteKxDatabase ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/kx/environments/%s/databases/%s"
+               (EnvironmentId.to_header
+                  x.DeleteKxDatabaseRequest.environmentId)
+               (DatabaseName.to_header x.DeleteKxDatabaseRequest.databaseName))
+            (List.filter_opt
+               [Some
+                  ("clientToken",
+                    (ClientTokenString.to_header x.clientToken))])
+      | DeleteKxDataview ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/kx/environments/%s/databases/%s/dataviews/%s"
+               (EnvironmentId.to_header
+                  x.DeleteKxDataviewRequest.environmentId)
+               (DatabaseName.to_header x.DeleteKxDataviewRequest.databaseName)
+               (KxDataviewName.to_header
+                  x.DeleteKxDataviewRequest.dataviewName))
+            (List.filter_opt
+               [Some
+                  ("clientToken",
+                    (ClientTokenString.to_header x.clientToken))])
+      | DeleteKxEnvironment ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/kx/environments/%s"
+               (IdType.to_header x.DeleteKxEnvironmentRequest.environmentId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
+      | DeleteKxScalingGroup ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/kx/environments/%s/scalingGroups/%s"
+               (KxEnvironmentId.to_header
+                  x.DeleteKxScalingGroupRequest.environmentId)
+               (KxScalingGroupName.to_header
+                  x.DeleteKxScalingGroupRequest.scalingGroupName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("clientToken", (ClientTokenString.to_header v)))
+                  x.clientToken])
+      | DeleteKxUser ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/kx/environments/%s/users/%s"
+               (IdType.to_header x.DeleteKxUserRequest.environmentId)
+               (KxUserNameString.to_header x.DeleteKxUserRequest.userName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
+      | DeleteKxVolume ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/kx/environments/%s/kxvolumes/%s"
+               (KxEnvironmentId.to_header
+                  x.DeleteKxVolumeRequest.environmentId)
+               (KxVolumeName.to_header x.DeleteKxVolumeRequest.volumeName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("clientToken", (ClientTokenString.to_header v)))
+                  x.clientToken])
       | GetEnvironment ->
           (Format.kasprintf Uri.of_string) "/environment/%s"
             (IdType.to_header x.GetEnvironmentRequest.environmentId)
+      | GetKxChangeset ->
+          (Format.kasprintf Uri.of_string)
+            "/kx/environments/%s/databases/%s/changesets/%s"
+            (EnvironmentId.to_header x.GetKxChangesetRequest.environmentId)
+            (DatabaseName.to_header x.GetKxChangesetRequest.databaseName)
+            (ChangesetId.to_header x.GetKxChangesetRequest.changesetId)
+      | GetKxCluster ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s/clusters/%s"
+            (KxEnvironmentId.to_header x.GetKxClusterRequest.environmentId)
+            (KxClusterName.to_header x.GetKxClusterRequest.clusterName)
+      | GetKxConnectionString ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/kx/environments/%s/connectionString"
+               (IdType.to_header x.GetKxConnectionStringRequest.environmentId))
+            (List.filter_opt
+               [Some ("userArn", (KxUserArn.to_header x.userArn));
+               Some ("clusterName", (KxClusterName.to_header x.clusterName))])
+      | GetKxDatabase ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s/databases/%s"
+            (EnvironmentId.to_header x.GetKxDatabaseRequest.environmentId)
+            (DatabaseName.to_header x.GetKxDatabaseRequest.databaseName)
+      | GetKxDataview ->
+          (Format.kasprintf Uri.of_string)
+            "/kx/environments/%s/databases/%s/dataviews/%s"
+            (EnvironmentId.to_header x.GetKxDataviewRequest.environmentId)
+            (DatabaseName.to_header x.GetKxDataviewRequest.databaseName)
+            (KxDataviewName.to_header x.GetKxDataviewRequest.dataviewName)
+      | GetKxEnvironment ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s"
+            (IdType.to_header x.GetKxEnvironmentRequest.environmentId)
+      | GetKxScalingGroup ->
+          (Format.kasprintf Uri.of_string)
+            "/kx/environments/%s/scalingGroups/%s"
+            (KxEnvironmentId.to_header
+               x.GetKxScalingGroupRequest.environmentId)
+            (KxScalingGroupName.to_header
+               x.GetKxScalingGroupRequest.scalingGroupName)
+      | GetKxUser ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s/users/%s"
+            (IdType.to_header x.GetKxUserRequest.environmentId)
+            (KxUserNameString.to_header x.GetKxUserRequest.userName)
+      | GetKxVolume ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s/kxvolumes/%s"
+            (KxEnvironmentId.to_header x.GetKxVolumeRequest.environmentId)
+            (KxVolumeName.to_header x.GetKxVolumeRequest.volumeName)
       | ListEnvironments ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/environment")
@@ -48,22 +339,181 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (ResultLimit.to_header v)))
                  x.maxResults])
+      | ListKxChangesets ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/kx/environments/%s/databases/%s/changesets"
+               (EnvironmentId.to_header
+                  x.ListKxChangesetsRequest.environmentId)
+               (DatabaseName.to_header x.ListKxChangesetsRequest.databaseName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListKxClusterNodes ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/kx/environments/%s/clusters/%s/nodes"
+               (KxEnvironmentId.to_header
+                  x.ListKxClusterNodesRequest.environmentId)
+               (KxClusterName.to_header
+                  x.ListKxClusterNodesRequest.clusterName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (ResultLimit.to_header v)))
+                 x.maxResults])
+      | ListKxClusters ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/kx/environments/%s/clusters"
+               (KxEnvironmentId.to_header
+                  x.ListKxClustersRequest.environmentId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clusterType", (KxClusterType.to_header v)))
+                  x.clusterType;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken])
+      | ListKxDatabases ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/kx/environments/%s/databases"
+               (EnvironmentId.to_header
+                  x.ListKxDatabasesRequest.environmentId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListKxDataviews ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/kx/environments/%s/databases/%s/dataviews"
+               (EnvironmentId.to_header
+                  x.ListKxDataviewsRequest.environmentId)
+               (DatabaseName.to_header x.ListKxDataviewsRequest.databaseName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListKxEnvironments ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/kx/environments")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (BoxedInteger.to_header v)))
+                 x.maxResults])
+      | ListKxScalingGroups ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/kx/environments/%s/scalingGroups"
+               (KxEnvironmentId.to_header
+                  x.ListKxScalingGroupsRequest.environmentId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken])
+      | ListKxUsers ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/kx/environments/%s/users"
+               (IdType.to_header x.ListKxUsersRequest.environmentId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (ResultLimit.to_header v)))
+                 x.maxResults])
+      | ListKxVolumes ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/kx/environments/%s/kxvolumes"
+               (KxEnvironmentId.to_header
+                  x.ListKxVolumesRequest.environmentId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("volumeType", (KxVolumeType.to_header v)))
+                 x.volumeType])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
-            (EnvironmentArn.to_header
+            (FinSpaceTaggableArn.to_header
                x.ListTagsForResourceRequest.resourceArn)
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
-            (EnvironmentArn.to_header x.TagResourceRequest.resourceArn)
+            (FinSpaceTaggableArn.to_header x.TagResourceRequest.resourceArn)
       | UntagResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/tags/%s"
-               (EnvironmentArn.to_header x.UntagResourceRequest.resourceArn))
+               (FinSpaceTaggableArn.to_header
+                  x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
       | UpdateEnvironment ->
           (Format.kasprintf Uri.of_string) "/environment/%s"
-            (IdType.to_header x.UpdateEnvironmentRequest.environmentId))
+            (IdType.to_header x.UpdateEnvironmentRequest.environmentId)
+      | UpdateKxClusterCodeConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/kx/environments/%s/clusters/%s/configuration/code"
+            (KxEnvironmentId.to_header
+               x.UpdateKxClusterCodeConfigurationRequest.environmentId)
+            (KxClusterName.to_header
+               x.UpdateKxClusterCodeConfigurationRequest.clusterName)
+      | UpdateKxClusterDatabases ->
+          (Format.kasprintf Uri.of_string)
+            "/kx/environments/%s/clusters/%s/configuration/databases"
+            (KxEnvironmentId.to_header
+               x.UpdateKxClusterDatabasesRequest.environmentId)
+            (KxClusterName.to_header
+               x.UpdateKxClusterDatabasesRequest.clusterName)
+      | UpdateKxDatabase ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s/databases/%s"
+            (EnvironmentId.to_header x.UpdateKxDatabaseRequest.environmentId)
+            (DatabaseName.to_header x.UpdateKxDatabaseRequest.databaseName)
+      | UpdateKxDataview ->
+          (Format.kasprintf Uri.of_string)
+            "/kx/environments/%s/databases/%s/dataviews/%s"
+            (EnvironmentId.to_header x.UpdateKxDataviewRequest.environmentId)
+            (DatabaseName.to_header x.UpdateKxDataviewRequest.databaseName)
+            (KxDataviewName.to_header x.UpdateKxDataviewRequest.dataviewName)
+      | UpdateKxEnvironment ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s"
+            (IdType.to_header x.UpdateKxEnvironmentRequest.environmentId)
+      | UpdateKxEnvironmentNetwork ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s/network"
+            (IdType.to_header
+               x.UpdateKxEnvironmentNetworkRequest.environmentId)
+      | UpdateKxUser ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s/users/%s"
+            (IdType.to_header x.UpdateKxUserRequest.environmentId)
+            (KxUserNameString.to_header x.UpdateKxUserRequest.userName)
+      | UpdateKxVolume ->
+          (Format.kasprintf Uri.of_string) "/kx/environments/%s/kxvolumes/%s"
+            (KxEnvironmentId.to_header x.UpdateKxVolumeRequest.environmentId)
+            (KxVolumeName.to_header x.UpdateKxVolumeRequest.volumeName))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -111,11 +561,416 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateKxChangeset ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("changeRequests",
+                           (ChangeRequests.to_value
+                              req.CreateKxChangesetRequest.changeRequests));
+                      Some
+                        ("clientToken",
+                          (ClientTokenString.to_value
+                             req.CreateKxChangesetRequest.clientToken))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateKxCluster ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.CreateKxClusterRequest.clientToken
+                         ~f:(fun x ->
+                               ("clientToken", (ClientToken.to_value x)));
+                      Some
+                        ("clusterName",
+                          (KxClusterName.to_value
+                             req.CreateKxClusterRequest.clusterName));
+                      Some
+                        ("clusterType",
+                          (KxClusterType.to_value
+                             req.CreateKxClusterRequest.clusterType));
+                      Option.map
+                        req.CreateKxClusterRequest.tickerplantLogConfiguration
+                        ~f:(fun x ->
+                              ("tickerplantLogConfiguration",
+                                (TickerplantLogConfiguration.to_value x)));
+                      Option.map req.CreateKxClusterRequest.databases
+                        ~f:(fun x ->
+                              ("databases",
+                                (KxDatabaseConfigurations.to_value x)));
+                      Option.map
+                        req.CreateKxClusterRequest.cacheStorageConfigurations
+                        ~f:(fun x ->
+                              ("cacheStorageConfigurations",
+                                (KxCacheStorageConfigurations.to_value x)));
+                      Option.map
+                        req.CreateKxClusterRequest.autoScalingConfiguration
+                        ~f:(fun x ->
+                              ("autoScalingConfiguration",
+                                (AutoScalingConfiguration.to_value x)));
+                      Option.map
+                        req.CreateKxClusterRequest.clusterDescription
+                        ~f:(fun x ->
+                              ("clusterDescription",
+                                (KxClusterDescription.to_value x)));
+                      Option.map
+                        req.CreateKxClusterRequest.capacityConfiguration
+                        ~f:(fun x ->
+                              ("capacityConfiguration",
+                                (CapacityConfiguration.to_value x)));
+                      Some
+                        ("releaseLabel",
+                          (ReleaseLabel.to_value
+                             req.CreateKxClusterRequest.releaseLabel));
+                      Some
+                        ("vpcConfiguration",
+                          (VpcConfiguration.to_value
+                             req.CreateKxClusterRequest.vpcConfiguration));
+                      Option.map
+                        req.CreateKxClusterRequest.initializationScript
+                        ~f:(fun x ->
+                              ("initializationScript",
+                                (InitializationScriptFilePath.to_value x)));
+                      Option.map
+                        req.CreateKxClusterRequest.commandLineArguments
+                        ~f:(fun x ->
+                              ("commandLineArguments",
+                                (KxCommandLineArguments.to_value x)));
+                      Option.map req.CreateKxClusterRequest.code
+                        ~f:(fun x -> ("code", (CodeConfiguration.to_value x)));
+                      Option.map req.CreateKxClusterRequest.executionRole
+                        ~f:(fun x ->
+                              ("executionRole",
+                                (ExecutionRoleArn.to_value x)));
+                      Option.map
+                        req.CreateKxClusterRequest.savedownStorageConfiguration
+                        ~f:(fun x ->
+                              ("savedownStorageConfiguration",
+                                (KxSavedownStorageConfiguration.to_value x)));
+                      Some
+                        ("azMode",
+                          (KxAzMode.to_value
+                             req.CreateKxClusterRequest.azMode));
+                      Option.map
+                        req.CreateKxClusterRequest.availabilityZoneId
+                        ~f:(fun x ->
+                              ("availabilityZoneId",
+                                (AvailabilityZoneId.to_value x)));
+                      Option.map req.CreateKxClusterRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map
+                        req.CreateKxClusterRequest.scalingGroupConfiguration
+                        ~f:(fun x ->
+                              ("scalingGroupConfiguration",
+                                (KxScalingGroupConfiguration.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateKxDatabase ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("databaseName",
+                           (DatabaseName.to_value
+                              req.CreateKxDatabaseRequest.databaseName));
+                      Option.map req.CreateKxDatabaseRequest.description
+                        ~f:(fun x ->
+                              ("description", (Description.to_value x)));
+                      Option.map req.CreateKxDatabaseRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Some
+                        ("clientToken",
+                          (ClientTokenString.to_value
+                             req.CreateKxDatabaseRequest.clientToken))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateKxDataview ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("dataviewName",
+                           (KxDataviewName.to_value
+                              req.CreateKxDataviewRequest.dataviewName));
+                      Some
+                        ("azMode",
+                          (KxAzMode.to_value
+                             req.CreateKxDataviewRequest.azMode));
+                      Option.map
+                        req.CreateKxDataviewRequest.availabilityZoneId
+                        ~f:(fun x ->
+                              ("availabilityZoneId",
+                                (AvailabilityZoneId.to_value x)));
+                      Option.map req.CreateKxDataviewRequest.changesetId
+                        ~f:(fun x ->
+                              ("changesetId", (ChangesetId.to_value x)));
+                      Option.map
+                        req.CreateKxDataviewRequest.segmentConfigurations
+                        ~f:(fun x ->
+                              ("segmentConfigurations",
+                                (KxDataviewSegmentConfigurationList.to_value
+                                   x)));
+                      Option.map req.CreateKxDataviewRequest.autoUpdate
+                        ~f:(fun x ->
+                              ("autoUpdate", (BooleanValue.to_value x)));
+                      Option.map req.CreateKxDataviewRequest.readWrite
+                        ~f:(fun x -> ("readWrite", (BooleanValue.to_value x)));
+                      Option.map req.CreateKxDataviewRequest.description
+                        ~f:(fun x ->
+                              ("description", (Description.to_value x)));
+                      Option.map req.CreateKxDataviewRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Some
+                        ("clientToken",
+                          (ClientTokenString.to_value
+                             req.CreateKxDataviewRequest.clientToken))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateKxEnvironment ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (KxEnvironmentName.to_value
+                              req.CreateKxEnvironmentRequest.name));
+                      Option.map req.CreateKxEnvironmentRequest.description
+                        ~f:(fun x ->
+                              ("description", (Description.to_value x)));
+                      Some
+                        ("kmsKeyId",
+                          (KmsKeyARN.to_value
+                             req.CreateKxEnvironmentRequest.kmsKeyId));
+                      Option.map req.CreateKxEnvironmentRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map req.CreateKxEnvironmentRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateKxScalingGroup ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("clientToken",
+                           (ClientToken.to_value
+                              req.CreateKxScalingGroupRequest.clientToken));
+                      Some
+                        ("scalingGroupName",
+                          (KxScalingGroupName.to_value
+                             req.CreateKxScalingGroupRequest.scalingGroupName));
+                      Some
+                        ("hostType",
+                          (KxHostType.to_value
+                             req.CreateKxScalingGroupRequest.hostType));
+                      Some
+                        ("availabilityZoneId",
+                          (AvailabilityZoneId.to_value
+                             req.CreateKxScalingGroupRequest.availabilityZoneId));
+                      Option.map req.CreateKxScalingGroupRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateKxUser ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("userName",
+                           (KxUserNameString.to_value
+                              req.CreateKxUserRequest.userName));
+                      Some
+                        ("iamRole",
+                          (RoleArn.to_value req.CreateKxUserRequest.iamRole));
+                      Option.map req.CreateKxUserRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map req.CreateKxUserRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateKxVolume ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.CreateKxVolumeRequest.clientToken
+                         ~f:(fun x ->
+                               ("clientToken", (ClientToken.to_value x)));
+                      Some
+                        ("volumeType",
+                          (KxVolumeType.to_value
+                             req.CreateKxVolumeRequest.volumeType));
+                      Some
+                        ("volumeName",
+                          (KxVolumeName.to_value
+                             req.CreateKxVolumeRequest.volumeName));
+                      Option.map req.CreateKxVolumeRequest.description
+                        ~f:(fun x ->
+                              ("description", (Description.to_value x)));
+                      Option.map req.CreateKxVolumeRequest.nas1Configuration
+                        ~f:(fun x ->
+                              ("nas1Configuration",
+                                (KxNAS1Configuration.to_value x)));
+                      Some
+                        ("azMode",
+                          (KxAzMode.to_value req.CreateKxVolumeRequest.azMode));
+                      Some
+                        ("availabilityZoneIds",
+                          (AvailabilityZoneIds.to_value
+                             req.CreateKxVolumeRequest.availabilityZoneIds));
+                      Option.map req.CreateKxVolumeRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteEnvironment -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteKxCluster -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteKxClusterNode -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteKxDatabase -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteKxDataview -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteKxEnvironment -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteKxScalingGroup -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteKxUser -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteKxVolume -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetEnvironment ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetKxChangeset ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetKxCluster ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetKxConnectionString ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetKxDatabase ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetKxDataview ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetKxEnvironment ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetKxScalingGroup ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetKxUser ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetKxVolume ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListEnvironments ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListKxChangesets ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListKxClusterNodes ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListKxClusters ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListKxDatabases ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListKxDataviews ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListKxEnvironments ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListKxScalingGroups ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListKxUsers ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListKxVolumes ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
@@ -142,6 +997,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateEnvironment -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateKxClusterCodeConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateKxClusterDatabases ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateKxDatabase -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateKxDataview -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateKxEnvironment -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateKxEnvironmentNetwork ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateKxUser -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateKxVolume -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -196,6 +1062,48 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateEnvironmentResponse.error_of_json))
+  | CreateKxChangeset ->
+      if is_success
+      then Ok (CreateKxChangesetResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateKxChangesetResponse.error_of_json))
+  | CreateKxCluster ->
+      if is_success
+      then Ok (CreateKxClusterResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateKxClusterResponse.error_of_json))
+  | CreateKxDatabase ->
+      if is_success
+      then Ok (CreateKxDatabaseResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateKxDatabaseResponse.error_of_json))
+  | CreateKxDataview ->
+      if is_success
+      then Ok (CreateKxDataviewResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateKxDataviewResponse.error_of_json))
+  | CreateKxEnvironment ->
+      if is_success
+      then Ok (CreateKxEnvironmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateKxEnvironmentResponse.error_of_json))
+  | CreateKxScalingGroup ->
+      if is_success
+      then Ok (CreateKxScalingGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateKxScalingGroupResponse.error_of_json))
+  | CreateKxUser ->
+      if is_success
+      then Ok (CreateKxUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateKxUserResponse.error_of_json))
+  | CreateKxVolume ->
+      if is_success
+      then Ok (CreateKxVolumeResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateKxVolumeResponse.error_of_json))
   | DeleteEnvironment ->
       if is_success
       then
@@ -205,16 +1113,170 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteEnvironmentResponse.error_of_json))
+  | DeleteKxCluster ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteKxClusterResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteKxClusterResponse.error_of_json))
+  | DeleteKxClusterNode ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteKxClusterNodeResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteKxClusterNodeResponse.error_of_json))
+  | DeleteKxDatabase ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteKxDatabaseResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteKxDatabaseResponse.error_of_json))
+  | DeleteKxDataview ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteKxDataviewResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteKxDataviewResponse.error_of_json))
+  | DeleteKxEnvironment ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteKxEnvironmentResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteKxEnvironmentResponse.error_of_json))
+  | DeleteKxScalingGroup ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteKxScalingGroupResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteKxScalingGroupResponse.error_of_json))
+  | DeleteKxUser ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteKxUserResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteKxUserResponse.error_of_json))
+  | DeleteKxVolume ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteKxVolumeResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteKxVolumeResponse.error_of_json))
   | GetEnvironment ->
       if is_success
       then Ok (GetEnvironmentResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetEnvironmentResponse.error_of_json))
+  | GetKxChangeset ->
+      if is_success
+      then Ok (GetKxChangesetResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetKxChangesetResponse.error_of_json))
+  | GetKxCluster ->
+      if is_success
+      then Ok (GetKxClusterResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetKxClusterResponse.error_of_json))
+  | GetKxConnectionString ->
+      if is_success
+      then Ok (GetKxConnectionStringResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetKxConnectionStringResponse.error_of_json))
+  | GetKxDatabase ->
+      if is_success
+      then Ok (GetKxDatabaseResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetKxDatabaseResponse.error_of_json))
+  | GetKxDataview ->
+      if is_success
+      then Ok (GetKxDataviewResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetKxDataviewResponse.error_of_json))
+  | GetKxEnvironment ->
+      if is_success
+      then Ok (GetKxEnvironmentResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetKxEnvironmentResponse.error_of_json))
+  | GetKxScalingGroup ->
+      if is_success
+      then Ok (GetKxScalingGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetKxScalingGroupResponse.error_of_json))
+  | GetKxUser ->
+      if is_success
+      then Ok (GetKxUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetKxUserResponse.error_of_json))
+  | GetKxVolume ->
+      if is_success
+      then Ok (GetKxVolumeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetKxVolumeResponse.error_of_json))
   | ListEnvironments ->
       if is_success
       then Ok (ListEnvironmentsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListEnvironmentsResponse.error_of_json))
+  | ListKxChangesets ->
+      if is_success
+      then Ok (ListKxChangesetsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListKxChangesetsResponse.error_of_json))
+  | ListKxClusterNodes ->
+      if is_success
+      then Ok (ListKxClusterNodesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListKxClusterNodesResponse.error_of_json))
+  | ListKxClusters ->
+      if is_success
+      then Ok (ListKxClustersResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListKxClustersResponse.error_of_json))
+  | ListKxDatabases ->
+      if is_success
+      then Ok (ListKxDatabasesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListKxDatabasesResponse.error_of_json))
+  | ListKxDataviews ->
+      if is_success
+      then Ok (ListKxDataviewsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListKxDataviewsResponse.error_of_json))
+  | ListKxEnvironments ->
+      if is_success
+      then Ok (ListKxEnvironmentsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListKxEnvironmentsResponse.error_of_json))
+  | ListKxScalingGroups ->
+      if is_success
+      then Ok (ListKxScalingGroupsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListKxScalingGroupsResponse.error_of_json))
+  | ListKxUsers ->
+      if is_success
+      then Ok (ListKxUsersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListKxUsersResponse.error_of_json))
+  | ListKxVolumes ->
+      if is_success
+      then Ok (ListKxVolumesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListKxVolumesResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
@@ -241,3 +1303,60 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateEnvironmentResponse.error_of_json))
+  | UpdateKxClusterCodeConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateKxClusterCodeConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateKxClusterCodeConfigurationResponse.error_of_json))
+  | UpdateKxClusterDatabases ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateKxClusterDatabasesResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateKxClusterDatabasesResponse.error_of_json))
+  | UpdateKxDatabase ->
+      if is_success
+      then Ok (UpdateKxDatabaseResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateKxDatabaseResponse.error_of_json))
+  | UpdateKxDataview ->
+      if is_success
+      then Ok (UpdateKxDataviewResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateKxDataviewResponse.error_of_json))
+  | UpdateKxEnvironment ->
+      if is_success
+      then Ok (UpdateKxEnvironmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateKxEnvironmentResponse.error_of_json))
+  | UpdateKxEnvironmentNetwork ->
+      if is_success
+      then
+        Ok
+          (UpdateKxEnvironmentNetworkResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateKxEnvironmentNetworkResponse.error_of_json))
+  | UpdateKxUser ->
+      if is_success
+      then Ok (UpdateKxUserResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateKxUserResponse.error_of_json))
+  | UpdateKxVolume ->
+      if is_success
+      then Ok (UpdateKxVolumeResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateKxVolumeResponse.error_of_json))

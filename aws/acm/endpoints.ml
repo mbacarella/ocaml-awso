@@ -26,6 +26,10 @@ type ('i, 'o, 'e) t =
   | RequestCertificate: (RequestCertificateRequest.t,
   RequestCertificateResponse.t, RequestCertificateResponse.error) t 
   | ResendValidationEmail: (ResendValidationEmailRequest.t, unit, unit) t 
+  | RevokeCertificate: (RevokeCertificateRequest.t,
+  RevokeCertificateResponse.t, RevokeCertificateResponse.error) t 
+  | SearchCertificates: (SearchCertificatesRequest.t,
+  SearchCertificatesResponse.t, SearchCertificatesResponse.error) t 
   | UpdateCertificateOptions: (UpdateCertificateOptionsRequest.t, unit, 
   unit) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
@@ -44,6 +48,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | RenewCertificate -> `POST
   | RequestCertificate -> `POST
   | ResendValidationEmail -> `POST
+  | RevokeCertificate -> `POST
+  | SearchCertificates -> `POST
   | UpdateCertificateOptions -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
@@ -62,6 +68,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RenewCertificate -> (Format.kasprintf Uri.of_string) "/"
       | RequestCertificate -> (Format.kasprintf Uri.of_string) "/"
       | ResendValidationEmail -> (Format.kasprintf Uri.of_string) "/"
+      | RevokeCertificate -> (Format.kasprintf Uri.of_string) "/"
+      | SearchCertificates -> (Format.kasprintf Uri.of_string) "/"
       | UpdateCertificateOptions -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
@@ -178,6 +186,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "CertificateManager.ResendValidationEmail")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RevokeCertificate ->
+      let json = RevokeCertificateRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CertificateManager.RevokeCertificate")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SearchCertificates ->
+      let json = SearchCertificatesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "CertificateManager.SearchCertificates")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateCertificateOptions ->
       let json = UpdateCertificateOptionsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -285,5 +309,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some RequestCertificateResponse.error_of_json))
   | ResendValidationEmail ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | RevokeCertificate ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RevokeCertificateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some RevokeCertificateResponse.error_of_json))
+  | SearchCertificates ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SearchCertificatesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some SearchCertificatesResponse.error_of_json))
   | UpdateCertificateOptions ->
       if is_success then Ok () else Error (parse_aws_error None)

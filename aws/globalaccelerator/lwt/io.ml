@@ -13,12 +13,16 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let add_custom_routing_endpoints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddCustomRoutingEndpoints input
+let add_endpoints ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AddEndpoints input
 let advertise_byoip_cidr ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AdvertiseByoipCidr input
 let allow_custom_routing_traffic ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AllowCustomRoutingTraffic input
 let create_accelerator ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAccelerator input
+let create_cross_account_attachment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCrossAccountAttachment input
 let create_custom_routing_accelerator ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCustomRoutingAccelerator input
 let create_custom_routing_endpoint_group ?endpoint_url ?cfg input =
@@ -31,6 +35,8 @@ let create_listener ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateListener input
 let delete_accelerator ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAccelerator input
+let delete_cross_account_attachment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCrossAccountAttachment input
 let delete_custom_routing_accelerator ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCustomRoutingAccelerator input
 let delete_custom_routing_endpoint_group ?endpoint_url ?cfg input =
@@ -49,6 +55,8 @@ let describe_accelerator ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAccelerator input
 let describe_accelerator_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAcceleratorAttributes input
+let describe_cross_account_attachment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCrossAccountAttachment input
 let describe_custom_routing_accelerator ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCustomRoutingAccelerator input
 let describe_custom_routing_accelerator_attributes ?endpoint_url ?cfg input =
@@ -66,6 +74,12 @@ let list_accelerators ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAccelerators input
 let list_byoip_cidrs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListByoipCidrs input
+let list_cross_account_attachments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCrossAccountAttachments input
+let list_cross_account_resource_accounts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCrossAccountResourceAccounts input
+let list_cross_account_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCrossAccountResources input
 let list_custom_routing_accelerators ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCustomRoutingAccelerators input
 let list_custom_routing_endpoint_groups ?endpoint_url ?cfg input =
@@ -88,6 +102,8 @@ let provision_byoip_cidr ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ProvisionByoipCidr input
 let remove_custom_routing_endpoints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemoveCustomRoutingEndpoints input
+let remove_endpoints ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RemoveEndpoints input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
@@ -96,6 +112,8 @@ let update_accelerator ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAccelerator input
 let update_accelerator_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAcceleratorAttributes input
+let update_cross_account_attachment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCrossAccountAttachment input
 let update_custom_routing_accelerator ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCustomRoutingAccelerator input
 let update_custom_routing_accelerator_attributes ?endpoint_url ?cfg input =

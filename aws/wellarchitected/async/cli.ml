@@ -48,6 +48,26 @@ let associate_lenses =
            (Values.AssociateLensesInput.make ~workloadId
               ~lensAliases:(Values.LensAliases.of_json lensAliases) ()) None
            None])
+let associate_profiles =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workloadId =
+         flag "workload-id" (required string) ~doc:"STRING WorkloadId"
+       and profileArns =
+         flag "profile-arns" (required json_arg) ~doc:"JSON ProfileArns" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_profiles
+           (Values.AssociateProfilesInput.make ~workloadId
+              ~profileArns:(Values.ProfileArns.of_json profileArns) ()) None
+           None])
 let create_lens_share =
   Command.async ~summary:""
     ([%map_open.Command
@@ -122,6 +142,118 @@ let create_milestone =
               ~clientRequestToken ())
            (Some Values.CreateMilestoneOutput.to_json)
            (Some Values.CreateMilestoneOutput.error_to_json)])
+let create_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and profileName =
+         flag "profile-name" (required string) ~doc:"STRING ProfileName"
+       and profileDescription =
+         flag "profile-description" (required string)
+           ~doc:"STRING ProfileDescription"
+       and profileQuestions =
+         flag "profile-questions" (required json_arg)
+           ~doc:"JSON ProfileQuestionUpdates"
+       and clientRequestToken =
+         flag "client-request-token" (required string)
+           ~doc:"STRING ClientRequestToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_profile
+           (Values.CreateProfileInput.make
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~profileName
+              ~profileDescription
+              ~profileQuestions:(Values.ProfileQuestionUpdates.of_json
+                                   profileQuestions) ~clientRequestToken ())
+           (Some Values.CreateProfileOutput.to_json)
+           (Some Values.CreateProfileOutput.error_to_json)])
+let create_profile_share =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and profileArn =
+         flag "profile-arn" (required string) ~doc:"STRING ProfileArn"
+       and sharedWith =
+         flag "shared-with" (required string) ~doc:"STRING SharedWith"
+       and clientRequestToken =
+         flag "client-request-token" (required string)
+           ~doc:"STRING ClientRequestToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_profile_share
+           (Values.CreateProfileShareInput.make ~profileArn ~sharedWith
+              ~clientRequestToken ())
+           (Some Values.CreateProfileShareOutput.to_json)
+           (Some Values.CreateProfileShareOutput.error_to_json)])
+let create_review_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and notes = flag "notes" (optional string) ~doc:"STRING Notes"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and templateName =
+         flag "template-name" (required string) ~doc:"STRING TemplateName"
+       and description =
+         flag "description" (required string)
+           ~doc:"STRING TemplateDescription"
+       and lenses =
+         flag "lenses" (required json_arg) ~doc:"JSON ReviewTemplateLenses"
+       and clientRequestToken =
+         flag "client-request-token" (required string)
+           ~doc:"STRING ClientRequestToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_review_template
+           (Values.CreateReviewTemplateInput.make ?notes
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~templateName
+              ~description
+              ~lenses:(Values.ReviewTemplateLenses.of_json lenses)
+              ~clientRequestToken ())
+           (Some Values.CreateReviewTemplateOutput.to_json)
+           (Some Values.CreateReviewTemplateOutput.error_to_json)])
+let create_template_share =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and templateArn =
+         flag "template-arn" (required string) ~doc:"STRING TemplateArn"
+       and sharedWith =
+         flag "shared-with" (required string) ~doc:"STRING SharedWith"
+       and clientRequestToken =
+         flag "client-request-token" (required string)
+           ~doc:"STRING ClientRequestToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_template_share
+           (Values.CreateTemplateShareInput.make ~templateArn ~sharedWith
+              ~clientRequestToken ())
+           (Some Values.CreateTemplateShareOutput.to_json)
+           (Some Values.CreateTemplateShareOutput.error_to_json)])
 let create_workload =
   Command.async ~summary:""
     ([%map_open.Command
@@ -147,6 +279,9 @@ let create_workload =
        and architecturalDesign =
          flag "architectural-design" (optional string)
            ~doc:"STRING WorkloadArchitecturalDesign"
+       and reviewOwner =
+         flag "review-owner" (optional string)
+           ~doc:"STRING WorkloadReviewOwner"
        and industryType =
          flag "industry-type" (optional string)
            ~doc:"STRING WorkloadIndustryType"
@@ -154,6 +289,21 @@ let create_workload =
          flag "industry" (optional string) ~doc:"STRING WorkloadIndustry"
        and notes = flag "notes" (optional string) ~doc:"STRING Notes"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and discoveryConfig =
+         flag "discovery-config" (optional json_arg)
+           ~doc:"JSON WorkloadDiscoveryConfig"
+       and applications =
+         flag "applications" (optional json_arg)
+           ~doc:"JSON WorkloadApplications"
+       and profileArns =
+         flag "profile-arns" (optional json_arg)
+           ~doc:"JSON WorkloadProfileArns"
+       and reviewTemplateArns =
+         flag "review-template-arns" (optional json_arg)
+           ~doc:"JSON ReviewTemplateArns"
+       and jiraConfiguration =
+         flag "jira-configuration" (optional json_arg)
+           ~doc:"JSON WorkloadJiraConfigurationInput"
        and workloadName =
          flag "workload-name" (required string) ~doc:"STRING WorkloadName"
        and description =
@@ -162,9 +312,6 @@ let create_workload =
        and environment =
          flag "environment" (required json_arg)
            ~doc:"JSON WorkloadEnvironment"
-       and reviewOwner =
-         flag "review-owner" (required string)
-           ~doc:"STRING WorkloadReviewOwner"
        and lenses =
          flag "lenses" (required json_arg) ~doc:"JSON WorkloadLenses"
        and clientRequestToken =
@@ -184,11 +331,25 @@ let create_workload =
               ?pillarPriorities:(Option.map
                                    ~f:Values.WorkloadPillarPriorities.of_json
                                    pillarPriorities) ?architecturalDesign
-              ?industryType ?industry ?notes
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~workloadName
+              ?reviewOwner ?industryType ?industry ?notes
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?discoveryConfig:(Option.map
+                                  ~f:Values.WorkloadDiscoveryConfig.of_json
+                                  discoveryConfig)
+              ?applications:(Option.map
+                               ~f:Values.WorkloadApplications.of_json
+                               applications)
+              ?profileArns:(Option.map ~f:Values.WorkloadProfileArns.of_json
+                              profileArns)
+              ?reviewTemplateArns:(Option.map
+                                     ~f:Values.ReviewTemplateArns.of_json
+                                     reviewTemplateArns)
+              ?jiraConfiguration:(Option.map
+                                    ~f:Values.WorkloadJiraConfigurationInput.of_json
+                                    jiraConfiguration) ~workloadName
               ~description
               ~environment:(Values.WorkloadEnvironment.of_json environment)
-              ~reviewOwner ~lenses:(Values.WorkloadLenses.of_json lenses)
+              ~lenses:(Values.WorkloadLenses.of_json lenses)
               ~clientRequestToken ())
            (Some Values.CreateWorkloadOutput.to_json)
            (Some Values.CreateWorkloadOutput.error_to_json)])
@@ -264,6 +425,88 @@ let delete_lens_share =
            Io.delete_lens_share
            (Values.DeleteLensShareInput.make ~shareId ~lensAlias
               ~clientRequestToken ()) None None])
+let delete_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and profileArn =
+         flag "profile-arn" (required string) ~doc:"STRING ProfileArn"
+       and clientRequestToken =
+         flag "client-request-token" (required string)
+           ~doc:"STRING ClientRequestToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_profile
+           (Values.DeleteProfileInput.make ~profileArn ~clientRequestToken ())
+           None None])
+let delete_profile_share =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and shareId = flag "share-id" (required string) ~doc:"STRING ShareId"
+       and profileArn =
+         flag "profile-arn" (required string) ~doc:"STRING ProfileArn"
+       and clientRequestToken =
+         flag "client-request-token" (required string)
+           ~doc:"STRING ClientRequestToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_profile_share
+           (Values.DeleteProfileShareInput.make ~shareId ~profileArn
+              ~clientRequestToken ()) None None])
+let delete_review_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and templateArn =
+         flag "template-arn" (required string) ~doc:"STRING TemplateArn"
+       and clientRequestToken =
+         flag "client-request-token" (required string)
+           ~doc:"STRING ClientRequestToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_review_template
+           (Values.DeleteReviewTemplateInput.make ~templateArn
+              ~clientRequestToken ()) None None])
+let delete_template_share =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and shareId = flag "share-id" (required string) ~doc:"STRING ShareId"
+       and templateArn =
+         flag "template-arn" (required string) ~doc:"STRING TemplateArn"
+       and clientRequestToken =
+         flag "client-request-token" (required string)
+           ~doc:"STRING ClientRequestToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_template_share
+           (Values.DeleteTemplateShareInput.make ~shareId ~templateArn
+              ~clientRequestToken ()) None None])
 let delete_workload =
   Command.async ~summary:""
     ([%map_open.Command
@@ -325,6 +568,26 @@ let disassociate_lenses =
            (Values.DisassociateLensesInput.make ~workloadId
               ~lensAliases:(Values.LensAliases.of_json lensAliases) ()) None
            None])
+let disassociate_profiles =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workloadId =
+         flag "workload-id" (required string) ~doc:"STRING WorkloadId"
+       and profileArns =
+         flag "profile-arns" (required json_arg) ~doc:"JSON ProfileArns" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_profiles
+           (Values.DisassociateProfilesInput.make ~workloadId
+              ~profileArns:(Values.ProfileArns.of_json profileArns) ()) None
+           None])
 let export_lens =
   Command.async ~summary:""
     ([%map_open.Command
@@ -370,6 +633,50 @@ let get_answer =
               ~lensAlias ~questionId ())
            (Some Values.GetAnswerOutput.to_json)
            (Some Values.GetAnswerOutput.error_to_json)])
+let get_consolidated_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and includeSharedResources =
+         flag "include-shared-resources" (optional bool)
+           ~doc:"BOOL IncludeSharedResources"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT GetConsolidatedReportMaxResults"
+       and format =
+         flag "format" (required json_arg) ~doc:"JSON ReportFormat" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_consolidated_report
+           (Values.GetConsolidatedReportInput.make ?includeSharedResources
+              ?nextToken ?maxResults
+              ~format:(Values.ReportFormat.of_json format) ())
+           (Some Values.GetConsolidatedReportOutput.to_json)
+           (Some Values.GetConsolidatedReportOutput.error_to_json)])
+let get_global_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_global_settings (Fn.id ())
+           (Some Values.GetGlobalSettingsOutput.to_json)
+           (Some Values.GetGlobalSettingsOutput.error_to_json)])
 let get_lens =
   Command.async ~summary:""
     ([%map_open.Command
@@ -477,6 +784,105 @@ let get_milestone =
            (Values.GetMilestoneInput.make ~workloadId ~milestoneNumber ())
            (Some Values.GetMilestoneOutput.to_json)
            (Some Values.GetMilestoneOutput.error_to_json)])
+let get_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and profileVersion =
+         flag "profile-version" (optional string)
+           ~doc:"STRING ProfileVersion"
+       and profileArn =
+         flag "profile-arn" (required string) ~doc:"STRING ProfileArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_profile
+           (Values.GetProfileInput.make ?profileVersion ~profileArn ())
+           (Some Values.GetProfileOutput.to_json)
+           (Some Values.GetProfileOutput.error_to_json)])
+let get_profile_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_profile_template (Values.GetProfileTemplateInput.make ())
+           (Some Values.GetProfileTemplateOutput.to_json)
+           (Some Values.GetProfileTemplateOutput.error_to_json)])
+let get_review_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and templateArn =
+         flag "template-arn" (required string) ~doc:"STRING TemplateArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_review_template
+           (Values.GetReviewTemplateInput.make ~templateArn ())
+           (Some Values.GetReviewTemplateOutput.to_json)
+           (Some Values.GetReviewTemplateOutput.error_to_json)])
+let get_review_template_answer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and templateArn =
+         flag "template-arn" (required string) ~doc:"STRING TemplateArn"
+       and lensAlias =
+         flag "lens-alias" (required string) ~doc:"STRING LensAlias"
+       and questionId =
+         flag "question-id" (required string) ~doc:"STRING QuestionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_review_template_answer
+           (Values.GetReviewTemplateAnswerInput.make ~templateArn ~lensAlias
+              ~questionId ())
+           (Some Values.GetReviewTemplateAnswerOutput.to_json)
+           (Some Values.GetReviewTemplateAnswerOutput.error_to_json)])
+let get_review_template_lens_review =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and templateArn =
+         flag "template-arn" (required string) ~doc:"STRING TemplateArn"
+       and lensAlias =
+         flag "lens-alias" (required string) ~doc:"STRING LensAlias" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_review_template_lens_review
+           (Values.GetReviewTemplateLensReviewInput.make ~templateArn
+              ~lensAlias ())
+           (Some Values.GetReviewTemplateLensReviewOutput.to_json)
+           (Some Values.GetReviewTemplateLensReviewOutput.error_to_json)])
 let get_workload =
   Command.async ~summary:""
     ([%map_open.Command
@@ -537,6 +943,9 @@ let list_answers =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT ListAnswersMaxResults"
+       and questionPriority =
+         flag "question-priority" (optional json_arg)
+           ~doc:"JSON QuestionPriority"
        and workloadId =
          flag "workload-id" (required string) ~doc:"STRING WorkloadId"
        and lensAlias =
@@ -545,9 +954,72 @@ let list_answers =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_answers
            (Values.ListAnswersInput.make ?pillarId ?milestoneNumber
-              ?nextToken ?maxResults ~workloadId ~lensAlias ())
-           (Some Values.ListAnswersOutput.to_json)
+              ?nextToken ?maxResults
+              ?questionPriority:(Option.map
+                                   ~f:Values.QuestionPriority.of_json
+                                   questionPriority) ~workloadId ~lensAlias
+              ()) (Some Values.ListAnswersOutput.to_json)
            (Some Values.ListAnswersOutput.error_to_json)])
+let list_check_details =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and workloadId =
+         flag "workload-id" (required string) ~doc:"STRING WorkloadId"
+       and lensArn = flag "lens-arn" (required string) ~doc:"STRING LensArn"
+       and pillarId =
+         flag "pillar-id" (required string) ~doc:"STRING PillarId"
+       and questionId =
+         flag "question-id" (required string) ~doc:"STRING QuestionId"
+       and choiceId =
+         flag "choice-id" (required string) ~doc:"STRING ChoiceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_check_details
+           (Values.ListCheckDetailsInput.make ?nextToken ?maxResults
+              ~workloadId ~lensArn ~pillarId ~questionId ~choiceId ())
+           (Some Values.ListCheckDetailsOutput.to_json)
+           (Some Values.ListCheckDetailsOutput.error_to_json)])
+let list_check_summaries =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and workloadId =
+         flag "workload-id" (required string) ~doc:"STRING WorkloadId"
+       and lensArn = flag "lens-arn" (required string) ~doc:"STRING LensArn"
+       and pillarId =
+         flag "pillar-id" (required string) ~doc:"STRING PillarId"
+       and questionId =
+         flag "question-id" (required string) ~doc:"STRING QuestionId"
+       and choiceId =
+         flag "choice-id" (required string) ~doc:"STRING ChoiceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_check_summaries
+           (Values.ListCheckSummariesInput.make ?nextToken ?maxResults
+              ~workloadId ~lensArn ~pillarId ~questionId ~choiceId ())
+           (Some Values.ListCheckSummariesOutput.to_json)
+           (Some Values.ListCheckSummariesOutput.error_to_json)])
 let list_lens_review_improvements =
   Command.async ~summary:""
     ([%map_open.Command
@@ -567,6 +1039,9 @@ let list_lens_review_improvements =
        and maxResults =
          flag "max-results" (optional int)
            ~doc:"INT ListLensReviewImprovementsMaxResults"
+       and questionPriority =
+         flag "question-priority" (optional json_arg)
+           ~doc:"JSON QuestionPriority"
        and workloadId =
          flag "workload-id" (required string) ~doc:"STRING WorkloadId"
        and lensAlias =
@@ -575,7 +1050,10 @@ let list_lens_review_improvements =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_lens_review_improvements
            (Values.ListLensReviewImprovementsInput.make ?pillarId
-              ?milestoneNumber ?nextToken ?maxResults ~workloadId ~lensAlias
+              ?milestoneNumber ?nextToken ?maxResults
+              ?questionPriority:(Option.map
+                                   ~f:Values.QuestionPriority.of_json
+                                   questionPriority) ~workloadId ~lensAlias
               ()) (Some Values.ListLensReviewImprovementsOutput.to_json)
            (Some Values.ListLensReviewImprovementsOutput.error_to_json)])
 let list_lens_reviews =
@@ -621,14 +1099,16 @@ let list_lens_shares =
        and maxResults =
          flag "max-results" (optional int)
            ~doc:"INT ListWorkloadSharesMaxResults"
+       and status = flag "status" (optional json_arg) ~doc:"JSON ShareStatus"
        and lensAlias =
          flag "lens-alias" (required string) ~doc:"STRING LensAlias" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_lens_shares
            (Values.ListLensSharesInput.make ?sharedWithPrefix ?nextToken
-              ?maxResults ~lensAlias ())
-           (Some Values.ListLensSharesOutput.to_json)
+              ?maxResults
+              ?status:(Option.map ~f:Values.ShareStatus.of_json status)
+              ~lensAlias ()) (Some Values.ListLensSharesOutput.to_json)
            (Some Values.ListLensSharesOutput.error_to_json)])
 let list_lenses =
   Command.async ~summary:""
@@ -697,13 +1177,145 @@ let list_notifications =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int)
-           ~doc:"INT ListNotificationsMaxResults" in
+           ~doc:"INT ListNotificationsMaxResults"
+       and resourceArn =
+         flag "resource-arn" (optional string) ~doc:"STRING ResourceArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_notifications
            (Values.ListNotificationsInput.make ?workloadId ?nextToken
-              ?maxResults ()) (Some Values.ListNotificationsOutput.to_json)
+              ?maxResults ?resourceArn ())
+           (Some Values.ListNotificationsOutput.to_json)
            (Some Values.ListNotificationsOutput.error_to_json)])
+let list_profile_notifications =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workloadId =
+         flag "workload-id" (optional string) ~doc:"STRING WorkloadId"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_profile_notifications
+           (Values.ListProfileNotificationsInput.make ?workloadId ?nextToken
+              ?maxResults ())
+           (Some Values.ListProfileNotificationsOutput.to_json)
+           (Some Values.ListProfileNotificationsOutput.error_to_json)])
+let list_profile_shares =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sharedWithPrefix =
+         flag "shared-with-prefix" (optional string)
+           ~doc:"STRING SharedWithPrefix"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListProfileSharesMaxResults"
+       and status = flag "status" (optional json_arg) ~doc:"JSON ShareStatus"
+       and profileArn =
+         flag "profile-arn" (required string) ~doc:"STRING ProfileArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_profile_shares
+           (Values.ListProfileSharesInput.make ?sharedWithPrefix ?nextToken
+              ?maxResults
+              ?status:(Option.map ~f:Values.ShareStatus.of_json status)
+              ~profileArn ()) (Some Values.ListProfileSharesOutput.to_json)
+           (Some Values.ListProfileSharesOutput.error_to_json)])
+let list_profiles =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and profileNamePrefix =
+         flag "profile-name-prefix" (optional string)
+           ~doc:"STRING ProfileNamePrefix"
+       and profileOwnerType =
+         flag "profile-owner-type" (optional json_arg)
+           ~doc:"JSON ProfileOwnerType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_profiles
+           (Values.ListProfilesInput.make ?profileNamePrefix
+              ?profileOwnerType:(Option.map
+                                   ~f:Values.ProfileOwnerType.of_json
+                                   profileOwnerType) ?nextToken ?maxResults
+              ()) (Some Values.ListProfilesOutput.to_json)
+           (Some Values.ListProfilesOutput.error_to_json)])
+let list_review_template_answers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and pillarId =
+         flag "pillar-id" (optional string) ~doc:"STRING PillarId"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListReviewTemplateAnswersMaxResults"
+       and templateArn =
+         flag "template-arn" (required string) ~doc:"STRING TemplateArn"
+       and lensAlias =
+         flag "lens-alias" (required string) ~doc:"STRING LensAlias" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_review_template_answers
+           (Values.ListReviewTemplateAnswersInput.make ?pillarId ?nextToken
+              ?maxResults ~templateArn ~lensAlias ())
+           (Some Values.ListReviewTemplateAnswersOutput.to_json)
+           (Some Values.ListReviewTemplateAnswersOutput.error_to_json)])
+let list_review_templates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_review_templates
+           (Values.ListReviewTemplatesInput.make ?nextToken ?maxResults ())
+           (Some Values.ListReviewTemplatesOutput.to_json)
+           (Some Values.ListReviewTemplatesOutput.error_to_json)])
 let list_share_invitations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -727,7 +1339,13 @@ let list_share_invitations =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int)
-           ~doc:"INT ListShareInvitationsMaxResults" in
+           ~doc:"INT ListShareInvitationsMaxResults"
+       and profileNamePrefix =
+         flag "profile-name-prefix" (optional string)
+           ~doc:"STRING ProfileNamePrefix"
+       and templateNamePrefix =
+         flag "template-name-prefix" (optional string)
+           ~doc:"STRING TemplateNamePrefix" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_share_invitations
@@ -736,7 +1354,8 @@ let list_share_invitations =
               ?shareResourceType:(Option.map
                                     ~f:Values.ShareResourceType.of_json
                                     shareResourceType) ?nextToken ?maxResults
-              ()) (Some Values.ListShareInvitationsOutput.to_json)
+              ?profileNamePrefix ?templateNamePrefix ())
+           (Some Values.ListShareInvitationsOutput.to_json)
            (Some Values.ListShareInvitationsOutput.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
@@ -756,6 +1375,35 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceInput.make ~workloadArn ())
            (Some Values.ListTagsForResourceOutput.to_json)
            (Some Values.ListTagsForResourceOutput.error_to_json)])
+let list_template_shares =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sharedWithPrefix =
+         flag "shared-with-prefix" (optional string)
+           ~doc:"STRING SharedWithPrefix"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListTemplateSharesMaxResults"
+       and status = flag "status" (optional json_arg) ~doc:"JSON ShareStatus"
+       and templateArn =
+         flag "template-arn" (required string) ~doc:"STRING TemplateArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_template_shares
+           (Values.ListTemplateSharesInput.make ?sharedWithPrefix ?nextToken
+              ?maxResults
+              ?status:(Option.map ~f:Values.ShareStatus.of_json status)
+              ~templateArn ()) (Some Values.ListTemplateSharesOutput.to_json)
+           (Some Values.ListTemplateSharesOutput.error_to_json)])
 let list_workload_shares =
   Command.async ~summary:""
     ([%map_open.Command
@@ -774,14 +1422,16 @@ let list_workload_shares =
        and maxResults =
          flag "max-results" (optional int)
            ~doc:"INT ListWorkloadSharesMaxResults"
+       and status = flag "status" (optional json_arg) ~doc:"JSON ShareStatus"
        and workloadId =
          flag "workload-id" (required string) ~doc:"STRING WorkloadId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_workload_shares
            (Values.ListWorkloadSharesInput.make ?sharedWithPrefix ?nextToken
-              ?maxResults ~workloadId ())
-           (Some Values.ListWorkloadSharesOutput.to_json)
+              ?maxResults
+              ?status:(Option.map ~f:Values.ShareStatus.of_json status)
+              ~workloadId ()) (Some Values.ListWorkloadSharesOutput.to_json)
            (Some Values.ListWorkloadSharesOutput.error_to_json)])
 let list_workloads =
   Command.async ~summary:""
@@ -885,6 +1535,63 @@ let update_answer =
               ~workloadId ~lensAlias ~questionId ())
            (Some Values.UpdateAnswerOutput.to_json)
            (Some Values.UpdateAnswerOutput.error_to_json)])
+let update_global_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and organizationSharingStatus =
+         flag "organization-sharing-status" (optional json_arg)
+           ~doc:"JSON OrganizationSharingStatus"
+       and discoveryIntegrationStatus =
+         flag "discovery-integration-status" (optional json_arg)
+           ~doc:"JSON DiscoveryIntegrationStatus"
+       and jiraConfiguration =
+         flag "jira-configuration" (optional json_arg)
+           ~doc:"JSON AccountJiraConfigurationInput" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_global_settings
+           (Values.UpdateGlobalSettingsInput.make
+              ?organizationSharingStatus:(Option.map
+                                            ~f:Values.OrganizationSharingStatus.of_json
+                                            organizationSharingStatus)
+              ?discoveryIntegrationStatus:(Option.map
+                                             ~f:Values.DiscoveryIntegrationStatus.of_json
+                                             discoveryIntegrationStatus)
+              ?jiraConfiguration:(Option.map
+                                    ~f:Values.AccountJiraConfigurationInput.of_json
+                                    jiraConfiguration) ()) None None])
+let update_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workloadId =
+         flag "workload-id" (required string) ~doc:"STRING WorkloadId"
+       and clientRequestToken =
+         flag "client-request-token" (required string)
+           ~doc:"STRING ClientRequestToken"
+       and integratingService =
+         flag "integrating-service" (required json_arg)
+           ~doc:"JSON IntegratingService" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_integration
+           (Values.UpdateIntegrationInput.make ~workloadId
+              ~clientRequestToken
+              ~integratingService:(Values.IntegratingService.of_json
+                                     integratingService) ()) None None])
 let update_lens_review =
   Command.async ~summary:""
     ([%map_open.Command
@@ -899,6 +1606,9 @@ let update_lens_review =
          flag "lens-notes" (optional string) ~doc:"STRING Notes"
        and pillarNotes =
          flag "pillar-notes" (optional json_arg) ~doc:"JSON PillarNotes"
+       and jiraConfiguration =
+         flag "jira-configuration" (optional json_arg)
+           ~doc:"JSON JiraSelectedQuestionConfiguration"
        and workloadId =
          flag "workload-id" (required string) ~doc:"STRING WorkloadId"
        and lensAlias =
@@ -908,9 +1618,140 @@ let update_lens_review =
            Io.update_lens_review
            (Values.UpdateLensReviewInput.make ?lensNotes
               ?pillarNotes:(Option.map ~f:Values.PillarNotes.of_json
-                              pillarNotes) ~workloadId ~lensAlias ())
-           (Some Values.UpdateLensReviewOutput.to_json)
+                              pillarNotes)
+              ?jiraConfiguration:(Option.map
+                                    ~f:Values.JiraSelectedQuestionConfiguration.of_json
+                                    jiraConfiguration) ~workloadId ~lensAlias
+              ()) (Some Values.UpdateLensReviewOutput.to_json)
            (Some Values.UpdateLensReviewOutput.error_to_json)])
+let update_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and profileDescription =
+         flag "profile-description" (optional string)
+           ~doc:"STRING ProfileDescription"
+       and profileQuestions =
+         flag "profile-questions" (optional json_arg)
+           ~doc:"JSON ProfileQuestionUpdates"
+       and profileArn =
+         flag "profile-arn" (required string) ~doc:"STRING ProfileArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_profile
+           (Values.UpdateProfileInput.make ?profileDescription
+              ?profileQuestions:(Option.map
+                                   ~f:Values.ProfileQuestionUpdates.of_json
+                                   profileQuestions) ~profileArn ())
+           (Some Values.UpdateProfileOutput.to_json)
+           (Some Values.UpdateProfileOutput.error_to_json)])
+let update_review_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and templateName =
+         flag "template-name" (optional string) ~doc:"STRING TemplateName"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING TemplateDescription"
+       and notes = flag "notes" (optional string) ~doc:"STRING Notes"
+       and lensesToAssociate =
+         flag "lenses-to-associate" (optional json_arg)
+           ~doc:"JSON ReviewTemplateLensAliases"
+       and lensesToDisassociate =
+         flag "lenses-to-disassociate" (optional json_arg)
+           ~doc:"JSON ReviewTemplateLensAliases"
+       and templateArn =
+         flag "template-arn" (required string) ~doc:"STRING TemplateArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_review_template
+           (Values.UpdateReviewTemplateInput.make ?templateName ?description
+              ?notes
+              ?lensesToAssociate:(Option.map
+                                    ~f:Values.ReviewTemplateLensAliases.of_json
+                                    lensesToAssociate)
+              ?lensesToDisassociate:(Option.map
+                                       ~f:Values.ReviewTemplateLensAliases.of_json
+                                       lensesToDisassociate) ~templateArn ())
+           (Some Values.UpdateReviewTemplateOutput.to_json)
+           (Some Values.UpdateReviewTemplateOutput.error_to_json)])
+let update_review_template_answer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and selectedChoices =
+         flag "selected-choices" (optional json_arg)
+           ~doc:"JSON SelectedChoices"
+       and choiceUpdates =
+         flag "choice-updates" (optional json_arg) ~doc:"JSON ChoiceUpdates"
+       and notes = flag "notes" (optional string) ~doc:"STRING Notes"
+       and isApplicable =
+         flag "is-applicable" (optional bool) ~doc:"BOOL IsApplicable"
+       and reason =
+         flag "reason" (optional json_arg) ~doc:"JSON AnswerReason"
+       and templateArn =
+         flag "template-arn" (required string) ~doc:"STRING TemplateArn"
+       and lensAlias =
+         flag "lens-alias" (required string) ~doc:"STRING LensAlias"
+       and questionId =
+         flag "question-id" (required string) ~doc:"STRING QuestionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_review_template_answer
+           (Values.UpdateReviewTemplateAnswerInput.make
+              ?selectedChoices:(Option.map ~f:Values.SelectedChoices.of_json
+                                  selectedChoices)
+              ?choiceUpdates:(Option.map ~f:Values.ChoiceUpdates.of_json
+                                choiceUpdates) ?notes ?isApplicable
+              ?reason:(Option.map ~f:Values.AnswerReason.of_json reason)
+              ~templateArn ~lensAlias ~questionId ())
+           (Some Values.UpdateReviewTemplateAnswerOutput.to_json)
+           (Some Values.UpdateReviewTemplateAnswerOutput.error_to_json)])
+let update_review_template_lens_review =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and lensNotes =
+         flag "lens-notes" (optional string) ~doc:"STRING Notes"
+       and pillarNotes =
+         flag "pillar-notes" (optional json_arg) ~doc:"JSON PillarNotes"
+       and templateArn =
+         flag "template-arn" (required string) ~doc:"STRING TemplateArn"
+       and lensAlias =
+         flag "lens-alias" (required string) ~doc:"STRING LensAlias" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_review_template_lens_review
+           (Values.UpdateReviewTemplateLensReviewInput.make ?lensNotes
+              ?pillarNotes:(Option.map ~f:Values.PillarNotes.of_json
+                              pillarNotes) ~templateArn ~lensAlias ())
+           (Some Values.UpdateReviewTemplateLensReviewOutput.to_json)
+           (Some Values.UpdateReviewTemplateLensReviewOutput.error_to_json)])
 let update_share_invitation =
   Command.async ~summary:""
     ([%map_open.Command
@@ -983,6 +1824,15 @@ let update_workload =
        and improvementStatus =
          flag "improvement-status" (optional json_arg)
            ~doc:"JSON WorkloadImprovementStatus"
+       and discoveryConfig =
+         flag "discovery-config" (optional json_arg)
+           ~doc:"JSON WorkloadDiscoveryConfig"
+       and applications =
+         flag "applications" (optional json_arg)
+           ~doc:"JSON WorkloadApplications"
+       and jiraConfiguration =
+         flag "jira-configuration" (optional json_arg)
+           ~doc:"JSON WorkloadJiraConfigurationInput"
        and workloadId =
          flag "workload-id" (required string) ~doc:"STRING WorkloadId" in
        fun () ->
@@ -1005,7 +1855,16 @@ let update_workload =
               ?industry ?notes
               ?improvementStatus:(Option.map
                                     ~f:Values.WorkloadImprovementStatus.of_json
-                                    improvementStatus) ~workloadId ())
+                                    improvementStatus)
+              ?discoveryConfig:(Option.map
+                                  ~f:Values.WorkloadDiscoveryConfig.of_json
+                                  discoveryConfig)
+              ?applications:(Option.map
+                               ~f:Values.WorkloadApplications.of_json
+                               applications)
+              ?jiraConfiguration:(Option.map
+                                    ~f:Values.WorkloadJiraConfigurationInput.of_json
+                                    jiraConfiguration) ~workloadId ())
            (Some Values.UpdateWorkloadOutput.to_json)
            (Some Values.UpdateWorkloadOutput.error_to_json)])
 let update_workload_share =
@@ -1055,45 +1914,126 @@ let upgrade_lens_review =
            Io.upgrade_lens_review
            (Values.UpgradeLensReviewInput.make ?clientRequestToken
               ~workloadId ~lensAlias ~milestoneName ()) None None])
+let upgrade_profile_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and milestoneName =
+         flag "milestone-name" (optional string) ~doc:"STRING MilestoneName"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and workloadId =
+         flag "workload-id" (required string) ~doc:"STRING WorkloadId"
+       and profileArn =
+         flag "profile-arn" (required string) ~doc:"STRING ProfileArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.upgrade_profile_version
+           (Values.UpgradeProfileVersionInput.make ?milestoneName
+              ?clientRequestToken ~workloadId ~profileArn ()) None None])
+let upgrade_review_template_lens_review =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and templateArn =
+         flag "template-arn" (required string) ~doc:"STRING TemplateArn"
+       and lensAlias =
+         flag "lens-alias" (required string) ~doc:"STRING LensAlias" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.upgrade_review_template_lens_review
+           (Values.UpgradeReviewTemplateLensReviewInput.make
+              ?clientRequestToken ~templateArn ~lensAlias ()) None None])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-lenses", associate_lenses);
+    ("associate-profiles", associate_profiles);
     ("create-lens-share", create_lens_share);
     ("create-lens-version", create_lens_version);
     ("create-milestone", create_milestone);
+    ("create-profile", create_profile);
+    ("create-profile-share", create_profile_share);
+    ("create-review-template", create_review_template);
+    ("create-template-share", create_template_share);
     ("create-workload", create_workload);
     ("create-workload-share", create_workload_share);
     ("delete-lens", delete_lens);
     ("delete-lens-share", delete_lens_share);
+    ("delete-profile", delete_profile);
+    ("delete-profile-share", delete_profile_share);
+    ("delete-review-template", delete_review_template);
+    ("delete-template-share", delete_template_share);
     ("delete-workload", delete_workload);
     ("delete-workload-share", delete_workload_share);
     ("disassociate-lenses", disassociate_lenses);
+    ("disassociate-profiles", disassociate_profiles);
     ("export-lens", export_lens);
     ("get-answer", get_answer);
+    ("get-consolidated-report", get_consolidated_report);
+    ("get-global-settings", get_global_settings);
     ("get-lens", get_lens);
     ("get-lens-review", get_lens_review);
     ("get-lens-review-report", get_lens_review_report);
     ("get-lens-version-difference", get_lens_version_difference);
     ("get-milestone", get_milestone);
+    ("get-profile", get_profile);
+    ("get-profile-template", get_profile_template);
+    ("get-review-template", get_review_template);
+    ("get-review-template-answer", get_review_template_answer);
+    ("get-review-template-lens-review", get_review_template_lens_review);
     ("get-workload", get_workload);
     ("import-lens", import_lens);
     ("list-answers", list_answers);
+    ("list-check-details", list_check_details);
+    ("list-check-summaries", list_check_summaries);
     ("list-lens-review-improvements", list_lens_review_improvements);
     ("list-lens-reviews", list_lens_reviews);
     ("list-lens-shares", list_lens_shares);
     ("list-lenses", list_lenses);
     ("list-milestones", list_milestones);
     ("list-notifications", list_notifications);
+    ("list-profile-notifications", list_profile_notifications);
+    ("list-profile-shares", list_profile_shares);
+    ("list-profiles", list_profiles);
+    ("list-review-template-answers", list_review_template_answers);
+    ("list-review-templates", list_review_templates);
     ("list-share-invitations", list_share_invitations);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-template-shares", list_template_shares);
     ("list-workload-shares", list_workload_shares);
     ("list-workloads", list_workloads);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-answer", update_answer);
+    ("update-global-settings", update_global_settings);
+    ("update-integration", update_integration);
     ("update-lens-review", update_lens_review);
+    ("update-profile", update_profile);
+    ("update-review-template", update_review_template);
+    ("update-review-template-answer", update_review_template_answer);
+    ("update-review-template-lens-review",
+      update_review_template_lens_review);
     ("update-share-invitation", update_share_invitation);
     ("update-workload", update_workload);
     ("update-workload-share", update_workload_share);
-    ("upgrade-lens-review", upgrade_lens_review)]
+    ("upgrade-lens-review", upgrade_lens_review);
+    ("upgrade-profile-version", upgrade_profile_version);
+    ("upgrade-review-template-lens-review",
+      upgrade_review_template_lens_review)]

@@ -2,18 +2,27 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AssociateFaces: (AssociateFacesRequest.t, AssociateFacesResponse.t,
+  AssociateFacesResponse.error) t 
   | CompareFaces: (CompareFacesRequest.t, CompareFacesResponse.t,
   CompareFacesResponse.error) t 
+  | CopyProjectVersion: (CopyProjectVersionRequest.t,
+  CopyProjectVersionResponse.t, CopyProjectVersionResponse.error) t 
   | CreateCollection: (CreateCollectionRequest.t, CreateCollectionResponse.t,
   CreateCollectionResponse.error) t 
   | CreateDataset: (CreateDatasetRequest.t, CreateDatasetResponse.t,
   CreateDatasetResponse.error) t 
+  | CreateFaceLivenessSession: (CreateFaceLivenessSessionRequest.t,
+  CreateFaceLivenessSessionResponse.t,
+  CreateFaceLivenessSessionResponse.error) t 
   | CreateProject: (CreateProjectRequest.t, CreateProjectResponse.t,
   CreateProjectResponse.error) t 
   | CreateProjectVersion: (CreateProjectVersionRequest.t,
   CreateProjectVersionResponse.t, CreateProjectVersionResponse.error) t 
   | CreateStreamProcessor: (CreateStreamProcessorRequest.t,
   CreateStreamProcessorResponse.t, CreateStreamProcessorResponse.error) t 
+  | CreateUser: (CreateUserRequest.t, CreateUserResponse.t,
+  CreateUserResponse.error) t 
   | DeleteCollection: (DeleteCollectionRequest.t, DeleteCollectionResponse.t,
   DeleteCollectionResponse.error) t 
   | DeleteDataset: (DeleteDatasetRequest.t, DeleteDatasetResponse.t,
@@ -22,10 +31,14 @@ type ('i, 'o, 'e) t =
   DeleteFacesResponse.error) t 
   | DeleteProject: (DeleteProjectRequest.t, DeleteProjectResponse.t,
   DeleteProjectResponse.error) t 
+  | DeleteProjectPolicy: (DeleteProjectPolicyRequest.t,
+  DeleteProjectPolicyResponse.t, DeleteProjectPolicyResponse.error) t 
   | DeleteProjectVersion: (DeleteProjectVersionRequest.t,
   DeleteProjectVersionResponse.t, DeleteProjectVersionResponse.error) t 
   | DeleteStreamProcessor: (DeleteStreamProcessorRequest.t,
   DeleteStreamProcessorResponse.t, DeleteStreamProcessorResponse.error) t 
+  | DeleteUser: (DeleteUserRequest.t, DeleteUserResponse.t,
+  DeleteUserResponse.error) t 
   | DescribeCollection: (DescribeCollectionRequest.t,
   DescribeCollectionResponse.t, DescribeCollectionResponse.error) t 
   | DescribeDataset: (DescribeDatasetRequest.t, DescribeDatasetResponse.t,
@@ -51,6 +64,8 @@ type ('i, 'o, 'e) t =
   DetectProtectiveEquipmentResponse.error) t 
   | DetectText: (DetectTextRequest.t, DetectTextResponse.t,
   DetectTextResponse.error) t 
+  | DisassociateFaces: (DisassociateFacesRequest.t,
+  DisassociateFacesResponse.t, DisassociateFacesResponse.error) t 
   | DistributeDatasetEntries: (DistributeDatasetEntriesRequest.t,
   DistributeDatasetEntriesResponse.t, DistributeDatasetEntriesResponse.error)
   t 
@@ -63,10 +78,15 @@ type ('i, 'o, 'e) t =
   GetContentModerationResponse.t, GetContentModerationResponse.error) t 
   | GetFaceDetection: (GetFaceDetectionRequest.t, GetFaceDetectionResponse.t,
   GetFaceDetectionResponse.error) t 
+  | GetFaceLivenessSessionResults: (GetFaceLivenessSessionResultsRequest.t,
+  GetFaceLivenessSessionResultsResponse.t,
+  GetFaceLivenessSessionResultsResponse.error) t 
   | GetFaceSearch: (GetFaceSearchRequest.t, GetFaceSearchResponse.t,
   GetFaceSearchResponse.error) t 
   | GetLabelDetection: (GetLabelDetectionRequest.t,
   GetLabelDetectionResponse.t, GetLabelDetectionResponse.error) t 
+  | GetMediaAnalysisJob: (GetMediaAnalysisJobRequest.t,
+  GetMediaAnalysisJobResponse.t, GetMediaAnalysisJobResponse.error) t 
   | GetPersonTracking: (GetPersonTrackingRequest.t,
   GetPersonTrackingResponse.t, GetPersonTrackingResponse.error) t 
   | GetSegmentDetection: (GetSegmentDetectionRequest.t,
@@ -83,16 +103,28 @@ type ('i, 'o, 'e) t =
   ListDatasetLabelsResponse.t, ListDatasetLabelsResponse.error) t 
   | ListFaces: (ListFacesRequest.t, ListFacesResponse.t,
   ListFacesResponse.error) t 
+  | ListMediaAnalysisJobs: (ListMediaAnalysisJobsRequest.t,
+  ListMediaAnalysisJobsResponse.t, ListMediaAnalysisJobsResponse.error) t 
+  | ListProjectPolicies: (ListProjectPoliciesRequest.t,
+  ListProjectPoliciesResponse.t, ListProjectPoliciesResponse.error) t 
   | ListStreamProcessors: (ListStreamProcessorsRequest.t,
   ListStreamProcessorsResponse.t, ListStreamProcessorsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListUsers: (ListUsersRequest.t, ListUsersResponse.t,
+  ListUsersResponse.error) t 
+  | PutProjectPolicy: (PutProjectPolicyRequest.t, PutProjectPolicyResponse.t,
+  PutProjectPolicyResponse.error) t 
   | RecognizeCelebrities: (RecognizeCelebritiesRequest.t,
   RecognizeCelebritiesResponse.t, RecognizeCelebritiesResponse.error) t 
   | SearchFaces: (SearchFacesRequest.t, SearchFacesResponse.t,
   SearchFacesResponse.error) t 
   | SearchFacesByImage: (SearchFacesByImageRequest.t,
   SearchFacesByImageResponse.t, SearchFacesByImageResponse.error) t 
+  | SearchUsers: (SearchUsersRequest.t, SearchUsersResponse.t,
+  SearchUsersResponse.error) t 
+  | SearchUsersByImage: (SearchUsersByImageRequest.t,
+  SearchUsersByImageResponse.t, SearchUsersByImageResponse.error) t 
   | StartCelebrityRecognition: (StartCelebrityRecognitionRequest.t,
   StartCelebrityRecognitionResponse.t,
   StartCelebrityRecognitionResponse.error) t 
@@ -104,6 +136,8 @@ type ('i, 'o, 'e) t =
   StartFaceSearchResponse.error) t 
   | StartLabelDetection: (StartLabelDetectionRequest.t,
   StartLabelDetectionResponse.t, StartLabelDetectionResponse.error) t 
+  | StartMediaAnalysisJob: (StartMediaAnalysisJobRequest.t,
+  StartMediaAnalysisJobResponse.t, StartMediaAnalysisJobResponse.error) t 
   | StartPersonTracking: (StartPersonTrackingRequest.t,
   StartPersonTrackingResponse.t, StartPersonTrackingResponse.error) t 
   | StartProjectVersion: (StartProjectVersionRequest.t,
@@ -124,20 +158,28 @@ type ('i, 'o, 'e) t =
   UntagResourceResponse.error) t 
   | UpdateDatasetEntries: (UpdateDatasetEntriesRequest.t,
   UpdateDatasetEntriesResponse.t, UpdateDatasetEntriesResponse.error) t 
+  | UpdateStreamProcessor: (UpdateStreamProcessorRequest.t,
+  UpdateStreamProcessorResponse.t, UpdateStreamProcessorResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AssociateFaces -> `POST
   | CompareFaces -> `POST
+  | CopyProjectVersion -> `POST
   | CreateCollection -> `POST
   | CreateDataset -> `POST
+  | CreateFaceLivenessSession -> `POST
   | CreateProject -> `POST
   | CreateProjectVersion -> `POST
   | CreateStreamProcessor -> `POST
+  | CreateUser -> `POST
   | DeleteCollection -> `POST
   | DeleteDataset -> `POST
   | DeleteFaces -> `POST
   | DeleteProject -> `POST
+  | DeleteProjectPolicy -> `POST
   | DeleteProjectVersion -> `POST
   | DeleteStreamProcessor -> `POST
+  | DeleteUser -> `POST
   | DescribeCollection -> `POST
   | DescribeDataset -> `POST
   | DescribeProjectVersions -> `POST
@@ -149,13 +191,16 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DetectModerationLabels -> `POST
   | DetectProtectiveEquipment -> `POST
   | DetectText -> `POST
+  | DisassociateFaces -> `POST
   | DistributeDatasetEntries -> `POST
   | GetCelebrityInfo -> `POST
   | GetCelebrityRecognition -> `POST
   | GetContentModeration -> `POST
   | GetFaceDetection -> `POST
+  | GetFaceLivenessSessionResults -> `POST
   | GetFaceSearch -> `POST
   | GetLabelDetection -> `POST
+  | GetMediaAnalysisJob -> `POST
   | GetPersonTracking -> `POST
   | GetSegmentDetection -> `POST
   | GetTextDetection -> `POST
@@ -164,16 +209,23 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListDatasetEntries -> `POST
   | ListDatasetLabels -> `POST
   | ListFaces -> `POST
+  | ListMediaAnalysisJobs -> `POST
+  | ListProjectPolicies -> `POST
   | ListStreamProcessors -> `POST
   | ListTagsForResource -> `POST
+  | ListUsers -> `POST
+  | PutProjectPolicy -> `POST
   | RecognizeCelebrities -> `POST
   | SearchFaces -> `POST
   | SearchFacesByImage -> `POST
+  | SearchUsers -> `POST
+  | SearchUsersByImage -> `POST
   | StartCelebrityRecognition -> `POST
   | StartContentModeration -> `POST
   | StartFaceDetection -> `POST
   | StartFaceSearch -> `POST
   | StartLabelDetection -> `POST
+  | StartMediaAnalysisJob -> `POST
   | StartPersonTracking -> `POST
   | StartProjectVersion -> `POST
   | StartSegmentDetection -> `POST
@@ -184,21 +236,28 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateDatasetEntries -> `POST
+  | UpdateStreamProcessor -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AssociateFaces -> (Format.kasprintf Uri.of_string) "/"
       | CompareFaces -> (Format.kasprintf Uri.of_string) "/"
+      | CopyProjectVersion -> (Format.kasprintf Uri.of_string) "/"
       | CreateCollection -> (Format.kasprintf Uri.of_string) "/"
       | CreateDataset -> (Format.kasprintf Uri.of_string) "/"
+      | CreateFaceLivenessSession -> (Format.kasprintf Uri.of_string) "/"
       | CreateProject -> (Format.kasprintf Uri.of_string) "/"
       | CreateProjectVersion -> (Format.kasprintf Uri.of_string) "/"
       | CreateStreamProcessor -> (Format.kasprintf Uri.of_string) "/"
+      | CreateUser -> (Format.kasprintf Uri.of_string) "/"
       | DeleteCollection -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDataset -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFaces -> (Format.kasprintf Uri.of_string) "/"
       | DeleteProject -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteProjectPolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeleteProjectVersion -> (Format.kasprintf Uri.of_string) "/"
       | DeleteStreamProcessor -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteUser -> (Format.kasprintf Uri.of_string) "/"
       | DescribeCollection -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDataset -> (Format.kasprintf Uri.of_string) "/"
       | DescribeProjectVersions -> (Format.kasprintf Uri.of_string) "/"
@@ -210,13 +269,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DetectModerationLabels -> (Format.kasprintf Uri.of_string) "/"
       | DetectProtectiveEquipment -> (Format.kasprintf Uri.of_string) "/"
       | DetectText -> (Format.kasprintf Uri.of_string) "/"
+      | DisassociateFaces -> (Format.kasprintf Uri.of_string) "/"
       | DistributeDatasetEntries -> (Format.kasprintf Uri.of_string) "/"
       | GetCelebrityInfo -> (Format.kasprintf Uri.of_string) "/"
       | GetCelebrityRecognition -> (Format.kasprintf Uri.of_string) "/"
       | GetContentModeration -> (Format.kasprintf Uri.of_string) "/"
       | GetFaceDetection -> (Format.kasprintf Uri.of_string) "/"
+      | GetFaceLivenessSessionResults -> (Format.kasprintf Uri.of_string) "/"
       | GetFaceSearch -> (Format.kasprintf Uri.of_string) "/"
       | GetLabelDetection -> (Format.kasprintf Uri.of_string) "/"
+      | GetMediaAnalysisJob -> (Format.kasprintf Uri.of_string) "/"
       | GetPersonTracking -> (Format.kasprintf Uri.of_string) "/"
       | GetSegmentDetection -> (Format.kasprintf Uri.of_string) "/"
       | GetTextDetection -> (Format.kasprintf Uri.of_string) "/"
@@ -225,16 +287,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListDatasetEntries -> (Format.kasprintf Uri.of_string) "/"
       | ListDatasetLabels -> (Format.kasprintf Uri.of_string) "/"
       | ListFaces -> (Format.kasprintf Uri.of_string) "/"
+      | ListMediaAnalysisJobs -> (Format.kasprintf Uri.of_string) "/"
+      | ListProjectPolicies -> (Format.kasprintf Uri.of_string) "/"
       | ListStreamProcessors -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | ListUsers -> (Format.kasprintf Uri.of_string) "/"
+      | PutProjectPolicy -> (Format.kasprintf Uri.of_string) "/"
       | RecognizeCelebrities -> (Format.kasprintf Uri.of_string) "/"
       | SearchFaces -> (Format.kasprintf Uri.of_string) "/"
       | SearchFacesByImage -> (Format.kasprintf Uri.of_string) "/"
+      | SearchUsers -> (Format.kasprintf Uri.of_string) "/"
+      | SearchUsersByImage -> (Format.kasprintf Uri.of_string) "/"
       | StartCelebrityRecognition -> (Format.kasprintf Uri.of_string) "/"
       | StartContentModeration -> (Format.kasprintf Uri.of_string) "/"
       | StartFaceDetection -> (Format.kasprintf Uri.of_string) "/"
       | StartFaceSearch -> (Format.kasprintf Uri.of_string) "/"
       | StartLabelDetection -> (Format.kasprintf Uri.of_string) "/"
+      | StartMediaAnalysisJob -> (Format.kasprintf Uri.of_string) "/"
       | StartPersonTracking -> (Format.kasprintf Uri.of_string) "/"
       | StartProjectVersion -> (Format.kasprintf Uri.of_string) "/"
       | StartSegmentDetection -> (Format.kasprintf Uri.of_string) "/"
@@ -244,10 +313,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | StopStreamProcessor -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateDatasetEntries -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateDatasetEntries -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateStreamProcessor -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
+  | AssociateFaces ->
+      let json = AssociateFacesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.AssociateFaces")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CompareFaces ->
       let json = CompareFacesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -255,6 +333,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RekognitionService.CompareFaces")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CopyProjectVersion ->
+      let json = CopyProjectVersionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.CopyProjectVersion")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateCollection ->
       let json = CreateCollectionRequest.to_json req in
@@ -271,6 +357,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RekognitionService.CreateDataset")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateFaceLivenessSession ->
+      let json = CreateFaceLivenessSessionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.CreateFaceLivenessSession")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateProject ->
       let json = CreateProjectRequest.to_json req in
@@ -295,6 +389,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RekognitionService.CreateStreamProcessor")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateUser ->
+      let json = CreateUserRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.CreateUser")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteCollection ->
       let json = DeleteCollectionRequest.to_json req in
@@ -328,6 +430,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RekognitionService.DeleteProject")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteProjectPolicy ->
+      let json = DeleteProjectPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.DeleteProjectPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteProjectVersion ->
       let json = DeleteProjectVersionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -343,6 +453,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RekognitionService.DeleteStreamProcessor")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteUser ->
+      let json = DeleteUserRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.DeleteUser")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeCollection ->
       let json = DescribeCollectionRequest.to_json req in
@@ -432,6 +550,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RekognitionService.DetectText")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisassociateFaces ->
+      let json = DisassociateFacesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.DisassociateFaces")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DistributeDatasetEntries ->
       let json = DistributeDatasetEntriesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -472,6 +598,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RekognitionService.GetFaceDetection")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetFaceLivenessSessionResults ->
+      let json = GetFaceLivenessSessionResultsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "RekognitionService.GetFaceLivenessSessionResults")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetFaceSearch ->
       let json = GetFaceSearchRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -487,6 +622,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RekognitionService.GetLabelDetection")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetMediaAnalysisJob ->
+      let json = GetMediaAnalysisJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.GetMediaAnalysisJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetPersonTracking ->
       let json = GetPersonTrackingRequest.to_json req in
@@ -552,6 +695,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RekognitionService.ListFaces")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMediaAnalysisJobs ->
+      let json = ListMediaAnalysisJobsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.ListMediaAnalysisJobs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListProjectPolicies ->
+      let json = ListProjectPoliciesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.ListProjectPolicies")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListStreamProcessors ->
       let json = ListStreamProcessorsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -567,6 +726,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RekognitionService.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListUsers ->
+      let json = ListUsersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.ListUsers")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutProjectPolicy ->
+      let json = PutProjectPolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.PutProjectPolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RecognizeCelebrities ->
       let json = RecognizeCelebritiesRequest.to_json req in
@@ -591,6 +766,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RekognitionService.SearchFacesByImage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SearchUsers ->
+      let json = SearchUsersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.SearchUsers")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SearchUsersByImage ->
+      let json = SearchUsersByImageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.SearchUsersByImage")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartCelebrityRecognition ->
       let json = StartCelebrityRecognitionRequest.to_json req in
@@ -631,6 +822,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RekognitionService.StartLabelDetection")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartMediaAnalysisJob ->
+      let json = StartMediaAnalysisJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.StartMediaAnalysisJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartPersonTracking ->
       let json = StartPersonTrackingRequest.to_json req in
@@ -712,6 +911,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RekognitionService.UpdateDatasetEntries")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateStreamProcessor ->
+      let json = UpdateStreamProcessorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RekognitionService.UpdateStreamProcessor")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -735,12 +942,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | AssociateFaces ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateFacesResponse.of_json json)
+      else
+        Error (parse_aws_error (Some AssociateFacesResponse.error_of_json))
   | CompareFaces ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CompareFacesResponse.of_json json)
       else Error (parse_aws_error (Some CompareFacesResponse.error_of_json))
+  | CopyProjectVersion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CopyProjectVersionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CopyProjectVersionResponse.error_of_json))
   | CreateCollection ->
       if is_success
       then
@@ -754,6 +976,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateDatasetResponse.of_json json)
       else Error (parse_aws_error (Some CreateDatasetResponse.error_of_json))
+  | CreateFaceLivenessSession ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateFaceLivenessSessionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateFaceLivenessSessionResponse.error_of_json))
   | CreateProject ->
       if is_success
       then
@@ -776,6 +1007,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateStreamProcessorResponse.error_of_json))
+  | CreateUser ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateUserResponse.of_json json)
+      else Error (parse_aws_error (Some CreateUserResponse.error_of_json))
   | DeleteCollection ->
       if is_success
       then
@@ -801,6 +1038,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteProjectResponse.of_json json)
       else Error (parse_aws_error (Some DeleteProjectResponse.error_of_json))
+  | DeleteProjectPolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteProjectPolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteProjectPolicyResponse.error_of_json))
   | DeleteProjectVersion ->
       if is_success
       then
@@ -817,6 +1062,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteStreamProcessorResponse.error_of_json))
+  | DeleteUser ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteUserResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteUserResponse.error_of_json))
   | DescribeCollection ->
       if is_success
       then
@@ -901,6 +1152,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DetectTextResponse.of_json json)
       else Error (parse_aws_error (Some DetectTextResponse.error_of_json))
+  | DisassociateFaces ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateFacesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DisassociateFacesResponse.error_of_json))
   | DistributeDatasetEntries ->
       if is_success
       then
@@ -941,6 +1200,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetFaceDetectionResponse.of_json json)
       else
         Error (parse_aws_error (Some GetFaceDetectionResponse.error_of_json))
+  | GetFaceLivenessSessionResults ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetFaceLivenessSessionResultsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetFaceLivenessSessionResultsResponse.error_of_json))
   | GetFaceSearch ->
       if is_success
       then
@@ -955,6 +1223,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetLabelDetectionResponse.error_of_json))
+  | GetMediaAnalysisJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetMediaAnalysisJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetMediaAnalysisJobResponse.error_of_json))
   | GetPersonTracking ->
       if is_success
       then
@@ -1013,6 +1289,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListFacesResponse.of_json json)
       else Error (parse_aws_error (Some ListFacesResponse.error_of_json))
+  | ListMediaAnalysisJobs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMediaAnalysisJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListMediaAnalysisJobsResponse.error_of_json))
+  | ListProjectPolicies ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListProjectPoliciesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListProjectPoliciesResponse.error_of_json))
   | ListStreamProcessors ->
       if is_success
       then
@@ -1029,6 +1321,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListUsers ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListUsersResponse.of_json json)
+      else Error (parse_aws_error (Some ListUsersResponse.error_of_json))
+  | PutProjectPolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutProjectPolicyResponse.of_json json)
+      else
+        Error (parse_aws_error (Some PutProjectPolicyResponse.error_of_json))
   | RecognizeCelebrities ->
       if is_success
       then
@@ -1051,6 +1356,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some SearchFacesByImageResponse.error_of_json))
+  | SearchUsers ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SearchUsersResponse.of_json json)
+      else Error (parse_aws_error (Some SearchUsersResponse.error_of_json))
+  | SearchUsersByImage ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SearchUsersByImageResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some SearchUsersByImageResponse.error_of_json))
   | StartCelebrityRecognition ->
       if is_success
       then
@@ -1092,6 +1411,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some StartLabelDetectionResponse.error_of_json))
+  | StartMediaAnalysisJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMediaAnalysisJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartMediaAnalysisJobResponse.error_of_json))
   | StartPersonTracking ->
       if is_success
       then
@@ -1168,3 +1495,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateDatasetEntriesResponse.error_of_json))
+  | UpdateStreamProcessor ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateStreamProcessorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateStreamProcessorResponse.error_of_json))

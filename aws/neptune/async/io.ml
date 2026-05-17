@@ -41,6 +41,8 @@ let create_d_b_subnet_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDBSubnetGroup input
 let create_event_subscription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateEventSubscription input
+let create_global_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateGlobalCluster input
 let delete_d_b_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDBCluster input
 let delete_d_b_cluster_endpoint ?endpoint_url ?cfg input =
@@ -57,6 +59,8 @@ let delete_d_b_subnet_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDBSubnetGroup input
 let delete_event_subscription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEventSubscription input
+let delete_global_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteGlobalCluster input
 let describe_d_b_cluster_endpoints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDBClusterEndpoints input
 let describe_d_b_cluster_parameter_groups ?endpoint_url ?cfg input =
@@ -90,6 +94,8 @@ let describe_event_subscriptions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEventSubscriptions input
 let describe_events ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEvents input
+let describe_global_clusters ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeGlobalClusters input
 let describe_orderable_d_b_instance_options ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeOrderableDBInstanceOptions input
 let describe_pending_maintenance_actions ?endpoint_url ?cfg input =
@@ -99,6 +105,8 @@ let describe_valid_d_b_instance_modifications ?endpoint_url ?cfg input =
     input
 let failover_d_b_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.FailoverDBCluster input
+let failover_global_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.FailoverGlobalCluster input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let modify_d_b_cluster ?endpoint_url ?cfg input =
@@ -117,10 +125,14 @@ let modify_d_b_subnet_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyDBSubnetGroup input
 let modify_event_subscription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyEventSubscription input
+let modify_global_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyGlobalCluster input
 let promote_read_replica_d_b_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PromoteReadReplicaDBCluster input
 let reboot_d_b_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RebootDBInstance input
+let remove_from_global_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RemoveFromGlobalCluster input
 let remove_role_from_d_b_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemoveRoleFromDBCluster input
 let remove_source_identifier_from_subscription ?endpoint_url ?cfg input =
@@ -140,3 +152,5 @@ let start_d_b_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartDBCluster input
 let stop_d_b_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopDBCluster input
+let switchover_global_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SwitchoverGlobalCluster input

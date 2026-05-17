@@ -64,11 +64,11 @@ module Highlight =
           (Xml.child xml_arg0 "beginOffsetInclusive") in
       make ?endOffsetExclusive ?beginOffsetInclusive ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endOffsetExclusive =
-        field_map json "endOffsetExclusive" HighlightOffset.of_json in
+        field_map json__ "endOffsetExclusive" HighlightOffset.of_json in
       let beginOffsetInclusive =
-        field_map json "beginOffsetInclusive" HighlightOffset.of_json in
+        field_map json__ "beginOffsetInclusive" HighlightOffset.of_json in
       make ?endOffsetExclusive ?beginOffsetInclusive ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -89,6 +89,78 @@ module NonEmptyString =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"NonEmptyString" j
+    let to_json = simple_to_json to_value
+  end
+module GroupingValue =
+  struct
+    type nonrec t = string
+    let context_ = "GroupingValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GroupingValue" j
+    let to_json = simple_to_json to_value
+  end
+module QuickResponseContent =
+  struct
+    type nonrec t = string
+    let context_ = "QuickResponseContent"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QuickResponseContent" j
+    let to_json = simple_to_json to_value
+  end
+module QuickResponseFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "QuickResponseFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QuickResponseFilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module QuickResponseQueryValue =
+  struct
+    type nonrec t = string
+    let context_ = "QuickResponseQueryValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QuickResponseQueryValue" j
     let to_json = simple_to_json to_value
   end
 module Arn =
@@ -131,6 +203,9 @@ module Highlights =
   struct
     type nonrec t = Highlight.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Highlight.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -151,17 +226,17 @@ module Highlights =
       list_of_json ~kind:"Highlights" ~of_json:Highlight.of_json j
     let to_json v = composed_to_json to_value v
   end
-module SyntheticDocumentTextString =
+module SensitiveString =
   struct
     type nonrec t = string
-    let context_ = "SyntheticDocumentTextString"
+    let context_ = "SensitiveString"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SyntheticDocumentTextString" j
+    let of_json j = string_of_json ~kind:"SensitiveString" j
     let to_json = simple_to_json to_value
   end
 module GenericArn =
@@ -195,6 +270,9 @@ module ObjectFieldsList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -214,6 +292,43 @@ module ObjectFieldsList =
     let of_json j =
       list_of_json ~kind:"ObjectFieldsList" ~of_json:NonEmptyString.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module ConnectConfiguration =
+  struct
+    type nonrec t =
+      {
+      instanceId: NonEmptyString.t option
+        [@ocaml.doc
+          "The identifier of the Amazon Connect instance. You can find the instanceId in the ARN of the instance."]}
+    let make ?instanceId = fun () -> { instanceId }
+    let to_value x =
+      structure_to_value
+        [("instanceId", (Option.map x.instanceId ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let instanceId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "instanceId") in
+      make ?instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let instanceId = field_map json__ "instanceId" NonEmptyString.of_json in
+      make ?instanceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration information of the Amazon Connect data source."]
+module QueryText =
+  struct
+    type nonrec t = string
+    let context_ = "QueryText"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryText" j
+    let to_json = simple_to_json to_value
   end
 module FilterField =
   struct
@@ -247,6 +362,104 @@ module FilterOperator =
     let of_json j = of_string (string_of_json ~kind:"FilterOperator" j)
     let to_json = simple_to_json to_value
   end
+module Channel =
+  struct
+    type nonrec t = string
+    let context_ = "Channel"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:10) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Channel" j
+    let to_json = simple_to_json to_value
+  end
+module ContactAttributeKey =
+  struct
+    type nonrec t = string
+    let context_ = "ContactAttributeKey"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ContactAttributeKey" j
+    let to_json = simple_to_json to_value
+  end
+module GroupingCriteria =
+  struct
+    type nonrec t = string
+    let context_ = "GroupingCriteria"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GroupingCriteria" j
+    let to_json = simple_to_json to_value
+  end
+module GroupingValues =
+  struct
+    type nonrec t = GroupingValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GroupingValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GroupingValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GroupingValues" ~of_json:GroupingValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module QuickResponseContentProvider =
+  struct
+    type nonrec t =
+      {
+      content: QuickResponseContent.t option
+        [@ocaml.doc "The content of the quick response."]}
+    let make ?content = fun () -> { content }
+    let to_value x =
+      structure_to_value
+        [("content", (Option.map x.content ~f:QuickResponseContent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let content =
+        (Option.map ~f:QuickResponseContent.of_xml)
+          (Xml.child xml_arg0 "content") in
+      make ?content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let content = field_map json__ "content" QuickResponseContent.of_json in
+      make ?content ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The container quick response content."]
 module TagKey =
   struct
     type nonrec t = string
@@ -286,6 +499,169 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module QuickResponseFilterOperator =
+  struct
+    type nonrec t =
+      | EQUALS 
+      | PREFIX 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EQUALS -> "EQUALS"
+      | PREFIX -> "PREFIX"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EQUALS" -> EQUALS
+      | "PREFIX" -> PREFIX
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration QuickResponseFilterOperator"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"QuickResponseFilterOperator" j)
+    let to_json = simple_to_json to_value
+  end
+module QuickResponseFilterValueList =
+  struct
+    type nonrec t = QuickResponseFilterValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QuickResponseFilterValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QuickResponseFilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QuickResponseFilterValueList"
+        ~of_json:QuickResponseFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Priority =
+  struct
+    type nonrec t =
+      | HIGH 
+      | MEDIUM 
+      | LOW 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HIGH -> "HIGH"
+      | MEDIUM -> "MEDIUM"
+      | LOW -> "LOW"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HIGH" -> HIGH
+      | "MEDIUM" -> MEDIUM
+      | "LOW" -> LOW
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Priority" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Priority" j)
+    let to_json = simple_to_json to_value
+  end
+module QuickResponseQueryOperator =
+  struct
+    type nonrec t =
+      | CONTAINS 
+      | CONTAINS_AND_PREFIX 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CONTAINS -> "CONTAINS"
+      | CONTAINS_AND_PREFIX -> "CONTAINS_AND_PREFIX"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CONTAINS" -> CONTAINS
+      | "CONTAINS_AND_PREFIX" -> CONTAINS_AND_PREFIX
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration QuickResponseQueryOperator"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"QuickResponseQueryOperator" j)
+    let to_json = simple_to_json to_value
+  end
+module QuickResponseQueryValueList =
+  struct
+    type nonrec t = QuickResponseQueryValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QuickResponseQueryValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QuickResponseQueryValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QuickResponseQueryValueList"
+        ~of_json:QuickResponseQueryValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ContentReference =
   struct
     type nonrec t =
@@ -296,7 +672,8 @@ module ContentReference =
       knowledgeBaseArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the knowledge base."];
       knowledgeBaseId: Uuid.t option
-        [@ocaml.doc "The the identifier of the knowledge base."]}
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it."]}
     let make ?contentArn =
       fun ?contentId ->
         fun ?knowledgeBaseArn ->
@@ -321,11 +698,11 @@ module ContentReference =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "contentArn") in
       make ?knowledgeBaseId ?knowledgeBaseArn ?contentId ?contentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let knowledgeBaseId = field_map json "knowledgeBaseId" Uuid.of_json in
-      let knowledgeBaseArn = field_map json "knowledgeBaseArn" Arn.of_json in
-      let contentId = field_map json "contentId" Uuid.of_json in
-      let contentArn = field_map json "contentArn" Arn.of_json in
+    let of_json json__ =
+      let knowledgeBaseId = field_map json__ "knowledgeBaseId" Uuid.of_json in
+      let knowledgeBaseArn = field_map json__ "knowledgeBaseArn" Arn.of_json in
+      let contentId = field_map json__ "contentId" Uuid.of_json in
+      let contentArn = field_map json__ "contentArn" Arn.of_json in
       make ?knowledgeBaseId ?knowledgeBaseArn ?contentId ?contentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Reference information about the content."]
@@ -335,25 +712,23 @@ module DocumentText =
       {
       highlights: Highlights.t option
         [@ocaml.doc "Highlights in the document text."];
-      text: SyntheticDocumentTextString.t option
-        [@ocaml.doc "Text in the document."]}
+      text: SensitiveString.t option [@ocaml.doc "Text in the document."]}
     let make ?highlights = fun ?text -> fun () -> { highlights; text }
     let to_value x =
       structure_to_value
         [("highlights", (Option.map x.highlights ~f:Highlights.to_value));
-        ("text", (Option.map x.text ~f:SyntheticDocumentTextString.to_value))]
+        ("text", (Option.map x.text ~f:SensitiveString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let text =
-        (Option.map ~f:SyntheticDocumentTextString.of_xml)
-          (Xml.child xml_arg0 "text") in
+        (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "text") in
       let highlights =
         (Option.map ~f:Highlights.of_xml) (Xml.child xml_arg0 "highlights") in
       make ?text ?highlights ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let text = field_map json "text" SyntheticDocumentTextString.of_json in
-      let highlights = field_map json "highlights" Highlights.of_json in
+    let of_json json__ =
+      let text = field_map json__ "text" SensitiveString.of_json in
+      let highlights = field_map json__ "highlights" Highlights.of_json in
       make ?text ?highlights ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The text of the document."]
@@ -381,37 +756,83 @@ module AppIntegrationsConfiguration =
       {
       appIntegrationArn: GenericArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AppIntegrations DataIntegration to use for ingesting content."];
-      objectFields: ObjectFieldsList.t
+          "The Amazon Resource Name (ARN) of the AppIntegrations DataIntegration to use for ingesting content. For Salesforce, your AppIntegrations DataIntegration must have an ObjectConfiguration if objectFields is not provided, including at least Id, ArticleNumber, VersionNumber, Title, PublishStatus, and IsDeleted as source fields. For ServiceNow, your AppIntegrations DataIntegration must have an ObjectConfiguration if objectFields is not provided, including at least number, short_description, sys_mod_count, workflow_state, and active as source fields. For Zendesk, your AppIntegrations DataIntegration must have an ObjectConfiguration if objectFields is not provided, including at least id, title, updated_at, and draft as source fields. For SharePoint, your AppIntegrations DataIntegration must have a FileConfiguration, including only file extensions that are among docx, pdf, html, htm, and txt. For Amazon S3, the ObjectConfiguration and FileConfiguration of your AppIntegrations DataIntegration must be null. The SourceURI of your DataIntegration must use the following format: s3://your_s3_bucket_name. The bucket policy of the corresponding S3 bucket must allow the Amazon Web Services principal app-integrations.amazonaws.com to perform s3:ListBucket, s3:GetObject, and s3:GetBucketLocation against the bucket."];
+      objectFields: ObjectFieldsList.t option
         [@ocaml.doc
-          "The fields from the source that are made available to your agents in Wisdom. For Salesforce, you must include at least Id, ArticleNumber, VersionNumber, Title, PublishStatus, and IsDeleted. For ServiceNow, you must include at least number, short_description, sys_mod_count, workflow_state, and active. Make sure to include additional field(s); these are indexed and used to source recommendations."]}
+          "The fields from the source that are made available to your agents in Wisdom. Optional if ObjectConfiguration is included in the provided DataIntegration. For Salesforce, you must include at least Id, ArticleNumber, VersionNumber, Title, PublishStatus, and IsDeleted. For ServiceNow, you must include at least number, short_description, sys_mod_count, workflow_state, and active. For Zendesk, you must include at least id, title, updated_at, and draft. Make sure to include additional fields. These fields are indexed and used to source recommendations."]}
     let context_ = "AppIntegrationsConfiguration"
-    let make ~appIntegrationArn =
-      fun ~objectFields -> fun () -> { appIntegrationArn; objectFields }
+    let make ?objectFields =
+      fun ~appIntegrationArn -> fun () -> { objectFields; appIntegrationArn }
     let to_value x =
       structure_to_value
         [("appIntegrationArn",
            (Some (GenericArn.to_value x.appIntegrationArn)));
-        ("objectFields", (Some (ObjectFieldsList.to_value x.objectFields)))]
+        ("objectFields",
+          (Option.map x.objectFields ~f:ObjectFieldsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let objectFields =
-        ObjectFieldsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "objectFields") in
+        (Option.map ~f:ObjectFieldsList.of_xml)
+          (Xml.child xml_arg0 "objectFields") in
       let appIntegrationArn =
         GenericArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "appIntegrationArn") in
-      make ~objectFields ~appIntegrationArn ()
+      make ?objectFields ~appIntegrationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectFields =
-        field_map_exn json "objectFields" ObjectFieldsList.of_json in
+        field_map json__ "objectFields" ObjectFieldsList.of_json in
       let appIntegrationArn =
-        field_map_exn json "appIntegrationArn" GenericArn.of_json in
-      make ~objectFields ~appIntegrationArn ()
+        field_map_exn json__ "appIntegrationArn" GenericArn.of_json in
+      make ?objectFields ~appIntegrationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Configuration information for Amazon AppIntegrations to automatically ingest content."]
+module Configuration =
+  struct
+    type nonrec t =
+      {
+      connectConfiguration: ConnectConfiguration.t option
+        [@ocaml.doc
+          "The configuration information of the Amazon Connect data source."]}
+    let make ?connectConfiguration = fun () -> { connectConfiguration }
+    let to_value x =
+      structure_to_value
+        [("connectConfiguration",
+           (Option.map x.connectConfiguration
+              ~f:ConnectConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectConfiguration =
+        (Option.map ~f:ConnectConfiguration.of_xml)
+          (Xml.child xml_arg0 "connectConfiguration") in
+      make ?connectConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectConfiguration =
+        field_map json__ "connectConfiguration" ConnectConfiguration.of_json in
+      make ?connectConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration information of the external data source."]
+module ExternalSource =
+  struct
+    type nonrec t =
+      | AMAZON_CONNECT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | AMAZON_CONNECT -> "AMAZON_CONNECT" | Non_static_id s -> s
+    let of_string =
+      function | "AMAZON_CONNECT" -> AMAZON_CONNECT | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ExternalSource" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExternalSource" j)
+    let to_json = simple_to_json to_value
+  end
 module KnowledgeBaseAssociationData =
   struct
     type nonrec t =
@@ -419,7 +840,8 @@ module KnowledgeBaseAssociationData =
       knowledgeBaseArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the knowledge base."];
       knowledgeBaseId: Uuid.t option
-        [@ocaml.doc "The the identifier of the knowledge base."]}
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it."]}
     let make ?knowledgeBaseArn =
       fun ?knowledgeBaseId -> fun () -> { knowledgeBaseArn; knowledgeBaseId }
     let to_value x =
@@ -435,12 +857,45 @@ module KnowledgeBaseAssociationData =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "knowledgeBaseArn") in
       make ?knowledgeBaseId ?knowledgeBaseArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let knowledgeBaseId = field_map json "knowledgeBaseId" Uuid.of_json in
-      let knowledgeBaseArn = field_map json "knowledgeBaseArn" Arn.of_json in
+    let of_json json__ =
+      let knowledgeBaseId = field_map json__ "knowledgeBaseId" Uuid.of_json in
+      let knowledgeBaseArn = field_map json__ "knowledgeBaseArn" Arn.of_json in
       make ?knowledgeBaseId ?knowledgeBaseArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Association information about the knowledge base."]
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module QueryRecommendationTriggerData =
+  struct
+    type nonrec t =
+      {
+      text: QueryText.t option
+        [@ocaml.doc "The text associated with the recommendation trigger."]}
+    let make ?text = fun () -> { text }
+    let to_value x =
+      structure_to_value
+        [("text", (Option.map x.text ~f:QueryText.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let text = (Option.map ~f:QueryText.of_xml) (Xml.child xml_arg0 "text") in
+      make ?text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let text = field_map json__ "text" QueryText.of_json in make ?text ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Data associated with the QUERY RecommendationTriggerType."]
 module Filter =
   struct
     type nonrec t =
@@ -471,17 +926,455 @@ module Filter =
         FilterField.of_xml (Xml.child_exn ~context:context_ xml_arg0 "field") in
       make ~value ~operator ~field ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" NonEmptyString.of_json in
-      let operator = field_map_exn json "operator" FilterOperator.of_json in
-      let field = field_map_exn json "field" FilterField.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "value" NonEmptyString.of_json in
+      let operator = field_map_exn json__ "operator" FilterOperator.of_json in
+      let field = field_map_exn json__ "field" FilterField.of_json in
       make ~value ~operator ~field ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A search filter."]
+module Channels =
+  struct
+    type nonrec t = Channel.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Channel.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Channel.of_xml)
+    let of_json j = list_of_json ~kind:"Channels" ~of_json:Channel.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ContactAttributeKeys =
+  struct
+    type nonrec t = ContactAttributeKey.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ContactAttributeKey.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ContactAttributeKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ContactAttributeKeys"
+        ~of_json:ContactAttributeKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GroupingConfiguration =
+  struct
+    type nonrec t =
+      {
+      criteria: GroupingCriteria.t option
+        [@ocaml.doc
+          "The criteria used for grouping Wisdom users. The following is the list of supported criteria values. RoutingProfileArn: Grouping the users by their Amazon Connect routing profile ARN. User should have SearchRoutingProfile and DescribeRoutingProfile permissions when setting criteria to this value."];
+      values: GroupingValues.t option
+        [@ocaml.doc
+          "The list of values that define different groups of Wisdom users. When setting criteria to RoutingProfileArn, you need to provide a list of ARNs of Amazon Connect routing profiles as values of this parameter."]}
+    let make ?criteria = fun ?values -> fun () -> { criteria; values }
+    let to_value x =
+      structure_to_value
+        [("criteria", (Option.map x.criteria ~f:GroupingCriteria.to_value));
+        ("values", (Option.map x.values ~f:GroupingValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:GroupingValues.of_xml) (Xml.child xml_arg0 "values") in
+      let criteria =
+        (Option.map ~f:GroupingCriteria.of_xml)
+          (Xml.child xml_arg0 "criteria") in
+      make ?values ?criteria ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values = field_map json__ "values" GroupingValues.of_json in
+      let criteria = field_map json__ "criteria" GroupingCriteria.of_json in
+      make ?values ?criteria ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration information of the grouping of Wisdom users."]
+module LanguageCode =
+  struct
+    type nonrec t = string
+    let context_ = "LanguageCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:5) >>=
+             (fun () -> check_string_min i ~min:2));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LanguageCode" j
+    let to_json = simple_to_json to_value
+  end
+module QuickResponseContents =
+  struct
+    type nonrec t =
+      {
+      markdown: QuickResponseContentProvider.t option ;
+      plainText: QuickResponseContentProvider.t option }
+    let make ?markdown = fun ?plainText -> fun () -> { markdown; plainText }
+    let to_value x =
+      structure_to_value
+        [("markdown",
+           (Option.map x.markdown ~f:QuickResponseContentProvider.to_value));
+        ("plainText",
+          (Option.map x.plainText ~f:QuickResponseContentProvider.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let plainText =
+        (Option.map ~f:QuickResponseContentProvider.of_xml)
+          (Xml.child xml_arg0 "plainText") in
+      let markdown =
+        (Option.map ~f:QuickResponseContentProvider.of_xml)
+          (Xml.child xml_arg0 "markdown") in
+      make ?plainText ?markdown ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let plainText =
+        field_map json__ "plainText" QuickResponseContentProvider.of_json in
+      let markdown =
+        field_map json__ "markdown" QuickResponseContentProvider.of_json in
+      make ?plainText ?markdown ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The content of the quick response stored in different media types."]
+module QuickResponseDescription =
+  struct
+    type nonrec t = string
+    let context_ = "QuickResponseDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QuickResponseDescription" j
+    let to_json = simple_to_json to_value
+  end
+module QuickResponseName =
+  struct
+    type nonrec t = string
+    let context_ = "QuickResponseName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:40) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QuickResponseName" j
+    let to_json = simple_to_json to_value
+  end
+module QuickResponseStatus =
+  struct
+    type nonrec t =
+      | CREATE_IN_PROGRESS 
+      | CREATE_FAILED 
+      | CREATED 
+      | DELETE_IN_PROGRESS 
+      | DELETE_FAILED 
+      | DELETED 
+      | UPDATE_IN_PROGRESS 
+      | UPDATE_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATE_IN_PROGRESS -> "CREATE_IN_PROGRESS"
+      | CREATE_FAILED -> "CREATE_FAILED"
+      | CREATED -> "CREATED"
+      | DELETE_IN_PROGRESS -> "DELETE_IN_PROGRESS"
+      | DELETE_FAILED -> "DELETE_FAILED"
+      | DELETED -> "DELETED"
+      | UPDATE_IN_PROGRESS -> "UPDATE_IN_PROGRESS"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATE_IN_PROGRESS" -> CREATE_IN_PROGRESS
+      | "CREATE_FAILED" -> CREATE_FAILED
+      | "CREATED" -> CREATED
+      | "DELETE_IN_PROGRESS" -> DELETE_IN_PROGRESS
+      | "DELETE_FAILED" -> DELETE_FAILED
+      | "DELETED" -> DELETED
+      | "UPDATE_IN_PROGRESS" -> UPDATE_IN_PROGRESS
+      | "UPDATE_FAILED" -> UPDATE_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration QuickResponseStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QuickResponseStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module QuickResponseType =
+  struct
+    type nonrec t = string
+    let context_ = "QuickResponseType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^(application/x\\.quickresponse;format=(plain|markdown))$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QuickResponseType" j
+    let to_json = simple_to_json to_value
+  end
+module ShortCutKey =
+  struct
+    type nonrec t = string
+    let context_ = "ShortCutKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:10) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ShortCutKey" j
+    let to_json = simple_to_json to_value
+  end
+module SyntheticTimestamp_epoch_seconds =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module Tags =
+  struct
+    type nonrec t = (TagKey.t * TagValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((TagKey.of_string chopped),
+                              (TagValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (TagKey.to_value x) |>
+                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:TagKey.of_string
+        ~of_json:TagValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module QuickResponseFilterField =
+  struct
+    type nonrec t =
+      {
+      includeNoExistence: Boolean.t option
+        [@ocaml.doc
+          "Whether to treat null value as a match for the attribute field."];
+      name: NonEmptyString.t
+        [@ocaml.doc
+          "The name of the attribute field to filter the quick responses by."];
+      operator: QuickResponseFilterOperator.t
+        [@ocaml.doc "The operator to use for filtering."];
+      values: QuickResponseFilterValueList.t option
+        [@ocaml.doc
+          "The values of attribute field to filter the quick response by."]}
+    let context_ = "QuickResponseFilterField"
+    let make ?includeNoExistence =
+      fun ?values ->
+        fun ~name ->
+          fun ~operator ->
+            fun () -> { includeNoExistence; values; name; operator }
+    let to_value x =
+      structure_to_value
+        [("includeNoExistence",
+           (Option.map x.includeNoExistence ~f:Boolean.to_value));
+        ("name", (Some (NonEmptyString.to_value x.name)));
+        ("operator",
+          (Some (QuickResponseFilterOperator.to_value x.operator)));
+        ("values",
+          (Option.map x.values ~f:QuickResponseFilterValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:QuickResponseFilterValueList.of_xml)
+          (Xml.child xml_arg0 "values") in
+      let operator =
+        QuickResponseFilterOperator.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "operator") in
+      let name =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let includeNoExistence =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "includeNoExistence") in
+      make ?values ~operator ~name ?includeNoExistence ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map json__ "values" QuickResponseFilterValueList.of_json in
+      let operator =
+        field_map_exn json__ "operator" QuickResponseFilterOperator.of_json in
+      let name = field_map_exn json__ "name" NonEmptyString.of_json in
+      let includeNoExistence =
+        field_map json__ "includeNoExistence" Boolean.of_json in
+      make ?values ~operator ~name ?includeNoExistence ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The quick response fields to filter the quick response query results by. The following is the list of supported field names. name description shortcutKey isActive channels language contentType createdTime lastModifiedTime lastModifiedBy groupingConfiguration.criteria groupingConfiguration.values"]
+module Order =
+  struct
+    type nonrec t =
+      | ASC 
+      | DESC 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ASC -> "ASC" | DESC -> "DESC" | Non_static_id s -> s
+    let of_string =
+      function | "ASC" -> ASC | "DESC" -> DESC | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Order" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Order" j)
+    let to_json = simple_to_json to_value
+  end
+module QuickResponseQueryField =
+  struct
+    type nonrec t =
+      {
+      allowFuzziness: Boolean.t option
+        [@ocaml.doc
+          "Whether the query expects only exact matches on the attribute field values. The results of the query will only include exact matches if this parameter is set to false."];
+      name: NonEmptyString.t
+        [@ocaml.doc
+          "The name of the attribute to query the quick responses by."];
+      operator: QuickResponseQueryOperator.t
+        [@ocaml.doc
+          "The operator to use for matching attribute field values in the query."];
+      priority: Priority.t option
+        [@ocaml.doc
+          "The importance of the attribute field when calculating query result relevancy scores. The value set for this parameter affects the ordering of search results."];
+      values: QuickResponseQueryValueList.t
+        [@ocaml.doc
+          "The values of the attribute to query the quick responses by."]}
+    let context_ = "QuickResponseQueryField"
+    let make ?allowFuzziness =
+      fun ?priority ->
+        fun ~name ->
+          fun ~operator ->
+            fun ~values ->
+              fun () -> { allowFuzziness; priority; name; operator; values }
+    let to_value x =
+      structure_to_value
+        [("allowFuzziness",
+           (Option.map x.allowFuzziness ~f:Boolean.to_value));
+        ("name", (Some (NonEmptyString.to_value x.name)));
+        ("operator", (Some (QuickResponseQueryOperator.to_value x.operator)));
+        ("priority", (Option.map x.priority ~f:Priority.to_value));
+        ("values", (Some (QuickResponseQueryValueList.to_value x.values)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        QuickResponseQueryValueList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "values") in
+      let priority =
+        (Option.map ~f:Priority.of_xml) (Xml.child xml_arg0 "priority") in
+      let operator =
+        QuickResponseQueryOperator.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "operator") in
+      let name =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let allowFuzziness =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "allowFuzziness") in
+      make ~values ?priority ~operator ~name ?allowFuzziness ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map_exn json__ "values" QuickResponseQueryValueList.of_json in
+      let priority = field_map json__ "priority" Priority.of_json in
+      let operator =
+        field_map_exn json__ "operator" QuickResponseQueryOperator.of_json in
+      let name = field_map_exn json__ "name" NonEmptyString.of_json in
+      let allowFuzziness = field_map json__ "allowFuzziness" Boolean.of_json in
+      make ~values ?priority ~operator ~name ?allowFuzziness ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The quick response fields to query quick responses by. The following is the list of supported field names. content name description shortcutKey"]
 module ContentMetadata =
   struct
     type nonrec t = (NonEmptyString.t * NonEmptyString.t) list
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
     let of_header xs =
       make
         (List.filter_map xs
@@ -500,6 +1393,8 @@ module ContentMetadata =
                        (NonEmptyString.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -573,7 +1468,7 @@ module ContentType =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^(text/(plain|html))|(application/x\\.wisdom-json;source=(salesforce|servicenow))$");
+             ~pattern:"^(text/(plain|html|csv))|(application/(pdf|vnd\\.openxmlformats-officedocument\\.wordprocessingml\\.document))|(application/x\\.wisdom-json;source=(salesforce|servicenow|zendesk))$");
         i
     let of_string x = x
     let to_value x = `String x
@@ -603,52 +1498,22 @@ module Name =
     let of_json j = string_of_json ~kind:"Name" j
     let to_json = simple_to_json to_value
   end
-module Tags =
-  struct
-    type nonrec t = (TagKey.t * TagValue.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((TagKey.of_string chopped),
-                              (TagValue.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (TagKey.to_value x) |>
-                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:TagKey.of_string
-        ~of_json:TagValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module Document =
   struct
     type nonrec t =
       {
-      contentReference: ContentReference.t
+      contentReference: ContentReference.t option
         [@ocaml.doc "A reference to the content resource."];
       excerpt: DocumentText.t option
         [@ocaml.doc "The excerpt from the document."];
       title: DocumentText.t option [@ocaml.doc "The title of the document."]}
-    let context_ = "Document"
-    let make ?excerpt =
-      fun ?title ->
-        fun ~contentReference ->
-          fun () -> { excerpt; title; contentReference }
+    let make ?contentReference =
+      fun ?excerpt ->
+        fun ?title -> fun () -> { contentReference; excerpt; title }
     let to_value x =
       structure_to_value
         [("contentReference",
-           (Some (ContentReference.to_value x.contentReference)));
+           (Option.map x.contentReference ~f:ContentReference.to_value));
         ("excerpt", (Option.map x.excerpt ~f:DocumentText.to_value));
         ("title", (Option.map x.title ~f:DocumentText.to_value))]
     let to_query v = to_query to_value v
@@ -658,16 +1523,16 @@ module Document =
       let excerpt =
         (Option.map ~f:DocumentText.of_xml) (Xml.child xml_arg0 "excerpt") in
       let contentReference =
-        ContentReference.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "contentReference") in
-      make ?title ?excerpt ~contentReference ()
+        (Option.map ~f:ContentReference.of_xml)
+          (Xml.child xml_arg0 "contentReference") in
+      make ?title ?excerpt ?contentReference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let title = field_map json "title" DocumentText.of_json in
-      let excerpt = field_map json "excerpt" DocumentText.of_json in
+    let of_json json__ =
+      let title = field_map json__ "title" DocumentText.of_json in
+      let excerpt = field_map json__ "excerpt" DocumentText.of_json in
       let contentReference =
-        field_map_exn json "contentReference" ContentReference.of_json in
-      make ?title ?excerpt ~contentReference ()
+        field_map json__ "contentReference" ContentReference.of_json in
+      make ?title ?excerpt ?contentReference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The document."]
 module RelevanceScore =
@@ -696,19 +1561,6 @@ module NotifyRecommendationsReceivedErrorMessage =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j =
       string_of_json ~kind:"NotifyRecommendationsReceivedErrorMessage" j
-    let to_json = simple_to_json to_value
-  end
-module String_ =
-  struct
-    type nonrec t = string
-    let context_ = "String"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
 module Description =
@@ -774,17 +1626,20 @@ module KnowledgeBaseType =
     type nonrec t =
       | EXTERNAL 
       | CUSTOM 
+      | QUICK_RESPONSES 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | EXTERNAL -> "EXTERNAL"
       | CUSTOM -> "CUSTOM"
+      | QUICK_RESPONSES -> "QUICK_RESPONSES"
       | Non_static_id s -> s
     let of_string =
       function
       | "EXTERNAL" -> EXTERNAL
       | "CUSTOM" -> CUSTOM
+      | "QUICK_RESPONSES" -> QUICK_RESPONSES
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -801,7 +1656,7 @@ module RenderingConfiguration =
       {
       templateUri: Uri_.t option
         [@ocaml.doc
-          "A URI template containing exactly one variable in $\\{variableName\\} format. This can only be set for EXTERNAL knowledge bases. For Salesforce and ServiceNow, the variable must be one of the following: Salesforce: Id, ArticleNumber, VersionNumber, Title, PublishStatus, or IsDeleted ServiceNow: number, short_description, sys_mod_count, workflow_state, or active <p>The variable is replaced with the actual value for a piece of content when calling <a href=\"https://docs.aws.amazon.com/wisdom/latest/APIReference/API_GetContent.html\">GetContent</a>. </p>"]}
+          "A URI template containing exactly one variable in $\\{variableName\\} format. This can only be set for EXTERNAL knowledge bases. For Salesforce, ServiceNow, and Zendesk, the variable must be one of the following: Salesforce: Id, ArticleNumber, VersionNumber, Title, PublishStatus, or IsDeleted ServiceNow: number, short_description, sys_mod_count, workflow_state, or active Zendesk: id, title, updated_at, or draft The variable is replaced with the actual value for a piece of content when calling GetContent."]}
     let make ?templateUri = fun () -> { templateUri }
     let to_value x =
       structure_to_value
@@ -812,8 +1667,8 @@ module RenderingConfiguration =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "templateUri") in
       make ?templateUri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateUri = field_map json "templateUri" Uri_.of_json in
+    let of_json json__ =
+      let templateUri = field_map json__ "templateUri" Uri_.of_json in
       make ?templateUri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about how to render the content."]
@@ -823,7 +1678,7 @@ module ServerSideEncryptionConfiguration =
       {
       kmsKeyId: NonEmptyString.t option
         [@ocaml.doc
-          "The KMS key. For information about valid ID values, see Key identifiers (KeyId) in the AWS Key Management Service Developer Guide."]}
+          "The customer managed key used for encryption. For more information about setting up a customer managed key for Wisdom, see Enable Amazon Connect Wisdom for your instance. For information about valid ID values, see Key identifiers (KeyId)."]}
     let make ?kmsKeyId = fun () -> { kmsKeyId }
     let to_value x =
       structure_to_value
@@ -834,11 +1689,12 @@ module ServerSideEncryptionConfiguration =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
       make ?kmsKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map json "kmsKeyId" NonEmptyString.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "kmsKeyId" NonEmptyString.of_json in
       make ?kmsKeyId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The KMS key used for encryption."]
+  end[@@ocaml.doc
+       "The configuration information for the customer managed key used for encryption."]
 module SourceConfiguration =
   struct
     type nonrec t =
@@ -859,13 +1715,147 @@ module SourceConfiguration =
           (Xml.child xml_arg0 "appIntegrations") in
       make ?appIntegrations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appIntegrations =
-        field_map json "appIntegrations" AppIntegrationsConfiguration.of_json in
+        field_map json__ "appIntegrations"
+          AppIntegrationsConfiguration.of_json in
       make ?appIntegrations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Configuration information about the external data source."]
+module ExternalSourceConfiguration =
+  struct
+    type nonrec t =
+      {
+      configuration: Configuration.t
+        [@ocaml.doc
+          "The configuration information of the external data source."];
+      source: ExternalSource.t
+        [@ocaml.doc "The type of the external data source."]}
+    let context_ = "ExternalSourceConfiguration"
+    let make ~configuration =
+      fun ~source -> fun () -> { configuration; source }
+    let to_value x =
+      structure_to_value
+        [("configuration", (Some (Configuration.to_value x.configuration)));
+        ("source", (Some (ExternalSource.to_value x.source)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let source =
+        ExternalSource.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "source") in
+      let configuration =
+        Configuration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "configuration") in
+      make ~source ~configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let source = field_map_exn json__ "source" ExternalSource.of_json in
+      let configuration =
+        field_map_exn json__ "configuration" Configuration.of_json in
+      make ~source ~configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration information of the external data source."]
+module ImportJobStatus =
+  struct
+    type nonrec t =
+      | START_IN_PROGRESS 
+      | FAILED 
+      | COMPLETE 
+      | DELETE_IN_PROGRESS 
+      | DELETE_FAILED 
+      | DELETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | START_IN_PROGRESS -> "START_IN_PROGRESS"
+      | FAILED -> "FAILED"
+      | COMPLETE -> "COMPLETE"
+      | DELETE_IN_PROGRESS -> "DELETE_IN_PROGRESS"
+      | DELETE_FAILED -> "DELETE_FAILED"
+      | DELETED -> "DELETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "START_IN_PROGRESS" -> START_IN_PROGRESS
+      | "FAILED" -> FAILED
+      | "COMPLETE" -> COMPLETE
+      | "DELETE_IN_PROGRESS" -> DELETE_IN_PROGRESS
+      | "DELETE_FAILED" -> DELETE_FAILED
+      | "DELETED" -> DELETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ImportJobStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImportJobStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ImportJobType =
+  struct
+    type nonrec t =
+      | QUICK_RESPONSES 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | QUICK_RESPONSES -> "QUICK_RESPONSES" | Non_static_id s -> s
+    let of_string =
+      function | "QUICK_RESPONSES" -> QUICK_RESPONSES | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ImportJobType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImportJobType" j)
+    let to_json = simple_to_json to_value
+  end
+module UploadId =
+  struct
+    type nonrec t = string
+    let context_ = "UploadId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1200) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UploadId" j
+    let to_json = simple_to_json to_value
+  end
+module AssistantIntegrationConfiguration =
+  struct
+    type nonrec t =
+      {
+      topicIntegrationArn: GenericArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the integrated Amazon SNS topic used for streaming chat messages."]}
+    let make ?topicIntegrationArn = fun () -> { topicIntegrationArn }
+    let to_value x =
+      structure_to_value
+        [("topicIntegrationArn",
+           (Option.map x.topicIntegrationArn ~f:GenericArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let topicIntegrationArn =
+        (Option.map ~f:GenericArn.of_xml)
+          (Xml.child xml_arg0 "topicIntegrationArn") in
+      make ?topicIntegrationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let topicIntegrationArn =
+        field_map json__ "topicIntegrationArn" GenericArn.of_json in
+      make ?topicIntegrationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration information for the Wisdom assistant integration."]
 module AssistantStatus =
   struct
     type nonrec t =
@@ -939,9 +1929,9 @@ module AssistantAssociationOutputData =
           (Xml.child xml_arg0 "knowledgeBaseAssociation") in
       make ?knowledgeBaseAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let knowledgeBaseAssociation =
-        field_map json "knowledgeBaseAssociation"
+        field_map json__ "knowledgeBaseAssociation"
           KnowledgeBaseAssociationData.of_json in
       make ?knowledgeBaseAssociation ()
     let to_json v = composed_to_json to_value v
@@ -963,6 +1953,29 @@ module AssociationType =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration AssociationType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"AssociationType" j)
+    let to_json = simple_to_json to_value
+  end
+module RecommendationType =
+  struct
+    type nonrec t =
+      | KNOWLEDGE_CONTENT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | KNOWLEDGE_CONTENT -> "KNOWLEDGE_CONTENT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "KNOWLEDGE_CONTENT" -> KNOWLEDGE_CONTENT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecommendationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RecommendationType" j)
     let to_json = simple_to_json to_value
   end
 module RelevanceLevel =
@@ -993,22 +2006,115 @@ module RelevanceLevel =
     let of_json j = of_string (string_of_json ~kind:"RelevanceLevel" j)
     let to_json = simple_to_json to_value
   end
-module SyntheticTimestamp_epoch_seconds =
+module RecommendationIdList =
   struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
+    type nonrec t = String_.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RecommendationIdList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RecommendationSourceType =
+  struct
+    type nonrec t =
+      | ISSUE_DETECTION 
+      | RULE_EVALUATION 
+      | OTHER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ISSUE_DETECTION -> "ISSUE_DETECTION"
+      | RULE_EVALUATION -> "RULE_EVALUATION"
+      | OTHER -> "OTHER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ISSUE_DETECTION" -> ISSUE_DETECTION
+      | "RULE_EVALUATION" -> RULE_EVALUATION
+      | "OTHER" -> OTHER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecommendationSourceType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RecommendationSourceType" j)
     let to_json = simple_to_json to_value
   end
-module SyntheticContentDataUrl =
+module RecommendationTriggerData =
+  struct
+    type nonrec t =
+      {
+      query: QueryRecommendationTriggerData.t option
+        [@ocaml.doc
+          "Data associated with the QUERY RecommendationTriggerType."]}
+    let make ?query = fun () -> { query }
+    let to_value x =
+      structure_to_value
+        [("query",
+           (Option.map x.query ~f:QueryRecommendationTriggerData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let query =
+        (Option.map ~f:QueryRecommendationTriggerData.of_xml)
+          (Xml.child xml_arg0 "query") in
+      make ?query ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let query =
+        field_map json__ "query" QueryRecommendationTriggerData.of_json in
+      make ?query ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A union type containing information related to the trigger."]
+module RecommendationTriggerType =
+  struct
+    type nonrec t =
+      | QUERY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | QUERY -> "QUERY" | Non_static_id s -> s
+    let of_string = function | "QUERY" -> QUERY | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecommendationTriggerType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RecommendationTriggerType" j)
+    let to_json = simple_to_json to_value
+  end
+module Url =
   struct
     type nonrec t = string
-    let context_ = "SyntheticContentDataUrl"
+    let context_ = "Url"
     let make i =
       let open Result in
         ok_or_failwith
@@ -1020,56 +2126,59 @@ module SyntheticContentDataUrl =
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SyntheticContentDataUrl" j
+    let of_json j = string_of_json ~kind:"Url" j
     let to_json = simple_to_json to_value
   end
 module SessionSummary =
   struct
     type nonrec t =
       {
-      assistantArn: Arn.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the Wisdom assistant"];
-      assistantId: Uuid.t
+      assistantArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Wisdom assistant."];
+      assistantId: Uuid.t option
         [@ocaml.doc "The identifier of the Wisdom assistant."];
-      sessionArn: Arn.t
+      sessionArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the session."];
-      sessionId: Uuid.t [@ocaml.doc "The identifier of the session."]}
-    let context_ = "SessionSummary"
-    let make ~assistantArn =
-      fun ~assistantId ->
-        fun ~sessionArn ->
-          fun ~sessionId ->
+      sessionId: Uuid.t option [@ocaml.doc "The identifier of the session."]}
+    let make ?assistantArn =
+      fun ?assistantId ->
+        fun ?sessionArn ->
+          fun ?sessionId ->
             fun () -> { assistantArn; assistantId; sessionArn; sessionId }
     let to_value x =
       structure_to_value
-        [("assistantArn", (Some (Arn.to_value x.assistantArn)));
-        ("assistantId", (Some (Uuid.to_value x.assistantId)));
-        ("sessionArn", (Some (Arn.to_value x.sessionArn)));
-        ("sessionId", (Some (Uuid.to_value x.sessionId)))]
+        [("assistantArn", (Option.map x.assistantArn ~f:Arn.to_value));
+        ("assistantId", (Option.map x.assistantId ~f:Uuid.to_value));
+        ("sessionArn", (Option.map x.sessionArn ~f:Arn.to_value));
+        ("sessionId", (Option.map x.sessionId ~f:Uuid.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sessionId =
-        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "sessionId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "sessionId") in
       let sessionArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "sessionArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "sessionArn") in
       let assistantId =
-        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "assistantId") in
       let assistantArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantArn") in
-      make ~sessionId ~sessionArn ~assistantId ~assistantArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assistantArn") in
+      make ?sessionId ?sessionArn ?assistantId ?assistantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sessionId = field_map_exn json "sessionId" Uuid.of_json in
-      let sessionArn = field_map_exn json "sessionArn" Arn.of_json in
-      let assistantId = field_map_exn json "assistantId" Uuid.of_json in
-      let assistantArn = field_map_exn json "assistantArn" Arn.of_json in
-      make ~sessionId ~sessionArn ~assistantId ~assistantArn ()
+    let of_json json__ =
+      let sessionId = field_map json__ "sessionId" Uuid.of_json in
+      let sessionArn = field_map json__ "sessionArn" Arn.of_json in
+      let assistantId = field_map json__ "assistantId" Uuid.of_json in
+      let assistantArn = field_map json__ "assistantArn" Arn.of_json in
+      make ?sessionId ?sessionArn ?assistantId ?assistantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about the session."]
 module FilterList =
   struct
     type nonrec t = Filter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1089,45 +2198,387 @@ module FilterList =
     let of_json j = list_of_json ~kind:"FilterList" ~of_json:Filter.of_json j
     let to_json v = composed_to_json to_value v
   end
+module QuickResponseSearchResultData =
+  struct
+    type nonrec t =
+      {
+      attributesInterpolated: ContactAttributeKeys.t option
+        [@ocaml.doc
+          "The user defined contact attributes that are resolved when the search result is returned."];
+      attributesNotInterpolated: ContactAttributeKeys.t option
+        [@ocaml.doc
+          "The user defined contact attributes that are not resolved when the search result is returned."];
+      channels: Channels.t option
+        [@ocaml.doc
+          "The Amazon Connect contact channels this quick response applies to. The supported contact channel types include Chat."];
+      contentType: QuickResponseType.t option
+        [@ocaml.doc
+          "The media type of the quick response content. Use application/x.quickresponse;format=plain for quick response written in plain text. Use application/x.quickresponse;format=markdown for quick response written in richtext."];
+      contents: QuickResponseContents.t option
+        [@ocaml.doc "The contents of the quick response."];
+      createdTime: SyntheticTimestamp_epoch_seconds.t option
+        [@ocaml.doc "The timestamp when the quick response was created."];
+      description: QuickResponseDescription.t option
+        [@ocaml.doc "The description of the quick response."];
+      groupingConfiguration: GroupingConfiguration.t option
+        [@ocaml.doc
+          "The configuration information of the user groups that the quick response is accessible to."];
+      isActive: Boolean.t option
+        [@ocaml.doc "Whether the quick response is active."];
+      knowledgeBaseArn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the knowledge base."];
+      knowledgeBaseId: Uuid.t option
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."];
+      language: LanguageCode.t option
+        [@ocaml.doc
+          "The language code value for the language in which the quick response is written."];
+      lastModifiedBy: GenericArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the user who last updated the quick response search result data."];
+      lastModifiedTime: SyntheticTimestamp_epoch_seconds.t option
+        [@ocaml.doc
+          "The timestamp when the quick response search result data was last modified."];
+      name: QuickResponseName.t option
+        [@ocaml.doc "The name of the quick response."];
+      quickResponseArn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the quick response."];
+      quickResponseId: Uuid.t option
+        [@ocaml.doc "The identifier of the quick response."];
+      shortcutKey: ShortCutKey.t option
+        [@ocaml.doc
+          "The shortcut key of the quick response. The value should be unique across the knowledge base."];
+      status: QuickResponseStatus.t option
+        [@ocaml.doc "The resource status of the quick response."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource."]}
+    let make ?attributesInterpolated =
+      fun ?attributesNotInterpolated ->
+        fun ?channels ->
+          fun ?contentType ->
+            fun ?contents ->
+              fun ?createdTime ->
+                fun ?description ->
+                  fun ?groupingConfiguration ->
+                    fun ?isActive ->
+                      fun ?knowledgeBaseArn ->
+                        fun ?knowledgeBaseId ->
+                          fun ?language ->
+                            fun ?lastModifiedBy ->
+                              fun ?lastModifiedTime ->
+                                fun ?name ->
+                                  fun ?quickResponseArn ->
+                                    fun ?quickResponseId ->
+                                      fun ?shortcutKey ->
+                                        fun ?status ->
+                                          fun ?tags ->
+                                            fun () ->
+                                              {
+                                                attributesInterpolated;
+                                                attributesNotInterpolated;
+                                                channels;
+                                                contentType;
+                                                contents;
+                                                createdTime;
+                                                description;
+                                                groupingConfiguration;
+                                                isActive;
+                                                knowledgeBaseArn;
+                                                knowledgeBaseId;
+                                                language;
+                                                lastModifiedBy;
+                                                lastModifiedTime;
+                                                name;
+                                                quickResponseArn;
+                                                quickResponseId;
+                                                shortcutKey;
+                                                status;
+                                                tags
+                                              }
+    let to_value x =
+      structure_to_value
+        [("attributesInterpolated",
+           (Option.map x.attributesInterpolated
+              ~f:ContactAttributeKeys.to_value));
+        ("attributesNotInterpolated",
+          (Option.map x.attributesNotInterpolated
+             ~f:ContactAttributeKeys.to_value));
+        ("channels", (Option.map x.channels ~f:Channels.to_value));
+        ("contentType",
+          (Option.map x.contentType ~f:QuickResponseType.to_value));
+        ("contents",
+          (Option.map x.contents ~f:QuickResponseContents.to_value));
+        ("createdTime",
+          (Option.map x.createdTime
+             ~f:SyntheticTimestamp_epoch_seconds.to_value));
+        ("description",
+          (Option.map x.description ~f:QuickResponseDescription.to_value));
+        ("groupingConfiguration",
+          (Option.map x.groupingConfiguration
+             ~f:GroupingConfiguration.to_value));
+        ("isActive", (Option.map x.isActive ~f:Boolean.to_value));
+        ("knowledgeBaseArn", (Option.map x.knowledgeBaseArn ~f:Arn.to_value));
+        ("knowledgeBaseId", (Option.map x.knowledgeBaseId ~f:Uuid.to_value));
+        ("language", (Option.map x.language ~f:LanguageCode.to_value));
+        ("lastModifiedBy",
+          (Option.map x.lastModifiedBy ~f:GenericArn.to_value));
+        ("lastModifiedTime",
+          (Option.map x.lastModifiedTime
+             ~f:SyntheticTimestamp_epoch_seconds.to_value));
+        ("name", (Option.map x.name ~f:QuickResponseName.to_value));
+        ("quickResponseArn", (Option.map x.quickResponseArn ~f:Arn.to_value));
+        ("quickResponseId", (Option.map x.quickResponseId ~f:Uuid.to_value));
+        ("shortcutKey", (Option.map x.shortcutKey ~f:ShortCutKey.to_value));
+        ("status", (Option.map x.status ~f:QuickResponseStatus.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let status =
+        (Option.map ~f:QuickResponseStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let shortcutKey =
+        (Option.map ~f:ShortCutKey.of_xml) (Xml.child xml_arg0 "shortcutKey") in
+      let quickResponseId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "quickResponseId") in
+      let quickResponseArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "quickResponseArn") in
+      let name =
+        (Option.map ~f:QuickResponseName.of_xml) (Xml.child xml_arg0 "name") in
+      let lastModifiedTime =
+        (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTime") in
+      let lastModifiedBy =
+        (Option.map ~f:GenericArn.of_xml)
+          (Xml.child xml_arg0 "lastModifiedBy") in
+      let language =
+        (Option.map ~f:LanguageCode.of_xml) (Xml.child xml_arg0 "language") in
+      let knowledgeBaseId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "knowledgeBaseId") in
+      let knowledgeBaseArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "knowledgeBaseArn") in
+      let isActive =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isActive") in
+      let groupingConfiguration =
+        (Option.map ~f:GroupingConfiguration.of_xml)
+          (Xml.child xml_arg0 "groupingConfiguration") in
+      let description =
+        (Option.map ~f:QuickResponseDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let createdTime =
+        (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
+          (Xml.child xml_arg0 "createdTime") in
+      let contents =
+        (Option.map ~f:QuickResponseContents.of_xml)
+          (Xml.child xml_arg0 "contents") in
+      let contentType =
+        (Option.map ~f:QuickResponseType.of_xml)
+          (Xml.child xml_arg0 "contentType") in
+      let channels =
+        (Option.map ~f:Channels.of_xml) (Xml.child xml_arg0 "channels") in
+      let attributesNotInterpolated =
+        (Option.map ~f:ContactAttributeKeys.of_xml)
+          (Xml.child xml_arg0 "attributesNotInterpolated") in
+      let attributesInterpolated =
+        (Option.map ~f:ContactAttributeKeys.of_xml)
+          (Xml.child xml_arg0 "attributesInterpolated") in
+      make ?tags ?status ?shortcutKey ?quickResponseId ?quickResponseArn
+        ?name ?lastModifiedTime ?lastModifiedBy ?language ?knowledgeBaseId
+        ?knowledgeBaseArn ?isActive ?groupingConfiguration ?description
+        ?createdTime ?contents ?contentType ?channels
+        ?attributesNotInterpolated ?attributesInterpolated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let status = field_map json__ "status" QuickResponseStatus.of_json in
+      let shortcutKey = field_map json__ "shortcutKey" ShortCutKey.of_json in
+      let quickResponseId = field_map json__ "quickResponseId" Uuid.of_json in
+      let quickResponseArn = field_map json__ "quickResponseArn" Arn.of_json in
+      let name = field_map json__ "name" QuickResponseName.of_json in
+      let lastModifiedTime =
+        field_map json__ "lastModifiedTime"
+          SyntheticTimestamp_epoch_seconds.of_json in
+      let lastModifiedBy =
+        field_map json__ "lastModifiedBy" GenericArn.of_json in
+      let language = field_map json__ "language" LanguageCode.of_json in
+      let knowledgeBaseId = field_map json__ "knowledgeBaseId" Uuid.of_json in
+      let knowledgeBaseArn = field_map json__ "knowledgeBaseArn" Arn.of_json in
+      let isActive = field_map json__ "isActive" Boolean.of_json in
+      let groupingConfiguration =
+        field_map json__ "groupingConfiguration"
+          GroupingConfiguration.of_json in
+      let description =
+        field_map json__ "description" QuickResponseDescription.of_json in
+      let createdTime =
+        field_map json__ "createdTime"
+          SyntheticTimestamp_epoch_seconds.of_json in
+      let contents =
+        field_map json__ "contents" QuickResponseContents.of_json in
+      let contentType =
+        field_map json__ "contentType" QuickResponseType.of_json in
+      let channels = field_map json__ "channels" Channels.of_json in
+      let attributesNotInterpolated =
+        field_map json__ "attributesNotInterpolated"
+          ContactAttributeKeys.of_json in
+      let attributesInterpolated =
+        field_map json__ "attributesInterpolated"
+          ContactAttributeKeys.of_json in
+      make ?tags ?status ?shortcutKey ?quickResponseId ?quickResponseArn
+        ?name ?lastModifiedTime ?lastModifiedBy ?language ?knowledgeBaseId
+        ?knowledgeBaseArn ?isActive ?groupingConfiguration ?description
+        ?createdTime ?contents ?contentType ?channels
+        ?attributesNotInterpolated ?attributesInterpolated ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The result of quick response search."]
+module ContactAttributeValue =
+  struct
+    type nonrec t = string
+    let context_ = "ContactAttributeValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ContactAttributeValue" j
+    let to_json = simple_to_json to_value
+  end
+module QuickResponseFilterFieldList =
+  struct
+    type nonrec t = QuickResponseFilterField.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QuickResponseFilterField.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QuickResponseFilterField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QuickResponseFilterFieldList"
+        ~of_json:QuickResponseFilterField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module QuickResponseOrderField =
+  struct
+    type nonrec t =
+      {
+      name: NonEmptyString.t
+        [@ocaml.doc
+          "The name of the attribute to order the quick response query results by."];
+      order: Order.t option
+        [@ocaml.doc "The order at which the quick responses are sorted by."]}
+    let context_ = "QuickResponseOrderField"
+    let make ?order = fun ~name -> fun () -> { order; name }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (NonEmptyString.to_value x.name)));
+        ("order", (Option.map x.order ~f:Order.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let order = (Option.map ~f:Order.of_xml) (Xml.child xml_arg0 "order") in
+      let name =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?order ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let order = field_map json__ "order" Order.of_json in
+      let name = field_map_exn json__ "name" NonEmptyString.of_json in
+      make ?order ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The quick response fields to order the quick response query results by. The following is the list of supported field names. name description shortcutKey isActive channels language contentType createdTime lastModifiedTime lastModifiedBy groupingConfiguration.criteria groupingConfiguration.values"]
+module QuickResponseQueryFieldList =
+  struct
+    type nonrec t = QuickResponseQueryField.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QuickResponseQueryField.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QuickResponseQueryField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QuickResponseQueryFieldList"
+        ~of_json:QuickResponseQueryField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ContentSummary =
   struct
     type nonrec t =
       {
-      contentArn: Arn.t
+      contentArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the content."];
-      contentId: Uuid.t [@ocaml.doc "The identifier of the content."];
-      contentType: ContentType.t
+      contentId: Uuid.t option [@ocaml.doc "The identifier of the content."];
+      contentType: ContentType.t option
         [@ocaml.doc "The media type of the content."];
-      knowledgeBaseArn: Arn.t
+      knowledgeBaseArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the knowledge base."];
-      knowledgeBaseId: Uuid.t
-        [@ocaml.doc "The the identifier of the knowledge base."];
-      metadata: ContentMetadata.t
+      knowledgeBaseId: Uuid.t option
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it."];
+      metadata: ContentMetadata.t option
         [@ocaml.doc
           "A key/value map to store attributes without affecting tagging or recommendations. For example, when synchronizing data between an external system and Wisdom, you can store an external version identifier as metadata to utilize for determining drift."];
-      name: Name.t [@ocaml.doc "The name of the content."];
-      revisionId: NonEmptyString.t
+      name: Name.t option [@ocaml.doc "The name of the content."];
+      revisionId: NonEmptyString.t option
         [@ocaml.doc "The identifier of the revision of the content."];
-      status: ContentStatus.t [@ocaml.doc "The status of the content."];
+      status: ContentStatus.t option
+        [@ocaml.doc "The status of the content."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags used to organize, track, or control access for this resource."];
-      title: ContentTitle.t [@ocaml.doc "The title of the content."]}
-    let context_ = "ContentSummary"
-    let make ?tags =
-      fun ~contentArn ->
-        fun ~contentId ->
-          fun ~contentType ->
-            fun ~knowledgeBaseArn ->
-              fun ~knowledgeBaseId ->
-                fun ~metadata ->
-                  fun ~name ->
-                    fun ~revisionId ->
-                      fun ~status ->
-                        fun ~title ->
+      title: ContentTitle.t option [@ocaml.doc "The title of the content."]}
+    let make ?contentArn =
+      fun ?contentId ->
+        fun ?contentType ->
+          fun ?knowledgeBaseArn ->
+            fun ?knowledgeBaseId ->
+              fun ?metadata ->
+                fun ?name ->
+                  fun ?revisionId ->
+                    fun ?status ->
+                      fun ?tags ->
+                        fun ?title ->
                           fun () ->
                             {
-                              tags;
                               contentArn;
                               contentId;
                               contentType;
@@ -1137,106 +2588,100 @@ module ContentSummary =
                               name;
                               revisionId;
                               status;
+                              tags;
                               title
                             }
     let to_value x =
       structure_to_value
-        [("contentArn", (Some (Arn.to_value x.contentArn)));
-        ("contentId", (Some (Uuid.to_value x.contentId)));
-        ("contentType", (Some (ContentType.to_value x.contentType)));
-        ("knowledgeBaseArn", (Some (Arn.to_value x.knowledgeBaseArn)));
-        ("knowledgeBaseId", (Some (Uuid.to_value x.knowledgeBaseId)));
-        ("metadata", (Some (ContentMetadata.to_value x.metadata)));
-        ("name", (Some (Name.to_value x.name)));
-        ("revisionId", (Some (NonEmptyString.to_value x.revisionId)));
-        ("status", (Some (ContentStatus.to_value x.status)));
+        [("contentArn", (Option.map x.contentArn ~f:Arn.to_value));
+        ("contentId", (Option.map x.contentId ~f:Uuid.to_value));
+        ("contentType", (Option.map x.contentType ~f:ContentType.to_value));
+        ("knowledgeBaseArn", (Option.map x.knowledgeBaseArn ~f:Arn.to_value));
+        ("knowledgeBaseId", (Option.map x.knowledgeBaseId ~f:Uuid.to_value));
+        ("metadata", (Option.map x.metadata ~f:ContentMetadata.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
+        ("revisionId", (Option.map x.revisionId ~f:NonEmptyString.to_value));
+        ("status", (Option.map x.status ~f:ContentStatus.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value));
-        ("title", (Some (ContentTitle.to_value x.title)))]
+        ("title", (Option.map x.title ~f:ContentTitle.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let title =
-        ContentTitle.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "title") in
+        (Option.map ~f:ContentTitle.of_xml) (Xml.child xml_arg0 "title") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
-        ContentStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:ContentStatus.of_xml) (Xml.child xml_arg0 "status") in
       let revisionId =
-        NonEmptyString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "revisionId") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "revisionId") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let metadata =
-        ContentMetadata.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "metadata") in
+        (Option.map ~f:ContentMetadata.of_xml)
+          (Xml.child xml_arg0 "metadata") in
       let knowledgeBaseId =
-        Uuid.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "knowledgeBaseId") in
       let knowledgeBaseArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "knowledgeBaseArn") in
       let contentType =
-        ContentType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "contentType") in
+        (Option.map ~f:ContentType.of_xml) (Xml.child xml_arg0 "contentType") in
       let contentId =
-        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contentId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "contentId") in
       let contentArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contentArn") in
-      make ~title ?tags ~status ~revisionId ~name ~metadata ~knowledgeBaseId
-        ~knowledgeBaseArn ~contentType ~contentId ~contentArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "contentArn") in
+      make ?title ?tags ?status ?revisionId ?name ?metadata ?knowledgeBaseId
+        ?knowledgeBaseArn ?contentType ?contentId ?contentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let title = field_map_exn json "title" ContentTitle.of_json in
-      let tags = field_map json "tags" Tags.of_json in
-      let status = field_map_exn json "status" ContentStatus.of_json in
-      let revisionId = field_map_exn json "revisionId" NonEmptyString.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let metadata = field_map_exn json "metadata" ContentMetadata.of_json in
-      let knowledgeBaseId = field_map_exn json "knowledgeBaseId" Uuid.of_json in
-      let knowledgeBaseArn =
-        field_map_exn json "knowledgeBaseArn" Arn.of_json in
-      let contentType = field_map_exn json "contentType" ContentType.of_json in
-      let contentId = field_map_exn json "contentId" Uuid.of_json in
-      let contentArn = field_map_exn json "contentArn" Arn.of_json in
-      make ~title ?tags ~status ~revisionId ~name ~metadata ~knowledgeBaseId
-        ~knowledgeBaseArn ~contentType ~contentId ~contentArn ()
+    let of_json json__ =
+      let title = field_map json__ "title" ContentTitle.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let status = field_map json__ "status" ContentStatus.of_json in
+      let revisionId = field_map json__ "revisionId" NonEmptyString.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let metadata = field_map json__ "metadata" ContentMetadata.of_json in
+      let knowledgeBaseId = field_map json__ "knowledgeBaseId" Uuid.of_json in
+      let knowledgeBaseArn = field_map json__ "knowledgeBaseArn" Arn.of_json in
+      let contentType = field_map json__ "contentType" ContentType.of_json in
+      let contentId = field_map json__ "contentId" Uuid.of_json in
+      let contentArn = field_map json__ "contentArn" Arn.of_json in
+      make ?title ?tags ?status ?revisionId ?name ?metadata ?knowledgeBaseId
+        ?knowledgeBaseArn ?contentType ?contentId ?contentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about the content."]
 module ResultData =
   struct
     type nonrec t =
       {
-      document: Document.t [@ocaml.doc "The document."];
+      document: Document.t option [@ocaml.doc "The document."];
       relevanceScore: RelevanceScore.t option
         [@ocaml.doc "The relevance score of the results."];
-      resultId: Uuid.t [@ocaml.doc "The identifier of the result data."]}
-    let context_ = "ResultData"
-    let make ?relevanceScore =
-      fun ~document ->
-        fun ~resultId -> fun () -> { relevanceScore; document; resultId }
+      resultId: Uuid.t option
+        [@ocaml.doc "The identifier of the result data."]}
+    let make ?document =
+      fun ?relevanceScore ->
+        fun ?resultId -> fun () -> { document; relevanceScore; resultId }
     let to_value x =
       structure_to_value
-        [("document", (Some (Document.to_value x.document)));
+        [("document", (Option.map x.document ~f:Document.to_value));
         ("relevanceScore",
           (Option.map x.relevanceScore ~f:RelevanceScore.to_value));
-        ("resultId", (Some (Uuid.to_value x.resultId)))]
+        ("resultId", (Option.map x.resultId ~f:Uuid.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resultId =
-        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resultId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "resultId") in
       let relevanceScore =
         (Option.map ~f:RelevanceScore.of_xml)
           (Xml.child xml_arg0 "relevanceScore") in
       let document =
-        Document.of_xml (Xml.child_exn ~context:context_ xml_arg0 "document") in
-      make ~resultId ?relevanceScore ~document ()
+        (Option.map ~f:Document.of_xml) (Xml.child xml_arg0 "document") in
+      make ?resultId ?relevanceScore ?document ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resultId = field_map_exn json "resultId" Uuid.of_json in
+    let of_json json__ =
+      let resultId = field_map json__ "resultId" Uuid.of_json in
       let relevanceScore =
-        field_map json "relevanceScore" RelevanceScore.of_json in
-      let document = field_map_exn json "document" Document.of_json in
-      make ~resultId ?relevanceScore ~document ()
+        field_map json__ "relevanceScore" RelevanceScore.of_json in
+      let document = field_map json__ "document" Document.of_json in
+      make ?resultId ?relevanceScore ?document ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the result."]
 module NotifyRecommendationsReceivedError =
@@ -1266,72 +2711,232 @@ module NotifyRecommendationsReceivedError =
           (Xml.child xml_arg0 "message") in
       make ?recommendationId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationId =
-        field_map json "recommendationId" String_.of_json in
+        field_map json__ "recommendationId" String_.of_json in
       let message =
-        field_map json "message"
+        field_map json__ "message"
           NotifyRecommendationsReceivedErrorMessage.of_json in
       make ?recommendationId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An error occurred when creating a recommendation."]
+module QuickResponseSummary =
+  struct
+    type nonrec t =
+      {
+      channels: Channels.t option
+        [@ocaml.doc
+          "The Amazon Connect contact channels this quick response applies to. The supported contact channel types include Chat."];
+      contentType: QuickResponseType.t option
+        [@ocaml.doc
+          "The media type of the quick response content. Use application/x.quickresponse;format=plain for quick response written in plain text. Use application/x.quickresponse;format=markdown for quick response written in richtext."];
+      createdTime: SyntheticTimestamp_epoch_seconds.t option
+        [@ocaml.doc "The timestamp when the quick response was created."];
+      description: QuickResponseDescription.t option
+        [@ocaml.doc "The description of the quick response."];
+      isActive: Boolean.t option
+        [@ocaml.doc "Whether the quick response is active."];
+      knowledgeBaseArn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the knowledge base."];
+      knowledgeBaseId: Uuid.t option
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it."];
+      lastModifiedBy: GenericArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the user who last updated the quick response data."];
+      lastModifiedTime: SyntheticTimestamp_epoch_seconds.t option
+        [@ocaml.doc
+          "The timestamp when the quick response summary was last modified."];
+      name: QuickResponseName.t option
+        [@ocaml.doc "The name of the quick response."];
+      quickResponseArn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the quick response."];
+      quickResponseId: Uuid.t option
+        [@ocaml.doc "The identifier of the quick response."];
+      status: QuickResponseStatus.t option
+        [@ocaml.doc "The resource status of the quick response."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource."]}
+    let make ?channels =
+      fun ?contentType ->
+        fun ?createdTime ->
+          fun ?description ->
+            fun ?isActive ->
+              fun ?knowledgeBaseArn ->
+                fun ?knowledgeBaseId ->
+                  fun ?lastModifiedBy ->
+                    fun ?lastModifiedTime ->
+                      fun ?name ->
+                        fun ?quickResponseArn ->
+                          fun ?quickResponseId ->
+                            fun ?status ->
+                              fun ?tags ->
+                                fun () ->
+                                  {
+                                    channels;
+                                    contentType;
+                                    createdTime;
+                                    description;
+                                    isActive;
+                                    knowledgeBaseArn;
+                                    knowledgeBaseId;
+                                    lastModifiedBy;
+                                    lastModifiedTime;
+                                    name;
+                                    quickResponseArn;
+                                    quickResponseId;
+                                    status;
+                                    tags
+                                  }
+    let to_value x =
+      structure_to_value
+        [("channels", (Option.map x.channels ~f:Channels.to_value));
+        ("contentType",
+          (Option.map x.contentType ~f:QuickResponseType.to_value));
+        ("createdTime",
+          (Option.map x.createdTime
+             ~f:SyntheticTimestamp_epoch_seconds.to_value));
+        ("description",
+          (Option.map x.description ~f:QuickResponseDescription.to_value));
+        ("isActive", (Option.map x.isActive ~f:Boolean.to_value));
+        ("knowledgeBaseArn", (Option.map x.knowledgeBaseArn ~f:Arn.to_value));
+        ("knowledgeBaseId", (Option.map x.knowledgeBaseId ~f:Uuid.to_value));
+        ("lastModifiedBy",
+          (Option.map x.lastModifiedBy ~f:GenericArn.to_value));
+        ("lastModifiedTime",
+          (Option.map x.lastModifiedTime
+             ~f:SyntheticTimestamp_epoch_seconds.to_value));
+        ("name", (Option.map x.name ~f:QuickResponseName.to_value));
+        ("quickResponseArn", (Option.map x.quickResponseArn ~f:Arn.to_value));
+        ("quickResponseId", (Option.map x.quickResponseId ~f:Uuid.to_value));
+        ("status", (Option.map x.status ~f:QuickResponseStatus.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let status =
+        (Option.map ~f:QuickResponseStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let quickResponseId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "quickResponseId") in
+      let quickResponseArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "quickResponseArn") in
+      let name =
+        (Option.map ~f:QuickResponseName.of_xml) (Xml.child xml_arg0 "name") in
+      let lastModifiedTime =
+        (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTime") in
+      let lastModifiedBy =
+        (Option.map ~f:GenericArn.of_xml)
+          (Xml.child xml_arg0 "lastModifiedBy") in
+      let knowledgeBaseId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "knowledgeBaseId") in
+      let knowledgeBaseArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "knowledgeBaseArn") in
+      let isActive =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isActive") in
+      let description =
+        (Option.map ~f:QuickResponseDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let createdTime =
+        (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
+          (Xml.child xml_arg0 "createdTime") in
+      let contentType =
+        (Option.map ~f:QuickResponseType.of_xml)
+          (Xml.child xml_arg0 "contentType") in
+      let channels =
+        (Option.map ~f:Channels.of_xml) (Xml.child xml_arg0 "channels") in
+      make ?tags ?status ?quickResponseId ?quickResponseArn ?name
+        ?lastModifiedTime ?lastModifiedBy ?knowledgeBaseId ?knowledgeBaseArn
+        ?isActive ?description ?createdTime ?contentType ?channels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let status = field_map json__ "status" QuickResponseStatus.of_json in
+      let quickResponseId = field_map json__ "quickResponseId" Uuid.of_json in
+      let quickResponseArn = field_map json__ "quickResponseArn" Arn.of_json in
+      let name = field_map json__ "name" QuickResponseName.of_json in
+      let lastModifiedTime =
+        field_map json__ "lastModifiedTime"
+          SyntheticTimestamp_epoch_seconds.of_json in
+      let lastModifiedBy =
+        field_map json__ "lastModifiedBy" GenericArn.of_json in
+      let knowledgeBaseId = field_map json__ "knowledgeBaseId" Uuid.of_json in
+      let knowledgeBaseArn = field_map json__ "knowledgeBaseArn" Arn.of_json in
+      let isActive = field_map json__ "isActive" Boolean.of_json in
+      let description =
+        field_map json__ "description" QuickResponseDescription.of_json in
+      let createdTime =
+        field_map json__ "createdTime"
+          SyntheticTimestamp_epoch_seconds.of_json in
+      let contentType =
+        field_map json__ "contentType" QuickResponseType.of_json in
+      let channels = field_map json__ "channels" Channels.of_json in
+      make ?tags ?status ?quickResponseId ?quickResponseArn ?name
+        ?lastModifiedTime ?lastModifiedBy ?knowledgeBaseId ?knowledgeBaseArn
+        ?isActive ?description ?createdTime ?contentType ?channels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The summary information about the quick response."]
 module KnowledgeBaseSummary =
   struct
     type nonrec t =
       {
       description: Description.t option
         [@ocaml.doc "The description of the knowledge base."];
-      knowledgeBaseArn: Arn.t
+      knowledgeBaseArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the knowledge base."];
-      knowledgeBaseId: Uuid.t
-        [@ocaml.doc "The the identifier of the knowledge base."];
-      knowledgeBaseType: KnowledgeBaseType.t
+      knowledgeBaseId: Uuid.t option
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it."];
+      knowledgeBaseType: KnowledgeBaseType.t option
         [@ocaml.doc "The type of knowledge base."];
-      name: Name.t [@ocaml.doc "The name of the knowledge base."];
+      name: Name.t option [@ocaml.doc "The name of the knowledge base."];
       renderingConfiguration: RenderingConfiguration.t option
         [@ocaml.doc "Information about how to render the content."];
       serverSideEncryptionConfiguration:
         ServerSideEncryptionConfiguration.t option
-        [@ocaml.doc "The KMS key used for encryption."];
+        [@ocaml.doc
+          "The configuration information for the customer managed key used for encryption. This KMS key must have a policy that allows kms:CreateGrant, kms:DescribeKey, kms:Decrypt/kms:GenerateDataKey permissions to the IAM identity using the key to invoke Wisdom. For more information about setting up a customer managed key for Wisdom, see Enable Amazon Connect Wisdom for your instance."];
       sourceConfiguration: SourceConfiguration.t option
-        [@ocaml.doc "\\[KEVIN\\]"];
-      status: KnowledgeBaseStatus.t
+        [@ocaml.doc
+          "Configuration information about the external data source."];
+      status: KnowledgeBaseStatus.t option
         [@ocaml.doc "The status of the knowledge base summary."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags used to organize, track, or control access for this resource."]}
-    let context_ = "KnowledgeBaseSummary"
     let make ?description =
-      fun ?renderingConfiguration ->
-        fun ?serverSideEncryptionConfiguration ->
-          fun ?sourceConfiguration ->
-            fun ?tags ->
-              fun ~knowledgeBaseArn ->
-                fun ~knowledgeBaseId ->
-                  fun ~knowledgeBaseType ->
-                    fun ~name ->
-                      fun ~status ->
+      fun ?knowledgeBaseArn ->
+        fun ?knowledgeBaseId ->
+          fun ?knowledgeBaseType ->
+            fun ?name ->
+              fun ?renderingConfiguration ->
+                fun ?serverSideEncryptionConfiguration ->
+                  fun ?sourceConfiguration ->
+                    fun ?status ->
+                      fun ?tags ->
                         fun () ->
                           {
                             description;
-                            renderingConfiguration;
-                            serverSideEncryptionConfiguration;
-                            sourceConfiguration;
-                            tags;
                             knowledgeBaseArn;
                             knowledgeBaseId;
                             knowledgeBaseType;
                             name;
-                            status
+                            renderingConfiguration;
+                            serverSideEncryptionConfiguration;
+                            sourceConfiguration;
+                            status;
+                            tags
                           }
     let to_value x =
       structure_to_value
         [("description", (Option.map x.description ~f:Description.to_value));
-        ("knowledgeBaseArn", (Some (Arn.to_value x.knowledgeBaseArn)));
-        ("knowledgeBaseId", (Some (Uuid.to_value x.knowledgeBaseId)));
+        ("knowledgeBaseArn", (Option.map x.knowledgeBaseArn ~f:Arn.to_value));
+        ("knowledgeBaseId", (Option.map x.knowledgeBaseId ~f:Uuid.to_value));
         ("knowledgeBaseType",
-          (Some (KnowledgeBaseType.to_value x.knowledgeBaseType)));
-        ("name", (Some (Name.to_value x.name)));
+          (Option.map x.knowledgeBaseType ~f:KnowledgeBaseType.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
         ("renderingConfiguration",
           (Option.map x.renderingConfiguration
              ~f:RenderingConfiguration.to_value));
@@ -1340,14 +2945,14 @@ module KnowledgeBaseSummary =
              ~f:ServerSideEncryptionConfiguration.to_value));
         ("sourceConfiguration",
           (Option.map x.sourceConfiguration ~f:SourceConfiguration.to_value));
-        ("status", (Some (KnowledgeBaseStatus.to_value x.status)));
+        ("status", (Option.map x.status ~f:KnowledgeBaseStatus.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
-        KnowledgeBaseStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:KnowledgeBaseStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let sourceConfiguration =
         (Option.map ~f:SourceConfiguration.of_xml)
           (Xml.child xml_arg0 "sourceConfiguration") in
@@ -1357,253 +2962,424 @@ module KnowledgeBaseSummary =
       let renderingConfiguration =
         (Option.map ~f:RenderingConfiguration.of_xml)
           (Xml.child xml_arg0 "renderingConfiguration") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let knowledgeBaseType =
-        KnowledgeBaseType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseType") in
+        (Option.map ~f:KnowledgeBaseType.of_xml)
+          (Xml.child xml_arg0 "knowledgeBaseType") in
       let knowledgeBaseId =
-        Uuid.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "knowledgeBaseId") in
       let knowledgeBaseArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "knowledgeBaseArn") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
-      make ?tags ~status ?sourceConfiguration
-        ?serverSideEncryptionConfiguration ?renderingConfiguration ~name
-        ~knowledgeBaseType ~knowledgeBaseId ~knowledgeBaseArn ?description ()
+      make ?tags ?status ?sourceConfiguration
+        ?serverSideEncryptionConfiguration ?renderingConfiguration ?name
+        ?knowledgeBaseType ?knowledgeBaseId ?knowledgeBaseArn ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let status = field_map_exn json "status" KnowledgeBaseStatus.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let status = field_map json__ "status" KnowledgeBaseStatus.of_json in
       let sourceConfiguration =
-        field_map json "sourceConfiguration" SourceConfiguration.of_json in
+        field_map json__ "sourceConfiguration" SourceConfiguration.of_json in
       let serverSideEncryptionConfiguration =
-        field_map json "serverSideEncryptionConfiguration"
+        field_map json__ "serverSideEncryptionConfiguration"
           ServerSideEncryptionConfiguration.of_json in
       let renderingConfiguration =
-        field_map json "renderingConfiguration"
+        field_map json__ "renderingConfiguration"
           RenderingConfiguration.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+      let name = field_map json__ "name" Name.of_json in
       let knowledgeBaseType =
-        field_map_exn json "knowledgeBaseType" KnowledgeBaseType.of_json in
-      let knowledgeBaseId = field_map_exn json "knowledgeBaseId" Uuid.of_json in
-      let knowledgeBaseArn =
-        field_map_exn json "knowledgeBaseArn" Arn.of_json in
-      let description = field_map json "description" Description.of_json in
-      make ?tags ~status ?sourceConfiguration
-        ?serverSideEncryptionConfiguration ?renderingConfiguration ~name
-        ~knowledgeBaseType ~knowledgeBaseId ~knowledgeBaseArn ?description ()
+        field_map json__ "knowledgeBaseType" KnowledgeBaseType.of_json in
+      let knowledgeBaseId = field_map json__ "knowledgeBaseId" Uuid.of_json in
+      let knowledgeBaseArn = field_map json__ "knowledgeBaseArn" Arn.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      make ?tags ?status ?sourceConfiguration
+        ?serverSideEncryptionConfiguration ?renderingConfiguration ?name
+        ?knowledgeBaseType ?knowledgeBaseId ?knowledgeBaseArn ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about the knowledge base."]
+module ImportJobSummary =
+  struct
+    type nonrec t =
+      {
+      createdTime: SyntheticTimestamp_epoch_seconds.t option
+        [@ocaml.doc "The timestamp when the import job was created."];
+      externalSourceConfiguration: ExternalSourceConfiguration.t option
+        [@ocaml.doc
+          "The configuration information of the external source that the resource data are imported from."];
+      importJobId: Uuid.t option
+        [@ocaml.doc "The identifier of the import job."];
+      importJobType: ImportJobType.t option
+        [@ocaml.doc "The type of import job."];
+      knowledgeBaseArn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the knowledge base."];
+      knowledgeBaseId: Uuid.t option
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it."];
+      lastModifiedTime: SyntheticTimestamp_epoch_seconds.t option
+        [@ocaml.doc "The timestamp when the import job was last modified."];
+      metadata: ContentMetadata.t option
+        [@ocaml.doc "The metadata fields of the imported Wisdom resources."];
+      status: ImportJobStatus.t option
+        [@ocaml.doc "The status of the import job."];
+      uploadId: UploadId.t option
+        [@ocaml.doc
+          "A pointer to the uploaded asset. This value is returned by StartContentUpload."]}
+    let make ?createdTime =
+      fun ?externalSourceConfiguration ->
+        fun ?importJobId ->
+          fun ?importJobType ->
+            fun ?knowledgeBaseArn ->
+              fun ?knowledgeBaseId ->
+                fun ?lastModifiedTime ->
+                  fun ?metadata ->
+                    fun ?status ->
+                      fun ?uploadId ->
+                        fun () ->
+                          {
+                            createdTime;
+                            externalSourceConfiguration;
+                            importJobId;
+                            importJobType;
+                            knowledgeBaseArn;
+                            knowledgeBaseId;
+                            lastModifiedTime;
+                            metadata;
+                            status;
+                            uploadId
+                          }
+    let to_value x =
+      structure_to_value
+        [("createdTime",
+           (Option.map x.createdTime
+              ~f:SyntheticTimestamp_epoch_seconds.to_value));
+        ("externalSourceConfiguration",
+          (Option.map x.externalSourceConfiguration
+             ~f:ExternalSourceConfiguration.to_value));
+        ("importJobId", (Option.map x.importJobId ~f:Uuid.to_value));
+        ("importJobType",
+          (Option.map x.importJobType ~f:ImportJobType.to_value));
+        ("knowledgeBaseArn", (Option.map x.knowledgeBaseArn ~f:Arn.to_value));
+        ("knowledgeBaseId", (Option.map x.knowledgeBaseId ~f:Uuid.to_value));
+        ("lastModifiedTime",
+          (Option.map x.lastModifiedTime
+             ~f:SyntheticTimestamp_epoch_seconds.to_value));
+        ("metadata", (Option.map x.metadata ~f:ContentMetadata.to_value));
+        ("status", (Option.map x.status ~f:ImportJobStatus.to_value));
+        ("uploadId", (Option.map x.uploadId ~f:UploadId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let uploadId =
+        (Option.map ~f:UploadId.of_xml) (Xml.child xml_arg0 "uploadId") in
+      let status =
+        (Option.map ~f:ImportJobStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let metadata =
+        (Option.map ~f:ContentMetadata.of_xml)
+          (Xml.child xml_arg0 "metadata") in
+      let lastModifiedTime =
+        (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTime") in
+      let knowledgeBaseId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "knowledgeBaseId") in
+      let knowledgeBaseArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "knowledgeBaseArn") in
+      let importJobType =
+        (Option.map ~f:ImportJobType.of_xml)
+          (Xml.child xml_arg0 "importJobType") in
+      let importJobId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "importJobId") in
+      let externalSourceConfiguration =
+        (Option.map ~f:ExternalSourceConfiguration.of_xml)
+          (Xml.child xml_arg0 "externalSourceConfiguration") in
+      let createdTime =
+        (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
+          (Xml.child xml_arg0 "createdTime") in
+      make ?uploadId ?status ?metadata ?lastModifiedTime ?knowledgeBaseId
+        ?knowledgeBaseArn ?importJobType ?importJobId
+        ?externalSourceConfiguration ?createdTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let uploadId = field_map json__ "uploadId" UploadId.of_json in
+      let status = field_map json__ "status" ImportJobStatus.of_json in
+      let metadata = field_map json__ "metadata" ContentMetadata.of_json in
+      let lastModifiedTime =
+        field_map json__ "lastModifiedTime"
+          SyntheticTimestamp_epoch_seconds.of_json in
+      let knowledgeBaseId = field_map json__ "knowledgeBaseId" Uuid.of_json in
+      let knowledgeBaseArn = field_map json__ "knowledgeBaseArn" Arn.of_json in
+      let importJobType =
+        field_map json__ "importJobType" ImportJobType.of_json in
+      let importJobId = field_map json__ "importJobId" Uuid.of_json in
+      let externalSourceConfiguration =
+        field_map json__ "externalSourceConfiguration"
+          ExternalSourceConfiguration.of_json in
+      let createdTime =
+        field_map json__ "createdTime"
+          SyntheticTimestamp_epoch_seconds.of_json in
+      make ?uploadId ?status ?metadata ?lastModifiedTime ?knowledgeBaseId
+        ?knowledgeBaseArn ?importJobType ?importJobId
+        ?externalSourceConfiguration ?createdTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary information about the import job."]
 module AssistantSummary =
   struct
     type nonrec t =
       {
-      assistantArn: Arn.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the Wisdom assistant"];
-      assistantId: Uuid.t
+      assistantArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Wisdom assistant."];
+      assistantId: Uuid.t option
         [@ocaml.doc "The identifier of the Wisdom assistant."];
       description: Description.t option
         [@ocaml.doc "The description of the assistant."];
-      name: Name.t [@ocaml.doc "The name of the assistant."];
+      integrationConfiguration: AssistantIntegrationConfiguration.t option
+        [@ocaml.doc
+          "The configuration information for the Wisdom assistant integration."];
+      name: Name.t option [@ocaml.doc "The name of the assistant."];
       serverSideEncryptionConfiguration:
         ServerSideEncryptionConfiguration.t option
-        [@ocaml.doc "The KMS key used for encryption."];
-      status: AssistantStatus.t [@ocaml.doc "The status of the assistant."];
+        [@ocaml.doc
+          "The configuration information for the customer managed key used for encryption. This KMS key must have a policy that allows kms:CreateGrant, kms:DescribeKey, and kms:Decrypt/kms:GenerateDataKey permissions to the IAM identity using the key to invoke Wisdom. To use Wisdom with chat, the key policy must also allow kms:Decrypt, kms:GenerateDataKey*, and kms:DescribeKey permissions to the connect.amazonaws.com service principal. For more information about setting up a customer managed key for Wisdom, see Enable Amazon Connect Wisdom for your instance."];
+      status: AssistantStatus.t option
+        [@ocaml.doc "The status of the assistant."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags used to organize, track, or control access for this resource."];
-      type_: AssistantType.t [@ocaml.doc "The type of the assistant."]}
-    let context_ = "AssistantSummary"
-    let make ?description =
-      fun ?serverSideEncryptionConfiguration ->
-        fun ?tags ->
-          fun ~assistantArn ->
-            fun ~assistantId ->
-              fun ~name ->
-                fun ~status ->
-                  fun ~type_ ->
-                    fun () ->
-                      {
-                        description;
-                        serverSideEncryptionConfiguration;
-                        tags;
-                        assistantArn;
-                        assistantId;
-                        name;
-                        status;
-                        type_
-                      }
+      type_: AssistantType.t option [@ocaml.doc "The type of the assistant."]}
+    let make ?assistantArn =
+      fun ?assistantId ->
+        fun ?description ->
+          fun ?integrationConfiguration ->
+            fun ?name ->
+              fun ?serverSideEncryptionConfiguration ->
+                fun ?status ->
+                  fun ?tags ->
+                    fun ?type_ ->
+                      fun () ->
+                        {
+                          assistantArn;
+                          assistantId;
+                          description;
+                          integrationConfiguration;
+                          name;
+                          serverSideEncryptionConfiguration;
+                          status;
+                          tags;
+                          type_
+                        }
     let to_value x =
       structure_to_value
-        [("assistantArn", (Some (Arn.to_value x.assistantArn)));
-        ("assistantId", (Some (Uuid.to_value x.assistantId)));
+        [("assistantArn", (Option.map x.assistantArn ~f:Arn.to_value));
+        ("assistantId", (Option.map x.assistantId ~f:Uuid.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
-        ("name", (Some (Name.to_value x.name)));
+        ("integrationConfiguration",
+          (Option.map x.integrationConfiguration
+             ~f:AssistantIntegrationConfiguration.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
         ("serverSideEncryptionConfiguration",
           (Option.map x.serverSideEncryptionConfiguration
              ~f:ServerSideEncryptionConfiguration.to_value));
-        ("status", (Some (AssistantStatus.to_value x.status)));
+        ("status", (Option.map x.status ~f:AssistantStatus.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value));
-        ("type", (Some (AssistantType.to_value x.type_)))]
+        ("type", (Option.map x.type_ ~f:AssistantType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let type_ =
-        AssistantType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+        (Option.map ~f:AssistantType.of_xml) (Xml.child xml_arg0 "type") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
-        AssistantStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:AssistantStatus.of_xml) (Xml.child xml_arg0 "status") in
       let serverSideEncryptionConfiguration =
         (Option.map ~f:ServerSideEncryptionConfiguration.of_xml)
           (Xml.child xml_arg0 "serverSideEncryptionConfiguration") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      let integrationConfiguration =
+        (Option.map ~f:AssistantIntegrationConfiguration.of_xml)
+          (Xml.child xml_arg0 "integrationConfiguration") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let assistantId =
-        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "assistantId") in
       let assistantArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantArn") in
-      make ~type_ ?tags ~status ?serverSideEncryptionConfiguration ~name
-        ?description ~assistantId ~assistantArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assistantArn") in
+      make ?type_ ?tags ?status ?serverSideEncryptionConfiguration ?name
+        ?integrationConfiguration ?description ?assistantId ?assistantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" AssistantType.of_json in
-      let tags = field_map json "tags" Tags.of_json in
-      let status = field_map_exn json "status" AssistantStatus.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "type" AssistantType.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let status = field_map json__ "status" AssistantStatus.of_json in
       let serverSideEncryptionConfiguration =
-        field_map json "serverSideEncryptionConfiguration"
+        field_map json__ "serverSideEncryptionConfiguration"
           ServerSideEncryptionConfiguration.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let description = field_map json "description" Description.of_json in
-      let assistantId = field_map_exn json "assistantId" Uuid.of_json in
-      let assistantArn = field_map_exn json "assistantArn" Arn.of_json in
-      make ~type_ ?tags ~status ?serverSideEncryptionConfiguration ~name
-        ?description ~assistantId ~assistantArn ()
+      let name = field_map json__ "name" Name.of_json in
+      let integrationConfiguration =
+        field_map json__ "integrationConfiguration"
+          AssistantIntegrationConfiguration.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let assistantId = field_map json__ "assistantId" Uuid.of_json in
+      let assistantArn = field_map json__ "assistantArn" Arn.of_json in
+      make ?type_ ?tags ?status ?serverSideEncryptionConfiguration ?name
+        ?integrationConfiguration ?description ?assistantId ?assistantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about the assistant."]
 module AssistantAssociationSummary =
   struct
     type nonrec t =
       {
-      assistantArn: Arn.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the Wisdom assistant"];
-      assistantAssociationArn: Arn.t
+      assistantArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Wisdom assistant."];
+      assistantAssociationArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the assistant association."];
-      assistantAssociationId: Uuid.t
+      assistantAssociationId: Uuid.t option
         [@ocaml.doc "The identifier of the assistant association."];
-      assistantId: Uuid.t
+      assistantId: Uuid.t option
         [@ocaml.doc "The identifier of the Wisdom assistant."];
-      associationData: AssistantAssociationOutputData.t
+      associationData: AssistantAssociationOutputData.t option
         [@ocaml.doc "The association data."];
-      associationType: AssociationType.t
+      associationType: AssociationType.t option
         [@ocaml.doc "The type of association."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags used to organize, track, or control access for this resource."]}
-    let context_ = "AssistantAssociationSummary"
-    let make ?tags =
-      fun ~assistantArn ->
-        fun ~assistantAssociationArn ->
-          fun ~assistantAssociationId ->
-            fun ~assistantId ->
-              fun ~associationData ->
-                fun ~associationType ->
+    let make ?assistantArn =
+      fun ?assistantAssociationArn ->
+        fun ?assistantAssociationId ->
+          fun ?assistantId ->
+            fun ?associationData ->
+              fun ?associationType ->
+                fun ?tags ->
                   fun () ->
                     {
-                      tags;
                       assistantArn;
                       assistantAssociationArn;
                       assistantAssociationId;
                       assistantId;
                       associationData;
-                      associationType
+                      associationType;
+                      tags
                     }
     let to_value x =
       structure_to_value
-        [("assistantArn", (Some (Arn.to_value x.assistantArn)));
+        [("assistantArn", (Option.map x.assistantArn ~f:Arn.to_value));
         ("assistantAssociationArn",
-          (Some (Arn.to_value x.assistantAssociationArn)));
+          (Option.map x.assistantAssociationArn ~f:Arn.to_value));
         ("assistantAssociationId",
-          (Some (Uuid.to_value x.assistantAssociationId)));
-        ("assistantId", (Some (Uuid.to_value x.assistantId)));
+          (Option.map x.assistantAssociationId ~f:Uuid.to_value));
+        ("assistantId", (Option.map x.assistantId ~f:Uuid.to_value));
         ("associationData",
-          (Some (AssistantAssociationOutputData.to_value x.associationData)));
+          (Option.map x.associationData
+             ~f:AssistantAssociationOutputData.to_value));
         ("associationType",
-          (Some (AssociationType.to_value x.associationType)));
+          (Option.map x.associationType ~f:AssociationType.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let associationType =
-        AssociationType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "associationType") in
+        (Option.map ~f:AssociationType.of_xml)
+          (Xml.child xml_arg0 "associationType") in
       let associationData =
-        AssistantAssociationOutputData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "associationData") in
+        (Option.map ~f:AssistantAssociationOutputData.of_xml)
+          (Xml.child xml_arg0 "associationData") in
       let assistantId =
-        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "assistantId") in
       let assistantAssociationId =
-        Uuid.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assistantAssociationId") in
+        (Option.map ~f:Uuid.of_xml)
+          (Xml.child xml_arg0 "assistantAssociationId") in
       let assistantAssociationArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assistantAssociationArn") in
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "assistantAssociationArn") in
       let assistantArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantArn") in
-      make ?tags ~associationType ~associationData ~assistantId
-        ~assistantAssociationId ~assistantAssociationArn ~assistantArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assistantArn") in
+      make ?tags ?associationType ?associationData ?assistantId
+        ?assistantAssociationId ?assistantAssociationArn ?assistantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
       let associationType =
-        field_map_exn json "associationType" AssociationType.of_json in
+        field_map json__ "associationType" AssociationType.of_json in
       let associationData =
-        field_map_exn json "associationData"
+        field_map json__ "associationData"
           AssistantAssociationOutputData.of_json in
-      let assistantId = field_map_exn json "assistantId" Uuid.of_json in
+      let assistantId = field_map json__ "assistantId" Uuid.of_json in
       let assistantAssociationId =
-        field_map_exn json "assistantAssociationId" Uuid.of_json in
+        field_map json__ "assistantAssociationId" Uuid.of_json in
       let assistantAssociationArn =
-        field_map_exn json "assistantAssociationArn" Arn.of_json in
-      let assistantArn = field_map_exn json "assistantArn" Arn.of_json in
-      make ?tags ~associationType ~associationData ~assistantId
-        ~assistantAssociationId ~assistantAssociationArn ~assistantArn ()
+        field_map json__ "assistantAssociationArn" Arn.of_json in
+      let assistantArn = field_map json__ "assistantArn" Arn.of_json in
+      make ?tags ?associationType ?associationData ?assistantId
+        ?assistantAssociationId ?assistantAssociationArn ?assistantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about the assistant association."]
+module SessionIntegrationConfiguration =
+  struct
+    type nonrec t =
+      {
+      topicIntegrationArn: GenericArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the integrated Amazon SNS topic used for streaming chat messages."]}
+    let make ?topicIntegrationArn = fun () -> { topicIntegrationArn }
+    let to_value x =
+      structure_to_value
+        [("topicIntegrationArn",
+           (Option.map x.topicIntegrationArn ~f:GenericArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let topicIntegrationArn =
+        (Option.map ~f:GenericArn.of_xml)
+          (Xml.child xml_arg0 "topicIntegrationArn") in
+      make ?topicIntegrationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let topicIntegrationArn =
+        field_map json__ "topicIntegrationArn" GenericArn.of_json in
+      make ?topicIntegrationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration information for the session integration."]
 module RecommendationData =
   struct
     type nonrec t =
       {
-      document: Document.t [@ocaml.doc "The recommended document."];
-      recommendationId: String_.t
+      document: Document.t option [@ocaml.doc "The recommended document."];
+      recommendationId: String_.t option
         [@ocaml.doc "The identifier of the recommendation."];
       relevanceLevel: RelevanceLevel.t option
         [@ocaml.doc "The relevance level of the recommendation."];
       relevanceScore: RelevanceScore.t option
-        [@ocaml.doc "The relevance score of the recommendation."]}
-    let context_ = "RecommendationData"
-    let make ?relevanceLevel =
-      fun ?relevanceScore ->
-        fun ~document ->
-          fun ~recommendationId ->
-            fun () ->
-              { relevanceLevel; relevanceScore; document; recommendationId }
+        [@ocaml.doc "The relevance score of the recommendation."];
+      type_: RecommendationType.t option
+        [@ocaml.doc "The type of recommendation."]}
+    let make ?document =
+      fun ?recommendationId ->
+        fun ?relevanceLevel ->
+          fun ?relevanceScore ->
+            fun ?type_ ->
+              fun () ->
+                {
+                  document;
+                  recommendationId;
+                  relevanceLevel;
+                  relevanceScore;
+                  type_
+                }
     let to_value x =
       structure_to_value
-        [("document", (Some (Document.to_value x.document)));
-        ("recommendationId", (Some (String_.to_value x.recommendationId)));
+        [("document", (Option.map x.document ~f:Document.to_value));
+        ("recommendationId",
+          (Option.map x.recommendationId ~f:String_.to_value));
         ("relevanceLevel",
           (Option.map x.relevanceLevel ~f:RelevanceLevel.to_value));
         ("relevanceScore",
-          (Option.map x.relevanceScore ~f:RelevanceScore.to_value))]
+          (Option.map x.relevanceScore ~f:RelevanceScore.to_value));
+        ("type", (Option.map x.type_ ~f:RecommendationType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:RecommendationType.of_xml) (Xml.child xml_arg0 "type") in
       let relevanceScore =
         (Option.map ~f:RelevanceScore.of_xml)
           (Xml.child xml_arg0 "relevanceScore") in
@@ -1611,23 +3387,85 @@ module RecommendationData =
         (Option.map ~f:RelevanceLevel.of_xml)
           (Xml.child xml_arg0 "relevanceLevel") in
       let recommendationId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recommendationId") in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "recommendationId") in
       let document =
-        Document.of_xml (Xml.child_exn ~context:context_ xml_arg0 "document") in
-      make ?relevanceScore ?relevanceLevel ~recommendationId ~document ()
+        (Option.map ~f:Document.of_xml) (Xml.child xml_arg0 "document") in
+      make ?type_ ?relevanceScore ?relevanceLevel ?recommendationId ?document
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let type_ = field_map json__ "type" RecommendationType.of_json in
       let relevanceScore =
-        field_map json "relevanceScore" RelevanceScore.of_json in
+        field_map json__ "relevanceScore" RelevanceScore.of_json in
       let relevanceLevel =
-        field_map json "relevanceLevel" RelevanceLevel.of_json in
+        field_map json__ "relevanceLevel" RelevanceLevel.of_json in
       let recommendationId =
-        field_map_exn json "recommendationId" String_.of_json in
-      let document = field_map_exn json "document" Document.of_json in
-      make ?relevanceScore ?relevanceLevel ~recommendationId ~document ()
+        field_map json__ "recommendationId" String_.of_json in
+      let document = field_map json__ "document" Document.of_json in
+      make ?type_ ?relevanceScore ?relevanceLevel ?recommendationId ?document
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the recommendation."]
+module RecommendationTrigger =
+  struct
+    type nonrec t =
+      {
+      data: RecommendationTriggerData.t option
+        [@ocaml.doc
+          "A union type containing information related to the trigger."];
+      id: Uuid.t option
+        [@ocaml.doc "The identifier of the recommendation trigger."];
+      recommendationIds: RecommendationIdList.t option
+        [@ocaml.doc "The identifiers of the recommendations."];
+      source: RecommendationSourceType.t option
+        [@ocaml.doc
+          "The source of the recommendation trigger. ISSUE_DETECTION: The corresponding recommendations were triggered by a Contact Lens issue. RULE_EVALUATION: The corresponding recommendations were triggered by a Contact Lens rule."];
+      type_: RecommendationTriggerType.t option
+        [@ocaml.doc "The type of recommendation trigger."]}
+    let make ?data =
+      fun ?id ->
+        fun ?recommendationIds ->
+          fun ?source ->
+            fun ?type_ ->
+              fun () -> { data; id; recommendationIds; source; type_ }
+    let to_value x =
+      structure_to_value
+        [("data", (Option.map x.data ~f:RecommendationTriggerData.to_value));
+        ("id", (Option.map x.id ~f:Uuid.to_value));
+        ("recommendationIds",
+          (Option.map x.recommendationIds ~f:RecommendationIdList.to_value));
+        ("source",
+          (Option.map x.source ~f:RecommendationSourceType.to_value));
+        ("type", (Option.map x.type_ ~f:RecommendationTriggerType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:RecommendationTriggerType.of_xml)
+          (Xml.child xml_arg0 "type") in
+      let source =
+        (Option.map ~f:RecommendationSourceType.of_xml)
+          (Xml.child xml_arg0 "source") in
+      let recommendationIds =
+        (Option.map ~f:RecommendationIdList.of_xml)
+          (Xml.child xml_arg0 "recommendationIds") in
+      let id = (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "id") in
+      let data =
+        (Option.map ~f:RecommendationTriggerData.of_xml)
+          (Xml.child xml_arg0 "data") in
+      make ?type_ ?source ?recommendationIds ?id ?data ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "type" RecommendationTriggerType.of_json in
+      let source = field_map json__ "source" RecommendationSourceType.of_json in
+      let recommendationIds =
+        field_map json__ "recommendationIds" RecommendationIdList.of_json in
+      let id = field_map json__ "id" Uuid.of_json in
+      let data = field_map json__ "data" RecommendationTriggerData.of_json in
+      make ?type_ ?source ?recommendationIds ?id ?data ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A recommendation trigger provides context on the event that produced the referenced recommendations. Recommendations are only referenced in recommendationIds by a single RecommendationTrigger."]
 module AccessDeniedException =
   struct
     type nonrec t = {
@@ -1642,150 +3480,255 @@ module AccessDeniedException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You do not have sufficient access to perform this action."]
-module KnowledgeBaseData =
+module ConflictException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request could not be processed because of conflict in the current state of the resource. For example, if you're using a Create API (such as CreateAssistant) that accepts name, a conflicting resource (usually with the same name) is being created or mutated."]
+module PreconditionFailedException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The provided revisionId does not match, indicating the content has been modified since it was last read."]
+module QuickResponseData =
   struct
     type nonrec t =
       {
-      description: Description.t option [@ocaml.doc "The description."];
-      knowledgeBaseArn: Arn.t
+      channels: Channels.t option
+        [@ocaml.doc
+          "The Amazon Connect contact channels this quick response applies to. The supported contact channel types include Chat."];
+      contentType: QuickResponseType.t option
+        [@ocaml.doc
+          "The media type of the quick response content. Use application/x.quickresponse;format=plain for quick response written in plain text. Use application/x.quickresponse;format=markdown for quick response written in richtext."];
+      contents: QuickResponseContents.t option
+        [@ocaml.doc "The contents of the quick response."];
+      createdTime: SyntheticTimestamp_epoch_seconds.t option
+        [@ocaml.doc "The timestamp when the quick response was created."];
+      description: QuickResponseDescription.t option
+        [@ocaml.doc "The description of the quick response."];
+      groupingConfiguration: GroupingConfiguration.t option
+        [@ocaml.doc
+          "The configuration information of the user groups that the quick response is accessible to."];
+      isActive: Boolean.t option
+        [@ocaml.doc "Whether the quick response is active."];
+      knowledgeBaseArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the knowledge base."];
-      knowledgeBaseId: Uuid.t
-        [@ocaml.doc "The the identifier of the knowledge base."];
-      knowledgeBaseType: KnowledgeBaseType.t
-        [@ocaml.doc "The type of knowledge base."];
-      lastContentModificationTime: SyntheticTimestamp_epoch_seconds.t option
+      knowledgeBaseId: Uuid.t option
         [@ocaml.doc
-          "An epoch timestamp indicating the most recent content modification inside the knowledge base. If no content exists in a knowledge base, this value is unset."];
-      name: Name.t [@ocaml.doc "The name of the knowledge base."];
-      renderingConfiguration: RenderingConfiguration.t option
-        [@ocaml.doc "Information about how to render the content."];
-      serverSideEncryptionConfiguration:
-        ServerSideEncryptionConfiguration.t option
-        [@ocaml.doc "The KMS key used for encryption."];
-      sourceConfiguration: SourceConfiguration.t option
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."];
+      language: LanguageCode.t option
         [@ocaml.doc
-          "Source configuration information about the knowledge base."];
-      status: KnowledgeBaseStatus.t
-        [@ocaml.doc "The status of the knowledge base."];
+          "The language code value for the language in which the quick response is written."];
+      lastModifiedBy: GenericArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the user who last updated the quick response data."];
+      lastModifiedTime: SyntheticTimestamp_epoch_seconds.t option
+        [@ocaml.doc
+          "The timestamp when the quick response data was last modified."];
+      name: QuickResponseName.t option
+        [@ocaml.doc "The name of the quick response."];
+      quickResponseArn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the quick response."];
+      quickResponseId: Uuid.t option
+        [@ocaml.doc "The identifier of the quick response."];
+      shortcutKey: ShortCutKey.t option
+        [@ocaml.doc
+          "The shortcut key of the quick response. The value should be unique across the knowledge base."];
+      status: QuickResponseStatus.t option
+        [@ocaml.doc "The status of the quick response data."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags used to organize, track, or control access for this resource."]}
-    let context_ = "KnowledgeBaseData"
-    let make ?description =
-      fun ?lastContentModificationTime ->
-        fun ?renderingConfiguration ->
-          fun ?serverSideEncryptionConfiguration ->
-            fun ?sourceConfiguration ->
-              fun ?tags ->
-                fun ~knowledgeBaseArn ->
-                  fun ~knowledgeBaseId ->
-                    fun ~knowledgeBaseType ->
-                      fun ~name ->
-                        fun ~status ->
-                          fun () ->
-                            {
-                              description;
-                              lastContentModificationTime;
-                              renderingConfiguration;
-                              serverSideEncryptionConfiguration;
-                              sourceConfiguration;
-                              tags;
-                              knowledgeBaseArn;
-                              knowledgeBaseId;
-                              knowledgeBaseType;
-                              name;
-                              status
-                            }
+    let make ?channels =
+      fun ?contentType ->
+        fun ?contents ->
+          fun ?createdTime ->
+            fun ?description ->
+              fun ?groupingConfiguration ->
+                fun ?isActive ->
+                  fun ?knowledgeBaseArn ->
+                    fun ?knowledgeBaseId ->
+                      fun ?language ->
+                        fun ?lastModifiedBy ->
+                          fun ?lastModifiedTime ->
+                            fun ?name ->
+                              fun ?quickResponseArn ->
+                                fun ?quickResponseId ->
+                                  fun ?shortcutKey ->
+                                    fun ?status ->
+                                      fun ?tags ->
+                                        fun () ->
+                                          {
+                                            channels;
+                                            contentType;
+                                            contents;
+                                            createdTime;
+                                            description;
+                                            groupingConfiguration;
+                                            isActive;
+                                            knowledgeBaseArn;
+                                            knowledgeBaseId;
+                                            language;
+                                            lastModifiedBy;
+                                            lastModifiedTime;
+                                            name;
+                                            quickResponseArn;
+                                            quickResponseId;
+                                            shortcutKey;
+                                            status;
+                                            tags
+                                          }
     let to_value x =
       structure_to_value
-        [("description", (Option.map x.description ~f:Description.to_value));
-        ("knowledgeBaseArn", (Some (Arn.to_value x.knowledgeBaseArn)));
-        ("knowledgeBaseId", (Some (Uuid.to_value x.knowledgeBaseId)));
-        ("knowledgeBaseType",
-          (Some (KnowledgeBaseType.to_value x.knowledgeBaseType)));
-        ("lastContentModificationTime",
-          (Option.map x.lastContentModificationTime
+        [("channels", (Option.map x.channels ~f:Channels.to_value));
+        ("contentType",
+          (Option.map x.contentType ~f:QuickResponseType.to_value));
+        ("contents",
+          (Option.map x.contents ~f:QuickResponseContents.to_value));
+        ("createdTime",
+          (Option.map x.createdTime
              ~f:SyntheticTimestamp_epoch_seconds.to_value));
-        ("name", (Some (Name.to_value x.name)));
-        ("renderingConfiguration",
-          (Option.map x.renderingConfiguration
-             ~f:RenderingConfiguration.to_value));
-        ("serverSideEncryptionConfiguration",
-          (Option.map x.serverSideEncryptionConfiguration
-             ~f:ServerSideEncryptionConfiguration.to_value));
-        ("sourceConfiguration",
-          (Option.map x.sourceConfiguration ~f:SourceConfiguration.to_value));
-        ("status", (Some (KnowledgeBaseStatus.to_value x.status)));
+        ("description",
+          (Option.map x.description ~f:QuickResponseDescription.to_value));
+        ("groupingConfiguration",
+          (Option.map x.groupingConfiguration
+             ~f:GroupingConfiguration.to_value));
+        ("isActive", (Option.map x.isActive ~f:Boolean.to_value));
+        ("knowledgeBaseArn", (Option.map x.knowledgeBaseArn ~f:Arn.to_value));
+        ("knowledgeBaseId", (Option.map x.knowledgeBaseId ~f:Uuid.to_value));
+        ("language", (Option.map x.language ~f:LanguageCode.to_value));
+        ("lastModifiedBy",
+          (Option.map x.lastModifiedBy ~f:GenericArn.to_value));
+        ("lastModifiedTime",
+          (Option.map x.lastModifiedTime
+             ~f:SyntheticTimestamp_epoch_seconds.to_value));
+        ("name", (Option.map x.name ~f:QuickResponseName.to_value));
+        ("quickResponseArn", (Option.map x.quickResponseArn ~f:Arn.to_value));
+        ("quickResponseId", (Option.map x.quickResponseId ~f:Uuid.to_value));
+        ("shortcutKey", (Option.map x.shortcutKey ~f:ShortCutKey.to_value));
+        ("status", (Option.map x.status ~f:QuickResponseStatus.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
-        KnowledgeBaseStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let sourceConfiguration =
-        (Option.map ~f:SourceConfiguration.of_xml)
-          (Xml.child xml_arg0 "sourceConfiguration") in
-      let serverSideEncryptionConfiguration =
-        (Option.map ~f:ServerSideEncryptionConfiguration.of_xml)
-          (Xml.child xml_arg0 "serverSideEncryptionConfiguration") in
-      let renderingConfiguration =
-        (Option.map ~f:RenderingConfiguration.of_xml)
-          (Xml.child xml_arg0 "renderingConfiguration") in
+        (Option.map ~f:QuickResponseStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let shortcutKey =
+        (Option.map ~f:ShortCutKey.of_xml) (Xml.child xml_arg0 "shortcutKey") in
+      let quickResponseId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "quickResponseId") in
+      let quickResponseArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "quickResponseArn") in
       let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let lastContentModificationTime =
+        (Option.map ~f:QuickResponseName.of_xml) (Xml.child xml_arg0 "name") in
+      let lastModifiedTime =
         (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
-          (Xml.child xml_arg0 "lastContentModificationTime") in
-      let knowledgeBaseType =
-        KnowledgeBaseType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseType") in
+          (Xml.child xml_arg0 "lastModifiedTime") in
+      let lastModifiedBy =
+        (Option.map ~f:GenericArn.of_xml)
+          (Xml.child xml_arg0 "lastModifiedBy") in
+      let language =
+        (Option.map ~f:LanguageCode.of_xml) (Xml.child xml_arg0 "language") in
       let knowledgeBaseId =
-        Uuid.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "knowledgeBaseId") in
       let knowledgeBaseArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "knowledgeBaseArn") in
+      let isActive =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isActive") in
+      let groupingConfiguration =
+        (Option.map ~f:GroupingConfiguration.of_xml)
+          (Xml.child xml_arg0 "groupingConfiguration") in
       let description =
-        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
-      make ?tags ~status ?sourceConfiguration
-        ?serverSideEncryptionConfiguration ?renderingConfiguration ~name
-        ?lastContentModificationTime ~knowledgeBaseType ~knowledgeBaseId
-        ~knowledgeBaseArn ?description ()
+        (Option.map ~f:QuickResponseDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let createdTime =
+        (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
+          (Xml.child xml_arg0 "createdTime") in
+      let contents =
+        (Option.map ~f:QuickResponseContents.of_xml)
+          (Xml.child xml_arg0 "contents") in
+      let contentType =
+        (Option.map ~f:QuickResponseType.of_xml)
+          (Xml.child xml_arg0 "contentType") in
+      let channels =
+        (Option.map ~f:Channels.of_xml) (Xml.child xml_arg0 "channels") in
+      make ?tags ?status ?shortcutKey ?quickResponseId ?quickResponseArn
+        ?name ?lastModifiedTime ?lastModifiedBy ?language ?knowledgeBaseId
+        ?knowledgeBaseArn ?isActive ?groupingConfiguration ?description
+        ?createdTime ?contents ?contentType ?channels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let status = field_map_exn json "status" KnowledgeBaseStatus.of_json in
-      let sourceConfiguration =
-        field_map json "sourceConfiguration" SourceConfiguration.of_json in
-      let serverSideEncryptionConfiguration =
-        field_map json "serverSideEncryptionConfiguration"
-          ServerSideEncryptionConfiguration.of_json in
-      let renderingConfiguration =
-        field_map json "renderingConfiguration"
-          RenderingConfiguration.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let lastContentModificationTime =
-        field_map json "lastContentModificationTime"
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let status = field_map json__ "status" QuickResponseStatus.of_json in
+      let shortcutKey = field_map json__ "shortcutKey" ShortCutKey.of_json in
+      let quickResponseId = field_map json__ "quickResponseId" Uuid.of_json in
+      let quickResponseArn = field_map json__ "quickResponseArn" Arn.of_json in
+      let name = field_map json__ "name" QuickResponseName.of_json in
+      let lastModifiedTime =
+        field_map json__ "lastModifiedTime"
           SyntheticTimestamp_epoch_seconds.of_json in
-      let knowledgeBaseType =
-        field_map_exn json "knowledgeBaseType" KnowledgeBaseType.of_json in
-      let knowledgeBaseId = field_map_exn json "knowledgeBaseId" Uuid.of_json in
-      let knowledgeBaseArn =
-        field_map_exn json "knowledgeBaseArn" Arn.of_json in
-      let description = field_map json "description" Description.of_json in
-      make ?tags ~status ?sourceConfiguration
-        ?serverSideEncryptionConfiguration ?renderingConfiguration ~name
-        ?lastContentModificationTime ~knowledgeBaseType ~knowledgeBaseId
-        ~knowledgeBaseArn ?description ()
+      let lastModifiedBy =
+        field_map json__ "lastModifiedBy" GenericArn.of_json in
+      let language = field_map json__ "language" LanguageCode.of_json in
+      let knowledgeBaseId = field_map json__ "knowledgeBaseId" Uuid.of_json in
+      let knowledgeBaseArn = field_map json__ "knowledgeBaseArn" Arn.of_json in
+      let isActive = field_map json__ "isActive" Boolean.of_json in
+      let groupingConfiguration =
+        field_map json__ "groupingConfiguration"
+          GroupingConfiguration.of_json in
+      let description =
+        field_map json__ "description" QuickResponseDescription.of_json in
+      let createdTime =
+        field_map json__ "createdTime"
+          SyntheticTimestamp_epoch_seconds.of_json in
+      let contents =
+        field_map json__ "contents" QuickResponseContents.of_json in
+      let contentType =
+        field_map json__ "contentType" QuickResponseType.of_json in
+      let channels = field_map json__ "channels" Channels.of_json in
+      make ?tags ?status ?shortcutKey ?quickResponseId ?quickResponseArn
+        ?name ?lastModifiedTime ?lastModifiedBy ?language ?knowledgeBaseId
+        ?knowledgeBaseArn ?isActive ?groupingConfiguration ?description
+        ?createdTime ?contents ?contentType ?channels ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about the knowledge base."]
+  end[@@ocaml.doc "Information about the quick response."]
 module ResourceNotFoundException =
   struct
     type nonrec t =
@@ -1807,9 +3750,9 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "resourceName" String_.of_json in
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "resourceName" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource does not exist."]
@@ -1827,12 +3770,34 @@ module ValidationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The input fails to satisfy the constraints specified by an AWS service."]
+       "The input fails to satisfy the constraints specified by a service."]
+module QuickResponseDataProvider =
+  struct
+    type nonrec t =
+      {
+      content: QuickResponseContent.t option
+        [@ocaml.doc "The content of the quick response."]}
+    let make ?content = fun () -> { content }
+    let to_value x =
+      structure_to_value
+        [("content", (Option.map x.content ~f:QuickResponseContent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let content =
+        (Option.map ~f:QuickResponseContent.of_xml)
+          (Xml.child xml_arg0 "content") in
+      make ?content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let content = field_map json__ "content" QuickResponseContent.of_json in
+      make ?content ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The container of quick response data."]
 module UuidOrArn =
   struct
     type nonrec t = string
@@ -1851,181 +3816,275 @@ module UuidOrArn =
     let of_json j = string_of_json ~kind:"UuidOrArn" j
     let to_json = simple_to_json to_value
   end
+module KnowledgeBaseData =
+  struct
+    type nonrec t =
+      {
+      description: Description.t option [@ocaml.doc "The description."];
+      knowledgeBaseArn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the knowledge base."];
+      knowledgeBaseId: Uuid.t option
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it."];
+      knowledgeBaseType: KnowledgeBaseType.t option
+        [@ocaml.doc "The type of knowledge base."];
+      lastContentModificationTime: SyntheticTimestamp_epoch_seconds.t option
+        [@ocaml.doc
+          "An epoch timestamp indicating the most recent content modification inside the knowledge base. If no content exists in a knowledge base, this value is unset."];
+      name: Name.t option [@ocaml.doc "The name of the knowledge base."];
+      renderingConfiguration: RenderingConfiguration.t option
+        [@ocaml.doc "Information about how to render the content."];
+      serverSideEncryptionConfiguration:
+        ServerSideEncryptionConfiguration.t option
+        [@ocaml.doc
+          "The configuration information for the customer managed key used for encryption. This KMS key must have a policy that allows kms:CreateGrant, kms:DescribeKey, and kms:Decrypt/kms:GenerateDataKey permissions to the IAM identity using the key to invoke Wisdom. For more information about setting up a customer managed key for Wisdom, see Enable Amazon Connect Wisdom for your instance."];
+      sourceConfiguration: SourceConfiguration.t option
+        [@ocaml.doc
+          "Source configuration information about the knowledge base."];
+      status: KnowledgeBaseStatus.t option
+        [@ocaml.doc "The status of the knowledge base."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource."]}
+    let make ?description =
+      fun ?knowledgeBaseArn ->
+        fun ?knowledgeBaseId ->
+          fun ?knowledgeBaseType ->
+            fun ?lastContentModificationTime ->
+              fun ?name ->
+                fun ?renderingConfiguration ->
+                  fun ?serverSideEncryptionConfiguration ->
+                    fun ?sourceConfiguration ->
+                      fun ?status ->
+                        fun ?tags ->
+                          fun () ->
+                            {
+                              description;
+                              knowledgeBaseArn;
+                              knowledgeBaseId;
+                              knowledgeBaseType;
+                              lastContentModificationTime;
+                              name;
+                              renderingConfiguration;
+                              serverSideEncryptionConfiguration;
+                              sourceConfiguration;
+                              status;
+                              tags
+                            }
+    let to_value x =
+      structure_to_value
+        [("description", (Option.map x.description ~f:Description.to_value));
+        ("knowledgeBaseArn", (Option.map x.knowledgeBaseArn ~f:Arn.to_value));
+        ("knowledgeBaseId", (Option.map x.knowledgeBaseId ~f:Uuid.to_value));
+        ("knowledgeBaseType",
+          (Option.map x.knowledgeBaseType ~f:KnowledgeBaseType.to_value));
+        ("lastContentModificationTime",
+          (Option.map x.lastContentModificationTime
+             ~f:SyntheticTimestamp_epoch_seconds.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
+        ("renderingConfiguration",
+          (Option.map x.renderingConfiguration
+             ~f:RenderingConfiguration.to_value));
+        ("serverSideEncryptionConfiguration",
+          (Option.map x.serverSideEncryptionConfiguration
+             ~f:ServerSideEncryptionConfiguration.to_value));
+        ("sourceConfiguration",
+          (Option.map x.sourceConfiguration ~f:SourceConfiguration.to_value));
+        ("status", (Option.map x.status ~f:KnowledgeBaseStatus.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let status =
+        (Option.map ~f:KnowledgeBaseStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let sourceConfiguration =
+        (Option.map ~f:SourceConfiguration.of_xml)
+          (Xml.child xml_arg0 "sourceConfiguration") in
+      let serverSideEncryptionConfiguration =
+        (Option.map ~f:ServerSideEncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "serverSideEncryptionConfiguration") in
+      let renderingConfiguration =
+        (Option.map ~f:RenderingConfiguration.of_xml)
+          (Xml.child xml_arg0 "renderingConfiguration") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      let lastContentModificationTime =
+        (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
+          (Xml.child xml_arg0 "lastContentModificationTime") in
+      let knowledgeBaseType =
+        (Option.map ~f:KnowledgeBaseType.of_xml)
+          (Xml.child xml_arg0 "knowledgeBaseType") in
+      let knowledgeBaseId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "knowledgeBaseId") in
+      let knowledgeBaseArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "knowledgeBaseArn") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      make ?tags ?status ?sourceConfiguration
+        ?serverSideEncryptionConfiguration ?renderingConfiguration ?name
+        ?lastContentModificationTime ?knowledgeBaseType ?knowledgeBaseId
+        ?knowledgeBaseArn ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let status = field_map json__ "status" KnowledgeBaseStatus.of_json in
+      let sourceConfiguration =
+        field_map json__ "sourceConfiguration" SourceConfiguration.of_json in
+      let serverSideEncryptionConfiguration =
+        field_map json__ "serverSideEncryptionConfiguration"
+          ServerSideEncryptionConfiguration.of_json in
+      let renderingConfiguration =
+        field_map json__ "renderingConfiguration"
+          RenderingConfiguration.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let lastContentModificationTime =
+        field_map json__ "lastContentModificationTime"
+          SyntheticTimestamp_epoch_seconds.of_json in
+      let knowledgeBaseType =
+        field_map json__ "knowledgeBaseType" KnowledgeBaseType.of_json in
+      let knowledgeBaseId = field_map json__ "knowledgeBaseId" Uuid.of_json in
+      let knowledgeBaseArn = field_map json__ "knowledgeBaseArn" Arn.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      make ?tags ?status ?sourceConfiguration
+        ?serverSideEncryptionConfiguration ?renderingConfiguration ?name
+        ?lastContentModificationTime ?knowledgeBaseType ?knowledgeBaseId
+        ?knowledgeBaseArn ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the knowledge base."]
 module ContentData =
   struct
     type nonrec t =
       {
-      contentArn: Arn.t
+      contentArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the content."];
-      contentId: Uuid.t [@ocaml.doc "The identifier of the content."];
-      contentType: ContentType.t
+      contentId: Uuid.t option [@ocaml.doc "The identifier of the content."];
+      contentType: ContentType.t option
         [@ocaml.doc "The media type of the content."];
-      knowledgeBaseArn: Arn.t
+      knowledgeBaseArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the knowledge base."];
-      knowledgeBaseId: Uuid.t
-        [@ocaml.doc "The the identifier of the knowledge base."];
+      knowledgeBaseId: Uuid.t option
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it."];
       linkOutUri: Uri_.t option [@ocaml.doc "The URI of the content."];
-      metadata: ContentMetadata.t
+      metadata: ContentMetadata.t option
         [@ocaml.doc
           "A key/value map to store attributes without affecting tagging or recommendations. For example, when synchronizing data between an external system and Wisdom, you can store an external version identifier as metadata to utilize for determining drift."];
-      name: Name.t [@ocaml.doc "The name of the content."];
-      revisionId: NonEmptyString.t
+      name: Name.t option [@ocaml.doc "The name of the content."];
+      revisionId: NonEmptyString.t option
         [@ocaml.doc "The identifier of the content revision."];
-      status: ContentStatus.t [@ocaml.doc "The status of the content."];
+      status: ContentStatus.t option
+        [@ocaml.doc "The status of the content."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags used to organize, track, or control access for this resource."];
-      title: ContentTitle.t [@ocaml.doc "The title of the content."];
-      url: SyntheticContentDataUrl.t [@ocaml.doc "The URL of the content."];
-      urlExpiry: SyntheticTimestamp_epoch_seconds.t
+      title: ContentTitle.t option [@ocaml.doc "The title of the content."];
+      url: Url.t option [@ocaml.doc "The URL of the content."];
+      urlExpiry: SyntheticTimestamp_epoch_seconds.t option
         [@ocaml.doc "The expiration time of the URL as an epoch timestamp."]}
-    let context_ = "ContentData"
-    let make ?linkOutUri =
-      fun ?tags ->
-        fun ~contentArn ->
-          fun ~contentId ->
-            fun ~contentType ->
-              fun ~knowledgeBaseArn ->
-                fun ~knowledgeBaseId ->
-                  fun ~metadata ->
-                    fun ~name ->
-                      fun ~revisionId ->
-                        fun ~status ->
-                          fun ~title ->
-                            fun ~url ->
-                              fun ~urlExpiry ->
+    let make ?contentArn =
+      fun ?contentId ->
+        fun ?contentType ->
+          fun ?knowledgeBaseArn ->
+            fun ?knowledgeBaseId ->
+              fun ?linkOutUri ->
+                fun ?metadata ->
+                  fun ?name ->
+                    fun ?revisionId ->
+                      fun ?status ->
+                        fun ?tags ->
+                          fun ?title ->
+                            fun ?url ->
+                              fun ?urlExpiry ->
                                 fun () ->
                                   {
-                                    linkOutUri;
-                                    tags;
                                     contentArn;
                                     contentId;
                                     contentType;
                                     knowledgeBaseArn;
                                     knowledgeBaseId;
+                                    linkOutUri;
                                     metadata;
                                     name;
                                     revisionId;
                                     status;
+                                    tags;
                                     title;
                                     url;
                                     urlExpiry
                                   }
     let to_value x =
       structure_to_value
-        [("contentArn", (Some (Arn.to_value x.contentArn)));
-        ("contentId", (Some (Uuid.to_value x.contentId)));
-        ("contentType", (Some (ContentType.to_value x.contentType)));
-        ("knowledgeBaseArn", (Some (Arn.to_value x.knowledgeBaseArn)));
-        ("knowledgeBaseId", (Some (Uuid.to_value x.knowledgeBaseId)));
+        [("contentArn", (Option.map x.contentArn ~f:Arn.to_value));
+        ("contentId", (Option.map x.contentId ~f:Uuid.to_value));
+        ("contentType", (Option.map x.contentType ~f:ContentType.to_value));
+        ("knowledgeBaseArn", (Option.map x.knowledgeBaseArn ~f:Arn.to_value));
+        ("knowledgeBaseId", (Option.map x.knowledgeBaseId ~f:Uuid.to_value));
         ("linkOutUri", (Option.map x.linkOutUri ~f:Uri_.to_value));
-        ("metadata", (Some (ContentMetadata.to_value x.metadata)));
-        ("name", (Some (Name.to_value x.name)));
-        ("revisionId", (Some (NonEmptyString.to_value x.revisionId)));
-        ("status", (Some (ContentStatus.to_value x.status)));
+        ("metadata", (Option.map x.metadata ~f:ContentMetadata.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
+        ("revisionId", (Option.map x.revisionId ~f:NonEmptyString.to_value));
+        ("status", (Option.map x.status ~f:ContentStatus.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value));
-        ("title", (Some (ContentTitle.to_value x.title)));
-        ("url", (Some (SyntheticContentDataUrl.to_value x.url)));
+        ("title", (Option.map x.title ~f:ContentTitle.to_value));
+        ("url", (Option.map x.url ~f:Url.to_value));
         ("urlExpiry",
-          (Some (SyntheticTimestamp_epoch_seconds.to_value x.urlExpiry)))]
+          (Option.map x.urlExpiry
+             ~f:SyntheticTimestamp_epoch_seconds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let urlExpiry =
-        SyntheticTimestamp_epoch_seconds.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "urlExpiry") in
-      let url =
-        SyntheticContentDataUrl.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "url") in
+        (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
+          (Xml.child xml_arg0 "urlExpiry") in
+      let url = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "url") in
       let title =
-        ContentTitle.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "title") in
+        (Option.map ~f:ContentTitle.of_xml) (Xml.child xml_arg0 "title") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
-        ContentStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:ContentStatus.of_xml) (Xml.child xml_arg0 "status") in
       let revisionId =
-        NonEmptyString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "revisionId") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "revisionId") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       let metadata =
-        ContentMetadata.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "metadata") in
+        (Option.map ~f:ContentMetadata.of_xml)
+          (Xml.child xml_arg0 "metadata") in
       let linkOutUri =
         (Option.map ~f:Uri_.of_xml) (Xml.child xml_arg0 "linkOutUri") in
       let knowledgeBaseId =
-        Uuid.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "knowledgeBaseId") in
       let knowledgeBaseArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "knowledgeBaseArn") in
       let contentType =
-        ContentType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "contentType") in
+        (Option.map ~f:ContentType.of_xml) (Xml.child xml_arg0 "contentType") in
       let contentId =
-        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contentId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "contentId") in
       let contentArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "contentArn") in
-      make ~urlExpiry ~url ~title ?tags ~status ~revisionId ~name ~metadata
-        ?linkOutUri ~knowledgeBaseId ~knowledgeBaseArn ~contentType
-        ~contentId ~contentArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "contentArn") in
+      make ?urlExpiry ?url ?title ?tags ?status ?revisionId ?name ?metadata
+        ?linkOutUri ?knowledgeBaseId ?knowledgeBaseArn ?contentType
+        ?contentId ?contentArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let urlExpiry =
-        field_map_exn json "urlExpiry"
-          SyntheticTimestamp_epoch_seconds.of_json in
-      let url = field_map_exn json "url" SyntheticContentDataUrl.of_json in
-      let title = field_map_exn json "title" ContentTitle.of_json in
-      let tags = field_map json "tags" Tags.of_json in
-      let status = field_map_exn json "status" ContentStatus.of_json in
-      let revisionId = field_map_exn json "revisionId" NonEmptyString.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let metadata = field_map_exn json "metadata" ContentMetadata.of_json in
-      let linkOutUri = field_map json "linkOutUri" Uri_.of_json in
-      let knowledgeBaseId = field_map_exn json "knowledgeBaseId" Uuid.of_json in
-      let knowledgeBaseArn =
-        field_map_exn json "knowledgeBaseArn" Arn.of_json in
-      let contentType = field_map_exn json "contentType" ContentType.of_json in
-      let contentId = field_map_exn json "contentId" Uuid.of_json in
-      let contentArn = field_map_exn json "contentArn" Arn.of_json in
-      make ~urlExpiry ~url ~title ?tags ~status ~revisionId ~name ~metadata
-        ?linkOutUri ~knowledgeBaseId ~knowledgeBaseArn ~contentType
-        ~contentId ~contentArn ()
+        field_map json__ "urlExpiry" SyntheticTimestamp_epoch_seconds.of_json in
+      let url = field_map json__ "url" Url.of_json in
+      let title = field_map json__ "title" ContentTitle.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let status = field_map json__ "status" ContentStatus.of_json in
+      let revisionId = field_map json__ "revisionId" NonEmptyString.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let metadata = field_map json__ "metadata" ContentMetadata.of_json in
+      let linkOutUri = field_map json__ "linkOutUri" Uri_.of_json in
+      let knowledgeBaseId = field_map json__ "knowledgeBaseId" Uuid.of_json in
+      let knowledgeBaseArn = field_map json__ "knowledgeBaseArn" Arn.of_json in
+      let contentType = field_map json__ "contentType" ContentType.of_json in
+      let contentId = field_map json__ "contentId" Uuid.of_json in
+      let contentArn = field_map json__ "contentArn" Arn.of_json in
+      make ?urlExpiry ?url ?title ?tags ?status ?revisionId ?name ?metadata
+        ?linkOutUri ?knowledgeBaseId ?knowledgeBaseArn ?contentType
+        ?contentId ?contentArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the content."]
-module PreconditionFailedException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The provided revisionId does not match, indicating the content has been modified since it was last read."]
-module Boolean =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
-    let to_json = simple_to_json to_value
-  end
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
@@ -2034,6 +4093,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2074,13 +4136,186 @@ module TooManyTagsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "resourceName" String_.of_json in
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "resourceName" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Amazon Connect Wisdom throws this exception if you have too many tags in your tag set."]
+module ImportJobData =
+  struct
+    type nonrec t =
+      {
+      createdTime: SyntheticTimestamp_epoch_seconds.t option
+        [@ocaml.doc "The timestamp when the import job was created."];
+      externalSourceConfiguration: ExternalSourceConfiguration.t option ;
+      failedRecordReport: Url.t option
+        [@ocaml.doc
+          "The link to donwload the information of resource data that failed to be imported."];
+      importJobId: Uuid.t option
+        [@ocaml.doc "The identifier of the import job."];
+      importJobType: ImportJobType.t option
+        [@ocaml.doc "The type of the import job."];
+      knowledgeBaseArn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the knowledge base."];
+      knowledgeBaseId: Uuid.t option
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it."];
+      lastModifiedTime: SyntheticTimestamp_epoch_seconds.t option
+        [@ocaml.doc
+          "The timestamp when the import job data was last modified."];
+      metadata: ContentMetadata.t option
+        [@ocaml.doc "The metadata fields of the imported Wisdom resources."];
+      status: ImportJobStatus.t option
+        [@ocaml.doc "The status of the import job."];
+      uploadId: UploadId.t option
+        [@ocaml.doc
+          "A pointer to the uploaded asset. This value is returned by StartContentUpload."];
+      url: Url.t option
+        [@ocaml.doc
+          "The download link to the resource file that is uploaded to the import job."];
+      urlExpiry: SyntheticTimestamp_epoch_seconds.t option
+        [@ocaml.doc "The expiration time of the URL as an epoch timestamp."]}
+    let make ?createdTime =
+      fun ?externalSourceConfiguration ->
+        fun ?failedRecordReport ->
+          fun ?importJobId ->
+            fun ?importJobType ->
+              fun ?knowledgeBaseArn ->
+                fun ?knowledgeBaseId ->
+                  fun ?lastModifiedTime ->
+                    fun ?metadata ->
+                      fun ?status ->
+                        fun ?uploadId ->
+                          fun ?url ->
+                            fun ?urlExpiry ->
+                              fun () ->
+                                {
+                                  createdTime;
+                                  externalSourceConfiguration;
+                                  failedRecordReport;
+                                  importJobId;
+                                  importJobType;
+                                  knowledgeBaseArn;
+                                  knowledgeBaseId;
+                                  lastModifiedTime;
+                                  metadata;
+                                  status;
+                                  uploadId;
+                                  url;
+                                  urlExpiry
+                                }
+    let to_value x =
+      structure_to_value
+        [("createdTime",
+           (Option.map x.createdTime
+              ~f:SyntheticTimestamp_epoch_seconds.to_value));
+        ("externalSourceConfiguration",
+          (Option.map x.externalSourceConfiguration
+             ~f:ExternalSourceConfiguration.to_value));
+        ("failedRecordReport",
+          (Option.map x.failedRecordReport ~f:Url.to_value));
+        ("importJobId", (Option.map x.importJobId ~f:Uuid.to_value));
+        ("importJobType",
+          (Option.map x.importJobType ~f:ImportJobType.to_value));
+        ("knowledgeBaseArn", (Option.map x.knowledgeBaseArn ~f:Arn.to_value));
+        ("knowledgeBaseId", (Option.map x.knowledgeBaseId ~f:Uuid.to_value));
+        ("lastModifiedTime",
+          (Option.map x.lastModifiedTime
+             ~f:SyntheticTimestamp_epoch_seconds.to_value));
+        ("metadata", (Option.map x.metadata ~f:ContentMetadata.to_value));
+        ("status", (Option.map x.status ~f:ImportJobStatus.to_value));
+        ("uploadId", (Option.map x.uploadId ~f:UploadId.to_value));
+        ("url", (Option.map x.url ~f:Url.to_value));
+        ("urlExpiry",
+          (Option.map x.urlExpiry
+             ~f:SyntheticTimestamp_epoch_seconds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let urlExpiry =
+        (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
+          (Xml.child xml_arg0 "urlExpiry") in
+      let url = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "url") in
+      let uploadId =
+        (Option.map ~f:UploadId.of_xml) (Xml.child xml_arg0 "uploadId") in
+      let status =
+        (Option.map ~f:ImportJobStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let metadata =
+        (Option.map ~f:ContentMetadata.of_xml)
+          (Xml.child xml_arg0 "metadata") in
+      let lastModifiedTime =
+        (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTime") in
+      let knowledgeBaseId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "knowledgeBaseId") in
+      let knowledgeBaseArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "knowledgeBaseArn") in
+      let importJobType =
+        (Option.map ~f:ImportJobType.of_xml)
+          (Xml.child xml_arg0 "importJobType") in
+      let importJobId =
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "importJobId") in
+      let failedRecordReport =
+        (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "failedRecordReport") in
+      let externalSourceConfiguration =
+        (Option.map ~f:ExternalSourceConfiguration.of_xml)
+          (Xml.child xml_arg0 "externalSourceConfiguration") in
+      let createdTime =
+        (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
+          (Xml.child xml_arg0 "createdTime") in
+      make ?urlExpiry ?url ?uploadId ?status ?metadata ?lastModifiedTime
+        ?knowledgeBaseId ?knowledgeBaseArn ?importJobType ?importJobId
+        ?failedRecordReport ?externalSourceConfiguration ?createdTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let urlExpiry =
+        field_map json__ "urlExpiry" SyntheticTimestamp_epoch_seconds.of_json in
+      let url = field_map json__ "url" Url.of_json in
+      let uploadId = field_map json__ "uploadId" UploadId.of_json in
+      let status = field_map json__ "status" ImportJobStatus.of_json in
+      let metadata = field_map json__ "metadata" ContentMetadata.of_json in
+      let lastModifiedTime =
+        field_map json__ "lastModifiedTime"
+          SyntheticTimestamp_epoch_seconds.of_json in
+      let knowledgeBaseId = field_map json__ "knowledgeBaseId" Uuid.of_json in
+      let knowledgeBaseArn = field_map json__ "knowledgeBaseArn" Arn.of_json in
+      let importJobType =
+        field_map json__ "importJobType" ImportJobType.of_json in
+      let importJobId = field_map json__ "importJobId" Uuid.of_json in
+      let failedRecordReport =
+        field_map json__ "failedRecordReport" Url.of_json in
+      let externalSourceConfiguration =
+        field_map json__ "externalSourceConfiguration"
+          ExternalSourceConfiguration.of_json in
+      let createdTime =
+        field_map json__ "createdTime"
+          SyntheticTimestamp_epoch_seconds.of_json in
+      make ?urlExpiry ?url ?uploadId ?status ?metadata ?lastModifiedTime
+        ?knowledgeBaseId ?knowledgeBaseArn ?importJobType ?importJobId
+        ?failedRecordReport ?externalSourceConfiguration ?createdTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary information about the import job."]
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You've exceeded your service quota. To perform the requested action, remove some of the relevant resources, or use service quotas to request a service quota increase."]
 module Headers =
   struct
     type nonrec t = (NonEmptyString.t * NonEmptyString.t) list
@@ -2103,6 +4338,8 @@ module Headers =
                        (NonEmptyString.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2110,25 +4347,24 @@ module Headers =
         ~of_json:NonEmptyString.of_json j
     let to_json v = composed_to_json to_value v
   end
-module SyntheticStartContentUploadResponseUrl =
+module TimeToLive =
   struct
-    type nonrec t = string
-    let context_ = "SyntheticStartContentUploadResponseUrl"
+    type nonrec t = int[@@ocaml.doc "Expiration time in minutes"]
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:4096) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_int_max i ~max:60) >>= (fun () -> check_int_min i ~min:1));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j =
-      string_of_json ~kind:"SyntheticStartContentUploadResponseUrl" j
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for TimeToLive" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
-  end
+  end[@@ocaml.doc "Expiration time in minutes"]
 module NextToken =
   struct
     type nonrec t = string
@@ -2151,6 +4387,9 @@ module SessionSummaries =
   struct
     type nonrec t = SessionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SessionSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2206,15 +4445,145 @@ module SearchExpression =
           (Xml.child_exn ~context:context_ xml_arg0 "filters") in
       make ~filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map_exn json "filters" FilterList.of_json in
+    let of_json json__ =
+      let filters = field_map_exn json__ "filters" FilterList.of_json in
       make ~filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The search expression."]
+module QuickResponseSearchResultsList =
+  struct
+    type nonrec t = QuickResponseSearchResultData.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QuickResponseSearchResultData.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QuickResponseSearchResultData.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QuickResponseSearchResultsList"
+        ~of_json:QuickResponseSearchResultData.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RequestTimeoutException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request reached the service more than 15 minutes after the date stamp on the request or more than 15 minutes after the request expiration date (such as for pre-signed URLs), or the date stamp on the request is more than 15 minutes in the future."]
+module ContactAttributes =
+  struct
+    type nonrec t = (ContactAttributeKey.t * ContactAttributeValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((ContactAttributeKey.of_string chopped),
+                              (ContactAttributeValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ContactAttributeKey.to_value x) |>
+                    (fun x ->
+                       (ContactAttributeValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ContactAttributeKey.of_string
+        ~of_json:ContactAttributeValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module QuickResponseSearchExpression =
+  struct
+    type nonrec t =
+      {
+      filters: QuickResponseFilterFieldList.t option
+        [@ocaml.doc
+          "The configuration of filtering rules applied to quick response query results."];
+      orderOnField: QuickResponseOrderField.t option
+        [@ocaml.doc
+          "The quick response attribute fields on which the query results are ordered."];
+      queries: QuickResponseQueryFieldList.t option
+        [@ocaml.doc "The quick response query expressions."]}
+    let make ?filters =
+      fun ?orderOnField ->
+        fun ?queries -> fun () -> { filters; orderOnField; queries }
+    let to_value x =
+      structure_to_value
+        [("filters",
+           (Option.map x.filters ~f:QuickResponseFilterFieldList.to_value));
+        ("orderOnField",
+          (Option.map x.orderOnField ~f:QuickResponseOrderField.to_value));
+        ("queries",
+          (Option.map x.queries ~f:QuickResponseQueryFieldList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queries =
+        (Option.map ~f:QuickResponseQueryFieldList.of_xml)
+          (Xml.child xml_arg0 "queries") in
+      let orderOnField =
+        (Option.map ~f:QuickResponseOrderField.of_xml)
+          (Xml.child xml_arg0 "orderOnField") in
+      let filters =
+        (Option.map ~f:QuickResponseFilterFieldList.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      make ?queries ?orderOnField ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queries =
+        field_map json__ "queries" QuickResponseQueryFieldList.of_json in
+      let orderOnField =
+        field_map json__ "orderOnField" QuickResponseOrderField.of_json in
+      let filters =
+        field_map json__ "filters" QuickResponseFilterFieldList.of_json in
+      make ?queries ?orderOnField ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the import job."]
 module ContentSummaryList =
   struct
     type nonrec t = ContentSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContentSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2240,6 +4609,9 @@ module QueryResultsList =
   struct
     type nonrec t = ResultData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResultData.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2260,23 +4632,13 @@ module QueryResultsList =
       list_of_json ~kind:"QueryResultsList" ~of_json:ResultData.of_json j
     let to_json v = composed_to_json to_value v
   end
-module QueryText =
-  struct
-    type nonrec t = string
-    let context_ = "QueryText"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"QueryText" j
-    let to_json = simple_to_json to_value
-  end
 module NotifyRecommendationsReceivedErrorList =
   struct
     type nonrec t = NotifyRecommendationsReceivedError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NotifyRecommendationsReceivedError.to_value)) |>
         (fun x -> `List x)
@@ -2300,12 +4662,16 @@ module NotifyRecommendationsReceivedErrorList =
         ~of_json:NotifyRecommendationsReceivedError.of_json j
     let to_json v = composed_to_json to_value v
   end
-module RecommendationIdList =
+module QuickResponseSummaryList =
   struct
-    type nonrec t = String_.t list
+    type nonrec t = QuickResponseSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:QuickResponseSummary.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -2319,15 +4685,19 @@ module RecommendationIdList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:String_.of_xml)
+                     | _ -> true))) ~f:QuickResponseSummary.of_xml)
     let of_json j =
-      list_of_json ~kind:"RecommendationIdList" ~of_json:String_.of_json j
+      list_of_json ~kind:"QuickResponseSummaryList"
+        ~of_json:QuickResponseSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
 module KnowledgeBaseList =
   struct
     type nonrec t = KnowledgeBaseSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KnowledgeBaseSummary.to_value)) |>
         (fun x -> `List x)
@@ -2350,10 +4720,40 @@ module KnowledgeBaseList =
         ~of_json:KnowledgeBaseSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ImportJobList =
+  struct
+    type nonrec t = ImportJobSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImportJobSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImportJobSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImportJobList" ~of_json:ImportJobSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AssistantList =
   struct
     type nonrec t = AssistantSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssistantSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2378,6 +4778,9 @@ module AssistantAssociationSummaryList =
   struct
     type nonrec t = AssistantAssociationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssistantAssociationSummary.to_value)) |>
         (fun x -> `List x)
@@ -2406,53 +4809,77 @@ module SessionData =
       {
       description: Description.t option
         [@ocaml.doc "The description of the session."];
-      name: Name.t [@ocaml.doc "The name of the session."];
-      sessionArn: Arn.t
+      integrationConfiguration: SessionIntegrationConfiguration.t option
+        [@ocaml.doc
+          "The configuration information for the session integration."];
+      name: Name.t option [@ocaml.doc "The name of the session."];
+      sessionArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the session."];
-      sessionId: Uuid.t [@ocaml.doc "The identifier of the session."];
+      sessionId: Uuid.t option [@ocaml.doc "The identifier of the session."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags used to organize, track, or control access for this resource."]}
-    let context_ = "SessionData"
     let make ?description =
-      fun ?tags ->
-        fun ~name ->
-          fun ~sessionArn ->
-            fun ~sessionId ->
-              fun () -> { description; tags; name; sessionArn; sessionId }
+      fun ?integrationConfiguration ->
+        fun ?name ->
+          fun ?sessionArn ->
+            fun ?sessionId ->
+              fun ?tags ->
+                fun () ->
+                  {
+                    description;
+                    integrationConfiguration;
+                    name;
+                    sessionArn;
+                    sessionId;
+                    tags
+                  }
     let to_value x =
       structure_to_value
         [("description", (Option.map x.description ~f:Description.to_value));
-        ("name", (Some (Name.to_value x.name)));
-        ("sessionArn", (Some (Arn.to_value x.sessionArn)));
-        ("sessionId", (Some (Uuid.to_value x.sessionId)));
+        ("integrationConfiguration",
+          (Option.map x.integrationConfiguration
+             ~f:SessionIntegrationConfiguration.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
+        ("sessionArn", (Option.map x.sessionArn ~f:Arn.to_value));
+        ("sessionId", (Option.map x.sessionId ~f:Uuid.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let sessionId =
-        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "sessionId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "sessionId") in
       let sessionArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "sessionArn") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "sessionArn") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      let integrationConfiguration =
+        (Option.map ~f:SessionIntegrationConfiguration.of_xml)
+          (Xml.child xml_arg0 "integrationConfiguration") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
-      make ?tags ~sessionId ~sessionArn ~name ?description ()
+      make ?tags ?sessionId ?sessionArn ?name ?integrationConfiguration
+        ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let sessionId = field_map_exn json "sessionId" Uuid.of_json in
-      let sessionArn = field_map_exn json "sessionArn" Arn.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let description = field_map json "description" Description.of_json in
-      make ?tags ~sessionId ~sessionArn ~name ?description ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let sessionId = field_map json__ "sessionId" Uuid.of_json in
+      let sessionArn = field_map json__ "sessionArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let integrationConfiguration =
+        field_map json__ "integrationConfiguration"
+          SessionIntegrationConfiguration.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      make ?tags ?sessionId ?sessionArn ?name ?integrationConfiguration
+        ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the session."]
 module RecommendationList =
   struct
     type nonrec t = RecommendationData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommendationData.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2472,6 +4899,35 @@ module RecommendationList =
     let of_json j =
       list_of_json ~kind:"RecommendationList"
         ~of_json:RecommendationData.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RecommendationTriggerList =
+  struct
+    type nonrec t = RecommendationTrigger.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RecommendationTrigger.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RecommendationTrigger.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RecommendationTriggerList"
+        ~of_json:RecommendationTrigger.of_json j
     let to_json v = composed_to_json to_value v
   end
 module WaitTimeSeconds =
@@ -2496,201 +4952,195 @@ module AssistantData =
   struct
     type nonrec t =
       {
-      assistantArn: Arn.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the Wisdom assistant"];
-      assistantId: Uuid.t
+      assistantArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Wisdom assistant."];
+      assistantId: Uuid.t option
         [@ocaml.doc "The identifier of the Wisdom assistant."];
       description: Description.t option [@ocaml.doc "The description."];
-      name: Name.t [@ocaml.doc "The name."];
+      integrationConfiguration: AssistantIntegrationConfiguration.t option
+        [@ocaml.doc
+          "The configuration information for the Wisdom assistant integration."];
+      name: Name.t option [@ocaml.doc "The name."];
       serverSideEncryptionConfiguration:
         ServerSideEncryptionConfiguration.t option
-        [@ocaml.doc "The KMS key used for encryption."];
-      status: AssistantStatus.t [@ocaml.doc "The status of the assistant."];
+        [@ocaml.doc
+          "The configuration information for the customer managed key used for encryption. This KMS key must have a policy that allows kms:CreateGrant, kms:DescribeKey, and kms:Decrypt/kms:GenerateDataKey permissions to the IAM identity using the key to invoke Wisdom. To use Wisdom with chat, the key policy must also allow kms:Decrypt, kms:GenerateDataKey*, and kms:DescribeKey permissions to the connect.amazonaws.com service principal. For more information about setting up a customer managed key for Wisdom, see Enable Amazon Connect Wisdom for your instance."];
+      status: AssistantStatus.t option
+        [@ocaml.doc "The status of the assistant."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags used to organize, track, or control access for this resource."];
-      type_: AssistantType.t [@ocaml.doc "The type of assistant."]}
-    let context_ = "AssistantData"
-    let make ?description =
-      fun ?serverSideEncryptionConfiguration ->
-        fun ?tags ->
-          fun ~assistantArn ->
-            fun ~assistantId ->
-              fun ~name ->
-                fun ~status ->
-                  fun ~type_ ->
-                    fun () ->
-                      {
-                        description;
-                        serverSideEncryptionConfiguration;
-                        tags;
-                        assistantArn;
-                        assistantId;
-                        name;
-                        status;
-                        type_
-                      }
+      type_: AssistantType.t option [@ocaml.doc "The type of assistant."]}
+    let make ?assistantArn =
+      fun ?assistantId ->
+        fun ?description ->
+          fun ?integrationConfiguration ->
+            fun ?name ->
+              fun ?serverSideEncryptionConfiguration ->
+                fun ?status ->
+                  fun ?tags ->
+                    fun ?type_ ->
+                      fun () ->
+                        {
+                          assistantArn;
+                          assistantId;
+                          description;
+                          integrationConfiguration;
+                          name;
+                          serverSideEncryptionConfiguration;
+                          status;
+                          tags;
+                          type_
+                        }
     let to_value x =
       structure_to_value
-        [("assistantArn", (Some (Arn.to_value x.assistantArn)));
-        ("assistantId", (Some (Uuid.to_value x.assistantId)));
+        [("assistantArn", (Option.map x.assistantArn ~f:Arn.to_value));
+        ("assistantId", (Option.map x.assistantId ~f:Uuid.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
-        ("name", (Some (Name.to_value x.name)));
+        ("integrationConfiguration",
+          (Option.map x.integrationConfiguration
+             ~f:AssistantIntegrationConfiguration.to_value));
+        ("name", (Option.map x.name ~f:Name.to_value));
         ("serverSideEncryptionConfiguration",
           (Option.map x.serverSideEncryptionConfiguration
              ~f:ServerSideEncryptionConfiguration.to_value));
-        ("status", (Some (AssistantStatus.to_value x.status)));
+        ("status", (Option.map x.status ~f:AssistantStatus.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value));
-        ("type", (Some (AssistantType.to_value x.type_)))]
+        ("type", (Option.map x.type_ ~f:AssistantType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let type_ =
-        AssistantType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+        (Option.map ~f:AssistantType.of_xml) (Xml.child xml_arg0 "type") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
-        AssistantStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:AssistantStatus.of_xml) (Xml.child xml_arg0 "status") in
       let serverSideEncryptionConfiguration =
         (Option.map ~f:ServerSideEncryptionConfiguration.of_xml)
           (Xml.child xml_arg0 "serverSideEncryptionConfiguration") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      let integrationConfiguration =
+        (Option.map ~f:AssistantIntegrationConfiguration.of_xml)
+          (Xml.child xml_arg0 "integrationConfiguration") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let assistantId =
-        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "assistantId") in
       let assistantArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantArn") in
-      make ~type_ ?tags ~status ?serverSideEncryptionConfiguration ~name
-        ?description ~assistantId ~assistantArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assistantArn") in
+      make ?type_ ?tags ?status ?serverSideEncryptionConfiguration ?name
+        ?integrationConfiguration ?description ?assistantId ?assistantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" AssistantType.of_json in
-      let tags = field_map json "tags" Tags.of_json in
-      let status = field_map_exn json "status" AssistantStatus.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "type" AssistantType.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let status = field_map json__ "status" AssistantStatus.of_json in
       let serverSideEncryptionConfiguration =
-        field_map json "serverSideEncryptionConfiguration"
+        field_map json__ "serverSideEncryptionConfiguration"
           ServerSideEncryptionConfiguration.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let description = field_map json "description" Description.of_json in
-      let assistantId = field_map_exn json "assistantId" Uuid.of_json in
-      let assistantArn = field_map_exn json "assistantArn" Arn.of_json in
-      make ~type_ ?tags ~status ?serverSideEncryptionConfiguration ~name
-        ?description ~assistantId ~assistantArn ()
+      let name = field_map json__ "name" Name.of_json in
+      let integrationConfiguration =
+        field_map json__ "integrationConfiguration"
+          AssistantIntegrationConfiguration.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let assistantId = field_map json__ "assistantId" Uuid.of_json in
+      let assistantArn = field_map json__ "assistantArn" Arn.of_json in
+      make ?type_ ?tags ?status ?serverSideEncryptionConfiguration ?name
+        ?integrationConfiguration ?description ?assistantId ?assistantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The assistant data."]
 module AssistantAssociationData =
   struct
     type nonrec t =
       {
-      assistantArn: Arn.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the Wisdom assistant"];
-      assistantAssociationArn: Arn.t
+      assistantArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Wisdom assistant."];
+      assistantAssociationArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the assistant association."];
-      assistantAssociationId: Uuid.t
+      assistantAssociationId: Uuid.t option
         [@ocaml.doc "The identifier of the assistant association."];
-      assistantId: Uuid.t
+      assistantId: Uuid.t option
         [@ocaml.doc "The identifier of the Wisdom assistant."];
-      associationData: AssistantAssociationOutputData.t
+      associationData: AssistantAssociationOutputData.t option
         [@ocaml.doc
           "A union type that currently has a single argument, the knowledge base ID."];
-      associationType: AssociationType.t
+      associationType: AssociationType.t option
         [@ocaml.doc "The type of association."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags used to organize, track, or control access for this resource."]}
-    let context_ = "AssistantAssociationData"
-    let make ?tags =
-      fun ~assistantArn ->
-        fun ~assistantAssociationArn ->
-          fun ~assistantAssociationId ->
-            fun ~assistantId ->
-              fun ~associationData ->
-                fun ~associationType ->
+    let make ?assistantArn =
+      fun ?assistantAssociationArn ->
+        fun ?assistantAssociationId ->
+          fun ?assistantId ->
+            fun ?associationData ->
+              fun ?associationType ->
+                fun ?tags ->
                   fun () ->
                     {
-                      tags;
                       assistantArn;
                       assistantAssociationArn;
                       assistantAssociationId;
                       assistantId;
                       associationData;
-                      associationType
+                      associationType;
+                      tags
                     }
     let to_value x =
       structure_to_value
-        [("assistantArn", (Some (Arn.to_value x.assistantArn)));
+        [("assistantArn", (Option.map x.assistantArn ~f:Arn.to_value));
         ("assistantAssociationArn",
-          (Some (Arn.to_value x.assistantAssociationArn)));
+          (Option.map x.assistantAssociationArn ~f:Arn.to_value));
         ("assistantAssociationId",
-          (Some (Uuid.to_value x.assistantAssociationId)));
-        ("assistantId", (Some (Uuid.to_value x.assistantId)));
+          (Option.map x.assistantAssociationId ~f:Uuid.to_value));
+        ("assistantId", (Option.map x.assistantId ~f:Uuid.to_value));
         ("associationData",
-          (Some (AssistantAssociationOutputData.to_value x.associationData)));
+          (Option.map x.associationData
+             ~f:AssistantAssociationOutputData.to_value));
         ("associationType",
-          (Some (AssociationType.to_value x.associationType)));
+          (Option.map x.associationType ~f:AssociationType.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let associationType =
-        AssociationType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "associationType") in
+        (Option.map ~f:AssociationType.of_xml)
+          (Xml.child xml_arg0 "associationType") in
       let associationData =
-        AssistantAssociationOutputData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "associationData") in
+        (Option.map ~f:AssistantAssociationOutputData.of_xml)
+          (Xml.child xml_arg0 "associationData") in
       let assistantId =
-        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
+        (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "assistantId") in
       let assistantAssociationId =
-        Uuid.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assistantAssociationId") in
+        (Option.map ~f:Uuid.of_xml)
+          (Xml.child xml_arg0 "assistantAssociationId") in
       let assistantAssociationArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assistantAssociationArn") in
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "assistantAssociationArn") in
       let assistantArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "assistantArn") in
-      make ?tags ~associationType ~associationData ~assistantId
-        ~assistantAssociationId ~assistantAssociationArn ~assistantArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "assistantArn") in
+      make ?tags ?associationType ?associationData ?assistantId
+        ?assistantAssociationId ?assistantAssociationArn ?assistantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
       let associationType =
-        field_map_exn json "associationType" AssociationType.of_json in
+        field_map json__ "associationType" AssociationType.of_json in
       let associationData =
-        field_map_exn json "associationData"
+        field_map json__ "associationData"
           AssistantAssociationOutputData.of_json in
-      let assistantId = field_map_exn json "assistantId" Uuid.of_json in
+      let assistantId = field_map json__ "assistantId" Uuid.of_json in
       let assistantAssociationId =
-        field_map_exn json "assistantAssociationId" Uuid.of_json in
+        field_map json__ "assistantAssociationId" Uuid.of_json in
       let assistantAssociationArn =
-        field_map_exn json "assistantAssociationArn" Arn.of_json in
-      let assistantArn = field_map_exn json "assistantArn" Arn.of_json in
-      make ?tags ~associationType ~associationData ~assistantId
-        ~assistantAssociationId ~assistantAssociationArn ~assistantArn ()
+        field_map json__ "assistantAssociationArn" Arn.of_json in
+      let assistantArn = field_map json__ "assistantArn" Arn.of_json in
+      make ?tags ?associationType ?associationData ?assistantId
+        ?assistantAssociationId ?assistantAssociationArn ?assistantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the assistant association."]
-module ConflictException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The request could not be processed because of conflict in the current state of the resource. For example, if you're using a Create API (such as CreateAssistant) that accepts name, a conflicting resource (usually with the same name) is being created or mutated."]
 module ClientToken =
   struct
     type nonrec t = string
@@ -2709,32 +5159,13 @@ module ClientToken =
     let of_json j = string_of_json ~kind:"ClientToken" j
     let to_json = simple_to_json to_value
   end
-module ServiceQuotaExceededException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You've exceeded your service quota. To perform the requested action, remove some of the relevant resources, or use service quotas to request a service quota increase."]
 module AssistantAssociationInputData =
   struct
     type nonrec t =
       {
       knowledgeBaseId: Uuid.t option
-        [@ocaml.doc "The the identifier of the knowledge base."]}
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it."]}
     let make ?knowledgeBaseId = fun () -> { knowledgeBaseId }
     let to_value x =
       structure_to_value
@@ -2745,12 +5176,273 @@ module AssistantAssociationInputData =
         (Option.map ~f:Uuid.of_xml) (Xml.child xml_arg0 "knowledgeBaseId") in
       make ?knowledgeBaseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let knowledgeBaseId = field_map json "knowledgeBaseId" Uuid.of_json in
+    let of_json json__ =
+      let knowledgeBaseId = field_map json__ "knowledgeBaseId" Uuid.of_json in
       make ?knowledgeBaseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The data that is input into Wisdom as a result of the assistant association."]
+module UpdateQuickResponseResponse =
+  struct
+    type nonrec t =
+      {
+      quickResponse: QuickResponseData.t option
+        [@ocaml.doc "The quick response."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `PreconditionFailedException of PreconditionFailedException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?quickResponse = fun () -> { quickResponse }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "PreconditionFailedException" ->
+          `PreconditionFailedException
+            (PreconditionFailedException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "PreconditionFailedException" ->
+          `PreconditionFailedException
+            (PreconditionFailedException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `PreconditionFailedException e ->
+          `Assoc
+            [("error", (`String "PreconditionFailedException"));
+            ("details", (PreconditionFailedException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("quickResponse",
+           (Option.map x.quickResponse ~f:QuickResponseData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quickResponse =
+        (Option.map ~f:QuickResponseData.of_xml)
+          (Xml.child xml_arg0 "quickResponse") in
+      make ?quickResponse ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quickResponse =
+        field_map json__ "quickResponse" QuickResponseData.of_json in
+      make ?quickResponse ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates an existing Wisdom quick response."]
+module UpdateQuickResponseRequest =
+  struct
+    type nonrec t =
+      {
+      channels: Channels.t option
+        [@ocaml.doc
+          "The Amazon Connect contact channels this quick response applies to. The supported contact channel types include Chat."];
+      content: QuickResponseDataProvider.t option
+        [@ocaml.doc "The updated content of the quick response."];
+      contentType: QuickResponseType.t option
+        [@ocaml.doc
+          "The media type of the quick response content. Use application/x.quickresponse;format=plain for quick response written in plain text. Use application/x.quickresponse;format=markdown for quick response written in richtext."];
+      description: QuickResponseDescription.t option
+        [@ocaml.doc "The updated description of the quick response."];
+      groupingConfiguration: GroupingConfiguration.t option
+        [@ocaml.doc
+          "The updated grouping configuration of the quick response."];
+      isActive: Boolean.t option
+        [@ocaml.doc "Whether the quick response is active."];
+      knowledgeBaseId: UuidOrArn.t
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."];
+      language: LanguageCode.t option
+        [@ocaml.doc
+          "The language code value for the language in which the quick response is written. The supported language codes include de_DE, en_US, es_ES, fr_FR, id_ID, it_IT, ja_JP, ko_KR, pt_BR, zh_CN, zh_TW"];
+      name: QuickResponseName.t option
+        [@ocaml.doc "The name of the quick response."];
+      quickResponseId: UuidOrArn.t
+        [@ocaml.doc "The identifier of the quick response."];
+      removeDescription: Boolean.t option
+        [@ocaml.doc
+          "Whether to remove the description from the quick response."];
+      removeGroupingConfiguration: Boolean.t option
+        [@ocaml.doc
+          "Whether to remove the grouping configuration of the quick response."];
+      removeShortcutKey: Boolean.t option
+        [@ocaml.doc
+          "Whether to remove the shortcut key of the quick response."];
+      shortcutKey: ShortCutKey.t option
+        [@ocaml.doc
+          "The shortcut key of the quick response. The value should be unique across the knowledge base."]}
+    let context_ = "UpdateQuickResponseRequest"
+    let make ?channels =
+      fun ?content ->
+        fun ?contentType ->
+          fun ?description ->
+            fun ?groupingConfiguration ->
+              fun ?isActive ->
+                fun ?language ->
+                  fun ?name ->
+                    fun ?removeDescription ->
+                      fun ?removeGroupingConfiguration ->
+                        fun ?removeShortcutKey ->
+                          fun ?shortcutKey ->
+                            fun ~knowledgeBaseId ->
+                              fun ~quickResponseId ->
+                                fun () ->
+                                  {
+                                    channels;
+                                    content;
+                                    contentType;
+                                    description;
+                                    groupingConfiguration;
+                                    isActive;
+                                    language;
+                                    name;
+                                    removeDescription;
+                                    removeGroupingConfiguration;
+                                    removeShortcutKey;
+                                    shortcutKey;
+                                    knowledgeBaseId;
+                                    quickResponseId
+                                  }
+    let to_value x =
+      structure_to_value
+        [("channels", (Option.map x.channels ~f:Channels.to_value));
+        ("content",
+          (Option.map x.content ~f:QuickResponseDataProvider.to_value));
+        ("contentType",
+          (Option.map x.contentType ~f:QuickResponseType.to_value));
+        ("description",
+          (Option.map x.description ~f:QuickResponseDescription.to_value));
+        ("groupingConfiguration",
+          (Option.map x.groupingConfiguration
+             ~f:GroupingConfiguration.to_value));
+        ("isActive", (Option.map x.isActive ~f:Boolean.to_value));
+        ("knowledgeBaseId", (Some (UuidOrArn.to_value x.knowledgeBaseId)));
+        ("language", (Option.map x.language ~f:LanguageCode.to_value));
+        ("name", (Option.map x.name ~f:QuickResponseName.to_value));
+        ("quickResponseId", (Some (UuidOrArn.to_value x.quickResponseId)));
+        ("removeDescription",
+          (Option.map x.removeDescription ~f:Boolean.to_value));
+        ("removeGroupingConfiguration",
+          (Option.map x.removeGroupingConfiguration ~f:Boolean.to_value));
+        ("removeShortcutKey",
+          (Option.map x.removeShortcutKey ~f:Boolean.to_value));
+        ("shortcutKey", (Option.map x.shortcutKey ~f:ShortCutKey.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let shortcutKey =
+        (Option.map ~f:ShortCutKey.of_xml) (Xml.child xml_arg0 "shortcutKey") in
+      let removeShortcutKey =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "removeShortcutKey") in
+      let removeGroupingConfiguration =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "removeGroupingConfiguration") in
+      let removeDescription =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "removeDescription") in
+      let quickResponseId =
+        UuidOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "quickResponseId") in
+      let name =
+        (Option.map ~f:QuickResponseName.of_xml) (Xml.child xml_arg0 "name") in
+      let language =
+        (Option.map ~f:LanguageCode.of_xml) (Xml.child xml_arg0 "language") in
+      let knowledgeBaseId =
+        UuidOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+      let isActive =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isActive") in
+      let groupingConfiguration =
+        (Option.map ~f:GroupingConfiguration.of_xml)
+          (Xml.child xml_arg0 "groupingConfiguration") in
+      let description =
+        (Option.map ~f:QuickResponseDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let contentType =
+        (Option.map ~f:QuickResponseType.of_xml)
+          (Xml.child xml_arg0 "contentType") in
+      let content =
+        (Option.map ~f:QuickResponseDataProvider.of_xml)
+          (Xml.child xml_arg0 "content") in
+      let channels =
+        (Option.map ~f:Channels.of_xml) (Xml.child xml_arg0 "channels") in
+      make ?shortcutKey ?removeShortcutKey ?removeGroupingConfiguration
+        ?removeDescription ~quickResponseId ?name ?language ~knowledgeBaseId
+        ?isActive ?groupingConfiguration ?description ?contentType ?content
+        ?channels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let shortcutKey = field_map json__ "shortcutKey" ShortCutKey.of_json in
+      let removeShortcutKey =
+        field_map json__ "removeShortcutKey" Boolean.of_json in
+      let removeGroupingConfiguration =
+        field_map json__ "removeGroupingConfiguration" Boolean.of_json in
+      let removeDescription =
+        field_map json__ "removeDescription" Boolean.of_json in
+      let quickResponseId =
+        field_map_exn json__ "quickResponseId" UuidOrArn.of_json in
+      let name = field_map json__ "name" QuickResponseName.of_json in
+      let language = field_map json__ "language" LanguageCode.of_json in
+      let knowledgeBaseId =
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      let isActive = field_map json__ "isActive" Boolean.of_json in
+      let groupingConfiguration =
+        field_map json__ "groupingConfiguration"
+          GroupingConfiguration.of_json in
+      let description =
+        field_map json__ "description" QuickResponseDescription.of_json in
+      let contentType =
+        field_map json__ "contentType" QuickResponseType.of_json in
+      let content =
+        field_map json__ "content" QuickResponseDataProvider.of_json in
+      let channels = field_map json__ "channels" Channels.of_json in
+      make ?shortcutKey ?removeShortcutKey ?removeGroupingConfiguration
+        ?removeDescription ~quickResponseId ?name ?language ~knowledgeBaseId
+        ?isActive ?groupingConfiguration ?description ?contentType ?content
+        ?channels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates an existing Wisdom quick response."]
 module UpdateKnowledgeBaseTemplateUriResponse =
   struct
     type nonrec t =
@@ -2814,9 +5506,9 @@ module UpdateKnowledgeBaseTemplateUriResponse =
           (Xml.child xml_arg0 "knowledgeBase") in
       make ?knowledgeBase ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let knowledgeBase =
-        field_map json "knowledgeBase" KnowledgeBaseData.of_json in
+        field_map json__ "knowledgeBase" KnowledgeBaseData.of_json in
       make ?knowledgeBase ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2827,7 +5519,7 @@ module UpdateKnowledgeBaseTemplateUriRequest =
       {
       knowledgeBaseId: UuidOrArn.t
         [@ocaml.doc
-          "The the identifier of the knowledge base. Can be either the ID or the ARN. URLs cannot contain the ARN."];
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."];
       templateUri: Uri_.t [@ocaml.doc "The template URI to update."]}
     let context_ = "UpdateKnowledgeBaseTemplateUriRequest"
     let make ~knowledgeBaseId =
@@ -2845,10 +5537,10 @@ module UpdateKnowledgeBaseTemplateUriRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
       make ~templateUri ~knowledgeBaseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateUri = field_map_exn json "templateUri" Uri_.of_json in
+    let of_json json__ =
+      let templateUri = field_map_exn json__ "templateUri" Uri_.of_json in
       let knowledgeBaseId =
-        field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
       make ~templateUri ~knowledgeBaseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2924,8 +5616,8 @@ module UpdateContentResponse =
         (Option.map ~f:ContentData.of_xml) (Xml.child xml_arg0 "content") in
       make ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map json "content" ContentData.of_json in
+    let of_json json__ =
+      let content = field_map json__ "content" ContentData.of_json in
       make ?content ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates information about the content."]
@@ -2938,7 +5630,7 @@ module UpdateContentRequest =
           "The identifier of the content. Can be either the ID or the ARN. URLs cannot contain the ARN."];
       knowledgeBaseId: UuidOrArn.t
         [@ocaml.doc
-          "The the identifier of the knowledge base. Can be either the ID or the ARN"];
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN"];
       metadata: ContentMetadata.t option
         [@ocaml.doc
           "A key/value map to store attributes without affecting tagging or recommendations. For example, when synchronizing data between an external system and Wisdom, you can store an external version identifier as metadata to utilize for determining drift."];
@@ -2951,7 +5643,7 @@ module UpdateContentRequest =
         [@ocaml.doc
           "The revisionId of the content resource to update, taken from an earlier call to GetContent, GetContentSummary, SearchContent, or ListContents. If included, this argument acts as an optimistic lock to ensure content was not modified since it was last read. If it has been modified, this API throws a PreconditionFailedException."];
       title: ContentTitle.t option [@ocaml.doc "The title of the content."];
-      uploadId: NonEmptyString.t option
+      uploadId: UploadId.t option
         [@ocaml.doc
           "A pointer to the uploaded asset. This value is returned by StartContentUpload."]}
     let context_ = "UpdateContentRequest"
@@ -2985,11 +5677,11 @@ module UpdateContentRequest =
           (Option.map x.removeOverrideLinkOutUri ~f:Boolean.to_value));
         ("revisionId", (Option.map x.revisionId ~f:NonEmptyString.to_value));
         ("title", (Option.map x.title ~f:ContentTitle.to_value));
-        ("uploadId", (Option.map x.uploadId ~f:NonEmptyString.to_value))]
+        ("uploadId", (Option.map x.uploadId ~f:UploadId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let uploadId =
-        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "uploadId") in
+        (Option.map ~f:UploadId.of_xml) (Xml.child xml_arg0 "uploadId") in
       let title =
         (Option.map ~f:ContentTitle.of_xml) (Xml.child xml_arg0 "title") in
       let revisionId =
@@ -3012,18 +5704,18 @@ module UpdateContentRequest =
       make ?uploadId ?title ?revisionId ?removeOverrideLinkOutUri
         ?overrideLinkOutUri ?metadata ~knowledgeBaseId ~contentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uploadId = field_map json "uploadId" NonEmptyString.of_json in
-      let title = field_map json "title" ContentTitle.of_json in
-      let revisionId = field_map json "revisionId" NonEmptyString.of_json in
+    let of_json json__ =
+      let uploadId = field_map json__ "uploadId" UploadId.of_json in
+      let title = field_map json__ "title" ContentTitle.of_json in
+      let revisionId = field_map json__ "revisionId" NonEmptyString.of_json in
       let removeOverrideLinkOutUri =
-        field_map json "removeOverrideLinkOutUri" Boolean.of_json in
+        field_map json__ "removeOverrideLinkOutUri" Boolean.of_json in
       let overrideLinkOutUri =
-        field_map json "overrideLinkOutUri" Uri_.of_json in
-      let metadata = field_map json "metadata" ContentMetadata.of_json in
+        field_map json__ "overrideLinkOutUri" Uri_.of_json in
+      let metadata = field_map json__ "metadata" ContentMetadata.of_json in
       let knowledgeBaseId =
-        field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
-      let contentId = field_map_exn json "contentId" UuidOrArn.of_json in
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      let contentId = field_map_exn json__ "contentId" UuidOrArn.of_json in
       make ?uploadId ?title ?revisionId ?removeOverrideLinkOutUri
         ?overrideLinkOutUri ?metadata ~knowledgeBaseId ~contentId ()
     let to_json v = composed_to_json to_value v
@@ -3090,9 +5782,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified tags from the specified resource."]
@@ -3167,33 +5859,204 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" Tags.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" Tags.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds the specified tags to the specified resource."]
+module StartImportJobResponse =
+  struct
+    type nonrec t =
+      {
+      importJob: ImportJobData.t option [@ocaml.doc "The import job."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?importJob = fun () -> { importJob }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("importJob", (Option.map x.importJob ~f:ImportJobData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let importJob =
+        (Option.map ~f:ImportJobData.of_xml) (Xml.child xml_arg0 "importJob") in
+      make ?importJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let importJob = field_map json__ "importJob" ImportJobData.of_json in
+      make ?importJob ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Start an asynchronous job to import Wisdom resources from an uploaded source file. Before calling this API, use StartContentUpload to upload an asset that contains the resource data. For importing Wisdom quick responses, you need to upload a csv file including the quick responses. For information about how to format the csv file for importing quick responses, see Import quick responses."]
+module StartImportJobRequest =
+  struct
+    type nonrec t =
+      {
+      clientToken: NonEmptyString.t option
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource."];
+      externalSourceConfiguration: ExternalSourceConfiguration.t option
+        [@ocaml.doc
+          "The configuration information of the external source that the resource data are imported from."];
+      importJobType: ImportJobType.t
+        [@ocaml.doc
+          "The type of the import job. For importing quick response resource, set the value to QUICK_RESPONSES."];
+      knowledgeBaseId: UuidOrArn.t
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN. For importing Wisdom quick responses, this should be a QUICK_RESPONSES type knowledge base."];
+      metadata: ContentMetadata.t option
+        [@ocaml.doc "The metadata fields of the imported Wisdom resources."];
+      uploadId: UploadId.t
+        [@ocaml.doc
+          "A pointer to the uploaded asset. This value is returned by StartContentUpload."]}
+    let context_ = "StartImportJobRequest"
+    let make ?clientToken =
+      fun ?externalSourceConfiguration ->
+        fun ?metadata ->
+          fun ~importJobType ->
+            fun ~knowledgeBaseId ->
+              fun ~uploadId ->
+                fun () ->
+                  {
+                    clientToken;
+                    externalSourceConfiguration;
+                    metadata;
+                    importJobType;
+                    knowledgeBaseId;
+                    uploadId
+                  }
+    let to_value x =
+      structure_to_value
+        [("clientToken",
+           (Option.map x.clientToken ~f:NonEmptyString.to_value));
+        ("externalSourceConfiguration",
+          (Option.map x.externalSourceConfiguration
+             ~f:ExternalSourceConfiguration.to_value));
+        ("importJobType", (Some (ImportJobType.to_value x.importJobType)));
+        ("knowledgeBaseId", (Some (UuidOrArn.to_value x.knowledgeBaseId)));
+        ("metadata", (Option.map x.metadata ~f:ContentMetadata.to_value));
+        ("uploadId", (Some (UploadId.to_value x.uploadId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let uploadId =
+        UploadId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "uploadId") in
+      let metadata =
+        (Option.map ~f:ContentMetadata.of_xml)
+          (Xml.child xml_arg0 "metadata") in
+      let knowledgeBaseId =
+        UuidOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+      let importJobType =
+        ImportJobType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "importJobType") in
+      let externalSourceConfiguration =
+        (Option.map ~f:ExternalSourceConfiguration.of_xml)
+          (Xml.child xml_arg0 "externalSourceConfiguration") in
+      let clientToken =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      make ~uploadId ?metadata ~knowledgeBaseId ~importJobType
+        ?externalSourceConfiguration ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let uploadId = field_map_exn json__ "uploadId" UploadId.of_json in
+      let metadata = field_map json__ "metadata" ContentMetadata.of_json in
+      let knowledgeBaseId =
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      let importJobType =
+        field_map_exn json__ "importJobType" ImportJobType.of_json in
+      let externalSourceConfiguration =
+        field_map json__ "externalSourceConfiguration"
+          ExternalSourceConfiguration.of_json in
+      let clientToken = field_map json__ "clientToken" NonEmptyString.of_json in
+      make ~uploadId ?metadata ~knowledgeBaseId ~importJobType
+        ?externalSourceConfiguration ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Start an asynchronous job to import Wisdom resources from an uploaded source file. Before calling this API, use StartContentUpload to upload an asset that contains the resource data. For importing Wisdom quick responses, you need to upload a csv file including the quick responses. For information about how to format the csv file for importing quick responses, see Import quick responses."]
 module StartContentUploadResponse =
   struct
     type nonrec t =
       {
-      headersToInclude: Headers.t
+      headersToInclude: Headers.t option
         [@ocaml.doc "The headers to include in the upload."];
-      uploadId: NonEmptyString.t [@ocaml.doc "The identifier of the upload."];
-      url: SyntheticStartContentUploadResponseUrl.t
-        [@ocaml.doc "The URL of the upload."];
-      urlExpiry: SyntheticTimestamp_epoch_seconds.t
+      uploadId: UploadId.t option
+        [@ocaml.doc "The identifier of the upload."];
+      url: Url.t option [@ocaml.doc "The URL of the upload."];
+      urlExpiry: SyntheticTimestamp_epoch_seconds.t option
         [@ocaml.doc "The expiration time of the URL as an epoch timestamp."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartContentUploadResponse"
-    let make ~headersToInclude =
-      fun ~uploadId ->
-        fun ~url ->
-          fun ~urlExpiry ->
+    let make ?headersToInclude =
+      fun ?uploadId ->
+        fun ?url ->
+          fun ?urlExpiry ->
             fun () -> { headersToInclude; uploadId; url; urlExpiry }
     let error_of_json name json =
       match name with
@@ -3237,39 +6100,34 @@ module StartContentUploadResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("headersToInclude", (Some (Headers.to_value x.headersToInclude)));
-        ("uploadId", (Some (NonEmptyString.to_value x.uploadId)));
-        ("url",
-          (Some (SyntheticStartContentUploadResponseUrl.to_value x.url)));
+        [("headersToInclude",
+           (Option.map x.headersToInclude ~f:Headers.to_value));
+        ("uploadId", (Option.map x.uploadId ~f:UploadId.to_value));
+        ("url", (Option.map x.url ~f:Url.to_value));
         ("urlExpiry",
-          (Some (SyntheticTimestamp_epoch_seconds.to_value x.urlExpiry)))]
+          (Option.map x.urlExpiry
+             ~f:SyntheticTimestamp_epoch_seconds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let urlExpiry =
-        SyntheticTimestamp_epoch_seconds.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "urlExpiry") in
-      let url =
-        SyntheticStartContentUploadResponseUrl.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "url") in
+        (Option.map ~f:SyntheticTimestamp_epoch_seconds.of_xml)
+          (Xml.child xml_arg0 "urlExpiry") in
+      let url = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "url") in
       let uploadId =
-        NonEmptyString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "uploadId") in
+        (Option.map ~f:UploadId.of_xml) (Xml.child xml_arg0 "uploadId") in
       let headersToInclude =
-        Headers.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "headersToInclude") in
-      make ~urlExpiry ~url ~uploadId ~headersToInclude ()
+        (Option.map ~f:Headers.of_xml)
+          (Xml.child xml_arg0 "headersToInclude") in
+      make ?urlExpiry ?url ?uploadId ?headersToInclude ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let urlExpiry =
-        field_map_exn json "urlExpiry"
-          SyntheticTimestamp_epoch_seconds.of_json in
-      let url =
-        field_map_exn json "url"
-          SyntheticStartContentUploadResponseUrl.of_json in
-      let uploadId = field_map_exn json "uploadId" NonEmptyString.of_json in
+        field_map json__ "urlExpiry" SyntheticTimestamp_epoch_seconds.of_json in
+      let url = field_map json__ "url" Url.of_json in
+      let uploadId = field_map json__ "uploadId" UploadId.of_json in
       let headersToInclude =
-        field_map_exn json "headersToInclude" Headers.of_json in
-      make ~urlExpiry ~url ~uploadId ~headersToInclude ()
+        field_map json__ "headersToInclude" Headers.of_json in
+      make ?urlExpiry ?url ?uploadId ?headersToInclude ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Get a URL to upload content to a knowledge base. To upload content, first make a PUT request to the returned URL with your file, making sure to include the required headers. Then use CreateContent to finalize the content creation process or UpdateContent to modify an existing resource. You can only upload content to a knowledge base of type CUSTOM."]
@@ -3281,29 +6139,42 @@ module StartContentUploadRequest =
         [@ocaml.doc "The type of content to upload."];
       knowledgeBaseId: UuidOrArn.t
         [@ocaml.doc
-          "The the identifier of the knowledge base. Can be either the ID or the ARN. URLs cannot contain the ARN."]}
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."];
+      presignedUrlTimeToLive: TimeToLive.t option
+        [@ocaml.doc
+          "The expected expiration time of the generated presigned URL, specified in minutes."]}
     let context_ = "StartContentUploadRequest"
-    let make ~contentType =
-      fun ~knowledgeBaseId -> fun () -> { contentType; knowledgeBaseId }
+    let make ?presignedUrlTimeToLive =
+      fun ~contentType ->
+        fun ~knowledgeBaseId ->
+          fun () -> { presignedUrlTimeToLive; contentType; knowledgeBaseId }
     let to_value x =
       structure_to_value
         [("contentType", (Some (ContentType.to_value x.contentType)));
-        ("knowledgeBaseId", (Some (UuidOrArn.to_value x.knowledgeBaseId)))]
+        ("knowledgeBaseId", (Some (UuidOrArn.to_value x.knowledgeBaseId)));
+        ("presignedUrlTimeToLive",
+          (Option.map x.presignedUrlTimeToLive ~f:TimeToLive.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let presignedUrlTimeToLive =
+        (Option.map ~f:TimeToLive.of_xml)
+          (Xml.child xml_arg0 "presignedUrlTimeToLive") in
       let knowledgeBaseId =
         UuidOrArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
       let contentType =
         ContentType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "contentType") in
-      make ~knowledgeBaseId ~contentType ()
+      make ?presignedUrlTimeToLive ~knowledgeBaseId ~contentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let presignedUrlTimeToLive =
+        field_map json__ "presignedUrlTimeToLive" TimeToLive.of_json in
       let knowledgeBaseId =
-        field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
-      let contentType = field_map_exn json "contentType" ContentType.of_json in
-      make ~knowledgeBaseId ~contentType ()
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      let contentType =
+        field_map_exn json__ "contentType" ContentType.of_json in
+      make ?presignedUrlTimeToLive ~knowledgeBaseId ~contentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Get a URL to upload content to a knowledge base. To upload content, first make a PUT request to the returned URL with your file, making sure to include the required headers. Then use CreateContent to finalize the content creation process or UpdateContent to modify an existing resource. You can only upload content to a knowledge base of type CUSTOM."]
@@ -3314,16 +6185,15 @@ module SearchSessionsResponse =
       nextToken: NextToken.t option
         [@ocaml.doc
           "If there are additional results, this is the token for the next set of results."];
-      sessionSummaries: SessionSummaries.t
+      sessionSummaries: SessionSummaries.t option
         [@ocaml.doc "Summary information about the sessions."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SearchSessionsResponse"
     let make ?nextToken =
-      fun ~sessionSummaries -> fun () -> { nextToken; sessionSummaries }
+      fun ?sessionSummaries -> fun () -> { nextToken; sessionSummaries }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3368,21 +6238,21 @@ module SearchSessionsResponse =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("sessionSummaries",
-          (Some (SessionSummaries.to_value x.sessionSummaries)))]
+          (Option.map x.sessionSummaries ~f:SessionSummaries.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sessionSummaries =
-        SessionSummaries.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sessionSummaries") in
+        (Option.map ~f:SessionSummaries.of_xml)
+          (Xml.child xml_arg0 "sessionSummaries") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~sessionSummaries ?nextToken ()
+      make ?sessionSummaries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sessionSummaries =
-        field_map_exn json "sessionSummaries" SessionSummaries.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~sessionSummaries ?nextToken ()
+        field_map json__ "sessionSummaries" SessionSummaries.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?sessionSummaries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Searches for sessions."]
 module SearchSessionsRequest =
@@ -3427,20 +6297,181 @@ module SearchSessionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ~searchExpression ?nextToken ?maxResults ~assistantId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let searchExpression =
-        field_map_exn json "searchExpression" SearchExpression.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
+        field_map_exn json__ "searchExpression" SearchExpression.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let assistantId = field_map_exn json__ "assistantId" UuidOrArn.of_json in
       make ~searchExpression ?nextToken ?maxResults ~assistantId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Searches for sessions."]
+module SearchQuickResponsesResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NonEmptyString.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."];
+      results: QuickResponseSearchResultsList.t option
+        [@ocaml.doc "The results of the quick response search."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `RequestTimeoutException of RequestTimeoutException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken = fun ?results -> fun () -> { nextToken; results }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "RequestTimeoutException" ->
+          `RequestTimeoutException (RequestTimeoutException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "RequestTimeoutException" ->
+          `RequestTimeoutException (RequestTimeoutException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `RequestTimeoutException e ->
+          `Assoc
+            [("error", (`String "RequestTimeoutException"));
+            ("details", (RequestTimeoutException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:NonEmptyString.to_value));
+        ("results",
+          (Option.map x.results ~f:QuickResponseSearchResultsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let results =
+        (Option.map ~f:QuickResponseSearchResultsList.of_xml)
+          (Xml.child xml_arg0 "results") in
+      let nextToken =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?results ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let results =
+        field_map json__ "results" QuickResponseSearchResultsList.of_json in
+      let nextToken = field_map json__ "nextToken" NonEmptyString.of_json in
+      make ?results ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Searches existing Wisdom quick responses in a Wisdom knowledge base."]
+module SearchQuickResponsesRequest =
+  struct
+    type nonrec t =
+      {
+      attributes: ContactAttributes.t option
+        [@ocaml.doc
+          "The user-defined Amazon Connect contact attributes to be resolved when search results are returned."];
+      knowledgeBaseId: UuidOrArn.t
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should be a QUICK_RESPONSES type knowledge base. Can be either the ID or the ARN. URLs cannot contain the ARN."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of results to return per page."];
+      nextToken: NonEmptyString.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."];
+      searchExpression: QuickResponseSearchExpression.t
+        [@ocaml.doc "The search expression for querying the quick response."]}
+    let context_ = "SearchQuickResponsesRequest"
+    let make ?attributes =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~knowledgeBaseId ->
+            fun ~searchExpression ->
+              fun () ->
+                {
+                  attributes;
+                  maxResults;
+                  nextToken;
+                  knowledgeBaseId;
+                  searchExpression
+                }
+    let to_value x =
+      structure_to_value
+        [("attributes",
+           (Option.map x.attributes ~f:ContactAttributes.to_value));
+        ("knowledgeBaseId", (Some (UuidOrArn.to_value x.knowledgeBaseId)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NonEmptyString.to_value));
+        ("searchExpression",
+          (Some (QuickResponseSearchExpression.to_value x.searchExpression)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let searchExpression =
+        QuickResponseSearchExpression.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "searchExpression") in
+      let nextToken =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let knowledgeBaseId =
+        UuidOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+      let attributes =
+        (Option.map ~f:ContactAttributes.of_xml)
+          (Xml.child xml_arg0 "attributes") in
+      make ~searchExpression ?nextToken ?maxResults ~knowledgeBaseId
+        ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let searchExpression =
+        field_map_exn json__ "searchExpression"
+          QuickResponseSearchExpression.of_json in
+      let nextToken = field_map json__ "nextToken" NonEmptyString.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let knowledgeBaseId =
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      let attributes =
+        field_map json__ "attributes" ContactAttributes.of_json in
+      make ~searchExpression ?nextToken ?maxResults ~knowledgeBaseId
+        ?attributes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Searches existing Wisdom quick responses in a Wisdom knowledge base."]
 module SearchContentResponse =
   struct
     type nonrec t =
       {
-      contentSummaries: ContentSummaryList.t
+      contentSummaries: ContentSummaryList.t option
         [@ocaml.doc "Summary information about the content."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -3450,9 +6481,8 @@ module SearchContentResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SearchContentResponse"
-    let make ?nextToken =
-      fun ~contentSummaries -> fun () -> { nextToken; contentSummaries }
+    let make ?contentSummaries =
+      fun ?nextToken -> fun () -> { contentSummaries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3496,22 +6526,22 @@ module SearchContentResponse =
     let to_value x =
       structure_to_value
         [("contentSummaries",
-           (Some (ContentSummaryList.to_value x.contentSummaries)));
+           (Option.map x.contentSummaries ~f:ContentSummaryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let contentSummaries =
-        ContentSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "contentSummaries") in
-      make ?nextToken ~contentSummaries ()
+        (Option.map ~f:ContentSummaryList.of_xml)
+          (Xml.child xml_arg0 "contentSummaries") in
+      make ?nextToken ?contentSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let contentSummaries =
-        field_map_exn json "contentSummaries" ContentSummaryList.of_json in
-      make ?nextToken ~contentSummaries ()
+        field_map json__ "contentSummaries" ContentSummaryList.of_json in
+      make ?nextToken ?contentSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Searches for content in a specified knowledge base. Can be used to get a specific content resource by its name."]
@@ -3521,7 +6551,7 @@ module SearchContentRequest =
       {
       knowledgeBaseId: UuidOrArn.t
         [@ocaml.doc
-          "The the identifier of the knowledge base. Can be either the ID or the ARN. URLs cannot contain the ARN."];
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."];
       maxResults: MaxResults.t option
         [@ocaml.doc "The maximum number of results to return per page."];
       nextToken: NextToken.t option
@@ -3557,13 +6587,13 @@ module SearchContentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
       make ~searchExpression ?nextToken ?maxResults ~knowledgeBaseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let searchExpression =
-        field_map_exn json "searchExpression" SearchExpression.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+        field_map_exn json__ "searchExpression" SearchExpression.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let knowledgeBaseId =
-        field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
       make ~searchExpression ?nextToken ?maxResults ~knowledgeBaseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3631,7 +6661,7 @@ module RemoveKnowledgeBaseTemplateUriRequest =
       {
       knowledgeBaseId: UuidOrArn.t
         [@ocaml.doc
-          "The the identifier of the knowledge base. Can be either the ID or the ARN. URLs cannot contain the ARN."]}
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."]}
     let context_ = "RemoveKnowledgeBaseTemplateUriRequest"
     let make ~knowledgeBaseId = fun () -> { knowledgeBaseId }
     let to_value x =
@@ -3644,9 +6674,9 @@ module RemoveKnowledgeBaseTemplateUriRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
       make ~knowledgeBaseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let knowledgeBaseId =
-        field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
       make ~knowledgeBaseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a URI template from a knowledge base."]
@@ -3657,18 +6687,21 @@ module QueryAssistantResponse =
       nextToken: NextToken.t option
         [@ocaml.doc
           "If there are additional results, this is the token for the next set of results."];
-      results: QueryResultsList.t [@ocaml.doc "The results of the query."]}
+      results: QueryResultsList.t option
+        [@ocaml.doc "The results of the query."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
+      | `RequestTimeoutException of RequestTimeoutException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "QueryAssistantResponse"
-    let make ?nextToken = fun ~results -> fun () -> { nextToken; results }
+    let make ?nextToken = fun ?results -> fun () -> { nextToken; results }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
+      | "RequestTimeoutException" ->
+          `RequestTimeoutException (RequestTimeoutException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
@@ -3680,6 +6713,8 @@ module QueryAssistantResponse =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "RequestTimeoutException" ->
+          `RequestTimeoutException (RequestTimeoutException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
@@ -3692,6 +6727,10 @@ module QueryAssistantResponse =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
+      | `RequestTimeoutException e ->
+          `Assoc
+            [("error", (`String "RequestTimeoutException"));
+            ("details", (RequestTimeoutException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -3708,20 +6747,20 @@ module QueryAssistantResponse =
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("results", (Some (QueryResultsList.to_value x.results)))]
+        ("results", (Option.map x.results ~f:QueryResultsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let results =
-        QueryResultsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "results") in
+        (Option.map ~f:QueryResultsList.of_xml)
+          (Xml.child xml_arg0 "results") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~results ?nextToken ()
+      make ?results ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let results = field_map_exn json "results" QueryResultsList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~results ?nextToken ()
+    let of_json json__ =
+      let results = field_map json__ "results" QueryResultsList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?results ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Performs a manual search against the specified assistant. To retrieve recommendations for an assistant, use GetRecommendations."]
@@ -3764,11 +6803,11 @@ module QueryAssistantRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ~queryText ?nextToken ?maxResults ~assistantId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryText = field_map_exn json "queryText" QueryText.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
+    let of_json json__ =
+      let queryText = field_map_exn json__ "queryText" QueryText.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let assistantId = field_map_exn json__ "assistantId" UuidOrArn.of_json in
       make ~queryText ?nextToken ?maxResults ~assistantId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3846,11 +6885,11 @@ module NotifyRecommendationsReceivedResponse =
           (Xml.child xml_arg0 "errors") in
       make ?recommendationIds ?errors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationIds =
-        field_map json "recommendationIds" RecommendationIdList.of_json in
+        field_map json__ "recommendationIds" RecommendationIdList.of_json in
       let errors =
-        field_map json "errors"
+        field_map json__ "errors"
           NotifyRecommendationsReceivedErrorList.of_json in
       make ?recommendationIds ?errors ()
     let to_json v = composed_to_json to_value v
@@ -3892,11 +6931,11 @@ module NotifyRecommendationsReceivedRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ~sessionId ~recommendationIds ~assistantId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sessionId = field_map_exn json "sessionId" UuidOrArn.of_json in
+    let of_json json__ =
+      let sessionId = field_map_exn json__ "sessionId" UuidOrArn.of_json in
       let recommendationIds =
-        field_map_exn json "recommendationIds" RecommendationIdList.of_json in
-      let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
+        field_map_exn json__ "recommendationIds" RecommendationIdList.of_json in
+      let assistantId = field_map_exn json__ "assistantId" UuidOrArn.of_json in
       make ~sessionId ~recommendationIds ~assistantId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3943,8 +6982,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
 module ListTagsForResourceRequest =
@@ -3964,16 +7003,139 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
+module ListQuickResponsesResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NonEmptyString.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."];
+      quickResponseSummaries: QuickResponseSummaryList.t option
+        [@ocaml.doc "Summary information about the quick responses."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?quickResponseSummaries ->
+        fun () -> { nextToken; quickResponseSummaries }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:NonEmptyString.to_value));
+        ("quickResponseSummaries",
+          (Option.map x.quickResponseSummaries
+             ~f:QuickResponseSummaryList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quickResponseSummaries =
+        (Option.map ~f:QuickResponseSummaryList.of_xml)
+          (Xml.child xml_arg0 "quickResponseSummaries") in
+      let nextToken =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?quickResponseSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quickResponseSummaries =
+        field_map json__ "quickResponseSummaries"
+          QuickResponseSummaryList.of_json in
+      let nextToken = field_map json__ "nextToken" NonEmptyString.of_json in
+      make ?quickResponseSummaries ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists information about quick response."]
+module ListQuickResponsesRequest =
+  struct
+    type nonrec t =
+      {
+      knowledgeBaseId: UuidOrArn.t
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of results to return per page."];
+      nextToken: NonEmptyString.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."]}
+    let context_ = "ListQuickResponsesRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~knowledgeBaseId ->
+          fun () -> { maxResults; nextToken; knowledgeBaseId }
+    let to_value x =
+      structure_to_value
+        [("knowledgeBaseId", (Some (UuidOrArn.to_value x.knowledgeBaseId)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let knowledgeBaseId =
+        UuidOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+      make ?nextToken ?maxResults ~knowledgeBaseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NonEmptyString.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let knowledgeBaseId =
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      make ?nextToken ?maxResults ~knowledgeBaseId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists information about quick response."]
 module ListKnowledgeBasesResponse =
   struct
     type nonrec t =
       {
-      knowledgeBaseSummaries: KnowledgeBaseList.t
+      knowledgeBaseSummaries: KnowledgeBaseList.t option
         [@ocaml.doc "Information about the knowledge bases."];
       nextToken: NonEmptyString.t option
         [@ocaml.doc
@@ -3982,10 +7144,8 @@ module ListKnowledgeBasesResponse =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListKnowledgeBasesResponse"
-    let make ?nextToken =
-      fun ~knowledgeBaseSummaries ->
-        fun () -> { nextToken; knowledgeBaseSummaries }
+    let make ?knowledgeBaseSummaries =
+      fun ?nextToken -> fun () -> { knowledgeBaseSummaries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4021,7 +7181,7 @@ module ListKnowledgeBasesResponse =
     let to_value x =
       structure_to_value
         [("knowledgeBaseSummaries",
-           (Some (KnowledgeBaseList.to_value x.knowledgeBaseSummaries)));
+           (Option.map x.knowledgeBaseSummaries ~f:KnowledgeBaseList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NonEmptyString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -4029,15 +7189,15 @@ module ListKnowledgeBasesResponse =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let knowledgeBaseSummaries =
-        KnowledgeBaseList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseSummaries") in
-      make ?nextToken ~knowledgeBaseSummaries ()
+        (Option.map ~f:KnowledgeBaseList.of_xml)
+          (Xml.child xml_arg0 "knowledgeBaseSummaries") in
+      make ?nextToken ?knowledgeBaseSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NonEmptyString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NonEmptyString.of_json in
       let knowledgeBaseSummaries =
-        field_map_exn json "knowledgeBaseSummaries" KnowledgeBaseList.of_json in
-      make ?nextToken ~knowledgeBaseSummaries ()
+        field_map json__ "knowledgeBaseSummaries" KnowledgeBaseList.of_json in
+      make ?nextToken ?knowledgeBaseSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the knowledge bases."]
 module ListKnowledgeBasesRequest =
@@ -4064,17 +7224,128 @@ module ListKnowledgeBasesRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NonEmptyString.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NonEmptyString.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the knowledge bases."]
+module ListImportJobsResponse =
+  struct
+    type nonrec t =
+      {
+      importJobSummaries: ImportJobList.t option
+        [@ocaml.doc "Summary information about the import jobs."];
+      nextToken: NonEmptyString.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?importJobSummaries =
+      fun ?nextToken -> fun () -> { importJobSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("importJobSummaries",
+           (Option.map x.importJobSummaries ~f:ImportJobList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let importJobSummaries =
+        (Option.map ~f:ImportJobList.of_xml)
+          (Xml.child xml_arg0 "importJobSummaries") in
+      make ?nextToken ?importJobSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NonEmptyString.of_json in
+      let importJobSummaries =
+        field_map json__ "importJobSummaries" ImportJobList.of_json in
+      make ?nextToken ?importJobSummaries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists information about import jobs."]
+module ListImportJobsRequest =
+  struct
+    type nonrec t =
+      {
+      knowledgeBaseId: UuidOrArn.t
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of results to return per page."];
+      nextToken: NonEmptyString.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."]}
+    let context_ = "ListImportJobsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~knowledgeBaseId ->
+          fun () -> { maxResults; nextToken; knowledgeBaseId }
+    let to_value x =
+      structure_to_value
+        [("knowledgeBaseId", (Some (UuidOrArn.to_value x.knowledgeBaseId)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let knowledgeBaseId =
+        UuidOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+      make ?nextToken ?maxResults ~knowledgeBaseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NonEmptyString.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let knowledgeBaseId =
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      make ?nextToken ?maxResults ~knowledgeBaseId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists information about import jobs."]
 module ListContentsResponse =
   struct
     type nonrec t =
       {
-      contentSummaries: ContentSummaryList.t
+      contentSummaries: ContentSummaryList.t option
         [@ocaml.doc "Information about the content."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -4084,9 +7355,8 @@ module ListContentsResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListContentsResponse"
-    let make ?nextToken =
-      fun ~contentSummaries -> fun () -> { nextToken; contentSummaries }
+    let make ?contentSummaries =
+      fun ?nextToken -> fun () -> { contentSummaries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4130,22 +7400,22 @@ module ListContentsResponse =
     let to_value x =
       structure_to_value
         [("contentSummaries",
-           (Some (ContentSummaryList.to_value x.contentSummaries)));
+           (Option.map x.contentSummaries ~f:ContentSummaryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let contentSummaries =
-        ContentSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "contentSummaries") in
-      make ?nextToken ~contentSummaries ()
+        (Option.map ~f:ContentSummaryList.of_xml)
+          (Xml.child xml_arg0 "contentSummaries") in
+      make ?nextToken ?contentSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let contentSummaries =
-        field_map_exn json "contentSummaries" ContentSummaryList.of_json in
-      make ?nextToken ~contentSummaries ()
+        field_map json__ "contentSummaries" ContentSummaryList.of_json in
+      make ?nextToken ?contentSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the content."]
 module ListContentsRequest =
@@ -4154,7 +7424,7 @@ module ListContentsRequest =
       {
       knowledgeBaseId: UuidOrArn.t
         [@ocaml.doc
-          "The the identifier of the knowledge base. Can be either the ID or the ARN. URLs cannot contain the ARN."];
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."];
       maxResults: MaxResults.t option
         [@ocaml.doc "The maximum number of results to return per page."];
       nextToken: NextToken.t option
@@ -4181,11 +7451,11 @@ module ListContentsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
       make ?nextToken ?maxResults ~knowledgeBaseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       let knowledgeBaseId =
-        field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
       make ?nextToken ?maxResults ~knowledgeBaseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the content."]
@@ -4193,7 +7463,7 @@ module ListAssistantsResponse =
   struct
     type nonrec t =
       {
-      assistantSummaries: AssistantList.t
+      assistantSummaries: AssistantList.t option
         [@ocaml.doc "Information about the assistants."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -4202,9 +7472,8 @@ module ListAssistantsResponse =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAssistantsResponse"
-    let make ?nextToken =
-      fun ~assistantSummaries -> fun () -> { nextToken; assistantSummaries }
+    let make ?assistantSummaries =
+      fun ?nextToken -> fun () -> { assistantSummaries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4240,22 +7509,22 @@ module ListAssistantsResponse =
     let to_value x =
       structure_to_value
         [("assistantSummaries",
-           (Some (AssistantList.to_value x.assistantSummaries)));
+           (Option.map x.assistantSummaries ~f:AssistantList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let assistantSummaries =
-        AssistantList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "assistantSummaries") in
-      make ?nextToken ~assistantSummaries ()
+        (Option.map ~f:AssistantList.of_xml)
+          (Xml.child xml_arg0 "assistantSummaries") in
+      make ?nextToken ?assistantSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let assistantSummaries =
-        field_map_exn json "assistantSummaries" AssistantList.of_json in
-      make ?nextToken ~assistantSummaries ()
+        field_map json__ "assistantSummaries" AssistantList.of_json in
+      make ?nextToken ?assistantSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists information about assistants."]
 module ListAssistantsRequest =
@@ -4281,9 +7550,9 @@ module ListAssistantsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists information about assistants."]
@@ -4291,7 +7560,7 @@ module ListAssistantAssociationsResponse =
   struct
     type nonrec t =
       {
-      assistantAssociationSummaries: AssistantAssociationSummaryList.t
+      assistantAssociationSummaries: AssistantAssociationSummaryList.t option
         [@ocaml.doc "Summary information about assistant associations."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -4301,10 +7570,9 @@ module ListAssistantAssociationsResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAssistantAssociationsResponse"
-    let make ?nextToken =
-      fun ~assistantAssociationSummaries ->
-        fun () -> { nextToken; assistantAssociationSummaries }
+    let make ?assistantAssociationSummaries =
+      fun ?nextToken ->
+        fun () -> { assistantAssociationSummaries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4348,26 +7616,24 @@ module ListAssistantAssociationsResponse =
     let to_value x =
       structure_to_value
         [("assistantAssociationSummaries",
-           (Some
-              (AssistantAssociationSummaryList.to_value
-                 x.assistantAssociationSummaries)));
+           (Option.map x.assistantAssociationSummaries
+              ~f:AssistantAssociationSummaryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let assistantAssociationSummaries =
-        AssistantAssociationSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "assistantAssociationSummaries") in
-      make ?nextToken ~assistantAssociationSummaries ()
+        (Option.map ~f:AssistantAssociationSummaryList.of_xml)
+          (Xml.child xml_arg0 "assistantAssociationSummaries") in
+      make ?nextToken ?assistantAssociationSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let assistantAssociationSummaries =
-        field_map_exn json "assistantAssociationSummaries"
+        field_map json__ "assistantAssociationSummaries"
           AssistantAssociationSummaryList.of_json in
-      make ?nextToken ~assistantAssociationSummaries ()
+      make ?nextToken ?assistantAssociationSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists information about assistant associations."]
 module ListAssistantAssociationsRequest =
@@ -4402,10 +7668,10 @@ module ListAssistantAssociationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ?nextToken ?maxResults ~assistantId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let assistantId = field_map_exn json__ "assistantId" UuidOrArn.of_json in
       make ?nextToken ?maxResults ~assistantId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists information about assistant associations."]
@@ -4469,8 +7735,8 @@ module GetSessionResponse =
         (Option.map ~f:SessionData.of_xml) (Xml.child xml_arg0 "session") in
       make ?session ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let session = field_map json "session" SessionData.of_json in
+    let of_json json__ =
+      let session = field_map json__ "session" SessionData.of_json in
       make ?session ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information for a specified session."]
@@ -4501,9 +7767,9 @@ module GetSessionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ~sessionId ~assistantId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sessionId = field_map_exn json "sessionId" UuidOrArn.of_json in
-      let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
+    let of_json json__ =
+      let sessionId = field_map_exn json__ "sessionId" UuidOrArn.of_json in
+      let assistantId = field_map_exn json__ "assistantId" UuidOrArn.of_json in
       make ~sessionId ~assistantId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information for a specified session."]
@@ -4511,15 +7777,17 @@ module GetRecommendationsResponse =
   struct
     type nonrec t =
       {
-      recommendations: RecommendationList.t
-        [@ocaml.doc "The recommendations."]}
+      recommendations: RecommendationList.t option
+        [@ocaml.doc "The recommendations."];
+      triggers: RecommendationTriggerList.t option
+        [@ocaml.doc "The triggers corresponding to recommendations."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetRecommendationsResponse"
-    let make ~recommendations = fun () -> { recommendations }
+    let make ?recommendations =
+      fun ?triggers -> fun () -> { recommendations; triggers }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4563,18 +7831,25 @@ module GetRecommendationsResponse =
     let to_value x =
       structure_to_value
         [("recommendations",
-           (Some (RecommendationList.to_value x.recommendations)))]
+           (Option.map x.recommendations ~f:RecommendationList.to_value));
+        ("triggers",
+          (Option.map x.triggers ~f:RecommendationTriggerList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let triggers =
+        (Option.map ~f:RecommendationTriggerList.of_xml)
+          (Xml.child xml_arg0 "triggers") in
       let recommendations =
-        RecommendationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recommendations") in
-      make ~recommendations ()
+        (Option.map ~f:RecommendationList.of_xml)
+          (Xml.child xml_arg0 "recommendations") in
+      make ?triggers ?recommendations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let triggers =
+        field_map json__ "triggers" RecommendationTriggerList.of_json in
       let recommendations =
-        field_map_exn json "recommendations" RecommendationList.of_json in
-      make ~recommendations ()
+        field_map json__ "recommendations" RecommendationList.of_json in
+      make ?triggers ?recommendations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves recommendations for the specified session. To avoid retrieving the same recommendations in subsequent calls, use NotifyRecommendationsReceived. This API supports long-polling behavior with the waitTimeSeconds parameter. Short poll is the default behavior and only returns recommendations already available. To perform a manual query against an assistant, use QueryAssistant."]
@@ -4621,16 +7896,119 @@ module GetRecommendationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ?waitTimeSeconds ~sessionId ?maxResults ~assistantId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let waitTimeSeconds =
-        field_map json "waitTimeSeconds" WaitTimeSeconds.of_json in
-      let sessionId = field_map_exn json "sessionId" UuidOrArn.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
+        field_map json__ "waitTimeSeconds" WaitTimeSeconds.of_json in
+      let sessionId = field_map_exn json__ "sessionId" UuidOrArn.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let assistantId = field_map_exn json__ "assistantId" UuidOrArn.of_json in
       make ?waitTimeSeconds ~sessionId ?maxResults ~assistantId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves recommendations for the specified session. To avoid retrieving the same recommendations in subsequent calls, use NotifyRecommendationsReceived. This API supports long-polling behavior with the waitTimeSeconds parameter. Short poll is the default behavior and only returns recommendations already available. To perform a manual query against an assistant, use QueryAssistant."]
+module GetQuickResponseResponse =
+  struct
+    type nonrec t =
+      {
+      quickResponse: QuickResponseData.t option
+        [@ocaml.doc "The quick response."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?quickResponse = fun () -> { quickResponse }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("quickResponse",
+           (Option.map x.quickResponse ~f:QuickResponseData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quickResponse =
+        (Option.map ~f:QuickResponseData.of_xml)
+          (Xml.child xml_arg0 "quickResponse") in
+      make ?quickResponse ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quickResponse =
+        field_map json__ "quickResponse" QuickResponseData.of_json in
+      make ?quickResponse ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the quick response."]
+module GetQuickResponseRequest =
+  struct
+    type nonrec t =
+      {
+      knowledgeBaseId: UuidOrArn.t
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should be a QUICK_RESPONSES type knowledge base."];
+      quickResponseId: UuidOrArn.t
+        [@ocaml.doc "The identifier of the quick response."]}
+    let context_ = "GetQuickResponseRequest"
+    let make ~knowledgeBaseId =
+      fun ~quickResponseId -> fun () -> { knowledgeBaseId; quickResponseId }
+    let to_value x =
+      structure_to_value
+        [("knowledgeBaseId", (Some (UuidOrArn.to_value x.knowledgeBaseId)));
+        ("quickResponseId", (Some (UuidOrArn.to_value x.quickResponseId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quickResponseId =
+        UuidOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "quickResponseId") in
+      let knowledgeBaseId =
+        UuidOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+      make ~quickResponseId ~knowledgeBaseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quickResponseId =
+        field_map_exn json__ "quickResponseId" UuidOrArn.of_json in
+      let knowledgeBaseId =
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      make ~quickResponseId ~knowledgeBaseId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the quick response."]
 module GetKnowledgeBaseResponse =
   struct
     type nonrec t =
@@ -4694,9 +8072,9 @@ module GetKnowledgeBaseResponse =
           (Xml.child xml_arg0 "knowledgeBase") in
       make ?knowledgeBase ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let knowledgeBase =
-        field_map json "knowledgeBase" KnowledgeBaseData.of_json in
+        field_map json__ "knowledgeBase" KnowledgeBaseData.of_json in
       make ?knowledgeBase ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about the knowledge base."]
@@ -4706,7 +8084,7 @@ module GetKnowledgeBaseRequest =
       {
       knowledgeBaseId: UuidOrArn.t
         [@ocaml.doc
-          "The the identifier of the knowledge base. Can be either the ID or the ARN. URLs cannot contain the ARN."]}
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."]}
     let context_ = "GetKnowledgeBaseRequest"
     let make ~knowledgeBaseId = fun () -> { knowledgeBaseId }
     let to_value x =
@@ -4719,12 +8097,109 @@ module GetKnowledgeBaseRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
       make ~knowledgeBaseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let knowledgeBaseId =
-        field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
       make ~knowledgeBaseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about the knowledge base."]
+module GetImportJobResponse =
+  struct
+    type nonrec t =
+      {
+      importJob: ImportJobData.t option [@ocaml.doc "The import job."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?importJob = fun () -> { importJob }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("importJob", (Option.map x.importJob ~f:ImportJobData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let importJob =
+        (Option.map ~f:ImportJobData.of_xml) (Xml.child xml_arg0 "importJob") in
+      make ?importJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let importJob = field_map json__ "importJob" ImportJobData.of_json in
+      make ?importJob ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the started import job."]
+module GetImportJobRequest =
+  struct
+    type nonrec t =
+      {
+      importJobId: Uuid.t
+        [@ocaml.doc "The identifier of the import job to retrieve."];
+      knowledgeBaseId: UuidOrArn.t
+        [@ocaml.doc
+          "The identifier of the knowledge base that the import job belongs to."]}
+    let context_ = "GetImportJobRequest"
+    let make ~importJobId =
+      fun ~knowledgeBaseId -> fun () -> { importJobId; knowledgeBaseId }
+    let to_value x =
+      structure_to_value
+        [("importJobId", (Some (Uuid.to_value x.importJobId)));
+        ("knowledgeBaseId", (Some (UuidOrArn.to_value x.knowledgeBaseId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let knowledgeBaseId =
+        UuidOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+      let importJobId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "importJobId") in
+      make ~knowledgeBaseId ~importJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let knowledgeBaseId =
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      let importJobId = field_map_exn json__ "importJobId" Uuid.of_json in
+      make ~knowledgeBaseId ~importJobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the started import job."]
 module GetContentSummaryResponse =
   struct
     type nonrec t =
@@ -4788,9 +8263,9 @@ module GetContentSummaryResponse =
           (Xml.child xml_arg0 "contentSummary") in
       make ?contentSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contentSummary =
-        field_map json "contentSummary" ContentSummary.of_json in
+        field_map json__ "contentSummary" ContentSummary.of_json in
       make ?contentSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves summary information about the content."]
@@ -4803,7 +8278,7 @@ module GetContentSummaryRequest =
           "The identifier of the content. Can be either the ID or the ARN. URLs cannot contain the ARN."];
       knowledgeBaseId: UuidOrArn.t
         [@ocaml.doc
-          "The the identifier of the knowledge base. Can be either the ID or the ARN. URLs cannot contain the ARN."]}
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."]}
     let context_ = "GetContentSummaryRequest"
     let make ~contentId =
       fun ~knowledgeBaseId -> fun () -> { contentId; knowledgeBaseId }
@@ -4821,10 +8296,10 @@ module GetContentSummaryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "contentId") in
       make ~knowledgeBaseId ~contentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let knowledgeBaseId =
-        field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
-      let contentId = field_map_exn json "contentId" UuidOrArn.of_json in
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      let contentId = field_map_exn json__ "contentId" UuidOrArn.of_json in
       make ~knowledgeBaseId ~contentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves summary information about the content."]
@@ -4888,8 +8363,8 @@ module GetContentResponse =
         (Option.map ~f:ContentData.of_xml) (Xml.child xml_arg0 "content") in
       make ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map json "content" ContentData.of_json in
+    let of_json json__ =
+      let content = field_map json__ "content" ContentData.of_json in
       make ?content ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4903,7 +8378,7 @@ module GetContentRequest =
           "The identifier of the content. Can be either the ID or the ARN. URLs cannot contain the ARN."];
       knowledgeBaseId: UuidOrArn.t
         [@ocaml.doc
-          "The the identifier of the knowledge base. Can be either the ID or the ARN. URLs cannot contain the ARN."]}
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."]}
     let context_ = "GetContentRequest"
     let make ~contentId =
       fun ~knowledgeBaseId -> fun () -> { contentId; knowledgeBaseId }
@@ -4921,10 +8396,10 @@ module GetContentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "contentId") in
       make ~knowledgeBaseId ~contentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let knowledgeBaseId =
-        field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
-      let contentId = field_map_exn json "contentId" UuidOrArn.of_json in
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      let contentId = field_map_exn json__ "contentId" UuidOrArn.of_json in
       make ~knowledgeBaseId ~contentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4990,8 +8465,8 @@ module GetAssistantResponse =
         (Option.map ~f:AssistantData.of_xml) (Xml.child xml_arg0 "assistant") in
       make ?assistant ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assistant = field_map json "assistant" AssistantData.of_json in
+    let of_json json__ =
+      let assistant = field_map json__ "assistant" AssistantData.of_json in
       make ?assistant ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about an assistant."]
@@ -5014,8 +8489,8 @@ module GetAssistantRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ~assistantId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
+    let of_json json__ =
+      let assistantId = field_map_exn json__ "assistantId" UuidOrArn.of_json in
       make ~assistantId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about an assistant."]
@@ -5083,9 +8558,9 @@ module GetAssistantAssociationResponse =
           (Xml.child xml_arg0 "assistantAssociation") in
       make ?assistantAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assistantAssociation =
-        field_map json "assistantAssociation"
+        field_map json__ "assistantAssociation"
           AssistantAssociationData.of_json in
       make ?assistantAssociation ()
     let to_json v = composed_to_json to_value v
@@ -5118,13 +8593,104 @@ module GetAssistantAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assistantAssociationId") in
       make ~assistantId ~assistantAssociationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
+    let of_json json__ =
+      let assistantId = field_map_exn json__ "assistantId" UuidOrArn.of_json in
       let assistantAssociationId =
-        field_map_exn json "assistantAssociationId" UuidOrArn.of_json in
+        field_map_exn json__ "assistantAssociationId" UuidOrArn.of_json in
       make ~assistantId ~assistantAssociationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about an assistant association."]
+module DeleteQuickResponseResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a quick response."]
+module DeleteQuickResponseRequest =
+  struct
+    type nonrec t =
+      {
+      knowledgeBaseId: UuidOrArn.t
+        [@ocaml.doc
+          "The knowledge base from which the quick response is deleted. The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it."];
+      quickResponseId: UuidOrArn.t
+        [@ocaml.doc "The identifier of the quick response to delete."]}
+    let context_ = "DeleteQuickResponseRequest"
+    let make ~knowledgeBaseId =
+      fun ~quickResponseId -> fun () -> { knowledgeBaseId; quickResponseId }
+    let to_value x =
+      structure_to_value
+        [("knowledgeBaseId", (Some (UuidOrArn.to_value x.knowledgeBaseId)));
+        ("quickResponseId", (Some (UuidOrArn.to_value x.quickResponseId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quickResponseId =
+        UuidOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "quickResponseId") in
+      let knowledgeBaseId =
+        UuidOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+      make ~quickResponseId ~knowledgeBaseId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quickResponseId =
+        field_map_exn json__ "quickResponseId" UuidOrArn.of_json in
+      let knowledgeBaseId =
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      make ~quickResponseId ~knowledgeBaseId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a quick response."]
 module DeleteKnowledgeBaseResponse =
   struct
     type nonrec t = unit
@@ -5132,6 +8698,7 @@ module DeleteKnowledgeBaseResponse =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
@@ -5142,6 +8709,8 @@ module DeleteKnowledgeBaseResponse =
           `ConflictException (ConflictException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -5153,6 +8722,8 @@ module DeleteKnowledgeBaseResponse =
           `ConflictException (ConflictException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -5169,6 +8740,10 @@ module DeleteKnowledgeBaseResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5202,13 +8777,111 @@ module DeleteKnowledgeBaseRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
       make ~knowledgeBaseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let knowledgeBaseId =
-        field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
       make ~knowledgeBaseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the knowledge base. When you use this API to delete an external knowledge base such as Salesforce or ServiceNow, you must also delete the Amazon AppIntegrations DataIntegration. This is because you can't reuse the DataIntegration after it's been associated with an external knowledge base. However, you can delete and recreate it. See DeleteDataIntegration and CreateDataIntegration in the Amazon AppIntegrations API Reference."]
+module DeleteImportJobResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the quick response import job."]
+module DeleteImportJobRequest =
+  struct
+    type nonrec t =
+      {
+      importJobId: Uuid.t
+        [@ocaml.doc "The identifier of the import job to be deleted."];
+      knowledgeBaseId: UuidOrArn.t
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it."]}
+    let context_ = "DeleteImportJobRequest"
+    let make ~importJobId =
+      fun ~knowledgeBaseId -> fun () -> { importJobId; knowledgeBaseId }
+    let to_value x =
+      structure_to_value
+        [("importJobId", (Some (Uuid.to_value x.importJobId)));
+        ("knowledgeBaseId", (Some (UuidOrArn.to_value x.knowledgeBaseId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let knowledgeBaseId =
+        UuidOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+      let importJobId =
+        Uuid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "importJobId") in
+      make ~knowledgeBaseId ~importJobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let knowledgeBaseId =
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      let importJobId = field_map_exn json__ "importJobId" Uuid.of_json in
+      make ~knowledgeBaseId ~importJobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the quick response import job."]
 module DeleteContentResponse =
   struct
     type nonrec t = unit
@@ -5275,7 +8948,7 @@ module DeleteContentRequest =
           "The identifier of the content. Can be either the ID or the ARN. URLs cannot contain the ARN."];
       knowledgeBaseId: UuidOrArn.t
         [@ocaml.doc
-          "The the identifier of the knowledge base. Can be either the ID or the ARN. URLs cannot contain the ARN."]}
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."]}
     let context_ = "DeleteContentRequest"
     let make ~contentId =
       fun ~knowledgeBaseId -> fun () -> { contentId; knowledgeBaseId }
@@ -5293,10 +8966,10 @@ module DeleteContentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "contentId") in
       make ~knowledgeBaseId ~contentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let knowledgeBaseId =
-        field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
-      let contentId = field_map_exn json "contentId" UuidOrArn.of_json in
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      let contentId = field_map_exn json__ "contentId" UuidOrArn.of_json in
       make ~knowledgeBaseId ~contentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the content."]
@@ -5376,8 +9049,8 @@ module DeleteAssistantRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ~assistantId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
+    let of_json json__ =
+      let assistantId = field_map_exn json__ "assistantId" UuidOrArn.of_json in
       make ~assistantId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an assistant."]
@@ -5466,10 +9139,10 @@ module DeleteAssistantAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assistantAssociationId") in
       make ~assistantId ~assistantAssociationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
+    let of_json json__ =
+      let assistantId = field_map_exn json__ "assistantId" UuidOrArn.of_json in
       let assistantAssociationId =
-        field_map_exn json "assistantAssociationId" UuidOrArn.of_json in
+        field_map_exn json__ "assistantAssociationId" UuidOrArn.of_json in
       make ~assistantId ~assistantAssociationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an assistant association."]
@@ -5533,8 +9206,8 @@ module CreateSessionResponse =
         (Option.map ~f:SessionData.of_xml) (Xml.child xml_arg0 "session") in
       make ?session ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let session = field_map json "session" SessionData.of_json in
+    let of_json json__ =
+      let session = field_map json__ "session" SessionData.of_json in
       make ?session ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5548,7 +9221,7 @@ module CreateSessionRequest =
           "The identifier of the Wisdom assistant. Can be either the ID or the ARN. URLs cannot contain the ARN."];
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
       description: Description.t option [@ocaml.doc "The description."];
       name: Name.t [@ocaml.doc "The name of the session."];
       tags: Tags.t option
@@ -5582,16 +9255,248 @@ module CreateSessionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ?tags ~name ?description ?clientToken ~assistantId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let description = field_map json "description" Description.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let assistantId = field_map_exn json__ "assistantId" UuidOrArn.of_json in
       make ?tags ~name ?description ?clientToken ~assistantId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a session. A session is a contextual container used for generating recommendations. Amazon Connect creates a new Wisdom session for each contact on which Wisdom is enabled."]
+module CreateQuickResponseResponse =
+  struct
+    type nonrec t =
+      {
+      quickResponse: QuickResponseData.t option
+        [@ocaml.doc "The quick response."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?quickResponse = fun () -> { quickResponse }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("quickResponse",
+           (Option.map x.quickResponse ~f:QuickResponseData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quickResponse =
+        (Option.map ~f:QuickResponseData.of_xml)
+          (Xml.child xml_arg0 "quickResponse") in
+      make ?quickResponse ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quickResponse =
+        field_map json__ "quickResponse" QuickResponseData.of_json in
+      make ?quickResponse ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a Wisdom quick response."]
+module CreateQuickResponseRequest =
+  struct
+    type nonrec t =
+      {
+      channels: Channels.t option
+        [@ocaml.doc
+          "The Amazon Connect channels this quick response applies to."];
+      clientToken: NonEmptyString.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
+      content: QuickResponseDataProvider.t
+        [@ocaml.doc "The content of the quick response."];
+      contentType: QuickResponseType.t option
+        [@ocaml.doc
+          "The media type of the quick response content. Use application/x.quickresponse;format=plain for a quick response written in plain text. Use application/x.quickresponse;format=markdown for a quick response written in richtext."];
+      description: QuickResponseDescription.t option
+        [@ocaml.doc "The description of the quick response."];
+      groupingConfiguration: GroupingConfiguration.t option
+        [@ocaml.doc
+          "The configuration information of the user groups that the quick response is accessible to."];
+      isActive: Boolean.t option
+        [@ocaml.doc "Whether the quick response is active."];
+      knowledgeBaseId: UuidOrArn.t
+        [@ocaml.doc
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."];
+      language: LanguageCode.t option
+        [@ocaml.doc
+          "The language code value for the language in which the quick response is written. The supported language codes include de_DE, en_US, es_ES, fr_FR, id_ID, it_IT, ja_JP, ko_KR, pt_BR, zh_CN, zh_TW"];
+      name: QuickResponseName.t
+        [@ocaml.doc "The name of the quick response."];
+      shortcutKey: ShortCutKey.t option
+        [@ocaml.doc
+          "The shortcut key of the quick response. The value should be unique across the knowledge base."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "The tags used to organize, track, or control access for this resource."]}
+    let context_ = "CreateQuickResponseRequest"
+    let make ?channels =
+      fun ?clientToken ->
+        fun ?contentType ->
+          fun ?description ->
+            fun ?groupingConfiguration ->
+              fun ?isActive ->
+                fun ?language ->
+                  fun ?shortcutKey ->
+                    fun ?tags ->
+                      fun ~content ->
+                        fun ~knowledgeBaseId ->
+                          fun ~name ->
+                            fun () ->
+                              {
+                                channels;
+                                clientToken;
+                                contentType;
+                                description;
+                                groupingConfiguration;
+                                isActive;
+                                language;
+                                shortcutKey;
+                                tags;
+                                content;
+                                knowledgeBaseId;
+                                name
+                              }
+    let to_value x =
+      structure_to_value
+        [("channels", (Option.map x.channels ~f:Channels.to_value));
+        ("clientToken",
+          (Option.map x.clientToken ~f:NonEmptyString.to_value));
+        ("content", (Some (QuickResponseDataProvider.to_value x.content)));
+        ("contentType",
+          (Option.map x.contentType ~f:QuickResponseType.to_value));
+        ("description",
+          (Option.map x.description ~f:QuickResponseDescription.to_value));
+        ("groupingConfiguration",
+          (Option.map x.groupingConfiguration
+             ~f:GroupingConfiguration.to_value));
+        ("isActive", (Option.map x.isActive ~f:Boolean.to_value));
+        ("knowledgeBaseId", (Some (UuidOrArn.to_value x.knowledgeBaseId)));
+        ("language", (Option.map x.language ~f:LanguageCode.to_value));
+        ("name", (Some (QuickResponseName.to_value x.name)));
+        ("shortcutKey", (Option.map x.shortcutKey ~f:ShortCutKey.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let shortcutKey =
+        (Option.map ~f:ShortCutKey.of_xml) (Xml.child xml_arg0 "shortcutKey") in
+      let name =
+        QuickResponseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let language =
+        (Option.map ~f:LanguageCode.of_xml) (Xml.child xml_arg0 "language") in
+      let knowledgeBaseId =
+        UuidOrArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "knowledgeBaseId") in
+      let isActive =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isActive") in
+      let groupingConfiguration =
+        (Option.map ~f:GroupingConfiguration.of_xml)
+          (Xml.child xml_arg0 "groupingConfiguration") in
+      let description =
+        (Option.map ~f:QuickResponseDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let contentType =
+        (Option.map ~f:QuickResponseType.of_xml)
+          (Xml.child xml_arg0 "contentType") in
+      let content =
+        QuickResponseDataProvider.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "content") in
+      let clientToken =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let channels =
+        (Option.map ~f:Channels.of_xml) (Xml.child xml_arg0 "channels") in
+      make ?tags ?shortcutKey ~name ?language ~knowledgeBaseId ?isActive
+        ?groupingConfiguration ?description ?contentType ~content
+        ?clientToken ?channels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let shortcutKey = field_map json__ "shortcutKey" ShortCutKey.of_json in
+      let name = field_map_exn json__ "name" QuickResponseName.of_json in
+      let language = field_map json__ "language" LanguageCode.of_json in
+      let knowledgeBaseId =
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      let isActive = field_map json__ "isActive" Boolean.of_json in
+      let groupingConfiguration =
+        field_map json__ "groupingConfiguration"
+          GroupingConfiguration.of_json in
+      let description =
+        field_map json__ "description" QuickResponseDescription.of_json in
+      let contentType =
+        field_map json__ "contentType" QuickResponseType.of_json in
+      let content =
+        field_map_exn json__ "content" QuickResponseDataProvider.of_json in
+      let clientToken = field_map json__ "clientToken" NonEmptyString.of_json in
+      let channels = field_map json__ "channels" Channels.of_json in
+      make ?tags ?shortcutKey ~name ?language ~knowledgeBaseId ?isActive
+        ?groupingConfiguration ?description ?contentType ~content
+        ?clientToken ?channels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a Wisdom quick response."]
 module CreateKnowledgeBaseResponse =
   struct
     type nonrec t =
@@ -5666,20 +9571,20 @@ module CreateKnowledgeBaseResponse =
           (Xml.child xml_arg0 "knowledgeBase") in
       make ?knowledgeBase ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let knowledgeBase =
-        field_map json "knowledgeBase" KnowledgeBaseData.of_json in
+        field_map json__ "knowledgeBase" KnowledgeBaseData.of_json in
       make ?knowledgeBase ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a knowledge base. When using this API, you cannot reuse Amazon AppIntegrations DataIntegrations with external knowledge bases such as Salesforce and ServiceNow. If you do, you'll get an InvalidRequestException error. <p>For example, you're programmatically managing your external knowledge base, and you want to add or remove one of the fields that is being ingested from Salesforce. Do the following:</p> <ol> <li> <p>Call <a href=\"https://docs.aws.amazon.com/wisdom/latest/APIReference/API_DeleteKnowledgeBase.html\">DeleteKnowledgeBase</a>.</p> </li> <li> <p>Call <a href=\"https://docs.aws.amazon.com/appintegrations/latest/APIReference/API_DeleteDataIntegration.html\">DeleteDataIntegration</a>.</p> </li> <li> <p>Call <a href=\"https://docs.aws.amazon.com/appintegrations/latest/APIReference/API_CreateDataIntegration.html\">CreateDataIntegration</a> to recreate the DataIntegration or a create different one.</p> </li> <li> <p>Call CreateKnowledgeBase.</p> </li> </ol> </note>"]
+       "Creates a knowledge base. When using this API, you cannot reuse Amazon AppIntegrations DataIntegrations with external knowledge bases such as Salesforce and ServiceNow. If you do, you'll get an InvalidRequestException error. For example, you're programmatically managing your external knowledge base, and you want to add or remove one of the fields that is being ingested from Salesforce. Do the following: Call DeleteKnowledgeBase. Call DeleteDataIntegration. Call CreateDataIntegration to recreate the DataIntegration or a create different one. Call CreateKnowledgeBase."]
 module CreateKnowledgeBaseRequest =
   struct
     type nonrec t =
       {
       clientToken: NonEmptyString.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
       description: Description.t option [@ocaml.doc "The description."];
       knowledgeBaseType: KnowledgeBaseType.t
         [@ocaml.doc
@@ -5689,7 +9594,8 @@ module CreateKnowledgeBaseRequest =
         [@ocaml.doc "Information about how to render the content."];
       serverSideEncryptionConfiguration:
         ServerSideEncryptionConfiguration.t option
-        [@ocaml.doc "The KMS key used for encryption."];
+        [@ocaml.doc
+          "The configuration information for the customer managed key used for encryption. This KMS key must have a policy that allows kms:CreateGrant, kms:DescribeKey, and kms:Decrypt/kms:GenerateDataKey permissions to the IAM identity using the key to invoke Wisdom. For more information about setting up a customer managed key for Wisdom, see Enable Amazon Connect Wisdom for your instance."];
       sourceConfiguration: SourceConfiguration.t option
         [@ocaml.doc
           "The source of the knowledge base content. Only set this argument for EXTERNAL knowledge bases."];
@@ -5759,27 +9665,27 @@ module CreateKnowledgeBaseRequest =
         ?renderingConfiguration ~name ~knowledgeBaseType ?description
         ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
       let sourceConfiguration =
-        field_map json "sourceConfiguration" SourceConfiguration.of_json in
+        field_map json__ "sourceConfiguration" SourceConfiguration.of_json in
       let serverSideEncryptionConfiguration =
-        field_map json "serverSideEncryptionConfiguration"
+        field_map json__ "serverSideEncryptionConfiguration"
           ServerSideEncryptionConfiguration.of_json in
       let renderingConfiguration =
-        field_map json "renderingConfiguration"
+        field_map json__ "renderingConfiguration"
           RenderingConfiguration.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       let knowledgeBaseType =
-        field_map_exn json "knowledgeBaseType" KnowledgeBaseType.of_json in
-      let description = field_map json "description" Description.of_json in
-      let clientToken = field_map json "clientToken" NonEmptyString.of_json in
+        field_map_exn json__ "knowledgeBaseType" KnowledgeBaseType.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let clientToken = field_map json__ "clientToken" NonEmptyString.of_json in
       make ?tags ?sourceConfiguration ?serverSideEncryptionConfiguration
         ?renderingConfiguration ~name ~knowledgeBaseType ?description
         ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a knowledge base. When using this API, you cannot reuse Amazon AppIntegrations DataIntegrations with external knowledge bases such as Salesforce and ServiceNow. If you do, you'll get an InvalidRequestException error. <p>For example, you're programmatically managing your external knowledge base, and you want to add or remove one of the fields that is being ingested from Salesforce. Do the following:</p> <ol> <li> <p>Call <a href=\"https://docs.aws.amazon.com/wisdom/latest/APIReference/API_DeleteKnowledgeBase.html\">DeleteKnowledgeBase</a>.</p> </li> <li> <p>Call <a href=\"https://docs.aws.amazon.com/appintegrations/latest/APIReference/API_DeleteDataIntegration.html\">DeleteDataIntegration</a>.</p> </li> <li> <p>Call <a href=\"https://docs.aws.amazon.com/appintegrations/latest/APIReference/API_CreateDataIntegration.html\">CreateDataIntegration</a> to recreate the DataIntegration or a create different one.</p> </li> <li> <p>Call CreateKnowledgeBase.</p> </li> </ol> </note>"]
+       "Creates a knowledge base. When using this API, you cannot reuse Amazon AppIntegrations DataIntegrations with external knowledge bases such as Salesforce and ServiceNow. If you do, you'll get an InvalidRequestException error. For example, you're programmatically managing your external knowledge base, and you want to add or remove one of the fields that is being ingested from Salesforce. Do the following: Call DeleteKnowledgeBase. Call DeleteDataIntegration. Call CreateDataIntegration to recreate the DataIntegration or a create different one. Call CreateKnowledgeBase."]
 module CreateContentResponse =
   struct
     type nonrec t =
@@ -5860,8 +9766,8 @@ module CreateContentResponse =
         (Option.map ~f:ContentData.of_xml) (Xml.child xml_arg0 "content") in
       make ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map json "content" ContentData.of_json in
+    let of_json json__ =
+      let content = field_map json__ "content" ContentData.of_json in
       make ?content ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5872,10 +9778,10 @@ module CreateContentRequest =
       {
       clientToken: NonEmptyString.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
       knowledgeBaseId: UuidOrArn.t
         [@ocaml.doc
-          "The the identifier of the knowledge base. Can be either the ID or the ARN. URLs cannot contain the ARN."];
+          "The identifier of the knowledge base. This should not be a QUICK_RESPONSES type knowledge base if you're storing Wisdom Content resource to it. Can be either the ID or the ARN. URLs cannot contain the ARN."];
       metadata: ContentMetadata.t option
         [@ocaml.doc
           "A key/value map to store attributes without affecting tagging or recommendations. For example, when synchronizing data between an external system and Wisdom, you can store an external version identifier as metadata to utilize for determining drift."];
@@ -5891,7 +9797,7 @@ module CreateContentRequest =
       title: ContentTitle.t option
         [@ocaml.doc
           "The title of the content. If not set, the title is equal to the name."];
-      uploadId: NonEmptyString.t
+      uploadId: UploadId.t
         [@ocaml.doc
           "A pointer to the uploaded asset. This value is returned by StartContentUpload."]}
     let context_ = "CreateContentRequest"
@@ -5925,12 +9831,11 @@ module CreateContentRequest =
           (Option.map x.overrideLinkOutUri ~f:Uri_.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value));
         ("title", (Option.map x.title ~f:ContentTitle.to_value));
-        ("uploadId", (Some (NonEmptyString.to_value x.uploadId)))]
+        ("uploadId", (Some (UploadId.to_value x.uploadId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let uploadId =
-        NonEmptyString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "uploadId") in
+        UploadId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "uploadId") in
       let title =
         (Option.map ~f:ContentTitle.of_xml) (Xml.child xml_arg0 "title") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
@@ -5950,17 +9855,17 @@ module CreateContentRequest =
       make ~uploadId ?title ?tags ?overrideLinkOutUri ~name ?metadata
         ~knowledgeBaseId ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uploadId = field_map_exn json "uploadId" NonEmptyString.of_json in
-      let title = field_map json "title" ContentTitle.of_json in
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let uploadId = field_map_exn json__ "uploadId" UploadId.of_json in
+      let title = field_map json__ "title" ContentTitle.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
       let overrideLinkOutUri =
-        field_map json "overrideLinkOutUri" Uri_.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let metadata = field_map json "metadata" ContentMetadata.of_json in
+        field_map json__ "overrideLinkOutUri" Uri_.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
+      let metadata = field_map json__ "metadata" ContentMetadata.of_json in
       let knowledgeBaseId =
-        field_map_exn json "knowledgeBaseId" UuidOrArn.of_json in
-      let clientToken = field_map json "clientToken" NonEmptyString.of_json in
+        field_map_exn json__ "knowledgeBaseId" UuidOrArn.of_json in
+      let clientToken = field_map json__ "clientToken" NonEmptyString.of_json in
       make ~uploadId ?title ?tags ?overrideLinkOutUri ~name ?metadata
         ~knowledgeBaseId ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -6038,8 +9943,8 @@ module CreateAssistantResponse =
         (Option.map ~f:AssistantData.of_xml) (Xml.child xml_arg0 "assistant") in
       make ?assistant ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assistant = field_map json "assistant" AssistantData.of_json in
+    let of_json json__ =
+      let assistant = field_map json__ "assistant" AssistantData.of_json in
       make ?assistant ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an Amazon Connect Wisdom assistant."]
@@ -6049,13 +9954,14 @@ module CreateAssistantRequest =
       {
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
       description: Description.t option
         [@ocaml.doc "The description of the assistant."];
       name: Name.t [@ocaml.doc "The name of the assistant."];
       serverSideEncryptionConfiguration:
         ServerSideEncryptionConfiguration.t option
-        [@ocaml.doc "The KMS key used for encryption."];
+        [@ocaml.doc
+          "The configuration information for the customer managed key used for encryption. The customer managed key must have a policy that allows kms:CreateGrant, kms:DescribeKey, and kms:Decrypt/kms:GenerateDataKey permissions to the IAM identity using the key to invoke Wisdom. To use Wisdom with chat, the key policy must also allow kms:Decrypt, kms:GenerateDataKey*, and kms:DescribeKey permissions to the connect.amazonaws.com service principal. For more information about setting up a customer managed key for Wisdom, see Enable Amazon Connect Wisdom for your instance."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags used to organize, track, or control access for this resource."];
@@ -6104,15 +10010,15 @@ module CreateAssistantRequest =
       make ~type_ ?tags ?serverSideEncryptionConfiguration ~name ?description
         ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" AssistantType.of_json in
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" AssistantType.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
       let serverSideEncryptionConfiguration =
-        field_map json "serverSideEncryptionConfiguration"
+        field_map json__ "serverSideEncryptionConfiguration"
           ServerSideEncryptionConfiguration.of_json in
-      let name = field_map_exn json "name" Name.of_json in
-      let description = field_map json "description" Description.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       make ~type_ ?tags ?serverSideEncryptionConfiguration ~name ?description
         ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -6201,9 +10107,9 @@ module CreateAssistantAssociationResponse =
           (Xml.child xml_arg0 "assistantAssociation") in
       make ?assistantAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assistantAssociation =
-        field_map json "assistantAssociation"
+        field_map json__ "assistantAssociation"
           AssistantAssociationData.of_json in
       make ?assistantAssociation ()
     let to_json v = composed_to_json to_value v
@@ -6222,7 +10128,7 @@ module CreateAssistantAssociationRequest =
         [@ocaml.doc "The type of association."];
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
       tags: Tags.t option
         [@ocaml.doc
           "The tags used to organize, track, or control access for this resource."]}
@@ -6265,15 +10171,15 @@ module CreateAssistantAssociationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "assistantId") in
       make ?tags ?clientToken ~associationType ~association ~assistantId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let associationType =
-        field_map_exn json "associationType" AssociationType.of_json in
+        field_map_exn json__ "associationType" AssociationType.of_json in
       let association =
-        field_map_exn json "association"
+        field_map_exn json__ "association"
           AssistantAssociationInputData.of_json in
-      let assistantId = field_map_exn json "assistantId" UuidOrArn.of_json in
+      let assistantId = field_map_exn json__ "assistantId" UuidOrArn.of_json in
       make ?tags ?clientToken ~associationType ~association ~assistantId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

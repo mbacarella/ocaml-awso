@@ -24,6 +24,69 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module ChoiceId =
+  struct
+    type nonrec t = string[@@ocaml.doc "The ID of a choice."]
+    let context_ = "ChoiceId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ChoiceId" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The ID of a choice."]
+module ChoiceTitle =
+  struct
+    type nonrec t = string[@@ocaml.doc "The title of a choice."]
+    let context_ = "ChoiceTitle"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ChoiceTitle" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The title of a choice."]
+module BestPractice =
+  struct
+    type nonrec t =
+      {
+      choiceId: ChoiceId.t option ;
+      choiceTitle: ChoiceTitle.t option }
+    let make ?choiceId =
+      fun ?choiceTitle -> fun () -> { choiceId; choiceTitle }
+    let to_value x =
+      structure_to_value
+        [("ChoiceId", (Option.map x.choiceId ~f:ChoiceId.to_value));
+        ("ChoiceTitle", (Option.map x.choiceTitle ~f:ChoiceTitle.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let choiceTitle =
+        (Option.map ~f:ChoiceTitle.of_xml) (Xml.child xml_arg0 "ChoiceTitle") in
+      let choiceId =
+        (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
+      make ?choiceTitle ?choiceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let choiceTitle = field_map json__ "ChoiceTitle" ChoiceTitle.of_json in
+      let choiceId = field_map json__ "ChoiceId" ChoiceId.of_json in
+      make ?choiceTitle ?choiceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A best practice, or question choice, that has been identified as a risk in this question."]
 module ChoiceContentDisplayText =
   struct
     type nonrec t = string
@@ -60,33 +123,32 @@ module ChoiceContentUrl =
     let of_json j = string_of_json ~kind:"ChoiceContentUrl" j
     let to_json = simple_to_json to_value
   end
-module DifferenceStatus =
+module BestPractices =
   struct
-    type nonrec t =
-      | UPDATED 
-      | NEW 
-      | DELETED 
-      | Non_static_id of string 
+    type nonrec t = BestPractice.t list
     let make i = i
-    let to_string =
-      function
-      | UPDATED -> "UPDATED"
-      | NEW -> "NEW"
-      | DELETED -> "DELETED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "UPDATED" -> UPDATED
-      | "NEW" -> NEW
-      | "DELETED" -> DELETED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BestPractice.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration DifferenceStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"DifferenceStatus" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BestPractice.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BestPractices" ~of_json:BestPractice.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module QuestionId =
   struct
@@ -106,39 +168,6 @@ module QuestionId =
     let of_json j = string_of_json ~kind:"QuestionId" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "The ID of the question."]
-module QuestionTitle =
-  struct
-    type nonrec t = string[@@ocaml.doc "The title of the question."]
-    let context_ = "QuestionTitle"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:512) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"QuestionTitle" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The title of the question."]
-module Count =
-  struct
-    type nonrec t = int[@@ocaml.doc
-                         "A non-negative integer that denotes how many."]
-    let make i =
-      let open Result in ok_or_failwith (check_int_min i ~min:0); i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for Count" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc "A non-negative integer that denotes how many."]
 module Risk =
   struct
     type nonrec t =
@@ -173,71 +202,150 @@ module Risk =
     let of_json j = of_string (string_of_json ~kind:"Risk" j)
     let to_json = simple_to_json to_value
   end
-module LensAlias =
+module ChoiceContent =
   struct
-    type nonrec t = string[@@ocaml.doc
-                            "The alias of the lens, for example, serverless. Each lens is identified by its LensSummary$LensAlias."]
-    let context_ = "LensAlias"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:128) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      displayText: ChoiceContentDisplayText.t option
+        [@ocaml.doc "The display text for the choice content."];
+      url: ChoiceContentUrl.t option
+        [@ocaml.doc "The URL for the choice content."]}
+    let make ?displayText = fun ?url -> fun () -> { displayText; url }
+    let to_value x =
+      structure_to_value
+        [("DisplayText",
+           (Option.map x.displayText ~f:ChoiceContentDisplayText.to_value));
+        ("Url", (Option.map x.url ~f:ChoiceContentUrl.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"LensAlias" j
+    let of_xml xml_arg0 =
+      let url =
+        (Option.map ~f:ChoiceContentUrl.of_xml) (Xml.child xml_arg0 "Url") in
+      let displayText =
+        (Option.map ~f:ChoiceContentDisplayText.of_xml)
+          (Xml.child xml_arg0 "DisplayText") in
+      make ?url ?displayText ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let url = field_map json__ "Url" ChoiceContentUrl.of_json in
+      let displayText =
+        field_map json__ "DisplayText" ChoiceContentDisplayText.of_json in
+      make ?url ?displayText ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The choice content."]
+module QuestionMetric =
+  struct
+    type nonrec t =
+      {
+      questionId: QuestionId.t option ;
+      risk: Risk.t option ;
+      bestPractices: BestPractices.t option
+        [@ocaml.doc
+          "The best practices, or choices, that have been identified as contributing to risk in a question."]}
+    let make ?questionId =
+      fun ?risk ->
+        fun ?bestPractices -> fun () -> { questionId; risk; bestPractices }
+    let to_value x =
+      structure_to_value
+        [("QuestionId", (Option.map x.questionId ~f:QuestionId.to_value));
+        ("Risk", (Option.map x.risk ~f:Risk.to_value));
+        ("BestPractices",
+          (Option.map x.bestPractices ~f:BestPractices.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bestPractices =
+        (Option.map ~f:BestPractices.of_xml)
+          (Xml.child xml_arg0 "BestPractices") in
+      let risk = (Option.map ~f:Risk.of_xml) (Xml.child xml_arg0 "Risk") in
+      let questionId =
+        (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
+      make ?bestPractices ?risk ?questionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bestPractices =
+        field_map json__ "BestPractices" BestPractices.of_json in
+      let risk = field_map json__ "Risk" Risk.of_json in
+      let questionId = field_map json__ "QuestionId" QuestionId.of_json in
+      make ?bestPractices ?risk ?questionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A metric for a particular question in the pillar."]
+module Count =
+  struct
+    type nonrec t = int[@@ocaml.doc
+                         "A non-negative integer that denotes how many."]
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Count" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "The alias of the lens, for example, serverless. Each lens is identified by its LensSummary$LensAlias."]
-module ChoiceId =
+  end[@@ocaml.doc "A non-negative integer that denotes how many."]
+module AdditionalResourceType =
   struct
-    type nonrec t = string[@@ocaml.doc "The ID of a choice."]
-    let context_ = "ChoiceId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:64) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | HELPFUL_RESOURCE 
+      | IMPROVEMENT_PLAN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HELPFUL_RESOURCE -> "HELPFUL_RESOURCE"
+      | IMPROVEMENT_PLAN -> "IMPROVEMENT_PLAN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HELPFUL_RESOURCE" -> HELPFUL_RESOURCE
+      | "IMPROVEMENT_PLAN" -> IMPROVEMENT_PLAN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ChoiceId" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The ID of a choice."]
-module DisplayText =
-  struct
-    type nonrec t = string
-    let context_ = "DisplayText"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:64) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DisplayText" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AdditionalResourceType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AdditionalResourceType" j)
     let to_json = simple_to_json to_value
   end
-module ImprovementPlanUrl =
+module Urls =
+  struct
+    type nonrec t = ChoiceContent.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ChoiceContent.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ChoiceContent.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Urls" ~of_json:ChoiceContent.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PillarId =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "The improvement plan URL for a question. This value is only available if the question has been answered."]
-    let context_ = "ImprovementPlanUrl"
+                            "The ID used to identify a pillar, for example, security. A pillar is identified by its PillarReviewSummary$PillarId."]
+    let context_ = "PillarId"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
+          ((check_string_max i ~max:64) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -245,10 +353,336 @@ module ImprovementPlanUrl =
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ImprovementPlanUrl" j
+    let of_json j = string_of_json ~kind:"PillarId" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "The improvement plan URL for a question. This value is only available if the question has been answered."]
+       "The ID used to identify a pillar, for example, security. A pillar is identified by its PillarReviewSummary$PillarId."]
+module QuestionMetrics =
+  struct
+    type nonrec t = QuestionMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QuestionMetric.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QuestionMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QuestionMetrics" ~of_json:QuestionMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RiskCounts =
+  struct
+    type nonrec t = (Risk.t * Count.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((Risk.of_string chopped), (Count.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (Risk.to_value x) |>
+                    (fun x -> (Count.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:Risk.of_string ~of_json:Count.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ChoiceDescription =
+  struct
+    type nonrec t = string[@@ocaml.doc "The description of a choice."]
+    let context_ = "ChoiceDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ChoiceDescription" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The description of a choice."]
+module SelectedQuestionId =
+  struct
+    type nonrec t = string
+    let context_ = "SelectedQuestionId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SelectedQuestionId" j
+    let to_json = simple_to_json to_value
+  end
+module AdditionalResources =
+  struct
+    type nonrec t =
+      {
+      type_: AdditionalResourceType.t option
+        [@ocaml.doc "Type of additional resource for a custom lens."];
+      content: Urls.t option
+        [@ocaml.doc
+          "The URLs for additional resources, either helpful resources or improvement plans, for a custom lens. Up to five additional URLs can be specified."]}
+    let make ?type_ = fun ?content -> fun () -> { type_; content }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:AdditionalResourceType.to_value));
+        ("Content", (Option.map x.content ~f:Urls.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let content =
+        (Option.map ~f:Urls.of_xml) (Xml.child xml_arg0 "Content") in
+      let type_ =
+        (Option.map ~f:AdditionalResourceType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      make ?content ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let content = field_map json__ "Content" Urls.of_json in
+      let type_ = field_map json__ "Type" AdditionalResourceType.of_json in
+      make ?content ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The choice level additional resources for a custom lens. This field does not apply to Amazon Web Services official lenses."]
+module ProfileArn =
+  struct
+    type nonrec t = string
+    let context_ = "ProfileArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2084) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"arn:aws[-a-z]*:wellarchitected:[a-z]{2}(-gov)?-[a-z]+-\\d:\\d{12}:profile/[a-z0-9]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProfileArn" j
+    let to_json = simple_to_json to_value
+  end
+module ProfileVersion =
+  struct
+    type nonrec t = string
+    let context_ = "ProfileVersion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:"^[A-Za-z0-9-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProfileVersion" j
+    let to_json = simple_to_json to_value
+  end
+module DifferenceStatus =
+  struct
+    type nonrec t =
+      | UPDATED 
+      | NEW 
+      | DELETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UPDATED -> "UPDATED"
+      | NEW -> "NEW"
+      | DELETED -> "DELETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UPDATED" -> UPDATED
+      | "NEW" -> NEW
+      | "DELETED" -> DELETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DifferenceStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DifferenceStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module QuestionTitle =
+  struct
+    type nonrec t = string[@@ocaml.doc "The title of the question."]
+    let context_ = "QuestionTitle"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QuestionTitle" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The title of the question."]
+module PillarMetric =
+  struct
+    type nonrec t =
+      {
+      pillarId: PillarId.t option ;
+      riskCounts: RiskCounts.t option ;
+      questions: QuestionMetrics.t option
+        [@ocaml.doc
+          "The questions that have been identified as risks in the pillar."]}
+    let make ?pillarId =
+      fun ?riskCounts ->
+        fun ?questions -> fun () -> { pillarId; riskCounts; questions }
+    let to_value x =
+      structure_to_value
+        [("PillarId", (Option.map x.pillarId ~f:PillarId.to_value));
+        ("RiskCounts", (Option.map x.riskCounts ~f:RiskCounts.to_value));
+        ("Questions", (Option.map x.questions ~f:QuestionMetrics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let questions =
+        (Option.map ~f:QuestionMetrics.of_xml)
+          (Xml.child xml_arg0 "Questions") in
+      let riskCounts =
+        (Option.map ~f:RiskCounts.of_xml) (Xml.child xml_arg0 "RiskCounts") in
+      let pillarId =
+        (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
+      make ?questions ?riskCounts ?pillarId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let questions = field_map json__ "Questions" QuestionMetrics.of_json in
+      let riskCounts = field_map json__ "RiskCounts" RiskCounts.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      make ?questions ?riskCounts ?pillarId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A metric for a particular pillar in a lens."]
+module Question =
+  struct
+    type nonrec t =
+      | UNANSWERED 
+      | ANSWERED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UNANSWERED -> "UNANSWERED"
+      | ANSWERED -> "ANSWERED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UNANSWERED" -> UNANSWERED
+      | "ANSWERED" -> ANSWERED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Question" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Question" j)
+    let to_json = simple_to_json to_value
+  end
+module ProfileChoice =
+  struct
+    type nonrec t =
+      {
+      choiceId: ChoiceId.t option ;
+      choiceTitle: ChoiceTitle.t option ;
+      choiceDescription: ChoiceDescription.t option }
+    let make ?choiceId =
+      fun ?choiceTitle ->
+        fun ?choiceDescription ->
+          fun () -> { choiceId; choiceTitle; choiceDescription }
+    let to_value x =
+      structure_to_value
+        [("ChoiceId", (Option.map x.choiceId ~f:ChoiceId.to_value));
+        ("ChoiceTitle", (Option.map x.choiceTitle ~f:ChoiceTitle.to_value));
+        ("ChoiceDescription",
+          (Option.map x.choiceDescription ~f:ChoiceDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let choiceDescription =
+        (Option.map ~f:ChoiceDescription.of_xml)
+          (Xml.child xml_arg0 "ChoiceDescription") in
+      let choiceTitle =
+        (Option.map ~f:ChoiceTitle.of_xml) (Xml.child xml_arg0 "ChoiceTitle") in
+      let choiceId =
+        (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
+      make ?choiceDescription ?choiceTitle ?choiceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let choiceDescription =
+        field_map json__ "ChoiceDescription" ChoiceDescription.of_json in
+      let choiceTitle = field_map json__ "ChoiceTitle" ChoiceTitle.of_json in
+      let choiceId = field_map json__ "ChoiceId" ChoiceId.of_json in
+      make ?choiceDescription ?choiceTitle ?choiceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The profile choice."]
+module SelectedQuestionIds =
+  struct
+    type nonrec t = SelectedQuestionId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SelectedQuestionId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SelectedQuestionId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SelectedQuestionIds"
+        ~of_json:SelectedQuestionId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ChoiceReason =
   struct
     type nonrec t =
@@ -311,44 +745,93 @@ module ChoiceStatus =
     let of_json j = of_string (string_of_json ~kind:"ChoiceStatus" j)
     let to_json = simple_to_json to_value
   end
-module ChoiceContent =
+module AdditionalResourcesList =
+  struct
+    type nonrec t = AdditionalResources.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AdditionalResources.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AdditionalResources.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AdditionalResourcesList"
+        ~of_json:AdditionalResources.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LensAlias =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The alias of the lens. For Amazon Web Services official lenses, this is either the lens alias, such as serverless, or the lens ARN, such as arn:aws:wellarchitected:us-east-1::lens/serverless. Note that some operations (such as ExportLens and CreateLensShare) are not permitted on Amazon Web Services official lenses. For custom lenses, this is the lens ARN, such as arn:aws:wellarchitected:us-west-2:123456789012:lens/0123456789abcdef01234567890abcdef. Each lens is identified by its LensSummary$LensAlias."]
+    let context_ = "LensAlias"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LensAlias" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The alias of the lens. For Amazon Web Services official lenses, this is either the lens alias, such as serverless, or the lens ARN, such as arn:aws:wellarchitected:us-east-1::lens/serverless. Note that some operations (such as ExportLens and CreateLensShare) are not permitted on Amazon Web Services official lenses. For custom lenses, this is the lens ARN, such as arn:aws:wellarchitected:us-west-2:123456789012:lens/0123456789abcdef01234567890abcdef. Each lens is identified by its LensSummary$LensAlias."]
+module WorkloadProfile =
   struct
     type nonrec t =
       {
-      displayText: ChoiceContentDisplayText.t option
-        [@ocaml.doc "The display text for the choice content."];
-      url: ChoiceContentUrl.t option
-        [@ocaml.doc "The URL for the choice content."]}
-    let make ?displayText = fun ?url -> fun () -> { displayText; url }
+      profileArn: ProfileArn.t option [@ocaml.doc "The profile ARN."];
+      profileVersion: ProfileVersion.t option
+        [@ocaml.doc "The profile version."]}
+    let make ?profileArn =
+      fun ?profileVersion -> fun () -> { profileArn; profileVersion }
     let to_value x =
       structure_to_value
-        [("DisplayText",
-           (Option.map x.displayText ~f:ChoiceContentDisplayText.to_value));
-        ("Url", (Option.map x.url ~f:ChoiceContentUrl.to_value))]
+        [("ProfileArn", (Option.map x.profileArn ~f:ProfileArn.to_value));
+        ("ProfileVersion",
+          (Option.map x.profileVersion ~f:ProfileVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let url =
-        (Option.map ~f:ChoiceContentUrl.of_xml) (Xml.child xml_arg0 "Url") in
-      let displayText =
-        (Option.map ~f:ChoiceContentDisplayText.of_xml)
-          (Xml.child xml_arg0 "DisplayText") in
-      make ?url ?displayText ()
+      let profileVersion =
+        (Option.map ~f:ProfileVersion.of_xml)
+          (Xml.child xml_arg0 "ProfileVersion") in
+      let profileArn =
+        (Option.map ~f:ProfileArn.of_xml) (Xml.child xml_arg0 "ProfileArn") in
+      make ?profileVersion ?profileArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map json "Url" ChoiceContentUrl.of_json in
-      let displayText =
-        field_map json "DisplayText" ChoiceContentDisplayText.of_json in
-      make ?url ?displayText ()
+    let of_json json__ =
+      let profileVersion =
+        field_map json__ "ProfileVersion" ProfileVersion.of_json in
+      let profileArn = field_map json__ "ProfileArn" ProfileArn.of_json in
+      make ?profileVersion ?profileArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The choice content."]
-module ChoiceDescription =
+  end[@@ocaml.doc "The profile associated with a workload."]
+module DisplayText =
   struct
-    type nonrec t = string[@@ocaml.doc "The description of a choice."]
-    let context_ = "ChoiceDescription"
+    type nonrec t = string
+    let context_ = "DisplayText"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
+          ((check_string_max i ~max:64) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -356,17 +839,18 @@ module ChoiceDescription =
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ChoiceDescription" j
+    let of_json j = string_of_json ~kind:"DisplayText" j
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The description of a choice."]
-module ChoiceTitle =
+  end
+module ImprovementPlanUrl =
   struct
-    type nonrec t = string[@@ocaml.doc "The title of a choice."]
-    let context_ = "ChoiceTitle"
+    type nonrec t = string[@@ocaml.doc
+                            "The improvement plan URL for a question in an Amazon Web Services official lenses. This value is only available if the question has been answered. This value does not apply to custom lenses."]
+    let context_ = "ImprovementPlanUrl"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:512) >>=
+          ((check_string_max i ~max:2048) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -374,9 +858,71 @@ module ChoiceTitle =
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ChoiceTitle" j
+    let of_json j = string_of_json ~kind:"ImprovementPlanUrl" j
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The title of a choice."]
+  end[@@ocaml.doc
+       "The improvement plan URL for a question in an Amazon Web Services official lenses. This value is only available if the question has been answered. This value does not apply to custom lenses."]
+module ProfileTemplateChoice =
+  struct
+    type nonrec t =
+      {
+      choiceId: ChoiceId.t option ;
+      choiceTitle: ChoiceTitle.t option ;
+      choiceDescription: ChoiceDescription.t option }
+    let make ?choiceId =
+      fun ?choiceTitle ->
+        fun ?choiceDescription ->
+          fun () -> { choiceId; choiceTitle; choiceDescription }
+    let to_value x =
+      structure_to_value
+        [("ChoiceId", (Option.map x.choiceId ~f:ChoiceId.to_value));
+        ("ChoiceTitle", (Option.map x.choiceTitle ~f:ChoiceTitle.to_value));
+        ("ChoiceDescription",
+          (Option.map x.choiceDescription ~f:ChoiceDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let choiceDescription =
+        (Option.map ~f:ChoiceDescription.of_xml)
+          (Xml.child xml_arg0 "ChoiceDescription") in
+      let choiceTitle =
+        (Option.map ~f:ChoiceTitle.of_xml) (Xml.child xml_arg0 "ChoiceTitle") in
+      let choiceId =
+        (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
+      make ?choiceDescription ?choiceTitle ?choiceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let choiceDescription =
+        field_map json__ "ChoiceDescription" ChoiceDescription.of_json in
+      let choiceTitle = field_map json__ "ChoiceTitle" ChoiceTitle.of_json in
+      let choiceId = field_map json__ "ChoiceId" ChoiceId.of_json in
+      make ?choiceDescription ?choiceTitle ?choiceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A profile template choice."]
+module DefinitionType =
+  struct
+    type nonrec t =
+      | WORKLOAD_METADATA 
+      | APP_REGISTRY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | WORKLOAD_METADATA -> "WORKLOAD_METADATA"
+      | APP_REGISTRY -> "APP_REGISTRY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "WORKLOAD_METADATA" -> WORKLOAD_METADATA
+      | "APP_REGISTRY" -> APP_REGISTRY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DefinitionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DefinitionType" j)
+    let to_json = simple_to_json to_value
+  end
 module QuestionDifference =
   struct
     type nonrec t =
@@ -408,15 +954,55 @@ module QuestionDifference =
         (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
       make ?differenceStatus ?questionTitle ?questionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let differenceStatus =
-        field_map json "DifferenceStatus" DifferenceStatus.of_json in
+        field_map json__ "DifferenceStatus" DifferenceStatus.of_json in
       let questionTitle =
-        field_map json "QuestionTitle" QuestionTitle.of_json in
-      let questionId = field_map json "QuestionId" QuestionId.of_json in
+        field_map json__ "QuestionTitle" QuestionTitle.of_json in
+      let questionId = field_map json__ "QuestionId" QuestionId.of_json in
       make ?differenceStatus ?questionTitle ?questionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A question difference return object."]
+module LensArn =
+  struct
+    type nonrec t = string
+    let context_ = "LensArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LensArn" j
+    let to_json = simple_to_json to_value
+  end
+module PillarMetrics =
+  struct
+    type nonrec t = PillarMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PillarMetric.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PillarMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PillarMetrics" ~of_json:PillarMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ExceptionMessage =
   struct
     type nonrec t = string[@@ocaml.doc "Description of the error."]
@@ -447,7 +1033,7 @@ module ValidationExceptionFieldName =
 module Notes =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "The notes associated with the workload."]
+                            "The notes associated with the workload. For a review template, these are the notes that will be associated with the workload when the template is applied."]
     let context_ = "Notes"
     let make i =
       let open Result in ok_or_failwith (check_string_max i ~max:2084); i
@@ -458,27 +1044,8 @@ module Notes =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Notes" j
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The notes associated with the workload."]
-module PillarId =
-  struct
-    type nonrec t = string[@@ocaml.doc
-                            "The ID used to identify a pillar, for example, security. A pillar is identified by its PillarReviewSummary$PillarId."]
-    let context_ = "PillarId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:64) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"PillarId" j
-    let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "The ID used to identify a pillar, for example, security. A pillar is identified by its PillarReviewSummary$PillarId."]
+       "The notes associated with the workload. For a review template, these are the notes that will be associated with the workload when the template is applied."]
 module PillarName =
   struct
     type nonrec t = string[@@ocaml.doc "The name of the pillar."]
@@ -497,9 +1064,9 @@ module PillarName =
     let of_json j = string_of_json ~kind:"PillarName" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "The name of the pillar."]
-module RiskCounts =
+module QuestionCounts =
   struct
-    type nonrec t = (Risk.t * Count.t) list
+    type nonrec t = (Question.t * Count.t) list
     let make i = i
     let of_header xs =
       make
@@ -508,19 +1075,23 @@ module RiskCounts =
                  (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
                    (Option.map
                       ~f:(fun chopped ->
-                            ((Risk.of_string chopped), (Count.of_string v))))))
+                            ((Question.of_string chopped),
+                              (Count.of_string v))))))
     let to_value xs =
       (xs |>
          (List.map
             ~f:(fun (x, y) ->
-                  (Risk.to_value x) |>
+                  (Question.to_value x) |>
                     (fun x -> (Count.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
-      object_of_json ~key_of_string:Risk.of_string ~of_json:Count.of_json j
+      object_of_json ~key_of_string:Question.of_string ~of_json:Count.of_json
+        j
     let to_json v = composed_to_json to_value v
   end
 module ChoiceNotes =
@@ -537,19 +1108,256 @@ module ChoiceNotes =
     let of_json j = string_of_json ~kind:"ChoiceNotes" j
     let to_json = simple_to_json to_value
   end
-module LensArn =
+module MaxSelectedProfileChoices =
   struct
-    type nonrec t = string
-    let context_ = "LensArn"
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxSelectedProfileChoices"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MinSelectedProfileChoices =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MinSelectedProfileChoices"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ProfileQuestionChoices =
+  struct
+    type nonrec t = ProfileChoice.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProfileChoice.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProfileChoice.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProfileQuestionChoices"
+        ~of_json:ProfileChoice.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module QuestionDescription =
+  struct
+    type nonrec t = string[@@ocaml.doc "The description of the question."]
+    let context_ = "QuestionDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"LensArn" j
+    let of_json j = string_of_json ~kind:"QuestionDescription" j
     let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The description of the question."]
+module SelectedChoiceIds =
+  struct
+    type nonrec t = ChoiceId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ChoiceId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ChoiceId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SelectedChoiceIds" ~of_json:ChoiceId.of_json j
+    let to_json v = composed_to_json to_value v
   end
+module SelectedPillar =
+  struct
+    type nonrec t =
+      {
+      pillarId: PillarId.t option ;
+      selectedQuestionIds: SelectedQuestionIds.t option
+        [@ocaml.doc "Selected question IDs in the selected pillar."]}
+    let make ?pillarId =
+      fun ?selectedQuestionIds -> fun () -> { pillarId; selectedQuestionIds }
+    let to_value x =
+      structure_to_value
+        [("PillarId", (Option.map x.pillarId ~f:PillarId.to_value));
+        ("SelectedQuestionIds",
+          (Option.map x.selectedQuestionIds ~f:SelectedQuestionIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let selectedQuestionIds =
+        (Option.map ~f:SelectedQuestionIds.of_xml)
+          (Xml.child xml_arg0 "SelectedQuestionIds") in
+      let pillarId =
+        (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
+      make ?selectedQuestionIds ?pillarId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let selectedQuestionIds =
+        field_map json__ "SelectedQuestionIds" SelectedQuestionIds.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      make ?selectedQuestionIds ?pillarId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The selected pillar."]
+module ChoiceAnswerSummary =
+  struct
+    type nonrec t =
+      {
+      choiceId: ChoiceId.t option ;
+      status: ChoiceStatus.t option [@ocaml.doc "The status of a choice."];
+      reason: ChoiceReason.t option
+        [@ocaml.doc
+          "The reason why a choice is non-applicable to a question in your workload."]}
+    let make ?choiceId =
+      fun ?status -> fun ?reason -> fun () -> { choiceId; status; reason }
+    let to_value x =
+      structure_to_value
+        [("ChoiceId", (Option.map x.choiceId ~f:ChoiceId.to_value));
+        ("Status", (Option.map x.status ~f:ChoiceStatus.to_value));
+        ("Reason", (Option.map x.reason ~f:ChoiceReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:ChoiceReason.of_xml) (Xml.child xml_arg0 "Reason") in
+      let status =
+        (Option.map ~f:ChoiceStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let choiceId =
+        (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
+      make ?reason ?status ?choiceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "Reason" ChoiceReason.of_json in
+      let status = field_map json__ "Status" ChoiceStatus.of_json in
+      let choiceId = field_map json__ "ChoiceId" ChoiceId.of_json in
+      make ?reason ?status ?choiceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A choice summary that has been answered on a question in your workload."]
+module Choice =
+  struct
+    type nonrec t =
+      {
+      choiceId: ChoiceId.t option ;
+      title: ChoiceTitle.t option ;
+      description: ChoiceDescription.t option ;
+      helpfulResource: ChoiceContent.t option
+        [@ocaml.doc
+          "The helpful resource (both text and URL) for a particular choice. This field only applies to custom lenses. Each choice can have only one helpful resource."];
+      improvementPlan: ChoiceContent.t option
+        [@ocaml.doc
+          "The improvement plan (both text and URL) for a particular choice. This field only applies to custom lenses. Each choice can have only one improvement plan."];
+      additionalResources: AdditionalResourcesList.t option
+        [@ocaml.doc
+          "The additional resources for a choice in a custom lens. A choice can have up to two additional resources: one of type HELPFUL_RESOURCE, one of type IMPROVEMENT_PLAN, or both."]}
+    let make ?choiceId =
+      fun ?title ->
+        fun ?description ->
+          fun ?helpfulResource ->
+            fun ?improvementPlan ->
+              fun ?additionalResources ->
+                fun () ->
+                  {
+                    choiceId;
+                    title;
+                    description;
+                    helpfulResource;
+                    improvementPlan;
+                    additionalResources
+                  }
+    let to_value x =
+      structure_to_value
+        [("ChoiceId", (Option.map x.choiceId ~f:ChoiceId.to_value));
+        ("Title", (Option.map x.title ~f:ChoiceTitle.to_value));
+        ("Description",
+          (Option.map x.description ~f:ChoiceDescription.to_value));
+        ("HelpfulResource",
+          (Option.map x.helpfulResource ~f:ChoiceContent.to_value));
+        ("ImprovementPlan",
+          (Option.map x.improvementPlan ~f:ChoiceContent.to_value));
+        ("AdditionalResources",
+          (Option.map x.additionalResources
+             ~f:AdditionalResourcesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let additionalResources =
+        (Option.map ~f:AdditionalResourcesList.of_xml)
+          (Xml.child xml_arg0 "AdditionalResources") in
+      let improvementPlan =
+        (Option.map ~f:ChoiceContent.of_xml)
+          (Xml.child xml_arg0 "ImprovementPlan") in
+      let helpfulResource =
+        (Option.map ~f:ChoiceContent.of_xml)
+          (Xml.child xml_arg0 "HelpfulResource") in
+      let description =
+        (Option.map ~f:ChoiceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let title =
+        (Option.map ~f:ChoiceTitle.of_xml) (Xml.child xml_arg0 "Title") in
+      let choiceId =
+        (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
+      make ?additionalResources ?improvementPlan ?helpfulResource
+        ?description ?title ?choiceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let additionalResources =
+        field_map json__ "AdditionalResources"
+          AdditionalResourcesList.of_json in
+      let improvementPlan =
+        field_map json__ "ImprovementPlan" ChoiceContent.of_json in
+      let helpfulResource =
+        field_map json__ "HelpfulResource" ChoiceContent.of_json in
+      let description =
+        field_map json__ "Description" ChoiceDescription.of_json in
+      let title = field_map json__ "Title" ChoiceTitle.of_json in
+      let choiceId = field_map json__ "ChoiceId" ChoiceId.of_json in
+      make ?additionalResources ?improvementPlan ?helpfulResource
+        ?description ?title ?choiceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A choice available to answer question."]
 module LensVersion =
   struct
     type nonrec t = string
@@ -568,6 +1376,28 @@ module LensVersion =
     let of_json j = string_of_json ~kind:"LensVersion" j
     let to_json = simple_to_json to_value
   end
+module ResourceArn =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:50) >>=
+             (fun () ->
+                (check_string_max i ~max:250) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws(-us-gov|-iso(-[a-z])?|-cn)?:wellarchitected:[a-z]{2}(-gov|-iso([a-z])?)?-[a-z]+-\\d:\\d{12}:(review-template)/[a-f0-9]{32}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceArn" j
+    let to_json = simple_to_json to_value
+  end
 module WorkloadId =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -575,7 +1405,12 @@ module WorkloadId =
     let context_ = "WorkloadId"
     let make i =
       let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"[0-9a-f]{32}"); i
+        ok_or_failwith
+          ((check_string_min i ~min:32) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9a-f]{32}")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -611,7 +1446,12 @@ module AwsAccountId =
     let context_ = "AwsAccountId"
     let make i =
       let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"[0-9]{12}"); i
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9]{12}")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -685,6 +1525,9 @@ module WorkloadLenses =
   struct
     type nonrec t = LensAlias.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LensAlias.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -703,6 +1546,35 @@ module WorkloadLenses =
                      | _ -> true))) ~f:LensAlias.of_xml)
     let of_json j =
       list_of_json ~kind:"WorkloadLenses" ~of_json:LensAlias.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WorkloadProfiles =
+  struct
+    type nonrec t = WorkloadProfile.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WorkloadProfile.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WorkloadProfile.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkloadProfiles" ~of_json:WorkloadProfile.of_json
+        j
     let to_json v = composed_to_json to_value v
   end
 module ChoiceImprovementPlan =
@@ -734,111 +1606,113 @@ module ChoiceImprovementPlan =
         (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
       make ?improvementPlanUrl ?displayText ?choiceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let improvementPlanUrl =
-        field_map json "ImprovementPlanUrl" ImprovementPlanUrl.of_json in
-      let displayText = field_map json "DisplayText" DisplayText.of_json in
-      let choiceId = field_map json "ChoiceId" ChoiceId.of_json in
+        field_map json__ "ImprovementPlanUrl" ImprovementPlanUrl.of_json in
+      let displayText = field_map json__ "DisplayText" DisplayText.of_json in
+      let choiceId = field_map json__ "ChoiceId" ChoiceId.of_json in
       make ?improvementPlanUrl ?displayText ?choiceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The choice level improvement plan."]
-module ChoiceAnswerSummary =
+module JiraIssueUrl =
+  struct
+    type nonrec t = string
+    let context_ = "JiraIssueUrl"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JiraIssueUrl" j
+    let to_json = simple_to_json to_value
+  end
+module CheckStatus =
   struct
     type nonrec t =
-      {
-      choiceId: ChoiceId.t option ;
-      status: ChoiceStatus.t option [@ocaml.doc "The status of a choice."];
-      reason: ChoiceReason.t option
-        [@ocaml.doc
-          "The reason why a choice is non-applicable to a question in your workload."]}
-    let make ?choiceId =
-      fun ?status -> fun ?reason -> fun () -> { choiceId; status; reason }
-    let to_value x =
-      structure_to_value
-        [("ChoiceId", (Option.map x.choiceId ~f:ChoiceId.to_value));
-        ("Status", (Option.map x.status ~f:ChoiceStatus.to_value));
-        ("Reason", (Option.map x.reason ~f:ChoiceReason.to_value))]
+      | OKAY 
+      | WARNING 
+      | ERROR 
+      | NOT_AVAILABLE 
+      | FETCH_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | OKAY -> "OKAY"
+      | WARNING -> "WARNING"
+      | ERROR -> "ERROR"
+      | NOT_AVAILABLE -> "NOT_AVAILABLE"
+      | FETCH_FAILED -> "FETCH_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "OKAY" -> OKAY
+      | "WARNING" -> WARNING
+      | "ERROR" -> ERROR
+      | "NOT_AVAILABLE" -> NOT_AVAILABLE
+      | "FETCH_FAILED" -> FETCH_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      let reason =
-        (Option.map ~f:ChoiceReason.of_xml) (Xml.child xml_arg0 "Reason") in
-      let status =
-        (Option.map ~f:ChoiceStatus.of_xml) (Xml.child xml_arg0 "Status") in
-      let choiceId =
-        (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
-      make ?reason ?status ?choiceId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" ChoiceReason.of_json in
-      let status = field_map json "Status" ChoiceStatus.of_json in
-      let choiceId = field_map json "ChoiceId" ChoiceId.of_json in
-      make ?reason ?status ?choiceId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A choice summary that has been answered on a question in your workload."]
-module Choice =
+      of_string (string_of_xml ~kind:"enumeration CheckStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CheckStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CheckStatusCount =
   struct
-    type nonrec t =
-      {
-      choiceId: ChoiceId.t option ;
-      title: ChoiceTitle.t option ;
-      description: ChoiceDescription.t option ;
-      helpfulResource: ChoiceContent.t option
-        [@ocaml.doc "The choice level helpful resource."];
-      improvementPlan: ChoiceContent.t option
-        [@ocaml.doc "The choice level improvement plan."]}
-    let make ?choiceId =
-      fun ?title ->
-        fun ?description ->
-          fun ?helpfulResource ->
-            fun ?improvementPlan ->
-              fun () ->
-                {
-                  choiceId;
-                  title;
-                  description;
-                  helpfulResource;
-                  improvementPlan
-                }
-    let to_value x =
-      structure_to_value
-        [("ChoiceId", (Option.map x.choiceId ~f:ChoiceId.to_value));
-        ("Title", (Option.map x.title ~f:ChoiceTitle.to_value));
-        ("Description",
-          (Option.map x.description ~f:ChoiceDescription.to_value));
-        ("HelpfulResource",
-          (Option.map x.helpfulResource ~f:ChoiceContent.to_value));
-        ("ImprovementPlan",
-          (Option.map x.improvementPlan ~f:ChoiceContent.to_value))]
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:101) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      let improvementPlan =
-        (Option.map ~f:ChoiceContent.of_xml)
-          (Xml.child xml_arg0 "ImprovementPlan") in
-      let helpfulResource =
-        (Option.map ~f:ChoiceContent.of_xml)
-          (Xml.child xml_arg0 "HelpfulResource") in
-      let description =
-        (Option.map ~f:ChoiceDescription.of_xml)
-          (Xml.child xml_arg0 "Description") in
-      let title =
-        (Option.map ~f:ChoiceTitle.of_xml) (Xml.child xml_arg0 "Title") in
-      let choiceId =
-        (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
-      make ?improvementPlan ?helpfulResource ?description ?title ?choiceId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let improvementPlan =
-        field_map json "ImprovementPlan" ChoiceContent.of_json in
-      let helpfulResource =
-        field_map json "HelpfulResource" ChoiceContent.of_json in
-      let description =
-        field_map json "Description" ChoiceDescription.of_json in
-      let title = field_map json "Title" ChoiceTitle.of_json in
-      let choiceId = field_map json "ChoiceId" ChoiceId.of_json in
-      make ?improvementPlan ?helpfulResource ?description ?title ?choiceId ()
+      Int.of_string
+        (string_of_xml ~kind:"an integer for CheckStatusCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ProfileTemplateQuestionChoices =
+  struct
+    type nonrec t = ProfileTemplateChoice.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProfileTemplateChoice.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProfileTemplateChoice.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProfileTemplateQuestionChoices"
+        ~of_json:ProfileTemplateChoice.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A choice available to answer question."]
+  end
 module TagKey =
   struct
     type nonrec t = string
@@ -875,6 +1749,26 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
+module ApplicationArn =
+  struct
+    type nonrec t = string
+    let context_ = "ApplicationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2084) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"arn:aws[-a-z]*:servicecatalog:[a-z]{2}(-gov)?-[a-z]+-\\d:\\d{12}:/applications/[a-z0-9]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApplicationArn" j
+    let to_json = simple_to_json to_value
+  end
 module AwsRegion =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -891,6 +1785,151 @@ module AwsRegion =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "An Amazon Web Services Region, for example, us-west-2 or ap-northeast-1."]
+module TrustedAdvisorIntegrationStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TrustedAdvisorIntegrationStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TrustedAdvisorIntegrationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module WorkloadResourceDefinition =
+  struct
+    type nonrec t = DefinitionType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DefinitionType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DefinitionType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkloadResourceDefinition"
+        ~of_json:DefinitionType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IssueManagementType =
+  struct
+    type nonrec t =
+      | AUTO 
+      | MANUAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | AUTO -> "AUTO" | MANUAL -> "MANUAL" | Non_static_id s -> s
+    let of_string =
+      function | "AUTO" -> AUTO | "MANUAL" -> MANUAL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IssueManagementType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IssueManagementType" j)
+    let to_json = simple_to_json to_value
+  end
+module JiraProjectKey =
+  struct
+    type nonrec t = string
+    let context_ = "JiraProjectKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:"^[A-Z][A-Z0-9_]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JiraProjectKey" j
+    let to_json = simple_to_json to_value
+  end
+module StatusMessage =
+  struct
+    type nonrec t = string
+    let context_ = "StatusMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StatusMessage" j
+    let to_json = simple_to_json to_value
+  end
+module WorkloadIssueManagementStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | INHERIT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | INHERIT -> "INHERIT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | "INHERIT" -> INHERIT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration WorkloadIssueManagementStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"WorkloadIssueManagementStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module WorkloadNonAwsRegion =
   struct
     type nonrec t = string
@@ -913,6 +1952,9 @@ module QuestionDifferences =
   struct
     type nonrec t = QuestionDifference.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QuestionDifference.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -934,74 +1976,111 @@ module QuestionDifferences =
         ~of_json:QuestionDifference.of_json j
     let to_json v = composed_to_json to_value v
   end
+module LensMetric =
+  struct
+    type nonrec t =
+      {
+      lensArn: LensArn.t option [@ocaml.doc "The lens ARN."];
+      pillars: PillarMetrics.t option
+        [@ocaml.doc "The metrics for the pillars in a lens."];
+      riskCounts: RiskCounts.t option }
+    let make ?lensArn =
+      fun ?pillars ->
+        fun ?riskCounts -> fun () -> { lensArn; pillars; riskCounts }
+    let to_value x =
+      structure_to_value
+        [("LensArn", (Option.map x.lensArn ~f:LensArn.to_value));
+        ("Pillars", (Option.map x.pillars ~f:PillarMetrics.to_value));
+        ("RiskCounts", (Option.map x.riskCounts ~f:RiskCounts.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let riskCounts =
+        (Option.map ~f:RiskCounts.of_xml) (Xml.child xml_arg0 "RiskCounts") in
+      let pillars =
+        (Option.map ~f:PillarMetrics.of_xml) (Xml.child xml_arg0 "Pillars") in
+      let lensArn =
+        (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
+      make ?riskCounts ?pillars ?lensArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let riskCounts = field_map json__ "RiskCounts" RiskCounts.of_json in
+      let pillars = field_map json__ "Pillars" PillarMetrics.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      make ?riskCounts ?pillars ?lensArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A metric for a particular lens in a workload."]
 module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      name: ValidationExceptionFieldName.t ;
-      message: ExceptionMessage.t }
-    let context_ = "ValidationExceptionField"
-    let make ~name = fun ~message -> fun () -> { name; message }
+      name: ValidationExceptionFieldName.t option ;
+      message: ExceptionMessage.t option }
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("Name", (Some (ValidationExceptionFieldName.to_value x.name)));
-        ("Message", (Some (ExceptionMessage.to_value x.message)))]
+        [("Name",
+           (Option.map x.name ~f:ValidationExceptionFieldName.to_value));
+        ("Message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
       let name =
-        ValidationExceptionFieldName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~message ~name ()
+        (Option.map ~f:ValidationExceptionFieldName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" ExceptionMessage.of_json in
-      let name =
-        field_map_exn json "Name" ValidationExceptionFieldName.of_json in
-      make ~message ~name ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      let name = field_map json__ "Name" ValidationExceptionFieldName.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stores information about a field passed inside a request that resulted in an exception."]
-module PillarReviewSummary =
+module ReviewTemplatePillarReviewSummary =
   struct
     type nonrec t =
       {
       pillarId: PillarId.t option ;
       pillarName: PillarName.t option ;
       notes: Notes.t option ;
-      riskCounts: RiskCounts.t option }
+      questionCounts: QuestionCounts.t option
+        [@ocaml.doc
+          "A count of how many questions are answered and unanswered in the requested pillar of the lens review."]}
     let make ?pillarId =
       fun ?pillarName ->
         fun ?notes ->
-          fun ?riskCounts ->
-            fun () -> { pillarId; pillarName; notes; riskCounts }
+          fun ?questionCounts ->
+            fun () -> { pillarId; pillarName; notes; questionCounts }
     let to_value x =
       structure_to_value
         [("PillarId", (Option.map x.pillarId ~f:PillarId.to_value));
         ("PillarName", (Option.map x.pillarName ~f:PillarName.to_value));
         ("Notes", (Option.map x.notes ~f:Notes.to_value));
-        ("RiskCounts", (Option.map x.riskCounts ~f:RiskCounts.to_value))]
+        ("QuestionCounts",
+          (Option.map x.questionCounts ~f:QuestionCounts.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let riskCounts =
-        (Option.map ~f:RiskCounts.of_xml) (Xml.child xml_arg0 "RiskCounts") in
+      let questionCounts =
+        (Option.map ~f:QuestionCounts.of_xml)
+          (Xml.child xml_arg0 "QuestionCounts") in
       let notes = (Option.map ~f:Notes.of_xml) (Xml.child xml_arg0 "Notes") in
       let pillarName =
         (Option.map ~f:PillarName.of_xml) (Xml.child xml_arg0 "PillarName") in
       let pillarId =
         (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
-      make ?riskCounts ?notes ?pillarName ?pillarId ()
+      make ?questionCounts ?notes ?pillarName ?pillarId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let riskCounts = field_map json "RiskCounts" RiskCounts.of_json in
-      let notes = field_map json "Notes" Notes.of_json in
-      let pillarName = field_map json "PillarName" PillarName.of_json in
-      let pillarId = field_map json "PillarId" PillarId.of_json in
-      make ?riskCounts ?notes ?pillarName ?pillarId ()
+    let of_json json__ =
+      let questionCounts =
+        field_map json__ "QuestionCounts" QuestionCounts.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
+      let pillarName = field_map json__ "PillarName" PillarName.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      make ?questionCounts ?notes ?pillarName ?pillarId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A pillar review summary of a lens review."]
+  end[@@ocaml.doc "Summary of a review template."]
 module ChoiceAnswer =
   struct
     type nonrec t =
@@ -1035,15 +2114,218 @@ module ChoiceAnswer =
         (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
       make ?notes ?reason ?status ?choiceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let notes = field_map json "Notes" ChoiceNotes.of_json in
-      let reason = field_map json "Reason" ChoiceReason.of_json in
-      let status = field_map json "Status" ChoiceStatus.of_json in
-      let choiceId = field_map json "ChoiceId" ChoiceId.of_json in
+    let of_json json__ =
+      let notes = field_map json__ "Notes" ChoiceNotes.of_json in
+      let reason = field_map json__ "Reason" ChoiceReason.of_json in
+      let status = field_map json__ "Status" ChoiceStatus.of_json in
+      let choiceId = field_map json__ "ChoiceId" ChoiceId.of_json in
       make ?notes ?reason ?status ?choiceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A choice that has been answered on a question in your workload."]
+module ProfileQuestion =
+  struct
+    type nonrec t =
+      {
+      questionId: QuestionId.t option ;
+      questionTitle: QuestionTitle.t option ;
+      questionDescription: QuestionDescription.t option ;
+      questionChoices: ProfileQuestionChoices.t option
+        [@ocaml.doc "The question choices."];
+      selectedChoiceIds: SelectedChoiceIds.t option
+        [@ocaml.doc "The selected choices."];
+      minSelectedChoices: MinSelectedProfileChoices.t option
+        [@ocaml.doc "The minimum number of selected choices."];
+      maxSelectedChoices: MaxSelectedProfileChoices.t option
+        [@ocaml.doc "The maximum number of selected choices."]}
+    let make ?questionId =
+      fun ?questionTitle ->
+        fun ?questionDescription ->
+          fun ?questionChoices ->
+            fun ?selectedChoiceIds ->
+              fun ?minSelectedChoices ->
+                fun ?maxSelectedChoices ->
+                  fun () ->
+                    {
+                      questionId;
+                      questionTitle;
+                      questionDescription;
+                      questionChoices;
+                      selectedChoiceIds;
+                      minSelectedChoices;
+                      maxSelectedChoices
+                    }
+    let to_value x =
+      structure_to_value
+        [("QuestionId", (Option.map x.questionId ~f:QuestionId.to_value));
+        ("QuestionTitle",
+          (Option.map x.questionTitle ~f:QuestionTitle.to_value));
+        ("QuestionDescription",
+          (Option.map x.questionDescription ~f:QuestionDescription.to_value));
+        ("QuestionChoices",
+          (Option.map x.questionChoices ~f:ProfileQuestionChoices.to_value));
+        ("SelectedChoiceIds",
+          (Option.map x.selectedChoiceIds ~f:SelectedChoiceIds.to_value));
+        ("MinSelectedChoices",
+          (Option.map x.minSelectedChoices
+             ~f:MinSelectedProfileChoices.to_value));
+        ("MaxSelectedChoices",
+          (Option.map x.maxSelectedChoices
+             ~f:MaxSelectedProfileChoices.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxSelectedChoices =
+        (Option.map ~f:MaxSelectedProfileChoices.of_xml)
+          (Xml.child xml_arg0 "MaxSelectedChoices") in
+      let minSelectedChoices =
+        (Option.map ~f:MinSelectedProfileChoices.of_xml)
+          (Xml.child xml_arg0 "MinSelectedChoices") in
+      let selectedChoiceIds =
+        (Option.map ~f:SelectedChoiceIds.of_xml)
+          (Xml.child xml_arg0 "SelectedChoiceIds") in
+      let questionChoices =
+        (Option.map ~f:ProfileQuestionChoices.of_xml)
+          (Xml.child xml_arg0 "QuestionChoices") in
+      let questionDescription =
+        (Option.map ~f:QuestionDescription.of_xml)
+          (Xml.child xml_arg0 "QuestionDescription") in
+      let questionTitle =
+        (Option.map ~f:QuestionTitle.of_xml)
+          (Xml.child xml_arg0 "QuestionTitle") in
+      let questionId =
+        (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
+      make ?maxSelectedChoices ?minSelectedChoices ?selectedChoiceIds
+        ?questionChoices ?questionDescription ?questionTitle ?questionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxSelectedChoices =
+        field_map json__ "MaxSelectedChoices"
+          MaxSelectedProfileChoices.of_json in
+      let minSelectedChoices =
+        field_map json__ "MinSelectedChoices"
+          MinSelectedProfileChoices.of_json in
+      let selectedChoiceIds =
+        field_map json__ "SelectedChoiceIds" SelectedChoiceIds.of_json in
+      let questionChoices =
+        field_map json__ "QuestionChoices" ProfileQuestionChoices.of_json in
+      let questionDescription =
+        field_map json__ "QuestionDescription" QuestionDescription.of_json in
+      let questionTitle =
+        field_map json__ "QuestionTitle" QuestionTitle.of_json in
+      let questionId = field_map json__ "QuestionId" QuestionId.of_json in
+      make ?maxSelectedChoices ?minSelectedChoices ?selectedChoiceIds
+        ?questionChoices ?questionDescription ?questionTitle ?questionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A profile question."]
+module SelectedProfileChoiceIds =
+  struct
+    type nonrec t = ChoiceId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ChoiceId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ChoiceId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SelectedProfileChoiceIds" ~of_json:ChoiceId.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module SelectedPillars =
+  struct
+    type nonrec t = SelectedPillar.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SelectedPillar.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SelectedPillar.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SelectedPillars" ~of_json:SelectedPillar.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PillarReviewSummary =
+  struct
+    type nonrec t =
+      {
+      pillarId: PillarId.t option ;
+      pillarName: PillarName.t option ;
+      notes: Notes.t option ;
+      riskCounts: RiskCounts.t option ;
+      prioritizedRiskCounts: RiskCounts.t option }
+    let make ?pillarId =
+      fun ?pillarName ->
+        fun ?notes ->
+          fun ?riskCounts ->
+            fun ?prioritizedRiskCounts ->
+              fun () ->
+                {
+                  pillarId;
+                  pillarName;
+                  notes;
+                  riskCounts;
+                  prioritizedRiskCounts
+                }
+    let to_value x =
+      structure_to_value
+        [("PillarId", (Option.map x.pillarId ~f:PillarId.to_value));
+        ("PillarName", (Option.map x.pillarName ~f:PillarName.to_value));
+        ("Notes", (Option.map x.notes ~f:Notes.to_value));
+        ("RiskCounts", (Option.map x.riskCounts ~f:RiskCounts.to_value));
+        ("PrioritizedRiskCounts",
+          (Option.map x.prioritizedRiskCounts ~f:RiskCounts.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prioritizedRiskCounts =
+        (Option.map ~f:RiskCounts.of_xml)
+          (Xml.child xml_arg0 "PrioritizedRiskCounts") in
+      let riskCounts =
+        (Option.map ~f:RiskCounts.of_xml) (Xml.child xml_arg0 "RiskCounts") in
+      let notes = (Option.map ~f:Notes.of_xml) (Xml.child xml_arg0 "Notes") in
+      let pillarName =
+        (Option.map ~f:PillarName.of_xml) (Xml.child xml_arg0 "PillarName") in
+      let pillarId =
+        (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
+      make ?prioritizedRiskCounts ?riskCounts ?notes ?pillarName ?pillarId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prioritizedRiskCounts =
+        field_map json__ "PrioritizedRiskCounts" RiskCounts.of_json in
+      let riskCounts = field_map json__ "RiskCounts" RiskCounts.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
+      let pillarName = field_map json__ "PillarName" PillarName.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      make ?prioritizedRiskCounts ?riskCounts ?notes ?pillarName ?pillarId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A pillar review summary of a lens review."]
 module PermissionType =
   struct
     type nonrec t =
@@ -1071,8 +2353,7 @@ module PermissionType =
   end
 module ShareId =
   struct
-    type nonrec t = string[@@ocaml.doc
-                            "The ID associated with the workload share."]
+    type nonrec t = string[@@ocaml.doc "The ID associated with the share."]
     let context_ = "ShareId"
     let make i =
       let open Result in
@@ -1084,7 +2365,7 @@ module ShareId =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ShareId" j
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The ID associated with the workload share."]
+  end[@@ocaml.doc "The ID associated with the share."]
 module ShareStatus =
   struct
     type nonrec t =
@@ -1093,6 +2374,9 @@ module ShareStatus =
       | PENDING 
       | REVOKED 
       | EXPIRED 
+      | ASSOCIATING 
+      | ASSOCIATED 
+      | FAILED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1102,6 +2386,9 @@ module ShareStatus =
       | PENDING -> "PENDING"
       | REVOKED -> "REVOKED"
       | EXPIRED -> "EXPIRED"
+      | ASSOCIATING -> "ASSOCIATING"
+      | ASSOCIATED -> "ASSOCIATED"
+      | FAILED -> "FAILED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1110,6 +2397,9 @@ module ShareStatus =
       | "PENDING" -> PENDING
       | "REVOKED" -> REVOKED
       | "EXPIRED" -> EXPIRED
+      | "ASSOCIATING" -> ASSOCIATING
+      | "ASSOCIATED" -> ASSOCIATED
+      | "FAILED" -> FAILED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1122,7 +2412,7 @@ module ShareStatus =
 module SharedWith =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "The Amazon Web Services account ID or IAM role with which the workload is shared."]
+                            "The Amazon Web Services account ID, organization ID, or organizational unit (OU) ID with which the workload, lens, profile, or review template is shared."]
     let context_ = "SharedWith"
     let make i =
       let open Result in
@@ -1138,7 +2428,7 @@ module SharedWith =
     let of_json j = string_of_json ~kind:"SharedWith" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "The Amazon Web Services account ID or IAM role with which the workload is shared."]
+       "The Amazon Web Services account ID, organization ID, or organizational unit (OU) ID with which the workload, lens, profile, or review template is shared."]
 module LensName =
   struct
     type nonrec t = string[@@ocaml.doc "The full name of the lens."]
@@ -1157,6 +2447,24 @@ module LensName =
     let of_json j = string_of_json ~kind:"LensName" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "The full name of the lens."]
+module ProfileName =
+  struct
+    type nonrec t = string
+    let context_ = "ProfileName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:3));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProfileName" j
+    let to_json = simple_to_json to_value
+  end
 module ShareInvitationId =
   struct
     type nonrec t = string
@@ -1177,17 +2485,23 @@ module ShareResourceType =
     type nonrec t =
       | WORKLOAD 
       | LENS 
+      | PROFILE 
+      | TEMPLATE 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | WORKLOAD -> "WORKLOAD"
       | LENS -> "LENS"
+      | PROFILE -> "PROFILE"
+      | TEMPLATE -> "TEMPLATE"
       | Non_static_id s -> s
     let of_string =
       function
       | "WORKLOAD" -> WORKLOAD
       | "LENS" -> LENS
+      | "PROFILE" -> PROFILE
+      | "TEMPLATE" -> TEMPLATE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1196,6 +2510,356 @@ module ShareResourceType =
       of_string
         (string_of_xml ~kind:"enumeration ShareResourceType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"ShareResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module TemplateArn =
+  struct
+    type nonrec t = string
+    let context_ = "TemplateArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:50) >>=
+             (fun () ->
+                (check_string_max i ~max:250) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws(-us-gov|-iso(-[a-z])?|-cn)?:wellarchitected:[a-z]{2}(-gov|-iso([a-z])?)?-[a-z]+-\\d:\\d{12}:(review-template)/[a-f0-9]{32}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TemplateArn" j
+    let to_json = simple_to_json to_value
+  end
+module TemplateName =
+  struct
+    type nonrec t = string
+    let context_ = "TemplateName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[A-Za-z0-9-_.,:/()@!&?#+'\226\128\153\\s]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TemplateName" j
+    let to_json = simple_to_json to_value
+  end
+module ReviewTemplateLenses =
+  struct
+    type nonrec t = LensAlias.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LensAlias.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LensAlias.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReviewTemplateLenses" ~of_json:LensAlias.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ReviewTemplateUpdateStatus =
+  struct
+    type nonrec t =
+      | CURRENT 
+      | LENS_NOT_CURRENT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CURRENT -> "CURRENT"
+      | LENS_NOT_CURRENT -> "LENS_NOT_CURRENT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CURRENT" -> CURRENT
+      | "LENS_NOT_CURRENT" -> LENS_NOT_CURRENT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ReviewTemplateUpdateStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ReviewTemplateUpdateStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module TemplateDescription =
+  struct
+    type nonrec t = string
+    let context_ = "TemplateDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:250) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[A-Za-z0-9-_.,:/()@!&?#+'\226\128\153\\s]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TemplateDescription" j
+    let to_json = simple_to_json to_value
+  end
+module AnswerReason =
+  struct
+    type nonrec t =
+      | OUT_OF_SCOPE 
+      | BUSINESS_PRIORITIES 
+      | ARCHITECTURE_CONSTRAINTS 
+      | OTHER 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | OUT_OF_SCOPE -> "OUT_OF_SCOPE"
+      | BUSINESS_PRIORITIES -> "BUSINESS_PRIORITIES"
+      | ARCHITECTURE_CONSTRAINTS -> "ARCHITECTURE_CONSTRAINTS"
+      | OTHER -> "OTHER"
+      | NONE -> "NONE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "OUT_OF_SCOPE" -> OUT_OF_SCOPE
+      | "BUSINESS_PRIORITIES" -> BUSINESS_PRIORITIES
+      | "ARCHITECTURE_CONSTRAINTS" -> ARCHITECTURE_CONSTRAINTS
+      | "OTHER" -> OTHER
+      | "NONE" -> NONE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AnswerReason" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AnswerReason" j)
+    let to_json = simple_to_json to_value
+  end
+module ChoiceAnswerSummaries =
+  struct
+    type nonrec t = ChoiceAnswerSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ChoiceAnswerSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ChoiceAnswerSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ChoiceAnswerSummaries"
+        ~of_json:ChoiceAnswerSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Choices =
+  struct
+    type nonrec t = Choice.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Choice.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Choice.of_xml)
+    let of_json j = list_of_json ~kind:"Choices" ~of_json:Choice.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IsApplicable =
+  struct
+    type nonrec t = bool[@@ocaml.doc
+                          "Defines whether this question is applicable to a lens review."]
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "Defines whether this question is applicable to a lens review."]
+module QuestionType =
+  struct
+    type nonrec t =
+      | PRIORITIZED 
+      | NON_PRIORITIZED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PRIORITIZED -> "PRIORITIZED"
+      | NON_PRIORITIZED -> "NON_PRIORITIZED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PRIORITIZED" -> PRIORITIZED
+      | "NON_PRIORITIZED" -> NON_PRIORITIZED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration QuestionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QuestionType" j)
+    let to_json = simple_to_json to_value
+  end
+module ReviewTemplateAnswerStatus =
+  struct
+    type nonrec t =
+      | UNANSWERED 
+      | ANSWERED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UNANSWERED -> "UNANSWERED"
+      | ANSWERED -> "ANSWERED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UNANSWERED" -> UNANSWERED
+      | "ANSWERED" -> ANSWERED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ReviewTemplateAnswerStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ReviewTemplateAnswerStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module SelectedChoices =
+  struct
+    type nonrec t = ChoiceId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ChoiceId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ChoiceId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SelectedChoices" ~of_json:ChoiceId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ProfileDescription =
+  struct
+    type nonrec t = string
+    let context_ = "ProfileDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:3));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProfileDescription" j
+    let to_json = simple_to_json to_value
+  end
+module ProfileNotificationType =
+  struct
+    type nonrec t =
+      | PROFILE_ANSWERS_UPDATED 
+      | PROFILE_DELETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PROFILE_ANSWERS_UPDATED -> "PROFILE_ANSWERS_UPDATED"
+      | PROFILE_DELETED -> "PROFILE_DELETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PROFILE_ANSWERS_UPDATED" -> PROFILE_ANSWERS_UPDATED
+      | "PROFILE_DELETED" -> PROFILE_DELETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ProfileNotificationType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ProfileNotificationType" j)
     let to_json = simple_to_json to_value
   end
 module LensUpgradeSummary =
@@ -1209,22 +2873,29 @@ module LensUpgradeSummary =
       currentLensVersion: LensVersion.t option
         [@ocaml.doc "The current version of the lens."];
       latestLensVersion: LensVersion.t option
-        [@ocaml.doc "The latest version of the lens."]}
+        [@ocaml.doc "The latest version of the lens."];
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc "ResourceArn of the lens being upgraded"];
+      resourceName: WorkloadName.t option }
     let make ?workloadId =
       fun ?workloadName ->
         fun ?lensAlias ->
           fun ?lensArn ->
             fun ?currentLensVersion ->
               fun ?latestLensVersion ->
-                fun () ->
-                  {
-                    workloadId;
-                    workloadName;
-                    lensAlias;
-                    lensArn;
-                    currentLensVersion;
-                    latestLensVersion
-                  }
+                fun ?resourceArn ->
+                  fun ?resourceName ->
+                    fun () ->
+                      {
+                        workloadId;
+                        workloadName;
+                        lensAlias;
+                        lensArn;
+                        currentLensVersion;
+                        latestLensVersion;
+                        resourceArn;
+                        resourceName
+                      }
     let to_value x =
       structure_to_value
         [("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
@@ -1235,9 +2906,17 @@ module LensUpgradeSummary =
         ("CurrentLensVersion",
           (Option.map x.currentLensVersion ~f:LensVersion.to_value));
         ("LatestLensVersion",
-          (Option.map x.latestLensVersion ~f:LensVersion.to_value))]
+          (Option.map x.latestLensVersion ~f:LensVersion.to_value));
+        ("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("ResourceName",
+          (Option.map x.resourceName ~f:WorkloadName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resourceName =
+        (Option.map ~f:WorkloadName.of_xml)
+          (Xml.child xml_arg0 "ResourceName") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       let latestLensVersion =
         (Option.map ~f:LensVersion.of_xml)
           (Xml.child xml_arg0 "LatestLensVersion") in
@@ -1253,20 +2932,22 @@ module LensUpgradeSummary =
           (Xml.child xml_arg0 "WorkloadName") in
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
-      make ?latestLensVersion ?currentLensVersion ?lensArn ?lensAlias
-        ?workloadName ?workloadId ()
+      make ?resourceName ?resourceArn ?latestLensVersion ?currentLensVersion
+        ?lensArn ?lensAlias ?workloadName ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" WorkloadName.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
       let latestLensVersion =
-        field_map json "LatestLensVersion" LensVersion.of_json in
+        field_map json__ "LatestLensVersion" LensVersion.of_json in
       let currentLensVersion =
-        field_map json "CurrentLensVersion" LensVersion.of_json in
-      let lensArn = field_map json "LensArn" LensArn.of_json in
-      let lensAlias = field_map json "LensAlias" LensAlias.of_json in
-      let workloadName = field_map json "WorkloadName" WorkloadName.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
-      make ?latestLensVersion ?currentLensVersion ?lensArn ?lensAlias
-        ?workloadName ?workloadId ()
+        field_map json__ "CurrentLensVersion" LensVersion.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
+      let workloadName = field_map json__ "WorkloadName" WorkloadName.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      make ?resourceName ?resourceArn ?latestLensVersion ?currentLensVersion
+        ?lensArn ?lensAlias ?workloadName ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lens upgrade summary return object."]
 module NotificationType =
@@ -1345,7 +3026,10 @@ module WorkloadSummary =
       updatedAt: Timestamp.t option ;
       lenses: WorkloadLenses.t option ;
       riskCounts: RiskCounts.t option ;
-      improvementStatus: WorkloadImprovementStatus.t option }
+      improvementStatus: WorkloadImprovementStatus.t option ;
+      profiles: WorkloadProfiles.t option
+        [@ocaml.doc "Profile associated with a workload."];
+      prioritizedRiskCounts: RiskCounts.t option }
     let make ?workloadId =
       fun ?workloadArn ->
         fun ?workloadName ->
@@ -1354,17 +3038,21 @@ module WorkloadSummary =
               fun ?lenses ->
                 fun ?riskCounts ->
                   fun ?improvementStatus ->
-                    fun () ->
-                      {
-                        workloadId;
-                        workloadArn;
-                        workloadName;
-                        owner;
-                        updatedAt;
-                        lenses;
-                        riskCounts;
-                        improvementStatus
-                      }
+                    fun ?profiles ->
+                      fun ?prioritizedRiskCounts ->
+                        fun () ->
+                          {
+                            workloadId;
+                            workloadArn;
+                            workloadName;
+                            owner;
+                            updatedAt;
+                            lenses;
+                            riskCounts;
+                            improvementStatus;
+                            profiles;
+                            prioritizedRiskCounts
+                          }
     let to_value x =
       structure_to_value
         [("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
@@ -1377,9 +3065,18 @@ module WorkloadSummary =
         ("RiskCounts", (Option.map x.riskCounts ~f:RiskCounts.to_value));
         ("ImprovementStatus",
           (Option.map x.improvementStatus
-             ~f:WorkloadImprovementStatus.to_value))]
+             ~f:WorkloadImprovementStatus.to_value));
+        ("Profiles", (Option.map x.profiles ~f:WorkloadProfiles.to_value));
+        ("PrioritizedRiskCounts",
+          (Option.map x.prioritizedRiskCounts ~f:RiskCounts.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let prioritizedRiskCounts =
+        (Option.map ~f:RiskCounts.of_xml)
+          (Xml.child xml_arg0 "PrioritizedRiskCounts") in
+      let profiles =
+        (Option.map ~f:WorkloadProfiles.of_xml)
+          (Xml.child xml_arg0 "Profiles") in
       let improvementStatus =
         (Option.map ~f:WorkloadImprovementStatus.of_xml)
           (Xml.child xml_arg0 "ImprovementStatus") in
@@ -1398,21 +3095,25 @@ module WorkloadSummary =
         (Option.map ~f:WorkloadArn.of_xml) (Xml.child xml_arg0 "WorkloadArn") in
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
-      make ?improvementStatus ?riskCounts ?lenses ?updatedAt ?owner
-        ?workloadName ?workloadArn ?workloadId ()
+      make ?prioritizedRiskCounts ?profiles ?improvementStatus ?riskCounts
+        ?lenses ?updatedAt ?owner ?workloadName ?workloadArn ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let prioritizedRiskCounts =
+        field_map json__ "PrioritizedRiskCounts" RiskCounts.of_json in
+      let profiles = field_map json__ "Profiles" WorkloadProfiles.of_json in
       let improvementStatus =
-        field_map json "ImprovementStatus" WorkloadImprovementStatus.of_json in
-      let riskCounts = field_map json "RiskCounts" RiskCounts.of_json in
-      let lenses = field_map json "Lenses" WorkloadLenses.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let owner = field_map json "Owner" AwsAccountId.of_json in
-      let workloadName = field_map json "WorkloadName" WorkloadName.of_json in
-      let workloadArn = field_map json "WorkloadArn" WorkloadArn.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
-      make ?improvementStatus ?riskCounts ?lenses ?updatedAt ?owner
-        ?workloadName ?workloadArn ?workloadId ()
+        field_map json__ "ImprovementStatus"
+          WorkloadImprovementStatus.of_json in
+      let riskCounts = field_map json__ "RiskCounts" RiskCounts.of_json in
+      let lenses = field_map json__ "Lenses" WorkloadLenses.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let owner = field_map json__ "Owner" AwsAccountId.of_json in
+      let workloadName = field_map json__ "WorkloadName" WorkloadName.of_json in
+      let workloadArn = field_map json__ "WorkloadArn" WorkloadArn.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      make ?prioritizedRiskCounts ?profiles ?improvementStatus ?riskCounts
+        ?lenses ?updatedAt ?owner ?workloadName ?workloadArn ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A workload summary return object."]
 module LensDescription =
@@ -1499,6 +3200,9 @@ module ChoiceImprovementPlans =
   struct
     type nonrec t = ChoiceImprovementPlan.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChoiceImprovementPlan.to_value)) |>
         (fun x -> `List x)
@@ -1521,128 +3225,261 @@ module ChoiceImprovementPlans =
         ~of_json:ChoiceImprovementPlan.of_json j
     let to_json v = composed_to_json to_value v
   end
-module AnswerReason =
+module JiraConfiguration =
   struct
     type nonrec t =
-      | OUT_OF_SCOPE 
-      | BUSINESS_PRIORITIES 
-      | ARCHITECTURE_CONSTRAINTS 
-      | OTHER 
-      | NONE 
+      {
+      jiraIssueUrl: JiraIssueUrl.t option
+        [@ocaml.doc "The URL of the associated Jira issue."];
+      lastSyncedTime: Timestamp.t option }
+    let make ?jiraIssueUrl =
+      fun ?lastSyncedTime -> fun () -> { jiraIssueUrl; lastSyncedTime }
+    let to_value x =
+      structure_to_value
+        [("JiraIssueUrl",
+           (Option.map x.jiraIssueUrl ~f:JiraIssueUrl.to_value));
+        ("LastSyncedTime",
+          (Option.map x.lastSyncedTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastSyncedTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastSyncedTime") in
+      let jiraIssueUrl =
+        (Option.map ~f:JiraIssueUrl.of_xml)
+          (Xml.child xml_arg0 "JiraIssueUrl") in
+      make ?lastSyncedTime ?jiraIssueUrl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastSyncedTime =
+        field_map json__ "LastSyncedTime" Timestamp.of_json in
+      let jiraIssueUrl = field_map json__ "JiraIssueUrl" JiraIssueUrl.of_json in
+      make ?lastSyncedTime ?jiraIssueUrl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configuration of the Jira integration."]
+module AccountSummary =
+  struct
+    type nonrec t = (CheckStatus.t * CheckStatusCount.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((CheckStatus.of_string chopped),
+                              (CheckStatusCount.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (CheckStatus.to_value x) |>
+                    (fun x ->
+                       (CheckStatusCount.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:CheckStatus.of_string
+        ~of_json:CheckStatusCount.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CheckDescription =
+  struct
+    type nonrec t = string
+    let context_ = "CheckDescription"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CheckDescription" j
+    let to_json = simple_to_json to_value
+  end
+module CheckId =
+  struct
+    type nonrec t = string
+    let context_ = "CheckId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CheckId" j
+    let to_json = simple_to_json to_value
+  end
+module CheckName =
+  struct
+    type nonrec t = string
+    let context_ = "CheckName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CheckName" j
+    let to_json = simple_to_json to_value
+  end
+module CheckProvider =
+  struct
+    type nonrec t =
+      | TRUSTED_ADVISOR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | TRUSTED_ADVISOR -> "TRUSTED_ADVISOR" | Non_static_id s -> s
+    let of_string =
+      function | "TRUSTED_ADVISOR" -> TRUSTED_ADVISOR | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CheckProvider" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CheckProvider" j)
+    let to_json = simple_to_json to_value
+  end
+module CheckFailureReason =
+  struct
+    type nonrec t =
+      | ASSUME_ROLE_ERROR 
+      | ACCESS_DENIED 
+      | UNKNOWN_ERROR 
+      | PREMIUM_SUPPORT_REQUIRED 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | OUT_OF_SCOPE -> "OUT_OF_SCOPE"
-      | BUSINESS_PRIORITIES -> "BUSINESS_PRIORITIES"
-      | ARCHITECTURE_CONSTRAINTS -> "ARCHITECTURE_CONSTRAINTS"
-      | OTHER -> "OTHER"
-      | NONE -> "NONE"
+      | ASSUME_ROLE_ERROR -> "ASSUME_ROLE_ERROR"
+      | ACCESS_DENIED -> "ACCESS_DENIED"
+      | UNKNOWN_ERROR -> "UNKNOWN_ERROR"
+      | PREMIUM_SUPPORT_REQUIRED -> "PREMIUM_SUPPORT_REQUIRED"
       | Non_static_id s -> s
     let of_string =
       function
-      | "OUT_OF_SCOPE" -> OUT_OF_SCOPE
-      | "BUSINESS_PRIORITIES" -> BUSINESS_PRIORITIES
-      | "ARCHITECTURE_CONSTRAINTS" -> ARCHITECTURE_CONSTRAINTS
-      | "OTHER" -> OTHER
-      | "NONE" -> NONE
+      | "ASSUME_ROLE_ERROR" -> ASSUME_ROLE_ERROR
+      | "ACCESS_DENIED" -> ACCESS_DENIED
+      | "UNKNOWN_ERROR" -> UNKNOWN_ERROR
+      | "PREMIUM_SUPPORT_REQUIRED" -> PREMIUM_SUPPORT_REQUIRED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration AnswerReason" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"AnswerReason" j)
+      of_string
+        (string_of_xml ~kind:"enumeration CheckFailureReason" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CheckFailureReason" j)
     let to_json = simple_to_json to_value
   end
-module ChoiceAnswerSummaries =
+module FlaggedResources =
   struct
-    type nonrec t = ChoiceAnswerSummary.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:ChoiceAnswerSummary.to_value)) |>
-        (fun x -> `List x)
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:9999) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ChoiceAnswerSummary.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ChoiceAnswerSummaries"
-        ~of_json:ChoiceAnswerSummary.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module Choices =
-  struct
-    type nonrec t = Choice.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Choice.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Choice.of_xml)
-    let of_json j = list_of_json ~kind:"Choices" ~of_json:Choice.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module IsApplicable =
-  struct
-    type nonrec t = bool[@@ocaml.doc
-                          "Defines whether this question is applicable to a lens review."]
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
+    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
+      Int.of_string
+        (string_of_xml ~kind:"an integer for FlaggedResources" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "Defines whether this question is applicable to a lens review."]
-module SelectedChoices =
-  struct
-    type nonrec t = ChoiceId.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:ChoiceId.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ChoiceId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"SelectedChoices" ~of_json:ChoiceId.of_json j
-    let to_json v = composed_to_json to_value v
   end
+module ProfileTemplateQuestion =
+  struct
+    type nonrec t =
+      {
+      questionId: QuestionId.t option ;
+      questionTitle: QuestionTitle.t option ;
+      questionDescription: QuestionDescription.t option ;
+      questionChoices: ProfileTemplateQuestionChoices.t option
+        [@ocaml.doc "The question choices."];
+      minSelectedChoices: MinSelectedProfileChoices.t option
+        [@ocaml.doc "The minimum number of choices selected."];
+      maxSelectedChoices: MaxSelectedProfileChoices.t option
+        [@ocaml.doc "The maximum number of choices selected."]}
+    let make ?questionId =
+      fun ?questionTitle ->
+        fun ?questionDescription ->
+          fun ?questionChoices ->
+            fun ?minSelectedChoices ->
+              fun ?maxSelectedChoices ->
+                fun () ->
+                  {
+                    questionId;
+                    questionTitle;
+                    questionDescription;
+                    questionChoices;
+                    minSelectedChoices;
+                    maxSelectedChoices
+                  }
+    let to_value x =
+      structure_to_value
+        [("QuestionId", (Option.map x.questionId ~f:QuestionId.to_value));
+        ("QuestionTitle",
+          (Option.map x.questionTitle ~f:QuestionTitle.to_value));
+        ("QuestionDescription",
+          (Option.map x.questionDescription ~f:QuestionDescription.to_value));
+        ("QuestionChoices",
+          (Option.map x.questionChoices
+             ~f:ProfileTemplateQuestionChoices.to_value));
+        ("MinSelectedChoices",
+          (Option.map x.minSelectedChoices
+             ~f:MinSelectedProfileChoices.to_value));
+        ("MaxSelectedChoices",
+          (Option.map x.maxSelectedChoices
+             ~f:MaxSelectedProfileChoices.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxSelectedChoices =
+        (Option.map ~f:MaxSelectedProfileChoices.of_xml)
+          (Xml.child xml_arg0 "MaxSelectedChoices") in
+      let minSelectedChoices =
+        (Option.map ~f:MinSelectedProfileChoices.of_xml)
+          (Xml.child xml_arg0 "MinSelectedChoices") in
+      let questionChoices =
+        (Option.map ~f:ProfileTemplateQuestionChoices.of_xml)
+          (Xml.child xml_arg0 "QuestionChoices") in
+      let questionDescription =
+        (Option.map ~f:QuestionDescription.of_xml)
+          (Xml.child xml_arg0 "QuestionDescription") in
+      let questionTitle =
+        (Option.map ~f:QuestionTitle.of_xml)
+          (Xml.child xml_arg0 "QuestionTitle") in
+      let questionId =
+        (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
+      make ?maxSelectedChoices ?minSelectedChoices ?questionChoices
+        ?questionDescription ?questionTitle ?questionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxSelectedChoices =
+        field_map json__ "MaxSelectedChoices"
+          MaxSelectedProfileChoices.of_json in
+      let minSelectedChoices =
+        field_map json__ "MinSelectedChoices"
+          MinSelectedProfileChoices.of_json in
+      let questionChoices =
+        field_map json__ "QuestionChoices"
+          ProfileTemplateQuestionChoices.of_json in
+      let questionDescription =
+        field_map json__ "QuestionDescription" QuestionDescription.of_json in
+      let questionTitle =
+        field_map json__ "QuestionTitle" QuestionTitle.of_json in
+      let questionId = field_map json__ "QuestionId" QuestionId.of_json in
+      make ?maxSelectedChoices ?minSelectedChoices ?questionChoices
+        ?questionDescription ?questionTitle ?questionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A profile template question."]
 module IsReviewOwnerUpdateAcknowledged =
   struct
     type nonrec t = bool
@@ -1681,6 +3518,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1693,6 +3532,9 @@ module WorkloadAccountIds =
     type nonrec t = AwsAccountId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AwsAccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1713,13 +3555,48 @@ module WorkloadAccountIds =
       list_of_json ~kind:"WorkloadAccountIds" ~of_json:AwsAccountId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module WorkloadApplications =
+  struct
+    type nonrec t = ApplicationArn.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ApplicationArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ApplicationArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkloadApplications"
+        ~of_json:ApplicationArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module WorkloadArchitecturalDesign =
   struct
     type nonrec t = string[@@ocaml.doc
                             "The URL of the architectural design for the workload."]
     let context_ = "WorkloadArchitecturalDesign"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:2048); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^(|(https?|ftp):\\/\\/[^\\s/$.?#].[^\\s]*)$"));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -1733,6 +3610,9 @@ module WorkloadAwsRegions =
     type nonrec t = AwsRegion.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AwsRegion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1771,6 +3651,49 @@ module WorkloadDescription =
     let of_json j = string_of_json ~kind:"WorkloadDescription" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "The description for the workload."]
+module WorkloadDiscoveryConfig =
+  struct
+    type nonrec t =
+      {
+      trustedAdvisorIntegrationStatus:
+        TrustedAdvisorIntegrationStatus.t option
+        [@ocaml.doc
+          "Discovery integration status in respect to Trusted Advisor for the workload."];
+      workloadResourceDefinition: WorkloadResourceDefinition.t option
+        [@ocaml.doc
+          "The mode to use for identifying resources associated with the workload. You can specify WORKLOAD_METADATA, APP_REGISTRY, or both."]}
+    let make ?trustedAdvisorIntegrationStatus =
+      fun ?workloadResourceDefinition ->
+        fun () ->
+          { trustedAdvisorIntegrationStatus; workloadResourceDefinition }
+    let to_value x =
+      structure_to_value
+        [("TrustedAdvisorIntegrationStatus",
+           (Option.map x.trustedAdvisorIntegrationStatus
+              ~f:TrustedAdvisorIntegrationStatus.to_value));
+        ("WorkloadResourceDefinition",
+          (Option.map x.workloadResourceDefinition
+             ~f:WorkloadResourceDefinition.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workloadResourceDefinition =
+        (Option.map ~f:WorkloadResourceDefinition.of_xml)
+          (Xml.child xml_arg0 "WorkloadResourceDefinition") in
+      let trustedAdvisorIntegrationStatus =
+        (Option.map ~f:TrustedAdvisorIntegrationStatus.of_xml)
+          (Xml.child xml_arg0 "TrustedAdvisorIntegrationStatus") in
+      make ?workloadResourceDefinition ?trustedAdvisorIntegrationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workloadResourceDefinition =
+        field_map json__ "WorkloadResourceDefinition"
+          WorkloadResourceDefinition.of_json in
+      let trustedAdvisorIntegrationStatus =
+        field_map json__ "TrustedAdvisorIntegrationStatus"
+          TrustedAdvisorIntegrationStatus.of_json in
+      make ?workloadResourceDefinition ?trustedAdvisorIntegrationStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Discovery configuration associated to the workload."]
 module WorkloadEnvironment =
   struct
     type nonrec t =
@@ -1827,11 +3750,81 @@ module WorkloadIndustryType =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "The industry type for the workload. If specified, must be one of the following: Agriculture Automobile Defense Design and Engineering Digital Advertising Education Environmental Protection Financial Services Gaming General Public Services Healthcare Hospitality InfoTech Justice and Public Safety Life Sciences Manufacturing Media & Entertainment Mining & Resources Oil & Gas Power & Utilities Professional Services Real Estate & Construction Retail & Wholesale Social Protection Telecommunications Travel, Transportation & Logistics Other"]
+module WorkloadJiraConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      issueManagementStatus: WorkloadIssueManagementStatus.t option
+        [@ocaml.doc "Workload-level: Jira issue management status."];
+      issueManagementType: IssueManagementType.t option
+        [@ocaml.doc "Workload-level: Jira issue management type."];
+      jiraProjectKey: JiraProjectKey.t option
+        [@ocaml.doc "Workload-level: Jira project key to sync workloads to."];
+      statusMessage: StatusMessage.t option
+        [@ocaml.doc
+          "Workload-level: Status message on configuration of the Jira integration."]}
+    let make ?issueManagementStatus =
+      fun ?issueManagementType ->
+        fun ?jiraProjectKey ->
+          fun ?statusMessage ->
+            fun () ->
+              {
+                issueManagementStatus;
+                issueManagementType;
+                jiraProjectKey;
+                statusMessage
+              }
+    let to_value x =
+      structure_to_value
+        [("IssueManagementStatus",
+           (Option.map x.issueManagementStatus
+              ~f:WorkloadIssueManagementStatus.to_value));
+        ("IssueManagementType",
+          (Option.map x.issueManagementType ~f:IssueManagementType.to_value));
+        ("JiraProjectKey",
+          (Option.map x.jiraProjectKey ~f:JiraProjectKey.to_value));
+        ("StatusMessage",
+          (Option.map x.statusMessage ~f:StatusMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "StatusMessage") in
+      let jiraProjectKey =
+        (Option.map ~f:JiraProjectKey.of_xml)
+          (Xml.child xml_arg0 "JiraProjectKey") in
+      let issueManagementType =
+        (Option.map ~f:IssueManagementType.of_xml)
+          (Xml.child xml_arg0 "IssueManagementType") in
+      let issueManagementStatus =
+        (Option.map ~f:WorkloadIssueManagementStatus.of_xml)
+          (Xml.child xml_arg0 "IssueManagementStatus") in
+      make ?statusMessage ?jiraProjectKey ?issueManagementType
+        ?issueManagementStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusMessage =
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let jiraProjectKey =
+        field_map json__ "JiraProjectKey" JiraProjectKey.of_json in
+      let issueManagementType =
+        field_map json__ "IssueManagementType" IssueManagementType.of_json in
+      let issueManagementStatus =
+        field_map json__ "IssueManagementStatus"
+          WorkloadIssueManagementStatus.of_json in
+      make ?statusMessage ?jiraProjectKey ?issueManagementType
+        ?issueManagementStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Workload-level: Output configuration of the Jira integration."]
 module WorkloadNonAwsRegions =
   struct
     type nonrec t = WorkloadNonAwsRegion.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WorkloadNonAwsRegion.to_value)) |>
         (fun x -> `List x)
@@ -1858,6 +3851,9 @@ module WorkloadPillarPriorities =
   struct
     type nonrec t = PillarId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PillarId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1937,16 +3933,74 @@ module PillarDifference =
         (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
       make ?questionDifferences ?differenceStatus ?pillarName ?pillarId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let questionDifferences =
-        field_map json "QuestionDifferences" QuestionDifferences.of_json in
+        field_map json__ "QuestionDifferences" QuestionDifferences.of_json in
       let differenceStatus =
-        field_map json "DifferenceStatus" DifferenceStatus.of_json in
-      let pillarName = field_map json "PillarName" PillarName.of_json in
-      let pillarId = field_map json "PillarId" PillarId.of_json in
+        field_map json__ "DifferenceStatus" DifferenceStatus.of_json in
+      let pillarName = field_map json__ "PillarName" PillarName.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
       make ?questionDifferences ?differenceStatus ?pillarName ?pillarId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A pillar difference return object."]
+module LensMetrics =
+  struct
+    type nonrec t = LensMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LensMetric.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LensMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LensMetrics" ~of_json:LensMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LensesAppliedCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for LensesAppliedCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MetricType =
+  struct
+    type nonrec t =
+      | WORKLOAD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | WORKLOAD -> "WORKLOAD" | Non_static_id s -> s
+    let of_string = function | "WORKLOAD" -> WORKLOAD | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MetricType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MetricType" j)
+    let to_json = simple_to_json to_value
+  end
 module ExceptionResourceId =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -2008,6 +4062,9 @@ module ValidationExceptionFieldList =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -2077,12 +4134,15 @@ module NextToken =
     let of_json j = string_of_json ~kind:"NextToken" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "The token to use to retrieve the next set of results."]
-module PillarReviewSummaries =
+module ReviewTemplatePillarReviewSummaries =
   struct
-    type nonrec t = PillarReviewSummary.t list
+    type nonrec t = ReviewTemplatePillarReviewSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:PillarReviewSummary.to_value)) |>
+      (xs |> (List.map ~f:ReviewTemplatePillarReviewSummary.to_value)) |>
         (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
@@ -2097,16 +4157,20 @@ module PillarReviewSummaries =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:PillarReviewSummary.of_xml)
+                     | _ -> true)))
+           ~f:ReviewTemplatePillarReviewSummary.of_xml)
     let of_json j =
-      list_of_json ~kind:"PillarReviewSummaries"
-        ~of_json:PillarReviewSummary.of_json j
+      list_of_json ~kind:"ReviewTemplatePillarReviewSummaries"
+        ~of_json:ReviewTemplatePillarReviewSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
 module ChoiceAnswers =
   struct
     type nonrec t = ChoiceAnswer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChoiceAnswer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2130,7 +4194,7 @@ module ChoiceAnswers =
 module HelpfulResourceUrl =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "The helpful resource URL for a question."]
+                            "The helpful resource URL. For Amazon Web Services official lenses, this is the helpful resource URL for a question or choice. For custom lenses, this is the helpful resource URL for a question and is only provided if HelpfulResourceDisplayText was specified for the question."]
     let context_ = "HelpfulResourceUrl"
     let make i =
       let open Result in
@@ -2145,25 +4209,8 @@ module HelpfulResourceUrl =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"HelpfulResourceUrl" j
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The helpful resource URL for a question."]
-module QuestionDescription =
-  struct
-    type nonrec t = string[@@ocaml.doc "The description of the question."]
-    let context_ = "QuestionDescription"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"QuestionDescription" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The description of the question."]
+  end[@@ocaml.doc
+       "The helpful resource URL. For Amazon Web Services official lenses, this is the helpful resource URL for a question or choice. For custom lenses, this is the helpful resource URL for a question and is only provided if HelpfulResourceDisplayText was specified for the question."]
 module ChoiceUpdate =
   struct
     type nonrec t =
@@ -2193,13 +4240,173 @@ module ChoiceUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ?notes ?reason ~status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let notes = field_map json "Notes" ChoiceNotes.of_json in
-      let reason = field_map json "Reason" ChoiceReason.of_json in
-      let status = field_map_exn json "Status" ChoiceStatus.of_json in
+    let of_json json__ =
+      let notes = field_map json__ "Notes" ChoiceNotes.of_json in
+      let reason = field_map json__ "Reason" ChoiceReason.of_json in
+      let status = field_map_exn json__ "Status" ChoiceStatus.of_json in
       make ?notes ?reason ~status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of choices to be updated."]
+module ProfileQuestions =
+  struct
+    type nonrec t = ProfileQuestion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProfileQuestion.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProfileQuestion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProfileQuestions" ~of_json:ProfileQuestion.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ProfileQuestionUpdate =
+  struct
+    type nonrec t =
+      {
+      questionId: QuestionId.t option ;
+      selectedChoiceIds: SelectedProfileChoiceIds.t option
+        [@ocaml.doc "The selected choices."]}
+    let make ?questionId =
+      fun ?selectedChoiceIds -> fun () -> { questionId; selectedChoiceIds }
+    let to_value x =
+      structure_to_value
+        [("QuestionId", (Option.map x.questionId ~f:QuestionId.to_value));
+        ("SelectedChoiceIds",
+          (Option.map x.selectedChoiceIds
+             ~f:SelectedProfileChoiceIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let selectedChoiceIds =
+        (Option.map ~f:SelectedProfileChoiceIds.of_xml)
+          (Xml.child xml_arg0 "SelectedChoiceIds") in
+      let questionId =
+        (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
+      make ?selectedChoiceIds ?questionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let selectedChoiceIds =
+        field_map json__ "SelectedChoiceIds" SelectedProfileChoiceIds.of_json in
+      let questionId = field_map json__ "QuestionId" QuestionId.of_json in
+      make ?selectedChoiceIds ?questionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An update to a profile question."]
+module JiraSelectedQuestionConfiguration =
+  struct
+    type nonrec t =
+      {
+      selectedPillars: SelectedPillars.t option
+        [@ocaml.doc "Selected pillars in the workload."]}
+    let make ?selectedPillars = fun () -> { selectedPillars }
+    let to_value x =
+      structure_to_value
+        [("SelectedPillars",
+           (Option.map x.selectedPillars ~f:SelectedPillars.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let selectedPillars =
+        (Option.map ~f:SelectedPillars.of_xml)
+          (Xml.child xml_arg0 "SelectedPillars") in
+      make ?selectedPillars ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let selectedPillars =
+        field_map json__ "SelectedPillars" SelectedPillars.of_json in
+      make ?selectedPillars ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Selected questions in the workload."]
+module PillarReviewSummaries =
+  struct
+    type nonrec t = PillarReviewSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PillarReviewSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PillarReviewSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PillarReviewSummaries"
+        ~of_json:PillarReviewSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AccountJiraIssueManagementStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AccountJiraIssueManagementStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AccountJiraIssueManagementStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module IntegrationStatusInput =
+  struct
+    type nonrec t =
+      | NOT_CONFIGURED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | NOT_CONFIGURED -> "NOT_CONFIGURED" | Non_static_id s -> s
+    let of_string =
+      function | "NOT_CONFIGURED" -> NOT_CONFIGURED | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IntegrationStatusInput" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"IntegrationStatusInput" j)
+    let to_json = simple_to_json to_value
+  end
 module WorkloadShareSummary =
   struct
     type nonrec t =
@@ -2207,21 +4414,31 @@ module WorkloadShareSummary =
       shareId: ShareId.t option ;
       sharedWith: SharedWith.t option ;
       permissionType: PermissionType.t option ;
-      status: ShareStatus.t option }
+      status: ShareStatus.t option ;
+      statusMessage: StatusMessage.t option
+        [@ocaml.doc "Optional message to compliment the Status field."]}
     let make ?shareId =
       fun ?sharedWith ->
         fun ?permissionType ->
           fun ?status ->
-            fun () -> { shareId; sharedWith; permissionType; status }
+            fun ?statusMessage ->
+              fun () ->
+                { shareId; sharedWith; permissionType; status; statusMessage
+                }
     let to_value x =
       structure_to_value
         [("ShareId", (Option.map x.shareId ~f:ShareId.to_value));
         ("SharedWith", (Option.map x.sharedWith ~f:SharedWith.to_value));
         ("PermissionType",
           (Option.map x.permissionType ~f:PermissionType.to_value));
-        ("Status", (Option.map x.status ~f:ShareStatus.to_value))]
+        ("Status", (Option.map x.status ~f:ShareStatus.to_value));
+        ("StatusMessage",
+          (Option.map x.statusMessage ~f:StatusMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let statusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "StatusMessage") in
       let status =
         (Option.map ~f:ShareStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let permissionType =
@@ -2231,17 +4448,62 @@ module WorkloadShareSummary =
         (Option.map ~f:SharedWith.of_xml) (Xml.child xml_arg0 "SharedWith") in
       let shareId =
         (Option.map ~f:ShareId.of_xml) (Xml.child xml_arg0 "ShareId") in
-      make ?status ?permissionType ?sharedWith ?shareId ()
+      make ?statusMessage ?status ?permissionType ?sharedWith ?shareId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ShareStatus.of_json in
+    let of_json json__ =
+      let statusMessage =
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" ShareStatus.of_json in
       let permissionType =
-        field_map json "PermissionType" PermissionType.of_json in
-      let sharedWith = field_map json "SharedWith" SharedWith.of_json in
-      let shareId = field_map json "ShareId" ShareId.of_json in
-      make ?status ?permissionType ?sharedWith ?shareId ()
+        field_map json__ "PermissionType" PermissionType.of_json in
+      let sharedWith = field_map json__ "SharedWith" SharedWith.of_json in
+      let shareId = field_map json__ "ShareId" ShareId.of_json in
+      make ?statusMessage ?status ?permissionType ?sharedWith ?shareId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A workload share summary return object."]
+module TemplateShareSummary =
+  struct
+    type nonrec t =
+      {
+      shareId: ShareId.t option ;
+      sharedWith: SharedWith.t option ;
+      status: ShareStatus.t option ;
+      statusMessage: StatusMessage.t option
+        [@ocaml.doc "Review template share invitation status message."]}
+    let make ?shareId =
+      fun ?sharedWith ->
+        fun ?status ->
+          fun ?statusMessage ->
+            fun () -> { shareId; sharedWith; status; statusMessage }
+    let to_value x =
+      structure_to_value
+        [("ShareId", (Option.map x.shareId ~f:ShareId.to_value));
+        ("SharedWith", (Option.map x.sharedWith ~f:SharedWith.to_value));
+        ("Status", (Option.map x.status ~f:ShareStatus.to_value));
+        ("StatusMessage",
+          (Option.map x.statusMessage ~f:StatusMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "StatusMessage") in
+      let status =
+        (Option.map ~f:ShareStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let sharedWith =
+        (Option.map ~f:SharedWith.of_xml) (Xml.child xml_arg0 "SharedWith") in
+      let shareId =
+        (Option.map ~f:ShareId.of_xml) (Xml.child xml_arg0 "ShareId") in
+      make ?statusMessage ?status ?sharedWith ?shareId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusMessage =
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" ShareStatus.of_json in
+      let sharedWith = field_map json__ "SharedWith" SharedWith.of_json in
+      let shareId = field_map json__ "ShareId" ShareId.of_json in
+      make ?statusMessage ?status ?sharedWith ?shareId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary of a review template share."]
 module ShareInvitationSummary =
   struct
     type nonrec t =
@@ -2256,7 +4518,13 @@ module ShareInvitationSummary =
       workloadName: WorkloadName.t option ;
       workloadId: WorkloadId.t option ;
       lensName: LensName.t option ;
-      lensArn: LensArn.t option [@ocaml.doc "The ARN for the lens."]}
+      lensArn: LensArn.t option [@ocaml.doc "The ARN for the lens."];
+      profileName: ProfileName.t option [@ocaml.doc "The profile name."];
+      profileArn: ProfileArn.t option [@ocaml.doc "The profile ARN."];
+      templateName: TemplateName.t option
+        [@ocaml.doc "The name of the review template."];
+      templateArn: TemplateArn.t option
+        [@ocaml.doc "The review template ARN."]}
     let make ?shareInvitationId =
       fun ?sharedBy ->
         fun ?sharedWith ->
@@ -2266,18 +4534,26 @@ module ShareInvitationSummary =
                 fun ?workloadId ->
                   fun ?lensName ->
                     fun ?lensArn ->
-                      fun () ->
-                        {
-                          shareInvitationId;
-                          sharedBy;
-                          sharedWith;
-                          permissionType;
-                          shareResourceType;
-                          workloadName;
-                          workloadId;
-                          lensName;
-                          lensArn
-                        }
+                      fun ?profileName ->
+                        fun ?profileArn ->
+                          fun ?templateName ->
+                            fun ?templateArn ->
+                              fun () ->
+                                {
+                                  shareInvitationId;
+                                  sharedBy;
+                                  sharedWith;
+                                  permissionType;
+                                  shareResourceType;
+                                  workloadName;
+                                  workloadId;
+                                  lensName;
+                                  lensArn;
+                                  profileName;
+                                  profileArn;
+                                  templateName;
+                                  templateArn
+                                }
     let to_value x =
       structure_to_value
         [("ShareInvitationId",
@@ -2292,9 +4568,23 @@ module ShareInvitationSummary =
           (Option.map x.workloadName ~f:WorkloadName.to_value));
         ("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
         ("LensName", (Option.map x.lensName ~f:LensName.to_value));
-        ("LensArn", (Option.map x.lensArn ~f:LensArn.to_value))]
+        ("LensArn", (Option.map x.lensArn ~f:LensArn.to_value));
+        ("ProfileName", (Option.map x.profileName ~f:ProfileName.to_value));
+        ("ProfileArn", (Option.map x.profileArn ~f:ProfileArn.to_value));
+        ("TemplateName",
+          (Option.map x.templateName ~f:TemplateName.to_value));
+        ("TemplateArn", (Option.map x.templateArn ~f:TemplateArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let templateArn =
+        (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "TemplateArn") in
+      let templateName =
+        (Option.map ~f:TemplateName.of_xml)
+          (Xml.child xml_arg0 "TemplateName") in
+      let profileArn =
+        (Option.map ~f:ProfileArn.of_xml) (Xml.child xml_arg0 "ProfileArn") in
+      let profileName =
+        (Option.map ~f:ProfileName.of_xml) (Xml.child xml_arg0 "ProfileName") in
       let lensArn =
         (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
       let lensName =
@@ -2317,26 +4607,429 @@ module ShareInvitationSummary =
       let shareInvitationId =
         (Option.map ~f:ShareInvitationId.of_xml)
           (Xml.child xml_arg0 "ShareInvitationId") in
-      make ?lensArn ?lensName ?workloadId ?workloadName ?shareResourceType
+      make ?templateArn ?templateName ?profileArn ?profileName ?lensArn
+        ?lensName ?workloadId ?workloadName ?shareResourceType
         ?permissionType ?sharedWith ?sharedBy ?shareInvitationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lensArn = field_map json "LensArn" LensArn.of_json in
-      let lensName = field_map json "LensName" LensName.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
-      let workloadName = field_map json "WorkloadName" WorkloadName.of_json in
+    let of_json json__ =
+      let templateArn = field_map json__ "TemplateArn" TemplateArn.of_json in
+      let templateName = field_map json__ "TemplateName" TemplateName.of_json in
+      let profileArn = field_map json__ "ProfileArn" ProfileArn.of_json in
+      let profileName = field_map json__ "ProfileName" ProfileName.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let lensName = field_map json__ "LensName" LensName.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      let workloadName = field_map json__ "WorkloadName" WorkloadName.of_json in
       let shareResourceType =
-        field_map json "ShareResourceType" ShareResourceType.of_json in
+        field_map json__ "ShareResourceType" ShareResourceType.of_json in
       let permissionType =
-        field_map json "PermissionType" PermissionType.of_json in
-      let sharedWith = field_map json "SharedWith" SharedWith.of_json in
-      let sharedBy = field_map json "SharedBy" AwsAccountId.of_json in
+        field_map json__ "PermissionType" PermissionType.of_json in
+      let sharedWith = field_map json__ "SharedWith" SharedWith.of_json in
+      let sharedBy = field_map json__ "SharedBy" AwsAccountId.of_json in
       let shareInvitationId =
-        field_map json "ShareInvitationId" ShareInvitationId.of_json in
-      make ?lensArn ?lensName ?workloadId ?workloadName ?shareResourceType
+        field_map json__ "ShareInvitationId" ShareInvitationId.of_json in
+      make ?templateArn ?templateName ?profileArn ?profileName ?lensArn
+        ?lensName ?workloadId ?workloadName ?shareResourceType
         ?permissionType ?sharedWith ?sharedBy ?shareInvitationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A share invitation summary return object."]
+module ReviewTemplateSummary =
+  struct
+    type nonrec t =
+      {
+      description: TemplateDescription.t option
+        [@ocaml.doc "Description of the review template."];
+      lenses: ReviewTemplateLenses.t option
+        [@ocaml.doc "Lenses associated with the review template."];
+      owner: AwsAccountId.t option ;
+      updatedAt: Timestamp.t option ;
+      templateArn: TemplateArn.t option
+        [@ocaml.doc "The review template ARN."];
+      templateName: TemplateName.t option
+        [@ocaml.doc "The name of the review template."];
+      updateStatus: ReviewTemplateUpdateStatus.t option
+        [@ocaml.doc "The latest status of a review template."]}
+    let make ?description =
+      fun ?lenses ->
+        fun ?owner ->
+          fun ?updatedAt ->
+            fun ?templateArn ->
+              fun ?templateName ->
+                fun ?updateStatus ->
+                  fun () ->
+                    {
+                      description;
+                      lenses;
+                      owner;
+                      updatedAt;
+                      templateArn;
+                      templateName;
+                      updateStatus
+                    }
+    let to_value x =
+      structure_to_value
+        [("Description",
+           (Option.map x.description ~f:TemplateDescription.to_value));
+        ("Lenses", (Option.map x.lenses ~f:ReviewTemplateLenses.to_value));
+        ("Owner", (Option.map x.owner ~f:AwsAccountId.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("TemplateArn", (Option.map x.templateArn ~f:TemplateArn.to_value));
+        ("TemplateName",
+          (Option.map x.templateName ~f:TemplateName.to_value));
+        ("UpdateStatus",
+          (Option.map x.updateStatus ~f:ReviewTemplateUpdateStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updateStatus =
+        (Option.map ~f:ReviewTemplateUpdateStatus.of_xml)
+          (Xml.child xml_arg0 "UpdateStatus") in
+      let templateName =
+        (Option.map ~f:TemplateName.of_xml)
+          (Xml.child xml_arg0 "TemplateName") in
+      let templateArn =
+        (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "TemplateArn") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let owner =
+        (Option.map ~f:AwsAccountId.of_xml) (Xml.child xml_arg0 "Owner") in
+      let lenses =
+        (Option.map ~f:ReviewTemplateLenses.of_xml)
+          (Xml.child xml_arg0 "Lenses") in
+      let description =
+        (Option.map ~f:TemplateDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      make ?updateStatus ?templateName ?templateArn ?updatedAt ?owner ?lenses
+        ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateStatus =
+        field_map json__ "UpdateStatus" ReviewTemplateUpdateStatus.of_json in
+      let templateName = field_map json__ "TemplateName" TemplateName.of_json in
+      let templateArn = field_map json__ "TemplateArn" TemplateArn.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let owner = field_map json__ "Owner" AwsAccountId.of_json in
+      let lenses = field_map json__ "Lenses" ReviewTemplateLenses.of_json in
+      let description =
+        field_map json__ "Description" TemplateDescription.of_json in
+      make ?updateStatus ?templateName ?templateArn ?updatedAt ?owner ?lenses
+        ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary of a review template."]
+module ReviewTemplateAnswerSummary =
+  struct
+    type nonrec t =
+      {
+      questionId: QuestionId.t option ;
+      pillarId: PillarId.t option ;
+      questionTitle: QuestionTitle.t option ;
+      choices: Choices.t option ;
+      selectedChoices: SelectedChoices.t option ;
+      choiceAnswerSummaries: ChoiceAnswerSummaries.t option
+        [@ocaml.doc
+          "A list of selected choices to a question in the review template."];
+      isApplicable: IsApplicable.t option ;
+      answerStatus: ReviewTemplateAnswerStatus.t option
+        [@ocaml.doc
+          "The status of whether or not this question has been answered."];
+      reason: AnswerReason.t option
+        [@ocaml.doc
+          "The reason why a choice is not-applicable to a question in the review template."];
+      questionType: QuestionType.t option
+        [@ocaml.doc "The type of question."]}
+    let make ?questionId =
+      fun ?pillarId ->
+        fun ?questionTitle ->
+          fun ?choices ->
+            fun ?selectedChoices ->
+              fun ?choiceAnswerSummaries ->
+                fun ?isApplicable ->
+                  fun ?answerStatus ->
+                    fun ?reason ->
+                      fun ?questionType ->
+                        fun () ->
+                          {
+                            questionId;
+                            pillarId;
+                            questionTitle;
+                            choices;
+                            selectedChoices;
+                            choiceAnswerSummaries;
+                            isApplicable;
+                            answerStatus;
+                            reason;
+                            questionType
+                          }
+    let to_value x =
+      structure_to_value
+        [("QuestionId", (Option.map x.questionId ~f:QuestionId.to_value));
+        ("PillarId", (Option.map x.pillarId ~f:PillarId.to_value));
+        ("QuestionTitle",
+          (Option.map x.questionTitle ~f:QuestionTitle.to_value));
+        ("Choices", (Option.map x.choices ~f:Choices.to_value));
+        ("SelectedChoices",
+          (Option.map x.selectedChoices ~f:SelectedChoices.to_value));
+        ("ChoiceAnswerSummaries",
+          (Option.map x.choiceAnswerSummaries
+             ~f:ChoiceAnswerSummaries.to_value));
+        ("IsApplicable",
+          (Option.map x.isApplicable ~f:IsApplicable.to_value));
+        ("AnswerStatus",
+          (Option.map x.answerStatus ~f:ReviewTemplateAnswerStatus.to_value));
+        ("Reason", (Option.map x.reason ~f:AnswerReason.to_value));
+        ("QuestionType",
+          (Option.map x.questionType ~f:QuestionType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let questionType =
+        (Option.map ~f:QuestionType.of_xml)
+          (Xml.child xml_arg0 "QuestionType") in
+      let reason =
+        (Option.map ~f:AnswerReason.of_xml) (Xml.child xml_arg0 "Reason") in
+      let answerStatus =
+        (Option.map ~f:ReviewTemplateAnswerStatus.of_xml)
+          (Xml.child xml_arg0 "AnswerStatus") in
+      let isApplicable =
+        (Option.map ~f:IsApplicable.of_xml)
+          (Xml.child xml_arg0 "IsApplicable") in
+      let choiceAnswerSummaries =
+        (Option.map ~f:ChoiceAnswerSummaries.of_xml)
+          (Xml.child xml_arg0 "ChoiceAnswerSummaries") in
+      let selectedChoices =
+        (Option.map ~f:SelectedChoices.of_xml)
+          (Xml.child xml_arg0 "SelectedChoices") in
+      let choices =
+        (Option.map ~f:Choices.of_xml) (Xml.child xml_arg0 "Choices") in
+      let questionTitle =
+        (Option.map ~f:QuestionTitle.of_xml)
+          (Xml.child xml_arg0 "QuestionTitle") in
+      let pillarId =
+        (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
+      let questionId =
+        (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
+      make ?questionType ?reason ?answerStatus ?isApplicable
+        ?choiceAnswerSummaries ?selectedChoices ?choices ?questionTitle
+        ?pillarId ?questionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let questionType = field_map json__ "QuestionType" QuestionType.of_json in
+      let reason = field_map json__ "Reason" AnswerReason.of_json in
+      let answerStatus =
+        field_map json__ "AnswerStatus" ReviewTemplateAnswerStatus.of_json in
+      let isApplicable = field_map json__ "IsApplicable" IsApplicable.of_json in
+      let choiceAnswerSummaries =
+        field_map json__ "ChoiceAnswerSummaries"
+          ChoiceAnswerSummaries.of_json in
+      let selectedChoices =
+        field_map json__ "SelectedChoices" SelectedChoices.of_json in
+      let choices = field_map json__ "Choices" Choices.of_json in
+      let questionTitle =
+        field_map json__ "QuestionTitle" QuestionTitle.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      let questionId = field_map json__ "QuestionId" QuestionId.of_json in
+      make ?questionType ?reason ?answerStatus ?isApplicable
+        ?choiceAnswerSummaries ?selectedChoices ?choices ?questionTitle
+        ?pillarId ?questionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The summary of review template answers."]
+module ProfileSummary =
+  struct
+    type nonrec t =
+      {
+      profileArn: ProfileArn.t option [@ocaml.doc "The profile ARN."];
+      profileVersion: ProfileVersion.t option
+        [@ocaml.doc "The profile version."];
+      profileName: ProfileName.t option [@ocaml.doc "The profile name."];
+      profileDescription: ProfileDescription.t option
+        [@ocaml.doc "The profile description."];
+      owner: AwsAccountId.t option ;
+      createdAt: Timestamp.t option ;
+      updatedAt: Timestamp.t option }
+    let make ?profileArn =
+      fun ?profileVersion ->
+        fun ?profileName ->
+          fun ?profileDescription ->
+            fun ?owner ->
+              fun ?createdAt ->
+                fun ?updatedAt ->
+                  fun () ->
+                    {
+                      profileArn;
+                      profileVersion;
+                      profileName;
+                      profileDescription;
+                      owner;
+                      createdAt;
+                      updatedAt
+                    }
+    let to_value x =
+      structure_to_value
+        [("ProfileArn", (Option.map x.profileArn ~f:ProfileArn.to_value));
+        ("ProfileVersion",
+          (Option.map x.profileVersion ~f:ProfileVersion.to_value));
+        ("ProfileName", (Option.map x.profileName ~f:ProfileName.to_value));
+        ("ProfileDescription",
+          (Option.map x.profileDescription ~f:ProfileDescription.to_value));
+        ("Owner", (Option.map x.owner ~f:AwsAccountId.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let owner =
+        (Option.map ~f:AwsAccountId.of_xml) (Xml.child xml_arg0 "Owner") in
+      let profileDescription =
+        (Option.map ~f:ProfileDescription.of_xml)
+          (Xml.child xml_arg0 "ProfileDescription") in
+      let profileName =
+        (Option.map ~f:ProfileName.of_xml) (Xml.child xml_arg0 "ProfileName") in
+      let profileVersion =
+        (Option.map ~f:ProfileVersion.of_xml)
+          (Xml.child xml_arg0 "ProfileVersion") in
+      let profileArn =
+        (Option.map ~f:ProfileArn.of_xml) (Xml.child xml_arg0 "ProfileArn") in
+      make ?updatedAt ?createdAt ?owner ?profileDescription ?profileName
+        ?profileVersion ?profileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let owner = field_map json__ "Owner" AwsAccountId.of_json in
+      let profileDescription =
+        field_map json__ "ProfileDescription" ProfileDescription.of_json in
+      let profileName = field_map json__ "ProfileName" ProfileName.of_json in
+      let profileVersion =
+        field_map json__ "ProfileVersion" ProfileVersion.of_json in
+      let profileArn = field_map json__ "ProfileArn" ProfileArn.of_json in
+      make ?updatedAt ?createdAt ?owner ?profileDescription ?profileName
+        ?profileVersion ?profileArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary of a profile."]
+module ProfileShareSummary =
+  struct
+    type nonrec t =
+      {
+      shareId: ShareId.t option ;
+      sharedWith: SharedWith.t option ;
+      status: ShareStatus.t option ;
+      statusMessage: StatusMessage.t option
+        [@ocaml.doc "Profile share invitation status message."]}
+    let make ?shareId =
+      fun ?sharedWith ->
+        fun ?status ->
+          fun ?statusMessage ->
+            fun () -> { shareId; sharedWith; status; statusMessage }
+    let to_value x =
+      structure_to_value
+        [("ShareId", (Option.map x.shareId ~f:ShareId.to_value));
+        ("SharedWith", (Option.map x.sharedWith ~f:SharedWith.to_value));
+        ("Status", (Option.map x.status ~f:ShareStatus.to_value));
+        ("StatusMessage",
+          (Option.map x.statusMessage ~f:StatusMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "StatusMessage") in
+      let status =
+        (Option.map ~f:ShareStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let sharedWith =
+        (Option.map ~f:SharedWith.of_xml) (Xml.child xml_arg0 "SharedWith") in
+      let shareId =
+        (Option.map ~f:ShareId.of_xml) (Xml.child xml_arg0 "ShareId") in
+      make ?statusMessage ?status ?sharedWith ?shareId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusMessage =
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" ShareStatus.of_json in
+      let sharedWith = field_map json__ "SharedWith" SharedWith.of_json in
+      let shareId = field_map json__ "ShareId" ShareId.of_json in
+      make ?statusMessage ?status ?sharedWith ?shareId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary of a profile share."]
+module ProfileNotificationSummary =
+  struct
+    type nonrec t =
+      {
+      currentProfileVersion: ProfileVersion.t option
+        [@ocaml.doc "The current profile version."];
+      latestProfileVersion: ProfileVersion.t option
+        [@ocaml.doc "The latest profile version."];
+      type_: ProfileNotificationType.t option
+        [@ocaml.doc "Type of notification."];
+      profileArn: ProfileArn.t option [@ocaml.doc "The profile ARN."];
+      profileName: ProfileName.t option [@ocaml.doc "The profile name."];
+      workloadId: WorkloadId.t option ;
+      workloadName: WorkloadName.t option }
+    let make ?currentProfileVersion =
+      fun ?latestProfileVersion ->
+        fun ?type_ ->
+          fun ?profileArn ->
+            fun ?profileName ->
+              fun ?workloadId ->
+                fun ?workloadName ->
+                  fun () ->
+                    {
+                      currentProfileVersion;
+                      latestProfileVersion;
+                      type_;
+                      profileArn;
+                      profileName;
+                      workloadId;
+                      workloadName
+                    }
+    let to_value x =
+      structure_to_value
+        [("CurrentProfileVersion",
+           (Option.map x.currentProfileVersion ~f:ProfileVersion.to_value));
+        ("LatestProfileVersion",
+          (Option.map x.latestProfileVersion ~f:ProfileVersion.to_value));
+        ("Type", (Option.map x.type_ ~f:ProfileNotificationType.to_value));
+        ("ProfileArn", (Option.map x.profileArn ~f:ProfileArn.to_value));
+        ("ProfileName", (Option.map x.profileName ~f:ProfileName.to_value));
+        ("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
+        ("WorkloadName",
+          (Option.map x.workloadName ~f:WorkloadName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workloadName =
+        (Option.map ~f:WorkloadName.of_xml)
+          (Xml.child xml_arg0 "WorkloadName") in
+      let workloadId =
+        (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
+      let profileName =
+        (Option.map ~f:ProfileName.of_xml) (Xml.child xml_arg0 "ProfileName") in
+      let profileArn =
+        (Option.map ~f:ProfileArn.of_xml) (Xml.child xml_arg0 "ProfileArn") in
+      let type_ =
+        (Option.map ~f:ProfileNotificationType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let latestProfileVersion =
+        (Option.map ~f:ProfileVersion.of_xml)
+          (Xml.child xml_arg0 "LatestProfileVersion") in
+      let currentProfileVersion =
+        (Option.map ~f:ProfileVersion.of_xml)
+          (Xml.child xml_arg0 "CurrentProfileVersion") in
+      make ?workloadName ?workloadId ?profileName ?profileArn ?type_
+        ?latestProfileVersion ?currentProfileVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workloadName = field_map json__ "WorkloadName" WorkloadName.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      let profileName = field_map json__ "ProfileName" ProfileName.of_json in
+      let profileArn = field_map json__ "ProfileArn" ProfileArn.of_json in
+      let type_ = field_map json__ "Type" ProfileNotificationType.of_json in
+      let latestProfileVersion =
+        field_map json__ "LatestProfileVersion" ProfileVersion.of_json in
+      let currentProfileVersion =
+        field_map json__ "CurrentProfileVersion" ProfileVersion.of_json in
+      make ?workloadName ?workloadId ?profileName ?profileArn ?type_
+        ?latestProfileVersion ?currentProfileVersion ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The profile notification summary."]
 module NotificationSummary =
   struct
     type nonrec t =
@@ -2361,10 +5054,10 @@ module NotificationSummary =
         (Option.map ~f:NotificationType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?lensUpgradeSummary ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lensUpgradeSummary =
-        field_map json "LensUpgradeSummary" LensUpgradeSummary.of_json in
-      let type_ = field_map json "Type" NotificationType.of_json in
+        field_map json__ "LensUpgradeSummary" LensUpgradeSummary.of_json in
+      let type_ = field_map json__ "Type" NotificationType.of_json in
       make ?lensUpgradeSummary ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A notification summary return object."]
@@ -2406,14 +5099,14 @@ module MilestoneSummary =
           (Xml.child xml_arg0 "MilestoneNumber") in
       make ?workloadSummary ?recordedAt ?milestoneName ?milestoneNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workloadSummary =
-        field_map json "WorkloadSummary" WorkloadSummary.of_json in
-      let recordedAt = field_map json "RecordedAt" Timestamp.of_json in
+        field_map json__ "WorkloadSummary" WorkloadSummary.of_json in
+      let recordedAt = field_map json__ "RecordedAt" Timestamp.of_json in
       let milestoneName =
-        field_map json "MilestoneName" MilestoneName.of_json in
+        field_map json__ "MilestoneName" MilestoneName.of_json in
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
       make ?workloadSummary ?recordedAt ?milestoneName ?milestoneNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A milestone summary return object."]
@@ -2494,17 +5187,18 @@ module LensSummary =
       make ?lensStatus ?owner ?lensVersion ?updatedAt ?createdAt ?description
         ?lensType ?lensName ?lensAlias ?lensArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lensStatus = field_map json "LensStatus" LensStatus.of_json in
-      let owner = field_map json "Owner" AwsAccountId.of_json in
-      let lensVersion = field_map json "LensVersion" LensVersion.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let description = field_map json "Description" LensDescription.of_json in
-      let lensType = field_map json "LensType" LensType.of_json in
-      let lensName = field_map json "LensName" LensName.of_json in
-      let lensAlias = field_map json "LensAlias" LensAlias.of_json in
-      let lensArn = field_map json "LensArn" LensArn.of_json in
+    let of_json json__ =
+      let lensStatus = field_map json__ "LensStatus" LensStatus.of_json in
+      let owner = field_map json__ "Owner" AwsAccountId.of_json in
+      let lensVersion = field_map json__ "LensVersion" LensVersion.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let description =
+        field_map json__ "Description" LensDescription.of_json in
+      let lensType = field_map json__ "LensType" LensType.of_json in
+      let lensName = field_map json__ "LensName" LensName.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
       make ?lensStatus ?owner ?lensVersion ?updatedAt ?createdAt ?description
         ?lensType ?lensName ?lensAlias ?lensArn ()
     let to_json v = composed_to_json to_value v
@@ -2515,30 +5209,41 @@ module LensShareSummary =
       {
       shareId: ShareId.t option ;
       sharedWith: SharedWith.t option ;
-      status: ShareStatus.t option }
+      status: ShareStatus.t option ;
+      statusMessage: StatusMessage.t option
+        [@ocaml.doc "Optional message to compliment the Status field."]}
     let make ?shareId =
       fun ?sharedWith ->
-        fun ?status -> fun () -> { shareId; sharedWith; status }
+        fun ?status ->
+          fun ?statusMessage ->
+            fun () -> { shareId; sharedWith; status; statusMessage }
     let to_value x =
       structure_to_value
         [("ShareId", (Option.map x.shareId ~f:ShareId.to_value));
         ("SharedWith", (Option.map x.sharedWith ~f:SharedWith.to_value));
-        ("Status", (Option.map x.status ~f:ShareStatus.to_value))]
+        ("Status", (Option.map x.status ~f:ShareStatus.to_value));
+        ("StatusMessage",
+          (Option.map x.statusMessage ~f:StatusMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let statusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "StatusMessage") in
       let status =
         (Option.map ~f:ShareStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let sharedWith =
         (Option.map ~f:SharedWith.of_xml) (Xml.child xml_arg0 "SharedWith") in
       let shareId =
         (Option.map ~f:ShareId.of_xml) (Xml.child xml_arg0 "ShareId") in
-      make ?status ?sharedWith ?shareId ()
+      make ?statusMessage ?status ?sharedWith ?shareId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ShareStatus.of_json in
-      let sharedWith = field_map json "SharedWith" SharedWith.of_json in
-      let shareId = field_map json "ShareId" ShareId.of_json in
-      make ?status ?sharedWith ?shareId ()
+    let of_json json__ =
+      let statusMessage =
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" ShareStatus.of_json in
+      let sharedWith = field_map json__ "SharedWith" SharedWith.of_json in
+      let shareId = field_map json__ "ShareId" ShareId.of_json in
+      make ?statusMessage ?status ?sharedWith ?shareId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A lens share summary return object."]
 module LensReviewSummary =
@@ -2552,7 +5257,10 @@ module LensReviewSummary =
       lensName: LensName.t option ;
       lensStatus: LensStatus.t option [@ocaml.doc "The status of the lens."];
       updatedAt: Timestamp.t option ;
-      riskCounts: RiskCounts.t option }
+      riskCounts: RiskCounts.t option ;
+      profiles: WorkloadProfiles.t option
+        [@ocaml.doc "The profiles associated with the workload."];
+      prioritizedRiskCounts: RiskCounts.t option }
     let make ?lensAlias =
       fun ?lensArn ->
         fun ?lensVersion ->
@@ -2560,16 +5268,20 @@ module LensReviewSummary =
             fun ?lensStatus ->
               fun ?updatedAt ->
                 fun ?riskCounts ->
-                  fun () ->
-                    {
-                      lensAlias;
-                      lensArn;
-                      lensVersion;
-                      lensName;
-                      lensStatus;
-                      updatedAt;
-                      riskCounts
-                    }
+                  fun ?profiles ->
+                    fun ?prioritizedRiskCounts ->
+                      fun () ->
+                        {
+                          lensAlias;
+                          lensArn;
+                          lensVersion;
+                          lensName;
+                          lensStatus;
+                          updatedAt;
+                          riskCounts;
+                          profiles;
+                          prioritizedRiskCounts
+                        }
     let to_value x =
       structure_to_value
         [("LensAlias", (Option.map x.lensAlias ~f:LensAlias.to_value));
@@ -2578,9 +5290,18 @@ module LensReviewSummary =
         ("LensName", (Option.map x.lensName ~f:LensName.to_value));
         ("LensStatus", (Option.map x.lensStatus ~f:LensStatus.to_value));
         ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
-        ("RiskCounts", (Option.map x.riskCounts ~f:RiskCounts.to_value))]
+        ("RiskCounts", (Option.map x.riskCounts ~f:RiskCounts.to_value));
+        ("Profiles", (Option.map x.profiles ~f:WorkloadProfiles.to_value));
+        ("PrioritizedRiskCounts",
+          (Option.map x.prioritizedRiskCounts ~f:RiskCounts.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let prioritizedRiskCounts =
+        (Option.map ~f:RiskCounts.of_xml)
+          (Xml.child xml_arg0 "PrioritizedRiskCounts") in
+      let profiles =
+        (Option.map ~f:WorkloadProfiles.of_xml)
+          (Xml.child xml_arg0 "Profiles") in
       let riskCounts =
         (Option.map ~f:RiskCounts.of_xml) (Xml.child xml_arg0 "RiskCounts") in
       let updatedAt =
@@ -2595,19 +5316,22 @@ module LensReviewSummary =
         (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
       let lensAlias =
         (Option.map ~f:LensAlias.of_xml) (Xml.child xml_arg0 "LensAlias") in
-      make ?riskCounts ?updatedAt ?lensStatus ?lensName ?lensVersion ?lensArn
-        ?lensAlias ()
+      make ?prioritizedRiskCounts ?profiles ?riskCounts ?updatedAt
+        ?lensStatus ?lensName ?lensVersion ?lensArn ?lensAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let riskCounts = field_map json "RiskCounts" RiskCounts.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let lensStatus = field_map json "LensStatus" LensStatus.of_json in
-      let lensName = field_map json "LensName" LensName.of_json in
-      let lensVersion = field_map json "LensVersion" LensVersion.of_json in
-      let lensArn = field_map json "LensArn" LensArn.of_json in
-      let lensAlias = field_map json "LensAlias" LensAlias.of_json in
-      make ?riskCounts ?updatedAt ?lensStatus ?lensName ?lensVersion ?lensArn
-        ?lensAlias ()
+    let of_json json__ =
+      let prioritizedRiskCounts =
+        field_map json__ "PrioritizedRiskCounts" RiskCounts.of_json in
+      let profiles = field_map json__ "Profiles" WorkloadProfiles.of_json in
+      let riskCounts = field_map json__ "RiskCounts" RiskCounts.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let lensStatus = field_map json__ "LensStatus" LensStatus.of_json in
+      let lensName = field_map json__ "LensName" LensName.of_json in
+      let lensVersion = field_map json__ "LensVersion" LensVersion.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
+      make ?prioritizedRiskCounts ?profiles ?riskCounts ?updatedAt
+        ?lensStatus ?lensName ?lensVersion ?lensArn ?lensAlias ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A lens review summary of a workload."]
 module ImprovementSummary =
@@ -2620,22 +5344,26 @@ module ImprovementSummary =
       risk: Risk.t option ;
       improvementPlanUrl: ImprovementPlanUrl.t option ;
       improvementPlans: ChoiceImprovementPlans.t option
-        [@ocaml.doc "The improvement plan details."]}
+        [@ocaml.doc "The improvement plan details."];
+      jiraConfiguration: JiraConfiguration.t option
+        [@ocaml.doc "Configuration of the Jira integration."]}
     let make ?questionId =
       fun ?pillarId ->
         fun ?questionTitle ->
           fun ?risk ->
             fun ?improvementPlanUrl ->
               fun ?improvementPlans ->
-                fun () ->
-                  {
-                    questionId;
-                    pillarId;
-                    questionTitle;
-                    risk;
-                    improvementPlanUrl;
-                    improvementPlans
-                  }
+                fun ?jiraConfiguration ->
+                  fun () ->
+                    {
+                      questionId;
+                      pillarId;
+                      questionTitle;
+                      risk;
+                      improvementPlanUrl;
+                      improvementPlans;
+                      jiraConfiguration
+                    }
     let to_value x =
       structure_to_value
         [("QuestionId", (Option.map x.questionId ~f:QuestionId.to_value));
@@ -2646,9 +5374,14 @@ module ImprovementSummary =
         ("ImprovementPlanUrl",
           (Option.map x.improvementPlanUrl ~f:ImprovementPlanUrl.to_value));
         ("ImprovementPlans",
-          (Option.map x.improvementPlans ~f:ChoiceImprovementPlans.to_value))]
+          (Option.map x.improvementPlans ~f:ChoiceImprovementPlans.to_value));
+        ("JiraConfiguration",
+          (Option.map x.jiraConfiguration ~f:JiraConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jiraConfiguration =
+        (Option.map ~f:JiraConfiguration.of_xml)
+          (Xml.child xml_arg0 "JiraConfiguration") in
       let improvementPlans =
         (Option.map ~f:ChoiceImprovementPlans.of_xml)
           (Xml.child xml_arg0 "ImprovementPlans") in
@@ -2663,23 +5396,252 @@ module ImprovementSummary =
         (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
       let questionId =
         (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
-      make ?improvementPlans ?improvementPlanUrl ?risk ?questionTitle
-        ?pillarId ?questionId ()
+      make ?jiraConfiguration ?improvementPlans ?improvementPlanUrl ?risk
+        ?questionTitle ?pillarId ?questionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let jiraConfiguration =
+        field_map json__ "JiraConfiguration" JiraConfiguration.of_json in
       let improvementPlans =
-        field_map json "ImprovementPlans" ChoiceImprovementPlans.of_json in
+        field_map json__ "ImprovementPlans" ChoiceImprovementPlans.of_json in
       let improvementPlanUrl =
-        field_map json "ImprovementPlanUrl" ImprovementPlanUrl.of_json in
-      let risk = field_map json "Risk" Risk.of_json in
+        field_map json__ "ImprovementPlanUrl" ImprovementPlanUrl.of_json in
+      let risk = field_map json__ "Risk" Risk.of_json in
       let questionTitle =
-        field_map json "QuestionTitle" QuestionTitle.of_json in
-      let pillarId = field_map json "PillarId" PillarId.of_json in
-      let questionId = field_map json "QuestionId" QuestionId.of_json in
-      make ?improvementPlans ?improvementPlanUrl ?risk ?questionTitle
-        ?pillarId ?questionId ()
+        field_map json__ "QuestionTitle" QuestionTitle.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      let questionId = field_map json__ "QuestionId" QuestionId.of_json in
+      make ?jiraConfiguration ?improvementPlans ?improvementPlanUrl ?risk
+        ?questionTitle ?pillarId ?questionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An improvement summary of a lens review in a workload."]
+module CheckSummary =
+  struct
+    type nonrec t =
+      {
+      id: CheckId.t option [@ocaml.doc "Trusted Advisor check ID."];
+      name: CheckName.t option [@ocaml.doc "Trusted Advisor check name."];
+      provider: CheckProvider.t option
+        [@ocaml.doc "Provider of the check related to the best practice."];
+      description: CheckDescription.t option
+        [@ocaml.doc "Trusted Advisor check description."];
+      updatedAt: Timestamp.t option ;
+      lensArn: LensArn.t option
+        [@ocaml.doc "Well-Architected Lens ARN associated to the check."];
+      pillarId: PillarId.t option ;
+      questionId: QuestionId.t option ;
+      choiceId: ChoiceId.t option ;
+      status: CheckStatus.t option
+        [@ocaml.doc "Status associated to the check."];
+      accountSummary: AccountSummary.t option
+        [@ocaml.doc "Account summary associated to the check."]}
+    let make ?id =
+      fun ?name ->
+        fun ?provider ->
+          fun ?description ->
+            fun ?updatedAt ->
+              fun ?lensArn ->
+                fun ?pillarId ->
+                  fun ?questionId ->
+                    fun ?choiceId ->
+                      fun ?status ->
+                        fun ?accountSummary ->
+                          fun () ->
+                            {
+                              id;
+                              name;
+                              provider;
+                              description;
+                              updatedAt;
+                              lensArn;
+                              pillarId;
+                              questionId;
+                              choiceId;
+                              status;
+                              accountSummary
+                            }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:CheckId.to_value));
+        ("Name", (Option.map x.name ~f:CheckName.to_value));
+        ("Provider", (Option.map x.provider ~f:CheckProvider.to_value));
+        ("Description",
+          (Option.map x.description ~f:CheckDescription.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("LensArn", (Option.map x.lensArn ~f:LensArn.to_value));
+        ("PillarId", (Option.map x.pillarId ~f:PillarId.to_value));
+        ("QuestionId", (Option.map x.questionId ~f:QuestionId.to_value));
+        ("ChoiceId", (Option.map x.choiceId ~f:ChoiceId.to_value));
+        ("Status", (Option.map x.status ~f:CheckStatus.to_value));
+        ("AccountSummary",
+          (Option.map x.accountSummary ~f:AccountSummary.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountSummary =
+        (Option.map ~f:AccountSummary.of_xml)
+          (Xml.child xml_arg0 "AccountSummary") in
+      let status =
+        (Option.map ~f:CheckStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let choiceId =
+        (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
+      let questionId =
+        (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
+      let pillarId =
+        (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
+      let lensArn =
+        (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let description =
+        (Option.map ~f:CheckDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let provider =
+        (Option.map ~f:CheckProvider.of_xml) (Xml.child xml_arg0 "Provider") in
+      let name = (Option.map ~f:CheckName.of_xml) (Xml.child xml_arg0 "Name") in
+      let id = (Option.map ~f:CheckId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?accountSummary ?status ?choiceId ?questionId ?pillarId ?lensArn
+        ?updatedAt ?description ?provider ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountSummary =
+        field_map json__ "AccountSummary" AccountSummary.of_json in
+      let status = field_map json__ "Status" CheckStatus.of_json in
+      let choiceId = field_map json__ "ChoiceId" ChoiceId.of_json in
+      let questionId = field_map json__ "QuestionId" QuestionId.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let description =
+        field_map json__ "Description" CheckDescription.of_json in
+      let provider = field_map json__ "Provider" CheckProvider.of_json in
+      let name = field_map json__ "Name" CheckName.of_json in
+      let id = field_map json__ "Id" CheckId.of_json in
+      make ?accountSummary ?status ?choiceId ?questionId ?pillarId ?lensArn
+        ?updatedAt ?description ?provider ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Trusted Advisor check summary."]
+module CheckDetail =
+  struct
+    type nonrec t =
+      {
+      id: CheckId.t option [@ocaml.doc "Trusted Advisor check ID."];
+      name: CheckName.t option [@ocaml.doc "Trusted Advisor check name."];
+      description: CheckDescription.t option
+        [@ocaml.doc "Trusted Advisor check description."];
+      provider: CheckProvider.t option
+        [@ocaml.doc "Provider of the check related to the best practice."];
+      lensArn: LensArn.t option
+        [@ocaml.doc "Well-Architected Lens ARN associated to the check."];
+      pillarId: PillarId.t option ;
+      questionId: QuestionId.t option ;
+      choiceId: ChoiceId.t option ;
+      status: CheckStatus.t option
+        [@ocaml.doc "Status associated to the check."];
+      accountId: AwsAccountId.t option ;
+      flaggedResources: FlaggedResources.t option
+        [@ocaml.doc "Count of flagged resources associated to the check."];
+      reason: CheckFailureReason.t option
+        [@ocaml.doc "Reason associated to the check."];
+      updatedAt: Timestamp.t option }
+    let make ?id =
+      fun ?name ->
+        fun ?description ->
+          fun ?provider ->
+            fun ?lensArn ->
+              fun ?pillarId ->
+                fun ?questionId ->
+                  fun ?choiceId ->
+                    fun ?status ->
+                      fun ?accountId ->
+                        fun ?flaggedResources ->
+                          fun ?reason ->
+                            fun ?updatedAt ->
+                              fun () ->
+                                {
+                                  id;
+                                  name;
+                                  description;
+                                  provider;
+                                  lensArn;
+                                  pillarId;
+                                  questionId;
+                                  choiceId;
+                                  status;
+                                  accountId;
+                                  flaggedResources;
+                                  reason;
+                                  updatedAt
+                                }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:CheckId.to_value));
+        ("Name", (Option.map x.name ~f:CheckName.to_value));
+        ("Description",
+          (Option.map x.description ~f:CheckDescription.to_value));
+        ("Provider", (Option.map x.provider ~f:CheckProvider.to_value));
+        ("LensArn", (Option.map x.lensArn ~f:LensArn.to_value));
+        ("PillarId", (Option.map x.pillarId ~f:PillarId.to_value));
+        ("QuestionId", (Option.map x.questionId ~f:QuestionId.to_value));
+        ("ChoiceId", (Option.map x.choiceId ~f:ChoiceId.to_value));
+        ("Status", (Option.map x.status ~f:CheckStatus.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AwsAccountId.to_value));
+        ("FlaggedResources",
+          (Option.map x.flaggedResources ~f:FlaggedResources.to_value));
+        ("Reason", (Option.map x.reason ~f:CheckFailureReason.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let reason =
+        (Option.map ~f:CheckFailureReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
+      let flaggedResources =
+        (Option.map ~f:FlaggedResources.of_xml)
+          (Xml.child xml_arg0 "FlaggedResources") in
+      let accountId =
+        (Option.map ~f:AwsAccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let status =
+        (Option.map ~f:CheckStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let choiceId =
+        (Option.map ~f:ChoiceId.of_xml) (Xml.child xml_arg0 "ChoiceId") in
+      let questionId =
+        (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
+      let pillarId =
+        (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
+      let lensArn =
+        (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
+      let provider =
+        (Option.map ~f:CheckProvider.of_xml) (Xml.child xml_arg0 "Provider") in
+      let description =
+        (Option.map ~f:CheckDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name = (Option.map ~f:CheckName.of_xml) (Xml.child xml_arg0 "Name") in
+      let id = (Option.map ~f:CheckId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?updatedAt ?reason ?flaggedResources ?accountId ?status ?choiceId
+        ?questionId ?pillarId ?lensArn ?provider ?description ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let reason = field_map json__ "Reason" CheckFailureReason.of_json in
+      let flaggedResources =
+        field_map json__ "FlaggedResources" FlaggedResources.of_json in
+      let accountId = field_map json__ "AccountId" AwsAccountId.of_json in
+      let status = field_map json__ "Status" CheckStatus.of_json in
+      let choiceId = field_map json__ "ChoiceId" ChoiceId.of_json in
+      let questionId = field_map json__ "QuestionId" QuestionId.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let provider = field_map json__ "Provider" CheckProvider.of_json in
+      let description =
+        field_map json__ "Description" CheckDescription.of_json in
+      let name = field_map json__ "Name" CheckName.of_json in
+      let id = field_map json__ "Id" CheckId.of_json in
+      make ?updatedAt ?reason ?flaggedResources ?accountId ?status ?choiceId
+        ?questionId ?pillarId ?lensArn ?provider ?description ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Account details for a Well-Architected best practice in relation to Trusted Advisor checks."]
 module AnswerSummary =
   struct
     type nonrec t =
@@ -2696,7 +5658,11 @@ module AnswerSummary =
       risk: Risk.t option ;
       reason: AnswerReason.t option
         [@ocaml.doc
-          "The reason why a choice is non-applicable to a question in your workload."]}
+          "The reason why a choice is non-applicable to a question in your workload."];
+      questionType: QuestionType.t option
+        [@ocaml.doc "The type of the question."];
+      jiraConfiguration: JiraConfiguration.t option
+        [@ocaml.doc "Configuration of the Jira integration."]}
     let make ?questionId =
       fun ?pillarId ->
         fun ?questionTitle ->
@@ -2706,18 +5672,22 @@ module AnswerSummary =
                 fun ?isApplicable ->
                   fun ?risk ->
                     fun ?reason ->
-                      fun () ->
-                        {
-                          questionId;
-                          pillarId;
-                          questionTitle;
-                          choices;
-                          selectedChoices;
-                          choiceAnswerSummaries;
-                          isApplicable;
-                          risk;
-                          reason
-                        }
+                      fun ?questionType ->
+                        fun ?jiraConfiguration ->
+                          fun () ->
+                            {
+                              questionId;
+                              pillarId;
+                              questionTitle;
+                              choices;
+                              selectedChoices;
+                              choiceAnswerSummaries;
+                              isApplicable;
+                              risk;
+                              reason;
+                              questionType;
+                              jiraConfiguration
+                            }
     let to_value x =
       structure_to_value
         [("QuestionId", (Option.map x.questionId ~f:QuestionId.to_value));
@@ -2733,9 +5703,19 @@ module AnswerSummary =
         ("IsApplicable",
           (Option.map x.isApplicable ~f:IsApplicable.to_value));
         ("Risk", (Option.map x.risk ~f:Risk.to_value));
-        ("Reason", (Option.map x.reason ~f:AnswerReason.to_value))]
+        ("Reason", (Option.map x.reason ~f:AnswerReason.to_value));
+        ("QuestionType",
+          (Option.map x.questionType ~f:QuestionType.to_value));
+        ("JiraConfiguration",
+          (Option.map x.jiraConfiguration ~f:JiraConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jiraConfiguration =
+        (Option.map ~f:JiraConfiguration.of_xml)
+          (Xml.child xml_arg0 "JiraConfiguration") in
+      let questionType =
+        (Option.map ~f:QuestionType.of_xml)
+          (Xml.child xml_arg0 "QuestionType") in
       let reason =
         (Option.map ~f:AnswerReason.of_xml) (Xml.child xml_arg0 "Reason") in
       let risk = (Option.map ~f:Risk.of_xml) (Xml.child xml_arg0 "Risk") in
@@ -2757,26 +5737,61 @@ module AnswerSummary =
         (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
       let questionId =
         (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
-      make ?reason ?risk ?isApplicable ?choiceAnswerSummaries
-        ?selectedChoices ?choices ?questionTitle ?pillarId ?questionId ()
+      make ?jiraConfiguration ?questionType ?reason ?risk ?isApplicable
+        ?choiceAnswerSummaries ?selectedChoices ?choices ?questionTitle
+        ?pillarId ?questionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" AnswerReason.of_json in
-      let risk = field_map json "Risk" Risk.of_json in
-      let isApplicable = field_map json "IsApplicable" IsApplicable.of_json in
+    let of_json json__ =
+      let jiraConfiguration =
+        field_map json__ "JiraConfiguration" JiraConfiguration.of_json in
+      let questionType = field_map json__ "QuestionType" QuestionType.of_json in
+      let reason = field_map json__ "Reason" AnswerReason.of_json in
+      let risk = field_map json__ "Risk" Risk.of_json in
+      let isApplicable = field_map json__ "IsApplicable" IsApplicable.of_json in
       let choiceAnswerSummaries =
-        field_map json "ChoiceAnswerSummaries" ChoiceAnswerSummaries.of_json in
+        field_map json__ "ChoiceAnswerSummaries"
+          ChoiceAnswerSummaries.of_json in
       let selectedChoices =
-        field_map json "SelectedChoices" SelectedChoices.of_json in
-      let choices = field_map json "Choices" Choices.of_json in
+        field_map json__ "SelectedChoices" SelectedChoices.of_json in
+      let choices = field_map json__ "Choices" Choices.of_json in
       let questionTitle =
-        field_map json "QuestionTitle" QuestionTitle.of_json in
-      let pillarId = field_map json "PillarId" PillarId.of_json in
-      let questionId = field_map json "QuestionId" QuestionId.of_json in
-      make ?reason ?risk ?isApplicable ?choiceAnswerSummaries
-        ?selectedChoices ?choices ?questionTitle ?pillarId ?questionId ()
+        field_map json__ "QuestionTitle" QuestionTitle.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      let questionId = field_map json__ "QuestionId" QuestionId.of_json in
+      make ?jiraConfiguration ?questionType ?reason ?risk ?isApplicable
+        ?choiceAnswerSummaries ?selectedChoices ?choices ?questionTitle
+        ?pillarId ?questionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An answer summary of a lens review in a workload."]
+module TemplateQuestions =
+  struct
+    type nonrec t = ProfileTemplateQuestion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProfileTemplateQuestion.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProfileTemplateQuestion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TemplateQuestions"
+        ~of_json:ProfileTemplateQuestion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Workload =
   struct
     type nonrec t =
@@ -2808,7 +5823,17 @@ module Workload =
       shareInvitationId: ShareInvitationId.t option
         [@ocaml.doc "The ID assigned to the share invitation."];
       tags: TagMap.t option
-        [@ocaml.doc "The tags associated with the workload."]}
+        [@ocaml.doc "The tags associated with the workload."];
+      discoveryConfig: WorkloadDiscoveryConfig.t option
+        [@ocaml.doc "Discovery configuration associated to the workload."];
+      applications: WorkloadApplications.t option
+        [@ocaml.doc
+          "List of AppRegistry application ARNs associated to the workload."];
+      profiles: WorkloadProfiles.t option
+        [@ocaml.doc "Profile associated with a workload."];
+      prioritizedRiskCounts: RiskCounts.t option ;
+      jiraConfiguration: WorkloadJiraConfigurationOutput.t option
+        [@ocaml.doc "Jira configuration for a specific workload."]}
     let make ?workloadId =
       fun ?workloadArn ->
         fun ?workloadName ->
@@ -2832,32 +5857,46 @@ module Workload =
                                             fun ?owner ->
                                               fun ?shareInvitationId ->
                                                 fun ?tags ->
-                                                  fun () ->
-                                                    {
-                                                      workloadId;
-                                                      workloadArn;
-                                                      workloadName;
-                                                      description;
-                                                      environment;
-                                                      updatedAt;
-                                                      accountIds;
-                                                      awsRegions;
-                                                      nonAwsRegions;
-                                                      architecturalDesign;
-                                                      reviewOwner;
-                                                      reviewRestrictionDate;
-                                                      isReviewOwnerUpdateAcknowledged;
-                                                      industryType;
-                                                      industry;
-                                                      notes;
-                                                      improvementStatus;
-                                                      riskCounts;
-                                                      pillarPriorities;
-                                                      lenses;
-                                                      owner;
-                                                      shareInvitationId;
-                                                      tags
-                                                    }
+                                                  fun ?discoveryConfig ->
+                                                    fun ?applications ->
+                                                      fun ?profiles ->
+                                                        fun
+                                                          ?prioritizedRiskCounts
+                                                          ->
+                                                          fun
+                                                            ?jiraConfiguration
+                                                            ->
+                                                            fun () ->
+                                                              {
+                                                                workloadId;
+                                                                workloadArn;
+                                                                workloadName;
+                                                                description;
+                                                                environment;
+                                                                updatedAt;
+                                                                accountIds;
+                                                                awsRegions;
+                                                                nonAwsRegions;
+                                                                architecturalDesign;
+                                                                reviewOwner;
+                                                                reviewRestrictionDate;
+                                                                isReviewOwnerUpdateAcknowledged;
+                                                                industryType;
+                                                                industry;
+                                                                notes;
+                                                                improvementStatus;
+                                                                riskCounts;
+                                                                pillarPriorities;
+                                                                lenses;
+                                                                owner;
+                                                                shareInvitationId;
+                                                                tags;
+                                                                discoveryConfig;
+                                                                applications;
+                                                                profiles;
+                                                                prioritizedRiskCounts;
+                                                                jiraConfiguration
+                                                              }
     let to_value x =
       structure_to_value
         [("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
@@ -2899,9 +5938,34 @@ module Workload =
         ("Owner", (Option.map x.owner ~f:AwsAccountId.to_value));
         ("ShareInvitationId",
           (Option.map x.shareInvitationId ~f:ShareInvitationId.to_value));
-        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("DiscoveryConfig",
+          (Option.map x.discoveryConfig ~f:WorkloadDiscoveryConfig.to_value));
+        ("Applications",
+          (Option.map x.applications ~f:WorkloadApplications.to_value));
+        ("Profiles", (Option.map x.profiles ~f:WorkloadProfiles.to_value));
+        ("PrioritizedRiskCounts",
+          (Option.map x.prioritizedRiskCounts ~f:RiskCounts.to_value));
+        ("JiraConfiguration",
+          (Option.map x.jiraConfiguration
+             ~f:WorkloadJiraConfigurationOutput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jiraConfiguration =
+        (Option.map ~f:WorkloadJiraConfigurationOutput.of_xml)
+          (Xml.child xml_arg0 "JiraConfiguration") in
+      let prioritizedRiskCounts =
+        (Option.map ~f:RiskCounts.of_xml)
+          (Xml.child xml_arg0 "PrioritizedRiskCounts") in
+      let profiles =
+        (Option.map ~f:WorkloadProfiles.of_xml)
+          (Xml.child xml_arg0 "Profiles") in
+      let applications =
+        (Option.map ~f:WorkloadApplications.of_xml)
+          (Xml.child xml_arg0 "Applications") in
+      let discoveryConfig =
+        (Option.map ~f:WorkloadDiscoveryConfig.of_xml)
+          (Xml.child xml_arg0 "DiscoveryConfig") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let shareInvitationId =
         (Option.map ~f:ShareInvitationId.of_xml)
@@ -2961,62 +6025,80 @@ module Workload =
         (Option.map ~f:WorkloadArn.of_xml) (Xml.child xml_arg0 "WorkloadArn") in
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
-      make ?tags ?shareInvitationId ?owner ?lenses ?pillarPriorities
-        ?riskCounts ?improvementStatus ?notes ?industry ?industryType
-        ?isReviewOwnerUpdateAcknowledged ?reviewRestrictionDate ?reviewOwner
-        ?architecturalDesign ?nonAwsRegions ?awsRegions ?accountIds
-        ?updatedAt ?environment ?description ?workloadName ?workloadArn
-        ?workloadId ()
+      make ?jiraConfiguration ?prioritizedRiskCounts ?profiles ?applications
+        ?discoveryConfig ?tags ?shareInvitationId ?owner ?lenses
+        ?pillarPriorities ?riskCounts ?improvementStatus ?notes ?industry
+        ?industryType ?isReviewOwnerUpdateAcknowledged ?reviewRestrictionDate
+        ?reviewOwner ?architecturalDesign ?nonAwsRegions ?awsRegions
+        ?accountIds ?updatedAt ?environment ?description ?workloadName
+        ?workloadArn ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let jiraConfiguration =
+        field_map json__ "JiraConfiguration"
+          WorkloadJiraConfigurationOutput.of_json in
+      let prioritizedRiskCounts =
+        field_map json__ "PrioritizedRiskCounts" RiskCounts.of_json in
+      let profiles = field_map json__ "Profiles" WorkloadProfiles.of_json in
+      let applications =
+        field_map json__ "Applications" WorkloadApplications.of_json in
+      let discoveryConfig =
+        field_map json__ "DiscoveryConfig" WorkloadDiscoveryConfig.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let shareInvitationId =
-        field_map json "ShareInvitationId" ShareInvitationId.of_json in
-      let owner = field_map json "Owner" AwsAccountId.of_json in
-      let lenses = field_map json "Lenses" WorkloadLenses.of_json in
+        field_map json__ "ShareInvitationId" ShareInvitationId.of_json in
+      let owner = field_map json__ "Owner" AwsAccountId.of_json in
+      let lenses = field_map json__ "Lenses" WorkloadLenses.of_json in
       let pillarPriorities =
-        field_map json "PillarPriorities" WorkloadPillarPriorities.of_json in
-      let riskCounts = field_map json "RiskCounts" RiskCounts.of_json in
+        field_map json__ "PillarPriorities" WorkloadPillarPriorities.of_json in
+      let riskCounts = field_map json__ "RiskCounts" RiskCounts.of_json in
       let improvementStatus =
-        field_map json "ImprovementStatus" WorkloadImprovementStatus.of_json in
-      let notes = field_map json "Notes" Notes.of_json in
-      let industry = field_map json "Industry" WorkloadIndustry.of_json in
+        field_map json__ "ImprovementStatus"
+          WorkloadImprovementStatus.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
+      let industry = field_map json__ "Industry" WorkloadIndustry.of_json in
       let industryType =
-        field_map json "IndustryType" WorkloadIndustryType.of_json in
+        field_map json__ "IndustryType" WorkloadIndustryType.of_json in
       let isReviewOwnerUpdateAcknowledged =
-        field_map json "IsReviewOwnerUpdateAcknowledged"
+        field_map json__ "IsReviewOwnerUpdateAcknowledged"
           IsReviewOwnerUpdateAcknowledged.of_json in
       let reviewRestrictionDate =
-        field_map json "ReviewRestrictionDate" Timestamp.of_json in
+        field_map json__ "ReviewRestrictionDate" Timestamp.of_json in
       let reviewOwner =
-        field_map json "ReviewOwner" WorkloadReviewOwner.of_json in
+        field_map json__ "ReviewOwner" WorkloadReviewOwner.of_json in
       let architecturalDesign =
-        field_map json "ArchitecturalDesign"
+        field_map json__ "ArchitecturalDesign"
           WorkloadArchitecturalDesign.of_json in
       let nonAwsRegions =
-        field_map json "NonAwsRegions" WorkloadNonAwsRegions.of_json in
-      let awsRegions = field_map json "AwsRegions" WorkloadAwsRegions.of_json in
-      let accountIds = field_map json "AccountIds" WorkloadAccountIds.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
+        field_map json__ "NonAwsRegions" WorkloadNonAwsRegions.of_json in
+      let awsRegions =
+        field_map json__ "AwsRegions" WorkloadAwsRegions.of_json in
+      let accountIds =
+        field_map json__ "AccountIds" WorkloadAccountIds.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
       let environment =
-        field_map json "Environment" WorkloadEnvironment.of_json in
+        field_map json__ "Environment" WorkloadEnvironment.of_json in
       let description =
-        field_map json "Description" WorkloadDescription.of_json in
-      let workloadName = field_map json "WorkloadName" WorkloadName.of_json in
-      let workloadArn = field_map json "WorkloadArn" WorkloadArn.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
-      make ?tags ?shareInvitationId ?owner ?lenses ?pillarPriorities
-        ?riskCounts ?improvementStatus ?notes ?industry ?industryType
-        ?isReviewOwnerUpdateAcknowledged ?reviewRestrictionDate ?reviewOwner
-        ?architecturalDesign ?nonAwsRegions ?awsRegions ?accountIds
-        ?updatedAt ?environment ?description ?workloadName ?workloadArn
-        ?workloadId ()
+        field_map json__ "Description" WorkloadDescription.of_json in
+      let workloadName = field_map json__ "WorkloadName" WorkloadName.of_json in
+      let workloadArn = field_map json__ "WorkloadArn" WorkloadArn.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      make ?jiraConfiguration ?prioritizedRiskCounts ?profiles ?applications
+        ?discoveryConfig ?tags ?shareInvitationId ?owner ?lenses
+        ?pillarPriorities ?riskCounts ?improvementStatus ?notes ?industry
+        ?industryType ?isReviewOwnerUpdateAcknowledged ?reviewRestrictionDate
+        ?reviewOwner ?architecturalDesign ?nonAwsRegions ?awsRegions
+        ?accountIds ?updatedAt ?environment ?description ?workloadName
+        ?workloadArn ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A workload return object."]
 module PillarDifferences =
   struct
     type nonrec t = PillarDifference.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PillarDifference.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3041,7 +6123,7 @@ module PillarDifferences =
 module Base64String =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "The Base64-encoded string representation of a lens review report. This data can be used to create a PDF file."]
+                            "The Base64-encoded string representation of a lens review report. This data can be used to create a PDF file. Only returned by GetConsolidatedReport when PDF format is requested."]
     let context_ = "Base64String"
     let make i = i
     let of_string x = x
@@ -3052,7 +6134,7 @@ module Base64String =
     let of_json j = string_of_json ~kind:"Base64String" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "The Base64-encoded string representation of a lens review report. This data can be used to create a PDF file."]
+       "The Base64-encoded string representation of a lens review report. This data can be used to create a PDF file. Only returned by GetConsolidatedReport when PDF format is requested."]
 module LensOwner =
   struct
     type nonrec t = string
@@ -3066,12 +6148,145 @@ module LensOwner =
     let of_json j = string_of_json ~kind:"LensOwner" j
     let to_json = simple_to_json to_value
   end
+module IntegrationStatus =
+  struct
+    type nonrec t =
+      | CONFIGURED 
+      | NOT_CONFIGURED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CONFIGURED -> "CONFIGURED"
+      | NOT_CONFIGURED -> "NOT_CONFIGURED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CONFIGURED" -> CONFIGURED
+      | "NOT_CONFIGURED" -> NOT_CONFIGURED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IntegrationStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IntegrationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module Subdomain =
+  struct
+    type nonrec t = string
+    let context_ = "Subdomain"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Subdomain" j
+    let to_json = simple_to_json to_value
+  end
+module ConsolidatedReportMetric =
+  struct
+    type nonrec t =
+      {
+      metricType: MetricType.t option
+        [@ocaml.doc
+          "The metric type of a metric in the consolidated report. Currently only WORKLOAD metric types are supported."];
+      riskCounts: RiskCounts.t option ;
+      workloadId: WorkloadId.t option ;
+      workloadName: WorkloadName.t option ;
+      workloadArn: WorkloadArn.t option ;
+      updatedAt: Timestamp.t option ;
+      lenses: LensMetrics.t option
+        [@ocaml.doc "The metrics for the lenses in the workload."];
+      lensesAppliedCount: LensesAppliedCount.t option
+        [@ocaml.doc "The total number of lenses applied to the workload."]}
+    let make ?metricType =
+      fun ?riskCounts ->
+        fun ?workloadId ->
+          fun ?workloadName ->
+            fun ?workloadArn ->
+              fun ?updatedAt ->
+                fun ?lenses ->
+                  fun ?lensesAppliedCount ->
+                    fun () ->
+                      {
+                        metricType;
+                        riskCounts;
+                        workloadId;
+                        workloadName;
+                        workloadArn;
+                        updatedAt;
+                        lenses;
+                        lensesAppliedCount
+                      }
+    let to_value x =
+      structure_to_value
+        [("MetricType", (Option.map x.metricType ~f:MetricType.to_value));
+        ("RiskCounts", (Option.map x.riskCounts ~f:RiskCounts.to_value));
+        ("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
+        ("WorkloadName",
+          (Option.map x.workloadName ~f:WorkloadName.to_value));
+        ("WorkloadArn", (Option.map x.workloadArn ~f:WorkloadArn.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("Lenses", (Option.map x.lenses ~f:LensMetrics.to_value));
+        ("LensesAppliedCount",
+          (Option.map x.lensesAppliedCount ~f:LensesAppliedCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lensesAppliedCount =
+        (Option.map ~f:LensesAppliedCount.of_xml)
+          (Xml.child xml_arg0 "LensesAppliedCount") in
+      let lenses =
+        (Option.map ~f:LensMetrics.of_xml) (Xml.child xml_arg0 "Lenses") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let workloadArn =
+        (Option.map ~f:WorkloadArn.of_xml) (Xml.child xml_arg0 "WorkloadArn") in
+      let workloadName =
+        (Option.map ~f:WorkloadName.of_xml)
+          (Xml.child xml_arg0 "WorkloadName") in
+      let workloadId =
+        (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
+      let riskCounts =
+        (Option.map ~f:RiskCounts.of_xml) (Xml.child xml_arg0 "RiskCounts") in
+      let metricType =
+        (Option.map ~f:MetricType.of_xml) (Xml.child xml_arg0 "MetricType") in
+      make ?lensesAppliedCount ?lenses ?updatedAt ?workloadArn ?workloadName
+        ?workloadId ?riskCounts ?metricType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lensesAppliedCount =
+        field_map json__ "LensesAppliedCount" LensesAppliedCount.of_json in
+      let lenses = field_map json__ "Lenses" LensMetrics.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let workloadArn = field_map json__ "WorkloadArn" WorkloadArn.of_json in
+      let workloadName = field_map json__ "WorkloadName" WorkloadName.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      let riskCounts = field_map json__ "RiskCounts" RiskCounts.of_json in
+      let metricType = field_map json__ "MetricType" MetricType.of_json in
+      make ?lensesAppliedCount ?lenses ?updatedAt ?workloadArn ?workloadName
+        ?workloadId ?riskCounts ?metricType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A metric that contributes to the consolidated report."]
 module ClientRequestToken =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "A unique case-sensitive string used to ensure that this request is idempotent (executes only once). You should not reuse the same token for other requests. If you retry a request with the same client request token and the same parameters after it has completed successfully, the result of the original request is returned. This token is listed as required, however, if you do not specify it, the Amazon Web Services SDKs automatically generate one for you. If you are not using the Amazon Web Services SDK or the CLI, you must provide this token or the request will fail."]
+                            "A unique case-sensitive string used to ensure that this request is idempotent (executes only once). You should not reuse the same token for other requests. If you retry a request with the same client request token and the same parameters after the original request has completed successfully, the result of the original request is returned. This token is listed as required, however, if you do not specify it, the Amazon Web Services SDKs automatically generate one for you. If you are not using the Amazon Web Services SDK or the CLI, you must provide this token or the request will fail."]
     let context_ = "ClientRequestToken"
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -3080,26 +6295,25 @@ module ClientRequestToken =
     let of_json j = string_of_json ~kind:"ClientRequestToken" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "A unique case-sensitive string used to ensure that this request is idempotent (executes only once). You should not reuse the same token for other requests. If you retry a request with the same client request token and the same parameters after it has completed successfully, the result of the original request is returned. This token is listed as required, however, if you do not specify it, the Amazon Web Services SDKs automatically generate one for you. If you are not using the Amazon Web Services SDK or the CLI, you must provide this token or the request will fail."]
+       "A unique case-sensitive string used to ensure that this request is idempotent (executes only once). You should not reuse the same token for other requests. If you retry a request with the same client request token and the same parameters after the original request has completed successfully, the result of the original request is returned. This token is listed as required, however, if you do not specify it, the Amazon Web Services SDKs automatically generate one for you. If you are not using the Amazon Web Services SDK or the CLI, you must provide this token or the request will fail."]
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: ExceptionMessage.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ExceptionMessage.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "User does not have sufficient access to perform this action."]
@@ -3107,60 +6321,60 @@ module ConflictException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t ;
-      resourceId: ExceptionResourceId.t ;
-      resourceType: ExceptionResourceType.t }
-    let context_ = "ConflictException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+      message: ExceptionMessage.t option ;
+      resourceId: ExceptionResourceId.t option ;
+      resourceType: ExceptionResourceType.t option }
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ExceptionMessage.to_value x.message)));
-        ("ResourceId", (Some (ExceptionResourceId.to_value x.resourceId)));
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("ResourceId",
+          (Option.map x.resourceId ~f:ExceptionResourceId.to_value));
         ("ResourceType",
-          (Some (ExceptionResourceType.to_value x.resourceType)))]
+          (Option.map x.resourceType ~f:ExceptionResourceType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        ExceptionResourceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:ExceptionResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
-        ExceptionResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:ExceptionResourceId.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map_exn json "ResourceType" ExceptionResourceType.of_json in
+        field_map json__ "ResourceType" ExceptionResourceType.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ExceptionResourceId.of_json in
-      let message = field_map_exn json "Message" ExceptionMessage.of_json in
-      make ~resourceType ~resourceId ~message ()
+        field_map json__ "ResourceId" ExceptionResourceId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The resource already exists."]
+  end[@@ocaml.doc
+       "The resource has already been processed, was deleted, or is too large."]
 module InternalServerException =
   struct
     type nonrec t = {
-      message: ExceptionMessage.t }
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ExceptionMessage.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" ExceptionMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "There is a problem with the Well-Architected Tool API service."]
@@ -3168,55 +6382,54 @@ module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t ;
-      resourceId: ExceptionResourceId.t ;
-      resourceType: ExceptionResourceType.t }
-    let context_ = "ResourceNotFoundException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+      message: ExceptionMessage.t option ;
+      resourceId: ExceptionResourceId.t option ;
+      resourceType: ExceptionResourceType.t option }
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ExceptionMessage.to_value x.message)));
-        ("ResourceId", (Some (ExceptionResourceId.to_value x.resourceId)));
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("ResourceId",
+          (Option.map x.resourceId ~f:ExceptionResourceId.to_value));
         ("ResourceType",
-          (Some (ExceptionResourceType.to_value x.resourceType)))]
+          (Option.map x.resourceType ~f:ExceptionResourceType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        ExceptionResourceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:ExceptionResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
-        ExceptionResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:ExceptionResourceId.of_xml)
+          (Xml.child xml_arg0 "ResourceId") in
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map_exn json "ResourceType" ExceptionResourceType.of_json in
+        field_map json__ "ResourceType" ExceptionResourceType.of_json in
       let resourceId =
-        field_map_exn json "ResourceId" ExceptionResourceId.of_json in
-      let message = field_map_exn json "Message" ExceptionMessage.of_json in
-      make ~resourceType ~resourceId ~message ()
+        field_map json__ "ResourceId" ExceptionResourceId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested resource was not found."]
 module ThrottlingException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t ;
+      message: ExceptionMessage.t option ;
       quotaCode: QuotaCode.t option ;
       serviceCode: ServiceCode.t option }
-    let context_ = "ThrottlingException"
-    let make ?quotaCode =
-      fun ?serviceCode ->
-        fun ~message -> fun () -> { quotaCode; serviceCode; message }
+    let make ?message =
+      fun ?quotaCode ->
+        fun ?serviceCode -> fun () -> { message; quotaCode; serviceCode }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ExceptionMessage.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
         ("QuotaCode", (Option.map x.quotaCode ~f:QuotaCode.to_value));
         ("ServiceCode", (Option.map x.serviceCode ~f:ServiceCode.to_value))]
     let to_query v = to_query to_value v
@@ -3226,30 +6439,29 @@ module ThrottlingException =
       let quotaCode =
         (Option.map ~f:QuotaCode.of_xml) (Xml.child xml_arg0 "QuotaCode") in
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?serviceCode ?quotaCode ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?serviceCode ?quotaCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map json "ServiceCode" ServiceCode.of_json in
-      let quotaCode = field_map json "QuotaCode" QuotaCode.of_json in
-      let message = field_map_exn json "Message" ExceptionMessage.of_json in
-      make ?serviceCode ?quotaCode ~message ()
+    let of_json json__ =
+      let serviceCode = field_map json__ "ServiceCode" ServiceCode.of_json in
+      let quotaCode = field_map json__ "QuotaCode" QuotaCode.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?serviceCode ?quotaCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Request was denied due to request throttling."]
 module ValidationException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t ;
+      message: ExceptionMessage.t option ;
       reason: ValidationExceptionReason.t option ;
       fields: ValidationExceptionFieldList.t option }
-    let context_ = "ValidationException"
-    let make ?reason =
-      fun ?fields -> fun ~message -> fun () -> { reason; fields; message }
+    let make ?message =
+      fun ?reason -> fun ?fields -> fun () -> { message; reason; fields }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ExceptionMessage.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
         ("Reason",
           (Option.map x.reason ~f:ValidationExceptionReason.to_value));
         ("Fields",
@@ -3263,16 +6475,17 @@ module ValidationException =
         (Option.map ~f:ValidationExceptionReason.of_xml)
           (Xml.child xml_arg0 "Reason") in
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?fields ?reason ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?fields ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fields =
-        field_map json "Fields" ValidationExceptionFieldList.of_json in
-      let reason = field_map json "Reason" ValidationExceptionReason.of_json in
-      let message = field_map_exn json "Message" ExceptionMessage.of_json in
-      make ?fields ?reason ~message ()
+        field_map json__ "Fields" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "Reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?fields ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The user input is not valid."]
 module WorkloadShare =
@@ -3335,19 +6548,67 @@ module WorkloadShare =
       make ?workloadId ?workloadName ?status ?permissionType ?sharedWith
         ?sharedBy ?shareId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
-      let workloadName = field_map json "WorkloadName" WorkloadName.of_json in
-      let status = field_map json "Status" ShareStatus.of_json in
+    let of_json json__ =
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      let workloadName = field_map json__ "WorkloadName" WorkloadName.of_json in
+      let status = field_map json__ "Status" ShareStatus.of_json in
       let permissionType =
-        field_map json "PermissionType" PermissionType.of_json in
-      let sharedWith = field_map json "SharedWith" SharedWith.of_json in
-      let sharedBy = field_map json "SharedBy" AwsAccountId.of_json in
-      let shareId = field_map json "ShareId" ShareId.of_json in
+        field_map json__ "PermissionType" PermissionType.of_json in
+      let sharedWith = field_map json__ "SharedWith" SharedWith.of_json in
+      let sharedBy = field_map json__ "SharedBy" AwsAccountId.of_json in
+      let shareId = field_map json__ "ShareId" ShareId.of_json in
       make ?workloadId ?workloadName ?status ?permissionType ?sharedWith
         ?sharedBy ?shareId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A workload share return object."]
+module WorkloadJiraConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      issueManagementStatus: WorkloadIssueManagementStatus.t option
+        [@ocaml.doc "Workload-level: Jira issue management status."];
+      issueManagementType: IssueManagementType.t option
+        [@ocaml.doc "Workload-level: Jira issue management type."];
+      jiraProjectKey: JiraProjectKey.t option
+        [@ocaml.doc "Workload-level: Jira project key to sync workloads to."]}
+    let make ?issueManagementStatus =
+      fun ?issueManagementType ->
+        fun ?jiraProjectKey ->
+          fun () ->
+            { issueManagementStatus; issueManagementType; jiraProjectKey }
+    let to_value x =
+      structure_to_value
+        [("IssueManagementStatus",
+           (Option.map x.issueManagementStatus
+              ~f:WorkloadIssueManagementStatus.to_value));
+        ("IssueManagementType",
+          (Option.map x.issueManagementType ~f:IssueManagementType.to_value));
+        ("JiraProjectKey",
+          (Option.map x.jiraProjectKey ~f:JiraProjectKey.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jiraProjectKey =
+        (Option.map ~f:JiraProjectKey.of_xml)
+          (Xml.child xml_arg0 "JiraProjectKey") in
+      let issueManagementType =
+        (Option.map ~f:IssueManagementType.of_xml)
+          (Xml.child xml_arg0 "IssueManagementType") in
+      let issueManagementStatus =
+        (Option.map ~f:WorkloadIssueManagementStatus.of_xml)
+          (Xml.child xml_arg0 "IssueManagementStatus") in
+      make ?jiraProjectKey ?issueManagementType ?issueManagementStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jiraProjectKey =
+        field_map json__ "JiraProjectKey" JiraProjectKey.of_json in
+      let issueManagementType =
+        field_map json__ "IssueManagementType" IssueManagementType.of_json in
+      let issueManagementStatus =
+        field_map json__ "IssueManagementStatus"
+          WorkloadIssueManagementStatus.of_json in
+      make ?jiraProjectKey ?issueManagementType ?issueManagementStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Workload-level: Input for the Jira configuration."]
 module ShareInvitation =
   struct
     type nonrec t =
@@ -3358,20 +6619,27 @@ module ShareInvitation =
         [@ocaml.doc "The resource type of the share invitation."];
       workloadId: WorkloadId.t option ;
       lensAlias: LensAlias.t option ;
-      lensArn: LensArn.t option [@ocaml.doc "The ARN for the lens."]}
+      lensArn: LensArn.t option [@ocaml.doc "The ARN for the lens."];
+      profileArn: ProfileArn.t option [@ocaml.doc "The profile ARN."];
+      templateArn: TemplateArn.t option
+        [@ocaml.doc "The review template ARN."]}
     let make ?shareInvitationId =
       fun ?shareResourceType ->
         fun ?workloadId ->
           fun ?lensAlias ->
             fun ?lensArn ->
-              fun () ->
-                {
-                  shareInvitationId;
-                  shareResourceType;
-                  workloadId;
-                  lensAlias;
-                  lensArn
-                }
+              fun ?profileArn ->
+                fun ?templateArn ->
+                  fun () ->
+                    {
+                      shareInvitationId;
+                      shareResourceType;
+                      workloadId;
+                      lensAlias;
+                      lensArn;
+                      profileArn;
+                      templateArn
+                    }
     let to_value x =
       structure_to_value
         [("ShareInvitationId",
@@ -3380,9 +6648,15 @@ module ShareInvitation =
           (Option.map x.shareResourceType ~f:ShareResourceType.to_value));
         ("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
         ("LensAlias", (Option.map x.lensAlias ~f:LensAlias.to_value));
-        ("LensArn", (Option.map x.lensArn ~f:LensArn.to_value))]
+        ("LensArn", (Option.map x.lensArn ~f:LensArn.to_value));
+        ("ProfileArn", (Option.map x.profileArn ~f:ProfileArn.to_value));
+        ("TemplateArn", (Option.map x.templateArn ~f:TemplateArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let templateArn =
+        (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "TemplateArn") in
+      let profileArn =
+        (Option.map ~f:ProfileArn.of_xml) (Xml.child xml_arg0 "ProfileArn") in
       let lensArn =
         (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
       let lensAlias =
@@ -3395,19 +6669,21 @@ module ShareInvitation =
       let shareInvitationId =
         (Option.map ~f:ShareInvitationId.of_xml)
           (Xml.child xml_arg0 "ShareInvitationId") in
-      make ?lensArn ?lensAlias ?workloadId ?shareResourceType
-        ?shareInvitationId ()
+      make ?templateArn ?profileArn ?lensArn ?lensAlias ?workloadId
+        ?shareResourceType ?shareInvitationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lensArn = field_map json "LensArn" LensArn.of_json in
-      let lensAlias = field_map json "LensAlias" LensAlias.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+    let of_json json__ =
+      let templateArn = field_map json__ "TemplateArn" TemplateArn.of_json in
+      let profileArn = field_map json__ "ProfileArn" ProfileArn.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       let shareResourceType =
-        field_map json "ShareResourceType" ShareResourceType.of_json in
+        field_map json__ "ShareResourceType" ShareResourceType.of_json in
       let shareInvitationId =
-        field_map json "ShareInvitationId" ShareInvitationId.of_json in
-      make ?lensArn ?lensAlias ?workloadId ?shareResourceType
-        ?shareInvitationId ()
+        field_map json__ "ShareInvitationId" ShareInvitationId.of_json in
+      make ?templateArn ?profileArn ?lensArn ?lensAlias ?workloadId
+        ?shareResourceType ?shareInvitationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The share invitation."]
 module ShareInvitationAction =
@@ -3437,20 +6713,141 @@ module ShareInvitationAction =
       of_string (string_of_json ~kind:"ShareInvitationAction" j)
     let to_json = simple_to_json to_value
   end
-module LensReview =
+module ReviewTemplate =
+  struct
+    type nonrec t =
+      {
+      description: TemplateDescription.t option
+        [@ocaml.doc "The review template description."];
+      lenses: ReviewTemplateLenses.t option
+        [@ocaml.doc "The lenses applied to the review template."];
+      notes: Notes.t option ;
+      questionCounts: QuestionCounts.t option
+        [@ocaml.doc
+          "A count of how many total questions are answered and unanswered in the review template."];
+      owner: AwsAccountId.t option ;
+      updatedAt: Timestamp.t option ;
+      templateArn: TemplateArn.t option
+        [@ocaml.doc "The review template ARN."];
+      templateName: TemplateName.t option
+        [@ocaml.doc "The name of the review template."];
+      tags: TagMap.t option
+        [@ocaml.doc "The tags assigned to the review template."];
+      updateStatus: ReviewTemplateUpdateStatus.t option
+        [@ocaml.doc "The latest status of a review template."];
+      shareInvitationId: ShareInvitationId.t option
+        [@ocaml.doc "The ID assigned to the template share invitation."]}
+    let make ?description =
+      fun ?lenses ->
+        fun ?notes ->
+          fun ?questionCounts ->
+            fun ?owner ->
+              fun ?updatedAt ->
+                fun ?templateArn ->
+                  fun ?templateName ->
+                    fun ?tags ->
+                      fun ?updateStatus ->
+                        fun ?shareInvitationId ->
+                          fun () ->
+                            {
+                              description;
+                              lenses;
+                              notes;
+                              questionCounts;
+                              owner;
+                              updatedAt;
+                              templateArn;
+                              templateName;
+                              tags;
+                              updateStatus;
+                              shareInvitationId
+                            }
+    let to_value x =
+      structure_to_value
+        [("Description",
+           (Option.map x.description ~f:TemplateDescription.to_value));
+        ("Lenses", (Option.map x.lenses ~f:ReviewTemplateLenses.to_value));
+        ("Notes", (Option.map x.notes ~f:Notes.to_value));
+        ("QuestionCounts",
+          (Option.map x.questionCounts ~f:QuestionCounts.to_value));
+        ("Owner", (Option.map x.owner ~f:AwsAccountId.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("TemplateArn", (Option.map x.templateArn ~f:TemplateArn.to_value));
+        ("TemplateName",
+          (Option.map x.templateName ~f:TemplateName.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("UpdateStatus",
+          (Option.map x.updateStatus ~f:ReviewTemplateUpdateStatus.to_value));
+        ("ShareInvitationId",
+          (Option.map x.shareInvitationId ~f:ShareInvitationId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let shareInvitationId =
+        (Option.map ~f:ShareInvitationId.of_xml)
+          (Xml.child xml_arg0 "ShareInvitationId") in
+      let updateStatus =
+        (Option.map ~f:ReviewTemplateUpdateStatus.of_xml)
+          (Xml.child xml_arg0 "UpdateStatus") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let templateName =
+        (Option.map ~f:TemplateName.of_xml)
+          (Xml.child xml_arg0 "TemplateName") in
+      let templateArn =
+        (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "TemplateArn") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let owner =
+        (Option.map ~f:AwsAccountId.of_xml) (Xml.child xml_arg0 "Owner") in
+      let questionCounts =
+        (Option.map ~f:QuestionCounts.of_xml)
+          (Xml.child xml_arg0 "QuestionCounts") in
+      let notes = (Option.map ~f:Notes.of_xml) (Xml.child xml_arg0 "Notes") in
+      let lenses =
+        (Option.map ~f:ReviewTemplateLenses.of_xml)
+          (Xml.child xml_arg0 "Lenses") in
+      let description =
+        (Option.map ~f:TemplateDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      make ?shareInvitationId ?updateStatus ?tags ?templateName ?templateArn
+        ?updatedAt ?owner ?questionCounts ?notes ?lenses ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let shareInvitationId =
+        field_map json__ "ShareInvitationId" ShareInvitationId.of_json in
+      let updateStatus =
+        field_map json__ "UpdateStatus" ReviewTemplateUpdateStatus.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let templateName = field_map json__ "TemplateName" TemplateName.of_json in
+      let templateArn = field_map json__ "TemplateArn" TemplateArn.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let owner = field_map json__ "Owner" AwsAccountId.of_json in
+      let questionCounts =
+        field_map json__ "QuestionCounts" QuestionCounts.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
+      let lenses = field_map json__ "Lenses" ReviewTemplateLenses.of_json in
+      let description =
+        field_map json__ "Description" TemplateDescription.of_json in
+      make ?shareInvitationId ?updateStatus ?tags ?templateName ?templateArn
+        ?updatedAt ?owner ?questionCounts ?notes ?lenses ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A review template."]
+module ReviewTemplateLensReview =
   struct
     type nonrec t =
       {
       lensAlias: LensAlias.t option ;
-      lensArn: LensArn.t option [@ocaml.doc "The ARN for the lens."];
+      lensArn: LensArn.t option [@ocaml.doc "The lens ARN."];
       lensVersion: LensVersion.t option
         [@ocaml.doc "The version of the lens."];
       lensName: LensName.t option ;
       lensStatus: LensStatus.t option [@ocaml.doc "The status of the lens."];
-      pillarReviewSummaries: PillarReviewSummaries.t option ;
+      pillarReviewSummaries: ReviewTemplatePillarReviewSummaries.t option
+        [@ocaml.doc "Pillar review summaries of a lens review."];
       updatedAt: Timestamp.t option ;
       notes: Notes.t option ;
-      riskCounts: RiskCounts.t option ;
+      questionCounts: QuestionCounts.t option
+        [@ocaml.doc
+          "A count of how many questions are answered and unanswered in the lens review."];
       nextToken: NextToken.t option }
     let make ?lensAlias =
       fun ?lensArn ->
@@ -3460,7 +6857,7 @@ module LensReview =
               fun ?pillarReviewSummaries ->
                 fun ?updatedAt ->
                   fun ?notes ->
-                    fun ?riskCounts ->
+                    fun ?questionCounts ->
                       fun ?nextToken ->
                         fun () ->
                           {
@@ -3472,7 +6869,7 @@ module LensReview =
                             pillarReviewSummaries;
                             updatedAt;
                             notes;
-                            riskCounts;
+                            questionCounts;
                             nextToken
                           }
     let to_value x =
@@ -3484,22 +6881,24 @@ module LensReview =
         ("LensStatus", (Option.map x.lensStatus ~f:LensStatus.to_value));
         ("PillarReviewSummaries",
           (Option.map x.pillarReviewSummaries
-             ~f:PillarReviewSummaries.to_value));
+             ~f:ReviewTemplatePillarReviewSummaries.to_value));
         ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
         ("Notes", (Option.map x.notes ~f:Notes.to_value));
-        ("RiskCounts", (Option.map x.riskCounts ~f:RiskCounts.to_value));
+        ("QuestionCounts",
+          (Option.map x.questionCounts ~f:QuestionCounts.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let riskCounts =
-        (Option.map ~f:RiskCounts.of_xml) (Xml.child xml_arg0 "RiskCounts") in
+      let questionCounts =
+        (Option.map ~f:QuestionCounts.of_xml)
+          (Xml.child xml_arg0 "QuestionCounts") in
       let notes = (Option.map ~f:Notes.of_xml) (Xml.child xml_arg0 "Notes") in
       let updatedAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
       let pillarReviewSummaries =
-        (Option.map ~f:PillarReviewSummaries.of_xml)
+        (Option.map ~f:ReviewTemplatePillarReviewSummaries.of_xml)
           (Xml.child xml_arg0 "PillarReviewSummaries") in
       let lensStatus =
         (Option.map ~f:LensStatus.of_xml) (Xml.child xml_arg0 "LensStatus") in
@@ -3511,25 +6910,29 @@ module LensReview =
         (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
       let lensAlias =
         (Option.map ~f:LensAlias.of_xml) (Xml.child xml_arg0 "LensAlias") in
-      make ?nextToken ?riskCounts ?notes ?updatedAt ?pillarReviewSummaries
-        ?lensStatus ?lensName ?lensVersion ?lensArn ?lensAlias ()
+      make ?nextToken ?questionCounts ?notes ?updatedAt
+        ?pillarReviewSummaries ?lensStatus ?lensName ?lensVersion ?lensArn
+        ?lensAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let riskCounts = field_map json "RiskCounts" RiskCounts.of_json in
-      let notes = field_map json "Notes" Notes.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let questionCounts =
+        field_map json__ "QuestionCounts" QuestionCounts.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
       let pillarReviewSummaries =
-        field_map json "PillarReviewSummaries" PillarReviewSummaries.of_json in
-      let lensStatus = field_map json "LensStatus" LensStatus.of_json in
-      let lensName = field_map json "LensName" LensName.of_json in
-      let lensVersion = field_map json "LensVersion" LensVersion.of_json in
-      let lensArn = field_map json "LensArn" LensArn.of_json in
-      let lensAlias = field_map json "LensAlias" LensAlias.of_json in
-      make ?nextToken ?riskCounts ?notes ?updatedAt ?pillarReviewSummaries
-        ?lensStatus ?lensName ?lensVersion ?lensArn ?lensAlias ()
+        field_map json__ "PillarReviewSummaries"
+          ReviewTemplatePillarReviewSummaries.of_json in
+      let lensStatus = field_map json__ "LensStatus" LensStatus.of_json in
+      let lensName = field_map json__ "LensName" LensName.of_json in
+      let lensVersion = field_map json__ "LensVersion" LensVersion.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
+      make ?nextToken ?questionCounts ?notes ?updatedAt
+        ?pillarReviewSummaries ?lensStatus ?lensName ?lensVersion ?lensArn
+        ?lensAlias ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A lens review of a question."]
+  end[@@ocaml.doc "The lens review of a review template."]
 module PillarNotes =
   struct
     type nonrec t = (PillarId.t * Notes.t) list
@@ -3551,6 +6954,8 @@ module PillarNotes =
                     (fun x -> (Notes.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3558,7 +6963,39 @@ module PillarNotes =
         j
     let to_json v = composed_to_json to_value v
   end
-module Answer =
+module ReviewTemplateLensAliases =
+  struct
+    type nonrec t = LensAlias.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LensAlias.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LensAlias.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReviewTemplateLensAliases"
+        ~of_json:LensAlias.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ReviewTemplateAnswer =
   struct
     type nonrec t =
       {
@@ -3569,18 +7006,21 @@ module Answer =
       improvementPlanUrl: ImprovementPlanUrl.t option ;
       helpfulResourceUrl: HelpfulResourceUrl.t option ;
       helpfulResourceDisplayText: DisplayText.t option
-        [@ocaml.doc "The helpful resource text to be displayed."];
+        [@ocaml.doc
+          "The helpful resource text to be displayed for a custom lens. This field does not apply to Amazon Web Services official lenses."];
       choices: Choices.t option ;
       selectedChoices: SelectedChoices.t option ;
       choiceAnswers: ChoiceAnswers.t option
         [@ocaml.doc
-          "A list of selected choices to a question in your workload."];
+          "A list of selected choices to a question in your review template."];
       isApplicable: IsApplicable.t option ;
-      risk: Risk.t option ;
+      answerStatus: ReviewTemplateAnswerStatus.t option
+        [@ocaml.doc
+          "The status of whether or not this question has been answered."];
       notes: Notes.t option ;
       reason: AnswerReason.t option
         [@ocaml.doc
-          "The reason why the question is not applicable to your workload."]}
+          "The reason why the question is not applicable to your review template."]}
     let make ?questionId =
       fun ?pillarId ->
         fun ?questionTitle ->
@@ -3592,7 +7032,7 @@ module Answer =
                     fun ?selectedChoices ->
                       fun ?choiceAnswers ->
                         fun ?isApplicable ->
-                          fun ?risk ->
+                          fun ?answerStatus ->
                             fun ?notes ->
                               fun ?reason ->
                                 fun () ->
@@ -3608,7 +7048,7 @@ module Answer =
                                     selectedChoices;
                                     choiceAnswers;
                                     isApplicable;
-                                    risk;
+                                    answerStatus;
                                     notes;
                                     reason
                                   }
@@ -3633,11 +7073,605 @@ module Answer =
           (Option.map x.choiceAnswers ~f:ChoiceAnswers.to_value));
         ("IsApplicable",
           (Option.map x.isApplicable ~f:IsApplicable.to_value));
-        ("Risk", (Option.map x.risk ~f:Risk.to_value));
+        ("AnswerStatus",
+          (Option.map x.answerStatus ~f:ReviewTemplateAnswerStatus.to_value));
         ("Notes", (Option.map x.notes ~f:Notes.to_value));
         ("Reason", (Option.map x.reason ~f:AnswerReason.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:AnswerReason.of_xml) (Xml.child xml_arg0 "Reason") in
+      let notes = (Option.map ~f:Notes.of_xml) (Xml.child xml_arg0 "Notes") in
+      let answerStatus =
+        (Option.map ~f:ReviewTemplateAnswerStatus.of_xml)
+          (Xml.child xml_arg0 "AnswerStatus") in
+      let isApplicable =
+        (Option.map ~f:IsApplicable.of_xml)
+          (Xml.child xml_arg0 "IsApplicable") in
+      let choiceAnswers =
+        (Option.map ~f:ChoiceAnswers.of_xml)
+          (Xml.child xml_arg0 "ChoiceAnswers") in
+      let selectedChoices =
+        (Option.map ~f:SelectedChoices.of_xml)
+          (Xml.child xml_arg0 "SelectedChoices") in
+      let choices =
+        (Option.map ~f:Choices.of_xml) (Xml.child xml_arg0 "Choices") in
+      let helpfulResourceDisplayText =
+        (Option.map ~f:DisplayText.of_xml)
+          (Xml.child xml_arg0 "HelpfulResourceDisplayText") in
+      let helpfulResourceUrl =
+        (Option.map ~f:HelpfulResourceUrl.of_xml)
+          (Xml.child xml_arg0 "HelpfulResourceUrl") in
+      let improvementPlanUrl =
+        (Option.map ~f:ImprovementPlanUrl.of_xml)
+          (Xml.child xml_arg0 "ImprovementPlanUrl") in
+      let questionDescription =
+        (Option.map ~f:QuestionDescription.of_xml)
+          (Xml.child xml_arg0 "QuestionDescription") in
+      let questionTitle =
+        (Option.map ~f:QuestionTitle.of_xml)
+          (Xml.child xml_arg0 "QuestionTitle") in
+      let pillarId =
+        (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
+      let questionId =
+        (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
+      make ?reason ?notes ?answerStatus ?isApplicable ?choiceAnswers
+        ?selectedChoices ?choices ?helpfulResourceDisplayText
+        ?helpfulResourceUrl ?improvementPlanUrl ?questionDescription
+        ?questionTitle ?pillarId ?questionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "Reason" AnswerReason.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
+      let answerStatus =
+        field_map json__ "AnswerStatus" ReviewTemplateAnswerStatus.of_json in
+      let isApplicable = field_map json__ "IsApplicable" IsApplicable.of_json in
+      let choiceAnswers =
+        field_map json__ "ChoiceAnswers" ChoiceAnswers.of_json in
+      let selectedChoices =
+        field_map json__ "SelectedChoices" SelectedChoices.of_json in
+      let choices = field_map json__ "Choices" Choices.of_json in
+      let helpfulResourceDisplayText =
+        field_map json__ "HelpfulResourceDisplayText" DisplayText.of_json in
+      let helpfulResourceUrl =
+        field_map json__ "HelpfulResourceUrl" HelpfulResourceUrl.of_json in
+      let improvementPlanUrl =
+        field_map json__ "ImprovementPlanUrl" ImprovementPlanUrl.of_json in
+      let questionDescription =
+        field_map json__ "QuestionDescription" QuestionDescription.of_json in
+      let questionTitle =
+        field_map json__ "QuestionTitle" QuestionTitle.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      let questionId = field_map json__ "QuestionId" QuestionId.of_json in
+      make ?reason ?notes ?answerStatus ?isApplicable ?choiceAnswers
+        ?selectedChoices ?choices ?helpfulResourceDisplayText
+        ?helpfulResourceUrl ?improvementPlanUrl ?questionDescription
+        ?questionTitle ?pillarId ?questionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An answer of the question."]
+module ChoiceUpdates =
+  struct
+    type nonrec t = (ChoiceId.t * ChoiceUpdate.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types ChoiceId ChoiceUpdate"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ChoiceId.to_value x) |>
+                    (fun x -> (ChoiceUpdate.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ChoiceId.of_string
+        ~of_json:ChoiceUpdate.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Profile =
+  struct
+    type nonrec t =
+      {
+      profileArn: ProfileArn.t option [@ocaml.doc "The profile ARN."];
+      profileVersion: ProfileVersion.t option
+        [@ocaml.doc "The profile version."];
+      profileName: ProfileName.t option [@ocaml.doc "The profile name."];
+      profileDescription: ProfileDescription.t option
+        [@ocaml.doc "The profile description."];
+      profileQuestions: ProfileQuestions.t option
+        [@ocaml.doc "Profile questions."];
+      owner: AwsAccountId.t option ;
+      createdAt: Timestamp.t option ;
+      updatedAt: Timestamp.t option ;
+      shareInvitationId: ShareInvitationId.t option
+        [@ocaml.doc "The ID assigned to the share invitation."];
+      tags: TagMap.t option [@ocaml.doc "The tags assigned to the profile."]}
+    let make ?profileArn =
+      fun ?profileVersion ->
+        fun ?profileName ->
+          fun ?profileDescription ->
+            fun ?profileQuestions ->
+              fun ?owner ->
+                fun ?createdAt ->
+                  fun ?updatedAt ->
+                    fun ?shareInvitationId ->
+                      fun ?tags ->
+                        fun () ->
+                          {
+                            profileArn;
+                            profileVersion;
+                            profileName;
+                            profileDescription;
+                            profileQuestions;
+                            owner;
+                            createdAt;
+                            updatedAt;
+                            shareInvitationId;
+                            tags
+                          }
+    let to_value x =
+      structure_to_value
+        [("ProfileArn", (Option.map x.profileArn ~f:ProfileArn.to_value));
+        ("ProfileVersion",
+          (Option.map x.profileVersion ~f:ProfileVersion.to_value));
+        ("ProfileName", (Option.map x.profileName ~f:ProfileName.to_value));
+        ("ProfileDescription",
+          (Option.map x.profileDescription ~f:ProfileDescription.to_value));
+        ("ProfileQuestions",
+          (Option.map x.profileQuestions ~f:ProfileQuestions.to_value));
+        ("Owner", (Option.map x.owner ~f:AwsAccountId.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("ShareInvitationId",
+          (Option.map x.shareInvitationId ~f:ShareInvitationId.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let shareInvitationId =
+        (Option.map ~f:ShareInvitationId.of_xml)
+          (Xml.child xml_arg0 "ShareInvitationId") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let owner =
+        (Option.map ~f:AwsAccountId.of_xml) (Xml.child xml_arg0 "Owner") in
+      let profileQuestions =
+        (Option.map ~f:ProfileQuestions.of_xml)
+          (Xml.child xml_arg0 "ProfileQuestions") in
+      let profileDescription =
+        (Option.map ~f:ProfileDescription.of_xml)
+          (Xml.child xml_arg0 "ProfileDescription") in
+      let profileName =
+        (Option.map ~f:ProfileName.of_xml) (Xml.child xml_arg0 "ProfileName") in
+      let profileVersion =
+        (Option.map ~f:ProfileVersion.of_xml)
+          (Xml.child xml_arg0 "ProfileVersion") in
+      let profileArn =
+        (Option.map ~f:ProfileArn.of_xml) (Xml.child xml_arg0 "ProfileArn") in
+      make ?tags ?shareInvitationId ?updatedAt ?createdAt ?owner
+        ?profileQuestions ?profileDescription ?profileName ?profileVersion
+        ?profileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let shareInvitationId =
+        field_map json__ "ShareInvitationId" ShareInvitationId.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let owner = field_map json__ "Owner" AwsAccountId.of_json in
+      let profileQuestions =
+        field_map json__ "ProfileQuestions" ProfileQuestions.of_json in
+      let profileDescription =
+        field_map json__ "ProfileDescription" ProfileDescription.of_json in
+      let profileName = field_map json__ "ProfileName" ProfileName.of_json in
+      let profileVersion =
+        field_map json__ "ProfileVersion" ProfileVersion.of_json in
+      let profileArn = field_map json__ "ProfileArn" ProfileArn.of_json in
+      make ?tags ?shareInvitationId ?updatedAt ?createdAt ?owner
+        ?profileQuestions ?profileDescription ?profileName ?profileVersion
+        ?profileArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A profile."]
+module ProfileQuestionUpdates =
+  struct
+    type nonrec t = ProfileQuestionUpdate.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProfileQuestionUpdate.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProfileQuestionUpdate.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProfileQuestionUpdates"
+        ~of_json:ProfileQuestionUpdate.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LensReview =
+  struct
+    type nonrec t =
+      {
+      lensAlias: LensAlias.t option ;
+      lensArn: LensArn.t option [@ocaml.doc "The ARN for the lens."];
+      lensVersion: LensVersion.t option
+        [@ocaml.doc "The version of the lens."];
+      lensName: LensName.t option ;
+      lensStatus: LensStatus.t option [@ocaml.doc "The status of the lens."];
+      pillarReviewSummaries: PillarReviewSummaries.t option ;
+      jiraConfiguration: JiraSelectedQuestionConfiguration.t option
+        [@ocaml.doc "Jira configuration status of the Lens review."];
+      updatedAt: Timestamp.t option ;
+      notes: Notes.t option ;
+      riskCounts: RiskCounts.t option ;
+      nextToken: NextToken.t option ;
+      profiles: WorkloadProfiles.t option
+        [@ocaml.doc "The profiles associated with the workload."];
+      prioritizedRiskCounts: RiskCounts.t option }
+    let make ?lensAlias =
+      fun ?lensArn ->
+        fun ?lensVersion ->
+          fun ?lensName ->
+            fun ?lensStatus ->
+              fun ?pillarReviewSummaries ->
+                fun ?jiraConfiguration ->
+                  fun ?updatedAt ->
+                    fun ?notes ->
+                      fun ?riskCounts ->
+                        fun ?nextToken ->
+                          fun ?profiles ->
+                            fun ?prioritizedRiskCounts ->
+                              fun () ->
+                                {
+                                  lensAlias;
+                                  lensArn;
+                                  lensVersion;
+                                  lensName;
+                                  lensStatus;
+                                  pillarReviewSummaries;
+                                  jiraConfiguration;
+                                  updatedAt;
+                                  notes;
+                                  riskCounts;
+                                  nextToken;
+                                  profiles;
+                                  prioritizedRiskCounts
+                                }
+    let to_value x =
+      structure_to_value
+        [("LensAlias", (Option.map x.lensAlias ~f:LensAlias.to_value));
+        ("LensArn", (Option.map x.lensArn ~f:LensArn.to_value));
+        ("LensVersion", (Option.map x.lensVersion ~f:LensVersion.to_value));
+        ("LensName", (Option.map x.lensName ~f:LensName.to_value));
+        ("LensStatus", (Option.map x.lensStatus ~f:LensStatus.to_value));
+        ("PillarReviewSummaries",
+          (Option.map x.pillarReviewSummaries
+             ~f:PillarReviewSummaries.to_value));
+        ("JiraConfiguration",
+          (Option.map x.jiraConfiguration
+             ~f:JiraSelectedQuestionConfiguration.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("Notes", (Option.map x.notes ~f:Notes.to_value));
+        ("RiskCounts", (Option.map x.riskCounts ~f:RiskCounts.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("Profiles", (Option.map x.profiles ~f:WorkloadProfiles.to_value));
+        ("PrioritizedRiskCounts",
+          (Option.map x.prioritizedRiskCounts ~f:RiskCounts.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prioritizedRiskCounts =
+        (Option.map ~f:RiskCounts.of_xml)
+          (Xml.child xml_arg0 "PrioritizedRiskCounts") in
+      let profiles =
+        (Option.map ~f:WorkloadProfiles.of_xml)
+          (Xml.child xml_arg0 "Profiles") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let riskCounts =
+        (Option.map ~f:RiskCounts.of_xml) (Xml.child xml_arg0 "RiskCounts") in
+      let notes = (Option.map ~f:Notes.of_xml) (Xml.child xml_arg0 "Notes") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let jiraConfiguration =
+        (Option.map ~f:JiraSelectedQuestionConfiguration.of_xml)
+          (Xml.child xml_arg0 "JiraConfiguration") in
+      let pillarReviewSummaries =
+        (Option.map ~f:PillarReviewSummaries.of_xml)
+          (Xml.child xml_arg0 "PillarReviewSummaries") in
+      let lensStatus =
+        (Option.map ~f:LensStatus.of_xml) (Xml.child xml_arg0 "LensStatus") in
+      let lensName =
+        (Option.map ~f:LensName.of_xml) (Xml.child xml_arg0 "LensName") in
+      let lensVersion =
+        (Option.map ~f:LensVersion.of_xml) (Xml.child xml_arg0 "LensVersion") in
+      let lensArn =
+        (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
+      let lensAlias =
+        (Option.map ~f:LensAlias.of_xml) (Xml.child xml_arg0 "LensAlias") in
+      make ?prioritizedRiskCounts ?profiles ?nextToken ?riskCounts ?notes
+        ?updatedAt ?jiraConfiguration ?pillarReviewSummaries ?lensStatus
+        ?lensName ?lensVersion ?lensArn ?lensAlias ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prioritizedRiskCounts =
+        field_map json__ "PrioritizedRiskCounts" RiskCounts.of_json in
+      let profiles = field_map json__ "Profiles" WorkloadProfiles.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let riskCounts = field_map json__ "RiskCounts" RiskCounts.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let jiraConfiguration =
+        field_map json__ "JiraConfiguration"
+          JiraSelectedQuestionConfiguration.of_json in
+      let pillarReviewSummaries =
+        field_map json__ "PillarReviewSummaries"
+          PillarReviewSummaries.of_json in
+      let lensStatus = field_map json__ "LensStatus" LensStatus.of_json in
+      let lensName = field_map json__ "LensName" LensName.of_json in
+      let lensVersion = field_map json__ "LensVersion" LensVersion.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
+      make ?prioritizedRiskCounts ?profiles ?nextToken ?riskCounts ?notes
+        ?updatedAt ?jiraConfiguration ?pillarReviewSummaries ?lensStatus
+        ?lensName ?lensVersion ?lensArn ?lensAlias ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A lens review of a question."]
+module IntegratingService =
+  struct
+    type nonrec t =
+      | JIRA 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | JIRA -> "JIRA" | Non_static_id s -> s
+    let of_string = function | "JIRA" -> JIRA | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IntegratingService" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IntegratingService" j)
+    let to_json = simple_to_json to_value
+  end
+module AccountJiraConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      issueManagementStatus: AccountJiraIssueManagementStatus.t option
+        [@ocaml.doc "Account-level: Jira issue management status."];
+      issueManagementType: IssueManagementType.t option
+        [@ocaml.doc "Account-level: Jira issue management type."];
+      jiraProjectKey: JiraProjectKey.t option
+        [@ocaml.doc "Account-level: Jira project key to sync workloads to."];
+      integrationStatus: IntegrationStatusInput.t option
+        [@ocaml.doc
+          "Account-level: Configuration status of the Jira integration."]}
+    let make ?issueManagementStatus =
+      fun ?issueManagementType ->
+        fun ?jiraProjectKey ->
+          fun ?integrationStatus ->
+            fun () ->
+              {
+                issueManagementStatus;
+                issueManagementType;
+                jiraProjectKey;
+                integrationStatus
+              }
+    let to_value x =
+      structure_to_value
+        [("IssueManagementStatus",
+           (Option.map x.issueManagementStatus
+              ~f:AccountJiraIssueManagementStatus.to_value));
+        ("IssueManagementType",
+          (Option.map x.issueManagementType ~f:IssueManagementType.to_value));
+        ("JiraProjectKey",
+          (Option.map x.jiraProjectKey ~f:JiraProjectKey.to_value));
+        ("IntegrationStatus",
+          (Option.map x.integrationStatus ~f:IntegrationStatusInput.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let integrationStatus =
+        (Option.map ~f:IntegrationStatusInput.of_xml)
+          (Xml.child xml_arg0 "IntegrationStatus") in
+      let jiraProjectKey =
+        (Option.map ~f:JiraProjectKey.of_xml)
+          (Xml.child xml_arg0 "JiraProjectKey") in
+      let issueManagementType =
+        (Option.map ~f:IssueManagementType.of_xml)
+          (Xml.child xml_arg0 "IssueManagementType") in
+      let issueManagementStatus =
+        (Option.map ~f:AccountJiraIssueManagementStatus.of_xml)
+          (Xml.child xml_arg0 "IssueManagementStatus") in
+      make ?integrationStatus ?jiraProjectKey ?issueManagementType
+        ?issueManagementStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let integrationStatus =
+        field_map json__ "IntegrationStatus" IntegrationStatusInput.of_json in
+      let jiraProjectKey =
+        field_map json__ "JiraProjectKey" JiraProjectKey.of_json in
+      let issueManagementType =
+        field_map json__ "IssueManagementType" IssueManagementType.of_json in
+      let issueManagementStatus =
+        field_map json__ "IssueManagementStatus"
+          AccountJiraIssueManagementStatus.of_json in
+      make ?integrationStatus ?jiraProjectKey ?issueManagementType
+        ?issueManagementStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Account-level: Input for the Jira configuration."]
+module DiscoveryIntegrationStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DiscoveryIntegrationStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DiscoveryIntegrationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module OrganizationSharingStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OrganizationSharingStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"OrganizationSharingStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module Answer =
+  struct
+    type nonrec t =
+      {
+      questionId: QuestionId.t option ;
+      pillarId: PillarId.t option ;
+      questionTitle: QuestionTitle.t option ;
+      questionDescription: QuestionDescription.t option ;
+      improvementPlanUrl: ImprovementPlanUrl.t option ;
+      helpfulResourceUrl: HelpfulResourceUrl.t option ;
+      helpfulResourceDisplayText: DisplayText.t option
+        [@ocaml.doc
+          "The helpful resource text to be displayed for a custom lens. This field does not apply to Amazon Web Services official lenses."];
+      choices: Choices.t option ;
+      selectedChoices: SelectedChoices.t option ;
+      choiceAnswers: ChoiceAnswers.t option
+        [@ocaml.doc
+          "A list of selected choices to a question in your workload."];
+      isApplicable: IsApplicable.t option ;
+      risk: Risk.t option ;
+      notes: Notes.t option ;
+      reason: AnswerReason.t option
+        [@ocaml.doc
+          "The reason why the question is not applicable to your workload."];
+      jiraConfiguration: JiraConfiguration.t option
+        [@ocaml.doc "Configuration of the Jira integration."]}
+    let make ?questionId =
+      fun ?pillarId ->
+        fun ?questionTitle ->
+          fun ?questionDescription ->
+            fun ?improvementPlanUrl ->
+              fun ?helpfulResourceUrl ->
+                fun ?helpfulResourceDisplayText ->
+                  fun ?choices ->
+                    fun ?selectedChoices ->
+                      fun ?choiceAnswers ->
+                        fun ?isApplicable ->
+                          fun ?risk ->
+                            fun ?notes ->
+                              fun ?reason ->
+                                fun ?jiraConfiguration ->
+                                  fun () ->
+                                    {
+                                      questionId;
+                                      pillarId;
+                                      questionTitle;
+                                      questionDescription;
+                                      improvementPlanUrl;
+                                      helpfulResourceUrl;
+                                      helpfulResourceDisplayText;
+                                      choices;
+                                      selectedChoices;
+                                      choiceAnswers;
+                                      isApplicable;
+                                      risk;
+                                      notes;
+                                      reason;
+                                      jiraConfiguration
+                                    }
+    let to_value x =
+      structure_to_value
+        [("QuestionId", (Option.map x.questionId ~f:QuestionId.to_value));
+        ("PillarId", (Option.map x.pillarId ~f:PillarId.to_value));
+        ("QuestionTitle",
+          (Option.map x.questionTitle ~f:QuestionTitle.to_value));
+        ("QuestionDescription",
+          (Option.map x.questionDescription ~f:QuestionDescription.to_value));
+        ("ImprovementPlanUrl",
+          (Option.map x.improvementPlanUrl ~f:ImprovementPlanUrl.to_value));
+        ("HelpfulResourceUrl",
+          (Option.map x.helpfulResourceUrl ~f:HelpfulResourceUrl.to_value));
+        ("HelpfulResourceDisplayText",
+          (Option.map x.helpfulResourceDisplayText ~f:DisplayText.to_value));
+        ("Choices", (Option.map x.choices ~f:Choices.to_value));
+        ("SelectedChoices",
+          (Option.map x.selectedChoices ~f:SelectedChoices.to_value));
+        ("ChoiceAnswers",
+          (Option.map x.choiceAnswers ~f:ChoiceAnswers.to_value));
+        ("IsApplicable",
+          (Option.map x.isApplicable ~f:IsApplicable.to_value));
+        ("Risk", (Option.map x.risk ~f:Risk.to_value));
+        ("Notes", (Option.map x.notes ~f:Notes.to_value));
+        ("Reason", (Option.map x.reason ~f:AnswerReason.to_value));
+        ("JiraConfiguration",
+          (Option.map x.jiraConfiguration ~f:JiraConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jiraConfiguration =
+        (Option.map ~f:JiraConfiguration.of_xml)
+          (Xml.child xml_arg0 "JiraConfiguration") in
       let reason =
         (Option.map ~f:AnswerReason.of_xml) (Xml.child xml_arg0 "Reason") in
       let notes = (Option.map ~f:Notes.of_xml) (Xml.child xml_arg0 "Notes") in
@@ -3672,69 +7706,41 @@ module Answer =
         (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
       let questionId =
         (Option.map ~f:QuestionId.of_xml) (Xml.child xml_arg0 "QuestionId") in
-      make ?reason ?notes ?risk ?isApplicable ?choiceAnswers ?selectedChoices
-        ?choices ?helpfulResourceDisplayText ?helpfulResourceUrl
-        ?improvementPlanUrl ?questionDescription ?questionTitle ?pillarId
-        ?questionId ()
+      make ?jiraConfiguration ?reason ?notes ?risk ?isApplicable
+        ?choiceAnswers ?selectedChoices ?choices ?helpfulResourceDisplayText
+        ?helpfulResourceUrl ?improvementPlanUrl ?questionDescription
+        ?questionTitle ?pillarId ?questionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" AnswerReason.of_json in
-      let notes = field_map json "Notes" Notes.of_json in
-      let risk = field_map json "Risk" Risk.of_json in
-      let isApplicable = field_map json "IsApplicable" IsApplicable.of_json in
+    let of_json json__ =
+      let jiraConfiguration =
+        field_map json__ "JiraConfiguration" JiraConfiguration.of_json in
+      let reason = field_map json__ "Reason" AnswerReason.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
+      let risk = field_map json__ "Risk" Risk.of_json in
+      let isApplicable = field_map json__ "IsApplicable" IsApplicable.of_json in
       let choiceAnswers =
-        field_map json "ChoiceAnswers" ChoiceAnswers.of_json in
+        field_map json__ "ChoiceAnswers" ChoiceAnswers.of_json in
       let selectedChoices =
-        field_map json "SelectedChoices" SelectedChoices.of_json in
-      let choices = field_map json "Choices" Choices.of_json in
+        field_map json__ "SelectedChoices" SelectedChoices.of_json in
+      let choices = field_map json__ "Choices" Choices.of_json in
       let helpfulResourceDisplayText =
-        field_map json "HelpfulResourceDisplayText" DisplayText.of_json in
+        field_map json__ "HelpfulResourceDisplayText" DisplayText.of_json in
       let helpfulResourceUrl =
-        field_map json "HelpfulResourceUrl" HelpfulResourceUrl.of_json in
+        field_map json__ "HelpfulResourceUrl" HelpfulResourceUrl.of_json in
       let improvementPlanUrl =
-        field_map json "ImprovementPlanUrl" ImprovementPlanUrl.of_json in
+        field_map json__ "ImprovementPlanUrl" ImprovementPlanUrl.of_json in
       let questionDescription =
-        field_map json "QuestionDescription" QuestionDescription.of_json in
+        field_map json__ "QuestionDescription" QuestionDescription.of_json in
       let questionTitle =
-        field_map json "QuestionTitle" QuestionTitle.of_json in
-      let pillarId = field_map json "PillarId" PillarId.of_json in
-      let questionId = field_map json "QuestionId" QuestionId.of_json in
-      make ?reason ?notes ?risk ?isApplicable ?choiceAnswers ?selectedChoices
-        ?choices ?helpfulResourceDisplayText ?helpfulResourceUrl
-        ?improvementPlanUrl ?questionDescription ?questionTitle ?pillarId
-        ?questionId ()
+        field_map json__ "QuestionTitle" QuestionTitle.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      let questionId = field_map json__ "QuestionId" QuestionId.of_json in
+      make ?jiraConfiguration ?reason ?notes ?risk ?isApplicable
+        ?choiceAnswers ?selectedChoices ?choices ?helpfulResourceDisplayText
+        ?helpfulResourceUrl ?improvementPlanUrl ?questionDescription
+        ?questionTitle ?pillarId ?questionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An answer of the question."]
-module ChoiceUpdates =
-  struct
-    type nonrec t = (ChoiceId.t * ChoiceUpdate.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            let (_ : string) = v in
-                            let (_ : string) = chopped in
-                            failwith
-                              "no of_header for complex types ChoiceId ChoiceUpdate"))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (ChoiceId.to_value x) |>
-                    (fun x -> (ChoiceUpdate.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:ChoiceId.of_string
-        ~of_json:ChoiceUpdate.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
@@ -3743,6 +7749,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3766,6 +7775,9 @@ module WorkloadSummaries =
   struct
     type nonrec t = WorkloadSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WorkloadSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3826,6 +7838,9 @@ module WorkloadShareSummaries =
   struct
     type nonrec t = WorkloadShareSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WorkloadShareSummary.to_value)) |>
         (fun x -> `List x)
@@ -3881,10 +7896,61 @@ module SharedWithPrefix =
     let of_json j = string_of_json ~kind:"SharedWithPrefix" j
     let to_json = simple_to_json to_value
   end
+module TemplateShareSummaries =
+  struct
+    type nonrec t = TemplateShareSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TemplateShareSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TemplateShareSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TemplateShareSummaries"
+        ~of_json:TemplateShareSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListTemplateSharesMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListTemplateSharesMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ShareInvitationSummaries =
   struct
     type nonrec t = ShareInvitationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ShareInvitationSummary.to_value)) |>
         (fun x -> `List x)
@@ -3940,10 +8006,268 @@ module ListShareInvitationsMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ProfileNamePrefix =
+  struct
+    type nonrec t = string
+    let context_ = "ProfileNamePrefix"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:100); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProfileNamePrefix" j
+    let to_json = simple_to_json to_value
+  end
+module TemplateNamePrefix =
+  struct
+    type nonrec t = string
+    let context_ = "TemplateNamePrefix"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^[A-Za-z0-9-_.,:/()@!&?#+'\226\128\153\\s]+$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TemplateNamePrefix" j
+    let to_json = simple_to_json to_value
+  end
+module ReviewTemplates =
+  struct
+    type nonrec t = ReviewTemplateSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ReviewTemplateSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ReviewTemplateSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReviewTemplates"
+        ~of_json:ReviewTemplateSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResults =
+  struct
+    type nonrec t = int[@@ocaml.doc
+                         "The maximum number of results to return for this request."]
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The maximum number of results to return for this request."]
+module ReviewTemplateAnswerSummaries =
+  struct
+    type nonrec t = ReviewTemplateAnswerSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ReviewTemplateAnswerSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ReviewTemplateAnswerSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReviewTemplateAnswerSummaries"
+        ~of_json:ReviewTemplateAnswerSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListReviewTemplateAnswersMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListReviewTemplateAnswersMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ProfileSummaries =
+  struct
+    type nonrec t = ProfileSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProfileSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProfileSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProfileSummaries" ~of_json:ProfileSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ProfileOwnerType =
+  struct
+    type nonrec t =
+      | SELF 
+      | SHARED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | SELF -> "SELF" | SHARED -> "SHARED" | Non_static_id s -> s
+    let of_string =
+      function | "SELF" -> SELF | "SHARED" -> SHARED | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ProfileOwnerType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ProfileOwnerType" j)
+    let to_json = simple_to_json to_value
+  end
+module ProfileShareSummaries =
+  struct
+    type nonrec t = ProfileShareSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProfileShareSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProfileShareSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProfileShareSummaries"
+        ~of_json:ProfileShareSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListProfileSharesMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListProfileSharesMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ProfileNotificationSummaries =
+  struct
+    type nonrec t = ProfileNotificationSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProfileNotificationSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProfileNotificationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProfileNotificationSummaries"
+        ~of_json:ProfileNotificationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module NotificationSummaries =
   struct
     type nonrec t = NotificationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NotificationSummary.to_value)) |>
         (fun x -> `List x)
@@ -3989,6 +8313,9 @@ module MilestoneSummaries =
   struct
     type nonrec t = MilestoneSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MilestoneSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4010,30 +8337,13 @@ module MilestoneSummaries =
         ~of_json:MilestoneSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module MaxResults =
-  struct
-    type nonrec t = int[@@ocaml.doc
-                         "The maximum number of results to return for this request."]
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "The maximum number of results to return for this request."]
 module LensSummaries =
   struct
     type nonrec t = LensSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LensSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4086,6 +8396,9 @@ module LensShareSummaries =
   struct
     type nonrec t = LensShareSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LensShareSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4111,6 +8424,9 @@ module LensReviewSummaries =
   struct
     type nonrec t = LensReviewSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LensReviewSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4136,6 +8452,9 @@ module ImprovementSummaries =
   struct
     type nonrec t = ImprovementSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImprovementSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4177,10 +8496,92 @@ module ListLensReviewImprovementsMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module QuestionPriority =
+  struct
+    type nonrec t =
+      | PRIORITIZED 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PRIORITIZED -> "PRIORITIZED"
+      | NONE -> "NONE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PRIORITIZED" -> PRIORITIZED
+      | "NONE" -> NONE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration QuestionPriority" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QuestionPriority" j)
+    let to_json = simple_to_json to_value
+  end
+module CheckSummaries =
+  struct
+    type nonrec t = CheckSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CheckSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CheckSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CheckSummaries" ~of_json:CheckSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CheckDetails =
+  struct
+    type nonrec t = CheckDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CheckDetail.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CheckDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CheckDetails" ~of_json:CheckDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AnswerSummaries =
   struct
     type nonrec t = AnswerSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AnswerSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4251,36 +8652,33 @@ module ServiceQuotaExceededException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t ;
+      message: ExceptionMessage.t option ;
       resourceId: ExceptionResourceId.t option ;
       resourceType: ExceptionResourceType.t option ;
-      quotaCode: QuotaCode.t ;
-      serviceCode: ServiceCode.t }
-    let context_ = "ServiceQuotaExceededException"
-    let make ?resourceId =
-      fun ?resourceType ->
-        fun ~message ->
-          fun ~quotaCode ->
-            fun ~serviceCode ->
+      quotaCode: QuotaCode.t option ;
+      serviceCode: ServiceCode.t option }
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType ->
+          fun ?quotaCode ->
+            fun ?serviceCode ->
               fun () ->
-                { resourceId; resourceType; message; quotaCode; serviceCode }
+                { message; resourceId; resourceType; quotaCode; serviceCode }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ExceptionMessage.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
         ("ResourceId",
           (Option.map x.resourceId ~f:ExceptionResourceId.to_value));
         ("ResourceType",
           (Option.map x.resourceType ~f:ExceptionResourceType.to_value));
-        ("QuotaCode", (Some (QuotaCode.to_value x.quotaCode)));
-        ("ServiceCode", (Some (ServiceCode.to_value x.serviceCode)))]
+        ("QuotaCode", (Option.map x.quotaCode ~f:QuotaCode.to_value));
+        ("ServiceCode", (Option.map x.serviceCode ~f:ServiceCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceCode =
-        ServiceCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
+        (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       let quotaCode =
-        QuotaCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QuotaCode") in
+        (Option.map ~f:QuotaCode.of_xml) (Xml.child xml_arg0 "QuotaCode") in
       let resourceType =
         (Option.map ~f:ExceptionResourceType.of_xml)
           (Xml.child xml_arg0 "ResourceType") in
@@ -4288,19 +8686,19 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ExceptionResourceId.of_xml)
           (Xml.child xml_arg0 "ResourceId") in
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~serviceCode ~quotaCode ?resourceType ?resourceId ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?serviceCode ?quotaCode ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map_exn json "ServiceCode" ServiceCode.of_json in
-      let quotaCode = field_map_exn json "QuotaCode" QuotaCode.of_json in
+    let of_json json__ =
+      let serviceCode = field_map json__ "ServiceCode" ServiceCode.of_json in
+      let quotaCode = field_map json__ "QuotaCode" QuotaCode.of_json in
       let resourceType =
-        field_map json "ResourceType" ExceptionResourceType.of_json in
+        field_map json__ "ResourceType" ExceptionResourceType.of_json in
       let resourceId =
-        field_map json "ResourceId" ExceptionResourceId.of_json in
-      let message = field_map_exn json "Message" ExceptionMessage.of_json in
-      make ~serviceCode ~quotaCode ?resourceType ?resourceId ~message ()
+        field_map json__ "ResourceId" ExceptionResourceId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?serviceCode ?quotaCode ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The user has reached their resource quota."]
 module LensJSON =
@@ -4321,6 +8719,53 @@ module LensJSON =
     let of_json j = string_of_json ~kind:"LensJSON" j
     let to_json = simple_to_json to_value
   end
+module ProfileTemplate =
+  struct
+    type nonrec t =
+      {
+      templateName: ProfileName.t option
+        [@ocaml.doc "The name of the profile template."];
+      templateQuestions: TemplateQuestions.t option
+        [@ocaml.doc "Profile template questions."];
+      createdAt: Timestamp.t option ;
+      updatedAt: Timestamp.t option }
+    let make ?templateName =
+      fun ?templateQuestions ->
+        fun ?createdAt ->
+          fun ?updatedAt ->
+            fun () ->
+              { templateName; templateQuestions; createdAt; updatedAt }
+    let to_value x =
+      structure_to_value
+        [("TemplateName",
+           (Option.map x.templateName ~f:ProfileName.to_value));
+        ("TemplateQuestions",
+          (Option.map x.templateQuestions ~f:TemplateQuestions.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let templateQuestions =
+        (Option.map ~f:TemplateQuestions.of_xml)
+          (Xml.child xml_arg0 "TemplateQuestions") in
+      let templateName =
+        (Option.map ~f:ProfileName.of_xml)
+          (Xml.child xml_arg0 "TemplateName") in
+      make ?updatedAt ?createdAt ?templateQuestions ?templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let templateQuestions =
+        field_map json__ "TemplateQuestions" TemplateQuestions.of_json in
+      let templateName = field_map json__ "TemplateName" ProfileName.of_json in
+      make ?updatedAt ?createdAt ?templateQuestions ?templateName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The profile template."]
 module Milestone =
   struct
     type nonrec t =
@@ -4357,13 +8802,13 @@ module Milestone =
           (Xml.child xml_arg0 "MilestoneNumber") in
       make ?workload ?recordedAt ?milestoneName ?milestoneNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workload = field_map json "Workload" Workload.of_json in
-      let recordedAt = field_map json "RecordedAt" Timestamp.of_json in
+    let of_json json__ =
+      let workload = field_map json__ "Workload" Workload.of_json in
+      let recordedAt = field_map json__ "RecordedAt" Timestamp.of_json in
       let milestoneName =
-        field_map json "MilestoneName" MilestoneName.of_json in
+        field_map json__ "MilestoneName" MilestoneName.of_json in
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
       make ?workload ?recordedAt ?milestoneName ?milestoneNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A milestone return object."]
@@ -4386,9 +8831,9 @@ module VersionDifferences =
           (Xml.child xml_arg0 "PillarDifferences") in
       make ?pillarDifferences ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pillarDifferences =
-        field_map json "PillarDifferences" PillarDifferences.of_json in
+        field_map json__ "PillarDifferences" PillarDifferences.of_json in
       make ?pillarDifferences ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4420,10 +8865,10 @@ module LensReviewReport =
         (Option.map ~f:LensAlias.of_xml) (Xml.child xml_arg0 "LensAlias") in
       make ?base64String ?lensArn ?lensAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let base64String = field_map json "Base64String" Base64String.of_json in
-      let lensArn = field_map json "LensArn" LensArn.of_json in
-      let lensAlias = field_map json "LensAlias" LensAlias.of_json in
+    let of_json json__ =
+      let base64String = field_map json__ "Base64String" Base64String.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
       make ?base64String ?lensArn ?lensAlias ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A report of a lens review."]
@@ -4438,22 +8883,25 @@ module Lens =
       owner: LensOwner.t option
         [@ocaml.doc "The Amazon Web Services account ID that owns the lens."];
       shareInvitationId: ShareInvitationId.t option
-        [@ocaml.doc "The ID assigned to the share invitation."]}
+        [@ocaml.doc "The ID assigned to the share invitation."];
+      tags: TagMap.t option [@ocaml.doc "The tags assigned to the lens."]}
     let make ?lensArn =
       fun ?lensVersion ->
         fun ?name ->
           fun ?description ->
             fun ?owner ->
               fun ?shareInvitationId ->
-                fun () ->
-                  {
-                    lensArn;
-                    lensVersion;
-                    name;
-                    description;
-                    owner;
-                    shareInvitationId
-                  }
+                fun ?tags ->
+                  fun () ->
+                    {
+                      lensArn;
+                      lensVersion;
+                      name;
+                      description;
+                      owner;
+                      shareInvitationId;
+                      tags
+                    }
     let to_value x =
       structure_to_value
         [("LensArn", (Option.map x.lensArn ~f:LensArn.to_value));
@@ -4463,9 +8911,11 @@ module Lens =
           (Option.map x.description ~f:LensDescription.to_value));
         ("Owner", (Option.map x.owner ~f:LensOwner.to_value));
         ("ShareInvitationId",
-          (Option.map x.shareInvitationId ~f:ShareInvitationId.to_value))]
+          (Option.map x.shareInvitationId ~f:ShareInvitationId.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let shareInvitationId =
         (Option.map ~f:ShareInvitationId.of_xml)
           (Xml.child xml_arg0 "ShareInvitationId") in
@@ -4479,26 +8929,226 @@ module Lens =
         (Option.map ~f:LensVersion.of_xml) (Xml.child xml_arg0 "LensVersion") in
       let lensArn =
         (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
-      make ?shareInvitationId ?owner ?description ?name ?lensVersion ?lensArn
-        ()
+      make ?tags ?shareInvitationId ?owner ?description ?name ?lensVersion
+        ?lensArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let shareInvitationId =
-        field_map json "ShareInvitationId" ShareInvitationId.of_json in
-      let owner = field_map json "Owner" LensOwner.of_json in
-      let description = field_map json "Description" LensDescription.of_json in
-      let name = field_map json "Name" LensName.of_json in
-      let lensVersion = field_map json "LensVersion" LensVersion.of_json in
-      let lensArn = field_map json "LensArn" LensArn.of_json in
-      make ?shareInvitationId ?owner ?description ?name ?lensVersion ?lensArn
-        ()
+        field_map json__ "ShareInvitationId" ShareInvitationId.of_json in
+      let owner = field_map json__ "Owner" LensOwner.of_json in
+      let description =
+        field_map json__ "Description" LensDescription.of_json in
+      let name = field_map json__ "Name" LensName.of_json in
+      let lensVersion = field_map json__ "LensVersion" LensVersion.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      make ?tags ?shareInvitationId ?owner ?description ?name ?lensVersion
+        ?lensArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A lens return object."]
+module AccountJiraConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      integrationStatus: IntegrationStatus.t option
+        [@ocaml.doc
+          "Account-level: Configuration status of the Jira integration."];
+      issueManagementStatus: AccountJiraIssueManagementStatus.t option
+        [@ocaml.doc "Account-level: Jira issue management status."];
+      issueManagementType: IssueManagementType.t option
+        [@ocaml.doc "Account-level: Jira issue management type."];
+      subdomain: Subdomain.t option
+        [@ocaml.doc "Account-level: Jira subdomain URL."];
+      jiraProjectKey: JiraProjectKey.t option
+        [@ocaml.doc "Account-level: Jira project key to sync workloads to."];
+      statusMessage: StatusMessage.t option
+        [@ocaml.doc
+          "Account-level: Status message on configuration of the Jira integration."]}
+    let make ?integrationStatus =
+      fun ?issueManagementStatus ->
+        fun ?issueManagementType ->
+          fun ?subdomain ->
+            fun ?jiraProjectKey ->
+              fun ?statusMessage ->
+                fun () ->
+                  {
+                    integrationStatus;
+                    issueManagementStatus;
+                    issueManagementType;
+                    subdomain;
+                    jiraProjectKey;
+                    statusMessage
+                  }
+    let to_value x =
+      structure_to_value
+        [("IntegrationStatus",
+           (Option.map x.integrationStatus ~f:IntegrationStatus.to_value));
+        ("IssueManagementStatus",
+          (Option.map x.issueManagementStatus
+             ~f:AccountJiraIssueManagementStatus.to_value));
+        ("IssueManagementType",
+          (Option.map x.issueManagementType ~f:IssueManagementType.to_value));
+        ("Subdomain", (Option.map x.subdomain ~f:Subdomain.to_value));
+        ("JiraProjectKey",
+          (Option.map x.jiraProjectKey ~f:JiraProjectKey.to_value));
+        ("StatusMessage",
+          (Option.map x.statusMessage ~f:StatusMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "StatusMessage") in
+      let jiraProjectKey =
+        (Option.map ~f:JiraProjectKey.of_xml)
+          (Xml.child xml_arg0 "JiraProjectKey") in
+      let subdomain =
+        (Option.map ~f:Subdomain.of_xml) (Xml.child xml_arg0 "Subdomain") in
+      let issueManagementType =
+        (Option.map ~f:IssueManagementType.of_xml)
+          (Xml.child xml_arg0 "IssueManagementType") in
+      let issueManagementStatus =
+        (Option.map ~f:AccountJiraIssueManagementStatus.of_xml)
+          (Xml.child xml_arg0 "IssueManagementStatus") in
+      let integrationStatus =
+        (Option.map ~f:IntegrationStatus.of_xml)
+          (Xml.child xml_arg0 "IntegrationStatus") in
+      make ?statusMessage ?jiraProjectKey ?subdomain ?issueManagementType
+        ?issueManagementStatus ?integrationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusMessage =
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let jiraProjectKey =
+        field_map json__ "JiraProjectKey" JiraProjectKey.of_json in
+      let subdomain = field_map json__ "Subdomain" Subdomain.of_json in
+      let issueManagementType =
+        field_map json__ "IssueManagementType" IssueManagementType.of_json in
+      let issueManagementStatus =
+        field_map json__ "IssueManagementStatus"
+          AccountJiraIssueManagementStatus.of_json in
+      let integrationStatus =
+        field_map json__ "IntegrationStatus" IntegrationStatus.of_json in
+      make ?statusMessage ?jiraProjectKey ?subdomain ?issueManagementType
+        ?issueManagementStatus ?integrationStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Account-level: Output configuration of the Jira integration."]
+module ConsolidatedReportMetrics =
+  struct
+    type nonrec t = ConsolidatedReportMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConsolidatedReportMetric.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConsolidatedReportMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConsolidatedReportMetrics"
+        ~of_json:ConsolidatedReportMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GetConsolidatedReportMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:15) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for GetConsolidatedReportMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module IncludeSharedResources =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ReportFormat =
+  struct
+    type nonrec t =
+      | PDF 
+      | JSON 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | PDF -> "PDF" | JSON -> "JSON" | Non_static_id s -> s
+    let of_string =
+      function | "PDF" -> PDF | "JSON" -> JSON | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ReportFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ReportFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module ProfileArns =
+  struct
+    type nonrec t = ProfileArn.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProfileArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProfileArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProfileArns" ~of_json:ProfileArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module LensAliases =
   struct
     type nonrec t = LensAlias.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LensAlias.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4519,6 +9169,62 @@ module LensAliases =
       list_of_json ~kind:"LensAliases" ~of_json:LensAlias.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ReviewTemplateArns =
+  struct
+    type nonrec t = TemplateArn.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TemplateArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TemplateArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReviewTemplateArns" ~of_json:TemplateArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WorkloadProfileArns =
+  struct
+    type nonrec t = ProfileArn.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProfileArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProfileArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WorkloadProfileArns" ~of_json:ProfileArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module IsMajorVersion =
   struct
     type nonrec t = bool
@@ -4532,6 +9238,96 @@ module IsMajorVersion =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module UpgradeReviewTemplateLensReviewInput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t
+        [@ocaml.doc "The ARN of the review template."];
+      lensAlias: LensAlias.t ;
+      clientRequestToken: ClientRequestToken.t option }
+    let context_ = "UpgradeReviewTemplateLensReviewInput"
+    let make ?clientRequestToken =
+      fun ~templateArn ->
+        fun ~lensAlias ->
+          fun () -> { clientRequestToken; templateArn; lensAlias }
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Some (TemplateArn.to_value x.templateArn)));
+        ("LensAlias", (Some (LensAlias.to_value x.lensAlias)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let lensAlias =
+        LensAlias.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
+      let templateArn =
+        TemplateArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateArn") in
+      make ?clientRequestToken ~lensAlias ~templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let templateArn =
+        field_map_exn json__ "TemplateArn" TemplateArn.of_json in
+      make ?clientRequestToken ~lensAlias ~templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Upgrade the lens review of a review template."]
+module UpgradeProfileVersionInput =
+  struct
+    type nonrec t =
+      {
+      workloadId: WorkloadId.t ;
+      profileArn: ProfileArn.t [@ocaml.doc "The profile ARN."];
+      milestoneName: MilestoneName.t option ;
+      clientRequestToken: ClientRequestToken.t option }
+    let context_ = "UpgradeProfileVersionInput"
+    let make ?milestoneName =
+      fun ?clientRequestToken ->
+        fun ~workloadId ->
+          fun ~profileArn ->
+            fun () ->
+              { milestoneName; clientRequestToken; workloadId; profileArn }
+    let to_value x =
+      structure_to_value
+        [("WorkloadId", (Some (WorkloadId.to_value x.workloadId)));
+        ("ProfileArn", (Some (ProfileArn.to_value x.profileArn)));
+        ("MilestoneName",
+          (Option.map x.milestoneName ~f:MilestoneName.to_value));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let milestoneName =
+        (Option.map ~f:MilestoneName.of_xml)
+          (Xml.child xml_arg0 "MilestoneName") in
+      let profileArn =
+        ProfileArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileArn") in
+      let workloadId =
+        WorkloadId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
+      make ?clientRequestToken ?milestoneName ~profileArn ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let milestoneName =
+        field_map json__ "MilestoneName" MilestoneName.of_json in
+      let profileArn = field_map_exn json__ "ProfileArn" ProfileArn.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      make ?clientRequestToken ?milestoneName ~profileArn ~workloadId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Upgrade a profile."]
 module UpgradeLensReviewInput =
   struct
     type nonrec t =
@@ -4570,16 +9366,16 @@ module UpgradeLensReviewInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?clientRequestToken ~milestoneName ~lensAlias ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let milestoneName =
-        field_map_exn json "MilestoneName" MilestoneName.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+        field_map_exn json__ "MilestoneName" MilestoneName.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ?clientRequestToken ~milestoneName ~lensAlias ~workloadId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Upgrade lens review."]
+  end[@@ocaml.doc "Upgrade lens review for a particular workload."]
 module UpdateWorkloadShareOutput =
   struct
     type nonrec t =
@@ -4674,10 +9470,10 @@ module UpdateWorkloadShareOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?workloadShare ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workloadShare =
-        field_map json "WorkloadShare" WorkloadShare.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "WorkloadShare" WorkloadShare.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?workloadShare ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for Update Workload Share"]
@@ -4710,11 +9506,11 @@ module UpdateWorkloadShareInput =
         ShareId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShareId") in
       make ~permissionType ~workloadId ~shareId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionType =
-        field_map_exn json "PermissionType" PermissionType.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
-      let shareId = field_map_exn json "ShareId" ShareId.of_json in
+        field_map_exn json__ "PermissionType" PermissionType.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      let shareId = field_map_exn json__ "ShareId" ShareId.of_json in
       make ~permissionType ~workloadId ~shareId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for Update Workload Share"]
@@ -4804,8 +9600,8 @@ module UpdateWorkloadOutput =
         (Option.map ~f:Workload.of_xml) (Xml.child xml_arg0 "Workload") in
       make ?workload ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workload = field_map json "Workload" Workload.of_json in
+    let of_json json__ =
+      let workload = field_map json__ "Workload" Workload.of_json in
       make ?workload ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output of an update workload call."]
@@ -4830,7 +9626,15 @@ module UpdateWorkloadInput =
       industryType: WorkloadIndustryType.t option ;
       industry: WorkloadIndustry.t option ;
       notes: Notes.t option ;
-      improvementStatus: WorkloadImprovementStatus.t option }
+      improvementStatus: WorkloadImprovementStatus.t option ;
+      discoveryConfig: WorkloadDiscoveryConfig.t option
+        [@ocaml.doc
+          "Well-Architected discovery configuration settings to associate to the workload."];
+      applications: WorkloadApplications.t option
+        [@ocaml.doc
+          "List of AppRegistry application ARNs to associate to the workload."];
+      jiraConfiguration: WorkloadJiraConfigurationInput.t option
+        [@ocaml.doc "Configuration of the Jira integration."]}
     let context_ = "UpdateWorkloadInput"
     let make ?workloadName =
       fun ?description ->
@@ -4846,25 +9650,31 @@ module UpdateWorkloadInput =
                           fun ?industry ->
                             fun ?notes ->
                               fun ?improvementStatus ->
-                                fun ~workloadId ->
-                                  fun () ->
-                                    {
-                                      workloadName;
-                                      description;
-                                      environment;
-                                      accountIds;
-                                      awsRegions;
-                                      nonAwsRegions;
-                                      pillarPriorities;
-                                      architecturalDesign;
-                                      reviewOwner;
-                                      isReviewOwnerUpdateAcknowledged;
-                                      industryType;
-                                      industry;
-                                      notes;
-                                      improvementStatus;
-                                      workloadId
-                                    }
+                                fun ?discoveryConfig ->
+                                  fun ?applications ->
+                                    fun ?jiraConfiguration ->
+                                      fun ~workloadId ->
+                                        fun () ->
+                                          {
+                                            workloadName;
+                                            description;
+                                            environment;
+                                            accountIds;
+                                            awsRegions;
+                                            nonAwsRegions;
+                                            pillarPriorities;
+                                            architecturalDesign;
+                                            reviewOwner;
+                                            isReviewOwnerUpdateAcknowledged;
+                                            industryType;
+                                            industry;
+                                            notes;
+                                            improvementStatus;
+                                            discoveryConfig;
+                                            applications;
+                                            jiraConfiguration;
+                                            workloadId
+                                          }
     let to_value x =
       structure_to_value
         [("WorkloadId", (Some (WorkloadId.to_value x.workloadId)));
@@ -4896,9 +9706,25 @@ module UpdateWorkloadInput =
         ("Notes", (Option.map x.notes ~f:Notes.to_value));
         ("ImprovementStatus",
           (Option.map x.improvementStatus
-             ~f:WorkloadImprovementStatus.to_value))]
+             ~f:WorkloadImprovementStatus.to_value));
+        ("DiscoveryConfig",
+          (Option.map x.discoveryConfig ~f:WorkloadDiscoveryConfig.to_value));
+        ("Applications",
+          (Option.map x.applications ~f:WorkloadApplications.to_value));
+        ("JiraConfiguration",
+          (Option.map x.jiraConfiguration
+             ~f:WorkloadJiraConfigurationInput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jiraConfiguration =
+        (Option.map ~f:WorkloadJiraConfigurationInput.of_xml)
+          (Xml.child xml_arg0 "JiraConfiguration") in
+      let applications =
+        (Option.map ~f:WorkloadApplications.of_xml)
+          (Xml.child xml_arg0 "Applications") in
+      let discoveryConfig =
+        (Option.map ~f:WorkloadDiscoveryConfig.of_xml)
+          (Xml.child xml_arg0 "DiscoveryConfig") in
       let improvementStatus =
         (Option.map ~f:WorkloadImprovementStatus.of_xml)
           (Xml.child xml_arg0 "ImprovementStatus") in
@@ -4942,39 +9768,51 @@ module UpdateWorkloadInput =
       let workloadId =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
-      make ?improvementStatus ?notes ?industry ?industryType
+      make ?jiraConfiguration ?applications ?discoveryConfig
+        ?improvementStatus ?notes ?industry ?industryType
         ?isReviewOwnerUpdateAcknowledged ?reviewOwner ?architecturalDesign
         ?pillarPriorities ?nonAwsRegions ?awsRegions ?accountIds ?environment
         ?description ?workloadName ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let jiraConfiguration =
+        field_map json__ "JiraConfiguration"
+          WorkloadJiraConfigurationInput.of_json in
+      let applications =
+        field_map json__ "Applications" WorkloadApplications.of_json in
+      let discoveryConfig =
+        field_map json__ "DiscoveryConfig" WorkloadDiscoveryConfig.of_json in
       let improvementStatus =
-        field_map json "ImprovementStatus" WorkloadImprovementStatus.of_json in
-      let notes = field_map json "Notes" Notes.of_json in
-      let industry = field_map json "Industry" WorkloadIndustry.of_json in
+        field_map json__ "ImprovementStatus"
+          WorkloadImprovementStatus.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
+      let industry = field_map json__ "Industry" WorkloadIndustry.of_json in
       let industryType =
-        field_map json "IndustryType" WorkloadIndustryType.of_json in
+        field_map json__ "IndustryType" WorkloadIndustryType.of_json in
       let isReviewOwnerUpdateAcknowledged =
-        field_map json "IsReviewOwnerUpdateAcknowledged"
+        field_map json__ "IsReviewOwnerUpdateAcknowledged"
           IsReviewOwnerUpdateAcknowledged.of_json in
       let reviewOwner =
-        field_map json "ReviewOwner" WorkloadReviewOwner.of_json in
+        field_map json__ "ReviewOwner" WorkloadReviewOwner.of_json in
       let architecturalDesign =
-        field_map json "ArchitecturalDesign"
+        field_map json__ "ArchitecturalDesign"
           WorkloadArchitecturalDesign.of_json in
       let pillarPriorities =
-        field_map json "PillarPriorities" WorkloadPillarPriorities.of_json in
+        field_map json__ "PillarPriorities" WorkloadPillarPriorities.of_json in
       let nonAwsRegions =
-        field_map json "NonAwsRegions" WorkloadNonAwsRegions.of_json in
-      let awsRegions = field_map json "AwsRegions" WorkloadAwsRegions.of_json in
-      let accountIds = field_map json "AccountIds" WorkloadAccountIds.of_json in
+        field_map json__ "NonAwsRegions" WorkloadNonAwsRegions.of_json in
+      let awsRegions =
+        field_map json__ "AwsRegions" WorkloadAwsRegions.of_json in
+      let accountIds =
+        field_map json__ "AccountIds" WorkloadAccountIds.of_json in
       let environment =
-        field_map json "Environment" WorkloadEnvironment.of_json in
+        field_map json__ "Environment" WorkloadEnvironment.of_json in
       let description =
-        field_map json "Description" WorkloadDescription.of_json in
-      let workloadName = field_map json "WorkloadName" WorkloadName.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
-      make ?improvementStatus ?notes ?industry ?industryType
+        field_map json__ "Description" WorkloadDescription.of_json in
+      let workloadName = field_map json__ "WorkloadName" WorkloadName.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      make ?jiraConfiguration ?applications ?discoveryConfig
+        ?improvementStatus ?notes ?industry ?industryType
         ?isReviewOwnerUpdateAcknowledged ?reviewOwner ?architecturalDesign
         ?pillarPriorities ?nonAwsRegions ?awsRegions ?accountIds ?environment
         ?description ?workloadName ~workloadId ()
@@ -4985,7 +9823,7 @@ module UpdateShareInvitationOutput =
     type nonrec t =
       {
       shareInvitation: ShareInvitation.t option
-        [@ocaml.doc "The updated workload share invitation."]}
+        [@ocaml.doc "The updated workload or custom lens share invitation."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -5070,12 +9908,13 @@ module UpdateShareInvitationOutput =
           (Xml.child xml_arg0 "ShareInvitation") in
       make ?shareInvitation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shareInvitation =
-        field_map json "ShareInvitation" ShareInvitation.of_json in
+        field_map json__ "ShareInvitation" ShareInvitation.of_json in
       make ?shareInvitation ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Update a workload invitation."]
+  end[@@ocaml.doc
+       "Update a workload or custom lens share invitation. This API operation can be called independently of any resource. Previous documentation implied that a workload ARN must be specified."]
 module UpdateShareInvitationInput =
   struct
     type nonrec t =
@@ -5103,15 +9942,670 @@ module UpdateShareInvitationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ShareInvitationId") in
       make ~shareInvitationAction ~shareInvitationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shareInvitationAction =
-        field_map_exn json "ShareInvitationAction"
+        field_map_exn json__ "ShareInvitationAction"
           ShareInvitationAction.of_json in
       let shareInvitationId =
-        field_map_exn json "ShareInvitationId" ShareInvitationId.of_json in
+        field_map_exn json__ "ShareInvitationId" ShareInvitationId.of_json in
       make ~shareInvitationAction ~shareInvitationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for Update Share Invitation"]
+module UpdateReviewTemplateOutput =
+  struct
+    type nonrec t =
+      {
+      reviewTemplate: ReviewTemplate.t option
+        [@ocaml.doc "A review template."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?reviewTemplate = fun () -> { reviewTemplate }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ReviewTemplate",
+           (Option.map x.reviewTemplate ~f:ReviewTemplate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reviewTemplate =
+        (Option.map ~f:ReviewTemplate.of_xml)
+          (Xml.child xml_arg0 "ReviewTemplate") in
+      make ?reviewTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reviewTemplate =
+        field_map json__ "ReviewTemplate" ReviewTemplate.of_json in
+      make ?reviewTemplate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update a review template."]
+module UpdateReviewTemplateLensReviewOutput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t option
+        [@ocaml.doc "The review template ARN."];
+      lensReview: ReviewTemplateLensReview.t option
+        [@ocaml.doc "A lens review of a question."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?templateArn =
+      fun ?lensReview -> fun () -> { templateArn; lensReview }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Option.map x.templateArn ~f:TemplateArn.to_value));
+        ("LensReview",
+          (Option.map x.lensReview ~f:ReviewTemplateLensReview.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lensReview =
+        (Option.map ~f:ReviewTemplateLensReview.of_xml)
+          (Xml.child xml_arg0 "LensReview") in
+      let templateArn =
+        (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "TemplateArn") in
+      make ?lensReview ?templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lensReview =
+        field_map json__ "LensReview" ReviewTemplateLensReview.of_json in
+      let templateArn = field_map json__ "TemplateArn" TemplateArn.of_json in
+      make ?lensReview ?templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update a lens review associated with a review template."]
+module UpdateReviewTemplateLensReviewInput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t [@ocaml.doc "The review template ARN."];
+      lensAlias: LensAlias.t ;
+      lensNotes: Notes.t option ;
+      pillarNotes: PillarNotes.t option }
+    let context_ = "UpdateReviewTemplateLensReviewInput"
+    let make ?lensNotes =
+      fun ?pillarNotes ->
+        fun ~templateArn ->
+          fun ~lensAlias ->
+            fun () -> { lensNotes; pillarNotes; templateArn; lensAlias }
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Some (TemplateArn.to_value x.templateArn)));
+        ("LensAlias", (Some (LensAlias.to_value x.lensAlias)));
+        ("LensNotes", (Option.map x.lensNotes ~f:Notes.to_value));
+        ("PillarNotes", (Option.map x.pillarNotes ~f:PillarNotes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pillarNotes =
+        (Option.map ~f:PillarNotes.of_xml) (Xml.child xml_arg0 "PillarNotes") in
+      let lensNotes =
+        (Option.map ~f:Notes.of_xml) (Xml.child xml_arg0 "LensNotes") in
+      let lensAlias =
+        LensAlias.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
+      let templateArn =
+        TemplateArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateArn") in
+      make ?pillarNotes ?lensNotes ~lensAlias ~templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pillarNotes = field_map json__ "PillarNotes" PillarNotes.of_json in
+      let lensNotes = field_map json__ "LensNotes" Notes.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let templateArn =
+        field_map_exn json__ "TemplateArn" TemplateArn.of_json in
+      make ?pillarNotes ?lensNotes ~lensAlias ~templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update a lens review associated with a review template."]
+module UpdateReviewTemplateInput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t [@ocaml.doc "The review template ARN."];
+      templateName: TemplateName.t option
+        [@ocaml.doc "The review template name."];
+      description: TemplateDescription.t option
+        [@ocaml.doc "The review template description."];
+      notes: Notes.t option ;
+      lensesToAssociate: ReviewTemplateLensAliases.t option
+        [@ocaml.doc
+          "A list of lens aliases or ARNs to apply to the review template."];
+      lensesToDisassociate: ReviewTemplateLensAliases.t option
+        [@ocaml.doc
+          "A list of lens aliases or ARNs to unapply to the review template. The wellarchitected lens cannot be unapplied."]}
+    let context_ = "UpdateReviewTemplateInput"
+    let make ?templateName =
+      fun ?description ->
+        fun ?notes ->
+          fun ?lensesToAssociate ->
+            fun ?lensesToDisassociate ->
+              fun ~templateArn ->
+                fun () ->
+                  {
+                    templateName;
+                    description;
+                    notes;
+                    lensesToAssociate;
+                    lensesToDisassociate;
+                    templateArn
+                  }
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Some (TemplateArn.to_value x.templateArn)));
+        ("TemplateName",
+          (Option.map x.templateName ~f:TemplateName.to_value));
+        ("Description",
+          (Option.map x.description ~f:TemplateDescription.to_value));
+        ("Notes", (Option.map x.notes ~f:Notes.to_value));
+        ("LensesToAssociate",
+          (Option.map x.lensesToAssociate
+             ~f:ReviewTemplateLensAliases.to_value));
+        ("LensesToDisassociate",
+          (Option.map x.lensesToDisassociate
+             ~f:ReviewTemplateLensAliases.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lensesToDisassociate =
+        (Option.map ~f:ReviewTemplateLensAliases.of_xml)
+          (Xml.child xml_arg0 "LensesToDisassociate") in
+      let lensesToAssociate =
+        (Option.map ~f:ReviewTemplateLensAliases.of_xml)
+          (Xml.child xml_arg0 "LensesToAssociate") in
+      let notes = (Option.map ~f:Notes.of_xml) (Xml.child xml_arg0 "Notes") in
+      let description =
+        (Option.map ~f:TemplateDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let templateName =
+        (Option.map ~f:TemplateName.of_xml)
+          (Xml.child xml_arg0 "TemplateName") in
+      let templateArn =
+        TemplateArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateArn") in
+      make ?lensesToDisassociate ?lensesToAssociate ?notes ?description
+        ?templateName ~templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lensesToDisassociate =
+        field_map json__ "LensesToDisassociate"
+          ReviewTemplateLensAliases.of_json in
+      let lensesToAssociate =
+        field_map json__ "LensesToAssociate"
+          ReviewTemplateLensAliases.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
+      let description =
+        field_map json__ "Description" TemplateDescription.of_json in
+      let templateName = field_map json__ "TemplateName" TemplateName.of_json in
+      let templateArn =
+        field_map_exn json__ "TemplateArn" TemplateArn.of_json in
+      make ?lensesToDisassociate ?lensesToAssociate ?notes ?description
+        ?templateName ~templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update a review template."]
+module UpdateReviewTemplateAnswerOutput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t option
+        [@ocaml.doc "The review template ARN."];
+      lensAlias: LensAlias.t option ;
+      answer: ReviewTemplateAnswer.t option
+        [@ocaml.doc "An answer of the question."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?templateArn =
+      fun ?lensAlias ->
+        fun ?answer -> fun () -> { templateArn; lensAlias; answer }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Option.map x.templateArn ~f:TemplateArn.to_value));
+        ("LensAlias", (Option.map x.lensAlias ~f:LensAlias.to_value));
+        ("Answer", (Option.map x.answer ~f:ReviewTemplateAnswer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let answer =
+        (Option.map ~f:ReviewTemplateAnswer.of_xml)
+          (Xml.child xml_arg0 "Answer") in
+      let lensAlias =
+        (Option.map ~f:LensAlias.of_xml) (Xml.child xml_arg0 "LensAlias") in
+      let templateArn =
+        (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "TemplateArn") in
+      make ?answer ?lensAlias ?templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let answer = field_map json__ "Answer" ReviewTemplateAnswer.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
+      let templateArn = field_map json__ "TemplateArn" TemplateArn.of_json in
+      make ?answer ?lensAlias ?templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update a review template answer."]
+module UpdateReviewTemplateAnswerInput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t [@ocaml.doc "The review template ARN."];
+      lensAlias: LensAlias.t ;
+      questionId: QuestionId.t ;
+      selectedChoices: SelectedChoices.t option ;
+      choiceUpdates: ChoiceUpdates.t option
+        [@ocaml.doc "A list of choices to be updated."];
+      notes: Notes.t option ;
+      isApplicable: IsApplicable.t option ;
+      reason: AnswerReason.t option [@ocaml.doc "The update reason."]}
+    let context_ = "UpdateReviewTemplateAnswerInput"
+    let make ?selectedChoices =
+      fun ?choiceUpdates ->
+        fun ?notes ->
+          fun ?isApplicable ->
+            fun ?reason ->
+              fun ~templateArn ->
+                fun ~lensAlias ->
+                  fun ~questionId ->
+                    fun () ->
+                      {
+                        selectedChoices;
+                        choiceUpdates;
+                        notes;
+                        isApplicable;
+                        reason;
+                        templateArn;
+                        lensAlias;
+                        questionId
+                      }
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Some (TemplateArn.to_value x.templateArn)));
+        ("LensAlias", (Some (LensAlias.to_value x.lensAlias)));
+        ("QuestionId", (Some (QuestionId.to_value x.questionId)));
+        ("SelectedChoices",
+          (Option.map x.selectedChoices ~f:SelectedChoices.to_value));
+        ("ChoiceUpdates",
+          (Option.map x.choiceUpdates ~f:ChoiceUpdates.to_value));
+        ("Notes", (Option.map x.notes ~f:Notes.to_value));
+        ("IsApplicable",
+          (Option.map x.isApplicable ~f:IsApplicable.to_value));
+        ("Reason", (Option.map x.reason ~f:AnswerReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:AnswerReason.of_xml) (Xml.child xml_arg0 "Reason") in
+      let isApplicable =
+        (Option.map ~f:IsApplicable.of_xml)
+          (Xml.child xml_arg0 "IsApplicable") in
+      let notes = (Option.map ~f:Notes.of_xml) (Xml.child xml_arg0 "Notes") in
+      let choiceUpdates =
+        (Option.map ~f:ChoiceUpdates.of_xml)
+          (Xml.child xml_arg0 "ChoiceUpdates") in
+      let selectedChoices =
+        (Option.map ~f:SelectedChoices.of_xml)
+          (Xml.child xml_arg0 "SelectedChoices") in
+      let questionId =
+        QuestionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "QuestionId") in
+      let lensAlias =
+        LensAlias.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
+      let templateArn =
+        TemplateArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateArn") in
+      make ?reason ?isApplicable ?notes ?choiceUpdates ?selectedChoices
+        ~questionId ~lensAlias ~templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "Reason" AnswerReason.of_json in
+      let isApplicable = field_map json__ "IsApplicable" IsApplicable.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
+      let choiceUpdates =
+        field_map json__ "ChoiceUpdates" ChoiceUpdates.of_json in
+      let selectedChoices =
+        field_map json__ "SelectedChoices" SelectedChoices.of_json in
+      let questionId = field_map_exn json__ "QuestionId" QuestionId.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let templateArn =
+        field_map_exn json__ "TemplateArn" TemplateArn.of_json in
+      make ?reason ?isApplicable ?notes ?choiceUpdates ?selectedChoices
+        ~questionId ~lensAlias ~templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update a review template answer."]
+module UpdateProfileOutput =
+  struct
+    type nonrec t = {
+      profile: Profile.t option [@ocaml.doc "The profile."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?profile = fun () -> { profile }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Profile", (Option.map x.profile ~f:Profile.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profile =
+        (Option.map ~f:Profile.of_xml) (Xml.child xml_arg0 "Profile") in
+      make ?profile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profile = field_map json__ "Profile" Profile.of_json in
+      make ?profile ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update a profile."]
+module UpdateProfileInput =
+  struct
+    type nonrec t =
+      {
+      profileArn: ProfileArn.t [@ocaml.doc "The profile ARN."];
+      profileDescription: ProfileDescription.t option
+        [@ocaml.doc "The profile description."];
+      profileQuestions: ProfileQuestionUpdates.t option
+        [@ocaml.doc "Profile questions."]}
+    let context_ = "UpdateProfileInput"
+    let make ?profileDescription =
+      fun ?profileQuestions ->
+        fun ~profileArn ->
+          fun () -> { profileDescription; profileQuestions; profileArn }
+    let to_value x =
+      structure_to_value
+        [("ProfileArn", (Some (ProfileArn.to_value x.profileArn)));
+        ("ProfileDescription",
+          (Option.map x.profileDescription ~f:ProfileDescription.to_value));
+        ("ProfileQuestions",
+          (Option.map x.profileQuestions ~f:ProfileQuestionUpdates.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profileQuestions =
+        (Option.map ~f:ProfileQuestionUpdates.of_xml)
+          (Xml.child xml_arg0 "ProfileQuestions") in
+      let profileDescription =
+        (Option.map ~f:ProfileDescription.of_xml)
+          (Xml.child xml_arg0 "ProfileDescription") in
+      let profileArn =
+        ProfileArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileArn") in
+      make ?profileQuestions ?profileDescription ~profileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profileQuestions =
+        field_map json__ "ProfileQuestions" ProfileQuestionUpdates.of_json in
+      let profileDescription =
+        field_map json__ "ProfileDescription" ProfileDescription.of_json in
+      let profileArn = field_map_exn json__ "ProfileArn" ProfileArn.of_json in
+      make ?profileQuestions ?profileDescription ~profileArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update a profile."]
 module UpdateLensReviewOutput =
   struct
     type nonrec t =
@@ -5204,9 +10698,9 @@ module UpdateLensReviewOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?lensReview ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lensReview = field_map json "LensReview" LensReview.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+    let of_json json__ =
+      let lensReview = field_map json__ "LensReview" LensReview.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?lensReview ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output of a update lens review call."]
@@ -5217,21 +10711,37 @@ module UpdateLensReviewInput =
       workloadId: WorkloadId.t ;
       lensAlias: LensAlias.t ;
       lensNotes: Notes.t option ;
-      pillarNotes: PillarNotes.t option }
+      pillarNotes: PillarNotes.t option ;
+      jiraConfiguration: JiraSelectedQuestionConfiguration.t option
+        [@ocaml.doc "Configuration of the Jira integration."]}
     let context_ = "UpdateLensReviewInput"
     let make ?lensNotes =
       fun ?pillarNotes ->
-        fun ~workloadId ->
-          fun ~lensAlias ->
-            fun () -> { lensNotes; pillarNotes; workloadId; lensAlias }
+        fun ?jiraConfiguration ->
+          fun ~workloadId ->
+            fun ~lensAlias ->
+              fun () ->
+                {
+                  lensNotes;
+                  pillarNotes;
+                  jiraConfiguration;
+                  workloadId;
+                  lensAlias
+                }
     let to_value x =
       structure_to_value
         [("WorkloadId", (Some (WorkloadId.to_value x.workloadId)));
         ("LensAlias", (Some (LensAlias.to_value x.lensAlias)));
         ("LensNotes", (Option.map x.lensNotes ~f:Notes.to_value));
-        ("PillarNotes", (Option.map x.pillarNotes ~f:PillarNotes.to_value))]
+        ("PillarNotes", (Option.map x.pillarNotes ~f:PillarNotes.to_value));
+        ("JiraConfiguration",
+          (Option.map x.jiraConfiguration
+             ~f:JiraSelectedQuestionConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jiraConfiguration =
+        (Option.map ~f:JiraSelectedQuestionConfiguration.of_xml)
+          (Xml.child xml_arg0 "JiraConfiguration") in
       let pillarNotes =
         (Option.map ~f:PillarNotes.of_xml) (Xml.child xml_arg0 "PillarNotes") in
       let lensNotes =
@@ -5242,16 +10752,122 @@ module UpdateLensReviewInput =
       let workloadId =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
-      make ?pillarNotes ?lensNotes ~lensAlias ~workloadId ()
+      make ?jiraConfiguration ?pillarNotes ?lensNotes ~lensAlias ~workloadId
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pillarNotes = field_map json "PillarNotes" PillarNotes.of_json in
-      let lensNotes = field_map json "LensNotes" Notes.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
-      make ?pillarNotes ?lensNotes ~lensAlias ~workloadId ()
+    let of_json json__ =
+      let jiraConfiguration =
+        field_map json__ "JiraConfiguration"
+          JiraSelectedQuestionConfiguration.of_json in
+      let pillarNotes = field_map json__ "PillarNotes" PillarNotes.of_json in
+      let lensNotes = field_map json__ "LensNotes" Notes.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      make ?jiraConfiguration ?pillarNotes ?lensNotes ~lensAlias ~workloadId
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for update lens review."]
+module UpdateIntegrationInput =
+  struct
+    type nonrec t =
+      {
+      workloadId: WorkloadId.t ;
+      clientRequestToken: ClientRequestToken.t ;
+      integratingService: IntegratingService.t
+        [@ocaml.doc "Which integrated service to update."]}
+    let context_ = "UpdateIntegrationInput"
+    let make ~workloadId =
+      fun ~clientRequestToken ->
+        fun ~integratingService ->
+          fun () -> { workloadId; clientRequestToken; integratingService }
+    let to_value x =
+      structure_to_value
+        [("WorkloadId", (Some (WorkloadId.to_value x.workloadId)));
+        ("ClientRequestToken",
+          (Some (ClientRequestToken.to_value x.clientRequestToken)));
+        ("IntegratingService",
+          (Some (IntegratingService.to_value x.integratingService)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let integratingService =
+        IntegratingService.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IntegratingService") in
+      let clientRequestToken =
+        ClientRequestToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
+      let workloadId =
+        WorkloadId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
+      make ~integratingService ~clientRequestToken ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let integratingService =
+        field_map_exn json__ "IntegratingService" IntegratingService.of_json in
+      let clientRequestToken =
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      make ~integratingService ~clientRequestToken ~workloadId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update integration features."]
+module UpdateGlobalSettingsInput =
+  struct
+    type nonrec t =
+      {
+      organizationSharingStatus: OrganizationSharingStatus.t option
+        [@ocaml.doc "The status of organization sharing settings."];
+      discoveryIntegrationStatus: DiscoveryIntegrationStatus.t option
+        [@ocaml.doc "The status of discovery support settings."];
+      jiraConfiguration: AccountJiraConfigurationInput.t option
+        [@ocaml.doc "The status of Jira integration settings."]}
+    let make ?organizationSharingStatus =
+      fun ?discoveryIntegrationStatus ->
+        fun ?jiraConfiguration ->
+          fun () ->
+            {
+              organizationSharingStatus;
+              discoveryIntegrationStatus;
+              jiraConfiguration
+            }
+    let to_value x =
+      structure_to_value
+        [("OrganizationSharingStatus",
+           (Option.map x.organizationSharingStatus
+              ~f:OrganizationSharingStatus.to_value));
+        ("DiscoveryIntegrationStatus",
+          (Option.map x.discoveryIntegrationStatus
+             ~f:DiscoveryIntegrationStatus.to_value));
+        ("JiraConfiguration",
+          (Option.map x.jiraConfiguration
+             ~f:AccountJiraConfigurationInput.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jiraConfiguration =
+        (Option.map ~f:AccountJiraConfigurationInput.of_xml)
+          (Xml.child xml_arg0 "JiraConfiguration") in
+      let discoveryIntegrationStatus =
+        (Option.map ~f:DiscoveryIntegrationStatus.of_xml)
+          (Xml.child xml_arg0 "DiscoveryIntegrationStatus") in
+      let organizationSharingStatus =
+        (Option.map ~f:OrganizationSharingStatus.of_xml)
+          (Xml.child xml_arg0 "OrganizationSharingStatus") in
+      make ?jiraConfiguration ?discoveryIntegrationStatus
+        ?organizationSharingStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jiraConfiguration =
+        field_map json__ "JiraConfiguration"
+          AccountJiraConfigurationInput.of_json in
+      let discoveryIntegrationStatus =
+        field_map json__ "DiscoveryIntegrationStatus"
+          DiscoveryIntegrationStatus.of_json in
+      let organizationSharingStatus =
+        field_map json__ "OrganizationSharingStatus"
+          OrganizationSharingStatus.of_json in
+      make ?jiraConfiguration ?discoveryIntegrationStatus
+        ?organizationSharingStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update whether the Amazon Web Services account is opted into organization sharing and discovery integration features."]
 module UpdateAnswerOutput =
   struct
     type nonrec t =
@@ -5354,11 +10970,11 @@ module UpdateAnswerOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?answer ?lensArn ?lensAlias ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let answer = field_map json "Answer" Answer.of_json in
-      let lensArn = field_map json "LensArn" LensArn.of_json in
-      let lensAlias = field_map json "LensAlias" LensAlias.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+    let of_json json__ =
+      let answer = field_map json__ "Answer" Answer.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?answer ?lensArn ?lensAlias ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output of a update answer call."]
@@ -5437,17 +11053,17 @@ module UpdateAnswerInput =
       make ?reason ?isApplicable ?notes ?choiceUpdates ?selectedChoices
         ~questionId ~lensAlias ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" AnswerReason.of_json in
-      let isApplicable = field_map json "IsApplicable" IsApplicable.of_json in
-      let notes = field_map json "Notes" Notes.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "Reason" AnswerReason.of_json in
+      let isApplicable = field_map json__ "IsApplicable" IsApplicable.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
       let choiceUpdates =
-        field_map json "ChoiceUpdates" ChoiceUpdates.of_json in
+        field_map json__ "ChoiceUpdates" ChoiceUpdates.of_json in
       let selectedChoices =
-        field_map json "SelectedChoices" SelectedChoices.of_json in
-      let questionId = field_map_exn json "QuestionId" QuestionId.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "SelectedChoices" SelectedChoices.of_json in
+      let questionId = field_map_exn json__ "QuestionId" QuestionId.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ?reason ?isApplicable ?notes ?choiceUpdates ?selectedChoices
         ~questionId ~lensAlias ~workloadId ()
     let to_json v = composed_to_json to_value v
@@ -5500,7 +11116,7 @@ module UntagResourceOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes specified tags from a resource. To specify multiple tags, use separate tagKeys parameters, for example: DELETE /tags/WorkloadArn?tagKeys=key1&tagKeys=key2"]
+       "Deletes specified tags from a resource. The WorkloadArn parameter can be a workload ARN, a custom lens ARN, a profile ARN, or review template ARN. To specify multiple tags, use separate tagKeys parameters, for example: DELETE /tags/WorkloadArn?tagKeys=key1&tagKeys=key2"]
 module UntagResourceInput =
   struct
     type nonrec t =
@@ -5526,13 +11142,14 @@ module UntagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadArn") in
       make ~tagKeys ~workloadArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let workloadArn = field_map_exn json "WorkloadArn" WorkloadArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let workloadArn =
+        field_map_exn json__ "WorkloadArn" WorkloadArn.of_json in
       make ~tagKeys ~workloadArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes specified tags from a resource. To specify multiple tags, use separate tagKeys parameters, for example: DELETE /tags/WorkloadArn?tagKeys=key1&tagKeys=key2"]
+       "Deletes specified tags from a resource. The WorkloadArn parameter can be a workload ARN, a custom lens ARN, a profile ARN, or review template ARN. To specify multiple tags, use separate tagKeys parameters, for example: DELETE /tags/WorkloadArn?tagKeys=key1&tagKeys=key2"]
 module TagResourceOutput =
   struct
     type nonrec t = unit
@@ -5580,7 +11197,8 @@ module TagResourceOutput =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Adds one or more tags to the specified resource."]
+  end[@@ocaml.doc
+       "Adds one or more tags to the specified resource. The WorkloadArn parameter can be a workload ARN, a custom lens ARN, a profile ARN, or review template ARN."]
 module TagResourceInput =
   struct
     type nonrec t =
@@ -5602,12 +11220,14 @@ module TagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadArn") in
       make ~tags ~workloadArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let workloadArn = field_map_exn json "WorkloadArn" WorkloadArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let workloadArn =
+        field_map_exn json__ "WorkloadArn" WorkloadArn.of_json in
       make ~tags ~workloadArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Adds one or more tags to the specified resource."]
+  end[@@ocaml.doc
+       "Adds one or more tags to the specified resource. The WorkloadArn parameter can be a workload ARN, a custom lens ARN, a profile ARN, or review template ARN."]
 module ListWorkloadsOutput =
   struct
     type nonrec t =
@@ -5684,10 +11304,10 @@ module ListWorkloadsOutput =
           (Xml.child xml_arg0 "WorkloadSummaries") in
       make ?nextToken ?workloadSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let workloadSummaries =
-        field_map json "WorkloadSummaries" WorkloadSummaries.of_json in
+        field_map json__ "WorkloadSummaries" WorkloadSummaries.of_json in
       make ?nextToken ?workloadSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output of a list workloads call."]
@@ -5723,12 +11343,12 @@ module ListWorkloadsInput =
           (Xml.child xml_arg0 "WorkloadNamePrefix") in
       make ?maxResults ?nextToken ?workloadNamePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" ListWorkloadsMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" ListWorkloadsMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let workloadNamePrefix =
-        field_map json "WorkloadNamePrefix" WorkloadNamePrefix.of_json in
+        field_map json__ "WorkloadNamePrefix" WorkloadNamePrefix.of_json in
       make ?maxResults ?nextToken ?workloadNamePrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to list all workloads."]
@@ -5824,12 +11444,12 @@ module ListWorkloadSharesOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?nextToken ?workloadShareSummaries ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let workloadShareSummaries =
-        field_map json "WorkloadShareSummaries"
+        field_map json__ "WorkloadShareSummaries"
           WorkloadShareSummaries.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?nextToken ?workloadShareSummaries ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for List Workload Share"]
@@ -5840,17 +11460,21 @@ module ListWorkloadSharesInput =
       workloadId: WorkloadId.t ;
       sharedWithPrefix: SharedWithPrefix.t option
         [@ocaml.doc
-          "The Amazon Web Services account ID or IAM role with which the workload is shared."];
+          "The Amazon Web Services account ID, organization ID, or organizational unit (OU) ID with which the workload is shared."];
       nextToken: NextToken.t option ;
       maxResults: ListWorkloadSharesMaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return for this request."]}
+          "The maximum number of results to return for this request."];
+      status: ShareStatus.t option }
     let context_ = "ListWorkloadSharesInput"
     let make ?sharedWithPrefix =
       fun ?nextToken ->
         fun ?maxResults ->
-          fun ~workloadId ->
-            fun () -> { sharedWithPrefix; nextToken; maxResults; workloadId }
+          fun ?status ->
+            fun ~workloadId ->
+              fun () ->
+                { sharedWithPrefix; nextToken; maxResults; status; workloadId
+                }
     let to_value x =
       structure_to_value
         [("WorkloadId", (Some (WorkloadId.to_value x.workloadId)));
@@ -5858,9 +11482,12 @@ module ListWorkloadSharesInput =
           (Option.map x.sharedWithPrefix ~f:SharedWithPrefix.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("MaxResults",
-          (Option.map x.maxResults ~f:ListWorkloadSharesMaxResults.to_value))]
+          (Option.map x.maxResults ~f:ListWorkloadSharesMaxResults.to_value));
+        ("Status", (Option.map x.status ~f:ShareStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:ShareStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let maxResults =
         (Option.map ~f:ListWorkloadSharesMaxResults.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
@@ -5872,18 +11499,187 @@ module ListWorkloadSharesInput =
       let workloadId =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
-      make ?maxResults ?nextToken ?sharedWithPrefix ~workloadId ()
+      make ?status ?maxResults ?nextToken ?sharedWithPrefix ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let status = field_map json__ "Status" ShareStatus.of_json in
       let maxResults =
-        field_map json "MaxResults" ListWorkloadSharesMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" ListWorkloadSharesMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let sharedWithPrefix =
-        field_map json "SharedWithPrefix" SharedWithPrefix.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
-      make ?maxResults ?nextToken ?sharedWithPrefix ~workloadId ()
+        field_map json__ "SharedWithPrefix" SharedWithPrefix.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      make ?status ?maxResults ?nextToken ?sharedWithPrefix ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for List Workload Share"]
+module ListTemplateSharesOutput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t option
+        [@ocaml.doc "The review template ARN."];
+      templateShareSummaries: TemplateShareSummaries.t option
+        [@ocaml.doc "A review template share summary return object."];
+      nextToken: NextToken.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?templateArn =
+      fun ?templateShareSummaries ->
+        fun ?nextToken ->
+          fun () -> { templateArn; templateShareSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Option.map x.templateArn ~f:TemplateArn.to_value));
+        ("TemplateShareSummaries",
+          (Option.map x.templateShareSummaries
+             ~f:TemplateShareSummaries.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let templateShareSummaries =
+        (Option.map ~f:TemplateShareSummaries.of_xml)
+          (Xml.child xml_arg0 "TemplateShareSummaries") in
+      let templateArn =
+        (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "TemplateArn") in
+      make ?nextToken ?templateShareSummaries ?templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let templateShareSummaries =
+        field_map json__ "TemplateShareSummaries"
+          TemplateShareSummaries.of_json in
+      let templateArn = field_map json__ "TemplateArn" TemplateArn.of_json in
+      make ?nextToken ?templateShareSummaries ?templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List review template shares."]
+module ListTemplateSharesInput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t [@ocaml.doc "The review template ARN."];
+      sharedWithPrefix: SharedWithPrefix.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID, organization ID, or organizational unit (OU) ID with which the profile is shared."];
+      nextToken: NextToken.t option ;
+      maxResults: ListTemplateSharesMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return for this request."];
+      status: ShareStatus.t option }
+    let context_ = "ListTemplateSharesInput"
+    let make ?sharedWithPrefix =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ?status ->
+            fun ~templateArn ->
+              fun () ->
+                {
+                  sharedWithPrefix;
+                  nextToken;
+                  maxResults;
+                  status;
+                  templateArn
+                }
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Some (TemplateArn.to_value x.templateArn)));
+        ("SharedWithPrefix",
+          (Option.map x.sharedWithPrefix ~f:SharedWithPrefix.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:ListTemplateSharesMaxResults.to_value));
+        ("Status", (Option.map x.status ~f:ShareStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:ShareStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let maxResults =
+        (Option.map ~f:ListTemplateSharesMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let sharedWithPrefix =
+        (Option.map ~f:SharedWithPrefix.of_xml)
+          (Xml.child xml_arg0 "SharedWithPrefix") in
+      let templateArn =
+        TemplateArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateArn") in
+      make ?status ?maxResults ?nextToken ?sharedWithPrefix ~templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" ShareStatus.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" ListTemplateSharesMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let sharedWithPrefix =
+        field_map json__ "SharedWithPrefix" SharedWithPrefix.of_json in
+      let templateArn =
+        field_map_exn json__ "TemplateArn" TemplateArn.of_json in
+      make ?status ?maxResults ?nextToken ?sharedWithPrefix ~templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List review template shares."]
 module ListTagsForResourceOutput =
   struct
     type nonrec t =
@@ -5933,10 +11729,11 @@ module ListTagsForResourceOutput =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List the tags for a resource."]
+  end[@@ocaml.doc
+       "List the tags for a resource. The WorkloadArn parameter can be a workload ARN, a custom lens ARN, a profile ARN, or review template ARN."]
 module ListTagsForResourceInput =
   struct
     type nonrec t = {
@@ -5953,11 +11750,13 @@ module ListTagsForResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadArn") in
       make ~workloadArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workloadArn = field_map_exn json "WorkloadArn" WorkloadArn.of_json in
+    let of_json json__ =
+      let workloadArn =
+        field_map_exn json__ "WorkloadArn" WorkloadArn.of_json in
       make ~workloadArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List the tags for a resource."]
+  end[@@ocaml.doc
+       "List the tags for a resource. The WorkloadArn parameter can be a workload ARN, a custom lens ARN, a profile ARN, or review template ARN."]
 module ListShareInvitationsOutput =
   struct
     type nonrec t =
@@ -6036,10 +11835,10 @@ module ListShareInvitationsOutput =
           (Xml.child xml_arg0 "ShareInvitationSummaries") in
       make ?nextToken ?shareInvitationSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let shareInvitationSummaries =
-        field_map json "ShareInvitationSummaries"
+        field_map json__ "ShareInvitationSummaries"
           ShareInvitationSummaries.of_json in
       make ?nextToken ?shareInvitationSummaries ()
     let to_json v = composed_to_json to_value v
@@ -6057,20 +11856,30 @@ module ListShareInvitationsInput =
       nextToken: NextToken.t option ;
       maxResults: ListShareInvitationsMaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return for this request."]}
+          "The maximum number of results to return for this request."];
+      profileNamePrefix: ProfileNamePrefix.t option
+        [@ocaml.doc
+          "An optional string added to the beginning of each profile name returned in the results."];
+      templateNamePrefix: TemplateNamePrefix.t option
+        [@ocaml.doc
+          "An optional string added to the beginning of each review template name returned in the results."]}
     let make ?workloadNamePrefix =
       fun ?lensNamePrefix ->
         fun ?shareResourceType ->
           fun ?nextToken ->
             fun ?maxResults ->
-              fun () ->
-                {
-                  workloadNamePrefix;
-                  lensNamePrefix;
-                  shareResourceType;
-                  nextToken;
-                  maxResults
-                }
+              fun ?profileNamePrefix ->
+                fun ?templateNamePrefix ->
+                  fun () ->
+                    {
+                      workloadNamePrefix;
+                      lensNamePrefix;
+                      shareResourceType;
+                      nextToken;
+                      maxResults;
+                      profileNamePrefix;
+                      templateNamePrefix
+                    }
     let to_value x =
       structure_to_value
         [("WorkloadNamePrefix",
@@ -6081,9 +11890,19 @@ module ListShareInvitationsInput =
           (Option.map x.shareResourceType ~f:ShareResourceType.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("MaxResults",
-          (Option.map x.maxResults ~f:ListShareInvitationsMaxResults.to_value))]
+          (Option.map x.maxResults ~f:ListShareInvitationsMaxResults.to_value));
+        ("ProfileNamePrefix",
+          (Option.map x.profileNamePrefix ~f:ProfileNamePrefix.to_value));
+        ("TemplateNamePrefix",
+          (Option.map x.templateNamePrefix ~f:TemplateNamePrefix.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let templateNamePrefix =
+        (Option.map ~f:TemplateNamePrefix.of_xml)
+          (Xml.child xml_arg0 "TemplateNamePrefix") in
+      let profileNamePrefix =
+        (Option.map ~f:ProfileNamePrefix.of_xml)
+          (Xml.child xml_arg0 "ProfileNamePrefix") in
       let maxResults =
         (Option.map ~f:ListShareInvitationsMaxResults.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
@@ -6098,23 +11917,710 @@ module ListShareInvitationsInput =
       let workloadNamePrefix =
         (Option.map ~f:WorkloadNamePrefix.of_xml)
           (Xml.child xml_arg0 "WorkloadNamePrefix") in
-      make ?maxResults ?nextToken ?shareResourceType ?lensNamePrefix
-        ?workloadNamePrefix ()
+      make ?templateNamePrefix ?profileNamePrefix ?maxResults ?nextToken
+        ?shareResourceType ?lensNamePrefix ?workloadNamePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let templateNamePrefix =
+        field_map json__ "TemplateNamePrefix" TemplateNamePrefix.of_json in
+      let profileNamePrefix =
+        field_map json__ "ProfileNamePrefix" ProfileNamePrefix.of_json in
       let maxResults =
-        field_map json "MaxResults" ListShareInvitationsMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" ListShareInvitationsMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let shareResourceType =
-        field_map json "ShareResourceType" ShareResourceType.of_json in
+        field_map json__ "ShareResourceType" ShareResourceType.of_json in
       let lensNamePrefix =
-        field_map json "LensNamePrefix" LensNamePrefix.of_json in
+        field_map json__ "LensNamePrefix" LensNamePrefix.of_json in
       let workloadNamePrefix =
-        field_map json "WorkloadNamePrefix" WorkloadNamePrefix.of_json in
-      make ?maxResults ?nextToken ?shareResourceType ?lensNamePrefix
-        ?workloadNamePrefix ()
+        field_map json__ "WorkloadNamePrefix" WorkloadNamePrefix.of_json in
+      make ?templateNamePrefix ?profileNamePrefix ?maxResults ?nextToken
+        ?shareResourceType ?lensNamePrefix ?workloadNamePrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for List Share Invitations"]
+module ListReviewTemplatesOutput =
+  struct
+    type nonrec t =
+      {
+      reviewTemplates: ReviewTemplates.t option
+        [@ocaml.doc "List of review templates."];
+      nextToken: NextToken.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?reviewTemplates =
+      fun ?nextToken -> fun () -> { reviewTemplates; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ReviewTemplates",
+           (Option.map x.reviewTemplates ~f:ReviewTemplates.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let reviewTemplates =
+        (Option.map ~f:ReviewTemplates.of_xml)
+          (Xml.child xml_arg0 "ReviewTemplates") in
+      make ?nextToken ?reviewTemplates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let reviewTemplates =
+        field_map json__ "ReviewTemplates" ReviewTemplates.of_json in
+      make ?nextToken ?reviewTemplates ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List review templates."]
+module ListReviewTemplatesInput =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option ;
+      maxResults: MaxResults.t option }
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List review templates."]
+module ListReviewTemplateAnswersOutput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t option
+        [@ocaml.doc "The ARN of the review template."];
+      lensAlias: LensAlias.t option ;
+      answerSummaries: ReviewTemplateAnswerSummaries.t option
+        [@ocaml.doc
+          "List of answer summaries of a lens review in a review template."];
+      nextToken: NextToken.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?templateArn =
+      fun ?lensAlias ->
+        fun ?answerSummaries ->
+          fun ?nextToken ->
+            fun () -> { templateArn; lensAlias; answerSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Option.map x.templateArn ~f:TemplateArn.to_value));
+        ("LensAlias", (Option.map x.lensAlias ~f:LensAlias.to_value));
+        ("AnswerSummaries",
+          (Option.map x.answerSummaries
+             ~f:ReviewTemplateAnswerSummaries.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let answerSummaries =
+        (Option.map ~f:ReviewTemplateAnswerSummaries.of_xml)
+          (Xml.child xml_arg0 "AnswerSummaries") in
+      let lensAlias =
+        (Option.map ~f:LensAlias.of_xml) (Xml.child xml_arg0 "LensAlias") in
+      let templateArn =
+        (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "TemplateArn") in
+      make ?nextToken ?answerSummaries ?lensAlias ?templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let answerSummaries =
+        field_map json__ "AnswerSummaries"
+          ReviewTemplateAnswerSummaries.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
+      let templateArn = field_map json__ "TemplateArn" TemplateArn.of_json in
+      make ?nextToken ?answerSummaries ?lensAlias ?templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List the answers of a review template."]
+module ListReviewTemplateAnswersInput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t
+        [@ocaml.doc "The ARN of the review template."];
+      lensAlias: LensAlias.t ;
+      pillarId: PillarId.t option ;
+      nextToken: NextToken.t option ;
+      maxResults: ListReviewTemplateAnswersMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return for this request."]}
+    let context_ = "ListReviewTemplateAnswersInput"
+    let make ?pillarId =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ~templateArn ->
+            fun ~lensAlias ->
+              fun () ->
+                { pillarId; nextToken; maxResults; templateArn; lensAlias }
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Some (TemplateArn.to_value x.templateArn)));
+        ("LensAlias", (Some (LensAlias.to_value x.lensAlias)));
+        ("PillarId", (Option.map x.pillarId ~f:PillarId.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:ListReviewTemplateAnswersMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ListReviewTemplateAnswersMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let pillarId =
+        (Option.map ~f:PillarId.of_xml) (Xml.child xml_arg0 "PillarId") in
+      let lensAlias =
+        LensAlias.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
+      let templateArn =
+        TemplateArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateArn") in
+      make ?maxResults ?nextToken ?pillarId ~lensAlias ~templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults"
+          ListReviewTemplateAnswersMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let templateArn =
+        field_map_exn json__ "TemplateArn" TemplateArn.of_json in
+      make ?maxResults ?nextToken ?pillarId ~lensAlias ~templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List the answers of a review template."]
+module ListProfilesOutput =
+  struct
+    type nonrec t =
+      {
+      profileSummaries: ProfileSummaries.t option
+        [@ocaml.doc "Profile summaries."];
+      nextToken: NextToken.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?profileSummaries =
+      fun ?nextToken -> fun () -> { profileSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ProfileSummaries",
+           (Option.map x.profileSummaries ~f:ProfileSummaries.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let profileSummaries =
+        (Option.map ~f:ProfileSummaries.of_xml)
+          (Xml.child xml_arg0 "ProfileSummaries") in
+      make ?nextToken ?profileSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let profileSummaries =
+        field_map json__ "ProfileSummaries" ProfileSummaries.of_json in
+      make ?nextToken ?profileSummaries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List profiles."]
+module ListProfilesInput =
+  struct
+    type nonrec t =
+      {
+      profileNamePrefix: ProfileNamePrefix.t option
+        [@ocaml.doc
+          "An optional string added to the beginning of each profile name returned in the results."];
+      profileOwnerType: ProfileOwnerType.t option
+        [@ocaml.doc "Profile owner type."];
+      nextToken: NextToken.t option ;
+      maxResults: MaxResults.t option }
+    let make ?profileNamePrefix =
+      fun ?profileOwnerType ->
+        fun ?nextToken ->
+          fun ?maxResults ->
+            fun () ->
+              { profileNamePrefix; profileOwnerType; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("ProfileNamePrefix",
+           (Option.map x.profileNamePrefix ~f:ProfileNamePrefix.to_value));
+        ("ProfileOwnerType",
+          (Option.map x.profileOwnerType ~f:ProfileOwnerType.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let profileOwnerType =
+        (Option.map ~f:ProfileOwnerType.of_xml)
+          (Xml.child xml_arg0 "ProfileOwnerType") in
+      let profileNamePrefix =
+        (Option.map ~f:ProfileNamePrefix.of_xml)
+          (Xml.child xml_arg0 "ProfileNamePrefix") in
+      make ?maxResults ?nextToken ?profileOwnerType ?profileNamePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let profileOwnerType =
+        field_map json__ "ProfileOwnerType" ProfileOwnerType.of_json in
+      let profileNamePrefix =
+        field_map json__ "ProfileNamePrefix" ProfileNamePrefix.of_json in
+      make ?maxResults ?nextToken ?profileOwnerType ?profileNamePrefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List profiles."]
+module ListProfileSharesOutput =
+  struct
+    type nonrec t =
+      {
+      profileShareSummaries: ProfileShareSummaries.t option
+        [@ocaml.doc "Profile share summaries."];
+      nextToken: NextToken.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?profileShareSummaries =
+      fun ?nextToken -> fun () -> { profileShareSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ProfileShareSummaries",
+           (Option.map x.profileShareSummaries
+              ~f:ProfileShareSummaries.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let profileShareSummaries =
+        (Option.map ~f:ProfileShareSummaries.of_xml)
+          (Xml.child xml_arg0 "ProfileShareSummaries") in
+      make ?nextToken ?profileShareSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let profileShareSummaries =
+        field_map json__ "ProfileShareSummaries"
+          ProfileShareSummaries.of_json in
+      make ?nextToken ?profileShareSummaries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List profile shares."]
+module ListProfileSharesInput =
+  struct
+    type nonrec t =
+      {
+      profileArn: ProfileArn.t [@ocaml.doc "The profile ARN."];
+      sharedWithPrefix: SharedWithPrefix.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID, organization ID, or organizational unit (OU) ID with which the profile is shared."];
+      nextToken: NextToken.t option ;
+      maxResults: ListProfileSharesMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return for this request."];
+      status: ShareStatus.t option }
+    let context_ = "ListProfileSharesInput"
+    let make ?sharedWithPrefix =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ?status ->
+            fun ~profileArn ->
+              fun () ->
+                { sharedWithPrefix; nextToken; maxResults; status; profileArn
+                }
+    let to_value x =
+      structure_to_value
+        [("ProfileArn", (Some (ProfileArn.to_value x.profileArn)));
+        ("SharedWithPrefix",
+          (Option.map x.sharedWithPrefix ~f:SharedWithPrefix.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:ListProfileSharesMaxResults.to_value));
+        ("Status", (Option.map x.status ~f:ShareStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:ShareStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let maxResults =
+        (Option.map ~f:ListProfileSharesMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let sharedWithPrefix =
+        (Option.map ~f:SharedWithPrefix.of_xml)
+          (Xml.child xml_arg0 "SharedWithPrefix") in
+      let profileArn =
+        ProfileArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileArn") in
+      make ?status ?maxResults ?nextToken ?sharedWithPrefix ~profileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" ShareStatus.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" ListProfileSharesMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let sharedWithPrefix =
+        field_map json__ "SharedWithPrefix" SharedWithPrefix.of_json in
+      let profileArn = field_map_exn json__ "ProfileArn" ProfileArn.of_json in
+      make ?status ?maxResults ?nextToken ?sharedWithPrefix ~profileArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List profile shares."]
+module ListProfileNotificationsOutput =
+  struct
+    type nonrec t =
+      {
+      notificationSummaries: ProfileNotificationSummaries.t option
+        [@ocaml.doc "Notification summaries."];
+      nextToken: NextToken.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?notificationSummaries =
+      fun ?nextToken -> fun () -> { notificationSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NotificationSummaries",
+           (Option.map x.notificationSummaries
+              ~f:ProfileNotificationSummaries.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let notificationSummaries =
+        (Option.map ~f:ProfileNotificationSummaries.of_xml)
+          (Xml.child xml_arg0 "NotificationSummaries") in
+      make ?nextToken ?notificationSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let notificationSummaries =
+        field_map json__ "NotificationSummaries"
+          ProfileNotificationSummaries.of_json in
+      make ?nextToken ?notificationSummaries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List profile notifications."]
+module ListProfileNotificationsInput =
+  struct
+    type nonrec t =
+      {
+      workloadId: WorkloadId.t option ;
+      nextToken: NextToken.t option ;
+      maxResults: MaxResults.t option }
+    let make ?workloadId =
+      fun ?nextToken ->
+        fun ?maxResults -> fun () -> { workloadId; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let workloadId =
+        (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
+      make ?maxResults ?nextToken ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      make ?maxResults ?nextToken ?workloadId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "List profile notifications."]
 module ListNotificationsOutput =
   struct
     type nonrec t =
@@ -6193,10 +12699,11 @@ module ListNotificationsOutput =
           (Xml.child xml_arg0 "NotificationSummaries") in
       make ?nextToken ?notificationSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let notificationSummaries =
-        field_map json "NotificationSummaries" NotificationSummaries.of_json in
+        field_map json__ "NotificationSummaries"
+          NotificationSummaries.of_json in
       make ?nextToken ?notificationSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List lens notifications."]
@@ -6208,18 +12715,26 @@ module ListNotificationsInput =
       nextToken: NextToken.t option ;
       maxResults: ListNotificationsMaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return for this request."]}
+          "The maximum number of results to return for this request."];
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc
+          "The ARN for the related resource for the notification. Only one of WorkloadID or ResourceARN should be specified."]}
     let make ?workloadId =
       fun ?nextToken ->
-        fun ?maxResults -> fun () -> { workloadId; nextToken; maxResults }
+        fun ?maxResults ->
+          fun ?resourceArn ->
+            fun () -> { workloadId; nextToken; maxResults; resourceArn }
     let to_value x =
       structure_to_value
         [("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("MaxResults",
-          (Option.map x.maxResults ~f:ListNotificationsMaxResults.to_value))]
+          (Option.map x.maxResults ~f:ListNotificationsMaxResults.to_value));
+        ("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       let maxResults =
         (Option.map ~f:ListNotificationsMaxResults.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
@@ -6227,14 +12742,15 @@ module ListNotificationsInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let workloadId =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
-      make ?maxResults ?nextToken ?workloadId ()
+      make ?resourceArn ?maxResults ?nextToken ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
       let maxResults =
-        field_map json "MaxResults" ListNotificationsMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
-      make ?maxResults ?nextToken ?workloadId ()
+        field_map json__ "MaxResults" ListNotificationsMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      make ?resourceArn ?maxResults ?nextToken ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List lens notifications."]
 module ListMilestonesOutput =
@@ -6328,11 +12844,11 @@ module ListMilestonesOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?nextToken ?milestoneSummaries ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let milestoneSummaries =
-        field_map json "MilestoneSummaries" MilestoneSummaries.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "MilestoneSummaries" MilestoneSummaries.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?nextToken ?milestoneSummaries ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output of a list milestones call."]
@@ -6363,10 +12879,10 @@ module ListMilestonesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?maxResults ?nextToken ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ?maxResults ?nextToken ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to list all milestones for a workload."]
@@ -6446,10 +12962,10 @@ module ListLensesOutput =
           (Xml.child xml_arg0 "LensSummaries") in
       make ?nextToken ?lensSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let lensSummaries =
-        field_map json "LensSummaries" LensSummaries.of_json in
+        field_map json__ "LensSummaries" LensSummaries.of_json in
       make ?nextToken ?lensSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output of a list lenses call."]
@@ -6493,12 +13009,12 @@ module ListLensesInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?lensName ?lensStatus ?lensType ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lensName = field_map json "LensName" LensName.of_json in
-      let lensStatus = field_map json "LensStatus" LensStatusType.of_json in
-      let lensType = field_map json "LensType" LensType.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let lensName = field_map json__ "LensName" LensName.of_json in
+      let lensStatus = field_map json__ "LensStatus" LensStatusType.of_json in
+      let lensType = field_map json__ "LensType" LensType.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?lensName ?lensStatus ?lensType ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to list lenses."]
@@ -6588,10 +13104,10 @@ module ListLensSharesOutput =
           (Xml.child xml_arg0 "LensShareSummaries") in
       make ?nextToken ?lensShareSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let lensShareSummaries =
-        field_map json "LensShareSummaries" LensShareSummaries.of_json in
+        field_map json__ "LensShareSummaries" LensShareSummaries.of_json in
       make ?nextToken ?lensShareSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the lens shares associated with the lens."]
@@ -6602,17 +13118,21 @@ module ListLensSharesInput =
       lensAlias: LensAlias.t ;
       sharedWithPrefix: SharedWithPrefix.t option
         [@ocaml.doc
-          "The Amazon Web Services account ID or IAM role with which the lens is shared."];
+          "The Amazon Web Services account ID, organization ID, or organizational unit (OU) ID with which the lens is shared."];
       nextToken: NextToken.t option ;
       maxResults: ListWorkloadSharesMaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return for this request."]}
+          "The maximum number of results to return for this request."];
+      status: ShareStatus.t option }
     let context_ = "ListLensSharesInput"
     let make ?sharedWithPrefix =
       fun ?nextToken ->
         fun ?maxResults ->
-          fun ~lensAlias ->
-            fun () -> { sharedWithPrefix; nextToken; maxResults; lensAlias }
+          fun ?status ->
+            fun ~lensAlias ->
+              fun () ->
+                { sharedWithPrefix; nextToken; maxResults; status; lensAlias
+                }
     let to_value x =
       structure_to_value
         [("LensAlias", (Some (LensAlias.to_value x.lensAlias)));
@@ -6620,9 +13140,12 @@ module ListLensSharesInput =
           (Option.map x.sharedWithPrefix ~f:SharedWithPrefix.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("MaxResults",
-          (Option.map x.maxResults ~f:ListWorkloadSharesMaxResults.to_value))]
+          (Option.map x.maxResults ~f:ListWorkloadSharesMaxResults.to_value));
+        ("Status", (Option.map x.status ~f:ShareStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:ShareStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let maxResults =
         (Option.map ~f:ListWorkloadSharesMaxResults.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
@@ -6634,16 +13157,17 @@ module ListLensSharesInput =
       let lensAlias =
         LensAlias.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
-      make ?maxResults ?nextToken ?sharedWithPrefix ~lensAlias ()
+      make ?status ?maxResults ?nextToken ?sharedWithPrefix ~lensAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let status = field_map json__ "Status" ShareStatus.of_json in
       let maxResults =
-        field_map json "MaxResults" ListWorkloadSharesMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" ListWorkloadSharesMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let sharedWithPrefix =
-        field_map json "SharedWithPrefix" SharedWithPrefix.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
-      make ?maxResults ?nextToken ?sharedWithPrefix ~lensAlias ()
+        field_map json__ "SharedWithPrefix" SharedWithPrefix.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      make ?status ?maxResults ?nextToken ?sharedWithPrefix ~lensAlias ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the lens shares associated with the lens."]
 module ListLensReviewsOutput =
@@ -6745,13 +13269,13 @@ module ListLensReviewsOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?nextToken ?lensReviewSummaries ?milestoneNumber ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let lensReviewSummaries =
-        field_map json "LensReviewSummaries" LensReviewSummaries.of_json in
+        field_map json__ "LensReviewSummaries" LensReviewSummaries.of_json in
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?nextToken ?lensReviewSummaries ?milestoneNumber ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output of a list lens reviews call."]
@@ -6790,12 +13314,12 @@ module ListLensReviewsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?maxResults ?nextToken ?milestoneNumber ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ?maxResults ?nextToken ?milestoneNumber ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to list lens reviews."]
@@ -6916,15 +13440,15 @@ module ListLensReviewImprovementsOutput =
       make ?nextToken ?improvementSummaries ?lensArn ?lensAlias
         ?milestoneNumber ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let improvementSummaries =
-        field_map json "ImprovementSummaries" ImprovementSummaries.of_json in
-      let lensArn = field_map json "LensArn" LensArn.of_json in
-      let lensAlias = field_map json "LensAlias" LensAlias.of_json in
+        field_map json__ "ImprovementSummaries" ImprovementSummaries.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?nextToken ?improvementSummaries ?lensArn ?lensAlias
         ?milestoneNumber ?workloadId ()
     let to_json v = composed_to_json to_value v
@@ -6940,23 +13464,27 @@ module ListLensReviewImprovementsInput =
       nextToken: NextToken.t option ;
       maxResults: ListLensReviewImprovementsMaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return for this request."]}
+          "The maximum number of results to return for this request."];
+      questionPriority: QuestionPriority.t option
+        [@ocaml.doc "The priority of the question."]}
     let context_ = "ListLensReviewImprovementsInput"
     let make ?pillarId =
       fun ?milestoneNumber ->
         fun ?nextToken ->
           fun ?maxResults ->
-            fun ~workloadId ->
-              fun ~lensAlias ->
-                fun () ->
-                  {
-                    pillarId;
-                    milestoneNumber;
-                    nextToken;
-                    maxResults;
-                    workloadId;
-                    lensAlias
-                  }
+            fun ?questionPriority ->
+              fun ~workloadId ->
+                fun ~lensAlias ->
+                  fun () ->
+                    {
+                      pillarId;
+                      milestoneNumber;
+                      nextToken;
+                      maxResults;
+                      questionPriority;
+                      workloadId;
+                      lensAlias
+                    }
     let to_value x =
       structure_to_value
         [("WorkloadId", (Some (WorkloadId.to_value x.workloadId)));
@@ -6967,9 +13495,14 @@ module ListLensReviewImprovementsInput =
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("MaxResults",
           (Option.map x.maxResults
-             ~f:ListLensReviewImprovementsMaxResults.to_value))]
+             ~f:ListLensReviewImprovementsMaxResults.to_value));
+        ("QuestionPriority",
+          (Option.map x.questionPriority ~f:QuestionPriority.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let questionPriority =
+        (Option.map ~f:QuestionPriority.of_xml)
+          (Xml.child xml_arg0 "QuestionPriority") in
       let maxResults =
         (Option.map ~f:ListLensReviewImprovementsMaxResults.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
@@ -6986,23 +13519,358 @@ module ListLensReviewImprovementsInput =
       let workloadId =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
-      make ?maxResults ?nextToken ?milestoneNumber ?pillarId ~lensAlias
-        ~workloadId ()
+      make ?questionPriority ?maxResults ?nextToken ?milestoneNumber
+        ?pillarId ~lensAlias ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let questionPriority =
+        field_map json__ "QuestionPriority" QuestionPriority.of_json in
       let maxResults =
-        field_map json "MaxResults"
+        field_map json__ "MaxResults"
           ListLensReviewImprovementsMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
-      let pillarId = field_map json "PillarId" PillarId.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
-      make ?maxResults ?nextToken ?milestoneNumber ?pillarId ~lensAlias
-        ~workloadId ()
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      make ?questionPriority ?maxResults ?nextToken ?milestoneNumber
+        ?pillarId ~lensAlias ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to list lens review improvements."]
+module ListCheckSummariesOutput =
+  struct
+    type nonrec t =
+      {
+      checkSummaries: CheckSummaries.t option
+        [@ocaml.doc
+          "List of Trusted Advisor summaries related to the Well-Architected best practice."];
+      nextToken: NextToken.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?checkSummaries =
+      fun ?nextToken -> fun () -> { checkSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CheckSummaries",
+           (Option.map x.checkSummaries ~f:CheckSummaries.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let checkSummaries =
+        (Option.map ~f:CheckSummaries.of_xml)
+          (Xml.child xml_arg0 "CheckSummaries") in
+      make ?nextToken ?checkSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let checkSummaries =
+        field_map json__ "CheckSummaries" CheckSummaries.of_json in
+      make ?nextToken ?checkSummaries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of Trusted Advisor checks summarized for all accounts related to the workload."]
+module ListCheckSummariesInput =
+  struct
+    type nonrec t =
+      {
+      workloadId: WorkloadId.t ;
+      nextToken: NextToken.t option ;
+      maxResults: MaxResults.t option ;
+      lensArn: LensArn.t [@ocaml.doc "Well-Architected Lens ARN."];
+      pillarId: PillarId.t ;
+      questionId: QuestionId.t ;
+      choiceId: ChoiceId.t }
+    let context_ = "ListCheckSummariesInput"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~workloadId ->
+          fun ~lensArn ->
+            fun ~pillarId ->
+              fun ~questionId ->
+                fun ~choiceId ->
+                  fun () ->
+                    {
+                      nextToken;
+                      maxResults;
+                      workloadId;
+                      lensArn;
+                      pillarId;
+                      questionId;
+                      choiceId
+                    }
+    let to_value x =
+      structure_to_value
+        [("WorkloadId", (Some (WorkloadId.to_value x.workloadId)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("LensArn", (Some (LensArn.to_value x.lensArn)));
+        ("PillarId", (Some (PillarId.to_value x.pillarId)));
+        ("QuestionId", (Some (QuestionId.to_value x.questionId)));
+        ("ChoiceId", (Some (ChoiceId.to_value x.choiceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let choiceId =
+        ChoiceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ChoiceId") in
+      let questionId =
+        QuestionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "QuestionId") in
+      let pillarId =
+        PillarId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PillarId") in
+      let lensArn =
+        LensArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LensArn") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let workloadId =
+        WorkloadId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
+      make ~choiceId ~questionId ~pillarId ~lensArn ?maxResults ?nextToken
+        ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let choiceId = field_map_exn json__ "ChoiceId" ChoiceId.of_json in
+      let questionId = field_map_exn json__ "QuestionId" QuestionId.of_json in
+      let pillarId = field_map_exn json__ "PillarId" PillarId.of_json in
+      let lensArn = field_map_exn json__ "LensArn" LensArn.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      make ~choiceId ~questionId ~pillarId ~lensArn ?maxResults ?nextToken
+        ~workloadId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of Trusted Advisor checks summarized for all accounts related to the workload."]
+module ListCheckDetailsOutput =
+  struct
+    type nonrec t =
+      {
+      checkDetails: CheckDetails.t option
+        [@ocaml.doc
+          "The details about the Trusted Advisor checks related to the Well-Architected best practice."];
+      nextToken: NextToken.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?checkDetails =
+      fun ?nextToken -> fun () -> { checkDetails; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CheckDetails",
+           (Option.map x.checkDetails ~f:CheckDetails.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let checkDetails =
+        (Option.map ~f:CheckDetails.of_xml)
+          (Xml.child xml_arg0 "CheckDetails") in
+      make ?nextToken ?checkDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let checkDetails = field_map json__ "CheckDetails" CheckDetails.of_json in
+      make ?nextToken ?checkDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of Trusted Advisor check details by account related to the workload."]
+module ListCheckDetailsInput =
+  struct
+    type nonrec t =
+      {
+      workloadId: WorkloadId.t ;
+      nextToken: NextToken.t option ;
+      maxResults: MaxResults.t option ;
+      lensArn: LensArn.t [@ocaml.doc "Well-Architected Lens ARN."];
+      pillarId: PillarId.t ;
+      questionId: QuestionId.t ;
+      choiceId: ChoiceId.t }
+    let context_ = "ListCheckDetailsInput"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~workloadId ->
+          fun ~lensArn ->
+            fun ~pillarId ->
+              fun ~questionId ->
+                fun ~choiceId ->
+                  fun () ->
+                    {
+                      nextToken;
+                      maxResults;
+                      workloadId;
+                      lensArn;
+                      pillarId;
+                      questionId;
+                      choiceId
+                    }
+    let to_value x =
+      structure_to_value
+        [("WorkloadId", (Some (WorkloadId.to_value x.workloadId)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("LensArn", (Some (LensArn.to_value x.lensArn)));
+        ("PillarId", (Some (PillarId.to_value x.pillarId)));
+        ("QuestionId", (Some (QuestionId.to_value x.questionId)));
+        ("ChoiceId", (Some (ChoiceId.to_value x.choiceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let choiceId =
+        ChoiceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ChoiceId") in
+      let questionId =
+        QuestionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "QuestionId") in
+      let pillarId =
+        PillarId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PillarId") in
+      let lensArn =
+        LensArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LensArn") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let workloadId =
+        WorkloadId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
+      make ~choiceId ~questionId ~pillarId ~lensArn ?maxResults ?nextToken
+        ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let choiceId = field_map_exn json__ "ChoiceId" ChoiceId.of_json in
+      let questionId = field_map_exn json__ "QuestionId" QuestionId.of_json in
+      let pillarId = field_map_exn json__ "PillarId" PillarId.of_json in
+      let lensArn = field_map_exn json__ "LensArn" LensArn.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      make ~choiceId ~questionId ~pillarId ~lensArn ?maxResults ?nextToken
+        ~workloadId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of Trusted Advisor check details by account related to the workload."]
 module ListAnswersOutput =
   struct
     type nonrec t =
@@ -7120,15 +13988,15 @@ module ListAnswersOutput =
       make ?nextToken ?answerSummaries ?lensArn ?lensAlias ?milestoneNumber
         ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let answerSummaries =
-        field_map json "AnswerSummaries" AnswerSummaries.of_json in
-      let lensArn = field_map json "LensArn" LensArn.of_json in
-      let lensAlias = field_map json "LensAlias" LensAlias.of_json in
+        field_map json__ "AnswerSummaries" AnswerSummaries.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?nextToken ?answerSummaries ?lensArn ?lensAlias ?milestoneNumber
         ?workloadId ()
     let to_json v = composed_to_json to_value v
@@ -7144,23 +14012,27 @@ module ListAnswersInput =
       nextToken: NextToken.t option ;
       maxResults: ListAnswersMaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return for this request."]}
+          "The maximum number of results to return for this request."];
+      questionPriority: QuestionPriority.t option
+        [@ocaml.doc "The priority of the question."]}
     let context_ = "ListAnswersInput"
     let make ?pillarId =
       fun ?milestoneNumber ->
         fun ?nextToken ->
           fun ?maxResults ->
-            fun ~workloadId ->
-              fun ~lensAlias ->
-                fun () ->
-                  {
-                    pillarId;
-                    milestoneNumber;
-                    nextToken;
-                    maxResults;
-                    workloadId;
-                    lensAlias
-                  }
+            fun ?questionPriority ->
+              fun ~workloadId ->
+                fun ~lensAlias ->
+                  fun () ->
+                    {
+                      pillarId;
+                      milestoneNumber;
+                      nextToken;
+                      maxResults;
+                      questionPriority;
+                      workloadId;
+                      lensAlias
+                    }
     let to_value x =
       structure_to_value
         [("WorkloadId", (Some (WorkloadId.to_value x.workloadId)));
@@ -7170,9 +14042,14 @@ module ListAnswersInput =
           (Option.map x.milestoneNumber ~f:MilestoneNumber.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("MaxResults",
-          (Option.map x.maxResults ~f:ListAnswersMaxResults.to_value))]
+          (Option.map x.maxResults ~f:ListAnswersMaxResults.to_value));
+        ("QuestionPriority",
+          (Option.map x.questionPriority ~f:QuestionPriority.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let questionPriority =
+        (Option.map ~f:QuestionPriority.of_xml)
+          (Xml.child xml_arg0 "QuestionPriority") in
       let maxResults =
         (Option.map ~f:ListAnswersMaxResults.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
@@ -7189,27 +14066,30 @@ module ListAnswersInput =
       let workloadId =
         WorkloadId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
-      make ?maxResults ?nextToken ?milestoneNumber ?pillarId ~lensAlias
-        ~workloadId ()
+      make ?questionPriority ?maxResults ?nextToken ?milestoneNumber
+        ?pillarId ~lensAlias ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let questionPriority =
+        field_map json__ "QuestionPriority" QuestionPriority.of_json in
       let maxResults =
-        field_map json "MaxResults" ListAnswersMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MaxResults" ListAnswersMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
-      let pillarId = field_map json "PillarId" PillarId.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
-      make ?maxResults ?nextToken ?milestoneNumber ?pillarId ~lensAlias
-        ~workloadId ()
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let pillarId = field_map json__ "PillarId" PillarId.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      make ?questionPriority ?maxResults ?nextToken ?milestoneNumber
+        ?pillarId ~lensAlias ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to list answers."]
 module ImportLensOutput =
   struct
     type nonrec t =
       {
-      lensArn: LensArn.t option [@ocaml.doc "The ARN for the lens."];
+      lensArn: LensArn.t option
+        [@ocaml.doc "The ARN for the lens that was created or updated."];
       status: ImportLensStatus.t option
         [@ocaml.doc "The status of the imported lens."]}
     type nonrec error =
@@ -7308,13 +14188,13 @@ module ImportLensOutput =
         (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
       make ?status ?lensArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ImportLensStatus.of_json in
-      let lensArn = field_map json "LensArn" LensArn.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ImportLensStatus.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
       make ?status ?lensArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Import a new lens. The lens cannot be applied to workloads or shared with other Amazon Web Services accounts until it's published with CreateLensVersion Lenses are defined in JSON. For more information, see JSON format specification in the Well-Architected Tool User Guide. A custom lens cannot exceed 500 KB in size. Disclaimer Do not include or gather personal identifiable information (PII) of end users or other identifiable individuals in or via your custom lenses. If your custom lens or those shared with you and used in your account do include or collect PII you are responsible for: ensuring that the included PII is processed in accordance with applicable law, providing adequate privacy notices, and obtaining necessary consents for processing such data."]
+       "Import a new custom lens or update an existing custom lens. To update an existing custom lens, specify its ARN as the LensAlias. If no ARN is specified, a new custom lens is created. The new or updated lens will have a status of DRAFT. The lens cannot be applied to workloads or shared with other Amazon Web Services accounts until it's published with CreateLensVersion. Lenses are defined in JSON. For more information, see JSON format specification in the Well-Architected Tool User Guide. A custom lens cannot exceed 500 KB in size. Disclaimer Do not include or gather personal identifiable information (PII) of end users or other identifiable individuals in or via your custom lenses. If your custom lens or those shared with you and used in your account do include or collect PII you are responsible for: ensuring that the included PII is processed in accordance with applicable law, providing adequate privacy notices, and obtaining necessary consents for processing such data."]
 module ImportLensInput =
   struct
     type nonrec t =
@@ -7350,16 +14230,16 @@ module ImportLensInput =
         (Option.map ~f:LensAlias.of_xml) (Xml.child xml_arg0 "LensAlias") in
       make ?tags ~clientRequestToken ~jSONString ?lensAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      let jSONString = field_map_exn json "JSONString" LensJSON.of_json in
-      let lensAlias = field_map json "LensAlias" LensAlias.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let jSONString = field_map_exn json__ "JSONString" LensJSON.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
       make ?tags ~clientRequestToken ~jSONString ?lensAlias ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Import a new lens. The lens cannot be applied to workloads or shared with other Amazon Web Services accounts until it's published with CreateLensVersion Lenses are defined in JSON. For more information, see JSON format specification in the Well-Architected Tool User Guide. A custom lens cannot exceed 500 KB in size. Disclaimer Do not include or gather personal identifiable information (PII) of end users or other identifiable individuals in or via your custom lenses. If your custom lens or those shared with you and used in your account do include or collect PII you are responsible for: ensuring that the included PII is processed in accordance with applicable law, providing adequate privacy notices, and obtaining necessary consents for processing such data."]
+       "Import a new custom lens or update an existing custom lens. To update an existing custom lens, specify its ARN as the LensAlias. If no ARN is specified, a new custom lens is created. The new or updated lens will have a status of DRAFT. The lens cannot be applied to workloads or shared with other Amazon Web Services accounts until it's published with CreateLensVersion. Lenses are defined in JSON. For more information, see JSON format specification in the Well-Architected Tool User Guide. A custom lens cannot exceed 500 KB in size. Disclaimer Do not include or gather personal identifiable information (PII) of end users or other identifiable individuals in or via your custom lenses. If your custom lens or those shared with you and used in your account do include or collect PII you are responsible for: ensuring that the included PII is processed in accordance with applicable law, providing adequate privacy notices, and obtaining necessary consents for processing such data."]
 module GetWorkloadOutput =
   struct
     type nonrec t = {
@@ -7437,8 +14317,8 @@ module GetWorkloadOutput =
         (Option.map ~f:Workload.of_xml) (Xml.child xml_arg0 "Workload") in
       make ?workload ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workload = field_map json "Workload" Workload.of_json in
+    let of_json json__ =
+      let workload = field_map json__ "Workload" Workload.of_json in
       make ?workload ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output of a get workload call."]
@@ -7458,11 +14338,593 @@ module GetWorkloadInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+    let of_json json__ =
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to get a workload."]
+module GetReviewTemplateOutput =
+  struct
+    type nonrec t =
+      {
+      reviewTemplate: ReviewTemplate.t option
+        [@ocaml.doc "The review template."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?reviewTemplate = fun () -> { reviewTemplate }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ReviewTemplate",
+           (Option.map x.reviewTemplate ~f:ReviewTemplate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reviewTemplate =
+        (Option.map ~f:ReviewTemplate.of_xml)
+          (Xml.child xml_arg0 "ReviewTemplate") in
+      make ?reviewTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reviewTemplate =
+        field_map json__ "ReviewTemplate" ReviewTemplate.of_json in
+      make ?reviewTemplate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get review template."]
+module GetReviewTemplateLensReviewOutput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t option
+        [@ocaml.doc "The review template ARN."];
+      lensReview: ReviewTemplateLensReview.t option
+        [@ocaml.doc "A lens review of a question."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?templateArn =
+      fun ?lensReview -> fun () -> { templateArn; lensReview }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Option.map x.templateArn ~f:TemplateArn.to_value));
+        ("LensReview",
+          (Option.map x.lensReview ~f:ReviewTemplateLensReview.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lensReview =
+        (Option.map ~f:ReviewTemplateLensReview.of_xml)
+          (Xml.child xml_arg0 "LensReview") in
+      let templateArn =
+        (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "TemplateArn") in
+      make ?lensReview ?templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lensReview =
+        field_map json__ "LensReview" ReviewTemplateLensReview.of_json in
+      let templateArn = field_map json__ "TemplateArn" TemplateArn.of_json in
+      make ?lensReview ?templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get a lens review associated with a review template."]
+module GetReviewTemplateLensReviewInput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t [@ocaml.doc "The review template ARN."];
+      lensAlias: LensAlias.t }
+    let context_ = "GetReviewTemplateLensReviewInput"
+    let make ~templateArn =
+      fun ~lensAlias -> fun () -> { templateArn; lensAlias }
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Some (TemplateArn.to_value x.templateArn)));
+        ("LensAlias", (Some (LensAlias.to_value x.lensAlias)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lensAlias =
+        LensAlias.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
+      let templateArn =
+        TemplateArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateArn") in
+      make ~lensAlias ~templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let templateArn =
+        field_map_exn json__ "TemplateArn" TemplateArn.of_json in
+      make ~lensAlias ~templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get a lens review associated with a review template."]
+module GetReviewTemplateInput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t [@ocaml.doc "The review template ARN."]}
+    let context_ = "GetReviewTemplateInput"
+    let make ~templateArn = fun () -> { templateArn }
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Some (TemplateArn.to_value x.templateArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let templateArn =
+        TemplateArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateArn") in
+      make ~templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let templateArn =
+        field_map_exn json__ "TemplateArn" TemplateArn.of_json in
+      make ~templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get review template."]
+module GetReviewTemplateAnswerOutput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t option
+        [@ocaml.doc "The review template ARN."];
+      lensAlias: LensAlias.t option ;
+      answer: ReviewTemplateAnswer.t option
+        [@ocaml.doc "An answer of the question."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?templateArn =
+      fun ?lensAlias ->
+        fun ?answer -> fun () -> { templateArn; lensAlias; answer }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Option.map x.templateArn ~f:TemplateArn.to_value));
+        ("LensAlias", (Option.map x.lensAlias ~f:LensAlias.to_value));
+        ("Answer", (Option.map x.answer ~f:ReviewTemplateAnswer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let answer =
+        (Option.map ~f:ReviewTemplateAnswer.of_xml)
+          (Xml.child xml_arg0 "Answer") in
+      let lensAlias =
+        (Option.map ~f:LensAlias.of_xml) (Xml.child xml_arg0 "LensAlias") in
+      let templateArn =
+        (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "TemplateArn") in
+      make ?answer ?lensAlias ?templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let answer = field_map json__ "Answer" ReviewTemplateAnswer.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
+      let templateArn = field_map json__ "TemplateArn" TemplateArn.of_json in
+      make ?answer ?lensAlias ?templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get review template answer."]
+module GetReviewTemplateAnswerInput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t [@ocaml.doc "The review template ARN."];
+      lensAlias: LensAlias.t ;
+      questionId: QuestionId.t }
+    let context_ = "GetReviewTemplateAnswerInput"
+    let make ~templateArn =
+      fun ~lensAlias ->
+        fun ~questionId -> fun () -> { templateArn; lensAlias; questionId }
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Some (TemplateArn.to_value x.templateArn)));
+        ("LensAlias", (Some (LensAlias.to_value x.lensAlias)));
+        ("QuestionId", (Some (QuestionId.to_value x.questionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let questionId =
+        QuestionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "QuestionId") in
+      let lensAlias =
+        LensAlias.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
+      let templateArn =
+        TemplateArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateArn") in
+      make ~questionId ~lensAlias ~templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let questionId = field_map_exn json__ "QuestionId" QuestionId.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let templateArn =
+        field_map_exn json__ "TemplateArn" TemplateArn.of_json in
+      make ~questionId ~lensAlias ~templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get review template answer."]
+module GetProfileTemplateOutput =
+  struct
+    type nonrec t =
+      {
+      profileTemplate: ProfileTemplate.t option
+        [@ocaml.doc "The profile template."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?profileTemplate = fun () -> { profileTemplate }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ProfileTemplate",
+           (Option.map x.profileTemplate ~f:ProfileTemplate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profileTemplate =
+        (Option.map ~f:ProfileTemplate.of_xml)
+          (Xml.child xml_arg0 "ProfileTemplate") in
+      make ?profileTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profileTemplate =
+        field_map json__ "ProfileTemplate" ProfileTemplate.of_json in
+      make ?profileTemplate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get profile template."]
+module GetProfileTemplateInput =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get profile template."]
+module GetProfileOutput =
+  struct
+    type nonrec t = {
+      profile: Profile.t option [@ocaml.doc "The profile."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?profile = fun () -> { profile }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Profile", (Option.map x.profile ~f:Profile.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profile =
+        (Option.map ~f:Profile.of_xml) (Xml.child xml_arg0 "Profile") in
+      make ?profile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profile = field_map json__ "Profile" Profile.of_json in
+      make ?profile ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get profile information."]
+module GetProfileInput =
+  struct
+    type nonrec t =
+      {
+      profileArn: ProfileArn.t [@ocaml.doc "The profile ARN."];
+      profileVersion: ProfileVersion.t option
+        [@ocaml.doc "The profile version."]}
+    let context_ = "GetProfileInput"
+    let make ?profileVersion =
+      fun ~profileArn -> fun () -> { profileVersion; profileArn }
+    let to_value x =
+      structure_to_value
+        [("ProfileArn", (Some (ProfileArn.to_value x.profileArn)));
+        ("ProfileVersion",
+          (Option.map x.profileVersion ~f:ProfileVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profileVersion =
+        (Option.map ~f:ProfileVersion.of_xml)
+          (Xml.child xml_arg0 "ProfileVersion") in
+      let profileArn =
+        ProfileArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileArn") in
+      make ?profileVersion ~profileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profileVersion =
+        field_map json__ "ProfileVersion" ProfileVersion.of_json in
+      let profileArn = field_map_exn json__ "ProfileArn" ProfileArn.of_json in
+      make ?profileVersion ~profileArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get profile information."]
 module GetMilestoneOutput =
   struct
     type nonrec t =
@@ -7546,9 +15008,9 @@ module GetMilestoneOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?milestone ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let milestone = field_map json "Milestone" Milestone.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+    let of_json json__ =
+      let milestone = field_map json__ "Milestone" Milestone.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?milestone ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output of a get milestone call."]
@@ -7576,10 +15038,10 @@ module GetMilestoneInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~milestoneNumber ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let milestoneNumber =
-        field_map_exn json "MilestoneNumber" MilestoneNumber.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+        field_map_exn json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ~milestoneNumber ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to get a milestone."]
@@ -7707,17 +15169,17 @@ module GetLensVersionDifferenceOutput =
       make ?versionDifferences ?latestLensVersion ?targetLensVersion
         ?baseLensVersion ?lensArn ?lensAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionDifferences =
-        field_map json "VersionDifferences" VersionDifferences.of_json in
+        field_map json__ "VersionDifferences" VersionDifferences.of_json in
       let latestLensVersion =
-        field_map json "LatestLensVersion" LensVersion.of_json in
+        field_map json__ "LatestLensVersion" LensVersion.of_json in
       let targetLensVersion =
-        field_map json "TargetLensVersion" LensVersion.of_json in
+        field_map json__ "TargetLensVersion" LensVersion.of_json in
       let baseLensVersion =
-        field_map json "BaseLensVersion" LensVersion.of_json in
-      let lensArn = field_map json "LensArn" LensArn.of_json in
-      let lensAlias = field_map json "LensAlias" LensAlias.of_json in
+        field_map json__ "BaseLensVersion" LensVersion.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
       make ?versionDifferences ?latestLensVersion ?targetLensVersion
         ?baseLensVersion ?lensArn ?lensAlias ()
     let to_json v = composed_to_json to_value v
@@ -7756,12 +15218,12 @@ module GetLensVersionDifferenceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
       make ?targetLensVersion ?baseLensVersion ~lensAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetLensVersion =
-        field_map json "TargetLensVersion" LensVersion.of_json in
+        field_map json__ "TargetLensVersion" LensVersion.of_json in
       let baseLensVersion =
-        field_map json "BaseLensVersion" LensVersion.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
+        field_map json__ "BaseLensVersion" LensVersion.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
       make ?targetLensVersion ?baseLensVersion ~lensAlias ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get lens version differences."]
@@ -7858,12 +15320,12 @@ module GetLensReviewReportOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?lensReviewReport ?milestoneNumber ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lensReviewReport =
-        field_map json "LensReviewReport" LensReviewReport.of_json in
+        field_map json__ "LensReviewReport" LensReviewReport.of_json in
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?lensReviewReport ?milestoneNumber ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output of a get lens review report call."]
@@ -7898,11 +15360,11 @@ module GetLensReviewReportInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?milestoneNumber ~lensAlias ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ?milestoneNumber ~lensAlias ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to get lens review report."]
@@ -7997,11 +15459,11 @@ module GetLensReviewOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?lensReview ?milestoneNumber ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lensReview = field_map json "LensReview" LensReview.of_json in
+    let of_json json__ =
+      let lensReview = field_map json__ "LensReview" LensReview.of_json in
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?lensReview ?milestoneNumber ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output of a get lens review call."]
@@ -8036,11 +15498,11 @@ module GetLensReviewInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?milestoneNumber ~lensAlias ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ?milestoneNumber ~lensAlias ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to get lens review."]
@@ -8120,8 +15582,8 @@ module GetLensOutput =
       let lens = (Option.map ~f:Lens.of_xml) (Xml.child xml_arg0 "Lens") in
       make ?lens ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lens = field_map json "Lens" Lens.of_json in make ?lens ()
+    let of_json json__ =
+      let lens = field_map json__ "Lens" Lens.of_json in make ?lens ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get an existing lens."]
 module GetLensInput =
@@ -8147,12 +15609,285 @@ module GetLensInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
       make ?lensVersion ~lensAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lensVersion = field_map json "LensVersion" LensVersion.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
+    let of_json json__ =
+      let lensVersion = field_map json__ "LensVersion" LensVersion.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
       make ?lensVersion ~lensAlias ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get an existing lens."]
+module GetGlobalSettingsOutput =
+  struct
+    type nonrec t =
+      {
+      organizationSharingStatus: OrganizationSharingStatus.t option
+        [@ocaml.doc "Amazon Web Services Organizations sharing status."];
+      discoveryIntegrationStatus: DiscoveryIntegrationStatus.t option
+        [@ocaml.doc "Discovery integration status."];
+      jiraConfiguration: AccountJiraConfigurationOutput.t option
+        [@ocaml.doc "Jira configuration status."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?organizationSharingStatus =
+      fun ?discoveryIntegrationStatus ->
+        fun ?jiraConfiguration ->
+          fun () ->
+            {
+              organizationSharingStatus;
+              discoveryIntegrationStatus;
+              jiraConfiguration
+            }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("OrganizationSharingStatus",
+           (Option.map x.organizationSharingStatus
+              ~f:OrganizationSharingStatus.to_value));
+        ("DiscoveryIntegrationStatus",
+          (Option.map x.discoveryIntegrationStatus
+             ~f:DiscoveryIntegrationStatus.to_value));
+        ("JiraConfiguration",
+          (Option.map x.jiraConfiguration
+             ~f:AccountJiraConfigurationOutput.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jiraConfiguration =
+        (Option.map ~f:AccountJiraConfigurationOutput.of_xml)
+          (Xml.child xml_arg0 "JiraConfiguration") in
+      let discoveryIntegrationStatus =
+        (Option.map ~f:DiscoveryIntegrationStatus.of_xml)
+          (Xml.child xml_arg0 "DiscoveryIntegrationStatus") in
+      let organizationSharingStatus =
+        (Option.map ~f:OrganizationSharingStatus.of_xml)
+          (Xml.child xml_arg0 "OrganizationSharingStatus") in
+      make ?jiraConfiguration ?discoveryIntegrationStatus
+        ?organizationSharingStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jiraConfiguration =
+        field_map json__ "JiraConfiguration"
+          AccountJiraConfigurationOutput.of_json in
+      let discoveryIntegrationStatus =
+        field_map json__ "DiscoveryIntegrationStatus"
+          DiscoveryIntegrationStatus.of_json in
+      let organizationSharingStatus =
+        field_map json__ "OrganizationSharingStatus"
+          OrganizationSharingStatus.of_json in
+      make ?jiraConfiguration ?discoveryIntegrationStatus
+        ?organizationSharingStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Global settings for all workloads."]
+module GetConsolidatedReportOutput =
+  struct
+    type nonrec t =
+      {
+      metrics: ConsolidatedReportMetrics.t option
+        [@ocaml.doc
+          "The metrics that make up the consolidated report. Only returned when JSON format is requested."];
+      nextToken: NextToken.t option ;
+      base64String: Base64String.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?metrics =
+      fun ?nextToken ->
+        fun ?base64String -> fun () -> { metrics; nextToken; base64String }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Metrics",
+           (Option.map x.metrics ~f:ConsolidatedReportMetrics.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("Base64String",
+          (Option.map x.base64String ~f:Base64String.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let base64String =
+        (Option.map ~f:Base64String.of_xml)
+          (Xml.child xml_arg0 "Base64String") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let metrics =
+        (Option.map ~f:ConsolidatedReportMetrics.of_xml)
+          (Xml.child xml_arg0 "Metrics") in
+      make ?base64String ?nextToken ?metrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let base64String = field_map json__ "Base64String" Base64String.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let metrics =
+        field_map json__ "Metrics" ConsolidatedReportMetrics.of_json in
+      make ?base64String ?nextToken ?metrics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get a consolidated report of your workloads. You can optionally choose to include workloads that have been shared with you."]
+module GetConsolidatedReportInput =
+  struct
+    type nonrec t =
+      {
+      format: ReportFormat.t
+        [@ocaml.doc
+          "The format of the consolidated report. For PDF, Base64String is returned. For JSON, Metrics is returned."];
+      includeSharedResources: IncludeSharedResources.t option
+        [@ocaml.doc
+          "Set to true to have shared resources included in the report."];
+      nextToken: NextToken.t option ;
+      maxResults: GetConsolidatedReportMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return for this request."]}
+    let context_ = "GetConsolidatedReportInput"
+    let make ?includeSharedResources =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ~format ->
+            fun () ->
+              { includeSharedResources; nextToken; maxResults; format }
+    let to_value x =
+      structure_to_value
+        [("Format", (Some (ReportFormat.to_value x.format)));
+        ("IncludeSharedResources",
+          (Option.map x.includeSharedResources
+             ~f:IncludeSharedResources.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:GetConsolidatedReportMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:GetConsolidatedReportMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let includeSharedResources =
+        (Option.map ~f:IncludeSharedResources.of_xml)
+          (Xml.child xml_arg0 "IncludeSharedResources") in
+      let format =
+        ReportFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Format") in
+      make ?maxResults ?nextToken ?includeSharedResources ~format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" GetConsolidatedReportMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let includeSharedResources =
+        field_map json__ "IncludeSharedResources"
+          IncludeSharedResources.of_json in
+      let format = field_map_exn json__ "Format" ReportFormat.of_json in
+      make ?maxResults ?nextToken ?includeSharedResources ~format ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get a consolidated report of your workloads. You can optionally choose to include workloads that have been shared with you."]
 module GetAnswerOutput =
   struct
     type nonrec t =
@@ -8255,13 +15990,13 @@ module GetAnswerOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?answer ?lensArn ?lensAlias ?milestoneNumber ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let answer = field_map json "Answer" Answer.of_json in
-      let lensArn = field_map json "LensArn" LensArn.of_json in
-      let lensAlias = field_map json "LensAlias" LensAlias.of_json in
+    let of_json json__ =
+      let answer = field_map json__ "Answer" Answer.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
+      let lensAlias = field_map json__ "LensAlias" LensAlias.of_json in
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?answer ?lensArn ?lensAlias ?milestoneNumber ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output of a get answer call."]
@@ -8302,12 +16037,12 @@ module GetAnswerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ?milestoneNumber ~questionId ~lensAlias ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
-      let questionId = field_map_exn json "QuestionId" QuestionId.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let questionId = field_map_exn json__ "QuestionId" QuestionId.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ?milestoneNumber ~questionId ~lensAlias ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to get answer."]
@@ -8315,7 +16050,8 @@ module ExportLensOutput =
   struct
     type nonrec t =
       {
-      lensJSON: LensJSON.t option [@ocaml.doc "The JSON for the lens."]}
+      lensJSON: LensJSON.t option
+        [@ocaml.doc "The JSON representation of a lens."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -8389,12 +16125,12 @@ module ExportLensOutput =
         (Option.map ~f:LensJSON.of_xml) (Xml.child xml_arg0 "LensJSON") in
       make ?lensJSON ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lensJSON = field_map json "LensJSON" LensJSON.of_json in
+    let of_json json__ =
+      let lensJSON = field_map json__ "LensJSON" LensJSON.of_json in
       make ?lensJSON ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Export an existing lens. Lenses are defined in JSON. For more information, see JSON format specification in the Well-Architected Tool User Guide. Only the owner of a lens can export it. Disclaimer Do not include or gather personal identifiable information (PII) of end users or other identifiable individuals in or via your custom lenses. If your custom lens or those shared with you and used in your account do include or collect PII you are responsible for: ensuring that the included PII is processed in accordance with applicable law, providing adequate privacy notices, and obtaining necessary consents for processing such data."]
+       "Export an existing lens. Only the owner of a lens can export it. Lenses provided by Amazon Web Services (Amazon Web Services Official Content) cannot be exported. Lenses are defined in JSON. For more information, see JSON format specification in the Well-Architected Tool User Guide. Disclaimer Do not include or gather personal identifiable information (PII) of end users or other identifiable individuals in or via your custom lenses. If your custom lens or those shared with you and used in your account do include or collect PII you are responsible for: ensuring that the included PII is processed in accordance with applicable law, providing adequate privacy notices, and obtaining necessary consents for processing such data."]
 module ExportLensInput =
   struct
     type nonrec t =
@@ -8418,13 +16154,45 @@ module ExportLensInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
       make ?lensVersion ~lensAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lensVersion = field_map json "LensVersion" LensVersion.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
+    let of_json json__ =
+      let lensVersion = field_map json__ "LensVersion" LensVersion.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
       make ?lensVersion ~lensAlias ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Export an existing lens. Lenses are defined in JSON. For more information, see JSON format specification in the Well-Architected Tool User Guide. Only the owner of a lens can export it. Disclaimer Do not include or gather personal identifiable information (PII) of end users or other identifiable individuals in or via your custom lenses. If your custom lens or those shared with you and used in your account do include or collect PII you are responsible for: ensuring that the included PII is processed in accordance with applicable law, providing adequate privacy notices, and obtaining necessary consents for processing such data."]
+       "Export an existing lens. Only the owner of a lens can export it. Lenses provided by Amazon Web Services (Amazon Web Services Official Content) cannot be exported. Lenses are defined in JSON. For more information, see JSON format specification in the Well-Architected Tool User Guide. Disclaimer Do not include or gather personal identifiable information (PII) of end users or other identifiable individuals in or via your custom lenses. If your custom lens or those shared with you and used in your account do include or collect PII you are responsible for: ensuring that the included PII is processed in accordance with applicable law, providing adequate privacy notices, and obtaining necessary consents for processing such data."]
+module DisassociateProfilesInput =
+  struct
+    type nonrec t =
+      {
+      workloadId: WorkloadId.t ;
+      profileArns: ProfileArns.t
+        [@ocaml.doc
+          "The list of profile ARNs to disassociate from the workload."]}
+    let context_ = "DisassociateProfilesInput"
+    let make ~workloadId =
+      fun ~profileArns -> fun () -> { workloadId; profileArns }
+    let to_value x =
+      structure_to_value
+        [("WorkloadId", (Some (WorkloadId.to_value x.workloadId)));
+        ("ProfileArns", (Some (ProfileArns.to_value x.profileArns)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profileArns =
+        ProfileArns.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileArns") in
+      let workloadId =
+        WorkloadId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
+      make ~profileArns ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profileArns =
+        field_map_exn json__ "ProfileArns" ProfileArns.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      make ~profileArns ~workloadId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Disassociate a profile from a workload."]
 module DisassociateLensesInput =
   struct
     type nonrec t = {
@@ -8447,9 +16215,10 @@ module DisassociateLensesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~lensAliases ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lensAliases = field_map_exn json "LensAliases" LensAliases.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+    let of_json json__ =
+      let lensAliases =
+        field_map_exn json__ "LensAliases" LensAliases.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ~lensAliases ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to disassociate lens reviews."]
@@ -8483,11 +16252,11 @@ module DeleteWorkloadShareInput =
         ShareId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShareId") in
       make ~clientRequestToken ~workloadId ~shareId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
-      let shareId = field_map_exn json "ShareId" ShareId.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      let shareId = field_map_exn json__ "ShareId" ShareId.of_json in
       make ~clientRequestToken ~workloadId ~shareId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for Delete Workload Share"]
@@ -8515,13 +16284,157 @@ module DeleteWorkloadInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~clientRequestToken ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ~clientRequestToken ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for workload deletion."]
+module DeleteTemplateShareInput =
+  struct
+    type nonrec t =
+      {
+      shareId: ShareId.t ;
+      templateArn: TemplateArn.t [@ocaml.doc "The review template ARN."];
+      clientRequestToken: ClientRequestToken.t }
+    let context_ = "DeleteTemplateShareInput"
+    let make ~shareId =
+      fun ~templateArn ->
+        fun ~clientRequestToken ->
+          fun () -> { shareId; templateArn; clientRequestToken }
+    let to_value x =
+      structure_to_value
+        [("ShareId", (Some (ShareId.to_value x.shareId)));
+        ("TemplateArn", (Some (TemplateArn.to_value x.templateArn)));
+        ("ClientRequestToken",
+          (Some (ClientRequestToken.to_value x.clientRequestToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        ClientRequestToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
+      let templateArn =
+        TemplateArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateArn") in
+      let shareId =
+        ShareId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShareId") in
+      make ~clientRequestToken ~templateArn ~shareId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let templateArn =
+        field_map_exn json__ "TemplateArn" TemplateArn.of_json in
+      let shareId = field_map_exn json__ "ShareId" ShareId.of_json in
+      make ~clientRequestToken ~templateArn ~shareId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Delete a review template share. After the review template share is deleted, Amazon Web Services accounts, users, organizations, and organizational units (OUs) that you shared the review template with will no longer be able to apply it to new workloads."]
+module DeleteReviewTemplateInput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t [@ocaml.doc "The review template ARN."];
+      clientRequestToken: ClientRequestToken.t }
+    let context_ = "DeleteReviewTemplateInput"
+    let make ~templateArn =
+      fun ~clientRequestToken ->
+        fun () -> { templateArn; clientRequestToken }
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Some (TemplateArn.to_value x.templateArn)));
+        ("ClientRequestToken",
+          (Some (ClientRequestToken.to_value x.clientRequestToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        ClientRequestToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
+      let templateArn =
+        TemplateArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateArn") in
+      make ~clientRequestToken ~templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let templateArn =
+        field_map_exn json__ "TemplateArn" TemplateArn.of_json in
+      make ~clientRequestToken ~templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Delete a review template. Only the owner of a review template can delete it. After the review template is deleted, Amazon Web Services accounts, users, organizations, and organizational units (OUs) that you shared the review template with will no longer be able to apply it to new workloads."]
+module DeleteProfileShareInput =
+  struct
+    type nonrec t =
+      {
+      shareId: ShareId.t ;
+      profileArn: ProfileArn.t [@ocaml.doc "The profile ARN."];
+      clientRequestToken: ClientRequestToken.t }
+    let context_ = "DeleteProfileShareInput"
+    let make ~shareId =
+      fun ~profileArn ->
+        fun ~clientRequestToken ->
+          fun () -> { shareId; profileArn; clientRequestToken }
+    let to_value x =
+      structure_to_value
+        [("ShareId", (Some (ShareId.to_value x.shareId)));
+        ("ProfileArn", (Some (ProfileArn.to_value x.profileArn)));
+        ("ClientRequestToken",
+          (Some (ClientRequestToken.to_value x.clientRequestToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        ClientRequestToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
+      let profileArn =
+        ProfileArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileArn") in
+      let shareId =
+        ShareId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShareId") in
+      make ~clientRequestToken ~profileArn ~shareId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let profileArn = field_map_exn json__ "ProfileArn" ProfileArn.of_json in
+      let shareId = field_map_exn json__ "ShareId" ShareId.of_json in
+      make ~clientRequestToken ~profileArn ~shareId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete a profile share."]
+module DeleteProfileInput =
+  struct
+    type nonrec t =
+      {
+      profileArn: ProfileArn.t [@ocaml.doc "The profile ARN."];
+      clientRequestToken: ClientRequestToken.t }
+    let context_ = "DeleteProfileInput"
+    let make ~profileArn =
+      fun ~clientRequestToken -> fun () -> { profileArn; clientRequestToken }
+    let to_value x =
+      structure_to_value
+        [("ProfileArn", (Some (ProfileArn.to_value x.profileArn)));
+        ("ClientRequestToken",
+          (Some (ClientRequestToken.to_value x.clientRequestToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        ClientRequestToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
+      let profileArn =
+        ProfileArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileArn") in
+      make ~clientRequestToken ~profileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let profileArn = field_map_exn json__ "ProfileArn" ProfileArn.of_json in
+      make ~clientRequestToken ~profileArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Delete a profile. Disclaimer By sharing your profile with other Amazon Web Services accounts, you acknowledge that Amazon Web Services will make your profile available to those other accounts. Those other accounts may continue to access and use your shared profile even if you delete the profile from your own Amazon Web Services account or terminate your Amazon Web Services account."]
 module DeleteLensShareInput =
   struct
     type nonrec t =
@@ -8552,15 +16465,15 @@ module DeleteLensShareInput =
         ShareId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShareId") in
       make ~clientRequestToken ~lensAlias ~shareId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
-      let shareId = field_map_exn json "ShareId" ShareId.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
+      let shareId = field_map_exn json__ "ShareId" ShareId.of_json in
       make ~clientRequestToken ~lensAlias ~shareId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Delete a lens share. After the lens share is deleted, Amazon Web Services accounts and IAM users that you shared the lens with can continue to use it, but they will no longer be able to apply it to new workloads. Disclaimer By sharing your custom lenses with other Amazon Web Services accounts, you acknowledge that Amazon Web Services will make your custom lenses available to those other accounts. Those other accounts may continue to access and use your shared custom lenses even if you delete the custom lenses from your own Amazon Web Services account or terminate your Amazon Web Services account."]
+       "Delete a lens share. After the lens share is deleted, Amazon Web Services accounts, users, organizations, and organizational units (OUs) that you shared the lens with can continue to use it, but they will no longer be able to apply it to new workloads. Disclaimer By sharing your custom lenses with other Amazon Web Services accounts, you acknowledge that Amazon Web Services will make your custom lenses available to those other accounts. Those other accounts may continue to access and use your shared custom lenses even if you delete the custom lenses from your own Amazon Web Services account or terminate your Amazon Web Services account."]
 module DeleteLensInput =
   struct
     type nonrec t =
@@ -8593,15 +16506,16 @@ module DeleteLensInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
       make ~lensStatus ~clientRequestToken ~lensAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lensStatus = field_map_exn json "LensStatus" LensStatusType.of_json in
+    let of_json json__ =
+      let lensStatus =
+        field_map_exn json__ "LensStatus" LensStatusType.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
       make ~lensStatus ~clientRequestToken ~lensAlias ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Delete an existing lens. Only the owner of a lens can delete it. After the lens is deleted, Amazon Web Services accounts and IAM users that you shared the lens with can continue to use it, but they will no longer be able to apply it to new workloads. Disclaimer By sharing your custom lenses with other Amazon Web Services accounts, you acknowledge that Amazon Web Services will make your custom lenses available to those other accounts. Those other accounts may continue to access and use your shared custom lenses even if you delete the custom lenses from your own Amazon Web Services account or terminate your Amazon Web Services account."]
+       "Delete an existing lens. Only the owner of a lens can delete it. After the lens is deleted, Amazon Web Services accounts and users that you shared the lens with can continue to use it, but they will no longer be able to apply it to new workloads. Disclaimer By sharing your custom lenses with other Amazon Web Services accounts, you acknowledge that Amazon Web Services will make your custom lenses available to those other accounts. Those other accounts may continue to access and use your shared custom lenses even if you delete the custom lenses from your own Amazon Web Services account or terminate your Amazon Web Services account."]
 module CreateWorkloadShareOutput =
   struct
     type nonrec t =
@@ -8704,9 +16618,9 @@ module CreateWorkloadShareOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?shareId ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shareId = field_map json "ShareId" ShareId.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+    let of_json json__ =
+      let shareId = field_map json__ "ShareId" ShareId.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?shareId ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for Create Workload Share"]
@@ -8748,13 +16662,13 @@ module CreateWorkloadShareInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~clientRequestToken ~permissionType ~sharedWith ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
       let permissionType =
-        field_map_exn json "PermissionType" PermissionType.of_json in
-      let sharedWith = field_map_exn json "SharedWith" SharedWith.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+        field_map_exn json__ "PermissionType" PermissionType.of_json in
+      let sharedWith = field_map_exn json__ "SharedWith" SharedWith.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ~clientRequestToken ~permissionType ~sharedWith ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for Create Workload Share"]
@@ -8768,12 +16682,823 @@ module CreateWorkloadOutput =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?workloadId =
       fun ?workloadArn -> fun () -> { workloadId; workloadArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
+        ("WorkloadArn", (Option.map x.workloadArn ~f:WorkloadArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workloadArn =
+        (Option.map ~f:WorkloadArn.of_xml) (Xml.child xml_arg0 "WorkloadArn") in
+      let workloadId =
+        (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
+      make ?workloadArn ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workloadArn = field_map json__ "WorkloadArn" WorkloadArn.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      make ?workloadArn ?workloadId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Output of a create workload call."]
+module CreateWorkloadInput =
+  struct
+    type nonrec t =
+      {
+      workloadName: WorkloadName.t ;
+      description: WorkloadDescription.t ;
+      environment: WorkloadEnvironment.t ;
+      accountIds: WorkloadAccountIds.t option ;
+      awsRegions: WorkloadAwsRegions.t option ;
+      nonAwsRegions: WorkloadNonAwsRegions.t option ;
+      pillarPriorities: WorkloadPillarPriorities.t option ;
+      architecturalDesign: WorkloadArchitecturalDesign.t option ;
+      reviewOwner: WorkloadReviewOwner.t option ;
+      industryType: WorkloadIndustryType.t option ;
+      industry: WorkloadIndustry.t option ;
+      lenses: WorkloadLenses.t ;
+      notes: Notes.t option ;
+      clientRequestToken: ClientRequestToken.t ;
+      tags: TagMap.t option
+        [@ocaml.doc "The tags to be associated with the workload."];
+      discoveryConfig: WorkloadDiscoveryConfig.t option
+        [@ocaml.doc
+          "Well-Architected discovery configuration settings associated to the workload."];
+      applications: WorkloadApplications.t option
+        [@ocaml.doc
+          "List of AppRegistry application ARNs associated to the workload."];
+      profileArns: WorkloadProfileArns.t option
+        [@ocaml.doc "The list of profile ARNs associated with the workload."];
+      reviewTemplateArns: ReviewTemplateArns.t option
+        [@ocaml.doc
+          "The list of review template ARNs to associate with the workload."];
+      jiraConfiguration: WorkloadJiraConfigurationInput.t option
+        [@ocaml.doc "Jira configuration settings when creating a workload."]}
+    let context_ = "CreateWorkloadInput"
+    let make ?accountIds =
+      fun ?awsRegions ->
+        fun ?nonAwsRegions ->
+          fun ?pillarPriorities ->
+            fun ?architecturalDesign ->
+              fun ?reviewOwner ->
+                fun ?industryType ->
+                  fun ?industry ->
+                    fun ?notes ->
+                      fun ?tags ->
+                        fun ?discoveryConfig ->
+                          fun ?applications ->
+                            fun ?profileArns ->
+                              fun ?reviewTemplateArns ->
+                                fun ?jiraConfiguration ->
+                                  fun ~workloadName ->
+                                    fun ~description ->
+                                      fun ~environment ->
+                                        fun ~lenses ->
+                                          fun ~clientRequestToken ->
+                                            fun () ->
+                                              {
+                                                accountIds;
+                                                awsRegions;
+                                                nonAwsRegions;
+                                                pillarPriorities;
+                                                architecturalDesign;
+                                                reviewOwner;
+                                                industryType;
+                                                industry;
+                                                notes;
+                                                tags;
+                                                discoveryConfig;
+                                                applications;
+                                                profileArns;
+                                                reviewTemplateArns;
+                                                jiraConfiguration;
+                                                workloadName;
+                                                description;
+                                                environment;
+                                                lenses;
+                                                clientRequestToken
+                                              }
+    let to_value x =
+      structure_to_value
+        [("WorkloadName", (Some (WorkloadName.to_value x.workloadName)));
+        ("Description", (Some (WorkloadDescription.to_value x.description)));
+        ("Environment", (Some (WorkloadEnvironment.to_value x.environment)));
+        ("AccountIds",
+          (Option.map x.accountIds ~f:WorkloadAccountIds.to_value));
+        ("AwsRegions",
+          (Option.map x.awsRegions ~f:WorkloadAwsRegions.to_value));
+        ("NonAwsRegions",
+          (Option.map x.nonAwsRegions ~f:WorkloadNonAwsRegions.to_value));
+        ("PillarPriorities",
+          (Option.map x.pillarPriorities ~f:WorkloadPillarPriorities.to_value));
+        ("ArchitecturalDesign",
+          (Option.map x.architecturalDesign
+             ~f:WorkloadArchitecturalDesign.to_value));
+        ("ReviewOwner",
+          (Option.map x.reviewOwner ~f:WorkloadReviewOwner.to_value));
+        ("IndustryType",
+          (Option.map x.industryType ~f:WorkloadIndustryType.to_value));
+        ("Industry", (Option.map x.industry ~f:WorkloadIndustry.to_value));
+        ("Lenses", (Some (WorkloadLenses.to_value x.lenses)));
+        ("Notes", (Option.map x.notes ~f:Notes.to_value));
+        ("ClientRequestToken",
+          (Some (ClientRequestToken.to_value x.clientRequestToken)));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("DiscoveryConfig",
+          (Option.map x.discoveryConfig ~f:WorkloadDiscoveryConfig.to_value));
+        ("Applications",
+          (Option.map x.applications ~f:WorkloadApplications.to_value));
+        ("ProfileArns",
+          (Option.map x.profileArns ~f:WorkloadProfileArns.to_value));
+        ("ReviewTemplateArns",
+          (Option.map x.reviewTemplateArns ~f:ReviewTemplateArns.to_value));
+        ("JiraConfiguration",
+          (Option.map x.jiraConfiguration
+             ~f:WorkloadJiraConfigurationInput.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jiraConfiguration =
+        (Option.map ~f:WorkloadJiraConfigurationInput.of_xml)
+          (Xml.child xml_arg0 "JiraConfiguration") in
+      let reviewTemplateArns =
+        (Option.map ~f:ReviewTemplateArns.of_xml)
+          (Xml.child xml_arg0 "ReviewTemplateArns") in
+      let profileArns =
+        (Option.map ~f:WorkloadProfileArns.of_xml)
+          (Xml.child xml_arg0 "ProfileArns") in
+      let applications =
+        (Option.map ~f:WorkloadApplications.of_xml)
+          (Xml.child xml_arg0 "Applications") in
+      let discoveryConfig =
+        (Option.map ~f:WorkloadDiscoveryConfig.of_xml)
+          (Xml.child xml_arg0 "DiscoveryConfig") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let clientRequestToken =
+        ClientRequestToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
+      let notes = (Option.map ~f:Notes.of_xml) (Xml.child xml_arg0 "Notes") in
+      let lenses =
+        WorkloadLenses.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Lenses") in
+      let industry =
+        (Option.map ~f:WorkloadIndustry.of_xml)
+          (Xml.child xml_arg0 "Industry") in
+      let industryType =
+        (Option.map ~f:WorkloadIndustryType.of_xml)
+          (Xml.child xml_arg0 "IndustryType") in
+      let reviewOwner =
+        (Option.map ~f:WorkloadReviewOwner.of_xml)
+          (Xml.child xml_arg0 "ReviewOwner") in
+      let architecturalDesign =
+        (Option.map ~f:WorkloadArchitecturalDesign.of_xml)
+          (Xml.child xml_arg0 "ArchitecturalDesign") in
+      let pillarPriorities =
+        (Option.map ~f:WorkloadPillarPriorities.of_xml)
+          (Xml.child xml_arg0 "PillarPriorities") in
+      let nonAwsRegions =
+        (Option.map ~f:WorkloadNonAwsRegions.of_xml)
+          (Xml.child xml_arg0 "NonAwsRegions") in
+      let awsRegions =
+        (Option.map ~f:WorkloadAwsRegions.of_xml)
+          (Xml.child xml_arg0 "AwsRegions") in
+      let accountIds =
+        (Option.map ~f:WorkloadAccountIds.of_xml)
+          (Xml.child xml_arg0 "AccountIds") in
+      let environment =
+        WorkloadEnvironment.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Environment") in
+      let description =
+        WorkloadDescription.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
+      let workloadName =
+        WorkloadName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkloadName") in
+      make ?jiraConfiguration ?reviewTemplateArns ?profileArns ?applications
+        ?discoveryConfig ?tags ~clientRequestToken ?notes ~lenses ?industry
+        ?industryType ?reviewOwner ?architecturalDesign ?pillarPriorities
+        ?nonAwsRegions ?awsRegions ?accountIds ~environment ~description
+        ~workloadName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jiraConfiguration =
+        field_map json__ "JiraConfiguration"
+          WorkloadJiraConfigurationInput.of_json in
+      let reviewTemplateArns =
+        field_map json__ "ReviewTemplateArns" ReviewTemplateArns.of_json in
+      let profileArns =
+        field_map json__ "ProfileArns" WorkloadProfileArns.of_json in
+      let applications =
+        field_map json__ "Applications" WorkloadApplications.of_json in
+      let discoveryConfig =
+        field_map json__ "DiscoveryConfig" WorkloadDiscoveryConfig.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let clientRequestToken =
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
+      let lenses = field_map_exn json__ "Lenses" WorkloadLenses.of_json in
+      let industry = field_map json__ "Industry" WorkloadIndustry.of_json in
+      let industryType =
+        field_map json__ "IndustryType" WorkloadIndustryType.of_json in
+      let reviewOwner =
+        field_map json__ "ReviewOwner" WorkloadReviewOwner.of_json in
+      let architecturalDesign =
+        field_map json__ "ArchitecturalDesign"
+          WorkloadArchitecturalDesign.of_json in
+      let pillarPriorities =
+        field_map json__ "PillarPriorities" WorkloadPillarPriorities.of_json in
+      let nonAwsRegions =
+        field_map json__ "NonAwsRegions" WorkloadNonAwsRegions.of_json in
+      let awsRegions =
+        field_map json__ "AwsRegions" WorkloadAwsRegions.of_json in
+      let accountIds =
+        field_map json__ "AccountIds" WorkloadAccountIds.of_json in
+      let environment =
+        field_map_exn json__ "Environment" WorkloadEnvironment.of_json in
+      let description =
+        field_map_exn json__ "Description" WorkloadDescription.of_json in
+      let workloadName =
+        field_map_exn json__ "WorkloadName" WorkloadName.of_json in
+      make ?jiraConfiguration ?reviewTemplateArns ?profileArns ?applications
+        ?discoveryConfig ?tags ~clientRequestToken ?notes ~lenses ?industry
+        ?industryType ?reviewOwner ?architecturalDesign ?pillarPriorities
+        ?nonAwsRegions ?awsRegions ?accountIds ~environment ~description
+        ~workloadName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Input for workload creation."]
+module CreateTemplateShareOutput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t option
+        [@ocaml.doc "The review template ARN."];
+      shareId: ShareId.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?templateArn =
+      fun ?shareId -> fun () -> { templateArn; shareId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Option.map x.templateArn ~f:TemplateArn.to_value));
+        ("ShareId", (Option.map x.shareId ~f:ShareId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let shareId =
+        (Option.map ~f:ShareId.of_xml) (Xml.child xml_arg0 "ShareId") in
+      let templateArn =
+        (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "TemplateArn") in
+      make ?shareId ?templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let shareId = field_map json__ "ShareId" ShareId.of_json in
+      let templateArn = field_map json__ "TemplateArn" TemplateArn.of_json in
+      make ?shareId ?templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create a review template share. The owner of a review template can share it with other Amazon Web Services accounts, users, an organization, and organizational units (OUs) in the same Amazon Web Services Region. Shared access to a review template is not removed until the review template share invitation is deleted. If you share a review template with an organization or OU, all accounts in the organization or OU are granted access to the review template. Disclaimer By sharing your review template with other Amazon Web Services accounts, you acknowledge that Amazon Web Services will make your review template available to those other accounts."]
+module CreateTemplateShareInput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t [@ocaml.doc "The review template ARN."];
+      sharedWith: SharedWith.t ;
+      clientRequestToken: ClientRequestToken.t }
+    let context_ = "CreateTemplateShareInput"
+    let make ~templateArn =
+      fun ~sharedWith ->
+        fun ~clientRequestToken ->
+          fun () -> { templateArn; sharedWith; clientRequestToken }
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Some (TemplateArn.to_value x.templateArn)));
+        ("SharedWith", (Some (SharedWith.to_value x.sharedWith)));
+        ("ClientRequestToken",
+          (Some (ClientRequestToken.to_value x.clientRequestToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        ClientRequestToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
+      let sharedWith =
+        SharedWith.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SharedWith") in
+      let templateArn =
+        TemplateArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateArn") in
+      make ~clientRequestToken ~sharedWith ~templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let sharedWith = field_map_exn json__ "SharedWith" SharedWith.of_json in
+      let templateArn =
+        field_map_exn json__ "TemplateArn" TemplateArn.of_json in
+      make ~clientRequestToken ~sharedWith ~templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create a review template share. The owner of a review template can share it with other Amazon Web Services accounts, users, an organization, and organizational units (OUs) in the same Amazon Web Services Region. Shared access to a review template is not removed until the review template share invitation is deleted. If you share a review template with an organization or OU, all accounts in the organization or OU are granted access to the review template. Disclaimer By sharing your review template with other Amazon Web Services accounts, you acknowledge that Amazon Web Services will make your review template available to those other accounts."]
+module CreateReviewTemplateOutput =
+  struct
+    type nonrec t =
+      {
+      templateArn: TemplateArn.t option
+        [@ocaml.doc "The review template ARN."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?templateArn = fun () -> { templateArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TemplateArn", (Option.map x.templateArn ~f:TemplateArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let templateArn =
+        (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "TemplateArn") in
+      make ?templateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let templateArn = field_map json__ "TemplateArn" TemplateArn.of_json in
+      make ?templateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create a review template. Disclaimer Do not include or gather personal identifiable information (PII) of end users or other identifiable individuals in or via your review templates. If your review template or those shared with you and used in your account do include or collect PII you are responsible for: ensuring that the included PII is processed in accordance with applicable law, providing adequate privacy notices, and obtaining necessary consents for processing such data."]
+module CreateReviewTemplateInput =
+  struct
+    type nonrec t =
+      {
+      templateName: TemplateName.t
+        [@ocaml.doc "Name of the review template."];
+      description: TemplateDescription.t
+        [@ocaml.doc "The review template description."];
+      lenses: ReviewTemplateLenses.t
+        [@ocaml.doc "Lenses applied to the review template."];
+      notes: Notes.t option ;
+      tags: TagMap.t option
+        [@ocaml.doc "The tags assigned to the review template."];
+      clientRequestToken: ClientRequestToken.t }
+    let context_ = "CreateReviewTemplateInput"
+    let make ?notes =
+      fun ?tags ->
+        fun ~templateName ->
+          fun ~description ->
+            fun ~lenses ->
+              fun ~clientRequestToken ->
+                fun () ->
+                  {
+                    notes;
+                    tags;
+                    templateName;
+                    description;
+                    lenses;
+                    clientRequestToken
+                  }
+    let to_value x =
+      structure_to_value
+        [("TemplateName", (Some (TemplateName.to_value x.templateName)));
+        ("Description", (Some (TemplateDescription.to_value x.description)));
+        ("Lenses", (Some (ReviewTemplateLenses.to_value x.lenses)));
+        ("Notes", (Option.map x.notes ~f:Notes.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("ClientRequestToken",
+          (Some (ClientRequestToken.to_value x.clientRequestToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        ClientRequestToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let notes = (Option.map ~f:Notes.of_xml) (Xml.child xml_arg0 "Notes") in
+      let lenses =
+        ReviewTemplateLenses.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Lenses") in
+      let description =
+        TemplateDescription.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
+      let templateName =
+        TemplateName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
+      make ~clientRequestToken ?tags ?notes ~lenses ~description
+        ~templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let notes = field_map json__ "Notes" Notes.of_json in
+      let lenses = field_map_exn json__ "Lenses" ReviewTemplateLenses.of_json in
+      let description =
+        field_map_exn json__ "Description" TemplateDescription.of_json in
+      let templateName =
+        field_map_exn json__ "TemplateName" TemplateName.of_json in
+      make ~clientRequestToken ?tags ?notes ~lenses ~description
+        ~templateName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create a review template. Disclaimer Do not include or gather personal identifiable information (PII) of end users or other identifiable individuals in or via your review templates. If your review template or those shared with you and used in your account do include or collect PII you are responsible for: ensuring that the included PII is processed in accordance with applicable law, providing adequate privacy notices, and obtaining necessary consents for processing such data."]
+module CreateProfileShareOutput =
+  struct
+    type nonrec t =
+      {
+      shareId: ShareId.t option ;
+      profileArn: ProfileArn.t option [@ocaml.doc "The profile ARN."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?shareId = fun ?profileArn -> fun () -> { shareId; profileArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ShareId", (Option.map x.shareId ~f:ShareId.to_value));
+        ("ProfileArn", (Option.map x.profileArn ~f:ProfileArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profileArn =
+        (Option.map ~f:ProfileArn.of_xml) (Xml.child xml_arg0 "ProfileArn") in
+      let shareId =
+        (Option.map ~f:ShareId.of_xml) (Xml.child xml_arg0 "ShareId") in
+      make ?profileArn ?shareId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profileArn = field_map json__ "ProfileArn" ProfileArn.of_json in
+      let shareId = field_map json__ "ShareId" ShareId.of_json in
+      make ?profileArn ?shareId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Create a profile share."]
+module CreateProfileShareInput =
+  struct
+    type nonrec t =
+      {
+      profileArn: ProfileArn.t [@ocaml.doc "The profile ARN."];
+      sharedWith: SharedWith.t ;
+      clientRequestToken: ClientRequestToken.t }
+    let context_ = "CreateProfileShareInput"
+    let make ~profileArn =
+      fun ~sharedWith ->
+        fun ~clientRequestToken ->
+          fun () -> { profileArn; sharedWith; clientRequestToken }
+    let to_value x =
+      structure_to_value
+        [("ProfileArn", (Some (ProfileArn.to_value x.profileArn)));
+        ("SharedWith", (Some (SharedWith.to_value x.sharedWith)));
+        ("ClientRequestToken",
+          (Some (ClientRequestToken.to_value x.clientRequestToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientRequestToken =
+        ClientRequestToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
+      let sharedWith =
+        SharedWith.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SharedWith") in
+      let profileArn =
+        ProfileArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileArn") in
+      make ~clientRequestToken ~sharedWith ~profileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientRequestToken =
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let sharedWith = field_map_exn json__ "SharedWith" SharedWith.of_json in
+      let profileArn = field_map_exn json__ "ProfileArn" ProfileArn.of_json in
+      make ~clientRequestToken ~sharedWith ~profileArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Create a profile share."]
+module CreateProfileOutput =
+  struct
+    type nonrec t =
+      {
+      profileArn: ProfileArn.t option [@ocaml.doc "The profile ARN."];
+      profileVersion: ProfileVersion.t option
+        [@ocaml.doc "Version of the profile."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?profileArn =
+      fun ?profileVersion -> fun () -> { profileArn; profileVersion }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8842,98 +17567,57 @@ module CreateWorkloadOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
-        ("WorkloadArn", (Option.map x.workloadArn ~f:WorkloadArn.to_value))]
+        [("ProfileArn", (Option.map x.profileArn ~f:ProfileArn.to_value));
+        ("ProfileVersion",
+          (Option.map x.profileVersion ~f:ProfileVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workloadArn =
-        (Option.map ~f:WorkloadArn.of_xml) (Xml.child xml_arg0 "WorkloadArn") in
-      let workloadId =
-        (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
-      make ?workloadArn ?workloadId ()
+      let profileVersion =
+        (Option.map ~f:ProfileVersion.of_xml)
+          (Xml.child xml_arg0 "ProfileVersion") in
+      let profileArn =
+        (Option.map ~f:ProfileArn.of_xml) (Xml.child xml_arg0 "ProfileArn") in
+      make ?profileVersion ?profileArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workloadArn = field_map json "WorkloadArn" WorkloadArn.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
-      make ?workloadArn ?workloadId ()
+    let of_json json__ =
+      let profileVersion =
+        field_map json__ "ProfileVersion" ProfileVersion.of_json in
+      let profileArn = field_map json__ "ProfileArn" ProfileArn.of_json in
+      make ?profileVersion ?profileArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Output of a create workload call."]
-module CreateWorkloadInput =
+  end[@@ocaml.doc "Create a profile."]
+module CreateProfileInput =
   struct
     type nonrec t =
       {
-      workloadName: WorkloadName.t ;
-      description: WorkloadDescription.t ;
-      environment: WorkloadEnvironment.t ;
-      accountIds: WorkloadAccountIds.t option ;
-      awsRegions: WorkloadAwsRegions.t option ;
-      nonAwsRegions: WorkloadNonAwsRegions.t option ;
-      pillarPriorities: WorkloadPillarPriorities.t option ;
-      architecturalDesign: WorkloadArchitecturalDesign.t option ;
-      reviewOwner: WorkloadReviewOwner.t ;
-      industryType: WorkloadIndustryType.t option ;
-      industry: WorkloadIndustry.t option ;
-      lenses: WorkloadLenses.t ;
-      notes: Notes.t option ;
+      profileName: ProfileName.t [@ocaml.doc "Name of the profile."];
+      profileDescription: ProfileDescription.t
+        [@ocaml.doc "The profile description."];
+      profileQuestions: ProfileQuestionUpdates.t
+        [@ocaml.doc "The profile questions."];
       clientRequestToken: ClientRequestToken.t ;
-      tags: TagMap.t option
-        [@ocaml.doc "The tags to be associated with the workload."]}
-    let context_ = "CreateWorkloadInput"
-    let make ?accountIds =
-      fun ?awsRegions ->
-        fun ?nonAwsRegions ->
-          fun ?pillarPriorities ->
-            fun ?architecturalDesign ->
-              fun ?industryType ->
-                fun ?industry ->
-                  fun ?notes ->
-                    fun ?tags ->
-                      fun ~workloadName ->
-                        fun ~description ->
-                          fun ~environment ->
-                            fun ~reviewOwner ->
-                              fun ~lenses ->
-                                fun ~clientRequestToken ->
-                                  fun () ->
-                                    {
-                                      accountIds;
-                                      awsRegions;
-                                      nonAwsRegions;
-                                      pillarPriorities;
-                                      architecturalDesign;
-                                      industryType;
-                                      industry;
-                                      notes;
-                                      tags;
-                                      workloadName;
-                                      description;
-                                      environment;
-                                      reviewOwner;
-                                      lenses;
-                                      clientRequestToken
-                                    }
+      tags: TagMap.t option [@ocaml.doc "The tags assigned to the profile."]}
+    let context_ = "CreateProfileInput"
+    let make ?tags =
+      fun ~profileName ->
+        fun ~profileDescription ->
+          fun ~profileQuestions ->
+            fun ~clientRequestToken ->
+              fun () ->
+                {
+                  tags;
+                  profileName;
+                  profileDescription;
+                  profileQuestions;
+                  clientRequestToken
+                }
     let to_value x =
       structure_to_value
-        [("WorkloadName", (Some (WorkloadName.to_value x.workloadName)));
-        ("Description", (Some (WorkloadDescription.to_value x.description)));
-        ("Environment", (Some (WorkloadEnvironment.to_value x.environment)));
-        ("AccountIds",
-          (Option.map x.accountIds ~f:WorkloadAccountIds.to_value));
-        ("AwsRegions",
-          (Option.map x.awsRegions ~f:WorkloadAwsRegions.to_value));
-        ("NonAwsRegions",
-          (Option.map x.nonAwsRegions ~f:WorkloadNonAwsRegions.to_value));
-        ("PillarPriorities",
-          (Option.map x.pillarPriorities ~f:WorkloadPillarPriorities.to_value));
-        ("ArchitecturalDesign",
-          (Option.map x.architecturalDesign
-             ~f:WorkloadArchitecturalDesign.to_value));
-        ("ReviewOwner", (Some (WorkloadReviewOwner.to_value x.reviewOwner)));
-        ("IndustryType",
-          (Option.map x.industryType ~f:WorkloadIndustryType.to_value));
-        ("Industry", (Option.map x.industry ~f:WorkloadIndustry.to_value));
-        ("Lenses", (Some (WorkloadLenses.to_value x.lenses)));
-        ("Notes", (Option.map x.notes ~f:Notes.to_value));
+        [("ProfileName", (Some (ProfileName.to_value x.profileName)));
+        ("ProfileDescription",
+          (Some (ProfileDescription.to_value x.profileDescription)));
+        ("ProfileQuestions",
+          (Some (ProfileQuestionUpdates.to_value x.profileQuestions)));
         ("ClientRequestToken",
           (Some (ClientRequestToken.to_value x.clientRequestToken)));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
@@ -8943,78 +17627,33 @@ module CreateWorkloadInput =
       let clientRequestToken =
         ClientRequestToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientRequestToken") in
-      let notes = (Option.map ~f:Notes.of_xml) (Xml.child xml_arg0 "Notes") in
-      let lenses =
-        WorkloadLenses.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Lenses") in
-      let industry =
-        (Option.map ~f:WorkloadIndustry.of_xml)
-          (Xml.child xml_arg0 "Industry") in
-      let industryType =
-        (Option.map ~f:WorkloadIndustryType.of_xml)
-          (Xml.child xml_arg0 "IndustryType") in
-      let reviewOwner =
-        WorkloadReviewOwner.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ReviewOwner") in
-      let architecturalDesign =
-        (Option.map ~f:WorkloadArchitecturalDesign.of_xml)
-          (Xml.child xml_arg0 "ArchitecturalDesign") in
-      let pillarPriorities =
-        (Option.map ~f:WorkloadPillarPriorities.of_xml)
-          (Xml.child xml_arg0 "PillarPriorities") in
-      let nonAwsRegions =
-        (Option.map ~f:WorkloadNonAwsRegions.of_xml)
-          (Xml.child xml_arg0 "NonAwsRegions") in
-      let awsRegions =
-        (Option.map ~f:WorkloadAwsRegions.of_xml)
-          (Xml.child xml_arg0 "AwsRegions") in
-      let accountIds =
-        (Option.map ~f:WorkloadAccountIds.of_xml)
-          (Xml.child xml_arg0 "AccountIds") in
-      let environment =
-        WorkloadEnvironment.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Environment") in
-      let description =
-        WorkloadDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Description") in
-      let workloadName =
-        WorkloadName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WorkloadName") in
-      make ?tags ~clientRequestToken ?notes ~lenses ?industry ?industryType
-        ~reviewOwner ?architecturalDesign ?pillarPriorities ?nonAwsRegions
-        ?awsRegions ?accountIds ~environment ~description ~workloadName ()
+      let profileQuestions =
+        ProfileQuestionUpdates.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileQuestions") in
+      let profileDescription =
+        ProfileDescription.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileDescription") in
+      let profileName =
+        ProfileName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileName") in
+      make ?tags ~clientRequestToken ~profileQuestions ~profileDescription
+        ~profileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      let notes = field_map json "Notes" Notes.of_json in
-      let lenses = field_map_exn json "Lenses" WorkloadLenses.of_json in
-      let industry = field_map json "Industry" WorkloadIndustry.of_json in
-      let industryType =
-        field_map json "IndustryType" WorkloadIndustryType.of_json in
-      let reviewOwner =
-        field_map_exn json "ReviewOwner" WorkloadReviewOwner.of_json in
-      let architecturalDesign =
-        field_map json "ArchitecturalDesign"
-          WorkloadArchitecturalDesign.of_json in
-      let pillarPriorities =
-        field_map json "PillarPriorities" WorkloadPillarPriorities.of_json in
-      let nonAwsRegions =
-        field_map json "NonAwsRegions" WorkloadNonAwsRegions.of_json in
-      let awsRegions = field_map json "AwsRegions" WorkloadAwsRegions.of_json in
-      let accountIds = field_map json "AccountIds" WorkloadAccountIds.of_json in
-      let environment =
-        field_map_exn json "Environment" WorkloadEnvironment.of_json in
-      let description =
-        field_map_exn json "Description" WorkloadDescription.of_json in
-      let workloadName =
-        field_map_exn json "WorkloadName" WorkloadName.of_json in
-      make ?tags ~clientRequestToken ?notes ~lenses ?industry ?industryType
-        ~reviewOwner ?architecturalDesign ?pillarPriorities ?nonAwsRegions
-        ?awsRegions ?accountIds ~environment ~description ~workloadName ()
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let profileQuestions =
+        field_map_exn json__ "ProfileQuestions"
+          ProfileQuestionUpdates.of_json in
+      let profileDescription =
+        field_map_exn json__ "ProfileDescription" ProfileDescription.of_json in
+      let profileName =
+        field_map_exn json__ "ProfileName" ProfileName.of_json in
+      make ?tags ~clientRequestToken ~profileQuestions ~profileDescription
+        ~profileName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Input for workload creation."]
+  end[@@ocaml.doc "Create a profile."]
 module CreateMilestoneOutput =
   struct
     type nonrec t =
@@ -9120,10 +17759,10 @@ module CreateMilestoneOutput =
         (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
       make ?milestoneNumber ?workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let milestoneNumber =
-        field_map json "MilestoneNumber" MilestoneNumber.of_json in
-      let workloadId = field_map json "WorkloadId" WorkloadId.of_json in
+        field_map json__ "MilestoneNumber" MilestoneNumber.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
       make ?milestoneNumber ?workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output of a create milestone call."]
@@ -9158,12 +17797,12 @@ module CreateMilestoneInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~clientRequestToken ~milestoneName ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
       let milestoneName =
-        field_map_exn json "MilestoneName" MilestoneName.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+        field_map_exn json__ "MilestoneName" MilestoneName.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ~clientRequestToken ~milestoneName ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input for milestone creation."]
@@ -9271,13 +17910,13 @@ module CreateLensVersionOutput =
         (Option.map ~f:LensArn.of_xml) (Xml.child xml_arg0 "LensArn") in
       make ?lensVersion ?lensArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lensVersion = field_map json "LensVersion" LensVersion.of_json in
-      let lensArn = field_map json "LensArn" LensArn.of_json in
+    let of_json json__ =
+      let lensVersion = field_map json__ "LensVersion" LensVersion.of_json in
+      let lensArn = field_map json__ "LensArn" LensArn.of_json in
       make ?lensVersion ?lensArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a new lens version. A lens can have up to 100 versions. After a lens has been imported, create a new lens version to publish it. The owner of a lens can share the lens with other Amazon Web Services accounts and IAM users in the same Amazon Web Services Region. Only the owner of a lens can delete it."]
+       "Create a new lens version. A lens can have up to 100 versions. Use this operation to publish a new lens version after you have imported a lens. The LensAlias is used to identify the lens to be published. The owner of a lens can share the lens with other Amazon Web Services accounts and users in the same Amazon Web Services Region. Only the owner of a lens can delete it."]
 module CreateLensVersionInput =
   struct
     type nonrec t =
@@ -9319,17 +17958,18 @@ module CreateLensVersionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
       make ~clientRequestToken ?isMajorVersion ~lensVersion ~lensAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
       let isMajorVersion =
-        field_map json "IsMajorVersion" IsMajorVersion.of_json in
-      let lensVersion = field_map_exn json "LensVersion" LensVersion.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
+        field_map json__ "IsMajorVersion" IsMajorVersion.of_json in
+      let lensVersion =
+        field_map_exn json__ "LensVersion" LensVersion.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
       make ~clientRequestToken ?isMajorVersion ~lensVersion ~lensAlias ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a new lens version. A lens can have up to 100 versions. After a lens has been imported, create a new lens version to publish it. The owner of a lens can share the lens with other Amazon Web Services accounts and IAM users in the same Amazon Web Services Region. Only the owner of a lens can delete it."]
+       "Create a new lens version. A lens can have up to 100 versions. Use this operation to publish a new lens version after you have imported a lens. The LensAlias is used to identify the lens to be published. The owner of a lens can share the lens with other Amazon Web Services accounts and users in the same Amazon Web Services Region. Only the owner of a lens can delete it."]
 module CreateLensShareOutput =
   struct
     type nonrec t = {
@@ -9427,12 +18067,12 @@ module CreateLensShareOutput =
         (Option.map ~f:ShareId.of_xml) (Xml.child xml_arg0 "ShareId") in
       make ?shareId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shareId = field_map json "ShareId" ShareId.of_json in
+    let of_json json__ =
+      let shareId = field_map json__ "ShareId" ShareId.of_json in
       make ?shareId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a lens share. The owner of a lens can share it with other Amazon Web Services accounts and IAM users in the same Amazon Web Services Region. Shared access to a lens is not removed until the lens invitation is deleted. Disclaimer By sharing your custom lenses with other Amazon Web Services accounts, you acknowledge that Amazon Web Services will make your custom lenses available to those other accounts. Those other accounts may continue to access and use your shared custom lenses even if you delete the custom lenses from your own Amazon Web Services account or terminate your Amazon Web Services account."]
+       "Create a lens share. The owner of a lens can share it with other Amazon Web Services accounts, users, an organization, and organizational units (OUs) in the same Amazon Web Services Region. Lenses provided by Amazon Web Services (Amazon Web Services Official Content) cannot be shared. Shared access to a lens is not removed until the lens invitation is deleted. If you share a lens with an organization or OU, all accounts in the organization or OU are granted access to the lens. For more information, see Sharing a custom lens in the Well-Architected Tool User Guide. Disclaimer By sharing your custom lenses with other Amazon Web Services accounts, you acknowledge that Amazon Web Services will make your custom lenses available to those other accounts. Those other accounts may continue to access and use your shared custom lenses even if you delete the custom lenses from your own Amazon Web Services account or terminate your Amazon Web Services account."]
 module CreateLensShareInput =
   struct
     type nonrec t =
@@ -9464,15 +18104,47 @@ module CreateLensShareInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LensAlias") in
       make ~clientRequestToken ~sharedWith ~lensAlias ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      let sharedWith = field_map_exn json "SharedWith" SharedWith.of_json in
-      let lensAlias = field_map_exn json "LensAlias" LensAlias.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let sharedWith = field_map_exn json__ "SharedWith" SharedWith.of_json in
+      let lensAlias = field_map_exn json__ "LensAlias" LensAlias.of_json in
       make ~clientRequestToken ~sharedWith ~lensAlias ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create a lens share. The owner of a lens can share it with other Amazon Web Services accounts and IAM users in the same Amazon Web Services Region. Shared access to a lens is not removed until the lens invitation is deleted. Disclaimer By sharing your custom lenses with other Amazon Web Services accounts, you acknowledge that Amazon Web Services will make your custom lenses available to those other accounts. Those other accounts may continue to access and use your shared custom lenses even if you delete the custom lenses from your own Amazon Web Services account or terminate your Amazon Web Services account."]
+       "Create a lens share. The owner of a lens can share it with other Amazon Web Services accounts, users, an organization, and organizational units (OUs) in the same Amazon Web Services Region. Lenses provided by Amazon Web Services (Amazon Web Services Official Content) cannot be shared. Shared access to a lens is not removed until the lens invitation is deleted. If you share a lens with an organization or OU, all accounts in the organization or OU are granted access to the lens. For more information, see Sharing a custom lens in the Well-Architected Tool User Guide. Disclaimer By sharing your custom lenses with other Amazon Web Services accounts, you acknowledge that Amazon Web Services will make your custom lenses available to those other accounts. Those other accounts may continue to access and use your shared custom lenses even if you delete the custom lenses from your own Amazon Web Services account or terminate your Amazon Web Services account."]
+module AssociateProfilesInput =
+  struct
+    type nonrec t =
+      {
+      workloadId: WorkloadId.t ;
+      profileArns: ProfileArns.t
+        [@ocaml.doc
+          "The list of profile ARNs to associate with the workload."]}
+    let context_ = "AssociateProfilesInput"
+    let make ~workloadId =
+      fun ~profileArns -> fun () -> { workloadId; profileArns }
+    let to_value x =
+      structure_to_value
+        [("WorkloadId", (Some (WorkloadId.to_value x.workloadId)));
+        ("ProfileArns", (Some (ProfileArns.to_value x.profileArns)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profileArns =
+        ProfileArns.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProfileArns") in
+      let workloadId =
+        WorkloadId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
+      make ~profileArns ~workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profileArns =
+        field_map_exn json__ "ProfileArns" ProfileArns.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      make ~profileArns ~workloadId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Associate a profile with a workload."]
 module AssociateLensesInput =
   struct
     type nonrec t = {
@@ -9495,9 +18167,10 @@ module AssociateLensesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
       make ~lensAliases ~workloadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lensAliases = field_map_exn json "LensAliases" LensAliases.of_json in
-      let workloadId = field_map_exn json "WorkloadId" WorkloadId.of_json in
+    let of_json json__ =
+      let lensAliases =
+        field_map_exn json__ "LensAliases" LensAliases.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
       make ~lensAliases ~workloadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to associate lens reviews."]

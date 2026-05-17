@@ -19,6 +19,24 @@ val batch_disassociate_project_assets :
       BatchDisassociateProjectAssetsRequest.t ->
         (BatchDisassociateProjectAssetsResponse.t,
           BatchDisassociateProjectAssetsResponse.error) Result.t
+val batch_get_asset_property_aggregates :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetAssetPropertyAggregatesRequest.t ->
+        (BatchGetAssetPropertyAggregatesResponse.t,
+          BatchGetAssetPropertyAggregatesResponse.error) Result.t
+val batch_get_asset_property_value :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetAssetPropertyValueRequest.t ->
+        (BatchGetAssetPropertyValueResponse.t,
+          BatchGetAssetPropertyValueResponse.error) Result.t
+val batch_get_asset_property_value_history :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetAssetPropertyValueHistoryRequest.t ->
+        (BatchGetAssetPropertyValueHistoryResponse.t,
+          BatchGetAssetPropertyValueHistoryResponse.error) Result.t
 val batch_put_asset_property_value :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -41,11 +59,34 @@ val create_asset_model :
     ?cfg:Awso.Cfg.t ->
       CreateAssetModelRequest.t ->
         (CreateAssetModelResponse.t, CreateAssetModelResponse.error) Result.t
+val create_asset_model_composite_model :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAssetModelCompositeModelRequest.t ->
+        (CreateAssetModelCompositeModelResponse.t,
+          CreateAssetModelCompositeModelResponse.error) Result.t
+val create_bulk_import_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateBulkImportJobRequest.t ->
+        (CreateBulkImportJobResponse.t, CreateBulkImportJobResponse.error)
+          Result.t
+val create_computation_model :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateComputationModelRequest.t ->
+        (CreateComputationModelResponse.t,
+          CreateComputationModelResponse.error) Result.t
 val create_dashboard :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDashboardRequest.t ->
         (CreateDashboardResponse.t, CreateDashboardResponse.error) Result.t
+val create_dataset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDatasetRequest.t ->
+        (CreateDatasetResponse.t, CreateDatasetResponse.error) Result.t
 val create_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -77,11 +118,34 @@ val delete_asset_model :
     ?cfg:Awso.Cfg.t ->
       DeleteAssetModelRequest.t ->
         (DeleteAssetModelResponse.t, DeleteAssetModelResponse.error) Result.t
+val delete_asset_model_composite_model :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAssetModelCompositeModelRequest.t ->
+        (DeleteAssetModelCompositeModelResponse.t,
+          DeleteAssetModelCompositeModelResponse.error) Result.t
+val delete_asset_model_interface_relationship :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAssetModelInterfaceRelationshipRequest.t ->
+        (DeleteAssetModelInterfaceRelationshipResponse.t,
+          DeleteAssetModelInterfaceRelationshipResponse.error) Result.t
+val delete_computation_model :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteComputationModelRequest.t ->
+        (DeleteComputationModelResponse.t,
+          DeleteComputationModelResponse.error) Result.t
 val delete_dashboard :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDashboardRequest.t ->
         (DeleteDashboardResponse.t, DeleteDashboardResponse.error) Result.t
+val delete_dataset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDatasetRequest.t ->
+        (DeleteDatasetResponse.t, DeleteDatasetResponse.error) Result.t
 val delete_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteGatewayRequest.t -> (unit, unit) Result.t
@@ -104,35 +168,87 @@ val describe_access_policy :
       DescribeAccessPolicyRequest.t ->
         (DescribeAccessPolicyResponse.t, DescribeAccessPolicyResponse.error)
           Result.t
+val describe_action :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeActionRequest.t ->
+        (DescribeActionResponse.t, DescribeActionResponse.error) Result.t
 val describe_asset :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAssetRequest.t ->
         (DescribeAssetResponse.t, DescribeAssetResponse.error) Result.t
+val describe_asset_composite_model :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAssetCompositeModelRequest.t ->
+        (DescribeAssetCompositeModelResponse.t,
+          DescribeAssetCompositeModelResponse.error) Result.t
 val describe_asset_model :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAssetModelRequest.t ->
         (DescribeAssetModelResponse.t, DescribeAssetModelResponse.error)
           Result.t
+val describe_asset_model_composite_model :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAssetModelCompositeModelRequest.t ->
+        (DescribeAssetModelCompositeModelResponse.t,
+          DescribeAssetModelCompositeModelResponse.error) Result.t
+val describe_asset_model_interface_relationship :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAssetModelInterfaceRelationshipRequest.t ->
+        (DescribeAssetModelInterfaceRelationshipResponse.t,
+          DescribeAssetModelInterfaceRelationshipResponse.error) Result.t
 val describe_asset_property :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeAssetPropertyRequest.t ->
         (DescribeAssetPropertyResponse.t,
           DescribeAssetPropertyResponse.error) Result.t
+val describe_bulk_import_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeBulkImportJobRequest.t ->
+        (DescribeBulkImportJobResponse.t,
+          DescribeBulkImportJobResponse.error) Result.t
+val describe_computation_model :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeComputationModelRequest.t ->
+        (DescribeComputationModelResponse.t,
+          DescribeComputationModelResponse.error) Result.t
+val describe_computation_model_execution_summary :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeComputationModelExecutionSummaryRequest.t ->
+        (DescribeComputationModelExecutionSummaryResponse.t,
+          DescribeComputationModelExecutionSummaryResponse.error) Result.t
 val describe_dashboard :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDashboardRequest.t ->
         (DescribeDashboardResponse.t, DescribeDashboardResponse.error)
           Result.t
+val describe_dataset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDatasetRequest.t ->
+        (DescribeDatasetResponse.t, DescribeDatasetResponse.error) Result.t
 val describe_default_encryption_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDefaultEncryptionConfigurationRequest.t ->
         (DescribeDefaultEncryptionConfigurationResponse.t,
           DescribeDefaultEncryptionConfigurationResponse.error) Result.t
+val describe_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeExecutionRequest.t ->
+        (DescribeExecutionResponse.t, DescribeExecutionResponse.error)
+          Result.t
 val describe_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -180,6 +296,16 @@ val disassociate_time_series_from_asset_property :
     ?cfg:Awso.Cfg.t ->
       DisassociateTimeSeriesFromAssetPropertyRequest.t ->
         (unit, unit) Result.t
+val execute_action :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ExecuteActionRequest.t ->
+        (ExecuteActionResponse.t, ExecuteActionResponse.error) Result.t
+val execute_query :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ExecuteQueryRequest.t ->
+        (ExecuteQueryResponse.t, ExecuteQueryResponse.error) Result.t
 val get_asset_property_aggregates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -204,17 +330,45 @@ val get_interpolated_asset_property_values :
       GetInterpolatedAssetPropertyValuesRequest.t ->
         (GetInterpolatedAssetPropertyValuesResponse.t,
           GetInterpolatedAssetPropertyValuesResponse.error) Result.t
+val invoke_assistant :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      InvokeAssistantRequest.t ->
+        (InvokeAssistantResponse.t, InvokeAssistantResponse.error) Result.t
 val list_access_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAccessPoliciesRequest.t ->
         (ListAccessPoliciesResponse.t, ListAccessPoliciesResponse.error)
           Result.t
+val list_actions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListActionsRequest.t ->
+        (ListActionsResponse.t, ListActionsResponse.error) Result.t
+val list_asset_model_composite_models :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAssetModelCompositeModelsRequest.t ->
+        (ListAssetModelCompositeModelsResponse.t,
+          ListAssetModelCompositeModelsResponse.error) Result.t
+val list_asset_model_properties :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAssetModelPropertiesRequest.t ->
+        (ListAssetModelPropertiesResponse.t,
+          ListAssetModelPropertiesResponse.error) Result.t
 val list_asset_models :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListAssetModelsRequest.t ->
         (ListAssetModelsResponse.t, ListAssetModelsResponse.error) Result.t
+val list_asset_properties :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAssetPropertiesRequest.t ->
+        (ListAssetPropertiesResponse.t, ListAssetPropertiesResponse.error)
+          Result.t
 val list_asset_relationships :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -232,16 +386,62 @@ val list_associated_assets :
       ListAssociatedAssetsRequest.t ->
         (ListAssociatedAssetsResponse.t, ListAssociatedAssetsResponse.error)
           Result.t
+val list_bulk_import_jobs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListBulkImportJobsRequest.t ->
+        (ListBulkImportJobsResponse.t, ListBulkImportJobsResponse.error)
+          Result.t
+val list_composition_relationships :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCompositionRelationshipsRequest.t ->
+        (ListCompositionRelationshipsResponse.t,
+          ListCompositionRelationshipsResponse.error) Result.t
+val list_computation_model_data_binding_usages :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListComputationModelDataBindingUsagesRequest.t ->
+        (ListComputationModelDataBindingUsagesResponse.t,
+          ListComputationModelDataBindingUsagesResponse.error) Result.t
+val list_computation_model_resolve_to_resources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListComputationModelResolveToResourcesRequest.t ->
+        (ListComputationModelResolveToResourcesResponse.t,
+          ListComputationModelResolveToResourcesResponse.error) Result.t
+val list_computation_models :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListComputationModelsRequest.t ->
+        (ListComputationModelsResponse.t,
+          ListComputationModelsResponse.error) Result.t
 val list_dashboards :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDashboardsRequest.t ->
         (ListDashboardsResponse.t, ListDashboardsResponse.error) Result.t
+val list_datasets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDatasetsRequest.t ->
+        (ListDatasetsResponse.t, ListDatasetsResponse.error) Result.t
+val list_executions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListExecutionsRequest.t ->
+        (ListExecutionsResponse.t, ListExecutionsResponse.error) Result.t
 val list_gateways :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListGatewaysRequest.t ->
         (ListGatewaysResponse.t, ListGatewaysResponse.error) Result.t
+val list_interface_relationships :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListInterfaceRelationshipsRequest.t ->
+        (ListInterfaceRelationshipsResponse.t,
+          ListInterfaceRelationshipsResponse.error) Result.t
 val list_portals :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -269,6 +469,12 @@ val list_time_series :
     ?cfg:Awso.Cfg.t ->
       ListTimeSeriesRequest.t ->
         (ListTimeSeriesResponse.t, ListTimeSeriesResponse.error) Result.t
+val put_asset_model_interface_relationship :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutAssetModelInterfaceRelationshipRequest.t ->
+        (PutAssetModelInterfaceRelationshipResponse.t,
+          PutAssetModelInterfaceRelationshipResponse.error) Result.t
 val put_default_encryption_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -313,14 +519,31 @@ val update_asset_model :
     ?cfg:Awso.Cfg.t ->
       UpdateAssetModelRequest.t ->
         (UpdateAssetModelResponse.t, UpdateAssetModelResponse.error) Result.t
+val update_asset_model_composite_model :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAssetModelCompositeModelRequest.t ->
+        (UpdateAssetModelCompositeModelResponse.t,
+          UpdateAssetModelCompositeModelResponse.error) Result.t
 val update_asset_property :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> UpdateAssetPropertyRequest.t -> (unit, unit) Result.t
+val update_computation_model :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateComputationModelRequest.t ->
+        (UpdateComputationModelResponse.t,
+          UpdateComputationModelResponse.error) Result.t
 val update_dashboard :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDashboardRequest.t ->
         (UpdateDashboardResponse.t, UpdateDashboardResponse.error) Result.t
+val update_dataset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDatasetRequest.t ->
+        (UpdateDatasetResponse.t, UpdateDatasetResponse.error) Result.t
 val update_gateway :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> UpdateGatewayRequest.t -> (unit, unit) Result.t

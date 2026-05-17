@@ -23,6 +23,94 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module DownlinkFrequency =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000000000) >>=
+             (fun () -> check_int_min i ~min:100000000));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for DownlinkFrequency" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module WirelessGatewayId =
+  struct
+    type nonrec t = string
+    let context_ = "WirelessGatewayId"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WirelessGatewayId" j
+    let to_json = simple_to_json to_value
+  end
+module GeranCid =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for GeranCid" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LAC =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for LAC" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module BeaconingFrequency =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000000000) >>=
+             (fun () -> check_int_min i ~min:100000000));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for BeaconingFrequency" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module JoinEui =
   struct
     type nonrec t = string
@@ -79,6 +167,511 @@ module SigningAlg =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration SigningAlg" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"SigningAlg" j)
+    let to_json = simple_to_json to_value
+  end
+module GatewayListItem =
+  struct
+    type nonrec t =
+      {
+      gatewayId: WirelessGatewayId.t
+        [@ocaml.doc
+          "The ID of the wireless gateways that you want to add to the list of gateways when sending downlink messages."];
+      downlinkFrequency: DownlinkFrequency.t
+        [@ocaml.doc
+          "The frequency to use for the gateways when sending a downlink message to the wireless device."]}
+    let context_ = "GatewayListItem"
+    let make ~gatewayId =
+      fun ~downlinkFrequency -> fun () -> { gatewayId; downlinkFrequency }
+    let to_value x =
+      structure_to_value
+        [("GatewayId", (Some (WirelessGatewayId.to_value x.gatewayId)));
+        ("DownlinkFrequency",
+          (Some (DownlinkFrequency.to_value x.downlinkFrequency)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let downlinkFrequency =
+        DownlinkFrequency.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DownlinkFrequency") in
+      let gatewayId =
+        WirelessGatewayId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GatewayId") in
+      make ~downlinkFrequency ~gatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let downlinkFrequency =
+        field_map_exn json__ "DownlinkFrequency" DownlinkFrequency.of_json in
+      let gatewayId =
+        field_map_exn json__ "GatewayId" WirelessGatewayId.of_json in
+      make ~downlinkFrequency ~gatewayId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gateway list item object that specifies the frequency and list of gateways for which the downlink message should be sent."]
+module EventNotificationTopicStatus =
+  struct
+    type nonrec t =
+      | Enabled 
+      | Disabled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Enabled -> "Enabled"
+      | Disabled -> "Disabled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Enabled" -> Enabled
+      | "Disabled" -> Disabled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EventNotificationTopicStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EventNotificationTopicStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module BaseStationId =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for BaseStationId" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module CdmaChannel =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:4095) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for CdmaChannel" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PilotPower =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:(-49)) >>=
+             (fun () -> check_int_min i ~min:(-142)));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PilotPower" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PnOffset =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:511) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for PnOffset" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module BCCH =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1023) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for BCCH" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module BSIC =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:63) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for BSIC" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module GlobalIdentity =
+  struct
+    type nonrec t =
+      {
+      lac: LAC.t [@ocaml.doc "Location area code of the global identity."];
+      geranCid: GeranCid.t
+        [@ocaml.doc
+          "GERAN (GSM EDGE Radio Access Network) cell global identifier."]}
+    let context_ = "GlobalIdentity"
+    let make ~lac = fun ~geranCid -> fun () -> { lac; geranCid }
+    let to_value x =
+      structure_to_value
+        [("Lac", (Some (LAC.to_value x.lac)));
+        ("GeranCid", (Some (GeranCid.to_value x.geranCid)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let geranCid =
+        GeranCid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GeranCid") in
+      let lac = LAC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Lac") in
+      make ~geranCid ~lac ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let geranCid = field_map_exn json__ "GeranCid" GeranCid.of_json in
+      let lac = field_map_exn json__ "Lac" LAC.of_json in
+      make ~geranCid ~lac ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Global identity information."]
+module RxLevel =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:(-25)) >>=
+             (fun () -> check_int_min i ~min:(-110)));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for RxLevel" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module EARFCN =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:262143) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for EARFCN" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module EutranCid =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:268435455) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for EutranCid" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PCI =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:503) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for PCI" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RSRP =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:(-44)) >>=
+             (fun () -> check_int_min i ~min:(-140)));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for RSRP" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RSRQ =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:(-3.)) >>=
+             (fun () -> check_float_min i ~min:(-19.5)));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module CellParams =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:127) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for CellParams" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PathLoss =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:158) >>= (fun () -> check_int_min i ~min:46));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for PathLoss" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RSCP =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:(-25)) >>=
+             (fun () -> check_int_min i ~min:(-120)));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for RSCP" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module UARFCN =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:16383) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for UARFCN" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module UtranCid =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:268435455) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for UtranCid" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PSC =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:511) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for PSC" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module UARFCNDL =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:16383) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for UARFCNDL" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ApplicationConfigType =
+  struct
+    type nonrec t =
+      | SemtechGeolocation 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SemtechGeolocation -> "SemtechGeolocation"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SemtechGeolocation" -> SemtechGeolocation
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ApplicationConfigType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ApplicationConfigType" j)
+    let to_json = simple_to_json to_value
+  end
+module DestinationName =
+  struct
+    type nonrec t = string
+    let context_ = "DestinationName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9-_]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DestinationName" j
+    let to_json = simple_to_json to_value
+  end
+module FPort =
+  struct
+    type nonrec t = int[@@ocaml.doc "The Fport value."]
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:223) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for FPort" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The Fport value."]
+module FuotaTaskEvent =
+  struct
+    type nonrec t =
+      | Fuota 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Fuota -> "Fuota" | Non_static_id s -> s
+    let of_string = function | "Fuota" -> Fuota | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FuotaTaskEvent" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FuotaTaskEvent" j)
     let to_json = simple_to_json to_value
   end
 module LogLevel =
@@ -170,6 +763,56 @@ module WirelessGatewayEvent =
     let of_json j = of_string (string_of_json ~kind:"WirelessGatewayEvent" j)
     let to_json = simple_to_json to_value
   end
+module BeaconingDataRate =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:15) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for BeaconingDataRate" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module BeaconingFrequencies =
+  struct
+    type nonrec t = BeaconingFrequency.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BeaconingFrequency.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BeaconingFrequency.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BeaconingFrequencies"
+        ~of_json:BeaconingFrequency.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module JoinEuiRange =
   struct
     type nonrec t = JoinEui.t list
@@ -178,6 +821,9 @@ module JoinEuiRange =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:2));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JoinEui.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -290,32 +936,720 @@ module CertificateList =
   struct
     type nonrec t =
       {
-      signingAlg: SigningAlg.t
+      signingAlg: SigningAlg.t option
         [@ocaml.doc "The certificate chain algorithm provided by sidewalk."];
-      value: CertificateValue.t
+      value: CertificateValue.t option
         [@ocaml.doc "The value of the chosen sidewalk certificate."]}
-    let context_ = "CertificateList"
-    let make ~signingAlg = fun ~value -> fun () -> { signingAlg; value }
+    let make ?signingAlg = fun ?value -> fun () -> { signingAlg; value }
     let to_value x =
       structure_to_value
-        [("SigningAlg", (Some (SigningAlg.to_value x.signingAlg)));
-        ("Value", (Some (CertificateValue.to_value x.value)))]
+        [("SigningAlg", (Option.map x.signingAlg ~f:SigningAlg.to_value));
+        ("Value", (Option.map x.value ~f:CertificateValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let value =
-        CertificateValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+        (Option.map ~f:CertificateValue.of_xml) (Xml.child xml_arg0 "Value") in
       let signingAlg =
-        SigningAlg.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SigningAlg") in
-      make ~value ~signingAlg ()
+        (Option.map ~f:SigningAlg.of_xml) (Xml.child xml_arg0 "SigningAlg") in
+      make ?value ?signingAlg ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" CertificateValue.of_json in
-      let signingAlg = field_map_exn json "SigningAlg" SigningAlg.of_json in
-      make ~value ~signingAlg ()
+    let of_json json__ =
+      let value = field_map json__ "Value" CertificateValue.of_json in
+      let signingAlg = field_map json__ "SigningAlg" SigningAlg.of_json in
+      make ?value ?signingAlg ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List of sidewalk certificates."]
+module DeviceCreationFile =
+  struct
+    type nonrec t = string
+    let context_ = "DeviceCreationFile"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:1024); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeviceCreationFile" j
+    let to_json = simple_to_json to_value
+  end
+module DownlinkMode =
+  struct
+    type nonrec t =
+      | SEQUENTIAL 
+      | CONCURRENT 
+      | USING_UPLINK_GATEWAY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SEQUENTIAL -> "SEQUENTIAL"
+      | CONCURRENT -> "CONCURRENT"
+      | USING_UPLINK_GATEWAY -> "USING_UPLINK_GATEWAY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SEQUENTIAL" -> SEQUENTIAL
+      | "CONCURRENT" -> CONCURRENT
+      | "USING_UPLINK_GATEWAY" -> USING_UPLINK_GATEWAY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DownlinkMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DownlinkMode" j)
+    let to_json = simple_to_json to_value
+  end
+module GatewayList =
+  struct
+    type nonrec t = GatewayListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GatewayListItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GatewayListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GatewayList" ~of_json:GatewayListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TransmissionInterval =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:604800) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for TransmissionInterval" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module PositionConfigurationFec =
+  struct
+    type nonrec t =
+      | ROSE 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ROSE -> "ROSE" | NONE -> "NONE" | Non_static_id s -> s
+    let of_string =
+      function | "ROSE" -> ROSE | "NONE" -> NONE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PositionConfigurationFec" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PositionConfigurationFec" j)
+    let to_json = simple_to_json to_value
+  end
+module PositionConfigurationStatus =
+  struct
+    type nonrec t =
+      | Enabled 
+      | Disabled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Enabled -> "Enabled"
+      | Disabled -> "Disabled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Enabled" -> Enabled
+      | "Disabled" -> Disabled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PositionConfigurationStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PositionConfigurationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module PositionSolverProvider =
+  struct
+    type nonrec t =
+      | Semtech 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Semtech -> "Semtech" | Non_static_id s -> s
+    let of_string = function | "Semtech" -> Semtech | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PositionSolverProvider" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PositionSolverProvider" j)
+    let to_json = simple_to_json to_value
+  end
+module PositionSolverType =
+  struct
+    type nonrec t =
+      | GNSS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | GNSS -> "GNSS" | Non_static_id s -> s
+    let of_string = function | "GNSS" -> GNSS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PositionSolverType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PositionSolverType" j)
+    let to_json = simple_to_json to_value
+  end
+module LoRaWANConnectionStatusEventNotificationConfigurations =
+  struct
+    type nonrec t =
+      {
+      gatewayEuiEventTopic: EventNotificationTopicStatus.t option
+        [@ocaml.doc
+          "Denotes whether the gateway EUI connection status event topic is enabled or disabled."]}
+    let make ?gatewayEuiEventTopic = fun () -> { gatewayEuiEventTopic }
+    let to_value x =
+      structure_to_value
+        [("GatewayEuiEventTopic",
+           (Option.map x.gatewayEuiEventTopic
+              ~f:EventNotificationTopicStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let gatewayEuiEventTopic =
+        (Option.map ~f:EventNotificationTopicStatus.of_xml)
+          (Xml.child xml_arg0 "GatewayEuiEventTopic") in
+      make ?gatewayEuiEventTopic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let gatewayEuiEventTopic =
+        field_map json__ "GatewayEuiEventTopic"
+          EventNotificationTopicStatus.of_json in
+      make ?gatewayEuiEventTopic ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object for LoRaWAN connection status resource type event configuration."]
+module SidewalkEventNotificationConfigurations =
+  struct
+    type nonrec t =
+      {
+      amazonIdEventTopic: EventNotificationTopicStatus.t option
+        [@ocaml.doc
+          "Denotes whether the Amazon ID event topic is enabled or disabled."]}
+    let make ?amazonIdEventTopic = fun () -> { amazonIdEventTopic }
+    let to_value x =
+      structure_to_value
+        [("AmazonIdEventTopic",
+           (Option.map x.amazonIdEventTopic
+              ~f:EventNotificationTopicStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let amazonIdEventTopic =
+        (Option.map ~f:EventNotificationTopicStatus.of_xml)
+          (Xml.child xml_arg0 "AmazonIdEventTopic") in
+      make ?amazonIdEventTopic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let amazonIdEventTopic =
+        field_map json__ "AmazonIdEventTopic"
+          EventNotificationTopicStatus.of_json in
+      make ?amazonIdEventTopic ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "SidewalkEventNotificationConfigurations object, which is the event configuration object for Sidewalk-related event topics."]
+module LoRaWANJoinEventNotificationConfigurations =
+  struct
+    type nonrec t =
+      {
+      devEuiEventTopic: EventNotificationTopicStatus.t option
+        [@ocaml.doc
+          "Denotes whether the Dev EUI join event topic is enabled or disabled."]}
+    let make ?devEuiEventTopic = fun () -> { devEuiEventTopic }
+    let to_value x =
+      structure_to_value
+        [("DevEuiEventTopic",
+           (Option.map x.devEuiEventTopic
+              ~f:EventNotificationTopicStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let devEuiEventTopic =
+        (Option.map ~f:EventNotificationTopicStatus.of_xml)
+          (Xml.child xml_arg0 "DevEuiEventTopic") in
+      make ?devEuiEventTopic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let devEuiEventTopic =
+        field_map json__ "DevEuiEventTopic"
+          EventNotificationTopicStatus.of_json in
+      make ?devEuiEventTopic ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object for LoRaWAN join resource type event configuration."]
+module CdmaNmrObj =
+  struct
+    type nonrec t =
+      {
+      pnOffset: PnOffset.t
+        [@ocaml.doc
+          "Pseudo-noise offset, which is a characteristic of the signal from a cell on a radio tower."];
+      cdmaChannel: CdmaChannel.t [@ocaml.doc "CDMA channel information."];
+      pilotPower: PilotPower.t option
+        [@ocaml.doc
+          "Transmit power level of the pilot signal, measured in dBm (decibel-milliwatts)."];
+      baseStationId: BaseStationId.t option
+        [@ocaml.doc "CDMA base station ID (BSID)."]}
+    let context_ = "CdmaNmrObj"
+    let make ?pilotPower =
+      fun ?baseStationId ->
+        fun ~pnOffset ->
+          fun ~cdmaChannel ->
+            fun () -> { pilotPower; baseStationId; pnOffset; cdmaChannel }
+    let to_value x =
+      structure_to_value
+        [("PnOffset", (Some (PnOffset.to_value x.pnOffset)));
+        ("CdmaChannel", (Some (CdmaChannel.to_value x.cdmaChannel)));
+        ("PilotPower", (Option.map x.pilotPower ~f:PilotPower.to_value));
+        ("BaseStationId",
+          (Option.map x.baseStationId ~f:BaseStationId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let baseStationId =
+        (Option.map ~f:BaseStationId.of_xml)
+          (Xml.child xml_arg0 "BaseStationId") in
+      let pilotPower =
+        (Option.map ~f:PilotPower.of_xml) (Xml.child xml_arg0 "PilotPower") in
+      let cdmaChannel =
+        CdmaChannel.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CdmaChannel") in
+      let pnOffset =
+        PnOffset.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PnOffset") in
+      make ?baseStationId ?pilotPower ~cdmaChannel ~pnOffset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let baseStationId =
+        field_map json__ "BaseStationId" BaseStationId.of_json in
+      let pilotPower = field_map json__ "PilotPower" PilotPower.of_json in
+      let cdmaChannel =
+        field_map_exn json__ "CdmaChannel" CdmaChannel.of_json in
+      let pnOffset = field_map_exn json__ "PnOffset" PnOffset.of_json in
+      make ?baseStationId ?pilotPower ~cdmaChannel ~pnOffset ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "CDMA object for network measurement reports."]
+module GsmNmrObj =
+  struct
+    type nonrec t =
+      {
+      bsic: BSIC.t [@ocaml.doc "GSM base station identity code (BSIC)."];
+      bcch: BCCH.t [@ocaml.doc "GSM broadcast control channel."];
+      rxLevel: RxLevel.t option
+        [@ocaml.doc
+          "Rx level, which is the received signal power, measured in dBm (decibel-milliwatts)."];
+      globalIdentity: GlobalIdentity.t option
+        [@ocaml.doc "Global identity information of the GSM object."]}
+    let context_ = "GsmNmrObj"
+    let make ?rxLevel =
+      fun ?globalIdentity ->
+        fun ~bsic ->
+          fun ~bcch -> fun () -> { rxLevel; globalIdentity; bsic; bcch }
+    let to_value x =
+      structure_to_value
+        [("Bsic", (Some (BSIC.to_value x.bsic)));
+        ("Bcch", (Some (BCCH.to_value x.bcch)));
+        ("RxLevel", (Option.map x.rxLevel ~f:RxLevel.to_value));
+        ("GlobalIdentity",
+          (Option.map x.globalIdentity ~f:GlobalIdentity.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let globalIdentity =
+        (Option.map ~f:GlobalIdentity.of_xml)
+          (Xml.child xml_arg0 "GlobalIdentity") in
+      let rxLevel =
+        (Option.map ~f:RxLevel.of_xml) (Xml.child xml_arg0 "RxLevel") in
+      let bcch =
+        BCCH.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bcch") in
+      let bsic =
+        BSIC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bsic") in
+      make ?globalIdentity ?rxLevel ~bcch ~bsic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let globalIdentity =
+        field_map json__ "GlobalIdentity" GlobalIdentity.of_json in
+      let rxLevel = field_map json__ "RxLevel" RxLevel.of_json in
+      let bcch = field_map_exn json__ "Bcch" BCCH.of_json in
+      let bsic = field_map_exn json__ "Bsic" BSIC.of_json in
+      make ?globalIdentity ?rxLevel ~bcch ~bsic ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "GSM object for network measurement reports."]
+module LteNmrObj =
+  struct
+    type nonrec t =
+      {
+      pci: PCI.t [@ocaml.doc "Physical cell ID."];
+      earfcn: EARFCN.t
+        [@ocaml.doc
+          "E-UTRA (Evolved universal terrestrial Radio Access) absolute radio frequency channel Number (EARFCN)."];
+      eutranCid: EutranCid.t option
+        [@ocaml.doc
+          "E-UTRAN (Evolved Universal Terrestrial Radio Access Network) cell global identifier (EUTRANCID)."];
+      rsrp: RSRP.t option
+        [@ocaml.doc
+          "Signal power of the reference signal received, measured in dBm (decibel-milliwatts)."];
+      rsrq: RSRQ.t option
+        [@ocaml.doc
+          "Signal quality of the reference Signal received, measured in decibels (dB)."]}
+    let context_ = "LteNmrObj"
+    let make ?eutranCid =
+      fun ?rsrp ->
+        fun ?rsrq ->
+          fun ~pci ->
+            fun ~earfcn -> fun () -> { eutranCid; rsrp; rsrq; pci; earfcn }
+    let to_value x =
+      structure_to_value
+        [("Pci", (Some (PCI.to_value x.pci)));
+        ("Earfcn", (Some (EARFCN.to_value x.earfcn)));
+        ("EutranCid", (Option.map x.eutranCid ~f:EutranCid.to_value));
+        ("Rsrp", (Option.map x.rsrp ~f:RSRP.to_value));
+        ("Rsrq", (Option.map x.rsrq ~f:RSRQ.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rsrq = (Option.map ~f:RSRQ.of_xml) (Xml.child xml_arg0 "Rsrq") in
+      let rsrp = (Option.map ~f:RSRP.of_xml) (Xml.child xml_arg0 "Rsrp") in
+      let eutranCid =
+        (Option.map ~f:EutranCid.of_xml) (Xml.child xml_arg0 "EutranCid") in
+      let earfcn =
+        EARFCN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Earfcn") in
+      let pci = PCI.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Pci") in
+      make ?rsrq ?rsrp ?eutranCid ~earfcn ~pci ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rsrq = field_map json__ "Rsrq" RSRQ.of_json in
+      let rsrp = field_map json__ "Rsrp" RSRP.of_json in
+      let eutranCid = field_map json__ "EutranCid" EutranCid.of_json in
+      let earfcn = field_map_exn json__ "Earfcn" EARFCN.of_json in
+      let pci = field_map_exn json__ "Pci" PCI.of_json in
+      make ?rsrq ?rsrp ?eutranCid ~earfcn ~pci ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "LTE object for network measurement reports."]
+module TdscdmaNmrObj =
+  struct
+    type nonrec t =
+      {
+      uarfcn: UARFCN.t
+        [@ocaml.doc
+          "TD-SCDMA UTRA (Universal Terrestrial Radio Access Network) absolute RF channel number."];
+      cellParams: CellParams.t
+        [@ocaml.doc
+          "Cell parameters for TD-SCDMA network measurement reports object."];
+      utranCid: UtranCid.t option
+        [@ocaml.doc
+          "UTRAN (UMTS Terrestrial Radio Access Network) cell global identifier."];
+      rscp: RSCP.t option
+        [@ocaml.doc
+          "Code power of the received signal, measured in decibel-milliwatts (dBm)."];
+      pathLoss: PathLoss.t option
+        [@ocaml.doc
+          "Path loss, or path attenuation, is the reduction in power density of an electromagnetic wave as it propagates through space."]}
+    let context_ = "TdscdmaNmrObj"
+    let make ?utranCid =
+      fun ?rscp ->
+        fun ?pathLoss ->
+          fun ~uarfcn ->
+            fun ~cellParams ->
+              fun () -> { utranCid; rscp; pathLoss; uarfcn; cellParams }
+    let to_value x =
+      structure_to_value
+        [("Uarfcn", (Some (UARFCN.to_value x.uarfcn)));
+        ("CellParams", (Some (CellParams.to_value x.cellParams)));
+        ("UtranCid", (Option.map x.utranCid ~f:UtranCid.to_value));
+        ("Rscp", (Option.map x.rscp ~f:RSCP.to_value));
+        ("PathLoss", (Option.map x.pathLoss ~f:PathLoss.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pathLoss =
+        (Option.map ~f:PathLoss.of_xml) (Xml.child xml_arg0 "PathLoss") in
+      let rscp = (Option.map ~f:RSCP.of_xml) (Xml.child xml_arg0 "Rscp") in
+      let utranCid =
+        (Option.map ~f:UtranCid.of_xml) (Xml.child xml_arg0 "UtranCid") in
+      let cellParams =
+        CellParams.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CellParams") in
+      let uarfcn =
+        UARFCN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Uarfcn") in
+      make ?pathLoss ?rscp ?utranCid ~cellParams ~uarfcn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pathLoss = field_map json__ "PathLoss" PathLoss.of_json in
+      let rscp = field_map json__ "Rscp" RSCP.of_json in
+      let utranCid = field_map json__ "UtranCid" UtranCid.of_json in
+      let cellParams = field_map_exn json__ "CellParams" CellParams.of_json in
+      let uarfcn = field_map_exn json__ "Uarfcn" UARFCN.of_json in
+      make ?pathLoss ?rscp ?utranCid ~cellParams ~uarfcn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "TD-SCDMA object for network measurement reports."]
+module WcdmaNmrObj =
+  struct
+    type nonrec t =
+      {
+      uarfcndl: UARFCNDL.t
+        [@ocaml.doc "WCDMA UTRA Absolute RF Channel Number downlink."];
+      psc: PSC.t [@ocaml.doc "Primary Scrambling Code."];
+      utranCid: UtranCid.t
+        [@ocaml.doc
+          "UTRAN (UMTS Terrestrial Radio Access Network) Cell Global Identifier."];
+      rscp: RSCP.t option
+        [@ocaml.doc "Received Signal Code Power (signal power) (dBm)"];
+      pathLoss: PathLoss.t option
+        [@ocaml.doc
+          "Path loss, or path attenuation, is the reduction in power density of an electromagnetic wave as it propagates through space."]}
+    let context_ = "WcdmaNmrObj"
+    let make ?rscp =
+      fun ?pathLoss ->
+        fun ~uarfcndl ->
+          fun ~psc ->
+            fun ~utranCid ->
+              fun () -> { rscp; pathLoss; uarfcndl; psc; utranCid }
+    let to_value x =
+      structure_to_value
+        [("Uarfcndl", (Some (UARFCNDL.to_value x.uarfcndl)));
+        ("Psc", (Some (PSC.to_value x.psc)));
+        ("UtranCid", (Some (UtranCid.to_value x.utranCid)));
+        ("Rscp", (Option.map x.rscp ~f:RSCP.to_value));
+        ("PathLoss", (Option.map x.pathLoss ~f:PathLoss.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pathLoss =
+        (Option.map ~f:PathLoss.of_xml) (Xml.child xml_arg0 "PathLoss") in
+      let rscp = (Option.map ~f:RSCP.of_xml) (Xml.child xml_arg0 "Rscp") in
+      let utranCid =
+        UtranCid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UtranCid") in
+      let psc = PSC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Psc") in
+      let uarfcndl =
+        UARFCNDL.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Uarfcndl") in
+      make ?pathLoss ?rscp ~utranCid ~psc ~uarfcndl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pathLoss = field_map json__ "PathLoss" PathLoss.of_json in
+      let rscp = field_map json__ "Rscp" RSCP.of_json in
+      let utranCid = field_map_exn json__ "UtranCid" UtranCid.of_json in
+      let psc = field_map_exn json__ "Psc" PSC.of_json in
+      let uarfcndl = field_map_exn json__ "Uarfcndl" UARFCNDL.of_json in
+      make ?pathLoss ?rscp ~utranCid ~psc ~uarfcndl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Network Measurement Reports."]
+module DimensionName =
+  struct
+    type nonrec t =
+      | DeviceId 
+      | GatewayId 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DeviceId -> "DeviceId"
+      | GatewayId -> "GatewayId"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DeviceId" -> DeviceId
+      | "GatewayId" -> GatewayId
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DimensionName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DimensionName" j)
+    let to_json = simple_to_json to_value
+  end
+module DimensionValue =
+  struct
+    type nonrec t = string
+    let context_ = "DimensionValue"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DimensionValue" j
+    let to_json = simple_to_json to_value
+  end
+module Avg =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module Max =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module Min =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module P90 =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module Std =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module Sum =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module ApplicationConfig =
+  struct
+    type nonrec t =
+      {
+      fPort: FPort.t option ;
+      type_: ApplicationConfigType.t option
+        [@ocaml.doc
+          "Application type, which can be specified to obtain real-time position information of your LoRaWAN device."];
+      destinationName: DestinationName.t option
+        [@ocaml.doc
+          "The name of the position data destination that describes the AWS IoT rule that processes the device's position data for use by AWS IoT Core for LoRaWAN."]}
+    let make ?fPort =
+      fun ?type_ ->
+        fun ?destinationName -> fun () -> { fPort; type_; destinationName }
+    let to_value x =
+      structure_to_value
+        [("FPort", (Option.map x.fPort ~f:FPort.to_value));
+        ("Type", (Option.map x.type_ ~f:ApplicationConfigType.to_value));
+        ("DestinationName",
+          (Option.map x.destinationName ~f:DestinationName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destinationName =
+        (Option.map ~f:DestinationName.of_xml)
+          (Xml.child xml_arg0 "DestinationName") in
+      let type_ =
+        (Option.map ~f:ApplicationConfigType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let fPort = (Option.map ~f:FPort.of_xml) (Xml.child xml_arg0 "FPort") in
+      make ?destinationName ?type_ ?fPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destinationName =
+        field_map json__ "DestinationName" DestinationName.of_json in
+      let type_ = field_map json__ "Type" ApplicationConfigType.of_json in
+      let fPort = field_map json__ "FPort" FPort.of_json in
+      make ?destinationName ?type_ ?fPort ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "LoRaWAN application configuration, which can be used to perform geolocation."]
+module FuotaTaskEventLogOption =
+  struct
+    type nonrec t = {
+      event: FuotaTaskEvent.t ;
+      logLevel: LogLevel.t }
+    let context_ = "FuotaTaskEventLogOption"
+    let make ~event = fun ~logLevel -> fun () -> { event; logLevel }
+    let to_value x =
+      structure_to_value
+        [("Event", (Some (FuotaTaskEvent.to_value x.event)));
+        ("LogLevel", (Some (LogLevel.to_value x.logLevel)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logLevel =
+        LogLevel.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LogLevel") in
+      let event =
+        FuotaTaskEvent.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Event") in
+      make ~logLevel ~event ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logLevel = field_map_exn json__ "LogLevel" LogLevel.of_json in
+      let event = field_map_exn json__ "Event" FuotaTaskEvent.of_json in
+      make ~logLevel ~event ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The log options for a FUOTA task event and can be used to set log levels for a specific FUOTA task event. For a LoRaWAN FUOTA task, the only possible event for a log message is Fuota."]
 module WirelessDeviceEventLogOption =
   struct
     type nonrec t = {
@@ -336,9 +1670,9 @@ module WirelessDeviceEventLogOption =
           (Xml.child_exn ~context:context_ xml_arg0 "Event") in
       make ~logLevel ~event ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logLevel = field_map_exn json "LogLevel" LogLevel.of_json in
-      let event = field_map_exn json "Event" WirelessDeviceEvent.of_json in
+    let of_json json__ =
+      let logLevel = field_map_exn json__ "LogLevel" LogLevel.of_json in
+      let event = field_map_exn json__ "Event" WirelessDeviceEvent.of_json in
       make ~logLevel ~event ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -363,13 +1697,48 @@ module WirelessGatewayEventLogOption =
           (Xml.child_exn ~context:context_ xml_arg0 "Event") in
       make ~logLevel ~event ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logLevel = field_map_exn json "LogLevel" LogLevel.of_json in
-      let event = field_map_exn json "Event" WirelessGatewayEvent.of_json in
+    let of_json json__ =
+      let logLevel = field_map_exn json__ "LogLevel" LogLevel.of_json in
+      let event = field_map_exn json__ "Event" WirelessGatewayEvent.of_json in
       make ~logLevel ~event ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The log options for a wireless gateway event and can be used to set log levels for a specific wireless gateway event. For a LoRaWAN gateway, possible events for a log message are CUPS_Request and Certificate."]
+module Beaconing =
+  struct
+    type nonrec t =
+      {
+      dataRate: BeaconingDataRate.t option
+        [@ocaml.doc
+          "The data rate for gateways that are sending the beacons."];
+      frequencies: BeaconingFrequencies.t option
+        [@ocaml.doc
+          "The frequency list for the gateways to send the beacons."]}
+    let make ?dataRate =
+      fun ?frequencies -> fun () -> { dataRate; frequencies }
+    let to_value x =
+      structure_to_value
+        [("DataRate", (Option.map x.dataRate ~f:BeaconingDataRate.to_value));
+        ("Frequencies",
+          (Option.map x.frequencies ~f:BeaconingFrequencies.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let frequencies =
+        (Option.map ~f:BeaconingFrequencies.of_xml)
+          (Xml.child xml_arg0 "Frequencies") in
+      let dataRate =
+        (Option.map ~f:BeaconingDataRate.of_xml)
+          (Xml.child xml_arg0 "DataRate") in
+      make ?frequencies ?dataRate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let frequencies =
+        field_map json__ "Frequencies" BeaconingFrequencies.of_json in
+      let dataRate = field_map json__ "DataRate" BeaconingDataRate.of_json in
+      make ?frequencies ?dataRate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Beaconing parameters for configuring the wireless gateways."]
 module GatewayEui =
   struct
     type nonrec t = string
@@ -388,6 +1757,24 @@ module GatewayEui =
     let of_json j = string_of_json ~kind:"GatewayEui" j
     let to_json = simple_to_json to_value
   end
+module GatewayMaxEirp =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:30.) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
 module JoinEuiFilters =
   struct
     type nonrec t = JoinEuiRange.t list
@@ -396,6 +1783,9 @@ module JoinEuiFilters =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JoinEuiRange.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -424,6 +1814,9 @@ module NetIdFilters =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -467,6 +1860,9 @@ module SubBands =
         ok_or_failwith
           ((check_list_max i ~max:8) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubBand.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -515,11 +1911,11 @@ module LoRaWANGatewayVersion =
           (Xml.child xml_arg0 "PackageVersion") in
       make ?station ?model ?packageVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let station = field_map json "Station" Station.of_json in
-      let model = field_map json "Model" Model.of_json in
+    let of_json json__ =
+      let station = field_map json__ "Station" Station.of_json in
+      let model = field_map json__ "Model" Model.of_json in
       let packageVersion =
-        field_map json "PackageVersion" PackageVersion.of_json in
+        field_map json__ "PackageVersion" PackageVersion.of_json in
       make ?station ?model ?packageVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "LoRaWANGatewayVersion object."]
@@ -556,6 +1952,9 @@ module DeviceCertificateList =
   struct
     type nonrec t = CertificateList.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CertificateList.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -576,6 +1975,20 @@ module DeviceCertificateList =
       list_of_json ~kind:"DeviceCertificateList"
         ~of_json:CertificateList.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module DeviceProfileId =
+  struct
+    type nonrec t = string
+    let context_ = "DeviceProfileId"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeviceProfileId" j
+    let to_json = simple_to_json to_value
   end
 module SidewalkId =
   struct
@@ -605,23 +2018,469 @@ module SidewalkManufacturingSn =
     let of_json j = string_of_json ~kind:"SidewalkManufacturingSn" j
     let to_json = simple_to_json to_value
   end
-module FPort =
+module SidewalkPositioning =
   struct
-    type nonrec t = int[@@ocaml.doc "The Fport value."]
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:223) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t =
+      {
+      destinationName: DestinationName.t option
+        [@ocaml.doc "The location destination name of the Sidewalk device."]}
+    let make ?destinationName = fun () -> { destinationName }
+    let to_value x =
+      structure_to_value
+        [("DestinationName",
+           (Option.map x.destinationName ~f:DestinationName.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for FPort" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+      let destinationName =
+        (Option.map ~f:DestinationName.of_xml)
+          (Xml.child xml_arg0 "DestinationName") in
+      make ?destinationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destinationName =
+        field_map json__ "DestinationName" DestinationName.of_json in
+      make ?destinationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The Positioning object of the Sidewalk device."]
+module WirelessDeviceSidewalkStatus =
+  struct
+    type nonrec t =
+      | PROVISIONED 
+      | REGISTERED 
+      | ACTIVATED 
+      | UNKNOWN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PROVISIONED -> "PROVISIONED"
+      | REGISTERED -> "REGISTERED"
+      | ACTIVATED -> "ACTIVATED"
+      | UNKNOWN -> "UNKNOWN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PROVISIONED" -> PROVISIONED
+      | "REGISTERED" -> REGISTERED
+      | "ACTIVATED" -> ACTIVATED
+      | "UNKNOWN" -> UNKNOWN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration WirelessDeviceSidewalkStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"WirelessDeviceSidewalkStatus" j)
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The Fport value."]
+  end
+module DeviceCreationFileList =
+  struct
+    type nonrec t = DeviceCreationFile.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeviceCreationFile.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeviceCreationFile.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DeviceCreationFileList"
+        ~of_json:DeviceCreationFile.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Role =
+  struct
+    type nonrec t = string
+    let context_ = "Role"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:2048); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Role" j
+    let to_json = simple_to_json to_value
+  end
+module ParticipatingGateways =
+  struct
+    type nonrec t =
+      {
+      downlinkMode: DownlinkMode.t
+        [@ocaml.doc
+          "Indicates whether to send the downlink message in sequential mode or concurrent mode, or to use only the chosen gateways from the previous uplink message transmission."];
+      gatewayList: GatewayList.t
+        [@ocaml.doc
+          "The list of gateways that you want to use for sending the downlink data traffic."];
+      transmissionInterval: TransmissionInterval.t
+        [@ocaml.doc
+          "The duration of time for which AWS IoT Core for LoRaWAN will wait before transmitting the payload to the next gateway."]}
+    let context_ = "ParticipatingGateways"
+    let make ~downlinkMode =
+      fun ~gatewayList ->
+        fun ~transmissionInterval ->
+          fun () -> { downlinkMode; gatewayList; transmissionInterval }
+    let to_value x =
+      structure_to_value
+        [("DownlinkMode", (Some (DownlinkMode.to_value x.downlinkMode)));
+        ("GatewayList", (Some (GatewayList.to_value x.gatewayList)));
+        ("TransmissionInterval",
+          (Some (TransmissionInterval.to_value x.transmissionInterval)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let transmissionInterval =
+        TransmissionInterval.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TransmissionInterval") in
+      let gatewayList =
+        GatewayList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GatewayList") in
+      let downlinkMode =
+        DownlinkMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DownlinkMode") in
+      make ~transmissionInterval ~gatewayList ~downlinkMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let transmissionInterval =
+        field_map_exn json__ "TransmissionInterval"
+          TransmissionInterval.of_json in
+      let gatewayList =
+        field_map_exn json__ "GatewayList" GatewayList.of_json in
+      let downlinkMode =
+        field_map_exn json__ "DownlinkMode" DownlinkMode.of_json in
+      make ~transmissionInterval ~gatewayList ~downlinkMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specify the list of gateways to which you want to send downlink data traffic when the wireless device is running in class B or class C mode."]
+module SemtechGnssDetail =
+  struct
+    type nonrec t =
+      {
+      provider: PositionSolverProvider.t option
+        [@ocaml.doc "The vendor of the solver object."];
+      type_: PositionSolverType.t option
+        [@ocaml.doc "The type of positioning solver used."];
+      status: PositionConfigurationStatus.t option
+        [@ocaml.doc "The status indicating whether the solver is enabled."];
+      fec: PositionConfigurationFec.t option
+        [@ocaml.doc "Whether forward error correction is enabled."]}
+    let make ?provider =
+      fun ?type_ ->
+        fun ?status -> fun ?fec -> fun () -> { provider; type_; status; fec }
+    let to_value x =
+      structure_to_value
+        [("Provider",
+           (Option.map x.provider ~f:PositionSolverProvider.to_value));
+        ("Type", (Option.map x.type_ ~f:PositionSolverType.to_value));
+        ("Status",
+          (Option.map x.status ~f:PositionConfigurationStatus.to_value));
+        ("Fec", (Option.map x.fec ~f:PositionConfigurationFec.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fec =
+        (Option.map ~f:PositionConfigurationFec.of_xml)
+          (Xml.child xml_arg0 "Fec") in
+      let status =
+        (Option.map ~f:PositionConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let type_ =
+        (Option.map ~f:PositionSolverType.of_xml) (Xml.child xml_arg0 "Type") in
+      let provider =
+        (Option.map ~f:PositionSolverProvider.of_xml)
+          (Xml.child xml_arg0 "Provider") in
+      make ?fec ?status ?type_ ?provider ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fec = field_map json__ "Fec" PositionConfigurationFec.of_json in
+      let status =
+        field_map json__ "Status" PositionConfigurationStatus.of_json in
+      let type_ = field_map json__ "Type" PositionSolverType.of_json in
+      let provider =
+        field_map json__ "Provider" PositionSolverProvider.of_json in
+      make ?fec ?status ?type_ ?provider ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details of the Semtech GNSS solver object."]
+module ConnectionStatusEventConfiguration =
+  struct
+    type nonrec t =
+      {
+      loRaWAN:
+        LoRaWANConnectionStatusEventNotificationConfigurations.t option
+        [@ocaml.doc
+          "Connection status event configuration object for enabling or disabling LoRaWAN related event topics."];
+      wirelessGatewayIdEventTopic: EventNotificationTopicStatus.t option
+        [@ocaml.doc
+          "Denotes whether the wireless gateway ID connection status event topic is enabled or disabled."]}
+    let make ?loRaWAN =
+      fun ?wirelessGatewayIdEventTopic ->
+        fun () -> { loRaWAN; wirelessGatewayIdEventTopic }
+    let to_value x =
+      structure_to_value
+        [("LoRaWAN",
+           (Option.map x.loRaWAN
+              ~f:LoRaWANConnectionStatusEventNotificationConfigurations.to_value));
+        ("WirelessGatewayIdEventTopic",
+          (Option.map x.wirelessGatewayIdEventTopic
+             ~f:EventNotificationTopicStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wirelessGatewayIdEventTopic =
+        (Option.map ~f:EventNotificationTopicStatus.of_xml)
+          (Xml.child xml_arg0 "WirelessGatewayIdEventTopic") in
+      let loRaWAN =
+        (Option.map
+           ~f:LoRaWANConnectionStatusEventNotificationConfigurations.of_xml)
+          (Xml.child xml_arg0 "LoRaWAN") in
+      make ?wirelessGatewayIdEventTopic ?loRaWAN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wirelessGatewayIdEventTopic =
+        field_map json__ "WirelessGatewayIdEventTopic"
+          EventNotificationTopicStatus.of_json in
+      let loRaWAN =
+        field_map json__ "LoRaWAN"
+          LoRaWANConnectionStatusEventNotificationConfigurations.of_json in
+      make ?wirelessGatewayIdEventTopic ?loRaWAN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Connection status event configuration object for enabling or disabling topic."]
+module DeviceRegistrationStateEventConfiguration =
+  struct
+    type nonrec t =
+      {
+      sidewalk: SidewalkEventNotificationConfigurations.t option
+        [@ocaml.doc
+          "Device registration state event configuration object for enabling or disabling Sidewalk related event topics."];
+      wirelessDeviceIdEventTopic: EventNotificationTopicStatus.t option
+        [@ocaml.doc
+          "Denotes whether the wireless device ID device registration state event topic is enabled or disabled."]}
+    let make ?sidewalk =
+      fun ?wirelessDeviceIdEventTopic ->
+        fun () -> { sidewalk; wirelessDeviceIdEventTopic }
+    let to_value x =
+      structure_to_value
+        [("Sidewalk",
+           (Option.map x.sidewalk
+              ~f:SidewalkEventNotificationConfigurations.to_value));
+        ("WirelessDeviceIdEventTopic",
+          (Option.map x.wirelessDeviceIdEventTopic
+             ~f:EventNotificationTopicStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wirelessDeviceIdEventTopic =
+        (Option.map ~f:EventNotificationTopicStatus.of_xml)
+          (Xml.child xml_arg0 "WirelessDeviceIdEventTopic") in
+      let sidewalk =
+        (Option.map ~f:SidewalkEventNotificationConfigurations.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
+      make ?wirelessDeviceIdEventTopic ?sidewalk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wirelessDeviceIdEventTopic =
+        field_map json__ "WirelessDeviceIdEventTopic"
+          EventNotificationTopicStatus.of_json in
+      let sidewalk =
+        field_map json__ "Sidewalk"
+          SidewalkEventNotificationConfigurations.of_json in
+      make ?wirelessDeviceIdEventTopic ?sidewalk ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Device registration state event configuration object for enabling and disabling relevant topics."]
+module JoinEventConfiguration =
+  struct
+    type nonrec t =
+      {
+      loRaWAN: LoRaWANJoinEventNotificationConfigurations.t option
+        [@ocaml.doc
+          "Join event configuration object for enabling or disabling LoRaWAN related event topics."];
+      wirelessDeviceIdEventTopic: EventNotificationTopicStatus.t option
+        [@ocaml.doc
+          "Denotes whether the wireless device ID join event topic is enabled or disabled."]}
+    let make ?loRaWAN =
+      fun ?wirelessDeviceIdEventTopic ->
+        fun () -> { loRaWAN; wirelessDeviceIdEventTopic }
+    let to_value x =
+      structure_to_value
+        [("LoRaWAN",
+           (Option.map x.loRaWAN
+              ~f:LoRaWANJoinEventNotificationConfigurations.to_value));
+        ("WirelessDeviceIdEventTopic",
+          (Option.map x.wirelessDeviceIdEventTopic
+             ~f:EventNotificationTopicStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wirelessDeviceIdEventTopic =
+        (Option.map ~f:EventNotificationTopicStatus.of_xml)
+          (Xml.child xml_arg0 "WirelessDeviceIdEventTopic") in
+      let loRaWAN =
+        (Option.map ~f:LoRaWANJoinEventNotificationConfigurations.of_xml)
+          (Xml.child xml_arg0 "LoRaWAN") in
+      make ?wirelessDeviceIdEventTopic ?loRaWAN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wirelessDeviceIdEventTopic =
+        field_map json__ "WirelessDeviceIdEventTopic"
+          EventNotificationTopicStatus.of_json in
+      let loRaWAN =
+        field_map json__ "LoRaWAN"
+          LoRaWANJoinEventNotificationConfigurations.of_json in
+      make ?wirelessDeviceIdEventTopic ?loRaWAN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Join event configuration object for enabling or disabling topic."]
+module MessageDeliveryStatusEventConfiguration =
+  struct
+    type nonrec t =
+      {
+      sidewalk: SidewalkEventNotificationConfigurations.t option ;
+      wirelessDeviceIdEventTopic: EventNotificationTopicStatus.t option
+        [@ocaml.doc
+          "Denotes whether the wireless device ID message delivery status event topic is enabled or disabled."]}
+    let make ?sidewalk =
+      fun ?wirelessDeviceIdEventTopic ->
+        fun () -> { sidewalk; wirelessDeviceIdEventTopic }
+    let to_value x =
+      structure_to_value
+        [("Sidewalk",
+           (Option.map x.sidewalk
+              ~f:SidewalkEventNotificationConfigurations.to_value));
+        ("WirelessDeviceIdEventTopic",
+          (Option.map x.wirelessDeviceIdEventTopic
+             ~f:EventNotificationTopicStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wirelessDeviceIdEventTopic =
+        (Option.map ~f:EventNotificationTopicStatus.of_xml)
+          (Xml.child xml_arg0 "WirelessDeviceIdEventTopic") in
+      let sidewalk =
+        (Option.map ~f:SidewalkEventNotificationConfigurations.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
+      make ?wirelessDeviceIdEventTopic ?sidewalk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wirelessDeviceIdEventTopic =
+        field_map json__ "WirelessDeviceIdEventTopic"
+          EventNotificationTopicStatus.of_json in
+      let sidewalk =
+        field_map json__ "Sidewalk"
+          SidewalkEventNotificationConfigurations.of_json in
+      make ?wirelessDeviceIdEventTopic ?sidewalk ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Message delivery status event configuration object for enabling and disabling relevant topics."]
+module ProximityEventConfiguration =
+  struct
+    type nonrec t =
+      {
+      sidewalk: SidewalkEventNotificationConfigurations.t option
+        [@ocaml.doc
+          "Proximity event configuration object for enabling or disabling Sidewalk related event topics."];
+      wirelessDeviceIdEventTopic: EventNotificationTopicStatus.t option
+        [@ocaml.doc
+          "Denotes whether the wireless device ID proximity event topic is enabled or disabled."]}
+    let make ?sidewalk =
+      fun ?wirelessDeviceIdEventTopic ->
+        fun () -> { sidewalk; wirelessDeviceIdEventTopic }
+    let to_value x =
+      structure_to_value
+        [("Sidewalk",
+           (Option.map x.sidewalk
+              ~f:SidewalkEventNotificationConfigurations.to_value));
+        ("WirelessDeviceIdEventTopic",
+          (Option.map x.wirelessDeviceIdEventTopic
+             ~f:EventNotificationTopicStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wirelessDeviceIdEventTopic =
+        (Option.map ~f:EventNotificationTopicStatus.of_xml)
+          (Xml.child xml_arg0 "WirelessDeviceIdEventTopic") in
+      let sidewalk =
+        (Option.map ~f:SidewalkEventNotificationConfigurations.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
+      make ?wirelessDeviceIdEventTopic ?sidewalk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wirelessDeviceIdEventTopic =
+        field_map json__ "WirelessDeviceIdEventTopic"
+          EventNotificationTopicStatus.of_json in
+      let sidewalk =
+        field_map json__ "Sidewalk"
+          SidewalkEventNotificationConfigurations.of_json in
+      make ?wirelessDeviceIdEventTopic ?sidewalk ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Proximity event configuration object for enabling and disabling relevant topics."]
+module LastUpdateTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module OnboardStatus =
+  struct
+    type nonrec t =
+      | INITIALIZED 
+      | PENDING 
+      | ONBOARDED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INITIALIZED -> "INITIALIZED"
+      | PENDING -> "PENDING"
+      | ONBOARDED -> "ONBOARDED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INITIALIZED" -> INITIALIZED
+      | "PENDING" -> PENDING
+      | "ONBOARDED" -> ONBOARDED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OnboardStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OnboardStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module OnboardStatusReason =
+  struct
+    type nonrec t = string
+    let context_ = "OnboardStatusReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OnboardStatusReason" j
+    let to_json = simple_to_json to_value
+  end
 module Double =
   struct
     type nonrec t = float
@@ -633,6 +2492,47 @@ module Double =
     let of_xml xml_arg0 =
       Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
     let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module DlAllowed =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module Id =
+  struct
+    type nonrec t = string
+    let context_ = "Id"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Id" j
+    let to_json = simple_to_json to_value
+  end
+module ProviderNetId =
+  struct
+    type nonrec t = string
+    let context_ = "ProviderNetId"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProviderNetId" j
     let to_json = simple_to_json to_value
   end
 module AppSKey =
@@ -710,38 +2610,849 @@ module SNwkSIntKey =
     let of_json j = string_of_json ~kind:"SNwkSIntKey" j
     let to_json = simple_to_json to_value
   end
-module EventNotificationTopicStatus =
+module BaseLat =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:90.) >>=
+             (fun () -> check_float_min i ~min:(-90.)));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module BaseLng =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:180.) >>=
+             (fun () -> check_float_min i ~min:(-180.)));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module CdmaLocalId =
   struct
     type nonrec t =
-      | Enabled 
-      | Disabled 
+      {
+      pnOffset: PnOffset.t
+        [@ocaml.doc
+          "Pseudo-noise offset, which is a characteristic of the signal from a cell on a radio tower."];
+      cdmaChannel: CdmaChannel.t [@ocaml.doc "CDMA channel information."]}
+    let context_ = "CdmaLocalId"
+    let make ~pnOffset =
+      fun ~cdmaChannel -> fun () -> { pnOffset; cdmaChannel }
+    let to_value x =
+      structure_to_value
+        [("PnOffset", (Some (PnOffset.to_value x.pnOffset)));
+        ("CdmaChannel", (Some (CdmaChannel.to_value x.cdmaChannel)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cdmaChannel =
+        CdmaChannel.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CdmaChannel") in
+      let pnOffset =
+        PnOffset.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PnOffset") in
+      make ~cdmaChannel ~pnOffset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cdmaChannel =
+        field_map_exn json__ "CdmaChannel" CdmaChannel.of_json in
+      let pnOffset = field_map_exn json__ "PnOffset" PnOffset.of_json in
+      make ~cdmaChannel ~pnOffset ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "CDMA local ID information, which corresponds to the local identification parameters of a CDMA cell."]
+module CdmaNmrList =
+  struct
+    type nonrec t = CdmaNmrObj.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:32) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CdmaNmrObj.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CdmaNmrObj.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CdmaNmrList" ~of_json:CdmaNmrObj.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NetworkId =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for NetworkId" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RegistrationZone =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:4095) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RegistrationZone" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SystemId =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:32767) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for SystemId" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module GsmLocalId =
+  struct
+    type nonrec t =
+      {
+      bsic: BSIC.t [@ocaml.doc "GSM base station identity code (BSIC)."];
+      bcch: BCCH.t [@ocaml.doc "GSM broadcast control channel."]}
+    let context_ = "GsmLocalId"
+    let make ~bsic = fun ~bcch -> fun () -> { bsic; bcch }
+    let to_value x =
+      structure_to_value
+        [("Bsic", (Some (BSIC.to_value x.bsic)));
+        ("Bcch", (Some (BCCH.to_value x.bcch)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bcch =
+        BCCH.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bcch") in
+      let bsic =
+        BSIC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Bsic") in
+      make ~bcch ~bsic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bcch = field_map_exn json__ "Bcch" BCCH.of_json in
+      let bsic = field_map_exn json__ "Bsic" BSIC.of_json in
+      make ~bcch ~bsic ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "GSM local ID information, which corresponds to the local identification parameters of a GSM cell."]
+module GsmNmrList =
+  struct
+    type nonrec t = GsmNmrObj.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:32) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GsmNmrObj.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GsmNmrObj.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GsmNmrList" ~of_json:GsmNmrObj.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GsmTimingAdvance =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:63) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for GsmTimingAdvance" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MCC =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:999) >>=
+             (fun () -> check_int_min i ~min:200));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for MCC" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MNC =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:999) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for MNC" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LteLocalId =
+  struct
+    type nonrec t =
+      {
+      pci: PCI.t [@ocaml.doc "Physical cell ID."];
+      earfcn: EARFCN.t
+        [@ocaml.doc
+          "Evolved universal terrestrial radio access (E-UTRA) absolute radio frequency channel number (FCN)."]}
+    let context_ = "LteLocalId"
+    let make ~pci = fun ~earfcn -> fun () -> { pci; earfcn }
+    let to_value x =
+      structure_to_value
+        [("Pci", (Some (PCI.to_value x.pci)));
+        ("Earfcn", (Some (EARFCN.to_value x.earfcn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let earfcn =
+        EARFCN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Earfcn") in
+      let pci = PCI.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Pci") in
+      make ~earfcn ~pci ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let earfcn = field_map_exn json__ "Earfcn" EARFCN.of_json in
+      let pci = field_map_exn json__ "Pci" PCI.of_json in
+      make ~earfcn ~pci ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "LTE local identification (local ID) information."]
+module LteNmrList =
+  struct
+    type nonrec t = LteNmrObj.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:32) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LteNmrObj.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LteNmrObj.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LteNmrList" ~of_json:LteNmrObj.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LteTimingAdvance =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1282) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for LteTimingAdvance" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module NRCapable =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module TAC =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for TAC" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module TdscdmaLocalId =
+  struct
+    type nonrec t =
+      {
+      uarfcn: UARFCN.t
+        [@ocaml.doc
+          "TD-SCDMA UTRA (Universal Terrestrial Radio Access Network) absolute RF channel number (UARFCN)."];
+      cellParams: CellParams.t [@ocaml.doc "Cell parameters for TD-SCDMA."]}
+    let context_ = "TdscdmaLocalId"
+    let make ~uarfcn = fun ~cellParams -> fun () -> { uarfcn; cellParams }
+    let to_value x =
+      structure_to_value
+        [("Uarfcn", (Some (UARFCN.to_value x.uarfcn)));
+        ("CellParams", (Some (CellParams.to_value x.cellParams)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cellParams =
+        CellParams.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CellParams") in
+      let uarfcn =
+        UARFCN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Uarfcn") in
+      make ~cellParams ~uarfcn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cellParams = field_map_exn json__ "CellParams" CellParams.of_json in
+      let uarfcn = field_map_exn json__ "Uarfcn" UARFCN.of_json in
+      make ~cellParams ~uarfcn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "TD-SCDMA local identification (local Id) information."]
+module TdscdmaNmrList =
+  struct
+    type nonrec t = TdscdmaNmrObj.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:32) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TdscdmaNmrObj.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TdscdmaNmrObj.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TdscdmaNmrList" ~of_json:TdscdmaNmrObj.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TdscdmaTimingAdvance =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1530) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for TdscdmaTimingAdvance" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module WcdmaLocalId =
+  struct
+    type nonrec t =
+      {
+      uarfcndl: UARFCNDL.t
+        [@ocaml.doc "WCDMA UTRA Absolute RF Channel Number downlink."];
+      psc: PSC.t [@ocaml.doc "Primary Scrambling Code."]}
+    let context_ = "WcdmaLocalId"
+    let make ~uarfcndl = fun ~psc -> fun () -> { uarfcndl; psc }
+    let to_value x =
+      structure_to_value
+        [("Uarfcndl", (Some (UARFCNDL.to_value x.uarfcndl)));
+        ("Psc", (Some (PSC.to_value x.psc)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let psc = PSC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Psc") in
+      let uarfcndl =
+        UARFCNDL.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Uarfcndl") in
+      make ~psc ~uarfcndl ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let psc = field_map_exn json__ "Psc" PSC.of_json in
+      let uarfcndl = field_map_exn json__ "Uarfcndl" UARFCNDL.of_json in
+      make ~psc ~uarfcndl ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "WCDMA local identification (local ID) information."]
+module WcdmaNmrList =
+  struct
+    type nonrec t = WcdmaNmrObj.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:32) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WcdmaNmrObj.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WcdmaNmrObj.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WcdmaNmrList" ~of_json:WcdmaNmrObj.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Dimension =
+  struct
+    type nonrec t =
+      {
+      name: DimensionName.t option [@ocaml.doc "The name of the dimension."];
+      value: DimensionValue.t option [@ocaml.doc "The dimension's value."]}
+    let make ?name = fun ?value -> fun () -> { name; value }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:DimensionName.to_value));
+        ("value", (Option.map x.value ~f:DimensionValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:DimensionValue.of_xml) (Xml.child xml_arg0 "value") in
+      let name =
+        (Option.map ~f:DimensionName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" DimensionValue.of_json in
+      let name = field_map json__ "name" DimensionName.of_json in
+      make ?value ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The required list of dimensions for the metric."]
+module MetricQueryTimestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module MetricQueryValue =
+  struct
+    type nonrec t =
+      {
+      min: Min.t option
+        [@ocaml.doc
+          "The minimum of the values of all data points collected during the aggregation period."];
+      max: Max.t option
+        [@ocaml.doc
+          "The maximum of the values of all the data points collected during the aggregation period."];
+      sum: Sum.t option
+        [@ocaml.doc
+          "The sum of the values of all data points collected during the aggregation period."];
+      avg: Avg.t option
+        [@ocaml.doc
+          "The average of the values of all data points collected during the aggregation period."];
+      std: Std.t option
+        [@ocaml.doc
+          "The standard deviation of the values of all data points collected during the aggregation period."];
+      p90: P90.t option
+        [@ocaml.doc
+          "The 90th percentile of the values of all data points collected during the aggregation period."]}
+    let make ?min =
+      fun ?max ->
+        fun ?sum ->
+          fun ?avg ->
+            fun ?std ->
+              fun ?p90 -> fun () -> { min; max; sum; avg; std; p90 }
+    let to_value x =
+      structure_to_value
+        [("Min", (Option.map x.min ~f:Min.to_value));
+        ("Max", (Option.map x.max ~f:Max.to_value));
+        ("Sum", (Option.map x.sum ~f:Sum.to_value));
+        ("Avg", (Option.map x.avg ~f:Avg.to_value));
+        ("Std", (Option.map x.std ~f:Std.to_value));
+        ("P90", (Option.map x.p90 ~f:P90.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let p90 = (Option.map ~f:P90.of_xml) (Xml.child xml_arg0 "P90") in
+      let std = (Option.map ~f:Std.of_xml) (Xml.child xml_arg0 "Std") in
+      let avg = (Option.map ~f:Avg.of_xml) (Xml.child xml_arg0 "Avg") in
+      let sum = (Option.map ~f:Sum.of_xml) (Xml.child xml_arg0 "Sum") in
+      let max = (Option.map ~f:Max.of_xml) (Xml.child xml_arg0 "Max") in
+      let min = (Option.map ~f:Min.of_xml) (Xml.child xml_arg0 "Min") in
+      make ?p90 ?std ?avg ?sum ?max ?min ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let p90 = field_map json__ "P90" P90.of_json in
+      let std = field_map json__ "Std" Std.of_json in
+      let avg = field_map json__ "Avg" Avg.of_json in
+      let sum = field_map json__ "Sum" Sum.of_json in
+      let max = field_map json__ "Max" Max.of_json in
+      let min = field_map json__ "Min" Min.of_json in
+      make ?p90 ?std ?avg ?sum ?max ?min ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The aggregated values of the metric."]
+module ApId =
+  struct
+    type nonrec t = string
+    let context_ = "ApId"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApId" j
+    let to_json = simple_to_json to_value
+  end
+module DakCertificateId =
+  struct
+    type nonrec t = string
+    let context_ = "DakCertificateId"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DakCertificateId" j
+    let to_json = simple_to_json to_value
+  end
+module DeviceTypeId =
+  struct
+    type nonrec t = string
+    let context_ = "DeviceTypeId"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:2048); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeviceTypeId" j
+    let to_json = simple_to_json to_value
+  end
+module FactorySupport =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module MaxAllowedSignature =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxAllowedSignature" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module FCntStart =
+  struct
+    type nonrec t = int[@@ocaml.doc "The FCnt init value."]
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for FCntStart" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The FCnt init value."]
+module Applications =
+  struct
+    type nonrec t = ApplicationConfig.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ApplicationConfig.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ApplicationConfig.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Applications" ~of_json:ApplicationConfig.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Positioning =
+  struct
+    type nonrec t =
+      {
+      clockSync: FPort.t option ;
+      stream: FPort.t option ;
+      gnss: FPort.t option }
+    let make ?clockSync =
+      fun ?stream -> fun ?gnss -> fun () -> { clockSync; stream; gnss }
+    let to_value x =
+      structure_to_value
+        [("ClockSync", (Option.map x.clockSync ~f:FPort.to_value));
+        ("Stream", (Option.map x.stream ~f:FPort.to_value));
+        ("Gnss", (Option.map x.gnss ~f:FPort.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let gnss = (Option.map ~f:FPort.of_xml) (Xml.child xml_arg0 "Gnss") in
+      let stream = (Option.map ~f:FPort.of_xml) (Xml.child xml_arg0 "Stream") in
+      let clockSync =
+        (Option.map ~f:FPort.of_xml) (Xml.child xml_arg0 "ClockSync") in
+      make ?gnss ?stream ?clockSync ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let gnss = field_map json__ "Gnss" FPort.of_json in
+      let stream = field_map json__ "Stream" FPort.of_json in
+      let clockSync = field_map json__ "ClockSync" FPort.of_json in
+      make ?gnss ?stream ?clockSync ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The FPorts for the position information."]
+module GatewayListMulticast =
+  struct
+    type nonrec t = WirelessGatewayId.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WirelessGatewayId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WirelessGatewayId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GatewayListMulticast"
+        ~of_json:WirelessGatewayId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TransmissionIntervalMulticast =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:60000) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for TransmissionIntervalMulticast"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module FuotaTaskEventLogOptionList =
+  struct
+    type nonrec t = FuotaTaskEventLogOption.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FuotaTaskEventLogOption.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FuotaTaskEventLogOption.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FuotaTaskEventLogOptionList"
+        ~of_json:FuotaTaskEventLogOption.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FuotaTaskType =
+  struct
+    type nonrec t =
+      | LoRaWAN 
       | Non_static_id of string 
     let make i = i
-    let to_string =
-      function
-      | Enabled -> "Enabled"
-      | Disabled -> "Disabled"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "Enabled" -> Enabled
-      | "Disabled" -> Disabled
-      | x -> Non_static_id x
+    let to_string = function | LoRaWAN -> "LoRaWAN" | Non_static_id s -> s
+    let of_string = function | "LoRaWAN" -> LoRaWAN | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration EventNotificationTopicStatus"
-           xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"EventNotificationTopicStatus" j)
+      of_string (string_of_xml ~kind:"enumeration FuotaTaskType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FuotaTaskType" j)
     let to_json = simple_to_json to_value
   end
 module WirelessDeviceEventLogOptionList =
   struct
     type nonrec t = WirelessDeviceEventLogOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WirelessDeviceEventLogOption.to_value)) |>
         (fun x -> `List x)
@@ -794,6 +3505,9 @@ module WirelessGatewayEventLogOptionList =
   struct
     type nonrec t = WirelessGatewayEventLogOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WirelessGatewayEventLogOption.to_value)) |>
         (fun x -> `List x)
@@ -867,6 +3581,26 @@ module TagValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module AckModeRetryDurationSecs =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:604800) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for AckModeRetryDurationSecs"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module MessageType =
@@ -960,20 +3694,28 @@ module LoRaWANGateway =
         [@ocaml.doc "The frequency band (RFRegion) value."];
       joinEuiFilters: JoinEuiFilters.t option ;
       netIdFilters: NetIdFilters.t option ;
-      subBands: SubBands.t option }
+      subBands: SubBands.t option ;
+      beaconing: Beaconing.t option
+        [@ocaml.doc
+          "Beaconing object information, which consists of the data rate and frequency parameters."];
+      maxEirp: GatewayMaxEirp.t option [@ocaml.doc "The MaxEIRP value."]}
     let make ?gatewayEui =
       fun ?rfRegion ->
         fun ?joinEuiFilters ->
           fun ?netIdFilters ->
             fun ?subBands ->
-              fun () ->
-                {
-                  gatewayEui;
-                  rfRegion;
-                  joinEuiFilters;
-                  netIdFilters;
-                  subBands
-                }
+              fun ?beaconing ->
+                fun ?maxEirp ->
+                  fun () ->
+                    {
+                      gatewayEui;
+                      rfRegion;
+                      joinEuiFilters;
+                      netIdFilters;
+                      subBands;
+                      beaconing;
+                      maxEirp
+                    }
     let to_value x =
       structure_to_value
         [("GatewayEui", (Option.map x.gatewayEui ~f:GatewayEui.to_value));
@@ -982,9 +3724,15 @@ module LoRaWANGateway =
           (Option.map x.joinEuiFilters ~f:JoinEuiFilters.to_value));
         ("NetIdFilters",
           (Option.map x.netIdFilters ~f:NetIdFilters.to_value));
-        ("SubBands", (Option.map x.subBands ~f:SubBands.to_value))]
+        ("SubBands", (Option.map x.subBands ~f:SubBands.to_value));
+        ("Beaconing", (Option.map x.beaconing ~f:Beaconing.to_value));
+        ("MaxEirp", (Option.map x.maxEirp ~f:GatewayMaxEirp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxEirp =
+        (Option.map ~f:GatewayMaxEirp.of_xml) (Xml.child xml_arg0 "MaxEirp") in
+      let beaconing =
+        (Option.map ~f:Beaconing.of_xml) (Xml.child xml_arg0 "Beaconing") in
       let subBands =
         (Option.map ~f:SubBands.of_xml) (Xml.child xml_arg0 "SubBands") in
       let netIdFilters =
@@ -997,16 +3745,20 @@ module LoRaWANGateway =
         (Option.map ~f:RfRegion.of_xml) (Xml.child xml_arg0 "RfRegion") in
       let gatewayEui =
         (Option.map ~f:GatewayEui.of_xml) (Xml.child xml_arg0 "GatewayEui") in
-      make ?subBands ?netIdFilters ?joinEuiFilters ?rfRegion ?gatewayEui ()
+      make ?maxEirp ?beaconing ?subBands ?netIdFilters ?joinEuiFilters
+        ?rfRegion ?gatewayEui ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subBands = field_map json "SubBands" SubBands.of_json in
-      let netIdFilters = field_map json "NetIdFilters" NetIdFilters.of_json in
+    let of_json json__ =
+      let maxEirp = field_map json__ "MaxEirp" GatewayMaxEirp.of_json in
+      let beaconing = field_map json__ "Beaconing" Beaconing.of_json in
+      let subBands = field_map json__ "SubBands" SubBands.of_json in
+      let netIdFilters = field_map json__ "NetIdFilters" NetIdFilters.of_json in
       let joinEuiFilters =
-        field_map json "JoinEuiFilters" JoinEuiFilters.of_json in
-      let rfRegion = field_map json "RfRegion" RfRegion.of_json in
-      let gatewayEui = field_map json "GatewayEui" GatewayEui.of_json in
-      make ?subBands ?netIdFilters ?joinEuiFilters ?rfRegion ?gatewayEui ()
+        field_map json__ "JoinEuiFilters" JoinEuiFilters.of_json in
+      let rfRegion = field_map json__ "RfRegion" RfRegion.of_json in
+      let gatewayEui = field_map json__ "GatewayEui" GatewayEui.of_json in
+      make ?maxEirp ?beaconing ?subBands ?netIdFilters ?joinEuiFilters
+        ?rfRegion ?gatewayEui ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "LoRaWANGateway object."]
 module WirelessGatewayArn =
@@ -1020,20 +3772,6 @@ module WirelessGatewayArn =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"WirelessGatewayArn" j
-    let to_json = simple_to_json to_value
-  end
-module WirelessGatewayId =
-  struct
-    type nonrec t = string
-    let context_ = "WirelessGatewayId"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:256); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"WirelessGatewayId" j
     let to_json = simple_to_json to_value
   end
 module WirelessGatewayName =
@@ -1077,11 +3815,11 @@ module LoRaWANUpdateGatewayTaskEntry =
           (Xml.child xml_arg0 "CurrentVersion") in
       make ?updateVersion ?currentVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updateVersion =
-        field_map json "UpdateVersion" LoRaWANGatewayVersion.of_json in
+        field_map json__ "UpdateVersion" LoRaWANGatewayVersion.of_json in
       let currentVersion =
-        field_map json "CurrentVersion" LoRaWANGatewayVersion.of_json in
+        field_map json__ "CurrentVersion" LoRaWANGatewayVersion.of_json in
       make ?updateVersion ?currentVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "LoRaWANUpdateGatewayTaskEntry object."]
@@ -1118,24 +3856,6 @@ module WirelessGatewayTaskDefinitionId =
     let of_json j = string_of_json ~kind:"WirelessGatewayTaskDefinitionId" j
     let to_json = simple_to_json to_value
   end
-module DestinationName =
-  struct
-    type nonrec t = string
-    let context_ = "DestinationName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:128) >>=
-             (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9-_]+"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DestinationName" j
-    let to_json = simple_to_json to_value
-  end
 module FuotaDeviceStatus =
   struct
     type nonrec t =
@@ -1150,6 +3870,7 @@ module FuotaDeviceStatus =
       | MemoryError 
       | MICError 
       | Successful 
+      | Device_exist_in_conflict_fuota_task 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1165,6 +3886,8 @@ module FuotaDeviceStatus =
       | MemoryError -> "MemoryError"
       | MICError -> "MICError"
       | Successful -> "Successful"
+      | Device_exist_in_conflict_fuota_task ->
+          "Device_exist_in_conflict_fuota_task"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1179,6 +3902,8 @@ module FuotaDeviceStatus =
       | "MemoryError" -> MemoryError
       | "MICError" -> MICError
       | "Successful" -> Successful
+      | "Device_exist_in_conflict_fuota_task" ->
+          Device_exist_in_conflict_fuota_task
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1204,8 +3929,9 @@ module LoRaWANListDevice =
         (Option.map ~f:DevEui.of_xml) (Xml.child xml_arg0 "DevEui") in
       make ?devEui ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let devEui = field_map json "DevEui" DevEui.of_json in make ?devEui ()
+    let of_json json__ =
+      let devEui = field_map json__ "DevEui" DevEui.of_json in
+      make ?devEui ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "LoRaWAN object for list functions."]
 module McGroupId =
@@ -1239,6 +3965,33 @@ module MulticastDeviceStatus =
     let of_json j = string_of_json ~kind:"MulticastDeviceStatus" j
     let to_json = simple_to_json to_value
   end
+module PositioningConfigStatus =
+  struct
+    type nonrec t =
+      | Enabled 
+      | Disabled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Enabled -> "Enabled"
+      | Disabled -> "Disabled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Enabled" -> Enabled
+      | "Disabled" -> Disabled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PositioningConfigStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PositioningConfigStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module SidewalkListDevice =
   struct
     type nonrec t =
@@ -1250,18 +4003,31 @@ module SidewalkListDevice =
         [@ocaml.doc "The Sidewalk manufacturing series number."];
       deviceCertificates: DeviceCertificateList.t option
         [@ocaml.doc
-          "The sidewalk device certificates for Ed25519 and P256r1."]}
+          "The sidewalk device certificates for Ed25519 and P256r1."];
+      deviceProfileId: DeviceProfileId.t option
+        [@ocaml.doc "Sidewalk object used by list functions."];
+      status: WirelessDeviceSidewalkStatus.t option
+        [@ocaml.doc
+          "The status of the Sidewalk devices, such as provisioned or registered."];
+      positioning: SidewalkPositioning.t option
+        [@ocaml.doc "The Positioning object of the Sidewalk device."]}
     let make ?amazonId =
       fun ?sidewalkId ->
         fun ?sidewalkManufacturingSn ->
           fun ?deviceCertificates ->
-            fun () ->
-              {
-                amazonId;
-                sidewalkId;
-                sidewalkManufacturingSn;
-                deviceCertificates
-              }
+            fun ?deviceProfileId ->
+              fun ?status ->
+                fun ?positioning ->
+                  fun () ->
+                    {
+                      amazonId;
+                      sidewalkId;
+                      sidewalkManufacturingSn;
+                      deviceCertificates;
+                      deviceProfileId;
+                      status;
+                      positioning
+                    }
     let to_value x =
       structure_to_value
         [("AmazonId", (Option.map x.amazonId ~f:AmazonId.to_value));
@@ -1270,9 +4036,24 @@ module SidewalkListDevice =
           (Option.map x.sidewalkManufacturingSn
              ~f:SidewalkManufacturingSn.to_value));
         ("DeviceCertificates",
-          (Option.map x.deviceCertificates ~f:DeviceCertificateList.to_value))]
+          (Option.map x.deviceCertificates ~f:DeviceCertificateList.to_value));
+        ("DeviceProfileId",
+          (Option.map x.deviceProfileId ~f:DeviceProfileId.to_value));
+        ("Status",
+          (Option.map x.status ~f:WirelessDeviceSidewalkStatus.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:SidewalkPositioning.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let positioning =
+        (Option.map ~f:SidewalkPositioning.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
+      let status =
+        (Option.map ~f:WirelessDeviceSidewalkStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let deviceProfileId =
+        (Option.map ~f:DeviceProfileId.of_xml)
+          (Xml.child xml_arg0 "DeviceProfileId") in
       let deviceCertificates =
         (Option.map ~f:DeviceCertificateList.of_xml)
           (Xml.child xml_arg0 "DeviceCertificates") in
@@ -1283,19 +4064,25 @@ module SidewalkListDevice =
         (Option.map ~f:SidewalkId.of_xml) (Xml.child xml_arg0 "SidewalkId") in
       let amazonId =
         (Option.map ~f:AmazonId.of_xml) (Xml.child xml_arg0 "AmazonId") in
-      make ?deviceCertificates ?sidewalkManufacturingSn ?sidewalkId ?amazonId
-        ()
+      make ?positioning ?status ?deviceProfileId ?deviceCertificates
+        ?sidewalkManufacturingSn ?sidewalkId ?amazonId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let positioning =
+        field_map json__ "Positioning" SidewalkPositioning.of_json in
+      let status =
+        field_map json__ "Status" WirelessDeviceSidewalkStatus.of_json in
+      let deviceProfileId =
+        field_map json__ "DeviceProfileId" DeviceProfileId.of_json in
       let deviceCertificates =
-        field_map json "DeviceCertificates" DeviceCertificateList.of_json in
+        field_map json__ "DeviceCertificates" DeviceCertificateList.of_json in
       let sidewalkManufacturingSn =
-        field_map json "SidewalkManufacturingSn"
+        field_map json__ "SidewalkManufacturingSn"
           SidewalkManufacturingSn.of_json in
-      let sidewalkId = field_map json "SidewalkId" SidewalkId.of_json in
-      let amazonId = field_map json "AmazonId" AmazonId.of_json in
-      make ?deviceCertificates ?sidewalkManufacturingSn ?sidewalkId ?amazonId
-        ()
+      let sidewalkId = field_map json__ "SidewalkId" SidewalkId.of_json in
+      let amazonId = field_map json__ "AmazonId" AmazonId.of_json in
+      make ?positioning ?status ?deviceProfileId ?deviceCertificates
+        ?sidewalkManufacturingSn ?sidewalkId ?amazonId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Sidewalk object used by list functions."]
 module WirelessDeviceArn =
@@ -1337,6 +4124,155 @@ module WirelessDeviceName =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"WirelessDeviceName" j
+    let to_json = simple_to_json to_value
+  end
+module CreationTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module ImportTaskArn =
+  struct
+    type nonrec t = string
+    let context_ = "ImportTaskArn"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:128); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImportTaskArn" j
+    let to_json = simple_to_json to_value
+  end
+module ImportTaskId =
+  struct
+    type nonrec t = string
+    let context_ = "ImportTaskId"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImportTaskId" j
+    let to_json = simple_to_json to_value
+  end
+module ImportTaskStatus =
+  struct
+    type nonrec t =
+      | INITIALIZING 
+      | INITIALIZED 
+      | PENDING 
+      | COMPLETE 
+      | FAILED 
+      | DELETING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INITIALIZING -> "INITIALIZING"
+      | INITIALIZED -> "INITIALIZED"
+      | PENDING -> "PENDING"
+      | COMPLETE -> "COMPLETE"
+      | FAILED -> "FAILED"
+      | DELETING -> "DELETING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INITIALIZING" -> INITIALIZING
+      | "INITIALIZED" -> INITIALIZED
+      | "PENDING" -> PENDING
+      | "COMPLETE" -> COMPLETE
+      | "FAILED" -> FAILED
+      | "DELETING" -> DELETING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ImportTaskStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImportTaskStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ImportedWirelessDeviceCount =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module SidewalkGetStartImportInfo =
+  struct
+    type nonrec t =
+      {
+      deviceCreationFileList: DeviceCreationFileList.t option
+        [@ocaml.doc
+          "List of Sidewalk devices that are added to the import task."];
+      role: Role.t option
+        [@ocaml.doc
+          "The IAM role that allows AWS IoT Wireless to access the CSV file in the S3 bucket."];
+      positioning: SidewalkPositioning.t option
+        [@ocaml.doc "The Positioning object of the Sidewalk device."]}
+    let make ?deviceCreationFileList =
+      fun ?role ->
+        fun ?positioning ->
+          fun () -> { deviceCreationFileList; role; positioning }
+    let to_value x =
+      structure_to_value
+        [("DeviceCreationFileList",
+           (Option.map x.deviceCreationFileList
+              ~f:DeviceCreationFileList.to_value));
+        ("Role", (Option.map x.role ~f:Role.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:SidewalkPositioning.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let positioning =
+        (Option.map ~f:SidewalkPositioning.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
+      let role = (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "Role") in
+      let deviceCreationFileList =
+        (Option.map ~f:DeviceCreationFileList.of_xml)
+          (Xml.child xml_arg0 "DeviceCreationFileList") in
+      make ?positioning ?role ?deviceCreationFileList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let positioning =
+        field_map json__ "Positioning" SidewalkPositioning.of_json in
+      let role = field_map json__ "Role" Role.of_json in
+      let deviceCreationFileList =
+        field_map json__ "DeviceCreationFileList"
+          DeviceCreationFileList.of_json in
+      make ?positioning ?role ?deviceCreationFileList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sidewalk-related information for devices in an import task that are being onboarded."]
+module StatusReason =
+  struct
+    type nonrec t = string
+    let context_ = "StatusReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StatusReason" j
     let to_json = simple_to_json to_value
   end
 module ServiceProfileArn =
@@ -1382,18 +4318,35 @@ module ServiceProfileName =
   end
 module LoRaWANSendDataToDevice =
   struct
-    type nonrec t = {
-      fPort: FPort.t option }
-    let make ?fPort = fun () -> { fPort }
+    type nonrec t =
+      {
+      fPort: FPort.t option ;
+      participatingGateways: ParticipatingGateways.t option
+        [@ocaml.doc
+          "Choose the gateways that you want to use for the downlink data traffic when the wireless device is running in class B or class C mode."]}
+    let make ?fPort =
+      fun ?participatingGateways ->
+        fun () -> { fPort; participatingGateways }
     let to_value x =
-      structure_to_value [("FPort", (Option.map x.fPort ~f:FPort.to_value))]
+      structure_to_value
+        [("FPort", (Option.map x.fPort ~f:FPort.to_value));
+        ("ParticipatingGateways",
+          (Option.map x.participatingGateways
+             ~f:ParticipatingGateways.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let participatingGateways =
+        (Option.map ~f:ParticipatingGateways.of_xml)
+          (Xml.child xml_arg0 "ParticipatingGateways") in
       let fPort = (Option.map ~f:FPort.of_xml) (Xml.child xml_arg0 "FPort") in
-      make ?fPort ()
+      make ?participatingGateways ?fPort ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fPort = field_map json "FPort" FPort.of_json in make ?fPort ()
+    let of_json json__ =
+      let participatingGateways =
+        field_map json__ "ParticipatingGateways"
+          ParticipatingGateways.of_json in
+      let fPort = field_map json__ "FPort" FPort.of_json in
+      make ?participatingGateways ?fPort ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "LoRaWAN router info."]
 module MessageId =
@@ -1427,6 +4380,74 @@ module TransmitMode =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module PositionResourceIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "PositionResourceIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PositionResourceIdentifier" j
+    let to_json = simple_to_json to_value
+  end
+module PositionResourceType =
+  struct
+    type nonrec t =
+      | WirelessDevice 
+      | WirelessGateway 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | WirelessDevice -> "WirelessDevice"
+      | WirelessGateway -> "WirelessGateway"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "WirelessDevice" -> WirelessDevice
+      | "WirelessGateway" -> WirelessGateway
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PositionResourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PositionResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module PositionSolverDetails =
+  struct
+    type nonrec t =
+      {
+      semtechGnss: SemtechGnssDetail.t option
+        [@ocaml.doc "The Semtech GNSS solver object details."]}
+    let make ?semtechGnss = fun () -> { semtechGnss }
+    let to_value x =
+      structure_to_value
+        [("SemtechGnss",
+           (Option.map x.semtechGnss ~f:SemtechGnssDetail.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let semtechGnss =
+        (Option.map ~f:SemtechGnssDetail.of_xml)
+          (Xml.child xml_arg0 "SemtechGnss") in
+      make ?semtechGnss ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let semtechGnss =
+        field_map json__ "SemtechGnss" SemtechGnssDetail.of_json in
+      make ?semtechGnss ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The wrapper for position solver details."]
 module Fingerprint =
   struct
     type nonrec t = string
@@ -1460,6 +4481,41 @@ module PartnerAccountArn =
     let of_json j = string_of_json ~kind:"PartnerAccountArn" j
     let to_json = simple_to_json to_value
   end
+module NetworkAnalyzerConfigurationArn =
+  struct
+    type nonrec t = string
+    let context_ = "NetworkAnalyzerConfigurationArn"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:1124); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NetworkAnalyzerConfigurationArn" j
+    let to_json = simple_to_json to_value
+  end
+module NetworkAnalyzerConfigurationName =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "Name of the network analyzer configuration."]
+    let context_ = "NetworkAnalyzerConfigurationName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9-_]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NetworkAnalyzerConfigurationName" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "Name of the network analyzer configuration."]
 module MulticastGroupArn =
   struct
     type nonrec t = string[@@ocaml.doc "The arn of the multicast group."]
@@ -1544,6 +4600,229 @@ module FuotaTaskName =
     let of_json j = string_of_json ~kind:"FuotaTaskName" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "The name of a FUOTA task."]
+module EventNotificationItemConfigurations =
+  struct
+    type nonrec t =
+      {
+      deviceRegistrationState:
+        DeviceRegistrationStateEventConfiguration.t option
+        [@ocaml.doc
+          "Device registration state event configuration for an event configuration item."];
+      proximity: ProximityEventConfiguration.t option
+        [@ocaml.doc
+          "Proximity event configuration for an event configuration item."];
+      join: JoinEventConfiguration.t option
+        [@ocaml.doc
+          "Join event configuration for an event configuration item."];
+      connectionStatus: ConnectionStatusEventConfiguration.t option
+        [@ocaml.doc
+          "Connection status event configuration for an event configuration item."];
+      messageDeliveryStatus: MessageDeliveryStatusEventConfiguration.t option
+        [@ocaml.doc
+          "Message delivery status event configuration for an event configuration item."]}
+    let make ?deviceRegistrationState =
+      fun ?proximity ->
+        fun ?join ->
+          fun ?connectionStatus ->
+            fun ?messageDeliveryStatus ->
+              fun () ->
+                {
+                  deviceRegistrationState;
+                  proximity;
+                  join;
+                  connectionStatus;
+                  messageDeliveryStatus
+                }
+    let to_value x =
+      structure_to_value
+        [("DeviceRegistrationState",
+           (Option.map x.deviceRegistrationState
+              ~f:DeviceRegistrationStateEventConfiguration.to_value));
+        ("Proximity",
+          (Option.map x.proximity ~f:ProximityEventConfiguration.to_value));
+        ("Join", (Option.map x.join ~f:JoinEventConfiguration.to_value));
+        ("ConnectionStatus",
+          (Option.map x.connectionStatus
+             ~f:ConnectionStatusEventConfiguration.to_value));
+        ("MessageDeliveryStatus",
+          (Option.map x.messageDeliveryStatus
+             ~f:MessageDeliveryStatusEventConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let messageDeliveryStatus =
+        (Option.map ~f:MessageDeliveryStatusEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "MessageDeliveryStatus") in
+      let connectionStatus =
+        (Option.map ~f:ConnectionStatusEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "ConnectionStatus") in
+      let join =
+        (Option.map ~f:JoinEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "Join") in
+      let proximity =
+        (Option.map ~f:ProximityEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "Proximity") in
+      let deviceRegistrationState =
+        (Option.map ~f:DeviceRegistrationStateEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "DeviceRegistrationState") in
+      make ?messageDeliveryStatus ?connectionStatus ?join ?proximity
+        ?deviceRegistrationState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let messageDeliveryStatus =
+        field_map json__ "MessageDeliveryStatus"
+          MessageDeliveryStatusEventConfiguration.of_json in
+      let connectionStatus =
+        field_map json__ "ConnectionStatus"
+          ConnectionStatusEventConfiguration.of_json in
+      let join = field_map json__ "Join" JoinEventConfiguration.of_json in
+      let proximity =
+        field_map json__ "Proximity" ProximityEventConfiguration.of_json in
+      let deviceRegistrationState =
+        field_map json__ "DeviceRegistrationState"
+          DeviceRegistrationStateEventConfiguration.of_json in
+      make ?messageDeliveryStatus ?connectionStatus ?join ?proximity
+        ?deviceRegistrationState ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object of all event configurations and the status of the event topics."]
+module EventNotificationPartnerType =
+  struct
+    type nonrec t =
+      | Sidewalk 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Sidewalk -> "Sidewalk" | Non_static_id s -> s
+    let of_string = function | "Sidewalk" -> Sidewalk | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EventNotificationPartnerType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EventNotificationPartnerType" j)
+    let to_json = simple_to_json to_value
+  end
+module Identifier =
+  struct
+    type nonrec t = string
+    let context_ = "Identifier"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Identifier" j
+    let to_json = simple_to_json to_value
+  end
+module IdentifierType =
+  struct
+    type nonrec t =
+      | PartnerAccountId 
+      | DevEui 
+      | GatewayEui 
+      | WirelessDeviceId 
+      | WirelessGatewayId 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PartnerAccountId -> "PartnerAccountId"
+      | DevEui -> "DevEui"
+      | GatewayEui -> "GatewayEui"
+      | WirelessDeviceId -> "WirelessDeviceId"
+      | WirelessGatewayId -> "WirelessGatewayId"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PartnerAccountId" -> PartnerAccountId
+      | "DevEui" -> DevEui
+      | "GatewayEui" -> GatewayEui
+      | "WirelessDeviceId" -> WirelessDeviceId
+      | "WirelessGatewayId" -> WirelessGatewayId
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IdentifierType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IdentifierType" j)
+    let to_json = simple_to_json to_value
+  end
+module ImportedSidewalkDevice =
+  struct
+    type nonrec t =
+      {
+      sidewalkManufacturingSn: SidewalkManufacturingSn.t option
+        [@ocaml.doc
+          "The Sidewalk manufacturing serial number (SMSN) of the Sidewalk device."];
+      onboardingStatus: OnboardStatus.t option
+        [@ocaml.doc
+          "The onboarding status of the Sidewalk device in the import task."];
+      onboardingStatusReason: OnboardStatusReason.t option
+        [@ocaml.doc
+          "The reason for the onboarding status information for the Sidewalk device."];
+      lastUpdateTime: LastUpdateTime.t option
+        [@ocaml.doc
+          "The time at which the status information was last updated."]}
+    let make ?sidewalkManufacturingSn =
+      fun ?onboardingStatus ->
+        fun ?onboardingStatusReason ->
+          fun ?lastUpdateTime ->
+            fun () ->
+              {
+                sidewalkManufacturingSn;
+                onboardingStatus;
+                onboardingStatusReason;
+                lastUpdateTime
+              }
+    let to_value x =
+      structure_to_value
+        [("SidewalkManufacturingSn",
+           (Option.map x.sidewalkManufacturingSn
+              ~f:SidewalkManufacturingSn.to_value));
+        ("OnboardingStatus",
+          (Option.map x.onboardingStatus ~f:OnboardStatus.to_value));
+        ("OnboardingStatusReason",
+          (Option.map x.onboardingStatusReason
+             ~f:OnboardStatusReason.to_value));
+        ("LastUpdateTime",
+          (Option.map x.lastUpdateTime ~f:LastUpdateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdateTime =
+        (Option.map ~f:LastUpdateTime.of_xml)
+          (Xml.child xml_arg0 "LastUpdateTime") in
+      let onboardingStatusReason =
+        (Option.map ~f:OnboardStatusReason.of_xml)
+          (Xml.child xml_arg0 "OnboardingStatusReason") in
+      let onboardingStatus =
+        (Option.map ~f:OnboardStatus.of_xml)
+          (Xml.child xml_arg0 "OnboardingStatus") in
+      let sidewalkManufacturingSn =
+        (Option.map ~f:SidewalkManufacturingSn.of_xml)
+          (Xml.child xml_arg0 "SidewalkManufacturingSn") in
+      make ?lastUpdateTime ?onboardingStatusReason ?onboardingStatus
+        ?sidewalkManufacturingSn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdateTime =
+        field_map json__ "LastUpdateTime" LastUpdateTime.of_json in
+      let onboardingStatusReason =
+        field_map json__ "OnboardingStatusReason" OnboardStatusReason.of_json in
+      let onboardingStatus =
+        field_map json__ "OnboardingStatus" OnboardStatus.of_json in
+      let sidewalkManufacturingSn =
+        field_map json__ "SidewalkManufacturingSn"
+          SidewalkManufacturingSn.of_json in
+      make ?lastUpdateTime ?onboardingStatusReason ?onboardingStatus
+        ?sidewalkManufacturingSn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a Sidewalk device that has been added to an import task."]
 module DeviceProfileArn =
   struct
     type nonrec t = string
@@ -1555,20 +4834,6 @@ module DeviceProfileArn =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"DeviceProfileArn" j
-    let to_json = simple_to_json to_value
-  end
-module DeviceProfileId =
-  struct
-    type nonrec t = string
-    let context_ = "DeviceProfileId"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:256); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DeviceProfileId" j
     let to_json = simple_to_json to_value
   end
 module DeviceProfileName =
@@ -1713,13 +4978,72 @@ module LoRaWANGatewayMetadata =
         (Option.map ~f:GatewayEui.of_xml) (Xml.child xml_arg0 "GatewayEui") in
       make ?rssi ?snr ?gatewayEui ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rssi = field_map json "Rssi" Double.of_json in
-      let snr = field_map json "Snr" Double.of_json in
-      let gatewayEui = field_map json "GatewayEui" GatewayEui.of_json in
+    let of_json json__ =
+      let rssi = field_map json__ "Rssi" Double.of_json in
+      let snr = field_map json__ "Snr" Double.of_json in
+      let gatewayEui = field_map json__ "GatewayEui" GatewayEui.of_json in
       make ?rssi ?snr ?gatewayEui ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "LoRaWAN gateway metatdata."]
+module LoRaWANPublicGatewayMetadata =
+  struct
+    type nonrec t =
+      {
+      providerNetId: ProviderNetId.t option
+        [@ocaml.doc "The ID of the LoRaWAN public network provider."];
+      id: Id.t option
+        [@ocaml.doc
+          "The ID of the gateways that are operated by the network provider."];
+      rssi: Double.t option
+        [@ocaml.doc "The RSSI (received signal strength indicator) value."];
+      snr: Double.t option
+        [@ocaml.doc "The SNR (signal to noise ratio) value."];
+      rfRegion: RfRegion.t option ;
+      dlAllowed: DlAllowed.t option
+        [@ocaml.doc
+          "Boolean that indicates whether downlink is allowed using the network."]}
+    let make ?providerNetId =
+      fun ?id ->
+        fun ?rssi ->
+          fun ?snr ->
+            fun ?rfRegion ->
+              fun ?dlAllowed ->
+                fun () ->
+                  { providerNetId; id; rssi; snr; rfRegion; dlAllowed }
+    let to_value x =
+      structure_to_value
+        [("ProviderNetId",
+           (Option.map x.providerNetId ~f:ProviderNetId.to_value));
+        ("Id", (Option.map x.id ~f:Id.to_value));
+        ("Rssi", (Option.map x.rssi ~f:Double.to_value));
+        ("Snr", (Option.map x.snr ~f:Double.to_value));
+        ("RfRegion", (Option.map x.rfRegion ~f:RfRegion.to_value));
+        ("DlAllowed", (Option.map x.dlAllowed ~f:DlAllowed.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dlAllowed =
+        (Option.map ~f:DlAllowed.of_xml) (Xml.child xml_arg0 "DlAllowed") in
+      let rfRegion =
+        (Option.map ~f:RfRegion.of_xml) (Xml.child xml_arg0 "RfRegion") in
+      let snr = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Snr") in
+      let rssi = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Rssi") in
+      let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
+      let providerNetId =
+        (Option.map ~f:ProviderNetId.of_xml)
+          (Xml.child xml_arg0 "ProviderNetId") in
+      make ?dlAllowed ?rfRegion ?snr ?rssi ?id ?providerNetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dlAllowed = field_map json__ "DlAllowed" DlAllowed.of_json in
+      let rfRegion = field_map json__ "RfRegion" RfRegion.of_json in
+      let snr = field_map json__ "Snr" Double.of_json in
+      let rssi = field_map json__ "Rssi" Double.of_json in
+      let id = field_map json__ "Id" Id.of_json in
+      let providerNetId =
+        field_map json__ "ProviderNetId" ProviderNetId.of_json in
+      make ?dlAllowed ?rfRegion ?snr ?rssi ?id ?providerNetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "LoRaWAN public gateway metadata."]
 module DevAddr =
   struct
     type nonrec t = string
@@ -1754,9 +5078,9 @@ module SessionKeysAbpV1_0_x =
         (Option.map ~f:NwkSKey.of_xml) (Xml.child xml_arg0 "NwkSKey") in
       make ?appSKey ?nwkSKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appSKey = field_map json "AppSKey" AppSKey.of_json in
-      let nwkSKey = field_map json "NwkSKey" NwkSKey.of_json in
+    let of_json json__ =
+      let appSKey = field_map json__ "AppSKey" AppSKey.of_json in
+      let nwkSKey = field_map json__ "NwkSKey" NwkSKey.of_json in
       make ?appSKey ?nwkSKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Session keys for ABP v1.1"]
@@ -1791,11 +5115,11 @@ module SessionKeysAbpV1_1 =
         (Option.map ~f:FNwkSIntKey.of_xml) (Xml.child xml_arg0 "FNwkSIntKey") in
       make ?appSKey ?nwkSEncKey ?sNwkSIntKey ?fNwkSIntKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appSKey = field_map json "AppSKey" AppSKey.of_json in
-      let nwkSEncKey = field_map json "NwkSEncKey" NwkSEncKey.of_json in
-      let sNwkSIntKey = field_map json "SNwkSIntKey" SNwkSIntKey.of_json in
-      let fNwkSIntKey = field_map json "FNwkSIntKey" FNwkSIntKey.of_json in
+    let of_json json__ =
+      let appSKey = field_map json__ "AppSKey" AppSKey.of_json in
+      let nwkSEncKey = field_map json__ "NwkSEncKey" NwkSEncKey.of_json in
+      let sNwkSIntKey = field_map json__ "SNwkSIntKey" SNwkSIntKey.of_json in
+      let fNwkSIntKey = field_map json__ "FNwkSIntKey" FNwkSIntKey.of_json in
       make ?appSKey ?nwkSEncKey ?sNwkSIntKey ?fNwkSIntKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Session keys for ABP v1.1"]
@@ -1859,6 +5183,854 @@ module NwkKey =
     let of_json j = string_of_json ~kind:"NwkKey" j
     let to_json = simple_to_json to_value
   end
+module ConfidencePercent =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:99) >>= (fun () -> check_int_min i ~min:50));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ConfidencePercent" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module CdmaObj =
+  struct
+    type nonrec t =
+      {
+      systemId: SystemId.t [@ocaml.doc "CDMA system ID (SID)."];
+      networkId: NetworkId.t [@ocaml.doc "CDMA network ID (NID)."];
+      baseStationId: BaseStationId.t
+        [@ocaml.doc "CDMA base station ID (BSID)."];
+      registrationZone: RegistrationZone.t option
+        [@ocaml.doc "CDMA registration zone (RZ)."];
+      cdmaLocalId: CdmaLocalId.t option
+        [@ocaml.doc "CDMA local identification (local ID) parameters."];
+      pilotPower: PilotPower.t option
+        [@ocaml.doc
+          "Transmit power level of the pilot signal, measured in dBm (decibel-milliwatts)."];
+      baseLat: BaseLat.t option
+        [@ocaml.doc "CDMA base station latitude in degrees."];
+      baseLng: BaseLng.t option
+        [@ocaml.doc "CDMA base station longitude in degrees."];
+      cdmaNmr: CdmaNmrList.t option
+        [@ocaml.doc "CDMA network measurement reports."]}
+    let context_ = "CdmaObj"
+    let make ?registrationZone =
+      fun ?cdmaLocalId ->
+        fun ?pilotPower ->
+          fun ?baseLat ->
+            fun ?baseLng ->
+              fun ?cdmaNmr ->
+                fun ~systemId ->
+                  fun ~networkId ->
+                    fun ~baseStationId ->
+                      fun () ->
+                        {
+                          registrationZone;
+                          cdmaLocalId;
+                          pilotPower;
+                          baseLat;
+                          baseLng;
+                          cdmaNmr;
+                          systemId;
+                          networkId;
+                          baseStationId
+                        }
+    let to_value x =
+      structure_to_value
+        [("SystemId", (Some (SystemId.to_value x.systemId)));
+        ("NetworkId", (Some (NetworkId.to_value x.networkId)));
+        ("BaseStationId", (Some (BaseStationId.to_value x.baseStationId)));
+        ("RegistrationZone",
+          (Option.map x.registrationZone ~f:RegistrationZone.to_value));
+        ("CdmaLocalId", (Option.map x.cdmaLocalId ~f:CdmaLocalId.to_value));
+        ("PilotPower", (Option.map x.pilotPower ~f:PilotPower.to_value));
+        ("BaseLat", (Option.map x.baseLat ~f:BaseLat.to_value));
+        ("BaseLng", (Option.map x.baseLng ~f:BaseLng.to_value));
+        ("CdmaNmr", (Option.map x.cdmaNmr ~f:CdmaNmrList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cdmaNmr =
+        (Option.map ~f:CdmaNmrList.of_xml) (Xml.child xml_arg0 "CdmaNmr") in
+      let baseLng =
+        (Option.map ~f:BaseLng.of_xml) (Xml.child xml_arg0 "BaseLng") in
+      let baseLat =
+        (Option.map ~f:BaseLat.of_xml) (Xml.child xml_arg0 "BaseLat") in
+      let pilotPower =
+        (Option.map ~f:PilotPower.of_xml) (Xml.child xml_arg0 "PilotPower") in
+      let cdmaLocalId =
+        (Option.map ~f:CdmaLocalId.of_xml) (Xml.child xml_arg0 "CdmaLocalId") in
+      let registrationZone =
+        (Option.map ~f:RegistrationZone.of_xml)
+          (Xml.child xml_arg0 "RegistrationZone") in
+      let baseStationId =
+        BaseStationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BaseStationId") in
+      let networkId =
+        NetworkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NetworkId") in
+      let systemId =
+        SystemId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SystemId") in
+      make ?cdmaNmr ?baseLng ?baseLat ?pilotPower ?cdmaLocalId
+        ?registrationZone ~baseStationId ~networkId ~systemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cdmaNmr = field_map json__ "CdmaNmr" CdmaNmrList.of_json in
+      let baseLng = field_map json__ "BaseLng" BaseLng.of_json in
+      let baseLat = field_map json__ "BaseLat" BaseLat.of_json in
+      let pilotPower = field_map json__ "PilotPower" PilotPower.of_json in
+      let cdmaLocalId = field_map json__ "CdmaLocalId" CdmaLocalId.of_json in
+      let registrationZone =
+        field_map json__ "RegistrationZone" RegistrationZone.of_json in
+      let baseStationId =
+        field_map_exn json__ "BaseStationId" BaseStationId.of_json in
+      let networkId = field_map_exn json__ "NetworkId" NetworkId.of_json in
+      let systemId = field_map_exn json__ "SystemId" SystemId.of_json in
+      make ?cdmaNmr ?baseLng ?baseLat ?pilotPower ?cdmaLocalId
+        ?registrationZone ~baseStationId ~networkId ~systemId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "CDMA (Code-division multiple access) object."]
+module GsmObj =
+  struct
+    type nonrec t =
+      {
+      mcc: MCC.t [@ocaml.doc "Mobile Country Code."];
+      mnc: MNC.t [@ocaml.doc "Mobile Network Code."];
+      lac: LAC.t [@ocaml.doc "Location area code."];
+      geranCid: GeranCid.t
+        [@ocaml.doc
+          "GERAN (GSM EDGE Radio Access Network) Cell Global Identifier."];
+      gsmLocalId: GsmLocalId.t option
+        [@ocaml.doc "GSM local identification (local ID) information."];
+      gsmTimingAdvance: GsmTimingAdvance.t option
+        [@ocaml.doc
+          "Timing advance value, which corresponds to the length of time a signal takes to reach the base station from a mobile phone."];
+      rxLevel: RxLevel.t option
+        [@ocaml.doc
+          "Rx level, which is the received signal power, measured in dBm (decibel-milliwatts)."];
+      gsmNmr: GsmNmrList.t option
+        [@ocaml.doc "GSM object for network measurement reports."]}
+    let context_ = "GsmObj"
+    let make ?gsmLocalId =
+      fun ?gsmTimingAdvance ->
+        fun ?rxLevel ->
+          fun ?gsmNmr ->
+            fun ~mcc ->
+              fun ~mnc ->
+                fun ~lac ->
+                  fun ~geranCid ->
+                    fun () ->
+                      {
+                        gsmLocalId;
+                        gsmTimingAdvance;
+                        rxLevel;
+                        gsmNmr;
+                        mcc;
+                        mnc;
+                        lac;
+                        geranCid
+                      }
+    let to_value x =
+      structure_to_value
+        [("Mcc", (Some (MCC.to_value x.mcc)));
+        ("Mnc", (Some (MNC.to_value x.mnc)));
+        ("Lac", (Some (LAC.to_value x.lac)));
+        ("GeranCid", (Some (GeranCid.to_value x.geranCid)));
+        ("GsmLocalId", (Option.map x.gsmLocalId ~f:GsmLocalId.to_value));
+        ("GsmTimingAdvance",
+          (Option.map x.gsmTimingAdvance ~f:GsmTimingAdvance.to_value));
+        ("RxLevel", (Option.map x.rxLevel ~f:RxLevel.to_value));
+        ("GsmNmr", (Option.map x.gsmNmr ~f:GsmNmrList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let gsmNmr =
+        (Option.map ~f:GsmNmrList.of_xml) (Xml.child xml_arg0 "GsmNmr") in
+      let rxLevel =
+        (Option.map ~f:RxLevel.of_xml) (Xml.child xml_arg0 "RxLevel") in
+      let gsmTimingAdvance =
+        (Option.map ~f:GsmTimingAdvance.of_xml)
+          (Xml.child xml_arg0 "GsmTimingAdvance") in
+      let gsmLocalId =
+        (Option.map ~f:GsmLocalId.of_xml) (Xml.child xml_arg0 "GsmLocalId") in
+      let geranCid =
+        GeranCid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GeranCid") in
+      let lac = LAC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Lac") in
+      let mnc = MNC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Mnc") in
+      let mcc = MCC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Mcc") in
+      make ?gsmNmr ?rxLevel ?gsmTimingAdvance ?gsmLocalId ~geranCid ~lac ~mnc
+        ~mcc ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let gsmNmr = field_map json__ "GsmNmr" GsmNmrList.of_json in
+      let rxLevel = field_map json__ "RxLevel" RxLevel.of_json in
+      let gsmTimingAdvance =
+        field_map json__ "GsmTimingAdvance" GsmTimingAdvance.of_json in
+      let gsmLocalId = field_map json__ "GsmLocalId" GsmLocalId.of_json in
+      let geranCid = field_map_exn json__ "GeranCid" GeranCid.of_json in
+      let lac = field_map_exn json__ "Lac" LAC.of_json in
+      let mnc = field_map_exn json__ "Mnc" MNC.of_json in
+      let mcc = field_map_exn json__ "Mcc" MCC.of_json in
+      make ?gsmNmr ?rxLevel ?gsmTimingAdvance ?gsmLocalId ~geranCid ~lac ~mnc
+        ~mcc ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "GSM object."]
+module LteObj =
+  struct
+    type nonrec t =
+      {
+      mcc: MCC.t [@ocaml.doc "Mobile Country Code."];
+      mnc: MNC.t [@ocaml.doc "Mobile Network Code."];
+      eutranCid: EutranCid.t
+        [@ocaml.doc
+          "E-UTRAN (Evolved Universal Terrestrial Radio Access Network) Cell Global Identifier."];
+      tac: TAC.t option [@ocaml.doc "LTE tracking area code."];
+      lteLocalId: LteLocalId.t option
+        [@ocaml.doc "LTE local identification (local ID) information."];
+      lteTimingAdvance: LteTimingAdvance.t option
+        [@ocaml.doc "LTE timing advance."];
+      rsrp: RSRP.t option
+        [@ocaml.doc
+          "Signal power of the reference signal received, measured in dBm (decibel-milliwatts)."];
+      rsrq: RSRQ.t option
+        [@ocaml.doc
+          "Signal quality of the reference Signal received, measured in decibels (dB)."];
+      nrCapable: NRCapable.t option
+        [@ocaml.doc
+          "Parameter that determines whether the LTE object is capable of supporting NR (new radio)."];
+      lteNmr: LteNmrList.t option
+        [@ocaml.doc "LTE object for network measurement reports."]}
+    let context_ = "LteObj"
+    let make ?tac =
+      fun ?lteLocalId ->
+        fun ?lteTimingAdvance ->
+          fun ?rsrp ->
+            fun ?rsrq ->
+              fun ?nrCapable ->
+                fun ?lteNmr ->
+                  fun ~mcc ->
+                    fun ~mnc ->
+                      fun ~eutranCid ->
+                        fun () ->
+                          {
+                            tac;
+                            lteLocalId;
+                            lteTimingAdvance;
+                            rsrp;
+                            rsrq;
+                            nrCapable;
+                            lteNmr;
+                            mcc;
+                            mnc;
+                            eutranCid
+                          }
+    let to_value x =
+      structure_to_value
+        [("Mcc", (Some (MCC.to_value x.mcc)));
+        ("Mnc", (Some (MNC.to_value x.mnc)));
+        ("EutranCid", (Some (EutranCid.to_value x.eutranCid)));
+        ("Tac", (Option.map x.tac ~f:TAC.to_value));
+        ("LteLocalId", (Option.map x.lteLocalId ~f:LteLocalId.to_value));
+        ("LteTimingAdvance",
+          (Option.map x.lteTimingAdvance ~f:LteTimingAdvance.to_value));
+        ("Rsrp", (Option.map x.rsrp ~f:RSRP.to_value));
+        ("Rsrq", (Option.map x.rsrq ~f:RSRQ.to_value));
+        ("NrCapable", (Option.map x.nrCapable ~f:NRCapable.to_value));
+        ("LteNmr", (Option.map x.lteNmr ~f:LteNmrList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lteNmr =
+        (Option.map ~f:LteNmrList.of_xml) (Xml.child xml_arg0 "LteNmr") in
+      let nrCapable =
+        (Option.map ~f:NRCapable.of_xml) (Xml.child xml_arg0 "NrCapable") in
+      let rsrq = (Option.map ~f:RSRQ.of_xml) (Xml.child xml_arg0 "Rsrq") in
+      let rsrp = (Option.map ~f:RSRP.of_xml) (Xml.child xml_arg0 "Rsrp") in
+      let lteTimingAdvance =
+        (Option.map ~f:LteTimingAdvance.of_xml)
+          (Xml.child xml_arg0 "LteTimingAdvance") in
+      let lteLocalId =
+        (Option.map ~f:LteLocalId.of_xml) (Xml.child xml_arg0 "LteLocalId") in
+      let tac = (Option.map ~f:TAC.of_xml) (Xml.child xml_arg0 "Tac") in
+      let eutranCid =
+        EutranCid.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EutranCid") in
+      let mnc = MNC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Mnc") in
+      let mcc = MCC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Mcc") in
+      make ?lteNmr ?nrCapable ?rsrq ?rsrp ?lteTimingAdvance ?lteLocalId ?tac
+        ~eutranCid ~mnc ~mcc ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lteNmr = field_map json__ "LteNmr" LteNmrList.of_json in
+      let nrCapable = field_map json__ "NrCapable" NRCapable.of_json in
+      let rsrq = field_map json__ "Rsrq" RSRQ.of_json in
+      let rsrp = field_map json__ "Rsrp" RSRP.of_json in
+      let lteTimingAdvance =
+        field_map json__ "LteTimingAdvance" LteTimingAdvance.of_json in
+      let lteLocalId = field_map json__ "LteLocalId" LteLocalId.of_json in
+      let tac = field_map json__ "Tac" TAC.of_json in
+      let eutranCid = field_map_exn json__ "EutranCid" EutranCid.of_json in
+      let mnc = field_map_exn json__ "Mnc" MNC.of_json in
+      let mcc = field_map_exn json__ "Mcc" MCC.of_json in
+      make ?lteNmr ?nrCapable ?rsrq ?rsrp ?lteTimingAdvance ?lteLocalId ?tac
+        ~eutranCid ~mnc ~mcc ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "LTE object."]
+module TdscdmaObj =
+  struct
+    type nonrec t =
+      {
+      mcc: MCC.t [@ocaml.doc "Mobile Country Code."];
+      mnc: MNC.t [@ocaml.doc "Mobile Network Code."];
+      lac: LAC.t option [@ocaml.doc "Location Area Code."];
+      utranCid: UtranCid.t
+        [@ocaml.doc
+          "UTRAN (UMTS Terrestrial Radio Access Network) Cell Global Identifier."];
+      tdscdmaLocalId: TdscdmaLocalId.t option
+        [@ocaml.doc "TD-SCDMA local identification (local ID) information."];
+      tdscdmaTimingAdvance: TdscdmaTimingAdvance.t option
+        [@ocaml.doc "TD-SCDMA Timing advance."];
+      rscp: RSCP.t option
+        [@ocaml.doc
+          "Signal power of the received signal (Received Signal Code Power), measured in decibel-milliwatts (dBm)."];
+      pathLoss: PathLoss.t option
+        [@ocaml.doc
+          "Path loss, or path attenuation, is the reduction in power density of an electromagnetic wave as it propagates through space."];
+      tdscdmaNmr: TdscdmaNmrList.t option
+        [@ocaml.doc "TD-SCDMA object for network measurement reports."]}
+    let context_ = "TdscdmaObj"
+    let make ?lac =
+      fun ?tdscdmaLocalId ->
+        fun ?tdscdmaTimingAdvance ->
+          fun ?rscp ->
+            fun ?pathLoss ->
+              fun ?tdscdmaNmr ->
+                fun ~mcc ->
+                  fun ~mnc ->
+                    fun ~utranCid ->
+                      fun () ->
+                        {
+                          lac;
+                          tdscdmaLocalId;
+                          tdscdmaTimingAdvance;
+                          rscp;
+                          pathLoss;
+                          tdscdmaNmr;
+                          mcc;
+                          mnc;
+                          utranCid
+                        }
+    let to_value x =
+      structure_to_value
+        [("Mcc", (Some (MCC.to_value x.mcc)));
+        ("Mnc", (Some (MNC.to_value x.mnc)));
+        ("Lac", (Option.map x.lac ~f:LAC.to_value));
+        ("UtranCid", (Some (UtranCid.to_value x.utranCid)));
+        ("TdscdmaLocalId",
+          (Option.map x.tdscdmaLocalId ~f:TdscdmaLocalId.to_value));
+        ("TdscdmaTimingAdvance",
+          (Option.map x.tdscdmaTimingAdvance ~f:TdscdmaTimingAdvance.to_value));
+        ("Rscp", (Option.map x.rscp ~f:RSCP.to_value));
+        ("PathLoss", (Option.map x.pathLoss ~f:PathLoss.to_value));
+        ("TdscdmaNmr", (Option.map x.tdscdmaNmr ~f:TdscdmaNmrList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tdscdmaNmr =
+        (Option.map ~f:TdscdmaNmrList.of_xml)
+          (Xml.child xml_arg0 "TdscdmaNmr") in
+      let pathLoss =
+        (Option.map ~f:PathLoss.of_xml) (Xml.child xml_arg0 "PathLoss") in
+      let rscp = (Option.map ~f:RSCP.of_xml) (Xml.child xml_arg0 "Rscp") in
+      let tdscdmaTimingAdvance =
+        (Option.map ~f:TdscdmaTimingAdvance.of_xml)
+          (Xml.child xml_arg0 "TdscdmaTimingAdvance") in
+      let tdscdmaLocalId =
+        (Option.map ~f:TdscdmaLocalId.of_xml)
+          (Xml.child xml_arg0 "TdscdmaLocalId") in
+      let utranCid =
+        UtranCid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UtranCid") in
+      let lac = (Option.map ~f:LAC.of_xml) (Xml.child xml_arg0 "Lac") in
+      let mnc = MNC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Mnc") in
+      let mcc = MCC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Mcc") in
+      make ?tdscdmaNmr ?pathLoss ?rscp ?tdscdmaTimingAdvance ?tdscdmaLocalId
+        ~utranCid ?lac ~mnc ~mcc ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tdscdmaNmr = field_map json__ "TdscdmaNmr" TdscdmaNmrList.of_json in
+      let pathLoss = field_map json__ "PathLoss" PathLoss.of_json in
+      let rscp = field_map json__ "Rscp" RSCP.of_json in
+      let tdscdmaTimingAdvance =
+        field_map json__ "TdscdmaTimingAdvance" TdscdmaTimingAdvance.of_json in
+      let tdscdmaLocalId =
+        field_map json__ "TdscdmaLocalId" TdscdmaLocalId.of_json in
+      let utranCid = field_map_exn json__ "UtranCid" UtranCid.of_json in
+      let lac = field_map json__ "Lac" LAC.of_json in
+      let mnc = field_map_exn json__ "Mnc" MNC.of_json in
+      let mcc = field_map_exn json__ "Mcc" MCC.of_json in
+      make ?tdscdmaNmr ?pathLoss ?rscp ?tdscdmaTimingAdvance ?tdscdmaLocalId
+        ~utranCid ?lac ~mnc ~mcc ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "TD-SCDMA object."]
+module WcdmaObj =
+  struct
+    type nonrec t =
+      {
+      mcc: MCC.t [@ocaml.doc "Mobile Country Code."];
+      mnc: MNC.t [@ocaml.doc "Mobile Network Code."];
+      lac: LAC.t option [@ocaml.doc "Location Area Code."];
+      utranCid: UtranCid.t
+        [@ocaml.doc
+          "UTRAN (UMTS Terrestrial Radio Access Network) Cell Global Identifier."];
+      wcdmaLocalId: WcdmaLocalId.t option
+        [@ocaml.doc "WCDMA local ID information."];
+      rscp: RSCP.t option
+        [@ocaml.doc "Received Signal Code Power (signal power) (dBm)."];
+      pathLoss: PathLoss.t option
+        [@ocaml.doc
+          "Path loss, or path attenuation, is the reduction in power density of an electromagnetic wave as it propagates through space."];
+      wcdmaNmr: WcdmaNmrList.t option
+        [@ocaml.doc "WCDMA object for network measurement reports."]}
+    let context_ = "WcdmaObj"
+    let make ?lac =
+      fun ?wcdmaLocalId ->
+        fun ?rscp ->
+          fun ?pathLoss ->
+            fun ?wcdmaNmr ->
+              fun ~mcc ->
+                fun ~mnc ->
+                  fun ~utranCid ->
+                    fun () ->
+                      {
+                        lac;
+                        wcdmaLocalId;
+                        rscp;
+                        pathLoss;
+                        wcdmaNmr;
+                        mcc;
+                        mnc;
+                        utranCid
+                      }
+    let to_value x =
+      structure_to_value
+        [("Mcc", (Some (MCC.to_value x.mcc)));
+        ("Mnc", (Some (MNC.to_value x.mnc)));
+        ("Lac", (Option.map x.lac ~f:LAC.to_value));
+        ("UtranCid", (Some (UtranCid.to_value x.utranCid)));
+        ("WcdmaLocalId",
+          (Option.map x.wcdmaLocalId ~f:WcdmaLocalId.to_value));
+        ("Rscp", (Option.map x.rscp ~f:RSCP.to_value));
+        ("PathLoss", (Option.map x.pathLoss ~f:PathLoss.to_value));
+        ("WcdmaNmr", (Option.map x.wcdmaNmr ~f:WcdmaNmrList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wcdmaNmr =
+        (Option.map ~f:WcdmaNmrList.of_xml) (Xml.child xml_arg0 "WcdmaNmr") in
+      let pathLoss =
+        (Option.map ~f:PathLoss.of_xml) (Xml.child xml_arg0 "PathLoss") in
+      let rscp = (Option.map ~f:RSCP.of_xml) (Xml.child xml_arg0 "Rscp") in
+      let wcdmaLocalId =
+        (Option.map ~f:WcdmaLocalId.of_xml)
+          (Xml.child xml_arg0 "WcdmaLocalId") in
+      let utranCid =
+        UtranCid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UtranCid") in
+      let lac = (Option.map ~f:LAC.of_xml) (Xml.child xml_arg0 "Lac") in
+      let mnc = MNC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Mnc") in
+      let mcc = MCC.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Mcc") in
+      make ?wcdmaNmr ?pathLoss ?rscp ?wcdmaLocalId ~utranCid ?lac ~mnc ~mcc
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wcdmaNmr = field_map json__ "WcdmaNmr" WcdmaNmrList.of_json in
+      let pathLoss = field_map json__ "PathLoss" PathLoss.of_json in
+      let rscp = field_map json__ "Rscp" RSCP.of_json in
+      let wcdmaLocalId = field_map json__ "WcdmaLocalId" WcdmaLocalId.of_json in
+      let utranCid = field_map_exn json__ "UtranCid" UtranCid.of_json in
+      let lac = field_map json__ "Lac" LAC.of_json in
+      let mnc = field_map_exn json__ "Mnc" MNC.of_json in
+      let mcc = field_map_exn json__ "Mcc" MCC.of_json in
+      make ?wcdmaNmr ?pathLoss ?rscp ?wcdmaLocalId ~utranCid ?lac ~mnc ~mcc
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "WCDMA."]
+module Coordinate =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module MacAddress =
+  struct
+    type nonrec t = string
+    let context_ = "MacAddress"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:17) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([0-9A-Fa-f]{2}[:-]?){5}([0-9A-Fa-f]{2})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MacAddress" j
+    let to_json = simple_to_json to_value
+  end
+module RSS =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:0) >>=
+             (fun () -> check_int_min i ~min:(-128)));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for RSS" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AggregationPeriod =
+  struct
+    type nonrec t =
+      | OneHour 
+      | OneDay 
+      | OneWeek 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | OneHour -> "OneHour"
+      | OneDay -> "OneDay"
+      | OneWeek -> "OneWeek"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "OneHour" -> OneHour
+      | "OneDay" -> OneDay
+      | "OneWeek" -> OneWeek
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AggregationPeriod" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AggregationPeriod" j)
+    let to_json = simple_to_json to_value
+  end
+module Dimensions =
+  struct
+    type nonrec t = Dimension.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Dimension.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Dimension.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Dimensions" ~of_json:Dimension.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricName =
+  struct
+    type nonrec t =
+      | DeviceRSSI 
+      | DeviceSNR 
+      | DeviceRoamingRSSI 
+      | DeviceRoamingSNR 
+      | DeviceUplinkCount 
+      | DeviceDownlinkCount 
+      | DeviceUplinkLostCount 
+      | DeviceUplinkLostRate 
+      | DeviceJoinRequestCount 
+      | DeviceJoinAcceptCount 
+      | DeviceRoamingUplinkCount 
+      | DeviceRoamingDownlinkCount 
+      | GatewayUpTime 
+      | GatewayDownTime 
+      | GatewayRSSI 
+      | GatewaySNR 
+      | GatewayUplinkCount 
+      | GatewayDownlinkCount 
+      | GatewayJoinRequestCount 
+      | GatewayJoinAcceptCount 
+      | AwsAccountUplinkCount 
+      | AwsAccountDownlinkCount 
+      | AwsAccountUplinkLostCount 
+      | AwsAccountUplinkLostRate 
+      | AwsAccountJoinRequestCount 
+      | AwsAccountJoinAcceptCount 
+      | AwsAccountRoamingUplinkCount 
+      | AwsAccountRoamingDownlinkCount 
+      | AwsAccountDeviceCount 
+      | AwsAccountGatewayCount 
+      | AwsAccountActiveDeviceCount 
+      | AwsAccountActiveGatewayCount 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DeviceRSSI -> "DeviceRSSI"
+      | DeviceSNR -> "DeviceSNR"
+      | DeviceRoamingRSSI -> "DeviceRoamingRSSI"
+      | DeviceRoamingSNR -> "DeviceRoamingSNR"
+      | DeviceUplinkCount -> "DeviceUplinkCount"
+      | DeviceDownlinkCount -> "DeviceDownlinkCount"
+      | DeviceUplinkLostCount -> "DeviceUplinkLostCount"
+      | DeviceUplinkLostRate -> "DeviceUplinkLostRate"
+      | DeviceJoinRequestCount -> "DeviceJoinRequestCount"
+      | DeviceJoinAcceptCount -> "DeviceJoinAcceptCount"
+      | DeviceRoamingUplinkCount -> "DeviceRoamingUplinkCount"
+      | DeviceRoamingDownlinkCount -> "DeviceRoamingDownlinkCount"
+      | GatewayUpTime -> "GatewayUpTime"
+      | GatewayDownTime -> "GatewayDownTime"
+      | GatewayRSSI -> "GatewayRSSI"
+      | GatewaySNR -> "GatewaySNR"
+      | GatewayUplinkCount -> "GatewayUplinkCount"
+      | GatewayDownlinkCount -> "GatewayDownlinkCount"
+      | GatewayJoinRequestCount -> "GatewayJoinRequestCount"
+      | GatewayJoinAcceptCount -> "GatewayJoinAcceptCount"
+      | AwsAccountUplinkCount -> "AwsAccountUplinkCount"
+      | AwsAccountDownlinkCount -> "AwsAccountDownlinkCount"
+      | AwsAccountUplinkLostCount -> "AwsAccountUplinkLostCount"
+      | AwsAccountUplinkLostRate -> "AwsAccountUplinkLostRate"
+      | AwsAccountJoinRequestCount -> "AwsAccountJoinRequestCount"
+      | AwsAccountJoinAcceptCount -> "AwsAccountJoinAcceptCount"
+      | AwsAccountRoamingUplinkCount -> "AwsAccountRoamingUplinkCount"
+      | AwsAccountRoamingDownlinkCount -> "AwsAccountRoamingDownlinkCount"
+      | AwsAccountDeviceCount -> "AwsAccountDeviceCount"
+      | AwsAccountGatewayCount -> "AwsAccountGatewayCount"
+      | AwsAccountActiveDeviceCount -> "AwsAccountActiveDeviceCount"
+      | AwsAccountActiveGatewayCount -> "AwsAccountActiveGatewayCount"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DeviceRSSI" -> DeviceRSSI
+      | "DeviceSNR" -> DeviceSNR
+      | "DeviceRoamingRSSI" -> DeviceRoamingRSSI
+      | "DeviceRoamingSNR" -> DeviceRoamingSNR
+      | "DeviceUplinkCount" -> DeviceUplinkCount
+      | "DeviceDownlinkCount" -> DeviceDownlinkCount
+      | "DeviceUplinkLostCount" -> DeviceUplinkLostCount
+      | "DeviceUplinkLostRate" -> DeviceUplinkLostRate
+      | "DeviceJoinRequestCount" -> DeviceJoinRequestCount
+      | "DeviceJoinAcceptCount" -> DeviceJoinAcceptCount
+      | "DeviceRoamingUplinkCount" -> DeviceRoamingUplinkCount
+      | "DeviceRoamingDownlinkCount" -> DeviceRoamingDownlinkCount
+      | "GatewayUpTime" -> GatewayUpTime
+      | "GatewayDownTime" -> GatewayDownTime
+      | "GatewayRSSI" -> GatewayRSSI
+      | "GatewaySNR" -> GatewaySNR
+      | "GatewayUplinkCount" -> GatewayUplinkCount
+      | "GatewayDownlinkCount" -> GatewayDownlinkCount
+      | "GatewayJoinRequestCount" -> GatewayJoinRequestCount
+      | "GatewayJoinAcceptCount" -> GatewayJoinAcceptCount
+      | "AwsAccountUplinkCount" -> AwsAccountUplinkCount
+      | "AwsAccountDownlinkCount" -> AwsAccountDownlinkCount
+      | "AwsAccountUplinkLostCount" -> AwsAccountUplinkLostCount
+      | "AwsAccountUplinkLostRate" -> AwsAccountUplinkLostRate
+      | "AwsAccountJoinRequestCount" -> AwsAccountJoinRequestCount
+      | "AwsAccountJoinAcceptCount" -> AwsAccountJoinAcceptCount
+      | "AwsAccountRoamingUplinkCount" -> AwsAccountRoamingUplinkCount
+      | "AwsAccountRoamingDownlinkCount" -> AwsAccountRoamingDownlinkCount
+      | "AwsAccountDeviceCount" -> AwsAccountDeviceCount
+      | "AwsAccountGatewayCount" -> AwsAccountGatewayCount
+      | "AwsAccountActiveDeviceCount" -> AwsAccountActiveDeviceCount
+      | "AwsAccountActiveGatewayCount" -> AwsAccountActiveGatewayCount
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MetricName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MetricName" j)
+    let to_json = simple_to_json to_value
+  end
+module MetricQueryEndTimestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module MetricQueryError =
+  struct
+    type nonrec t = string
+    let context_ = "MetricQueryError"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MetricQueryError" j
+    let to_json = simple_to_json to_value
+  end
+module MetricQueryId =
+  struct
+    type nonrec t = string
+    let context_ = "MetricQueryId"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MetricQueryId" j
+    let to_json = simple_to_json to_value
+  end
+module MetricQueryStartTimestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module MetricQueryStatus =
+  struct
+    type nonrec t =
+      | Succeeded 
+      | Failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Succeeded -> "Succeeded"
+      | Failed -> "Failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Succeeded" -> Succeeded
+      | "Failed" -> Failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MetricQueryStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MetricQueryStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module MetricQueryTimestamps =
+  struct
+    type nonrec t = MetricQueryTimestamp.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricQueryTimestamp.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricQueryTimestamp.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricQueryTimestamps"
+        ~of_json:MetricQueryTimestamp.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricQueryValues =
+  struct
+    type nonrec t = MetricQueryValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricQueryValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricQueryValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricQueryValues"
+        ~of_json:MetricQueryValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricUnit =
+  struct
+    type nonrec t = string
+    let context_ = "MetricUnit"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MetricUnit" j
+    let to_json = simple_to_json to_value
+  end
 module PresetFreq =
   struct
     type nonrec t = int
@@ -1878,6 +6050,78 @@ module PresetFreq =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module DakCertificateMetadata =
+  struct
+    type nonrec t =
+      {
+      certificateId: DakCertificateId.t option
+        [@ocaml.doc "The certificate ID for the DAK."];
+      maxAllowedSignature: MaxAllowedSignature.t option
+        [@ocaml.doc
+          "The maximum number of signatures that the DAK can sign. A value of -1 indicates that there's no device limit."];
+      factorySupport: FactorySupport.t option
+        [@ocaml.doc "Whether factory support has been enabled."];
+      apId: ApId.t option
+        [@ocaml.doc
+          "The advertised product ID (APID) that's used for pre-production and production applications."];
+      deviceTypeId: DeviceTypeId.t option
+        [@ocaml.doc
+          "The device type ID that's used for prototyping applications."]}
+    let make ?certificateId =
+      fun ?maxAllowedSignature ->
+        fun ?factorySupport ->
+          fun ?apId ->
+            fun ?deviceTypeId ->
+              fun () ->
+                {
+                  certificateId;
+                  maxAllowedSignature;
+                  factorySupport;
+                  apId;
+                  deviceTypeId
+                }
+    let to_value x =
+      structure_to_value
+        [("CertificateId",
+           (Option.map x.certificateId ~f:DakCertificateId.to_value));
+        ("MaxAllowedSignature",
+          (Option.map x.maxAllowedSignature ~f:MaxAllowedSignature.to_value));
+        ("FactorySupport",
+          (Option.map x.factorySupport ~f:FactorySupport.to_value));
+        ("ApId", (Option.map x.apId ~f:ApId.to_value));
+        ("DeviceTypeId",
+          (Option.map x.deviceTypeId ~f:DeviceTypeId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deviceTypeId =
+        (Option.map ~f:DeviceTypeId.of_xml)
+          (Xml.child xml_arg0 "DeviceTypeId") in
+      let apId = (Option.map ~f:ApId.of_xml) (Xml.child xml_arg0 "ApId") in
+      let factorySupport =
+        (Option.map ~f:FactorySupport.of_xml)
+          (Xml.child xml_arg0 "FactorySupport") in
+      let maxAllowedSignature =
+        (Option.map ~f:MaxAllowedSignature.of_xml)
+          (Xml.child xml_arg0 "MaxAllowedSignature") in
+      let certificateId =
+        (Option.map ~f:DakCertificateId.of_xml)
+          (Xml.child xml_arg0 "CertificateId") in
+      make ?deviceTypeId ?apId ?factorySupport ?maxAllowedSignature
+        ?certificateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deviceTypeId = field_map json__ "DeviceTypeId" DeviceTypeId.of_json in
+      let apId = field_map json__ "ApId" ApId.of_json in
+      let factorySupport =
+        field_map json__ "FactorySupport" FactorySupport.of_json in
+      let maxAllowedSignature =
+        field_map json__ "MaxAllowedSignature" MaxAllowedSignature.of_json in
+      let certificateId =
+        field_map json__ "CertificateId" DakCertificateId.of_json in
+      make ?deviceTypeId ?apId ?factorySupport ?maxAllowedSignature
+        ?certificateId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The device attestation key (DAK) information."]
 module Message =
   struct
     type nonrec t = string
@@ -1918,34 +6162,91 @@ module ResourceType =
     let of_json j = string_of_json ~kind:"ResourceType" j
     let to_json = simple_to_json to_value
   end
-module SidewalkEventNotificationConfigurations =
+module UpdateAbpV1_0_x =
   struct
     type nonrec t =
       {
-      amazonIdEventTopic: EventNotificationTopicStatus.t option
-        [@ocaml.doc
-          "Enum to denote whether amazon id event topic is enabled or disabled."]}
-    let make ?amazonIdEventTopic = fun () -> { amazonIdEventTopic }
+      fCntStart: FCntStart.t option [@ocaml.doc "The FCnt init value."]}
+    let make ?fCntStart = fun () -> { fCntStart }
     let to_value x =
       structure_to_value
-        [("AmazonIdEventTopic",
-           (Option.map x.amazonIdEventTopic
-              ~f:EventNotificationTopicStatus.to_value))]
+        [("FCntStart", (Option.map x.fCntStart ~f:FCntStart.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let amazonIdEventTopic =
-        (Option.map ~f:EventNotificationTopicStatus.of_xml)
-          (Xml.child xml_arg0 "AmazonIdEventTopic") in
-      make ?amazonIdEventTopic ()
+      let fCntStart =
+        (Option.map ~f:FCntStart.of_xml) (Xml.child xml_arg0 "FCntStart") in
+      make ?fCntStart ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let amazonIdEventTopic =
-        field_map json "AmazonIdEventTopic"
-          EventNotificationTopicStatus.of_json in
-      make ?amazonIdEventTopic ()
+    let of_json json__ =
+      let fCntStart = field_map json__ "FCntStart" FCntStart.of_json in
+      make ?fCntStart ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "SidewalkEventNotificationConfigurations object Event configuration object for Sidewalk related event topics."]
+  end[@@ocaml.doc "ABP device object for LoRaWAN specification v1.0.x"]
+module UpdateAbpV1_1 =
+  struct
+    type nonrec t =
+      {
+      fCntStart: FCntStart.t option [@ocaml.doc "The FCnt init value."]}
+    let make ?fCntStart = fun () -> { fCntStart }
+    let to_value x =
+      structure_to_value
+        [("FCntStart", (Option.map x.fCntStart ~f:FCntStart.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fCntStart =
+        (Option.map ~f:FCntStart.of_xml) (Xml.child xml_arg0 "FCntStart") in
+      make ?fCntStart ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fCntStart = field_map json__ "FCntStart" FCntStart.of_json in
+      make ?fCntStart ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "ABP device object for LoRaWAN specification v1.1"]
+module UpdateFPorts =
+  struct
+    type nonrec t =
+      {
+      positioning: Positioning.t option
+        [@ocaml.doc
+          "Positioning FPorts for the ClockSync, Stream, and GNSS functions."];
+      applications: Applications.t option
+        [@ocaml.doc
+          "LoRaWAN application, which can be used for geolocation by activating positioning."]}
+    let make ?positioning =
+      fun ?applications -> fun () -> { positioning; applications }
+    let to_value x =
+      structure_to_value
+        [("Positioning", (Option.map x.positioning ~f:Positioning.to_value));
+        ("Applications",
+          (Option.map x.applications ~f:Applications.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let applications =
+        (Option.map ~f:Applications.of_xml)
+          (Xml.child xml_arg0 "Applications") in
+      let positioning =
+        (Option.map ~f:Positioning.of_xml) (Xml.child xml_arg0 "Positioning") in
+      make ?applications ?positioning ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applications = field_map json__ "Applications" Applications.of_json in
+      let positioning = field_map json__ "Positioning" Positioning.of_json in
+      make ?applications ?positioning ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Object for updating the FPorts information."]
+module PositionCoordinateValue =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
 module AppServerPrivateKey =
   struct
     type nonrec t = string
@@ -1964,6 +6265,32 @@ module AppServerPrivateKey =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"AppServerPrivateKey" j
+    let to_json = simple_to_json to_value
+  end
+module MulticastFrameInfo =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MulticastFrameInfo" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MulticastFrameInfo" j)
     let to_json = simple_to_json to_value
   end
 module WirelessDeviceFrameInfo =
@@ -2018,6 +6345,46 @@ module DlClass =
     let of_json j = of_string (string_of_json ~kind:"DlClass" j)
     let to_json = simple_to_json to_value
   end
+module ParticipatingGatewaysMulticast =
+  struct
+    type nonrec t =
+      {
+      gatewayList: GatewayListMulticast.t option
+        [@ocaml.doc
+          "The list of gateways that you want to use for sending the multicast downlink message. Each downlink message will be sent to all the gateways in the list in the order that you provided. If the gateway list is empty, then AWS IoT Core for LoRaWAN chooses the gateways that were most recently used by the devices to send an uplink message."];
+      transmissionInterval: TransmissionIntervalMulticast.t option
+        [@ocaml.doc
+          "The duration of time in milliseconds for which AWS IoT Core for LoRaWAN will wait before transmitting the multicast payload to the next gateway in the list."]}
+    let make ?gatewayList =
+      fun ?transmissionInterval ->
+        fun () -> { gatewayList; transmissionInterval }
+    let to_value x =
+      structure_to_value
+        [("GatewayList",
+           (Option.map x.gatewayList ~f:GatewayListMulticast.to_value));
+        ("TransmissionInterval",
+          (Option.map x.transmissionInterval
+             ~f:TransmissionIntervalMulticast.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let transmissionInterval =
+        (Option.map ~f:TransmissionIntervalMulticast.of_xml)
+          (Xml.child xml_arg0 "TransmissionInterval") in
+      let gatewayList =
+        (Option.map ~f:GatewayListMulticast.of_xml)
+          (Xml.child xml_arg0 "GatewayList") in
+      make ?transmissionInterval ?gatewayList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let transmissionInterval =
+        field_map json__ "TransmissionInterval"
+          TransmissionIntervalMulticast.of_json in
+      let gatewayList =
+        field_map json__ "GatewayList" GatewayListMulticast.of_json in
+      make ?transmissionInterval ?gatewayList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specify the list of gateways to which you want to send the multicast downlink messages. The multicast message will be sent to each gateway in the list, with the transmission interval as the time interval between each message."]
 module SupportedRfRegion =
   struct
     type nonrec t =
@@ -2025,6 +6392,15 @@ module SupportedRfRegion =
       | US915 
       | AU915 
       | AS923_1 
+      | AS923_2 
+      | AS923_3 
+      | AS923_4 
+      | EU433 
+      | CN470 
+      | CN779 
+      | RU864 
+      | KR920 
+      | IN865 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2033,6 +6409,15 @@ module SupportedRfRegion =
       | US915 -> "US915"
       | AU915 -> "AU915"
       | AS923_1 -> "AS923-1"
+      | AS923_2 -> "AS923-2"
+      | AS923_3 -> "AS923-3"
+      | AS923_4 -> "AS923-4"
+      | EU433 -> "EU433"
+      | CN470 -> "CN470"
+      | CN779 -> "CN779"
+      | RU864 -> "RU864"
+      | KR920 -> "KR920"
+      | IN865 -> "IN865"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2040,6 +6425,15 @@ module SupportedRfRegion =
       | "US915" -> US915
       | "AU915" -> AU915
       | "AS923-1" -> AS923_1
+      | "AS923-2" -> AS923_2
+      | "AS923-3" -> AS923_3
+      | "AS923-4" -> AS923_4
+      | "EU433" -> EU433
+      | "CN470" -> CN470
+      | "CN779" -> CN779
+      | "RU864" -> RU864
+      | "KR920" -> KR920
+      | "IN865" -> IN865
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2050,6 +6444,71 @@ module SupportedRfRegion =
     let of_json j = of_string (string_of_json ~kind:"SupportedRfRegion" j)
     let to_json = simple_to_json to_value
   end
+module SummaryMetricConfigurationStatus =
+  struct
+    type nonrec t =
+      | Enabled 
+      | Disabled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Enabled -> "Enabled"
+      | Disabled -> "Disabled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Enabled" -> Enabled
+      | "Disabled" -> Disabled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SummaryMetricConfigurationStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SummaryMetricConfigurationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module FuotaTaskLogOption =
+  struct
+    type nonrec t =
+      {
+      type_: FuotaTaskType.t [@ocaml.doc "The FUOTA task type."];
+      logLevel: LogLevel.t ;
+      events: FuotaTaskEventLogOptionList.t option }
+    let context_ = "FuotaTaskLogOption"
+    let make ?events =
+      fun ~type_ -> fun ~logLevel -> fun () -> { events; type_; logLevel }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (FuotaTaskType.to_value x.type_)));
+        ("LogLevel", (Some (LogLevel.to_value x.logLevel)));
+        ("Events",
+          (Option.map x.events ~f:FuotaTaskEventLogOptionList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let events =
+        (Option.map ~f:FuotaTaskEventLogOptionList.of_xml)
+          (Xml.child xml_arg0 "Events") in
+      let logLevel =
+        LogLevel.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LogLevel") in
+      let type_ =
+        FuotaTaskType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ?events ~logLevel ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let events =
+        field_map json__ "Events" FuotaTaskEventLogOptionList.of_json in
+      let logLevel = field_map_exn json__ "LogLevel" LogLevel.of_json in
+      let type_ = field_map_exn json__ "Type" FuotaTaskType.of_json in
+      make ?events ~logLevel ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The log options for FUOTA tasks and can be used to set log levels for a specific type of FUOTA task."]
 module WirelessDeviceLogOption =
   struct
     type nonrec t =
@@ -2078,11 +6537,11 @@ module WirelessDeviceLogOption =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?events ~logLevel ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let events =
-        field_map json "Events" WirelessDeviceEventLogOptionList.of_json in
-      let logLevel = field_map_exn json "LogLevel" LogLevel.of_json in
-      let type_ = field_map_exn json "Type" WirelessDeviceType.of_json in
+        field_map json__ "Events" WirelessDeviceEventLogOptionList.of_json in
+      let logLevel = field_map_exn json__ "LogLevel" LogLevel.of_json in
+      let type_ = field_map_exn json__ "Type" WirelessDeviceType.of_json in
       make ?events ~logLevel ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2115,15 +6574,102 @@ module WirelessGatewayLogOption =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?events ~logLevel ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let events =
-        field_map json "Events" WirelessGatewayEventLogOptionList.of_json in
-      let logLevel = field_map_exn json "LogLevel" LogLevel.of_json in
-      let type_ = field_map_exn json "Type" WirelessGatewayType.of_json in
+        field_map json__ "Events" WirelessGatewayEventLogOptionList.of_json in
+      let logLevel = field_map_exn json__ "LogLevel" LogLevel.of_json in
+      let type_ = field_map_exn json__ "Type" WirelessGatewayType.of_json in
       make ?events ~logLevel ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The log options for wireless gateways and can be used to set log levels for a specific type of wireless gateway."]
+module LoRaWANConnectionStatusResourceTypeEventConfiguration =
+  struct
+    type nonrec t =
+      {
+      wirelessGatewayEventTopic: EventNotificationTopicStatus.t option
+        [@ocaml.doc
+          "Denotes whether the wireless gateway connection status event topic is enabled or disabled."]}
+    let make ?wirelessGatewayEventTopic =
+      fun () -> { wirelessGatewayEventTopic }
+    let to_value x =
+      structure_to_value
+        [("WirelessGatewayEventTopic",
+           (Option.map x.wirelessGatewayEventTopic
+              ~f:EventNotificationTopicStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wirelessGatewayEventTopic =
+        (Option.map ~f:EventNotificationTopicStatus.of_xml)
+          (Xml.child xml_arg0 "WirelessGatewayEventTopic") in
+      make ?wirelessGatewayEventTopic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wirelessGatewayEventTopic =
+        field_map json__ "WirelessGatewayEventTopic"
+          EventNotificationTopicStatus.of_json in
+      make ?wirelessGatewayEventTopic ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object for LoRaWAN connection status resource type event configuration."]
+module SidewalkResourceTypeEventConfiguration =
+  struct
+    type nonrec t =
+      {
+      wirelessDeviceEventTopic: EventNotificationTopicStatus.t option
+        [@ocaml.doc
+          "Denotes whether the wireless device join event topic is enabled or disabled."]}
+    let make ?wirelessDeviceEventTopic =
+      fun () -> { wirelessDeviceEventTopic }
+    let to_value x =
+      structure_to_value
+        [("WirelessDeviceEventTopic",
+           (Option.map x.wirelessDeviceEventTopic
+              ~f:EventNotificationTopicStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wirelessDeviceEventTopic =
+        (Option.map ~f:EventNotificationTopicStatus.of_xml)
+          (Xml.child xml_arg0 "WirelessDeviceEventTopic") in
+      make ?wirelessDeviceEventTopic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wirelessDeviceEventTopic =
+        field_map json__ "WirelessDeviceEventTopic"
+          EventNotificationTopicStatus.of_json in
+      make ?wirelessDeviceEventTopic ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sidewalk resource type event configuration object for enabling or disabling topic."]
+module LoRaWANJoinResourceTypeEventConfiguration =
+  struct
+    type nonrec t =
+      {
+      wirelessDeviceEventTopic: EventNotificationTopicStatus.t option
+        [@ocaml.doc
+          "Denotes whether the wireless device join event topic is enabled or disabled."]}
+    let make ?wirelessDeviceEventTopic =
+      fun () -> { wirelessDeviceEventTopic }
+    let to_value x =
+      structure_to_value
+        [("WirelessDeviceEventTopic",
+           (Option.map x.wirelessDeviceEventTopic
+              ~f:EventNotificationTopicStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wirelessDeviceEventTopic =
+        (Option.map ~f:EventNotificationTopicStatus.of_xml)
+          (Xml.child xml_arg0 "WirelessDeviceEventTopic") in
+      make ?wirelessDeviceEventTopic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wirelessDeviceEventTopic =
+        field_map json__ "WirelessDeviceEventTopic"
+          EventNotificationTopicStatus.of_json in
+      make ?wirelessDeviceEventTopic ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object for LoRaWAN join resource type event configuration."]
 module AmazonResourceName =
   struct
     type nonrec t = string
@@ -2162,9 +6708,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2204,6 +6750,25 @@ module DlFreq =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "Downlink frequency."]
+module PingSlotPeriod =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:4096) >>=
+             (fun () -> check_int_min i ~min:32));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PingSlotPeriod" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module SessionStartTimeTimestamp =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -2221,7 +6786,7 @@ module SessionStartTimeTimestamp =
 module SessionTimeout =
   struct
     type nonrec t = int[@@ocaml.doc
-                         "How long before a multicast group session is to timeout."]
+                         "How long before a multicast group session is to timeout. We recommend that you provide a timeout value that is a power-of-two (such as 64, 128, 256). If a non-power-of-two value is provided, it will automatically be rounded up to the next supported power-of-two within the allowed range."]
     let make i =
       let open Result in
         ok_or_failwith
@@ -2237,7 +6802,8 @@ module SessionTimeout =
         (string_of_xml ~kind:"an integer for SessionTimeout" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "How long before a multicast group session is to timeout."]
+  end[@@ocaml.doc
+       "How long before a multicast group session is to timeout. We recommend that you provide a timeout value that is a power-of-two (such as 64, 128, 256). If a non-power-of-two value is provided, it will automatically be rounded up to the next supported power-of-two within the allowed range."]
 module StartTime =
   struct
     type nonrec t = string[@@ocaml.doc "Start time of a FUOTA task."]
@@ -2255,22 +6821,38 @@ module SidewalkSendDataToDevice =
     type nonrec t =
       {
       seq: Seq.t option [@ocaml.doc "The sequence number."];
-      messageType: MessageType.t option }
-    let make ?seq = fun ?messageType -> fun () -> { seq; messageType }
+      messageType: MessageType.t option ;
+      ackModeRetryDurationSecs: AckModeRetryDurationSecs.t option
+        [@ocaml.doc
+          "The duration of time in seconds to retry sending the ACK."]}
+    let make ?seq =
+      fun ?messageType ->
+        fun ?ackModeRetryDurationSecs ->
+          fun () -> { seq; messageType; ackModeRetryDurationSecs }
     let to_value x =
       structure_to_value
         [("Seq", (Option.map x.seq ~f:Seq.to_value));
-        ("MessageType", (Option.map x.messageType ~f:MessageType.to_value))]
+        ("MessageType", (Option.map x.messageType ~f:MessageType.to_value));
+        ("AckModeRetryDurationSecs",
+          (Option.map x.ackModeRetryDurationSecs
+             ~f:AckModeRetryDurationSecs.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ackModeRetryDurationSecs =
+        (Option.map ~f:AckModeRetryDurationSecs.of_xml)
+          (Xml.child xml_arg0 "AckModeRetryDurationSecs") in
       let messageType =
         (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "MessageType") in
       let seq = (Option.map ~f:Seq.of_xml) (Xml.child xml_arg0 "Seq") in
-      make ?messageType ?seq ()
+      make ?ackModeRetryDurationSecs ?messageType ?seq ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageType = field_map json "MessageType" MessageType.of_json in
-      let seq = field_map json "Seq" Seq.of_json in make ?messageType ?seq ()
+    let of_json json__ =
+      let ackModeRetryDurationSecs =
+        field_map json__ "AckModeRetryDurationSecs"
+          AckModeRetryDurationSecs.of_json in
+      let messageType = field_map json__ "MessageType" MessageType.of_json in
+      let seq = field_map json__ "Seq" Seq.of_json in
+      make ?ackModeRetryDurationSecs ?messageType ?seq ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a Sidewalk router."]
 module LoRaWANMulticastMetadata =
@@ -2285,10 +6867,41 @@ module LoRaWANMulticastMetadata =
       let fPort = (Option.map ~f:FPort.of_xml) (Xml.child xml_arg0 "FPort") in
       make ?fPort ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fPort = field_map json "FPort" FPort.of_json in make ?fPort ()
+    let of_json json__ =
+      let fPort = field_map json__ "FPort" FPort.of_json in make ?fPort ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The metadata information of the LoRaWAN multicast group."]
+module SemtechGnssConfiguration =
+  struct
+    type nonrec t =
+      {
+      status: PositionConfigurationStatus.t
+        [@ocaml.doc "The status indicating whether the solver is enabled."];
+      fec: PositionConfigurationFec.t
+        [@ocaml.doc "Whether forward error correction is enabled."]}
+    let context_ = "SemtechGnssConfiguration"
+    let make ~status = fun ~fec -> fun () -> { status; fec }
+    let to_value x =
+      structure_to_value
+        [("Status", (Some (PositionConfigurationStatus.to_value x.status)));
+        ("Fec", (Some (PositionConfigurationFec.to_value x.fec)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fec =
+        PositionConfigurationFec.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Fec") in
+      let status =
+        PositionConfigurationStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+      make ~fec ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fec = field_map_exn json__ "Fec" PositionConfigurationFec.of_json in
+      let status =
+        field_map_exn json__ "Status" PositionConfigurationStatus.of_json in
+      make ~fec ~status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the Semtech GNSS solver configuration."]
 module WirelessGatewayStatistics =
   struct
     type nonrec t =
@@ -2304,7 +6917,7 @@ module WirelessGatewayStatistics =
       loRaWAN: LoRaWANGateway.t option [@ocaml.doc "LoRaWAN gateway info."];
       lastUplinkReceivedAt: ISODateTimeString.t option
         [@ocaml.doc
-          "The date and time when the most recent uplink was received."]}
+          "The date and time when the most recent uplink was received. This value is only valid for 3 months."]}
     let make ?arn =
       fun ?id ->
         fun ?name ->
@@ -2341,14 +6954,14 @@ module WirelessGatewayStatistics =
         (Option.map ~f:WirelessGatewayArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?lastUplinkReceivedAt ?loRaWAN ?description ?name ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUplinkReceivedAt =
-        field_map json "LastUplinkReceivedAt" ISODateTimeString.of_json in
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANGateway.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" WirelessGatewayName.of_json in
-      let id = field_map json "Id" WirelessGatewayId.of_json in
-      let arn = field_map json "Arn" WirelessGatewayArn.of_json in
+        field_map json__ "LastUplinkReceivedAt" ISODateTimeString.of_json in
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANGateway.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" WirelessGatewayName.of_json in
+      let id = field_map json__ "Id" WirelessGatewayId.of_json in
+      let arn = field_map json__ "Arn" WirelessGatewayArn.of_json in
       make ?lastUplinkReceivedAt ?loRaWAN ?description ?name ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a wireless gateway's operation."]
@@ -2385,11 +6998,12 @@ module UpdateWirelessGatewayTaskEntry =
           (Xml.child xml_arg0 "Id") in
       make ?arn ?loRaWAN ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" WirelessGatewayTaskDefinitionArn.of_json in
+    let of_json json__ =
+      let arn =
+        field_map json__ "Arn" WirelessGatewayTaskDefinitionArn.of_json in
       let loRaWAN =
-        field_map json "LoRaWAN" LoRaWANUpdateGatewayTaskEntry.of_json in
-      let id = field_map json "Id" WirelessGatewayTaskDefinitionId.of_json in
+        field_map json__ "LoRaWAN" LoRaWANUpdateGatewayTaskEntry.of_json in
+      let id = field_map json__ "Id" WirelessGatewayTaskDefinitionId.of_json in
       make ?arn ?loRaWAN ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "UpdateWirelessGatewayTaskEntry object."]
@@ -2410,7 +7024,7 @@ module WirelessDeviceStatistics =
           "The name of the destination to which the device is assigned."];
       lastUplinkReceivedAt: ISODateTimeString.t option
         [@ocaml.doc
-          "The date and time when the most recent uplink was received."];
+          "The date and time when the most recent uplink was received. Theis value is only valid for 3 months."];
       loRaWAN: LoRaWANListDevice.t option [@ocaml.doc "LoRaWAN device info."];
       sidewalk: SidewalkListDevice.t option
         [@ocaml.doc "The Sidewalk account credentials."];
@@ -2418,7 +7032,10 @@ module WirelessDeviceStatistics =
       multicastDeviceStatus: MulticastDeviceStatus.t option
         [@ocaml.doc
           "The status of the wireless device in the multicast group."];
-      mcGroupId: McGroupId.t option }
+      mcGroupId: McGroupId.t option ;
+      positioning: PositioningConfigStatus.t option
+        [@ocaml.doc
+          "The integration status of the Device Location feature for LoRaWAN and Amazon Sidewalk enabled devices."]}
     let make ?arn =
       fun ?id ->
         fun ?type_ ->
@@ -2430,20 +7047,22 @@ module WirelessDeviceStatistics =
                     fun ?fuotaDeviceStatus ->
                       fun ?multicastDeviceStatus ->
                         fun ?mcGroupId ->
-                          fun () ->
-                            {
-                              arn;
-                              id;
-                              type_;
-                              name;
-                              destinationName;
-                              lastUplinkReceivedAt;
-                              loRaWAN;
-                              sidewalk;
-                              fuotaDeviceStatus;
-                              multicastDeviceStatus;
-                              mcGroupId
-                            }
+                          fun ?positioning ->
+                            fun () ->
+                              {
+                                arn;
+                                id;
+                                type_;
+                                name;
+                                destinationName;
+                                lastUplinkReceivedAt;
+                                loRaWAN;
+                                sidewalk;
+                                fuotaDeviceStatus;
+                                multicastDeviceStatus;
+                                mcGroupId;
+                                positioning
+                              }
     let to_value x =
       structure_to_value
         [("Arn", (Option.map x.arn ~f:WirelessDeviceArn.to_value));
@@ -2461,9 +7080,14 @@ module WirelessDeviceStatistics =
         ("MulticastDeviceStatus",
           (Option.map x.multicastDeviceStatus
              ~f:MulticastDeviceStatus.to_value));
-        ("McGroupId", (Option.map x.mcGroupId ~f:McGroupId.to_value))]
+        ("McGroupId", (Option.map x.mcGroupId ~f:McGroupId.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:PositioningConfigStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let positioning =
+        (Option.map ~f:PositioningConfigStatus.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
       let mcGroupId =
         (Option.map ~f:McGroupId.of_xml) (Xml.child xml_arg0 "McGroupId") in
       let multicastDeviceStatus =
@@ -2492,31 +7116,195 @@ module WirelessDeviceStatistics =
         (Option.map ~f:WirelessDeviceId.of_xml) (Xml.child xml_arg0 "Id") in
       let arn =
         (Option.map ~f:WirelessDeviceArn.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?mcGroupId ?multicastDeviceStatus ?fuotaDeviceStatus ?sidewalk
-        ?loRaWAN ?lastUplinkReceivedAt ?destinationName ?name ?type_ ?id ?arn
-        ()
+      make ?positioning ?mcGroupId ?multicastDeviceStatus ?fuotaDeviceStatus
+        ?sidewalk ?loRaWAN ?lastUplinkReceivedAt ?destinationName ?name
+        ?type_ ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mcGroupId = field_map json "McGroupId" McGroupId.of_json in
+    let of_json json__ =
+      let positioning =
+        field_map json__ "Positioning" PositioningConfigStatus.of_json in
+      let mcGroupId = field_map json__ "McGroupId" McGroupId.of_json in
       let multicastDeviceStatus =
-        field_map json "MulticastDeviceStatus" MulticastDeviceStatus.of_json in
+        field_map json__ "MulticastDeviceStatus"
+          MulticastDeviceStatus.of_json in
       let fuotaDeviceStatus =
-        field_map json "FuotaDeviceStatus" FuotaDeviceStatus.of_json in
-      let sidewalk = field_map json "Sidewalk" SidewalkListDevice.of_json in
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANListDevice.of_json in
+        field_map json__ "FuotaDeviceStatus" FuotaDeviceStatus.of_json in
+      let sidewalk = field_map json__ "Sidewalk" SidewalkListDevice.of_json in
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANListDevice.of_json in
       let lastUplinkReceivedAt =
-        field_map json "LastUplinkReceivedAt" ISODateTimeString.of_json in
+        field_map json__ "LastUplinkReceivedAt" ISODateTimeString.of_json in
       let destinationName =
-        field_map json "DestinationName" DestinationName.of_json in
-      let name = field_map json "Name" WirelessDeviceName.of_json in
-      let type_ = field_map json "Type" WirelessDeviceType.of_json in
-      let id = field_map json "Id" WirelessDeviceId.of_json in
-      let arn = field_map json "Arn" WirelessDeviceArn.of_json in
-      make ?mcGroupId ?multicastDeviceStatus ?fuotaDeviceStatus ?sidewalk
-        ?loRaWAN ?lastUplinkReceivedAt ?destinationName ?name ?type_ ?id ?arn
-        ()
+        field_map json__ "DestinationName" DestinationName.of_json in
+      let name = field_map json__ "Name" WirelessDeviceName.of_json in
+      let type_ = field_map json__ "Type" WirelessDeviceType.of_json in
+      let id = field_map json__ "Id" WirelessDeviceId.of_json in
+      let arn = field_map json__ "Arn" WirelessDeviceArn.of_json in
+      make ?positioning ?mcGroupId ?multicastDeviceStatus ?fuotaDeviceStatus
+        ?sidewalk ?loRaWAN ?lastUplinkReceivedAt ?destinationName ?name
+        ?type_ ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a wireless device's operation."]
+module WirelessDeviceImportTask =
+  struct
+    type nonrec t =
+      {
+      id: ImportTaskId.t option
+        [@ocaml.doc "The ID of the wireless device import task."];
+      arn: ImportTaskArn.t option
+        [@ocaml.doc
+          "The ARN (Amazon Resource Name) of the wireless device import task."];
+      destinationName: DestinationName.t option
+        [@ocaml.doc
+          "The name of the Sidewalk destination that that describes the IoT rule to route messages from the device in the import task that will be onboarded to AWS IoT Wireless"];
+      positioning: PositioningConfigStatus.t option
+        [@ocaml.doc
+          "The integration status of the Device Location feature for Sidewalk devices."];
+      sidewalk: SidewalkGetStartImportInfo.t option
+        [@ocaml.doc
+          "The Sidewalk-related information of the wireless device import task."];
+      creationTime: CreationTime.t option
+        [@ocaml.doc "The time at which the import task was created."];
+      status: ImportTaskStatus.t option
+        [@ocaml.doc
+          "The status information of the wireless device import task."];
+      statusReason: StatusReason.t option
+        [@ocaml.doc
+          "The reason that provides additional information about the import task status."];
+      initializedImportedDeviceCount: ImportedWirelessDeviceCount.t option
+        [@ocaml.doc
+          "The summary information of count of wireless devices that are waiting for the control log to be added to an import task."];
+      pendingImportedDeviceCount: ImportedWirelessDeviceCount.t option
+        [@ocaml.doc
+          "The summary information of count of wireless devices in an import task that are waiting in the queue to be onboarded."];
+      onboardedImportedDeviceCount: ImportedWirelessDeviceCount.t option
+        [@ocaml.doc
+          "The summary information of count of wireless devices in an import task that have been onboarded to the import task."];
+      failedImportedDeviceCount: ImportedWirelessDeviceCount.t option
+        [@ocaml.doc
+          "The summary information of count of wireless devices in an import task that failed to onboarded to the import task."]}
+    let make ?id =
+      fun ?arn ->
+        fun ?destinationName ->
+          fun ?positioning ->
+            fun ?sidewalk ->
+              fun ?creationTime ->
+                fun ?status ->
+                  fun ?statusReason ->
+                    fun ?initializedImportedDeviceCount ->
+                      fun ?pendingImportedDeviceCount ->
+                        fun ?onboardedImportedDeviceCount ->
+                          fun ?failedImportedDeviceCount ->
+                            fun () ->
+                              {
+                                id;
+                                arn;
+                                destinationName;
+                                positioning;
+                                sidewalk;
+                                creationTime;
+                                status;
+                                statusReason;
+                                initializedImportedDeviceCount;
+                                pendingImportedDeviceCount;
+                                onboardedImportedDeviceCount;
+                                failedImportedDeviceCount
+                              }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:ImportTaskId.to_value));
+        ("Arn", (Option.map x.arn ~f:ImportTaskArn.to_value));
+        ("DestinationName",
+          (Option.map x.destinationName ~f:DestinationName.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:PositioningConfigStatus.to_value));
+        ("Sidewalk",
+          (Option.map x.sidewalk ~f:SidewalkGetStartImportInfo.to_value));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:CreationTime.to_value));
+        ("Status", (Option.map x.status ~f:ImportTaskStatus.to_value));
+        ("StatusReason",
+          (Option.map x.statusReason ~f:StatusReason.to_value));
+        ("InitializedImportedDeviceCount",
+          (Option.map x.initializedImportedDeviceCount
+             ~f:ImportedWirelessDeviceCount.to_value));
+        ("PendingImportedDeviceCount",
+          (Option.map x.pendingImportedDeviceCount
+             ~f:ImportedWirelessDeviceCount.to_value));
+        ("OnboardedImportedDeviceCount",
+          (Option.map x.onboardedImportedDeviceCount
+             ~f:ImportedWirelessDeviceCount.to_value));
+        ("FailedImportedDeviceCount",
+          (Option.map x.failedImportedDeviceCount
+             ~f:ImportedWirelessDeviceCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failedImportedDeviceCount =
+        (Option.map ~f:ImportedWirelessDeviceCount.of_xml)
+          (Xml.child xml_arg0 "FailedImportedDeviceCount") in
+      let onboardedImportedDeviceCount =
+        (Option.map ~f:ImportedWirelessDeviceCount.of_xml)
+          (Xml.child xml_arg0 "OnboardedImportedDeviceCount") in
+      let pendingImportedDeviceCount =
+        (Option.map ~f:ImportedWirelessDeviceCount.of_xml)
+          (Xml.child xml_arg0 "PendingImportedDeviceCount") in
+      let initializedImportedDeviceCount =
+        (Option.map ~f:ImportedWirelessDeviceCount.of_xml)
+          (Xml.child xml_arg0 "InitializedImportedDeviceCount") in
+      let statusReason =
+        (Option.map ~f:StatusReason.of_xml)
+          (Xml.child xml_arg0 "StatusReason") in
+      let status =
+        (Option.map ~f:ImportTaskStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let creationTime =
+        (Option.map ~f:CreationTime.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
+      let sidewalk =
+        (Option.map ~f:SidewalkGetStartImportInfo.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
+      let positioning =
+        (Option.map ~f:PositioningConfigStatus.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
+      let destinationName =
+        (Option.map ~f:DestinationName.of_xml)
+          (Xml.child xml_arg0 "DestinationName") in
+      let arn =
+        (Option.map ~f:ImportTaskArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      let id = (Option.map ~f:ImportTaskId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?failedImportedDeviceCount ?onboardedImportedDeviceCount
+        ?pendingImportedDeviceCount ?initializedImportedDeviceCount
+        ?statusReason ?status ?creationTime ?sidewalk ?positioning
+        ?destinationName ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failedImportedDeviceCount =
+        field_map json__ "FailedImportedDeviceCount"
+          ImportedWirelessDeviceCount.of_json in
+      let onboardedImportedDeviceCount =
+        field_map json__ "OnboardedImportedDeviceCount"
+          ImportedWirelessDeviceCount.of_json in
+      let pendingImportedDeviceCount =
+        field_map json__ "PendingImportedDeviceCount"
+          ImportedWirelessDeviceCount.of_json in
+      let initializedImportedDeviceCount =
+        field_map json__ "InitializedImportedDeviceCount"
+          ImportedWirelessDeviceCount.of_json in
+      let statusReason = field_map json__ "StatusReason" StatusReason.of_json in
+      let status = field_map json__ "Status" ImportTaskStatus.of_json in
+      let creationTime = field_map json__ "CreationTime" CreationTime.of_json in
+      let sidewalk =
+        field_map json__ "Sidewalk" SidewalkGetStartImportInfo.of_json in
+      let positioning =
+        field_map json__ "Positioning" PositioningConfigStatus.of_json in
+      let destinationName =
+        field_map json__ "DestinationName" DestinationName.of_json in
+      let arn = field_map json__ "Arn" ImportTaskArn.of_json in
+      let id = field_map json__ "Id" ImportTaskId.of_json in
+      make ?failedImportedDeviceCount ?onboardedImportedDeviceCount
+        ?pendingImportedDeviceCount ?initializedImportedDeviceCount
+        ?statusReason ?status ?creationTime ?sidewalk ?positioning
+        ?destinationName ?arn ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about an import task for wireless devices."]
 module ServiceProfile =
   struct
     type nonrec t =
@@ -2543,10 +7331,10 @@ module ServiceProfile =
         (Option.map ~f:ServiceProfileArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" ServiceProfileId.of_json in
-      let name = field_map json "Name" ServiceProfileName.of_json in
-      let arn = field_map json "Arn" ServiceProfileArn.of_json in
+    let of_json json__ =
+      let id = field_map json__ "Id" ServiceProfileId.of_json in
+      let name = field_map json__ "Name" ServiceProfileName.of_json in
+      let arn = field_map json__ "Arn" ServiceProfileArn.of_json in
       make ?id ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a service profile."]
@@ -2556,12 +7344,13 @@ module DownlinkQueueMessage =
       {
       messageId: MessageId.t option
         [@ocaml.doc
-          "The messageId allocated by IoT Wireless for tracing purpose"];
+          "The message ID assigned by IoT Wireless to each downlink message, which helps identify the message."];
       transmitMode: TransmitMode.t option
         [@ocaml.doc
-          "The transmit mode to use to send data to the wireless device. Can be: 0 for UM (unacknowledge mode) or 1 for AM (acknowledge mode)."];
+          "The transmit mode to use for sending data to the wireless device. This can be 0 for UM (unacknowledge mode) or 1 for AM (acknowledge mode)."];
       receivedAt: ISODateTimeString.t option
-        [@ocaml.doc "The timestamp that Iot Wireless received the message."];
+        [@ocaml.doc
+          "The time at which Iot Wireless received the downlink message."];
       loRaWAN: LoRaWANSendDataToDevice.t option }
     let make ?messageId =
       fun ?transmitMode ->
@@ -2592,14 +7381,75 @@ module DownlinkQueueMessage =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
       make ?loRaWAN ?receivedAt ?transmitMode ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANSendDataToDevice.of_json in
-      let receivedAt = field_map json "ReceivedAt" ISODateTimeString.of_json in
-      let transmitMode = field_map json "TransmitMode" TransmitMode.of_json in
-      let messageId = field_map json "MessageId" MessageId.of_json in
+    let of_json json__ =
+      let loRaWAN =
+        field_map json__ "LoRaWAN" LoRaWANSendDataToDevice.of_json in
+      let receivedAt =
+        field_map json__ "ReceivedAt" ISODateTimeString.of_json in
+      let transmitMode = field_map json__ "TransmitMode" TransmitMode.of_json in
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
       make ?loRaWAN ?receivedAt ?transmitMode ?messageId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The message in downlink queue."]
+  end[@@ocaml.doc "The message in the downlink queue."]
+module PositionConfigurationItem =
+  struct
+    type nonrec t =
+      {
+      resourceIdentifier: PositionResourceIdentifier.t option
+        [@ocaml.doc "Resource identifier for the position configuration."];
+      resourceType: PositionResourceType.t option
+        [@ocaml.doc
+          "Resource type of the resource for the position configuration."];
+      solvers: PositionSolverDetails.t option
+        [@ocaml.doc
+          "The details of the positioning solver object used to compute the location."];
+      destination: DestinationName.t option
+        [@ocaml.doc
+          "The position data destination that describes the AWS IoT rule that processes the device's position data for use by AWS IoT Core for LoRaWAN."]}
+    let make ?resourceIdentifier =
+      fun ?resourceType ->
+        fun ?solvers ->
+          fun ?destination ->
+            fun () ->
+              { resourceIdentifier; resourceType; solvers; destination }
+    let to_value x =
+      structure_to_value
+        [("ResourceIdentifier",
+           (Option.map x.resourceIdentifier
+              ~f:PositionResourceIdentifier.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:PositionResourceType.to_value));
+        ("Solvers", (Option.map x.solvers ~f:PositionSolverDetails.to_value));
+        ("Destination",
+          (Option.map x.destination ~f:DestinationName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destination =
+        (Option.map ~f:DestinationName.of_xml)
+          (Xml.child xml_arg0 "Destination") in
+      let solvers =
+        (Option.map ~f:PositionSolverDetails.of_xml)
+          (Xml.child xml_arg0 "Solvers") in
+      let resourceType =
+        (Option.map ~f:PositionResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      let resourceIdentifier =
+        (Option.map ~f:PositionResourceIdentifier.of_xml)
+          (Xml.child xml_arg0 "ResourceIdentifier") in
+      make ?destination ?solvers ?resourceType ?resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destination =
+        field_map json__ "Destination" DestinationName.of_json in
+      let solvers = field_map json__ "Solvers" PositionSolverDetails.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" PositionResourceType.of_json in
+      let resourceIdentifier =
+        field_map json__ "ResourceIdentifier"
+          PositionResourceIdentifier.of_json in
+      make ?destination ?solvers ?resourceType ?resourceIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The wrapper for a position configuration."]
 module SidewalkAccountInfoWithFingerprint =
   struct
     type nonrec t =
@@ -2628,13 +7478,45 @@ module SidewalkAccountInfoWithFingerprint =
         (Option.map ~f:AmazonId.of_xml) (Xml.child xml_arg0 "AmazonId") in
       make ?arn ?fingerprint ?amazonId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" PartnerAccountArn.of_json in
-      let fingerprint = field_map json "Fingerprint" Fingerprint.of_json in
-      let amazonId = field_map json "AmazonId" AmazonId.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" PartnerAccountArn.of_json in
+      let fingerprint = field_map json__ "Fingerprint" Fingerprint.of_json in
+      let amazonId = field_map json__ "AmazonId" AmazonId.of_json in
       make ?arn ?fingerprint ?amazonId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a Sidewalk account."]
+module NetworkAnalyzerConfigurations =
+  struct
+    type nonrec t =
+      {
+      arn: NetworkAnalyzerConfigurationArn.t option
+        [@ocaml.doc "The Amazon Resource Name of the new resource."];
+      name: NetworkAnalyzerConfigurationName.t option }
+    let make ?arn = fun ?name -> fun () -> { arn; name }
+    let to_value x =
+      structure_to_value
+        [("Arn",
+           (Option.map x.arn ~f:NetworkAnalyzerConfigurationArn.to_value));
+        ("Name",
+          (Option.map x.name ~f:NetworkAnalyzerConfigurationName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:NetworkAnalyzerConfigurationName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let arn =
+        (Option.map ~f:NetworkAnalyzerConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "Arn") in
+      make ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name =
+        field_map json__ "Name" NetworkAnalyzerConfigurationName.of_json in
+      let arn =
+        field_map json__ "Arn" NetworkAnalyzerConfigurationArn.of_json in
+      make ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Network analyzer configurations."]
 module MulticastGroup =
   struct
     type nonrec t =
@@ -2658,10 +7540,10 @@ module MulticastGroup =
         (Option.map ~f:MulticastGroupId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" MulticastGroupName.of_json in
-      let arn = field_map json "Arn" MulticastGroupArn.of_json in
-      let id = field_map json "Id" MulticastGroupId.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" MulticastGroupName.of_json in
+      let arn = field_map json__ "Arn" MulticastGroupArn.of_json in
+      let id = field_map json__ "Id" MulticastGroupId.of_json in
       make ?name ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A multicast group."]
@@ -2679,8 +7561,8 @@ module MulticastGroupByFuotaTask =
         (Option.map ~f:MulticastGroupId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" MulticastGroupId.of_json in make ?id ()
+    let of_json json__ =
+      let id = field_map json__ "Id" MulticastGroupId.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A multicast group that is associated with a FUOTA task."]
 module FuotaTask =
@@ -2705,13 +7587,93 @@ module FuotaTask =
       let id = (Option.map ~f:FuotaTaskId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" FuotaTaskName.of_json in
-      let arn = field_map json "Arn" FuotaTaskArn.of_json in
-      let id = field_map json "Id" FuotaTaskId.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" FuotaTaskName.of_json in
+      let arn = field_map json__ "Arn" FuotaTaskArn.of_json in
+      let id = field_map json__ "Id" FuotaTaskId.of_json in
       make ?name ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A FUOTA task."]
+module EventConfigurationItem =
+  struct
+    type nonrec t =
+      {
+      identifier: Identifier.t option
+        [@ocaml.doc "Resource identifier opted in for event messaging."];
+      identifierType: IdentifierType.t option
+        [@ocaml.doc
+          "Identifier type of the particular resource identifier for event configuration."];
+      partnerType: EventNotificationPartnerType.t option
+        [@ocaml.doc
+          "Partner type of the resource if the identifier type is PartnerAccountId."];
+      events: EventNotificationItemConfigurations.t option }
+    let make ?identifier =
+      fun ?identifierType ->
+        fun ?partnerType ->
+          fun ?events ->
+            fun () -> { identifier; identifierType; partnerType; events }
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Option.map x.identifier ~f:Identifier.to_value));
+        ("IdentifierType",
+          (Option.map x.identifierType ~f:IdentifierType.to_value));
+        ("PartnerType",
+          (Option.map x.partnerType ~f:EventNotificationPartnerType.to_value));
+        ("Events",
+          (Option.map x.events
+             ~f:EventNotificationItemConfigurations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let events =
+        (Option.map ~f:EventNotificationItemConfigurations.of_xml)
+          (Xml.child xml_arg0 "Events") in
+      let partnerType =
+        (Option.map ~f:EventNotificationPartnerType.of_xml)
+          (Xml.child xml_arg0 "PartnerType") in
+      let identifierType =
+        (Option.map ~f:IdentifierType.of_xml)
+          (Xml.child xml_arg0 "IdentifierType") in
+      let identifier =
+        (Option.map ~f:Identifier.of_xml) (Xml.child xml_arg0 "Identifier") in
+      make ?events ?partnerType ?identifierType ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let events =
+        field_map json__ "Events" EventNotificationItemConfigurations.of_json in
+      let partnerType =
+        field_map json__ "PartnerType" EventNotificationPartnerType.of_json in
+      let identifierType =
+        field_map json__ "IdentifierType" IdentifierType.of_json in
+      let identifier = field_map json__ "Identifier" Identifier.of_json in
+      make ?events ?partnerType ?identifierType ?identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Event configuration object for a single resource."]
+module ImportedWirelessDevice =
+  struct
+    type nonrec t =
+      {
+      sidewalk: ImportedSidewalkDevice.t option
+        [@ocaml.doc
+          "The Sidewalk-related information about a device that has been added to an import task."]}
+    let make ?sidewalk = fun () -> { sidewalk }
+    let to_value x =
+      structure_to_value
+        [("Sidewalk",
+           (Option.map x.sidewalk ~f:ImportedSidewalkDevice.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sidewalk =
+        (Option.map ~f:ImportedSidewalkDevice.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
+      make ?sidewalk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sidewalk =
+        field_map json__ "Sidewalk" ImportedSidewalkDevice.of_json in
+      make ?sidewalk ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a wireless device that has been added to an import task."]
 module DeviceProfile =
   struct
     type nonrec t =
@@ -2738,10 +7700,10 @@ module DeviceProfile =
         (Option.map ~f:DeviceProfileArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" DeviceProfileId.of_json in
-      let name = field_map json "Name" DeviceProfileName.of_json in
-      let arn = field_map json "Arn" DeviceProfileArn.of_json in
+    let of_json json__ =
+      let id = field_map json__ "Id" DeviceProfileId.of_json in
+      let name = field_map json__ "Name" DeviceProfileName.of_json in
+      let arn = field_map json__ "Arn" DeviceProfileArn.of_json in
       make ?id ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a device profile."]
@@ -2802,14 +7764,14 @@ module Destinations =
         (Option.map ~f:DestinationArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?roleArn ?description ?expression ?expressionType ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let expression = field_map json "Expression" Expression.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let expression = field_map json__ "Expression" Expression.of_json in
       let expressionType =
-        field_map json "ExpressionType" ExpressionType.of_json in
-      let name = field_map json "Name" DestinationName.of_json in
-      let arn = field_map json "Arn" DestinationArn.of_json in
+        field_map json__ "ExpressionType" ExpressionType.of_json in
+      let name = field_map json__ "Name" DestinationName.of_json in
+      let arn = field_map json__ "Arn" DestinationArn.of_json in
       make ?roleArn ?description ?expression ?expressionType ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a destination."]
@@ -2856,14 +7818,14 @@ module LoRaWANUpdateGatewayTaskCreate =
           (Xml.child xml_arg0 "UpdateSignature") in
       make ?updateVersion ?currentVersion ?sigKeyCrc ?updateSignature ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updateVersion =
-        field_map json "UpdateVersion" LoRaWANGatewayVersion.of_json in
+        field_map json__ "UpdateVersion" LoRaWANGatewayVersion.of_json in
       let currentVersion =
-        field_map json "CurrentVersion" LoRaWANGatewayVersion.of_json in
-      let sigKeyCrc = field_map json "SigKeyCrc" Crc.of_json in
+        field_map json__ "CurrentVersion" LoRaWANGatewayVersion.of_json in
+      let sigKeyCrc = field_map json__ "SigKeyCrc" Crc.of_json in
       let updateSignature =
-        field_map json "UpdateSignature" UpdateSignature.of_json in
+        field_map json__ "UpdateSignature" UpdateSignature.of_json in
       make ?updateVersion ?currentVersion ?sigKeyCrc ?updateSignature ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "LoRaWANUpdateGatewayTaskCreate object."]
@@ -2902,6 +7864,9 @@ module LoRaWANGatewayMetadataList =
   struct
     type nonrec t = LoRaWANGatewayMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LoRaWANGatewayMetadata.to_value)) |>
         (fun x -> `List x)
@@ -2922,6 +7887,35 @@ module LoRaWANGatewayMetadataList =
     let of_json j =
       list_of_json ~kind:"LoRaWANGatewayMetadataList"
         ~of_json:LoRaWANGatewayMetadata.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LoRaWANPublicGatewayMetadataList =
+  struct
+    type nonrec t = LoRaWANPublicGatewayMetadata.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LoRaWANPublicGatewayMetadata.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LoRaWANPublicGatewayMetadata.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LoRaWANPublicGatewayMetadataList"
+        ~of_json:LoRaWANPublicGatewayMetadata.of_json j
     let to_json v = composed_to_json to_value v
   end
 module BatteryLevel =
@@ -3023,28 +8017,34 @@ module AbpV1_0_x =
       {
       devAddr: DevAddr.t option [@ocaml.doc "The DevAddr value."];
       sessionKeys: SessionKeysAbpV1_0_x.t option
-        [@ocaml.doc "Session keys for ABP v1.0.x"]}
+        [@ocaml.doc "Session keys for ABP v1.0.x"];
+      fCntStart: FCntStart.t option [@ocaml.doc "The FCnt init value."]}
     let make ?devAddr =
-      fun ?sessionKeys -> fun () -> { devAddr; sessionKeys }
+      fun ?sessionKeys ->
+        fun ?fCntStart -> fun () -> { devAddr; sessionKeys; fCntStart }
     let to_value x =
       structure_to_value
         [("DevAddr", (Option.map x.devAddr ~f:DevAddr.to_value));
         ("SessionKeys",
-          (Option.map x.sessionKeys ~f:SessionKeysAbpV1_0_x.to_value))]
+          (Option.map x.sessionKeys ~f:SessionKeysAbpV1_0_x.to_value));
+        ("FCntStart", (Option.map x.fCntStart ~f:FCntStart.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let fCntStart =
+        (Option.map ~f:FCntStart.of_xml) (Xml.child xml_arg0 "FCntStart") in
       let sessionKeys =
         (Option.map ~f:SessionKeysAbpV1_0_x.of_xml)
           (Xml.child xml_arg0 "SessionKeys") in
       let devAddr =
         (Option.map ~f:DevAddr.of_xml) (Xml.child xml_arg0 "DevAddr") in
-      make ?sessionKeys ?devAddr ()
+      make ?fCntStart ?sessionKeys ?devAddr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let fCntStart = field_map json__ "FCntStart" FCntStart.of_json in
       let sessionKeys =
-        field_map json "SessionKeys" SessionKeysAbpV1_0_x.of_json in
-      let devAddr = field_map json "DevAddr" DevAddr.of_json in
-      make ?sessionKeys ?devAddr ()
+        field_map json__ "SessionKeys" SessionKeysAbpV1_0_x.of_json in
+      let devAddr = field_map json__ "DevAddr" DevAddr.of_json in
+      make ?fCntStart ?sessionKeys ?devAddr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ABP device object for LoRaWAN specification v1.0.x"]
 module AbpV1_1 =
@@ -3053,28 +8053,34 @@ module AbpV1_1 =
       {
       devAddr: DevAddr.t option [@ocaml.doc "The DevAddr value."];
       sessionKeys: SessionKeysAbpV1_1.t option
-        [@ocaml.doc "Session keys for ABP v1.1"]}
+        [@ocaml.doc "Session keys for ABP v1.1"];
+      fCntStart: FCntStart.t option [@ocaml.doc "The FCnt init value."]}
     let make ?devAddr =
-      fun ?sessionKeys -> fun () -> { devAddr; sessionKeys }
+      fun ?sessionKeys ->
+        fun ?fCntStart -> fun () -> { devAddr; sessionKeys; fCntStart }
     let to_value x =
       structure_to_value
         [("DevAddr", (Option.map x.devAddr ~f:DevAddr.to_value));
         ("SessionKeys",
-          (Option.map x.sessionKeys ~f:SessionKeysAbpV1_1.to_value))]
+          (Option.map x.sessionKeys ~f:SessionKeysAbpV1_1.to_value));
+        ("FCntStart", (Option.map x.fCntStart ~f:FCntStart.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let fCntStart =
+        (Option.map ~f:FCntStart.of_xml) (Xml.child xml_arg0 "FCntStart") in
       let sessionKeys =
         (Option.map ~f:SessionKeysAbpV1_1.of_xml)
           (Xml.child xml_arg0 "SessionKeys") in
       let devAddr =
         (Option.map ~f:DevAddr.of_xml) (Xml.child xml_arg0 "DevAddr") in
-      make ?sessionKeys ?devAddr ()
+      make ?fCntStart ?sessionKeys ?devAddr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let fCntStart = field_map json__ "FCntStart" FCntStart.of_json in
       let sessionKeys =
-        field_map json "SessionKeys" SessionKeysAbpV1_1.of_json in
-      let devAddr = field_map json "DevAddr" DevAddr.of_json in
-      make ?sessionKeys ?devAddr ()
+        field_map json__ "SessionKeys" SessionKeysAbpV1_1.of_json in
+      let devAddr = field_map json__ "DevAddr" DevAddr.of_json in
+      make ?fCntStart ?sessionKeys ?devAddr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ABP device object for LoRaWAN specification v1.1"]
 module FPorts =
@@ -3083,29 +8089,49 @@ module FPorts =
       {
       fuota: FPort.t option ;
       multicast: FPort.t option ;
-      clockSync: FPort.t option }
+      clockSync: FPort.t option ;
+      positioning: Positioning.t option
+        [@ocaml.doc
+          "FPort values for the GNSS, stream, and ClockSync functions of the positioning information."];
+      applications: Applications.t option
+        [@ocaml.doc
+          "Optional LoRaWAN application information, which can be used for geolocation."]}
     let make ?fuota =
       fun ?multicast ->
-        fun ?clockSync -> fun () -> { fuota; multicast; clockSync }
+        fun ?clockSync ->
+          fun ?positioning ->
+            fun ?applications ->
+              fun () ->
+                { fuota; multicast; clockSync; positioning; applications }
     let to_value x =
       structure_to_value
         [("Fuota", (Option.map x.fuota ~f:FPort.to_value));
         ("Multicast", (Option.map x.multicast ~f:FPort.to_value));
-        ("ClockSync", (Option.map x.clockSync ~f:FPort.to_value))]
+        ("ClockSync", (Option.map x.clockSync ~f:FPort.to_value));
+        ("Positioning", (Option.map x.positioning ~f:Positioning.to_value));
+        ("Applications",
+          (Option.map x.applications ~f:Applications.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applications =
+        (Option.map ~f:Applications.of_xml)
+          (Xml.child xml_arg0 "Applications") in
+      let positioning =
+        (Option.map ~f:Positioning.of_xml) (Xml.child xml_arg0 "Positioning") in
       let clockSync =
         (Option.map ~f:FPort.of_xml) (Xml.child xml_arg0 "ClockSync") in
       let multicast =
         (Option.map ~f:FPort.of_xml) (Xml.child xml_arg0 "Multicast") in
       let fuota = (Option.map ~f:FPort.of_xml) (Xml.child xml_arg0 "Fuota") in
-      make ?clockSync ?multicast ?fuota ()
+      make ?applications ?positioning ?clockSync ?multicast ?fuota ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clockSync = field_map json "ClockSync" FPort.of_json in
-      let multicast = field_map json "Multicast" FPort.of_json in
-      let fuota = field_map json "Fuota" FPort.of_json in
-      make ?clockSync ?multicast ?fuota ()
+    let of_json json__ =
+      let applications = field_map json__ "Applications" Applications.of_json in
+      let positioning = field_map json__ "Positioning" Positioning.of_json in
+      let clockSync = field_map json__ "ClockSync" FPort.of_json in
+      let multicast = field_map json__ "Multicast" FPort.of_json in
+      let fuota = field_map json__ "Fuota" FPort.of_json in
+      make ?applications ?positioning ?clockSync ?multicast ?fuota ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List of FPort assigned for different LoRaWAN application packages to use"]
@@ -3114,31 +8140,41 @@ module OtaaV1_0_x =
     type nonrec t =
       {
       appKey: AppKey.t option [@ocaml.doc "The AppKey value."];
-      appEui: AppEui.t option [@ocaml.doc "The AppEUI value."];
+      appEui: AppEui.t option
+        [@ocaml.doc
+          "The AppEUI value. You specify this value when using LoRaWAN versions v1.0.2 or v1.0.3."];
+      joinEui: JoinEui.t option
+        [@ocaml.doc
+          "The JoinEUI value. You specify this value instead of the AppEUI when using LoRaWAN version v1.0.4."];
       genAppKey: GenAppKey.t option [@ocaml.doc "The GenAppKey value."]}
     let make ?appKey =
       fun ?appEui ->
-        fun ?genAppKey -> fun () -> { appKey; appEui; genAppKey }
+        fun ?joinEui ->
+          fun ?genAppKey -> fun () -> { appKey; appEui; joinEui; genAppKey }
     let to_value x =
       structure_to_value
         [("AppKey", (Option.map x.appKey ~f:AppKey.to_value));
         ("AppEui", (Option.map x.appEui ~f:AppEui.to_value));
+        ("JoinEui", (Option.map x.joinEui ~f:JoinEui.to_value));
         ("GenAppKey", (Option.map x.genAppKey ~f:GenAppKey.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let genAppKey =
         (Option.map ~f:GenAppKey.of_xml) (Xml.child xml_arg0 "GenAppKey") in
+      let joinEui =
+        (Option.map ~f:JoinEui.of_xml) (Xml.child xml_arg0 "JoinEui") in
       let appEui =
         (Option.map ~f:AppEui.of_xml) (Xml.child xml_arg0 "AppEui") in
       let appKey =
         (Option.map ~f:AppKey.of_xml) (Xml.child xml_arg0 "AppKey") in
-      make ?genAppKey ?appEui ?appKey ()
+      make ?genAppKey ?joinEui ?appEui ?appKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let genAppKey = field_map json "GenAppKey" GenAppKey.of_json in
-      let appEui = field_map json "AppEui" AppEui.of_json in
-      let appKey = field_map json "AppKey" AppKey.of_json in
-      make ?genAppKey ?appEui ?appKey ()
+    let of_json json__ =
+      let genAppKey = field_map json__ "GenAppKey" GenAppKey.of_json in
+      let joinEui = field_map json__ "JoinEui" JoinEui.of_json in
+      let appEui = field_map json__ "AppEui" AppEui.of_json in
+      let appKey = field_map json__ "AppKey" AppKey.of_json in
+      make ?genAppKey ?joinEui ?appEui ?appKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "OTAA device object for v1.0.x"]
 module OtaaV1_1 =
@@ -3165,13 +8201,40 @@ module OtaaV1_1 =
         (Option.map ~f:AppKey.of_xml) (Xml.child xml_arg0 "AppKey") in
       make ?joinEui ?nwkKey ?appKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let joinEui = field_map json "JoinEui" JoinEui.of_json in
-      let nwkKey = field_map json "NwkKey" NwkKey.of_json in
-      let appKey = field_map json "AppKey" AppKey.of_json in
+    let of_json json__ =
+      let joinEui = field_map json__ "JoinEui" JoinEui.of_json in
+      let nwkKey = field_map json__ "NwkKey" NwkKey.of_json in
+      let appKey = field_map json__ "AppKey" AppKey.of_json in
       make ?joinEui ?nwkKey ?appKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "OTAA device object for v1.1"]
+module PrivateKeysList =
+  struct
+    type nonrec t = CertificateList.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CertificateList.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CertificateList.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PrivateKeysList" ~of_json:CertificateList.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AddGwMetadata =
   struct
     type nonrec t = bool
@@ -3334,6 +8397,42 @@ module MinGwDiversity =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module NbTransMax =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:15) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NbTransMax" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module NbTransMin =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:15) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NbTransMin" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module NwkGeoLoc =
   struct
     type nonrec t = bool
@@ -3416,6 +8515,42 @@ module TargetPer =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module TxPowerIndexMax =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:15) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for TxPowerIndexMax" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module TxPowerIndexMin =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:15) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for TxPowerIndexMin" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module UlBucketSize =
   struct
     type nonrec t = int
@@ -3467,6 +8602,336 @@ module UlRatePolicy =
     let of_json j = string_of_json ~kind:"UlRatePolicy" j
     let to_json = simple_to_json to_value
   end
+module HorizontalAccuracy =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in ok_or_failwith (check_float_min i ~min:0.); i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module VerticalAccuracy =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in ok_or_failwith (check_float_min i ~min:0.); i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module WiFiCellular =
+  struct
+    type nonrec t =
+      {
+      confidencePercent: ConfidencePercent.t option
+        [@ocaml.doc
+          "Confidence level for WiFi and cellular position estimates, expressed as a percentage. Valid range: 50\226\128\14799 inclusive. Defaults to 68 if not specified."]}
+    let make ?confidencePercent = fun () -> { confidencePercent }
+    let to_value x =
+      structure_to_value
+        [("ConfidencePercent",
+           (Option.map x.confidencePercent ~f:ConfidencePercent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let confidencePercent =
+        (Option.map ~f:ConfidencePercent.of_xml)
+          (Xml.child xml_arg0 "ConfidencePercent") in
+      make ?confidencePercent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let confidencePercent =
+        field_map json__ "ConfidencePercent" ConfidencePercent.of_json in
+      make ?confidencePercent ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configuration for WiFi and cellular location payloads."]
+module CdmaList =
+  struct
+    type nonrec t = CdmaObj.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:16) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CdmaObj.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CdmaObj.of_xml)
+    let of_json j = list_of_json ~kind:"CdmaList" ~of_json:CdmaObj.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GsmList =
+  struct
+    type nonrec t = GsmObj.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:16) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GsmObj.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GsmObj.of_xml)
+    let of_json j = list_of_json ~kind:"GsmList" ~of_json:GsmObj.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LteList =
+  struct
+    type nonrec t = LteObj.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:16) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LteObj.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LteObj.of_xml)
+    let of_json j = list_of_json ~kind:"LteList" ~of_json:LteObj.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TdscdmaList =
+  struct
+    type nonrec t = TdscdmaObj.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:16) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TdscdmaObj.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TdscdmaObj.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TdscdmaList" ~of_json:TdscdmaObj.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WcdmaList =
+  struct
+    type nonrec t = WcdmaObj.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:16) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WcdmaObj.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WcdmaObj.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WcdmaList" ~of_json:WcdmaObj.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AssistPosition =
+  struct
+    type nonrec t = Coordinate.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:2));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Coordinate.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Coordinate.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssistPosition" ~of_json:Coordinate.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CaptureTimeAccuracy =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module GPST =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module GnssNav =
+  struct
+    type nonrec t = string
+    let context_ = "GnssNav"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:2048); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GnssNav" j
+    let to_json = simple_to_json to_value
+  end
+module Use2DSolver =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module IPAddress =
+  struct
+    type nonrec t = string
+    let context_ = "IPAddress"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IPAddress" j
+    let to_json = simple_to_json to_value
+  end
+module WiFiAccessPoint =
+  struct
+    type nonrec t =
+      {
+      macAddress: MacAddress.t [@ocaml.doc "Wi-Fi MAC Address."];
+      rss: RSS.t
+        [@ocaml.doc
+          "Received signal strength (dBm) of the WLAN measurement data."]}
+    let context_ = "WiFiAccessPoint"
+    let make ~macAddress = fun ~rss -> fun () -> { macAddress; rss }
+    let to_value x =
+      structure_to_value
+        [("MacAddress", (Some (MacAddress.to_value x.macAddress)));
+        ("Rss", (Some (RSS.to_value x.rss)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rss = RSS.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Rss") in
+      let macAddress =
+        MacAddress.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MacAddress") in
+      make ~rss ~macAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rss = field_map_exn json__ "Rss" RSS.of_json in
+      let macAddress = field_map_exn json__ "MacAddress" MacAddress.of_json in
+      make ~rss ~macAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Wi-Fi access point."]
 module NumberOfDevicesInGroup =
   struct
     type nonrec t = int[@@ocaml.doc
@@ -3500,6 +8965,207 @@ module NumberOfDevicesRequested =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "Number of devices that are requested to be associated with the multicast group."]
+module SummaryMetricQueryResult =
+  struct
+    type nonrec t =
+      {
+      queryId: MetricQueryId.t option
+        [@ocaml.doc "The ID of the summary metric results query operation."];
+      queryStatus: MetricQueryStatus.t option
+        [@ocaml.doc "The status of the summary metric query result."];
+      error: MetricQueryError.t option
+        [@ocaml.doc "The error message for the summary metric query result."];
+      metricName: MetricName.t option
+        [@ocaml.doc "The name of the summary metric query result."];
+      dimensions: Dimensions.t option
+        [@ocaml.doc "The dimensions of the metric."];
+      aggregationPeriod: AggregationPeriod.t option
+        [@ocaml.doc "The aggregation period of the metric."];
+      startTimestamp: MetricQueryStartTimestamp.t option
+        [@ocaml.doc "The start timestamp for the summary metric query."];
+      endTimestamp: MetricQueryEndTimestamp.t option
+        [@ocaml.doc "The end timestamp for the summary metric query."];
+      timestamps: MetricQueryTimestamps.t option
+        [@ocaml.doc "The timestamp of each aggregation result."];
+      values: MetricQueryValues.t option
+        [@ocaml.doc "The list of aggregated summary metric query results."];
+      unit: MetricUnit.t option
+        [@ocaml.doc
+          "The units of measurement to be used for interpreting the aggregation result."]}
+    let make ?queryId =
+      fun ?queryStatus ->
+        fun ?error ->
+          fun ?metricName ->
+            fun ?dimensions ->
+              fun ?aggregationPeriod ->
+                fun ?startTimestamp ->
+                  fun ?endTimestamp ->
+                    fun ?timestamps ->
+                      fun ?values ->
+                        fun ?unit ->
+                          fun () ->
+                            {
+                              queryId;
+                              queryStatus;
+                              error;
+                              metricName;
+                              dimensions;
+                              aggregationPeriod;
+                              startTimestamp;
+                              endTimestamp;
+                              timestamps;
+                              values;
+                              unit
+                            }
+    let to_value x =
+      structure_to_value
+        [("QueryId", (Option.map x.queryId ~f:MetricQueryId.to_value));
+        ("QueryStatus",
+          (Option.map x.queryStatus ~f:MetricQueryStatus.to_value));
+        ("Error", (Option.map x.error ~f:MetricQueryError.to_value));
+        ("MetricName", (Option.map x.metricName ~f:MetricName.to_value));
+        ("Dimensions", (Option.map x.dimensions ~f:Dimensions.to_value));
+        ("AggregationPeriod",
+          (Option.map x.aggregationPeriod ~f:AggregationPeriod.to_value));
+        ("StartTimestamp",
+          (Option.map x.startTimestamp ~f:MetricQueryStartTimestamp.to_value));
+        ("EndTimestamp",
+          (Option.map x.endTimestamp ~f:MetricQueryEndTimestamp.to_value));
+        ("Timestamps",
+          (Option.map x.timestamps ~f:MetricQueryTimestamps.to_value));
+        ("Values", (Option.map x.values ~f:MetricQueryValues.to_value));
+        ("Unit", (Option.map x.unit ~f:MetricUnit.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unit =
+        (Option.map ~f:MetricUnit.of_xml) (Xml.child xml_arg0 "Unit") in
+      let values =
+        (Option.map ~f:MetricQueryValues.of_xml)
+          (Xml.child xml_arg0 "Values") in
+      let timestamps =
+        (Option.map ~f:MetricQueryTimestamps.of_xml)
+          (Xml.child xml_arg0 "Timestamps") in
+      let endTimestamp =
+        (Option.map ~f:MetricQueryEndTimestamp.of_xml)
+          (Xml.child xml_arg0 "EndTimestamp") in
+      let startTimestamp =
+        (Option.map ~f:MetricQueryStartTimestamp.of_xml)
+          (Xml.child xml_arg0 "StartTimestamp") in
+      let aggregationPeriod =
+        (Option.map ~f:AggregationPeriod.of_xml)
+          (Xml.child xml_arg0 "AggregationPeriod") in
+      let dimensions =
+        (Option.map ~f:Dimensions.of_xml) (Xml.child xml_arg0 "Dimensions") in
+      let metricName =
+        (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "MetricName") in
+      let error =
+        (Option.map ~f:MetricQueryError.of_xml) (Xml.child xml_arg0 "Error") in
+      let queryStatus =
+        (Option.map ~f:MetricQueryStatus.of_xml)
+          (Xml.child xml_arg0 "QueryStatus") in
+      let queryId =
+        (Option.map ~f:MetricQueryId.of_xml) (Xml.child xml_arg0 "QueryId") in
+      make ?unit ?values ?timestamps ?endTimestamp ?startTimestamp
+        ?aggregationPeriod ?dimensions ?metricName ?error ?queryStatus
+        ?queryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unit = field_map json__ "Unit" MetricUnit.of_json in
+      let values = field_map json__ "Values" MetricQueryValues.of_json in
+      let timestamps =
+        field_map json__ "Timestamps" MetricQueryTimestamps.of_json in
+      let endTimestamp =
+        field_map json__ "EndTimestamp" MetricQueryEndTimestamp.of_json in
+      let startTimestamp =
+        field_map json__ "StartTimestamp" MetricQueryStartTimestamp.of_json in
+      let aggregationPeriod =
+        field_map json__ "AggregationPeriod" AggregationPeriod.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
+      let error = field_map json__ "Error" MetricQueryError.of_json in
+      let queryStatus =
+        field_map json__ "QueryStatus" MetricQueryStatus.of_json in
+      let queryId = field_map json__ "QueryId" MetricQueryId.of_json in
+      make ?unit ?values ?timestamps ?endTimestamp ?startTimestamp
+        ?aggregationPeriod ?dimensions ?metricName ?error ?queryStatus
+        ?queryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The result of the summary metrics aggregation operation."]
+module SummaryMetricQuery =
+  struct
+    type nonrec t =
+      {
+      queryId: MetricQueryId.t option
+        [@ocaml.doc "The id of the summary metric query."];
+      metricName: MetricName.t option [@ocaml.doc "The name of the metric."];
+      dimensions: Dimensions.t option
+        [@ocaml.doc "The dimensions of the summary metric."];
+      aggregationPeriod: AggregationPeriod.t option
+        [@ocaml.doc "The aggregation period of the summary metric."];
+      startTimestamp: MetricQueryStartTimestamp.t option
+        [@ocaml.doc "The start timestamp for the summary metric query."];
+      endTimestamp: MetricQueryEndTimestamp.t option
+        [@ocaml.doc "The end timestamp for the summary metric query."]}
+    let make ?queryId =
+      fun ?metricName ->
+        fun ?dimensions ->
+          fun ?aggregationPeriod ->
+            fun ?startTimestamp ->
+              fun ?endTimestamp ->
+                fun () ->
+                  {
+                    queryId;
+                    metricName;
+                    dimensions;
+                    aggregationPeriod;
+                    startTimestamp;
+                    endTimestamp
+                  }
+    let to_value x =
+      structure_to_value
+        [("QueryId", (Option.map x.queryId ~f:MetricQueryId.to_value));
+        ("MetricName", (Option.map x.metricName ~f:MetricName.to_value));
+        ("Dimensions", (Option.map x.dimensions ~f:Dimensions.to_value));
+        ("AggregationPeriod",
+          (Option.map x.aggregationPeriod ~f:AggregationPeriod.to_value));
+        ("StartTimestamp",
+          (Option.map x.startTimestamp ~f:MetricQueryStartTimestamp.to_value));
+        ("EndTimestamp",
+          (Option.map x.endTimestamp ~f:MetricQueryEndTimestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTimestamp =
+        (Option.map ~f:MetricQueryEndTimestamp.of_xml)
+          (Xml.child xml_arg0 "EndTimestamp") in
+      let startTimestamp =
+        (Option.map ~f:MetricQueryStartTimestamp.of_xml)
+          (Xml.child xml_arg0 "StartTimestamp") in
+      let aggregationPeriod =
+        (Option.map ~f:AggregationPeriod.of_xml)
+          (Xml.child xml_arg0 "AggregationPeriod") in
+      let dimensions =
+        (Option.map ~f:Dimensions.of_xml) (Xml.child xml_arg0 "Dimensions") in
+      let metricName =
+        (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "MetricName") in
+      let queryId =
+        (Option.map ~f:MetricQueryId.of_xml) (Xml.child xml_arg0 "QueryId") in
+      make ?endTimestamp ?startTimestamp ?aggregationPeriod ?dimensions
+        ?metricName ?queryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTimestamp =
+        field_map json__ "EndTimestamp" MetricQueryEndTimestamp.of_json in
+      let startTimestamp =
+        field_map json__ "StartTimestamp" MetricQueryStartTimestamp.of_json in
+      let aggregationPeriod =
+        field_map json__ "AggregationPeriod" AggregationPeriod.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
+      let queryId = field_map json__ "QueryId" MetricQueryId.of_json in
+      make ?endTimestamp ?startTimestamp ?aggregationPeriod ?dimensions
+        ?metricName ?queryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The summary metric query object."]
 module ClassBTimeout =
   struct
     type nonrec t = int
@@ -3544,6 +9210,9 @@ module FactoryPresetFreqsList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PresetFreq.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3648,25 +9317,6 @@ module PingSlotFreq =
     let of_xml xml_arg0 =
       Int.of_string
         (string_of_xml ~kind:"an integer for PingSlotFreq" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module PingSlotPeriod =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:4096) >>=
-             (fun () -> check_int_min i ~min:128));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for PingSlotPeriod" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
@@ -3807,6 +9457,102 @@ module SupportsJoin =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module ApplicationServerPublicKey =
+  struct
+    type nonrec t = string
+    let context_ = "ApplicationServerPublicKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:4096) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-fA-F0-9]{64}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApplicationServerPublicKey" j
+    let to_json = simple_to_json to_value
+  end
+module DakCertificateMetadataList =
+  struct
+    type nonrec t = DakCertificateMetadata.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DakCertificateMetadata.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DakCertificateMetadata.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DakCertificateMetadataList"
+        ~of_json:DakCertificateMetadata.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module QualificationStatus =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module DrMaxBox =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:15) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for DrMaxBox" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module DrMinBox =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:15) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for DrMinBox" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module AccessDeniedException =
   struct
     type nonrec t = {
@@ -3821,8 +9567,8 @@ module AccessDeniedException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "User does not have permission to perform this action."]
@@ -3840,8 +9586,8 @@ module InternalServerException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An unexpected error occurred while processing a request."]
@@ -3874,10 +9620,10 @@ module ResourceNotFoundException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
+      let message = field_map json__ "Message" Message.of_json in
       make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Resource does not exist."]
@@ -3895,8 +9641,8 @@ module ThrottlingException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3915,8 +9661,8 @@ module ValidationException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input did not meet the specified constraints."]
@@ -3927,34 +9673,88 @@ module LoRaWANUpdateDevice =
       deviceProfileId: DeviceProfileId.t option
         [@ocaml.doc "The ID of the device profile for the wireless device."];
       serviceProfileId: ServiceProfileId.t option
-        [@ocaml.doc "The ID of the service profile."]}
+        [@ocaml.doc "The ID of the service profile."];
+      abpV1_1: UpdateAbpV1_1.t option
+        [@ocaml.doc "ABP device object for update APIs for v1.1"];
+      abpV1_0_x: UpdateAbpV1_0_x.t option
+        [@ocaml.doc "ABP device object for update APIs for v1.0.x"];
+      fPorts: UpdateFPorts.t option
+        [@ocaml.doc
+          "FPorts object for the positioning information of the device."]}
     let make ?deviceProfileId =
       fun ?serviceProfileId ->
-        fun () -> { deviceProfileId; serviceProfileId }
+        fun ?abpV1_1 ->
+          fun ?abpV1_0_x ->
+            fun ?fPorts ->
+              fun () ->
+                {
+                  deviceProfileId;
+                  serviceProfileId;
+                  abpV1_1;
+                  abpV1_0_x;
+                  fPorts
+                }
     let to_value x =
       structure_to_value
         [("DeviceProfileId",
            (Option.map x.deviceProfileId ~f:DeviceProfileId.to_value));
         ("ServiceProfileId",
-          (Option.map x.serviceProfileId ~f:ServiceProfileId.to_value))]
+          (Option.map x.serviceProfileId ~f:ServiceProfileId.to_value));
+        ("AbpV1_1", (Option.map x.abpV1_1 ~f:UpdateAbpV1_1.to_value));
+        ("AbpV1_0_x", (Option.map x.abpV1_0_x ~f:UpdateAbpV1_0_x.to_value));
+        ("FPorts", (Option.map x.fPorts ~f:UpdateFPorts.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let fPorts =
+        (Option.map ~f:UpdateFPorts.of_xml) (Xml.child xml_arg0 "FPorts") in
+      let abpV1_0_x =
+        (Option.map ~f:UpdateAbpV1_0_x.of_xml)
+          (Xml.child xml_arg0 "AbpV1_0_x") in
+      let abpV1_1 =
+        (Option.map ~f:UpdateAbpV1_1.of_xml) (Xml.child xml_arg0 "AbpV1_1") in
       let serviceProfileId =
         (Option.map ~f:ServiceProfileId.of_xml)
           (Xml.child xml_arg0 "ServiceProfileId") in
       let deviceProfileId =
         (Option.map ~f:DeviceProfileId.of_xml)
           (Xml.child xml_arg0 "DeviceProfileId") in
-      make ?serviceProfileId ?deviceProfileId ()
+      make ?fPorts ?abpV1_0_x ?abpV1_1 ?serviceProfileId ?deviceProfileId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let fPorts = field_map json__ "FPorts" UpdateFPorts.of_json in
+      let abpV1_0_x = field_map json__ "AbpV1_0_x" UpdateAbpV1_0_x.of_json in
+      let abpV1_1 = field_map json__ "AbpV1_1" UpdateAbpV1_1.of_json in
       let serviceProfileId =
-        field_map json "ServiceProfileId" ServiceProfileId.of_json in
+        field_map json__ "ServiceProfileId" ServiceProfileId.of_json in
       let deviceProfileId =
-        field_map json "DeviceProfileId" DeviceProfileId.of_json in
-      make ?serviceProfileId ?deviceProfileId ()
+        field_map json__ "DeviceProfileId" DeviceProfileId.of_json in
+      make ?fPorts ?abpV1_0_x ?abpV1_1 ?serviceProfileId ?deviceProfileId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "LoRaWAN object for update functions."]
+module SidewalkUpdateWirelessDevice =
+  struct
+    type nonrec t =
+      {
+      positioning: SidewalkPositioning.t option
+        [@ocaml.doc "The Positioning object of the Sidewalk device."]}
+    let make ?positioning = fun () -> { positioning }
+    let to_value x =
+      structure_to_value
+        [("Positioning",
+           (Option.map x.positioning ~f:SidewalkPositioning.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let positioning =
+        (Option.map ~f:SidewalkPositioning.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
+      make ?positioning ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let positioning =
+        field_map json__ "Positioning" SidewalkPositioning.of_json in
+      make ?positioning ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Sidewalk object for updating a wireless device."]
 module ConflictException =
   struct
     type nonrec t =
@@ -3984,125 +9784,80 @@ module ConflictException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
+      let message = field_map json__ "Message" Message.of_json in
       make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Adding, updating, or deleting the resource can cause an inconsistent state."]
-module DeviceRegistrationStateEventConfiguration =
+module SidewalkUpdateImportInfo =
   struct
     type nonrec t =
       {
-      sidewalk: SidewalkEventNotificationConfigurations.t option
+      deviceCreationFile: DeviceCreationFile.t option
         [@ocaml.doc
-          "Device registration state event configuration object for enabling or disabling Sidewalk related event topics."]}
-    let make ?sidewalk = fun () -> { sidewalk }
+          "The CSV file contained in an S3 bucket that's used for appending devices to an existing import task."]}
+    let make ?deviceCreationFile = fun () -> { deviceCreationFile }
     let to_value x =
       structure_to_value
-        [("Sidewalk",
-           (Option.map x.sidewalk
-              ~f:SidewalkEventNotificationConfigurations.to_value))]
+        [("DeviceCreationFile",
+           (Option.map x.deviceCreationFile ~f:DeviceCreationFile.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sidewalk =
-        (Option.map ~f:SidewalkEventNotificationConfigurations.of_xml)
-          (Xml.child xml_arg0 "Sidewalk") in
-      make ?sidewalk ()
+      let deviceCreationFile =
+        (Option.map ~f:DeviceCreationFile.of_xml)
+          (Xml.child xml_arg0 "DeviceCreationFile") in
+      make ?deviceCreationFile ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sidewalk =
-        field_map json "Sidewalk"
-          SidewalkEventNotificationConfigurations.of_json in
-      make ?sidewalk ()
+    let of_json json__ =
+      let deviceCreationFile =
+        field_map json__ "DeviceCreationFile" DeviceCreationFile.of_json in
+      make ?deviceCreationFile ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Device registration state event configuration object for enabling and disabling relevant topics."]
-module EventNotificationPartnerType =
-  struct
-    type nonrec t =
-      | Sidewalk 
-      | Non_static_id of string 
-    let make i = i
-    let to_string = function | Sidewalk -> "Sidewalk" | Non_static_id s -> s
-    let of_string = function | "Sidewalk" -> Sidewalk | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration EventNotificationPartnerType"
-           xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"EventNotificationPartnerType" j)
-    let to_json = simple_to_json to_value
-  end
-module Identifier =
+  end[@@ocaml.doc "Sidewalk object information for updating an import task."]
+module GeoJsonPayload =
   struct
     type nonrec t = string
-    let context_ = "Identifier"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let make i = i
     let of_string x = x
-    let to_value x = `String x
+    let to_value x = `Blob x
     let to_query v = to_query to_value v
     let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Identifier" j
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
     let to_json = simple_to_json to_value
   end
-module IdentifierType =
+module PositionCoordinate =
   struct
-    type nonrec t =
-      | PartnerAccountId 
-      | Non_static_id of string 
+    type nonrec t = PositionCoordinateValue.t list
     let make i = i
-    let to_string =
-      function
-      | PartnerAccountId -> "PartnerAccountId"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "PartnerAccountId" -> PartnerAccountId
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PositionCoordinateValue.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration IdentifierType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"IdentifierType" j)
-    let to_json = simple_to_json to_value
-  end
-module ProximityEventConfiguration =
-  struct
-    type nonrec t =
-      {
-      sidewalk: SidewalkEventNotificationConfigurations.t option
-        [@ocaml.doc
-          "Proximity event configuration object for enabling or disabling Sidewalk related event topics."]}
-    let make ?sidewalk = fun () -> { sidewalk }
-    let to_value x =
-      structure_to_value
-        [("Sidewalk",
-           (Option.map x.sidewalk
-              ~f:SidewalkEventNotificationConfigurations.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let sidewalk =
-        (Option.map ~f:SidewalkEventNotificationConfigurations.of_xml)
-          (Xml.child xml_arg0 "Sidewalk") in
-      make ?sidewalk ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sidewalk =
-        field_map json "Sidewalk"
-          SidewalkEventNotificationConfigurations.of_json in
-      make ?sidewalk ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PositionCoordinateValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PositionCoordinate"
+        ~of_json:PositionCoordinateValue.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Proximity event configuration object for enabling and disabling relevant topics."]
+  end
 module PartnerAccountId =
   struct
     type nonrec t = string
@@ -4151,64 +9906,86 @@ module SidewalkUpdateAccount =
           (Xml.child xml_arg0 "AppServerPrivateKey") in
       make ?appServerPrivateKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appServerPrivateKey =
-        field_map json "AppServerPrivateKey" AppServerPrivateKey.of_json in
+        field_map json__ "AppServerPrivateKey" AppServerPrivateKey.of_json in
       make ?appServerPrivateKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Sidewalk update."]
-module NetworkAnalyzerConfigurationName =
+module NetworkAnalyzerMulticastGroupList =
   struct
-    type nonrec t = string[@@ocaml.doc "NetworkAnalyzer configuration name."]
-    let context_ = "NetworkAnalyzerConfigurationName"
+    type nonrec t = MulticastGroupId.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"NetworkAnalyzerConfig_Default")));
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MulticastGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NetworkAnalyzerConfigurationName" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc "NetworkAnalyzer configuration name."]
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MulticastGroupId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NetworkAnalyzerMulticastGroupList"
+        ~of_json:MulticastGroupId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TraceContent =
   struct
     type nonrec t =
       {
       wirelessDeviceFrameInfo: WirelessDeviceFrameInfo.t option ;
-      logLevel: LogLevel.t option }
+      logLevel: LogLevel.t option ;
+      multicastFrameInfo: MulticastFrameInfo.t option }
     let make ?wirelessDeviceFrameInfo =
-      fun ?logLevel -> fun () -> { wirelessDeviceFrameInfo; logLevel }
+      fun ?logLevel ->
+        fun ?multicastFrameInfo ->
+          fun () -> { wirelessDeviceFrameInfo; logLevel; multicastFrameInfo }
     let to_value x =
       structure_to_value
         [("WirelessDeviceFrameInfo",
            (Option.map x.wirelessDeviceFrameInfo
               ~f:WirelessDeviceFrameInfo.to_value));
-        ("LogLevel", (Option.map x.logLevel ~f:LogLevel.to_value))]
+        ("LogLevel", (Option.map x.logLevel ~f:LogLevel.to_value));
+        ("MulticastFrameInfo",
+          (Option.map x.multicastFrameInfo ~f:MulticastFrameInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let multicastFrameInfo =
+        (Option.map ~f:MulticastFrameInfo.of_xml)
+          (Xml.child xml_arg0 "MulticastFrameInfo") in
       let logLevel =
         (Option.map ~f:LogLevel.of_xml) (Xml.child xml_arg0 "LogLevel") in
       let wirelessDeviceFrameInfo =
         (Option.map ~f:WirelessDeviceFrameInfo.of_xml)
           (Xml.child xml_arg0 "WirelessDeviceFrameInfo") in
-      make ?logLevel ?wirelessDeviceFrameInfo ()
+      make ?multicastFrameInfo ?logLevel ?wirelessDeviceFrameInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logLevel = field_map json "LogLevel" LogLevel.of_json in
+    let of_json json__ =
+      let multicastFrameInfo =
+        field_map json__ "MulticastFrameInfo" MulticastFrameInfo.of_json in
+      let logLevel = field_map json__ "LogLevel" LogLevel.of_json in
       let wirelessDeviceFrameInfo =
-        field_map json "WirelessDeviceFrameInfo"
+        field_map json__ "WirelessDeviceFrameInfo"
           WirelessDeviceFrameInfo.of_json in
-      make ?logLevel ?wirelessDeviceFrameInfo ()
+      make ?multicastFrameInfo ?logLevel ?wirelessDeviceFrameInfo ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Trace Content for resources."]
+  end[@@ocaml.doc
+       "Trace content for your wireless devices, gateways, and multicast groups."]
 module WirelessDeviceList =
   struct
     type nonrec t = WirelessDeviceId.t list
@@ -4218,6 +9995,9 @@ module WirelessDeviceList =
           ((check_list_max i ~max:250) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WirelessDeviceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4243,6 +10023,9 @@ module WirelessGatewayList =
   struct
     type nonrec t = WirelessGatewayId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WirelessGatewayId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4269,32 +10052,100 @@ module LoRaWANMulticast =
     type nonrec t =
       {
       rfRegion: SupportedRfRegion.t option ;
-      dlClass: DlClass.t option }
-    let make ?rfRegion = fun ?dlClass -> fun () -> { rfRegion; dlClass }
+      dlClass: DlClass.t option ;
+      participatingGateways: ParticipatingGatewaysMulticast.t option }
+    let make ?rfRegion =
+      fun ?dlClass ->
+        fun ?participatingGateways ->
+          fun () -> { rfRegion; dlClass; participatingGateways }
     let to_value x =
       structure_to_value
         [("RfRegion", (Option.map x.rfRegion ~f:SupportedRfRegion.to_value));
-        ("DlClass", (Option.map x.dlClass ~f:DlClass.to_value))]
+        ("DlClass", (Option.map x.dlClass ~f:DlClass.to_value));
+        ("ParticipatingGateways",
+          (Option.map x.participatingGateways
+             ~f:ParticipatingGatewaysMulticast.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let participatingGateways =
+        (Option.map ~f:ParticipatingGatewaysMulticast.of_xml)
+          (Xml.child xml_arg0 "ParticipatingGateways") in
       let dlClass =
         (Option.map ~f:DlClass.of_xml) (Xml.child xml_arg0 "DlClass") in
       let rfRegion =
         (Option.map ~f:SupportedRfRegion.of_xml)
           (Xml.child xml_arg0 "RfRegion") in
-      make ?dlClass ?rfRegion ()
+      make ?participatingGateways ?dlClass ?rfRegion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dlClass = field_map json "DlClass" DlClass.of_json in
-      let rfRegion = field_map json "RfRegion" SupportedRfRegion.of_json in
-      make ?dlClass ?rfRegion ()
+    let of_json json__ =
+      let participatingGateways =
+        field_map json__ "ParticipatingGateways"
+          ParticipatingGatewaysMulticast.of_json in
+      let dlClass = field_map json__ "DlClass" DlClass.of_json in
+      let rfRegion = field_map json__ "RfRegion" SupportedRfRegion.of_json in
+      make ?participatingGateways ?dlClass ?rfRegion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The LoRaWAN information that is to be used with the multicast group."]
+module SummaryMetricConfiguration =
+  struct
+    type nonrec t =
+      {
+      status: SummaryMetricConfigurationStatus.t option
+        [@ocaml.doc "The status of the configuration of summary metrics."]}
+    let make ?status = fun () -> { status }
+    let to_value x =
+      structure_to_value
+        [("Status",
+           (Option.map x.status ~f:SummaryMetricConfigurationStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:SummaryMetricConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "Status" SummaryMetricConfigurationStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration of summary metrics."]
+module FuotaTaskLogOptionList =
+  struct
+    type nonrec t = FuotaTaskLogOption.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FuotaTaskLogOption.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FuotaTaskLogOption.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FuotaTaskLogOptionList"
+        ~of_json:FuotaTaskLogOption.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module WirelessDeviceLogOptionList =
   struct
     type nonrec t = WirelessDeviceLogOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WirelessDeviceLogOption.to_value)) |>
         (fun x -> `List x)
@@ -4321,6 +10172,9 @@ module WirelessGatewayLogOptionList =
   struct
     type nonrec t = WirelessGatewayLogOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WirelessGatewayLogOption.to_value)) |>
         (fun x -> `List x)
@@ -4343,6 +10197,28 @@ module WirelessGatewayLogOptionList =
         ~of_json:WirelessGatewayLogOption.of_json j
     let to_json v = composed_to_json to_value v
   end
+module FileDescriptor =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The descriptor is the metadata about the file that is transferred to the device using FUOTA, such as the software version. It is a binary field encoded in base64."]
+    let context_ = "FileDescriptor"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:332) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FileDescriptor" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The descriptor is the metadata about the file that is transferred to the device using FUOTA, such as the software version. It is a binary field encoded in base64."]
 module FirmwareUpdateImage =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -4383,6 +10259,40 @@ module FirmwareUpdateRole =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "The firmware update role that is to be used with a FUOTA task."]
+module FragmentIntervalMS =
+  struct
+    type nonrec t = int[@@ocaml.doc
+                         "The interval for sending fragments in milliseconds, rounded to the nearest second. This interval only determines the timing for when the Cloud sends down the fragments to yor device. There can be a delay for when your device will receive these fragments. This delay depends on the device's class and the communication delay with the cloud."]
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for FragmentIntervalMS" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The interval for sending fragments in milliseconds, rounded to the nearest second. This interval only determines the timing for when the Cloud sends down the fragments to yor device. There can be a delay for when your device will receive these fragments. This delay depends on the device's class and the communication delay with the cloud."]
+module FragmentSizeBytes =
+  struct
+    type nonrec t = int[@@ocaml.doc
+                         "The size of each fragment in bytes. This parameter is supported only for FUOTA tasks with multicast groups."]
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for FragmentSizeBytes" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The size of each fragment in bytes. This parameter is supported only for FUOTA tasks with multicast groups."]
 module LoRaWANFuotaTask =
   struct
     type nonrec t = {
@@ -4398,11 +10308,170 @@ module LoRaWANFuotaTask =
           (Xml.child xml_arg0 "RfRegion") in
       make ?rfRegion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rfRegion = field_map json "RfRegion" SupportedRfRegion.of_json in
+    let of_json json__ =
+      let rfRegion = field_map json__ "RfRegion" SupportedRfRegion.of_json in
       make ?rfRegion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The LoRaWAN information used with a FUOTA task."]
+module RedundancyPercent =
+  struct
+    type nonrec t = int[@@ocaml.doc
+                         "The percentage of the added fragments that are redundant. For example, if the size of the firmware image file is 100 bytes and the fragment size is 10 bytes, with RedundancyPercent set to 50(%), the final number of encoded fragments is (100 / 10) + (100 / 10 * 50%) = 15."]
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RedundancyPercent" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The percentage of the added fragments that are redundant. For example, if the size of the firmware image file is 100 bytes and the fragment size is 10 bytes, with RedundancyPercent set to 50(%), the final number of encoded fragments is (100 / 10) + (100 / 10 * 50%) = 15."]
+module ConnectionStatusResourceTypeEventConfiguration =
+  struct
+    type nonrec t =
+      {
+      loRaWAN: LoRaWANConnectionStatusResourceTypeEventConfiguration.t option
+        [@ocaml.doc
+          "Connection status resource type event configuration object for enabling or disabling LoRaWAN related event topics."]}
+    let make ?loRaWAN = fun () -> { loRaWAN }
+    let to_value x =
+      structure_to_value
+        [("LoRaWAN",
+           (Option.map x.loRaWAN
+              ~f:LoRaWANConnectionStatusResourceTypeEventConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let loRaWAN =
+        (Option.map
+           ~f:LoRaWANConnectionStatusResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "LoRaWAN") in
+      make ?loRaWAN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let loRaWAN =
+        field_map json__ "LoRaWAN"
+          LoRaWANConnectionStatusResourceTypeEventConfiguration.of_json in
+      make ?loRaWAN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Connection status resource type event configuration object for enabling or disabling topic."]
+module DeviceRegistrationStateResourceTypeEventConfiguration =
+  struct
+    type nonrec t =
+      {
+      sidewalk: SidewalkResourceTypeEventConfiguration.t option
+        [@ocaml.doc
+          "Device registration resource type state event configuration object for enabling or disabling Sidewalk related event topics."]}
+    let make ?sidewalk = fun () -> { sidewalk }
+    let to_value x =
+      structure_to_value
+        [("Sidewalk",
+           (Option.map x.sidewalk
+              ~f:SidewalkResourceTypeEventConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sidewalk =
+        (Option.map ~f:SidewalkResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
+      make ?sidewalk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sidewalk =
+        field_map json__ "Sidewalk"
+          SidewalkResourceTypeEventConfiguration.of_json in
+      make ?sidewalk ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Device registration state resource type event configuration object for enabling or disabling topic."]
+module JoinResourceTypeEventConfiguration =
+  struct
+    type nonrec t =
+      {
+      loRaWAN: LoRaWANJoinResourceTypeEventConfiguration.t option
+        [@ocaml.doc
+          "Join resource type event configuration object for enabling or disabling LoRaWAN related event topics."]}
+    let make ?loRaWAN = fun () -> { loRaWAN }
+    let to_value x =
+      structure_to_value
+        [("LoRaWAN",
+           (Option.map x.loRaWAN
+              ~f:LoRaWANJoinResourceTypeEventConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let loRaWAN =
+        (Option.map ~f:LoRaWANJoinResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "LoRaWAN") in
+      make ?loRaWAN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let loRaWAN =
+        field_map json__ "LoRaWAN"
+          LoRaWANJoinResourceTypeEventConfiguration.of_json in
+      make ?loRaWAN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Join resource type event configuration object for enabling or disabling topic."]
+module MessageDeliveryStatusResourceTypeEventConfiguration =
+  struct
+    type nonrec t =
+      {
+      sidewalk: SidewalkResourceTypeEventConfiguration.t option }
+    let make ?sidewalk = fun () -> { sidewalk }
+    let to_value x =
+      structure_to_value
+        [("Sidewalk",
+           (Option.map x.sidewalk
+              ~f:SidewalkResourceTypeEventConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sidewalk =
+        (Option.map ~f:SidewalkResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
+      make ?sidewalk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sidewalk =
+        field_map json__ "Sidewalk"
+          SidewalkResourceTypeEventConfiguration.of_json in
+      make ?sidewalk ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Message delivery status resource type event configuration object for enabling or disabling relevant topic."]
+module ProximityResourceTypeEventConfiguration =
+  struct
+    type nonrec t =
+      {
+      sidewalk: SidewalkResourceTypeEventConfiguration.t option
+        [@ocaml.doc
+          "Proximity resource type event configuration object for enabling and disabling wireless device topic."]}
+    let make ?sidewalk = fun () -> { sidewalk }
+    let to_value x =
+      structure_to_value
+        [("Sidewalk",
+           (Option.map x.sidewalk
+              ~f:SidewalkResourceTypeEventConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sidewalk =
+        (Option.map ~f:SidewalkResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
+      make ?sidewalk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sidewalk =
+        field_map json__ "Sidewalk"
+          SidewalkResourceTypeEventConfiguration.of_json in
+      make ?sidewalk ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Proximity resource type event configuration object for enabling or disabling topic."]
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
@@ -4412,6 +10481,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4469,10 +10541,10 @@ module TooManyTagsException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceName =
-        field_map json "ResourceName" AmazonResourceName.of_json in
-      let message = field_map json "Message" Message.of_json in
+        field_map json__ "ResourceName" AmazonResourceName.of_json in
+      let message = field_map json__ "Message" Message.of_json in
       make ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4486,6 +10558,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4505,6 +10580,123 @@ module TagList =
     let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ClientRequestToken =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "Each resource must have a unique client request token. The client token is used to implement idempotency. It ensures that the request completes no more than one time. If you retry a request with the same token and the same parameters, the request will complete successfully. However, if you try to create a new resource using the same token but different parameters, an HTTP 409 conflict occurs. If you omit this value, AWS SDKs will automatically generate a unique client request. For more information about idempotency, see Ensuring idempotency in Amazon EC2 API requests."]
+    let context_ = "ClientRequestToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9-_]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientRequestToken" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "Each resource must have a unique client request token. The client token is used to implement idempotency. It ensures that the request completes no more than one time. If you retry a request with the same token and the same parameters, the request will complete successfully. However, if you try to create a new resource using the same token but different parameters, an HTTP 409 conflict occurs. If you omit this value, AWS SDKs will automatically generate a unique client request. For more information about idempotency, see Ensuring idempotency in Amazon EC2 API requests."]
+module SidewalkStartImportInfo =
+  struct
+    type nonrec t =
+      {
+      deviceCreationFile: DeviceCreationFile.t option
+        [@ocaml.doc
+          "The CSV file contained in an S3 bucket that's used for adding devices to an import task."];
+      role: Role.t option
+        [@ocaml.doc
+          "The IAM role that allows AWS IoT Wireless to access the CSV file in the S3 bucket."];
+      positioning: SidewalkPositioning.t option
+        [@ocaml.doc "The Positioning object of the Sidewalk device."]}
+    let make ?deviceCreationFile =
+      fun ?role ->
+        fun ?positioning ->
+          fun () -> { deviceCreationFile; role; positioning }
+    let to_value x =
+      structure_to_value
+        [("DeviceCreationFile",
+           (Option.map x.deviceCreationFile ~f:DeviceCreationFile.to_value));
+        ("Role", (Option.map x.role ~f:Role.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:SidewalkPositioning.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let positioning =
+        (Option.map ~f:SidewalkPositioning.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
+      let role = (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "Role") in
+      let deviceCreationFile =
+        (Option.map ~f:DeviceCreationFile.of_xml)
+          (Xml.child xml_arg0 "DeviceCreationFile") in
+      make ?positioning ?role ?deviceCreationFile ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let positioning =
+        field_map json__ "Positioning" SidewalkPositioning.of_json in
+      let role = field_map json__ "Role" Role.of_json in
+      let deviceCreationFile =
+        field_map json__ "DeviceCreationFile" DeviceCreationFile.of_json in
+      make ?positioning ?role ?deviceCreationFile ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about an import task created for bulk provisioning."]
+module DeviceName =
+  struct
+    type nonrec t = string
+    let context_ = "DeviceName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeviceName" j
+    let to_json = simple_to_json to_value
+  end
+module SidewalkSingleStartImportInfo =
+  struct
+    type nonrec t =
+      {
+      sidewalkManufacturingSn: SidewalkManufacturingSn.t option
+        [@ocaml.doc
+          "The Sidewalk manufacturing serial number (SMSN) of the device added to the import task."];
+      positioning: SidewalkPositioning.t option
+        [@ocaml.doc "The Positioning object of the Sidewalk device."]}
+    let make ?sidewalkManufacturingSn =
+      fun ?positioning -> fun () -> { sidewalkManufacturingSn; positioning }
+    let to_value x =
+      structure_to_value
+        [("SidewalkManufacturingSn",
+           (Option.map x.sidewalkManufacturingSn
+              ~f:SidewalkManufacturingSn.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:SidewalkPositioning.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let positioning =
+        (Option.map ~f:SidewalkPositioning.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
+      let sidewalkManufacturingSn =
+        (Option.map ~f:SidewalkManufacturingSn.of_xml)
+          (Xml.child xml_arg0 "SidewalkManufacturingSn") in
+      make ?positioning ?sidewalkManufacturingSn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let positioning =
+        field_map json__ "Positioning" SidewalkPositioning.of_json in
+      let sidewalkManufacturingSn =
+        field_map json__ "SidewalkManufacturingSn"
+          SidewalkManufacturingSn.of_json in
+      make ?positioning ?sidewalkManufacturingSn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about an import task created for an individual Sidewalk device."]
 module LoRaWANMulticastSession =
   struct
     type nonrec t =
@@ -4512,12 +10704,22 @@ module LoRaWANMulticastSession =
       dlDr: DlDr.t option ;
       dlFreq: DlFreq.t option ;
       sessionStartTime: SessionStartTimeTimestamp.t option ;
-      sessionTimeout: SessionTimeout.t option }
+      sessionTimeout: SessionTimeout.t option ;
+      pingSlotPeriod: PingSlotPeriod.t option
+        [@ocaml.doc "The PingSlotPeriod value."]}
     let make ?dlDr =
       fun ?dlFreq ->
         fun ?sessionStartTime ->
           fun ?sessionTimeout ->
-            fun () -> { dlDr; dlFreq; sessionStartTime; sessionTimeout }
+            fun ?pingSlotPeriod ->
+              fun () ->
+                {
+                  dlDr;
+                  dlFreq;
+                  sessionStartTime;
+                  sessionTimeout;
+                  pingSlotPeriod
+                }
     let to_value x =
       structure_to_value
         [("DlDr", (Option.map x.dlDr ~f:DlDr.to_value));
@@ -4526,9 +10728,14 @@ module LoRaWANMulticastSession =
           (Option.map x.sessionStartTime
              ~f:SessionStartTimeTimestamp.to_value));
         ("SessionTimeout",
-          (Option.map x.sessionTimeout ~f:SessionTimeout.to_value))]
+          (Option.map x.sessionTimeout ~f:SessionTimeout.to_value));
+        ("PingSlotPeriod",
+          (Option.map x.pingSlotPeriod ~f:PingSlotPeriod.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let pingSlotPeriod =
+        (Option.map ~f:PingSlotPeriod.of_xml)
+          (Xml.child xml_arg0 "PingSlotPeriod") in
       let sessionTimeout =
         (Option.map ~f:SessionTimeout.of_xml)
           (Xml.child xml_arg0 "SessionTimeout") in
@@ -4538,16 +10745,18 @@ module LoRaWANMulticastSession =
       let dlFreq =
         (Option.map ~f:DlFreq.of_xml) (Xml.child xml_arg0 "DlFreq") in
       let dlDr = (Option.map ~f:DlDr.of_xml) (Xml.child xml_arg0 "DlDr") in
-      make ?sessionTimeout ?sessionStartTime ?dlFreq ?dlDr ()
+      make ?pingSlotPeriod ?sessionTimeout ?sessionStartTime ?dlFreq ?dlDr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let pingSlotPeriod =
+        field_map json__ "PingSlotPeriod" PingSlotPeriod.of_json in
       let sessionTimeout =
-        field_map json "SessionTimeout" SessionTimeout.of_json in
+        field_map json__ "SessionTimeout" SessionTimeout.of_json in
       let sessionStartTime =
-        field_map json "SessionStartTime" SessionStartTimeTimestamp.of_json in
-      let dlFreq = field_map json "DlFreq" DlFreq.of_json in
-      let dlDr = field_map json "DlDr" DlDr.of_json in
-      make ?sessionTimeout ?sessionStartTime ?dlFreq ?dlDr ()
+        field_map json__ "SessionStartTime" SessionStartTimeTimestamp.of_json in
+      let dlFreq = field_map json__ "DlFreq" DlFreq.of_json in
+      let dlDr = field_map json__ "DlDr" DlDr.of_json in
+      make ?pingSlotPeriod ?sessionTimeout ?sessionStartTime ?dlFreq ?dlDr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The LoRaWAN information used with the multicast session."]
 module LoRaWANStartFuotaTask =
@@ -4564,8 +10773,8 @@ module LoRaWANStartFuotaTask =
         (Option.map ~f:StartTime.of_xml) (Xml.child xml_arg0 "StartTime") in
       make ?startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startTime = field_map json "StartTime" StartTime.of_json in
+    let of_json json__ =
+      let startTime = field_map json__ "StartTime" StartTime.of_json in
       make ?startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The LoRaWAN information used to start a FUOTA task."]
@@ -4632,10 +10841,11 @@ module WirelessMetadata =
           (Xml.child xml_arg0 "LoRaWAN") in
       make ?sidewalk ?loRaWAN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sidewalk =
-        field_map json "Sidewalk" SidewalkSendDataToDevice.of_json in
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANSendDataToDevice.of_json in
+        field_map json__ "Sidewalk" SidewalkSendDataToDevice.of_json in
+      let loRaWAN =
+        field_map json__ "LoRaWAN" LoRaWANSendDataToDevice.of_json in
       make ?sidewalk ?loRaWAN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "WirelessMetadata object."]
@@ -4669,15 +10879,16 @@ module MulticastWirelessMetadata =
           (Xml.child xml_arg0 "LoRaWAN") in
       make ?loRaWAN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANMulticastMetadata.of_json in
+    let of_json json__ =
+      let loRaWAN =
+        field_map json__ "LoRaWAN" LoRaWANMulticastMetadata.of_json in
       make ?loRaWAN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Wireless metadata that is to be sent to multicast group."]
 module ResourceIdentifier =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "The identifier of the resource. For a Wireless Device, it is the wireless device ID. For a wireless gateway, it is the wireless gateway ID."]
+                            "The unique identifier of the resource, which can be the wireless gateway ID, the wireless device ID, or the FUOTA task ID."]
     let context_ = "ResourceIdentifier"
     let make i =
       let open Result in ok_or_failwith (check_string_max i ~max:256); i
@@ -4689,7 +10900,31 @@ module ResourceIdentifier =
     let of_json j = string_of_json ~kind:"ResourceIdentifier" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "The identifier of the resource. For a Wireless Device, it is the wireless device ID. For a wireless gateway, it is the wireless gateway ID."]
+       "The unique identifier of the resource, which can be the wireless gateway ID, the wireless device ID, or the FUOTA task ID."]
+module PositionSolverConfigurations =
+  struct
+    type nonrec t =
+      {
+      semtechGnss: SemtechGnssConfiguration.t option
+        [@ocaml.doc "The Semtech GNSS solver configuration object."]}
+    let make ?semtechGnss = fun () -> { semtechGnss }
+    let to_value x =
+      structure_to_value
+        [("SemtechGnss",
+           (Option.map x.semtechGnss ~f:SemtechGnssConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let semtechGnss =
+        (Option.map ~f:SemtechGnssConfiguration.of_xml)
+          (Xml.child xml_arg0 "SemtechGnss") in
+      make ?semtechGnss ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let semtechGnss =
+        field_map json__ "SemtechGnss" SemtechGnssConfiguration.of_json in
+      make ?semtechGnss ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The wrapper for position solver configurations."]
 module NextToken =
   struct
     type nonrec t = string
@@ -4708,6 +10943,9 @@ module WirelessGatewayStatisticsList =
   struct
     type nonrec t = WirelessGatewayStatistics.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WirelessGatewayStatistics.to_value)) |>
         (fun x -> `List x)
@@ -4754,6 +10992,9 @@ module WirelessGatewayTaskDefinitionList =
   struct
     type nonrec t = UpdateWirelessGatewayTaskEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpdateWirelessGatewayTaskEntry.to_value)) |>
         (fun x -> `List x)
@@ -4799,6 +11040,9 @@ module WirelessDeviceStatisticsList =
   struct
     type nonrec t = WirelessDeviceStatistics.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WirelessDeviceStatistics.to_value)) |>
         (fun x -> `List x)
@@ -4821,10 +11065,42 @@ module WirelessDeviceStatisticsList =
         ~of_json:WirelessDeviceStatistics.of_json j
     let to_json v = composed_to_json to_value v
   end
+module WirelessDeviceImportTaskList =
+  struct
+    type nonrec t = WirelessDeviceImportTask.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WirelessDeviceImportTask.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WirelessDeviceImportTask.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WirelessDeviceImportTaskList"
+        ~of_json:WirelessDeviceImportTask.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ServiceProfileList =
   struct
     type nonrec t = ServiceProfile.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceProfile.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4850,6 +11126,9 @@ module DownlinkQueueMessagesList =
   struct
     type nonrec t = DownlinkQueueMessage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DownlinkQueueMessage.to_value)) |>
         (fun x -> `List x)
@@ -4872,10 +11151,42 @@ module DownlinkQueueMessagesList =
         ~of_json:DownlinkQueueMessage.of_json j
     let to_json v = composed_to_json to_value v
   end
+module PositionConfigurationList =
+  struct
+    type nonrec t = PositionConfigurationItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PositionConfigurationItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PositionConfigurationItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PositionConfigurationList"
+        ~of_json:PositionConfigurationItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SidewalkAccountList =
   struct
     type nonrec t = SidewalkAccountInfoWithFingerprint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SidewalkAccountInfoWithFingerprint.to_value)) |>
         (fun x -> `List x)
@@ -4899,10 +11210,42 @@ module SidewalkAccountList =
         ~of_json:SidewalkAccountInfoWithFingerprint.of_json j
     let to_json v = composed_to_json to_value v
   end
+module NetworkAnalyzerConfigurationList =
+  struct
+    type nonrec t = NetworkAnalyzerConfigurations.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NetworkAnalyzerConfigurations.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NetworkAnalyzerConfigurations.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NetworkAnalyzerConfigurationList"
+        ~of_json:NetworkAnalyzerConfigurations.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module MulticastGroupList =
   struct
     type nonrec t = MulticastGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MulticastGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4928,6 +11271,9 @@ module MulticastGroupListByFuotaTask =
   struct
     type nonrec t = MulticastGroupByFuotaTask.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MulticastGroupByFuotaTask.to_value)) |>
         (fun x -> `List x)
@@ -4954,6 +11300,9 @@ module FuotaTaskList =
   struct
     type nonrec t = FuotaTask.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FuotaTask.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4974,10 +11323,127 @@ module FuotaTaskList =
       list_of_json ~kind:"FuotaTaskList" ~of_json:FuotaTask.of_json j
     let to_json v = composed_to_json to_value v
   end
+module EventConfigurationsList =
+  struct
+    type nonrec t = EventConfigurationItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EventConfigurationItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EventConfigurationItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EventConfigurationsList"
+        ~of_json:EventConfigurationItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EventNotificationResourceType =
+  struct
+    type nonrec t =
+      | SidewalkAccount 
+      | WirelessDevice 
+      | WirelessGateway 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SidewalkAccount -> "SidewalkAccount"
+      | WirelessDevice -> "WirelessDevice"
+      | WirelessGateway -> "WirelessGateway"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SidewalkAccount" -> SidewalkAccount
+      | "WirelessDevice" -> WirelessDevice
+      | "WirelessGateway" -> WirelessGateway
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EventNotificationResourceType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EventNotificationResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module ImportedWirelessDeviceList =
+  struct
+    type nonrec t = ImportedWirelessDevice.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImportedWirelessDevice.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImportedWirelessDevice.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImportedWirelessDeviceList"
+        ~of_json:ImportedWirelessDevice.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SidewalkListDevicesForImportInfo =
+  struct
+    type nonrec t =
+      {
+      positioning: SidewalkPositioning.t option
+        [@ocaml.doc "The Positioning object of the Sidewalk device."]}
+    let make ?positioning = fun () -> { positioning }
+    let to_value x =
+      structure_to_value
+        [("Positioning",
+           (Option.map x.positioning ~f:SidewalkPositioning.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let positioning =
+        (Option.map ~f:SidewalkPositioning.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
+      make ?positioning ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let positioning =
+        field_map json__ "Positioning" SidewalkPositioning.of_json in
+      make ?positioning ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Sidewalk-related object containing positioning information used to configure Sidewalk devices during import."]
 module DeviceProfileList =
   struct
     type nonrec t = DeviceProfile.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeviceProfile.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4998,10 +11464,39 @@ module DeviceProfileList =
       list_of_json ~kind:"DeviceProfileList" ~of_json:DeviceProfile.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DeviceProfileType =
+  struct
+    type nonrec t =
+      | Sidewalk 
+      | LoRaWAN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Sidewalk -> "Sidewalk"
+      | LoRaWAN -> "LoRaWAN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Sidewalk" -> Sidewalk
+      | "LoRaWAN" -> LoRaWAN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DeviceProfileType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeviceProfileType" j)
+    let to_json = simple_to_json to_value
+  end
 module DestinationList =
   struct
     type nonrec t = Destinations.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Destinations.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5110,13 +11605,13 @@ module UpdateWirelessGatewayTaskCreate =
           (Xml.child xml_arg0 "UpdateDataSource") in
       make ?loRaWAN ?updateDataRole ?updateDataSource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loRaWAN =
-        field_map json "LoRaWAN" LoRaWANUpdateGatewayTaskCreate.of_json in
+        field_map json__ "LoRaWAN" LoRaWANUpdateGatewayTaskCreate.of_json in
       let updateDataRole =
-        field_map json "UpdateDataRole" UpdateDataSource.of_json in
+        field_map json__ "UpdateDataRole" UpdateDataSource.of_json in
       let updateDataSource =
-        field_map json "UpdateDataSource" UpdateDataSource.of_json in
+        field_map json__ "UpdateDataSource" UpdateDataSource.of_json in
       make ?loRaWAN ?updateDataRole ?updateDataSource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "UpdateWirelessGatewayTaskCreate object."]
@@ -5238,9 +11733,9 @@ module LoRaWANGatewayCurrentVersion =
           (Xml.child xml_arg0 "CurrentVersion") in
       make ?currentVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let currentVersion =
-        field_map json "CurrentVersion" LoRaWANGatewayVersion.of_json in
+        field_map json__ "CurrentVersion" LoRaWANGatewayVersion.of_json in
       make ?currentVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "LoRaWANGatewayCurrentVersion object."]
@@ -5274,15 +11769,27 @@ module LoRaWANDeviceMetadata =
       timestamp: ISODateTimeString.t option
         [@ocaml.doc "The date and time of the metadata."];
       gateways: LoRaWANGatewayMetadataList.t option
-        [@ocaml.doc "Information about the gateways accessed by the device."]}
+        [@ocaml.doc "Information about the gateways accessed by the device."];
+      publicGateways: LoRaWANPublicGatewayMetadataList.t option
+        [@ocaml.doc
+          "Information about the LoRaWAN public network accessed by the device."]}
     let make ?devEui =
       fun ?fPort ->
         fun ?dataRate ->
           fun ?frequency ->
             fun ?timestamp ->
               fun ?gateways ->
-                fun () ->
-                  { devEui; fPort; dataRate; frequency; timestamp; gateways }
+                fun ?publicGateways ->
+                  fun () ->
+                    {
+                      devEui;
+                      fPort;
+                      dataRate;
+                      frequency;
+                      timestamp;
+                      gateways;
+                      publicGateways
+                    }
     let to_value x =
       structure_to_value
         [("DevEui", (Option.map x.devEui ~f:DevEui.to_value));
@@ -5291,9 +11798,15 @@ module LoRaWANDeviceMetadata =
         ("Frequency", (Option.map x.frequency ~f:Integer.to_value));
         ("Timestamp", (Option.map x.timestamp ~f:ISODateTimeString.to_value));
         ("Gateways",
-          (Option.map x.gateways ~f:LoRaWANGatewayMetadataList.to_value))]
+          (Option.map x.gateways ~f:LoRaWANGatewayMetadataList.to_value));
+        ("PublicGateways",
+          (Option.map x.publicGateways
+             ~f:LoRaWANPublicGatewayMetadataList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let publicGateways =
+        (Option.map ~f:LoRaWANPublicGatewayMetadataList.of_xml)
+          (Xml.child xml_arg0 "PublicGateways") in
       let gateways =
         (Option.map ~f:LoRaWANGatewayMetadataList.of_xml)
           (Xml.child xml_arg0 "Gateways") in
@@ -5307,17 +11820,22 @@ module LoRaWANDeviceMetadata =
       let fPort = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "FPort") in
       let devEui =
         (Option.map ~f:DevEui.of_xml) (Xml.child xml_arg0 "DevEui") in
-      make ?gateways ?timestamp ?frequency ?dataRate ?fPort ?devEui ()
+      make ?publicGateways ?gateways ?timestamp ?frequency ?dataRate ?fPort
+        ?devEui ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let publicGateways =
+        field_map json__ "PublicGateways"
+          LoRaWANPublicGatewayMetadataList.of_json in
       let gateways =
-        field_map json "Gateways" LoRaWANGatewayMetadataList.of_json in
-      let timestamp = field_map json "Timestamp" ISODateTimeString.of_json in
-      let frequency = field_map json "Frequency" Integer.of_json in
-      let dataRate = field_map json "DataRate" Integer.of_json in
-      let fPort = field_map json "FPort" Integer.of_json in
-      let devEui = field_map json "DevEui" DevEui.of_json in
-      make ?gateways ?timestamp ?frequency ?dataRate ?fPort ?devEui ()
+        field_map json__ "Gateways" LoRaWANGatewayMetadataList.of_json in
+      let timestamp = field_map json__ "Timestamp" ISODateTimeString.of_json in
+      let frequency = field_map json__ "Frequency" Integer.of_json in
+      let dataRate = field_map json__ "DataRate" Integer.of_json in
+      let fPort = field_map json__ "FPort" Integer.of_json in
+      let devEui = field_map json__ "DevEui" DevEui.of_json in
+      make ?publicGateways ?gateways ?timestamp ?frequency ?dataRate ?fPort
+        ?devEui ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "LoRaWAN device metatdata."]
 module SidewalkDeviceMetadata =
@@ -5355,11 +11873,11 @@ module SidewalkDeviceMetadata =
       let rssi = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Rssi") in
       make ?deviceState ?event ?batteryLevel ?rssi ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deviceState = field_map json "DeviceState" DeviceState.of_json in
-      let event = field_map json "Event" Event.of_json in
-      let batteryLevel = field_map json "BatteryLevel" BatteryLevel.of_json in
-      let rssi = field_map json "Rssi" Integer.of_json in
+    let of_json json__ =
+      let deviceState = field_map json__ "DeviceState" DeviceState.of_json in
+      let event = field_map json__ "Event" Event.of_json in
+      let batteryLevel = field_map json__ "BatteryLevel" BatteryLevel.of_json in
+      let rssi = field_map json__ "Rssi" Integer.of_json in
       make ?deviceState ?event ?batteryLevel ?rssi ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "MetaData for Sidewalk device."]
@@ -5436,17 +11954,17 @@ module LoRaWANDevice =
       make ?fPorts ?abpV1_0_x ?abpV1_1 ?otaaV1_0_x ?otaaV1_1
         ?serviceProfileId ?deviceProfileId ?devEui ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fPorts = field_map json "FPorts" FPorts.of_json in
-      let abpV1_0_x = field_map json "AbpV1_0_x" AbpV1_0_x.of_json in
-      let abpV1_1 = field_map json "AbpV1_1" AbpV1_1.of_json in
-      let otaaV1_0_x = field_map json "OtaaV1_0_x" OtaaV1_0_x.of_json in
-      let otaaV1_1 = field_map json "OtaaV1_1" OtaaV1_1.of_json in
+    let of_json json__ =
+      let fPorts = field_map json__ "FPorts" FPorts.of_json in
+      let abpV1_0_x = field_map json__ "AbpV1_0_x" AbpV1_0_x.of_json in
+      let abpV1_1 = field_map json__ "AbpV1_1" AbpV1_1.of_json in
+      let otaaV1_0_x = field_map json__ "OtaaV1_0_x" OtaaV1_0_x.of_json in
+      let otaaV1_1 = field_map json__ "OtaaV1_1" OtaaV1_1.of_json in
       let serviceProfileId =
-        field_map json "ServiceProfileId" ServiceProfileId.of_json in
+        field_map json__ "ServiceProfileId" ServiceProfileId.of_json in
       let deviceProfileId =
-        field_map json "DeviceProfileId" DeviceProfileId.of_json in
-      let devEui = field_map json "DevEui" DevEui.of_json in
+        field_map json__ "DeviceProfileId" DeviceProfileId.of_json in
+      let devEui = field_map json__ "DevEui" DevEui.of_json in
       make ?fPorts ?abpV1_0_x ?abpV1_1 ?otaaV1_0_x ?otaaV1_1
         ?serviceProfileId ?deviceProfileId ?devEui ()
     let to_json v = composed_to_json to_value v
@@ -5462,18 +11980,40 @@ module SidewalkDevice =
         [@ocaml.doc "The Sidewalk manufacturing series number."];
       deviceCertificates: DeviceCertificateList.t option
         [@ocaml.doc
-          "The sidewalk device certificates for Ed25519 and P256r1."]}
+          "The sidewalk device certificates for Ed25519 and P256r1."];
+      privateKeys: PrivateKeysList.t option
+        [@ocaml.doc
+          "The Sidewalk device private keys that will be used for onboarding the device."];
+      deviceProfileId: DeviceProfileId.t option
+        [@ocaml.doc "The ID of the Sidewalk device profile."];
+      certificateId: DakCertificateId.t option
+        [@ocaml.doc "The ID of the Sidewalk device profile."];
+      status: WirelessDeviceSidewalkStatus.t option
+        [@ocaml.doc
+          "The Sidewalk device status, such as provisioned or registered."];
+      positioning: SidewalkPositioning.t option
+        [@ocaml.doc "The Positioning object of the Sidewalk device."]}
     let make ?amazonId =
       fun ?sidewalkId ->
         fun ?sidewalkManufacturingSn ->
           fun ?deviceCertificates ->
-            fun () ->
-              {
-                amazonId;
-                sidewalkId;
-                sidewalkManufacturingSn;
-                deviceCertificates
-              }
+            fun ?privateKeys ->
+              fun ?deviceProfileId ->
+                fun ?certificateId ->
+                  fun ?status ->
+                    fun ?positioning ->
+                      fun () ->
+                        {
+                          amazonId;
+                          sidewalkId;
+                          sidewalkManufacturingSn;
+                          deviceCertificates;
+                          privateKeys;
+                          deviceProfileId;
+                          certificateId;
+                          status;
+                          positioning
+                        }
     let to_value x =
       structure_to_value
         [("AmazonId", (Option.map x.amazonId ~f:AmazonId.to_value));
@@ -5482,9 +12022,34 @@ module SidewalkDevice =
           (Option.map x.sidewalkManufacturingSn
              ~f:SidewalkManufacturingSn.to_value));
         ("DeviceCertificates",
-          (Option.map x.deviceCertificates ~f:DeviceCertificateList.to_value))]
+          (Option.map x.deviceCertificates ~f:DeviceCertificateList.to_value));
+        ("PrivateKeys",
+          (Option.map x.privateKeys ~f:PrivateKeysList.to_value));
+        ("DeviceProfileId",
+          (Option.map x.deviceProfileId ~f:DeviceProfileId.to_value));
+        ("CertificateId",
+          (Option.map x.certificateId ~f:DakCertificateId.to_value));
+        ("Status",
+          (Option.map x.status ~f:WirelessDeviceSidewalkStatus.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:SidewalkPositioning.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let positioning =
+        (Option.map ~f:SidewalkPositioning.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
+      let status =
+        (Option.map ~f:WirelessDeviceSidewalkStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let certificateId =
+        (Option.map ~f:DakCertificateId.of_xml)
+          (Xml.child xml_arg0 "CertificateId") in
+      let deviceProfileId =
+        (Option.map ~f:DeviceProfileId.of_xml)
+          (Xml.child xml_arg0 "DeviceProfileId") in
+      let privateKeys =
+        (Option.map ~f:PrivateKeysList.of_xml)
+          (Xml.child xml_arg0 "PrivateKeys") in
       let deviceCertificates =
         (Option.map ~f:DeviceCertificateList.of_xml)
           (Xml.child xml_arg0 "DeviceCertificates") in
@@ -5495,19 +12060,29 @@ module SidewalkDevice =
         (Option.map ~f:SidewalkId.of_xml) (Xml.child xml_arg0 "SidewalkId") in
       let amazonId =
         (Option.map ~f:AmazonId.of_xml) (Xml.child xml_arg0 "AmazonId") in
-      make ?deviceCertificates ?sidewalkManufacturingSn ?sidewalkId ?amazonId
-        ()
+      make ?positioning ?status ?certificateId ?deviceProfileId ?privateKeys
+        ?deviceCertificates ?sidewalkManufacturingSn ?sidewalkId ?amazonId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let positioning =
+        field_map json__ "Positioning" SidewalkPositioning.of_json in
+      let status =
+        field_map json__ "Status" WirelessDeviceSidewalkStatus.of_json in
+      let certificateId =
+        field_map json__ "CertificateId" DakCertificateId.of_json in
+      let deviceProfileId =
+        field_map json__ "DeviceProfileId" DeviceProfileId.of_json in
+      let privateKeys =
+        field_map json__ "PrivateKeys" PrivateKeysList.of_json in
       let deviceCertificates =
-        field_map json "DeviceCertificates" DeviceCertificateList.of_json in
+        field_map json__ "DeviceCertificates" DeviceCertificateList.of_json in
       let sidewalkManufacturingSn =
-        field_map json "SidewalkManufacturingSn"
+        field_map json__ "SidewalkManufacturingSn"
           SidewalkManufacturingSn.of_json in
-      let sidewalkId = field_map json "SidewalkId" SidewalkId.of_json in
-      let amazonId = field_map json "AmazonId" AmazonId.of_json in
-      make ?deviceCertificates ?sidewalkManufacturingSn ?sidewalkId ?amazonId
-        ()
+      let sidewalkId = field_map json__ "SidewalkId" SidewalkId.of_json in
+      let amazonId = field_map json__ "AmazonId" AmazonId.of_json in
+      make ?positioning ?status ?certificateId ?deviceProfileId ?privateKeys
+        ?deviceCertificates ?sidewalkManufacturingSn ?sidewalkId ?amazonId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Sidewalk device object."]
 module WirelessDeviceIdType =
@@ -5579,7 +12154,15 @@ module LoRaWANGetServiceProfileInfo =
       nwkGeoLoc: NwkGeoLoc.t option [@ocaml.doc "The NwkGeoLoc value."];
       targetPer: TargetPer.t option [@ocaml.doc "The TargetPER value."];
       minGwDiversity: MinGwDiversity.t option
-        [@ocaml.doc "The MinGwDiversity value."]}
+        [@ocaml.doc "The MinGwDiversity value."];
+      txPowerIndexMin: TxPowerIndexMin.t option
+        [@ocaml.doc "The Transmit Power Index minimum value. Default: 0"];
+      txPowerIndexMax: TxPowerIndexMax.t option
+        [@ocaml.doc "The Transmit Power Index maximum value. Default: 15"];
+      nbTransMin: NbTransMin.t option
+        [@ocaml.doc "The minimum number of transmissions. Default: 0"];
+      nbTransMax: NbTransMax.t option
+        [@ocaml.doc "The maximum number of transmissions. Default: 3"]}
     let make ?ulRate =
       fun ?ulBucketSize ->
         fun ?ulRatePolicy ->
@@ -5599,28 +12182,36 @@ module LoRaWANGetServiceProfileInfo =
                                     fun ?nwkGeoLoc ->
                                       fun ?targetPer ->
                                         fun ?minGwDiversity ->
-                                          fun () ->
-                                            {
-                                              ulRate;
-                                              ulBucketSize;
-                                              ulRatePolicy;
-                                              dlRate;
-                                              dlBucketSize;
-                                              dlRatePolicy;
-                                              addGwMetadata;
-                                              devStatusReqFreq;
-                                              reportDevStatusBattery;
-                                              reportDevStatusMargin;
-                                              drMin;
-                                              drMax;
-                                              channelMask;
-                                              prAllowed;
-                                              hrAllowed;
-                                              raAllowed;
-                                              nwkGeoLoc;
-                                              targetPer;
-                                              minGwDiversity
-                                            }
+                                          fun ?txPowerIndexMin ->
+                                            fun ?txPowerIndexMax ->
+                                              fun ?nbTransMin ->
+                                                fun ?nbTransMax ->
+                                                  fun () ->
+                                                    {
+                                                      ulRate;
+                                                      ulBucketSize;
+                                                      ulRatePolicy;
+                                                      dlRate;
+                                                      dlBucketSize;
+                                                      dlRatePolicy;
+                                                      addGwMetadata;
+                                                      devStatusReqFreq;
+                                                      reportDevStatusBattery;
+                                                      reportDevStatusMargin;
+                                                      drMin;
+                                                      drMax;
+                                                      channelMask;
+                                                      prAllowed;
+                                                      hrAllowed;
+                                                      raAllowed;
+                                                      nwkGeoLoc;
+                                                      targetPer;
+                                                      minGwDiversity;
+                                                      txPowerIndexMin;
+                                                      txPowerIndexMax;
+                                                      nbTransMin;
+                                                      nbTransMax
+                                                    }
     let to_value x =
       structure_to_value
         [("UlRate", (Option.map x.ulRate ~f:UlRate.to_value));
@@ -5652,9 +12243,25 @@ module LoRaWANGetServiceProfileInfo =
         ("NwkGeoLoc", (Option.map x.nwkGeoLoc ~f:NwkGeoLoc.to_value));
         ("TargetPer", (Option.map x.targetPer ~f:TargetPer.to_value));
         ("MinGwDiversity",
-          (Option.map x.minGwDiversity ~f:MinGwDiversity.to_value))]
+          (Option.map x.minGwDiversity ~f:MinGwDiversity.to_value));
+        ("TxPowerIndexMin",
+          (Option.map x.txPowerIndexMin ~f:TxPowerIndexMin.to_value));
+        ("TxPowerIndexMax",
+          (Option.map x.txPowerIndexMax ~f:TxPowerIndexMax.to_value));
+        ("NbTransMin", (Option.map x.nbTransMin ~f:NbTransMin.to_value));
+        ("NbTransMax", (Option.map x.nbTransMax ~f:NbTransMax.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nbTransMax =
+        (Option.map ~f:NbTransMax.of_xml) (Xml.child xml_arg0 "NbTransMax") in
+      let nbTransMin =
+        (Option.map ~f:NbTransMin.of_xml) (Xml.child xml_arg0 "NbTransMin") in
+      let txPowerIndexMax =
+        (Option.map ~f:TxPowerIndexMax.of_xml)
+          (Xml.child xml_arg0 "TxPowerIndexMax") in
+      let txPowerIndexMin =
+        (Option.map ~f:TxPowerIndexMin.of_xml)
+          (Xml.child xml_arg0 "TxPowerIndexMin") in
       let minGwDiversity =
         (Option.map ~f:MinGwDiversity.of_xml)
           (Xml.child xml_arg0 "MinGwDiversity") in
@@ -5700,39 +12307,48 @@ module LoRaWANGetServiceProfileInfo =
           (Xml.child xml_arg0 "UlBucketSize") in
       let ulRate =
         (Option.map ~f:UlRate.of_xml) (Xml.child xml_arg0 "UlRate") in
-      make ?minGwDiversity ?targetPer ?nwkGeoLoc ?raAllowed ?hrAllowed
+      make ?nbTransMax ?nbTransMin ?txPowerIndexMax ?txPowerIndexMin
+        ?minGwDiversity ?targetPer ?nwkGeoLoc ?raAllowed ?hrAllowed
         ?prAllowed ?channelMask ?drMax ?drMin ?reportDevStatusMargin
         ?reportDevStatusBattery ?devStatusReqFreq ?addGwMetadata
         ?dlRatePolicy ?dlBucketSize ?dlRate ?ulRatePolicy ?ulBucketSize
         ?ulRate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let nbTransMax = field_map json__ "NbTransMax" NbTransMax.of_json in
+      let nbTransMin = field_map json__ "NbTransMin" NbTransMin.of_json in
+      let txPowerIndexMax =
+        field_map json__ "TxPowerIndexMax" TxPowerIndexMax.of_json in
+      let txPowerIndexMin =
+        field_map json__ "TxPowerIndexMin" TxPowerIndexMin.of_json in
       let minGwDiversity =
-        field_map json "MinGwDiversity" MinGwDiversity.of_json in
-      let targetPer = field_map json "TargetPer" TargetPer.of_json in
-      let nwkGeoLoc = field_map json "NwkGeoLoc" NwkGeoLoc.of_json in
-      let raAllowed = field_map json "RaAllowed" RaAllowed.of_json in
-      let hrAllowed = field_map json "HrAllowed" HrAllowed.of_json in
-      let prAllowed = field_map json "PrAllowed" PrAllowed.of_json in
-      let channelMask = field_map json "ChannelMask" ChannelMask.of_json in
-      let drMax = field_map json "DrMax" DrMax.of_json in
-      let drMin = field_map json "DrMin" DrMin.of_json in
+        field_map json__ "MinGwDiversity" MinGwDiversity.of_json in
+      let targetPer = field_map json__ "TargetPer" TargetPer.of_json in
+      let nwkGeoLoc = field_map json__ "NwkGeoLoc" NwkGeoLoc.of_json in
+      let raAllowed = field_map json__ "RaAllowed" RaAllowed.of_json in
+      let hrAllowed = field_map json__ "HrAllowed" HrAllowed.of_json in
+      let prAllowed = field_map json__ "PrAllowed" PrAllowed.of_json in
+      let channelMask = field_map json__ "ChannelMask" ChannelMask.of_json in
+      let drMax = field_map json__ "DrMax" DrMax.of_json in
+      let drMin = field_map json__ "DrMin" DrMin.of_json in
       let reportDevStatusMargin =
-        field_map json "ReportDevStatusMargin" ReportDevStatusMargin.of_json in
+        field_map json__ "ReportDevStatusMargin"
+          ReportDevStatusMargin.of_json in
       let reportDevStatusBattery =
-        field_map json "ReportDevStatusBattery"
+        field_map json__ "ReportDevStatusBattery"
           ReportDevStatusBattery.of_json in
       let devStatusReqFreq =
-        field_map json "DevStatusReqFreq" DevStatusReqFreq.of_json in
+        field_map json__ "DevStatusReqFreq" DevStatusReqFreq.of_json in
       let addGwMetadata =
-        field_map json "AddGwMetadata" AddGwMetadata.of_json in
-      let dlRatePolicy = field_map json "DlRatePolicy" DlRatePolicy.of_json in
-      let dlBucketSize = field_map json "DlBucketSize" DlBucketSize.of_json in
-      let dlRate = field_map json "DlRate" DlRate.of_json in
-      let ulRatePolicy = field_map json "UlRatePolicy" UlRatePolicy.of_json in
-      let ulBucketSize = field_map json "UlBucketSize" UlBucketSize.of_json in
-      let ulRate = field_map json "UlRate" UlRate.of_json in
-      make ?minGwDiversity ?targetPer ?nwkGeoLoc ?raAllowed ?hrAllowed
+        field_map json__ "AddGwMetadata" AddGwMetadata.of_json in
+      let dlRatePolicy = field_map json__ "DlRatePolicy" DlRatePolicy.of_json in
+      let dlBucketSize = field_map json__ "DlBucketSize" DlBucketSize.of_json in
+      let dlRate = field_map json__ "DlRate" DlRate.of_json in
+      let ulRatePolicy = field_map json__ "UlRatePolicy" UlRatePolicy.of_json in
+      let ulBucketSize = field_map json__ "UlBucketSize" UlBucketSize.of_json in
+      let ulRate = field_map json__ "UlRate" UlRate.of_json in
+      make ?nbTransMax ?nbTransMin ?txPowerIndexMax ?txPowerIndexMin
+        ?minGwDiversity ?targetPer ?nwkGeoLoc ?raAllowed ?hrAllowed
         ?prAllowed ?channelMask ?drMax ?drMin ?reportDevStatusMargin
         ?reportDevStatusBattery ?devStatusReqFreq ?addGwMetadata
         ?dlRatePolicy ?dlBucketSize ?dlRate ?ulRatePolicy ?ulBucketSize
@@ -5801,6 +12417,275 @@ module WirelessGatewayServiceType =
       of_string (string_of_json ~kind:"WirelessGatewayServiceType" j)
     let to_json = simple_to_json to_value
   end
+module Accuracy =
+  struct
+    type nonrec t =
+      {
+      horizontalAccuracy: HorizontalAccuracy.t option
+        [@ocaml.doc
+          "The horizontal accuracy of the estimated position, which is the difference between the estimated location and the actual device location."];
+      verticalAccuracy: VerticalAccuracy.t option
+        [@ocaml.doc
+          "The vertical accuracy of the estimated position, which is the difference between the estimated altitude and actual device latitude in meters."]}
+    let make ?horizontalAccuracy =
+      fun ?verticalAccuracy ->
+        fun () -> { horizontalAccuracy; verticalAccuracy }
+    let to_value x =
+      structure_to_value
+        [("HorizontalAccuracy",
+           (Option.map x.horizontalAccuracy ~f:HorizontalAccuracy.to_value));
+        ("VerticalAccuracy",
+          (Option.map x.verticalAccuracy ~f:VerticalAccuracy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let verticalAccuracy =
+        (Option.map ~f:VerticalAccuracy.of_xml)
+          (Xml.child xml_arg0 "VerticalAccuracy") in
+      let horizontalAccuracy =
+        (Option.map ~f:HorizontalAccuracy.of_xml)
+          (Xml.child xml_arg0 "HorizontalAccuracy") in
+      make ?verticalAccuracy ?horizontalAccuracy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let verticalAccuracy =
+        field_map json__ "VerticalAccuracy" VerticalAccuracy.of_json in
+      let horizontalAccuracy =
+        field_map json__ "HorizontalAccuracy" HorizontalAccuracy.of_json in
+      make ?verticalAccuracy ?horizontalAccuracy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The accuracy of the estimated position in meters. An empty value indicates that no position data is available. A value of \226\128\1520.0\226\128\153 value indicates that position data is available. This data corresponds to the position information that you specified instead of the position computed by solver."]
+module PositionSolverVersion =
+  struct
+    type nonrec t = string
+    let context_ = "PositionSolverVersion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PositionSolverVersion" j
+    let to_json = simple_to_json to_value
+  end
+module AdvancedConfiguration =
+  struct
+    type nonrec t =
+      {
+      wiFiCellular: WiFiCellular.t option
+        [@ocaml.doc
+          "Configuration for WiFi and cellular-based payloads for location estimates."]}
+    let make ?wiFiCellular = fun () -> { wiFiCellular }
+    let to_value x =
+      structure_to_value
+        [("WiFiCellular",
+           (Option.map x.wiFiCellular ~f:WiFiCellular.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wiFiCellular =
+        (Option.map ~f:WiFiCellular.of_xml)
+          (Xml.child xml_arg0 "WiFiCellular") in
+      make ?wiFiCellular ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wiFiCellular = field_map json__ "WiFiCellular" WiFiCellular.of_json in
+      make ?wiFiCellular ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Optional configuration to customize location estimates."]
+module CellTowers =
+  struct
+    type nonrec t =
+      {
+      gsm: GsmList.t option [@ocaml.doc "GSM object information."];
+      wcdma: WcdmaList.t option [@ocaml.doc "WCDMA object information."];
+      tdscdma: TdscdmaList.t option
+        [@ocaml.doc "TD-SCDMA object information."];
+      lte: LteList.t option [@ocaml.doc "LTE object information."];
+      cdma: CdmaList.t option [@ocaml.doc "CDMA object information."]}
+    let make ?gsm =
+      fun ?wcdma ->
+        fun ?tdscdma ->
+          fun ?lte ->
+            fun ?cdma -> fun () -> { gsm; wcdma; tdscdma; lte; cdma }
+    let to_value x =
+      structure_to_value
+        [("Gsm", (Option.map x.gsm ~f:GsmList.to_value));
+        ("Wcdma", (Option.map x.wcdma ~f:WcdmaList.to_value));
+        ("Tdscdma", (Option.map x.tdscdma ~f:TdscdmaList.to_value));
+        ("Lte", (Option.map x.lte ~f:LteList.to_value));
+        ("Cdma", (Option.map x.cdma ~f:CdmaList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cdma = (Option.map ~f:CdmaList.of_xml) (Xml.child xml_arg0 "Cdma") in
+      let lte = (Option.map ~f:LteList.of_xml) (Xml.child xml_arg0 "Lte") in
+      let tdscdma =
+        (Option.map ~f:TdscdmaList.of_xml) (Xml.child xml_arg0 "Tdscdma") in
+      let wcdma =
+        (Option.map ~f:WcdmaList.of_xml) (Xml.child xml_arg0 "Wcdma") in
+      let gsm = (Option.map ~f:GsmList.of_xml) (Xml.child xml_arg0 "Gsm") in
+      make ?cdma ?lte ?tdscdma ?wcdma ?gsm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cdma = field_map json__ "Cdma" CdmaList.of_json in
+      let lte = field_map json__ "Lte" LteList.of_json in
+      let tdscdma = field_map json__ "Tdscdma" TdscdmaList.of_json in
+      let wcdma = field_map json__ "Wcdma" WcdmaList.of_json in
+      let gsm = field_map json__ "Gsm" GsmList.of_json in
+      make ?cdma ?lte ?tdscdma ?wcdma ?gsm ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The cell towers that were used to perform the measurements."]
+module CreationDate =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module Gnss =
+  struct
+    type nonrec t =
+      {
+      payload: GnssNav.t
+        [@ocaml.doc
+          "Payload that contains the GNSS scan result, or NAV message, in hexadecimal notation."];
+      captureTime: GPST.t option
+        [@ocaml.doc
+          "Optional parameter that gives an estimate of the time when the GNSS scan information is taken, in seconds GPS time (GPST). If capture time is not specified, the local server time is used."];
+      captureTimeAccuracy: CaptureTimeAccuracy.t option
+        [@ocaml.doc
+          "Optional value that gives the capture time estimate accuracy, in seconds. If capture time accuracy is not specified, default value of 300 is used."];
+      assistPosition: AssistPosition.t option
+        [@ocaml.doc
+          "Optional assistance position information, specified using latitude and longitude values in degrees. The coordinates are inside the WGS84 reference frame."];
+      assistAltitude: Coordinate.t option
+        [@ocaml.doc
+          "Optional assistance altitude, which is the altitude of the device at capture time, specified in meters above the WGS84 reference ellipsoid."];
+      use2DSolver: Use2DSolver.t option
+        [@ocaml.doc
+          "Optional parameter that forces 2D solve, which modifies the positioning algorithm to a 2D solution problem. When this parameter is specified, the assistance altitude should have an accuracy of at least 10 meters."]}
+    let context_ = "Gnss"
+    let make ?captureTime =
+      fun ?captureTimeAccuracy ->
+        fun ?assistPosition ->
+          fun ?assistAltitude ->
+            fun ?use2DSolver ->
+              fun ~payload ->
+                fun () ->
+                  {
+                    captureTime;
+                    captureTimeAccuracy;
+                    assistPosition;
+                    assistAltitude;
+                    use2DSolver;
+                    payload
+                  }
+    let to_value x =
+      structure_to_value
+        [("Payload", (Some (GnssNav.to_value x.payload)));
+        ("CaptureTime", (Option.map x.captureTime ~f:GPST.to_value));
+        ("CaptureTimeAccuracy",
+          (Option.map x.captureTimeAccuracy ~f:CaptureTimeAccuracy.to_value));
+        ("AssistPosition",
+          (Option.map x.assistPosition ~f:AssistPosition.to_value));
+        ("AssistAltitude",
+          (Option.map x.assistAltitude ~f:Coordinate.to_value));
+        ("Use2DSolver", (Option.map x.use2DSolver ~f:Use2DSolver.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let use2DSolver =
+        (Option.map ~f:Use2DSolver.of_xml) (Xml.child xml_arg0 "Use2DSolver") in
+      let assistAltitude =
+        (Option.map ~f:Coordinate.of_xml)
+          (Xml.child xml_arg0 "AssistAltitude") in
+      let assistPosition =
+        (Option.map ~f:AssistPosition.of_xml)
+          (Xml.child xml_arg0 "AssistPosition") in
+      let captureTimeAccuracy =
+        (Option.map ~f:CaptureTimeAccuracy.of_xml)
+          (Xml.child xml_arg0 "CaptureTimeAccuracy") in
+      let captureTime =
+        (Option.map ~f:GPST.of_xml) (Xml.child xml_arg0 "CaptureTime") in
+      let payload =
+        GnssNav.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Payload") in
+      make ?use2DSolver ?assistAltitude ?assistPosition ?captureTimeAccuracy
+        ?captureTime ~payload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let use2DSolver = field_map json__ "Use2DSolver" Use2DSolver.of_json in
+      let assistAltitude =
+        field_map json__ "AssistAltitude" Coordinate.of_json in
+      let assistPosition =
+        field_map json__ "AssistPosition" AssistPosition.of_json in
+      let captureTimeAccuracy =
+        field_map json__ "CaptureTimeAccuracy" CaptureTimeAccuracy.of_json in
+      let captureTime = field_map json__ "CaptureTime" GPST.of_json in
+      let payload = field_map_exn json__ "Payload" GnssNav.of_json in
+      make ?use2DSolver ?assistAltitude ?assistPosition ?captureTimeAccuracy
+        ?captureTime ~payload ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Global navigation satellite system (GNSS) object used for positioning."]
+module Ip =
+  struct
+    type nonrec t =
+      {
+      ipAddress: IPAddress.t [@ocaml.doc "IP address information."]}
+    let context_ = "Ip"
+    let make ~ipAddress = fun () -> { ipAddress }
+    let to_value x =
+      structure_to_value
+        [("IpAddress", (Some (IPAddress.to_value x.ipAddress)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAddress =
+        IPAddress.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IpAddress") in
+      make ~ipAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAddress = field_map_exn json__ "IpAddress" IPAddress.of_json in
+      make ~ipAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "IP address used for resolving device location."]
+module WiFiAccessPoints =
+  struct
+    type nonrec t = WiFiAccessPoint.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WiFiAccessPoint.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WiFiAccessPoint.of_xml)
+    let of_json j =
+      list_of_json ~kind:"WiFiAccessPoints" ~of_json:WiFiAccessPoint.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module AccountLinked =
   struct
     type nonrec t = bool
@@ -5834,18 +12719,21 @@ module LoRaWANMulticastGet =
       rfRegion: SupportedRfRegion.t option ;
       dlClass: DlClass.t option ;
       numberOfDevicesRequested: NumberOfDevicesRequested.t option ;
-      numberOfDevicesInGroup: NumberOfDevicesInGroup.t option }
+      numberOfDevicesInGroup: NumberOfDevicesInGroup.t option ;
+      participatingGateways: ParticipatingGatewaysMulticast.t option }
     let make ?rfRegion =
       fun ?dlClass ->
         fun ?numberOfDevicesRequested ->
           fun ?numberOfDevicesInGroup ->
-            fun () ->
-              {
-                rfRegion;
-                dlClass;
-                numberOfDevicesRequested;
-                numberOfDevicesInGroup
-              }
+            fun ?participatingGateways ->
+              fun () ->
+                {
+                  rfRegion;
+                  dlClass;
+                  numberOfDevicesRequested;
+                  numberOfDevicesInGroup;
+                  participatingGateways
+                }
     let to_value x =
       structure_to_value
         [("RfRegion", (Option.map x.rfRegion ~f:SupportedRfRegion.to_value));
@@ -5855,9 +12743,15 @@ module LoRaWANMulticastGet =
              ~f:NumberOfDevicesRequested.to_value));
         ("NumberOfDevicesInGroup",
           (Option.map x.numberOfDevicesInGroup
-             ~f:NumberOfDevicesInGroup.to_value))]
+             ~f:NumberOfDevicesInGroup.to_value));
+        ("ParticipatingGateways",
+          (Option.map x.participatingGateways
+             ~f:ParticipatingGatewaysMulticast.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let participatingGateways =
+        (Option.map ~f:ParticipatingGatewaysMulticast.of_xml)
+          (Xml.child xml_arg0 "ParticipatingGateways") in
       let numberOfDevicesInGroup =
         (Option.map ~f:NumberOfDevicesInGroup.of_xml)
           (Xml.child xml_arg0 "NumberOfDevicesInGroup") in
@@ -5869,20 +12763,23 @@ module LoRaWANMulticastGet =
       let rfRegion =
         (Option.map ~f:SupportedRfRegion.of_xml)
           (Xml.child xml_arg0 "RfRegion") in
-      make ?numberOfDevicesInGroup ?numberOfDevicesRequested ?dlClass
-        ?rfRegion ()
+      make ?participatingGateways ?numberOfDevicesInGroup
+        ?numberOfDevicesRequested ?dlClass ?rfRegion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let participatingGateways =
+        field_map json__ "ParticipatingGateways"
+          ParticipatingGatewaysMulticast.of_json in
       let numberOfDevicesInGroup =
-        field_map json "NumberOfDevicesInGroup"
+        field_map json__ "NumberOfDevicesInGroup"
           NumberOfDevicesInGroup.of_json in
       let numberOfDevicesRequested =
-        field_map json "NumberOfDevicesRequested"
+        field_map json__ "NumberOfDevicesRequested"
           NumberOfDevicesRequested.of_json in
-      let dlClass = field_map json "DlClass" DlClass.of_json in
-      let rfRegion = field_map json "RfRegion" SupportedRfRegion.of_json in
-      make ?numberOfDevicesInGroup ?numberOfDevicesRequested ?dlClass
-        ?rfRegion ()
+      let dlClass = field_map json__ "DlClass" DlClass.of_json in
+      let rfRegion = field_map json__ "RfRegion" SupportedRfRegion.of_json in
+      make ?participatingGateways ?numberOfDevicesInGroup
+        ?numberOfDevicesRequested ?dlClass ?rfRegion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The LoRaWAN information that is to be returned from getting multicast group information."]
@@ -5900,6 +12797,63 @@ module MulticastGroupStatus =
     let of_json j = string_of_json ~kind:"MulticastGroupStatus" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "The status of the multicast group."]
+module SummaryMetricQueryResults =
+  struct
+    type nonrec t = SummaryMetricQueryResult.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SummaryMetricQueryResult.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SummaryMetricQueryResult.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SummaryMetricQueryResults"
+        ~of_json:SummaryMetricQueryResult.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SummaryMetricQueries =
+  struct
+    type nonrec t = SummaryMetricQuery.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SummaryMetricQuery.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SummaryMetricQuery.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SummaryMetricQueries"
+        ~of_json:SummaryMetricQuery.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module FuotaTaskStatus =
   struct
     type nonrec t =
@@ -5953,9 +12907,9 @@ module LoRaWANFuotaTaskGetInfo =
         (Option.map ~f:RfRegion.of_xml) (Xml.child xml_arg0 "RfRegion") in
       make ?startTime ?rfRegion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startTime = field_map json "StartTime" StartTime.of_json in
-      let rfRegion = field_map json "RfRegion" RfRegion.of_json in
+    let of_json json__ =
+      let startTime = field_map json__ "StartTime" StartTime.of_json in
+      let rfRegion = field_map json__ "RfRegion" RfRegion.of_json in
       make ?startTime ?rfRegion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5991,7 +12945,7 @@ module LoRaWANDeviceProfile =
           "The list of values that make up the FactoryPresetFreqs value."];
       maxEirp: MaxEirp.t option [@ocaml.doc "The MaxEIRP value."];
       maxDutyCycle: MaxDutyCycle.t option
-        [@ocaml.doc "The MaxDutyCycle value."];
+        [@ocaml.doc "The MaxDutyCycle value. It ranges from 0 to 15."];
       rfRegion: RfRegion.t option
         [@ocaml.doc "The frequency band (RFRegion) value."];
       supportsJoin: SupportsJoin.t option
@@ -6129,35 +13083,35 @@ module LoRaWANDeviceProfile =
         ?pingSlotFreq ?pingSlotDr ?pingSlotPeriod ?classBTimeout
         ?supportsClassB ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supports32BitFCnt =
-        field_map json "Supports32BitFCnt" Supports32BitFCnt.of_json in
-      let supportsJoin = field_map json "SupportsJoin" SupportsJoin.of_json in
-      let rfRegion = field_map json "RfRegion" RfRegion.of_json in
-      let maxDutyCycle = field_map json "MaxDutyCycle" MaxDutyCycle.of_json in
-      let maxEirp = field_map json "MaxEirp" MaxEirp.of_json in
+        field_map json__ "Supports32BitFCnt" Supports32BitFCnt.of_json in
+      let supportsJoin = field_map json__ "SupportsJoin" SupportsJoin.of_json in
+      let rfRegion = field_map json__ "RfRegion" RfRegion.of_json in
+      let maxDutyCycle = field_map json__ "MaxDutyCycle" MaxDutyCycle.of_json in
+      let maxEirp = field_map json__ "MaxEirp" MaxEirp.of_json in
       let factoryPresetFreqsList =
-        field_map json "FactoryPresetFreqsList"
+        field_map json__ "FactoryPresetFreqsList"
           FactoryPresetFreqsList.of_json in
-      let rxFreq2 = field_map json "RxFreq2" RxFreq2.of_json in
-      let rxDataRate2 = field_map json "RxDataRate2" RxDataRate2.of_json in
-      let rxDrOffset1 = field_map json "RxDrOffset1" RxDrOffset1.of_json in
-      let rxDelay1 = field_map json "RxDelay1" RxDelay1.of_json in
+      let rxFreq2 = field_map json__ "RxFreq2" RxFreq2.of_json in
+      let rxDataRate2 = field_map json__ "RxDataRate2" RxDataRate2.of_json in
+      let rxDrOffset1 = field_map json__ "RxDrOffset1" RxDrOffset1.of_json in
+      let rxDelay1 = field_map json__ "RxDelay1" RxDelay1.of_json in
       let regParamsRevision =
-        field_map json "RegParamsRevision" RegParamsRevision.of_json in
-      let macVersion = field_map json "MacVersion" MacVersion.of_json in
+        field_map json__ "RegParamsRevision" RegParamsRevision.of_json in
+      let macVersion = field_map json__ "MacVersion" MacVersion.of_json in
       let classCTimeout =
-        field_map json "ClassCTimeout" ClassCTimeout.of_json in
+        field_map json__ "ClassCTimeout" ClassCTimeout.of_json in
       let supportsClassC =
-        field_map json "SupportsClassC" SupportsClassC.of_json in
-      let pingSlotFreq = field_map json "PingSlotFreq" PingSlotFreq.of_json in
-      let pingSlotDr = field_map json "PingSlotDr" PingSlotDr.of_json in
+        field_map json__ "SupportsClassC" SupportsClassC.of_json in
+      let pingSlotFreq = field_map json__ "PingSlotFreq" PingSlotFreq.of_json in
+      let pingSlotDr = field_map json__ "PingSlotDr" PingSlotDr.of_json in
       let pingSlotPeriod =
-        field_map json "PingSlotPeriod" PingSlotPeriod.of_json in
+        field_map json__ "PingSlotPeriod" PingSlotPeriod.of_json in
       let classBTimeout =
-        field_map json "ClassBTimeout" ClassBTimeout.of_json in
+        field_map json__ "ClassBTimeout" ClassBTimeout.of_json in
       let supportsClassB =
-        field_map json "SupportsClassB" SupportsClassB.of_json in
+        field_map json__ "SupportsClassB" SupportsClassB.of_json in
       make ?supports32BitFCnt ?supportsJoin ?rfRegion ?maxDutyCycle ?maxEirp
         ?factoryPresetFreqsList ?rxFreq2 ?rxDataRate2 ?rxDrOffset1 ?rxDelay1
         ?regParamsRevision ?macVersion ?classCTimeout ?supportsClassC
@@ -6165,52 +13119,223 @@ module LoRaWANDeviceProfile =
         ?supportsClassB ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "LoRaWANDeviceProfile object."]
-module ClientRequestToken =
+module SidewalkGetDeviceProfile =
   struct
-    type nonrec t = string[@@ocaml.doc
-                            "Each resource must have a unique client request token. If you try to create a new resource with the same token as a resource that already exists, an exception occurs. If you omit this value, AWS SDKs will automatically generate a unique client request."]
-    let context_ = "ClientRequestToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9-_]+$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      applicationServerPublicKey: ApplicationServerPublicKey.t option
+        [@ocaml.doc "The Sidewalk application server public key."];
+      qualificationStatus: QualificationStatus.t option
+        [@ocaml.doc
+          "Gets information about the certification status of a Sidewalk device profile."];
+      dakCertificateMetadata: DakCertificateMetadataList.t option
+        [@ocaml.doc
+          "The DAK certificate information of the Sidewalk device profile."]}
+    let make ?applicationServerPublicKey =
+      fun ?qualificationStatus ->
+        fun ?dakCertificateMetadata ->
+          fun () ->
+            {
+              applicationServerPublicKey;
+              qualificationStatus;
+              dakCertificateMetadata
+            }
+    let to_value x =
+      structure_to_value
+        [("ApplicationServerPublicKey",
+           (Option.map x.applicationServerPublicKey
+              ~f:ApplicationServerPublicKey.to_value));
+        ("QualificationStatus",
+          (Option.map x.qualificationStatus ~f:QualificationStatus.to_value));
+        ("DakCertificateMetadata",
+          (Option.map x.dakCertificateMetadata
+             ~f:DakCertificateMetadataList.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ClientRequestToken" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "Each resource must have a unique client request token. If you try to create a new resource with the same token as a resource that already exists, an exception occurs. If you omit this value, AWS SDKs will automatically generate a unique client request."]
+    let of_xml xml_arg0 =
+      let dakCertificateMetadata =
+        (Option.map ~f:DakCertificateMetadataList.of_xml)
+          (Xml.child xml_arg0 "DakCertificateMetadata") in
+      let qualificationStatus =
+        (Option.map ~f:QualificationStatus.of_xml)
+          (Xml.child xml_arg0 "QualificationStatus") in
+      let applicationServerPublicKey =
+        (Option.map ~f:ApplicationServerPublicKey.of_xml)
+          (Xml.child xml_arg0 "ApplicationServerPublicKey") in
+      make ?dakCertificateMetadata ?qualificationStatus
+        ?applicationServerPublicKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dakCertificateMetadata =
+        field_map json__ "DakCertificateMetadata"
+          DakCertificateMetadataList.of_json in
+      let qualificationStatus =
+        field_map json__ "QualificationStatus" QualificationStatus.of_json in
+      let applicationServerPublicKey =
+        field_map json__ "ApplicationServerPublicKey"
+          ApplicationServerPublicKey.of_json in
+      make ?dakCertificateMetadata ?qualificationStatus
+        ?applicationServerPublicKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets information about a Sidewalk device profile."]
+module SidewalkCreateWirelessDevice =
+  struct
+    type nonrec t =
+      {
+      deviceProfileId: DeviceProfileId.t option
+        [@ocaml.doc "The ID of the Sidewalk device profile."];
+      positioning: SidewalkPositioning.t option
+        [@ocaml.doc "The Positioning object of the Sidewalk device."];
+      sidewalkManufacturingSn: SidewalkManufacturingSn.t option
+        [@ocaml.doc "The Sidewalk manufacturing serial number."]}
+    let make ?deviceProfileId =
+      fun ?positioning ->
+        fun ?sidewalkManufacturingSn ->
+          fun () -> { deviceProfileId; positioning; sidewalkManufacturingSn }
+    let to_value x =
+      structure_to_value
+        [("DeviceProfileId",
+           (Option.map x.deviceProfileId ~f:DeviceProfileId.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:SidewalkPositioning.to_value));
+        ("SidewalkManufacturingSn",
+          (Option.map x.sidewalkManufacturingSn
+             ~f:SidewalkManufacturingSn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sidewalkManufacturingSn =
+        (Option.map ~f:SidewalkManufacturingSn.of_xml)
+          (Xml.child xml_arg0 "SidewalkManufacturingSn") in
+      let positioning =
+        (Option.map ~f:SidewalkPositioning.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
+      let deviceProfileId =
+        (Option.map ~f:DeviceProfileId.of_xml)
+          (Xml.child xml_arg0 "DeviceProfileId") in
+      make ?sidewalkManufacturingSn ?positioning ?deviceProfileId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sidewalkManufacturingSn =
+        field_map json__ "SidewalkManufacturingSn"
+          SidewalkManufacturingSn.of_json in
+      let positioning =
+        field_map json__ "Positioning" SidewalkPositioning.of_json in
+      let deviceProfileId =
+        field_map json__ "DeviceProfileId" DeviceProfileId.of_json in
+      make ?sidewalkManufacturingSn ?positioning ?deviceProfileId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Sidewalk object for creating a wireless device."]
 module LoRaWANServiceProfile =
   struct
     type nonrec t =
       {
       addGwMetadata: AddGwMetadata.t option
-        [@ocaml.doc "The AddGWMetaData value."]}
-    let make ?addGwMetadata = fun () -> { addGwMetadata }
+        [@ocaml.doc "The AddGWMetaData value."];
+      drMin: DrMinBox.t option [@ocaml.doc "The DrMin value."];
+      drMax: DrMaxBox.t option [@ocaml.doc "The DrMax value."];
+      prAllowed: PrAllowed.t option
+        [@ocaml.doc
+          "The PRAllowed value that describes whether passive roaming is allowed."];
+      raAllowed: RaAllowed.t option
+        [@ocaml.doc
+          "The RAAllowed value that describes whether roaming activation is allowed."];
+      txPowerIndexMin: TxPowerIndexMin.t option
+        [@ocaml.doc "The Transmit Power Index minimum. Default: 0"];
+      txPowerIndexMax: TxPowerIndexMax.t option
+        [@ocaml.doc "The Transmit Power Index maximum. Default: 15"];
+      nbTransMin: NbTransMin.t option
+        [@ocaml.doc "The minimum number of transmissions. Default: 0"];
+      nbTransMax: NbTransMax.t option
+        [@ocaml.doc "The maximum number of transmissions. Default: 3"]}
+    let make ?addGwMetadata =
+      fun ?drMin ->
+        fun ?drMax ->
+          fun ?prAllowed ->
+            fun ?raAllowed ->
+              fun ?txPowerIndexMin ->
+                fun ?txPowerIndexMax ->
+                  fun ?nbTransMin ->
+                    fun ?nbTransMax ->
+                      fun () ->
+                        {
+                          addGwMetadata;
+                          drMin;
+                          drMax;
+                          prAllowed;
+                          raAllowed;
+                          txPowerIndexMin;
+                          txPowerIndexMax;
+                          nbTransMin;
+                          nbTransMax
+                        }
     let to_value x =
       structure_to_value
         [("AddGwMetadata",
-           (Option.map x.addGwMetadata ~f:AddGwMetadata.to_value))]
+           (Option.map x.addGwMetadata ~f:AddGwMetadata.to_value));
+        ("DrMin", (Option.map x.drMin ~f:DrMinBox.to_value));
+        ("DrMax", (Option.map x.drMax ~f:DrMaxBox.to_value));
+        ("PrAllowed", (Option.map x.prAllowed ~f:PrAllowed.to_value));
+        ("RaAllowed", (Option.map x.raAllowed ~f:RaAllowed.to_value));
+        ("TxPowerIndexMin",
+          (Option.map x.txPowerIndexMin ~f:TxPowerIndexMin.to_value));
+        ("TxPowerIndexMax",
+          (Option.map x.txPowerIndexMax ~f:TxPowerIndexMax.to_value));
+        ("NbTransMin", (Option.map x.nbTransMin ~f:NbTransMin.to_value));
+        ("NbTransMax", (Option.map x.nbTransMax ~f:NbTransMax.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nbTransMax =
+        (Option.map ~f:NbTransMax.of_xml) (Xml.child xml_arg0 "NbTransMax") in
+      let nbTransMin =
+        (Option.map ~f:NbTransMin.of_xml) (Xml.child xml_arg0 "NbTransMin") in
+      let txPowerIndexMax =
+        (Option.map ~f:TxPowerIndexMax.of_xml)
+          (Xml.child xml_arg0 "TxPowerIndexMax") in
+      let txPowerIndexMin =
+        (Option.map ~f:TxPowerIndexMin.of_xml)
+          (Xml.child xml_arg0 "TxPowerIndexMin") in
+      let raAllowed =
+        (Option.map ~f:RaAllowed.of_xml) (Xml.child xml_arg0 "RaAllowed") in
+      let prAllowed =
+        (Option.map ~f:PrAllowed.of_xml) (Xml.child xml_arg0 "PrAllowed") in
+      let drMax =
+        (Option.map ~f:DrMaxBox.of_xml) (Xml.child xml_arg0 "DrMax") in
+      let drMin =
+        (Option.map ~f:DrMinBox.of_xml) (Xml.child xml_arg0 "DrMin") in
       let addGwMetadata =
         (Option.map ~f:AddGwMetadata.of_xml)
           (Xml.child xml_arg0 "AddGwMetadata") in
-      make ?addGwMetadata ()
+      make ?nbTransMax ?nbTransMin ?txPowerIndexMax ?txPowerIndexMin
+        ?raAllowed ?prAllowed ?drMax ?drMin ?addGwMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let nbTransMax = field_map json__ "NbTransMax" NbTransMax.of_json in
+      let nbTransMin = field_map json__ "NbTransMin" NbTransMin.of_json in
+      let txPowerIndexMax =
+        field_map json__ "TxPowerIndexMax" TxPowerIndexMax.of_json in
+      let txPowerIndexMin =
+        field_map json__ "TxPowerIndexMin" TxPowerIndexMin.of_json in
+      let raAllowed = field_map json__ "RaAllowed" RaAllowed.of_json in
+      let prAllowed = field_map json__ "PrAllowed" PrAllowed.of_json in
+      let drMax = field_map json__ "DrMax" DrMaxBox.of_json in
+      let drMin = field_map json__ "DrMin" DrMinBox.of_json in
       let addGwMetadata =
-        field_map json "AddGwMetadata" AddGwMetadata.of_json in
-      make ?addGwMetadata ()
+        field_map json__ "AddGwMetadata" AddGwMetadata.of_json in
+      make ?nbTransMax ?nbTransMin ?txPowerIndexMax ?txPowerIndexMin
+        ?raAllowed ?prAllowed ?drMax ?drMin ?addGwMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "LoRaWANServiceProfile object."]
+module SidewalkCreateDeviceProfile =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Sidewalk object for creating a device profile."]
 module SidewalkAccountInfo =
   struct
     type nonrec t =
@@ -6234,10 +13359,10 @@ module SidewalkAccountInfo =
         (Option.map ~f:AmazonId.of_xml) (Xml.child xml_arg0 "AmazonId") in
       make ?appServerPrivateKey ?amazonId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appServerPrivateKey =
-        field_map json "AppServerPrivateKey" AppServerPrivateKey.of_json in
-      let amazonId = field_map json "AmazonId" AmazonId.of_json in
+        field_map json__ "AppServerPrivateKey" AppServerPrivateKey.of_json in
+      let amazonId = field_map json__ "AmazonId" AmazonId.of_json in
       make ?appServerPrivateKey ?amazonId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a Sidewalk account."]
@@ -6323,19 +13448,29 @@ module UpdateWirelessGatewayRequest =
       id: WirelessGatewayId.t
         [@ocaml.doc "The ID of the resource to update."];
       name: WirelessGatewayName.t option
-        [@ocaml.doc "The new name of the resource."];
+        [@ocaml.doc
+          "The new name of the resource. The following special characters aren't accepted: <>^#~$"];
       description: Description.t option
         [@ocaml.doc "A new description of the resource."];
       joinEuiFilters: JoinEuiFilters.t option ;
-      netIdFilters: NetIdFilters.t option }
+      netIdFilters: NetIdFilters.t option ;
+      maxEirp: GatewayMaxEirp.t option [@ocaml.doc "The MaxEIRP value."]}
     let context_ = "UpdateWirelessGatewayRequest"
     let make ?name =
       fun ?description ->
         fun ?joinEuiFilters ->
           fun ?netIdFilters ->
-            fun ~id ->
-              fun () ->
-                { name; description; joinEuiFilters; netIdFilters; id }
+            fun ?maxEirp ->
+              fun ~id ->
+                fun () ->
+                  {
+                    name;
+                    description;
+                    joinEuiFilters;
+                    netIdFilters;
+                    maxEirp;
+                    id
+                  }
     let to_value x =
       structure_to_value
         [("Id", (Some (WirelessGatewayId.to_value x.id)));
@@ -6344,9 +13479,12 @@ module UpdateWirelessGatewayRequest =
         ("JoinEuiFilters",
           (Option.map x.joinEuiFilters ~f:JoinEuiFilters.to_value));
         ("NetIdFilters",
-          (Option.map x.netIdFilters ~f:NetIdFilters.to_value))]
+          (Option.map x.netIdFilters ~f:NetIdFilters.to_value));
+        ("MaxEirp", (Option.map x.maxEirp ~f:GatewayMaxEirp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxEirp =
+        (Option.map ~f:GatewayMaxEirp.of_xml) (Xml.child xml_arg0 "MaxEirp") in
       let netIdFilters =
         (Option.map ~f:NetIdFilters.of_xml)
           (Xml.child xml_arg0 "NetIdFilters") in
@@ -6361,16 +13499,17 @@ module UpdateWirelessGatewayRequest =
       let id =
         WirelessGatewayId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?netIdFilters ?joinEuiFilters ?description ?name ~id ()
+      make ?maxEirp ?netIdFilters ?joinEuiFilters ?description ?name ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let netIdFilters = field_map json "NetIdFilters" NetIdFilters.of_json in
+    let of_json json__ =
+      let maxEirp = field_map json__ "MaxEirp" GatewayMaxEirp.of_json in
+      let netIdFilters = field_map json__ "NetIdFilters" NetIdFilters.of_json in
       let joinEuiFilters =
-        field_map json "JoinEuiFilters" JoinEuiFilters.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" WirelessGatewayName.of_json in
-      let id = field_map_exn json "Id" WirelessGatewayId.of_json in
-      make ?netIdFilters ?joinEuiFilters ?description ?name ~id ()
+        field_map json__ "JoinEuiFilters" JoinEuiFilters.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" WirelessGatewayName.of_json in
+      let id = field_map_exn json__ "Id" WirelessGatewayId.of_json in
+      make ?maxEirp ?netIdFilters ?joinEuiFilters ?description ?name ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates properties of a wireless gateway."]
 module UpdateWirelessDeviceResponse =
@@ -6456,18 +13595,35 @@ module UpdateWirelessDeviceRequest =
       destinationName: DestinationName.t option
         [@ocaml.doc "The name of the new destination for the device."];
       name: WirelessDeviceName.t option
-        [@ocaml.doc "The new name of the resource."];
+        [@ocaml.doc
+          "The new name of the resource. The following special characters aren't accepted: <>^#~$"];
       description: Description.t option
         [@ocaml.doc "A new description of the resource."];
       loRaWAN: LoRaWANUpdateDevice.t option
-        [@ocaml.doc "The updated wireless device's configuration."]}
+        [@ocaml.doc "The updated wireless device's configuration."];
+      positioning: PositioningConfigStatus.t option
+        [@ocaml.doc
+          "The integration status of the Device Location feature for LoRaWAN and Sidewalk devices."];
+      sidewalk: SidewalkUpdateWirelessDevice.t option
+        [@ocaml.doc "The updated sidewalk properties."]}
     let context_ = "UpdateWirelessDeviceRequest"
     let make ?destinationName =
       fun ?name ->
         fun ?description ->
           fun ?loRaWAN ->
-            fun ~id ->
-              fun () -> { destinationName; name; description; loRaWAN; id }
+            fun ?positioning ->
+              fun ?sidewalk ->
+                fun ~id ->
+                  fun () ->
+                    {
+                      destinationName;
+                      name;
+                      description;
+                      loRaWAN;
+                      positioning;
+                      sidewalk;
+                      id
+                    }
     let to_value x =
       structure_to_value
         [("Id", (Some (WirelessDeviceId.to_value x.id)));
@@ -6475,9 +13631,19 @@ module UpdateWirelessDeviceRequest =
           (Option.map x.destinationName ~f:DestinationName.to_value));
         ("Name", (Option.map x.name ~f:WirelessDeviceName.to_value));
         ("Description", (Option.map x.description ~f:Description.to_value));
-        ("LoRaWAN", (Option.map x.loRaWAN ~f:LoRaWANUpdateDevice.to_value))]
+        ("LoRaWAN", (Option.map x.loRaWAN ~f:LoRaWANUpdateDevice.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:PositioningConfigStatus.to_value));
+        ("Sidewalk",
+          (Option.map x.sidewalk ~f:SidewalkUpdateWirelessDevice.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sidewalk =
+        (Option.map ~f:SidewalkUpdateWirelessDevice.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
+      let positioning =
+        (Option.map ~f:PositioningConfigStatus.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
       let loRaWAN =
         (Option.map ~f:LoRaWANUpdateDevice.of_xml)
           (Xml.child xml_arg0 "LoRaWAN") in
@@ -6491,18 +13657,279 @@ module UpdateWirelessDeviceRequest =
       let id =
         WirelessDeviceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?loRaWAN ?description ?name ?destinationName ~id ()
+      make ?sidewalk ?positioning ?loRaWAN ?description ?name
+        ?destinationName ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANUpdateDevice.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" WirelessDeviceName.of_json in
+    let of_json json__ =
+      let sidewalk =
+        field_map json__ "Sidewalk" SidewalkUpdateWirelessDevice.of_json in
+      let positioning =
+        field_map json__ "Positioning" PositioningConfigStatus.of_json in
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANUpdateDevice.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" WirelessDeviceName.of_json in
       let destinationName =
-        field_map json "DestinationName" DestinationName.of_json in
-      let id = field_map_exn json "Id" WirelessDeviceId.of_json in
-      make ?loRaWAN ?description ?name ?destinationName ~id ()
+        field_map json__ "DestinationName" DestinationName.of_json in
+      let id = field_map_exn json__ "Id" WirelessDeviceId.of_json in
+      make ?sidewalk ?positioning ?loRaWAN ?description ?name
+        ?destinationName ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates properties of a wireless device."]
+module UpdateWirelessDeviceImportTaskResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update an import task to add more devices to the task."]
+module UpdateWirelessDeviceImportTaskRequest =
+  struct
+    type nonrec t =
+      {
+      id: ImportTaskId.t
+        [@ocaml.doc "The identifier of the import task to be updated."];
+      sidewalk: SidewalkUpdateImportInfo.t
+        [@ocaml.doc
+          "The Sidewalk-related parameters of the import task to be updated."]}
+    let context_ = "UpdateWirelessDeviceImportTaskRequest"
+    let make ~id = fun ~sidewalk -> fun () -> { id; sidewalk }
+    let to_value x =
+      structure_to_value
+        [("Id", (Some (ImportTaskId.to_value x.id)));
+        ("Sidewalk", (Some (SidewalkUpdateImportInfo.to_value x.sidewalk)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sidewalk =
+        SidewalkUpdateImportInfo.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Sidewalk") in
+      let id =
+        ImportTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ~sidewalk ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sidewalk =
+        field_map_exn json__ "Sidewalk" SidewalkUpdateImportInfo.of_json in
+      let id = field_map_exn json__ "Id" ImportTaskId.of_json in
+      make ~sidewalk ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update an import task to add more devices to the task."]
+module UpdateResourcePositionResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update the position information of a given wireless device or a wireless gateway resource. The position coordinates are based on the World Geodetic System (WGS84)."]
+module UpdateResourcePositionRequest =
+  struct
+    type nonrec t =
+      {
+      resourceIdentifier: PositionResourceIdentifier.t
+        [@ocaml.doc
+          "The identifier of the resource for which position information is updated. It can be the wireless device ID or the wireless gateway ID, depending on the resource type."];
+      resourceType: PositionResourceType.t
+        [@ocaml.doc
+          "The type of resource for which position information is updated, which can be a wireless device or a wireless gateway."];
+      geoJsonPayload: GeoJsonPayload.t option
+        [@ocaml.doc
+          "The position information of the resource, displayed as a JSON payload. The payload uses the GeoJSON format, which a format that's used to encode geographic data structures. For more information, see GeoJSON."]}
+    let context_ = "UpdateResourcePositionRequest"
+    let make ?geoJsonPayload =
+      fun ~resourceIdentifier ->
+        fun ~resourceType ->
+          fun () -> { geoJsonPayload; resourceIdentifier; resourceType }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~resourceIdentifier:(PositionResourceIdentifier.of_string
+                                   ((List.Assoc.find_exn
+                                       ~equal:String.Caseless.equal) xs
+                                      "ResourceIdentifier"))
+            ~resourceType:(PositionResourceType.of_string
+                             ((List.Assoc.find_exn
+                                 ~equal:String.Caseless.equal) xs
+                                "resourceType")) ?geoJsonPayload:(Some pipe)
+            ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("ResourceIdentifier",
+           (Some (PositionResourceIdentifier.to_value x.resourceIdentifier)));
+        ("resourceType",
+          (Some (PositionResourceType.to_value x.resourceType)));
+        ("GeoJsonPayload",
+          (Option.map x.geoJsonPayload ~f:GeoJsonPayload.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let geoJsonPayload =
+        (Option.map ~f:GeoJsonPayload.of_xml)
+          (Xml.child xml_arg0 "GeoJsonPayload") in
+      let resourceType =
+        PositionResourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      let resourceIdentifier =
+        PositionResourceIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
+      make ?geoJsonPayload ~resourceType ~resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let geoJsonPayload =
+        field_map json__ "GeoJsonPayload" GeoJsonPayload.of_json in
+      let resourceType =
+        field_map_exn json__ "ResourceType" PositionResourceType.of_json in
+      let resourceIdentifier =
+        field_map_exn json__ "ResourceIdentifier"
+          PositionResourceIdentifier.of_json in
+      make ?geoJsonPayload ~resourceType ~resourceIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update the position information of a given wireless device or a wireless gateway resource. The position coordinates are based on the World Geodetic System (WGS84)."]
 module UpdateResourceEventConfigurationResponse =
   struct
     type nonrec t = unit
@@ -6603,23 +14030,36 @@ module UpdateResourceEventConfigurationRequest =
       deviceRegistrationState:
         DeviceRegistrationStateEventConfiguration.t option
         [@ocaml.doc
-          "Event configuration for the device registration state event"];
+          "Event configuration for the device registration state event."];
       proximity: ProximityEventConfiguration.t option
-        [@ocaml.doc "Event configuration for the Proximity event"]}
+        [@ocaml.doc "Event configuration for the proximity event."];
+      join: JoinEventConfiguration.t option
+        [@ocaml.doc "Event configuration for the join event."];
+      connectionStatus: ConnectionStatusEventConfiguration.t option
+        [@ocaml.doc "Event configuration for the connection status event."];
+      messageDeliveryStatus: MessageDeliveryStatusEventConfiguration.t option
+        [@ocaml.doc
+          "Event configuration for the message delivery status event."]}
     let context_ = "UpdateResourceEventConfigurationRequest"
     let make ?partnerType =
       fun ?deviceRegistrationState ->
         fun ?proximity ->
-          fun ~identifier ->
-            fun ~identifierType ->
-              fun () ->
-                {
-                  partnerType;
-                  deviceRegistrationState;
-                  proximity;
-                  identifier;
-                  identifierType
-                }
+          fun ?join ->
+            fun ?connectionStatus ->
+              fun ?messageDeliveryStatus ->
+                fun ~identifier ->
+                  fun ~identifierType ->
+                    fun () ->
+                      {
+                        partnerType;
+                        deviceRegistrationState;
+                        proximity;
+                        join;
+                        connectionStatus;
+                        messageDeliveryStatus;
+                        identifier;
+                        identifierType
+                      }
     let to_value x =
       structure_to_value
         [("Identifier", (Some (Identifier.to_value x.identifier)));
@@ -6630,9 +14070,25 @@ module UpdateResourceEventConfigurationRequest =
           (Option.map x.deviceRegistrationState
              ~f:DeviceRegistrationStateEventConfiguration.to_value));
         ("Proximity",
-          (Option.map x.proximity ~f:ProximityEventConfiguration.to_value))]
+          (Option.map x.proximity ~f:ProximityEventConfiguration.to_value));
+        ("Join", (Option.map x.join ~f:JoinEventConfiguration.to_value));
+        ("ConnectionStatus",
+          (Option.map x.connectionStatus
+             ~f:ConnectionStatusEventConfiguration.to_value));
+        ("MessageDeliveryStatus",
+          (Option.map x.messageDeliveryStatus
+             ~f:MessageDeliveryStatusEventConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let messageDeliveryStatus =
+        (Option.map ~f:MessageDeliveryStatusEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "MessageDeliveryStatus") in
+      let connectionStatus =
+        (Option.map ~f:ConnectionStatusEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "ConnectionStatus") in
+      let join =
+        (Option.map ~f:JoinEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "Join") in
       let proximity =
         (Option.map ~f:ProximityEventConfiguration.of_xml)
           (Xml.child xml_arg0 "Proximity") in
@@ -6648,25 +14104,157 @@ module UpdateResourceEventConfigurationRequest =
       let identifier =
         Identifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
-      make ?proximity ?deviceRegistrationState ?partnerType ~identifierType
-        ~identifier ()
+      make ?messageDeliveryStatus ?connectionStatus ?join ?proximity
+        ?deviceRegistrationState ?partnerType ~identifierType ~identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let messageDeliveryStatus =
+        field_map json__ "MessageDeliveryStatus"
+          MessageDeliveryStatusEventConfiguration.of_json in
+      let connectionStatus =
+        field_map json__ "ConnectionStatus"
+          ConnectionStatusEventConfiguration.of_json in
+      let join = field_map json__ "Join" JoinEventConfiguration.of_json in
       let proximity =
-        field_map json "Proximity" ProximityEventConfiguration.of_json in
+        field_map json__ "Proximity" ProximityEventConfiguration.of_json in
       let deviceRegistrationState =
-        field_map json "DeviceRegistrationState"
+        field_map json__ "DeviceRegistrationState"
           DeviceRegistrationStateEventConfiguration.of_json in
       let partnerType =
-        field_map json "PartnerType" EventNotificationPartnerType.of_json in
+        field_map json__ "PartnerType" EventNotificationPartnerType.of_json in
       let identifierType =
-        field_map_exn json "IdentifierType" IdentifierType.of_json in
-      let identifier = field_map_exn json "Identifier" Identifier.of_json in
-      make ?proximity ?deviceRegistrationState ?partnerType ~identifierType
-        ~identifier ()
+        field_map_exn json__ "IdentifierType" IdentifierType.of_json in
+      let identifier = field_map_exn json__ "Identifier" Identifier.of_json in
+      make ?messageDeliveryStatus ?connectionStatus ?join ?proximity
+        ?deviceRegistrationState ?partnerType ~identifierType ~identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Update the event configuration for a particular resource identifier."]
+module UpdatePositionResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update the position information of a resource. This action is no longer supported. Calls to update the position information should use the UpdateResourcePosition API operation instead."]
+module UpdatePositionRequest =
+  struct
+    type nonrec t =
+      {
+      resourceIdentifier: PositionResourceIdentifier.t
+        [@ocaml.doc
+          "Resource identifier of the resource for which position is updated."];
+      resourceType: PositionResourceType.t
+        [@ocaml.doc
+          "Resource type of the resource for which position is updated."];
+      position: PositionCoordinate.t
+        [@ocaml.doc "The position information of the resource."]}
+    let context_ = "UpdatePositionRequest"
+    let make ~resourceIdentifier =
+      fun ~resourceType ->
+        fun ~position ->
+          fun () -> { resourceIdentifier; resourceType; position }
+    let to_value x =
+      structure_to_value
+        [("ResourceIdentifier",
+           (Some (PositionResourceIdentifier.to_value x.resourceIdentifier)));
+        ("resourceType",
+          (Some (PositionResourceType.to_value x.resourceType)));
+        ("Position", (Some (PositionCoordinate.to_value x.position)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let position =
+        PositionCoordinate.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Position") in
+      let resourceType =
+        PositionResourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      let resourceIdentifier =
+        PositionResourceIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
+      make ~position ~resourceType ~resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let position =
+        field_map_exn json__ "Position" PositionCoordinate.of_json in
+      let resourceType =
+        field_map_exn json__ "ResourceType" PositionResourceType.of_json in
+      let resourceIdentifier =
+        field_map_exn json__ "ResourceIdentifier"
+          PositionResourceIdentifier.of_json in
+      make ~position ~resourceType ~resourceIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update the position information of a resource. This action is no longer supported. Calls to update the position information should use the UpdateResourcePosition API operation instead."]
 module UpdatePartnerAccountResponse =
   struct
     type nonrec t = unit
@@ -6766,12 +14354,13 @@ module UpdatePartnerAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Sidewalk") in
       make ~partnerType ~partnerAccountId ~sidewalk ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let partnerType = field_map_exn json "PartnerType" PartnerType.of_json in
+    let of_json json__ =
+      let partnerType =
+        field_map_exn json__ "PartnerType" PartnerType.of_json in
       let partnerAccountId =
-        field_map_exn json "PartnerAccountId" PartnerAccountId.of_json in
+        field_map_exn json__ "PartnerAccountId" PartnerAccountId.of_json in
       let sidewalk =
-        field_map_exn json "Sidewalk" SidewalkUpdateAccount.of_json in
+        field_map_exn json__ "Sidewalk" SidewalkUpdateAccount.of_json in
       make ~partnerType ~partnerAccountId ~sidewalk ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates properties of a partner account."]
@@ -6849,7 +14438,7 @@ module UpdateNetworkAnalyzerConfigurationResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Update NetworkAnalyzer configuration."]
+  end[@@ocaml.doc "Update network analyzer configuration."]
 module UpdateNetworkAnalyzerConfigurationRequest =
   struct
     type nonrec t =
@@ -6858,32 +14447,45 @@ module UpdateNetworkAnalyzerConfigurationRequest =
       traceContent: TraceContent.t option ;
       wirelessDevicesToAdd: WirelessDeviceList.t option
         [@ocaml.doc
-          "WirelessDevices to add into NetworkAnalyzerConfiguration."];
+          "Wireless device resources to add to the network analyzer configuration. Provide the WirelessDeviceId of the resource to add in the input array."];
       wirelessDevicesToRemove: WirelessDeviceList.t option
         [@ocaml.doc
-          "WirelessDevices to remove from NetworkAnalyzerConfiguration."];
+          "Wireless device resources to remove from the network analyzer configuration. Provide the WirelessDeviceId of the resources to remove in the input array."];
       wirelessGatewaysToAdd: WirelessGatewayList.t option
         [@ocaml.doc
-          "WirelessGateways to add into NetworkAnalyzerConfiguration."];
+          "Wireless gateway resources to add to the network analyzer configuration. Provide the WirelessGatewayId of the resource to add in the input array."];
       wirelessGatewaysToRemove: WirelessGatewayList.t option
         [@ocaml.doc
-          "WirelessGateways to remove from NetworkAnalyzerConfiguration."]}
+          "Wireless gateway resources to remove from the network analyzer configuration. Provide the WirelessGatewayId of the resources to remove in the input array."];
+      description: Description.t option ;
+      multicastGroupsToAdd: NetworkAnalyzerMulticastGroupList.t option
+        [@ocaml.doc
+          "Multicast group resources to add to the network analyzer configuration. Provide the MulticastGroupId of the resource to add in the input array."];
+      multicastGroupsToRemove: NetworkAnalyzerMulticastGroupList.t option
+        [@ocaml.doc
+          "Multicast group resources to remove from the network analyzer configuration. Provide the MulticastGroupId of the resources to remove in the input array."]}
     let context_ = "UpdateNetworkAnalyzerConfigurationRequest"
     let make ?traceContent =
       fun ?wirelessDevicesToAdd ->
         fun ?wirelessDevicesToRemove ->
           fun ?wirelessGatewaysToAdd ->
             fun ?wirelessGatewaysToRemove ->
-              fun ~configurationName ->
-                fun () ->
-                  {
-                    traceContent;
-                    wirelessDevicesToAdd;
-                    wirelessDevicesToRemove;
-                    wirelessGatewaysToAdd;
-                    wirelessGatewaysToRemove;
-                    configurationName
-                  }
+              fun ?description ->
+                fun ?multicastGroupsToAdd ->
+                  fun ?multicastGroupsToRemove ->
+                    fun ~configurationName ->
+                      fun () ->
+                        {
+                          traceContent;
+                          wirelessDevicesToAdd;
+                          wirelessDevicesToRemove;
+                          wirelessGatewaysToAdd;
+                          wirelessGatewaysToRemove;
+                          description;
+                          multicastGroupsToAdd;
+                          multicastGroupsToRemove;
+                          configurationName
+                        }
     let to_value x =
       structure_to_value
         [("ConfigurationName",
@@ -6900,9 +14502,24 @@ module UpdateNetworkAnalyzerConfigurationRequest =
           (Option.map x.wirelessGatewaysToAdd ~f:WirelessGatewayList.to_value));
         ("WirelessGatewaysToRemove",
           (Option.map x.wirelessGatewaysToRemove
-             ~f:WirelessGatewayList.to_value))]
+             ~f:WirelessGatewayList.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("MulticastGroupsToAdd",
+          (Option.map x.multicastGroupsToAdd
+             ~f:NetworkAnalyzerMulticastGroupList.to_value));
+        ("MulticastGroupsToRemove",
+          (Option.map x.multicastGroupsToRemove
+             ~f:NetworkAnalyzerMulticastGroupList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let multicastGroupsToRemove =
+        (Option.map ~f:NetworkAnalyzerMulticastGroupList.of_xml)
+          (Xml.child xml_arg0 "MulticastGroupsToRemove") in
+      let multicastGroupsToAdd =
+        (Option.map ~f:NetworkAnalyzerMulticastGroupList.of_xml)
+          (Xml.child xml_arg0 "MulticastGroupsToAdd") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
       let wirelessGatewaysToRemove =
         (Option.map ~f:WirelessGatewayList.of_xml)
           (Xml.child xml_arg0 "WirelessGatewaysToRemove") in
@@ -6921,28 +14538,38 @@ module UpdateNetworkAnalyzerConfigurationRequest =
       let configurationName =
         NetworkAnalyzerConfigurationName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationName") in
-      make ?wirelessGatewaysToRemove ?wirelessGatewaysToAdd
+      make ?multicastGroupsToRemove ?multicastGroupsToAdd ?description
+        ?wirelessGatewaysToRemove ?wirelessGatewaysToAdd
         ?wirelessDevicesToRemove ?wirelessDevicesToAdd ?traceContent
         ~configurationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let multicastGroupsToRemove =
+        field_map json__ "MulticastGroupsToRemove"
+          NetworkAnalyzerMulticastGroupList.of_json in
+      let multicastGroupsToAdd =
+        field_map json__ "MulticastGroupsToAdd"
+          NetworkAnalyzerMulticastGroupList.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let wirelessGatewaysToRemove =
-        field_map json "WirelessGatewaysToRemove" WirelessGatewayList.of_json in
+        field_map json__ "WirelessGatewaysToRemove"
+          WirelessGatewayList.of_json in
       let wirelessGatewaysToAdd =
-        field_map json "WirelessGatewaysToAdd" WirelessGatewayList.of_json in
+        field_map json__ "WirelessGatewaysToAdd" WirelessGatewayList.of_json in
       let wirelessDevicesToRemove =
-        field_map json "WirelessDevicesToRemove" WirelessDeviceList.of_json in
+        field_map json__ "WirelessDevicesToRemove" WirelessDeviceList.of_json in
       let wirelessDevicesToAdd =
-        field_map json "WirelessDevicesToAdd" WirelessDeviceList.of_json in
-      let traceContent = field_map json "TraceContent" TraceContent.of_json in
+        field_map json__ "WirelessDevicesToAdd" WirelessDeviceList.of_json in
+      let traceContent = field_map json__ "TraceContent" TraceContent.of_json in
       let configurationName =
-        field_map_exn json "ConfigurationName"
+        field_map_exn json__ "ConfigurationName"
           NetworkAnalyzerConfigurationName.of_json in
-      make ?wirelessGatewaysToRemove ?wirelessGatewaysToAdd
+      make ?multicastGroupsToRemove ?multicastGroupsToAdd ?description
+        ?wirelessGatewaysToRemove ?wirelessGatewaysToAdd
         ?wirelessDevicesToRemove ?wirelessDevicesToAdd ?traceContent
         ~configurationName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Update NetworkAnalyzer configuration."]
+  end[@@ocaml.doc "Update network analyzer configuration."]
 module UpdateMulticastGroupResponse =
   struct
     type nonrec t = unit
@@ -7060,14 +14687,123 @@ module UpdateMulticastGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?loRaWAN ?description ?name ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANMulticast.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" MulticastGroupName.of_json in
-      let id = field_map_exn json "Id" MulticastGroupId.of_json in
+    let of_json json__ =
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANMulticast.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" MulticastGroupName.of_json in
+      let id = field_map_exn json__ "Id" MulticastGroupId.of_json in
       make ?loRaWAN ?description ?name ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates properties of a multicast group session."]
+module UpdateMetricConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update the summary metric configuration."]
+module UpdateMetricConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      summaryMetric: SummaryMetricConfiguration.t option
+        [@ocaml.doc
+          "The value to be used to set summary metric configuration."]}
+    let make ?summaryMetric = fun () -> { summaryMetric }
+    let to_value x =
+      structure_to_value
+        [("SummaryMetric",
+           (Option.map x.summaryMetric ~f:SummaryMetricConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let summaryMetric =
+        (Option.map ~f:SummaryMetricConfiguration.of_xml)
+          (Xml.child xml_arg0 "SummaryMetric") in
+      make ?summaryMetric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let summaryMetric =
+        field_map json__ "SummaryMetric" SummaryMetricConfiguration.of_json in
+      make ?summaryMetric ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update the summary metric configuration."]
 module UpdateLogLevelsByResourceTypesResponse =
   struct
     type nonrec t = unit
@@ -7152,27 +14888,33 @@ module UpdateLogLevelsByResourceTypesResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Set default log level, or log levels by resource types. This can be for wireless device log options or wireless gateways log options and is used to control the log messages that'll be displayed in CloudWatch."]
+       "Set default log level, or log levels by resource types. This can be for wireless device, wireless gateway, or FUOTA task log options, and is used to control the log messages that'll be displayed in CloudWatch."]
 module UpdateLogLevelsByResourceTypesRequest =
   struct
     type nonrec t =
       {
       defaultLogLevel: LogLevel.t option ;
+      fuotaTaskLogOptions: FuotaTaskLogOptionList.t option ;
       wirelessDeviceLogOptions: WirelessDeviceLogOptionList.t option ;
       wirelessGatewayLogOptions: WirelessGatewayLogOptionList.t option }
     let make ?defaultLogLevel =
-      fun ?wirelessDeviceLogOptions ->
-        fun ?wirelessGatewayLogOptions ->
-          fun () ->
-            {
-              defaultLogLevel;
-              wirelessDeviceLogOptions;
-              wirelessGatewayLogOptions
-            }
+      fun ?fuotaTaskLogOptions ->
+        fun ?wirelessDeviceLogOptions ->
+          fun ?wirelessGatewayLogOptions ->
+            fun () ->
+              {
+                defaultLogLevel;
+                fuotaTaskLogOptions;
+                wirelessDeviceLogOptions;
+                wirelessGatewayLogOptions
+              }
     let to_value x =
       structure_to_value
         [("DefaultLogLevel",
            (Option.map x.defaultLogLevel ~f:LogLevel.to_value));
+        ("FuotaTaskLogOptions",
+          (Option.map x.fuotaTaskLogOptions
+             ~f:FuotaTaskLogOptionList.to_value));
         ("WirelessDeviceLogOptions",
           (Option.map x.wirelessDeviceLogOptions
              ~f:WirelessDeviceLogOptionList.to_value));
@@ -7187,25 +14929,31 @@ module UpdateLogLevelsByResourceTypesRequest =
       let wirelessDeviceLogOptions =
         (Option.map ~f:WirelessDeviceLogOptionList.of_xml)
           (Xml.child xml_arg0 "WirelessDeviceLogOptions") in
+      let fuotaTaskLogOptions =
+        (Option.map ~f:FuotaTaskLogOptionList.of_xml)
+          (Xml.child xml_arg0 "FuotaTaskLogOptions") in
       let defaultLogLevel =
         (Option.map ~f:LogLevel.of_xml)
           (Xml.child xml_arg0 "DefaultLogLevel") in
       make ?wirelessGatewayLogOptions ?wirelessDeviceLogOptions
-        ?defaultLogLevel ()
+        ?fuotaTaskLogOptions ?defaultLogLevel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessGatewayLogOptions =
-        field_map json "WirelessGatewayLogOptions"
+        field_map json__ "WirelessGatewayLogOptions"
           WirelessGatewayLogOptionList.of_json in
       let wirelessDeviceLogOptions =
-        field_map json "WirelessDeviceLogOptions"
+        field_map json__ "WirelessDeviceLogOptions"
           WirelessDeviceLogOptionList.of_json in
-      let defaultLogLevel = field_map json "DefaultLogLevel" LogLevel.of_json in
+      let fuotaTaskLogOptions =
+        field_map json__ "FuotaTaskLogOptions" FuotaTaskLogOptionList.of_json in
+      let defaultLogLevel =
+        field_map json__ "DefaultLogLevel" LogLevel.of_json in
       make ?wirelessGatewayLogOptions ?wirelessDeviceLogOptions
-        ?defaultLogLevel ()
+        ?fuotaTaskLogOptions ?defaultLogLevel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Set default log level, or log levels by resource types. This can be for wireless device log options or wireless gateways log options and is used to control the log messages that'll be displayed in CloudWatch."]
+       "Set default log level, or log levels by resource types. This can be for wireless device, wireless gateway, or FUOTA task log options, and is used to control the log messages that'll be displayed in CloudWatch."]
 module UpdateFuotaTaskResponse =
   struct
     type nonrec t = unit
@@ -7299,23 +15047,35 @@ module UpdateFuotaTaskRequest =
       description: Description.t option ;
       loRaWAN: LoRaWANFuotaTask.t option ;
       firmwareUpdateImage: FirmwareUpdateImage.t option ;
-      firmwareUpdateRole: FirmwareUpdateRole.t option }
+      firmwareUpdateRole: FirmwareUpdateRole.t option ;
+      redundancyPercent: RedundancyPercent.t option ;
+      fragmentSizeBytes: FragmentSizeBytes.t option ;
+      fragmentIntervalMS: FragmentIntervalMS.t option ;
+      descriptor: FileDescriptor.t option }
     let context_ = "UpdateFuotaTaskRequest"
     let make ?name =
       fun ?description ->
         fun ?loRaWAN ->
           fun ?firmwareUpdateImage ->
             fun ?firmwareUpdateRole ->
-              fun ~id ->
-                fun () ->
-                  {
-                    name;
-                    description;
-                    loRaWAN;
-                    firmwareUpdateImage;
-                    firmwareUpdateRole;
-                    id
-                  }
+              fun ?redundancyPercent ->
+                fun ?fragmentSizeBytes ->
+                  fun ?fragmentIntervalMS ->
+                    fun ?descriptor ->
+                      fun ~id ->
+                        fun () ->
+                          {
+                            name;
+                            description;
+                            loRaWAN;
+                            firmwareUpdateImage;
+                            firmwareUpdateRole;
+                            redundancyPercent;
+                            fragmentSizeBytes;
+                            fragmentIntervalMS;
+                            descriptor;
+                            id
+                          }
     let to_value x =
       structure_to_value
         [("Id", (Some (FuotaTaskId.to_value x.id)));
@@ -7325,9 +15085,28 @@ module UpdateFuotaTaskRequest =
         ("FirmwareUpdateImage",
           (Option.map x.firmwareUpdateImage ~f:FirmwareUpdateImage.to_value));
         ("FirmwareUpdateRole",
-          (Option.map x.firmwareUpdateRole ~f:FirmwareUpdateRole.to_value))]
+          (Option.map x.firmwareUpdateRole ~f:FirmwareUpdateRole.to_value));
+        ("RedundancyPercent",
+          (Option.map x.redundancyPercent ~f:RedundancyPercent.to_value));
+        ("FragmentSizeBytes",
+          (Option.map x.fragmentSizeBytes ~f:FragmentSizeBytes.to_value));
+        ("FragmentIntervalMS",
+          (Option.map x.fragmentIntervalMS ~f:FragmentIntervalMS.to_value));
+        ("Descriptor", (Option.map x.descriptor ~f:FileDescriptor.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let descriptor =
+        (Option.map ~f:FileDescriptor.of_xml)
+          (Xml.child xml_arg0 "Descriptor") in
+      let fragmentIntervalMS =
+        (Option.map ~f:FragmentIntervalMS.of_xml)
+          (Xml.child xml_arg0 "FragmentIntervalMS") in
+      let fragmentSizeBytes =
+        (Option.map ~f:FragmentSizeBytes.of_xml)
+          (Xml.child xml_arg0 "FragmentSizeBytes") in
+      let redundancyPercent =
+        (Option.map ~f:RedundancyPercent.of_xml)
+          (Xml.child xml_arg0 "RedundancyPercent") in
       let firmwareUpdateRole =
         (Option.map ~f:FirmwareUpdateRole.of_xml)
           (Xml.child xml_arg0 "FirmwareUpdateRole") in
@@ -7343,22 +15122,189 @@ module UpdateFuotaTaskRequest =
         (Option.map ~f:FuotaTaskName.of_xml) (Xml.child xml_arg0 "Name") in
       let id =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?firmwareUpdateRole ?firmwareUpdateImage ?loRaWAN ?description
-        ?name ~id ()
+      make ?descriptor ?fragmentIntervalMS ?fragmentSizeBytes
+        ?redundancyPercent ?firmwareUpdateRole ?firmwareUpdateImage ?loRaWAN
+        ?description ?name ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let descriptor = field_map json__ "Descriptor" FileDescriptor.of_json in
+      let fragmentIntervalMS =
+        field_map json__ "FragmentIntervalMS" FragmentIntervalMS.of_json in
+      let fragmentSizeBytes =
+        field_map json__ "FragmentSizeBytes" FragmentSizeBytes.of_json in
+      let redundancyPercent =
+        field_map json__ "RedundancyPercent" RedundancyPercent.of_json in
       let firmwareUpdateRole =
-        field_map json "FirmwareUpdateRole" FirmwareUpdateRole.of_json in
+        field_map json__ "FirmwareUpdateRole" FirmwareUpdateRole.of_json in
       let firmwareUpdateImage =
-        field_map json "FirmwareUpdateImage" FirmwareUpdateImage.of_json in
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANFuotaTask.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" FuotaTaskName.of_json in
-      let id = field_map_exn json "Id" FuotaTaskId.of_json in
-      make ?firmwareUpdateRole ?firmwareUpdateImage ?loRaWAN ?description
-        ?name ~id ()
+        field_map json__ "FirmwareUpdateImage" FirmwareUpdateImage.of_json in
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANFuotaTask.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" FuotaTaskName.of_json in
+      let id = field_map_exn json__ "Id" FuotaTaskId.of_json in
+      make ?descriptor ?fragmentIntervalMS ?fragmentSizeBytes
+        ?redundancyPercent ?firmwareUpdateRole ?firmwareUpdateImage ?loRaWAN
+        ?description ?name ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates properties of a FUOTA task."]
+module UpdateEventConfigurationByResourceTypesResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update the event configuration based on resource types."]
+module UpdateEventConfigurationByResourceTypesRequest =
+  struct
+    type nonrec t =
+      {
+      deviceRegistrationState:
+        DeviceRegistrationStateResourceTypeEventConfiguration.t option
+        [@ocaml.doc
+          "Device registration state resource type event configuration object for enabling and disabling wireless gateway topic."];
+      proximity: ProximityResourceTypeEventConfiguration.t option
+        [@ocaml.doc
+          "Proximity resource type event configuration object for enabling and disabling wireless gateway topic."];
+      join: JoinResourceTypeEventConfiguration.t option
+        [@ocaml.doc
+          "Join resource type event configuration object for enabling and disabling wireless device topic."];
+      connectionStatus:
+        ConnectionStatusResourceTypeEventConfiguration.t option
+        [@ocaml.doc
+          "Connection status resource type event configuration object for enabling and disabling wireless gateway topic."];
+      messageDeliveryStatus:
+        MessageDeliveryStatusResourceTypeEventConfiguration.t option
+        [@ocaml.doc
+          "Message delivery status resource type event configuration object for enabling and disabling wireless device topic."]}
+    let make ?deviceRegistrationState =
+      fun ?proximity ->
+        fun ?join ->
+          fun ?connectionStatus ->
+            fun ?messageDeliveryStatus ->
+              fun () ->
+                {
+                  deviceRegistrationState;
+                  proximity;
+                  join;
+                  connectionStatus;
+                  messageDeliveryStatus
+                }
+    let to_value x =
+      structure_to_value
+        [("DeviceRegistrationState",
+           (Option.map x.deviceRegistrationState
+              ~f:DeviceRegistrationStateResourceTypeEventConfiguration.to_value));
+        ("Proximity",
+          (Option.map x.proximity
+             ~f:ProximityResourceTypeEventConfiguration.to_value));
+        ("Join",
+          (Option.map x.join ~f:JoinResourceTypeEventConfiguration.to_value));
+        ("ConnectionStatus",
+          (Option.map x.connectionStatus
+             ~f:ConnectionStatusResourceTypeEventConfiguration.to_value));
+        ("MessageDeliveryStatus",
+          (Option.map x.messageDeliveryStatus
+             ~f:MessageDeliveryStatusResourceTypeEventConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let messageDeliveryStatus =
+        (Option.map
+           ~f:MessageDeliveryStatusResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "MessageDeliveryStatus") in
+      let connectionStatus =
+        (Option.map ~f:ConnectionStatusResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "ConnectionStatus") in
+      let join =
+        (Option.map ~f:JoinResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "Join") in
+      let proximity =
+        (Option.map ~f:ProximityResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "Proximity") in
+      let deviceRegistrationState =
+        (Option.map
+           ~f:DeviceRegistrationStateResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "DeviceRegistrationState") in
+      make ?messageDeliveryStatus ?connectionStatus ?join ?proximity
+        ?deviceRegistrationState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let messageDeliveryStatus =
+        field_map json__ "MessageDeliveryStatus"
+          MessageDeliveryStatusResourceTypeEventConfiguration.of_json in
+      let connectionStatus =
+        field_map json__ "ConnectionStatus"
+          ConnectionStatusResourceTypeEventConfiguration.of_json in
+      let join =
+        field_map json__ "Join" JoinResourceTypeEventConfiguration.of_json in
+      let proximity =
+        field_map json__ "Proximity"
+          ProximityResourceTypeEventConfiguration.of_json in
+      let deviceRegistrationState =
+        field_map json__ "DeviceRegistrationState"
+          DeviceRegistrationStateResourceTypeEventConfiguration.of_json in
+      make ?messageDeliveryStatus ?connectionStatus ?join ?proximity
+        ?deviceRegistrationState ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Update the event configuration based on resource types."]
 module UpdateDestinationResponse =
   struct
     type nonrec t = unit
@@ -7480,13 +15426,13 @@ module UpdateDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?roleArn ?description ?expression ?expressionType ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let expression = field_map json "Expression" Expression.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let expression = field_map json__ "Expression" Expression.of_json in
       let expressionType =
-        field_map json "ExpressionType" ExpressionType.of_json in
-      let name = field_map_exn json "Name" DestinationName.of_json in
+        field_map json__ "ExpressionType" ExpressionType.of_json in
+      let name = field_map_exn json__ "Name" DestinationName.of_json in
       make ?roleArn ?description ?expression ?expressionType ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates properties of a destination."]
@@ -7591,10 +15537,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from a resource."]
@@ -7668,8 +15614,9 @@ module TestWirelessDeviceResponse =
         (Option.map ~f:Result_.of_xml) (Xml.child xml_arg0 "Result") in
       make ?result ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let result = field_map json "Result" Result_.of_json in make ?result ()
+    let of_json json__ =
+      let result = field_map json__ "Result" Result_.of_json in
+      make ?result ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Simulates a provisioned device by sending an uplink data payload of Hello."]
@@ -7690,8 +15637,8 @@ module TestWirelessDeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" WirelessDeviceId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" WirelessDeviceId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7804,13 +15751,359 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a tag to a resource."]
+module StartWirelessDeviceImportTaskResponse =
+  struct
+    type nonrec t =
+      {
+      id: ImportTaskId.t option [@ocaml.doc "The import task ID."];
+      arn: ImportTaskArn.t option
+        [@ocaml.doc "The ARN (Amazon Resource Name) of the import task."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?id = fun ?arn -> fun () -> { id; arn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:ImportTaskId.to_value));
+        ("Arn", (Option.map x.arn ~f:ImportTaskArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn =
+        (Option.map ~f:ImportTaskArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      let id = (Option.map ~f:ImportTaskId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ImportTaskArn.of_json in
+      let id = field_map json__ "Id" ImportTaskId.of_json in make ?arn ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Start import task for provisioning Sidewalk devices in bulk using an S3 CSV file."]
+module StartWirelessDeviceImportTaskRequest =
+  struct
+    type nonrec t =
+      {
+      destinationName: DestinationName.t
+        [@ocaml.doc
+          "The name of the Sidewalk destination that describes the IoT rule to route messages from the devices in the import task that are onboarded to AWS IoT Wireless."];
+      clientRequestToken: ClientRequestToken.t option ;
+      tags: TagList.t option ;
+      positioning: PositioningConfigStatus.t option
+        [@ocaml.doc
+          "The integration status of the Device Location feature for Sidewalk devices."];
+      sidewalk: SidewalkStartImportInfo.t
+        [@ocaml.doc
+          "The Sidewalk-related parameters for importing wireless devices that need to be provisioned in bulk."]}
+    let context_ = "StartWirelessDeviceImportTaskRequest"
+    let make ?clientRequestToken =
+      fun ?tags ->
+        fun ?positioning ->
+          fun ~destinationName ->
+            fun ~sidewalk ->
+              fun () ->
+                {
+                  clientRequestToken;
+                  tags;
+                  positioning;
+                  destinationName;
+                  sidewalk
+                }
+    let to_value x =
+      structure_to_value
+        [("DestinationName",
+           (Some (DestinationName.to_value x.destinationName)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:PositioningConfigStatus.to_value));
+        ("Sidewalk", (Some (SidewalkStartImportInfo.to_value x.sidewalk)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sidewalk =
+        SidewalkStartImportInfo.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Sidewalk") in
+      let positioning =
+        (Option.map ~f:PositioningConfigStatus.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let destinationName =
+        DestinationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DestinationName") in
+      make ~sidewalk ?positioning ?tags ?clientRequestToken ~destinationName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sidewalk =
+        field_map_exn json__ "Sidewalk" SidewalkStartImportInfo.of_json in
+      let positioning =
+        field_map json__ "Positioning" PositioningConfigStatus.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let destinationName =
+        field_map_exn json__ "DestinationName" DestinationName.of_json in
+      make ~sidewalk ?positioning ?tags ?clientRequestToken ~destinationName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Start import task for provisioning Sidewalk devices in bulk using an S3 CSV file."]
+module StartSingleWirelessDeviceImportTaskResponse =
+  struct
+    type nonrec t =
+      {
+      id: ImportTaskId.t option [@ocaml.doc "The import task ID."];
+      arn: ImportTaskArn.t option
+        [@ocaml.doc "The ARN (Amazon Resource Name) of the import task."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?id = fun ?arn -> fun () -> { id; arn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:ImportTaskId.to_value));
+        ("Arn", (Option.map x.arn ~f:ImportTaskArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn =
+        (Option.map ~f:ImportTaskArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      let id = (Option.map ~f:ImportTaskId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map json__ "Arn" ImportTaskArn.of_json in
+      let id = field_map json__ "Id" ImportTaskId.of_json in make ?arn ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Start import task for a single wireless device."]
+module StartSingleWirelessDeviceImportTaskRequest =
+  struct
+    type nonrec t =
+      {
+      destinationName: DestinationName.t
+        [@ocaml.doc
+          "The name of the Sidewalk destination that describes the IoT rule to route messages from the device in the import task that will be onboarded to AWS IoT Wireless."];
+      clientRequestToken: ClientRequestToken.t option ;
+      deviceName: DeviceName.t option
+        [@ocaml.doc
+          "The name of the wireless device for which an import task is being started."];
+      tags: TagList.t option ;
+      positioning: PositioningConfigStatus.t option
+        [@ocaml.doc
+          "The integration status of the Device Location feature for Sidewalk devices."];
+      sidewalk: SidewalkSingleStartImportInfo.t
+        [@ocaml.doc
+          "The Sidewalk-related parameters for importing a single wireless device."]}
+    let context_ = "StartSingleWirelessDeviceImportTaskRequest"
+    let make ?clientRequestToken =
+      fun ?deviceName ->
+        fun ?tags ->
+          fun ?positioning ->
+            fun ~destinationName ->
+              fun ~sidewalk ->
+                fun () ->
+                  {
+                    clientRequestToken;
+                    deviceName;
+                    tags;
+                    positioning;
+                    destinationName;
+                    sidewalk
+                  }
+    let to_value x =
+      structure_to_value
+        [("DestinationName",
+           (Some (DestinationName.to_value x.destinationName)));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("DeviceName", (Option.map x.deviceName ~f:DeviceName.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:PositioningConfigStatus.to_value));
+        ("Sidewalk",
+          (Some (SidewalkSingleStartImportInfo.to_value x.sidewalk)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sidewalk =
+        SidewalkSingleStartImportInfo.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Sidewalk") in
+      let positioning =
+        (Option.map ~f:PositioningConfigStatus.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let deviceName =
+        (Option.map ~f:DeviceName.of_xml) (Xml.child xml_arg0 "DeviceName") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let destinationName =
+        DestinationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DestinationName") in
+      make ~sidewalk ?positioning ?tags ?deviceName ?clientRequestToken
+        ~destinationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sidewalk =
+        field_map_exn json__ "Sidewalk" SidewalkSingleStartImportInfo.of_json in
+      let positioning =
+        field_map json__ "Positioning" PositioningConfigStatus.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let deviceName = field_map json__ "DeviceName" DeviceName.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let destinationName =
+        field_map_exn json__ "DestinationName" DestinationName.of_json in
+      make ~sidewalk ?positioning ?tags ?deviceName ?clientRequestToken
+        ~destinationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Start import task for a single wireless device."]
 module StartMulticastGroupSessionResponse =
   struct
     type nonrec t = unit
@@ -7917,10 +16210,10 @@ module StartMulticastGroupSessionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~loRaWAN ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loRaWAN =
-        field_map_exn json "LoRaWAN" LoRaWANMulticastSession.of_json in
-      let id = field_map_exn json "Id" MulticastGroupId.of_json in
+        field_map_exn json__ "LoRaWAN" LoRaWANMulticastSession.of_json in
+      let id = field_map_exn json__ "Id" MulticastGroupId.of_json in
       make ~loRaWAN ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts a multicast group session."]
@@ -8029,9 +16322,9 @@ module StartFuotaTaskRequest =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?loRaWAN ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANStartFuotaTask.of_json in
-      let id = field_map_exn json "Id" FuotaTaskId.of_json in
+    let of_json json__ =
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANStartFuotaTask.of_json in
+      let id = field_map_exn json__ "Id" FuotaTaskId.of_json in
       make ?loRaWAN ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts a FUOTA task."]
@@ -8137,10 +16430,10 @@ module StartBulkDisassociateWirelessDeviceFromMulticastGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?tags ?queryString ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let queryString = field_map json "QueryString" QueryString.of_json in
-      let id = field_map_exn json "Id" MulticastGroupId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let queryString = field_map json__ "QueryString" QueryString.of_json in
+      let id = field_map_exn json__ "Id" MulticastGroupId.of_json in
       make ?tags ?queryString ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8247,10 +16540,10 @@ module StartBulkAssociateWirelessDeviceWithMulticastGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?tags ?queryString ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let queryString = field_map json "QueryString" QueryString.of_json in
-      let id = field_map_exn json "Id" MulticastGroupId.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let queryString = field_map json__ "QueryString" QueryString.of_json in
+      let id = field_map_exn json__ "Id" MulticastGroupId.of_json in
       make ?tags ?queryString ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8325,8 +16618,8 @@ module SendDataToWirelessDeviceResponse =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageId = field_map json "MessageId" MessageId.of_json in
+    let of_json json__ =
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
       make ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Sends a decrypted application data frame to a device."]
@@ -8371,13 +16664,14 @@ module SendDataToWirelessDeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?wirelessMetadata ~payloadData ~transmitMode ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessMetadata =
-        field_map json "WirelessMetadata" WirelessMetadata.of_json in
-      let payloadData = field_map_exn json "PayloadData" PayloadData.of_json in
+        field_map json__ "WirelessMetadata" WirelessMetadata.of_json in
+      let payloadData =
+        field_map_exn json__ "PayloadData" PayloadData.of_json in
       let transmitMode =
-        field_map_exn json "TransmitMode" TransmitMode.of_json in
-      let id = field_map_exn json "Id" WirelessDeviceId.of_json in
+        field_map_exn json__ "TransmitMode" TransmitMode.of_json in
+      let id = field_map_exn json__ "Id" WirelessDeviceId.of_json in
       make ?wirelessMetadata ~payloadData ~transmitMode ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Sends a decrypted application data frame to a device."]
@@ -8469,9 +16763,9 @@ module SendDataToMulticastGroupResponse =
           (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let messageId =
-        field_map json "MessageId" MulticastGroupMessageId.of_json in
+        field_map json__ "MessageId" MulticastGroupMessageId.of_json in
       make ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Sends the specified data to a multicast group."]
@@ -8506,12 +16800,13 @@ module SendDataToMulticastGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessMetadata ~payloadData ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessMetadata =
-        field_map_exn json "WirelessMetadata"
+        field_map_exn json__ "WirelessMetadata"
           MulticastWirelessMetadata.of_json in
-      let payloadData = field_map_exn json "PayloadData" PayloadData.of_json in
-      let id = field_map_exn json "Id" MulticastGroupId.of_json in
+      let payloadData =
+        field_map_exn json__ "PayloadData" PayloadData.of_json in
+      let id = field_map_exn json__ "Id" MulticastGroupId.of_json in
       make ~wirelessMetadata ~payloadData ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Sends the specified data to a multicast group."]
@@ -8590,7 +16885,7 @@ module ResetResourceLogLevelResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the log-level override, if any, for a specific resource-ID and resource-type. It can be used for a wireless device or a wireless gateway."]
+       "Removes the log-level override, if any, for a specific resource ID and resource type. It can be used for a wireless device, a wireless gateway, or a FUOTA task."]
 module ResetResourceLogLevelRequest =
   struct
     type nonrec t =
@@ -8598,7 +16893,7 @@ module ResetResourceLogLevelRequest =
       resourceIdentifier: ResourceIdentifier.t ;
       resourceType: ResourceType.t
         [@ocaml.doc
-          "The type of the resource, which can be WirelessDevice or WirelessGateway."]}
+          "The type of resource, which can be WirelessDevice, WirelessGateway, or FuotaTask."]}
     let context_ = "ResetResourceLogLevelRequest"
     let make ~resourceIdentifier =
       fun ~resourceType -> fun () -> { resourceIdentifier; resourceType }
@@ -8617,15 +16912,15 @@ module ResetResourceLogLevelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
       make ~resourceType ~resourceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map_exn json "ResourceType" ResourceType.of_json in
+        field_map_exn json__ "ResourceType" ResourceType.of_json in
       let resourceIdentifier =
-        field_map_exn json "ResourceIdentifier" ResourceIdentifier.of_json in
+        field_map_exn json__ "ResourceIdentifier" ResourceIdentifier.of_json in
       make ~resourceType ~resourceIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the log-level override, if any, for a specific resource-ID and resource-type. It can be used for a wireless device or a wireless gateway."]
+       "Removes the log-level override, if any, for a specific resource ID and resource type. It can be used for a wireless device, a wireless gateway, or a FUOTA task."]
 module ResetAllResourceLogLevelsResponse =
   struct
     type nonrec t = unit
@@ -8701,7 +16996,7 @@ module ResetAllResourceLogLevelsResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the log-level overrides for all resources; both wireless devices and wireless gateways."]
+       "Removes the log-level overrides for all resources; wireless devices, wireless gateways, and FUOTA tasks."]
 module ResetAllResourceLogLevelsRequest =
   struct
     type nonrec t = unit
@@ -8714,7 +17009,7 @@ module ResetAllResourceLogLevelsRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the log-level overrides for all resources; both wireless devices and wireless gateways."]
+       "Removes the log-level overrides for all resources; wireless devices, wireless gateways, and FUOTA tasks."]
 module PutResourceLogLevelResponse =
   struct
     type nonrec t = unit
@@ -8790,7 +17085,7 @@ module PutResourceLogLevelResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sets the log-level override for a resource-ID and resource-type. This option can be specified for a wireless gateway or a wireless device. A limit of 200 log level override can be set per account."]
+       "Sets the log-level override for a resource ID and resource type. A limit of 200 log level override can be set per account."]
 module PutResourceLogLevelRequest =
   struct
     type nonrec t =
@@ -8798,7 +17093,7 @@ module PutResourceLogLevelRequest =
       resourceIdentifier: ResourceIdentifier.t ;
       resourceType: ResourceType.t
         [@ocaml.doc
-          "The type of the resource, which can be WirelessDevice or WirelessGateway."];
+          "The type of resource, which can be WirelessDevice, WirelessGateway, or FuotaTask."];
       logLevel: LogLevel.t }
     let context_ = "PutResourceLogLevelRequest"
     let make ~resourceIdentifier =
@@ -8823,16 +17118,155 @@ module PutResourceLogLevelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
       make ~logLevel ~resourceType ~resourceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logLevel = field_map_exn json "LogLevel" LogLevel.of_json in
+    let of_json json__ =
+      let logLevel = field_map_exn json__ "LogLevel" LogLevel.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" ResourceType.of_json in
+        field_map_exn json__ "ResourceType" ResourceType.of_json in
       let resourceIdentifier =
-        field_map_exn json "ResourceIdentifier" ResourceIdentifier.of_json in
+        field_map_exn json__ "ResourceIdentifier" ResourceIdentifier.of_json in
       make ~logLevel ~resourceType ~resourceIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sets the log-level override for a resource-ID and resource-type. This option can be specified for a wireless gateway or a wireless device. A limit of 200 log level override can be set per account."]
+       "Sets the log-level override for a resource ID and resource type. A limit of 200 log level override can be set per account."]
+module PutPositionConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Put position configuration for a given resource. This action is no longer supported. Calls to update the position configuration should use the UpdateResourcePosition API operation instead."]
+module PutPositionConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      resourceIdentifier: PositionResourceIdentifier.t
+        [@ocaml.doc
+          "Resource identifier used to update the position configuration."];
+      resourceType: PositionResourceType.t
+        [@ocaml.doc
+          "Resource type of the resource for which you want to update the position configuration."];
+      solvers: PositionSolverConfigurations.t option
+        [@ocaml.doc
+          "The positioning solvers used to update the position configuration of the resource."];
+      destination: DestinationName.t option
+        [@ocaml.doc
+          "The position data destination that describes the AWS IoT rule that processes the device's position data for use by AWS IoT Core for LoRaWAN."]}
+    let context_ = "PutPositionConfigurationRequest"
+    let make ?solvers =
+      fun ?destination ->
+        fun ~resourceIdentifier ->
+          fun ~resourceType ->
+            fun () ->
+              { solvers; destination; resourceIdentifier; resourceType }
+    let to_value x =
+      structure_to_value
+        [("ResourceIdentifier",
+           (Some (PositionResourceIdentifier.to_value x.resourceIdentifier)));
+        ("resourceType",
+          (Some (PositionResourceType.to_value x.resourceType)));
+        ("Solvers",
+          (Option.map x.solvers ~f:PositionSolverConfigurations.to_value));
+        ("Destination",
+          (Option.map x.destination ~f:DestinationName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destination =
+        (Option.map ~f:DestinationName.of_xml)
+          (Xml.child xml_arg0 "Destination") in
+      let solvers =
+        (Option.map ~f:PositionSolverConfigurations.of_xml)
+          (Xml.child xml_arg0 "Solvers") in
+      let resourceType =
+        PositionResourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      let resourceIdentifier =
+        PositionResourceIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
+      make ?destination ?solvers ~resourceType ~resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destination =
+        field_map json__ "Destination" DestinationName.of_json in
+      let solvers =
+        field_map json__ "Solvers" PositionSolverConfigurations.of_json in
+      let resourceType =
+        field_map_exn json__ "ResourceType" PositionResourceType.of_json in
+      let resourceIdentifier =
+        field_map_exn json__ "ResourceIdentifier"
+          PositionResourceIdentifier.of_json in
+      make ?destination ?solvers ~resourceType ~resourceIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Put position configuration for a given resource. This action is no longer supported. Calls to update the position configuration should use the UpdateResourcePosition API operation instead."]
 module ListWirelessGatewaysResponse =
   struct
     type nonrec t =
@@ -8914,11 +17348,11 @@ module ListWirelessGatewaysResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?wirelessGatewayList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessGatewayList =
-        field_map json "WirelessGatewayList"
+        field_map json__ "WirelessGatewayList"
           WirelessGatewayStatisticsList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?wirelessGatewayList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8947,9 +17381,9 @@ module ListWirelessGatewaysRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9034,11 +17468,11 @@ module ListWirelessGatewayTaskDefinitionsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?taskDefinitions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let taskDefinitions =
-        field_map json "TaskDefinitions"
+        field_map json__ "TaskDefinitions"
           WirelessGatewayTaskDefinitionList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?taskDefinitions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9078,12 +17512,12 @@ module ListWirelessGatewayTaskDefinitionsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?taskDefinitionType ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let taskDefinitionType =
-        field_map json "TaskDefinitionType"
+        field_map json__ "TaskDefinitionType"
           WirelessGatewayTaskDefinitionType.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?taskDefinitionType ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9168,11 +17602,11 @@ module ListWirelessDevicesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?wirelessDeviceList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessDeviceList =
-        field_map json "WirelessDeviceList"
+        field_map json__ "WirelessDeviceList"
           WirelessDeviceStatisticsList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?wirelessDeviceList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9189,7 +17623,7 @@ module ListWirelessDevicesRequest =
           "To retrieve the next set of results, the nextToken value from a previous response; otherwise null to receive the first set of results."];
       destinationName: DestinationName.t option
         [@ocaml.doc
-          "A filter to list only the wireless devices that use this destination."];
+          "A filter to list only the wireless devices that use as uplink destination."];
       deviceProfileId: DeviceProfileId.t option
         [@ocaml.doc
           "A filter to list only the wireless devices that use this device profile."];
@@ -9262,26 +17696,164 @@ module ListWirelessDevicesRequest =
         ?serviceProfileId ?deviceProfileId ?destinationName ?nextToken
         ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let multicastGroupId =
-        field_map json "MulticastGroupId" MulticastGroupId.of_json in
-      let fuotaTaskId = field_map json "FuotaTaskId" FuotaTaskId.of_json in
+        field_map json__ "MulticastGroupId" MulticastGroupId.of_json in
+      let fuotaTaskId = field_map json__ "FuotaTaskId" FuotaTaskId.of_json in
       let wirelessDeviceType =
-        field_map json "WirelessDeviceType" WirelessDeviceType.of_json in
+        field_map json__ "WirelessDeviceType" WirelessDeviceType.of_json in
       let serviceProfileId =
-        field_map json "ServiceProfileId" ServiceProfileId.of_json in
+        field_map json__ "ServiceProfileId" ServiceProfileId.of_json in
       let deviceProfileId =
-        field_map json "DeviceProfileId" DeviceProfileId.of_json in
+        field_map json__ "DeviceProfileId" DeviceProfileId.of_json in
       let destinationName =
-        field_map json "DestinationName" DestinationName.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+        field_map json__ "DestinationName" DestinationName.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?multicastGroupId ?fuotaTaskId ?wirelessDeviceType
         ?serviceProfileId ?deviceProfileId ?destinationName ?nextToken
         ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the wireless devices registered to your AWS account."]
+module ListWirelessDeviceImportTasksResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use to get the next set of results, or null if there are no additional results."];
+      wirelessDeviceImportTaskList: WirelessDeviceImportTaskList.t option
+        [@ocaml.doc
+          "List of import tasks and summary information of onboarding status of devices in each import task."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?wirelessDeviceImportTaskList ->
+        fun () -> { nextToken; wirelessDeviceImportTaskList }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("WirelessDeviceImportTaskList",
+          (Option.map x.wirelessDeviceImportTaskList
+             ~f:WirelessDeviceImportTaskList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wirelessDeviceImportTaskList =
+        (Option.map ~f:WirelessDeviceImportTaskList.of_xml)
+          (Xml.child xml_arg0 "WirelessDeviceImportTaskList") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?wirelessDeviceImportTaskList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wirelessDeviceImportTaskList =
+        field_map json__ "WirelessDeviceImportTaskList"
+          WirelessDeviceImportTaskList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?wirelessDeviceImportTaskList ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of import tasks and summary information of onboarding status of devices in each import task."]
+module ListWirelessDeviceImportTasksRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option ;
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "To retrieve the next set of results, the nextToken value from a previous response; otherwise null to receive the first set of results."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of import tasks and summary information of onboarding status of devices in each import task."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -9360,8 +17932,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags (metadata) you have assigned to the resource."]
@@ -9384,9 +17956,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9470,10 +18042,10 @@ module ListServiceProfilesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?serviceProfileList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceProfileList =
-        field_map json "ServiceProfileList" ServiceProfileList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ServiceProfileList" ServiceProfileList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?serviceProfileList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9502,9 +18074,9 @@ module ListServiceProfilesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9517,7 +18089,7 @@ module ListQueuedMessagesResponse =
         [@ocaml.doc
           "To retrieve the next set of results, the nextToken value from a previous response; otherwise null to receive the first set of results."];
       downlinkQueueMessagesList: DownlinkQueueMessagesList.t option
-        [@ocaml.doc "The messages in downlink queue."]}
+        [@ocaml.doc "The messages in the downlink queue."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -9599,21 +18171,21 @@ module ListQueuedMessagesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?downlinkQueueMessagesList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let downlinkQueueMessagesList =
-        field_map json "DownlinkQueueMessagesList"
+        field_map json__ "DownlinkQueueMessagesList"
           DownlinkQueueMessagesList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?downlinkQueueMessagesList ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The operation to list queued messages."]
+  end[@@ocaml.doc "List queued messages in the downlink queue."]
 module ListQueuedMessagesRequest =
   struct
     type nonrec t =
       {
       id: WirelessDeviceId.t
         [@ocaml.doc
-          "Id of a given wireless device which the downlink packets are targeted"];
+          "The ID of a given wireless device which the downlink message packets are being sent."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "To retrieve the next set of results, the nextToken value from a previous response; otherwise null to receive the first set of results."];
@@ -9622,7 +18194,7 @@ module ListQueuedMessagesRequest =
           "The maximum number of results to return in this operation."];
       wirelessDeviceType: WirelessDeviceType.t option
         [@ocaml.doc
-          "The wireless device type, it is either Sidewalk or LoRaWAN."]}
+          "The wireless device type, whic can be either Sidewalk or LoRaWAN."]}
     let context_ = "ListQueuedMessagesRequest"
     let make ?nextToken =
       fun ?maxResults ->
@@ -9650,15 +18222,144 @@ module ListQueuedMessagesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?wirelessDeviceType ?maxResults ?nextToken ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessDeviceType =
-        field_map json "WirelessDeviceType" WirelessDeviceType.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let id = field_map_exn json "Id" WirelessDeviceId.of_json in
+        field_map json__ "WirelessDeviceType" WirelessDeviceType.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let id = field_map_exn json__ "Id" WirelessDeviceId.of_json in
       make ?wirelessDeviceType ?maxResults ?nextToken ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The operation to list queued messages."]
+  end[@@ocaml.doc "List queued messages in the downlink queue."]
+module ListPositionConfigurationsResponse =
+  struct
+    type nonrec t =
+      {
+      positionConfigurationList: PositionConfigurationList.t option
+        [@ocaml.doc "A list of position configurations."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use to get the next set of results, or null if there are no additional results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?positionConfigurationList =
+      fun ?nextToken -> fun () -> { positionConfigurationList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PositionConfigurationList",
+           (Option.map x.positionConfigurationList
+              ~f:PositionConfigurationList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let positionConfigurationList =
+        (Option.map ~f:PositionConfigurationList.of_xml)
+          (Xml.child xml_arg0 "PositionConfigurationList") in
+      make ?nextToken ?positionConfigurationList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let positionConfigurationList =
+        field_map json__ "PositionConfigurationList"
+          PositionConfigurationList.of_json in
+      make ?nextToken ?positionConfigurationList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List position configurations for a given resource, such as positioning solvers. This action is no longer supported. Calls to retrieve position information should use the GetResourcePosition API operation instead."]
+module ListPositionConfigurationsRequest =
+  struct
+    type nonrec t =
+      {
+      resourceType: PositionResourceType.t option
+        [@ocaml.doc
+          "Resource type for which position configurations are listed."];
+      maxResults: MaxResults.t option ;
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "To retrieve the next set of results, the nextToken value from a previous response; otherwise null to receive the first set of results."]}
+    let make ?resourceType =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { resourceType; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("resourceType",
+           (Option.map x.resourceType ~f:PositionResourceType.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let resourceType =
+        (Option.map ~f:PositionResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      make ?nextToken ?maxResults ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" PositionResourceType.of_json in
+      make ?nextToken ?maxResults ?resourceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List position configurations for a given resource, such as positioning solvers. This action is no longer supported. Calls to retrieve position information should use the GetResourcePosition API operation instead."]
 module ListPartnerAccountsResponse =
   struct
     type nonrec t =
@@ -9736,9 +18437,9 @@ module ListPartnerAccountsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?sidewalk ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sidewalk = field_map json "Sidewalk" SidewalkAccountList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let sidewalk = field_map json__ "Sidewalk" SidewalkAccountList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?sidewalk ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9767,13 +18468,131 @@ module ListPartnerAccountsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the partner accounts associated with your AWS account."]
+module ListNetworkAnalyzerConfigurationsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use to get the next set of results, or null if there are no additional results."];
+      networkAnalyzerConfigurationList:
+        NetworkAnalyzerConfigurationList.t option
+        [@ocaml.doc "The list of network analyzer configurations."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?networkAnalyzerConfigurationList ->
+        fun () -> { nextToken; networkAnalyzerConfigurationList }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("NetworkAnalyzerConfigurationList",
+          (Option.map x.networkAnalyzerConfigurationList
+             ~f:NetworkAnalyzerConfigurationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkAnalyzerConfigurationList =
+        (Option.map ~f:NetworkAnalyzerConfigurationList.of_xml)
+          (Xml.child xml_arg0 "NetworkAnalyzerConfigurationList") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?networkAnalyzerConfigurationList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkAnalyzerConfigurationList =
+        field_map json__ "NetworkAnalyzerConfigurationList"
+          NetworkAnalyzerConfigurationList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?networkAnalyzerConfigurationList ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the network analyzer configurations."]
+module ListNetworkAnalyzerConfigurationsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option ;
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "To retrieve the next set of results, the nextToken value from a previous response; otherwise null to receive the first set of results."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the network analyzer configurations."]
 module ListMulticastGroupsResponse =
   struct
     type nonrec t =
@@ -9852,10 +18671,10 @@ module ListMulticastGroupsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?multicastGroupList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let multicastGroupList =
-        field_map json "MulticastGroupList" MulticastGroupList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "MulticastGroupList" MulticastGroupList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?multicastGroupList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9882,9 +18701,9 @@ module ListMulticastGroupsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9977,14 +18796,14 @@ module ListMulticastGroupsByFuotaTaskResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?multicastGroupList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let multicastGroupList =
-        field_map json "MulticastGroupList"
+        field_map json__ "MulticastGroupList"
           MulticastGroupListByFuotaTask.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?multicastGroupList ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List all multicast groups associated with a fuota task."]
+  end[@@ocaml.doc "List all multicast groups associated with a FUOTA task."]
 module ListMulticastGroupsByFuotaTaskRequest =
   struct
     type nonrec t =
@@ -10012,13 +18831,13 @@ module ListMulticastGroupsByFuotaTaskRequest =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?maxResults ?nextToken ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let id = field_map_exn json "Id" FuotaTaskId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let id = field_map_exn json__ "Id" FuotaTaskId.of_json in
       make ?maxResults ?nextToken ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List all multicast groups associated with a fuota task."]
+  end[@@ocaml.doc "List all multicast groups associated with a FUOTA task."]
 module ListFuotaTasksResponse =
   struct
     type nonrec t =
@@ -10097,10 +18916,10 @@ module ListFuotaTasksResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?fuotaTaskList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fuotaTaskList =
-        field_map json "FuotaTaskList" FuotaTaskList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "FuotaTaskList" FuotaTaskList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?fuotaTaskList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the FUOTA tasks registered to your AWS account."]
@@ -10126,12 +18945,341 @@ module ListFuotaTasksRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the FUOTA tasks registered to your AWS account."]
+module ListEventConfigurationsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "To retrieve the next set of results, the nextToken value from a previous response; otherwise null to receive the first set of results."];
+      eventConfigurationsList: EventConfigurationsList.t option
+        [@ocaml.doc
+          "Event configurations of all events for a single resource."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?eventConfigurationsList ->
+        fun () -> { nextToken; eventConfigurationsList }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("EventConfigurationsList",
+          (Option.map x.eventConfigurationsList
+             ~f:EventConfigurationsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventConfigurationsList =
+        (Option.map ~f:EventConfigurationsList.of_xml)
+          (Xml.child xml_arg0 "EventConfigurationsList") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?eventConfigurationsList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventConfigurationsList =
+        field_map json__ "EventConfigurationsList"
+          EventConfigurationsList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?eventConfigurationsList ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List event configurations where at least one event topic has been enabled."]
+module ListEventConfigurationsRequest =
+  struct
+    type nonrec t =
+      {
+      resourceType: EventNotificationResourceType.t
+        [@ocaml.doc "Resource type to filter event configurations."];
+      maxResults: MaxResults.t option ;
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "To retrieve the next set of results, the nextToken value from a previous response; otherwise null to receive the first set of results."]}
+    let context_ = "ListEventConfigurationsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~resourceType ->
+          fun () -> { maxResults; nextToken; resourceType }
+    let to_value x =
+      structure_to_value
+        [("resourceType",
+           (Some (EventNotificationResourceType.to_value x.resourceType)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let resourceType =
+        EventNotificationResourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      make ?nextToken ?maxResults ~resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let resourceType =
+        field_map_exn json__ "ResourceType"
+          EventNotificationResourceType.of_json in
+      make ?nextToken ?maxResults ~resourceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List event configurations where at least one event topic has been enabled."]
+module ListDevicesForWirelessDeviceImportTaskResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use to get the next set of results, or null if there are no additional results."];
+      destinationName: DestinationName.t option
+        [@ocaml.doc
+          "The name of the Sidewalk destination that describes the IoT rule to route messages received from devices in an import task that are onboarded to AWS IoT Wireless."];
+      positioning: PositioningConfigStatus.t option
+        [@ocaml.doc
+          "The integration status of the Device Location feature for Sidewalk devices."];
+      sidewalk: SidewalkListDevicesForImportInfo.t option
+        [@ocaml.doc
+          "The Sidewalk object containing Sidewalk-related device information."];
+      importedWirelessDeviceList: ImportedWirelessDeviceList.t option
+        [@ocaml.doc
+          "List of wireless devices in an import task and their onboarding status."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?destinationName ->
+        fun ?positioning ->
+          fun ?sidewalk ->
+            fun ?importedWirelessDeviceList ->
+              fun () ->
+                {
+                  nextToken;
+                  destinationName;
+                  positioning;
+                  sidewalk;
+                  importedWirelessDeviceList
+                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("DestinationName",
+          (Option.map x.destinationName ~f:DestinationName.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:PositioningConfigStatus.to_value));
+        ("Sidewalk",
+          (Option.map x.sidewalk ~f:SidewalkListDevicesForImportInfo.to_value));
+        ("ImportedWirelessDeviceList",
+          (Option.map x.importedWirelessDeviceList
+             ~f:ImportedWirelessDeviceList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let importedWirelessDeviceList =
+        (Option.map ~f:ImportedWirelessDeviceList.of_xml)
+          (Xml.child xml_arg0 "ImportedWirelessDeviceList") in
+      let sidewalk =
+        (Option.map ~f:SidewalkListDevicesForImportInfo.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
+      let positioning =
+        (Option.map ~f:PositioningConfigStatus.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
+      let destinationName =
+        (Option.map ~f:DestinationName.of_xml)
+          (Xml.child xml_arg0 "DestinationName") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?importedWirelessDeviceList ?sidewalk ?positioning
+        ?destinationName ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let importedWirelessDeviceList =
+        field_map json__ "ImportedWirelessDeviceList"
+          ImportedWirelessDeviceList.of_json in
+      let sidewalk =
+        field_map json__ "Sidewalk" SidewalkListDevicesForImportInfo.of_json in
+      let positioning =
+        field_map json__ "Positioning" PositioningConfigStatus.of_json in
+      let destinationName =
+        field_map json__ "DestinationName" DestinationName.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?importedWirelessDeviceList ?sidewalk ?positioning
+        ?destinationName ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List the Sidewalk devices in an import task and their onboarding status."]
+module ListDevicesForWirelessDeviceImportTaskRequest =
+  struct
+    type nonrec t =
+      {
+      id: ImportTaskId.t
+        [@ocaml.doc
+          "The identifier of the import task for which wireless devices are listed."];
+      maxResults: MaxResults.t option ;
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "To retrieve the next set of results, the nextToken value from a previous response; otherwise null to receive the first set of results."];
+      status: OnboardStatus.t option
+        [@ocaml.doc "The status of the devices in the import task."]}
+    let context_ = "ListDevicesForWirelessDeviceImportTaskRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?status ->
+          fun ~id -> fun () -> { maxResults; nextToken; status; id }
+    let to_value x =
+      structure_to_value
+        [("id", (Some (ImportTaskId.to_value x.id)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("status", (Option.map x.status ~f:OnboardStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:OnboardStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let id =
+        ImportTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ?status ?nextToken ?maxResults ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" OnboardStatus.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let id = field_map_exn json__ "Id" ImportTaskId.of_json in
+      make ?status ?nextToken ?maxResults ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List the Sidewalk devices in an import task and their onboarding status."]
 module ListDeviceProfilesResponse =
   struct
     type nonrec t =
@@ -10211,10 +19359,10 @@ module ListDeviceProfilesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?deviceProfileList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deviceProfileList =
-        field_map json "DeviceProfileList" DeviceProfileList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "DeviceProfileList" DeviceProfileList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?deviceProfileList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10228,25 +19376,37 @@ module ListDeviceProfilesRequest =
           "To retrieve the next set of results, the nextToken value from a previous response; otherwise null to receive the first set of results."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return in this operation."]}
+          "The maximum number of results to return in this operation."];
+      deviceProfileType: DeviceProfileType.t option
+        [@ocaml.doc
+          "A filter to list only device profiles that use this type, which can be LoRaWAN or Sidewalk."]}
     let make ?nextToken =
-      fun ?maxResults -> fun () -> { nextToken; maxResults }
+      fun ?maxResults ->
+        fun ?deviceProfileType ->
+          fun () -> { nextToken; maxResults; deviceProfileType }
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("deviceProfileType",
+          (Option.map x.deviceProfileType ~f:DeviceProfileType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let deviceProfileType =
+        (Option.map ~f:DeviceProfileType.of_xml)
+          (Xml.child xml_arg0 "deviceProfileType") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ?maxResults ?nextToken ()
+      make ?deviceProfileType ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      make ?maxResults ?nextToken ()
+    let of_json json__ =
+      let deviceProfileType =
+        field_map json__ "DeviceProfileType" DeviceProfileType.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?deviceProfileType ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the device profiles registered to your AWS account."]
@@ -10329,10 +19489,10 @@ module ListDestinationsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?destinationList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationList =
-        field_map json "DestinationList" DestinationList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "DestinationList" DestinationList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?destinationList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the destinations registered to your AWS account."]
@@ -10360,9 +19520,9 @@ module ListDestinationsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the destinations registered to your AWS account."]
@@ -10377,7 +19537,7 @@ module GetWirelessGatewayTaskResponse =
         [@ocaml.doc "The ID of the WirelessGatewayTask."];
       lastUplinkReceivedAt: ISODateTimeString.t option
         [@ocaml.doc
-          "The date and time when the most recent uplink was received."];
+          "The date and time when the most recent uplink was received. This value is only valid for 3 months."];
       taskCreatedAt: ISODateTimeString.t option
         [@ocaml.doc "The date and time when the task was created."];
       status: WirelessGatewayTaskStatus.t option
@@ -10491,17 +19651,18 @@ module GetWirelessGatewayTaskResponse =
       make ?status ?taskCreatedAt ?lastUplinkReceivedAt
         ?wirelessGatewayTaskDefinitionId ?wirelessGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" WirelessGatewayTaskStatus.of_json in
+    let of_json json__ =
+      let status =
+        field_map json__ "Status" WirelessGatewayTaskStatus.of_json in
       let taskCreatedAt =
-        field_map json "TaskCreatedAt" ISODateTimeString.of_json in
+        field_map json__ "TaskCreatedAt" ISODateTimeString.of_json in
       let lastUplinkReceivedAt =
-        field_map json "LastUplinkReceivedAt" ISODateTimeString.of_json in
+        field_map json__ "LastUplinkReceivedAt" ISODateTimeString.of_json in
       let wirelessGatewayTaskDefinitionId =
-        field_map json "WirelessGatewayTaskDefinitionId"
+        field_map json__ "WirelessGatewayTaskDefinitionId"
           WirelessGatewayTaskDefinitionId.of_json in
       let wirelessGatewayId =
-        field_map json "WirelessGatewayId" WirelessGatewayId.of_json in
+        field_map json__ "WirelessGatewayId" WirelessGatewayId.of_json in
       make ?status ?taskCreatedAt ?lastUplinkReceivedAt
         ?wirelessGatewayTaskDefinitionId ?wirelessGatewayId ()
     let to_json v = composed_to_json to_value v
@@ -10522,8 +19683,8 @@ module GetWirelessGatewayTaskRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" WirelessGatewayId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" WirelessGatewayId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a wireless gateway task."]
@@ -10632,13 +19793,14 @@ module GetWirelessGatewayTaskDefinitionResponse =
           (Xml.child xml_arg0 "AutoCreateTasks") in
       make ?arn ?update ?name ?autoCreateTasks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" WirelessGatewayTaskDefinitionArn.of_json in
+    let of_json json__ =
+      let arn =
+        field_map json__ "Arn" WirelessGatewayTaskDefinitionArn.of_json in
       let update =
-        field_map json "Update" UpdateWirelessGatewayTaskCreate.of_json in
-      let name = field_map json "Name" WirelessGatewayTaskName.of_json in
+        field_map json__ "Update" UpdateWirelessGatewayTaskCreate.of_json in
+      let name = field_map json__ "Name" WirelessGatewayTaskName.of_json in
       let autoCreateTasks =
-        field_map json "AutoCreateTasks" AutoCreateTasks.of_json in
+        field_map json__ "AutoCreateTasks" AutoCreateTasks.of_json in
       make ?arn ?update ?name ?autoCreateTasks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10661,9 +19823,9 @@ module GetWirelessGatewayTaskDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let id =
-        field_map_exn json "Id" WirelessGatewayTaskDefinitionId.of_json in
+        field_map_exn json__ "Id" WirelessGatewayTaskDefinitionId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10676,7 +19838,7 @@ module GetWirelessGatewayStatisticsResponse =
         [@ocaml.doc "The ID of the wireless gateway."];
       lastUplinkReceivedAt: ISODateTimeString.t option
         [@ocaml.doc
-          "The date and time when the most recent uplink was received."];
+          "The date and time when the most recent uplink was received. This value is only valid for 3 months."];
       connectionStatus: ConnectionStatus.t option
         [@ocaml.doc "The connection status of the wireless gateway."]}
     type nonrec error =
@@ -10768,13 +19930,13 @@ module GetWirelessGatewayStatisticsResponse =
           (Xml.child xml_arg0 "WirelessGatewayId") in
       make ?connectionStatus ?lastUplinkReceivedAt ?wirelessGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionStatus =
-        field_map json "ConnectionStatus" ConnectionStatus.of_json in
+        field_map json__ "ConnectionStatus" ConnectionStatus.of_json in
       let lastUplinkReceivedAt =
-        field_map json "LastUplinkReceivedAt" ISODateTimeString.of_json in
+        field_map json__ "LastUplinkReceivedAt" ISODateTimeString.of_json in
       let wirelessGatewayId =
-        field_map json "WirelessGatewayId" WirelessGatewayId.of_json in
+        field_map json__ "WirelessGatewayId" WirelessGatewayId.of_json in
       make ?connectionStatus ?lastUplinkReceivedAt ?wirelessGatewayId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets operating information about a wireless gateway."]
@@ -10797,9 +19959,9 @@ module GetWirelessGatewayStatisticsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessGatewayId =
-        field_map_exn json "WirelessGatewayId" WirelessGatewayId.of_json in
+        field_map_exn json__ "WirelessGatewayId" WirelessGatewayId.of_json in
       make ~wirelessGatewayId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets operating information about a wireless gateway."]
@@ -10931,14 +20093,14 @@ module GetWirelessGatewayResponse =
           (Xml.child xml_arg0 "Name") in
       make ?thingArn ?thingName ?arn ?loRaWAN ?description ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let thingArn = field_map json "ThingArn" ThingArn.of_json in
-      let thingName = field_map json "ThingName" ThingName.of_json in
-      let arn = field_map json "Arn" WirelessGatewayArn.of_json in
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANGateway.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let id = field_map json "Id" WirelessGatewayId.of_json in
-      let name = field_map json "Name" WirelessGatewayName.of_json in
+    let of_json json__ =
+      let thingArn = field_map json__ "ThingArn" ThingArn.of_json in
+      let thingName = field_map json__ "ThingName" ThingName.of_json in
+      let arn = field_map json__ "Arn" WirelessGatewayArn.of_json in
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANGateway.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let id = field_map json__ "Id" WirelessGatewayId.of_json in
+      let name = field_map json__ "Name" WirelessGatewayName.of_json in
       make ?thingArn ?thingName ?arn ?loRaWAN ?description ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a wireless gateway."]
@@ -10968,10 +20130,10 @@ module GetWirelessGatewayRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ~identifierType ~identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identifierType =
-        field_map_exn json "IdentifierType" WirelessGatewayIdType.of_json in
-      let identifier = field_map_exn json "Identifier" Identifier.of_json in
+        field_map_exn json__ "IdentifierType" WirelessGatewayIdType.of_json in
+      let identifier = field_map_exn json__ "Identifier" Identifier.of_json in
       make ~identifierType ~identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a wireless gateway."]
@@ -11056,9 +20218,9 @@ module GetWirelessGatewayFirmwareInformationResponse =
           (Xml.child xml_arg0 "LoRaWAN") in
       make ?loRaWAN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loRaWAN =
-        field_map json "LoRaWAN" LoRaWANGatewayCurrentVersion.of_json in
+        field_map json__ "LoRaWAN" LoRaWANGatewayCurrentVersion.of_json in
       make ?loRaWAN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11079,8 +20241,8 @@ module GetWirelessGatewayFirmwareInformationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" WirelessGatewayId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" WirelessGatewayId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11178,12 +20340,12 @@ module GetWirelessGatewayCertificateResponse =
           (Xml.child xml_arg0 "IotCertificateId") in
       make ?loRaWANNetworkServerCertificateId ?iotCertificateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loRaWANNetworkServerCertificateId =
-        field_map json "LoRaWANNetworkServerCertificateId"
+        field_map json__ "LoRaWANNetworkServerCertificateId"
           IotCertificateId.of_json in
       let iotCertificateId =
-        field_map json "IotCertificateId" IotCertificateId.of_json in
+        field_map json__ "IotCertificateId" IotCertificateId.of_json in
       make ?loRaWANNetworkServerCertificateId ?iotCertificateId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11204,8 +20366,8 @@ module GetWirelessGatewayCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" WirelessGatewayId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" WirelessGatewayId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11218,7 +20380,7 @@ module GetWirelessDeviceStatisticsResponse =
         [@ocaml.doc "The ID of the wireless device."];
       lastUplinkReceivedAt: ISODateTimeString.t option
         [@ocaml.doc
-          "The date and time when the most recent uplink was received."];
+          "The date and time when the most recent uplink was received. This value is only valid for 3 months."];
       loRaWAN: LoRaWANDeviceMetadata.t option
         [@ocaml.doc "Information about the wireless device's operations."];
       sidewalk: SidewalkDeviceMetadata.t option
@@ -11317,13 +20479,14 @@ module GetWirelessDeviceStatisticsResponse =
           (Xml.child xml_arg0 "WirelessDeviceId") in
       make ?sidewalk ?loRaWAN ?lastUplinkReceivedAt ?wirelessDeviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sidewalk = field_map json "Sidewalk" SidewalkDeviceMetadata.of_json in
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANDeviceMetadata.of_json in
+    let of_json json__ =
+      let sidewalk =
+        field_map json__ "Sidewalk" SidewalkDeviceMetadata.of_json in
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANDeviceMetadata.of_json in
       let lastUplinkReceivedAt =
-        field_map json "LastUplinkReceivedAt" ISODateTimeString.of_json in
+        field_map json__ "LastUplinkReceivedAt" ISODateTimeString.of_json in
       let wirelessDeviceId =
-        field_map json "WirelessDeviceId" WirelessDeviceId.of_json in
+        field_map json__ "WirelessDeviceId" WirelessDeviceId.of_json in
       make ?sidewalk ?loRaWAN ?lastUplinkReceivedAt ?wirelessDeviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets operating information about a wireless device."]
@@ -11346,9 +20509,9 @@ module GetWirelessDeviceStatisticsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessDeviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessDeviceId =
-        field_map_exn json "WirelessDeviceId" WirelessDeviceId.of_json in
+        field_map_exn json__ "WirelessDeviceId" WirelessDeviceId.of_json in
       make ~wirelessDeviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets operating information about a wireless device."]
@@ -11378,7 +20541,10 @@ module GetWirelessDeviceResponse =
       loRaWAN: LoRaWANDevice.t option
         [@ocaml.doc "Information about the wireless device."];
       sidewalk: SidewalkDevice.t option
-        [@ocaml.doc "Sidewalk device object."]}
+        [@ocaml.doc "Sidewalk device object."];
+      positioning: PositioningConfigStatus.t option
+        [@ocaml.doc
+          "The integration status of the Device Location feature for LoRaWAN and Sidewalk devices."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -11396,19 +20562,21 @@ module GetWirelessDeviceResponse =
                   fun ?thingArn ->
                     fun ?loRaWAN ->
                       fun ?sidewalk ->
-                        fun () ->
-                          {
-                            type_;
-                            name;
-                            description;
-                            destinationName;
-                            id;
-                            arn;
-                            thingName;
-                            thingArn;
-                            loRaWAN;
-                            sidewalk
-                          }
+                        fun ?positioning ->
+                          fun () ->
+                            {
+                              type_;
+                              name;
+                              description;
+                              destinationName;
+                              id;
+                              arn;
+                              thingName;
+                              thingArn;
+                              loRaWAN;
+                              sidewalk;
+                              positioning
+                            }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -11477,9 +20645,14 @@ module GetWirelessDeviceResponse =
         ("ThingName", (Option.map x.thingName ~f:ThingName.to_value));
         ("ThingArn", (Option.map x.thingArn ~f:ThingArn.to_value));
         ("LoRaWAN", (Option.map x.loRaWAN ~f:LoRaWANDevice.to_value));
-        ("Sidewalk", (Option.map x.sidewalk ~f:SidewalkDevice.to_value))]
+        ("Sidewalk", (Option.map x.sidewalk ~f:SidewalkDevice.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:PositioningConfigStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let positioning =
+        (Option.map ~f:PositioningConfigStatus.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
       let sidewalk =
         (Option.map ~f:SidewalkDevice.of_xml) (Xml.child xml_arg0 "Sidewalk") in
       let loRaWAN =
@@ -11501,23 +20674,25 @@ module GetWirelessDeviceResponse =
         (Option.map ~f:WirelessDeviceName.of_xml) (Xml.child xml_arg0 "Name") in
       let type_ =
         (Option.map ~f:WirelessDeviceType.of_xml) (Xml.child xml_arg0 "Type") in
-      make ?sidewalk ?loRaWAN ?thingArn ?thingName ?arn ?id ?destinationName
-        ?description ?name ?type_ ()
+      make ?positioning ?sidewalk ?loRaWAN ?thingArn ?thingName ?arn ?id
+        ?destinationName ?description ?name ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sidewalk = field_map json "Sidewalk" SidewalkDevice.of_json in
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANDevice.of_json in
-      let thingArn = field_map json "ThingArn" ThingArn.of_json in
-      let thingName = field_map json "ThingName" ThingName.of_json in
-      let arn = field_map json "Arn" WirelessDeviceArn.of_json in
-      let id = field_map json "Id" WirelessDeviceId.of_json in
+    let of_json json__ =
+      let positioning =
+        field_map json__ "Positioning" PositioningConfigStatus.of_json in
+      let sidewalk = field_map json__ "Sidewalk" SidewalkDevice.of_json in
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANDevice.of_json in
+      let thingArn = field_map json__ "ThingArn" ThingArn.of_json in
+      let thingName = field_map json__ "ThingName" ThingName.of_json in
+      let arn = field_map json__ "Arn" WirelessDeviceArn.of_json in
+      let id = field_map json__ "Id" WirelessDeviceId.of_json in
       let destinationName =
-        field_map json "DestinationName" DestinationName.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" WirelessDeviceName.of_json in
-      let type_ = field_map json "Type" WirelessDeviceType.of_json in
-      make ?sidewalk ?loRaWAN ?thingArn ?thingName ?arn ?id ?destinationName
-        ?description ?name ?type_ ()
+        field_map json__ "DestinationName" DestinationName.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" WirelessDeviceName.of_json in
+      let type_ = field_map json__ "Type" WirelessDeviceType.of_json in
+      make ?positioning ?sidewalk ?loRaWAN ?thingArn ?thingName ?arn ?id
+        ?destinationName ?description ?name ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a wireless device."]
 module GetWirelessDeviceRequest =
@@ -11546,13 +20721,267 @@ module GetWirelessDeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ~identifierType ~identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identifierType =
-        field_map_exn json "IdentifierType" WirelessDeviceIdType.of_json in
-      let identifier = field_map_exn json "Identifier" Identifier.of_json in
+        field_map_exn json__ "IdentifierType" WirelessDeviceIdType.of_json in
+      let identifier = field_map_exn json__ "Identifier" Identifier.of_json in
       make ~identifierType ~identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a wireless device."]
+module GetWirelessDeviceImportTaskResponse =
+  struct
+    type nonrec t =
+      {
+      id: ImportTaskId.t option
+        [@ocaml.doc
+          "The identifier of the import task for which information is retrieved."];
+      arn: ImportTaskArn.t option
+        [@ocaml.doc "The ARN (Amazon Resource Name) of the import task."];
+      destinationName: DestinationName.t option
+        [@ocaml.doc
+          "The name of the destination that's assigned to the wireless devices in the import task."];
+      positioning: PositioningConfigStatus.t option
+        [@ocaml.doc
+          "The integration status of the Device Location feature for LoRaWAN and Sidewalk devices."];
+      sidewalk: SidewalkGetStartImportInfo.t option
+        [@ocaml.doc "The Sidewalk-related information about an import task."];
+      creationTime: CreationTime.t option
+        [@ocaml.doc "The time at which the import task was created."];
+      status: ImportTaskStatus.t option
+        [@ocaml.doc "The import task status."];
+      statusReason: StatusReason.t option
+        [@ocaml.doc
+          "The reason for the provided status information, such as a validation error that causes the import task to fail."];
+      initializedImportedDeviceCount: ImportedWirelessDeviceCount.t option
+        [@ocaml.doc
+          "The number of devices in the import task that are waiting for the control log to start processing."];
+      pendingImportedDeviceCount: ImportedWirelessDeviceCount.t option
+        [@ocaml.doc
+          "The number of devices in the import task that are waiting in the import task queue to be onboarded."];
+      onboardedImportedDeviceCount: ImportedWirelessDeviceCount.t option
+        [@ocaml.doc
+          "The number of devices in the import task that have been onboarded to the import task."];
+      failedImportedDeviceCount: ImportedWirelessDeviceCount.t option
+        [@ocaml.doc
+          "The number of devices in the import task that failed to onboard to the import task."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?id =
+      fun ?arn ->
+        fun ?destinationName ->
+          fun ?positioning ->
+            fun ?sidewalk ->
+              fun ?creationTime ->
+                fun ?status ->
+                  fun ?statusReason ->
+                    fun ?initializedImportedDeviceCount ->
+                      fun ?pendingImportedDeviceCount ->
+                        fun ?onboardedImportedDeviceCount ->
+                          fun ?failedImportedDeviceCount ->
+                            fun () ->
+                              {
+                                id;
+                                arn;
+                                destinationName;
+                                positioning;
+                                sidewalk;
+                                creationTime;
+                                status;
+                                statusReason;
+                                initializedImportedDeviceCount;
+                                pendingImportedDeviceCount;
+                                onboardedImportedDeviceCount;
+                                failedImportedDeviceCount
+                              }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:ImportTaskId.to_value));
+        ("Arn", (Option.map x.arn ~f:ImportTaskArn.to_value));
+        ("DestinationName",
+          (Option.map x.destinationName ~f:DestinationName.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:PositioningConfigStatus.to_value));
+        ("Sidewalk",
+          (Option.map x.sidewalk ~f:SidewalkGetStartImportInfo.to_value));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:CreationTime.to_value));
+        ("Status", (Option.map x.status ~f:ImportTaskStatus.to_value));
+        ("StatusReason",
+          (Option.map x.statusReason ~f:StatusReason.to_value));
+        ("InitializedImportedDeviceCount",
+          (Option.map x.initializedImportedDeviceCount
+             ~f:ImportedWirelessDeviceCount.to_value));
+        ("PendingImportedDeviceCount",
+          (Option.map x.pendingImportedDeviceCount
+             ~f:ImportedWirelessDeviceCount.to_value));
+        ("OnboardedImportedDeviceCount",
+          (Option.map x.onboardedImportedDeviceCount
+             ~f:ImportedWirelessDeviceCount.to_value));
+        ("FailedImportedDeviceCount",
+          (Option.map x.failedImportedDeviceCount
+             ~f:ImportedWirelessDeviceCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failedImportedDeviceCount =
+        (Option.map ~f:ImportedWirelessDeviceCount.of_xml)
+          (Xml.child xml_arg0 "FailedImportedDeviceCount") in
+      let onboardedImportedDeviceCount =
+        (Option.map ~f:ImportedWirelessDeviceCount.of_xml)
+          (Xml.child xml_arg0 "OnboardedImportedDeviceCount") in
+      let pendingImportedDeviceCount =
+        (Option.map ~f:ImportedWirelessDeviceCount.of_xml)
+          (Xml.child xml_arg0 "PendingImportedDeviceCount") in
+      let initializedImportedDeviceCount =
+        (Option.map ~f:ImportedWirelessDeviceCount.of_xml)
+          (Xml.child xml_arg0 "InitializedImportedDeviceCount") in
+      let statusReason =
+        (Option.map ~f:StatusReason.of_xml)
+          (Xml.child xml_arg0 "StatusReason") in
+      let status =
+        (Option.map ~f:ImportTaskStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let creationTime =
+        (Option.map ~f:CreationTime.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
+      let sidewalk =
+        (Option.map ~f:SidewalkGetStartImportInfo.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
+      let positioning =
+        (Option.map ~f:PositioningConfigStatus.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
+      let destinationName =
+        (Option.map ~f:DestinationName.of_xml)
+          (Xml.child xml_arg0 "DestinationName") in
+      let arn =
+        (Option.map ~f:ImportTaskArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      let id = (Option.map ~f:ImportTaskId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?failedImportedDeviceCount ?onboardedImportedDeviceCount
+        ?pendingImportedDeviceCount ?initializedImportedDeviceCount
+        ?statusReason ?status ?creationTime ?sidewalk ?positioning
+        ?destinationName ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failedImportedDeviceCount =
+        field_map json__ "FailedImportedDeviceCount"
+          ImportedWirelessDeviceCount.of_json in
+      let onboardedImportedDeviceCount =
+        field_map json__ "OnboardedImportedDeviceCount"
+          ImportedWirelessDeviceCount.of_json in
+      let pendingImportedDeviceCount =
+        field_map json__ "PendingImportedDeviceCount"
+          ImportedWirelessDeviceCount.of_json in
+      let initializedImportedDeviceCount =
+        field_map json__ "InitializedImportedDeviceCount"
+          ImportedWirelessDeviceCount.of_json in
+      let statusReason = field_map json__ "StatusReason" StatusReason.of_json in
+      let status = field_map json__ "Status" ImportTaskStatus.of_json in
+      let creationTime = field_map json__ "CreationTime" CreationTime.of_json in
+      let sidewalk =
+        field_map json__ "Sidewalk" SidewalkGetStartImportInfo.of_json in
+      let positioning =
+        field_map json__ "Positioning" PositioningConfigStatus.of_json in
+      let destinationName =
+        field_map json__ "DestinationName" DestinationName.of_json in
+      let arn = field_map json__ "Arn" ImportTaskArn.of_json in
+      let id = field_map json__ "Id" ImportTaskId.of_json in
+      make ?failedImportedDeviceCount ?onboardedImportedDeviceCount
+        ?pendingImportedDeviceCount ?initializedImportedDeviceCount
+        ?statusReason ?status ?creationTime ?sidewalk ?positioning
+        ?destinationName ?arn ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get information about an import task and count of device onboarding summary information for the import task."]
+module GetWirelessDeviceImportTaskRequest =
+  struct
+    type nonrec t =
+      {
+      id: ImportTaskId.t
+        [@ocaml.doc
+          "The identifier of the import task for which information is requested."]}
+    let context_ = "GetWirelessDeviceImportTaskRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("Id", (Some (ImportTaskId.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        ImportTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ImportTaskId.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get information about an import task and count of device onboarding summary information for the import task."]
 module GetServiceProfileResponse =
   struct
     type nonrec t =
@@ -11651,12 +21080,12 @@ module GetServiceProfileResponse =
         (Option.map ~f:ServiceProfileArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?loRaWAN ?id ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loRaWAN =
-        field_map json "LoRaWAN" LoRaWANGetServiceProfileInfo.of_json in
-      let id = field_map json "Id" ServiceProfileId.of_json in
-      let name = field_map json "Name" ServiceProfileName.of_json in
-      let arn = field_map json "Arn" ServiceProfileArn.of_json in
+        field_map json__ "LoRaWAN" LoRaWANGetServiceProfileInfo.of_json in
+      let id = field_map json__ "Id" ServiceProfileId.of_json in
+      let name = field_map json__ "Name" ServiceProfileName.of_json in
+      let arn = field_map json__ "Arn" ServiceProfileArn.of_json in
       make ?loRaWAN ?id ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a service profile."]
@@ -11676,8 +21105,8 @@ module GetServiceProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" ServiceProfileId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ServiceProfileId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a service profile."]
@@ -11770,11 +21199,12 @@ module GetServiceEndpointResponse =
           (Xml.child xml_arg0 "ServiceType") in
       make ?serverTrust ?serviceEndpoint ?serviceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverTrust = field_map json "ServerTrust" CertificatePEM.of_json in
-      let serviceEndpoint = field_map json "ServiceEndpoint" EndPoint.of_json in
+    let of_json json__ =
+      let serverTrust = field_map json__ "ServerTrust" CertificatePEM.of_json in
+      let serviceEndpoint =
+        field_map json__ "ServiceEndpoint" EndPoint.of_json in
       let serviceType =
-        field_map json "ServiceType" WirelessGatewayServiceType.of_json in
+        field_map json__ "ServiceType" WirelessGatewayServiceType.of_json in
       make ?serverTrust ?serviceEndpoint ?serviceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11798,13 +21228,144 @@ module GetServiceEndpointRequest =
           (Xml.child xml_arg0 "serviceType") in
       make ?serviceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceType =
-        field_map json "ServiceType" WirelessGatewayServiceType.of_json in
+        field_map json__ "ServiceType" WirelessGatewayServiceType.of_json in
       make ?serviceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the account-specific endpoint for Configuration and Update Server (CUPS) protocol or LoRaWAN Network Server (LNS) connections."]
+module GetResourcePositionResponse =
+  struct
+    type nonrec t =
+      {
+      geoJsonPayload: GeoJsonPayload.t option
+        [@ocaml.doc
+          "The position information of the resource, displayed as a JSON payload. The payload uses the GeoJSON format, which a format that's used to encode geographic data structures. For more information, see GeoJSON."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?geoJsonPayload = fun () -> { geoJsonPayload }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?geoJsonPayload:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("GeoJsonPayload",
+           (Option.map x.geoJsonPayload ~f:GeoJsonPayload.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let geoJsonPayload =
+        (Option.map ~f:GeoJsonPayload.of_xml)
+          (Xml.child xml_arg0 "GeoJsonPayload") in
+      make ?geoJsonPayload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let geoJsonPayload =
+        field_map json__ "GeoJsonPayload" GeoJsonPayload.of_json in
+      make ?geoJsonPayload ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the position information for a given wireless device or a wireless gateway resource. The position information uses the World Geodetic System (WGS84)."]
+module GetResourcePositionRequest =
+  struct
+    type nonrec t =
+      {
+      resourceIdentifier: PositionResourceIdentifier.t
+        [@ocaml.doc
+          "The identifier of the resource for which position information is retrieved. It can be the wireless device ID or the wireless gateway ID, depending on the resource type."];
+      resourceType: PositionResourceType.t
+        [@ocaml.doc
+          "The type of resource for which position information is retrieved, which can be a wireless device or a wireless gateway."]}
+    let context_ = "GetResourcePositionRequest"
+    let make ~resourceIdentifier =
+      fun ~resourceType -> fun () -> { resourceIdentifier; resourceType }
+    let to_value x =
+      structure_to_value
+        [("ResourceIdentifier",
+           (Some (PositionResourceIdentifier.to_value x.resourceIdentifier)));
+        ("resourceType",
+          (Some (PositionResourceType.to_value x.resourceType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        PositionResourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      let resourceIdentifier =
+        PositionResourceIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
+      make ~resourceType ~resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType =
+        field_map_exn json__ "ResourceType" PositionResourceType.of_json in
+      let resourceIdentifier =
+        field_map_exn json__ "ResourceIdentifier"
+          PositionResourceIdentifier.of_json in
+      make ~resourceType ~resourceIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the position information for a given wireless device or a wireless gateway resource. The position information uses the World Geodetic System (WGS84)."]
 module GetResourceLogLevelResponse =
   struct
     type nonrec t = {
@@ -11882,12 +21443,12 @@ module GetResourceLogLevelResponse =
         (Option.map ~f:LogLevel.of_xml) (Xml.child xml_arg0 "LogLevel") in
       make ?logLevel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logLevel = field_map json "LogLevel" LogLevel.of_json in
+    let of_json json__ =
+      let logLevel = field_map json__ "LogLevel" LogLevel.of_json in
       make ?logLevel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Fetches the log-level override, if any, for a given resource-ID and resource-type. It can be used for a wireless device or a wireless gateway."]
+       "Fetches the log-level override, if any, for a given resource ID and resource type.."]
 module GetResourceLogLevelRequest =
   struct
     type nonrec t =
@@ -11895,7 +21456,7 @@ module GetResourceLogLevelRequest =
       resourceIdentifier: ResourceIdentifier.t ;
       resourceType: ResourceType.t
         [@ocaml.doc
-          "The type of the resource, which can be WirelessDevice or WirelessGateway."]}
+          "The type of resource, which can be WirelessDevice, WirelessGateway, or FuotaTask."]}
     let context_ = "GetResourceLogLevelRequest"
     let make ~resourceIdentifier =
       fun ~resourceType -> fun () -> { resourceIdentifier; resourceType }
@@ -11914,15 +21475,15 @@ module GetResourceLogLevelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
       make ~resourceType ~resourceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map_exn json "ResourceType" ResourceType.of_json in
+        field_map_exn json__ "ResourceType" ResourceType.of_json in
       let resourceIdentifier =
-        field_map_exn json "ResourceIdentifier" ResourceIdentifier.of_json in
+        field_map_exn json__ "ResourceIdentifier" ResourceIdentifier.of_json in
       make ~resourceType ~resourceIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Fetches the log-level override, if any, for a given resource-ID and resource-type. It can be used for a wireless device or a wireless gateway."]
+       "Fetches the log-level override, if any, for a given resource ID and resource type.."]
 module GetResourceEventConfigurationResponse =
   struct
     type nonrec t =
@@ -11930,9 +21491,16 @@ module GetResourceEventConfigurationResponse =
       deviceRegistrationState:
         DeviceRegistrationStateEventConfiguration.t option
         [@ocaml.doc
-          "Event configuration for the device registration state event"];
+          "Event configuration for the device registration state event."];
       proximity: ProximityEventConfiguration.t option
-        [@ocaml.doc "Event configuration for the Proximity event"]}
+        [@ocaml.doc "Event configuration for the proximity event."];
+      join: JoinEventConfiguration.t option
+        [@ocaml.doc "Event configuration for the join event."];
+      connectionStatus: ConnectionStatusEventConfiguration.t option
+        [@ocaml.doc "Event configuration for the connection status event."];
+      messageDeliveryStatus: MessageDeliveryStatusEventConfiguration.t option
+        [@ocaml.doc
+          "Event configuration for the message delivery status event."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -11941,7 +21509,18 @@ module GetResourceEventConfigurationResponse =
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?deviceRegistrationState =
-      fun ?proximity -> fun () -> { deviceRegistrationState; proximity }
+      fun ?proximity ->
+        fun ?join ->
+          fun ?connectionStatus ->
+            fun ?messageDeliveryStatus ->
+              fun () ->
+                {
+                  deviceRegistrationState;
+                  proximity;
+                  join;
+                  connectionStatus;
+                  messageDeliveryStatus
+                }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12004,24 +21583,49 @@ module GetResourceEventConfigurationResponse =
            (Option.map x.deviceRegistrationState
               ~f:DeviceRegistrationStateEventConfiguration.to_value));
         ("Proximity",
-          (Option.map x.proximity ~f:ProximityEventConfiguration.to_value))]
+          (Option.map x.proximity ~f:ProximityEventConfiguration.to_value));
+        ("Join", (Option.map x.join ~f:JoinEventConfiguration.to_value));
+        ("ConnectionStatus",
+          (Option.map x.connectionStatus
+             ~f:ConnectionStatusEventConfiguration.to_value));
+        ("MessageDeliveryStatus",
+          (Option.map x.messageDeliveryStatus
+             ~f:MessageDeliveryStatusEventConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let messageDeliveryStatus =
+        (Option.map ~f:MessageDeliveryStatusEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "MessageDeliveryStatus") in
+      let connectionStatus =
+        (Option.map ~f:ConnectionStatusEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "ConnectionStatus") in
+      let join =
+        (Option.map ~f:JoinEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "Join") in
       let proximity =
         (Option.map ~f:ProximityEventConfiguration.of_xml)
           (Xml.child xml_arg0 "Proximity") in
       let deviceRegistrationState =
         (Option.map ~f:DeviceRegistrationStateEventConfiguration.of_xml)
           (Xml.child xml_arg0 "DeviceRegistrationState") in
-      make ?proximity ?deviceRegistrationState ()
+      make ?messageDeliveryStatus ?connectionStatus ?join ?proximity
+        ?deviceRegistrationState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let messageDeliveryStatus =
+        field_map json__ "MessageDeliveryStatus"
+          MessageDeliveryStatusEventConfiguration.of_json in
+      let connectionStatus =
+        field_map json__ "ConnectionStatus"
+          ConnectionStatusEventConfiguration.of_json in
+      let join = field_map json__ "Join" JoinEventConfiguration.of_json in
       let proximity =
-        field_map json "Proximity" ProximityEventConfiguration.of_json in
+        field_map json__ "Proximity" ProximityEventConfiguration.of_json in
       let deviceRegistrationState =
-        field_map json "DeviceRegistrationState"
+        field_map json__ "DeviceRegistrationState"
           DeviceRegistrationStateEventConfiguration.of_json in
-      make ?proximity ?deviceRegistrationState ()
+      make ?messageDeliveryStatus ?connectionStatus ?join ?proximity
+        ?deviceRegistrationState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Get the event configuration for a particular resource identifier."]
@@ -12061,16 +21665,509 @@ module GetResourceEventConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       make ?partnerType ~identifierType ~identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let partnerType =
-        field_map json "PartnerType" EventNotificationPartnerType.of_json in
+        field_map json__ "PartnerType" EventNotificationPartnerType.of_json in
       let identifierType =
-        field_map_exn json "IdentifierType" IdentifierType.of_json in
-      let identifier = field_map_exn json "Identifier" Identifier.of_json in
+        field_map_exn json__ "IdentifierType" IdentifierType.of_json in
+      let identifier = field_map_exn json__ "Identifier" Identifier.of_json in
       make ?partnerType ~identifierType ~identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Get the event configuration for a particular resource identifier."]
+module GetPositionResponse =
+  struct
+    type nonrec t =
+      {
+      position: PositionCoordinate.t option
+        [@ocaml.doc "The position information of the resource."];
+      accuracy: Accuracy.t option
+        [@ocaml.doc
+          "The accuracy of the estimated position in meters. An empty value indicates that no position data is available. A value of \226\128\1520.0\226\128\153 value indicates that position data is available. This data corresponds to the position information that you specified instead of the position computed by solver."];
+      solverType: PositionSolverType.t option
+        [@ocaml.doc
+          "The type of solver used to identify the position of the resource."];
+      solverProvider: PositionSolverProvider.t option
+        [@ocaml.doc "The vendor of the positioning solver."];
+      solverVersion: PositionSolverVersion.t option
+        [@ocaml.doc "The version of the positioning solver."];
+      timestamp: ISODateTimeString.t option
+        [@ocaml.doc
+          "The timestamp at which the device's position was determined."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?position =
+      fun ?accuracy ->
+        fun ?solverType ->
+          fun ?solverProvider ->
+            fun ?solverVersion ->
+              fun ?timestamp ->
+                fun () ->
+                  {
+                    position;
+                    accuracy;
+                    solverType;
+                    solverProvider;
+                    solverVersion;
+                    timestamp
+                  }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Position", (Option.map x.position ~f:PositionCoordinate.to_value));
+        ("Accuracy", (Option.map x.accuracy ~f:Accuracy.to_value));
+        ("SolverType",
+          (Option.map x.solverType ~f:PositionSolverType.to_value));
+        ("SolverProvider",
+          (Option.map x.solverProvider ~f:PositionSolverProvider.to_value));
+        ("SolverVersion",
+          (Option.map x.solverVersion ~f:PositionSolverVersion.to_value));
+        ("Timestamp", (Option.map x.timestamp ~f:ISODateTimeString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timestamp =
+        (Option.map ~f:ISODateTimeString.of_xml)
+          (Xml.child xml_arg0 "Timestamp") in
+      let solverVersion =
+        (Option.map ~f:PositionSolverVersion.of_xml)
+          (Xml.child xml_arg0 "SolverVersion") in
+      let solverProvider =
+        (Option.map ~f:PositionSolverProvider.of_xml)
+          (Xml.child xml_arg0 "SolverProvider") in
+      let solverType =
+        (Option.map ~f:PositionSolverType.of_xml)
+          (Xml.child xml_arg0 "SolverType") in
+      let accuracy =
+        (Option.map ~f:Accuracy.of_xml) (Xml.child xml_arg0 "Accuracy") in
+      let position =
+        (Option.map ~f:PositionCoordinate.of_xml)
+          (Xml.child xml_arg0 "Position") in
+      make ?timestamp ?solverVersion ?solverProvider ?solverType ?accuracy
+        ?position ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timestamp = field_map json__ "Timestamp" ISODateTimeString.of_json in
+      let solverVersion =
+        field_map json__ "SolverVersion" PositionSolverVersion.of_json in
+      let solverProvider =
+        field_map json__ "SolverProvider" PositionSolverProvider.of_json in
+      let solverType =
+        field_map json__ "SolverType" PositionSolverType.of_json in
+      let accuracy = field_map json__ "Accuracy" Accuracy.of_json in
+      let position = field_map json__ "Position" PositionCoordinate.of_json in
+      make ?timestamp ?solverVersion ?solverProvider ?solverType ?accuracy
+        ?position ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the position information for a given resource. This action is no longer supported. Calls to retrieve the position information should use the GetResourcePosition API operation instead."]
+module GetPositionRequest =
+  struct
+    type nonrec t =
+      {
+      resourceIdentifier: PositionResourceIdentifier.t
+        [@ocaml.doc
+          "Resource identifier used to retrieve the position information."];
+      resourceType: PositionResourceType.t
+        [@ocaml.doc
+          "Resource type of the resource for which position information is retrieved."]}
+    let context_ = "GetPositionRequest"
+    let make ~resourceIdentifier =
+      fun ~resourceType -> fun () -> { resourceIdentifier; resourceType }
+    let to_value x =
+      structure_to_value
+        [("ResourceIdentifier",
+           (Some (PositionResourceIdentifier.to_value x.resourceIdentifier)));
+        ("resourceType",
+          (Some (PositionResourceType.to_value x.resourceType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        PositionResourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      let resourceIdentifier =
+        PositionResourceIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
+      make ~resourceType ~resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType =
+        field_map_exn json__ "ResourceType" PositionResourceType.of_json in
+      let resourceIdentifier =
+        field_map_exn json__ "ResourceIdentifier"
+          PositionResourceIdentifier.of_json in
+      make ~resourceType ~resourceIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the position information for a given resource. This action is no longer supported. Calls to retrieve the position information should use the GetResourcePosition API operation instead."]
+module GetPositionEstimateResponse =
+  struct
+    type nonrec t =
+      {
+      geoJsonPayload: GeoJsonPayload.t option
+        [@ocaml.doc
+          "The position information of the resource, displayed as a JSON payload. The payload is of type blob and uses the GeoJSON format, which a format that's used to encode geographic data structures. A sample payload contains the timestamp information, the WGS84 coordinates of the location, and the accuracy and confidence level. For more information and examples, see Resolve device location (console)."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?geoJsonPayload = fun () -> { geoJsonPayload }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?geoJsonPayload:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("GeoJsonPayload",
+           (Option.map x.geoJsonPayload ~f:GeoJsonPayload.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let geoJsonPayload =
+        (Option.map ~f:GeoJsonPayload.of_xml)
+          (Xml.child xml_arg0 "GeoJsonPayload") in
+      make ?geoJsonPayload ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let geoJsonPayload =
+        field_map json__ "GeoJsonPayload" GeoJsonPayload.of_json in
+      make ?geoJsonPayload ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get estimated position information as a payload in GeoJSON format. The payload measurement data is resolved using solvers that are provided by third-party vendors."]
+module GetPositionEstimateRequest =
+  struct
+    type nonrec t =
+      {
+      wiFiAccessPoints: WiFiAccessPoints.t option
+        [@ocaml.doc
+          "Retrieves an estimated device position by resolving WLAN measurement data. The position is resolved using HERE's Wi-Fi based solver."];
+      cellTowers: CellTowers.t option
+        [@ocaml.doc
+          "Retrieves an estimated device position by resolving measurement data from cellular radio towers. The position is resolved using HERE's cellular-based solver."];
+      ip: Ip.t option
+        [@ocaml.doc
+          "Retrieves an estimated device position by resolving the IP address information from the device. The position is resolved using MaxMind's IP-based solver."];
+      gnss: Gnss.t option
+        [@ocaml.doc
+          "Retrieves an estimated device position by resolving the global navigation satellite system (GNSS) scan data. The position is resolved using the GNSS solver powered by LoRa Cloud."];
+      timestamp: CreationDate.t option
+        [@ocaml.doc
+          "Optional information that specifies the time when the position information will be resolved. It uses the Unix timestamp format. If not specified, the time at which the request was received will be used."];
+      advancedConfiguration: AdvancedConfiguration.t option
+        [@ocaml.doc
+          "Optional configuration to customize position estimates. If not provided, defaults are applied."]}
+    let make ?wiFiAccessPoints =
+      fun ?cellTowers ->
+        fun ?ip ->
+          fun ?gnss ->
+            fun ?timestamp ->
+              fun ?advancedConfiguration ->
+                fun () ->
+                  {
+                    wiFiAccessPoints;
+                    cellTowers;
+                    ip;
+                    gnss;
+                    timestamp;
+                    advancedConfiguration
+                  }
+    let to_value x =
+      structure_to_value
+        [("WiFiAccessPoints",
+           (Option.map x.wiFiAccessPoints ~f:WiFiAccessPoints.to_value));
+        ("CellTowers", (Option.map x.cellTowers ~f:CellTowers.to_value));
+        ("Ip", (Option.map x.ip ~f:Ip.to_value));
+        ("Gnss", (Option.map x.gnss ~f:Gnss.to_value));
+        ("Timestamp", (Option.map x.timestamp ~f:CreationDate.to_value));
+        ("AdvancedConfiguration",
+          (Option.map x.advancedConfiguration
+             ~f:AdvancedConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let advancedConfiguration =
+        (Option.map ~f:AdvancedConfiguration.of_xml)
+          (Xml.child xml_arg0 "AdvancedConfiguration") in
+      let timestamp =
+        (Option.map ~f:CreationDate.of_xml) (Xml.child xml_arg0 "Timestamp") in
+      let gnss = (Option.map ~f:Gnss.of_xml) (Xml.child xml_arg0 "Gnss") in
+      let ip = (Option.map ~f:Ip.of_xml) (Xml.child xml_arg0 "Ip") in
+      let cellTowers =
+        (Option.map ~f:CellTowers.of_xml) (Xml.child xml_arg0 "CellTowers") in
+      let wiFiAccessPoints =
+        (Option.map ~f:WiFiAccessPoints.of_xml)
+          (Xml.child xml_arg0 "WiFiAccessPoints") in
+      make ?advancedConfiguration ?timestamp ?gnss ?ip ?cellTowers
+        ?wiFiAccessPoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let advancedConfiguration =
+        field_map json__ "AdvancedConfiguration"
+          AdvancedConfiguration.of_json in
+      let timestamp = field_map json__ "Timestamp" CreationDate.of_json in
+      let gnss = field_map json__ "Gnss" Gnss.of_json in
+      let ip = field_map json__ "Ip" Ip.of_json in
+      let cellTowers = field_map json__ "CellTowers" CellTowers.of_json in
+      let wiFiAccessPoints =
+        field_map json__ "WiFiAccessPoints" WiFiAccessPoints.of_json in
+      make ?advancedConfiguration ?timestamp ?gnss ?ip ?cellTowers
+        ?wiFiAccessPoints ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get estimated position information as a payload in GeoJSON format. The payload measurement data is resolved using solvers that are provided by third-party vendors."]
+module GetPositionConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      solvers: PositionSolverDetails.t option
+        [@ocaml.doc
+          "The wrapper for the solver configuration details object."];
+      destination: DestinationName.t option
+        [@ocaml.doc
+          "The position data destination that describes the AWS IoT rule that processes the device's position data for use by AWS IoT Core for LoRaWAN."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?solvers =
+      fun ?destination -> fun () -> { solvers; destination }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Solvers",
+           (Option.map x.solvers ~f:PositionSolverDetails.to_value));
+        ("Destination",
+          (Option.map x.destination ~f:DestinationName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destination =
+        (Option.map ~f:DestinationName.of_xml)
+          (Xml.child xml_arg0 "Destination") in
+      let solvers =
+        (Option.map ~f:PositionSolverDetails.of_xml)
+          (Xml.child xml_arg0 "Solvers") in
+      make ?destination ?solvers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destination =
+        field_map json__ "Destination" DestinationName.of_json in
+      let solvers = field_map json__ "Solvers" PositionSolverDetails.of_json in
+      make ?destination ?solvers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get position configuration for a given resource. This action is no longer supported. Calls to retrieve the position configuration should use the GetResourcePosition API operation instead."]
+module GetPositionConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      resourceIdentifier: PositionResourceIdentifier.t
+        [@ocaml.doc "Resource identifier used in a position configuration."];
+      resourceType: PositionResourceType.t
+        [@ocaml.doc
+          "Resource type of the resource for which position configuration is retrieved."]}
+    let context_ = "GetPositionConfigurationRequest"
+    let make ~resourceIdentifier =
+      fun ~resourceType -> fun () -> { resourceIdentifier; resourceType }
+    let to_value x =
+      structure_to_value
+        [("ResourceIdentifier",
+           (Some (PositionResourceIdentifier.to_value x.resourceIdentifier)));
+        ("resourceType",
+          (Some (PositionResourceType.to_value x.resourceType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        PositionResourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+      let resourceIdentifier =
+        PositionResourceIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdentifier") in
+      make ~resourceType ~resourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType =
+        field_map_exn json__ "ResourceType" PositionResourceType.of_json in
+      let resourceIdentifier =
+        field_map_exn json__ "ResourceIdentifier"
+          PositionResourceIdentifier.of_json in
+      make ~resourceType ~resourceIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get position configuration for a given resource. This action is no longer supported. Calls to retrieve the position configuration should use the GetResourcePosition API operation instead."]
 module GetPartnerAccountResponse =
   struct
     type nonrec t =
@@ -12153,11 +22250,12 @@ module GetPartnerAccountResponse =
           (Xml.child xml_arg0 "Sidewalk") in
       make ?accountLinked ?sidewalk ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accountLinked =
-        field_map json "AccountLinked" AccountLinked.of_json in
+        field_map json__ "AccountLinked" AccountLinked.of_json in
       let sidewalk =
-        field_map json "Sidewalk" SidewalkAccountInfoWithFingerprint.of_json in
+        field_map json__ "Sidewalk"
+          SidewalkAccountInfoWithFingerprint.of_json in
       make ?accountLinked ?sidewalk ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12188,10 +22286,11 @@ module GetPartnerAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PartnerAccountId") in
       make ~partnerType ~partnerAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let partnerType = field_map_exn json "PartnerType" PartnerType.of_json in
+    let of_json json__ =
+      let partnerType =
+        field_map_exn json__ "PartnerType" PartnerType.of_json in
       let partnerAccountId =
-        field_map_exn json "PartnerAccountId" PartnerAccountId.of_json in
+        field_map_exn json__ "PartnerAccountId" PartnerAccountId.of_json in
       make ~partnerType ~partnerAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12203,10 +22302,17 @@ module GetNetworkAnalyzerConfigurationResponse =
       traceContent: TraceContent.t option ;
       wirelessDevices: WirelessDeviceList.t option
         [@ocaml.doc
-          "List of WirelessDevices in the NetworkAnalyzerConfiguration."];
+          "List of wireless device resources that have been added to the network analyzer configuration."];
       wirelessGateways: WirelessGatewayList.t option
         [@ocaml.doc
-          "List of WirelessGateways in the NetworkAnalyzerConfiguration."]}
+          "List of wireless gateway resources that have been added to the network analyzer configuration."];
+      description: Description.t option ;
+      arn: NetworkAnalyzerConfigurationArn.t option
+        [@ocaml.doc "The Amazon Resource Name of the new resource."];
+      name: NetworkAnalyzerConfigurationName.t option ;
+      multicastGroups: NetworkAnalyzerMulticastGroupList.t option
+        [@ocaml.doc
+          "List of multicast group resources that have been added to the network analyzer configuration."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -12217,7 +22323,20 @@ module GetNetworkAnalyzerConfigurationResponse =
     let make ?traceContent =
       fun ?wirelessDevices ->
         fun ?wirelessGateways ->
-          fun () -> { traceContent; wirelessDevices; wirelessGateways }
+          fun ?description ->
+            fun ?arn ->
+              fun ?name ->
+                fun ?multicastGroups ->
+                  fun () ->
+                    {
+                      traceContent;
+                      wirelessDevices;
+                      wirelessGateways;
+                      description;
+                      arn;
+                      name;
+                      multicastGroups
+                    }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12281,9 +22400,28 @@ module GetNetworkAnalyzerConfigurationResponse =
         ("WirelessDevices",
           (Option.map x.wirelessDevices ~f:WirelessDeviceList.to_value));
         ("WirelessGateways",
-          (Option.map x.wirelessGateways ~f:WirelessGatewayList.to_value))]
+          (Option.map x.wirelessGateways ~f:WirelessGatewayList.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("Arn",
+          (Option.map x.arn ~f:NetworkAnalyzerConfigurationArn.to_value));
+        ("Name",
+          (Option.map x.name ~f:NetworkAnalyzerConfigurationName.to_value));
+        ("MulticastGroups",
+          (Option.map x.multicastGroups
+             ~f:NetworkAnalyzerMulticastGroupList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let multicastGroups =
+        (Option.map ~f:NetworkAnalyzerMulticastGroupList.of_xml)
+          (Xml.child xml_arg0 "MulticastGroups") in
+      let name =
+        (Option.map ~f:NetworkAnalyzerConfigurationName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let arn =
+        (Option.map ~f:NetworkAnalyzerConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "Arn") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
       let wirelessGateways =
         (Option.map ~f:WirelessGatewayList.of_xml)
           (Xml.child xml_arg0 "WirelessGateways") in
@@ -12293,17 +22431,27 @@ module GetNetworkAnalyzerConfigurationResponse =
       let traceContent =
         (Option.map ~f:TraceContent.of_xml)
           (Xml.child xml_arg0 "TraceContent") in
-      make ?wirelessGateways ?wirelessDevices ?traceContent ()
+      make ?multicastGroups ?name ?arn ?description ?wirelessGateways
+        ?wirelessDevices ?traceContent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let multicastGroups =
+        field_map json__ "MulticastGroups"
+          NetworkAnalyzerMulticastGroupList.of_json in
+      let name =
+        field_map json__ "Name" NetworkAnalyzerConfigurationName.of_json in
+      let arn =
+        field_map json__ "Arn" NetworkAnalyzerConfigurationArn.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let wirelessGateways =
-        field_map json "WirelessGateways" WirelessGatewayList.of_json in
+        field_map json__ "WirelessGateways" WirelessGatewayList.of_json in
       let wirelessDevices =
-        field_map json "WirelessDevices" WirelessDeviceList.of_json in
-      let traceContent = field_map json "TraceContent" TraceContent.of_json in
-      make ?wirelessGateways ?wirelessDevices ?traceContent ()
+        field_map json__ "WirelessDevices" WirelessDeviceList.of_json in
+      let traceContent = field_map json__ "TraceContent" TraceContent.of_json in
+      make ?multicastGroups ?name ?arn ?description ?wirelessGateways
+        ?wirelessDevices ?traceContent ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get NetworkAnalyzer configuration."]
+  end[@@ocaml.doc "Get network analyzer configuration."]
 module GetNetworkAnalyzerConfigurationRequest =
   struct
     type nonrec t = {
@@ -12322,13 +22470,13 @@ module GetNetworkAnalyzerConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationName") in
       make ~configurationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationName =
-        field_map_exn json "ConfigurationName"
+        field_map_exn json__ "ConfigurationName"
           NetworkAnalyzerConfigurationName.of_json in
       make ~configurationName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Get NetworkAnalyzer configuration."]
+  end[@@ocaml.doc "Get network analyzer configuration."]
 module GetMulticastGroupSessionResponse =
   struct
     type nonrec t = {
@@ -12408,8 +22556,9 @@ module GetMulticastGroupSessionResponse =
           (Xml.child xml_arg0 "LoRaWAN") in
       make ?loRaWAN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANMulticastSession.of_json in
+    let of_json json__ =
+      let loRaWAN =
+        field_map json__ "LoRaWAN" LoRaWANMulticastSession.of_json in
       make ?loRaWAN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a multicast group session."]
@@ -12428,8 +22577,8 @@ module GetMulticastGroupSessionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" MulticastGroupId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" MulticastGroupId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a multicast group session."]
@@ -12546,14 +22695,14 @@ module GetMulticastGroupResponse =
         (Option.map ~f:MulticastGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?createdAt ?loRaWAN ?status ?description ?name ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map json "CreatedAt" CreatedAt.of_json in
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANMulticastGet.of_json in
-      let status = field_map json "Status" MulticastGroupStatus.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" MulticastGroupName.of_json in
-      let id = field_map json "Id" MulticastGroupId.of_json in
-      let arn = field_map json "Arn" MulticastGroupArn.of_json in
+    let of_json json__ =
+      let createdAt = field_map json__ "CreatedAt" CreatedAt.of_json in
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANMulticastGet.of_json in
+      let status = field_map json__ "Status" MulticastGroupStatus.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" MulticastGroupName.of_json in
+      let id = field_map json__ "Id" MulticastGroupId.of_json in
+      let arn = field_map json__ "Arn" MulticastGroupArn.of_json in
       make ?createdAt ?loRaWAN ?status ?description ?name ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a multicast group."]
@@ -12572,18 +22721,254 @@ module GetMulticastGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" MulticastGroupId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" MulticastGroupId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a multicast group."]
+module GetMetricsResponse =
+  struct
+    type nonrec t =
+      {
+      summaryMetricQueryResults: SummaryMetricQueryResults.t option
+        [@ocaml.doc "The list of summary metrics that were retrieved."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?summaryMetricQueryResults =
+      fun () -> { summaryMetricQueryResults }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SummaryMetricQueryResults",
+           (Option.map x.summaryMetricQueryResults
+              ~f:SummaryMetricQueryResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let summaryMetricQueryResults =
+        (Option.map ~f:SummaryMetricQueryResults.of_xml)
+          (Xml.child xml_arg0 "SummaryMetricQueryResults") in
+      make ?summaryMetricQueryResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let summaryMetricQueryResults =
+        field_map json__ "SummaryMetricQueryResults"
+          SummaryMetricQueryResults.of_json in
+      make ?summaryMetricQueryResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get the summary metrics for this AWS account."]
+module GetMetricsRequest =
+  struct
+    type nonrec t =
+      {
+      summaryMetricQueries: SummaryMetricQueries.t option
+        [@ocaml.doc "The list of queries to retrieve the summary metrics."]}
+    let make ?summaryMetricQueries = fun () -> { summaryMetricQueries }
+    let to_value x =
+      structure_to_value
+        [("SummaryMetricQueries",
+           (Option.map x.summaryMetricQueries
+              ~f:SummaryMetricQueries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let summaryMetricQueries =
+        (Option.map ~f:SummaryMetricQueries.of_xml)
+          (Xml.child xml_arg0 "SummaryMetricQueries") in
+      make ?summaryMetricQueries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let summaryMetricQueries =
+        field_map json__ "SummaryMetricQueries" SummaryMetricQueries.of_json in
+      make ?summaryMetricQueries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get the summary metrics for this AWS account."]
+module GetMetricConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      summaryMetric: SummaryMetricConfiguration.t option
+        [@ocaml.doc
+          "The configuration status of the AWS account for summary metric aggregation."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?summaryMetric = fun () -> { summaryMetric }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SummaryMetric",
+           (Option.map x.summaryMetric ~f:SummaryMetricConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let summaryMetric =
+        (Option.map ~f:SummaryMetricConfiguration.of_xml)
+          (Xml.child xml_arg0 "SummaryMetric") in
+      make ?summaryMetric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let summaryMetric =
+        field_map json__ "SummaryMetric" SummaryMetricConfiguration.of_json in
+      make ?summaryMetric ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the metric configuration status for this AWS account."]
+module GetMetricConfigurationRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the metric configuration status for this AWS account."]
 module GetLogLevelsByResourceTypesResponse =
   struct
     type nonrec t =
       {
       defaultLogLevel: LogLevel.t option ;
       wirelessGatewayLogOptions: WirelessGatewayLogOptionList.t option ;
-      wirelessDeviceLogOptions: WirelessDeviceLogOptionList.t option }
+      wirelessDeviceLogOptions: WirelessDeviceLogOptionList.t option ;
+      fuotaTaskLogOptions: FuotaTaskLogOptionList.t option }
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -12594,12 +22979,14 @@ module GetLogLevelsByResourceTypesResponse =
     let make ?defaultLogLevel =
       fun ?wirelessGatewayLogOptions ->
         fun ?wirelessDeviceLogOptions ->
-          fun () ->
-            {
-              defaultLogLevel;
-              wirelessGatewayLogOptions;
-              wirelessDeviceLogOptions
-            }
+          fun ?fuotaTaskLogOptions ->
+            fun () ->
+              {
+                defaultLogLevel;
+                wirelessGatewayLogOptions;
+                wirelessDeviceLogOptions;
+                fuotaTaskLogOptions
+              }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12665,9 +23052,15 @@ module GetLogLevelsByResourceTypesResponse =
              ~f:WirelessGatewayLogOptionList.to_value));
         ("WirelessDeviceLogOptions",
           (Option.map x.wirelessDeviceLogOptions
-             ~f:WirelessDeviceLogOptionList.to_value))]
+             ~f:WirelessDeviceLogOptionList.to_value));
+        ("FuotaTaskLogOptions",
+          (Option.map x.fuotaTaskLogOptions
+             ~f:FuotaTaskLogOptionList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let fuotaTaskLogOptions =
+        (Option.map ~f:FuotaTaskLogOptionList.of_xml)
+          (Xml.child xml_arg0 "FuotaTaskLogOptions") in
       let wirelessDeviceLogOptions =
         (Option.map ~f:WirelessDeviceLogOptionList.of_xml)
           (Xml.child xml_arg0 "WirelessDeviceLogOptions") in
@@ -12677,22 +23070,25 @@ module GetLogLevelsByResourceTypesResponse =
       let defaultLogLevel =
         (Option.map ~f:LogLevel.of_xml)
           (Xml.child xml_arg0 "DefaultLogLevel") in
-      make ?wirelessDeviceLogOptions ?wirelessGatewayLogOptions
-        ?defaultLogLevel ()
+      make ?fuotaTaskLogOptions ?wirelessDeviceLogOptions
+        ?wirelessGatewayLogOptions ?defaultLogLevel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let fuotaTaskLogOptions =
+        field_map json__ "FuotaTaskLogOptions" FuotaTaskLogOptionList.of_json in
       let wirelessDeviceLogOptions =
-        field_map json "WirelessDeviceLogOptions"
+        field_map json__ "WirelessDeviceLogOptions"
           WirelessDeviceLogOptionList.of_json in
       let wirelessGatewayLogOptions =
-        field_map json "WirelessGatewayLogOptions"
+        field_map json__ "WirelessGatewayLogOptions"
           WirelessGatewayLogOptionList.of_json in
-      let defaultLogLevel = field_map json "DefaultLogLevel" LogLevel.of_json in
-      make ?wirelessDeviceLogOptions ?wirelessGatewayLogOptions
-        ?defaultLogLevel ()
+      let defaultLogLevel =
+        field_map json__ "DefaultLogLevel" LogLevel.of_json in
+      make ?fuotaTaskLogOptions ?wirelessDeviceLogOptions
+        ?wirelessGatewayLogOptions ?defaultLogLevel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns current default log levels or log levels by resource types. Based on resource types, log levels can be for wireless device log options or wireless gateway log options."]
+       "Returns current default log levels or log levels by resource types. Based on the resource type, log levels can be returned for wireless device, wireless gateway, or FUOTA task log options."]
 module GetLogLevelsByResourceTypesRequest =
   struct
     type nonrec t = unit
@@ -12705,7 +23101,7 @@ module GetLogLevelsByResourceTypesRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns current default log levels or log levels by resource types. Based on resource types, log levels can be for wireless device log options or wireless gateway log options."]
+       "Returns current default log levels or log levels by resource types. Based on the resource type, log levels can be returned for wireless device, wireless gateway, or FUOTA task log options."]
 module GetFuotaTaskResponse =
   struct
     type nonrec t =
@@ -12718,7 +23114,11 @@ module GetFuotaTaskResponse =
       loRaWAN: LoRaWANFuotaTaskGetInfo.t option ;
       firmwareUpdateImage: FirmwareUpdateImage.t option ;
       firmwareUpdateRole: FirmwareUpdateRole.t option ;
-      createdAt: CreatedAt.t option }
+      createdAt: CreatedAt.t option ;
+      redundancyPercent: RedundancyPercent.t option ;
+      fragmentSizeBytes: FragmentSizeBytes.t option ;
+      fragmentIntervalMS: FragmentIntervalMS.t option ;
+      descriptor: FileDescriptor.t option }
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -12735,18 +23135,26 @@ module GetFuotaTaskResponse =
                 fun ?firmwareUpdateImage ->
                   fun ?firmwareUpdateRole ->
                     fun ?createdAt ->
-                      fun () ->
-                        {
-                          arn;
-                          id;
-                          status;
-                          name;
-                          description;
-                          loRaWAN;
-                          firmwareUpdateImage;
-                          firmwareUpdateRole;
-                          createdAt
-                        }
+                      fun ?redundancyPercent ->
+                        fun ?fragmentSizeBytes ->
+                          fun ?fragmentIntervalMS ->
+                            fun ?descriptor ->
+                              fun () ->
+                                {
+                                  arn;
+                                  id;
+                                  status;
+                                  name;
+                                  description;
+                                  loRaWAN;
+                                  firmwareUpdateImage;
+                                  firmwareUpdateRole;
+                                  createdAt;
+                                  redundancyPercent;
+                                  fragmentSizeBytes;
+                                  fragmentIntervalMS;
+                                  descriptor
+                                }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12816,9 +23224,28 @@ module GetFuotaTaskResponse =
           (Option.map x.firmwareUpdateImage ~f:FirmwareUpdateImage.to_value));
         ("FirmwareUpdateRole",
           (Option.map x.firmwareUpdateRole ~f:FirmwareUpdateRole.to_value));
-        ("CreatedAt", (Option.map x.createdAt ~f:CreatedAt.to_value))]
+        ("CreatedAt", (Option.map x.createdAt ~f:CreatedAt.to_value));
+        ("RedundancyPercent",
+          (Option.map x.redundancyPercent ~f:RedundancyPercent.to_value));
+        ("FragmentSizeBytes",
+          (Option.map x.fragmentSizeBytes ~f:FragmentSizeBytes.to_value));
+        ("FragmentIntervalMS",
+          (Option.map x.fragmentIntervalMS ~f:FragmentIntervalMS.to_value));
+        ("Descriptor", (Option.map x.descriptor ~f:FileDescriptor.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let descriptor =
+        (Option.map ~f:FileDescriptor.of_xml)
+          (Xml.child xml_arg0 "Descriptor") in
+      let fragmentIntervalMS =
+        (Option.map ~f:FragmentIntervalMS.of_xml)
+          (Xml.child xml_arg0 "FragmentIntervalMS") in
+      let fragmentSizeBytes =
+        (Option.map ~f:FragmentSizeBytes.of_xml)
+          (Xml.child xml_arg0 "FragmentSizeBytes") in
+      let redundancyPercent =
+        (Option.map ~f:RedundancyPercent.of_xml)
+          (Xml.child xml_arg0 "RedundancyPercent") in
       let createdAt =
         (Option.map ~f:CreatedAt.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       let firmwareUpdateRole =
@@ -12839,23 +23266,33 @@ module GetFuotaTaskResponse =
       let id = (Option.map ~f:FuotaTaskId.of_xml) (Xml.child xml_arg0 "Id") in
       let arn =
         (Option.map ~f:FuotaTaskArn.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?createdAt ?firmwareUpdateRole ?firmwareUpdateImage ?loRaWAN
-        ?description ?name ?status ?id ?arn ()
+      make ?descriptor ?fragmentIntervalMS ?fragmentSizeBytes
+        ?redundancyPercent ?createdAt ?firmwareUpdateRole
+        ?firmwareUpdateImage ?loRaWAN ?description ?name ?status ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map json "CreatedAt" CreatedAt.of_json in
+    let of_json json__ =
+      let descriptor = field_map json__ "Descriptor" FileDescriptor.of_json in
+      let fragmentIntervalMS =
+        field_map json__ "FragmentIntervalMS" FragmentIntervalMS.of_json in
+      let fragmentSizeBytes =
+        field_map json__ "FragmentSizeBytes" FragmentSizeBytes.of_json in
+      let redundancyPercent =
+        field_map json__ "RedundancyPercent" RedundancyPercent.of_json in
+      let createdAt = field_map json__ "CreatedAt" CreatedAt.of_json in
       let firmwareUpdateRole =
-        field_map json "FirmwareUpdateRole" FirmwareUpdateRole.of_json in
+        field_map json__ "FirmwareUpdateRole" FirmwareUpdateRole.of_json in
       let firmwareUpdateImage =
-        field_map json "FirmwareUpdateImage" FirmwareUpdateImage.of_json in
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANFuotaTaskGetInfo.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" FuotaTaskName.of_json in
-      let status = field_map json "Status" FuotaTaskStatus.of_json in
-      let id = field_map json "Id" FuotaTaskId.of_json in
-      let arn = field_map json "Arn" FuotaTaskArn.of_json in
-      make ?createdAt ?firmwareUpdateRole ?firmwareUpdateImage ?loRaWAN
-        ?description ?name ?status ?id ?arn ()
+        field_map json__ "FirmwareUpdateImage" FirmwareUpdateImage.of_json in
+      let loRaWAN =
+        field_map json__ "LoRaWAN" LoRaWANFuotaTaskGetInfo.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" FuotaTaskName.of_json in
+      let status = field_map json__ "Status" FuotaTaskStatus.of_json in
+      let id = field_map json__ "Id" FuotaTaskId.of_json in
+      let arn = field_map json__ "Arn" FuotaTaskArn.of_json in
+      make ?descriptor ?fragmentIntervalMS ?fragmentSizeBytes
+        ?redundancyPercent ?createdAt ?firmwareUpdateRole
+        ?firmwareUpdateImage ?loRaWAN ?description ?name ?status ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a FUOTA task."]
 module GetFuotaTaskRequest =
@@ -12872,10 +23309,158 @@ module GetFuotaTaskRequest =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" FuotaTaskId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" FuotaTaskId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a FUOTA task."]
+module GetEventConfigurationByResourceTypesResponse =
+  struct
+    type nonrec t =
+      {
+      deviceRegistrationState:
+        DeviceRegistrationStateResourceTypeEventConfiguration.t option
+        [@ocaml.doc
+          "Resource type event configuration for the device registration state event."];
+      proximity: ProximityResourceTypeEventConfiguration.t option
+        [@ocaml.doc
+          "Resource type event configuration for the proximity event."];
+      join: JoinResourceTypeEventConfiguration.t option
+        [@ocaml.doc "Resource type event configuration for the join event."];
+      connectionStatus:
+        ConnectionStatusResourceTypeEventConfiguration.t option
+        [@ocaml.doc
+          "Resource type event configuration for the connection status event."];
+      messageDeliveryStatus:
+        MessageDeliveryStatusResourceTypeEventConfiguration.t option
+        [@ocaml.doc
+          "Resource type event configuration object for the message delivery status event."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?deviceRegistrationState =
+      fun ?proximity ->
+        fun ?join ->
+          fun ?connectionStatus ->
+            fun ?messageDeliveryStatus ->
+              fun () ->
+                {
+                  deviceRegistrationState;
+                  proximity;
+                  join;
+                  connectionStatus;
+                  messageDeliveryStatus
+                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DeviceRegistrationState",
+           (Option.map x.deviceRegistrationState
+              ~f:DeviceRegistrationStateResourceTypeEventConfiguration.to_value));
+        ("Proximity",
+          (Option.map x.proximity
+             ~f:ProximityResourceTypeEventConfiguration.to_value));
+        ("Join",
+          (Option.map x.join ~f:JoinResourceTypeEventConfiguration.to_value));
+        ("ConnectionStatus",
+          (Option.map x.connectionStatus
+             ~f:ConnectionStatusResourceTypeEventConfiguration.to_value));
+        ("MessageDeliveryStatus",
+          (Option.map x.messageDeliveryStatus
+             ~f:MessageDeliveryStatusResourceTypeEventConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let messageDeliveryStatus =
+        (Option.map
+           ~f:MessageDeliveryStatusResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "MessageDeliveryStatus") in
+      let connectionStatus =
+        (Option.map ~f:ConnectionStatusResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "ConnectionStatus") in
+      let join =
+        (Option.map ~f:JoinResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "Join") in
+      let proximity =
+        (Option.map ~f:ProximityResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "Proximity") in
+      let deviceRegistrationState =
+        (Option.map
+           ~f:DeviceRegistrationStateResourceTypeEventConfiguration.of_xml)
+          (Xml.child xml_arg0 "DeviceRegistrationState") in
+      make ?messageDeliveryStatus ?connectionStatus ?join ?proximity
+        ?deviceRegistrationState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let messageDeliveryStatus =
+        field_map json__ "MessageDeliveryStatus"
+          MessageDeliveryStatusResourceTypeEventConfiguration.of_json in
+      let connectionStatus =
+        field_map json__ "ConnectionStatus"
+          ConnectionStatusResourceTypeEventConfiguration.of_json in
+      let join =
+        field_map json__ "Join" JoinResourceTypeEventConfiguration.of_json in
+      let proximity =
+        field_map json__ "Proximity"
+          ProximityResourceTypeEventConfiguration.of_json in
+      let deviceRegistrationState =
+        field_map json__ "DeviceRegistrationState"
+          DeviceRegistrationStateResourceTypeEventConfiguration.of_json in
+      make ?messageDeliveryStatus ?connectionStatus ?join ?proximity
+        ?deviceRegistrationState ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get the event configuration based on resource types."]
+module GetEventConfigurationByResourceTypesRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get the event configuration based on resource types."]
 module GetDeviceProfileResponse =
   struct
     type nonrec t =
@@ -12887,7 +23472,10 @@ module GetDeviceProfileResponse =
       id: DeviceProfileId.t option
         [@ocaml.doc "The ID of the device profile."];
       loRaWAN: LoRaWANDeviceProfile.t option
-        [@ocaml.doc "Information about the device profile."]}
+        [@ocaml.doc "Information about the device profile."];
+      sidewalk: SidewalkGetDeviceProfile.t option
+        [@ocaml.doc
+          "Information about the Sidewalk parameters in the device profile."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -12897,7 +23485,9 @@ module GetDeviceProfileResponse =
       | `Unknown_operation_error of (string * string option) ]
     let make ?arn =
       fun ?name ->
-        fun ?id -> fun ?loRaWAN -> fun () -> { arn; name; id; loRaWAN }
+        fun ?id ->
+          fun ?loRaWAN ->
+            fun ?sidewalk -> fun () -> { arn; name; id; loRaWAN; sidewalk }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -12959,9 +23549,14 @@ module GetDeviceProfileResponse =
         [("Arn", (Option.map x.arn ~f:DeviceProfileArn.to_value));
         ("Name", (Option.map x.name ~f:DeviceProfileName.to_value));
         ("Id", (Option.map x.id ~f:DeviceProfileId.to_value));
-        ("LoRaWAN", (Option.map x.loRaWAN ~f:LoRaWANDeviceProfile.to_value))]
+        ("LoRaWAN", (Option.map x.loRaWAN ~f:LoRaWANDeviceProfile.to_value));
+        ("Sidewalk",
+          (Option.map x.sidewalk ~f:SidewalkGetDeviceProfile.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sidewalk =
+        (Option.map ~f:SidewalkGetDeviceProfile.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
       let loRaWAN =
         (Option.map ~f:LoRaWANDeviceProfile.of_xml)
           (Xml.child xml_arg0 "LoRaWAN") in
@@ -12971,14 +23566,16 @@ module GetDeviceProfileResponse =
         (Option.map ~f:DeviceProfileName.of_xml) (Xml.child xml_arg0 "Name") in
       let arn =
         (Option.map ~f:DeviceProfileArn.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?loRaWAN ?id ?name ?arn ()
+      make ?sidewalk ?loRaWAN ?id ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANDeviceProfile.of_json in
-      let id = field_map json "Id" DeviceProfileId.of_json in
-      let name = field_map json "Name" DeviceProfileName.of_json in
-      let arn = field_map json "Arn" DeviceProfileArn.of_json in
-      make ?loRaWAN ?id ?name ?arn ()
+    let of_json json__ =
+      let sidewalk =
+        field_map json__ "Sidewalk" SidewalkGetDeviceProfile.of_json in
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANDeviceProfile.of_json in
+      let id = field_map json__ "Id" DeviceProfileId.of_json in
+      let name = field_map json__ "Name" DeviceProfileName.of_json in
+      let arn = field_map json__ "Arn" DeviceProfileArn.of_json in
+      make ?sidewalk ?loRaWAN ?id ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a device profile."]
 module GetDeviceProfileRequest =
@@ -12997,8 +23594,9 @@ module GetDeviceProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" DeviceProfileId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" DeviceProfileId.of_json in
+      make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a device profile."]
 module GetDestinationResponse =
@@ -13121,14 +23719,14 @@ module GetDestinationResponse =
         (Option.map ~f:DestinationArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?roleArn ?description ?expressionType ?expression ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let description = field_map json "Description" Description.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let expressionType =
-        field_map json "ExpressionType" ExpressionType.of_json in
-      let expression = field_map json "Expression" Expression.of_json in
-      let name = field_map json "Name" DestinationName.of_json in
-      let arn = field_map json "Arn" DestinationArn.of_json in
+        field_map json__ "ExpressionType" ExpressionType.of_json in
+      let expression = field_map json__ "Expression" Expression.of_json in
+      let name = field_map json__ "Name" DestinationName.of_json in
+      let arn = field_map json__ "Arn" DestinationArn.of_json in
       make ?roleArn ?description ?expressionType ?expression ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a destination."]
@@ -13148,8 +23746,8 @@ module GetDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" DestinationName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" DestinationName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a destination."]
@@ -13255,8 +23853,8 @@ module DisassociateWirelessGatewayFromThingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" WirelessGatewayId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" WirelessGatewayId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13354,8 +23952,8 @@ module DisassociateWirelessGatewayFromCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" WirelessGatewayId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" WirelessGatewayId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13461,8 +24059,8 @@ module DisassociateWirelessDeviceFromThingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" WirelessDeviceId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" WirelessDeviceId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13566,10 +24164,10 @@ module DisassociateWirelessDeviceFromMulticastGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessDeviceId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessDeviceId =
-        field_map_exn json "WirelessDeviceId" WirelessDeviceId.of_json in
-      let id = field_map_exn json "Id" MulticastGroupId.of_json in
+        field_map_exn json__ "WirelessDeviceId" WirelessDeviceId.of_json in
+      let id = field_map_exn json__ "Id" MulticastGroupId.of_json in
       make ~wirelessDeviceId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates a wireless device from a multicast group."]
@@ -13680,10 +24278,10 @@ module DisassociateWirelessDeviceFromFuotaTaskRequest =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessDeviceId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessDeviceId =
-        field_map_exn json "WirelessDeviceId" WirelessDeviceId.of_json in
-      let id = field_map_exn json "Id" FuotaTaskId.of_json in
+        field_map_exn json__ "WirelessDeviceId" WirelessDeviceId.of_json in
+      let id = field_map_exn json__ "Id" FuotaTaskId.of_json in
       make ~wirelessDeviceId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Disassociates a wireless device from a FUOTA task."]
@@ -13761,7 +24359,7 @@ module DisassociateMulticastGroupFromFuotaTaskResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Disassociates a multicast group from a fuota task."]
+  end[@@ocaml.doc "Disassociates a multicast group from a FUOTA task."]
 module DisassociateMulticastGroupFromFuotaTaskRequest =
   struct
     type nonrec t =
@@ -13785,13 +24383,13 @@ module DisassociateMulticastGroupFromFuotaTaskRequest =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~multicastGroupId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let multicastGroupId =
-        field_map_exn json "MulticastGroupId" MulticastGroupId.of_json in
-      let id = field_map_exn json "Id" FuotaTaskId.of_json in
+        field_map_exn json__ "MulticastGroupId" MulticastGroupId.of_json in
+      let id = field_map_exn json__ "Id" FuotaTaskId.of_json in
       make ~multicastGroupId ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Disassociates a multicast group from a fuota task."]
+  end[@@ocaml.doc "Disassociates a multicast group from a FUOTA task."]
 module DisassociateAwsAccountFromPartnerAccountResponse =
   struct
     type nonrec t = unit
@@ -13885,14 +24483,116 @@ module DisassociateAwsAccountFromPartnerAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PartnerAccountId") in
       make ~partnerType ~partnerAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let partnerType = field_map_exn json "PartnerType" PartnerType.of_json in
+    let of_json json__ =
+      let partnerType =
+        field_map_exn json__ "PartnerType" PartnerType.of_json in
       let partnerAccountId =
-        field_map_exn json "PartnerAccountId" PartnerAccountId.of_json in
+        field_map_exn json__ "PartnerAccountId" PartnerAccountId.of_json in
       make ~partnerType ~partnerAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Disassociates your AWS account from a partner account. If PartnerAccountId and PartnerType are null, disassociates your AWS account from all partner accounts."]
+module DeregisterWirelessDeviceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deregister a wireless device from AWS IoT Wireless."]
+module DeregisterWirelessDeviceRequest =
+  struct
+    type nonrec t =
+      {
+      identifier: Identifier.t
+        [@ocaml.doc
+          "The identifier of the wireless device to deregister from AWS IoT Wireless."];
+      wirelessDeviceType: WirelessDeviceType.t option
+        [@ocaml.doc
+          "The type of wireless device to deregister from AWS IoT Wireless, which can be LoRaWAN or Sidewalk."]}
+    let context_ = "DeregisterWirelessDeviceRequest"
+    let make ?wirelessDeviceType =
+      fun ~identifier -> fun () -> { wirelessDeviceType; identifier }
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Some (Identifier.to_value x.identifier)));
+        ("WirelessDeviceType",
+          (Option.map x.wirelessDeviceType ~f:WirelessDeviceType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let wirelessDeviceType =
+        (Option.map ~f:WirelessDeviceType.of_xml)
+          (Xml.child xml_arg0 "WirelessDeviceType") in
+      let identifier =
+        Identifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      make ?wirelessDeviceType ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let wirelessDeviceType =
+        field_map json__ "WirelessDeviceType" WirelessDeviceType.of_json in
+      let identifier = field_map_exn json__ "Identifier" Identifier.of_json in
+      make ?wirelessDeviceType ~identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deregister a wireless device from AWS IoT Wireless."]
 module DeleteWirelessGatewayTaskResponse =
   struct
     type nonrec t = unit
@@ -13985,8 +24685,8 @@ module DeleteWirelessGatewayTaskRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" WirelessGatewayId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" WirelessGatewayId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a wireless gateway task."]
@@ -14084,9 +24784,9 @@ module DeleteWirelessGatewayTaskDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let id =
-        field_map_exn json "Id" WirelessGatewayTaskDefinitionId.of_json in
+        field_map_exn json__ "Id" WirelessGatewayTaskDefinitionId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14165,7 +24865,8 @@ module DeleteWirelessGatewayResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a wireless gateway."]
+  end[@@ocaml.doc
+       "Deletes a wireless gateway. When deleting a wireless gateway, you might run into duplication errors for the following reasons. If you specify a GatewayEui value that already exists. If you used a ClientRequestToken with the same parameters within the last 10 minutes. To avoid this error, make sure that you use unique identifiers and parameters for each request within the specified time period."]
 module DeleteWirelessGatewayRequest =
   struct
     type nonrec t =
@@ -14183,11 +24884,12 @@ module DeleteWirelessGatewayRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" WirelessGatewayId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" WirelessGatewayId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a wireless gateway."]
+  end[@@ocaml.doc
+       "Deletes a wireless gateway. When deleting a wireless gateway, you might run into duplication errors for the following reasons. If you specify a GatewayEui value that already exists. If you used a ClientRequestToken with the same parameters within the last 10 minutes. To avoid this error, make sure that you use unique identifiers and parameters for each request within the specified time period."]
 module DeleteWirelessDeviceResponse =
   struct
     type nonrec t = unit
@@ -14279,11 +24981,116 @@ module DeleteWirelessDeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" WirelessDeviceId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" WirelessDeviceId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a wireless device."]
+module DeleteWirelessDeviceImportTaskResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete an import task."]
+module DeleteWirelessDeviceImportTaskRequest =
+  struct
+    type nonrec t =
+      {
+      id: ImportTaskId.t
+        [@ocaml.doc
+          "The unique identifier of the import task to be deleted."]}
+    let context_ = "DeleteWirelessDeviceImportTaskRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("Id", (Some (ImportTaskId.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        ImportTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ImportTaskId.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete an import task."]
 module DeleteServiceProfileResponse =
   struct
     type nonrec t = unit
@@ -14384,8 +25191,8 @@ module DeleteServiceProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" ServiceProfileId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ServiceProfileId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a service profile."]
@@ -14463,20 +25270,20 @@ module DeleteQueuedMessagesResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The operation to delete queued messages."]
+  end[@@ocaml.doc "Remove queued messages from the downlink queue."]
 module DeleteQueuedMessagesRequest =
   struct
     type nonrec t =
       {
       id: WirelessDeviceId.t
         [@ocaml.doc
-          "Id of a given wireless device which messages will be deleted"];
+          "The ID of a given wireless device for which downlink messages will be deleted."];
       messageId: MessageId.t
         [@ocaml.doc
-          "if messageID==\"*\", the queue for a particular wireless deviceId will be purged, otherwise, the specific message with messageId will be deleted"];
+          "If message ID is \"*\", it cleares the entire downlink queue for a given device, specified by the wireless device ID. Otherwise, the downlink message with the specified message ID will be deleted."];
       wirelessDeviceType: WirelessDeviceType.t option
         [@ocaml.doc
-          "The wireless device type, it is either Sidewalk or LoRaWAN."]}
+          "The wireless device type, which can be either Sidewalk or LoRaWAN."]}
     let context_ = "DeleteQueuedMessagesRequest"
     let make ?wirelessDeviceType =
       fun ~id ->
@@ -14500,14 +25307,123 @@ module DeleteQueuedMessagesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?wirelessDeviceType ~messageId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessDeviceType =
-        field_map json "WirelessDeviceType" WirelessDeviceType.of_json in
-      let messageId = field_map_exn json "MessageId" MessageId.of_json in
-      let id = field_map_exn json "Id" WirelessDeviceId.of_json in
+        field_map json__ "WirelessDeviceType" WirelessDeviceType.of_json in
+      let messageId = field_map_exn json__ "MessageId" MessageId.of_json in
+      let id = field_map_exn json__ "Id" WirelessDeviceId.of_json in
       make ?wirelessDeviceType ~messageId ~id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The operation to delete queued messages."]
+  end[@@ocaml.doc "Remove queued messages from the downlink queue."]
+module DeleteNetworkAnalyzerConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a network analyzer configuration."]
+module DeleteNetworkAnalyzerConfigurationRequest =
+  struct
+    type nonrec t = {
+      configurationName: NetworkAnalyzerConfigurationName.t }
+    let context_ = "DeleteNetworkAnalyzerConfigurationRequest"
+    let make ~configurationName = fun () -> { configurationName }
+    let to_value x =
+      structure_to_value
+        [("ConfigurationName",
+           (Some
+              (NetworkAnalyzerConfigurationName.to_value x.configurationName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let configurationName =
+        NetworkAnalyzerConfigurationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationName") in
+      make ~configurationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configurationName =
+        field_map_exn json__ "ConfigurationName"
+          NetworkAnalyzerConfigurationName.of_json in
+      make ~configurationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a network analyzer configuration."]
 module DeleteMulticastGroupResponse =
   struct
     type nonrec t = unit
@@ -14592,7 +25508,7 @@ module DeleteMulticastGroupResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a multicast group if it is not in use by a fuota task."]
+       "Deletes a multicast group if it is not in use by a FUOTA task."]
 module DeleteMulticastGroupRequest =
   struct
     type nonrec t = {
@@ -14608,12 +25524,12 @@ module DeleteMulticastGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" MulticastGroupId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" MulticastGroupId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a multicast group if it is not in use by a fuota task."]
+       "Deletes a multicast group if it is not in use by a FUOTA task."]
 module DeleteFuotaTaskResponse =
   struct
     type nonrec t = unit
@@ -14703,8 +25619,8 @@ module DeleteFuotaTaskRequest =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" FuotaTaskId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" FuotaTaskId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a FUOTA task."]
 module DeleteDeviceProfileResponse =
@@ -14807,8 +25723,9 @@ module DeleteDeviceProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" DeviceProfileId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" DeviceProfileId.of_json in
+      make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a device profile."]
 module DeleteDestinationResponse =
@@ -14912,8 +25829,8 @@ module DeleteDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" DestinationName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" DestinationName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a destination."]
@@ -15017,10 +25934,11 @@ module CreateWirelessGatewayTaskResponse =
           (Xml.child xml_arg0 "WirelessGatewayTaskDefinitionId") in
       make ?status ?wirelessGatewayTaskDefinitionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" WirelessGatewayTaskStatus.of_json in
+    let of_json json__ =
+      let status =
+        field_map json__ "Status" WirelessGatewayTaskStatus.of_json in
       let wirelessGatewayTaskDefinitionId =
-        field_map json "WirelessGatewayTaskDefinitionId"
+        field_map json__ "WirelessGatewayTaskDefinitionId"
           WirelessGatewayTaskDefinitionId.of_json in
       make ?status ?wirelessGatewayTaskDefinitionId ()
     let to_json v = composed_to_json to_value v
@@ -15055,11 +25973,11 @@ module CreateWirelessGatewayTaskRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessGatewayTaskDefinitionId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessGatewayTaskDefinitionId =
-        field_map_exn json "WirelessGatewayTaskDefinitionId"
+        field_map_exn json__ "WirelessGatewayTaskDefinitionId"
           WirelessGatewayTaskDefinitionId.of_json in
-      let id = field_map_exn json "Id" WirelessGatewayId.of_json in
+      let id = field_map_exn json__ "Id" WirelessGatewayId.of_json in
       make ~wirelessGatewayTaskDefinitionId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a task for a wireless gateway."]
@@ -15160,9 +26078,10 @@ module CreateWirelessGatewayTaskDefinitionResponse =
           (Xml.child xml_arg0 "Id") in
       make ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" WirelessGatewayTaskDefinitionArn.of_json in
-      let id = field_map json "Id" WirelessGatewayTaskDefinitionId.of_json in
+    let of_json json__ =
+      let arn =
+        field_map json__ "Arn" WirelessGatewayTaskDefinitionArn.of_json in
+      let id = field_map json__ "Id" WirelessGatewayTaskDefinitionId.of_json in
       make ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a gateway task definition."]
@@ -15179,7 +26098,7 @@ module CreateWirelessGatewayTaskDefinitionRequest =
         [@ocaml.doc "Information about the gateways to update."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "Each resource must have a unique client request token. If you try to create a new resource with the same token as a resource that already exists, an exception occurs. If you omit this value, AWS SDKs will automatically generate a unique client request."];
+          "Each resource must have a unique client request token. The client token is used to implement idempotency. It ensures that the request completes no more than one time. If you retry a request with the same token and the same parameters, the request will complete successfully. However, if you try to create a new resource using the same token but different parameters, an HTTP 409 conflict occurs. If you omit this value, AWS SDKs will automatically generate a unique client request. For more information about idempotency, see Ensuring idempotency in Amazon EC2 API requests."];
       tags: TagList.t option
         [@ocaml.doc
           "The tags to attach to the specified resource. Tags are metadata that you can use to manage a resource."]}
@@ -15218,15 +26137,15 @@ module CreateWirelessGatewayTaskDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AutoCreateTasks") in
       make ?tags ?clientRequestToken ?update ?name ~autoCreateTasks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let update =
-        field_map json "Update" UpdateWirelessGatewayTaskCreate.of_json in
-      let name = field_map json "Name" WirelessGatewayTaskName.of_json in
+        field_map json__ "Update" UpdateWirelessGatewayTaskCreate.of_json in
+      let name = field_map json__ "Name" WirelessGatewayTaskName.of_json in
       let autoCreateTasks =
-        field_map_exn json "AutoCreateTasks" AutoCreateTasks.of_json in
+        field_map_exn json__ "AutoCreateTasks" AutoCreateTasks.of_json in
       make ?tags ?clientRequestToken ?update ?name ~autoCreateTasks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a gateway task definition."]
@@ -15314,18 +26233,20 @@ module CreateWirelessGatewayResponse =
         (Option.map ~f:WirelessGatewayArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" WirelessDeviceId.of_json in
-      let arn = field_map json "Arn" WirelessGatewayArn.of_json in
+    let of_json json__ =
+      let id = field_map json__ "Id" WirelessDeviceId.of_json in
+      let arn = field_map json__ "Arn" WirelessGatewayArn.of_json in
       make ?id ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Provisions a wireless gateway."]
+  end[@@ocaml.doc
+       "Provisions a wireless gateway. When provisioning a wireless gateway, you might run into duplication errors for the following reasons. If you specify a GatewayEui value that already exists. If you used a ClientRequestToken with the same parameters within the last 10 minutes. To avoid this error, make sure that you use unique identifiers and parameters for each request within the specified time period."]
 module CreateWirelessGatewayRequest =
   struct
     type nonrec t =
       {
       name: WirelessGatewayName.t option
-        [@ocaml.doc "The name of the new resource."];
+        [@ocaml.doc
+          "The name of the new resource. The following special characters aren't accepted: <>^#~$"];
       description: Description.t option
         [@ocaml.doc "The description of the new resource."];
       loRaWAN: LoRaWANGateway.t
@@ -15336,7 +26257,7 @@ module CreateWirelessGatewayRequest =
           "The tags to attach to the new wireless gateway. Tags are metadata that you can use to manage a resource."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "Each resource must have a unique client request token. If you try to create a new resource with the same token as a resource that already exists, an exception occurs. If you omit this value, AWS SDKs will automatically generate a unique client request."]}
+          "Each resource must have a unique client request token. The client token is used to implement idempotency. It ensures that the request completes no more than one time. If you retry a request with the same token and the same parameters, the request will complete successfully. However, if you try to create a new resource using the same token but different parameters, an HTTP 409 conflict occurs. If you omit this value, AWS SDKs will automatically generate a unique client request. For more information about idempotency, see Ensuring idempotency in Amazon EC2 API requests."]}
     let context_ = "CreateWirelessGatewayRequest"
     let make ?name =
       fun ?description ->
@@ -15369,16 +26290,17 @@ module CreateWirelessGatewayRequest =
           (Xml.child xml_arg0 "Name") in
       make ?clientRequestToken ?tags ~loRaWAN ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let loRaWAN = field_map_exn json "LoRaWAN" LoRaWANGateway.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" WirelessGatewayName.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let loRaWAN = field_map_exn json__ "LoRaWAN" LoRaWANGateway.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" WirelessGatewayName.of_json in
       make ?clientRequestToken ?tags ~loRaWAN ?description ?name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Provisions a wireless gateway."]
+  end[@@ocaml.doc
+       "Provisions a wireless gateway. When provisioning a wireless gateway, you might run into duplication errors for the following reasons. If you specify a GatewayEui value that already exists. If you used a ClientRequestToken with the same parameters within the last 10 minutes. To avoid this error, make sure that you use unique identifiers and parameters for each request within the specified time period."]
 module CreateWirelessDeviceResponse =
   struct
     type nonrec t =
@@ -15472,9 +26394,9 @@ module CreateWirelessDeviceResponse =
         (Option.map ~f:WirelessDeviceArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" WirelessDeviceId.of_json in
-      let arn = field_map json "Arn" WirelessDeviceArn.of_json in
+    let of_json json__ =
+      let id = field_map json__ "Id" WirelessDeviceId.of_json in
+      let arn = field_map json__ "Arn" WirelessDeviceArn.of_json in
       make ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provisions a wireless device."]
@@ -15484,7 +26406,8 @@ module CreateWirelessDeviceRequest =
       {
       type_: WirelessDeviceType.t [@ocaml.doc "The wireless device type."];
       name: WirelessDeviceName.t option
-        [@ocaml.doc "The name of the new resource."];
+        [@ocaml.doc
+          "The name of the new resource. The following special characters aren't accepted: <>^#~$"];
       description: Description.t option
         [@ocaml.doc "The description of the new resource."];
       destinationName: DestinationName.t
@@ -15492,31 +26415,41 @@ module CreateWirelessDeviceRequest =
           "The name of the destination to assign to the new wireless device."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "Each resource must have a unique client request token. If you try to create a new resource with the same token as a resource that already exists, an exception occurs. If you omit this value, AWS SDKs will automatically generate a unique client request."];
+          "Each resource must have a unique client request token. The client token is used to implement idempotency. It ensures that the request completes no more than one time. If you retry a request with the same token and the same parameters, the request will complete successfully. However, if you try to create a new resource using the same token but different parameters, an HTTP 409 conflict occurs. If you omit this value, AWS SDKs will automatically generate a unique client request. For more information about idempotency, see Ensuring idempotency in Amazon EC2 API requests."];
       loRaWAN: LoRaWANDevice.t option
         [@ocaml.doc
           "The device configuration information to use to create the wireless device."];
       tags: TagList.t option
         [@ocaml.doc
-          "The tags to attach to the new wireless device. Tags are metadata that you can use to manage a resource."]}
+          "The tags to attach to the new wireless device. Tags are metadata that you can use to manage a resource."];
+      positioning: PositioningConfigStatus.t option
+        [@ocaml.doc
+          "The integration status of the Device Location feature for LoRaWAN and Sidewalk devices."];
+      sidewalk: SidewalkCreateWirelessDevice.t option
+        [@ocaml.doc
+          "The device configuration information to use to create the Sidewalk device."]}
     let context_ = "CreateWirelessDeviceRequest"
     let make ?name =
       fun ?description ->
         fun ?clientRequestToken ->
           fun ?loRaWAN ->
             fun ?tags ->
-              fun ~type_ ->
-                fun ~destinationName ->
-                  fun () ->
-                    {
-                      name;
-                      description;
-                      clientRequestToken;
-                      loRaWAN;
-                      tags;
-                      type_;
-                      destinationName
-                    }
+              fun ?positioning ->
+                fun ?sidewalk ->
+                  fun ~type_ ->
+                    fun ~destinationName ->
+                      fun () ->
+                        {
+                          name;
+                          description;
+                          clientRequestToken;
+                          loRaWAN;
+                          tags;
+                          positioning;
+                          sidewalk;
+                          type_;
+                          destinationName
+                        }
     let to_value x =
       structure_to_value
         [("Type", (Some (WirelessDeviceType.to_value x.type_)));
@@ -15527,9 +26460,19 @@ module CreateWirelessDeviceRequest =
         ("ClientRequestToken",
           (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
         ("LoRaWAN", (Option.map x.loRaWAN ~f:LoRaWANDevice.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("Positioning",
+          (Option.map x.positioning ~f:PositioningConfigStatus.to_value));
+        ("Sidewalk",
+          (Option.map x.sidewalk ~f:SidewalkCreateWirelessDevice.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sidewalk =
+        (Option.map ~f:SidewalkCreateWirelessDevice.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
+      let positioning =
+        (Option.map ~f:PositioningConfigStatus.of_xml)
+          (Xml.child xml_arg0 "Positioning") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let loRaWAN =
         (Option.map ~f:LoRaWANDevice.of_xml) (Xml.child xml_arg0 "LoRaWAN") in
@@ -15546,21 +26489,25 @@ module CreateWirelessDeviceRequest =
       let type_ =
         WirelessDeviceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      make ?tags ?loRaWAN ?clientRequestToken ~destinationName ?description
-        ?name ~type_ ()
+      make ?sidewalk ?positioning ?tags ?loRaWAN ?clientRequestToken
+        ~destinationName ?description ?name ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANDevice.of_json in
+    let of_json json__ =
+      let sidewalk =
+        field_map json__ "Sidewalk" SidewalkCreateWirelessDevice.of_json in
+      let positioning =
+        field_map json__ "Positioning" PositioningConfigStatus.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANDevice.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let destinationName =
-        field_map_exn json "DestinationName" DestinationName.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" WirelessDeviceName.of_json in
-      let type_ = field_map_exn json "Type" WirelessDeviceType.of_json in
-      make ?tags ?loRaWAN ?clientRequestToken ~destinationName ?description
-        ?name ~type_ ()
+        field_map_exn json__ "DestinationName" DestinationName.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" WirelessDeviceName.of_json in
+      let type_ = field_map_exn json__ "Type" WirelessDeviceType.of_json in
+      make ?sidewalk ?positioning ?tags ?loRaWAN ?clientRequestToken
+        ~destinationName ?description ?name ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provisions a wireless device."]
 module CreateServiceProfileResponse =
@@ -15647,9 +26594,9 @@ module CreateServiceProfileResponse =
         (Option.map ~f:ServiceProfileArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" ServiceProfileId.of_json in
-      let arn = field_map json "Arn" ServiceProfileArn.of_json in
+    let of_json json__ =
+      let id = field_map json__ "Id" ServiceProfileId.of_json in
+      let arn = field_map json__ "Arn" ServiceProfileArn.of_json in
       make ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new service profile."]
@@ -15658,7 +26605,8 @@ module CreateServiceProfileRequest =
     type nonrec t =
       {
       name: ServiceProfileName.t option
-        [@ocaml.doc "The name of the new resource."];
+        [@ocaml.doc
+          "The name of the new resource. The following special characters aren't accepted: <>^#~$"];
       loRaWAN: LoRaWANServiceProfile.t option
         [@ocaml.doc
           "The service profile information to use to create the service profile."];
@@ -15667,7 +26615,7 @@ module CreateServiceProfileRequest =
           "The tags to attach to the new service profile. Tags are metadata that you can use to manage a resource."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "Each resource must have a unique client request token. If you try to create a new resource with the same token as a resource that already exists, an exception occurs. If you omit this value, AWS SDKs will automatically generate a unique client request."]}
+          "Each resource must have a unique client request token. The client token is used to implement idempotency. It ensures that the request completes no more than one time. If you retry a request with the same token and the same parameters, the request will complete successfully. However, if you try to create a new resource using the same token but different parameters, an HTTP 409 conflict occurs. If you omit this value, AWS SDKs will automatically generate a unique client request. For more information about idempotency, see Ensuring idempotency in Amazon EC2 API requests."]}
     let make ?name =
       fun ?loRaWAN ->
         fun ?tags ->
@@ -15693,15 +26641,218 @@ module CreateServiceProfileRequest =
         (Option.map ~f:ServiceProfileName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?clientRequestToken ?tags ?loRaWAN ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANServiceProfile.of_json in
-      let name = field_map json "Name" ServiceProfileName.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANServiceProfile.of_json in
+      let name = field_map json__ "Name" ServiceProfileName.of_json in
       make ?clientRequestToken ?tags ?loRaWAN ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new service profile."]
+module CreateNetworkAnalyzerConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      arn: NetworkAnalyzerConfigurationArn.t option
+        [@ocaml.doc "The Amazon Resource Name of the new resource."];
+      name: NetworkAnalyzerConfigurationName.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?arn = fun ?name -> fun () -> { arn; name }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Arn",
+           (Option.map x.arn ~f:NetworkAnalyzerConfigurationArn.to_value));
+        ("Name",
+          (Option.map x.name ~f:NetworkAnalyzerConfigurationName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:NetworkAnalyzerConfigurationName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let arn =
+        (Option.map ~f:NetworkAnalyzerConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "Arn") in
+      make ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name =
+        field_map json__ "Name" NetworkAnalyzerConfigurationName.of_json in
+      let arn =
+        field_map json__ "Arn" NetworkAnalyzerConfigurationArn.of_json in
+      make ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new network analyzer configuration."]
+module CreateNetworkAnalyzerConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      name: NetworkAnalyzerConfigurationName.t ;
+      traceContent: TraceContent.t option ;
+      wirelessDevices: WirelessDeviceList.t option
+        [@ocaml.doc
+          "Wireless device resources to add to the network analyzer configuration. Provide the WirelessDeviceId of the resource to add in the input array."];
+      wirelessGateways: WirelessGatewayList.t option
+        [@ocaml.doc
+          "Wireless gateway resources to add to the network analyzer configuration. Provide the WirelessGatewayId of the resource to add in the input array."];
+      description: Description.t option ;
+      tags: TagList.t option ;
+      clientRequestToken: ClientRequestToken.t option ;
+      multicastGroups: NetworkAnalyzerMulticastGroupList.t option
+        [@ocaml.doc
+          "Multicast Group resources to add to the network analyzer configruation. Provide the MulticastGroupId of the resource to add in the input array."]}
+    let context_ = "CreateNetworkAnalyzerConfigurationRequest"
+    let make ?traceContent =
+      fun ?wirelessDevices ->
+        fun ?wirelessGateways ->
+          fun ?description ->
+            fun ?tags ->
+              fun ?clientRequestToken ->
+                fun ?multicastGroups ->
+                  fun ~name ->
+                    fun () ->
+                      {
+                        traceContent;
+                        wirelessDevices;
+                        wirelessGateways;
+                        description;
+                        tags;
+                        clientRequestToken;
+                        multicastGroups;
+                        name
+                      }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (NetworkAnalyzerConfigurationName.to_value x.name)));
+        ("TraceContent",
+          (Option.map x.traceContent ~f:TraceContent.to_value));
+        ("WirelessDevices",
+          (Option.map x.wirelessDevices ~f:WirelessDeviceList.to_value));
+        ("WirelessGateways",
+          (Option.map x.wirelessGateways ~f:WirelessGatewayList.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("ClientRequestToken",
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("MulticastGroups",
+          (Option.map x.multicastGroups
+             ~f:NetworkAnalyzerMulticastGroupList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let multicastGroups =
+        (Option.map ~f:NetworkAnalyzerMulticastGroupList.of_xml)
+          (Xml.child xml_arg0 "MulticastGroups") in
+      let clientRequestToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientRequestToken") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let wirelessGateways =
+        (Option.map ~f:WirelessGatewayList.of_xml)
+          (Xml.child xml_arg0 "WirelessGateways") in
+      let wirelessDevices =
+        (Option.map ~f:WirelessDeviceList.of_xml)
+          (Xml.child xml_arg0 "WirelessDevices") in
+      let traceContent =
+        (Option.map ~f:TraceContent.of_xml)
+          (Xml.child xml_arg0 "TraceContent") in
+      let name =
+        NetworkAnalyzerConfigurationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?multicastGroups ?clientRequestToken ?tags ?description
+        ?wirelessGateways ?wirelessDevices ?traceContent ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let multicastGroups =
+        field_map json__ "MulticastGroups"
+          NetworkAnalyzerMulticastGroupList.of_json in
+      let clientRequestToken =
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let wirelessGateways =
+        field_map json__ "WirelessGateways" WirelessGatewayList.of_json in
+      let wirelessDevices =
+        field_map json__ "WirelessDevices" WirelessDeviceList.of_json in
+      let traceContent = field_map json__ "TraceContent" TraceContent.of_json in
+      let name =
+        field_map_exn json__ "Name" NetworkAnalyzerConfigurationName.of_json in
+      make ?multicastGroups ?clientRequestToken ?tags ?description
+        ?wirelessGateways ?wirelessDevices ?traceContent ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new network analyzer configuration."]
 module CreateMulticastGroupResponse =
   struct
     type nonrec t =
@@ -15793,9 +26944,9 @@ module CreateMulticastGroupResponse =
         (Option.map ~f:MulticastGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" MulticastGroupId.of_json in
-      let arn = field_map json "Arn" MulticastGroupArn.of_json in
+    let of_json json__ =
+      let id = field_map json__ "Id" MulticastGroupId.of_json in
+      let arn = field_map json__ "Arn" MulticastGroupArn.of_json in
       make ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a multicast group."]
@@ -15808,7 +26959,7 @@ module CreateMulticastGroupRequest =
         [@ocaml.doc "The description of the multicast group."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "Each resource must have a unique client request token. If you try to create a new resource with the same token as a resource that already exists, an exception occurs. If you omit this value, AWS SDKs will automatically generate a unique client request."];
+          "Each resource must have a unique client request token. The client token is used to implement idempotency. It ensures that the request completes no more than one time. If you retry a request with the same token and the same parameters, the request will complete successfully. However, if you try to create a new resource using the same token but different parameters, an HTTP 409 conflict occurs. If you omit this value, AWS SDKs will automatically generate a unique client request. For more information about idempotency, see Ensuring idempotency in Amazon EC2 API requests."];
       loRaWAN: LoRaWANMulticast.t ;
       tags: TagList.t option }
     let context_ = "CreateMulticastGroupRequest"
@@ -15842,13 +26993,13 @@ module CreateMulticastGroupRequest =
         (Option.map ~f:MulticastGroupName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?tags ~loRaWAN ?clientRequestToken ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let loRaWAN = field_map_exn json "LoRaWAN" LoRaWANMulticast.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let loRaWAN = field_map_exn json__ "LoRaWAN" LoRaWANMulticast.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" MulticastGroupName.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" MulticastGroupName.of_json in
       make ?tags ~loRaWAN ?clientRequestToken ?description ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a multicast group."]
@@ -15941,9 +27092,10 @@ module CreateFuotaTaskResponse =
         (Option.map ~f:FuotaTaskArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" FuotaTaskId.of_json in
-      let arn = field_map json "Arn" FuotaTaskArn.of_json in make ?id ?arn ()
+    let of_json json__ =
+      let id = field_map json__ "Id" FuotaTaskId.of_json in
+      let arn = field_map json__ "Arn" FuotaTaskArn.of_json in
+      make ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a FUOTA task."]
 module CreateFuotaTaskRequest =
@@ -15956,25 +27108,37 @@ module CreateFuotaTaskRequest =
       loRaWAN: LoRaWANFuotaTask.t option ;
       firmwareUpdateImage: FirmwareUpdateImage.t ;
       firmwareUpdateRole: FirmwareUpdateRole.t ;
-      tags: TagList.t option }
+      tags: TagList.t option ;
+      redundancyPercent: RedundancyPercent.t option ;
+      fragmentSizeBytes: FragmentSizeBytes.t option ;
+      fragmentIntervalMS: FragmentIntervalMS.t option ;
+      descriptor: FileDescriptor.t option }
     let context_ = "CreateFuotaTaskRequest"
     let make ?name =
       fun ?description ->
         fun ?clientRequestToken ->
           fun ?loRaWAN ->
             fun ?tags ->
-              fun ~firmwareUpdateImage ->
-                fun ~firmwareUpdateRole ->
-                  fun () ->
-                    {
-                      name;
-                      description;
-                      clientRequestToken;
-                      loRaWAN;
-                      tags;
-                      firmwareUpdateImage;
-                      firmwareUpdateRole
-                    }
+              fun ?redundancyPercent ->
+                fun ?fragmentSizeBytes ->
+                  fun ?fragmentIntervalMS ->
+                    fun ?descriptor ->
+                      fun ~firmwareUpdateImage ->
+                        fun ~firmwareUpdateRole ->
+                          fun () ->
+                            {
+                              name;
+                              description;
+                              clientRequestToken;
+                              loRaWAN;
+                              tags;
+                              redundancyPercent;
+                              fragmentSizeBytes;
+                              fragmentIntervalMS;
+                              descriptor;
+                              firmwareUpdateImage;
+                              firmwareUpdateRole
+                            }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:FuotaTaskName.to_value));
@@ -15986,9 +27150,28 @@ module CreateFuotaTaskRequest =
           (Some (FirmwareUpdateImage.to_value x.firmwareUpdateImage)));
         ("FirmwareUpdateRole",
           (Some (FirmwareUpdateRole.to_value x.firmwareUpdateRole)));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("RedundancyPercent",
+          (Option.map x.redundancyPercent ~f:RedundancyPercent.to_value));
+        ("FragmentSizeBytes",
+          (Option.map x.fragmentSizeBytes ~f:FragmentSizeBytes.to_value));
+        ("FragmentIntervalMS",
+          (Option.map x.fragmentIntervalMS ~f:FragmentIntervalMS.to_value));
+        ("Descriptor", (Option.map x.descriptor ~f:FileDescriptor.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let descriptor =
+        (Option.map ~f:FileDescriptor.of_xml)
+          (Xml.child xml_arg0 "Descriptor") in
+      let fragmentIntervalMS =
+        (Option.map ~f:FragmentIntervalMS.of_xml)
+          (Xml.child xml_arg0 "FragmentIntervalMS") in
+      let fragmentSizeBytes =
+        (Option.map ~f:FragmentSizeBytes.of_xml)
+          (Xml.child xml_arg0 "FragmentSizeBytes") in
+      let redundancyPercent =
+        (Option.map ~f:RedundancyPercent.of_xml)
+          (Xml.child xml_arg0 "RedundancyPercent") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let firmwareUpdateRole =
         FirmwareUpdateRole.of_xml
@@ -16006,22 +27189,32 @@ module CreateFuotaTaskRequest =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
       let name =
         (Option.map ~f:FuotaTaskName.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?tags ~firmwareUpdateRole ~firmwareUpdateImage ?loRaWAN
-        ?clientRequestToken ?description ?name ()
+      make ?descriptor ?fragmentIntervalMS ?fragmentSizeBytes
+        ?redundancyPercent ?tags ~firmwareUpdateRole ~firmwareUpdateImage
+        ?loRaWAN ?clientRequestToken ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let descriptor = field_map json__ "Descriptor" FileDescriptor.of_json in
+      let fragmentIntervalMS =
+        field_map json__ "FragmentIntervalMS" FragmentIntervalMS.of_json in
+      let fragmentSizeBytes =
+        field_map json__ "FragmentSizeBytes" FragmentSizeBytes.of_json in
+      let redundancyPercent =
+        field_map json__ "RedundancyPercent" RedundancyPercent.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let firmwareUpdateRole =
-        field_map_exn json "FirmwareUpdateRole" FirmwareUpdateRole.of_json in
+        field_map_exn json__ "FirmwareUpdateRole" FirmwareUpdateRole.of_json in
       let firmwareUpdateImage =
-        field_map_exn json "FirmwareUpdateImage" FirmwareUpdateImage.of_json in
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANFuotaTask.of_json in
+        field_map_exn json__ "FirmwareUpdateImage"
+          FirmwareUpdateImage.of_json in
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANFuotaTask.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" FuotaTaskName.of_json in
-      make ?tags ~firmwareUpdateRole ~firmwareUpdateImage ?loRaWAN
-        ?clientRequestToken ?description ?name ()
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" FuotaTaskName.of_json in
+      make ?descriptor ?fragmentIntervalMS ?fragmentSizeBytes
+        ?redundancyPercent ?tags ~firmwareUpdateRole ~firmwareUpdateImage
+        ?loRaWAN ?clientRequestToken ?description ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a FUOTA task."]
 module CreateDeviceProfileResponse =
@@ -16108,9 +27301,9 @@ module CreateDeviceProfileResponse =
         (Option.map ~f:DeviceProfileArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?id ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" DeviceProfileId.of_json in
-      let arn = field_map json "Arn" DeviceProfileArn.of_json in
+    let of_json json__ =
+      let id = field_map json__ "Id" DeviceProfileId.of_json in
+      let arn = field_map json__ "Arn" DeviceProfileArn.of_json in
       make ?id ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new device profile."]
@@ -16119,7 +27312,8 @@ module CreateDeviceProfileRequest =
     type nonrec t =
       {
       name: DeviceProfileName.t option
-        [@ocaml.doc "The name of the new resource."];
+        [@ocaml.doc
+          "The name of the new resource. The following special characters aren't accepted: <>^#~$"];
       loRaWAN: LoRaWANDeviceProfile.t option
         [@ocaml.doc
           "The device profile information to use to create the device profile."];
@@ -16128,21 +27322,30 @@ module CreateDeviceProfileRequest =
           "The tags to attach to the new device profile. Tags are metadata that you can use to manage a resource."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "Each resource must have a unique client request token. If you try to create a new resource with the same token as a resource that already exists, an exception occurs. If you omit this value, AWS SDKs will automatically generate a unique client request."]}
+          "Each resource must have a unique client request token. The client token is used to implement idempotency. It ensures that the request completes no more than one time. If you retry a request with the same token and the same parameters, the request will complete successfully. However, if you try to create a new resource using the same token but different parameters, an HTTP 409 conflict occurs. If you omit this value, AWS SDKs will automatically generate a unique client request. For more information about idempotency, see Ensuring idempotency in Amazon EC2 API requests."];
+      sidewalk: SidewalkCreateDeviceProfile.t option
+        [@ocaml.doc
+          "The Sidewalk-related information for creating the Sidewalk device profile."]}
     let make ?name =
       fun ?loRaWAN ->
         fun ?tags ->
           fun ?clientRequestToken ->
-            fun () -> { name; loRaWAN; tags; clientRequestToken }
+            fun ?sidewalk ->
+              fun () -> { name; loRaWAN; tags; clientRequestToken; sidewalk }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:DeviceProfileName.to_value));
         ("LoRaWAN", (Option.map x.loRaWAN ~f:LoRaWANDeviceProfile.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("ClientRequestToken",
-          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value))]
+          (Option.map x.clientRequestToken ~f:ClientRequestToken.to_value));
+        ("Sidewalk",
+          (Option.map x.sidewalk ~f:SidewalkCreateDeviceProfile.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sidewalk =
+        (Option.map ~f:SidewalkCreateDeviceProfile.of_xml)
+          (Xml.child xml_arg0 "Sidewalk") in
       let clientRequestToken =
         (Option.map ~f:ClientRequestToken.of_xml)
           (Xml.child xml_arg0 "ClientRequestToken") in
@@ -16152,15 +27355,17 @@ module CreateDeviceProfileRequest =
           (Xml.child xml_arg0 "LoRaWAN") in
       let name =
         (Option.map ~f:DeviceProfileName.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?clientRequestToken ?tags ?loRaWAN ?name ()
+      make ?sidewalk ?clientRequestToken ?tags ?loRaWAN ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let sidewalk =
+        field_map json__ "Sidewalk" SidewalkCreateDeviceProfile.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let loRaWAN = field_map json "LoRaWAN" LoRaWANDeviceProfile.of_json in
-      let name = field_map json "Name" DeviceProfileName.of_json in
-      make ?clientRequestToken ?tags ?loRaWAN ?name ()
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let loRaWAN = field_map json__ "LoRaWAN" LoRaWANDeviceProfile.of_json in
+      let name = field_map json__ "Name" DeviceProfileName.of_json in
+      make ?sidewalk ?clientRequestToken ?tags ?loRaWAN ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new device profile."]
 module CreateDestinationResponse =
@@ -16256,9 +27461,9 @@ module CreateDestinationResponse =
         (Option.map ~f:DestinationArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" DestinationName.of_json in
-      let arn = field_map json "Arn" DestinationArn.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" DestinationName.of_json in
+      let arn = field_map json__ "Arn" DestinationArn.of_json in
       make ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16282,7 +27487,7 @@ module CreateDestinationRequest =
           "The tags to attach to the new destination. Tags are metadata that you can use to manage a resource."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "Each resource must have a unique client request token. If you try to create a new resource with the same token as a resource that already exists, an exception occurs. If you omit this value, AWS SDKs will automatically generate a unique client request."]}
+          "Each resource must have a unique client request token. The client token is used to implement idempotency. It ensures that the request completes no more than one time. If you retry a request with the same token and the same parameters, the request will complete successfully. However, if you try to create a new resource using the same token but different parameters, an HTTP 409 conflict occurs. If you omit this value, AWS SDKs will automatically generate a unique client request. For more information about idempotency, see Ensuring idempotency in Amazon EC2 API requests."]}
     let context_ = "CreateDestinationRequest"
     let make ?description =
       fun ?tags ->
@@ -16333,16 +27538,16 @@ module CreateDestinationRequest =
       make ?clientRequestToken ?tags ~roleArn ?description ~expression
         ~expressionType ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let expression = field_map_exn json "Expression" Expression.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" RoleArn.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let expression = field_map_exn json__ "Expression" Expression.of_json in
       let expressionType =
-        field_map_exn json "ExpressionType" ExpressionType.of_json in
-      let name = field_map_exn json "Name" DestinationName.of_json in
+        field_map_exn json__ "ExpressionType" ExpressionType.of_json in
+      let name = field_map_exn json__ "Name" DestinationName.of_json in
       make ?clientRequestToken ?tags ~roleArn ?description ~expression
         ~expressionType ~name ()
     let to_json v = composed_to_json to_value v
@@ -16447,8 +27652,8 @@ module CancelMulticastGroupSessionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" MulticastGroupId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" MulticastGroupId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels an existing multicast group session."]
@@ -16560,9 +27765,9 @@ module AssociateWirelessGatewayWithThingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~thingArn ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let thingArn = field_map_exn json "ThingArn" ThingArn.of_json in
-      let id = field_map_exn json "Id" WirelessGatewayId.of_json in
+    let of_json json__ =
+      let thingArn = field_map_exn json__ "ThingArn" ThingArn.of_json in
+      let id = field_map_exn json__ "Id" WirelessGatewayId.of_json in
       make ~thingArn ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a wireless gateway with a thing."]
@@ -16657,9 +27862,9 @@ module AssociateWirelessGatewayWithCertificateResponse =
           (Xml.child xml_arg0 "IotCertificateId") in
       make ?iotCertificateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let iotCertificateId =
-        field_map json "IotCertificateId" IotCertificateId.of_json in
+        field_map json__ "IotCertificateId" IotCertificateId.of_json in
       make ?iotCertificateId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a wireless gateway with a certificate."]
@@ -16690,10 +27895,10 @@ module AssociateWirelessGatewayWithCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~iotCertificateId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let iotCertificateId =
-        field_map_exn json "IotCertificateId" IotCertificateId.of_json in
-      let id = field_map_exn json "Id" WirelessGatewayId.of_json in
+        field_map_exn json__ "IotCertificateId" IotCertificateId.of_json in
+      let id = field_map_exn json__ "Id" WirelessGatewayId.of_json in
       make ~iotCertificateId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a wireless gateway with a certificate."]
@@ -16804,9 +28009,9 @@ module AssociateWirelessDeviceWithThingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~thingArn ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let thingArn = field_map_exn json "ThingArn" ThingArn.of_json in
-      let id = field_map_exn json "Id" WirelessDeviceId.of_json in
+    let of_json json__ =
+      let thingArn = field_map_exn json__ "ThingArn" ThingArn.of_json in
+      let id = field_map_exn json__ "Id" WirelessDeviceId.of_json in
       make ~thingArn ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a wireless device with a thing."]
@@ -16918,10 +28123,10 @@ module AssociateWirelessDeviceWithMulticastGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessDeviceId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessDeviceId =
-        field_map_exn json "WirelessDeviceId" WirelessDeviceId.of_json in
-      let id = field_map_exn json "Id" MulticastGroupId.of_json in
+        field_map_exn json__ "WirelessDeviceId" WirelessDeviceId.of_json in
+      let id = field_map_exn json__ "Id" MulticastGroupId.of_json in
       make ~wirelessDeviceId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a wireless device with a multicast group."]
@@ -17032,10 +28237,10 @@ module AssociateWirelessDeviceWithFuotaTaskRequest =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~wirelessDeviceId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessDeviceId =
-        field_map_exn json "WirelessDeviceId" WirelessDeviceId.of_json in
-      let id = field_map_exn json "Id" FuotaTaskId.of_json in
+        field_map_exn json__ "WirelessDeviceId" WirelessDeviceId.of_json in
+      let id = field_map_exn json__ "Id" FuotaTaskId.of_json in
       make ~wirelessDeviceId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associate a wireless device with a FUOTA task."]
@@ -17146,10 +28351,10 @@ module AssociateMulticastGroupWithFuotaTaskRequest =
         FuotaTaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~multicastGroupId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let multicastGroupId =
-        field_map_exn json "MulticastGroupId" MulticastGroupId.of_json in
-      let id = field_map_exn json "Id" FuotaTaskId.of_json in
+        field_map_exn json__ "MulticastGroupId" MulticastGroupId.of_json in
+      let id = field_map_exn json__ "Id" FuotaTaskId.of_json in
       make ~multicastGroupId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associate a multicast group with a FUOTA task."]
@@ -17248,9 +28453,9 @@ module AssociateAwsAccountWithPartnerAccountResponse =
           (Xml.child xml_arg0 "Sidewalk") in
       make ?arn ?sidewalk ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" PartnerAccountArn.of_json in
-      let sidewalk = field_map json "Sidewalk" SidewalkAccountInfo.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" PartnerAccountArn.of_json in
+      let sidewalk = field_map json__ "Sidewalk" SidewalkAccountInfo.of_json in
       make ?arn ?sidewalk ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a partner account with your AWS account."]
@@ -17262,7 +28467,7 @@ module AssociateAwsAccountWithPartnerAccountRequest =
         [@ocaml.doc "The Sidewalk account credentials."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "Each resource must have a unique client request token. If you try to create a new resource with the same token as a resource that already exists, an exception occurs. If you omit this value, AWS SDKs will automatically generate a unique client request."];
+          "Each resource must have a unique client request token. The client token is used to implement idempotency. It ensures that the request completes no more than one time. If you retry a request with the same token and the same parameters, the request will complete successfully. However, if you try to create a new resource using the same token but different parameters, an HTTP 409 conflict occurs. If you omit this value, AWS SDKs will automatically generate a unique client request. For more information about idempotency, see Ensuring idempotency in Amazon EC2 API requests."];
       tags: TagList.t option
         [@ocaml.doc
           "The tags to attach to the specified resource. Tags are metadata that you can use to manage a resource."]}
@@ -17287,12 +28492,12 @@ module AssociateAwsAccountWithPartnerAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Sidewalk") in
       make ?tags ?clientRequestToken ~sidewalk ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
       let sidewalk =
-        field_map_exn json "Sidewalk" SidewalkAccountInfo.of_json in
+        field_map_exn json__ "Sidewalk" SidewalkAccountInfo.of_json in
       make ?tags ?clientRequestToken ~sidewalk ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Associates a partner account with your AWS account."]

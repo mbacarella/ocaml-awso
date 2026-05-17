@@ -17,6 +17,9 @@ type ('i, 'o, 'e) t =
   CreateServiceResponse.error) t 
   | CreateVpcConnector: (CreateVpcConnectorRequest.t,
   CreateVpcConnectorResponse.t, CreateVpcConnectorResponse.error) t 
+  | CreateVpcIngressConnection: (CreateVpcIngressConnectionRequest.t,
+  CreateVpcIngressConnectionResponse.t,
+  CreateVpcIngressConnectionResponse.error) t 
   | DeleteAutoScalingConfiguration: (DeleteAutoScalingConfigurationRequest.t,
   DeleteAutoScalingConfigurationResponse.t,
   DeleteAutoScalingConfigurationResponse.error) t 
@@ -30,6 +33,9 @@ type ('i, 'o, 'e) t =
   DeleteServiceResponse.error) t 
   | DeleteVpcConnector: (DeleteVpcConnectorRequest.t,
   DeleteVpcConnectorResponse.t, DeleteVpcConnectorResponse.error) t 
+  | DeleteVpcIngressConnection: (DeleteVpcIngressConnectionRequest.t,
+  DeleteVpcIngressConnectionResponse.t,
+  DeleteVpcIngressConnectionResponse.error) t 
   | DescribeAutoScalingConfiguration:
   (DescribeAutoScalingConfigurationRequest.t,
   DescribeAutoScalingConfigurationResponse.t,
@@ -44,6 +50,9 @@ type ('i, 'o, 'e) t =
   DescribeServiceResponse.error) t 
   | DescribeVpcConnector: (DescribeVpcConnectorRequest.t,
   DescribeVpcConnectorResponse.t, DescribeVpcConnectorResponse.error) t 
+  | DescribeVpcIngressConnection: (DescribeVpcIngressConnectionRequest.t,
+  DescribeVpcIngressConnectionResponse.t,
+  DescribeVpcIngressConnectionResponse.error) t 
   | DisassociateCustomDomain: (DisassociateCustomDomainRequest.t,
   DisassociateCustomDomainResponse.t, DisassociateCustomDomainResponse.error)
   t 
@@ -60,10 +69,17 @@ type ('i, 'o, 'e) t =
   ListOperationsResponse.error) t 
   | ListServices: (ListServicesRequest.t, ListServicesResponse.t,
   ListServicesResponse.error) t 
+  | ListServicesForAutoScalingConfiguration:
+  (ListServicesForAutoScalingConfigurationRequest.t,
+  ListServicesForAutoScalingConfigurationResponse.t,
+  ListServicesForAutoScalingConfigurationResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListVpcConnectors: (ListVpcConnectorsRequest.t,
   ListVpcConnectorsResponse.t, ListVpcConnectorsResponse.error) t 
+  | ListVpcIngressConnections: (ListVpcIngressConnectionsRequest.t,
+  ListVpcIngressConnectionsResponse.t,
+  ListVpcIngressConnectionsResponse.error) t 
   | PauseService: (PauseServiceRequest.t, PauseServiceResponse.t,
   PauseServiceResponse.error) t 
   | ResumeService: (ResumeServiceRequest.t, ResumeServiceResponse.t,
@@ -74,8 +90,15 @@ type ('i, 'o, 'e) t =
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateDefaultAutoScalingConfiguration:
+  (UpdateDefaultAutoScalingConfigurationRequest.t,
+  UpdateDefaultAutoScalingConfigurationResponse.t,
+  UpdateDefaultAutoScalingConfigurationResponse.error) t 
   | UpdateService: (UpdateServiceRequest.t, UpdateServiceResponse.t,
   UpdateServiceResponse.error) t 
+  | UpdateVpcIngressConnection: (UpdateVpcIngressConnectionRequest.t,
+  UpdateVpcIngressConnectionResponse.t,
+  UpdateVpcIngressConnectionResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateCustomDomain -> `POST
@@ -84,30 +107,37 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateObservabilityConfiguration -> `POST
   | CreateService -> `POST
   | CreateVpcConnector -> `POST
+  | CreateVpcIngressConnection -> `POST
   | DeleteAutoScalingConfiguration -> `POST
   | DeleteConnection -> `POST
   | DeleteObservabilityConfiguration -> `POST
   | DeleteService -> `POST
   | DeleteVpcConnector -> `POST
+  | DeleteVpcIngressConnection -> `POST
   | DescribeAutoScalingConfiguration -> `POST
   | DescribeCustomDomains -> `POST
   | DescribeObservabilityConfiguration -> `POST
   | DescribeService -> `POST
   | DescribeVpcConnector -> `POST
+  | DescribeVpcIngressConnection -> `POST
   | DisassociateCustomDomain -> `POST
   | ListAutoScalingConfigurations -> `POST
   | ListConnections -> `POST
   | ListObservabilityConfigurations -> `POST
   | ListOperations -> `POST
   | ListServices -> `POST
+  | ListServicesForAutoScalingConfiguration -> `POST
   | ListTagsForResource -> `POST
   | ListVpcConnectors -> `POST
+  | ListVpcIngressConnections -> `POST
   | PauseService -> `POST
   | ResumeService -> `POST
   | StartDeployment -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
+  | UpdateDefaultAutoScalingConfiguration -> `POST
   | UpdateService -> `POST
+  | UpdateVpcIngressConnection -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -119,6 +149,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | CreateService -> (Format.kasprintf Uri.of_string) "/"
       | CreateVpcConnector -> (Format.kasprintf Uri.of_string) "/"
+      | CreateVpcIngressConnection -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAutoScalingConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteConnection -> (Format.kasprintf Uri.of_string) "/"
@@ -126,6 +157,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | DeleteService -> (Format.kasprintf Uri.of_string) "/"
       | DeleteVpcConnector -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteVpcIngressConnection -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAutoScalingConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeCustomDomains -> (Format.kasprintf Uri.of_string) "/"
@@ -133,6 +165,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | DescribeService -> (Format.kasprintf Uri.of_string) "/"
       | DescribeVpcConnector -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeVpcIngressConnection -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateCustomDomain -> (Format.kasprintf Uri.of_string) "/"
       | ListAutoScalingConfigurations -> (Format.kasprintf Uri.of_string) "/"
       | ListConnections -> (Format.kasprintf Uri.of_string) "/"
@@ -140,14 +173,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | ListOperations -> (Format.kasprintf Uri.of_string) "/"
       | ListServices -> (Format.kasprintf Uri.of_string) "/"
+      | ListServicesForAutoScalingConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListVpcConnectors -> (Format.kasprintf Uri.of_string) "/"
+      | ListVpcIngressConnections -> (Format.kasprintf Uri.of_string) "/"
       | PauseService -> (Format.kasprintf Uri.of_string) "/"
       | ResumeService -> (Format.kasprintf Uri.of_string) "/"
       | StartDeployment -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateService -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateDefaultAutoScalingConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | UpdateService -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateVpcIngressConnection -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -199,6 +238,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AppRunner.CreateVpcConnector")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateVpcIngressConnection ->
+      let json = CreateVpcIngressConnectionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AppRunner.CreateVpcIngressConnection")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteAutoScalingConfiguration ->
       let json = DeleteAutoScalingConfigurationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -239,6 +286,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AppRunner.DeleteVpcConnector")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteVpcIngressConnection ->
+      let json = DeleteVpcIngressConnectionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AppRunner.DeleteVpcIngressConnection")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeAutoScalingConfiguration ->
       let json = DescribeAutoScalingConfigurationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -278,6 +333,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AppRunner.DescribeVpcConnector")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeVpcIngressConnection ->
+      let json = DescribeVpcIngressConnectionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AppRunner.DescribeVpcIngressConnection")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DisassociateCustomDomain ->
       let json = DisassociateCustomDomainRequest.to_json req in
@@ -327,6 +390,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AppRunner.ListServices")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListServicesForAutoScalingConfiguration ->
+      let json = ListServicesForAutoScalingConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AppRunner.ListServicesForAutoScalingConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let json = ListTagsForResourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -342,6 +414,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AppRunner.ListVpcConnectors")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListVpcIngressConnections ->
+      let json = ListVpcIngressConnectionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AppRunner.ListVpcIngressConnections")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PauseService ->
       let json = PauseServiceRequest.to_json req in
@@ -383,6 +463,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AppRunner.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateDefaultAutoScalingConfiguration ->
+      let json = UpdateDefaultAutoScalingConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AppRunner.UpdateDefaultAutoScalingConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateService ->
       let json = UpdateServiceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -390,6 +478,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AppRunner.UpdateService")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateVpcIngressConnection ->
+      let json = UpdateVpcIngressConnectionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AppRunner.UpdateVpcIngressConnection")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -461,6 +557,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateVpcConnectorResponse.error_of_json))
+  | CreateVpcIngressConnection ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateVpcIngressConnectionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateVpcIngressConnectionResponse.error_of_json))
   | DeleteAutoScalingConfiguration ->
       if is_success
       then
@@ -500,6 +605,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteVpcConnectorResponse.error_of_json))
+  | DeleteVpcIngressConnection ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteVpcIngressConnectionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteVpcIngressConnectionResponse.error_of_json))
   | DescribeAutoScalingConfiguration ->
       if is_success
       then
@@ -541,6 +655,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeVpcConnectorResponse.error_of_json))
+  | DescribeVpcIngressConnection ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeVpcIngressConnectionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeVpcIngressConnectionResponse.error_of_json))
   | DisassociateCustomDomain ->
       if is_success
       then
@@ -588,6 +711,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListServicesResponse.of_json json)
       else Error (parse_aws_error (Some ListServicesResponse.error_of_json))
+  | ListServicesForAutoScalingConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListServicesForAutoScalingConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListServicesForAutoScalingConfigurationResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then
@@ -604,6 +737,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListVpcConnectorsResponse.error_of_json))
+  | ListVpcIngressConnections ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListVpcIngressConnectionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListVpcIngressConnectionsResponse.error_of_json))
   | PauseService ->
       if is_success
       then
@@ -635,9 +777,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceResponse.of_json json)
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateDefaultAutoScalingConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateDefaultAutoScalingConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                UpdateDefaultAutoScalingConfigurationResponse.error_of_json))
   | UpdateService ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateServiceResponse.of_json json)
       else Error (parse_aws_error (Some UpdateServiceResponse.error_of_json))
+  | UpdateVpcIngressConnection ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateVpcIngressConnectionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateVpcIngressConnectionResponse.error_of_json))

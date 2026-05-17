@@ -25,6 +25,75 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module IntegerObject =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:2147483647) >>=
+             (fun () -> check_int_min i ~min:(-2147483648)));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for IntegerObject" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module IPPortNumberInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for IPPortNumberInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module BooleanObject =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module LengthBoundedNonEmptyString =
+  struct
+    type nonrec t = string
+    let context_ = "LengthBoundedNonEmptyString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LengthBoundedNonEmptyString" j
+    let to_json = simple_to_json to_value
+  end
 module LengthBoundedString =
   struct
     type nonrec t = string
@@ -43,6 +112,227 @@ module LengthBoundedString =
     let of_json j = string_of_json ~kind:"LengthBoundedString" j
     let to_json = simple_to_json to_value
   end
+module NetworkAclIcmpTypeCode =
+  struct
+    type nonrec t =
+      {
+      code: IntegerObject.t option [@ocaml.doc "ICMP code."];
+      type_: IntegerObject.t option [@ocaml.doc "ICMP type."]}
+    let make ?code = fun ?type_ -> fun () -> { code; type_ }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:IntegerObject.to_value));
+        ("Type", (Option.map x.type_ ~f:IntegerObject.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:IntegerObject.of_xml) (Xml.child xml_arg0 "Type") in
+      let code =
+        (Option.map ~f:IntegerObject.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?type_ ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" IntegerObject.of_json in
+      let code = field_map json__ "Code" IntegerObject.of_json in
+      make ?type_ ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "ICMP protocol: The ICMP type and code."]
+module NetworkAclPortRange =
+  struct
+    type nonrec t =
+      {
+      from: IPPortNumberInteger.t option
+        [@ocaml.doc "The beginning port number of the range."];
+      to_: IPPortNumberInteger.t option
+        [@ocaml.doc "The ending port number of the range."]}
+    let make ?from = fun ?to_ -> fun () -> { from; to_ }
+    let to_value x =
+      structure_to_value
+        [("From", (Option.map x.from ~f:IPPortNumberInteger.to_value));
+        ("To", (Option.map x.to_ ~f:IPPortNumberInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let to_ =
+        (Option.map ~f:IPPortNumberInteger.of_xml) (Xml.child xml_arg0 "To") in
+      let from =
+        (Option.map ~f:IPPortNumberInteger.of_xml)
+          (Xml.child xml_arg0 "From") in
+      make ?to_ ?from ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let to_ = field_map json__ "To" IPPortNumberInteger.of_json in
+      let from = field_map json__ "From" IPPortNumberInteger.of_json in
+      make ?to_ ?from ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "TCP or UDP protocols: The range of ports the rule applies to."]
+module NetworkAclRuleAction =
+  struct
+    type nonrec t =
+      | Allow 
+      | Deny 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Allow -> "allow" | Deny -> "deny" | Non_static_id s -> s
+    let of_string =
+      function | "allow" -> Allow | "deny" -> Deny | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration NetworkAclRuleAction" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NetworkAclRuleAction" j)
+    let to_json = simple_to_json to_value
+  end
+module EntryType =
+  struct
+    type nonrec t =
+      | FMS_MANAGED_FIRST_ENTRY 
+      | FMS_MANAGED_LAST_ENTRY 
+      | CUSTOM_ENTRY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FMS_MANAGED_FIRST_ENTRY -> "FMS_MANAGED_FIRST_ENTRY"
+      | FMS_MANAGED_LAST_ENTRY -> "FMS_MANAGED_LAST_ENTRY"
+      | CUSTOM_ENTRY -> "CUSTOM_ENTRY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FMS_MANAGED_FIRST_ENTRY" -> FMS_MANAGED_FIRST_ENTRY
+      | "FMS_MANAGED_LAST_ENTRY" -> FMS_MANAGED_LAST_ENTRY
+      | "CUSTOM_ENTRY" -> CUSTOM_ENTRY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EntryType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EntryType" j)
+    let to_json = simple_to_json to_value
+  end
+module IntegerObjectMinimum0 =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:2147483647) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for IntegerObjectMinimum0" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module NetworkAclEntry =
+  struct
+    type nonrec t =
+      {
+      icmpTypeCode: NetworkAclIcmpTypeCode.t option
+        [@ocaml.doc "ICMP protocol: The ICMP type and code."];
+      protocol: LengthBoundedString.t
+        [@ocaml.doc
+          "The protocol number. A value of \"-1\" means all protocols."];
+      portRange: NetworkAclPortRange.t option
+        [@ocaml.doc
+          "TCP or UDP protocols: The range of ports the rule applies to."];
+      cidrBlock: LengthBoundedNonEmptyString.t option
+        [@ocaml.doc
+          "The IPv4 network range to allow or deny, in CIDR notation."];
+      ipv6CidrBlock: LengthBoundedNonEmptyString.t option
+        [@ocaml.doc
+          "The IPv6 network range to allow or deny, in CIDR notation."];
+      ruleAction: NetworkAclRuleAction.t
+        [@ocaml.doc
+          "Indicates whether to allow or deny the traffic that matches the rule."];
+      egress: BooleanObject.t
+        [@ocaml.doc
+          "Indicates whether the rule is an egress, or outbound, rule (applied to traffic leaving the subnet). If it's not an egress rule, then it's an ingress, or inbound, rule."]}
+    let context_ = "NetworkAclEntry"
+    let make ?icmpTypeCode =
+      fun ?portRange ->
+        fun ?cidrBlock ->
+          fun ?ipv6CidrBlock ->
+            fun ~protocol ->
+              fun ~ruleAction ->
+                fun ~egress ->
+                  fun () ->
+                    {
+                      icmpTypeCode;
+                      portRange;
+                      cidrBlock;
+                      ipv6CidrBlock;
+                      protocol;
+                      ruleAction;
+                      egress
+                    }
+    let to_value x =
+      structure_to_value
+        [("IcmpTypeCode",
+           (Option.map x.icmpTypeCode ~f:NetworkAclIcmpTypeCode.to_value));
+        ("Protocol", (Some (LengthBoundedString.to_value x.protocol)));
+        ("PortRange",
+          (Option.map x.portRange ~f:NetworkAclPortRange.to_value));
+        ("CidrBlock",
+          (Option.map x.cidrBlock ~f:LengthBoundedNonEmptyString.to_value));
+        ("Ipv6CidrBlock",
+          (Option.map x.ipv6CidrBlock ~f:LengthBoundedNonEmptyString.to_value));
+        ("RuleAction", (Some (NetworkAclRuleAction.to_value x.ruleAction)));
+        ("Egress", (Some (BooleanObject.to_value x.egress)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let egress =
+        BooleanObject.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Egress") in
+      let ruleAction =
+        NetworkAclRuleAction.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RuleAction") in
+      let ipv6CidrBlock =
+        (Option.map ~f:LengthBoundedNonEmptyString.of_xml)
+          (Xml.child xml_arg0 "Ipv6CidrBlock") in
+      let cidrBlock =
+        (Option.map ~f:LengthBoundedNonEmptyString.of_xml)
+          (Xml.child xml_arg0 "CidrBlock") in
+      let portRange =
+        (Option.map ~f:NetworkAclPortRange.of_xml)
+          (Xml.child xml_arg0 "PortRange") in
+      let protocol =
+        LengthBoundedString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Protocol") in
+      let icmpTypeCode =
+        (Option.map ~f:NetworkAclIcmpTypeCode.of_xml)
+          (Xml.child xml_arg0 "IcmpTypeCode") in
+      make ~egress ~ruleAction ?ipv6CidrBlock ?cidrBlock ?portRange ~protocol
+        ?icmpTypeCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let egress = field_map_exn json__ "Egress" BooleanObject.of_json in
+      let ruleAction =
+        field_map_exn json__ "RuleAction" NetworkAclRuleAction.of_json in
+      let ipv6CidrBlock =
+        field_map json__ "Ipv6CidrBlock" LengthBoundedNonEmptyString.of_json in
+      let cidrBlock =
+        field_map json__ "CidrBlock" LengthBoundedNonEmptyString.of_json in
+      let portRange =
+        field_map json__ "PortRange" NetworkAclPortRange.of_json in
+      let protocol =
+        field_map_exn json__ "Protocol" LengthBoundedString.of_json in
+      let icmpTypeCode =
+        field_map json__ "IcmpTypeCode" NetworkAclIcmpTypeCode.of_json in
+      make ~egress ~ruleAction ?ipv6CidrBlock ?cidrBlock ?portRange ~protocol
+        ?icmpTypeCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a rule in a network ACL. Each network ACL has a set of numbered ingress rules and a separate set of numbered egress rules. When determining whether a packet should be allowed in or out of a subnet associated with the network ACL, Amazon Web Services processes the entries in the network ACL according to the rule numbers, in ascending order. When you manage an individual network ACL, you explicitly specify the rule numbers. When you specify the network ACL rules in a Firewall Manager policy, you provide the rules to run first, in the order that you want them to run, and the rules to run last, in the order that you want them to run. Firewall Manager assigns the rule numbers for you when you save the network ACL policy specification."]
 module ResourceId =
   struct
     type nonrec t = string
@@ -65,6 +355,51 @@ module ResourceId =
     let of_json j = string_of_json ~kind:"ResourceId" j
     let to_json = simple_to_json to_value
   end
+module EntryDescription =
+  struct
+    type nonrec t =
+      {
+      entryDetail: NetworkAclEntry.t option
+        [@ocaml.doc
+          "Describes a rule in a network ACL. Each network ACL has a set of numbered ingress rules and a separate set of numbered egress rules. When determining whether a packet should be allowed in or out of a subnet associated with the network ACL, Amazon Web Services processes the entries in the network ACL according to the rule numbers, in ascending order. When you manage an individual network ACL, you explicitly specify the rule numbers. When you specify the network ACL rules in a Firewall Manager policy, you provide the rules to run first, in the order that you want them to run, and the rules to run last, in the order that you want them to run. Firewall Manager assigns the rule numbers for you when you save the network ACL policy specification."];
+      entryRuleNumber: IntegerObjectMinimum0.t option
+        [@ocaml.doc
+          "The rule number for the entry. ACL entries are processed in ascending order by rule number. In a Firewall Manager network ACL policy, Firewall Manager assigns rule numbers."];
+      entryType: EntryType.t option
+        [@ocaml.doc
+          "Specifies whether the entry is managed by Firewall Manager or by a user, and, for Firewall Manager-managed entries, specifies whether the entry is among those that run first in the network ACL or those that run last."]}
+    let make ?entryDetail =
+      fun ?entryRuleNumber ->
+        fun ?entryType ->
+          fun () -> { entryDetail; entryRuleNumber; entryType }
+    let to_value x =
+      structure_to_value
+        [("EntryDetail",
+           (Option.map x.entryDetail ~f:NetworkAclEntry.to_value));
+        ("EntryRuleNumber",
+          (Option.map x.entryRuleNumber ~f:IntegerObjectMinimum0.to_value));
+        ("EntryType", (Option.map x.entryType ~f:EntryType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entryType =
+        (Option.map ~f:EntryType.of_xml) (Xml.child xml_arg0 "EntryType") in
+      let entryRuleNumber =
+        (Option.map ~f:IntegerObjectMinimum0.of_xml)
+          (Xml.child xml_arg0 "EntryRuleNumber") in
+      let entryDetail =
+        (Option.map ~f:NetworkAclEntry.of_xml)
+          (Xml.child xml_arg0 "EntryDetail") in
+      make ?entryType ?entryRuleNumber ?entryDetail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entryType = field_map json__ "EntryType" EntryType.of_json in
+      let entryRuleNumber =
+        field_map json__ "EntryRuleNumber" IntegerObjectMinimum0.of_json in
+      let entryDetail =
+        field_map json__ "EntryDetail" NetworkAclEntry.of_json in
+      make ?entryType ?entryRuleNumber ?entryDetail ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a single rule in a network ACL."]
 module ActionTarget =
   struct
     type nonrec t =
@@ -89,13 +424,54 @@ module ActionTarget =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?description ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" LengthBoundedString.of_json in
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
+        field_map json__ "Description" LengthBoundedString.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
       make ?description ?resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a remediation action target."]
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module EntriesDescription =
+  struct
+    type nonrec t = EntryDescription.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EntryDescription.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EntryDescription.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EntriesDescription"
+        ~of_json:EntryDescription.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CIDR =
   struct
     type nonrec t = string
@@ -125,7 +501,7 @@ module ManagedServiceData =
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:8192) >>=
+                (check_string_max i ~max:30000) >>=
                   (fun () -> check_pattern i ~pattern:"^((?!\\\\[nr]).)+")));
         i
     let of_string x = x
@@ -136,6 +512,183 @@ module ManagedServiceData =
     let of_json j = string_of_json ~kind:"ManagedServiceData" j
     let to_json = simple_to_json to_value
   end
+module CreateNetworkAclAction =
+  struct
+    type nonrec t =
+      {
+      description: LengthBoundedString.t option
+        [@ocaml.doc "Brief description of this remediation action."];
+      vpc: ActionTarget.t option
+        [@ocaml.doc "The VPC that's associated with the remediation action."];
+      fMSCanRemediate: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether it is possible for Firewall Manager to perform this remediation action. A false value indicates that auto remediation is disabled or Firewall Manager is unable to perform the action due to a conflict of some kind."]}
+    let make ?description =
+      fun ?vpc ->
+        fun ?fMSCanRemediate ->
+          fun () -> { description; vpc; fMSCanRemediate }
+    let to_value x =
+      structure_to_value
+        [("Description",
+           (Option.map x.description ~f:LengthBoundedString.to_value));
+        ("Vpc", (Option.map x.vpc ~f:ActionTarget.to_value));
+        ("FMSCanRemediate",
+          (Option.map x.fMSCanRemediate ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fMSCanRemediate =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "FMSCanRemediate") in
+      let vpc =
+        (Option.map ~f:ActionTarget.of_xml) (Xml.child xml_arg0 "Vpc") in
+      let description =
+        (Option.map ~f:LengthBoundedString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      make ?fMSCanRemediate ?vpc ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fMSCanRemediate =
+        field_map json__ "FMSCanRemediate" Boolean.of_json in
+      let vpc = field_map json__ "Vpc" ActionTarget.of_json in
+      let description =
+        field_map json__ "Description" LengthBoundedString.of_json in
+      make ?fMSCanRemediate ?vpc ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the CreateNetworkAcl action in Amazon EC2. This is a remediation option in RemediationAction."]
+module CreateNetworkAclEntriesAction =
+  struct
+    type nonrec t =
+      {
+      description: LengthBoundedString.t option
+        [@ocaml.doc "Brief description of this remediation action."];
+      networkAclId: ActionTarget.t option
+        [@ocaml.doc
+          "The network ACL that's associated with the remediation action."];
+      networkAclEntriesToBeCreated: EntriesDescription.t option
+        [@ocaml.doc
+          "Lists the entries that the remediation action would create."];
+      fMSCanRemediate: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether it is possible for Firewall Manager to perform this remediation action. A false value indicates that auto remediation is disabled or Firewall Manager is unable to perform the action due to a conflict of some kind."]}
+    let make ?description =
+      fun ?networkAclId ->
+        fun ?networkAclEntriesToBeCreated ->
+          fun ?fMSCanRemediate ->
+            fun () ->
+              {
+                description;
+                networkAclId;
+                networkAclEntriesToBeCreated;
+                fMSCanRemediate
+              }
+    let to_value x =
+      structure_to_value
+        [("Description",
+           (Option.map x.description ~f:LengthBoundedString.to_value));
+        ("NetworkAclId",
+          (Option.map x.networkAclId ~f:ActionTarget.to_value));
+        ("NetworkAclEntriesToBeCreated",
+          (Option.map x.networkAclEntriesToBeCreated
+             ~f:EntriesDescription.to_value));
+        ("FMSCanRemediate",
+          (Option.map x.fMSCanRemediate ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fMSCanRemediate =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "FMSCanRemediate") in
+      let networkAclEntriesToBeCreated =
+        (Option.map ~f:EntriesDescription.of_xml)
+          (Xml.child xml_arg0 "NetworkAclEntriesToBeCreated") in
+      let networkAclId =
+        (Option.map ~f:ActionTarget.of_xml)
+          (Xml.child xml_arg0 "NetworkAclId") in
+      let description =
+        (Option.map ~f:LengthBoundedString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      make ?fMSCanRemediate ?networkAclEntriesToBeCreated ?networkAclId
+        ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fMSCanRemediate =
+        field_map json__ "FMSCanRemediate" Boolean.of_json in
+      let networkAclEntriesToBeCreated =
+        field_map json__ "NetworkAclEntriesToBeCreated"
+          EntriesDescription.of_json in
+      let networkAclId = field_map json__ "NetworkAclId" ActionTarget.of_json in
+      let description =
+        field_map json__ "Description" LengthBoundedString.of_json in
+      make ?fMSCanRemediate ?networkAclEntriesToBeCreated ?networkAclId
+        ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the CreateNetworkAclEntries action in Amazon EC2. This is a remediation option in RemediationAction."]
+module DeleteNetworkAclEntriesAction =
+  struct
+    type nonrec t =
+      {
+      description: LengthBoundedString.t option
+        [@ocaml.doc "Brief description of this remediation action."];
+      networkAclId: ActionTarget.t option
+        [@ocaml.doc
+          "The network ACL that's associated with the remediation action."];
+      networkAclEntriesToBeDeleted: EntriesDescription.t option
+        [@ocaml.doc
+          "Lists the entries that the remediation action would delete."];
+      fMSCanRemediate: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether it is possible for Firewall Manager to perform this remediation action. A false value indicates that auto remediation is disabled or Firewall Manager is unable to perform the action due to a conflict of some kind."]}
+    let make ?description =
+      fun ?networkAclId ->
+        fun ?networkAclEntriesToBeDeleted ->
+          fun ?fMSCanRemediate ->
+            fun () ->
+              {
+                description;
+                networkAclId;
+                networkAclEntriesToBeDeleted;
+                fMSCanRemediate
+              }
+    let to_value x =
+      structure_to_value
+        [("Description",
+           (Option.map x.description ~f:LengthBoundedString.to_value));
+        ("NetworkAclId",
+          (Option.map x.networkAclId ~f:ActionTarget.to_value));
+        ("NetworkAclEntriesToBeDeleted",
+          (Option.map x.networkAclEntriesToBeDeleted
+             ~f:EntriesDescription.to_value));
+        ("FMSCanRemediate",
+          (Option.map x.fMSCanRemediate ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fMSCanRemediate =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "FMSCanRemediate") in
+      let networkAclEntriesToBeDeleted =
+        (Option.map ~f:EntriesDescription.of_xml)
+          (Xml.child xml_arg0 "NetworkAclEntriesToBeDeleted") in
+      let networkAclId =
+        (Option.map ~f:ActionTarget.of_xml)
+          (Xml.child xml_arg0 "NetworkAclId") in
+      let description =
+        (Option.map ~f:LengthBoundedString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      make ?fMSCanRemediate ?networkAclEntriesToBeDeleted ?networkAclId
+        ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fMSCanRemediate =
+        field_map json__ "FMSCanRemediate" Boolean.of_json in
+      let networkAclEntriesToBeDeleted =
+        field_map json__ "NetworkAclEntriesToBeDeleted"
+          EntriesDescription.of_json in
+      let networkAclId = field_map json__ "NetworkAclId" ActionTarget.of_json in
+      let description =
+        field_map json__ "Description" LengthBoundedString.of_json in
+      make ?fMSCanRemediate ?networkAclEntriesToBeDeleted ?networkAclId
+        ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the DeleteNetworkAclEntries action in Amazon EC2. This is a remediation option in RemediationAction."]
 module EC2AssociateRouteTableAction =
   struct
     type nonrec t =
@@ -143,7 +696,7 @@ module EC2AssociateRouteTableAction =
       description: LengthBoundedString.t option
         [@ocaml.doc
           "A description of the EC2 route table that is associated with the remediation action."];
-      routeTableId: ActionTarget.t
+      routeTableId: ActionTarget.t option
         [@ocaml.doc
           "The ID of the EC2 route table that is associated with the remediation action."];
       subnetId: ActionTarget.t option
@@ -152,17 +705,17 @@ module EC2AssociateRouteTableAction =
       gatewayId: ActionTarget.t option
         [@ocaml.doc
           "The ID of the gateway to be used with the EC2 route table that is associated with the remediation action."]}
-    let context_ = "EC2AssociateRouteTableAction"
     let make ?description =
-      fun ?subnetId ->
-        fun ?gatewayId ->
-          fun ~routeTableId ->
-            fun () -> { description; subnetId; gatewayId; routeTableId }
+      fun ?routeTableId ->
+        fun ?subnetId ->
+          fun ?gatewayId ->
+            fun () -> { description; routeTableId; subnetId; gatewayId }
     let to_value x =
       structure_to_value
         [("Description",
            (Option.map x.description ~f:LengthBoundedString.to_value));
-        ("RouteTableId", (Some (ActionTarget.to_value x.routeTableId)));
+        ("RouteTableId",
+          (Option.map x.routeTableId ~f:ActionTarget.to_value));
         ("SubnetId", (Option.map x.subnetId ~f:ActionTarget.to_value));
         ("GatewayId", (Option.map x.gatewayId ~f:ActionTarget.to_value))]
     let to_query v = to_query to_value v
@@ -172,21 +725,20 @@ module EC2AssociateRouteTableAction =
       let subnetId =
         (Option.map ~f:ActionTarget.of_xml) (Xml.child xml_arg0 "SubnetId") in
       let routeTableId =
-        ActionTarget.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RouteTableId") in
+        (Option.map ~f:ActionTarget.of_xml)
+          (Xml.child xml_arg0 "RouteTableId") in
       let description =
         (Option.map ~f:LengthBoundedString.of_xml)
           (Xml.child xml_arg0 "Description") in
-      make ?gatewayId ?subnetId ~routeTableId ?description ()
+      make ?gatewayId ?subnetId ?routeTableId ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayId = field_map json "GatewayId" ActionTarget.of_json in
-      let subnetId = field_map json "SubnetId" ActionTarget.of_json in
-      let routeTableId =
-        field_map_exn json "RouteTableId" ActionTarget.of_json in
+    let of_json json__ =
+      let gatewayId = field_map json__ "GatewayId" ActionTarget.of_json in
+      let subnetId = field_map json__ "SubnetId" ActionTarget.of_json in
+      let routeTableId = field_map json__ "RouteTableId" ActionTarget.of_json in
       let description =
-        field_map json "Description" LengthBoundedString.of_json in
-      make ?gatewayId ?subnetId ~routeTableId ?description ()
+        field_map json__ "Description" LengthBoundedString.of_json in
+      make ?gatewayId ?subnetId ?routeTableId ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The action of associating an EC2 resource, such as a subnet or internet gateway, with a route table."]
@@ -197,42 +749,40 @@ module EC2CopyRouteTableAction =
       description: LengthBoundedString.t option
         [@ocaml.doc
           "A description of the copied EC2 route table that is associated with the remediation action."];
-      vpcId: ActionTarget.t
+      vpcId: ActionTarget.t option
         [@ocaml.doc
           "The VPC ID of the copied EC2 route table that is associated with the remediation action."];
-      routeTableId: ActionTarget.t
+      routeTableId: ActionTarget.t option
         [@ocaml.doc
           "The ID of the copied EC2 route table that is associated with the remediation action."]}
-    let context_ = "EC2CopyRouteTableAction"
     let make ?description =
-      fun ~vpcId ->
-        fun ~routeTableId -> fun () -> { description; vpcId; routeTableId }
+      fun ?vpcId ->
+        fun ?routeTableId -> fun () -> { description; vpcId; routeTableId }
     let to_value x =
       structure_to_value
         [("Description",
            (Option.map x.description ~f:LengthBoundedString.to_value));
-        ("VpcId", (Some (ActionTarget.to_value x.vpcId)));
-        ("RouteTableId", (Some (ActionTarget.to_value x.routeTableId)))]
+        ("VpcId", (Option.map x.vpcId ~f:ActionTarget.to_value));
+        ("RouteTableId",
+          (Option.map x.routeTableId ~f:ActionTarget.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let routeTableId =
-        ActionTarget.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RouteTableId") in
+        (Option.map ~f:ActionTarget.of_xml)
+          (Xml.child xml_arg0 "RouteTableId") in
       let vpcId =
-        ActionTarget.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
+        (Option.map ~f:ActionTarget.of_xml) (Xml.child xml_arg0 "VpcId") in
       let description =
         (Option.map ~f:LengthBoundedString.of_xml)
           (Xml.child xml_arg0 "Description") in
-      make ~routeTableId ~vpcId ?description ()
+      make ?routeTableId ?vpcId ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let routeTableId =
-        field_map_exn json "RouteTableId" ActionTarget.of_json in
-      let vpcId = field_map_exn json "VpcId" ActionTarget.of_json in
+    let of_json json__ =
+      let routeTableId = field_map json__ "RouteTableId" ActionTarget.of_json in
+      let vpcId = field_map json__ "VpcId" ActionTarget.of_json in
       let description =
-        field_map json "Description" LengthBoundedString.of_json in
-      make ~routeTableId ~vpcId ?description ()
+        field_map json__ "Description" LengthBoundedString.of_json in
+      make ?routeTableId ?vpcId ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An action that copies the EC2 route table for use in remediation."]
@@ -256,17 +806,16 @@ module EC2CreateRouteAction =
       gatewayId: ActionTarget.t option
         [@ocaml.doc
           "Information about the ID of an internet gateway or virtual private gateway attached to your VPC."];
-      routeTableId: ActionTarget.t
+      routeTableId: ActionTarget.t option
         [@ocaml.doc
           "Information about the ID of the route table for the route."]}
-    let context_ = "EC2CreateRouteAction"
     let make ?description =
       fun ?destinationCidrBlock ->
         fun ?destinationPrefixListId ->
           fun ?destinationIpv6CidrBlock ->
             fun ?vpcEndpointId ->
               fun ?gatewayId ->
-                fun ~routeTableId ->
+                fun ?routeTableId ->
                   fun () ->
                     {
                       description;
@@ -290,12 +839,13 @@ module EC2CreateRouteAction =
         ("VpcEndpointId",
           (Option.map x.vpcEndpointId ~f:ActionTarget.to_value));
         ("GatewayId", (Option.map x.gatewayId ~f:ActionTarget.to_value));
-        ("RouteTableId", (Some (ActionTarget.to_value x.routeTableId)))]
+        ("RouteTableId",
+          (Option.map x.routeTableId ~f:ActionTarget.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let routeTableId =
-        ActionTarget.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RouteTableId") in
+        (Option.map ~f:ActionTarget.of_xml)
+          (Xml.child xml_arg0 "RouteTableId") in
       let gatewayId =
         (Option.map ~f:ActionTarget.of_xml) (Xml.child xml_arg0 "GatewayId") in
       let vpcEndpointId =
@@ -313,23 +863,23 @@ module EC2CreateRouteAction =
       let description =
         (Option.map ~f:LengthBoundedString.of_xml)
           (Xml.child xml_arg0 "Description") in
-      make ~routeTableId ?gatewayId ?vpcEndpointId ?destinationIpv6CidrBlock
+      make ?routeTableId ?gatewayId ?vpcEndpointId ?destinationIpv6CidrBlock
         ?destinationPrefixListId ?destinationCidrBlock ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let routeTableId =
-        field_map_exn json "RouteTableId" ActionTarget.of_json in
-      let gatewayId = field_map json "GatewayId" ActionTarget.of_json in
-      let vpcEndpointId = field_map json "VpcEndpointId" ActionTarget.of_json in
+    let of_json json__ =
+      let routeTableId = field_map json__ "RouteTableId" ActionTarget.of_json in
+      let gatewayId = field_map json__ "GatewayId" ActionTarget.of_json in
+      let vpcEndpointId =
+        field_map json__ "VpcEndpointId" ActionTarget.of_json in
       let destinationIpv6CidrBlock =
-        field_map json "DestinationIpv6CidrBlock" CIDR.of_json in
+        field_map json__ "DestinationIpv6CidrBlock" CIDR.of_json in
       let destinationPrefixListId =
-        field_map json "DestinationPrefixListId" ResourceId.of_json in
+        field_map json__ "DestinationPrefixListId" ResourceId.of_json in
       let destinationCidrBlock =
-        field_map json "DestinationCidrBlock" CIDR.of_json in
+        field_map json__ "DestinationCidrBlock" CIDR.of_json in
       let description =
-        field_map json "Description" LengthBoundedString.of_json in
-      make ~routeTableId ?gatewayId ?vpcEndpointId ?destinationIpv6CidrBlock
+        field_map json__ "Description" LengthBoundedString.of_json in
+      make ?routeTableId ?gatewayId ?vpcEndpointId ?destinationIpv6CidrBlock
         ?destinationPrefixListId ?destinationCidrBlock ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the CreateRoute action in Amazon EC2."]
@@ -339,29 +889,28 @@ module EC2CreateRouteTableAction =
       {
       description: LengthBoundedString.t option
         [@ocaml.doc "A description of the CreateRouteTable action."];
-      vpcId: ActionTarget.t [@ocaml.doc "Information about the ID of a VPC."]}
-    let context_ = "EC2CreateRouteTableAction"
-    let make ?description = fun ~vpcId -> fun () -> { description; vpcId }
+      vpcId: ActionTarget.t option
+        [@ocaml.doc "Information about the ID of a VPC."]}
+    let make ?description = fun ?vpcId -> fun () -> { description; vpcId }
     let to_value x =
       structure_to_value
         [("Description",
            (Option.map x.description ~f:LengthBoundedString.to_value));
-        ("VpcId", (Some (ActionTarget.to_value x.vpcId)))]
+        ("VpcId", (Option.map x.vpcId ~f:ActionTarget.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let vpcId =
-        ActionTarget.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
+        (Option.map ~f:ActionTarget.of_xml) (Xml.child xml_arg0 "VpcId") in
       let description =
         (Option.map ~f:LengthBoundedString.of_xml)
           (Xml.child xml_arg0 "Description") in
-      make ~vpcId ?description ()
+      make ?vpcId ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map_exn json "VpcId" ActionTarget.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" ActionTarget.of_json in
       let description =
-        field_map json "Description" LengthBoundedString.of_json in
-      make ~vpcId ?description ()
+        field_map json__ "Description" LengthBoundedString.of_json in
+      make ?vpcId ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the CreateRouteTable action in Amazon EC2."]
@@ -380,14 +929,13 @@ module EC2DeleteRouteAction =
       destinationIpv6CidrBlock: CIDR.t option
         [@ocaml.doc
           "Information about the IPv6 CIDR range for the route. The value you specify must match the CIDR for the route exactly."];
-      routeTableId: ActionTarget.t
+      routeTableId: ActionTarget.t option
         [@ocaml.doc "Information about the ID of the route table."]}
-    let context_ = "EC2DeleteRouteAction"
     let make ?description =
       fun ?destinationCidrBlock ->
         fun ?destinationPrefixListId ->
           fun ?destinationIpv6CidrBlock ->
-            fun ~routeTableId ->
+            fun ?routeTableId ->
               fun () ->
                 {
                   description;
@@ -406,12 +954,13 @@ module EC2DeleteRouteAction =
           (Option.map x.destinationPrefixListId ~f:ResourceId.to_value));
         ("DestinationIpv6CidrBlock",
           (Option.map x.destinationIpv6CidrBlock ~f:CIDR.to_value));
-        ("RouteTableId", (Some (ActionTarget.to_value x.routeTableId)))]
+        ("RouteTableId",
+          (Option.map x.routeTableId ~f:ActionTarget.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let routeTableId =
-        ActionTarget.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RouteTableId") in
+        (Option.map ~f:ActionTarget.of_xml)
+          (Xml.child xml_arg0 "RouteTableId") in
       let destinationIpv6CidrBlock =
         (Option.map ~f:CIDR.of_xml)
           (Xml.child xml_arg0 "DestinationIpv6CidrBlock") in
@@ -424,21 +973,20 @@ module EC2DeleteRouteAction =
       let description =
         (Option.map ~f:LengthBoundedString.of_xml)
           (Xml.child xml_arg0 "Description") in
-      make ~routeTableId ?destinationIpv6CidrBlock ?destinationPrefixListId
+      make ?routeTableId ?destinationIpv6CidrBlock ?destinationPrefixListId
         ?destinationCidrBlock ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let routeTableId =
-        field_map_exn json "RouteTableId" ActionTarget.of_json in
+    let of_json json__ =
+      let routeTableId = field_map json__ "RouteTableId" ActionTarget.of_json in
       let destinationIpv6CidrBlock =
-        field_map json "DestinationIpv6CidrBlock" CIDR.of_json in
+        field_map json__ "DestinationIpv6CidrBlock" CIDR.of_json in
       let destinationPrefixListId =
-        field_map json "DestinationPrefixListId" ResourceId.of_json in
+        field_map json__ "DestinationPrefixListId" ResourceId.of_json in
       let destinationCidrBlock =
-        field_map json "DestinationCidrBlock" CIDR.of_json in
+        field_map json__ "DestinationCidrBlock" CIDR.of_json in
       let description =
-        field_map json "Description" LengthBoundedString.of_json in
-      make ~routeTableId ?destinationIpv6CidrBlock ?destinationPrefixListId
+        field_map json__ "Description" LengthBoundedString.of_json in
+      make ?routeTableId ?destinationIpv6CidrBlock ?destinationPrefixListId
         ?destinationCidrBlock ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the DeleteRoute action in Amazon EC2."]
@@ -461,15 +1009,14 @@ module EC2ReplaceRouteAction =
       gatewayId: ActionTarget.t option
         [@ocaml.doc
           "Information about the ID of an internet gateway or virtual private gateway."];
-      routeTableId: ActionTarget.t
+      routeTableId: ActionTarget.t option
         [@ocaml.doc "Information about the ID of the route table."]}
-    let context_ = "EC2ReplaceRouteAction"
     let make ?description =
       fun ?destinationCidrBlock ->
         fun ?destinationPrefixListId ->
           fun ?destinationIpv6CidrBlock ->
             fun ?gatewayId ->
-              fun ~routeTableId ->
+              fun ?routeTableId ->
                 fun () ->
                   {
                     description;
@@ -490,12 +1037,13 @@ module EC2ReplaceRouteAction =
         ("DestinationIpv6CidrBlock",
           (Option.map x.destinationIpv6CidrBlock ~f:CIDR.to_value));
         ("GatewayId", (Option.map x.gatewayId ~f:ActionTarget.to_value));
-        ("RouteTableId", (Some (ActionTarget.to_value x.routeTableId)))]
+        ("RouteTableId",
+          (Option.map x.routeTableId ~f:ActionTarget.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let routeTableId =
-        ActionTarget.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RouteTableId") in
+        (Option.map ~f:ActionTarget.of_xml)
+          (Xml.child xml_arg0 "RouteTableId") in
       let gatewayId =
         (Option.map ~f:ActionTarget.of_xml) (Xml.child xml_arg0 "GatewayId") in
       let destinationIpv6CidrBlock =
@@ -510,22 +1058,21 @@ module EC2ReplaceRouteAction =
       let description =
         (Option.map ~f:LengthBoundedString.of_xml)
           (Xml.child xml_arg0 "Description") in
-      make ~routeTableId ?gatewayId ?destinationIpv6CidrBlock
+      make ?routeTableId ?gatewayId ?destinationIpv6CidrBlock
         ?destinationPrefixListId ?destinationCidrBlock ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let routeTableId =
-        field_map_exn json "RouteTableId" ActionTarget.of_json in
-      let gatewayId = field_map json "GatewayId" ActionTarget.of_json in
+    let of_json json__ =
+      let routeTableId = field_map json__ "RouteTableId" ActionTarget.of_json in
+      let gatewayId = field_map json__ "GatewayId" ActionTarget.of_json in
       let destinationIpv6CidrBlock =
-        field_map json "DestinationIpv6CidrBlock" CIDR.of_json in
+        field_map json__ "DestinationIpv6CidrBlock" CIDR.of_json in
       let destinationPrefixListId =
-        field_map json "DestinationPrefixListId" ResourceId.of_json in
+        field_map json__ "DestinationPrefixListId" ResourceId.of_json in
       let destinationCidrBlock =
-        field_map json "DestinationCidrBlock" CIDR.of_json in
+        field_map json__ "DestinationCidrBlock" CIDR.of_json in
       let description =
-        field_map json "Description" LengthBoundedString.of_json in
-      make ~routeTableId ?gatewayId ?destinationIpv6CidrBlock
+        field_map json__ "Description" LengthBoundedString.of_json in
+      make ?routeTableId ?gatewayId ?destinationIpv6CidrBlock
         ?destinationPrefixListId ?destinationCidrBlock ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the ReplaceRoute action in Amazon EC2."]
@@ -536,43 +1083,43 @@ module EC2ReplaceRouteTableAssociationAction =
       description: LengthBoundedString.t option
         [@ocaml.doc
           "A description of the ReplaceRouteTableAssociation action in Amazon EC2."];
-      associationId: ActionTarget.t
+      associationId: ActionTarget.t option
         [@ocaml.doc "Information about the association ID."];
-      routeTableId: ActionTarget.t
+      routeTableId: ActionTarget.t option
         [@ocaml.doc
           "Information about the ID of the new route table to associate with the subnet."]}
-    let context_ = "EC2ReplaceRouteTableAssociationAction"
     let make ?description =
-      fun ~associationId ->
-        fun ~routeTableId ->
+      fun ?associationId ->
+        fun ?routeTableId ->
           fun () -> { description; associationId; routeTableId }
     let to_value x =
       structure_to_value
         [("Description",
            (Option.map x.description ~f:LengthBoundedString.to_value));
-        ("AssociationId", (Some (ActionTarget.to_value x.associationId)));
-        ("RouteTableId", (Some (ActionTarget.to_value x.routeTableId)))]
+        ("AssociationId",
+          (Option.map x.associationId ~f:ActionTarget.to_value));
+        ("RouteTableId",
+          (Option.map x.routeTableId ~f:ActionTarget.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let routeTableId =
-        ActionTarget.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RouteTableId") in
+        (Option.map ~f:ActionTarget.of_xml)
+          (Xml.child xml_arg0 "RouteTableId") in
       let associationId =
-        ActionTarget.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AssociationId") in
+        (Option.map ~f:ActionTarget.of_xml)
+          (Xml.child xml_arg0 "AssociationId") in
       let description =
         (Option.map ~f:LengthBoundedString.of_xml)
           (Xml.child xml_arg0 "Description") in
-      make ~routeTableId ~associationId ?description ()
+      make ?routeTableId ?associationId ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let routeTableId =
-        field_map_exn json "RouteTableId" ActionTarget.of_json in
+    let of_json json__ =
+      let routeTableId = field_map json__ "RouteTableId" ActionTarget.of_json in
       let associationId =
-        field_map_exn json "AssociationId" ActionTarget.of_json in
+        field_map json__ "AssociationId" ActionTarget.of_json in
       let description =
-        field_map json "Description" LengthBoundedString.of_json in
-      make ~routeTableId ~associationId ?description ()
+        field_map json__ "Description" LengthBoundedString.of_json in
+      make ?routeTableId ?associationId ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the ReplaceRouteTableAssociation action in Amazon EC2."]
@@ -604,15 +1151,92 @@ module FMSPolicyUpdateFirewallCreationConfigAction =
           (Xml.child xml_arg0 "Description") in
       make ?firewallCreationConfig ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallCreationConfig =
-        field_map json "FirewallCreationConfig" ManagedServiceData.of_json in
+        field_map json__ "FirewallCreationConfig" ManagedServiceData.of_json in
       let description =
-        field_map json "Description" LengthBoundedString.of_json in
+        field_map json__ "Description" LengthBoundedString.of_json in
       make ?firewallCreationConfig ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about the actions that you can take to remediate scope violations caused by your policy's FirewallCreationConfig. FirewallCreationConfig is an optional configuration that you can use to choose which Availability Zones Firewall Manager creates Network Firewall endpoints in."]
+module ReplaceNetworkAclAssociationAction =
+  struct
+    type nonrec t =
+      {
+      description: LengthBoundedString.t option
+        [@ocaml.doc "Brief description of this remediation action."];
+      associationId: ActionTarget.t option ;
+      networkAclId: ActionTarget.t option
+        [@ocaml.doc
+          "The network ACL that's associated with the remediation action."];
+      fMSCanRemediate: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether it is possible for Firewall Manager to perform this remediation action. A false value indicates that auto remediation is disabled or Firewall Manager is unable to perform the action due to a conflict of some kind."]}
+    let make ?description =
+      fun ?associationId ->
+        fun ?networkAclId ->
+          fun ?fMSCanRemediate ->
+            fun () ->
+              { description; associationId; networkAclId; fMSCanRemediate }
+    let to_value x =
+      structure_to_value
+        [("Description",
+           (Option.map x.description ~f:LengthBoundedString.to_value));
+        ("AssociationId",
+          (Option.map x.associationId ~f:ActionTarget.to_value));
+        ("NetworkAclId",
+          (Option.map x.networkAclId ~f:ActionTarget.to_value));
+        ("FMSCanRemediate",
+          (Option.map x.fMSCanRemediate ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fMSCanRemediate =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "FMSCanRemediate") in
+      let networkAclId =
+        (Option.map ~f:ActionTarget.of_xml)
+          (Xml.child xml_arg0 "NetworkAclId") in
+      let associationId =
+        (Option.map ~f:ActionTarget.of_xml)
+          (Xml.child xml_arg0 "AssociationId") in
+      let description =
+        (Option.map ~f:LengthBoundedString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      make ?fMSCanRemediate ?networkAclId ?associationId ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fMSCanRemediate =
+        field_map json__ "FMSCanRemediate" Boolean.of_json in
+      let networkAclId = field_map json__ "NetworkAclId" ActionTarget.of_json in
+      let associationId =
+        field_map json__ "AssociationId" ActionTarget.of_json in
+      let description =
+        field_map json__ "Description" LengthBoundedString.of_json in
+      make ?fMSCanRemediate ?networkAclId ?associationId ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the ReplaceNetworkAclAssociation action in Amazon EC2. This is a remediation option in RemediationAction."]
+module NetworkFirewallOverrideAction =
+  struct
+    type nonrec t =
+      | DROP_TO_ALERT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | DROP_TO_ALERT -> "DROP_TO_ALERT" | Non_static_id s -> s
+    let of_string =
+      function | "DROP_TO_ALERT" -> DROP_TO_ALERT | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration NetworkFirewallOverrideAction"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"NetworkFirewallOverrideAction" j)
+    let to_json = simple_to_json to_value
+  end
 module BasicInteger =
   struct
     type nonrec t = int
@@ -663,7 +1287,20 @@ module RemediationAction =
       fMSPolicyUpdateFirewallCreationConfigAction:
         FMSPolicyUpdateFirewallCreationConfigAction.t option
         [@ocaml.doc
-          "The remedial action to take when updating a firewall configuration."]}
+          "The remedial action to take when updating a firewall configuration."];
+      createNetworkAclAction: CreateNetworkAclAction.t option
+        [@ocaml.doc
+          "Information about the CreateNetworkAcl action in Amazon EC2."];
+      replaceNetworkAclAssociationAction:
+        ReplaceNetworkAclAssociationAction.t option
+        [@ocaml.doc
+          "Information about the ReplaceNetworkAclAssociation action in Amazon EC2."];
+      createNetworkAclEntriesAction: CreateNetworkAclEntriesAction.t option
+        [@ocaml.doc
+          "Information about the CreateNetworkAclEntries action in Amazon EC2."];
+      deleteNetworkAclEntriesAction: DeleteNetworkAclEntriesAction.t option
+        [@ocaml.doc
+          "Information about the DeleteNetworkAclEntries action in Amazon EC2."]}
     let make ?description =
       fun ?eC2CreateRouteAction ->
         fun ?eC2ReplaceRouteAction ->
@@ -673,18 +1310,26 @@ module RemediationAction =
                 fun ?eC2AssociateRouteTableAction ->
                   fun ?eC2CreateRouteTableAction ->
                     fun ?fMSPolicyUpdateFirewallCreationConfigAction ->
-                      fun () ->
-                        {
-                          description;
-                          eC2CreateRouteAction;
-                          eC2ReplaceRouteAction;
-                          eC2DeleteRouteAction;
-                          eC2CopyRouteTableAction;
-                          eC2ReplaceRouteTableAssociationAction;
-                          eC2AssociateRouteTableAction;
-                          eC2CreateRouteTableAction;
-                          fMSPolicyUpdateFirewallCreationConfigAction
-                        }
+                      fun ?createNetworkAclAction ->
+                        fun ?replaceNetworkAclAssociationAction ->
+                          fun ?createNetworkAclEntriesAction ->
+                            fun ?deleteNetworkAclEntriesAction ->
+                              fun () ->
+                                {
+                                  description;
+                                  eC2CreateRouteAction;
+                                  eC2ReplaceRouteAction;
+                                  eC2DeleteRouteAction;
+                                  eC2CopyRouteTableAction;
+                                  eC2ReplaceRouteTableAssociationAction;
+                                  eC2AssociateRouteTableAction;
+                                  eC2CreateRouteTableAction;
+                                  fMSPolicyUpdateFirewallCreationConfigAction;
+                                  createNetworkAclAction;
+                                  replaceNetworkAclAssociationAction;
+                                  createNetworkAclEntriesAction;
+                                  deleteNetworkAclEntriesAction
+                                }
     let to_value x =
       structure_to_value
         [("Description",
@@ -710,9 +1355,33 @@ module RemediationAction =
              ~f:EC2CreateRouteTableAction.to_value));
         ("FMSPolicyUpdateFirewallCreationConfigAction",
           (Option.map x.fMSPolicyUpdateFirewallCreationConfigAction
-             ~f:FMSPolicyUpdateFirewallCreationConfigAction.to_value))]
+             ~f:FMSPolicyUpdateFirewallCreationConfigAction.to_value));
+        ("CreateNetworkAclAction",
+          (Option.map x.createNetworkAclAction
+             ~f:CreateNetworkAclAction.to_value));
+        ("ReplaceNetworkAclAssociationAction",
+          (Option.map x.replaceNetworkAclAssociationAction
+             ~f:ReplaceNetworkAclAssociationAction.to_value));
+        ("CreateNetworkAclEntriesAction",
+          (Option.map x.createNetworkAclEntriesAction
+             ~f:CreateNetworkAclEntriesAction.to_value));
+        ("DeleteNetworkAclEntriesAction",
+          (Option.map x.deleteNetworkAclEntriesAction
+             ~f:DeleteNetworkAclEntriesAction.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let deleteNetworkAclEntriesAction =
+        (Option.map ~f:DeleteNetworkAclEntriesAction.of_xml)
+          (Xml.child xml_arg0 "DeleteNetworkAclEntriesAction") in
+      let createNetworkAclEntriesAction =
+        (Option.map ~f:CreateNetworkAclEntriesAction.of_xml)
+          (Xml.child xml_arg0 "CreateNetworkAclEntriesAction") in
+      let replaceNetworkAclAssociationAction =
+        (Option.map ~f:ReplaceNetworkAclAssociationAction.of_xml)
+          (Xml.child xml_arg0 "ReplaceNetworkAclAssociationAction") in
+      let createNetworkAclAction =
+        (Option.map ~f:CreateNetworkAclAction.of_xml)
+          (Xml.child xml_arg0 "CreateNetworkAclAction") in
       let fMSPolicyUpdateFirewallCreationConfigAction =
         (Option.map ~f:FMSPolicyUpdateFirewallCreationConfigAction.of_xml)
           (Xml.child xml_arg0 "FMSPolicyUpdateFirewallCreationConfigAction") in
@@ -740,37 +1409,54 @@ module RemediationAction =
       let description =
         (Option.map ~f:LengthBoundedString.of_xml)
           (Xml.child xml_arg0 "Description") in
-      make ?fMSPolicyUpdateFirewallCreationConfigAction
+      make ?deleteNetworkAclEntriesAction ?createNetworkAclEntriesAction
+        ?replaceNetworkAclAssociationAction ?createNetworkAclAction
+        ?fMSPolicyUpdateFirewallCreationConfigAction
         ?eC2CreateRouteTableAction ?eC2AssociateRouteTableAction
         ?eC2ReplaceRouteTableAssociationAction ?eC2CopyRouteTableAction
         ?eC2DeleteRouteAction ?eC2ReplaceRouteAction ?eC2CreateRouteAction
         ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let deleteNetworkAclEntriesAction =
+        field_map json__ "DeleteNetworkAclEntriesAction"
+          DeleteNetworkAclEntriesAction.of_json in
+      let createNetworkAclEntriesAction =
+        field_map json__ "CreateNetworkAclEntriesAction"
+          CreateNetworkAclEntriesAction.of_json in
+      let replaceNetworkAclAssociationAction =
+        field_map json__ "ReplaceNetworkAclAssociationAction"
+          ReplaceNetworkAclAssociationAction.of_json in
+      let createNetworkAclAction =
+        field_map json__ "CreateNetworkAclAction"
+          CreateNetworkAclAction.of_json in
       let fMSPolicyUpdateFirewallCreationConfigAction =
-        field_map json "FMSPolicyUpdateFirewallCreationConfigAction"
+        field_map json__ "FMSPolicyUpdateFirewallCreationConfigAction"
           FMSPolicyUpdateFirewallCreationConfigAction.of_json in
       let eC2CreateRouteTableAction =
-        field_map json "EC2CreateRouteTableAction"
+        field_map json__ "EC2CreateRouteTableAction"
           EC2CreateRouteTableAction.of_json in
       let eC2AssociateRouteTableAction =
-        field_map json "EC2AssociateRouteTableAction"
+        field_map json__ "EC2AssociateRouteTableAction"
           EC2AssociateRouteTableAction.of_json in
       let eC2ReplaceRouteTableAssociationAction =
-        field_map json "EC2ReplaceRouteTableAssociationAction"
+        field_map json__ "EC2ReplaceRouteTableAssociationAction"
           EC2ReplaceRouteTableAssociationAction.of_json in
       let eC2CopyRouteTableAction =
-        field_map json "EC2CopyRouteTableAction"
+        field_map json__ "EC2CopyRouteTableAction"
           EC2CopyRouteTableAction.of_json in
       let eC2DeleteRouteAction =
-        field_map json "EC2DeleteRouteAction" EC2DeleteRouteAction.of_json in
+        field_map json__ "EC2DeleteRouteAction" EC2DeleteRouteAction.of_json in
       let eC2ReplaceRouteAction =
-        field_map json "EC2ReplaceRouteAction" EC2ReplaceRouteAction.of_json in
+        field_map json__ "EC2ReplaceRouteAction"
+          EC2ReplaceRouteAction.of_json in
       let eC2CreateRouteAction =
-        field_map json "EC2CreateRouteAction" EC2CreateRouteAction.of_json in
+        field_map json__ "EC2CreateRouteAction" EC2CreateRouteAction.of_json in
       let description =
-        field_map json "Description" LengthBoundedString.of_json in
-      make ?fMSPolicyUpdateFirewallCreationConfigAction
+        field_map json__ "Description" LengthBoundedString.of_json in
+      make ?deleteNetworkAclEntriesAction ?createNetworkAclEntriesAction
+        ?replaceNetworkAclAssociationAction ?createNetworkAclAction
+        ?fMSPolicyUpdateFirewallCreationConfigAction
         ?eC2CreateRouteTableAction ?eC2AssociateRouteTableAction
         ?eC2ReplaceRouteTableAssociationAction ?eC2CopyRouteTableAction
         ?eC2DeleteRouteAction ?eC2ReplaceRouteAction ?eC2CreateRouteAction
@@ -816,6 +1502,35 @@ module IPPortNumber =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
+module EntryViolationReason =
+  struct
+    type nonrec t =
+      | MISSING_EXPECTED_ENTRY 
+      | INCORRECT_ENTRY_ORDER 
+      | ENTRY_CONFLICT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MISSING_EXPECTED_ENTRY -> "MISSING_EXPECTED_ENTRY"
+      | INCORRECT_ENTRY_ORDER -> "INCORRECT_ENTRY_ORDER"
+      | ENTRY_CONFLICT -> "ENTRY_CONFLICT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MISSING_EXPECTED_ENTRY" -> MISSING_EXPECTED_ENTRY
+      | "INCORRECT_ENTRY_ORDER" -> INCORRECT_ENTRY_ORDER
+      | "ENTRY_CONFLICT" -> ENTRY_CONFLICT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EntryViolationReason" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EntryViolationReason" j)
+    let to_json = simple_to_json to_value
+  end
 module NetworkFirewallResourceName =
   struct
     type nonrec t = string
@@ -834,6 +1549,46 @@ module NetworkFirewallResourceName =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"NetworkFirewallResourceName" j
+    let to_json = simple_to_json to_value
+  end
+module NetworkFirewallStatefulRuleGroupOverride =
+  struct
+    type nonrec t =
+      {
+      action: NetworkFirewallOverrideAction.t option
+        [@ocaml.doc
+          "The action that changes the rule group from DROP to ALERT. This only applies to managed rule groups."]}
+    let make ?action = fun () -> { action }
+    let to_value x =
+      structure_to_value
+        [("Action",
+           (Option.map x.action ~f:NetworkFirewallOverrideAction.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let action =
+        (Option.map ~f:NetworkFirewallOverrideAction.of_xml)
+          (Xml.child xml_arg0 "Action") in
+      make ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let action =
+        field_map json__ "Action" NetworkFirewallOverrideAction.of_json in
+      make ?action ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The setting that allows the policy owner to change the behavior of the rule group within a policy."]
+module PriorityNumber =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PriorityNumber" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module StatelessRuleGroupPriority =
@@ -881,10 +1636,10 @@ module RemediationActionWithOrder =
           (Xml.child xml_arg0 "RemediationAction") in
       make ?order ?remediationAction ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let order = field_map json "Order" BasicInteger.of_json in
+    let of_json json__ =
+      let order = field_map json__ "Order" BasicInteger.of_json in
       let remediationAction =
-        field_map json "RemediationAction" RemediationAction.of_json in
+        field_map json__ "RemediationAction" RemediationAction.of_json in
       make ?order ?remediationAction ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -893,6 +1648,9 @@ module ResourceIdList =
   struct
     type nonrec t = ResourceId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -950,6 +1708,9 @@ module TargetViolationReasons =
   struct
     type nonrec t = TargetViolationReason.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetViolationReason.to_value)) |>
         (fun x -> `List x)
@@ -971,19 +1732,6 @@ module TargetViolationReasons =
       list_of_json ~kind:"TargetViolationReasons"
         ~of_json:TargetViolationReason.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module Boolean =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
-    let to_json = simple_to_json to_value
   end
 module RemediationActionDescription =
   struct
@@ -1091,17 +1839,74 @@ module SecurityGroupRuleDescription =
         (Option.map ~f:CIDR.of_xml) (Xml.child xml_arg0 "IPV4Range") in
       make ?toPort ?fromPort ?protocol ?prefixListId ?iPV6Range ?iPV4Range ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let toPort = field_map json "ToPort" IPPortNumber.of_json in
-      let fromPort = field_map json "FromPort" IPPortNumber.of_json in
-      let protocol = field_map json "Protocol" LengthBoundedString.of_json in
-      let prefixListId = field_map json "PrefixListId" ResourceId.of_json in
-      let iPV6Range = field_map json "IPV6Range" CIDR.of_json in
-      let iPV4Range = field_map json "IPV4Range" CIDR.of_json in
+    let of_json json__ =
+      let toPort = field_map json__ "ToPort" IPPortNumber.of_json in
+      let fromPort = field_map json__ "FromPort" IPPortNumber.of_json in
+      let protocol = field_map json__ "Protocol" LengthBoundedString.of_json in
+      let prefixListId = field_map json__ "PrefixListId" ResourceId.of_json in
+      let iPV6Range = field_map json__ "IPV6Range" CIDR.of_json in
+      let iPV4Range = field_map json__ "IPV4Range" CIDR.of_json in
       make ?toPort ?fromPort ?protocol ?prefixListId ?iPV6Range ?iPV4Range ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a set of permissions for a security group rule."]
+module EntriesWithConflicts =
+  struct
+    type nonrec t = EntryDescription.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EntryDescription.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EntryDescription.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EntriesWithConflicts"
+        ~of_json:EntryDescription.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EntryViolationReasons =
+  struct
+    type nonrec t = EntryViolationReason.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EntryViolationReason.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EntryViolationReason.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EntryViolationReasons"
+        ~of_json:EntryViolationReason.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DestinationType =
   struct
     type nonrec t =
@@ -1183,6 +1988,9 @@ module LengthBoundedStringList =
   struct
     type nonrec t = LengthBoundedString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LengthBoundedString.to_value)) |>
         (fun x -> `List x)
@@ -1225,6 +2033,64 @@ module NetworkFirewallAction =
     let of_json j = string_of_json ~kind:"NetworkFirewallAction" j
     let to_json = simple_to_json to_value
   end
+module RuleOrder =
+  struct
+    type nonrec t =
+      | STRICT_ORDER 
+      | DEFAULT_ACTION_ORDER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STRICT_ORDER -> "STRICT_ORDER"
+      | DEFAULT_ACTION_ORDER -> "DEFAULT_ACTION_ORDER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STRICT_ORDER" -> STRICT_ORDER
+      | "DEFAULT_ACTION_ORDER" -> DEFAULT_ACTION_ORDER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RuleOrder" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RuleOrder" j)
+    let to_json = simple_to_json to_value
+  end
+module StreamExceptionPolicy =
+  struct
+    type nonrec t =
+      | DROP 
+      | CONTINUE 
+      | REJECT 
+      | FMS_IGNORE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DROP -> "DROP"
+      | CONTINUE -> "CONTINUE"
+      | REJECT -> "REJECT"
+      | FMS_IGNORE -> "FMS_IGNORE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DROP" -> DROP
+      | "CONTINUE" -> CONTINUE
+      | "REJECT" -> REJECT
+      | "FMS_IGNORE" -> FMS_IGNORE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration StreamExceptionPolicy" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"StreamExceptionPolicy" j)
+    let to_json = simple_to_json to_value
+  end
 module StatefulRuleGroup =
   struct
     type nonrec t =
@@ -1232,29 +2098,51 @@ module StatefulRuleGroup =
       ruleGroupName: NetworkFirewallResourceName.t option
         [@ocaml.doc "The name of the rule group."];
       resourceId: ResourceId.t option
-        [@ocaml.doc "The resource ID of the rule group."]}
+        [@ocaml.doc "The resource ID of the rule group."];
+      priority: PriorityNumber.t option
+        [@ocaml.doc
+          "An integer setting that indicates the order in which to run the stateful rule groups in a single Network Firewall firewall policy. This setting only applies to firewall policies that specify the STRICT_ORDER rule order in the stateful engine options settings. Network Firewall evalutes each stateful rule group against a packet starting with the group that has the lowest priority setting. You must ensure that the priority settings are unique within each policy. For information about You can change the priority settings of your rule groups at any time. To make it easier to insert rule groups later, number them so there's a wide range in between, for example use 100, 200, and so on."];
+      override: NetworkFirewallStatefulRuleGroupOverride.t option
+        [@ocaml.doc
+          "The action that allows the policy owner to override the behavior of the rule group within a policy."]}
     let make ?ruleGroupName =
-      fun ?resourceId -> fun () -> { ruleGroupName; resourceId }
+      fun ?resourceId ->
+        fun ?priority ->
+          fun ?override ->
+            fun () -> { ruleGroupName; resourceId; priority; override }
     let to_value x =
       structure_to_value
         [("RuleGroupName",
            (Option.map x.ruleGroupName
               ~f:NetworkFirewallResourceName.to_value));
-        ("ResourceId", (Option.map x.resourceId ~f:ResourceId.to_value))]
+        ("ResourceId", (Option.map x.resourceId ~f:ResourceId.to_value));
+        ("Priority", (Option.map x.priority ~f:PriorityNumber.to_value));
+        ("Override",
+          (Option.map x.override
+             ~f:NetworkFirewallStatefulRuleGroupOverride.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let override =
+        (Option.map ~f:NetworkFirewallStatefulRuleGroupOverride.of_xml)
+          (Xml.child xml_arg0 "Override") in
+      let priority =
+        (Option.map ~f:PriorityNumber.of_xml) (Xml.child xml_arg0 "Priority") in
       let resourceId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ResourceId") in
       let ruleGroupName =
         (Option.map ~f:NetworkFirewallResourceName.of_xml)
           (Xml.child xml_arg0 "RuleGroupName") in
-      make ?resourceId ?ruleGroupName ()
+      make ?override ?priority ?resourceId ?ruleGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let override =
+        field_map json__ "Override"
+          NetworkFirewallStatefulRuleGroupOverride.of_json in
+      let priority = field_map json__ "Priority" PriorityNumber.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
       let ruleGroupName =
-        field_map json "RuleGroupName" NetworkFirewallResourceName.of_json in
-      make ?resourceId ?ruleGroupName ()
+        field_map json__ "RuleGroupName" NetworkFirewallResourceName.of_json in
+      make ?override ?priority ?resourceId ?ruleGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Network Firewall stateful rule group, used in a NetworkFirewallPolicyDescription."]
@@ -1292,12 +2180,12 @@ module StatelessRuleGroup =
           (Xml.child xml_arg0 "RuleGroupName") in
       make ?priority ?resourceId ?ruleGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let priority =
-        field_map json "Priority" StatelessRuleGroupPriority.of_json in
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
+        field_map json__ "Priority" StatelessRuleGroupPriority.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
       let ruleGroupName =
-        field_map json "RuleGroupName" NetworkFirewallResourceName.of_json in
+        field_map json__ "RuleGroupName" NetworkFirewallResourceName.of_json in
       make ?priority ?resourceId ?ruleGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1306,6 +2194,9 @@ module OrderedRemediationActions =
   struct
     type nonrec t = RemediationActionWithOrder.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RemediationActionWithOrder.to_value)) |>
         (fun x -> `List x)
@@ -1326,6 +2217,34 @@ module OrderedRemediationActions =
     let of_json j =
       list_of_json ~kind:"OrderedRemediationActions"
         ~of_json:RemediationActionWithOrder.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NetworkAclEntries =
+  struct
+    type nonrec t = NetworkAclEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NetworkAclEntry.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NetworkAclEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NetworkAclEntries" ~of_json:NetworkAclEntry.of_json
+        j
     let to_json v = composed_to_json to_value v
   end
 module AwsEc2NetworkInterfaceViolation =
@@ -1356,11 +2275,11 @@ module AwsEc2NetworkInterfaceViolation =
           (Xml.child xml_arg0 "ViolationTarget") in
       make ?violatingSecurityGroups ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let violatingSecurityGroups =
-        field_map json "ViolatingSecurityGroups" ResourceIdList.of_json in
+        field_map json__ "ViolatingSecurityGroups" ResourceIdList.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?violatingSecurityGroups ?violationTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1392,11 +2311,11 @@ module PartialMatch =
         (Option.map ~f:ReferenceRule.of_xml) (Xml.child xml_arg0 "Reference") in
       make ?targetViolationReasons ?reference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetViolationReasons =
-        field_map json "TargetViolationReasons"
+        field_map json__ "TargetViolationReasons"
           TargetViolationReasons.of_json in
-      let reference = field_map json "Reference" ReferenceRule.of_json in
+      let reference = field_map json__ "Reference" ReferenceRule.of_json in
       make ?targetViolationReasons ?reference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1454,15 +2373,17 @@ module SecurityGroupRemediationAction =
       make ?isDefaultAction ?remediationResult ?description
         ?remediationActionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isDefaultAction = field_map json "IsDefaultAction" Boolean.of_json in
+    let of_json json__ =
+      let isDefaultAction =
+        field_map json__ "IsDefaultAction" Boolean.of_json in
       let remediationResult =
-        field_map json "RemediationResult"
+        field_map json__ "RemediationResult"
           SecurityGroupRuleDescription.of_json in
       let description =
-        field_map json "Description" RemediationActionDescription.of_json in
+        field_map json__ "Description" RemediationActionDescription.of_json in
       let remediationActionType =
-        field_map json "RemediationActionType" RemediationActionType.of_json in
+        field_map json__ "RemediationActionType"
+          RemediationActionType.of_json in
       make ?isDefaultAction ?remediationResult ?description
         ?remediationActionType ()
     let to_json v = composed_to_json to_value v
@@ -1487,6 +2408,106 @@ module DnsRuleGroupPriority =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module EntryViolation =
+  struct
+    type nonrec t =
+      {
+      expectedEntry: EntryDescription.t option
+        [@ocaml.doc
+          "The Firewall Manager-managed network ACL entry that is involved in the entry violation."];
+      expectedEvaluationOrder: LengthBoundedString.t option
+        [@ocaml.doc
+          "The evaluation location within the ordered list of entries where the ExpectedEntry should be, according to the network ACL policy specifications."];
+      actualEvaluationOrder: LengthBoundedString.t option
+        [@ocaml.doc
+          "The evaluation location within the ordered list of entries where the ExpectedEntry is currently located."];
+      entryAtExpectedEvaluationOrder: EntryDescription.t option
+        [@ocaml.doc
+          "The entry that's currently in the ExpectedEvaluationOrder location, in place of the expected entry."];
+      entriesWithConflicts: EntriesWithConflicts.t option
+        [@ocaml.doc
+          "The list of entries that are in conflict with ExpectedEntry."];
+      entryViolationReasons: EntryViolationReasons.t option
+        [@ocaml.doc
+          "Descriptions of the violations that Firewall Manager found for these entries."]}
+    let make ?expectedEntry =
+      fun ?expectedEvaluationOrder ->
+        fun ?actualEvaluationOrder ->
+          fun ?entryAtExpectedEvaluationOrder ->
+            fun ?entriesWithConflicts ->
+              fun ?entryViolationReasons ->
+                fun () ->
+                  {
+                    expectedEntry;
+                    expectedEvaluationOrder;
+                    actualEvaluationOrder;
+                    entryAtExpectedEvaluationOrder;
+                    entriesWithConflicts;
+                    entryViolationReasons
+                  }
+    let to_value x =
+      structure_to_value
+        [("ExpectedEntry",
+           (Option.map x.expectedEntry ~f:EntryDescription.to_value));
+        ("ExpectedEvaluationOrder",
+          (Option.map x.expectedEvaluationOrder
+             ~f:LengthBoundedString.to_value));
+        ("ActualEvaluationOrder",
+          (Option.map x.actualEvaluationOrder ~f:LengthBoundedString.to_value));
+        ("EntryAtExpectedEvaluationOrder",
+          (Option.map x.entryAtExpectedEvaluationOrder
+             ~f:EntryDescription.to_value));
+        ("EntriesWithConflicts",
+          (Option.map x.entriesWithConflicts ~f:EntriesWithConflicts.to_value));
+        ("EntryViolationReasons",
+          (Option.map x.entryViolationReasons
+             ~f:EntryViolationReasons.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entryViolationReasons =
+        (Option.map ~f:EntryViolationReasons.of_xml)
+          (Xml.child xml_arg0 "EntryViolationReasons") in
+      let entriesWithConflicts =
+        (Option.map ~f:EntriesWithConflicts.of_xml)
+          (Xml.child xml_arg0 "EntriesWithConflicts") in
+      let entryAtExpectedEvaluationOrder =
+        (Option.map ~f:EntryDescription.of_xml)
+          (Xml.child xml_arg0 "EntryAtExpectedEvaluationOrder") in
+      let actualEvaluationOrder =
+        (Option.map ~f:LengthBoundedString.of_xml)
+          (Xml.child xml_arg0 "ActualEvaluationOrder") in
+      let expectedEvaluationOrder =
+        (Option.map ~f:LengthBoundedString.of_xml)
+          (Xml.child xml_arg0 "ExpectedEvaluationOrder") in
+      let expectedEntry =
+        (Option.map ~f:EntryDescription.of_xml)
+          (Xml.child xml_arg0 "ExpectedEntry") in
+      make ?entryViolationReasons ?entriesWithConflicts
+        ?entryAtExpectedEvaluationOrder ?actualEvaluationOrder
+        ?expectedEvaluationOrder ?expectedEntry ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entryViolationReasons =
+        field_map json__ "EntryViolationReasons"
+          EntryViolationReasons.of_json in
+      let entriesWithConflicts =
+        field_map json__ "EntriesWithConflicts" EntriesWithConflicts.of_json in
+      let entryAtExpectedEvaluationOrder =
+        field_map json__ "EntryAtExpectedEvaluationOrder"
+          EntryDescription.of_json in
+      let actualEvaluationOrder =
+        field_map json__ "ActualEvaluationOrder" LengthBoundedString.of_json in
+      let expectedEvaluationOrder =
+        field_map json__ "ExpectedEvaluationOrder"
+          LengthBoundedString.of_json in
+      let expectedEntry =
+        field_map json__ "ExpectedEntry" EntryDescription.of_json in
+      make ?entryViolationReasons ?entriesWithConflicts
+        ?entryAtExpectedEvaluationOrder ?actualEvaluationOrder
+        ?expectedEvaluationOrder ?expectedEntry ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detailed information about an entry violation in a network ACL. The violation is against the network ACL specification inside the Firewall Manager network ACL policy. This data object is part of InvalidNetworkAclEntriesViolation."]
 module Route =
   struct
     type nonrec t =
@@ -1526,13 +2547,13 @@ module Route =
           (Xml.child xml_arg0 "DestinationType") in
       make ?target ?destination ?targetType ?destinationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let target = field_map json "Target" LengthBoundedString.of_json in
+    let of_json json__ =
+      let target = field_map json__ "Target" LengthBoundedString.of_json in
       let destination =
-        field_map json "Destination" LengthBoundedString.of_json in
-      let targetType = field_map json "TargetType" TargetType.of_json in
+        field_map json__ "Destination" LengthBoundedString.of_json in
+      let targetType = field_map json__ "TargetType" TargetType.of_json in
       let destinationType =
-        field_map json "DestinationType" DestinationType.of_json in
+        field_map json__ "DestinationType" DestinationType.of_json in
       make ?target ?destination ?targetType ?destinationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a route in a route table."]
@@ -1597,15 +2618,15 @@ module ExpectedRoute =
       make ?routeTableId ?allowedTargets ?contributingSubnets ?ipV6Cidr
         ?prefixListId ?ipV4Cidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let routeTableId = field_map json "RouteTableId" ResourceId.of_json in
+    let of_json json__ =
+      let routeTableId = field_map json__ "RouteTableId" ResourceId.of_json in
       let allowedTargets =
-        field_map json "AllowedTargets" LengthBoundedStringList.of_json in
+        field_map json__ "AllowedTargets" LengthBoundedStringList.of_json in
       let contributingSubnets =
-        field_map json "ContributingSubnets" ResourceIdList.of_json in
-      let ipV6Cidr = field_map json "IpV6Cidr" CIDR.of_json in
-      let prefixListId = field_map json "PrefixListId" CIDR.of_json in
-      let ipV4Cidr = field_map json "IpV4Cidr" CIDR.of_json in
+        field_map json__ "ContributingSubnets" ResourceIdList.of_json in
+      let ipV6Cidr = field_map json__ "IpV6Cidr" CIDR.of_json in
+      let prefixListId = field_map json__ "PrefixListId" CIDR.of_json in
+      let ipV4Cidr = field_map json__ "IpV4Cidr" CIDR.of_json in
       make ?routeTableId ?allowedTargets ?contributingSubnets ?ipV6Cidr
         ?prefixListId ?ipV4Cidr ()
     let to_json v = composed_to_json to_value v
@@ -1614,6 +2635,9 @@ module NetworkFirewallActionList =
   struct
     type nonrec t = NetworkFirewallAction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkFirewallAction.to_value)) |>
         (fun x -> `List x)
@@ -1636,10 +2660,50 @@ module NetworkFirewallActionList =
         ~of_json:NetworkFirewallAction.of_json j
     let to_json v = composed_to_json to_value v
   end
+module StatefulEngineOptions =
+  struct
+    type nonrec t =
+      {
+      ruleOrder: RuleOrder.t option
+        [@ocaml.doc
+          "Indicates how to manage the order of stateful rule evaluation for the policy. Stateful rules are provided to the rule engine as Suricata compatible strings, and Suricata evaluates them based on certain settings. For more information, see Evaluation order for stateful rules in the Network Firewall Developer Guide. Default: DEFAULT_ACTION_ORDER"];
+      streamExceptionPolicy: StreamExceptionPolicy.t option
+        [@ocaml.doc
+          "Indicates how Network Firewall should handle traffic when a network connection breaks midstream. DROP - Fail closed and drop all subsequent traffic going to the firewall. CONTINUE - Continue to apply rules to subsequent traffic without context from traffic before the break. This impacts the behavior of rules that depend on context. For example, with a stateful rule that drops HTTP traffic, Network Firewall won't match subsequent traffic because the it won't have the context from session initialization, which defines the application layer protocol as HTTP. However, a TCP-layer rule using a flow:stateless rule would still match, and so would the aws:drop_strict default action. REJECT - Fail closed and drop all subsequent traffic going to the firewall. With this option, Network Firewall also sends a TCP reject packet back to the client so the client can immediately establish a new session. With the new session, Network Firewall will have context and will apply rules appropriately. For applications that are reliant on long-lived TCP connections that trigger Gateway Load Balancer idle timeouts, this is the recommended setting. FMS_IGNORE - Firewall Manager doesn't monitor or modify the Network Firewall stream exception policy settings. For more information, see Stream exception policy in your firewall policy in the Network Firewall Developer Guide. Default: FMS_IGNORE"]}
+    let make ?ruleOrder =
+      fun ?streamExceptionPolicy ->
+        fun () -> { ruleOrder; streamExceptionPolicy }
+    let to_value x =
+      structure_to_value
+        [("RuleOrder", (Option.map x.ruleOrder ~f:RuleOrder.to_value));
+        ("StreamExceptionPolicy",
+          (Option.map x.streamExceptionPolicy
+             ~f:StreamExceptionPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamExceptionPolicy =
+        (Option.map ~f:StreamExceptionPolicy.of_xml)
+          (Xml.child xml_arg0 "StreamExceptionPolicy") in
+      let ruleOrder =
+        (Option.map ~f:RuleOrder.of_xml) (Xml.child xml_arg0 "RuleOrder") in
+      make ?streamExceptionPolicy ?ruleOrder ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamExceptionPolicy =
+        field_map json__ "StreamExceptionPolicy"
+          StreamExceptionPolicy.of_json in
+      let ruleOrder = field_map json__ "RuleOrder" RuleOrder.of_json in
+      make ?streamExceptionPolicy ?ruleOrder ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration settings for the handling of the stateful rule groups in a Network Firewall firewall policy."]
 module StatefulRuleGroupList =
   struct
     type nonrec t = StatefulRuleGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StatefulRuleGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1665,6 +2729,9 @@ module StatelessRuleGroupList =
   struct
     type nonrec t = StatelessRuleGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StatelessRuleGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1692,24 +2759,23 @@ module PossibleRemediationAction =
       {
       description: LengthBoundedString.t option
         [@ocaml.doc "A description of the list of remediation actions."];
-      orderedRemediationActions: OrderedRemediationActions.t
+      orderedRemediationActions: OrderedRemediationActions.t option
         [@ocaml.doc "The ordered list of remediation actions."];
       isDefaultAction: Boolean.t option
         [@ocaml.doc
           "Information about whether an action is taken by default."]}
-    let context_ = "PossibleRemediationAction"
     let make ?description =
-      fun ?isDefaultAction ->
-        fun ~orderedRemediationActions ->
+      fun ?orderedRemediationActions ->
+        fun ?isDefaultAction ->
           fun () ->
-            { description; isDefaultAction; orderedRemediationActions }
+            { description; orderedRemediationActions; isDefaultAction }
     let to_value x =
       structure_to_value
         [("Description",
            (Option.map x.description ~f:LengthBoundedString.to_value));
         ("OrderedRemediationActions",
-          (Some
-             (OrderedRemediationActions.to_value x.orderedRemediationActions)));
+          (Option.map x.orderedRemediationActions
+             ~f:OrderedRemediationActions.to_value));
         ("IsDefaultAction",
           (Option.map x.isDefaultAction ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
@@ -1717,24 +2783,119 @@ module PossibleRemediationAction =
       let isDefaultAction =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsDefaultAction") in
       let orderedRemediationActions =
-        OrderedRemediationActions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "OrderedRemediationActions") in
+        (Option.map ~f:OrderedRemediationActions.of_xml)
+          (Xml.child xml_arg0 "OrderedRemediationActions") in
       let description =
         (Option.map ~f:LengthBoundedString.of_xml)
           (Xml.child xml_arg0 "Description") in
-      make ?isDefaultAction ~orderedRemediationActions ?description ()
+      make ?isDefaultAction ?orderedRemediationActions ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isDefaultAction = field_map json "IsDefaultAction" Boolean.of_json in
+    let of_json json__ =
+      let isDefaultAction =
+        field_map json__ "IsDefaultAction" Boolean.of_json in
       let orderedRemediationActions =
-        field_map_exn json "OrderedRemediationActions"
+        field_map json__ "OrderedRemediationActions"
           OrderedRemediationActions.of_json in
       let description =
-        field_map json "Description" LengthBoundedString.of_json in
-      make ?isDefaultAction ~orderedRemediationActions ?description ()
+        field_map json__ "Description" LengthBoundedString.of_json in
+      make ?isDefaultAction ?orderedRemediationActions ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of remediation actions."]
+module ResourceArn =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceArn" j
+    let to_json = simple_to_json to_value
+  end
+module NetworkAclEntrySet =
+  struct
+    type nonrec t =
+      {
+      firstEntries: NetworkAclEntries.t option
+        [@ocaml.doc
+          "The rules that you want to run first in the Firewall Manager managed network ACLs. Provide these in the order in which you want them to run. Firewall Manager will assign the specific rule numbers for you, in the network ACLs that it creates. You must specify at least one first entry or one last entry in any network ACL policy."];
+      forceRemediateForFirstEntries: BooleanObject.t
+        [@ocaml.doc
+          "Applies only when remediation is enabled for the policy as a whole. Firewall Manager uses this setting when it finds policy violations that involve conflicts between the custom entries and the policy entries. If forced remediation is disabled, Firewall Manager marks the network ACL as noncompliant and does not try to remediate. For more information about the remediation behavior, see Remediation for managed network ACLs in the Firewall Manager Developer Guide."];
+      lastEntries: NetworkAclEntries.t option
+        [@ocaml.doc
+          "The rules that you want to run last in the Firewall Manager managed network ACLs. Provide these in the order in which you want them to run. Firewall Manager will assign the specific rule numbers for you, in the network ACLs that it creates. You must specify at least one first entry or one last entry in any network ACL policy."];
+      forceRemediateForLastEntries: BooleanObject.t
+        [@ocaml.doc
+          "Applies only when remediation is enabled for the policy as a whole. Firewall Manager uses this setting when it finds policy violations that involve conflicts between the custom entries and the policy entries. If forced remediation is disabled, Firewall Manager marks the network ACL as noncompliant and does not try to remediate. For more information about the remediation behavior, see Remediation for managed network ACLs in the Firewall Manager Developer Guide."]}
+    let context_ = "NetworkAclEntrySet"
+    let make ?firstEntries =
+      fun ?lastEntries ->
+        fun ~forceRemediateForFirstEntries ->
+          fun ~forceRemediateForLastEntries ->
+            fun () ->
+              {
+                firstEntries;
+                lastEntries;
+                forceRemediateForFirstEntries;
+                forceRemediateForLastEntries
+              }
+    let to_value x =
+      structure_to_value
+        [("FirstEntries",
+           (Option.map x.firstEntries ~f:NetworkAclEntries.to_value));
+        ("ForceRemediateForFirstEntries",
+          (Some (BooleanObject.to_value x.forceRemediateForFirstEntries)));
+        ("LastEntries",
+          (Option.map x.lastEntries ~f:NetworkAclEntries.to_value));
+        ("ForceRemediateForLastEntries",
+          (Some (BooleanObject.to_value x.forceRemediateForLastEntries)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let forceRemediateForLastEntries =
+        BooleanObject.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ForceRemediateForLastEntries") in
+      let lastEntries =
+        (Option.map ~f:NetworkAclEntries.of_xml)
+          (Xml.child xml_arg0 "LastEntries") in
+      let forceRemediateForFirstEntries =
+        BooleanObject.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ForceRemediateForFirstEntries") in
+      let firstEntries =
+        (Option.map ~f:NetworkAclEntries.of_xml)
+          (Xml.child xml_arg0 "FirstEntries") in
+      make ~forceRemediateForLastEntries ?lastEntries
+        ~forceRemediateForFirstEntries ?firstEntries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let forceRemediateForLastEntries =
+        field_map_exn json__ "ForceRemediateForLastEntries"
+          BooleanObject.of_json in
+      let lastEntries =
+        field_map json__ "LastEntries" NetworkAclEntries.of_json in
+      let forceRemediateForFirstEntries =
+        field_map_exn json__ "ForceRemediateForFirstEntries"
+          BooleanObject.of_json in
+      let firstEntries =
+        field_map json__ "FirstEntries" NetworkAclEntries.of_json in
+      make ~forceRemediateForLastEntries ?lastEntries
+        ~forceRemediateForFirstEntries ?firstEntries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration of the first and last rules for the network ACL policy, and the remediation settings for each."]
 module FirewallDeploymentModel =
   struct
     type nonrec t =
@@ -1852,6 +3013,9 @@ module AwsEc2NetworkInterfaceViolations =
   struct
     type nonrec t = AwsEc2NetworkInterfaceViolation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AwsEc2NetworkInterfaceViolation.to_value)) |>
         (fun x -> `List x)
@@ -1878,6 +3042,9 @@ module PartialMatches =
   struct
     type nonrec t = PartialMatch.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PartialMatch.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1902,6 +3069,9 @@ module SecurityGroupRemediationActions =
   struct
     type nonrec t = SecurityGroupRemediationAction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupRemediationAction.to_value)) |>
         (fun x -> `List x)
@@ -1928,6 +3098,9 @@ module DnsRuleGroupPriorities =
   struct
     type nonrec t = DnsRuleGroupPriority.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DnsRuleGroupPriority.to_value)) |>
         (fun x -> `List x)
@@ -1970,10 +3143,40 @@ module PolicyId =
     let of_json j = string_of_json ~kind:"PolicyId" j
     let to_json = simple_to_json to_value
   end
+module EntryViolations =
+  struct
+    type nonrec t = EntryViolation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EntryViolation.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EntryViolation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EntryViolations" ~of_json:EntryViolation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Routes =
   struct
     type nonrec t = Route.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Route.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1997,6 +3200,9 @@ module ExpectedRoutes =
   struct
     type nonrec t = ExpectedRoute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExpectedRoute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2035,20 +3241,30 @@ module NetworkFirewallPolicyDescription =
           "Names of custom actions that are available for use in the stateless default actions settings."];
       statefulRuleGroups: StatefulRuleGroupList.t option
         [@ocaml.doc
-          "The stateful rule groups that are used in the Network Firewall firewall policy."]}
+          "The stateful rule groups that are used in the Network Firewall firewall policy."];
+      statefulDefaultActions: NetworkFirewallActionList.t option
+        [@ocaml.doc
+          "The default actions to take on a packet that doesn't match any stateful rules. The stateful default action is optional, and is only valid when using the strict rule order. Valid values of the stateful default action: aws:drop_strict aws:drop_established aws:alert_strict aws:alert_established"];
+      statefulEngineOptions: StatefulEngineOptions.t option
+        [@ocaml.doc
+          "Additional options governing how Network Firewall handles stateful rules. The stateful rule groups that you use in your policy must have stateful rule options settings that are compatible with these settings."]}
     let make ?statelessRuleGroups =
       fun ?statelessDefaultActions ->
         fun ?statelessFragmentDefaultActions ->
           fun ?statelessCustomActions ->
             fun ?statefulRuleGroups ->
-              fun () ->
-                {
-                  statelessRuleGroups;
-                  statelessDefaultActions;
-                  statelessFragmentDefaultActions;
-                  statelessCustomActions;
-                  statefulRuleGroups
-                }
+              fun ?statefulDefaultActions ->
+                fun ?statefulEngineOptions ->
+                  fun () ->
+                    {
+                      statelessRuleGroups;
+                      statelessDefaultActions;
+                      statelessFragmentDefaultActions;
+                      statelessCustomActions;
+                      statefulRuleGroups;
+                      statefulDefaultActions;
+                      statefulEngineOptions
+                    }
     let to_value x =
       structure_to_value
         [("StatelessRuleGroups",
@@ -2064,9 +3280,21 @@ module NetworkFirewallPolicyDescription =
           (Option.map x.statelessCustomActions
              ~f:NetworkFirewallActionList.to_value));
         ("StatefulRuleGroups",
-          (Option.map x.statefulRuleGroups ~f:StatefulRuleGroupList.to_value))]
+          (Option.map x.statefulRuleGroups ~f:StatefulRuleGroupList.to_value));
+        ("StatefulDefaultActions",
+          (Option.map x.statefulDefaultActions
+             ~f:NetworkFirewallActionList.to_value));
+        ("StatefulEngineOptions",
+          (Option.map x.statefulEngineOptions
+             ~f:StatefulEngineOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let statefulEngineOptions =
+        (Option.map ~f:StatefulEngineOptions.of_xml)
+          (Xml.child xml_arg0 "StatefulEngineOptions") in
+      let statefulDefaultActions =
+        (Option.map ~f:NetworkFirewallActionList.of_xml)
+          (Xml.child xml_arg0 "StatefulDefaultActions") in
       let statefulRuleGroups =
         (Option.map ~f:StatefulRuleGroupList.of_xml)
           (Xml.child xml_arg0 "StatefulRuleGroups") in
@@ -2082,33 +3310,42 @@ module NetworkFirewallPolicyDescription =
       let statelessRuleGroups =
         (Option.map ~f:StatelessRuleGroupList.of_xml)
           (Xml.child xml_arg0 "StatelessRuleGroups") in
-      make ?statefulRuleGroups ?statelessCustomActions
-        ?statelessFragmentDefaultActions ?statelessDefaultActions
-        ?statelessRuleGroups ()
+      make ?statefulEngineOptions ?statefulDefaultActions ?statefulRuleGroups
+        ?statelessCustomActions ?statelessFragmentDefaultActions
+        ?statelessDefaultActions ?statelessRuleGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let statefulEngineOptions =
+        field_map json__ "StatefulEngineOptions"
+          StatefulEngineOptions.of_json in
+      let statefulDefaultActions =
+        field_map json__ "StatefulDefaultActions"
+          NetworkFirewallActionList.of_json in
       let statefulRuleGroups =
-        field_map json "StatefulRuleGroups" StatefulRuleGroupList.of_json in
+        field_map json__ "StatefulRuleGroups" StatefulRuleGroupList.of_json in
       let statelessCustomActions =
-        field_map json "StatelessCustomActions"
+        field_map json__ "StatelessCustomActions"
           NetworkFirewallActionList.of_json in
       let statelessFragmentDefaultActions =
-        field_map json "StatelessFragmentDefaultActions"
+        field_map json__ "StatelessFragmentDefaultActions"
           NetworkFirewallActionList.of_json in
       let statelessDefaultActions =
-        field_map json "StatelessDefaultActions"
+        field_map json__ "StatelessDefaultActions"
           NetworkFirewallActionList.of_json in
       let statelessRuleGroups =
-        field_map json "StatelessRuleGroups" StatelessRuleGroupList.of_json in
-      make ?statefulRuleGroups ?statelessCustomActions
-        ?statelessFragmentDefaultActions ?statelessDefaultActions
-        ?statelessRuleGroups ()
+        field_map json__ "StatelessRuleGroups" StatelessRuleGroupList.of_json in
+      make ?statefulEngineOptions ?statefulDefaultActions ?statefulRuleGroups
+        ?statelessCustomActions ?statelessFragmentDefaultActions
+        ?statelessDefaultActions ?statelessRuleGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The definition of the Network Firewall firewall policy."]
 module PossibleRemediationActionList =
   struct
     type nonrec t = PossibleRemediationAction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PossibleRemediationAction.to_value)) |>
         (fun x -> `List x)
@@ -2129,6 +3366,33 @@ module PossibleRemediationActionList =
     let of_json j =
       list_of_json ~kind:"PossibleRemediationActionList"
         ~of_json:PossibleRemediationAction.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceArnList =
+  struct
+    type nonrec t = ResourceArn.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceArnList" ~of_json:ResourceArn.of_json j
     let to_json v = composed_to_json to_value v
   end
 module CustomerPolicyScopeId =
@@ -2165,7 +3429,7 @@ module ResourceTagKey =
                 (check_string_max i ~max:128) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:\\/=+\\-@*\\\\]*)$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2185,7 +3449,7 @@ module ResourceTagValue =
           ((check_string_max i ~max:256) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"));
+                  ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:\\/=+\\-@*\\\\]*)$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2195,6 +3459,33 @@ module ResourceTagValue =
     let of_json j = string_of_json ~kind:"ResourceTagValue" j
     let to_json = simple_to_json to_value
   end
+module NetworkAclCommonPolicy =
+  struct
+    type nonrec t =
+      {
+      networkAclEntrySet: NetworkAclEntrySet.t
+        [@ocaml.doc
+          "The definition of the first and last rules for the network ACL policy."]}
+    let context_ = "NetworkAclCommonPolicy"
+    let make ~networkAclEntrySet = fun () -> { networkAclEntrySet }
+    let to_value x =
+      structure_to_value
+        [("NetworkAclEntrySet",
+           (Some (NetworkAclEntrySet.to_value x.networkAclEntrySet)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkAclEntrySet =
+        NetworkAclEntrySet.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NetworkAclEntrySet") in
+      make ~networkAclEntrySet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkAclEntrySet =
+        field_map_exn json__ "NetworkAclEntrySet" NetworkAclEntrySet.of_json in
+      make ~networkAclEntrySet ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines a Firewall Manager network ACL policy. This is used in the PolicyOption of a SecurityServicePolicyData for a Policy, when the SecurityServicePolicyData type is set to NETWORK_ACL_COMMON. For information about network ACLs, see Control traffic to subnets using network ACLs in the Amazon Virtual Private Cloud User Guide."]
 module NetworkFirewallPolicy =
   struct
     type nonrec t =
@@ -2215,9 +3506,9 @@ module NetworkFirewallPolicy =
           (Xml.child xml_arg0 "FirewallDeploymentModel") in
       make ?firewallDeploymentModel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallDeploymentModel =
-        field_map json "FirewallDeploymentModel"
+        field_map json__ "FirewallDeploymentModel"
           FirewallDeploymentModel.of_json in
       make ?firewallDeploymentModel ()
     let to_json v = composed_to_json to_value v
@@ -2229,7 +3520,7 @@ module ThirdPartyFirewallPolicy =
       {
       firewallDeploymentModel: FirewallDeploymentModel.t option
         [@ocaml.doc
-          "Defines the deployment model to use for the third-party firewall."]}
+          "Defines the deployment model to use for the third-party firewall policy."]}
     let make ?firewallDeploymentModel = fun () -> { firewallDeploymentModel }
     let to_value x =
       structure_to_value
@@ -2243,13 +3534,14 @@ module ThirdPartyFirewallPolicy =
           (Xml.child xml_arg0 "FirewallDeploymentModel") in
       make ?firewallDeploymentModel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallDeploymentModel =
-        field_map json "FirewallDeploymentModel"
+        field_map json__ "FirewallDeploymentModel"
           FirewallDeploymentModel.of_json in
       make ?firewallDeploymentModel ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Configures the policy for the third-party firewall."]
+  end[@@ocaml.doc
+       "Configures the deployment model for the third-party firewall."]
 module App =
   struct
     type nonrec t =
@@ -2279,13 +3571,130 @@ module App =
           (Xml.child_exn ~context:context_ xml_arg0 "AppName") in
       make ~port ~protocol ~appName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let port = field_map_exn json "Port" IPPortNumber.of_json in
-      let protocol = field_map_exn json "Protocol" Protocol.of_json in
-      let appName = field_map_exn json "AppName" ResourceName.of_json in
+    let of_json json__ =
+      let port = field_map_exn json__ "Port" IPPortNumber.of_json in
+      let protocol = field_map_exn json__ "Protocol" Protocol.of_json in
+      let appName = field_map_exn json__ "AppName" ResourceName.of_json in
       make ~port ~protocol ~appName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An individual Firewall Manager application."]
+module AWSAccountId =
+  struct
+    type nonrec t = string
+    let context_ = "AWSAccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"^[0-9]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AWSAccountId" j
+    let to_json = simple_to_json to_value
+  end
+module OrganizationalUnitId =
+  struct
+    type nonrec t = string
+    let context_ = "OrganizationalUnitId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:16) >>=
+             (fun () ->
+                (check_string_max i ~max:68) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OrganizationalUnitId" j
+    let to_json = simple_to_json to_value
+  end
+module SecurityServiceType =
+  struct
+    type nonrec t =
+      | WAF 
+      | WAFV2 
+      | SHIELD_ADVANCED 
+      | SECURITY_GROUPS_COMMON 
+      | SECURITY_GROUPS_CONTENT_AUDIT 
+      | SECURITY_GROUPS_USAGE_AUDIT 
+      | NETWORK_FIREWALL 
+      | DNS_FIREWALL 
+      | THIRD_PARTY_FIREWALL 
+      | IMPORT_NETWORK_FIREWALL 
+      | NETWORK_ACL_COMMON 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | WAF -> "WAF"
+      | WAFV2 -> "WAFV2"
+      | SHIELD_ADVANCED -> "SHIELD_ADVANCED"
+      | SECURITY_GROUPS_COMMON -> "SECURITY_GROUPS_COMMON"
+      | SECURITY_GROUPS_CONTENT_AUDIT -> "SECURITY_GROUPS_CONTENT_AUDIT"
+      | SECURITY_GROUPS_USAGE_AUDIT -> "SECURITY_GROUPS_USAGE_AUDIT"
+      | NETWORK_FIREWALL -> "NETWORK_FIREWALL"
+      | DNS_FIREWALL -> "DNS_FIREWALL"
+      | THIRD_PARTY_FIREWALL -> "THIRD_PARTY_FIREWALL"
+      | IMPORT_NETWORK_FIREWALL -> "IMPORT_NETWORK_FIREWALL"
+      | NETWORK_ACL_COMMON -> "NETWORK_ACL_COMMON"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "WAF" -> WAF
+      | "WAFV2" -> WAFV2
+      | "SHIELD_ADVANCED" -> SHIELD_ADVANCED
+      | "SECURITY_GROUPS_COMMON" -> SECURITY_GROUPS_COMMON
+      | "SECURITY_GROUPS_CONTENT_AUDIT" -> SECURITY_GROUPS_CONTENT_AUDIT
+      | "SECURITY_GROUPS_USAGE_AUDIT" -> SECURITY_GROUPS_USAGE_AUDIT
+      | "NETWORK_FIREWALL" -> NETWORK_FIREWALL
+      | "DNS_FIREWALL" -> DNS_FIREWALL
+      | "THIRD_PARTY_FIREWALL" -> THIRD_PARTY_FIREWALL
+      | "IMPORT_NETWORK_FIREWALL" -> IMPORT_NETWORK_FIREWALL
+      | "NETWORK_ACL_COMMON" -> NETWORK_ACL_COMMON
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SecurityServiceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SecurityServiceType" j)
+    let to_json = simple_to_json to_value
+  end
+module AWSRegion =
+  struct
+    type nonrec t = string
+    let context_ = "AWSRegion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:6) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(af|ap|ca|eu|il|me|mx|sa|us|cn|us-gov)-\\w+-\\d+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AWSRegion" j
+    let to_json = simple_to_json to_value
+  end
 module EvaluationResult =
   struct
     type nonrec t =
@@ -2326,13 +3735,14 @@ module EvaluationResult =
           (Xml.child xml_arg0 "ComplianceStatus") in
       make ?evaluationLimitExceeded ?violatorCount ?complianceStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let evaluationLimitExceeded =
-        field_map json "EvaluationLimitExceeded" Boolean.of_json in
+        field_map json__ "EvaluationLimitExceeded" Boolean.of_json in
       let violatorCount =
-        field_map json "ViolatorCount" ResourceCount.of_json in
+        field_map json__ "ViolatorCount" ResourceCount.of_json in
       let complianceStatus =
-        field_map json "ComplianceStatus" PolicyComplianceStatusType.of_json in
+        field_map json__ "ComplianceStatus"
+          PolicyComplianceStatusType.of_json in
       make ?evaluationLimitExceeded ?violatorCount ?complianceStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2378,7 +3788,7 @@ module DetailedInfo =
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:1024) >>=
+                (check_string_max i ~max:4096) >>=
                   (fun () ->
                      check_pattern i
                        ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=,+\\-@]*)$")));
@@ -2421,12 +3831,12 @@ module AwsEc2InstanceViolation =
           (Xml.child xml_arg0 "ViolationTarget") in
       make ?awsEc2NetworkInterfaceViolations ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let awsEc2NetworkInterfaceViolations =
-        field_map json "AwsEc2NetworkInterfaceViolations"
+        field_map json__ "AwsEc2NetworkInterfaceViolations"
           AwsEc2NetworkInterfaceViolations.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?awsEc2NetworkInterfaceViolations ?violationTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Violation detail for an EC2 instance resource."]
@@ -2486,17 +3896,17 @@ module AwsVPCSecurityGroupViolation =
       make ?possibleSecurityGroupRemediationActions ?partialMatches
         ?violationTargetDescription ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let possibleSecurityGroupRemediationActions =
-        field_map json "PossibleSecurityGroupRemediationActions"
+        field_map json__ "PossibleSecurityGroupRemediationActions"
           SecurityGroupRemediationActions.of_json in
       let partialMatches =
-        field_map json "PartialMatches" PartialMatches.of_json in
+        field_map json__ "PartialMatches" PartialMatches.of_json in
       let violationTargetDescription =
-        field_map json "ViolationTargetDescription"
+        field_map json__ "ViolationTargetDescription"
           LengthBoundedString.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?possibleSecurityGroupRemediationActions ?partialMatches
         ?violationTargetDescription ?violationTarget ()
     let to_json v = composed_to_json to_value v
@@ -2531,12 +3941,12 @@ module DnsDuplicateRuleGroupViolation =
           (Xml.child xml_arg0 "ViolationTarget") in
       make ?violationTargetDescription ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let violationTargetDescription =
-        field_map json "ViolationTargetDescription"
+        field_map json__ "ViolationTargetDescription"
           LengthBoundedString.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?violationTargetDescription ?violationTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2586,15 +3996,15 @@ module DnsRuleGroupLimitExceededViolation =
       make ?numberOfRuleGroupsAlreadyAssociated ?violationTargetDescription
         ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let numberOfRuleGroupsAlreadyAssociated =
-        field_map json "NumberOfRuleGroupsAlreadyAssociated"
+        field_map json__ "NumberOfRuleGroupsAlreadyAssociated"
           BasicInteger.of_json in
       let violationTargetDescription =
-        field_map json "ViolationTargetDescription"
+        field_map json__ "ViolationTargetDescription"
           LengthBoundedString.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?numberOfRuleGroupsAlreadyAssociated ?violationTargetDescription
         ?violationTarget ()
     let to_json v = composed_to_json to_value v
@@ -2665,18 +4075,19 @@ module DnsRuleGroupPriorityConflictViolation =
       make ?unavailablePriorities ?conflictingPolicyId ?conflictingPriority
         ?violationTargetDescription ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unavailablePriorities =
-        field_map json "UnavailablePriorities" DnsRuleGroupPriorities.of_json in
+        field_map json__ "UnavailablePriorities"
+          DnsRuleGroupPriorities.of_json in
       let conflictingPolicyId =
-        field_map json "ConflictingPolicyId" PolicyId.of_json in
+        field_map json__ "ConflictingPolicyId" PolicyId.of_json in
       let conflictingPriority =
-        field_map json "ConflictingPriority" DnsRuleGroupPriority.of_json in
+        field_map json__ "ConflictingPriority" DnsRuleGroupPriority.of_json in
       let violationTargetDescription =
-        field_map json "ViolationTargetDescription"
+        field_map json__ "ViolationTargetDescription"
           LengthBoundedString.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?unavailablePriorities ?conflictingPolicyId ?conflictingPriority
         ?violationTargetDescription ?violationTarget ()
     let to_json v = composed_to_json to_value v
@@ -2746,15 +4157,16 @@ module FirewallSubnetIsOutOfScopeViolation =
       make ?vpcEndpointId ?subnetAvailabilityZoneId ?subnetAvailabilityZone
         ?vpcId ?firewallSubnetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcEndpointId = field_map json "VpcEndpointId" ResourceId.of_json in
+    let of_json json__ =
+      let vpcEndpointId = field_map json__ "VpcEndpointId" ResourceId.of_json in
       let subnetAvailabilityZoneId =
-        field_map json "SubnetAvailabilityZoneId" LengthBoundedString.of_json in
+        field_map json__ "SubnetAvailabilityZoneId"
+          LengthBoundedString.of_json in
       let subnetAvailabilityZone =
-        field_map json "SubnetAvailabilityZone" LengthBoundedString.of_json in
-      let vpcId = field_map json "VpcId" ResourceId.of_json in
+        field_map json__ "SubnetAvailabilityZone" LengthBoundedString.of_json in
+      let vpcId = field_map json__ "VpcId" ResourceId.of_json in
       let firewallSubnetId =
-        field_map json "FirewallSubnetId" ResourceId.of_json in
+        field_map json__ "FirewallSubnetId" ResourceId.of_json in
       make ?vpcEndpointId ?subnetAvailabilityZoneId ?subnetAvailabilityZone
         ?vpcId ?firewallSubnetId ()
     let to_json v = composed_to_json to_value v
@@ -2814,19 +4226,90 @@ module FirewallSubnetMissingVPCEndpointViolation =
       make ?subnetAvailabilityZoneId ?subnetAvailabilityZone ?vpcId
         ?firewallSubnetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subnetAvailabilityZoneId =
-        field_map json "SubnetAvailabilityZoneId" LengthBoundedString.of_json in
+        field_map json__ "SubnetAvailabilityZoneId"
+          LengthBoundedString.of_json in
       let subnetAvailabilityZone =
-        field_map json "SubnetAvailabilityZone" LengthBoundedString.of_json in
-      let vpcId = field_map json "VpcId" ResourceId.of_json in
+        field_map json__ "SubnetAvailabilityZone" LengthBoundedString.of_json in
+      let vpcId = field_map json__ "VpcId" ResourceId.of_json in
       let firewallSubnetId =
-        field_map json "FirewallSubnetId" ResourceId.of_json in
+        field_map json__ "FirewallSubnetId" ResourceId.of_json in
       make ?subnetAvailabilityZoneId ?subnetAvailabilityZone ?vpcId
         ?firewallSubnetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The violation details for a firewall subnet's VPC endpoint that's deleted or missing."]
+module InvalidNetworkAclEntriesViolation =
+  struct
+    type nonrec t =
+      {
+      vpc: ResourceId.t option
+        [@ocaml.doc "The VPC where the violation was found."];
+      subnet: ResourceId.t option
+        [@ocaml.doc "The subnet that's associated with the network ACL."];
+      subnetAvailabilityZone: LengthBoundedString.t option
+        [@ocaml.doc "The Availability Zone where the network ACL is in use."];
+      currentAssociatedNetworkAcl: ResourceId.t option
+        [@ocaml.doc "The network ACL containing the entry violations."];
+      entryViolations: EntryViolations.t option
+        [@ocaml.doc
+          "Detailed information about the entry violations in the network ACL."]}
+    let make ?vpc =
+      fun ?subnet ->
+        fun ?subnetAvailabilityZone ->
+          fun ?currentAssociatedNetworkAcl ->
+            fun ?entryViolations ->
+              fun () ->
+                {
+                  vpc;
+                  subnet;
+                  subnetAvailabilityZone;
+                  currentAssociatedNetworkAcl;
+                  entryViolations
+                }
+    let to_value x =
+      structure_to_value
+        [("Vpc", (Option.map x.vpc ~f:ResourceId.to_value));
+        ("Subnet", (Option.map x.subnet ~f:ResourceId.to_value));
+        ("SubnetAvailabilityZone",
+          (Option.map x.subnetAvailabilityZone
+             ~f:LengthBoundedString.to_value));
+        ("CurrentAssociatedNetworkAcl",
+          (Option.map x.currentAssociatedNetworkAcl ~f:ResourceId.to_value));
+        ("EntryViolations",
+          (Option.map x.entryViolations ~f:EntryViolations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entryViolations =
+        (Option.map ~f:EntryViolations.of_xml)
+          (Xml.child xml_arg0 "EntryViolations") in
+      let currentAssociatedNetworkAcl =
+        (Option.map ~f:ResourceId.of_xml)
+          (Xml.child xml_arg0 "CurrentAssociatedNetworkAcl") in
+      let subnetAvailabilityZone =
+        (Option.map ~f:LengthBoundedString.of_xml)
+          (Xml.child xml_arg0 "SubnetAvailabilityZone") in
+      let subnet =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Subnet") in
+      let vpc = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Vpc") in
+      make ?entryViolations ?currentAssociatedNetworkAcl
+        ?subnetAvailabilityZone ?subnet ?vpc ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entryViolations =
+        field_map json__ "EntryViolations" EntryViolations.of_json in
+      let currentAssociatedNetworkAcl =
+        field_map json__ "CurrentAssociatedNetworkAcl" ResourceId.of_json in
+      let subnetAvailabilityZone =
+        field_map json__ "SubnetAvailabilityZone" LengthBoundedString.of_json in
+      let subnet = field_map json__ "Subnet" ResourceId.of_json in
+      let vpc = field_map json__ "Vpc" ResourceId.of_json in
+      make ?entryViolations ?currentAssociatedNetworkAcl
+        ?subnetAvailabilityZone ?subnet ?vpc ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Violation detail for the entries in a network ACL resource."]
 module NetworkFirewallBlackHoleRouteDetectedViolation =
   struct
     type nonrec t =
@@ -2866,12 +4349,12 @@ module NetworkFirewallBlackHoleRouteDetectedViolation =
           (Xml.child xml_arg0 "ViolationTarget") in
       make ?violatingRoutes ?vpcId ?routeTableId ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let violatingRoutes = field_map json "ViolatingRoutes" Routes.of_json in
-      let vpcId = field_map json "VpcId" ResourceId.of_json in
-      let routeTableId = field_map json "RouteTableId" ResourceId.of_json in
+    let of_json json__ =
+      let violatingRoutes = field_map json__ "ViolatingRoutes" Routes.of_json in
+      let vpcId = field_map json__ "VpcId" ResourceId.of_json in
+      let routeTableId = field_map json__ "RouteTableId" ResourceId.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?violatingRoutes ?vpcId ?routeTableId ?violationTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3027,33 +4510,36 @@ module NetworkFirewallInternetTrafficNotInspectedViolation =
         ?currentFirewallSubnetRouteTable ?isRouteTableUsedInDifferentAZ
         ?violatingRoutes ?routeTableId ?subnetAvailabilityZone ?subnetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" ResourceId.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" ResourceId.of_json in
       let actualInternetGatewayRoutes =
-        field_map json "ActualInternetGatewayRoutes" Routes.of_json in
+        field_map json__ "ActualInternetGatewayRoutes" Routes.of_json in
       let expectedInternetGatewayRoutes =
-        field_map json "ExpectedInternetGatewayRoutes" ExpectedRoutes.of_json in
+        field_map json__ "ExpectedInternetGatewayRoutes"
+          ExpectedRoutes.of_json in
       let currentInternetGatewayRouteTable =
-        field_map json "CurrentInternetGatewayRouteTable" ResourceId.of_json in
+        field_map json__ "CurrentInternetGatewayRouteTable"
+          ResourceId.of_json in
       let internetGatewayId =
-        field_map json "InternetGatewayId" ResourceId.of_json in
+        field_map json__ "InternetGatewayId" ResourceId.of_json in
       let actualFirewallSubnetRoutes =
-        field_map json "ActualFirewallSubnetRoutes" Routes.of_json in
+        field_map json__ "ActualFirewallSubnetRoutes" Routes.of_json in
       let expectedFirewallSubnetRoutes =
-        field_map json "ExpectedFirewallSubnetRoutes" ExpectedRoutes.of_json in
+        field_map json__ "ExpectedFirewallSubnetRoutes"
+          ExpectedRoutes.of_json in
       let firewallSubnetId =
-        field_map json "FirewallSubnetId" ResourceId.of_json in
+        field_map json__ "FirewallSubnetId" ResourceId.of_json in
       let expectedFirewallEndpoint =
-        field_map json "ExpectedFirewallEndpoint" ResourceId.of_json in
+        field_map json__ "ExpectedFirewallEndpoint" ResourceId.of_json in
       let currentFirewallSubnetRouteTable =
-        field_map json "CurrentFirewallSubnetRouteTable" ResourceId.of_json in
+        field_map json__ "CurrentFirewallSubnetRouteTable" ResourceId.of_json in
       let isRouteTableUsedInDifferentAZ =
-        field_map json "IsRouteTableUsedInDifferentAZ" Boolean.of_json in
-      let violatingRoutes = field_map json "ViolatingRoutes" Routes.of_json in
-      let routeTableId = field_map json "RouteTableId" ResourceId.of_json in
+        field_map json__ "IsRouteTableUsedInDifferentAZ" Boolean.of_json in
+      let violatingRoutes = field_map json__ "ViolatingRoutes" Routes.of_json in
+      let routeTableId = field_map json__ "RouteTableId" ResourceId.of_json in
       let subnetAvailabilityZone =
-        field_map json "SubnetAvailabilityZone" LengthBoundedString.of_json in
-      let subnetId = field_map json "SubnetId" ResourceId.of_json in
+        field_map json__ "SubnetAvailabilityZone" LengthBoundedString.of_json in
+      let subnetId = field_map json__ "SubnetId" ResourceId.of_json in
       make ?vpcId ?actualInternetGatewayRoutes ?expectedInternetGatewayRoutes
         ?currentInternetGatewayRouteTable ?internetGatewayId
         ?actualFirewallSubnetRoutes ?expectedFirewallSubnetRoutes
@@ -3223,36 +4709,39 @@ module NetworkFirewallInvalidRouteConfigurationViolation =
         ?currentFirewallSubnetRouteTable ?violatingRoute
         ?isRouteTableUsedInDifferentAZ ?routeTableId ?affectedSubnets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" ResourceId.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" ResourceId.of_json in
       let actualInternetGatewayRoutes =
-        field_map json "ActualInternetGatewayRoutes" Routes.of_json in
+        field_map json__ "ActualInternetGatewayRoutes" Routes.of_json in
       let expectedInternetGatewayRoutes =
-        field_map json "ExpectedInternetGatewayRoutes" ExpectedRoutes.of_json in
+        field_map json__ "ExpectedInternetGatewayRoutes"
+          ExpectedRoutes.of_json in
       let currentInternetGatewayRouteTable =
-        field_map json "CurrentInternetGatewayRouteTable" ResourceId.of_json in
+        field_map json__ "CurrentInternetGatewayRouteTable"
+          ResourceId.of_json in
       let internetGatewayId =
-        field_map json "InternetGatewayId" ResourceId.of_json in
+        field_map json__ "InternetGatewayId" ResourceId.of_json in
       let actualFirewallSubnetRoutes =
-        field_map json "ActualFirewallSubnetRoutes" Routes.of_json in
+        field_map json__ "ActualFirewallSubnetRoutes" Routes.of_json in
       let expectedFirewallSubnetRoutes =
-        field_map json "ExpectedFirewallSubnetRoutes" ExpectedRoutes.of_json in
+        field_map json__ "ExpectedFirewallSubnetRoutes"
+          ExpectedRoutes.of_json in
       let actualFirewallSubnetId =
-        field_map json "ActualFirewallSubnetId" ResourceId.of_json in
+        field_map json__ "ActualFirewallSubnetId" ResourceId.of_json in
       let expectedFirewallSubnetId =
-        field_map json "ExpectedFirewallSubnetId" ResourceId.of_json in
+        field_map json__ "ExpectedFirewallSubnetId" ResourceId.of_json in
       let actualFirewallEndpoint =
-        field_map json "ActualFirewallEndpoint" ResourceId.of_json in
+        field_map json__ "ActualFirewallEndpoint" ResourceId.of_json in
       let expectedFirewallEndpoint =
-        field_map json "ExpectedFirewallEndpoint" ResourceId.of_json in
+        field_map json__ "ExpectedFirewallEndpoint" ResourceId.of_json in
       let currentFirewallSubnetRouteTable =
-        field_map json "CurrentFirewallSubnetRouteTable" ResourceId.of_json in
-      let violatingRoute = field_map json "ViolatingRoute" Route.of_json in
+        field_map json__ "CurrentFirewallSubnetRouteTable" ResourceId.of_json in
+      let violatingRoute = field_map json__ "ViolatingRoute" Route.of_json in
       let isRouteTableUsedInDifferentAZ =
-        field_map json "IsRouteTableUsedInDifferentAZ" Boolean.of_json in
-      let routeTableId = field_map json "RouteTableId" ResourceId.of_json in
+        field_map json__ "IsRouteTableUsedInDifferentAZ" Boolean.of_json in
+      let routeTableId = field_map json__ "RouteTableId" ResourceId.of_json in
       let affectedSubnets =
-        field_map json "AffectedSubnets" ResourceIdList.of_json in
+        field_map json__ "AffectedSubnets" ResourceIdList.of_json in
       make ?vpcId ?actualInternetGatewayRoutes ?expectedInternetGatewayRoutes
         ?currentInternetGatewayRouteTable ?internetGatewayId
         ?actualFirewallSubnetRoutes ?expectedFirewallSubnetRoutes
@@ -3323,16 +4812,16 @@ module NetworkFirewallMissingExpectedRTViolation =
       make ?expectedRouteTable ?currentRouteTable ?availabilityZone ?vPC
         ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expectedRouteTable =
-        field_map json "ExpectedRouteTable" ResourceId.of_json in
+        field_map json__ "ExpectedRouteTable" ResourceId.of_json in
       let currentRouteTable =
-        field_map json "CurrentRouteTable" ResourceId.of_json in
+        field_map json__ "CurrentRouteTable" ResourceId.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" LengthBoundedString.of_json in
-      let vPC = field_map json "VPC" ResourceId.of_json in
+        field_map json__ "AvailabilityZone" LengthBoundedString.of_json in
+      let vPC = field_map json__ "VPC" ResourceId.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?expectedRouteTable ?currentRouteTable ?availabilityZone ?vPC
         ?violationTarget ()
     let to_json v = composed_to_json to_value v
@@ -3369,12 +4858,12 @@ module NetworkFirewallMissingExpectedRoutesViolation =
           (Xml.child xml_arg0 "ViolationTarget") in
       make ?vpcId ?expectedRoutes ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" ResourceId.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" ResourceId.of_json in
       let expectedRoutes =
-        field_map json "ExpectedRoutes" ExpectedRoutes.of_json in
+        field_map json__ "ExpectedRoutes" ExpectedRoutes.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?vpcId ?expectedRoutes ?violationTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3425,14 +4914,15 @@ module NetworkFirewallMissingFirewallViolation =
           (Xml.child xml_arg0 "ViolationTarget") in
       make ?targetViolationReason ?availabilityZone ?vPC ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetViolationReason =
-        field_map json "TargetViolationReason" TargetViolationReason.of_json in
+        field_map json__ "TargetViolationReason"
+          TargetViolationReason.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" LengthBoundedString.of_json in
-      let vPC = field_map json "VPC" ResourceId.of_json in
+        field_map json__ "AvailabilityZone" LengthBoundedString.of_json in
+      let vPC = field_map json__ "VPC" ResourceId.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?targetViolationReason ?availabilityZone ?vPC ?violationTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3483,14 +4973,15 @@ module NetworkFirewallMissingSubnetViolation =
           (Xml.child xml_arg0 "ViolationTarget") in
       make ?targetViolationReason ?availabilityZone ?vPC ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetViolationReason =
-        field_map json "TargetViolationReason" TargetViolationReason.of_json in
+        field_map json__ "TargetViolationReason"
+          TargetViolationReason.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" LengthBoundedString.of_json in
-      let vPC = field_map json "VPC" ResourceId.of_json in
+        field_map json__ "AvailabilityZone" LengthBoundedString.of_json in
+      let vPC = field_map json__ "VPC" ResourceId.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?targetViolationReason ?availabilityZone ?vPC ?violationTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3541,15 +5032,15 @@ module NetworkFirewallPolicyModifiedViolation =
       make ?expectedPolicyDescription ?currentPolicyDescription
         ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expectedPolicyDescription =
-        field_map json "ExpectedPolicyDescription"
+        field_map json__ "ExpectedPolicyDescription"
           NetworkFirewallPolicyDescription.of_json in
       let currentPolicyDescription =
-        field_map json "CurrentPolicyDescription"
+        field_map json__ "CurrentPolicyDescription"
           NetworkFirewallPolicyDescription.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?expectedPolicyDescription ?currentPolicyDescription
         ?violationTarget ()
     let to_json v = composed_to_json to_value v
@@ -3608,14 +5099,14 @@ module NetworkFirewallUnexpectedFirewallRoutesViolation =
       make ?vpcId ?firewallEndpoint ?routeTableId ?violatingRoutes
         ?firewallSubnetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" ResourceId.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" ResourceId.of_json in
       let firewallEndpoint =
-        field_map json "FirewallEndpoint" ResourceId.of_json in
-      let routeTableId = field_map json "RouteTableId" ResourceId.of_json in
-      let violatingRoutes = field_map json "ViolatingRoutes" Routes.of_json in
+        field_map json__ "FirewallEndpoint" ResourceId.of_json in
+      let routeTableId = field_map json__ "RouteTableId" ResourceId.of_json in
+      let violatingRoutes = field_map json__ "ViolatingRoutes" Routes.of_json in
       let firewallSubnetId =
-        field_map json "FirewallSubnetId" ResourceId.of_json in
+        field_map json__ "FirewallSubnetId" ResourceId.of_json in
       make ?vpcId ?firewallEndpoint ?routeTableId ?violatingRoutes
         ?firewallSubnetId ()
     let to_json v = composed_to_json to_value v
@@ -3656,11 +5147,11 @@ module NetworkFirewallUnexpectedGatewayRoutesViolation =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "GatewayId") in
       make ?vpcId ?routeTableId ?violatingRoutes ?gatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" ResourceId.of_json in
-      let routeTableId = field_map json "RouteTableId" ResourceId.of_json in
-      let violatingRoutes = field_map json "ViolatingRoutes" Routes.of_json in
-      let gatewayId = field_map json "GatewayId" ResourceId.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" ResourceId.of_json in
+      let routeTableId = field_map json__ "RouteTableId" ResourceId.of_json in
+      let violatingRoutes = field_map json__ "ViolatingRoutes" Routes.of_json in
+      let gatewayId = field_map json__ "GatewayId" ResourceId.of_json in
       make ?vpcId ?routeTableId ?violatingRoutes ?gatewayId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3692,11 +5183,11 @@ module PossibleRemediationActions =
           (Xml.child xml_arg0 "Description") in
       make ?actions ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let actions =
-        field_map json "Actions" PossibleRemediationActionList.of_json in
+        field_map json__ "Actions" PossibleRemediationActionList.of_json in
       let description =
-        field_map json "Description" LengthBoundedString.of_json in
+        field_map json__ "Description" LengthBoundedString.of_json in
       make ?actions ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3828,27 +5319,29 @@ module RouteHasOutOfScopeEndpointViolation =
         ?subnetAvailabilityZone ?violatingRoutes ?routeTableId ?vpcId
         ?subnetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let internetGatewayRoutes =
-        field_map json "InternetGatewayRoutes" Routes.of_json in
+        field_map json__ "InternetGatewayRoutes" Routes.of_json in
       let currentInternetGatewayRouteTable =
-        field_map json "CurrentInternetGatewayRouteTable" ResourceId.of_json in
+        field_map json__ "CurrentInternetGatewayRouteTable"
+          ResourceId.of_json in
       let internetGatewayId =
-        field_map json "InternetGatewayId" ResourceId.of_json in
+        field_map json__ "InternetGatewayId" ResourceId.of_json in
       let firewallSubnetRoutes =
-        field_map json "FirewallSubnetRoutes" Routes.of_json in
+        field_map json__ "FirewallSubnetRoutes" Routes.of_json in
       let firewallSubnetId =
-        field_map json "FirewallSubnetId" ResourceId.of_json in
+        field_map json__ "FirewallSubnetId" ResourceId.of_json in
       let currentFirewallSubnetRouteTable =
-        field_map json "CurrentFirewallSubnetRouteTable" ResourceId.of_json in
+        field_map json__ "CurrentFirewallSubnetRouteTable" ResourceId.of_json in
       let subnetAvailabilityZoneId =
-        field_map json "SubnetAvailabilityZoneId" LengthBoundedString.of_json in
+        field_map json__ "SubnetAvailabilityZoneId"
+          LengthBoundedString.of_json in
       let subnetAvailabilityZone =
-        field_map json "SubnetAvailabilityZone" LengthBoundedString.of_json in
-      let violatingRoutes = field_map json "ViolatingRoutes" Routes.of_json in
-      let routeTableId = field_map json "RouteTableId" ResourceId.of_json in
-      let vpcId = field_map json "VpcId" ResourceId.of_json in
-      let subnetId = field_map json "SubnetId" ResourceId.of_json in
+        field_map json__ "SubnetAvailabilityZone" LengthBoundedString.of_json in
+      let violatingRoutes = field_map json__ "ViolatingRoutes" Routes.of_json in
+      let routeTableId = field_map json__ "RouteTableId" ResourceId.of_json in
+      let vpcId = field_map json__ "VpcId" ResourceId.of_json in
+      let subnetId = field_map json__ "SubnetId" ResourceId.of_json in
       make ?internetGatewayRoutes ?currentInternetGatewayRouteTable
         ?internetGatewayId ?firewallSubnetRoutes ?firewallSubnetId
         ?currentFirewallSubnetRouteTable ?subnetAvailabilityZoneId
@@ -3918,16 +5411,16 @@ module ThirdPartyFirewallMissingExpectedRouteTableViolation =
       make ?expectedRouteTable ?currentRouteTable ?availabilityZone ?vPC
         ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expectedRouteTable =
-        field_map json "ExpectedRouteTable" ResourceId.of_json in
+        field_map json__ "ExpectedRouteTable" ResourceId.of_json in
       let currentRouteTable =
-        field_map json "CurrentRouteTable" ResourceId.of_json in
+        field_map json__ "CurrentRouteTable" ResourceId.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" LengthBoundedString.of_json in
-      let vPC = field_map json "VPC" ResourceId.of_json in
+        field_map json__ "AvailabilityZone" LengthBoundedString.of_json in
+      let vPC = field_map json__ "VPC" ResourceId.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?expectedRouteTable ?currentRouteTable ?availabilityZone ?vPC
         ?violationTarget ()
     let to_json v = composed_to_json to_value v
@@ -3980,14 +5473,15 @@ module ThirdPartyFirewallMissingFirewallViolation =
           (Xml.child xml_arg0 "ViolationTarget") in
       make ?targetViolationReason ?availabilityZone ?vPC ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetViolationReason =
-        field_map json "TargetViolationReason" TargetViolationReason.of_json in
+        field_map json__ "TargetViolationReason"
+          TargetViolationReason.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" LengthBoundedString.of_json in
-      let vPC = field_map json "VPC" ResourceId.of_json in
+        field_map json__ "AvailabilityZone" LengthBoundedString.of_json in
+      let vPC = field_map json__ "VPC" ResourceId.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?targetViolationReason ?availabilityZone ?vPC ?violationTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4039,18 +5533,86 @@ module ThirdPartyFirewallMissingSubnetViolation =
           (Xml.child xml_arg0 "ViolationTarget") in
       make ?targetViolationReason ?availabilityZone ?vPC ?violationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetViolationReason =
-        field_map json "TargetViolationReason" TargetViolationReason.of_json in
+        field_map json__ "TargetViolationReason"
+          TargetViolationReason.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" LengthBoundedString.of_json in
-      let vPC = field_map json "VPC" ResourceId.of_json in
+        field_map json__ "AvailabilityZone" LengthBoundedString.of_json in
+      let vPC = field_map json__ "VPC" ResourceId.of_json in
       let violationTarget =
-        field_map json "ViolationTarget" ViolationTarget.of_json in
+        field_map json__ "ViolationTarget" ViolationTarget.of_json in
       make ?targetViolationReason ?availabilityZone ?vPC ?violationTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The violation details for a third-party firewall for an Availability Zone that's missing the Firewall Manager managed subnet."]
+module WebACLHasIncompatibleConfigurationViolation =
+  struct
+    type nonrec t =
+      {
+      webACLArn: ResourceArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the web ACL."];
+      description: LengthBoundedString.t option
+        [@ocaml.doc
+          "Information about the problems that Firewall Manager encountered with the web ACL configuration."]}
+    let make ?webACLArn =
+      fun ?description -> fun () -> { webACLArn; description }
+    let to_value x =
+      structure_to_value
+        [("WebACLArn", (Option.map x.webACLArn ~f:ResourceArn.to_value));
+        ("Description",
+          (Option.map x.description ~f:LengthBoundedString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:LengthBoundedString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let webACLArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "WebACLArn") in
+      make ?description ?webACLArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "Description" LengthBoundedString.of_json in
+      let webACLArn = field_map json__ "WebACLArn" ResourceArn.of_json in
+      make ?description ?webACLArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The violation details for a web ACL whose configuration is incompatible with the Firewall Manager policy."]
+module WebACLHasOutOfScopeResourcesViolation =
+  struct
+    type nonrec t =
+      {
+      webACLArn: ResourceArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the web ACL."];
+      outOfScopeResourceList: ResourceArnList.t option
+        [@ocaml.doc
+          "An array of Amazon Resource Name (ARN) for the resources that are out of scope of the policy and are associated with the web ACL."]}
+    let make ?webACLArn =
+      fun ?outOfScopeResourceList ->
+        fun () -> { webACLArn; outOfScopeResourceList }
+    let to_value x =
+      structure_to_value
+        [("WebACLArn", (Option.map x.webACLArn ~f:ResourceArn.to_value));
+        ("OutOfScopeResourceList",
+          (Option.map x.outOfScopeResourceList ~f:ResourceArnList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outOfScopeResourceList =
+        (Option.map ~f:ResourceArnList.of_xml)
+          (Xml.child xml_arg0 "OutOfScopeResourceList") in
+      let webACLArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "WebACLArn") in
+      make ?outOfScopeResourceList ?webACLArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outOfScopeResourceList =
+        field_map json__ "OutOfScopeResourceList" ResourceArnList.of_json in
+      let webACLArn = field_map json__ "WebACLArn" ResourceArn.of_json in
+      make ?outOfScopeResourceList ?webACLArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The violation details for a web ACL that's associated with at least one resource that's out of scope of the Firewall Manager policy."]
 module TagKey =
   struct
     type nonrec t = string
@@ -4117,6 +5679,8 @@ module ComplianceViolatorMetadata =
                        (LengthBoundedString.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4177,6 +5741,8 @@ module ViolationReason =
       | RESOURCE_MISSING_DNS_FIREWALL 
       | ROUTE_HAS_OUT_OF_SCOPE_ENDPOINT 
       | FIREWALL_SUBNET_MISSING_VPCE_ENDPOINT 
+      | INVALID_NETWORK_ACL_ENTRY 
+      | WEB_ACL_CONFIGURATION_OR_SCOPE_OF_USE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -4220,6 +5786,9 @@ module ViolationReason =
       | ROUTE_HAS_OUT_OF_SCOPE_ENDPOINT -> "ROUTE_HAS_OUT_OF_SCOPE_ENDPOINT"
       | FIREWALL_SUBNET_MISSING_VPCE_ENDPOINT ->
           "FIREWALL_SUBNET_MISSING_VPCE_ENDPOINT"
+      | INVALID_NETWORK_ACL_ENTRY -> "INVALID_NETWORK_ACL_ENTRY"
+      | WEB_ACL_CONFIGURATION_OR_SCOPE_OF_USE ->
+          "WEB_ACL_CONFIGURATION_OR_SCOPE_OF_USE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -4262,6 +5831,9 @@ module ViolationReason =
       | "ROUTE_HAS_OUT_OF_SCOPE_ENDPOINT" -> ROUTE_HAS_OUT_OF_SCOPE_ENDPOINT
       | "FIREWALL_SUBNET_MISSING_VPCE_ENDPOINT" ->
           FIREWALL_SUBNET_MISSING_VPCE_ENDPOINT
+      | "INVALID_NETWORK_ACL_ENTRY" -> INVALID_NETWORK_ACL_ENTRY
+      | "WEB_ACL_CONFIGURATION_OR_SCOPE_OF_USE" ->
+          WEB_ACL_CONFIGURATION_OR_SCOPE_OF_USE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4295,6 +5867,9 @@ module ProtocolsList =
   struct
     type nonrec t = Protocol.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Protocol.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4319,6 +5894,9 @@ module CustomerPolicyScopeIdList =
   struct
     type nonrec t = CustomerPolicyScopeId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomerPolicyScopeId.to_value)) |>
         (fun x -> `List x)
@@ -4368,12 +5946,34 @@ module CustomerPolicyScopeIdType =
       of_string (string_of_json ~kind:"CustomerPolicyScopeIdType" j)
     let to_json = simple_to_json to_value
   end
+module Base62Id =
+  struct
+    type nonrec t = string
+    let context_ = "Base62Id"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:22) >>=
+             (fun () ->
+                (check_string_max i ~max:22) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-z0-9A-Z]{22}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Base62Id" j
+    let to_json = simple_to_json to_value
+  end
 module ResourceTag =
   struct
     type nonrec t =
       {
       key: ResourceTagKey.t [@ocaml.doc "The resource tag key."];
-      value: ResourceTagValue.t option [@ocaml.doc "The resource tag value."]}
+      value: ResourceTagValue.t option
+        [@ocaml.doc
+          "The resource tag value. To specify an empty string value, either don't provide this or specify it as \"\"."]}
     let context_ = "ResourceTag"
     let make ?value = fun ~key -> fun () -> { value; key }
     let to_value x =
@@ -4389,13 +5989,13 @@ module ResourceTag =
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" ResourceTagValue.of_json in
-      let key = field_map_exn json "Key" ResourceTagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" ResourceTagValue.of_json in
+      let key = field_map_exn json__ "Key" ResourceTagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The resource tags that Firewall Manager uses to determine if a particular resource should be included or excluded from the Firewall Manager policy. Tags enable you to categorize your Amazon Web Services resources in different ways, for example, by purpose, owner, or environment. Each tag consists of a key and an optional value. Firewall Manager combines the tags with \"AND\" so that, if you add more than one tag to a policy scope, a resource must have all the specified tags to be included or excluded. For more information, see Working with Tag Editor."]
+       "The resource tags that Firewall Manager uses to determine if a particular resource should be included or excluded from the Firewall Manager policy. Tags enable you to categorize your Amazon Web Services resources in different ways, for example, by purpose, owner, or environment. Each tag consists of a key and an optional value. If you add more than one tag to a policy, you can specify whether to combine them using the logical AND operator or the logical OR operator. For more information, see Working with Tag Editor. Every resource tag must have a string value, either a non-empty string or an empty string. If you don't provide a value for a resource tag, Firewall Manager saves the value as an empty string: \"\". When Firewall Manager compares tags, it only matches two tags if they have the same key and the same value. A tag with an empty string value only matches with tags that also have an empty string value."]
 module PolicyOption =
   struct
     type nonrec t =
@@ -4405,10 +6005,18 @@ module PolicyOption =
           "Defines the deployment model to use for the firewall policy."];
       thirdPartyFirewallPolicy: ThirdPartyFirewallPolicy.t option
         [@ocaml.doc
-          "Defines the policy options for a third-party firewall policy."]}
+          "Defines the policy options for a third-party firewall policy."];
+      networkAclCommonPolicy: NetworkAclCommonPolicy.t option
+        [@ocaml.doc "Defines a Firewall Manager network ACL policy."]}
     let make ?networkFirewallPolicy =
       fun ?thirdPartyFirewallPolicy ->
-        fun () -> { networkFirewallPolicy; thirdPartyFirewallPolicy }
+        fun ?networkAclCommonPolicy ->
+          fun () ->
+            {
+              networkFirewallPolicy;
+              thirdPartyFirewallPolicy;
+              networkAclCommonPolicy
+            }
     let to_value x =
       structure_to_value
         [("NetworkFirewallPolicy",
@@ -4416,78 +6024,46 @@ module PolicyOption =
               ~f:NetworkFirewallPolicy.to_value));
         ("ThirdPartyFirewallPolicy",
           (Option.map x.thirdPartyFirewallPolicy
-             ~f:ThirdPartyFirewallPolicy.to_value))]
+             ~f:ThirdPartyFirewallPolicy.to_value));
+        ("NetworkAclCommonPolicy",
+          (Option.map x.networkAclCommonPolicy
+             ~f:NetworkAclCommonPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkAclCommonPolicy =
+        (Option.map ~f:NetworkAclCommonPolicy.of_xml)
+          (Xml.child xml_arg0 "NetworkAclCommonPolicy") in
       let thirdPartyFirewallPolicy =
         (Option.map ~f:ThirdPartyFirewallPolicy.of_xml)
           (Xml.child xml_arg0 "ThirdPartyFirewallPolicy") in
       let networkFirewallPolicy =
         (Option.map ~f:NetworkFirewallPolicy.of_xml)
           (Xml.child xml_arg0 "NetworkFirewallPolicy") in
-      make ?thirdPartyFirewallPolicy ?networkFirewallPolicy ()
+      make ?networkAclCommonPolicy ?thirdPartyFirewallPolicy
+        ?networkFirewallPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let networkAclCommonPolicy =
+        field_map json__ "NetworkAclCommonPolicy"
+          NetworkAclCommonPolicy.of_json in
       let thirdPartyFirewallPolicy =
-        field_map json "ThirdPartyFirewallPolicy"
+        field_map json__ "ThirdPartyFirewallPolicy"
           ThirdPartyFirewallPolicy.of_json in
       let networkFirewallPolicy =
-        field_map json "NetworkFirewallPolicy" NetworkFirewallPolicy.of_json in
-      make ?thirdPartyFirewallPolicy ?networkFirewallPolicy ()
+        field_map json__ "NetworkFirewallPolicy"
+          NetworkFirewallPolicy.of_json in
+      make ?networkAclCommonPolicy ?thirdPartyFirewallPolicy
+        ?networkFirewallPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains the Network Firewall firewall policy options to configure a centralized deployment model."]
-module SecurityServiceType =
-  struct
-    type nonrec t =
-      | WAF 
-      | WAFV2 
-      | SHIELD_ADVANCED 
-      | SECURITY_GROUPS_COMMON 
-      | SECURITY_GROUPS_CONTENT_AUDIT 
-      | SECURITY_GROUPS_USAGE_AUDIT 
-      | NETWORK_FIREWALL 
-      | DNS_FIREWALL 
-      | THIRD_PARTY_FIREWALL 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | WAF -> "WAF"
-      | WAFV2 -> "WAFV2"
-      | SHIELD_ADVANCED -> "SHIELD_ADVANCED"
-      | SECURITY_GROUPS_COMMON -> "SECURITY_GROUPS_COMMON"
-      | SECURITY_GROUPS_CONTENT_AUDIT -> "SECURITY_GROUPS_CONTENT_AUDIT"
-      | SECURITY_GROUPS_USAGE_AUDIT -> "SECURITY_GROUPS_USAGE_AUDIT"
-      | NETWORK_FIREWALL -> "NETWORK_FIREWALL"
-      | DNS_FIREWALL -> "DNS_FIREWALL"
-      | THIRD_PARTY_FIREWALL -> "THIRD_PARTY_FIREWALL"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "WAF" -> WAF
-      | "WAFV2" -> WAFV2
-      | "SHIELD_ADVANCED" -> SHIELD_ADVANCED
-      | "SECURITY_GROUPS_COMMON" -> SECURITY_GROUPS_COMMON
-      | "SECURITY_GROUPS_CONTENT_AUDIT" -> SECURITY_GROUPS_CONTENT_AUDIT
-      | "SECURITY_GROUPS_USAGE_AUDIT" -> SECURITY_GROUPS_USAGE_AUDIT
-      | "NETWORK_FIREWALL" -> NETWORK_FIREWALL
-      | "DNS_FIREWALL" -> DNS_FIREWALL
-      | "THIRD_PARTY_FIREWALL" -> THIRD_PARTY_FIREWALL
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration SecurityServiceType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"SecurityServiceType" j)
-    let to_json = simple_to_json to_value
-  end
+       "Contains the settings to configure a network ACL policy, a Network Firewall firewall policy deployment model, or a third-party firewall policy."]
 module AppsList =
   struct
     type nonrec t = App.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:App.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4505,6 +6081,126 @@ module AppsList =
                           | _ -> true)
                      | _ -> true))) ~f:App.of_xml)
     let of_json j = list_of_json ~kind:"AppsList" ~of_json:App.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AccountIdList =
+  struct
+    type nonrec t = AWSAccountId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AWSAccountId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AWSAccountId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccountIdList" ~of_json:AWSAccountId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OrganizationalUnitIdList =
+  struct
+    type nonrec t = OrganizationalUnitId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OrganizationalUnitId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OrganizationalUnitId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OrganizationalUnitIdList"
+        ~of_json:OrganizationalUnitId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SecurityServiceTypeList =
+  struct
+    type nonrec t = SecurityServiceType.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:32) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecurityServiceType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecurityServiceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecurityServiceTypeList"
+        ~of_json:SecurityServiceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AWSRegionList =
+  struct
+    type nonrec t = AWSRegion.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:64) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AWSRegion.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AWSRegion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AWSRegionList" ~of_json:AWSRegion.of_json j
     let to_json v = composed_to_json to_value v
   end
 module FirewallPolicyId =
@@ -4551,6 +6247,108 @@ module FirewallPolicyName =
     let of_json j = string_of_json ~kind:"FirewallPolicyName" j
     let to_json = simple_to_json to_value
   end
+module Description =
+  struct
+    type nonrec t = string
+    let context_ = "Description"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Description" j
+    let to_json = simple_to_json to_value
+  end
+module Name =
+  struct
+    type nonrec t = string
+    let context_ = "Name"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Name" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceSetStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | OUT_OF_ADMIN_SCOPE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | OUT_OF_ADMIN_SCOPE -> "OUT_OF_ADMIN_SCOPE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "OUT_OF_ADMIN_SCOPE" -> OUT_OF_ADMIN_SCOPE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResourceSetStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceSetStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module TimeStamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module Identifier =
+  struct
+    type nonrec t = string
+    let context_ = "Identifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Identifier" j
+    let to_json = simple_to_json to_value
+  end
 module ListId =
   struct
     type nonrec t = string
@@ -4571,52 +6369,39 @@ module ListId =
     let of_json j = string_of_json ~kind:"ListId" j
     let to_json = simple_to_json to_value
   end
-module ResourceArn =
+module CustomerPolicyStatus =
   struct
-    type nonrec t = string
-    let context_ = "ResourceArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | ACTIVE 
+      | OUT_OF_ADMIN_SCOPE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | OUT_OF_ADMIN_SCOPE -> "OUT_OF_ADMIN_SCOPE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "OUT_OF_ADMIN_SCOPE" -> OUT_OF_ADMIN_SCOPE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ResourceArn" j
-    let to_json = simple_to_json to_value
-  end
-module AWSAccountId =
-  struct
-    type nonrec t = string
-    let context_ = "AWSAccountId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () -> check_pattern i ~pattern:"^[0-9]+$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AWSAccountId" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CustomerPolicyStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CustomerPolicyStatus" j)
     let to_json = simple_to_json to_value
   end
 module EvaluationResults =
   struct
     type nonrec t = EvaluationResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EvaluationResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4659,6 +6444,8 @@ module IssueInfoMap =
                     (fun x -> (DetailedInfo.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4666,16 +6453,36 @@ module IssueInfoMap =
         ~of_json:DetailedInfo.of_json j
     let to_json v = composed_to_json to_value v
   end
-module TimeStamp =
+module OrganizationStatus =
   struct
-    type nonrec t = string
+    type nonrec t =
+      | ONBOARDING 
+      | ONBOARDING_COMPLETE 
+      | OFFBOARDING 
+      | OFFBOARDING_COMPLETE 
+      | Non_static_id of string 
     let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
+    let to_string =
+      function
+      | ONBOARDING -> "ONBOARDING"
+      | ONBOARDING_COMPLETE -> "ONBOARDING_COMPLETE"
+      | OFFBOARDING -> "OFFBOARDING"
+      | OFFBOARDING_COMPLETE -> "OFFBOARDING_COMPLETE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ONBOARDING" -> ONBOARDING
+      | "ONBOARDING_COMPLETE" -> ONBOARDING_COMPLETE
+      | "OFFBOARDING" -> OFFBOARDING
+      | "OFFBOARDING_COMPLETE" -> OFFBOARDING_COMPLETE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OrganizationStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OrganizationStatus" j)
     let to_json = simple_to_json to_value
   end
 module ResourceViolation =
@@ -4734,9 +6541,6 @@ module ResourceViolation =
         DnsRuleGroupLimitExceededViolation.t option
         [@ocaml.doc
           "Violation detail for a DNS Firewall policy that indicates that the VPC reached the limit for associated DNS Firewall rule groups. Firewall Manager tried to associate another rule group with the VPC and failed."];
-      possibleRemediationActions: PossibleRemediationActions.t option
-        [@ocaml.doc
-          "A list of possible remediation action lists. Each individual possible remediation action is a list of individual remediation actions."];
       firewallSubnetIsOutOfScopeViolation:
         FirewallSubnetIsOutOfScopeViolation.t option
         [@ocaml.doc
@@ -4760,7 +6564,22 @@ module ResourceViolation =
       firewallSubnetMissingVPCEndpointViolation:
         FirewallSubnetMissingVPCEndpointViolation.t option
         [@ocaml.doc
-          "The violation details for a third-party firewall's VPC endpoint subnet that was deleted."]}
+          "The violation details for a third-party firewall's VPC endpoint subnet that was deleted."];
+      invalidNetworkAclEntriesViolation:
+        InvalidNetworkAclEntriesViolation.t option
+        [@ocaml.doc
+          "Violation detail for the entries in a network ACL resource."];
+      possibleRemediationActions: PossibleRemediationActions.t option
+        [@ocaml.doc
+          "A list of possible remediation action lists. Each individual possible remediation action is a list of individual remediation actions."];
+      webACLHasIncompatibleConfigurationViolation:
+        WebACLHasIncompatibleConfigurationViolation.t option
+        [@ocaml.doc
+          "The violation details for a web ACL whose configuration is incompatible with the Firewall Manager policy."];
+      webACLHasOutOfScopeResourcesViolation:
+        WebACLHasOutOfScopeResourcesViolation.t option
+        [@ocaml.doc
+          "The violation details for a web ACL that's associated with at least one resource that's out of scope of the Firewall Manager policy."]}
     let make ?awsVPCSecurityGroupViolation =
       fun ?awsEc2NetworkInterfaceViolation ->
         fun ?awsEc2InstanceViolation ->
@@ -4782,51 +6601,64 @@ module ResourceViolation =
                               fun ?dnsRuleGroupPriorityConflictViolation ->
                                 fun ?dnsDuplicateRuleGroupViolation ->
                                   fun ?dnsRuleGroupLimitExceededViolation ->
-                                    fun ?possibleRemediationActions ->
+                                    fun ?firewallSubnetIsOutOfScopeViolation
+                                      ->
                                       fun
-                                        ?firewallSubnetIsOutOfScopeViolation
+                                        ?routeHasOutOfScopeEndpointViolation
                                         ->
                                         fun
-                                          ?routeHasOutOfScopeEndpointViolation
+                                          ?thirdPartyFirewallMissingFirewallViolation
                                           ->
                                           fun
-                                            ?thirdPartyFirewallMissingFirewallViolation
+                                            ?thirdPartyFirewallMissingSubnetViolation
                                             ->
                                             fun
-                                              ?thirdPartyFirewallMissingSubnetViolation
+                                              ?thirdPartyFirewallMissingExpectedRouteTableViolation
                                               ->
                                               fun
-                                                ?thirdPartyFirewallMissingExpectedRouteTableViolation
+                                                ?firewallSubnetMissingVPCEndpointViolation
                                                 ->
                                                 fun
-                                                  ?firewallSubnetMissingVPCEndpointViolation
+                                                  ?invalidNetworkAclEntriesViolation
                                                   ->
-                                                  fun () ->
-                                                    {
-                                                      awsVPCSecurityGroupViolation;
-                                                      awsEc2NetworkInterfaceViolation;
-                                                      awsEc2InstanceViolation;
-                                                      networkFirewallMissingFirewallViolation;
-                                                      networkFirewallMissingSubnetViolation;
-                                                      networkFirewallMissingExpectedRTViolation;
-                                                      networkFirewallPolicyModifiedViolation;
-                                                      networkFirewallInternetTrafficNotInspectedViolation;
-                                                      networkFirewallInvalidRouteConfigurationViolation;
-                                                      networkFirewallBlackHoleRouteDetectedViolation;
-                                                      networkFirewallUnexpectedFirewallRoutesViolation;
-                                                      networkFirewallUnexpectedGatewayRoutesViolation;
-                                                      networkFirewallMissingExpectedRoutesViolation;
-                                                      dnsRuleGroupPriorityConflictViolation;
-                                                      dnsDuplicateRuleGroupViolation;
-                                                      dnsRuleGroupLimitExceededViolation;
-                                                      possibleRemediationActions;
-                                                      firewallSubnetIsOutOfScopeViolation;
-                                                      routeHasOutOfScopeEndpointViolation;
-                                                      thirdPartyFirewallMissingFirewallViolation;
-                                                      thirdPartyFirewallMissingSubnetViolation;
-                                                      thirdPartyFirewallMissingExpectedRouteTableViolation;
-                                                      firewallSubnetMissingVPCEndpointViolation
-                                                    }
+                                                  fun
+                                                    ?possibleRemediationActions
+                                                    ->
+                                                    fun
+                                                      ?webACLHasIncompatibleConfigurationViolation
+                                                      ->
+                                                      fun
+                                                        ?webACLHasOutOfScopeResourcesViolation
+                                                        ->
+                                                        fun () ->
+                                                          {
+                                                            awsVPCSecurityGroupViolation;
+                                                            awsEc2NetworkInterfaceViolation;
+                                                            awsEc2InstanceViolation;
+                                                            networkFirewallMissingFirewallViolation;
+                                                            networkFirewallMissingSubnetViolation;
+                                                            networkFirewallMissingExpectedRTViolation;
+                                                            networkFirewallPolicyModifiedViolation;
+                                                            networkFirewallInternetTrafficNotInspectedViolation;
+                                                            networkFirewallInvalidRouteConfigurationViolation;
+                                                            networkFirewallBlackHoleRouteDetectedViolation;
+                                                            networkFirewallUnexpectedFirewallRoutesViolation;
+                                                            networkFirewallUnexpectedGatewayRoutesViolation;
+                                                            networkFirewallMissingExpectedRoutesViolation;
+                                                            dnsRuleGroupPriorityConflictViolation;
+                                                            dnsDuplicateRuleGroupViolation;
+                                                            dnsRuleGroupLimitExceededViolation;
+                                                            firewallSubnetIsOutOfScopeViolation;
+                                                            routeHasOutOfScopeEndpointViolation;
+                                                            thirdPartyFirewallMissingFirewallViolation;
+                                                            thirdPartyFirewallMissingSubnetViolation;
+                                                            thirdPartyFirewallMissingExpectedRouteTableViolation;
+                                                            firewallSubnetMissingVPCEndpointViolation;
+                                                            invalidNetworkAclEntriesViolation;
+                                                            possibleRemediationActions;
+                                                            webACLHasIncompatibleConfigurationViolation;
+                                                            webACLHasOutOfScopeResourcesViolation
+                                                          }
     let to_value x =
       structure_to_value
         [("AwsVPCSecurityGroupViolation",
@@ -4877,9 +6709,6 @@ module ResourceViolation =
         ("DnsRuleGroupLimitExceededViolation",
           (Option.map x.dnsRuleGroupLimitExceededViolation
              ~f:DnsRuleGroupLimitExceededViolation.to_value));
-        ("PossibleRemediationActions",
-          (Option.map x.possibleRemediationActions
-             ~f:PossibleRemediationActions.to_value));
         ("FirewallSubnetIsOutOfScopeViolation",
           (Option.map x.firewallSubnetIsOutOfScopeViolation
              ~f:FirewallSubnetIsOutOfScopeViolation.to_value));
@@ -4897,9 +6726,33 @@ module ResourceViolation =
              ~f:ThirdPartyFirewallMissingExpectedRouteTableViolation.to_value));
         ("FirewallSubnetMissingVPCEndpointViolation",
           (Option.map x.firewallSubnetMissingVPCEndpointViolation
-             ~f:FirewallSubnetMissingVPCEndpointViolation.to_value))]
+             ~f:FirewallSubnetMissingVPCEndpointViolation.to_value));
+        ("InvalidNetworkAclEntriesViolation",
+          (Option.map x.invalidNetworkAclEntriesViolation
+             ~f:InvalidNetworkAclEntriesViolation.to_value));
+        ("PossibleRemediationActions",
+          (Option.map x.possibleRemediationActions
+             ~f:PossibleRemediationActions.to_value));
+        ("WebACLHasIncompatibleConfigurationViolation",
+          (Option.map x.webACLHasIncompatibleConfigurationViolation
+             ~f:WebACLHasIncompatibleConfigurationViolation.to_value));
+        ("WebACLHasOutOfScopeResourcesViolation",
+          (Option.map x.webACLHasOutOfScopeResourcesViolation
+             ~f:WebACLHasOutOfScopeResourcesViolation.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let webACLHasOutOfScopeResourcesViolation =
+        (Option.map ~f:WebACLHasOutOfScopeResourcesViolation.of_xml)
+          (Xml.child xml_arg0 "WebACLHasOutOfScopeResourcesViolation") in
+      let webACLHasIncompatibleConfigurationViolation =
+        (Option.map ~f:WebACLHasIncompatibleConfigurationViolation.of_xml)
+          (Xml.child xml_arg0 "WebACLHasIncompatibleConfigurationViolation") in
+      let possibleRemediationActions =
+        (Option.map ~f:PossibleRemediationActions.of_xml)
+          (Xml.child xml_arg0 "PossibleRemediationActions") in
+      let invalidNetworkAclEntriesViolation =
+        (Option.map ~f:InvalidNetworkAclEntriesViolation.of_xml)
+          (Xml.child xml_arg0 "InvalidNetworkAclEntriesViolation") in
       let firewallSubnetMissingVPCEndpointViolation =
         (Option.map ~f:FirewallSubnetMissingVPCEndpointViolation.of_xml)
           (Xml.child xml_arg0 "FirewallSubnetMissingVPCEndpointViolation") in
@@ -4920,9 +6773,6 @@ module ResourceViolation =
       let firewallSubnetIsOutOfScopeViolation =
         (Option.map ~f:FirewallSubnetIsOutOfScopeViolation.of_xml)
           (Xml.child xml_arg0 "FirewallSubnetIsOutOfScopeViolation") in
-      let possibleRemediationActions =
-        (Option.map ~f:PossibleRemediationActions.of_xml)
-          (Xml.child xml_arg0 "PossibleRemediationActions") in
       let dnsRuleGroupLimitExceededViolation =
         (Option.map ~f:DnsRuleGroupLimitExceededViolation.of_xml)
           (Xml.child xml_arg0 "DnsRuleGroupLimitExceededViolation") in
@@ -4979,12 +6829,15 @@ module ResourceViolation =
       let awsVPCSecurityGroupViolation =
         (Option.map ~f:AwsVPCSecurityGroupViolation.of_xml)
           (Xml.child xml_arg0 "AwsVPCSecurityGroupViolation") in
-      make ?firewallSubnetMissingVPCEndpointViolation
+      make ?webACLHasOutOfScopeResourcesViolation
+        ?webACLHasIncompatibleConfigurationViolation
+        ?possibleRemediationActions ?invalidNetworkAclEntriesViolation
+        ?firewallSubnetMissingVPCEndpointViolation
         ?thirdPartyFirewallMissingExpectedRouteTableViolation
         ?thirdPartyFirewallMissingSubnetViolation
         ?thirdPartyFirewallMissingFirewallViolation
         ?routeHasOutOfScopeEndpointViolation
-        ?firewallSubnetIsOutOfScopeViolation ?possibleRemediationActions
+        ?firewallSubnetIsOutOfScopeViolation
         ?dnsRuleGroupLimitExceededViolation ?dnsDuplicateRuleGroupViolation
         ?dnsRuleGroupPriorityConflictViolation
         ?networkFirewallMissingExpectedRoutesViolation
@@ -4999,82 +6852,96 @@ module ResourceViolation =
         ?networkFirewallMissingFirewallViolation ?awsEc2InstanceViolation
         ?awsEc2NetworkInterfaceViolation ?awsVPCSecurityGroupViolation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let webACLHasOutOfScopeResourcesViolation =
+        field_map json__ "WebACLHasOutOfScopeResourcesViolation"
+          WebACLHasOutOfScopeResourcesViolation.of_json in
+      let webACLHasIncompatibleConfigurationViolation =
+        field_map json__ "WebACLHasIncompatibleConfigurationViolation"
+          WebACLHasIncompatibleConfigurationViolation.of_json in
+      let possibleRemediationActions =
+        field_map json__ "PossibleRemediationActions"
+          PossibleRemediationActions.of_json in
+      let invalidNetworkAclEntriesViolation =
+        field_map json__ "InvalidNetworkAclEntriesViolation"
+          InvalidNetworkAclEntriesViolation.of_json in
       let firewallSubnetMissingVPCEndpointViolation =
-        field_map json "FirewallSubnetMissingVPCEndpointViolation"
+        field_map json__ "FirewallSubnetMissingVPCEndpointViolation"
           FirewallSubnetMissingVPCEndpointViolation.of_json in
       let thirdPartyFirewallMissingExpectedRouteTableViolation =
-        field_map json "ThirdPartyFirewallMissingExpectedRouteTableViolation"
+        field_map json__
+          "ThirdPartyFirewallMissingExpectedRouteTableViolation"
           ThirdPartyFirewallMissingExpectedRouteTableViolation.of_json in
       let thirdPartyFirewallMissingSubnetViolation =
-        field_map json "ThirdPartyFirewallMissingSubnetViolation"
+        field_map json__ "ThirdPartyFirewallMissingSubnetViolation"
           ThirdPartyFirewallMissingSubnetViolation.of_json in
       let thirdPartyFirewallMissingFirewallViolation =
-        field_map json "ThirdPartyFirewallMissingFirewallViolation"
+        field_map json__ "ThirdPartyFirewallMissingFirewallViolation"
           ThirdPartyFirewallMissingFirewallViolation.of_json in
       let routeHasOutOfScopeEndpointViolation =
-        field_map json "RouteHasOutOfScopeEndpointViolation"
+        field_map json__ "RouteHasOutOfScopeEndpointViolation"
           RouteHasOutOfScopeEndpointViolation.of_json in
       let firewallSubnetIsOutOfScopeViolation =
-        field_map json "FirewallSubnetIsOutOfScopeViolation"
+        field_map json__ "FirewallSubnetIsOutOfScopeViolation"
           FirewallSubnetIsOutOfScopeViolation.of_json in
-      let possibleRemediationActions =
-        field_map json "PossibleRemediationActions"
-          PossibleRemediationActions.of_json in
       let dnsRuleGroupLimitExceededViolation =
-        field_map json "DnsRuleGroupLimitExceededViolation"
+        field_map json__ "DnsRuleGroupLimitExceededViolation"
           DnsRuleGroupLimitExceededViolation.of_json in
       let dnsDuplicateRuleGroupViolation =
-        field_map json "DnsDuplicateRuleGroupViolation"
+        field_map json__ "DnsDuplicateRuleGroupViolation"
           DnsDuplicateRuleGroupViolation.of_json in
       let dnsRuleGroupPriorityConflictViolation =
-        field_map json "DnsRuleGroupPriorityConflictViolation"
+        field_map json__ "DnsRuleGroupPriorityConflictViolation"
           DnsRuleGroupPriorityConflictViolation.of_json in
       let networkFirewallMissingExpectedRoutesViolation =
-        field_map json "NetworkFirewallMissingExpectedRoutesViolation"
+        field_map json__ "NetworkFirewallMissingExpectedRoutesViolation"
           NetworkFirewallMissingExpectedRoutesViolation.of_json in
       let networkFirewallUnexpectedGatewayRoutesViolation =
-        field_map json "NetworkFirewallUnexpectedGatewayRoutesViolation"
+        field_map json__ "NetworkFirewallUnexpectedGatewayRoutesViolation"
           NetworkFirewallUnexpectedGatewayRoutesViolation.of_json in
       let networkFirewallUnexpectedFirewallRoutesViolation =
-        field_map json "NetworkFirewallUnexpectedFirewallRoutesViolation"
+        field_map json__ "NetworkFirewallUnexpectedFirewallRoutesViolation"
           NetworkFirewallUnexpectedFirewallRoutesViolation.of_json in
       let networkFirewallBlackHoleRouteDetectedViolation =
-        field_map json "NetworkFirewallBlackHoleRouteDetectedViolation"
+        field_map json__ "NetworkFirewallBlackHoleRouteDetectedViolation"
           NetworkFirewallBlackHoleRouteDetectedViolation.of_json in
       let networkFirewallInvalidRouteConfigurationViolation =
-        field_map json "NetworkFirewallInvalidRouteConfigurationViolation"
+        field_map json__ "NetworkFirewallInvalidRouteConfigurationViolation"
           NetworkFirewallInvalidRouteConfigurationViolation.of_json in
       let networkFirewallInternetTrafficNotInspectedViolation =
-        field_map json "NetworkFirewallInternetTrafficNotInspectedViolation"
+        field_map json__
+          "NetworkFirewallInternetTrafficNotInspectedViolation"
           NetworkFirewallInternetTrafficNotInspectedViolation.of_json in
       let networkFirewallPolicyModifiedViolation =
-        field_map json "NetworkFirewallPolicyModifiedViolation"
+        field_map json__ "NetworkFirewallPolicyModifiedViolation"
           NetworkFirewallPolicyModifiedViolation.of_json in
       let networkFirewallMissingExpectedRTViolation =
-        field_map json "NetworkFirewallMissingExpectedRTViolation"
+        field_map json__ "NetworkFirewallMissingExpectedRTViolation"
           NetworkFirewallMissingExpectedRTViolation.of_json in
       let networkFirewallMissingSubnetViolation =
-        field_map json "NetworkFirewallMissingSubnetViolation"
+        field_map json__ "NetworkFirewallMissingSubnetViolation"
           NetworkFirewallMissingSubnetViolation.of_json in
       let networkFirewallMissingFirewallViolation =
-        field_map json "NetworkFirewallMissingFirewallViolation"
+        field_map json__ "NetworkFirewallMissingFirewallViolation"
           NetworkFirewallMissingFirewallViolation.of_json in
       let awsEc2InstanceViolation =
-        field_map json "AwsEc2InstanceViolation"
+        field_map json__ "AwsEc2InstanceViolation"
           AwsEc2InstanceViolation.of_json in
       let awsEc2NetworkInterfaceViolation =
-        field_map json "AwsEc2NetworkInterfaceViolation"
+        field_map json__ "AwsEc2NetworkInterfaceViolation"
           AwsEc2NetworkInterfaceViolation.of_json in
       let awsVPCSecurityGroupViolation =
-        field_map json "AwsVPCSecurityGroupViolation"
+        field_map json__ "AwsVPCSecurityGroupViolation"
           AwsVPCSecurityGroupViolation.of_json in
-      make ?firewallSubnetMissingVPCEndpointViolation
+      make ?webACLHasOutOfScopeResourcesViolation
+        ?webACLHasIncompatibleConfigurationViolation
+        ?possibleRemediationActions ?invalidNetworkAclEntriesViolation
+        ?firewallSubnetMissingVPCEndpointViolation
         ?thirdPartyFirewallMissingExpectedRouteTableViolation
         ?thirdPartyFirewallMissingSubnetViolation
         ?thirdPartyFirewallMissingFirewallViolation
         ?routeHasOutOfScopeEndpointViolation
-        ?firewallSubnetIsOutOfScopeViolation ?possibleRemediationActions
+        ?firewallSubnetIsOutOfScopeViolation
         ?dnsRuleGroupLimitExceededViolation ?dnsDuplicateRuleGroupViolation
         ?dnsRuleGroupPriorityConflictViolation
         ?networkFirewallMissingExpectedRoutesViolation
@@ -5114,9 +6981,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5164,17 +7031,54 @@ module ComplianceViolator =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?metadata ?resourceType ?violationReason ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metadata =
-        field_map json "Metadata" ComplianceViolatorMetadata.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
+        field_map json__ "Metadata" ComplianceViolatorMetadata.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
       let violationReason =
-        field_map json "ViolationReason" ViolationReason.of_json in
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
+        field_map json__ "ViolationReason" ViolationReason.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
       make ?metadata ?resourceType ?violationReason ?resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Details of the resource that is not protected by the policy."]
+module FailedItemReason =
+  struct
+    type nonrec t =
+      | NOT_VALID_ARN 
+      | NOT_VALID_PARTITION 
+      | NOT_VALID_REGION 
+      | NOT_VALID_SERVICE 
+      | NOT_VALID_RESOURCE_TYPE 
+      | NOT_VALID_ACCOUNT_ID 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NOT_VALID_ARN -> "NOT_VALID_ARN"
+      | NOT_VALID_PARTITION -> "NOT_VALID_PARTITION"
+      | NOT_VALID_REGION -> "NOT_VALID_REGION"
+      | NOT_VALID_SERVICE -> "NOT_VALID_SERVICE"
+      | NOT_VALID_RESOURCE_TYPE -> "NOT_VALID_RESOURCE_TYPE"
+      | NOT_VALID_ACCOUNT_ID -> "NOT_VALID_ACCOUNT_ID"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NOT_VALID_ARN" -> NOT_VALID_ARN
+      | "NOT_VALID_PARTITION" -> NOT_VALID_PARTITION
+      | "NOT_VALID_REGION" -> NOT_VALID_REGION
+      | "NOT_VALID_SERVICE" -> NOT_VALID_SERVICE
+      | "NOT_VALID_RESOURCE_TYPE" -> NOT_VALID_RESOURCE_TYPE
+      | "NOT_VALID_ACCOUNT_ID" -> NOT_VALID_ACCOUNT_ID
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FailedItemReason" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FailedItemReason" j)
+    let to_json = simple_to_json to_value
+  end
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -5186,6 +7090,55 @@ module ErrorMessage =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceTypeList =
+  struct
+    type nonrec t = ResourceType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceTypeList" ~of_json:ResourceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UpdateToken =
+  struct
+    type nonrec t = string
+    let context_ = "UpdateToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UpdateToken" j
     let to_json = simple_to_json to_value
   end
 module PreviousProtocolsList =
@@ -5211,34 +7164,14 @@ module PreviousProtocolsList =
                     (fun x -> (ProtocolsList.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:PreviousListVersion.of_string
         ~of_json:ProtocolsList.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module UpdateToken =
-  struct
-    type nonrec t = string
-    let context_ = "UpdateToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"UpdateToken" j
-    let to_json = simple_to_json to_value
   end
 module CustomerPolicyScopeMap =
   struct
@@ -5266,6 +7199,8 @@ module CustomerPolicyScopeMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -5295,14 +7230,86 @@ module PolicyUpdateToken =
     let of_json j = string_of_json ~kind:"PolicyUpdateToken" j
     let to_json = simple_to_json to_value
   end
+module ResourceDescription =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceDescription" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceSetIds =
+  struct
+    type nonrec t = Base62Id.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Base62Id.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Base62Id.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceSetIds" ~of_json:Base62Id.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceTagLogicalOperator =
+  struct
+    type nonrec t =
+      | AND 
+      | OR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | AND -> "AND" | OR -> "OR" | Non_static_id s -> s
+    let of_string =
+      function | "AND" -> AND | "OR" -> OR | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResourceTagLogicalOperator"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ResourceTagLogicalOperator" j)
+    let to_json = simple_to_json to_value
+  end
 module ResourceTags =
   struct
     type nonrec t = ResourceTag.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:8) >>= (fun () -> check_list_min i ~min:0));
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5323,30 +7330,6 @@ module ResourceTags =
       list_of_json ~kind:"ResourceTags" ~of_json:ResourceTag.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ResourceTypeList =
-  struct
-    type nonrec t = ResourceType.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:ResourceType.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ResourceType.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ResourceTypeList" ~of_json:ResourceType.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module SecurityServicePolicyData =
   struct
     type nonrec t =
@@ -5356,10 +7339,10 @@ module SecurityServicePolicyData =
           "The service that the policy is using to protect the resources. This specifies the type of policy that is created, either an WAF policy, a Shield Advanced policy, or a security group policy. For security group policies, Firewall Manager supports one security group for each common policy and for each content audit policy. This is an adjustable limit that you can increase by contacting Amazon Web Services Support."];
       managedServiceData: ManagedServiceData.t option
         [@ocaml.doc
-          "Details about the service that are specific to the service type, in JSON format. Example: DNS_FIREWALL \"\\{\\\"type\\\":\\\"DNS_FIREWALL\\\",\\\"preProcessRuleGroups\\\":\\[\\{\\\"ruleGroupId\\\":\\\"rslvr-frg-1\\\",\\\"priority\\\":10\\}\\],\\\"postProcessRuleGroups\\\":\\[\\{\\\"ruleGroupId\\\":\\\"rslvr-frg-2\\\",\\\"priority\\\":9911\\}\\]\\}\" Valid values for preProcessRuleGroups are between 1 and 99. Valid values for postProcessRuleGroups are between 9901 and 10000. Example: DNS_FIREWALL \"\\{\\\"type\\\":\\\"DNS_FIREWALL\\\",\\\"preProcessRuleGroups\\\":\\[\\{\\\"ruleGroupId\\\":\\\"rslvr-frg-1\\\",\\\"priority\\\":10\\}\\],\\\"postProcessRuleGroups\\\":\\[\\{\\\"ruleGroupId\\\":\\\"rslvr-frg-2\\\",\\\"priority\\\":9911\\}\\]\\}\" Valid values for preProcessRuleGroups are between 1 and 99. Valid values for postProcessRuleGroups are between 9901 and 10000. Example: NETWORK_FIREWALL - Distributed deployment model with automatic Availability Zone configuration. With automatic Availbility Zone configuration, Firewall Manager chooses which Availability Zones to create the endpoints in. \"\\{ \\\"type\\\": \\\"NETWORK_FIREWALL\\\", \\\"networkFirewallStatelessRuleGroupReferences\\\": \\[ \\{ \\\"resourceARN\\\": \\\"arn:aws:network-firewall:us-east-1:123456789011:stateless-rulegroup/test\\\", \\\"priority\\\": 1 \\} \\], \\\"networkFirewallStatelessDefaultActions\\\": \\[ \\\"aws:forward_to_sfe\\\", \\\"customActionName\\\" \\], \\\"networkFirewallStatelessFragmentDefaultActions\\\": \\[ \\\"aws:forward_to_sfe\\\", \\\"customActionName\\\" \\], \\\"networkFirewallStatelessCustomActions\\\": \\[ \\{ \\\"actionName\\\": \\\"customActionName\\\", \\\"actionDefinition\\\": \\{ \\\"publishMetricAction\\\": \\{ \\\"dimensions\\\": \\[ \\{ \\\"value\\\": \\\"metricdimensionvalue\\\" \\} \\] \\} \\} \\} \\], \\\"networkFirewallStatefulRuleGroupReferences\\\": \\[ \\{ \\\"resourceARN\\\": \\\"arn:aws:network-firewall:us-east-1:123456789011:stateful-rulegroup/test\\\" \\} \\], \\\"networkFirewallOrchestrationConfig\\\": \\{ \\\"singleFirewallEndpointPerVPC\\\": false, \\\"allowedIPV4CidrList\\\": \\[ \\\"10.0.0.0/28\\\", \\\"192.168.0.0/28\\\" \\], \\\"routeManagementAction\\\": \\\"OFF\\\" \\}, \\\"networkFirewallLoggingConfiguration\\\": \\{ \\\"logDestinationConfigs\\\": \\[ \\{ \\\"logDestinationType\\\": \\\"S3\\\", \\\"logType\\\": \\\"ALERT\\\", \\\"logDestination\\\": \\{ \\\"bucketName\\\": \\\"s3-bucket-name\\\" \\} \\}, \\{ \\\"logDestinationType\\\": \\\"S3\\\", \\\"logType\\\": \\\"FLOW\\\", \\\"logDestination\\\": \\{ \\\"bucketName\\\": \\\"s3-bucket-name\\\" \\} \\} \\], \\\"overrideExistingConfig\\\": true \\} \\}\" To use the distributed deployment model, you must set PolicyOption to NULL. Example: NETWORK_FIREWALL - Distributed deployment model with automatic Availability Zone configuration, and route management. \"\\{ \\\"type\\\": \\\"NETWORK_FIREWALL\\\", \\\"networkFirewallStatelessRuleGroupReferences\\\": \\[ \\{ \\\"resourceARN\\\": \\\"arn:aws:network-firewall:us-east-1:123456789011:stateless-rulegroup/test\\\", \\\"priority\\\": 1 \\} \\], \\\"networkFirewallStatelessDefaultActions\\\": \\[ \\\"aws:forward_to_sfe\\\", \\\"customActionName\\\" \\], \\\"networkFirewallStatelessFragmentDefaultActions\\\": \\[ \\\"aws:forward_to_sfe\\\", \\\"customActionName\\\" \\], \\\"networkFirewallStatelessCustomActions\\\": \\[ \\{ \\\"actionName\\\": \\\"customActionName\\\", \\\"actionDefinition\\\": \\{ \\\"publishMetricAction\\\": \\{ \\\"dimensions\\\": \\[ \\{ \\\"value\\\": \\\"metricdimensionvalue\\\" \\} \\] \\} \\} \\} \\], \\\"networkFirewallStatefulRuleGroupReferences\\\": \\[ \\{ \\\"resourceARN\\\": \\\"arn:aws:network-firewall:us-east-1:123456789011:stateful-rulegroup/test\\\" \\} \\], \\\"networkFirewallOrchestrationConfig\\\": \\{ \\\"singleFirewallEndpointPerVPC\\\": false, \\\"allowedIPV4CidrList\\\": \\[ \\\"10.0.0.0/28\\\", \\\"192.168.0.0/28\\\" \\], \\\"routeManagementAction\\\": \\\"MONITOR\\\", \\\"routeManagementTargetTypes\\\": \\[ \\\"InternetGateway\\\" \\] \\}, \\\"networkFirewallLoggingConfiguration\\\": \\{ \\\"logDestinationConfigs\\\": \\[ \\{ \\\"logDestinationType\\\": \\\"S3\\\", \\\"logType\\\": \\\"ALERT\\\", \\\"logDestination\\\": \\{ \\\"bucketName\\\": \\\"s3-bucket-name\\\" \\} \\}, \\{ \\\"logDestinationType\\\": \\\"S3\\\", \\\"logType\\\": \\\"FLOW\\\", \\\"logDestination\\\": \\{ \\\"bucketName\\\": \\\"s3-bucket-name\\\" \\} \\} \\], \\\"overrideExistingConfig\\\": true \\} \\}\" Example: NETWORK_FIREWALL - Distributed deployment model with custom Availability Zone configuration. With custom Availability Zone configuration, you define which specific Availability Zones to create endpoints in by configuring firewallCreationConfig. \"\\{ \\\"type\\\":\\\"NETWORK_FIREWALL\\\",\\\"networkFirewallStatelessRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateless-rulegroup/test\\\",\\\"priority\\\":1\\}\\], \\\"networkFirewallStatelessDefaultActions\\\":\\[ \\\"aws:forward_to_sfe\\\", \\\"customActionName\\\" \\], \\\"networkFirewallStatelessFragmentDefaultActions\\\":\\[ \\\"aws:forward_to_sfe\\\", \\\"fragmentcustomactionname\\\" \\], \\\"networkFirewallStatelessCustomActions\\\":\\[ \\{ \\\"actionName\\\":\\\"customActionName\\\", \\\"actionDefinition\\\":\\{ \\\"publishMetricAction\\\":\\{ \\\"dimensions\\\":\\[ \\{ \\\"value\\\":\\\"metricdimensionvalue\\\" \\} \\] \\} \\} \\}, \\{ \\\"actionName\\\":\\\"fragmentcustomactionname\\\", \\\"actionDefinition\\\":\\{ \\\"publishMetricAction\\\":\\{ \\\"dimensions\\\":\\[ \\{ \\\"value\\\":\\\"fragmentmetricdimensionvalue\\\" \\} \\] \\} \\} \\} \\], \\\"networkFirewallStatefulRuleGroupReferences\\\":\\[ \\{ \\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateful-rulegroup/test\\\" \\} \\], \\\"networkFirewallOrchestrationConfig\\\":\\{ \\\"firewallCreationConfig\\\":\\{ \\\"endpointLocation\\\":\\{ \\\"availabilityZoneConfigList\\\":\\[ \\{ \\\"availabilityZoneId\\\":null, \\\"availabilityZoneName\\\":\\\"us-east-1a\\\", \\\"allowedIPV4CidrList\\\":\\[ \\\"10.0.0.0/28\\\" \\] \\}, \\{ \194\175\\\"availabilityZoneId\\\":null, \\\"availabilityZoneName\\\":\\\"us-east-1b\\\", \\\"allowedIPV4CidrList\\\":\\[ \\\"10.0.0.0/28\\\" \\] \\} \\] \\} \\}, \\\"singleFirewallEndpointPerVPC\\\":false, \\\"allowedIPV4CidrList\\\":null, \\\"routeManagementAction\\\":\\\"OFF\\\", \\\"networkFirewallLoggingConfiguration\\\":\\{ \\\"logDestinationConfigs\\\":\\[ \\{ \\\"logDestinationType\\\":\\\"S3\\\", \\\"logType\\\":\\\"ALERT\\\", \\\"logDestination\\\":\\{ \\\"bucketName\\\":\\\"s3-bucket-name\\\" \\} \\}, \\{ \\\"logDestinationType\\\":\\\"S3\\\", \\\"logType\\\":\\\"FLOW\\\", \\\"logDestination\\\":\\{ \\\"bucketName\\\":\\\"s3-bucket-name\\\" \\} \\} \\], \\\"overrideExistingConfig\\\":boolean \\} \\}\" Example: NETWORK_FIREWALL - Distributed deployment model with custom Availability Zone configuration, and route management. \"\\{ \\\"type\\\":\\\"NETWORK_FIREWALL\\\",\\\"networkFirewallStatelessRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateless-rulegroup/test\\\",\\\"priority\\\":1\\}\\], \\\"networkFirewallStatelessDefaultActions\\\":\\[ \\\"aws:forward_to_sfe\\\", \\\"customActionName\\\" \\], \\\"networkFirewallStatelessFragmentDefaultActions\\\":\\[ \\\"aws:forward_to_sfe\\\", \\\"fragmentcustomactionname\\\" \\], \\\"networkFirewallStatelessCustomActions\\\":\\[ \\{ \\\"actionName\\\":\\\"customActionName\\\", \\\"actionDefinition\\\":\\{ \\\"publishMetricAction\\\":\\{ \\\"dimensions\\\":\\[ \\{ \\\"value\\\":\\\"metricdimensionvalue\\\" \\} \\] \\} \\} \\}, \\{ \\\"actionName\\\":\\\"fragmentcustomactionname\\\", \\\"actionDefinition\\\":\\{ \\\"publishMetricAction\\\":\\{ \\\"dimensions\\\":\\[ \\{ \\\"value\\\":\\\"fragmentmetricdimensionvalue\\\" \\} \\] \\} \\} \\} \\], \\\"networkFirewallStatefulRuleGroupReferences\\\":\\[ \\{ \\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateful-rulegroup/test\\\" \\} \\], \\\"networkFirewallOrchestrationConfig\\\":\\{ \\\"firewallCreationConfig\\\":\\{ \\\"endpointLocation\\\":\\{ \\\"availabilityZoneConfigList\\\":\\[ \\{ \\\"availabilityZoneId\\\":null, \\\"availabilityZoneName\\\":\\\"us-east-1a\\\", \\\"allowedIPV4CidrList\\\":\\[ \\\"10.0.0.0/28\\\" \\] \\}, \\{ \194\175\\\"availabilityZoneId\\\":null, \\\"availabilityZoneName\\\":\\\"us-east-1b\\\", \\\"allowedIPV4CidrList\\\":\\[ \\\"10.0.0.0/28\\\" \\] \\} \\] \\} \\}, \\\"singleFirewallEndpointPerVPC\\\":false, \\\"allowedIPV4CidrList\\\":null, \\\"routeManagementAction\\\":\\\"MONITOR\\\", \\\"routeManagementTargetTypes\\\":\\[ \\\"InternetGateway\\\" \\], \\\"routeManagementConfig\\\":\\{ \\\"allowCrossAZTrafficIfNoEndpoint\\\":true \\} \\}, \\\"networkFirewallLoggingConfiguration\\\":\\{ \\\"logDestinationConfigs\\\":\\[ \\{ \\\"logDestinationType\\\":\\\"S3\\\", \\\"logType\\\":\\\"ALERT\\\", \\\"logDestination\\\":\\{ \\\"bucketName\\\":\\\"s3-bucket-name\\\" \\} \\}, \\{ \\\"logDestinationType\\\":\\\"S3\\\", \\\"logType\\\":\\\"FLOW\\\", \\\"logDestination\\\":\\{ \\\"bucketName\\\":\\\"s3-bucket-name\\\" \\} \\} \\], \\\"overrideExistingConfig\\\":boolean \\} \\}\" Example: PARTNER_FIREWALL for Firewall Manager \"\\{\\\"type\\\":\\\"THIRD_PARTY_FIREWALL\\\",\\\"thirdPartyrFirewall\\\":\\\"PALO_ALTO_NETWORKS_CLOUD_NGFW\\\",\\\"thirdPartyFirewallConfig\\\":\\{\\\"thirdPartyFirewallPolicyList\\\":\\[\\\"global-123456789012-1\\\"\\],\\\"networkFirewallLoggingConfiguration\\\":null\\},\\\"firewallDeploymentModel\\\":\\{\\\"distributedFirewallDeploymentModel\\\":\\{\\\"distributedFirewallOrchestrationConfig\\\":\\{\\\"firewallCreationConfig\\\":\\{\\\"endpointLocation\\\":\\{\\\"availabilityZoneConfigList\\\":\\[\\{\\\"availabilityZoneId\\\":null,\\\"availabilityZoneName\\\":\\\"us-east-1a\\\",\\\"allowedIPV4CidrList\\\":\\[\\\"10.0.1.0/28\\\"\\]\\}\\]\\}\\},\\\"allowedIPV4CidrList\\\":null\\},\\\"distributedRouteManagementConfig\\\":null\\},\\\"centralizedFirewallDeploymentModel\\\":null\\}\\}\"\" Specification for SHIELD_ADVANCED for Amazon CloudFront distributions \"\\{\\\"type\\\":\\\"SHIELD_ADVANCED\\\",\\\"automaticResponseConfiguration\\\": \\{\\\"automaticResponseStatus\\\":\\\"ENABLED|IGNORED|DISABLED\\\", \\\"automaticResponseAction\\\":\\\"BLOCK|COUNT\\\"\\}, \\\"overrideCustomerWebaclClassic\\\":true|false\\}\" For example: \"\\{\\\"type\\\":\\\"SHIELD_ADVANCED\\\",\\\"automaticResponseConfiguration\\\": \\{\\\"automaticResponseStatus\\\":\\\"ENABLED\\\", \\\"automaticResponseAction\\\":\\\"COUNT\\\"\\}\\}\" The default value for automaticResponseStatus is IGNORED. The value for automaticResponseAction is only required when automaticResponseStatus is set to ENABLED. The default value for overrideCustomerWebaclClassic is false. For other resource types that you can protect with a Shield Advanced policy, this ManagedServiceData configuration is an empty string. Example: WAFV2 \"\\{\\\"type\\\":\\\"WAFV2\\\",\\\"preProcessRuleGroups\\\":\\[\\{\\\"ruleGroupArn\\\":null,\\\"overrideAction\\\":\\{\\\"type\\\":\\\"NONE\\\"\\},\\\"managedRuleGroupIdentifier\\\":\\{\\\"version\\\":null,\\\"vendorName\\\":\\\"AWS\\\",\\\"managedRuleGroupName\\\":\\\"AWSManagedRulesAmazonIpReputationList\\\"\\},\\\"ruleGroupType\\\":\\\"ManagedRuleGroup\\\",\\\"excludeRules\\\":\\[\\{\\\"name\\\":\\\"NoUserAgent_HEADER\\\"\\}\\]\\}\\],\\\"postProcessRuleGroups\\\":\\[\\],\\\"defaultAction\\\":\\{\\\"type\\\":\\\"ALLOW\\\"\\},\\\"overrideCustomerWebACLAssociation\\\":false,\\\"loggingConfiguration\\\":\\{\\\"logDestinationConfigs\\\":\\[\\\"arn:aws:firehose:us-west-2:12345678912:deliverystream/aws-waf-logs-fms-admin-destination\\\"\\],\\\"redactedFields\\\":\\[\\{\\\"redactedFieldType\\\":\\\"SingleHeader\\\",\\\"redactedFieldValue\\\":\\\"Cookies\\\"\\},\\{\\\"redactedFieldType\\\":\\\"Method\\\"\\}\\]\\}\\}\" In the loggingConfiguration, you can specify one logDestinationConfigs, you can optionally provide up to 20 redactedFields, and the RedactedFieldType must be one of URI, QUERY_STRING, HEADER, or METHOD. Example: WAF Classic \"\\{\\\"type\\\": \\\"WAF\\\", \\\"ruleGroups\\\": \\[\\{\\\"id\\\":\\\"12345678-1bcd-9012-efga-0987654321ab\\\", \\\"overrideAction\\\" : \\{\\\"type\\\": \\\"COUNT\\\"\\}\\}\\], \\\"defaultAction\\\": \\{\\\"type\\\": \\\"BLOCK\\\"\\}\\}\" Example: WAFV2 - Firewall Manager support for WAF managed rule group versioning \"\\{\\\"type\\\":\\\"WAFV2\\\",\\\"preProcessRuleGroups\\\":\\[\\{\\\"ruleGroupArn\\\":null,\\\"overrideAction\\\":\\{\\\"type\\\":\\\"NONE\\\"\\},\\\"managedRuleGroupIdentifier\\\":\\{\\\"versionEnabled\\\":true,\\\"version\\\":\\\"Version_2.0\\\",\\\"vendorName\\\":\\\"AWS\\\",\\\"managedRuleGroupName\\\":\\\"AWSManagedRulesCommonRuleSet\\\"\\},\\\"ruleGroupType\\\":\\\"ManagedRuleGroup\\\",\\\"excludeRules\\\":\\[\\{\\\"name\\\":\\\"NoUserAgent_HEADER\\\"\\}\\]\\}\\],\\\"postProcessRuleGroups\\\":\\[\\],\\\"defaultAction\\\":\\{\\\"type\\\":\\\"ALLOW\\\"\\},\\\"overrideCustomerWebACLAssociation\\\":false,\\\"loggingConfiguration\\\":\\{\\\"logDestinationConfigs\\\":\\[\\\"arn:aws:firehose:us-west-2:12345678912:deliverystream/aws-waf-logs-fms-admin-destination\\\"\\],\\\"redactedFields\\\":\\[\\{\\\"redactedFieldType\\\":\\\"SingleHeader\\\",\\\"redactedFieldValue\\\":\\\"Cookies\\\"\\},\\{\\\"redactedFieldType\\\":\\\"Method\\\"\\}\\]\\}\\}\" To use a specific version of a WAF managed rule group in your Firewall Manager policy, you must set versionEnabled to true, and set version to the version you'd like to use. If you don't set versionEnabled to true, or if you omit versionEnabled, then Firewall Manager uses the default version of the WAF managed rule group. Example: SECURITY_GROUPS_COMMON \"\\{\\\"type\\\":\\\"SECURITY_GROUPS_COMMON\\\",\\\"revertManualSecurityGroupChanges\\\":false,\\\"exclusiveResourceSecurityGroupManagement\\\":false, \\\"applyToAllEC2InstanceENIs\\\":false,\\\"securityGroups\\\":\\[\\{\\\"id\\\":\\\" sg-000e55995d61a06bd\\\"\\}\\]\\}\" Example: Shared VPCs. Apply the preceding policy to resources in shared VPCs as well as to those in VPCs that the account owns \"\\{\\\"type\\\":\\\"SECURITY_GROUPS_COMMON\\\",\\\"revertManualSecurityGroupChanges\\\":false,\\\"exclusiveResourceSecurityGroupManagement\\\":false, \\\"applyToAllEC2InstanceENIs\\\":false,\\\"includeSharedVPC\\\":true,\\\"securityGroups\\\":\\[\\{\\\"id\\\":\\\" sg-000e55995d61a06bd\\\"\\}\\]\\}\" Example: SECURITY_GROUPS_CONTENT_AUDIT \"\\{\\\"type\\\":\\\"SECURITY_GROUPS_CONTENT_AUDIT\\\",\\\"securityGroups\\\":\\[\\{\\\"id\\\":\\\"sg-000e55995d61a06bd\\\"\\}\\],\\\"securityGroupAction\\\":\\{\\\"type\\\":\\\"ALLOW\\\"\\}\\}\" The security group action for content audit can be ALLOW or DENY. For ALLOW, all in-scope security group rules must be within the allowed range of the policy's security group rules. For DENY, all in-scope security group rules must not contain a value or a range that matches a rule value or range in the policy security group. Example: SECURITY_GROUPS_USAGE_AUDIT \"\\{\\\"type\\\":\\\"SECURITY_GROUPS_USAGE_AUDIT\\\",\\\"deleteUnusedSecurityGroups\\\":true,\\\"coalesceRedundantSecurityGroups\\\":true\\}\""];
+          "Details about the service that are specific to the service type, in JSON format. Example: DNS_FIREWALL \"\\{\\\"type\\\":\\\"DNS_FIREWALL\\\",\\\"preProcessRuleGroups\\\":\\[\\{\\\"ruleGroupId\\\":\\\"rslvr-frg-1\\\",\\\"priority\\\":10\\}\\],\\\"postProcessRuleGroups\\\":\\[\\{\\\"ruleGroupId\\\":\\\"rslvr-frg-2\\\",\\\"priority\\\":9911\\}\\]\\}\" Valid values for preProcessRuleGroups are between 1 and 99. Valid values for postProcessRuleGroups are between 9901 and 10000. Example: IMPORT_NETWORK_FIREWALL \"\\{\\\"type\\\":\\\"IMPORT_NETWORK_FIREWALL\\\",\\\"awsNetworkFirewallConfig\\\":\\{\\\"networkFirewallStatelessRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-west-2:000000000000:stateless-rulegroup\\/rg1\\\",\\\"priority\\\":1\\}\\],\\\"networkFirewallStatelessDefaultActions\\\":\\[\\\"aws:drop\\\"\\],\\\"networkFirewallStatelessFragmentDefaultActions\\\":\\[\\\"aws:pass\\\"\\],\\\"networkFirewallStatelessCustomActions\\\":\\[\\],\\\"networkFirewallStatefulRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-west-2:aws-managed:stateful-rulegroup\\/ThreatSignaturesEmergingEventsStrictOrder\\\",\\\"priority\\\":8\\}\\],\\\"networkFirewallStatefulEngineOptions\\\":\\{\\\"ruleOrder\\\":\\\"STRICT_ORDER\\\"\\},\\\"networkFirewallStatefulDefaultActions\\\":\\[\\\"aws:drop_strict\\\"\\]\\}\\}\" \"\\{\\\"type\\\":\\\"DNS_FIREWALL\\\",\\\"preProcessRuleGroups\\\":\\[\\{\\\"ruleGroupId\\\":\\\"rslvr-frg-1\\\",\\\"priority\\\":10\\}\\],\\\"postProcessRuleGroups\\\":\\[\\{\\\"ruleGroupId\\\":\\\"rslvr-frg-2\\\",\\\"priority\\\":9911\\}\\]\\}\" Valid values for preProcessRuleGroups are between 1 and 99. Valid values for postProcessRuleGroups are between 9901 and 10000. Example: NETWORK_FIREWALL - Centralized deployment model \"\\{\\\"type\\\":\\\"NETWORK_FIREWALL\\\",\\\"awsNetworkFirewallConfig\\\":\\{\\\"networkFirewallStatelessRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateless-rulegroup/test\\\",\\\"priority\\\":1\\}\\],\\\"networkFirewallStatelessDefaultActions\\\":\\[\\\"aws:forward_to_sfe\\\",\\\"customActionName\\\"\\],\\\"networkFirewallStatelessFragmentDefaultActions\\\":\\[\\\"aws:forward_to_sfe\\\",\\\"customActionName\\\"\\],\\\"networkFirewallStatelessCustomActions\\\":\\[\\{\\\"actionName\\\":\\\"customActionName\\\",\\\"actionDefinition\\\":\\{\\\"publishMetricAction\\\":\\{\\\"dimensions\\\":\\[\\{\\\"value\\\":\\\"metricdimensionvalue\\\"\\}\\]\\}\\}\\}\\],\\\"networkFirewallStatefulRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateful-rulegroup/test\\\"\\}\\],\\\"networkFirewallLoggingConfiguration\\\":\\{\\\"logDestinationConfigs\\\":\\[\\{\\\"logDestinationType\\\":\\\"S3\\\",\\\"logType\\\":\\\"ALERT\\\",\\\"logDestination\\\":\\{\\\"bucketName\\\":\\\"s3-bucket-name\\\"\\}\\},\\{\\\"logDestinationType\\\":\\\"S3\\\",\\\"logType\\\":\\\"FLOW\\\",\\\"logDestination\\\":\\{\\\"bucketName\\\":\\\"s3-bucket-name\\\"\\}\\}\\],\\\"overrideExistingConfig\\\":true\\}\\},\\\"firewallDeploymentModel\\\":\\{\\\"centralizedFirewallDeploymentModel\\\":\\{\\\"centralizedFirewallOrchestrationConfig\\\":\\{\\\"inspectionVpcIds\\\":\\[\\{\\\"resourceId\\\":\\\"vpc-1234\\\",\\\"accountId\\\":\\\"123456789011\\\"\\}\\],\\\"firewallCreationConfig\\\":\\{\\\"endpointLocation\\\":\\{\\\"availabilityZoneConfigList\\\":\\[\\{\\\"availabilityZoneId\\\":null,\\\"availabilityZoneName\\\":\\\"us-east-1a\\\",\\\"allowedIPV4CidrList\\\":\\[\\\"10.0.0.0/28\\\"\\]\\}\\]\\}\\},\\\"allowedIPV4CidrList\\\":\\[\\]\\}\\}\\}\\}\" To use the centralized deployment model, you must set PolicyOption to CENTRALIZED. Example: NETWORK_FIREWALL - Distributed deployment model with automatic Availability Zone configuration \"\\{\\\"type\\\":\\\"NETWORK_FIREWALL\\\",\\\"networkFirewallStatelessRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateless-rulegroup/test\\\",\\\"priority\\\":1\\}\\],\\\"networkFirewallStatelessDefaultActions\\\":\\[\\\"aws:forward_to_sfe\\\",\\\"customActionName\\\"\\],\\\"networkFirewallStatelessFragmentDefaultActions\\\":\\[\\\"aws:forward_to_sfe\\\",\\\"customActionName\\\"\\],\\\"networkFirewallStatelessCustomActions\\\":\\[\\{\\\"actionName\\\":\\\"customActionName\\\",\\\"actionDefinition\\\":\\{\\\"publishMetricAction\\\":\\{\\\"dimensions\\\":\\[\\{\\\"value\\\":\\\"metricdimensionvalue\\\"\\}\\]\\}\\}\\}\\],\\\"networkFirewallStatefulRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateful-rulegroup/test\\\"\\}\\],\\\"networkFirewallOrchestrationConfig\\\":\\{\\\"singleFirewallEndpointPerVPC\\\":false,\\\"allowedIPV4CidrList\\\":\\[\\\"10.0.0.0/28\\\",\\\"192.168.0.0/28\\\"\\],\\\"routeManagementAction\\\":\\\"OFF\\\"\\},\\\"networkFirewallLoggingConfiguration\\\":\\{\\\"logDestinationConfigs\\\":\\[\\{\\\"logDestinationType\\\":\\\"S3\\\",\\\"logType\\\":\\\"ALERT\\\",\\\"logDestination\\\":\\{\\\"bucketName\\\":\\\"s3-bucket-name\\\"\\}\\},\\{\\\"logDestinationType\\\":\\\"S3\\\",\\\"logType\\\":\\\"FLOW\\\",\\\"logDestination\\\":\\{\\\"bucketName\\\":\\\"s3-bucket-name\\\"\\}\\}\\],\\\"overrideExistingConfig\\\":true\\}\\}\" With automatic Availbility Zone configuration, Firewall Manager chooses which Availability Zones to create the endpoints in. To use the distributed deployment model, you must set PolicyOption to NULL. Example: NETWORK_FIREWALL - Distributed deployment model with automatic Availability Zone configuration and route management \"\\{\\\"type\\\":\\\"NETWORK_FIREWALL\\\",\\\"networkFirewallStatelessRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateless-rulegroup/test\\\",\\\"priority\\\":1\\}\\],\\\"networkFirewallStatelessDefaultActions\\\":\\[\\\"aws:forward_to_sfe\\\",\\\"customActionName\\\"\\],\\\"networkFirewallStatelessFragmentDefaultActions\\\":\\[\\\"aws:forward_to_sfe\\\",\\\"customActionName\\\"\\],\\\"networkFirewallStatelessCustomActions\\\":\\[\\{\\\"actionName\\\":\\\"customActionName\\\",\\\"actionDefinition\\\":\\{\\\"publishMetricAction\\\":\\{\\\"dimensions\\\":\\[\\{\\\"value\\\":\\\"metricdimensionvalue\\\"\\}\\]\\}\\}\\}\\],\\\"networkFirewallStatefulRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateful-rulegroup/test\\\"\\}\\],\\\"networkFirewallOrchestrationConfig\\\":\\{\\\"singleFirewallEndpointPerVPC\\\":false,\\\"allowedIPV4CidrList\\\":\\[\\\"10.0.0.0/28\\\",\\\"192.168.0.0/28\\\"\\],\\\"routeManagementAction\\\":\\\"MONITOR\\\",\\\"routeManagementTargetTypes\\\":\\[\\\"InternetGateway\\\"\\]\\},\\\"networkFirewallLoggingConfiguration\\\":\\{\\\"logDestinationConfigs\\\":\\[\\{\\\"logDestinationType\\\":\\\"S3\\\",\\\"logType\\\":\\\"ALERT\\\",\\\"logDestination\\\":\\{\\\"bucketName\\\":\\\"s3-bucket-name\\\"\\}\\},\\{\\\"logDestinationType\\\":\\\"S3\\\",\\\"logType\\\": \\\"FLOW\\\",\\\"logDestination\\\":\\{\\\"bucketName\\\":\\\"s3-bucket-name\\\"\\}\\}\\],\\\"overrideExistingConfig\\\":true\\}\\}\" To use the distributed deployment model, you must set PolicyOption to NULL. Example: NETWORK_FIREWALL - Distributed deployment model with custom Availability Zone configuration \"\\{\\\"type\\\":\\\"NETWORK_FIREWALL\\\",\\\"networkFirewallStatelessRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateless-rulegroup/test\\\",\\\"priority\\\":1\\}\\],\\\"networkFirewallStatelessDefaultActions\\\":\\[\\\"aws:forward_to_sfe\\\",\\\"customActionName\\\"\\],\\\"networkFirewallStatelessFragmentDefaultActions\\\":\\[\\\"aws:forward_to_sfe\\\",\\\"fragmentcustomactionname\\\"\\],\\\"networkFirewallStatelessCustomActions\\\":\\[\\{\\\"actionName\\\":\\\"customActionName\\\", \\\"actionDefinition\\\":\\{\\\"publishMetricAction\\\":\\{\\\"dimensions\\\":\\[\\{\\\"value\\\":\\\"metricdimensionvalue\\\"\\}\\]\\}\\}\\},\\{\\\"actionName\\\":\\\"fragmentcustomactionname\\\",\\\"actionDefinition\\\":\\{\\\"publishMetricAction\\\":\\{\\\"dimensions\\\":\\[\\{\\\"value\\\":\\\"fragmentmetricdimensionvalue\\\"\\}\\]\\}\\}\\}\\],\\\"networkFirewallStatefulRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateful-rulegroup/test\\\"\\}\\],\\\"networkFirewallOrchestrationConfig\\\":\\{\\\"firewallCreationConfig\\\":\\{ \\\"endpointLocation\\\":\\{\\\"availabilityZoneConfigList\\\":\\[\\{\\\"availabilityZoneName\\\":\\\"us-east-1a\\\",\\\"allowedIPV4CidrList\\\":\\[\\\"10.0.0.0/28\\\"\\]\\},\\{\\\"availabilityZoneName\\\":\\\"us-east-1b\\\",\\\"allowedIPV4CidrList\\\":\\[ \\\"10.0.0.0/28\\\"\\]\\}\\]\\} \\},\\\"singleFirewallEndpointPerVPC\\\":false,\\\"allowedIPV4CidrList\\\":null,\\\"routeManagementAction\\\":\\\"OFF\\\",\\\"networkFirewallLoggingConfiguration\\\":\\{\\\"logDestinationConfigs\\\":\\[\\{\\\"logDestinationType\\\":\\\"S3\\\",\\\"logType\\\":\\\"ALERT\\\",\\\"logDestination\\\":\\{\\\"bucketName\\\":\\\"s3-bucket-name\\\"\\}\\},\\{\\\"logDestinationType\\\":\\\"S3\\\",\\\"logType\\\":\\\"FLOW\\\",\\\"logDestination\\\":\\{\\\"bucketName\\\":\\\"s3-bucket-name\\\"\\}\\}\\],\\\"overrideExistingConfig\\\":boolean\\}\\}\" With custom Availability Zone configuration, you define which specific Availability Zones to create endpoints in by configuring firewallCreationConfig. To configure the Availability Zones in firewallCreationConfig, specify either the availabilityZoneName or availabilityZoneId parameter, not both parameters. To use the distributed deployment model, you must set PolicyOption to NULL. Example: NETWORK_FIREWALL - Distributed deployment model with custom Availability Zone configuration and route management \"\\{\\\"type\\\":\\\"NETWORK_FIREWALL\\\",\\\"networkFirewallStatelessRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateless-rulegroup/test\\\",\\\"priority\\\":1\\}\\],\\\"networkFirewallStatelessDefaultActions\\\":\\[\\\"aws:forward_to_sfe\\\",\\\"customActionName\\\"\\],\\\"networkFirewallStatelessFragmentDefaultActions\\\":\\[\\\"aws:forward_to_sfe\\\",\\\"fragmentcustomactionname\\\"\\],\\\"networkFirewallStatelessCustomActions\\\":\\[\\{\\\"actionName\\\":\\\"customActionName\\\",\\\"actionDefinition\\\":\\{\\\"publishMetricAction\\\":\\{\\\"dimensions\\\":\\[\\{\\\"value\\\":\\\"metricdimensionvalue\\\"\\}\\]\\}\\}\\},\\{\\\"actionName\\\":\\\"fragmentcustomactionname\\\",\\\"actionDefinition\\\":\\{\\\"publishMetricAction\\\":\\{\\\"dimensions\\\":\\[\\{\\\"value\\\":\\\"fragmentmetricdimensionvalue\\\"\\}\\]\\}\\}\\}\\],\\\"networkFirewallStatefulRuleGroupReferences\\\":\\[\\{\\\"resourceARN\\\":\\\"arn:aws:network-firewall:us-east-1:123456789011:stateful-rulegroup/test\\\"\\}\\],\\\"networkFirewallOrchestrationConfig\\\":\\{\\\"firewallCreationConfig\\\":\\{\\\"endpointLocation\\\":\\{\\\"availabilityZoneConfigList\\\":\\[\\{\\\"availabilityZoneName\\\":\\\"us-east-1a\\\",\\\"allowedIPV4CidrList\\\":\\[\\\"10.0.0.0/28\\\"\\]\\},\\{\\\"availabilityZoneName\\\":\\\"us-east-1b\\\",\\\"allowedIPV4CidrList\\\":\\[\\\"10.0.0.0/28\\\"\\]\\}\\]\\}\\},\\\"singleFirewallEndpointPerVPC\\\":false,\\\"allowedIPV4CidrList\\\":null,\\\"routeManagementAction\\\":\\\"MONITOR\\\",\\\"routeManagementTargetTypes\\\":\\[\\\"InternetGateway\\\"\\],\\\"routeManagementConfig\\\":\\{\\\"allowCrossAZTrafficIfNoEndpoint\\\":true\\}\\},\\\"networkFirewallLoggingConfiguration\\\":\\{\\\"logDestinationConfigs\\\":\\[\\{\\\"logDestinationType\\\":\\\"S3\\\",\\\"logType\\\":\\\"ALERT\\\",\\\"logDestination\\\":\\{\\\"bucketName\\\":\\\"s3-bucket-name\\\"\\}\\},\\{\\\"logDestinationType\\\":\\\"S3\\\",\\\"logType\\\":\\\"FLOW\\\",\\\"logDestination\\\":\\{\\\"bucketName\\\":\\\"s3-bucket-name\\\"\\}\\}\\],\\\"overrideExistingConfig\\\":boolean\\}\\}\" To use the distributed deployment model, you must set PolicyOption to NULL. Example: SECURITY_GROUPS_COMMON \"\\{\\\"type\\\":\\\"SECURITY_GROUPS_COMMON\\\",\\\"securityGroups\\\":\\[\\{\\\"id\\\":\\\"sg-03b1f67d69ed00197\\\"\\}\\],\\\"revertManualSecurityGroupChanges\\\":true,\\\"exclusiveResourceSecurityGroupManagement\\\":true,\\\"applyToAllEC2InstanceENIs\\\":false,\\\"includeSharedVPC\\\":true,\\\"enableSecurityGroupReferencesDistribution\\\":true\\}\" Example: SECURITY_GROUPS_COMMON - Security group tag distribution \"\"\\{\\\"type\\\":\\\"SECURITY_GROUPS_COMMON\\\",\\\"securityGroups\\\":\\[\\{\\\"id\\\":\\\"sg-000e55995d61a06bd\\\"\\}\\],\\\"revertManualSecurityGroupChanges\\\":true,\\\"exclusiveResourceSecurityGroupManagement\\\":false,\\\"applyToAllEC2InstanceENIs\\\":false,\\\"includeSharedVPC\\\":false,\\\"enableTagDistribution\\\":true\\}\"\" Firewall Manager automatically distributes tags from the primary group to the security groups created by this policy. To use security group tag distribution, you must also set revertManualSecurityGroupChanges to true, otherwise Firewall Manager won't be able to create the policy. When you enable revertManualSecurityGroupChanges, Firewall Manager identifies and reports when the security groups created by this policy become non-compliant. Firewall Manager won't distribute system tags added by Amazon Web Services services into the replica security groups. System tags begin with the aws: prefix. Example: Shared VPCs. Apply the preceding policy to resources in shared VPCs as well as to those in VPCs that the account owns \"\\{\\\"type\\\":\\\"SECURITY_GROUPS_COMMON\\\",\\\"revertManualSecurityGroupChanges\\\":false,\\\"exclusiveResourceSecurityGroupManagement\\\":false, \\\"applyToAllEC2InstanceENIs\\\":false,\\\"includeSharedVPC\\\":true,\\\"securityGroups\\\":\\[\\{\\\"id\\\":\\\" sg-000e55995d61a06bd\\\"\\}\\]\\}\" Example: SECURITY_GROUPS_CONTENT_AUDIT \"\\{\\\"type\\\":\\\"SECURITY_GROUPS_CONTENT_AUDIT\\\",\\\"preManagedOptions\\\":\\[\\{\\\"denyProtocolAllValue\\\":true\\},\\{\\\"auditSgDirection\\\":\\{\\\"type\\\":\\\"ALL\\\"\\}\\}\\],\\\"securityGroups\\\":\\[\\{\\\"id\\\":\\\"sg-049b2393a25468971\\\"\\}\\],\\\"securityGroupAction\\\":\\{\\\"type\\\":\\\"ALLOW\\\"\\}\\}\" The security group action for content audit can be ALLOW or DENY. For ALLOW, all in-scope security group rules must be within the allowed range of the policy's security group rules. For DENY, all in-scope security group rules must not contain a value or a range that matches a rule value or range in the policy security group. Example: SECURITY_GROUPS_USAGE_AUDIT \"\\{\\\"type\\\":\\\"SECURITY_GROUPS_USAGE_AUDIT\\\",\\\"deleteUnusedSecurityGroups\\\":true,\\\"coalesceRedundantSecurityGroups\\\":true,\\\"optionalDelayForUnusedInMinutes\\\":60\\}\" Example: SHIELD_ADVANCED with web ACL management \"\\{\\\"type\\\":\\\"SHIELD_ADVANCED\\\",\\\"optimizeUnassociatedWebACL\\\":true\\}\" If you set optimizeUnassociatedWebACL to true, Firewall Manager creates web ACLs in accounts within the policy scope if the web ACLs will be used by at least one resource. Firewall Manager creates web ACLs in the accounts within policy scope only if the web ACLs will be used by at least one resource. If at any time an account comes into policy scope, Firewall Manager automatically creates a web ACL in the account if at least one resource will use the web ACL. Upon enablement, Firewall Manager performs a one-time cleanup of unused web ACLs in your account. The cleanup process can take several hours. If a resource leaves policy scope after Firewall Manager creates a web ACL, Firewall Manager doesn't disassociate the resource from the web ACL. If you want Firewall Manager to clean up the web ACL, you must first manually disassociate the resources from the web ACL, and then enable the manage unused web ACLs option in your policy. If you set optimizeUnassociatedWebACL to false, and Firewall Manager automatically creates an empty web ACL in each account that's within policy scope. Specification for SHIELD_ADVANCED for Amazon CloudFront distributions \"\\{\\\"type\\\":\\\"SHIELD_ADVANCED\\\",\\\"automaticResponseConfiguration\\\": \\{\\\"automaticResponseStatus\\\":\\\"ENABLED|IGNORED|DISABLED\\\", \\\"automaticResponseAction\\\":\\\"BLOCK|COUNT\\\"\\}, \\\"overrideCustomerWebaclClassic\\\":true|false, \\\"optimizeUnassociatedWebACL\\\":true|false\\}\" For example: \"\\{\\\"type\\\":\\\"SHIELD_ADVANCED\\\",\\\"automaticResponseConfiguration\\\": \\{\\\"automaticResponseStatus\\\":\\\"ENABLED\\\", \\\"automaticResponseAction\\\":\\\"COUNT\\\"\\}\\}\" The default value for automaticResponseStatus is IGNORED. The value for automaticResponseAction is only required when automaticResponseStatus is set to ENABLED. The default value for overrideCustomerWebaclClassic is false. For other resource types that you can protect with a Shield Advanced policy, this ManagedServiceData configuration is an empty string. Example: THIRD_PARTY_FIREWALL Replace THIRD_PARTY_FIREWALL_NAME with the name of the third-party firewall. \"\\{ \"type\":\"THIRD_PARTY_FIREWALL\", \"thirdPartyFirewall\":\"THIRD_PARTY_FIREWALL_NAME\", \"thirdPartyFirewallConfig\":\\{ \"thirdPartyFirewallPolicyList\":\\[\"global-1\"\\] \\}, \"firewallDeploymentModel\":\\{ \"distributedFirewallDeploymentModel\":\\{ \"distributedFirewallOrchestrationConfig\":\\{ \"firewallCreationConfig\":\\{ \"endpointLocation\":\\{ \"availabilityZoneConfigList\":\\[ \\{ \"availabilityZoneName\":\"$\\{AvailabilityZone\\}\" \\} \\] \\} \\}, \"allowedIPV4CidrList\":\\[ \\] \\} \\} \\} \\}\" Example: WAFV2 - Account takeover prevention, Bot Control managed rule groups, optimize unassociated web ACL, and rule action override \"\\{\\\"type\\\":\\\"WAFV2\\\",\\\"preProcessRuleGroups\\\":\\[\\{\\\"ruleGroupArn\\\":null,\\\"overrideAction\\\":\\{\\\"type\\\":\\\"NONE\\\"\\},\\\"managedRuleGroupIdentifier\\\":\\{\\\"versionEnabled\\\":null,\\\"version\\\":null,\\\"vendorName\\\":\\\"AWS\\\",\\\"managedRuleGroupName\\\":\\\"AWSManagedRulesATPRuleSet\\\",\\\"managedRuleGroupConfigs\\\":\\[\\{\\\"awsmanagedRulesATPRuleSet\\\":\\{\\\"loginPath\\\":\\\"/loginpath\\\",\\\"requestInspection\\\":\\{\\\"payloadType\\\":\\\"FORM_ENCODED|JSON\\\",\\\"usernameField\\\":\\{\\\"identifier\\\":\\\"/form/username\\\"\\},\\\"passwordField\\\":\\{\\\"identifier\\\":\\\"/form/password\\\"\\}\\}\\}\\}\\]\\},\\\"ruleGroupType\\\":\\\"ManagedRuleGroup\\\",\\\"excludeRules\\\":\\[\\],\\\"sampledRequestsEnabled\\\":true\\},\\{\\\"ruleGroupArn\\\":null,\\\"overrideAction\\\":\\{\\\"type\\\":\\\"NONE\\\"\\},\\\"managedRuleGroupIdentifier\\\":\\{\\\"versionEnabled\\\":null,\\\"version\\\":null,\\\"vendorName\\\":\\\"AWS\\\",\\\"managedRuleGroupName\\\":\\\"AWSManagedRulesBotControlRuleSet\\\",\\\"managedRuleGroupConfigs\\\":\\[\\{\\\"awsmanagedRulesBotControlRuleSet\\\":\\{\\\"inspectionLevel\\\":\\\"TARGETED|COMMON\\\"\\}\\}\\]\\},\\\"ruleGroupType\\\":\\\"ManagedRuleGroup\\\",\\\"excludeRules\\\":\\[\\],\\\"sampledRequestsEnabled\\\":true,\\\"ruleActionOverrides\\\":\\[\\{\\\"name\\\":\\\"Rule1\\\",\\\"actionToUse\\\":\\{\\\"allow|block|count|captcha|challenge\\\":\\{\\}\\}\\},\\{\\\"name\\\":\\\"Rule2\\\",\\\"actionToUse\\\":\\{\\\"allow|block|count|captcha|challenge\\\":\\{\\}\\}\\}\\]\\}\\],\\\"postProcessRuleGroups\\\":\\[\\],\\\"defaultAction\\\":\\{\\\"type\\\":\\\"ALLOW\\\"\\},\\\"customRequestHandling\\\":null,\\\"customResponse\\\":null,\\\"overrideCustomerWebACLAssociation\\\":false,\\\"loggingConfiguration\\\":null,\\\"sampledRequestsEnabledForDefaultActions\\\":true,\\\"optimizeUnassociatedWebACL\\\":true\\}\" Bot Control - For information about AWSManagedRulesBotControlRuleSet managed rule groups, see AWSManagedRulesBotControlRuleSet in the WAF API Reference. Fraud Control account takeover prevention (ATP) - For information about the properties available for AWSManagedRulesATPRuleSet managed rule groups, see AWSManagedRulesATPRuleSet in the WAF API Reference. Optimize unassociated web ACL - If you set optimizeUnassociatedWebACL to true, Firewall Manager creates web ACLs in accounts within the policy scope if the web ACLs will be used by at least one resource. Firewall Manager creates web ACLs in the accounts within policy scope only if the web ACLs will be used by at least one resource. If at any time an account comes into policy scope, Firewall Manager automatically creates a web ACL in the account if at least one resource will use the web ACL. Upon enablement, Firewall Manager performs a one-time cleanup of unused web ACLs in your account. The cleanup process can take several hours. If a resource leaves policy scope after Firewall Manager creates a web ACL, Firewall Manager disassociates the resource from the web ACL, but won't clean up the unused web ACL. Firewall Manager only cleans up unused web ACLs when you first enable management of unused web ACLs in a policy. If you set optimizeUnassociatedWebACL to false Firewall Manager doesn't manage unused web ACLs, and Firewall Manager automatically creates an empty web ACL in each account that's within policy scope. Rule action overrides - Firewall Manager supports rule action overrides only for managed rule groups. To configure a RuleActionOverrides add the Name of the rule to override, and ActionToUse, which is the new action to use for the rule. For information about using rule action override, see RuleActionOverride in the WAF API Reference. Example: WAFV2 - CAPTCHA and Challenge configs \"\\{\\\"type\\\":\\\"WAFV2\\\",\\\"preProcessRuleGroups\\\":\\[\\{\\\"ruleGroupArn\\\":null,\\\"overrideAction\\\":\\{\\\"type\\\":\\\"NONE\\\"\\},\\\"managedRuleGroupIdentifier\\\":\\{\\\"versionEnabled\\\":null,\\\"version\\\":null,\\\"vendorName\\\":\\\"AWS\\\",\\\"managedRuleGroupName\\\":\\\"AWSManagedRulesAdminProtectionRuleSet\\\"\\},\\\"ruleGroupType\\\":\\\"ManagedRuleGroup\\\",\\\"excludeRules\\\":\\[\\],\\\"sampledRequestsEnabled\\\":true\\}\\],\\\"postProcessRuleGroups\\\":\\[\\],\\\"defaultAction\\\":\\{\\\"type\\\":\\\"ALLOW\\\"\\},\\\"customRequestHandling\\\":null,\\\"customResponse\\\":null,\\\"overrideCustomerWebACLAssociation\\\":false,\\\"loggingConfiguration\\\":null,\\\"sampledRequestsEnabledForDefaultActions\\\":true,\\\"captchaConfig\\\":\\{\\\"immunityTimeProperty\\\":\\{\\\"immunityTime\\\":500\\}\\},\\\"challengeConfig\\\":\\{\\\"immunityTimeProperty\\\":\\{\\\"immunityTime\\\":800\\}\\},\\\"tokenDomains\\\":\\[\\\"google.com\\\",\\\"amazon.com\\\"\\],\\\"associationConfig\\\":\\{\\\"requestBody\\\":\\{\\\"CLOUDFRONT\\\":\\{\\\"defaultSizeInspectionLimit\\\":\\\"KB_16\\\"\\}\\}\\}\\}\" CAPTCHA and Challenge configs - If you update the policy's values for associationConfig, captchaConfig, challengeConfig, or tokenDomains, Firewall Manager will overwrite your local web ACLs to contain the new value(s). However, if you don't update the policy's associationConfig, captchaConfig, challengeConfig, or tokenDomains values, the values in your local web ACLs will remain unchanged. For information about association configs, see AssociationConfig. For information about CAPTCHA and Challenge configs, see CaptchaConfig and ChallengeConfig in the WAF API Reference. defaultSizeInspectionLimit - Specifies the maximum size of the web request body component that an associated Amazon CloudFront distribution should send to WAF for inspection. For more information, see DefaultSizeInspectionLimit in the WAF API Reference. Example: WAFV2 - Firewall Manager support for WAF managed rule group versioning \"\\{\\\"preProcessRuleGroups\\\":\\[\\{\\\"ruleGroupType\\\":\\\"ManagedRuleGroup\\\",\\\"overrideAction\\\":\\{\\\"type\\\":\\\"NONE\\\"\\},\\\"sampledRequestsEnabled\\\":true,\\\"managedRuleGroupIdentifier\\\":\\{\\\"managedRuleGroupName\\\":\\\"AWSManagedRulesAdminProtectionRuleSet\\\",\\\"vendorName\\\":\\\"AWS\\\",\\\"managedRuleGroupConfigs\\\":null\\}\\}\\],\\\"postProcessRuleGroups\\\":\\[\\],\\\"defaultAction\\\":\\{\\\"type\\\":\\\"ALLOW\\\"\\},\\\"customRequestHandling\\\":null,\\\"tokenDomains\\\":null,\\\"customResponse\\\":null,\\\"type\\\":\\\"WAFV2\\\",\\\"overrideCustomerWebACLAssociation\\\":false,\\\"sampledRequestsEnabledForDefaultActions\\\":true,\\\"optimizeUnassociatedWebACL\\\":true,\\\"webACLSource\\\":\\\"RETROFIT_EXISTING\\\"\\}\" To use a specific version of a WAF managed rule group in your Firewall Manager policy, you must set versionEnabled to true, and set version to the version you'd like to use. If you don't set versionEnabled to true, or if you omit versionEnabled, then Firewall Manager uses the default version of the WAF managed rule group. Example: WAFV2 - Logging configurations \"\\{\\\"type\\\":\\\"WAFV2\\\",\\\"preProcessRuleGroups\\\":\\[\\{\\\"ruleGroupArn\\\":null, \\\"overrideAction\\\":\\{\\\"type\\\":\\\"NONE\\\"\\},\\\"managedRuleGroupIdentifier\\\": \\{\\\"versionEnabled\\\":null,\\\"version\\\":null,\\\"vendorName\\\":\\\"AWS\\\", \\\"managedRuleGroupName\\\":\\\"AWSManagedRulesAdminProtectionRuleSet\\\"\\} ,\\\"ruleGroupType\\\":\\\"ManagedRuleGroup\\\",\\\"excludeRules\\\":\\[\\], \\\"sampledRequestsEnabled\\\":true\\}\\],\\\"postProcessRuleGroups\\\":\\[\\], \\\"defaultAction\\\":\\{\\\"type\\\":\\\"ALLOW\\\"\\},\\\"customRequestHandling\\\" :null,\\\"customResponse\\\":null,\\\"overrideCustomerWebACLAssociation\\\" :false,\\\"loggingConfiguration\\\":\\{\\\"logDestinationConfigs\\\": \\[\\\"arn:aws:s3:::aws-waf-logs-example-bucket\\\"\\] ,\\\"redactedFields\\\":\\[\\],\\\"loggingFilterConfigs\\\":\\{\\\"defaultBehavior\\\":\\\"KEEP\\\", \\\"filters\\\":\\[\\{\\\"behavior\\\":\\\"KEEP\\\",\\\"requirement\\\":\\\"MEETS_ALL\\\", \\\"conditions\\\":\\[\\{\\\"actionCondition\\\":\\\"CAPTCHA\\\"\\},\\{\\\"actionCondition\\\": \\\"CHALLENGE\\\"\\}, \\{\\\"actionCondition\\\":\\\"EXCLUDED_AS_COUNT\\\"\\}\\]\\}\\]\\}\\},\\\"sampledRequestsEnabledForDefaultActions\\\":true\\}\" Firewall Manager supports Amazon Kinesis Data Firehose and Amazon S3 as the logDestinationConfigs in your loggingConfiguration. For information about WAF logging configurations, see LoggingConfiguration in the WAF API Reference In the loggingConfiguration, you can specify one logDestinationConfigs. Optionally provide as many as 20 redactedFields. The RedactedFieldType must be one of URI, QUERY_STRING, HEADER, or METHOD. Example: WAF Classic \"\\{\\\"ruleGroups\\\":\\[\\{\\\"id\\\":\\\"78cb36c0-1b5e-4d7d-82b2-cf48d3ad9659\\\",\\\"overrideAction\\\":\\{\\\"type\\\":\\\"NONE\\\"\\}\\}\\],\\\"overrideCustomerWebACLAssociation\\\":true,\\\"defaultAction\\\":\\{\\\"type\\\":\\\"ALLOW\\\"\\},\\\"type\\\":\\\"WAF\\\"\\}\""];
       policyOption: PolicyOption.t option
         [@ocaml.doc
-          "Contains the Network Firewall firewall policy options to configure a centralized deployment model."]}
+          "Contains the settings to configure a network ACL policy, a Network Firewall firewall policy deployment model, or a third-party firewall policy."]}
     let context_ = "SecurityServicePolicyData"
     let make ?managedServiceData =
       fun ?policyOption ->
@@ -5384,11 +7367,11 @@ module SecurityServicePolicyData =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?policyOption ?managedServiceData ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyOption = field_map json "PolicyOption" PolicyOption.of_json in
+    let of_json json__ =
+      let policyOption = field_map json__ "PolicyOption" PolicyOption.of_json in
       let managedServiceData =
-        field_map json "ManagedServiceData" ManagedServiceData.of_json in
-      let type_ = field_map_exn json "Type" SecurityServiceType.of_json in
+        field_map json__ "ManagedServiceData" ManagedServiceData.of_json in
+      let type_ = field_map_exn json__ "Type" SecurityServiceType.of_json in
       make ?policyOption ?managedServiceData ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5416,6 +7399,8 @@ module PreviousAppsList =
                     (fun x -> (AppsList.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -5423,6 +7408,185 @@ module PreviousAppsList =
         ~of_json:AppsList.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AccountScope =
+  struct
+    type nonrec t =
+      {
+      accounts: AccountIdList.t option
+        [@ocaml.doc
+          "The list of accounts within the organization that the specified Firewall Manager administrator either can or cannot apply policies to, based on the value of ExcludeSpecifiedAccounts. If ExcludeSpecifiedAccounts is set to true, then the Firewall Manager administrator can apply policies to all members of the organization except for the accounts in this list. If ExcludeSpecifiedAccounts is set to false, then the Firewall Manager administrator can only apply policies to the accounts in this list."];
+      allAccountsEnabled: Boolean.t option
+        [@ocaml.doc
+          "A boolean value that indicates if the administrator can apply policies to all accounts within an organization. If true, the administrator can apply policies to all accounts within the organization. You can either enable management of all accounts through this operation, or you can specify a list of accounts to manage in AccountScope$Accounts. You cannot specify both."];
+      excludeSpecifiedAccounts: Boolean.t option
+        [@ocaml.doc
+          "A boolean value that excludes the accounts in AccountScope$Accounts from the administrator's scope. If true, the Firewall Manager administrator can apply policies to all members of the organization except for the accounts listed in AccountScope$Accounts. You can either specify a list of accounts to exclude by AccountScope$Accounts, or you can enable management of all accounts by AccountScope$AllAccountsEnabled. You cannot specify both."]}
+    let make ?accounts =
+      fun ?allAccountsEnabled ->
+        fun ?excludeSpecifiedAccounts ->
+          fun () ->
+            { accounts; allAccountsEnabled; excludeSpecifiedAccounts }
+    let to_value x =
+      structure_to_value
+        [("Accounts", (Option.map x.accounts ~f:AccountIdList.to_value));
+        ("AllAccountsEnabled",
+          (Option.map x.allAccountsEnabled ~f:Boolean.to_value));
+        ("ExcludeSpecifiedAccounts",
+          (Option.map x.excludeSpecifiedAccounts ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludeSpecifiedAccounts =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "ExcludeSpecifiedAccounts") in
+      let allAccountsEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "AllAccountsEnabled") in
+      let accounts =
+        (Option.map ~f:AccountIdList.of_xml) (Xml.child xml_arg0 "Accounts") in
+      make ?excludeSpecifiedAccounts ?allAccountsEnabled ?accounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludeSpecifiedAccounts =
+        field_map json__ "ExcludeSpecifiedAccounts" Boolean.of_json in
+      let allAccountsEnabled =
+        field_map json__ "AllAccountsEnabled" Boolean.of_json in
+      let accounts = field_map json__ "Accounts" AccountIdList.of_json in
+      make ?excludeSpecifiedAccounts ?allAccountsEnabled ?accounts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configures the accounts within the administrator's Organizations organization that the specified Firewall Manager administrator can apply policies to."]
+module OrganizationalUnitScope =
+  struct
+    type nonrec t =
+      {
+      organizationalUnits: OrganizationalUnitIdList.t option
+        [@ocaml.doc
+          "The list of OUs within the organization that the specified Firewall Manager administrator either can or cannot apply policies to, based on the value of OrganizationalUnitScope$ExcludeSpecifiedOrganizationalUnits. If OrganizationalUnitScope$ExcludeSpecifiedOrganizationalUnits is set to true, then the Firewall Manager administrator can apply policies to all OUs in the organization except for the OUs in this list. If OrganizationalUnitScope$ExcludeSpecifiedOrganizationalUnits is set to false, then the Firewall Manager administrator can only apply policies to the OUs in this list."];
+      allOrganizationalUnitsEnabled: Boolean.t option
+        [@ocaml.doc
+          "A boolean value that indicates if the administrator can apply policies to all OUs within an organization. If true, the administrator can manage all OUs within the organization. You can either enable management of all OUs through this operation, or you can specify OUs to manage in OrganizationalUnitScope$OrganizationalUnits. You cannot specify both."];
+      excludeSpecifiedOrganizationalUnits: Boolean.t option
+        [@ocaml.doc
+          "A boolean value that excludes the OUs in OrganizationalUnitScope$OrganizationalUnits from the administrator's scope. If true, the Firewall Manager administrator can apply policies to all OUs in the organization except for the OUs listed in OrganizationalUnitScope$OrganizationalUnits. You can either specify a list of OUs to exclude by OrganizationalUnitScope$OrganizationalUnits, or you can enable management of all OUs by OrganizationalUnitScope$AllOrganizationalUnitsEnabled. You cannot specify both."]}
+    let make ?organizationalUnits =
+      fun ?allOrganizationalUnitsEnabled ->
+        fun ?excludeSpecifiedOrganizationalUnits ->
+          fun () ->
+            {
+              organizationalUnits;
+              allOrganizationalUnitsEnabled;
+              excludeSpecifiedOrganizationalUnits
+            }
+    let to_value x =
+      structure_to_value
+        [("OrganizationalUnits",
+           (Option.map x.organizationalUnits
+              ~f:OrganizationalUnitIdList.to_value));
+        ("AllOrganizationalUnitsEnabled",
+          (Option.map x.allOrganizationalUnitsEnabled ~f:Boolean.to_value));
+        ("ExcludeSpecifiedOrganizationalUnits",
+          (Option.map x.excludeSpecifiedOrganizationalUnits
+             ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludeSpecifiedOrganizationalUnits =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "ExcludeSpecifiedOrganizationalUnits") in
+      let allOrganizationalUnitsEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "AllOrganizationalUnitsEnabled") in
+      let organizationalUnits =
+        (Option.map ~f:OrganizationalUnitIdList.of_xml)
+          (Xml.child xml_arg0 "OrganizationalUnits") in
+      make ?excludeSpecifiedOrganizationalUnits
+        ?allOrganizationalUnitsEnabled ?organizationalUnits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludeSpecifiedOrganizationalUnits =
+        field_map json__ "ExcludeSpecifiedOrganizationalUnits"
+          Boolean.of_json in
+      let allOrganizationalUnitsEnabled =
+        field_map json__ "AllOrganizationalUnitsEnabled" Boolean.of_json in
+      let organizationalUnits =
+        field_map json__ "OrganizationalUnits"
+          OrganizationalUnitIdList.of_json in
+      make ?excludeSpecifiedOrganizationalUnits
+        ?allOrganizationalUnitsEnabled ?organizationalUnits ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the Organizations organizational units (OUs) that the specified Firewall Manager administrator can apply policies to. For more information about OUs in Organizations, see Managing organizational units (OUs) in the Organizations User Guide."]
+module PolicyTypeScope =
+  struct
+    type nonrec t =
+      {
+      policyTypes: SecurityServiceTypeList.t option
+        [@ocaml.doc
+          "The list of policy types that the specified Firewall Manager administrator can manage."];
+      allPolicyTypesEnabled: Boolean.t option
+        [@ocaml.doc
+          "Allows the specified Firewall Manager administrator to manage all Firewall Manager policy types, except for third-party policy types. Third-party policy types can only be managed by the Firewall Manager default administrator."]}
+    let make ?policyTypes =
+      fun ?allPolicyTypesEnabled ->
+        fun () -> { policyTypes; allPolicyTypesEnabled }
+    let to_value x =
+      structure_to_value
+        [("PolicyTypes",
+           (Option.map x.policyTypes ~f:SecurityServiceTypeList.to_value));
+        ("AllPolicyTypesEnabled",
+          (Option.map x.allPolicyTypesEnabled ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let allPolicyTypesEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "AllPolicyTypesEnabled") in
+      let policyTypes =
+        (Option.map ~f:SecurityServiceTypeList.of_xml)
+          (Xml.child xml_arg0 "PolicyTypes") in
+      make ?allPolicyTypesEnabled ?policyTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let allPolicyTypesEnabled =
+        field_map json__ "AllPolicyTypesEnabled" Boolean.of_json in
+      let policyTypes =
+        field_map json__ "PolicyTypes" SecurityServiceTypeList.of_json in
+      make ?allPolicyTypesEnabled ?policyTypes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the policy types that the specified Firewall Manager administrator can manage."]
+module RegionScope =
+  struct
+    type nonrec t =
+      {
+      regions: AWSRegionList.t option
+        [@ocaml.doc
+          "The Amazon Web Services Regions that the specified Firewall Manager administrator can perform actions in."];
+      allRegionsEnabled: Boolean.t option
+        [@ocaml.doc
+          "Allows the specified Firewall Manager administrator to manage all Amazon Web Services Regions."]}
+    let make ?regions =
+      fun ?allRegionsEnabled -> fun () -> { regions; allRegionsEnabled }
+    let to_value x =
+      structure_to_value
+        [("Regions", (Option.map x.regions ~f:AWSRegionList.to_value));
+        ("AllRegionsEnabled",
+          (Option.map x.allRegionsEnabled ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let allRegionsEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "AllRegionsEnabled") in
+      let regions =
+        (Option.map ~f:AWSRegionList.of_xml) (Xml.child xml_arg0 "Regions") in
+      make ?allRegionsEnabled ?regions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let allRegionsEnabled =
+        field_map json__ "AllRegionsEnabled" Boolean.of_json in
+      let regions = field_map json__ "Regions" AWSRegionList.of_json in
+      make ?allRegionsEnabled ?regions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the Amazon Web Services Regions that the specified Firewall Manager administrator can manage."]
 module ThirdPartyFirewallFirewallPolicy =
   struct
     type nonrec t =
@@ -5450,15 +7614,100 @@ module ThirdPartyFirewallFirewallPolicy =
           (Xml.child xml_arg0 "FirewallPolicyId") in
       make ?firewallPolicyName ?firewallPolicyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallPolicyName =
-        field_map json "FirewallPolicyName" FirewallPolicyName.of_json in
+        field_map json__ "FirewallPolicyName" FirewallPolicyName.of_json in
       let firewallPolicyId =
-        field_map json "FirewallPolicyId" FirewallPolicyId.of_json in
+        field_map json__ "FirewallPolicyId" FirewallPolicyId.of_json in
       make ?firewallPolicyName ?firewallPolicyId ()
     let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configures the third-party firewall's firewall policy."]
+module ResourceSetSummary =
+  struct
+    type nonrec t =
+      {
+      id: Base62Id.t option
+        [@ocaml.doc
+          "A unique identifier for the resource set. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
+      name: Name.t option
+        [@ocaml.doc
+          "The descriptive name of the resource set. You can't change the name of a resource set after you create it."];
+      description: Description.t option
+        [@ocaml.doc "A description of the resource set."];
+      lastUpdateTime: TimeStamp.t option
+        [@ocaml.doc "The last time that the resource set was changed."];
+      resourceSetStatus: ResourceSetStatus.t option
+        [@ocaml.doc
+          "Indicates whether the resource set is in or out of an admin's Region scope. ACTIVE - The administrator can manage and delete the resource set. OUT_OF_ADMIN_SCOPE - The administrator can view the resource set, but they can't edit or delete the resource set. Existing protections stay in place. Any new resource that come into scope of the resource set won't be protected."]}
+    let make ?id =
+      fun ?name ->
+        fun ?description ->
+          fun ?lastUpdateTime ->
+            fun ?resourceSetStatus ->
+              fun () ->
+                { id; name; description; lastUpdateTime; resourceSetStatus }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:Base62Id.to_value));
+        ("Name", (Option.map x.name ~f:Name.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("LastUpdateTime",
+          (Option.map x.lastUpdateTime ~f:TimeStamp.to_value));
+        ("ResourceSetStatus",
+          (Option.map x.resourceSetStatus ~f:ResourceSetStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceSetStatus =
+        (Option.map ~f:ResourceSetStatus.of_xml)
+          (Xml.child xml_arg0 "ResourceSetStatus") in
+      let lastUpdateTime =
+        (Option.map ~f:TimeStamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdateTime") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
+      let id = (Option.map ~f:Base62Id.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?resourceSetStatus ?lastUpdateTime ?description ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceSetStatus =
+        field_map json__ "ResourceSetStatus" ResourceSetStatus.of_json in
+      let lastUpdateTime =
+        field_map json__ "LastUpdateTime" TimeStamp.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let id = field_map json__ "Id" Base62Id.of_json in
+      make ?resourceSetStatus ?lastUpdateTime ?description ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summarizes the resource sets used in a policy."]
+module Resource =
+  struct
+    type nonrec t =
+      {
+      uRI: Identifier.t option
+        [@ocaml.doc "The resource's universal resource indicator (URI)."];
+      accountId: AWSAccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID that the associated resource belongs to."]}
+    let make ?uRI = fun ?accountId -> fun () -> { uRI; accountId }
+    let to_value x =
+      structure_to_value
+        [("URI", (Option.map x.uRI ~f:Identifier.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AWSAccountId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AWSAccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let uRI = (Option.map ~f:Identifier.of_xml) (Xml.child xml_arg0 "URI") in
+      make ?accountId ?uRI ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AWSAccountId.of_json in
+      let uRI = field_map json__ "URI" Identifier.of_json in
+      make ?accountId ?uRI ()
+    let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configures the firewall policy deployment model for a third-party firewall. The deployment model can either be distributed or centralized."]
+       "Details of a resource that is associated to an Firewall Manager resource set."]
 module ProtocolsListDataSummary =
   struct
     type nonrec t =
@@ -5498,12 +7747,12 @@ module ProtocolsListDataSummary =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ListArn") in
       make ?protocolsList ?listName ?listId ?listArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protocolsList =
-        field_map json "ProtocolsList" ProtocolsList.of_json in
-      let listName = field_map json "ListName" ResourceName.of_json in
-      let listId = field_map json "ListId" ListId.of_json in
-      let listArn = field_map json "ListArn" ResourceArn.of_json in
+        field_map json__ "ProtocolsList" ProtocolsList.of_json in
+      let listName = field_map json__ "ListName" ResourceName.of_json in
+      let listId = field_map json__ "ListId" ListId.of_json in
+      let listArn = field_map json__ "ListArn" ResourceArn.of_json in
       make ?protocolsList ?listName ?listId ?listArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details of the Firewall Manager protocols list."]
@@ -5520,7 +7769,7 @@ module PolicySummary =
         [@ocaml.doc "The name of the specified policy."];
       resourceType: ResourceType.t option
         [@ocaml.doc
-          "The type of resource protected by or in scope of the policy. This is in the format shown in the Amazon Web Services Resource Types Reference. For WAF and Shield Advanced, examples include AWS::ElasticLoadBalancingV2::LoadBalancer and AWS::CloudFront::Distribution. For a security group common policy, valid values are AWS::EC2::NetworkInterface and AWS::EC2::Instance. For a security group content audit policy, valid values are AWS::EC2::SecurityGroup, AWS::EC2::NetworkInterface, and AWS::EC2::Instance. For a security group usage audit policy, the value is AWS::EC2::SecurityGroup. For an Network Firewall policy or DNS Firewall policy, the value is AWS::EC2::VPC."];
+          "The type of resource protected by or in scope of the policy. This is in the format shown in the Amazon Web Services Resource Types Reference."];
       securityServiceType: SecurityServiceType.t option
         [@ocaml.doc
           "The service that the policy is using to protect the resources. This specifies the type of policy that is created, either an WAF policy, a Shield Advanced policy, or a security group policy."];
@@ -5529,7 +7778,10 @@ module PolicySummary =
           "Indicates if the policy should be automatically applied to new resources."];
       deleteUnusedFMManagedResources: Boolean.t option
         [@ocaml.doc
-          "Indicates whether Firewall Manager should automatically remove protections from resources that leave the policy scope and clean up resources that Firewall Manager is managing for accounts when those accounts leave policy scope. For example, Firewall Manager will disassociate a Firewall Manager managed web ACL from a protected customer resource when the customer resource leaves policy scope. By default, Firewall Manager doesn't remove protections or delete Firewall Manager managed resources. This option is not available for Shield Advanced or WAF Classic policies."]}
+          "Indicates whether Firewall Manager should automatically remove protections from resources that leave the policy scope and clean up resources that Firewall Manager is managing for accounts when those accounts leave policy scope. For example, Firewall Manager will disassociate a Firewall Manager managed web ACL from a protected customer resource when the customer resource leaves policy scope. By default, Firewall Manager doesn't remove protections or delete Firewall Manager managed resources. This option is not available for Shield Advanced or WAF Classic policies."];
+      policyStatus: CustomerPolicyStatus.t option
+        [@ocaml.doc
+          "Indicates whether the policy is in or out of an admin's policy or Region scope. ACTIVE - The administrator can manage and delete the policy. OUT_OF_ADMIN_SCOPE - The administrator can view the policy, but they can't edit or delete the policy. Existing policy protections stay in place. Any new resources that come into scope of the policy won't be protected."]}
     let make ?policyArn =
       fun ?policyId ->
         fun ?policyName ->
@@ -5537,16 +7789,18 @@ module PolicySummary =
             fun ?securityServiceType ->
               fun ?remediationEnabled ->
                 fun ?deleteUnusedFMManagedResources ->
-                  fun () ->
-                    {
-                      policyArn;
-                      policyId;
-                      policyName;
-                      resourceType;
-                      securityServiceType;
-                      remediationEnabled;
-                      deleteUnusedFMManagedResources
-                    }
+                  fun ?policyStatus ->
+                    fun () ->
+                      {
+                        policyArn;
+                        policyId;
+                        policyName;
+                        resourceType;
+                        securityServiceType;
+                        remediationEnabled;
+                        deleteUnusedFMManagedResources;
+                        policyStatus
+                      }
     let to_value x =
       structure_to_value
         [("PolicyArn", (Option.map x.policyArn ~f:ResourceArn.to_value));
@@ -5559,9 +7813,14 @@ module PolicySummary =
         ("RemediationEnabled",
           (Option.map x.remediationEnabled ~f:Boolean.to_value));
         ("DeleteUnusedFMManagedResources",
-          (Option.map x.deleteUnusedFMManagedResources ~f:Boolean.to_value))]
+          (Option.map x.deleteUnusedFMManagedResources ~f:Boolean.to_value));
+        ("PolicyStatus",
+          (Option.map x.policyStatus ~f:CustomerPolicyStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let policyStatus =
+        (Option.map ~f:CustomerPolicyStatus.of_xml)
+          (Xml.child xml_arg0 "PolicyStatus") in
       let deleteUnusedFMManagedResources =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "DeleteUnusedFMManagedResources") in
@@ -5580,26 +7839,71 @@ module PolicySummary =
         (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "PolicyId") in
       let policyArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "PolicyArn") in
-      make ?deleteUnusedFMManagedResources ?remediationEnabled
+      make ?policyStatus ?deleteUnusedFMManagedResources ?remediationEnabled
         ?securityServiceType ?resourceType ?policyName ?policyId ?policyArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let policyStatus =
+        field_map json__ "PolicyStatus" CustomerPolicyStatus.of_json in
       let deleteUnusedFMManagedResources =
-        field_map json "DeleteUnusedFMManagedResources" Boolean.of_json in
+        field_map json__ "DeleteUnusedFMManagedResources" Boolean.of_json in
       let remediationEnabled =
-        field_map json "RemediationEnabled" Boolean.of_json in
+        field_map json__ "RemediationEnabled" Boolean.of_json in
       let securityServiceType =
-        field_map json "SecurityServiceType" SecurityServiceType.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let policyName = field_map json "PolicyName" ResourceName.of_json in
-      let policyId = field_map json "PolicyId" PolicyId.of_json in
-      let policyArn = field_map json "PolicyArn" ResourceArn.of_json in
-      make ?deleteUnusedFMManagedResources ?remediationEnabled
+        field_map json__ "SecurityServiceType" SecurityServiceType.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let policyName = field_map json__ "PolicyName" ResourceName.of_json in
+      let policyId = field_map json__ "PolicyId" PolicyId.of_json in
+      let policyArn = field_map json__ "PolicyArn" ResourceArn.of_json in
+      make ?policyStatus ?deleteUnusedFMManagedResources ?remediationEnabled
         ?securityServiceType ?resourceType ?policyName ?policyId ?policyArn
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details of the Firewall Manager policy."]
+module DiscoveredResource =
+  struct
+    type nonrec t =
+      {
+      uRI: Identifier.t option
+        [@ocaml.doc
+          "The universal resource identifier (URI) of the discovered resource."];
+      accountId: AWSAccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID associated with the discovered resource."];
+      type_: ResourceType.t option
+        [@ocaml.doc "The type of the discovered resource."];
+      name: ResourceName.t option
+        [@ocaml.doc "The name of the discovered resource."]}
+    let make ?uRI =
+      fun ?accountId ->
+        fun ?type_ -> fun ?name -> fun () -> { uRI; accountId; type_; name }
+    let to_value x =
+      structure_to_value
+        [("URI", (Option.map x.uRI ~f:Identifier.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AWSAccountId.to_value));
+        ("Type", (Option.map x.type_ ~f:ResourceType.to_value));
+        ("Name", (Option.map x.name ~f:ResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
+      let type_ =
+        (Option.map ~f:ResourceType.of_xml) (Xml.child xml_arg0 "Type") in
+      let accountId =
+        (Option.map ~f:AWSAccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let uRI = (Option.map ~f:Identifier.of_xml) (Xml.child xml_arg0 "URI") in
+      make ?name ?type_ ?accountId ?uRI ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" ResourceName.of_json in
+      let type_ = field_map json__ "Type" ResourceType.of_json in
+      let accountId = field_map json__ "AccountId" AWSAccountId.of_json in
+      let uRI = field_map json__ "URI" Identifier.of_json in
+      make ?name ?type_ ?accountId ?uRI ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A resource in the organization that's available to be associated with a Firewall Manager resource set."]
 module PolicyComplianceStatus =
   struct
     type nonrec t =
@@ -5673,15 +7977,16 @@ module PolicyComplianceStatus =
       make ?issueInfoMap ?lastUpdated ?evaluationResults ?memberAccount
         ?policyName ?policyId ?policyOwner ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let issueInfoMap = field_map json "IssueInfoMap" IssueInfoMap.of_json in
-      let lastUpdated = field_map json "LastUpdated" TimeStamp.of_json in
+    let of_json json__ =
+      let issueInfoMap = field_map json__ "IssueInfoMap" IssueInfoMap.of_json in
+      let lastUpdated = field_map json__ "LastUpdated" TimeStamp.of_json in
       let evaluationResults =
-        field_map json "EvaluationResults" EvaluationResults.of_json in
-      let memberAccount = field_map json "MemberAccount" AWSAccountId.of_json in
-      let policyName = field_map json "PolicyName" ResourceName.of_json in
-      let policyId = field_map json "PolicyId" PolicyId.of_json in
-      let policyOwner = field_map json "PolicyOwner" AWSAccountId.of_json in
+        field_map json__ "EvaluationResults" EvaluationResults.of_json in
+      let memberAccount =
+        field_map json__ "MemberAccount" AWSAccountId.of_json in
+      let policyName = field_map json__ "PolicyName" ResourceName.of_json in
+      let policyId = field_map json__ "PolicyId" PolicyId.of_json in
+      let policyOwner = field_map json__ "PolicyOwner" AWSAccountId.of_json in
       make ?issueInfoMap ?lastUpdated ?evaluationResults ?memberAccount
         ?policyName ?policyId ?policyOwner ()
     let to_json v = composed_to_json to_value v
@@ -5722,18 +8027,63 @@ module AppsListDataSummary =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ListArn") in
       make ?appsList ?listName ?listId ?listArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appsList = field_map json "AppsList" AppsList.of_json in
-      let listName = field_map json "ListName" ResourceName.of_json in
-      let listId = field_map json "ListId" ListId.of_json in
-      let listArn = field_map json "ListArn" ResourceArn.of_json in
+    let of_json json__ =
+      let appsList = field_map json__ "AppsList" AppsList.of_json in
+      let listName = field_map json__ "ListName" ResourceName.of_json in
+      let listId = field_map json__ "ListId" ListId.of_json in
+      let listArn = field_map json__ "ListArn" ResourceArn.of_json in
       make ?appsList ?listName ?listId ?listArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details of the Firewall Manager applications list."]
+module AdminAccountSummary =
+  struct
+    type nonrec t =
+      {
+      adminAccount: AWSAccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the Firewall Manager administrator's account."];
+      defaultAdmin: Boolean.t option
+        [@ocaml.doc
+          "A boolean value that indicates if the administrator is the default administrator. If true, then this is the default administrator account. The default administrator can manage third-party firewalls and has full administrative scope. There is only one default administrator account per organization. For information about Firewall Manager default administrator accounts, see Managing Firewall Manager administrators in the Firewall Manager Developer Guide."];
+      status: OrganizationStatus.t option
+        [@ocaml.doc
+          "The current status of the request to onboard a member account as an Firewall Manager administrator. ONBOARDING - The account is onboarding to Firewall Manager as an administrator. ONBOARDING_COMPLETE - Firewall Manager The account is onboarded to Firewall Manager as an administrator, and can perform actions on the resources defined in their AdminScope. OFFBOARDING - The account is being removed as an Firewall Manager administrator. OFFBOARDING_COMPLETE - The account has been removed as an Firewall Manager administrator."]}
+    let make ?adminAccount =
+      fun ?defaultAdmin ->
+        fun ?status -> fun () -> { adminAccount; defaultAdmin; status }
+    let to_value x =
+      structure_to_value
+        [("AdminAccount",
+           (Option.map x.adminAccount ~f:AWSAccountId.to_value));
+        ("DefaultAdmin", (Option.map x.defaultAdmin ~f:Boolean.to_value));
+        ("Status", (Option.map x.status ~f:OrganizationStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:OrganizationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let defaultAdmin =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DefaultAdmin") in
+      let adminAccount =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "AdminAccount") in
+      make ?status ?defaultAdmin ?adminAccount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" OrganizationStatus.of_json in
+      let defaultAdmin = field_map json__ "DefaultAdmin" Boolean.of_json in
+      let adminAccount = field_map json__ "AdminAccount" AWSAccountId.of_json in
+      make ?status ?defaultAdmin ?adminAccount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains high level information about the Firewall Manager administrator account."]
 module ResourceViolations =
   struct
     type nonrec t = ResourceViolation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceViolation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5764,6 +8114,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5787,6 +8140,9 @@ module ComplianceViolators =
   struct
     type nonrec t = ComplianceViolator.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComplianceViolator.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5808,6 +8164,35 @@ module ComplianceViolators =
         ~of_json:ComplianceViolator.of_json j
     let to_json v = composed_to_json to_value v
   end
+module FailedItem =
+  struct
+    type nonrec t =
+      {
+      uRI: Identifier.t option
+        [@ocaml.doc
+          "The univeral resource indicator (URI) of the resource that failed."];
+      reason: FailedItemReason.t option
+        [@ocaml.doc
+          "The reason the resource's association could not be updated."]}
+    let make ?uRI = fun ?reason -> fun () -> { uRI; reason }
+    let to_value x =
+      structure_to_value
+        [("URI", (Option.map x.uRI ~f:Identifier.to_value));
+        ("Reason", (Option.map x.reason ~f:FailedItemReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:FailedItemReason.of_xml) (Xml.child xml_arg0 "Reason") in
+      let uRI = (Option.map ~f:Identifier.of_xml) (Xml.child xml_arg0 "URI") in
+      make ?reason ?uRI ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "Reason" FailedItemReason.of_json in
+      let uRI = field_map json__ "URI" Identifier.of_json in
+      make ?reason ?uRI ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details of a resource that failed when trying to update it's association to a resource set."]
 module InternalErrorException =
   struct
     type nonrec t = {
@@ -5822,8 +8207,8 @@ module InternalErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5842,8 +8227,8 @@ module InvalidInputException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The parameters of the request were invalid."]
@@ -5861,8 +8246,8 @@ module InvalidOperationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5881,8 +8266,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource was not found."]
@@ -5895,6 +8280,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5928,12 +8316,101 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The operation exceeds a resource limit, for example, the maximum number of policy objects that you can create for an Amazon Web Services account. For more information, see Firewall Manager Limits in the WAF Developer Guide."]
+module ResourceSet =
+  struct
+    type nonrec t =
+      {
+      id: Base62Id.t option
+        [@ocaml.doc
+          "A unique identifier for the resource set. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
+      name: Name.t
+        [@ocaml.doc
+          "The descriptive name of the resource set. You can't change the name of a resource set after you create it."];
+      description: Description.t option
+        [@ocaml.doc "A description of the resource set."];
+      updateToken: UpdateToken.t option
+        [@ocaml.doc
+          "An optional token that you can use for optimistic locking. Firewall Manager returns a token to your requests that access the resource set. The token marks the state of the resource set resource at the time of the request. Update tokens are not allowed when creating a resource set. After creation, each subsequent update call to the resource set requires the update token. To make an unconditional change to the resource set, omit the token in your update request. Without the token, Firewall Manager performs your updates regardless of whether the resource set has changed since you last retrieved it. To make a conditional change to the resource set, provide the token in your update request. Firewall Manager uses the token to ensure that the resource set hasn't changed since you last retrieved it. If it has changed, the operation fails with an InvalidTokenException. If this happens, retrieve the resource set again to get a current copy of it with a new token. Reapply your changes as needed, then try the operation again using the new token."];
+      resourceTypeList: ResourceTypeList.t
+        [@ocaml.doc
+          "Determines the resources that can be associated to the resource set. Depending on your setting for max results and the number of resource sets, a single call might not return the full list."];
+      lastUpdateTime: TimeStamp.t option
+        [@ocaml.doc "The last time that the resource set was changed."];
+      resourceSetStatus: ResourceSetStatus.t option
+        [@ocaml.doc
+          "Indicates whether the resource set is in or out of an admin's Region scope. ACTIVE - The administrator can manage and delete the resource set. OUT_OF_ADMIN_SCOPE - The administrator can view the resource set, but they can't edit or delete the resource set. Existing protections stay in place. Any new resource that come into scope of the resource set won't be protected."]}
+    let context_ = "ResourceSet"
+    let make ?id =
+      fun ?description ->
+        fun ?updateToken ->
+          fun ?lastUpdateTime ->
+            fun ?resourceSetStatus ->
+              fun ~name ->
+                fun ~resourceTypeList ->
+                  fun () ->
+                    {
+                      id;
+                      description;
+                      updateToken;
+                      lastUpdateTime;
+                      resourceSetStatus;
+                      name;
+                      resourceTypeList
+                    }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:Base62Id.to_value));
+        ("Name", (Some (Name.to_value x.name)));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("UpdateToken", (Option.map x.updateToken ~f:UpdateToken.to_value));
+        ("ResourceTypeList",
+          (Some (ResourceTypeList.to_value x.resourceTypeList)));
+        ("LastUpdateTime",
+          (Option.map x.lastUpdateTime ~f:TimeStamp.to_value));
+        ("ResourceSetStatus",
+          (Option.map x.resourceSetStatus ~f:ResourceSetStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceSetStatus =
+        (Option.map ~f:ResourceSetStatus.of_xml)
+          (Xml.child xml_arg0 "ResourceSetStatus") in
+      let lastUpdateTime =
+        (Option.map ~f:TimeStamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdateTime") in
+      let resourceTypeList =
+        ResourceTypeList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceTypeList") in
+      let updateToken =
+        (Option.map ~f:UpdateToken.of_xml) (Xml.child xml_arg0 "UpdateToken") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let name =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let id = (Option.map ~f:Base62Id.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?resourceSetStatus ?lastUpdateTime ~resourceTypeList ?updateToken
+        ?description ~name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceSetStatus =
+        field_map json__ "ResourceSetStatus" ResourceSetStatus.of_json in
+      let lastUpdateTime =
+        field_map json__ "LastUpdateTime" TimeStamp.of_json in
+      let resourceTypeList =
+        field_map_exn json__ "ResourceTypeList" ResourceTypeList.of_json in
+      let updateToken = field_map json__ "UpdateToken" UpdateToken.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
+      let id = field_map json__ "Id" Base62Id.of_json in
+      make ?resourceSetStatus ?lastUpdateTime ~resourceTypeList ?updateToken
+        ?description ~name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A set of resources to include in a policy."]
 module ProtocolsListData =
   struct
     type nonrec t =
@@ -6012,17 +8489,19 @@ module ProtocolsListData =
       make ?previousProtocolsList ~protocolsList ?lastUpdateTime ?createTime
         ?listUpdateToken ~listName ?listId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let previousProtocolsList =
-        field_map json "PreviousProtocolsList" PreviousProtocolsList.of_json in
+        field_map json__ "PreviousProtocolsList"
+          PreviousProtocolsList.of_json in
       let protocolsList =
-        field_map_exn json "ProtocolsList" ProtocolsList.of_json in
-      let lastUpdateTime = field_map json "LastUpdateTime" TimeStamp.of_json in
-      let createTime = field_map json "CreateTime" TimeStamp.of_json in
+        field_map_exn json__ "ProtocolsList" ProtocolsList.of_json in
+      let lastUpdateTime =
+        field_map json__ "LastUpdateTime" TimeStamp.of_json in
+      let createTime = field_map json__ "CreateTime" TimeStamp.of_json in
       let listUpdateToken =
-        field_map json "ListUpdateToken" UpdateToken.of_json in
-      let listName = field_map_exn json "ListName" ResourceName.of_json in
-      let listId = field_map json "ListId" ListId.of_json in
+        field_map json__ "ListUpdateToken" UpdateToken.of_json in
+      let listName = field_map_exn json__ "ListName" ResourceName.of_json in
+      let listId = field_map json__ "ListId" ListId.of_json in
       make ?previousProtocolsList ~protocolsList ?lastUpdateTime ?createTime
         ?listUpdateToken ~listName ?listId ()
     let to_json v = composed_to_json to_value v
@@ -6041,8 +8520,8 @@ module InvalidTypeException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The value of the Type parameter is invalid."]
@@ -6062,7 +8541,7 @@ module Policy =
           "Details about the security service that is being used to protect the resources."];
       resourceType: ResourceType.t
         [@ocaml.doc
-          "The type of resource protected by or in scope of the policy. This is in the format shown in the Amazon Web Services Resource Types Reference. To apply this policy to multiple resource types, specify a resource type of ResourceTypeList and then specify the resource types in a ResourceTypeList. For WAF and Shield Advanced, resource types include AWS::ElasticLoadBalancingV2::LoadBalancer, AWS::ElasticLoadBalancing::LoadBalancer, AWS::EC2::EIP, and AWS::CloudFront::Distribution. For a security group common policy, valid values are AWS::EC2::NetworkInterface and AWS::EC2::Instance. For a security group content audit policy, valid values are AWS::EC2::SecurityGroup, AWS::EC2::NetworkInterface, and AWS::EC2::Instance. For a security group usage audit policy, the value is AWS::EC2::SecurityGroup. For an Network Firewall policy or DNS Firewall policy, the value is AWS::EC2::VPC."];
+          "The type of resource protected by or in scope of the policy. This is in the format shown in the Amazon Web Services Resource Types Reference. To apply this policy to multiple resource types, specify a resource type of ResourceTypeList and then specify the resource types in a ResourceTypeList. The following are valid resource types for each Firewall Manager policy type: Amazon Web Services WAF Classic - AWS::ApiGateway::Stage, AWS::CloudFront::Distribution, and AWS::ElasticLoadBalancingV2::LoadBalancer. WAF - AWS::ApiGateway::Stage, AWS::ElasticLoadBalancingV2::LoadBalancer, and AWS::CloudFront::Distribution. Shield Advanced - AWS::ElasticLoadBalancingV2::LoadBalancer, AWS::ElasticLoadBalancing::LoadBalancer, AWS::EC2::EIP, and AWS::CloudFront::Distribution. Network ACL - AWS::EC2::Subnet. Security group usage audit - AWS::EC2::SecurityGroup. Security group content audit - AWS::EC2::SecurityGroup, AWS::EC2::NetworkInterface, and AWS::EC2::Instance. DNS Firewall, Network Firewall, and third-party firewall - AWS::EC2::VPC."];
       resourceTypeList: ResourceTypeList.t option
         [@ocaml.doc
           "An array of ResourceType objects. Use this only to specify multiple resource types. To specify a single resource type, use ResourceType."];
@@ -6082,7 +8561,18 @@ module Policy =
           "Specifies the Amazon Web Services account IDs and Organizations organizational units (OUs) to include in the policy. Specifying an OU is the equivalent of specifying all accounts in the OU and in any of its child OUs, including any child OUs and accounts that are added at a later time. You can specify inclusions or exclusions, but not both. If you specify an IncludeMap, Firewall Manager applies the policy to all accounts specified by the IncludeMap, and does not evaluate any ExcludeMap specifications. If you do not specify an IncludeMap, then Firewall Manager applies the policy to all accounts except for those specified by the ExcludeMap. You can specify account IDs, OUs, or a combination: Specify account IDs by setting the key to ACCOUNT. For example, the following is a valid map: \\{\226\128\156ACCOUNT\226\128\157 : \\[\226\128\156accountID1\226\128\157, \226\128\156accountID2\226\128\157\\]\\}. Specify OUs by setting the key to ORG_UNIT. For example, the following is a valid map: \\{\226\128\156ORG_UNIT\226\128\157 : \\[\226\128\156ouid111\226\128\157, \226\128\156ouid112\226\128\157\\]\\}. Specify accounts and OUs together in a single map, separated with a comma. For example, the following is a valid map: \\{\226\128\156ACCOUNT\226\128\157 : \\[\226\128\156accountID1\226\128\157, \226\128\156accountID2\226\128\157\\], \226\128\156ORG_UNIT\226\128\157 : \\[\226\128\156ouid111\226\128\157, \226\128\156ouid112\226\128\157\\]\\}."];
       excludeMap: CustomerPolicyScopeMap.t option
         [@ocaml.doc
-          "Specifies the Amazon Web Services account IDs and Organizations organizational units (OUs) to exclude from the policy. Specifying an OU is the equivalent of specifying all accounts in the OU and in any of its child OUs, including any child OUs and accounts that are added at a later time. You can specify inclusions or exclusions, but not both. If you specify an IncludeMap, Firewall Manager applies the policy to all accounts specified by the IncludeMap, and does not evaluate any ExcludeMap specifications. If you do not specify an IncludeMap, then Firewall Manager applies the policy to all accounts except for those specified by the ExcludeMap. You can specify account IDs, OUs, or a combination: Specify account IDs by setting the key to ACCOUNT. For example, the following is a valid map: \\{\226\128\156ACCOUNT\226\128\157 : \\[\226\128\156accountID1\226\128\157, \226\128\156accountID2\226\128\157\\]\\}. Specify OUs by setting the key to ORG_UNIT. For example, the following is a valid map: \\{\226\128\156ORG_UNIT\226\128\157 : \\[\226\128\156ouid111\226\128\157, \226\128\156ouid112\226\128\157\\]\\}. Specify accounts and OUs together in a single map, separated with a comma. For example, the following is a valid map: \\{\226\128\156ACCOUNT\226\128\157 : \\[\226\128\156accountID1\226\128\157, \226\128\156accountID2\226\128\157\\], \226\128\156ORG_UNIT\226\128\157 : \\[\226\128\156ouid111\226\128\157, \226\128\156ouid112\226\128\157\\]\\}."]}
+          "Specifies the Amazon Web Services account IDs and Organizations organizational units (OUs) to exclude from the policy. Specifying an OU is the equivalent of specifying all accounts in the OU and in any of its child OUs, including any child OUs and accounts that are added at a later time. You can specify inclusions or exclusions, but not both. If you specify an IncludeMap, Firewall Manager applies the policy to all accounts specified by the IncludeMap, and does not evaluate any ExcludeMap specifications. If you do not specify an IncludeMap, then Firewall Manager applies the policy to all accounts except for those specified by the ExcludeMap. You can specify account IDs, OUs, or a combination: Specify account IDs by setting the key to ACCOUNT. For example, the following is a valid map: \\{\226\128\156ACCOUNT\226\128\157 : \\[\226\128\156accountID1\226\128\157, \226\128\156accountID2\226\128\157\\]\\}. Specify OUs by setting the key to ORG_UNIT. For example, the following is a valid map: \\{\226\128\156ORG_UNIT\226\128\157 : \\[\226\128\156ouid111\226\128\157, \226\128\156ouid112\226\128\157\\]\\}. Specify accounts and OUs together in a single map, separated with a comma. For example, the following is a valid map: \\{\226\128\156ACCOUNT\226\128\157 : \\[\226\128\156accountID1\226\128\157, \226\128\156accountID2\226\128\157\\], \226\128\156ORG_UNIT\226\128\157 : \\[\226\128\156ouid111\226\128\157, \226\128\156ouid112\226\128\157\\]\\}."];
+      resourceSetIds: ResourceSetIds.t option
+        [@ocaml.doc
+          "The unique identifiers of the resource sets used by the policy."];
+      policyDescription: ResourceDescription.t option
+        [@ocaml.doc "Your description of the Firewall Manager policy."];
+      policyStatus: CustomerPolicyStatus.t option
+        [@ocaml.doc
+          "Indicates whether the policy is in or out of an admin's policy or Region scope. ACTIVE - The administrator can manage and delete the policy. OUT_OF_ADMIN_SCOPE - The administrator can view the policy, but they can't edit or delete the policy. Existing policy protections stay in place. Any new resources that come into scope of the policy won't be protected."];
+      resourceTagLogicalOperator: ResourceTagLogicalOperator.t option
+        [@ocaml.doc
+          "Specifies whether to combine multiple resource tags with AND, so that a resource must have all tags to be included or excluded, or OR, so that a resource must have at least one tag. Default: AND"]}
     let context_ = "Policy"
     let make ?policyId =
       fun ?policyUpdateToken ->
@@ -6091,26 +8581,34 @@ module Policy =
             fun ?deleteUnusedFMManagedResources ->
               fun ?includeMap ->
                 fun ?excludeMap ->
-                  fun ~policyName ->
-                    fun ~securityServicePolicyData ->
-                      fun ~resourceType ->
-                        fun ~excludeResourceTags ->
-                          fun ~remediationEnabled ->
-                            fun () ->
-                              {
-                                policyId;
-                                policyUpdateToken;
-                                resourceTypeList;
-                                resourceTags;
-                                deleteUnusedFMManagedResources;
-                                includeMap;
-                                excludeMap;
-                                policyName;
-                                securityServicePolicyData;
-                                resourceType;
-                                excludeResourceTags;
-                                remediationEnabled
-                              }
+                  fun ?resourceSetIds ->
+                    fun ?policyDescription ->
+                      fun ?policyStatus ->
+                        fun ?resourceTagLogicalOperator ->
+                          fun ~policyName ->
+                            fun ~securityServicePolicyData ->
+                              fun ~resourceType ->
+                                fun ~excludeResourceTags ->
+                                  fun ~remediationEnabled ->
+                                    fun () ->
+                                      {
+                                        policyId;
+                                        policyUpdateToken;
+                                        resourceTypeList;
+                                        resourceTags;
+                                        deleteUnusedFMManagedResources;
+                                        includeMap;
+                                        excludeMap;
+                                        resourceSetIds;
+                                        policyDescription;
+                                        policyStatus;
+                                        resourceTagLogicalOperator;
+                                        policyName;
+                                        securityServicePolicyData;
+                                        resourceType;
+                                        excludeResourceTags;
+                                        remediationEnabled
+                                      }
     let to_value x =
       structure_to_value
         [("PolicyId", (Option.map x.policyId ~f:PolicyId.to_value));
@@ -6134,9 +8632,30 @@ module Policy =
         ("IncludeMap",
           (Option.map x.includeMap ~f:CustomerPolicyScopeMap.to_value));
         ("ExcludeMap",
-          (Option.map x.excludeMap ~f:CustomerPolicyScopeMap.to_value))]
+          (Option.map x.excludeMap ~f:CustomerPolicyScopeMap.to_value));
+        ("ResourceSetIds",
+          (Option.map x.resourceSetIds ~f:ResourceSetIds.to_value));
+        ("PolicyDescription",
+          (Option.map x.policyDescription ~f:ResourceDescription.to_value));
+        ("PolicyStatus",
+          (Option.map x.policyStatus ~f:CustomerPolicyStatus.to_value));
+        ("ResourceTagLogicalOperator",
+          (Option.map x.resourceTagLogicalOperator
+             ~f:ResourceTagLogicalOperator.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resourceTagLogicalOperator =
+        (Option.map ~f:ResourceTagLogicalOperator.of_xml)
+          (Xml.child xml_arg0 "ResourceTagLogicalOperator") in
+      let policyStatus =
+        (Option.map ~f:CustomerPolicyStatus.of_xml)
+          (Xml.child xml_arg0 "PolicyStatus") in
+      let policyDescription =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "PolicyDescription") in
+      let resourceSetIds =
+        (Option.map ~f:ResourceSetIds.of_xml)
+          (Xml.child xml_arg0 "ResourceSetIds") in
       let excludeMap =
         (Option.map ~f:CustomerPolicyScopeMap.of_xml)
           (Xml.child xml_arg0 "ExcludeMap") in
@@ -6173,38 +8692,51 @@ module Policy =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
       let policyId =
         (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "PolicyId") in
-      make ?excludeMap ?includeMap ?deleteUnusedFMManagedResources
-        ~remediationEnabled ~excludeResourceTags ?resourceTags
-        ?resourceTypeList ~resourceType ~securityServicePolicyData
-        ?policyUpdateToken ~policyName ?policyId ()
+      make ?resourceTagLogicalOperator ?policyStatus ?policyDescription
+        ?resourceSetIds ?excludeMap ?includeMap
+        ?deleteUnusedFMManagedResources ~remediationEnabled
+        ~excludeResourceTags ?resourceTags ?resourceTypeList ~resourceType
+        ~securityServicePolicyData ?policyUpdateToken ~policyName ?policyId
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let resourceTagLogicalOperator =
+        field_map json__ "ResourceTagLogicalOperator"
+          ResourceTagLogicalOperator.of_json in
+      let policyStatus =
+        field_map json__ "PolicyStatus" CustomerPolicyStatus.of_json in
+      let policyDescription =
+        field_map json__ "PolicyDescription" ResourceDescription.of_json in
+      let resourceSetIds =
+        field_map json__ "ResourceSetIds" ResourceSetIds.of_json in
       let excludeMap =
-        field_map json "ExcludeMap" CustomerPolicyScopeMap.of_json in
+        field_map json__ "ExcludeMap" CustomerPolicyScopeMap.of_json in
       let includeMap =
-        field_map json "IncludeMap" CustomerPolicyScopeMap.of_json in
+        field_map json__ "IncludeMap" CustomerPolicyScopeMap.of_json in
       let deleteUnusedFMManagedResources =
-        field_map json "DeleteUnusedFMManagedResources" Boolean.of_json in
+        field_map json__ "DeleteUnusedFMManagedResources" Boolean.of_json in
       let remediationEnabled =
-        field_map_exn json "RemediationEnabled" Boolean.of_json in
+        field_map_exn json__ "RemediationEnabled" Boolean.of_json in
       let excludeResourceTags =
-        field_map_exn json "ExcludeResourceTags" Boolean.of_json in
-      let resourceTags = field_map json "ResourceTags" ResourceTags.of_json in
+        field_map_exn json__ "ExcludeResourceTags" Boolean.of_json in
+      let resourceTags = field_map json__ "ResourceTags" ResourceTags.of_json in
       let resourceTypeList =
-        field_map json "ResourceTypeList" ResourceTypeList.of_json in
+        field_map json__ "ResourceTypeList" ResourceTypeList.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" ResourceType.of_json in
+        field_map_exn json__ "ResourceType" ResourceType.of_json in
       let securityServicePolicyData =
-        field_map_exn json "SecurityServicePolicyData"
+        field_map_exn json__ "SecurityServicePolicyData"
           SecurityServicePolicyData.of_json in
       let policyUpdateToken =
-        field_map json "PolicyUpdateToken" PolicyUpdateToken.of_json in
-      let policyName = field_map_exn json "PolicyName" ResourceName.of_json in
-      let policyId = field_map json "PolicyId" PolicyId.of_json in
-      make ?excludeMap ?includeMap ?deleteUnusedFMManagedResources
-        ~remediationEnabled ~excludeResourceTags ?resourceTags
-        ?resourceTypeList ~resourceType ~securityServicePolicyData
-        ?policyUpdateToken ~policyName ?policyId ()
+        field_map json__ "PolicyUpdateToken" PolicyUpdateToken.of_json in
+      let policyName = field_map_exn json__ "PolicyName" ResourceName.of_json in
+      let policyId = field_map json__ "PolicyId" PolicyId.of_json in
+      make ?resourceTagLogicalOperator ?policyStatus ?policyDescription
+        ?resourceSetIds ?excludeMap ?includeMap
+        ?deleteUnusedFMManagedResources ~remediationEnabled
+        ~excludeResourceTags ?resourceTags ?resourceTypeList ~resourceType
+        ~securityServicePolicyData ?policyUpdateToken ~policyName ?policyId
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An Firewall Manager policy."]
 module AppsListData =
@@ -6283,20 +8815,87 @@ module AppsListData =
       make ?previousAppsList ~appsList ?lastUpdateTime ?createTime
         ?listUpdateToken ~listName ?listId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let previousAppsList =
-        field_map json "PreviousAppsList" PreviousAppsList.of_json in
-      let appsList = field_map_exn json "AppsList" AppsList.of_json in
-      let lastUpdateTime = field_map json "LastUpdateTime" TimeStamp.of_json in
-      let createTime = field_map json "CreateTime" TimeStamp.of_json in
+        field_map json__ "PreviousAppsList" PreviousAppsList.of_json in
+      let appsList = field_map_exn json__ "AppsList" AppsList.of_json in
+      let lastUpdateTime =
+        field_map json__ "LastUpdateTime" TimeStamp.of_json in
+      let createTime = field_map json__ "CreateTime" TimeStamp.of_json in
       let listUpdateToken =
-        field_map json "ListUpdateToken" UpdateToken.of_json in
-      let listName = field_map_exn json "ListName" ResourceName.of_json in
-      let listId = field_map json "ListId" ListId.of_json in
+        field_map json__ "ListUpdateToken" UpdateToken.of_json in
+      let listName = field_map_exn json__ "ListName" ResourceName.of_json in
+      let listId = field_map json__ "ListId" ListId.of_json in
       make ?previousAppsList ~appsList ?lastUpdateTime ?createTime
         ?listUpdateToken ~listName ?listId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An Firewall Manager applications list."]
+module AdminScope =
+  struct
+    type nonrec t =
+      {
+      accountScope: AccountScope.t option
+        [@ocaml.doc
+          "Defines the accounts that the specified Firewall Manager administrator can apply policies to."];
+      organizationalUnitScope: OrganizationalUnitScope.t option
+        [@ocaml.doc
+          "Defines the Organizations organizational units that the specified Firewall Manager administrator can apply policies to. For more information about OUs in Organizations, see Managing organizational units (OUs) in the Organizations User Guide."];
+      regionScope: RegionScope.t option
+        [@ocaml.doc
+          "Defines the Amazon Web Services Regions that the specified Firewall Manager administrator can perform actions in."];
+      policyTypeScope: PolicyTypeScope.t option
+        [@ocaml.doc
+          "Defines the Firewall Manager policy types that the specified Firewall Manager administrator can create and manage."]}
+    let make ?accountScope =
+      fun ?organizationalUnitScope ->
+        fun ?regionScope ->
+          fun ?policyTypeScope ->
+            fun () ->
+              {
+                accountScope;
+                organizationalUnitScope;
+                regionScope;
+                policyTypeScope
+              }
+    let to_value x =
+      structure_to_value
+        [("AccountScope",
+           (Option.map x.accountScope ~f:AccountScope.to_value));
+        ("OrganizationalUnitScope",
+          (Option.map x.organizationalUnitScope
+             ~f:OrganizationalUnitScope.to_value));
+        ("RegionScope", (Option.map x.regionScope ~f:RegionScope.to_value));
+        ("PolicyTypeScope",
+          (Option.map x.policyTypeScope ~f:PolicyTypeScope.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyTypeScope =
+        (Option.map ~f:PolicyTypeScope.of_xml)
+          (Xml.child xml_arg0 "PolicyTypeScope") in
+      let regionScope =
+        (Option.map ~f:RegionScope.of_xml) (Xml.child xml_arg0 "RegionScope") in
+      let organizationalUnitScope =
+        (Option.map ~f:OrganizationalUnitScope.of_xml)
+          (Xml.child xml_arg0 "OrganizationalUnitScope") in
+      let accountScope =
+        (Option.map ~f:AccountScope.of_xml)
+          (Xml.child xml_arg0 "AccountScope") in
+      make ?policyTypeScope ?regionScope ?organizationalUnitScope
+        ?accountScope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyTypeScope =
+        field_map json__ "PolicyTypeScope" PolicyTypeScope.of_json in
+      let regionScope = field_map json__ "RegionScope" RegionScope.of_json in
+      let organizationalUnitScope =
+        field_map json__ "OrganizationalUnitScope"
+          OrganizationalUnitScope.of_json in
+      let accountScope = field_map json__ "AccountScope" AccountScope.of_json in
+      make ?policyTypeScope ?regionScope ?organizationalUnitScope
+        ?accountScope ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the resources that the Firewall Manager administrator can manage. For more information about administrative scope, see Managing Firewall Manager administrators in the Firewall Manager Developer Guide."]
 module PaginationToken =
   struct
     type nonrec t = string
@@ -6323,6 +8922,9 @@ module ThirdPartyFirewallFirewallPolicies =
   struct
     type nonrec t = ThirdPartyFirewallFirewallPolicy.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ThirdPartyFirewallFirewallPolicy.to_value)) |>
         (fun x -> `List x)
@@ -6368,15 +8970,18 @@ module ThirdPartyFirewall =
   struct
     type nonrec t =
       | PALO_ALTO_NETWORKS_CLOUD_NGFW 
+      | FORTIGATE_CLOUD_NATIVE_FIREWALL 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | PALO_ALTO_NETWORKS_CLOUD_NGFW -> "PALO_ALTO_NETWORKS_CLOUD_NGFW"
+      | FORTIGATE_CLOUD_NATIVE_FIREWALL -> "FORTIGATE_CLOUD_NATIVE_FIREWALL"
       | Non_static_id s -> s
     let of_string =
       function
       | "PALO_ALTO_NETWORKS_CLOUD_NGFW" -> PALO_ALTO_NETWORKS_CLOUD_NGFW
+      | "FORTIGATE_CLOUD_NATIVE_FIREWALL" -> FORTIGATE_CLOUD_NATIVE_FIREWALL
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -6387,10 +8992,68 @@ module ThirdPartyFirewall =
     let of_json j = of_string (string_of_json ~kind:"ThirdPartyFirewall" j)
     let to_json = simple_to_json to_value
   end
+module ResourceSetSummaryList =
+  struct
+    type nonrec t = ResourceSetSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceSetSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceSetSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceSetSummaryList"
+        ~of_json:ResourceSetSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceList =
+  struct
+    type nonrec t = Resource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Resource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Resource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceList" ~of_json:Resource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ProtocolsListsData =
   struct
     type nonrec t = ProtocolsListDataSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProtocolsListDataSummary.to_value)) |>
         (fun x -> `List x)
@@ -6417,6 +9080,9 @@ module PolicySummaryList =
   struct
     type nonrec t = PolicySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicySummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6441,6 +9107,9 @@ module MemberAccounts =
   struct
     type nonrec t = AWSAccountId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AWSAccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6461,10 +9130,68 @@ module MemberAccounts =
       list_of_json ~kind:"MemberAccounts" ~of_json:AWSAccountId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DiscoveredResourceList =
+  struct
+    type nonrec t = DiscoveredResource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DiscoveredResource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DiscoveredResource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DiscoveredResourceList"
+        ~of_json:DiscoveredResource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AWSAccountIdList =
+  struct
+    type nonrec t = AWSAccountId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AWSAccountId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AWSAccountId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AWSAccountIdList" ~of_json:AWSAccountId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PolicyComplianceStatusList =
   struct
     type nonrec t = PolicyComplianceStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyComplianceStatus.to_value)) |>
         (fun x -> `List x)
@@ -6491,6 +9218,9 @@ module AppsListsData =
   struct
     type nonrec t = AppsListDataSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AppsListDataSummary.to_value)) |>
         (fun x -> `List x)
@@ -6513,54 +9243,84 @@ module AppsListsData =
         j
     let to_json v = composed_to_json to_value v
   end
+module AdminAccountSummaryList =
+  struct
+    type nonrec t = AdminAccountSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AdminAccountSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AdminAccountSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AdminAccountSummaryList"
+        ~of_json:AdminAccountSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ViolationDetail =
   struct
     type nonrec t =
       {
-      policyId: PolicyId.t
+      policyId: PolicyId.t option
         [@ocaml.doc
           "The ID of the Firewall Manager policy that the violation details were requested for."];
-      memberAccount: AWSAccountId.t
+      memberAccount: AWSAccountId.t option
         [@ocaml.doc
           "The Amazon Web Services account that the violation details were requested for."];
-      resourceId: ResourceId.t
+      resourceId: ResourceId.t option
         [@ocaml.doc
           "The resource ID that the violation details were requested for."];
-      resourceType: ResourceType.t
+      resourceType: ResourceType.t option
         [@ocaml.doc
           "The resource type that the violation details were requested for."];
-      resourceViolations: ResourceViolations.t
+      resourceViolations: ResourceViolations.t option
         [@ocaml.doc "List of violations for the requested resource."];
       resourceTags: TagList.t option
         [@ocaml.doc "The ResourceTag objects associated with the resource."];
       resourceDescription: LengthBoundedString.t option
         [@ocaml.doc "Brief description for the requested resource."]}
-    let context_ = "ViolationDetail"
-    let make ?resourceTags =
-      fun ?resourceDescription ->
-        fun ~policyId ->
-          fun ~memberAccount ->
-            fun ~resourceId ->
-              fun ~resourceType ->
-                fun ~resourceViolations ->
+    let make ?policyId =
+      fun ?memberAccount ->
+        fun ?resourceId ->
+          fun ?resourceType ->
+            fun ?resourceViolations ->
+              fun ?resourceTags ->
+                fun ?resourceDescription ->
                   fun () ->
                     {
-                      resourceTags;
-                      resourceDescription;
                       policyId;
                       memberAccount;
                       resourceId;
                       resourceType;
-                      resourceViolations
+                      resourceViolations;
+                      resourceTags;
+                      resourceDescription
                     }
     let to_value x =
       structure_to_value
-        [("PolicyId", (Some (PolicyId.to_value x.policyId)));
-        ("MemberAccount", (Some (AWSAccountId.to_value x.memberAccount)));
-        ("ResourceId", (Some (ResourceId.to_value x.resourceId)));
-        ("ResourceType", (Some (ResourceType.to_value x.resourceType)));
+        [("PolicyId", (Option.map x.policyId ~f:PolicyId.to_value));
+        ("MemberAccount",
+          (Option.map x.memberAccount ~f:AWSAccountId.to_value));
+        ("ResourceId", (Option.map x.resourceId ~f:ResourceId.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ResourceType.to_value));
         ("ResourceViolations",
-          (Some (ResourceViolations.to_value x.resourceViolations)));
+          (Option.map x.resourceViolations ~f:ResourceViolations.to_value));
         ("ResourceTags", (Option.map x.resourceTags ~f:TagList.to_value));
         ("ResourceDescription",
           (Option.map x.resourceDescription ~f:LengthBoundedString.to_value))]
@@ -6572,36 +9332,34 @@ module ViolationDetail =
       let resourceTags =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "ResourceTags") in
       let resourceViolations =
-        ResourceViolations.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceViolations") in
+        (Option.map ~f:ResourceViolations.of_xml)
+          (Xml.child xml_arg0 "ResourceViolations") in
       let resourceType =
-        ResourceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ResourceId") in
       let memberAccount =
-        AWSAccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MemberAccount") in
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "MemberAccount") in
       let policyId =
-        PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
-      make ?resourceDescription ?resourceTags ~resourceViolations
-        ~resourceType ~resourceId ~memberAccount ~policyId ()
+        (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "PolicyId") in
+      make ?resourceDescription ?resourceTags ?resourceViolations
+        ?resourceType ?resourceId ?memberAccount ?policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceDescription =
-        field_map json "ResourceDescription" LengthBoundedString.of_json in
-      let resourceTags = field_map json "ResourceTags" TagList.of_json in
+        field_map json__ "ResourceDescription" LengthBoundedString.of_json in
+      let resourceTags = field_map json__ "ResourceTags" TagList.of_json in
       let resourceViolations =
-        field_map_exn json "ResourceViolations" ResourceViolations.of_json in
-      let resourceType =
-        field_map_exn json "ResourceType" ResourceType.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+        field_map json__ "ResourceViolations" ResourceViolations.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
       let memberAccount =
-        field_map_exn json "MemberAccount" AWSAccountId.of_json in
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
-      make ?resourceDescription ?resourceTags ~resourceViolations
-        ~resourceType ~resourceId ~memberAccount ~policyId ()
+        field_map json__ "MemberAccount" AWSAccountId.of_json in
+      let policyId = field_map json__ "PolicyId" PolicyId.of_json in
+      make ?resourceDescription ?resourceTags ?resourceViolations
+        ?resourceType ?resourceId ?memberAccount ?policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Violations for a resource based on the specified Firewall Manager policy and Amazon Web Services account."]
@@ -6766,15 +9524,17 @@ module PolicyComplianceDetail =
       make ?issueInfoMap ?expiredAt ?evaluationLimitExceeded ?violators
         ?memberAccount ?policyId ?policyOwner ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let issueInfoMap = field_map json "IssueInfoMap" IssueInfoMap.of_json in
-      let expiredAt = field_map json "ExpiredAt" TimeStamp.of_json in
+    let of_json json__ =
+      let issueInfoMap = field_map json__ "IssueInfoMap" IssueInfoMap.of_json in
+      let expiredAt = field_map json__ "ExpiredAt" TimeStamp.of_json in
       let evaluationLimitExceeded =
-        field_map json "EvaluationLimitExceeded" Boolean.of_json in
-      let violators = field_map json "Violators" ComplianceViolators.of_json in
-      let memberAccount = field_map json "MemberAccount" AWSAccountId.of_json in
-      let policyId = field_map json "PolicyId" PolicyId.of_json in
-      let policyOwner = field_map json "PolicyOwner" AWSAccountId.of_json in
+        field_map json__ "EvaluationLimitExceeded" Boolean.of_json in
+      let violators =
+        field_map json__ "Violators" ComplianceViolators.of_json in
+      let memberAccount =
+        field_map json__ "MemberAccount" AWSAccountId.of_json in
+      let policyId = field_map json__ "PolicyId" PolicyId.of_json in
+      let policyOwner = field_map json__ "PolicyOwner" AWSAccountId.of_json in
       make ?issueInfoMap ?expiredAt ?evaluationLimitExceeded ?violators
         ?memberAccount ?policyId ?policyOwner ()
     let to_json v = composed_to_json to_value v
@@ -6814,6 +9574,60 @@ module AccountRoleStatus =
         (string_of_xml ~kind:"enumeration AccountRoleStatus" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"AccountRoleStatus" j)
     let to_json = simple_to_json to_value
+  end
+module FailedItemList =
+  struct
+    type nonrec t = FailedItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FailedItem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FailedItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FailedItemList" ~of_json:FailedItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IdentifierList =
+  struct
+    type nonrec t = Identifier.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Identifier.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Identifier.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IdentifierList" ~of_json:Identifier.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module UntagResourceResponse =
   struct
@@ -6908,9 +9722,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7015,13 +9830,134 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagList ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map_exn json "TagList" TagList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tagList = field_map_exn json__ "TagList" TagList.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~tagList ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Adds one or more tags to an Amazon Web Services resource."]
+module PutResourceSetResponse =
+  struct
+    type nonrec t =
+      {
+      resourceSet: ResourceSet.t option
+        [@ocaml.doc "Details about the resource set."];
+      resourceSetArn: ResourceArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource set."]}
+    type nonrec error =
+      [ `InternalErrorException of InternalErrorException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `InvalidOperationException of InvalidOperationException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceSet =
+      fun ?resourceSetArn -> fun () -> { resourceSet; resourceSetArn }
+    let error_of_json name json =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidOperationException e ->
+          `Assoc
+            [("error", (`String "InvalidOperationException"));
+            ("details", (InvalidOperationException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceSet", (Option.map x.resourceSet ~f:ResourceSet.to_value));
+        ("ResourceSetArn",
+          (Option.map x.resourceSetArn ~f:ResourceArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceSetArn =
+        (Option.map ~f:ResourceArn.of_xml)
+          (Xml.child xml_arg0 "ResourceSetArn") in
+      let resourceSet =
+        (Option.map ~f:ResourceSet.of_xml) (Xml.child xml_arg0 "ResourceSet") in
+      make ?resourceSetArn ?resourceSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceSetArn =
+        field_map json__ "ResourceSetArn" ResourceArn.of_json in
+      let resourceSet = field_map json__ "ResourceSet" ResourceSet.of_json in
+      make ?resourceSetArn ?resourceSet ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates the resource set. An Firewall Manager resource set defines the resources to import into an Firewall Manager policy from another Amazon Web Services service."]
+module PutResourceSetRequest =
+  struct
+    type nonrec t =
+      {
+      resourceSet: ResourceSet.t
+        [@ocaml.doc
+          "Details about the resource set to be created or updated.>"];
+      tagList: TagList.t option
+        [@ocaml.doc
+          "Retrieves the tags associated with the specified resource set. Tags are key:value pairs that you can use to categorize and manage your resources, for purposes like billing. For example, you might set the tag key to \"customer\" and the value to the customer name or ID. You can specify one or more tags to add to each Amazon Web Services resource, up to 50 tags for a resource."]}
+    let context_ = "PutResourceSetRequest"
+    let make ?tagList =
+      fun ~resourceSet -> fun () -> { tagList; resourceSet }
+    let to_value x =
+      structure_to_value
+        [("ResourceSet", (Some (ResourceSet.to_value x.resourceSet)));
+        ("TagList", (Option.map x.tagList ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagList =
+        (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
+      let resourceSet =
+        ResourceSet.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceSet") in
+      make ?tagList ~resourceSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
+      let resourceSet =
+        field_map_exn json__ "ResourceSet" ResourceSet.of_json in
+      make ?tagList ~resourceSet ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates the resource set. An Firewall Manager resource set defines the resources to import into an Firewall Manager policy from another Amazon Web Services service."]
 module PutProtocolsListResponse =
   struct
     type nonrec t =
@@ -7111,11 +10047,11 @@ module PutProtocolsListResponse =
           (Xml.child xml_arg0 "ProtocolsList") in
       make ?protocolsListArn ?protocolsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protocolsListArn =
-        field_map json "ProtocolsListArn" ResourceArn.of_json in
+        field_map json__ "ProtocolsListArn" ResourceArn.of_json in
       let protocolsList =
-        field_map json "ProtocolsList" ProtocolsListData.of_json in
+        field_map json__ "ProtocolsList" ProtocolsListData.of_json in
       make ?protocolsListArn ?protocolsList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an Firewall Manager protocols list."]
@@ -7145,10 +10081,10 @@ module PutProtocolsListRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProtocolsList") in
       make ?tagList ~protocolsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
       let protocolsList =
-        field_map_exn json "ProtocolsList" ProtocolsListData.of_json in
+        field_map_exn json__ "ProtocolsList" ProtocolsListData.of_json in
       make ?tagList ~protocolsList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an Firewall Manager protocols list."]
@@ -7245,13 +10181,13 @@ module PutPolicyResponse =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policyArn ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map json "PolicyArn" ResourceArn.of_json in
-      let policy = field_map json "Policy" Policy.of_json in
+    let of_json json__ =
+      let policyArn = field_map json__ "PolicyArn" ResourceArn.of_json in
+      let policy = field_map json__ "Policy" Policy.of_json in
       make ?policyArn ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Firewall Manager policy. Firewall Manager provides the following types of policies: An WAF policy (type WAFV2), which defines rule groups to run first in the corresponding WAF web ACL and rule groups to run last in the web ACL. An WAF Classic policy (type WAF), which defines a rule group. A Shield Advanced policy, which applies Shield Advanced protection to specified accounts and resources. A security group policy, which manages VPC security groups across your Amazon Web Services organization. An Network Firewall policy, which provides firewall rules to filter network traffic in specified Amazon VPCs. A DNS Firewall policy, which provides Route\194\16053 Resolver DNS Firewall rules to filter DNS queries for specified VPCs. Each policy is specific to one of the types. If you want to enforce more than one policy type across accounts, create multiple policies. You can create multiple policies for each type. You must be subscribed to Shield Advanced to create a Shield Advanced policy. For more information about subscribing to Shield Advanced, see CreateSubscription."]
+       "Creates an Firewall Manager policy. A Firewall Manager policy is specific to the individual policy type. If you want to enforce multiple policy types across accounts, you can create multiple policies. You can create more than one policy for each type. If you add a new account to an organization that you created with Organizations, Firewall Manager automatically applies the policy to the resources in that account that are within scope of the policy. Firewall Manager provides the following types of policies: WAF policy - This policy applies WAF web ACL protections to specified accounts and resources. Shield Advanced policy - This policy applies Shield Advanced protection to specified accounts and resources. Security Groups policy - This type of policy gives you control over security groups that are in use throughout your organization in Organizations and lets you enforce a baseline set of rules across your organization. Network ACL policy - This type of policy gives you control over the network ACLs that are in use throughout your organization in Organizations and lets you enforce a baseline set of first and last network ACL rules across your organization. Network Firewall policy - This policy applies Network Firewall protection to your organization's VPCs. DNS Firewall policy - This policy applies Amazon Route 53 Resolver DNS Firewall protections to your organization's VPCs. Third-party firewall policy - This policy applies third-party firewall protections. Third-party firewalls are available by subscription through the Amazon Web Services Marketplace console at Amazon Web Services Marketplace. Palo Alto Networks Cloud NGFW policy - This policy applies Palo Alto Networks Cloud Next Generation Firewall (NGFW) protections and Palo Alto Networks Cloud NGFW rulestacks to your organization's VPCs. Fortigate CNF policy - This policy applies Fortigate Cloud Native Firewall (CNF) protections. Fortigate CNF is a cloud-centered solution that blocks Zero-Day threats and secures cloud infrastructures with industry-leading advanced threat prevention, smart web application firewalls (WAF), and API protection."]
 module PutPolicyRequest =
   struct
     type nonrec t =
@@ -7275,13 +10211,13 @@ module PutPolicyRequest =
         Policy.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
       make ?tagList ~policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
-      let policy = field_map_exn json "Policy" Policy.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
+      let policy = field_map_exn json__ "Policy" Policy.of_json in
       make ?tagList ~policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Firewall Manager policy. Firewall Manager provides the following types of policies: An WAF policy (type WAFV2), which defines rule groups to run first in the corresponding WAF web ACL and rule groups to run last in the web ACL. An WAF Classic policy (type WAF), which defines a rule group. A Shield Advanced policy, which applies Shield Advanced protection to specified accounts and resources. A security group policy, which manages VPC security groups across your Amazon Web Services organization. An Network Firewall policy, which provides firewall rules to filter network traffic in specified Amazon VPCs. A DNS Firewall policy, which provides Route\194\16053 Resolver DNS Firewall rules to filter DNS queries for specified VPCs. Each policy is specific to one of the types. If you want to enforce more than one policy type across accounts, create multiple policies. You can create multiple policies for each type. You must be subscribed to Shield Advanced to create a Shield Advanced policy. For more information about subscribing to Shield Advanced, see CreateSubscription."]
+       "Creates an Firewall Manager policy. A Firewall Manager policy is specific to the individual policy type. If you want to enforce multiple policy types across accounts, you can create multiple policies. You can create more than one policy for each type. If you add a new account to an organization that you created with Organizations, Firewall Manager automatically applies the policy to the resources in that account that are within scope of the policy. Firewall Manager provides the following types of policies: WAF policy - This policy applies WAF web ACL protections to specified accounts and resources. Shield Advanced policy - This policy applies Shield Advanced protection to specified accounts and resources. Security Groups policy - This type of policy gives you control over security groups that are in use throughout your organization in Organizations and lets you enforce a baseline set of rules across your organization. Network ACL policy - This type of policy gives you control over the network ACLs that are in use throughout your organization in Organizations and lets you enforce a baseline set of first and last network ACL rules across your organization. Network Firewall policy - This policy applies Network Firewall protection to your organization's VPCs. DNS Firewall policy - This policy applies Amazon Route 53 Resolver DNS Firewall protections to your organization's VPCs. Third-party firewall policy - This policy applies third-party firewall protections. Third-party firewalls are available by subscription through the Amazon Web Services Marketplace console at Amazon Web Services Marketplace. Palo Alto Networks Cloud NGFW policy - This policy applies Palo Alto Networks Cloud Next Generation Firewall (NGFW) protections and Palo Alto Networks Cloud NGFW rulestacks to your organization's VPCs. Fortigate CNF policy - This policy applies Fortigate Cloud Native Firewall (CNF) protections. Fortigate CNF is a cloud-centered solution that blocks Zero-Day threats and secures cloud infrastructures with industry-leading advanced threat prevention, smart web application firewalls (WAF), and API protection."]
 module PutNotificationChannelRequest =
   struct
     type nonrec t =
@@ -7309,13 +10245,15 @@ module PutNotificationChannelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SnsTopicArn") in
       make ~snsRoleName ~snsTopicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snsRoleName = field_map_exn json "SnsRoleName" ResourceArn.of_json in
-      let snsTopicArn = field_map_exn json "SnsTopicArn" ResourceArn.of_json in
+    let of_json json__ =
+      let snsRoleName =
+        field_map_exn json__ "SnsRoleName" ResourceArn.of_json in
+      let snsTopicArn =
+        field_map_exn json__ "SnsTopicArn" ResourceArn.of_json in
       make ~snsRoleName ~snsTopicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Designates the IAM role and Amazon Simple Notification Service (SNS) topic that Firewall Manager uses to record SNS logs. To perform this action outside of the console, you must configure the SNS topic to allow the Firewall Manager role AWSServiceRoleForFMS to publish SNS logs. For more information, see Firewall Manager required permissions for API actions in the Firewall Manager Developer Guide."]
+       "Designates the IAM role and Amazon Simple Notification Service (SNS) topic that Firewall Manager uses to record SNS logs. To perform this action outside of the console, you must first configure the SNS topic's access policy to allow the SnsRoleName to publish SNS logs. If the SnsRoleName provided is a role other than the AWSServiceRoleForFMS service-linked role, this role must have a trust relationship configured to allow the Firewall Manager service principal fms.amazonaws.com to assume this role. For information about configuring an SNS access policy, see Service roles for Firewall Manager in the Firewall Manager Developer Guide."]
 module PutAppsListResponse =
   struct
     type nonrec t =
@@ -7402,9 +10340,9 @@ module PutAppsListResponse =
         (Option.map ~f:AppsListData.of_xml) (Xml.child xml_arg0 "AppsList") in
       make ?appsListArn ?appsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appsListArn = field_map json "AppsListArn" ResourceArn.of_json in
-      let appsList = field_map json "AppsList" AppsListData.of_json in
+    let of_json json__ =
+      let appsListArn = field_map json__ "AppsListArn" ResourceArn.of_json in
+      let appsList = field_map json__ "AppsList" AppsListData.of_json in
       make ?appsListArn ?appsList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an Firewall Manager applications list."]
@@ -7432,12 +10370,46 @@ module PutAppsListRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AppsList") in
       make ?tagList ~appsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
-      let appsList = field_map_exn json "AppsList" AppsListData.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
+      let appsList = field_map_exn json__ "AppsList" AppsListData.of_json in
       make ?tagList ~appsList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an Firewall Manager applications list."]
+module PutAdminAccountRequest =
+  struct
+    type nonrec t =
+      {
+      adminAccount: AWSAccountId.t
+        [@ocaml.doc
+          "The Amazon Web Services account ID to add as an Firewall Manager administrator account. The account must be a member of the organization that was onboarded to Firewall Manager by AssociateAdminAccount. For more information about Organizations, see Managing the Amazon Web Services Accounts in Your Organization."];
+      adminScope: AdminScope.t option
+        [@ocaml.doc
+          "Configures the resources that the specified Firewall Manager administrator can manage. As a best practice, set the administrative scope according to the principles of least privilege. Only grant the administrator the specific resources or permissions that they need to perform the duties of their role."]}
+    let context_ = "PutAdminAccountRequest"
+    let make ?adminScope =
+      fun ~adminAccount -> fun () -> { adminScope; adminAccount }
+    let to_value x =
+      structure_to_value
+        [("AdminAccount", (Some (AWSAccountId.to_value x.adminAccount)));
+        ("AdminScope", (Option.map x.adminScope ~f:AdminScope.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adminScope =
+        (Option.map ~f:AdminScope.of_xml) (Xml.child xml_arg0 "AdminScope") in
+      let adminAccount =
+        AWSAccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AdminAccount") in
+      make ?adminScope ~adminAccount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adminScope = field_map json__ "AdminScope" AdminScope.of_json in
+      let adminAccount =
+        field_map_exn json__ "AdminAccount" AWSAccountId.of_json in
+      make ?adminScope ~adminAccount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates an Firewall Manager administrator account. The account must be a member of the organization that was onboarded to Firewall Manager by AssociateAdminAccount. Only the organization's management account can create an Firewall Manager administrator account. When you create an Firewall Manager administrator account, the service checks to see if the account is already a delegated administrator within Organizations. If the account isn't a delegated administrator, Firewall Manager calls Organizations to delegate the account within Organizations. For more information about administrator accounts within Organizations, see Managing the Amazon Web Services Accounts in Your Organization."]
 module ListThirdPartyFirewallFirewallPoliciesResponse =
   struct
     type nonrec t =
@@ -7522,10 +10494,10 @@ module ListThirdPartyFirewallFirewallPoliciesResponse =
           (Xml.child xml_arg0 "ThirdPartyFirewallFirewallPolicies") in
       make ?nextToken ?thirdPartyFirewallFirewallPolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let thirdPartyFirewallFirewallPolicies =
-        field_map json "ThirdPartyFirewallFirewallPolicies"
+        field_map json__ "ThirdPartyFirewallFirewallPolicies"
           ThirdPartyFirewallFirewallPolicies.of_json in
       make ?nextToken ?thirdPartyFirewallFirewallPolicies ()
     let to_json v = composed_to_json to_value v
@@ -7567,12 +10539,12 @@ module ListThirdPartyFirewallFirewallPoliciesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ThirdPartyFirewall") in
       make ~maxResults ?nextToken ~thirdPartyFirewall ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map_exn json "MaxResults" PaginationMaxResults.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map_exn json__ "MaxResults" PaginationMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let thirdPartyFirewall =
-        field_map_exn json "ThirdPartyFirewall" ThirdPartyFirewall.of_json in
+        field_map_exn json__ "ThirdPartyFirewall" ThirdPartyFirewall.of_json in
       make ~maxResults ?nextToken ~thirdPartyFirewall ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7647,8 +10619,8 @@ module ListTagsForResourceResponse =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       make ?tagList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
       make ?tagList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7672,12 +10644,255 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the list of tags for the specified Amazon Web Services resource."]
+module ListResourceSetsResponse =
+  struct
+    type nonrec t =
+      {
+      resourceSets: ResourceSetSummaryList.t option
+        [@ocaml.doc "An array of ResourceSetSummary objects."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "When you request a list of objects with a MaxResults setting, if the number of objects that are still available for retrieval exceeds the maximum you requested, Firewall Manager returns a NextToken value in the response. To retrieve the next batch of objects, use the token returned from the prior request in your next request."]}
+    type nonrec error =
+      [ `InternalErrorException of InternalErrorException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `InvalidOperationException of InvalidOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceSets =
+      fun ?nextToken -> fun () -> { resourceSets; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidOperationException e ->
+          `Assoc
+            [("error", (`String "InvalidOperationException"));
+            ("details", (InvalidOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceSets",
+           (Option.map x.resourceSets ~f:ResourceSetSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let resourceSets =
+        (Option.map ~f:ResourceSetSummaryList.of_xml)
+          (Xml.child xml_arg0 "ResourceSets") in
+      make ?nextToken ?resourceSets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let resourceSets =
+        field_map json__ "ResourceSets" ResourceSetSummaryList.of_json in
+      make ?nextToken ?resourceSets ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns an array of ResourceSetSummary objects."]
+module ListResourceSetsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "When you request a list of objects with a MaxResults setting, if the number of objects that are still available for retrieval exceeds the maximum you requested, Firewall Manager returns a NextToken value in the response. To retrieve the next batch of objects, use the token returned from the prior request in your next request."];
+      maxResults: PaginationMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of objects that you want Firewall Manager to return for this request. If more objects are available, in the response, Firewall Manager provides a NextToken value that you can use in a subsequent call to get the next batch of objects."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:PaginationMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" PaginationMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns an array of ResourceSetSummary objects."]
+module ListResourceSetResourcesResponse =
+  struct
+    type nonrec t =
+      {
+      items: ResourceList.t option
+        [@ocaml.doc
+          "An array of the associated resources' uniform resource identifiers (URI)."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "When you request a list of objects with a MaxResults setting, if the number of objects that are still available for retrieval exceeds the maximum you requested, Firewall Manager returns a NextToken value in the response. To retrieve the next batch of objects, use the token returned from the prior request in your next request."]}
+    type nonrec error =
+      [ `InternalErrorException of InternalErrorException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `InvalidOperationException of InvalidOperationException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidOperationException e ->
+          `Assoc
+            [("error", (`String "InvalidOperationException"));
+            ("details", (InvalidOperationException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Items", (Option.map x.items ~f:ResourceList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let items =
+        (Option.map ~f:ResourceList.of_xml) (Xml.child xml_arg0 "Items") in
+      make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let items = field_map json__ "Items" ResourceList.of_json in
+      make ?nextToken ?items ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns an array of resources that are currently associated to a resource set."]
+module ListResourceSetResourcesRequest =
+  struct
+    type nonrec t =
+      {
+      identifier: ResourceId.t
+        [@ocaml.doc
+          "A unique identifier for the resource set, used in a request to refer to the resource set."];
+      maxResults: PaginationMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of objects that you want Firewall Manager to return for this request. If more objects are available, in the response, Firewall Manager provides a NextToken value that you can use in a subsequent call to get the next batch of objects."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "When you request a list of objects with a MaxResults setting, if the number of objects that are still available for retrieval exceeds the maximum you requested, Firewall Manager returns a NextToken value in the response. To retrieve the next batch of objects, use the token returned from the prior request in your next request."]}
+    let context_ = "ListResourceSetResourcesRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~identifier -> fun () -> { maxResults; nextToken; identifier }
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Some (ResourceId.to_value x.identifier)));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:PaginationMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let identifier =
+        ResourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      make ?nextToken ?maxResults ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" PaginationMaxResults.of_json in
+      let identifier = field_map_exn json__ "Identifier" ResourceId.of_json in
+      make ?nextToken ?maxResults ~identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns an array of resources that are currently associated to a resource set."]
 module ListProtocolsListsResponse =
   struct
     type nonrec t =
@@ -7749,10 +10964,10 @@ module ListProtocolsListsResponse =
           (Xml.child xml_arg0 "ProtocolsLists") in
       make ?nextToken ?protocolsLists ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let protocolsLists =
-        field_map json "ProtocolsLists" ProtocolsListsData.of_json in
+        field_map json__ "ProtocolsLists" ProtocolsListsData.of_json in
       make ?nextToken ?protocolsLists ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of ProtocolsListDataSummary objects."]
@@ -7790,11 +11005,11 @@ module ListProtocolsListsRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DefaultLists") in
       make ~maxResults ?nextToken ?defaultLists ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map_exn json "MaxResults" PaginationMaxResults.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let defaultLists = field_map json "DefaultLists" Boolean.of_json in
+        field_map_exn json__ "MaxResults" PaginationMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let defaultLists = field_map json__ "DefaultLists" Boolean.of_json in
       make ~maxResults ?nextToken ?defaultLists ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of ProtocolsListDataSummary objects."]
@@ -7878,9 +11093,10 @@ module ListPoliciesResponse =
           (Xml.child xml_arg0 "PolicyList") in
       make ?nextToken ?policyList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let policyList = field_map json "PolicyList" PolicySummaryList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let policyList =
+        field_map json__ "PolicyList" PolicySummaryList.of_json in
       make ?nextToken ?policyList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of PolicySummary objects."]
@@ -7911,10 +11127,10 @@ module ListPoliciesRequest =
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" PaginationMaxResults.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map json__ "MaxResults" PaginationMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of PolicySummary objects."]
@@ -7980,14 +11196,14 @@ module ListMemberAccountsResponse =
           (Xml.child xml_arg0 "MemberAccounts") in
       make ?nextToken ?memberAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let memberAccounts =
-        field_map json "MemberAccounts" MemberAccounts.of_json in
+        field_map json__ "MemberAccounts" MemberAccounts.of_json in
       make ?nextToken ?memberAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a MemberAccounts object that lists the member accounts in the administrator's Amazon Web Services organization. The ListMemberAccounts must be submitted by the account that is set as the Firewall Manager administrator."]
+       "Returns a MemberAccounts object that lists the member accounts in the administrator's Amazon Web Services organization. Either an Firewall Manager administrator or the organization's management account can make this request."]
 module ListMemberAccountsRequest =
   struct
     type nonrec t =
@@ -8015,14 +11231,148 @@ module ListMemberAccountsRequest =
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" PaginationMaxResults.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map json__ "MaxResults" PaginationMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a MemberAccounts object that lists the member accounts in the administrator's Amazon Web Services organization. The ListMemberAccounts must be submitted by the account that is set as the Firewall Manager administrator."]
+       "Returns a MemberAccounts object that lists the member accounts in the administrator's Amazon Web Services organization. Either an Firewall Manager administrator or the organization's management account can make this request."]
+module ListDiscoveredResourcesResponse =
+  struct
+    type nonrec t =
+      {
+      items: DiscoveredResourceList.t option
+        [@ocaml.doc "Details of the resources that were discovered."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "When you request a list of objects with a MaxResults setting, if the number of objects that are still available for retrieval exceeds the maximum you requested, Firewall Manager returns a NextToken value in the response. To retrieve the next batch of objects, use the token returned from the prior request in your next request."]}
+    type nonrec error =
+      [ `InternalErrorException of InternalErrorException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `InvalidOperationException of InvalidOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidOperationException e ->
+          `Assoc
+            [("error", (`String "InvalidOperationException"));
+            ("details", (InvalidOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Items", (Option.map x.items ~f:DiscoveredResourceList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let items =
+        (Option.map ~f:DiscoveredResourceList.of_xml)
+          (Xml.child xml_arg0 "Items") in
+      make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let items = field_map json__ "Items" DiscoveredResourceList.of_json in
+      make ?nextToken ?items ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns an array of resources in the organization's accounts that are available to be associated with a resource set."]
+module ListDiscoveredResourcesRequest =
+  struct
+    type nonrec t =
+      {
+      memberAccountIds: AWSAccountIdList.t
+        [@ocaml.doc
+          "The Amazon Web Services account IDs to discover resources in. Only one account is supported per request. The account must be a member of your organization."];
+      resourceType: ResourceType.t
+        [@ocaml.doc "The type of resources to discover."];
+      maxResults: PaginationMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of objects that you want Firewall Manager to return for this request. If more objects are available, in the response, Firewall Manager provides a NextToken value that you can use in a subsequent call to get the next batch of objects."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "When you request a list of objects with a MaxResults setting, if the number of objects that are still available for retrieval exceeds the maximum you requested, Firewall Manager returns a NextToken value in the response. To retrieve the next batch of objects, use the token returned from the prior request in your next request."]}
+    let context_ = "ListDiscoveredResourcesRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~memberAccountIds ->
+          fun ~resourceType ->
+            fun () ->
+              { maxResults; nextToken; memberAccountIds; resourceType }
+    let to_value x =
+      structure_to_value
+        [("MemberAccountIds",
+           (Some (AWSAccountIdList.to_value x.memberAccountIds)));
+        ("ResourceType", (Some (ResourceType.to_value x.resourceType)));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:PaginationMaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let resourceType =
+        ResourceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+      let memberAccountIds =
+        AWSAccountIdList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MemberAccountIds") in
+      make ?nextToken ?maxResults ~resourceType ~memberAccountIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" PaginationMaxResults.of_json in
+      let resourceType =
+        field_map_exn json__ "ResourceType" ResourceType.of_json in
+      let memberAccountIds =
+        field_map_exn json__ "MemberAccountIds" AWSAccountIdList.of_json in
+      make ?nextToken ?maxResults ~resourceType ~memberAccountIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns an array of resources in the organization's accounts that are available to be associated with a resource set."]
 module ListComplianceStatusResponse =
   struct
     type nonrec t =
@@ -8086,10 +11436,10 @@ module ListComplianceStatusResponse =
           (Xml.child xml_arg0 "PolicyComplianceStatusList") in
       make ?nextToken ?policyComplianceStatusList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let policyComplianceStatusList =
-        field_map json "PolicyComplianceStatusList"
+        field_map json__ "PolicyComplianceStatusList"
           PolicyComplianceStatusList.of_json in
       make ?nextToken ?policyComplianceStatusList ()
     let to_json v = composed_to_json to_value v
@@ -8130,11 +11480,11 @@ module ListComplianceStatusRequest =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ?maxResults ?nextToken ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" PaginationMaxResults.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+        field_map json__ "MaxResults" PaginationMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ?maxResults ?nextToken ~policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8217,9 +11567,9 @@ module ListAppsListsResponse =
         (Option.map ~f:AppsListsData.of_xml) (Xml.child xml_arg0 "AppsLists") in
       make ?nextToken ?appsLists ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let appsLists = field_map json "AppsLists" AppsListsData.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let appsLists = field_map json__ "AppsLists" AppsListsData.of_json in
       make ?nextToken ?appsLists ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of AppsListDataSummary objects."]
@@ -8257,14 +11607,253 @@ module ListAppsListsRequest =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "DefaultLists") in
       make ~maxResults ?nextToken ?defaultLists ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map_exn json "MaxResults" PaginationMaxResults.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let defaultLists = field_map json "DefaultLists" Boolean.of_json in
+        field_map_exn json__ "MaxResults" PaginationMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let defaultLists = field_map json__ "DefaultLists" Boolean.of_json in
       make ~maxResults ?nextToken ?defaultLists ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of AppsListDataSummary objects."]
+module ListAdminsManagingAccountResponse =
+  struct
+    type nonrec t =
+      {
+      adminAccounts: AccountIdList.t option
+        [@ocaml.doc
+          "The list of accounts who manage member accounts within their AdminScope."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "When you request a list of objects with a MaxResults setting, if the number of objects that are still available for retrieval exceeds the maximum you requested, Firewall Manager returns a NextToken value in the response. To retrieve the next batch of objects, use the token returned from the prior request in your next request."]}
+    type nonrec error =
+      [ `InternalErrorException of InternalErrorException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adminAccounts =
+      fun ?nextToken -> fun () -> { adminAccounts; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AdminAccounts",
+           (Option.map x.adminAccounts ~f:AccountIdList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let adminAccounts =
+        (Option.map ~f:AccountIdList.of_xml)
+          (Xml.child xml_arg0 "AdminAccounts") in
+      make ?nextToken ?adminAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let adminAccounts =
+        field_map json__ "AdminAccounts" AccountIdList.of_json in
+      make ?nextToken ?adminAccounts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the accounts that are managing the specified Organizations member account. This is useful for any member account so that they can view the accounts who are managing their account. This operation only returns the managing administrators that have the requested account within their AdminScope."]
+module ListAdminsManagingAccountRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "When you request a list of objects with a MaxResults setting, if the number of objects that are still available for retrieval exceeds the maximum you requested, Firewall Manager returns a NextToken value in the response. To retrieve the next batch of objects, use the token returned from the prior request in your next request."];
+      maxResults: PaginationMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of objects that you want Firewall Manager to return for this request. If more objects are available, in the response, Firewall Manager provides a NextToken value that you can use in a subsequent call to get the next batch of objects."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:PaginationMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" PaginationMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the accounts that are managing the specified Organizations member account. This is useful for any member account so that they can view the accounts who are managing their account. This operation only returns the managing administrators that have the requested account within their AdminScope."]
+module ListAdminAccountsForOrganizationResponse =
+  struct
+    type nonrec t =
+      {
+      adminAccounts: AdminAccountSummaryList.t option
+        [@ocaml.doc
+          "A list of Firewall Manager administrator accounts within the organization that were onboarded as administrators by AssociateAdminAccount or PutAdminAccount."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "When you request a list of objects with a MaxResults setting, if the number of objects that are still available for retrieval exceeds the maximum you requested, Firewall Manager returns a NextToken value in the response. To retrieve the next batch of objects, use the token returned from the prior request in your next request."]}
+    type nonrec error =
+      [ `InternalErrorException of InternalErrorException.t 
+      | `InvalidOperationException of InvalidOperationException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adminAccounts =
+      fun ?nextToken -> fun () -> { adminAccounts; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidOperationException e ->
+          `Assoc
+            [("error", (`String "InvalidOperationException"));
+            ("details", (InvalidOperationException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AdminAccounts",
+           (Option.map x.adminAccounts ~f:AdminAccountSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let adminAccounts =
+        (Option.map ~f:AdminAccountSummaryList.of_xml)
+          (Xml.child xml_arg0 "AdminAccounts") in
+      make ?nextToken ?adminAccounts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let adminAccounts =
+        field_map json__ "AdminAccounts" AdminAccountSummaryList.of_json in
+      make ?nextToken ?adminAccounts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a AdminAccounts object that lists the Firewall Manager administrators within the organization that are onboarded to Firewall Manager by AssociateAdminAccount. This operation can be called only from the organization's management account."]
+module ListAdminAccountsForOrganizationRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "When you request a list of objects with a MaxResults setting, if the number of objects that are still available for retrieval exceeds the maximum you requested, Firewall Manager returns a NextToken value in the response. To retrieve the next batch of objects, use the token returned from the prior request in your next request."];
+      maxResults: PaginationMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of objects that you want Firewall Manager to return for this request. If more objects are available, in the response, Firewall Manager provides a NextToken value that you can use in a subsequent call to get the next batch of objects."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:PaginationMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:PaginationMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" PaginationMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a AdminAccounts object that lists the Firewall Manager administrators within the organization that are onboarded to Firewall Manager by AssociateAdminAccount. This operation can be called only from the organization's management account."]
 module GetViolationDetailsResponse =
   struct
     type nonrec t =
@@ -8328,9 +11917,9 @@ module GetViolationDetailsResponse =
           (Xml.child xml_arg0 "ViolationDetail") in
       make ?violationDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let violationDetail =
-        field_map json "ViolationDetail" ViolationDetail.of_json in
+        field_map json__ "ViolationDetail" ViolationDetail.of_json in
       make ?violationDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8341,7 +11930,7 @@ module GetViolationDetailsRequest =
       {
       policyId: PolicyId.t
         [@ocaml.doc
-          "The ID of the Firewall Manager policy that you want the details for. This currently only supports security group content audit policies."];
+          "The ID of the Firewall Manager policy that you want the details for. You can get violation details for the following policy types: WAF DNS Firewall Imported Network Firewall Network Firewall Security group content audit Network ACL Third-party firewall"];
       memberAccount: AWSAccountId.t
         [@ocaml.doc
           "The Amazon Web Services account ID that you want the details for."];
@@ -8349,7 +11938,7 @@ module GetViolationDetailsRequest =
         [@ocaml.doc "The ID of the resource that has violations."];
       resourceType: ResourceType.t
         [@ocaml.doc
-          "The resource type. This is in the format shown in the Amazon Web Services Resource Types Reference. Supported resource types are: AWS::EC2::Instance, AWS::EC2::NetworkInterface, AWS::EC2::SecurityGroup, AWS::NetworkFirewall::FirewallPolicy, and AWS::EC2::Subnet."]}
+          "The resource type. This is in the format shown in the Amazon Web Services Resource Types Reference. Supported resource types are: AWS::WAFv2::WebACL, AWS::EC2::Instance, AWS::EC2::NetworkInterface, AWS::EC2::SecurityGroup, AWS::NetworkFirewall::FirewallPolicy, and AWS::EC2::Subnet."]}
     let context_ = "GetViolationDetailsRequest"
     let make ~policyId =
       fun ~memberAccount ->
@@ -8377,13 +11966,13 @@ module GetViolationDetailsRequest =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ~resourceType ~resourceId ~memberAccount ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map_exn json "ResourceType" ResourceType.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+        field_map_exn json__ "ResourceType" ResourceType.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       let memberAccount =
-        field_map_exn json "MemberAccount" AWSAccountId.of_json in
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+        field_map_exn json__ "MemberAccount" AWSAccountId.of_json in
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ~resourceType ~resourceId ~memberAccount ~policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8398,7 +11987,7 @@ module GetThirdPartyFirewallAssociationStatusResponse =
       marketplaceOnboardingStatus:
         MarketplaceSubscriptionOnboardingStatus.t option
         [@ocaml.doc
-          "The status for subscribing to the third-party firewall vendor in the AWS Marketplace. NO_SUBSCRIPTION - The Firewall Manager policy administrator isn't subscribed to the third-party firewall service in the AWS Marketplace. NOT_COMPLETE - The Firewall Manager policy administrator is in the process of subscribing to the third-party firewall service in the Amazon Web Services Marketplace, but doesn't yet have an active subscription. COMPLETE - The Firewall Manager policy administrator has an active subscription to the third-party firewall service in the Amazon Web Services Marketplace."]}
+          "The status for subscribing to the third-party firewall vendor in the Amazon Web Services Marketplace. NO_SUBSCRIPTION - The Firewall Manager policy administrator isn't subscribed to the third-party firewall service in the Amazon Web Services Marketplace. NOT_COMPLETE - The Firewall Manager policy administrator is in the process of subscribing to the third-party firewall service in the Amazon Web Services Marketplace, but doesn't yet have an active subscription. COMPLETE - The Firewall Manager policy administrator has an active subscription to the third-party firewall service in the Amazon Web Services Marketplace."]}
     type nonrec error =
       [ `InternalErrorException of InternalErrorException.t 
       | `InvalidInputException of InvalidInputException.t 
@@ -8474,12 +12063,12 @@ module GetThirdPartyFirewallAssociationStatusResponse =
           (Xml.child xml_arg0 "ThirdPartyFirewallStatus") in
       make ?marketplaceOnboardingStatus ?thirdPartyFirewallStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let marketplaceOnboardingStatus =
-        field_map json "MarketplaceOnboardingStatus"
+        field_map json__ "MarketplaceOnboardingStatus"
           MarketplaceSubscriptionOnboardingStatus.of_json in
       let thirdPartyFirewallStatus =
-        field_map json "ThirdPartyFirewallStatus"
+        field_map json__ "ThirdPartyFirewallStatus"
           ThirdPartyFirewallAssociationStatus.of_json in
       make ?marketplaceOnboardingStatus ?thirdPartyFirewallStatus ()
     let to_json v = composed_to_json to_value v
@@ -8504,13 +12093,122 @@ module GetThirdPartyFirewallAssociationStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ThirdPartyFirewall") in
       make ~thirdPartyFirewall ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let thirdPartyFirewall =
-        field_map_exn json "ThirdPartyFirewall" ThirdPartyFirewall.of_json in
+        field_map_exn json__ "ThirdPartyFirewall" ThirdPartyFirewall.of_json in
       make ~thirdPartyFirewall ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The onboarding status of a Firewall Manager admin account to third-party firewall vendor tenant."]
+module GetResourceSetResponse =
+  struct
+    type nonrec t =
+      {
+      resourceSet: ResourceSet.t option
+        [@ocaml.doc "Information about the specified resource set."];
+      resourceSetArn: ResourceArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource set."]}
+    type nonrec error =
+      [ `InternalErrorException of InternalErrorException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `InvalidOperationException of InvalidOperationException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceSet =
+      fun ?resourceSetArn -> fun () -> { resourceSet; resourceSetArn }
+    let error_of_json name json =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidOperationException e ->
+          `Assoc
+            [("error", (`String "InvalidOperationException"));
+            ("details", (InvalidOperationException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceSet", (Option.map x.resourceSet ~f:ResourceSet.to_value));
+        ("ResourceSetArn",
+          (Option.map x.resourceSetArn ~f:ResourceArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceSetArn =
+        (Option.map ~f:ResourceArn.of_xml)
+          (Xml.child xml_arg0 "ResourceSetArn") in
+      let resourceSet =
+        (Option.map ~f:ResourceSet.of_xml) (Xml.child xml_arg0 "ResourceSet") in
+      make ?resourceSetArn ?resourceSet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceSetArn =
+        field_map json__ "ResourceSetArn" ResourceArn.of_json in
+      let resourceSet = field_map json__ "ResourceSet" ResourceSet.of_json in
+      make ?resourceSetArn ?resourceSet ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets information about a specific resource set."]
+module GetResourceSetRequest =
+  struct
+    type nonrec t =
+      {
+      identifier: Base62Id.t
+        [@ocaml.doc
+          "A unique identifier for the resource set, used in a request to refer to the resource set."]}
+    let context_ = "GetResourceSetRequest"
+    let make ~identifier = fun () -> { identifier }
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Some (Base62Id.to_value x.identifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identifier =
+        Base62Id.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      make ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identifier = field_map_exn json__ "Identifier" Base62Id.of_json in
+      make ~identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets information about a specific resource set."]
 module GetProtocolsListResponse =
   struct
     type nonrec t =
@@ -8584,11 +12282,11 @@ module GetProtocolsListResponse =
           (Xml.child xml_arg0 "ProtocolsList") in
       make ?protocolsListArn ?protocolsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protocolsListArn =
-        field_map json "ProtocolsListArn" ResourceArn.of_json in
+        field_map json__ "ProtocolsListArn" ResourceArn.of_json in
       let protocolsList =
-        field_map json "ProtocolsList" ProtocolsListData.of_json in
+        field_map json__ "ProtocolsList" ProtocolsListData.of_json in
       make ?protocolsListArn ?protocolsList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8617,9 +12315,9 @@ module GetProtocolsListRequest =
         ListId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ListId") in
       make ?defaultList ~listId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let defaultList = field_map json "DefaultList" Boolean.of_json in
-      let listId = field_map_exn json "ListId" ListId.of_json in
+    let of_json json__ =
+      let defaultList = field_map json__ "DefaultList" Boolean.of_json in
+      let listId = field_map_exn json__ "ListId" ListId.of_json in
       make ?defaultList ~listId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8713,13 +12411,13 @@ module GetProtectionStatusResponse =
           (Xml.child xml_arg0 "AdminAccountId") in
       make ?nextToken ?data ?serviceType ?adminAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let data = field_map json "Data" ProtectionData.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let data = field_map json__ "Data" ProtectionData.of_json in
       let serviceType =
-        field_map json "ServiceType" SecurityServiceType.of_json in
+        field_map json__ "ServiceType" SecurityServiceType.of_json in
       let adminAccountId =
-        field_map json "AdminAccountId" AWSAccountId.of_json in
+        field_map json__ "AdminAccountId" AWSAccountId.of_json in
       make ?nextToken ?data ?serviceType ?adminAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8792,15 +12490,15 @@ module GetProtectionStatusRequest =
       make ?maxResults ?nextToken ?endTime ?startTime ?memberAccountId
         ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" PaginationMaxResults.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let endTime = field_map json "EndTime" TimeStamp.of_json in
-      let startTime = field_map json "StartTime" TimeStamp.of_json in
+        field_map json__ "MaxResults" PaginationMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let endTime = field_map json__ "EndTime" TimeStamp.of_json in
+      let startTime = field_map json__ "StartTime" TimeStamp.of_json in
       let memberAccountId =
-        field_map json "MemberAccountId" AWSAccountId.of_json in
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+        field_map json__ "MemberAccountId" AWSAccountId.of_json in
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ?maxResults ?nextToken ?endTime ?startTime ?memberAccountId
         ~policyId ()
     let to_json v = composed_to_json to_value v
@@ -8883,9 +12581,9 @@ module GetPolicyResponse =
         (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policyArn ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map json "PolicyArn" ResourceArn.of_json in
-      let policy = field_map json "Policy" Policy.of_json in
+    let of_json json__ =
+      let policyArn = field_map json__ "PolicyArn" ResourceArn.of_json in
+      let policy = field_map json__ "Policy" Policy.of_json in
       make ?policyArn ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8908,8 +12606,8 @@ module GetPolicyRequest =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+    let of_json json__ =
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ~policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8982,9 +12680,9 @@ module GetNotificationChannelResponse =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "SnsTopicArn") in
       make ?snsRoleName ?snsTopicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snsRoleName = field_map json "SnsRoleName" ResourceArn.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" ResourceArn.of_json in
+    let of_json json__ =
+      let snsRoleName = field_map json__ "SnsRoleName" ResourceArn.of_json in
+      let snsTopicArn = field_map json__ "SnsTopicArn" ResourceArn.of_json in
       make ?snsRoleName ?snsTopicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9076,14 +12774,14 @@ module GetComplianceDetailResponse =
           (Xml.child xml_arg0 "PolicyComplianceDetail") in
       make ?policyComplianceDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyComplianceDetail =
-        field_map json "PolicyComplianceDetail"
+        field_map json__ "PolicyComplianceDetail"
           PolicyComplianceDetail.of_json in
       make ?policyComplianceDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns detailed compliance information about the specified member account. Details include resources that are in and out of compliance with the specified policy. Resources are considered noncompliant for WAF and Shield Advanced policies if the specified policy has not been applied to them. Resources are considered noncompliant for security group policies if they are in scope of the policy, they violate one or more of the policy rules, and remediation is disabled or not possible. Resources are considered noncompliant for Network Firewall policies if a firewall is missing in the VPC, if the firewall endpoint isn't set up in an expected Availability Zone and subnet, if a subnet created by the Firewall Manager doesn't have the expected route table, and for modifications to a firewall policy that violate the Firewall Manager policy's rules. Resources are considered noncompliant for DNS Firewall policies if a DNS Firewall rule group is missing from the rule group associations for the VPC."]
+       "Returns detailed compliance information about the specified member account. Details include resources that are in and out of compliance with the specified policy. The reasons for resources being considered compliant depend on the Firewall Manager policy type."]
 module GetComplianceDetailRequest =
   struct
     type nonrec t =
@@ -9110,14 +12808,14 @@ module GetComplianceDetailRequest =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ~memberAccount ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let memberAccount =
-        field_map_exn json "MemberAccount" AWSAccountId.of_json in
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+        field_map_exn json__ "MemberAccount" AWSAccountId.of_json in
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ~memberAccount ~policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns detailed compliance information about the specified member account. Details include resources that are in and out of compliance with the specified policy. Resources are considered noncompliant for WAF and Shield Advanced policies if the specified policy has not been applied to them. Resources are considered noncompliant for security group policies if they are in scope of the policy, they violate one or more of the policy rules, and remediation is disabled or not possible. Resources are considered noncompliant for Network Firewall policies if a firewall is missing in the VPC, if the firewall endpoint isn't set up in an expected Availability Zone and subnet, if a subnet created by the Firewall Manager doesn't have the expected route table, and for modifications to a firewall policy that violate the Firewall Manager policy's rules. Resources are considered noncompliant for DNS Firewall policies if a DNS Firewall rule group is missing from the rule group associations for the VPC."]
+       "Returns detailed compliance information about the specified member account. Details include resources that are in and out of compliance with the specified policy. The reasons for resources being considered compliant depend on the Firewall Manager policy type."]
 module GetAppsListResponse =
   struct
     type nonrec t =
@@ -9187,9 +12885,9 @@ module GetAppsListResponse =
         (Option.map ~f:AppsListData.of_xml) (Xml.child xml_arg0 "AppsList") in
       make ?appsListArn ?appsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appsListArn = field_map json "AppsListArn" ResourceArn.of_json in
-      let appsList = field_map json "AppsList" AppsListData.of_json in
+    let of_json json__ =
+      let appsListArn = field_map json__ "AppsListArn" ResourceArn.of_json in
+      let appsList = field_map json__ "AppsList" AppsListData.of_json in
       make ?appsListArn ?appsList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9218,23 +12916,143 @@ module GetAppsListRequest =
         ListId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ListId") in
       make ?defaultList ~listId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let defaultList = field_map json "DefaultList" Boolean.of_json in
-      let listId = field_map_exn json "ListId" ListId.of_json in
+    let of_json json__ =
+      let defaultList = field_map json__ "DefaultList" Boolean.of_json in
+      let listId = field_map_exn json__ "ListId" ListId.of_json in
       make ?defaultList ~listId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about the specified Firewall Manager applications list."]
+module GetAdminScopeResponse =
+  struct
+    type nonrec t =
+      {
+      adminScope: AdminScope.t option
+        [@ocaml.doc
+          "Contains details about the administrative scope of the requested account."];
+      status: OrganizationStatus.t option
+        [@ocaml.doc
+          "The current status of the request to onboard a member account as an Firewall Manager administrator. ONBOARDING - The account is onboarding to Firewall Manager as an administrator. ONBOARDING_COMPLETE - Firewall Manager The account is onboarded to Firewall Manager as an administrator, and can perform actions on the resources defined in their AdminScope. OFFBOARDING - The account is being removed as an Firewall Manager administrator. OFFBOARDING_COMPLETE - The account has been removed as an Firewall Manager administrator."]}
+    type nonrec error =
+      [ `InternalErrorException of InternalErrorException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `InvalidOperationException of InvalidOperationException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?adminScope = fun ?status -> fun () -> { adminScope; status }
+    let error_of_json name json =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidOperationException e ->
+          `Assoc
+            [("error", (`String "InvalidOperationException"));
+            ("details", (InvalidOperationException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AdminScope", (Option.map x.adminScope ~f:AdminScope.to_value));
+        ("Status", (Option.map x.status ~f:OrganizationStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:OrganizationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let adminScope =
+        (Option.map ~f:AdminScope.of_xml) (Xml.child xml_arg0 "AdminScope") in
+      make ?status ?adminScope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" OrganizationStatus.of_json in
+      let adminScope = field_map json__ "AdminScope" AdminScope.of_json in
+      make ?status ?adminScope ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the specified account's administrative scope. The administrative scope defines the resources that an Firewall Manager administrator can manage."]
+module GetAdminScopeRequest =
+  struct
+    type nonrec t =
+      {
+      adminAccount: AWSAccountId.t
+        [@ocaml.doc
+          "The administrator account that you want to get the details for."]}
+    let context_ = "GetAdminScopeRequest"
+    let make ~adminAccount = fun () -> { adminAccount }
+    let to_value x =
+      structure_to_value
+        [("AdminAccount", (Some (AWSAccountId.to_value x.adminAccount)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adminAccount =
+        AWSAccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AdminAccount") in
+      make ~adminAccount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adminAccount =
+        field_map_exn json__ "AdminAccount" AWSAccountId.of_json in
+      make ~adminAccount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the specified account's administrative scope. The administrative scope defines the resources that an Firewall Manager administrator can manage."]
 module GetAdminAccountResponse =
   struct
     type nonrec t =
       {
       adminAccount: AWSAccountId.t option
         [@ocaml.doc
-          "The Amazon Web Services account that is set as the Firewall Manager administrator."];
+          "The account that is set as the Firewall Manager default administrator."];
       roleStatus: AccountRoleStatus.t option
         [@ocaml.doc
-          "The status of the Amazon Web Services account that you set as the Firewall Manager administrator."]}
+          "The status of the account that you set as the Firewall Manager default administrator."]}
     type nonrec error =
       [ `InternalErrorException of InternalErrorException.t 
       | `InvalidOperationException of InvalidOperationException.t 
@@ -9298,13 +13116,14 @@ module GetAdminAccountResponse =
           (Xml.child xml_arg0 "AdminAccount") in
       make ?roleStatus ?adminAccount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleStatus = field_map json "RoleStatus" AccountRoleStatus.of_json in
-      let adminAccount = field_map json "AdminAccount" AWSAccountId.of_json in
+    let of_json json__ =
+      let roleStatus =
+        field_map json__ "RoleStatus" AccountRoleStatus.of_json in
+      let adminAccount = field_map json__ "AdminAccount" AWSAccountId.of_json in
       make ?roleStatus ?adminAccount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the Organizations account that is associated with Firewall Manager as the Firewall Manager administrator."]
+       "Returns the Organizations account that is associated with Firewall Manager as the Firewall Manager default administrator."]
 module GetAdminAccountRequest =
   struct
     type nonrec t = unit
@@ -9317,7 +13136,7 @@ module GetAdminAccountRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the Organizations account that is associated with Firewall Manager as the Firewall Manager administrator."]
+       "Returns the Organizations account that is associated with Firewall Manager as the Firewall Manager default administrator."]
 module DisassociateThirdPartyFirewallResponse =
   struct
     type nonrec t =
@@ -9393,9 +13212,9 @@ module DisassociateThirdPartyFirewallResponse =
           (Xml.child xml_arg0 "ThirdPartyFirewallStatus") in
       make ?thirdPartyFirewallStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let thirdPartyFirewallStatus =
-        field_map json "ThirdPartyFirewallStatus"
+        field_map json__ "ThirdPartyFirewallStatus"
           ThirdPartyFirewallAssociationStatus.of_json in
       make ?thirdPartyFirewallStatus ()
     let to_json v = composed_to_json to_value v
@@ -9420,9 +13239,9 @@ module DisassociateThirdPartyFirewallRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ThirdPartyFirewall") in
       make ~thirdPartyFirewall ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let thirdPartyFirewall =
-        field_map_exn json "ThirdPartyFirewall" ThirdPartyFirewall.of_json in
+        field_map_exn json__ "ThirdPartyFirewall" ThirdPartyFirewall.of_json in
       make ~thirdPartyFirewall ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9439,7 +13258,31 @@ module DisassociateAdminAccountRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates the account that has been set as the Firewall Manager administrator account. To set a different account as the administrator account, you must submit an AssociateAdminAccount request."]
+       "Disassociates an Firewall Manager administrator account. To set a different account as an Firewall Manager administrator, submit a PutAdminAccount request. To set an account as a default administrator account, you must submit an AssociateAdminAccount request. Disassociation of the default administrator account follows the first in, last out principle. If you are the default administrator, all Firewall Manager administrators within the organization must first disassociate their accounts before you can disassociate your account."]
+module DeleteResourceSetRequest =
+  struct
+    type nonrec t =
+      {
+      identifier: Base62Id.t
+        [@ocaml.doc
+          "A unique identifier for the resource set, used in a request to refer to the resource set."]}
+    let context_ = "DeleteResourceSetRequest"
+    let make ~identifier = fun () -> { identifier }
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Some (Base62Id.to_value x.identifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identifier =
+        Base62Id.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      make ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identifier = field_map_exn json__ "Identifier" Base62Id.of_json in
+      make ~identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified ResourceSet."]
 module DeleteProtocolsListRequest =
   struct
     type nonrec t =
@@ -9457,8 +13300,8 @@ module DeleteProtocolsListRequest =
         ListId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ListId") in
       make ~listId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let listId = field_map_exn json "ListId" ListId.of_json in
+    let of_json json__ =
+      let listId = field_map_exn json__ "ListId" ListId.of_json in
       make ~listId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Permanently deletes an Firewall Manager protocols list."]
@@ -9471,7 +13314,7 @@ module DeletePolicyRequest =
           "The ID of the policy that you want to delete. You can retrieve this ID from PutPolicy and ListPolicies."];
       deleteAllPolicyResources: Boolean.t option
         [@ocaml.doc
-          "If True, the request performs cleanup according to the policy type. For WAF and Shield Advanced policies, the cleanup does the following: Deletes rule groups created by Firewall Manager Removes web ACLs from in-scope resources Deletes web ACLs that contain no rules or rule groups For security group policies, the cleanup does the following for each security group in the policy: Disassociates the security group from in-scope resources Deletes the security group if it was created through Firewall Manager and if it's no longer associated with any resources through another policy After the cleanup, in-scope resources are no longer protected by web ACLs in this policy. Protection of out-of-scope resources remains unchanged. Scope is determined by tags that you create and accounts that you associate with the policy. When creating the policy, if you specify that only resources in specific accounts or with specific tags are in scope of the policy, those accounts and resources are handled by the policy. All others are out of scope. If you don't specify tags or accounts, all resources are in scope."]}
+          "If True, the request performs cleanup according to the policy type. For WAF and Shield Advanced policies, the cleanup does the following: Deletes rule groups created by Firewall Manager Removes web ACLs from in-scope resources Deletes web ACLs that contain no rules or rule groups For security group policies, the cleanup does the following for each security group in the policy: Disassociates the security group from in-scope resources Deletes the security group if it was created through Firewall Manager and if it's no longer associated with any resources through another policy For security group common policies, even if set to False, Firewall Manager deletes all security groups created by Firewall Manager that aren't associated with any other resources through another policy. After the cleanup, in-scope resources are no longer protected by web ACLs in this policy. Protection of out-of-scope resources remains unchanged. Scope is determined by tags that you create and accounts that you associate with the policy. When creating the policy, if you specify that only resources in specific accounts or with specific tags are in scope of the policy, those accounts and resources are handled by the policy. All others are out of scope. If you don't specify tags or accounts, all resources are in scope."]}
     let context_ = "DeletePolicyRequest"
     let make ?deleteAllPolicyResources =
       fun ~policyId -> fun () -> { deleteAllPolicyResources; policyId }
@@ -9489,10 +13332,10 @@ module DeletePolicyRequest =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PolicyId") in
       make ?deleteAllPolicyResources ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deleteAllPolicyResources =
-        field_map json "DeleteAllPolicyResources" Boolean.of_json in
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+        field_map json__ "DeleteAllPolicyResources" Boolean.of_json in
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ?deleteAllPolicyResources ~policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Permanently deletes an Firewall Manager policy."]
@@ -9526,12 +13369,271 @@ module DeleteAppsListRequest =
         ListId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ListId") in
       make ~listId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let listId = field_map_exn json "ListId" ListId.of_json in
+    let of_json json__ =
+      let listId = field_map_exn json__ "ListId" ListId.of_json in
       make ~listId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Permanently deletes an Firewall Manager applications list."]
+module BatchDisassociateResourceResponse =
+  struct
+    type nonrec t =
+      {
+      resourceSetIdentifier: Identifier.t option
+        [@ocaml.doc
+          "A unique identifier for the resource set, used in a request to refer to the resource set."];
+      failedItems: FailedItemList.t option
+        [@ocaml.doc
+          "The resources that failed to disassociate from the resource set."]}
+    type nonrec error =
+      [ `InternalErrorException of InternalErrorException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `InvalidOperationException of InvalidOperationException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceSetIdentifier =
+      fun ?failedItems -> fun () -> { resourceSetIdentifier; failedItems }
+    let error_of_json name json =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidOperationException e ->
+          `Assoc
+            [("error", (`String "InvalidOperationException"));
+            ("details", (InvalidOperationException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceSetIdentifier",
+           (Option.map x.resourceSetIdentifier ~f:Identifier.to_value));
+        ("FailedItems",
+          (Option.map x.failedItems ~f:FailedItemList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failedItems =
+        (Option.map ~f:FailedItemList.of_xml)
+          (Xml.child xml_arg0 "FailedItems") in
+      let resourceSetIdentifier =
+        (Option.map ~f:Identifier.of_xml)
+          (Xml.child xml_arg0 "ResourceSetIdentifier") in
+      make ?failedItems ?resourceSetIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failedItems = field_map json__ "FailedItems" FailedItemList.of_json in
+      let resourceSetIdentifier =
+        field_map json__ "ResourceSetIdentifier" Identifier.of_json in
+      make ?failedItems ?resourceSetIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disassociates resources from a Firewall Manager resource set."]
+module BatchDisassociateResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceSetIdentifier: Identifier.t
+        [@ocaml.doc
+          "A unique identifier for the resource set, used in a request to refer to the resource set."];
+      items: IdentifierList.t
+        [@ocaml.doc
+          "The uniform resource identifiers (URI) of resources that should be disassociated from the resource set. The URIs must be Amazon Resource Names (ARNs)."]}
+    let context_ = "BatchDisassociateResourceRequest"
+    let make ~resourceSetIdentifier =
+      fun ~items -> fun () -> { resourceSetIdentifier; items }
+    let to_value x =
+      structure_to_value
+        [("ResourceSetIdentifier",
+           (Some (Identifier.to_value x.resourceSetIdentifier)));
+        ("Items", (Some (IdentifierList.to_value x.items)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let items =
+        IdentifierList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Items") in
+      let resourceSetIdentifier =
+        Identifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceSetIdentifier") in
+      make ~items ~resourceSetIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let items = field_map_exn json__ "Items" IdentifierList.of_json in
+      let resourceSetIdentifier =
+        field_map_exn json__ "ResourceSetIdentifier" Identifier.of_json in
+      make ~items ~resourceSetIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disassociates resources from a Firewall Manager resource set."]
+module BatchAssociateResourceResponse =
+  struct
+    type nonrec t =
+      {
+      resourceSetIdentifier: Identifier.t option
+        [@ocaml.doc
+          "A unique identifier for the resource set, used in a request to refer to the resource set."];
+      failedItems: FailedItemList.t option
+        [@ocaml.doc
+          "The resources that failed to associate to the resource set."]}
+    type nonrec error =
+      [ `InternalErrorException of InternalErrorException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `InvalidOperationException of InvalidOperationException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceSetIdentifier =
+      fun ?failedItems -> fun () -> { resourceSetIdentifier; failedItems }
+    let error_of_json name json =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidOperationException" ->
+          `InvalidOperationException (InvalidOperationException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidOperationException e ->
+          `Assoc
+            [("error", (`String "InvalidOperationException"));
+            ("details", (InvalidOperationException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceSetIdentifier",
+           (Option.map x.resourceSetIdentifier ~f:Identifier.to_value));
+        ("FailedItems",
+          (Option.map x.failedItems ~f:FailedItemList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failedItems =
+        (Option.map ~f:FailedItemList.of_xml)
+          (Xml.child xml_arg0 "FailedItems") in
+      let resourceSetIdentifier =
+        (Option.map ~f:Identifier.of_xml)
+          (Xml.child xml_arg0 "ResourceSetIdentifier") in
+      make ?failedItems ?resourceSetIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failedItems = field_map json__ "FailedItems" FailedItemList.of_json in
+      let resourceSetIdentifier =
+        field_map json__ "ResourceSetIdentifier" Identifier.of_json in
+      make ?failedItems ?resourceSetIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Associate resources to a Firewall Manager resource set."]
+module BatchAssociateResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceSetIdentifier: Identifier.t
+        [@ocaml.doc
+          "A unique identifier for the resource set, used in a request to refer to the resource set."];
+      items: IdentifierList.t
+        [@ocaml.doc
+          "The uniform resource identifiers (URIs) of resources that should be associated to the resource set. The URIs must be Amazon Resource Names (ARNs)."]}
+    let context_ = "BatchAssociateResourceRequest"
+    let make ~resourceSetIdentifier =
+      fun ~items -> fun () -> { resourceSetIdentifier; items }
+    let to_value x =
+      structure_to_value
+        [("ResourceSetIdentifier",
+           (Some (Identifier.to_value x.resourceSetIdentifier)));
+        ("Items", (Some (IdentifierList.to_value x.items)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let items =
+        IdentifierList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Items") in
+      let resourceSetIdentifier =
+        Identifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceSetIdentifier") in
+      make ~items ~resourceSetIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let items = field_map_exn json__ "Items" IdentifierList.of_json in
+      let resourceSetIdentifier =
+        field_map_exn json__ "ResourceSetIdentifier" Identifier.of_json in
+      make ~items ~resourceSetIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Associate resources to a Firewall Manager resource set."]
 module AssociateThirdPartyFirewallResponse =
   struct
     type nonrec t =
@@ -9607,9 +13709,9 @@ module AssociateThirdPartyFirewallResponse =
           (Xml.child xml_arg0 "ThirdPartyFirewallStatus") in
       make ?thirdPartyFirewallStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let thirdPartyFirewallStatus =
-        field_map json "ThirdPartyFirewallStatus"
+        field_map json__ "ThirdPartyFirewallStatus"
           ThirdPartyFirewallAssociationStatus.of_json in
       make ?thirdPartyFirewallStatus ()
     let to_json v = composed_to_json to_value v
@@ -9634,9 +13736,9 @@ module AssociateThirdPartyFirewallRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ThirdPartyFirewall") in
       make ~thirdPartyFirewall ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let thirdPartyFirewall =
-        field_map_exn json "ThirdPartyFirewall" ThirdPartyFirewall.of_json in
+        field_map_exn json__ "ThirdPartyFirewall" ThirdPartyFirewall.of_json in
       make ~thirdPartyFirewall ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9647,7 +13749,7 @@ module AssociateAdminAccountRequest =
       {
       adminAccount: AWSAccountId.t
         [@ocaml.doc
-          "The Amazon Web Services account ID to associate with Firewall Manager as the Firewall Manager administrator account. This must be an Organizations member account. For more information about Organizations, see Managing the Amazon Web Services Accounts in Your Organization."]}
+          "The Amazon Web Services account ID to associate with Firewall Manager as the Firewall Manager default administrator account. This account must be a member account of the organization in Organizations whose resources you want to protect. For more information about Organizations, see Managing the Amazon Web Services Accounts in Your Organization."]}
     let context_ = "AssociateAdminAccountRequest"
     let make ~adminAccount = fun () -> { adminAccount }
     let to_value x =
@@ -9660,10 +13762,10 @@ module AssociateAdminAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AdminAccount") in
       make ~adminAccount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let adminAccount =
-        field_map_exn json "AdminAccount" AWSAccountId.of_json in
+        field_map_exn json__ "AdminAccount" AWSAccountId.of_json in
       make ~adminAccount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sets the Firewall Manager administrator account. The account must be a member of the organization in Organizations whose resources you want to protect. Firewall Manager sets the permissions that allow the account to administer your Firewall Manager policies. The account that you associate with Firewall Manager is called the Firewall Manager administrator account."]
+       "Sets a Firewall Manager default administrator account. The Firewall Manager default administrator account can manage third-party firewalls and has full administrative scope that allows administration of all policy types, accounts, organizational units, and Regions. This account must be a member account of the organization in Organizations whose resources you want to protect. For information about working with Firewall Manager administrator accounts, see Managing Firewall Manager administrators in the Firewall Manager Developer Guide."]

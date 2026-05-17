@@ -24,8 +24,16 @@ type ('i, 'o, 'e) t =
   CreateConnectionResponse.error) t 
   | CreateCoreNetwork: (CreateCoreNetworkRequest.t,
   CreateCoreNetworkResponse.t, CreateCoreNetworkResponse.error) t 
+  | CreateCoreNetworkPrefixListAssociation:
+  (CreateCoreNetworkPrefixListAssociationRequest.t,
+  CreateCoreNetworkPrefixListAssociationResponse.t,
+  CreateCoreNetworkPrefixListAssociationResponse.error) t 
   | CreateDevice: (CreateDeviceRequest.t, CreateDeviceResponse.t,
   CreateDeviceResponse.error) t 
+  | CreateDirectConnectGatewayAttachment:
+  (CreateDirectConnectGatewayAttachmentRequest.t,
+  CreateDirectConnectGatewayAttachmentResponse.t,
+  CreateDirectConnectGatewayAttachmentResponse.error) t 
   | CreateGlobalNetwork: (CreateGlobalNetworkRequest.t,
   CreateGlobalNetworkResponse.t, CreateGlobalNetworkResponse.error) t 
   | CreateLink: (CreateLinkRequest.t, CreateLinkResponse.t,
@@ -35,6 +43,13 @@ type ('i, 'o, 'e) t =
   | CreateSiteToSiteVpnAttachment: (CreateSiteToSiteVpnAttachmentRequest.t,
   CreateSiteToSiteVpnAttachmentResponse.t,
   CreateSiteToSiteVpnAttachmentResponse.error) t 
+  | CreateTransitGatewayPeering: (CreateTransitGatewayPeeringRequest.t,
+  CreateTransitGatewayPeeringResponse.t,
+  CreateTransitGatewayPeeringResponse.error) t 
+  | CreateTransitGatewayRouteTableAttachment:
+  (CreateTransitGatewayRouteTableAttachmentRequest.t,
+  CreateTransitGatewayRouteTableAttachmentResponse.t,
+  CreateTransitGatewayRouteTableAttachmentResponse.error) t 
   | CreateVpcAttachment: (CreateVpcAttachmentRequest.t,
   CreateVpcAttachmentResponse.t, CreateVpcAttachmentResponse.error) t 
   | DeleteAttachment: (DeleteAttachmentRequest.t, DeleteAttachmentResponse.t,
@@ -48,12 +63,18 @@ type ('i, 'o, 'e) t =
   | DeleteCoreNetworkPolicyVersion: (DeleteCoreNetworkPolicyVersionRequest.t,
   DeleteCoreNetworkPolicyVersionResponse.t,
   DeleteCoreNetworkPolicyVersionResponse.error) t 
+  | DeleteCoreNetworkPrefixListAssociation:
+  (DeleteCoreNetworkPrefixListAssociationRequest.t,
+  DeleteCoreNetworkPrefixListAssociationResponse.t,
+  DeleteCoreNetworkPrefixListAssociationResponse.error) t 
   | DeleteDevice: (DeleteDeviceRequest.t, DeleteDeviceResponse.t,
   DeleteDeviceResponse.error) t 
   | DeleteGlobalNetwork: (DeleteGlobalNetworkRequest.t,
   DeleteGlobalNetworkResponse.t, DeleteGlobalNetworkResponse.error) t 
   | DeleteLink: (DeleteLinkRequest.t, DeleteLinkResponse.t,
   DeleteLinkResponse.error) t 
+  | DeletePeering: (DeletePeeringRequest.t, DeletePeeringResponse.t,
+  DeletePeeringResponse.error) t 
   | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t,
   DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error) t 
   | DeleteSite: (DeleteSiteRequest.t, DeleteSiteResponse.t,
@@ -89,6 +110,9 @@ type ('i, 'o, 'e) t =
   GetConnectionsResponse.error) t 
   | GetCoreNetwork: (GetCoreNetworkRequest.t, GetCoreNetworkResponse.t,
   GetCoreNetworkResponse.error) t 
+  | GetCoreNetworkChangeEvents: (GetCoreNetworkChangeEventsRequest.t,
+  GetCoreNetworkChangeEventsResponse.t,
+  GetCoreNetworkChangeEventsResponse.error) t 
   | GetCoreNetworkChangeSet: (GetCoreNetworkChangeSetRequest.t,
   GetCoreNetworkChangeSetResponse.t, GetCoreNetworkChangeSetResponse.error) t
   
@@ -99,6 +123,10 @@ type ('i, 'o, 'e) t =
   GetCustomerGatewayAssociationsResponse.error) t 
   | GetDevices: (GetDevicesRequest.t, GetDevicesResponse.t,
   GetDevicesResponse.error) t 
+  | GetDirectConnectGatewayAttachment:
+  (GetDirectConnectGatewayAttachmentRequest.t,
+  GetDirectConnectGatewayAttachmentResponse.t,
+  GetDirectConnectGatewayAttachmentResponse.error) t 
   | GetLinkAssociations: (GetLinkAssociationsRequest.t,
   GetLinkAssociationsResponse.t, GetLinkAssociationsResponse.error) t 
   | GetLinks: (GetLinksRequest.t, GetLinksResponse.t, GetLinksResponse.error)
@@ -129,11 +157,22 @@ type ('i, 'o, 'e) t =
   (GetTransitGatewayConnectPeerAssociationsRequest.t,
   GetTransitGatewayConnectPeerAssociationsResponse.t,
   GetTransitGatewayConnectPeerAssociationsResponse.error) t 
+  | GetTransitGatewayPeering: (GetTransitGatewayPeeringRequest.t,
+  GetTransitGatewayPeeringResponse.t, GetTransitGatewayPeeringResponse.error)
+  t 
   | GetTransitGatewayRegistrations: (GetTransitGatewayRegistrationsRequest.t,
   GetTransitGatewayRegistrationsResponse.t,
   GetTransitGatewayRegistrationsResponse.error) t 
+  | GetTransitGatewayRouteTableAttachment:
+  (GetTransitGatewayRouteTableAttachmentRequest.t,
+  GetTransitGatewayRouteTableAttachmentResponse.t,
+  GetTransitGatewayRouteTableAttachmentResponse.error) t 
   | GetVpcAttachment: (GetVpcAttachmentRequest.t, GetVpcAttachmentResponse.t,
   GetVpcAttachmentResponse.error) t 
+  | ListAttachmentRoutingPolicyAssociations:
+  (ListAttachmentRoutingPolicyAssociationsRequest.t,
+  ListAttachmentRoutingPolicyAssociationsResponse.t,
+  ListAttachmentRoutingPolicyAssociationsResponse.error) t 
   | ListAttachments: (ListAttachmentsRequest.t, ListAttachmentsResponse.t,
   ListAttachmentsResponse.error) t 
   | ListConnectPeers: (ListConnectPeersRequest.t, ListConnectPeersResponse.t,
@@ -141,10 +180,28 @@ type ('i, 'o, 'e) t =
   | ListCoreNetworkPolicyVersions: (ListCoreNetworkPolicyVersionsRequest.t,
   ListCoreNetworkPolicyVersionsResponse.t,
   ListCoreNetworkPolicyVersionsResponse.error) t 
+  | ListCoreNetworkPrefixListAssociations:
+  (ListCoreNetworkPrefixListAssociationsRequest.t,
+  ListCoreNetworkPrefixListAssociationsResponse.t,
+  ListCoreNetworkPrefixListAssociationsResponse.error) t 
+  | ListCoreNetworkRoutingInformation:
+  (ListCoreNetworkRoutingInformationRequest.t,
+  ListCoreNetworkRoutingInformationResponse.t,
+  ListCoreNetworkRoutingInformationResponse.error) t 
   | ListCoreNetworks: (ListCoreNetworksRequest.t, ListCoreNetworksResponse.t,
   ListCoreNetworksResponse.error) t 
+  | ListOrganizationServiceAccessStatus:
+  (ListOrganizationServiceAccessStatusRequest.t,
+  ListOrganizationServiceAccessStatusResponse.t,
+  ListOrganizationServiceAccessStatusResponse.error) t 
+  | ListPeerings: (ListPeeringsRequest.t, ListPeeringsResponse.t,
+  ListPeeringsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | PutAttachmentRoutingPolicyLabel:
+  (PutAttachmentRoutingPolicyLabelRequest.t,
+  PutAttachmentRoutingPolicyLabelResponse.t,
+  PutAttachmentRoutingPolicyLabelResponse.error) t 
   | PutCoreNetworkPolicy: (PutCoreNetworkPolicyRequest.t,
   PutCoreNetworkPolicyResponse.t, PutCoreNetworkPolicyResponse.error) t 
   | PutResourcePolicy: (PutResourcePolicyRequest.t,
@@ -153,10 +210,18 @@ type ('i, 'o, 'e) t =
   RegisterTransitGatewayResponse.t, RegisterTransitGatewayResponse.error) t 
   | RejectAttachment: (RejectAttachmentRequest.t, RejectAttachmentResponse.t,
   RejectAttachmentResponse.error) t 
+  | RemoveAttachmentRoutingPolicyLabel:
+  (RemoveAttachmentRoutingPolicyLabelRequest.t,
+  RemoveAttachmentRoutingPolicyLabelResponse.t,
+  RemoveAttachmentRoutingPolicyLabelResponse.error) t 
   | RestoreCoreNetworkPolicyVersion:
   (RestoreCoreNetworkPolicyVersionRequest.t,
   RestoreCoreNetworkPolicyVersionResponse.t,
   RestoreCoreNetworkPolicyVersionResponse.error) t 
+  | StartOrganizationServiceAccessUpdate:
+  (StartOrganizationServiceAccessUpdateRequest.t,
+  StartOrganizationServiceAccessUpdateResponse.t,
+  StartOrganizationServiceAccessUpdateResponse.error) t 
   | StartRouteAnalysis: (StartRouteAnalysisRequest.t,
   StartRouteAnalysisResponse.t, StartRouteAnalysisResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
@@ -169,6 +234,10 @@ type ('i, 'o, 'e) t =
   UpdateCoreNetworkResponse.t, UpdateCoreNetworkResponse.error) t 
   | UpdateDevice: (UpdateDeviceRequest.t, UpdateDeviceResponse.t,
   UpdateDeviceResponse.error) t 
+  | UpdateDirectConnectGatewayAttachment:
+  (UpdateDirectConnectGatewayAttachmentRequest.t,
+  UpdateDirectConnectGatewayAttachmentResponse.t,
+  UpdateDirectConnectGatewayAttachmentResponse.error) t 
   | UpdateGlobalNetwork: (UpdateGlobalNetworkRequest.t,
   UpdateGlobalNetworkResponse.t, UpdateGlobalNetworkResponse.error) t 
   | UpdateLink: (UpdateLinkRequest.t, UpdateLinkResponse.t,
@@ -191,20 +260,26 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateConnectPeer -> `POST
   | CreateConnection -> `POST
   | CreateCoreNetwork -> `POST
+  | CreateCoreNetworkPrefixListAssociation -> `POST
   | CreateDevice -> `POST
+  | CreateDirectConnectGatewayAttachment -> `POST
   | CreateGlobalNetwork -> `POST
   | CreateLink -> `POST
   | CreateSite -> `POST
   | CreateSiteToSiteVpnAttachment -> `POST
+  | CreateTransitGatewayPeering -> `POST
+  | CreateTransitGatewayRouteTableAttachment -> `POST
   | CreateVpcAttachment -> `POST
   | DeleteAttachment -> `DELETE
   | DeleteConnectPeer -> `DELETE
   | DeleteConnection -> `DELETE
   | DeleteCoreNetwork -> `DELETE
   | DeleteCoreNetworkPolicyVersion -> `DELETE
+  | DeleteCoreNetworkPrefixListAssociation -> `DELETE
   | DeleteDevice -> `DELETE
   | DeleteGlobalNetwork -> `DELETE
   | DeleteLink -> `DELETE
+  | DeletePeering -> `DELETE
   | DeleteResourcePolicy -> `DELETE
   | DeleteSite -> `DELETE
   | DeregisterTransitGateway -> `DELETE
@@ -219,10 +294,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetConnectPeerAssociations -> `GET
   | GetConnections -> `GET
   | GetCoreNetwork -> `GET
+  | GetCoreNetworkChangeEvents -> `GET
   | GetCoreNetworkChangeSet -> `GET
   | GetCoreNetworkPolicy -> `GET
   | GetCustomerGatewayAssociations -> `GET
   | GetDevices -> `GET
+  | GetDirectConnectGatewayAttachment -> `GET
   | GetLinkAssociations -> `GET
   | GetLinks -> `GET
   | GetNetworkResourceCounts -> `GET
@@ -235,24 +312,35 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetSiteToSiteVpnAttachment -> `GET
   | GetSites -> `GET
   | GetTransitGatewayConnectPeerAssociations -> `GET
+  | GetTransitGatewayPeering -> `GET
   | GetTransitGatewayRegistrations -> `GET
+  | GetTransitGatewayRouteTableAttachment -> `GET
   | GetVpcAttachment -> `GET
+  | ListAttachmentRoutingPolicyAssociations -> `GET
   | ListAttachments -> `GET
   | ListConnectPeers -> `GET
   | ListCoreNetworkPolicyVersions -> `GET
+  | ListCoreNetworkPrefixListAssociations -> `GET
+  | ListCoreNetworkRoutingInformation -> `POST
   | ListCoreNetworks -> `GET
+  | ListOrganizationServiceAccessStatus -> `GET
+  | ListPeerings -> `GET
   | ListTagsForResource -> `GET
+  | PutAttachmentRoutingPolicyLabel -> `POST
   | PutCoreNetworkPolicy -> `POST
   | PutResourcePolicy -> `POST
   | RegisterTransitGateway -> `POST
   | RejectAttachment -> `POST
+  | RemoveAttachmentRoutingPolicyLabel -> `DELETE
   | RestoreCoreNetworkPolicyVersion -> `POST
+  | StartOrganizationServiceAccessUpdate -> `POST
   | StartRouteAnalysis -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateConnection -> `PATCH
   | UpdateCoreNetwork -> `PATCH
   | UpdateDevice -> `PATCH
+  | UpdateDirectConnectGatewayAttachment -> `PATCH
   | UpdateGlobalNetwork -> `PATCH
   | UpdateLink -> `PATCH
   | UpdateNetworkResourceMetadata -> `PATCH
@@ -293,9 +381,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.CreateConnectionRequest.globalNetworkId)
       | CreateCoreNetwork ->
           (Format.kasprintf Uri.of_string) "/core-networks"
+      | CreateCoreNetworkPrefixListAssociation ->
+          (Format.kasprintf Uri.of_string) "/prefix-list"
       | CreateDevice ->
           (Format.kasprintf Uri.of_string) "/global-networks/%s/devices"
             (GlobalNetworkId.to_header x.CreateDeviceRequest.globalNetworkId)
+      | CreateDirectConnectGatewayAttachment ->
+          (Format.kasprintf Uri.of_string)
+            "/direct-connect-gateway-attachments"
       | CreateGlobalNetwork ->
           (Format.kasprintf Uri.of_string) "/global-networks"
       | CreateLink ->
@@ -306,6 +399,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (GlobalNetworkId.to_header x.CreateSiteRequest.globalNetworkId)
       | CreateSiteToSiteVpnAttachment ->
           (Format.kasprintf Uri.of_string) "/site-to-site-vpn-attachments"
+      | CreateTransitGatewayPeering ->
+          (Format.kasprintf Uri.of_string) "/transit-gateway-peerings"
+      | CreateTransitGatewayRouteTableAttachment ->
+          (Format.kasprintf Uri.of_string)
+            "/transit-gateway-route-table-attachments"
       | CreateVpcAttachment ->
           (Format.kasprintf Uri.of_string) "/vpc-attachments"
       | DeleteAttachment ->
@@ -330,6 +428,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DeleteCoreNetworkPolicyVersionRequest.coreNetworkId)
             (Integer.to_header
                x.DeleteCoreNetworkPolicyVersionRequest.policyVersionId)
+      | DeleteCoreNetworkPrefixListAssociation ->
+          (Format.kasprintf Uri.of_string) "/prefix-list/%s/core-network/%s"
+            (PrefixListArn.to_header
+               x.DeleteCoreNetworkPrefixListAssociationRequest.prefixListArn)
+            (CoreNetworkId.to_header
+               x.DeleteCoreNetworkPrefixListAssociationRequest.coreNetworkId)
       | DeleteDevice ->
           (Format.kasprintf Uri.of_string) "/global-networks/%s/devices/%s"
             (GlobalNetworkId.to_header x.DeleteDeviceRequest.globalNetworkId)
@@ -342,6 +446,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/global-networks/%s/links/%s"
             (GlobalNetworkId.to_header x.DeleteLinkRequest.globalNetworkId)
             (LinkId.to_header x.DeleteLinkRequest.linkId)
+      | DeletePeering ->
+          (Format.kasprintf Uri.of_string) "/peerings/%s"
+            (PeeringId.to_header x.DeletePeeringRequest.peeringId)
       | DeleteResourcePolicy ->
           (Format.kasprintf Uri.of_string) "/resource-policy/%s"
             (ResourceArn.to_header x.DeleteResourcePolicyRequest.resourceArn)
@@ -454,6 +561,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetCoreNetwork ->
           (Format.kasprintf Uri.of_string) "/core-networks/%s"
             (CoreNetworkId.to_header x.GetCoreNetworkRequest.coreNetworkId)
+      | GetCoreNetworkChangeEvents ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/core-networks/%s/core-network-change-events/%s"
+               (CoreNetworkId.to_header
+                  x.GetCoreNetworkChangeEventsRequest.coreNetworkId)
+               (Integer.to_header
+                  x.GetCoreNetworkChangeEventsRequest.policyVersionId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | GetCoreNetworkChangeSet ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -516,6 +638,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | GetDirectConnectGatewayAttachment ->
+          (Format.kasprintf Uri.of_string)
+            "/direct-connect-gateway-attachments/%s"
+            (AttachmentId.to_header
+               x.GetDirectConnectGatewayAttachmentRequest.attachmentId)
       | GetLinkAssociations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -722,6 +849,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | GetTransitGatewayPeering ->
+          (Format.kasprintf Uri.of_string) "/transit-gateway-peerings/%s"
+            (PeeringId.to_header x.GetTransitGatewayPeeringRequest.peeringId)
       | GetTransitGatewayRegistrations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -740,9 +870,30 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | GetTransitGatewayRouteTableAttachment ->
+          (Format.kasprintf Uri.of_string)
+            "/transit-gateway-route-table-attachments/%s"
+            (AttachmentId.to_header
+               x.GetTransitGatewayRouteTableAttachmentRequest.attachmentId)
       | GetVpcAttachment ->
           (Format.kasprintf Uri.of_string) "/vpc-attachments/%s"
             (AttachmentId.to_header x.GetVpcAttachmentRequest.attachmentId)
+      | ListAttachmentRoutingPolicyAssociations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/routing-policy-label/core-network/%s"
+               (CoreNetworkId.to_header
+                  x.ListAttachmentRoutingPolicyAssociationsRequest.coreNetworkId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("attachmentId", (AttachmentId.to_header v)))
+                  x.attachmentId;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListAttachments ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/attachments")
@@ -797,6 +948,34 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | ListCoreNetworkPrefixListAssociations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/prefix-list/core-network/%s"
+               (CoreNetworkId.to_header
+                  x.ListCoreNetworkPrefixListAssociationsRequest.coreNetworkId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("prefixListArn", (PrefixListArn.to_header v)))
+                  x.prefixListArn;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
+      | ListCoreNetworkRoutingInformation ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/core-networks/%s/core-network-routing-information"
+               (CoreNetworkId.to_header
+                  x.ListCoreNetworkRoutingInformationRequest.coreNetworkId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListCoreNetworks ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/core-networks")
@@ -807,9 +986,43 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | ListOrganizationServiceAccessStatus ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/organizations/service-access")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
+      | ListPeerings ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/peerings")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("coreNetworkId", (CoreNetworkId.to_header v)))
+                  x.coreNetworkId;
+               Option.map
+                 ~f:(fun v -> ("peeringType", (PeeringType.to_header v)))
+                 x.peeringType;
+               Option.map
+                 ~f:(fun v ->
+                       ("edgeLocation", (ExternalRegionCode.to_header v)))
+                 x.edgeLocation;
+               Option.map ~f:(fun v -> ("state", (PeeringState.to_header v)))
+                 x.state;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ResourceArn.to_header x.ListTagsForResourceRequest.resourceArn)
+      | PutAttachmentRoutingPolicyLabel ->
+          (Format.kasprintf Uri.of_string) "/routing-policy-label"
       | PutCoreNetworkPolicy ->
           (Format.kasprintf Uri.of_string)
             "/core-networks/%s/core-network-policy"
@@ -826,6 +1039,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RejectAttachment ->
           (Format.kasprintf Uri.of_string) "/attachments/%s/reject"
             (AttachmentId.to_header x.RejectAttachmentRequest.attachmentId)
+      | RemoveAttachmentRoutingPolicyLabel ->
+          (Format.kasprintf Uri.of_string)
+            "/routing-policy-label/core-network/%s/attachment/%s"
+            (CoreNetworkId.to_header
+               x.RemoveAttachmentRoutingPolicyLabelRequest.coreNetworkId)
+            (AttachmentId.to_header
+               x.RemoveAttachmentRoutingPolicyLabelRequest.attachmentId)
       | RestoreCoreNetworkPolicyVersion ->
           (Format.kasprintf Uri.of_string)
             "/core-networks/%s/core-network-policy-versions/%s/restore"
@@ -833,6 +1053,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.RestoreCoreNetworkPolicyVersionRequest.coreNetworkId)
             (Integer.to_header
                x.RestoreCoreNetworkPolicyVersionRequest.policyVersionId)
+      | StartOrganizationServiceAccessUpdate ->
+          (Format.kasprintf Uri.of_string) "/organizations/service-access"
       | StartRouteAnalysis ->
           (Format.kasprintf Uri.of_string)
             "/global-networks/%s/route-analyses"
@@ -860,6 +1082,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/global-networks/%s/devices/%s"
             (GlobalNetworkId.to_header x.UpdateDeviceRequest.globalNetworkId)
             (DeviceId.to_header x.UpdateDeviceRequest.deviceId)
+      | UpdateDirectConnectGatewayAttachment ->
+          (Format.kasprintf Uri.of_string)
+            "/direct-connect-gateway-attachments/%s"
+            (AttachmentId.to_header
+               x.UpdateDirectConnectGatewayAttachmentRequest.attachmentId)
       | UpdateGlobalNetwork ->
           (Format.kasprintf Uri.of_string) "/global-networks/%s"
             (GlobalNetworkId.to_header
@@ -1012,6 +1239,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("TransportAttachmentId",
                           (AttachmentId.to_value
                              req.CreateConnectAttachmentRequest.transportAttachmentId));
+                      Option.map
+                        req.CreateConnectAttachmentRequest.routingPolicyLabel
+                        ~f:(fun x ->
+                              ("RoutingPolicyLabel",
+                                (ConstrainedString.to_value x)));
                       Some
                         ("Options",
                           (ConnectAttachmentOptions.to_value
@@ -1052,15 +1284,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                              req.CreateConnectPeerRequest.peerAddress));
                       Option.map req.CreateConnectPeerRequest.bgpOptions
                         ~f:(fun x -> ("BgpOptions", (BgpOptions.to_value x)));
-                      Some
-                        ("InsideCidrBlocks",
-                          (ConstrainedStringList.to_value
-                             req.CreateConnectPeerRequest.insideCidrBlocks));
+                      Option.map
+                        req.CreateConnectPeerRequest.insideCidrBlocks
+                        ~f:(fun x ->
+                              ("InsideCidrBlocks",
+                                (ConstrainedStringList.to_value x)));
                       Option.map req.CreateConnectPeerRequest.tags
                         ~f:(fun x -> ("Tags", (TagList.to_value x)));
                       Option.map req.CreateConnectPeerRequest.clientToken
                         ~f:(fun x ->
-                              ("ClientToken", (ClientToken.to_value x)))])
+                              ("ClientToken", (ClientToken.to_value x)));
+                      Option.map req.CreateConnectPeerRequest.subnetArn
+                        ~f:(fun x -> ("SubnetArn", (SubnetArn.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1133,6 +1368,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateCoreNetworkPrefixListAssociation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("CoreNetworkId",
+                           (CoreNetworkId.to_value
+                              req.CreateCoreNetworkPrefixListAssociationRequest.coreNetworkId));
+                      Some
+                        ("PrefixListArn",
+                          (PrefixListArn.to_value
+                             req.CreateCoreNetworkPrefixListAssociationRequest.prefixListArn));
+                      Some
+                        ("PrefixListAlias",
+                          (ConstrainedString.to_value
+                             req.CreateCoreNetworkPrefixListAssociationRequest.prefixListAlias));
+                      Option.map
+                        req.CreateCoreNetworkPrefixListAssociationRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateDevice ->
       let (headers, body) =
         let headers =
@@ -1166,6 +1433,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("SiteId", (SiteId.to_value x)));
                       Option.map req.CreateDeviceRequest.tags
                         ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateDirectConnectGatewayAttachment ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("CoreNetworkId",
+                           (CoreNetworkId.to_value
+                              req.CreateDirectConnectGatewayAttachmentRequest.coreNetworkId));
+                      Some
+                        ("DirectConnectGatewayArn",
+                          (DirectConnectGatewayArn.to_value
+                             req.CreateDirectConnectGatewayAttachmentRequest.directConnectGatewayArn));
+                      Option.map
+                        req.CreateDirectConnectGatewayAttachmentRequest.routingPolicyLabel
+                        ~f:(fun x ->
+                              ("RoutingPolicyLabel",
+                                (ConstrainedString.to_value x)));
+                      Some
+                        ("EdgeLocations",
+                          (ExternalRegionCodeList.to_value
+                             req.CreateDirectConnectGatewayAttachmentRequest.edgeLocations));
+                      Option.map
+                        req.CreateDirectConnectGatewayAttachmentRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map
+                        req.CreateDirectConnectGatewayAttachmentRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1270,10 +1577,81 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                           (VpnConnectionArn.to_value
                              req.CreateSiteToSiteVpnAttachmentRequest.vpnConnectionArn));
                       Option.map
+                        req.CreateSiteToSiteVpnAttachmentRequest.routingPolicyLabel
+                        ~f:(fun x ->
+                              ("RoutingPolicyLabel",
+                                (ConstrainedString.to_value x)));
+                      Option.map
                         req.CreateSiteToSiteVpnAttachmentRequest.tags
                         ~f:(fun x -> ("Tags", (TagList.to_value x)));
                       Option.map
                         req.CreateSiteToSiteVpnAttachmentRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateTransitGatewayPeering ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("CoreNetworkId",
+                           (CoreNetworkId.to_value
+                              req.CreateTransitGatewayPeeringRequest.coreNetworkId));
+                      Some
+                        ("TransitGatewayArn",
+                          (TransitGatewayArn.to_value
+                             req.CreateTransitGatewayPeeringRequest.transitGatewayArn));
+                      Option.map req.CreateTransitGatewayPeeringRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map
+                        req.CreateTransitGatewayPeeringRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateTransitGatewayRouteTableAttachment ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("PeeringId",
+                           (PeeringId.to_value
+                              req.CreateTransitGatewayRouteTableAttachmentRequest.peeringId));
+                      Some
+                        ("TransitGatewayRouteTableArn",
+                          (TransitGatewayRouteTableArn.to_value
+                             req.CreateTransitGatewayRouteTableAttachmentRequest.transitGatewayRouteTableArn));
+                      Option.map
+                        req.CreateTransitGatewayRouteTableAttachmentRequest.routingPolicyLabel
+                        ~f:(fun x ->
+                              ("RoutingPolicyLabel",
+                                (ConstrainedString.to_value x)));
+                      Option.map
+                        req.CreateTransitGatewayRouteTableAttachmentRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map
+                        req.CreateTransitGatewayRouteTableAttachmentRequest.clientToken
                         ~f:(fun x ->
                               ("ClientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
@@ -1306,6 +1684,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                              req.CreateVpcAttachmentRequest.subnetArns));
                       Option.map req.CreateVpcAttachmentRequest.options
                         ~f:(fun x -> ("Options", (VpcOptions.to_value x)));
+                      Option.map
+                        req.CreateVpcAttachmentRequest.routingPolicyLabel
+                        ~f:(fun x ->
+                              ("RoutingPolicyLabel",
+                                (ConstrainedString.to_value x)));
                       Option.map req.CreateVpcAttachmentRequest.tags
                         ~f:(fun x -> ("Tags", (TagList.to_value x)));
                       Option.map req.CreateVpcAttachmentRequest.clientToken
@@ -1324,9 +1707,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteCoreNetwork -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteCoreNetworkPolicyVersion ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteCoreNetworkPrefixListAssociation ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDevice -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteGlobalNetwork -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteLink -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeletePeering -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteResourcePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteSite -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeregisterTransitGateway ->
@@ -1359,6 +1745,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetCoreNetwork ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCoreNetworkChangeEvents ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetCoreNetworkChangeSet ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -1369,6 +1758,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetDevices ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDirectConnectGatewayAttachment ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetLinkAssociations ->
@@ -1454,10 +1846,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetTransitGatewayConnectPeerAssociations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetTransitGatewayPeering ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetTransitGatewayRegistrations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetTransitGatewayRouteTableAttachment ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetVpcAttachment ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAttachmentRoutingPolicyAssociations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAttachments ->
@@ -1469,11 +1870,100 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListCoreNetworkPolicyVersions ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCoreNetworkPrefixListAssociations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCoreNetworkRoutingInformation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("SegmentName",
+                           (ConstrainedString.to_value
+                              req.ListCoreNetworkRoutingInformationRequest.segmentName));
+                      Some
+                        ("EdgeLocation",
+                          (ExternalRegionCode.to_value
+                             req.ListCoreNetworkRoutingInformationRequest.edgeLocation));
+                      Option.map
+                        req.ListCoreNetworkRoutingInformationRequest.nextHopFilters
+                        ~f:(fun x ->
+                              ("NextHopFilters", (FilterMap.to_value x)));
+                      Option.map
+                        req.ListCoreNetworkRoutingInformationRequest.localPreferenceMatches
+                        ~f:(fun x ->
+                              ("LocalPreferenceMatches",
+                                (ConstrainedStringList.to_value x)));
+                      Option.map
+                        req.ListCoreNetworkRoutingInformationRequest.exactAsPathMatches
+                        ~f:(fun x ->
+                              ("ExactAsPathMatches",
+                                (ConstrainedStringList.to_value x)));
+                      Option.map
+                        req.ListCoreNetworkRoutingInformationRequest.medMatches
+                        ~f:(fun x ->
+                              ("MedMatches",
+                                (ConstrainedStringList.to_value x)));
+                      Option.map
+                        req.ListCoreNetworkRoutingInformationRequest.communityMatches
+                        ~f:(fun x ->
+                              ("CommunityMatches",
+                                (ConstrainedStringList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListCoreNetworks ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListOrganizationServiceAccessStatus ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListPeerings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutAttachmentRoutingPolicyLabel ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("CoreNetworkId",
+                           (CoreNetworkId.to_value
+                              req.PutAttachmentRoutingPolicyLabelRequest.coreNetworkId));
+                      Some
+                        ("AttachmentId",
+                          (AttachmentId.to_value
+                             req.PutAttachmentRoutingPolicyLabelRequest.attachmentId));
+                      Some
+                        ("RoutingPolicyLabel",
+                          (ConstrainedString.to_value
+                             req.PutAttachmentRoutingPolicyLabelRequest.routingPolicyLabel));
+                      Option.map
+                        req.PutAttachmentRoutingPolicyLabelRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PutCoreNetworkPolicy ->
       let (headers, body) =
@@ -1548,8 +2038,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | RejectAttachment ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | RemoveAttachmentRoutingPolicyLabel ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | RestoreCoreNetworkPolicyVersion ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartOrganizationServiceAccessUpdate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Action",
+                           (Action.to_value
+                              req.StartOrganizationServiceAccessUpdateRequest.action))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | StartRouteAnalysis ->
       let (headers, body) =
@@ -1604,6 +2116,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateConnection -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateCoreNetwork -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDevice -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateDirectConnectGatewayAttachment ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateGlobalNetwork -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateLink -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateNetworkResourceMetadata ->
@@ -1716,10 +2230,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateCoreNetworkResponse.error_of_json))
+  | CreateCoreNetworkPrefixListAssociation ->
+      if is_success
+      then
+        Ok
+          (CreateCoreNetworkPrefixListAssociationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                CreateCoreNetworkPrefixListAssociationResponse.error_of_json))
   | CreateDevice ->
       if is_success
       then Ok (CreateDeviceResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateDeviceResponse.error_of_json))
+  | CreateDirectConnectGatewayAttachment ->
+      if is_success
+      then
+        Ok
+          (CreateDirectConnectGatewayAttachmentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateDirectConnectGatewayAttachmentResponse.error_of_json))
   | CreateGlobalNetwork ->
       if is_success
       then Ok (CreateGlobalNetworkResponse.of_json (response_to_json resp))
@@ -1744,6 +2279,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateSiteToSiteVpnAttachmentResponse.error_of_json))
+  | CreateTransitGatewayPeering ->
+      if is_success
+      then
+        Ok
+          (CreateTransitGatewayPeeringResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateTransitGatewayPeeringResponse.error_of_json))
+  | CreateTransitGatewayRouteTableAttachment ->
+      if is_success
+      then
+        Ok
+          (CreateTransitGatewayRouteTableAttachmentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                CreateTransitGatewayRouteTableAttachmentResponse.error_of_json))
   | CreateVpcAttachment ->
       if is_success
       then Ok (CreateVpcAttachmentResponse.of_json (response_to_json resp))
@@ -1782,6 +2338,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteCoreNetworkPolicyVersionResponse.error_of_json))
+  | DeleteCoreNetworkPrefixListAssociation ->
+      if is_success
+      then
+        Ok
+          (DeleteCoreNetworkPrefixListAssociationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DeleteCoreNetworkPrefixListAssociationResponse.error_of_json))
   | DeleteDevice ->
       if is_success
       then Ok (DeleteDeviceResponse.of_json (response_to_json resp))
@@ -1796,6 +2363,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (DeleteLinkResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DeleteLinkResponse.error_of_json))
+  | DeletePeering ->
+      if is_success
+      then Ok (DeletePeeringResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeletePeeringResponse.error_of_json))
   | DeleteResourcePolicy ->
       if is_success
       then
@@ -1901,6 +2472,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (GetCoreNetworkResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetCoreNetworkResponse.error_of_json))
+  | GetCoreNetworkChangeEvents ->
+      if is_success
+      then
+        Ok
+          (GetCoreNetworkChangeEventsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetCoreNetworkChangeEventsResponse.error_of_json))
   | GetCoreNetworkChangeSet ->
       if is_success
       then
@@ -1929,6 +2509,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetDevicesResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetDevicesResponse.error_of_json))
+  | GetDirectConnectGatewayAttachment ->
+      if is_success
+      then
+        Ok
+          (GetDirectConnectGatewayAttachmentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDirectConnectGatewayAttachmentResponse.error_of_json))
   | GetLinkAssociations ->
       if is_success
       then Ok (GetLinkAssociationsResponse.of_json (response_to_json resp))
@@ -2009,6 +2599,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 GetTransitGatewayConnectPeerAssociationsResponse.error_of_json))
+  | GetTransitGatewayPeering ->
+      if is_success
+      then
+        Ok (GetTransitGatewayPeeringResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTransitGatewayPeeringResponse.error_of_json))
   | GetTransitGatewayRegistrations ->
       if is_success
       then
@@ -2019,11 +2617,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetTransitGatewayRegistrationsResponse.error_of_json))
+  | GetTransitGatewayRouteTableAttachment ->
+      if is_success
+      then
+        Ok
+          (GetTransitGatewayRouteTableAttachmentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                GetTransitGatewayRouteTableAttachmentResponse.error_of_json))
   | GetVpcAttachment ->
       if is_success
       then Ok (GetVpcAttachmentResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetVpcAttachmentResponse.error_of_json))
+  | ListAttachmentRoutingPolicyAssociations ->
+      if is_success
+      then
+        Ok
+          (ListAttachmentRoutingPolicyAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListAttachmentRoutingPolicyAssociationsResponse.error_of_json))
   | ListAttachments ->
       if is_success
       then Ok (ListAttachmentsResponse.of_json (response_to_json resp))
@@ -2044,17 +2664,59 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListCoreNetworkPolicyVersionsResponse.error_of_json))
+  | ListCoreNetworkPrefixListAssociations ->
+      if is_success
+      then
+        Ok
+          (ListCoreNetworkPrefixListAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListCoreNetworkPrefixListAssociationsResponse.error_of_json))
+  | ListCoreNetworkRoutingInformation ->
+      if is_success
+      then
+        Ok
+          (ListCoreNetworkRoutingInformationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCoreNetworkRoutingInformationResponse.error_of_json))
   | ListCoreNetworks ->
       if is_success
       then Ok (ListCoreNetworksResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListCoreNetworksResponse.error_of_json))
+  | ListOrganizationServiceAccessStatus ->
+      if is_success
+      then
+        Ok
+          (ListOrganizationServiceAccessStatusResponse.of_json
+             (response_to_json resp))
+      else Error (parse_aws_error None)
+  | ListPeerings ->
+      if is_success
+      then Ok (ListPeeringsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListPeeringsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | PutAttachmentRoutingPolicyLabel ->
+      if is_success
+      then
+        Ok
+          (PutAttachmentRoutingPolicyLabelResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutAttachmentRoutingPolicyLabelResponse.error_of_json))
   | PutCoreNetworkPolicy ->
       if is_success
       then Ok (PutCoreNetworkPolicyResponse.of_json (response_to_json resp))
@@ -2083,6 +2745,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (RejectAttachmentResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some RejectAttachmentResponse.error_of_json))
+  | RemoveAttachmentRoutingPolicyLabel ->
+      if is_success
+      then
+        Ok
+          (RemoveAttachmentRoutingPolicyLabelResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some RemoveAttachmentRoutingPolicyLabelResponse.error_of_json))
   | RestoreCoreNetworkPolicyVersion ->
       if is_success
       then
@@ -2093,6 +2765,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some RestoreCoreNetworkPolicyVersionResponse.error_of_json))
+  | StartOrganizationServiceAccessUpdate ->
+      if is_success
+      then
+        Ok
+          (StartOrganizationServiceAccessUpdateResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartOrganizationServiceAccessUpdateResponse.error_of_json))
   | StartRouteAnalysis ->
       if is_success
       then Ok (StartRouteAnalysisResponse.of_json (response_to_json resp))
@@ -2128,6 +2810,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (UpdateDeviceResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdateDeviceResponse.error_of_json))
+  | UpdateDirectConnectGatewayAttachment ->
+      if is_success
+      then
+        Ok
+          (UpdateDirectConnectGatewayAttachmentResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDirectConnectGatewayAttachmentResponse.error_of_json))
   | UpdateGlobalNetwork ->
       if is_success
       then Ok (UpdateGlobalNetworkResponse.of_json (response_to_json resp))

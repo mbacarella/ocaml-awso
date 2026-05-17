@@ -4,6 +4,9 @@ open Values
 type ('i, 'o, 'e) t =
   | CancelImageCreation: (CancelImageCreationRequest.t,
   CancelImageCreationResponse.t, CancelImageCreationResponse.error) t 
+  | CancelLifecycleExecution: (CancelLifecycleExecutionRequest.t,
+  CancelLifecycleExecutionResponse.t, CancelLifecycleExecutionResponse.error)
+  t 
   | CreateComponent: (CreateComponentRequest.t, CreateComponentResponse.t,
   CreateComponentResponse.error) t 
   | CreateContainerRecipe: (CreateContainerRecipeRequest.t,
@@ -22,6 +25,10 @@ type ('i, 'o, 'e) t =
   (CreateInfrastructureConfigurationRequest.t,
   CreateInfrastructureConfigurationResponse.t,
   CreateInfrastructureConfigurationResponse.error) t 
+  | CreateLifecyclePolicy: (CreateLifecyclePolicyRequest.t,
+  CreateLifecyclePolicyResponse.t, CreateLifecyclePolicyResponse.error) t 
+  | CreateWorkflow: (CreateWorkflowRequest.t, CreateWorkflowResponse.t,
+  CreateWorkflowResponse.error) t 
   | DeleteComponent: (DeleteComponentRequest.t, DeleteComponentResponse.t,
   DeleteComponentResponse.error) t 
   | DeleteContainerRecipe: (DeleteContainerRecipeRequest.t,
@@ -40,6 +47,12 @@ type ('i, 'o, 'e) t =
   (DeleteInfrastructureConfigurationRequest.t,
   DeleteInfrastructureConfigurationResponse.t,
   DeleteInfrastructureConfigurationResponse.error) t 
+  | DeleteLifecyclePolicy: (DeleteLifecyclePolicyRequest.t,
+  DeleteLifecyclePolicyResponse.t, DeleteLifecyclePolicyResponse.error) t 
+  | DeleteWorkflow: (DeleteWorkflowRequest.t, DeleteWorkflowResponse.t,
+  DeleteWorkflowResponse.error) t 
+  | DistributeImage: (DistributeImageRequest.t, DistributeImageResponse.t,
+  DistributeImageResponse.error) t 
   | GetComponent: (GetComponentRequest.t, GetComponentResponse.t,
   GetComponentResponse.error) t 
   | GetComponentPolicy: (GetComponentPolicyRequest.t,
@@ -65,8 +78,23 @@ type ('i, 'o, 'e) t =
   | GetInfrastructureConfiguration: (GetInfrastructureConfigurationRequest.t,
   GetInfrastructureConfigurationResponse.t,
   GetInfrastructureConfigurationResponse.error) t 
+  | GetLifecycleExecution: (GetLifecycleExecutionRequest.t,
+  GetLifecycleExecutionResponse.t, GetLifecycleExecutionResponse.error) t 
+  | GetLifecyclePolicy: (GetLifecyclePolicyRequest.t,
+  GetLifecyclePolicyResponse.t, GetLifecyclePolicyResponse.error) t 
+  | GetMarketplaceResource: (GetMarketplaceResourceRequest.t,
+  GetMarketplaceResourceResponse.t, GetMarketplaceResourceResponse.error) t 
+  | GetWorkflow: (GetWorkflowRequest.t, GetWorkflowResponse.t,
+  GetWorkflowResponse.error) t 
+  | GetWorkflowExecution: (GetWorkflowExecutionRequest.t,
+  GetWorkflowExecutionResponse.t, GetWorkflowExecutionResponse.error) t 
+  | GetWorkflowStepExecution: (GetWorkflowStepExecutionRequest.t,
+  GetWorkflowStepExecutionResponse.t, GetWorkflowStepExecutionResponse.error)
+  t 
   | ImportComponent: (ImportComponentRequest.t, ImportComponentResponse.t,
   ImportComponentResponse.error) t 
+  | ImportDiskImage: (ImportDiskImageRequest.t, ImportDiskImageResponse.t,
+  ImportDiskImageResponse.error) t 
   | ImportVmImage: (ImportVmImageRequest.t, ImportVmImageResponse.t,
   ImportVmImageResponse.error) t 
   | ListComponentBuildVersions: (ListComponentBuildVersionsRequest.t,
@@ -90,14 +118,42 @@ type ('i, 'o, 'e) t =
   ListImagePipelinesResponse.t, ListImagePipelinesResponse.error) t 
   | ListImageRecipes: (ListImageRecipesRequest.t, ListImageRecipesResponse.t,
   ListImageRecipesResponse.error) t 
+  | ListImageScanFindingAggregations:
+  (ListImageScanFindingAggregationsRequest.t,
+  ListImageScanFindingAggregationsResponse.t,
+  ListImageScanFindingAggregationsResponse.error) t 
+  | ListImageScanFindings: (ListImageScanFindingsRequest.t,
+  ListImageScanFindingsResponse.t, ListImageScanFindingsResponse.error) t 
   | ListImages: (ListImagesRequest.t, ListImagesResponse.t,
   ListImagesResponse.error) t 
   | ListInfrastructureConfigurations:
   (ListInfrastructureConfigurationsRequest.t,
   ListInfrastructureConfigurationsResponse.t,
   ListInfrastructureConfigurationsResponse.error) t 
+  | ListLifecycleExecutionResources:
+  (ListLifecycleExecutionResourcesRequest.t,
+  ListLifecycleExecutionResourcesResponse.t,
+  ListLifecycleExecutionResourcesResponse.error) t 
+  | ListLifecycleExecutions: (ListLifecycleExecutionsRequest.t,
+  ListLifecycleExecutionsResponse.t, ListLifecycleExecutionsResponse.error) t
+  
+  | ListLifecyclePolicies: (ListLifecyclePoliciesRequest.t,
+  ListLifecyclePoliciesResponse.t, ListLifecyclePoliciesResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListWaitingWorkflowSteps: (ListWaitingWorkflowStepsRequest.t,
+  ListWaitingWorkflowStepsResponse.t, ListWaitingWorkflowStepsResponse.error)
+  t 
+  | ListWorkflowBuildVersions: (ListWorkflowBuildVersionsRequest.t,
+  ListWorkflowBuildVersionsResponse.t,
+  ListWorkflowBuildVersionsResponse.error) t 
+  | ListWorkflowExecutions: (ListWorkflowExecutionsRequest.t,
+  ListWorkflowExecutionsResponse.t, ListWorkflowExecutionsResponse.error) t 
+  | ListWorkflowStepExecutions: (ListWorkflowStepExecutionsRequest.t,
+  ListWorkflowStepExecutionsResponse.t,
+  ListWorkflowStepExecutionsResponse.error) t 
+  | ListWorkflows: (ListWorkflowsRequest.t, ListWorkflowsResponse.t,
+  ListWorkflowsResponse.error) t 
   | PutComponentPolicy: (PutComponentPolicyRequest.t,
   PutComponentPolicyResponse.t, PutComponentPolicyResponse.error) t 
   | PutContainerRecipePolicy: (PutContainerRecipePolicyRequest.t,
@@ -107,9 +163,16 @@ type ('i, 'o, 'e) t =
   PutImagePolicyResponse.error) t 
   | PutImageRecipePolicy: (PutImageRecipePolicyRequest.t,
   PutImageRecipePolicyResponse.t, PutImageRecipePolicyResponse.error) t 
+  | RetryImage: (RetryImageRequest.t, RetryImageResponse.t,
+  RetryImageResponse.error) t 
+  | SendWorkflowStepAction: (SendWorkflowStepActionRequest.t,
+  SendWorkflowStepActionResponse.t, SendWorkflowStepActionResponse.error) t 
   | StartImagePipelineExecution: (StartImagePipelineExecutionRequest.t,
   StartImagePipelineExecutionResponse.t,
   StartImagePipelineExecutionResponse.error) t 
+  | StartResourceStateUpdate: (StartResourceStateUpdateRequest.t,
+  StartResourceStateUpdateResponse.t, StartResourceStateUpdateResponse.error)
+  t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -124,9 +187,12 @@ type ('i, 'o, 'e) t =
   (UpdateInfrastructureConfigurationRequest.t,
   UpdateInfrastructureConfigurationResponse.t,
   UpdateInfrastructureConfigurationResponse.error) t 
+  | UpdateLifecyclePolicy: (UpdateLifecyclePolicyRequest.t,
+  UpdateLifecyclePolicyResponse.t, UpdateLifecyclePolicyResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CancelImageCreation -> `PUT
+  | CancelLifecycleExecution -> `PUT
   | CreateComponent -> `PUT
   | CreateContainerRecipe -> `PUT
   | CreateDistributionConfiguration -> `PUT
@@ -134,6 +200,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateImagePipeline -> `PUT
   | CreateImageRecipe -> `PUT
   | CreateInfrastructureConfiguration -> `PUT
+  | CreateLifecyclePolicy -> `PUT
+  | CreateWorkflow -> `PUT
   | DeleteComponent -> `DELETE
   | DeleteContainerRecipe -> `DELETE
   | DeleteDistributionConfiguration -> `DELETE
@@ -141,6 +209,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteImagePipeline -> `DELETE
   | DeleteImageRecipe -> `DELETE
   | DeleteInfrastructureConfiguration -> `DELETE
+  | DeleteLifecyclePolicy -> `DELETE
+  | DeleteWorkflow -> `DELETE
+  | DistributeImage -> `PUT
   | GetComponent -> `GET
   | GetComponentPolicy -> `GET
   | GetContainerRecipe -> `GET
@@ -152,7 +223,14 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetImageRecipe -> `GET
   | GetImageRecipePolicy -> `GET
   | GetInfrastructureConfiguration -> `GET
+  | GetLifecycleExecution -> `GET
+  | GetLifecyclePolicy -> `GET
+  | GetMarketplaceResource -> `POST
+  | GetWorkflow -> `GET
+  | GetWorkflowExecution -> `GET
+  | GetWorkflowStepExecution -> `GET
   | ImportComponent -> `PUT
+  | ImportDiskImage -> `PUT
   | ImportVmImage -> `PUT
   | ListComponentBuildVersions -> `POST
   | ListComponents -> `POST
@@ -163,24 +241,40 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListImagePipelineImages -> `POST
   | ListImagePipelines -> `POST
   | ListImageRecipes -> `POST
+  | ListImageScanFindingAggregations -> `POST
+  | ListImageScanFindings -> `POST
   | ListImages -> `POST
   | ListInfrastructureConfigurations -> `POST
+  | ListLifecycleExecutionResources -> `POST
+  | ListLifecycleExecutions -> `POST
+  | ListLifecyclePolicies -> `POST
   | ListTagsForResource -> `GET
+  | ListWaitingWorkflowSteps -> `POST
+  | ListWorkflowBuildVersions -> `POST
+  | ListWorkflowExecutions -> `POST
+  | ListWorkflowStepExecutions -> `POST
+  | ListWorkflows -> `POST
   | PutComponentPolicy -> `PUT
   | PutContainerRecipePolicy -> `PUT
   | PutImagePolicy -> `PUT
   | PutImageRecipePolicy -> `PUT
+  | RetryImage -> `PUT
+  | SendWorkflowStepAction -> `PUT
   | StartImagePipelineExecution -> `PUT
+  | StartResourceStateUpdate -> `PUT
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateDistributionConfiguration -> `PUT
   | UpdateImagePipeline -> `PUT
   | UpdateInfrastructureConfiguration -> `PUT
+  | UpdateLifecyclePolicy -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CancelImageCreation ->
           (Format.kasprintf Uri.of_string) "/CancelImageCreation"
+      | CancelLifecycleExecution ->
+          (Format.kasprintf Uri.of_string) "/CancelLifecycleExecution"
       | CreateComponent ->
           (Format.kasprintf Uri.of_string) "/CreateComponent"
       | CreateContainerRecipe ->
@@ -195,6 +289,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateInfrastructureConfiguration ->
           (Format.kasprintf Uri.of_string)
             "/CreateInfrastructureConfiguration"
+      | CreateLifecyclePolicy ->
+          (Format.kasprintf Uri.of_string) "/CreateLifecyclePolicy"
+      | CreateWorkflow -> (Format.kasprintf Uri.of_string) "/CreateWorkflow"
       | DeleteComponent ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/DeleteComponent")
@@ -249,6 +346,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   ("infrastructureConfigurationArn",
                     (InfrastructureConfigurationArn.to_header
                        x.infrastructureConfigurationArn))])
+      | DeleteLifecyclePolicy ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/DeleteLifecyclePolicy")
+            (List.filter_opt
+               [Some
+                  ("lifecyclePolicyArn",
+                    (LifecyclePolicyArn.to_header x.lifecyclePolicyArn))])
+      | DeleteWorkflow ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/DeleteWorkflow")
+            (List.filter_opt
+               [Some
+                  ("workflowBuildVersionArn",
+                    (WorkflowBuildVersionArn.to_header
+                       x.workflowBuildVersionArn))])
+      | DistributeImage ->
+          (Format.kasprintf Uri.of_string) "/DistributeImage"
       | GetComponent ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/GetComponent")
@@ -330,8 +444,48 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   ("infrastructureConfigurationArn",
                     (InfrastructureConfigurationArn.to_header
                        x.infrastructureConfigurationArn))])
+      | GetLifecycleExecution ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/GetLifecycleExecution")
+            (List.filter_opt
+               [Some
+                  ("lifecycleExecutionId",
+                    (LifecycleExecutionId.to_header x.lifecycleExecutionId))])
+      | GetLifecyclePolicy ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/GetLifecyclePolicy")
+            (List.filter_opt
+               [Some
+                  ("lifecyclePolicyArn",
+                    (LifecyclePolicyArn.to_header x.lifecyclePolicyArn))])
+      | GetMarketplaceResource ->
+          (Format.kasprintf Uri.of_string) "/GetMarketplaceResource"
+      | GetWorkflow ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/GetWorkflow")
+            (List.filter_opt
+               [Some
+                  ("workflowBuildVersionArn",
+                    (WorkflowVersionArnOrBuildVersionArn.to_header
+                       x.workflowBuildVersionArn))])
+      | GetWorkflowExecution ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/GetWorkflowExecution")
+            (List.filter_opt
+               [Some
+                  ("workflowExecutionId",
+                    (WorkflowExecutionId.to_header x.workflowExecutionId))])
+      | GetWorkflowStepExecution ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/GetWorkflowStepExecution")
+            (List.filter_opt
+               [Some
+                  ("stepExecutionId",
+                    (WorkflowStepExecutionId.to_header x.stepExecutionId))])
       | ImportComponent ->
           (Format.kasprintf Uri.of_string) "/ImportComponent"
+      | ImportDiskImage ->
+          (Format.kasprintf Uri.of_string) "/ImportDiskImage"
       | ImportVmImage -> (Format.kasprintf Uri.of_string) "/ImportVmImage"
       | ListComponentBuildVersions ->
           (Format.kasprintf Uri.of_string) "/ListComponentBuildVersions"
@@ -350,14 +504,34 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/ListImagePipelines"
       | ListImageRecipes ->
           (Format.kasprintf Uri.of_string) "/ListImageRecipes"
+      | ListImageScanFindingAggregations ->
+          (Format.kasprintf Uri.of_string)
+            "/ListImageScanFindingAggregations"
+      | ListImageScanFindings ->
+          (Format.kasprintf Uri.of_string) "/ListImageScanFindings"
       | ListImages -> (Format.kasprintf Uri.of_string) "/ListImages"
       | ListInfrastructureConfigurations ->
           (Format.kasprintf Uri.of_string)
             "/ListInfrastructureConfigurations"
+      | ListLifecycleExecutionResources ->
+          (Format.kasprintf Uri.of_string) "/ListLifecycleExecutionResources"
+      | ListLifecycleExecutions ->
+          (Format.kasprintf Uri.of_string) "/ListLifecycleExecutions"
+      | ListLifecyclePolicies ->
+          (Format.kasprintf Uri.of_string) "/ListLifecyclePolicies"
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ImageBuilderArn.to_header
                x.ListTagsForResourceRequest.resourceArn)
+      | ListWaitingWorkflowSteps ->
+          (Format.kasprintf Uri.of_string) "/ListWaitingWorkflowSteps"
+      | ListWorkflowBuildVersions ->
+          (Format.kasprintf Uri.of_string) "/ListWorkflowBuildVersions"
+      | ListWorkflowExecutions ->
+          (Format.kasprintf Uri.of_string) "/ListWorkflowExecutions"
+      | ListWorkflowStepExecutions ->
+          (Format.kasprintf Uri.of_string) "/ListWorkflowStepExecutions"
+      | ListWorkflows -> (Format.kasprintf Uri.of_string) "/ListWorkflows"
       | PutComponentPolicy ->
           (Format.kasprintf Uri.of_string) "/PutComponentPolicy"
       | PutContainerRecipePolicy ->
@@ -365,8 +539,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | PutImagePolicy -> (Format.kasprintf Uri.of_string) "/PutImagePolicy"
       | PutImageRecipePolicy ->
           (Format.kasprintf Uri.of_string) "/PutImageRecipePolicy"
+      | RetryImage -> (Format.kasprintf Uri.of_string) "/RetryImage"
+      | SendWorkflowStepAction ->
+          (Format.kasprintf Uri.of_string) "/SendWorkflowStepAction"
       | StartImagePipelineExecution ->
           (Format.kasprintf Uri.of_string) "/StartImagePipelineExecution"
+      | StartResourceStateUpdate ->
+          (Format.kasprintf Uri.of_string) "/StartResourceStateUpdate"
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ImageBuilderArn.to_header x.TagResourceRequest.resourceArn)
@@ -382,12 +561,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/UpdateImagePipeline"
       | UpdateInfrastructureConfiguration ->
           (Format.kasprintf Uri.of_string)
-            "/UpdateInfrastructureConfiguration")
+            "/UpdateInfrastructureConfiguration"
+      | UpdateLifecyclePolicy ->
+          (Format.kasprintf Uri.of_string) "/UpdateLifecyclePolicy")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
   | CancelImageCreation -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CancelLifecycleExecution ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | CreateComponent -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateContainerRecipe -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateDistributionConfiguration ->
@@ -397,6 +580,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | CreateImageRecipe -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateInfrastructureConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateLifecyclePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateWorkflow -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteComponent -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteContainerRecipe -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDistributionConfiguration ->
@@ -406,6 +591,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteImageRecipe -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteInfrastructureConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteLifecyclePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteWorkflow -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DistributeImage -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetComponent ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -439,7 +627,52 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetInfrastructureConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetLifecycleExecution ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetLifecyclePolicy ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetMarketplaceResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("resourceType",
+                           (MarketplaceResourceType.to_value
+                              req.GetMarketplaceResourceRequest.resourceType));
+                      Some
+                        ("resourceArn",
+                          (ImageBuilderArn.to_value
+                             req.GetMarketplaceResourceRequest.resourceArn));
+                      Option.map
+                        req.GetMarketplaceResourceRequest.resourceLocation
+                        ~f:(fun x ->
+                              ("resourceLocation",
+                                (MarketplaceResourceLocation.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetWorkflow ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetWorkflowExecution ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetWorkflowStepExecution ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ImportComponent -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ImportDiskImage -> Awso.Http.Request.make (method_of_endpoint endp)
   | ImportVmImage -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListComponentBuildVersions ->
       let (headers, body) =
@@ -450,10 +683,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("componentVersionArn",
-                           (ComponentVersionArn.to_value
-                              req.ListComponentBuildVersionsRequest.componentVersionArn));
+                      [Option.map
+                         req.ListComponentBuildVersionsRequest.componentVersionArn
+                         ~f:(fun x ->
+                               ("componentVersionArn",
+                                 (ComponentVersionArn.to_value x)));
                       Option.map
                         req.ListComponentBuildVersionsRequest.maxResults
                         ~f:(fun x ->
@@ -515,7 +749,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("maxResults", (RestrictedInteger.to_value x)));
                       Option.map req.ListContainerRecipesRequest.nextToken
                         ~f:(fun x ->
-                              ("nextToken", (NonEmptyString.to_value x)))])
+                              ("nextToken", (PaginationToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -559,10 +793,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("imageVersionArn",
-                           (ImageVersionArn.to_value
-                              req.ListImageBuildVersionsRequest.imageVersionArn));
+                      [Option.map
+                         req.ListImageBuildVersionsRequest.imageVersionArn
+                         ~f:(fun x ->
+                               ("imageVersionArn",
+                                 (ImageVersionArn.to_value x)));
                       Option.map req.ListImageBuildVersionsRequest.filters
                         ~f:(fun x -> ("filters", (FilterList.to_value x)));
                       Option.map req.ListImageBuildVersionsRequest.maxResults
@@ -683,6 +918,55 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListImageScanFindingAggregations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListImageScanFindingAggregationsRequest.filter
+                         ~f:(fun x -> ("filter", (Filter.to_value x)));
+                      Option.map
+                        req.ListImageScanFindingAggregationsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListImageScanFindings ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListImageScanFindingsRequest.filters
+                         ~f:(fun x ->
+                               ("filters",
+                                 (ImageScanFindingsFilterList.to_value x)));
+                      Option.map req.ListImageScanFindingsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (RestrictedInteger.to_value x)));
+                      Option.map req.ListImageScanFindingsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListImages ->
       let (headers, body) =
         let headers =
@@ -742,15 +1026,240 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListLifecycleExecutionResources ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("lifecycleExecutionId",
+                           (LifecycleExecutionId.to_value
+                              req.ListLifecycleExecutionResourcesRequest.lifecycleExecutionId));
+                      Option.map
+                        req.ListLifecycleExecutionResourcesRequest.parentResourceId
+                        ~f:(fun x ->
+                              ("parentResourceId",
+                                (NonEmptyString.to_value x)));
+                      Option.map
+                        req.ListLifecycleExecutionResourcesRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (RestrictedInteger.to_value x)));
+                      Option.map
+                        req.ListLifecycleExecutionResourcesRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListLifecycleExecutions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListLifecycleExecutionsRequest.maxResults
+                         ~f:(fun x ->
+                               ("maxResults", (RestrictedInteger.to_value x)));
+                      Option.map req.ListLifecycleExecutionsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Some
+                        ("resourceArn",
+                          (ImageBuilderArn.to_value
+                             req.ListLifecycleExecutionsRequest.resourceArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListLifecyclePolicies ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListLifecyclePoliciesRequest.filters
+                         ~f:(fun x -> ("filters", (FilterList.to_value x)));
+                      Option.map req.ListLifecyclePoliciesRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (RestrictedInteger.to_value x)));
+                      Option.map req.ListLifecyclePoliciesRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListWaitingWorkflowSteps ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListWaitingWorkflowStepsRequest.maxResults
+                         ~f:(fun x ->
+                               ("maxResults", (RestrictedInteger.to_value x)));
+                      Option.map
+                        req.ListWaitingWorkflowStepsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListWorkflowBuildVersions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListWorkflowBuildVersionsRequest.workflowVersionArn
+                         ~f:(fun x ->
+                               ("workflowVersionArn",
+                                 (WorkflowWildcardVersionArn.to_value x)));
+                      Option.map
+                        req.ListWorkflowBuildVersionsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (RestrictedInteger.to_value x)));
+                      Option.map
+                        req.ListWorkflowBuildVersionsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListWorkflowExecutions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListWorkflowExecutionsRequest.maxResults
+                         ~f:(fun x ->
+                               ("maxResults", (RestrictedInteger.to_value x)));
+                      Option.map req.ListWorkflowExecutionsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Some
+                        ("imageBuildVersionArn",
+                          (ImageBuildVersionArn.to_value
+                             req.ListWorkflowExecutionsRequest.imageBuildVersionArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListWorkflowStepExecutions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListWorkflowStepExecutionsRequest.maxResults
+                         ~f:(fun x ->
+                               ("maxResults", (RestrictedInteger.to_value x)));
+                      Option.map
+                        req.ListWorkflowStepExecutionsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Some
+                        ("workflowExecutionId",
+                          (WorkflowExecutionId.to_value
+                             req.ListWorkflowStepExecutionsRequest.workflowExecutionId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListWorkflows ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListWorkflowsRequest.owner
+                         ~f:(fun x -> ("owner", (Ownership.to_value x)));
+                      Option.map req.ListWorkflowsRequest.filters
+                        ~f:(fun x -> ("filters", (FilterList.to_value x)));
+                      Option.map req.ListWorkflowsRequest.byName
+                        ~f:(fun x -> ("byName", (Boolean.to_value x)));
+                      Option.map req.ListWorkflowsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults", (RestrictedInteger.to_value x)));
+                      Option.map req.ListWorkflowsRequest.nextToken
+                        ~f:(fun x ->
+                              ("nextToken", (PaginationToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PutComponentPolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | PutContainerRecipePolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | PutImagePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | PutImageRecipePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
+  | RetryImage -> Awso.Http.Request.make (method_of_endpoint endp)
+  | SendWorkflowStepAction ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | StartImagePipelineExecution ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | StartResourceStateUpdate ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
@@ -777,6 +1286,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateImagePipeline -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateInfrastructureConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateLifecyclePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -831,6 +1341,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CancelImageCreationResponse.error_of_json))
+  | CancelLifecycleExecution ->
+      if is_success
+      then
+        Ok (CancelLifecycleExecutionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CancelLifecycleExecutionResponse.error_of_json))
   | CreateComponent ->
       if is_success
       then Ok (CreateComponentResponse.of_json (response_to_json resp))
@@ -878,6 +1396,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateInfrastructureConfigurationResponse.error_of_json))
+  | CreateLifecyclePolicy ->
+      if is_success
+      then Ok (CreateLifecyclePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateLifecyclePolicyResponse.error_of_json))
+  | CreateWorkflow ->
+      if is_success
+      then Ok (CreateWorkflowResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateWorkflowResponse.error_of_json))
   | DeleteComponent ->
       if is_success
       then Ok (DeleteComponentResponse.of_json (response_to_json resp))
@@ -925,6 +1454,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteInfrastructureConfigurationResponse.error_of_json))
+  | DeleteLifecyclePolicy ->
+      if is_success
+      then Ok (DeleteLifecyclePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteLifecyclePolicyResponse.error_of_json))
+  | DeleteWorkflow ->
+      if is_success
+      then Ok (DeleteWorkflowResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteWorkflowResponse.error_of_json))
+  | DistributeImage ->
+      if is_success
+      then Ok (DistributeImageResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DistributeImageResponse.error_of_json))
   | GetComponent ->
       if is_success
       then Ok (GetComponentResponse.of_json (response_to_json resp))
@@ -994,11 +1539,54 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetInfrastructureConfigurationResponse.error_of_json))
+  | GetLifecycleExecution ->
+      if is_success
+      then Ok (GetLifecycleExecutionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetLifecycleExecutionResponse.error_of_json))
+  | GetLifecyclePolicy ->
+      if is_success
+      then Ok (GetLifecyclePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetLifecyclePolicyResponse.error_of_json))
+  | GetMarketplaceResource ->
+      if is_success
+      then
+        Ok (GetMarketplaceResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetMarketplaceResourceResponse.error_of_json))
+  | GetWorkflow ->
+      if is_success
+      then Ok (GetWorkflowResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetWorkflowResponse.error_of_json))
+  | GetWorkflowExecution ->
+      if is_success
+      then Ok (GetWorkflowExecutionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetWorkflowExecutionResponse.error_of_json))
+  | GetWorkflowStepExecution ->
+      if is_success
+      then
+        Ok (GetWorkflowStepExecutionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetWorkflowStepExecutionResponse.error_of_json))
   | ImportComponent ->
       if is_success
       then Ok (ImportComponentResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ImportComponentResponse.error_of_json))
+  | ImportDiskImage ->
+      if is_success
+      then Ok (ImportDiskImageResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ImportDiskImageResponse.error_of_json))
   | ImportVmImage ->
       if is_success
       then Ok (ImportVmImageResponse.of_json (response_to_json resp))
@@ -1066,6 +1654,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListImageRecipesResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListImageRecipesResponse.error_of_json))
+  | ListImageScanFindingAggregations ->
+      if is_success
+      then
+        Ok
+          (ListImageScanFindingAggregationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListImageScanFindingAggregationsResponse.error_of_json))
+  | ListImageScanFindings ->
+      if is_success
+      then Ok (ListImageScanFindingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListImageScanFindingsResponse.error_of_json))
   | ListImages ->
       if is_success
       then Ok (ListImagesResponse.of_json (response_to_json resp))
@@ -1080,12 +1684,74 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListInfrastructureConfigurationsResponse.error_of_json))
+  | ListLifecycleExecutionResources ->
+      if is_success
+      then
+        Ok
+          (ListLifecycleExecutionResourcesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListLifecycleExecutionResourcesResponse.error_of_json))
+  | ListLifecycleExecutions ->
+      if is_success
+      then
+        Ok (ListLifecycleExecutionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListLifecycleExecutionsResponse.error_of_json))
+  | ListLifecyclePolicies ->
+      if is_success
+      then Ok (ListLifecyclePoliciesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListLifecyclePoliciesResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListWaitingWorkflowSteps ->
+      if is_success
+      then
+        Ok (ListWaitingWorkflowStepsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListWaitingWorkflowStepsResponse.error_of_json))
+  | ListWorkflowBuildVersions ->
+      if is_success
+      then
+        Ok
+          (ListWorkflowBuildVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListWorkflowBuildVersionsResponse.error_of_json))
+  | ListWorkflowExecutions ->
+      if is_success
+      then
+        Ok (ListWorkflowExecutionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListWorkflowExecutionsResponse.error_of_json))
+  | ListWorkflowStepExecutions ->
+      if is_success
+      then
+        Ok
+          (ListWorkflowStepExecutionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListWorkflowStepExecutionsResponse.error_of_json))
+  | ListWorkflows ->
+      if is_success
+      then Ok (ListWorkflowsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListWorkflowsResponse.error_of_json))
   | PutComponentPolicy ->
       if is_success
       then Ok (PutComponentPolicyResponse.of_json (response_to_json resp))
@@ -1111,6 +1777,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some PutImageRecipePolicyResponse.error_of_json))
+  | RetryImage ->
+      if is_success
+      then Ok (RetryImageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some RetryImageResponse.error_of_json))
+  | SendWorkflowStepAction ->
+      if is_success
+      then
+        Ok (SendWorkflowStepActionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SendWorkflowStepActionResponse.error_of_json))
   | StartImagePipelineExecution ->
       if is_success
       then
@@ -1121,6 +1799,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StartImagePipelineExecutionResponse.error_of_json))
+  | StartResourceStateUpdate ->
+      if is_success
+      then
+        Ok (StartResourceStateUpdateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartResourceStateUpdateResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -1161,3 +1847,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateInfrastructureConfigurationResponse.error_of_json))
+  | UpdateLifecyclePolicy ->
+      if is_success
+      then Ok (UpdateLifecyclePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateLifecyclePolicyResponse.error_of_json))

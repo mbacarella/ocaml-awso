@@ -149,15 +149,15 @@ let batch_get_deployment_targets =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and deploymentId =
-         flag "deployment-id" (optional string) ~doc:"STRING DeploymentId"
+         flag "deployment-id" (required string) ~doc:"STRING DeploymentId"
        and targetIds =
-         flag "target-ids" (optional json_arg) ~doc:"JSON TargetIdList" in
+         flag "target-ids" (required json_arg) ~doc:"JSON TargetIdList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.batch_get_deployment_targets
-           (Values.BatchGetDeploymentTargetsInput.make ?deploymentId
-              ?targetIds:(Option.map ~f:Values.TargetIdList.of_json targetIds)
-              ()) (Some Values.BatchGetDeploymentTargetsOutput.to_json)
+           (Values.BatchGetDeploymentTargetsInput.make ~deploymentId
+              ~targetIds:(Values.TargetIdList.of_json targetIds) ())
+           (Some Values.BatchGetDeploymentTargetsOutput.to_json)
            (Some Values.BatchGetDeploymentTargetsOutput.error_to_json)])
 let batch_get_deployments =
   Command.async ~summary:""
@@ -283,6 +283,9 @@ let create_deployment =
        and fileExistsBehavior =
          flag "file-exists-behavior" (optional json_arg)
            ~doc:"JSON FileExistsBehavior"
+       and overrideAlarmConfiguration =
+         flag "override-alarm-configuration" (optional json_arg)
+           ~doc:"JSON AlarmConfiguration"
        and applicationName =
          flag "application-name" (required string)
            ~doc:"STRING ApplicationName" in
@@ -301,7 +304,11 @@ let create_deployment =
               ?updateOutdatedInstancesOnly
               ?fileExistsBehavior:(Option.map
                                      ~f:Values.FileExistsBehavior.of_json
-                                     fileExistsBehavior) ~applicationName ())
+                                     fileExistsBehavior)
+              ?overrideAlarmConfiguration:(Option.map
+                                             ~f:Values.AlarmConfiguration.of_json
+                                             overrideAlarmConfiguration)
+              ~applicationName ())
            (Some Values.CreateDeploymentOutput.to_json)
            (Some Values.CreateDeploymentOutput.error_to_json)])
 let create_deployment_config =
@@ -323,6 +330,8 @@ let create_deployment_config =
        and computePlatform =
          flag "compute-platform" (optional json_arg)
            ~doc:"JSON ComputePlatform"
+       and zonalConfig =
+         flag "zonal-config" (optional json_arg) ~doc:"JSON ZonalConfig"
        and deploymentConfigName =
          flag "deployment-config-name" (required string)
            ~doc:"STRING DeploymentConfigName" in
@@ -337,7 +346,9 @@ let create_deployment_config =
                                        ~f:Values.TrafficRoutingConfig.of_json
                                        trafficRoutingConfig)
               ?computePlatform:(Option.map ~f:Values.ComputePlatform.of_json
-                                  computePlatform) ~deploymentConfigName ())
+                                  computePlatform)
+              ?zonalConfig:(Option.map ~f:Values.ZonalConfig.of_json
+                              zonalConfig) ~deploymentConfigName ())
            (Some Values.CreateDeploymentConfigOutput.to_json)
            (Some Values.CreateDeploymentConfigOutput.error_to_json)])
 let create_deployment_group =
@@ -391,6 +402,9 @@ let create_deployment_group =
          flag "on-premises-tag-set" (optional json_arg)
            ~doc:"JSON OnPremisesTagSet"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and terminationHookEnabled =
+         flag "termination-hook-enabled" (optional bool)
+           ~doc:"BOOL NullableBoolean"
        and applicationName =
          flag "application-name" (required string)
            ~doc:"STRING ApplicationName"
@@ -438,7 +452,8 @@ let create_deployment_group =
                                    ~f:Values.OnPremisesTagSet.of_json
                                    onPremisesTagSet)
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ~applicationName ~deploymentGroupName ~serviceRoleArn ())
+              ?terminationHookEnabled ~applicationName ~deploymentGroupName
+              ~serviceRoleArn ())
            (Some Values.CreateDeploymentGroupOutput.to_json)
            (Some Values.CreateDeploymentGroupOutput.error_to_json)])
 let delete_application =
@@ -685,13 +700,13 @@ let get_deployment_target =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and deploymentId =
-         flag "deployment-id" (optional string) ~doc:"STRING DeploymentId"
+         flag "deployment-id" (required string) ~doc:"STRING DeploymentId"
        and targetId =
-         flag "target-id" (optional string) ~doc:"STRING TargetId" in
+         flag "target-id" (required string) ~doc:"STRING TargetId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_deployment_target
-           (Values.GetDeploymentTargetInput.make ?deploymentId ?targetId ())
+           (Values.GetDeploymentTargetInput.make ~deploymentId ~targetId ())
            (Some Values.GetDeploymentTargetOutput.to_json)
            (Some Values.GetDeploymentTargetOutput.error_to_json)])
 let get_on_premises_instance =
@@ -850,18 +865,18 @@ let list_deployment_targets =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and deploymentId =
-         flag "deployment-id" (optional string) ~doc:"STRING DeploymentId"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and targetFilters =
-         flag "target-filters" (optional json_arg) ~doc:"JSON TargetFilters" in
+         flag "target-filters" (optional json_arg) ~doc:"JSON TargetFilters"
+       and deploymentId =
+         flag "deployment-id" (required string) ~doc:"STRING DeploymentId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_deployment_targets
-           (Values.ListDeploymentTargetsInput.make ?deploymentId ?nextToken
+           (Values.ListDeploymentTargetsInput.make ?nextToken
               ?targetFilters:(Option.map ~f:Values.TargetFilters.of_json
-                                targetFilters) ())
+                                targetFilters) ~deploymentId ())
            (Some Values.ListDeploymentTargetsOutput.to_json)
            (Some Values.ListDeploymentTargetsOutput.error_to_json)])
 let list_deployments =
@@ -1215,6 +1230,9 @@ let update_deployment_group =
        and onPremisesTagSet =
          flag "on-premises-tag-set" (optional json_arg)
            ~doc:"JSON OnPremisesTagSet"
+       and terminationHookEnabled =
+         flag "termination-hook-enabled" (optional bool)
+           ~doc:"BOOL NullableBoolean"
        and applicationName =
          flag "application-name" (required string)
            ~doc:"STRING ApplicationName"
@@ -1259,8 +1277,8 @@ let update_deployment_group =
                               ecsServices)
               ?onPremisesTagSet:(Option.map
                                    ~f:Values.OnPremisesTagSet.of_json
-                                   onPremisesTagSet) ~applicationName
-              ~currentDeploymentGroupName ())
+                                   onPremisesTagSet) ?terminationHookEnabled
+              ~applicationName ~currentDeploymentGroupName ())
            (Some Values.UpdateDeploymentGroupOutput.to_json)
            (Some Values.UpdateDeploymentGroupOutput.error_to_json)])
 let main =

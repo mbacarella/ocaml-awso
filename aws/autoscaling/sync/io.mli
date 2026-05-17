@@ -15,6 +15,12 @@ val attach_load_balancers :
       AttachLoadBalancersType.t ->
         (AttachLoadBalancersResultType.t,
           AttachLoadBalancersResultType.error) Result.t
+val attach_traffic_sources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AttachTrafficSourcesType.t ->
+        (AttachTrafficSourcesResultType.t,
+          AttachTrafficSourcesResultType.error) Result.t
 val batch_delete_scheduled_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -182,6 +188,12 @@ val describe_termination_policy_types :
       unit ->
         (DescribeTerminationPolicyTypesAnswer.t,
           DescribeTerminationPolicyTypesAnswer.error) Result.t
+val describe_traffic_sources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeTrafficSourcesRequest.t ->
+        (DescribeTrafficSourcesResponse.t,
+          DescribeTrafficSourcesResponse.error) Result.t
 val describe_warm_pool :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -204,6 +216,12 @@ val detach_load_balancers :
       DetachLoadBalancersType.t ->
         (DetachLoadBalancersResultType.t,
           DetachLoadBalancersResultType.error) Result.t
+val detach_traffic_sources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DetachTrafficSourcesType.t ->
+        (DetachTrafficSourcesResultType.t,
+          DetachTrafficSourcesResultType.error) Result.t
 val disable_metrics_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -231,6 +249,11 @@ val get_predictive_scaling_forecast :
       GetPredictiveScalingForecastType.t ->
         (GetPredictiveScalingForecastAnswer.t,
           GetPredictiveScalingForecastAnswer.error) Result.t
+val launch_instances :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      LaunchInstancesRequest.t ->
+        (LaunchInstancesResult.t, LaunchInstancesResult.error) Result.t
 val put_lifecycle_hook :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -263,6 +286,12 @@ val record_lifecycle_action_heartbeat :
 val resume_processes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> ScalingProcessQuery.t -> (unit, unit) Result.t
+val rollback_instance_refresh :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RollbackInstanceRefreshType.t ->
+        (RollbackInstanceRefreshAnswer.t,
+          RollbackInstanceRefreshAnswer.error) Result.t
 val set_desired_capacity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> SetDesiredCapacityType.t -> (unit, unit) Result.t

@@ -138,3 +138,9 @@ val untag_resource :
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
+val update_route :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateRouteRequest.t ->
+        (UpdateRouteResponse.t, UpdateRouteResponse.error) Result.t
+          Async.Deferred.t

@@ -2,6 +2,10 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | BatchGetMetricData: (BatchGetMetricDataRequest.t,
+  BatchGetMetricDataResponse.t, BatchGetMetricDataResponse.error) t 
+  | CancelExportJob: (CancelExportJobRequest.t, CancelExportJobResponse.t,
+  CancelExportJobResponse.error) t 
   | CreateConfigurationSet: (CreateConfigurationSetRequest.t,
   CreateConfigurationSetResponse.t, CreateConfigurationSetResponse.error) t 
   | CreateConfigurationSetEventDestination:
@@ -28,8 +32,19 @@ type ('i, 'o, 'e) t =
   CreateEmailIdentityPolicyResponse.error) t 
   | CreateEmailTemplate: (CreateEmailTemplateRequest.t,
   CreateEmailTemplateResponse.t, CreateEmailTemplateResponse.error) t 
+  | CreateExportJob: (CreateExportJobRequest.t, CreateExportJobResponse.t,
+  CreateExportJobResponse.error) t 
   | CreateImportJob: (CreateImportJobRequest.t, CreateImportJobResponse.t,
   CreateImportJobResponse.error) t 
+  | CreateMultiRegionEndpoint: (CreateMultiRegionEndpointRequest.t,
+  CreateMultiRegionEndpointResponse.t,
+  CreateMultiRegionEndpointResponse.error) t 
+  | CreateTenant: (CreateTenantRequest.t, CreateTenantResponse.t,
+  CreateTenantResponse.error) t 
+  | CreateTenantResourceAssociation:
+  (CreateTenantResourceAssociationRequest.t,
+  CreateTenantResourceAssociationResponse.t,
+  CreateTenantResourceAssociationResponse.error) t 
   | DeleteConfigurationSet: (DeleteConfigurationSetRequest.t,
   DeleteConfigurationSetResponse.t, DeleteConfigurationSetResponse.error) t 
   | DeleteConfigurationSetEventDestination:
@@ -53,9 +68,18 @@ type ('i, 'o, 'e) t =
   DeleteEmailIdentityPolicyResponse.error) t 
   | DeleteEmailTemplate: (DeleteEmailTemplateRequest.t,
   DeleteEmailTemplateResponse.t, DeleteEmailTemplateResponse.error) t 
+  | DeleteMultiRegionEndpoint: (DeleteMultiRegionEndpointRequest.t,
+  DeleteMultiRegionEndpointResponse.t,
+  DeleteMultiRegionEndpointResponse.error) t 
   | DeleteSuppressedDestination: (DeleteSuppressedDestinationRequest.t,
   DeleteSuppressedDestinationResponse.t,
   DeleteSuppressedDestinationResponse.error) t 
+  | DeleteTenant: (DeleteTenantRequest.t, DeleteTenantResponse.t,
+  DeleteTenantResponse.error) t 
+  | DeleteTenantResourceAssociation:
+  (DeleteTenantResourceAssociationRequest.t,
+  DeleteTenantResourceAssociationResponse.t,
+  DeleteTenantResourceAssociationResponse.error) t 
   | GetAccount: (GetAccountRequest.t, GetAccountResponse.t,
   GetAccountResponse.error) t 
   | GetBlacklistReports: (GetBlacklistReportsRequest.t,
@@ -76,6 +100,8 @@ type ('i, 'o, 'e) t =
   GetCustomVerificationEmailTemplateResponse.error) t 
   | GetDedicatedIp: (GetDedicatedIpRequest.t, GetDedicatedIpResponse.t,
   GetDedicatedIpResponse.error) t 
+  | GetDedicatedIpPool: (GetDedicatedIpPoolRequest.t,
+  GetDedicatedIpPoolResponse.t, GetDedicatedIpPoolResponse.error) t 
   | GetDedicatedIps: (GetDedicatedIpsRequest.t, GetDedicatedIpsResponse.t,
   GetDedicatedIpsResponse.error) t 
   | GetDeliverabilityDashboardOptions:
@@ -92,6 +118,9 @@ type ('i, 'o, 'e) t =
   | GetDomainStatisticsReport: (GetDomainStatisticsReportRequest.t,
   GetDomainStatisticsReportResponse.t,
   GetDomainStatisticsReportResponse.error) t 
+  | GetEmailAddressInsights: (GetEmailAddressInsightsRequest.t,
+  GetEmailAddressInsightsResponse.t, GetEmailAddressInsightsResponse.error) t
+  
   | GetEmailIdentity: (GetEmailIdentityRequest.t, GetEmailIdentityResponse.t,
   GetEmailIdentityResponse.error) t 
   | GetEmailIdentityPolicies: (GetEmailIdentityPoliciesRequest.t,
@@ -99,11 +128,21 @@ type ('i, 'o, 'e) t =
   t 
   | GetEmailTemplate: (GetEmailTemplateRequest.t, GetEmailTemplateResponse.t,
   GetEmailTemplateResponse.error) t 
+  | GetExportJob: (GetExportJobRequest.t, GetExportJobResponse.t,
+  GetExportJobResponse.error) t 
   | GetImportJob: (GetImportJobRequest.t, GetImportJobResponse.t,
   GetImportJobResponse.error) t 
+  | GetMessageInsights: (GetMessageInsightsRequest.t,
+  GetMessageInsightsResponse.t, GetMessageInsightsResponse.error) t 
+  | GetMultiRegionEndpoint: (GetMultiRegionEndpointRequest.t,
+  GetMultiRegionEndpointResponse.t, GetMultiRegionEndpointResponse.error) t 
+  | GetReputationEntity: (GetReputationEntityRequest.t,
+  GetReputationEntityResponse.t, GetReputationEntityResponse.error) t 
   | GetSuppressedDestination: (GetSuppressedDestinationRequest.t,
   GetSuppressedDestinationResponse.t, GetSuppressedDestinationResponse.error)
   t 
+  | GetTenant: (GetTenantRequest.t, GetTenantResponse.t,
+  GetTenantResponse.error) t 
   | ListConfigurationSets: (ListConfigurationSetsRequest.t,
   ListConfigurationSetsResponse.t, ListConfigurationSetsResponse.error) t 
   | ListContactLists: (ListContactListsRequest.t, ListContactListsResponse.t,
@@ -127,13 +166,28 @@ type ('i, 'o, 'e) t =
   ListEmailIdentitiesResponse.t, ListEmailIdentitiesResponse.error) t 
   | ListEmailTemplates: (ListEmailTemplatesRequest.t,
   ListEmailTemplatesResponse.t, ListEmailTemplatesResponse.error) t 
+  | ListExportJobs: (ListExportJobsRequest.t, ListExportJobsResponse.t,
+  ListExportJobsResponse.error) t 
   | ListImportJobs: (ListImportJobsRequest.t, ListImportJobsResponse.t,
   ListImportJobsResponse.error) t 
+  | ListMultiRegionEndpoints: (ListMultiRegionEndpointsRequest.t,
+  ListMultiRegionEndpointsResponse.t, ListMultiRegionEndpointsResponse.error)
+  t 
+  | ListRecommendations: (ListRecommendationsRequest.t,
+  ListRecommendationsResponse.t, ListRecommendationsResponse.error) t 
+  | ListReputationEntities: (ListReputationEntitiesRequest.t,
+  ListReputationEntitiesResponse.t, ListReputationEntitiesResponse.error) t 
+  | ListResourceTenants: (ListResourceTenantsRequest.t,
+  ListResourceTenantsResponse.t, ListResourceTenantsResponse.error) t 
   | ListSuppressedDestinations: (ListSuppressedDestinationsRequest.t,
   ListSuppressedDestinationsResponse.t,
   ListSuppressedDestinationsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListTenantResources: (ListTenantResourcesRequest.t,
+  ListTenantResourcesResponse.t, ListTenantResourcesResponse.error) t 
+  | ListTenants: (ListTenantsRequest.t, ListTenantsResponse.t,
+  ListTenantsResponse.error) t 
   | PutAccountDedicatedIpWarmupAttributes:
   (PutAccountDedicatedIpWarmupAttributesRequest.t,
   PutAccountDedicatedIpWarmupAttributesResponse.t,
@@ -147,6 +201,13 @@ type ('i, 'o, 'e) t =
   (PutAccountSuppressionAttributesRequest.t,
   PutAccountSuppressionAttributesResponse.t,
   PutAccountSuppressionAttributesResponse.error) t 
+  | PutAccountVdmAttributes: (PutAccountVdmAttributesRequest.t,
+  PutAccountVdmAttributesResponse.t, PutAccountVdmAttributesResponse.error) t
+  
+  | PutConfigurationSetArchivingOptions:
+  (PutConfigurationSetArchivingOptionsRequest.t,
+  PutConfigurationSetArchivingOptionsResponse.t,
+  PutConfigurationSetArchivingOptionsResponse.error) t 
   | PutConfigurationSetDeliveryOptions:
   (PutConfigurationSetDeliveryOptionsRequest.t,
   PutConfigurationSetDeliveryOptionsResponse.t,
@@ -167,8 +228,15 @@ type ('i, 'o, 'e) t =
   (PutConfigurationSetTrackingOptionsRequest.t,
   PutConfigurationSetTrackingOptionsResponse.t,
   PutConfigurationSetTrackingOptionsResponse.error) t 
+  | PutConfigurationSetVdmOptions: (PutConfigurationSetVdmOptionsRequest.t,
+  PutConfigurationSetVdmOptionsResponse.t,
+  PutConfigurationSetVdmOptionsResponse.error) t 
   | PutDedicatedIpInPool: (PutDedicatedIpInPoolRequest.t,
   PutDedicatedIpInPoolResponse.t, PutDedicatedIpInPoolResponse.error) t 
+  | PutDedicatedIpPoolScalingAttributes:
+  (PutDedicatedIpPoolScalingAttributesRequest.t,
+  PutDedicatedIpPoolScalingAttributesResponse.t,
+  PutDedicatedIpPoolScalingAttributesResponse.error) t 
   | PutDedicatedIpWarmupAttributes: (PutDedicatedIpWarmupAttributesRequest.t,
   PutDedicatedIpWarmupAttributesResponse.t,
   PutDedicatedIpWarmupAttributesResponse.error) t 
@@ -229,8 +297,17 @@ type ('i, 'o, 'e) t =
   UpdateEmailIdentityPolicyResponse.error) t 
   | UpdateEmailTemplate: (UpdateEmailTemplateRequest.t,
   UpdateEmailTemplateResponse.t, UpdateEmailTemplateResponse.error) t 
+  | UpdateReputationEntityCustomerManagedStatus:
+  (UpdateReputationEntityCustomerManagedStatusRequest.t,
+  UpdateReputationEntityCustomerManagedStatusResponse.t,
+  UpdateReputationEntityCustomerManagedStatusResponse.error) t 
+  | UpdateReputationEntityPolicy: (UpdateReputationEntityPolicyRequest.t,
+  UpdateReputationEntityPolicyResponse.t,
+  UpdateReputationEntityPolicyResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | BatchGetMetricData -> `POST
+  | CancelExportJob -> `PUT
   | CreateConfigurationSet -> `POST
   | CreateConfigurationSetEventDestination -> `POST
   | CreateContact -> `POST
@@ -241,7 +318,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateEmailIdentity -> `POST
   | CreateEmailIdentityPolicy -> `POST
   | CreateEmailTemplate -> `POST
+  | CreateExportJob -> `POST
   | CreateImportJob -> `POST
+  | CreateMultiRegionEndpoint -> `POST
+  | CreateTenant -> `POST
+  | CreateTenantResourceAssociation -> `POST
   | DeleteConfigurationSet -> `DELETE
   | DeleteConfigurationSetEventDestination -> `DELETE
   | DeleteContact -> `DELETE
@@ -251,7 +332,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteEmailIdentity -> `DELETE
   | DeleteEmailIdentityPolicy -> `DELETE
   | DeleteEmailTemplate -> `DELETE
+  | DeleteMultiRegionEndpoint -> `DELETE
   | DeleteSuppressedDestination -> `DELETE
+  | DeleteTenant -> `POST
+  | DeleteTenantResourceAssociation -> `POST
   | GetAccount -> `GET
   | GetBlacklistReports -> `GET
   | GetConfigurationSet -> `GET
@@ -260,38 +344,56 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetContactList -> `GET
   | GetCustomVerificationEmailTemplate -> `GET
   | GetDedicatedIp -> `GET
+  | GetDedicatedIpPool -> `GET
   | GetDedicatedIps -> `GET
   | GetDeliverabilityDashboardOptions -> `GET
   | GetDeliverabilityTestReport -> `GET
   | GetDomainDeliverabilityCampaign -> `GET
   | GetDomainStatisticsReport -> `GET
+  | GetEmailAddressInsights -> `POST
   | GetEmailIdentity -> `GET
   | GetEmailIdentityPolicies -> `GET
   | GetEmailTemplate -> `GET
+  | GetExportJob -> `GET
   | GetImportJob -> `GET
+  | GetMessageInsights -> `GET
+  | GetMultiRegionEndpoint -> `GET
+  | GetReputationEntity -> `GET
   | GetSuppressedDestination -> `GET
+  | GetTenant -> `POST
   | ListConfigurationSets -> `GET
   | ListContactLists -> `GET
-  | ListContacts -> `GET
+  | ListContacts -> `POST
   | ListCustomVerificationEmailTemplates -> `GET
   | ListDedicatedIpPools -> `GET
   | ListDeliverabilityTestReports -> `GET
   | ListDomainDeliverabilityCampaigns -> `GET
   | ListEmailIdentities -> `GET
   | ListEmailTemplates -> `GET
-  | ListImportJobs -> `GET
+  | ListExportJobs -> `POST
+  | ListImportJobs -> `POST
+  | ListMultiRegionEndpoints -> `GET
+  | ListRecommendations -> `POST
+  | ListReputationEntities -> `POST
+  | ListResourceTenants -> `POST
   | ListSuppressedDestinations -> `GET
   | ListTagsForResource -> `GET
+  | ListTenantResources -> `POST
+  | ListTenants -> `POST
   | PutAccountDedicatedIpWarmupAttributes -> `PUT
   | PutAccountDetails -> `POST
   | PutAccountSendingAttributes -> `PUT
   | PutAccountSuppressionAttributes -> `PUT
+  | PutAccountVdmAttributes -> `PUT
+  | PutConfigurationSetArchivingOptions -> `PUT
   | PutConfigurationSetDeliveryOptions -> `PUT
   | PutConfigurationSetReputationOptions -> `PUT
   | PutConfigurationSetSendingOptions -> `PUT
   | PutConfigurationSetSuppressionOptions -> `PUT
   | PutConfigurationSetTrackingOptions -> `PUT
+  | PutConfigurationSetVdmOptions -> `PUT
   | PutDedicatedIpInPool -> `PUT
+  | PutDedicatedIpPoolScalingAttributes -> `PUT
   | PutDedicatedIpWarmupAttributes -> `PUT
   | PutDeliverabilityDashboardOption -> `PUT
   | PutEmailIdentityConfigurationSetAttributes -> `PUT
@@ -312,9 +414,16 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateCustomVerificationEmailTemplate -> `PUT
   | UpdateEmailIdentityPolicy -> `PUT
   | UpdateEmailTemplate -> `PUT
+  | UpdateReputationEntityCustomerManagedStatus -> `PUT
+  | UpdateReputationEntityPolicy -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | BatchGetMetricData ->
+          (Format.kasprintf Uri.of_string) "/v2/email/metrics/batch"
+      | CancelExportJob ->
+          (Format.kasprintf Uri.of_string) "/v2/email/export-jobs/%s/cancel"
+            (JobId.to_header x.CancelExportJobRequest.jobId)
       | CreateConfigurationSet ->
           (Format.kasprintf Uri.of_string) "/v2/email/configuration-sets"
       | CreateConfigurationSetEventDestination ->
@@ -347,8 +456,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.CreateEmailIdentityPolicyRequest.policyName)
       | CreateEmailTemplate ->
           (Format.kasprintf Uri.of_string) "/v2/email/templates"
+      | CreateExportJob ->
+          (Format.kasprintf Uri.of_string) "/v2/email/export-jobs"
       | CreateImportJob ->
           (Format.kasprintf Uri.of_string) "/v2/email/import-jobs"
+      | CreateMultiRegionEndpoint ->
+          (Format.kasprintf Uri.of_string) "/v2/email/multi-region-endpoints"
+      | CreateTenant -> (Format.kasprintf Uri.of_string) "/v2/email/tenants"
+      | CreateTenantResourceAssociation ->
+          (Format.kasprintf Uri.of_string) "/v2/email/tenants/resources"
       | DeleteConfigurationSet ->
           (Format.kasprintf Uri.of_string) "/v2/email/configuration-sets/%s"
             (ConfigurationSetName.to_header
@@ -391,11 +507,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/v2/email/templates/%s"
             (EmailTemplateName.to_header
                x.DeleteEmailTemplateRequest.templateName)
+      | DeleteMultiRegionEndpoint ->
+          (Format.kasprintf Uri.of_string)
+            "/v2/email/multi-region-endpoints/%s"
+            (EndpointName.to_header
+               x.DeleteMultiRegionEndpointRequest.endpointName)
       | DeleteSuppressedDestination ->
           (Format.kasprintf Uri.of_string)
             "/v2/email/suppression/addresses/%s"
             (EmailAddress.to_header
                x.DeleteSuppressedDestinationRequest.emailAddress)
+      | DeleteTenant ->
+          (Format.kasprintf Uri.of_string) "/v2/email/tenants/delete"
+      | DeleteTenantResourceAssociation ->
+          (Format.kasprintf Uri.of_string)
+            "/v2/email/tenants/resources/delete"
       | GetAccount -> (Format.kasprintf Uri.of_string) "/v2/email/account"
       | GetBlacklistReports ->
           Uri.add_query_params'
@@ -431,6 +557,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetDedicatedIp ->
           (Format.kasprintf Uri.of_string) "/v2/email/dedicated-ips/%s"
             (Ip.to_header x.GetDedicatedIpRequest.ip)
+      | GetDedicatedIpPool ->
+          (Format.kasprintf Uri.of_string) "/v2/email/dedicated-ip-pools/%s"
+            (PoolName.to_header x.GetDedicatedIpPoolRequest.poolName)
       | GetDedicatedIps ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v2/email/dedicated-ips")
@@ -462,6 +591,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (List.filter_opt
                [Some ("StartDate", (Timestamp.to_header x.startDate));
                Some ("EndDate", (Timestamp.to_header x.endDate))])
+      | GetEmailAddressInsights ->
+          (Format.kasprintf Uri.of_string)
+            "/v2/email/email-address-insights/"
       | GetEmailIdentity ->
           (Format.kasprintf Uri.of_string) "/v2/email/identities/%s"
             (Identity.to_header x.GetEmailIdentityRequest.emailIdentity)
@@ -473,14 +605,34 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/v2/email/templates/%s"
             (EmailTemplateName.to_header
                x.GetEmailTemplateRequest.templateName)
+      | GetExportJob ->
+          (Format.kasprintf Uri.of_string) "/v2/email/export-jobs/%s"
+            (JobId.to_header x.GetExportJobRequest.jobId)
       | GetImportJob ->
           (Format.kasprintf Uri.of_string) "/v2/email/import-jobs/%s"
             (JobId.to_header x.GetImportJobRequest.jobId)
+      | GetMessageInsights ->
+          (Format.kasprintf Uri.of_string) "/v2/email/insights/%s/"
+            (OutboundMessageId.to_header
+               x.GetMessageInsightsRequest.messageId)
+      | GetMultiRegionEndpoint ->
+          (Format.kasprintf Uri.of_string)
+            "/v2/email/multi-region-endpoints/%s"
+            (EndpointName.to_header
+               x.GetMultiRegionEndpointRequest.endpointName)
+      | GetReputationEntity ->
+          (Format.kasprintf Uri.of_string)
+            "/v2/email/reputation/entities/%s/%s"
+            (ReputationEntityType.to_header
+               x.GetReputationEntityRequest.reputationEntityType)
+            (ReputationEntityReference.to_header
+               x.GetReputationEntityRequest.reputationEntityReference)
       | GetSuppressedDestination ->
           (Format.kasprintf Uri.of_string)
             "/v2/email/suppression/addresses/%s"
             (EmailAddress.to_header
                x.GetSuppressedDestinationRequest.emailAddress)
+      | GetTenant -> (Format.kasprintf Uri.of_string) "/v2/email/tenants/get"
       | ListConfigurationSets ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v2/email/configuration-sets")
@@ -500,17 +652,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
                  x.nextToken])
       | ListContacts ->
-          Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string)
-               "/v2/email/contact-lists/%s/contacts"
-               (ContactListName.to_header
-                  x.ListContactsRequest.contactListName))
-            (List.filter_opt
-               [Option.map ~f:(fun v -> ("PageSize", (MaxItems.to_header v)))
-                  x.pageSize;
-               Option.map
-                 ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
-                 x.nextToken])
+          (Format.kasprintf Uri.of_string)
+            "/v2/email/contact-lists/%s/contacts/list"
+            (ContactListName.to_header x.ListContactsRequest.contactListName)
       | ListCustomVerificationEmailTemplates ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -572,15 +716,27 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.nextToken;
                Option.map ~f:(fun v -> ("PageSize", (MaxItems.to_header v)))
                  x.pageSize])
+      | ListExportJobs ->
+          (Format.kasprintf Uri.of_string) "/v2/email/list-export-jobs"
       | ListImportJobs ->
+          (Format.kasprintf Uri.of_string) "/v2/email/import-jobs/list"
+      | ListMultiRegionEndpoints ->
           Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/v2/email/import-jobs")
+            ((Format.kasprintf Uri.of_string)
+               "/v2/email/multi-region-endpoints")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                  ~f:(fun v -> ("NextToken", (NextTokenV2.to_header v)))
                   x.nextToken;
-               Option.map ~f:(fun v -> ("PageSize", (MaxItems.to_header v)))
+               Option.map
+                 ~f:(fun v -> ("PageSize", (PageSizeV2.to_header v)))
                  x.pageSize])
+      | ListRecommendations ->
+          (Format.kasprintf Uri.of_string) "/v2/email/vdm/recommendations"
+      | ListReputationEntities ->
+          (Format.kasprintf Uri.of_string) "/v2/email/reputation/entities"
+      | ListResourceTenants ->
+          (Format.kasprintf Uri.of_string) "/v2/email/resources/tenants/list"
       | ListSuppressedDestinations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -607,6 +763,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some
                   ("ResourceArn",
                     (AmazonResourceName.to_header x.resourceArn))])
+      | ListTenantResources ->
+          (Format.kasprintf Uri.of_string) "/v2/email/tenants/resources/list"
+      | ListTenants ->
+          (Format.kasprintf Uri.of_string) "/v2/email/tenants/list"
       | PutAccountDedicatedIpWarmupAttributes ->
           (Format.kasprintf Uri.of_string)
             "/v2/email/account/dedicated-ips/warmup"
@@ -616,6 +776,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/v2/email/account/sending"
       | PutAccountSuppressionAttributes ->
           (Format.kasprintf Uri.of_string) "/v2/email/account/suppression"
+      | PutAccountVdmAttributes ->
+          (Format.kasprintf Uri.of_string) "/v2/email/account/vdm"
+      | PutConfigurationSetArchivingOptions ->
+          (Format.kasprintf Uri.of_string)
+            "/v2/email/configuration-sets/%s/archiving-options"
+            (ConfigurationSetName.to_header
+               x.PutConfigurationSetArchivingOptionsRequest.configurationSetName)
       | PutConfigurationSetDeliveryOptions ->
           (Format.kasprintf Uri.of_string)
             "/v2/email/configuration-sets/%s/delivery-options"
@@ -641,9 +808,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/v2/email/configuration-sets/%s/tracking-options"
             (ConfigurationSetName.to_header
                x.PutConfigurationSetTrackingOptionsRequest.configurationSetName)
+      | PutConfigurationSetVdmOptions ->
+          (Format.kasprintf Uri.of_string)
+            "/v2/email/configuration-sets/%s/vdm-options"
+            (ConfigurationSetName.to_header
+               x.PutConfigurationSetVdmOptionsRequest.configurationSetName)
       | PutDedicatedIpInPool ->
           (Format.kasprintf Uri.of_string) "/v2/email/dedicated-ips/%s/pool"
             (Ip.to_header x.PutDedicatedIpInPoolRequest.ip)
+      | PutDedicatedIpPoolScalingAttributes ->
+          (Format.kasprintf Uri.of_string)
+            "/v2/email/dedicated-ip-pools/%s/scaling"
+            (PoolName.to_header
+               x.PutDedicatedIpPoolScalingAttributesRequest.poolName)
       | PutDedicatedIpWarmupAttributes ->
           (Format.kasprintf Uri.of_string)
             "/v2/email/dedicated-ips/%s/warmup"
@@ -662,7 +839,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.PutEmailIdentityDkimAttributesRequest.emailIdentity)
       | PutEmailIdentityDkimSigningAttributes ->
           (Format.kasprintf Uri.of_string)
-            "/v1/email/identities/%s/dkim/signing"
+            "/v2/email/identities/%s/dkim/signing"
             (Identity.to_header
                x.PutEmailIdentityDkimSigningAttributesRequest.emailIdentity)
       | PutEmailIdentityFeedbackAttributes ->
@@ -727,11 +904,46 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateEmailTemplate ->
           (Format.kasprintf Uri.of_string) "/v2/email/templates/%s"
             (EmailTemplateName.to_header
-               x.UpdateEmailTemplateRequest.templateName))
+               x.UpdateEmailTemplateRequest.templateName)
+      | UpdateReputationEntityCustomerManagedStatus ->
+          (Format.kasprintf Uri.of_string)
+            "/v2/email/reputation/entities/%s/%s/customer-managed-status"
+            (ReputationEntityType.to_header
+               x.UpdateReputationEntityCustomerManagedStatusRequest.reputationEntityType)
+            (ReputationEntityReference.to_header
+               x.UpdateReputationEntityCustomerManagedStatusRequest.reputationEntityReference)
+      | UpdateReputationEntityPolicy ->
+          (Format.kasprintf Uri.of_string)
+            "/v2/email/reputation/entities/%s/%s/policy"
+            (ReputationEntityType.to_header
+               x.UpdateReputationEntityPolicyRequest.reputationEntityType)
+            (ReputationEntityReference.to_header
+               x.UpdateReputationEntityPolicyRequest.reputationEntityReference))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | BatchGetMetricData ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Queries",
+                           (BatchGetMetricDataQueries.to_value
+                              req.BatchGetMetricDataRequest.queries))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CancelExportJob -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateConfigurationSet ->
       let (headers, body) =
         let headers =
@@ -770,7 +982,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateConfigurationSetRequest.suppressionOptions
                         ~f:(fun x ->
                               ("SuppressionOptions",
-                                (SuppressionOptions.to_value x)))])
+                                (SuppressionOptions.to_value x)));
+                      Option.map req.CreateConfigurationSetRequest.vdmOptions
+                        ~f:(fun x -> ("VdmOptions", (VdmOptions.to_value x)));
+                      Option.map
+                        req.CreateConfigurationSetRequest.archivingOptions
+                        ~f:(fun x ->
+                              ("ArchivingOptions",
+                                (ArchivingOptions.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -884,6 +1103,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("TemplateContent",
                           (TemplateContent.to_value
                              req.CreateCustomVerificationEmailTemplateRequest.templateContent));
+                      Option.map
+                        req.CreateCustomVerificationEmailTemplateRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
                       Some
                         ("SuccessRedirectionURL",
                           (SuccessRedirectionURL.to_value
@@ -913,7 +1135,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (PoolName.to_value
                               req.CreateDedicatedIpPoolRequest.poolName));
                       Option.map req.CreateDedicatedIpPoolRequest.tags
-                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map req.CreateDedicatedIpPoolRequest.scalingMode
+                        ~f:(fun x ->
+                              ("ScalingMode", (ScalingMode.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1019,7 +1244,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("TemplateContent",
                           (EmailTemplateContent.to_value
-                             req.CreateEmailTemplateRequest.templateContent))])
+                             req.CreateEmailTemplateRequest.templateContent));
+                      Option.map req.CreateEmailTemplateRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateExportJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ExportDataSource",
+                           (ExportDataSource.to_value
+                              req.CreateExportJobRequest.exportDataSource));
+                      Some
+                        ("ExportDestination",
+                          (ExportDestination.to_value
+                             req.CreateExportJobRequest.exportDestination))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1051,6 +1302,78 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateMultiRegionEndpoint ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("EndpointName",
+                           (EndpointName.to_value
+                              req.CreateMultiRegionEndpointRequest.endpointName));
+                      Some
+                        ("Details",
+                          (Details.to_value
+                             req.CreateMultiRegionEndpointRequest.details));
+                      Option.map req.CreateMultiRegionEndpointRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateTenant ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("TenantName",
+                           (TenantName.to_value
+                              req.CreateTenantRequest.tenantName));
+                      Option.map req.CreateTenantRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateTenantResourceAssociation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("TenantName",
+                           (TenantName.to_value
+                              req.CreateTenantResourceAssociationRequest.tenantName));
+                      Some
+                        ("ResourceArn",
+                          (AmazonResourceName.to_value
+                             req.CreateTenantResourceAssociationRequest.resourceArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteConfigurationSet ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteConfigurationSetEventDestination ->
@@ -1064,8 +1387,54 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteEmailIdentityPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteEmailTemplate -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteMultiRegionEndpoint ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteSuppressedDestination ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteTenant ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("TenantName",
+                           (TenantName.to_value
+                              req.DeleteTenantRequest.tenantName))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteTenantResourceAssociation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("TenantName",
+                           (TenantName.to_value
+                              req.DeleteTenantResourceAssociationRequest.tenantName));
+                      Some
+                        ("ResourceArn",
+                          (AmazonResourceName.to_value
+                             req.DeleteTenantResourceAssociationRequest.resourceArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetAccount ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -1090,6 +1459,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetDedicatedIp ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDedicatedIpPool ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetDedicatedIps ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -1105,6 +1477,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetDomainStatisticsReport ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetEmailAddressInsights ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("EmailAddress",
+                           (EmailAddress.to_value
+                              req.GetEmailAddressInsightsRequest.emailAddress))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetEmailIdentity ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -1114,11 +1506,43 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetEmailTemplate ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetExportJob ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetImportJob ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetMessageInsights ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetMultiRegionEndpoint ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetReputationEntity ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetSuppressedDestination ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetTenant ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("TenantName",
+                           (TenantName.to_value
+                              req.GetTenantRequest.tenantName))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListConfigurationSets ->
       let (headers, body) = (None, None) in
@@ -1137,7 +1561,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Option.map req.ListContactsRequest.filter
                          ~f:(fun x ->
-                               ("Filter", (ListContactsFilter.to_value x)))])
+                               ("Filter", (ListContactsFilter.to_value x)));
+                      Option.map req.ListContactsRequest.pageSize
+                        ~f:(fun x -> ("PageSize", (MaxItems.to_value x)));
+                      Option.map req.ListContactsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1163,6 +1591,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListEmailTemplates ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListExportJobs ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListExportJobsRequest.nextToken
+                         ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.ListExportJobsRequest.pageSize
+                        ~f:(fun x -> ("PageSize", (MaxItems.to_value x)));
+                      Option.map req.ListExportJobsRequest.exportSourceType
+                        ~f:(fun x ->
+                              ("ExportSourceType",
+                                (ExportSourceType.to_value x)));
+                      Option.map req.ListExportJobsRequest.jobStatus
+                        ~f:(fun x -> ("JobStatus", (JobStatus.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListImportJobs ->
       let (headers, body) =
         let headers =
@@ -1176,7 +1630,86 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          req.ListImportJobsRequest.importDestinationType
                          ~f:(fun x ->
                                ("ImportDestinationType",
-                                 (ImportDestinationType.to_value x)))])
+                                 (ImportDestinationType.to_value x)));
+                      Option.map req.ListImportJobsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.ListImportJobsRequest.pageSize
+                        ~f:(fun x -> ("PageSize", (MaxItems.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListMultiRegionEndpoints ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRecommendations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListRecommendationsRequest.filter
+                         ~f:(fun x ->
+                               ("Filter",
+                                 (ListRecommendationsFilter.to_value x)));
+                      Option.map req.ListRecommendationsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.ListRecommendationsRequest.pageSize
+                        ~f:(fun x -> ("PageSize", (MaxItems.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListReputationEntities ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListReputationEntitiesRequest.filter
+                         ~f:(fun x ->
+                               ("Filter",
+                                 (ReputationEntityFilter.to_value x)));
+                      Option.map req.ListReputationEntitiesRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.ListReputationEntitiesRequest.pageSize
+                        ~f:(fun x -> ("PageSize", (MaxItems.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListResourceTenants ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ResourceArn",
+                           (AmazonResourceName.to_value
+                              req.ListResourceTenantsRequest.resourceArn));
+                      Option.map req.ListResourceTenantsRequest.pageSize
+                        ~f:(fun x -> ("PageSize", (MaxItems.to_value x)));
+                      Option.map req.ListResourceTenantsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1189,6 +1722,54 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTenantResources ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("TenantName",
+                           (TenantName.to_value
+                              req.ListTenantResourcesRequest.tenantName));
+                      Option.map req.ListTenantResourcesRequest.filter
+                        ~f:(fun x ->
+                              ("Filter",
+                                (ListTenantResourcesFilter.to_value x)));
+                      Option.map req.ListTenantResourcesRequest.pageSize
+                        ~f:(fun x -> ("PageSize", (MaxItems.to_value x)));
+                      Option.map req.ListTenantResourcesRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTenants ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListTenantsRequest.nextToken
+                         ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.ListTenantsRequest.pageSize
+                        ~f:(fun x -> ("PageSize", (MaxItems.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PutAccountDedicatedIpWarmupAttributes ->
       Awso.Http.Request.make (method_of_endpoint endp)
@@ -1213,10 +1794,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("ContactLanguage",
                                 (ContactLanguage.to_value x)));
-                      Some
-                        ("UseCaseDescription",
-                          (UseCaseDescription.to_value
-                             req.PutAccountDetailsRequest.useCaseDescription));
+                      Option.map
+                        req.PutAccountDetailsRequest.useCaseDescription
+                        ~f:(fun x ->
+                              ("UseCaseDescription",
+                                (UseCaseDescription.to_value x)));
                       Option.map
                         req.PutAccountDetailsRequest.additionalContactEmailAddresses
                         ~f:(fun x ->
@@ -1238,6 +1820,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make (method_of_endpoint endp)
   | PutAccountSuppressionAttributes ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | PutAccountVdmAttributes ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | PutConfigurationSetArchivingOptions ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | PutConfigurationSetDeliveryOptions ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | PutConfigurationSetReputationOptions ->
@@ -1248,7 +1834,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make (method_of_endpoint endp)
   | PutConfigurationSetTrackingOptions ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | PutConfigurationSetVdmOptions ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | PutDedicatedIpInPool -> Awso.Http.Request.make (method_of_endpoint endp)
+  | PutDedicatedIpPoolScalingAttributes ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | PutDedicatedIpWarmupAttributes ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | PutDeliverabilityDashboardOption ->
@@ -1313,7 +1903,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.SendBulkEmailRequest.configurationSetName
                         ~f:(fun x ->
                               ("ConfigurationSetName",
-                                (ConfigurationSetName.to_value x)))])
+                                (ConfigurationSetName.to_value x)));
+                      Option.map req.SendBulkEmailRequest.endpointId
+                        ~f:(fun x -> ("EndpointId", (EndpointId.to_value x)));
+                      Option.map req.SendBulkEmailRequest.tenantName
+                        ~f:(fun x -> ("TenantName", (TenantName.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1395,6 +1989,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("ConfigurationSetName",
                                 (ConfigurationSetName.to_value x)));
+                      Option.map req.SendEmailRequest.endpointId
+                        ~f:(fun x -> ("EndpointId", (EndpointId.to_value x)));
+                      Option.map req.SendEmailRequest.tenantName
+                        ~f:(fun x -> ("TenantName", (TenantName.to_value x)));
                       Option.map req.SendEmailRequest.listManagementOptions
                         ~f:(fun x ->
                               ("ListManagementOptions",
@@ -1459,6 +2057,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateEmailIdentityPolicy ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateEmailTemplate -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateReputationEntityCustomerManagedStatus ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateReputationEntityPolicy ->
+      Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -1507,6 +2109,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | BatchGetMetricData ->
+      if is_success
+      then Ok (BatchGetMetricDataResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchGetMetricDataResponse.error_of_json))
+  | CancelExportJob ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CancelExportJobResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some CancelExportJobResponse.error_of_json))
   | CreateConfigurationSet ->
       if is_success
       then
@@ -1604,11 +2220,41 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateEmailTemplateResponse.error_of_json))
+  | CreateExportJob ->
+      if is_success
+      then Ok (CreateExportJobResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateExportJobResponse.error_of_json))
   | CreateImportJob ->
       if is_success
       then Ok (CreateImportJobResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateImportJobResponse.error_of_json))
+  | CreateMultiRegionEndpoint ->
+      if is_success
+      then
+        Ok
+          (CreateMultiRegionEndpointResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateMultiRegionEndpointResponse.error_of_json))
+  | CreateTenant ->
+      if is_success
+      then Ok (CreateTenantResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateTenantResponse.error_of_json))
+  | CreateTenantResourceAssociation ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CreateTenantResourceAssociationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateTenantResourceAssociationResponse.error_of_json))
   | DeleteConfigurationSet ->
       if is_success
       then
@@ -1699,6 +2345,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteEmailTemplateResponse.error_of_json))
+  | DeleteMultiRegionEndpoint ->
+      if is_success
+      then
+        Ok
+          (DeleteMultiRegionEndpointResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteMultiRegionEndpointResponse.error_of_json))
   | DeleteSuppressedDestination ->
       if is_success
       then
@@ -1711,6 +2366,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteSuppressedDestinationResponse.error_of_json))
+  | DeleteTenant ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteTenantResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteTenantResponse.error_of_json))
+  | DeleteTenantResourceAssociation ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteTenantResourceAssociationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteTenantResourceAssociationResponse.error_of_json))
   | GetAccount ->
       if is_success
       then Ok (GetAccountResponse.of_json (response_to_json resp))
@@ -1761,6 +2435,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (GetDedicatedIpResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetDedicatedIpResponse.error_of_json))
+  | GetDedicatedIpPool ->
+      if is_success
+      then Ok (GetDedicatedIpPoolResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetDedicatedIpPoolResponse.error_of_json))
   | GetDedicatedIps ->
       if is_success
       then Ok (GetDedicatedIpsResponse.of_json (response_to_json resp))
@@ -1805,6 +2485,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetDomainStatisticsReportResponse.error_of_json))
+  | GetEmailAddressInsights ->
+      if is_success
+      then
+        Ok (GetEmailAddressInsightsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetEmailAddressInsightsResponse.error_of_json))
   | GetEmailIdentity ->
       if is_success
       then Ok (GetEmailIdentityResponse.of_json (response_to_json resp))
@@ -1823,10 +2511,34 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (GetEmailTemplateResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetEmailTemplateResponse.error_of_json))
+  | GetExportJob ->
+      if is_success
+      then Ok (GetExportJobResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetExportJobResponse.error_of_json))
   | GetImportJob ->
       if is_success
       then Ok (GetImportJobResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetImportJobResponse.error_of_json))
+  | GetMessageInsights ->
+      if is_success
+      then Ok (GetMessageInsightsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetMessageInsightsResponse.error_of_json))
+  | GetMultiRegionEndpoint ->
+      if is_success
+      then
+        Ok (GetMultiRegionEndpointResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetMultiRegionEndpointResponse.error_of_json))
+  | GetReputationEntity ->
+      if is_success
+      then Ok (GetReputationEntityResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetReputationEntityResponse.error_of_json))
   | GetSuppressedDestination ->
       if is_success
       then
@@ -1835,6 +2547,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetSuppressedDestinationResponse.error_of_json))
+  | GetTenant ->
+      if is_success
+      then Ok (GetTenantResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetTenantResponse.error_of_json))
   | ListConfigurationSets ->
       if is_success
       then Ok (ListConfigurationSetsResponse.of_json (response_to_json resp))
@@ -1898,11 +2614,44 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListEmailTemplatesResponse.error_of_json))
+  | ListExportJobs ->
+      if is_success
+      then Ok (ListExportJobsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListExportJobsResponse.error_of_json))
   | ListImportJobs ->
       if is_success
       then Ok (ListImportJobsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListImportJobsResponse.error_of_json))
+  | ListMultiRegionEndpoints ->
+      if is_success
+      then
+        Ok (ListMultiRegionEndpointsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListMultiRegionEndpointsResponse.error_of_json))
+  | ListRecommendations ->
+      if is_success
+      then Ok (ListRecommendationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListRecommendationsResponse.error_of_json))
+  | ListReputationEntities ->
+      if is_success
+      then
+        Ok (ListReputationEntitiesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListReputationEntitiesResponse.error_of_json))
+  | ListResourceTenants ->
+      if is_success
+      then Ok (ListResourceTenantsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListResourceTenantsResponse.error_of_json))
   | ListSuppressedDestinations ->
       if is_success
       then
@@ -1918,6 +2667,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListTenantResources ->
+      if is_success
+      then Ok (ListTenantResourcesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTenantResourcesResponse.error_of_json))
+  | ListTenants ->
+      if is_success
+      then Ok (ListTenantsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListTenantsResponse.error_of_json))
   | PutAccountDedicatedIpWarmupAttributes ->
       if is_success
       then
@@ -1964,6 +2723,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PutAccountSuppressionAttributesResponse.error_of_json))
+  | PutAccountVdmAttributes ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutAccountVdmAttributesResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some PutAccountVdmAttributesResponse.error_of_json))
+  | PutConfigurationSetArchivingOptions ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (PutConfigurationSetArchivingOptionsResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some PutConfigurationSetArchivingOptionsResponse.error_of_json))
   | PutConfigurationSetDeliveryOptions ->
       if is_success
       then
@@ -2025,6 +2806,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PutConfigurationSetTrackingOptionsResponse.error_of_json))
+  | PutConfigurationSetVdmOptions ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (PutConfigurationSetVdmOptionsResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some PutConfigurationSetVdmOptionsResponse.error_of_json))
   | PutDedicatedIpInPool ->
       if is_success
       then
@@ -2034,6 +2827,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some PutDedicatedIpInPoolResponse.error_of_json))
+  | PutDedicatedIpPoolScalingAttributes ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (PutDedicatedIpPoolScalingAttributesResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some PutDedicatedIpPoolScalingAttributesResponse.error_of_json))
   | PutDedicatedIpWarmupAttributes ->
       if is_success
       then
@@ -2231,3 +3036,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateEmailTemplateResponse.error_of_json))
+  | UpdateReputationEntityCustomerManagedStatus ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateReputationEntityCustomerManagedStatusResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                UpdateReputationEntityCustomerManagedStatusResponse.error_of_json))
+  | UpdateReputationEntityPolicy ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateReputationEntityPolicyResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateReputationEntityPolicyResponse.error_of_json))

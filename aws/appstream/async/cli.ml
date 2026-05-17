@@ -28,6 +28,27 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let associate_app_block_builder_app_block =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appBlockArn =
+         flag "app-block-arn" (required string) ~doc:"STRING Arn"
+       and appBlockBuilderName =
+         flag "app-block-builder-name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_app_block_builder_app_block
+           (Values.AssociateAppBlockBuilderAppBlockRequest.make ~appBlockArn
+              ~appBlockBuilderName ())
+           (Some Values.AssociateAppBlockBuilderAppBlockResult.to_json)
+           (Some Values.AssociateAppBlockBuilderAppBlockResult.error_to_json)])
 let associate_application_fleet =
   Command.async ~summary:""
     ([%map_open.Command
@@ -90,6 +111,28 @@ let associate_fleet =
            (Values.AssociateFleetRequest.make ~fleetName ~stackName ())
            (Some Values.AssociateFleetResult.to_json)
            (Some Values.AssociateFleetResult.error_to_json)])
+let associate_software_to_image_builder =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and imageBuilderName =
+         flag "image-builder-name" (required string) ~doc:"STRING Name"
+       and softwareNames =
+         flag "software-names" (required json_arg) ~doc:"JSON StringList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_software_to_image_builder
+           (Values.AssociateSoftwareToImageBuilderRequest.make
+              ~imageBuilderName
+              ~softwareNames:(Values.StringList.of_json softwareNames) ())
+           (Some Values.AssociateSoftwareToImageBuilderResult.to_json)
+           (Some Values.AssociateSoftwareToImageBuilderResult.error_to_json)])
 let batch_associate_user_stack =
   Command.async ~summary:""
     ([%map_open.Command
@@ -172,23 +215,100 @@ let create_app_block =
          flag "description" (optional string) ~doc:"STRING Description"
        and displayName =
          flag "display-name" (optional string) ~doc:"STRING DisplayName"
+       and setupScriptDetails =
+         flag "setup-script-details" (optional json_arg)
+           ~doc:"JSON ScriptDetails"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and postSetupScriptDetails =
+         flag "post-setup-script-details" (optional json_arg)
+           ~doc:"JSON ScriptDetails"
+       and packagingType =
+         flag "packaging-type" (optional json_arg) ~doc:"JSON PackagingType"
        and name = flag "name" (required string) ~doc:"STRING Name"
        and sourceS3Location =
-         flag "source-s3-location" (required json_arg) ~doc:"JSON S3Location"
-       and setupScriptDetails =
-         flag "setup-script-details" (required json_arg)
-           ~doc:"JSON ScriptDetails" in
+         flag "source-s3-location" (required json_arg) ~doc:"JSON S3Location" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_app_block
            (Values.CreateAppBlockRequest.make ?description ?displayName
-              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name
+              ?setupScriptDetails:(Option.map ~f:Values.ScriptDetails.of_json
+                                     setupScriptDetails)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?postSetupScriptDetails:(Option.map
+                                         ~f:Values.ScriptDetails.of_json
+                                         postSetupScriptDetails)
+              ?packagingType:(Option.map ~f:Values.PackagingType.of_json
+                                packagingType) ~name
               ~sourceS3Location:(Values.S3Location.of_json sourceS3Location)
-              ~setupScriptDetails:(Values.ScriptDetails.of_json
-                                     setupScriptDetails) ())
-           (Some Values.CreateAppBlockResult.to_json)
+              ()) (Some Values.CreateAppBlockResult.to_json)
            (Some Values.CreateAppBlockResult.error_to_json)])
+let create_app_block_builder =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING DisplayName"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and enableDefaultInternetAccess =
+         flag "enable-default-internet-access" (optional bool)
+           ~doc:"BOOL BooleanObject"
+       and iamRoleArn =
+         flag "iam-role-arn" (optional string) ~doc:"STRING Arn"
+       and accessEndpoints =
+         flag "access-endpoints" (optional json_arg)
+           ~doc:"JSON AccessEndpointList"
+       and disableIMDSV1 =
+         flag "disable-i-m-d-s-v1" (optional bool) ~doc:"BOOL BooleanObject"
+       and name = flag "name" (required string) ~doc:"STRING Name"
+       and platform =
+         flag "platform" (required json_arg)
+           ~doc:"JSON AppBlockBuilderPlatformType"
+       and instanceType =
+         flag "instance-type" (required string) ~doc:"STRING String"
+       and vpcConfig =
+         flag "vpc-config" (required json_arg) ~doc:"JSON VpcConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_app_block_builder
+           (Values.CreateAppBlockBuilderRequest.make ?description
+              ?displayName ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?enableDefaultInternetAccess ?iamRoleArn
+              ?accessEndpoints:(Option.map
+                                  ~f:Values.AccessEndpointList.of_json
+                                  accessEndpoints) ?disableIMDSV1 ~name
+              ~platform:(Values.AppBlockBuilderPlatformType.of_json platform)
+              ~instanceType ~vpcConfig:(Values.VpcConfig.of_json vpcConfig)
+              ()) (Some Values.CreateAppBlockBuilderResult.to_json)
+           (Some Values.CreateAppBlockBuilderResult.error_to_json)])
+let create_app_block_builder_streaming_u_r_l =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and validity = flag "validity" (optional json_arg) ~doc:"JSON Long"
+       and appBlockBuilderName =
+         flag "app-block-builder-name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_app_block_builder_streaming_u_r_l
+           (Values.CreateAppBlockBuilderStreamingURLRequest.make
+              ?validity:(Option.map ~f:Values.Long.of_json validity)
+              ~appBlockBuilderName ())
+           (Some Values.CreateAppBlockBuilderStreamingURLResult.to_json)
+           (Some Values.CreateAppBlockBuilderStreamingURLResult.error_to_json)])
 let create_application =
   Command.async ~summary:""
     ([%map_open.Command
@@ -243,6 +363,9 @@ let create_directory_config =
        and serviceAccountCredentials =
          flag "service-account-credentials" (optional json_arg)
            ~doc:"JSON ServiceAccountCredentials"
+       and certificateBasedAuthProperties =
+         flag "certificate-based-auth-properties" (optional json_arg)
+           ~doc:"JSON CertificateBasedAuthProperties"
        and directoryName =
          flag "directory-name" (required string) ~doc:"STRING DirectoryName"
        and organizationalUnitDistinguishedNames =
@@ -255,6 +378,9 @@ let create_directory_config =
               ?serviceAccountCredentials:(Option.map
                                             ~f:Values.ServiceAccountCredentials.of_json
                                             serviceAccountCredentials)
+              ?certificateBasedAuthProperties:(Option.map
+                                                 ~f:Values.CertificateBasedAuthProperties.of_json
+                                                 certificateBasedAuthProperties)
               ~directoryName
               ~organizationalUnitDistinguishedNames:(Values.OrganizationalUnitDistinguishedNamesList.of_json
                                                        organizationalUnitDistinguishedNames)
@@ -288,6 +414,33 @@ let create_entitlement =
               ~attributes:(Values.EntitlementAttributeList.of_json attributes)
               ()) (Some Values.CreateEntitlementResult.to_json)
            (Some Values.CreateEntitlementResult.error_to_json)])
+let create_export_image_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tagSpecifications =
+         flag "tag-specifications" (optional json_arg) ~doc:"JSON Tags"
+       and amiDescription =
+         flag "ami-description" (optional string) ~doc:"STRING Description"
+       and imageName = flag "image-name" (required string) ~doc:"STRING Name"
+       and amiName = flag "ami-name" (required string) ~doc:"STRING AmiName"
+       and iamRoleArn =
+         flag "iam-role-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_export_image_task
+           (Values.CreateExportImageTaskRequest.make
+              ?tagSpecifications:(Option.map ~f:Values.Tags.of_json
+                                    tagSpecifications) ?amiDescription
+              ~imageName ~amiName ~iamRoleArn ())
+           (Some Values.CreateExportImageTaskResult.to_json)
+           (Some Values.CreateExportImageTaskResult.error_to_json)])
 let create_fleet =
   Command.async ~summary:""
     ([%map_open.Command
@@ -298,8 +451,7 @@ let create_fleet =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and imageName =
-         flag "image-name" (optional string) ~doc:"STRING String"
+       and imageName = flag "image-name" (optional string) ~doc:"STRING Name"
        and imageArn = flag "image-arn" (optional string) ~doc:"STRING Arn"
        and fleetType =
          flag "fleet-type" (optional json_arg) ~doc:"JSON FleetType"
@@ -339,6 +491,16 @@ let create_fleet =
        and usbDeviceFilterStrings =
          flag "usb-device-filter-strings" (optional json_arg)
            ~doc:"JSON UsbDeviceFilterStrings"
+       and sessionScriptS3Location =
+         flag "session-script-s3-location" (optional json_arg)
+           ~doc:"JSON S3Location"
+       and maxSessionsPerInstance =
+         flag "max-sessions-per-instance" (optional int) ~doc:"INT Integer"
+       and rootVolumeConfig =
+         flag "root-volume-config" (optional json_arg)
+           ~doc:"JSON VolumeConfig"
+       and disableIMDSV1 =
+         flag "disable-i-m-d-s-v1" (optional bool) ~doc:"BOOL BooleanObject"
        and name = flag "name" (required string) ~doc:"STRING Name"
        and instanceType =
          flag "instance-type" (required string) ~doc:"STRING String" in
@@ -361,7 +523,13 @@ let create_fleet =
               ?maxConcurrentSessions
               ?usbDeviceFilterStrings:(Option.map
                                          ~f:Values.UsbDeviceFilterStrings.of_json
-                                         usbDeviceFilterStrings) ~name
+                                         usbDeviceFilterStrings)
+              ?sessionScriptS3Location:(Option.map
+                                          ~f:Values.S3Location.of_json
+                                          sessionScriptS3Location)
+              ?maxSessionsPerInstance
+              ?rootVolumeConfig:(Option.map ~f:Values.VolumeConfig.of_json
+                                   rootVolumeConfig) ?disableIMDSV1 ~name
               ~instanceType ()) (Some Values.CreateFleetResult.to_json)
            (Some Values.CreateFleetResult.error_to_json)])
 let create_image_builder =
@@ -398,6 +566,17 @@ let create_image_builder =
        and accessEndpoints =
          flag "access-endpoints" (optional json_arg)
            ~doc:"JSON AccessEndpointList"
+       and rootVolumeConfig =
+         flag "root-volume-config" (optional json_arg)
+           ~doc:"JSON VolumeConfig"
+       and softwaresToInstall =
+         flag "softwares-to-install" (optional json_arg)
+           ~doc:"JSON StringList"
+       and softwaresToUninstall =
+         flag "softwares-to-uninstall" (optional json_arg)
+           ~doc:"JSON StringList"
+       and disableIMDSV1 =
+         flag "disable-i-m-d-s-v1" (optional bool) ~doc:"BOOL BooleanObject"
        and name = flag "name" (required string) ~doc:"STRING Name"
        and instanceType =
          flag "instance-type" (required string) ~doc:"STRING String" in
@@ -413,7 +592,14 @@ let create_image_builder =
               ?tags:(Option.map ~f:Values.Tags.of_json tags)
               ?accessEndpoints:(Option.map
                                   ~f:Values.AccessEndpointList.of_json
-                                  accessEndpoints) ~name ~instanceType ())
+                                  accessEndpoints)
+              ?rootVolumeConfig:(Option.map ~f:Values.VolumeConfig.of_json
+                                   rootVolumeConfig)
+              ?softwaresToInstall:(Option.map ~f:Values.StringList.of_json
+                                     softwaresToInstall)
+              ?softwaresToUninstall:(Option.map ~f:Values.StringList.of_json
+                                       softwaresToUninstall) ?disableIMDSV1
+              ~name ~instanceType ())
            (Some Values.CreateImageBuilderResult.to_json)
            (Some Values.CreateImageBuilderResult.error_to_json)])
 let create_image_builder_streaming_u_r_l =
@@ -435,6 +621,55 @@ let create_image_builder_streaming_u_r_l =
               ?validity:(Option.map ~f:Values.Long.of_json validity) ~name ())
            (Some Values.CreateImageBuilderStreamingURLResult.to_json)
            (Some Values.CreateImageBuilderStreamingURLResult.error_to_json)])
+let create_imported_image =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ImageImportDescription"
+       and displayName =
+         flag "display-name" (optional string)
+           ~doc:"STRING ImageImportDisplayName"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and runtimeValidationConfig =
+         flag "runtime-validation-config" (optional json_arg)
+           ~doc:"JSON RuntimeValidationConfig"
+       and agentSoftwareVersion =
+         flag "agent-software-version" (optional json_arg)
+           ~doc:"JSON AgentSoftwareVersion"
+       and appCatalogConfig =
+         flag "app-catalog-config" (optional json_arg)
+           ~doc:"JSON AppCatalogConfig"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and name = flag "name" (required string) ~doc:"STRING Name"
+       and sourceAmiId =
+         flag "source-ami-id" (required string) ~doc:"STRING PhotonAmiId"
+       and iamRoleArn =
+         flag "iam-role-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_imported_image
+           (Values.CreateImportedImageRequest.make ?description ?displayName
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?runtimeValidationConfig:(Option.map
+                                          ~f:Values.RuntimeValidationConfig.of_json
+                                          runtimeValidationConfig)
+              ?agentSoftwareVersion:(Option.map
+                                       ~f:Values.AgentSoftwareVersion.of_json
+                                       agentSoftwareVersion)
+              ?appCatalogConfig:(Option.map
+                                   ~f:Values.AppCatalogConfig.of_json
+                                   appCatalogConfig) ?dryRun ~name
+              ~sourceAmiId ~iamRoleArn ())
+           (Some Values.CreateImportedImageResult.to_json)
+           (Some Values.CreateImportedImageResult.error_to_json)])
 let create_stack =
   Command.async ~summary:""
     ([%map_open.Command
@@ -468,6 +703,15 @@ let create_stack =
        and embedHostDomains =
          flag "embed-host-domains" (optional json_arg)
            ~doc:"JSON EmbedHostDomains"
+       and streamingExperienceSettings =
+         flag "streaming-experience-settings" (optional json_arg)
+           ~doc:"JSON StreamingExperienceSettings"
+       and contentRedirection =
+         flag "content-redirection" (optional json_arg)
+           ~doc:"JSON ContentRedirection"
+       and agentAccessConfig =
+         flag "agent-access-config" (optional json_arg)
+           ~doc:"JSON AgentAccessConfig"
        and name = flag "name" (required string) ~doc:"STRING Name" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -488,7 +732,16 @@ let create_stack =
                                   accessEndpoints)
               ?embedHostDomains:(Option.map
                                    ~f:Values.EmbedHostDomains.of_json
-                                   embedHostDomains) ~name ())
+                                   embedHostDomains)
+              ?streamingExperienceSettings:(Option.map
+                                              ~f:Values.StreamingExperienceSettings.of_json
+                                              streamingExperienceSettings)
+              ?contentRedirection:(Option.map
+                                     ~f:Values.ContentRedirection.of_json
+                                     contentRedirection)
+              ?agentAccessConfig:(Option.map
+                                    ~f:Values.AgentAccessConfig.of_json
+                                    agentAccessConfig) ~name ())
            (Some Values.CreateStackResult.to_json)
            (Some Values.CreateStackResult.error_to_json)])
 let create_streaming_u_r_l =
@@ -520,6 +773,41 @@ let create_streaming_u_r_l =
               ?sessionContext ~stackName ~fleetName ~userId ())
            (Some Values.CreateStreamingURLResult.to_json)
            (Some Values.CreateStreamingURLResult.error_to_json)])
+let create_theme_for_stack =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and footerLinks =
+         flag "footer-links" (optional json_arg) ~doc:"JSON ThemeFooterLinks"
+       and stackName = flag "stack-name" (required string) ~doc:"STRING Name"
+       and titleText =
+         flag "title-text" (required string) ~doc:"STRING ThemeTitleText"
+       and themeStyling =
+         flag "theme-styling" (required json_arg) ~doc:"JSON ThemeStyling"
+       and organizationLogoS3Location =
+         flag "organization-logo-s3-location" (required json_arg)
+           ~doc:"JSON S3Location"
+       and faviconS3Location =
+         flag "favicon-s3-location" (required json_arg)
+           ~doc:"JSON S3Location" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_theme_for_stack
+           (Values.CreateThemeForStackRequest.make
+              ?footerLinks:(Option.map ~f:Values.ThemeFooterLinks.of_json
+                              footerLinks) ~stackName ~titleText
+              ~themeStyling:(Values.ThemeStyling.of_json themeStyling)
+              ~organizationLogoS3Location:(Values.S3Location.of_json
+                                             organizationLogoS3Location)
+              ~faviconS3Location:(Values.S3Location.of_json faviconS3Location)
+              ()) (Some Values.CreateThemeForStackResult.to_json)
+           (Some Values.CreateThemeForStackResult.error_to_json)])
 let create_updated_image =
   Command.async ~summary:""
     ([%map_open.Command
@@ -616,6 +904,23 @@ let delete_app_block =
            Io.delete_app_block (Values.DeleteAppBlockRequest.make ~name ())
            (Some Values.DeleteAppBlockResult.to_json)
            (Some Values.DeleteAppBlockResult.error_to_json)])
+let delete_app_block_builder =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_app_block_builder
+           (Values.DeleteAppBlockBuilderRequest.make ~name ())
+           (Some Values.DeleteAppBlockBuilderResult.to_json)
+           (Some Values.DeleteAppBlockBuilderResult.error_to_json)])
 let delete_application =
   Command.async ~summary:""
     ([%map_open.Command
@@ -754,6 +1059,23 @@ let delete_stack =
            Io.delete_stack (Values.DeleteStackRequest.make ~name ())
            (Some Values.DeleteStackResult.to_json)
            (Some Values.DeleteStackResult.error_to_json)])
+let delete_theme_for_stack =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stackName = flag "stack-name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_theme_for_stack
+           (Values.DeleteThemeForStackRequest.make ~stackName ())
+           (Some Values.DeleteThemeForStackResult.to_json)
+           (Some Values.DeleteThemeForStackResult.error_to_json)])
 let delete_usage_report_subscription =
   Command.async ~summary:""
     ([%map_open.Command
@@ -794,6 +1116,54 @@ let delete_user =
                                      authenticationType) ())
            (Some Values.DeleteUserResult.to_json)
            (Some Values.DeleteUserResult.error_to_json)])
+let describe_app_block_builder_app_block_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appBlockArn =
+         flag "app-block-arn" (optional string) ~doc:"STRING Arn"
+       and appBlockBuilderName =
+         flag "app-block-builder-name" (optional string) ~doc:"STRING Name"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_app_block_builder_app_block_associations
+           (Values.DescribeAppBlockBuilderAppBlockAssociationsRequest.make
+              ?appBlockArn ?appBlockBuilderName ?maxResults ?nextToken ())
+           (Some
+              Values.DescribeAppBlockBuilderAppBlockAssociationsResult.to_json)
+           (Some
+              Values.DescribeAppBlockBuilderAppBlockAssociationsResult.error_to_json)])
+let describe_app_block_builders =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and names = flag "names" (optional json_arg) ~doc:"JSON StringList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_app_block_builders
+           (Values.DescribeAppBlockBuildersRequest.make
+              ?names:(Option.map ~f:Values.StringList.of_json names)
+              ?nextToken ?maxResults ())
+           (Some Values.DescribeAppBlockBuildersResult.to_json)
+           (Some Values.DescribeAppBlockBuildersResult.error_to_json)])
 let describe_app_blocks =
   Command.async ~summary:""
     ([%map_open.Command
@@ -815,6 +1185,28 @@ let describe_app_blocks =
               ?arns:(Option.map ~f:Values.ArnList.of_json arns) ?nextToken
               ?maxResults ()) (Some Values.DescribeAppBlocksResult.to_json)
            (Some Values.DescribeAppBlocksResult.error_to_json)])
+let describe_app_license_usage =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and billingPeriod =
+         flag "billing-period" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_app_license_usage
+           (Values.DescribeAppLicenseUsageRequest.make ?maxResults ?nextToken
+              ~billingPeriod ())
+           (Some Values.DescribeAppLicenseUsageResult.to_json)
+           (Some Values.DescribeAppLicenseUsageResult.error_to_json)])
 let describe_application_fleet_associations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1022,19 +1414,42 @@ let describe_sessions =
        and authenticationType =
          flag "authentication-type" (optional json_arg)
            ~doc:"JSON AuthenticationType"
-       and stackName =
-         flag "stack-name" (required string) ~doc:"STRING String"
-       and fleetName =
-         flag "fleet-name" (required string) ~doc:"STRING String" in
+       and instanceId =
+         flag "instance-id" (optional string) ~doc:"STRING String"
+       and stackName = flag "stack-name" (required string) ~doc:"STRING Name"
+       and fleetName = flag "fleet-name" (required string) ~doc:"STRING Name" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_sessions
            (Values.DescribeSessionsRequest.make ?userId ?nextToken ?limit
               ?authenticationType:(Option.map
                                      ~f:Values.AuthenticationType.of_json
-                                     authenticationType) ~stackName
-              ~fleetName ()) (Some Values.DescribeSessionsResult.to_json)
+                                     authenticationType) ?instanceId
+              ~stackName ~fleetName ())
+           (Some Values.DescribeSessionsResult.to_json)
            (Some Values.DescribeSessionsResult.error_to_json)])
+let describe_software_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and associatedResource =
+         flag "associated-resource" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_software_associations
+           (Values.DescribeSoftwareAssociationsRequest.make ?maxResults
+              ?nextToken ~associatedResource ())
+           (Some Values.DescribeSoftwareAssociationsResult.to_json)
+           (Some Values.DescribeSoftwareAssociationsResult.error_to_json)])
 let describe_stacks =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1055,6 +1470,23 @@ let describe_stacks =
               ?names:(Option.map ~f:Values.StringList.of_json names)
               ?nextToken ()) (Some Values.DescribeStacksResult.to_json)
            (Some Values.DescribeStacksResult.error_to_json)])
+let describe_theme_for_stack =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stackName = flag "stack-name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_theme_for_stack
+           (Values.DescribeThemeForStackRequest.make ~stackName ())
+           (Some Values.DescribeThemeForStackResult.to_json)
+           (Some Values.DescribeThemeForStackResult.error_to_json)])
 let describe_usage_report_subscriptions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1154,6 +1586,28 @@ let disable_user =
                                      authenticationType) ())
            (Some Values.DisableUserResult.to_json)
            (Some Values.DisableUserResult.error_to_json)])
+let disassociate_app_block_builder_app_block =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appBlockArn =
+         flag "app-block-arn" (required string) ~doc:"STRING Arn"
+       and appBlockBuilderName =
+         flag "app-block-builder-name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_app_block_builder_app_block
+           (Values.DisassociateAppBlockBuilderAppBlockRequest.make
+              ~appBlockArn ~appBlockBuilderName ())
+           (Some Values.DisassociateAppBlockBuilderAppBlockResult.to_json)
+           (Some
+              Values.DisassociateAppBlockBuilderAppBlockResult.error_to_json)])
 let disassociate_application_fleet =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1217,6 +1671,47 @@ let disassociate_fleet =
            (Values.DisassociateFleetRequest.make ~fleetName ~stackName ())
            (Some Values.DisassociateFleetResult.to_json)
            (Some Values.DisassociateFleetResult.error_to_json)])
+let disassociate_software_from_image_builder =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and imageBuilderName =
+         flag "image-builder-name" (required string) ~doc:"STRING Name"
+       and softwareNames =
+         flag "software-names" (required json_arg) ~doc:"JSON StringList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_software_from_image_builder
+           (Values.DisassociateSoftwareFromImageBuilderRequest.make
+              ~imageBuilderName
+              ~softwareNames:(Values.StringList.of_json softwareNames) ())
+           (Some Values.DisassociateSoftwareFromImageBuilderResult.to_json)
+           (Some
+              Values.DisassociateSoftwareFromImageBuilderResult.error_to_json)])
+let drain_session_instance =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.drain_session_instance
+           (Values.DrainSessionInstanceRequest.make ~sessionId ())
+           (Some Values.DrainSessionInstanceResult.to_json)
+           (Some Values.DrainSessionInstanceResult.error_to_json)])
 let enable_user =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1257,6 +1752,23 @@ let expire_session =
            Io.expire_session (Values.ExpireSessionRequest.make ~sessionId ())
            (Some Values.ExpireSessionResult.to_json)
            (Some Values.ExpireSessionResult.error_to_json)])
+let get_export_image_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and taskId = flag "task-id" (optional string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_export_image_task
+           (Values.GetExportImageTaskRequest.make ?taskId ())
+           (Some Values.GetExportImageTaskResult.to_json)
+           (Some Values.GetExportImageTaskResult.error_to_json)])
 let list_associated_fleets =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1320,6 +1832,29 @@ let list_entitled_applications =
               ?maxResults ~stackName ~entitlementName ())
            (Some Values.ListEntitledApplicationsResult.to_json)
            (Some Values.ListEntitledApplicationsResult.error_to_json)])
+let list_export_image_tasks =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters = flag "filters" (optional json_arg) ~doc:"JSON Filters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_export_image_tasks
+           (Values.ListExportImageTasksRequest.make
+              ?filters:(Option.map ~f:Values.Filters.of_json filters)
+              ?maxResults ?nextToken ())
+           (Some Values.ListExportImageTasksResult.to_json)
+           (Some Values.ListExportImageTasksResult.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1338,6 +1873,23 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let start_app_block_builder =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_app_block_builder
+           (Values.StartAppBlockBuilderRequest.make ~name ())
+           (Some Values.StartAppBlockBuilderResult.to_json)
+           (Some Values.StartAppBlockBuilderResult.error_to_json)])
 let start_fleet =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1374,6 +1926,45 @@ let start_image_builder =
            (Values.StartImageBuilderRequest.make ?appstreamAgentVersion ~name
               ()) (Some Values.StartImageBuilderResult.to_json)
            (Some Values.StartImageBuilderResult.error_to_json)])
+let start_software_deployment_to_image_builder =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and retryFailedDeployments =
+         flag "retry-failed-deployments" (optional bool) ~doc:"BOOL Boolean"
+       and imageBuilderName =
+         flag "image-builder-name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_software_deployment_to_image_builder
+           (Values.StartSoftwareDeploymentToImageBuilderRequest.make
+              ?retryFailedDeployments ~imageBuilderName ())
+           (Some Values.StartSoftwareDeploymentToImageBuilderResult.to_json)
+           (Some
+              Values.StartSoftwareDeploymentToImageBuilderResult.error_to_json)])
+let stop_app_block_builder =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_app_block_builder
+           (Values.StopAppBlockBuilderRequest.make ~name ())
+           (Some Values.StopAppBlockBuilderResult.to_json)
+           (Some Values.StopAppBlockBuilderResult.error_to_json)])
 let stop_fleet =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1448,6 +2039,57 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_app_block_builder =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING DisplayName"
+       and platform =
+         flag "platform" (optional json_arg) ~doc:"JSON PlatformType"
+       and instanceType =
+         flag "instance-type" (optional string) ~doc:"STRING String"
+       and vpcConfig =
+         flag "vpc-config" (optional json_arg) ~doc:"JSON VpcConfig"
+       and enableDefaultInternetAccess =
+         flag "enable-default-internet-access" (optional bool)
+           ~doc:"BOOL BooleanObject"
+       and iamRoleArn =
+         flag "iam-role-arn" (optional string) ~doc:"STRING Arn"
+       and accessEndpoints =
+         flag "access-endpoints" (optional json_arg)
+           ~doc:"JSON AccessEndpointList"
+       and attributesToDelete =
+         flag "attributes-to-delete" (optional json_arg)
+           ~doc:"JSON AppBlockBuilderAttributes"
+       and disableIMDSV1 =
+         flag "disable-i-m-d-s-v1" (optional bool) ~doc:"BOOL BooleanObject"
+       and name = flag "name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_app_block_builder
+           (Values.UpdateAppBlockBuilderRequest.make ?description
+              ?displayName
+              ?platform:(Option.map ~f:Values.PlatformType.of_json platform)
+              ?instanceType
+              ?vpcConfig:(Option.map ~f:Values.VpcConfig.of_json vpcConfig)
+              ?enableDefaultInternetAccess ?iamRoleArn
+              ?accessEndpoints:(Option.map
+                                  ~f:Values.AccessEndpointList.of_json
+                                  accessEndpoints)
+              ?attributesToDelete:(Option.map
+                                     ~f:Values.AppBlockBuilderAttributes.of_json
+                                     attributesToDelete) ?disableIMDSV1 ~name
+              ()) (Some Values.UpdateAppBlockBuilderResult.to_json)
+           (Some Values.UpdateAppBlockBuilderResult.error_to_json)])
 let update_application =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1504,6 +2146,9 @@ let update_directory_config =
        and serviceAccountCredentials =
          flag "service-account-credentials" (optional json_arg)
            ~doc:"JSON ServiceAccountCredentials"
+       and certificateBasedAuthProperties =
+         flag "certificate-based-auth-properties" (optional json_arg)
+           ~doc:"JSON CertificateBasedAuthProperties"
        and directoryName =
          flag "directory-name" (required string) ~doc:"STRING DirectoryName" in
        fun () ->
@@ -1516,6 +2161,9 @@ let update_directory_config =
               ?serviceAccountCredentials:(Option.map
                                             ~f:Values.ServiceAccountCredentials.of_json
                                             serviceAccountCredentials)
+              ?certificateBasedAuthProperties:(Option.map
+                                                 ~f:Values.CertificateBasedAuthProperties.of_json
+                                                 certificateBasedAuthProperties)
               ~directoryName ())
            (Some Values.UpdateDirectoryConfigResult.to_json)
            (Some Values.UpdateDirectoryConfigResult.error_to_json)])
@@ -1562,7 +2210,7 @@ let update_fleet =
        and imageName =
          flag "image-name" (optional string) ~doc:"STRING String"
        and imageArn = flag "image-arn" (optional string) ~doc:"STRING Arn"
-       and name = flag "name" (optional string) ~doc:"STRING String"
+       and name = flag "name" (optional string) ~doc:"STRING Name"
        and instanceType =
          flag "instance-type" (optional string) ~doc:"STRING String"
        and computeCapacity =
@@ -1604,7 +2252,17 @@ let update_fleet =
          flag "max-concurrent-sessions" (optional int) ~doc:"INT Integer"
        and usbDeviceFilterStrings =
          flag "usb-device-filter-strings" (optional json_arg)
-           ~doc:"JSON UsbDeviceFilterStrings" in
+           ~doc:"JSON UsbDeviceFilterStrings"
+       and sessionScriptS3Location =
+         flag "session-script-s3-location" (optional json_arg)
+           ~doc:"JSON S3Location"
+       and maxSessionsPerInstance =
+         flag "max-sessions-per-instance" (optional int) ~doc:"INT Integer"
+       and rootVolumeConfig =
+         flag "root-volume-config" (optional json_arg)
+           ~doc:"JSON VolumeConfig"
+       and disableIMDSV1 =
+         flag "disable-i-m-d-s-v1" (optional bool) ~doc:"BOOL BooleanObject" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_fleet
@@ -1627,7 +2285,13 @@ let update_fleet =
               ?maxConcurrentSessions
               ?usbDeviceFilterStrings:(Option.map
                                          ~f:Values.UsbDeviceFilterStrings.of_json
-                                         usbDeviceFilterStrings) ())
+                                         usbDeviceFilterStrings)
+              ?sessionScriptS3Location:(Option.map
+                                          ~f:Values.S3Location.of_json
+                                          sessionScriptS3Location)
+              ?maxSessionsPerInstance
+              ?rootVolumeConfig:(Option.map ~f:Values.VolumeConfig.of_json
+                                   rootVolumeConfig) ?disableIMDSV1 ())
            (Some Values.UpdateFleetResult.to_json)
            (Some Values.UpdateFleetResult.error_to_json)])
 let update_image_permissions =
@@ -1692,6 +2356,15 @@ let update_stack =
        and embedHostDomains =
          flag "embed-host-domains" (optional json_arg)
            ~doc:"JSON EmbedHostDomains"
+       and streamingExperienceSettings =
+         flag "streaming-experience-settings" (optional json_arg)
+           ~doc:"JSON StreamingExperienceSettings"
+       and contentRedirection =
+         flag "content-redirection" (optional json_arg)
+           ~doc:"JSON ContentRedirection"
+       and agentAccessConfig =
+         flag "agent-access-config" (optional json_arg)
+           ~doc:"JSON AgentAccessConfigForUpdate"
        and name = flag "name" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1714,33 +2387,99 @@ let update_stack =
                                   accessEndpoints)
               ?embedHostDomains:(Option.map
                                    ~f:Values.EmbedHostDomains.of_json
-                                   embedHostDomains) ~name ())
+                                   embedHostDomains)
+              ?streamingExperienceSettings:(Option.map
+                                              ~f:Values.StreamingExperienceSettings.of_json
+                                              streamingExperienceSettings)
+              ?contentRedirection:(Option.map
+                                     ~f:Values.ContentRedirection.of_json
+                                     contentRedirection)
+              ?agentAccessConfig:(Option.map
+                                    ~f:Values.AgentAccessConfigForUpdate.of_json
+                                    agentAccessConfig) ~name ())
            (Some Values.UpdateStackResult.to_json)
            (Some Values.UpdateStackResult.error_to_json)])
+let update_theme_for_stack =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and footerLinks =
+         flag "footer-links" (optional json_arg) ~doc:"JSON ThemeFooterLinks"
+       and titleText =
+         flag "title-text" (optional string) ~doc:"STRING ThemeTitleText"
+       and themeStyling =
+         flag "theme-styling" (optional json_arg) ~doc:"JSON ThemeStyling"
+       and organizationLogoS3Location =
+         flag "organization-logo-s3-location" (optional json_arg)
+           ~doc:"JSON S3Location"
+       and faviconS3Location =
+         flag "favicon-s3-location" (optional json_arg)
+           ~doc:"JSON S3Location"
+       and state = flag "state" (optional json_arg) ~doc:"JSON ThemeState"
+       and attributesToDelete =
+         flag "attributes-to-delete" (optional json_arg)
+           ~doc:"JSON ThemeAttributes"
+       and stackName = flag "stack-name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_theme_for_stack
+           (Values.UpdateThemeForStackRequest.make
+              ?footerLinks:(Option.map ~f:Values.ThemeFooterLinks.of_json
+                              footerLinks) ?titleText
+              ?themeStyling:(Option.map ~f:Values.ThemeStyling.of_json
+                               themeStyling)
+              ?organizationLogoS3Location:(Option.map
+                                             ~f:Values.S3Location.of_json
+                                             organizationLogoS3Location)
+              ?faviconS3Location:(Option.map ~f:Values.S3Location.of_json
+                                    faviconS3Location)
+              ?state:(Option.map ~f:Values.ThemeState.of_json state)
+              ?attributesToDelete:(Option.map
+                                     ~f:Values.ThemeAttributes.of_json
+                                     attributesToDelete) ~stackName ())
+           (Some Values.UpdateThemeForStackResult.to_json)
+           (Some Values.UpdateThemeForStackResult.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("associate-application-fleet", associate_application_fleet);
+    [("associate-app-block-builder-app-block",
+       associate_app_block_builder_app_block);
+    ("associate-application-fleet", associate_application_fleet);
     ("associate-application-to-entitlement",
       associate_application_to_entitlement);
     ("associate-fleet", associate_fleet);
+    ("associate-software-to-image-builder",
+      associate_software_to_image_builder);
     ("batch-associate-user-stack", batch_associate_user_stack);
     ("batch-disassociate-user-stack", batch_disassociate_user_stack);
     ("copy-image", copy_image);
     ("create-app-block", create_app_block);
+    ("create-app-block-builder", create_app_block_builder);
+    ("create-app-block-builder-streaming-u-r-l",
+      create_app_block_builder_streaming_u_r_l);
     ("create-application", create_application);
     ("create-directory-config", create_directory_config);
     ("create-entitlement", create_entitlement);
+    ("create-export-image-task", create_export_image_task);
     ("create-fleet", create_fleet);
     ("create-image-builder", create_image_builder);
     ("create-image-builder-streaming-u-r-l",
       create_image_builder_streaming_u_r_l);
+    ("create-imported-image", create_imported_image);
     ("create-stack", create_stack);
     ("create-streaming-u-r-l", create_streaming_u_r_l);
+    ("create-theme-for-stack", create_theme_for_stack);
     ("create-updated-image", create_updated_image);
     ("create-usage-report-subscription", create_usage_report_subscription);
     ("create-user", create_user);
     ("delete-app-block", delete_app_block);
+    ("delete-app-block-builder", delete_app_block_builder);
     ("delete-application", delete_application);
     ("delete-directory-config", delete_directory_config);
     ("delete-entitlement", delete_entitlement);
@@ -1749,9 +2488,14 @@ let main =
     ("delete-image-builder", delete_image_builder);
     ("delete-image-permissions", delete_image_permissions);
     ("delete-stack", delete_stack);
+    ("delete-theme-for-stack", delete_theme_for_stack);
     ("delete-usage-report-subscription", delete_usage_report_subscription);
     ("delete-user", delete_user);
+    ("describe-app-block-builder-app-block-associations",
+      describe_app_block_builder_app_block_associations);
+    ("describe-app-block-builders", describe_app_block_builders);
     ("describe-app-blocks", describe_app_blocks);
+    ("describe-app-license-usage", describe_app_license_usage);
     ("describe-application-fleet-associations",
       describe_application_fleet_associations);
     ("describe-applications", describe_applications);
@@ -1762,31 +2506,46 @@ let main =
     ("describe-image-permissions", describe_image_permissions);
     ("describe-images", describe_images);
     ("describe-sessions", describe_sessions);
+    ("describe-software-associations", describe_software_associations);
     ("describe-stacks", describe_stacks);
+    ("describe-theme-for-stack", describe_theme_for_stack);
     ("describe-usage-report-subscriptions",
       describe_usage_report_subscriptions);
     ("describe-user-stack-associations", describe_user_stack_associations);
     ("describe-users", describe_users);
     ("disable-user", disable_user);
+    ("disassociate-app-block-builder-app-block",
+      disassociate_app_block_builder_app_block);
     ("disassociate-application-fleet", disassociate_application_fleet);
     ("disassociate-application-from-entitlement",
       disassociate_application_from_entitlement);
     ("disassociate-fleet", disassociate_fleet);
+    ("disassociate-software-from-image-builder",
+      disassociate_software_from_image_builder);
+    ("drain-session-instance", drain_session_instance);
     ("enable-user", enable_user);
     ("expire-session", expire_session);
+    ("get-export-image-task", get_export_image_task);
     ("list-associated-fleets", list_associated_fleets);
     ("list-associated-stacks", list_associated_stacks);
     ("list-entitled-applications", list_entitled_applications);
+    ("list-export-image-tasks", list_export_image_tasks);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("start-app-block-builder", start_app_block_builder);
     ("start-fleet", start_fleet);
     ("start-image-builder", start_image_builder);
+    ("start-software-deployment-to-image-builder",
+      start_software_deployment_to_image_builder);
+    ("stop-app-block-builder", stop_app_block_builder);
     ("stop-fleet", stop_fleet);
     ("stop-image-builder", stop_image_builder);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-app-block-builder", update_app_block_builder);
     ("update-application", update_application);
     ("update-directory-config", update_directory_config);
     ("update-entitlement", update_entitlement);
     ("update-fleet", update_fleet);
     ("update-image-permissions", update_image_permissions);
-    ("update-stack", update_stack)]
+    ("update-stack", update_stack);
+    ("update-theme-for-stack", update_theme_for_stack)]

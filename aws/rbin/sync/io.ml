@@ -21,8 +21,12 @@ let list_rules ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListRules input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let lock_rule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.LockRule input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
+let unlock_rule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UnlockRule input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_rule ?endpoint_url ?cfg input =

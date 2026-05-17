@@ -30,8 +30,7 @@ let body_makes_sense_for = function
 
 (* Curl wants headers as a "Name: value" string list. *)
 let cohttp_headers_to_curl headers =
-  Cohttp.Header.to_list headers
-  |> List.map ~f:(fun (k, v) -> sprintf "%s: %s" k v)
+  Cohttp.Header.to_list headers |> List.map ~f:(fun (k, v) -> sprintf "%s: %s" k v)
 ;;
 
 (* libcurl reports the response status as the integer code; turn it into the
@@ -121,17 +120,12 @@ module Io = struct
       | Some endpoint_url -> Uri.of_string endpoint_url
       | None -> Awso.Botocore_endpoints.lookup_uri ~region service `HTTPS
     in
-    let uri =
-      Uri.with_uri ~scheme:(Uri.scheme endpoint) ~host:(Uri.host endpoint) uri
-    in
+    let uri = Uri.with_uri ~scheme:(Uri.scheme endpoint) ~host:(Uri.host endpoint) uri in
     let host =
       match Uri.host endpoint with
       | Some h -> h
       | None ->
-        failwith
-          (sprintf
-             "could not extract 'host' from url %s"
-             (Uri.to_string endpoint))
+        failwith (sprintf "could not extract 'host' from url %s" (Uri.to_string endpoint))
     in
     let cohttp_meth : Cohttp.Code.meth = (meth :> Cohttp.Code.meth) in
     let req_body = Awso.Http.Request.body request in

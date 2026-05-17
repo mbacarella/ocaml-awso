@@ -146,13 +146,13 @@ module Endpoint =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Address") in
       make ?port ?address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let port = field_map json "Port" Integer.of_json in
-      let address = field_map json "Address" String_.of_json in
+    let of_json json__ =
+      let port = field_map json__ "Port" Integer.of_json in
+      let address = field_map json__ "Address" String_.of_json in
       make ?port ?address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents the information required for client programs to connect to a cache node."]
+       "Represents the information required for client programs to connect to a cache node. This value is read-only."]
 module CloudWatchLogsDestinationDetails =
   struct
     type nonrec t =
@@ -169,8 +169,8 @@ module CloudWatchLogsDestinationDetails =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "LogGroup") in
       make ?logGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logGroup = field_map json "LogGroup" String_.of_json in
+    let of_json json__ =
+      let logGroup = field_map json__ "LogGroup" String_.of_json in
       make ?logGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -192,8 +192,8 @@ module KinesisFirehoseDestinationDetails =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DeliveryStream") in
       make ?deliveryStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deliveryStream = field_map json "DeliveryStream" String_.of_json in
+    let of_json json__ =
+      let deliveryStream = field_map json__ "DeliveryStream" String_.of_json in
       make ?deliveryStream ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -291,22 +291,24 @@ module NodeGroupMemberUpdateStatus =
         ?nodeUpdateInitiatedBy ?nodeUpdateEndDate ?nodeUpdateStartDate
         ?nodeDeletionDate ?nodeUpdateStatus ?cacheNodeId ?cacheClusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nodeUpdateStatusModifiedDate =
-        field_map json "NodeUpdateStatusModifiedDate" TStamp.of_json in
+        field_map json__ "NodeUpdateStatusModifiedDate" TStamp.of_json in
       let nodeUpdateInitiatedDate =
-        field_map json "NodeUpdateInitiatedDate" TStamp.of_json in
+        field_map json__ "NodeUpdateInitiatedDate" TStamp.of_json in
       let nodeUpdateInitiatedBy =
-        field_map json "NodeUpdateInitiatedBy" NodeUpdateInitiatedBy.of_json in
+        field_map json__ "NodeUpdateInitiatedBy"
+          NodeUpdateInitiatedBy.of_json in
       let nodeUpdateEndDate =
-        field_map json "NodeUpdateEndDate" TStamp.of_json in
+        field_map json__ "NodeUpdateEndDate" TStamp.of_json in
       let nodeUpdateStartDate =
-        field_map json "NodeUpdateStartDate" TStamp.of_json in
-      let nodeDeletionDate = field_map json "NodeDeletionDate" TStamp.of_json in
+        field_map json__ "NodeUpdateStartDate" TStamp.of_json in
+      let nodeDeletionDate =
+        field_map json__ "NodeDeletionDate" TStamp.of_json in
       let nodeUpdateStatus =
-        field_map json "NodeUpdateStatus" NodeUpdateStatus.of_json in
-      let cacheNodeId = field_map json "CacheNodeId" String_.of_json in
-      let cacheClusterId = field_map json "CacheClusterId" String_.of_json in
+        field_map json__ "NodeUpdateStatus" NodeUpdateStatus.of_json in
+      let cacheNodeId = field_map json__ "CacheNodeId" String_.of_json in
+      let cacheClusterId = field_map json__ "CacheClusterId" String_.of_json in
       make ?nodeUpdateStatusModifiedDate ?nodeUpdateInitiatedDate
         ?nodeUpdateInitiatedBy ?nodeUpdateEndDate ?nodeUpdateStartDate
         ?nodeDeletionDate ?nodeUpdateStatus ?cacheNodeId ?cacheClusterId ()
@@ -324,7 +326,7 @@ module NodeGroupMember =
           "The ID of the node within its cluster. A node ID is a numeric identifier (0001, 0002, etc.)."];
       readEndpoint: Endpoint.t option
         [@ocaml.doc
-          "The information required for client programs to connect to a node for read operations. The read endpoint is only applicable on Redis (cluster mode disabled) clusters."];
+          "The information required for client programs to connect to a node for read operations. The read endpoint is only applicable on Valkey or Redis OSS (cluster mode disabled) clusters."];
       preferredAvailabilityZone: String_.t option
         [@ocaml.doc
           "The name of the Availability Zone in which the node is located."];
@@ -332,7 +334,7 @@ module NodeGroupMember =
         [@ocaml.doc "The outpost ARN of the node group member."];
       currentRole: String_.t option
         [@ocaml.doc
-          "The role that is currently assigned to the node - primary or replica. This member is only applicable for Redis (cluster mode disabled) replication groups."]}
+          "The role that is currently assigned to the node - primary or replica. This member is only applicable for Valkey or Redis OSS (cluster mode disabled) replication groups."]}
     let make ?cacheClusterId =
       fun ?cacheNodeId ->
         fun ?readEndpoint ->
@@ -378,15 +380,15 @@ module NodeGroupMember =
       make ?currentRole ?preferredOutpostArn ?preferredAvailabilityZone
         ?readEndpoint ?cacheNodeId ?cacheClusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let currentRole = field_map json "CurrentRole" String_.of_json in
+    let of_json json__ =
+      let currentRole = field_map json__ "CurrentRole" String_.of_json in
       let preferredOutpostArn =
-        field_map json "PreferredOutpostArn" String_.of_json in
+        field_map json__ "PreferredOutpostArn" String_.of_json in
       let preferredAvailabilityZone =
-        field_map json "PreferredAvailabilityZone" String_.of_json in
-      let readEndpoint = field_map json "ReadEndpoint" Endpoint.of_json in
-      let cacheNodeId = field_map json "CacheNodeId" String_.of_json in
-      let cacheClusterId = field_map json "CacheClusterId" String_.of_json in
+        field_map json__ "PreferredAvailabilityZone" String_.of_json in
+      let readEndpoint = field_map json__ "ReadEndpoint" Endpoint.of_json in
+      let cacheNodeId = field_map json__ "CacheNodeId" String_.of_json in
+      let cacheClusterId = field_map json__ "CacheClusterId" String_.of_json in
       make ?currentRole ?preferredOutpostArn ?preferredAvailabilityZone
         ?readEndpoint ?cacheNodeId ?cacheClusterId ()
     let to_json v = composed_to_json to_value v
@@ -422,12 +424,12 @@ module DestinationDetails =
           (Xml.child xml_arg0 "CloudWatchLogsDetails") in
       make ?kinesisFirehoseDetails ?cloudWatchLogsDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let kinesisFirehoseDetails =
-        field_map json "KinesisFirehoseDetails"
+        field_map json__ "KinesisFirehoseDetails"
           KinesisFirehoseDestinationDetails.of_json in
       let cloudWatchLogsDetails =
-        field_map json "CloudWatchLogsDetails"
+        field_map json__ "CloudWatchLogsDetails"
           CloudWatchLogsDestinationDetails.of_json in
       make ?kinesisFirehoseDetails ?cloudWatchLogsDetails ()
     let to_json v = composed_to_json to_value v
@@ -557,6 +559,9 @@ module AvailabilityZonesList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -595,6 +600,9 @@ module OutpostArnsList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -615,10 +623,41 @@ module OutpostArnsList =
       list_of_json ~kind:"OutpostArnsList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module NetworkType =
+  struct
+    type nonrec t =
+      | Ipv4 
+      | Ipv6 
+      | Dual_stack 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Ipv4 -> "ipv4"
+      | Ipv6 -> "ipv6"
+      | Dual_stack -> "dual_stack"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ipv4" -> Ipv4
+      | "ipv6" -> Ipv6
+      | "dual_stack" -> Dual_stack
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NetworkType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NetworkType" j)
+    let to_json = simple_to_json to_value
+  end
 module NodeGroupMemberUpdateStatusList =
   struct
     type nonrec t = NodeGroupMemberUpdateStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NodeGroupMemberUpdateStatus.to_value)) |>
         (fun x -> `List x)
@@ -682,6 +721,9 @@ module NodeGroupMemberList =
   struct
     type nonrec t = NodeGroupMember.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NodeGroupMember.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -745,13 +787,13 @@ module PendingLogDeliveryConfiguration =
         (Option.map ~f:LogType.of_xml) (Xml.child xml_arg0 "LogType") in
       make ?logFormat ?destinationDetails ?destinationType ?logType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logFormat = field_map json "LogFormat" LogFormat.of_json in
+    let of_json json__ =
+      let logFormat = field_map json__ "LogFormat" LogFormat.of_json in
       let destinationDetails =
-        field_map json "DestinationDetails" DestinationDetails.of_json in
+        field_map json__ "DestinationDetails" DestinationDetails.of_json in
       let destinationType =
-        field_map json "DestinationType" DestinationType.of_json in
-      let logType = field_map json "LogType" LogType.of_json in
+        field_map json__ "DestinationType" DestinationType.of_json in
+      let logType = field_map json__ "LogType" LogType.of_json in
       make ?logFormat ?destinationDetails ?destinationType ?logType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The log delivery configurations being modified"]
@@ -773,9 +815,9 @@ module SlotMigration =
           (Xml.child xml_arg0 "ProgressPercentage") in
       make ?progressPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let progressPercentage =
-        field_map json "ProgressPercentage" Double.of_json in
+        field_map json__ "ProgressPercentage" Double.of_json in
       make ?progressPercentage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -784,6 +826,9 @@ module UserGroupIdList =
   struct
     type nonrec t = UserGroupId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UserGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -828,7 +873,7 @@ module NodeGroupConfiguration =
       {
       nodeGroupId: AllowedNodeGroupId.t option
         [@ocaml.doc
-          "Either the ElastiCache for Redis supplied 4-digit id or a user supplied id for the node group these configuration values apply to."];
+          "Either the ElastiCache supplied 4-digit id or a user supplied id for the node group these configuration values apply to."];
       slots: String_.t option
         [@ocaml.doc
           "A string that specifies the keyspace for a particular node group. Keyspaces range from 0 to 16,383. The string is in the format startkey-endkey. Example: \"0-3999\""];
@@ -902,26 +947,42 @@ module NodeGroupConfiguration =
       make ?replicaOutpostArns ?primaryOutpostArn ?replicaAvailabilityZones
         ?primaryAvailabilityZone ?replicaCount ?slots ?nodeGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicaOutpostArns =
-        field_map json "ReplicaOutpostArns" OutpostArnsList.of_json in
+        field_map json__ "ReplicaOutpostArns" OutpostArnsList.of_json in
       let primaryOutpostArn =
-        field_map json "PrimaryOutpostArn" String_.of_json in
+        field_map json__ "PrimaryOutpostArn" String_.of_json in
       let replicaAvailabilityZones =
-        field_map json "ReplicaAvailabilityZones"
+        field_map json__ "ReplicaAvailabilityZones"
           AvailabilityZonesList.of_json in
       let primaryAvailabilityZone =
-        field_map json "PrimaryAvailabilityZone" String_.of_json in
+        field_map json__ "PrimaryAvailabilityZone" String_.of_json in
       let replicaCount =
-        field_map json "ReplicaCount" IntegerOptional.of_json in
-      let slots = field_map json "Slots" String_.of_json in
+        field_map json__ "ReplicaCount" IntegerOptional.of_json in
+      let slots = field_map json__ "Slots" String_.of_json in
       let nodeGroupId =
-        field_map json "NodeGroupId" AllowedNodeGroupId.of_json in
+        field_map json__ "NodeGroupId" AllowedNodeGroupId.of_json in
       make ?replicaOutpostArns ?primaryOutpostArn ?replicaAvailabilityZones
         ?primaryAvailabilityZone ?replicaCount ?slots ?nodeGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Node group (shard) configuration options. Each node group (shard) configuration has the following: Slots, PrimaryAvailabilityZone, ReplicaAvailabilityZones, ReplicaCount."]
+module DataStorageUnit =
+  struct
+    type nonrec t =
+      | GB 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | GB -> "GB" | Non_static_id s -> s
+    let of_string = function | "GB" -> GB | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DataStorageUnit" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DataStorageUnit" j)
+    let to_json = simple_to_json to_value
+  end
 module AutomaticFailoverStatus =
   struct
     type nonrec t =
@@ -976,9 +1037,9 @@ module CacheNodeTypeSpecificValue =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CacheNodeType") in
       make ?value ?cacheNodeType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
       make ?value ?cacheNodeType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A value that applies only to a certain cache node type."]
@@ -996,11 +1057,38 @@ module AvailabilityZone =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" String_.of_json in make ?name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" String_.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes an Availability Zone in which the cluster is launched."]
+module NetworkTypeList =
+  struct
+    type nonrec t = NetworkType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NetworkType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NetworkType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NetworkTypeList" ~of_json:NetworkType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SubnetOutpost =
   struct
     type nonrec t =
@@ -1019,9 +1107,9 @@ module SubnetOutpost =
           (Xml.child xml_arg0 "SubnetOutpostArn") in
       make ?subnetOutpostArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subnetOutpostArn =
-        field_map json "SubnetOutpostArn" String_.of_json in
+        field_map json__ "SubnetOutpostArn" String_.of_json in
       make ?subnetOutpostArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The ID of the outpost subnet."]
@@ -1111,21 +1199,23 @@ module CacheNodeUpdateStatus =
         ?nodeUpdateInitiatedBy ?nodeUpdateEndDate ?nodeUpdateStartDate
         ?nodeDeletionDate ?nodeUpdateStatus ?cacheNodeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nodeUpdateStatusModifiedDate =
-        field_map json "NodeUpdateStatusModifiedDate" TStamp.of_json in
+        field_map json__ "NodeUpdateStatusModifiedDate" TStamp.of_json in
       let nodeUpdateInitiatedDate =
-        field_map json "NodeUpdateInitiatedDate" TStamp.of_json in
+        field_map json__ "NodeUpdateInitiatedDate" TStamp.of_json in
       let nodeUpdateInitiatedBy =
-        field_map json "NodeUpdateInitiatedBy" NodeUpdateInitiatedBy.of_json in
+        field_map json__ "NodeUpdateInitiatedBy"
+          NodeUpdateInitiatedBy.of_json in
       let nodeUpdateEndDate =
-        field_map json "NodeUpdateEndDate" TStamp.of_json in
+        field_map json__ "NodeUpdateEndDate" TStamp.of_json in
       let nodeUpdateStartDate =
-        field_map json "NodeUpdateStartDate" TStamp.of_json in
-      let nodeDeletionDate = field_map json "NodeDeletionDate" TStamp.of_json in
+        field_map json__ "NodeUpdateStartDate" TStamp.of_json in
+      let nodeDeletionDate =
+        field_map json__ "NodeDeletionDate" TStamp.of_json in
       let nodeUpdateStatus =
-        field_map json "NodeUpdateStatus" NodeUpdateStatus.of_json in
-      let cacheNodeId = field_map json "CacheNodeId" String_.of_json in
+        field_map json__ "NodeUpdateStatus" NodeUpdateStatus.of_json in
+      let cacheNodeId = field_map json__ "CacheNodeId" String_.of_json in
       make ?nodeUpdateStatusModifiedDate ?nodeUpdateInitiatedDate
         ?nodeUpdateInitiatedBy ?nodeUpdateEndDate ?nodeUpdateStartDate
         ?nodeDeletionDate ?nodeUpdateStatus ?cacheNodeId ()
@@ -1157,11 +1247,11 @@ module NodeGroupUpdateStatus =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeGroupId") in
       make ?nodeGroupMemberUpdateStatus ?nodeGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nodeGroupMemberUpdateStatus =
-        field_map json "NodeGroupMemberUpdateStatus"
+        field_map json__ "NodeGroupMemberUpdateStatus"
           NodeGroupMemberUpdateStatusList.of_json in
-      let nodeGroupId = field_map json "NodeGroupId" String_.of_json in
+      let nodeGroupId = field_map json__ "NodeGroupId" String_.of_json in
       make ?nodeGroupMemberUpdateStatus ?nodeGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The status of the service update on the node group"]
@@ -1192,11 +1282,11 @@ module RecurringCharge =
           (Xml.child xml_arg0 "RecurringChargeAmount") in
       make ?recurringChargeFrequency ?recurringChargeAmount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recurringChargeFrequency =
-        field_map json "RecurringChargeFrequency" String_.of_json in
+        field_map json__ "RecurringChargeFrequency" String_.of_json in
       let recurringChargeAmount =
-        field_map json "RecurringChargeAmount" Double.of_json in
+        field_map json__ "RecurringChargeAmount" Double.of_json in
       make ?recurringChargeFrequency ?recurringChargeAmount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1267,16 +1357,16 @@ module LogDeliveryConfiguration =
       make ?message ?status ?logFormat ?destinationDetails ?destinationType
         ?logType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       let status =
-        field_map json "Status" LogDeliveryConfigurationStatus.of_json in
-      let logFormat = field_map json "LogFormat" LogFormat.of_json in
+        field_map json__ "Status" LogDeliveryConfigurationStatus.of_json in
+      let logFormat = field_map json__ "LogFormat" LogFormat.of_json in
       let destinationDetails =
-        field_map json "DestinationDetails" DestinationDetails.of_json in
+        field_map json__ "DestinationDetails" DestinationDetails.of_json in
       let destinationType =
-        field_map json "DestinationType" DestinationType.of_json in
-      let logType = field_map json "LogType" LogType.of_json in
+        field_map json__ "DestinationType" DestinationType.of_json in
+      let logType = field_map json__ "LogType" LogType.of_json in
       make ?message ?status ?logFormat ?destinationDetails ?destinationType
         ?logType ()
     let to_json v = composed_to_json to_value v
@@ -1287,7 +1377,7 @@ module NodeGroup =
       {
       nodeGroupId: String_.t option
         [@ocaml.doc
-          "The identifier for the node group (shard). A Redis (cluster mode disabled) replication group contains only 1 node group; therefore, the node group ID is 0001. A Redis (cluster mode enabled) replication group contains 1 to 90 node groups numbered 0001 to 0090. Optionally, the user can provide the id for a node group."];
+          "The identifier for the node group (shard). A Valkey or Redis OSS (cluster mode disabled) replication group contains only 1 node group; therefore, the node group ID is 0001. A Valkey or Redis OSS (cluster mode enabled) replication group contains 1 to 90 node groups numbered 0001 to 0090. Optionally, the user can provide the id for a node group."];
       status: String_.t option
         [@ocaml.doc
           "The current state of this replication group - creating, available, modifying, deleting."];
@@ -1296,7 +1386,7 @@ module NodeGroup =
           "The endpoint of the primary node in this node group (shard)."];
       readerEndpoint: Endpoint.t option
         [@ocaml.doc
-          "The endpoint of the replica nodes in this node group (shard)."];
+          "The endpoint of the replica nodes in this node group (shard). This value is read-only."];
       slots: String_.t option
         [@ocaml.doc "The keyspace for this node group (shard)."];
       nodeGroupMembers: NodeGroupMemberList.t option
@@ -1346,14 +1436,15 @@ module NodeGroup =
       make ?nodeGroupMembers ?slots ?readerEndpoint ?primaryEndpoint ?status
         ?nodeGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nodeGroupMembers =
-        field_map json "NodeGroupMembers" NodeGroupMemberList.of_json in
-      let slots = field_map json "Slots" String_.of_json in
-      let readerEndpoint = field_map json "ReaderEndpoint" Endpoint.of_json in
-      let primaryEndpoint = field_map json "PrimaryEndpoint" Endpoint.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let nodeGroupId = field_map json "NodeGroupId" String_.of_json in
+        field_map json__ "NodeGroupMembers" NodeGroupMemberList.of_json in
+      let slots = field_map json__ "Slots" String_.of_json in
+      let readerEndpoint = field_map json__ "ReaderEndpoint" Endpoint.of_json in
+      let primaryEndpoint =
+        field_map json__ "PrimaryEndpoint" Endpoint.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let nodeGroupId = field_map json__ "NodeGroupId" String_.of_json in
       make ?nodeGroupMembers ?slots ?readerEndpoint ?primaryEndpoint ?status
         ?nodeGroupId ()
     let to_json v = composed_to_json to_value v
@@ -1384,6 +1475,47 @@ module AuthTokenUpdateStatus =
         (string_of_xml ~kind:"enumeration AuthTokenUpdateStatus" xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"AuthTokenUpdateStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module BooleanOptional =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ClusterMode =
+  struct
+    type nonrec t =
+      | Enabled 
+      | Disabled 
+      | Compatible 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Enabled -> "enabled"
+      | Disabled -> "disabled"
+      | Compatible -> "compatible"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "enabled" -> Enabled
+      | "disabled" -> Disabled
+      | "compatible" -> Compatible
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ClusterMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ClusterMode" j)
     let to_json = simple_to_json to_value
   end
 module PendingAutomaticFailoverStatus =
@@ -1418,6 +1550,9 @@ module PendingLogDeliveryConfigurationList =
   struct
     type nonrec t = PendingLogDeliveryConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PendingLogDeliveryConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -1459,12 +1594,39 @@ module ReshardingStatus =
           (Xml.child xml_arg0 "SlotMigration") in
       make ?slotMigration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let slotMigration =
-        field_map json "SlotMigration" SlotMigration.of_json in
+        field_map json__ "SlotMigration" SlotMigration.of_json in
       make ?slotMigration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The status of an online resharding operation."]
+module TransitEncryptionMode =
+  struct
+    type nonrec t =
+      | Preferred 
+      | Required 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Preferred -> "preferred"
+      | Required -> "required"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "preferred" -> Preferred
+      | "required" -> Required
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TransitEncryptionMode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TransitEncryptionMode" j)
+    let to_json = simple_to_json to_value
+  end
 module UserGroupsUpdateStatus =
   struct
     type nonrec t =
@@ -1492,11 +1654,11 @@ module UserGroupsUpdateStatus =
           (Xml.child xml_arg0 "UserGroupIdsToAdd") in
       make ?userGroupIdsToRemove ?userGroupIdsToAdd ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userGroupIdsToRemove =
-        field_map json "UserGroupIdsToRemove" UserGroupIdList.of_json in
+        field_map json__ "UserGroupIdsToRemove" UserGroupIdList.of_json in
       let userGroupIdsToAdd =
-        field_map json "UserGroupIdsToAdd" UserGroupIdList.of_json in
+        field_map json__ "UserGroupIdsToAdd" UserGroupIdList.of_json in
       make ?userGroupIdsToRemove ?userGroupIdsToAdd ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The status of the user group update."]
@@ -1506,7 +1668,7 @@ module ReshardingConfiguration =
       {
       nodeGroupId: AllowedNodeGroupId.t option
         [@ocaml.doc
-          "Either the ElastiCache for Redis supplied 4-digit id or a user supplied id for the node group these configuration values apply to."];
+          "Either the ElastiCache supplied 4-digit id or a user supplied id for the node group these configuration values apply to."];
       preferredAvailabilityZones: AvailabilityZonesList.t option
         [@ocaml.doc
           "A list of preferred availability zones for the nodes in this cluster."]}
@@ -1530,12 +1692,12 @@ module ReshardingConfiguration =
           (Xml.child xml_arg0 "NodeGroupId") in
       make ?preferredAvailabilityZones ?nodeGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let preferredAvailabilityZones =
-        field_map json "PreferredAvailabilityZones"
+        field_map json__ "PreferredAvailabilityZones"
           AvailabilityZonesList.of_json in
       let nodeGroupId =
-        field_map json "NodeGroupId" AllowedNodeGroupId.of_json in
+        field_map json__ "NodeGroupId" AllowedNodeGroupId.of_json in
       make ?preferredAvailabilityZones ?nodeGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1545,17 +1707,20 @@ module AuthenticationType =
     type nonrec t =
       | Password 
       | No_password 
+      | Iam 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Password -> "password"
       | No_password -> "no-password"
+      | Iam -> "iam"
       | Non_static_id s -> s
     let of_string =
       function
       | "password" -> Password
       | "no-password" -> No_password
+      | "iam" -> Iam
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1598,6 +1763,9 @@ module UserIdList =
   struct
     type nonrec t = UserId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UserId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1691,23 +1859,91 @@ module NodeSnapshot =
       make ?snapshotCreateTime ?cacheNodeCreateTime ?cacheSize
         ?nodeGroupConfiguration ?cacheNodeId ?nodeGroupId ?cacheClusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotCreateTime =
-        field_map json "SnapshotCreateTime" TStamp.of_json in
+        field_map json__ "SnapshotCreateTime" TStamp.of_json in
       let cacheNodeCreateTime =
-        field_map json "CacheNodeCreateTime" TStamp.of_json in
-      let cacheSize = field_map json "CacheSize" String_.of_json in
+        field_map json__ "CacheNodeCreateTime" TStamp.of_json in
+      let cacheSize = field_map json__ "CacheSize" String_.of_json in
       let nodeGroupConfiguration =
-        field_map json "NodeGroupConfiguration"
+        field_map json__ "NodeGroupConfiguration"
           NodeGroupConfiguration.of_json in
-      let cacheNodeId = field_map json "CacheNodeId" String_.of_json in
-      let nodeGroupId = field_map json "NodeGroupId" String_.of_json in
-      let cacheClusterId = field_map json "CacheClusterId" String_.of_json in
+      let cacheNodeId = field_map json__ "CacheNodeId" String_.of_json in
+      let nodeGroupId = field_map json__ "NodeGroupId" String_.of_json in
+      let cacheClusterId = field_map json__ "CacheClusterId" String_.of_json in
       make ?snapshotCreateTime ?cacheNodeCreateTime ?cacheSize
         ?nodeGroupConfiguration ?cacheNodeId ?nodeGroupId ?cacheClusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents an individual cache node in a snapshot of a cluster."]
+module DataStorage =
+  struct
+    type nonrec t =
+      {
+      maximum: IntegerOptional.t option
+        [@ocaml.doc
+          "The upper limit for data storage the cache is set to use."];
+      minimum: IntegerOptional.t option
+        [@ocaml.doc
+          "The lower limit for data storage the cache is set to use."];
+      unit: DataStorageUnit.t
+        [@ocaml.doc "The unit that the storage is measured in, in GB."]}
+    let context_ = "DataStorage"
+    let make ?maximum =
+      fun ?minimum -> fun ~unit -> fun () -> { maximum; minimum; unit }
+    let to_value x =
+      structure_to_value
+        [("Maximum", (Option.map x.maximum ~f:IntegerOptional.to_value));
+        ("Minimum", (Option.map x.minimum ~f:IntegerOptional.to_value));
+        ("Unit", (Some (DataStorageUnit.to_value x.unit)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unit =
+        DataStorageUnit.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Unit") in
+      let minimum =
+        (Option.map ~f:IntegerOptional.of_xml) (Xml.child xml_arg0 "Minimum") in
+      let maximum =
+        (Option.map ~f:IntegerOptional.of_xml) (Xml.child xml_arg0 "Maximum") in
+      make ~unit ?minimum ?maximum ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unit = field_map_exn json__ "Unit" DataStorageUnit.of_json in
+      let minimum = field_map json__ "Minimum" IntegerOptional.of_json in
+      let maximum = field_map json__ "Maximum" IntegerOptional.of_json in
+      make ~unit ?minimum ?maximum ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The data storage limit."]
+module ECPUPerSecond =
+  struct
+    type nonrec t =
+      {
+      maximum: IntegerOptional.t option
+        [@ocaml.doc
+          "The configuration for the maximum number of ECPUs the cache can consume per second."];
+      minimum: IntegerOptional.t option
+        [@ocaml.doc
+          "The configuration for the minimum number of ECPUs the cache should be able consume per second."]}
+    let make ?maximum = fun ?minimum -> fun () -> { maximum; minimum }
+    let to_value x =
+      structure_to_value
+        [("Maximum", (Option.map x.maximum ~f:IntegerOptional.to_value));
+        ("Minimum", (Option.map x.minimum ~f:IntegerOptional.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let minimum =
+        (Option.map ~f:IntegerOptional.of_xml) (Xml.child xml_arg0 "Minimum") in
+      let maximum =
+        (Option.map ~f:IntegerOptional.of_xml) (Xml.child xml_arg0 "Maximum") in
+      make ?minimum ?maximum ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let minimum = field_map json__ "Minimum" IntegerOptional.of_json in
+      let maximum = field_map json__ "Maximum" IntegerOptional.of_json in
+      make ?minimum ?maximum ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for the number of ElastiCache Processing Units (ECPU) the cache can consume per second."]
 module GlobalNodeGroup =
   struct
     type nonrec t =
@@ -1730,10 +1966,10 @@ module GlobalNodeGroup =
           (Xml.child xml_arg0 "GlobalNodeGroupId") in
       make ?slots ?globalNodeGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let slots = field_map json "Slots" String_.of_json in
+    let of_json json__ =
+      let slots = field_map json__ "Slots" String_.of_json in
       let globalNodeGroupId =
-        field_map json "GlobalNodeGroupId" String_.of_json in
+        field_map json__ "GlobalNodeGroupId" String_.of_json in
       make ?slots ?globalNodeGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1795,15 +2031,15 @@ module GlobalReplicationGroupMember =
       make ?status ?automaticFailover ?role ?replicationGroupRegion
         ?replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
       let automaticFailover =
-        field_map json "AutomaticFailover" AutomaticFailoverStatus.of_json in
-      let role = field_map json "Role" String_.of_json in
+        field_map json__ "AutomaticFailover" AutomaticFailoverStatus.of_json in
+      let role = field_map json__ "Role" String_.of_json in
       let replicationGroupRegion =
-        field_map json "ReplicationGroupRegion" String_.of_json in
+        field_map json__ "ReplicationGroupRegion" String_.of_json in
       let replicationGroupId =
-        field_map json "ReplicationGroupId" String_.of_json in
+        field_map json__ "ReplicationGroupId" String_.of_json in
       make ?status ?automaticFailover ?role ?replicationGroupRegion
         ?replicationGroupId ()
     let to_json v = composed_to_json to_value v
@@ -1826,6 +2062,9 @@ module CacheNodeTypeSpecificValueList =
   struct
     type nonrec t = CacheNodeTypeSpecificValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CacheNodeTypeSpecificValue.to_value)) |>
         (fun x -> `List x)
@@ -1882,12 +2121,21 @@ module Subnet =
       subnetAvailabilityZone: AvailabilityZone.t option
         [@ocaml.doc "The Availability Zone associated with the subnet."];
       subnetOutpost: SubnetOutpost.t option
-        [@ocaml.doc "The outpost ARN of the subnet."]}
+        [@ocaml.doc "The outpost ARN of the subnet."];
+      supportedNetworkTypes: NetworkTypeList.t option
+        [@ocaml.doc
+          "Either ipv4 | ipv6 | dual_stack. IPv6 is supported for workloads using Valkey 7.2 and above, Redis OSS engine version 6.2 to 7.1 or Memcached engine version 1.6.6 and above on all instances built on the Nitro system."]}
     let make ?subnetIdentifier =
       fun ?subnetAvailabilityZone ->
         fun ?subnetOutpost ->
-          fun () ->
-            { subnetIdentifier; subnetAvailabilityZone; subnetOutpost }
+          fun ?supportedNetworkTypes ->
+            fun () ->
+              {
+                subnetIdentifier;
+                subnetAvailabilityZone;
+                subnetOutpost;
+                supportedNetworkTypes
+              }
     let to_value x =
       structure_to_value
         [("SubnetIdentifier",
@@ -1895,9 +2143,14 @@ module Subnet =
         ("SubnetAvailabilityZone",
           (Option.map x.subnetAvailabilityZone ~f:AvailabilityZone.to_value));
         ("SubnetOutpost",
-          (Option.map x.subnetOutpost ~f:SubnetOutpost.to_value))]
+          (Option.map x.subnetOutpost ~f:SubnetOutpost.to_value));
+        ("SupportedNetworkTypes",
+          (Option.map x.supportedNetworkTypes ~f:NetworkTypeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supportedNetworkTypes =
+        (Option.map ~f:NetworkTypeList.of_xml)
+          (Xml.child xml_arg0 "SupportedNetworkTypes") in
       let subnetOutpost =
         (Option.map ~f:SubnetOutpost.of_xml)
           (Xml.child xml_arg0 "SubnetOutpost") in
@@ -1907,16 +2160,20 @@ module Subnet =
       let subnetIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SubnetIdentifier") in
-      make ?subnetOutpost ?subnetAvailabilityZone ?subnetIdentifier ()
+      make ?supportedNetworkTypes ?subnetOutpost ?subnetAvailabilityZone
+        ?subnetIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let supportedNetworkTypes =
+        field_map json__ "SupportedNetworkTypes" NetworkTypeList.of_json in
       let subnetOutpost =
-        field_map json "SubnetOutpost" SubnetOutpost.of_json in
+        field_map json__ "SubnetOutpost" SubnetOutpost.of_json in
       let subnetAvailabilityZone =
-        field_map json "SubnetAvailabilityZone" AvailabilityZone.of_json in
+        field_map json__ "SubnetAvailabilityZone" AvailabilityZone.of_json in
       let subnetIdentifier =
-        field_map json "SubnetIdentifier" String_.of_json in
-      make ?subnetOutpost ?subnetAvailabilityZone ?subnetIdentifier ()
+        field_map json__ "SubnetIdentifier" String_.of_json in
+      make ?supportedNetworkTypes ?subnetOutpost ?subnetAvailabilityZone
+        ?subnetIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the subnet associated with a cluster. This parameter refers to subnets defined in Amazon Virtual Private Cloud (Amazon VPC) and used with ElastiCache."]
@@ -1954,12 +2211,12 @@ module EC2SecurityGroup =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
       make ?eC2SecurityGroupOwnerId ?eC2SecurityGroupName ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eC2SecurityGroupOwnerId =
-        field_map json "EC2SecurityGroupOwnerId" String_.of_json in
+        field_map json__ "EC2SecurityGroupOwnerId" String_.of_json in
       let eC2SecurityGroupName =
-        field_map json "EC2SecurityGroupName" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
+        field_map json__ "EC2SecurityGroupName" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       make ?eC2SecurityGroupOwnerId ?eC2SecurityGroupName ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2051,30 +2308,34 @@ module CacheNode =
         ?parameterGroupStatus ?endpoint ?cacheNodeCreateTime ?cacheNodeStatus
         ?cacheNodeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customerOutpostArn =
-        field_map json "CustomerOutpostArn" String_.of_json in
+        field_map json__ "CustomerOutpostArn" String_.of_json in
       let customerAvailabilityZone =
-        field_map json "CustomerAvailabilityZone" String_.of_json in
+        field_map json__ "CustomerAvailabilityZone" String_.of_json in
       let sourceCacheNodeId =
-        field_map json "SourceCacheNodeId" String_.of_json in
+        field_map json__ "SourceCacheNodeId" String_.of_json in
       let parameterGroupStatus =
-        field_map json "ParameterGroupStatus" String_.of_json in
-      let endpoint = field_map json "Endpoint" Endpoint.of_json in
+        field_map json__ "ParameterGroupStatus" String_.of_json in
+      let endpoint = field_map json__ "Endpoint" Endpoint.of_json in
       let cacheNodeCreateTime =
-        field_map json "CacheNodeCreateTime" TStamp.of_json in
-      let cacheNodeStatus = field_map json "CacheNodeStatus" String_.of_json in
-      let cacheNodeId = field_map json "CacheNodeId" String_.of_json in
+        field_map json__ "CacheNodeCreateTime" TStamp.of_json in
+      let cacheNodeStatus =
+        field_map json__ "CacheNodeStatus" String_.of_json in
+      let cacheNodeId = field_map json__ "CacheNodeId" String_.of_json in
       make ?customerOutpostArn ?customerAvailabilityZone ?sourceCacheNodeId
         ?parameterGroupStatus ?endpoint ?cacheNodeCreateTime ?cacheNodeStatus
         ?cacheNodeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents an individual cache node within a cluster. Each cache node runs its own instance of the cluster's protocol-compliant caching software - either Memcached or Redis. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M6g node types: (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge For region availability, see Supported Node Types M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended) C1 node types: cache.c1.xlarge Memory optimized with data tiering: Current generation: R6gd node types (available only for Redis engine version 6.2 onward). cache.r6gd.xlarge, cache.r6gd.2xlarge, cache.r6gd.4xlarge, cache.r6gd.8xlarge, cache.r6gd.12xlarge, cache.r6gd.16xlarge Memory optimized: Current generation: R6g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward). cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge For region availability, see Supported Node Types R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Redis append-only files (AOF) are not supported for T1 or T2 instances. Redis Multi-AZ with automatic failover is not supported on T1 instances. Redis configuration variables appendonly and appendfsync are not supported on Redis version 2.8.22 and later."]
+       "Represents an individual cache node within a cluster. Each cache node runs its own instance of the cluster's protocol-compliant caching software - either Memcached, Valkey or Redis OSS. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M7g node types: cache.m7g.large, cache.m7g.xlarge, cache.m7g.2xlarge, cache.m7g.4xlarge, cache.m7g.8xlarge, cache.m7g.12xlarge, cache.m7g.16xlarge For region availability, see Supported Node Types M6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis OSS engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) C1 node types: cache.c1.xlarge Memory optimized: Current generation: R7g node types: cache.r7g.large, cache.r7g.xlarge, cache.r7g.2xlarge, cache.r7g.4xlarge, cache.r7g.8xlarge, cache.r7g.12xlarge, cache.r7g.16xlarge For region availability, see Supported Node Types R6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Valkey or Redis OSS append-only files (AOF) are not supported for T1 or T2 instances. Valkey or Redis OSS Multi-AZ with automatic failover is not supported on T1 instances. The configuration variables appendonly and appendfsync are not supported on Valkey, or on Redis OSS version 2.8.22 and later."]
 module CacheNodeIdsList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2120,14 +2381,52 @@ module CacheSecurityGroupMembership =
           (Xml.child xml_arg0 "CacheSecurityGroupName") in
       make ?status ?cacheSecurityGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
       let cacheSecurityGroupName =
-        field_map json "CacheSecurityGroupName" String_.of_json in
+        field_map json__ "CacheSecurityGroupName" String_.of_json in
       make ?status ?cacheSecurityGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a cluster's status within a particular cache security group."]
+module ScaleConfig =
+  struct
+    type nonrec t =
+      {
+      scalePercentage: IntegerOptional.t option
+        [@ocaml.doc
+          "The percentage by which to scale the Memcached cluster, either horizontally by adding nodes or vertically by increasing resources."];
+      scaleIntervalMinutes: IntegerOptional.t option
+        [@ocaml.doc
+          "The time interval in seconds between scaling operations when performing gradual scaling for a Memcached cluster."]}
+    let make ?scalePercentage =
+      fun ?scaleIntervalMinutes ->
+        fun () -> { scalePercentage; scaleIntervalMinutes }
+    let to_value x =
+      structure_to_value
+        [("ScalePercentage",
+           (Option.map x.scalePercentage ~f:IntegerOptional.to_value));
+        ("ScaleIntervalMinutes",
+          (Option.map x.scaleIntervalMinutes ~f:IntegerOptional.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scaleIntervalMinutes =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "ScaleIntervalMinutes") in
+      let scalePercentage =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "ScalePercentage") in
+      make ?scaleIntervalMinutes ?scalePercentage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scaleIntervalMinutes =
+        field_map json__ "ScaleIntervalMinutes" IntegerOptional.of_json in
+      let scalePercentage =
+        field_map json__ "ScalePercentage" IntegerOptional.of_json in
+      make ?scaleIntervalMinutes ?scalePercentage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration settings for horizontal or vertical scaling operations on Memcached clusters."]
 module SecurityGroupMembership =
   struct
     type nonrec t =
@@ -2152,9 +2451,10 @@ module SecurityGroupMembership =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SecurityGroupId") in
       make ?status ?securityGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
-      let securityGroupId = field_map json "SecurityGroupId" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
+      let securityGroupId =
+        field_map json__ "SecurityGroupId" String_.of_json in
       make ?status ?securityGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a single cache security group and its status."]
@@ -2162,6 +2462,9 @@ module CacheNodeUpdateStatusList =
   struct
     type nonrec t = CacheNodeUpdateStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CacheNodeUpdateStatus.to_value)) |>
         (fun x -> `List x)
@@ -2188,6 +2491,9 @@ module NodeGroupUpdateStatusList =
   struct
     type nonrec t = NodeGroupUpdateStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NodeGroupUpdateStatus.to_value)) |>
         (fun x -> `List x)
@@ -2366,23 +2672,13 @@ module UpdateActionStatus =
     let of_json j = of_string (string_of_json ~kind:"UpdateActionStatus" j)
     let to_json = simple_to_json to_value
   end
-module BooleanOptional =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
-    let to_json = simple_to_json to_value
-  end
 module RecurringChargeList =
   struct
     type nonrec t = RecurringCharge.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecurringCharge.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2408,6 +2704,9 @@ module ClusterIdList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2483,19 +2782,41 @@ module GlobalReplicationGroupInfo =
           (Xml.child xml_arg0 "GlobalReplicationGroupId") in
       make ?globalReplicationGroupMemberRole ?globalReplicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalReplicationGroupMemberRole =
-        field_map json "GlobalReplicationGroupMemberRole" String_.of_json in
+        field_map json__ "GlobalReplicationGroupMemberRole" String_.of_json in
       let globalReplicationGroupId =
-        field_map json "GlobalReplicationGroupId" String_.of_json in
+        field_map json__ "GlobalReplicationGroupId" String_.of_json in
       make ?globalReplicationGroupMemberRole ?globalReplicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The name of the Global datastore and role of this replication group in the Global datastore."]
+module IpDiscovery =
+  struct
+    type nonrec t =
+      | Ipv4 
+      | Ipv6 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Ipv4 -> "ipv4" | Ipv6 -> "ipv6" | Non_static_id s -> s
+    let of_string =
+      function | "ipv4" -> Ipv4 | "ipv6" -> Ipv6 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IpDiscovery" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IpDiscovery" j)
+    let to_json = simple_to_json to_value
+  end
 module LogDeliveryConfigurationList =
   struct
     type nonrec t = LogDeliveryConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LogDeliveryConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -2547,6 +2868,9 @@ module NodeGroupList =
   struct
     type nonrec t = NodeGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NodeGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2571,6 +2895,9 @@ module ReplicationGroupOutpostArnList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2601,7 +2928,7 @@ module ReplicationGroupPendingModifiedValues =
           "The primary cluster ID that is applied immediately (if --apply-immediately was specified), or during the next maintenance window."];
       automaticFailoverStatus: PendingAutomaticFailoverStatus.t option
         [@ocaml.doc
-          "Indicates the status of automatic failover for this Redis replication group."];
+          "Indicates the status of automatic failover for this Valkey or Redis OSS replication group."];
       resharding: ReshardingStatus.t option
         [@ocaml.doc "The status of an online resharding operation."];
       authTokenStatus: AuthTokenUpdateStatus.t option
@@ -2609,22 +2936,37 @@ module ReplicationGroupPendingModifiedValues =
       userGroups: UserGroupsUpdateStatus.t option
         [@ocaml.doc "The user group being modified."];
       logDeliveryConfigurations: PendingLogDeliveryConfigurationList.t option
-        [@ocaml.doc "The log delivery configurations being modified"]}
+        [@ocaml.doc "The log delivery configurations being modified"];
+      transitEncryptionEnabled: BooleanOptional.t option
+        [@ocaml.doc
+          "A flag that enables in-transit encryption when set to true."];
+      transitEncryptionMode: TransitEncryptionMode.t option
+        [@ocaml.doc
+          "A setting that allows you to migrate your clients to use in-transit encryption, with no downtime."];
+      clusterMode: ClusterMode.t option
+        [@ocaml.doc
+          "Enabled or Disabled. To modify cluster mode from Disabled to Enabled, you must first set the cluster mode to Compatible. Compatible mode allows your Valkey or Redis OSS clients to connect using both cluster mode enabled and cluster mode disabled. After you migrate all Valkey or Redis OSS clients to use cluster mode enabled, you can then complete cluster mode configuration and set the cluster mode to Enabled."]}
     let make ?primaryClusterId =
       fun ?automaticFailoverStatus ->
         fun ?resharding ->
           fun ?authTokenStatus ->
             fun ?userGroups ->
               fun ?logDeliveryConfigurations ->
-                fun () ->
-                  {
-                    primaryClusterId;
-                    automaticFailoverStatus;
-                    resharding;
-                    authTokenStatus;
-                    userGroups;
-                    logDeliveryConfigurations
-                  }
+                fun ?transitEncryptionEnabled ->
+                  fun ?transitEncryptionMode ->
+                    fun ?clusterMode ->
+                      fun () ->
+                        {
+                          primaryClusterId;
+                          automaticFailoverStatus;
+                          resharding;
+                          authTokenStatus;
+                          userGroups;
+                          logDeliveryConfigurations;
+                          transitEncryptionEnabled;
+                          transitEncryptionMode;
+                          clusterMode
+                        }
     let to_value x =
       structure_to_value
         [("PrimaryClusterId",
@@ -2640,9 +2982,23 @@ module ReplicationGroupPendingModifiedValues =
           (Option.map x.userGroups ~f:UserGroupsUpdateStatus.to_value));
         ("LogDeliveryConfigurations",
           (Option.map x.logDeliveryConfigurations
-             ~f:PendingLogDeliveryConfigurationList.to_value))]
+             ~f:PendingLogDeliveryConfigurationList.to_value));
+        ("TransitEncryptionEnabled",
+          (Option.map x.transitEncryptionEnabled ~f:BooleanOptional.to_value));
+        ("TransitEncryptionMode",
+          (Option.map x.transitEncryptionMode
+             ~f:TransitEncryptionMode.to_value));
+        ("ClusterMode", (Option.map x.clusterMode ~f:ClusterMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clusterMode =
+        (Option.map ~f:ClusterMode.of_xml) (Xml.child xml_arg0 "ClusterMode") in
+      let transitEncryptionMode =
+        (Option.map ~f:TransitEncryptionMode.of_xml)
+          (Xml.child xml_arg0 "TransitEncryptionMode") in
+      let transitEncryptionEnabled =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "TransitEncryptionEnabled") in
       let logDeliveryConfigurations =
         (Option.map ~f:PendingLogDeliveryConfigurationList.of_xml)
           (Xml.child xml_arg0 "LogDeliveryConfigurations") in
@@ -2661,32 +3017,43 @@ module ReplicationGroupPendingModifiedValues =
       let primaryClusterId =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "PrimaryClusterId") in
-      make ?logDeliveryConfigurations ?userGroups ?authTokenStatus
-        ?resharding ?automaticFailoverStatus ?primaryClusterId ()
+      make ?clusterMode ?transitEncryptionMode ?transitEncryptionEnabled
+        ?logDeliveryConfigurations ?userGroups ?authTokenStatus ?resharding
+        ?automaticFailoverStatus ?primaryClusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let clusterMode = field_map json__ "ClusterMode" ClusterMode.of_json in
+      let transitEncryptionMode =
+        field_map json__ "TransitEncryptionMode"
+          TransitEncryptionMode.of_json in
+      let transitEncryptionEnabled =
+        field_map json__ "TransitEncryptionEnabled" BooleanOptional.of_json in
       let logDeliveryConfigurations =
-        field_map json "LogDeliveryConfigurations"
+        field_map json__ "LogDeliveryConfigurations"
           PendingLogDeliveryConfigurationList.of_json in
       let userGroups =
-        field_map json "UserGroups" UserGroupsUpdateStatus.of_json in
+        field_map json__ "UserGroups" UserGroupsUpdateStatus.of_json in
       let authTokenStatus =
-        field_map json "AuthTokenStatus" AuthTokenUpdateStatus.of_json in
-      let resharding = field_map json "Resharding" ReshardingStatus.of_json in
+        field_map json__ "AuthTokenStatus" AuthTokenUpdateStatus.of_json in
+      let resharding = field_map json__ "Resharding" ReshardingStatus.of_json in
       let automaticFailoverStatus =
-        field_map json "AutomaticFailoverStatus"
+        field_map json__ "AutomaticFailoverStatus"
           PendingAutomaticFailoverStatus.of_json in
       let primaryClusterId =
-        field_map json "PrimaryClusterId" String_.of_json in
-      make ?logDeliveryConfigurations ?userGroups ?authTokenStatus
-        ?resharding ?automaticFailoverStatus ?primaryClusterId ()
+        field_map json__ "PrimaryClusterId" String_.of_json in
+      make ?clusterMode ?transitEncryptionMode ?transitEncryptionEnabled
+        ?logDeliveryConfigurations ?userGroups ?authTokenStatus ?resharding
+        ?automaticFailoverStatus ?primaryClusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The settings to be applied to the Redis replication group, either immediately or during the next maintenance window."]
+       "The settings to be applied to the Valkey or Redis OSS replication group, either immediately or during the next maintenance window."]
 module PreferredAvailabilityZoneList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2712,6 +3079,9 @@ module PreferredOutpostArnList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2736,6 +3106,9 @@ module ReshardingConfigurationList =
   struct
     type nonrec t = ReshardingConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReshardingConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -2766,6 +3139,8 @@ module SourceType =
       | Cache_security_group 
       | Cache_subnet_group 
       | Replication_group 
+      | Serverless_cache 
+      | Serverless_cache_snapshot 
       | User 
       | User_group 
       | Non_static_id of string 
@@ -2777,6 +3152,8 @@ module SourceType =
       | Cache_security_group -> "cache-security-group"
       | Cache_subnet_group -> "cache-subnet-group"
       | Replication_group -> "replication-group"
+      | Serverless_cache -> "serverless-cache"
+      | Serverless_cache_snapshot -> "serverless-cache-snapshot"
       | User -> "user"
       | User_group -> "user-group"
       | Non_static_id s -> s
@@ -2787,6 +3164,8 @@ module SourceType =
       | "cache-security-group" -> Cache_security_group
       | "cache-subnet-group" -> Cache_subnet_group
       | "replication-group" -> Replication_group
+      | "serverless-cache" -> Serverless_cache
+      | "serverless-cache-snapshot" -> Serverless_cache_snapshot
       | "user" -> User
       | "user-group" -> User_group
       | x -> Non_static_id x
@@ -2824,10 +3203,10 @@ module Authentication =
         (Option.map ~f:AuthenticationType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?passwordCount ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let passwordCount =
-        field_map json "PasswordCount" IntegerOptional.of_json in
-      let type_ = field_map json "Type" AuthenticationType.of_json in
+        field_map json__ "PasswordCount" IntegerOptional.of_json in
+      let type_ = field_map json__ "Type" AuthenticationType.of_json in
       make ?passwordCount ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2889,8 +3268,8 @@ module InvalidParameterCombinationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" AwsQueryErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" AwsQueryErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Two or more incompatible parameters were specified."]
@@ -2911,8 +3290,8 @@ module InvalidParameterValueException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" AwsQueryErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" AwsQueryErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The value for a parameter is invalid."]
@@ -3009,6 +3388,9 @@ module FilterValueList =
     type nonrec t = FilterValue.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3057,6 +3439,9 @@ module UGReplicationGroupIdList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3076,6 +3461,33 @@ module UGReplicationGroupIdList =
     let of_json j =
       list_of_json ~kind:"UGReplicationGroupIdList" ~of_json:String_.of_json
         j
+    let to_json v = composed_to_json to_value v
+  end
+module UGServerlessCacheIdList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UGServerlessCacheIdList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
 module UserGroupAlreadyExistsFault =
@@ -3126,10 +3538,10 @@ module UserGroupPendingChanges =
           (Xml.child xml_arg0 "UserIdsToRemove") in
       make ?userIdsToAdd ?userIdsToRemove ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userIdsToAdd = field_map json "UserIdsToAdd" UserIdList.of_json in
+    let of_json json__ =
+      let userIdsToAdd = field_map json__ "UserIdsToAdd" UserIdList.of_json in
       let userIdsToRemove =
-        field_map json "UserIdsToRemove" UserIdList.of_json in
+        field_map json__ "UserIdsToRemove" UserIdList.of_json in
       make ?userIdsToAdd ?userIdsToRemove ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the updates being applied to the user group."]
@@ -3149,6 +3561,9 @@ module NodeSnapshotList =
   struct
     type nonrec t = NodeSnapshot.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NodeSnapshot.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3169,10 +3584,144 @@ module NodeSnapshotList =
       list_of_json ~kind:"NodeSnapshotList" ~of_json:NodeSnapshot.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CacheUsageLimits =
+  struct
+    type nonrec t =
+      {
+      dataStorage: DataStorage.t option
+        [@ocaml.doc
+          "The maximum data storage limit in the cache, expressed in Gigabytes."];
+      eCPUPerSecond: ECPUPerSecond.t option }
+    let make ?dataStorage =
+      fun ?eCPUPerSecond -> fun () -> { dataStorage; eCPUPerSecond }
+    let to_value x =
+      structure_to_value
+        [("DataStorage", (Option.map x.dataStorage ~f:DataStorage.to_value));
+        ("ECPUPerSecond",
+          (Option.map x.eCPUPerSecond ~f:ECPUPerSecond.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eCPUPerSecond =
+        (Option.map ~f:ECPUPerSecond.of_xml)
+          (Xml.child xml_arg0 "ECPUPerSecond") in
+      let dataStorage =
+        (Option.map ~f:DataStorage.of_xml) (Xml.child xml_arg0 "DataStorage") in
+      make ?eCPUPerSecond ?dataStorage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eCPUPerSecond =
+        field_map json__ "ECPUPerSecond" ECPUPerSecond.of_json in
+      let dataStorage = field_map json__ "DataStorage" DataStorage.of_json in
+      make ?eCPUPerSecond ?dataStorage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The usage limits for storage and ElastiCache Processing Units for the cache."]
+module SecurityGroupIdsList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecurityGroupIdsList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SubnetIdsList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SubnetIdsList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServerlessCacheConfiguration =
+  struct
+    type nonrec t =
+      {
+      serverlessCacheName: String_.t option
+        [@ocaml.doc "The identifier of a serverless cache."];
+      engine: String_.t option
+        [@ocaml.doc
+          "The engine that the serverless cache is configured with."];
+      majorEngineVersion: String_.t option
+        [@ocaml.doc
+          "The engine version number that the serverless cache is configured with."]}
+    let make ?serverlessCacheName =
+      fun ?engine ->
+        fun ?majorEngineVersion ->
+          fun () -> { serverlessCacheName; engine; majorEngineVersion }
+    let to_value x =
+      structure_to_value
+        [("ServerlessCacheName",
+           (Option.map x.serverlessCacheName ~f:String_.to_value));
+        ("Engine", (Option.map x.engine ~f:String_.to_value));
+        ("MajorEngineVersion",
+          (Option.map x.majorEngineVersion ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let majorEngineVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MajorEngineVersion") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
+      let serverlessCacheName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ServerlessCacheName") in
+      make ?majorEngineVersion ?engine ?serverlessCacheName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let majorEngineVersion =
+        field_map json__ "MajorEngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let serverlessCacheName =
+        field_map json__ "ServerlessCacheName" String_.of_json in
+      make ?majorEngineVersion ?engine ?serverlessCacheName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration settings for a specific serverless cache."]
 module GlobalNodeGroupList =
   struct
     type nonrec t = GlobalNodeGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlobalNodeGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3198,6 +3747,9 @@ module GlobalReplicationGroupMemberList =
   struct
     type nonrec t = GlobalReplicationGroupMember.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlobalReplicationGroupMember.to_value)) |>
         (fun x -> `List x)
@@ -3307,25 +3859,25 @@ module CacheNodeTypeSpecificParameter =
         ?isModifiable ?allowedValues ?dataType ?source ?description
         ?parameterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeType = field_map json "ChangeType" ChangeType.of_json in
+    let of_json json__ =
+      let changeType = field_map json__ "ChangeType" ChangeType.of_json in
       let cacheNodeTypeSpecificValues =
-        field_map json "CacheNodeTypeSpecificValues"
+        field_map json__ "CacheNodeTypeSpecificValues"
           CacheNodeTypeSpecificValueList.of_json in
       let minimumEngineVersion =
-        field_map json "MinimumEngineVersion" String_.of_json in
-      let isModifiable = field_map json "IsModifiable" Boolean.of_json in
-      let allowedValues = field_map json "AllowedValues" String_.of_json in
-      let dataType = field_map json "DataType" String_.of_json in
-      let source = field_map json "Source" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let parameterName = field_map json "ParameterName" String_.of_json in
+        field_map json__ "MinimumEngineVersion" String_.of_json in
+      let isModifiable = field_map json__ "IsModifiable" Boolean.of_json in
+      let allowedValues = field_map json__ "AllowedValues" String_.of_json in
+      let dataType = field_map json__ "DataType" String_.of_json in
+      let source = field_map json__ "Source" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let parameterName = field_map json__ "ParameterName" String_.of_json in
       make ?changeType ?cacheNodeTypeSpecificValues ?minimumEngineVersion
         ?isModifiable ?allowedValues ?dataType ?source ?description
         ?parameterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A parameter that has a different value for each cache node type it is applied to. For example, in a Redis cluster, a cache.m1.large cache node type would have a larger maxmemory value than a cache.m1.small type."]
+       "A parameter that has a different value for each cache node type it is applied to. For example, in a Valkey or Redis OSS cluster, a cache.m1.large cache node type would have a larger maxmemory value than a cache.m1.small type."]
 module Parameter =
   struct
     type nonrec t =
@@ -3407,17 +3959,17 @@ module Parameter =
       make ?changeType ?minimumEngineVersion ?isModifiable ?allowedValues
         ?dataType ?source ?description ?parameterValue ?parameterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeType = field_map json "ChangeType" ChangeType.of_json in
+    let of_json json__ =
+      let changeType = field_map json__ "ChangeType" ChangeType.of_json in
       let minimumEngineVersion =
-        field_map json "MinimumEngineVersion" String_.of_json in
-      let isModifiable = field_map json "IsModifiable" Boolean.of_json in
-      let allowedValues = field_map json "AllowedValues" String_.of_json in
-      let dataType = field_map json "DataType" String_.of_json in
-      let source = field_map json "Source" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let parameterValue = field_map json "ParameterValue" String_.of_json in
-      let parameterName = field_map json "ParameterName" String_.of_json in
+        field_map json__ "MinimumEngineVersion" String_.of_json in
+      let isModifiable = field_map json__ "IsModifiable" Boolean.of_json in
+      let allowedValues = field_map json__ "AllowedValues" String_.of_json in
+      let dataType = field_map json__ "DataType" String_.of_json in
+      let source = field_map json__ "Source" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let parameterValue = field_map json__ "ParameterValue" String_.of_json in
+      let parameterName = field_map json__ "ParameterName" String_.of_json in
       make ?changeType ?minimumEngineVersion ?isModifiable ?allowedValues
         ?dataType ?source ?description ?parameterValue ?parameterName ()
     let to_json v = composed_to_json to_value v
@@ -3427,6 +3979,9 @@ module SubnetList =
   struct
     type nonrec t = Subnet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Subnet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3450,6 +4005,9 @@ module EC2SecurityGroupList =
   struct
     type nonrec t = EC2SecurityGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EC2SecurityGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3475,6 +4033,9 @@ module CacheNodeList =
   struct
     type nonrec t = CacheNode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CacheNode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3537,13 +4098,13 @@ module CacheParameterGroupStatus =
       make ?cacheNodeIdsToReboot ?parameterApplyStatus
         ?cacheParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheNodeIdsToReboot =
-        field_map json "CacheNodeIdsToReboot" CacheNodeIdsList.of_json in
+        field_map json__ "CacheNodeIdsToReboot" CacheNodeIdsList.of_json in
       let parameterApplyStatus =
-        field_map json "ParameterApplyStatus" String_.of_json in
+        field_map json__ "ParameterApplyStatus" String_.of_json in
       let cacheParameterGroupName =
-        field_map json "CacheParameterGroupName" String_.of_json in
+        field_map json__ "CacheParameterGroupName" String_.of_json in
       make ?cacheNodeIdsToReboot ?parameterApplyStatus
         ?cacheParameterGroupName ()
     let to_json v = composed_to_json to_value v
@@ -3552,6 +4113,9 @@ module CacheSecurityGroupMembershipList =
   struct
     type nonrec t = CacheSecurityGroupMembership.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CacheSecurityGroupMembership.to_value)) |>
         (fun x -> `List x)
@@ -3597,9 +4161,9 @@ module NotificationConfiguration =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TopicArn") in
       make ?topicStatus ?topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicStatus = field_map json "TopicStatus" String_.of_json in
-      let topicArn = field_map json "TopicArn" String_.of_json in
+    let of_json json__ =
+      let topicStatus = field_map json__ "TopicStatus" String_.of_json in
+      let topicArn = field_map json__ "TopicArn" String_.of_json in
       make ?topicStatus ?topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3610,7 +4174,7 @@ module PendingModifiedValues =
       {
       numCacheNodes: IntegerOptional.t option
         [@ocaml.doc
-          "The new number of cache nodes for the cluster. For clusters running Redis, this value must be 1. For clusters running Memcached, this value must be between 1 and 40."];
+          "The new number of cache nodes for the cluster. For clusters running Valkey or Redis OSS, this value must be 1. For clusters running Memcached, this value must be between 1 and 40."];
       cacheNodeIdsToRemove: CacheNodeIdsList.t option
         [@ocaml.doc
           "A list of cache node IDs that are being removed (or will be removed) from the cluster. A node ID is a 4-digit numeric identifier (0001, 0002, etc.)."];
@@ -3622,22 +4186,37 @@ module PendingModifiedValues =
       authTokenStatus: AuthTokenUpdateStatus.t option
         [@ocaml.doc "The auth token status"];
       logDeliveryConfigurations: PendingLogDeliveryConfigurationList.t option
-        [@ocaml.doc "The log delivery configurations being modified"]}
+        [@ocaml.doc "The log delivery configurations being modified"];
+      transitEncryptionEnabled: BooleanOptional.t option
+        [@ocaml.doc
+          "A flag that enables in-transit encryption when set to true."];
+      transitEncryptionMode: TransitEncryptionMode.t option
+        [@ocaml.doc
+          "A setting that allows you to migrate your clients to use in-transit encryption, with no downtime."];
+      scaleConfig: ScaleConfig.t option
+        [@ocaml.doc
+          "The scaling configuration changes that are pending for the Memcached cluster."]}
     let make ?numCacheNodes =
       fun ?cacheNodeIdsToRemove ->
         fun ?engineVersion ->
           fun ?cacheNodeType ->
             fun ?authTokenStatus ->
               fun ?logDeliveryConfigurations ->
-                fun () ->
-                  {
-                    numCacheNodes;
-                    cacheNodeIdsToRemove;
-                    engineVersion;
-                    cacheNodeType;
-                    authTokenStatus;
-                    logDeliveryConfigurations
-                  }
+                fun ?transitEncryptionEnabled ->
+                  fun ?transitEncryptionMode ->
+                    fun ?scaleConfig ->
+                      fun () ->
+                        {
+                          numCacheNodes;
+                          cacheNodeIdsToRemove;
+                          engineVersion;
+                          cacheNodeType;
+                          authTokenStatus;
+                          logDeliveryConfigurations;
+                          transitEncryptionEnabled;
+                          transitEncryptionMode;
+                          scaleConfig
+                        }
     let to_value x =
       structure_to_value
         [("NumCacheNodes",
@@ -3650,9 +4229,23 @@ module PendingModifiedValues =
           (Option.map x.authTokenStatus ~f:AuthTokenUpdateStatus.to_value));
         ("LogDeliveryConfigurations",
           (Option.map x.logDeliveryConfigurations
-             ~f:PendingLogDeliveryConfigurationList.to_value))]
+             ~f:PendingLogDeliveryConfigurationList.to_value));
+        ("TransitEncryptionEnabled",
+          (Option.map x.transitEncryptionEnabled ~f:BooleanOptional.to_value));
+        ("TransitEncryptionMode",
+          (Option.map x.transitEncryptionMode
+             ~f:TransitEncryptionMode.to_value));
+        ("ScaleConfig", (Option.map x.scaleConfig ~f:ScaleConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let scaleConfig =
+        (Option.map ~f:ScaleConfig.of_xml) (Xml.child xml_arg0 "ScaleConfig") in
+      let transitEncryptionMode =
+        (Option.map ~f:TransitEncryptionMode.of_xml)
+          (Xml.child xml_arg0 "TransitEncryptionMode") in
+      let transitEncryptionEnabled =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "TransitEncryptionEnabled") in
       let logDeliveryConfigurations =
         (Option.map ~f:PendingLogDeliveryConfigurationList.of_xml)
           (Xml.child xml_arg0 "LogDeliveryConfigurations") in
@@ -3669,22 +4262,30 @@ module PendingModifiedValues =
       let numCacheNodes =
         (Option.map ~f:IntegerOptional.of_xml)
           (Xml.child xml_arg0 "NumCacheNodes") in
-      make ?logDeliveryConfigurations ?authTokenStatus ?cacheNodeType
+      make ?scaleConfig ?transitEncryptionMode ?transitEncryptionEnabled
+        ?logDeliveryConfigurations ?authTokenStatus ?cacheNodeType
         ?engineVersion ?cacheNodeIdsToRemove ?numCacheNodes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let scaleConfig = field_map json__ "ScaleConfig" ScaleConfig.of_json in
+      let transitEncryptionMode =
+        field_map json__ "TransitEncryptionMode"
+          TransitEncryptionMode.of_json in
+      let transitEncryptionEnabled =
+        field_map json__ "TransitEncryptionEnabled" BooleanOptional.of_json in
       let logDeliveryConfigurations =
-        field_map json "LogDeliveryConfigurations"
+        field_map json__ "LogDeliveryConfigurations"
           PendingLogDeliveryConfigurationList.of_json in
       let authTokenStatus =
-        field_map json "AuthTokenStatus" AuthTokenUpdateStatus.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
+        field_map json__ "AuthTokenStatus" AuthTokenUpdateStatus.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
       let cacheNodeIdsToRemove =
-        field_map json "CacheNodeIdsToRemove" CacheNodeIdsList.of_json in
+        field_map json__ "CacheNodeIdsToRemove" CacheNodeIdsList.of_json in
       let numCacheNodes =
-        field_map json "NumCacheNodes" IntegerOptional.of_json in
-      make ?logDeliveryConfigurations ?authTokenStatus ?cacheNodeType
+        field_map json__ "NumCacheNodes" IntegerOptional.of_json in
+      make ?scaleConfig ?transitEncryptionMode ?transitEncryptionEnabled
+        ?logDeliveryConfigurations ?authTokenStatus ?cacheNodeType
         ?engineVersion ?cacheNodeIdsToRemove ?numCacheNodes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3693,6 +4294,9 @@ module SecurityGroupMembershipList =
   struct
     type nonrec t = SecurityGroupMembership.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupMembership.to_value)) |>
         (fun x -> `List x)
@@ -3758,7 +4362,7 @@ module UpdateAction =
           "The estimated length of time for the update to complete"];
       engine: String_.t option
         [@ocaml.doc
-          "The Elasticache engine to which the update applies. Either Redis or Memcached"]}
+          "The Elasticache engine to which the update applies. Either Valkey, Redis OSS or Memcached."]}
     let make ?replicationGroupId =
       fun ?cacheClusterId ->
         fun ?serviceUpdateName ->
@@ -3888,39 +4492,40 @@ module UpdateAction =
         ?serviceUpdateStatus ?serviceUpdateSeverity ?serviceUpdateReleaseDate
         ?serviceUpdateName ?cacheClusterId ?replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let engine = field_map json "Engine" String_.of_json in
+    let of_json json__ =
+      let engine = field_map json__ "Engine" String_.of_json in
       let estimatedUpdateTime =
-        field_map json "EstimatedUpdateTime" String_.of_json in
+        field_map json__ "EstimatedUpdateTime" String_.of_json in
       let cacheNodeUpdateStatus =
-        field_map json "CacheNodeUpdateStatus"
+        field_map json__ "CacheNodeUpdateStatus"
           CacheNodeUpdateStatusList.of_json in
       let nodeGroupUpdateStatus =
-        field_map json "NodeGroupUpdateStatus"
+        field_map json__ "NodeGroupUpdateStatus"
           NodeGroupUpdateStatusList.of_json in
-      let slaMet = field_map json "SlaMet" SlaMet.of_json in
+      let slaMet = field_map json__ "SlaMet" SlaMet.of_json in
       let updateActionStatusModifiedDate =
-        field_map json "UpdateActionStatusModifiedDate" TStamp.of_json in
-      let nodesUpdated = field_map json "NodesUpdated" String_.of_json in
+        field_map json__ "UpdateActionStatusModifiedDate" TStamp.of_json in
+      let nodesUpdated = field_map json__ "NodesUpdated" String_.of_json in
       let updateActionStatus =
-        field_map json "UpdateActionStatus" UpdateActionStatus.of_json in
+        field_map json__ "UpdateActionStatus" UpdateActionStatus.of_json in
       let updateActionAvailableDate =
-        field_map json "UpdateActionAvailableDate" TStamp.of_json in
+        field_map json__ "UpdateActionAvailableDate" TStamp.of_json in
       let serviceUpdateType =
-        field_map json "ServiceUpdateType" ServiceUpdateType.of_json in
+        field_map json__ "ServiceUpdateType" ServiceUpdateType.of_json in
       let serviceUpdateRecommendedApplyByDate =
-        field_map json "ServiceUpdateRecommendedApplyByDate" TStamp.of_json in
+        field_map json__ "ServiceUpdateRecommendedApplyByDate" TStamp.of_json in
       let serviceUpdateStatus =
-        field_map json "ServiceUpdateStatus" ServiceUpdateStatus.of_json in
+        field_map json__ "ServiceUpdateStatus" ServiceUpdateStatus.of_json in
       let serviceUpdateSeverity =
-        field_map json "ServiceUpdateSeverity" ServiceUpdateSeverity.of_json in
+        field_map json__ "ServiceUpdateSeverity"
+          ServiceUpdateSeverity.of_json in
       let serviceUpdateReleaseDate =
-        field_map json "ServiceUpdateReleaseDate" TStamp.of_json in
+        field_map json__ "ServiceUpdateReleaseDate" TStamp.of_json in
       let serviceUpdateName =
-        field_map json "ServiceUpdateName" String_.of_json in
-      let cacheClusterId = field_map json "CacheClusterId" String_.of_json in
+        field_map json__ "ServiceUpdateName" String_.of_json in
+      let cacheClusterId = field_map json__ "CacheClusterId" String_.of_json in
       let replicationGroupId =
-        field_map json "ReplicationGroupId" String_.of_json in
+        field_map json__ "ReplicationGroupId" String_.of_json in
       make ?engine ?estimatedUpdateTime ?cacheNodeUpdateStatus
         ?nodeGroupUpdateStatus ?slaMet ?updateActionStatusModifiedDate
         ?nodesUpdated ?updateActionStatus ?updateActionAvailableDate
@@ -3941,7 +4546,8 @@ module ProcessedUpdateAction =
       serviceUpdateName: String_.t option
         [@ocaml.doc "The unique ID of the service update"];
       updateActionStatus: UpdateActionStatus.t option
-        [@ocaml.doc "The status of the update action on the Redis cluster"]}
+        [@ocaml.doc
+          "The status of the update action on the Valkey or Redis OSS cluster"]}
     let make ?replicationGroupId =
       fun ?cacheClusterId ->
         fun ?serviceUpdateName ->
@@ -3978,14 +4584,14 @@ module ProcessedUpdateAction =
       make ?updateActionStatus ?serviceUpdateName ?cacheClusterId
         ?replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updateActionStatus =
-        field_map json "UpdateActionStatus" UpdateActionStatus.of_json in
+        field_map json__ "UpdateActionStatus" UpdateActionStatus.of_json in
       let serviceUpdateName =
-        field_map json "ServiceUpdateName" String_.of_json in
-      let cacheClusterId = field_map json "CacheClusterId" String_.of_json in
+        field_map json__ "ServiceUpdateName" String_.of_json in
+      let cacheClusterId = field_map json__ "CacheClusterId" String_.of_json in
       let replicationGroupId =
-        field_map json "ReplicationGroupId" String_.of_json in
+        field_map json__ "ReplicationGroupId" String_.of_json in
       make ?updateActionStatus ?serviceUpdateName ?cacheClusterId
         ?replicationGroupId ()
     let to_json v = composed_to_json to_value v
@@ -4045,43 +4651,19 @@ module UnprocessedUpdateAction =
       make ?errorMessage ?errorType ?serviceUpdateName ?cacheClusterId
         ?replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
-      let errorType = field_map json "ErrorType" String_.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorType = field_map json__ "ErrorType" String_.of_json in
       let serviceUpdateName =
-        field_map json "ServiceUpdateName" String_.of_json in
-      let cacheClusterId = field_map json "CacheClusterId" String_.of_json in
+        field_map json__ "ServiceUpdateName" String_.of_json in
+      let cacheClusterId = field_map json__ "CacheClusterId" String_.of_json in
       let replicationGroupId =
-        field_map json "ReplicationGroupId" String_.of_json in
+        field_map json__ "ReplicationGroupId" String_.of_json in
       make ?errorMessage ?errorType ?serviceUpdateName ?cacheClusterId
         ?replicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Update action that has failed to be processed for the corresponding apply/stop request"]
-module Tag =
-  struct
-    type nonrec t =
-      {
-      key: String_.t option
-        [@ocaml.doc "The key for the tag. May not be null."];
-      value: String_.t option [@ocaml.doc "The tag's value. May be null."]}
-    let make ?key = fun ?value -> fun () -> { key; value }
-    let to_value x =
-      structure_to_value
-        [("Key", (Option.map x.key ~f:String_.to_value));
-        ("Value", (Option.map x.value ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
-      let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
-      make ?value ?key ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let key = field_map json "Key" String_.of_json in make ?value ?key ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A tag that can be added to an ElastiCache cluster or replication group. Tags are composed of a Key/Value pair. You can use tags to categorize and track all your ElastiCache resources, with the exception of global replication group. When you add or remove tags on replication groups, those actions will be replicated to all nodes in the replication group. A tag with a null Value is permitted."]
 module CustomerNodeEndpoint =
   struct
     type nonrec t =
@@ -4103,12 +4685,36 @@ module CustomerNodeEndpoint =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Address") in
       make ?port ?address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let port = field_map json "Port" IntegerOptional.of_json in
-      let address = field_map json "Address" String_.of_json in
+    let of_json json__ =
+      let port = field_map json__ "Port" IntegerOptional.of_json in
+      let address = field_map json__ "Address" String_.of_json in
       make ?port ?address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The endpoint from which data should be migrated."]
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: String_.t option
+        [@ocaml.doc "The key for the tag. May not be null."];
+      value: String_.t option [@ocaml.doc "The tag's value. May be null."]}
+    let make ?key = fun ?value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Option.map x.key ~f:String_.to_value));
+        ("Value", (Option.map x.value ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
+      let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
+      make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let key = field_map json__ "Key" String_.of_json in make ?value ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A tag that can be added to an ElastiCache cluster or replication group. Tags are composed of a Key/Value pair. You can use tags to categorize and track all your ElastiCache resources, with the exception of global replication group. When you add or remove tags on replication groups, those actions will be replicated to all nodes in the replication group. A tag with a null Value is permitted."]
 module ServiceUpdate =
   struct
     type nonrec t =
@@ -4134,10 +4740,10 @@ module ServiceUpdate =
         [@ocaml.doc "Reflects the nature of the service update"];
       engine: String_.t option
         [@ocaml.doc
-          "The Elasticache engine to which the update applies. Either Redis or Memcached"];
+          "The Elasticache engine to which the update applies. Either Valkey, Redis OSS or Memcached."];
       engineVersion: String_.t option
         [@ocaml.doc
-          "The Elasticache engine version to which the update applies. Either Redis or Memcached engine version"];
+          "The Elasticache engine version to which the update applies. Either Valkey, Redis OSS or Memcached engine version."];
       autoUpdateAfterRecommendedApplyByDate: BooleanOptional.t option
         [@ocaml.doc
           "Indicates whether the service update will be automatically applied once the recommended apply-by date has expired."];
@@ -4240,37 +4846,39 @@ module ServiceUpdate =
         ?serviceUpdateSeverity ?serviceUpdateEndDate
         ?serviceUpdateReleaseDate ?serviceUpdateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let estimatedUpdateTime =
-        field_map json "EstimatedUpdateTime" String_.of_json in
+        field_map json__ "EstimatedUpdateTime" String_.of_json in
       let autoUpdateAfterRecommendedApplyByDate =
-        field_map json "AutoUpdateAfterRecommendedApplyByDate"
+        field_map json__ "AutoUpdateAfterRecommendedApplyByDate"
           BooleanOptional.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
       let serviceUpdateType =
-        field_map json "ServiceUpdateType" ServiceUpdateType.of_json in
+        field_map json__ "ServiceUpdateType" ServiceUpdateType.of_json in
       let serviceUpdateDescription =
-        field_map json "ServiceUpdateDescription" String_.of_json in
+        field_map json__ "ServiceUpdateDescription" String_.of_json in
       let serviceUpdateStatus =
-        field_map json "ServiceUpdateStatus" ServiceUpdateStatus.of_json in
+        field_map json__ "ServiceUpdateStatus" ServiceUpdateStatus.of_json in
       let serviceUpdateRecommendedApplyByDate =
-        field_map json "ServiceUpdateRecommendedApplyByDate" TStamp.of_json in
+        field_map json__ "ServiceUpdateRecommendedApplyByDate" TStamp.of_json in
       let serviceUpdateSeverity =
-        field_map json "ServiceUpdateSeverity" ServiceUpdateSeverity.of_json in
+        field_map json__ "ServiceUpdateSeverity"
+          ServiceUpdateSeverity.of_json in
       let serviceUpdateEndDate =
-        field_map json "ServiceUpdateEndDate" TStamp.of_json in
+        field_map json__ "ServiceUpdateEndDate" TStamp.of_json in
       let serviceUpdateReleaseDate =
-        field_map json "ServiceUpdateReleaseDate" TStamp.of_json in
+        field_map json__ "ServiceUpdateReleaseDate" TStamp.of_json in
       let serviceUpdateName =
-        field_map json "ServiceUpdateName" String_.of_json in
+        field_map json__ "ServiceUpdateName" String_.of_json in
       make ?estimatedUpdateTime ?autoUpdateAfterRecommendedApplyByDate
         ?engineVersion ?engine ?serviceUpdateType ?serviceUpdateDescription
         ?serviceUpdateStatus ?serviceUpdateRecommendedApplyByDate
         ?serviceUpdateSeverity ?serviceUpdateEndDate
         ?serviceUpdateReleaseDate ?serviceUpdateName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An update that you can apply to your Redis clusters."]
+  end[@@ocaml.doc
+       "An update that you can apply to your Valkey or Redis OSS clusters."]
 module ParameterNameValue =
   struct
     type nonrec t =
@@ -4293,9 +4901,9 @@ module ParameterNameValue =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ParameterName") in
       make ?parameterValue ?parameterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameterValue = field_map json "ParameterValue" String_.of_json in
-      let parameterName = field_map json "ParameterName" String_.of_json in
+    let of_json json__ =
+      let parameterValue = field_map json__ "ParameterValue" String_.of_json in
+      let parameterName = field_map json__ "ParameterName" String_.of_json in
       make ?parameterValue ?parameterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4309,7 +4917,7 @@ module ReservedCacheNodesOffering =
           "A unique identifier for the reserved cache node offering."];
       cacheNodeType: String_.t option
         [@ocaml.doc
-          "The cache node type for the reserved cache node. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M6g node types: (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge For region availability, see Supported Node Types M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended) C1 node types: cache.c1.xlarge Memory optimized with data tiering: Current generation: R6gd node types (available only for Redis engine version 6.2 onward). cache.r6gd.xlarge, cache.r6gd.2xlarge, cache.r6gd.4xlarge, cache.r6gd.8xlarge, cache.r6gd.12xlarge, cache.r6gd.16xlarge Memory optimized: Current generation: R6g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward). cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge For region availability, see Supported Node Types R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Redis append-only files (AOF) are not supported for T1 or T2 instances. Redis Multi-AZ with automatic failover is not supported on T1 instances. Redis configuration variables appendonly and appendfsync are not supported on Redis version 2.8.22 and later."];
+          "The cache node type for the reserved cache node. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M7g node types: cache.m7g.large, cache.m7g.xlarge, cache.m7g.2xlarge, cache.m7g.4xlarge, cache.m7g.8xlarge, cache.m7g.12xlarge, cache.m7g.16xlarge For region availability, see Supported Node Types M6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis OSS engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) C1 node types: cache.c1.xlarge Memory optimized: Current generation: R7g node types: cache.r7g.large, cache.r7g.xlarge, cache.r7g.2xlarge, cache.r7g.4xlarge, cache.r7g.8xlarge, cache.r7g.12xlarge, cache.r7g.16xlarge For region availability, see Supported Node Types R6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Valkey or Redis OSS append-only files (AOF) are not supported for T1 or T2 instances. Valkey or Redis OSS Multi-AZ with automatic failover is not supported on T1 instances. The configuration variables appendonly and appendfsync are not supported on Valkey, or on Redis OSS version 2.8.22 and later."];
       duration: Integer.t option
         [@ocaml.doc "The duration of the offering. in seconds."];
       fixedPrice: Double.t option
@@ -4378,18 +4986,18 @@ module ReservedCacheNodesOffering =
       make ?recurringCharges ?offeringType ?productDescription ?usagePrice
         ?fixedPrice ?duration ?cacheNodeType ?reservedCacheNodesOfferingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recurringCharges =
-        field_map json "RecurringCharges" RecurringChargeList.of_json in
-      let offeringType = field_map json "OfferingType" String_.of_json in
+        field_map json__ "RecurringCharges" RecurringChargeList.of_json in
+      let offeringType = field_map json__ "OfferingType" String_.of_json in
       let productDescription =
-        field_map json "ProductDescription" String_.of_json in
-      let usagePrice = field_map json "UsagePrice" Double.of_json in
-      let fixedPrice = field_map json "FixedPrice" Double.of_json in
-      let duration = field_map json "Duration" Integer.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
+        field_map json__ "ProductDescription" String_.of_json in
+      let usagePrice = field_map json__ "UsagePrice" Double.of_json in
+      let fixedPrice = field_map json__ "FixedPrice" Double.of_json in
+      let duration = field_map json__ "Duration" Integer.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
       let reservedCacheNodesOfferingId =
-        field_map json "ReservedCacheNodesOfferingId" String_.of_json in
+        field_map json__ "ReservedCacheNodesOfferingId" String_.of_json in
       make ?recurringCharges ?offeringType ?productDescription ?usagePrice
         ?fixedPrice ?duration ?cacheNodeType ?reservedCacheNodesOfferingId ()
     let to_json v = composed_to_json to_value v
@@ -4405,7 +5013,7 @@ module ReservedCacheNode =
         [@ocaml.doc "The offering identifier."];
       cacheNodeType: String_.t option
         [@ocaml.doc
-          "The cache node type for the reserved cache nodes. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M6g node types: (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge For region availability, see Supported Node Types M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended) C1 node types: cache.c1.xlarge Memory optimized with data tiering: Current generation: R6gd node types (available only for Redis engine version 6.2 onward). cache.r6gd.xlarge, cache.r6gd.2xlarge, cache.r6gd.4xlarge, cache.r6gd.8xlarge, cache.r6gd.12xlarge, cache.r6gd.16xlarge Memory optimized: Current generation: R6g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward). cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge For region availability, see Supported Node Types R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Redis append-only files (AOF) are not supported for T1 or T2 instances. Redis Multi-AZ with automatic failover is not supported on T1 instances. Redis configuration variables appendonly and appendfsync are not supported on Redis version 2.8.22 and later."];
+          "The cache node type for the reserved cache nodes. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M7g node types: cache.m7g.large, cache.m7g.xlarge, cache.m7g.2xlarge, cache.m7g.4xlarge, cache.m7g.8xlarge, cache.m7g.12xlarge, cache.m7g.16xlarge For region availability, see Supported Node Types M6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis OSS engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) C1 node types: cache.c1.xlarge Memory optimized: Current generation: R7g node types: cache.r7g.large, cache.r7g.xlarge, cache.r7g.2xlarge, cache.r7g.4xlarge, cache.r7g.8xlarge, cache.r7g.12xlarge, cache.r7g.16xlarge For region availability, see Supported Node Types R6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Valkey or Redis OSS append-only files (AOF) are not supported for T1 or T2 instances. Valkey or Redis OSS Multi-AZ with automatic failover is not supported on T1 instances. The configuration variables appendonly and appendfsync are not supported on Valkey, or on Redis OSS version 2.8.22 and later."];
       startTime: TStamp.t option
         [@ocaml.doc "The time the reservation started."];
       duration: Integer.t option
@@ -4512,24 +5120,24 @@ module ReservedCacheNode =
         ?startTime ?cacheNodeType ?reservedCacheNodesOfferingId
         ?reservedCacheNodeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reservationARN = field_map json "ReservationARN" String_.of_json in
+    let of_json json__ =
+      let reservationARN = field_map json__ "ReservationARN" String_.of_json in
       let recurringCharges =
-        field_map json "RecurringCharges" RecurringChargeList.of_json in
-      let state = field_map json "State" String_.of_json in
-      let offeringType = field_map json "OfferingType" String_.of_json in
+        field_map json__ "RecurringCharges" RecurringChargeList.of_json in
+      let state = field_map json__ "State" String_.of_json in
+      let offeringType = field_map json__ "OfferingType" String_.of_json in
       let productDescription =
-        field_map json "ProductDescription" String_.of_json in
-      let cacheNodeCount = field_map json "CacheNodeCount" Integer.of_json in
-      let usagePrice = field_map json "UsagePrice" Double.of_json in
-      let fixedPrice = field_map json "FixedPrice" Double.of_json in
-      let duration = field_map json "Duration" Integer.of_json in
-      let startTime = field_map json "StartTime" TStamp.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
+        field_map json__ "ProductDescription" String_.of_json in
+      let cacheNodeCount = field_map json__ "CacheNodeCount" Integer.of_json in
+      let usagePrice = field_map json__ "UsagePrice" Double.of_json in
+      let fixedPrice = field_map json__ "FixedPrice" Double.of_json in
+      let duration = field_map json__ "Duration" Integer.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
       let reservedCacheNodesOfferingId =
-        field_map json "ReservedCacheNodesOfferingId" String_.of_json in
+        field_map json__ "ReservedCacheNodesOfferingId" String_.of_json in
       let reservedCacheNodeId =
-        field_map json "ReservedCacheNodeId" String_.of_json in
+        field_map json__ "ReservedCacheNodeId" String_.of_json in
       make ?reservationARN ?recurringCharges ?state ?offeringType
         ?productDescription ?cacheNodeCount ?usagePrice ?fixedPrice ?duration
         ?startTime ?cacheNodeType ?reservedCacheNodesOfferingId
@@ -4560,13 +5168,13 @@ module ReplicationGroup =
           "The names of all the cache clusters that are part of this replication group."];
       nodeGroups: NodeGroupList.t option
         [@ocaml.doc
-          "A list of node groups in this replication group. For Redis (cluster mode disabled) replication groups, this is a single-element list. For Redis (cluster mode enabled) replication groups, the list contains an entry for each node group (shard)."];
+          "A list of node groups in this replication group. For Valkey or Redis OSS (cluster mode disabled) replication groups, this is a single-element list. For Valkey or Redis OSS (cluster mode enabled) replication groups, the list contains an entry for each node group (shard)."];
       snapshottingClusterId: String_.t option
         [@ocaml.doc
           "The cluster ID that is used as the daily snapshot source for the replication group."];
       automaticFailover: AutomaticFailoverStatus.t option
         [@ocaml.doc
-          "Indicates the status of automatic failover for this Redis replication group."];
+          "Indicates the status of automatic failover for this Valkey or Redis OSS replication group."];
       multiAZ: MultiAZStatus.t option
         [@ocaml.doc
           "A flag indicating if you have Multi-AZ enabled to enhance fault tolerance. For more information, see Minimizing Downtime: Multi-AZ"];
@@ -4587,15 +5195,15 @@ module ReplicationGroup =
           "The name of the compute and memory capacity node type for each node in the replication group."];
       authTokenEnabled: BooleanOptional.t option
         [@ocaml.doc
-          "A flag that enables using an AuthToken (password) when issuing Redis commands. Default: false"];
+          "A flag that enables using an AuthToken (password) when issuing Valkey or Redis OSS commands. Default: false"];
       authTokenLastModifiedDate: TStamp.t option
         [@ocaml.doc "The date the auth token was last modified"];
       transitEncryptionEnabled: BooleanOptional.t option
         [@ocaml.doc
-          "A flag that enables in-transit encryption when set to true. You cannot modify the value of TransitEncryptionEnabled after the cluster is created. To enable in-transit encryption on a cluster you must set TransitEncryptionEnabled to true when you create a cluster. Required: Only available when creating a replication group in an Amazon VPC using redis version 3.2.6, 4.x or later. Default: false"];
+          "A flag that enables in-transit encryption when set to true. Required: Only available when creating a replication group in an Amazon VPC using Redis OSS version 3.2.6, 4.x or later. Default: false"];
       atRestEncryptionEnabled: BooleanOptional.t option
         [@ocaml.doc
-          "A flag that enables encryption at-rest when set to true. You cannot modify the value of AtRestEncryptionEnabled after the cluster is created. To enable encryption at-rest on a cluster you must set AtRestEncryptionEnabled to true when you create a cluster. Required: Only available when creating a replication group in an Amazon VPC using redis version 3.2.6, 4.x or later. Default: false"];
+          "A flag that enables encryption at-rest when set to true. You cannot modify the value of AtRestEncryptionEnabled after the cluster is created. To enable encryption at-rest on a cluster you must set AtRestEncryptionEnabled to true when you create a cluster. Required: Only available when creating a replication group in an Amazon VPC using Redis OSS version 3.2.6, 4.x or later. Default: false"];
       memberClustersOutpostArns: ReplicationGroupOutpostArnList.t option
         [@ocaml.doc
           "The outpost ARNs of the replication group's member clusters."];
@@ -4614,7 +5222,25 @@ module ReplicationGroup =
         [@ocaml.doc "The date and time when the cluster was created."];
       dataTiering: DataTieringStatus.t option
         [@ocaml.doc
-          "Enables data tiering. Data tiering is only supported for replication groups using the r6gd node type. This parameter must be set to true when using r6gd nodes. For more information, see Data tiering."]}
+          "Enables data tiering. Data tiering is only supported for replication groups using the r6gd node type. This parameter must be set to true when using r6gd nodes. For more information, see Data tiering."];
+      autoMinorVersionUpgrade: Boolean.t option
+        [@ocaml.doc
+          "If you are running Valkey 7.2 and above, or Redis OSS engine version 6.0 and above, set this parameter to yes if you want to opt-in to the next auto minor version upgrade campaign. This parameter is disabled for previous versions."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "Must be either ipv4 | ipv6 | dual_stack. IPv6 is supported for workloads using Valkey 7.2 and above, Redis OSS engine version 6.2 to 7.1 or Memcached engine version 1.6.6 and above on all instances built on the Nitro system."];
+      ipDiscovery: IpDiscovery.t option
+        [@ocaml.doc
+          "The network type you choose when modifying a cluster, either ipv4 | ipv6. IPv6 is supported for workloads using Valkey 7.2 and above, Redis OSS engine version 6.2 to 7.1 or Memcached engine version 1.6.6 and above on all instances built on the Nitro system."];
+      transitEncryptionMode: TransitEncryptionMode.t option
+        [@ocaml.doc
+          "A setting that allows you to migrate your clients to use in-transit encryption, with no downtime."];
+      clusterMode: ClusterMode.t option
+        [@ocaml.doc
+          "Enabled or Disabled. To modify cluster mode from Disabled to Enabled, you must first set the cluster mode to Compatible. Compatible mode allows your Valkey or Redis OSS clients to connect using both cluster mode enabled and cluster mode disabled. After you migrate all Valkey or Redis OSS clients to use cluster mode enabled, you can then complete cluster mode configuration and set the cluster mode to Enabled."];
+      engine: String_.t option
+        [@ocaml.doc
+          "The engine used in a replication group. The options are valkey, memcached or redis."]}
     let make ?replicationGroupId =
       fun ?description ->
         fun ?globalReplicationGroupInfo ->
@@ -4645,35 +5271,55 @@ module ReplicationGroup =
                                                       ?replicationGroupCreateTime
                                                       ->
                                                       fun ?dataTiering ->
-                                                        fun () ->
-                                                          {
-                                                            replicationGroupId;
-                                                            description;
-                                                            globalReplicationGroupInfo;
-                                                            status;
-                                                            pendingModifiedValues;
-                                                            memberClusters;
-                                                            nodeGroups;
-                                                            snapshottingClusterId;
-                                                            automaticFailover;
-                                                            multiAZ;
-                                                            configurationEndpoint;
-                                                            snapshotRetentionLimit;
-                                                            snapshotWindow;
-                                                            clusterEnabled;
-                                                            cacheNodeType;
-                                                            authTokenEnabled;
-                                                            authTokenLastModifiedDate;
-                                                            transitEncryptionEnabled;
-                                                            atRestEncryptionEnabled;
-                                                            memberClustersOutpostArns;
-                                                            kmsKeyId;
-                                                            aRN;
-                                                            userGroupIds;
-                                                            logDeliveryConfigurations;
-                                                            replicationGroupCreateTime;
-                                                            dataTiering
-                                                          }
+                                                        fun
+                                                          ?autoMinorVersionUpgrade
+                                                          ->
+                                                          fun ?networkType ->
+                                                            fun ?ipDiscovery
+                                                              ->
+                                                              fun
+                                                                ?transitEncryptionMode
+                                                                ->
+                                                                fun
+                                                                  ?clusterMode
+                                                                  ->
+                                                                  fun ?engine
+                                                                    ->
+                                                                    fun () ->
+                                                                    {
+                                                                    replicationGroupId;
+                                                                    description;
+                                                                    globalReplicationGroupInfo;
+                                                                    status;
+                                                                    pendingModifiedValues;
+                                                                    memberClusters;
+                                                                    nodeGroups;
+                                                                    snapshottingClusterId;
+                                                                    automaticFailover;
+                                                                    multiAZ;
+                                                                    configurationEndpoint;
+                                                                    snapshotRetentionLimit;
+                                                                    snapshotWindow;
+                                                                    clusterEnabled;
+                                                                    cacheNodeType;
+                                                                    authTokenEnabled;
+                                                                    authTokenLastModifiedDate;
+                                                                    transitEncryptionEnabled;
+                                                                    atRestEncryptionEnabled;
+                                                                    memberClustersOutpostArns;
+                                                                    kmsKeyId;
+                                                                    aRN;
+                                                                    userGroupIds;
+                                                                    logDeliveryConfigurations;
+                                                                    replicationGroupCreateTime;
+                                                                    dataTiering;
+                                                                    autoMinorVersionUpgrade;
+                                                                    networkType;
+                                                                    ipDiscovery;
+                                                                    transitEncryptionMode;
+                                                                    clusterMode;
+                                                                    engine
+                                                                    }
     let to_value x =
       structure_to_value
         [("ReplicationGroupId",
@@ -4723,9 +5369,32 @@ module ReplicationGroup =
         ("ReplicationGroupCreateTime",
           (Option.map x.replicationGroupCreateTime ~f:TStamp.to_value));
         ("DataTiering",
-          (Option.map x.dataTiering ~f:DataTieringStatus.to_value))]
+          (Option.map x.dataTiering ~f:DataTieringStatus.to_value));
+        ("AutoMinorVersionUpgrade",
+          (Option.map x.autoMinorVersionUpgrade ~f:Boolean.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value));
+        ("IpDiscovery", (Option.map x.ipDiscovery ~f:IpDiscovery.to_value));
+        ("TransitEncryptionMode",
+          (Option.map x.transitEncryptionMode
+             ~f:TransitEncryptionMode.to_value));
+        ("ClusterMode", (Option.map x.clusterMode ~f:ClusterMode.to_value));
+        ("Engine", (Option.map x.engine ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
+      let clusterMode =
+        (Option.map ~f:ClusterMode.of_xml) (Xml.child xml_arg0 "ClusterMode") in
+      let transitEncryptionMode =
+        (Option.map ~f:TransitEncryptionMode.of_xml)
+          (Xml.child xml_arg0 "TransitEncryptionMode") in
+      let ipDiscovery =
+        (Option.map ~f:IpDiscovery.of_xml) (Xml.child xml_arg0 "IpDiscovery") in
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let autoMinorVersionUpgrade =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "AutoMinorVersionUpgrade") in
       let dataTiering =
         (Option.map ~f:DataTieringStatus.of_xml)
           (Xml.child xml_arg0 "DataTiering") in
@@ -4796,9 +5465,10 @@ module ReplicationGroup =
       let replicationGroupId =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ReplicationGroupId") in
-      make ?dataTiering ?replicationGroupCreateTime
-        ?logDeliveryConfigurations ?userGroupIds ?aRN ?kmsKeyId
-        ?memberClustersOutpostArns ?atRestEncryptionEnabled
+      make ?engine ?clusterMode ?transitEncryptionMode ?ipDiscovery
+        ?networkType ?autoMinorVersionUpgrade ?dataTiering
+        ?replicationGroupCreateTime ?logDeliveryConfigurations ?userGroupIds
+        ?aRN ?kmsKeyId ?memberClustersOutpostArns ?atRestEncryptionEnabled
         ?transitEncryptionEnabled ?authTokenLastModifiedDate
         ?authTokenEnabled ?cacheNodeType ?clusterEnabled ?snapshotWindow
         ?snapshotRetentionLimit ?configurationEndpoint ?multiAZ
@@ -4806,58 +5476,68 @@ module ReplicationGroup =
         ?pendingModifiedValues ?status ?globalReplicationGroupInfo
         ?description ?replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let engine = field_map json__ "Engine" String_.of_json in
+      let clusterMode = field_map json__ "ClusterMode" ClusterMode.of_json in
+      let transitEncryptionMode =
+        field_map json__ "TransitEncryptionMode"
+          TransitEncryptionMode.of_json in
+      let ipDiscovery = field_map json__ "IpDiscovery" IpDiscovery.of_json in
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let autoMinorVersionUpgrade =
+        field_map json__ "AutoMinorVersionUpgrade" Boolean.of_json in
       let dataTiering =
-        field_map json "DataTiering" DataTieringStatus.of_json in
+        field_map json__ "DataTiering" DataTieringStatus.of_json in
       let replicationGroupCreateTime =
-        field_map json "ReplicationGroupCreateTime" TStamp.of_json in
+        field_map json__ "ReplicationGroupCreateTime" TStamp.of_json in
       let logDeliveryConfigurations =
-        field_map json "LogDeliveryConfigurations"
+        field_map json__ "LogDeliveryConfigurations"
           LogDeliveryConfigurationList.of_json in
       let userGroupIds =
-        field_map json "UserGroupIds" UserGroupIdList.of_json in
-      let aRN = field_map json "ARN" String_.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+        field_map json__ "UserGroupIds" UserGroupIdList.of_json in
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let memberClustersOutpostArns =
-        field_map json "MemberClustersOutpostArns"
+        field_map json__ "MemberClustersOutpostArns"
           ReplicationGroupOutpostArnList.of_json in
       let atRestEncryptionEnabled =
-        field_map json "AtRestEncryptionEnabled" BooleanOptional.of_json in
+        field_map json__ "AtRestEncryptionEnabled" BooleanOptional.of_json in
       let transitEncryptionEnabled =
-        field_map json "TransitEncryptionEnabled" BooleanOptional.of_json in
+        field_map json__ "TransitEncryptionEnabled" BooleanOptional.of_json in
       let authTokenLastModifiedDate =
-        field_map json "AuthTokenLastModifiedDate" TStamp.of_json in
+        field_map json__ "AuthTokenLastModifiedDate" TStamp.of_json in
       let authTokenEnabled =
-        field_map json "AuthTokenEnabled" BooleanOptional.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
+        field_map json__ "AuthTokenEnabled" BooleanOptional.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
       let clusterEnabled =
-        field_map json "ClusterEnabled" BooleanOptional.of_json in
-      let snapshotWindow = field_map json "SnapshotWindow" String_.of_json in
+        field_map json__ "ClusterEnabled" BooleanOptional.of_json in
+      let snapshotWindow = field_map json__ "SnapshotWindow" String_.of_json in
       let snapshotRetentionLimit =
-        field_map json "SnapshotRetentionLimit" IntegerOptional.of_json in
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
       let configurationEndpoint =
-        field_map json "ConfigurationEndpoint" Endpoint.of_json in
-      let multiAZ = field_map json "MultiAZ" MultiAZStatus.of_json in
+        field_map json__ "ConfigurationEndpoint" Endpoint.of_json in
+      let multiAZ = field_map json__ "MultiAZ" MultiAZStatus.of_json in
       let automaticFailover =
-        field_map json "AutomaticFailover" AutomaticFailoverStatus.of_json in
+        field_map json__ "AutomaticFailover" AutomaticFailoverStatus.of_json in
       let snapshottingClusterId =
-        field_map json "SnapshottingClusterId" String_.of_json in
-      let nodeGroups = field_map json "NodeGroups" NodeGroupList.of_json in
+        field_map json__ "SnapshottingClusterId" String_.of_json in
+      let nodeGroups = field_map json__ "NodeGroups" NodeGroupList.of_json in
       let memberClusters =
-        field_map json "MemberClusters" ClusterIdList.of_json in
+        field_map json__ "MemberClusters" ClusterIdList.of_json in
       let pendingModifiedValues =
-        field_map json "PendingModifiedValues"
+        field_map json__ "PendingModifiedValues"
           ReplicationGroupPendingModifiedValues.of_json in
-      let status = field_map json "Status" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       let globalReplicationGroupInfo =
-        field_map json "GlobalReplicationGroupInfo"
+        field_map json__ "GlobalReplicationGroupInfo"
           GlobalReplicationGroupInfo.of_json in
-      let description = field_map json "Description" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let replicationGroupId =
-        field_map json "ReplicationGroupId" String_.of_json in
-      make ?dataTiering ?replicationGroupCreateTime
-        ?logDeliveryConfigurations ?userGroupIds ?aRN ?kmsKeyId
-        ?memberClustersOutpostArns ?atRestEncryptionEnabled
+        field_map json__ "ReplicationGroupId" String_.of_json in
+      make ?engine ?clusterMode ?transitEncryptionMode ?ipDiscovery
+        ?networkType ?autoMinorVersionUpgrade ?dataTiering
+        ?replicationGroupCreateTime ?logDeliveryConfigurations ?userGroupIds
+        ?aRN ?kmsKeyId ?memberClustersOutpostArns ?atRestEncryptionEnabled
         ?transitEncryptionEnabled ?authTokenLastModifiedDate
         ?authTokenEnabled ?cacheNodeType ?clusterEnabled ?snapshotWindow
         ?snapshotRetentionLimit ?configurationEndpoint ?multiAZ
@@ -4866,7 +5546,65 @@ module ReplicationGroup =
         ?description ?replicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains all of the attributes of a specific Redis replication group."]
+       "Contains all of the attributes of a specific Valkey or Redis OSS replication group."]
+module InputAuthenticationType =
+  struct
+    type nonrec t =
+      | Password 
+      | No_password_required 
+      | Iam 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Password -> "password"
+      | No_password_required -> "no-password-required"
+      | Iam -> "iam"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "password" -> Password
+      | "no-password-required" -> No_password_required
+      | "iam" -> Iam
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InputAuthenticationType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InputAuthenticationType" j)
+    let to_json = simple_to_json to_value
+  end
+module PasswordListInput =
+  struct
+    type nonrec t = String_.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PasswordListInput" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module LogDeliveryConfigurationRequest =
   struct
     type nonrec t =
@@ -4922,14 +5660,14 @@ module LogDeliveryConfigurationRequest =
       make ?enabled ?logFormat ?destinationDetails ?destinationType ?logType
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" BooleanOptional.of_json in
-      let logFormat = field_map json "LogFormat" LogFormat.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" BooleanOptional.of_json in
+      let logFormat = field_map json__ "LogFormat" LogFormat.of_json in
       let destinationDetails =
-        field_map json "DestinationDetails" DestinationDetails.of_json in
+        field_map json__ "DestinationDetails" DestinationDetails.of_json in
       let destinationType =
-        field_map json "DestinationType" DestinationType.of_json in
-      let logType = field_map json "LogType" LogType.of_json in
+        field_map json__ "DestinationType" DestinationType.of_json in
+      let logType = field_map json__ "LogType" LogType.of_json in
       make ?enabled ?logFormat ?destinationDetails ?destinationType ?logType
         ()
     let to_json v = composed_to_json to_value v
@@ -4940,13 +5678,13 @@ module ConfigureShard =
       {
       nodeGroupId: AllowedNodeGroupId.t
         [@ocaml.doc
-          "The 4-digit id for the node group you are configuring. For Redis (cluster mode disabled) replication groups, the node group id is always 0001. To find a Redis (cluster mode enabled)'s node group's (shard's) id, see Finding a Shard's Id."];
+          "The 4-digit id for the node group you are configuring. For Valkey or Redis OSS (cluster mode disabled) replication groups, the node group id is always 0001. To find a Valkey or Redis OSS (cluster mode enabled)'s node group's (shard's) id, see Finding a Shard's Id."];
       newReplicaCount: Integer.t
         [@ocaml.doc
-          "The number of replicas you want in this node group at the end of this operation. The maximum value for NewReplicaCount is 5. The minimum value depends upon the type of Redis replication group you are working with. The minimum number of replicas in a shard or replication group is: Redis (cluster mode disabled) If Multi-AZ: 1 If Multi-AZ: 0 Redis (cluster mode enabled): 0 (though you will not be able to failover to a replica if your primary node fails)"];
+          "The number of replicas you want in this node group at the end of this operation. The maximum value for NewReplicaCount is 5. The minimum value depends upon the type of Valkey or Redis OSS replication group you are working with. The minimum number of replicas in a shard or replication group is: Valkey or Redis OSS (cluster mode disabled) If Multi-AZ: 1 If Multi-AZ: 0 Valkey or Redis OSS (cluster mode enabled): 0 (though you will not be able to failover to a replica if your primary node fails)"];
       preferredAvailabilityZones: PreferredAvailabilityZoneList.t option
         [@ocaml.doc
-          "A list of PreferredAvailabilityZone strings that specify which availability zones the replication group's nodes are to be in. The nummber of PreferredAvailabilityZone values must equal the value of NewReplicaCount plus 1 to account for the primary node. If this member of ReplicaConfiguration is omitted, ElastiCache for Redis selects the availability zone for each of the replicas."];
+          "A list of PreferredAvailabilityZone strings that specify which availability zones the replication group's nodes are to be in. The nummber of PreferredAvailabilityZone values must equal the value of NewReplicaCount plus 1 to account for the primary node. If this member of ReplicaConfiguration is omitted, ElastiCache selects the availability zone for each of the replicas."];
       preferredOutpostArns: PreferredOutpostArnList.t option
         [@ocaml.doc
           "The outpost ARNs in which the cache cluster is created."]}
@@ -4989,16 +5727,17 @@ module ConfigureShard =
       make ?preferredOutpostArns ?preferredAvailabilityZones ~newReplicaCount
         ~nodeGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let preferredOutpostArns =
-        field_map json "PreferredOutpostArns" PreferredOutpostArnList.of_json in
+        field_map json__ "PreferredOutpostArns"
+          PreferredOutpostArnList.of_json in
       let preferredAvailabilityZones =
-        field_map json "PreferredAvailabilityZones"
+        field_map json__ "PreferredAvailabilityZones"
           PreferredAvailabilityZoneList.of_json in
       let newReplicaCount =
-        field_map_exn json "NewReplicaCount" Integer.of_json in
+        field_map_exn json__ "NewReplicaCount" Integer.of_json in
       let nodeGroupId =
-        field_map_exn json "NodeGroupId" AllowedNodeGroupId.of_json in
+        field_map_exn json__ "NodeGroupId" AllowedNodeGroupId.of_json in
       make ?preferredOutpostArns ?preferredAvailabilityZones ~newReplicaCount
         ~nodeGroupId ()
     let to_json v = composed_to_json to_value v
@@ -5048,14 +5787,14 @@ module RegionalConfiguration =
       make ~reshardingConfiguration ~replicationGroupRegion
         ~replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reshardingConfiguration =
-        field_map_exn json "ReshardingConfiguration"
+        field_map_exn json__ "ReshardingConfiguration"
           ReshardingConfigurationList.of_json in
       let replicationGroupRegion =
-        field_map_exn json "ReplicationGroupRegion" String_.of_json in
+        field_map_exn json__ "ReplicationGroupRegion" String_.of_json in
       let replicationGroupId =
-        field_map_exn json "ReplicationGroupId" String_.of_json in
+        field_map_exn json__ "ReplicationGroupId" String_.of_json in
       make ~reshardingConfiguration ~replicationGroupRegion
         ~replicationGroupId ()
     let to_json v = composed_to_json to_value v
@@ -5097,12 +5836,12 @@ module Event =
           (Xml.child xml_arg0 "SourceIdentifier") in
       make ?date ?message ?sourceType ?sourceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let date = field_map json "Date" TStamp.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let sourceType = field_map json "SourceType" SourceType.of_json in
+    let of_json json__ =
+      let date = field_map json__ "Date" TStamp.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
       let sourceIdentifier =
-        field_map json "SourceIdentifier" String_.of_json in
+        field_map json__ "SourceIdentifier" String_.of_json in
       make ?date ?message ?sourceType ?sourceIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5117,10 +5856,10 @@ module User =
         [@ocaml.doc
           "Indicates the user status. Can be \"active\", \"modifying\" or \"deleting\"."];
       engine: EngineType.t option
-        [@ocaml.doc "The current supported value is Redis."];
+        [@ocaml.doc "The options are valkey or redis."];
       minimumEngineVersion: String_.t option
         [@ocaml.doc
-          "The minimum engine version required, which is Redis 6.0"];
+          "The minimum engine version required, which is Redis OSS 6.0"];
       accessString: String_.t option
         [@ocaml.doc "Access permissions string used for this user."];
       userGroupIds: UserGroupIdList.t option
@@ -5294,24 +6033,24 @@ module User =
       make ?aRN ?authentication ?userGroupIds ?accessString
         ?minimumEngineVersion ?engine ?status ?userName ?userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" String_.of_json in
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" String_.of_json in
       let authentication =
-        field_map json "Authentication" Authentication.of_json in
+        field_map json__ "Authentication" Authentication.of_json in
       let userGroupIds =
-        field_map json "UserGroupIds" UserGroupIdList.of_json in
-      let accessString = field_map json "AccessString" String_.of_json in
+        field_map json__ "UserGroupIds" UserGroupIdList.of_json in
+      let accessString = field_map json__ "AccessString" String_.of_json in
       let minimumEngineVersion =
-        field_map json "MinimumEngineVersion" String_.of_json in
-      let engine = field_map json "Engine" EngineType.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let userName = field_map json "UserName" String_.of_json in
-      let userId = field_map json "UserId" String_.of_json in
+        field_map json__ "MinimumEngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" EngineType.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let userName = field_map json__ "UserName" String_.of_json in
+      let userId = field_map json__ "UserId" String_.of_json in
       make ?aRN ?authentication ?userGroupIds ?accessString
         ?minimumEngineVersion ?engine ?status ?userName ?userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For Redis engine version 6.0 onwards: Creates a Redis user. For more information, see Using Role Based Access Control (RBAC)."]
+       "For Valkey engine version 7.2 onwards and Redis OSS 6.0 to 7.1: Creates a user. For more information, see Using Role Based Access Control (RBAC)."]
 module Filter =
   struct
     type nonrec t =
@@ -5336,9 +6075,9 @@ module Filter =
         FilterName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "Values" FilterValueList.of_json in
-      let name = field_map_exn json "Name" FilterName.of_json in
+    let of_json json__ =
+      let values = field_map_exn json__ "Values" FilterValueList.of_json in
+      let name = field_map_exn json__ "Name" FilterName.of_json in
       make ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5352,17 +6091,20 @@ module UserGroup =
         [@ocaml.doc
           "Indicates user group status. Can be \"creating\", \"active\", \"modifying\", \"deleting\"."];
       engine: EngineType.t option
-        [@ocaml.doc "The current supported value is Redis."];
+        [@ocaml.doc "The options are valkey or redis."];
       userIds: UserIdList.t option
         [@ocaml.doc "The list of user IDs that belong to the user group."];
       minimumEngineVersion: String_.t option
         [@ocaml.doc
-          "The minimum engine version required, which is Redis 6.0"];
+          "The minimum engine version required, which is Redis OSS 6.0"];
       pendingChanges: UserGroupPendingChanges.t option
         [@ocaml.doc "A list of updates being applied to the user group."];
       replicationGroups: UGReplicationGroupIdList.t option
         [@ocaml.doc
           "A list of replication groups that the user group can access."];
+      serverlessCaches: UGServerlessCacheIdList.t option
+        [@ocaml.doc
+          "Indicates which serverless caches the specified user group is associated with. Available for Valkey, Redis OSS and Serverless Memcached only."];
       aRN: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the user group."]}
     and responseMetaData = unit
@@ -5388,22 +6130,24 @@ module UserGroup =
             fun ?minimumEngineVersion ->
               fun ?pendingChanges ->
                 fun ?replicationGroups ->
-                  fun ?aRN ->
-                    fun () ->
-                      {
-                        createUserGroupResult =
-                          {
-                            userGroupId;
-                            status;
-                            engine;
-                            userIds;
-                            minimumEngineVersion;
-                            pendingChanges;
-                            replicationGroups;
-                            aRN
-                          };
-                        responseMetaData = ()
-                      }
+                  fun ?serverlessCaches ->
+                    fun ?aRN ->
+                      fun () ->
+                        {
+                          createUserGroupResult =
+                            {
+                              userGroupId;
+                              status;
+                              engine;
+                              userIds;
+                              minimumEngineVersion;
+                              pendingChanges;
+                              replicationGroups;
+                              serverlessCaches;
+                              aRN
+                            };
+                          responseMetaData = ()
+                        }
     let error_of_json name json =
       match name with
       | "DefaultUserRequired" ->
@@ -5508,6 +6252,8 @@ module UserGroup =
         ("ReplicationGroups",
           (Option.map x.replicationGroups
              ~f:UGReplicationGroupIdList.to_value));
+        ("ServerlessCaches",
+          (Option.map x.serverlessCaches ~f:UGServerlessCacheIdList.to_value));
         ("ARN", (Option.map x.aRN ~f:String_.to_value))]
         ~wrapper:"CreateUserGroupResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
@@ -5515,6 +6261,9 @@ module UserGroup =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "CreateUserGroupResult" in
       let aRN = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ARN") in
+      let serverlessCaches =
+        (Option.map ~f:UGServerlessCacheIdList.of_xml)
+          (Xml.child xml_arg0 "ServerlessCaches") in
       let replicationGroups =
         (Option.map ~f:UGReplicationGroupIdList.of_xml)
           (Xml.child xml_arg0 "ReplicationGroups") in
@@ -5532,26 +6281,28 @@ module UserGroup =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
       let userGroupId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "UserGroupId") in
-      make ?aRN ?replicationGroups ?pendingChanges ?minimumEngineVersion
-        ?userIds ?engine ?status ?userGroupId ()
+      make ?aRN ?serverlessCaches ?replicationGroups ?pendingChanges
+        ?minimumEngineVersion ?userIds ?engine ?status ?userGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" String_.of_json in
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let serverlessCaches =
+        field_map json__ "ServerlessCaches" UGServerlessCacheIdList.of_json in
       let replicationGroups =
-        field_map json "ReplicationGroups" UGReplicationGroupIdList.of_json in
+        field_map json__ "ReplicationGroups" UGReplicationGroupIdList.of_json in
       let pendingChanges =
-        field_map json "PendingChanges" UserGroupPendingChanges.of_json in
+        field_map json__ "PendingChanges" UserGroupPendingChanges.of_json in
       let minimumEngineVersion =
-        field_map json "MinimumEngineVersion" String_.of_json in
-      let userIds = field_map json "UserIds" UserIdList.of_json in
-      let engine = field_map json "Engine" EngineType.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let userGroupId = field_map json "UserGroupId" String_.of_json in
-      make ?aRN ?replicationGroups ?pendingChanges ?minimumEngineVersion
-        ?userIds ?engine ?status ?userGroupId ()
+        field_map json__ "MinimumEngineVersion" String_.of_json in
+      let userIds = field_map json__ "UserIds" UserIdList.of_json in
+      let engine = field_map json__ "Engine" EngineType.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let userGroupId = field_map json__ "UserGroupId" String_.of_json in
+      make ?aRN ?serverlessCaches ?replicationGroups ?pendingChanges
+        ?minimumEngineVersion ?userIds ?engine ?status ?userGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For Redis engine version 6.0 onwards: Creates a Redis user group. For more information, see Using Role Based Access Control (RBAC)"]
+       "For Valkey engine version 7.2 onwards and Redis OSS 6.0 to 7.1: Creates a user group. For more information, see Using Role Based Access Control (RBAC)"]
 module Snapshot =
   struct
     type nonrec t =
@@ -5573,7 +6324,7 @@ module Snapshot =
           "Indicates whether the snapshot is from an automatic backup (automated) or was created manually (manual)."];
       cacheNodeType: String_.t option
         [@ocaml.doc
-          "The name of the compute and memory capacity node type for the source cluster. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M6g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward). cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge For region availability, see Supported Node Types M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended) C1 node types: cache.c1.xlarge Memory optimized with data tiering: Current generation: R6gd node types (available only for Redis engine version 6.2 onward). cache.r6gd.xlarge, cache.r6gd.2xlarge, cache.r6gd.4xlarge, cache.r6gd.8xlarge, cache.r6gd.12xlarge, cache.r6gd.16xlarge Memory optimized: Current generation: R6g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward). cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge For region availability, see Supported Node Types For region availability, see Supported Node Types R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Redis append-only files (AOF) are not supported for T1 or T2 instances. Redis Multi-AZ with automatic failover is not supported on T1 instances. Redis configuration variables appendonly and appendfsync are not supported on Redis version 2.8.22 and later."];
+          "The name of the compute and memory capacity node type for the source cluster. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M7g node types: cache.m7g.large, cache.m7g.xlarge, cache.m7g.2xlarge, cache.m7g.4xlarge, cache.m7g.8xlarge, cache.m7g.12xlarge, cache.m7g.16xlarge For region availability, see Supported Node Types M6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis OSS engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) C1 node types: cache.c1.xlarge Memory optimized: Current generation: R7g node types: cache.r7g.large, cache.r7g.xlarge, cache.r7g.2xlarge, cache.r7g.4xlarge, cache.r7g.8xlarge, cache.r7g.12xlarge, cache.r7g.16xlarge For region availability, see Supported Node Types R6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Valkey or Redis OSS append-only files (AOF) are not supported for T1 or T2 instances. Valkey or Redis OSS Multi-AZ with automatic failover is not supported on T1 instances. The configuration variables appendonly and appendfsync are not supported on Valkey, or on Redis OSS version 2.8.22 and later."];
       engine: String_.t option
         [@ocaml.doc
           "The name of the cache engine (memcached or redis) used by the source cluster."];
@@ -5582,7 +6333,7 @@ module Snapshot =
           "The version of the cache engine version that is used by the source cluster."];
       numCacheNodes: IntegerOptional.t option
         [@ocaml.doc
-          "The number of cache nodes in the source cluster. For clusters running Redis, this value must be 1. For clusters running Memcached, this value must be between 1 and 40."];
+          "The number of cache nodes in the source cluster. For clusters running Valkey or Redis OSS, this value must be 1. For clusters running Memcached, this value must be between 1 and 40."];
       preferredAvailabilityZone: String_.t option
         [@ocaml.doc
           "The name of the Availability Zone in which the source cluster is located."];
@@ -5611,7 +6362,7 @@ module Snapshot =
           "The Amazon Virtual Private Cloud identifier (VPC ID) of the cache subnet group for the source cluster."];
       autoMinorVersionUpgrade: Boolean.t option
         [@ocaml.doc
-          "\194\160If you are running Redis engine version 6.0 or later, set this parameter to yes if you want to opt-in to the next auto minor version upgrade campaign. This parameter is disabled for previous versions.\194\160"];
+          "\194\160If you are running Valkey 7.2 and above or Redis OSS engine version 6.0 and above, set this parameter to yes if you want to opt-in to the next auto minor version upgrade campaign. This parameter is disabled for previous versions.\194\160"];
       snapshotRetentionLimit: IntegerOptional.t option
         [@ocaml.doc
           "For an automatic snapshot, the number of days for which ElastiCache retains the snapshot before deleting it. For manual snapshots, this field reflects the SnapshotRetentionLimit for the source cluster when the snapshot was created. This field is otherwise ignored: Manual snapshots do not expire, and can only be deleted using the DeleteSnapshot operation. Important If the value of SnapshotRetentionLimit is set to zero (0), backups are turned off."];
@@ -5623,7 +6374,7 @@ module Snapshot =
           "The number of node groups (shards) in this snapshot. When restoring from a snapshot, the number of node groups (shards) in the snapshot and in the restored replication group must be the same."];
       automaticFailover: AutomaticFailoverStatus.t option
         [@ocaml.doc
-          "Indicates the status of automatic failover for the source Redis replication group."];
+          "Indicates the status of automatic failover for the source Valkey or Redis OSS replication group."];
       nodeSnapshots: NodeSnapshotList.t option
         [@ocaml.doc "A list of the cache nodes in the source cluster."];
       kmsKeyId: String_.t option
@@ -5817,50 +6568,50 @@ module Snapshot =
         ?cacheNodeType ?snapshotSource ?snapshotStatus ?cacheClusterId
         ?replicationGroupDescription ?replicationGroupId ?snapshotName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataTiering =
-        field_map json "DataTiering" DataTieringStatus.of_json in
-      let aRN = field_map json "ARN" String_.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+        field_map json__ "DataTiering" DataTieringStatus.of_json in
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let nodeSnapshots =
-        field_map json "NodeSnapshots" NodeSnapshotList.of_json in
+        field_map json__ "NodeSnapshots" NodeSnapshotList.of_json in
       let automaticFailover =
-        field_map json "AutomaticFailover" AutomaticFailoverStatus.of_json in
+        field_map json__ "AutomaticFailover" AutomaticFailoverStatus.of_json in
       let numNodeGroups =
-        field_map json "NumNodeGroups" IntegerOptional.of_json in
-      let snapshotWindow = field_map json "SnapshotWindow" String_.of_json in
+        field_map json__ "NumNodeGroups" IntegerOptional.of_json in
+      let snapshotWindow = field_map json__ "SnapshotWindow" String_.of_json in
       let snapshotRetentionLimit =
-        field_map json "SnapshotRetentionLimit" IntegerOptional.of_json in
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
       let autoMinorVersionUpgrade =
-        field_map json "AutoMinorVersionUpgrade" Boolean.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
+        field_map json__ "AutoMinorVersionUpgrade" Boolean.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
       let cacheSubnetGroupName =
-        field_map json "CacheSubnetGroupName" String_.of_json in
+        field_map json__ "CacheSubnetGroupName" String_.of_json in
       let cacheParameterGroupName =
-        field_map json "CacheParameterGroupName" String_.of_json in
-      let port = field_map json "Port" IntegerOptional.of_json in
-      let topicArn = field_map json "TopicArn" String_.of_json in
+        field_map json__ "CacheParameterGroupName" String_.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
+      let topicArn = field_map json__ "TopicArn" String_.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let cacheClusterCreateTime =
-        field_map json "CacheClusterCreateTime" TStamp.of_json in
+        field_map json__ "CacheClusterCreateTime" TStamp.of_json in
       let preferredOutpostArn =
-        field_map json "PreferredOutpostArn" String_.of_json in
+        field_map json__ "PreferredOutpostArn" String_.of_json in
       let preferredAvailabilityZone =
-        field_map json "PreferredAvailabilityZone" String_.of_json in
+        field_map json__ "PreferredAvailabilityZone" String_.of_json in
       let numCacheNodes =
-        field_map json "NumCacheNodes" IntegerOptional.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
-      let snapshotSource = field_map json "SnapshotSource" String_.of_json in
-      let snapshotStatus = field_map json "SnapshotStatus" String_.of_json in
-      let cacheClusterId = field_map json "CacheClusterId" String_.of_json in
+        field_map json__ "NumCacheNodes" IntegerOptional.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
+      let snapshotSource = field_map json__ "SnapshotSource" String_.of_json in
+      let snapshotStatus = field_map json__ "SnapshotStatus" String_.of_json in
+      let cacheClusterId = field_map json__ "CacheClusterId" String_.of_json in
       let replicationGroupDescription =
-        field_map json "ReplicationGroupDescription" String_.of_json in
+        field_map json__ "ReplicationGroupDescription" String_.of_json in
       let replicationGroupId =
-        field_map json "ReplicationGroupId" String_.of_json in
-      let snapshotName = field_map json "SnapshotName" String_.of_json in
+        field_map json__ "ReplicationGroupId" String_.of_json in
+      let snapshotName = field_map json__ "SnapshotName" String_.of_json in
       make ?dataTiering ?aRN ?kmsKeyId ?nodeSnapshots ?automaticFailover
         ?numNodeGroups ?snapshotWindow ?snapshotRetentionLimit
         ?autoMinorVersionUpgrade ?vpcId ?cacheSubnetGroupName
@@ -5871,7 +6622,317 @@ module Snapshot =
         ?replicationGroupDescription ?replicationGroupId ?snapshotName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents a copy of an entire Redis cluster as of the time when the snapshot was taken."]
+       "Represents a copy of an entire Valkey or Redis OSS cluster as of the time when the snapshot was taken."]
+module ServerlessCache =
+  struct
+    type nonrec t =
+      {
+      serverlessCacheName: String_.t option
+        [@ocaml.doc "The unique identifier of the serverless cache."];
+      description: String_.t option
+        [@ocaml.doc "A description of the serverless cache."];
+      createTime: TStamp.t option
+        [@ocaml.doc "When the serverless cache was created."];
+      status: String_.t option
+        [@ocaml.doc
+          "The current status of the serverless cache. The allowed values are CREATING, AVAILABLE, DELETING, CREATE-FAILED and MODIFYING."];
+      engine: String_.t option
+        [@ocaml.doc "The engine the serverless cache is compatible with."];
+      majorEngineVersion: String_.t option
+        [@ocaml.doc
+          "The version number of the engine the serverless cache is compatible with."];
+      fullEngineVersion: String_.t option
+        [@ocaml.doc
+          "The name and version number of the engine the serverless cache is compatible with."];
+      cacheUsageLimits: CacheUsageLimits.t option
+        [@ocaml.doc "The cache usage limit for the serverless cache."];
+      kmsKeyId: String_.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services Key Management Service (KMS) key that is used to encrypt data at rest in the serverless cache."];
+      securityGroupIds: SecurityGroupIdsList.t option
+        [@ocaml.doc
+          "The IDs of the EC2 security groups associated with the serverless cache."];
+      endpoint: Endpoint.t option ;
+      readerEndpoint: Endpoint.t option ;
+      aRN: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the serverless cache."];
+      userGroupId: String_.t option
+        [@ocaml.doc
+          "The identifier of the user group associated with the serverless cache. Available for Valkey and Redis OSS only. Default is NULL."];
+      subnetIds: SubnetIdsList.t option
+        [@ocaml.doc
+          "If no subnet IDs are given and your VPC is in us-west-1, then ElastiCache will select 2 default subnets across AZs in your VPC. For all other Regions, if no subnet IDs are given then ElastiCache will select 3 default subnets across AZs in your default VPC."];
+      snapshotRetentionLimit: IntegerOptional.t option
+        [@ocaml.doc
+          "The number of days for which ElastiCache retains automatic snapshots before deleting them. Available for Valkey, Redis OSS and Serverless Memcached only. The maximum value allowed is 35 days."];
+      dailySnapshotTime: String_.t option
+        [@ocaml.doc
+          "The daily time that a cache snapshot will be created. Default is NULL, i.e. snapshots will not be created at a specific time on a daily basis. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The type of IP address protocol used by the serverless cache. Must be either ipv4 | ipv6 | dual_stack. ipv6 is only supported with IPv6-only subnets. If not specified, defaults to ipv4, unless all provided subnets are IPv6-only, in which case it defaults to ipv6."]}
+    let make ?serverlessCacheName =
+      fun ?description ->
+        fun ?createTime ->
+          fun ?status ->
+            fun ?engine ->
+              fun ?majorEngineVersion ->
+                fun ?fullEngineVersion ->
+                  fun ?cacheUsageLimits ->
+                    fun ?kmsKeyId ->
+                      fun ?securityGroupIds ->
+                        fun ?endpoint ->
+                          fun ?readerEndpoint ->
+                            fun ?aRN ->
+                              fun ?userGroupId ->
+                                fun ?subnetIds ->
+                                  fun ?snapshotRetentionLimit ->
+                                    fun ?dailySnapshotTime ->
+                                      fun ?networkType ->
+                                        fun () ->
+                                          {
+                                            serverlessCacheName;
+                                            description;
+                                            createTime;
+                                            status;
+                                            engine;
+                                            majorEngineVersion;
+                                            fullEngineVersion;
+                                            cacheUsageLimits;
+                                            kmsKeyId;
+                                            securityGroupIds;
+                                            endpoint;
+                                            readerEndpoint;
+                                            aRN;
+                                            userGroupId;
+                                            subnetIds;
+                                            snapshotRetentionLimit;
+                                            dailySnapshotTime;
+                                            networkType
+                                          }
+    let to_value x =
+      structure_to_value
+        [("ServerlessCacheName",
+           (Option.map x.serverlessCacheName ~f:String_.to_value));
+        ("Description", (Option.map x.description ~f:String_.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:TStamp.to_value));
+        ("Status", (Option.map x.status ~f:String_.to_value));
+        ("Engine", (Option.map x.engine ~f:String_.to_value));
+        ("MajorEngineVersion",
+          (Option.map x.majorEngineVersion ~f:String_.to_value));
+        ("FullEngineVersion",
+          (Option.map x.fullEngineVersion ~f:String_.to_value));
+        ("CacheUsageLimits",
+          (Option.map x.cacheUsageLimits ~f:CacheUsageLimits.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:String_.to_value));
+        ("SecurityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupIdsList.to_value));
+        ("Endpoint", (Option.map x.endpoint ~f:Endpoint.to_value));
+        ("ReaderEndpoint",
+          (Option.map x.readerEndpoint ~f:Endpoint.to_value));
+        ("ARN", (Option.map x.aRN ~f:String_.to_value));
+        ("UserGroupId", (Option.map x.userGroupId ~f:String_.to_value));
+        ("SubnetIds", (Option.map x.subnetIds ~f:SubnetIdsList.to_value));
+        ("SnapshotRetentionLimit",
+          (Option.map x.snapshotRetentionLimit ~f:IntegerOptional.to_value));
+        ("DailySnapshotTime",
+          (Option.map x.dailySnapshotTime ~f:String_.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let dailySnapshotTime =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "DailySnapshotTime") in
+      let snapshotRetentionLimit =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "SnapshotRetentionLimit") in
+      let subnetIds =
+        (Option.map ~f:SubnetIdsList.of_xml) (Xml.child xml_arg0 "SubnetIds") in
+      let userGroupId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "UserGroupId") in
+      let aRN = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ARN") in
+      let readerEndpoint =
+        (Option.map ~f:Endpoint.of_xml) (Xml.child xml_arg0 "ReaderEndpoint") in
+      let endpoint =
+        (Option.map ~f:Endpoint.of_xml) (Xml.child xml_arg0 "Endpoint") in
+      let securityGroupIds =
+        (Option.map ~f:SecurityGroupIdsList.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupIds") in
+      let kmsKeyId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let cacheUsageLimits =
+        (Option.map ~f:CacheUsageLimits.of_xml)
+          (Xml.child xml_arg0 "CacheUsageLimits") in
+      let fullEngineVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "FullEngineVersion") in
+      let majorEngineVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MajorEngineVersion") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
+      let createTime =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
+      let serverlessCacheName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ServerlessCacheName") in
+      make ?networkType ?dailySnapshotTime ?snapshotRetentionLimit ?subnetIds
+        ?userGroupId ?aRN ?readerEndpoint ?endpoint ?securityGroupIds
+        ?kmsKeyId ?cacheUsageLimits ?fullEngineVersion ?majorEngineVersion
+        ?engine ?status ?createTime ?description ?serverlessCacheName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let dailySnapshotTime =
+        field_map json__ "DailySnapshotTime" String_.of_json in
+      let snapshotRetentionLimit =
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIdsList.of_json in
+      let userGroupId = field_map json__ "UserGroupId" String_.of_json in
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let readerEndpoint = field_map json__ "ReaderEndpoint" Endpoint.of_json in
+      let endpoint = field_map json__ "Endpoint" Endpoint.of_json in
+      let securityGroupIds =
+        field_map json__ "SecurityGroupIds" SecurityGroupIdsList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let cacheUsageLimits =
+        field_map json__ "CacheUsageLimits" CacheUsageLimits.of_json in
+      let fullEngineVersion =
+        field_map json__ "FullEngineVersion" String_.of_json in
+      let majorEngineVersion =
+        field_map json__ "MajorEngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let createTime = field_map json__ "CreateTime" TStamp.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let serverlessCacheName =
+        field_map json__ "ServerlessCacheName" String_.of_json in
+      make ?networkType ?dailySnapshotTime ?snapshotRetentionLimit ?subnetIds
+        ?userGroupId ?aRN ?readerEndpoint ?endpoint ?securityGroupIds
+        ?kmsKeyId ?cacheUsageLimits ?fullEngineVersion ?majorEngineVersion
+        ?engine ?status ?createTime ?description ?serverlessCacheName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The resource representing a serverless cache."]
+module ServerlessCacheSnapshot =
+  struct
+    type nonrec t =
+      {
+      serverlessCacheSnapshotName: String_.t option
+        [@ocaml.doc
+          "The identifier of a serverless cache snapshot. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      aRN: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of a serverless cache snapshot. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      kmsKeyId: String_.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services Key Management Service (KMS) key of a serverless cache snapshot. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      snapshotType: String_.t option
+        [@ocaml.doc
+          "The type of snapshot of serverless cache. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      status: String_.t option
+        [@ocaml.doc
+          "The current status of the serverless cache. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      createTime: TStamp.t option
+        [@ocaml.doc
+          "The date and time that the source serverless cache's metadata and cache data set was obtained for the snapshot. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      expiryTime: TStamp.t option
+        [@ocaml.doc
+          "The time that the serverless cache snapshot will expire. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      bytesUsedForCache: String_.t option
+        [@ocaml.doc
+          "The total size of a serverless cache snapshot, in bytes. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      serverlessCacheConfiguration: ServerlessCacheConfiguration.t option
+        [@ocaml.doc
+          "The configuration of the serverless cache, at the time the snapshot was taken. Available for Valkey, Redis OSS and Serverless Memcached only."]}
+    let make ?serverlessCacheSnapshotName =
+      fun ?aRN ->
+        fun ?kmsKeyId ->
+          fun ?snapshotType ->
+            fun ?status ->
+              fun ?createTime ->
+                fun ?expiryTime ->
+                  fun ?bytesUsedForCache ->
+                    fun ?serverlessCacheConfiguration ->
+                      fun () ->
+                        {
+                          serverlessCacheSnapshotName;
+                          aRN;
+                          kmsKeyId;
+                          snapshotType;
+                          status;
+                          createTime;
+                          expiryTime;
+                          bytesUsedForCache;
+                          serverlessCacheConfiguration
+                        }
+    let to_value x =
+      structure_to_value
+        [("ServerlessCacheSnapshotName",
+           (Option.map x.serverlessCacheSnapshotName ~f:String_.to_value));
+        ("ARN", (Option.map x.aRN ~f:String_.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:String_.to_value));
+        ("SnapshotType", (Option.map x.snapshotType ~f:String_.to_value));
+        ("Status", (Option.map x.status ~f:String_.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:TStamp.to_value));
+        ("ExpiryTime", (Option.map x.expiryTime ~f:TStamp.to_value));
+        ("BytesUsedForCache",
+          (Option.map x.bytesUsedForCache ~f:String_.to_value));
+        ("ServerlessCacheConfiguration",
+          (Option.map x.serverlessCacheConfiguration
+             ~f:ServerlessCacheConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serverlessCacheConfiguration =
+        (Option.map ~f:ServerlessCacheConfiguration.of_xml)
+          (Xml.child xml_arg0 "ServerlessCacheConfiguration") in
+      let bytesUsedForCache =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "BytesUsedForCache") in
+      let expiryTime =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "ExpiryTime") in
+      let createTime =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
+      let snapshotType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SnapshotType") in
+      let kmsKeyId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let aRN = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ARN") in
+      let serverlessCacheSnapshotName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ServerlessCacheSnapshotName") in
+      make ?serverlessCacheConfiguration ?bytesUsedForCache ?expiryTime
+        ?createTime ?status ?snapshotType ?kmsKeyId ?aRN
+        ?serverlessCacheSnapshotName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverlessCacheConfiguration =
+        field_map json__ "ServerlessCacheConfiguration"
+          ServerlessCacheConfiguration.of_json in
+      let bytesUsedForCache =
+        field_map json__ "BytesUsedForCache" String_.of_json in
+      let expiryTime = field_map json__ "ExpiryTime" TStamp.of_json in
+      let createTime = field_map json__ "CreateTime" TStamp.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let snapshotType = field_map json__ "SnapshotType" String_.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let serverlessCacheSnapshotName =
+        field_map json__ "ServerlessCacheSnapshotName" String_.of_json in
+      make ?serverlessCacheConfiguration ?bytesUsedForCache ?expiryTime
+        ?createTime ?status ?snapshotType ?kmsKeyId ?aRN
+        ?serverlessCacheSnapshotName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The resource representing a serverless cache snapshot. Available for Valkey, Redis OSS and Serverless Memcached only."]
 module GlobalReplicationGroup =
   struct
     type nonrec t =
@@ -5885,9 +6946,9 @@ module GlobalReplicationGroup =
       cacheNodeType: String_.t option
         [@ocaml.doc "The cache node type of the Global datastore"];
       engine: String_.t option
-        [@ocaml.doc "The Elasticache engine. For Redis only."];
+        [@ocaml.doc "The ElastiCache engine. For Valkey or Redis OSS only."];
       engineVersion: String_.t option
-        [@ocaml.doc "The Elasticache Redis engine version."];
+        [@ocaml.doc "The ElastiCache engine version."];
       members: GlobalReplicationGroupMemberList.t option
         [@ocaml.doc
           "The replication groups that comprise the Global datastore."];
@@ -5899,13 +6960,13 @@ module GlobalReplicationGroup =
           "Indicates the slot configuration and global identifier for each slice group."];
       authTokenEnabled: BooleanOptional.t option
         [@ocaml.doc
-          "A flag that enables using an AuthToken (password) when issuing Redis commands. Default: false"];
+          "A flag that enables using an AuthToken (password) when issuing Valkey or Redis OSS commands. Default: false"];
       transitEncryptionEnabled: BooleanOptional.t option
         [@ocaml.doc
-          "A flag that enables in-transit encryption when set to true. You cannot modify the value of TransitEncryptionEnabled after the cluster is created. To enable in-transit encryption on a cluster you must set TransitEncryptionEnabled to true when you create a cluster. Required: Only available when creating a replication group in an Amazon VPC using redis version 3.2.6, 4.x or later."];
+          "A flag that enables in-transit encryption when set to true. Required: Only available when creating a replication group in an Amazon VPC using Redis OSS version 3.2.6, 4.x or later."];
       atRestEncryptionEnabled: BooleanOptional.t option
         [@ocaml.doc
-          "A flag that enables encryption at rest when set to true. You cannot modify the value of AtRestEncryptionEnabled after the replication group is created. To enable encryption at rest on a replication group you must set AtRestEncryptionEnabled to true when you create the replication group. Required: Only available when creating a replication group in an Amazon VPC using redis version 3.2.6, 4.x or later."];
+          "A flag that enables encryption at rest when set to true. You cannot modify the value of AtRestEncryptionEnabled after the replication group is created. To enable encryption at rest on a replication group you must set AtRestEncryptionEnabled to true when you create the replication group. Required: Only available when creating a replication group in an Amazon VPC using Redis OSS version 3.2.6, 4.x or later."];
       aRN: String_.t option
         [@ocaml.doc
           "The ARN (Amazon Resource Name) of the global replication group."]}
@@ -6001,28 +7062,28 @@ module GlobalReplicationGroup =
         ?engineVersion ?engine ?cacheNodeType ?status
         ?globalReplicationGroupDescription ?globalReplicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" String_.of_json in
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" String_.of_json in
       let atRestEncryptionEnabled =
-        field_map json "AtRestEncryptionEnabled" BooleanOptional.of_json in
+        field_map json__ "AtRestEncryptionEnabled" BooleanOptional.of_json in
       let transitEncryptionEnabled =
-        field_map json "TransitEncryptionEnabled" BooleanOptional.of_json in
+        field_map json__ "TransitEncryptionEnabled" BooleanOptional.of_json in
       let authTokenEnabled =
-        field_map json "AuthTokenEnabled" BooleanOptional.of_json in
+        field_map json__ "AuthTokenEnabled" BooleanOptional.of_json in
       let globalNodeGroups =
-        field_map json "GlobalNodeGroups" GlobalNodeGroupList.of_json in
+        field_map json__ "GlobalNodeGroups" GlobalNodeGroupList.of_json in
       let clusterEnabled =
-        field_map json "ClusterEnabled" BooleanOptional.of_json in
+        field_map json__ "ClusterEnabled" BooleanOptional.of_json in
       let members =
-        field_map json "Members" GlobalReplicationGroupMemberList.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
+        field_map json__ "Members" GlobalReplicationGroupMemberList.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       let globalReplicationGroupDescription =
-        field_map json "GlobalReplicationGroupDescription" String_.of_json in
+        field_map json__ "GlobalReplicationGroupDescription" String_.of_json in
       let globalReplicationGroupId =
-        field_map json "GlobalReplicationGroupId" String_.of_json in
+        field_map json__ "GlobalReplicationGroupId" String_.of_json in
       make ?aRN ?atRestEncryptionEnabled ?transitEncryptionEnabled
         ?authTokenEnabled ?globalNodeGroups ?clusterEnabled ?members
         ?engineVersion ?engine ?cacheNodeType ?status
@@ -6034,6 +7095,9 @@ module CacheNodeTypeSpecificParametersList =
   struct
     type nonrec t = CacheNodeTypeSpecificParameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CacheNodeTypeSpecificParameter.to_value)) |>
         (fun x -> `List x)
@@ -6060,6 +7124,9 @@ module ParametersList =
   struct
     type nonrec t = Parameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Parameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6096,20 +7163,25 @@ module CacheSubnetGroup =
           "A list of subnets associated with the cache subnet group."];
       aRN: String_.t option
         [@ocaml.doc
-          "The ARN (Amazon Resource Name) of the cache subnet group."]}
+          "The ARN (Amazon Resource Name) of the cache subnet group."];
+      supportedNetworkTypes: NetworkTypeList.t option
+        [@ocaml.doc
+          "Either ipv4 | ipv6 | dual_stack. IPv6 is supported for workloads using Valkey 7.2 and above, Redis OSS engine version 6.2 to 7.1 or Memcached engine version 1.6.6 and above on all instances built on the Nitro system."]}
     let make ?cacheSubnetGroupName =
       fun ?cacheSubnetGroupDescription ->
         fun ?vpcId ->
           fun ?subnets ->
             fun ?aRN ->
-              fun () ->
-                {
-                  cacheSubnetGroupName;
-                  cacheSubnetGroupDescription;
-                  vpcId;
-                  subnets;
-                  aRN
-                }
+              fun ?supportedNetworkTypes ->
+                fun () ->
+                  {
+                    cacheSubnetGroupName;
+                    cacheSubnetGroupDescription;
+                    vpcId;
+                    subnets;
+                    aRN;
+                    supportedNetworkTypes
+                  }
     let to_value x =
       structure_to_value
         [("CacheSubnetGroupName",
@@ -6118,9 +7190,14 @@ module CacheSubnetGroup =
           (Option.map x.cacheSubnetGroupDescription ~f:String_.to_value));
         ("VpcId", (Option.map x.vpcId ~f:String_.to_value));
         ("Subnets", (Option.map x.subnets ~f:SubnetList.to_value));
-        ("ARN", (Option.map x.aRN ~f:String_.to_value))]
+        ("ARN", (Option.map x.aRN ~f:String_.to_value));
+        ("SupportedNetworkTypes",
+          (Option.map x.supportedNetworkTypes ~f:NetworkTypeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supportedNetworkTypes =
+        (Option.map ~f:NetworkTypeList.of_xml)
+          (Xml.child xml_arg0 "SupportedNetworkTypes") in
       let aRN = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ARN") in
       let subnets =
         (Option.map ~f:SubnetList.of_xml) (Xml.child xml_arg0 "Subnets") in
@@ -6131,19 +7208,21 @@ module CacheSubnetGroup =
       let cacheSubnetGroupName =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "CacheSubnetGroupName") in
-      make ?aRN ?subnets ?vpcId ?cacheSubnetGroupDescription
-        ?cacheSubnetGroupName ()
+      make ?supportedNetworkTypes ?aRN ?subnets ?vpcId
+        ?cacheSubnetGroupDescription ?cacheSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" String_.of_json in
-      let subnets = field_map json "Subnets" SubnetList.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
+    let of_json json__ =
+      let supportedNetworkTypes =
+        field_map json__ "SupportedNetworkTypes" NetworkTypeList.of_json in
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let subnets = field_map json__ "Subnets" SubnetList.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
       let cacheSubnetGroupDescription =
-        field_map json "CacheSubnetGroupDescription" String_.of_json in
+        field_map json__ "CacheSubnetGroupDescription" String_.of_json in
       let cacheSubnetGroupName =
-        field_map json "CacheSubnetGroupName" String_.of_json in
-      make ?aRN ?subnets ?vpcId ?cacheSubnetGroupDescription
-        ?cacheSubnetGroupName ()
+        field_map json__ "CacheSubnetGroupName" String_.of_json in
+      make ?supportedNetworkTypes ?aRN ?subnets ?vpcId
+        ?cacheSubnetGroupDescription ?cacheSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output of one of the following operations: CreateCacheSubnetGroup ModifyCacheSubnetGroup"]
@@ -6201,14 +7280,14 @@ module CacheSecurityGroup =
       make ?aRN ?eC2SecurityGroups ?description ?cacheSecurityGroupName
         ?ownerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" String_.of_json in
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" String_.of_json in
       let eC2SecurityGroups =
-        field_map json "EC2SecurityGroups" EC2SecurityGroupList.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map json__ "EC2SecurityGroups" EC2SecurityGroupList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let cacheSecurityGroupName =
-        field_map json "CacheSecurityGroupName" String_.of_json in
-      let ownerId = field_map json "OwnerId" String_.of_json in
+        field_map json__ "CacheSecurityGroupName" String_.of_json in
+      let ownerId = field_map json__ "OwnerId" String_.of_json in
       make ?aRN ?eC2SecurityGroups ?description ?cacheSecurityGroupName
         ?ownerId ()
     let to_json v = composed_to_json to_value v
@@ -6222,7 +7301,7 @@ module CacheParameterGroup =
         [@ocaml.doc "The name of the cache parameter group."];
       cacheParameterGroupFamily: String_.t option
         [@ocaml.doc
-          "The name of the cache parameter group family that this cache parameter group is compatible with. Valid values are: memcached1.4 | memcached1.5 | memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.x |"];
+          "The name of the cache parameter group family that this cache parameter group is compatible with. Valid values are: memcached1.4 | memcached1.5 | memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.x | redis7"];
       description: String_.t option
         [@ocaml.doc "The description for this cache parameter group."];
       isGlobal: Boolean.t option
@@ -6269,14 +7348,14 @@ module CacheParameterGroup =
       make ?aRN ?isGlobal ?description ?cacheParameterGroupFamily
         ?cacheParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" String_.of_json in
-      let isGlobal = field_map json "IsGlobal" Boolean.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" String_.of_json in
+      let isGlobal = field_map json__ "IsGlobal" Boolean.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let cacheParameterGroupFamily =
-        field_map json "CacheParameterGroupFamily" String_.of_json in
+        field_map json__ "CacheParameterGroupFamily" String_.of_json in
       let cacheParameterGroupName =
-        field_map json "CacheParameterGroupName" String_.of_json in
+        field_map json__ "CacheParameterGroupName" String_.of_json in
       make ?aRN ?isGlobal ?description ?cacheParameterGroupFamily
         ?cacheParameterGroupName ()
     let to_json v = composed_to_json to_value v
@@ -6291,7 +7370,7 @@ module CacheEngineVersion =
         [@ocaml.doc "The version number of the cache engine."];
       cacheParameterGroupFamily: String_.t option
         [@ocaml.doc
-          "The name of the cache parameter group family associated with this cache engine. Valid values are: memcached1.4 | memcached1.5 | memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.x"];
+          "The name of the cache parameter group family associated with this cache engine. Valid values are: memcached1.4 | memcached1.5 | memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.x | redis7"];
       cacheEngineDescription: String_.t option
         [@ocaml.doc "The description of the cache engine."];
       cacheEngineVersionDescription: String_.t option
@@ -6337,15 +7416,15 @@ module CacheEngineVersion =
       make ?cacheEngineVersionDescription ?cacheEngineDescription
         ?cacheParameterGroupFamily ?engineVersion ?engine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheEngineVersionDescription =
-        field_map json "CacheEngineVersionDescription" String_.of_json in
+        field_map json__ "CacheEngineVersionDescription" String_.of_json in
       let cacheEngineDescription =
-        field_map json "CacheEngineDescription" String_.of_json in
+        field_map json__ "CacheEngineDescription" String_.of_json in
       let cacheParameterGroupFamily =
-        field_map json "CacheParameterGroupFamily" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
+        field_map json__ "CacheParameterGroupFamily" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
       make ?cacheEngineVersionDescription ?cacheEngineDescription
         ?cacheParameterGroupFamily ?engineVersion ?engine ()
     let to_json v = composed_to_json to_value v
@@ -6366,7 +7445,7 @@ module CacheCluster =
           "The URL of the web page where you can download the latest ElastiCache client library."];
       cacheNodeType: String_.t option
         [@ocaml.doc
-          "The name of the compute and memory capacity node type for the cluster. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M6g node types: (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge For region availability, see Supported Node Types M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended) C1 node types: cache.c1.xlarge Memory optimized with data tiering: Current generation: R6gd node types (available only for Redis engine version 6.2 onward). cache.r6gd.xlarge, cache.r6gd.2xlarge, cache.r6gd.4xlarge, cache.r6gd.8xlarge, cache.r6gd.12xlarge, cache.r6gd.16xlarge Memory optimized: Current generation: R6g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward). cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge For region availability, see Supported Node Types R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Redis append-only files (AOF) are not supported for T1 or T2 instances. Redis Multi-AZ with automatic failover is not supported on T1 instances. Redis configuration variables appendonly and appendfsync are not supported on Redis version 2.8.22 and later."];
+          "The name of the compute and memory capacity node type for the cluster. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M7g node types: cache.m7g.large, cache.m7g.xlarge, cache.m7g.2xlarge, cache.m7g.4xlarge, cache.m7g.8xlarge, cache.m7g.12xlarge, cache.m7g.16xlarge For region availability, see Supported Node Types M6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis OSS engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) C1 node types: cache.c1.xlarge Memory optimized: Current generation: R7g node types: cache.r7g.large, cache.r7g.xlarge, cache.r7g.2xlarge, cache.r7g.4xlarge, cache.r7g.8xlarge, cache.r7g.12xlarge, cache.r7g.16xlarge For region availability, see Supported Node Types R6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Valkey or Redis OSS append-only files (AOF) are not supported for T1 or T2 instances. Valkey or Redis OSS Multi-AZ with automatic failover is not supported on T1 instances. The configuration variables appendonly and appendfsync are not supported on Valkey, or on Redis OSS version 2.8.22 and later."];
       engine: String_.t option
         [@ocaml.doc
           "The name of the cache engine (memcached or redis) to be used for this cluster."];
@@ -6378,7 +7457,7 @@ module CacheCluster =
           "The current state of this cluster, one of the following values: available, creating, deleted, deleting, incompatible-network, modifying, rebooting cluster nodes, restore-failed, or snapshotting."];
       numCacheNodes: IntegerOptional.t option
         [@ocaml.doc
-          "The number of cache nodes in the cluster. For clusters running Redis, this value must be 1. For clusters running Memcached, this value must be between 1 and 40."];
+          "The number of cache nodes in the cluster. For clusters running Valkey or Redis OSS, this value must be 1. For clusters running Memcached, this value must be between 1 and 40."];
       preferredAvailabilityZone: String_.t option
         [@ocaml.doc
           "The name of the Availability Zone in which the cluster is located or \"Multiple\" if the cache nodes are located in different Availability Zones."];
@@ -6405,7 +7484,7 @@ module CacheCluster =
         [@ocaml.doc "A list of cache nodes that are members of the cluster."];
       autoMinorVersionUpgrade: Boolean.t option
         [@ocaml.doc
-          "\194\160If you are running Redis engine version 6.0 or later, set this parameter to yes if you want to opt-in to the next auto minor version upgrade campaign. This parameter is disabled for previous versions.\194\160"];
+          "\194\160If you are running Valkey or Redis OSS engine version 6.0 or later, set this parameter to yes if you want to opt-in to the next auto minor version upgrade campaign. This parameter is disabled for previous versions.\194\160"];
       securityGroups: SecurityGroupMembershipList.t option
         [@ocaml.doc
           "A list of VPC Security Groups associated with the cluster."];
@@ -6420,22 +7499,31 @@ module CacheCluster =
           "The daily time range (in UTC) during which ElastiCache begins taking a daily snapshot of your cluster. Example: 05:00-09:00"];
       authTokenEnabled: BooleanOptional.t option
         [@ocaml.doc
-          "A flag that enables using an AuthToken (password) when issuing Redis commands. Default: false"];
+          "A flag that enables using an AuthToken (password) when issuing Valkey or Redis OSS commands. Default: false"];
       authTokenLastModifiedDate: TStamp.t option
         [@ocaml.doc "The date the auth token was last modified"];
       transitEncryptionEnabled: BooleanOptional.t option
         [@ocaml.doc
-          "A flag that enables in-transit encryption when set to true. You cannot modify the value of TransitEncryptionEnabled after the cluster is created. To enable in-transit encryption on a cluster you must set TransitEncryptionEnabled to true when you create a cluster. Required: Only available when creating a replication group in an Amazon VPC using redis version 3.2.6, 4.x or later. Default: false"];
+          "A flag that enables in-transit encryption when set to true. Required: Only available when creating a replication group in an Amazon VPC using Redis OSS version 3.2.6, 4.x or later. Default: false"];
       atRestEncryptionEnabled: BooleanOptional.t option
         [@ocaml.doc
-          "A flag that enables encryption at-rest when set to true. You cannot modify the value of AtRestEncryptionEnabled after the cluster is created. To enable at-rest encryption on a cluster you must set AtRestEncryptionEnabled to true when you create a cluster. Required: Only available when creating a replication group in an Amazon VPC using redis version 3.2.6, 4.x or later. Default: false"];
+          "A flag that enables encryption at-rest when set to true. You cannot modify the value of AtRestEncryptionEnabled after the cluster is created. To enable at-rest encryption on a cluster you must set AtRestEncryptionEnabled to true when you create a cluster. Required: Only available when creating a replication group in an Amazon VPC using Redis OSS version 3.2.6, 4.x or later. Default: false"];
       aRN: String_.t option
         [@ocaml.doc "The ARN (Amazon Resource Name) of the cache cluster."];
       replicationGroupLogDeliveryEnabled: Boolean.t option
         [@ocaml.doc
           "A boolean value indicating whether log delivery is enabled for the replication group."];
       logDeliveryConfigurations: LogDeliveryConfigurationList.t option
-        [@ocaml.doc "Returns the destination, format and type of the logs."]}
+        [@ocaml.doc "Returns the destination, format and type of the logs."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "Must be either ipv4 | ipv6 | dual_stack. IPv6 is supported for workloads using Valkey 7.2 and above, Redis OSS engine version 6.2 7.1 or Memcached engine version 1.6.6 and above on all instances built on the Nitro system."];
+      ipDiscovery: IpDiscovery.t option
+        [@ocaml.doc
+          "The network type associated with the cluster, either ipv4 | ipv6. IPv6 is supported for workloads using Valkey 7.2 and above, Redis OSS engine version 6.2 to 7.1 or Memcached engine version 1.6.6 and above on all instances built on the Nitro system."];
+      transitEncryptionMode: TransitEncryptionMode.t option
+        [@ocaml.doc
+          "A setting that allows you to migrate your clients to use in-transit encryption, with no downtime."]}
     let make ?cacheClusterId =
       fun ?configurationEndpoint ->
         fun ?clientDownloadLandingPage ->
@@ -6476,8 +7564,17 @@ module CacheCluster =
                                                               fun
                                                                 ?logDeliveryConfigurations
                                                                 ->
-                                                                fun () ->
-                                                                  {
+                                                                fun
+                                                                  ?networkType
+                                                                  ->
+                                                                  fun
+                                                                    ?ipDiscovery
+                                                                    ->
+                                                                    fun
+                                                                    ?transitEncryptionMode
+                                                                    ->
+                                                                    fun () ->
+                                                                    {
                                                                     cacheClusterId;
                                                                     configurationEndpoint;
                                                                     clientDownloadLandingPage;
@@ -6507,8 +7604,11 @@ module CacheCluster =
                                                                     atRestEncryptionEnabled;
                                                                     aRN;
                                                                     replicationGroupLogDeliveryEnabled;
-                                                                    logDeliveryConfigurations
-                                                                  }
+                                                                    logDeliveryConfigurations;
+                                                                    networkType;
+                                                                    ipDiscovery;
+                                                                    transitEncryptionMode
+                                                                    }
     let to_value x =
       structure_to_value
         [("CacheClusterId",
@@ -6571,9 +7671,21 @@ module CacheCluster =
              ~f:Boolean.to_value));
         ("LogDeliveryConfigurations",
           (Option.map x.logDeliveryConfigurations
-             ~f:LogDeliveryConfigurationList.to_value))]
+             ~f:LogDeliveryConfigurationList.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value));
+        ("IpDiscovery", (Option.map x.ipDiscovery ~f:IpDiscovery.to_value));
+        ("TransitEncryptionMode",
+          (Option.map x.transitEncryptionMode
+             ~f:TransitEncryptionMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let transitEncryptionMode =
+        (Option.map ~f:TransitEncryptionMode.of_xml)
+          (Xml.child xml_arg0 "TransitEncryptionMode") in
+      let ipDiscovery =
+        (Option.map ~f:IpDiscovery.of_xml) (Xml.child xml_arg0 "IpDiscovery") in
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
       let logDeliveryConfigurations =
         (Option.map ~f:LogDeliveryConfigurationList.of_xml)
           (Xml.child xml_arg0 "LogDeliveryConfigurations") in
@@ -6657,8 +7769,9 @@ module CacheCluster =
           (Xml.child xml_arg0 "ConfigurationEndpoint") in
       let cacheClusterId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CacheClusterId") in
-      make ?logDeliveryConfigurations ?replicationGroupLogDeliveryEnabled
-        ?aRN ?atRestEncryptionEnabled ?transitEncryptionEnabled
+      make ?transitEncryptionMode ?ipDiscovery ?networkType
+        ?logDeliveryConfigurations ?replicationGroupLogDeliveryEnabled ?aRN
+        ?atRestEncryptionEnabled ?transitEncryptionEnabled
         ?authTokenLastModifiedDate ?authTokenEnabled ?snapshotWindow
         ?snapshotRetentionLimit ?replicationGroupId ?securityGroups
         ?autoMinorVersionUpgrade ?cacheNodes ?cacheSubnetGroupName
@@ -6669,66 +7782,73 @@ module CacheCluster =
         ?engineVersion ?engine ?cacheNodeType ?clientDownloadLandingPage
         ?configurationEndpoint ?cacheClusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let transitEncryptionMode =
+        field_map json__ "TransitEncryptionMode"
+          TransitEncryptionMode.of_json in
+      let ipDiscovery = field_map json__ "IpDiscovery" IpDiscovery.of_json in
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
       let logDeliveryConfigurations =
-        field_map json "LogDeliveryConfigurations"
+        field_map json__ "LogDeliveryConfigurations"
           LogDeliveryConfigurationList.of_json in
       let replicationGroupLogDeliveryEnabled =
-        field_map json "ReplicationGroupLogDeliveryEnabled" Boolean.of_json in
-      let aRN = field_map json "ARN" String_.of_json in
+        field_map json__ "ReplicationGroupLogDeliveryEnabled" Boolean.of_json in
+      let aRN = field_map json__ "ARN" String_.of_json in
       let atRestEncryptionEnabled =
-        field_map json "AtRestEncryptionEnabled" BooleanOptional.of_json in
+        field_map json__ "AtRestEncryptionEnabled" BooleanOptional.of_json in
       let transitEncryptionEnabled =
-        field_map json "TransitEncryptionEnabled" BooleanOptional.of_json in
+        field_map json__ "TransitEncryptionEnabled" BooleanOptional.of_json in
       let authTokenLastModifiedDate =
-        field_map json "AuthTokenLastModifiedDate" TStamp.of_json in
+        field_map json__ "AuthTokenLastModifiedDate" TStamp.of_json in
       let authTokenEnabled =
-        field_map json "AuthTokenEnabled" BooleanOptional.of_json in
-      let snapshotWindow = field_map json "SnapshotWindow" String_.of_json in
+        field_map json__ "AuthTokenEnabled" BooleanOptional.of_json in
+      let snapshotWindow = field_map json__ "SnapshotWindow" String_.of_json in
       let snapshotRetentionLimit =
-        field_map json "SnapshotRetentionLimit" IntegerOptional.of_json in
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
       let replicationGroupId =
-        field_map json "ReplicationGroupId" String_.of_json in
+        field_map json__ "ReplicationGroupId" String_.of_json in
       let securityGroups =
-        field_map json "SecurityGroups" SecurityGroupMembershipList.of_json in
+        field_map json__ "SecurityGroups" SecurityGroupMembershipList.of_json in
       let autoMinorVersionUpgrade =
-        field_map json "AutoMinorVersionUpgrade" Boolean.of_json in
-      let cacheNodes = field_map json "CacheNodes" CacheNodeList.of_json in
+        field_map json__ "AutoMinorVersionUpgrade" Boolean.of_json in
+      let cacheNodes = field_map json__ "CacheNodes" CacheNodeList.of_json in
       let cacheSubnetGroupName =
-        field_map json "CacheSubnetGroupName" String_.of_json in
+        field_map json__ "CacheSubnetGroupName" String_.of_json in
       let cacheParameterGroup =
-        field_map json "CacheParameterGroup"
+        field_map json__ "CacheParameterGroup"
           CacheParameterGroupStatus.of_json in
       let cacheSecurityGroups =
-        field_map json "CacheSecurityGroups"
+        field_map json__ "CacheSecurityGroups"
           CacheSecurityGroupMembershipList.of_json in
       let notificationConfiguration =
-        field_map json "NotificationConfiguration"
+        field_map json__ "NotificationConfiguration"
           NotificationConfiguration.of_json in
       let pendingModifiedValues =
-        field_map json "PendingModifiedValues" PendingModifiedValues.of_json in
+        field_map json__ "PendingModifiedValues"
+          PendingModifiedValues.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let cacheClusterCreateTime =
-        field_map json "CacheClusterCreateTime" TStamp.of_json in
+        field_map json__ "CacheClusterCreateTime" TStamp.of_json in
       let preferredOutpostArn =
-        field_map json "PreferredOutpostArn" String_.of_json in
+        field_map json__ "PreferredOutpostArn" String_.of_json in
       let preferredAvailabilityZone =
-        field_map json "PreferredAvailabilityZone" String_.of_json in
+        field_map json__ "PreferredAvailabilityZone" String_.of_json in
       let numCacheNodes =
-        field_map json "NumCacheNodes" IntegerOptional.of_json in
+        field_map json__ "NumCacheNodes" IntegerOptional.of_json in
       let cacheClusterStatus =
-        field_map json "CacheClusterStatus" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
+        field_map json__ "CacheClusterStatus" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
       let clientDownloadLandingPage =
-        field_map json "ClientDownloadLandingPage" String_.of_json in
+        field_map json__ "ClientDownloadLandingPage" String_.of_json in
       let configurationEndpoint =
-        field_map json "ConfigurationEndpoint" Endpoint.of_json in
-      let cacheClusterId = field_map json "CacheClusterId" String_.of_json in
-      make ?logDeliveryConfigurations ?replicationGroupLogDeliveryEnabled
-        ?aRN ?atRestEncryptionEnabled ?transitEncryptionEnabled
+        field_map json__ "ConfigurationEndpoint" Endpoint.of_json in
+      let cacheClusterId = field_map json__ "CacheClusterId" String_.of_json in
+      make ?transitEncryptionMode ?ipDiscovery ?networkType
+        ?logDeliveryConfigurations ?replicationGroupLogDeliveryEnabled ?aRN
+        ?atRestEncryptionEnabled ?transitEncryptionEnabled
         ?authTokenLastModifiedDate ?authTokenEnabled ?snapshotWindow
         ?snapshotRetentionLimit ?replicationGroupId ?securityGroups
         ?autoMinorVersionUpgrade ?cacheNodes ?cacheSubnetGroupName
@@ -6744,6 +7864,9 @@ module UpdateActionList =
   struct
     type nonrec t = UpdateAction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpdateAction.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6768,6 +7891,9 @@ module ProcessedUpdateActionList =
   struct
     type nonrec t = ProcessedUpdateAction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProcessedUpdateAction.to_value)) |>
         (fun x -> `List x)
@@ -6806,6 +7932,9 @@ module UnprocessedUpdateActionList =
   struct
     type nonrec t = UnprocessedUpdateAction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UnprocessedUpdateAction.to_value)) |>
         (fun x -> `List x)
@@ -6826,6 +7955,72 @@ module UnprocessedUpdateActionList =
     let of_json j =
       list_of_json ~kind:"UnprocessedUpdateActionList"
         ~of_json:UnprocessedUpdateAction.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InvalidReplicationGroupStateFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The requested replication group is not in the available state."]
+module ReplicationGroupAlreadyUnderMigrationFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The targeted replication group is not available."]
+module ReplicationGroupNotFoundFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified replication group does not exist."]
+module CustomerNodeEndpointList =
+  struct
+    type nonrec t = CustomerNodeEndpoint.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CustomerNodeEndpoint.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CustomerNodeEndpoint.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CustomerNodeEndpointList"
+        ~of_json:CustomerNodeEndpoint.of_json j
     let to_json v = composed_to_json to_value v
   end
 module APICallRateForCustomerExceededFault =
@@ -6864,19 +8059,6 @@ module InvalidKMSKeyFault =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The KMS key supplied is not valid."]
-module InvalidReplicationGroupStateFault =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The requested replication group is not in the available state."]
 module NodeGroupNotFoundFault =
   struct
     type nonrec t = unit
@@ -6890,18 +8072,6 @@ module NodeGroupNotFoundFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The node group specified by the NodeGroupId parameter could not be found. Please verify that the node group exists and that you spelled the NodeGroupId value correctly."]
-module ReplicationGroupNotFoundFault =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified replication group does not exist."]
 module TestFailoverNotAvailableFault =
   struct
     type nonrec t = unit
@@ -6979,6 +8149,32 @@ module InvalidARNFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The requested Amazon Resource Name (ARN) does not refer to an existing resource."]
+module InvalidServerlessCacheSnapshotStateFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The state of the serverless cache snapshot was not received. Available for Valkey, Redis OSS and Serverless Memcached only."]
+module InvalidServerlessCacheStateFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The account for these credentials is not currently active."]
 module ReservedCacheNodeNotFoundFault =
   struct
     type nonrec t = unit
@@ -6991,6 +8187,31 @@ module ReservedCacheNodeNotFoundFault =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested reserved cache node was not found."]
+module ServerlessCacheNotFoundFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The serverless cache was not found or does not exist."]
+module ServerlessCacheSnapshotNotFoundFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This serverless cache snapshot could not be found or does not exist. Available for Valkey, Redis OSS and Serverless Memcached only."]
 module SnapshotNotFoundFault =
   struct
     type nonrec t = unit
@@ -7008,6 +8229,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7039,48 +8263,13 @@ module TagNotFoundFault =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested tag was not found on this resource."]
-module ReplicationGroupAlreadyUnderMigrationFault =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The targeted replication group is not available."]
-module CustomerNodeEndpointList =
-  struct
-    type nonrec t = CustomerNodeEndpoint.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:CustomerNodeEndpoint.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:CustomerNodeEndpoint.of_xml)
-    let of_json j =
-      list_of_json ~kind:"CustomerNodeEndpointList"
-        ~of_json:CustomerNodeEndpoint.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module ServiceUpdateList =
   struct
     type nonrec t = ServiceUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceUpdate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7131,6 +8320,9 @@ module ParameterNameValueList =
   struct
     type nonrec t = ParameterNameValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterNameValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7156,6 +8348,9 @@ module ReservedCacheNodesOfferingList =
   struct
     type nonrec t = ReservedCacheNodesOffering.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedCacheNodesOffering.to_value)) |>
         (fun x -> `List x)
@@ -7194,6 +8389,9 @@ module ReservedCacheNodeList =
   struct
     type nonrec t = ReservedCacheNode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedCacheNode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7219,6 +8417,9 @@ module ReplicationGroupList =
   struct
     type nonrec t = ReplicationGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicationGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7244,6 +8445,9 @@ module KeyList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7329,36 +8533,45 @@ module AccessString =
     let of_json j = string_of_json ~kind:"AccessString" j
     let to_json = simple_to_json to_value
   end
-module PasswordListInput =
+module AuthenticationMode =
   struct
-    type nonrec t = String_.t list
-    let make i =
-      let open Result in ok_or_failwith (check_list_min i ~min:1); i
-    let to_value xs =
-      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    type nonrec t =
+      {
+      type_: InputAuthenticationType.t option
+        [@ocaml.doc
+          "Specifies the authentication type. Possible options are IAM authentication, password and no password."];
+      passwords: PasswordListInput.t option
+        [@ocaml.doc
+          "Specifies the passwords to use for authentication if Type is set to password."]}
+    let make ?type_ = fun ?passwords -> fun () -> { type_; passwords }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:InputAuthenticationType.to_value));
+        ("Passwords", (Option.map x.passwords ~f:PasswordListInput.to_value))]
     let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:String_.of_xml)
-    let of_json j =
-      list_of_json ~kind:"PasswordListInput" ~of_json:String_.of_json j
+    let of_xml xml_arg0 =
+      let passwords =
+        (Option.map ~f:PasswordListInput.of_xml)
+          (Xml.child xml_arg0 "Passwords") in
+      let type_ =
+        (Option.map ~f:InputAuthenticationType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      make ?passwords ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let passwords = field_map json__ "Passwords" PasswordListInput.of_json in
+      let type_ = field_map json__ "Type" InputAuthenticationType.of_json in
+      make ?passwords ?type_ ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc "Specifies the authentication mode to use."]
 module UserIdListInput =
   struct
     type nonrec t = UserId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UserId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7379,6 +8592,18 @@ module UserIdListInput =
       list_of_json ~kind:"UserIdListInput" ~of_json:UserId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InvalidCredentialsException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "You must enter valid credentials."]
 module InsufficientCacheClusterCapacityFault =
   struct
     type nonrec t = unit
@@ -7434,6 +8659,9 @@ module NodeGroupsToRemoveList =
   struct
     type nonrec t = AllowedNodeGroupId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AllowedNodeGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7459,6 +8687,9 @@ module NodeGroupsToRetainList =
   struct
     type nonrec t = AllowedNodeGroupId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AllowedNodeGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7528,6 +8759,9 @@ module CacheSecurityGroupNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7553,6 +8787,9 @@ module LogDeliveryConfigurationRequestList =
   struct
     type nonrec t = LogDeliveryConfigurationRequest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LogDeliveryConfigurationRequest.to_value)) |>
         (fun x -> `List x)
@@ -7573,30 +8810,6 @@ module LogDeliveryConfigurationRequestList =
     let of_json j =
       list_of_json ~kind:"LogDeliveryConfigurationRequestList"
         ~of_json:LogDeliveryConfigurationRequest.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module SecurityGroupIdsList =
-  struct
-    type nonrec t = String_.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:String_.of_xml)
-    let of_json j =
-      list_of_json ~kind:"SecurityGroupIdsList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
 module CacheSubnetQuotaExceededFault =
@@ -7654,6 +8867,9 @@ module SubnetIdentifierList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7729,6 +8945,9 @@ module ReplicaConfigurationList =
   struct
     type nonrec t = ConfigureShard.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigureShard.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7754,6 +8973,9 @@ module RegionalConfigurationList =
   struct
     type nonrec t = RegionalConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RegionalConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -7780,6 +9002,9 @@ module EventList =
   struct
     type nonrec t = Event.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Event.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7803,6 +9028,9 @@ module UserList =
   struct
     type nonrec t = User.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:User.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7826,6 +9054,9 @@ module FilterList =
   struct
     type nonrec t = Filter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7849,6 +9080,9 @@ module UserGroupList =
   struct
     type nonrec t = UserGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UserGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7874,6 +9108,9 @@ module CacheClusterIdList =
     type nonrec t = String_.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7899,6 +9136,9 @@ module ReplicationGroupIdList =
     type nonrec t = String_.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7924,6 +9164,9 @@ module ServiceUpdateStatusList =
     type nonrec t = ServiceUpdateStatus.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:3); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceUpdateStatus.to_value)) |>
         (fun x -> `List x)
@@ -7967,9 +9210,9 @@ module TimeRangeFilter =
         (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "StartTime") in
       make ?endTime ?startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" TStamp.of_json in
-      let startTime = field_map json "StartTime" TStamp.of_json in
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" TStamp.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
       make ?endTime ?startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7979,6 +9222,9 @@ module UpdateActionStatusList =
     type nonrec t = UpdateActionStatus.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:9); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpdateActionStatus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8004,6 +9250,9 @@ module SnapshotList =
   struct
     type nonrec t = Snapshot.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Snapshot.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8024,10 +9273,70 @@ module SnapshotList =
       list_of_json ~kind:"SnapshotList" ~of_json:Snapshot.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ServerlessCacheList =
+  struct
+    type nonrec t = ServerlessCache.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServerlessCache.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServerlessCache.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServerlessCacheList"
+        ~of_json:ServerlessCache.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServerlessCacheSnapshotList =
+  struct
+    type nonrec t = ServerlessCacheSnapshot.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServerlessCacheSnapshot.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServerlessCacheSnapshot.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServerlessCacheSnapshotList"
+        ~of_json:ServerlessCacheSnapshot.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module GlobalReplicationGroupList =
   struct
     type nonrec t = GlobalReplicationGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlobalReplicationGroup.to_value)) |>
         (fun x -> `List x)
@@ -8056,7 +9365,7 @@ module EngineDefaults =
       {
       cacheParameterGroupFamily: String_.t option
         [@ocaml.doc
-          "Specifies the name of the cache parameter group family to which the engine default parameters apply. Valid values are: memcached1.4 | memcached1.5 | memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.0 | redis6.x"];
+          "Specifies the name of the cache parameter group family to which the engine default parameters apply. Valid values are: memcached1.4 | memcached1.5 | memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.0 | redis6.x | redis7"];
       marker: String_.t option
         [@ocaml.doc
           "Provides an identifier to allow retrieval of paginated results."];
@@ -8102,14 +9411,14 @@ module EngineDefaults =
       make ?cacheNodeTypeSpecificParameters ?parameters ?marker
         ?cacheParameterGroupFamily ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheNodeTypeSpecificParameters =
-        field_map json "CacheNodeTypeSpecificParameters"
+        field_map json__ "CacheNodeTypeSpecificParameters"
           CacheNodeTypeSpecificParametersList.of_json in
-      let parameters = field_map json "Parameters" ParametersList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+      let parameters = field_map json__ "Parameters" ParametersList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       let cacheParameterGroupFamily =
-        field_map json "CacheParameterGroupFamily" String_.of_json in
+        field_map json__ "CacheParameterGroupFamily" String_.of_json in
       make ?cacheNodeTypeSpecificParameters ?parameters ?marker
         ?cacheParameterGroupFamily ()
     let to_json v = composed_to_json to_value v
@@ -8128,6 +9437,19 @@ module InvalidSnapshotStateFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The current state of the snapshot does not allow the requested operation to occur."]
+module ServerlessCacheSnapshotAlreadyExistsFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A serverless cache snapshot with this name already exists. Available for Valkey, Redis OSS and Serverless Memcached only."]
 module SnapshotAlreadyExistsFault =
   struct
     type nonrec t = unit
@@ -8152,7 +9474,7 @@ module SnapshotFeatureNotSupportedFault =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You attempted one of the following operations: Creating a snapshot of a Redis cluster running on a cache.t1.micro cache node. Creating a snapshot of a cluster that is running Memcached rather than Redis. Neither of these are supported by ElastiCache."]
+       "You attempted one of the following operations: Creating a snapshot of a Valkey or Redis OSS cluster running on a cache.t1.micro cache node. Creating a snapshot of a cluster that is running Memcached rather than Valkey or Redis OSS. Neither of these are supported by ElastiCache."]
 module SnapshotQuotaExceededFault =
   struct
     type nonrec t = unit
@@ -8170,6 +9492,9 @@ module RemoveReplicasList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8194,6 +9519,9 @@ module GlobalNodeGroupIdList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8228,6 +9556,71 @@ module UserName =
     let of_json j = string_of_json ~kind:"UserName" j
     let to_json = simple_to_json to_value
   end
+module ServerlessCacheSnapshotQuotaExceededFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The number of serverless cache snapshots exceeds the customer snapshot quota. Available for Valkey, Redis OSS and Serverless Memcached only."]
+module ServerlessCacheAlreadyExistsFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A serverless cache with this name already exists."]
+module ServerlessCacheQuotaForCustomerExceededFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The number of serverless caches exceeds the customer quota."]
+module SnapshotArnsList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SnapshotArnsList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ReplicationGroupAlreadyExistsFault =
   struct
     type nonrec t = unit
@@ -8244,6 +9637,9 @@ module NodeGroupConfigurationList =
   struct
     type nonrec t = NodeGroupConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NodeGroupConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -8266,35 +9662,14 @@ module NodeGroupConfigurationList =
         ~of_json:NodeGroupConfiguration.of_json j
     let to_json v = composed_to_json to_value v
   end
-module SnapshotArnsList =
-  struct
-    type nonrec t = String_.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:String_.of_xml)
-    let of_json j =
-      list_of_json ~kind:"SnapshotArnsList" ~of_json:String_.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module UserGroupIdListInput =
   struct
     type nonrec t = UserGroupId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UserGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8473,6 +9848,9 @@ module CacheSubnetGroups =
   struct
     type nonrec t = CacheSubnetGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CacheSubnetGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8498,6 +9876,9 @@ module CacheSecurityGroups =
   struct
     type nonrec t = CacheSecurityGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CacheSecurityGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8523,6 +9904,9 @@ module CacheParameterGroupList =
   struct
     type nonrec t = CacheParameterGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CacheParameterGroup.to_value)) |>
         (fun x -> `List x)
@@ -8549,6 +9933,9 @@ module CacheEngineVersionList =
   struct
     type nonrec t = CacheEngineVersion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CacheEngineVersion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8574,6 +9961,9 @@ module CacheClusterList =
   struct
     type nonrec t = CacheCluster.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CacheCluster.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8611,6 +10001,9 @@ module NodeTypeList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8713,10 +10106,10 @@ module UpdateActionsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?updateActions ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updateActions =
-        field_map json "UpdateActions" UpdateActionList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "UpdateActions" UpdateActionList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?updateActions ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns details of the update actions"]
@@ -8804,17 +10197,159 @@ module UpdateActionResultsMessage =
           (Xml.child xml_arg0 "ProcessedUpdateActions") in
       make ?unprocessedUpdateActions ?processedUpdateActions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unprocessedUpdateActions =
-        field_map json "UnprocessedUpdateActions"
+        field_map json__ "UnprocessedUpdateActions"
           UnprocessedUpdateActionList.of_json in
       let processedUpdateActions =
-        field_map json "ProcessedUpdateActions"
+        field_map json__ "ProcessedUpdateActions"
           ProcessedUpdateActionList.of_json in
       make ?unprocessedUpdateActions ?processedUpdateActions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Apply the service update. For more information on service updates and applying them, see Applying Service Updates."]
+module TestMigrationResponse =
+  struct
+    type testMigrationResult = {
+      replicationGroup: ReplicationGroup.t option }
+    and responseMetaData = unit
+    and t =
+      {
+      testMigrationResult: testMigrationResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `InvalidReplicationGroupStateFault of
+          InvalidReplicationGroupStateFault.t 
+      | `ReplicationGroupAlreadyUnderMigrationFault of
+          ReplicationGroupAlreadyUnderMigrationFault.t 
+      | `ReplicationGroupNotFoundFault of ReplicationGroupNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "TestMigrationResponse"
+    let make ?replicationGroup =
+      fun () ->
+        { testMigrationResult = { replicationGroup }; responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "InvalidReplicationGroupStateFault" ->
+          `InvalidReplicationGroupStateFault
+            (InvalidReplicationGroupStateFault.of_json json)
+      | "ReplicationGroupAlreadyUnderMigrationFault" ->
+          `ReplicationGroupAlreadyUnderMigrationFault
+            (ReplicationGroupAlreadyUnderMigrationFault.of_json json)
+      | "ReplicationGroupNotFoundFault" ->
+          `ReplicationGroupNotFoundFault
+            (ReplicationGroupNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "InvalidReplicationGroupStateFault" ->
+          `InvalidReplicationGroupStateFault
+            (InvalidReplicationGroupStateFault.of_xml xml)
+      | "ReplicationGroupAlreadyUnderMigrationFault" ->
+          `ReplicationGroupAlreadyUnderMigrationFault
+            (ReplicationGroupAlreadyUnderMigrationFault.of_xml xml)
+      | "ReplicationGroupNotFoundFault" ->
+          `ReplicationGroupNotFoundFault
+            (ReplicationGroupNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `InvalidReplicationGroupStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidReplicationGroupStateFault"));
+            ("details", (InvalidReplicationGroupStateFault.to_json e))]
+      | `ReplicationGroupAlreadyUnderMigrationFault e ->
+          `Assoc
+            [("error",
+               (`String "ReplicationGroupAlreadyUnderMigrationFault"));
+            ("details",
+              (ReplicationGroupAlreadyUnderMigrationFault.to_json e))]
+      | `ReplicationGroupNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ReplicationGroupNotFoundFault"));
+            ("details", (ReplicationGroupNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.testMigrationResult in
+      structure_to_wrapped_value
+        [("ReplicationGroup",
+           (Option.map x.replicationGroup ~f:ReplicationGroup.to_value))]
+        ~wrapper:"TestMigrationResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 = Xml.child_exn ~context:context_ t "TestMigrationResult" in
+      let replicationGroup =
+        (Option.map ~f:ReplicationGroup.of_xml)
+          (Xml.child xml_arg0 "ReplicationGroup") in
+      make ?replicationGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let replicationGroup =
+        field_map json__ "ReplicationGroup" ReplicationGroup.of_json in
+      make ?replicationGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Async API to test connection between source and target replication group."]
+module TestMigrationMessage =
+  struct
+    type nonrec t =
+      {
+      replicationGroupId: String_.t
+        [@ocaml.doc
+          "The ID of the replication group to which data is to be migrated."];
+      customerNodeEndpointList: CustomerNodeEndpointList.t
+        [@ocaml.doc
+          "List of endpoints from which data should be migrated. List should have only one element."]}
+    let context_ = "TestMigrationMessage"
+    let make ~replicationGroupId =
+      fun ~customerNodeEndpointList ->
+        fun () -> { replicationGroupId; customerNodeEndpointList }
+    let to_value x =
+      structure_to_value
+        [("ReplicationGroupId",
+           (Some (String_.to_value x.replicationGroupId)));
+        ("CustomerNodeEndpointList",
+          (Some
+             (CustomerNodeEndpointList.to_value x.customerNodeEndpointList)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customerNodeEndpointList =
+        CustomerNodeEndpointList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "CustomerNodeEndpointList") in
+      let replicationGroupId =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ReplicationGroupId") in
+      make ~customerNodeEndpointList ~replicationGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customerNodeEndpointList =
+        field_map_exn json__ "CustomerNodeEndpointList"
+          CustomerNodeEndpointList.of_json in
+      let replicationGroupId =
+        field_map_exn json__ "ReplicationGroupId" String_.of_json in
+      make ~customerNodeEndpointList ~replicationGroupId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Async API to test connection between source and target replication group."]
 module TestFailoverResult =
   struct
     type testFailoverResult = {
@@ -8959,13 +10494,13 @@ module TestFailoverResult =
           (Xml.child xml_arg0 "ReplicationGroup") in
       make ?replicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroup =
-        field_map json "ReplicationGroup" ReplicationGroup.of_json in
+        field_map json__ "ReplicationGroup" ReplicationGroup.of_json in
       make ?replicationGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents the input of a TestFailover operation which test automatic failover on a specified node group (called shard in the console) in a replication group (called cluster in the console). This API is designed for testing the behavior of your application in case of ElastiCache failover. It is not designed to be an operational tool for initiating a failover to overcome a problem you may have with the cluster. Moreover, in certain conditions such as large-scale operational events, Amazon may block this API. Note the following A customer can use this operation to test automatic failover on up to 5 shards (called node groups in the ElastiCache API and Amazon CLI) in any rolling 24-hour period. If calling this operation on shards in different clusters (called replication groups in the API and CLI), the calls can be made concurrently. If calling this operation multiple times on different shards in the same Redis (cluster mode enabled) replication group, the first node replacement must complete before a subsequent call can be made. To determine whether the node replacement is complete you can check Events using the Amazon ElastiCache console, the Amazon CLI, or the ElastiCache API. Look for the following automatic failover related events, listed here in order of occurrance: Replication group message: Test Failover API called for node group <node-group-id> Cache cluster message: Failover from primary node <primary-node-id> to replica node <node-id> completed Replication group message: Failover from primary node <primary-node-id> to replica node <node-id> completed Cache cluster message: Recovering cache nodes <node-id> Cache cluster message: Finished recovery for cache nodes <node-id> For more information see: Viewing ElastiCache Events in the ElastiCache User Guide DescribeEvents in the ElastiCache API Reference Also see, Testing Multi-AZ in the ElastiCache User Guide."]
+       "Represents the input of a TestFailover operation which tests automatic failover on a specified node group (called shard in the console) in a replication group (called cluster in the console). This API is designed for testing the behavior of your application in case of ElastiCache failover. It is not designed to be an operational tool for initiating a failover to overcome a problem you may have with the cluster. Moreover, in certain conditions such as large-scale operational events, Amazon may block this API. Note the following A customer can use this operation to test automatic failover on up to 15 shards (called node groups in the ElastiCache API and Amazon CLI) in any rolling 24-hour period. If calling this operation on shards in different clusters (called replication groups in the API and CLI), the calls can be made concurrently. If calling this operation multiple times on different shards in the same Valkey or Redis OSS (cluster mode enabled) replication group, the first node replacement must complete before a subsequent call can be made. To determine whether the node replacement is complete you can check Events using the Amazon ElastiCache console, the Amazon CLI, or the ElastiCache API. Look for the following automatic failover related events, listed here in order of occurrance: Replication group message: Test Failover API called for node group <node-group-id> Cache cluster message: Failover from primary node <primary-node-id> to replica node <node-id> completed Replication group message: Failover from primary node <primary-node-id> to replica node <node-id> completed Cache cluster message: Recovering cache nodes <node-id> Cache cluster message: Finished recovery for cache nodes <node-id> For more information see: Viewing ElastiCache Events in the ElastiCache User Guide DescribeEvents in the ElastiCache API Reference Also see, Testing Multi-AZ in the ElastiCache User Guide."]
 module TestFailoverMessage =
   struct
     type nonrec t =
@@ -8975,7 +10510,7 @@ module TestFailoverMessage =
           "The name of the replication group (console: cluster) whose automatic failover is being tested by this operation."];
       nodeGroupId: AllowedNodeGroupId.t
         [@ocaml.doc
-          "The name of the node group (called shard in the console) in this replication group on which automatic failover is to be tested. You may test automatic failover on up to 5 node groups in any rolling 24-hour period."]}
+          "The name of the node group (called shard in the console) in this replication group on which automatic failover is to be tested. You may test automatic failover on up to 15 node groups in any rolling 24-hour period."]}
     let context_ = "TestFailoverMessage"
     let make ~replicationGroupId =
       fun ~nodeGroupId -> fun () -> { replicationGroupId; nodeGroupId }
@@ -8994,15 +10529,15 @@ module TestFailoverMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationGroupId") in
       make ~nodeGroupId ~replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nodeGroupId =
-        field_map_exn json "NodeGroupId" AllowedNodeGroupId.of_json in
+        field_map_exn json__ "NodeGroupId" AllowedNodeGroupId.of_json in
       let replicationGroupId =
-        field_map_exn json "ReplicationGroupId" String_.of_json in
+        field_map_exn json__ "ReplicationGroupId" String_.of_json in
       make ~nodeGroupId ~replicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents the input of a TestFailover operation which test automatic failover on a specified node group (called shard in the console) in a replication group (called cluster in the console). This API is designed for testing the behavior of your application in case of ElastiCache failover. It is not designed to be an operational tool for initiating a failover to overcome a problem you may have with the cluster. Moreover, in certain conditions such as large-scale operational events, Amazon may block this API. Note the following A customer can use this operation to test automatic failover on up to 5 shards (called node groups in the ElastiCache API and Amazon CLI) in any rolling 24-hour period. If calling this operation on shards in different clusters (called replication groups in the API and CLI), the calls can be made concurrently. If calling this operation multiple times on different shards in the same Redis (cluster mode enabled) replication group, the first node replacement must complete before a subsequent call can be made. To determine whether the node replacement is complete you can check Events using the Amazon ElastiCache console, the Amazon CLI, or the ElastiCache API. Look for the following automatic failover related events, listed here in order of occurrance: Replication group message: Test Failover API called for node group <node-group-id> Cache cluster message: Failover from primary node <primary-node-id> to replica node <node-id> completed Replication group message: Failover from primary node <primary-node-id> to replica node <node-id> completed Cache cluster message: Recovering cache nodes <node-id> Cache cluster message: Finished recovery for cache nodes <node-id> For more information see: Viewing ElastiCache Events in the ElastiCache User Guide DescribeEvents in the ElastiCache API Reference Also see, Testing Multi-AZ in the ElastiCache User Guide."]
+       "Represents the input of a TestFailover operation which tests automatic failover on a specified node group (called shard in the console) in a replication group (called cluster in the console). This API is designed for testing the behavior of your application in case of ElastiCache failover. It is not designed to be an operational tool for initiating a failover to overcome a problem you may have with the cluster. Moreover, in certain conditions such as large-scale operational events, Amazon may block this API. Note the following A customer can use this operation to test automatic failover on up to 15 shards (called node groups in the ElastiCache API and Amazon CLI) in any rolling 24-hour period. If calling this operation on shards in different clusters (called replication groups in the API and CLI), the calls can be made concurrently. If calling this operation multiple times on different shards in the same Valkey or Redis OSS (cluster mode enabled) replication group, the first node replacement must complete before a subsequent call can be made. To determine whether the node replacement is complete you can check Events using the Amazon ElastiCache console, the Amazon CLI, or the ElastiCache API. Look for the following automatic failover related events, listed here in order of occurrance: Replication group message: Test Failover API called for node group <node-group-id> Cache cluster message: Failover from primary node <primary-node-id> to replica node <node-id> completed Replication group message: Failover from primary node <primary-node-id> to replica node <node-id> completed Cache cluster message: Recovering cache nodes <node-id> Cache cluster message: Finished recovery for cache nodes <node-id> For more information see: Viewing ElastiCache Events in the ElastiCache User Guide DescribeEvents in the ElastiCache API Reference Also see, Testing Multi-AZ in the ElastiCache User Guide."]
 module TagListMessage =
   struct
     type addTagsToResourceResult =
@@ -9023,8 +10558,15 @@ module TagListMessage =
       | `InvalidARNFault of InvalidARNFault.t 
       | `InvalidReplicationGroupStateFault of
           InvalidReplicationGroupStateFault.t 
+      | `InvalidServerlessCacheSnapshotStateFault of
+          InvalidServerlessCacheSnapshotStateFault.t 
+      | `InvalidServerlessCacheStateFault of
+          InvalidServerlessCacheStateFault.t 
       | `ReplicationGroupNotFoundFault of ReplicationGroupNotFoundFault.t 
       | `ReservedCacheNodeNotFoundFault of ReservedCacheNodeNotFoundFault.t 
+      | `ServerlessCacheNotFoundFault of ServerlessCacheNotFoundFault.t 
+      | `ServerlessCacheSnapshotNotFoundFault of
+          ServerlessCacheSnapshotNotFoundFault.t 
       | `SnapshotNotFoundFault of SnapshotNotFoundFault.t 
       | `TagQuotaPerResourceExceeded of TagQuotaPerResourceExceeded.t 
       | `UserGroupNotFoundFault of UserGroupNotFoundFault.t 
@@ -9051,12 +10593,24 @@ module TagListMessage =
       | "InvalidReplicationGroupStateFault" ->
           `InvalidReplicationGroupStateFault
             (InvalidReplicationGroupStateFault.of_json json)
+      | "InvalidServerlessCacheSnapshotStateFault" ->
+          `InvalidServerlessCacheSnapshotStateFault
+            (InvalidServerlessCacheSnapshotStateFault.of_json json)
+      | "InvalidServerlessCacheStateFault" ->
+          `InvalidServerlessCacheStateFault
+            (InvalidServerlessCacheStateFault.of_json json)
       | "ReplicationGroupNotFoundFault" ->
           `ReplicationGroupNotFoundFault
             (ReplicationGroupNotFoundFault.of_json json)
       | "ReservedCacheNodeNotFoundFault" ->
           `ReservedCacheNodeNotFoundFault
             (ReservedCacheNodeNotFoundFault.of_json json)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_json json)
+      | "ServerlessCacheSnapshotNotFoundFault" ->
+          `ServerlessCacheSnapshotNotFoundFault
+            (ServerlessCacheSnapshotNotFoundFault.of_json json)
       | "SnapshotNotFoundFault" ->
           `SnapshotNotFoundFault (SnapshotNotFoundFault.of_json json)
       | "TagQuotaPerResourceExceeded" ->
@@ -9086,12 +10640,24 @@ module TagListMessage =
       | "InvalidReplicationGroupStateFault" ->
           `InvalidReplicationGroupStateFault
             (InvalidReplicationGroupStateFault.of_xml xml)
+      | "InvalidServerlessCacheSnapshotStateFault" ->
+          `InvalidServerlessCacheSnapshotStateFault
+            (InvalidServerlessCacheSnapshotStateFault.of_xml xml)
+      | "InvalidServerlessCacheStateFault" ->
+          `InvalidServerlessCacheStateFault
+            (InvalidServerlessCacheStateFault.of_xml xml)
       | "ReplicationGroupNotFoundFault" ->
           `ReplicationGroupNotFoundFault
             (ReplicationGroupNotFoundFault.of_xml xml)
       | "ReservedCacheNodeNotFoundFault" ->
           `ReservedCacheNodeNotFoundFault
             (ReservedCacheNodeNotFoundFault.of_xml xml)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_xml xml)
+      | "ServerlessCacheSnapshotNotFoundFault" ->
+          `ServerlessCacheSnapshotNotFoundFault
+            (ServerlessCacheSnapshotNotFoundFault.of_xml xml)
       | "SnapshotNotFoundFault" ->
           `SnapshotNotFoundFault (SnapshotNotFoundFault.of_xml xml)
       | "TagQuotaPerResourceExceeded" ->
@@ -9129,6 +10695,14 @@ module TagListMessage =
           `Assoc
             [("error", (`String "InvalidReplicationGroupStateFault"));
             ("details", (InvalidReplicationGroupStateFault.to_json e))]
+      | `InvalidServerlessCacheSnapshotStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidServerlessCacheSnapshotStateFault"));
+            ("details", (InvalidServerlessCacheSnapshotStateFault.to_json e))]
+      | `InvalidServerlessCacheStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidServerlessCacheStateFault"));
+            ("details", (InvalidServerlessCacheStateFault.to_json e))]
       | `ReplicationGroupNotFoundFault e ->
           `Assoc
             [("error", (`String "ReplicationGroupNotFoundFault"));
@@ -9137,6 +10711,14 @@ module TagListMessage =
           `Assoc
             [("error", (`String "ReservedCacheNodeNotFoundFault"));
             ("details", (ReservedCacheNodeNotFoundFault.to_json e))]
+      | `ServerlessCacheNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheNotFoundFault"));
+            ("details", (ServerlessCacheNotFoundFault.to_json e))]
+      | `ServerlessCacheSnapshotNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheSnapshotNotFoundFault"));
+            ("details", (ServerlessCacheSnapshotNotFoundFault.to_json e))]
       | `SnapshotNotFoundFault e ->
           `Assoc
             [("error", (`String "SnapshotNotFoundFault"));
@@ -9171,8 +10753,8 @@ module TagListMessage =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       make ?tagList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
       make ?tagList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9272,9 +10854,9 @@ module StartMigrationResponse =
           (Xml.child xml_arg0 "ReplicationGroup") in
       make ?replicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroup =
-        field_map json "ReplicationGroup" ReplicationGroup.of_json in
+        field_map json__ "ReplicationGroup" ReplicationGroup.of_json in
       make ?replicationGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Start the migration of data."]
@@ -9287,7 +10869,7 @@ module StartMigrationMessage =
           "The ID of the replication group to which data should be migrated."];
       customerNodeEndpointList: CustomerNodeEndpointList.t
         [@ocaml.doc
-          "List of endpoints from which data should be migrated. For Redis (cluster mode disabled), list should have only one element."]}
+          "List of endpoints from which data should be migrated. For Valkey or Redis OSS (cluster mode disabled), the list should have only one element."]}
     let context_ = "StartMigrationMessage"
     let make ~replicationGroupId =
       fun ~customerNodeEndpointList ->
@@ -9310,12 +10892,12 @@ module StartMigrationMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationGroupId") in
       make ~customerNodeEndpointList ~replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customerNodeEndpointList =
-        field_map_exn json "CustomerNodeEndpointList"
+        field_map_exn json__ "CustomerNodeEndpointList"
           CustomerNodeEndpointList.of_json in
       let replicationGroupId =
-        field_map_exn json "ReplicationGroupId" String_.of_json in
+        field_map_exn json__ "ReplicationGroupId" String_.of_json in
       make ~customerNodeEndpointList ~replicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Start the migration of data."]
@@ -9411,10 +10993,10 @@ module ServiceUpdatesMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?serviceUpdates ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceUpdates =
-        field_map json "ServiceUpdates" ServiceUpdateList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "ServiceUpdates" ServiceUpdateList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?serviceUpdates ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns details of the service updates"]
@@ -9527,9 +11109,9 @@ module RevokeCacheSecurityGroupIngressResult =
           (Xml.child xml_arg0 "CacheSecurityGroup") in
       make ?cacheSecurityGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheSecurityGroup =
-        field_map json "CacheSecurityGroup" CacheSecurityGroup.of_json in
+        field_map json__ "CacheSecurityGroup" CacheSecurityGroup.of_json in
       make ?cacheSecurityGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9579,13 +11161,13 @@ module RevokeCacheSecurityGroupIngressMessage =
       make ~eC2SecurityGroupOwnerId ~eC2SecurityGroupName
         ~cacheSecurityGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eC2SecurityGroupOwnerId =
-        field_map_exn json "EC2SecurityGroupOwnerId" String_.of_json in
+        field_map_exn json__ "EC2SecurityGroupOwnerId" String_.of_json in
       let eC2SecurityGroupName =
-        field_map_exn json "EC2SecurityGroupName" String_.of_json in
+        field_map_exn json__ "EC2SecurityGroupName" String_.of_json in
       let cacheSecurityGroupName =
-        field_map_exn json "CacheSecurityGroupName" String_.of_json in
+        field_map_exn json__ "CacheSecurityGroupName" String_.of_json in
       make ~eC2SecurityGroupOwnerId ~eC2SecurityGroupName
         ~cacheSecurityGroupName ()
     let to_json v = composed_to_json to_value v
@@ -9636,13 +11218,13 @@ module ResetCacheParameterGroupMessage =
       make ?parameterNameValues ?resetAllParameters ~cacheParameterGroupName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterNameValues =
-        field_map json "ParameterNameValues" ParameterNameValueList.of_json in
+        field_map json__ "ParameterNameValues" ParameterNameValueList.of_json in
       let resetAllParameters =
-        field_map json "ResetAllParameters" Boolean.of_json in
+        field_map json__ "ResetAllParameters" Boolean.of_json in
       let cacheParameterGroupName =
-        field_map_exn json "CacheParameterGroupName" String_.of_json in
+        field_map_exn json__ "CacheParameterGroupName" String_.of_json in
       make ?parameterNameValues ?resetAllParameters ~cacheParameterGroupName
         ()
     let to_json v = composed_to_json to_value v
@@ -9748,11 +11330,11 @@ module ReservedCacheNodesOfferingMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?reservedCacheNodesOfferings ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reservedCacheNodesOfferings =
-        field_map json "ReservedCacheNodesOfferings"
+        field_map json__ "ReservedCacheNodesOfferings"
           ReservedCacheNodesOfferingList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?reservedCacheNodesOfferings ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9852,10 +11434,10 @@ module ReservedCacheNodeMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?reservedCacheNodes ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reservedCacheNodes =
-        field_map json "ReservedCacheNodes" ReservedCacheNodeList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "ReservedCacheNodes" ReservedCacheNodeList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?reservedCacheNodes ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9955,10 +11537,10 @@ module ReplicationGroupMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?replicationGroups ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroups =
-        field_map json "ReplicationGroups" ReplicationGroupList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "ReplicationGroups" ReplicationGroupList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?replicationGroups ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9989,9 +11571,9 @@ module RemoveTagsFromResourceMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ~tagKeys ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" KeyList.of_json in
-      let resourceName = field_map_exn json "ResourceName" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" KeyList.of_json in
+      let resourceName = field_map_exn json__ "ResourceName" String_.of_json in
       make ~tagKeys ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10063,12 +11645,12 @@ module RebootCacheClusterResult =
           (Xml.child xml_arg0 "CacheCluster") in
       make ?cacheCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cacheCluster = field_map json "CacheCluster" CacheCluster.of_json in
+    let of_json json__ =
+      let cacheCluster = field_map json__ "CacheCluster" CacheCluster.of_json in
       make ?cacheCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Reboots some, or all, of the cache nodes within a provisioned cluster. This operation applies any modified cache parameter groups to the cluster. The reboot operation takes place as soon as possible, and results in a momentary outage to the cluster. During the reboot, the cluster status is set to REBOOTING. The reboot causes the contents of the cache (for each cache node being rebooted) to be lost. When the reboot is complete, a cluster event is created. Rebooting a cluster is currently supported on Memcached and Redis (cluster mode disabled) clusters. Rebooting is not supported on Redis (cluster mode enabled) clusters. If you make changes to parameters that require a Redis (cluster mode enabled) cluster reboot for the changes to be applied, see Rebooting a Cluster for an alternate process."]
+       "Reboots some, or all, of the cache nodes within a provisioned cluster. This operation applies any modified cache parameter groups to the cluster. The reboot operation takes place as soon as possible, and results in a momentary outage to the cluster. During the reboot, the cluster status is set to REBOOTING. The reboot causes the contents of the cache (for each cache node being rebooted) to be lost. When the reboot is complete, a cluster event is created. Rebooting a cluster is currently supported on Memcached, Valkey and Redis OSS (cluster mode disabled) clusters. Rebooting is not supported on Valkey or Redis OSS (cluster mode enabled) clusters. If you make changes to parameters that require a Valkey or Redis OSS (cluster mode enabled) cluster reboot for the changes to be applied, see Rebooting a Cluster for an alternate process."]
 module RebootCacheClusterMessage =
   struct
     type nonrec t =
@@ -10098,11 +11680,11 @@ module RebootCacheClusterMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "CacheClusterId") in
       make ~cacheNodeIdsToReboot ~cacheClusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheNodeIdsToReboot =
-        field_map_exn json "CacheNodeIdsToReboot" CacheNodeIdsList.of_json in
+        field_map_exn json__ "CacheNodeIdsToReboot" CacheNodeIdsList.of_json in
       let cacheClusterId =
-        field_map_exn json "CacheClusterId" String_.of_json in
+        field_map_exn json__ "CacheClusterId" String_.of_json in
       make ~cacheNodeIdsToReboot ~cacheClusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a RebootCacheCluster operation."]
@@ -10197,9 +11779,9 @@ module RebalanceSlotsInGlobalReplicationGroupResult =
           (Xml.child xml_arg0 "GlobalReplicationGroup") in
       make ?globalReplicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalReplicationGroup =
-        field_map json "GlobalReplicationGroup"
+        field_map json__ "GlobalReplicationGroup"
           GlobalReplicationGroup.of_json in
       make ?globalReplicationGroup ()
     let to_json v = composed_to_json to_value v
@@ -10233,11 +11815,11 @@ module RebalanceSlotsInGlobalReplicationGroupMessage =
              "GlobalReplicationGroupId") in
       make ~applyImmediately ~globalReplicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applyImmediately =
-        field_map_exn json "ApplyImmediately" Boolean.of_json in
+        field_map_exn json__ "ApplyImmediately" Boolean.of_json in
       let globalReplicationGroupId =
-        field_map_exn json "GlobalReplicationGroupId" String_.of_json in
+        field_map_exn json__ "GlobalReplicationGroupId" String_.of_json in
       make ~applyImmediately ~globalReplicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10366,13 +11948,13 @@ module PurchaseReservedCacheNodesOfferingResult =
           (Xml.child xml_arg0 "ReservedCacheNode") in
       make ?reservedCacheNode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reservedCacheNode =
-        field_map json "ReservedCacheNode" ReservedCacheNode.of_json in
+        field_map json__ "ReservedCacheNode" ReservedCacheNode.of_json in
       make ?reservedCacheNode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Allows you to purchase a reserved cache node offering. Reserved nodes are not eligible for cancellation and are non-refundable. For more information, see Managing Costs with Reserved Nodes for Redis or Managing Costs with Reserved Nodes for Memcached."]
+       "Allows you to purchase a reserved cache node offering. Reserved nodes are not eligible for cancellation and are non-refundable. For more information, see Managing Costs with Reserved Nodes."]
 module PurchaseReservedCacheNodesOfferingMessage =
   struct
     type nonrec t =
@@ -10426,14 +12008,14 @@ module PurchaseReservedCacheNodesOfferingMessage =
       make ?tags ?cacheNodeCount ?reservedCacheNodeId
         ~reservedCacheNodesOfferingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let cacheNodeCount =
-        field_map json "CacheNodeCount" IntegerOptional.of_json in
+        field_map json__ "CacheNodeCount" IntegerOptional.of_json in
       let reservedCacheNodeId =
-        field_map json "ReservedCacheNodeId" String_.of_json in
+        field_map json__ "ReservedCacheNodeId" String_.of_json in
       let reservedCacheNodesOfferingId =
-        field_map_exn json "ReservedCacheNodesOfferingId" String_.of_json in
+        field_map_exn json__ "ReservedCacheNodesOfferingId" String_.of_json in
       make ?tags ?cacheNodeCount ?reservedCacheNodeId
         ~reservedCacheNodesOfferingId ()
     let to_json v = composed_to_json to_value v
@@ -10452,21 +12034,30 @@ module ModifyUserMessage =
         [@ocaml.doc
           "The passwords belonging to the user. You are allowed up to two."];
       noPasswordRequired: BooleanOptional.t option
-        [@ocaml.doc "Indicates no password is required for the user."]}
+        [@ocaml.doc "Indicates no password is required for the user."];
+      authenticationMode: AuthenticationMode.t option
+        [@ocaml.doc "Specifies how to authenticate the user."];
+      engine: EngineType.t option
+        [@ocaml.doc
+          "Modifies the engine listed for a user. The options are valkey or redis."]}
     let context_ = "ModifyUserMessage"
     let make ?accessString =
       fun ?appendAccessString ->
         fun ?passwords ->
           fun ?noPasswordRequired ->
-            fun ~userId ->
-              fun () ->
-                {
-                  accessString;
-                  appendAccessString;
-                  passwords;
-                  noPasswordRequired;
-                  userId
-                }
+            fun ?authenticationMode ->
+              fun ?engine ->
+                fun ~userId ->
+                  fun () ->
+                    {
+                      accessString;
+                      appendAccessString;
+                      passwords;
+                      noPasswordRequired;
+                      authenticationMode;
+                      engine;
+                      userId
+                    }
     let to_value x =
       structure_to_value
         [("UserId", (Some (UserId.to_value x.userId)));
@@ -10476,9 +12067,17 @@ module ModifyUserMessage =
           (Option.map x.appendAccessString ~f:AccessString.to_value));
         ("Passwords", (Option.map x.passwords ~f:PasswordListInput.to_value));
         ("NoPasswordRequired",
-          (Option.map x.noPasswordRequired ~f:BooleanOptional.to_value))]
+          (Option.map x.noPasswordRequired ~f:BooleanOptional.to_value));
+        ("AuthenticationMode",
+          (Option.map x.authenticationMode ~f:AuthenticationMode.to_value));
+        ("Engine", (Option.map x.engine ~f:EngineType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let engine =
+        (Option.map ~f:EngineType.of_xml) (Xml.child xml_arg0 "Engine") in
+      let authenticationMode =
+        (Option.map ~f:AuthenticationMode.of_xml)
+          (Xml.child xml_arg0 "AuthenticationMode") in
       let noPasswordRequired =
         (Option.map ~f:BooleanOptional.of_xml)
           (Xml.child xml_arg0 "NoPasswordRequired") in
@@ -10493,19 +12092,22 @@ module ModifyUserMessage =
           (Xml.child xml_arg0 "AccessString") in
       let userId =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
-      make ?noPasswordRequired ?passwords ?appendAccessString ?accessString
-        ~userId ()
+      make ?engine ?authenticationMode ?noPasswordRequired ?passwords
+        ?appendAccessString ?accessString ~userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let engine = field_map json__ "Engine" EngineType.of_json in
+      let authenticationMode =
+        field_map json__ "AuthenticationMode" AuthenticationMode.of_json in
       let noPasswordRequired =
-        field_map json "NoPasswordRequired" BooleanOptional.of_json in
-      let passwords = field_map json "Passwords" PasswordListInput.of_json in
+        field_map json__ "NoPasswordRequired" BooleanOptional.of_json in
+      let passwords = field_map json__ "Passwords" PasswordListInput.of_json in
       let appendAccessString =
-        field_map json "AppendAccessString" AccessString.of_json in
-      let accessString = field_map json "AccessString" AccessString.of_json in
-      let userId = field_map_exn json "UserId" UserId.of_json in
-      make ?noPasswordRequired ?passwords ?appendAccessString ?accessString
-        ~userId ()
+        field_map json__ "AppendAccessString" AccessString.of_json in
+      let accessString = field_map json__ "AccessString" AccessString.of_json in
+      let userId = field_map_exn json__ "UserId" UserId.of_json in
+      make ?engine ?authenticationMode ?noPasswordRequired ?passwords
+        ?appendAccessString ?accessString ~userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Changes user password(s) and/or access string."]
 module ModifyUserGroupMessage =
@@ -10516,21 +12118,28 @@ module ModifyUserGroupMessage =
       userIdsToAdd: UserIdListInput.t option
         [@ocaml.doc "The list of user IDs to add to the user group."];
       userIdsToRemove: UserIdListInput.t option
-        [@ocaml.doc "The list of user IDs to remove from the user group."]}
+        [@ocaml.doc "The list of user IDs to remove from the user group."];
+      engine: EngineType.t option
+        [@ocaml.doc
+          "Modifies the engine listed in a user group. The options are valkey or redis."]}
     let context_ = "ModifyUserGroupMessage"
     let make ?userIdsToAdd =
       fun ?userIdsToRemove ->
-        fun ~userGroupId ->
-          fun () -> { userIdsToAdd; userIdsToRemove; userGroupId }
+        fun ?engine ->
+          fun ~userGroupId ->
+            fun () -> { userIdsToAdd; userIdsToRemove; engine; userGroupId }
     let to_value x =
       structure_to_value
         [("UserGroupId", (Some (String_.to_value x.userGroupId)));
         ("UserIdsToAdd",
           (Option.map x.userIdsToAdd ~f:UserIdListInput.to_value));
         ("UserIdsToRemove",
-          (Option.map x.userIdsToRemove ~f:UserIdListInput.to_value))]
+          (Option.map x.userIdsToRemove ~f:UserIdListInput.to_value));
+        ("Engine", (Option.map x.engine ~f:EngineType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let engine =
+        (Option.map ~f:EngineType.of_xml) (Xml.child xml_arg0 "Engine") in
       let userIdsToRemove =
         (Option.map ~f:UserIdListInput.of_xml)
           (Xml.child xml_arg0 "UserIdsToRemove") in
@@ -10540,17 +12149,297 @@ module ModifyUserGroupMessage =
       let userGroupId =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserGroupId") in
-      make ?userIdsToRemove ?userIdsToAdd ~userGroupId ()
+      make ?engine ?userIdsToRemove ?userIdsToAdd ~userGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let engine = field_map json__ "Engine" EngineType.of_json in
       let userIdsToRemove =
-        field_map json "UserIdsToRemove" UserIdListInput.of_json in
+        field_map json__ "UserIdsToRemove" UserIdListInput.of_json in
       let userIdsToAdd =
-        field_map json "UserIdsToAdd" UserIdListInput.of_json in
-      let userGroupId = field_map_exn json "UserGroupId" String_.of_json in
-      make ?userIdsToRemove ?userIdsToAdd ~userGroupId ()
+        field_map json__ "UserIdsToAdd" UserIdListInput.of_json in
+      let userGroupId = field_map_exn json__ "UserGroupId" String_.of_json in
+      make ?engine ?userIdsToRemove ?userIdsToAdd ~userGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Changes the list of users that belong to the user group."]
+module ModifyServerlessCacheResponse =
+  struct
+    type modifyServerlessCacheResult =
+      {
+      serverlessCache: ServerlessCache.t option
+        [@ocaml.doc
+          "The response for the attempt to modify the serverless cache."]}
+    and responseMetaData = unit
+    and t =
+      {
+      modifyServerlessCacheResult: modifyServerlessCacheResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidCredentialsException of InvalidCredentialsException.t 
+      | `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `InvalidServerlessCacheStateFault of
+          InvalidServerlessCacheStateFault.t 
+      | `InvalidUserGroupStateFault of InvalidUserGroupStateFault.t 
+      | `ServerlessCacheNotFoundFault of ServerlessCacheNotFoundFault.t 
+      | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
+      | `UserGroupNotFoundFault of UserGroupNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ModifyServerlessCacheResponse"
+    let make ?serverlessCache =
+      fun () ->
+        {
+          modifyServerlessCacheResult = { serverlessCache };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "InvalidCredentialsException" ->
+          `InvalidCredentialsException
+            (InvalidCredentialsException.of_json json)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "InvalidServerlessCacheStateFault" ->
+          `InvalidServerlessCacheStateFault
+            (InvalidServerlessCacheStateFault.of_json json)
+      | "InvalidUserGroupStateFault" ->
+          `InvalidUserGroupStateFault
+            (InvalidUserGroupStateFault.of_json json)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_json json)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_json json)
+      | "UserGroupNotFoundFault" ->
+          `UserGroupNotFoundFault (UserGroupNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidCredentialsException" ->
+          `InvalidCredentialsException
+            (InvalidCredentialsException.of_xml xml)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "InvalidServerlessCacheStateFault" ->
+          `InvalidServerlessCacheStateFault
+            (InvalidServerlessCacheStateFault.of_xml xml)
+      | "InvalidUserGroupStateFault" ->
+          `InvalidUserGroupStateFault (InvalidUserGroupStateFault.of_xml xml)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_xml xml)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_xml xml)
+      | "UserGroupNotFoundFault" ->
+          `UserGroupNotFoundFault (UserGroupNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidCredentialsException e ->
+          `Assoc
+            [("error", (`String "InvalidCredentialsException"));
+            ("details", (InvalidCredentialsException.to_json e))]
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `InvalidServerlessCacheStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidServerlessCacheStateFault"));
+            ("details", (InvalidServerlessCacheStateFault.to_json e))]
+      | `InvalidUserGroupStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidUserGroupStateFault"));
+            ("details", (InvalidUserGroupStateFault.to_json e))]
+      | `ServerlessCacheNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheNotFoundFault"));
+            ("details", (ServerlessCacheNotFoundFault.to_json e))]
+      | `ServiceLinkedRoleNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServiceLinkedRoleNotFoundFault"));
+            ("details", (ServiceLinkedRoleNotFoundFault.to_json e))]
+      | `UserGroupNotFoundFault e ->
+          `Assoc
+            [("error", (`String "UserGroupNotFoundFault"));
+            ("details", (UserGroupNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.modifyServerlessCacheResult in
+      structure_to_wrapped_value
+        [("ServerlessCache",
+           (Option.map x.serverlessCache ~f:ServerlessCache.to_value))]
+        ~wrapper:"ModifyServerlessCacheResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "ModifyServerlessCacheResult" in
+      let serverlessCache =
+        (Option.map ~f:ServerlessCache.of_xml)
+          (Xml.child xml_arg0 "ServerlessCache") in
+      make ?serverlessCache ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverlessCache =
+        field_map json__ "ServerlessCache" ServerlessCache.of_json in
+      make ?serverlessCache ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "This API modifies the attributes of a serverless cache."]
+module ModifyServerlessCacheRequest =
+  struct
+    type nonrec t =
+      {
+      serverlessCacheName: String_.t
+        [@ocaml.doc
+          "User-provided identifier for the serverless cache to be modified."];
+      description: String_.t option
+        [@ocaml.doc
+          "User provided description for the serverless cache. Default = NULL, i.e. the existing description is not removed/modified. The description has a maximum length of 255 characters."];
+      cacheUsageLimits: CacheUsageLimits.t option
+        [@ocaml.doc "Modify the cache usage limit for the serverless cache."];
+      removeUserGroup: BooleanOptional.t option
+        [@ocaml.doc
+          "The identifier of the UserGroup to be removed from association with the Valkey and Redis OSS serverless cache. Available for Valkey and Redis OSS only. Default is NULL."];
+      userGroupId: String_.t option
+        [@ocaml.doc
+          "The identifier of the UserGroup to be associated with the serverless cache. Available for Valkey and Redis OSS only. Default is NULL - the existing UserGroup is not removed."];
+      securityGroupIds: SecurityGroupIdsList.t option
+        [@ocaml.doc
+          "The new list of VPC security groups to be associated with the serverless cache. Populating this list means the current VPC security groups will be removed. This security group is used to authorize traffic access for the VPC end-point (private-link). Default = NULL - the existing list of VPC security groups is not removed."];
+      snapshotRetentionLimit: IntegerOptional.t option
+        [@ocaml.doc
+          "The number of days for which Elasticache retains automatic snapshots before deleting them. Available for Valkey, Redis OSS and Serverless Memcached only. Default = NULL, i.e. the existing snapshot-retention-limit will not be removed or modified. The maximum value allowed is 35 days."];
+      dailySnapshotTime: String_.t option
+        [@ocaml.doc
+          "The daily time during which Elasticache begins taking a daily snapshot of the serverless cache. Available for Valkey, Redis OSS and Serverless Memcached only. The default is NULL, i.e. the existing snapshot time configured for the cluster is not removed."];
+      engine: String_.t option
+        [@ocaml.doc
+          "Modifies the engine listed in a serverless cache request. The options are valkey, memcached or redis."];
+      majorEngineVersion: String_.t option
+        [@ocaml.doc
+          "Modifies the engine vesion listed in a serverless cache request."]}
+    let context_ = "ModifyServerlessCacheRequest"
+    let make ?description =
+      fun ?cacheUsageLimits ->
+        fun ?removeUserGroup ->
+          fun ?userGroupId ->
+            fun ?securityGroupIds ->
+              fun ?snapshotRetentionLimit ->
+                fun ?dailySnapshotTime ->
+                  fun ?engine ->
+                    fun ?majorEngineVersion ->
+                      fun ~serverlessCacheName ->
+                        fun () ->
+                          {
+                            description;
+                            cacheUsageLimits;
+                            removeUserGroup;
+                            userGroupId;
+                            securityGroupIds;
+                            snapshotRetentionLimit;
+                            dailySnapshotTime;
+                            engine;
+                            majorEngineVersion;
+                            serverlessCacheName
+                          }
+    let to_value x =
+      structure_to_value
+        [("ServerlessCacheName",
+           (Some (String_.to_value x.serverlessCacheName)));
+        ("Description", (Option.map x.description ~f:String_.to_value));
+        ("CacheUsageLimits",
+          (Option.map x.cacheUsageLimits ~f:CacheUsageLimits.to_value));
+        ("RemoveUserGroup",
+          (Option.map x.removeUserGroup ~f:BooleanOptional.to_value));
+        ("UserGroupId", (Option.map x.userGroupId ~f:String_.to_value));
+        ("SecurityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupIdsList.to_value));
+        ("SnapshotRetentionLimit",
+          (Option.map x.snapshotRetentionLimit ~f:IntegerOptional.to_value));
+        ("DailySnapshotTime",
+          (Option.map x.dailySnapshotTime ~f:String_.to_value));
+        ("Engine", (Option.map x.engine ~f:String_.to_value));
+        ("MajorEngineVersion",
+          (Option.map x.majorEngineVersion ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let majorEngineVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MajorEngineVersion") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
+      let dailySnapshotTime =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "DailySnapshotTime") in
+      let snapshotRetentionLimit =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "SnapshotRetentionLimit") in
+      let securityGroupIds =
+        (Option.map ~f:SecurityGroupIdsList.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupIds") in
+      let userGroupId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "UserGroupId") in
+      let removeUserGroup =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "RemoveUserGroup") in
+      let cacheUsageLimits =
+        (Option.map ~f:CacheUsageLimits.of_xml)
+          (Xml.child xml_arg0 "CacheUsageLimits") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
+      let serverlessCacheName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServerlessCacheName") in
+      make ?majorEngineVersion ?engine ?dailySnapshotTime
+        ?snapshotRetentionLimit ?securityGroupIds ?userGroupId
+        ?removeUserGroup ?cacheUsageLimits ?description ~serverlessCacheName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let majorEngineVersion =
+        field_map json__ "MajorEngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let dailySnapshotTime =
+        field_map json__ "DailySnapshotTime" String_.of_json in
+      let snapshotRetentionLimit =
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
+      let securityGroupIds =
+        field_map json__ "SecurityGroupIds" SecurityGroupIdsList.of_json in
+      let userGroupId = field_map json__ "UserGroupId" String_.of_json in
+      let removeUserGroup =
+        field_map json__ "RemoveUserGroup" BooleanOptional.of_json in
+      let cacheUsageLimits =
+        field_map json__ "CacheUsageLimits" CacheUsageLimits.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let serverlessCacheName =
+        field_map_exn json__ "ServerlessCacheName" String_.of_json in
+      make ?majorEngineVersion ?engine ?dailySnapshotTime
+        ?snapshotRetentionLimit ?securityGroupIds ?userGroupId
+        ?removeUserGroup ?cacheUsageLimits ?description ~serverlessCacheName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "This API modifies the attributes of a serverless cache."]
 module ModifyReplicationGroupShardConfigurationResult =
   struct
     type modifyReplicationGroupShardConfigurationResult =
@@ -10721,9 +12610,9 @@ module ModifyReplicationGroupShardConfigurationResult =
           (Xml.child xml_arg0 "ReplicationGroup") in
       make ?replicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroup =
-        field_map json "ReplicationGroup" ReplicationGroup.of_json in
+        field_map json__ "ReplicationGroup" ReplicationGroup.of_json in
       make ?replicationGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10734,7 +12623,7 @@ module ModifyReplicationGroupShardConfigurationMessage =
       {
       replicationGroupId: String_.t
         [@ocaml.doc
-          "The name of the Redis (cluster mode enabled) cluster (replication group) on which the shards are to be configured."];
+          "The name of the Valkey or Redis OSS (cluster mode enabled) cluster (replication group) on which the shards are to be configured."];
       nodeGroupCount: Integer.t
         [@ocaml.doc
           "The number of node groups (shards) that results from the modification of the shard configuration."];
@@ -10746,10 +12635,10 @@ module ModifyReplicationGroupShardConfigurationMessage =
           "Specifies the preferred availability zones for each node group in the cluster. If the value of NodeGroupCount is greater than the current number of node groups (shards), you can use this parameter to specify the preferred availability zones of the cluster's shards. If you omit this parameter ElastiCache selects availability zones for you. You can specify this parameter only if the value of NodeGroupCount is greater than the current number of node groups (shards)."];
       nodeGroupsToRemove: NodeGroupsToRemoveList.t option
         [@ocaml.doc
-          "If the value of NodeGroupCount is less than the current number of node groups (shards), then either NodeGroupsToRemove or NodeGroupsToRetain is required. NodeGroupsToRemove is a list of NodeGroupIds to remove from the cluster. ElastiCache for Redis will attempt to remove all node groups listed by NodeGroupsToRemove from the cluster."];
+          "If the value of NodeGroupCount is less than the current number of node groups (shards), then either NodeGroupsToRemove or NodeGroupsToRetain is required. NodeGroupsToRemove is a list of NodeGroupIds to remove from the cluster. ElastiCache will attempt to remove all node groups listed by NodeGroupsToRemove from the cluster."];
       nodeGroupsToRetain: NodeGroupsToRetainList.t option
         [@ocaml.doc
-          "If the value of NodeGroupCount is less than the current number of node groups (shards), then either NodeGroupsToRemove or NodeGroupsToRetain is required. NodeGroupsToRetain is a list of NodeGroupIds to retain in the cluster. ElastiCache for Redis will attempt to remove all node groups except those listed by NodeGroupsToRetain from the cluster."]}
+          "If the value of NodeGroupCount is less than the current number of node groups (shards), then either NodeGroupsToRemove or NodeGroupsToRetain is required. NodeGroupsToRetain is a list of NodeGroupIds to retain in the cluster. ElastiCache will attempt to remove all node groups except those listed by NodeGroupsToRetain from the cluster."]}
     let context_ = "ModifyReplicationGroupShardConfigurationMessage"
     let make ?reshardingConfiguration =
       fun ?nodeGroupsToRemove ->
@@ -10802,20 +12691,20 @@ module ModifyReplicationGroupShardConfigurationMessage =
       make ?nodeGroupsToRetain ?nodeGroupsToRemove ?reshardingConfiguration
         ~applyImmediately ~nodeGroupCount ~replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nodeGroupsToRetain =
-        field_map json "NodeGroupsToRetain" NodeGroupsToRetainList.of_json in
+        field_map json__ "NodeGroupsToRetain" NodeGroupsToRetainList.of_json in
       let nodeGroupsToRemove =
-        field_map json "NodeGroupsToRemove" NodeGroupsToRemoveList.of_json in
+        field_map json__ "NodeGroupsToRemove" NodeGroupsToRemoveList.of_json in
       let reshardingConfiguration =
-        field_map json "ReshardingConfiguration"
+        field_map json__ "ReshardingConfiguration"
           ReshardingConfigurationList.of_json in
       let applyImmediately =
-        field_map_exn json "ApplyImmediately" Boolean.of_json in
+        field_map_exn json__ "ApplyImmediately" Boolean.of_json in
       let nodeGroupCount =
-        field_map_exn json "NodeGroupCount" Integer.of_json in
+        field_map_exn json__ "NodeGroupCount" Integer.of_json in
       let replicationGroupId =
-        field_map_exn json "ReplicationGroupId" String_.of_json in
+        field_map_exn json__ "ReplicationGroupId" String_.of_json in
       make ?nodeGroupsToRetain ?nodeGroupsToRemove ?reshardingConfiguration
         ~applyImmediately ~nodeGroupCount ~replicationGroupId ()
     let to_json v = composed_to_json to_value v
@@ -11047,13 +12936,13 @@ module ModifyReplicationGroupResult =
           (Xml.child xml_arg0 "ReplicationGroup") in
       make ?replicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroup =
-        field_map json "ReplicationGroup" ReplicationGroup.of_json in
+        field_map json__ "ReplicationGroup" ReplicationGroup.of_json in
       make ?replicationGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies the settings for a replication group. Scaling for Amazon ElastiCache for Redis (cluster mode enabled) in the ElastiCache User Guide ModifyReplicationGroupShardConfiguration in the ElastiCache API Reference This operation is valid for Redis only."]
+       "Modifies the settings for a replication group. This is limited to Valkey and Redis OSS 7 and above. Scaling for Valkey or Redis OSS (cluster mode enabled) in the ElastiCache User Guide ModifyReplicationGroupShardConfiguration in the ElastiCache API Reference This operation is valid for Valkey or Redis OSS only."]
 module ModifyReplicationGroupMessage =
   struct
     type nonrec t =
@@ -11068,7 +12957,7 @@ module ModifyReplicationGroupMessage =
           "For replication groups with a single primary, if this parameter is specified, ElastiCache promotes the specified cluster in the specified replication group to the primary role. The nodes of all other clusters in the replication group are read replicas."];
       snapshottingClusterId: String_.t option
         [@ocaml.doc
-          "The cluster ID that is used as the daily snapshot source for the replication group. This parameter cannot be set for Redis (cluster mode enabled) replication groups."];
+          "The cluster ID that is used as the daily snapshot source for the replication group. This parameter cannot be set for Valkey or Redis OSS (cluster mode enabled) replication groups."];
       automaticFailoverEnabled: BooleanOptional.t option
         [@ocaml.doc
           "Determines whether a read replica is automatically promoted to read/write primary if the existing primary encounters a failure. Valid values: true | false"];
@@ -11097,12 +12986,15 @@ module ModifyReplicationGroupMessage =
       applyImmediately: Boolean.t option
         [@ocaml.doc
           "If true, this parameter causes the modifications in this request and any pending modifications to be applied, asynchronously and as soon as possible, regardless of the PreferredMaintenanceWindow setting for the replication group. If false, changes to the nodes in the replication group are applied on the next maintenance reboot, or the next failure reboot, whichever occurs first. Valid values: true | false Default: false"];
+      engine: String_.t option
+        [@ocaml.doc
+          "Modifies the engine listed in a replication group message. The options are valkey, memcached or redis."];
       engineVersion: String_.t option
         [@ocaml.doc
           "The upgraded version of the cache engine to be run on the clusters in the replication group. Important: You can upgrade to a newer engine version (see Selecting a Cache Engine and Version), but you cannot downgrade to an earlier engine version. If you want to use an earlier engine version, you must delete the existing replication group and create it anew with the earlier engine version."];
       autoMinorVersionUpgrade: BooleanOptional.t option
         [@ocaml.doc
-          "\194\160If you are running Redis engine version 6.0 or later, set this parameter to yes if you want to opt-in to the next auto minor version upgrade campaign. This parameter is disabled for previous versions.\194\160"];
+          "\194\160If you are running Valkey or Redis OSS engine version 6.0 or later, set this parameter to yes if you want to opt-in to the next auto minor version upgrade campaign. This parameter is disabled for previous versions.\194\160"];
       snapshotRetentionLimit: IntegerOptional.t option
         [@ocaml.doc
           "The number of days for which ElastiCache retains automatic node group (shard) snapshots before deleting them. For example, if you set SnapshotRetentionLimit to 5, a snapshot that was taken today is retained for 5 days before being deleted. Important If the value of SnapshotRetentionLimit is set to zero (0), backups are turned off."];
@@ -11117,7 +13009,7 @@ module ModifyReplicationGroupMessage =
           "Reserved parameter. The password used to access a password protected server. This parameter must be specified with the auth-token-update-strategy parameter. Password constraints: Must be only printable ASCII characters Must be at least 16 characters and no more than 128 characters in length Cannot contain any of the following characters: '/', '\"', or '\\@', '%' For more information, see AUTH password at AUTH."];
       authTokenUpdateStrategy: AuthTokenUpdateStrategyType.t option
         [@ocaml.doc
-          "Specifies the strategy to use to update the AUTH token. This parameter must be specified with the auth-token parameter. Possible values: Rotate Set For more information, see Authenticating Users with Redis AUTH"];
+          "Specifies the strategy to use to update the AUTH token. This parameter must be specified with the auth-token parameter. Possible values: ROTATE - default, if no update strategy is provided SET - allowed only after ROTATE DELETE - allowed only when transitioning to RBAC For more information, see Authenticating Users with AUTH"];
       userGroupIdsToAdd: UserGroupIdList.t option
         [@ocaml.doc
           "The ID of the user group you are associating with the replication group."];
@@ -11129,7 +13021,19 @@ module ModifyReplicationGroupMessage =
           "Removes the user group associated with this replication group."];
       logDeliveryConfigurations: LogDeliveryConfigurationRequestList.t option
         [@ocaml.doc
-          "Specifies the destination, format and type of the logs."]}
+          "Specifies the destination, format and type of the logs."];
+      ipDiscovery: IpDiscovery.t option
+        [@ocaml.doc
+          "The network type you choose when modifying a cluster, either ipv4 | ipv6. IPv6 is supported for workloads using Valkey 7.2 and above, Redis OSS engine version 6.2 to 7.1 and Memcached engine version 1.6.6 and above on all instances built on the Nitro system."];
+      transitEncryptionEnabled: BooleanOptional.t option
+        [@ocaml.doc
+          "A flag that enables in-transit encryption when set to true. If you are enabling in-transit encryption for an existing cluster, you must also set TransitEncryptionMode to preferred."];
+      transitEncryptionMode: TransitEncryptionMode.t option
+        [@ocaml.doc
+          "A setting that allows you to migrate your clients to use in-transit encryption, with no downtime. You must set TransitEncryptionEnabled to true, for your existing cluster, and set TransitEncryptionMode to preferred in the same request to allow both encrypted and unencrypted connections at the same time. Once you migrate all your Valkey or Redis OSS clients to use encrypted connections you can set the value to required to allow encrypted connections only. Setting TransitEncryptionMode to required is a two-step process that requires you to first set the TransitEncryptionMode to preferred, after that you can set TransitEncryptionMode to required."];
+      clusterMode: ClusterMode.t option
+        [@ocaml.doc
+          "Enabled or Disabled. To modify cluster mode from Disabled to Enabled, you must first set the cluster mode to Compatible. Compatible mode allows your Valkey or Redis OSS clients to connect using both cluster mode enabled and cluster mode disabled. After you migrate all Valkey or Redis OSS clients to use cluster mode enabled, you can then complete cluster mode configuration and set the cluster mode to Enabled."]}
     let context_ = "ModifyReplicationGroupMessage"
     let make ?replicationGroupDescription =
       fun ?primaryClusterId ->
@@ -11144,49 +13048,65 @@ module ModifyReplicationGroupMessage =
                         fun ?cacheParameterGroupName ->
                           fun ?notificationTopicStatus ->
                             fun ?applyImmediately ->
-                              fun ?engineVersion ->
-                                fun ?autoMinorVersionUpgrade ->
-                                  fun ?snapshotRetentionLimit ->
-                                    fun ?snapshotWindow ->
-                                      fun ?cacheNodeType ->
-                                        fun ?authToken ->
-                                          fun ?authTokenUpdateStrategy ->
-                                            fun ?userGroupIdsToAdd ->
-                                              fun ?userGroupIdsToRemove ->
-                                                fun ?removeUserGroups ->
-                                                  fun
-                                                    ?logDeliveryConfigurations
-                                                    ->
-                                                    fun ~replicationGroupId
+                              fun ?engine ->
+                                fun ?engineVersion ->
+                                  fun ?autoMinorVersionUpgrade ->
+                                    fun ?snapshotRetentionLimit ->
+                                      fun ?snapshotWindow ->
+                                        fun ?cacheNodeType ->
+                                          fun ?authToken ->
+                                            fun ?authTokenUpdateStrategy ->
+                                              fun ?userGroupIdsToAdd ->
+                                                fun ?userGroupIdsToRemove ->
+                                                  fun ?removeUserGroups ->
+                                                    fun
+                                                      ?logDeliveryConfigurations
                                                       ->
-                                                      fun () ->
-                                                        {
-                                                          replicationGroupDescription;
-                                                          primaryClusterId;
-                                                          snapshottingClusterId;
-                                                          automaticFailoverEnabled;
-                                                          multiAZEnabled;
-                                                          nodeGroupId;
-                                                          cacheSecurityGroupNames;
-                                                          securityGroupIds;
-                                                          preferredMaintenanceWindow;
-                                                          notificationTopicArn;
-                                                          cacheParameterGroupName;
-                                                          notificationTopicStatus;
-                                                          applyImmediately;
-                                                          engineVersion;
-                                                          autoMinorVersionUpgrade;
-                                                          snapshotRetentionLimit;
-                                                          snapshotWindow;
-                                                          cacheNodeType;
-                                                          authToken;
-                                                          authTokenUpdateStrategy;
-                                                          userGroupIdsToAdd;
-                                                          userGroupIdsToRemove;
-                                                          removeUserGroups;
-                                                          logDeliveryConfigurations;
-                                                          replicationGroupId
-                                                        }
+                                                      fun ?ipDiscovery ->
+                                                        fun
+                                                          ?transitEncryptionEnabled
+                                                          ->
+                                                          fun
+                                                            ?transitEncryptionMode
+                                                            ->
+                                                            fun ?clusterMode
+                                                              ->
+                                                              fun
+                                                                ~replicationGroupId
+                                                                ->
+                                                                fun () ->
+                                                                  {
+                                                                    replicationGroupDescription;
+                                                                    primaryClusterId;
+                                                                    snapshottingClusterId;
+                                                                    automaticFailoverEnabled;
+                                                                    multiAZEnabled;
+                                                                    nodeGroupId;
+                                                                    cacheSecurityGroupNames;
+                                                                    securityGroupIds;
+                                                                    preferredMaintenanceWindow;
+                                                                    notificationTopicArn;
+                                                                    cacheParameterGroupName;
+                                                                    notificationTopicStatus;
+                                                                    applyImmediately;
+                                                                    engine;
+                                                                    engineVersion;
+                                                                    autoMinorVersionUpgrade;
+                                                                    snapshotRetentionLimit;
+                                                                    snapshotWindow;
+                                                                    cacheNodeType;
+                                                                    authToken;
+                                                                    authTokenUpdateStrategy;
+                                                                    userGroupIdsToAdd;
+                                                                    userGroupIdsToRemove;
+                                                                    removeUserGroups;
+                                                                    logDeliveryConfigurations;
+                                                                    ipDiscovery;
+                                                                    transitEncryptionEnabled;
+                                                                    transitEncryptionMode;
+                                                                    clusterMode;
+                                                                    replicationGroupId
+                                                                  }
     let to_value x =
       structure_to_value
         [("ReplicationGroupId",
@@ -11217,6 +13137,7 @@ module ModifyReplicationGroupMessage =
           (Option.map x.notificationTopicStatus ~f:String_.to_value));
         ("ApplyImmediately",
           (Option.map x.applyImmediately ~f:Boolean.to_value));
+        ("Engine", (Option.map x.engine ~f:String_.to_value));
         ("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
         ("AutoMinorVersionUpgrade",
           (Option.map x.autoMinorVersionUpgrade ~f:BooleanOptional.to_value));
@@ -11236,9 +13157,26 @@ module ModifyReplicationGroupMessage =
           (Option.map x.removeUserGroups ~f:BooleanOptional.to_value));
         ("LogDeliveryConfigurations",
           (Option.map x.logDeliveryConfigurations
-             ~f:LogDeliveryConfigurationRequestList.to_value))]
+             ~f:LogDeliveryConfigurationRequestList.to_value));
+        ("IpDiscovery", (Option.map x.ipDiscovery ~f:IpDiscovery.to_value));
+        ("TransitEncryptionEnabled",
+          (Option.map x.transitEncryptionEnabled ~f:BooleanOptional.to_value));
+        ("TransitEncryptionMode",
+          (Option.map x.transitEncryptionMode
+             ~f:TransitEncryptionMode.to_value));
+        ("ClusterMode", (Option.map x.clusterMode ~f:ClusterMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clusterMode =
+        (Option.map ~f:ClusterMode.of_xml) (Xml.child xml_arg0 "ClusterMode") in
+      let transitEncryptionMode =
+        (Option.map ~f:TransitEncryptionMode.of_xml)
+          (Xml.child xml_arg0 "TransitEncryptionMode") in
+      let transitEncryptionEnabled =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "TransitEncryptionEnabled") in
+      let ipDiscovery =
+        (Option.map ~f:IpDiscovery.of_xml) (Xml.child xml_arg0 "IpDiscovery") in
       let logDeliveryConfigurations =
         (Option.map ~f:LogDeliveryConfigurationRequestList.of_xml)
           (Xml.child xml_arg0 "LogDeliveryConfigurations") in
@@ -11268,6 +13206,8 @@ module ModifyReplicationGroupMessage =
           (Xml.child xml_arg0 "AutoMinorVersionUpgrade") in
       let engineVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
       let applyImmediately =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "ApplyImmediately") in
@@ -11309,71 +13249,81 @@ module ModifyReplicationGroupMessage =
       let replicationGroupId =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationGroupId") in
-      make ?logDeliveryConfigurations ?removeUserGroups ?userGroupIdsToRemove
-        ?userGroupIdsToAdd ?authTokenUpdateStrategy ?authToken ?cacheNodeType
-        ?snapshotWindow ?snapshotRetentionLimit ?autoMinorVersionUpgrade
-        ?engineVersion ?applyImmediately ?notificationTopicStatus
-        ?cacheParameterGroupName ?notificationTopicArn
-        ?preferredMaintenanceWindow ?securityGroupIds
+      make ?clusterMode ?transitEncryptionMode ?transitEncryptionEnabled
+        ?ipDiscovery ?logDeliveryConfigurations ?removeUserGroups
+        ?userGroupIdsToRemove ?userGroupIdsToAdd ?authTokenUpdateStrategy
+        ?authToken ?cacheNodeType ?snapshotWindow ?snapshotRetentionLimit
+        ?autoMinorVersionUpgrade ?engineVersion ?engine ?applyImmediately
+        ?notificationTopicStatus ?cacheParameterGroupName
+        ?notificationTopicArn ?preferredMaintenanceWindow ?securityGroupIds
         ?cacheSecurityGroupNames ?nodeGroupId ?multiAZEnabled
         ?automaticFailoverEnabled ?snapshottingClusterId ?primaryClusterId
         ?replicationGroupDescription ~replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let clusterMode = field_map json__ "ClusterMode" ClusterMode.of_json in
+      let transitEncryptionMode =
+        field_map json__ "TransitEncryptionMode"
+          TransitEncryptionMode.of_json in
+      let transitEncryptionEnabled =
+        field_map json__ "TransitEncryptionEnabled" BooleanOptional.of_json in
+      let ipDiscovery = field_map json__ "IpDiscovery" IpDiscovery.of_json in
       let logDeliveryConfigurations =
-        field_map json "LogDeliveryConfigurations"
+        field_map json__ "LogDeliveryConfigurations"
           LogDeliveryConfigurationRequestList.of_json in
       let removeUserGroups =
-        field_map json "RemoveUserGroups" BooleanOptional.of_json in
+        field_map json__ "RemoveUserGroups" BooleanOptional.of_json in
       let userGroupIdsToRemove =
-        field_map json "UserGroupIdsToRemove" UserGroupIdList.of_json in
+        field_map json__ "UserGroupIdsToRemove" UserGroupIdList.of_json in
       let userGroupIdsToAdd =
-        field_map json "UserGroupIdsToAdd" UserGroupIdList.of_json in
+        field_map json__ "UserGroupIdsToAdd" UserGroupIdList.of_json in
       let authTokenUpdateStrategy =
-        field_map json "AuthTokenUpdateStrategy"
+        field_map json__ "AuthTokenUpdateStrategy"
           AuthTokenUpdateStrategyType.of_json in
-      let authToken = field_map json "AuthToken" String_.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
-      let snapshotWindow = field_map json "SnapshotWindow" String_.of_json in
+      let authToken = field_map json__ "AuthToken" String_.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
+      let snapshotWindow = field_map json__ "SnapshotWindow" String_.of_json in
       let snapshotRetentionLimit =
-        field_map json "SnapshotRetentionLimit" IntegerOptional.of_json in
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
       let autoMinorVersionUpgrade =
-        field_map json "AutoMinorVersionUpgrade" BooleanOptional.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
+        field_map json__ "AutoMinorVersionUpgrade" BooleanOptional.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
       let applyImmediately =
-        field_map json "ApplyImmediately" Boolean.of_json in
+        field_map json__ "ApplyImmediately" Boolean.of_json in
       let notificationTopicStatus =
-        field_map json "NotificationTopicStatus" String_.of_json in
+        field_map json__ "NotificationTopicStatus" String_.of_json in
       let cacheParameterGroupName =
-        field_map json "CacheParameterGroupName" String_.of_json in
+        field_map json__ "CacheParameterGroupName" String_.of_json in
       let notificationTopicArn =
-        field_map json "NotificationTopicArn" String_.of_json in
+        field_map json__ "NotificationTopicArn" String_.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIdsList.of_json in
+        field_map json__ "SecurityGroupIds" SecurityGroupIdsList.of_json in
       let cacheSecurityGroupNames =
-        field_map json "CacheSecurityGroupNames"
+        field_map json__ "CacheSecurityGroupNames"
           CacheSecurityGroupNameList.of_json in
-      let nodeGroupId = field_map json "NodeGroupId" String_.of_json in
+      let nodeGroupId = field_map json__ "NodeGroupId" String_.of_json in
       let multiAZEnabled =
-        field_map json "MultiAZEnabled" BooleanOptional.of_json in
+        field_map json__ "MultiAZEnabled" BooleanOptional.of_json in
       let automaticFailoverEnabled =
-        field_map json "AutomaticFailoverEnabled" BooleanOptional.of_json in
+        field_map json__ "AutomaticFailoverEnabled" BooleanOptional.of_json in
       let snapshottingClusterId =
-        field_map json "SnapshottingClusterId" String_.of_json in
+        field_map json__ "SnapshottingClusterId" String_.of_json in
       let primaryClusterId =
-        field_map json "PrimaryClusterId" String_.of_json in
+        field_map json__ "PrimaryClusterId" String_.of_json in
       let replicationGroupDescription =
-        field_map json "ReplicationGroupDescription" String_.of_json in
+        field_map json__ "ReplicationGroupDescription" String_.of_json in
       let replicationGroupId =
-        field_map_exn json "ReplicationGroupId" String_.of_json in
-      make ?logDeliveryConfigurations ?removeUserGroups ?userGroupIdsToRemove
-        ?userGroupIdsToAdd ?authTokenUpdateStrategy ?authToken ?cacheNodeType
-        ?snapshotWindow ?snapshotRetentionLimit ?autoMinorVersionUpgrade
-        ?engineVersion ?applyImmediately ?notificationTopicStatus
-        ?cacheParameterGroupName ?notificationTopicArn
-        ?preferredMaintenanceWindow ?securityGroupIds
+        field_map_exn json__ "ReplicationGroupId" String_.of_json in
+      make ?clusterMode ?transitEncryptionMode ?transitEncryptionEnabled
+        ?ipDiscovery ?logDeliveryConfigurations ?removeUserGroups
+        ?userGroupIdsToRemove ?userGroupIdsToAdd ?authTokenUpdateStrategy
+        ?authToken ?cacheNodeType ?snapshotWindow ?snapshotRetentionLimit
+        ?autoMinorVersionUpgrade ?engineVersion ?engine ?applyImmediately
+        ?notificationTopicStatus ?cacheParameterGroupName
+        ?notificationTopicArn ?preferredMaintenanceWindow ?securityGroupIds
         ?cacheSecurityGroupNames ?nodeGroupId ?multiAZEnabled
         ?automaticFailoverEnabled ?snapshottingClusterId ?primaryClusterId
         ?replicationGroupDescription ~replicationGroupId ()
@@ -11469,9 +13419,9 @@ module ModifyGlobalReplicationGroupResult =
           (Xml.child xml_arg0 "GlobalReplicationGroup") in
       make ?globalReplicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalReplicationGroup =
-        field_map json "GlobalReplicationGroup"
+        field_map json__ "GlobalReplicationGroup"
           GlobalReplicationGroup.of_json in
       make ?globalReplicationGroup ()
     let to_json v = composed_to_json to_value v
@@ -11488,6 +13438,9 @@ module ModifyGlobalReplicationGroupMessage =
       cacheNodeType: String_.t option
         [@ocaml.doc
           "A valid cache node type that you want to scale this Global datastore to."];
+      engine: String_.t option
+        [@ocaml.doc
+          "Modifies the engine listed in a global replication group message. The options are valkey, memcached or redis."];
       engineVersion: String_.t option
         [@ocaml.doc
           "The upgraded version of the cache engine to be run on the clusters in the Global datastore."];
@@ -11501,28 +13454,31 @@ module ModifyGlobalReplicationGroupMessage =
           "Determines whether a read replica is automatically promoted to read/write primary if the existing primary encounters a failure."]}
     let context_ = "ModifyGlobalReplicationGroupMessage"
     let make ?cacheNodeType =
-      fun ?engineVersion ->
-        fun ?cacheParameterGroupName ->
-          fun ?globalReplicationGroupDescription ->
-            fun ?automaticFailoverEnabled ->
-              fun ~globalReplicationGroupId ->
-                fun ~applyImmediately ->
-                  fun () ->
-                    {
-                      cacheNodeType;
-                      engineVersion;
-                      cacheParameterGroupName;
-                      globalReplicationGroupDescription;
-                      automaticFailoverEnabled;
-                      globalReplicationGroupId;
-                      applyImmediately
-                    }
+      fun ?engine ->
+        fun ?engineVersion ->
+          fun ?cacheParameterGroupName ->
+            fun ?globalReplicationGroupDescription ->
+              fun ?automaticFailoverEnabled ->
+                fun ~globalReplicationGroupId ->
+                  fun ~applyImmediately ->
+                    fun () ->
+                      {
+                        cacheNodeType;
+                        engine;
+                        engineVersion;
+                        cacheParameterGroupName;
+                        globalReplicationGroupDescription;
+                        automaticFailoverEnabled;
+                        globalReplicationGroupId;
+                        applyImmediately
+                      }
     let to_value x =
       structure_to_value
         [("GlobalReplicationGroupId",
            (Some (String_.to_value x.globalReplicationGroupId)));
         ("ApplyImmediately", (Some (Boolean.to_value x.applyImmediately)));
         ("CacheNodeType", (Option.map x.cacheNodeType ~f:String_.to_value));
+        ("Engine", (Option.map x.engine ~f:String_.to_value));
         ("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
         ("CacheParameterGroupName",
           (Option.map x.cacheParameterGroupName ~f:String_.to_value));
@@ -11543,6 +13499,8 @@ module ModifyGlobalReplicationGroupMessage =
           (Xml.child xml_arg0 "CacheParameterGroupName") in
       let engineVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
       let cacheNodeType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CacheNodeType") in
       let applyImmediately =
@@ -11553,24 +13511,25 @@ module ModifyGlobalReplicationGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0
              "GlobalReplicationGroupId") in
       make ?automaticFailoverEnabled ?globalReplicationGroupDescription
-        ?cacheParameterGroupName ?engineVersion ?cacheNodeType
+        ?cacheParameterGroupName ?engineVersion ?engine ?cacheNodeType
         ~applyImmediately ~globalReplicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let automaticFailoverEnabled =
-        field_map json "AutomaticFailoverEnabled" BooleanOptional.of_json in
+        field_map json__ "AutomaticFailoverEnabled" BooleanOptional.of_json in
       let globalReplicationGroupDescription =
-        field_map json "GlobalReplicationGroupDescription" String_.of_json in
+        field_map json__ "GlobalReplicationGroupDescription" String_.of_json in
       let cacheParameterGroupName =
-        field_map json "CacheParameterGroupName" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
+        field_map json__ "CacheParameterGroupName" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
       let applyImmediately =
-        field_map_exn json "ApplyImmediately" Boolean.of_json in
+        field_map_exn json__ "ApplyImmediately" Boolean.of_json in
       let globalReplicationGroupId =
-        field_map_exn json "GlobalReplicationGroupId" String_.of_json in
+        field_map_exn json__ "GlobalReplicationGroupId" String_.of_json in
       make ?automaticFailoverEnabled ?globalReplicationGroupDescription
-        ?cacheParameterGroupName ?engineVersion ?cacheNodeType
+        ?cacheParameterGroupName ?engineVersion ?engine ?cacheNodeType
         ~applyImmediately ~globalReplicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies the settings for a Global datastore."]
@@ -11668,9 +13627,9 @@ module ModifyCacheSubnetGroupResult =
           (Xml.child xml_arg0 "CacheSubnetGroup") in
       make ?cacheSubnetGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheSubnetGroup =
-        field_map json "CacheSubnetGroup" CacheSubnetGroup.of_json in
+        field_map json__ "CacheSubnetGroup" CacheSubnetGroup.of_json in
       make ?cacheSubnetGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies an existing cache subnet group."]
@@ -11712,12 +13671,13 @@ module ModifyCacheSubnetGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "CacheSubnetGroupName") in
       make ?subnetIds ?cacheSubnetGroupDescription ~cacheSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetIds = field_map json "SubnetIds" SubnetIdentifierList.of_json in
+    let of_json json__ =
+      let subnetIds =
+        field_map json__ "SubnetIds" SubnetIdentifierList.of_json in
       let cacheSubnetGroupDescription =
-        field_map json "CacheSubnetGroupDescription" String_.of_json in
+        field_map json__ "CacheSubnetGroupDescription" String_.of_json in
       let cacheSubnetGroupName =
-        field_map_exn json "CacheSubnetGroupName" String_.of_json in
+        field_map_exn json__ "CacheSubnetGroupName" String_.of_json in
       make ?subnetIds ?cacheSubnetGroupDescription ~cacheSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11751,12 +13711,12 @@ module ModifyCacheParameterGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "CacheParameterGroupName") in
       make ~parameterNameValues ~cacheParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterNameValues =
-        field_map_exn json "ParameterNameValues"
+        field_map_exn json__ "ParameterNameValues"
           ParameterNameValueList.of_json in
       let cacheParameterGroupName =
-        field_map_exn json "CacheParameterGroupName" String_.of_json in
+        field_map_exn json__ "CacheParameterGroupName" String_.of_json in
       make ~parameterNameValues ~cacheParameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11933,8 +13893,8 @@ module ModifyCacheClusterResult =
           (Xml.child xml_arg0 "CacheCluster") in
       make ?cacheCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cacheCluster = field_map json "CacheCluster" CacheCluster.of_json in
+    let of_json json__ =
+      let cacheCluster = field_map json__ "CacheCluster" CacheCluster.of_json in
       make ?cacheCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11948,7 +13908,7 @@ module ModifyCacheClusterMessage =
           "The cluster identifier. This value is stored as a lowercase string."];
       numCacheNodes: IntegerOptional.t option
         [@ocaml.doc
-          "The number of cache nodes that the cluster should have. If the value for NumCacheNodes is greater than the sum of the number of current cache nodes and the number of cache nodes pending creation (which may be zero), more nodes are added. If the value is less than the number of existing cache nodes, nodes are removed. If the value is equal to the number of current cache nodes, any pending add or remove requests are canceled. If you are removing cache nodes, you must use the CacheNodeIdsToRemove parameter to provide the IDs of the specific cache nodes to remove. For clusters running Redis, this value must be 1. For clusters running Memcached, this value must be between 1 and 40. Adding or removing Memcached cache nodes can be applied immediately or as a pending operation (see ApplyImmediately). A pending operation to modify the number of cache nodes in a cluster during its maintenance window, whether by adding or removing nodes in accordance with the scale out architecture, is not queued. The customer's latest request to add or remove nodes to the cluster overrides any previous pending operations to modify the number of cache nodes in the cluster. For example, a request to remove 2 nodes would override a previous pending operation to remove 3 nodes. Similarly, a request to add 2 nodes would override a previous pending operation to remove 3 nodes and vice versa. As Memcached cache nodes may now be provisioned in different Availability Zones with flexible cache node placement, a request to add nodes does not automatically override a previous pending operation to add nodes. The customer can modify the previous pending operation to add more nodes or explicitly cancel the pending request and retry the new request. To cancel pending operations to modify the number of cache nodes in a cluster, use the ModifyCacheCluster request and set NumCacheNodes equal to the number of cache nodes currently in the cluster."];
+          "The number of cache nodes that the cluster should have. If the value for NumCacheNodes is greater than the sum of the number of current cache nodes and the number of cache nodes pending creation (which may be zero), more nodes are added. If the value is less than the number of existing cache nodes, nodes are removed. If the value is equal to the number of current cache nodes, any pending add or remove requests are canceled. If you are removing cache nodes, you must use the CacheNodeIdsToRemove parameter to provide the IDs of the specific cache nodes to remove. For clusters running Valkey or Redis OSS, this value must be 1. For clusters running Memcached, this value must be between 1 and 40. Adding or removing Memcached cache nodes can be applied immediately or as a pending operation (see ApplyImmediately). A pending operation to modify the number of cache nodes in a cluster during its maintenance window, whether by adding or removing nodes in accordance with the scale out architecture, is not queued. The customer's latest request to add or remove nodes to the cluster overrides any previous pending operations to modify the number of cache nodes in the cluster. For example, a request to remove 2 nodes would override a previous pending operation to remove 3 nodes. Similarly, a request to add 2 nodes would override a previous pending operation to remove 3 nodes and vice versa. As Memcached cache nodes may now be provisioned in different Availability Zones with flexible cache node placement, a request to add nodes does not automatically override a previous pending operation to add nodes. The customer can modify the previous pending operation to add more nodes or explicitly cancel the pending request and retry the new request. To cancel pending operations to modify the number of cache nodes in a cluster, use the ModifyCacheCluster request and set NumCacheNodes equal to the number of cache nodes currently in the cluster."];
       cacheNodeIdsToRemove: CacheNodeIdsList.t option
         [@ocaml.doc
           "A list of cache node IDs to be removed. A node ID is a numeric identifier (0001, 0002, etc.). This parameter is only valid when NumCacheNodes is less than the existing number of cache nodes. The number of cache node IDs supplied in this parameter must match the difference between the existing number of cache nodes in the cluster or pending cache nodes, whichever is greater, and the value of NumCacheNodes in the request. For example: If you have 3 active cache nodes, 7 pending cache nodes, and the number of cache nodes in this ModifyCacheCluster call is 5, you must list 2 (7 - 5) cache node IDs to remove."];
@@ -11979,12 +13939,15 @@ module ModifyCacheClusterMessage =
       applyImmediately: Boolean.t option
         [@ocaml.doc
           "If true, this parameter causes the modifications in this request and any pending modifications to be applied, asynchronously and as soon as possible, regardless of the PreferredMaintenanceWindow setting for the cluster. If false, changes to the cluster are applied on the next maintenance reboot, or the next failure reboot, whichever occurs first. If you perform a ModifyCacheCluster before a pending modification is applied, the pending modification is replaced by the newer modification. Valid values: true | false Default: false"];
+      engine: String_.t option
+        [@ocaml.doc
+          "The engine type used by the cache cluster. The options are valkey, memcached or redis."];
       engineVersion: String_.t option
         [@ocaml.doc
           "The upgraded version of the cache engine to be run on the cache nodes. Important: You can upgrade to a newer engine version (see Selecting a Cache Engine and Version), but you cannot downgrade to an earlier engine version. If you want to use an earlier engine version, you must delete the existing cluster and create it anew with the earlier engine version."];
       autoMinorVersionUpgrade: BooleanOptional.t option
         [@ocaml.doc
-          "\194\160If you are running Redis engine version 6.0 or later, set this parameter to yes if you want to opt-in to the next auto minor version upgrade campaign. This parameter is disabled for previous versions.\194\160"];
+          "\194\160If you are running Valkey 7.2 or Redis OSS engine version 6.0 or later, set this parameter to yes to opt-in to the next auto minor version upgrade campaign. This parameter is disabled for previous versions.\194\160"];
       snapshotRetentionLimit: IntegerOptional.t option
         [@ocaml.doc
           "The number of days for which ElastiCache retains automatic cluster snapshots before deleting them. For example, if you set SnapshotRetentionLimit to 5, a snapshot that was taken today is retained for 5 days before being deleted. If the value of SnapshotRetentionLimit is set to zero (0), backups are turned off."];
@@ -11999,10 +13962,16 @@ module ModifyCacheClusterMessage =
           "Reserved parameter. The password used to access a password protected server. This parameter must be specified with the auth-token-update parameter. Password constraints: Must be only printable ASCII characters Must be at least 16 characters and no more than 128 characters in length Cannot contain any of the following characters: '/', '\"', or '\\@', '%' For more information, see AUTH password at AUTH."];
       authTokenUpdateStrategy: AuthTokenUpdateStrategyType.t option
         [@ocaml.doc
-          "Specifies the strategy to use to update the AUTH token. This parameter must be specified with the auth-token parameter. Possible values: Rotate Set For more information, see Authenticating Users with Redis AUTH"];
+          "Specifies the strategy to use to update the AUTH token. This parameter must be specified with the auth-token parameter. Possible values: ROTATE - default, if no update strategy is provided SET - allowed only after ROTATE DELETE - allowed only when transitioning to RBAC For more information, see Authenticating Users with AUTH"];
       logDeliveryConfigurations: LogDeliveryConfigurationRequestList.t option
         [@ocaml.doc
-          "Specifies the destination, format and type of the logs."]}
+          "Specifies the destination, format and type of the logs."];
+      ipDiscovery: IpDiscovery.t option
+        [@ocaml.doc
+          "The network type you choose when modifying a cluster, either ipv4 | ipv6. IPv6 is supported for workloads using Valkey 7.2 and above, Redis OSS engine version 6.2 to 7.1 or Memcached engine version 1.6.6 and above on all instances built on the Nitro system."];
+      scaleConfig: ScaleConfig.t option
+        [@ocaml.doc
+          "Configures horizontal or vertical scaling for Memcached clusters, specifying the scaling percentage and interval."]}
     let context_ = "ModifyCacheClusterMessage"
     let make ?numCacheNodes =
       fun ?cacheNodeIdsToRemove ->
@@ -12015,38 +13984,44 @@ module ModifyCacheClusterMessage =
                     fun ?cacheParameterGroupName ->
                       fun ?notificationTopicStatus ->
                         fun ?applyImmediately ->
-                          fun ?engineVersion ->
-                            fun ?autoMinorVersionUpgrade ->
-                              fun ?snapshotRetentionLimit ->
-                                fun ?snapshotWindow ->
-                                  fun ?cacheNodeType ->
-                                    fun ?authToken ->
-                                      fun ?authTokenUpdateStrategy ->
-                                        fun ?logDeliveryConfigurations ->
-                                          fun ~cacheClusterId ->
-                                            fun () ->
-                                              {
-                                                numCacheNodes;
-                                                cacheNodeIdsToRemove;
-                                                aZMode;
-                                                newAvailabilityZones;
-                                                cacheSecurityGroupNames;
-                                                securityGroupIds;
-                                                preferredMaintenanceWindow;
-                                                notificationTopicArn;
-                                                cacheParameterGroupName;
-                                                notificationTopicStatus;
-                                                applyImmediately;
-                                                engineVersion;
-                                                autoMinorVersionUpgrade;
-                                                snapshotRetentionLimit;
-                                                snapshotWindow;
-                                                cacheNodeType;
-                                                authToken;
-                                                authTokenUpdateStrategy;
-                                                logDeliveryConfigurations;
-                                                cacheClusterId
-                                              }
+                          fun ?engine ->
+                            fun ?engineVersion ->
+                              fun ?autoMinorVersionUpgrade ->
+                                fun ?snapshotRetentionLimit ->
+                                  fun ?snapshotWindow ->
+                                    fun ?cacheNodeType ->
+                                      fun ?authToken ->
+                                        fun ?authTokenUpdateStrategy ->
+                                          fun ?logDeliveryConfigurations ->
+                                            fun ?ipDiscovery ->
+                                              fun ?scaleConfig ->
+                                                fun ~cacheClusterId ->
+                                                  fun () ->
+                                                    {
+                                                      numCacheNodes;
+                                                      cacheNodeIdsToRemove;
+                                                      aZMode;
+                                                      newAvailabilityZones;
+                                                      cacheSecurityGroupNames;
+                                                      securityGroupIds;
+                                                      preferredMaintenanceWindow;
+                                                      notificationTopicArn;
+                                                      cacheParameterGroupName;
+                                                      notificationTopicStatus;
+                                                      applyImmediately;
+                                                      engine;
+                                                      engineVersion;
+                                                      autoMinorVersionUpgrade;
+                                                      snapshotRetentionLimit;
+                                                      snapshotWindow;
+                                                      cacheNodeType;
+                                                      authToken;
+                                                      authTokenUpdateStrategy;
+                                                      logDeliveryConfigurations;
+                                                      ipDiscovery;
+                                                      scaleConfig;
+                                                      cacheClusterId
+                                                    }
     let to_value x =
       structure_to_value
         [("CacheClusterId", (Some (String_.to_value x.cacheClusterId)));
@@ -12073,6 +14048,7 @@ module ModifyCacheClusterMessage =
           (Option.map x.notificationTopicStatus ~f:String_.to_value));
         ("ApplyImmediately",
           (Option.map x.applyImmediately ~f:Boolean.to_value));
+        ("Engine", (Option.map x.engine ~f:String_.to_value));
         ("EngineVersion", (Option.map x.engineVersion ~f:String_.to_value));
         ("AutoMinorVersionUpgrade",
           (Option.map x.autoMinorVersionUpgrade ~f:BooleanOptional.to_value));
@@ -12086,9 +14062,15 @@ module ModifyCacheClusterMessage =
              ~f:AuthTokenUpdateStrategyType.to_value));
         ("LogDeliveryConfigurations",
           (Option.map x.logDeliveryConfigurations
-             ~f:LogDeliveryConfigurationRequestList.to_value))]
+             ~f:LogDeliveryConfigurationRequestList.to_value));
+        ("IpDiscovery", (Option.map x.ipDiscovery ~f:IpDiscovery.to_value));
+        ("ScaleConfig", (Option.map x.scaleConfig ~f:ScaleConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let scaleConfig =
+        (Option.map ~f:ScaleConfig.of_xml) (Xml.child xml_arg0 "ScaleConfig") in
+      let ipDiscovery =
+        (Option.map ~f:IpDiscovery.of_xml) (Xml.child xml_arg0 "IpDiscovery") in
       let logDeliveryConfigurations =
         (Option.map ~f:LogDeliveryConfigurationRequestList.of_xml)
           (Xml.child xml_arg0 "LogDeliveryConfigurations") in
@@ -12109,6 +14091,8 @@ module ModifyCacheClusterMessage =
           (Xml.child xml_arg0 "AutoMinorVersionUpgrade") in
       let engineVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EngineVersion") in
+      let engine =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Engine") in
       let applyImmediately =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "ApplyImmediately") in
@@ -12144,59 +14128,64 @@ module ModifyCacheClusterMessage =
       let cacheClusterId =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CacheClusterId") in
-      make ?logDeliveryConfigurations ?authTokenUpdateStrategy ?authToken
-        ?cacheNodeType ?snapshotWindow ?snapshotRetentionLimit
-        ?autoMinorVersionUpgrade ?engineVersion ?applyImmediately
-        ?notificationTopicStatus ?cacheParameterGroupName
-        ?notificationTopicArn ?preferredMaintenanceWindow ?securityGroupIds
+      make ?scaleConfig ?ipDiscovery ?logDeliveryConfigurations
+        ?authTokenUpdateStrategy ?authToken ?cacheNodeType ?snapshotWindow
+        ?snapshotRetentionLimit ?autoMinorVersionUpgrade ?engineVersion
+        ?engine ?applyImmediately ?notificationTopicStatus
+        ?cacheParameterGroupName ?notificationTopicArn
+        ?preferredMaintenanceWindow ?securityGroupIds
         ?cacheSecurityGroupNames ?newAvailabilityZones ?aZMode
         ?cacheNodeIdsToRemove ?numCacheNodes ~cacheClusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let scaleConfig = field_map json__ "ScaleConfig" ScaleConfig.of_json in
+      let ipDiscovery = field_map json__ "IpDiscovery" IpDiscovery.of_json in
       let logDeliveryConfigurations =
-        field_map json "LogDeliveryConfigurations"
+        field_map json__ "LogDeliveryConfigurations"
           LogDeliveryConfigurationRequestList.of_json in
       let authTokenUpdateStrategy =
-        field_map json "AuthTokenUpdateStrategy"
+        field_map json__ "AuthTokenUpdateStrategy"
           AuthTokenUpdateStrategyType.of_json in
-      let authToken = field_map json "AuthToken" String_.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
-      let snapshotWindow = field_map json "SnapshotWindow" String_.of_json in
+      let authToken = field_map json__ "AuthToken" String_.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
+      let snapshotWindow = field_map json__ "SnapshotWindow" String_.of_json in
       let snapshotRetentionLimit =
-        field_map json "SnapshotRetentionLimit" IntegerOptional.of_json in
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
       let autoMinorVersionUpgrade =
-        field_map json "AutoMinorVersionUpgrade" BooleanOptional.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
+        field_map json__ "AutoMinorVersionUpgrade" BooleanOptional.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
       let applyImmediately =
-        field_map json "ApplyImmediately" Boolean.of_json in
+        field_map json__ "ApplyImmediately" Boolean.of_json in
       let notificationTopicStatus =
-        field_map json "NotificationTopicStatus" String_.of_json in
+        field_map json__ "NotificationTopicStatus" String_.of_json in
       let cacheParameterGroupName =
-        field_map json "CacheParameterGroupName" String_.of_json in
+        field_map json__ "CacheParameterGroupName" String_.of_json in
       let notificationTopicArn =
-        field_map json "NotificationTopicArn" String_.of_json in
+        field_map json__ "NotificationTopicArn" String_.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIdsList.of_json in
+        field_map json__ "SecurityGroupIds" SecurityGroupIdsList.of_json in
       let cacheSecurityGroupNames =
-        field_map json "CacheSecurityGroupNames"
+        field_map json__ "CacheSecurityGroupNames"
           CacheSecurityGroupNameList.of_json in
       let newAvailabilityZones =
-        field_map json "NewAvailabilityZones"
+        field_map json__ "NewAvailabilityZones"
           PreferredAvailabilityZoneList.of_json in
-      let aZMode = field_map json "AZMode" AZMode.of_json in
+      let aZMode = field_map json__ "AZMode" AZMode.of_json in
       let cacheNodeIdsToRemove =
-        field_map json "CacheNodeIdsToRemove" CacheNodeIdsList.of_json in
+        field_map json__ "CacheNodeIdsToRemove" CacheNodeIdsList.of_json in
       let numCacheNodes =
-        field_map json "NumCacheNodes" IntegerOptional.of_json in
+        field_map json__ "NumCacheNodes" IntegerOptional.of_json in
       let cacheClusterId =
-        field_map_exn json "CacheClusterId" String_.of_json in
-      make ?logDeliveryConfigurations ?authTokenUpdateStrategy ?authToken
-        ?cacheNodeType ?snapshotWindow ?snapshotRetentionLimit
-        ?autoMinorVersionUpgrade ?engineVersion ?applyImmediately
-        ?notificationTopicStatus ?cacheParameterGroupName
-        ?notificationTopicArn ?preferredMaintenanceWindow ?securityGroupIds
+        field_map_exn json__ "CacheClusterId" String_.of_json in
+      make ?scaleConfig ?ipDiscovery ?logDeliveryConfigurations
+        ?authTokenUpdateStrategy ?authToken ?cacheNodeType ?snapshotWindow
+        ?snapshotRetentionLimit ?autoMinorVersionUpgrade ?engineVersion
+        ?engine ?applyImmediately ?notificationTopicStatus
+        ?cacheParameterGroupName ?notificationTopicArn
+        ?preferredMaintenanceWindow ?securityGroupIds
         ?cacheSecurityGroupNames ?newAvailabilityZones ?aZMode
         ?cacheNodeIdsToRemove ?numCacheNodes ~cacheClusterId ()
     let to_json v = composed_to_json to_value v
@@ -12220,8 +14209,8 @@ module ListTagsForResourceMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map_exn json "ResourceName" String_.of_json in
+    let of_json json__ =
+      let resourceName = field_map_exn json__ "ResourceName" String_.of_json in
       make ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12254,10 +14243,10 @@ module ListAllowedNodeTypeModificationsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CacheClusterId") in
       make ?replicationGroupId ?cacheClusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroupId =
-        field_map json "ReplicationGroupId" String_.of_json in
-      let cacheClusterId = field_map json "CacheClusterId" String_.of_json in
+        field_map json__ "ReplicationGroupId" String_.of_json in
+      let cacheClusterId = field_map json__ "CacheClusterId" String_.of_json in
       make ?replicationGroupId ?cacheClusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12448,13 +14437,13 @@ module IncreaseReplicaCountResult =
           (Xml.child xml_arg0 "ReplicationGroup") in
       make ?replicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroup =
-        field_map json "ReplicationGroup" ReplicationGroup.of_json in
+        field_map json__ "ReplicationGroup" ReplicationGroup.of_json in
       make ?replicationGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Dynamically increases the number of replicas in a Redis (cluster mode disabled) replication group or the number of replica nodes in one or more node groups (shards) of a Redis (cluster mode enabled) replication group. This operation is performed with no cluster down time."]
+       "Dynamically increases the number of replicas in a Valkey or Redis OSS (cluster mode disabled) replication group or the number of replica nodes in one or more node groups (shards) of a Valkey or Redis OSS (cluster mode enabled) replication group. This operation is performed with no cluster down time."]
 module IncreaseReplicaCountMessage =
   struct
     type nonrec t =
@@ -12464,10 +14453,10 @@ module IncreaseReplicaCountMessage =
           "The id of the replication group to which you want to add replica nodes."];
       newReplicaCount: IntegerOptional.t option
         [@ocaml.doc
-          "The number of read replica nodes you want at the completion of this operation. For Redis (cluster mode disabled) replication groups, this is the number of replica nodes in the replication group. For Redis (cluster mode enabled) replication groups, this is the number of replica nodes in each of the replication group's node groups."];
+          "The number of read replica nodes you want at the completion of this operation. For Valkey or Redis OSS (cluster mode disabled) replication groups, this is the number of replica nodes in the replication group. For Valkey or Redis OSS (cluster mode enabled) replication groups, this is the number of replica nodes in each of the replication group's node groups."];
       replicaConfiguration: ReplicaConfigurationList.t option
         [@ocaml.doc
-          "A list of ConfigureShard objects that can be used to configure each shard in a Redis (cluster mode enabled) replication group. The ConfigureShard has three members: NewReplicaCount, NodeGroupId, and PreferredAvailabilityZones."];
+          "A list of ConfigureShard objects that can be used to configure each shard in a Valkey or Redis OSS (cluster mode enabled) replication group. The ConfigureShard has three members: NewReplicaCount, NodeGroupId, and PreferredAvailabilityZones."];
       applyImmediately: Boolean.t
         [@ocaml.doc
           "If True, the number of replica nodes is increased immediately. ApplyImmediately=False is not currently supported."]}
@@ -12510,21 +14499,21 @@ module IncreaseReplicaCountMessage =
       make ~applyImmediately ?replicaConfiguration ?newReplicaCount
         ~replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applyImmediately =
-        field_map_exn json "ApplyImmediately" Boolean.of_json in
+        field_map_exn json__ "ApplyImmediately" Boolean.of_json in
       let replicaConfiguration =
-        field_map json "ReplicaConfiguration"
+        field_map json__ "ReplicaConfiguration"
           ReplicaConfigurationList.of_json in
       let newReplicaCount =
-        field_map json "NewReplicaCount" IntegerOptional.of_json in
+        field_map json__ "NewReplicaCount" IntegerOptional.of_json in
       let replicationGroupId =
-        field_map_exn json "ReplicationGroupId" String_.of_json in
+        field_map_exn json__ "ReplicationGroupId" String_.of_json in
       make ~applyImmediately ?replicaConfiguration ?newReplicaCount
         ~replicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Dynamically increases the number of replicas in a Redis (cluster mode disabled) replication group or the number of replica nodes in one or more node groups (shards) of a Redis (cluster mode enabled) replication group. This operation is performed with no cluster down time."]
+       "Dynamically increases the number of replicas in a Valkey or Redis OSS (cluster mode disabled) replication group or the number of replica nodes in one or more node groups (shards) of a Valkey or Redis OSS (cluster mode enabled) replication group. This operation is performed with no cluster down time."]
 module IncreaseNodeGroupsInGlobalReplicationGroupResult =
   struct
     type increaseNodeGroupsInGlobalReplicationGroupResult =
@@ -12616,9 +14605,9 @@ module IncreaseNodeGroupsInGlobalReplicationGroupResult =
           (Xml.child xml_arg0 "GlobalReplicationGroup") in
       make ?globalReplicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalReplicationGroup =
-        field_map json "GlobalReplicationGroup"
+        field_map json__ "GlobalReplicationGroup"
           GlobalReplicationGroup.of_json in
       make ?globalReplicationGroup ()
     let to_json v = composed_to_json to_value v
@@ -12631,7 +14620,7 @@ module IncreaseNodeGroupsInGlobalReplicationGroupMessage =
       globalReplicationGroupId: String_.t
         [@ocaml.doc "The name of the Global datastore"];
       nodeGroupCount: Integer.t
-        [@ocaml.doc "The number of node groups you wish to add"];
+        [@ocaml.doc "Total number of node groups you want"];
       regionalConfigurations: RegionalConfigurationList.t option
         [@ocaml.doc
           "Describes the replication group IDs, the Amazon regions where they are stored and the shard configuration for each that comprise the Global datastore"];
@@ -12677,16 +14666,16 @@ module IncreaseNodeGroupsInGlobalReplicationGroupMessage =
       make ~applyImmediately ?regionalConfigurations ~nodeGroupCount
         ~globalReplicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applyImmediately =
-        field_map_exn json "ApplyImmediately" Boolean.of_json in
+        field_map_exn json__ "ApplyImmediately" Boolean.of_json in
       let regionalConfigurations =
-        field_map json "RegionalConfigurations"
+        field_map json__ "RegionalConfigurations"
           RegionalConfigurationList.of_json in
       let nodeGroupCount =
-        field_map_exn json "NodeGroupCount" Integer.of_json in
+        field_map_exn json__ "NodeGroupCount" Integer.of_json in
       let globalReplicationGroupId =
-        field_map_exn json "GlobalReplicationGroupId" String_.of_json in
+        field_map_exn json__ "GlobalReplicationGroupId" String_.of_json in
       make ~applyImmediately ?regionalConfigurations ~nodeGroupCount
         ~globalReplicationGroupId ()
     let to_json v = composed_to_json to_value v
@@ -12794,14 +14783,14 @@ module FailoverGlobalReplicationGroupResult =
           (Xml.child xml_arg0 "GlobalReplicationGroup") in
       make ?globalReplicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalReplicationGroup =
-        field_map json "GlobalReplicationGroup"
+        field_map json__ "GlobalReplicationGroup"
           GlobalReplicationGroup.of_json in
       make ?globalReplicationGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used to failover the primary region to a selected secondary region. The selected secondary region will become primary, and all other clusters will become secondary."]
+       "Used to failover the primary region to a secondary region. The secondary region will become primary, and all other clusters will become secondary."]
 module FailoverGlobalReplicationGroupMessage =
   struct
     type nonrec t =
@@ -12846,17 +14835,166 @@ module FailoverGlobalReplicationGroupMessage =
       make ~primaryReplicationGroupId ~primaryRegion
         ~globalReplicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let primaryReplicationGroupId =
-        field_map_exn json "PrimaryReplicationGroupId" String_.of_json in
-      let primaryRegion = field_map_exn json "PrimaryRegion" String_.of_json in
+        field_map_exn json__ "PrimaryReplicationGroupId" String_.of_json in
+      let primaryRegion =
+        field_map_exn json__ "PrimaryRegion" String_.of_json in
       let globalReplicationGroupId =
-        field_map_exn json "GlobalReplicationGroupId" String_.of_json in
+        field_map_exn json__ "GlobalReplicationGroupId" String_.of_json in
       make ~primaryReplicationGroupId ~primaryRegion
         ~globalReplicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Used to failover the primary region to a selected secondary region. The selected secondary region will become primary, and all other clusters will become secondary."]
+       "Used to failover the primary region to a secondary region. The secondary region will become primary, and all other clusters will become secondary."]
+module ExportServerlessCacheSnapshotResponse =
+  struct
+    type exportServerlessCacheSnapshotResult =
+      {
+      serverlessCacheSnapshot: ServerlessCacheSnapshot.t option
+        [@ocaml.doc
+          "The state of a serverless cache at a specific point in time, to the millisecond. Available for Valkey, Redis OSS and Serverless Memcached only."]}
+    and responseMetaData = unit
+    and t =
+      {
+      exportServerlessCacheSnapshotResult:
+        exportServerlessCacheSnapshotResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `InvalidServerlessCacheSnapshotStateFault of
+          InvalidServerlessCacheSnapshotStateFault.t 
+      | `ServerlessCacheSnapshotNotFoundFault of
+          ServerlessCacheSnapshotNotFoundFault.t 
+      | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ExportServerlessCacheSnapshotResponse"
+    let make ?serverlessCacheSnapshot =
+      fun () ->
+        {
+          exportServerlessCacheSnapshotResult = { serverlessCacheSnapshot };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "InvalidServerlessCacheSnapshotStateFault" ->
+          `InvalidServerlessCacheSnapshotStateFault
+            (InvalidServerlessCacheSnapshotStateFault.of_json json)
+      | "ServerlessCacheSnapshotNotFoundFault" ->
+          `ServerlessCacheSnapshotNotFoundFault
+            (ServerlessCacheSnapshotNotFoundFault.of_json json)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "InvalidServerlessCacheSnapshotStateFault" ->
+          `InvalidServerlessCacheSnapshotStateFault
+            (InvalidServerlessCacheSnapshotStateFault.of_xml xml)
+      | "ServerlessCacheSnapshotNotFoundFault" ->
+          `ServerlessCacheSnapshotNotFoundFault
+            (ServerlessCacheSnapshotNotFoundFault.of_xml xml)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `InvalidServerlessCacheSnapshotStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidServerlessCacheSnapshotStateFault"));
+            ("details", (InvalidServerlessCacheSnapshotStateFault.to_json e))]
+      | `ServerlessCacheSnapshotNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheSnapshotNotFoundFault"));
+            ("details", (ServerlessCacheSnapshotNotFoundFault.to_json e))]
+      | `ServiceLinkedRoleNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServiceLinkedRoleNotFoundFault"));
+            ("details", (ServiceLinkedRoleNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.exportServerlessCacheSnapshotResult in
+      structure_to_wrapped_value
+        [("ServerlessCacheSnapshot",
+           (Option.map x.serverlessCacheSnapshot
+              ~f:ServerlessCacheSnapshot.to_value))]
+        ~wrapper:"ExportServerlessCacheSnapshotResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "ExportServerlessCacheSnapshotResult" in
+      let serverlessCacheSnapshot =
+        (Option.map ~f:ServerlessCacheSnapshot.of_xml)
+          (Xml.child xml_arg0 "ServerlessCacheSnapshot") in
+      make ?serverlessCacheSnapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverlessCacheSnapshot =
+        field_map json__ "ServerlessCacheSnapshot"
+          ServerlessCacheSnapshot.of_json in
+      make ?serverlessCacheSnapshot ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the functionality to export the serverless cache snapshot data to Amazon S3. Available for Valkey and Redis OSS only."]
+module ExportServerlessCacheSnapshotRequest =
+  struct
+    type nonrec t =
+      {
+      serverlessCacheSnapshotName: String_.t
+        [@ocaml.doc
+          "The identifier of the serverless cache snapshot to be exported to S3. Available for Valkey and Redis OSS only."];
+      s3BucketName: String_.t
+        [@ocaml.doc
+          "Name of the Amazon S3 bucket to export the snapshot to. The Amazon S3 bucket must also be in same region as the snapshot. Available for Valkey and Redis OSS only."]}
+    let context_ = "ExportServerlessCacheSnapshotRequest"
+    let make ~serverlessCacheSnapshotName =
+      fun ~s3BucketName ->
+        fun () -> { serverlessCacheSnapshotName; s3BucketName }
+    let to_value x =
+      structure_to_value
+        [("ServerlessCacheSnapshotName",
+           (Some (String_.to_value x.serverlessCacheSnapshotName)));
+        ("S3BucketName", (Some (String_.to_value x.s3BucketName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3BucketName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "S3BucketName") in
+      let serverlessCacheSnapshotName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ServerlessCacheSnapshotName") in
+      make ~s3BucketName ~serverlessCacheSnapshotName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3BucketName = field_map_exn json__ "S3BucketName" String_.of_json in
+      let serverlessCacheSnapshotName =
+        field_map_exn json__ "ServerlessCacheSnapshotName" String_.of_json in
+      make ~s3BucketName ~serverlessCacheSnapshotName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides the functionality to export the serverless cache snapshot data to Amazon S3. Available for Valkey and Redis OSS only."]
 module EventsMessage =
   struct
     type describeEventsResult =
@@ -12935,9 +15073,9 @@ module EventsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?events ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let events = field_map json "Events" EventList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let events = field_map json__ "Events" EventList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?events ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a DescribeEvents operation."]
@@ -13044,9 +15182,9 @@ module DisassociateGlobalReplicationGroupResult =
           (Xml.child xml_arg0 "GlobalReplicationGroup") in
       make ?globalReplicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalReplicationGroup =
-        field_map json "GlobalReplicationGroup"
+        field_map json__ "GlobalReplicationGroup"
           GlobalReplicationGroup.of_json in
       make ?globalReplicationGroup ()
     let to_json v = composed_to_json to_value v
@@ -13097,13 +15235,13 @@ module DisassociateGlobalReplicationGroupMessage =
       make ~replicationGroupRegion ~replicationGroupId
         ~globalReplicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroupRegion =
-        field_map_exn json "ReplicationGroupRegion" String_.of_json in
+        field_map_exn json__ "ReplicationGroupRegion" String_.of_json in
       let replicationGroupId =
-        field_map_exn json "ReplicationGroupId" String_.of_json in
+        field_map_exn json__ "ReplicationGroupId" String_.of_json in
       let globalReplicationGroupId =
-        field_map_exn json "GlobalReplicationGroupId" String_.of_json in
+        field_map_exn json__ "GlobalReplicationGroupId" String_.of_json in
       make ~replicationGroupRegion ~replicationGroupId
         ~globalReplicationGroupId ()
     let to_json v = composed_to_json to_value v
@@ -13193,9 +15331,9 @@ module DescribeUsersResult =
         (Option.map ~f:UserList.of_xml) (Xml.child xml_arg0 "Users") in
       make ?marker ?users ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let users = field_map json "Users" UserList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let users = field_map json__ "Users" UserList.of_json in
       make ?marker ?users ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of users."]
@@ -13203,7 +15341,7 @@ module DescribeUsersMessage =
   struct
     type nonrec t =
       {
-      engine: EngineType.t option [@ocaml.doc "The Redis engine."];
+      engine: EngineType.t option [@ocaml.doc "The engine."];
       userId: UserId.t option [@ocaml.doc "The ID of the user."];
       filters: FilterList.t option
         [@ocaml.doc "Filter to determine the list of User IDs to return."];
@@ -13241,12 +15379,12 @@ module DescribeUsersMessage =
         (Option.map ~f:EngineType.of_xml) (Xml.child xml_arg0 "Engine") in
       make ?marker ?maxRecords ?filters ?userId ?engine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
-      let userId = field_map json "UserId" UserId.of_json in
-      let engine = field_map json "Engine" EngineType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      let userId = field_map json__ "UserId" UserId.of_json in
+      let engine = field_map json__ "Engine" EngineType.of_json in
       make ?marker ?maxRecords ?filters ?userId ?engine ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of users."]
@@ -13258,7 +15396,7 @@ module DescribeUserGroupsResult =
         [@ocaml.doc "Returns a list of user groups."];
       marker: String_.t option
         [@ocaml.doc
-          "An optional marker returned from a prior request. Use this marker for pagination of results from this operation. If this parameter is specified, the response includes only records beyond the marker, up to the value specified by MaxRecords. >"]}
+          "An optional marker returned from a prior request. Use this marker for pagination of results from this operation. If this parameter is specified, the response includes only records beyond the marker, up to the value specified by MaxRecords.>"]}
     and responseMetaData = unit
     and t =
       {
@@ -13340,9 +15478,9 @@ module DescribeUserGroupsResult =
           (Xml.child xml_arg0 "UserGroups") in
       make ?marker ?userGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let userGroups = field_map json "UserGroups" UserGroupList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let userGroups = field_map json__ "UserGroups" UserGroupList.of_json in
       make ?marker ?userGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of user groups."]
@@ -13376,10 +15514,10 @@ module DescribeUserGroupsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "UserGroupId") in
       make ?marker ?maxRecords ?userGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let userGroupId = field_map json "UserGroupId" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let userGroupId = field_map json__ "UserGroupId" String_.of_json in
       make ?marker ?maxRecords ?userGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of user groups."]
@@ -13395,7 +15533,7 @@ module DescribeUpdateActionsMessage =
         [@ocaml.doc "The cache cluster IDs"];
       engine: String_.t option
         [@ocaml.doc
-          "The Elasticache engine to which the update applies. Either Redis or Memcached"];
+          "The Elasticache engine to which the update applies. Either Valkey, Redis OSS or Memcached."];
       serviceUpdateStatus: ServiceUpdateStatusList.t option
         [@ocaml.doc "The status of the service update"];
       serviceUpdateTimeRange: TimeRangeFilter.t option
@@ -13490,24 +15628,25 @@ module DescribeUpdateActionsMessage =
         ?serviceUpdateTimeRange ?serviceUpdateStatus ?engine ?cacheClusterIds
         ?replicationGroupIds ?serviceUpdateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let showNodeLevelUpdateStatus =
-        field_map json "ShowNodeLevelUpdateStatus" BooleanOptional.of_json in
+        field_map json__ "ShowNodeLevelUpdateStatus" BooleanOptional.of_json in
       let updateActionStatus =
-        field_map json "UpdateActionStatus" UpdateActionStatusList.of_json in
+        field_map json__ "UpdateActionStatus" UpdateActionStatusList.of_json in
       let serviceUpdateTimeRange =
-        field_map json "ServiceUpdateTimeRange" TimeRangeFilter.of_json in
+        field_map json__ "ServiceUpdateTimeRange" TimeRangeFilter.of_json in
       let serviceUpdateStatus =
-        field_map json "ServiceUpdateStatus" ServiceUpdateStatusList.of_json in
-      let engine = field_map json "Engine" String_.of_json in
+        field_map json__ "ServiceUpdateStatus"
+          ServiceUpdateStatusList.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
       let cacheClusterIds =
-        field_map json "CacheClusterIds" CacheClusterIdList.of_json in
+        field_map json__ "CacheClusterIds" CacheClusterIdList.of_json in
       let replicationGroupIds =
-        field_map json "ReplicationGroupIds" ReplicationGroupIdList.of_json in
+        field_map json__ "ReplicationGroupIds" ReplicationGroupIdList.of_json in
       let serviceUpdateName =
-        field_map json "ServiceUpdateName" String_.of_json in
+        field_map json__ "ServiceUpdateName" String_.of_json in
       make ?marker ?maxRecords ?showNodeLevelUpdateStatus ?updateActionStatus
         ?serviceUpdateTimeRange ?serviceUpdateStatus ?engine ?cacheClusterIds
         ?replicationGroupIds ?serviceUpdateName ()
@@ -13588,16 +15727,16 @@ module DescribeSnapshotsMessage =
       make ?showNodeGroupConfig ?maxRecords ?marker ?snapshotSource
         ?snapshotName ?cacheClusterId ?replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let showNodeGroupConfig =
-        field_map json "ShowNodeGroupConfig" BooleanOptional.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let snapshotSource = field_map json "SnapshotSource" String_.of_json in
-      let snapshotName = field_map json "SnapshotName" String_.of_json in
-      let cacheClusterId = field_map json "CacheClusterId" String_.of_json in
+        field_map json__ "ShowNodeGroupConfig" BooleanOptional.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let snapshotSource = field_map json__ "SnapshotSource" String_.of_json in
+      let snapshotName = field_map json__ "SnapshotName" String_.of_json in
+      let cacheClusterId = field_map json__ "CacheClusterId" String_.of_json in
       let replicationGroupId =
-        field_map json "ReplicationGroupId" String_.of_json in
+        field_map json__ "ReplicationGroupId" String_.of_json in
       make ?showNodeGroupConfig ?maxRecords ?marker ?snapshotSource
         ?snapshotName ?cacheClusterId ?replicationGroupId ()
     let to_json v = composed_to_json to_value v
@@ -13701,9 +15840,9 @@ module DescribeSnapshotsListMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?snapshots ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshots = field_map json "Snapshots" SnapshotList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let snapshots = field_map json__ "Snapshots" SnapshotList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?snapshots ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a DescribeSnapshots operation."]
@@ -13751,16 +15890,356 @@ module DescribeServiceUpdatesMessage =
           (Xml.child xml_arg0 "ServiceUpdateName") in
       make ?marker ?maxRecords ?serviceUpdateStatus ?serviceUpdateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let serviceUpdateStatus =
-        field_map json "ServiceUpdateStatus" ServiceUpdateStatusList.of_json in
+        field_map json__ "ServiceUpdateStatus"
+          ServiceUpdateStatusList.of_json in
       let serviceUpdateName =
-        field_map json "ServiceUpdateName" String_.of_json in
+        field_map json__ "ServiceUpdateName" String_.of_json in
       make ?marker ?maxRecords ?serviceUpdateStatus ?serviceUpdateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns details of the service updates"]
+module DescribeServerlessCachesResponse =
+  struct
+    type describeServerlessCachesResult =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "An optional marker returned from a prior request to support pagination of results from this operation. If this parameter is specified, the response includes only records beyond the marker, up to the value specified by MaxResults."];
+      serverlessCaches: ServerlessCacheList.t option
+        [@ocaml.doc
+          "The serverless caches associated with a given description request."]}
+    and responseMetaData = unit
+    and t =
+      {
+      describeServerlessCachesResult: describeServerlessCachesResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `ServerlessCacheNotFoundFault of ServerlessCacheNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DescribeServerlessCachesResponse"
+    let make ?nextToken =
+      fun ?serverlessCaches ->
+        fun () ->
+          {
+            describeServerlessCachesResult = { nextToken; serverlessCaches };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `ServerlessCacheNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheNotFoundFault"));
+            ("details", (ServerlessCacheNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.describeServerlessCachesResult in
+      structure_to_wrapped_value
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("ServerlessCaches",
+          (Option.map x.serverlessCaches ~f:ServerlessCacheList.to_value))]
+        ~wrapper:"DescribeServerlessCachesResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "DescribeServerlessCachesResult" in
+      let serverlessCaches =
+        (Option.map ~f:ServerlessCacheList.of_xml)
+          (Xml.child xml_arg0 "ServerlessCaches") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?serverlessCaches ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverlessCaches =
+        field_map json__ "ServerlessCaches" ServerlessCacheList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?serverlessCaches ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about a specific serverless cache. If no identifier is specified, then the API returns information on all the serverless caches belonging to this Amazon Web Services account."]
+module DescribeServerlessCachesRequest =
+  struct
+    type nonrec t =
+      {
+      serverlessCacheName: String_.t option
+        [@ocaml.doc
+          "The identifier for the serverless cache. If this parameter is specified, only information about that specific serverless cache is returned. Default: NULL"];
+      maxResults: IntegerOptional.t option
+        [@ocaml.doc
+          "The maximum number of records in the response. If more records exist than the specified max-records value, the next token is included in the response so that remaining results can be retrieved. The default is 50."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "An optional marker returned from a prior request to support pagination of results from this operation. If this parameter is specified, the response includes only records beyond the marker, up to the value specified by MaxResults."]}
+    let make ?serverlessCacheName =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun () -> { serverlessCacheName; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("ServerlessCacheName",
+           (Option.map x.serverlessCacheName ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:IntegerOptional.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let serverlessCacheName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ServerlessCacheName") in
+      make ?nextToken ?maxResults ?serverlessCacheName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let serverlessCacheName =
+        field_map json__ "ServerlessCacheName" String_.of_json in
+      make ?nextToken ?maxResults ?serverlessCacheName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about a specific serverless cache. If no identifier is specified, then the API returns information on all the serverless caches belonging to this Amazon Web Services account."]
+module DescribeServerlessCacheSnapshotsResponse =
+  struct
+    type describeServerlessCacheSnapshotsResult =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "An optional marker returned from a prior request to support pagination of results from this operation. If this parameter is specified, the response includes only records beyond the marker, up to the value specified by max-results. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      serverlessCacheSnapshots: ServerlessCacheSnapshotList.t option
+        [@ocaml.doc
+          "The serverless caches snapshots associated with a given description request. Available for Valkey, Redis OSS and Serverless Memcached only."]}
+    and responseMetaData = unit
+    and t =
+      {
+      describeServerlessCacheSnapshotsResult:
+        describeServerlessCacheSnapshotsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `ServerlessCacheNotFoundFault of ServerlessCacheNotFoundFault.t 
+      | `ServerlessCacheSnapshotNotFoundFault of
+          ServerlessCacheSnapshotNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DescribeServerlessCacheSnapshotsResponse"
+    let make ?nextToken =
+      fun ?serverlessCacheSnapshots ->
+        fun () ->
+          {
+            describeServerlessCacheSnapshotsResult =
+              { nextToken; serverlessCacheSnapshots };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_json json)
+      | "ServerlessCacheSnapshotNotFoundFault" ->
+          `ServerlessCacheSnapshotNotFoundFault
+            (ServerlessCacheSnapshotNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_xml xml)
+      | "ServerlessCacheSnapshotNotFoundFault" ->
+          `ServerlessCacheSnapshotNotFoundFault
+            (ServerlessCacheSnapshotNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `ServerlessCacheNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheNotFoundFault"));
+            ("details", (ServerlessCacheNotFoundFault.to_json e))]
+      | `ServerlessCacheSnapshotNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheSnapshotNotFoundFault"));
+            ("details", (ServerlessCacheSnapshotNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.describeServerlessCacheSnapshotsResult in
+      structure_to_wrapped_value
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("ServerlessCacheSnapshots",
+          (Option.map x.serverlessCacheSnapshots
+             ~f:ServerlessCacheSnapshotList.to_value))]
+        ~wrapper:"DescribeServerlessCacheSnapshotsResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "DescribeServerlessCacheSnapshotsResult" in
+      let serverlessCacheSnapshots =
+        (Option.map ~f:ServerlessCacheSnapshotList.of_xml)
+          (Xml.child xml_arg0 "ServerlessCacheSnapshots") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?serverlessCacheSnapshots ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverlessCacheSnapshots =
+        field_map json__ "ServerlessCacheSnapshots"
+          ServerlessCacheSnapshotList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?serverlessCacheSnapshots ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about serverless cache snapshots. By default, this API lists all of the customer\226\128\153s serverless cache snapshots. It can also describe a single serverless cache snapshot, or the snapshots associated with a particular serverless cache. Available for Valkey, Redis OSS and Serverless Memcached only."]
+module DescribeServerlessCacheSnapshotsRequest =
+  struct
+    type nonrec t =
+      {
+      serverlessCacheName: String_.t option
+        [@ocaml.doc
+          "The identifier of serverless cache. If this parameter is specified, only snapshots associated with that specific serverless cache are described. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      serverlessCacheSnapshotName: String_.t option
+        [@ocaml.doc
+          "The identifier of the serverless cache\226\128\153s snapshot. If this parameter is specified, only this snapshot is described. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      snapshotType: String_.t option
+        [@ocaml.doc
+          "The type of snapshot that is being described. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "An optional marker returned from a prior request to support pagination of results from this operation. If this parameter is specified, the response includes only records beyond the marker, up to the value specified by max-results. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      maxResults: IntegerOptional.t option
+        [@ocaml.doc
+          "The maximum number of records to include in the response. If more records exist than the specified max-results value, a market is included in the response so that remaining results can be retrieved. Available for Valkey, Redis OSS and Serverless Memcached only.The default is 50. The Validation Constraints are a maximum of 50."]}
+    let make ?serverlessCacheName =
+      fun ?serverlessCacheSnapshotName ->
+        fun ?snapshotType ->
+          fun ?nextToken ->
+            fun ?maxResults ->
+              fun () ->
+                {
+                  serverlessCacheName;
+                  serverlessCacheSnapshotName;
+                  snapshotType;
+                  nextToken;
+                  maxResults
+                }
+    let to_value x =
+      structure_to_value
+        [("ServerlessCacheName",
+           (Option.map x.serverlessCacheName ~f:String_.to_value));
+        ("ServerlessCacheSnapshotName",
+          (Option.map x.serverlessCacheSnapshotName ~f:String_.to_value));
+        ("SnapshotType", (Option.map x.snapshotType ~f:String_.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:IntegerOptional.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let snapshotType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SnapshotType") in
+      let serverlessCacheSnapshotName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ServerlessCacheSnapshotName") in
+      let serverlessCacheName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ServerlessCacheName") in
+      make ?maxResults ?nextToken ?snapshotType ?serverlessCacheSnapshotName
+        ?serverlessCacheName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" IntegerOptional.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let snapshotType = field_map json__ "SnapshotType" String_.of_json in
+      let serverlessCacheSnapshotName =
+        field_map json__ "ServerlessCacheSnapshotName" String_.of_json in
+      let serverlessCacheName =
+        field_map json__ "ServerlessCacheName" String_.of_json in
+      make ?maxResults ?nextToken ?snapshotType ?serverlessCacheSnapshotName
+        ?serverlessCacheName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about serverless cache snapshots. By default, this API lists all of the customer\226\128\153s serverless cache snapshots. It can also describe a single serverless cache snapshot, or the snapshots associated with a particular serverless cache. Available for Valkey, Redis OSS and Serverless Memcached only."]
 module DescribeReservedCacheNodesOfferingsMessage =
   struct
     type nonrec t =
@@ -13770,7 +16249,7 @@ module DescribeReservedCacheNodesOfferingsMessage =
           "The offering identifier filter value. Use this parameter to show only the available offering that matches the specified reservation identifier. Example: 438012d3-4052-4cc7-b2e3-8d3372e0e706"];
       cacheNodeType: String_.t option
         [@ocaml.doc
-          "The cache node type filter value. Use this parameter to show only the available offerings matching the specified cache node type. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M6g node types: (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward) cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge For region availability, see Supported Node Types M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended) C1 node types: cache.c1.xlarge Memory optimized with data tiering: Current generation: R6gd node types (available only for Redis engine version 6.2 onward). cache.r6gd.xlarge, cache.r6gd.2xlarge, cache.r6gd.4xlarge, cache.r6gd.8xlarge, cache.r6gd.12xlarge, cache.r6gd.16xlarge Memory optimized: Current generation: R6g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward). cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge For region availability, see Supported Node Types R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Redis append-only files (AOF) are not supported for T1 or T2 instances. Redis Multi-AZ with automatic failover is not supported on T1 instances. Redis configuration variables appendonly and appendfsync are not supported on Redis version 2.8.22 and later."];
+          "The cache node type filter value. Use this parameter to show only the available offerings matching the specified cache node type. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M7g node types: cache.m7g.large, cache.m7g.xlarge, cache.m7g.2xlarge, cache.m7g.4xlarge, cache.m7g.8xlarge, cache.m7g.12xlarge, cache.m7g.16xlarge For region availability, see Supported Node Types M6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis OSS engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) C1 node types: cache.c1.xlarge Memory optimized: Current generation: R7g node types: cache.r7g.large, cache.r7g.xlarge, cache.r7g.2xlarge, cache.r7g.4xlarge, cache.r7g.8xlarge, cache.r7g.12xlarge, cache.r7g.16xlarge For region availability, see Supported Node Types R6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Valkey or Redis OSS append-only files (AOF) are not supported for T1 or T2 instances. Valkey or Redis OSS Multi-AZ with automatic failover is not supported on T1 instances. The configuration variables appendonly and appendfsync are not supported on Valkey, or on Redis OSS version 2.8.22 and later."];
       duration: String_.t option
         [@ocaml.doc
           "Duration filter value, specified in years or seconds. Use this parameter to show only reservations for a given duration. Valid Values: 1 | 3 | 31536000 | 94608000"];
@@ -13836,16 +16315,16 @@ module DescribeReservedCacheNodesOfferingsMessage =
       make ?marker ?maxRecords ?offeringType ?productDescription ?duration
         ?cacheNodeType ?reservedCacheNodesOfferingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let offeringType = field_map json "OfferingType" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let offeringType = field_map json__ "OfferingType" String_.of_json in
       let productDescription =
-        field_map json "ProductDescription" String_.of_json in
-      let duration = field_map json "Duration" String_.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
+        field_map json__ "ProductDescription" String_.of_json in
+      let duration = field_map json__ "Duration" String_.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
       let reservedCacheNodesOfferingId =
-        field_map json "ReservedCacheNodesOfferingId" String_.of_json in
+        field_map json__ "ReservedCacheNodesOfferingId" String_.of_json in
       make ?marker ?maxRecords ?offeringType ?productDescription ?duration
         ?cacheNodeType ?reservedCacheNodesOfferingId ()
     let to_json v = composed_to_json to_value v
@@ -13863,7 +16342,7 @@ module DescribeReservedCacheNodesMessage =
           "The offering identifier filter value. Use this parameter to show only purchased reservations matching the specified offering identifier."];
       cacheNodeType: String_.t option
         [@ocaml.doc
-          "The cache node type filter value. Use this parameter to show only those reservations matching the specified cache node type. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M6g node types: (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge For region availability, see Supported Node Types M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended) C1 node types: cache.c1.xlarge Memory optimized with data tiering: Current generation: R6gd node types (available only for Redis engine version 6.2 onward). cache.r6gd.xlarge, cache.r6gd.2xlarge, cache.r6gd.4xlarge, cache.r6gd.8xlarge, cache.r6gd.12xlarge, cache.r6gd.16xlarge Memory optimized: Current generation: R6g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward). cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge For region availability, see Supported Node Types R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Redis append-only files (AOF) are not supported for T1 or T2 instances. Redis Multi-AZ with automatic failover is not supported on T1 instances. Redis configuration variables appendonly and appendfsync are not supported on Redis version 2.8.22 and later."];
+          "The cache node type filter value. Use this parameter to show only those reservations matching the specified cache node type. The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M7g node types: cache.m7g.large, cache.m7g.xlarge, cache.m7g.2xlarge, cache.m7g.4xlarge, cache.m7g.8xlarge, cache.m7g.12xlarge, cache.m7g.16xlarge For region availability, see Supported Node Types M6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis OSS engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) C1 node types: cache.c1.xlarge Memory optimized: Current generation: R7g node types: cache.r7g.large, cache.r7g.xlarge, cache.r7g.2xlarge, cache.r7g.4xlarge, cache.r7g.8xlarge, cache.r7g.12xlarge, cache.r7g.16xlarge For region availability, see Supported Node Types R6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Valkey or Redis OSS append-only files (AOF) are not supported for T1 or T2 instances. Valkey or Redis OSS Multi-AZ with automatic failover is not supported on T1 instances. The configuration variables appendonly and appendfsync are not supported on Valkey, or on Redis OSS version 2.8.22 and later."];
       duration: String_.t option
         [@ocaml.doc
           "The duration filter value, specified in years or seconds. Use this parameter to show only reservations for this duration. Valid Values: 1 | 3 | 31536000 | 94608000"];
@@ -13936,18 +16415,18 @@ module DescribeReservedCacheNodesMessage =
       make ?marker ?maxRecords ?offeringType ?productDescription ?duration
         ?cacheNodeType ?reservedCacheNodesOfferingId ?reservedCacheNodeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let offeringType = field_map json "OfferingType" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let offeringType = field_map json__ "OfferingType" String_.of_json in
       let productDescription =
-        field_map json "ProductDescription" String_.of_json in
-      let duration = field_map json "Duration" String_.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
+        field_map json__ "ProductDescription" String_.of_json in
+      let duration = field_map json__ "Duration" String_.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
       let reservedCacheNodesOfferingId =
-        field_map json "ReservedCacheNodesOfferingId" String_.of_json in
+        field_map json__ "ReservedCacheNodesOfferingId" String_.of_json in
       let reservedCacheNodeId =
-        field_map json "ReservedCacheNodeId" String_.of_json in
+        field_map json__ "ReservedCacheNodeId" String_.of_json in
       make ?marker ?maxRecords ?offeringType ?productDescription ?duration
         ?cacheNodeType ?reservedCacheNodesOfferingId ?reservedCacheNodeId ()
     let to_json v = composed_to_json to_value v
@@ -13987,11 +16466,11 @@ module DescribeReplicationGroupsMessage =
           (Xml.child xml_arg0 "ReplicationGroupId") in
       make ?marker ?maxRecords ?replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let replicationGroupId =
-        field_map json "ReplicationGroupId" String_.of_json in
+        field_map json__ "ReplicationGroupId" String_.of_json in
       make ?marker ?maxRecords ?replicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14096,11 +16575,11 @@ module DescribeGlobalReplicationGroupsResult =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?globalReplicationGroups ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalReplicationGroups =
-        field_map json "GlobalReplicationGroups"
+        field_map json__ "GlobalReplicationGroups"
           GlobalReplicationGroupList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?globalReplicationGroups ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14150,13 +16629,13 @@ module DescribeGlobalReplicationGroupsMessage =
           (Xml.child xml_arg0 "GlobalReplicationGroupId") in
       make ?showMemberInfo ?marker ?maxRecords ?globalReplicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let showMemberInfo =
-        field_map json "ShowMemberInfo" BooleanOptional.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+        field_map json__ "ShowMemberInfo" BooleanOptional.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let globalReplicationGroupId =
-        field_map json "GlobalReplicationGroupId" String_.of_json in
+        field_map json__ "GlobalReplicationGroupId" String_.of_json in
       make ?showMemberInfo ?marker ?maxRecords ?globalReplicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14234,15 +16713,15 @@ module DescribeEventsMessage =
       make ?marker ?maxRecords ?duration ?endTime ?startTime ?sourceType
         ?sourceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let duration = field_map json "Duration" IntegerOptional.of_json in
-      let endTime = field_map json "EndTime" TStamp.of_json in
-      let startTime = field_map json "StartTime" TStamp.of_json in
-      let sourceType = field_map json "SourceType" SourceType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let duration = field_map json__ "Duration" IntegerOptional.of_json in
+      let endTime = field_map json__ "EndTime" TStamp.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
       let sourceIdentifier =
-        field_map json "SourceIdentifier" String_.of_json in
+        field_map json__ "SourceIdentifier" String_.of_json in
       make ?marker ?maxRecords ?duration ?endTime ?startTime ?sourceType
         ?sourceIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -14324,9 +16803,9 @@ module DescribeEngineDefaultParametersResult =
           (Xml.child xml_arg0 "EngineDefaults") in
       make ?engineDefaults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let engineDefaults =
-        field_map json "EngineDefaults" EngineDefaults.of_json in
+        field_map json__ "EngineDefaults" EngineDefaults.of_json in
       make ?engineDefaults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14337,7 +16816,7 @@ module DescribeEngineDefaultParametersMessage =
       {
       cacheParameterGroupFamily: String_.t
         [@ocaml.doc
-          "The name of the cache parameter group family. Valid values are: memcached1.4 | memcached1.5 | memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.x | redis6.2"];
+          "The name of the cache parameter group family. Valid values are: memcached1.4 | memcached1.5 | memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.x | redis6.2 | redis7"];
       maxRecords: IntegerOptional.t option
         [@ocaml.doc
           "The maximum number of records to include in the response. If more records exist than the specified MaxRecords value, a marker is included in the response so that the remaining results can be retrieved. Default: 100 Constraints: minimum 20; maximum 100."];
@@ -14368,11 +16847,11 @@ module DescribeEngineDefaultParametersMessage =
              "CacheParameterGroupFamily") in
       make ?marker ?maxRecords ~cacheParameterGroupFamily ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let cacheParameterGroupFamily =
-        field_map_exn json "CacheParameterGroupFamily" String_.of_json in
+        field_map_exn json__ "CacheParameterGroupFamily" String_.of_json in
       make ?marker ?maxRecords ~cacheParameterGroupFamily ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14411,11 +16890,11 @@ module DescribeCacheSubnetGroupsMessage =
           (Xml.child xml_arg0 "CacheSubnetGroupName") in
       make ?marker ?maxRecords ?cacheSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let cacheSubnetGroupName =
-        field_map json "CacheSubnetGroupName" String_.of_json in
+        field_map json__ "CacheSubnetGroupName" String_.of_json in
       make ?marker ?maxRecords ?cacheSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14455,11 +16934,11 @@ module DescribeCacheSecurityGroupsMessage =
           (Xml.child xml_arg0 "CacheSecurityGroupName") in
       make ?marker ?maxRecords ?cacheSecurityGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let cacheSecurityGroupName =
-        field_map json "CacheSecurityGroupName" String_.of_json in
+        field_map json__ "CacheSecurityGroupName" String_.of_json in
       make ?marker ?maxRecords ?cacheSecurityGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14507,12 +16986,12 @@ module DescribeCacheParametersMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "CacheParameterGroupName") in
       make ?marker ?maxRecords ?source ~cacheParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let source = field_map json "Source" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let source = field_map json__ "Source" String_.of_json in
       let cacheParameterGroupName =
-        field_map_exn json "CacheParameterGroupName" String_.of_json in
+        field_map_exn json__ "CacheParameterGroupName" String_.of_json in
       make ?marker ?maxRecords ?source ~cacheParameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14552,11 +17031,11 @@ module DescribeCacheParameterGroupsMessage =
           (Xml.child xml_arg0 "CacheParameterGroupName") in
       make ?marker ?maxRecords ?cacheParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let cacheParameterGroupName =
-        field_map json "CacheParameterGroupName" String_.of_json in
+        field_map json__ "CacheParameterGroupName" String_.of_json in
       make ?marker ?maxRecords ?cacheParameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14572,7 +17051,7 @@ module DescribeCacheEngineVersionsMessage =
         [@ocaml.doc "The cache engine version to return. Example: 1.4.14"];
       cacheParameterGroupFamily: String_.t option
         [@ocaml.doc
-          "The name of a specific cache parameter group family to return details for. Valid values are: memcached1.4 | memcached1.5 | memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.x | redis6.2 Constraints: Must be 1 to 255 alphanumeric characters First character must be a letter Cannot end with a hyphen or contain two consecutive hyphens"];
+          "The name of a specific cache parameter group family to return details for. Valid values are: memcached1.4 | memcached1.5 | memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.x | redis6.2 | redis7 | valkey7 Constraints: Must be 1 to 255 alphanumeric characters First character must be a letter Cannot end with a hyphen or contain two consecutive hyphens"];
       maxRecords: IntegerOptional.t option
         [@ocaml.doc
           "The maximum number of records to include in the response. If more records exist than the specified MaxRecords value, a marker is included in the response so that the remaining results can be retrieved. Default: 100 Constraints: minimum 20; maximum 100."];
@@ -14625,14 +17104,14 @@ module DescribeCacheEngineVersionsMessage =
       make ?defaultOnly ?marker ?maxRecords ?cacheParameterGroupFamily
         ?engineVersion ?engine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let defaultOnly = field_map json "DefaultOnly" Boolean.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let defaultOnly = field_map json__ "DefaultOnly" Boolean.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let cacheParameterGroupFamily =
-        field_map json "CacheParameterGroupFamily" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
+        field_map json__ "CacheParameterGroupFamily" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
       make ?defaultOnly ?marker ?maxRecords ?cacheParameterGroupFamily
         ?engineVersion ?engine ()
     let to_json v = composed_to_json to_value v
@@ -14656,7 +17135,7 @@ module DescribeCacheClustersMessage =
           "An optional flag that can be included in the DescribeCacheCluster request to retrieve information about the individual cache nodes."];
       showCacheClustersNotInReplicationGroups: BooleanOptional.t option
         [@ocaml.doc
-          "An optional flag that can be included in the DescribeCacheCluster request to show only nodes (API/CLI: clusters) that are not members of a replication group. In practice, this mean Memcached and single node Redis clusters."]}
+          "An optional flag that can be included in the DescribeCacheCluster request to show only nodes (API/CLI: clusters) that are not members of a replication group. In practice, this means Memcached and single node Valkey or Redis OSS clusters."]}
     let make ?cacheClusterId =
       fun ?maxRecords ->
         fun ?marker ->
@@ -14699,15 +17178,15 @@ module DescribeCacheClustersMessage =
       make ?showCacheClustersNotInReplicationGroups ?showCacheNodeInfo
         ?marker ?maxRecords ?cacheClusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let showCacheClustersNotInReplicationGroups =
-        field_map json "ShowCacheClustersNotInReplicationGroups"
+        field_map json__ "ShowCacheClustersNotInReplicationGroups"
           BooleanOptional.of_json in
       let showCacheNodeInfo =
-        field_map json "ShowCacheNodeInfo" BooleanOptional.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let cacheClusterId = field_map json "CacheClusterId" String_.of_json in
+        field_map json__ "ShowCacheNodeInfo" BooleanOptional.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let cacheClusterId = field_map json__ "CacheClusterId" String_.of_json in
       make ?showCacheClustersNotInReplicationGroups ?showCacheNodeInfo
         ?marker ?maxRecords ?cacheClusterId ()
     let to_json v = composed_to_json to_value v
@@ -14727,12 +17206,12 @@ module DeleteUserMessage =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       make ~userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map_exn json "UserId" UserId.of_json in
+    let of_json json__ =
+      let userId = field_map_exn json__ "UserId" UserId.of_json in
       make ~userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For Redis engine version 6.0 onwards: Deletes a user. The user will be removed from all user groups and in turn removed from all replication groups. For more information, see Using Role Based Access Control (RBAC)."]
+       "For Valkey engine version 7.2 onwards and Redis OSS 6.0 onwards: Deletes a user. The user will be removed from all user groups and in turn removed from all replication groups. For more information, see Using Role Based Access Control (RBAC)."]
 module DeleteUserGroupMessage =
   struct
     type nonrec t =
@@ -14750,12 +17229,12 @@ module DeleteUserGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "UserGroupId") in
       make ~userGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userGroupId = field_map_exn json "UserGroupId" String_.of_json in
+    let of_json json__ =
+      let userGroupId = field_map_exn json__ "UserGroupId" String_.of_json in
       make ~userGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For Redis engine version 6.0 onwards: Deletes a user group. The user group must first be disassociated from the replication group before it can be deleted. For more information, see Using Role Based Access Control (RBAC)."]
+       "For Valkey engine version 7.2 onwards and Redis OSS 6.0 onwards: Deletes a user group. The user group must first be disassociated from the replication group before it can be deleted. For more information, see Using Role Based Access Control (RBAC)."]
 module DeleteSnapshotResult =
   struct
     type deleteSnapshotResult = {
@@ -14841,12 +17320,12 @@ module DeleteSnapshotResult =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an existing snapshot. When you receive a successful response from this operation, ElastiCache immediately begins deleting the snapshot; you cannot cancel or revert this operation. This operation is valid for Redis only."]
+       "Deletes an existing snapshot. When you receive a successful response from this operation, ElastiCache immediately begins deleting the snapshot; you cannot cancel or revert this operation. This operation is valid for Valkey or Redis OSS only."]
 module DeleteSnapshotMessage =
   struct
     type nonrec t =
@@ -14865,11 +17344,328 @@ module DeleteSnapshotMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotName") in
       make ~snapshotName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshotName = field_map_exn json "SnapshotName" String_.of_json in
+    let of_json json__ =
+      let snapshotName = field_map_exn json__ "SnapshotName" String_.of_json in
       make ~snapshotName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a DeleteSnapshot operation."]
+module DeleteServerlessCacheSnapshotResponse =
+  struct
+    type deleteServerlessCacheSnapshotResult =
+      {
+      serverlessCacheSnapshot: ServerlessCacheSnapshot.t option
+        [@ocaml.doc
+          "The snapshot to be deleted. Available for Valkey, Redis OSS and Serverless Memcached only."]}
+    and responseMetaData = unit
+    and t =
+      {
+      deleteServerlessCacheSnapshotResult:
+        deleteServerlessCacheSnapshotResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `InvalidServerlessCacheSnapshotStateFault of
+          InvalidServerlessCacheSnapshotStateFault.t 
+      | `ServerlessCacheSnapshotNotFoundFault of
+          ServerlessCacheSnapshotNotFoundFault.t 
+      | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DeleteServerlessCacheSnapshotResponse"
+    let make ?serverlessCacheSnapshot =
+      fun () ->
+        {
+          deleteServerlessCacheSnapshotResult = { serverlessCacheSnapshot };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "InvalidServerlessCacheSnapshotStateFault" ->
+          `InvalidServerlessCacheSnapshotStateFault
+            (InvalidServerlessCacheSnapshotStateFault.of_json json)
+      | "ServerlessCacheSnapshotNotFoundFault" ->
+          `ServerlessCacheSnapshotNotFoundFault
+            (ServerlessCacheSnapshotNotFoundFault.of_json json)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "InvalidServerlessCacheSnapshotStateFault" ->
+          `InvalidServerlessCacheSnapshotStateFault
+            (InvalidServerlessCacheSnapshotStateFault.of_xml xml)
+      | "ServerlessCacheSnapshotNotFoundFault" ->
+          `ServerlessCacheSnapshotNotFoundFault
+            (ServerlessCacheSnapshotNotFoundFault.of_xml xml)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `InvalidServerlessCacheSnapshotStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidServerlessCacheSnapshotStateFault"));
+            ("details", (InvalidServerlessCacheSnapshotStateFault.to_json e))]
+      | `ServerlessCacheSnapshotNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheSnapshotNotFoundFault"));
+            ("details", (ServerlessCacheSnapshotNotFoundFault.to_json e))]
+      | `ServiceLinkedRoleNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServiceLinkedRoleNotFoundFault"));
+            ("details", (ServiceLinkedRoleNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.deleteServerlessCacheSnapshotResult in
+      structure_to_wrapped_value
+        [("ServerlessCacheSnapshot",
+           (Option.map x.serverlessCacheSnapshot
+              ~f:ServerlessCacheSnapshot.to_value))]
+        ~wrapper:"DeleteServerlessCacheSnapshotResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "DeleteServerlessCacheSnapshotResult" in
+      let serverlessCacheSnapshot =
+        (Option.map ~f:ServerlessCacheSnapshot.of_xml)
+          (Xml.child xml_arg0 "ServerlessCacheSnapshot") in
+      make ?serverlessCacheSnapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverlessCacheSnapshot =
+        field_map json__ "ServerlessCacheSnapshot"
+          ServerlessCacheSnapshot.of_json in
+      make ?serverlessCacheSnapshot ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an existing serverless cache snapshot. Available for Valkey, Redis OSS and Serverless Memcached only."]
+module DeleteServerlessCacheSnapshotRequest =
+  struct
+    type nonrec t =
+      {
+      serverlessCacheSnapshotName: String_.t
+        [@ocaml.doc
+          "Idenfitier of the snapshot to be deleted. Available for Valkey, Redis OSS and Serverless Memcached only."]}
+    let context_ = "DeleteServerlessCacheSnapshotRequest"
+    let make ~serverlessCacheSnapshotName =
+      fun () -> { serverlessCacheSnapshotName }
+    let to_value x =
+      structure_to_value
+        [("ServerlessCacheSnapshotName",
+           (Some (String_.to_value x.serverlessCacheSnapshotName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serverlessCacheSnapshotName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ServerlessCacheSnapshotName") in
+      make ~serverlessCacheSnapshotName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverlessCacheSnapshotName =
+        field_map_exn json__ "ServerlessCacheSnapshotName" String_.of_json in
+      make ~serverlessCacheSnapshotName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an existing serverless cache snapshot. Available for Valkey, Redis OSS and Serverless Memcached only."]
+module DeleteServerlessCacheResponse =
+  struct
+    type deleteServerlessCacheResult =
+      {
+      serverlessCache: ServerlessCache.t option
+        [@ocaml.doc
+          "Provides the details of the specified serverless cache that is about to be deleted."]}
+    and responseMetaData = unit
+    and t =
+      {
+      deleteServerlessCacheResult: deleteServerlessCacheResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidCredentialsException of InvalidCredentialsException.t 
+      | `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `InvalidServerlessCacheStateFault of
+          InvalidServerlessCacheStateFault.t 
+      | `ServerlessCacheNotFoundFault of ServerlessCacheNotFoundFault.t 
+      | `ServerlessCacheSnapshotAlreadyExistsFault of
+          ServerlessCacheSnapshotAlreadyExistsFault.t 
+      | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DeleteServerlessCacheResponse"
+    let make ?serverlessCache =
+      fun () ->
+        {
+          deleteServerlessCacheResult = { serverlessCache };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "InvalidCredentialsException" ->
+          `InvalidCredentialsException
+            (InvalidCredentialsException.of_json json)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "InvalidServerlessCacheStateFault" ->
+          `InvalidServerlessCacheStateFault
+            (InvalidServerlessCacheStateFault.of_json json)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_json json)
+      | "ServerlessCacheSnapshotAlreadyExistsFault" ->
+          `ServerlessCacheSnapshotAlreadyExistsFault
+            (ServerlessCacheSnapshotAlreadyExistsFault.of_json json)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidCredentialsException" ->
+          `InvalidCredentialsException
+            (InvalidCredentialsException.of_xml xml)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "InvalidServerlessCacheStateFault" ->
+          `InvalidServerlessCacheStateFault
+            (InvalidServerlessCacheStateFault.of_xml xml)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_xml xml)
+      | "ServerlessCacheSnapshotAlreadyExistsFault" ->
+          `ServerlessCacheSnapshotAlreadyExistsFault
+            (ServerlessCacheSnapshotAlreadyExistsFault.of_xml xml)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidCredentialsException e ->
+          `Assoc
+            [("error", (`String "InvalidCredentialsException"));
+            ("details", (InvalidCredentialsException.to_json e))]
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `InvalidServerlessCacheStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidServerlessCacheStateFault"));
+            ("details", (InvalidServerlessCacheStateFault.to_json e))]
+      | `ServerlessCacheNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheNotFoundFault"));
+            ("details", (ServerlessCacheNotFoundFault.to_json e))]
+      | `ServerlessCacheSnapshotAlreadyExistsFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheSnapshotAlreadyExistsFault"));
+            ("details",
+              (ServerlessCacheSnapshotAlreadyExistsFault.to_json e))]
+      | `ServiceLinkedRoleNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServiceLinkedRoleNotFoundFault"));
+            ("details", (ServiceLinkedRoleNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.deleteServerlessCacheResult in
+      structure_to_wrapped_value
+        [("ServerlessCache",
+           (Option.map x.serverlessCache ~f:ServerlessCache.to_value))]
+        ~wrapper:"DeleteServerlessCacheResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "DeleteServerlessCacheResult" in
+      let serverlessCache =
+        (Option.map ~f:ServerlessCache.of_xml)
+          (Xml.child xml_arg0 "ServerlessCache") in
+      make ?serverlessCache ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverlessCache =
+        field_map json__ "ServerlessCache" ServerlessCache.of_json in
+      make ?serverlessCache ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a specified existing serverless cache. CreateServerlessCacheSnapshot permission is required to create a final snapshot. Without this permission, the API call will fail with an Access Denied exception."]
+module DeleteServerlessCacheRequest =
+  struct
+    type nonrec t =
+      {
+      serverlessCacheName: String_.t
+        [@ocaml.doc "The identifier of the serverless cache to be deleted."];
+      finalSnapshotName: String_.t option
+        [@ocaml.doc
+          "Name of the final snapshot to be taken before the serverless cache is deleted. Available for Valkey, Redis OSS and Serverless Memcached only. Default: NULL, i.e. a final snapshot is not taken."]}
+    let context_ = "DeleteServerlessCacheRequest"
+    let make ?finalSnapshotName =
+      fun ~serverlessCacheName ->
+        fun () -> { finalSnapshotName; serverlessCacheName }
+    let to_value x =
+      structure_to_value
+        [("ServerlessCacheName",
+           (Some (String_.to_value x.serverlessCacheName)));
+        ("FinalSnapshotName",
+          (Option.map x.finalSnapshotName ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let finalSnapshotName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "FinalSnapshotName") in
+      let serverlessCacheName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServerlessCacheName") in
+      make ?finalSnapshotName ~serverlessCacheName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let finalSnapshotName =
+        field_map json__ "FinalSnapshotName" String_.of_json in
+      let serverlessCacheName =
+        field_map_exn json__ "ServerlessCacheName" String_.of_json in
+      make ?finalSnapshotName ~serverlessCacheName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a specified existing serverless cache. CreateServerlessCacheSnapshot permission is required to create a final snapshot. Without this permission, the API call will fail with an Access Denied exception."]
 module DeleteReplicationGroupResult =
   struct
     type deleteReplicationGroupResult =
@@ -14999,13 +17795,13 @@ module DeleteReplicationGroupResult =
           (Xml.child xml_arg0 "ReplicationGroup") in
       make ?replicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroup =
-        field_map json "ReplicationGroup" ReplicationGroup.of_json in
+        field_map json__ "ReplicationGroup" ReplicationGroup.of_json in
       make ?replicationGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an existing replication group. By default, this operation deletes the entire replication group, including the primary/primaries and all of the read replicas. If the replication group has only one primary, you can optionally delete only the read replicas, while retaining the primary by setting RetainPrimaryCluster=true. When you receive a successful response from this operation, Amazon ElastiCache immediately begins deleting the selected resources; you cannot cancel or revert this operation. This operation is valid for Redis only."]
+       "Deletes an existing replication group. By default, this operation deletes the entire replication group, including the primary/primaries and all of the read replicas. If the replication group has only one primary, you can optionally delete only the read replicas, while retaining the primary by setting RetainPrimaryCluster=true. When you receive a successful response from this operation, Amazon ElastiCache immediately begins deleting the selected resources; you cannot cancel or revert this operation. CreateSnapshot permission is required to create a final snapshot. Without this permission, the API call will fail with an Access Denied exception. This operation is valid for Redis OSS only."]
 module DeleteReplicationGroupMessage =
   struct
     type nonrec t =
@@ -15051,13 +17847,13 @@ module DeleteReplicationGroupMessage =
       make ?finalSnapshotIdentifier ?retainPrimaryCluster ~replicationGroupId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let finalSnapshotIdentifier =
-        field_map json "FinalSnapshotIdentifier" String_.of_json in
+        field_map json__ "FinalSnapshotIdentifier" String_.of_json in
       let retainPrimaryCluster =
-        field_map json "RetainPrimaryCluster" BooleanOptional.of_json in
+        field_map json__ "RetainPrimaryCluster" BooleanOptional.of_json in
       let replicationGroupId =
-        field_map_exn json "ReplicationGroupId" String_.of_json in
+        field_map_exn json__ "ReplicationGroupId" String_.of_json in
       make ?finalSnapshotIdentifier ?retainPrimaryCluster ~replicationGroupId
         ()
     let to_json v = composed_to_json to_value v
@@ -15152,9 +17948,9 @@ module DeleteGlobalReplicationGroupResult =
           (Xml.child xml_arg0 "GlobalReplicationGroup") in
       make ?globalReplicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalReplicationGroup =
-        field_map json "GlobalReplicationGroup"
+        field_map json__ "GlobalReplicationGroup"
           GlobalReplicationGroup.of_json in
       make ?globalReplicationGroup ()
     let to_json v = composed_to_json to_value v
@@ -15191,11 +17987,11 @@ module DeleteGlobalReplicationGroupMessage =
              "GlobalReplicationGroupId") in
       make ~retainPrimaryReplicationGroup ~globalReplicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retainPrimaryReplicationGroup =
-        field_map_exn json "RetainPrimaryReplicationGroup" Boolean.of_json in
+        field_map_exn json__ "RetainPrimaryReplicationGroup" Boolean.of_json in
       let globalReplicationGroupId =
-        field_map_exn json "GlobalReplicationGroupId" String_.of_json in
+        field_map_exn json__ "GlobalReplicationGroupId" String_.of_json in
       make ~retainPrimaryReplicationGroup ~globalReplicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15220,9 +18016,9 @@ module DeleteCacheSubnetGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "CacheSubnetGroupName") in
       make ~cacheSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheSubnetGroupName =
-        field_map_exn json "CacheSubnetGroupName" String_.of_json in
+        field_map_exn json__ "CacheSubnetGroupName" String_.of_json in
       make ~cacheSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15247,9 +18043,9 @@ module DeleteCacheSecurityGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "CacheSecurityGroupName") in
       make ~cacheSecurityGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheSecurityGroupName =
-        field_map_exn json "CacheSecurityGroupName" String_.of_json in
+        field_map_exn json__ "CacheSecurityGroupName" String_.of_json in
       make ~cacheSecurityGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15274,9 +18070,9 @@ module DeleteCacheParameterGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "CacheParameterGroupName") in
       make ~cacheParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheParameterGroupName =
-        field_map_exn json "CacheParameterGroupName" String_.of_json in
+        field_map_exn json__ "CacheParameterGroupName" String_.of_json in
       make ~cacheParameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15403,12 +18199,12 @@ module DeleteCacheClusterResult =
           (Xml.child xml_arg0 "CacheCluster") in
       make ?cacheCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cacheCluster = field_map json "CacheCluster" CacheCluster.of_json in
+    let of_json json__ =
+      let cacheCluster = field_map json__ "CacheCluster" CacheCluster.of_json in
       make ?cacheCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a previously provisioned cluster. DeleteCacheCluster deletes all associated cache nodes, node endpoints and the cluster itself. When you receive a successful response from this operation, Amazon ElastiCache immediately begins deleting the cluster; you cannot cancel or revert this operation. This operation is not valid for: Redis (cluster mode enabled) clusters Redis (cluster mode disabled) clusters A cluster that is the last read replica of a replication group A cluster that is the primary node of a replication group A node group (shard) that has Multi-AZ mode enabled A cluster from a Redis (cluster mode enabled) replication group A cluster that is not in the available state"]
+       "Deletes a previously provisioned cluster. DeleteCacheCluster deletes all associated cache nodes, node endpoints and the cluster itself. When you receive a successful response from this operation, Amazon ElastiCache immediately begins deleting the cluster; you cannot cancel or revert this operation. This operation is not valid for: Valkey or Redis OSS (cluster mode enabled) clusters Valkey or Redis OSS (cluster mode disabled) clusters A cluster that is the last read replica of a replication group A cluster that is the primary node of a replication group A node group (shard) that has Multi-AZ mode enabled A cluster from a Valkey or Redis OSS (cluster mode enabled) replication group A cluster that is not in the available state"]
 module DeleteCacheClusterMessage =
   struct
     type nonrec t =
@@ -15438,11 +18234,11 @@ module DeleteCacheClusterMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "CacheClusterId") in
       make ?finalSnapshotIdentifier ~cacheClusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let finalSnapshotIdentifier =
-        field_map json "FinalSnapshotIdentifier" String_.of_json in
+        field_map json__ "FinalSnapshotIdentifier" String_.of_json in
       let cacheClusterId =
-        field_map_exn json "CacheClusterId" String_.of_json in
+        field_map_exn json__ "CacheClusterId" String_.of_json in
       make ?finalSnapshotIdentifier ~cacheClusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a DeleteCacheCluster operation."]
@@ -15634,13 +18430,13 @@ module DecreaseReplicaCountResult =
           (Xml.child xml_arg0 "ReplicationGroup") in
       make ?replicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroup =
-        field_map json "ReplicationGroup" ReplicationGroup.of_json in
+        field_map json__ "ReplicationGroup" ReplicationGroup.of_json in
       make ?replicationGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Dynamically decreases the number of replicas in a Redis (cluster mode disabled) replication group or the number of replica nodes in one or more node groups (shards) of a Redis (cluster mode enabled) replication group. This operation is performed with no cluster down time."]
+       "Dynamically decreases the number of replicas in a Valkey or Redis OSS (cluster mode disabled) replication group or the number of replica nodes in one or more node groups (shards) of a Valkey or Redis OSS (cluster mode enabled) replication group. This operation is performed with no cluster down time."]
 module DecreaseReplicaCountMessage =
   struct
     type nonrec t =
@@ -15650,10 +18446,10 @@ module DecreaseReplicaCountMessage =
           "The id of the replication group from which you want to remove replica nodes."];
       newReplicaCount: IntegerOptional.t option
         [@ocaml.doc
-          "The number of read replica nodes you want at the completion of this operation. For Redis (cluster mode disabled) replication groups, this is the number of replica nodes in the replication group. For Redis (cluster mode enabled) replication groups, this is the number of replica nodes in each of the replication group's node groups. The minimum number of replicas in a shard or replication group is: Redis (cluster mode disabled) If Multi-AZ is enabled: 1 If Multi-AZ is not enabled: 0 Redis (cluster mode enabled): 0 (though you will not be able to failover to a replica if your primary node fails)"];
+          "The number of read replica nodes you want at the completion of this operation. For Valkey or Redis OSS (cluster mode disabled) replication groups, this is the number of replica nodes in the replication group. For Valkey or Redis OSS (cluster mode enabled) replication groups, this is the number of replica nodes in each of the replication group's node groups. The minimum number of replicas in a shard or replication group is: Valkey or Redis OSS (cluster mode disabled) If Multi-AZ is enabled: 1 If Multi-AZ is not enabled: 0 Valkey or Redis OSS (cluster mode enabled): 0 (though you will not be able to failover to a replica if your primary node fails)"];
       replicaConfiguration: ReplicaConfigurationList.t option
         [@ocaml.doc
-          "A list of ConfigureShard objects that can be used to configure each shard in a Redis (cluster mode enabled) replication group. The ConfigureShard has three members: NewReplicaCount, NodeGroupId, and PreferredAvailabilityZones."];
+          "A list of ConfigureShard objects that can be used to configure each shard in a Valkey or Redis OSS replication group. The ConfigureShard has three members: NewReplicaCount, NodeGroupId, and PreferredAvailabilityZones."];
       replicasToRemove: RemoveReplicasList.t option
         [@ocaml.doc
           "A list of the node ids to remove from the replication group or node group (shard)."];
@@ -15706,23 +18502,23 @@ module DecreaseReplicaCountMessage =
       make ~applyImmediately ?replicasToRemove ?replicaConfiguration
         ?newReplicaCount ~replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applyImmediately =
-        field_map_exn json "ApplyImmediately" Boolean.of_json in
+        field_map_exn json__ "ApplyImmediately" Boolean.of_json in
       let replicasToRemove =
-        field_map json "ReplicasToRemove" RemoveReplicasList.of_json in
+        field_map json__ "ReplicasToRemove" RemoveReplicasList.of_json in
       let replicaConfiguration =
-        field_map json "ReplicaConfiguration"
+        field_map json__ "ReplicaConfiguration"
           ReplicaConfigurationList.of_json in
       let newReplicaCount =
-        field_map json "NewReplicaCount" IntegerOptional.of_json in
+        field_map json__ "NewReplicaCount" IntegerOptional.of_json in
       let replicationGroupId =
-        field_map_exn json "ReplicationGroupId" String_.of_json in
+        field_map_exn json__ "ReplicationGroupId" String_.of_json in
       make ~applyImmediately ?replicasToRemove ?replicaConfiguration
         ?newReplicaCount ~replicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Dynamically decreases the number of replicas in a Redis (cluster mode disabled) replication group or the number of replica nodes in one or more node groups (shards) of a Redis (cluster mode enabled) replication group. This operation is performed with no cluster down time."]
+       "Dynamically decreases the number of replicas in a Valkey or Redis OSS (cluster mode disabled) replication group or the number of replica nodes in one or more node groups (shards) of a Valkey or Redis OSS (cluster mode enabled) replication group. This operation is performed with no cluster down time."]
 module DecreaseNodeGroupsInGlobalReplicationGroupResult =
   struct
     type decreaseNodeGroupsInGlobalReplicationGroupResult =
@@ -15826,9 +18622,9 @@ module DecreaseNodeGroupsInGlobalReplicationGroupResult =
           (Xml.child xml_arg0 "GlobalReplicationGroup") in
       make ?globalReplicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalReplicationGroup =
-        field_map json "GlobalReplicationGroup"
+        field_map json__ "GlobalReplicationGroup"
           GlobalReplicationGroup.of_json in
       make ?globalReplicationGroup ()
     let to_json v = composed_to_json to_value v
@@ -15845,10 +18641,10 @@ module DecreaseNodeGroupsInGlobalReplicationGroupMessage =
           "The number of node groups (shards) that results from the modification of the shard configuration"];
       globalNodeGroupsToRemove: GlobalNodeGroupIdList.t option
         [@ocaml.doc
-          "If the value of NodeGroupCount is less than the current number of node groups (shards), then either NodeGroupsToRemove or NodeGroupsToRetain is required. GlobalNodeGroupsToRemove is a list of NodeGroupIds to remove from the cluster. ElastiCache for Redis will attempt to remove all node groups listed by GlobalNodeGroupsToRemove from the cluster."];
+          "If the value of NodeGroupCount is less than the current number of node groups (shards), then either NodeGroupsToRemove or NodeGroupsToRetain is required. GlobalNodeGroupsToRemove is a list of NodeGroupIds to remove from the cluster. ElastiCache will attempt to remove all node groups listed by GlobalNodeGroupsToRemove from the cluster."];
       globalNodeGroupsToRetain: GlobalNodeGroupIdList.t option
         [@ocaml.doc
-          "If the value of NodeGroupCount is less than the current number of node groups (shards), then either NodeGroupsToRemove or NodeGroupsToRetain is required. GlobalNodeGroupsToRetain is a list of NodeGroupIds to retain from the cluster. ElastiCache for Redis will attempt to retain all node groups listed by GlobalNodeGroupsToRetain from the cluster."];
+          "If the value of NodeGroupCount is less than the current number of node groups (shards), then either NodeGroupsToRemove or NodeGroupsToRetain is required. GlobalNodeGroupsToRetain is a list of NodeGroupIds to retain from the cluster. ElastiCache will attempt to retain all node groups listed by GlobalNodeGroupsToRetain from the cluster."];
       applyImmediately: Boolean.t
         [@ocaml.doc
           "Indicates that the shard reconfiguration process begins immediately. At present, the only permitted value for this parameter is true."]}
@@ -15900,19 +18696,19 @@ module DecreaseNodeGroupsInGlobalReplicationGroupMessage =
         ?globalNodeGroupsToRemove ~nodeGroupCount ~globalReplicationGroupId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applyImmediately =
-        field_map_exn json "ApplyImmediately" Boolean.of_json in
+        field_map_exn json__ "ApplyImmediately" Boolean.of_json in
       let globalNodeGroupsToRetain =
-        field_map json "GlobalNodeGroupsToRetain"
+        field_map json__ "GlobalNodeGroupsToRetain"
           GlobalNodeGroupIdList.of_json in
       let globalNodeGroupsToRemove =
-        field_map json "GlobalNodeGroupsToRemove"
+        field_map json__ "GlobalNodeGroupsToRemove"
           GlobalNodeGroupIdList.of_json in
       let nodeGroupCount =
-        field_map_exn json "NodeGroupCount" Integer.of_json in
+        field_map_exn json__ "NodeGroupCount" Integer.of_json in
       let globalReplicationGroupId =
-        field_map_exn json "GlobalReplicationGroupId" String_.of_json in
+        field_map_exn json__ "GlobalReplicationGroupId" String_.of_json in
       make ~applyImmediately ?globalNodeGroupsToRetain
         ?globalNodeGroupsToRemove ~nodeGroupCount ~globalReplicationGroupId
         ()
@@ -15923,10 +18719,11 @@ module CreateUserMessage =
   struct
     type nonrec t =
       {
-      userId: UserId.t [@ocaml.doc "The ID of the user."];
+      userId: UserId.t
+        [@ocaml.doc
+          "The ID of the user. This value is stored as a lowercase string."];
       userName: UserName.t [@ocaml.doc "The username of the user."];
-      engine: EngineType.t
-        [@ocaml.doc "The current supported value is Redis."];
+      engine: EngineType.t [@ocaml.doc "The options are valkey or redis."];
       passwords: PasswordListInput.t option
         [@ocaml.doc
           "Passwords used for this user. You can create up to two passwords for each user."];
@@ -15936,25 +18733,29 @@ module CreateUserMessage =
         [@ocaml.doc "Indicates a password is not required for this user."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of tags to be added to this resource. A tag is a key-value pair. A tag key must be accompanied by a tag value, although null is accepted."]}
+          "A list of tags to be added to this resource. A tag is a key-value pair. A tag key must be accompanied by a tag value, although null is accepted."];
+      authenticationMode: AuthenticationMode.t option
+        [@ocaml.doc "Specifies how to authenticate the user."]}
     let context_ = "CreateUserMessage"
     let make ?passwords =
       fun ?noPasswordRequired ->
         fun ?tags ->
-          fun ~userId ->
-            fun ~userName ->
-              fun ~engine ->
-                fun ~accessString ->
-                  fun () ->
-                    {
-                      passwords;
-                      noPasswordRequired;
-                      tags;
-                      userId;
-                      userName;
-                      engine;
-                      accessString
-                    }
+          fun ?authenticationMode ->
+            fun ~userId ->
+              fun ~userName ->
+                fun ~engine ->
+                  fun ~accessString ->
+                    fun () ->
+                      {
+                        passwords;
+                        noPasswordRequired;
+                        tags;
+                        authenticationMode;
+                        userId;
+                        userName;
+                        engine;
+                        accessString
+                      }
     let to_value x =
       structure_to_value
         [("UserId", (Some (UserId.to_value x.userId)));
@@ -15964,9 +18765,14 @@ module CreateUserMessage =
         ("AccessString", (Some (AccessString.to_value x.accessString)));
         ("NoPasswordRequired",
           (Option.map x.noPasswordRequired ~f:BooleanOptional.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("AuthenticationMode",
+          (Option.map x.authenticationMode ~f:AuthenticationMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let authenticationMode =
+        (Option.map ~f:AuthenticationMode.of_xml)
+          (Xml.child xml_arg0 "AuthenticationMode") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let noPasswordRequired =
         (Option.map ~f:BooleanOptional.of_xml)
@@ -15983,36 +18789,41 @@ module CreateUserMessage =
         UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
       let userId =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
-      make ?tags ?noPasswordRequired ~accessString ?passwords ~engine
-        ~userName ~userId ()
+      make ?authenticationMode ?tags ?noPasswordRequired ~accessString
+        ?passwords ~engine ~userName ~userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let authenticationMode =
+        field_map json__ "AuthenticationMode" AuthenticationMode.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let noPasswordRequired =
-        field_map json "NoPasswordRequired" BooleanOptional.of_json in
+        field_map json__ "NoPasswordRequired" BooleanOptional.of_json in
       let accessString =
-        field_map_exn json "AccessString" AccessString.of_json in
-      let passwords = field_map json "Passwords" PasswordListInput.of_json in
-      let engine = field_map_exn json "Engine" EngineType.of_json in
-      let userName = field_map_exn json "UserName" UserName.of_json in
-      let userId = field_map_exn json "UserId" UserId.of_json in
-      make ?tags ?noPasswordRequired ~accessString ?passwords ~engine
-        ~userName ~userId ()
+        field_map_exn json__ "AccessString" AccessString.of_json in
+      let passwords = field_map json__ "Passwords" PasswordListInput.of_json in
+      let engine = field_map_exn json__ "Engine" EngineType.of_json in
+      let userName = field_map_exn json__ "UserName" UserName.of_json in
+      let userId = field_map_exn json__ "UserId" UserId.of_json in
+      make ?authenticationMode ?tags ?noPasswordRequired ~accessString
+        ?passwords ~engine ~userName ~userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For Redis engine version 6.0 onwards: Creates a Redis user. For more information, see Using Role Based Access Control (RBAC)."]
+       "For Valkey engine version 7.2 onwards and Redis OSS 6.0 to 7.1: Creates a user. For more information, see Using Role Based Access Control (RBAC)."]
 module CreateUserGroupMessage =
   struct
     type nonrec t =
       {
-      userGroupId: String_.t [@ocaml.doc "The ID of the user group."];
+      userGroupId: String_.t
+        [@ocaml.doc
+          "The ID of the user group. This value is stored as a lowercase string."];
       engine: EngineType.t
-        [@ocaml.doc "The current supported value is Redis."];
+        [@ocaml.doc
+          "Sets the engine listed in a user group. The options are valkey or redis."];
       userIds: UserIdListInput.t option
         [@ocaml.doc "The list of user IDs that belong to the user group."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of tags to be added to this resource. A tag is a key-value pair. A tag key must be accompanied by a tag value, although null is accepted."]}
+          "A list of tags to be added to this resource. A tag is a key-value pair. A tag key must be accompanied by a tag value, although null is accepted. Available for Valkey and Redis OSS only."]}
     let context_ = "CreateUserGroupMessage"
     let make ?userIds =
       fun ?tags ->
@@ -16036,15 +18847,15 @@ module CreateUserGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "UserGroupId") in
       make ?tags ?userIds ~engine ~userGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let userIds = field_map json "UserIds" UserIdListInput.of_json in
-      let engine = field_map_exn json "Engine" EngineType.of_json in
-      let userGroupId = field_map_exn json "UserGroupId" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let userIds = field_map json__ "UserIds" UserIdListInput.of_json in
+      let engine = field_map_exn json__ "Engine" EngineType.of_json in
+      let userGroupId = field_map_exn json__ "UserGroupId" String_.of_json in
       make ?tags ?userIds ~engine ~userGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For Redis engine version 6.0 onwards: Creates a Redis user group. For more information, see Using Role Based Access Control (RBAC)"]
+       "For Valkey engine version 7.2 onwards and Redis OSS 6.0 to 7.1: Creates a user group. For more information, see Using Role Based Access Control (RBAC)"]
 module CreateSnapshotResult =
   struct
     type createSnapshotResult = {
@@ -16197,12 +19008,12 @@ module CreateSnapshotResult =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a copy of an entire cluster or replication group at a specific moment in time. This operation is valid for Redis only."]
+       "Creates a copy of an entire cluster or replication group at a specific moment in time. This operation is valid for Valkey or Redis OSS only."]
 module CreateSnapshotMessage =
   struct
     type nonrec t =
@@ -16214,7 +19025,8 @@ module CreateSnapshotMessage =
         [@ocaml.doc
           "The identifier of an existing cluster. The snapshot is created from this cluster."];
       snapshotName: String_.t
-        [@ocaml.doc "A name for the snapshot being created."];
+        [@ocaml.doc
+          "A name for the snapshot being created. This value is stored as a lowercase string."];
       kmsKeyId: String_.t option
         [@ocaml.doc "The ID of the KMS key used to encrypt the snapshot."];
       tags: TagList.t option
@@ -16258,17 +19070,591 @@ module CreateSnapshotMessage =
       make ?tags ?kmsKeyId ~snapshotName ?cacheClusterId ?replicationGroupId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let snapshotName = field_map_exn json "SnapshotName" String_.of_json in
-      let cacheClusterId = field_map json "CacheClusterId" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let snapshotName = field_map_exn json__ "SnapshotName" String_.of_json in
+      let cacheClusterId = field_map json__ "CacheClusterId" String_.of_json in
       let replicationGroupId =
-        field_map json "ReplicationGroupId" String_.of_json in
+        field_map json__ "ReplicationGroupId" String_.of_json in
       make ?tags ?kmsKeyId ~snapshotName ?cacheClusterId ?replicationGroupId
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a CreateSnapshot operation."]
+module CreateServerlessCacheSnapshotResponse =
+  struct
+    type createServerlessCacheSnapshotResult =
+      {
+      serverlessCacheSnapshot: ServerlessCacheSnapshot.t option
+        [@ocaml.doc
+          "The state of a serverless cache snapshot at a specific point in time, to the millisecond. Available for Valkey, Redis OSS and Serverless Memcached only."]}
+    and responseMetaData = unit
+    and t =
+      {
+      createServerlessCacheSnapshotResult:
+        createServerlessCacheSnapshotResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `InvalidServerlessCacheStateFault of
+          InvalidServerlessCacheStateFault.t 
+      | `ServerlessCacheNotFoundFault of ServerlessCacheNotFoundFault.t 
+      | `ServerlessCacheSnapshotAlreadyExistsFault of
+          ServerlessCacheSnapshotAlreadyExistsFault.t 
+      | `ServerlessCacheSnapshotQuotaExceededFault of
+          ServerlessCacheSnapshotQuotaExceededFault.t 
+      | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
+      | `TagQuotaPerResourceExceeded of TagQuotaPerResourceExceeded.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "CreateServerlessCacheSnapshotResponse"
+    let make ?serverlessCacheSnapshot =
+      fun () ->
+        {
+          createServerlessCacheSnapshotResult = { serverlessCacheSnapshot };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "InvalidServerlessCacheStateFault" ->
+          `InvalidServerlessCacheStateFault
+            (InvalidServerlessCacheStateFault.of_json json)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_json json)
+      | "ServerlessCacheSnapshotAlreadyExistsFault" ->
+          `ServerlessCacheSnapshotAlreadyExistsFault
+            (ServerlessCacheSnapshotAlreadyExistsFault.of_json json)
+      | "ServerlessCacheSnapshotQuotaExceededFault" ->
+          `ServerlessCacheSnapshotQuotaExceededFault
+            (ServerlessCacheSnapshotQuotaExceededFault.of_json json)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_json json)
+      | "TagQuotaPerResourceExceeded" ->
+          `TagQuotaPerResourceExceeded
+            (TagQuotaPerResourceExceeded.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "InvalidServerlessCacheStateFault" ->
+          `InvalidServerlessCacheStateFault
+            (InvalidServerlessCacheStateFault.of_xml xml)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_xml xml)
+      | "ServerlessCacheSnapshotAlreadyExistsFault" ->
+          `ServerlessCacheSnapshotAlreadyExistsFault
+            (ServerlessCacheSnapshotAlreadyExistsFault.of_xml xml)
+      | "ServerlessCacheSnapshotQuotaExceededFault" ->
+          `ServerlessCacheSnapshotQuotaExceededFault
+            (ServerlessCacheSnapshotQuotaExceededFault.of_xml xml)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_xml xml)
+      | "TagQuotaPerResourceExceeded" ->
+          `TagQuotaPerResourceExceeded
+            (TagQuotaPerResourceExceeded.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `InvalidServerlessCacheStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidServerlessCacheStateFault"));
+            ("details", (InvalidServerlessCacheStateFault.to_json e))]
+      | `ServerlessCacheNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheNotFoundFault"));
+            ("details", (ServerlessCacheNotFoundFault.to_json e))]
+      | `ServerlessCacheSnapshotAlreadyExistsFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheSnapshotAlreadyExistsFault"));
+            ("details",
+              (ServerlessCacheSnapshotAlreadyExistsFault.to_json e))]
+      | `ServerlessCacheSnapshotQuotaExceededFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheSnapshotQuotaExceededFault"));
+            ("details",
+              (ServerlessCacheSnapshotQuotaExceededFault.to_json e))]
+      | `ServiceLinkedRoleNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServiceLinkedRoleNotFoundFault"));
+            ("details", (ServiceLinkedRoleNotFoundFault.to_json e))]
+      | `TagQuotaPerResourceExceeded e ->
+          `Assoc
+            [("error", (`String "TagQuotaPerResourceExceeded"));
+            ("details", (TagQuotaPerResourceExceeded.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.createServerlessCacheSnapshotResult in
+      structure_to_wrapped_value
+        [("ServerlessCacheSnapshot",
+           (Option.map x.serverlessCacheSnapshot
+              ~f:ServerlessCacheSnapshot.to_value))]
+        ~wrapper:"CreateServerlessCacheSnapshotResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "CreateServerlessCacheSnapshotResult" in
+      let serverlessCacheSnapshot =
+        (Option.map ~f:ServerlessCacheSnapshot.of_xml)
+          (Xml.child xml_arg0 "ServerlessCacheSnapshot") in
+      make ?serverlessCacheSnapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverlessCacheSnapshot =
+        field_map json__ "ServerlessCacheSnapshot"
+          ServerlessCacheSnapshot.of_json in
+      make ?serverlessCacheSnapshot ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This API creates a copy of an entire ServerlessCache at a specific moment in time. Available for Valkey, Redis OSS and Serverless Memcached only."]
+module CreateServerlessCacheSnapshotRequest =
+  struct
+    type nonrec t =
+      {
+      serverlessCacheSnapshotName: String_.t
+        [@ocaml.doc
+          "The name for the snapshot being created. Must be unique for the customer account. Available for Valkey, Redis OSS and Serverless Memcached only. Must be between 1 and 255 characters. This value is stored as a lowercase string."];
+      serverlessCacheName: String_.t
+        [@ocaml.doc
+          "The name of an existing serverless cache. The snapshot is created from this cache. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      kmsKeyId: String_.t option
+        [@ocaml.doc
+          "The ID of the KMS key used to encrypt the snapshot. Available for Valkey, Redis OSS and Serverless Memcached only. Default: NULL"];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of tags to be added to the snapshot resource. A tag is a key-value pair. Available for Valkey, Redis OSS and Serverless Memcached only."]}
+    let context_ = "CreateServerlessCacheSnapshotRequest"
+    let make ?kmsKeyId =
+      fun ?tags ->
+        fun ~serverlessCacheSnapshotName ->
+          fun ~serverlessCacheName ->
+            fun () ->
+              {
+                kmsKeyId;
+                tags;
+                serverlessCacheSnapshotName;
+                serverlessCacheName
+              }
+    let to_value x =
+      structure_to_value
+        [("ServerlessCacheSnapshotName",
+           (Some (String_.to_value x.serverlessCacheSnapshotName)));
+        ("ServerlessCacheName",
+          (Some (String_.to_value x.serverlessCacheName)));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:String_.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let kmsKeyId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let serverlessCacheName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServerlessCacheName") in
+      let serverlessCacheSnapshotName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ServerlessCacheSnapshotName") in
+      make ?tags ?kmsKeyId ~serverlessCacheName ~serverlessCacheSnapshotName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let serverlessCacheName =
+        field_map_exn json__ "ServerlessCacheName" String_.of_json in
+      let serverlessCacheSnapshotName =
+        field_map_exn json__ "ServerlessCacheSnapshotName" String_.of_json in
+      make ?tags ?kmsKeyId ~serverlessCacheName ~serverlessCacheSnapshotName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This API creates a copy of an entire ServerlessCache at a specific moment in time. Available for Valkey, Redis OSS and Serverless Memcached only."]
+module CreateServerlessCacheResponse =
+  struct
+    type createServerlessCacheResult =
+      {
+      serverlessCache: ServerlessCache.t option
+        [@ocaml.doc
+          "The response for the attempt to create the serverless cache."]}
+    and responseMetaData = unit
+    and t =
+      {
+      createServerlessCacheResult: createServerlessCacheResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidCredentialsException of InvalidCredentialsException.t 
+      | `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `InvalidServerlessCacheStateFault of
+          InvalidServerlessCacheStateFault.t 
+      | `InvalidUserGroupStateFault of InvalidUserGroupStateFault.t 
+      | `ServerlessCacheAlreadyExistsFault of
+          ServerlessCacheAlreadyExistsFault.t 
+      | `ServerlessCacheNotFoundFault of ServerlessCacheNotFoundFault.t 
+      | `ServerlessCacheQuotaForCustomerExceededFault of
+          ServerlessCacheQuotaForCustomerExceededFault.t 
+      | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
+      | `TagQuotaPerResourceExceeded of TagQuotaPerResourceExceeded.t 
+      | `UserGroupNotFoundFault of UserGroupNotFoundFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "CreateServerlessCacheResponse"
+    let make ?serverlessCache =
+      fun () ->
+        {
+          createServerlessCacheResult = { serverlessCache };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "InvalidCredentialsException" ->
+          `InvalidCredentialsException
+            (InvalidCredentialsException.of_json json)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "InvalidServerlessCacheStateFault" ->
+          `InvalidServerlessCacheStateFault
+            (InvalidServerlessCacheStateFault.of_json json)
+      | "InvalidUserGroupStateFault" ->
+          `InvalidUserGroupStateFault
+            (InvalidUserGroupStateFault.of_json json)
+      | "ServerlessCacheAlreadyExistsFault" ->
+          `ServerlessCacheAlreadyExistsFault
+            (ServerlessCacheAlreadyExistsFault.of_json json)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_json json)
+      | "ServerlessCacheQuotaForCustomerExceededFault" ->
+          `ServerlessCacheQuotaForCustomerExceededFault
+            (ServerlessCacheQuotaForCustomerExceededFault.of_json json)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_json json)
+      | "TagQuotaPerResourceExceeded" ->
+          `TagQuotaPerResourceExceeded
+            (TagQuotaPerResourceExceeded.of_json json)
+      | "UserGroupNotFoundFault" ->
+          `UserGroupNotFoundFault (UserGroupNotFoundFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidCredentialsException" ->
+          `InvalidCredentialsException
+            (InvalidCredentialsException.of_xml xml)
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "InvalidServerlessCacheStateFault" ->
+          `InvalidServerlessCacheStateFault
+            (InvalidServerlessCacheStateFault.of_xml xml)
+      | "InvalidUserGroupStateFault" ->
+          `InvalidUserGroupStateFault (InvalidUserGroupStateFault.of_xml xml)
+      | "ServerlessCacheAlreadyExistsFault" ->
+          `ServerlessCacheAlreadyExistsFault
+            (ServerlessCacheAlreadyExistsFault.of_xml xml)
+      | "ServerlessCacheNotFoundFault" ->
+          `ServerlessCacheNotFoundFault
+            (ServerlessCacheNotFoundFault.of_xml xml)
+      | "ServerlessCacheQuotaForCustomerExceededFault" ->
+          `ServerlessCacheQuotaForCustomerExceededFault
+            (ServerlessCacheQuotaForCustomerExceededFault.of_xml xml)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_xml xml)
+      | "TagQuotaPerResourceExceeded" ->
+          `TagQuotaPerResourceExceeded
+            (TagQuotaPerResourceExceeded.of_xml xml)
+      | "UserGroupNotFoundFault" ->
+          `UserGroupNotFoundFault (UserGroupNotFoundFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidCredentialsException e ->
+          `Assoc
+            [("error", (`String "InvalidCredentialsException"));
+            ("details", (InvalidCredentialsException.to_json e))]
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `InvalidServerlessCacheStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidServerlessCacheStateFault"));
+            ("details", (InvalidServerlessCacheStateFault.to_json e))]
+      | `InvalidUserGroupStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidUserGroupStateFault"));
+            ("details", (InvalidUserGroupStateFault.to_json e))]
+      | `ServerlessCacheAlreadyExistsFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheAlreadyExistsFault"));
+            ("details", (ServerlessCacheAlreadyExistsFault.to_json e))]
+      | `ServerlessCacheNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheNotFoundFault"));
+            ("details", (ServerlessCacheNotFoundFault.to_json e))]
+      | `ServerlessCacheQuotaForCustomerExceededFault e ->
+          `Assoc
+            [("error",
+               (`String "ServerlessCacheQuotaForCustomerExceededFault"));
+            ("details",
+              (ServerlessCacheQuotaForCustomerExceededFault.to_json e))]
+      | `ServiceLinkedRoleNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServiceLinkedRoleNotFoundFault"));
+            ("details", (ServiceLinkedRoleNotFoundFault.to_json e))]
+      | `TagQuotaPerResourceExceeded e ->
+          `Assoc
+            [("error", (`String "TagQuotaPerResourceExceeded"));
+            ("details", (TagQuotaPerResourceExceeded.to_json e))]
+      | `UserGroupNotFoundFault e ->
+          `Assoc
+            [("error", (`String "UserGroupNotFoundFault"));
+            ("details", (UserGroupNotFoundFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.createServerlessCacheResult in
+      structure_to_wrapped_value
+        [("ServerlessCache",
+           (Option.map x.serverlessCache ~f:ServerlessCache.to_value))]
+        ~wrapper:"CreateServerlessCacheResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "CreateServerlessCacheResult" in
+      let serverlessCache =
+        (Option.map ~f:ServerlessCache.of_xml)
+          (Xml.child xml_arg0 "ServerlessCache") in
+      make ?serverlessCache ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverlessCache =
+        field_map json__ "ServerlessCache" ServerlessCache.of_json in
+      make ?serverlessCache ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a serverless cache."]
+module CreateServerlessCacheRequest =
+  struct
+    type nonrec t =
+      {
+      serverlessCacheName: String_.t
+        [@ocaml.doc
+          "User-provided identifier for the serverless cache. This parameter is stored as a lowercase string."];
+      description: String_.t option
+        [@ocaml.doc
+          "User-provided description for the serverless cache. The default is NULL, i.e. if no description is provided then an empty string will be returned. The maximum length is 255 characters."];
+      engine: String_.t
+        [@ocaml.doc
+          "The name of the cache engine to be used for creating the serverless cache."];
+      majorEngineVersion: String_.t option
+        [@ocaml.doc
+          "The version of the cache engine that will be used to create the serverless cache."];
+      cacheUsageLimits: CacheUsageLimits.t option
+        [@ocaml.doc
+          "Sets the cache usage limits for storage and ElastiCache Processing Units for the cache."];
+      kmsKeyId: String_.t option
+        [@ocaml.doc
+          "ARN of the customer managed key for encrypting the data at rest. If no KMS key is provided, a default service key is used."];
+      securityGroupIds: SecurityGroupIdsList.t option
+        [@ocaml.doc
+          "A list of the one or more VPC security groups to be associated with the serverless cache. The security group will authorize traffic access for the VPC end-point (private-link). If no other information is given this will be the VPC\226\128\153s Default Security Group that is associated with the cluster VPC end-point."];
+      snapshotArnsToRestore: SnapshotArnsList.t option
+        [@ocaml.doc
+          "The ARN(s) of the snapshot that the new serverless cache will be created from. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The list of tags (key, value) pairs to be added to the serverless cache resource. Default is NULL."];
+      userGroupId: String_.t option
+        [@ocaml.doc
+          "The identifier of the UserGroup to be associated with the serverless cache. Available for Valkey and Redis OSS only. Default is NULL."];
+      subnetIds: SubnetIdsList.t option
+        [@ocaml.doc
+          "A list of the identifiers of the subnets where the VPC endpoint for the serverless cache will be deployed. All the subnetIds must belong to the same VPC."];
+      snapshotRetentionLimit: IntegerOptional.t option
+        [@ocaml.doc
+          "The number of days for which ElastiCache retains automatic snapshots before deleting them. Available for Valkey, Redis OSS and Serverless Memcached only. The maximum value allowed is 35 days."];
+      dailySnapshotTime: String_.t option
+        [@ocaml.doc
+          "The daily time that snapshots will be created from the new serverless cache. By default this number is populated with 0, i.e. no snapshots will be created on an automatic daily basis. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The IP protocol version used by the serverless cache. Must be either ipv4 | ipv6 | dual_stack. ipv6 is only supported with ipv6-only subnets. If not specified, defaults to ipv4, unless all provided subnets are IPv6-only, in which case it defaults to ipv6."]}
+    let context_ = "CreateServerlessCacheRequest"
+    let make ?description =
+      fun ?majorEngineVersion ->
+        fun ?cacheUsageLimits ->
+          fun ?kmsKeyId ->
+            fun ?securityGroupIds ->
+              fun ?snapshotArnsToRestore ->
+                fun ?tags ->
+                  fun ?userGroupId ->
+                    fun ?subnetIds ->
+                      fun ?snapshotRetentionLimit ->
+                        fun ?dailySnapshotTime ->
+                          fun ?networkType ->
+                            fun ~serverlessCacheName ->
+                              fun ~engine ->
+                                fun () ->
+                                  {
+                                    description;
+                                    majorEngineVersion;
+                                    cacheUsageLimits;
+                                    kmsKeyId;
+                                    securityGroupIds;
+                                    snapshotArnsToRestore;
+                                    tags;
+                                    userGroupId;
+                                    subnetIds;
+                                    snapshotRetentionLimit;
+                                    dailySnapshotTime;
+                                    networkType;
+                                    serverlessCacheName;
+                                    engine
+                                  }
+    let to_value x =
+      structure_to_value
+        [("ServerlessCacheName",
+           (Some (String_.to_value x.serverlessCacheName)));
+        ("Description", (Option.map x.description ~f:String_.to_value));
+        ("Engine", (Some (String_.to_value x.engine)));
+        ("MajorEngineVersion",
+          (Option.map x.majorEngineVersion ~f:String_.to_value));
+        ("CacheUsageLimits",
+          (Option.map x.cacheUsageLimits ~f:CacheUsageLimits.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:String_.to_value));
+        ("SecurityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupIdsList.to_value));
+        ("SnapshotArnsToRestore",
+          (Option.map x.snapshotArnsToRestore ~f:SnapshotArnsList.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("UserGroupId", (Option.map x.userGroupId ~f:String_.to_value));
+        ("SubnetIds", (Option.map x.subnetIds ~f:SubnetIdsList.to_value));
+        ("SnapshotRetentionLimit",
+          (Option.map x.snapshotRetentionLimit ~f:IntegerOptional.to_value));
+        ("DailySnapshotTime",
+          (Option.map x.dailySnapshotTime ~f:String_.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let dailySnapshotTime =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "DailySnapshotTime") in
+      let snapshotRetentionLimit =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "SnapshotRetentionLimit") in
+      let subnetIds =
+        (Option.map ~f:SubnetIdsList.of_xml) (Xml.child xml_arg0 "SubnetIds") in
+      let userGroupId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "UserGroupId") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let snapshotArnsToRestore =
+        (Option.map ~f:SnapshotArnsList.of_xml)
+          (Xml.child xml_arg0 "SnapshotArnsToRestore") in
+      let securityGroupIds =
+        (Option.map ~f:SecurityGroupIdsList.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupIds") in
+      let kmsKeyId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let cacheUsageLimits =
+        (Option.map ~f:CacheUsageLimits.of_xml)
+          (Xml.child xml_arg0 "CacheUsageLimits") in
+      let majorEngineVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MajorEngineVersion") in
+      let engine =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Engine") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
+      let serverlessCacheName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServerlessCacheName") in
+      make ?networkType ?dailySnapshotTime ?snapshotRetentionLimit ?subnetIds
+        ?userGroupId ?tags ?snapshotArnsToRestore ?securityGroupIds ?kmsKeyId
+        ?cacheUsageLimits ?majorEngineVersion ~engine ?description
+        ~serverlessCacheName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let dailySnapshotTime =
+        field_map json__ "DailySnapshotTime" String_.of_json in
+      let snapshotRetentionLimit =
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIdsList.of_json in
+      let userGroupId = field_map json__ "UserGroupId" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let snapshotArnsToRestore =
+        field_map json__ "SnapshotArnsToRestore" SnapshotArnsList.of_json in
+      let securityGroupIds =
+        field_map json__ "SecurityGroupIds" SecurityGroupIdsList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let cacheUsageLimits =
+        field_map json__ "CacheUsageLimits" CacheUsageLimits.of_json in
+      let majorEngineVersion =
+        field_map json__ "MajorEngineVersion" String_.of_json in
+      let engine = field_map_exn json__ "Engine" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let serverlessCacheName =
+        field_map_exn json__ "ServerlessCacheName" String_.of_json in
+      make ?networkType ?dailySnapshotTime ?snapshotRetentionLimit ?subnetIds
+        ?userGroupId ?tags ?snapshotArnsToRestore ?securityGroupIds ?kmsKeyId
+        ?cacheUsageLimits ?majorEngineVersion ~engine ?description
+        ~serverlessCacheName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a serverless cache."]
 module CreateReplicationGroupResult =
   struct
     type createReplicationGroupResult =
@@ -16535,13 +19921,13 @@ module CreateReplicationGroupResult =
           (Xml.child xml_arg0 "ReplicationGroup") in
       make ?replicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroup =
-        field_map json "ReplicationGroup" ReplicationGroup.of_json in
+        field_map json__ "ReplicationGroup" ReplicationGroup.of_json in
       make ?replicationGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a Redis (cluster mode disabled) or a Redis (cluster mode enabled) replication group. This API can be used to create a standalone regional replication group or a secondary replication group associated with a Global datastore. A Redis (cluster mode disabled) replication group is a collection of clusters, where one of the clusters is a read/write primary and the others are read-only replicas. Writes to the primary are asynchronously propagated to the replicas. A Redis cluster-mode enabled cluster is comprised of from 1 to 90 shards (API/CLI: node groups). Each shard has a primary node and up to 5 read-only replica nodes. The configuration can range from 90 shards and 0 replicas to 15 shards and 5 replicas, which is the maximum number or replicas allowed. The node or shard limit can be increased to a maximum of 500 per cluster if the Redis engine version is 5.0.6 or higher. For example, you can choose to configure a 500 node cluster that ranges between 83 shards (one primary and 5 replicas per shard) and 500 shards (single primary and no replicas). Make sure there are enough available IP addresses to accommodate the increase. Common pitfalls include the subnets in the subnet group have too small a CIDR range or the subnets are shared and heavily used by other clusters. For more information, see Creating a Subnet Group. For versions below 5.0.6, the limit is 250 per cluster. To request a limit increase, see Amazon Service Limits and choose the limit type Nodes per cluster per instance type. When a Redis (cluster mode disabled) replication group has been successfully created, you can add one or more read replicas to it, up to a total of 5 read replicas. If you need to increase or decrease the number of node groups (console: shards), you can avail yourself of ElastiCache for Redis' scaling. For more information, see Scaling ElastiCache for Redis Clusters in the ElastiCache User Guide. This operation is valid for Redis only."]
+       "Creates a Valkey or Redis OSS (cluster mode disabled) or a Valkey or Redis OSS (cluster mode enabled) replication group. This API can be used to create a standalone regional replication group or a secondary replication group associated with a Global datastore. A Valkey or Redis OSS (cluster mode disabled) replication group is a collection of nodes, where one of the nodes is a read/write primary and the others are read-only replicas. Writes to the primary are asynchronously propagated to the replicas. A Valkey or Redis OSS cluster-mode enabled cluster is comprised of from 1 to 90 shards (API/CLI: node groups). Each shard has a primary node and up to 5 read-only replica nodes. The configuration can range from 90 shards and 0 replicas to 15 shards and 5 replicas, which is the maximum number or replicas allowed. The node or shard limit can be increased to a maximum of 500 per cluster if the Valkey or Redis OSS engine version is 5.0.6 or higher. For example, you can choose to configure a 500 node cluster that ranges between 83 shards (one primary and 5 replicas per shard) and 500 shards (single primary and no replicas). Make sure there are enough available IP addresses to accommodate the increase. Common pitfalls include the subnets in the subnet group have too small a CIDR range or the subnets are shared and heavily used by other clusters. For more information, see Creating a Subnet Group. For versions below 5.0.6, the limit is 250 per cluster. To request a limit increase, see Amazon Service Limits and choose the limit type Nodes per cluster per instance type. When a Valkey or Redis OSS (cluster mode disabled) replication group has been successfully created, you can add one or more read replicas to it, up to a total of 5 read replicas. If you need to increase or decrease the number of node groups (console: shards), you can use scaling. For more information, see Scaling self-designed clusters in the ElastiCache User Guide. This operation is valid for Valkey and Redis OSS only."]
 module CreateReplicationGroupMessage =
   struct
     type nonrec t =
@@ -16558,7 +19944,7 @@ module CreateReplicationGroupMessage =
           "The identifier of the cluster that serves as the primary for this replication group. This cluster must already exist and have a status of available. This parameter is not required if NumCacheClusters, NumNodeGroups, or ReplicasPerNodeGroup is specified."];
       automaticFailoverEnabled: BooleanOptional.t option
         [@ocaml.doc
-          "Specifies whether a read-only replica is automatically promoted to read/write primary if the existing primary fails. AutomaticFailoverEnabled must be enabled for Redis (cluster mode enabled) replication groups. Default: false"];
+          "Specifies whether a read-only replica is automatically promoted to read/write primary if the existing primary fails. AutomaticFailoverEnabled must be enabled for Valkey or Redis OSS (cluster mode enabled) replication groups. Default: false"];
       multiAZEnabled: BooleanOptional.t option
         [@ocaml.doc
           "A flag indicating if you have Multi-AZ enabled to enhance fault tolerance. For more information, see Minimizing Downtime: Multi-AZ."];
@@ -16570,25 +19956,25 @@ module CreateReplicationGroupMessage =
           "A list of EC2 Availability Zones in which the replication group's clusters are created. The order of the Availability Zones in the list is the order in which clusters are allocated. The primary cluster is created in the first AZ in the list. This parameter is not used if there is more than one node group (shard). You should use NodeGroupConfiguration instead. If you are creating your replication group in an Amazon VPC (recommended), you can only locate clusters in Availability Zones associated with the subnets in the selected subnet group. The number of Availability Zones listed must equal the value of NumCacheClusters. Default: system chosen Availability Zones."];
       numNodeGroups: IntegerOptional.t option
         [@ocaml.doc
-          "An optional parameter that specifies the number of node groups (shards) for this Redis (cluster mode enabled) replication group. For Redis (cluster mode disabled) either omit this parameter or set it to 1. Default: 1"];
+          "An optional parameter that specifies the number of node groups (shards) for this Valkey or Redis OSS (cluster mode enabled) replication group. For Valkey or Redis OSS (cluster mode disabled) either omit this parameter or set it to 1. Default: 1"];
       replicasPerNodeGroup: IntegerOptional.t option
         [@ocaml.doc
           "An optional parameter that specifies the number of replica nodes in each node group (shard). Valid values are 0 to 5."];
       nodeGroupConfiguration: NodeGroupConfigurationList.t option
         [@ocaml.doc
-          "A list of node group (shard) configuration options. Each node group (shard) configuration has the following members: PrimaryAvailabilityZone, ReplicaAvailabilityZones, ReplicaCount, and Slots. If you're creating a Redis (cluster mode disabled) or a Redis (cluster mode enabled) replication group, you can use this parameter to individually configure each node group (shard), or you can omit this parameter. However, it is required when seeding a Redis (cluster mode enabled) cluster from a S3 rdb file. You must configure each node group (shard) using this parameter because you must specify the slots for each node group."];
+          "A list of node group (shard) configuration options. Each node group (shard) configuration has the following members: PrimaryAvailabilityZone, ReplicaAvailabilityZones, ReplicaCount, and Slots. If you're creating a Valkey or Redis OSS (cluster mode disabled) or a Valkey or Redis OSS (cluster mode enabled) replication group, you can use this parameter to individually configure each node group (shard), or you can omit this parameter. However, it is required when seeding a Valkey or Redis OSS (cluster mode enabled) cluster from a S3 rdb file. You must configure each node group (shard) using this parameter because you must specify the slots for each node group."];
       cacheNodeType: String_.t option
         [@ocaml.doc
-          "The compute and memory capacity of the nodes in the node group (shard). The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M6g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge For region availability, see Supported Node Types M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended) C1 node types: cache.c1.xlarge Memory optimized with data tiering: Current generation: R6gd node types (available only for Redis engine version 6.2 onward). cache.r6gd.xlarge, cache.r6gd.2xlarge, cache.r6gd.4xlarge, cache.r6gd.8xlarge, cache.r6gd.12xlarge, cache.r6gd.16xlarge Memory optimized: Current generation: R6g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward). cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge For region availability, see Supported Node Types R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Redis append-only files (AOF) are not supported for T1 or T2 instances. Redis Multi-AZ with automatic failover is not supported on T1 instances. Redis configuration variables appendonly and appendfsync are not supported on Redis version 2.8.22 and later."];
+          "The compute and memory capacity of the nodes in the node group (shard). The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M7g node types: cache.m7g.large, cache.m7g.xlarge, cache.m7g.2xlarge, cache.m7g.4xlarge, cache.m7g.8xlarge, cache.m7g.12xlarge, cache.m7g.16xlarge For region availability, see Supported Node Types M6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis OSS engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) C1 node types: cache.c1.xlarge Memory optimized: Current generation: R7g node types: cache.r7g.large, cache.r7g.xlarge, cache.r7g.2xlarge, cache.r7g.4xlarge, cache.r7g.8xlarge, cache.r7g.12xlarge, cache.r7g.16xlarge For region availability, see Supported Node Types R6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Valkey or Redis OSS append-only files (AOF) are not supported for T1 or T2 instances. Valkey or Redis OSS Multi-AZ with automatic failover is not supported on T1 instances. The configuration variables appendonly and appendfsync are not supported on Valkey, or on Redis OSS version 2.8.22 and later."];
       engine: String_.t option
         [@ocaml.doc
-          "The name of the cache engine to be used for the clusters in this replication group. Must be Redis."];
+          "The name of the cache engine to be used for the clusters in this replication group. The value must be set to valkey or redis."];
       engineVersion: String_.t option
         [@ocaml.doc
           "The version number of the cache engine to be used for the clusters in this replication group. To view the supported cache engine versions, use the DescribeCacheEngineVersions operation. Important: You can upgrade to a newer engine version (see Selecting a Cache Engine and Version) in the ElastiCache User Guide, but you cannot downgrade to an earlier engine version. If you want to use an earlier engine version, you must delete the existing cluster or replication group and create it anew with the earlier engine version."];
       cacheParameterGroupName: String_.t option
         [@ocaml.doc
-          "The name of the parameter group to associate with this replication group. If this argument is omitted, the default cache parameter group for the specified engine is used. If you are running Redis version 3.2.4 or later, only one node group (shard), and want to use a default parameter group, we recommend that you specify the parameter group by name. To create a Redis (cluster mode disabled) replication group, use CacheParameterGroupName=default.redis3.2. To create a Redis (cluster mode enabled) replication group, use CacheParameterGroupName=default.redis3.2.cluster.on."];
+          "The name of the parameter group to associate with this replication group. If this argument is omitted, the default cache parameter group for the specified engine is used. If you are running Valkey or Redis OSS version 3.2.4 or later, only one node group (shard), and want to use a default parameter group, we recommend that you specify the parameter group by name. To create a Valkey or Redis OSS (cluster mode disabled) replication group, use CacheParameterGroupName=default.redis3.2. To create a Valkey or Redis OSS (cluster mode enabled) replication group, use CacheParameterGroupName=default.redis3.2.cluster.on."];
       cacheSubnetGroupName: String_.t option
         [@ocaml.doc
           "The name of the cache subnet group to be used for the replication group. If you're going to launch your cluster in an Amazon VPC, you need to create a subnet group before you start creating a cluster. For more information, see Subnets and Subnet Groups."];
@@ -16603,13 +19989,13 @@ module CreateReplicationGroupMessage =
           "A list of tags to be added to this resource. Tags are comma-separated key,value pairs (e.g. Key=myKey, Value=myKeyValue. You can include multiple tags as shown following: Key=myKey, Value=myKeyValue Key=mySecondKey, Value=mySecondKeyValue. Tags on replication groups will be replicated to all nodes."];
       snapshotArns: SnapshotArnsList.t option
         [@ocaml.doc
-          "A list of Amazon Resource Names (ARN) that uniquely identify the Redis RDB snapshot files stored in Amazon S3. The snapshot files are used to populate the new replication group. The Amazon S3 object name in the ARN cannot contain any commas. The new replication group will have the number of node groups (console: shards) specified by the parameter NumNodeGroups or the number of node groups configured by NodeGroupConfiguration regardless of the number of ARNs specified here. Example of an Amazon S3 ARN: arn:aws:s3:::my_bucket/snapshot1.rdb"];
+          "A list of Amazon Resource Names (ARN) that uniquely identify the Valkey or Redis OSS RDB snapshot files stored in Amazon S3. The snapshot files are used to populate the new replication group. The Amazon S3 object name in the ARN cannot contain any commas. The new replication group will have the number of node groups (console: shards) specified by the parameter NumNodeGroups or the number of node groups configured by NodeGroupConfiguration regardless of the number of ARNs specified here. Example of an Amazon S3 ARN: arn:aws:s3:::my_bucket/snapshot1.rdb"];
       snapshotName: String_.t option
         [@ocaml.doc
           "The name of a snapshot from which to restore data into the new replication group. The snapshot status changes to restoring while the new replication group is being created."];
       preferredMaintenanceWindow: String_.t option
         [@ocaml.doc
-          "Specifies the weekly time range during which maintenance on the cluster is performed. It is specified as a range in the format ddd:hh24:mi-ddd:hh24:mi (24H Clock UTC). The minimum maintenance window is a 60 minute period. Valid values for ddd are: Specifies the weekly time range during which maintenance on the cluster is performed. It is specified as a range in the format ddd:hh24:mi-ddd:hh24:mi (24H Clock UTC). The minimum maintenance window is a 60 minute period. Valid values for ddd are: sun mon tue wed thu fri sat Example: sun:23:00-mon:01:30"];
+          "Specifies the weekly time range during which maintenance on the cluster is performed. It is specified as a range in the format ddd:hh24:mi-ddd:hh24:mi (24H Clock UTC). The minimum maintenance window is a 60 minute period. Valid values for ddd are: sun mon tue wed thu fri sat Example: sun:23:00-mon:01:30"];
       port: IntegerOptional.t option
         [@ocaml.doc
           "The port number on which each member of the replication group accepts connections."];
@@ -16618,7 +20004,7 @@ module CreateReplicationGroupMessage =
           "The Amazon Resource Name (ARN) of the Amazon Simple Notification Service (SNS) topic to which notifications are sent. The Amazon SNS topic owner must be the same as the cluster owner."];
       autoMinorVersionUpgrade: BooleanOptional.t option
         [@ocaml.doc
-          "\194\160If you are running Redis engine version 6.0 or later, set this parameter to yes if you want to opt-in to the next auto minor version upgrade campaign. This parameter is disabled for previous versions.\194\160"];
+          "\194\160If you are running Valkey 7.2 and above or Redis OSS engine version 6.0 and above, set this parameter to yes to opt-in to the next auto minor version upgrade campaign. This parameter is disabled for previous versions.\194\160"];
       snapshotRetentionLimit: IntegerOptional.t option
         [@ocaml.doc
           "The number of days for which ElastiCache retains automatic snapshots before deleting them. For example, if you set SnapshotRetentionLimit to 5, a snapshot that was taken today is retained for 5 days before being deleted. Default: 0 (i.e., automatic backups are disabled for this cluster)."];
@@ -16630,10 +20016,10 @@ module CreateReplicationGroupMessage =
           "Reserved parameter. The password used to access a password protected server. AuthToken can be specified only on replication groups where TransitEncryptionEnabled is true. For HIPAA compliance, you must specify TransitEncryptionEnabled as true, an AuthToken, and a CacheSubnetGroup. Password constraints: Must be only printable ASCII characters. Must be at least 16 characters and no more than 128 characters in length. The only permitted printable special characters are !, &, #, $, ^, <, >, and -. Other printable special characters cannot be used in the AUTH token. For more information, see AUTH password at http://redis.io/commands/AUTH."];
       transitEncryptionEnabled: BooleanOptional.t option
         [@ocaml.doc
-          "A flag that enables in-transit encryption when set to true. You cannot modify the value of TransitEncryptionEnabled after the cluster is created. To enable in-transit encryption on a cluster you must set TransitEncryptionEnabled to true when you create a cluster. This parameter is valid only if the Engine parameter is redis, the EngineVersion parameter is 3.2.6, 4.x or later, and the cluster is being created in an Amazon VPC. If you enable in-transit encryption, you must also specify a value for CacheSubnetGroup. Required: Only available when creating a replication group in an Amazon VPC using redis version 3.2.6, 4.x or later. Default: false For HIPAA compliance, you must specify TransitEncryptionEnabled as true, an AuthToken, and a CacheSubnetGroup."];
+          "A flag that enables in-transit encryption when set to true. This parameter is valid only if the Engine parameter is redis, the EngineVersion parameter is 3.2.6, 4.x or later, and the cluster is being created in an Amazon VPC. If you enable in-transit encryption, you must also specify a value for CacheSubnetGroup. Required: Only available when creating a replication group in an Amazon VPC using Redis OSS version 3.2.6, 4.x or later. Default: false For HIPAA compliance, you must specify TransitEncryptionEnabled as true, an AuthToken, and a CacheSubnetGroup."];
       atRestEncryptionEnabled: BooleanOptional.t option
         [@ocaml.doc
-          "A flag that enables encryption at rest when set to true. You cannot modify the value of AtRestEncryptionEnabled after the replication group is created. To enable encryption at rest on a replication group you must set AtRestEncryptionEnabled to true when you create the replication group. Required: Only available when creating a replication group in an Amazon VPC using redis version 3.2.6, 4.x or later. Default: false"];
+          "A flag that enables encryption at rest when set to true. You cannot modify the value of AtRestEncryptionEnabled after the replication group is created. To enable encryption at rest on a replication group you must set AtRestEncryptionEnabled to true when you create the replication group. Required: Only available when creating a replication group in an Amazon VPC using Valkey 7.2 and later, Redis OSS version 3.2.6, or Redis OSS 4.x and later. Default: true when using Valkey, false when using Redis OSS"];
       kmsKeyId: String_.t option
         [@ocaml.doc
           "The ID of the KMS key used to encrypt the disk in the cluster."];
@@ -16645,7 +20031,22 @@ module CreateReplicationGroupMessage =
           "Specifies the destination, format and type of the logs."];
       dataTieringEnabled: BooleanOptional.t option
         [@ocaml.doc
-          "Enables data tiering. Data tiering is only supported for replication groups using the r6gd node type. This parameter must be set to true when using r6gd nodes. For more information, see Data tiering."]}
+          "Enables data tiering. Data tiering is only supported for replication groups using the r6gd node type. This parameter must be set to true when using r6gd nodes. For more information, see Data tiering."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "Must be either ipv4 | ipv6 | dual_stack. IPv6 is supported for workloads using Valkey 7.2 and above, Redis OSS engine version 6.2 to 7.1 and Memcached engine version 1.6.6 and above on all instances built on the Nitro system."];
+      ipDiscovery: IpDiscovery.t option
+        [@ocaml.doc
+          "The network type you choose when creating a replication group, either ipv4 | ipv6. IPv6 is supported for workloads using Valkey 7.2 and above, Redis OSS engine version 6.2 to 7.1 or Memcached engine version 1.6.6 and above on all instances built on the Nitro system."];
+      transitEncryptionMode: TransitEncryptionMode.t option
+        [@ocaml.doc
+          "A setting that allows you to migrate your clients to use in-transit encryption, with no downtime. When setting TransitEncryptionEnabled to true, you can set your TransitEncryptionMode to preferred in the same request, to allow both encrypted and unencrypted connections at the same time. Once you migrate all your Valkey or Redis OSS clients to use encrypted connections you can modify the value to required to allow encrypted connections only. Setting TransitEncryptionMode to required is a two-step process that requires you to first set the TransitEncryptionMode to preferred, after that you can set TransitEncryptionMode to required. This process will not trigger the replacement of the replication group."];
+      clusterMode: ClusterMode.t option
+        [@ocaml.doc
+          "Enabled or Disabled. To modify cluster mode from Disabled to Enabled, you must first set the cluster mode to Compatible. Compatible mode allows your Valkey or Redis OSS clients to connect using both cluster mode enabled and cluster mode disabled. After you migrate all Valkey or Redis OSS clients to use cluster mode enabled, you can then complete cluster mode configuration and set the cluster mode to Enabled."];
+      serverlessCacheSnapshotName: String_.t option
+        [@ocaml.doc
+          "The name of the snapshot used to create a replication group. Available for Valkey, Redis OSS only."]}
     let context_ = "CreateReplicationGroupMessage"
     let make ?globalReplicationGroupId =
       fun ?primaryClusterId ->
@@ -16692,6 +20093,21 @@ module CreateReplicationGroupMessage =
                                                                     ?dataTieringEnabled
                                                                     ->
                                                                     fun
+                                                                    ?networkType
+                                                                    ->
+                                                                    fun
+                                                                    ?ipDiscovery
+                                                                    ->
+                                                                    fun
+                                                                    ?transitEncryptionMode
+                                                                    ->
+                                                                    fun
+                                                                    ?clusterMode
+                                                                    ->
+                                                                    fun
+                                                                    ?serverlessCacheSnapshotName
+                                                                    ->
+                                                                    fun
                                                                     ~replicationGroupId
                                                                     ->
                                                                     fun
@@ -16731,6 +20147,11 @@ module CreateReplicationGroupMessage =
                                                                     userGroupIds;
                                                                     logDeliveryConfigurations;
                                                                     dataTieringEnabled;
+                                                                    networkType;
+                                                                    ipDiscovery;
+                                                                    transitEncryptionMode;
+                                                                    clusterMode;
+                                                                    serverlessCacheSnapshotName;
                                                                     replicationGroupId;
                                                                     replicationGroupDescription
                                                                     }
@@ -16798,9 +20219,29 @@ module CreateReplicationGroupMessage =
           (Option.map x.logDeliveryConfigurations
              ~f:LogDeliveryConfigurationRequestList.to_value));
         ("DataTieringEnabled",
-          (Option.map x.dataTieringEnabled ~f:BooleanOptional.to_value))]
+          (Option.map x.dataTieringEnabled ~f:BooleanOptional.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value));
+        ("IpDiscovery", (Option.map x.ipDiscovery ~f:IpDiscovery.to_value));
+        ("TransitEncryptionMode",
+          (Option.map x.transitEncryptionMode
+             ~f:TransitEncryptionMode.to_value));
+        ("ClusterMode", (Option.map x.clusterMode ~f:ClusterMode.to_value));
+        ("ServerlessCacheSnapshotName",
+          (Option.map x.serverlessCacheSnapshotName ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let serverlessCacheSnapshotName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ServerlessCacheSnapshotName") in
+      let clusterMode =
+        (Option.map ~f:ClusterMode.of_xml) (Xml.child xml_arg0 "ClusterMode") in
+      let transitEncryptionMode =
+        (Option.map ~f:TransitEncryptionMode.of_xml)
+          (Xml.child xml_arg0 "TransitEncryptionMode") in
+      let ipDiscovery =
+        (Option.map ~f:IpDiscovery.of_xml) (Xml.child xml_arg0 "IpDiscovery") in
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
       let dataTieringEnabled =
         (Option.map ~f:BooleanOptional.of_xml)
           (Xml.child xml_arg0 "DataTieringEnabled") in
@@ -16894,93 +20335,105 @@ module CreateReplicationGroupMessage =
       let replicationGroupId =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationGroupId") in
-      make ?dataTieringEnabled ?logDeliveryConfigurations ?userGroupIds
-        ?kmsKeyId ?atRestEncryptionEnabled ?transitEncryptionEnabled
-        ?authToken ?snapshotWindow ?snapshotRetentionLimit
-        ?autoMinorVersionUpgrade ?notificationTopicArn ?port
-        ?preferredMaintenanceWindow ?snapshotName ?snapshotArns ?tags
-        ?securityGroupIds ?cacheSecurityGroupNames ?cacheSubnetGroupName
-        ?cacheParameterGroupName ?engineVersion ?engine ?cacheNodeType
-        ?nodeGroupConfiguration ?replicasPerNodeGroup ?numNodeGroups
-        ?preferredCacheClusterAZs ?numCacheClusters ?multiAZEnabled
-        ?automaticFailoverEnabled ?primaryClusterId ?globalReplicationGroupId
-        ~replicationGroupDescription ~replicationGroupId ()
+      make ?serverlessCacheSnapshotName ?clusterMode ?transitEncryptionMode
+        ?ipDiscovery ?networkType ?dataTieringEnabled
+        ?logDeliveryConfigurations ?userGroupIds ?kmsKeyId
+        ?atRestEncryptionEnabled ?transitEncryptionEnabled ?authToken
+        ?snapshotWindow ?snapshotRetentionLimit ?autoMinorVersionUpgrade
+        ?notificationTopicArn ?port ?preferredMaintenanceWindow ?snapshotName
+        ?snapshotArns ?tags ?securityGroupIds ?cacheSecurityGroupNames
+        ?cacheSubnetGroupName ?cacheParameterGroupName ?engineVersion ?engine
+        ?cacheNodeType ?nodeGroupConfiguration ?replicasPerNodeGroup
+        ?numNodeGroups ?preferredCacheClusterAZs ?numCacheClusters
+        ?multiAZEnabled ?automaticFailoverEnabled ?primaryClusterId
+        ?globalReplicationGroupId ~replicationGroupDescription
+        ~replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let serverlessCacheSnapshotName =
+        field_map json__ "ServerlessCacheSnapshotName" String_.of_json in
+      let clusterMode = field_map json__ "ClusterMode" ClusterMode.of_json in
+      let transitEncryptionMode =
+        field_map json__ "TransitEncryptionMode"
+          TransitEncryptionMode.of_json in
+      let ipDiscovery = field_map json__ "IpDiscovery" IpDiscovery.of_json in
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
       let dataTieringEnabled =
-        field_map json "DataTieringEnabled" BooleanOptional.of_json in
+        field_map json__ "DataTieringEnabled" BooleanOptional.of_json in
       let logDeliveryConfigurations =
-        field_map json "LogDeliveryConfigurations"
+        field_map json__ "LogDeliveryConfigurations"
           LogDeliveryConfigurationRequestList.of_json in
       let userGroupIds =
-        field_map json "UserGroupIds" UserGroupIdListInput.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+        field_map json__ "UserGroupIds" UserGroupIdListInput.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let atRestEncryptionEnabled =
-        field_map json "AtRestEncryptionEnabled" BooleanOptional.of_json in
+        field_map json__ "AtRestEncryptionEnabled" BooleanOptional.of_json in
       let transitEncryptionEnabled =
-        field_map json "TransitEncryptionEnabled" BooleanOptional.of_json in
-      let authToken = field_map json "AuthToken" String_.of_json in
-      let snapshotWindow = field_map json "SnapshotWindow" String_.of_json in
+        field_map json__ "TransitEncryptionEnabled" BooleanOptional.of_json in
+      let authToken = field_map json__ "AuthToken" String_.of_json in
+      let snapshotWindow = field_map json__ "SnapshotWindow" String_.of_json in
       let snapshotRetentionLimit =
-        field_map json "SnapshotRetentionLimit" IntegerOptional.of_json in
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
       let autoMinorVersionUpgrade =
-        field_map json "AutoMinorVersionUpgrade" BooleanOptional.of_json in
+        field_map json__ "AutoMinorVersionUpgrade" BooleanOptional.of_json in
       let notificationTopicArn =
-        field_map json "NotificationTopicArn" String_.of_json in
-      let port = field_map json "Port" IntegerOptional.of_json in
+        field_map json__ "NotificationTopicArn" String_.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
-      let snapshotName = field_map json "SnapshotName" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
+      let snapshotName = field_map json__ "SnapshotName" String_.of_json in
       let snapshotArns =
-        field_map json "SnapshotArns" SnapshotArnsList.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "SnapshotArns" SnapshotArnsList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIdsList.of_json in
+        field_map json__ "SecurityGroupIds" SecurityGroupIdsList.of_json in
       let cacheSecurityGroupNames =
-        field_map json "CacheSecurityGroupNames"
+        field_map json__ "CacheSecurityGroupNames"
           CacheSecurityGroupNameList.of_json in
       let cacheSubnetGroupName =
-        field_map json "CacheSubnetGroupName" String_.of_json in
+        field_map json__ "CacheSubnetGroupName" String_.of_json in
       let cacheParameterGroupName =
-        field_map json "CacheParameterGroupName" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
+        field_map json__ "CacheParameterGroupName" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
       let nodeGroupConfiguration =
-        field_map json "NodeGroupConfiguration"
+        field_map json__ "NodeGroupConfiguration"
           NodeGroupConfigurationList.of_json in
       let replicasPerNodeGroup =
-        field_map json "ReplicasPerNodeGroup" IntegerOptional.of_json in
+        field_map json__ "ReplicasPerNodeGroup" IntegerOptional.of_json in
       let numNodeGroups =
-        field_map json "NumNodeGroups" IntegerOptional.of_json in
+        field_map json__ "NumNodeGroups" IntegerOptional.of_json in
       let preferredCacheClusterAZs =
-        field_map json "PreferredCacheClusterAZs"
+        field_map json__ "PreferredCacheClusterAZs"
           AvailabilityZonesList.of_json in
       let numCacheClusters =
-        field_map json "NumCacheClusters" IntegerOptional.of_json in
+        field_map json__ "NumCacheClusters" IntegerOptional.of_json in
       let multiAZEnabled =
-        field_map json "MultiAZEnabled" BooleanOptional.of_json in
+        field_map json__ "MultiAZEnabled" BooleanOptional.of_json in
       let automaticFailoverEnabled =
-        field_map json "AutomaticFailoverEnabled" BooleanOptional.of_json in
+        field_map json__ "AutomaticFailoverEnabled" BooleanOptional.of_json in
       let primaryClusterId =
-        field_map json "PrimaryClusterId" String_.of_json in
+        field_map json__ "PrimaryClusterId" String_.of_json in
       let globalReplicationGroupId =
-        field_map json "GlobalReplicationGroupId" String_.of_json in
+        field_map json__ "GlobalReplicationGroupId" String_.of_json in
       let replicationGroupDescription =
-        field_map_exn json "ReplicationGroupDescription" String_.of_json in
+        field_map_exn json__ "ReplicationGroupDescription" String_.of_json in
       let replicationGroupId =
-        field_map_exn json "ReplicationGroupId" String_.of_json in
-      make ?dataTieringEnabled ?logDeliveryConfigurations ?userGroupIds
-        ?kmsKeyId ?atRestEncryptionEnabled ?transitEncryptionEnabled
-        ?authToken ?snapshotWindow ?snapshotRetentionLimit
-        ?autoMinorVersionUpgrade ?notificationTopicArn ?port
-        ?preferredMaintenanceWindow ?snapshotName ?snapshotArns ?tags
-        ?securityGroupIds ?cacheSecurityGroupNames ?cacheSubnetGroupName
-        ?cacheParameterGroupName ?engineVersion ?engine ?cacheNodeType
-        ?nodeGroupConfiguration ?replicasPerNodeGroup ?numNodeGroups
-        ?preferredCacheClusterAZs ?numCacheClusters ?multiAZEnabled
-        ?automaticFailoverEnabled ?primaryClusterId ?globalReplicationGroupId
-        ~replicationGroupDescription ~replicationGroupId ()
+        field_map_exn json__ "ReplicationGroupId" String_.of_json in
+      make ?serverlessCacheSnapshotName ?clusterMode ?transitEncryptionMode
+        ?ipDiscovery ?networkType ?dataTieringEnabled
+        ?logDeliveryConfigurations ?userGroupIds ?kmsKeyId
+        ?atRestEncryptionEnabled ?transitEncryptionEnabled ?authToken
+        ?snapshotWindow ?snapshotRetentionLimit ?autoMinorVersionUpgrade
+        ?notificationTopicArn ?port ?preferredMaintenanceWindow ?snapshotName
+        ?snapshotArns ?tags ?securityGroupIds ?cacheSecurityGroupNames
+        ?cacheSubnetGroupName ?cacheParameterGroupName ?engineVersion ?engine
+        ?cacheNodeType ?nodeGroupConfiguration ?replicasPerNodeGroup
+        ?numNodeGroups ?preferredCacheClusterAZs ?numCacheClusters
+        ?multiAZEnabled ?automaticFailoverEnabled ?primaryClusterId
+        ?globalReplicationGroupId ~replicationGroupDescription
+        ~replicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of a CreateReplicationGroup operation."]
@@ -17095,14 +20548,14 @@ module CreateGlobalReplicationGroupResult =
           (Xml.child xml_arg0 "GlobalReplicationGroup") in
       make ?globalReplicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let globalReplicationGroup =
-        field_map json "GlobalReplicationGroup"
+        field_map json__ "GlobalReplicationGroup"
           GlobalReplicationGroup.of_json in
       make ?globalReplicationGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Global Datastore for Redis offers fully managed, fast, reliable and secure cross-region replication. Using Global Datastore for Redis, you can create cross-region read replica clusters for ElastiCache for Redis to enable low-latency reads and disaster recovery across regions. For more information, see Replication Across Regions Using Global Datastore. The GlobalReplicationGroupIdSuffix is the name of the Global datastore. The PrimaryReplicationGroupId represents the name of the primary cluster that accepts writes and will replicate updates to the secondary cluster."]
+       "Global Datastore offers fully managed, fast, reliable and secure cross-region replication. Using Global Datastore with Valkey or Redis OSS, you can create cross-region read replica clusters for ElastiCache to enable low-latency reads and disaster recovery across regions. For more information, see Replication Across Regions Using Global Datastore. The GlobalReplicationGroupIdSuffix is the name of the Global datastore. The PrimaryReplicationGroupId represents the name of the primary cluster that accepts writes and will replicate updates to the secondary cluster."]
 module CreateGlobalReplicationGroupMessage =
   struct
     type nonrec t =
@@ -17114,7 +20567,7 @@ module CreateGlobalReplicationGroupMessage =
         [@ocaml.doc "Provides details of the Global datastore"];
       primaryReplicationGroupId: String_.t
         [@ocaml.doc
-          "The name of the primary cluster that accepts writes and will replicate updates to the secondary cluster."]}
+          "The name of the primary cluster that accepts writes and will replicate updates to the secondary cluster. This value is stored as a lowercase string."]}
     let context_ = "CreateGlobalReplicationGroupMessage"
     let make ?globalReplicationGroupDescription =
       fun ~globalReplicationGroupIdSuffix ->
@@ -17149,18 +20602,18 @@ module CreateGlobalReplicationGroupMessage =
       make ~primaryReplicationGroupId ?globalReplicationGroupDescription
         ~globalReplicationGroupIdSuffix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let primaryReplicationGroupId =
-        field_map_exn json "PrimaryReplicationGroupId" String_.of_json in
+        field_map_exn json__ "PrimaryReplicationGroupId" String_.of_json in
       let globalReplicationGroupDescription =
-        field_map json "GlobalReplicationGroupDescription" String_.of_json in
+        field_map json__ "GlobalReplicationGroupDescription" String_.of_json in
       let globalReplicationGroupIdSuffix =
-        field_map_exn json "GlobalReplicationGroupIdSuffix" String_.of_json in
+        field_map_exn json__ "GlobalReplicationGroupIdSuffix" String_.of_json in
       make ~primaryReplicationGroupId ?globalReplicationGroupDescription
         ~globalReplicationGroupIdSuffix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Global Datastore for Redis offers fully managed, fast, reliable and secure cross-region replication. Using Global Datastore for Redis, you can create cross-region read replica clusters for ElastiCache for Redis to enable low-latency reads and disaster recovery across regions. For more information, see Replication Across Regions Using Global Datastore. The GlobalReplicationGroupIdSuffix is the name of the Global datastore. The PrimaryReplicationGroupId represents the name of the primary cluster that accepts writes and will replicate updates to the secondary cluster."]
+       "Global Datastore offers fully managed, fast, reliable and secure cross-region replication. Using Global Datastore with Valkey or Redis OSS, you can create cross-region read replica clusters for ElastiCache to enable low-latency reads and disaster recovery across regions. For more information, see Replication Across Regions Using Global Datastore. The GlobalReplicationGroupIdSuffix is the name of the Global datastore. The PrimaryReplicationGroupId represents the name of the primary cluster that accepts writes and will replicate updates to the secondary cluster."]
 module CreateCacheSubnetGroupResult =
   struct
     type createCacheSubnetGroupResult =
@@ -17274,9 +20727,9 @@ module CreateCacheSubnetGroupResult =
           (Xml.child xml_arg0 "CacheSubnetGroup") in
       make ?cacheSubnetGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheSubnetGroup =
-        field_map json "CacheSubnetGroup" CacheSubnetGroup.of_json in
+        field_map json__ "CacheSubnetGroup" CacheSubnetGroup.of_json in
       make ?cacheSubnetGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17331,14 +20784,14 @@ module CreateCacheSubnetGroupMessage =
       make ?tags ~subnetIds ~cacheSubnetGroupDescription
         ~cacheSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let subnetIds =
-        field_map_exn json "SubnetIds" SubnetIdentifierList.of_json in
+        field_map_exn json__ "SubnetIds" SubnetIdentifierList.of_json in
       let cacheSubnetGroupDescription =
-        field_map_exn json "CacheSubnetGroupDescription" String_.of_json in
+        field_map_exn json__ "CacheSubnetGroupDescription" String_.of_json in
       let cacheSubnetGroupName =
-        field_map_exn json "CacheSubnetGroupName" String_.of_json in
+        field_map_exn json__ "CacheSubnetGroupName" String_.of_json in
       make ?tags ~subnetIds ~cacheSubnetGroupDescription
         ~cacheSubnetGroupName ()
     let to_json v = composed_to_json to_value v
@@ -17454,9 +20907,9 @@ module CreateCacheSecurityGroupResult =
           (Xml.child xml_arg0 "CacheSecurityGroup") in
       make ?cacheSecurityGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheSecurityGroup =
-        field_map json "CacheSecurityGroup" CacheSecurityGroup.of_json in
+        field_map json__ "CacheSecurityGroup" CacheSecurityGroup.of_json in
       make ?cacheSecurityGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17495,11 +20948,11 @@ module CreateCacheSecurityGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "CacheSecurityGroupName") in
       make ?tags ~description ~cacheSecurityGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let description = field_map_exn json "Description" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description = field_map_exn json__ "Description" String_.of_json in
       let cacheSecurityGroupName =
-        field_map_exn json "CacheSecurityGroupName" String_.of_json in
+        field_map_exn json__ "CacheSecurityGroupName" String_.of_json in
       make ?tags ~description ~cacheSecurityGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17626,9 +21079,9 @@ module CreateCacheParameterGroupResult =
           (Xml.child xml_arg0 "CacheParameterGroup") in
       make ?cacheParameterGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheParameterGroup =
-        field_map json "CacheParameterGroup" CacheParameterGroup.of_json in
+        field_map json__ "CacheParameterGroup" CacheParameterGroup.of_json in
       make ?cacheParameterGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17638,10 +21091,11 @@ module CreateCacheParameterGroupMessage =
     type nonrec t =
       {
       cacheParameterGroupName: String_.t
-        [@ocaml.doc "A user-specified name for the cache parameter group."];
+        [@ocaml.doc
+          "A user-specified name for the cache parameter group. This value is stored as a lowercase string."];
       cacheParameterGroupFamily: String_.t
         [@ocaml.doc
-          "The name of the cache parameter group family that the cache parameter group can be used with. Valid values are: memcached1.4 | memcached1.5 | memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.x"];
+          "The name of the cache parameter group family that the cache parameter group can be used with. Valid values are: valkey8 | valkey7 | memcached1.4 | memcached1.5 | memcached1.6 | redis2.6 | redis2.8 | redis3.2 | redis4.0 | redis5.0 | redis6.x | redis7"];
       description: String_.t
         [@ocaml.doc
           "A user-specified description for the cache parameter group."];
@@ -17684,13 +21138,13 @@ module CreateCacheParameterGroupMessage =
       make ?tags ~description ~cacheParameterGroupFamily
         ~cacheParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let description = field_map_exn json "Description" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description = field_map_exn json__ "Description" String_.of_json in
       let cacheParameterGroupFamily =
-        field_map_exn json "CacheParameterGroupFamily" String_.of_json in
+        field_map_exn json__ "CacheParameterGroupFamily" String_.of_json in
       let cacheParameterGroupName =
-        field_map_exn json "CacheParameterGroupName" String_.of_json in
+        field_map_exn json__ "CacheParameterGroupName" String_.of_json in
       make ?tags ~description ~cacheParameterGroupFamily
         ~cacheParameterGroupName ()
     let to_json v = composed_to_json to_value v
@@ -17904,12 +21358,12 @@ module CreateCacheClusterResult =
           (Xml.child xml_arg0 "CacheCluster") in
       make ?cacheCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cacheCluster = field_map json "CacheCluster" CacheCluster.of_json in
+    let of_json json__ =
+      let cacheCluster = field_map json__ "CacheCluster" CacheCluster.of_json in
       make ?cacheCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a cluster. All nodes in the cluster run the same protocol-compliant cache engine software, either Memcached or Redis. This operation is not supported for Redis (cluster mode enabled) clusters."]
+       "Creates a cluster. All nodes in the cluster run the same protocol-compliant cache engine software, either Memcached, Valkey or Redis OSS. This operation is not supported for Valkey or Redis OSS (cluster mode enabled) clusters."]
 module CreateCacheClusterMessage =
   struct
     type nonrec t =
@@ -17931,10 +21385,10 @@ module CreateCacheClusterMessage =
           "A list of the Availability Zones in which cache nodes are created. The order of the zones in the list is not important. This option is only supported on Memcached. If you are creating your cluster in an Amazon VPC (recommended) you can only locate nodes in Availability Zones that are associated with the subnets in the selected subnet group. The number of Availability Zones listed must equal the value of NumCacheNodes. If you want all the nodes in the same Availability Zone, use PreferredAvailabilityZone instead, or repeat the Availability Zone multiple times in the list. Default: System chosen Availability Zones."];
       numCacheNodes: IntegerOptional.t option
         [@ocaml.doc
-          "The initial number of cache nodes that the cluster has. For clusters running Redis, this value must be 1. For clusters running Memcached, this value must be between 1 and 40. If you need more than 40 nodes for your Memcached cluster, please fill out the ElastiCache Limit Increase Request form at http://aws.amazon.com/contact-us/elasticache-node-limit-request/."];
+          "The initial number of cache nodes that the cluster has. For clusters running Valkey or Redis OSS, this value must be 1. For clusters running Memcached, this value must be between 1 and 40. If you need more than 40 nodes for your Memcached cluster, please fill out the ElastiCache Limit Increase Request form at http://aws.amazon.com/contact-us/elasticache-node-limit-request/."];
       cacheNodeType: String_.t option
         [@ocaml.doc
-          "The compute and memory capacity of the nodes in the node group (shard). The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M6g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge For region availability, see Supported Node Types M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended) C1 node types: cache.c1.xlarge Memory optimized: Current generation: R6g node types (available only for Redis engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward). cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge For region availability, see Supported Node Types R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Redis append-only files (AOF) are not supported for T1 or T2 instances. Redis Multi-AZ with automatic failover is not supported on T1 instances. Redis configuration variables appendonly and appendfsync are not supported on Redis version 2.8.22 and later."];
+          "The compute and memory capacity of the nodes in the node group (shard). The following node types are supported by ElastiCache. Generally speaking, the current generation types provide more memory and computational power at lower cost when compared to their equivalent previous generation counterparts. General purpose: Current generation: M7g node types: cache.m7g.large, cache.m7g.xlarge, cache.m7g.2xlarge, cache.m7g.4xlarge, cache.m7g.8xlarge, cache.m7g.12xlarge, cache.m7g.16xlarge For region availability, see Supported Node Types M6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.m6g.large, cache.m6g.xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge M5 node types: cache.m5.large, cache.m5.xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.12xlarge, cache.m5.24xlarge M4 node types: cache.m4.large, cache.m4.xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.10xlarge T4g node types (available only for Redis OSS engine version 5.0.6 onward and Memcached engine version 1.5.16 onward): cache.t4g.micro, cache.t4g.small, cache.t4g.medium T3 node types: cache.t3.micro, cache.t3.small, cache.t3.medium T2 node types: cache.t2.micro, cache.t2.small, cache.t2.medium Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) T1 node types: cache.t1.micro M1 node types: cache.m1.small, cache.m1.medium, cache.m1.large, cache.m1.xlarge M3 node types: cache.m3.medium, cache.m3.large, cache.m3.xlarge, cache.m3.2xlarge Compute optimized: Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) C1 node types: cache.c1.xlarge Memory optimized: Current generation: R7g node types: cache.r7g.large, cache.r7g.xlarge, cache.r7g.2xlarge, cache.r7g.4xlarge, cache.r7g.8xlarge, cache.r7g.12xlarge, cache.r7g.16xlarge For region availability, see Supported Node Types R6g node types (available only for Redis OSS engine version 5.0.6 onward and for Memcached engine version 1.5.16 onward): cache.r6g.large, cache.r6g.xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge R5 node types: cache.r5.large, cache.r5.xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.12xlarge, cache.r5.24xlarge R4 node types: cache.r4.large, cache.r4.xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.16xlarge Previous generation: (not recommended. Existing clusters are still supported but creation of new clusters is not supported for these types.) M2 node types: cache.m2.xlarge, cache.m2.2xlarge, cache.m2.4xlarge R3 node types: cache.r3.large, cache.r3.xlarge, cache.r3.2xlarge, cache.r3.4xlarge, cache.r3.8xlarge Additional node type info All current generation instance types are created in Amazon VPC by default. Valkey or Redis OSS append-only files (AOF) are not supported for T1 or T2 instances. Valkey or Redis OSS Multi-AZ with automatic failover is not supported on T1 instances. The configuration variables appendonly and appendfsync are not supported on Valkey, or on Redis OSS version 2.8.22 and later."];
       engine: String_.t option
         [@ocaml.doc
           "The name of the cache engine to be used for this cluster. Valid values for this parameter are: memcached | redis"];
@@ -17957,10 +21411,10 @@ module CreateCacheClusterMessage =
         [@ocaml.doc "A list of tags to be added to this resource."];
       snapshotArns: SnapshotArnsList.t option
         [@ocaml.doc
-          "A single-element string list containing an Amazon Resource Name (ARN) that uniquely identifies a Redis RDB snapshot file stored in Amazon S3. The snapshot file is used to populate the node group (shard). The Amazon S3 object name in the ARN cannot contain any commas. This parameter is only valid if the Engine parameter is redis. Example of an Amazon S3 ARN: arn:aws:s3:::my_bucket/snapshot1.rdb"];
+          "A single-element string list containing an Amazon Resource Name (ARN) that uniquely identifies a Valkey or Redis OSS RDB snapshot file stored in Amazon S3. The snapshot file is used to populate the node group (shard). The Amazon S3 object name in the ARN cannot contain any commas. This parameter is only valid if the Engine parameter is redis. Example of an Amazon S3 ARN: arn:aws:s3:::my_bucket/snapshot1.rdb"];
       snapshotName: String_.t option
         [@ocaml.doc
-          "The name of a Redis snapshot from which to restore data into the new node group (shard). The snapshot status changes to restoring while the new node group (shard) is being created. This parameter is only valid if the Engine parameter is redis."];
+          "The name of a Valkey or Redis OSS snapshot from which to restore data into the new node group (shard). The snapshot status changes to restoring while the new node group (shard) is being created. This parameter is only valid if the Engine parameter is redis."];
       preferredMaintenanceWindow: String_.t option
         [@ocaml.doc
           "Specifies the weekly time range during which maintenance on the cluster is performed. It is specified as a range in the format ddd:hh24:mi-ddd:hh24:mi (24H Clock UTC). The minimum maintenance window is a 60 minute period."];
@@ -17972,7 +21426,7 @@ module CreateCacheClusterMessage =
           "The Amazon Resource Name (ARN) of the Amazon Simple Notification Service (SNS) topic to which notifications are sent. The Amazon SNS topic owner must be the same as the cluster owner."];
       autoMinorVersionUpgrade: BooleanOptional.t option
         [@ocaml.doc
-          "\194\160If you are running Redis engine version 6.0 or later, set this parameter to yes if you want to opt-in to the next auto minor version upgrade campaign. This parameter is disabled for previous versions.\194\160"];
+          "\194\160If you are running Valkey 7.2 and above or Redis OSS engine version 6.0 and above, set this parameter to yes to opt-in to the next auto minor version upgrade campaign. This parameter is disabled for previous versions.\194\160"];
       snapshotRetentionLimit: IntegerOptional.t option
         [@ocaml.doc
           "The number of days for which ElastiCache retains automatic snapshots before deleting them. For example, if you set SnapshotRetentionLimit to 5, a snapshot taken today is retained for 5 days before being deleted. This parameter is only valid if the Engine parameter is redis. Default: 0 (i.e., automatic backups are disabled for this cache cluster)."];
@@ -17992,7 +21446,16 @@ module CreateCacheClusterMessage =
           "The outpost ARNs in which the cache cluster is created."];
       logDeliveryConfigurations: LogDeliveryConfigurationRequestList.t option
         [@ocaml.doc
-          "Specifies the destination, format and type of the logs."]}
+          "Specifies the destination, format and type of the logs."];
+      transitEncryptionEnabled: BooleanOptional.t option
+        [@ocaml.doc
+          "A flag that enables in-transit encryption when set to true."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "Must be either ipv4 | ipv6 | dual_stack. IPv6 is supported for workloads using Valkey 7.2 and above, Redis OSS engine version 6.2 to 7.1 and Memcached engine version 1.6.6 and above on all instances built on the Nitro system."];
+      ipDiscovery: IpDiscovery.t option
+        [@ocaml.doc
+          "The network type you choose when modifying a cluster, either ipv4 | ipv6. IPv6 is supported for workloads using Valkey 7.2 and above, Redis OSS engine version 6.2 to 7.1 and Memcached engine version 1.6.6 and above on all instances built on the Nitro system."]}
     let context_ = "CreateCacheClusterMessage"
     let make ?replicationGroupId =
       fun ?aZMode ->
@@ -18023,38 +21486,48 @@ module CreateCacheClusterMessage =
                                                       fun
                                                         ?logDeliveryConfigurations
                                                         ->
-                                                        fun ~cacheClusterId
+                                                        fun
+                                                          ?transitEncryptionEnabled
                                                           ->
-                                                          fun () ->
-                                                            {
-                                                              replicationGroupId;
-                                                              aZMode;
-                                                              preferredAvailabilityZone;
-                                                              preferredAvailabilityZones;
-                                                              numCacheNodes;
-                                                              cacheNodeType;
-                                                              engine;
-                                                              engineVersion;
-                                                              cacheParameterGroupName;
-                                                              cacheSubnetGroupName;
-                                                              cacheSecurityGroupNames;
-                                                              securityGroupIds;
-                                                              tags;
-                                                              snapshotArns;
-                                                              snapshotName;
-                                                              preferredMaintenanceWindow;
-                                                              port;
-                                                              notificationTopicArn;
-                                                              autoMinorVersionUpgrade;
-                                                              snapshotRetentionLimit;
-                                                              snapshotWindow;
-                                                              authToken;
-                                                              outpostMode;
-                                                              preferredOutpostArn;
-                                                              preferredOutpostArns;
-                                                              logDeliveryConfigurations;
-                                                              cacheClusterId
-                                                            }
+                                                          fun ?networkType ->
+                                                            fun ?ipDiscovery
+                                                              ->
+                                                              fun
+                                                                ~cacheClusterId
+                                                                ->
+                                                                fun () ->
+                                                                  {
+                                                                    replicationGroupId;
+                                                                    aZMode;
+                                                                    preferredAvailabilityZone;
+                                                                    preferredAvailabilityZones;
+                                                                    numCacheNodes;
+                                                                    cacheNodeType;
+                                                                    engine;
+                                                                    engineVersion;
+                                                                    cacheParameterGroupName;
+                                                                    cacheSubnetGroupName;
+                                                                    cacheSecurityGroupNames;
+                                                                    securityGroupIds;
+                                                                    tags;
+                                                                    snapshotArns;
+                                                                    snapshotName;
+                                                                    preferredMaintenanceWindow;
+                                                                    port;
+                                                                    notificationTopicArn;
+                                                                    autoMinorVersionUpgrade;
+                                                                    snapshotRetentionLimit;
+                                                                    snapshotWindow;
+                                                                    authToken;
+                                                                    outpostMode;
+                                                                    preferredOutpostArn;
+                                                                    preferredOutpostArns;
+                                                                    logDeliveryConfigurations;
+                                                                    transitEncryptionEnabled;
+                                                                    networkType;
+                                                                    ipDiscovery;
+                                                                    cacheClusterId
+                                                                  }
     let to_value x =
       structure_to_value
         [("CacheClusterId", (Some (String_.to_value x.cacheClusterId)));
@@ -18103,9 +21576,20 @@ module CreateCacheClusterMessage =
              ~f:PreferredOutpostArnList.to_value));
         ("LogDeliveryConfigurations",
           (Option.map x.logDeliveryConfigurations
-             ~f:LogDeliveryConfigurationRequestList.to_value))]
+             ~f:LogDeliveryConfigurationRequestList.to_value));
+        ("TransitEncryptionEnabled",
+          (Option.map x.transitEncryptionEnabled ~f:BooleanOptional.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value));
+        ("IpDiscovery", (Option.map x.ipDiscovery ~f:IpDiscovery.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipDiscovery =
+        (Option.map ~f:IpDiscovery.of_xml) (Xml.child xml_arg0 "IpDiscovery") in
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let transitEncryptionEnabled =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "TransitEncryptionEnabled") in
       let logDeliveryConfigurations =
         (Option.map ~f:LogDeliveryConfigurationRequestList.of_xml)
           (Xml.child xml_arg0 "LogDeliveryConfigurations") in
@@ -18176,73 +21660,78 @@ module CreateCacheClusterMessage =
       let cacheClusterId =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CacheClusterId") in
-      make ?logDeliveryConfigurations ?preferredOutpostArns
-        ?preferredOutpostArn ?outpostMode ?authToken ?snapshotWindow
-        ?snapshotRetentionLimit ?autoMinorVersionUpgrade
-        ?notificationTopicArn ?port ?preferredMaintenanceWindow ?snapshotName
-        ?snapshotArns ?tags ?securityGroupIds ?cacheSecurityGroupNames
-        ?cacheSubnetGroupName ?cacheParameterGroupName ?engineVersion ?engine
-        ?cacheNodeType ?numCacheNodes ?preferredAvailabilityZones
-        ?preferredAvailabilityZone ?aZMode ?replicationGroupId
-        ~cacheClusterId ()
+      make ?ipDiscovery ?networkType ?transitEncryptionEnabled
+        ?logDeliveryConfigurations ?preferredOutpostArns ?preferredOutpostArn
+        ?outpostMode ?authToken ?snapshotWindow ?snapshotRetentionLimit
+        ?autoMinorVersionUpgrade ?notificationTopicArn ?port
+        ?preferredMaintenanceWindow ?snapshotName ?snapshotArns ?tags
+        ?securityGroupIds ?cacheSecurityGroupNames ?cacheSubnetGroupName
+        ?cacheParameterGroupName ?engineVersion ?engine ?cacheNodeType
+        ?numCacheNodes ?preferredAvailabilityZones ?preferredAvailabilityZone
+        ?aZMode ?replicationGroupId ~cacheClusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipDiscovery = field_map json__ "IpDiscovery" IpDiscovery.of_json in
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let transitEncryptionEnabled =
+        field_map json__ "TransitEncryptionEnabled" BooleanOptional.of_json in
       let logDeliveryConfigurations =
-        field_map json "LogDeliveryConfigurations"
+        field_map json__ "LogDeliveryConfigurations"
           LogDeliveryConfigurationRequestList.of_json in
       let preferredOutpostArns =
-        field_map json "PreferredOutpostArns" PreferredOutpostArnList.of_json in
+        field_map json__ "PreferredOutpostArns"
+          PreferredOutpostArnList.of_json in
       let preferredOutpostArn =
-        field_map json "PreferredOutpostArn" String_.of_json in
-      let outpostMode = field_map json "OutpostMode" OutpostMode.of_json in
-      let authToken = field_map json "AuthToken" String_.of_json in
-      let snapshotWindow = field_map json "SnapshotWindow" String_.of_json in
+        field_map json__ "PreferredOutpostArn" String_.of_json in
+      let outpostMode = field_map json__ "OutpostMode" OutpostMode.of_json in
+      let authToken = field_map json__ "AuthToken" String_.of_json in
+      let snapshotWindow = field_map json__ "SnapshotWindow" String_.of_json in
       let snapshotRetentionLimit =
-        field_map json "SnapshotRetentionLimit" IntegerOptional.of_json in
+        field_map json__ "SnapshotRetentionLimit" IntegerOptional.of_json in
       let autoMinorVersionUpgrade =
-        field_map json "AutoMinorVersionUpgrade" BooleanOptional.of_json in
+        field_map json__ "AutoMinorVersionUpgrade" BooleanOptional.of_json in
       let notificationTopicArn =
-        field_map json "NotificationTopicArn" String_.of_json in
-      let port = field_map json "Port" IntegerOptional.of_json in
+        field_map json__ "NotificationTopicArn" String_.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
-      let snapshotName = field_map json "SnapshotName" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
+      let snapshotName = field_map json__ "SnapshotName" String_.of_json in
       let snapshotArns =
-        field_map json "SnapshotArns" SnapshotArnsList.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "SnapshotArns" SnapshotArnsList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIdsList.of_json in
+        field_map json__ "SecurityGroupIds" SecurityGroupIdsList.of_json in
       let cacheSecurityGroupNames =
-        field_map json "CacheSecurityGroupNames"
+        field_map json__ "CacheSecurityGroupNames"
           CacheSecurityGroupNameList.of_json in
       let cacheSubnetGroupName =
-        field_map json "CacheSubnetGroupName" String_.of_json in
+        field_map json__ "CacheSubnetGroupName" String_.of_json in
       let cacheParameterGroupName =
-        field_map json "CacheParameterGroupName" String_.of_json in
-      let engineVersion = field_map json "EngineVersion" String_.of_json in
-      let engine = field_map json "Engine" String_.of_json in
-      let cacheNodeType = field_map json "CacheNodeType" String_.of_json in
+        field_map json__ "CacheParameterGroupName" String_.of_json in
+      let engineVersion = field_map json__ "EngineVersion" String_.of_json in
+      let engine = field_map json__ "Engine" String_.of_json in
+      let cacheNodeType = field_map json__ "CacheNodeType" String_.of_json in
       let numCacheNodes =
-        field_map json "NumCacheNodes" IntegerOptional.of_json in
+        field_map json__ "NumCacheNodes" IntegerOptional.of_json in
       let preferredAvailabilityZones =
-        field_map json "PreferredAvailabilityZones"
+        field_map json__ "PreferredAvailabilityZones"
           PreferredAvailabilityZoneList.of_json in
       let preferredAvailabilityZone =
-        field_map json "PreferredAvailabilityZone" String_.of_json in
-      let aZMode = field_map json "AZMode" AZMode.of_json in
+        field_map json__ "PreferredAvailabilityZone" String_.of_json in
+      let aZMode = field_map json__ "AZMode" AZMode.of_json in
       let replicationGroupId =
-        field_map json "ReplicationGroupId" String_.of_json in
+        field_map json__ "ReplicationGroupId" String_.of_json in
       let cacheClusterId =
-        field_map_exn json "CacheClusterId" String_.of_json in
-      make ?logDeliveryConfigurations ?preferredOutpostArns
-        ?preferredOutpostArn ?outpostMode ?authToken ?snapshotWindow
-        ?snapshotRetentionLimit ?autoMinorVersionUpgrade
-        ?notificationTopicArn ?port ?preferredMaintenanceWindow ?snapshotName
-        ?snapshotArns ?tags ?securityGroupIds ?cacheSecurityGroupNames
-        ?cacheSubnetGroupName ?cacheParameterGroupName ?engineVersion ?engine
-        ?cacheNodeType ?numCacheNodes ?preferredAvailabilityZones
-        ?preferredAvailabilityZone ?aZMode ?replicationGroupId
-        ~cacheClusterId ()
+        field_map_exn json__ "CacheClusterId" String_.of_json in
+      make ?ipDiscovery ?networkType ?transitEncryptionEnabled
+        ?logDeliveryConfigurations ?preferredOutpostArns ?preferredOutpostArn
+        ?outpostMode ?authToken ?snapshotWindow ?snapshotRetentionLimit
+        ?autoMinorVersionUpgrade ?notificationTopicArn ?port
+        ?preferredMaintenanceWindow ?snapshotName ?snapshotArns ?tags
+        ?securityGroupIds ?cacheSecurityGroupNames ?cacheSubnetGroupName
+        ?cacheParameterGroupName ?engineVersion ?engine ?cacheNodeType
+        ?numCacheNodes ?preferredAvailabilityZones ?preferredAvailabilityZone
+        ?aZMode ?replicationGroupId ~cacheClusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a CreateCacheCluster operation."]
 module CopySnapshotResult =
@@ -18360,12 +21849,12 @@ module CopySnapshotResult =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Makes a copy of an existing snapshot. This operation is valid for Redis only. Users or groups that have permissions to use the CopySnapshot operation can create their own Amazon S3 buckets and copy snapshots to it. To control access to your snapshots, use an IAM policy to control who has the ability to use the CopySnapshot operation. For more information about using IAM to control the use of ElastiCache operations, see Exporting Snapshots and Authentication & Access Control. You could receive the following error messages. Error Messages Error Message: The S3 bucket %s is outside of the region. Solution: Create an Amazon S3 bucket in the same region as your snapshot. For more information, see Step 1: Create an Amazon S3 Bucket in the ElastiCache User Guide. Error Message: The S3 bucket %s does not exist. Solution: Create an Amazon S3 bucket in the same region as your snapshot. For more information, see Step 1: Create an Amazon S3 Bucket in the ElastiCache User Guide. Error Message: The S3 bucket %s is not owned by the authenticated user. Solution: Create an Amazon S3 bucket in the same region as your snapshot. For more information, see Step 1: Create an Amazon S3 Bucket in the ElastiCache User Guide. Error Message: The authenticated user does not have sufficient permissions to perform the desired activity. Solution: Contact your system administrator to get the needed permissions. Error Message: The S3 bucket %s already contains an object with key %s. Solution: Give the TargetSnapshotName a new and unique value. If exporting a snapshot, you could alternatively create a new Amazon S3 bucket and use this same value for TargetSnapshotName. Error Message: ElastiCache has not been granted READ permissions %s on the S3 Bucket. Solution: Add List and Read permissions on the bucket. For more information, see Step 2: Grant ElastiCache Access to Your Amazon S3 Bucket in the ElastiCache User Guide. Error Message: ElastiCache has not been granted WRITE permissions %s on the S3 Bucket. Solution: Add Upload/Delete permissions on the bucket. For more information, see Step 2: Grant ElastiCache Access to Your Amazon S3 Bucket in the ElastiCache User Guide. Error Message: ElastiCache has not been granted READ_ACP permissions %s on the S3 Bucket. Solution: Add View Permissions on the bucket. For more information, see Step 2: Grant ElastiCache Access to Your Amazon S3 Bucket in the ElastiCache User Guide."]
+       "Makes a copy of an existing snapshot. This operation is valid for Valkey or Redis OSS only. Users or groups that have permissions to use the CopySnapshot operation can create their own Amazon S3 buckets and copy snapshots to it. To control access to your snapshots, use an IAM policy to control who has the ability to use the CopySnapshot operation. For more information about using IAM to control the use of ElastiCache operations, see Exporting Snapshots and Authentication & Access Control. You could receive the following error messages. Error Messages Error Message: The S3 bucket %s is outside of the region. Solution: Create an Amazon S3 bucket in the same region as your snapshot. For more information, see Step 1: Create an Amazon S3 Bucket in the ElastiCache User Guide. Error Message: The S3 bucket %s does not exist. Solution: Create an Amazon S3 bucket in the same region as your snapshot. For more information, see Step 1: Create an Amazon S3 Bucket in the ElastiCache User Guide. Error Message: The S3 bucket %s is not owned by the authenticated user. Solution: Create an Amazon S3 bucket in the same region as your snapshot. For more information, see Step 1: Create an Amazon S3 Bucket in the ElastiCache User Guide. Error Message: The authenticated user does not have sufficient permissions to perform the desired activity. Solution: Contact your system administrator to get the needed permissions. Error Message: The S3 bucket %s already contains an object with key %s. Solution: Give the TargetSnapshotName a new and unique value. If exporting a snapshot, you could alternatively create a new Amazon S3 bucket and use this same value for TargetSnapshotName. Error Message: ElastiCache has not been granted READ permissions %s on the S3 Bucket. Solution: Add List and Read permissions on the bucket. For more information, see Step 2: Grant ElastiCache Access to Your Amazon S3 Bucket in the ElastiCache User Guide. Error Message: ElastiCache has not been granted WRITE permissions %s on the S3 Bucket. Solution: Add Upload/Delete permissions on the bucket. For more information, see Step 2: Grant ElastiCache Access to Your Amazon S3 Bucket in the ElastiCache User Guide. Error Message: ElastiCache has not been granted READ_ACP permissions %s on the S3 Bucket. Solution: Add View Permissions on the bucket. For more information, see Step 2: Grant ElastiCache Access to Your Amazon S3 Bucket in the ElastiCache User Guide."]
 module CopySnapshotMessage =
   struct
     type nonrec t =
@@ -18375,7 +21864,7 @@ module CopySnapshotMessage =
           "The name of an existing snapshot from which to make a copy."];
       targetSnapshotName: String_.t
         [@ocaml.doc
-          "A name for the snapshot copy. ElastiCache does not permit overwriting a snapshot, therefore this name must be unique within its context - ElastiCache or an Amazon S3 bucket if exporting."];
+          "A name for the snapshot copy. ElastiCache does not permit overwriting a snapshot, therefore this name must be unique within its context - ElastiCache or an Amazon S3 bucket if exporting. This value is stored as a lowercase string."];
       targetBucket: String_.t option
         [@ocaml.doc
           "The Amazon S3 bucket to which the snapshot is exported. This parameter is used only when exporting a snapshot for external access. When using this parameter to export a snapshot, be sure Amazon ElastiCache has the needed permissions to this S3 bucket. For more information, see Step 2: Grant ElastiCache Access to Your Amazon S3 Bucket in the Amazon ElastiCache User Guide. For more information, see Exporting a Snapshot in the Amazon ElastiCache User Guide."];
@@ -18424,18 +21913,242 @@ module CopySnapshotMessage =
       make ?tags ?kmsKeyId ?targetBucket ~targetSnapshotName
         ~sourceSnapshotName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let targetBucket = field_map json "TargetBucket" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let targetBucket = field_map json__ "TargetBucket" String_.of_json in
       let targetSnapshotName =
-        field_map_exn json "TargetSnapshotName" String_.of_json in
+        field_map_exn json__ "TargetSnapshotName" String_.of_json in
       let sourceSnapshotName =
-        field_map_exn json "SourceSnapshotName" String_.of_json in
+        field_map_exn json__ "SourceSnapshotName" String_.of_json in
       make ?tags ?kmsKeyId ?targetBucket ~targetSnapshotName
         ~sourceSnapshotName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a CopySnapshotMessage operation."]
+module CopyServerlessCacheSnapshotResponse =
+  struct
+    type copyServerlessCacheSnapshotResult =
+      {
+      serverlessCacheSnapshot: ServerlessCacheSnapshot.t option
+        [@ocaml.doc
+          "The response for the attempt to copy the serverless cache snapshot. Available for Valkey, Redis OSS and Serverless Memcached only."]}
+    and responseMetaData = unit
+    and t =
+      {
+      copyServerlessCacheSnapshotResult: copyServerlessCacheSnapshotResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `InvalidParameterCombinationException of
+          InvalidParameterCombinationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `InvalidServerlessCacheSnapshotStateFault of
+          InvalidServerlessCacheSnapshotStateFault.t 
+      | `ServerlessCacheSnapshotAlreadyExistsFault of
+          ServerlessCacheSnapshotAlreadyExistsFault.t 
+      | `ServerlessCacheSnapshotNotFoundFault of
+          ServerlessCacheSnapshotNotFoundFault.t 
+      | `ServerlessCacheSnapshotQuotaExceededFault of
+          ServerlessCacheSnapshotQuotaExceededFault.t 
+      | `ServiceLinkedRoleNotFoundFault of ServiceLinkedRoleNotFoundFault.t 
+      | `TagQuotaPerResourceExceeded of TagQuotaPerResourceExceeded.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "CopyServerlessCacheSnapshotResponse"
+    let make ?serverlessCacheSnapshot =
+      fun () ->
+        {
+          copyServerlessCacheSnapshotResult = { serverlessCacheSnapshot };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "InvalidServerlessCacheSnapshotStateFault" ->
+          `InvalidServerlessCacheSnapshotStateFault
+            (InvalidServerlessCacheSnapshotStateFault.of_json json)
+      | "ServerlessCacheSnapshotAlreadyExistsFault" ->
+          `ServerlessCacheSnapshotAlreadyExistsFault
+            (ServerlessCacheSnapshotAlreadyExistsFault.of_json json)
+      | "ServerlessCacheSnapshotNotFoundFault" ->
+          `ServerlessCacheSnapshotNotFoundFault
+            (ServerlessCacheSnapshotNotFoundFault.of_json json)
+      | "ServerlessCacheSnapshotQuotaExceededFault" ->
+          `ServerlessCacheSnapshotQuotaExceededFault
+            (ServerlessCacheSnapshotQuotaExceededFault.of_json json)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_json json)
+      | "TagQuotaPerResourceExceeded" ->
+          `TagQuotaPerResourceExceeded
+            (TagQuotaPerResourceExceeded.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterCombinationException" ->
+          `InvalidParameterCombinationException
+            (InvalidParameterCombinationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "InvalidServerlessCacheSnapshotStateFault" ->
+          `InvalidServerlessCacheSnapshotStateFault
+            (InvalidServerlessCacheSnapshotStateFault.of_xml xml)
+      | "ServerlessCacheSnapshotAlreadyExistsFault" ->
+          `ServerlessCacheSnapshotAlreadyExistsFault
+            (ServerlessCacheSnapshotAlreadyExistsFault.of_xml xml)
+      | "ServerlessCacheSnapshotNotFoundFault" ->
+          `ServerlessCacheSnapshotNotFoundFault
+            (ServerlessCacheSnapshotNotFoundFault.of_xml xml)
+      | "ServerlessCacheSnapshotQuotaExceededFault" ->
+          `ServerlessCacheSnapshotQuotaExceededFault
+            (ServerlessCacheSnapshotQuotaExceededFault.of_xml xml)
+      | "ServiceLinkedRoleNotFoundFault" ->
+          `ServiceLinkedRoleNotFoundFault
+            (ServiceLinkedRoleNotFoundFault.of_xml xml)
+      | "TagQuotaPerResourceExceeded" ->
+          `TagQuotaPerResourceExceeded
+            (TagQuotaPerResourceExceeded.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterCombinationException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterCombinationException"));
+            ("details", (InvalidParameterCombinationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `InvalidServerlessCacheSnapshotStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidServerlessCacheSnapshotStateFault"));
+            ("details", (InvalidServerlessCacheSnapshotStateFault.to_json e))]
+      | `ServerlessCacheSnapshotAlreadyExistsFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheSnapshotAlreadyExistsFault"));
+            ("details",
+              (ServerlessCacheSnapshotAlreadyExistsFault.to_json e))]
+      | `ServerlessCacheSnapshotNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheSnapshotNotFoundFault"));
+            ("details", (ServerlessCacheSnapshotNotFoundFault.to_json e))]
+      | `ServerlessCacheSnapshotQuotaExceededFault e ->
+          `Assoc
+            [("error", (`String "ServerlessCacheSnapshotQuotaExceededFault"));
+            ("details",
+              (ServerlessCacheSnapshotQuotaExceededFault.to_json e))]
+      | `ServiceLinkedRoleNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ServiceLinkedRoleNotFoundFault"));
+            ("details", (ServiceLinkedRoleNotFoundFault.to_json e))]
+      | `TagQuotaPerResourceExceeded e ->
+          `Assoc
+            [("error", (`String "TagQuotaPerResourceExceeded"));
+            ("details", (TagQuotaPerResourceExceeded.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.copyServerlessCacheSnapshotResult in
+      structure_to_wrapped_value
+        [("ServerlessCacheSnapshot",
+           (Option.map x.serverlessCacheSnapshot
+              ~f:ServerlessCacheSnapshot.to_value))]
+        ~wrapper:"CopyServerlessCacheSnapshotResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "CopyServerlessCacheSnapshotResult" in
+      let serverlessCacheSnapshot =
+        (Option.map ~f:ServerlessCacheSnapshot.of_xml)
+          (Xml.child xml_arg0 "ServerlessCacheSnapshot") in
+      make ?serverlessCacheSnapshot ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serverlessCacheSnapshot =
+        field_map json__ "ServerlessCacheSnapshot"
+          ServerlessCacheSnapshot.of_json in
+      make ?serverlessCacheSnapshot ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a copy of an existing serverless cache\226\128\153s snapshot. Available for Valkey, Redis OSS and Serverless Memcached only."]
+module CopyServerlessCacheSnapshotRequest =
+  struct
+    type nonrec t =
+      {
+      sourceServerlessCacheSnapshotName: String_.t
+        [@ocaml.doc
+          "The identifier of the existing serverless cache\226\128\153s snapshot to be copied. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      targetServerlessCacheSnapshotName: String_.t
+        [@ocaml.doc
+          "The identifier for the snapshot to be created. Available for Valkey, Redis OSS and Serverless Memcached only. This value is stored as a lowercase string."];
+      kmsKeyId: String_.t option
+        [@ocaml.doc
+          "The identifier of the KMS key used to encrypt the target snapshot. Available for Valkey, Redis OSS and Serverless Memcached only."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of tags to be added to the target snapshot resource. A tag is a key-value pair. Available for Valkey, Redis OSS and Serverless Memcached only. Default: NULL"]}
+    let context_ = "CopyServerlessCacheSnapshotRequest"
+    let make ?kmsKeyId =
+      fun ?tags ->
+        fun ~sourceServerlessCacheSnapshotName ->
+          fun ~targetServerlessCacheSnapshotName ->
+            fun () ->
+              {
+                kmsKeyId;
+                tags;
+                sourceServerlessCacheSnapshotName;
+                targetServerlessCacheSnapshotName
+              }
+    let to_value x =
+      structure_to_value
+        [("SourceServerlessCacheSnapshotName",
+           (Some (String_.to_value x.sourceServerlessCacheSnapshotName)));
+        ("TargetServerlessCacheSnapshotName",
+          (Some (String_.to_value x.targetServerlessCacheSnapshotName)));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:String_.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let kmsKeyId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
+      let targetServerlessCacheSnapshotName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "TargetServerlessCacheSnapshotName") in
+      let sourceServerlessCacheSnapshotName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "SourceServerlessCacheSnapshotName") in
+      make ?tags ?kmsKeyId ~targetServerlessCacheSnapshotName
+        ~sourceServerlessCacheSnapshotName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let targetServerlessCacheSnapshotName =
+        field_map_exn json__ "TargetServerlessCacheSnapshotName"
+          String_.of_json in
+      let sourceServerlessCacheSnapshotName =
+        field_map_exn json__ "SourceServerlessCacheSnapshotName"
+          String_.of_json in
+      make ?tags ?kmsKeyId ~targetServerlessCacheSnapshotName
+        ~sourceServerlessCacheSnapshotName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a copy of an existing serverless cache\226\128\153s snapshot. Available for Valkey, Redis OSS and Serverless Memcached only."]
 module CompleteMigrationResponse =
   struct
     type completeMigrationResult =
@@ -18522,9 +22235,9 @@ module CompleteMigrationResponse =
           (Xml.child xml_arg0 "ReplicationGroup") in
       make ?replicationGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationGroup =
-        field_map json "ReplicationGroup" ReplicationGroup.of_json in
+        field_map json__ "ReplicationGroup" ReplicationGroup.of_json in
       make ?replicationGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Complete the migration of data."]
@@ -18554,10 +22267,10 @@ module CompleteMigrationMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ReplicationGroupId") in
       make ?force ~replicationGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let force = field_map json "Force" Boolean.of_json in
+    let of_json json__ =
+      let force = field_map json__ "Force" Boolean.of_json in
       let replicationGroupId =
-        field_map_exn json "ReplicationGroupId" String_.of_json in
+        field_map_exn json__ "ReplicationGroupId" String_.of_json in
       make ?force ~replicationGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Complete the migration of data."]
@@ -18632,10 +22345,10 @@ module CacheSubnetGroupMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?cacheSubnetGroups ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheSubnetGroups =
-        field_map json "CacheSubnetGroups" CacheSubnetGroups.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "CacheSubnetGroups" CacheSubnetGroups.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?cacheSubnetGroups ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18748,10 +22461,10 @@ module CacheSecurityGroupMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?cacheSecurityGroups ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheSecurityGroups =
-        field_map json "CacheSecurityGroups" CacheSecurityGroups.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "CacheSecurityGroups" CacheSecurityGroups.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?cacheSecurityGroups ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18855,10 +22568,11 @@ module CacheParameterGroupsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?cacheParameterGroups ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheParameterGroups =
-        field_map json "CacheParameterGroups" CacheParameterGroupList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "CacheParameterGroups"
+          CacheParameterGroupList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?cacheParameterGroups ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18975,9 +22689,9 @@ module CacheParameterGroupNameMessage =
           (Xml.child xml_arg0 "CacheParameterGroupName") in
       make ?cacheParameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheParameterGroupName =
-        field_map json "CacheParameterGroupName" String_.of_json in
+        field_map json__ "CacheParameterGroupName" String_.of_json in
       make ?cacheParameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19087,12 +22801,12 @@ module CacheParameterGroupDetails =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?cacheNodeTypeSpecificParameters ?parameters ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheNodeTypeSpecificParameters =
-        field_map json "CacheNodeTypeSpecificParameters"
+        field_map json__ "CacheNodeTypeSpecificParameters"
           CacheNodeTypeSpecificParametersList.of_json in
-      let parameters = field_map json "Parameters" ParametersList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+      let parameters = field_map json__ "Parameters" ParametersList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?cacheNodeTypeSpecificParameters ?parameters ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19158,10 +22872,10 @@ module CacheEngineVersionMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?cacheEngineVersions ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheEngineVersions =
-        field_map json "CacheEngineVersions" CacheEngineVersionList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "CacheEngineVersions" CacheEngineVersionList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?cacheEngineVersions ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19257,10 +22971,10 @@ module CacheClusterMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?cacheClusters ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheClusters =
-        field_map json "CacheClusters" CacheClusterList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "CacheClusters" CacheClusterList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?cacheClusters ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19302,13 +23016,13 @@ module BatchStopUpdateActionMessage =
           (Xml.child xml_arg0 "ReplicationGroupIds") in
       make ~serviceUpdateName ?cacheClusterIds ?replicationGroupIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceUpdateName =
-        field_map_exn json "ServiceUpdateName" String_.of_json in
+        field_map_exn json__ "ServiceUpdateName" String_.of_json in
       let cacheClusterIds =
-        field_map json "CacheClusterIds" CacheClusterIdList.of_json in
+        field_map json__ "CacheClusterIds" CacheClusterIdList.of_json in
       let replicationGroupIds =
-        field_map json "ReplicationGroupIds" ReplicationGroupIdList.of_json in
+        field_map json__ "ReplicationGroupIds" ReplicationGroupIdList.of_json in
       make ~serviceUpdateName ?cacheClusterIds ?replicationGroupIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19350,13 +23064,13 @@ module BatchApplyUpdateActionMessage =
           (Xml.child xml_arg0 "ReplicationGroupIds") in
       make ~serviceUpdateName ?cacheClusterIds ?replicationGroupIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceUpdateName =
-        field_map_exn json "ServiceUpdateName" String_.of_json in
+        field_map_exn json__ "ServiceUpdateName" String_.of_json in
       let cacheClusterIds =
-        field_map json "CacheClusterIds" CacheClusterIdList.of_json in
+        field_map json__ "CacheClusterIds" CacheClusterIdList.of_json in
       let replicationGroupIds =
-        field_map json "ReplicationGroupIds" ReplicationGroupIdList.of_json in
+        field_map json__ "ReplicationGroupIds" ReplicationGroupIdList.of_json in
       make ~serviceUpdateName ?cacheClusterIds ?replicationGroupIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19472,9 +23186,9 @@ module AuthorizeCacheSecurityGroupIngressResult =
           (Xml.child xml_arg0 "CacheSecurityGroup") in
       make ?cacheSecurityGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheSecurityGroup =
-        field_map json "CacheSecurityGroup" CacheSecurityGroup.of_json in
+        field_map json__ "CacheSecurityGroup" CacheSecurityGroup.of_json in
       make ?cacheSecurityGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19523,13 +23237,13 @@ module AuthorizeCacheSecurityGroupIngressMessage =
       make ~eC2SecurityGroupOwnerId ~eC2SecurityGroupName
         ~cacheSecurityGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eC2SecurityGroupOwnerId =
-        field_map_exn json "EC2SecurityGroupOwnerId" String_.of_json in
+        field_map_exn json__ "EC2SecurityGroupOwnerId" String_.of_json in
       let eC2SecurityGroupName =
-        field_map_exn json "EC2SecurityGroupName" String_.of_json in
+        field_map_exn json__ "EC2SecurityGroupName" String_.of_json in
       let cacheSecurityGroupName =
-        field_map_exn json "CacheSecurityGroupName" String_.of_json in
+        field_map_exn json__ "CacheSecurityGroupName" String_.of_json in
       make ~eC2SecurityGroupOwnerId ~eC2SecurityGroupName
         ~cacheSecurityGroupName ()
     let to_json v = composed_to_json to_value v
@@ -19541,10 +23255,10 @@ module AllowedNodeTypeModificationsMessage =
       {
       scaleUpModifications: NodeTypeList.t option
         [@ocaml.doc
-          "A string list, each element of which specifies a cache node type which you can use to scale your cluster or replication group. When scaling up a Redis cluster or replication group using ModifyCacheCluster or ModifyReplicationGroup, use a value from this list for the CacheNodeType parameter."];
+          "A string list, each element of which specifies a cache node type which you can use to scale your cluster or replication group. When scaling up a Valkey or Redis OSS cluster or replication group using ModifyCacheCluster or ModifyReplicationGroup, use a value from this list for the CacheNodeType parameter."];
       scaleDownModifications: NodeTypeList.t option
         [@ocaml.doc
-          "A string list, each element of which specifies a cache node type which you can use to scale your cluster or replication group. When scaling down a Redis cluster or replication group using ModifyCacheCluster or ModifyReplicationGroup, use a value from this list for the CacheNodeType parameter."]}
+          "A string list, each element of which specifies a cache node type which you can use to scale your cluster or replication group. When scaling down a Valkey or Redis OSS cluster or replication group using ModifyCacheCluster or ModifyReplicationGroup, use a value from this list for the CacheNodeType parameter."]}
     and responseMetaData = unit
     and t =
       {
@@ -19643,11 +23357,11 @@ module AllowedNodeTypeModificationsMessage =
           (Xml.child xml_arg0 "ScaleUpModifications") in
       make ?scaleDownModifications ?scaleUpModifications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scaleDownModifications =
-        field_map json "ScaleDownModifications" NodeTypeList.of_json in
+        field_map json__ "ScaleDownModifications" NodeTypeList.of_json in
       let scaleUpModifications =
-        field_map json "ScaleUpModifications" NodeTypeList.of_json in
+        field_map json__ "ScaleUpModifications" NodeTypeList.of_json in
       make ?scaleDownModifications ?scaleUpModifications ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19677,9 +23391,9 @@ module AddTagsToResourceMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ~tags ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceName = field_map_exn json "ResourceName" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceName = field_map_exn json__ "ResourceName" String_.of_json in
       make ~tags ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of an AddTagsToResource operation."]

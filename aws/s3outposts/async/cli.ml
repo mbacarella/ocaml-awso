@@ -99,6 +99,26 @@ let list_endpoints =
            (Values.ListEndpointsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListEndpointsResult.to_json)
            (Some Values.ListEndpointsResult.error_to_json)])
+let list_outposts_with_s3 =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_outposts_with_s3
+           (Values.ListOutpostsWithS3Request.make ?nextToken ?maxResults ())
+           (Some Values.ListOutpostsWithS3Result.to_json)
+           (Some Values.ListOutpostsWithS3Result.error_to_json)])
 let list_shared_endpoints =
   Command.async ~summary:""
     ([%map_open.Command
@@ -127,4 +147,5 @@ let main =
     [("create-endpoint", create_endpoint);
     ("delete-endpoint", delete_endpoint);
     ("list-endpoints", list_endpoints);
+    ("list-outposts-with-s3", list_outposts_with_s3);
     ("list-shared-endpoints", list_shared_endpoints)]

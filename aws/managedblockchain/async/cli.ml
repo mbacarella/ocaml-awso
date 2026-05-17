@@ -28,6 +28,35 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let create_accessor =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON InputTagMap"
+       and networkType =
+         flag "network-type" (optional json_arg)
+           ~doc:"JSON AccessorNetworkType"
+       and clientRequestToken =
+         flag "client-request-token" (required string)
+           ~doc:"STRING ClientRequestTokenString"
+       and accessorType =
+         flag "accessor-type" (required json_arg) ~doc:"JSON AccessorType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_accessor
+           (Values.CreateAccessorInput.make
+              ?tags:(Option.map ~f:Values.InputTagMap.of_json tags)
+              ?networkType:(Option.map ~f:Values.AccessorNetworkType.of_json
+                              networkType) ~clientRequestToken
+              ~accessorType:(Values.AccessorType.of_json accessorType) ())
+           (Some Values.CreateAccessorOutput.to_json)
+           (Some Values.CreateAccessorOutput.error_to_json)])
 let create_member =
   Command.async ~summary:""
     ([%map_open.Command
@@ -166,6 +195,24 @@ let create_proposal =
               ~actions:(Values.ProposalActions.of_json actions) ())
            (Some Values.CreateProposalOutput.to_json)
            (Some Values.CreateProposalOutput.error_to_json)])
+let delete_accessor =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accessorId =
+         flag "accessor-id" (required string) ~doc:"STRING ResourceIdString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_accessor
+           (Values.DeleteAccessorInput.make ~accessorId ())
+           (Some Values.DeleteAccessorOutput.to_json)
+           (Some Values.DeleteAccessorOutput.error_to_json)])
 let delete_member =
   Command.async ~summary:""
     ([%map_open.Command
@@ -208,6 +255,23 @@ let delete_node =
            (Values.DeleteNodeInput.make ?memberId ~networkId ~nodeId ())
            (Some Values.DeleteNodeOutput.to_json)
            (Some Values.DeleteNodeOutput.error_to_json)])
+let get_accessor =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accessorId =
+         flag "accessor-id" (required string) ~doc:"STRING ResourceIdString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_accessor (Values.GetAccessorInput.make ~accessorId ())
+           (Some Values.GetAccessorOutput.to_json)
+           (Some Values.GetAccessorOutput.error_to_json)])
 let get_member =
   Command.async ~summary:""
     ([%map_open.Command
@@ -286,6 +350,31 @@ let get_proposal =
            (Values.GetProposalInput.make ~networkId ~proposalId ())
            (Some Values.GetProposalOutput.to_json)
            (Some Values.GetProposalOutput.error_to_json)])
+let list_accessors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT AccessorListMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and networkType =
+         flag "network-type" (optional json_arg)
+           ~doc:"JSON AccessorNetworkType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_accessors
+           (Values.ListAccessorsInput.make ?maxResults ?nextToken
+              ?networkType:(Option.map ~f:Values.AccessorNetworkType.of_json
+                              networkType) ())
+           (Some Values.ListAccessorsOutput.to_json)
+           (Some Values.ListAccessorsOutput.error_to_json)])
 let list_invitations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -597,16 +686,20 @@ let vote_on_proposal =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-member", create_member);
+    [("create-accessor", create_accessor);
+    ("create-member", create_member);
     ("create-network", create_network);
     ("create-node", create_node);
     ("create-proposal", create_proposal);
+    ("delete-accessor", delete_accessor);
     ("delete-member", delete_member);
     ("delete-node", delete_node);
+    ("get-accessor", get_accessor);
     ("get-member", get_member);
     ("get-network", get_network);
     ("get-node", get_node);
     ("get-proposal", get_proposal);
+    ("list-accessors", list_accessors);
     ("list-invitations", list_invitations);
     ("list-members", list_members);
     ("list-networks", list_networks);

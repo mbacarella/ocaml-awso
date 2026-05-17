@@ -11,8 +11,12 @@ type ('i, 'o, 'e) t =
   ListRulesResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | LockRule: (LockRuleRequest.t, LockRuleResponse.t, LockRuleResponse.error)
+  t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
+  | UnlockRule: (UnlockRuleRequest.t, UnlockRuleResponse.t,
+  UnlockRuleResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
   | UpdateRule: (UpdateRuleRequest.t, UpdateRuleResponse.t,
@@ -24,7 +28,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetRule -> `GET
   | ListRules -> `POST
   | ListTagsForResource -> `GET
+  | LockRule -> `PATCH
   | TagResource -> `POST
+  | UnlockRule -> `PATCH
   | UntagResource -> `DELETE
   | UpdateRule -> `PATCH
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -41,9 +47,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (RuleArn.to_header x.ListTagsForResourceRequest.resourceArn)
+      | LockRule ->
+          (Format.kasprintf Uri.of_string) "/rules/%s/lock"
+            (RuleIdentifier.to_header x.LockRuleRequest.identifier)
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (RuleArn.to_header x.TagResourceRequest.resourceArn)
+      | UnlockRule ->
+          (Format.kasprintf Uri.of_string) "/rules/%s/unlock"
+            (RuleIdentifier.to_header x.UnlockRuleRequest.identifier)
       | UntagResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/tags/%s"
@@ -81,7 +93,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                              req.CreateRuleRequest.resourceType));
                       Option.map req.CreateRuleRequest.resourceTags
                         ~f:(fun x ->
-                              ("ResourceTags", (ResourceTags.to_value x)))])
+                              ("ResourceTags", (ResourceTags.to_value x)));
+                      Option.map req.CreateRuleRequest.lockConfiguration
+                        ~f:(fun x ->
+                              ("LockConfiguration",
+                                (LockConfiguration.to_value x)));
+                      Option.map req.CreateRuleRequest.excludeResourceTags
+                        ~f:(fun x ->
+                              ("ExcludeResourceTags",
+                                (ExcludeResourceTags.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -112,7 +132,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                              req.ListRulesRequest.resourceType));
                       Option.map req.ListRulesRequest.resourceTags
                         ~f:(fun x ->
-                              ("ResourceTags", (ResourceTags.to_value x)))])
+                              ("ResourceTags", (ResourceTags.to_value x)));
+                      Option.map req.ListRulesRequest.lockState
+                        ~f:(fun x -> ("LockState", (LockState.to_value x)));
+                      Option.map req.ListRulesRequest.excludeResourceTags
+                        ~f:(fun x ->
+                              ("ExcludeResourceTags",
+                                (ExcludeResourceTags.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -123,6 +149,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | LockRule -> Awso.Http.Request.make (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
         let headers =
@@ -142,6 +169,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UnlockRule -> Awso.Http.Request.make (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateRule -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
@@ -217,6 +245,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | LockRule ->
+      if is_success
+      then Ok (LockRuleResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some LockRuleResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -224,6 +256,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (TagResourceResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | UnlockRule ->
+      if is_success
+      then Ok (UnlockRuleResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UnlockRuleResponse.error_of_json))
   | UntagResource ->
       if is_success
       then

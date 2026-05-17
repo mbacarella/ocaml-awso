@@ -66,6 +66,9 @@ module Zz__listOf__string =
   struct
     type nonrec t = Zz__string.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__string.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -148,16 +151,15 @@ module ParameterDefinition =
       minValue: Zz__integer.t option
         [@ocaml.doc
           "A numeric value that determines the smallest numeric value that you want to allow for Number types."];
-      name: Zz__string.t [@ocaml.doc "The name of the parameter."];
+      name: Zz__string.t option [@ocaml.doc "The name of the parameter."];
       noEcho: Zz__boolean.t option
         [@ocaml.doc
           "Whether to mask the parameter value whenever anyone makes a call that describes the stack. If you set the value to true, the parameter value is masked with asterisks (*****)."];
-      referencedByResources: Zz__listOf__string.t
+      referencedByResources: Zz__listOf__string.t option
         [@ocaml.doc "A list of AWS SAM resources that use this parameter."];
       type_: Zz__string.t option
         [@ocaml.doc
           "The type of the parameter.Valid values: String | Number | List<Number> | CommaDelimitedList String: A literal string.For example, users can specify \"MyUserName\". Number: An integer or float. AWS CloudFormation validates the parameter value as a number. However, when you use the parameter elsewhere in your template (for example, by using the Ref intrinsic function), the parameter value becomes a string.For example, users might specify \"8888\". List<Number>: An array of integers or floats that are separated by commas. AWS CloudFormation validates the parameter value as numbers. However, when you use the parameter elsewhere in your template (for example, by using the Ref intrinsic function), the parameter value becomes a list of strings.For example, users might specify \"80,20\", and then Ref results in \\[\"80\",\"20\"\\]. CommaDelimitedList: An array of literal strings that are separated by commas. The total number of strings should be one more than the total number of commas. Also, each member string is space-trimmed.For example, users might specify \"test,dev,prod\", and then Ref results in \\[\"test\",\"dev\",\"prod\"\\]."]}
-    let context_ = "ParameterDefinition"
     let make ?allowedPattern =
       fun ?allowedValues ->
         fun ?constraintDescription ->
@@ -167,10 +169,10 @@ module ParameterDefinition =
                 fun ?maxValue ->
                   fun ?minLength ->
                     fun ?minValue ->
-                      fun ?noEcho ->
-                        fun ?type_ ->
-                          fun ~name ->
-                            fun ~referencedByResources ->
+                      fun ?name ->
+                        fun ?noEcho ->
+                          fun ?referencedByResources ->
+                            fun ?type_ ->
                               fun () ->
                                 {
                                   allowedPattern;
@@ -182,10 +184,10 @@ module ParameterDefinition =
                                   maxValue;
                                   minLength;
                                   minValue;
-                                  noEcho;
-                                  type_;
                                   name;
-                                  referencedByResources
+                                  noEcho;
+                                  referencedByResources;
+                                  type_
                                 }
     let to_value x =
       structure_to_value
@@ -201,22 +203,22 @@ module ParameterDefinition =
         ("maxValue", (Option.map x.maxValue ~f:Zz__integer.to_value));
         ("minLength", (Option.map x.minLength ~f:Zz__integer.to_value));
         ("minValue", (Option.map x.minValue ~f:Zz__integer.to_value));
-        ("name", (Some (Zz__string.to_value x.name)));
+        ("name", (Option.map x.name ~f:Zz__string.to_value));
         ("noEcho", (Option.map x.noEcho ~f:Zz__boolean.to_value));
         ("referencedByResources",
-          (Some (Zz__listOf__string.to_value x.referencedByResources)));
+          (Option.map x.referencedByResources ~f:Zz__listOf__string.to_value));
         ("type", (Option.map x.type_ ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let type_ =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "type") in
       let referencedByResources =
-        Zz__listOf__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "referencedByResources") in
+        (Option.map ~f:Zz__listOf__string.of_xml)
+          (Xml.child xml_arg0 "referencedByResources") in
       let noEcho =
         (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "noEcho") in
       let name =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "name") in
       let minValue =
         (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "minValue") in
       let minLength =
@@ -238,28 +240,29 @@ module ParameterDefinition =
       let allowedPattern =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "allowedPattern") in
-      make ?type_ ~referencedByResources ?noEcho ~name ?minValue ?minLength
+      make ?type_ ?referencedByResources ?noEcho ?name ?minValue ?minLength
         ?maxValue ?maxLength ?description ?defaultValue
         ?constraintDescription ?allowedValues ?allowedPattern ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" Zz__string.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" Zz__string.of_json in
       let referencedByResources =
-        field_map_exn json "ReferencedByResources" Zz__listOf__string.of_json in
-      let noEcho = field_map json "NoEcho" Zz__boolean.of_json in
-      let name = field_map_exn json "Name" Zz__string.of_json in
-      let minValue = field_map json "MinValue" Zz__integer.of_json in
-      let minLength = field_map json "MinLength" Zz__integer.of_json in
-      let maxValue = field_map json "MaxValue" Zz__integer.of_json in
-      let maxLength = field_map json "MaxLength" Zz__integer.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let defaultValue = field_map json "DefaultValue" Zz__string.of_json in
+        field_map json__ "ReferencedByResources" Zz__listOf__string.of_json in
+      let noEcho = field_map json__ "NoEcho" Zz__boolean.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
+      let minValue = field_map json__ "MinValue" Zz__integer.of_json in
+      let minLength = field_map json__ "MinLength" Zz__integer.of_json in
+      let maxValue = field_map json__ "MaxValue" Zz__integer.of_json in
+      let maxLength = field_map json__ "MaxLength" Zz__integer.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let defaultValue = field_map json__ "DefaultValue" Zz__string.of_json in
       let constraintDescription =
-        field_map json "ConstraintDescription" Zz__string.of_json in
+        field_map json__ "ConstraintDescription" Zz__string.of_json in
       let allowedValues =
-        field_map json "AllowedValues" Zz__listOf__string.of_json in
-      let allowedPattern = field_map json "AllowedPattern" Zz__string.of_json in
-      make ?type_ ~referencedByResources ?noEcho ~name ?minValue ?minLength
+        field_map json__ "AllowedValues" Zz__listOf__string.of_json in
+      let allowedPattern =
+        field_map json__ "AllowedPattern" Zz__string.of_json in
+      make ?type_ ?referencedByResources ?noEcho ?name ?minValue ?minLength
         ?maxValue ?maxLength ?description ?defaultValue
         ?constraintDescription ?allowedValues ?allowedPattern ()
     let to_json v = composed_to_json to_value v
@@ -288,9 +291,9 @@ module RollbackTrigger =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~type_ ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" Zz__string.of_json in
-      let arn = field_map_exn json "Arn" Zz__string.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" Zz__string.of_json in
+      let arn = field_map_exn json__ "Arn" Zz__string.of_json in
       make ~type_ ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -299,6 +302,9 @@ module Zz__listOfCapability =
   struct
     type nonrec t = Capability.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Capability.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -323,6 +329,9 @@ module Zz__listOfParameterDefinition =
   struct
     type nonrec t = ParameterDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterDefinition.to_value)) |>
         (fun x -> `List x)
@@ -388,13 +397,13 @@ module ApplicationPolicyStatement =
           (Xml.child_exn ~context:context_ xml_arg0 "actions") in
       make ?statementId ~principals ?principalOrgIDs ~actions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statementId = field_map json "StatementId" Zz__string.of_json in
+    let of_json json__ =
+      let statementId = field_map json__ "StatementId" Zz__string.of_json in
       let principals =
-        field_map_exn json "Principals" Zz__listOf__string.of_json in
+        field_map_exn json__ "Principals" Zz__listOf__string.of_json in
       let principalOrgIDs =
-        field_map json "PrincipalOrgIDs" Zz__listOf__string.of_json in
-      let actions = field_map_exn json "Actions" Zz__listOf__string.of_json in
+        field_map json__ "PrincipalOrgIDs" Zz__listOf__string.of_json in
+      let actions = field_map_exn json__ "Actions" Zz__listOf__string.of_json in
       make ?statementId ~principals ?principalOrgIDs ~actions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Policy statement applied to the application."]
@@ -402,14 +411,14 @@ module ApplicationSummary =
   struct
     type nonrec t =
       {
-      applicationId: Zz__string.t
+      applicationId: Zz__string.t option
         [@ocaml.doc "The application Amazon Resource Name (ARN)."];
-      author: Zz__string.t
+      author: Zz__string.t option
         [@ocaml.doc
           "The name of the author publishing the app.Minimum length=1. Maximum length=127.Pattern \"^\\[a-z0-9\\]((\\[a-z0-9\\]|-(?!-))*\\[a-z0-9\\])?$\";"];
       creationTime: Zz__string.t option
         [@ocaml.doc "The date and time this resource was created."];
-      description: Zz__string.t
+      description: Zz__string.t option
         [@ocaml.doc
           "The description of the application.Minimum length=1. Maximum length=256"];
       homePageUrl: Zz__string.t option
@@ -418,40 +427,40 @@ module ApplicationSummary =
       labels: Zz__listOf__string.t option
         [@ocaml.doc
           "Labels to improve discovery of apps in search results.Minimum length=1. Maximum length=127. Maximum number of labels: 10Pattern: \"^\\[a-zA-Z0-9+\\\\-_:\\\\/\\@\\]+$\";"];
-      name: Zz__string.t
+      name: Zz__string.t option
         [@ocaml.doc
           "The name of the application.Minimum length=1. Maximum length=140Pattern: \"\\[a-zA-Z0-9\\\\-\\]+\";"];
       spdxLicenseId: Zz__string.t option
         [@ocaml.doc "A valid identifier from https://spdx.org/licenses/."]}
-    let context_ = "ApplicationSummary"
-    let make ?creationTime =
-      fun ?homePageUrl ->
-        fun ?labels ->
-          fun ?spdxLicenseId ->
-            fun ~applicationId ->
-              fun ~author ->
-                fun ~description ->
-                  fun ~name ->
+    let make ?applicationId =
+      fun ?author ->
+        fun ?creationTime ->
+          fun ?description ->
+            fun ?homePageUrl ->
+              fun ?labels ->
+                fun ?name ->
+                  fun ?spdxLicenseId ->
                     fun () ->
                       {
-                        creationTime;
-                        homePageUrl;
-                        labels;
-                        spdxLicenseId;
                         applicationId;
                         author;
+                        creationTime;
                         description;
-                        name
+                        homePageUrl;
+                        labels;
+                        name;
+                        spdxLicenseId
                       }
     let to_value x =
       structure_to_value
-        [("applicationId", (Some (Zz__string.to_value x.applicationId)));
-        ("author", (Some (Zz__string.to_value x.author)));
+        [("applicationId",
+           (Option.map x.applicationId ~f:Zz__string.to_value));
+        ("author", (Option.map x.author ~f:Zz__string.to_value));
         ("creationTime", (Option.map x.creationTime ~f:Zz__string.to_value));
-        ("description", (Some (Zz__string.to_value x.description)));
+        ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("homePageUrl", (Option.map x.homePageUrl ~f:Zz__string.to_value));
         ("labels", (Option.map x.labels ~f:Zz__listOf__string.to_value));
-        ("name", (Some (Zz__string.to_value x.name)));
+        ("name", (Option.map x.name ~f:Zz__string.to_value));
         ("spdxLicenseId",
           (Option.map x.spdxLicenseId ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
@@ -460,65 +469,64 @@ module ApplicationSummary =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "spdxLicenseId") in
       let name =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "name") in
       let labels =
         (Option.map ~f:Zz__listOf__string.of_xml)
           (Xml.child xml_arg0 "labels") in
       let homePageUrl =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "homePageUrl") in
       let description =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "description") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
       let creationTime =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "creationTime") in
       let author =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "author") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "author") in
       let applicationId =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
-      make ?spdxLicenseId ~name ?labels ?homePageUrl ~description
-        ?creationTime ~author ~applicationId ()
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "applicationId") in
+      make ?spdxLicenseId ?name ?labels ?homePageUrl ?description
+        ?creationTime ?author ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let spdxLicenseId = field_map json "SpdxLicenseId" Zz__string.of_json in
-      let name = field_map_exn json "Name" Zz__string.of_json in
-      let labels = field_map json "Labels" Zz__listOf__string.of_json in
-      let homePageUrl = field_map json "HomePageUrl" Zz__string.of_json in
-      let description = field_map_exn json "Description" Zz__string.of_json in
-      let creationTime = field_map json "CreationTime" Zz__string.of_json in
-      let author = field_map_exn json "Author" Zz__string.of_json in
-      let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
-      make ?spdxLicenseId ~name ?labels ?homePageUrl ~description
-        ?creationTime ~author ~applicationId ()
+    let of_json json__ =
+      let spdxLicenseId = field_map json__ "SpdxLicenseId" Zz__string.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
+      let labels = field_map json__ "Labels" Zz__listOf__string.of_json in
+      let homePageUrl = field_map json__ "HomePageUrl" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let creationTime = field_map json__ "CreationTime" Zz__string.of_json in
+      let author = field_map json__ "Author" Zz__string.of_json in
+      let applicationId = field_map json__ "ApplicationId" Zz__string.of_json in
+      make ?spdxLicenseId ?name ?labels ?homePageUrl ?description
+        ?creationTime ?author ?applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary of details about the application."]
 module VersionSummary =
   struct
     type nonrec t =
       {
-      applicationId: Zz__string.t
+      applicationId: Zz__string.t option
         [@ocaml.doc "The application Amazon Resource Name (ARN)."];
-      creationTime: Zz__string.t
+      creationTime: Zz__string.t option
         [@ocaml.doc "The date and time this resource was created."];
-      semanticVersion: Zz__string.t
+      semanticVersion: Zz__string.t option
         [@ocaml.doc
           "The semantic version of the application: https://semver.org/"];
       sourceCodeUrl: Zz__string.t option
         [@ocaml.doc
           "A link to a public repository for the source code of your application, for example the URL of a specific GitHub commit."]}
-    let context_ = "VersionSummary"
-    let make ?sourceCodeUrl =
-      fun ~applicationId ->
-        fun ~creationTime ->
-          fun ~semanticVersion ->
+    let make ?applicationId =
+      fun ?creationTime ->
+        fun ?semanticVersion ->
+          fun ?sourceCodeUrl ->
             fun () ->
-              { sourceCodeUrl; applicationId; creationTime; semanticVersion }
+              { applicationId; creationTime; semanticVersion; sourceCodeUrl }
     let to_value x =
       structure_to_value
-        [("applicationId", (Some (Zz__string.to_value x.applicationId)));
-        ("creationTime", (Some (Zz__string.to_value x.creationTime)));
-        ("semanticVersion", (Some (Zz__string.to_value x.semanticVersion)));
+        [("applicationId",
+           (Option.map x.applicationId ~f:Zz__string.to_value));
+        ("creationTime", (Option.map x.creationTime ~f:Zz__string.to_value));
+        ("semanticVersion",
+          (Option.map x.semanticVersion ~f:Zz__string.to_value));
         ("sourceCodeUrl",
           (Option.map x.sourceCodeUrl ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
@@ -527,64 +535,65 @@ module VersionSummary =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "sourceCodeUrl") in
       let semanticVersion =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "semanticVersion") in
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "semanticVersion") in
       let creationTime =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationTime") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "creationTime") in
       let applicationId =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
-      make ?sourceCodeUrl ~semanticVersion ~creationTime ~applicationId ()
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "applicationId") in
+      make ?sourceCodeUrl ?semanticVersion ?creationTime ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceCodeUrl = field_map json "SourceCodeUrl" Zz__string.of_json in
+    let of_json json__ =
+      let sourceCodeUrl = field_map json__ "SourceCodeUrl" Zz__string.of_json in
       let semanticVersion =
-        field_map_exn json "SemanticVersion" Zz__string.of_json in
-      let creationTime = field_map_exn json "CreationTime" Zz__string.of_json in
-      let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
-      make ?sourceCodeUrl ~semanticVersion ~creationTime ~applicationId ()
+        field_map json__ "SemanticVersion" Zz__string.of_json in
+      let creationTime = field_map json__ "CreationTime" Zz__string.of_json in
+      let applicationId = field_map json__ "ApplicationId" Zz__string.of_json in
+      make ?sourceCodeUrl ?semanticVersion ?creationTime ?applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An application version summary."]
 module ApplicationDependencySummary =
   struct
     type nonrec t =
       {
-      applicationId: Zz__string.t
+      applicationId: Zz__string.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the nested application."];
-      semanticVersion: Zz__string.t
+      semanticVersion: Zz__string.t option
         [@ocaml.doc "The semantic version of the nested application."]}
-    let context_ = "ApplicationDependencySummary"
-    let make ~applicationId =
-      fun ~semanticVersion -> fun () -> { applicationId; semanticVersion }
+    let make ?applicationId =
+      fun ?semanticVersion -> fun () -> { applicationId; semanticVersion }
     let to_value x =
       structure_to_value
-        [("applicationId", (Some (Zz__string.to_value x.applicationId)));
-        ("semanticVersion", (Some (Zz__string.to_value x.semanticVersion)))]
+        [("applicationId",
+           (Option.map x.applicationId ~f:Zz__string.to_value));
+        ("semanticVersion",
+          (Option.map x.semanticVersion ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let semanticVersion =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "semanticVersion") in
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "semanticVersion") in
       let applicationId =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
-      make ~semanticVersion ~applicationId ()
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "applicationId") in
+      make ?semanticVersion ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let semanticVersion =
-        field_map_exn json "SemanticVersion" Zz__string.of_json in
-      let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
-      make ~semanticVersion ~applicationId ()
+        field_map json__ "SemanticVersion" Zz__string.of_json in
+      let applicationId = field_map json__ "ApplicationId" Zz__string.of_json in
+      make ?semanticVersion ?applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A nested application summary."]
 module Zz__listOfRollbackTrigger =
   struct
     type nonrec t = RollbackTrigger.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RollbackTrigger.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -629,9 +638,9 @@ module ParameterValue =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" Zz__string.of_json in
-      let name = field_map_exn json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" Zz__string.of_json in
+      let name = field_map_exn json__ "Name" Zz__string.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Parameter value of the application."]
@@ -659,9 +668,9 @@ module Tag =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" Zz__string.of_json in
-      let key = field_map_exn json "Key" Zz__string.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" Zz__string.of_json in
+      let key = field_map_exn json__ "Key" Zz__string.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -686,9 +695,9 @@ module BadRequestException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
-      let errorCode = field_map json "ErrorCode" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let errorCode = field_map json__ "ErrorCode" Zz__string.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One of the parameters in the request is invalid."]
@@ -712,9 +721,9 @@ module ConflictException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
-      let errorCode = field_map json "ErrorCode" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let errorCode = field_map json__ "ErrorCode" Zz__string.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource already exists."]
@@ -738,9 +747,9 @@ module ForbiddenException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
-      let errorCode = field_map json "ErrorCode" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let errorCode = field_map json__ "ErrorCode" Zz__string.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The client is not authenticated."]
@@ -765,9 +774,9 @@ module InternalServerErrorException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
-      let errorCode = field_map json "ErrorCode" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let errorCode = field_map json__ "ErrorCode" Zz__string.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -793,9 +802,9 @@ module NotFoundException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
-      let errorCode = field_map json "ErrorCode" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let errorCode = field_map json__ "ErrorCode" Zz__string.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -821,9 +830,9 @@ module TooManyRequestsException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
-      let errorCode = field_map json "ErrorCode" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      let errorCode = field_map json__ "ErrorCode" Zz__string.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -832,20 +841,20 @@ module Version =
   struct
     type nonrec t =
       {
-      applicationId: Zz__string.t
+      applicationId: Zz__string.t option
         [@ocaml.doc "The application Amazon Resource Name (ARN)."];
-      creationTime: Zz__string.t
+      creationTime: Zz__string.t option
         [@ocaml.doc "The date and time this resource was created."];
-      parameterDefinitions: Zz__listOfParameterDefinition.t
+      parameterDefinitions: Zz__listOfParameterDefinition.t option
         [@ocaml.doc
           "An array of parameter types supported by the application."];
-      requiredCapabilities: Zz__listOfCapability.t
+      requiredCapabilities: Zz__listOfCapability.t option
         [@ocaml.doc
           "A list of values that you must specify before you can deploy certain applications. Some applications might include resources that can affect permissions in your AWS account, for example, by creating new AWS Identity and Access Management (IAM) users. For those applications, you must explicitly acknowledge their capabilities by specifying this parameter.The only valid values are CAPABILITY_IAM, CAPABILITY_NAMED_IAM, CAPABILITY_RESOURCE_POLICY, and CAPABILITY_AUTO_EXPAND.The following resources require you to specify CAPABILITY_IAM or CAPABILITY_NAMED_IAM: AWS::IAM::Group, AWS::IAM::InstanceProfile, AWS::IAM::Policy, and AWS::IAM::Role. If the application contains IAM resources, you can specify either CAPABILITY_IAM or CAPABILITY_NAMED_IAM. If the application contains IAM resources with custom names, you must specify CAPABILITY_NAMED_IAM.The following resources require you to specify CAPABILITY_RESOURCE_POLICY: AWS::Lambda::Permission, AWS::IAM:Policy, AWS::ApplicationAutoScaling::ScalingPolicy, AWS::S3::BucketPolicy, AWS::SQS::QueuePolicy, and AWS::SNS::TopicPolicy.Applications that contain one or more nested applications require you to specify CAPABILITY_AUTO_EXPAND.If your application template contains any of the above resources, we recommend that you review all permissions associated with the application before deploying. If you don't specify this parameter for an application that requires capabilities, the call will fail."];
-      resourcesSupported: Zz__boolean.t
+      resourcesSupported: Zz__boolean.t option
         [@ocaml.doc
           "Whether all of the AWS resources contained in this application are supported in the region in which it is being retrieved."];
-      semanticVersion: Zz__string.t
+      semanticVersion: Zz__string.t option
         [@ocaml.doc
           "The semantic version of the application: https://semver.org/"];
       sourceCodeArchiveUrl: Zz__string.t option
@@ -854,53 +863,53 @@ module Version =
       sourceCodeUrl: Zz__string.t option
         [@ocaml.doc
           "A link to a public repository for the source code of your application, for example the URL of a specific GitHub commit."];
-      templateUrl: Zz__string.t
+      templateUrl: Zz__string.t option
         [@ocaml.doc
           "A link to the packaged AWS SAM template of your application."]}
-    let context_ = "Version"
-    let make ?sourceCodeArchiveUrl =
-      fun ?sourceCodeUrl ->
-        fun ~applicationId ->
-          fun ~creationTime ->
-            fun ~parameterDefinitions ->
-              fun ~requiredCapabilities ->
-                fun ~resourcesSupported ->
-                  fun ~semanticVersion ->
-                    fun ~templateUrl ->
+    let make ?applicationId =
+      fun ?creationTime ->
+        fun ?parameterDefinitions ->
+          fun ?requiredCapabilities ->
+            fun ?resourcesSupported ->
+              fun ?semanticVersion ->
+                fun ?sourceCodeArchiveUrl ->
+                  fun ?sourceCodeUrl ->
+                    fun ?templateUrl ->
                       fun () ->
                         {
-                          sourceCodeArchiveUrl;
-                          sourceCodeUrl;
                           applicationId;
                           creationTime;
                           parameterDefinitions;
                           requiredCapabilities;
                           resourcesSupported;
                           semanticVersion;
+                          sourceCodeArchiveUrl;
+                          sourceCodeUrl;
                           templateUrl
                         }
     let to_value x =
       structure_to_value
-        [("applicationId", (Some (Zz__string.to_value x.applicationId)));
-        ("creationTime", (Some (Zz__string.to_value x.creationTime)));
+        [("applicationId",
+           (Option.map x.applicationId ~f:Zz__string.to_value));
+        ("creationTime", (Option.map x.creationTime ~f:Zz__string.to_value));
         ("parameterDefinitions",
-          (Some
-             (Zz__listOfParameterDefinition.to_value x.parameterDefinitions)));
+          (Option.map x.parameterDefinitions
+             ~f:Zz__listOfParameterDefinition.to_value));
         ("requiredCapabilities",
-          (Some (Zz__listOfCapability.to_value x.requiredCapabilities)));
+          (Option.map x.requiredCapabilities ~f:Zz__listOfCapability.to_value));
         ("resourcesSupported",
-          (Some (Zz__boolean.to_value x.resourcesSupported)));
-        ("semanticVersion", (Some (Zz__string.to_value x.semanticVersion)));
+          (Option.map x.resourcesSupported ~f:Zz__boolean.to_value));
+        ("semanticVersion",
+          (Option.map x.semanticVersion ~f:Zz__string.to_value));
         ("sourceCodeArchiveUrl",
           (Option.map x.sourceCodeArchiveUrl ~f:Zz__string.to_value));
         ("sourceCodeUrl",
           (Option.map x.sourceCodeUrl ~f:Zz__string.to_value));
-        ("templateUrl", (Some (Zz__string.to_value x.templateUrl)))]
+        ("templateUrl", (Option.map x.templateUrl ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let templateUrl =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "templateUrl") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "templateUrl") in
       let sourceCodeUrl =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "sourceCodeUrl") in
@@ -908,48 +917,45 @@ module Version =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "sourceCodeArchiveUrl") in
       let semanticVersion =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "semanticVersion") in
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "semanticVersion") in
       let resourcesSupported =
-        Zz__boolean.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourcesSupported") in
+        (Option.map ~f:Zz__boolean.of_xml)
+          (Xml.child xml_arg0 "resourcesSupported") in
       let requiredCapabilities =
-        Zz__listOfCapability.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "requiredCapabilities") in
+        (Option.map ~f:Zz__listOfCapability.of_xml)
+          (Xml.child xml_arg0 "requiredCapabilities") in
       let parameterDefinitions =
-        Zz__listOfParameterDefinition.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "parameterDefinitions") in
+        (Option.map ~f:Zz__listOfParameterDefinition.of_xml)
+          (Xml.child xml_arg0 "parameterDefinitions") in
       let creationTime =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "creationTime") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "creationTime") in
       let applicationId =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
-      make ~templateUrl ?sourceCodeUrl ?sourceCodeArchiveUrl ~semanticVersion
-        ~resourcesSupported ~requiredCapabilities ~parameterDefinitions
-        ~creationTime ~applicationId ()
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "applicationId") in
+      make ?templateUrl ?sourceCodeUrl ?sourceCodeArchiveUrl ?semanticVersion
+        ?resourcesSupported ?requiredCapabilities ?parameterDefinitions
+        ?creationTime ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateUrl = field_map_exn json "TemplateUrl" Zz__string.of_json in
-      let sourceCodeUrl = field_map json "SourceCodeUrl" Zz__string.of_json in
+    let of_json json__ =
+      let templateUrl = field_map json__ "TemplateUrl" Zz__string.of_json in
+      let sourceCodeUrl = field_map json__ "SourceCodeUrl" Zz__string.of_json in
       let sourceCodeArchiveUrl =
-        field_map json "SourceCodeArchiveUrl" Zz__string.of_json in
+        field_map json__ "SourceCodeArchiveUrl" Zz__string.of_json in
       let semanticVersion =
-        field_map_exn json "SemanticVersion" Zz__string.of_json in
+        field_map json__ "SemanticVersion" Zz__string.of_json in
       let resourcesSupported =
-        field_map_exn json "ResourcesSupported" Zz__boolean.of_json in
+        field_map json__ "ResourcesSupported" Zz__boolean.of_json in
       let requiredCapabilities =
-        field_map_exn json "RequiredCapabilities"
-          Zz__listOfCapability.of_json in
+        field_map json__ "RequiredCapabilities" Zz__listOfCapability.of_json in
       let parameterDefinitions =
-        field_map_exn json "ParameterDefinitions"
+        field_map json__ "ParameterDefinitions"
           Zz__listOfParameterDefinition.of_json in
-      let creationTime = field_map_exn json "CreationTime" Zz__string.of_json in
-      let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
-      make ~templateUrl ?sourceCodeUrl ?sourceCodeArchiveUrl ~semanticVersion
-        ~resourcesSupported ~requiredCapabilities ~parameterDefinitions
-        ~creationTime ~applicationId ()
+      let creationTime = field_map json__ "CreationTime" Zz__string.of_json in
+      let applicationId = field_map json__ "ApplicationId" Zz__string.of_json in
+      make ?templateUrl ?sourceCodeUrl ?sourceCodeArchiveUrl ?semanticVersion
+        ?resourcesSupported ?requiredCapabilities ?parameterDefinitions
+        ?creationTime ?applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Application version details."]
 module Status =
@@ -984,6 +990,9 @@ module Zz__listOfApplicationPolicyStatement =
   struct
     type nonrec t = ApplicationPolicyStatement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationPolicyStatement.to_value)) |>
         (fun x -> `List x)
@@ -1010,6 +1019,9 @@ module Zz__listOfApplicationSummary =
   struct
     type nonrec t = ApplicationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1052,6 +1064,9 @@ module Zz__listOfVersionSummary =
   struct
     type nonrec t = VersionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VersionSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1077,6 +1092,9 @@ module Zz__listOfApplicationDependencySummary =
   struct
     type nonrec t = ApplicationDependencySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationDependencySummary.to_value)) |>
         (fun x -> `List x)
@@ -1129,11 +1147,11 @@ module RollbackConfiguration =
           (Xml.child xml_arg0 "monitoringTimeInMinutes") in
       make ?rollbackTriggers ?monitoringTimeInMinutes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rollbackTriggers =
-        field_map json "RollbackTriggers" Zz__listOfRollbackTrigger.of_json in
+        field_map json__ "RollbackTriggers" Zz__listOfRollbackTrigger.of_json in
       let monitoringTimeInMinutes =
-        field_map json "MonitoringTimeInMinutes" Zz__integer.of_json in
+        field_map json__ "MonitoringTimeInMinutes" Zz__integer.of_json in
       make ?rollbackTriggers ?monitoringTimeInMinutes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1142,6 +1160,9 @@ module Zz__listOfParameterValue =
   struct
     type nonrec t = ParameterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1167,6 +1188,9 @@ module Zz__listOfTag =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1410,22 +1434,22 @@ module UpdateApplicationResponse =
         ?licenseUrl ?labels ?isVerifiedAuthor ?homePageUrl ?description
         ?creationTime ?author ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Version.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Version.of_json in
       let verifiedAuthorUrl =
-        field_map json "VerifiedAuthorUrl" Zz__string.of_json in
-      let spdxLicenseId = field_map json "SpdxLicenseId" Zz__string.of_json in
-      let readmeUrl = field_map json "ReadmeUrl" Zz__string.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
-      let licenseUrl = field_map json "LicenseUrl" Zz__string.of_json in
-      let labels = field_map json "Labels" Zz__listOf__string.of_json in
+        field_map json__ "VerifiedAuthorUrl" Zz__string.of_json in
+      let spdxLicenseId = field_map json__ "SpdxLicenseId" Zz__string.of_json in
+      let readmeUrl = field_map json__ "ReadmeUrl" Zz__string.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
+      let licenseUrl = field_map json__ "LicenseUrl" Zz__string.of_json in
+      let labels = field_map json__ "Labels" Zz__listOf__string.of_json in
       let isVerifiedAuthor =
-        field_map json "IsVerifiedAuthor" Zz__boolean.of_json in
-      let homePageUrl = field_map json "HomePageUrl" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let creationTime = field_map json "CreationTime" Zz__string.of_json in
-      let author = field_map json "Author" Zz__string.of_json in
-      let applicationId = field_map json "ApplicationId" Zz__string.of_json in
+        field_map json__ "IsVerifiedAuthor" Zz__boolean.of_json in
+      let homePageUrl = field_map json__ "HomePageUrl" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let creationTime = field_map json__ "CreationTime" Zz__string.of_json in
+      let author = field_map json__ "Author" Zz__string.of_json in
+      let applicationId = field_map json__ "ApplicationId" Zz__string.of_json in
       make ?version ?verifiedAuthorUrl ?spdxLicenseId ?readmeUrl ?name
         ?licenseUrl ?labels ?isVerifiedAuthor ?homePageUrl ?description
         ?creationTime ?author ?applicationId ()
@@ -1503,15 +1527,15 @@ module UpdateApplicationRequest =
       make ?readmeUrl ?readmeBody ?labels ?homePageUrl ?description ?author
         ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let readmeUrl = field_map json "ReadmeUrl" Zz__string.of_json in
-      let readmeBody = field_map json "ReadmeBody" Zz__string.of_json in
-      let labels = field_map json "Labels" Zz__listOf__string.of_json in
-      let homePageUrl = field_map json "HomePageUrl" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let author = field_map json "Author" Zz__string.of_json in
+    let of_json json__ =
+      let readmeUrl = field_map json__ "ReadmeUrl" Zz__string.of_json in
+      let readmeBody = field_map json__ "ReadmeBody" Zz__string.of_json in
+      let labels = field_map json__ "Labels" Zz__listOf__string.of_json in
+      let homePageUrl = field_map json__ "HomePageUrl" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let author = field_map json__ "Author" Zz__string.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ?readmeUrl ?readmeBody ?labels ?homePageUrl ?description ?author
         ~applicationId ()
     let to_json v = composed_to_json to_value v
@@ -1579,13 +1603,13 @@ module UpdateApplicationInput =
       make ?readmeUrl ?readmeBody ?labels ?homePageUrl ?description ?author
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let readmeUrl = field_map json "ReadmeUrl" Zz__string.of_json in
-      let readmeBody = field_map json "ReadmeBody" Zz__string.of_json in
-      let labels = field_map json "Labels" Zz__listOf__string.of_json in
-      let homePageUrl = field_map json "HomePageUrl" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let author = field_map json "Author" Zz__string.of_json in
+    let of_json json__ =
+      let readmeUrl = field_map json__ "ReadmeUrl" Zz__string.of_json in
+      let readmeBody = field_map json__ "ReadmeBody" Zz__string.of_json in
+      let labels = field_map json__ "Labels" Zz__listOf__string.of_json in
+      let homePageUrl = field_map json__ "HomePageUrl" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let author = field_map json__ "Author" Zz__string.of_json in
       make ?readmeUrl ?readmeBody ?labels ?homePageUrl ?description ?author
         ()
     let to_json v = composed_to_json to_value v
@@ -1616,11 +1640,11 @@ module UnshareApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~organizationId ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map_exn json "OrganizationId" Zz__string.of_json in
+        field_map_exn json__ "OrganizationId" Zz__string.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ~organizationId ~applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1644,9 +1668,9 @@ module UnshareApplicationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "organizationId") in
       make ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map_exn json "OrganizationId" Zz__string.of_json in
+        field_map_exn json__ "OrganizationId" Zz__string.of_json in
       make ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Unshare application request."]
@@ -1725,17 +1749,18 @@ module TemplateDetails =
       make ~templateUrl ~templateId ~status ~semanticVersion ~expirationTime
         ~creationTime ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateUrl = field_map_exn json "TemplateUrl" Zz__string.of_json in
-      let templateId = field_map_exn json "TemplateId" Zz__string.of_json in
-      let status = field_map_exn json "Status" Status.of_json in
+    let of_json json__ =
+      let templateUrl = field_map_exn json__ "TemplateUrl" Zz__string.of_json in
+      let templateId = field_map_exn json__ "TemplateId" Zz__string.of_json in
+      let status = field_map_exn json__ "Status" Status.of_json in
       let semanticVersion =
-        field_map_exn json "SemanticVersion" Zz__string.of_json in
+        field_map_exn json__ "SemanticVersion" Zz__string.of_json in
       let expirationTime =
-        field_map_exn json "ExpirationTime" Zz__string.of_json in
-      let creationTime = field_map_exn json "CreationTime" Zz__string.of_json in
+        field_map_exn json__ "ExpirationTime" Zz__string.of_json in
+      let creationTime =
+        field_map_exn json__ "CreationTime" Zz__string.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ~templateUrl ~templateId ~status ~semanticVersion ~expirationTime
         ~creationTime ~applicationId ()
     let to_json v = composed_to_json to_value v
@@ -1825,9 +1850,9 @@ module PutApplicationPolicyResponse =
           (Xml.child xml_arg0 "statements") in
       make ?statements ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statements =
-        field_map json "Statements"
+        field_map json__ "Statements"
           Zz__listOfApplicationPolicyStatement.of_json in
       make ?statements ()
     let to_json v = composed_to_json to_value v
@@ -1860,12 +1885,12 @@ module PutApplicationPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~statements ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statements =
-        field_map_exn json "Statements"
+        field_map_exn json__ "Statements"
           Zz__listOfApplicationPolicyStatement.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ~statements ~applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1951,10 +1976,10 @@ module ListApplicationsResponse =
           (Xml.child xml_arg0 "applications") in
       make ?nextToken ?applications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let applications =
-        field_map json "Applications" Zz__listOfApplicationSummary.of_json in
+        field_map json__ "Applications" Zz__listOfApplicationSummary.of_json in
       make ?nextToken ?applications ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists applications owned by the requester."]
@@ -1979,9 +2004,9 @@ module ListApplicationsRequest =
         (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "maxItems") in
       make ?nextToken ?maxItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxItems = field_map json "MaxItems" MaxItems.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItems.of_json in
       make ?nextToken ?maxItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists applications owned by the requester."]
@@ -2073,10 +2098,10 @@ module ListApplicationVersionsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?versions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versions =
-        field_map json "Versions" Zz__listOfVersionSummary.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Versions" Zz__listOfVersionSummary.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?versions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists versions for the specified application."]
@@ -2111,11 +2136,11 @@ module ListApplicationVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?nextToken ?maxItems ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxItems = field_map json "MaxItems" MaxItems.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItems.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ?nextToken ?maxItems ~applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists versions for the specified application."]
@@ -2210,10 +2235,10 @@ module ListApplicationDependenciesResponse =
           (Xml.child xml_arg0 "dependencies") in
       make ?nextToken ?dependencies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let dependencies =
-        field_map json "Dependencies"
+        field_map json__ "Dependencies"
           Zz__listOfApplicationDependencySummary.of_json in
       make ?nextToken ?dependencies ()
     let to_json v = composed_to_json to_value v
@@ -2258,13 +2283,13 @@ module ListApplicationDependenciesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?semanticVersion ?nextToken ?maxItems ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let semanticVersion =
-        field_map json "SemanticVersion" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxItems = field_map json "MaxItems" MaxItems.of_json in
+        field_map json__ "SemanticVersion" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItems.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ?semanticVersion ?nextToken ?maxItems ~applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2408,15 +2433,16 @@ module GetCloudFormationTemplateResponse =
       make ?templateUrl ?templateId ?status ?semanticVersion ?expirationTime
         ?creationTime ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
-      let templateId = field_map json "TemplateId" Zz__string.of_json in
-      let status = field_map json "Status" Status.of_json in
+    let of_json json__ =
+      let templateUrl = field_map json__ "TemplateUrl" Zz__string.of_json in
+      let templateId = field_map json__ "TemplateId" Zz__string.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       let semanticVersion =
-        field_map json "SemanticVersion" Zz__string.of_json in
-      let expirationTime = field_map json "ExpirationTime" Zz__string.of_json in
-      let creationTime = field_map json "CreationTime" Zz__string.of_json in
-      let applicationId = field_map json "ApplicationId" Zz__string.of_json in
+        field_map json__ "SemanticVersion" Zz__string.of_json in
+      let expirationTime =
+        field_map json__ "ExpirationTime" Zz__string.of_json in
+      let creationTime = field_map json__ "CreationTime" Zz__string.of_json in
+      let applicationId = field_map json__ "ApplicationId" Zz__string.of_json in
       make ?templateUrl ?templateId ?status ?semanticVersion ?expirationTime
         ?creationTime ?applicationId ()
     let to_json v = composed_to_json to_value v
@@ -2447,10 +2473,10 @@ module GetCloudFormationTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~templateId ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateId = field_map_exn json "TemplateId" Zz__string.of_json in
+    let of_json json__ =
+      let templateId = field_map_exn json__ "TemplateId" Zz__string.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ~templateId ~applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the specified AWS CloudFormation template."]
@@ -2643,22 +2669,22 @@ module GetApplicationResponse =
         ?licenseUrl ?labels ?isVerifiedAuthor ?homePageUrl ?description
         ?creationTime ?author ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Version.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Version.of_json in
       let verifiedAuthorUrl =
-        field_map json "VerifiedAuthorUrl" Zz__string.of_json in
-      let spdxLicenseId = field_map json "SpdxLicenseId" Zz__string.of_json in
-      let readmeUrl = field_map json "ReadmeUrl" Zz__string.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
-      let licenseUrl = field_map json "LicenseUrl" Zz__string.of_json in
-      let labels = field_map json "Labels" Zz__listOf__string.of_json in
+        field_map json__ "VerifiedAuthorUrl" Zz__string.of_json in
+      let spdxLicenseId = field_map json__ "SpdxLicenseId" Zz__string.of_json in
+      let readmeUrl = field_map json__ "ReadmeUrl" Zz__string.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
+      let licenseUrl = field_map json__ "LicenseUrl" Zz__string.of_json in
+      let labels = field_map json__ "Labels" Zz__listOf__string.of_json in
       let isVerifiedAuthor =
-        field_map json "IsVerifiedAuthor" Zz__boolean.of_json in
-      let homePageUrl = field_map json "HomePageUrl" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let creationTime = field_map json "CreationTime" Zz__string.of_json in
-      let author = field_map json "Author" Zz__string.of_json in
-      let applicationId = field_map json "ApplicationId" Zz__string.of_json in
+        field_map json__ "IsVerifiedAuthor" Zz__boolean.of_json in
+      let homePageUrl = field_map json__ "HomePageUrl" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let creationTime = field_map json__ "CreationTime" Zz__string.of_json in
+      let author = field_map json__ "Author" Zz__string.of_json in
+      let applicationId = field_map json__ "ApplicationId" Zz__string.of_json in
       make ?version ?verifiedAuthorUrl ?spdxLicenseId ?readmeUrl ?name
         ?licenseUrl ?labels ?isVerifiedAuthor ?homePageUrl ?description
         ?creationTime ?author ?applicationId ()
@@ -2690,11 +2716,11 @@ module GetApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?semanticVersion ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let semanticVersion =
-        field_map json "SemanticVersion" Zz__string.of_json in
+        field_map json__ "SemanticVersion" Zz__string.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ?semanticVersion ~applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the specified application."]
@@ -2783,9 +2809,9 @@ module GetApplicationPolicyResponse =
           (Xml.child xml_arg0 "statements") in
       make ?statements ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statements =
-        field_map json "Statements"
+        field_map json__ "Statements"
           Zz__listOfApplicationPolicyStatement.of_json in
       make ?statements ()
     let to_json v = composed_to_json to_value v
@@ -2808,9 +2834,9 @@ module GetApplicationPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ~applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the policy for the application."]
@@ -2832,9 +2858,9 @@ module DeleteApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ~applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified application."]
@@ -2977,15 +3003,16 @@ module CreateCloudFormationTemplateResponse =
       make ?templateUrl ?templateId ?status ?semanticVersion ?expirationTime
         ?creationTime ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
-      let templateId = field_map json "TemplateId" Zz__string.of_json in
-      let status = field_map json "Status" Status.of_json in
+    let of_json json__ =
+      let templateUrl = field_map json__ "TemplateUrl" Zz__string.of_json in
+      let templateId = field_map json__ "TemplateId" Zz__string.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       let semanticVersion =
-        field_map json "SemanticVersion" Zz__string.of_json in
-      let expirationTime = field_map json "ExpirationTime" Zz__string.of_json in
-      let creationTime = field_map json "CreationTime" Zz__string.of_json in
-      let applicationId = field_map json "ApplicationId" Zz__string.of_json in
+        field_map json__ "SemanticVersion" Zz__string.of_json in
+      let expirationTime =
+        field_map json__ "ExpirationTime" Zz__string.of_json in
+      let creationTime = field_map json__ "CreationTime" Zz__string.of_json in
+      let applicationId = field_map json__ "ApplicationId" Zz__string.of_json in
       make ?templateUrl ?templateId ?status ?semanticVersion ?expirationTime
         ?creationTime ?applicationId ()
     let to_json v = composed_to_json to_value v
@@ -3017,11 +3044,11 @@ module CreateCloudFormationTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ?semanticVersion ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let semanticVersion =
-        field_map json "SemanticVersion" Zz__string.of_json in
+        field_map json__ "SemanticVersion" Zz__string.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ?semanticVersion ~applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an AWS CloudFormation template."]
@@ -3122,12 +3149,12 @@ module CreateCloudFormationChangeSetResponse =
           (Xml.child xml_arg0 "applicationId") in
       make ?stackId ?semanticVersion ?changeSetId ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stackId = field_map json "StackId" Zz__string.of_json in
+    let of_json json__ =
+      let stackId = field_map json__ "StackId" Zz__string.of_json in
       let semanticVersion =
-        field_map json "SemanticVersion" Zz__string.of_json in
-      let changeSetId = field_map json "ChangeSetId" Zz__string.of_json in
-      let applicationId = field_map json "ApplicationId" Zz__string.of_json in
+        field_map json__ "SemanticVersion" Zz__string.of_json in
+      let changeSetId = field_map json__ "ChangeSetId" Zz__string.of_json in
+      let applicationId = field_map json__ "ApplicationId" Zz__string.of_json in
       make ?stackId ?semanticVersion ?changeSetId ?applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3270,27 +3297,29 @@ module CreateCloudFormationChangeSetRequest =
         ?notificationArns ?description ?clientToken ?changeSetName
         ?capabilities ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateId = field_map json "TemplateId" Zz__string.of_json in
-      let tags = field_map json "Tags" Zz__listOfTag.of_json in
-      let stackName = field_map_exn json "StackName" Zz__string.of_json in
+    let of_json json__ =
+      let templateId = field_map json__ "TemplateId" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__listOfTag.of_json in
+      let stackName = field_map_exn json__ "StackName" Zz__string.of_json in
       let semanticVersion =
-        field_map json "SemanticVersion" Zz__string.of_json in
+        field_map json__ "SemanticVersion" Zz__string.of_json in
       let rollbackConfiguration =
-        field_map json "RollbackConfiguration" RollbackConfiguration.of_json in
+        field_map json__ "RollbackConfiguration"
+          RollbackConfiguration.of_json in
       let resourceTypes =
-        field_map json "ResourceTypes" Zz__listOf__string.of_json in
+        field_map json__ "ResourceTypes" Zz__listOf__string.of_json in
       let parameterOverrides =
-        field_map json "ParameterOverrides" Zz__listOfParameterValue.of_json in
+        field_map json__ "ParameterOverrides"
+          Zz__listOfParameterValue.of_json in
       let notificationArns =
-        field_map json "NotificationArns" Zz__listOf__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let clientToken = field_map json "ClientToken" Zz__string.of_json in
-      let changeSetName = field_map json "ChangeSetName" Zz__string.of_json in
+        field_map json__ "NotificationArns" Zz__listOf__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let clientToken = field_map json__ "ClientToken" Zz__string.of_json in
+      let changeSetName = field_map json__ "ChangeSetName" Zz__string.of_json in
       let capabilities =
-        field_map json "Capabilities" Zz__listOf__string.of_json in
+        field_map json__ "Capabilities" Zz__listOf__string.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ?templateId ?tags ~stackName ?semanticVersion
         ?rollbackConfiguration ?resourceTypes ?parameterOverrides
         ?notificationArns ?description ?clientToken ?changeSetName
@@ -3428,25 +3457,27 @@ module CreateCloudFormationChangeSetInput =
         ?notificationArns ?description ?clientToken ?changeSetName
         ?capabilities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateId = field_map json "TemplateId" Zz__string.of_json in
-      let tags = field_map json "Tags" Zz__listOfTag.of_json in
-      let stackName = field_map_exn json "StackName" Zz__string.of_json in
+    let of_json json__ =
+      let templateId = field_map json__ "TemplateId" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__listOfTag.of_json in
+      let stackName = field_map_exn json__ "StackName" Zz__string.of_json in
       let semanticVersion =
-        field_map json "SemanticVersion" Zz__string.of_json in
+        field_map json__ "SemanticVersion" Zz__string.of_json in
       let rollbackConfiguration =
-        field_map json "RollbackConfiguration" RollbackConfiguration.of_json in
+        field_map json__ "RollbackConfiguration"
+          RollbackConfiguration.of_json in
       let resourceTypes =
-        field_map json "ResourceTypes" Zz__listOf__string.of_json in
+        field_map json__ "ResourceTypes" Zz__listOf__string.of_json in
       let parameterOverrides =
-        field_map json "ParameterOverrides" Zz__listOfParameterValue.of_json in
+        field_map json__ "ParameterOverrides"
+          Zz__listOfParameterValue.of_json in
       let notificationArns =
-        field_map json "NotificationArns" Zz__listOf__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let clientToken = field_map json "ClientToken" Zz__string.of_json in
-      let changeSetName = field_map json "ChangeSetName" Zz__string.of_json in
+        field_map json__ "NotificationArns" Zz__listOf__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let clientToken = field_map json__ "ClientToken" Zz__string.of_json in
+      let changeSetName = field_map json__ "ChangeSetName" Zz__string.of_json in
       let capabilities =
-        field_map json "Capabilities" Zz__listOf__string.of_json in
+        field_map json__ "Capabilities" Zz__listOf__string.of_json in
       make ?templateId ?tags ~stackName ?semanticVersion
         ?rollbackConfiguration ?resourceTypes ?parameterOverrides
         ?notificationArns ?description ?clientToken ?changeSetName
@@ -3618,22 +3649,22 @@ module CreateApplicationVersionResponse =
         ?resourcesSupported ?requiredCapabilities ?parameterDefinitions
         ?creationTime ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
-      let sourceCodeUrl = field_map json "SourceCodeUrl" Zz__string.of_json in
+    let of_json json__ =
+      let templateUrl = field_map json__ "TemplateUrl" Zz__string.of_json in
+      let sourceCodeUrl = field_map json__ "SourceCodeUrl" Zz__string.of_json in
       let sourceCodeArchiveUrl =
-        field_map json "SourceCodeArchiveUrl" Zz__string.of_json in
+        field_map json__ "SourceCodeArchiveUrl" Zz__string.of_json in
       let semanticVersion =
-        field_map json "SemanticVersion" Zz__string.of_json in
+        field_map json__ "SemanticVersion" Zz__string.of_json in
       let resourcesSupported =
-        field_map json "ResourcesSupported" Zz__boolean.of_json in
+        field_map json__ "ResourcesSupported" Zz__boolean.of_json in
       let requiredCapabilities =
-        field_map json "RequiredCapabilities" Zz__listOfCapability.of_json in
+        field_map json__ "RequiredCapabilities" Zz__listOfCapability.of_json in
       let parameterDefinitions =
-        field_map json "ParameterDefinitions"
+        field_map json__ "ParameterDefinitions"
           Zz__listOfParameterDefinition.of_json in
-      let creationTime = field_map json "CreationTime" Zz__string.of_json in
-      let applicationId = field_map json "ApplicationId" Zz__string.of_json in
+      let creationTime = field_map json__ "CreationTime" Zz__string.of_json in
+      let applicationId = field_map json__ "ApplicationId" Zz__string.of_json in
       make ?templateUrl ?sourceCodeUrl ?sourceCodeArchiveUrl ?semanticVersion
         ?resourcesSupported ?requiredCapabilities ?parameterDefinitions
         ?creationTime ?applicationId ()
@@ -3705,16 +3736,16 @@ module CreateApplicationVersionRequest =
       make ?templateUrl ?templateBody ?sourceCodeUrl ?sourceCodeArchiveUrl
         ~semanticVersion ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
-      let templateBody = field_map json "TemplateBody" Zz__string.of_json in
-      let sourceCodeUrl = field_map json "SourceCodeUrl" Zz__string.of_json in
+    let of_json json__ =
+      let templateUrl = field_map json__ "TemplateUrl" Zz__string.of_json in
+      let templateBody = field_map json__ "TemplateBody" Zz__string.of_json in
+      let sourceCodeUrl = field_map json__ "SourceCodeUrl" Zz__string.of_json in
       let sourceCodeArchiveUrl =
-        field_map json "SourceCodeArchiveUrl" Zz__string.of_json in
+        field_map json__ "SourceCodeArchiveUrl" Zz__string.of_json in
       let semanticVersion =
-        field_map_exn json "SemanticVersion" Zz__string.of_json in
+        field_map_exn json__ "SemanticVersion" Zz__string.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ?templateUrl ?templateBody ?sourceCodeUrl ?sourceCodeArchiveUrl
         ~semanticVersion ~applicationId ()
     let to_json v = composed_to_json to_value v
@@ -3767,12 +3798,12 @@ module CreateApplicationVersionInput =
           (Xml.child xml_arg0 "sourceCodeArchiveUrl") in
       make ?templateUrl ?templateBody ?sourceCodeUrl ?sourceCodeArchiveUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
-      let templateBody = field_map json "TemplateBody" Zz__string.of_json in
-      let sourceCodeUrl = field_map json "SourceCodeUrl" Zz__string.of_json in
+    let of_json json__ =
+      let templateUrl = field_map json__ "TemplateUrl" Zz__string.of_json in
+      let templateBody = field_map json__ "TemplateBody" Zz__string.of_json in
+      let sourceCodeUrl = field_map json__ "SourceCodeUrl" Zz__string.of_json in
       let sourceCodeArchiveUrl =
-        field_map json "SourceCodeArchiveUrl" Zz__string.of_json in
+        field_map json__ "SourceCodeArchiveUrl" Zz__string.of_json in
       make ?templateUrl ?templateBody ?sourceCodeUrl ?sourceCodeArchiveUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Create a version request."]
@@ -3965,22 +3996,22 @@ module CreateApplicationResponse =
         ?licenseUrl ?labels ?isVerifiedAuthor ?homePageUrl ?description
         ?creationTime ?author ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Version.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Version.of_json in
       let verifiedAuthorUrl =
-        field_map json "VerifiedAuthorUrl" Zz__string.of_json in
-      let spdxLicenseId = field_map json "SpdxLicenseId" Zz__string.of_json in
-      let readmeUrl = field_map json "ReadmeUrl" Zz__string.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
-      let licenseUrl = field_map json "LicenseUrl" Zz__string.of_json in
-      let labels = field_map json "Labels" Zz__listOf__string.of_json in
+        field_map json__ "VerifiedAuthorUrl" Zz__string.of_json in
+      let spdxLicenseId = field_map json__ "SpdxLicenseId" Zz__string.of_json in
+      let readmeUrl = field_map json__ "ReadmeUrl" Zz__string.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
+      let licenseUrl = field_map json__ "LicenseUrl" Zz__string.of_json in
+      let labels = field_map json__ "Labels" Zz__listOf__string.of_json in
       let isVerifiedAuthor =
-        field_map json "IsVerifiedAuthor" Zz__boolean.of_json in
-      let homePageUrl = field_map json "HomePageUrl" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let creationTime = field_map json "CreationTime" Zz__string.of_json in
-      let author = field_map json "Author" Zz__string.of_json in
-      let applicationId = field_map json "ApplicationId" Zz__string.of_json in
+        field_map json__ "IsVerifiedAuthor" Zz__boolean.of_json in
+      let homePageUrl = field_map json__ "HomePageUrl" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let creationTime = field_map json__ "CreationTime" Zz__string.of_json in
+      let author = field_map json__ "Author" Zz__string.of_json in
+      let applicationId = field_map json__ "ApplicationId" Zz__string.of_json in
       make ?version ?verifiedAuthorUrl ?spdxLicenseId ?readmeUrl ?name
         ?licenseUrl ?labels ?isVerifiedAuthor ?homePageUrl ?description
         ?creationTime ?author ?applicationId ()
@@ -4132,24 +4163,24 @@ module CreateApplicationRequest =
         ?sourceCodeArchiveUrl ?semanticVersion ?readmeUrl ?readmeBody ~name
         ?licenseUrl ?licenseBody ?labels ?homePageUrl ~description ~author ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
-      let templateBody = field_map json "TemplateBody" Zz__string.of_json in
-      let spdxLicenseId = field_map json "SpdxLicenseId" Zz__string.of_json in
-      let sourceCodeUrl = field_map json "SourceCodeUrl" Zz__string.of_json in
+    let of_json json__ =
+      let templateUrl = field_map json__ "TemplateUrl" Zz__string.of_json in
+      let templateBody = field_map json__ "TemplateBody" Zz__string.of_json in
+      let spdxLicenseId = field_map json__ "SpdxLicenseId" Zz__string.of_json in
+      let sourceCodeUrl = field_map json__ "SourceCodeUrl" Zz__string.of_json in
       let sourceCodeArchiveUrl =
-        field_map json "SourceCodeArchiveUrl" Zz__string.of_json in
+        field_map json__ "SourceCodeArchiveUrl" Zz__string.of_json in
       let semanticVersion =
-        field_map json "SemanticVersion" Zz__string.of_json in
-      let readmeUrl = field_map json "ReadmeUrl" Zz__string.of_json in
-      let readmeBody = field_map json "ReadmeBody" Zz__string.of_json in
-      let name = field_map_exn json "Name" Zz__string.of_json in
-      let licenseUrl = field_map json "LicenseUrl" Zz__string.of_json in
-      let licenseBody = field_map json "LicenseBody" Zz__string.of_json in
-      let labels = field_map json "Labels" Zz__listOf__string.of_json in
-      let homePageUrl = field_map json "HomePageUrl" Zz__string.of_json in
-      let description = field_map_exn json "Description" Zz__string.of_json in
-      let author = field_map_exn json "Author" Zz__string.of_json in
+        field_map json__ "SemanticVersion" Zz__string.of_json in
+      let readmeUrl = field_map json__ "ReadmeUrl" Zz__string.of_json in
+      let readmeBody = field_map json__ "ReadmeBody" Zz__string.of_json in
+      let name = field_map_exn json__ "Name" Zz__string.of_json in
+      let licenseUrl = field_map json__ "LicenseUrl" Zz__string.of_json in
+      let licenseBody = field_map json__ "LicenseBody" Zz__string.of_json in
+      let labels = field_map json__ "Labels" Zz__listOf__string.of_json in
+      let homePageUrl = field_map json__ "HomePageUrl" Zz__string.of_json in
+      let description = field_map_exn json__ "Description" Zz__string.of_json in
+      let author = field_map_exn json__ "Author" Zz__string.of_json in
       make ?templateUrl ?templateBody ?spdxLicenseId ?sourceCodeUrl
         ?sourceCodeArchiveUrl ?semanticVersion ?readmeUrl ?readmeBody ~name
         ?licenseUrl ?licenseBody ?labels ?homePageUrl ~description ~author ()
@@ -4301,24 +4332,24 @@ module CreateApplicationInput =
         ?sourceCodeArchiveUrl ?semanticVersion ?readmeUrl ?readmeBody ~name
         ?licenseUrl ?licenseBody ?labels ?homePageUrl ~description ~author ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateUrl = field_map json "TemplateUrl" Zz__string.of_json in
-      let templateBody = field_map json "TemplateBody" Zz__string.of_json in
-      let spdxLicenseId = field_map json "SpdxLicenseId" Zz__string.of_json in
-      let sourceCodeUrl = field_map json "SourceCodeUrl" Zz__string.of_json in
+    let of_json json__ =
+      let templateUrl = field_map json__ "TemplateUrl" Zz__string.of_json in
+      let templateBody = field_map json__ "TemplateBody" Zz__string.of_json in
+      let spdxLicenseId = field_map json__ "SpdxLicenseId" Zz__string.of_json in
+      let sourceCodeUrl = field_map json__ "SourceCodeUrl" Zz__string.of_json in
       let sourceCodeArchiveUrl =
-        field_map json "SourceCodeArchiveUrl" Zz__string.of_json in
+        field_map json__ "SourceCodeArchiveUrl" Zz__string.of_json in
       let semanticVersion =
-        field_map json "SemanticVersion" Zz__string.of_json in
-      let readmeUrl = field_map json "ReadmeUrl" Zz__string.of_json in
-      let readmeBody = field_map json "ReadmeBody" Zz__string.of_json in
-      let name = field_map_exn json "Name" Zz__string.of_json in
-      let licenseUrl = field_map json "LicenseUrl" Zz__string.of_json in
-      let licenseBody = field_map json "LicenseBody" Zz__string.of_json in
-      let labels = field_map json "Labels" Zz__listOf__string.of_json in
-      let homePageUrl = field_map json "HomePageUrl" Zz__string.of_json in
-      let description = field_map_exn json "Description" Zz__string.of_json in
-      let author = field_map_exn json "Author" Zz__string.of_json in
+        field_map json__ "SemanticVersion" Zz__string.of_json in
+      let readmeUrl = field_map json__ "ReadmeUrl" Zz__string.of_json in
+      let readmeBody = field_map json__ "ReadmeBody" Zz__string.of_json in
+      let name = field_map_exn json__ "Name" Zz__string.of_json in
+      let licenseUrl = field_map json__ "LicenseUrl" Zz__string.of_json in
+      let licenseBody = field_map json__ "LicenseBody" Zz__string.of_json in
+      let labels = field_map json__ "Labels" Zz__listOf__string.of_json in
+      let homePageUrl = field_map json__ "HomePageUrl" Zz__string.of_json in
+      let description = field_map_exn json__ "Description" Zz__string.of_json in
+      let author = field_map_exn json__ "Author" Zz__string.of_json in
       make ?templateUrl ?templateBody ?spdxLicenseId ?sourceCodeUrl
         ?sourceCodeArchiveUrl ?semanticVersion ?readmeUrl ?readmeBody ~name
         ?licenseUrl ?licenseBody ?labels ?homePageUrl ~description ~author ()
@@ -4366,13 +4397,13 @@ module ChangeSetDetails =
           (Xml.child_exn ~context:context_ xml_arg0 "applicationId") in
       make ~stackId ~semanticVersion ~changeSetId ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stackId = field_map_exn json "StackId" Zz__string.of_json in
+    let of_json json__ =
+      let stackId = field_map_exn json__ "StackId" Zz__string.of_json in
       let semanticVersion =
-        field_map_exn json "SemanticVersion" Zz__string.of_json in
-      let changeSetId = field_map_exn json "ChangeSetId" Zz__string.of_json in
+        field_map_exn json__ "SemanticVersion" Zz__string.of_json in
+      let changeSetId = field_map_exn json__ "ChangeSetId" Zz__string.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ~stackId ~semanticVersion ~changeSetId ~applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details of the change set."]
@@ -4399,10 +4430,10 @@ module ApplicationVersionPage =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~versions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versions =
-        field_map_exn json "Versions" Zz__listOfVersionSummary.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map_exn json__ "Versions" Zz__listOfVersionSummary.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ~versions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of version summaries for the application."]
@@ -4426,9 +4457,9 @@ module ApplicationPolicy =
           (Xml.child_exn ~context:context_ xml_arg0 "statements") in
       make ~statements ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statements =
-        field_map_exn json "Statements"
+        field_map_exn json__ "Statements"
           Zz__listOfApplicationPolicyStatement.of_json in
       make ~statements ()
     let to_json v = composed_to_json to_value v
@@ -4458,10 +4489,10 @@ module ApplicationPage =
           (Xml.child_exn ~context:context_ xml_arg0 "applications") in
       make ?nextToken ~applications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let applications =
-        field_map_exn json "Applications"
+        field_map_exn json__ "Applications"
           Zz__listOfApplicationSummary.of_json in
       make ?nextToken ~applications ()
     let to_json v = composed_to_json to_value v
@@ -4493,10 +4524,10 @@ module ApplicationDependencyPage =
           (Xml.child_exn ~context:context_ xml_arg0 "dependencies") in
       make ?nextToken ~dependencies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let dependencies =
-        field_map_exn json "Dependencies"
+        field_map_exn json__ "Dependencies"
           Zz__listOfApplicationDependencySummary.of_json in
       make ?nextToken ~dependencies ()
     let to_json v = composed_to_json to_value v
@@ -4627,23 +4658,23 @@ module Application =
         ?licenseUrl ?labels ?isVerifiedAuthor ?homePageUrl ~description
         ?creationTime ~author ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" Version.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" Version.of_json in
       let verifiedAuthorUrl =
-        field_map json "VerifiedAuthorUrl" Zz__string.of_json in
-      let spdxLicenseId = field_map json "SpdxLicenseId" Zz__string.of_json in
-      let readmeUrl = field_map json "ReadmeUrl" Zz__string.of_json in
-      let name = field_map_exn json "Name" Zz__string.of_json in
-      let licenseUrl = field_map json "LicenseUrl" Zz__string.of_json in
-      let labels = field_map json "Labels" Zz__listOf__string.of_json in
+        field_map json__ "VerifiedAuthorUrl" Zz__string.of_json in
+      let spdxLicenseId = field_map json__ "SpdxLicenseId" Zz__string.of_json in
+      let readmeUrl = field_map json__ "ReadmeUrl" Zz__string.of_json in
+      let name = field_map_exn json__ "Name" Zz__string.of_json in
+      let licenseUrl = field_map json__ "LicenseUrl" Zz__string.of_json in
+      let labels = field_map json__ "Labels" Zz__listOf__string.of_json in
       let isVerifiedAuthor =
-        field_map json "IsVerifiedAuthor" Zz__boolean.of_json in
-      let homePageUrl = field_map json "HomePageUrl" Zz__string.of_json in
-      let description = field_map_exn json "Description" Zz__string.of_json in
-      let creationTime = field_map json "CreationTime" Zz__string.of_json in
-      let author = field_map_exn json "Author" Zz__string.of_json in
+        field_map json__ "IsVerifiedAuthor" Zz__boolean.of_json in
+      let homePageUrl = field_map json__ "HomePageUrl" Zz__string.of_json in
+      let description = field_map_exn json__ "Description" Zz__string.of_json in
+      let creationTime = field_map json__ "CreationTime" Zz__string.of_json in
+      let author = field_map_exn json__ "Author" Zz__string.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" Zz__string.of_json in
+        field_map_exn json__ "ApplicationId" Zz__string.of_json in
       make ?version ?verifiedAuthorUrl ?spdxLicenseId ?readmeUrl ~name
         ?licenseUrl ?labels ?isVerifiedAuthor ?homePageUrl ~description
         ?creationTime ~author ~applicationId ()

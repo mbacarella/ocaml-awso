@@ -31,12 +31,20 @@ let get_anomaly_monitors ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAnomalyMonitors input
 let get_anomaly_subscriptions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAnomalySubscriptions input
+let get_approximate_usage_records ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetApproximateUsageRecords input
+let get_commitment_purchase_analysis ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCommitmentPurchaseAnalysis input
 let get_cost_and_usage ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCostAndUsage input
+let get_cost_and_usage_comparisons ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCostAndUsageComparisons input
 let get_cost_and_usage_with_resources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCostAndUsageWithResources input
 let get_cost_categories ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCostCategories input
+let get_cost_comparison_drivers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCostComparisonDrivers input
 let get_cost_forecast ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCostForecast input
 let get_dimension_values ?endpoint_url ?cfg input =
@@ -50,6 +58,10 @@ let get_reservation_utilization ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetReservationUtilization input
 let get_rightsizing_recommendation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRightsizingRecommendation input
+let get_savings_plan_purchase_recommendation_details ?endpoint_url ?cfg input
+  =
+  eval ?endpoint_url ?cfg
+    Endpoints.GetSavingsPlanPurchaseRecommendationDetails input
 let get_savings_plans_coverage ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSavingsPlansCoverage input
 let get_savings_plans_purchase_recommendation ?endpoint_url ?cfg input =
@@ -63,12 +75,34 @@ let get_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTags input
 let get_usage_forecast ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetUsageForecast input
+let list_commitment_purchase_analyses ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCommitmentPurchaseAnalyses input
+let list_cost_allocation_tag_backfill_history ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCostAllocationTagBackfillHistory
+    input
+let list_cost_allocation_tags ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCostAllocationTags input
 let list_cost_category_definitions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCostCategoryDefinitions input
+let list_cost_category_resource_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCostCategoryResourceAssociations
+    input
+let list_savings_plans_purchase_recommendation_generation ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.ListSavingsPlansPurchaseRecommendationGeneration input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let provide_anomaly_feedback ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ProvideAnomalyFeedback input
+let start_commitment_purchase_analysis ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartCommitmentPurchaseAnalysis input
+let start_cost_allocation_tag_backfill ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartCostAllocationTagBackfill input
+let start_savings_plans_purchase_recommendation_generation ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.StartSavingsPlansPurchaseRecommendationGeneration input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
@@ -77,5 +111,7 @@ let update_anomaly_monitor ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAnomalyMonitor input
 let update_anomaly_subscription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAnomalySubscription input
+let update_cost_allocation_tags_status ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCostAllocationTagsStatus input
 let update_cost_category_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCostCategoryDefinition input

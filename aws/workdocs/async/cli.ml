@@ -385,6 +385,31 @@ let delete_document =
            Io.delete_document
            (Values.DeleteDocumentRequest.make ?authenticationToken
               ~documentId ()) None None])
+let delete_document_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and authenticationToken =
+         flag "authentication-token" (optional string)
+           ~doc:"STRING AuthenticationHeaderType"
+       and documentId =
+         flag "document-id" (required string) ~doc:"STRING ResourceIdType"
+       and versionId =
+         flag "version-id" (required string)
+           ~doc:"STRING DocumentVersionIdType"
+       and deletePriorVersions =
+         flag "delete-prior-versions" (required bool) ~doc:"BOOL BooleanType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_document_version
+           (Values.DeleteDocumentVersionRequest.make ?authenticationToken
+              ~documentId ~versionId ~deletePriorVersions ()) None None])
 let delete_folder =
   Command.async ~summary:""
     ([%map_open.Command
@@ -519,7 +544,8 @@ let describe_activities =
          flag "include-indirect-activities" (optional bool)
            ~doc:"BOOL BooleanType"
        and limit = flag "limit" (optional int) ~doc:"INT LimitType"
-       and marker = flag "marker" (optional string) ~doc:"STRING MarkerType" in
+       and marker =
+         flag "marker" (optional string) ~doc:"STRING SearchMarkerType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_activities
@@ -970,7 +996,7 @@ let initiate_document_version_upload =
          flag "document-size-in-bytes" (optional json_arg)
            ~doc:"JSON SizeType"
        and parentFolderId =
-         flag "parent-folder-id" (required string)
+         flag "parent-folder-id" (optional string)
            ~doc:"STRING ResourceIdType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -985,7 +1011,7 @@ let initiate_document_version_upload =
                                            contentModifiedTimestamp)
               ?contentType
               ?documentSizeInBytes:(Option.map ~f:Values.SizeType.of_json
-                                      documentSizeInBytes) ~parentFolderId ())
+                                      documentSizeInBytes) ?parentFolderId ())
            (Some Values.InitiateDocumentVersionUploadResponse.to_json)
            (Some Values.InitiateDocumentVersionUploadResponse.error_to_json)])
 let remove_all_resource_permissions =
@@ -1034,6 +1060,72 @@ let remove_resource_permission =
               ?principalType:(Option.map ~f:Values.PrincipalType.of_json
                                 principalType) ~resourceId ~principalId ())
            None None])
+let restore_document_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and authenticationToken =
+         flag "authentication-token" (optional string)
+           ~doc:"STRING AuthenticationHeaderType"
+       and documentId =
+         flag "document-id" (required string) ~doc:"STRING ResourceIdType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.restore_document_versions
+           (Values.RestoreDocumentVersionsRequest.make ?authenticationToken
+              ~documentId ()) None None])
+let search_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and authenticationToken =
+         flag "authentication-token" (optional string)
+           ~doc:"STRING AuthenticationHeaderType"
+       and queryText =
+         flag "query-text" (optional string) ~doc:"STRING SearchQueryType"
+       and queryScopes =
+         flag "query-scopes" (optional json_arg)
+           ~doc:"JSON SearchQueryScopeTypeList"
+       and organizationId =
+         flag "organization-id" (optional string) ~doc:"STRING IdType"
+       and additionalResponseFields =
+         flag "additional-response-fields" (optional json_arg)
+           ~doc:"JSON AdditionalResponseFieldsList"
+       and filters = flag "filters" (optional json_arg) ~doc:"JSON Filters"
+       and orderBy =
+         flag "order-by" (optional json_arg) ~doc:"JSON SearchResultSortList"
+       and limit =
+         flag "limit" (optional int) ~doc:"INT SearchResultsLimitType"
+       and marker =
+         flag "marker" (optional string) ~doc:"STRING NextMarkerType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.search_resources
+           (Values.SearchResourcesRequest.make ?authenticationToken
+              ?queryText
+              ?queryScopes:(Option.map
+                              ~f:Values.SearchQueryScopeTypeList.of_json
+                              queryScopes) ?organizationId
+              ?additionalResponseFields:(Option.map
+                                           ~f:Values.AdditionalResponseFieldsList.of_json
+                                           additionalResponseFields)
+              ?filters:(Option.map ~f:Values.Filters.of_json filters)
+              ?orderBy:(Option.map ~f:Values.SearchResultSortList.of_json
+                          orderBy) ?limit ?marker ())
+           (Some Values.SearchResourcesResponse.to_json)
+           (Some Values.SearchResourcesResponse.error_to_json)])
 let update_document =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1181,6 +1273,7 @@ let main =
     ("delete-comment", delete_comment);
     ("delete-custom-metadata", delete_custom_metadata);
     ("delete-document", delete_document);
+    ("delete-document-version", delete_document_version);
     ("delete-folder", delete_folder);
     ("delete-folder-contents", delete_folder_contents);
     ("delete-labels", delete_labels);
@@ -1206,6 +1299,8 @@ let main =
     ("initiate-document-version-upload", initiate_document_version_upload);
     ("remove-all-resource-permissions", remove_all_resource_permissions);
     ("remove-resource-permission", remove_resource_permission);
+    ("restore-document-versions", restore_document_versions);
+    ("search-resources", search_resources);
     ("update-document", update_document);
     ("update-document-version", update_document_version);
     ("update-folder", update_folder);

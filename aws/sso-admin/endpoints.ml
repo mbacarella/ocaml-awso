@@ -2,6 +2,12 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AddRegion: (AddRegionRequest.t, AddRegionResponse.t,
+  AddRegionResponse.error) t 
+  | AttachCustomerManagedPolicyReferenceToPermissionSet:
+  (AttachCustomerManagedPolicyReferenceToPermissionSetRequest.t,
+  AttachCustomerManagedPolicyReferenceToPermissionSetResponse.t,
+  AttachCustomerManagedPolicyReferenceToPermissionSetResponse.error) t 
   | AttachManagedPolicyToPermissionSet:
   (AttachManagedPolicyToPermissionSetRequest.t,
   AttachManagedPolicyToPermissionSetResponse.t,
@@ -9,25 +15,54 @@ type ('i, 'o, 'e) t =
   | CreateAccountAssignment: (CreateAccountAssignmentRequest.t,
   CreateAccountAssignmentResponse.t, CreateAccountAssignmentResponse.error) t
   
+  | CreateApplication: (CreateApplicationRequest.t,
+  CreateApplicationResponse.t, CreateApplicationResponse.error) t 
+  | CreateApplicationAssignment: (CreateApplicationAssignmentRequest.t,
+  CreateApplicationAssignmentResponse.t,
+  CreateApplicationAssignmentResponse.error) t 
+  | CreateInstance: (CreateInstanceRequest.t, CreateInstanceResponse.t,
+  CreateInstanceResponse.error) t 
   | CreateInstanceAccessControlAttributeConfiguration:
   (CreateInstanceAccessControlAttributeConfigurationRequest.t,
   CreateInstanceAccessControlAttributeConfigurationResponse.t,
   CreateInstanceAccessControlAttributeConfigurationResponse.error) t 
   | CreatePermissionSet: (CreatePermissionSetRequest.t,
   CreatePermissionSetResponse.t, CreatePermissionSetResponse.error) t 
+  | CreateTrustedTokenIssuer: (CreateTrustedTokenIssuerRequest.t,
+  CreateTrustedTokenIssuerResponse.t, CreateTrustedTokenIssuerResponse.error)
+  t 
   | DeleteAccountAssignment: (DeleteAccountAssignmentRequest.t,
   DeleteAccountAssignmentResponse.t, DeleteAccountAssignmentResponse.error) t
   
+  | DeleteApplication: (DeleteApplicationRequest.t,
+  DeleteApplicationResponse.t, DeleteApplicationResponse.error) t 
+  | DeleteApplicationAccessScope: (DeleteApplicationAccessScopeRequest.t,
+  unit, unit) t 
+  | DeleteApplicationAssignment: (DeleteApplicationAssignmentRequest.t,
+  DeleteApplicationAssignmentResponse.t,
+  DeleteApplicationAssignmentResponse.error) t 
+  | DeleteApplicationAuthenticationMethod:
+  (DeleteApplicationAuthenticationMethodRequest.t, unit, unit) t 
+  | DeleteApplicationGrant: (DeleteApplicationGrantRequest.t, unit, unit) t 
   | DeleteInlinePolicyFromPermissionSet:
   (DeleteInlinePolicyFromPermissionSetRequest.t,
   DeleteInlinePolicyFromPermissionSetResponse.t,
   DeleteInlinePolicyFromPermissionSetResponse.error) t 
+  | DeleteInstance: (DeleteInstanceRequest.t, DeleteInstanceResponse.t,
+  DeleteInstanceResponse.error) t 
   | DeleteInstanceAccessControlAttributeConfiguration:
   (DeleteInstanceAccessControlAttributeConfigurationRequest.t,
   DeleteInstanceAccessControlAttributeConfigurationResponse.t,
   DeleteInstanceAccessControlAttributeConfigurationResponse.error) t 
   | DeletePermissionSet: (DeletePermissionSetRequest.t,
   DeletePermissionSetResponse.t, DeletePermissionSetResponse.error) t 
+  | DeletePermissionsBoundaryFromPermissionSet:
+  (DeletePermissionsBoundaryFromPermissionSetRequest.t,
+  DeletePermissionsBoundaryFromPermissionSetResponse.t,
+  DeletePermissionsBoundaryFromPermissionSetResponse.error) t 
+  | DeleteTrustedTokenIssuer: (DeleteTrustedTokenIssuerRequest.t,
+  DeleteTrustedTokenIssuerResponse.t, DeleteTrustedTokenIssuerResponse.error)
+  t 
   | DescribeAccountAssignmentCreationStatus:
   (DescribeAccountAssignmentCreationStatusRequest.t,
   DescribeAccountAssignmentCreationStatusResponse.t,
@@ -36,6 +71,16 @@ type ('i, 'o, 'e) t =
   (DescribeAccountAssignmentDeletionStatusRequest.t,
   DescribeAccountAssignmentDeletionStatusResponse.t,
   DescribeAccountAssignmentDeletionStatusResponse.error) t 
+  | DescribeApplication: (DescribeApplicationRequest.t,
+  DescribeApplicationResponse.t, DescribeApplicationResponse.error) t 
+  | DescribeApplicationAssignment: (DescribeApplicationAssignmentRequest.t,
+  DescribeApplicationAssignmentResponse.t,
+  DescribeApplicationAssignmentResponse.error) t 
+  | DescribeApplicationProvider: (DescribeApplicationProviderRequest.t,
+  DescribeApplicationProviderResponse.t,
+  DescribeApplicationProviderResponse.error) t 
+  | DescribeInstance: (DescribeInstanceRequest.t, DescribeInstanceResponse.t,
+  DescribeInstanceResponse.error) t 
   | DescribeInstanceAccessControlAttributeConfiguration:
   (DescribeInstanceAccessControlAttributeConfigurationRequest.t,
   DescribeInstanceAccessControlAttributeConfigurationResponse.t,
@@ -46,14 +91,44 @@ type ('i, 'o, 'e) t =
   (DescribePermissionSetProvisioningStatusRequest.t,
   DescribePermissionSetProvisioningStatusResponse.t,
   DescribePermissionSetProvisioningStatusResponse.error) t 
+  | DescribeRegion: (DescribeRegionRequest.t, DescribeRegionResponse.t,
+  DescribeRegionResponse.error) t 
+  | DescribeTrustedTokenIssuer: (DescribeTrustedTokenIssuerRequest.t,
+  DescribeTrustedTokenIssuerResponse.t,
+  DescribeTrustedTokenIssuerResponse.error) t 
+  | DetachCustomerManagedPolicyReferenceFromPermissionSet:
+  (DetachCustomerManagedPolicyReferenceFromPermissionSetRequest.t,
+  DetachCustomerManagedPolicyReferenceFromPermissionSetResponse.t,
+  DetachCustomerManagedPolicyReferenceFromPermissionSetResponse.error) t 
   | DetachManagedPolicyFromPermissionSet:
   (DetachManagedPolicyFromPermissionSetRequest.t,
   DetachManagedPolicyFromPermissionSetResponse.t,
   DetachManagedPolicyFromPermissionSetResponse.error) t 
+  | GetApplicationAccessScope: (GetApplicationAccessScopeRequest.t,
+  GetApplicationAccessScopeResponse.t,
+  GetApplicationAccessScopeResponse.error) t 
+  | GetApplicationAssignmentConfiguration:
+  (GetApplicationAssignmentConfigurationRequest.t,
+  GetApplicationAssignmentConfigurationResponse.t,
+  GetApplicationAssignmentConfigurationResponse.error) t 
+  | GetApplicationAuthenticationMethod:
+  (GetApplicationAuthenticationMethodRequest.t,
+  GetApplicationAuthenticationMethodResponse.t,
+  GetApplicationAuthenticationMethodResponse.error) t 
+  | GetApplicationGrant: (GetApplicationGrantRequest.t,
+  GetApplicationGrantResponse.t, GetApplicationGrantResponse.error) t 
+  | GetApplicationSessionConfiguration:
+  (GetApplicationSessionConfigurationRequest.t,
+  GetApplicationSessionConfigurationResponse.t,
+  GetApplicationSessionConfigurationResponse.error) t 
   | GetInlinePolicyForPermissionSet:
   (GetInlinePolicyForPermissionSetRequest.t,
   GetInlinePolicyForPermissionSetResponse.t,
   GetInlinePolicyForPermissionSetResponse.error) t 
+  | GetPermissionsBoundaryForPermissionSet:
+  (GetPermissionsBoundaryForPermissionSetRequest.t,
+  GetPermissionsBoundaryForPermissionSetResponse.t,
+  GetPermissionsBoundaryForPermissionSetResponse.error) t 
   | ListAccountAssignmentCreationStatus:
   (ListAccountAssignmentCreationStatusRequest.t,
   ListAccountAssignmentCreationStatusResponse.t,
@@ -64,10 +139,39 @@ type ('i, 'o, 'e) t =
   ListAccountAssignmentDeletionStatusResponse.error) t 
   | ListAccountAssignments: (ListAccountAssignmentsRequest.t,
   ListAccountAssignmentsResponse.t, ListAccountAssignmentsResponse.error) t 
+  | ListAccountAssignmentsForPrincipal:
+  (ListAccountAssignmentsForPrincipalRequest.t,
+  ListAccountAssignmentsForPrincipalResponse.t,
+  ListAccountAssignmentsForPrincipalResponse.error) t 
   | ListAccountsForProvisionedPermissionSet:
   (ListAccountsForProvisionedPermissionSetRequest.t,
   ListAccountsForProvisionedPermissionSetResponse.t,
   ListAccountsForProvisionedPermissionSetResponse.error) t 
+  | ListApplicationAccessScopes: (ListApplicationAccessScopesRequest.t,
+  ListApplicationAccessScopesResponse.t,
+  ListApplicationAccessScopesResponse.error) t 
+  | ListApplicationAssignments: (ListApplicationAssignmentsRequest.t,
+  ListApplicationAssignmentsResponse.t,
+  ListApplicationAssignmentsResponse.error) t 
+  | ListApplicationAssignmentsForPrincipal:
+  (ListApplicationAssignmentsForPrincipalRequest.t,
+  ListApplicationAssignmentsForPrincipalResponse.t,
+  ListApplicationAssignmentsForPrincipalResponse.error) t 
+  | ListApplicationAuthenticationMethods:
+  (ListApplicationAuthenticationMethodsRequest.t,
+  ListApplicationAuthenticationMethodsResponse.t,
+  ListApplicationAuthenticationMethodsResponse.error) t 
+  | ListApplicationGrants: (ListApplicationGrantsRequest.t,
+  ListApplicationGrantsResponse.t, ListApplicationGrantsResponse.error) t 
+  | ListApplicationProviders: (ListApplicationProvidersRequest.t,
+  ListApplicationProvidersResponse.t, ListApplicationProvidersResponse.error)
+  t 
+  | ListApplications: (ListApplicationsRequest.t, ListApplicationsResponse.t,
+  ListApplicationsResponse.error) t 
+  | ListCustomerManagedPolicyReferencesInPermissionSet:
+  (ListCustomerManagedPolicyReferencesInPermissionSetRequest.t,
+  ListCustomerManagedPolicyReferencesInPermissionSetResponse.t,
+  ListCustomerManagedPolicyReferencesInPermissionSetResponse.error) t 
   | ListInstances: (ListInstancesRequest.t, ListInstancesResponse.t,
   ListInstancesResponse.error) t 
   | ListManagedPoliciesInPermissionSet:
@@ -84,90 +188,217 @@ type ('i, 'o, 'e) t =
   (ListPermissionSetsProvisionedToAccountRequest.t,
   ListPermissionSetsProvisionedToAccountResponse.t,
   ListPermissionSetsProvisionedToAccountResponse.error) t 
+  | ListRegions: (ListRegionsRequest.t, ListRegionsResponse.t,
+  ListRegionsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListTrustedTokenIssuers: (ListTrustedTokenIssuersRequest.t,
+  ListTrustedTokenIssuersResponse.t, ListTrustedTokenIssuersResponse.error) t
+  
   | ProvisionPermissionSet: (ProvisionPermissionSetRequest.t,
   ProvisionPermissionSetResponse.t, ProvisionPermissionSetResponse.error) t 
+  | PutApplicationAccessScope: (PutApplicationAccessScopeRequest.t, unit,
+  unit) t 
+  | PutApplicationAssignmentConfiguration:
+  (PutApplicationAssignmentConfigurationRequest.t,
+  PutApplicationAssignmentConfigurationResponse.t,
+  PutApplicationAssignmentConfigurationResponse.error) t 
+  | PutApplicationAuthenticationMethod:
+  (PutApplicationAuthenticationMethodRequest.t, unit, unit) t 
+  | PutApplicationGrant: (PutApplicationGrantRequest.t, unit, unit) t 
+  | PutApplicationSessionConfiguration:
+  (PutApplicationSessionConfigurationRequest.t,
+  PutApplicationSessionConfigurationResponse.t,
+  PutApplicationSessionConfigurationResponse.error) t 
   | PutInlinePolicyToPermissionSet: (PutInlinePolicyToPermissionSetRequest.t,
   PutInlinePolicyToPermissionSetResponse.t,
   PutInlinePolicyToPermissionSetResponse.error) t 
+  | PutPermissionsBoundaryToPermissionSet:
+  (PutPermissionsBoundaryToPermissionSetRequest.t,
+  PutPermissionsBoundaryToPermissionSetResponse.t,
+  PutPermissionsBoundaryToPermissionSetResponse.error) t 
+  | RemoveRegion: (RemoveRegionRequest.t, RemoveRegionResponse.t,
+  RemoveRegionResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateApplication: (UpdateApplicationRequest.t,
+  UpdateApplicationResponse.t, UpdateApplicationResponse.error) t 
+  | UpdateInstance: (UpdateInstanceRequest.t, UpdateInstanceResponse.t,
+  UpdateInstanceResponse.error) t 
   | UpdateInstanceAccessControlAttributeConfiguration:
   (UpdateInstanceAccessControlAttributeConfigurationRequest.t,
   UpdateInstanceAccessControlAttributeConfigurationResponse.t,
   UpdateInstanceAccessControlAttributeConfigurationResponse.error) t 
   | UpdatePermissionSet: (UpdatePermissionSetRequest.t,
   UpdatePermissionSetResponse.t, UpdatePermissionSetResponse.error) t 
+  | UpdateTrustedTokenIssuer: (UpdateTrustedTokenIssuerRequest.t,
+  UpdateTrustedTokenIssuerResponse.t, UpdateTrustedTokenIssuerResponse.error)
+  t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AddRegion -> `POST
+  | AttachCustomerManagedPolicyReferenceToPermissionSet -> `POST
   | AttachManagedPolicyToPermissionSet -> `POST
   | CreateAccountAssignment -> `POST
+  | CreateApplication -> `POST
+  | CreateApplicationAssignment -> `POST
+  | CreateInstance -> `POST
   | CreateInstanceAccessControlAttributeConfiguration -> `POST
   | CreatePermissionSet -> `POST
+  | CreateTrustedTokenIssuer -> `POST
   | DeleteAccountAssignment -> `POST
+  | DeleteApplication -> `POST
+  | DeleteApplicationAccessScope -> `POST
+  | DeleteApplicationAssignment -> `POST
+  | DeleteApplicationAuthenticationMethod -> `POST
+  | DeleteApplicationGrant -> `POST
   | DeleteInlinePolicyFromPermissionSet -> `POST
+  | DeleteInstance -> `POST
   | DeleteInstanceAccessControlAttributeConfiguration -> `POST
   | DeletePermissionSet -> `POST
+  | DeletePermissionsBoundaryFromPermissionSet -> `POST
+  | DeleteTrustedTokenIssuer -> `POST
   | DescribeAccountAssignmentCreationStatus -> `POST
   | DescribeAccountAssignmentDeletionStatus -> `POST
+  | DescribeApplication -> `POST
+  | DescribeApplicationAssignment -> `POST
+  | DescribeApplicationProvider -> `POST
+  | DescribeInstance -> `POST
   | DescribeInstanceAccessControlAttributeConfiguration -> `POST
   | DescribePermissionSet -> `POST
   | DescribePermissionSetProvisioningStatus -> `POST
+  | DescribeRegion -> `POST
+  | DescribeTrustedTokenIssuer -> `POST
+  | DetachCustomerManagedPolicyReferenceFromPermissionSet -> `POST
   | DetachManagedPolicyFromPermissionSet -> `POST
+  | GetApplicationAccessScope -> `POST
+  | GetApplicationAssignmentConfiguration -> `POST
+  | GetApplicationAuthenticationMethod -> `POST
+  | GetApplicationGrant -> `POST
+  | GetApplicationSessionConfiguration -> `POST
   | GetInlinePolicyForPermissionSet -> `POST
+  | GetPermissionsBoundaryForPermissionSet -> `POST
   | ListAccountAssignmentCreationStatus -> `POST
   | ListAccountAssignmentDeletionStatus -> `POST
   | ListAccountAssignments -> `POST
+  | ListAccountAssignmentsForPrincipal -> `POST
   | ListAccountsForProvisionedPermissionSet -> `POST
+  | ListApplicationAccessScopes -> `POST
+  | ListApplicationAssignments -> `POST
+  | ListApplicationAssignmentsForPrincipal -> `POST
+  | ListApplicationAuthenticationMethods -> `POST
+  | ListApplicationGrants -> `POST
+  | ListApplicationProviders -> `POST
+  | ListApplications -> `POST
+  | ListCustomerManagedPolicyReferencesInPermissionSet -> `POST
   | ListInstances -> `POST
   | ListManagedPoliciesInPermissionSet -> `POST
   | ListPermissionSetProvisioningStatus -> `POST
   | ListPermissionSets -> `POST
   | ListPermissionSetsProvisionedToAccount -> `POST
+  | ListRegions -> `POST
   | ListTagsForResource -> `POST
+  | ListTrustedTokenIssuers -> `POST
   | ProvisionPermissionSet -> `POST
+  | PutApplicationAccessScope -> `POST
+  | PutApplicationAssignmentConfiguration -> `POST
+  | PutApplicationAuthenticationMethod -> `POST
+  | PutApplicationGrant -> `POST
+  | PutApplicationSessionConfiguration -> `POST
   | PutInlinePolicyToPermissionSet -> `POST
+  | PutPermissionsBoundaryToPermissionSet -> `POST
+  | RemoveRegion -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
+  | UpdateApplication -> `POST
+  | UpdateInstance -> `POST
   | UpdateInstanceAccessControlAttributeConfiguration -> `POST
   | UpdatePermissionSet -> `POST
+  | UpdateTrustedTokenIssuer -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AddRegion -> (Format.kasprintf Uri.of_string) "/"
+      | AttachCustomerManagedPolicyReferenceToPermissionSet ->
+          (Format.kasprintf Uri.of_string) "/"
       | AttachManagedPolicyToPermissionSet ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateAccountAssignment -> (Format.kasprintf Uri.of_string) "/"
+      | CreateApplication -> (Format.kasprintf Uri.of_string) "/"
+      | CreateApplicationAssignment -> (Format.kasprintf Uri.of_string) "/"
+      | CreateInstance -> (Format.kasprintf Uri.of_string) "/"
       | CreateInstanceAccessControlAttributeConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | CreatePermissionSet -> (Format.kasprintf Uri.of_string) "/"
+      | CreateTrustedTokenIssuer -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAccountAssignment -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteApplication -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteApplicationAccessScope -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteApplicationAssignment -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteApplicationAuthenticationMethod ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteApplicationGrant -> (Format.kasprintf Uri.of_string) "/"
       | DeleteInlinePolicyFromPermissionSet ->
           (Format.kasprintf Uri.of_string) "/"
+      | DeleteInstance -> (Format.kasprintf Uri.of_string) "/"
       | DeleteInstanceAccessControlAttributeConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | DeletePermissionSet -> (Format.kasprintf Uri.of_string) "/"
+      | DeletePermissionsBoundaryFromPermissionSet ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteTrustedTokenIssuer -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAccountAssignmentCreationStatus ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeAccountAssignmentDeletionStatus ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeApplication -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeApplicationAssignment -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeApplicationProvider -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeInstance -> (Format.kasprintf Uri.of_string) "/"
       | DescribeInstanceAccessControlAttributeConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribePermissionSet -> (Format.kasprintf Uri.of_string) "/"
       | DescribePermissionSetProvisioningStatus ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeRegion -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeTrustedTokenIssuer -> (Format.kasprintf Uri.of_string) "/"
+      | DetachCustomerManagedPolicyReferenceFromPermissionSet ->
+          (Format.kasprintf Uri.of_string) "/"
       | DetachManagedPolicyFromPermissionSet ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetApplicationAccessScope -> (Format.kasprintf Uri.of_string) "/"
+      | GetApplicationAssignmentConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetApplicationAuthenticationMethod ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetApplicationGrant -> (Format.kasprintf Uri.of_string) "/"
+      | GetApplicationSessionConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetInlinePolicyForPermissionSet ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetPermissionsBoundaryForPermissionSet ->
           (Format.kasprintf Uri.of_string) "/"
       | ListAccountAssignmentCreationStatus ->
           (Format.kasprintf Uri.of_string) "/"
       | ListAccountAssignmentDeletionStatus ->
           (Format.kasprintf Uri.of_string) "/"
       | ListAccountAssignments -> (Format.kasprintf Uri.of_string) "/"
+      | ListAccountAssignmentsForPrincipal ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListAccountsForProvisionedPermissionSet ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListApplicationAccessScopes -> (Format.kasprintf Uri.of_string) "/"
+      | ListApplicationAssignments -> (Format.kasprintf Uri.of_string) "/"
+      | ListApplicationAssignmentsForPrincipal ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListApplicationAuthenticationMethods ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListApplicationGrants -> (Format.kasprintf Uri.of_string) "/"
+      | ListApplicationProviders -> (Format.kasprintf Uri.of_string) "/"
+      | ListApplications -> (Format.kasprintf Uri.of_string) "/"
+      | ListCustomerManagedPolicyReferencesInPermissionSet ->
           (Format.kasprintf Uri.of_string) "/"
       | ListInstances -> (Format.kasprintf Uri.of_string) "/"
       | ListManagedPoliciesInPermissionSet ->
@@ -177,18 +408,53 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListPermissionSets -> (Format.kasprintf Uri.of_string) "/"
       | ListPermissionSetsProvisionedToAccount ->
           (Format.kasprintf Uri.of_string) "/"
+      | ListRegions -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | ListTrustedTokenIssuers -> (Format.kasprintf Uri.of_string) "/"
       | ProvisionPermissionSet -> (Format.kasprintf Uri.of_string) "/"
+      | PutApplicationAccessScope -> (Format.kasprintf Uri.of_string) "/"
+      | PutApplicationAssignmentConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | PutApplicationAuthenticationMethod ->
+          (Format.kasprintf Uri.of_string) "/"
+      | PutApplicationGrant -> (Format.kasprintf Uri.of_string) "/"
+      | PutApplicationSessionConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | PutInlinePolicyToPermissionSet ->
           (Format.kasprintf Uri.of_string) "/"
+      | PutPermissionsBoundaryToPermissionSet ->
+          (Format.kasprintf Uri.of_string) "/"
+      | RemoveRegion -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateApplication -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateInstance -> (Format.kasprintf Uri.of_string) "/"
       | UpdateInstanceAccessControlAttributeConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
-      | UpdatePermissionSet -> (Format.kasprintf Uri.of_string) "/")
+      | UpdatePermissionSet -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateTrustedTokenIssuer -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
+  | AddRegion ->
+      let json = AddRegionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.AddRegion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | AttachCustomerManagedPolicyReferenceToPermissionSet ->
+      let json =
+        AttachCustomerManagedPolicyReferenceToPermissionSetRequest.to_json
+          req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.AttachCustomerManagedPolicyReferenceToPermissionSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | AttachManagedPolicyToPermissionSet ->
       let json = AttachManagedPolicyToPermissionSetRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -205,6 +471,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SWBExternalService.CreateAccountAssignment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateApplication ->
+      let json = CreateApplicationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.CreateApplication")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateApplicationAssignment ->
+      let json = CreateApplicationAssignmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.CreateApplicationAssignment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateInstance ->
+      let json = CreateInstanceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.CreateInstance")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateInstanceAccessControlAttributeConfiguration ->
       let json =
@@ -224,6 +514,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SWBExternalService.CreatePermissionSet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateTrustedTokenIssuer ->
+      let json = CreateTrustedTokenIssuerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.CreateTrustedTokenIssuer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteAccountAssignment ->
       let json = DeleteAccountAssignmentRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -231,6 +529,47 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SWBExternalService.DeleteAccountAssignment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteApplication ->
+      let json = DeleteApplicationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.DeleteApplication")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteApplicationAccessScope ->
+      let json = DeleteApplicationAccessScopeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.DeleteApplicationAccessScope")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteApplicationAssignment ->
+      let json = DeleteApplicationAssignmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.DeleteApplicationAssignment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteApplicationAuthenticationMethod ->
+      let json = DeleteApplicationAuthenticationMethodRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.DeleteApplicationAuthenticationMethod")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteApplicationGrant ->
+      let json = DeleteApplicationGrantRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.DeleteApplicationGrant")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteInlinePolicyFromPermissionSet ->
       let json = DeleteInlinePolicyFromPermissionSetRequest.to_json req in
@@ -240,6 +579,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "SWBExternalService.DeleteInlinePolicyFromPermissionSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteInstance ->
+      let json = DeleteInstanceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.DeleteInstance")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteInstanceAccessControlAttributeConfiguration ->
       let json =
@@ -259,6 +606,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SWBExternalService.DeletePermissionSet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeletePermissionsBoundaryFromPermissionSet ->
+      let json =
+        DeletePermissionsBoundaryFromPermissionSetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.DeletePermissionsBoundaryFromPermissionSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteTrustedTokenIssuer ->
+      let json = DeleteTrustedTokenIssuerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.DeleteTrustedTokenIssuer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeAccountAssignmentCreationStatus ->
       let json = DescribeAccountAssignmentCreationStatusRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -276,6 +641,39 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "SWBExternalService.DescribeAccountAssignmentDeletionStatus")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeApplication ->
+      let json = DescribeApplicationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.DescribeApplication")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeApplicationAssignment ->
+      let json = DescribeApplicationAssignmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.DescribeApplicationAssignment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeApplicationProvider ->
+      let json = DescribeApplicationProviderRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.DescribeApplicationProvider")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeInstance ->
+      let json = DescribeInstanceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.DescribeInstance")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeInstanceAccessControlAttributeConfiguration ->
       let json =
@@ -305,6 +703,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "SWBExternalService.DescribePermissionSetProvisioningStatus")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRegion ->
+      let json = DescribeRegionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.DescribeRegion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeTrustedTokenIssuer ->
+      let json = DescribeTrustedTokenIssuerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.DescribeTrustedTokenIssuer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DetachCustomerManagedPolicyReferenceFromPermissionSet ->
+      let json =
+        DetachCustomerManagedPolicyReferenceFromPermissionSetRequest.to_json
+          req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.DetachCustomerManagedPolicyReferenceFromPermissionSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DetachManagedPolicyFromPermissionSet ->
       let json = DetachManagedPolicyFromPermissionSetRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -314,6 +739,49 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "SWBExternalService.DetachManagedPolicyFromPermissionSet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetApplicationAccessScope ->
+      let json = GetApplicationAccessScopeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.GetApplicationAccessScope")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetApplicationAssignmentConfiguration ->
+      let json = GetApplicationAssignmentConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.GetApplicationAssignmentConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetApplicationAuthenticationMethod ->
+      let json = GetApplicationAuthenticationMethodRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.GetApplicationAuthenticationMethod")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetApplicationGrant ->
+      let json = GetApplicationGrantRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.GetApplicationGrant")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetApplicationSessionConfiguration ->
+      let json = GetApplicationSessionConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.GetApplicationSessionConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetInlinePolicyForPermissionSet ->
       let json = GetInlinePolicyForPermissionSetRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -322,6 +790,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "SWBExternalService.GetInlinePolicyForPermissionSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetPermissionsBoundaryForPermissionSet ->
+      let json = GetPermissionsBoundaryForPermissionSetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.GetPermissionsBoundaryForPermissionSet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListAccountAssignmentCreationStatus ->
       let json = ListAccountAssignmentCreationStatusRequest.to_json req in
@@ -349,6 +826,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SWBExternalService.ListAccountAssignments")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAccountAssignmentsForPrincipal ->
+      let json = ListAccountAssignmentsForPrincipalRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.ListAccountAssignmentsForPrincipal")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListAccountsForProvisionedPermissionSet ->
       let json = ListAccountsForProvisionedPermissionSetRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -357,6 +843,74 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "SWBExternalService.ListAccountsForProvisionedPermissionSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListApplicationAccessScopes ->
+      let json = ListApplicationAccessScopesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.ListApplicationAccessScopes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListApplicationAssignments ->
+      let json = ListApplicationAssignmentsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.ListApplicationAssignments")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListApplicationAssignmentsForPrincipal ->
+      let json = ListApplicationAssignmentsForPrincipalRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.ListApplicationAssignmentsForPrincipal")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListApplicationAuthenticationMethods ->
+      let json = ListApplicationAuthenticationMethodsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.ListApplicationAuthenticationMethods")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListApplicationGrants ->
+      let json = ListApplicationGrantsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.ListApplicationGrants")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListApplicationProviders ->
+      let json = ListApplicationProvidersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.ListApplicationProviders")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListApplications ->
+      let json = ListApplicationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.ListApplications")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCustomerManagedPolicyReferencesInPermissionSet ->
+      let json =
+        ListCustomerManagedPolicyReferencesInPermissionSetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.ListCustomerManagedPolicyReferencesInPermissionSet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListInstances ->
       let json = ListInstancesRequest.to_json req in
@@ -401,6 +955,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "SWBExternalService.ListPermissionSetsProvisionedToAccount")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListRegions ->
+      let json = ListRegionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.ListRegions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let json = ListTagsForResourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -408,6 +970,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SWBExternalService.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTrustedTokenIssuers ->
+      let json = ListTrustedTokenIssuersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.ListTrustedTokenIssuers")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ProvisionPermissionSet ->
       let json = ProvisionPermissionSetRequest.to_json req in
@@ -417,6 +987,49 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SWBExternalService.ProvisionPermissionSet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutApplicationAccessScope ->
+      let json = PutApplicationAccessScopeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.PutApplicationAccessScope")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutApplicationAssignmentConfiguration ->
+      let json = PutApplicationAssignmentConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.PutApplicationAssignmentConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutApplicationAuthenticationMethod ->
+      let json = PutApplicationAuthenticationMethodRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.PutApplicationAuthenticationMethod")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutApplicationGrant ->
+      let json = PutApplicationGrantRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.PutApplicationGrant")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutApplicationSessionConfiguration ->
+      let json = PutApplicationSessionConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.PutApplicationSessionConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutInlinePolicyToPermissionSet ->
       let json = PutInlinePolicyToPermissionSetRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -425,6 +1038,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "SWBExternalService.PutInlinePolicyToPermissionSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutPermissionsBoundaryToPermissionSet ->
+      let json = PutPermissionsBoundaryToPermissionSetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "SWBExternalService.PutPermissionsBoundaryToPermissionSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RemoveRegion ->
+      let json = RemoveRegionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.RemoveRegion")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagResource ->
       let json = TagResourceRequest.to_json req in
@@ -441,6 +1071,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SWBExternalService.UntagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateApplication ->
+      let json = UpdateApplicationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.UpdateApplication")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateInstance ->
+      let json = UpdateInstanceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.UpdateInstance")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateInstanceAccessControlAttributeConfiguration ->
       let json =
@@ -459,6 +1105,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "SWBExternalService.UpdatePermissionSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateTrustedTokenIssuer ->
+      let json = UpdateTrustedTokenIssuerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "SWBExternalService.UpdateTrustedTokenIssuer")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -483,6 +1137,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | AddRegion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AddRegionResponse.of_json json)
+      else Error (parse_aws_error (Some AddRegionResponse.error_of_json))
+  | AttachCustomerManagedPolicyReferenceToPermissionSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (AttachCustomerManagedPolicyReferenceToPermissionSetResponse.of_json
+             json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                AttachCustomerManagedPolicyReferenceToPermissionSetResponse.error_of_json))
   | AttachManagedPolicyToPermissionSet ->
       if is_success
       then
@@ -501,6 +1173,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateAccountAssignmentResponse.error_of_json))
+  | CreateApplication ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateApplicationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateApplicationResponse.error_of_json))
+  | CreateApplicationAssignment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateApplicationAssignmentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateApplicationAssignmentResponse.error_of_json))
+  | CreateInstance ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateInstanceResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateInstanceResponse.error_of_json))
   | CreateInstanceAccessControlAttributeConfiguration ->
       if is_success
       then
@@ -521,6 +1217,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreatePermissionSetResponse.error_of_json))
+  | CreateTrustedTokenIssuer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateTrustedTokenIssuerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateTrustedTokenIssuerResponse.error_of_json))
   | DeleteAccountAssignment ->
       if is_success
       then
@@ -530,6 +1235,29 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteAccountAssignmentResponse.error_of_json))
+  | DeleteApplication ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteApplicationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteApplicationResponse.error_of_json))
+  | DeleteApplicationAccessScope ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteApplicationAssignment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteApplicationAssignmentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteApplicationAssignmentResponse.error_of_json))
+  | DeleteApplicationAuthenticationMethod ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteApplicationGrant ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteInlinePolicyFromPermissionSet ->
       if is_success
       then
@@ -539,6 +1267,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteInlinePolicyFromPermissionSetResponse.error_of_json))
+  | DeleteInstance ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteInstanceResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DeleteInstanceResponse.error_of_json))
   | DeleteInstanceAccessControlAttributeConfiguration ->
       if is_success
       then
@@ -559,6 +1294,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeletePermissionSetResponse.error_of_json))
+  | DeletePermissionsBoundaryFromPermissionSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeletePermissionsBoundaryFromPermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DeletePermissionsBoundaryFromPermissionSetResponse.error_of_json))
+  | DeleteTrustedTokenIssuer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteTrustedTokenIssuerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteTrustedTokenIssuerResponse.error_of_json))
   | DescribeAccountAssignmentCreationStatus ->
       if is_success
       then
@@ -579,6 +1333,39 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 DescribeAccountAssignmentDeletionStatusResponse.error_of_json))
+  | DescribeApplication ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeApplicationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeApplicationResponse.error_of_json))
+  | DescribeApplicationAssignment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeApplicationAssignmentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeApplicationAssignmentResponse.error_of_json))
+  | DescribeApplicationProvider ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeApplicationProviderResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeApplicationProviderResponse.error_of_json))
+  | DescribeInstance ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeInstanceResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeInstanceResponse.error_of_json))
   | DescribeInstanceAccessControlAttributeConfiguration ->
       if is_success
       then
@@ -609,6 +1396,34 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 DescribePermissionSetProvisioningStatusResponse.error_of_json))
+  | DescribeRegion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRegionResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeRegionResponse.error_of_json))
+  | DescribeTrustedTokenIssuer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeTrustedTokenIssuerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTrustedTokenIssuerResponse.error_of_json))
+  | DetachCustomerManagedPolicyReferenceFromPermissionSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (DetachCustomerManagedPolicyReferenceFromPermissionSetResponse.of_json
+             json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DetachCustomerManagedPolicyReferenceFromPermissionSetResponse.error_of_json))
   | DetachManagedPolicyFromPermissionSet ->
       if is_success
       then
@@ -618,6 +1433,51 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DetachManagedPolicyFromPermissionSetResponse.error_of_json))
+  | GetApplicationAccessScope ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetApplicationAccessScopeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetApplicationAccessScopeResponse.error_of_json))
+  | GetApplicationAssignmentConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetApplicationAssignmentConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                GetApplicationAssignmentConfigurationResponse.error_of_json))
+  | GetApplicationAuthenticationMethod ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetApplicationAuthenticationMethodResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetApplicationAuthenticationMethodResponse.error_of_json))
+  | GetApplicationGrant ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetApplicationGrantResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetApplicationGrantResponse.error_of_json))
+  | GetApplicationSessionConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetApplicationSessionConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetApplicationSessionConfigurationResponse.error_of_json))
   | GetInlinePolicyForPermissionSet ->
       if is_success
       then
@@ -627,6 +1487,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetInlinePolicyForPermissionSetResponse.error_of_json))
+  | GetPermissionsBoundaryForPermissionSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetPermissionsBoundaryForPermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                GetPermissionsBoundaryForPermissionSetResponse.error_of_json))
   | ListAccountAssignmentCreationStatus ->
       if is_success
       then
@@ -654,6 +1524,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListAccountAssignmentsResponse.error_of_json))
+  | ListAccountAssignmentsForPrincipal ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAccountAssignmentsForPrincipalResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAccountAssignmentsForPrincipalResponse.error_of_json))
   | ListAccountsForProvisionedPermissionSet ->
       if is_success
       then
@@ -664,6 +1543,79 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 ListAccountsForProvisionedPermissionSetResponse.error_of_json))
+  | ListApplicationAccessScopes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListApplicationAccessScopesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListApplicationAccessScopesResponse.error_of_json))
+  | ListApplicationAssignments ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListApplicationAssignmentsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListApplicationAssignmentsResponse.error_of_json))
+  | ListApplicationAssignmentsForPrincipal ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListApplicationAssignmentsForPrincipalResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListApplicationAssignmentsForPrincipalResponse.error_of_json))
+  | ListApplicationAuthenticationMethods ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListApplicationAuthenticationMethodsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListApplicationAuthenticationMethodsResponse.error_of_json))
+  | ListApplicationGrants ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListApplicationGrantsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListApplicationGrantsResponse.error_of_json))
+  | ListApplicationProviders ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListApplicationProvidersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListApplicationProvidersResponse.error_of_json))
+  | ListApplications ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListApplicationsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListApplicationsResponse.error_of_json))
+  | ListCustomerManagedPolicyReferencesInPermissionSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (ListCustomerManagedPolicyReferencesInPermissionSetResponse.of_json
+             json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListCustomerManagedPolicyReferencesInPermissionSetResponse.error_of_json))
   | ListInstances ->
       if is_success
       then
@@ -706,6 +1658,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 ListPermissionSetsProvisionedToAccountResponse.error_of_json))
+  | ListRegions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRegionsResponse.of_json json)
+      else Error (parse_aws_error (Some ListRegionsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then
@@ -714,6 +1672,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListTrustedTokenIssuers ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTrustedTokenIssuersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListTrustedTokenIssuersResponse.error_of_json))
   | ProvisionPermissionSet ->
       if is_success
       then
@@ -723,6 +1690,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ProvisionPermissionSetResponse.error_of_json))
+  | PutApplicationAccessScope ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutApplicationAssignmentConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutApplicationAssignmentConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                PutApplicationAssignmentConfigurationResponse.error_of_json))
+  | PutApplicationAuthenticationMethod ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutApplicationGrant ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutApplicationSessionConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutApplicationSessionConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutApplicationSessionConfigurationResponse.error_of_json))
   | PutInlinePolicyToPermissionSet ->
       if is_success
       then
@@ -732,6 +1724,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PutInlinePolicyToPermissionSetResponse.error_of_json))
+  | PutPermissionsBoundaryToPermissionSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutPermissionsBoundaryToPermissionSetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                PutPermissionsBoundaryToPermissionSetResponse.error_of_json))
+  | RemoveRegion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RemoveRegionResponse.of_json json)
+      else Error (parse_aws_error (Some RemoveRegionResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -744,6 +1752,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceResponse.of_json json)
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateApplication ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateApplicationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateApplicationResponse.error_of_json))
+  | UpdateInstance ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateInstanceResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateInstanceResponse.error_of_json))
   | UpdateInstanceAccessControlAttributeConfiguration ->
       if is_success
       then
@@ -764,3 +1787,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdatePermissionSetResponse.error_of_json))
+  | UpdateTrustedTokenIssuer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateTrustedTokenIssuerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateTrustedTokenIssuerResponse.error_of_json))

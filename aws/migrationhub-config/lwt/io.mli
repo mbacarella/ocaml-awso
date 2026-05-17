@@ -6,6 +6,12 @@ val create_home_region_control :
       CreateHomeRegionControlRequest.t ->
         (CreateHomeRegionControlResult.t,
           CreateHomeRegionControlResult.error) Result.t Lwt.t
+val delete_home_region_control :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteHomeRegionControlRequest.t ->
+        (DeleteHomeRegionControlResult.t,
+          DeleteHomeRegionControlResult.error) Result.t Lwt.t
 val describe_home_region_controls :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

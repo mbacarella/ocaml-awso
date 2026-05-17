@@ -102,6 +102,23 @@ let get_import_file_task =
            (Values.GetImportFileTaskRequest.make ~id ())
            (Some Values.GetImportFileTaskResponse.to_json)
            (Some Values.GetImportFileTaskResponse.error_to_json)])
+let get_latest_assessment_id =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_latest_assessment_id
+           (Values.GetLatestAssessmentIdRequest.make ())
+           (Some Values.GetLatestAssessmentIdResponse.to_json)
+           (Some Values.GetLatestAssessmentIdResponse.error_to_json)])
 let get_portfolio_preferences =
   Command.async ~summary:""
     ([%map_open.Command
@@ -194,6 +211,28 @@ let get_server_strategies =
            (Values.GetServerStrategiesRequest.make ~serverId ())
            (Some Values.GetServerStrategiesResponse.to_json)
            (Some Values.GetServerStrategiesResponse.error_to_json)])
+let list_analyzable_servers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResult"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and sort = flag "sort" (optional json_arg) ~doc:"JSON SortOrder" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_analyzable_servers
+           (Values.ListAnalyzableServersRequest.make ?maxResults ?nextToken
+              ?sort:(Option.map ~f:Values.SortOrder.of_json sort) ())
+           (Some Values.ListAnalyzableServersResponse.to_json)
+           (Some Values.ListAnalyzableServersResponse.error_to_json)])
 let list_application_components =
   Command.async ~summary:""
     ([%map_open.Command
@@ -312,6 +351,9 @@ let put_portfolio_preferences =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and applicationMode =
+         flag "application-mode" (optional json_arg)
+           ~doc:"JSON ApplicationMode"
        and applicationPreferences =
          flag "application-preferences" (optional json_arg)
            ~doc:"JSON ApplicationPreferences"
@@ -325,6 +367,8 @@ let put_portfolio_preferences =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_portfolio_preferences
            (Values.PutPortfolioPreferencesRequest.make
+              ?applicationMode:(Option.map ~f:Values.ApplicationMode.of_json
+                                  applicationMode)
               ?applicationPreferences:(Option.map
                                          ~f:Values.ApplicationPreferences.of_json
                                          applicationPreferences)
@@ -346,6 +390,12 @@ let start_assessment =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and assessmentDataSourceType =
+         flag "assessment-data-source-type" (optional json_arg)
+           ~doc:"JSON AssessmentDataSourceType"
+       and assessmentTargets =
+         flag "assessment-targets" (optional json_arg)
+           ~doc:"JSON AssessmentTargets"
        and s3bucketForAnalysisData =
          flag "s3bucket-for-analysis-data" (optional string)
            ~doc:"STRING StartAssessmentRequestS3bucketForAnalysisDataString"
@@ -355,8 +405,14 @@ let start_assessment =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_assessment
-           (Values.StartAssessmentRequest.make ?s3bucketForAnalysisData
-              ?s3bucketForReportData ())
+           (Values.StartAssessmentRequest.make
+              ?assessmentDataSourceType:(Option.map
+                                           ~f:Values.AssessmentDataSourceType.of_json
+                                           assessmentDataSourceType)
+              ?assessmentTargets:(Option.map
+                                    ~f:Values.AssessmentTargets.of_json
+                                    assessmentTargets)
+              ?s3bucketForAnalysisData ?s3bucketForReportData ())
            (Some Values.StartAssessmentResponse.to_json)
            (Some Values.StartAssessmentResponse.error_to_json)])
 let start_import_file_task =
@@ -445,6 +501,9 @@ let update_application_component_config =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and appType = flag "app-type" (optional json_arg) ~doc:"JSON AppType"
+       and configureOnly =
+         flag "configure-only" (optional bool) ~doc:"BOOL Boolean"
        and inclusionStatus =
          flag "inclusion-status" (optional json_arg)
            ~doc:"JSON InclusionStatus"
@@ -464,6 +523,8 @@ let update_application_component_config =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_application_component_config
            (Values.UpdateApplicationComponentConfigRequest.make
+              ?appType:(Option.map ~f:Values.AppType.of_json appType)
+              ?configureOnly
               ?inclusionStatus:(Option.map ~f:Values.InclusionStatus.of_json
                                   inclusionStatus) ?secretsManagerKey
               ?sourceCodeList:(Option.map ~f:Values.SourceCodeList.of_json
@@ -504,11 +565,13 @@ let main =
       get_application_component_strategies);
     ("get-assessment", get_assessment);
     ("get-import-file-task", get_import_file_task);
+    ("get-latest-assessment-id", get_latest_assessment_id);
     ("get-portfolio-preferences", get_portfolio_preferences);
     ("get-portfolio-summary", get_portfolio_summary);
     ("get-recommendation-report-details", get_recommendation_report_details);
     ("get-server-details", get_server_details);
     ("get-server-strategies", get_server_strategies);
+    ("list-analyzable-servers", list_analyzable_servers);
     ("list-application-components", list_application_components);
     ("list-collectors", list_collectors);
     ("list-import-file-task", list_import_file_task);

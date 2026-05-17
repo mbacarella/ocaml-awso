@@ -2,6 +2,8 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | CancelFlowExecutions: (CancelFlowExecutionsRequest.t,
+  CancelFlowExecutionsResponse.t, CancelFlowExecutionsResponse.error) t 
   | CreateConnectorProfile: (CreateConnectorProfileRequest.t,
   CreateConnectorProfileResponse.t, CreateConnectorProfileResponse.error) t 
   | CreateFlow: (CreateFlowRequest.t, CreateFlowResponse.t,
@@ -35,6 +37,9 @@ type ('i, 'o, 'e) t =
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | RegisterConnector: (RegisterConnectorRequest.t,
   RegisterConnectorResponse.t, RegisterConnectorResponse.error) t 
+  | ResetConnectorMetadataCache: (ResetConnectorMetadataCacheRequest.t,
+  ResetConnectorMetadataCacheResponse.t,
+  ResetConnectorMetadataCacheResponse.error) t 
   | StartFlow: (StartFlowRequest.t, StartFlowResponse.t,
   StartFlowResponse.error) t 
   | StopFlow: (StopFlowRequest.t, StopFlowResponse.t, StopFlowResponse.error)
@@ -47,10 +52,14 @@ type ('i, 'o, 'e) t =
   UntagResourceResponse.error) t 
   | UpdateConnectorProfile: (UpdateConnectorProfileRequest.t,
   UpdateConnectorProfileResponse.t, UpdateConnectorProfileResponse.error) t 
+  | UpdateConnectorRegistration: (UpdateConnectorRegistrationRequest.t,
+  UpdateConnectorRegistrationResponse.t,
+  UpdateConnectorRegistrationResponse.error) t 
   | UpdateFlow: (UpdateFlowRequest.t, UpdateFlowResponse.t,
   UpdateFlowResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | CancelFlowExecutions -> `POST
   | CreateConnectorProfile -> `POST
   | CreateFlow -> `POST
   | DeleteConnectorProfile -> `POST
@@ -66,16 +75,20 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListFlows -> `POST
   | ListTagsForResource -> `GET
   | RegisterConnector -> `POST
+  | ResetConnectorMetadataCache -> `POST
   | StartFlow -> `POST
   | StopFlow -> `POST
   | TagResource -> `POST
   | UnregisterConnector -> `POST
   | UntagResource -> `DELETE
   | UpdateConnectorProfile -> `POST
+  | UpdateConnectorRegistration -> `POST
   | UpdateFlow -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | CancelFlowExecutions ->
+          (Format.kasprintf Uri.of_string) "/cancel-flow-executions"
       | CreateConnectorProfile ->
           (Format.kasprintf Uri.of_string) "/create-connector-profile"
       | CreateFlow -> (Format.kasprintf Uri.of_string) "/create-flow"
@@ -102,6 +115,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (ARN.to_header x.ListTagsForResourceRequest.resourceArn)
       | RegisterConnector ->
           (Format.kasprintf Uri.of_string) "/register-connector"
+      | ResetConnectorMetadataCache ->
+          (Format.kasprintf Uri.of_string) "/reset-connector-metadata-cache"
       | StartFlow -> (Format.kasprintf Uri.of_string) "/start-flow"
       | StopFlow -> (Format.kasprintf Uri.of_string) "/stop-flow"
       | TagResource ->
@@ -117,11 +132,36 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
       | UpdateConnectorProfile ->
           (Format.kasprintf Uri.of_string) "/update-connector-profile"
+      | UpdateConnectorRegistration ->
+          (Format.kasprintf Uri.of_string) "/update-connector-registration"
       | UpdateFlow -> (Format.kasprintf Uri.of_string) "/update-flow")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | CancelFlowExecutions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("flowName",
+                           (FlowName.to_value
+                              req.CancelFlowExecutionsRequest.flowName));
+                      Option.map req.CancelFlowExecutionsRequest.executionIds
+                        ~f:(fun x ->
+                              ("executionIds", (ExecutionIds.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateConnectorProfile ->
       let (headers, body) =
         let headers =
@@ -152,7 +192,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("connectorProfileConfig",
                           (ConnectorProfileConfig.to_value
-                             req.CreateConnectorProfileRequest.connectorProfileConfig))])
+                             req.CreateConnectorProfileRequest.connectorProfileConfig));
+                      Option.map
+                        req.CreateConnectorProfileRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -193,7 +237,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("tasks",
                           (Tasks.to_value req.CreateFlowRequest.tasks));
                       Option.map req.CreateFlowRequest.tags
-                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map req.CreateFlowRequest.metadataCatalogConfig
+                        ~f:(fun x ->
+                              ("metadataCatalogConfig",
+                                (MetadataCatalogConfig.to_value x)));
+                      Option.map req.CreateFlowRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -429,7 +480,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("entitiesPath", (EntitiesPath.to_value x)));
                       Option.map req.ListConnectorEntitiesRequest.apiVersion
-                        ~f:(fun x -> ("apiVersion", (ApiVersion.to_value x)))])
+                        ~f:(fun x -> ("apiVersion", (ApiVersion.to_value x)));
+                      Option.map req.ListConnectorEntitiesRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (ListEntitiesMaxResults.to_value x)));
+                      Option.map req.ListConnectorEntitiesRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (NextToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -505,7 +562,47 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.RegisterConnectorRequest.connectorProvisioningConfig
                         ~f:(fun x ->
                               ("connectorProvisioningConfig",
-                                (ConnectorProvisioningConfig.to_value x)))])
+                                (ConnectorProvisioningConfig.to_value x)));
+                      Option.map req.RegisterConnectorRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ResetConnectorMetadataCache ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ResetConnectorMetadataCacheRequest.connectorProfileName
+                         ~f:(fun x ->
+                               ("connectorProfileName",
+                                 (ConnectorProfileName.to_value x)));
+                      Option.map
+                        req.ResetConnectorMetadataCacheRequest.connectorType
+                        ~f:(fun x ->
+                              ("connectorType", (ConnectorType.to_value x)));
+                      Option.map
+                        req.ResetConnectorMetadataCacheRequest.connectorEntityName
+                        ~f:(fun x ->
+                              ("connectorEntityName",
+                                (EntityName.to_value x)));
+                      Option.map
+                        req.ResetConnectorMetadataCacheRequest.entitiesPath
+                        ~f:(fun x ->
+                              ("entitiesPath", (EntitiesPath.to_value x)));
+                      Option.map
+                        req.ResetConnectorMetadataCacheRequest.apiVersion
+                        ~f:(fun x -> ("apiVersion", (ApiVersion.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -524,7 +621,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Some
                          ("flowName",
-                           (FlowName.to_value req.StartFlowRequest.flowName))])
+                           (FlowName.to_value req.StartFlowRequest.flowName));
+                      Option.map req.StartFlowRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -613,7 +713,44 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("connectorProfileConfig",
                           (ConnectorProfileConfig.to_value
-                             req.UpdateConnectorProfileRequest.connectorProfileConfig))])
+                             req.UpdateConnectorProfileRequest.connectorProfileConfig));
+                      Option.map
+                        req.UpdateConnectorProfileRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateConnectorRegistration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("connectorLabel",
+                           (ConnectorLabel.to_value
+                              req.UpdateConnectorRegistrationRequest.connectorLabel));
+                      Option.map
+                        req.UpdateConnectorRegistrationRequest.description
+                        ~f:(fun x ->
+                              ("description", (Description.to_value x)));
+                      Option.map
+                        req.UpdateConnectorRegistrationRequest.connectorProvisioningConfig
+                        ~f:(fun x ->
+                              ("connectorProvisioningConfig",
+                                (ConnectorProvisioningConfig.to_value x)));
+                      Option.map
+                        req.UpdateConnectorRegistrationRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -650,7 +787,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                              req.UpdateFlowRequest.destinationFlowConfigList));
                       Some
                         ("tasks",
-                          (Tasks.to_value req.UpdateFlowRequest.tasks))])
+                          (Tasks.to_value req.UpdateFlowRequest.tasks));
+                      Option.map req.UpdateFlowRequest.metadataCatalogConfig
+                        ~f:(fun x ->
+                              ("metadataCatalogConfig",
+                                (MetadataCatalogConfig.to_value x)));
+                      Option.map req.UpdateFlowRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -706,6 +850,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | CancelFlowExecutions ->
+      if is_success
+      then Ok (CancelFlowExecutionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CancelFlowExecutionsResponse.error_of_json))
   | CreateConnectorProfile ->
       if is_success
       then
@@ -805,6 +955,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some RegisterConnectorResponse.error_of_json))
+  | ResetConnectorMetadataCache ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (ResetConnectorMetadataCacheResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some ResetConnectorMetadataCacheResponse.error_of_json))
   | StartFlow ->
       if is_success
       then Ok (StartFlowResponse.of_json (response_to_json resp))
@@ -844,6 +1006,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateConnectorProfileResponse.error_of_json))
+  | UpdateConnectorRegistration ->
+      if is_success
+      then
+        Ok
+          (UpdateConnectorRegistrationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateConnectorRegistrationResponse.error_of_json))
   | UpdateFlow ->
       if is_success
       then Ok (UpdateFlowResponse.of_json (response_to_json resp))

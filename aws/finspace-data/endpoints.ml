@@ -2,6 +2,9 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AssociateUserToPermissionGroup: (AssociateUserToPermissionGroupRequest.t,
+  AssociateUserToPermissionGroupResponse.t,
+  AssociateUserToPermissionGroupResponse.error) t 
   | CreateChangeset: (CreateChangesetRequest.t, CreateChangesetResponse.t,
   CreateChangesetResponse.error) t 
   | CreateDataView: (CreateDataViewRequest.t, CreateDataViewResponse.t,
@@ -18,6 +21,10 @@ type ('i, 'o, 'e) t =
   DeletePermissionGroupResponse.t, DeletePermissionGroupResponse.error) t 
   | DisableUser: (DisableUserRequest.t, DisableUserResponse.t,
   DisableUserResponse.error) t 
+  | DisassociateUserFromPermissionGroup:
+  (DisassociateUserFromPermissionGroupRequest.t,
+  DisassociateUserFromPermissionGroupResponse.t,
+  DisassociateUserFromPermissionGroupResponse.error) t 
   | EnableUser: (EnableUserRequest.t, EnableUserResponse.t,
   EnableUserResponse.error) t 
   | GetChangeset: (GetChangesetRequest.t, GetChangesetResponse.t,
@@ -26,6 +33,12 @@ type ('i, 'o, 'e) t =
   GetDataViewResponse.error) t 
   | GetDataset: (GetDatasetRequest.t, GetDatasetResponse.t,
   GetDatasetResponse.error) t 
+  | GetExternalDataViewAccessDetails:
+  (GetExternalDataViewAccessDetailsRequest.t,
+  GetExternalDataViewAccessDetailsResponse.t,
+  GetExternalDataViewAccessDetailsResponse.error) t 
+  | GetPermissionGroup: (GetPermissionGroupRequest.t,
+  GetPermissionGroupResponse.t, GetPermissionGroupResponse.error) t 
   | GetProgrammaticAccessCredentials:
   (GetProgrammaticAccessCredentialsRequest.t,
   GetProgrammaticAccessCredentialsResponse.t,
@@ -41,8 +54,14 @@ type ('i, 'o, 'e) t =
   ListDatasetsResponse.error) t 
   | ListPermissionGroups: (ListPermissionGroupsRequest.t,
   ListPermissionGroupsResponse.t, ListPermissionGroupsResponse.error) t 
+  | ListPermissionGroupsByUser: (ListPermissionGroupsByUserRequest.t,
+  ListPermissionGroupsByUserResponse.t,
+  ListPermissionGroupsByUserResponse.error) t 
   | ListUsers: (ListUsersRequest.t, ListUsersResponse.t,
   ListUsersResponse.error) t 
+  | ListUsersByPermissionGroup: (ListUsersByPermissionGroupRequest.t,
+  ListUsersByPermissionGroupResponse.t,
+  ListUsersByPermissionGroupResponse.error) t 
   | ResetUserPassword: (ResetUserPasswordRequest.t,
   ResetUserPasswordResponse.t, ResetUserPasswordResponse.error) t 
   | UpdateChangeset: (UpdateChangesetRequest.t, UpdateChangesetResponse.t,
@@ -55,6 +74,7 @@ type ('i, 'o, 'e) t =
   UpdateUserResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AssociateUserToPermissionGroup -> `POST
   | CreateChangeset -> `POST
   | CreateDataView -> `POST
   | CreateDataset -> `POST
@@ -63,10 +83,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteDataset -> `DELETE
   | DeletePermissionGroup -> `DELETE
   | DisableUser -> `POST
+  | DisassociateUserFromPermissionGroup -> `DELETE
   | EnableUser -> `POST
   | GetChangeset -> `GET
   | GetDataView -> `GET
   | GetDataset -> `GET
+  | GetExternalDataViewAccessDetails -> `POST
+  | GetPermissionGroup -> `GET
   | GetProgrammaticAccessCredentials -> `GET
   | GetUser -> `GET
   | GetWorkingLocation -> `POST
@@ -74,7 +97,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListDataViews -> `GET
   | ListDatasets -> `GET
   | ListPermissionGroups -> `GET
+  | ListPermissionGroupsByUser -> `GET
   | ListUsers -> `GET
+  | ListUsersByPermissionGroup -> `GET
   | ResetUserPassword -> `POST
   | UpdateChangeset -> `PUT
   | UpdateDataset -> `PUT
@@ -83,6 +108,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AssociateUserToPermissionGroup ->
+          (Format.kasprintf Uri.of_string) "/permission-group/%s/users/%s"
+            (PermissionGroupId.to_header
+               x.AssociateUserToPermissionGroupRequest.permissionGroupId)
+            (UserId.to_header x.AssociateUserToPermissionGroupRequest.userId)
       | CreateChangeset ->
           (Format.kasprintf Uri.of_string) "/datasets/%s/changesetsv2"
             (DatasetId.to_header x.CreateChangesetRequest.datasetId)
@@ -113,6 +143,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DisableUser ->
           (Format.kasprintf Uri.of_string) "/user/%s/disable"
             (UserId.to_header x.DisableUserRequest.userId)
+      | DisassociateUserFromPermissionGroup ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/permission-group/%s/users/%s"
+               (PermissionGroupId.to_header
+                  x.DisassociateUserFromPermissionGroupRequest.permissionGroupId)
+               (UserId.to_header
+                  x.DisassociateUserFromPermissionGroupRequest.userId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
       | EnableUser ->
           (Format.kasprintf Uri.of_string) "/user/%s/enable"
             (UserId.to_header x.EnableUserRequest.userId)
@@ -127,6 +168,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetDataset ->
           (Format.kasprintf Uri.of_string) "/datasetsv2/%s"
             (StringValueLength1to255.to_header x.GetDatasetRequest.datasetId)
+      | GetExternalDataViewAccessDetails ->
+          (Format.kasprintf Uri.of_string)
+            "/datasets/%s/dataviewsv2/%s/external-access-details"
+            (DatasetId.to_header
+               x.GetExternalDataViewAccessDetailsRequest.datasetId)
+            (DataViewId.to_header
+               x.GetExternalDataViewAccessDetailsRequest.dataViewId)
+      | GetPermissionGroup ->
+          (Format.kasprintf Uri.of_string) "/permission-group/%s"
+            (PermissionGroupId.to_header
+               x.GetPermissionGroupRequest.permissionGroupId)
       | GetProgrammaticAccessCredentials ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/credentials/programmatic")
@@ -181,8 +233,27 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
                   x.nextToken;
                Some ("maxResults", (ResultLimit.to_header x.maxResults))])
+      | ListPermissionGroupsByUser ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/user/%s/permission-groups"
+               (UserId.to_header x.ListPermissionGroupsByUserRequest.userId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Some ("maxResults", (ResultLimit.to_header x.maxResults))])
       | ListUsers ->
           Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/user")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Some ("maxResults", (ResultLimit.to_header x.maxResults))])
+      | ListUsersByPermissionGroup ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/permission-group/%s/users"
+               (PermissionGroupId.to_header
+                  x.ListUsersByPermissionGroupRequest.permissionGroupId))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
@@ -209,6 +280,26 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | AssociateUserToPermissionGroup ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.AssociateUserToPermissionGroupRequest.clientToken
+                         ~f:(fun x ->
+                               ("clientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateChangeset ->
       let (headers, body) =
         let headers =
@@ -368,7 +459,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateUserRequest.lastName
                         ~f:(fun x -> ("lastName", (LastName.to_value x)));
                       Option.map req.CreateUserRequest.apiAccess
-                        ~f:(fun x -> ("ApiAccess", (ApiAccess.to_value x)));
+                        ~f:(fun x -> ("apiAccess", (ApiAccess.to_value x)));
                       Option.map req.CreateUserRequest.apiAccessPrincipalArn
                         ~f:(fun x ->
                               ("apiAccessPrincipalArn", (RoleArn.to_value x)));
@@ -403,6 +494,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateUserFromPermissionGroup ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | EnableUser ->
       let (headers, body) =
         let headers =
@@ -429,6 +522,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetDataset ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetExternalDataViewAccessDetails ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetPermissionGroup ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetProgrammaticAccessCredentials ->
@@ -468,7 +567,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListPermissionGroups ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListPermissionGroupsByUser ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListUsers ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListUsersByPermissionGroup ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ResetUserPassword ->
@@ -542,6 +647,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | AssociateUserToPermissionGroup ->
+      if is_success
+      then
+        Ok
+          (AssociateUserToPermissionGroupResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateUserToPermissionGroupResponse.error_of_json))
   | CreateChangeset ->
       if is_success
       then Ok (CreateChangesetResponse.of_json (response_to_json resp))
@@ -580,6 +695,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (DisableUserResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DisableUserResponse.error_of_json))
+  | DisassociateUserFromPermissionGroup ->
+      if is_success
+      then
+        Ok
+          (DisassociateUserFromPermissionGroupResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateUserFromPermissionGroupResponse.error_of_json))
   | EnableUser ->
       if is_success
       then Ok (EnableUserResponse.of_json (response_to_json resp))
@@ -596,6 +721,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetDatasetResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetDatasetResponse.error_of_json))
+  | GetExternalDataViewAccessDetails ->
+      if is_success
+      then
+        Ok
+          (GetExternalDataViewAccessDetailsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetExternalDataViewAccessDetailsResponse.error_of_json))
+  | GetPermissionGroup ->
+      if is_success
+      then Ok (GetPermissionGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetPermissionGroupResponse.error_of_json))
   | GetProgrammaticAccessCredentials ->
       if is_success
       then
@@ -635,10 +776,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListPermissionGroupsResponse.error_of_json))
+  | ListPermissionGroupsByUser ->
+      if is_success
+      then
+        Ok
+          (ListPermissionGroupsByUserResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListPermissionGroupsByUserResponse.error_of_json))
   | ListUsers ->
       if is_success
       then Ok (ListUsersResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListUsersResponse.error_of_json))
+  | ListUsersByPermissionGroup ->
+      if is_success
+      then
+        Ok
+          (ListUsersByPermissionGroupResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListUsersByPermissionGroupResponse.error_of_json))
   | ResetUserPassword ->
       if is_success
       then Ok (ResetUserPasswordResponse.of_json (response_to_json resp))

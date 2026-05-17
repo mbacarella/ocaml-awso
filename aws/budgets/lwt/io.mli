@@ -112,6 +112,22 @@ val execute_budget_action :
       ExecuteBudgetActionRequest.t ->
         (ExecuteBudgetActionResponse.t, ExecuteBudgetActionResponse.error)
           Result.t Lwt.t
+val list_tags_for_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTagsForResourceRequest.t ->
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
+val tag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TagResourceRequest.t ->
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
+val untag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UntagResourceRequest.t ->
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_budget :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

@@ -11,6 +11,12 @@ val create_stream :
     ?cfg:Awso.Cfg.t ->
       CreateStreamInput.t ->
         (CreateStreamOutput.t, CreateStreamOutput.error) Result.t Lwt.t
+val delete_edge_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteEdgeConfigurationInput.t ->
+        (DeleteEdgeConfigurationOutput.t,
+          DeleteEdgeConfigurationOutput.error) Result.t Lwt.t
 val delete_signaling_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -22,6 +28,36 @@ val delete_stream :
     ?cfg:Awso.Cfg.t ->
       DeleteStreamInput.t ->
         (DeleteStreamOutput.t, DeleteStreamOutput.error) Result.t Lwt.t
+val describe_edge_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeEdgeConfigurationInput.t ->
+        (DescribeEdgeConfigurationOutput.t,
+          DescribeEdgeConfigurationOutput.error) Result.t Lwt.t
+val describe_image_generation_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeImageGenerationConfigurationInput.t ->
+        (DescribeImageGenerationConfigurationOutput.t,
+          DescribeImageGenerationConfigurationOutput.error) Result.t Lwt.t
+val describe_mapped_resource_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMappedResourceConfigurationInput.t ->
+        (DescribeMappedResourceConfigurationOutput.t,
+          DescribeMappedResourceConfigurationOutput.error) Result.t Lwt.t
+val describe_media_storage_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeMediaStorageConfigurationInput.t ->
+        (DescribeMediaStorageConfigurationOutput.t,
+          DescribeMediaStorageConfigurationOutput.error) Result.t Lwt.t
+val describe_notification_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeNotificationConfigurationInput.t ->
+        (DescribeNotificationConfigurationOutput.t,
+          DescribeNotificationConfigurationOutput.error) Result.t Lwt.t
 val describe_signaling_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -33,6 +69,12 @@ val describe_stream :
     ?cfg:Awso.Cfg.t ->
       DescribeStreamInput.t ->
         (DescribeStreamOutput.t, DescribeStreamOutput.error) Result.t Lwt.t
+val describe_stream_storage_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeStreamStorageConfigurationInput.t ->
+        (DescribeStreamStorageConfigurationOutput.t,
+          DescribeStreamStorageConfigurationOutput.error) Result.t Lwt.t
 val get_data_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -44,6 +86,12 @@ val get_signaling_channel_endpoint :
       GetSignalingChannelEndpointInput.t ->
         (GetSignalingChannelEndpointOutput.t,
           GetSignalingChannelEndpointOutput.error) Result.t Lwt.t
+val list_edge_agent_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListEdgeAgentConfigurationsInput.t ->
+        (ListEdgeAgentConfigurationsOutput.t,
+          ListEdgeAgentConfigurationsOutput.error) Result.t Lwt.t
 val list_signaling_channels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -67,6 +115,12 @@ val list_tags_for_stream :
       ListTagsForStreamInput.t ->
         (ListTagsForStreamOutput.t, ListTagsForStreamOutput.error) Result.t
           Lwt.t
+val start_edge_configuration_update :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartEdgeConfigurationUpdateInput.t ->
+        (StartEdgeConfigurationUpdateOutput.t,
+          StartEdgeConfigurationUpdateOutput.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -93,6 +147,24 @@ val update_data_retention :
       UpdateDataRetentionInput.t ->
         (UpdateDataRetentionOutput.t, UpdateDataRetentionOutput.error)
           Result.t Lwt.t
+val update_image_generation_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateImageGenerationConfigurationInput.t ->
+        (UpdateImageGenerationConfigurationOutput.t,
+          UpdateImageGenerationConfigurationOutput.error) Result.t Lwt.t
+val update_media_storage_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateMediaStorageConfigurationInput.t ->
+        (UpdateMediaStorageConfigurationOutput.t,
+          UpdateMediaStorageConfigurationOutput.error) Result.t Lwt.t
+val update_notification_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateNotificationConfigurationInput.t ->
+        (UpdateNotificationConfigurationOutput.t,
+          UpdateNotificationConfigurationOutput.error) Result.t Lwt.t
 val update_signaling_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -104,3 +176,9 @@ val update_stream :
     ?cfg:Awso.Cfg.t ->
       UpdateStreamInput.t ->
         (UpdateStreamOutput.t, UpdateStreamOutput.error) Result.t Lwt.t
+val update_stream_storage_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateStreamStorageConfigurationInput.t ->
+        (UpdateStreamStorageConfigurationOutput.t,
+          UpdateStreamStorageConfigurationOutput.error) Result.t Lwt.t

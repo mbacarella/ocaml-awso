@@ -113,6 +113,16 @@ module SavingsPlanProductType =
       | Fargate 
       | Lambda 
       | SageMaker 
+      | RDS 
+      | DSQL 
+      | DynamoDB 
+      | ElastiCache 
+      | DocDB 
+      | Neptune 
+      | Timestream 
+      | Keyspaces 
+      | DMS 
+      | OpenSearch 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -121,6 +131,16 @@ module SavingsPlanProductType =
       | Fargate -> "Fargate"
       | Lambda -> "Lambda"
       | SageMaker -> "SageMaker"
+      | RDS -> "RDS"
+      | DSQL -> "DSQL"
+      | DynamoDB -> "DynamoDB"
+      | ElastiCache -> "ElastiCache"
+      | DocDB -> "DocDB"
+      | Neptune -> "Neptune"
+      | Timestream -> "Timestream"
+      | Keyspaces -> "Keyspaces"
+      | DMS -> "DMS"
+      | OpenSearch -> "OpenSearch"
       | Non_static_id s -> s
     let of_string =
       function
@@ -128,6 +148,16 @@ module SavingsPlanProductType =
       | "Fargate" -> Fargate
       | "Lambda" -> Lambda
       | "SageMaker" -> SageMaker
+      | "RDS" -> RDS
+      | "DSQL" -> DSQL
+      | "DynamoDB" -> DynamoDB
+      | "ElastiCache" -> ElastiCache
+      | "DocDB" -> DocDB
+      | "Neptune" -> Neptune
+      | "Timestream" -> Timestream
+      | "Keyspaces" -> Keyspaces
+      | "DMS" -> DMS
+      | "OpenSearch" -> OpenSearch
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -202,23 +232,33 @@ module SavingsPlanOfferingProperty =
           (Xml.child xml_arg0 "name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" JsonSafeFilterValueString.of_json in
-      let name = field_map json "name" SavingsPlanOfferingPropertyKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" JsonSafeFilterValueString.of_json in
+      let name =
+        field_map json__ "name" SavingsPlanOfferingPropertyKey.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about a property."]
+  end[@@ocaml.doc "Information about a Savings Plan offering property."]
 module CurrencyCode =
   struct
     type nonrec t =
       | CNY 
       | USD 
+      | EUR 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | CNY -> "CNY" | USD -> "USD" | Non_static_id s -> s
+      function
+      | CNY -> "CNY"
+      | USD -> "USD"
+      | EUR -> "EUR"
+      | Non_static_id s -> s
     let of_string =
-      function | "CNY" -> CNY | "USD" -> USD | x -> Non_static_id x
+      function
+      | "CNY" -> CNY
+      | "USD" -> USD
+      | "EUR" -> EUR
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -278,6 +318,7 @@ module SavingsPlanType =
       | Compute 
       | EC2Instance 
       | SageMaker 
+      | Database 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -285,12 +326,14 @@ module SavingsPlanType =
       | Compute -> "Compute"
       | EC2Instance -> "EC2Instance"
       | SageMaker -> "SageMaker"
+      | Database -> "Database"
       | Non_static_id s -> s
     let of_string =
       function
       | "Compute" -> Compute
       | "EC2Instance" -> EC2Instance
       | "SageMaker" -> SageMaker
+      | "Database" -> Database
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -352,12 +395,12 @@ module SavingsPlanOfferingRateProperty =
           (Xml.child xml_arg0 "name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" JsonSafeFilterValueString.of_json in
-      let name = field_map json "name" JsonSafeFilterValueString.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" JsonSafeFilterValueString.of_json in
+      let name = field_map json__ "name" JsonSafeFilterValueString.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about a property."]
+  end[@@ocaml.doc "Information about a Savings Plan offering rate property."]
 module SavingsPlanRateProperty =
   struct
     type nonrec t =
@@ -381,12 +424,12 @@ module SavingsPlanRateProperty =
           (Xml.child xml_arg0 "name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" JsonSafeFilterValueString.of_json in
-      let name = field_map json "name" SavingsPlanRatePropertyKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" JsonSafeFilterValueString.of_json in
+      let name = field_map json__ "name" SavingsPlanRatePropertyKey.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about a property."]
+  end[@@ocaml.doc "Information about a Savings Plan rate property."]
 module Amount =
   struct
     type nonrec t = string
@@ -474,6 +517,9 @@ module SavingsPlanProductTypeList =
   struct
     type nonrec t = SavingsPlanProductType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanProductType.to_value)) |>
         (fun x -> `List x)
@@ -505,6 +551,8 @@ module SavingsPlanState =
       | Retired 
       | Queued 
       | Queued_deleted 
+      | Pending_return 
+      | Returned 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -515,6 +563,8 @@ module SavingsPlanState =
       | Retired -> "retired"
       | Queued -> "queued"
       | Queued_deleted -> "queued-deleted"
+      | Pending_return -> "pending-return"
+      | Returned -> "returned"
       | Non_static_id s -> s
     let of_string =
       function
@@ -524,6 +574,8 @@ module SavingsPlanState =
       | "retired" -> Retired
       | "queued" -> Queued
       | "queued-deleted" -> Queued_deleted
+      | "pending-return" -> Pending_return
+      | "returned" -> Returned
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -554,6 +606,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -578,6 +632,9 @@ module ListOfStrings =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -610,6 +667,7 @@ module SavingsPlansFilterName =
       | Payment_option 
       | Start 
       | End 
+      | Instance_family 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -623,6 +681,7 @@ module SavingsPlansFilterName =
       | Payment_option -> "payment-option"
       | Start -> "start"
       | End -> "end"
+      | Instance_family -> "instance-family"
       | Non_static_id s -> s
     let of_string =
       function
@@ -635,6 +694,7 @@ module SavingsPlansFilterName =
       | "payment-option" -> Payment_option
       | "start" -> Start
       | "end" -> End
+      | "instance-family" -> Instance_family
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -650,6 +710,9 @@ module SavingsPlanOfferingPropertyList =
   struct
     type nonrec t = SavingsPlanOfferingProperty.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanOfferingProperty.to_value)) |>
         (fun x -> `List x)
@@ -730,6 +793,9 @@ module FilterValuesList =
   struct
     type nonrec t = JsonSafeFilterValueString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JsonSafeFilterValueString.to_value)) |>
         (fun x -> `List x)
@@ -840,16 +906,16 @@ module ParentSavingsPlanOffering =
       make ?planDescription ?currency ?durationSeconds ?planType
         ?paymentOption ?offeringId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let planDescription =
-        field_map json "planDescription" SavingsPlanDescription.of_json in
-      let currency = field_map json "currency" CurrencyCode.of_json in
+        field_map json__ "planDescription" SavingsPlanDescription.of_json in
+      let currency = field_map json__ "currency" CurrencyCode.of_json in
       let durationSeconds =
-        field_map json "durationSeconds" SavingsPlansDuration.of_json in
-      let planType = field_map json "planType" SavingsPlanType.of_json in
+        field_map json__ "durationSeconds" SavingsPlansDuration.of_json in
+      let planType = field_map json__ "planType" SavingsPlanType.of_json in
       let paymentOption =
-        field_map json "paymentOption" SavingsPlanPaymentOption.of_json in
-      let offeringId = field_map json "offeringId" UUID.of_json in
+        field_map json__ "paymentOption" SavingsPlanPaymentOption.of_json in
+      let offeringId = field_map json__ "offeringId" UUID.of_json in
       make ?planDescription ?currency ?durationSeconds ?planType
         ?paymentOption ?offeringId ()
     let to_json v = composed_to_json to_value v
@@ -858,6 +924,9 @@ module SavingsPlanOfferingRatePropertyList =
   struct
     type nonrec t = SavingsPlanOfferingRateProperty.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanOfferingRateProperty.to_value)) |>
         (fun x -> `List x)
@@ -919,6 +988,16 @@ module SavingsPlanRateServiceCode =
       | AmazonEKS 
       | AWSLambda 
       | AmazonSageMaker 
+      | AmazonRDS 
+      | AuroraDSQL 
+      | AmazonDynamoDB 
+      | AmazonElastiCache 
+      | AmazonDocDB 
+      | AmazonNeptune 
+      | AmazonTimestream 
+      | AmazonMCS 
+      | AWSDatabaseMigrationSvc 
+      | AmazonES 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -928,6 +1007,16 @@ module SavingsPlanRateServiceCode =
       | AmazonEKS -> "AmazonEKS"
       | AWSLambda -> "AWSLambda"
       | AmazonSageMaker -> "AmazonSageMaker"
+      | AmazonRDS -> "AmazonRDS"
+      | AuroraDSQL -> "AuroraDSQL"
+      | AmazonDynamoDB -> "AmazonDynamoDB"
+      | AmazonElastiCache -> "AmazonElastiCache"
+      | AmazonDocDB -> "AmazonDocDB"
+      | AmazonNeptune -> "AmazonNeptune"
+      | AmazonTimestream -> "AmazonTimestream"
+      | AmazonMCS -> "AmazonMCS"
+      | AWSDatabaseMigrationSvc -> "AWSDatabaseMigrationSvc"
+      | AmazonES -> "AmazonES"
       | Non_static_id s -> s
     let of_string =
       function
@@ -936,6 +1025,16 @@ module SavingsPlanRateServiceCode =
       | "AmazonEKS" -> AmazonEKS
       | "AWSLambda" -> AWSLambda
       | "AmazonSageMaker" -> AmazonSageMaker
+      | "AmazonRDS" -> AmazonRDS
+      | "AuroraDSQL" -> AuroraDSQL
+      | "AmazonDynamoDB" -> AmazonDynamoDB
+      | "AmazonElastiCache" -> AmazonElastiCache
+      | "AmazonDocDB" -> AmazonDocDB
+      | "AmazonNeptune" -> AmazonNeptune
+      | "AmazonTimestream" -> AmazonTimestream
+      | "AmazonMCS" -> AmazonMCS
+      | "AWSDatabaseMigrationSvc" -> AWSDatabaseMigrationSvc
+      | "AmazonES" -> AmazonES
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -954,6 +1053,20 @@ module SavingsPlanRateUnit =
       | Hrs 
       | Lambda_GB_Second 
       | Request 
+      | ACU_Hr 
+      | ReadRequestUnits 
+      | WriteRequestUnits 
+      | ReadCapacityUnit_Hrs 
+      | WriteCapacityUnit_Hrs 
+      | ReplicatedWriteRequestUnits 
+      | ReplicatedWriteCapacityUnit_Hrs 
+      | GB_Hours 
+      | DPU 
+      | ElastiCacheProcessingUnit 
+      | DCU_Hr 
+      | NCU_hr 
+      | OCU_hours 
+      | Jobs 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -961,12 +1074,40 @@ module SavingsPlanRateUnit =
       | Hrs -> "Hrs"
       | Lambda_GB_Second -> "Lambda-GB-Second"
       | Request -> "Request"
+      | ACU_Hr -> "ACU-Hr"
+      | ReadRequestUnits -> "ReadRequestUnits"
+      | WriteRequestUnits -> "WriteRequestUnits"
+      | ReadCapacityUnit_Hrs -> "ReadCapacityUnit-Hrs"
+      | WriteCapacityUnit_Hrs -> "WriteCapacityUnit-Hrs"
+      | ReplicatedWriteRequestUnits -> "ReplicatedWriteRequestUnits"
+      | ReplicatedWriteCapacityUnit_Hrs -> "ReplicatedWriteCapacityUnit-Hrs"
+      | GB_Hours -> "GB-Hours"
+      | DPU -> "DPU"
+      | ElastiCacheProcessingUnit -> "ElastiCacheProcessingUnit"
+      | DCU_Hr -> "DCU-Hr"
+      | NCU_hr -> "NCU-hr"
+      | OCU_hours -> "OCU-hours"
+      | Jobs -> "Jobs"
       | Non_static_id s -> s
     let of_string =
       function
       | "Hrs" -> Hrs
       | "Lambda-GB-Second" -> Lambda_GB_Second
       | "Request" -> Request
+      | "ACU-Hr" -> ACU_Hr
+      | "ReadRequestUnits" -> ReadRequestUnits
+      | "WriteRequestUnits" -> WriteRequestUnits
+      | "ReadCapacityUnit-Hrs" -> ReadCapacityUnit_Hrs
+      | "WriteCapacityUnit-Hrs" -> WriteCapacityUnit_Hrs
+      | "ReplicatedWriteRequestUnits" -> ReplicatedWriteRequestUnits
+      | "ReplicatedWriteCapacityUnit-Hrs" -> ReplicatedWriteCapacityUnit_Hrs
+      | "GB-Hours" -> GB_Hours
+      | "DPU" -> DPU
+      | "ElastiCacheProcessingUnit" -> ElastiCacheProcessingUnit
+      | "DCU-Hr" -> DCU_Hr
+      | "NCU-hr" -> NCU_hr
+      | "OCU-hours" -> OCU_hours
+      | "Jobs" -> Jobs
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1039,6 +1180,9 @@ module SavingsPlanRatePropertyList =
   struct
     type nonrec t = SavingsPlanRateProperty.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanRateProperty.to_value)) |>
         (fun x -> `List x)
@@ -1119,8 +1263,8 @@ module SavingsPlan =
       description: String_.t option [@ocaml.doc "The description."];
       start: String_.t option [@ocaml.doc "The start time."];
       end_: String_.t option [@ocaml.doc "The end time."];
-      state: SavingsPlanState.t option [@ocaml.doc "The state."];
-      region: Region.t option [@ocaml.doc "The AWS Region."];
+      state: SavingsPlanState.t option [@ocaml.doc "The current state."];
+      region: Region.t option [@ocaml.doc "The Amazon Web Services Region."];
       ec2InstanceFamily: EC2InstanceFamily.t option
         [@ocaml.doc "The EC2 instance family."];
       savingsPlanType: SavingsPlanType.t option [@ocaml.doc "The plan type."];
@@ -1130,14 +1274,18 @@ module SavingsPlan =
         [@ocaml.doc "The product types."];
       currency: CurrencyCode.t option [@ocaml.doc "The currency."];
       commitment: Amount.t option
-        [@ocaml.doc "The hourly commitment, in USD."];
+        [@ocaml.doc
+          "The hourly commitment amount in the specified currency."];
       upfrontPaymentAmount: Amount.t option
         [@ocaml.doc "The up-front payment amount."];
       recurringPaymentAmount: Amount.t option
         [@ocaml.doc "The recurring payment amount."];
       termDurationInSeconds: TermDurationInSeconds.t option
         [@ocaml.doc "The duration of the term, in seconds."];
-      tags: TagMap.t option [@ocaml.doc "One or more tags."]}
+      tags: TagMap.t option [@ocaml.doc "One or more tags."];
+      returnableUntil: String_.t option
+        [@ocaml.doc
+          "The time until when a return for the Savings Plan can be requested. If the Savings Plan is not returnable, the field reflects the Savings Plans start time."]}
     let make ?offeringId =
       fun ?savingsPlanId ->
         fun ?savingsPlanArn ->
@@ -1156,27 +1304,29 @@ module SavingsPlan =
                                   fun ?recurringPaymentAmount ->
                                     fun ?termDurationInSeconds ->
                                       fun ?tags ->
-                                        fun () ->
-                                          {
-                                            offeringId;
-                                            savingsPlanId;
-                                            savingsPlanArn;
-                                            description;
-                                            start;
-                                            end_;
-                                            state;
-                                            region;
-                                            ec2InstanceFamily;
-                                            savingsPlanType;
-                                            paymentOption;
-                                            productTypes;
-                                            currency;
-                                            commitment;
-                                            upfrontPaymentAmount;
-                                            recurringPaymentAmount;
-                                            termDurationInSeconds;
-                                            tags
-                                          }
+                                        fun ?returnableUntil ->
+                                          fun () ->
+                                            {
+                                              offeringId;
+                                              savingsPlanId;
+                                              savingsPlanArn;
+                                              description;
+                                              start;
+                                              end_;
+                                              state;
+                                              region;
+                                              ec2InstanceFamily;
+                                              savingsPlanType;
+                                              paymentOption;
+                                              productTypes;
+                                              currency;
+                                              commitment;
+                                              upfrontPaymentAmount;
+                                              recurringPaymentAmount;
+                                              termDurationInSeconds;
+                                              tags;
+                                              returnableUntil
+                                            }
     let to_value x =
       structure_to_value
         [("offeringId",
@@ -1207,9 +1357,13 @@ module SavingsPlan =
         ("termDurationInSeconds",
           (Option.map x.termDurationInSeconds
              ~f:TermDurationInSeconds.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("returnableUntil",
+          (Option.map x.returnableUntil ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let returnableUntil =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "returnableUntil") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let termDurationInSeconds =
         (Option.map ~f:TermDurationInSeconds.of_xml)
@@ -1253,46 +1407,49 @@ module SavingsPlan =
       let offeringId =
         (Option.map ~f:SavingsPlanOfferingId.of_xml)
           (Xml.child xml_arg0 "offeringId") in
-      make ?tags ?termDurationInSeconds ?recurringPaymentAmount
-        ?upfrontPaymentAmount ?commitment ?currency ?productTypes
-        ?paymentOption ?savingsPlanType ?ec2InstanceFamily ?region ?state
-        ?end_ ?start ?description ?savingsPlanArn ?savingsPlanId ?offeringId
-        ()
+      make ?returnableUntil ?tags ?termDurationInSeconds
+        ?recurringPaymentAmount ?upfrontPaymentAmount ?commitment ?currency
+        ?productTypes ?paymentOption ?savingsPlanType ?ec2InstanceFamily
+        ?region ?state ?end_ ?start ?description ?savingsPlanArn
+        ?savingsPlanId ?offeringId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let returnableUntil =
+        field_map json__ "returnableUntil" String_.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let termDurationInSeconds =
-        field_map json "termDurationInSeconds" TermDurationInSeconds.of_json in
+        field_map json__ "termDurationInSeconds"
+          TermDurationInSeconds.of_json in
       let recurringPaymentAmount =
-        field_map json "recurringPaymentAmount" Amount.of_json in
+        field_map json__ "recurringPaymentAmount" Amount.of_json in
       let upfrontPaymentAmount =
-        field_map json "upfrontPaymentAmount" Amount.of_json in
-      let commitment = field_map json "commitment" Amount.of_json in
-      let currency = field_map json "currency" CurrencyCode.of_json in
+        field_map json__ "upfrontPaymentAmount" Amount.of_json in
+      let commitment = field_map json__ "commitment" Amount.of_json in
+      let currency = field_map json__ "currency" CurrencyCode.of_json in
       let productTypes =
-        field_map json "productTypes" SavingsPlanProductTypeList.of_json in
+        field_map json__ "productTypes" SavingsPlanProductTypeList.of_json in
       let paymentOption =
-        field_map json "paymentOption" SavingsPlanPaymentOption.of_json in
+        field_map json__ "paymentOption" SavingsPlanPaymentOption.of_json in
       let savingsPlanType =
-        field_map json "savingsPlanType" SavingsPlanType.of_json in
+        field_map json__ "savingsPlanType" SavingsPlanType.of_json in
       let ec2InstanceFamily =
-        field_map json "ec2InstanceFamily" EC2InstanceFamily.of_json in
-      let region = field_map json "region" Region.of_json in
-      let state = field_map json "state" SavingsPlanState.of_json in
-      let end_ = field_map json "end" String_.of_json in
-      let start = field_map json "start" String_.of_json in
-      let description = field_map json "description" String_.of_json in
+        field_map json__ "ec2InstanceFamily" EC2InstanceFamily.of_json in
+      let region = field_map json__ "region" Region.of_json in
+      let state = field_map json__ "state" SavingsPlanState.of_json in
+      let end_ = field_map json__ "end" String_.of_json in
+      let start = field_map json__ "start" String_.of_json in
+      let description = field_map json__ "description" String_.of_json in
       let savingsPlanArn =
-        field_map json "savingsPlanArn" SavingsPlanArn.of_json in
+        field_map json__ "savingsPlanArn" SavingsPlanArn.of_json in
       let savingsPlanId =
-        field_map json "savingsPlanId" SavingsPlanId.of_json in
+        field_map json__ "savingsPlanId" SavingsPlanId.of_json in
       let offeringId =
-        field_map json "offeringId" SavingsPlanOfferingId.of_json in
-      make ?tags ?termDurationInSeconds ?recurringPaymentAmount
-        ?upfrontPaymentAmount ?commitment ?currency ?productTypes
-        ?paymentOption ?savingsPlanType ?ec2InstanceFamily ?region ?state
-        ?end_ ?start ?description ?savingsPlanArn ?savingsPlanId ?offeringId
-        ()
+        field_map json__ "offeringId" SavingsPlanOfferingId.of_json in
+      make ?returnableUntil ?tags ?termDurationInSeconds
+        ?recurringPaymentAmount ?upfrontPaymentAmount ?commitment ?currency
+        ?productTypes ?paymentOption ?savingsPlanType ?ec2InstanceFamily
+        ?region ?state ?end_ ?start ?description ?savingsPlanArn
+        ?savingsPlanId ?offeringId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a Savings Plan."]
 module SavingsPlanFilter =
@@ -1315,12 +1472,12 @@ module SavingsPlanFilter =
           (Xml.child xml_arg0 "name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" ListOfStrings.of_json in
-      let name = field_map json "name" SavingsPlansFilterName.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" ListOfStrings.of_json in
+      let name = field_map json__ "name" SavingsPlansFilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about a filter."]
+  end[@@ocaml.doc "Information about a Savings Plan filter."]
 module SavingsPlanOffering =
   struct
     type nonrec t =
@@ -1343,7 +1500,7 @@ module SavingsPlanOffering =
           "The usage details of the line item in the billing report."];
       operation: SavingsPlanOperation.t option
         [@ocaml.doc
-          "The specific AWS operation for the line item in the billing report."];
+          "The specific Amazon Web Services operation for the line item in the billing report."];
       properties: SavingsPlanOfferingPropertyList.t option
         [@ocaml.doc "The properties."]}
     let make ?offeringId =
@@ -1430,24 +1587,26 @@ module SavingsPlanOffering =
         ?durationSeconds ?paymentOption ?description ?planType ?productTypes
         ?offeringId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let properties =
-        field_map json "properties" SavingsPlanOfferingPropertyList.of_json in
-      let operation = field_map json "operation" SavingsPlanOperation.of_json in
-      let usageType = field_map json "usageType" SavingsPlanUsageType.of_json in
+        field_map json__ "properties" SavingsPlanOfferingPropertyList.of_json in
+      let operation =
+        field_map json__ "operation" SavingsPlanOperation.of_json in
+      let usageType =
+        field_map json__ "usageType" SavingsPlanUsageType.of_json in
       let serviceCode =
-        field_map json "serviceCode" SavingsPlanServiceCode.of_json in
-      let currency = field_map json "currency" CurrencyCode.of_json in
+        field_map json__ "serviceCode" SavingsPlanServiceCode.of_json in
+      let currency = field_map json__ "currency" CurrencyCode.of_json in
       let durationSeconds =
-        field_map json "durationSeconds" SavingsPlansDuration.of_json in
+        field_map json__ "durationSeconds" SavingsPlansDuration.of_json in
       let paymentOption =
-        field_map json "paymentOption" SavingsPlanPaymentOption.of_json in
+        field_map json__ "paymentOption" SavingsPlanPaymentOption.of_json in
       let description =
-        field_map json "description" SavingsPlanDescription.of_json in
-      let planType = field_map json "planType" SavingsPlanType.of_json in
+        field_map json__ "description" SavingsPlanDescription.of_json in
+      let planType = field_map json__ "planType" SavingsPlanType.of_json in
       let productTypes =
-        field_map json "productTypes" SavingsPlanProductTypeList.of_json in
-      let offeringId = field_map json "offeringId" UUID.of_json in
+        field_map json__ "productTypes" SavingsPlanProductTypeList.of_json in
+      let offeringId = field_map json__ "offeringId" UUID.of_json in
       make ?properties ?operation ?usageType ?serviceCode ?currency
         ?durationSeconds ?paymentOption ?description ?planType ?productTypes
         ?offeringId ()
@@ -1475,13 +1634,13 @@ module SavingsPlanOfferingFilterElement =
           (Xml.child xml_arg0 "name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" FilterValuesList.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" FilterValuesList.of_json in
       let name =
-        field_map json "name" SavingsPlanOfferingFilterAttribute.of_json in
+        field_map json__ "name" SavingsPlanOfferingFilterAttribute.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about a filter."]
+  end[@@ocaml.doc "Information about a Savings Plan offering filter."]
 module SavingsPlanOfferingRate =
   struct
     type nonrec t =
@@ -1500,7 +1659,7 @@ module SavingsPlanOfferingRate =
           "The usage details of the line item in the billing report."];
       operation: SavingsPlanRateOperation.t option
         [@ocaml.doc
-          "The specific AWS operation for the line item in the billing report."];
+          "The specific Amazon Web Services operation for the line item in the billing report."];
       properties: SavingsPlanOfferingRatePropertyList.t option
         [@ocaml.doc "The properties."]}
     let make ?savingsPlanOffering =
@@ -1569,22 +1728,22 @@ module SavingsPlanOfferingRate =
       make ?properties ?operation ?usageType ?serviceCode ?productType ?unit
         ?rate ?savingsPlanOffering ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let properties =
-        field_map json "properties"
+        field_map json__ "properties"
           SavingsPlanOfferingRatePropertyList.of_json in
       let operation =
-        field_map json "operation" SavingsPlanRateOperation.of_json in
+        field_map json__ "operation" SavingsPlanRateOperation.of_json in
       let usageType =
-        field_map json "usageType" SavingsPlanRateUsageType.of_json in
+        field_map json__ "usageType" SavingsPlanRateUsageType.of_json in
       let serviceCode =
-        field_map json "serviceCode" SavingsPlanRateServiceCode.of_json in
+        field_map json__ "serviceCode" SavingsPlanRateServiceCode.of_json in
       let productType =
-        field_map json "productType" SavingsPlanProductType.of_json in
-      let unit = field_map json "unit" SavingsPlanRateUnit.of_json in
-      let rate = field_map json "rate" SavingsPlanRatePricePerUnit.of_json in
+        field_map json__ "productType" SavingsPlanProductType.of_json in
+      let unit = field_map json__ "unit" SavingsPlanRateUnit.of_json in
+      let rate = field_map json__ "rate" SavingsPlanRatePricePerUnit.of_json in
       let savingsPlanOffering =
-        field_map json "savingsPlanOffering"
+        field_map json__ "savingsPlanOffering"
           ParentSavingsPlanOffering.of_json in
       make ?properties ?operation ?usageType ?serviceCode ?productType ?unit
         ?rate ?savingsPlanOffering ()
@@ -1612,12 +1771,13 @@ module SavingsPlanOfferingRateFilterElement =
           (Xml.child xml_arg0 "name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" FilterValuesList.of_json in
-      let name = field_map json "name" SavingsPlanRateFilterAttribute.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" FilterValuesList.of_json in
+      let name =
+        field_map json__ "name" SavingsPlanRateFilterAttribute.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about a filter."]
+  end[@@ocaml.doc "Information about a Savings Plan offering rate filter."]
 module SavingsPlanRate =
   struct
     type nonrec t =
@@ -1634,7 +1794,7 @@ module SavingsPlanRate =
           "The usage details of the line item in the billing report."];
       operation: SavingsPlanRateOperation.t option
         [@ocaml.doc
-          "The specific AWS operation for the line item in the billing report."];
+          "The specific Amazon Web Services operation for the line item in the billing report."];
       properties: SavingsPlanRatePropertyList.t option
         [@ocaml.doc "The properties."]}
     let make ?rate =
@@ -1697,20 +1857,20 @@ module SavingsPlanRate =
       make ?properties ?operation ?usageType ?serviceCode ?productType ?unit
         ?currency ?rate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let properties =
-        field_map json "properties" SavingsPlanRatePropertyList.of_json in
+        field_map json__ "properties" SavingsPlanRatePropertyList.of_json in
       let operation =
-        field_map json "operation" SavingsPlanRateOperation.of_json in
+        field_map json__ "operation" SavingsPlanRateOperation.of_json in
       let usageType =
-        field_map json "usageType" SavingsPlanRateUsageType.of_json in
+        field_map json__ "usageType" SavingsPlanRateUsageType.of_json in
       let serviceCode =
-        field_map json "serviceCode" SavingsPlanRateServiceCode.of_json in
+        field_map json__ "serviceCode" SavingsPlanRateServiceCode.of_json in
       let productType =
-        field_map json "productType" SavingsPlanProductType.of_json in
-      let unit = field_map json "unit" SavingsPlanRateUnit.of_json in
-      let currency = field_map json "currency" CurrencyCode.of_json in
-      let rate = field_map json "rate" Amount.of_json in
+        field_map json__ "productType" SavingsPlanProductType.of_json in
+      let unit = field_map json__ "unit" SavingsPlanRateUnit.of_json in
+      let currency = field_map json__ "currency" CurrencyCode.of_json in
+      let rate = field_map json__ "rate" Amount.of_json in
       make ?properties ?operation ?usageType ?serviceCode ?productType ?unit
         ?currency ?rate ()
     let to_json v = composed_to_json to_value v
@@ -1736,73 +1896,76 @@ module SavingsPlanRateFilter =
           (Xml.child xml_arg0 "name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" ListOfStrings.of_json in
-      let name = field_map json "name" SavingsPlanRateFilterName.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" ListOfStrings.of_json in
+      let name = field_map json__ "name" SavingsPlanRateFilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about a filter."]
+  end[@@ocaml.doc "Information about a Savings Plan rate filter."]
 module InternalServerException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An unexpected error occurred."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ResourceNotFoundException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource was not found."]
 module ValidationException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ValidationException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One of the input parameters is not valid."]
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1825,22 +1988,35 @@ module TagKeyList =
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ServiceQuotaExceededException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A service quota has been exceeded."]
+module ClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientToken"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
+  end
 module PaginationToken =
   struct
     type nonrec t = string
@@ -1863,6 +2039,9 @@ module SavingsPlanList =
   struct
     type nonrec t = SavingsPlan.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlan.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1906,6 +2085,9 @@ module SavingsPlanArnList =
     type nonrec t = SavingsPlanArn.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1931,6 +2113,9 @@ module SavingsPlanFilterList =
   struct
     type nonrec t = SavingsPlanFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1956,6 +2141,9 @@ module SavingsPlanIdList =
   struct
     type nonrec t = SavingsPlanId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1980,6 +2168,9 @@ module SavingsPlanStateList =
   struct
     type nonrec t = SavingsPlanState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2005,6 +2196,9 @@ module SavingsPlanOfferingsList =
   struct
     type nonrec t = SavingsPlanOffering.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanOffering.to_value)) |>
         (fun x -> `List x)
@@ -2031,6 +2225,9 @@ module CurrencyList =
   struct
     type nonrec t = CurrencyCode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CurrencyCode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2055,6 +2252,9 @@ module DurationsList =
   struct
     type nonrec t = SavingsPlansDuration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlansDuration.to_value)) |>
         (fun x -> `List x)
@@ -2098,6 +2298,9 @@ module SavingsPlanDescriptionsList =
   struct
     type nonrec t = SavingsPlanDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanDescription.to_value)) |>
         (fun x -> `List x)
@@ -2124,6 +2327,9 @@ module SavingsPlanOfferingFiltersList =
   struct
     type nonrec t = SavingsPlanOfferingFilterElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanOfferingFilterElement.to_value)) |>
         (fun x -> `List x)
@@ -2151,6 +2357,9 @@ module SavingsPlanOperationList =
   struct
     type nonrec t = SavingsPlanOperation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanOperation.to_value)) |>
         (fun x -> `List x)
@@ -2177,6 +2386,9 @@ module SavingsPlanPaymentOptionList =
   struct
     type nonrec t = SavingsPlanPaymentOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanPaymentOption.to_value)) |>
         (fun x -> `List x)
@@ -2203,6 +2415,9 @@ module SavingsPlanServiceCodeList =
   struct
     type nonrec t = SavingsPlanServiceCode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanServiceCode.to_value)) |>
         (fun x -> `List x)
@@ -2229,6 +2444,9 @@ module SavingsPlanTypeList =
   struct
     type nonrec t = SavingsPlanType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2254,6 +2472,9 @@ module SavingsPlanUsageTypeList =
   struct
     type nonrec t = SavingsPlanUsageType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanUsageType.to_value)) |>
         (fun x -> `List x)
@@ -2280,6 +2501,9 @@ module UUIDs =
   struct
     type nonrec t = UUID.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UUID.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2303,6 +2527,9 @@ module SavingsPlanOfferingRatesList =
   struct
     type nonrec t = SavingsPlanOfferingRate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanOfferingRate.to_value)) |>
         (fun x -> `List x)
@@ -2329,6 +2556,9 @@ module SavingsPlanOfferingRateFiltersList =
   struct
     type nonrec t = SavingsPlanOfferingRateFilterElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanOfferingRateFilterElement.to_value)) |>
         (fun x -> `List x)
@@ -2356,6 +2586,9 @@ module SavingsPlanRateOperationList =
   struct
     type nonrec t = SavingsPlanRateOperation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanRateOperation.to_value)) |>
         (fun x -> `List x)
@@ -2382,6 +2615,9 @@ module SavingsPlanRateServiceCodeList =
   struct
     type nonrec t = SavingsPlanRateServiceCode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanRateServiceCode.to_value)) |>
         (fun x -> `List x)
@@ -2408,6 +2644,9 @@ module SavingsPlanRateUsageTypeList =
   struct
     type nonrec t = SavingsPlanRateUsageType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanRateUsageType.to_value)) |>
         (fun x -> `List x)
@@ -2434,6 +2673,9 @@ module SavingsPlanRateList =
   struct
     type nonrec t = SavingsPlanRate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanRate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2459,6 +2701,9 @@ module SavingsPlanRateFilterList =
   struct
     type nonrec t = SavingsPlanRateFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlanRateFilter.to_value)) |>
         (fun x -> `List x)
@@ -2480,19 +2725,6 @@ module SavingsPlanRateFilterList =
       list_of_json ~kind:"SavingsPlanRateFilterList"
         ~of_json:SavingsPlanRateFilter.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module ClientToken =
-  struct
-    type nonrec t = string
-    let context_ = "ClientToken"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ClientToken" j
-    let to_json = simple_to_json to_value
   end
 module DateTime =
   struct
@@ -2587,10 +2819,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" SavingsPlanArn.of_json in
+        field_map_exn json__ "resourceArn" SavingsPlanArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified tags from the specified resource."]
@@ -2686,13 +2918,125 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" SavingsPlanArn.of_json in
+        field_map_exn json__ "resourceArn" SavingsPlanArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds the specified tags to the specified resource."]
+module ReturnSavingsPlanResponse =
+  struct
+    type nonrec t =
+      {
+      savingsPlanId: SavingsPlanId.t option
+        [@ocaml.doc "The ID of the Savings Plan."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?savingsPlanId = fun () -> { savingsPlanId }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("savingsPlanId",
+           (Option.map x.savingsPlanId ~f:SavingsPlanId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let savingsPlanId =
+        (Option.map ~f:SavingsPlanId.of_xml)
+          (Xml.child xml_arg0 "savingsPlanId") in
+      make ?savingsPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let savingsPlanId =
+        field_map json__ "savingsPlanId" SavingsPlanId.of_json in
+      make ?savingsPlanId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns the specified Savings Plan."]
+module ReturnSavingsPlanRequest =
+  struct
+    type nonrec t =
+      {
+      savingsPlanId: SavingsPlanId.t
+        [@ocaml.doc "The ID of the Savings Plan."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+    let context_ = "ReturnSavingsPlanRequest"
+    let make ?clientToken =
+      fun ~savingsPlanId -> fun () -> { clientToken; savingsPlanId }
+    let to_value x =
+      structure_to_value
+        [("savingsPlanId", (Some (SavingsPlanId.to_value x.savingsPlanId)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let savingsPlanId =
+        SavingsPlanId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "savingsPlanId") in
+      make ?clientToken ~savingsPlanId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let savingsPlanId =
+        field_map_exn json__ "savingsPlanId" SavingsPlanId.of_json in
+      make ?clientToken ~savingsPlanId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns the specified Savings Plan."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -2751,8 +3095,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
 module ListTagsForResourceRequest =
@@ -2773,9 +3117,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "resourceArn" SavingsPlanArn.of_json in
+        field_map_exn json__ "resourceArn" SavingsPlanArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
@@ -2841,10 +3185,10 @@ module DescribeSavingsPlansResponse =
           (Xml.child xml_arg0 "savingsPlans") in
       make ?nextToken ?savingsPlans ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let savingsPlans =
-        field_map json "savingsPlans" SavingsPlanList.of_json in
+        field_map json__ "savingsPlans" SavingsPlanList.of_json in
       make ?nextToken ?savingsPlans ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the specified Savings Plans."]
@@ -2861,7 +3205,8 @@ module DescribeSavingsPlansRequest =
       maxResults: MaxResults.t option
         [@ocaml.doc
           "The maximum number of results to return with a single call. To retrieve additional results, make another call with the returned token value."];
-      states: SavingsPlanStateList.t option [@ocaml.doc "The states."];
+      states: SavingsPlanStateList.t option
+        [@ocaml.doc "The current states of the Savings Plans."];
       filters: SavingsPlanFilterList.t option [@ocaml.doc "The filters."]}
     let make ?savingsPlanArns =
       fun ?savingsPlanIds ->
@@ -2910,15 +3255,15 @@ module DescribeSavingsPlansRequest =
       make ?filters ?states ?maxResults ?nextToken ?savingsPlanIds
         ?savingsPlanArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "filters" SavingsPlanFilterList.of_json in
-      let states = field_map json "states" SavingsPlanStateList.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "filters" SavingsPlanFilterList.of_json in
+      let states = field_map json__ "states" SavingsPlanStateList.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let savingsPlanIds =
-        field_map json "savingsPlanIds" SavingsPlanIdList.of_json in
+        field_map json__ "savingsPlanIds" SavingsPlanIdList.of_json in
       let savingsPlanArns =
-        field_map json "savingsPlanArns" SavingsPlanArnList.of_json in
+        field_map json__ "savingsPlanArns" SavingsPlanArnList.of_json in
       make ?filters ?states ?maxResults ?nextToken ?savingsPlanIds
         ?savingsPlanArns ()
     let to_json v = composed_to_json to_value v
@@ -2985,13 +3330,13 @@ module DescribeSavingsPlansOfferingsResponse =
           (Xml.child xml_arg0 "searchResults") in
       make ?nextToken ?searchResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let searchResults =
-        field_map json "searchResults" SavingsPlanOfferingsList.of_json in
+        field_map json__ "searchResults" SavingsPlanOfferingsList.of_json in
       make ?nextToken ?searchResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the specified Savings Plans offerings."]
+  end[@@ocaml.doc "Describes the offerings for the specified Savings Plans."]
 module DescribeSavingsPlansOfferingsRequest =
   struct
     type nonrec t =
@@ -3001,9 +3346,9 @@ module DescribeSavingsPlansOfferingsRequest =
         [@ocaml.doc "The payment options."];
       productType: SavingsPlanProductType.t option
         [@ocaml.doc "The product type."];
-      planTypes: SavingsPlanTypeList.t option [@ocaml.doc "The plan type."];
+      planTypes: SavingsPlanTypeList.t option [@ocaml.doc "The plan types."];
       durations: DurationsList.t option
-        [@ocaml.doc "The durations, in seconds."];
+        [@ocaml.doc "The duration, in seconds."];
       currencies: CurrencyList.t option [@ocaml.doc "The currencies."];
       descriptions: SavingsPlanDescriptionsList.t option
         [@ocaml.doc "The descriptions."];
@@ -3014,7 +3359,7 @@ module DescribeSavingsPlansOfferingsRequest =
           "The usage details of the line item in the billing report."];
       operations: SavingsPlanOperationList.t option
         [@ocaml.doc
-          "The specific AWS operation for the line item in the billing report."];
+          "The specific Amazon Web Services operation for the line item in the billing report."];
       filters: SavingsPlanOfferingFiltersList.t option
         [@ocaml.doc "The filters."];
       nextToken: PaginationToken.t option
@@ -3116,32 +3461,34 @@ module DescribeSavingsPlansOfferingsRequest =
         ?serviceCodes ?descriptions ?currencies ?durations ?planTypes
         ?productType ?paymentOptions ?offeringIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let filters =
-        field_map json "filters" SavingsPlanOfferingFiltersList.of_json in
+        field_map json__ "filters" SavingsPlanOfferingFiltersList.of_json in
       let operations =
-        field_map json "operations" SavingsPlanOperationList.of_json in
+        field_map json__ "operations" SavingsPlanOperationList.of_json in
       let usageTypes =
-        field_map json "usageTypes" SavingsPlanUsageTypeList.of_json in
+        field_map json__ "usageTypes" SavingsPlanUsageTypeList.of_json in
       let serviceCodes =
-        field_map json "serviceCodes" SavingsPlanServiceCodeList.of_json in
+        field_map json__ "serviceCodes" SavingsPlanServiceCodeList.of_json in
       let descriptions =
-        field_map json "descriptions" SavingsPlanDescriptionsList.of_json in
-      let currencies = field_map json "currencies" CurrencyList.of_json in
-      let durations = field_map json "durations" DurationsList.of_json in
-      let planTypes = field_map json "planTypes" SavingsPlanTypeList.of_json in
+        field_map json__ "descriptions" SavingsPlanDescriptionsList.of_json in
+      let currencies = field_map json__ "currencies" CurrencyList.of_json in
+      let durations = field_map json__ "durations" DurationsList.of_json in
+      let planTypes =
+        field_map json__ "planTypes" SavingsPlanTypeList.of_json in
       let productType =
-        field_map json "productType" SavingsPlanProductType.of_json in
+        field_map json__ "productType" SavingsPlanProductType.of_json in
       let paymentOptions =
-        field_map json "paymentOptions" SavingsPlanPaymentOptionList.of_json in
-      let offeringIds = field_map json "offeringIds" UUIDs.of_json in
+        field_map json__ "paymentOptions"
+          SavingsPlanPaymentOptionList.of_json in
+      let offeringIds = field_map json__ "offeringIds" UUIDs.of_json in
       make ?maxResults ?nextToken ?filters ?operations ?usageTypes
         ?serviceCodes ?descriptions ?currencies ?durations ?planTypes
         ?productType ?paymentOptions ?offeringIds ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the specified Savings Plans offerings."]
+  end[@@ocaml.doc "Describes the offerings for the specified Savings Plans."]
 module DescribeSavingsPlansOfferingRatesResponse =
   struct
     type nonrec t =
@@ -3205,13 +3552,14 @@ module DescribeSavingsPlansOfferingRatesResponse =
           (Xml.child xml_arg0 "searchResults") in
       make ?nextToken ?searchResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let searchResults =
-        field_map json "searchResults" SavingsPlanOfferingRatesList.of_json in
+        field_map json__ "searchResults" SavingsPlanOfferingRatesList.of_json in
       make ?nextToken ?searchResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the specified Savings Plans offering rates."]
+  end[@@ocaml.doc
+       "Describes the offering rates for Savings Plans you might want to purchase."]
 module DescribeSavingsPlansOfferingRatesRequest =
   struct
     type nonrec t =
@@ -3223,7 +3571,7 @@ module DescribeSavingsPlansOfferingRatesRequest =
       savingsPlanTypes: SavingsPlanTypeList.t option
         [@ocaml.doc "The plan types."];
       products: SavingsPlanProductTypeList.t option
-        [@ocaml.doc "The AWS products."];
+        [@ocaml.doc "The Amazon Web Services products."];
       serviceCodes: SavingsPlanRateServiceCodeList.t option
         [@ocaml.doc "The services."];
       usageTypes: SavingsPlanRateUsageTypeList.t option
@@ -3231,7 +3579,7 @@ module DescribeSavingsPlansOfferingRatesRequest =
           "The usage details of the line item in the billing report."];
       operations: SavingsPlanRateOperationList.t option
         [@ocaml.doc
-          "The specific AWS operation for the line item in the billing report."];
+          "The specific Amazon Web Services operation for the line item in the billing report."];
       filters: SavingsPlanOfferingRateFiltersList.t option
         [@ocaml.doc "The filters."];
       nextToken: PaginationToken.t option
@@ -3320,31 +3668,33 @@ module DescribeSavingsPlansOfferingRatesRequest =
         ?serviceCodes ?products ?savingsPlanTypes ?savingsPlanPaymentOptions
         ?savingsPlanOfferingIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let filters =
-        field_map json "filters" SavingsPlanOfferingRateFiltersList.of_json in
+        field_map json__ "filters" SavingsPlanOfferingRateFiltersList.of_json in
       let operations =
-        field_map json "operations" SavingsPlanRateOperationList.of_json in
+        field_map json__ "operations" SavingsPlanRateOperationList.of_json in
       let usageTypes =
-        field_map json "usageTypes" SavingsPlanRateUsageTypeList.of_json in
+        field_map json__ "usageTypes" SavingsPlanRateUsageTypeList.of_json in
       let serviceCodes =
-        field_map json "serviceCodes" SavingsPlanRateServiceCodeList.of_json in
+        field_map json__ "serviceCodes"
+          SavingsPlanRateServiceCodeList.of_json in
       let products =
-        field_map json "products" SavingsPlanProductTypeList.of_json in
+        field_map json__ "products" SavingsPlanProductTypeList.of_json in
       let savingsPlanTypes =
-        field_map json "savingsPlanTypes" SavingsPlanTypeList.of_json in
+        field_map json__ "savingsPlanTypes" SavingsPlanTypeList.of_json in
       let savingsPlanPaymentOptions =
-        field_map json "savingsPlanPaymentOptions"
+        field_map json__ "savingsPlanPaymentOptions"
           SavingsPlanPaymentOptionList.of_json in
       let savingsPlanOfferingIds =
-        field_map json "savingsPlanOfferingIds" UUIDs.of_json in
+        field_map json__ "savingsPlanOfferingIds" UUIDs.of_json in
       make ?maxResults ?nextToken ?filters ?operations ?usageTypes
         ?serviceCodes ?products ?savingsPlanTypes ?savingsPlanPaymentOptions
         ?savingsPlanOfferingIds ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the specified Savings Plans offering rates."]
+  end[@@ocaml.doc
+       "Describes the offering rates for Savings Plans you might want to purchase."]
 module DescribeSavingsPlanRatesResponse =
   struct
     type nonrec t =
@@ -3352,12 +3702,13 @@ module DescribeSavingsPlanRatesResponse =
       savingsPlanId: SavingsPlanId.t option
         [@ocaml.doc "The ID of the Savings Plan."];
       searchResults: SavingsPlanRateList.t option
-        [@ocaml.doc "Information about the Savings Plans rates."];
+        [@ocaml.doc "Information about the Savings Plan rates."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "The token to use to retrieve the next page of results. This value is null when there are no more results to return."]}
     type nonrec error =
-      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?savingsPlanId =
@@ -3366,6 +3717,8 @@ module DescribeSavingsPlanRatesResponse =
           fun () -> { savingsPlanId; searchResults; nextToken }
     let error_of_json name json =
       match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
@@ -3375,6 +3728,8 @@ module DescribeSavingsPlanRatesResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
@@ -3383,6 +3738,10 @@ module DescribeSavingsPlanRatesResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -3416,15 +3775,16 @@ module DescribeSavingsPlanRatesResponse =
           (Xml.child xml_arg0 "savingsPlanId") in
       make ?nextToken ?searchResults ?savingsPlanId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let searchResults =
-        field_map json "searchResults" SavingsPlanRateList.of_json in
+        field_map json__ "searchResults" SavingsPlanRateList.of_json in
       let savingsPlanId =
-        field_map json "savingsPlanId" SavingsPlanId.of_json in
+        field_map json__ "savingsPlanId" SavingsPlanId.of_json in
       make ?nextToken ?searchResults ?savingsPlanId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the specified Savings Plans rates."]
+  end[@@ocaml.doc
+       "Describes the rates for a specific, existing Savings Plan."]
 module DescribeSavingsPlanRatesRequest =
   struct
     type nonrec t =
@@ -3465,16 +3825,17 @@ module DescribeSavingsPlanRatesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "savingsPlanId") in
       make ?maxResults ?nextToken ?filters ~savingsPlanId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let filters =
-        field_map json "filters" SavingsPlanRateFilterList.of_json in
+        field_map json__ "filters" SavingsPlanRateFilterList.of_json in
       let savingsPlanId =
-        field_map_exn json "savingsPlanId" SavingsPlanId.of_json in
+        field_map_exn json__ "savingsPlanId" SavingsPlanId.of_json in
       make ?maxResults ?nextToken ?filters ~savingsPlanId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the specified Savings Plans rates."]
+  end[@@ocaml.doc
+       "Describes the rates for a specific, existing Savings Plan."]
 module DeleteQueuedSavingsPlanResponse =
   struct
     type nonrec t = unit
@@ -3562,9 +3923,9 @@ module DeleteQueuedSavingsPlanRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "savingsPlanId") in
       make ~savingsPlanId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let savingsPlanId =
-        field_map_exn json "savingsPlanId" SavingsPlanId.of_json in
+        field_map_exn json__ "savingsPlanId" SavingsPlanId.of_json in
       make ~savingsPlanId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3643,9 +4004,9 @@ module CreateSavingsPlanResponse =
           (Xml.child xml_arg0 "savingsPlanId") in
       make ?savingsPlanId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let savingsPlanId =
-        field_map json "savingsPlanId" SavingsPlanId.of_json in
+        field_map json__ "savingsPlanId" SavingsPlanId.of_json in
       make ?savingsPlanId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a Savings Plan."]
@@ -3657,16 +4018,16 @@ module CreateSavingsPlanRequest =
         [@ocaml.doc "The ID of the offering."];
       commitment: Amount.t
         [@ocaml.doc
-          "The hourly commitment, in USD. This is a value between 0.001 and 1 million. You cannot specify more than five digits after the decimal point."];
+          "The hourly commitment, in the same currency of the savingsPlanOfferingId. This is a value between 0.001 and 1 million. You cannot specify more than five digits after the decimal point."];
       upfrontPaymentAmount: Amount.t option
         [@ocaml.doc
-          "The up-front payment amount. This is a whole number between 50 and 99 percent of the total value of the Savings Plan. This parameter is supported only if the payment option is Partial Upfront."];
+          "The up-front payment amount. This is a whole number between 50 and 99 percent of the total value of the Savings Plan. This parameter is only supported if the payment option is Partial Upfront."];
       purchaseTime: DateTime.t option
         [@ocaml.doc
-          "The time at which to purchase the Savings Plan, in UTC format (YYYY-MM-DDTHH:MM:SSZ)."];
+          "The purchase time of the Savings Plan in UTC format (YYYY-MM-DDTHH:MM:SSZ)."];
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
       tags: TagMap.t option [@ocaml.doc "One or more tags."]}
     let context_ = "CreateSavingsPlanRequest"
     let make ?upfrontPaymentAmount =
@@ -3712,15 +4073,15 @@ module CreateSavingsPlanRequest =
       make ?tags ?clientToken ?purchaseTime ?upfrontPaymentAmount ~commitment
         ~savingsPlanOfferingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let purchaseTime = field_map json "purchaseTime" DateTime.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let purchaseTime = field_map json__ "purchaseTime" DateTime.of_json in
       let upfrontPaymentAmount =
-        field_map json "upfrontPaymentAmount" Amount.of_json in
-      let commitment = field_map_exn json "commitment" Amount.of_json in
+        field_map json__ "upfrontPaymentAmount" Amount.of_json in
+      let commitment = field_map_exn json__ "commitment" Amount.of_json in
       let savingsPlanOfferingId =
-        field_map_exn json "savingsPlanOfferingId"
+        field_map_exn json__ "savingsPlanOfferingId"
           SavingsPlanOfferingId.of_json in
       make ?tags ?clientToken ?purchaseTime ?upfrontPaymentAmount ~commitment
         ~savingsPlanOfferingId ()

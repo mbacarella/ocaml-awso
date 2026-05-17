@@ -4,6 +4,8 @@ open Values
 type ('i, 'o, 'e) t =
   | BatchAcknowledgeAlarm: (BatchAcknowledgeAlarmRequest.t,
   BatchAcknowledgeAlarmResponse.t, BatchAcknowledgeAlarmResponse.error) t 
+  | BatchDeleteDetector: (BatchDeleteDetectorRequest.t,
+  BatchDeleteDetectorResponse.t, BatchDeleteDetectorResponse.error) t 
   | BatchDisableAlarm: (BatchDisableAlarmRequest.t,
   BatchDisableAlarmResponse.t, BatchDisableAlarmResponse.error) t 
   | BatchEnableAlarm: (BatchEnableAlarmRequest.t, BatchEnableAlarmResponse.t,
@@ -27,6 +29,7 @@ type ('i, 'o, 'e) t =
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | BatchAcknowledgeAlarm -> `POST
+  | BatchDeleteDetector -> `POST
   | BatchDisableAlarm -> `POST
   | BatchEnableAlarm -> `POST
   | BatchPutMessage -> `POST
@@ -42,6 +45,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       match endpoint with
       | BatchAcknowledgeAlarm ->
           (Format.kasprintf Uri.of_string) "/alarms/acknowledge"
+      | BatchDeleteDetector ->
+          (Format.kasprintf Uri.of_string) "/detectors/delete"
       | BatchDisableAlarm ->
           (Format.kasprintf Uri.of_string) "/alarms/disable"
       | BatchEnableAlarm -> (Format.kasprintf Uri.of_string) "/alarms/enable"
@@ -109,6 +114,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("acknowledgeActionRequests",
                            (AcknowledgeAlarmActionRequests.to_value
                               req.BatchAcknowledgeAlarmRequest.acknowledgeActionRequests))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchDeleteDetector ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("detectors",
+                           (DeleteDetectorRequests.to_value
+                              req.BatchDeleteDetectorRequest.detectors))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -302,6 +327,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some BatchAcknowledgeAlarmResponse.error_of_json))
+  | BatchDeleteDetector ->
+      if is_success
+      then Ok (BatchDeleteDetectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchDeleteDetectorResponse.error_of_json))
   | BatchDisableAlarm ->
       if is_success
       then Ok (BatchDisableAlarmResponse.of_json (response_to_json resp))

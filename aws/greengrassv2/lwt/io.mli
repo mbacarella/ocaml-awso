@@ -46,6 +46,10 @@ val delete_core_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCoreDeviceRequest.t -> (unit, unit) Result.t Lwt.t
+val delete_deployment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDeploymentRequest.t -> (unit, unit) Result.t Lwt.t
 val describe_component :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

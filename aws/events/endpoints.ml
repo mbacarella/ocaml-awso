@@ -109,6 +109,8 @@ type ('i, 'o, 'e) t =
   UpdateConnectionResponse.error) t 
   | UpdateEndpoint: (UpdateEndpointRequest.t, UpdateEndpointResponse.t,
   UpdateEndpointResponse.error) t 
+  | UpdateEventBus: (UpdateEventBusRequest.t, UpdateEventBusResponse.t,
+  UpdateEventBusResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | ActivateEventSource -> `POST
@@ -167,6 +169,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateArchive -> `POST
   | UpdateConnection -> `POST
   | UpdateEndpoint -> `POST
+  | UpdateEventBus -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -226,7 +229,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateApiDestination -> (Format.kasprintf Uri.of_string) "/"
       | UpdateArchive -> (Format.kasprintf Uri.of_string) "/"
       | UpdateConnection -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateEndpoint -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateEndpoint -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateEventBus -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -678,6 +682,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSEvents.UpdateEndpoint")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateEventBus ->
+      let json = UpdateEventBusRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSEvents.UpdateEventBus")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -1049,3 +1061,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateEndpointResponse.of_json json)
       else
         Error (parse_aws_error (Some UpdateEndpointResponse.error_of_json))
+  | UpdateEventBus ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateEventBusResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateEventBusResponse.error_of_json))

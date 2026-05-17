@@ -23,27 +23,6 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
-module S3Path =
-  struct
-    type nonrec t = string
-    let context_ = "S3Path"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^(https|s3)://([^/]+)/?(.*)$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"S3Path" j
-    let to_json = simple_to_json to_value
-  end
 module String_ =
   struct
     type nonrec t = string
@@ -55,6 +34,80 @@ module String_ =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module S3Path =
+  struct
+    type nonrec t = string
+    let context_ = "S3Path"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"(https|s3)://([^/]+)/?(.*)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Path" j
+    let to_json = simple_to_json to_value
+  end
+module Long =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module ProgramValidationFailuresList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProgramValidationFailuresList"
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SyntheticTimestamp_epoch_seconds =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
 module String256 =
@@ -92,11 +145,54 @@ module S3DataSource =
         S3Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "s3Uri") in
       make ~s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Uri = field_map_exn json "s3Uri" S3Path.of_json in make ~s3Uri ()
+    let of_json json__ =
+      let s3Uri = field_map_exn json__ "s3Uri" S3Path.of_json in
+      make ~s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about the data stored in Amazon S3 used by the Amazon Braket job."]
+       "Information about the Amazon S3 storage used by the Amazon Braket hybrid job."]
+module ProgramSetValidationFailure =
+  struct
+    type nonrec t =
+      {
+      programIndex: Long.t option
+        [@ocaml.doc
+          "The index of the program within the program set that failed validation."];
+      inputsIndex: Long.t option
+        [@ocaml.doc
+          "The index of the input within the program set that failed validation."];
+      errors: ProgramValidationFailuresList.t option
+        [@ocaml.doc
+          "A list of error messages describing the validation failures that occurred."]}
+    let make ?programIndex =
+      fun ?inputsIndex ->
+        fun ?errors -> fun () -> { programIndex; inputsIndex; errors }
+    let to_value x =
+      structure_to_value
+        [("programIndex", (Option.map x.programIndex ~f:Long.to_value));
+        ("inputsIndex", (Option.map x.inputsIndex ~f:Long.to_value));
+        ("errors",
+          (Option.map x.errors ~f:ProgramValidationFailuresList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:ProgramValidationFailuresList.of_xml)
+          (Xml.child xml_arg0 "errors") in
+      let inputsIndex =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "inputsIndex") in
+      let programIndex =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "programIndex") in
+      make ?errors ?inputsIndex ?programIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors =
+        field_map json__ "errors" ProgramValidationFailuresList.of_json in
+      let inputsIndex = field_map json__ "inputsIndex" Long.of_json in
+      let programIndex = field_map json__ "programIndex" Long.of_json in
+      make ?errors ?inputsIndex ?programIndex ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about validation failures that occurred during the processing of a program set in a quantum task."]
 module DeviceArn =
   struct
     type nonrec t = string
@@ -115,17 +211,174 @@ module DeviceArn =
     let of_json j = string_of_json ~kind:"DeviceArn" j
     let to_json = simple_to_json to_value
   end
-module Long =
+module SpendingLimitArn =
   struct
-    type nonrec t = Int64.t
-    let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
+    type nonrec t = string
+    let context_ = "SpendingLimitArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws[a-z\\-]*:braket:[a-z0-9\\-]+:[0-9]{12}:spending-limit/.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SpendingLimitArn" j
+    let to_json = simple_to_json to_value
+  end
+module SyntheticTimestamp_date_time =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module TagsMap =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TimePeriod =
+  struct
+    type nonrec t =
+      {
+      startAt: SyntheticTimestamp_epoch_seconds.t
+        [@ocaml.doc
+          "The start date and time for the spending limit period, in epoch seconds."];
+      endAt: SyntheticTimestamp_epoch_seconds.t
+        [@ocaml.doc
+          "The end date and time for the spending limit period, in epoch seconds."]}
+    let context_ = "TimePeriod"
+    let make ~startAt = fun ~endAt -> fun () -> { startAt; endAt }
+    let to_value x =
+      structure_to_value
+        [("startAt",
+           (Some (SyntheticTimestamp_epoch_seconds.to_value x.startAt)));
+        ("endAt", (Some (SyntheticTimestamp_epoch_seconds.to_value x.endAt)))]
+    let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+      let endAt =
+        SyntheticTimestamp_epoch_seconds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "endAt") in
+      let startAt =
+        SyntheticTimestamp_epoch_seconds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "startAt") in
+      make ~endAt ~startAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endAt =
+        field_map_exn json__ "endAt" SyntheticTimestamp_epoch_seconds.of_json in
+      let startAt =
+        field_map_exn json__ "startAt"
+          SyntheticTimestamp_epoch_seconds.of_json in
+      make ~endAt ~startAt ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines a time range for spending limits, specifying when the limit is active."]
+module SearchSpendingLimitsFilterOperator =
+  struct
+    type nonrec t =
+      | EQUAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | EQUAL -> "EQUAL" | Non_static_id s -> s
+    let of_string = function | "EQUAL" -> EQUAL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SearchSpendingLimitsFilterOperator"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SearchSpendingLimitsFilterOperator" j)
+    let to_json = simple_to_json to_value
+  end
+module SearchSpendingLimitsFilterValuesList =
+  struct
+    type nonrec t = String256.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String256.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String256.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchSpendingLimitsFilterValuesList"
+        ~of_json:String256.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module String64 =
+  struct
+    type nonrec t = string
+    let context_ = "String64"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String64" j
     let to_json = simple_to_json to_value
   end
 module QuantumTaskArn =
@@ -136,7 +389,7 @@ module QuantumTaskArn =
       let open Result in
         ok_or_failwith
           ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:1));
+             (fun () -> check_string_min i ~min:0));
         i
     let of_string x = x
     let to_value x = `String x
@@ -187,46 +440,6 @@ module QuantumTaskStatus =
     let of_json j = of_string (string_of_json ~kind:"QuantumTaskStatus" j)
     let to_json = simple_to_json to_value
   end
-module SyntheticTimestamp_date_time =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
-module TagsMap =
-  struct
-    type nonrec t = (String_.t * String_.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((String_.of_string chopped),
-                              (String_.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (String_.to_value x) |>
-                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:String_.of_string
-        ~of_json:String_.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module SearchQuantumTasksFilterOperator =
   struct
     type nonrec t =
@@ -275,6 +488,9 @@ module SearchQuantumTasksFilterValuesList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String256.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -296,24 +512,6 @@ module SearchQuantumTasksFilterValuesList =
         ~of_json:String256.of_json j
     let to_json v = composed_to_json to_value v
   end
-module String64 =
-  struct
-    type nonrec t = string
-    let context_ = "String64"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:64) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String64" j
-    let to_json = simple_to_json to_value
-  end
 module JobArn =
   struct
     type nonrec t = string
@@ -322,7 +520,7 @@ module JobArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^arn:aws[a-z\\-]*:braket:[a-z0-9\\-]*:[0-9]{12}:job/.*$");
+             ~pattern:"arn:aws[a-z\\-]*:braket:[a-z0-9\\-]+:[0-9]{12}:job/.*");
         i
     let of_string x = x
     let to_value x = `String x
@@ -419,6 +617,9 @@ module SearchJobsFilterValuesList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String256.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -519,6 +720,9 @@ module SearchDevicesFilterValuesList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String256.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -539,6 +743,46 @@ module SearchDevicesFilterValuesList =
       list_of_json ~kind:"SearchDevicesFilterValuesList"
         ~of_json:String256.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module AssociationType =
+  struct
+    type nonrec t =
+      | RESERVATION_TIME_WINDOW_ARN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RESERVATION_TIME_WINDOW_ARN -> "RESERVATION_TIME_WINDOW_ARN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RESERVATION_TIME_WINDOW_ARN" -> RESERVATION_TIME_WINDOW_ARN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AssociationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AssociationType" j)
+    let to_json = simple_to_json to_value
+  end
+module BraketResourceArn =
+  struct
+    type nonrec t = string
+    let context_ = "BraketResourceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"arn:aws[a-z\\-]*:braket:[a-z0-9\\-]*:[0-9]{12}:.*");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BraketResourceArn" j
+    let to_json = simple_to_json to_value
   end
 module Uri_ =
   struct
@@ -587,7 +831,7 @@ module DataSource =
       {
       s3DataSource: S3DataSource.t
         [@ocaml.doc
-          "Information about the data stored in Amazon S3 used by the Amazon Braket job."]}
+          "Amazon S3 path of the input data used by the hybrid job."]}
     let context_ = "DataSource"
     let make ~s3DataSource = fun () -> { s3DataSource }
     let to_value x =
@@ -600,13 +844,13 @@ module DataSource =
           (Xml.child_exn ~context:context_ xml_arg0 "s3DataSource") in
       make ~s3DataSource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3DataSource =
-        field_map_exn json "s3DataSource" S3DataSource.of_json in
+        field_map_exn json__ "s3DataSource" S3DataSource.of_json in
       make ~s3DataSource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about the source of the data used by the Amazon Braket job."]
+       "Information about the source of the input data used by the Amazon Braket hybrid job."]
 module InputFileConfigChannelNameString =
   struct
     type nonrec t = string
@@ -617,7 +861,7 @@ module InputFileConfigChannelNameString =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"^[A-Za-z0-9\\.\\-_]+$")));
+                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9\\.\\-_]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -697,108 +941,367 @@ module JobEventType =
     let of_json j = of_string (string_of_json ~kind:"JobEventType" j)
     let to_json = simple_to_json to_value
   end
-module QuantumTaskSummary =
+module QueueName =
+  struct
+    type nonrec t =
+      | QUANTUM_TASKS_QUEUE 
+      | JOBS_QUEUE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | QUANTUM_TASKS_QUEUE -> "QUANTUM_TASKS_QUEUE"
+      | JOBS_QUEUE -> "JOBS_QUEUE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "QUANTUM_TASKS_QUEUE" -> QUANTUM_TASKS_QUEUE
+      | "JOBS_QUEUE" -> JOBS_QUEUE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration QueueName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QueueName" j)
+    let to_json = simple_to_json to_value
+  end
+module QueuePriority =
+  struct
+    type nonrec t =
+      | Normal 
+      | Priority 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Normal -> "Normal"
+      | Priority -> "Priority"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Normal" -> Normal
+      | "Priority" -> Priority
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration QueuePriority" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QueuePriority" j)
+    let to_json = simple_to_json to_value
+  end
+module ProgramSetValidationFailuresList =
+  struct
+    type nonrec t = ProgramSetValidationFailure.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProgramSetValidationFailure.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProgramSetValidationFailure.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProgramSetValidationFailuresList"
+        ~of_json:ProgramSetValidationFailure.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ValidationExceptionReason =
+  struct
+    type nonrec t =
+      | ProgramSetValidationFailed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ProgramSetValidationFailed -> "ProgramSetValidationFailed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ProgramSetValidationFailed" -> ProgramSetValidationFailed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ValidationExceptionReason" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ValidationExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module SpendingLimitSummary =
   struct
     type nonrec t =
       {
-      createdAt: SyntheticTimestamp_date_time.t
-        [@ocaml.doc "The time at which the task was created."];
-      deviceArn: DeviceArn.t
-        [@ocaml.doc "The ARN of the device the task ran on."];
-      endedAt: SyntheticTimestamp_date_time.t option
-        [@ocaml.doc "The time at which the task finished."];
-      outputS3Bucket: String_.t
-        [@ocaml.doc "The S3 bucket where the task result file is stored.."];
-      outputS3Directory: String_.t
+      spendingLimitArn: SpendingLimitArn.t option
         [@ocaml.doc
-          "The folder in the S3 bucket where the task result file is stored."];
-      quantumTaskArn: QuantumTaskArn.t [@ocaml.doc "The ARN of the task."];
-      shots: Long.t [@ocaml.doc "The shots used for the task."];
-      status: QuantumTaskStatus.t [@ocaml.doc "The status of the task."];
+          "The Amazon Resource Name (ARN) that uniquely identifies the spending limit."];
+      deviceArn: DeviceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the quantum device associated with this spending limit."];
+      timePeriod: TimePeriod.t option
+        [@ocaml.doc
+          "The time period during which the spending limit is active."];
+      spendingLimit: String_.t option
+        [@ocaml.doc
+          "The maximum spending amount allowed for the device during the specified time period, in USD."];
+      queuedSpend: String_.t option
+        [@ocaml.doc
+          "The amount currently queued for spending on the device, in USD."];
+      totalSpend: String_.t option
+        [@ocaml.doc
+          "The total amount spent on the device so far during the current time period, in USD."];
+      createdAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc
+          "The date and time when the spending limit was created, in epoch seconds."];
+      updatedAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc
+          "The date and time when the spending limit was last modified, in epoch seconds."];
       tags: TagsMap.t option
         [@ocaml.doc
-          "Displays the key, value pairs of tags associated with this quantum task."]}
-    let context_ = "QuantumTaskSummary"
-    let make ?endedAt =
-      fun ?tags ->
-        fun ~createdAt ->
-          fun ~deviceArn ->
-            fun ~outputS3Bucket ->
-              fun ~outputS3Directory ->
-                fun ~quantumTaskArn ->
-                  fun ~shots ->
-                    fun ~status ->
+          "The tags associated with the spending limit. Each tag consists of a key and an optional value."]}
+    let make ?spendingLimitArn =
+      fun ?deviceArn ->
+        fun ?timePeriod ->
+          fun ?spendingLimit ->
+            fun ?queuedSpend ->
+              fun ?totalSpend ->
+                fun ?createdAt ->
+                  fun ?updatedAt ->
+                    fun ?tags ->
                       fun () ->
                         {
-                          endedAt;
-                          tags;
-                          createdAt;
+                          spendingLimitArn;
                           deviceArn;
-                          outputS3Bucket;
-                          outputS3Directory;
-                          quantumTaskArn;
-                          shots;
-                          status
+                          timePeriod;
+                          spendingLimit;
+                          queuedSpend;
+                          totalSpend;
+                          createdAt;
+                          updatedAt;
+                          tags
                         }
     let to_value x =
       structure_to_value
-        [("createdAt",
-           (Some (SyntheticTimestamp_date_time.to_value x.createdAt)));
-        ("deviceArn", (Some (DeviceArn.to_value x.deviceArn)));
-        ("endedAt",
-          (Option.map x.endedAt ~f:SyntheticTimestamp_date_time.to_value));
-        ("outputS3Bucket", (Some (String_.to_value x.outputS3Bucket)));
-        ("outputS3Directory", (Some (String_.to_value x.outputS3Directory)));
-        ("quantumTaskArn", (Some (QuantumTaskArn.to_value x.quantumTaskArn)));
-        ("shots", (Some (Long.to_value x.shots)));
-        ("status", (Some (QuantumTaskStatus.to_value x.status)));
+        [("spendingLimitArn",
+           (Option.map x.spendingLimitArn ~f:SpendingLimitArn.to_value));
+        ("deviceArn", (Option.map x.deviceArn ~f:DeviceArn.to_value));
+        ("timePeriod", (Option.map x.timePeriod ~f:TimePeriod.to_value));
+        ("spendingLimit", (Option.map x.spendingLimit ~f:String_.to_value));
+        ("queuedSpend", (Option.map x.queuedSpend ~f:String_.to_value));
+        ("totalSpend", (Option.map x.totalSpend ~f:String_.to_value));
+        ("createdAt",
+          (Option.map x.createdAt ~f:SyntheticTimestamp_date_time.to_value));
+        ("updatedAt",
+          (Option.map x.updatedAt ~f:SyntheticTimestamp_date_time.to_value));
         ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let status =
-        QuantumTaskStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let shots =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "shots") in
-      let quantumTaskArn =
-        QuantumTaskArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "quantumTaskArn") in
-      let outputS3Directory =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "outputS3Directory") in
-      let outputS3Bucket =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "outputS3Bucket") in
+      let updatedAt =
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "updatedAt") in
+      let createdAt =
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "createdAt") in
+      let totalSpend =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "totalSpend") in
+      let queuedSpend =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "queuedSpend") in
+      let spendingLimit =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "spendingLimit") in
+      let timePeriod =
+        (Option.map ~f:TimePeriod.of_xml) (Xml.child xml_arg0 "timePeriod") in
+      let deviceArn =
+        (Option.map ~f:DeviceArn.of_xml) (Xml.child xml_arg0 "deviceArn") in
+      let spendingLimitArn =
+        (Option.map ~f:SpendingLimitArn.of_xml)
+          (Xml.child xml_arg0 "spendingLimitArn") in
+      make ?tags ?updatedAt ?createdAt ?totalSpend ?queuedSpend
+        ?spendingLimit ?timePeriod ?deviceArn ?spendingLimitArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let updatedAt =
+        field_map json__ "updatedAt" SyntheticTimestamp_date_time.of_json in
+      let createdAt =
+        field_map json__ "createdAt" SyntheticTimestamp_date_time.of_json in
+      let totalSpend = field_map json__ "totalSpend" String_.of_json in
+      let queuedSpend = field_map json__ "queuedSpend" String_.of_json in
+      let spendingLimit = field_map json__ "spendingLimit" String_.of_json in
+      let timePeriod = field_map json__ "timePeriod" TimePeriod.of_json in
+      let deviceArn = field_map json__ "deviceArn" DeviceArn.of_json in
+      let spendingLimitArn =
+        field_map json__ "spendingLimitArn" SpendingLimitArn.of_json in
+      make ?tags ?updatedAt ?createdAt ?totalSpend ?queuedSpend
+        ?spendingLimit ?timePeriod ?deviceArn ?spendingLimitArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains summary information about a spending limit, including current spending status and configuration details."]
+module SearchSpendingLimitsFilter =
+  struct
+    type nonrec t =
+      {
+      name: String64.t
+        [@ocaml.doc
+          "The name of the field to filter on. Currently only supports deviceArn."];
+      values: SearchSpendingLimitsFilterValuesList.t
+        [@ocaml.doc
+          "An array of values to match against the specified field."];
+      operator: SearchSpendingLimitsFilterOperator.t
+        [@ocaml.doc "The comparison operator to use when filtering."]}
+    let context_ = "SearchSpendingLimitsFilter"
+    let make ~name =
+      fun ~values -> fun ~operator -> fun () -> { name; values; operator }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String64.to_value x.name)));
+        ("values",
+          (Some (SearchSpendingLimitsFilterValuesList.to_value x.values)));
+        ("operator",
+          (Some (SearchSpendingLimitsFilterOperator.to_value x.operator)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operator =
+        SearchSpendingLimitsFilterOperator.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "operator") in
+      let values =
+        SearchSpendingLimitsFilterValuesList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "values") in
+      let name =
+        String64.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~operator ~values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operator =
+        field_map_exn json__ "operator"
+          SearchSpendingLimitsFilterOperator.of_json in
+      let values =
+        field_map_exn json__ "values"
+          SearchSpendingLimitsFilterValuesList.of_json in
+      let name = field_map_exn json__ "name" String64.of_json in
+      make ~operator ~values ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies filter criteria for searching spending limits. Use filters to narrow down results based on specific attributes."]
+module QuantumTaskSummary =
+  struct
+    type nonrec t =
+      {
+      quantumTaskArn: QuantumTaskArn.t option
+        [@ocaml.doc "The ARN of the quantum task."];
+      status: QuantumTaskStatus.t option
+        [@ocaml.doc "The status of the quantum task."];
+      deviceArn: DeviceArn.t option
+        [@ocaml.doc "The ARN of the device the quantum task ran on."];
+      shots: Long.t option
+        [@ocaml.doc "The shots used for the quantum task."];
+      outputS3Bucket: String_.t option
+        [@ocaml.doc
+          "The S3 bucket where the quantum task result file is stored."];
+      outputS3Directory: String_.t option
+        [@ocaml.doc
+          "The folder in the S3 bucket where the quantum task result file is stored."];
+      createdAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc "The time at which the quantum task was created."];
+      endedAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc "The time at which the quantum task finished."];
+      tags: TagsMap.t option
+        [@ocaml.doc
+          "Displays the key, value pairs of tags associated with this quantum task."]}
+    let make ?quantumTaskArn =
+      fun ?status ->
+        fun ?deviceArn ->
+          fun ?shots ->
+            fun ?outputS3Bucket ->
+              fun ?outputS3Directory ->
+                fun ?createdAt ->
+                  fun ?endedAt ->
+                    fun ?tags ->
+                      fun () ->
+                        {
+                          quantumTaskArn;
+                          status;
+                          deviceArn;
+                          shots;
+                          outputS3Bucket;
+                          outputS3Directory;
+                          createdAt;
+                          endedAt;
+                          tags
+                        }
+    let to_value x =
+      structure_to_value
+        [("quantumTaskArn",
+           (Option.map x.quantumTaskArn ~f:QuantumTaskArn.to_value));
+        ("status", (Option.map x.status ~f:QuantumTaskStatus.to_value));
+        ("deviceArn", (Option.map x.deviceArn ~f:DeviceArn.to_value));
+        ("shots", (Option.map x.shots ~f:Long.to_value));
+        ("outputS3Bucket", (Option.map x.outputS3Bucket ~f:String_.to_value));
+        ("outputS3Directory",
+          (Option.map x.outputS3Directory ~f:String_.to_value));
+        ("createdAt",
+          (Option.map x.createdAt ~f:SyntheticTimestamp_date_time.to_value));
+        ("endedAt",
+          (Option.map x.endedAt ~f:SyntheticTimestamp_date_time.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       let endedAt =
         (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
           (Xml.child xml_arg0 "endedAt") in
-      let deviceArn =
-        DeviceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceArn") in
       let createdAt =
-        SyntheticTimestamp_date_time.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      make ?tags ~status ~shots ~quantumTaskArn ~outputS3Directory
-        ~outputS3Bucket ?endedAt ~deviceArn ~createdAt ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let status = field_map_exn json "status" QuantumTaskStatus.of_json in
-      let shots = field_map_exn json "shots" Long.of_json in
-      let quantumTaskArn =
-        field_map_exn json "quantumTaskArn" QuantumTaskArn.of_json in
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "createdAt") in
       let outputS3Directory =
-        field_map_exn json "outputS3Directory" String_.of_json in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "outputS3Directory") in
       let outputS3Bucket =
-        field_map_exn json "outputS3Bucket" String_.of_json in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "outputS3Bucket") in
+      let shots = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "shots") in
+      let deviceArn =
+        (Option.map ~f:DeviceArn.of_xml) (Xml.child xml_arg0 "deviceArn") in
+      let status =
+        (Option.map ~f:QuantumTaskStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let quantumTaskArn =
+        (Option.map ~f:QuantumTaskArn.of_xml)
+          (Xml.child xml_arg0 "quantumTaskArn") in
+      make ?tags ?endedAt ?createdAt ?outputS3Directory ?outputS3Bucket
+        ?shots ?deviceArn ?status ?quantumTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
       let endedAt =
-        field_map json "endedAt" SyntheticTimestamp_date_time.of_json in
-      let deviceArn = field_map_exn json "deviceArn" DeviceArn.of_json in
+        field_map json__ "endedAt" SyntheticTimestamp_date_time.of_json in
       let createdAt =
-        field_map_exn json "createdAt" SyntheticTimestamp_date_time.of_json in
-      make ?tags ~status ~shots ~quantumTaskArn ~outputS3Directory
-        ~outputS3Bucket ?endedAt ~deviceArn ~createdAt ()
+        field_map json__ "createdAt" SyntheticTimestamp_date_time.of_json in
+      let outputS3Directory =
+        field_map json__ "outputS3Directory" String_.of_json in
+      let outputS3Bucket = field_map json__ "outputS3Bucket" String_.of_json in
+      let shots = field_map json__ "shots" Long.of_json in
+      let deviceArn = field_map json__ "deviceArn" DeviceArn.of_json in
+      let status = field_map json__ "status" QuantumTaskStatus.of_json in
+      let quantumTaskArn =
+        field_map json__ "quantumTaskArn" QuantumTaskArn.of_json in
+      make ?tags ?endedAt ?createdAt ?outputS3Directory ?outputS3Bucket
+        ?shots ?deviceArn ?status ?quantumTaskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Includes information about a quantum task."]
 module SearchQuantumTasksFilter =
@@ -806,234 +1309,237 @@ module SearchQuantumTasksFilter =
     type nonrec t =
       {
       name: String64.t
-        [@ocaml.doc "The name of the device used for the task."];
-      operator: SearchQuantumTasksFilterOperator.t
-        [@ocaml.doc "An operator to use in the filter."];
+        [@ocaml.doc
+          "The name of the quantum task parameter to filter based on. Filter name can be either quantumTaskArn, deviceArn, jobArn, status or createdAt."];
       values: SearchQuantumTasksFilterValuesList.t
-        [@ocaml.doc "The values to use for the filter."]}
+        [@ocaml.doc
+          "The values used to filter quantum tasks based on the filter name and operator."];
+      operator: SearchQuantumTasksFilterOperator.t
+        [@ocaml.doc "An operator to use for the filter."]}
     let context_ = "SearchQuantumTasksFilter"
     let make ~name =
-      fun ~operator -> fun ~values -> fun () -> { name; operator; values }
+      fun ~values -> fun ~operator -> fun () -> { name; values; operator }
     let to_value x =
       structure_to_value
         [("name", (Some (String64.to_value x.name)));
-        ("operator",
-          (Some (SearchQuantumTasksFilterOperator.to_value x.operator)));
         ("values",
-          (Some (SearchQuantumTasksFilterValuesList.to_value x.values)))]
+          (Some (SearchQuantumTasksFilterValuesList.to_value x.values)));
+        ("operator",
+          (Some (SearchQuantumTasksFilterOperator.to_value x.operator)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let values =
-        SearchQuantumTasksFilterValuesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "values") in
       let operator =
         SearchQuantumTasksFilterOperator.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "operator") in
+      let values =
+        SearchQuantumTasksFilterValuesList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "values") in
       let name =
         String64.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~values ~operator ~name ()
+      make ~operator ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values =
-        field_map_exn json "values"
-          SearchQuantumTasksFilterValuesList.of_json in
+    let of_json json__ =
       let operator =
-        field_map_exn json "operator"
+        field_map_exn json__ "operator"
           SearchQuantumTasksFilterOperator.of_json in
-      let name = field_map_exn json "name" String64.of_json in
-      make ~values ~operator ~name ()
+      let values =
+        field_map_exn json__ "values"
+          SearchQuantumTasksFilterValuesList.of_json in
+      let name = field_map_exn json__ "name" String64.of_json in
+      make ~operator ~values ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A filter to use to search for tasks."]
+  end[@@ocaml.doc "A filter used to search for quantum tasks."]
 module JobSummary =
   struct
     type nonrec t =
       {
-      createdAt: SyntheticTimestamp_date_time.t
+      status: JobPrimaryStatus.t option
+        [@ocaml.doc "The status of the Amazon Braket hybrid job."];
+      jobArn: JobArn.t option
+        [@ocaml.doc "The ARN of the Amazon Braket hybrid job."];
+      jobName: String_.t option
+        [@ocaml.doc "The name of the Amazon Braket hybrid job."];
+      device: String256.t option
         [@ocaml.doc
-          "The date and time that the Amazon Braket job was created."];
-      device: String256.t
+          "The primary device used by an Amazon Braket hybrid job."];
+      createdAt: SyntheticTimestamp_date_time.t option
         [@ocaml.doc
-          "Provides summary information about the primary device used by an Amazon Braket job."];
-      endedAt: SyntheticTimestamp_date_time.t option
-        [@ocaml.doc "The date and time that the Amazon Braket job ended."];
-      jobArn: JobArn.t [@ocaml.doc "The ARN of the Amazon Braket job."];
-      jobName: String_.t [@ocaml.doc "The name of the Amazon Braket job."];
+          "The time at which the Amazon Braket hybrid job was created."];
       startedAt: SyntheticTimestamp_date_time.t option
         [@ocaml.doc
-          "The date and time that the Amazon Braket job was started."];
-      status: JobPrimaryStatus.t
-        [@ocaml.doc "The status of the Amazon Braket job."];
+          "The time at which the Amazon Braket hybrid job was started."];
+      endedAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc "The time at which the Amazon Braket hybrid job ended."];
       tags: TagsMap.t option
         [@ocaml.doc
-          "A tag object that consists of a key and an optional value, used to manage metadata for Amazon Braket resources."]}
-    let context_ = "JobSummary"
-    let make ?endedAt =
-      fun ?startedAt ->
-        fun ?tags ->
-          fun ~createdAt ->
-            fun ~device ->
-              fun ~jobArn ->
-                fun ~jobName ->
-                  fun ~status ->
+          "Displays the key, value pairs of tags associated with this hybrid job."]}
+    let make ?status =
+      fun ?jobArn ->
+        fun ?jobName ->
+          fun ?device ->
+            fun ?createdAt ->
+              fun ?startedAt ->
+                fun ?endedAt ->
+                  fun ?tags ->
                     fun () ->
                       {
-                        endedAt;
-                        startedAt;
-                        tags;
-                        createdAt;
-                        device;
+                        status;
                         jobArn;
                         jobName;
-                        status
+                        device;
+                        createdAt;
+                        startedAt;
+                        endedAt;
+                        tags
                       }
     let to_value x =
       structure_to_value
-        [("createdAt",
-           (Some (SyntheticTimestamp_date_time.to_value x.createdAt)));
-        ("device", (Some (String256.to_value x.device)));
-        ("endedAt",
-          (Option.map x.endedAt ~f:SyntheticTimestamp_date_time.to_value));
-        ("jobArn", (Some (JobArn.to_value x.jobArn)));
-        ("jobName", (Some (String_.to_value x.jobName)));
+        [("status", (Option.map x.status ~f:JobPrimaryStatus.to_value));
+        ("jobArn", (Option.map x.jobArn ~f:JobArn.to_value));
+        ("jobName", (Option.map x.jobName ~f:String_.to_value));
+        ("device", (Option.map x.device ~f:String256.to_value));
+        ("createdAt",
+          (Option.map x.createdAt ~f:SyntheticTimestamp_date_time.to_value));
         ("startedAt",
           (Option.map x.startedAt ~f:SyntheticTimestamp_date_time.to_value));
-        ("status", (Some (JobPrimaryStatus.to_value x.status)));
+        ("endedAt",
+          (Option.map x.endedAt ~f:SyntheticTimestamp_date_time.to_value));
         ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let status =
-        JobPrimaryStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let startedAt =
-        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
-          (Xml.child xml_arg0 "startedAt") in
-      let jobName =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobName") in
-      let jobArn =
-        JobArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobArn") in
       let endedAt =
         (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
           (Xml.child xml_arg0 "endedAt") in
-      let device =
-        String256.of_xml (Xml.child_exn ~context:context_ xml_arg0 "device") in
-      let createdAt =
-        SyntheticTimestamp_date_time.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      make ?tags ~status ?startedAt ~jobName ~jobArn ?endedAt ~device
-        ~createdAt ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let status = field_map_exn json "status" JobPrimaryStatus.of_json in
       let startedAt =
-        field_map json "startedAt" SyntheticTimestamp_date_time.of_json in
-      let jobName = field_map_exn json "jobName" String_.of_json in
-      let jobArn = field_map_exn json "jobArn" JobArn.of_json in
-      let endedAt =
-        field_map json "endedAt" SyntheticTimestamp_date_time.of_json in
-      let device = field_map_exn json "device" String256.of_json in
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "startedAt") in
       let createdAt =
-        field_map_exn json "createdAt" SyntheticTimestamp_date_time.of_json in
-      make ?tags ~status ?startedAt ~jobName ~jobArn ?endedAt ~device
-        ~createdAt ()
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "createdAt") in
+      let device =
+        (Option.map ~f:String256.of_xml) (Xml.child xml_arg0 "device") in
+      let jobName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobName") in
+      let jobArn =
+        (Option.map ~f:JobArn.of_xml) (Xml.child xml_arg0 "jobArn") in
+      let status =
+        (Option.map ~f:JobPrimaryStatus.of_xml) (Xml.child xml_arg0 "status") in
+      make ?tags ?endedAt ?startedAt ?createdAt ?device ?jobName ?jobArn
+        ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let endedAt =
+        field_map json__ "endedAt" SyntheticTimestamp_date_time.of_json in
+      let startedAt =
+        field_map json__ "startedAt" SyntheticTimestamp_date_time.of_json in
+      let createdAt =
+        field_map json__ "createdAt" SyntheticTimestamp_date_time.of_json in
+      let device = field_map json__ "device" String256.of_json in
+      let jobName = field_map json__ "jobName" String_.of_json in
+      let jobArn = field_map json__ "jobArn" JobArn.of_json in
+      let status = field_map json__ "status" JobPrimaryStatus.of_json in
+      make ?tags ?endedAt ?startedAt ?createdAt ?device ?jobName ?jobArn
+        ?status ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Provides summary information about an Amazon Braket job."]
+  end[@@ocaml.doc
+       "Provides summary information about an Amazon Braket hybrid job."]
 module SearchJobsFilter =
   struct
     type nonrec t =
       {
-      name: String64.t [@ocaml.doc "The name to use for the jobs filter."];
-      operator: SearchJobsFilterOperator.t
-        [@ocaml.doc "An operator to use for the jobs filter."];
+      name: String64.t
+        [@ocaml.doc
+          "The name of the hybrid job parameter to filter based on. Filter name can be either jobArn or createdAt."];
       values: SearchJobsFilterValuesList.t
-        [@ocaml.doc "The values to use for the jobs filter."]}
+        [@ocaml.doc
+          "The values used to filter hybrid jobs based on the filter name and operator."];
+      operator: SearchJobsFilterOperator.t
+        [@ocaml.doc "An operator to use for the filter."]}
     let context_ = "SearchJobsFilter"
     let make ~name =
-      fun ~operator -> fun ~values -> fun () -> { name; operator; values }
+      fun ~values -> fun ~operator -> fun () -> { name; values; operator }
     let to_value x =
       structure_to_value
         [("name", (Some (String64.to_value x.name)));
-        ("operator", (Some (SearchJobsFilterOperator.to_value x.operator)));
-        ("values", (Some (SearchJobsFilterValuesList.to_value x.values)))]
+        ("values", (Some (SearchJobsFilterValuesList.to_value x.values)));
+        ("operator", (Some (SearchJobsFilterOperator.to_value x.operator)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let values =
-        SearchJobsFilterValuesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "values") in
       let operator =
         SearchJobsFilterOperator.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "operator") in
+      let values =
+        SearchJobsFilterValuesList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "values") in
       let name =
         String64.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~values ~operator ~name ()
+      make ~operator ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values =
-        field_map_exn json "values" SearchJobsFilterValuesList.of_json in
+    let of_json json__ =
       let operator =
-        field_map_exn json "operator" SearchJobsFilterOperator.of_json in
-      let name = field_map_exn json "name" String64.of_json in
-      make ~values ~operator ~name ()
+        field_map_exn json__ "operator" SearchJobsFilterOperator.of_json in
+      let values =
+        field_map_exn json__ "values" SearchJobsFilterValuesList.of_json in
+      let name = field_map_exn json__ "name" String64.of_json in
+      make ~operator ~values ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A filter used to search for Amazon Braket jobs."]
+  end[@@ocaml.doc "A filter used to search for Amazon Braket hybrid jobs."]
 module DeviceSummary =
   struct
     type nonrec t =
       {
-      deviceArn: DeviceArn.t [@ocaml.doc "The ARN of the device."];
-      deviceName: String_.t [@ocaml.doc "The name of the device."];
-      deviceStatus: DeviceStatus.t [@ocaml.doc "The status of the device."];
-      deviceType: DeviceType.t [@ocaml.doc "The type of the device."];
-      providerName: String_.t [@ocaml.doc "The provider of the device."]}
-    let context_ = "DeviceSummary"
-    let make ~deviceArn =
-      fun ~deviceName ->
-        fun ~deviceStatus ->
-          fun ~deviceType ->
-            fun ~providerName ->
+      deviceArn: DeviceArn.t option [@ocaml.doc "The ARN of the device."];
+      deviceName: String_.t option [@ocaml.doc "The name of the device."];
+      providerName: String_.t option
+        [@ocaml.doc "The provider of the device."];
+      deviceType: DeviceType.t option [@ocaml.doc "The type of the device."];
+      deviceStatus: DeviceStatus.t option
+        [@ocaml.doc "The status of the device."]}
+    let make ?deviceArn =
+      fun ?deviceName ->
+        fun ?providerName ->
+          fun ?deviceType ->
+            fun ?deviceStatus ->
               fun () ->
                 {
                   deviceArn;
                   deviceName;
-                  deviceStatus;
+                  providerName;
                   deviceType;
-                  providerName
+                  deviceStatus
                 }
     let to_value x =
       structure_to_value
-        [("deviceArn", (Some (DeviceArn.to_value x.deviceArn)));
-        ("deviceName", (Some (String_.to_value x.deviceName)));
-        ("deviceStatus", (Some (DeviceStatus.to_value x.deviceStatus)));
-        ("deviceType", (Some (DeviceType.to_value x.deviceType)));
-        ("providerName", (Some (String_.to_value x.providerName)))]
+        [("deviceArn", (Option.map x.deviceArn ~f:DeviceArn.to_value));
+        ("deviceName", (Option.map x.deviceName ~f:String_.to_value));
+        ("providerName", (Option.map x.providerName ~f:String_.to_value));
+        ("deviceType", (Option.map x.deviceType ~f:DeviceType.to_value));
+        ("deviceStatus",
+          (Option.map x.deviceStatus ~f:DeviceStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let providerName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "providerName") in
+      let deviceStatus =
+        (Option.map ~f:DeviceStatus.of_xml)
+          (Xml.child xml_arg0 "deviceStatus") in
       let deviceType =
-        DeviceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceType") in
-      let deviceStatus =
-        DeviceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceStatus") in
+        (Option.map ~f:DeviceType.of_xml) (Xml.child xml_arg0 "deviceType") in
+      let providerName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "providerName") in
       let deviceName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceName") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "deviceName") in
       let deviceArn =
-        DeviceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceArn") in
-      make ~providerName ~deviceType ~deviceStatus ~deviceName ~deviceArn ()
+        (Option.map ~f:DeviceArn.of_xml) (Xml.child xml_arg0 "deviceArn") in
+      make ?deviceStatus ?deviceType ?providerName ?deviceName ?deviceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let providerName = field_map_exn json "providerName" String_.of_json in
-      let deviceType = field_map_exn json "deviceType" DeviceType.of_json in
-      let deviceStatus =
-        field_map_exn json "deviceStatus" DeviceStatus.of_json in
-      let deviceName = field_map_exn json "deviceName" String_.of_json in
-      let deviceArn = field_map_exn json "deviceArn" DeviceArn.of_json in
-      make ~providerName ~deviceType ~deviceStatus ~deviceName ~deviceArn ()
+    let of_json json__ =
+      let deviceStatus = field_map json__ "deviceStatus" DeviceStatus.of_json in
+      let deviceType = field_map json__ "deviceType" DeviceType.of_json in
+      let providerName = field_map json__ "providerName" String_.of_json in
+      let deviceName = field_map json__ "deviceName" String_.of_json in
+      let deviceArn = field_map json__ "deviceArn" DeviceArn.of_json in
+      make ?deviceStatus ?deviceType ?providerName ?deviceName ?deviceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Includes information about the device."]
 module SearchDevicesFilter =
@@ -1041,9 +1547,11 @@ module SearchDevicesFilter =
     type nonrec t =
       {
       name: SearchDevicesFilterNameString.t
-        [@ocaml.doc "The name to use to filter results."];
+        [@ocaml.doc
+          "The name of the device parameter to filter based on. Only deviceArn filter name is currently supported."];
       values: SearchDevicesFilterValuesList.t
-        [@ocaml.doc "The values to use to filter results."]}
+        [@ocaml.doc
+          "The values used to filter devices based on the filter name."]}
     let context_ = "SearchDevicesFilter"
     let make ~name = fun ~values -> fun () -> { name; values }
     let to_value x =
@@ -1060,14 +1568,89 @@ module SearchDevicesFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map_exn json "values" SearchDevicesFilterValuesList.of_json in
+        field_map_exn json__ "values" SearchDevicesFilterValuesList.of_json in
       let name =
-        field_map_exn json "name" SearchDevicesFilterNameString.of_json in
+        field_map_exn json__ "name" SearchDevicesFilterNameString.of_json in
       make ~values ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The filter to use for searching devices."]
+  end[@@ocaml.doc "The filter used to search for devices."]
+module Association =
+  struct
+    type nonrec t =
+      {
+      arn: BraketResourceArn.t [@ocaml.doc "The Amazon Braket resource arn."];
+      type_: AssociationType.t
+        [@ocaml.doc
+          "The association type for the specified Amazon Braket resource arn."]}
+    let context_ = "Association"
+    let make ~arn = fun ~type_ -> fun () -> { arn; type_ }
+    let to_value x =
+      structure_to_value
+        [("arn", (Some (BraketResourceArn.to_value x.arn)));
+        ("type", (Some (AssociationType.to_value x.type_)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        AssociationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      let arn =
+        BraketResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
+      make ~type_ ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" AssociationType.of_json in
+      let arn = field_map_exn json__ "arn" BraketResourceArn.of_json in
+      make ~type_ ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The Amazon Braket resource and the association type."]
+module ExperimentalCapabilitiesEnablementType =
+  struct
+    type nonrec t =
+      | ALL 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ALL -> "ALL" | NONE -> "NONE" | Non_static_id s -> s
+    let of_string =
+      function | "ALL" -> ALL | "NONE" -> NONE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration ExperimentalCapabilitiesEnablementType"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"ExperimentalCapabilitiesEnablementType" j)
+    let to_json = simple_to_json to_value
+  end
+module QuantumTaskAdditionalAttributeName =
+  struct
+    type nonrec t =
+      | QueueInfo 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | QueueInfo -> "QueueInfo" | Non_static_id s -> s
+    let of_string =
+      function | "QueueInfo" -> QueueInfo | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration QuantumTaskAdditionalAttributeName"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"QuantumTaskAdditionalAttributeName" j)
+    let to_json = simple_to_json to_value
+  end
 module ContainerImage =
   struct
     type nonrec t =
@@ -1082,54 +1665,55 @@ module ContainerImage =
       let uri = Uri_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "uri") in
       make ~uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uri = field_map_exn json "uri" Uri_.of_json in make ~uri ()
+    let of_json json__ =
+      let uri = field_map_exn json__ "uri" Uri_.of_json in make ~uri ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The container image used to create an Amazon Braket job."]
+  end[@@ocaml.doc
+       "The container image used to create an Amazon Braket hybrid job."]
 module ScriptModeConfig =
   struct
     type nonrec t =
       {
-      compressionType: CompressionType.t option
-        [@ocaml.doc
-          "The type of compression used by the Python scripts for an Amazon Braket job."];
       entryPoint: String_.t
         [@ocaml.doc
-          "The path to the Python script that serves as the entry point for an Amazon Braket job."];
+          "The entry point in the algorithm scripts from where the execution begins in the hybrid job."];
       s3Uri: S3Path.t
         [@ocaml.doc
-          "The URI that specifies the S3 path to the Python script module that contains the training script used by an Amazon Braket job."]}
+          "The URI that specifies the S3 path to the algorithm scripts used by an Amazon Braket hybrid job."];
+      compressionType: CompressionType.t option
+        [@ocaml.doc
+          "The type of compression used to store the algorithm scripts in Amazon S3 storage."]}
     let context_ = "ScriptModeConfig"
     let make ?compressionType =
       fun ~entryPoint ->
         fun ~s3Uri -> fun () -> { compressionType; entryPoint; s3Uri }
     let to_value x =
       structure_to_value
-        [("compressionType",
-           (Option.map x.compressionType ~f:CompressionType.to_value));
-        ("entryPoint", (Some (String_.to_value x.entryPoint)));
-        ("s3Uri", (Some (S3Path.to_value x.s3Uri)))]
+        [("entryPoint", (Some (String_.to_value x.entryPoint)));
+        ("s3Uri", (Some (S3Path.to_value x.s3Uri)));
+        ("compressionType",
+          (Option.map x.compressionType ~f:CompressionType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let compressionType =
+        (Option.map ~f:CompressionType.of_xml)
+          (Xml.child xml_arg0 "compressionType") in
       let s3Uri =
         S3Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "s3Uri") in
       let entryPoint =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "entryPoint") in
-      let compressionType =
-        (Option.map ~f:CompressionType.of_xml)
-          (Xml.child xml_arg0 "compressionType") in
-      make ~s3Uri ~entryPoint ?compressionType ()
+      make ?compressionType ~s3Uri ~entryPoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Uri = field_map_exn json "s3Uri" S3Path.of_json in
-      let entryPoint = field_map_exn json "entryPoint" String_.of_json in
+    let of_json json__ =
       let compressionType =
-        field_map json "compressionType" CompressionType.of_json in
-      make ~s3Uri ~entryPoint ?compressionType ()
+        field_map json__ "compressionType" CompressionType.of_json in
+      let s3Uri = field_map_exn json__ "s3Uri" S3Path.of_json in
+      let entryPoint = field_map_exn json__ "entryPoint" String_.of_json in
+      make ?compressionType ~s3Uri ~entryPoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains information about the Python scripts used for entry and by an Amazon Braket job."]
+       "Contains information about algorithm scripts used for the Amazon Braket hybrid job."]
 module HyperParametersValueString =
   struct
     type nonrec t = string
@@ -1137,8 +1721,10 @@ module HyperParametersValueString =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:2500) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2500) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1154,11 +1740,10 @@ module InputFileConfig =
       {
       channelName: InputFileConfigChannelNameString.t
         [@ocaml.doc
-          "A named input source that an Amazon Braket job can consume."];
+          "A named input source that an Amazon Braket hybrid job can consume."];
       contentType: String256.t option
         [@ocaml.doc "The MIME type of the data."];
-      dataSource: DataSource.t
-        [@ocaml.doc "The location of the channel data."]}
+      dataSource: DataSource.t [@ocaml.doc "The location of the input data."]}
     let context_ = "InputFileConfig"
     let make ?contentType =
       fun ~channelName ->
@@ -1181,16 +1766,32 @@ module InputFileConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
       make ~dataSource ?contentType ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataSource = field_map_exn json "dataSource" DataSource.of_json in
-      let contentType = field_map json "contentType" String256.of_json in
+    let of_json json__ =
+      let dataSource = field_map_exn json__ "dataSource" DataSource.of_json in
+      let contentType = field_map json__ "contentType" String256.of_json in
       let channelName =
-        field_map_exn json "channelName"
+        field_map_exn json__ "channelName"
           InputFileConfigChannelNameString.of_json in
       make ~dataSource ?contentType ~channelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A list of parameters that specify the input channels, type of input data, and where it is located."]
+module InstanceConfigInstanceCountInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for InstanceConfigInstanceCountInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module InstanceConfigVolumeSizeInGbInteger =
   struct
     type nonrec t = int
@@ -1211,17 +1812,14 @@ module InstanceConfigVolumeSizeInGbInteger =
 module InstanceType =
   struct
     type nonrec t =
+      | Ml_t3_large 
+      | Ml_t3_xlarge 
+      | Ml_t3_2xlarge 
       | Ml_m4_xlarge 
       | Ml_m4_2xlarge 
       | Ml_m4_4xlarge 
       | Ml_m4_10xlarge 
       | Ml_m4_16xlarge 
-      | Ml_g4dn_xlarge 
-      | Ml_g4dn_2xlarge 
-      | Ml_g4dn_4xlarge 
-      | Ml_g4dn_8xlarge 
-      | Ml_g4dn_12xlarge 
-      | Ml_g4dn_16xlarge 
       | Ml_m5_large 
       | Ml_m5_xlarge 
       | Ml_m5_2xlarge 
@@ -1232,14 +1830,6 @@ module InstanceType =
       | Ml_c4_2xlarge 
       | Ml_c4_4xlarge 
       | Ml_c4_8xlarge 
-      | Ml_p2_xlarge 
-      | Ml_p2_8xlarge 
-      | Ml_p2_16xlarge 
-      | Ml_p3_2xlarge 
-      | Ml_p3_8xlarge 
-      | Ml_p3_16xlarge 
-      | Ml_p3dn_24xlarge 
-      | Ml_p4d_24xlarge 
       | Ml_c5_xlarge 
       | Ml_c5_2xlarge 
       | Ml_c5_4xlarge 
@@ -1250,21 +1840,48 @@ module InstanceType =
       | Ml_c5n_4xlarge 
       | Ml_c5n_9xlarge 
       | Ml_c5n_18xlarge 
+      | Ml_p2_xlarge 
+      | Ml_p2_8xlarge 
+      | Ml_p2_16xlarge 
+      | Ml_p3_2xlarge 
+      | Ml_p3_8xlarge 
+      | Ml_p3_16xlarge 
+      | Ml_p3dn_24xlarge 
+      | Ml_p4d_24xlarge 
+      | Ml_g4dn_xlarge 
+      | Ml_g4dn_2xlarge 
+      | Ml_g4dn_4xlarge 
+      | Ml_g4dn_8xlarge 
+      | Ml_g4dn_12xlarge 
+      | Ml_g4dn_16xlarge 
+      | Ml_g6_xlarge 
+      | Ml_g6_2xlarge 
+      | Ml_g6_4xlarge 
+      | Ml_g6_8xlarge 
+      | Ml_g6_12xlarge 
+      | Ml_g6_16xlarge 
+      | Ml_g6_24xlarge 
+      | Ml_g6_48xlarge 
+      | Ml_g6e_xlarge 
+      | Ml_g6e_2xlarge 
+      | Ml_g6e_4xlarge 
+      | Ml_g6e_8xlarge 
+      | Ml_g6e_12xlarge 
+      | Ml_g6e_16xlarge 
+      | Ml_g6e_24xlarge 
+      | Ml_g6e_48xlarge 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
+      | Ml_t3_large -> "ml.t3.large"
+      | Ml_t3_xlarge -> "ml.t3.xlarge"
+      | Ml_t3_2xlarge -> "ml.t3.2xlarge"
       | Ml_m4_xlarge -> "ml.m4.xlarge"
       | Ml_m4_2xlarge -> "ml.m4.2xlarge"
       | Ml_m4_4xlarge -> "ml.m4.4xlarge"
       | Ml_m4_10xlarge -> "ml.m4.10xlarge"
       | Ml_m4_16xlarge -> "ml.m4.16xlarge"
-      | Ml_g4dn_xlarge -> "ml.g4dn.xlarge"
-      | Ml_g4dn_2xlarge -> "ml.g4dn.2xlarge"
-      | Ml_g4dn_4xlarge -> "ml.g4dn.4xlarge"
-      | Ml_g4dn_8xlarge -> "ml.g4dn.8xlarge"
-      | Ml_g4dn_12xlarge -> "ml.g4dn.12xlarge"
-      | Ml_g4dn_16xlarge -> "ml.g4dn.16xlarge"
       | Ml_m5_large -> "ml.m5.large"
       | Ml_m5_xlarge -> "ml.m5.xlarge"
       | Ml_m5_2xlarge -> "ml.m5.2xlarge"
@@ -1275,14 +1892,6 @@ module InstanceType =
       | Ml_c4_2xlarge -> "ml.c4.2xlarge"
       | Ml_c4_4xlarge -> "ml.c4.4xlarge"
       | Ml_c4_8xlarge -> "ml.c4.8xlarge"
-      | Ml_p2_xlarge -> "ml.p2.xlarge"
-      | Ml_p2_8xlarge -> "ml.p2.8xlarge"
-      | Ml_p2_16xlarge -> "ml.p2.16xlarge"
-      | Ml_p3_2xlarge -> "ml.p3.2xlarge"
-      | Ml_p3_8xlarge -> "ml.p3.8xlarge"
-      | Ml_p3_16xlarge -> "ml.p3.16xlarge"
-      | Ml_p3dn_24xlarge -> "ml.p3dn.24xlarge"
-      | Ml_p4d_24xlarge -> "ml.p4d.24xlarge"
       | Ml_c5_xlarge -> "ml.c5.xlarge"
       | Ml_c5_2xlarge -> "ml.c5.2xlarge"
       | Ml_c5_4xlarge -> "ml.c5.4xlarge"
@@ -1293,20 +1902,47 @@ module InstanceType =
       | Ml_c5n_4xlarge -> "ml.c5n.4xlarge"
       | Ml_c5n_9xlarge -> "ml.c5n.9xlarge"
       | Ml_c5n_18xlarge -> "ml.c5n.18xlarge"
+      | Ml_p2_xlarge -> "ml.p2.xlarge"
+      | Ml_p2_8xlarge -> "ml.p2.8xlarge"
+      | Ml_p2_16xlarge -> "ml.p2.16xlarge"
+      | Ml_p3_2xlarge -> "ml.p3.2xlarge"
+      | Ml_p3_8xlarge -> "ml.p3.8xlarge"
+      | Ml_p3_16xlarge -> "ml.p3.16xlarge"
+      | Ml_p3dn_24xlarge -> "ml.p3dn.24xlarge"
+      | Ml_p4d_24xlarge -> "ml.p4d.24xlarge"
+      | Ml_g4dn_xlarge -> "ml.g4dn.xlarge"
+      | Ml_g4dn_2xlarge -> "ml.g4dn.2xlarge"
+      | Ml_g4dn_4xlarge -> "ml.g4dn.4xlarge"
+      | Ml_g4dn_8xlarge -> "ml.g4dn.8xlarge"
+      | Ml_g4dn_12xlarge -> "ml.g4dn.12xlarge"
+      | Ml_g4dn_16xlarge -> "ml.g4dn.16xlarge"
+      | Ml_g6_xlarge -> "ml.g6.xlarge"
+      | Ml_g6_2xlarge -> "ml.g6.2xlarge"
+      | Ml_g6_4xlarge -> "ml.g6.4xlarge"
+      | Ml_g6_8xlarge -> "ml.g6.8xlarge"
+      | Ml_g6_12xlarge -> "ml.g6.12xlarge"
+      | Ml_g6_16xlarge -> "ml.g6.16xlarge"
+      | Ml_g6_24xlarge -> "ml.g6.24xlarge"
+      | Ml_g6_48xlarge -> "ml.g6.48xlarge"
+      | Ml_g6e_xlarge -> "ml.g6e.xlarge"
+      | Ml_g6e_2xlarge -> "ml.g6e.2xlarge"
+      | Ml_g6e_4xlarge -> "ml.g6e.4xlarge"
+      | Ml_g6e_8xlarge -> "ml.g6e.8xlarge"
+      | Ml_g6e_12xlarge -> "ml.g6e.12xlarge"
+      | Ml_g6e_16xlarge -> "ml.g6e.16xlarge"
+      | Ml_g6e_24xlarge -> "ml.g6e.24xlarge"
+      | Ml_g6e_48xlarge -> "ml.g6e.48xlarge"
       | Non_static_id s -> s
     let of_string =
       function
+      | "ml.t3.large" -> Ml_t3_large
+      | "ml.t3.xlarge" -> Ml_t3_xlarge
+      | "ml.t3.2xlarge" -> Ml_t3_2xlarge
       | "ml.m4.xlarge" -> Ml_m4_xlarge
       | "ml.m4.2xlarge" -> Ml_m4_2xlarge
       | "ml.m4.4xlarge" -> Ml_m4_4xlarge
       | "ml.m4.10xlarge" -> Ml_m4_10xlarge
       | "ml.m4.16xlarge" -> Ml_m4_16xlarge
-      | "ml.g4dn.xlarge" -> Ml_g4dn_xlarge
-      | "ml.g4dn.2xlarge" -> Ml_g4dn_2xlarge
-      | "ml.g4dn.4xlarge" -> Ml_g4dn_4xlarge
-      | "ml.g4dn.8xlarge" -> Ml_g4dn_8xlarge
-      | "ml.g4dn.12xlarge" -> Ml_g4dn_12xlarge
-      | "ml.g4dn.16xlarge" -> Ml_g4dn_16xlarge
       | "ml.m5.large" -> Ml_m5_large
       | "ml.m5.xlarge" -> Ml_m5_xlarge
       | "ml.m5.2xlarge" -> Ml_m5_2xlarge
@@ -1317,14 +1953,6 @@ module InstanceType =
       | "ml.c4.2xlarge" -> Ml_c4_2xlarge
       | "ml.c4.4xlarge" -> Ml_c4_4xlarge
       | "ml.c4.8xlarge" -> Ml_c4_8xlarge
-      | "ml.p2.xlarge" -> Ml_p2_xlarge
-      | "ml.p2.8xlarge" -> Ml_p2_8xlarge
-      | "ml.p2.16xlarge" -> Ml_p2_16xlarge
-      | "ml.p3.2xlarge" -> Ml_p3_2xlarge
-      | "ml.p3.8xlarge" -> Ml_p3_8xlarge
-      | "ml.p3.16xlarge" -> Ml_p3_16xlarge
-      | "ml.p3dn.24xlarge" -> Ml_p3dn_24xlarge
-      | "ml.p4d.24xlarge" -> Ml_p4d_24xlarge
       | "ml.c5.xlarge" -> Ml_c5_xlarge
       | "ml.c5.2xlarge" -> Ml_c5_2xlarge
       | "ml.c5.4xlarge" -> Ml_c5_4xlarge
@@ -1335,6 +1963,36 @@ module InstanceType =
       | "ml.c5n.4xlarge" -> Ml_c5n_4xlarge
       | "ml.c5n.9xlarge" -> Ml_c5n_9xlarge
       | "ml.c5n.18xlarge" -> Ml_c5n_18xlarge
+      | "ml.p2.xlarge" -> Ml_p2_xlarge
+      | "ml.p2.8xlarge" -> Ml_p2_8xlarge
+      | "ml.p2.16xlarge" -> Ml_p2_16xlarge
+      | "ml.p3.2xlarge" -> Ml_p3_2xlarge
+      | "ml.p3.8xlarge" -> Ml_p3_8xlarge
+      | "ml.p3.16xlarge" -> Ml_p3_16xlarge
+      | "ml.p3dn.24xlarge" -> Ml_p3dn_24xlarge
+      | "ml.p4d.24xlarge" -> Ml_p4d_24xlarge
+      | "ml.g4dn.xlarge" -> Ml_g4dn_xlarge
+      | "ml.g4dn.2xlarge" -> Ml_g4dn_2xlarge
+      | "ml.g4dn.4xlarge" -> Ml_g4dn_4xlarge
+      | "ml.g4dn.8xlarge" -> Ml_g4dn_8xlarge
+      | "ml.g4dn.12xlarge" -> Ml_g4dn_12xlarge
+      | "ml.g4dn.16xlarge" -> Ml_g4dn_16xlarge
+      | "ml.g6.xlarge" -> Ml_g6_xlarge
+      | "ml.g6.2xlarge" -> Ml_g6_2xlarge
+      | "ml.g6.4xlarge" -> Ml_g6_4xlarge
+      | "ml.g6.8xlarge" -> Ml_g6_8xlarge
+      | "ml.g6.12xlarge" -> Ml_g6_12xlarge
+      | "ml.g6.16xlarge" -> Ml_g6_16xlarge
+      | "ml.g6.24xlarge" -> Ml_g6_24xlarge
+      | "ml.g6.48xlarge" -> Ml_g6_48xlarge
+      | "ml.g6e.xlarge" -> Ml_g6e_xlarge
+      | "ml.g6e.2xlarge" -> Ml_g6e_2xlarge
+      | "ml.g6e.4xlarge" -> Ml_g6e_4xlarge
+      | "ml.g6e.8xlarge" -> Ml_g6e_8xlarge
+      | "ml.g6e.12xlarge" -> Ml_g6e_12xlarge
+      | "ml.g6e.16xlarge" -> Ml_g6e_16xlarge
+      | "ml.g6e.24xlarge" -> Ml_g6e_24xlarge
+      | "ml.g6e.48xlarge" -> Ml_g6e_48xlarge
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1368,45 +2026,45 @@ module JobEventDetails =
       {
       eventType: JobEventType.t option
         [@ocaml.doc
-          "The type of event that occurred related to the Amazon Braket job."];
-      message: JobEventDetailsMessageString.t option
-        [@ocaml.doc
-          "A message describing the event that occurred related to the Amazon Braket job."];
+          "The type of event that occurred related to the Amazon Braket hybrid job."];
       timeOfEvent: SyntheticTimestamp_date_time.t option
         [@ocaml.doc
-          "TThe type of event that occurred related to the Amazon Braket job."]}
+          "The time of the event that occurred related to the Amazon Braket hybrid job."];
+      message: JobEventDetailsMessageString.t option
+        [@ocaml.doc
+          "A message describing the event that occurred related to the Amazon Braket hybrid job."]}
     let make ?eventType =
-      fun ?message ->
-        fun ?timeOfEvent -> fun () -> { eventType; message; timeOfEvent }
+      fun ?timeOfEvent ->
+        fun ?message -> fun () -> { eventType; timeOfEvent; message }
     let to_value x =
       structure_to_value
         [("eventType", (Option.map x.eventType ~f:JobEventType.to_value));
-        ("message",
-          (Option.map x.message ~f:JobEventDetailsMessageString.to_value));
         ("timeOfEvent",
-          (Option.map x.timeOfEvent ~f:SyntheticTimestamp_date_time.to_value))]
+          (Option.map x.timeOfEvent ~f:SyntheticTimestamp_date_time.to_value));
+        ("message",
+          (Option.map x.message ~f:JobEventDetailsMessageString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let timeOfEvent =
-        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
-          (Xml.child xml_arg0 "timeOfEvent") in
       let message =
         (Option.map ~f:JobEventDetailsMessageString.of_xml)
           (Xml.child xml_arg0 "message") in
+      let timeOfEvent =
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "timeOfEvent") in
       let eventType =
         (Option.map ~f:JobEventType.of_xml) (Xml.child xml_arg0 "eventType") in
-      make ?timeOfEvent ?message ?eventType ()
+      make ?message ?timeOfEvent ?eventType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeOfEvent =
-        field_map json "timeOfEvent" SyntheticTimestamp_date_time.of_json in
+    let of_json json__ =
       let message =
-        field_map json "message" JobEventDetailsMessageString.of_json in
-      let eventType = field_map json "eventType" JobEventType.of_json in
-      make ?timeOfEvent ?message ?eventType ()
+        field_map json__ "message" JobEventDetailsMessageString.of_json in
+      let timeOfEvent =
+        field_map json__ "timeOfEvent" SyntheticTimestamp_date_time.of_json in
+      let eventType = field_map json__ "eventType" JobEventType.of_json in
+      make ?message ?timeOfEvent ?eventType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Details about the type and time events occurred related to the Amazon Braket job."]
+       "Details about the type and time events that occurred related to the Amazon Braket hybrid job."]
 module String2048 =
   struct
     type nonrec t = string
@@ -1446,6 +2104,87 @@ module JobStoppingConditionMaxRuntimeInSecondsInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module HybridJobAdditionalAttributeName =
+  struct
+    type nonrec t =
+      | QueueInfo 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | QueueInfo -> "QueueInfo" | Non_static_id s -> s
+    let of_string =
+      function | "QueueInfo" -> QueueInfo | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration HybridJobAdditionalAttributeName"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"HybridJobAdditionalAttributeName" j)
+    let to_json = simple_to_json to_value
+  end
+module DeviceQueueInfo =
+  struct
+    type nonrec t =
+      {
+      queue: QueueName.t option [@ocaml.doc "The name of the queue."];
+      queueSize: String_.t option
+        [@ocaml.doc
+          "The number of hybrid jobs or quantum tasks in the queue for a given device."];
+      queuePriority: QueuePriority.t option
+        [@ocaml.doc
+          "Optional. Specifies the priority of the queue. Quantum tasks in a priority queue are processed before the quantum tasks in a normal queue."]}
+    let make ?queue =
+      fun ?queueSize ->
+        fun ?queuePriority -> fun () -> { queue; queueSize; queuePriority }
+    let to_value x =
+      structure_to_value
+        [("queue", (Option.map x.queue ~f:QueueName.to_value));
+        ("queueSize", (Option.map x.queueSize ~f:String_.to_value));
+        ("queuePriority",
+          (Option.map x.queuePriority ~f:QueuePriority.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queuePriority =
+        (Option.map ~f:QueuePriority.of_xml)
+          (Xml.child xml_arg0 "queuePriority") in
+      let queueSize =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "queueSize") in
+      let queue =
+        (Option.map ~f:QueueName.of_xml) (Xml.child xml_arg0 "queue") in
+      make ?queuePriority ?queueSize ?queue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queuePriority =
+        field_map json__ "queuePriority" QueuePriority.of_json in
+      let queueSize = field_map json__ "queueSize" String_.of_json in
+      let queue = field_map json__ "queue" QueueName.of_json in
+      make ?queuePriority ?queueSize ?queue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about quantum tasks and hybrid jobs queued on a device."]
+module AccessDeniedException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You do not have sufficient permissions to perform this action."]
 module InternalServiceException =
   struct
     type nonrec t = {
@@ -1460,12 +2199,11 @@ module InternalServiceException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The request processing has failed because of an unknown error, exception, or failure."]
+  end[@@ocaml.doc "The request failed because of an unknown error."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
@@ -1480,12 +2218,12 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource was not found."]
-module ValidationException =
+module ThrottlingException =
   struct
     type nonrec t = {
       message: String_.t option }
@@ -1499,16 +2237,82 @@ module ValidationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The API throttling rate limit is exceeded."]
+module ValidationException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      reason: ValidationExceptionReason.t option
+        [@ocaml.doc "The reason for validation failure."];
+      programSetValidationFailures: ProgramSetValidationFailuresList.t option
+        [@ocaml.doc
+          "The validation failures in the program set submitted in the request."]}
+    let make ?message =
+      fun ?reason ->
+        fun ?programSetValidationFailures ->
+          fun () -> { message; reason; programSetValidationFailures }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("reason",
+          (Option.map x.reason ~f:ValidationExceptionReason.to_value));
+        ("programSetValidationFailures",
+          (Option.map x.programSetValidationFailures
+             ~f:ProgramSetValidationFailuresList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let programSetValidationFailures =
+        (Option.map ~f:ProgramSetValidationFailuresList.of_xml)
+          (Xml.child xml_arg0 "programSetValidationFailures") in
+      let reason =
+        (Option.map ~f:ValidationExceptionReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?programSetValidationFailures ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let programSetValidationFailures =
+        field_map json__ "programSetValidationFailures"
+          ProgramSetValidationFailuresList.of_json in
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?programSetValidationFailures ?reason ?message ()
+    let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The input fails to satisfy the constraints specified by an AWS service."]
+       "The input request failed to satisfy constraints expected by Amazon Braket."]
+module UpdateSpendingLimitRequestSpendingLimitString =
+  struct
+    type nonrec t = string
+    let context_ = "UpdateSpendingLimitRequestSpendingLimitString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () -> check_pattern i ~pattern:"\\d+(\\.\\d{1,2})?"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"UpdateSpendingLimitRequestSpendingLimitString" j
+    let to_json = simple_to_json to_value
+  end
 module TagKeys =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1528,30 +2332,95 @@ module TagKeys =
     let of_json j = list_of_json ~kind:"TagKeys" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
-module AccessDeniedException =
+module SpendingLimitSummaryList =
   struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
+    type nonrec t = SpendingLimitSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SpendingLimitSummary.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SpendingLimitSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SpendingLimitSummaryList"
+        ~of_json:SpendingLimitSummary.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You do not have sufficient access to perform this action."]
+  end
+module SearchSpendingLimitsRequestFiltersList =
+  struct
+    type nonrec t = SearchSpendingLimitsFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SearchSpendingLimitsFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SearchSpendingLimitsFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchSpendingLimitsRequestFiltersList"
+        ~of_json:SearchSpendingLimitsFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SearchSpendingLimitsRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for SearchSpendingLimitsRequestMaxResultsInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module QuantumTaskSummaryList =
   struct
     type nonrec t = QuantumTaskSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QuantumTaskSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1573,25 +2442,6 @@ module QuantumTaskSummaryList =
         ~of_json:QuantumTaskSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ThrottlingException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The throttling rate limit is met."]
 module SearchQuantumTasksRequestFiltersList =
   struct
     type nonrec t = SearchQuantumTasksFilter.t list
@@ -1600,6 +2450,9 @@ module SearchQuantumTasksRequestFiltersList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SearchQuantumTasksFilter.to_value)) |>
         (fun x -> `List x)
@@ -1646,6 +2499,9 @@ module JobSummaryList =
   struct
     type nonrec t = JobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1674,6 +2530,9 @@ module SearchJobsRequestFiltersList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SearchJobsFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1718,6 +2577,9 @@ module DeviceSummaryList =
   struct
     type nonrec t = DeviceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeviceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1746,6 +2608,9 @@ module SearchDevicesRequestFiltersList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SearchDevicesFilter.to_value)) |>
         (fun x -> `List x)
@@ -1788,6 +2653,99 @@ module SearchDevicesRequestMaxResultsInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ActionMetadata =
+  struct
+    type nonrec t =
+      {
+      actionType: String_.t option
+        [@ocaml.doc "The type of action associated with the quantum task."];
+      programCount: Long.t option
+        [@ocaml.doc
+          "The number of programs in a program set. This is only available for a program set."];
+      executableCount: Long.t option
+        [@ocaml.doc
+          "The number of executables in a program set. This is only available for a program set."]}
+    let make ?actionType =
+      fun ?programCount ->
+        fun ?executableCount ->
+          fun () -> { actionType; programCount; executableCount }
+    let to_value x =
+      structure_to_value
+        [("actionType", (Option.map x.actionType ~f:String_.to_value));
+        ("programCount", (Option.map x.programCount ~f:Long.to_value));
+        ("executableCount", (Option.map x.executableCount ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executableCount =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "executableCount") in
+      let programCount =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "programCount") in
+      let actionType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "actionType") in
+      make ?executableCount ?programCount ?actionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executableCount = field_map json__ "executableCount" Long.of_json in
+      let programCount = field_map json__ "programCount" Long.of_json in
+      let actionType = field_map json__ "actionType" String_.of_json in
+      make ?executableCount ?programCount ?actionType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains metadata about the quantum task action, including the action type and program statistics."]
+module Associations =
+  struct
+    type nonrec t = Association.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Association.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Association.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Associations" ~of_json:Association.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExperimentalCapabilities =
+  struct
+    type nonrec t =
+      {
+      enabled: ExperimentalCapabilitiesEnablementType.t option
+        [@ocaml.doc "Enabled experimental capabilities."]}
+    let make ?enabled = fun () -> { enabled }
+    let to_value x =
+      structure_to_value
+        [("enabled",
+           (Option.map x.enabled
+              ~f:ExperimentalCapabilitiesEnablementType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enabled =
+        (Option.map ~f:ExperimentalCapabilitiesEnablementType.of_xml)
+          (Xml.child xml_arg0 "enabled") in
+      make ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enabled =
+        field_map json__ "enabled"
+          ExperimentalCapabilitiesEnablementType.of_json in
+      make ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enabled experimental capabilities for quantum hardware. Note that the use of these features may impact device capabilities and performance beyond its standard specifications."]
 module JsonValue =
   struct
     type nonrec t = string
@@ -1801,50 +2759,128 @@ module JsonValue =
     let of_json j = string_of_json ~kind:"JsonValue" j
     let to_json = simple_to_json to_value
   end
+module QuantumTaskQueueInfo =
+  struct
+    type nonrec t =
+      {
+      queue: QueueName.t option [@ocaml.doc "The name of the queue."];
+      position: String_.t option
+        [@ocaml.doc
+          "Current position of the quantum task in the quantum tasks queue."];
+      queuePriority: QueuePriority.t option
+        [@ocaml.doc
+          "Optional. Specifies the priority of the queue. Quantum tasks in a priority queue are processed before the quantum tasks in a normal queue."];
+      message: String_.t option
+        [@ocaml.doc
+          "Optional. Provides more information about the queue position. For example, if the quantum task is complete and no longer in the queue, the message field contains that information."]}
+    let make ?queue =
+      fun ?position ->
+        fun ?queuePriority ->
+          fun ?message ->
+            fun () -> { queue; position; queuePriority; message }
+    let to_value x =
+      structure_to_value
+        [("queue", (Option.map x.queue ~f:QueueName.to_value));
+        ("position", (Option.map x.position ~f:String_.to_value));
+        ("queuePriority",
+          (Option.map x.queuePriority ~f:QueuePriority.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let queuePriority =
+        (Option.map ~f:QueuePriority.of_xml)
+          (Xml.child xml_arg0 "queuePriority") in
+      let position =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "position") in
+      let queue =
+        (Option.map ~f:QueueName.of_xml) (Xml.child xml_arg0 "queue") in
+      make ?message ?queuePriority ?position ?queue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let queuePriority =
+        field_map json__ "queuePriority" QueuePriority.of_json in
+      let position = field_map json__ "position" String_.of_json in
+      let queue = field_map json__ "queue" QueueName.of_json in
+      make ?message ?queuePriority ?position ?queue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The queue information for the specified quantum task."]
+module QuantumTaskAdditionalAttributeNamesList =
+  struct
+    type nonrec t = QuantumTaskAdditionalAttributeName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QuantumTaskAdditionalAttributeName.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:QuantumTaskAdditionalAttributeName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QuantumTaskAdditionalAttributeNamesList"
+        ~of_json:QuantumTaskAdditionalAttributeName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AlgorithmSpecification =
   struct
     type nonrec t =
       {
-      containerImage: ContainerImage.t option
-        [@ocaml.doc
-          "The container image used to create an Amazon Braket job."];
       scriptModeConfig: ScriptModeConfig.t option
         [@ocaml.doc
-          "Configures the paths to the Python scripts used for entry and training."]}
-    let make ?containerImage =
-      fun ?scriptModeConfig -> fun () -> { containerImage; scriptModeConfig }
+          "Configures the paths to the Python scripts used for entry and training."];
+      containerImage: ContainerImage.t option
+        [@ocaml.doc
+          "The container image used to create an Amazon Braket hybrid job."]}
+    let make ?scriptModeConfig =
+      fun ?containerImage -> fun () -> { scriptModeConfig; containerImage }
     let to_value x =
       structure_to_value
-        [("containerImage",
-           (Option.map x.containerImage ~f:ContainerImage.to_value));
-        ("scriptModeConfig",
-          (Option.map x.scriptModeConfig ~f:ScriptModeConfig.to_value))]
+        [("scriptModeConfig",
+           (Option.map x.scriptModeConfig ~f:ScriptModeConfig.to_value));
+        ("containerImage",
+          (Option.map x.containerImage ~f:ContainerImage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let scriptModeConfig =
-        (Option.map ~f:ScriptModeConfig.of_xml)
-          (Xml.child xml_arg0 "scriptModeConfig") in
       let containerImage =
         (Option.map ~f:ContainerImage.of_xml)
           (Xml.child xml_arg0 "containerImage") in
-      make ?scriptModeConfig ?containerImage ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let scriptModeConfig =
-        field_map json "scriptModeConfig" ScriptModeConfig.of_json in
+        (Option.map ~f:ScriptModeConfig.of_xml)
+          (Xml.child xml_arg0 "scriptModeConfig") in
+      make ?containerImage ?scriptModeConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let containerImage =
-        field_map json "containerImage" ContainerImage.of_json in
-      make ?scriptModeConfig ?containerImage ()
+        field_map json__ "containerImage" ContainerImage.of_json in
+      let scriptModeConfig =
+        field_map json__ "scriptModeConfig" ScriptModeConfig.of_json in
+      make ?containerImage ?scriptModeConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Defines the Amazon Braket job to be created. Specifies the container image the job uses and the paths to the Python scripts used for entry and training."]
+       "Defines the Amazon Braket hybrid job to be created. Specifies the container image the job uses and the paths to the Python scripts used for entry and training."]
 module DeviceConfig =
   struct
     type nonrec t =
       {
       device: String256.t
         [@ocaml.doc
-          "The primary quantum processing unit (QPU) or simulator used to create and run an Amazon Braket job."]}
+          "The primary device ARN used to create and run an Amazon Braket hybrid job."]}
     let context_ = "DeviceConfig"
     let make ~device = fun () -> { device }
     let to_value x =
@@ -1855,12 +2891,12 @@ module DeviceConfig =
         String256.of_xml (Xml.child_exn ~context:context_ xml_arg0 "device") in
       make ~device ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let device = field_map_exn json "device" String256.of_json in
+    let of_json json__ =
+      let device = field_map_exn json__ "device" String256.of_json in
       make ~device ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configures the quantum processing units (QPUs) or simulator used to create and run an Amazon Braket job."]
+       "Configures the primary device used to create and run an Amazon Braket hybrid job."]
 module GetJobResponseJobNameString =
   struct
     type nonrec t = string
@@ -1873,7 +2909,7 @@ module GetJobResponseJobNameString =
                 (check_string_max i ~max:50) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[a-zA-Z0-9](-*[a-zA-Z0-9]){0,50}$")));
+                       ~pattern:"[a-zA-Z0-9](-*[a-zA-Z0-9]){0,50}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1883,6 +2919,40 @@ module GetJobResponseJobNameString =
     let of_json j = string_of_json ~kind:"GetJobResponseJobNameString" j
     let to_json = simple_to_json to_value
   end
+module HybridJobQueueInfo =
+  struct
+    type nonrec t =
+      {
+      queue: QueueName.t option [@ocaml.doc "The name of the queue."];
+      position: String_.t option
+        [@ocaml.doc "Current position of the hybrid job in the jobs queue."];
+      message: String_.t option
+        [@ocaml.doc
+          "Optional. Provides more information about the queue position. For example, if the hybrid job is complete and no longer in the queue, the message field contains that information."]}
+    let make ?queue =
+      fun ?position -> fun ?message -> fun () -> { queue; position; message }
+    let to_value x =
+      structure_to_value
+        [("queue", (Option.map x.queue ~f:QueueName.to_value));
+        ("position", (Option.map x.position ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let position =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "position") in
+      let queue =
+        (Option.map ~f:QueueName.of_xml) (Xml.child xml_arg0 "queue") in
+      make ?message ?position ?queue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let position = field_map json__ "position" String_.of_json in
+      let queue = field_map json__ "queue" QueueName.of_json in
+      make ?message ?position ?queue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the queue for a specified hybrid job."]
 module HyperParameters =
   struct
     type nonrec t = (String256.t * HyperParametersValueString.t) list
@@ -1911,6 +2981,8 @@ module HyperParameters =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1922,6 +2994,9 @@ module InputConfigList =
   struct
     type nonrec t = InputFileConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InputFileConfig.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1948,36 +3023,49 @@ module InstanceConfig =
       {
       instanceType: InstanceType.t
         [@ocaml.doc
-          "Configures the type resource instances to use while running an Amazon Braket hybrid job."];
+          "Configures the type of resource instances to use while running an Amazon Braket hybrid job."];
       volumeSizeInGb: InstanceConfigVolumeSizeInGbInteger.t
+        [@ocaml.doc "The size of the storage volume, in GB, to provision."];
+      instanceCount: InstanceConfigInstanceCountInteger.t option
         [@ocaml.doc
-          "The size of the storage volume, in GB, that user wants to provision."]}
+          "Configures the number of resource instances to use while running an Amazon Braket hybrid job on Amazon Braket. The default value is 1."]}
     let context_ = "InstanceConfig"
-    let make ~instanceType =
-      fun ~volumeSizeInGb -> fun () -> { instanceType; volumeSizeInGb }
+    let make ?instanceCount =
+      fun ~instanceType ->
+        fun ~volumeSizeInGb ->
+          fun () -> { instanceCount; instanceType; volumeSizeInGb }
     let to_value x =
       structure_to_value
         [("instanceType", (Some (InstanceType.to_value x.instanceType)));
         ("volumeSizeInGb",
           (Some
-             (InstanceConfigVolumeSizeInGbInteger.to_value x.volumeSizeInGb)))]
+             (InstanceConfigVolumeSizeInGbInteger.to_value x.volumeSizeInGb)));
+        ("instanceCount",
+          (Option.map x.instanceCount
+             ~f:InstanceConfigInstanceCountInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let instanceCount =
+        (Option.map ~f:InstanceConfigInstanceCountInteger.of_xml)
+          (Xml.child xml_arg0 "instanceCount") in
       let volumeSizeInGb =
         InstanceConfigVolumeSizeInGbInteger.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "volumeSizeInGb") in
       let instanceType =
         InstanceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "instanceType") in
-      make ~volumeSizeInGb ~instanceType ()
+      make ?instanceCount ~volumeSizeInGb ~instanceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let instanceCount =
+        field_map json__ "instanceCount"
+          InstanceConfigInstanceCountInteger.of_json in
       let volumeSizeInGb =
-        field_map_exn json "volumeSizeInGb"
+        field_map_exn json__ "volumeSizeInGb"
           InstanceConfigVolumeSizeInGbInteger.of_json in
       let instanceType =
-        field_map_exn json "instanceType" InstanceType.of_json in
-      make ~volumeSizeInGb ~instanceType ()
+        field_map_exn json__ "instanceType" InstanceType.of_json in
+      make ?instanceCount ~volumeSizeInGb ~instanceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Configures the resource instances to use while running the Amazon Braket hybrid job on Amazon Braket."]
@@ -2000,10 +3088,10 @@ module JobCheckpointConfig =
       {
       localPath: String4096.t option
         [@ocaml.doc
-          "(Optional) The local directory where checkpoints are written. The default directory is /opt/braket/checkpoints/."];
+          "(Optional) The local directory where checkpoint data is stored. The default directory is /opt/braket/checkpoints/."];
       s3Uri: S3Path.t
         [@ocaml.doc
-          "Identifies the S3 path where you want Amazon Braket to store checkpoints. For example, s3://bucket-name/key-name-prefix."]}
+          "Identifies the S3 path where you want Amazon Braket to store checkpoint data. For example, s3://bucket-name/key-name-prefix."]}
     let context_ = "JobCheckpointConfig"
     let make ?localPath = fun ~s3Uri -> fun () -> { localPath; s3Uri }
     let to_value x =
@@ -2018,13 +3106,13 @@ module JobCheckpointConfig =
         (Option.map ~f:String4096.of_xml) (Xml.child xml_arg0 "localPath") in
       make ~s3Uri ?localPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Uri = field_map_exn json "s3Uri" S3Path.of_json in
-      let localPath = field_map json "localPath" String4096.of_json in
+    let of_json json__ =
+      let s3Uri = field_map_exn json__ "s3Uri" S3Path.of_json in
+      let localPath = field_map json__ "localPath" String4096.of_json in
       make ~s3Uri ?localPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains information about the output locations for job checkpoint data."]
+       "Contains information about the output locations for hybrid job checkpoint data."]
 module JobEvents =
   struct
     type nonrec t = JobEventDetails.t list
@@ -2033,6 +3121,9 @@ module JobEvents =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobEventDetails.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2059,10 +3150,10 @@ module JobOutputDataConfig =
       {
       kmsKeyId: String2048.t option
         [@ocaml.doc
-          "The AWS Key Management Service (AWS KMS) key that Amazon Braket uses to encrypt the job training artifacts at rest using Amazon S3 server-side encryption."];
+          "The AWS Key Management Service (AWS KMS) key that Amazon Braket uses to encrypt the hybrid job training artifacts at rest using Amazon S3 server-side encryption."];
       s3Path: S3Path.t
         [@ocaml.doc
-          "Identifies the S3 path where you want Amazon Braket to store the job training artifacts. For example, s3://bucket-name/key-name-prefix."]}
+          "Identifies the S3 path where you want Amazon Braket to store the hybrid job training artifacts. For example, s3://bucket-name/key-name-prefix."]}
     let context_ = "JobOutputDataConfig"
     let make ?kmsKeyId = fun ~s3Path -> fun () -> { kmsKeyId; s3Path }
     let to_value x =
@@ -2077,13 +3168,13 @@ module JobOutputDataConfig =
         (Option.map ~f:String2048.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
       make ~s3Path ?kmsKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Path = field_map_exn json "s3Path" S3Path.of_json in
-      let kmsKeyId = field_map json "kmsKeyId" String2048.of_json in
+    let of_json json__ =
+      let s3Path = field_map_exn json__ "s3Path" S3Path.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" String2048.of_json in
       make ~s3Path ?kmsKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the path to the S3 location where you want to store job artifacts and the encryption key used to store them."]
+       "Specifies the path to the S3 location where you want to store hybrid job artifacts and the encryption key used to store them."]
 module JobStoppingCondition =
   struct
     type nonrec t =
@@ -2091,7 +3182,7 @@ module JobStoppingCondition =
       maxRuntimeInSeconds:
         JobStoppingConditionMaxRuntimeInSecondsInteger.t option
         [@ocaml.doc
-          "The maximum length of time, in seconds, that an Amazon Braket job can run."]}
+          "The maximum length of time, in seconds, that an Amazon Braket hybrid job can run."]}
     let make ?maxRuntimeInSeconds = fun () -> { maxRuntimeInSeconds }
     let to_value x =
       structure_to_value
@@ -2105,14 +3196,14 @@ module JobStoppingCondition =
           (Xml.child xml_arg0 "maxRuntimeInSeconds") in
       make ?maxRuntimeInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxRuntimeInSeconds =
-        field_map json "maxRuntimeInSeconds"
+        field_map json__ "maxRuntimeInSeconds"
           JobStoppingConditionMaxRuntimeInSecondsInteger.of_json in
       make ?maxRuntimeInSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies limits for how long an Amazon Braket job can run."]
+       "Specifies limits for how long an Amazon Braket hybrid job can run."]
 module RoleArn =
   struct
     type nonrec t = string
@@ -2121,7 +3212,7 @@ module RoleArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^arn:aws[a-z\\-]*:iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+$");
+             ~pattern:"arn:aws[a-z\\-]*:iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+");
         i
     let of_string x = x
     let to_value x = `String x
@@ -2149,25 +3240,64 @@ module String1024 =
     let of_json j = string_of_json ~kind:"String1024" j
     let to_json = simple_to_json to_value
   end
-module DeviceOfflineException =
+module HybridJobAdditionalAttributeNamesList =
   struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String_.to_value))]
+    type nonrec t = HybridJobAdditionalAttributeName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:HybridJobAdditionalAttributeName.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      make ?message ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:HybridJobAdditionalAttributeName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"HybridJobAdditionalAttributeNamesList"
+        ~of_json:HybridJobAdditionalAttributeName.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified device is currently offline."]
+  end
+module DeviceQueueInfoList =
+  struct
+    type nonrec t = DeviceQueueInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeviceQueueInfo.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeviceQueueInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DeviceQueueInfoList"
+        ~of_json:DeviceQueueInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DeviceRetiredException =
   struct
     type nonrec t = {
@@ -2182,11 +3312,49 @@ module DeviceRetiredException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified device has been retired."]
+module CreateSpendingLimitRequestSpendingLimitString =
+  struct
+    type nonrec t = string
+    let context_ = "CreateSpendingLimitRequestSpendingLimitString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () -> check_pattern i ~pattern:"\\d+(\\.\\d{1,2})?"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"CreateSpendingLimitRequestSpendingLimitString" j
+    let to_json = simple_to_json to_value
+  end
+module DeviceOfflineException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified device is currently offline."]
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
@@ -2201,11 +3369,43 @@ module ServiceQuotaExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request failed because a service quota is exceeded."]
+module CreateQuantumTaskRequestAssociationsList =
+  struct
+    type nonrec t = Association.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Association.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Association.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CreateQuantumTaskRequestAssociationsList"
+        ~of_json:Association.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CreateQuantumTaskRequestDeviceParametersString =
   struct
     type nonrec t = string
@@ -2310,11 +3510,43 @@ module ConflictException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An error occurred due to a conflict."]
+module CreateJobRequestAssociationsList =
+  struct
+    type nonrec t = Association.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Association.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Association.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CreateJobRequestAssociationsList"
+        ~of_json:Association.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CreateJobRequestInputDataConfigList =
   struct
     type nonrec t = InputFileConfig.t list
@@ -2323,6 +3555,9 @@ module CreateJobRequestInputDataConfigList =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InputFileConfig.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2356,7 +3591,7 @@ module CreateJobRequestJobNameString =
                 (check_string_max i ~max:50) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[a-zA-Z0-9](-*[a-zA-Z0-9]){0,50}$")));
+                       ~pattern:"[a-zA-Z0-9](-*[a-zA-Z0-9]){0,50}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2392,6 +3627,141 @@ module CancellationStatus =
     let of_json j = of_string (string_of_json ~kind:"CancellationStatus" j)
     let to_json = simple_to_json to_value
   end
+module UpdateSpendingLimitResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing spending limit. You can modify the spending amount or time period. Changes take effect immediately."]
+module UpdateSpendingLimitRequest =
+  struct
+    type nonrec t =
+      {
+      spendingLimitArn: SpendingLimitArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the spending limit to update."];
+      clientToken: String64.t
+        [@ocaml.doc
+          "A unique, case-sensitive identifier to ensure that the operation completes no more than one time. If this token matches a previous request, Amazon Braket ignores the request, but does not return an error."];
+      spendingLimit: UpdateSpendingLimitRequestSpendingLimitString.t option
+        [@ocaml.doc
+          "The new maximum amount that can be spent on the specified device, in USD."];
+      timePeriod: TimePeriod.t option
+        [@ocaml.doc
+          "The new time period during which the spending limit is active, including start and end dates."]}
+    let context_ = "UpdateSpendingLimitRequest"
+    let make ?spendingLimit =
+      fun ?timePeriod ->
+        fun ~spendingLimitArn ->
+          fun ~clientToken ->
+            fun () ->
+              { spendingLimit; timePeriod; spendingLimitArn; clientToken }
+    let to_value x =
+      structure_to_value
+        [("spendingLimitArn",
+           (Some (SpendingLimitArn.to_value x.spendingLimitArn)));
+        ("clientToken", (Some (String64.to_value x.clientToken)));
+        ("spendingLimit",
+          (Option.map x.spendingLimit
+             ~f:UpdateSpendingLimitRequestSpendingLimitString.to_value));
+        ("timePeriod", (Option.map x.timePeriod ~f:TimePeriod.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timePeriod =
+        (Option.map ~f:TimePeriod.of_xml) (Xml.child xml_arg0 "timePeriod") in
+      let spendingLimit =
+        (Option.map ~f:UpdateSpendingLimitRequestSpendingLimitString.of_xml)
+          (Xml.child xml_arg0 "spendingLimit") in
+      let clientToken =
+        String64.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let spendingLimitArn =
+        SpendingLimitArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "spendingLimitArn") in
+      make ?timePeriod ?spendingLimit ~clientToken ~spendingLimitArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timePeriod = field_map json__ "timePeriod" TimePeriod.of_json in
+      let spendingLimit =
+        field_map json__ "spendingLimit"
+          UpdateSpendingLimitRequestSpendingLimitString.of_json in
+      let clientToken = field_map_exn json__ "clientToken" String64.of_json in
+      let spendingLimitArn =
+        field_map_exn json__ "spendingLimitArn" SpendingLimitArn.of_json in
+      make ?timePeriod ?spendingLimit ~clientToken ~spendingLimitArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing spending limit. You can modify the spending amount or time period. Changes take effect immediately."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -2475,9 +3845,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeys.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Remove tags from a resource."]
@@ -2545,7 +3915,9 @@ module TagResourceRequest =
       resourceArn: String_.t
         [@ocaml.doc
           "Specify the resourceArn of the resource to which a tag will be added."];
-      tags: TagsMap.t [@ocaml.doc "Specify the tags to add to the resource."]}
+      tags: TagsMap.t
+        [@ocaml.doc
+          "Specify the tags to add to the resource. Tags can be specified as a key-value map."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -2561,31 +3933,30 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagsMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagsMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Add a tag to the specified resource."]
-module SearchQuantumTasksResponse =
+module SearchSpendingLimitsResponse =
   struct
     type nonrec t =
       {
+      spendingLimits: SpendingLimitSummaryList.t option
+        [@ocaml.doc
+          "An array of spending limit summaries that match the specified filters."];
       nextToken: String_.t option
         [@ocaml.doc
-          "A token used for pagination of results, or null if there are no additional results. Use the token value in a subsequent request to continue results where the previous request ended."];
-      quantumTasks: QuantumTaskSummaryList.t
-        [@ocaml.doc
-          "An array of QuantumTaskSummary objects for tasks that match the specified filters."]}
+          "The token to retrieve the next page of results. This value is null when there are no more results to return."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceException of InternalServiceException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SearchQuantumTasksResponse"
-    let make ?nextToken =
-      fun ~quantumTasks -> fun () -> { nextToken; quantumTasks }
+    let make ?spendingLimits =
+      fun ?nextToken -> fun () -> { spendingLimits; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2636,23 +4007,160 @@ module SearchQuantumTasksResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("quantumTasks",
-          (Some (QuantumTaskSummaryList.to_value x.quantumTasks)))]
+        [("spendingLimits",
+           (Option.map x.spendingLimits ~f:SpendingLimitSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let quantumTasks =
-        QuantumTaskSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "quantumTasks") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~quantumTasks ?nextToken ()
+      let spendingLimits =
+        (Option.map ~f:SpendingLimitSummaryList.of_xml)
+          (Xml.child xml_arg0 "spendingLimits") in
+      make ?nextToken ?spendingLimits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let spendingLimits =
+        field_map json__ "spendingLimits" SpendingLimitSummaryList.of_json in
+      make ?nextToken ?spendingLimits ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Searches and lists spending limits based on specified filters. This operation supports pagination and allows filtering by various criteria to find specific spending limits. We recommend using pagination to ensure that the operation returns quickly and successfully."]
+module SearchSpendingLimitsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The token to retrieve the next page of results. This value is returned from a previous call to SearchSpendingLimits when there are more results available."];
+      maxResults: SearchSpendingLimitsRequestMaxResultsInteger.t option
+        [@ocaml.doc
+          "The maximum number of results to return in a single call. Minimum value of 1, maximum value of 100. Default is 20."];
+      filters: SearchSpendingLimitsRequestFiltersList.t option
+        [@ocaml.doc
+          "The filters to apply when searching for spending limits. Use filters to narrow down the results based on specific criteria."]}
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?filters -> fun () -> { nextToken; maxResults; filters }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:SearchSpendingLimitsRequestMaxResultsInteger.to_value));
+        ("filters",
+          (Option.map x.filters
+             ~f:SearchSpendingLimitsRequestFiltersList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:SearchSpendingLimitsRequestFiltersList.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      let maxResults =
+        (Option.map ~f:SearchSpendingLimitsRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filters =
+        field_map json__ "filters"
+          SearchSpendingLimitsRequestFiltersList.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          SearchSpendingLimitsRequestMaxResultsInteger.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      make ?filters ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Searches and lists spending limits based on specified filters. This operation supports pagination and allows filtering by various criteria to find specific spending limits. We recommend using pagination to ensure that the operation returns quickly and successfully."]
+module SearchQuantumTasksResponse =
+  struct
+    type nonrec t =
+      {
+      quantumTasks: QuantumTaskSummaryList.t option
+        [@ocaml.doc
+          "An array of QuantumTaskSummary objects for quantum tasks that match the specified filters."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A token used for pagination of results, or null if there are no additional results. Use the token value in a subsequent request to continue search where the previous request ended."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?quantumTasks =
+      fun ?nextToken -> fun () -> { quantumTasks; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("quantumTasks",
+           (Option.map x.quantumTasks ~f:QuantumTaskSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let quantumTasks =
-        field_map_exn json "quantumTasks" QuantumTaskSummaryList.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      make ~quantumTasks ?nextToken ()
+        (Option.map ~f:QuantumTaskSummaryList.of_xml)
+          (Xml.child xml_arg0 "quantumTasks") in
+      make ?nextToken ?quantumTasks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let quantumTasks =
+        field_map json__ "quantumTasks" QuantumTaskSummaryList.of_json in
+      make ?nextToken ?quantumTasks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Searches for tasks that match the specified filter values."]
@@ -2660,46 +4168,47 @@ module SearchQuantumTasksRequest =
   struct
     type nonrec t =
       {
-      filters: SearchQuantumTasksRequestFiltersList.t
-        [@ocaml.doc "Array of SearchQuantumTasksFilter objects."];
-      maxResults: SearchQuantumTasksRequestMaxResultsInteger.t option
-        [@ocaml.doc "Maximum number of results to return in the response."];
       nextToken: String_.t option
         [@ocaml.doc
-          "A token used for pagination of results returned in the response. Use the token returned from the previous request continue results where the previous request ended."]}
+          "A token used for pagination of results returned in the response. Use the token returned from the previous request to continue search where the previous request ended."];
+      maxResults: SearchQuantumTasksRequestMaxResultsInteger.t option
+        [@ocaml.doc "Maximum number of results to return in the response."];
+      filters: SearchQuantumTasksRequestFiltersList.t
+        [@ocaml.doc
+          "Array of SearchQuantumTasksFilter objects to use when searching for quantum tasks."]}
     let context_ = "SearchQuantumTasksRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~filters -> fun () -> { maxResults; nextToken; filters }
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~filters -> fun () -> { nextToken; maxResults; filters }
     let to_value x =
       structure_to_value
-        [("filters",
-           (Some (SearchQuantumTasksRequestFiltersList.to_value x.filters)));
+        [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
         ("maxResults",
           (Option.map x.maxResults
              ~f:SearchQuantumTasksRequestMaxResultsInteger.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        ("filters",
+          (Some (SearchQuantumTasksRequestFiltersList.to_value x.filters)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
-      let maxResults =
-        (Option.map ~f:SearchQuantumTasksRequestMaxResultsInteger.of_xml)
-          (Xml.child xml_arg0 "maxResults") in
       let filters =
         SearchQuantumTasksRequestFiltersList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filters") in
-      make ?nextToken ?maxResults ~filters ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults =
-        field_map json "maxResults"
-          SearchQuantumTasksRequestMaxResultsInteger.of_json in
+        (Option.map ~f:SearchQuantumTasksRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ~filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let filters =
-        field_map_exn json "filters"
+        field_map_exn json__ "filters"
           SearchQuantumTasksRequestFiltersList.of_json in
-      make ?nextToken ?maxResults ~filters ()
+      let maxResults =
+        field_map json__ "maxResults"
+          SearchQuantumTasksRequestMaxResultsInteger.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      make ~filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Searches for tasks that match the specified filter values."]
@@ -2707,20 +4216,19 @@ module SearchJobsResponse =
   struct
     type nonrec t =
       {
-      jobs: JobSummaryList.t
+      jobs: JobSummaryList.t option
         [@ocaml.doc
           "An array of JobSummary objects for devices that match the specified filter values."];
       nextToken: String_.t option
         [@ocaml.doc
-          "A token used for pagination of results, or null if there are no additional results. Use the token value in a subsequent request to continue results where the previous request ended."]}
+          "A token used for pagination of results, or null if there are no additional results. Use the token value in a subsequent request to continue search where the previous request ended."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceException of InternalServiceException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SearchJobsResponse"
-    let make ?nextToken = fun ~jobs -> fun () -> { nextToken; jobs }
+    let make ?jobs = fun ?nextToken -> fun () -> { jobs; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2771,89 +4279,87 @@ module SearchJobsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("jobs", (Some (JobSummaryList.to_value x.jobs)));
+        [("jobs", (Option.map x.jobs ~f:JobSummaryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let jobs =
-        JobSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobs") in
-      make ?nextToken ~jobs ()
+        (Option.map ~f:JobSummaryList.of_xml) (Xml.child xml_arg0 "jobs") in
+      make ?nextToken ?jobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let jobs = field_map_exn json "jobs" JobSummaryList.of_json in
-      make ?nextToken ~jobs ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let jobs = field_map json__ "jobs" JobSummaryList.of_json in
+      make ?nextToken ?jobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Searches for Amazon Braket jobs that match the specified filter values."]
+       "Searches for Amazon Braket hybrid jobs that match the specified filter values."]
 module SearchJobsRequest =
   struct
     type nonrec t =
       {
-      filters: SearchJobsRequestFiltersList.t
-        [@ocaml.doc "The filter values to use when searching for a job."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A token used for pagination of results returned in the response. Use the token returned from the previous request to continue search where the previous request ended."];
       maxResults: SearchJobsRequestMaxResultsInteger.t option
         [@ocaml.doc
           "The maximum number of results to return in the response."];
-      nextToken: String_.t option
+      filters: SearchJobsRequestFiltersList.t
         [@ocaml.doc
-          "A token used for pagination of results returned in the response. Use the token returned from the previous request to continue results where the previous request ended."]}
+          "Array of SearchJobsFilter objects to use when searching for hybrid jobs."]}
     let context_ = "SearchJobsRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~filters -> fun () -> { maxResults; nextToken; filters }
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~filters -> fun () -> { nextToken; maxResults; filters }
     let to_value x =
       structure_to_value
-        [("filters",
-           (Some (SearchJobsRequestFiltersList.to_value x.filters)));
+        [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
         ("maxResults",
           (Option.map x.maxResults
              ~f:SearchJobsRequestMaxResultsInteger.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        ("filters", (Some (SearchJobsRequestFiltersList.to_value x.filters)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
-      let maxResults =
-        (Option.map ~f:SearchJobsRequestMaxResultsInteger.of_xml)
-          (Xml.child xml_arg0 "maxResults") in
       let filters =
         SearchJobsRequestFiltersList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filters") in
-      make ?nextToken ?maxResults ~filters ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults =
-        field_map json "maxResults"
-          SearchJobsRequestMaxResultsInteger.of_json in
+        (Option.map ~f:SearchJobsRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ~filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let filters =
-        field_map_exn json "filters" SearchJobsRequestFiltersList.of_json in
-      make ?nextToken ?maxResults ~filters ()
+        field_map_exn json__ "filters" SearchJobsRequestFiltersList.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          SearchJobsRequestMaxResultsInteger.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      make ~filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Searches for Amazon Braket jobs that match the specified filter values."]
+       "Searches for Amazon Braket hybrid jobs that match the specified filter values."]
 module SearchDevicesResponse =
   struct
     type nonrec t =
       {
-      devices: DeviceSummaryList.t
+      devices: DeviceSummaryList.t option
         [@ocaml.doc
           "An array of DeviceSummary objects for devices that match the specified filter values."];
       nextToken: String_.t option
         [@ocaml.doc
-          "A token used for pagination of results, or null if there are no additional results. Use the token value in a subsequent request to continue results where the previous request ended."]}
+          "A token used for pagination of results, or null if there are no additional results. Use the token value in a subsequent request to continue search where the previous request ended."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceException of InternalServiceException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SearchDevicesResponse"
-    let make ?nextToken = fun ~devices -> fun () -> { nextToken; devices }
+    let make ?devices = fun ?nextToken -> fun () -> { devices; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2904,67 +4410,69 @@ module SearchDevicesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("devices", (Some (DeviceSummaryList.to_value x.devices)));
+        [("devices", (Option.map x.devices ~f:DeviceSummaryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let devices =
-        DeviceSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "devices") in
-      make ?nextToken ~devices ()
+        (Option.map ~f:DeviceSummaryList.of_xml)
+          (Xml.child xml_arg0 "devices") in
+      make ?nextToken ?devices ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let devices = field_map_exn json "devices" DeviceSummaryList.of_json in
-      make ?nextToken ~devices ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let devices = field_map json__ "devices" DeviceSummaryList.of_json in
+      make ?nextToken ?devices ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Searches for devices using the specified filters."]
 module SearchDevicesRequest =
   struct
     type nonrec t =
       {
-      filters: SearchDevicesRequestFiltersList.t
-        [@ocaml.doc "The filter values to use to search for a device."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A token used for pagination of results returned in the response. Use the token returned from the previous request to continue search where the previous request ended."];
       maxResults: SearchDevicesRequestMaxResultsInteger.t option
         [@ocaml.doc
           "The maximum number of results to return in the response."];
-      nextToken: String_.t option
+      filters: SearchDevicesRequestFiltersList.t
         [@ocaml.doc
-          "A token used for pagination of results returned in the response. Use the token returned from the previous request continue results where the previous request ended."]}
+          "Array of SearchDevicesFilter objects to use when searching for devices."]}
     let context_ = "SearchDevicesRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~filters -> fun () -> { maxResults; nextToken; filters }
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~filters -> fun () -> { nextToken; maxResults; filters }
     let to_value x =
       structure_to_value
-        [("filters",
-           (Some (SearchDevicesRequestFiltersList.to_value x.filters)));
+        [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
         ("maxResults",
           (Option.map x.maxResults
              ~f:SearchDevicesRequestMaxResultsInteger.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        ("filters",
+          (Some (SearchDevicesRequestFiltersList.to_value x.filters)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
-      let maxResults =
-        (Option.map ~f:SearchDevicesRequestMaxResultsInteger.of_xml)
-          (Xml.child xml_arg0 "maxResults") in
       let filters =
         SearchDevicesRequestFiltersList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "filters") in
-      make ?nextToken ?maxResults ~filters ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
       let maxResults =
-        field_map json "maxResults"
-          SearchDevicesRequestMaxResultsInteger.of_json in
+        (Option.map ~f:SearchDevicesRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ~filters ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let filters =
-        field_map_exn json "filters" SearchDevicesRequestFiltersList.of_json in
-      make ?nextToken ?maxResults ~filters ()
+        field_map_exn json__ "filters"
+          SearchDevicesRequestFiltersList.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          SearchDevicesRequestMaxResultsInteger.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      make ~filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Searches for devices using the specified filters."]
 module ListTagsForResourceResponse =
@@ -3027,8 +4535,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Shows the tags associated with this resource."]
 module ListTagsForResourceRequest =
@@ -3050,8 +4558,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Shows the tags associated with this resource."]
@@ -3059,29 +4567,48 @@ module GetQuantumTaskResponse =
   struct
     type nonrec t =
       {
-      createdAt: SyntheticTimestamp_date_time.t
-        [@ocaml.doc "The time at which the task was created."];
-      deviceArn: DeviceArn.t
-        [@ocaml.doc "The ARN of the device the task was run on."];
-      deviceParameters: JsonValue.t
-        [@ocaml.doc "The parameters for the device on which the task ran."];
-      endedAt: SyntheticTimestamp_date_time.t option
-        [@ocaml.doc "The time at which the task ended."];
+      quantumTaskArn: QuantumTaskArn.t option
+        [@ocaml.doc "The ARN of the quantum task."];
+      status: QuantumTaskStatus.t option
+        [@ocaml.doc "The status of the quantum task."];
       failureReason: String_.t option
-        [@ocaml.doc "The reason that a task failed."];
+        [@ocaml.doc "The reason that a quantum task failed."];
+      deviceArn: DeviceArn.t option
+        [@ocaml.doc "The ARN of the device the quantum task was run on."];
+      deviceParameters: JsonValue.t option
+        [@ocaml.doc
+          "The parameters for the device on which the quantum task ran."];
+      shots: Long.t option
+        [@ocaml.doc "The number of shots used in the quantum task."];
+      outputS3Bucket: String_.t option
+        [@ocaml.doc "The S3 bucket where quantum task results are stored."];
+      outputS3Directory: String_.t option
+        [@ocaml.doc
+          "The folder in the S3 bucket where quantum task results are stored."];
+      createdAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc "The time at which the quantum task was created."];
+      endedAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc "The time at which the quantum task ended."];
+      tags: TagsMap.t option
+        [@ocaml.doc "The tags that belong to this quantum task."];
       jobArn: JobArn.t option
         [@ocaml.doc
           "The ARN of the Amazon Braket job associated with the quantum task."];
-      outputS3Bucket: String_.t
-        [@ocaml.doc "The S3 bucket where task results are stored."];
-      outputS3Directory: String_.t
+      queueInfo: QuantumTaskQueueInfo.t option
         [@ocaml.doc
-          "The folder in the S3 bucket where task results are stored."];
-      quantumTaskArn: QuantumTaskArn.t [@ocaml.doc "The ARN of the task."];
-      shots: Long.t [@ocaml.doc "The number of shots used in the task."];
-      status: QuantumTaskStatus.t [@ocaml.doc "The status of the task."];
-      tags: TagsMap.t option
-        [@ocaml.doc "The tags that belong to this task."]}
+          "Queue information for the requested quantum task. Only returned if QueueInfo is specified in the additionalAttributeNames\" field in the GetQuantumTask API request."];
+      associations: Associations.t option
+        [@ocaml.doc
+          "The list of Amazon Braket resources associated with the quantum task."];
+      numSuccessfulShots: Long.t option
+        [@ocaml.doc
+          "The number of successful shots for the quantum task. This is available after a successfully completed quantum task."];
+      actionMetadata: ActionMetadata.t option
+        [@ocaml.doc
+          "Metadata about the action performed by the quantum task, including information about the type of action and program counts."];
+      experimentalCapabilities: ExperimentalCapabilities.t option
+        [@ocaml.doc
+          "Enabled experimental capabilities for the quantum task, if any."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceException of InternalServiceException.t 
@@ -3089,34 +4616,43 @@ module GetQuantumTaskResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetQuantumTaskResponse"
-    let make ?endedAt =
-      fun ?failureReason ->
-        fun ?jobArn ->
-          fun ?tags ->
-            fun ~createdAt ->
-              fun ~deviceArn ->
-                fun ~deviceParameters ->
-                  fun ~outputS3Bucket ->
-                    fun ~outputS3Directory ->
-                      fun ~quantumTaskArn ->
-                        fun ~shots ->
-                          fun ~status ->
-                            fun () ->
-                              {
-                                endedAt;
-                                failureReason;
-                                jobArn;
-                                tags;
-                                createdAt;
-                                deviceArn;
-                                deviceParameters;
-                                outputS3Bucket;
-                                outputS3Directory;
-                                quantumTaskArn;
-                                shots;
-                                status
-                              }
+    let make ?quantumTaskArn =
+      fun ?status ->
+        fun ?failureReason ->
+          fun ?deviceArn ->
+            fun ?deviceParameters ->
+              fun ?shots ->
+                fun ?outputS3Bucket ->
+                  fun ?outputS3Directory ->
+                    fun ?createdAt ->
+                      fun ?endedAt ->
+                        fun ?tags ->
+                          fun ?jobArn ->
+                            fun ?queueInfo ->
+                              fun ?associations ->
+                                fun ?numSuccessfulShots ->
+                                  fun ?actionMetadata ->
+                                    fun ?experimentalCapabilities ->
+                                      fun () ->
+                                        {
+                                          quantumTaskArn;
+                                          status;
+                                          failureReason;
+                                          deviceArn;
+                                          deviceParameters;
+                                          shots;
+                                          outputS3Bucket;
+                                          outputS3Directory;
+                                          createdAt;
+                                          endedAt;
+                                          tags;
+                                          jobArn;
+                                          queueInfo;
+                                          associations;
+                                          numSuccessfulShots;
+                                          actionMetadata;
+                                          experimentalCapabilities
+                                        }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3175,79 +4711,115 @@ module GetQuantumTaskResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("createdAt",
-           (Some (SyntheticTimestamp_date_time.to_value x.createdAt)));
-        ("deviceArn", (Some (DeviceArn.to_value x.deviceArn)));
-        ("deviceParameters", (Some (JsonValue.to_value x.deviceParameters)));
+        [("quantumTaskArn",
+           (Option.map x.quantumTaskArn ~f:QuantumTaskArn.to_value));
+        ("status", (Option.map x.status ~f:QuantumTaskStatus.to_value));
+        ("failureReason", (Option.map x.failureReason ~f:String_.to_value));
+        ("deviceArn", (Option.map x.deviceArn ~f:DeviceArn.to_value));
+        ("deviceParameters",
+          (Option.map x.deviceParameters ~f:JsonValue.to_value));
+        ("shots", (Option.map x.shots ~f:Long.to_value));
+        ("outputS3Bucket", (Option.map x.outputS3Bucket ~f:String_.to_value));
+        ("outputS3Directory",
+          (Option.map x.outputS3Directory ~f:String_.to_value));
+        ("createdAt",
+          (Option.map x.createdAt ~f:SyntheticTimestamp_date_time.to_value));
         ("endedAt",
           (Option.map x.endedAt ~f:SyntheticTimestamp_date_time.to_value));
-        ("failureReason", (Option.map x.failureReason ~f:String_.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
         ("jobArn", (Option.map x.jobArn ~f:JobArn.to_value));
-        ("outputS3Bucket", (Some (String_.to_value x.outputS3Bucket)));
-        ("outputS3Directory", (Some (String_.to_value x.outputS3Directory)));
-        ("quantumTaskArn", (Some (QuantumTaskArn.to_value x.quantumTaskArn)));
-        ("shots", (Some (Long.to_value x.shots)));
-        ("status", (Some (QuantumTaskStatus.to_value x.status)));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+        ("queueInfo",
+          (Option.map x.queueInfo ~f:QuantumTaskQueueInfo.to_value));
+        ("associations",
+          (Option.map x.associations ~f:Associations.to_value));
+        ("numSuccessfulShots",
+          (Option.map x.numSuccessfulShots ~f:Long.to_value));
+        ("actionMetadata",
+          (Option.map x.actionMetadata ~f:ActionMetadata.to_value));
+        ("experimentalCapabilities",
+          (Option.map x.experimentalCapabilities
+             ~f:ExperimentalCapabilities.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let status =
-        QuantumTaskStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let shots =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "shots") in
-      let quantumTaskArn =
-        QuantumTaskArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "quantumTaskArn") in
-      let outputS3Directory =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "outputS3Directory") in
-      let outputS3Bucket =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "outputS3Bucket") in
+      let experimentalCapabilities =
+        (Option.map ~f:ExperimentalCapabilities.of_xml)
+          (Xml.child xml_arg0 "experimentalCapabilities") in
+      let actionMetadata =
+        (Option.map ~f:ActionMetadata.of_xml)
+          (Xml.child xml_arg0 "actionMetadata") in
+      let numSuccessfulShots =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "numSuccessfulShots") in
+      let associations =
+        (Option.map ~f:Associations.of_xml)
+          (Xml.child xml_arg0 "associations") in
+      let queueInfo =
+        (Option.map ~f:QuantumTaskQueueInfo.of_xml)
+          (Xml.child xml_arg0 "queueInfo") in
       let jobArn =
         (Option.map ~f:JobArn.of_xml) (Xml.child xml_arg0 "jobArn") in
-      let failureReason =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "failureReason") in
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       let endedAt =
         (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
           (Xml.child xml_arg0 "endedAt") in
-      let deviceParameters =
-        JsonValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceParameters") in
-      let deviceArn =
-        DeviceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceArn") in
       let createdAt =
-        SyntheticTimestamp_date_time.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      make ?tags ~status ~shots ~quantumTaskArn ~outputS3Directory
-        ~outputS3Bucket ?jobArn ?failureReason ?endedAt ~deviceParameters
-        ~deviceArn ~createdAt ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let status = field_map_exn json "status" QuantumTaskStatus.of_json in
-      let shots = field_map_exn json "shots" Long.of_json in
-      let quantumTaskArn =
-        field_map_exn json "quantumTaskArn" QuantumTaskArn.of_json in
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "createdAt") in
       let outputS3Directory =
-        field_map_exn json "outputS3Directory" String_.of_json in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "outputS3Directory") in
       let outputS3Bucket =
-        field_map_exn json "outputS3Bucket" String_.of_json in
-      let jobArn = field_map json "jobArn" JobArn.of_json in
-      let failureReason = field_map json "failureReason" String_.of_json in
-      let endedAt =
-        field_map json "endedAt" SyntheticTimestamp_date_time.of_json in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "outputS3Bucket") in
+      let shots = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "shots") in
       let deviceParameters =
-        field_map_exn json "deviceParameters" JsonValue.of_json in
-      let deviceArn = field_map_exn json "deviceArn" DeviceArn.of_json in
+        (Option.map ~f:JsonValue.of_xml)
+          (Xml.child xml_arg0 "deviceParameters") in
+      let deviceArn =
+        (Option.map ~f:DeviceArn.of_xml) (Xml.child xml_arg0 "deviceArn") in
+      let failureReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "failureReason") in
+      let status =
+        (Option.map ~f:QuantumTaskStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let quantumTaskArn =
+        (Option.map ~f:QuantumTaskArn.of_xml)
+          (Xml.child xml_arg0 "quantumTaskArn") in
+      make ?experimentalCapabilities ?actionMetadata ?numSuccessfulShots
+        ?associations ?queueInfo ?jobArn ?tags ?endedAt ?createdAt
+        ?outputS3Directory ?outputS3Bucket ?shots ?deviceParameters
+        ?deviceArn ?failureReason ?status ?quantumTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let experimentalCapabilities =
+        field_map json__ "experimentalCapabilities"
+          ExperimentalCapabilities.of_json in
+      let actionMetadata =
+        field_map json__ "actionMetadata" ActionMetadata.of_json in
+      let numSuccessfulShots =
+        field_map json__ "numSuccessfulShots" Long.of_json in
+      let associations = field_map json__ "associations" Associations.of_json in
+      let queueInfo =
+        field_map json__ "queueInfo" QuantumTaskQueueInfo.of_json in
+      let jobArn = field_map json__ "jobArn" JobArn.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let endedAt =
+        field_map json__ "endedAt" SyntheticTimestamp_date_time.of_json in
       let createdAt =
-        field_map_exn json "createdAt" SyntheticTimestamp_date_time.of_json in
-      make ?tags ~status ~shots ~quantumTaskArn ~outputS3Directory
-        ~outputS3Bucket ?jobArn ?failureReason ?endedAt ~deviceParameters
-        ~deviceArn ~createdAt ()
+        field_map json__ "createdAt" SyntheticTimestamp_date_time.of_json in
+      let outputS3Directory =
+        field_map json__ "outputS3Directory" String_.of_json in
+      let outputS3Bucket = field_map json__ "outputS3Bucket" String_.of_json in
+      let shots = field_map json__ "shots" Long.of_json in
+      let deviceParameters =
+        field_map json__ "deviceParameters" JsonValue.of_json in
+      let deviceArn = field_map json__ "deviceArn" DeviceArn.of_json in
+      let failureReason = field_map json__ "failureReason" String_.of_json in
+      let status = field_map json__ "status" QuantumTaskStatus.of_json in
+      let quantumTaskArn =
+        field_map json__ "quantumTaskArn" QuantumTaskArn.of_json in
+      make ?experimentalCapabilities ?actionMetadata ?numSuccessfulShots
+        ?associations ?queueInfo ?jobArn ?tags ?endedAt ?createdAt
+        ?outputS3Directory ?outputS3Bucket ?shots ?deviceParameters
+        ?deviceArn ?failureReason ?status ?quantumTaskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified quantum task."]
 module GetQuantumTaskRequest =
@@ -3255,82 +4827,103 @@ module GetQuantumTaskRequest =
     type nonrec t =
       {
       quantumTaskArn: QuantumTaskArn.t
-        [@ocaml.doc "the ARN of the task to retrieve."]}
+        [@ocaml.doc "The ARN of the quantum task to retrieve."];
+      additionalAttributeNames:
+        QuantumTaskAdditionalAttributeNamesList.t option
+        [@ocaml.doc
+          "A list of attributes to return additional information for. Only the QueueInfo additional attribute name is currently supported."]}
     let context_ = "GetQuantumTaskRequest"
-    let make ~quantumTaskArn = fun () -> { quantumTaskArn }
+    let make ?additionalAttributeNames =
+      fun ~quantumTaskArn ->
+        fun () -> { additionalAttributeNames; quantumTaskArn }
     let to_value x =
       structure_to_value
         [("quantumTaskArn",
-           (Some (QuantumTaskArn.to_value x.quantumTaskArn)))]
+           (Some (QuantumTaskArn.to_value x.quantumTaskArn)));
+        ("additionalAttributeNames",
+          (Option.map x.additionalAttributeNames
+             ~f:QuantumTaskAdditionalAttributeNamesList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let additionalAttributeNames =
+        (Option.map ~f:QuantumTaskAdditionalAttributeNamesList.of_xml)
+          (Xml.child xml_arg0 "additionalAttributeNames") in
       let quantumTaskArn =
         QuantumTaskArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "quantumTaskArn") in
-      make ~quantumTaskArn ()
+      make ?additionalAttributeNames ~quantumTaskArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let additionalAttributeNames =
+        field_map json__ "additionalAttributeNames"
+          QuantumTaskAdditionalAttributeNamesList.of_json in
       let quantumTaskArn =
-        field_map_exn json "quantumTaskArn" QuantumTaskArn.of_json in
-      make ~quantumTaskArn ()
+        field_map_exn json__ "quantumTaskArn" QuantumTaskArn.of_json in
+      make ?additionalAttributeNames ~quantumTaskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified quantum task."]
 module GetJobResponse =
   struct
     type nonrec t =
       {
-      algorithmSpecification: AlgorithmSpecification.t
+      status: JobPrimaryStatus.t option
+        [@ocaml.doc "The status of the Amazon Braket hybrid job."];
+      jobArn: JobArn.t option
+        [@ocaml.doc "The ARN of the Amazon Braket hybrid job."];
+      roleArn: RoleArn.t option
         [@ocaml.doc
-          "Definition of the Amazon Braket job created. Specifies the container image the job uses, information about the Python scripts used for entry and training, and the user-defined metrics used to evaluation the job."];
-      billableDuration: Integer.t option
-        [@ocaml.doc
-          "The billable time the Amazon Braket job used to complete."];
-      checkpointConfig: JobCheckpointConfig.t option
-        [@ocaml.doc
-          "Information about the output locations for job checkpoint data."];
-      createdAt: SyntheticTimestamp_date_time.t
-        [@ocaml.doc
-          "The date and time that the Amazon Braket job was created."];
-      deviceConfig: DeviceConfig.t option
-        [@ocaml.doc
-          "The quantum processing unit (QPU) or simulator used to run the Amazon Braket job."];
-      endedAt: SyntheticTimestamp_date_time.t option
-        [@ocaml.doc "The date and time that the Amazon Braket job ended."];
-      events: JobEvents.t option
-        [@ocaml.doc
-          "Details about the type and time events occurred related to the Amazon Braket job."];
+          "The Amazon Resource Name (ARN) of an IAM role that Amazon Braket can assume to perform tasks on behalf of a user. It can access user resources, run an Amazon Braket job container on behalf of user, and output results and other hybrid job details to the s3 buckets of a user."];
       failureReason: String1024.t option
         [@ocaml.doc
-          "A description of the reason why an Amazon Braket job failed, if it failed."];
+          "A description of the reason why an Amazon Braket hybrid job failed, if it failed."];
+      jobName: GetJobResponseJobNameString.t option
+        [@ocaml.doc "The name of the Amazon Braket hybrid job."];
       hyperParameters: HyperParameters.t option
         [@ocaml.doc
-          "Algorithm-specific parameters used by an Amazon Braket job that influence the quality of the traiing job. The values are set with a string of JSON key:value pairs, where the key is the name of the hyperparameter and the value is the value of th hyperparameter."];
+          "Algorithm-specific parameters used by an Amazon Braket hybrid job that influence the quality of the traiing job. The values are set with a map of JSON key:value pairs, where the key is the name of the hyperparameter and the value is the value of th hyperparameter."];
       inputDataConfig: InputConfigList.t option
         [@ocaml.doc
           "A list of parameters that specify the name and type of input data and where it is located."];
-      instanceConfig: InstanceConfig.t
+      outputDataConfig: JobOutputDataConfig.t option
         [@ocaml.doc
-          "The resource instances to use while running the hybrid job on Amazon Braket."];
-      jobArn: JobArn.t [@ocaml.doc "The ARN of the Amazon Braket job."];
-      jobName: GetJobResponseJobNameString.t
-        [@ocaml.doc "The name of the Amazon Braket job."];
-      outputDataConfig: JobOutputDataConfig.t
-        [@ocaml.doc
-          "The path to the S3 location where job artifacts are stored and the encryption key used to store them there."];
-      roleArn: RoleArn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of an IAM role that Amazon Braket can assume to perform tasks on behalf of a user. It can access user resources, run an Amazon Braket job container on behalf of user, and output resources to the s3 buckets of a user."];
-      startedAt: SyntheticTimestamp_date_time.t option
-        [@ocaml.doc
-          "The date and time that the Amazon Braket job was started."];
-      status: JobPrimaryStatus.t
-        [@ocaml.doc "The status of the Amazon Braket job."];
+          "The path to the S3 location where hybrid job artifacts are stored and the encryption key used to store them there."];
       stoppingCondition: JobStoppingCondition.t option
         [@ocaml.doc
-          "The user-defined criteria that specifies when to stop a job running."];
-      tags: TagsMap.t option
+          "The user-defined criteria that specifies when to stop a running hybrid job."];
+      checkpointConfig: JobCheckpointConfig.t option
         [@ocaml.doc
-          "A tag object that consists of a key and an optional value, used to manage metadata for Amazon Braket resources."]}
+          "Information about the output locations for hybrid job checkpoint data."];
+      algorithmSpecification: AlgorithmSpecification.t option
+        [@ocaml.doc
+          "Definition of the Amazon Braket hybrid job created. Provides information about the container image used, and the Python scripts used for training."];
+      instanceConfig: InstanceConfig.t option
+        [@ocaml.doc
+          "The resource instances to use while running the hybrid job on Amazon Braket."];
+      createdAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc
+          "The time at which the Amazon Braket hybrid job was created."];
+      startedAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc
+          "The time at which the Amazon Braket hybrid job was started."];
+      endedAt: SyntheticTimestamp_date_time.t option
+        [@ocaml.doc "The time at which the Amazon Braket hybrid job ended."];
+      billableDuration: Integer.t option
+        [@ocaml.doc
+          "The billable time for which the Amazon Braket hybrid job used to complete."];
+      deviceConfig: DeviceConfig.t option
+        [@ocaml.doc
+          "The primary device used by the Amazon Braket hybrid job."];
+      events: JobEvents.t option
+        [@ocaml.doc
+          "Details about the time and type of events occurred related to the Amazon Braket hybrid job."];
+      tags: TagsMap.t option
+        [@ocaml.doc "The tags associated with this hybrid job."];
+      queueInfo: HybridJobQueueInfo.t option
+        [@ocaml.doc
+          "Queue information for the requested hybrid job. Only returned if QueueInfo is specified in the additionalAttributeNames\" field in the GetJob API request."];
+      associations: Associations.t option
+        [@ocaml.doc
+          "The list of Amazon Braket resources associated with the hybrid job."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceException of InternalServiceException.t 
@@ -3338,48 +4931,51 @@ module GetJobResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetJobResponse"
-    let make ?billableDuration =
-      fun ?checkpointConfig ->
-        fun ?deviceConfig ->
-          fun ?endedAt ->
-            fun ?events ->
-              fun ?failureReason ->
-                fun ?hyperParameters ->
-                  fun ?inputDataConfig ->
-                    fun ?startedAt ->
-                      fun ?stoppingCondition ->
-                        fun ?tags ->
-                          fun ~algorithmSpecification ->
-                            fun ~createdAt ->
-                              fun ~instanceConfig ->
-                                fun ~jobArn ->
-                                  fun ~jobName ->
-                                    fun ~outputDataConfig ->
-                                      fun ~roleArn ->
-                                        fun ~status ->
-                                          fun () ->
-                                            {
-                                              billableDuration;
-                                              checkpointConfig;
-                                              deviceConfig;
-                                              endedAt;
-                                              events;
-                                              failureReason;
-                                              hyperParameters;
-                                              inputDataConfig;
-                                              startedAt;
-                                              stoppingCondition;
-                                              tags;
-                                              algorithmSpecification;
-                                              createdAt;
-                                              instanceConfig;
-                                              jobArn;
-                                              jobName;
-                                              outputDataConfig;
-                                              roleArn;
-                                              status
-                                            }
+    let make ?status =
+      fun ?jobArn ->
+        fun ?roleArn ->
+          fun ?failureReason ->
+            fun ?jobName ->
+              fun ?hyperParameters ->
+                fun ?inputDataConfig ->
+                  fun ?outputDataConfig ->
+                    fun ?stoppingCondition ->
+                      fun ?checkpointConfig ->
+                        fun ?algorithmSpecification ->
+                          fun ?instanceConfig ->
+                            fun ?createdAt ->
+                              fun ?startedAt ->
+                                fun ?endedAt ->
+                                  fun ?billableDuration ->
+                                    fun ?deviceConfig ->
+                                      fun ?events ->
+                                        fun ?tags ->
+                                          fun ?queueInfo ->
+                                            fun ?associations ->
+                                              fun () ->
+                                                {
+                                                  status;
+                                                  jobArn;
+                                                  roleArn;
+                                                  failureReason;
+                                                  jobName;
+                                                  hyperParameters;
+                                                  inputDataConfig;
+                                                  outputDataConfig;
+                                                  stoppingCondition;
+                                                  checkpointConfig;
+                                                  algorithmSpecification;
+                                                  instanceConfig;
+                                                  createdAt;
+                                                  startedAt;
+                                                  endedAt;
+                                                  billableDuration;
+                                                  deviceConfig;
+                                                  events;
+                                                  tags;
+                                                  queueInfo;
+                                                  associations
+                                                }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3438,169 +5034,202 @@ module GetJobResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("algorithmSpecification",
-           (Some (AlgorithmSpecification.to_value x.algorithmSpecification)));
-        ("billableDuration",
-          (Option.map x.billableDuration ~f:Integer.to_value));
-        ("checkpointConfig",
-          (Option.map x.checkpointConfig ~f:JobCheckpointConfig.to_value));
-        ("createdAt",
-          (Some (SyntheticTimestamp_date_time.to_value x.createdAt)));
-        ("deviceConfig",
-          (Option.map x.deviceConfig ~f:DeviceConfig.to_value));
-        ("endedAt",
-          (Option.map x.endedAt ~f:SyntheticTimestamp_date_time.to_value));
-        ("events", (Option.map x.events ~f:JobEvents.to_value));
+        [("status", (Option.map x.status ~f:JobPrimaryStatus.to_value));
+        ("jobArn", (Option.map x.jobArn ~f:JobArn.to_value));
+        ("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
         ("failureReason",
           (Option.map x.failureReason ~f:String1024.to_value));
+        ("jobName",
+          (Option.map x.jobName ~f:GetJobResponseJobNameString.to_value));
         ("hyperParameters",
           (Option.map x.hyperParameters ~f:HyperParameters.to_value));
         ("inputDataConfig",
           (Option.map x.inputDataConfig ~f:InputConfigList.to_value));
-        ("instanceConfig", (Some (InstanceConfig.to_value x.instanceConfig)));
-        ("jobArn", (Some (JobArn.to_value x.jobArn)));
-        ("jobName", (Some (GetJobResponseJobNameString.to_value x.jobName)));
         ("outputDataConfig",
-          (Some (JobOutputDataConfig.to_value x.outputDataConfig)));
-        ("roleArn", (Some (RoleArn.to_value x.roleArn)));
-        ("startedAt",
-          (Option.map x.startedAt ~f:SyntheticTimestamp_date_time.to_value));
-        ("status", (Some (JobPrimaryStatus.to_value x.status)));
+          (Option.map x.outputDataConfig ~f:JobOutputDataConfig.to_value));
         ("stoppingCondition",
           (Option.map x.stoppingCondition ~f:JobStoppingCondition.to_value));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+        ("checkpointConfig",
+          (Option.map x.checkpointConfig ~f:JobCheckpointConfig.to_value));
+        ("algorithmSpecification",
+          (Option.map x.algorithmSpecification
+             ~f:AlgorithmSpecification.to_value));
+        ("instanceConfig",
+          (Option.map x.instanceConfig ~f:InstanceConfig.to_value));
+        ("createdAt",
+          (Option.map x.createdAt ~f:SyntheticTimestamp_date_time.to_value));
+        ("startedAt",
+          (Option.map x.startedAt ~f:SyntheticTimestamp_date_time.to_value));
+        ("endedAt",
+          (Option.map x.endedAt ~f:SyntheticTimestamp_date_time.to_value));
+        ("billableDuration",
+          (Option.map x.billableDuration ~f:Integer.to_value));
+        ("deviceConfig",
+          (Option.map x.deviceConfig ~f:DeviceConfig.to_value));
+        ("events", (Option.map x.events ~f:JobEvents.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("queueInfo",
+          (Option.map x.queueInfo ~f:HybridJobQueueInfo.to_value));
+        ("associations",
+          (Option.map x.associations ~f:Associations.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let associations =
+        (Option.map ~f:Associations.of_xml)
+          (Xml.child xml_arg0 "associations") in
+      let queueInfo =
+        (Option.map ~f:HybridJobQueueInfo.of_xml)
+          (Xml.child xml_arg0 "queueInfo") in
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let stoppingCondition =
-        (Option.map ~f:JobStoppingCondition.of_xml)
-          (Xml.child xml_arg0 "stoppingCondition") in
-      let status =
-        JobPrimaryStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      let events =
+        (Option.map ~f:JobEvents.of_xml) (Xml.child xml_arg0 "events") in
+      let deviceConfig =
+        (Option.map ~f:DeviceConfig.of_xml)
+          (Xml.child xml_arg0 "deviceConfig") in
+      let billableDuration =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "billableDuration") in
+      let endedAt =
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "endedAt") in
       let startedAt =
         (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
           (Xml.child xml_arg0 "startedAt") in
-      let roleArn =
-        RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
-      let outputDataConfig =
-        JobOutputDataConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "outputDataConfig") in
-      let jobName =
-        GetJobResponseJobNameString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobName") in
-      let jobArn =
-        JobArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobArn") in
+      let createdAt =
+        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
+          (Xml.child xml_arg0 "createdAt") in
       let instanceConfig =
-        InstanceConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "instanceConfig") in
+        (Option.map ~f:InstanceConfig.of_xml)
+          (Xml.child xml_arg0 "instanceConfig") in
+      let algorithmSpecification =
+        (Option.map ~f:AlgorithmSpecification.of_xml)
+          (Xml.child xml_arg0 "algorithmSpecification") in
+      let checkpointConfig =
+        (Option.map ~f:JobCheckpointConfig.of_xml)
+          (Xml.child xml_arg0 "checkpointConfig") in
+      let stoppingCondition =
+        (Option.map ~f:JobStoppingCondition.of_xml)
+          (Xml.child xml_arg0 "stoppingCondition") in
+      let outputDataConfig =
+        (Option.map ~f:JobOutputDataConfig.of_xml)
+          (Xml.child xml_arg0 "outputDataConfig") in
       let inputDataConfig =
         (Option.map ~f:InputConfigList.of_xml)
           (Xml.child xml_arg0 "inputDataConfig") in
       let hyperParameters =
         (Option.map ~f:HyperParameters.of_xml)
           (Xml.child xml_arg0 "hyperParameters") in
+      let jobName =
+        (Option.map ~f:GetJobResponseJobNameString.of_xml)
+          (Xml.child xml_arg0 "jobName") in
       let failureReason =
         (Option.map ~f:String1024.of_xml)
           (Xml.child xml_arg0 "failureReason") in
-      let events =
-        (Option.map ~f:JobEvents.of_xml) (Xml.child xml_arg0 "events") in
-      let endedAt =
-        (Option.map ~f:SyntheticTimestamp_date_time.of_xml)
-          (Xml.child xml_arg0 "endedAt") in
-      let deviceConfig =
-        (Option.map ~f:DeviceConfig.of_xml)
-          (Xml.child xml_arg0 "deviceConfig") in
-      let createdAt =
-        SyntheticTimestamp_date_time.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let checkpointConfig =
-        (Option.map ~f:JobCheckpointConfig.of_xml)
-          (Xml.child xml_arg0 "checkpointConfig") in
-      let billableDuration =
-        (Option.map ~f:Integer.of_xml)
-          (Xml.child xml_arg0 "billableDuration") in
-      let algorithmSpecification =
-        AlgorithmSpecification.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "algorithmSpecification") in
-      make ?tags ?stoppingCondition ~status ?startedAt ~roleArn
-        ~outputDataConfig ~jobName ~jobArn ~instanceConfig ?inputDataConfig
-        ?hyperParameters ?failureReason ?events ?endedAt ?deviceConfig
-        ~createdAt ?checkpointConfig ?billableDuration
-        ~algorithmSpecification ()
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      let jobArn =
+        (Option.map ~f:JobArn.of_xml) (Xml.child xml_arg0 "jobArn") in
+      let status =
+        (Option.map ~f:JobPrimaryStatus.of_xml) (Xml.child xml_arg0 "status") in
+      make ?associations ?queueInfo ?tags ?events ?deviceConfig
+        ?billableDuration ?endedAt ?startedAt ?createdAt ?instanceConfig
+        ?algorithmSpecification ?checkpointConfig ?stoppingCondition
+        ?outputDataConfig ?inputDataConfig ?hyperParameters ?jobName
+        ?failureReason ?roleArn ?jobArn ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let stoppingCondition =
-        field_map json "stoppingCondition" JobStoppingCondition.of_json in
-      let status = field_map_exn json "status" JobPrimaryStatus.of_json in
-      let startedAt =
-        field_map json "startedAt" SyntheticTimestamp_date_time.of_json in
-      let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
-      let outputDataConfig =
-        field_map_exn json "outputDataConfig" JobOutputDataConfig.of_json in
-      let jobName =
-        field_map_exn json "jobName" GetJobResponseJobNameString.of_json in
-      let jobArn = field_map_exn json "jobArn" JobArn.of_json in
-      let instanceConfig =
-        field_map_exn json "instanceConfig" InstanceConfig.of_json in
-      let inputDataConfig =
-        field_map json "inputDataConfig" InputConfigList.of_json in
-      let hyperParameters =
-        field_map json "hyperParameters" HyperParameters.of_json in
-      let failureReason = field_map json "failureReason" String1024.of_json in
-      let events = field_map json "events" JobEvents.of_json in
-      let endedAt =
-        field_map json "endedAt" SyntheticTimestamp_date_time.of_json in
-      let deviceConfig = field_map json "deviceConfig" DeviceConfig.of_json in
-      let createdAt =
-        field_map_exn json "createdAt" SyntheticTimestamp_date_time.of_json in
-      let checkpointConfig =
-        field_map json "checkpointConfig" JobCheckpointConfig.of_json in
+    let of_json json__ =
+      let associations = field_map json__ "associations" Associations.of_json in
+      let queueInfo = field_map json__ "queueInfo" HybridJobQueueInfo.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let events = field_map json__ "events" JobEvents.of_json in
+      let deviceConfig = field_map json__ "deviceConfig" DeviceConfig.of_json in
       let billableDuration =
-        field_map json "billableDuration" Integer.of_json in
+        field_map json__ "billableDuration" Integer.of_json in
+      let endedAt =
+        field_map json__ "endedAt" SyntheticTimestamp_date_time.of_json in
+      let startedAt =
+        field_map json__ "startedAt" SyntheticTimestamp_date_time.of_json in
+      let createdAt =
+        field_map json__ "createdAt" SyntheticTimestamp_date_time.of_json in
+      let instanceConfig =
+        field_map json__ "instanceConfig" InstanceConfig.of_json in
       let algorithmSpecification =
-        field_map_exn json "algorithmSpecification"
+        field_map json__ "algorithmSpecification"
           AlgorithmSpecification.of_json in
-      make ?tags ?stoppingCondition ~status ?startedAt ~roleArn
-        ~outputDataConfig ~jobName ~jobArn ~instanceConfig ?inputDataConfig
-        ?hyperParameters ?failureReason ?events ?endedAt ?deviceConfig
-        ~createdAt ?checkpointConfig ?billableDuration
-        ~algorithmSpecification ()
+      let checkpointConfig =
+        field_map json__ "checkpointConfig" JobCheckpointConfig.of_json in
+      let stoppingCondition =
+        field_map json__ "stoppingCondition" JobStoppingCondition.of_json in
+      let outputDataConfig =
+        field_map json__ "outputDataConfig" JobOutputDataConfig.of_json in
+      let inputDataConfig =
+        field_map json__ "inputDataConfig" InputConfigList.of_json in
+      let hyperParameters =
+        field_map json__ "hyperParameters" HyperParameters.of_json in
+      let jobName =
+        field_map json__ "jobName" GetJobResponseJobNameString.of_json in
+      let failureReason = field_map json__ "failureReason" String1024.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      let jobArn = field_map json__ "jobArn" JobArn.of_json in
+      let status = field_map json__ "status" JobPrimaryStatus.of_json in
+      make ?associations ?queueInfo ?tags ?events ?deviceConfig
+        ?billableDuration ?endedAt ?startedAt ?createdAt ?instanceConfig
+        ?algorithmSpecification ?checkpointConfig ?stoppingCondition
+        ?outputDataConfig ?inputDataConfig ?hyperParameters ?jobName
+        ?failureReason ?roleArn ?jobArn ?status ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the specified Amazon Braket job."]
+  end[@@ocaml.doc "Retrieves the specified Amazon Braket hybrid job."]
 module GetJobRequest =
   struct
     type nonrec t =
       {
-      jobArn: JobArn.t [@ocaml.doc "The ARN of the job to retrieve."]}
+      jobArn: JobArn.t [@ocaml.doc "The ARN of the hybrid job to retrieve."];
+      additionalAttributeNames:
+        HybridJobAdditionalAttributeNamesList.t option
+        [@ocaml.doc
+          "A list of attributes to return additional information for. Only the QueueInfo additional attribute name is currently supported."]}
     let context_ = "GetJobRequest"
-    let make ~jobArn = fun () -> { jobArn }
+    let make ?additionalAttributeNames =
+      fun ~jobArn -> fun () -> { additionalAttributeNames; jobArn }
     let to_value x =
-      structure_to_value [("jobArn", (Some (JobArn.to_value x.jobArn)))]
+      structure_to_value
+        [("jobArn", (Some (JobArn.to_value x.jobArn)));
+        ("additionalAttributeNames",
+          (Option.map x.additionalAttributeNames
+             ~f:HybridJobAdditionalAttributeNamesList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let additionalAttributeNames =
+        (Option.map ~f:HybridJobAdditionalAttributeNamesList.of_xml)
+          (Xml.child xml_arg0 "additionalAttributeNames") in
       let jobArn =
         JobArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobArn") in
-      make ~jobArn ()
+      make ?additionalAttributeNames ~jobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobArn = field_map_exn json "jobArn" JobArn.of_json in
-      make ~jobArn ()
+    let of_json json__ =
+      let additionalAttributeNames =
+        field_map json__ "additionalAttributeNames"
+          HybridJobAdditionalAttributeNamesList.of_json in
+      let jobArn = field_map_exn json__ "jobArn" JobArn.of_json in
+      make ?additionalAttributeNames ~jobArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the specified Amazon Braket job."]
+  end[@@ocaml.doc "Retrieves the specified Amazon Braket hybrid job."]
 module GetDeviceResponse =
   struct
     type nonrec t =
       {
-      deviceArn: DeviceArn.t [@ocaml.doc "The ARN of the device."];
-      deviceCapabilities: JsonValue.t
+      deviceArn: DeviceArn.t option [@ocaml.doc "The ARN of the device."];
+      deviceName: String_.t option [@ocaml.doc "The name of the device."];
+      providerName: String_.t option
+        [@ocaml.doc "The name of the partner company for the device."];
+      deviceType: DeviceType.t option [@ocaml.doc "The type of the device."];
+      deviceStatus: DeviceStatus.t option
+        [@ocaml.doc "The status of the device."];
+      deviceCapabilities: JsonValue.t option
         [@ocaml.doc "Details about the capabilities of the device."];
-      deviceName: String_.t [@ocaml.doc "The name of the device."];
-      deviceStatus: DeviceStatus.t [@ocaml.doc "The status of the device."];
-      deviceType: DeviceType.t [@ocaml.doc "The type of the device."];
-      providerName: String_.t
-        [@ocaml.doc "The name of the partner company for the device."]}
+      deviceQueueInfo: DeviceQueueInfoList.t option
+        [@ocaml.doc
+          "The number of quantum tasks and hybrid jobs currently queued on the device."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceException of InternalServiceException.t 
@@ -3608,22 +5237,23 @@ module GetDeviceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDeviceResponse"
-    let make ~deviceArn =
-      fun ~deviceCapabilities ->
-        fun ~deviceName ->
-          fun ~deviceStatus ->
-            fun ~deviceType ->
-              fun ~providerName ->
-                fun () ->
-                  {
-                    deviceArn;
-                    deviceCapabilities;
-                    deviceName;
-                    deviceStatus;
-                    deviceType;
-                    providerName
-                  }
+    let make ?deviceArn =
+      fun ?deviceName ->
+        fun ?providerName ->
+          fun ?deviceType ->
+            fun ?deviceStatus ->
+              fun ?deviceCapabilities ->
+                fun ?deviceQueueInfo ->
+                  fun () ->
+                    {
+                      deviceArn;
+                      deviceName;
+                      providerName;
+                      deviceType;
+                      deviceStatus;
+                      deviceCapabilities;
+                      deviceQueueInfo
+                    }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3682,49 +5312,53 @@ module GetDeviceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("deviceArn", (Some (DeviceArn.to_value x.deviceArn)));
+        [("deviceArn", (Option.map x.deviceArn ~f:DeviceArn.to_value));
+        ("deviceName", (Option.map x.deviceName ~f:String_.to_value));
+        ("providerName", (Option.map x.providerName ~f:String_.to_value));
+        ("deviceType", (Option.map x.deviceType ~f:DeviceType.to_value));
+        ("deviceStatus",
+          (Option.map x.deviceStatus ~f:DeviceStatus.to_value));
         ("deviceCapabilities",
-          (Some (JsonValue.to_value x.deviceCapabilities)));
-        ("deviceName", (Some (String_.to_value x.deviceName)));
-        ("deviceStatus", (Some (DeviceStatus.to_value x.deviceStatus)));
-        ("deviceType", (Some (DeviceType.to_value x.deviceType)));
-        ("providerName", (Some (String_.to_value x.providerName)))]
+          (Option.map x.deviceCapabilities ~f:JsonValue.to_value));
+        ("deviceQueueInfo",
+          (Option.map x.deviceQueueInfo ~f:DeviceQueueInfoList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let providerName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "providerName") in
+      let deviceQueueInfo =
+        (Option.map ~f:DeviceQueueInfoList.of_xml)
+          (Xml.child xml_arg0 "deviceQueueInfo") in
+      let deviceCapabilities =
+        (Option.map ~f:JsonValue.of_xml)
+          (Xml.child xml_arg0 "deviceCapabilities") in
+      let deviceStatus =
+        (Option.map ~f:DeviceStatus.of_xml)
+          (Xml.child xml_arg0 "deviceStatus") in
       let deviceType =
-        DeviceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceType") in
-      let deviceStatus =
-        DeviceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceStatus") in
+        (Option.map ~f:DeviceType.of_xml) (Xml.child xml_arg0 "deviceType") in
+      let providerName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "providerName") in
       let deviceName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceName") in
-      let deviceCapabilities =
-        JsonValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceCapabilities") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "deviceName") in
       let deviceArn =
-        DeviceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceArn") in
-      make ~providerName ~deviceType ~deviceStatus ~deviceName
-        ~deviceCapabilities ~deviceArn ()
+        (Option.map ~f:DeviceArn.of_xml) (Xml.child xml_arg0 "deviceArn") in
+      make ?deviceQueueInfo ?deviceCapabilities ?deviceStatus ?deviceType
+        ?providerName ?deviceName ?deviceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let providerName = field_map_exn json "providerName" String_.of_json in
-      let deviceType = field_map_exn json "deviceType" DeviceType.of_json in
-      let deviceStatus =
-        field_map_exn json "deviceStatus" DeviceStatus.of_json in
-      let deviceName = field_map_exn json "deviceName" String_.of_json in
+    let of_json json__ =
+      let deviceQueueInfo =
+        field_map json__ "deviceQueueInfo" DeviceQueueInfoList.of_json in
       let deviceCapabilities =
-        field_map_exn json "deviceCapabilities" JsonValue.of_json in
-      let deviceArn = field_map_exn json "deviceArn" DeviceArn.of_json in
-      make ~providerName ~deviceType ~deviceStatus ~deviceName
-        ~deviceCapabilities ~deviceArn ()
+        field_map json__ "deviceCapabilities" JsonValue.of_json in
+      let deviceStatus = field_map json__ "deviceStatus" DeviceStatus.of_json in
+      let deviceType = field_map json__ "deviceType" DeviceType.of_json in
+      let providerName = field_map json__ "providerName" String_.of_json in
+      let deviceName = field_map json__ "deviceName" String_.of_json in
+      let deviceArn = field_map json__ "deviceArn" DeviceArn.of_json in
+      make ?deviceQueueInfo ?deviceCapabilities ?deviceStatus ?deviceType
+        ?providerName ?deviceName ?deviceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the devices available in Amazon Braket."]
+  end[@@ocaml.doc
+       "Retrieves the devices available in Amazon Braket. For backwards compatibility with older versions of BraketSchemas, OpenQASM information is omitted from GetDevice API calls. To get this information the user-agent needs to present a recent version of the BraketSchemas (1.8.0 or later). The Braket SDK automatically reports this for you. If you do not see OpenQASM results in the GetDevice response when using a Braket SDK, you may need to set AWS_EXECUTION_ENV environment variable to configure user-agent. See the code examples provided below for how to do this for the AWS CLI, Boto3, and the Go, Java, and JavaScript/TypeScript SDKs."]
 module GetDeviceRequest =
   struct
     type nonrec t =
@@ -3743,17 +5377,275 @@ module GetDeviceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "deviceArn") in
       make ~deviceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deviceArn = field_map_exn json "deviceArn" DeviceArn.of_json in
+    let of_json json__ =
+      let deviceArn = field_map_exn json__ "deviceArn" DeviceArn.of_json in
       make ~deviceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the devices available in Amazon Braket."]
+  end[@@ocaml.doc
+       "Retrieves the devices available in Amazon Braket. For backwards compatibility with older versions of BraketSchemas, OpenQASM information is omitted from GetDevice API calls. To get this information the user-agent needs to present a recent version of the BraketSchemas (1.8.0 or later). The Braket SDK automatically reports this for you. If you do not see OpenQASM results in the GetDevice response when using a Braket SDK, you may need to set AWS_EXECUTION_ENV environment variable to configure user-agent. See the code examples provided below for how to do this for the AWS CLI, Boto3, and the Go, Java, and JavaScript/TypeScript SDKs."]
+module DeleteSpendingLimitResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an existing spending limit. This operation permanently removes the spending limit and cannot be undone. After deletion, the associated device becomes unrestricted for spending."]
+module DeleteSpendingLimitRequest =
+  struct
+    type nonrec t =
+      {
+      spendingLimitArn: SpendingLimitArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the spending limit to delete."]}
+    let context_ = "DeleteSpendingLimitRequest"
+    let make ~spendingLimitArn = fun () -> { spendingLimitArn }
+    let to_value x =
+      structure_to_value
+        [("spendingLimitArn",
+           (Some (SpendingLimitArn.to_value x.spendingLimitArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let spendingLimitArn =
+        SpendingLimitArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "spendingLimitArn") in
+      make ~spendingLimitArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let spendingLimitArn =
+        field_map_exn json__ "spendingLimitArn" SpendingLimitArn.of_json in
+      make ~spendingLimitArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an existing spending limit. This operation permanently removes the spending limit and cannot be undone. After deletion, the associated device becomes unrestricted for spending."]
+module CreateSpendingLimitResponse =
+  struct
+    type nonrec t =
+      {
+      spendingLimitArn: SpendingLimitArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the created spending limit."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `DeviceRetiredException of DeviceRetiredException.t 
+      | `InternalServiceException of InternalServiceException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?spendingLimitArn = fun () -> { spendingLimitArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "DeviceRetiredException" ->
+          `DeviceRetiredException (DeviceRetiredException.of_json json)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "DeviceRetiredException" ->
+          `DeviceRetiredException (DeviceRetiredException.of_xml xml)
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `DeviceRetiredException e ->
+          `Assoc
+            [("error", (`String "DeviceRetiredException"));
+            ("details", (DeviceRetiredException.to_json e))]
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("spendingLimitArn",
+           (Option.map x.spendingLimitArn ~f:SpendingLimitArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let spendingLimitArn =
+        (Option.map ~f:SpendingLimitArn.of_xml)
+          (Xml.child xml_arg0 "spendingLimitArn") in
+      make ?spendingLimitArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let spendingLimitArn =
+        field_map json__ "spendingLimitArn" SpendingLimitArn.of_json in
+      make ?spendingLimitArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a spending limit for a specified quantum device. Spending limits help you control costs by setting maximum amounts that can be spent on quantum computing tasks within a specified time period. Simulators do not support spending limits."]
+module CreateSpendingLimitRequest =
+  struct
+    type nonrec t =
+      {
+      clientToken: String64.t
+        [@ocaml.doc
+          "A unique, case-sensitive identifier to ensure that the operation completes no more than one time. If this token matches a previous request, Amazon Braket ignores the request, but does not return an error."];
+      deviceArn: DeviceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the quantum device to apply the spending limit to."];
+      spendingLimit: CreateSpendingLimitRequestSpendingLimitString.t
+        [@ocaml.doc
+          "The maximum amount that can be spent on the specified device, in USD."];
+      timePeriod: TimePeriod.t option
+        [@ocaml.doc
+          "The time period during which the spending limit is active, including start and end dates."];
+      tags: TagsMap.t option
+        [@ocaml.doc
+          "The tags to apply to the spending limit. Each tag consists of a key and an optional value."]}
+    let context_ = "CreateSpendingLimitRequest"
+    let make ?timePeriod =
+      fun ?tags ->
+        fun ~clientToken ->
+          fun ~deviceArn ->
+            fun ~spendingLimit ->
+              fun () ->
+                { timePeriod; tags; clientToken; deviceArn; spendingLimit }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Some (String64.to_value x.clientToken)));
+        ("deviceArn", (Some (DeviceArn.to_value x.deviceArn)));
+        ("spendingLimit",
+          (Some
+             (CreateSpendingLimitRequestSpendingLimitString.to_value
+                x.spendingLimit)));
+        ("timePeriod", (Option.map x.timePeriod ~f:TimePeriod.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let timePeriod =
+        (Option.map ~f:TimePeriod.of_xml) (Xml.child xml_arg0 "timePeriod") in
+      let spendingLimit =
+        CreateSpendingLimitRequestSpendingLimitString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "spendingLimit") in
+      let deviceArn =
+        DeviceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "deviceArn") in
+      let clientToken =
+        String64.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      make ?tags ?timePeriod ~spendingLimit ~deviceArn ~clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let timePeriod = field_map json__ "timePeriod" TimePeriod.of_json in
+      let spendingLimit =
+        field_map_exn json__ "spendingLimit"
+          CreateSpendingLimitRequestSpendingLimitString.of_json in
+      let deviceArn = field_map_exn json__ "deviceArn" DeviceArn.of_json in
+      let clientToken = field_map_exn json__ "clientToken" String64.of_json in
+      make ?tags ?timePeriod ~spendingLimit ~deviceArn ~clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a spending limit for a specified quantum device. Spending limits help you control costs by setting maximum amounts that can be spent on quantum computing tasks within a specified time period. Simulators do not support spending limits."]
 module CreateQuantumTaskResponse =
   struct
     type nonrec t =
       {
-      quantumTaskArn: QuantumTaskArn.t
-        [@ocaml.doc "The ARN of the task created by the request."]}
+      quantumTaskArn: QuantumTaskArn.t option
+        [@ocaml.doc "The ARN of the quantum task created by the request."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `DeviceOfflineException of DeviceOfflineException.t 
@@ -3763,8 +5655,7 @@ module CreateQuantumTaskResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateQuantumTaskResponse"
-    let make ~quantumTaskArn = fun () -> { quantumTaskArn }
+    let make ?quantumTaskArn = fun () -> { quantumTaskArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3842,75 +5733,86 @@ module CreateQuantumTaskResponse =
     let to_value x =
       structure_to_value
         [("quantumTaskArn",
-           (Some (QuantumTaskArn.to_value x.quantumTaskArn)))]
+           (Option.map x.quantumTaskArn ~f:QuantumTaskArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let quantumTaskArn =
-        QuantumTaskArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "quantumTaskArn") in
-      make ~quantumTaskArn ()
+        (Option.map ~f:QuantumTaskArn.of_xml)
+          (Xml.child xml_arg0 "quantumTaskArn") in
+      make ?quantumTaskArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let quantumTaskArn =
-        field_map_exn json "quantumTaskArn" QuantumTaskArn.of_json in
-      make ~quantumTaskArn ()
+        field_map json__ "quantumTaskArn" QuantumTaskArn.of_json in
+      make ?quantumTaskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a quantum task."]
 module CreateQuantumTaskRequest =
   struct
     type nonrec t =
       {
-      action: JsonValue.t [@ocaml.doc "The action associated with the task."];
       clientToken: String64.t
         [@ocaml.doc "The client token associated with the request."];
       deviceArn: DeviceArn.t
-        [@ocaml.doc "The ARN of the device to run the task on."];
+        [@ocaml.doc "The ARN of the device to run the quantum task on."];
       deviceParameters:
         CreateQuantumTaskRequestDeviceParametersString.t option
-        [@ocaml.doc "The parameters for the device to run the task on."];
-      jobToken: JobToken.t option
         [@ocaml.doc
-          "The token for an Amazon Braket job that associates it with the quantum task."];
+          "The parameters for the device to run the quantum task on."];
+      shots: CreateQuantumTaskRequestShotsLong.t
+        [@ocaml.doc "The number of shots to use for the quantum task."];
       outputS3Bucket: CreateQuantumTaskRequestOutputS3BucketString.t
-        [@ocaml.doc "The S3 bucket to store task result files in."];
+        [@ocaml.doc "The S3 bucket to store quantum task result files in."];
       outputS3KeyPrefix: CreateQuantumTaskRequestOutputS3KeyPrefixString.t
         [@ocaml.doc
-          "The key prefix for the location in the S3 bucket to store task results in."];
-      shots: CreateQuantumTaskRequestShotsLong.t
-        [@ocaml.doc "The number of shots to use for the task."];
+          "The key prefix for the location in the S3 bucket to store quantum task results in."];
+      action: JsonValue.t
+        [@ocaml.doc "The action associated with the quantum task."];
       tags: TagsMap.t option
-        [@ocaml.doc "Tags to be added to the quantum task you're creating."]}
+        [@ocaml.doc "Tags to be added to the quantum task you're creating."];
+      jobToken: JobToken.t option
+        [@ocaml.doc
+          "The token for an Amazon Braket hybrid job that associates it with the quantum task."];
+      associations: CreateQuantumTaskRequestAssociationsList.t option
+        [@ocaml.doc
+          "The list of Amazon Braket resources associated with the quantum task."];
+      experimentalCapabilities: ExperimentalCapabilities.t option
+        [@ocaml.doc "Enable experimental capabilities for the quantum task."]}
     let context_ = "CreateQuantumTaskRequest"
     let make ?deviceParameters =
-      fun ?jobToken ->
-        fun ?tags ->
-          fun ~action ->
-            fun ~clientToken ->
-              fun ~deviceArn ->
-                fun ~outputS3Bucket ->
-                  fun ~outputS3KeyPrefix ->
-                    fun ~shots ->
-                      fun () ->
-                        {
-                          deviceParameters;
-                          jobToken;
-                          tags;
-                          action;
-                          clientToken;
-                          deviceArn;
-                          outputS3Bucket;
-                          outputS3KeyPrefix;
-                          shots
-                        }
+      fun ?tags ->
+        fun ?jobToken ->
+          fun ?associations ->
+            fun ?experimentalCapabilities ->
+              fun ~clientToken ->
+                fun ~deviceArn ->
+                  fun ~shots ->
+                    fun ~outputS3Bucket ->
+                      fun ~outputS3KeyPrefix ->
+                        fun ~action ->
+                          fun () ->
+                            {
+                              deviceParameters;
+                              tags;
+                              jobToken;
+                              associations;
+                              experimentalCapabilities;
+                              clientToken;
+                              deviceArn;
+                              shots;
+                              outputS3Bucket;
+                              outputS3KeyPrefix;
+                              action
+                            }
     let to_value x =
       structure_to_value
-        [("action", (Some (JsonValue.to_value x.action)));
-        ("clientToken", (Some (String64.to_value x.clientToken)));
+        [("clientToken", (Some (String64.to_value x.clientToken)));
         ("deviceArn", (Some (DeviceArn.to_value x.deviceArn)));
         ("deviceParameters",
           (Option.map x.deviceParameters
              ~f:CreateQuantumTaskRequestDeviceParametersString.to_value));
-        ("jobToken", (Option.map x.jobToken ~f:JobToken.to_value));
+        ("shots",
+          (Some (CreateQuantumTaskRequestShotsLong.to_value x.shots)));
         ("outputS3Bucket",
           (Some
              (CreateQuantumTaskRequestOutputS3BucketString.to_value
@@ -3919,23 +5821,37 @@ module CreateQuantumTaskRequest =
           (Some
              (CreateQuantumTaskRequestOutputS3KeyPrefixString.to_value
                 x.outputS3KeyPrefix)));
-        ("shots",
-          (Some (CreateQuantumTaskRequestShotsLong.to_value x.shots)));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+        ("action", (Some (JsonValue.to_value x.action)));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("jobToken", (Option.map x.jobToken ~f:JobToken.to_value));
+        ("associations",
+          (Option.map x.associations
+             ~f:CreateQuantumTaskRequestAssociationsList.to_value));
+        ("experimentalCapabilities",
+          (Option.map x.experimentalCapabilities
+             ~f:ExperimentalCapabilities.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let experimentalCapabilities =
+        (Option.map ~f:ExperimentalCapabilities.of_xml)
+          (Xml.child xml_arg0 "experimentalCapabilities") in
+      let associations =
+        (Option.map ~f:CreateQuantumTaskRequestAssociationsList.of_xml)
+          (Xml.child xml_arg0 "associations") in
+      let jobToken =
+        (Option.map ~f:JobToken.of_xml) (Xml.child xml_arg0 "jobToken") in
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
-      let shots =
-        CreateQuantumTaskRequestShotsLong.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "shots") in
+      let action =
+        JsonValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "action") in
       let outputS3KeyPrefix =
         CreateQuantumTaskRequestOutputS3KeyPrefixString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "outputS3KeyPrefix") in
       let outputS3Bucket =
         CreateQuantumTaskRequestOutputS3BucketString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "outputS3Bucket") in
-      let jobToken =
-        (Option.map ~f:JobToken.of_xml) (Xml.child xml_arg0 "jobToken") in
+      let shots =
+        CreateQuantumTaskRequestShotsLong.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "shots") in
       let deviceParameters =
         (Option.map ~f:CreateQuantumTaskRequestDeviceParametersString.of_xml)
           (Xml.child xml_arg0 "deviceParameters") in
@@ -3945,55 +5861,64 @@ module CreateQuantumTaskRequest =
       let clientToken =
         String64.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
-      let action =
-        JsonValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "action") in
-      make ?tags ~shots ~outputS3KeyPrefix ~outputS3Bucket ?jobToken
-        ?deviceParameters ~deviceArn ~clientToken ~action ()
+      make ?experimentalCapabilities ?associations ?jobToken ?tags ~action
+        ~outputS3KeyPrefix ~outputS3Bucket ~shots ?deviceParameters
+        ~deviceArn ~clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let shots =
-        field_map_exn json "shots" CreateQuantumTaskRequestShotsLong.of_json in
+    let of_json json__ =
+      let experimentalCapabilities =
+        field_map json__ "experimentalCapabilities"
+          ExperimentalCapabilities.of_json in
+      let associations =
+        field_map json__ "associations"
+          CreateQuantumTaskRequestAssociationsList.of_json in
+      let jobToken = field_map json__ "jobToken" JobToken.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let action = field_map_exn json__ "action" JsonValue.of_json in
       let outputS3KeyPrefix =
-        field_map_exn json "outputS3KeyPrefix"
+        field_map_exn json__ "outputS3KeyPrefix"
           CreateQuantumTaskRequestOutputS3KeyPrefixString.of_json in
       let outputS3Bucket =
-        field_map_exn json "outputS3Bucket"
+        field_map_exn json__ "outputS3Bucket"
           CreateQuantumTaskRequestOutputS3BucketString.of_json in
-      let jobToken = field_map json "jobToken" JobToken.of_json in
+      let shots =
+        field_map_exn json__ "shots"
+          CreateQuantumTaskRequestShotsLong.of_json in
       let deviceParameters =
-        field_map json "deviceParameters"
+        field_map json__ "deviceParameters"
           CreateQuantumTaskRequestDeviceParametersString.of_json in
-      let deviceArn = field_map_exn json "deviceArn" DeviceArn.of_json in
-      let clientToken = field_map_exn json "clientToken" String64.of_json in
-      let action = field_map_exn json "action" JsonValue.of_json in
-      make ?tags ~shots ~outputS3KeyPrefix ~outputS3Bucket ?jobToken
-        ?deviceParameters ~deviceArn ~clientToken ~action ()
+      let deviceArn = field_map_exn json__ "deviceArn" DeviceArn.of_json in
+      let clientToken = field_map_exn json__ "clientToken" String64.of_json in
+      make ?experimentalCapabilities ?associations ?jobToken ?tags ~action
+        ~outputS3KeyPrefix ~outputS3Bucket ~shots ?deviceParameters
+        ~deviceArn ~clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a quantum task."]
 module CreateJobResponse =
   struct
     type nonrec t =
       {
-      jobArn: JobArn.t
-        [@ocaml.doc "The ARN of the Amazon Braket job created."]}
+      jobArn: JobArn.t option
+        [@ocaml.doc "The ARN of the Amazon Braket hybrid job created."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
+      | `DeviceOfflineException of DeviceOfflineException.t 
       | `DeviceRetiredException of DeviceRetiredException.t 
       | `InternalServiceException of InternalServiceException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateJobResponse"
-    let make ~jobArn = fun () -> { jobArn }
+    let make ?jobArn = fun () -> { jobArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_json json)
+      | "DeviceOfflineException" ->
+          `DeviceOfflineException (DeviceOfflineException.of_json json)
       | "DeviceRetiredException" ->
           `DeviceRetiredException (DeviceRetiredException.of_json json)
       | "InternalServiceException" ->
@@ -4014,6 +5939,8 @@ module CreateJobResponse =
           `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_xml xml)
+      | "DeviceOfflineException" ->
+          `DeviceOfflineException (DeviceOfflineException.of_xml xml)
       | "DeviceRetiredException" ->
           `DeviceRetiredException (DeviceRetiredException.of_xml xml)
       | "InternalServiceException" ->
@@ -4037,6 +5964,10 @@ module CreateJobResponse =
           `Assoc
             [("error", (`String "ConflictException"));
             ("details", (ConflictException.to_json e))]
+      | `DeviceOfflineException e ->
+          `Assoc
+            [("error", (`String "DeviceOfflineException"));
+            ("details", (DeviceOfflineException.to_json e))]
       | `DeviceRetiredException e ->
           `Assoc
             [("error", (`String "DeviceRetiredException"));
@@ -4063,182 +5994,199 @@ module CreateJobResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("jobArn", (Some (JobArn.to_value x.jobArn)))]
+      structure_to_value
+        [("jobArn", (Option.map x.jobArn ~f:JobArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let jobArn =
-        JobArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobArn") in
-      make ~jobArn ()
+        (Option.map ~f:JobArn.of_xml) (Xml.child xml_arg0 "jobArn") in
+      make ?jobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobArn = field_map_exn json "jobArn" JobArn.of_json in
-      make ~jobArn ()
+    let of_json json__ =
+      let jobArn = field_map json__ "jobArn" JobArn.of_json in
+      make ?jobArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates an Amazon Braket job."]
+  end[@@ocaml.doc "Creates an Amazon Braket hybrid job."]
 module CreateJobRequest =
   struct
     type nonrec t =
       {
+      clientToken: String64.t
+        [@ocaml.doc
+          "The client token associated with this request that guarantees that the request is idempotent."];
       algorithmSpecification: AlgorithmSpecification.t
         [@ocaml.doc
           "Definition of the Amazon Braket job to be created. Specifies the container image the job uses and information about the Python scripts used for entry and training."];
-      checkpointConfig: JobCheckpointConfig.t option
-        [@ocaml.doc
-          "Information about the output locations for job checkpoint data."];
-      clientToken: String64.t
-        [@ocaml.doc
-          "A unique token that guarantees that the call to this API is idempotent."];
-      deviceConfig: DeviceConfig.t
-        [@ocaml.doc
-          "The quantum processing unit (QPU) or simulator used to create an Amazon Braket job."];
-      hyperParameters: HyperParameters.t option
-        [@ocaml.doc
-          "Algorithm-specific parameters used by an Amazon Braket job that influence the quality of the training job. The values are set with a string of JSON key:value pairs, where the key is the name of the hyperparameter and the value is the value of th hyperparameter."];
       inputDataConfig: CreateJobRequestInputDataConfigList.t option
         [@ocaml.doc
           "A list of parameters that specify the name and type of input data and where it is located."];
+      outputDataConfig: JobOutputDataConfig.t
+        [@ocaml.doc
+          "The path to the S3 location where you want to store hybrid job artifacts and the encryption key used to store them."];
+      checkpointConfig: JobCheckpointConfig.t option
+        [@ocaml.doc
+          "Information about the output locations for hybrid job checkpoint data."];
+      jobName: CreateJobRequestJobNameString.t
+        [@ocaml.doc "The name of the Amazon Braket hybrid job."];
+      roleArn: RoleArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role that Amazon Braket can assume to perform tasks on behalf of a user. It can access user resources, run an Amazon Braket job container on behalf of user, and output results and hybrid job details to the users' s3 buckets."];
+      stoppingCondition: JobStoppingCondition.t option
+        [@ocaml.doc
+          "The user-defined criteria that specifies when a hybrid job stops running."];
       instanceConfig: InstanceConfig.t
         [@ocaml.doc
           "Configuration of the resource instances to use while running the hybrid job on Amazon Braket."];
-      jobName: CreateJobRequestJobNameString.t
-        [@ocaml.doc "The name of the Amazon Braket job."];
-      outputDataConfig: JobOutputDataConfig.t
+      hyperParameters: HyperParameters.t option
         [@ocaml.doc
-          "The path to the S3 location where you want to store job artifacts and the encryption key used to store them."];
-      roleArn: RoleArn.t
+          "Algorithm-specific parameters used by an Amazon Braket hybrid job that influence the quality of the training job. The values are set with a map of JSON key:value pairs, where the key is the name of the hyperparameter and the value is the value of the hyperparameter. Do not include any security-sensitive information including account access IDs, secrets, or tokens in any hyperparameter fields. As part of the shared responsibility model, you are responsible for any potential exposure, unauthorized access, or compromise of your sensitive data if caused by security-sensitive information included in the request hyperparameter variable or plain text fields."];
+      deviceConfig: DeviceConfig.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of an IAM role that Amazon Braket can assume to perform tasks on behalf of a user. It can access user resources, run an Amazon Braket job container on behalf of user, and output resources to the users' s3 buckets."];
-      stoppingCondition: JobStoppingCondition.t option
-        [@ocaml.doc
-          "The user-defined criteria that specifies when a job stops running."];
+          "The quantum processing unit (QPU) or simulator used to create an Amazon Braket hybrid job."];
       tags: TagsMap.t option
+        [@ocaml.doc "Tags to be added to the hybrid job you're creating."];
+      associations: CreateJobRequestAssociationsList.t option
         [@ocaml.doc
-          "A tag object that consists of a key and an optional value, used to manage metadata for Amazon Braket resources."]}
+          "The list of Amazon Braket resources associated with the hybrid job."]}
     let context_ = "CreateJobRequest"
-    let make ?checkpointConfig =
-      fun ?hyperParameters ->
-        fun ?inputDataConfig ->
-          fun ?stoppingCondition ->
+    let make ?inputDataConfig =
+      fun ?checkpointConfig ->
+        fun ?stoppingCondition ->
+          fun ?hyperParameters ->
             fun ?tags ->
-              fun ~algorithmSpecification ->
+              fun ?associations ->
                 fun ~clientToken ->
-                  fun ~deviceConfig ->
-                    fun ~instanceConfig ->
+                  fun ~algorithmSpecification ->
+                    fun ~outputDataConfig ->
                       fun ~jobName ->
-                        fun ~outputDataConfig ->
-                          fun ~roleArn ->
-                            fun () ->
-                              {
-                                checkpointConfig;
-                                hyperParameters;
-                                inputDataConfig;
-                                stoppingCondition;
-                                tags;
-                                algorithmSpecification;
-                                clientToken;
-                                deviceConfig;
-                                instanceConfig;
-                                jobName;
-                                outputDataConfig;
-                                roleArn
-                              }
+                        fun ~roleArn ->
+                          fun ~instanceConfig ->
+                            fun ~deviceConfig ->
+                              fun () ->
+                                {
+                                  inputDataConfig;
+                                  checkpointConfig;
+                                  stoppingCondition;
+                                  hyperParameters;
+                                  tags;
+                                  associations;
+                                  clientToken;
+                                  algorithmSpecification;
+                                  outputDataConfig;
+                                  jobName;
+                                  roleArn;
+                                  instanceConfig;
+                                  deviceConfig
+                                }
     let to_value x =
       structure_to_value
-        [("algorithmSpecification",
-           (Some (AlgorithmSpecification.to_value x.algorithmSpecification)));
-        ("checkpointConfig",
-          (Option.map x.checkpointConfig ~f:JobCheckpointConfig.to_value));
-        ("clientToken", (Some (String64.to_value x.clientToken)));
-        ("deviceConfig", (Some (DeviceConfig.to_value x.deviceConfig)));
-        ("hyperParameters",
-          (Option.map x.hyperParameters ~f:HyperParameters.to_value));
+        [("clientToken", (Some (String64.to_value x.clientToken)));
+        ("algorithmSpecification",
+          (Some (AlgorithmSpecification.to_value x.algorithmSpecification)));
         ("inputDataConfig",
           (Option.map x.inputDataConfig
              ~f:CreateJobRequestInputDataConfigList.to_value));
-        ("instanceConfig", (Some (InstanceConfig.to_value x.instanceConfig)));
-        ("jobName",
-          (Some (CreateJobRequestJobNameString.to_value x.jobName)));
         ("outputDataConfig",
           (Some (JobOutputDataConfig.to_value x.outputDataConfig)));
+        ("checkpointConfig",
+          (Option.map x.checkpointConfig ~f:JobCheckpointConfig.to_value));
+        ("jobName",
+          (Some (CreateJobRequestJobNameString.to_value x.jobName)));
         ("roleArn", (Some (RoleArn.to_value x.roleArn)));
         ("stoppingCondition",
           (Option.map x.stoppingCondition ~f:JobStoppingCondition.to_value));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+        ("instanceConfig", (Some (InstanceConfig.to_value x.instanceConfig)));
+        ("hyperParameters",
+          (Option.map x.hyperParameters ~f:HyperParameters.to_value));
+        ("deviceConfig", (Some (DeviceConfig.to_value x.deviceConfig)));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("associations",
+          (Option.map x.associations
+             ~f:CreateJobRequestAssociationsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let associations =
+        (Option.map ~f:CreateJobRequestAssociationsList.of_xml)
+          (Xml.child xml_arg0 "associations") in
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let deviceConfig =
+        DeviceConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "deviceConfig") in
+      let hyperParameters =
+        (Option.map ~f:HyperParameters.of_xml)
+          (Xml.child xml_arg0 "hyperParameters") in
+      let instanceConfig =
+        InstanceConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "instanceConfig") in
       let stoppingCondition =
         (Option.map ~f:JobStoppingCondition.of_xml)
           (Xml.child xml_arg0 "stoppingCondition") in
       let roleArn =
         RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
-      let outputDataConfig =
-        JobOutputDataConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "outputDataConfig") in
       let jobName =
         CreateJobRequestJobNameString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobName") in
-      let instanceConfig =
-        InstanceConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "instanceConfig") in
-      let inputDataConfig =
-        (Option.map ~f:CreateJobRequestInputDataConfigList.of_xml)
-          (Xml.child xml_arg0 "inputDataConfig") in
-      let hyperParameters =
-        (Option.map ~f:HyperParameters.of_xml)
-          (Xml.child xml_arg0 "hyperParameters") in
-      let deviceConfig =
-        DeviceConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "deviceConfig") in
-      let clientToken =
-        String64.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
       let checkpointConfig =
         (Option.map ~f:JobCheckpointConfig.of_xml)
           (Xml.child xml_arg0 "checkpointConfig") in
+      let outputDataConfig =
+        JobOutputDataConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "outputDataConfig") in
+      let inputDataConfig =
+        (Option.map ~f:CreateJobRequestInputDataConfigList.of_xml)
+          (Xml.child xml_arg0 "inputDataConfig") in
       let algorithmSpecification =
         AlgorithmSpecification.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "algorithmSpecification") in
-      make ?tags ?stoppingCondition ~roleArn ~outputDataConfig ~jobName
-        ~instanceConfig ?inputDataConfig ?hyperParameters ~deviceConfig
-        ~clientToken ?checkpointConfig ~algorithmSpecification ()
+      let clientToken =
+        String64.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      make ?associations ?tags ~deviceConfig ?hyperParameters ~instanceConfig
+        ?stoppingCondition ~roleArn ~jobName ?checkpointConfig
+        ~outputDataConfig ?inputDataConfig ~algorithmSpecification
+        ~clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
-      let stoppingCondition =
-        field_map json "stoppingCondition" JobStoppingCondition.of_json in
-      let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
-      let outputDataConfig =
-        field_map_exn json "outputDataConfig" JobOutputDataConfig.of_json in
-      let jobName =
-        field_map_exn json "jobName" CreateJobRequestJobNameString.of_json in
-      let instanceConfig =
-        field_map_exn json "instanceConfig" InstanceConfig.of_json in
-      let inputDataConfig =
-        field_map json "inputDataConfig"
-          CreateJobRequestInputDataConfigList.of_json in
-      let hyperParameters =
-        field_map json "hyperParameters" HyperParameters.of_json in
+    let of_json json__ =
+      let associations =
+        field_map json__ "associations"
+          CreateJobRequestAssociationsList.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
       let deviceConfig =
-        field_map_exn json "deviceConfig" DeviceConfig.of_json in
-      let clientToken = field_map_exn json "clientToken" String64.of_json in
+        field_map_exn json__ "deviceConfig" DeviceConfig.of_json in
+      let hyperParameters =
+        field_map json__ "hyperParameters" HyperParameters.of_json in
+      let instanceConfig =
+        field_map_exn json__ "instanceConfig" InstanceConfig.of_json in
+      let stoppingCondition =
+        field_map json__ "stoppingCondition" JobStoppingCondition.of_json in
+      let roleArn = field_map_exn json__ "roleArn" RoleArn.of_json in
+      let jobName =
+        field_map_exn json__ "jobName" CreateJobRequestJobNameString.of_json in
       let checkpointConfig =
-        field_map json "checkpointConfig" JobCheckpointConfig.of_json in
+        field_map json__ "checkpointConfig" JobCheckpointConfig.of_json in
+      let outputDataConfig =
+        field_map_exn json__ "outputDataConfig" JobOutputDataConfig.of_json in
+      let inputDataConfig =
+        field_map json__ "inputDataConfig"
+          CreateJobRequestInputDataConfigList.of_json in
       let algorithmSpecification =
-        field_map_exn json "algorithmSpecification"
+        field_map_exn json__ "algorithmSpecification"
           AlgorithmSpecification.of_json in
-      make ?tags ?stoppingCondition ~roleArn ~outputDataConfig ~jobName
-        ~instanceConfig ?inputDataConfig ?hyperParameters ~deviceConfig
-        ~clientToken ?checkpointConfig ~algorithmSpecification ()
+      let clientToken = field_map_exn json__ "clientToken" String64.of_json in
+      make ?associations ?tags ~deviceConfig ?hyperParameters ~instanceConfig
+        ?stoppingCondition ~roleArn ~jobName ?checkpointConfig
+        ~outputDataConfig ?inputDataConfig ~algorithmSpecification
+        ~clientToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates an Amazon Braket job."]
+  end[@@ocaml.doc "Creates an Amazon Braket hybrid job."]
 module CancelQuantumTaskResponse =
   struct
     type nonrec t =
       {
-      cancellationStatus: CancellationStatus.t
-        [@ocaml.doc "The status of the cancellation request."];
-      quantumTaskArn: QuantumTaskArn.t [@ocaml.doc "The ARN of the task."]}
+      quantumTaskArn: QuantumTaskArn.t option
+        [@ocaml.doc "The ARN of the quantum task."];
+      cancellationStatus: CancellationStatus.t option
+        [@ocaml.doc "The status of the quantum task."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -4247,9 +6195,9 @@ module CancelQuantumTaskResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CancelQuantumTaskResponse"
-    let make ~cancellationStatus =
-      fun ~quantumTaskArn -> fun () -> { cancellationStatus; quantumTaskArn }
+    let make ?quantumTaskArn =
+      fun ?cancellationStatus ->
+        fun () -> { quantumTaskArn; cancellationStatus }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4316,66 +6264,70 @@ module CancelQuantumTaskResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("cancellationStatus",
-           (Some (CancellationStatus.to_value x.cancellationStatus)));
-        ("quantumTaskArn", (Some (QuantumTaskArn.to_value x.quantumTaskArn)))]
+        [("quantumTaskArn",
+           (Option.map x.quantumTaskArn ~f:QuantumTaskArn.to_value));
+        ("cancellationStatus",
+          (Option.map x.cancellationStatus ~f:CancellationStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let quantumTaskArn =
-        QuantumTaskArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "quantumTaskArn") in
       let cancellationStatus =
-        CancellationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cancellationStatus") in
-      make ~quantumTaskArn ~cancellationStatus ()
+        (Option.map ~f:CancellationStatus.of_xml)
+          (Xml.child xml_arg0 "cancellationStatus") in
+      let quantumTaskArn =
+        (Option.map ~f:QuantumTaskArn.of_xml)
+          (Xml.child xml_arg0 "quantumTaskArn") in
+      make ?cancellationStatus ?quantumTaskArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let quantumTaskArn =
-        field_map_exn json "quantumTaskArn" QuantumTaskArn.of_json in
+    let of_json json__ =
       let cancellationStatus =
-        field_map_exn json "cancellationStatus" CancellationStatus.of_json in
-      make ~quantumTaskArn ~cancellationStatus ()
+        field_map json__ "cancellationStatus" CancellationStatus.of_json in
+      let quantumTaskArn =
+        field_map json__ "quantumTaskArn" QuantumTaskArn.of_json in
+      make ?cancellationStatus ?quantumTaskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels the specified task."]
 module CancelQuantumTaskRequest =
   struct
     type nonrec t =
       {
-      clientToken: String64.t
-        [@ocaml.doc "The client token associated with the request."];
       quantumTaskArn: QuantumTaskArn.t
-        [@ocaml.doc "The ARN of the task to cancel."]}
+        [@ocaml.doc "The ARN of the quantum task to cancel."];
+      clientToken: String64.t
+        [@ocaml.doc
+          "The client token associated with the cancellation request."]}
     let context_ = "CancelQuantumTaskRequest"
-    let make ~clientToken =
-      fun ~quantumTaskArn -> fun () -> { clientToken; quantumTaskArn }
+    let make ~quantumTaskArn =
+      fun ~clientToken -> fun () -> { quantumTaskArn; clientToken }
     let to_value x =
       structure_to_value
-        [("clientToken", (Some (String64.to_value x.clientToken)));
-        ("quantumTaskArn", (Some (QuantumTaskArn.to_value x.quantumTaskArn)))]
+        [("quantumTaskArn",
+           (Some (QuantumTaskArn.to_value x.quantumTaskArn)));
+        ("clientToken", (Some (String64.to_value x.clientToken)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let quantumTaskArn =
-        QuantumTaskArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "quantumTaskArn") in
       let clientToken =
         String64.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
-      make ~quantumTaskArn ~clientToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let quantumTaskArn =
-        field_map_exn json "quantumTaskArn" QuantumTaskArn.of_json in
-      let clientToken = field_map_exn json "clientToken" String64.of_json in
-      make ~quantumTaskArn ~clientToken ()
+        QuantumTaskArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "quantumTaskArn") in
+      make ~clientToken ~quantumTaskArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map_exn json__ "clientToken" String64.of_json in
+      let quantumTaskArn =
+        field_map_exn json__ "quantumTaskArn" QuantumTaskArn.of_json in
+      make ~clientToken ~quantumTaskArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels the specified task."]
 module CancelJobResponse =
   struct
     type nonrec t =
       {
-      cancellationStatus: CancellationStatus.t
-        [@ocaml.doc "The status of the job cancellation request."];
-      jobArn: JobArn.t [@ocaml.doc "The ARN of the Amazon Braket job."]}
+      jobArn: JobArn.t option
+        [@ocaml.doc "The ARN of the Amazon Braket job."];
+      cancellationStatus: CancellationStatus.t option
+        [@ocaml.doc "The status of the hybrid job."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -4384,9 +6336,8 @@ module CancelJobResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CancelJobResponse"
-    let make ~cancellationStatus =
-      fun ~jobArn -> fun () -> { cancellationStatus; jobArn }
+    let make ?jobArn =
+      fun ?cancellationStatus -> fun () -> { jobArn; cancellationStatus }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4453,31 +6404,31 @@ module CancelJobResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("cancellationStatus",
-           (Some (CancellationStatus.to_value x.cancellationStatus)));
-        ("jobArn", (Some (JobArn.to_value x.jobArn)))]
+        [("jobArn", (Option.map x.jobArn ~f:JobArn.to_value));
+        ("cancellationStatus",
+          (Option.map x.cancellationStatus ~f:CancellationStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let cancellationStatus =
+        (Option.map ~f:CancellationStatus.of_xml)
+          (Xml.child xml_arg0 "cancellationStatus") in
       let jobArn =
-        JobArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobArn") in
-      let cancellationStatus =
-        CancellationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cancellationStatus") in
-      make ~jobArn ~cancellationStatus ()
+        (Option.map ~f:JobArn.of_xml) (Xml.child xml_arg0 "jobArn") in
+      make ?cancellationStatus ?jobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobArn = field_map_exn json "jobArn" JobArn.of_json in
+    let of_json json__ =
       let cancellationStatus =
-        field_map_exn json "cancellationStatus" CancellationStatus.of_json in
-      make ~jobArn ~cancellationStatus ()
+        field_map json__ "cancellationStatus" CancellationStatus.of_json in
+      let jobArn = field_map json__ "jobArn" JobArn.of_json in
+      make ?cancellationStatus ?jobArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Cancels an Amazon Braket job."]
+  end[@@ocaml.doc "Cancels an Amazon Braket hybrid job."]
 module CancelJobRequest =
   struct
     type nonrec t =
       {
       jobArn: JobArn.t
-        [@ocaml.doc "The ARN of the Amazon Braket job to cancel."]}
+        [@ocaml.doc "The ARN of the Amazon Braket hybrid job to cancel."]}
     let context_ = "CancelJobRequest"
     let make ~jobArn = fun () -> { jobArn }
     let to_value x =
@@ -4488,8 +6439,8 @@ module CancelJobRequest =
         JobArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobArn") in
       make ~jobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobArn = field_map_exn json "jobArn" JobArn.of_json in
+    let of_json json__ =
+      let jobArn = field_map_exn json__ "jobArn" JobArn.of_json in
       make ~jobArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Cancels an Amazon Braket job."]
+  end[@@ocaml.doc "Cancels an Amazon Braket hybrid job."]

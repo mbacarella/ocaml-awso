@@ -6,6 +6,12 @@ val accept_domain_transfer_from_another_aws_account :
       AcceptDomainTransferFromAnotherAwsAccountRequest.t ->
         (AcceptDomainTransferFromAnotherAwsAccountResponse.t,
           AcceptDomainTransferFromAnotherAwsAccountResponse.error) Result.t
+val associate_delegation_signer_to_domain :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssociateDelegationSignerToDomainRequest.t ->
+        (AssociateDelegationSignerToDomainResponse.t,
+          AssociateDelegationSignerToDomainResponse.error) Result.t
 val cancel_domain_transfer_to_another_aws_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -47,6 +53,12 @@ val disable_domain_transfer_lock :
       DisableDomainTransferLockRequest.t ->
         (DisableDomainTransferLockResponse.t,
           DisableDomainTransferLockResponse.error) Result.t
+val disassociate_delegation_signer_from_domain :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisassociateDelegationSignerFromDomainRequest.t ->
+        (DisassociateDelegationSignerFromDomainResponse.t,
+          DisassociateDelegationSignerFromDomainResponse.error) Result.t
 val enable_domain_auto_renew :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -103,6 +115,9 @@ val list_tags_for_domain :
       ListTagsForDomainRequest.t ->
         (ListTagsForDomainResponse.t, ListTagsForDomainResponse.error)
           Result.t
+val push_domain :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t -> PushDomainRequest.t -> (unit, unit) Result.t
 val register_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -125,6 +140,10 @@ val resend_contact_reachability_email :
       ResendContactReachabilityEmailRequest.t ->
         (ResendContactReachabilityEmailResponse.t,
           ResendContactReachabilityEmailResponse.error) Result.t
+val resend_operation_authorization :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ResendOperationAuthorizationRequest.t -> (unit, unit) Result.t
 val retrieve_domain_auth_code :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

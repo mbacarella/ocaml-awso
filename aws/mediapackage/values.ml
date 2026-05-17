@@ -28,12 +28,28 @@ module PresetSpeke20Audio =
   struct
     type nonrec t =
       | PRESET_AUDIO_1 
+      | PRESET_AUDIO_2 
+      | PRESET_AUDIO_3 
+      | SHARED 
+      | UNENCRYPTED 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | PRESET_AUDIO_1 -> "PRESET-AUDIO-1" | Non_static_id s -> s
+      function
+      | PRESET_AUDIO_1 -> "PRESET-AUDIO-1"
+      | PRESET_AUDIO_2 -> "PRESET-AUDIO-2"
+      | PRESET_AUDIO_3 -> "PRESET-AUDIO-3"
+      | SHARED -> "SHARED"
+      | UNENCRYPTED -> "UNENCRYPTED"
+      | Non_static_id s -> s
     let of_string =
-      function | "PRESET-AUDIO-1" -> PRESET_AUDIO_1 | x -> Non_static_id x
+      function
+      | "PRESET-AUDIO-1" -> PRESET_AUDIO_1
+      | "PRESET-AUDIO-2" -> PRESET_AUDIO_2
+      | "PRESET-AUDIO-3" -> PRESET_AUDIO_3
+      | "SHARED" -> SHARED
+      | "UNENCRYPTED" -> UNENCRYPTED
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -47,12 +63,43 @@ module PresetSpeke20Video =
   struct
     type nonrec t =
       | PRESET_VIDEO_1 
+      | PRESET_VIDEO_2 
+      | PRESET_VIDEO_3 
+      | PRESET_VIDEO_4 
+      | PRESET_VIDEO_5 
+      | PRESET_VIDEO_6 
+      | PRESET_VIDEO_7 
+      | PRESET_VIDEO_8 
+      | SHARED 
+      | UNENCRYPTED 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | PRESET_VIDEO_1 -> "PRESET-VIDEO-1" | Non_static_id s -> s
+      function
+      | PRESET_VIDEO_1 -> "PRESET-VIDEO-1"
+      | PRESET_VIDEO_2 -> "PRESET-VIDEO-2"
+      | PRESET_VIDEO_3 -> "PRESET-VIDEO-3"
+      | PRESET_VIDEO_4 -> "PRESET-VIDEO-4"
+      | PRESET_VIDEO_5 -> "PRESET-VIDEO-5"
+      | PRESET_VIDEO_6 -> "PRESET-VIDEO-6"
+      | PRESET_VIDEO_7 -> "PRESET-VIDEO-7"
+      | PRESET_VIDEO_8 -> "PRESET-VIDEO-8"
+      | SHARED -> "SHARED"
+      | UNENCRYPTED -> "UNENCRYPTED"
+      | Non_static_id s -> s
     let of_string =
-      function | "PRESET-VIDEO-1" -> PRESET_VIDEO_1 | x -> Non_static_id x
+      function
+      | "PRESET-VIDEO-1" -> PRESET_VIDEO_1
+      | "PRESET-VIDEO-2" -> PRESET_VIDEO_2
+      | "PRESET-VIDEO-3" -> PRESET_VIDEO_3
+      | "PRESET-VIDEO-4" -> PRESET_VIDEO_4
+      | "PRESET-VIDEO-5" -> PRESET_VIDEO_5
+      | "PRESET-VIDEO-6" -> PRESET_VIDEO_6
+      | "PRESET-VIDEO-7" -> PRESET_VIDEO_7
+      | "PRESET-VIDEO-8" -> PRESET_VIDEO_8
+      | "SHARED" -> SHARED
+      | "UNENCRYPTED" -> UNENCRYPTED
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -73,6 +120,56 @@ module Zz__string =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"__string" j
+    let to_json = simple_to_json to_value
+  end
+module Zz__AdTriggersElement =
+  struct
+    type nonrec t =
+      | SPLICE_INSERT 
+      | BREAK 
+      | PROVIDER_ADVERTISEMENT 
+      | DISTRIBUTOR_ADVERTISEMENT 
+      | PROVIDER_PLACEMENT_OPPORTUNITY 
+      | DISTRIBUTOR_PLACEMENT_OPPORTUNITY 
+      | PROVIDER_OVERLAY_PLACEMENT_OPPORTUNITY 
+      | DISTRIBUTOR_OVERLAY_PLACEMENT_OPPORTUNITY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SPLICE_INSERT -> "SPLICE_INSERT"
+      | BREAK -> "BREAK"
+      | PROVIDER_ADVERTISEMENT -> "PROVIDER_ADVERTISEMENT"
+      | DISTRIBUTOR_ADVERTISEMENT -> "DISTRIBUTOR_ADVERTISEMENT"
+      | PROVIDER_PLACEMENT_OPPORTUNITY -> "PROVIDER_PLACEMENT_OPPORTUNITY"
+      | DISTRIBUTOR_PLACEMENT_OPPORTUNITY ->
+          "DISTRIBUTOR_PLACEMENT_OPPORTUNITY"
+      | PROVIDER_OVERLAY_PLACEMENT_OPPORTUNITY ->
+          "PROVIDER_OVERLAY_PLACEMENT_OPPORTUNITY"
+      | DISTRIBUTOR_OVERLAY_PLACEMENT_OPPORTUNITY ->
+          "DISTRIBUTOR_OVERLAY_PLACEMENT_OPPORTUNITY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SPLICE_INSERT" -> SPLICE_INSERT
+      | "BREAK" -> BREAK
+      | "PROVIDER_ADVERTISEMENT" -> PROVIDER_ADVERTISEMENT
+      | "DISTRIBUTOR_ADVERTISEMENT" -> DISTRIBUTOR_ADVERTISEMENT
+      | "PROVIDER_PLACEMENT_OPPORTUNITY" -> PROVIDER_PLACEMENT_OPPORTUNITY
+      | "DISTRIBUTOR_PLACEMENT_OPPORTUNITY" ->
+          DISTRIBUTOR_PLACEMENT_OPPORTUNITY
+      | "PROVIDER_OVERLAY_PLACEMENT_OPPORTUNITY" ->
+          PROVIDER_OVERLAY_PLACEMENT_OPPORTUNITY
+      | "DISTRIBUTOR_OVERLAY_PLACEMENT_OPPORTUNITY" ->
+          DISTRIBUTOR_OVERLAY_PLACEMENT_OPPORTUNITY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration __AdTriggersElement" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"__AdTriggersElement" j)
     let to_json = simple_to_json to_value
   end
 module EncryptionContractConfiguration =
@@ -103,11 +200,11 @@ module EncryptionContractConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "presetSpeke20Audio") in
       make ~presetSpeke20Video ~presetSpeke20Audio ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let presetSpeke20Video =
-        field_map_exn json "PresetSpeke20Video" PresetSpeke20Video.of_json in
+        field_map_exn json__ "PresetSpeke20Video" PresetSpeke20Video.of_json in
       let presetSpeke20Audio =
-        field_map_exn json "PresetSpeke20Audio" PresetSpeke20Audio.of_json in
+        field_map_exn json__ "PresetSpeke20Audio" PresetSpeke20Audio.of_json in
       make ~presetSpeke20Video ~presetSpeke20Audio ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -116,6 +213,9 @@ module Zz__listOf__string =
   struct
     type nonrec t = Zz__string.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__string.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -165,6 +265,68 @@ module AdMarkers =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration AdMarkers" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"AdMarkers" j)
+    let to_json = simple_to_json to_value
+  end
+module AdTriggers =
+  struct
+    type nonrec t = Zz__AdTriggersElement.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Zz__AdTriggersElement.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Zz__AdTriggersElement.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AdTriggers" ~of_json:Zz__AdTriggersElement.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module AdsOnDeliveryRestrictions =
+  struct
+    type nonrec t =
+      | NONE 
+      | RESTRICTED 
+      | UNRESTRICTED 
+      | BOTH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NONE -> "NONE"
+      | RESTRICTED -> "RESTRICTED"
+      | UNRESTRICTED -> "UNRESTRICTED"
+      | BOTH -> "BOTH"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NONE" -> NONE
+      | "RESTRICTED" -> RESTRICTED
+      | "UNRESTRICTED" -> UNRESTRICTED
+      | "BOTH" -> BOTH
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AdsOnDeliveryRestrictions" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AdsOnDeliveryRestrictions" j)
     let to_json = simple_to_json to_value
   end
 module PlaylistType =
@@ -221,54 +383,43 @@ module Zz__integer =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module Zz__AdTriggersElement =
+module SensitiveString =
+  struct
+    type nonrec t = string
+    let context_ = "SensitiveString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SensitiveString" j
+    let to_json = simple_to_json to_value
+  end
+module CmafEncryptionMethod =
   struct
     type nonrec t =
-      | SPLICE_INSERT 
-      | BREAK 
-      | PROVIDER_ADVERTISEMENT 
-      | DISTRIBUTOR_ADVERTISEMENT 
-      | PROVIDER_PLACEMENT_OPPORTUNITY 
-      | DISTRIBUTOR_PLACEMENT_OPPORTUNITY 
-      | PROVIDER_OVERLAY_PLACEMENT_OPPORTUNITY 
-      | DISTRIBUTOR_OVERLAY_PLACEMENT_OPPORTUNITY 
+      | SAMPLE_AES 
+      | AES_CTR 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | SPLICE_INSERT -> "SPLICE_INSERT"
-      | BREAK -> "BREAK"
-      | PROVIDER_ADVERTISEMENT -> "PROVIDER_ADVERTISEMENT"
-      | DISTRIBUTOR_ADVERTISEMENT -> "DISTRIBUTOR_ADVERTISEMENT"
-      | PROVIDER_PLACEMENT_OPPORTUNITY -> "PROVIDER_PLACEMENT_OPPORTUNITY"
-      | DISTRIBUTOR_PLACEMENT_OPPORTUNITY ->
-          "DISTRIBUTOR_PLACEMENT_OPPORTUNITY"
-      | PROVIDER_OVERLAY_PLACEMENT_OPPORTUNITY ->
-          "PROVIDER_OVERLAY_PLACEMENT_OPPORTUNITY"
-      | DISTRIBUTOR_OVERLAY_PLACEMENT_OPPORTUNITY ->
-          "DISTRIBUTOR_OVERLAY_PLACEMENT_OPPORTUNITY"
+      | SAMPLE_AES -> "SAMPLE_AES"
+      | AES_CTR -> "AES_CTR"
       | Non_static_id s -> s
     let of_string =
       function
-      | "SPLICE_INSERT" -> SPLICE_INSERT
-      | "BREAK" -> BREAK
-      | "PROVIDER_ADVERTISEMENT" -> PROVIDER_ADVERTISEMENT
-      | "DISTRIBUTOR_ADVERTISEMENT" -> DISTRIBUTOR_ADVERTISEMENT
-      | "PROVIDER_PLACEMENT_OPPORTUNITY" -> PROVIDER_PLACEMENT_OPPORTUNITY
-      | "DISTRIBUTOR_PLACEMENT_OPPORTUNITY" ->
-          DISTRIBUTOR_PLACEMENT_OPPORTUNITY
-      | "PROVIDER_OVERLAY_PLACEMENT_OPPORTUNITY" ->
-          PROVIDER_OVERLAY_PLACEMENT_OPPORTUNITY
-      | "DISTRIBUTOR_OVERLAY_PLACEMENT_OPPORTUNITY" ->
-          DISTRIBUTOR_OVERLAY_PLACEMENT_OPPORTUNITY
+      | "SAMPLE_AES" -> SAMPLE_AES
+      | "AES_CTR" -> AES_CTR
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
       of_string
-        (string_of_xml ~kind:"enumeration __AdTriggersElement" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"__AdTriggersElement" j)
+        (string_of_xml ~kind:"enumeration CmafEncryptionMethod" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CmafEncryptionMethod" j)
     let to_json = simple_to_json to_value
   end
 module SpekeKeyProvider =
@@ -338,16 +489,17 @@ module SpekeKeyProvider =
       make ~url ~systemIds ~roleArn ~resourceId
         ?encryptionContractConfiguration ?certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map_exn json "Url" Zz__string.of_json in
+    let of_json json__ =
+      let url = field_map_exn json__ "Url" Zz__string.of_json in
       let systemIds =
-        field_map_exn json "SystemIds" Zz__listOf__string.of_json in
-      let roleArn = field_map_exn json "RoleArn" Zz__string.of_json in
-      let resourceId = field_map_exn json "ResourceId" Zz__string.of_json in
+        field_map_exn json__ "SystemIds" Zz__listOf__string.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" Zz__string.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" Zz__string.of_json in
       let encryptionContractConfiguration =
-        field_map json "EncryptionContractConfiguration"
+        field_map json__ "EncryptionContractConfiguration"
           EncryptionContractConfiguration.of_json in
-      let certificateArn = field_map json "CertificateArn" Zz__string.of_json in
+      let certificateArn =
+        field_map json__ "CertificateArn" Zz__string.of_json in
       make ~url ~systemIds ~roleArn ~resourceId
         ?encryptionContractConfiguration ?certificateArn ()
     let to_json v = composed_to_json to_value v
@@ -388,7 +540,7 @@ module HlsManifest =
       adMarkers: AdMarkers.t option
         [@ocaml.doc
           "This setting controls how ad markers are included in the packaged OriginEndpoint. \"NONE\" will omit all SCTE-35 ad markers from the output. \"PASSTHROUGH\" causes the manifest to contain a copy of the SCTE-35 ad markers (comments) taken directly from the input HTTP Live Streaming (HLS) manifest. \"SCTE35_ENHANCED\" generates ad markers and blackout tags based on SCTE-35 messages in the input source. \"DATERANGE\" inserts EXT-X-DATERANGE tags to signal ad and program transition events in HLS and CMAF manifests. For this option, you must set a programDateTimeIntervalSeconds value that is greater than 0."];
-      id: Zz__string.t
+      id: Zz__string.t option
         [@ocaml.doc
           "The ID of the manifest. The ID must be unique within the OriginEndpoint and it cannot be changed after it is created."];
       includeIframeOnlyStream: Zz__boolean.t option
@@ -408,31 +560,36 @@ module HlsManifest =
           "The interval (in seconds) between each EXT-X-PROGRAM-DATE-TIME tag inserted into manifests. Additionally, when an interval is specified ID3Timed Metadata messages will be generated every 5 seconds using the ingest time of the content. If the interval is not specified, or set to 0, then no EXT-X-PROGRAM-DATE-TIME tags will be inserted into manifests and no ID3Timed Metadata messages will be generated. Note that irrespective of this parameter, if any ID3 Timed Metadata is found in HTTP Live Streaming (HLS) input, it will be passed through to HLS output."];
       url: Zz__string.t option
         [@ocaml.doc
-          "The URL of the packaged OriginEndpoint for consumption."]}
-    let context_ = "HlsManifest"
+          "The URL of the packaged OriginEndpoint for consumption."];
+      adTriggers: AdTriggers.t option ;
+      adsOnDeliveryRestrictions: AdsOnDeliveryRestrictions.t option }
     let make ?adMarkers =
-      fun ?includeIframeOnlyStream ->
-        fun ?manifestName ->
-          fun ?playlistType ->
-            fun ?playlistWindowSeconds ->
-              fun ?programDateTimeIntervalSeconds ->
-                fun ?url ->
-                  fun ~id ->
-                    fun () ->
-                      {
-                        adMarkers;
-                        includeIframeOnlyStream;
-                        manifestName;
-                        playlistType;
-                        playlistWindowSeconds;
-                        programDateTimeIntervalSeconds;
-                        url;
-                        id
-                      }
+      fun ?id ->
+        fun ?includeIframeOnlyStream ->
+          fun ?manifestName ->
+            fun ?playlistType ->
+              fun ?playlistWindowSeconds ->
+                fun ?programDateTimeIntervalSeconds ->
+                  fun ?url ->
+                    fun ?adTriggers ->
+                      fun ?adsOnDeliveryRestrictions ->
+                        fun () ->
+                          {
+                            adMarkers;
+                            id;
+                            includeIframeOnlyStream;
+                            manifestName;
+                            playlistType;
+                            playlistWindowSeconds;
+                            programDateTimeIntervalSeconds;
+                            url;
+                            adTriggers;
+                            adsOnDeliveryRestrictions
+                          }
     let to_value x =
       structure_to_value
         [("adMarkers", (Option.map x.adMarkers ~f:AdMarkers.to_value));
-        ("id", (Some (Zz__string.to_value x.id)));
+        ("id", (Option.map x.id ~f:Zz__string.to_value));
         ("includeIframeOnlyStream",
           (Option.map x.includeIframeOnlyStream ~f:Zz__boolean.to_value));
         ("manifestName", (Option.map x.manifestName ~f:Zz__string.to_value));
@@ -443,9 +600,18 @@ module HlsManifest =
         ("programDateTimeIntervalSeconds",
           (Option.map x.programDateTimeIntervalSeconds
              ~f:Zz__integer.to_value));
-        ("url", (Option.map x.url ~f:Zz__string.to_value))]
+        ("url", (Option.map x.url ~f:Zz__string.to_value));
+        ("adTriggers", (Option.map x.adTriggers ~f:AdTriggers.to_value));
+        ("adsOnDeliveryRestrictions",
+          (Option.map x.adsOnDeliveryRestrictions
+             ~f:AdsOnDeliveryRestrictions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let adsOnDeliveryRestrictions =
+        (Option.map ~f:AdsOnDeliveryRestrictions.of_xml)
+          (Xml.child xml_arg0 "adsOnDeliveryRestrictions") in
+      let adTriggers =
+        (Option.map ~f:AdTriggers.of_xml) (Xml.child xml_arg0 "adTriggers") in
       let url = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "url") in
       let programDateTimeIntervalSeconds =
         (Option.map ~f:Zz__integer.of_xml)
@@ -461,29 +627,32 @@ module HlsManifest =
       let includeIframeOnlyStream =
         (Option.map ~f:Zz__boolean.of_xml)
           (Xml.child xml_arg0 "includeIframeOnlyStream") in
-      let id =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let id = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "id") in
       let adMarkers =
         (Option.map ~f:AdMarkers.of_xml) (Xml.child xml_arg0 "adMarkers") in
-      make ?url ?programDateTimeIntervalSeconds ?playlistWindowSeconds
-        ?playlistType ?manifestName ?includeIframeOnlyStream ~id ?adMarkers
-        ()
+      make ?adsOnDeliveryRestrictions ?adTriggers ?url
+        ?programDateTimeIntervalSeconds ?playlistWindowSeconds ?playlistType
+        ?manifestName ?includeIframeOnlyStream ?id ?adMarkers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map json "Url" Zz__string.of_json in
+    let of_json json__ =
+      let adsOnDeliveryRestrictions =
+        field_map json__ "AdsOnDeliveryRestrictions"
+          AdsOnDeliveryRestrictions.of_json in
+      let adTriggers = field_map json__ "AdTriggers" AdTriggers.of_json in
+      let url = field_map json__ "Url" Zz__string.of_json in
       let programDateTimeIntervalSeconds =
-        field_map json "ProgramDateTimeIntervalSeconds" Zz__integer.of_json in
+        field_map json__ "ProgramDateTimeIntervalSeconds" Zz__integer.of_json in
       let playlistWindowSeconds =
-        field_map json "PlaylistWindowSeconds" Zz__integer.of_json in
-      let playlistType = field_map json "PlaylistType" PlaylistType.of_json in
-      let manifestName = field_map json "ManifestName" Zz__string.of_json in
+        field_map json__ "PlaylistWindowSeconds" Zz__integer.of_json in
+      let playlistType = field_map json__ "PlaylistType" PlaylistType.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
       let includeIframeOnlyStream =
-        field_map json "IncludeIframeOnlyStream" Zz__boolean.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
-      let adMarkers = field_map json "AdMarkers" AdMarkers.of_json in
-      make ?url ?programDateTimeIntervalSeconds ?playlistWindowSeconds
-        ?playlistType ?manifestName ?includeIframeOnlyStream ~id ?adMarkers
-        ()
+        field_map json__ "IncludeIframeOnlyStream" Zz__boolean.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let adMarkers = field_map json__ "AdMarkers" AdMarkers.of_json in
+      make ?adsOnDeliveryRestrictions ?adTriggers ?url
+        ?programDateTimeIntervalSeconds ?playlistWindowSeconds ?playlistType
+        ?manifestName ?includeIframeOnlyStream ?id ?adMarkers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A HTTP Live Streaming (HLS) manifest configuration."]
 module Zz__PeriodTriggersElement =
@@ -536,13 +705,13 @@ module IngestEndpoint =
       id: Zz__string.t option
         [@ocaml.doc
           "The system generated unique identifier for the IngestEndpoint"];
-      password: Zz__string.t option
+      password: SensitiveString.t option
         [@ocaml.doc
           "The system generated password for ingest authentication."];
       url: Zz__string.t option
         [@ocaml.doc
           "The ingest URL to which the source stream should be sent."];
-      username: Zz__string.t option
+      username: SensitiveString.t option
         [@ocaml.doc
           "The system generated username for ingest authentication."]}
     let make ?id =
@@ -552,86 +721,29 @@ module IngestEndpoint =
     let to_value x =
       structure_to_value
         [("id", (Option.map x.id ~f:Zz__string.to_value));
-        ("password", (Option.map x.password ~f:Zz__string.to_value));
+        ("password", (Option.map x.password ~f:SensitiveString.to_value));
         ("url", (Option.map x.url ~f:Zz__string.to_value));
-        ("username", (Option.map x.username ~f:Zz__string.to_value))]
+        ("username", (Option.map x.username ~f:SensitiveString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let username =
-        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "username") in
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "username") in
       let url = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "url") in
       let password =
-        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "password") in
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "password") in
       let id = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "id") in
       make ?username ?url ?password ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let username = field_map json "Username" Zz__string.of_json in
-      let url = field_map json "Url" Zz__string.of_json in
-      let password = field_map json "Password" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
+    let of_json json__ =
+      let username = field_map json__ "Username" SensitiveString.of_json in
+      let url = field_map json__ "Url" Zz__string.of_json in
+      let password = field_map json__ "Password" SensitiveString.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
       make ?username ?url ?password ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An endpoint for ingesting source content for a Channel."]
-module AdTriggers =
-  struct
-    type nonrec t = Zz__AdTriggersElement.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Zz__AdTriggersElement.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Zz__AdTriggersElement.of_xml)
-    let of_json j =
-      list_of_json ~kind:"AdTriggers" ~of_json:Zz__AdTriggersElement.of_json
-        j
-    let to_json v = composed_to_json to_value v
-  end
-module AdsOnDeliveryRestrictions =
-  struct
-    type nonrec t =
-      | NONE 
-      | RESTRICTED 
-      | UNRESTRICTED 
-      | BOTH 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | NONE -> "NONE"
-      | RESTRICTED -> "RESTRICTED"
-      | UNRESTRICTED -> "UNRESTRICTED"
-      | BOTH -> "BOTH"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "NONE" -> NONE
-      | "RESTRICTED" -> RESTRICTED
-      | "UNRESTRICTED" -> UNRESTRICTED
-      | "BOTH" -> BOTH
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration AdsOnDeliveryRestrictions" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"AdsOnDeliveryRestrictions" j)
-    let to_json = simple_to_json to_value
-  end
 module CmafEncryption =
   struct
     type nonrec t =
@@ -639,24 +751,29 @@ module CmafEncryption =
       constantInitializationVector: Zz__string.t option
         [@ocaml.doc
           "An optional 128-bit, 16-byte hex value represented by a 32-character string, used in conjunction with the key for encrypting blocks. If you don't specify a value, then MediaPackage creates the constant initialization vector (IV)."];
+      encryptionMethod: CmafEncryptionMethod.t option ;
       keyRotationIntervalSeconds: Zz__integer.t option
         [@ocaml.doc
           "Time (in seconds) between each encryption key rotation."];
       spekeKeyProvider: SpekeKeyProvider.t }
     let context_ = "CmafEncryption"
     let make ?constantInitializationVector =
-      fun ?keyRotationIntervalSeconds ->
-        fun ~spekeKeyProvider ->
-          fun () ->
-            {
-              constantInitializationVector;
-              keyRotationIntervalSeconds;
-              spekeKeyProvider
-            }
+      fun ?encryptionMethod ->
+        fun ?keyRotationIntervalSeconds ->
+          fun ~spekeKeyProvider ->
+            fun () ->
+              {
+                constantInitializationVector;
+                encryptionMethod;
+                keyRotationIntervalSeconds;
+                spekeKeyProvider
+              }
     let to_value x =
       structure_to_value
         [("constantInitializationVector",
            (Option.map x.constantInitializationVector ~f:Zz__string.to_value));
+        ("encryptionMethod",
+          (Option.map x.encryptionMethod ~f:CmafEncryptionMethod.to_value));
         ("keyRotationIntervalSeconds",
           (Option.map x.keyRotationIntervalSeconds ~f:Zz__integer.to_value));
         ("spekeKeyProvider",
@@ -669,20 +786,25 @@ module CmafEncryption =
       let keyRotationIntervalSeconds =
         (Option.map ~f:Zz__integer.of_xml)
           (Xml.child xml_arg0 "keyRotationIntervalSeconds") in
+      let encryptionMethod =
+        (Option.map ~f:CmafEncryptionMethod.of_xml)
+          (Xml.child xml_arg0 "encryptionMethod") in
       let constantInitializationVector =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "constantInitializationVector") in
-      make ~spekeKeyProvider ?keyRotationIntervalSeconds
+      make ~spekeKeyProvider ?keyRotationIntervalSeconds ?encryptionMethod
         ?constantInitializationVector ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let spekeKeyProvider =
-        field_map_exn json "SpekeKeyProvider" SpekeKeyProvider.of_json in
+        field_map_exn json__ "SpekeKeyProvider" SpekeKeyProvider.of_json in
       let keyRotationIntervalSeconds =
-        field_map json "KeyRotationIntervalSeconds" Zz__integer.of_json in
+        field_map json__ "KeyRotationIntervalSeconds" Zz__integer.of_json in
+      let encryptionMethod =
+        field_map json__ "EncryptionMethod" CmafEncryptionMethod.of_json in
       let constantInitializationVector =
-        field_map json "ConstantInitializationVector" Zz__string.of_json in
-      make ~spekeKeyProvider ?keyRotationIntervalSeconds
+        field_map json__ "ConstantInitializationVector" Zz__string.of_json in
+      make ~spekeKeyProvider ?keyRotationIntervalSeconds ?encryptionMethod
         ?constantInitializationVector ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -722,12 +844,12 @@ module StreamSelection =
           (Xml.child xml_arg0 "maxVideoBitsPerSecond") in
       make ?streamOrder ?minVideoBitsPerSecond ?maxVideoBitsPerSecond ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamOrder = field_map json "StreamOrder" StreamOrder.of_json in
+    let of_json json__ =
+      let streamOrder = field_map json__ "StreamOrder" StreamOrder.of_json in
       let minVideoBitsPerSecond =
-        field_map json "MinVideoBitsPerSecond" Zz__integer.of_json in
+        field_map json__ "MinVideoBitsPerSecond" Zz__integer.of_json in
       let maxVideoBitsPerSecond =
-        field_map json "MaxVideoBitsPerSecond" Zz__integer.of_json in
+        field_map json__ "MaxVideoBitsPerSecond" Zz__integer.of_json in
       make ?streamOrder ?minVideoBitsPerSecond ?maxVideoBitsPerSecond ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A StreamSelection configuration."]
@@ -735,6 +857,9 @@ module Zz__listOfHlsManifest =
   struct
     type nonrec t = HlsManifest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HlsManifest.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -783,11 +908,11 @@ module DashEncryption =
           (Xml.child xml_arg0 "keyRotationIntervalSeconds") in
       make ~spekeKeyProvider ?keyRotationIntervalSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let spekeKeyProvider =
-        field_map_exn json "SpekeKeyProvider" SpekeKeyProvider.of_json in
+        field_map_exn json__ "SpekeKeyProvider" SpekeKeyProvider.of_json in
       let keyRotationIntervalSeconds =
-        field_map json "KeyRotationIntervalSeconds" Zz__integer.of_json in
+        field_map json__ "KeyRotationIntervalSeconds" Zz__integer.of_json in
       make ~spekeKeyProvider ?keyRotationIntervalSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -797,12 +922,21 @@ module ManifestLayout =
     type nonrec t =
       | FULL 
       | COMPACT 
+      | DRM_TOP_LEVEL_COMPACT 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | FULL -> "FULL" | COMPACT -> "COMPACT" | Non_static_id s -> s
+      function
+      | FULL -> "FULL"
+      | COMPACT -> "COMPACT"
+      | DRM_TOP_LEVEL_COMPACT -> "DRM_TOP_LEVEL_COMPACT"
+      | Non_static_id s -> s
     let of_string =
-      function | "FULL" -> FULL | "COMPACT" -> COMPACT | x -> Non_static_id x
+      function
+      | "FULL" -> FULL
+      | "COMPACT" -> COMPACT
+      | "DRM_TOP_LEVEL_COMPACT" -> DRM_TOP_LEVEL_COMPACT
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -817,6 +951,7 @@ module Profile =
       | NONE 
       | HBBTV_1_5 
       | HYBRIDCAST 
+      | DVB_DASH_2014 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -824,12 +959,14 @@ module Profile =
       | NONE -> "NONE"
       | HBBTV_1_5 -> "HBBTV_1_5"
       | HYBRIDCAST -> "HYBRIDCAST"
+      | DVB_DASH_2014 -> "DVB_DASH_2014"
       | Non_static_id s -> s
     let of_string =
       function
       | "NONE" -> NONE
       | "HBBTV_1_5" -> HBBTV_1_5
       | "HYBRIDCAST" -> HYBRIDCAST
+      | "DVB_DASH_2014" -> DVB_DASH_2014
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -875,6 +1012,7 @@ module UtcTiming =
       | NONE 
       | HTTP_HEAD 
       | HTTP_ISO 
+      | HTTP_XSDATE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -882,12 +1020,14 @@ module UtcTiming =
       | NONE -> "NONE"
       | HTTP_HEAD -> "HTTP-HEAD"
       | HTTP_ISO -> "HTTP-ISO"
+      | HTTP_XSDATE -> "HTTP-XSDATE"
       | Non_static_id s -> s
     let of_string =
       function
       | "NONE" -> NONE
       | "HTTP-HEAD" -> HTTP_HEAD
       | "HTTP-ISO" -> HTTP_ISO
+      | "HTTP-XSDATE" -> HTTP_XSDATE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -901,6 +1041,9 @@ module Zz__listOf__PeriodTriggersElement =
   struct
     type nonrec t = Zz__PeriodTriggersElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__PeriodTriggersElement.to_value)) |>
         (fun x -> `List x)
@@ -985,16 +1128,17 @@ module HlsEncryption =
       make ~spekeKeyProvider ?repeatExtXKey ?keyRotationIntervalSeconds
         ?encryptionMethod ?constantInitializationVector ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let spekeKeyProvider =
-        field_map_exn json "SpekeKeyProvider" SpekeKeyProvider.of_json in
-      let repeatExtXKey = field_map json "RepeatExtXKey" Zz__boolean.of_json in
+        field_map_exn json__ "SpekeKeyProvider" SpekeKeyProvider.of_json in
+      let repeatExtXKey =
+        field_map json__ "RepeatExtXKey" Zz__boolean.of_json in
       let keyRotationIntervalSeconds =
-        field_map json "KeyRotationIntervalSeconds" Zz__integer.of_json in
+        field_map json__ "KeyRotationIntervalSeconds" Zz__integer.of_json in
       let encryptionMethod =
-        field_map json "EncryptionMethod" EncryptionMethod.of_json in
+        field_map json__ "EncryptionMethod" EncryptionMethod.of_json in
       let constantInitializationVector =
-        field_map json "ConstantInitializationVector" Zz__string.of_json in
+        field_map json__ "ConstantInitializationVector" Zz__string.of_json in
       make ~spekeKeyProvider ?repeatExtXKey ?keyRotationIntervalSeconds
         ?encryptionMethod ?constantInitializationVector ()
     let to_json v = composed_to_json to_value v
@@ -1016,9 +1160,9 @@ module MssEncryption =
           (Xml.child_exn ~context:context_ xml_arg0 "spekeKeyProvider") in
       make ~spekeKeyProvider ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let spekeKeyProvider =
-        field_map_exn json "SpekeKeyProvider" SpekeKeyProvider.of_json in
+        field_map_exn json__ "SpekeKeyProvider" SpekeKeyProvider.of_json in
       make ~spekeKeyProvider ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1027,6 +1171,9 @@ module Zz__listOfIngestEndpoint =
   struct
     type nonrec t = IngestEndpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IngestEndpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1144,21 +1291,21 @@ module HlsManifestCreateOrUpdateParameters =
         ?playlistType ?manifestName ?includeIframeOnlyStream ~id
         ?adsOnDeliveryRestrictions ?adTriggers ?adMarkers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let programDateTimeIntervalSeconds =
-        field_map json "ProgramDateTimeIntervalSeconds" Zz__integer.of_json in
+        field_map json__ "ProgramDateTimeIntervalSeconds" Zz__integer.of_json in
       let playlistWindowSeconds =
-        field_map json "PlaylistWindowSeconds" Zz__integer.of_json in
-      let playlistType = field_map json "PlaylistType" PlaylistType.of_json in
-      let manifestName = field_map json "ManifestName" Zz__string.of_json in
+        field_map json__ "PlaylistWindowSeconds" Zz__integer.of_json in
+      let playlistType = field_map json__ "PlaylistType" PlaylistType.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
       let includeIframeOnlyStream =
-        field_map json "IncludeIframeOnlyStream" Zz__boolean.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
+        field_map json__ "IncludeIframeOnlyStream" Zz__boolean.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       let adsOnDeliveryRestrictions =
-        field_map json "AdsOnDeliveryRestrictions"
+        field_map json__ "AdsOnDeliveryRestrictions"
           AdsOnDeliveryRestrictions.of_json in
-      let adTriggers = field_map json "AdTriggers" AdTriggers.of_json in
-      let adMarkers = field_map json "AdMarkers" AdMarkers.of_json in
+      let adTriggers = field_map json__ "AdTriggers" AdTriggers.of_json in
+      let adMarkers = field_map json__ "AdMarkers" AdMarkers.of_json in
       make ?programDateTimeIntervalSeconds ?playlistWindowSeconds
         ?playlistType ?manifestName ?includeIframeOnlyStream ~id
         ?adsOnDeliveryRestrictions ?adTriggers ?adMarkers ()
@@ -1193,11 +1340,11 @@ module Authorization =
           (Xml.child_exn ~context:context_ xml_arg0 "cdnIdentifierSecret") in
       make ~secretsRoleArn ~cdnIdentifierSecret ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secretsRoleArn =
-        field_map_exn json "SecretsRoleArn" Zz__string.of_json in
+        field_map_exn json__ "SecretsRoleArn" Zz__string.of_json in
       let cdnIdentifierSecret =
-        field_map_exn json "CdnIdentifierSecret" Zz__string.of_json in
+        field_map_exn json__ "CdnIdentifierSecret" Zz__string.of_json in
       make ~secretsRoleArn ~cdnIdentifierSecret ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CDN Authorization credentials"]
@@ -1259,15 +1406,15 @@ module CmafPackage =
       make ?streamSelection ?segmentPrefix ?segmentDurationSeconds
         ?hlsManifests ?encryption ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamSelection =
-        field_map json "StreamSelection" StreamSelection.of_json in
-      let segmentPrefix = field_map json "SegmentPrefix" Zz__string.of_json in
+        field_map json__ "StreamSelection" StreamSelection.of_json in
+      let segmentPrefix = field_map json__ "SegmentPrefix" Zz__string.of_json in
       let segmentDurationSeconds =
-        field_map json "SegmentDurationSeconds" Zz__integer.of_json in
+        field_map json__ "SegmentDurationSeconds" Zz__integer.of_json in
       let hlsManifests =
-        field_map json "HlsManifests" Zz__listOfHlsManifest.of_json in
-      let encryption = field_map json "Encryption" CmafEncryption.of_json in
+        field_map json__ "HlsManifests" Zz__listOfHlsManifest.of_json in
+      let encryption = field_map json__ "Encryption" CmafEncryption.of_json in
       make ?streamSelection ?segmentPrefix ?segmentDurationSeconds
         ?hlsManifests ?encryption ()
     let to_json v = composed_to_json to_value v
@@ -1280,9 +1427,12 @@ module DashPackage =
       adTriggers: AdTriggers.t option ;
       adsOnDeliveryRestrictions: AdsOnDeliveryRestrictions.t option ;
       encryption: DashEncryption.t option ;
+      includeIframeOnlyStream: Zz__boolean.t option
+        [@ocaml.doc
+          "When enabled, an I-Frame only stream will be included in the output."];
       manifestLayout: ManifestLayout.t option
         [@ocaml.doc
-          "Determines the position of some tags in the Media Presentation Description (MPD). When set to FULL, elements like SegmentTemplate and ContentProtection are included in each Representation. When set to COMPACT, duplicate elements are combined and presented at the AdaptationSet level."];
+          "Determines the position of some tags in the Media Presentation Description (MPD). When set to FULL, elements like SegmentTemplate and ContentProtection are included in each Representation. When set to COMPACT, duplicate elements are combined and presented at the AdaptationSet level. When set to DRM_TOP_LEVEL_COMPACT, content protection elements are placed the MPD level and referenced at the AdaptationSet level."];
       manifestWindowSeconds: Zz__integer.t option
         [@ocaml.doc "Time window (in seconds) contained in each manifest."];
       minBufferTimeSeconds: Zz__integer.t option
@@ -1296,7 +1446,7 @@ module DashPackage =
           "A list of triggers that controls when the outgoing Dynamic Adaptive Streaming over HTTP (DASH) Media Presentation Description (MPD) will be partitioned into multiple periods. If empty, the content will not be partitioned into more than one period. If the list contains \"ADS\", new periods will be created where the Channel source contains SCTE-35 ad markers."];
       profile: Profile.t option
         [@ocaml.doc
-          "The Dynamic Adaptive Streaming over HTTP (DASH) profile type. When set to \"HBBTV_1_5\", HbbTV 1.5 compliant output is enabled."];
+          "The Dynamic Adaptive Streaming over HTTP (DASH) profile type. When set to \"HBBTV_1_5\", HbbTV 1.5 compliant output is enabled. When set to \"DVB-DASH_2014\", DVB-DASH 2014 compliant output is enabled."];
       segmentDurationSeconds: Zz__integer.t option
         [@ocaml.doc
           "Duration (in seconds) of each segment. Actual segments will be rounded to the nearest multiple of the source segment duration."];
@@ -1312,40 +1462,42 @@ module DashPackage =
           "Determines the type of UTCTiming included in the Media Presentation Description (MPD)"];
       utcTimingUri: Zz__string.t option
         [@ocaml.doc
-          "Specifies the value attribute of the UTCTiming field when utcTiming is set to HTTP-ISO or HTTP-HEAD"]}
+          "Specifies the value attribute of the UTCTiming field when utcTiming is set to HTTP-ISO, HTTP-HEAD or HTTP-XSDATE"]}
     let make ?adTriggers =
       fun ?adsOnDeliveryRestrictions ->
         fun ?encryption ->
-          fun ?manifestLayout ->
-            fun ?manifestWindowSeconds ->
-              fun ?minBufferTimeSeconds ->
-                fun ?minUpdatePeriodSeconds ->
-                  fun ?periodTriggers ->
-                    fun ?profile ->
-                      fun ?segmentDurationSeconds ->
-                        fun ?segmentTemplateFormat ->
-                          fun ?streamSelection ->
-                            fun ?suggestedPresentationDelaySeconds ->
-                              fun ?utcTiming ->
-                                fun ?utcTimingUri ->
-                                  fun () ->
-                                    {
-                                      adTriggers;
-                                      adsOnDeliveryRestrictions;
-                                      encryption;
-                                      manifestLayout;
-                                      manifestWindowSeconds;
-                                      minBufferTimeSeconds;
-                                      minUpdatePeriodSeconds;
-                                      periodTriggers;
-                                      profile;
-                                      segmentDurationSeconds;
-                                      segmentTemplateFormat;
-                                      streamSelection;
-                                      suggestedPresentationDelaySeconds;
-                                      utcTiming;
-                                      utcTimingUri
-                                    }
+          fun ?includeIframeOnlyStream ->
+            fun ?manifestLayout ->
+              fun ?manifestWindowSeconds ->
+                fun ?minBufferTimeSeconds ->
+                  fun ?minUpdatePeriodSeconds ->
+                    fun ?periodTriggers ->
+                      fun ?profile ->
+                        fun ?segmentDurationSeconds ->
+                          fun ?segmentTemplateFormat ->
+                            fun ?streamSelection ->
+                              fun ?suggestedPresentationDelaySeconds ->
+                                fun ?utcTiming ->
+                                  fun ?utcTimingUri ->
+                                    fun () ->
+                                      {
+                                        adTriggers;
+                                        adsOnDeliveryRestrictions;
+                                        encryption;
+                                        includeIframeOnlyStream;
+                                        manifestLayout;
+                                        manifestWindowSeconds;
+                                        minBufferTimeSeconds;
+                                        minUpdatePeriodSeconds;
+                                        periodTriggers;
+                                        profile;
+                                        segmentDurationSeconds;
+                                        segmentTemplateFormat;
+                                        streamSelection;
+                                        suggestedPresentationDelaySeconds;
+                                        utcTiming;
+                                        utcTimingUri
+                                      }
     let to_value x =
       structure_to_value
         [("adTriggers", (Option.map x.adTriggers ~f:AdTriggers.to_value));
@@ -1353,6 +1505,8 @@ module DashPackage =
           (Option.map x.adsOnDeliveryRestrictions
              ~f:AdsOnDeliveryRestrictions.to_value));
         ("encryption", (Option.map x.encryption ~f:DashEncryption.to_value));
+        ("includeIframeOnlyStream",
+          (Option.map x.includeIframeOnlyStream ~f:Zz__boolean.to_value));
         ("manifestLayout",
           (Option.map x.manifestLayout ~f:ManifestLayout.to_value));
         ("manifestWindowSeconds",
@@ -1412,6 +1566,9 @@ module DashPackage =
       let manifestLayout =
         (Option.map ~f:ManifestLayout.of_xml)
           (Xml.child xml_arg0 "manifestLayout") in
+      let includeIframeOnlyStream =
+        (Option.map ~f:Zz__boolean.of_xml)
+          (Xml.child xml_arg0 "includeIframeOnlyStream") in
       let encryption =
         (Option.map ~f:DashEncryption.of_xml)
           (Xml.child xml_arg0 "encryption") in
@@ -1424,42 +1581,47 @@ module DashPackage =
         ?streamSelection ?segmentTemplateFormat ?segmentDurationSeconds
         ?profile ?periodTriggers ?minUpdatePeriodSeconds
         ?minBufferTimeSeconds ?manifestWindowSeconds ?manifestLayout
-        ?encryption ?adsOnDeliveryRestrictions ?adTriggers ()
+        ?includeIframeOnlyStream ?encryption ?adsOnDeliveryRestrictions
+        ?adTriggers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let utcTimingUri = field_map json "UtcTimingUri" Zz__string.of_json in
-      let utcTiming = field_map json "UtcTiming" UtcTiming.of_json in
+    let of_json json__ =
+      let utcTimingUri = field_map json__ "UtcTimingUri" Zz__string.of_json in
+      let utcTiming = field_map json__ "UtcTiming" UtcTiming.of_json in
       let suggestedPresentationDelaySeconds =
-        field_map json "SuggestedPresentationDelaySeconds"
+        field_map json__ "SuggestedPresentationDelaySeconds"
           Zz__integer.of_json in
       let streamSelection =
-        field_map json "StreamSelection" StreamSelection.of_json in
+        field_map json__ "StreamSelection" StreamSelection.of_json in
       let segmentTemplateFormat =
-        field_map json "SegmentTemplateFormat" SegmentTemplateFormat.of_json in
+        field_map json__ "SegmentTemplateFormat"
+          SegmentTemplateFormat.of_json in
       let segmentDurationSeconds =
-        field_map json "SegmentDurationSeconds" Zz__integer.of_json in
-      let profile = field_map json "Profile" Profile.of_json in
+        field_map json__ "SegmentDurationSeconds" Zz__integer.of_json in
+      let profile = field_map json__ "Profile" Profile.of_json in
       let periodTriggers =
-        field_map json "PeriodTriggers"
+        field_map json__ "PeriodTriggers"
           Zz__listOf__PeriodTriggersElement.of_json in
       let minUpdatePeriodSeconds =
-        field_map json "MinUpdatePeriodSeconds" Zz__integer.of_json in
+        field_map json__ "MinUpdatePeriodSeconds" Zz__integer.of_json in
       let minBufferTimeSeconds =
-        field_map json "MinBufferTimeSeconds" Zz__integer.of_json in
+        field_map json__ "MinBufferTimeSeconds" Zz__integer.of_json in
       let manifestWindowSeconds =
-        field_map json "ManifestWindowSeconds" Zz__integer.of_json in
+        field_map json__ "ManifestWindowSeconds" Zz__integer.of_json in
       let manifestLayout =
-        field_map json "ManifestLayout" ManifestLayout.of_json in
-      let encryption = field_map json "Encryption" DashEncryption.of_json in
+        field_map json__ "ManifestLayout" ManifestLayout.of_json in
+      let includeIframeOnlyStream =
+        field_map json__ "IncludeIframeOnlyStream" Zz__boolean.of_json in
+      let encryption = field_map json__ "Encryption" DashEncryption.of_json in
       let adsOnDeliveryRestrictions =
-        field_map json "AdsOnDeliveryRestrictions"
+        field_map json__ "AdsOnDeliveryRestrictions"
           AdsOnDeliveryRestrictions.of_json in
-      let adTriggers = field_map json "AdTriggers" AdTriggers.of_json in
+      let adTriggers = field_map json__ "AdTriggers" AdTriggers.of_json in
       make ?utcTimingUri ?utcTiming ?suggestedPresentationDelaySeconds
         ?streamSelection ?segmentTemplateFormat ?segmentDurationSeconds
         ?profile ?periodTriggers ?minUpdatePeriodSeconds
         ?minBufferTimeSeconds ?manifestWindowSeconds ?manifestLayout
-        ?encryption ?adsOnDeliveryRestrictions ?adTriggers ()
+        ?includeIframeOnlyStream ?encryption ?adsOnDeliveryRestrictions
+        ?adTriggers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A Dynamic Adaptive Streaming over HTTP (DASH) packaging configuration."]
@@ -1588,28 +1750,28 @@ module HlsPackage =
         ?includeIframeOnlyStream ?includeDvbSubtitles ?encryption
         ?adsOnDeliveryRestrictions ?adTriggers ?adMarkers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let useAudioRenditionGroup =
-        field_map json "UseAudioRenditionGroup" Zz__boolean.of_json in
+        field_map json__ "UseAudioRenditionGroup" Zz__boolean.of_json in
       let streamSelection =
-        field_map json "StreamSelection" StreamSelection.of_json in
+        field_map json__ "StreamSelection" StreamSelection.of_json in
       let segmentDurationSeconds =
-        field_map json "SegmentDurationSeconds" Zz__integer.of_json in
+        field_map json__ "SegmentDurationSeconds" Zz__integer.of_json in
       let programDateTimeIntervalSeconds =
-        field_map json "ProgramDateTimeIntervalSeconds" Zz__integer.of_json in
+        field_map json__ "ProgramDateTimeIntervalSeconds" Zz__integer.of_json in
       let playlistWindowSeconds =
-        field_map json "PlaylistWindowSeconds" Zz__integer.of_json in
-      let playlistType = field_map json "PlaylistType" PlaylistType.of_json in
+        field_map json__ "PlaylistWindowSeconds" Zz__integer.of_json in
+      let playlistType = field_map json__ "PlaylistType" PlaylistType.of_json in
       let includeIframeOnlyStream =
-        field_map json "IncludeIframeOnlyStream" Zz__boolean.of_json in
+        field_map json__ "IncludeIframeOnlyStream" Zz__boolean.of_json in
       let includeDvbSubtitles =
-        field_map json "IncludeDvbSubtitles" Zz__boolean.of_json in
-      let encryption = field_map json "Encryption" HlsEncryption.of_json in
+        field_map json__ "IncludeDvbSubtitles" Zz__boolean.of_json in
+      let encryption = field_map json__ "Encryption" HlsEncryption.of_json in
       let adsOnDeliveryRestrictions =
-        field_map json "AdsOnDeliveryRestrictions"
+        field_map json__ "AdsOnDeliveryRestrictions"
           AdsOnDeliveryRestrictions.of_json in
-      let adTriggers = field_map json "AdTriggers" AdTriggers.of_json in
-      let adMarkers = field_map json "AdMarkers" AdMarkers.of_json in
+      let adTriggers = field_map json__ "AdTriggers" AdTriggers.of_json in
+      let adMarkers = field_map json__ "AdMarkers" AdMarkers.of_json in
       make ?useAudioRenditionGroup ?streamSelection ?segmentDurationSeconds
         ?programDateTimeIntervalSeconds ?playlistWindowSeconds ?playlistType
         ?includeIframeOnlyStream ?includeDvbSubtitles ?encryption
@@ -1664,14 +1826,14 @@ module MssPackage =
       make ?streamSelection ?segmentDurationSeconds ?manifestWindowSeconds
         ?encryption ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamSelection =
-        field_map json "StreamSelection" StreamSelection.of_json in
+        field_map json__ "StreamSelection" StreamSelection.of_json in
       let segmentDurationSeconds =
-        field_map json "SegmentDurationSeconds" Zz__integer.of_json in
+        field_map json__ "SegmentDurationSeconds" Zz__integer.of_json in
       let manifestWindowSeconds =
-        field_map json "ManifestWindowSeconds" Zz__integer.of_json in
-      let encryption = field_map json "Encryption" MssEncryption.of_json in
+        field_map json__ "ManifestWindowSeconds" Zz__integer.of_json in
+      let encryption = field_map json__ "Encryption" MssEncryption.of_json in
       make ?streamSelection ?segmentDurationSeconds ?manifestWindowSeconds
         ?encryption ()
     let to_json v = composed_to_json to_value v
@@ -1717,6 +1879,8 @@ module Tags =
                     (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1758,10 +1922,10 @@ module S3Destination =
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ~roleArn ~manifestKey ~bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map_exn json "RoleArn" Zz__string.of_json in
-      let manifestKey = field_map_exn json "ManifestKey" Zz__string.of_json in
-      let bucketName = field_map_exn json "BucketName" Zz__string.of_json in
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "RoleArn" Zz__string.of_json in
+      let manifestKey = field_map_exn json__ "ManifestKey" Zz__string.of_json in
+      let bucketName = field_map_exn json__ "BucketName" Zz__string.of_json in
       make ~roleArn ~manifestKey ~bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1810,8 +1974,8 @@ module EgressAccessLogs =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "logGroupName") in
       make ?logGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logGroupName = field_map json "LogGroupName" Zz__string.of_json in
+    let of_json json__ =
+      let logGroupName = field_map json__ "LogGroupName" Zz__string.of_json in
       make ?logGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configure egress access logging."]
@@ -1834,9 +1998,9 @@ module HlsIngest =
           (Xml.child xml_arg0 "ingestEndpoints") in
       make ?ingestEndpoints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ingestEndpoints =
-        field_map json "IngestEndpoints" Zz__listOfIngestEndpoint.of_json in
+        field_map json__ "IngestEndpoints" Zz__listOfIngestEndpoint.of_json in
       make ?ingestEndpoints ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1857,8 +2021,8 @@ module IngressAccessLogs =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "logGroupName") in
       make ?logGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logGroupName = field_map json "LogGroupName" Zz__string.of_json in
+    let of_json json__ =
+      let logGroupName = field_map json__ "LogGroupName" Zz__string.of_json in
       make ?logGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configure ingress access logging."]
@@ -1866,6 +2030,9 @@ module Zz__listOfHlsManifestCreateOrUpdateParameters =
   struct
     type nonrec t = HlsManifestCreateOrUpdateParameters.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HlsManifestCreateOrUpdateParameters.to_value)) |>
         (fun x -> `List x)
@@ -1901,6 +2068,8 @@ module OriginEndpoint =
         [@ocaml.doc
           "The ID of the Channel the OriginEndpoint is associated with."];
       cmafPackage: CmafPackage.t option ;
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The date and time the OriginEndpoint was created."];
       dashPackage: DashPackage.t option ;
       description: Zz__string.t option
         [@ocaml.doc "A short text description of the OriginEndpoint."];
@@ -1930,37 +2099,39 @@ module OriginEndpoint =
       fun ?authorization ->
         fun ?channelId ->
           fun ?cmafPackage ->
-            fun ?dashPackage ->
-              fun ?description ->
-                fun ?hlsPackage ->
-                  fun ?id ->
-                    fun ?manifestName ->
-                      fun ?mssPackage ->
-                        fun ?origination ->
-                          fun ?startoverWindowSeconds ->
-                            fun ?tags ->
-                              fun ?timeDelaySeconds ->
-                                fun ?url ->
-                                  fun ?whitelist ->
-                                    fun () ->
-                                      {
-                                        arn;
-                                        authorization;
-                                        channelId;
-                                        cmafPackage;
-                                        dashPackage;
-                                        description;
-                                        hlsPackage;
-                                        id;
-                                        manifestName;
-                                        mssPackage;
-                                        origination;
-                                        startoverWindowSeconds;
-                                        tags;
-                                        timeDelaySeconds;
-                                        url;
-                                        whitelist
-                                      }
+            fun ?createdAt ->
+              fun ?dashPackage ->
+                fun ?description ->
+                  fun ?hlsPackage ->
+                    fun ?id ->
+                      fun ?manifestName ->
+                        fun ?mssPackage ->
+                          fun ?origination ->
+                            fun ?startoverWindowSeconds ->
+                              fun ?tags ->
+                                fun ?timeDelaySeconds ->
+                                  fun ?url ->
+                                    fun ?whitelist ->
+                                      fun () ->
+                                        {
+                                          arn;
+                                          authorization;
+                                          channelId;
+                                          cmafPackage;
+                                          createdAt;
+                                          dashPackage;
+                                          description;
+                                          hlsPackage;
+                                          id;
+                                          manifestName;
+                                          mssPackage;
+                                          origination;
+                                          startoverWindowSeconds;
+                                          tags;
+                                          timeDelaySeconds;
+                                          url;
+                                          whitelist
+                                        }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:Zz__string.to_value));
@@ -1968,6 +2139,7 @@ module OriginEndpoint =
           (Option.map x.authorization ~f:Authorization.to_value));
         ("channelId", (Option.map x.channelId ~f:Zz__string.to_value));
         ("cmafPackage", (Option.map x.cmafPackage ~f:CmafPackage.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("dashPackage", (Option.map x.dashPackage ~f:DashPackage.to_value));
         ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("hlsPackage", (Option.map x.hlsPackage ~f:HlsPackage.to_value));
@@ -2009,6 +2181,8 @@ module OriginEndpoint =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
       let dashPackage =
         (Option.map ~f:DashPackage.of_xml) (Xml.child xml_arg0 "dashPackage") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let cmafPackage =
         (Option.map ~f:CmafPackage.of_xml) (Xml.child xml_arg0 "cmafPackage") in
       let channelId =
@@ -2019,31 +2193,34 @@ module OriginEndpoint =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?whitelist ?url ?timeDelaySeconds ?tags ?startoverWindowSeconds
         ?origination ?mssPackage ?manifestName ?id ?hlsPackage ?description
-        ?dashPackage ?cmafPackage ?channelId ?authorization ?arn ()
+        ?dashPackage ?createdAt ?cmafPackage ?channelId ?authorization ?arn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let whitelist = field_map json "Whitelist" Zz__listOf__string.of_json in
-      let url = field_map json "Url" Zz__string.of_json in
+    let of_json json__ =
+      let whitelist = field_map json__ "Whitelist" Zz__listOf__string.of_json in
+      let url = field_map json__ "Url" Zz__string.of_json in
       let timeDelaySeconds =
-        field_map json "TimeDelaySeconds" Zz__integer.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "TimeDelaySeconds" Zz__integer.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let startoverWindowSeconds =
-        field_map json "StartoverWindowSeconds" Zz__integer.of_json in
-      let origination = field_map json "Origination" Origination.of_json in
-      let mssPackage = field_map json "MssPackage" MssPackage.of_json in
-      let manifestName = field_map json "ManifestName" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsPackage = field_map json "HlsPackage" HlsPackage.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let dashPackage = field_map json "DashPackage" DashPackage.of_json in
-      let cmafPackage = field_map json "CmafPackage" CmafPackage.of_json in
-      let channelId = field_map json "ChannelId" Zz__string.of_json in
+        field_map json__ "StartoverWindowSeconds" Zz__integer.of_json in
+      let origination = field_map json__ "Origination" Origination.of_json in
+      let mssPackage = field_map json__ "MssPackage" MssPackage.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsPackage = field_map json__ "HlsPackage" HlsPackage.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let dashPackage = field_map json__ "DashPackage" DashPackage.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let cmafPackage = field_map json__ "CmafPackage" CmafPackage.of_json in
+      let channelId = field_map json__ "ChannelId" Zz__string.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "Authorization" Authorization.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?whitelist ?url ?timeDelaySeconds ?tags ?startoverWindowSeconds
         ?origination ?mssPackage ?manifestName ?id ?hlsPackage ?description
-        ?dashPackage ?cmafPackage ?channelId ?authorization ?arn ()
+        ?dashPackage ?createdAt ?cmafPackage ?channelId ?authorization ?arn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An OriginEndpoint resource configuration."]
 module HarvestJob =
@@ -2057,7 +2234,7 @@ module HarvestJob =
         [@ocaml.doc
           "The ID of the Channel that the HarvestJob will harvest from."];
       createdAt: Zz__string.t option
-        [@ocaml.doc "The time the HarvestJob was submitted"];
+        [@ocaml.doc "The date and time the HarvestJob was submitted."];
       endTime: Zz__string.t option
         [@ocaml.doc "The end of the time-window which will be harvested."];
       id: Zz__string.t option
@@ -2129,18 +2306,18 @@ module HarvestJob =
       make ?status ?startTime ?s3Destination ?originEndpointId ?id ?endTime
         ?createdAt ?channelId ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
-      let startTime = field_map json "StartTime" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Status.of_json in
+      let startTime = field_map json__ "StartTime" Zz__string.of_json in
       let s3Destination =
-        field_map json "S3Destination" S3Destination.of_json in
+        field_map json__ "S3Destination" S3Destination.of_json in
       let originEndpointId =
-        field_map json "OriginEndpointId" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let endTime = field_map json "EndTime" Zz__string.of_json in
-      let createdAt = field_map json "CreatedAt" Zz__string.of_json in
-      let channelId = field_map json "ChannelId" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "OriginEndpointId" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let endTime = field_map json__ "EndTime" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let channelId = field_map json__ "ChannelId" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?status ?startTime ?s3Destination ?originEndpointId ?id ?endTime
         ?createdAt ?channelId ?arn ()
     let to_json v = composed_to_json to_value v
@@ -2152,6 +2329,8 @@ module Channel =
       arn: Zz__string.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) assigned to the Channel."];
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The date and time the Channel was created."];
       description: Zz__string.t option
         [@ocaml.doc "A short text description of the Channel."];
       egressAccessLogs: EgressAccessLogs.t option ;
@@ -2160,25 +2339,28 @@ module Channel =
       ingressAccessLogs: IngressAccessLogs.t option ;
       tags: Tags.t option }
     let make ?arn =
-      fun ?description ->
-        fun ?egressAccessLogs ->
-          fun ?hlsIngest ->
-            fun ?id ->
-              fun ?ingressAccessLogs ->
-                fun ?tags ->
-                  fun () ->
-                    {
-                      arn;
-                      description;
-                      egressAccessLogs;
-                      hlsIngest;
-                      id;
-                      ingressAccessLogs;
-                      tags
-                    }
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?egressAccessLogs ->
+            fun ?hlsIngest ->
+              fun ?id ->
+                fun ?ingressAccessLogs ->
+                  fun ?tags ->
+                    fun () ->
+                      {
+                        arn;
+                        createdAt;
+                        description;
+                        egressAccessLogs;
+                        hlsIngest;
+                        id;
+                        ingressAccessLogs;
+                        tags
+                      }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("egressAccessLogs",
           (Option.map x.egressAccessLogs ~f:EgressAccessLogs.to_value));
@@ -2201,22 +2383,25 @@ module Channel =
           (Xml.child xml_arg0 "egressAccessLogs") in
       let description =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let ingressAccessLogs =
-        field_map json "IngressAccessLogs" IngressAccessLogs.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsIngest = field_map json "HlsIngest" HlsIngest.of_json in
+        field_map json__ "IngressAccessLogs" IngressAccessLogs.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsIngest = field_map json__ "HlsIngest" HlsIngest.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A Channel resource configuration."]
 module ForbiddenException =
@@ -2233,8 +2418,8 @@ module ForbiddenException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2253,8 +2438,8 @@ module InternalServerErrorException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An unexpected error occurred."]
@@ -2272,8 +2457,8 @@ module NotFoundException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested resource does not exist."]
@@ -2291,8 +2476,8 @@ module ServiceUnavailableException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An unexpected error occurred."]
@@ -2310,8 +2495,8 @@ module TooManyRequestsException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2330,8 +2515,8 @@ module UnprocessableEntityException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The parameters sent in the request are not valid."]
@@ -2394,16 +2579,16 @@ module CmafPackageCreateOrUpdateParameters =
       make ?streamSelection ?segmentPrefix ?segmentDurationSeconds
         ?hlsManifests ?encryption ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamSelection =
-        field_map json "StreamSelection" StreamSelection.of_json in
-      let segmentPrefix = field_map json "SegmentPrefix" Zz__string.of_json in
+        field_map json__ "StreamSelection" StreamSelection.of_json in
+      let segmentPrefix = field_map json__ "SegmentPrefix" Zz__string.of_json in
       let segmentDurationSeconds =
-        field_map json "SegmentDurationSeconds" Zz__integer.of_json in
+        field_map json__ "SegmentDurationSeconds" Zz__integer.of_json in
       let hlsManifests =
-        field_map json "HlsManifests"
+        field_map json__ "HlsManifests"
           Zz__listOfHlsManifestCreateOrUpdateParameters.of_json in
-      let encryption = field_map json "Encryption" CmafEncryption.of_json in
+      let encryption = field_map json__ "Encryption" CmafEncryption.of_json in
       make ?streamSelection ?segmentPrefix ?segmentDurationSeconds
         ?hlsManifests ?encryption ()
     let to_json v = composed_to_json to_value v
@@ -2430,6 +2615,8 @@ module Zz__mapOf__string =
                     (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2441,6 +2628,9 @@ module Zz__listOfOriginEndpoint =
   struct
     type nonrec t = OriginEndpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OriginEndpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2484,6 +2674,9 @@ module Zz__listOfHarvestJob =
   struct
     type nonrec t = HarvestJob.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HarvestJob.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2508,6 +2701,9 @@ module Zz__listOfChannel =
   struct
     type nonrec t = Channel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Channel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2566,6 +2762,8 @@ module UpdateOriginEndpointResponse =
         [@ocaml.doc
           "The ID of the Channel the OriginEndpoint is associated with."];
       cmafPackage: CmafPackage.t option ;
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The date and time the OriginEndpoint was created."];
       dashPackage: DashPackage.t option ;
       description: Zz__string.t option
         [@ocaml.doc "A short text description of the OriginEndpoint."];
@@ -2603,37 +2801,39 @@ module UpdateOriginEndpointResponse =
       fun ?authorization ->
         fun ?channelId ->
           fun ?cmafPackage ->
-            fun ?dashPackage ->
-              fun ?description ->
-                fun ?hlsPackage ->
-                  fun ?id ->
-                    fun ?manifestName ->
-                      fun ?mssPackage ->
-                        fun ?origination ->
-                          fun ?startoverWindowSeconds ->
-                            fun ?tags ->
-                              fun ?timeDelaySeconds ->
-                                fun ?url ->
-                                  fun ?whitelist ->
-                                    fun () ->
-                                      {
-                                        arn;
-                                        authorization;
-                                        channelId;
-                                        cmafPackage;
-                                        dashPackage;
-                                        description;
-                                        hlsPackage;
-                                        id;
-                                        manifestName;
-                                        mssPackage;
-                                        origination;
-                                        startoverWindowSeconds;
-                                        tags;
-                                        timeDelaySeconds;
-                                        url;
-                                        whitelist
-                                      }
+            fun ?createdAt ->
+              fun ?dashPackage ->
+                fun ?description ->
+                  fun ?hlsPackage ->
+                    fun ?id ->
+                      fun ?manifestName ->
+                        fun ?mssPackage ->
+                          fun ?origination ->
+                            fun ?startoverWindowSeconds ->
+                              fun ?tags ->
+                                fun ?timeDelaySeconds ->
+                                  fun ?url ->
+                                    fun ?whitelist ->
+                                      fun () ->
+                                        {
+                                          arn;
+                                          authorization;
+                                          channelId;
+                                          cmafPackage;
+                                          createdAt;
+                                          dashPackage;
+                                          description;
+                                          hlsPackage;
+                                          id;
+                                          manifestName;
+                                          mssPackage;
+                                          origination;
+                                          startoverWindowSeconds;
+                                          tags;
+                                          timeDelaySeconds;
+                                          url;
+                                          whitelist
+                                        }
     let error_of_json name json =
       match name with
       | "ForbiddenException" ->
@@ -2711,6 +2911,7 @@ module UpdateOriginEndpointResponse =
           (Option.map x.authorization ~f:Authorization.to_value));
         ("channelId", (Option.map x.channelId ~f:Zz__string.to_value));
         ("cmafPackage", (Option.map x.cmafPackage ~f:CmafPackage.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("dashPackage", (Option.map x.dashPackage ~f:DashPackage.to_value));
         ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("hlsPackage", (Option.map x.hlsPackage ~f:HlsPackage.to_value));
@@ -2752,6 +2953,8 @@ module UpdateOriginEndpointResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
       let dashPackage =
         (Option.map ~f:DashPackage.of_xml) (Xml.child xml_arg0 "dashPackage") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let cmafPackage =
         (Option.map ~f:CmafPackage.of_xml) (Xml.child xml_arg0 "cmafPackage") in
       let channelId =
@@ -2762,31 +2965,34 @@ module UpdateOriginEndpointResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?whitelist ?url ?timeDelaySeconds ?tags ?startoverWindowSeconds
         ?origination ?mssPackage ?manifestName ?id ?hlsPackage ?description
-        ?dashPackage ?cmafPackage ?channelId ?authorization ?arn ()
+        ?dashPackage ?createdAt ?cmafPackage ?channelId ?authorization ?arn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let whitelist = field_map json "Whitelist" Zz__listOf__string.of_json in
-      let url = field_map json "Url" Zz__string.of_json in
+    let of_json json__ =
+      let whitelist = field_map json__ "Whitelist" Zz__listOf__string.of_json in
+      let url = field_map json__ "Url" Zz__string.of_json in
       let timeDelaySeconds =
-        field_map json "TimeDelaySeconds" Zz__integer.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "TimeDelaySeconds" Zz__integer.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let startoverWindowSeconds =
-        field_map json "StartoverWindowSeconds" Zz__integer.of_json in
-      let origination = field_map json "Origination" Origination.of_json in
-      let mssPackage = field_map json "MssPackage" MssPackage.of_json in
-      let manifestName = field_map json "ManifestName" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsPackage = field_map json "HlsPackage" HlsPackage.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let dashPackage = field_map json "DashPackage" DashPackage.of_json in
-      let cmafPackage = field_map json "CmafPackage" CmafPackage.of_json in
-      let channelId = field_map json "ChannelId" Zz__string.of_json in
+        field_map json__ "StartoverWindowSeconds" Zz__integer.of_json in
+      let origination = field_map json__ "Origination" Origination.of_json in
+      let mssPackage = field_map json__ "MssPackage" MssPackage.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsPackage = field_map json__ "HlsPackage" HlsPackage.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let dashPackage = field_map json__ "DashPackage" DashPackage.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let cmafPackage = field_map json__ "CmafPackage" CmafPackage.of_json in
+      let channelId = field_map json__ "ChannelId" Zz__string.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "Authorization" Authorization.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?whitelist ?url ?timeDelaySeconds ?tags ?startoverWindowSeconds
         ?origination ?mssPackage ?manifestName ?id ?hlsPackage ?description
-        ?dashPackage ?cmafPackage ?channelId ?authorization ?arn ()
+        ?dashPackage ?createdAt ?cmafPackage ?channelId ?authorization ?arn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing OriginEndpoint."]
 module UpdateOriginEndpointRequest =
@@ -2899,24 +3105,24 @@ module UpdateOriginEndpointRequest =
         ?mssPackage ?manifestName ~id ?hlsPackage ?description ?dashPackage
         ?cmafPackage ?authorization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let whitelist = field_map json "Whitelist" Zz__listOf__string.of_json in
+    let of_json json__ =
+      let whitelist = field_map json__ "Whitelist" Zz__listOf__string.of_json in
       let timeDelaySeconds =
-        field_map json "TimeDelaySeconds" Zz__integer.of_json in
+        field_map json__ "TimeDelaySeconds" Zz__integer.of_json in
       let startoverWindowSeconds =
-        field_map json "StartoverWindowSeconds" Zz__integer.of_json in
-      let origination = field_map json "Origination" Origination.of_json in
-      let mssPackage = field_map json "MssPackage" MssPackage.of_json in
-      let manifestName = field_map json "ManifestName" Zz__string.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
-      let hlsPackage = field_map json "HlsPackage" HlsPackage.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let dashPackage = field_map json "DashPackage" DashPackage.of_json in
+        field_map json__ "StartoverWindowSeconds" Zz__integer.of_json in
+      let origination = field_map json__ "Origination" Origination.of_json in
+      let mssPackage = field_map json__ "MssPackage" MssPackage.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
+      let hlsPackage = field_map json__ "HlsPackage" HlsPackage.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let dashPackage = field_map json__ "DashPackage" DashPackage.of_json in
       let cmafPackage =
-        field_map json "CmafPackage"
+        field_map json__ "CmafPackage"
           CmafPackageCreateOrUpdateParameters.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
+        field_map json__ "Authorization" Authorization.of_json in
       make ?whitelist ?timeDelaySeconds ?startoverWindowSeconds ?origination
         ?mssPackage ?manifestName ~id ?hlsPackage ?description ?dashPackage
         ?cmafPackage ?authorization ()
@@ -2930,6 +3136,8 @@ module UpdateChannelResponse =
       arn: Zz__string.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) assigned to the Channel."];
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The date and time the Channel was created."];
       description: Zz__string.t option
         [@ocaml.doc "A short text description of the Channel."];
       egressAccessLogs: EgressAccessLogs.t option ;
@@ -2946,22 +3154,24 @@ module UpdateChannelResponse =
       | `UnprocessableEntityException of UnprocessableEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?arn =
-      fun ?description ->
-        fun ?egressAccessLogs ->
-          fun ?hlsIngest ->
-            fun ?id ->
-              fun ?ingressAccessLogs ->
-                fun ?tags ->
-                  fun () ->
-                    {
-                      arn;
-                      description;
-                      egressAccessLogs;
-                      hlsIngest;
-                      id;
-                      ingressAccessLogs;
-                      tags
-                    }
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?egressAccessLogs ->
+            fun ?hlsIngest ->
+              fun ?id ->
+                fun ?ingressAccessLogs ->
+                  fun ?tags ->
+                    fun () ->
+                      {
+                        arn;
+                        createdAt;
+                        description;
+                        egressAccessLogs;
+                        hlsIngest;
+                        id;
+                        ingressAccessLogs;
+                        tags
+                      }
     let error_of_json name json =
       match name with
       | "ForbiddenException" ->
@@ -3035,6 +3245,7 @@ module UpdateChannelResponse =
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("egressAccessLogs",
           (Option.map x.egressAccessLogs ~f:EgressAccessLogs.to_value));
@@ -3057,22 +3268,25 @@ module UpdateChannelResponse =
           (Xml.child xml_arg0 "egressAccessLogs") in
       let description =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let ingressAccessLogs =
-        field_map json "IngressAccessLogs" IngressAccessLogs.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsIngest = field_map json "HlsIngest" HlsIngest.of_json in
+        field_map json__ "IngressAccessLogs" IngressAccessLogs.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsIngest = field_map json__ "HlsIngest" HlsIngest.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing Channel."]
 module UpdateChannelRequest =
@@ -3096,9 +3310,9 @@ module UpdateChannelRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
       make ~id ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ~id ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration parameters used to update the Channel."]
@@ -3126,9 +3340,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" Zz__listOf__string.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" Zz__listOf__string.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end
@@ -3148,8 +3362,8 @@ module TagsModel =
           (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       make ~tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Zz__mapOf__string.of_json in
       make ~tags ()
     let to_json v = composed_to_json to_value v
   end
@@ -3174,9 +3388,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Zz__mapOf__string.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Zz__mapOf__string.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end
@@ -3187,6 +3401,8 @@ module RotateIngestEndpointCredentialsResponse =
       arn: Zz__string.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) assigned to the Channel."];
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The date and time the Channel was created."];
       description: Zz__string.t option
         [@ocaml.doc "A short text description of the Channel."];
       egressAccessLogs: EgressAccessLogs.t option ;
@@ -3203,22 +3419,24 @@ module RotateIngestEndpointCredentialsResponse =
       | `UnprocessableEntityException of UnprocessableEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?arn =
-      fun ?description ->
-        fun ?egressAccessLogs ->
-          fun ?hlsIngest ->
-            fun ?id ->
-              fun ?ingressAccessLogs ->
-                fun ?tags ->
-                  fun () ->
-                    {
-                      arn;
-                      description;
-                      egressAccessLogs;
-                      hlsIngest;
-                      id;
-                      ingressAccessLogs;
-                      tags
-                    }
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?egressAccessLogs ->
+            fun ?hlsIngest ->
+              fun ?id ->
+                fun ?ingressAccessLogs ->
+                  fun ?tags ->
+                    fun () ->
+                      {
+                        arn;
+                        createdAt;
+                        description;
+                        egressAccessLogs;
+                        hlsIngest;
+                        id;
+                        ingressAccessLogs;
+                        tags
+                      }
     let error_of_json name json =
       match name with
       | "ForbiddenException" ->
@@ -3292,6 +3510,7 @@ module RotateIngestEndpointCredentialsResponse =
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("egressAccessLogs",
           (Option.map x.egressAccessLogs ~f:EgressAccessLogs.to_value));
@@ -3314,22 +3533,25 @@ module RotateIngestEndpointCredentialsResponse =
           (Xml.child xml_arg0 "egressAccessLogs") in
       let description =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let ingressAccessLogs =
-        field_map json "IngressAccessLogs" IngressAccessLogs.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsIngest = field_map json "HlsIngest" HlsIngest.of_json in
+        field_map json__ "IngressAccessLogs" IngressAccessLogs.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsIngest = field_map json__ "HlsIngest" HlsIngest.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Rotate the IngestEndpoint's username and password, as specified by the IngestEndpoint's id."]
@@ -3359,10 +3581,10 @@ module RotateIngestEndpointCredentialsRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~ingestEndpointId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ingestEndpointId =
-        field_map_exn json "IngestEndpointId" Zz__string.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
+        field_map_exn json__ "IngestEndpointId" Zz__string.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       make ~ingestEndpointId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3374,6 +3596,8 @@ module RotateChannelCredentialsResponse =
       arn: Zz__string.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) assigned to the Channel."];
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The date and time the Channel was created."];
       description: Zz__string.t option
         [@ocaml.doc "A short text description of the Channel."];
       egressAccessLogs: EgressAccessLogs.t option ;
@@ -3390,22 +3614,24 @@ module RotateChannelCredentialsResponse =
       | `UnprocessableEntityException of UnprocessableEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?arn =
-      fun ?description ->
-        fun ?egressAccessLogs ->
-          fun ?hlsIngest ->
-            fun ?id ->
-              fun ?ingressAccessLogs ->
-                fun ?tags ->
-                  fun () ->
-                    {
-                      arn;
-                      description;
-                      egressAccessLogs;
-                      hlsIngest;
-                      id;
-                      ingressAccessLogs;
-                      tags
-                    }
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?egressAccessLogs ->
+            fun ?hlsIngest ->
+              fun ?id ->
+                fun ?ingressAccessLogs ->
+                  fun ?tags ->
+                    fun () ->
+                      {
+                        arn;
+                        createdAt;
+                        description;
+                        egressAccessLogs;
+                        hlsIngest;
+                        id;
+                        ingressAccessLogs;
+                        tags
+                      }
     let error_of_json name json =
       match name with
       | "ForbiddenException" ->
@@ -3479,6 +3705,7 @@ module RotateChannelCredentialsResponse =
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("egressAccessLogs",
           (Option.map x.egressAccessLogs ~f:EgressAccessLogs.to_value));
@@ -3501,22 +3728,25 @@ module RotateChannelCredentialsResponse =
           (Xml.child xml_arg0 "egressAccessLogs") in
       let description =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let ingressAccessLogs =
-        field_map json "IngressAccessLogs" IngressAccessLogs.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsIngest = field_map json "HlsIngest" HlsIngest.of_json in
+        field_map json__ "IngressAccessLogs" IngressAccessLogs.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsIngest = field_map json__ "HlsIngest" HlsIngest.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Changes the Channel's first IngestEndpoint's username and password. WARNING - This API is deprecated. Please use RotateIngestEndpointCredentials instead"]
@@ -3535,8 +3765,8 @@ module RotateChannelCredentialsRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Changes the Channel's first IngestEndpoint's username and password. WARNING - This API is deprecated. Please use RotateIngestEndpointCredentials instead"]
@@ -3643,23 +3873,23 @@ module OriginEndpointUpdateParameters =
         ?mssPackage ?manifestName ?hlsPackage ?description ?dashPackage
         ?cmafPackage ?authorization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let whitelist = field_map json "Whitelist" Zz__listOf__string.of_json in
+    let of_json json__ =
+      let whitelist = field_map json__ "Whitelist" Zz__listOf__string.of_json in
       let timeDelaySeconds =
-        field_map json "TimeDelaySeconds" Zz__integer.of_json in
+        field_map json__ "TimeDelaySeconds" Zz__integer.of_json in
       let startoverWindowSeconds =
-        field_map json "StartoverWindowSeconds" Zz__integer.of_json in
-      let origination = field_map json "Origination" Origination.of_json in
-      let mssPackage = field_map json "MssPackage" MssPackage.of_json in
-      let manifestName = field_map json "ManifestName" Zz__string.of_json in
-      let hlsPackage = field_map json "HlsPackage" HlsPackage.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let dashPackage = field_map json "DashPackage" DashPackage.of_json in
+        field_map json__ "StartoverWindowSeconds" Zz__integer.of_json in
+      let origination = field_map json__ "Origination" Origination.of_json in
+      let mssPackage = field_map json__ "MssPackage" MssPackage.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
+      let hlsPackage = field_map json__ "HlsPackage" HlsPackage.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let dashPackage = field_map json__ "DashPackage" DashPackage.of_json in
       let cmafPackage =
-        field_map json "CmafPackage"
+        field_map json__ "CmafPackage"
           CmafPackageCreateOrUpdateParameters.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
+        field_map json__ "Authorization" Authorization.of_json in
       make ?whitelist ?timeDelaySeconds ?startoverWindowSeconds ?origination
         ?mssPackage ?manifestName ?hlsPackage ?description ?dashPackage
         ?cmafPackage ?authorization ()
@@ -3691,10 +3921,10 @@ module OriginEndpointList =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?originEndpoints ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let originEndpoints =
-        field_map json "OriginEndpoints" Zz__listOfOriginEndpoint.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "OriginEndpoints" Zz__listOfOriginEndpoint.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?originEndpoints ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A collection of OriginEndpoint records."]
@@ -3824,26 +4054,26 @@ module OriginEndpointCreateParameters =
         ?origination ?mssPackage ?manifestName ~id ?hlsPackage ?description
         ?dashPackage ?cmafPackage ~channelId ?authorization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let whitelist = field_map json "Whitelist" Zz__listOf__string.of_json in
+    let of_json json__ =
+      let whitelist = field_map json__ "Whitelist" Zz__listOf__string.of_json in
       let timeDelaySeconds =
-        field_map json "TimeDelaySeconds" Zz__integer.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "TimeDelaySeconds" Zz__integer.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let startoverWindowSeconds =
-        field_map json "StartoverWindowSeconds" Zz__integer.of_json in
-      let origination = field_map json "Origination" Origination.of_json in
-      let mssPackage = field_map json "MssPackage" MssPackage.of_json in
-      let manifestName = field_map json "ManifestName" Zz__string.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
-      let hlsPackage = field_map json "HlsPackage" HlsPackage.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let dashPackage = field_map json "DashPackage" DashPackage.of_json in
+        field_map json__ "StartoverWindowSeconds" Zz__integer.of_json in
+      let origination = field_map json__ "Origination" Origination.of_json in
+      let mssPackage = field_map json__ "MssPackage" MssPackage.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
+      let hlsPackage = field_map json__ "HlsPackage" HlsPackage.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let dashPackage = field_map json__ "DashPackage" DashPackage.of_json in
       let cmafPackage =
-        field_map json "CmafPackage"
+        field_map json__ "CmafPackage"
           CmafPackageCreateOrUpdateParameters.of_json in
-      let channelId = field_map_exn json "ChannelId" Zz__string.of_json in
+      let channelId = field_map_exn json__ "ChannelId" Zz__string.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
+        field_map json__ "Authorization" Authorization.of_json in
       make ?whitelist ?timeDelaySeconds ?tags ?startoverWindowSeconds
         ?origination ?mssPackage ?manifestName ~id ?hlsPackage ?description
         ?dashPackage ?cmafPackage ~channelId ?authorization ()
@@ -3881,8 +4111,8 @@ module ListTagsForResourceResponse =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       make ?tags ()
     let to_json v = composed_to_json to_value v
   end
@@ -3902,8 +4132,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end
@@ -4010,10 +4240,10 @@ module ListOriginEndpointsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?originEndpoints ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let originEndpoints =
-        field_map json "OriginEndpoints" Zz__listOfOriginEndpoint.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "OriginEndpoints" Zz__listOfOriginEndpoint.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?originEndpoints ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a collection of OriginEndpoint records."]
@@ -4047,10 +4277,10 @@ module ListOriginEndpointsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "channelId") in
       make ?nextToken ?maxResults ?channelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let channelId = field_map json "ChannelId" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let channelId = field_map json__ "ChannelId" Zz__string.of_json in
       make ?nextToken ?maxResults ?channelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a collection of OriginEndpoint records."]
@@ -4157,10 +4387,10 @@ module ListHarvestJobsResponse =
           (Xml.child xml_arg0 "harvestJobs") in
       make ?nextToken ?harvestJobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let harvestJobs =
-        field_map json "HarvestJobs" Zz__listOfHarvestJob.of_json in
+        field_map json__ "HarvestJobs" Zz__listOfHarvestJob.of_json in
       make ?nextToken ?harvestJobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a collection of HarvestJob records."]
@@ -4207,12 +4437,12 @@ module ListHarvestJobsRequest =
           (Xml.child xml_arg0 "includeChannelId") in
       make ?nextToken ?maxResults ?includeStatus ?includeChannelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let includeStatus = field_map json "IncludeStatus" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let includeStatus = field_map json__ "IncludeStatus" Zz__string.of_json in
       let includeChannelId =
-        field_map json "IncludeChannelId" Zz__string.of_json in
+        field_map json__ "IncludeChannelId" Zz__string.of_json in
       make ?nextToken ?maxResults ?includeStatus ?includeChannelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a collection of HarvestJob records."]
@@ -4317,9 +4547,9 @@ module ListChannelsResponse =
           (Xml.child xml_arg0 "channels") in
       make ?nextToken ?channels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let channels = field_map json "Channels" Zz__listOfChannel.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let channels = field_map json__ "Channels" Zz__listOfChannel.of_json in
       make ?nextToken ?channels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a collection of Channels."]
@@ -4346,9 +4576,9 @@ module ListChannelsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a collection of Channels."]
@@ -4377,10 +4607,10 @@ module HarvestJobList =
           (Xml.child xml_arg0 "harvestJobs") in
       make ?nextToken ?harvestJobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let harvestJobs =
-        field_map json "HarvestJobs" Zz__listOfHarvestJob.of_json in
+        field_map json__ "HarvestJobs" Zz__listOfHarvestJob.of_json in
       make ?nextToken ?harvestJobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A collection of HarvestJob records."]
@@ -4432,14 +4662,14 @@ module HarvestJobCreateParameters =
           (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
       make ~startTime ~s3Destination ~originEndpointId ~id ~endTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startTime = field_map_exn json "StartTime" Zz__string.of_json in
+    let of_json json__ =
+      let startTime = field_map_exn json__ "StartTime" Zz__string.of_json in
       let s3Destination =
-        field_map_exn json "S3Destination" S3Destination.of_json in
+        field_map_exn json__ "S3Destination" S3Destination.of_json in
       let originEndpointId =
-        field_map_exn json "OriginEndpointId" Zz__string.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
-      let endTime = field_map_exn json "EndTime" Zz__string.of_json in
+        field_map_exn json__ "OriginEndpointId" Zz__string.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
+      let endTime = field_map_exn json__ "EndTime" Zz__string.of_json in
       make ~startTime ~s3Destination ~originEndpointId ~id ~endTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration parameters for a new HarvestJob"]
@@ -4455,6 +4685,8 @@ module DescribeOriginEndpointResponse =
         [@ocaml.doc
           "The ID of the Channel the OriginEndpoint is associated with."];
       cmafPackage: CmafPackage.t option ;
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The date and time the OriginEndpoint was created."];
       dashPackage: DashPackage.t option ;
       description: Zz__string.t option
         [@ocaml.doc "A short text description of the OriginEndpoint."];
@@ -4492,37 +4724,39 @@ module DescribeOriginEndpointResponse =
       fun ?authorization ->
         fun ?channelId ->
           fun ?cmafPackage ->
-            fun ?dashPackage ->
-              fun ?description ->
-                fun ?hlsPackage ->
-                  fun ?id ->
-                    fun ?manifestName ->
-                      fun ?mssPackage ->
-                        fun ?origination ->
-                          fun ?startoverWindowSeconds ->
-                            fun ?tags ->
-                              fun ?timeDelaySeconds ->
-                                fun ?url ->
-                                  fun ?whitelist ->
-                                    fun () ->
-                                      {
-                                        arn;
-                                        authorization;
-                                        channelId;
-                                        cmafPackage;
-                                        dashPackage;
-                                        description;
-                                        hlsPackage;
-                                        id;
-                                        manifestName;
-                                        mssPackage;
-                                        origination;
-                                        startoverWindowSeconds;
-                                        tags;
-                                        timeDelaySeconds;
-                                        url;
-                                        whitelist
-                                      }
+            fun ?createdAt ->
+              fun ?dashPackage ->
+                fun ?description ->
+                  fun ?hlsPackage ->
+                    fun ?id ->
+                      fun ?manifestName ->
+                        fun ?mssPackage ->
+                          fun ?origination ->
+                            fun ?startoverWindowSeconds ->
+                              fun ?tags ->
+                                fun ?timeDelaySeconds ->
+                                  fun ?url ->
+                                    fun ?whitelist ->
+                                      fun () ->
+                                        {
+                                          arn;
+                                          authorization;
+                                          channelId;
+                                          cmafPackage;
+                                          createdAt;
+                                          dashPackage;
+                                          description;
+                                          hlsPackage;
+                                          id;
+                                          manifestName;
+                                          mssPackage;
+                                          origination;
+                                          startoverWindowSeconds;
+                                          tags;
+                                          timeDelaySeconds;
+                                          url;
+                                          whitelist
+                                        }
     let error_of_json name json =
       match name with
       | "ForbiddenException" ->
@@ -4600,6 +4834,7 @@ module DescribeOriginEndpointResponse =
           (Option.map x.authorization ~f:Authorization.to_value));
         ("channelId", (Option.map x.channelId ~f:Zz__string.to_value));
         ("cmafPackage", (Option.map x.cmafPackage ~f:CmafPackage.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("dashPackage", (Option.map x.dashPackage ~f:DashPackage.to_value));
         ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("hlsPackage", (Option.map x.hlsPackage ~f:HlsPackage.to_value));
@@ -4641,6 +4876,8 @@ module DescribeOriginEndpointResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
       let dashPackage =
         (Option.map ~f:DashPackage.of_xml) (Xml.child xml_arg0 "dashPackage") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let cmafPackage =
         (Option.map ~f:CmafPackage.of_xml) (Xml.child xml_arg0 "cmafPackage") in
       let channelId =
@@ -4651,31 +4888,34 @@ module DescribeOriginEndpointResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?whitelist ?url ?timeDelaySeconds ?tags ?startoverWindowSeconds
         ?origination ?mssPackage ?manifestName ?id ?hlsPackage ?description
-        ?dashPackage ?cmafPackage ?channelId ?authorization ?arn ()
+        ?dashPackage ?createdAt ?cmafPackage ?channelId ?authorization ?arn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let whitelist = field_map json "Whitelist" Zz__listOf__string.of_json in
-      let url = field_map json "Url" Zz__string.of_json in
+    let of_json json__ =
+      let whitelist = field_map json__ "Whitelist" Zz__listOf__string.of_json in
+      let url = field_map json__ "Url" Zz__string.of_json in
       let timeDelaySeconds =
-        field_map json "TimeDelaySeconds" Zz__integer.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "TimeDelaySeconds" Zz__integer.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let startoverWindowSeconds =
-        field_map json "StartoverWindowSeconds" Zz__integer.of_json in
-      let origination = field_map json "Origination" Origination.of_json in
-      let mssPackage = field_map json "MssPackage" MssPackage.of_json in
-      let manifestName = field_map json "ManifestName" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsPackage = field_map json "HlsPackage" HlsPackage.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let dashPackage = field_map json "DashPackage" DashPackage.of_json in
-      let cmafPackage = field_map json "CmafPackage" CmafPackage.of_json in
-      let channelId = field_map json "ChannelId" Zz__string.of_json in
+        field_map json__ "StartoverWindowSeconds" Zz__integer.of_json in
+      let origination = field_map json__ "Origination" Origination.of_json in
+      let mssPackage = field_map json__ "MssPackage" MssPackage.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsPackage = field_map json__ "HlsPackage" HlsPackage.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let dashPackage = field_map json__ "DashPackage" DashPackage.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let cmafPackage = field_map json__ "CmafPackage" CmafPackage.of_json in
+      let channelId = field_map json__ "ChannelId" Zz__string.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "Authorization" Authorization.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?whitelist ?url ?timeDelaySeconds ?tags ?startoverWindowSeconds
         ?origination ?mssPackage ?manifestName ?id ?hlsPackage ?description
-        ?dashPackage ?cmafPackage ?channelId ?authorization ?arn ()
+        ?dashPackage ?createdAt ?cmafPackage ?channelId ?authorization ?arn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets details about an existing OriginEndpoint."]
 module DescribeOriginEndpointRequest =
@@ -4693,8 +4933,8 @@ module DescribeOriginEndpointRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets details about an existing OriginEndpoint."]
 module DescribeHarvestJobResponse =
@@ -4708,7 +4948,7 @@ module DescribeHarvestJobResponse =
         [@ocaml.doc
           "The ID of the Channel that the HarvestJob will harvest from."];
       createdAt: Zz__string.t option
-        [@ocaml.doc "The time the HarvestJob was submitted"];
+        [@ocaml.doc "The date and time the HarvestJob was submitted."];
       endTime: Zz__string.t option
         [@ocaml.doc "The end of the time-window which will be harvested."];
       id: Zz__string.t option
@@ -4858,18 +5098,18 @@ module DescribeHarvestJobResponse =
       make ?status ?startTime ?s3Destination ?originEndpointId ?id ?endTime
         ?createdAt ?channelId ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
-      let startTime = field_map json "StartTime" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Status.of_json in
+      let startTime = field_map json__ "StartTime" Zz__string.of_json in
       let s3Destination =
-        field_map json "S3Destination" S3Destination.of_json in
+        field_map json__ "S3Destination" S3Destination.of_json in
       let originEndpointId =
-        field_map json "OriginEndpointId" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let endTime = field_map json "EndTime" Zz__string.of_json in
-      let createdAt = field_map json "CreatedAt" Zz__string.of_json in
-      let channelId = field_map json "ChannelId" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "OriginEndpointId" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let endTime = field_map json__ "EndTime" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let channelId = field_map json__ "ChannelId" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?status ?startTime ?s3Destination ?originEndpointId ?id ?endTime
         ?createdAt ?channelId ?arn ()
     let to_json v = composed_to_json to_value v
@@ -4889,8 +5129,8 @@ module DescribeHarvestJobRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets details about an existing HarvestJob."]
 module DescribeChannelResponse =
@@ -4900,6 +5140,8 @@ module DescribeChannelResponse =
       arn: Zz__string.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) assigned to the Channel."];
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The date and time the Channel was created."];
       description: Zz__string.t option
         [@ocaml.doc "A short text description of the Channel."];
       egressAccessLogs: EgressAccessLogs.t option ;
@@ -4916,22 +5158,24 @@ module DescribeChannelResponse =
       | `UnprocessableEntityException of UnprocessableEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?arn =
-      fun ?description ->
-        fun ?egressAccessLogs ->
-          fun ?hlsIngest ->
-            fun ?id ->
-              fun ?ingressAccessLogs ->
-                fun ?tags ->
-                  fun () ->
-                    {
-                      arn;
-                      description;
-                      egressAccessLogs;
-                      hlsIngest;
-                      id;
-                      ingressAccessLogs;
-                      tags
-                    }
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?egressAccessLogs ->
+            fun ?hlsIngest ->
+              fun ?id ->
+                fun ?ingressAccessLogs ->
+                  fun ?tags ->
+                    fun () ->
+                      {
+                        arn;
+                        createdAt;
+                        description;
+                        egressAccessLogs;
+                        hlsIngest;
+                        id;
+                        ingressAccessLogs;
+                        tags
+                      }
     let error_of_json name json =
       match name with
       | "ForbiddenException" ->
@@ -5005,6 +5249,7 @@ module DescribeChannelResponse =
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("egressAccessLogs",
           (Option.map x.egressAccessLogs ~f:EgressAccessLogs.to_value));
@@ -5027,22 +5272,25 @@ module DescribeChannelResponse =
           (Xml.child xml_arg0 "egressAccessLogs") in
       let description =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let ingressAccessLogs =
-        field_map json "IngressAccessLogs" IngressAccessLogs.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsIngest = field_map json "HlsIngest" HlsIngest.of_json in
+        field_map json__ "IngressAccessLogs" IngressAccessLogs.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsIngest = field_map json__ "HlsIngest" HlsIngest.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets details about a Channel."]
 module DescribeChannelRequest =
@@ -5059,8 +5307,8 @@ module DescribeChannelRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets details about a Channel."]
 module DeleteOriginEndpointResponse =
@@ -5168,8 +5416,8 @@ module DeleteOriginEndpointRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an existing OriginEndpoint."]
 module DeleteChannelResponse =
@@ -5277,8 +5525,8 @@ module DeleteChannelRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Zz__string.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Zz__string.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an existing Channel."]
 module CreateOriginEndpointResponse =
@@ -5293,6 +5541,8 @@ module CreateOriginEndpointResponse =
         [@ocaml.doc
           "The ID of the Channel the OriginEndpoint is associated with."];
       cmafPackage: CmafPackage.t option ;
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The date and time the OriginEndpoint was created."];
       dashPackage: DashPackage.t option ;
       description: Zz__string.t option
         [@ocaml.doc "A short text description of the OriginEndpoint."];
@@ -5330,37 +5580,39 @@ module CreateOriginEndpointResponse =
       fun ?authorization ->
         fun ?channelId ->
           fun ?cmafPackage ->
-            fun ?dashPackage ->
-              fun ?description ->
-                fun ?hlsPackage ->
-                  fun ?id ->
-                    fun ?manifestName ->
-                      fun ?mssPackage ->
-                        fun ?origination ->
-                          fun ?startoverWindowSeconds ->
-                            fun ?tags ->
-                              fun ?timeDelaySeconds ->
-                                fun ?url ->
-                                  fun ?whitelist ->
-                                    fun () ->
-                                      {
-                                        arn;
-                                        authorization;
-                                        channelId;
-                                        cmafPackage;
-                                        dashPackage;
-                                        description;
-                                        hlsPackage;
-                                        id;
-                                        manifestName;
-                                        mssPackage;
-                                        origination;
-                                        startoverWindowSeconds;
-                                        tags;
-                                        timeDelaySeconds;
-                                        url;
-                                        whitelist
-                                      }
+            fun ?createdAt ->
+              fun ?dashPackage ->
+                fun ?description ->
+                  fun ?hlsPackage ->
+                    fun ?id ->
+                      fun ?manifestName ->
+                        fun ?mssPackage ->
+                          fun ?origination ->
+                            fun ?startoverWindowSeconds ->
+                              fun ?tags ->
+                                fun ?timeDelaySeconds ->
+                                  fun ?url ->
+                                    fun ?whitelist ->
+                                      fun () ->
+                                        {
+                                          arn;
+                                          authorization;
+                                          channelId;
+                                          cmafPackage;
+                                          createdAt;
+                                          dashPackage;
+                                          description;
+                                          hlsPackage;
+                                          id;
+                                          manifestName;
+                                          mssPackage;
+                                          origination;
+                                          startoverWindowSeconds;
+                                          tags;
+                                          timeDelaySeconds;
+                                          url;
+                                          whitelist
+                                        }
     let error_of_json name json =
       match name with
       | "ForbiddenException" ->
@@ -5438,6 +5690,7 @@ module CreateOriginEndpointResponse =
           (Option.map x.authorization ~f:Authorization.to_value));
         ("channelId", (Option.map x.channelId ~f:Zz__string.to_value));
         ("cmafPackage", (Option.map x.cmafPackage ~f:CmafPackage.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("dashPackage", (Option.map x.dashPackage ~f:DashPackage.to_value));
         ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("hlsPackage", (Option.map x.hlsPackage ~f:HlsPackage.to_value));
@@ -5479,6 +5732,8 @@ module CreateOriginEndpointResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
       let dashPackage =
         (Option.map ~f:DashPackage.of_xml) (Xml.child xml_arg0 "dashPackage") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let cmafPackage =
         (Option.map ~f:CmafPackage.of_xml) (Xml.child xml_arg0 "cmafPackage") in
       let channelId =
@@ -5489,31 +5744,34 @@ module CreateOriginEndpointResponse =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?whitelist ?url ?timeDelaySeconds ?tags ?startoverWindowSeconds
         ?origination ?mssPackage ?manifestName ?id ?hlsPackage ?description
-        ?dashPackage ?cmafPackage ?channelId ?authorization ?arn ()
+        ?dashPackage ?createdAt ?cmafPackage ?channelId ?authorization ?arn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let whitelist = field_map json "Whitelist" Zz__listOf__string.of_json in
-      let url = field_map json "Url" Zz__string.of_json in
+    let of_json json__ =
+      let whitelist = field_map json__ "Whitelist" Zz__listOf__string.of_json in
+      let url = field_map json__ "Url" Zz__string.of_json in
       let timeDelaySeconds =
-        field_map json "TimeDelaySeconds" Zz__integer.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "TimeDelaySeconds" Zz__integer.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let startoverWindowSeconds =
-        field_map json "StartoverWindowSeconds" Zz__integer.of_json in
-      let origination = field_map json "Origination" Origination.of_json in
-      let mssPackage = field_map json "MssPackage" MssPackage.of_json in
-      let manifestName = field_map json "ManifestName" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsPackage = field_map json "HlsPackage" HlsPackage.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let dashPackage = field_map json "DashPackage" DashPackage.of_json in
-      let cmafPackage = field_map json "CmafPackage" CmafPackage.of_json in
-      let channelId = field_map json "ChannelId" Zz__string.of_json in
+        field_map json__ "StartoverWindowSeconds" Zz__integer.of_json in
+      let origination = field_map json__ "Origination" Origination.of_json in
+      let mssPackage = field_map json__ "MssPackage" MssPackage.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsPackage = field_map json__ "HlsPackage" HlsPackage.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let dashPackage = field_map json__ "DashPackage" DashPackage.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let cmafPackage = field_map json__ "CmafPackage" CmafPackage.of_json in
+      let channelId = field_map json__ "ChannelId" Zz__string.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "Authorization" Authorization.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?whitelist ?url ?timeDelaySeconds ?tags ?startoverWindowSeconds
         ?origination ?mssPackage ?manifestName ?id ?hlsPackage ?description
-        ?dashPackage ?cmafPackage ?channelId ?authorization ?arn ()
+        ?dashPackage ?createdAt ?cmafPackage ?channelId ?authorization ?arn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new OriginEndpoint record."]
 module CreateOriginEndpointRequest =
@@ -5642,26 +5900,26 @@ module CreateOriginEndpointRequest =
         ?origination ?mssPackage ?manifestName ~id ?hlsPackage ?description
         ?dashPackage ?cmafPackage ~channelId ?authorization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let whitelist = field_map json "Whitelist" Zz__listOf__string.of_json in
+    let of_json json__ =
+      let whitelist = field_map json__ "Whitelist" Zz__listOf__string.of_json in
       let timeDelaySeconds =
-        field_map json "TimeDelaySeconds" Zz__integer.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "TimeDelaySeconds" Zz__integer.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let startoverWindowSeconds =
-        field_map json "StartoverWindowSeconds" Zz__integer.of_json in
-      let origination = field_map json "Origination" Origination.of_json in
-      let mssPackage = field_map json "MssPackage" MssPackage.of_json in
-      let manifestName = field_map json "ManifestName" Zz__string.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
-      let hlsPackage = field_map json "HlsPackage" HlsPackage.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let dashPackage = field_map json "DashPackage" DashPackage.of_json in
+        field_map json__ "StartoverWindowSeconds" Zz__integer.of_json in
+      let origination = field_map json__ "Origination" Origination.of_json in
+      let mssPackage = field_map json__ "MssPackage" MssPackage.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
+      let hlsPackage = field_map json__ "HlsPackage" HlsPackage.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let dashPackage = field_map json__ "DashPackage" DashPackage.of_json in
       let cmafPackage =
-        field_map json "CmafPackage"
+        field_map json__ "CmafPackage"
           CmafPackageCreateOrUpdateParameters.of_json in
-      let channelId = field_map_exn json "ChannelId" Zz__string.of_json in
+      let channelId = field_map_exn json__ "ChannelId" Zz__string.of_json in
       let authorization =
-        field_map json "Authorization" Authorization.of_json in
+        field_map json__ "Authorization" Authorization.of_json in
       make ?whitelist ?timeDelaySeconds ?tags ?startoverWindowSeconds
         ?origination ?mssPackage ?manifestName ~id ?hlsPackage ?description
         ?dashPackage ?cmafPackage ~channelId ?authorization ()
@@ -5679,7 +5937,7 @@ module CreateHarvestJobResponse =
         [@ocaml.doc
           "The ID of the Channel that the HarvestJob will harvest from."];
       createdAt: Zz__string.t option
-        [@ocaml.doc "The time the HarvestJob was submitted"];
+        [@ocaml.doc "The date and time the HarvestJob was submitted."];
       endTime: Zz__string.t option
         [@ocaml.doc "The end of the time-window which will be harvested."];
       id: Zz__string.t option
@@ -5829,18 +6087,18 @@ module CreateHarvestJobResponse =
       make ?status ?startTime ?s3Destination ?originEndpointId ?id ?endTime
         ?createdAt ?channelId ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
-      let startTime = field_map json "StartTime" Zz__string.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Status.of_json in
+      let startTime = field_map json__ "StartTime" Zz__string.of_json in
       let s3Destination =
-        field_map json "S3Destination" S3Destination.of_json in
+        field_map json__ "S3Destination" S3Destination.of_json in
       let originEndpointId =
-        field_map json "OriginEndpointId" Zz__string.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let endTime = field_map json "EndTime" Zz__string.of_json in
-      let createdAt = field_map json "CreatedAt" Zz__string.of_json in
-      let channelId = field_map json "ChannelId" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "OriginEndpointId" Zz__string.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let endTime = field_map json__ "EndTime" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let channelId = field_map json__ "ChannelId" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?status ?startTime ?s3Destination ?originEndpointId ?id ?endTime
         ?createdAt ?channelId ?arn ()
     let to_json v = composed_to_json to_value v
@@ -5893,14 +6151,14 @@ module CreateHarvestJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "endTime") in
       make ~startTime ~s3Destination ~originEndpointId ~id ~endTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startTime = field_map_exn json "StartTime" Zz__string.of_json in
+    let of_json json__ =
+      let startTime = field_map_exn json__ "StartTime" Zz__string.of_json in
       let s3Destination =
-        field_map_exn json "S3Destination" S3Destination.of_json in
+        field_map_exn json__ "S3Destination" S3Destination.of_json in
       let originEndpointId =
-        field_map_exn json "OriginEndpointId" Zz__string.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
-      let endTime = field_map_exn json "EndTime" Zz__string.of_json in
+        field_map_exn json__ "OriginEndpointId" Zz__string.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
+      let endTime = field_map_exn json__ "EndTime" Zz__string.of_json in
       make ~startTime ~s3Destination ~originEndpointId ~id ~endTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5912,6 +6170,8 @@ module CreateChannelResponse =
       arn: Zz__string.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) assigned to the Channel."];
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The date and time the Channel was created."];
       description: Zz__string.t option
         [@ocaml.doc "A short text description of the Channel."];
       egressAccessLogs: EgressAccessLogs.t option ;
@@ -5928,22 +6188,24 @@ module CreateChannelResponse =
       | `UnprocessableEntityException of UnprocessableEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?arn =
-      fun ?description ->
-        fun ?egressAccessLogs ->
-          fun ?hlsIngest ->
-            fun ?id ->
-              fun ?ingressAccessLogs ->
-                fun ?tags ->
-                  fun () ->
-                    {
-                      arn;
-                      description;
-                      egressAccessLogs;
-                      hlsIngest;
-                      id;
-                      ingressAccessLogs;
-                      tags
-                    }
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?egressAccessLogs ->
+            fun ?hlsIngest ->
+              fun ?id ->
+                fun ?ingressAccessLogs ->
+                  fun ?tags ->
+                    fun () ->
+                      {
+                        arn;
+                        createdAt;
+                        description;
+                        egressAccessLogs;
+                        hlsIngest;
+                        id;
+                        ingressAccessLogs;
+                        tags
+                      }
     let error_of_json name json =
       match name with
       | "ForbiddenException" ->
@@ -6017,6 +6279,7 @@ module CreateChannelResponse =
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("egressAccessLogs",
           (Option.map x.egressAccessLogs ~f:EgressAccessLogs.to_value));
@@ -6039,22 +6302,25 @@ module CreateChannelResponse =
           (Xml.child xml_arg0 "egressAccessLogs") in
       let description =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let ingressAccessLogs =
-        field_map json "IngressAccessLogs" IngressAccessLogs.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsIngest = field_map json "HlsIngest" HlsIngest.of_json in
+        field_map json__ "IngressAccessLogs" IngressAccessLogs.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsIngest = field_map json__ "HlsIngest" HlsIngest.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new Channel."]
 module CreateChannelRequest =
@@ -6084,10 +6350,10 @@ module CreateChannelRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
       make ?tags ~id ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?tags ~id ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A new Channel configuration."]
@@ -6098,6 +6364,8 @@ module ConfigureLogsResponse =
       arn: Zz__string.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) assigned to the Channel."];
+      createdAt: Zz__string.t option
+        [@ocaml.doc "The date and time the Channel was created."];
       description: Zz__string.t option
         [@ocaml.doc "A short text description of the Channel."];
       egressAccessLogs: EgressAccessLogs.t option ;
@@ -6114,22 +6382,24 @@ module ConfigureLogsResponse =
       | `UnprocessableEntityException of UnprocessableEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?arn =
-      fun ?description ->
-        fun ?egressAccessLogs ->
-          fun ?hlsIngest ->
-            fun ?id ->
-              fun ?ingressAccessLogs ->
-                fun ?tags ->
-                  fun () ->
-                    {
-                      arn;
-                      description;
-                      egressAccessLogs;
-                      hlsIngest;
-                      id;
-                      ingressAccessLogs;
-                      tags
-                    }
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?egressAccessLogs ->
+            fun ?hlsIngest ->
+              fun ?id ->
+                fun ?ingressAccessLogs ->
+                  fun ?tags ->
+                    fun () ->
+                      {
+                        arn;
+                        createdAt;
+                        description;
+                        egressAccessLogs;
+                        hlsIngest;
+                        id;
+                        ingressAccessLogs;
+                        tags
+                      }
     let error_of_json name json =
       match name with
       | "ForbiddenException" ->
@@ -6203,6 +6473,7 @@ module ConfigureLogsResponse =
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Zz__string.to_value));
         ("description", (Option.map x.description ~f:Zz__string.to_value));
         ("egressAccessLogs",
           (Option.map x.egressAccessLogs ~f:EgressAccessLogs.to_value));
@@ -6225,22 +6496,25 @@ module ConfigureLogsResponse =
           (Xml.child xml_arg0 "egressAccessLogs") in
       let description =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
+      let createdAt =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "createdAt") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let ingressAccessLogs =
-        field_map json "IngressAccessLogs" IngressAccessLogs.of_json in
-      let id = field_map json "Id" Zz__string.of_json in
-      let hlsIngest = field_map json "HlsIngest" HlsIngest.of_json in
+        field_map json__ "IngressAccessLogs" IngressAccessLogs.of_json in
+      let id = field_map json__ "Id" Zz__string.of_json in
+      let hlsIngest = field_map json__ "HlsIngest" HlsIngest.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let createdAt = field_map json__ "CreatedAt" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?tags ?ingressAccessLogs ?id ?hlsIngest ?egressAccessLogs
-        ?description ?arn ()
+        ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Changes the Channel's properities to configure log subscription"]
@@ -6275,12 +6549,12 @@ module ConfigureLogsRequest =
           (Xml.child xml_arg0 "egressAccessLogs") in
       make ?ingressAccessLogs ~id ?egressAccessLogs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ingressAccessLogs =
-        field_map json "IngressAccessLogs" IngressAccessLogs.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
+        field_map json__ "IngressAccessLogs" IngressAccessLogs.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
       make ?ingressAccessLogs ~id ?egressAccessLogs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "the option to configure log subscription."]
@@ -6309,11 +6583,11 @@ module ConfigureLogsParameters =
           (Xml.child xml_arg0 "egressAccessLogs") in
       make ?ingressAccessLogs ?egressAccessLogs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ingressAccessLogs =
-        field_map json "IngressAccessLogs" IngressAccessLogs.of_json in
+        field_map json__ "IngressAccessLogs" IngressAccessLogs.of_json in
       let egressAccessLogs =
-        field_map json "EgressAccessLogs" EgressAccessLogs.of_json in
+        field_map json__ "EgressAccessLogs" EgressAccessLogs.of_json in
       make ?ingressAccessLogs ?egressAccessLogs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6334,8 +6608,8 @@ module ChannelUpdateParameters =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
       make ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" Zz__string.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6363,9 +6637,9 @@ module ChannelList =
           (Xml.child xml_arg0 "channels") in
       make ?nextToken ?channels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let channels = field_map json "Channels" Zz__listOfChannel.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let channels = field_map json__ "Channels" Zz__listOfChannel.of_json in
       make ?nextToken ?channels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A collection of Channel records."]
@@ -6396,10 +6670,10 @@ module ChannelCreateParameters =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "description") in
       make ?tags ~id ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let id = field_map_exn json "Id" Zz__string.of_json in
-      let description = field_map json "Description" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let id = field_map_exn json__ "Id" Zz__string.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
       make ?tags ~id ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration parameters for a new Channel."]

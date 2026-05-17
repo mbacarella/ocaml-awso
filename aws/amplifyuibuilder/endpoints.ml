@@ -4,45 +4,84 @@ open Values
 type ('i, 'o, 'e) t =
   | CreateComponent: (CreateComponentRequest.t, CreateComponentResponse.t,
   CreateComponentResponse.error) t 
+  | CreateForm: (CreateFormRequest.t, CreateFormResponse.t,
+  CreateFormResponse.error) t 
   | CreateTheme: (CreateThemeRequest.t, CreateThemeResponse.t,
   CreateThemeResponse.error) t 
   | DeleteComponent: (DeleteComponentRequest.t, unit, unit) t 
+  | DeleteForm: (DeleteFormRequest.t, unit, unit) t 
   | DeleteTheme: (DeleteThemeRequest.t, unit, unit) t 
   | ExchangeCodeForToken: (ExchangeCodeForTokenRequest.t,
   ExchangeCodeForTokenResponse.t, ExchangeCodeForTokenResponse.error) t 
   | ExportComponents: (ExportComponentsRequest.t, ExportComponentsResponse.t,
   ExportComponentsResponse.error) t 
+  | ExportForms: (ExportFormsRequest.t, ExportFormsResponse.t,
+  ExportFormsResponse.error) t 
   | ExportThemes: (ExportThemesRequest.t, ExportThemesResponse.t,
   ExportThemesResponse.error) t 
+  | GetCodegenJob: (GetCodegenJobRequest.t, GetCodegenJobResponse.t,
+  GetCodegenJobResponse.error) t 
   | GetComponent: (GetComponentRequest.t, GetComponentResponse.t,
   GetComponentResponse.error) t 
+  | GetForm: (GetFormRequest.t, GetFormResponse.t, GetFormResponse.error) t 
+  | GetMetadata: (GetMetadataRequest.t, GetMetadataResponse.t,
+  GetMetadataResponse.error) t 
   | GetTheme: (GetThemeRequest.t, GetThemeResponse.t, GetThemeResponse.error)
   t 
+  | ListCodegenJobs: (ListCodegenJobsRequest.t, ListCodegenJobsResponse.t,
+  ListCodegenJobsResponse.error) t 
   | ListComponents: (ListComponentsRequest.t, ListComponentsResponse.t,
   ListComponentsResponse.error) t 
+  | ListForms: (ListFormsRequest.t, ListFormsResponse.t,
+  ListFormsResponse.error) t 
+  | ListTagsForResource: (ListTagsForResourceRequest.t,
+  ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListThemes: (ListThemesRequest.t, ListThemesResponse.t,
   ListThemesResponse.error) t 
+  | PutMetadataFlag: (PutMetadataFlagRequest.t, unit, unit) t 
   | RefreshToken: (RefreshTokenRequest.t, RefreshTokenResponse.t,
   RefreshTokenResponse.error) t 
+  | StartCodegenJob: (StartCodegenJobRequest.t, StartCodegenJobResponse.t,
+  StartCodegenJobResponse.error) t 
+  | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
+  TagResourceResponse.error) t 
+  | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
+  UntagResourceResponse.error) t 
   | UpdateComponent: (UpdateComponentRequest.t, UpdateComponentResponse.t,
   UpdateComponentResponse.error) t 
+  | UpdateForm: (UpdateFormRequest.t, UpdateFormResponse.t,
+  UpdateFormResponse.error) t 
   | UpdateTheme: (UpdateThemeRequest.t, UpdateThemeResponse.t,
   UpdateThemeResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateComponent -> `POST
+  | CreateForm -> `POST
   | CreateTheme -> `POST
   | DeleteComponent -> `DELETE
+  | DeleteForm -> `DELETE
   | DeleteTheme -> `DELETE
   | ExchangeCodeForToken -> `POST
   | ExportComponents -> `GET
+  | ExportForms -> `GET
   | ExportThemes -> `GET
+  | GetCodegenJob -> `GET
   | GetComponent -> `GET
+  | GetForm -> `GET
+  | GetMetadata -> `GET
   | GetTheme -> `GET
+  | ListCodegenJobs -> `GET
   | ListComponents -> `GET
+  | ListForms -> `GET
+  | ListTagsForResource -> `GET
   | ListThemes -> `GET
+  | PutMetadataFlag -> `PUT
   | RefreshToken -> `POST
+  | StartCodegenJob -> `POST
+  | TagResource -> `POST
+  | UntagResource -> `DELETE
   | UpdateComponent -> `PATCH
+  | UpdateForm -> `PATCH
   | UpdateTheme -> `PATCH
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
@@ -53,6 +92,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                "/app/%s/environment/%s/components"
                (String_.to_header x.CreateComponentRequest.appId)
                (String_.to_header x.CreateComponentRequest.environmentName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (String_.to_header v)))
+                  x.clientToken])
+      | CreateForm ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/app/%s/environment/%s/forms"
+               (String_.to_header x.CreateFormRequest.appId)
+               (String_.to_header x.CreateFormRequest.environmentName))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("clientToken", (String_.to_header v)))
@@ -72,6 +120,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (String_.to_header x.DeleteComponentRequest.appId)
             (String_.to_header x.DeleteComponentRequest.environmentName)
             (Uuid.to_header x.DeleteComponentRequest.id)
+      | DeleteForm ->
+          (Format.kasprintf Uri.of_string) "/app/%s/environment/%s/forms/%s"
+            (String_.to_header x.DeleteFormRequest.appId)
+            (String_.to_header x.DeleteFormRequest.environmentName)
+            (Uuid.to_header x.DeleteFormRequest.id)
       | DeleteTheme ->
           (Format.kasprintf Uri.of_string) "/app/%s/environment/%s/themes/%s"
             (String_.to_header x.DeleteThemeRequest.appId)
@@ -89,6 +142,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (List.filter_opt
                [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
                   x.nextToken])
+      | ExportForms ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/export/app/%s/environment/%s/forms"
+               (String_.to_header x.ExportFormsRequest.appId)
+               (String_.to_header x.ExportFormsRequest.environmentName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                  x.nextToken])
       | ExportThemes ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -98,17 +160,45 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (List.filter_opt
                [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
                   x.nextToken])
+      | GetCodegenJob ->
+          (Format.kasprintf Uri.of_string)
+            "/app/%s/environment/%s/codegen-jobs/%s"
+            (AppId.to_header x.GetCodegenJobRequest.appId)
+            (String_.to_header x.GetCodegenJobRequest.environmentName)
+            (Uuid.to_header x.GetCodegenJobRequest.id)
       | GetComponent ->
           (Format.kasprintf Uri.of_string)
             "/app/%s/environment/%s/components/%s"
             (String_.to_header x.GetComponentRequest.appId)
             (String_.to_header x.GetComponentRequest.environmentName)
             (Uuid.to_header x.GetComponentRequest.id)
+      | GetForm ->
+          (Format.kasprintf Uri.of_string) "/app/%s/environment/%s/forms/%s"
+            (String_.to_header x.GetFormRequest.appId)
+            (String_.to_header x.GetFormRequest.environmentName)
+            (Uuid.to_header x.GetFormRequest.id)
+      | GetMetadata ->
+          (Format.kasprintf Uri.of_string) "/app/%s/environment/%s/metadata"
+            (String_.to_header x.GetMetadataRequest.appId)
+            (String_.to_header x.GetMetadataRequest.environmentName)
       | GetTheme ->
           (Format.kasprintf Uri.of_string) "/app/%s/environment/%s/themes/%s"
             (String_.to_header x.GetThemeRequest.appId)
             (String_.to_header x.GetThemeRequest.environmentName)
             (Uuid.to_header x.GetThemeRequest.id)
+      | ListCodegenJobs ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/app/%s/environment/%s/codegen-jobs"
+               (AppId.to_header x.ListCodegenJobsRequest.appId)
+               (String_.to_header x.ListCodegenJobsRequest.environmentName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults", (ListCodegenJobsLimit.to_header v)))
+                 x.maxResults])
       | ListComponents ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -116,26 +206,64 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (String_.to_header x.ListComponentsRequest.appId)
                (String_.to_header x.ListComponentsRequest.environmentName))
             (List.filter_opt
-               [Option.map
-                  ~f:(fun v ->
-                        ("maxResults", (ListComponentsLimit.to_header v)))
-                  x.maxResults;
-               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
-                 x.nextToken])
+               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (ListEntityLimit.to_header v)))
+                 x.maxResults])
+      | ListForms ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/app/%s/environment/%s/forms"
+               (String_.to_header x.ListFormsRequest.appId)
+               (String_.to_header x.ListFormsRequest.environmentName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (ListEntityLimit.to_header v)))
+                 x.maxResults])
+      | ListTagsForResource ->
+          (Format.kasprintf Uri.of_string) "/tags/%s"
+            (String_.to_header x.ListTagsForResourceRequest.resourceArn)
       | ListThemes ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/app/%s/environment/%s/themes"
                (String_.to_header x.ListThemesRequest.appId)
                (String_.to_header x.ListThemesRequest.environmentName))
             (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("maxResults", (ListThemesLimit.to_header v)))
-                  x.maxResults;
-               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
-                 x.nextToken])
+               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (ListEntityLimit.to_header v)))
+                 x.maxResults])
+      | PutMetadataFlag ->
+          (Format.kasprintf Uri.of_string)
+            "/app/%s/environment/%s/metadata/features/%s"
+            (String_.to_header x.PutMetadataFlagRequest.appId)
+            (String_.to_header x.PutMetadataFlagRequest.environmentName)
+            (String_.to_header x.PutMetadataFlagRequest.featureName)
       | RefreshToken ->
           (Format.kasprintf Uri.of_string) "/tokens/%s/refresh"
             (TokenProviders.to_header x.RefreshTokenRequest.provider)
+      | StartCodegenJob ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/app/%s/environment/%s/codegen-jobs"
+               (AppId.to_header x.StartCodegenJobRequest.appId)
+               (String_.to_header x.StartCodegenJobRequest.environmentName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (String_.to_header v)))
+                  x.clientToken])
+      | TagResource ->
+          (Format.kasprintf Uri.of_string) "/tags/%s"
+            (String_.to_header x.TagResourceRequest.resourceArn)
+      | UntagResource ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/tags/%s"
+               (String_.to_header x.UntagResourceRequest.resourceArn))
+            (List.filter_opt
+               [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
       | UpdateComponent ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -143,6 +271,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (String_.to_header x.UpdateComponentRequest.appId)
                (String_.to_header x.UpdateComponentRequest.environmentName)
                (Uuid.to_header x.UpdateComponentRequest.id))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (String_.to_header v)))
+                  x.clientToken])
+      | UpdateForm ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/app/%s/environment/%s/forms/%s"
+               (String_.to_header x.UpdateFormRequest.appId)
+               (String_.to_header x.UpdateFormRequest.environmentName)
+               (Uuid.to_header x.UpdateFormRequest.id))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("clientToken", (String_.to_header v)))
@@ -170,6 +309,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
               Awso.Botodata.Json.value_to_json)
              |> Yojson.Safe.to_string) req.componentToCreate in
       Awso.Http.Request.make ?headers ~body (method_of_endpoint endp)
+  | CreateForm ->
+      let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+      let body =
+        (fun param ->
+           ((param |> CreateFormData.to_value) |>
+              Awso.Botodata.Json.value_to_json)
+             |> Yojson.Safe.to_string) req.formToCreate in
+      Awso.Http.Request.make ?headers ~body (method_of_endpoint endp)
   | CreateTheme ->
       let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
       let body =
@@ -179,6 +326,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
              |> Yojson.Safe.to_string) req.themeToCreate in
       Awso.Http.Request.make ?headers ~body (method_of_endpoint endp)
   | DeleteComponent -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteForm -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteTheme -> Awso.Http.Request.make (method_of_endpoint endp)
   | ExchangeCodeForToken ->
       let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
@@ -191,21 +339,50 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ExportComponents ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ExportForms ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ExportThemes ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCodegenJob ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetComponent ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetForm ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetMetadata ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetTheme ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCodegenJobs ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListComponents ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListForms ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTagsForResource ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListThemes ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutMetadataFlag ->
+      let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+      let body =
+        (fun param ->
+           ((param |> PutMetadataFlagBody.to_value) |>
+              Awso.Botodata.Json.value_to_json)
+             |> Yojson.Safe.to_string) req.body in
+      Awso.Http.Request.make ?headers ~body (method_of_endpoint endp)
   | RefreshToken ->
       let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
       let body =
@@ -214,6 +391,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
               Awso.Botodata.Json.value_to_json)
              |> Yojson.Safe.to_string) req.refreshTokenBody in
       Awso.Http.Request.make ?headers ~body (method_of_endpoint endp)
+  | StartCodegenJob ->
+      let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+      let body =
+        (fun param ->
+           ((param |> StartCodegenJobData.to_value) |>
+              Awso.Botodata.Json.value_to_json)
+             |> Yojson.Safe.to_string) req.codegenJobToCreate in
+      Awso.Http.Request.make ?headers ~body (method_of_endpoint endp)
+  | TagResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("tags",
+                           (Tags.to_value req.TagResourceRequest.tags))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateComponent ->
       let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
       let body =
@@ -221,6 +426,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
            ((param |> UpdateComponentData.to_value) |>
               Awso.Botodata.Json.value_to_json)
              |> Yojson.Safe.to_string) req.updatedComponent in
+      Awso.Http.Request.make ?headers ~body (method_of_endpoint endp)
+  | UpdateForm ->
+      let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+      let body =
+        (fun param ->
+           ((param |> UpdateFormData.to_value) |>
+              Awso.Botodata.Json.value_to_json)
+             |> Yojson.Safe.to_string) req.updatedForm in
       Awso.Http.Request.make ?headers ~body (method_of_endpoint endp)
   | UpdateTheme ->
       let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
@@ -287,6 +500,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateComponentResponse.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some CreateComponentResponse.error_of_json))
+  | CreateForm ->
+      if is_success
+      then
+        let body = Form.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateFormResponse.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some CreateFormResponse.error_of_json))
   | CreateTheme ->
       if is_success
       then
@@ -297,6 +518,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error (Some CreateThemeResponse.error_of_json))
   | DeleteComponent ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteForm -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteTheme -> if is_success then Ok () else Error (parse_aws_error None)
   | ExchangeCodeForToken ->
       if is_success
@@ -309,10 +531,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ExportComponentsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ExportComponentsResponse.error_of_json))
+  | ExportForms ->
+      if is_success
+      then Ok (ExportFormsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ExportFormsResponse.error_of_json))
   | ExportThemes ->
       if is_success
       then Ok (ExportThemesResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ExportThemesResponse.error_of_json))
+  | GetCodegenJob ->
+      if is_success
+      then
+        let body = CodegenJob.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetCodegenJobResponse.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some GetCodegenJobResponse.error_of_json))
   | GetComponent ->
       if is_success
       then
@@ -321,6 +555,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (GetComponentResponse.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetComponentResponse.error_of_json))
+  | GetForm ->
+      if is_success
+      then
+        let body = Form.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetFormResponse.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some GetFormResponse.error_of_json))
+  | GetMetadata ->
+      if is_success
+      then Ok (GetMetadataResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetMetadataResponse.error_of_json))
   | GetTheme ->
       if is_success
       then
@@ -329,19 +575,59 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (GetThemeResponse.of_header_and_body (headers, body))
       else Error (parse_aws_error (Some GetThemeResponse.error_of_json))
+  | ListCodegenJobs ->
+      if is_success
+      then Ok (ListCodegenJobsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListCodegenJobsResponse.error_of_json))
   | ListComponents ->
       if is_success
       then Ok (ListComponentsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListComponentsResponse.error_of_json))
+  | ListForms ->
+      if is_success
+      then Ok (ListFormsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListFormsResponse.error_of_json))
+  | ListTagsForResource ->
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListThemes ->
       if is_success
       then Ok (ListThemesResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListThemesResponse.error_of_json))
+  | PutMetadataFlag ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | RefreshToken ->
       if is_success
       then Ok (RefreshTokenResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some RefreshTokenResponse.error_of_json))
+  | StartCodegenJob ->
+      if is_success
+      then
+        let body = CodegenJob.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (StartCodegenJobResponse.of_header_and_body (headers, body))
+      else
+        Error (parse_aws_error (Some StartCodegenJobResponse.error_of_json))
+  | TagResource ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | UntagResource ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateComponent ->
       if is_success
       then
@@ -351,6 +637,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateComponentResponse.of_header_and_body (headers, body))
       else
         Error (parse_aws_error (Some UpdateComponentResponse.error_of_json))
+  | UpdateForm ->
+      if is_success
+      then
+        let body = Form.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateFormResponse.of_header_and_body (headers, body))
+      else Error (parse_aws_error (Some UpdateFormResponse.error_of_json))
   | UpdateTheme ->
       if is_success
       then

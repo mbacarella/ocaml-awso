@@ -11,6 +11,17 @@ val create_cluster :
     ?cfg:Awso.Cfg.t ->
       CreateClusterRequest.t ->
         (CreateClusterResponse.t, CreateClusterResponse.error) Result.t
+val create_daemon :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDaemonRequest.t ->
+        (CreateDaemonResponse.t, CreateDaemonResponse.error) Result.t
+val create_express_gateway_service :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateExpressGatewayServiceRequest.t ->
+        (CreateExpressGatewayServiceResponse.t,
+          CreateExpressGatewayServiceResponse.error) Result.t
 val create_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -43,11 +54,34 @@ val delete_cluster :
     ?cfg:Awso.Cfg.t ->
       DeleteClusterRequest.t ->
         (DeleteClusterResponse.t, DeleteClusterResponse.error) Result.t
+val delete_daemon :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDaemonRequest.t ->
+        (DeleteDaemonResponse.t, DeleteDaemonResponse.error) Result.t
+val delete_daemon_task_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDaemonTaskDefinitionRequest.t ->
+        (DeleteDaemonTaskDefinitionResponse.t,
+          DeleteDaemonTaskDefinitionResponse.error) Result.t
+val delete_express_gateway_service :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteExpressGatewayServiceRequest.t ->
+        (DeleteExpressGatewayServiceResponse.t,
+          DeleteExpressGatewayServiceResponse.error) Result.t
 val delete_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteServiceRequest.t ->
         (DeleteServiceResponse.t, DeleteServiceResponse.error) Result.t
+val delete_task_definitions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteTaskDefinitionsRequest.t ->
+        (DeleteTaskDefinitionsResponse.t,
+          DeleteTaskDefinitionsResponse.error) Result.t
 val delete_task_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -82,6 +116,47 @@ val describe_container_instances :
       DescribeContainerInstancesRequest.t ->
         (DescribeContainerInstancesResponse.t,
           DescribeContainerInstancesResponse.error) Result.t
+val describe_daemon :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDaemonRequest.t ->
+        (DescribeDaemonResponse.t, DescribeDaemonResponse.error) Result.t
+val describe_daemon_deployments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDaemonDeploymentsRequest.t ->
+        (DescribeDaemonDeploymentsResponse.t,
+          DescribeDaemonDeploymentsResponse.error) Result.t
+val describe_daemon_revisions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDaemonRevisionsRequest.t ->
+        (DescribeDaemonRevisionsResponse.t,
+          DescribeDaemonRevisionsResponse.error) Result.t
+val describe_daemon_task_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDaemonTaskDefinitionRequest.t ->
+        (DescribeDaemonTaskDefinitionResponse.t,
+          DescribeDaemonTaskDefinitionResponse.error) Result.t
+val describe_express_gateway_service :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeExpressGatewayServiceRequest.t ->
+        (DescribeExpressGatewayServiceResponse.t,
+          DescribeExpressGatewayServiceResponse.error) Result.t
+val describe_service_deployments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeServiceDeploymentsRequest.t ->
+        (DescribeServiceDeploymentsResponse.t,
+          DescribeServiceDeploymentsResponse.error) Result.t
+val describe_service_revisions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeServiceRevisionsRequest.t ->
+        (DescribeServiceRevisionsResponse.t,
+          DescribeServiceRevisionsResponse.error) Result.t
 val describe_services :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -114,6 +189,12 @@ val execute_command :
     ?cfg:Awso.Cfg.t ->
       ExecuteCommandRequest.t ->
         (ExecuteCommandResponse.t, ExecuteCommandResponse.error) Result.t
+val get_task_protection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTaskProtectionRequest.t ->
+        (GetTaskProtectionResponse.t, GetTaskProtectionResponse.error)
+          Result.t
 val list_account_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -136,11 +217,40 @@ val list_container_instances :
       ListContainerInstancesRequest.t ->
         (ListContainerInstancesResponse.t,
           ListContainerInstancesResponse.error) Result.t
+val list_daemon_deployments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDaemonDeploymentsRequest.t ->
+        (ListDaemonDeploymentsResponse.t,
+          ListDaemonDeploymentsResponse.error) Result.t
+val list_daemon_task_definitions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDaemonTaskDefinitionsRequest.t ->
+        (ListDaemonTaskDefinitionsResponse.t,
+          ListDaemonTaskDefinitionsResponse.error) Result.t
+val list_daemons :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDaemonsRequest.t ->
+        (ListDaemonsResponse.t, ListDaemonsResponse.error) Result.t
+val list_service_deployments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListServiceDeploymentsRequest.t ->
+        (ListServiceDeploymentsResponse.t,
+          ListServiceDeploymentsResponse.error) Result.t
 val list_services :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListServicesRequest.t ->
         (ListServicesResponse.t, ListServicesResponse.error) Result.t
+val list_services_by_namespace :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListServicesByNamespaceRequest.t ->
+        (ListServicesByNamespaceResponse.t,
+          ListServicesByNamespaceResponse.error) Result.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -193,6 +303,12 @@ val register_container_instance :
       RegisterContainerInstanceRequest.t ->
         (RegisterContainerInstanceResponse.t,
           RegisterContainerInstanceResponse.error) Result.t
+val register_daemon_task_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RegisterDaemonTaskDefinitionRequest.t ->
+        (RegisterDaemonTaskDefinitionResponse.t,
+          RegisterDaemonTaskDefinitionResponse.error) Result.t
 val register_task_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -208,6 +324,12 @@ val start_task :
     ?cfg:Awso.Cfg.t ->
       StartTaskRequest.t ->
         (StartTaskResponse.t, StartTaskResponse.error) Result.t
+val stop_service_deployment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopServiceDeploymentRequest.t ->
+        (StopServiceDeploymentResponse.t,
+          StopServiceDeploymentResponse.error) Result.t
 val stop_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -270,6 +392,17 @@ val update_container_instances_state :
       UpdateContainerInstancesStateRequest.t ->
         (UpdateContainerInstancesStateResponse.t,
           UpdateContainerInstancesStateResponse.error) Result.t
+val update_daemon :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDaemonRequest.t ->
+        (UpdateDaemonResponse.t, UpdateDaemonResponse.error) Result.t
+val update_express_gateway_service :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateExpressGatewayServiceRequest.t ->
+        (UpdateExpressGatewayServiceResponse.t,
+          UpdateExpressGatewayServiceResponse.error) Result.t
 val update_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -281,6 +414,12 @@ val update_service_primary_task_set :
       UpdateServicePrimaryTaskSetRequest.t ->
         (UpdateServicePrimaryTaskSetResponse.t,
           UpdateServicePrimaryTaskSetResponse.error) Result.t
+val update_task_protection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateTaskProtectionRequest.t ->
+        (UpdateTaskProtectionResponse.t, UpdateTaskProtectionResponse.error)
+          Result.t
 val update_task_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

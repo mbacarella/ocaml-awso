@@ -2,32 +2,93 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AcceptNetworkFirewallTransitGatewayAttachment:
+  (AcceptNetworkFirewallTransitGatewayAttachmentRequest.t,
+  AcceptNetworkFirewallTransitGatewayAttachmentResponse.t,
+  AcceptNetworkFirewallTransitGatewayAttachmentResponse.error) t 
+  | AssociateAvailabilityZones: (AssociateAvailabilityZonesRequest.t,
+  AssociateAvailabilityZonesResponse.t,
+  AssociateAvailabilityZonesResponse.error) t 
   | AssociateFirewallPolicy: (AssociateFirewallPolicyRequest.t,
   AssociateFirewallPolicyResponse.t, AssociateFirewallPolicyResponse.error) t
   
   | AssociateSubnets: (AssociateSubnetsRequest.t, AssociateSubnetsResponse.t,
   AssociateSubnetsResponse.error) t 
+  | AttachRuleGroupsToProxyConfiguration:
+  (AttachRuleGroupsToProxyConfigurationRequest.t,
+  AttachRuleGroupsToProxyConfigurationResponse.t,
+  AttachRuleGroupsToProxyConfigurationResponse.error) t 
   | CreateFirewall: (CreateFirewallRequest.t, CreateFirewallResponse.t,
   CreateFirewallResponse.error) t 
   | CreateFirewallPolicy: (CreateFirewallPolicyRequest.t,
   CreateFirewallPolicyResponse.t, CreateFirewallPolicyResponse.error) t 
+  | CreateProxy: (CreateProxyRequest.t, CreateProxyResponse.t,
+  CreateProxyResponse.error) t 
+  | CreateProxyConfiguration: (CreateProxyConfigurationRequest.t,
+  CreateProxyConfigurationResponse.t, CreateProxyConfigurationResponse.error)
+  t 
+  | CreateProxyRuleGroup: (CreateProxyRuleGroupRequest.t,
+  CreateProxyRuleGroupResponse.t, CreateProxyRuleGroupResponse.error) t 
+  | CreateProxyRules: (CreateProxyRulesRequest.t, CreateProxyRulesResponse.t,
+  CreateProxyRulesResponse.error) t 
   | CreateRuleGroup: (CreateRuleGroupRequest.t, CreateRuleGroupResponse.t,
   CreateRuleGroupResponse.error) t 
+  | CreateTLSInspectionConfiguration:
+  (CreateTLSInspectionConfigurationRequest.t,
+  CreateTLSInspectionConfigurationResponse.t,
+  CreateTLSInspectionConfigurationResponse.error) t 
+  | CreateVpcEndpointAssociation: (CreateVpcEndpointAssociationRequest.t,
+  CreateVpcEndpointAssociationResponse.t,
+  CreateVpcEndpointAssociationResponse.error) t 
   | DeleteFirewall: (DeleteFirewallRequest.t, DeleteFirewallResponse.t,
   DeleteFirewallResponse.error) t 
   | DeleteFirewallPolicy: (DeleteFirewallPolicyRequest.t,
   DeleteFirewallPolicyResponse.t, DeleteFirewallPolicyResponse.error) t 
+  | DeleteNetworkFirewallTransitGatewayAttachment:
+  (DeleteNetworkFirewallTransitGatewayAttachmentRequest.t,
+  DeleteNetworkFirewallTransitGatewayAttachmentResponse.t,
+  DeleteNetworkFirewallTransitGatewayAttachmentResponse.error) t 
+  | DeleteProxy: (DeleteProxyRequest.t, DeleteProxyResponse.t,
+  DeleteProxyResponse.error) t 
+  | DeleteProxyConfiguration: (DeleteProxyConfigurationRequest.t,
+  DeleteProxyConfigurationResponse.t, DeleteProxyConfigurationResponse.error)
+  t 
+  | DeleteProxyRuleGroup: (DeleteProxyRuleGroupRequest.t,
+  DeleteProxyRuleGroupResponse.t, DeleteProxyRuleGroupResponse.error) t 
+  | DeleteProxyRules: (DeleteProxyRulesRequest.t, DeleteProxyRulesResponse.t,
+  DeleteProxyRulesResponse.error) t 
   | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t,
   DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error) t 
   | DeleteRuleGroup: (DeleteRuleGroupRequest.t, DeleteRuleGroupResponse.t,
   DeleteRuleGroupResponse.error) t 
+  | DeleteTLSInspectionConfiguration:
+  (DeleteTLSInspectionConfigurationRequest.t,
+  DeleteTLSInspectionConfigurationResponse.t,
+  DeleteTLSInspectionConfigurationResponse.error) t 
+  | DeleteVpcEndpointAssociation: (DeleteVpcEndpointAssociationRequest.t,
+  DeleteVpcEndpointAssociationResponse.t,
+  DeleteVpcEndpointAssociationResponse.error) t 
   | DescribeFirewall: (DescribeFirewallRequest.t, DescribeFirewallResponse.t,
   DescribeFirewallResponse.error) t 
+  | DescribeFirewallMetadata: (DescribeFirewallMetadataRequest.t,
+  DescribeFirewallMetadataResponse.t, DescribeFirewallMetadataResponse.error)
+  t 
   | DescribeFirewallPolicy: (DescribeFirewallPolicyRequest.t,
   DescribeFirewallPolicyResponse.t, DescribeFirewallPolicyResponse.error) t 
+  | DescribeFlowOperation: (DescribeFlowOperationRequest.t,
+  DescribeFlowOperationResponse.t, DescribeFlowOperationResponse.error) t 
   | DescribeLoggingConfiguration: (DescribeLoggingConfigurationRequest.t,
   DescribeLoggingConfigurationResponse.t,
   DescribeLoggingConfigurationResponse.error) t 
+  | DescribeProxy: (DescribeProxyRequest.t, DescribeProxyResponse.t,
+  DescribeProxyResponse.error) t 
+  | DescribeProxyConfiguration: (DescribeProxyConfigurationRequest.t,
+  DescribeProxyConfigurationResponse.t,
+  DescribeProxyConfigurationResponse.error) t 
+  | DescribeProxyRule: (DescribeProxyRuleRequest.t,
+  DescribeProxyRuleResponse.t, DescribeProxyRuleResponse.error) t 
+  | DescribeProxyRuleGroup: (DescribeProxyRuleGroupRequest.t,
+  DescribeProxyRuleGroupResponse.t, DescribeProxyRuleGroupResponse.error) t 
   | DescribeResourcePolicy: (DescribeResourcePolicyRequest.t,
   DescribeResourcePolicyResponse.t, DescribeResourcePolicyResponse.error) t 
   | DescribeRuleGroup: (DescribeRuleGroupRequest.t,
@@ -35,28 +96,90 @@ type ('i, 'o, 'e) t =
   | DescribeRuleGroupMetadata: (DescribeRuleGroupMetadataRequest.t,
   DescribeRuleGroupMetadataResponse.t,
   DescribeRuleGroupMetadataResponse.error) t 
+  | DescribeRuleGroupSummary: (DescribeRuleGroupSummaryRequest.t,
+  DescribeRuleGroupSummaryResponse.t, DescribeRuleGroupSummaryResponse.error)
+  t 
+  | DescribeTLSInspectionConfiguration:
+  (DescribeTLSInspectionConfigurationRequest.t,
+  DescribeTLSInspectionConfigurationResponse.t,
+  DescribeTLSInspectionConfigurationResponse.error) t 
+  | DescribeVpcEndpointAssociation: (DescribeVpcEndpointAssociationRequest.t,
+  DescribeVpcEndpointAssociationResponse.t,
+  DescribeVpcEndpointAssociationResponse.error) t 
+  | DetachRuleGroupsFromProxyConfiguration:
+  (DetachRuleGroupsFromProxyConfigurationRequest.t,
+  DetachRuleGroupsFromProxyConfigurationResponse.t,
+  DetachRuleGroupsFromProxyConfigurationResponse.error) t 
+  | DisassociateAvailabilityZones: (DisassociateAvailabilityZonesRequest.t,
+  DisassociateAvailabilityZonesResponse.t,
+  DisassociateAvailabilityZonesResponse.error) t 
   | DisassociateSubnets: (DisassociateSubnetsRequest.t,
   DisassociateSubnetsResponse.t, DisassociateSubnetsResponse.error) t 
+  | GetAnalysisReportResults: (GetAnalysisReportResultsRequest.t,
+  GetAnalysisReportResultsResponse.t, GetAnalysisReportResultsResponse.error)
+  t 
+  | ListAnalysisReports: (ListAnalysisReportsRequest.t,
+  ListAnalysisReportsResponse.t, ListAnalysisReportsResponse.error) t 
   | ListFirewallPolicies: (ListFirewallPoliciesRequest.t,
   ListFirewallPoliciesResponse.t, ListFirewallPoliciesResponse.error) t 
   | ListFirewalls: (ListFirewallsRequest.t, ListFirewallsResponse.t,
   ListFirewallsResponse.error) t 
+  | ListFlowOperationResults: (ListFlowOperationResultsRequest.t,
+  ListFlowOperationResultsResponse.t, ListFlowOperationResultsResponse.error)
+  t 
+  | ListFlowOperations: (ListFlowOperationsRequest.t,
+  ListFlowOperationsResponse.t, ListFlowOperationsResponse.error) t 
+  | ListProxies: (ListProxiesRequest.t, ListProxiesResponse.t,
+  ListProxiesResponse.error) t 
+  | ListProxyConfigurations: (ListProxyConfigurationsRequest.t,
+  ListProxyConfigurationsResponse.t, ListProxyConfigurationsResponse.error) t
+  
+  | ListProxyRuleGroups: (ListProxyRuleGroupsRequest.t,
+  ListProxyRuleGroupsResponse.t, ListProxyRuleGroupsResponse.error) t 
   | ListRuleGroups: (ListRuleGroupsRequest.t, ListRuleGroupsResponse.t,
   ListRuleGroupsResponse.error) t 
+  | ListTLSInspectionConfigurations:
+  (ListTLSInspectionConfigurationsRequest.t,
+  ListTLSInspectionConfigurationsResponse.t,
+  ListTLSInspectionConfigurationsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListVpcEndpointAssociations: (ListVpcEndpointAssociationsRequest.t,
+  ListVpcEndpointAssociationsResponse.t,
+  ListVpcEndpointAssociationsResponse.error) t 
   | PutResourcePolicy: (PutResourcePolicyRequest.t,
   PutResourcePolicyResponse.t, PutResourcePolicyResponse.error) t 
+  | RejectNetworkFirewallTransitGatewayAttachment:
+  (RejectNetworkFirewallTransitGatewayAttachmentRequest.t,
+  RejectNetworkFirewallTransitGatewayAttachmentResponse.t,
+  RejectNetworkFirewallTransitGatewayAttachmentResponse.error) t 
+  | StartAnalysisReport: (StartAnalysisReportRequest.t,
+  StartAnalysisReportResponse.t, StartAnalysisReportResponse.error) t 
+  | StartFlowCapture: (StartFlowCaptureRequest.t, StartFlowCaptureResponse.t,
+  StartFlowCaptureResponse.error) t 
+  | StartFlowFlush: (StartFlowFlushRequest.t, StartFlowFlushResponse.t,
+  StartFlowFlushResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateAvailabilityZoneChangeProtection:
+  (UpdateAvailabilityZoneChangeProtectionRequest.t,
+  UpdateAvailabilityZoneChangeProtectionResponse.t,
+  UpdateAvailabilityZoneChangeProtectionResponse.error) t 
+  | UpdateFirewallAnalysisSettings: (UpdateFirewallAnalysisSettingsRequest.t,
+  UpdateFirewallAnalysisSettingsResponse.t,
+  UpdateFirewallAnalysisSettingsResponse.error) t 
   | UpdateFirewallDeleteProtection: (UpdateFirewallDeleteProtectionRequest.t,
   UpdateFirewallDeleteProtectionResponse.t,
   UpdateFirewallDeleteProtectionResponse.error) t 
   | UpdateFirewallDescription: (UpdateFirewallDescriptionRequest.t,
   UpdateFirewallDescriptionResponse.t,
   UpdateFirewallDescriptionResponse.error) t 
+  | UpdateFirewallEncryptionConfiguration:
+  (UpdateFirewallEncryptionConfigurationRequest.t,
+  UpdateFirewallEncryptionConfigurationResponse.t,
+  UpdateFirewallEncryptionConfigurationResponse.error) t 
   | UpdateFirewallPolicy: (UpdateFirewallPolicyRequest.t,
   UpdateFirewallPolicyResponse.t, UpdateFirewallPolicyResponse.error) t 
   | UpdateFirewallPolicyChangeProtection:
@@ -66,81 +189,230 @@ type ('i, 'o, 'e) t =
   | UpdateLoggingConfiguration: (UpdateLoggingConfigurationRequest.t,
   UpdateLoggingConfigurationResponse.t,
   UpdateLoggingConfigurationResponse.error) t 
+  | UpdateProxy: (UpdateProxyRequest.t, UpdateProxyResponse.t,
+  UpdateProxyResponse.error) t 
+  | UpdateProxyConfiguration: (UpdateProxyConfigurationRequest.t,
+  UpdateProxyConfigurationResponse.t, UpdateProxyConfigurationResponse.error)
+  t 
+  | UpdateProxyRule: (UpdateProxyRuleRequest.t, UpdateProxyRuleResponse.t,
+  UpdateProxyRuleResponse.error) t 
+  | UpdateProxyRuleGroupPriorities: (UpdateProxyRuleGroupPrioritiesRequest.t,
+  UpdateProxyRuleGroupPrioritiesResponse.t,
+  UpdateProxyRuleGroupPrioritiesResponse.error) t 
+  | UpdateProxyRulePriorities: (UpdateProxyRulePrioritiesRequest.t,
+  UpdateProxyRulePrioritiesResponse.t,
+  UpdateProxyRulePrioritiesResponse.error) t 
   | UpdateRuleGroup: (UpdateRuleGroupRequest.t, UpdateRuleGroupResponse.t,
   UpdateRuleGroupResponse.error) t 
   | UpdateSubnetChangeProtection: (UpdateSubnetChangeProtectionRequest.t,
   UpdateSubnetChangeProtectionResponse.t,
   UpdateSubnetChangeProtectionResponse.error) t 
+  | UpdateTLSInspectionConfiguration:
+  (UpdateTLSInspectionConfigurationRequest.t,
+  UpdateTLSInspectionConfigurationResponse.t,
+  UpdateTLSInspectionConfigurationResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AcceptNetworkFirewallTransitGatewayAttachment -> `POST
+  | AssociateAvailabilityZones -> `POST
   | AssociateFirewallPolicy -> `POST
   | AssociateSubnets -> `POST
+  | AttachRuleGroupsToProxyConfiguration -> `POST
   | CreateFirewall -> `POST
   | CreateFirewallPolicy -> `POST
+  | CreateProxy -> `POST
+  | CreateProxyConfiguration -> `POST
+  | CreateProxyRuleGroup -> `POST
+  | CreateProxyRules -> `POST
   | CreateRuleGroup -> `POST
+  | CreateTLSInspectionConfiguration -> `POST
+  | CreateVpcEndpointAssociation -> `POST
   | DeleteFirewall -> `POST
   | DeleteFirewallPolicy -> `POST
+  | DeleteNetworkFirewallTransitGatewayAttachment -> `POST
+  | DeleteProxy -> `POST
+  | DeleteProxyConfiguration -> `POST
+  | DeleteProxyRuleGroup -> `POST
+  | DeleteProxyRules -> `POST
   | DeleteResourcePolicy -> `POST
   | DeleteRuleGroup -> `POST
+  | DeleteTLSInspectionConfiguration -> `POST
+  | DeleteVpcEndpointAssociation -> `POST
   | DescribeFirewall -> `POST
+  | DescribeFirewallMetadata -> `POST
   | DescribeFirewallPolicy -> `POST
+  | DescribeFlowOperation -> `POST
   | DescribeLoggingConfiguration -> `POST
+  | DescribeProxy -> `POST
+  | DescribeProxyConfiguration -> `POST
+  | DescribeProxyRule -> `POST
+  | DescribeProxyRuleGroup -> `POST
   | DescribeResourcePolicy -> `POST
   | DescribeRuleGroup -> `POST
   | DescribeRuleGroupMetadata -> `POST
+  | DescribeRuleGroupSummary -> `POST
+  | DescribeTLSInspectionConfiguration -> `POST
+  | DescribeVpcEndpointAssociation -> `POST
+  | DetachRuleGroupsFromProxyConfiguration -> `POST
+  | DisassociateAvailabilityZones -> `POST
   | DisassociateSubnets -> `POST
+  | GetAnalysisReportResults -> `POST
+  | ListAnalysisReports -> `POST
   | ListFirewallPolicies -> `POST
   | ListFirewalls -> `POST
+  | ListFlowOperationResults -> `POST
+  | ListFlowOperations -> `POST
+  | ListProxies -> `POST
+  | ListProxyConfigurations -> `POST
+  | ListProxyRuleGroups -> `POST
   | ListRuleGroups -> `POST
+  | ListTLSInspectionConfigurations -> `POST
   | ListTagsForResource -> `POST
+  | ListVpcEndpointAssociations -> `POST
   | PutResourcePolicy -> `POST
+  | RejectNetworkFirewallTransitGatewayAttachment -> `POST
+  | StartAnalysisReport -> `POST
+  | StartFlowCapture -> `POST
+  | StartFlowFlush -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
+  | UpdateAvailabilityZoneChangeProtection -> `POST
+  | UpdateFirewallAnalysisSettings -> `POST
   | UpdateFirewallDeleteProtection -> `POST
   | UpdateFirewallDescription -> `POST
+  | UpdateFirewallEncryptionConfiguration -> `POST
   | UpdateFirewallPolicy -> `POST
   | UpdateFirewallPolicyChangeProtection -> `POST
   | UpdateLoggingConfiguration -> `POST
+  | UpdateProxy -> `POST
+  | UpdateProxyConfiguration -> `POST
+  | UpdateProxyRule -> `POST
+  | UpdateProxyRuleGroupPriorities -> `POST
+  | UpdateProxyRulePriorities -> `POST
   | UpdateRuleGroup -> `POST
   | UpdateSubnetChangeProtection -> `POST
+  | UpdateTLSInspectionConfiguration -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AcceptNetworkFirewallTransitGatewayAttachment ->
+          (Format.kasprintf Uri.of_string) "/"
+      | AssociateAvailabilityZones -> (Format.kasprintf Uri.of_string) "/"
       | AssociateFirewallPolicy -> (Format.kasprintf Uri.of_string) "/"
       | AssociateSubnets -> (Format.kasprintf Uri.of_string) "/"
+      | AttachRuleGroupsToProxyConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateFirewall -> (Format.kasprintf Uri.of_string) "/"
       | CreateFirewallPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | CreateProxy -> (Format.kasprintf Uri.of_string) "/"
+      | CreateProxyConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | CreateProxyRuleGroup -> (Format.kasprintf Uri.of_string) "/"
+      | CreateProxyRules -> (Format.kasprintf Uri.of_string) "/"
       | CreateRuleGroup -> (Format.kasprintf Uri.of_string) "/"
+      | CreateTLSInspectionConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CreateVpcEndpointAssociation -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFirewall -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFirewallPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteNetworkFirewallTransitGatewayAttachment ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteProxy -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteProxyConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteProxyRuleGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteProxyRules -> (Format.kasprintf Uri.of_string) "/"
       | DeleteResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeleteRuleGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteTLSInspectionConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteVpcEndpointAssociation -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFirewall -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeFirewallMetadata -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFirewallPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeFlowOperation -> (Format.kasprintf Uri.of_string) "/"
       | DescribeLoggingConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeProxy -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeProxyConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeProxyRule -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeProxyRuleGroup -> (Format.kasprintf Uri.of_string) "/"
       | DescribeResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DescribeRuleGroup -> (Format.kasprintf Uri.of_string) "/"
       | DescribeRuleGroupMetadata -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeRuleGroupSummary -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeTLSInspectionConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeVpcEndpointAssociation ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DetachRuleGroupsFromProxyConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DisassociateAvailabilityZones -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateSubnets -> (Format.kasprintf Uri.of_string) "/"
+      | GetAnalysisReportResults -> (Format.kasprintf Uri.of_string) "/"
+      | ListAnalysisReports -> (Format.kasprintf Uri.of_string) "/"
       | ListFirewallPolicies -> (Format.kasprintf Uri.of_string) "/"
       | ListFirewalls -> (Format.kasprintf Uri.of_string) "/"
+      | ListFlowOperationResults -> (Format.kasprintf Uri.of_string) "/"
+      | ListFlowOperations -> (Format.kasprintf Uri.of_string) "/"
+      | ListProxies -> (Format.kasprintf Uri.of_string) "/"
+      | ListProxyConfigurations -> (Format.kasprintf Uri.of_string) "/"
+      | ListProxyRuleGroups -> (Format.kasprintf Uri.of_string) "/"
       | ListRuleGroups -> (Format.kasprintf Uri.of_string) "/"
+      | ListTLSInspectionConfigurations ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | ListVpcEndpointAssociations -> (Format.kasprintf Uri.of_string) "/"
       | PutResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | RejectNetworkFirewallTransitGatewayAttachment ->
+          (Format.kasprintf Uri.of_string) "/"
+      | StartAnalysisReport -> (Format.kasprintf Uri.of_string) "/"
+      | StartFlowCapture -> (Format.kasprintf Uri.of_string) "/"
+      | StartFlowFlush -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateAvailabilityZoneChangeProtection ->
+          (Format.kasprintf Uri.of_string) "/"
+      | UpdateFirewallAnalysisSettings ->
+          (Format.kasprintf Uri.of_string) "/"
       | UpdateFirewallDeleteProtection ->
           (Format.kasprintf Uri.of_string) "/"
       | UpdateFirewallDescription -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateFirewallEncryptionConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | UpdateFirewallPolicy -> (Format.kasprintf Uri.of_string) "/"
       | UpdateFirewallPolicyChangeProtection ->
           (Format.kasprintf Uri.of_string) "/"
       | UpdateLoggingConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateProxy -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateProxyConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateProxyRule -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateProxyRuleGroupPriorities ->
+          (Format.kasprintf Uri.of_string) "/"
+      | UpdateProxyRulePriorities -> (Format.kasprintf Uri.of_string) "/"
       | UpdateRuleGroup -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateSubnetChangeProtection -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateSubnetChangeProtection -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateTLSInspectionConfiguration ->
+          (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
+  | AcceptNetworkFirewallTransitGatewayAttachment ->
+      let json =
+        AcceptNetworkFirewallTransitGatewayAttachmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.AcceptNetworkFirewallTransitGatewayAttachment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | AssociateAvailabilityZones ->
+      let json = AssociateAvailabilityZonesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.AssociateAvailabilityZones")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | AssociateFirewallPolicy ->
       let json = AssociateFirewallPolicyRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -158,6 +430,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "NetworkFirewall_20201112.AssociateSubnets")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | AttachRuleGroupsToProxyConfiguration ->
+      let json = AttachRuleGroupsToProxyConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.AttachRuleGroupsToProxyConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateFirewall ->
       let json = CreateFirewallRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -174,6 +455,39 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "NetworkFirewall_20201112.CreateFirewallPolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateProxy ->
+      let json = CreateProxyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.CreateProxy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateProxyConfiguration ->
+      let json = CreateProxyConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.CreateProxyConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateProxyRuleGroup ->
+      let json = CreateProxyRuleGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.CreateProxyRuleGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateProxyRules ->
+      let json = CreateProxyRulesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.CreateProxyRules")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateRuleGroup ->
       let json = CreateRuleGroupRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -181,6 +495,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "NetworkFirewall_20201112.CreateRuleGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateTLSInspectionConfiguration ->
+      let json = CreateTLSInspectionConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.CreateTLSInspectionConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateVpcEndpointAssociation ->
+      let json = CreateVpcEndpointAssociationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.CreateVpcEndpointAssociation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteFirewall ->
       let json = DeleteFirewallRequest.to_json req in
@@ -198,6 +530,49 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "NetworkFirewall_20201112.DeleteFirewallPolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteNetworkFirewallTransitGatewayAttachment ->
+      let json =
+        DeleteNetworkFirewallTransitGatewayAttachmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.DeleteNetworkFirewallTransitGatewayAttachment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteProxy ->
+      let json = DeleteProxyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.DeleteProxy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteProxyConfiguration ->
+      let json = DeleteProxyConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.DeleteProxyConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteProxyRuleGroup ->
+      let json = DeleteProxyRuleGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.DeleteProxyRuleGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteProxyRules ->
+      let json = DeleteProxyRulesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.DeleteProxyRules")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteResourcePolicy ->
       let json = DeleteResourcePolicyRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -214,6 +589,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "NetworkFirewall_20201112.DeleteRuleGroup")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteTLSInspectionConfiguration ->
+      let json = DeleteTLSInspectionConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.DeleteTLSInspectionConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteVpcEndpointAssociation ->
+      let json = DeleteVpcEndpointAssociationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.DeleteVpcEndpointAssociation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeFirewall ->
       let json = DescribeFirewallRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -221,6 +614,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "NetworkFirewall_20201112.DescribeFirewall")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFirewallMetadata ->
+      let json = DescribeFirewallMetadataRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.DescribeFirewallMetadata")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeFirewallPolicy ->
       let json = DescribeFirewallPolicyRequest.to_json req in
@@ -230,6 +632,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "NetworkFirewall_20201112.DescribeFirewallPolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFlowOperation ->
+      let json = DescribeFlowOperationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.DescribeFlowOperation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeLoggingConfiguration ->
       let json = DescribeLoggingConfigurationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -238,6 +648,39 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "NetworkFirewall_20201112.DescribeLoggingConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeProxy ->
+      let json = DescribeProxyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.DescribeProxy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeProxyConfiguration ->
+      let json = DescribeProxyConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.DescribeProxyConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeProxyRule ->
+      let json = DescribeProxyRuleRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.DescribeProxyRule")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeProxyRuleGroup ->
+      let json = DescribeProxyRuleGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.DescribeProxyRuleGroup")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeResourcePolicy ->
       let json = DescribeResourcePolicyRequest.to_json req in
@@ -264,6 +707,51 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "NetworkFirewall_20201112.DescribeRuleGroupMetadata")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRuleGroupSummary ->
+      let json = DescribeRuleGroupSummaryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.DescribeRuleGroupSummary")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeTLSInspectionConfiguration ->
+      let json = DescribeTLSInspectionConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.DescribeTLSInspectionConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeVpcEndpointAssociation ->
+      let json = DescribeVpcEndpointAssociationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.DescribeVpcEndpointAssociation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DetachRuleGroupsFromProxyConfiguration ->
+      let json = DetachRuleGroupsFromProxyConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.DetachRuleGroupsFromProxyConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisassociateAvailabilityZones ->
+      let json = DisassociateAvailabilityZonesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.DisassociateAvailabilityZones")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DisassociateSubnets ->
       let json = DisassociateSubnetsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -271,6 +759,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "NetworkFirewall_20201112.DisassociateSubnets")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetAnalysisReportResults ->
+      let json = GetAnalysisReportResultsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.GetAnalysisReportResults")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAnalysisReports ->
+      let json = ListAnalysisReportsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.ListAnalysisReports")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListFirewallPolicies ->
       let json = ListFirewallPoliciesRequest.to_json req in
@@ -288,6 +793,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "NetworkFirewall_20201112.ListFirewalls")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListFlowOperationResults ->
+      let json = ListFlowOperationResultsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.ListFlowOperationResults")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListFlowOperations ->
+      let json = ListFlowOperationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.ListFlowOperations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListProxies ->
+      let json = ListProxiesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.ListProxies")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListProxyConfigurations ->
+      let json = ListProxyConfigurationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.ListProxyConfigurations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListProxyRuleGroups ->
+      let json = ListProxyRuleGroupsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.ListProxyRuleGroups")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListRuleGroups ->
       let json = ListRuleGroupsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -295,6 +842,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "NetworkFirewall_20201112.ListRuleGroups")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTLSInspectionConfigurations ->
+      let json = ListTLSInspectionConfigurationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.ListTLSInspectionConfigurations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let json = ListTagsForResourceRequest.to_json req in
@@ -304,6 +860,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "NetworkFirewall_20201112.ListTagsForResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListVpcEndpointAssociations ->
+      let json = ListVpcEndpointAssociationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.ListVpcEndpointAssociations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutResourcePolicy ->
       let json = PutResourcePolicyRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -311,6 +876,40 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "NetworkFirewall_20201112.PutResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RejectNetworkFirewallTransitGatewayAttachment ->
+      let json =
+        RejectNetworkFirewallTransitGatewayAttachmentRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.RejectNetworkFirewallTransitGatewayAttachment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartAnalysisReport ->
+      let json = StartAnalysisReportRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.StartAnalysisReport")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartFlowCapture ->
+      let json = StartFlowCaptureRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.StartFlowCapture")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartFlowFlush ->
+      let json = StartFlowFlushRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.StartFlowFlush")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagResource ->
       let json = TagResourceRequest.to_json req in
@@ -327,6 +926,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "NetworkFirewall_20201112.UntagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateAvailabilityZoneChangeProtection ->
+      let json = UpdateAvailabilityZoneChangeProtectionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.UpdateAvailabilityZoneChangeProtection")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateFirewallAnalysisSettings ->
+      let json = UpdateFirewallAnalysisSettingsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.UpdateFirewallAnalysisSettings")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateFirewallDeleteProtection ->
       let json = UpdateFirewallDeleteProtectionRequest.to_json req in
@@ -345,6 +962,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "NetworkFirewall_20201112.UpdateFirewallDescription")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateFirewallEncryptionConfiguration ->
+      let json = UpdateFirewallEncryptionConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.UpdateFirewallEncryptionConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateFirewallPolicy ->
       let json = UpdateFirewallPolicyRequest.to_json req in
@@ -372,6 +998,49 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "NetworkFirewall_20201112.UpdateLoggingConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateProxy ->
+      let json = UpdateProxyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.UpdateProxy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateProxyConfiguration ->
+      let json = UpdateProxyConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.UpdateProxyConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateProxyRule ->
+      let json = UpdateProxyRuleRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "NetworkFirewall_20201112.UpdateProxyRule")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateProxyRuleGroupPriorities ->
+      let json = UpdateProxyRuleGroupPrioritiesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.UpdateProxyRuleGroupPriorities")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateProxyRulePriorities ->
+      let json = UpdateProxyRulePrioritiesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.UpdateProxyRulePriorities")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateRuleGroup ->
       let json = UpdateRuleGroupRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -388,6 +1057,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "NetworkFirewall_20201112.UpdateSubnetChangeProtection")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateTLSInspectionConfiguration ->
+      let json = UpdateTLSInspectionConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "NetworkFirewall_20201112.UpdateTLSInspectionConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -412,6 +1090,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | AcceptNetworkFirewallTransitGatewayAttachment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (AcceptNetworkFirewallTransitGatewayAttachmentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                AcceptNetworkFirewallTransitGatewayAttachmentResponse.error_of_json))
+  | AssociateAvailabilityZones ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateAvailabilityZonesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateAvailabilityZonesResponse.error_of_json))
   | AssociateFirewallPolicy ->
       if is_success
       then
@@ -428,6 +1126,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (AssociateSubnetsResponse.of_json json)
       else
         Error (parse_aws_error (Some AssociateSubnetsResponse.error_of_json))
+  | AttachRuleGroupsToProxyConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AttachRuleGroupsToProxyConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AttachRuleGroupsToProxyConfigurationResponse.error_of_json))
   | CreateFirewall ->
       if is_success
       then
@@ -443,6 +1150,36 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateFirewallPolicyResponse.error_of_json))
+  | CreateProxy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateProxyResponse.of_json json)
+      else Error (parse_aws_error (Some CreateProxyResponse.error_of_json))
+  | CreateProxyConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateProxyConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateProxyConfigurationResponse.error_of_json))
+  | CreateProxyRuleGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateProxyRuleGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateProxyRuleGroupResponse.error_of_json))
+  | CreateProxyRules ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateProxyRulesResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateProxyRulesResponse.error_of_json))
   | CreateRuleGroup ->
       if is_success
       then
@@ -450,6 +1187,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateRuleGroupResponse.of_json json)
       else
         Error (parse_aws_error (Some CreateRuleGroupResponse.error_of_json))
+  | CreateTLSInspectionConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateTLSInspectionConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateTLSInspectionConfigurationResponse.error_of_json))
+  | CreateVpcEndpointAssociation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateVpcEndpointAssociationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateVpcEndpointAssociationResponse.error_of_json))
   | DeleteFirewall ->
       if is_success
       then
@@ -465,6 +1220,47 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteFirewallPolicyResponse.error_of_json))
+  | DeleteNetworkFirewallTransitGatewayAttachment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (DeleteNetworkFirewallTransitGatewayAttachmentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DeleteNetworkFirewallTransitGatewayAttachmentResponse.error_of_json))
+  | DeleteProxy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteProxyResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteProxyResponse.error_of_json))
+  | DeleteProxyConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteProxyConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteProxyConfigurationResponse.error_of_json))
+  | DeleteProxyRuleGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteProxyRuleGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteProxyRuleGroupResponse.error_of_json))
+  | DeleteProxyRules ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteProxyRulesResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DeleteProxyRulesResponse.error_of_json))
   | DeleteResourcePolicy ->
       if is_success
       then
@@ -480,6 +1276,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteRuleGroupResponse.of_json json)
       else
         Error (parse_aws_error (Some DeleteRuleGroupResponse.error_of_json))
+  | DeleteTLSInspectionConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteTLSInspectionConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteTLSInspectionConfigurationResponse.error_of_json))
+  | DeleteVpcEndpointAssociation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteVpcEndpointAssociationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteVpcEndpointAssociationResponse.error_of_json))
   | DescribeFirewall ->
       if is_success
       then
@@ -487,6 +1301,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeFirewallResponse.of_json json)
       else
         Error (parse_aws_error (Some DescribeFirewallResponse.error_of_json))
+  | DescribeFirewallMetadata ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFirewallMetadataResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeFirewallMetadataResponse.error_of_json))
   | DescribeFirewallPolicy ->
       if is_success
       then
@@ -496,6 +1319,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeFirewallPolicyResponse.error_of_json))
+  | DescribeFlowOperation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFlowOperationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeFlowOperationResponse.error_of_json))
   | DescribeLoggingConfiguration ->
       if is_success
       then
@@ -505,6 +1336,38 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeLoggingConfigurationResponse.error_of_json))
+  | DescribeProxy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeProxyResponse.of_json json)
+      else Error (parse_aws_error (Some DescribeProxyResponse.error_of_json))
+  | DescribeProxyConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeProxyConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeProxyConfigurationResponse.error_of_json))
+  | DescribeProxyRule ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeProxyRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeProxyRuleResponse.error_of_json))
+  | DescribeProxyRuleGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeProxyRuleGroupResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeProxyRuleGroupResponse.error_of_json))
   | DescribeResourcePolicy ->
       if is_success
       then
@@ -531,6 +1394,52 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeRuleGroupMetadataResponse.error_of_json))
+  | DescribeRuleGroupSummary ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRuleGroupSummaryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRuleGroupSummaryResponse.error_of_json))
+  | DescribeTLSInspectionConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeTLSInspectionConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTLSInspectionConfigurationResponse.error_of_json))
+  | DescribeVpcEndpointAssociation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeVpcEndpointAssociationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeVpcEndpointAssociationResponse.error_of_json))
+  | DetachRuleGroupsFromProxyConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DetachRuleGroupsFromProxyConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DetachRuleGroupsFromProxyConfigurationResponse.error_of_json))
+  | DisassociateAvailabilityZones ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateAvailabilityZonesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateAvailabilityZonesResponse.error_of_json))
   | DisassociateSubnets ->
       if is_success
       then
@@ -539,6 +1448,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DisassociateSubnetsResponse.error_of_json))
+  | GetAnalysisReportResults ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAnalysisReportResultsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetAnalysisReportResultsResponse.error_of_json))
+  | ListAnalysisReports ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAnalysisReportsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListAnalysisReportsResponse.error_of_json))
   | ListFirewallPolicies ->
       if is_success
       then
@@ -553,6 +1479,46 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListFirewallsResponse.of_json json)
       else Error (parse_aws_error (Some ListFirewallsResponse.error_of_json))
+  | ListFlowOperationResults ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListFlowOperationResultsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListFlowOperationResultsResponse.error_of_json))
+  | ListFlowOperations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListFlowOperationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListFlowOperationsResponse.error_of_json))
+  | ListProxies ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListProxiesResponse.of_json json)
+      else Error (parse_aws_error (Some ListProxiesResponse.error_of_json))
+  | ListProxyConfigurations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListProxyConfigurationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListProxyConfigurationsResponse.error_of_json))
+  | ListProxyRuleGroups ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListProxyRuleGroupsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListProxyRuleGroupsResponse.error_of_json))
   | ListRuleGroups ->
       if is_success
       then
@@ -560,6 +1526,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListRuleGroupsResponse.of_json json)
       else
         Error (parse_aws_error (Some ListRuleGroupsResponse.error_of_json))
+  | ListTLSInspectionConfigurations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTLSInspectionConfigurationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListTLSInspectionConfigurationsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then
@@ -568,6 +1543,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListVpcEndpointAssociations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListVpcEndpointAssociationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListVpcEndpointAssociationsResponse.error_of_json))
   | PutResourcePolicy ->
       if is_success
       then
@@ -576,6 +1560,39 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some PutResourcePolicyResponse.error_of_json))
+  | RejectNetworkFirewallTransitGatewayAttachment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (RejectNetworkFirewallTransitGatewayAttachmentResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                RejectNetworkFirewallTransitGatewayAttachmentResponse.error_of_json))
+  | StartAnalysisReport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartAnalysisReportResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartAnalysisReportResponse.error_of_json))
+  | StartFlowCapture ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartFlowCaptureResponse.of_json json)
+      else
+        Error (parse_aws_error (Some StartFlowCaptureResponse.error_of_json))
+  | StartFlowFlush ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartFlowFlushResponse.of_json json)
+      else
+        Error (parse_aws_error (Some StartFlowFlushResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -588,6 +1605,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceResponse.of_json json)
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateAvailabilityZoneChangeProtection ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateAvailabilityZoneChangeProtectionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                UpdateAvailabilityZoneChangeProtectionResponse.error_of_json))
+  | UpdateFirewallAnalysisSettings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateFirewallAnalysisSettingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateFirewallAnalysisSettingsResponse.error_of_json))
   | UpdateFirewallDeleteProtection ->
       if is_success
       then
@@ -606,6 +1642,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateFirewallDescriptionResponse.error_of_json))
+  | UpdateFirewallEncryptionConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateFirewallEncryptionConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                UpdateFirewallEncryptionConfigurationResponse.error_of_json))
   | UpdateFirewallPolicy ->
       if is_success
       then
@@ -632,6 +1678,46 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateLoggingConfigurationResponse.error_of_json))
+  | UpdateProxy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateProxyResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateProxyResponse.error_of_json))
+  | UpdateProxyConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateProxyConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateProxyConfigurationResponse.error_of_json))
+  | UpdateProxyRule ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateProxyRuleResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateProxyRuleResponse.error_of_json))
+  | UpdateProxyRuleGroupPriorities ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateProxyRuleGroupPrioritiesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateProxyRuleGroupPrioritiesResponse.error_of_json))
+  | UpdateProxyRulePriorities ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateProxyRulePrioritiesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateProxyRulePrioritiesResponse.error_of_json))
   | UpdateRuleGroup ->
       if is_success
       then
@@ -648,3 +1734,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateSubnetChangeProtectionResponse.error_of_json))
+  | UpdateTLSInspectionConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateTLSInspectionConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateTLSInspectionConfigurationResponse.error_of_json))

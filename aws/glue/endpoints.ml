@@ -17,20 +17,40 @@ type ('i, 'o, 'e) t =
   BatchGetBlueprintsResponse.t, BatchGetBlueprintsResponse.error) t 
   | BatchGetCrawlers: (BatchGetCrawlersRequest.t, BatchGetCrawlersResponse.t,
   BatchGetCrawlersResponse.error) t 
+  | BatchGetCustomEntityTypes: (BatchGetCustomEntityTypesRequest.t,
+  BatchGetCustomEntityTypesResponse.t,
+  BatchGetCustomEntityTypesResponse.error) t 
+  | BatchGetDataQualityResult: (BatchGetDataQualityResultRequest.t,
+  BatchGetDataQualityResultResponse.t,
+  BatchGetDataQualityResultResponse.error) t 
   | BatchGetDevEndpoints: (BatchGetDevEndpointsRequest.t,
   BatchGetDevEndpointsResponse.t, BatchGetDevEndpointsResponse.error) t 
   | BatchGetJobs: (BatchGetJobsRequest.t, BatchGetJobsResponse.t,
   BatchGetJobsResponse.error) t 
   | BatchGetPartition: (BatchGetPartitionRequest.t,
   BatchGetPartitionResponse.t, BatchGetPartitionResponse.error) t 
+  | BatchGetTableOptimizer: (BatchGetTableOptimizerRequest.t,
+  BatchGetTableOptimizerResponse.t, BatchGetTableOptimizerResponse.error) t 
   | BatchGetTriggers: (BatchGetTriggersRequest.t, BatchGetTriggersResponse.t,
   BatchGetTriggersResponse.error) t 
   | BatchGetWorkflows: (BatchGetWorkflowsRequest.t,
   BatchGetWorkflowsResponse.t, BatchGetWorkflowsResponse.error) t 
+  | BatchPutDataQualityStatisticAnnotation:
+  (BatchPutDataQualityStatisticAnnotationRequest.t,
+  BatchPutDataQualityStatisticAnnotationResponse.t,
+  BatchPutDataQualityStatisticAnnotationResponse.error) t 
   | BatchStopJobRun: (BatchStopJobRunRequest.t, BatchStopJobRunResponse.t,
   BatchStopJobRunResponse.error) t 
   | BatchUpdatePartition: (BatchUpdatePartitionRequest.t,
   BatchUpdatePartitionResponse.t, BatchUpdatePartitionResponse.error) t 
+  | CancelDataQualityRuleRecommendationRun:
+  (CancelDataQualityRuleRecommendationRunRequest.t,
+  CancelDataQualityRuleRecommendationRunResponse.t,
+  CancelDataQualityRuleRecommendationRunResponse.error) t 
+  | CancelDataQualityRulesetEvaluationRun:
+  (CancelDataQualityRulesetEvaluationRunRequest.t,
+  CancelDataQualityRulesetEvaluationRunResponse.t,
+  CancelDataQualityRulesetEvaluationRunResponse.error) t 
   | CancelMLTaskRun: (CancelMLTaskRunRequest.t, CancelMLTaskRunResponse.t,
   CancelMLTaskRunResponse.error) t 
   | CancelStatement: (CancelStatementRequest.t, CancelStatementResponse.t,
@@ -40,16 +60,41 @@ type ('i, 'o, 'e) t =
   CheckSchemaVersionValidityResponse.error) t 
   | CreateBlueprint: (CreateBlueprintRequest.t, CreateBlueprintResponse.t,
   CreateBlueprintResponse.error) t 
+  | CreateCatalog: (CreateCatalogRequest.t, CreateCatalogResponse.t,
+  CreateCatalogResponse.error) t 
   | CreateClassifier: (CreateClassifierRequest.t, CreateClassifierResponse.t,
   CreateClassifierResponse.error) t 
+  | CreateColumnStatisticsTaskSettings:
+  (CreateColumnStatisticsTaskSettingsRequest.t,
+  CreateColumnStatisticsTaskSettingsResponse.t,
+  CreateColumnStatisticsTaskSettingsResponse.error) t 
   | CreateConnection: (CreateConnectionRequest.t, CreateConnectionResponse.t,
   CreateConnectionResponse.error) t 
   | CreateCrawler: (CreateCrawlerRequest.t, CreateCrawlerResponse.t,
   CreateCrawlerResponse.error) t 
+  | CreateCustomEntityType: (CreateCustomEntityTypeRequest.t,
+  CreateCustomEntityTypeResponse.t, CreateCustomEntityTypeResponse.error) t 
+  | CreateDataQualityRuleset: (CreateDataQualityRulesetRequest.t,
+  CreateDataQualityRulesetResponse.t, CreateDataQualityRulesetResponse.error)
+  t 
   | CreateDatabase: (CreateDatabaseRequest.t, CreateDatabaseResponse.t,
   CreateDatabaseResponse.error) t 
   | CreateDevEndpoint: (CreateDevEndpointRequest.t,
   CreateDevEndpointResponse.t, CreateDevEndpointResponse.error) t 
+  | CreateGlueIdentityCenterConfiguration:
+  (CreateGlueIdentityCenterConfigurationRequest.t,
+  CreateGlueIdentityCenterConfigurationResponse.t,
+  CreateGlueIdentityCenterConfigurationResponse.error) t 
+  | CreateIntegration: (CreateIntegrationRequest.t,
+  CreateIntegrationResponse.t, CreateIntegrationResponse.error) t 
+  | CreateIntegrationResourceProperty:
+  (CreateIntegrationResourcePropertyRequest.t,
+  CreateIntegrationResourcePropertyResponse.t,
+  CreateIntegrationResourcePropertyResponse.error) t 
+  | CreateIntegrationTableProperties:
+  (CreateIntegrationTablePropertiesRequest.t,
+  CreateIntegrationTablePropertiesResponse.t,
+  CreateIntegrationTablePropertiesResponse.error) t 
   | CreateJob: (CreateJobRequest.t, CreateJobResponse.t,
   CreateJobResponse.error) t 
   | CreateMLTransform: (CreateMLTransformRequest.t,
@@ -71,8 +116,12 @@ type ('i, 'o, 'e) t =
   CreateSessionResponse.error) t 
   | CreateTable: (CreateTableRequest.t, CreateTableResponse.t,
   CreateTableResponse.error) t 
+  | CreateTableOptimizer: (CreateTableOptimizerRequest.t,
+  CreateTableOptimizerResponse.t, CreateTableOptimizerResponse.error) t 
   | CreateTrigger: (CreateTriggerRequest.t, CreateTriggerResponse.t,
   CreateTriggerResponse.error) t 
+  | CreateUsageProfile: (CreateUsageProfileRequest.t,
+  CreateUsageProfileResponse.t, CreateUsageProfileResponse.error) t 
   | CreateUserDefinedFunction: (CreateUserDefinedFunctionRequest.t,
   CreateUserDefinedFunctionResponse.t,
   CreateUserDefinedFunctionResponse.error) t 
@@ -80,6 +129,8 @@ type ('i, 'o, 'e) t =
   CreateWorkflowResponse.error) t 
   | DeleteBlueprint: (DeleteBlueprintRequest.t, DeleteBlueprintResponse.t,
   DeleteBlueprintResponse.error) t 
+  | DeleteCatalog: (DeleteCatalogRequest.t, DeleteCatalogResponse.t,
+  DeleteCatalogResponse.error) t 
   | DeleteClassifier: (DeleteClassifierRequest.t, DeleteClassifierResponse.t,
   DeleteClassifierResponse.error) t 
   | DeleteColumnStatisticsForPartition:
@@ -89,14 +140,39 @@ type ('i, 'o, 'e) t =
   | DeleteColumnStatisticsForTable: (DeleteColumnStatisticsForTableRequest.t,
   DeleteColumnStatisticsForTableResponse.t,
   DeleteColumnStatisticsForTableResponse.error) t 
+  | DeleteColumnStatisticsTaskSettings:
+  (DeleteColumnStatisticsTaskSettingsRequest.t,
+  DeleteColumnStatisticsTaskSettingsResponse.t,
+  DeleteColumnStatisticsTaskSettingsResponse.error) t 
   | DeleteConnection: (DeleteConnectionRequest.t, DeleteConnectionResponse.t,
   DeleteConnectionResponse.error) t 
+  | DeleteConnectionType: (DeleteConnectionTypeRequest.t,
+  DeleteConnectionTypeResponse.t, DeleteConnectionTypeResponse.error) t 
   | DeleteCrawler: (DeleteCrawlerRequest.t, DeleteCrawlerResponse.t,
   DeleteCrawlerResponse.error) t 
+  | DeleteCustomEntityType: (DeleteCustomEntityTypeRequest.t,
+  DeleteCustomEntityTypeResponse.t, DeleteCustomEntityTypeResponse.error) t 
+  | DeleteDataQualityRuleset: (DeleteDataQualityRulesetRequest.t,
+  DeleteDataQualityRulesetResponse.t, DeleteDataQualityRulesetResponse.error)
+  t 
   | DeleteDatabase: (DeleteDatabaseRequest.t, DeleteDatabaseResponse.t,
   DeleteDatabaseResponse.error) t 
   | DeleteDevEndpoint: (DeleteDevEndpointRequest.t,
   DeleteDevEndpointResponse.t, DeleteDevEndpointResponse.error) t 
+  | DeleteGlueIdentityCenterConfiguration:
+  (DeleteGlueIdentityCenterConfigurationRequest.t,
+  DeleteGlueIdentityCenterConfigurationResponse.t,
+  DeleteGlueIdentityCenterConfigurationResponse.error) t 
+  | DeleteIntegration: (DeleteIntegrationRequest.t,
+  DeleteIntegrationResponse.t, DeleteIntegrationResponse.error) t 
+  | DeleteIntegrationResourceProperty:
+  (DeleteIntegrationResourcePropertyRequest.t,
+  DeleteIntegrationResourcePropertyResponse.t,
+  DeleteIntegrationResourcePropertyResponse.error) t 
+  | DeleteIntegrationTableProperties:
+  (DeleteIntegrationTablePropertiesRequest.t,
+  DeleteIntegrationTablePropertiesResponse.t,
+  DeleteIntegrationTablePropertiesResponse.error) t 
   | DeleteJob: (DeleteJobRequest.t, DeleteJobResponse.t,
   DeleteJobResponse.error) t 
   | DeleteMLTransform: (DeleteMLTransformRequest.t,
@@ -120,23 +196,40 @@ type ('i, 'o, 'e) t =
   DeleteSessionResponse.error) t 
   | DeleteTable: (DeleteTableRequest.t, DeleteTableResponse.t,
   DeleteTableResponse.error) t 
+  | DeleteTableOptimizer: (DeleteTableOptimizerRequest.t,
+  DeleteTableOptimizerResponse.t, DeleteTableOptimizerResponse.error) t 
   | DeleteTableVersion: (DeleteTableVersionRequest.t,
   DeleteTableVersionResponse.t, DeleteTableVersionResponse.error) t 
   | DeleteTrigger: (DeleteTriggerRequest.t, DeleteTriggerResponse.t,
   DeleteTriggerResponse.error) t 
+  | DeleteUsageProfile: (DeleteUsageProfileRequest.t,
+  DeleteUsageProfileResponse.t, DeleteUsageProfileResponse.error) t 
   | DeleteUserDefinedFunction: (DeleteUserDefinedFunctionRequest.t,
   DeleteUserDefinedFunctionResponse.t,
   DeleteUserDefinedFunctionResponse.error) t 
   | DeleteWorkflow: (DeleteWorkflowRequest.t, DeleteWorkflowResponse.t,
   DeleteWorkflowResponse.error) t 
+  | DescribeConnectionType: (DescribeConnectionTypeRequest.t,
+  DescribeConnectionTypeResponse.t, DescribeConnectionTypeResponse.error) t 
+  | DescribeEntity: (DescribeEntityRequest.t, DescribeEntityResponse.t,
+  DescribeEntityResponse.error) t 
+  | DescribeInboundIntegrations: (DescribeInboundIntegrationsRequest.t,
+  DescribeInboundIntegrationsResponse.t,
+  DescribeInboundIntegrationsResponse.error) t 
+  | DescribeIntegrations: (DescribeIntegrationsRequest.t,
+  DescribeIntegrationsResponse.t, DescribeIntegrationsResponse.error) t 
   | GetBlueprint: (GetBlueprintRequest.t, GetBlueprintResponse.t,
   GetBlueprintResponse.error) t 
   | GetBlueprintRun: (GetBlueprintRunRequest.t, GetBlueprintRunResponse.t,
   GetBlueprintRunResponse.error) t 
   | GetBlueprintRuns: (GetBlueprintRunsRequest.t, GetBlueprintRunsResponse.t,
   GetBlueprintRunsResponse.error) t 
+  | GetCatalog: (GetCatalogRequest.t, GetCatalogResponse.t,
+  GetCatalogResponse.error) t 
   | GetCatalogImportStatus: (GetCatalogImportStatusRequest.t,
   GetCatalogImportStatusResponse.t, GetCatalogImportStatusResponse.error) t 
+  | GetCatalogs: (GetCatalogsRequest.t, GetCatalogsResponse.t,
+  GetCatalogsResponse.error) t 
   | GetClassifier: (GetClassifierRequest.t, GetClassifierResponse.t,
   GetClassifierResponse.error) t 
   | GetClassifiers: (GetClassifiersRequest.t, GetClassifiersResponse.t,
@@ -148,6 +241,16 @@ type ('i, 'o, 'e) t =
   | GetColumnStatisticsForTable: (GetColumnStatisticsForTableRequest.t,
   GetColumnStatisticsForTableResponse.t,
   GetColumnStatisticsForTableResponse.error) t 
+  | GetColumnStatisticsTaskRun: (GetColumnStatisticsTaskRunRequest.t,
+  GetColumnStatisticsTaskRunResponse.t,
+  GetColumnStatisticsTaskRunResponse.error) t 
+  | GetColumnStatisticsTaskRuns: (GetColumnStatisticsTaskRunsRequest.t,
+  GetColumnStatisticsTaskRunsResponse.t,
+  GetColumnStatisticsTaskRunsResponse.error) t 
+  | GetColumnStatisticsTaskSettings:
+  (GetColumnStatisticsTaskSettingsRequest.t,
+  GetColumnStatisticsTaskSettingsResponse.t,
+  GetColumnStatisticsTaskSettingsResponse.error) t 
   | GetConnection: (GetConnectionRequest.t, GetConnectionResponse.t,
   GetConnectionResponse.error) t 
   | GetConnections: (GetConnectionsRequest.t, GetConnectionsResponse.t,
@@ -158,10 +261,29 @@ type ('i, 'o, 'e) t =
   GetCrawlerMetricsResponse.t, GetCrawlerMetricsResponse.error) t 
   | GetCrawlers: (GetCrawlersRequest.t, GetCrawlersResponse.t,
   GetCrawlersResponse.error) t 
+  | GetCustomEntityType: (GetCustomEntityTypeRequest.t,
+  GetCustomEntityTypeResponse.t, GetCustomEntityTypeResponse.error) t 
   | GetDataCatalogEncryptionSettings:
   (GetDataCatalogEncryptionSettingsRequest.t,
   GetDataCatalogEncryptionSettingsResponse.t,
   GetDataCatalogEncryptionSettingsResponse.error) t 
+  | GetDataQualityModel: (GetDataQualityModelRequest.t,
+  GetDataQualityModelResponse.t, GetDataQualityModelResponse.error) t 
+  | GetDataQualityModelResult: (GetDataQualityModelResultRequest.t,
+  GetDataQualityModelResultResponse.t,
+  GetDataQualityModelResultResponse.error) t 
+  | GetDataQualityResult: (GetDataQualityResultRequest.t,
+  GetDataQualityResultResponse.t, GetDataQualityResultResponse.error) t 
+  | GetDataQualityRuleRecommendationRun:
+  (GetDataQualityRuleRecommendationRunRequest.t,
+  GetDataQualityRuleRecommendationRunResponse.t,
+  GetDataQualityRuleRecommendationRunResponse.error) t 
+  | GetDataQualityRuleset: (GetDataQualityRulesetRequest.t,
+  GetDataQualityRulesetResponse.t, GetDataQualityRulesetResponse.error) t 
+  | GetDataQualityRulesetEvaluationRun:
+  (GetDataQualityRulesetEvaluationRunRequest.t,
+  GetDataQualityRulesetEvaluationRunResponse.t,
+  GetDataQualityRulesetEvaluationRunResponse.error) t 
   | GetDatabase: (GetDatabaseRequest.t, GetDatabaseResponse.t,
   GetDatabaseResponse.error) t 
   | GetDatabases: (GetDatabasesRequest.t, GetDatabasesResponse.t,
@@ -172,6 +294,18 @@ type ('i, 'o, 'e) t =
   GetDevEndpointResponse.error) t 
   | GetDevEndpoints: (GetDevEndpointsRequest.t, GetDevEndpointsResponse.t,
   GetDevEndpointsResponse.error) t 
+  | GetEntityRecords: (GetEntityRecordsRequest.t, GetEntityRecordsResponse.t,
+  GetEntityRecordsResponse.error) t 
+  | GetGlueIdentityCenterConfiguration:
+  (GetGlueIdentityCenterConfigurationRequest.t,
+  GetGlueIdentityCenterConfigurationResponse.t,
+  GetGlueIdentityCenterConfigurationResponse.error) t 
+  | GetIntegrationResourceProperty: (GetIntegrationResourcePropertyRequest.t,
+  GetIntegrationResourcePropertyResponse.t,
+  GetIntegrationResourcePropertyResponse.error) t 
+  | GetIntegrationTableProperties: (GetIntegrationTablePropertiesRequest.t,
+  GetIntegrationTablePropertiesResponse.t,
+  GetIntegrationTablePropertiesResponse.error) t 
   | GetJob: (GetJobRequest.t, GetJobResponse.t, GetJobResponse.error) t 
   | GetJobBookmark: (GetJobBookmarkRequest.t, GetJobBookmarkResponse.t,
   GetJobBookmarkResponse.error) t 
@@ -190,6 +324,10 @@ type ('i, 'o, 'e) t =
   GetMLTransformsResponse.error) t 
   | GetMapping: (GetMappingRequest.t, GetMappingResponse.t,
   GetMappingResponse.error) t 
+  | GetMaterializedViewRefreshTaskRun:
+  (GetMaterializedViewRefreshTaskRunRequest.t,
+  GetMaterializedViewRefreshTaskRunResponse.t,
+  GetMaterializedViewRefreshTaskRunResponse.error) t 
   | GetPartition: (GetPartitionRequest.t, GetPartitionResponse.t,
   GetPartitionResponse.error) t 
   | GetPartitionIndexes: (GetPartitionIndexesRequest.t,
@@ -223,6 +361,8 @@ type ('i, 'o, 'e) t =
   GetStatementResponse.error) t 
   | GetTable: (GetTableRequest.t, GetTableResponse.t, GetTableResponse.error)
   t 
+  | GetTableOptimizer: (GetTableOptimizerRequest.t,
+  GetTableOptimizerResponse.t, GetTableOptimizerResponse.error) t 
   | GetTableVersion: (GetTableVersionRequest.t, GetTableVersionResponse.t,
   GetTableVersionResponse.error) t 
   | GetTableVersions: (GetTableVersionsRequest.t, GetTableVersionsResponse.t,
@@ -244,6 +384,8 @@ type ('i, 'o, 'e) t =
   | GetUnfilteredTableMetadata: (GetUnfilteredTableMetadataRequest.t,
   GetUnfilteredTableMetadataResponse.t,
   GetUnfilteredTableMetadataResponse.error) t 
+  | GetUsageProfile: (GetUsageProfileRequest.t, GetUsageProfileResponse.t,
+  GetUsageProfileResponse.error) t 
   | GetUserDefinedFunction: (GetUserDefinedFunctionRequest.t,
   GetUserDefinedFunctionResponse.t, GetUserDefinedFunctionResponse.error) t 
   | GetUserDefinedFunctions: (GetUserDefinedFunctionsRequest.t,
@@ -262,14 +404,53 @@ type ('i, 'o, 'e) t =
   ImportCatalogToGlueResponse.t, ImportCatalogToGlueResponse.error) t 
   | ListBlueprints: (ListBlueprintsRequest.t, ListBlueprintsResponse.t,
   ListBlueprintsResponse.error) t 
+  | ListColumnStatisticsTaskRuns: (ListColumnStatisticsTaskRunsRequest.t,
+  ListColumnStatisticsTaskRunsResponse.t,
+  ListColumnStatisticsTaskRunsResponse.error) t 
+  | ListConnectionTypes: (ListConnectionTypesRequest.t,
+  ListConnectionTypesResponse.t, ListConnectionTypesResponse.error) t 
   | ListCrawlers: (ListCrawlersRequest.t, ListCrawlersResponse.t,
   ListCrawlersResponse.error) t 
+  | ListCrawls: (ListCrawlsRequest.t, ListCrawlsResponse.t,
+  ListCrawlsResponse.error) t 
+  | ListCustomEntityTypes: (ListCustomEntityTypesRequest.t,
+  ListCustomEntityTypesResponse.t, ListCustomEntityTypesResponse.error) t 
+  | ListDataQualityResults: (ListDataQualityResultsRequest.t,
+  ListDataQualityResultsResponse.t, ListDataQualityResultsResponse.error) t 
+  | ListDataQualityRuleRecommendationRuns:
+  (ListDataQualityRuleRecommendationRunsRequest.t,
+  ListDataQualityRuleRecommendationRunsResponse.t,
+  ListDataQualityRuleRecommendationRunsResponse.error) t 
+  | ListDataQualityRulesetEvaluationRuns:
+  (ListDataQualityRulesetEvaluationRunsRequest.t,
+  ListDataQualityRulesetEvaluationRunsResponse.t,
+  ListDataQualityRulesetEvaluationRunsResponse.error) t 
+  | ListDataQualityRulesets: (ListDataQualityRulesetsRequest.t,
+  ListDataQualityRulesetsResponse.t, ListDataQualityRulesetsResponse.error) t
+  
+  | ListDataQualityStatisticAnnotations:
+  (ListDataQualityStatisticAnnotationsRequest.t,
+  ListDataQualityStatisticAnnotationsResponse.t,
+  ListDataQualityStatisticAnnotationsResponse.error) t 
+  | ListDataQualityStatistics: (ListDataQualityStatisticsRequest.t,
+  ListDataQualityStatisticsResponse.t,
+  ListDataQualityStatisticsResponse.error) t 
   | ListDevEndpoints: (ListDevEndpointsRequest.t, ListDevEndpointsResponse.t,
   ListDevEndpointsResponse.error) t 
+  | ListEntities: (ListEntitiesRequest.t, ListEntitiesResponse.t,
+  ListEntitiesResponse.error) t 
+  | ListIntegrationResourceProperties:
+  (ListIntegrationResourcePropertiesRequest.t,
+  ListIntegrationResourcePropertiesResponse.t,
+  ListIntegrationResourcePropertiesResponse.error) t 
   | ListJobs: (ListJobsRequest.t, ListJobsResponse.t, ListJobsResponse.error)
   t 
   | ListMLTransforms: (ListMLTransformsRequest.t, ListMLTransformsResponse.t,
   ListMLTransformsResponse.error) t 
+  | ListMaterializedViewRefreshTaskRuns:
+  (ListMaterializedViewRefreshTaskRunsRequest.t,
+  ListMaterializedViewRefreshTaskRunsResponse.t,
+  ListMaterializedViewRefreshTaskRunsResponse.error) t 
   | ListRegistries: (ListRegistriesInput.t, ListRegistriesResponse.t,
   ListRegistriesResponse.error) t 
   | ListSchemaVersions: (ListSchemaVersionsInput.t,
@@ -280,14 +461,24 @@ type ('i, 'o, 'e) t =
   ListSessionsResponse.error) t 
   | ListStatements: (ListStatementsRequest.t, ListStatementsResponse.t,
   ListStatementsResponse.error) t 
+  | ListTableOptimizerRuns: (ListTableOptimizerRunsRequest.t,
+  ListTableOptimizerRunsResponse.t, ListTableOptimizerRunsResponse.error) t 
   | ListTriggers: (ListTriggersRequest.t, ListTriggersResponse.t,
   ListTriggersResponse.error) t 
+  | ListUsageProfiles: (ListUsageProfilesRequest.t,
+  ListUsageProfilesResponse.t, ListUsageProfilesResponse.error) t 
   | ListWorkflows: (ListWorkflowsRequest.t, ListWorkflowsResponse.t,
   ListWorkflowsResponse.error) t 
+  | ModifyIntegration: (ModifyIntegrationRequest.t,
+  ModifyIntegrationResponse.t, ModifyIntegrationResponse.error) t 
   | PutDataCatalogEncryptionSettings:
   (PutDataCatalogEncryptionSettingsRequest.t,
   PutDataCatalogEncryptionSettingsResponse.t,
   PutDataCatalogEncryptionSettingsResponse.error) t 
+  | PutDataQualityProfileAnnotation:
+  (PutDataQualityProfileAnnotationRequest.t,
+  PutDataQualityProfileAnnotationResponse.t,
+  PutDataQualityProfileAnnotationResponse.error) t 
   | PutResourcePolicy: (PutResourcePolicyRequest.t,
   PutResourcePolicyResponse.t, PutResourcePolicyResponse.error) t 
   | PutSchemaVersionMetadata: (PutSchemaVersionMetadataInput.t,
@@ -299,6 +490,8 @@ type ('i, 'o, 'e) t =
   | QuerySchemaVersionMetadata: (QuerySchemaVersionMetadataInput.t,
   QuerySchemaVersionMetadataResponse.t,
   QuerySchemaVersionMetadataResponse.error) t 
+  | RegisterConnectionType: (RegisterConnectionTypeRequest.t,
+  RegisterConnectionTypeResponse.t, RegisterConnectionTypeResponse.error) t 
   | RegisterSchemaVersion: (RegisterSchemaVersionInput.t,
   RegisterSchemaVersionResponse.t, RegisterSchemaVersionResponse.error) t 
   | RemoveSchemaVersionMetadata: (RemoveSchemaVersionMetadataInput.t,
@@ -314,10 +507,25 @@ type ('i, 'o, 'e) t =
   SearchTablesResponse.error) t 
   | StartBlueprintRun: (StartBlueprintRunRequest.t,
   StartBlueprintRunResponse.t, StartBlueprintRunResponse.error) t 
+  | StartColumnStatisticsTaskRun: (StartColumnStatisticsTaskRunRequest.t,
+  StartColumnStatisticsTaskRunResponse.t,
+  StartColumnStatisticsTaskRunResponse.error) t 
+  | StartColumnStatisticsTaskRunSchedule:
+  (StartColumnStatisticsTaskRunScheduleRequest.t,
+  StartColumnStatisticsTaskRunScheduleResponse.t,
+  StartColumnStatisticsTaskRunScheduleResponse.error) t 
   | StartCrawler: (StartCrawlerRequest.t, StartCrawlerResponse.t,
   StartCrawlerResponse.error) t 
   | StartCrawlerSchedule: (StartCrawlerScheduleRequest.t,
   StartCrawlerScheduleResponse.t, StartCrawlerScheduleResponse.error) t 
+  | StartDataQualityRuleRecommendationRun:
+  (StartDataQualityRuleRecommendationRunRequest.t,
+  StartDataQualityRuleRecommendationRunResponse.t,
+  StartDataQualityRuleRecommendationRunResponse.error) t 
+  | StartDataQualityRulesetEvaluationRun:
+  (StartDataQualityRulesetEvaluationRunRequest.t,
+  StartDataQualityRulesetEvaluationRunResponse.t,
+  StartDataQualityRulesetEvaluationRunResponse.error) t 
   | StartExportLabelsTaskRun: (StartExportLabelsTaskRunRequest.t,
   StartExportLabelsTaskRunResponse.t, StartExportLabelsTaskRunResponse.error)
   t 
@@ -333,14 +541,29 @@ type ('i, 'o, 'e) t =
   (StartMLLabelingSetGenerationTaskRunRequest.t,
   StartMLLabelingSetGenerationTaskRunResponse.t,
   StartMLLabelingSetGenerationTaskRunResponse.error) t 
+  | StartMaterializedViewRefreshTaskRun:
+  (StartMaterializedViewRefreshTaskRunRequest.t,
+  StartMaterializedViewRefreshTaskRunResponse.t,
+  StartMaterializedViewRefreshTaskRunResponse.error) t 
   | StartTrigger: (StartTriggerRequest.t, StartTriggerResponse.t,
   StartTriggerResponse.error) t 
   | StartWorkflowRun: (StartWorkflowRunRequest.t, StartWorkflowRunResponse.t,
   StartWorkflowRunResponse.error) t 
+  | StopColumnStatisticsTaskRun: (StopColumnStatisticsTaskRunRequest.t,
+  StopColumnStatisticsTaskRunResponse.t,
+  StopColumnStatisticsTaskRunResponse.error) t 
+  | StopColumnStatisticsTaskRunSchedule:
+  (StopColumnStatisticsTaskRunScheduleRequest.t,
+  StopColumnStatisticsTaskRunScheduleResponse.t,
+  StopColumnStatisticsTaskRunScheduleResponse.error) t 
   | StopCrawler: (StopCrawlerRequest.t, StopCrawlerResponse.t,
   StopCrawlerResponse.error) t 
   | StopCrawlerSchedule: (StopCrawlerScheduleRequest.t,
   StopCrawlerScheduleResponse.t, StopCrawlerScheduleResponse.error) t 
+  | StopMaterializedViewRefreshTaskRun:
+  (StopMaterializedViewRefreshTaskRunRequest.t,
+  StopMaterializedViewRefreshTaskRunResponse.t,
+  StopMaterializedViewRefreshTaskRunResponse.error) t 
   | StopSession: (StopSessionRequest.t, StopSessionResponse.t,
   StopSessionResponse.error) t 
   | StopTrigger: (StopTriggerRequest.t, StopTriggerResponse.t,
@@ -349,10 +572,14 @@ type ('i, 'o, 'e) t =
   StopWorkflowRunResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
+  | TestConnection: (TestConnectionRequest.t, TestConnectionResponse.t,
+  TestConnectionResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
   | UpdateBlueprint: (UpdateBlueprintRequest.t, UpdateBlueprintResponse.t,
   UpdateBlueprintResponse.error) t 
+  | UpdateCatalog: (UpdateCatalogRequest.t, UpdateCatalogResponse.t,
+  UpdateCatalogResponse.error) t 
   | UpdateClassifier: (UpdateClassifierRequest.t, UpdateClassifierResponse.t,
   UpdateClassifierResponse.error) t 
   | UpdateColumnStatisticsForPartition:
@@ -362,18 +589,40 @@ type ('i, 'o, 'e) t =
   | UpdateColumnStatisticsForTable: (UpdateColumnStatisticsForTableRequest.t,
   UpdateColumnStatisticsForTableResponse.t,
   UpdateColumnStatisticsForTableResponse.error) t 
+  | UpdateColumnStatisticsTaskSettings:
+  (UpdateColumnStatisticsTaskSettingsRequest.t,
+  UpdateColumnStatisticsTaskSettingsResponse.t,
+  UpdateColumnStatisticsTaskSettingsResponse.error) t 
   | UpdateConnection: (UpdateConnectionRequest.t, UpdateConnectionResponse.t,
   UpdateConnectionResponse.error) t 
   | UpdateCrawler: (UpdateCrawlerRequest.t, UpdateCrawlerResponse.t,
   UpdateCrawlerResponse.error) t 
   | UpdateCrawlerSchedule: (UpdateCrawlerScheduleRequest.t,
   UpdateCrawlerScheduleResponse.t, UpdateCrawlerScheduleResponse.error) t 
+  | UpdateDataQualityRuleset: (UpdateDataQualityRulesetRequest.t,
+  UpdateDataQualityRulesetResponse.t, UpdateDataQualityRulesetResponse.error)
+  t 
   | UpdateDatabase: (UpdateDatabaseRequest.t, UpdateDatabaseResponse.t,
   UpdateDatabaseResponse.error) t 
   | UpdateDevEndpoint: (UpdateDevEndpointRequest.t,
   UpdateDevEndpointResponse.t, UpdateDevEndpointResponse.error) t 
+  | UpdateGlueIdentityCenterConfiguration:
+  (UpdateGlueIdentityCenterConfigurationRequest.t,
+  UpdateGlueIdentityCenterConfigurationResponse.t,
+  UpdateGlueIdentityCenterConfigurationResponse.error) t 
+  | UpdateIntegrationResourceProperty:
+  (UpdateIntegrationResourcePropertyRequest.t,
+  UpdateIntegrationResourcePropertyResponse.t,
+  UpdateIntegrationResourcePropertyResponse.error) t 
+  | UpdateIntegrationTableProperties:
+  (UpdateIntegrationTablePropertiesRequest.t,
+  UpdateIntegrationTablePropertiesResponse.t,
+  UpdateIntegrationTablePropertiesResponse.error) t 
   | UpdateJob: (UpdateJobRequest.t, UpdateJobResponse.t,
   UpdateJobResponse.error) t 
+  | UpdateJobFromSourceControl: (UpdateJobFromSourceControlRequest.t,
+  UpdateJobFromSourceControlResponse.t,
+  UpdateJobFromSourceControlResponse.error) t 
   | UpdateMLTransform: (UpdateMLTransformRequest.t,
   UpdateMLTransformResponse.t, UpdateMLTransformResponse.error) t 
   | UpdatePartition: (UpdatePartitionRequest.t, UpdatePartitionResponse.t,
@@ -382,10 +631,17 @@ type ('i, 'o, 'e) t =
   UpdateRegistryResponse.error) t 
   | UpdateSchema: (UpdateSchemaInput.t, UpdateSchemaResponse.t,
   UpdateSchemaResponse.error) t 
+  | UpdateSourceControlFromJob: (UpdateSourceControlFromJobRequest.t,
+  UpdateSourceControlFromJobResponse.t,
+  UpdateSourceControlFromJobResponse.error) t 
   | UpdateTable: (UpdateTableRequest.t, UpdateTableResponse.t,
   UpdateTableResponse.error) t 
+  | UpdateTableOptimizer: (UpdateTableOptimizerRequest.t,
+  UpdateTableOptimizerResponse.t, UpdateTableOptimizerResponse.error) t 
   | UpdateTrigger: (UpdateTriggerRequest.t, UpdateTriggerResponse.t,
   UpdateTriggerResponse.error) t 
+  | UpdateUsageProfile: (UpdateUsageProfileRequest.t,
+  UpdateUsageProfileResponse.t, UpdateUsageProfileResponse.error) t 
   | UpdateUserDefinedFunction: (UpdateUserDefinedFunctionRequest.t,
   UpdateUserDefinedFunctionResponse.t,
   UpdateUserDefinedFunctionResponse.error) t 
@@ -400,22 +656,36 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | BatchDeleteTableVersion -> `POST
   | BatchGetBlueprints -> `POST
   | BatchGetCrawlers -> `POST
+  | BatchGetCustomEntityTypes -> `POST
+  | BatchGetDataQualityResult -> `POST
   | BatchGetDevEndpoints -> `POST
   | BatchGetJobs -> `POST
   | BatchGetPartition -> `POST
+  | BatchGetTableOptimizer -> `POST
   | BatchGetTriggers -> `POST
   | BatchGetWorkflows -> `POST
+  | BatchPutDataQualityStatisticAnnotation -> `POST
   | BatchStopJobRun -> `POST
   | BatchUpdatePartition -> `POST
+  | CancelDataQualityRuleRecommendationRun -> `POST
+  | CancelDataQualityRulesetEvaluationRun -> `POST
   | CancelMLTaskRun -> `POST
   | CancelStatement -> `POST
   | CheckSchemaVersionValidity -> `POST
   | CreateBlueprint -> `POST
+  | CreateCatalog -> `POST
   | CreateClassifier -> `POST
+  | CreateColumnStatisticsTaskSettings -> `POST
   | CreateConnection -> `POST
   | CreateCrawler -> `POST
+  | CreateCustomEntityType -> `POST
+  | CreateDataQualityRuleset -> `POST
   | CreateDatabase -> `POST
   | CreateDevEndpoint -> `POST
+  | CreateGlueIdentityCenterConfiguration -> `POST
+  | CreateIntegration -> `POST
+  | CreateIntegrationResourceProperty -> `POST
+  | CreateIntegrationTableProperties -> `POST
   | CreateJob -> `POST
   | CreateMLTransform -> `POST
   | CreatePartition -> `POST
@@ -426,17 +696,28 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateSecurityConfiguration -> `POST
   | CreateSession -> `POST
   | CreateTable -> `POST
+  | CreateTableOptimizer -> `POST
   | CreateTrigger -> `POST
+  | CreateUsageProfile -> `POST
   | CreateUserDefinedFunction -> `POST
   | CreateWorkflow -> `POST
   | DeleteBlueprint -> `POST
+  | DeleteCatalog -> `POST
   | DeleteClassifier -> `POST
   | DeleteColumnStatisticsForPartition -> `POST
   | DeleteColumnStatisticsForTable -> `POST
+  | DeleteColumnStatisticsTaskSettings -> `POST
   | DeleteConnection -> `POST
+  | DeleteConnectionType -> `POST
   | DeleteCrawler -> `POST
+  | DeleteCustomEntityType -> `POST
+  | DeleteDataQualityRuleset -> `POST
   | DeleteDatabase -> `POST
   | DeleteDevEndpoint -> `POST
+  | DeleteGlueIdentityCenterConfiguration -> `POST
+  | DeleteIntegration -> `POST
+  | DeleteIntegrationResourceProperty -> `POST
+  | DeleteIntegrationTableProperties -> `POST
   | DeleteJob -> `POST
   | DeleteMLTransform -> `POST
   | DeletePartition -> `POST
@@ -448,29 +729,51 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteSecurityConfiguration -> `POST
   | DeleteSession -> `POST
   | DeleteTable -> `POST
+  | DeleteTableOptimizer -> `POST
   | DeleteTableVersion -> `POST
   | DeleteTrigger -> `POST
+  | DeleteUsageProfile -> `POST
   | DeleteUserDefinedFunction -> `POST
   | DeleteWorkflow -> `POST
+  | DescribeConnectionType -> `POST
+  | DescribeEntity -> `POST
+  | DescribeInboundIntegrations -> `POST
+  | DescribeIntegrations -> `POST
   | GetBlueprint -> `POST
   | GetBlueprintRun -> `POST
   | GetBlueprintRuns -> `POST
+  | GetCatalog -> `POST
   | GetCatalogImportStatus -> `POST
+  | GetCatalogs -> `POST
   | GetClassifier -> `POST
   | GetClassifiers -> `POST
   | GetColumnStatisticsForPartition -> `POST
   | GetColumnStatisticsForTable -> `POST
+  | GetColumnStatisticsTaskRun -> `POST
+  | GetColumnStatisticsTaskRuns -> `POST
+  | GetColumnStatisticsTaskSettings -> `POST
   | GetConnection -> `POST
   | GetConnections -> `POST
   | GetCrawler -> `POST
   | GetCrawlerMetrics -> `POST
   | GetCrawlers -> `POST
+  | GetCustomEntityType -> `POST
   | GetDataCatalogEncryptionSettings -> `POST
+  | GetDataQualityModel -> `POST
+  | GetDataQualityModelResult -> `POST
+  | GetDataQualityResult -> `POST
+  | GetDataQualityRuleRecommendationRun -> `POST
+  | GetDataQualityRuleset -> `POST
+  | GetDataQualityRulesetEvaluationRun -> `POST
   | GetDatabase -> `POST
   | GetDatabases -> `POST
   | GetDataflowGraph -> `POST
   | GetDevEndpoint -> `POST
   | GetDevEndpoints -> `POST
+  | GetEntityRecords -> `POST
+  | GetGlueIdentityCenterConfiguration -> `POST
+  | GetIntegrationResourceProperty -> `POST
+  | GetIntegrationTableProperties -> `POST
   | GetJob -> `POST
   | GetJobBookmark -> `POST
   | GetJobRun -> `POST
@@ -481,6 +784,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetMLTransform -> `POST
   | GetMLTransforms -> `POST
   | GetMapping -> `POST
+  | GetMaterializedViewRefreshTaskRun -> `POST
   | GetPartition -> `POST
   | GetPartitionIndexes -> `POST
   | GetPartitions -> `POST
@@ -497,6 +801,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetSession -> `POST
   | GetStatement -> `POST
   | GetTable -> `POST
+  | GetTableOptimizer -> `POST
   | GetTableVersion -> `POST
   | GetTableVersions -> `POST
   | GetTables -> `POST
@@ -506,6 +811,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetUnfilteredPartitionMetadata -> `POST
   | GetUnfilteredPartitionsMetadata -> `POST
   | GetUnfilteredTableMetadata -> `POST
+  | GetUsageProfile -> `POST
   | GetUserDefinedFunction -> `POST
   | GetUserDefinedFunctions -> `POST
   | GetWorkflow -> `POST
@@ -514,22 +820,40 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetWorkflowRuns -> `POST
   | ImportCatalogToGlue -> `POST
   | ListBlueprints -> `POST
+  | ListColumnStatisticsTaskRuns -> `POST
+  | ListConnectionTypes -> `POST
   | ListCrawlers -> `POST
+  | ListCrawls -> `POST
+  | ListCustomEntityTypes -> `POST
+  | ListDataQualityResults -> `POST
+  | ListDataQualityRuleRecommendationRuns -> `POST
+  | ListDataQualityRulesetEvaluationRuns -> `POST
+  | ListDataQualityRulesets -> `POST
+  | ListDataQualityStatisticAnnotations -> `POST
+  | ListDataQualityStatistics -> `POST
   | ListDevEndpoints -> `POST
+  | ListEntities -> `POST
+  | ListIntegrationResourceProperties -> `POST
   | ListJobs -> `POST
   | ListMLTransforms -> `POST
+  | ListMaterializedViewRefreshTaskRuns -> `POST
   | ListRegistries -> `POST
   | ListSchemaVersions -> `POST
   | ListSchemas -> `POST
   | ListSessions -> `POST
   | ListStatements -> `POST
+  | ListTableOptimizerRuns -> `POST
   | ListTriggers -> `POST
+  | ListUsageProfiles -> `POST
   | ListWorkflows -> `POST
+  | ModifyIntegration -> `POST
   | PutDataCatalogEncryptionSettings -> `POST
+  | PutDataQualityProfileAnnotation -> `POST
   | PutResourcePolicy -> `POST
   | PutSchemaVersionMetadata -> `POST
   | PutWorkflowRunProperties -> `POST
   | QuerySchemaVersionMetadata -> `POST
+  | RegisterConnectionType -> `POST
   | RegisterSchemaVersion -> `POST
   | RemoveSchemaVersionMetadata -> `POST
   | ResetJobBookmark -> `POST
@@ -537,38 +861,57 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | RunStatement -> `POST
   | SearchTables -> `POST
   | StartBlueprintRun -> `POST
+  | StartColumnStatisticsTaskRun -> `POST
+  | StartColumnStatisticsTaskRunSchedule -> `POST
   | StartCrawler -> `POST
   | StartCrawlerSchedule -> `POST
+  | StartDataQualityRuleRecommendationRun -> `POST
+  | StartDataQualityRulesetEvaluationRun -> `POST
   | StartExportLabelsTaskRun -> `POST
   | StartImportLabelsTaskRun -> `POST
   | StartJobRun -> `POST
   | StartMLEvaluationTaskRun -> `POST
   | StartMLLabelingSetGenerationTaskRun -> `POST
+  | StartMaterializedViewRefreshTaskRun -> `POST
   | StartTrigger -> `POST
   | StartWorkflowRun -> `POST
+  | StopColumnStatisticsTaskRun -> `POST
+  | StopColumnStatisticsTaskRunSchedule -> `POST
   | StopCrawler -> `POST
   | StopCrawlerSchedule -> `POST
+  | StopMaterializedViewRefreshTaskRun -> `POST
   | StopSession -> `POST
   | StopTrigger -> `POST
   | StopWorkflowRun -> `POST
   | TagResource -> `POST
+  | TestConnection -> `POST
   | UntagResource -> `POST
   | UpdateBlueprint -> `POST
+  | UpdateCatalog -> `POST
   | UpdateClassifier -> `POST
   | UpdateColumnStatisticsForPartition -> `POST
   | UpdateColumnStatisticsForTable -> `POST
+  | UpdateColumnStatisticsTaskSettings -> `POST
   | UpdateConnection -> `POST
   | UpdateCrawler -> `POST
   | UpdateCrawlerSchedule -> `POST
+  | UpdateDataQualityRuleset -> `POST
   | UpdateDatabase -> `POST
   | UpdateDevEndpoint -> `POST
+  | UpdateGlueIdentityCenterConfiguration -> `POST
+  | UpdateIntegrationResourceProperty -> `POST
+  | UpdateIntegrationTableProperties -> `POST
   | UpdateJob -> `POST
+  | UpdateJobFromSourceControl -> `POST
   | UpdateMLTransform -> `POST
   | UpdatePartition -> `POST
   | UpdateRegistry -> `POST
   | UpdateSchema -> `POST
+  | UpdateSourceControlFromJob -> `POST
   | UpdateTable -> `POST
+  | UpdateTableOptimizer -> `POST
   | UpdateTrigger -> `POST
+  | UpdateUsageProfile -> `POST
   | UpdateUserDefinedFunction -> `POST
   | UpdateWorkflow -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -581,22 +924,43 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | BatchDeleteTableVersion -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetBlueprints -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetCrawlers -> (Format.kasprintf Uri.of_string) "/"
+      | BatchGetCustomEntityTypes -> (Format.kasprintf Uri.of_string) "/"
+      | BatchGetDataQualityResult -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetDevEndpoints -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetJobs -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetPartition -> (Format.kasprintf Uri.of_string) "/"
+      | BatchGetTableOptimizer -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetTriggers -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetWorkflows -> (Format.kasprintf Uri.of_string) "/"
+      | BatchPutDataQualityStatisticAnnotation ->
+          (Format.kasprintf Uri.of_string) "/"
       | BatchStopJobRun -> (Format.kasprintf Uri.of_string) "/"
       | BatchUpdatePartition -> (Format.kasprintf Uri.of_string) "/"
+      | CancelDataQualityRuleRecommendationRun ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CancelDataQualityRulesetEvaluationRun ->
+          (Format.kasprintf Uri.of_string) "/"
       | CancelMLTaskRun -> (Format.kasprintf Uri.of_string) "/"
       | CancelStatement -> (Format.kasprintf Uri.of_string) "/"
       | CheckSchemaVersionValidity -> (Format.kasprintf Uri.of_string) "/"
       | CreateBlueprint -> (Format.kasprintf Uri.of_string) "/"
+      | CreateCatalog -> (Format.kasprintf Uri.of_string) "/"
       | CreateClassifier -> (Format.kasprintf Uri.of_string) "/"
+      | CreateColumnStatisticsTaskSettings ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateConnection -> (Format.kasprintf Uri.of_string) "/"
       | CreateCrawler -> (Format.kasprintf Uri.of_string) "/"
+      | CreateCustomEntityType -> (Format.kasprintf Uri.of_string) "/"
+      | CreateDataQualityRuleset -> (Format.kasprintf Uri.of_string) "/"
       | CreateDatabase -> (Format.kasprintf Uri.of_string) "/"
       | CreateDevEndpoint -> (Format.kasprintf Uri.of_string) "/"
+      | CreateGlueIdentityCenterConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CreateIntegration -> (Format.kasprintf Uri.of_string) "/"
+      | CreateIntegrationResourceProperty ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CreateIntegrationTableProperties ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateMLTransform -> (Format.kasprintf Uri.of_string) "/"
       | CreatePartition -> (Format.kasprintf Uri.of_string) "/"
@@ -607,19 +971,34 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateSecurityConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | CreateSession -> (Format.kasprintf Uri.of_string) "/"
       | CreateTable -> (Format.kasprintf Uri.of_string) "/"
+      | CreateTableOptimizer -> (Format.kasprintf Uri.of_string) "/"
       | CreateTrigger -> (Format.kasprintf Uri.of_string) "/"
+      | CreateUsageProfile -> (Format.kasprintf Uri.of_string) "/"
       | CreateUserDefinedFunction -> (Format.kasprintf Uri.of_string) "/"
       | CreateWorkflow -> (Format.kasprintf Uri.of_string) "/"
       | DeleteBlueprint -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteCatalog -> (Format.kasprintf Uri.of_string) "/"
       | DeleteClassifier -> (Format.kasprintf Uri.of_string) "/"
       | DeleteColumnStatisticsForPartition ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteColumnStatisticsForTable ->
           (Format.kasprintf Uri.of_string) "/"
+      | DeleteColumnStatisticsTaskSettings ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteConnection -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteConnectionType -> (Format.kasprintf Uri.of_string) "/"
       | DeleteCrawler -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteCustomEntityType -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteDataQualityRuleset -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDatabase -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDevEndpoint -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteGlueIdentityCenterConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteIntegration -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteIntegrationResourceProperty ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteIntegrationTableProperties ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteJob -> (Format.kasprintf Uri.of_string) "/"
       | DeleteMLTransform -> (Format.kasprintf Uri.of_string) "/"
       | DeletePartition -> (Format.kasprintf Uri.of_string) "/"
@@ -631,31 +1010,58 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteSecurityConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSession -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTable -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteTableOptimizer -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTableVersion -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTrigger -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteUsageProfile -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUserDefinedFunction -> (Format.kasprintf Uri.of_string) "/"
       | DeleteWorkflow -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeConnectionType -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeEntity -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeInboundIntegrations -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeIntegrations -> (Format.kasprintf Uri.of_string) "/"
       | GetBlueprint -> (Format.kasprintf Uri.of_string) "/"
       | GetBlueprintRun -> (Format.kasprintf Uri.of_string) "/"
       | GetBlueprintRuns -> (Format.kasprintf Uri.of_string) "/"
+      | GetCatalog -> (Format.kasprintf Uri.of_string) "/"
       | GetCatalogImportStatus -> (Format.kasprintf Uri.of_string) "/"
+      | GetCatalogs -> (Format.kasprintf Uri.of_string) "/"
       | GetClassifier -> (Format.kasprintf Uri.of_string) "/"
       | GetClassifiers -> (Format.kasprintf Uri.of_string) "/"
       | GetColumnStatisticsForPartition ->
           (Format.kasprintf Uri.of_string) "/"
       | GetColumnStatisticsForTable -> (Format.kasprintf Uri.of_string) "/"
+      | GetColumnStatisticsTaskRun -> (Format.kasprintf Uri.of_string) "/"
+      | GetColumnStatisticsTaskRuns -> (Format.kasprintf Uri.of_string) "/"
+      | GetColumnStatisticsTaskSettings ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetConnection -> (Format.kasprintf Uri.of_string) "/"
       | GetConnections -> (Format.kasprintf Uri.of_string) "/"
       | GetCrawler -> (Format.kasprintf Uri.of_string) "/"
       | GetCrawlerMetrics -> (Format.kasprintf Uri.of_string) "/"
       | GetCrawlers -> (Format.kasprintf Uri.of_string) "/"
+      | GetCustomEntityType -> (Format.kasprintf Uri.of_string) "/"
       | GetDataCatalogEncryptionSettings ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetDataQualityModel -> (Format.kasprintf Uri.of_string) "/"
+      | GetDataQualityModelResult -> (Format.kasprintf Uri.of_string) "/"
+      | GetDataQualityResult -> (Format.kasprintf Uri.of_string) "/"
+      | GetDataQualityRuleRecommendationRun ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetDataQualityRuleset -> (Format.kasprintf Uri.of_string) "/"
+      | GetDataQualityRulesetEvaluationRun ->
           (Format.kasprintf Uri.of_string) "/"
       | GetDatabase -> (Format.kasprintf Uri.of_string) "/"
       | GetDatabases -> (Format.kasprintf Uri.of_string) "/"
       | GetDataflowGraph -> (Format.kasprintf Uri.of_string) "/"
       | GetDevEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | GetDevEndpoints -> (Format.kasprintf Uri.of_string) "/"
+      | GetEntityRecords -> (Format.kasprintf Uri.of_string) "/"
+      | GetGlueIdentityCenterConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetIntegrationResourceProperty ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetIntegrationTableProperties -> (Format.kasprintf Uri.of_string) "/"
       | GetJob -> (Format.kasprintf Uri.of_string) "/"
       | GetJobBookmark -> (Format.kasprintf Uri.of_string) "/"
       | GetJobRun -> (Format.kasprintf Uri.of_string) "/"
@@ -666,6 +1072,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetMLTransform -> (Format.kasprintf Uri.of_string) "/"
       | GetMLTransforms -> (Format.kasprintf Uri.of_string) "/"
       | GetMapping -> (Format.kasprintf Uri.of_string) "/"
+      | GetMaterializedViewRefreshTaskRun ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetPartition -> (Format.kasprintf Uri.of_string) "/"
       | GetPartitionIndexes -> (Format.kasprintf Uri.of_string) "/"
       | GetPartitions -> (Format.kasprintf Uri.of_string) "/"
@@ -682,6 +1090,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetSession -> (Format.kasprintf Uri.of_string) "/"
       | GetStatement -> (Format.kasprintf Uri.of_string) "/"
       | GetTable -> (Format.kasprintf Uri.of_string) "/"
+      | GetTableOptimizer -> (Format.kasprintf Uri.of_string) "/"
       | GetTableVersion -> (Format.kasprintf Uri.of_string) "/"
       | GetTableVersions -> (Format.kasprintf Uri.of_string) "/"
       | GetTables -> (Format.kasprintf Uri.of_string) "/"
@@ -693,6 +1102,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetUnfilteredPartitionsMetadata ->
           (Format.kasprintf Uri.of_string) "/"
       | GetUnfilteredTableMetadata -> (Format.kasprintf Uri.of_string) "/"
+      | GetUsageProfile -> (Format.kasprintf Uri.of_string) "/"
       | GetUserDefinedFunction -> (Format.kasprintf Uri.of_string) "/"
       | GetUserDefinedFunctions -> (Format.kasprintf Uri.of_string) "/"
       | GetWorkflow -> (Format.kasprintf Uri.of_string) "/"
@@ -701,23 +1111,47 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetWorkflowRuns -> (Format.kasprintf Uri.of_string) "/"
       | ImportCatalogToGlue -> (Format.kasprintf Uri.of_string) "/"
       | ListBlueprints -> (Format.kasprintf Uri.of_string) "/"
+      | ListColumnStatisticsTaskRuns -> (Format.kasprintf Uri.of_string) "/"
+      | ListConnectionTypes -> (Format.kasprintf Uri.of_string) "/"
       | ListCrawlers -> (Format.kasprintf Uri.of_string) "/"
+      | ListCrawls -> (Format.kasprintf Uri.of_string) "/"
+      | ListCustomEntityTypes -> (Format.kasprintf Uri.of_string) "/"
+      | ListDataQualityResults -> (Format.kasprintf Uri.of_string) "/"
+      | ListDataQualityRuleRecommendationRuns ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListDataQualityRulesetEvaluationRuns ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListDataQualityRulesets -> (Format.kasprintf Uri.of_string) "/"
+      | ListDataQualityStatisticAnnotations ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListDataQualityStatistics -> (Format.kasprintf Uri.of_string) "/"
       | ListDevEndpoints -> (Format.kasprintf Uri.of_string) "/"
+      | ListEntities -> (Format.kasprintf Uri.of_string) "/"
+      | ListIntegrationResourceProperties ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListMLTransforms -> (Format.kasprintf Uri.of_string) "/"
+      | ListMaterializedViewRefreshTaskRuns ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListRegistries -> (Format.kasprintf Uri.of_string) "/"
       | ListSchemaVersions -> (Format.kasprintf Uri.of_string) "/"
       | ListSchemas -> (Format.kasprintf Uri.of_string) "/"
       | ListSessions -> (Format.kasprintf Uri.of_string) "/"
       | ListStatements -> (Format.kasprintf Uri.of_string) "/"
+      | ListTableOptimizerRuns -> (Format.kasprintf Uri.of_string) "/"
       | ListTriggers -> (Format.kasprintf Uri.of_string) "/"
+      | ListUsageProfiles -> (Format.kasprintf Uri.of_string) "/"
       | ListWorkflows -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyIntegration -> (Format.kasprintf Uri.of_string) "/"
       | PutDataCatalogEncryptionSettings ->
+          (Format.kasprintf Uri.of_string) "/"
+      | PutDataQualityProfileAnnotation ->
           (Format.kasprintf Uri.of_string) "/"
       | PutResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | PutSchemaVersionMetadata -> (Format.kasprintf Uri.of_string) "/"
       | PutWorkflowRunProperties -> (Format.kasprintf Uri.of_string) "/"
       | QuerySchemaVersionMetadata -> (Format.kasprintf Uri.of_string) "/"
+      | RegisterConnectionType -> (Format.kasprintf Uri.of_string) "/"
       | RegisterSchemaVersion -> (Format.kasprintf Uri.of_string) "/"
       | RemoveSchemaVersionMetadata -> (Format.kasprintf Uri.of_string) "/"
       | ResetJobBookmark -> (Format.kasprintf Uri.of_string) "/"
@@ -725,41 +1159,70 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RunStatement -> (Format.kasprintf Uri.of_string) "/"
       | SearchTables -> (Format.kasprintf Uri.of_string) "/"
       | StartBlueprintRun -> (Format.kasprintf Uri.of_string) "/"
+      | StartColumnStatisticsTaskRun -> (Format.kasprintf Uri.of_string) "/"
+      | StartColumnStatisticsTaskRunSchedule ->
+          (Format.kasprintf Uri.of_string) "/"
       | StartCrawler -> (Format.kasprintf Uri.of_string) "/"
       | StartCrawlerSchedule -> (Format.kasprintf Uri.of_string) "/"
+      | StartDataQualityRuleRecommendationRun ->
+          (Format.kasprintf Uri.of_string) "/"
+      | StartDataQualityRulesetEvaluationRun ->
+          (Format.kasprintf Uri.of_string) "/"
       | StartExportLabelsTaskRun -> (Format.kasprintf Uri.of_string) "/"
       | StartImportLabelsTaskRun -> (Format.kasprintf Uri.of_string) "/"
       | StartJobRun -> (Format.kasprintf Uri.of_string) "/"
       | StartMLEvaluationTaskRun -> (Format.kasprintf Uri.of_string) "/"
       | StartMLLabelingSetGenerationTaskRun ->
           (Format.kasprintf Uri.of_string) "/"
+      | StartMaterializedViewRefreshTaskRun ->
+          (Format.kasprintf Uri.of_string) "/"
       | StartTrigger -> (Format.kasprintf Uri.of_string) "/"
       | StartWorkflowRun -> (Format.kasprintf Uri.of_string) "/"
+      | StopColumnStatisticsTaskRun -> (Format.kasprintf Uri.of_string) "/"
+      | StopColumnStatisticsTaskRunSchedule ->
+          (Format.kasprintf Uri.of_string) "/"
       | StopCrawler -> (Format.kasprintf Uri.of_string) "/"
       | StopCrawlerSchedule -> (Format.kasprintf Uri.of_string) "/"
+      | StopMaterializedViewRefreshTaskRun ->
+          (Format.kasprintf Uri.of_string) "/"
       | StopSession -> (Format.kasprintf Uri.of_string) "/"
       | StopTrigger -> (Format.kasprintf Uri.of_string) "/"
       | StopWorkflowRun -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | TestConnection -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateBlueprint -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateCatalog -> (Format.kasprintf Uri.of_string) "/"
       | UpdateClassifier -> (Format.kasprintf Uri.of_string) "/"
       | UpdateColumnStatisticsForPartition ->
           (Format.kasprintf Uri.of_string) "/"
       | UpdateColumnStatisticsForTable ->
           (Format.kasprintf Uri.of_string) "/"
+      | UpdateColumnStatisticsTaskSettings ->
+          (Format.kasprintf Uri.of_string) "/"
       | UpdateConnection -> (Format.kasprintf Uri.of_string) "/"
       | UpdateCrawler -> (Format.kasprintf Uri.of_string) "/"
       | UpdateCrawlerSchedule -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateDataQualityRuleset -> (Format.kasprintf Uri.of_string) "/"
       | UpdateDatabase -> (Format.kasprintf Uri.of_string) "/"
       | UpdateDevEndpoint -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateGlueIdentityCenterConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | UpdateIntegrationResourceProperty ->
+          (Format.kasprintf Uri.of_string) "/"
+      | UpdateIntegrationTableProperties ->
+          (Format.kasprintf Uri.of_string) "/"
       | UpdateJob -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateJobFromSourceControl -> (Format.kasprintf Uri.of_string) "/"
       | UpdateMLTransform -> (Format.kasprintf Uri.of_string) "/"
       | UpdatePartition -> (Format.kasprintf Uri.of_string) "/"
       | UpdateRegistry -> (Format.kasprintf Uri.of_string) "/"
       | UpdateSchema -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateSourceControlFromJob -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTable -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateTableOptimizer -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTrigger -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateUsageProfile -> (Format.kasprintf Uri.of_string) "/"
       | UpdateUserDefinedFunction -> (Format.kasprintf Uri.of_string) "/"
       | UpdateWorkflow -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
@@ -821,6 +1284,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.BatchGetCrawlers")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchGetCustomEntityTypes ->
+      let json = BatchGetCustomEntityTypesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.BatchGetCustomEntityTypes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchGetDataQualityResult ->
+      let json = BatchGetDataQualityResultRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.BatchGetDataQualityResult")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | BatchGetDevEndpoints ->
       let json = BatchGetDevEndpointsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -845,6 +1324,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.BatchGetPartition")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchGetTableOptimizer ->
+      let json = BatchGetTableOptimizerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.BatchGetTableOptimizer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | BatchGetTriggers ->
       let json = BatchGetTriggersRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -861,6 +1348,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.BatchGetWorkflows")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchPutDataQualityStatisticAnnotation ->
+      let json = BatchPutDataQualityStatisticAnnotationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.BatchPutDataQualityStatisticAnnotation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | BatchStopJobRun ->
       let json = BatchStopJobRunRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -876,6 +1371,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.BatchUpdatePartition")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CancelDataQualityRuleRecommendationRun ->
+      let json = CancelDataQualityRuleRecommendationRunRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.CancelDataQualityRuleRecommendationRun")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CancelDataQualityRulesetEvaluationRun ->
+      let json = CancelDataQualityRulesetEvaluationRunRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.CancelDataQualityRulesetEvaluationRun")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CancelMLTaskRun ->
       let json = CancelMLTaskRunRequest.to_json req in
@@ -909,6 +1420,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.CreateBlueprint")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateCatalog ->
+      let json = CreateCatalogRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.CreateCatalog")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateClassifier ->
       let json = CreateClassifierRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -916,6 +1435,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.CreateClassifier")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateColumnStatisticsTaskSettings ->
+      let json = CreateColumnStatisticsTaskSettingsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.CreateColumnStatisticsTaskSettings")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateConnection ->
       let json = CreateConnectionRequest.to_json req in
@@ -933,6 +1460,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.CreateCrawler")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateCustomEntityType ->
+      let json = CreateCustomEntityTypeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.CreateCustomEntityType")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateDataQualityRuleset ->
+      let json = CreateDataQualityRulesetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.CreateDataQualityRuleset")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateDatabase ->
       let json = CreateDatabaseRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -948,6 +1491,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.CreateDevEndpoint")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateGlueIdentityCenterConfiguration ->
+      let json = CreateGlueIdentityCenterConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.CreateGlueIdentityCenterConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateIntegration ->
+      let json = CreateIntegrationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.CreateIntegration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateIntegrationResourceProperty ->
+      let json = CreateIntegrationResourcePropertyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.CreateIntegrationResourceProperty")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateIntegrationTableProperties ->
+      let json = CreateIntegrationTablePropertiesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.CreateIntegrationTableProperties")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateJob ->
       let json = CreateJobRequest.to_json req in
@@ -1029,6 +1604,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.CreateTable")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateTableOptimizer ->
+      let json = CreateTableOptimizerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.CreateTableOptimizer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateTrigger ->
       let json = CreateTriggerRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1036,6 +1619,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.CreateTrigger")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateUsageProfile ->
+      let json = CreateUsageProfileRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.CreateUsageProfile")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateUserDefinedFunction ->
       let json = CreateUserDefinedFunctionRequest.to_json req in
@@ -1061,6 +1652,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.DeleteBlueprint")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteCatalog ->
+      let json = DeleteCatalogRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DeleteCatalog")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteClassifier ->
       let json = DeleteClassifierRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1085,6 +1684,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.DeleteColumnStatisticsForTable")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteColumnStatisticsTaskSettings ->
+      let json = DeleteColumnStatisticsTaskSettingsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DeleteColumnStatisticsTaskSettings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteConnection ->
       let json = DeleteConnectionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1093,6 +1700,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.DeleteConnection")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteConnectionType ->
+      let json = DeleteConnectionTypeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DeleteConnectionType")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteCrawler ->
       let json = DeleteCrawlerRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1100,6 +1715,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.DeleteCrawler")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteCustomEntityType ->
+      let json = DeleteCustomEntityTypeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DeleteCustomEntityType")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteDataQualityRuleset ->
+      let json = DeleteDataQualityRulesetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DeleteDataQualityRuleset")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteDatabase ->
       let json = DeleteDatabaseRequest.to_json req in
@@ -1116,6 +1747,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.DeleteDevEndpoint")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteGlueIdentityCenterConfiguration ->
+      let json = DeleteGlueIdentityCenterConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DeleteGlueIdentityCenterConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteIntegration ->
+      let json = DeleteIntegrationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DeleteIntegration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteIntegrationResourceProperty ->
+      let json = DeleteIntegrationResourcePropertyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DeleteIntegrationResourceProperty")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteIntegrationTableProperties ->
+      let json = DeleteIntegrationTablePropertiesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DeleteIntegrationTableProperties")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteJob ->
       let json = DeleteJobRequest.to_json req in
@@ -1205,6 +1868,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.DeleteTable")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteTableOptimizer ->
+      let json = DeleteTableOptimizerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DeleteTableOptimizer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteTableVersion ->
       let json = DeleteTableVersionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1221,6 +1892,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.DeleteTrigger")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteUsageProfile ->
+      let json = DeleteUsageProfileRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DeleteUsageProfile")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteUserDefinedFunction ->
       let json = DeleteUserDefinedFunctionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1236,6 +1915,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.DeleteWorkflow")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeConnectionType ->
+      let json = DescribeConnectionTypeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DescribeConnectionType")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeEntity ->
+      let json = DescribeEntityRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DescribeEntity")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeInboundIntegrations ->
+      let json = DescribeInboundIntegrationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DescribeInboundIntegrations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeIntegrations ->
+      let json = DescribeIntegrationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.DescribeIntegrations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetBlueprint ->
       let json = GetBlueprintRequest.to_json req in
@@ -1261,6 +1972,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.GetBlueprintRuns")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetCatalog ->
+      let json = GetCatalogRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetCatalog")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetCatalogImportStatus ->
       let json = GetCatalogImportStatusRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1268,6 +1987,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.GetCatalogImportStatus")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetCatalogs ->
+      let json = GetCatalogsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetCatalogs")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetClassifier ->
       let json = GetClassifierRequest.to_json req in
@@ -1300,6 +2027,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.GetColumnStatisticsForTable")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetColumnStatisticsTaskRun ->
+      let json = GetColumnStatisticsTaskRunRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetColumnStatisticsTaskRun")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetColumnStatisticsTaskRuns ->
+      let json = GetColumnStatisticsTaskRunsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetColumnStatisticsTaskRuns")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetColumnStatisticsTaskSettings ->
+      let json = GetColumnStatisticsTaskSettingsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetColumnStatisticsTaskSettings")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetConnection ->
       let json = GetConnectionRequest.to_json req in
@@ -1341,6 +2092,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.GetCrawlers")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetCustomEntityType ->
+      let json = GetCustomEntityTypeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetCustomEntityType")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetDataCatalogEncryptionSettings ->
       let json = GetDataCatalogEncryptionSettingsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1348,6 +2107,54 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.GetDataCatalogEncryptionSettings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDataQualityModel ->
+      let json = GetDataQualityModelRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetDataQualityModel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDataQualityModelResult ->
+      let json = GetDataQualityModelResultRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetDataQualityModelResult")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDataQualityResult ->
+      let json = GetDataQualityResultRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetDataQualityResult")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDataQualityRuleRecommendationRun ->
+      let json = GetDataQualityRuleRecommendationRunRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetDataQualityRuleRecommendationRun")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDataQualityRuleset ->
+      let json = GetDataQualityRulesetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetDataQualityRuleset")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDataQualityRulesetEvaluationRun ->
+      let json = GetDataQualityRulesetEvaluationRunRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetDataQualityRulesetEvaluationRun")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetDatabase ->
       let json = GetDatabaseRequest.to_json req in
@@ -1388,6 +2195,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.GetDevEndpoints")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetEntityRecords ->
+      let json = GetEntityRecordsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetEntityRecords")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetGlueIdentityCenterConfiguration ->
+      let json = GetGlueIdentityCenterConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetGlueIdentityCenterConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetIntegrationResourceProperty ->
+      let json = GetIntegrationResourcePropertyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetIntegrationResourceProperty")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetIntegrationTableProperties ->
+      let json = GetIntegrationTablePropertiesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetIntegrationTableProperties")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetJob ->
       let json = GetJobRequest.to_json req in
@@ -1468,6 +2307,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.GetMapping")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetMaterializedViewRefreshTaskRun ->
+      let json = GetMaterializedViewRefreshTaskRunRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetMaterializedViewRefreshTaskRun")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetPartition ->
       let json = GetPartitionRequest.to_json req in
@@ -1597,6 +2444,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.GetTable")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetTableOptimizer ->
+      let json = GetTableOptimizerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetTableOptimizer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetTableVersion ->
       let json = GetTableVersionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1669,6 +2524,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.GetUnfilteredTableMetadata")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetUsageProfile ->
+      let json = GetUsageProfileRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.GetUsageProfile")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetUserDefinedFunction ->
       let json = GetUserDefinedFunctionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1733,6 +2596,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.ListBlueprints")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListColumnStatisticsTaskRuns ->
+      let json = ListColumnStatisticsTaskRunsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListColumnStatisticsTaskRuns")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListConnectionTypes ->
+      let json = ListConnectionTypesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListConnectionTypes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListCrawlers ->
       let json = ListCrawlersRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1741,6 +2620,70 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.ListCrawlers")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCrawls ->
+      let json = ListCrawlsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListCrawls")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCustomEntityTypes ->
+      let json = ListCustomEntityTypesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListCustomEntityTypes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDataQualityResults ->
+      let json = ListDataQualityResultsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListDataQualityResults")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDataQualityRuleRecommendationRuns ->
+      let json = ListDataQualityRuleRecommendationRunsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListDataQualityRuleRecommendationRuns")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDataQualityRulesetEvaluationRuns ->
+      let json = ListDataQualityRulesetEvaluationRunsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListDataQualityRulesetEvaluationRuns")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDataQualityRulesets ->
+      let json = ListDataQualityRulesetsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListDataQualityRulesets")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDataQualityStatisticAnnotations ->
+      let json = ListDataQualityStatisticAnnotationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListDataQualityStatisticAnnotations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDataQualityStatistics ->
+      let json = ListDataQualityStatisticsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListDataQualityStatistics")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListDevEndpoints ->
       let json = ListDevEndpointsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1748,6 +2691,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.ListDevEndpoints")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListEntities ->
+      let json = ListEntitiesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListEntities")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListIntegrationResourceProperties ->
+      let json = ListIntegrationResourcePropertiesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListIntegrationResourceProperties")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListJobs ->
       let json = ListJobsRequest.to_json req in
@@ -1764,6 +2723,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.ListMLTransforms")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMaterializedViewRefreshTaskRuns ->
+      let json = ListMaterializedViewRefreshTaskRunsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListMaterializedViewRefreshTaskRuns")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListRegistries ->
       let json = ListRegistriesInput.to_json req in
@@ -1805,6 +2772,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.ListStatements")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTableOptimizerRuns ->
+      let json = ListTableOptimizerRunsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListTableOptimizerRuns")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTriggers ->
       let json = ListTriggersRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1812,6 +2787,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.ListTriggers")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListUsageProfiles ->
+      let json = ListUsageProfilesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ListUsageProfiles")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListWorkflows ->
       let json = ListWorkflowsRequest.to_json req in
@@ -1821,6 +2804,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.ListWorkflows")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ModifyIntegration ->
+      let json = ModifyIntegrationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.ModifyIntegration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutDataCatalogEncryptionSettings ->
       let json = PutDataCatalogEncryptionSettingsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1828,6 +2819,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.PutDataCatalogEncryptionSettings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutDataQualityProfileAnnotation ->
+      let json = PutDataQualityProfileAnnotationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.PutDataQualityProfileAnnotation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutResourcePolicy ->
       let json = PutResourcePolicyRequest.to_json req in
@@ -1860,6 +2859,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.QuerySchemaVersionMetadata")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RegisterConnectionType ->
+      let json = RegisterConnectionTypeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.RegisterConnectionType")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RegisterSchemaVersion ->
       let json = RegisterSchemaVersionInput.to_json req in
@@ -1917,6 +2924,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.StartBlueprintRun")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartColumnStatisticsTaskRun ->
+      let json = StartColumnStatisticsTaskRunRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.StartColumnStatisticsTaskRun")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartColumnStatisticsTaskRunSchedule ->
+      let json = StartColumnStatisticsTaskRunScheduleRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.StartColumnStatisticsTaskRunSchedule")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartCrawler ->
       let json = StartCrawlerRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1932,6 +2955,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.StartCrawlerSchedule")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartDataQualityRuleRecommendationRun ->
+      let json = StartDataQualityRuleRecommendationRunRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.StartDataQualityRuleRecommendationRun")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartDataQualityRulesetEvaluationRun ->
+      let json = StartDataQualityRulesetEvaluationRunRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.StartDataQualityRulesetEvaluationRun")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartExportLabelsTaskRun ->
       let json = StartExportLabelsTaskRunRequest.to_json req in
@@ -1973,6 +3012,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.StartMLLabelingSetGenerationTaskRun")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartMaterializedViewRefreshTaskRun ->
+      let json = StartMaterializedViewRefreshTaskRunRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.StartMaterializedViewRefreshTaskRun")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartTrigger ->
       let json = StartTriggerRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1989,6 +3036,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.StartWorkflowRun")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopColumnStatisticsTaskRun ->
+      let json = StopColumnStatisticsTaskRunRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.StopColumnStatisticsTaskRun")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopColumnStatisticsTaskRunSchedule ->
+      let json = StopColumnStatisticsTaskRunScheduleRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.StopColumnStatisticsTaskRunSchedule")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopCrawler ->
       let json = StopCrawlerRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2004,6 +3067,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.StopCrawlerSchedule")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopMaterializedViewRefreshTaskRun ->
+      let json = StopMaterializedViewRefreshTaskRunRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.StopMaterializedViewRefreshTaskRun")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopSession ->
       let json = StopSessionRequest.to_json req in
@@ -2037,6 +3108,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.TagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TestConnection ->
+      let json = TestConnectionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.TestConnection")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UntagResource ->
       let json = UntagResourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2052,6 +3131,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.UpdateBlueprint")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateCatalog ->
+      let json = UpdateCatalogRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.UpdateCatalog")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateClassifier ->
       let json = UpdateClassifierRequest.to_json req in
@@ -2077,6 +3164,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.UpdateColumnStatisticsForTable")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateColumnStatisticsTaskSettings ->
+      let json = UpdateColumnStatisticsTaskSettingsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.UpdateColumnStatisticsTaskSettings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateConnection ->
       let json = UpdateConnectionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2101,6 +3196,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.UpdateCrawlerSchedule")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateDataQualityRuleset ->
+      let json = UpdateDataQualityRulesetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.UpdateDataQualityRuleset")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateDatabase ->
       let json = UpdateDatabaseRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2117,6 +3220,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.UpdateDevEndpoint")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateGlueIdentityCenterConfiguration ->
+      let json = UpdateGlueIdentityCenterConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.UpdateGlueIdentityCenterConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateIntegrationResourceProperty ->
+      let json = UpdateIntegrationResourcePropertyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.UpdateIntegrationResourceProperty")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateIntegrationTableProperties ->
+      let json = UpdateIntegrationTablePropertiesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.UpdateIntegrationTableProperties")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateJob ->
       let json = UpdateJobRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2124,6 +3251,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.UpdateJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateJobFromSourceControl ->
+      let json = UpdateJobFromSourceControlRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.UpdateJobFromSourceControl")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateMLTransform ->
       let json = UpdateMLTransformRequest.to_json req in
@@ -2157,6 +3292,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.UpdateSchema")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateSourceControlFromJob ->
+      let json = UpdateSourceControlFromJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.UpdateSourceControlFromJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateTable ->
       let json = UpdateTableRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2165,6 +3308,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.UpdateTable")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateTableOptimizer ->
+      let json = UpdateTableOptimizerRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.UpdateTableOptimizer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateTrigger ->
       let json = UpdateTriggerRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -2172,6 +3323,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSGlue.UpdateTrigger")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateUsageProfile ->
+      let json = UpdateUsageProfileRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSGlue.UpdateUsageProfile")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateUserDefinedFunction ->
       let json = UpdateUserDefinedFunctionRequest.to_json req in
@@ -2267,6 +3426,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (BatchGetCrawlersResponse.of_json json)
       else
         Error (parse_aws_error (Some BatchGetCrawlersResponse.error_of_json))
+  | BatchGetCustomEntityTypes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchGetCustomEntityTypesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetCustomEntityTypesResponse.error_of_json))
+  | BatchGetDataQualityResult ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchGetDataQualityResultResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetDataQualityResultResponse.error_of_json))
   | BatchGetDevEndpoints ->
       if is_success
       then
@@ -2289,6 +3466,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some BatchGetPartitionResponse.error_of_json))
+  | BatchGetTableOptimizer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchGetTableOptimizerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetTableOptimizerResponse.error_of_json))
   | BatchGetTriggers ->
       if is_success
       then
@@ -2304,6 +3490,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some BatchGetWorkflowsResponse.error_of_json))
+  | BatchPutDataQualityStatisticAnnotation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchPutDataQualityStatisticAnnotationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                BatchPutDataQualityStatisticAnnotationResponse.error_of_json))
   | BatchStopJobRun ->
       if is_success
       then
@@ -2319,6 +3515,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some BatchUpdatePartitionResponse.error_of_json))
+  | CancelDataQualityRuleRecommendationRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelDataQualityRuleRecommendationRunResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                CancelDataQualityRuleRecommendationRunResponse.error_of_json))
+  | CancelDataQualityRulesetEvaluationRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelDataQualityRulesetEvaluationRunResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                CancelDataQualityRulesetEvaluationRunResponse.error_of_json))
   | CancelMLTaskRun ->
       if is_success
       then
@@ -2349,6 +3565,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateBlueprintResponse.of_json json)
       else
         Error (parse_aws_error (Some CreateBlueprintResponse.error_of_json))
+  | CreateCatalog ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateCatalogResponse.of_json json)
+      else Error (parse_aws_error (Some CreateCatalogResponse.error_of_json))
   | CreateClassifier ->
       if is_success
       then
@@ -2356,6 +3578,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateClassifierResponse.of_json json)
       else
         Error (parse_aws_error (Some CreateClassifierResponse.error_of_json))
+  | CreateColumnStatisticsTaskSettings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateColumnStatisticsTaskSettingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateColumnStatisticsTaskSettingsResponse.error_of_json))
   | CreateConnection ->
       if is_success
       then
@@ -2369,6 +3600,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateCrawlerResponse.of_json json)
       else Error (parse_aws_error (Some CreateCrawlerResponse.error_of_json))
+  | CreateCustomEntityType ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateCustomEntityTypeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCustomEntityTypeResponse.error_of_json))
+  | CreateDataQualityRuleset ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateDataQualityRulesetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateDataQualityRulesetResponse.error_of_json))
   | CreateDatabase ->
       if is_success
       then
@@ -2384,6 +3633,42 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateDevEndpointResponse.error_of_json))
+  | CreateGlueIdentityCenterConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateGlueIdentityCenterConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                CreateGlueIdentityCenterConfigurationResponse.error_of_json))
+  | CreateIntegration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateIntegrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateIntegrationResponse.error_of_json))
+  | CreateIntegrationResourceProperty ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateIntegrationResourcePropertyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateIntegrationResourcePropertyResponse.error_of_json))
+  | CreateIntegrationTableProperties ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateIntegrationTablePropertiesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateIntegrationTablePropertiesResponse.error_of_json))
   | CreateJob ->
       if is_success
       then
@@ -2453,12 +3738,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateTableResponse.of_json json)
       else Error (parse_aws_error (Some CreateTableResponse.error_of_json))
+  | CreateTableOptimizer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateTableOptimizerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateTableOptimizerResponse.error_of_json))
   | CreateTrigger ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateTriggerResponse.of_json json)
       else Error (parse_aws_error (Some CreateTriggerResponse.error_of_json))
+  | CreateUsageProfile ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateUsageProfileResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateUsageProfileResponse.error_of_json))
   | CreateUserDefinedFunction ->
       if is_success
       then
@@ -2482,6 +3783,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteBlueprintResponse.of_json json)
       else
         Error (parse_aws_error (Some DeleteBlueprintResponse.error_of_json))
+  | DeleteCatalog ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteCatalogResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteCatalogResponse.error_of_json))
   | DeleteClassifier ->
       if is_success
       then
@@ -2507,6 +3814,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteColumnStatisticsForTableResponse.error_of_json))
+  | DeleteColumnStatisticsTaskSettings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteColumnStatisticsTaskSettingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteColumnStatisticsTaskSettingsResponse.error_of_json))
   | DeleteConnection ->
       if is_success
       then
@@ -2514,12 +3830,38 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteConnectionResponse.of_json json)
       else
         Error (parse_aws_error (Some DeleteConnectionResponse.error_of_json))
+  | DeleteConnectionType ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteConnectionTypeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteConnectionTypeResponse.error_of_json))
   | DeleteCrawler ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteCrawlerResponse.of_json json)
       else Error (parse_aws_error (Some DeleteCrawlerResponse.error_of_json))
+  | DeleteCustomEntityType ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteCustomEntityTypeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCustomEntityTypeResponse.error_of_json))
+  | DeleteDataQualityRuleset ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteDataQualityRulesetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteDataQualityRulesetResponse.error_of_json))
   | DeleteDatabase ->
       if is_success
       then
@@ -2535,6 +3877,42 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteDevEndpointResponse.error_of_json))
+  | DeleteGlueIdentityCenterConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteGlueIdentityCenterConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DeleteGlueIdentityCenterConfigurationResponse.error_of_json))
+  | DeleteIntegration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteIntegrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteIntegrationResponse.error_of_json))
+  | DeleteIntegrationResourceProperty ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteIntegrationResourcePropertyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteIntegrationResourcePropertyResponse.error_of_json))
+  | DeleteIntegrationTableProperties ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteIntegrationTablePropertiesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteIntegrationTablePropertiesResponse.error_of_json))
   | DeleteJob ->
       if is_success
       then
@@ -2614,6 +3992,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteTableResponse.of_json json)
       else Error (parse_aws_error (Some DeleteTableResponse.error_of_json))
+  | DeleteTableOptimizer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteTableOptimizerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteTableOptimizerResponse.error_of_json))
   | DeleteTableVersion ->
       if is_success
       then
@@ -2628,6 +4014,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteTriggerResponse.of_json json)
       else Error (parse_aws_error (Some DeleteTriggerResponse.error_of_json))
+  | DeleteUsageProfile ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteUsageProfileResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteUsageProfileResponse.error_of_json))
   | DeleteUserDefinedFunction ->
       if is_success
       then
@@ -2644,6 +4038,39 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteWorkflowResponse.of_json json)
       else
         Error (parse_aws_error (Some DeleteWorkflowResponse.error_of_json))
+  | DescribeConnectionType ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeConnectionTypeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConnectionTypeResponse.error_of_json))
+  | DescribeEntity ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeEntityResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeEntityResponse.error_of_json))
+  | DescribeInboundIntegrations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeInboundIntegrationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeInboundIntegrationsResponse.error_of_json))
+  | DescribeIntegrations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeIntegrationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeIntegrationsResponse.error_of_json))
   | GetBlueprint ->
       if is_success
       then
@@ -2664,6 +4091,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetBlueprintRunsResponse.of_json json)
       else
         Error (parse_aws_error (Some GetBlueprintRunsResponse.error_of_json))
+  | GetCatalog ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCatalogResponse.of_json json)
+      else Error (parse_aws_error (Some GetCatalogResponse.error_of_json))
   | GetCatalogImportStatus ->
       if is_success
       then
@@ -2673,6 +4106,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetCatalogImportStatusResponse.error_of_json))
+  | GetCatalogs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCatalogsResponse.of_json json)
+      else Error (parse_aws_error (Some GetCatalogsResponse.error_of_json))
   | GetClassifier ->
       if is_success
       then
@@ -2704,6 +4143,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetColumnStatisticsForTableResponse.error_of_json))
+  | GetColumnStatisticsTaskRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetColumnStatisticsTaskRunResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetColumnStatisticsTaskRunResponse.error_of_json))
+  | GetColumnStatisticsTaskRuns ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetColumnStatisticsTaskRunsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetColumnStatisticsTaskRunsResponse.error_of_json))
+  | GetColumnStatisticsTaskSettings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetColumnStatisticsTaskSettingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetColumnStatisticsTaskSettingsResponse.error_of_json))
   | GetConnection ->
       if is_success
       then
@@ -2737,6 +4203,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetCrawlersResponse.of_json json)
       else Error (parse_aws_error (Some GetCrawlersResponse.error_of_json))
+  | GetCustomEntityType ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCustomEntityTypeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetCustomEntityTypeResponse.error_of_json))
   | GetDataCatalogEncryptionSettings ->
       if is_success
       then
@@ -2746,6 +4220,57 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetDataCatalogEncryptionSettingsResponse.error_of_json))
+  | GetDataQualityModel ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDataQualityModelResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetDataQualityModelResponse.error_of_json))
+  | GetDataQualityModelResult ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDataQualityModelResultResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetDataQualityModelResultResponse.error_of_json))
+  | GetDataQualityResult ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDataQualityResultResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetDataQualityResultResponse.error_of_json))
+  | GetDataQualityRuleRecommendationRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDataQualityRuleRecommendationRunResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetDataQualityRuleRecommendationRunResponse.error_of_json))
+  | GetDataQualityRuleset ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDataQualityRulesetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetDataQualityRulesetResponse.error_of_json))
+  | GetDataQualityRulesetEvaluationRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDataQualityRulesetEvaluationRunResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetDataQualityRulesetEvaluationRunResponse.error_of_json))
   | GetDatabase ->
       if is_success
       then
@@ -2779,6 +4304,40 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetDevEndpointsResponse.of_json json)
       else
         Error (parse_aws_error (Some GetDevEndpointsResponse.error_of_json))
+  | GetEntityRecords ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetEntityRecordsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetEntityRecordsResponse.error_of_json))
+  | GetGlueIdentityCenterConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetGlueIdentityCenterConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetGlueIdentityCenterConfigurationResponse.error_of_json))
+  | GetIntegrationResourceProperty ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetIntegrationResourcePropertyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetIntegrationResourcePropertyResponse.error_of_json))
+  | GetIntegrationTableProperties ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetIntegrationTablePropertiesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetIntegrationTablePropertiesResponse.error_of_json))
   | GetJob ->
       if is_success
       then
@@ -2842,6 +4401,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetMappingResponse.of_json json)
       else Error (parse_aws_error (Some GetMappingResponse.error_of_json))
+  | GetMaterializedViewRefreshTaskRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetMaterializedViewRefreshTaskRunResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetMaterializedViewRefreshTaskRunResponse.error_of_json))
   | GetPartition ->
       if is_success
       then
@@ -2955,6 +4523,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetTableResponse.of_json json)
       else Error (parse_aws_error (Some GetTableResponse.error_of_json))
+  | GetTableOptimizer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetTableOptimizerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetTableOptimizerResponse.error_of_json))
   | GetTableVersion ->
       if is_success
       then
@@ -3020,6 +4596,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetUnfilteredTableMetadataResponse.error_of_json))
+  | GetUsageProfile ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetUsageProfileResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetUsageProfileResponse.error_of_json))
   | GetUserDefinedFunction ->
       if is_success
       then
@@ -3082,12 +4665,98 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListBlueprintsResponse.of_json json)
       else
         Error (parse_aws_error (Some ListBlueprintsResponse.error_of_json))
+  | ListColumnStatisticsTaskRuns ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListColumnStatisticsTaskRunsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListColumnStatisticsTaskRunsResponse.error_of_json))
+  | ListConnectionTypes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListConnectionTypesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListConnectionTypesResponse.error_of_json))
   | ListCrawlers ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListCrawlersResponse.of_json json)
       else Error (parse_aws_error (Some ListCrawlersResponse.error_of_json))
+  | ListCrawls ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCrawlsResponse.of_json json)
+      else Error (parse_aws_error (Some ListCrawlsResponse.error_of_json))
+  | ListCustomEntityTypes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCustomEntityTypesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListCustomEntityTypesResponse.error_of_json))
+  | ListDataQualityResults ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDataQualityResultsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListDataQualityResultsResponse.error_of_json))
+  | ListDataQualityRuleRecommendationRuns ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDataQualityRuleRecommendationRunsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListDataQualityRuleRecommendationRunsResponse.error_of_json))
+  | ListDataQualityRulesetEvaluationRuns ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDataQualityRulesetEvaluationRunsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListDataQualityRulesetEvaluationRunsResponse.error_of_json))
+  | ListDataQualityRulesets ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDataQualityRulesetsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListDataQualityRulesetsResponse.error_of_json))
+  | ListDataQualityStatisticAnnotations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDataQualityStatisticAnnotationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListDataQualityStatisticAnnotationsResponse.error_of_json))
+  | ListDataQualityStatistics ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDataQualityStatisticsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListDataQualityStatisticsResponse.error_of_json))
   | ListDevEndpoints ->
       if is_success
       then
@@ -3095,6 +4764,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListDevEndpointsResponse.of_json json)
       else
         Error (parse_aws_error (Some ListDevEndpointsResponse.error_of_json))
+  | ListEntities ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListEntitiesResponse.of_json json)
+      else Error (parse_aws_error (Some ListEntitiesResponse.error_of_json))
+  | ListIntegrationResourceProperties ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListIntegrationResourcePropertiesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListIntegrationResourcePropertiesResponse.error_of_json))
   | ListJobs ->
       if is_success
       then
@@ -3108,6 +4792,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListMLTransformsResponse.of_json json)
       else
         Error (parse_aws_error (Some ListMLTransformsResponse.error_of_json))
+  | ListMaterializedViewRefreshTaskRuns ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMaterializedViewRefreshTaskRunsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListMaterializedViewRefreshTaskRunsResponse.error_of_json))
   | ListRegistries ->
       if is_success
       then
@@ -3142,18 +4835,43 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListStatementsResponse.of_json json)
       else
         Error (parse_aws_error (Some ListStatementsResponse.error_of_json))
+  | ListTableOptimizerRuns ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTableOptimizerRunsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListTableOptimizerRunsResponse.error_of_json))
   | ListTriggers ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListTriggersResponse.of_json json)
       else Error (parse_aws_error (Some ListTriggersResponse.error_of_json))
+  | ListUsageProfiles ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListUsageProfilesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListUsageProfilesResponse.error_of_json))
   | ListWorkflows ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListWorkflowsResponse.of_json json)
       else Error (parse_aws_error (Some ListWorkflowsResponse.error_of_json))
+  | ModifyIntegration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ModifyIntegrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ModifyIntegrationResponse.error_of_json))
   | PutDataCatalogEncryptionSettings ->
       if is_success
       then
@@ -3163,6 +4881,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PutDataCatalogEncryptionSettingsResponse.error_of_json))
+  | PutDataQualityProfileAnnotation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutDataQualityProfileAnnotationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutDataQualityProfileAnnotationResponse.error_of_json))
   | PutResourcePolicy ->
       if is_success
       then
@@ -3198,6 +4925,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some QuerySchemaVersionMetadataResponse.error_of_json))
+  | RegisterConnectionType ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RegisterConnectionTypeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some RegisterConnectionTypeResponse.error_of_json))
   | RegisterSchemaVersion ->
       if is_success
       then
@@ -3250,6 +4986,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some StartBlueprintRunResponse.error_of_json))
+  | StartColumnStatisticsTaskRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartColumnStatisticsTaskRunResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartColumnStatisticsTaskRunResponse.error_of_json))
+  | StartColumnStatisticsTaskRunSchedule ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartColumnStatisticsTaskRunScheduleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartColumnStatisticsTaskRunScheduleResponse.error_of_json))
   | StartCrawler ->
       if is_success
       then
@@ -3264,6 +5018,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some StartCrawlerScheduleResponse.error_of_json))
+  | StartDataQualityRuleRecommendationRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartDataQualityRuleRecommendationRunResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                StartDataQualityRuleRecommendationRunResponse.error_of_json))
+  | StartDataQualityRulesetEvaluationRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartDataQualityRulesetEvaluationRunResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartDataQualityRulesetEvaluationRunResponse.error_of_json))
   | StartExportLabelsTaskRun ->
       if is_success
       then
@@ -3306,6 +5079,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StartMLLabelingSetGenerationTaskRunResponse.error_of_json))
+  | StartMaterializedViewRefreshTaskRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMaterializedViewRefreshTaskRunResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartMaterializedViewRefreshTaskRunResponse.error_of_json))
   | StartTrigger ->
       if is_success
       then
@@ -3319,6 +5101,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (StartWorkflowRunResponse.of_json json)
       else
         Error (parse_aws_error (Some StartWorkflowRunResponse.error_of_json))
+  | StopColumnStatisticsTaskRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopColumnStatisticsTaskRunResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopColumnStatisticsTaskRunResponse.error_of_json))
+  | StopColumnStatisticsTaskRunSchedule ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopColumnStatisticsTaskRunScheduleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopColumnStatisticsTaskRunScheduleResponse.error_of_json))
   | StopCrawler ->
       if is_success
       then
@@ -3333,6 +5133,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some StopCrawlerScheduleResponse.error_of_json))
+  | StopMaterializedViewRefreshTaskRun ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopMaterializedViewRefreshTaskRunResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopMaterializedViewRefreshTaskRunResponse.error_of_json))
   | StopSession ->
       if is_success
       then
@@ -3358,6 +5167,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (TagResourceResponse.of_json json)
       else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | TestConnection ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TestConnectionResponse.of_json json)
+      else
+        Error (parse_aws_error (Some TestConnectionResponse.error_of_json))
   | UntagResource ->
       if is_success
       then
@@ -3371,6 +5187,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateBlueprintResponse.of_json json)
       else
         Error (parse_aws_error (Some UpdateBlueprintResponse.error_of_json))
+  | UpdateCatalog ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateCatalogResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateCatalogResponse.error_of_json))
   | UpdateClassifier ->
       if is_success
       then
@@ -3396,6 +5218,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateColumnStatisticsForTableResponse.error_of_json))
+  | UpdateColumnStatisticsTaskSettings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateColumnStatisticsTaskSettingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateColumnStatisticsTaskSettingsResponse.error_of_json))
   | UpdateConnection ->
       if is_success
       then
@@ -3417,6 +5248,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateCrawlerScheduleResponse.error_of_json))
+  | UpdateDataQualityRuleset ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateDataQualityRulesetResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDataQualityRulesetResponse.error_of_json))
   | UpdateDatabase ->
       if is_success
       then
@@ -3432,12 +5272,49 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateDevEndpointResponse.error_of_json))
+  | UpdateGlueIdentityCenterConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateGlueIdentityCenterConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                UpdateGlueIdentityCenterConfigurationResponse.error_of_json))
+  | UpdateIntegrationResourceProperty ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateIntegrationResourcePropertyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateIntegrationResourcePropertyResponse.error_of_json))
+  | UpdateIntegrationTableProperties ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateIntegrationTablePropertiesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateIntegrationTablePropertiesResponse.error_of_json))
   | UpdateJob ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateJobResponse.of_json json)
       else Error (parse_aws_error (Some UpdateJobResponse.error_of_json))
+  | UpdateJobFromSourceControl ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateJobFromSourceControlResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateJobFromSourceControlResponse.error_of_json))
   | UpdateMLTransform ->
       if is_success
       then
@@ -3466,18 +5343,43 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateSchemaResponse.of_json json)
       else Error (parse_aws_error (Some UpdateSchemaResponse.error_of_json))
+  | UpdateSourceControlFromJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateSourceControlFromJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSourceControlFromJobResponse.error_of_json))
   | UpdateTable ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateTableResponse.of_json json)
       else Error (parse_aws_error (Some UpdateTableResponse.error_of_json))
+  | UpdateTableOptimizer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateTableOptimizerResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateTableOptimizerResponse.error_of_json))
   | UpdateTrigger ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateTriggerResponse.of_json json)
       else Error (parse_aws_error (Some UpdateTriggerResponse.error_of_json))
+  | UpdateUsageProfile ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateUsageProfileResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateUsageProfileResponse.error_of_json))
   | UpdateUserDefinedFunction ->
       if is_success
       then

@@ -78,31 +78,28 @@ module Identity =
   struct
     type nonrec t =
       {
-      sourceIp: Zz__string.t
+      sourceIp: Zz__string.t option
         [@ocaml.doc
           "The source IP address of the TCP connection making the request to API Gateway."];
-      userAgent: Zz__string.t
+      userAgent: Zz__string.t option
         [@ocaml.doc "The User Agent of the API caller."]}
-    let context_ = "Identity"
-    let make ~sourceIp = fun ~userAgent -> fun () -> { sourceIp; userAgent }
+    let make ?sourceIp = fun ?userAgent -> fun () -> { sourceIp; userAgent }
     let to_value x =
       structure_to_value
-        [("sourceIp", (Some (Zz__string.to_value x.sourceIp)));
-        ("userAgent", (Some (Zz__string.to_value x.userAgent)))]
+        [("sourceIp", (Option.map x.sourceIp ~f:Zz__string.to_value));
+        ("userAgent", (Option.map x.userAgent ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userAgent =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "userAgent") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "userAgent") in
       let sourceIp =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceIp") in
-      make ~userAgent ~sourceIp ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "sourceIp") in
+      make ?userAgent ?sourceIp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userAgent = field_map_exn json "UserAgent" Zz__string.of_json in
-      let sourceIp = field_map_exn json "SourceIp" Zz__string.of_json in
-      make ~userAgent ~sourceIp ()
+    let of_json json__ =
+      let userAgent = field_map json__ "UserAgent" Zz__string.of_json in
+      let sourceIp = field_map json__ "SourceIp" Zz__string.of_json in
+      make ?userAgent ?sourceIp ()
     let to_json v = composed_to_json to_value v
   end
 module LimitExceededException =
@@ -163,9 +160,10 @@ module PostToConnectionRequest =
         Data.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ~connectionId ~data ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connectionId = field_map_exn json "ConnectionId" Zz__string.of_json in
-      let data = field_map_exn json "Data" Data.of_json in
+    let of_json json__ =
+      let connectionId =
+        field_map_exn json__ "ConnectionId" Zz__string.of_json in
+      let data = field_map_exn json__ "Data" Data.of_json in
       make ~connectionId ~data ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Sends the provided data to the specified connection."]
@@ -183,8 +181,8 @@ module PayloadTooLargeException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The data has exceeded the maximum size allowed."]
@@ -265,12 +263,12 @@ module GetConnectionResponse =
           (Xml.child xml_arg0 "connectedAt") in
       make ?lastActiveAt ?identity ?connectedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastActiveAt =
-        field_map json "LastActiveAt" Zz__timestampIso8601.of_json in
-      let identity = field_map json "Identity" Identity.of_json in
+        field_map json__ "LastActiveAt" Zz__timestampIso8601.of_json in
+      let identity = field_map json__ "Identity" Identity.of_json in
       let connectedAt =
-        field_map json "ConnectedAt" Zz__timestampIso8601.of_json in
+        field_map json__ "ConnectedAt" Zz__timestampIso8601.of_json in
       make ?lastActiveAt ?identity ?connectedAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -291,8 +289,9 @@ module GetConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connectionId = field_map_exn json "ConnectionId" Zz__string.of_json in
+    let of_json json__ =
+      let connectionId =
+        field_map_exn json__ "ConnectionId" Zz__string.of_json in
       make ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -313,8 +312,9 @@ module DeleteConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connectionId = field_map_exn json "ConnectionId" Zz__string.of_json in
+    let of_json json__ =
+      let connectionId =
+        field_map_exn json__ "ConnectionId" Zz__string.of_json in
       make ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete the connection with the provided id."]

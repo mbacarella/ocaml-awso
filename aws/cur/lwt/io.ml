@@ -15,7 +15,13 @@ let delete_report_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteReportDefinition input
 let describe_report_definitions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeReportDefinitions input
+let list_tags_for_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let modify_report_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyReportDefinition input
 let put_report_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutReportDefinition input
+let tag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TagResource input
+let untag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UntagResource input

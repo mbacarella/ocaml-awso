@@ -26,6 +26,12 @@ val open_tunnel :
     ?cfg:Awso.Cfg.t ->
       OpenTunnelRequest.t ->
         (OpenTunnelResponse.t, OpenTunnelResponse.error) Result.t
+val rotate_tunnel_access_token :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RotateTunnelAccessTokenRequest.t ->
+        (RotateTunnelAccessTokenResponse.t,
+          RotateTunnelAccessTokenResponse.error) Result.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

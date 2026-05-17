@@ -38,11 +38,32 @@ module CategoricalValue =
     let of_json j = string_of_json ~kind:"CategoricalValue" j
     let to_json = simple_to_json to_value
   end
+module ColumnName =
+  struct
+    type nonrec t = string
+    let context_ = "ColumnName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:150) >>=
+             (fun () -> check_pattern i ~pattern:"[A-Za-z_][A-Za-z\\d_]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ColumnName" j
+    let to_json = simple_to_json to_value
+  end
 module CategoricalValues =
   struct
     type nonrec t = CategoricalValue.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CategoricalValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -138,6 +159,97 @@ module IntegerMinValue =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module EventType =
+  struct
+    type nonrec t = string
+    let context_ = "EventType"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EventType" j
+    let to_json = simple_to_json to_value
+  end
+module EventTypeThresholdValue =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module EventTypeWeight =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:1.) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module ColumnNamesList =
+  struct
+    type nonrec t = ColumnName.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ColumnName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ColumnName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ColumnNamesList" ~of_json:ColumnName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DatasetType =
+  struct
+    type nonrec t = string
+    let context_ = "DatasetType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_pattern i ~pattern:"^[A-Za-z_]+$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DatasetType" j
+    let to_json = simple_to_json to_value
+  end
 module CategoricalHyperParameterRange =
   struct
     type nonrec t =
@@ -160,9 +272,9 @@ module CategoricalHyperParameterRange =
         (Option.map ~f:ParameterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" CategoricalValues.of_json in
-      let name = field_map json "name" ParameterName.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" CategoricalValues.of_json in
+      let name = field_map json__ "name" ParameterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -197,10 +309,10 @@ module ContinuousHyperParameterRange =
         (Option.map ~f:ParameterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?maxValue ?minValue ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxValue = field_map json "maxValue" ContinuousMaxValue.of_json in
-      let minValue = field_map json "minValue" ContinuousMinValue.of_json in
-      let name = field_map json "name" ParameterName.of_json in
+    let of_json json__ =
+      let maxValue = field_map json__ "maxValue" ContinuousMaxValue.of_json in
+      let minValue = field_map json__ "minValue" ContinuousMinValue.of_json in
+      let name = field_map json__ "name" ParameterName.of_json in
       make ?maxValue ?minValue ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -235,14 +347,58 @@ module IntegerHyperParameterRange =
         (Option.map ~f:ParameterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?maxValue ?minValue ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxValue = field_map json "maxValue" IntegerMaxValue.of_json in
-      let minValue = field_map json "minValue" IntegerMinValue.of_json in
-      let name = field_map json "name" ParameterName.of_json in
+    let of_json json__ =
+      let maxValue = field_map json__ "maxValue" IntegerMaxValue.of_json in
+      let minValue = field_map json__ "minValue" IntegerMinValue.of_json in
+      let name = field_map json__ "name" ParameterName.of_json in
       make ?maxValue ?minValue ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the name and range of an integer-valued hyperparameter."]
+module EventParameters =
+  struct
+    type nonrec t =
+      {
+      eventType: EventType.t option
+        [@ocaml.doc
+          "The name of the event type to be considered for solution creation."];
+      eventValueThreshold: EventTypeThresholdValue.t option
+        [@ocaml.doc
+          "The threshold of the event type. Only events with a value greater or equal to this threshold will be considered for solution creation."];
+      weight: EventTypeWeight.t option
+        [@ocaml.doc
+          "The weight of the event type. A higher weight means higher importance of the event type for the created solution."]}
+    let make ?eventType =
+      fun ?eventValueThreshold ->
+        fun ?weight -> fun () -> { eventType; eventValueThreshold; weight }
+    let to_value x =
+      structure_to_value
+        [("eventType", (Option.map x.eventType ~f:EventType.to_value));
+        ("eventValueThreshold",
+          (Option.map x.eventValueThreshold
+             ~f:EventTypeThresholdValue.to_value));
+        ("weight", (Option.map x.weight ~f:EventTypeWeight.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let weight =
+        (Option.map ~f:EventTypeWeight.of_xml) (Xml.child xml_arg0 "weight") in
+      let eventValueThreshold =
+        (Option.map ~f:EventTypeThresholdValue.of_xml)
+          (Xml.child xml_arg0 "eventValueThreshold") in
+      let eventType =
+        (Option.map ~f:EventType.of_xml) (Xml.child xml_arg0 "eventType") in
+      make ?weight ?eventValueThreshold ?eventType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let weight = field_map json__ "weight" EventTypeWeight.of_json in
+      let eventValueThreshold =
+        field_map json__ "eventValueThreshold"
+          EventTypeThresholdValue.of_json in
+      let eventType = field_map json__ "eventType" EventType.of_json in
+      make ?weight ?eventValueThreshold ?eventType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the parameters of events, which are used in solution creation."]
 module ParameterValue =
   struct
     type nonrec t = string
@@ -256,6 +412,74 @@ module ParameterValue =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ParameterValue" j
     let to_json = simple_to_json to_value
+  end
+module ExcludedDatasetColumns =
+  struct
+    type nonrec t = (DatasetType.t * ColumnNamesList.t) list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:3); i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types DatasetType ColumnNamesList"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (DatasetType.to_value x) |>
+                    (fun x ->
+                       (ColumnNamesList.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:DatasetType.of_string
+        ~of_json:ColumnNamesList.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IncludedDatasetColumns =
+  struct
+    type nonrec t = (DatasetType.t * ColumnNamesList.t) list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:3); i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types DatasetType ColumnNamesList"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (DatasetType.to_value x) |>
+                    (fun x ->
+                       (ColumnNamesList.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:DatasetType.of_string
+        ~of_json:ColumnNamesList.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module Arn =
   struct
@@ -338,6 +562,9 @@ module CategoricalHyperParameterRanges =
     type nonrec t = CategoricalHyperParameterRange.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CategoricalHyperParameterRange.to_value)) |>
         (fun x -> `List x)
@@ -365,6 +592,9 @@ module ContinuousHyperParameterRanges =
     type nonrec t = ContinuousHyperParameterRange.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContinuousHyperParameterRange.to_value)) |>
         (fun x -> `List x)
@@ -392,6 +622,9 @@ module IntegerHyperParameterRanges =
     type nonrec t = IntegerHyperParameterRange.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IntegerHyperParameterRange.to_value)) |>
         (fun x -> `List x)
@@ -414,7 +647,113 @@ module IntegerHyperParameterRanges =
         ~of_json:IntegerHyperParameterRange.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SchedulingExpression =
+  struct
+    type nonrec t = string
+    let context_ = "SchedulingExpression"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:16) >>=
+                  (fun () -> check_pattern i ~pattern:"rate\\(\\d+ days?\\)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SchedulingExpression" j
+    let to_json = simple_to_json to_value
+  end
+module EventParametersList =
+  struct
+    type nonrec t = EventParameters.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EventParameters.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EventParameters.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EventParametersList"
+        ~of_json:EventParameters.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RankingInfluenceType =
+  struct
+    type nonrec t =
+      | POPULARITY 
+      | FRESHNESS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | POPULARITY -> "POPULARITY"
+      | FRESHNESS -> "FRESHNESS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "POPULARITY" -> POPULARITY
+      | "FRESHNESS" -> FRESHNESS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RankingInfluenceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RankingInfluenceType" j)
+    let to_json = simple_to_json to_value
+  end
+module RankingInfluenceWeight =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:1.) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
 module Tunable =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module Boolean =
   struct
     type nonrec t = bool
     let make i = i
@@ -450,6 +789,8 @@ module HyperParameters =
                        (ParameterValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -457,6 +798,48 @@ module HyperParameters =
         ~of_json:ParameterValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TrainingDataConfig =
+  struct
+    type nonrec t =
+      {
+      excludedDatasetColumns: ExcludedDatasetColumns.t option
+        [@ocaml.doc
+          "Specifies the columns to exclude from training. Each key is a dataset type, and each value is a list of columns. Exclude columns to control what data Amazon Personalize uses to generate recommendations. For example, you might have a column that you want to use only to filter recommendations. You can exclude this column from training and Amazon Personalize considers it only when filtering."];
+      includedDatasetColumns: IncludedDatasetColumns.t option
+        [@ocaml.doc
+          "A map that specifies which columns to include from each dataset during training. The map can contain up to 3 entries, where each key is a dataset name (maximum length of 256 characters, must contain only letters and underscores) and each value is an array of up to 50 column names. Column names can be up to 150 characters long, must start with a letter or underscore, and can contain only letters, numbers, and underscores."]}
+    let make ?excludedDatasetColumns =
+      fun ?includedDatasetColumns ->
+        fun () -> { excludedDatasetColumns; includedDatasetColumns }
+    let to_value x =
+      structure_to_value
+        [("excludedDatasetColumns",
+           (Option.map x.excludedDatasetColumns
+              ~f:ExcludedDatasetColumns.to_value));
+        ("includedDatasetColumns",
+          (Option.map x.includedDatasetColumns
+             ~f:IncludedDatasetColumns.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let includedDatasetColumns =
+        (Option.map ~f:IncludedDatasetColumns.of_xml)
+          (Xml.child xml_arg0 "includedDatasetColumns") in
+      let excludedDatasetColumns =
+        (Option.map ~f:ExcludedDatasetColumns.of_xml)
+          (Xml.child xml_arg0 "excludedDatasetColumns") in
+      make ?includedDatasetColumns ?excludedDatasetColumns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let includedDatasetColumns =
+        field_map json__ "includedDatasetColumns"
+          IncludedDatasetColumns.of_json in
+      let excludedDatasetColumns =
+        field_map json__ "excludedDatasetColumns"
+          ExcludedDatasetColumns.of_json in
+      make ?includedDatasetColumns ?excludedDatasetColumns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The training data configuration to use when creating a domain recommender or custom solution version (trained model)."]
 module TransactionsPerSecond =
   struct
     type nonrec t = int
@@ -477,6 +860,9 @@ module ArnList =
     type nonrec t = Arn.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -525,10 +911,10 @@ module HPOObjective =
         (Option.map ~f:HPOObjectiveType.of_xml) (Xml.child xml_arg0 "type") in
       make ?metricRegex ?metricName ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metricRegex = field_map json "metricRegex" MetricRegex.of_json in
-      let metricName = field_map json "metricName" MetricName.of_json in
-      let type_ = field_map json "type" HPOObjectiveType.of_json in
+    let of_json json__ =
+      let metricRegex = field_map json__ "metricRegex" MetricRegex.of_json in
+      let metricName = field_map json__ "metricName" MetricName.of_json in
+      let type_ = field_map json__ "type" HPOObjectiveType.of_json in
       make ?metricRegex ?metricName ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -562,11 +948,11 @@ module HPOResourceConfig =
           (Xml.child xml_arg0 "maxNumberOfTrainingJobs") in
       make ?maxParallelTrainingJobs ?maxNumberOfTrainingJobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxParallelTrainingJobs =
-        field_map json "maxParallelTrainingJobs" HPOResource.of_json in
+        field_map json__ "maxParallelTrainingJobs" HPOResource.of_json in
       let maxNumberOfTrainingJobs =
-        field_map json "maxNumberOfTrainingJobs" HPOResource.of_json in
+        field_map json__ "maxNumberOfTrainingJobs" HPOResource.of_json in
       make ?maxParallelTrainingJobs ?maxNumberOfTrainingJobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -616,15 +1002,15 @@ module HyperParameterRanges =
       make ?categoricalHyperParameterRanges ?continuousHyperParameterRanges
         ?integerHyperParameterRanges ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let categoricalHyperParameterRanges =
-        field_map json "categoricalHyperParameterRanges"
+        field_map json__ "categoricalHyperParameterRanges"
           CategoricalHyperParameterRanges.of_json in
       let continuousHyperParameterRanges =
-        field_map json "continuousHyperParameterRanges"
+        field_map json__ "continuousHyperParameterRanges"
           ContinuousHyperParameterRanges.of_json in
       let integerHyperParameterRanges =
-        field_map json "integerHyperParameterRanges"
+        field_map json__ "integerHyperParameterRanges"
           IntegerHyperParameterRanges.of_json in
       make ?categoricalHyperParameterRanges ?continuousHyperParameterRanges
         ?integerHyperParameterRanges ()
@@ -681,6 +1067,59 @@ module ObjectiveSensitivity =
     let of_json j = of_string (string_of_json ~kind:"ObjectiveSensitivity" j)
     let to_json = simple_to_json to_value
   end
+module AutoTrainingConfig =
+  struct
+    type nonrec t =
+      {
+      schedulingExpression: SchedulingExpression.t option
+        [@ocaml.doc
+          "Specifies how often to automatically train new solution versions. Specify a rate expression in rate(value unit) format. For value, specify a number between 1 and 30. For unit, specify day or days. For example, to automatically create a new solution version every 5 days, specify rate(5 days). The default is every 7 days. For more information about auto training, see Creating and configuring a solution."]}
+    let make ?schedulingExpression = fun () -> { schedulingExpression }
+    let to_value x =
+      structure_to_value
+        [("schedulingExpression",
+           (Option.map x.schedulingExpression
+              ~f:SchedulingExpression.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let schedulingExpression =
+        (Option.map ~f:SchedulingExpression.of_xml)
+          (Xml.child xml_arg0 "schedulingExpression") in
+      make ?schedulingExpression ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let schedulingExpression =
+        field_map json__ "schedulingExpression" SchedulingExpression.of_json in
+      make ?schedulingExpression ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The automatic training configuration to use when performAutoTraining is true."]
+module EventsConfig =
+  struct
+    type nonrec t =
+      {
+      eventParametersList: EventParametersList.t option
+        [@ocaml.doc
+          "A list of event parameters, which includes event types and their event value thresholds and weights."]}
+    let make ?eventParametersList = fun () -> { eventParametersList }
+    let to_value x =
+      structure_to_value
+        [("eventParametersList",
+           (Option.map x.eventParametersList ~f:EventParametersList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventParametersList =
+        (Option.map ~f:EventParametersList.of_xml)
+          (Xml.child xml_arg0 "eventParametersList") in
+      make ?eventParametersList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventParametersList =
+        field_map json__ "eventParametersList" EventParametersList.of_json in
+      make ?eventParametersList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration of events, which are used in solution creation."]
 module KmsKeyArn =
   struct
     type nonrec t = string
@@ -718,6 +1157,38 @@ module S3Location =
     let of_json j = string_of_json ~kind:"S3Location" j
     let to_json = simple_to_json to_value
   end
+module RankingInfluence =
+  struct
+    type nonrec t = (RankingInfluenceType.t * RankingInfluenceWeight.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((RankingInfluenceType.of_string chopped),
+                              (RankingInfluenceWeight.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (RankingInfluenceType.to_value x) |>
+                    (fun x ->
+                       (RankingInfluenceWeight.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:RankingInfluenceType.of_string
+        ~of_json:RankingInfluenceWeight.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DefaultCategoricalHyperParameterRange =
   struct
     type nonrec t =
@@ -746,10 +1217,10 @@ module DefaultCategoricalHyperParameterRange =
         (Option.map ~f:ParameterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?isTunable ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isTunable = field_map json "isTunable" Tunable.of_json in
-      let values = field_map json "values" CategoricalValues.of_json in
-      let name = field_map json "name" ParameterName.of_json in
+    let of_json json__ =
+      let isTunable = field_map json__ "isTunable" Tunable.of_json in
+      let values = field_map json__ "values" CategoricalValues.of_json in
+      let name = field_map json__ "name" ParameterName.of_json in
       make ?isTunable ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -790,11 +1261,11 @@ module DefaultContinuousHyperParameterRange =
         (Option.map ~f:ParameterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?isTunable ?maxValue ?minValue ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isTunable = field_map json "isTunable" Tunable.of_json in
-      let maxValue = field_map json "maxValue" ContinuousMaxValue.of_json in
-      let minValue = field_map json "minValue" ContinuousMinValue.of_json in
-      let name = field_map json "name" ParameterName.of_json in
+    let of_json json__ =
+      let isTunable = field_map json__ "isTunable" Tunable.of_json in
+      let maxValue = field_map json__ "maxValue" ContinuousMaxValue.of_json in
+      let minValue = field_map json__ "minValue" ContinuousMinValue.of_json in
+      let name = field_map json__ "name" ParameterName.of_json in
       make ?isTunable ?maxValue ?minValue ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -835,15 +1306,29 @@ module DefaultIntegerHyperParameterRange =
         (Option.map ~f:ParameterName.of_xml) (Xml.child xml_arg0 "name") in
       make ?isTunable ?maxValue ?minValue ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isTunable = field_map json "isTunable" Tunable.of_json in
-      let maxValue = field_map json "maxValue" IntegerMaxValue.of_json in
-      let minValue = field_map json "minValue" IntegerMinValue.of_json in
-      let name = field_map json "name" ParameterName.of_json in
+    let of_json json__ =
+      let isTunable = field_map json__ "isTunable" Tunable.of_json in
+      let maxValue = field_map json__ "maxValue" IntegerMaxValue.of_json in
+      let minValue = field_map json__ "minValue" IntegerMinValue.of_json in
+      let name = field_map json__ "name" ParameterName.of_json in
       make ?isTunable ?maxValue ?minValue ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the name and default range of a integer-valued hyperparameter and whether the hyperparameter is tunable. A tunable hyperparameter can have its value determined during hyperparameter optimization (HPO)."]
+module MetricExpression =
+  struct
+    type nonrec t = string
+    let context_ = "MetricExpression"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MetricExpression" j
+    let to_json = simple_to_json to_value
+  end
 module TagKey =
   struct
     type nonrec t = string
@@ -948,6 +1433,59 @@ module FailureReason =
     let of_json j = string_of_json ~kind:"FailureReason" j
     let to_json = simple_to_json to_value
   end
+module TrainingMode =
+  struct
+    type nonrec t =
+      | FULL 
+      | UPDATE 
+      | AUTOTRAIN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FULL -> "FULL"
+      | UPDATE -> "UPDATE"
+      | AUTOTRAIN -> "AUTOTRAIN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FULL" -> FULL
+      | "UPDATE" -> UPDATE
+      | "AUTOTRAIN" -> AUTOTRAIN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TrainingMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TrainingMode" j)
+    let to_json = simple_to_json to_value
+  end
+module TrainingType =
+  struct
+    type nonrec t =
+      | AUTOMATIC 
+      | MANUAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AUTOMATIC -> "AUTOMATIC"
+      | MANUAL -> "MANUAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AUTOMATIC" -> AUTOMATIC
+      | "MANUAL" -> MANUAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TrainingType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TrainingType" j)
+    let to_json = simple_to_json to_value
+  end
 module Domain =
   struct
     type nonrec t =
@@ -982,49 +1520,116 @@ module RecommenderConfig =
           "Specifies the exploration configuration hyperparameters, including explorationWeight and explorationItemAgeCutOff, you want to use to configure the amount of item exploration Amazon Personalize uses when recommending items. Provide itemExplorationConfig data only if your recommenders generate personalized recommendations for a user (not popular items or similar items)."];
       minRecommendationRequestsPerSecond: TransactionsPerSecond.t option
         [@ocaml.doc
-          "Specifies the requested minimum provisioned recommendation requests per second that Amazon Personalize will support."]}
+          "Specifies the requested minimum provisioned recommendation requests per second that Amazon Personalize will support. A high minRecommendationRequestsPerSecond will increase your bill. We recommend starting with 1 for minRecommendationRequestsPerSecond (the default). Track your usage using Amazon CloudWatch metrics, and increase the minRecommendationRequestsPerSecond as necessary."];
+      trainingDataConfig: TrainingDataConfig.t option
+        [@ocaml.doc
+          "Specifies the training data configuration to use when creating a domain recommender."];
+      enableMetadataWithRecommendations: Boolean.t option
+        [@ocaml.doc
+          "Whether metadata with recommendations is enabled for the recommender. If enabled, you can specify the columns from your Items dataset in your request for recommendations. Amazon Personalize returns this data for each item in the recommendation response. For information about enabling metadata for a recommender, see Enabling metadata in recommendations for a recommender. If you enable metadata in recommendations, you will incur additional costs. For more information, see Amazon Personalize pricing."]}
     let make ?itemExplorationConfig =
       fun ?minRecommendationRequestsPerSecond ->
-        fun () ->
-          { itemExplorationConfig; minRecommendationRequestsPerSecond }
+        fun ?trainingDataConfig ->
+          fun ?enableMetadataWithRecommendations ->
+            fun () ->
+              {
+                itemExplorationConfig;
+                minRecommendationRequestsPerSecond;
+                trainingDataConfig;
+                enableMetadataWithRecommendations
+              }
     let to_value x =
       structure_to_value
         [("itemExplorationConfig",
            (Option.map x.itemExplorationConfig ~f:HyperParameters.to_value));
         ("minRecommendationRequestsPerSecond",
           (Option.map x.minRecommendationRequestsPerSecond
-             ~f:TransactionsPerSecond.to_value))]
+             ~f:TransactionsPerSecond.to_value));
+        ("trainingDataConfig",
+          (Option.map x.trainingDataConfig ~f:TrainingDataConfig.to_value));
+        ("enableMetadataWithRecommendations",
+          (Option.map x.enableMetadataWithRecommendations ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let enableMetadataWithRecommendations =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "enableMetadataWithRecommendations") in
+      let trainingDataConfig =
+        (Option.map ~f:TrainingDataConfig.of_xml)
+          (Xml.child xml_arg0 "trainingDataConfig") in
       let minRecommendationRequestsPerSecond =
         (Option.map ~f:TransactionsPerSecond.of_xml)
           (Xml.child xml_arg0 "minRecommendationRequestsPerSecond") in
       let itemExplorationConfig =
         (Option.map ~f:HyperParameters.of_xml)
           (Xml.child xml_arg0 "itemExplorationConfig") in
-      make ?minRecommendationRequestsPerSecond ?itemExplorationConfig ()
+      make ?enableMetadataWithRecommendations ?trainingDataConfig
+        ?minRecommendationRequestsPerSecond ?itemExplorationConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let enableMetadataWithRecommendations =
+        field_map json__ "enableMetadataWithRecommendations" Boolean.of_json in
+      let trainingDataConfig =
+        field_map json__ "trainingDataConfig" TrainingDataConfig.of_json in
       let minRecommendationRequestsPerSecond =
-        field_map json "minRecommendationRequestsPerSecond"
+        field_map json__ "minRecommendationRequestsPerSecond"
           TransactionsPerSecond.of_json in
       let itemExplorationConfig =
-        field_map json "itemExplorationConfig" HyperParameters.of_json in
-      make ?minRecommendationRequestsPerSecond ?itemExplorationConfig ()
+        field_map json__ "itemExplorationConfig" HyperParameters.of_json in
+      make ?enableMetadataWithRecommendations ?trainingDataConfig
+        ?minRecommendationRequestsPerSecond ?itemExplorationConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration details of the recommender."]
-module DatasetType =
+module ImportMode =
   struct
-    type nonrec t = string
-    let context_ = "DatasetType"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:256); i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | FULL 
+      | INCREMENTAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FULL -> "FULL"
+      | INCREMENTAL -> "INCREMENTAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FULL" -> FULL
+      | "INCREMENTAL" -> INCREMENTAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DatasetType" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ImportMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImportMode" j)
+    let to_json = simple_to_json to_value
+  end
+module BatchInferenceJobMode =
+  struct
+    type nonrec t =
+      | BATCH_INFERENCE 
+      | THEME_GENERATION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | BATCH_INFERENCE -> "BATCH_INFERENCE"
+      | THEME_GENERATION -> "THEME_GENERATION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "BATCH_INFERENCE" -> BATCH_INFERENCE
+      | "THEME_GENERATION" -> THEME_GENERATION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration BatchInferenceJobMode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"BatchInferenceJobMode" j)
     let to_json = simple_to_json to_value
   end
 module AutoMLConfig =
@@ -1048,9 +1653,9 @@ module AutoMLConfig =
         (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "metricName") in
       make ?recipeList ?metricName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recipeList = field_map json "recipeList" ArnList.of_json in
-      let metricName = field_map json "metricName" MetricName.of_json in
+    let of_json json__ =
+      let recipeList = field_map json__ "recipeList" ArnList.of_json in
+      let metricName = field_map json__ "metricName" MetricName.of_json in
       make ?recipeList ?metricName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1092,6 +1697,8 @@ module FeatureTransformationParameters =
                        (ParameterValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1138,13 +1745,13 @@ module HPOConfig =
           (Xml.child xml_arg0 "hpoObjective") in
       make ?algorithmHyperParameterRanges ?hpoResourceConfig ?hpoObjective ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let algorithmHyperParameterRanges =
-        field_map json "algorithmHyperParameterRanges"
+        field_map json__ "algorithmHyperParameterRanges"
           HyperParameterRanges.of_json in
       let hpoResourceConfig =
-        field_map json "hpoResourceConfig" HPOResourceConfig.of_json in
-      let hpoObjective = field_map json "hpoObjective" HPOObjective.of_json in
+        field_map json__ "hpoResourceConfig" HPOResourceConfig.of_json in
+      let hpoObjective = field_map json__ "hpoObjective" HPOObjective.of_json in
       make ?algorithmHyperParameterRanges ?hpoResourceConfig ?hpoObjective ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1178,15 +1785,107 @@ module OptimizationObjective =
           (Xml.child xml_arg0 "itemAttribute") in
       make ?objectiveSensitivity ?itemAttribute ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectiveSensitivity =
-        field_map json "objectiveSensitivity" ObjectiveSensitivity.of_json in
+        field_map json__ "objectiveSensitivity" ObjectiveSensitivity.of_json in
       let itemAttribute =
-        field_map json "itemAttribute" ItemAttribute.of_json in
+        field_map json__ "itemAttribute" ItemAttribute.of_json in
       make ?objectiveSensitivity ?itemAttribute ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the additional objective for the solution, such as maximizing streaming minutes or increasing revenue. For more information see Optimizing a solution."]
+module PerformAutoTraining =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module PerformIncrementalUpdate =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module SolutionUpdateConfig =
+  struct
+    type nonrec t =
+      {
+      autoTrainingConfig: AutoTrainingConfig.t option ;
+      eventsConfig: EventsConfig.t option
+        [@ocaml.doc
+          "Describes the configuration of an event, which includes a list of event parameters. You can specify up to 10 event parameters. Events are used in solution creation."]}
+    let make ?autoTrainingConfig =
+      fun ?eventsConfig -> fun () -> { autoTrainingConfig; eventsConfig }
+    let to_value x =
+      structure_to_value
+        [("autoTrainingConfig",
+           (Option.map x.autoTrainingConfig ~f:AutoTrainingConfig.to_value));
+        ("eventsConfig",
+          (Option.map x.eventsConfig ~f:EventsConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventsConfig =
+        (Option.map ~f:EventsConfig.of_xml)
+          (Xml.child xml_arg0 "eventsConfig") in
+      let autoTrainingConfig =
+        (Option.map ~f:AutoTrainingConfig.of_xml)
+          (Xml.child xml_arg0 "autoTrainingConfig") in
+      make ?eventsConfig ?autoTrainingConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventsConfig = field_map json__ "eventsConfig" EventsConfig.of_json in
+      let autoTrainingConfig =
+        field_map json__ "autoTrainingConfig" AutoTrainingConfig.of_json in
+      make ?eventsConfig ?autoTrainingConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration details of the solution update."]
+module MetricValue =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module RoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "RoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"arn:([a-z\\d-]+):iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RoleArn" j
+    let to_json = simple_to_json to_value
+  end
 module S3DataConfig =
   struct
     type nonrec t =
@@ -1210,9 +1909,9 @@ module S3DataConfig =
         S3Location.of_xml (Xml.child_exn ~context:context_ xml_arg0 "path") in
       make ?kmsKeyArn ~path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyArn = field_map json "kmsKeyArn" KmsKeyArn.of_json in
-      let path = field_map_exn json "path" S3Location.of_json in
+    let of_json json__ =
+      let kmsKeyArn = field_map json__ "kmsKeyArn" KmsKeyArn.of_json in
+      let path = field_map_exn json__ "path" S3Location.of_json in
       make ?kmsKeyArn ~path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1223,25 +1922,92 @@ module CampaignConfig =
       {
       itemExplorationConfig: HyperParameters.t option
         [@ocaml.doc
-          "Specifies the exploration configuration hyperparameters, including explorationWeight and explorationItemAgeCutOff, you want to use to configure the amount of item exploration Amazon Personalize uses when recommending items. Provide itemExplorationConfig data only if your solution uses the User-Personalization recipe."]}
-    let make ?itemExplorationConfig = fun () -> { itemExplorationConfig }
+          "Specifies the exploration configuration hyperparameters, including explorationWeight and explorationItemAgeCutOff, you want to use to configure the amount of item exploration Amazon Personalize uses when recommending items. Provide itemExplorationConfig data only if your solution uses the User-Personalization recipe."];
+      enableMetadataWithRecommendations: Boolean.t option
+        [@ocaml.doc
+          "Whether metadata with recommendations is enabled for the campaign. If enabled, you can specify the columns from your Items dataset in your request for recommendations. Amazon Personalize returns this data for each item in the recommendation response. For information about enabling metadata for a campaign, see Enabling metadata in recommendations for a campaign. If you enable metadata in recommendations, you will incur additional costs. For more information, see Amazon Personalize pricing."];
+      syncWithLatestSolutionVersion: Boolean.t option
+        [@ocaml.doc
+          "Whether the campaign automatically updates to use the latest solution version (trained model) of a solution. If you specify True, you must specify the ARN of your solution for the SolutionVersionArn parameter. It must be in SolutionArn/$LATEST format. The default is False and you must manually update the campaign to deploy the latest solution version. For more information about automatic campaign updates, see Enabling automatic campaign updates."];
+      rankingInfluence: RankingInfluence.t option
+        [@ocaml.doc
+          "A map of ranking influence values for POPULARITY and FRESHNESS. For each key, specify a numerical value between 0.0 and 1.0 that determines how much influence that ranking factor has on the final recommendations. A value closer to 1.0 gives more weight to the factor, while a value closer to 0.0 reduces its influence."]}
+    let make ?itemExplorationConfig =
+      fun ?enableMetadataWithRecommendations ->
+        fun ?syncWithLatestSolutionVersion ->
+          fun ?rankingInfluence ->
+            fun () ->
+              {
+                itemExplorationConfig;
+                enableMetadataWithRecommendations;
+                syncWithLatestSolutionVersion;
+                rankingInfluence
+              }
     let to_value x =
       structure_to_value
         [("itemExplorationConfig",
-           (Option.map x.itemExplorationConfig ~f:HyperParameters.to_value))]
+           (Option.map x.itemExplorationConfig ~f:HyperParameters.to_value));
+        ("enableMetadataWithRecommendations",
+          (Option.map x.enableMetadataWithRecommendations ~f:Boolean.to_value));
+        ("syncWithLatestSolutionVersion",
+          (Option.map x.syncWithLatestSolutionVersion ~f:Boolean.to_value));
+        ("rankingInfluence",
+          (Option.map x.rankingInfluence ~f:RankingInfluence.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let rankingInfluence =
+        (Option.map ~f:RankingInfluence.of_xml)
+          (Xml.child xml_arg0 "rankingInfluence") in
+      let syncWithLatestSolutionVersion =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "syncWithLatestSolutionVersion") in
+      let enableMetadataWithRecommendations =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "enableMetadataWithRecommendations") in
       let itemExplorationConfig =
         (Option.map ~f:HyperParameters.of_xml)
           (Xml.child xml_arg0 "itemExplorationConfig") in
-      make ?itemExplorationConfig ()
+      make ?rankingInfluence ?syncWithLatestSolutionVersion
+        ?enableMetadataWithRecommendations ?itemExplorationConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let rankingInfluence =
+        field_map json__ "rankingInfluence" RankingInfluence.of_json in
+      let syncWithLatestSolutionVersion =
+        field_map json__ "syncWithLatestSolutionVersion" Boolean.of_json in
+      let enableMetadataWithRecommendations =
+        field_map json__ "enableMetadataWithRecommendations" Boolean.of_json in
       let itemExplorationConfig =
-        field_map json "itemExplorationConfig" HyperParameters.of_json in
-      make ?itemExplorationConfig ()
+        field_map json__ "itemExplorationConfig" HyperParameters.of_json in
+      make ?rankingInfluence ?syncWithLatestSolutionVersion
+        ?enableMetadataWithRecommendations ?itemExplorationConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration details of a campaign."]
+module FieldsForThemeGeneration =
+  struct
+    type nonrec t =
+      {
+      itemName: ColumnName.t
+        [@ocaml.doc
+          "The name of the Items dataset column that stores the name of each item in the dataset."]}
+    let context_ = "FieldsForThemeGeneration"
+    let make ~itemName = fun () -> { itemName }
+    let to_value x =
+      structure_to_value
+        [("itemName", (Some (ColumnName.to_value x.itemName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let itemName =
+        ColumnName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "itemName") in
+      make ~itemName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let itemName = field_map_exn json__ "itemName" ColumnName.of_json in
+      make ~itemName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A string to string map of the configuration details for theme generation."]
 module DockerURI =
   struct
     type nonrec t = string
@@ -1261,6 +2027,9 @@ module DefaultCategoricalHyperParameterRanges =
     type nonrec t = DefaultCategoricalHyperParameterRange.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DefaultCategoricalHyperParameterRange.to_value)) |>
         (fun x -> `List x)
@@ -1289,6 +2058,9 @@ module DefaultContinuousHyperParameterRanges =
     type nonrec t = DefaultContinuousHyperParameterRange.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DefaultContinuousHyperParameterRange.to_value)) |>
         (fun x -> `List x)
@@ -1317,6 +2089,9 @@ module DefaultIntegerHyperParameterRanges =
     type nonrec t = DefaultIntegerHyperParameterRange.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DefaultIntegerHyperParameterRange.to_value)) |>
         (fun x -> `List x)
@@ -1353,6 +2128,48 @@ module ErrorMessage =
     let of_json j = string_of_json ~kind:"ErrorMessage" j
     let to_json = simple_to_json to_value
   end
+module MetricAttribute =
+  struct
+    type nonrec t =
+      {
+      eventType: EventType.t [@ocaml.doc "The metric's event type."];
+      metricName: MetricName.t
+        [@ocaml.doc
+          "The metric's name. The name helps you identify the metric in Amazon CloudWatch or Amazon S3."];
+      expression: MetricExpression.t
+        [@ocaml.doc
+          "The attribute's expression. Available functions are SUM() or SAMPLECOUNT(). For SUM() functions, provide the dataset type (either Interactions or Items) and column to sum as a parameter. For example SUM(Items.PRICE)."]}
+    let context_ = "MetricAttribute"
+    let make ~eventType =
+      fun ~metricName ->
+        fun ~expression -> fun () -> { eventType; metricName; expression }
+    let to_value x =
+      structure_to_value
+        [("eventType", (Some (EventType.to_value x.eventType)));
+        ("metricName", (Some (MetricName.to_value x.metricName)));
+        ("expression", (Some (MetricExpression.to_value x.expression)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expression =
+        MetricExpression.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "expression") in
+      let metricName =
+        MetricName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "metricName") in
+      let eventType =
+        EventType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "eventType") in
+      make ~expression ~metricName ~eventType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expression =
+        field_map_exn json__ "expression" MetricExpression.of_json in
+      let metricName = field_map_exn json__ "metricName" MetricName.of_json in
+      let eventType = field_map_exn json__ "eventType" EventType.of_json in
+      make ~expression ~metricName ~eventType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information on a metric that a metric attribution reports on. For more information, see Measuring impact of recommendations."]
 module Tag =
   struct
     type nonrec t =
@@ -1377,13 +2194,13 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tagKey") in
       make ~tagValue ~tagKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValue = field_map_exn json "tagValue" TagValue.of_json in
-      let tagKey = field_map_exn json "tagKey" TagKey.of_json in
+    let of_json json__ =
+      let tagValue = field_map_exn json__ "tagValue" TagValue.of_json in
+      let tagKey = field_map_exn json__ "tagKey" TagKey.of_json in
       make ~tagValue ~tagKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The optional metadata that you apply to resources to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. For more information see Tagging Personalize resources."]
+       "The optional metadata that you apply to resources to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. For more information see Tagging Amazon Personalize resources."]
 module SolutionSummary =
   struct
     type nonrec t =
@@ -1399,20 +2216,25 @@ module SolutionSummary =
           "The date and time (in Unix time) that the solution was created."];
       lastUpdatedDateTime: Date.t option
         [@ocaml.doc
-          "The date and time (in Unix time) that the solution was last updated."]}
+          "The date and time (in Unix time) that the solution was last updated."];
+      recipeArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the recipe used by the solution."]}
     let make ?name =
       fun ?solutionArn ->
         fun ?status ->
           fun ?creationDateTime ->
             fun ?lastUpdatedDateTime ->
-              fun () ->
-                {
-                  name;
-                  solutionArn;
-                  status;
-                  creationDateTime;
-                  lastUpdatedDateTime
-                }
+              fun ?recipeArn ->
+                fun () ->
+                  {
+                    name;
+                    solutionArn;
+                    status;
+                    creationDateTime;
+                    lastUpdatedDateTime;
+                    recipeArn
+                  }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:Name.to_value));
@@ -1421,9 +2243,12 @@ module SolutionSummary =
         ("creationDateTime",
           (Option.map x.creationDateTime ~f:Date.to_value));
         ("lastUpdatedDateTime",
-          (Option.map x.lastUpdatedDateTime ~f:Date.to_value))]
+          (Option.map x.lastUpdatedDateTime ~f:Date.to_value));
+        ("recipeArn", (Option.map x.recipeArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let recipeArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "recipeArn") in
       let lastUpdatedDateTime =
         (Option.map ~f:Date.of_xml)
           (Xml.child xml_arg0 "lastUpdatedDateTime") in
@@ -1434,18 +2259,19 @@ module SolutionSummary =
       let solutionArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionArn") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
-      make ?lastUpdatedDateTime ?creationDateTime ?status ?solutionArn ?name
-        ()
+      make ?recipeArn ?lastUpdatedDateTime ?creationDateTime ?status
+        ?solutionArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let recipeArn = field_map json__ "recipeArn" Arn.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let solutionArn = field_map json "solutionArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
-      make ?lastUpdatedDateTime ?creationDateTime ?status ?solutionArn ?name
-        ()
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let solutionArn = field_map json__ "solutionArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      make ?recipeArn ?lastUpdatedDateTime ?creationDateTime ?status
+        ?solutionArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides a summary of the properties of a solution. For a complete listing, call the DescribeSolution API."]
@@ -1459,6 +2285,12 @@ module SolutionVersionSummary =
       status: Status.t option
         [@ocaml.doc
           "The status of the solution version. A solution version can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED"];
+      trainingMode: TrainingMode.t option
+        [@ocaml.doc
+          "The scope of training to be performed when creating the solution version. A FULL training considers all of the data in your dataset group. An UPDATE processes only the data that has changed since the latest training. Only solution versions created with the User-Personalization recipe can use UPDATE."];
+      trainingType: TrainingType.t option
+        [@ocaml.doc
+          "Whether the solution version was created automatically or manually."];
       creationDateTime: Date.t option
         [@ocaml.doc
           "The date and time (in Unix time) that this version of a solution was created."];
@@ -1470,22 +2302,30 @@ module SolutionVersionSummary =
           "If a solution version fails, the reason behind the failure."]}
     let make ?solutionVersionArn =
       fun ?status ->
-        fun ?creationDateTime ->
-          fun ?lastUpdatedDateTime ->
-            fun ?failureReason ->
-              fun () ->
-                {
-                  solutionVersionArn;
-                  status;
-                  creationDateTime;
-                  lastUpdatedDateTime;
-                  failureReason
-                }
+        fun ?trainingMode ->
+          fun ?trainingType ->
+            fun ?creationDateTime ->
+              fun ?lastUpdatedDateTime ->
+                fun ?failureReason ->
+                  fun () ->
+                    {
+                      solutionVersionArn;
+                      status;
+                      trainingMode;
+                      trainingType;
+                      creationDateTime;
+                      lastUpdatedDateTime;
+                      failureReason
+                    }
     let to_value x =
       structure_to_value
         [("solutionVersionArn",
            (Option.map x.solutionVersionArn ~f:Arn.to_value));
         ("status", (Option.map x.status ~f:Status.to_value));
+        ("trainingMode",
+          (Option.map x.trainingMode ~f:TrainingMode.to_value));
+        ("trainingType",
+          (Option.map x.trainingType ~f:TrainingType.to_value));
         ("creationDateTime",
           (Option.map x.creationDateTime ~f:Date.to_value));
         ("lastUpdatedDateTime",
@@ -1502,24 +2342,32 @@ module SolutionVersionSummary =
           (Xml.child xml_arg0 "lastUpdatedDateTime") in
       let creationDateTime =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "creationDateTime") in
+      let trainingType =
+        (Option.map ~f:TrainingType.of_xml)
+          (Xml.child xml_arg0 "trainingType") in
+      let trainingMode =
+        (Option.map ~f:TrainingMode.of_xml)
+          (Xml.child xml_arg0 "trainingMode") in
       let status =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
       let solutionVersionArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionVersionArn") in
-      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
-        ?solutionVersionArn ()
+      make ?failureReason ?lastUpdatedDateTime ?creationDateTime
+        ?trainingType ?trainingMode ?status ?solutionVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let trainingType = field_map json__ "trainingType" TrainingType.of_json in
+      let trainingMode = field_map json__ "trainingMode" TrainingMode.of_json in
+      let status = field_map json__ "status" Status.of_json in
       let solutionVersionArn =
-        field_map json "solutionVersionArn" Arn.of_json in
-      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
-        ?solutionVersionArn ()
+        field_map json__ "solutionVersionArn" Arn.of_json in
+      make ?failureReason ?lastUpdatedDateTime ?creationDateTime
+        ?trainingType ?trainingMode ?status ?solutionVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides a summary of the properties of a solution version. For a complete listing, call the DescribeSolutionVersion API."]
@@ -1575,13 +2423,13 @@ module DatasetSchemaSummary =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
       make ?domain ?lastUpdatedDateTime ?creationDateTime ?schemaArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "domain" Domain.of_json in
+    let of_json json__ =
+      let domain = field_map json__ "domain" Domain.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let schemaArn = field_map json "schemaArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let schemaArn = field_map json__ "schemaArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?domain ?lastUpdatedDateTime ?creationDateTime ?schemaArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1603,7 +2451,7 @@ module RecommenderSummary =
         [@ocaml.doc "The configuration details of the recommender."];
       status: Status.t option
         [@ocaml.doc
-          "The status of the recommender. A recommender can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS"];
+          "The status of the recommender. A recommender can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED STOP PENDING > STOP IN_PROGRESS > INACTIVE > START PENDING > START IN_PROGRESS > ACTIVE DELETE PENDING > DELETE IN_PROGRESS"];
       creationDateTime: Date.t option
         [@ocaml.doc
           "The date and time (in Unix format) that the recommender was created."];
@@ -1664,17 +2512,17 @@ module RecommenderSummary =
       make ?lastUpdatedDateTime ?creationDateTime ?status ?recommenderConfig
         ?recipeArn ?datasetGroupArn ?recommenderArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
       let recommenderConfig =
-        field_map json "recommenderConfig" RecommenderConfig.of_json in
-      let recipeArn = field_map json "recipeArn" Arn.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
-      let recommenderArn = field_map json "recommenderArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "recommenderConfig" RecommenderConfig.of_json in
+      let recipeArn = field_map json__ "recipeArn" Arn.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
+      let recommenderArn = field_map json__ "recommenderArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?lastUpdatedDateTime ?creationDateTime ?status ?recommenderConfig
         ?recipeArn ?datasetGroupArn ?recommenderArn ?name ()
     let to_json v = composed_to_json to_value v
@@ -1738,19 +2586,94 @@ module RecipeSummary =
       make ?domain ?lastUpdatedDateTime ?creationDateTime ?status ?recipeArn
         ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "domain" Domain.of_json in
+    let of_json json__ =
+      let domain = field_map json__ "domain" Domain.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let recipeArn = field_map json "recipeArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let recipeArn = field_map json__ "recipeArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?domain ?lastUpdatedDateTime ?creationDateTime ?status ?recipeArn
         ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides a summary of the properties of a recipe. For a complete listing, call the DescribeRecipe API."]
+module MetricAttributionSummary =
+  struct
+    type nonrec t =
+      {
+      name: Name.t option [@ocaml.doc "The name of the metric attribution."];
+      metricAttributionArn: Arn.t option
+        [@ocaml.doc "The metric attribution's Amazon Resource Name (ARN)."];
+      status: Status.t option [@ocaml.doc "The metric attribution's status."];
+      creationDateTime: Date.t option
+        [@ocaml.doc "The metric attribution's creation date time."];
+      lastUpdatedDateTime: Date.t option
+        [@ocaml.doc "The metric attribution's last updated date time."];
+      failureReason: FailureReason.t option
+        [@ocaml.doc "The metric attribution's failure reason."]}
+    let make ?name =
+      fun ?metricAttributionArn ->
+        fun ?status ->
+          fun ?creationDateTime ->
+            fun ?lastUpdatedDateTime ->
+              fun ?failureReason ->
+                fun () ->
+                  {
+                    name;
+                    metricAttributionArn;
+                    status;
+                    creationDateTime;
+                    lastUpdatedDateTime;
+                    failureReason
+                  }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:Name.to_value));
+        ("metricAttributionArn",
+          (Option.map x.metricAttributionArn ~f:Arn.to_value));
+        ("status", (Option.map x.status ~f:Status.to_value));
+        ("creationDateTime",
+          (Option.map x.creationDateTime ~f:Date.to_value));
+        ("lastUpdatedDateTime",
+          (Option.map x.lastUpdatedDateTime ~f:Date.to_value));
+        ("failureReason",
+          (Option.map x.failureReason ~f:FailureReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureReason =
+        (Option.map ~f:FailureReason.of_xml)
+          (Xml.child xml_arg0 "failureReason") in
+      let lastUpdatedDateTime =
+        (Option.map ~f:Date.of_xml)
+          (Xml.child xml_arg0 "lastUpdatedDateTime") in
+      let creationDateTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "creationDateTime") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
+      let metricAttributionArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "metricAttributionArn") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
+        ?metricAttributionArn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureReason =
+        field_map json__ "failureReason" FailureReason.of_json in
+      let lastUpdatedDateTime =
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let metricAttributionArn =
+        field_map json__ "metricAttributionArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
+        ?metricAttributionArn ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a summary of the properties of a metric attribution. For a complete listing, call the DescribeMetricAttribution."]
 module FilterSummary =
   struct
     type nonrec t =
@@ -1816,16 +2739,16 @@ module FilterSummary =
       make ?status ?failureReason ?datasetGroupArn ?lastUpdatedDateTime
         ?creationDateTime ?filterArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" Status.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" Status.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let filterArn = field_map json "filterArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let filterArn = field_map json__ "filterArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?status ?failureReason ?datasetGroupArn ?lastUpdatedDateTime
         ?creationDateTime ?filterArn ?name ()
     let to_json v = composed_to_json to_value v
@@ -1883,13 +2806,13 @@ module EventTrackerSummary =
       make ?lastUpdatedDateTime ?creationDateTime ?status ?eventTrackerArn
         ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let eventTrackerArn = field_map json "eventTrackerArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let eventTrackerArn = field_map json__ "eventTrackerArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?lastUpdatedDateTime ?creationDateTime ?status ?eventTrackerArn
         ?name ()
     let to_json v = composed_to_json to_value v
@@ -1956,14 +2879,14 @@ module DatasetSummary =
       make ?lastUpdatedDateTime ?creationDateTime ?status ?datasetType
         ?datasetArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let datasetType = field_map json "datasetType" DatasetType.of_json in
-      let datasetArn = field_map json "datasetArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let datasetType = field_map json__ "datasetType" DatasetType.of_json in
+      let datasetArn = field_map json__ "datasetArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?lastUpdatedDateTime ?creationDateTime ?status ?datasetType
         ?datasetArn ?name ()
     let to_json v = composed_to_json to_value v
@@ -1989,22 +2912,27 @@ module DatasetImportJobSummary =
           "The date and time (in Unix time) that the dataset import job status was last updated."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "If a dataset import job fails, the reason behind the failure."]}
+          "If a dataset import job fails, the reason behind the failure."];
+      importMode: ImportMode.t option
+        [@ocaml.doc
+          "The import mode the dataset import job used to update the data in the dataset. For more information see Updating existing bulk data."]}
     let make ?datasetImportJobArn =
       fun ?jobName ->
         fun ?status ->
           fun ?creationDateTime ->
             fun ?lastUpdatedDateTime ->
               fun ?failureReason ->
-                fun () ->
-                  {
-                    datasetImportJobArn;
-                    jobName;
-                    status;
-                    creationDateTime;
-                    lastUpdatedDateTime;
-                    failureReason
-                  }
+                fun ?importMode ->
+                  fun () ->
+                    {
+                      datasetImportJobArn;
+                      jobName;
+                      status;
+                      creationDateTime;
+                      lastUpdatedDateTime;
+                      failureReason;
+                      importMode
+                    }
     let to_value x =
       structure_to_value
         [("datasetImportJobArn",
@@ -2016,9 +2944,12 @@ module DatasetImportJobSummary =
         ("lastUpdatedDateTime",
           (Option.map x.lastUpdatedDateTime ~f:Date.to_value));
         ("failureReason",
-          (Option.map x.failureReason ~f:FailureReason.to_value))]
+          (Option.map x.failureReason ~f:FailureReason.to_value));
+        ("importMode", (Option.map x.importMode ~f:ImportMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let importMode =
+        (Option.map ~f:ImportMode.of_xml) (Xml.child xml_arg0 "importMode") in
       let failureReason =
         (Option.map ~f:FailureReason.of_xml)
           (Xml.child xml_arg0 "failureReason") in
@@ -2033,21 +2964,22 @@ module DatasetImportJobSummary =
         (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "jobName") in
       let datasetImportJobArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetImportJobArn") in
-      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
-        ?jobName ?datasetImportJobArn ()
+      make ?importMode ?failureReason ?lastUpdatedDateTime ?creationDateTime
+        ?status ?jobName ?datasetImportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let importMode = field_map json__ "importMode" ImportMode.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let jobName = field_map json "jobName" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let jobName = field_map json__ "jobName" Name.of_json in
       let datasetImportJobArn =
-        field_map json "datasetImportJobArn" Arn.of_json in
-      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
-        ?jobName ?datasetImportJobArn ()
+        field_map json__ "datasetImportJobArn" Arn.of_json in
+      make ?importMode ?failureReason ?lastUpdatedDateTime ?creationDateTime
+        ?status ?jobName ?datasetImportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides a summary of the properties of a dataset import job. For a complete listing, call the DescribeDatasetImportJob API."]
@@ -2121,16 +3053,16 @@ module DatasetGroupSummary =
       make ?domain ?failureReason ?lastUpdatedDateTime ?creationDateTime
         ?status ?datasetGroupArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "domain" Domain.of_json in
+    let of_json json__ =
+      let domain = field_map json__ "domain" Domain.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?domain ?failureReason ?lastUpdatedDateTime ?creationDateTime
         ?status ?datasetGroupArn ?name ()
     let to_json v = composed_to_json to_value v
@@ -2203,21 +3135,111 @@ module DatasetExportJobSummary =
       make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
         ?jobName ?datasetExportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let jobName = field_map json "jobName" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let jobName = field_map json__ "jobName" Name.of_json in
       let datasetExportJobArn =
-        field_map json "datasetExportJobArn" Arn.of_json in
+        field_map json__ "datasetExportJobArn" Arn.of_json in
       make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
         ?jobName ?datasetExportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides a summary of the properties of a dataset export job. For a complete listing, call the DescribeDatasetExportJob API."]
+module DataDeletionJobSummary =
+  struct
+    type nonrec t =
+      {
+      dataDeletionJobArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the data deletion job."];
+      datasetGroupArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the dataset group the job deleted records from."];
+      jobName: Name.t option
+        [@ocaml.doc "The name of the data deletion job."];
+      status: Status.t option
+        [@ocaml.doc
+          "The status of the data deletion job. A data deletion job can have one of the following statuses: PENDING > IN_PROGRESS > COMPLETED -or- FAILED"];
+      creationDateTime: Date.t option
+        [@ocaml.doc
+          "The creation date and time (in Unix time) of the data deletion job."];
+      lastUpdatedDateTime: Date.t option
+        [@ocaml.doc
+          "The date and time (in Unix time) the data deletion job was last updated."];
+      failureReason: FailureReason.t option
+        [@ocaml.doc "If a data deletion job fails, provides the reason why."]}
+    let make ?dataDeletionJobArn =
+      fun ?datasetGroupArn ->
+        fun ?jobName ->
+          fun ?status ->
+            fun ?creationDateTime ->
+              fun ?lastUpdatedDateTime ->
+                fun ?failureReason ->
+                  fun () ->
+                    {
+                      dataDeletionJobArn;
+                      datasetGroupArn;
+                      jobName;
+                      status;
+                      creationDateTime;
+                      lastUpdatedDateTime;
+                      failureReason
+                    }
+    let to_value x =
+      structure_to_value
+        [("dataDeletionJobArn",
+           (Option.map x.dataDeletionJobArn ~f:Arn.to_value));
+        ("datasetGroupArn", (Option.map x.datasetGroupArn ~f:Arn.to_value));
+        ("jobName", (Option.map x.jobName ~f:Name.to_value));
+        ("status", (Option.map x.status ~f:Status.to_value));
+        ("creationDateTime",
+          (Option.map x.creationDateTime ~f:Date.to_value));
+        ("lastUpdatedDateTime",
+          (Option.map x.lastUpdatedDateTime ~f:Date.to_value));
+        ("failureReason",
+          (Option.map x.failureReason ~f:FailureReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureReason =
+        (Option.map ~f:FailureReason.of_xml)
+          (Xml.child xml_arg0 "failureReason") in
+      let lastUpdatedDateTime =
+        (Option.map ~f:Date.of_xml)
+          (Xml.child xml_arg0 "lastUpdatedDateTime") in
+      let creationDateTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "creationDateTime") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
+      let jobName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "jobName") in
+      let datasetGroupArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetGroupArn") in
+      let dataDeletionJobArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "dataDeletionJobArn") in
+      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
+        ?jobName ?datasetGroupArn ?dataDeletionJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureReason =
+        field_map json__ "failureReason" FailureReason.of_json in
+      let lastUpdatedDateTime =
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let jobName = field_map json__ "jobName" Name.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
+      let dataDeletionJobArn =
+        field_map json__ "dataDeletionJobArn" Arn.of_json in
+      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
+        ?jobName ?datasetGroupArn ?dataDeletionJobArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a summary of the properties of a data deletion job. For a complete listing, call the DescribeDataDeletionJob API operation."]
 module CampaignSummary =
   struct
     type nonrec t =
@@ -2280,15 +3302,15 @@ module CampaignSummary =
       make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
         ?campaignArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let campaignArn = field_map json "campaignArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let campaignArn = field_map json__ "campaignArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
         ?campaignArn ?name ()
     let to_json v = composed_to_json to_value v
@@ -2369,18 +3391,18 @@ module BatchSegmentJobSummary =
       make ?solutionVersionArn ?failureReason ?lastUpdatedDateTime
         ?creationDateTime ?status ?jobName ?batchSegmentJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let solutionVersionArn =
-        field_map json "solutionVersionArn" Arn.of_json in
+        field_map json__ "solutionVersionArn" Arn.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let jobName = field_map json "jobName" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let jobName = field_map json__ "jobName" Name.of_json in
       let batchSegmentJobArn =
-        field_map json "batchSegmentJobArn" Arn.of_json in
+        field_map json__ "batchSegmentJobArn" Arn.of_json in
       make ?solutionVersionArn ?failureReason ?lastUpdatedDateTime
         ?creationDateTime ?status ?jobName ?batchSegmentJobArn ()
     let to_json v = composed_to_json to_value v
@@ -2408,7 +3430,9 @@ module BatchInferenceJobSummary =
           "If the batch inference job failed, the reason for the failure."];
       solutionVersionArn: Arn.t option
         [@ocaml.doc
-          "The ARN of the solution version used by the batch inference job."]}
+          "The ARN of the solution version used by the batch inference job."];
+      batchInferenceJobMode: BatchInferenceJobMode.t option
+        [@ocaml.doc "The job's mode."]}
     let make ?batchInferenceJobArn =
       fun ?jobName ->
         fun ?status ->
@@ -2416,16 +3440,18 @@ module BatchInferenceJobSummary =
             fun ?lastUpdatedDateTime ->
               fun ?failureReason ->
                 fun ?solutionVersionArn ->
-                  fun () ->
-                    {
-                      batchInferenceJobArn;
-                      jobName;
-                      status;
-                      creationDateTime;
-                      lastUpdatedDateTime;
-                      failureReason;
-                      solutionVersionArn
-                    }
+                  fun ?batchInferenceJobMode ->
+                    fun () ->
+                      {
+                        batchInferenceJobArn;
+                        jobName;
+                        status;
+                        creationDateTime;
+                        lastUpdatedDateTime;
+                        failureReason;
+                        solutionVersionArn;
+                        batchInferenceJobMode
+                      }
     let to_value x =
       structure_to_value
         [("batchInferenceJobArn",
@@ -2439,9 +3465,15 @@ module BatchInferenceJobSummary =
         ("failureReason",
           (Option.map x.failureReason ~f:FailureReason.to_value));
         ("solutionVersionArn",
-          (Option.map x.solutionVersionArn ~f:Arn.to_value))]
+          (Option.map x.solutionVersionArn ~f:Arn.to_value));
+        ("batchInferenceJobMode",
+          (Option.map x.batchInferenceJobMode
+             ~f:BatchInferenceJobMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let batchInferenceJobMode =
+        (Option.map ~f:BatchInferenceJobMode.of_xml)
+          (Xml.child xml_arg0 "batchInferenceJobMode") in
       let solutionVersionArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionVersionArn") in
       let failureReason =
@@ -2459,53 +3491,31 @@ module BatchInferenceJobSummary =
       let batchInferenceJobArn =
         (Option.map ~f:Arn.of_xml)
           (Xml.child xml_arg0 "batchInferenceJobArn") in
-      make ?solutionVersionArn ?failureReason ?lastUpdatedDateTime
-        ?creationDateTime ?status ?jobName ?batchInferenceJobArn ()
+      make ?batchInferenceJobMode ?solutionVersionArn ?failureReason
+        ?lastUpdatedDateTime ?creationDateTime ?status ?jobName
+        ?batchInferenceJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let batchInferenceJobMode =
+        field_map json__ "batchInferenceJobMode"
+          BatchInferenceJobMode.of_json in
       let solutionVersionArn =
-        field_map json "solutionVersionArn" Arn.of_json in
+        field_map json__ "solutionVersionArn" Arn.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let jobName = field_map json "jobName" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let jobName = field_map json__ "jobName" Name.of_json in
       let batchInferenceJobArn =
-        field_map json "batchInferenceJobArn" Arn.of_json in
-      make ?solutionVersionArn ?failureReason ?lastUpdatedDateTime
-        ?creationDateTime ?status ?jobName ?batchInferenceJobArn ()
+        field_map json__ "batchInferenceJobArn" Arn.of_json in
+      make ?batchInferenceJobMode ?solutionVersionArn ?failureReason
+        ?lastUpdatedDateTime ?creationDateTime ?status ?jobName
+        ?batchInferenceJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A truncated version of the BatchInferenceJob. The ListBatchInferenceJobs operation returns a list of batch inference job summaries."]
-module MetricValue =
-  struct
-    type nonrec t = float
-    let make i = i
-    let of_string = Float.of_string
-    let to_value x = `Double x
-    let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
-    let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
-    let of_json j = float_of_json ~kind:"a double" j
-    let to_json = simple_to_json to_value
-  end
-module EventType =
-  struct
-    type nonrec t = string
-    let context_ = "EventType"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:256); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"EventType" j
-    let to_json = simple_to_json to_value
-  end
 module PerformAutoML =
   struct
     type nonrec t = bool
@@ -2543,31 +3553,45 @@ module SolutionConfig =
         [@ocaml.doc
           "Describes the properties for hyperparameter optimization (HPO)."];
       algorithmHyperParameters: HyperParameters.t option
-        [@ocaml.doc "Lists the hyperparameter names and ranges."];
+        [@ocaml.doc "Lists the algorithm hyperparameters and their values."];
       featureTransformationParameters:
         FeatureTransformationParameters.t option
         [@ocaml.doc "Lists the feature transformation parameters."];
       autoMLConfig: AutoMLConfig.t option
         [@ocaml.doc
           "The AutoMLConfig object containing a list of recipes to search when AutoML is performed."];
+      eventsConfig: EventsConfig.t option
+        [@ocaml.doc
+          "Describes the configuration of an event, which includes a list of event parameters. You can specify up to 10 event parameters. Events are used in solution creation."];
       optimizationObjective: OptimizationObjective.t option
         [@ocaml.doc
-          "Describes the additional objective for the solution, such as maximizing streaming minutes or increasing revenue. For more information see Optimizing a solution."]}
+          "Describes the additional objective for the solution, such as maximizing streaming minutes or increasing revenue. For more information see Optimizing a solution."];
+      trainingDataConfig: TrainingDataConfig.t option
+        [@ocaml.doc
+          "Specifies the training data configuration to use when creating a custom solution version (trained model)."];
+      autoTrainingConfig: AutoTrainingConfig.t option
+        [@ocaml.doc "Specifies the automatic training configuration to use."]}
     let make ?eventValueThreshold =
       fun ?hpoConfig ->
         fun ?algorithmHyperParameters ->
           fun ?featureTransformationParameters ->
             fun ?autoMLConfig ->
-              fun ?optimizationObjective ->
-                fun () ->
-                  {
-                    eventValueThreshold;
-                    hpoConfig;
-                    algorithmHyperParameters;
-                    featureTransformationParameters;
-                    autoMLConfig;
-                    optimizationObjective
-                  }
+              fun ?eventsConfig ->
+                fun ?optimizationObjective ->
+                  fun ?trainingDataConfig ->
+                    fun ?autoTrainingConfig ->
+                      fun () ->
+                        {
+                          eventValueThreshold;
+                          hpoConfig;
+                          algorithmHyperParameters;
+                          featureTransformationParameters;
+                          autoMLConfig;
+                          eventsConfig;
+                          optimizationObjective;
+                          trainingDataConfig;
+                          autoTrainingConfig
+                        }
     let to_value x =
       structure_to_value
         [("eventValueThreshold",
@@ -2580,14 +3604,29 @@ module SolutionConfig =
              ~f:FeatureTransformationParameters.to_value));
         ("autoMLConfig",
           (Option.map x.autoMLConfig ~f:AutoMLConfig.to_value));
+        ("eventsConfig",
+          (Option.map x.eventsConfig ~f:EventsConfig.to_value));
         ("optimizationObjective",
           (Option.map x.optimizationObjective
-             ~f:OptimizationObjective.to_value))]
+             ~f:OptimizationObjective.to_value));
+        ("trainingDataConfig",
+          (Option.map x.trainingDataConfig ~f:TrainingDataConfig.to_value));
+        ("autoTrainingConfig",
+          (Option.map x.autoTrainingConfig ~f:AutoTrainingConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let autoTrainingConfig =
+        (Option.map ~f:AutoTrainingConfig.of_xml)
+          (Xml.child xml_arg0 "autoTrainingConfig") in
+      let trainingDataConfig =
+        (Option.map ~f:TrainingDataConfig.of_xml)
+          (Xml.child xml_arg0 "trainingDataConfig") in
       let optimizationObjective =
         (Option.map ~f:OptimizationObjective.of_xml)
           (Xml.child xml_arg0 "optimizationObjective") in
+      let eventsConfig =
+        (Option.map ~f:EventsConfig.of_xml)
+          (Xml.child xml_arg0 "eventsConfig") in
       let autoMLConfig =
         (Option.map ~f:AutoMLConfig.of_xml)
           (Xml.child xml_arg0 "autoMLConfig") in
@@ -2602,25 +3641,31 @@ module SolutionConfig =
       let eventValueThreshold =
         (Option.map ~f:EventValueThreshold.of_xml)
           (Xml.child xml_arg0 "eventValueThreshold") in
-      make ?optimizationObjective ?autoMLConfig
-        ?featureTransformationParameters ?algorithmHyperParameters ?hpoConfig
-        ?eventValueThreshold ()
+      make ?autoTrainingConfig ?trainingDataConfig ?optimizationObjective
+        ?eventsConfig ?autoMLConfig ?featureTransformationParameters
+        ?algorithmHyperParameters ?hpoConfig ?eventValueThreshold ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let autoTrainingConfig =
+        field_map json__ "autoTrainingConfig" AutoTrainingConfig.of_json in
+      let trainingDataConfig =
+        field_map json__ "trainingDataConfig" TrainingDataConfig.of_json in
       let optimizationObjective =
-        field_map json "optimizationObjective" OptimizationObjective.of_json in
-      let autoMLConfig = field_map json "autoMLConfig" AutoMLConfig.of_json in
+        field_map json__ "optimizationObjective"
+          OptimizationObjective.of_json in
+      let eventsConfig = field_map json__ "eventsConfig" EventsConfig.of_json in
+      let autoMLConfig = field_map json__ "autoMLConfig" AutoMLConfig.of_json in
       let featureTransformationParameters =
-        field_map json "featureTransformationParameters"
+        field_map json__ "featureTransformationParameters"
           FeatureTransformationParameters.of_json in
       let algorithmHyperParameters =
-        field_map json "algorithmHyperParameters" HyperParameters.of_json in
-      let hpoConfig = field_map json "hpoConfig" HPOConfig.of_json in
+        field_map json__ "algorithmHyperParameters" HyperParameters.of_json in
+      let hpoConfig = field_map json__ "hpoConfig" HPOConfig.of_json in
       let eventValueThreshold =
-        field_map json "eventValueThreshold" EventValueThreshold.of_json in
-      make ?optimizationObjective ?autoMLConfig
-        ?featureTransformationParameters ?algorithmHyperParameters ?hpoConfig
-        ?eventValueThreshold ()
+        field_map json__ "eventValueThreshold" EventValueThreshold.of_json in
+      make ?autoTrainingConfig ?trainingDataConfig ?optimizationObjective
+        ?eventsConfig ?autoMLConfig ?featureTransformationParameters
+        ?algorithmHyperParameters ?hpoConfig ?eventValueThreshold ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the configuration properties for the solution."]
 module TrainingHours =
@@ -2635,25 +3680,6 @@ module TrainingHours =
     let of_xml xml_arg0 =
       Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
     let of_json j = float_of_json ~kind:"a double" j
-    let to_json = simple_to_json to_value
-  end
-module TrainingMode =
-  struct
-    type nonrec t =
-      | FULL 
-      | UPDATE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | FULL -> "FULL" | UPDATE -> "UPDATE" | Non_static_id s -> s
-    let of_string =
-      function | "FULL" -> FULL | "UPDATE" -> UPDATE | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration TrainingMode" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"TrainingMode" j)
     let to_json = simple_to_json to_value
   end
 module TunedHPOParams =
@@ -2676,9 +3702,9 @@ module TunedHPOParams =
           (Xml.child xml_arg0 "algorithmHyperParameters") in
       make ?algorithmHyperParameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let algorithmHyperParameters =
-        field_map json "algorithmHyperParameters" HyperParameters.of_json in
+        field_map json__ "algorithmHyperParameters" HyperParameters.of_json in
       make ?algorithmHyperParameters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2699,18 +3725,121 @@ module AutoMLResult =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "bestRecipeArn") in
       make ?bestRecipeArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bestRecipeArn = field_map json "bestRecipeArn" Arn.of_json in
+    let of_json json__ =
+      let bestRecipeArn = field_map json__ "bestRecipeArn" Arn.of_json in
       make ?bestRecipeArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "When the solution performs AutoML (performAutoML is true in CreateSolution), specifies the recipe that best optimized the specified metric."]
+module SolutionUpdateSummary =
+  struct
+    type nonrec t =
+      {
+      solutionUpdateConfig: SolutionUpdateConfig.t option
+        [@ocaml.doc "The configuration details of the solution."];
+      status: Status.t option
+        [@ocaml.doc
+          "The status of the solution update. A solution update can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED"];
+      performAutoTraining: PerformAutoTraining.t option
+        [@ocaml.doc
+          "Whether the solution automatically creates solution versions."];
+      performIncrementalUpdate: PerformIncrementalUpdate.t option
+        [@ocaml.doc
+          "A Boolean value that indicates whether incremental training updates are performed on the model. When enabled, this allows the model to learn from new data more frequently without requiring full retraining, which enables near real-time personalization. This parameter is supported only for solutions that use the semantic-similarity recipe."];
+      creationDateTime: Date.t option
+        [@ocaml.doc
+          "The date and time (in Unix format) that the solution update was created."];
+      lastUpdatedDateTime: Date.t option
+        [@ocaml.doc
+          "The date and time (in Unix time) that the solution update was last updated."];
+      failureReason: FailureReason.t option
+        [@ocaml.doc
+          "If a solution update fails, the reason behind the failure."]}
+    let make ?solutionUpdateConfig =
+      fun ?status ->
+        fun ?performAutoTraining ->
+          fun ?performIncrementalUpdate ->
+            fun ?creationDateTime ->
+              fun ?lastUpdatedDateTime ->
+                fun ?failureReason ->
+                  fun () ->
+                    {
+                      solutionUpdateConfig;
+                      status;
+                      performAutoTraining;
+                      performIncrementalUpdate;
+                      creationDateTime;
+                      lastUpdatedDateTime;
+                      failureReason
+                    }
+    let to_value x =
+      structure_to_value
+        [("solutionUpdateConfig",
+           (Option.map x.solutionUpdateConfig
+              ~f:SolutionUpdateConfig.to_value));
+        ("status", (Option.map x.status ~f:Status.to_value));
+        ("performAutoTraining",
+          (Option.map x.performAutoTraining ~f:PerformAutoTraining.to_value));
+        ("performIncrementalUpdate",
+          (Option.map x.performIncrementalUpdate
+             ~f:PerformIncrementalUpdate.to_value));
+        ("creationDateTime",
+          (Option.map x.creationDateTime ~f:Date.to_value));
+        ("lastUpdatedDateTime",
+          (Option.map x.lastUpdatedDateTime ~f:Date.to_value));
+        ("failureReason",
+          (Option.map x.failureReason ~f:FailureReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureReason =
+        (Option.map ~f:FailureReason.of_xml)
+          (Xml.child xml_arg0 "failureReason") in
+      let lastUpdatedDateTime =
+        (Option.map ~f:Date.of_xml)
+          (Xml.child xml_arg0 "lastUpdatedDateTime") in
+      let creationDateTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "creationDateTime") in
+      let performIncrementalUpdate =
+        (Option.map ~f:PerformIncrementalUpdate.of_xml)
+          (Xml.child xml_arg0 "performIncrementalUpdate") in
+      let performAutoTraining =
+        (Option.map ~f:PerformAutoTraining.of_xml)
+          (Xml.child xml_arg0 "performAutoTraining") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
+      let solutionUpdateConfig =
+        (Option.map ~f:SolutionUpdateConfig.of_xml)
+          (Xml.child xml_arg0 "solutionUpdateConfig") in
+      make ?failureReason ?lastUpdatedDateTime ?creationDateTime
+        ?performIncrementalUpdate ?performAutoTraining ?status
+        ?solutionUpdateConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureReason =
+        field_map json__ "failureReason" FailureReason.of_json in
+      let lastUpdatedDateTime =
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let performIncrementalUpdate =
+        field_map json__ "performIncrementalUpdate"
+          PerformIncrementalUpdate.of_json in
+      let performAutoTraining =
+        field_map json__ "performAutoTraining" PerformAutoTraining.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let solutionUpdateConfig =
+        field_map json__ "solutionUpdateConfig" SolutionUpdateConfig.of_json in
+      make ?failureReason ?lastUpdatedDateTime ?creationDateTime
+        ?performIncrementalUpdate ?performAutoTraining ?status
+        ?solutionUpdateConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a summary of the properties of a solution update. For a complete listing, call the DescribeSolution API."]
 module AvroSchema =
   struct
     type nonrec t = string
     let context_ = "AvroSchema"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:10000); i
+      let open Result in ok_or_failwith (check_string_max i ~max:20000); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -2718,6 +3847,37 @@ module AvroSchema =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"AvroSchema" j
     let to_json = simple_to_json to_value
+  end
+module Metrics =
+  struct
+    type nonrec t = (MetricName.t * MetricValue.t) list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((MetricName.of_string chopped),
+                              (MetricValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (MetricName.to_value x) |>
+                    (fun x -> (MetricValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:MetricName.of_string
+        ~of_json:MetricValue.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module RecommenderUpdateSummary =
   struct
@@ -2733,7 +3893,7 @@ module RecommenderUpdateSummary =
           "The date and time (in Unix time) that the recommender update was last updated."];
       status: Status.t option
         [@ocaml.doc
-          "The status of the recommender update. A recommender can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS"];
+          "The status of the recommender update. A recommender update can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED"];
       failureReason: FailureReason.t option
         [@ocaml.doc
           "If a recommender update fails, the reason behind the failure."]}
@@ -2779,15 +3939,15 @@ module RecommenderUpdateSummary =
       make ?failureReason ?status ?lastUpdatedDateTime ?creationDateTime
         ?recommenderConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
-      let status = field_map json "status" Status.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
+      let status = field_map json__ "status" Status.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
       let recommenderConfig =
-        field_map json "recommenderConfig" RecommenderConfig.of_json in
+        field_map json__ "recommenderConfig" RecommenderConfig.of_json in
       make ?failureReason ?status ?lastUpdatedDateTime ?creationDateTime
         ?recommenderConfig ()
     let to_json v = composed_to_json to_value v
@@ -2820,6 +3980,39 @@ module RecipeType =
     let of_json j = string_of_json ~kind:"RecipeType" j
     let to_json = simple_to_json to_value
   end
+module MetricAttributionOutput =
+  struct
+    type nonrec t =
+      {
+      s3DataDestination: S3DataConfig.t option ;
+      roleArn: RoleArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM service role that has permissions to add data to your output Amazon S3 bucket and add metrics to Amazon CloudWatch. For more information, see Measuring impact of recommendations."]}
+    let context_ = "MetricAttributionOutput"
+    let make ?s3DataDestination =
+      fun ~roleArn -> fun () -> { s3DataDestination; roleArn }
+    let to_value x =
+      structure_to_value
+        [("s3DataDestination",
+           (Option.map x.s3DataDestination ~f:S3DataConfig.to_value));
+        ("roleArn", (Some (RoleArn.to_value x.roleArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let roleArn =
+        RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+      let s3DataDestination =
+        (Option.map ~f:S3DataConfig.of_xml)
+          (Xml.child xml_arg0 "s3DataDestination") in
+      make ~roleArn ?s3DataDestination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "roleArn" RoleArn.of_json in
+      let s3DataDestination =
+        field_map json__ "s3DataDestination" S3DataConfig.of_json in
+      make ~roleArn ?s3DataDestination ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The output configuration details for a metric attribution."]
 module FilterExpression =
   struct
     type nonrec t = string
@@ -2861,6 +4054,8 @@ module FeaturizationParameters =
                        (ParameterValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2896,13 +4091,82 @@ module TrackingId =
     let of_json j = string_of_json ~kind:"TrackingId" j
     let to_json = simple_to_json to_value
   end
+module DatasetUpdateSummary =
+  struct
+    type nonrec t =
+      {
+      schemaArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the schema that replaced the previous schema of the dataset."];
+      status: Status.t option
+        [@ocaml.doc "The status of the dataset update."];
+      failureReason: FailureReason.t option
+        [@ocaml.doc "If updating a dataset fails, provides the reason why."];
+      creationDateTime: Date.t option
+        [@ocaml.doc
+          "The creation date and time (in Unix time) of the dataset update."];
+      lastUpdatedDateTime: Date.t option
+        [@ocaml.doc
+          "The last update date and time (in Unix time) of the dataset."]}
+    let make ?schemaArn =
+      fun ?status ->
+        fun ?failureReason ->
+          fun ?creationDateTime ->
+            fun ?lastUpdatedDateTime ->
+              fun () ->
+                {
+                  schemaArn;
+                  status;
+                  failureReason;
+                  creationDateTime;
+                  lastUpdatedDateTime
+                }
+    let to_value x =
+      structure_to_value
+        [("schemaArn", (Option.map x.schemaArn ~f:Arn.to_value));
+        ("status", (Option.map x.status ~f:Status.to_value));
+        ("failureReason",
+          (Option.map x.failureReason ~f:FailureReason.to_value));
+        ("creationDateTime",
+          (Option.map x.creationDateTime ~f:Date.to_value));
+        ("lastUpdatedDateTime",
+          (Option.map x.lastUpdatedDateTime ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedDateTime =
+        (Option.map ~f:Date.of_xml)
+          (Xml.child xml_arg0 "lastUpdatedDateTime") in
+      let creationDateTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "creationDateTime") in
+      let failureReason =
+        (Option.map ~f:FailureReason.of_xml)
+          (Xml.child xml_arg0 "failureReason") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
+      let schemaArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "schemaArn") in
+      make ?lastUpdatedDateTime ?creationDateTime ?failureReason ?status
+        ?schemaArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedDateTime =
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let failureReason =
+        field_map json__ "failureReason" FailureReason.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let schemaArn = field_map json__ "schemaArn" Arn.of_json in
+      make ?lastUpdatedDateTime ?creationDateTime ?failureReason ?status
+        ?schemaArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an update to a dataset."]
 module DataSource =
   struct
     type nonrec t =
       {
       dataLocation: S3Location.t option
         [@ocaml.doc
-          "The path to the Amazon S3 bucket where the data that you want to upload to your dataset is stored. For example: s3://bucket-name/folder-name/"]}
+          "For dataset import jobs, the path to the Amazon S3 bucket where the data that you want to upload to your dataset is stored. For data deletion jobs, the path to the Amazon S3 bucket that stores the list of records to delete. For example: s3://bucket-name/folder-name/fileName.csv If your CSV files are in a folder in your Amazon S3 bucket and you want your import job or data deletion job to consider multiple files, you can specify the path to the folder. With a data deletion job, Amazon Personalize uses all files in the folder and any sub folder. Use the following syntax with a / after the folder name: s3://bucket-name/folder-name/"]}
     let make ?dataLocation = fun () -> { dataLocation }
     let to_value x =
       structure_to_value
@@ -2913,32 +4177,12 @@ module DataSource =
         (Option.map ~f:S3Location.of_xml) (Xml.child xml_arg0 "dataLocation") in
       make ?dataLocation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataLocation = field_map json "dataLocation" S3Location.of_json in
+    let of_json json__ =
+      let dataLocation = field_map json__ "dataLocation" S3Location.of_json in
       make ?dataLocation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the data source that contains the data to upload to a dataset."]
-module RoleArn =
-  struct
-    type nonrec t = string
-    let context_ = "RoleArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () ->
-                check_pattern i
-                  ~pattern:"arn:([a-z\\d-]+):iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RoleArn" j
-    let to_json = simple_to_json to_value
-  end
+       "Describes the data source that contains the data to upload to a dataset, or the list of records to delete from Amazon Personalize."]
 module DatasetExportJobOutput =
   struct
     type nonrec t = {
@@ -2956,9 +4200,9 @@ module DatasetExportJobOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "s3DataDestination") in
       make ~s3DataDestination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3DataDestination =
-        field_map_exn json "s3DataDestination" S3DataConfig.of_json in
+        field_map_exn json__ "s3DataDestination" S3DataConfig.of_json in
       make ~s3DataDestination ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2989,6 +4233,19 @@ module IngestionMode =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration IngestionMode" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"IngestionMode" j)
+    let to_json = simple_to_json to_value
+  end
+module Integer =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module CampaignUpdateSummary =
@@ -3069,19 +4326,19 @@ module CampaignUpdateSummary =
       make ?lastUpdatedDateTime ?creationDateTime ?failureReason ?status
         ?campaignConfig ?minProvisionedTPS ?solutionVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
-      let status = field_map json "status" Status.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
+      let status = field_map json__ "status" Status.of_json in
       let campaignConfig =
-        field_map json "campaignConfig" CampaignConfig.of_json in
+        field_map json__ "campaignConfig" CampaignConfig.of_json in
       let minProvisionedTPS =
-        field_map json "minProvisionedTPS" TransactionsPerSecond.of_json in
+        field_map json__ "minProvisionedTPS" TransactionsPerSecond.of_json in
       let solutionVersionArn =
-        field_map json "solutionVersionArn" Arn.of_json in
+        field_map json__ "solutionVersionArn" Arn.of_json in
       make ?lastUpdatedDateTime ?creationDateTime ?failureReason ?status
         ?campaignConfig ?minProvisionedTPS ?solutionVersionArn ()
     let to_json v = composed_to_json to_value v
@@ -3103,9 +4360,9 @@ module BatchSegmentJobInput =
           (Xml.child_exn ~context:context_ xml_arg0 "s3DataSource") in
       make ~s3DataSource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3DataSource =
-        field_map_exn json "s3DataSource" S3DataConfig.of_json in
+        field_map_exn json__ "s3DataSource" S3DataConfig.of_json in
       make ~s3DataSource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input configuration of a batch segment job."]
@@ -3126,9 +4383,9 @@ module BatchSegmentJobOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "s3DataDestination") in
       make ~s3DataDestination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3DataDestination =
-        field_map_exn json "s3DataDestination" S3DataConfig.of_json in
+        field_map_exn json__ "s3DataDestination" S3DataConfig.of_json in
       make ~s3DataDestination ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3153,23 +4410,35 @@ module BatchInferenceJobConfig =
       {
       itemExplorationConfig: HyperParameters.t option
         [@ocaml.doc
-          "A string to string map specifying the exploration configuration hyperparameters, including explorationWeight and explorationItemAgeCutOff, you want to use to configure the amount of item exploration Amazon Personalize uses when recommending items. See User-Personalization."]}
-    let make ?itemExplorationConfig = fun () -> { itemExplorationConfig }
+          "A string to string map specifying the exploration configuration hyperparameters, including explorationWeight and explorationItemAgeCutOff, you want to use to configure the amount of item exploration Amazon Personalize uses when recommending items. See User-Personalization."];
+      rankingInfluence: RankingInfluence.t option
+        [@ocaml.doc
+          "A map of ranking influence values for POPULARITY and FRESHNESS. For each key, specify a numerical value between 0.0 and 1.0 that determines how much influence that ranking factor has on the final recommendations. A value closer to 1.0 gives more weight to the factor, while a value closer to 0.0 reduces its influence."]}
+    let make ?itemExplorationConfig =
+      fun ?rankingInfluence ->
+        fun () -> { itemExplorationConfig; rankingInfluence }
     let to_value x =
       structure_to_value
         [("itemExplorationConfig",
-           (Option.map x.itemExplorationConfig ~f:HyperParameters.to_value))]
+           (Option.map x.itemExplorationConfig ~f:HyperParameters.to_value));
+        ("rankingInfluence",
+          (Option.map x.rankingInfluence ~f:RankingInfluence.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let rankingInfluence =
+        (Option.map ~f:RankingInfluence.of_xml)
+          (Xml.child xml_arg0 "rankingInfluence") in
       let itemExplorationConfig =
         (Option.map ~f:HyperParameters.of_xml)
           (Xml.child xml_arg0 "itemExplorationConfig") in
-      make ?itemExplorationConfig ()
+      make ?rankingInfluence ?itemExplorationConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let rankingInfluence =
+        field_map json__ "rankingInfluence" RankingInfluence.of_json in
       let itemExplorationConfig =
-        field_map json "itemExplorationConfig" HyperParameters.of_json in
-      make ?itemExplorationConfig ()
+        field_map json__ "itemExplorationConfig" HyperParameters.of_json in
+      make ?rankingInfluence ?itemExplorationConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration details of a batch inference job."]
 module BatchInferenceJobInput =
@@ -3191,9 +4460,9 @@ module BatchInferenceJobInput =
           (Xml.child_exn ~context:context_ xml_arg0 "s3DataSource") in
       make ~s3DataSource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3DataSource =
-        field_map_exn json "s3DataSource" S3DataConfig.of_json in
+        field_map_exn json__ "s3DataSource" S3DataConfig.of_json in
       make ~s3DataSource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input configuration of a batch inference job."]
@@ -3217,39 +4486,68 @@ module BatchInferenceJobOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "s3DataDestination") in
       make ~s3DataDestination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3DataDestination =
-        field_map_exn json "s3DataDestination" S3DataConfig.of_json in
+        field_map_exn json__ "s3DataDestination" S3DataConfig.of_json in
       make ~s3DataDestination ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The output configuration parameters of a batch inference job."]
+module ThemeGenerationConfig =
+  struct
+    type nonrec t =
+      {
+      fieldsForThemeGeneration: FieldsForThemeGeneration.t
+        [@ocaml.doc
+          "Fields used to generate descriptive themes for a batch inference job."]}
+    let context_ = "ThemeGenerationConfig"
+    let make ~fieldsForThemeGeneration =
+      fun () -> { fieldsForThemeGeneration }
+    let to_value x =
+      structure_to_value
+        [("fieldsForThemeGeneration",
+           (Some
+              (FieldsForThemeGeneration.to_value x.fieldsForThemeGeneration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fieldsForThemeGeneration =
+        FieldsForThemeGeneration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "fieldsForThemeGeneration") in
+      make ~fieldsForThemeGeneration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fieldsForThemeGeneration =
+        field_map_exn json__ "fieldsForThemeGeneration"
+          FieldsForThemeGeneration.of_json in
+      make ~fieldsForThemeGeneration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration details for generating themes with a batch inference job."]
 module AlgorithmImage =
   struct
     type nonrec t =
       {
       name: Name.t option [@ocaml.doc "The name of the algorithm image."];
-      dockerURI: DockerURI.t
+      dockerURI: DockerURI.t option
         [@ocaml.doc
           "The URI of the Docker container for the algorithm image."]}
-    let context_ = "AlgorithmImage"
-    let make ?name = fun ~dockerURI -> fun () -> { name; dockerURI }
+    let make ?name = fun ?dockerURI -> fun () -> { name; dockerURI }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:Name.to_value));
-        ("dockerURI", (Some (DockerURI.to_value x.dockerURI)))]
+        ("dockerURI", (Option.map x.dockerURI ~f:DockerURI.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let dockerURI =
-        DockerURI.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "dockerURI") in
+        (Option.map ~f:DockerURI.of_xml) (Xml.child xml_arg0 "dockerURI") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
-      make ~dockerURI ?name ()
+      make ?dockerURI ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dockerURI = field_map_exn json "dockerURI" DockerURI.of_json in
-      let name = field_map json "name" Name.of_json in
-      make ~dockerURI ?name ()
+    let of_json json__ =
+      let dockerURI = field_map json__ "dockerURI" DockerURI.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      make ?dockerURI ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an algorithm image."]
 module DefaultHyperParameterRanges =
@@ -3302,15 +4600,15 @@ module DefaultHyperParameterRanges =
       make ?categoricalHyperParameterRanges ?continuousHyperParameterRanges
         ?integerHyperParameterRanges ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let categoricalHyperParameterRanges =
-        field_map json "categoricalHyperParameterRanges"
+        field_map json__ "categoricalHyperParameterRanges"
           DefaultCategoricalHyperParameterRanges.of_json in
       let continuousHyperParameterRanges =
-        field_map json "continuousHyperParameterRanges"
+        field_map json__ "continuousHyperParameterRanges"
           DefaultContinuousHyperParameterRanges.of_json in
       let integerHyperParameterRanges =
-        field_map json "integerHyperParameterRanges"
+        field_map json__ "integerHyperParameterRanges"
           DefaultIntegerHyperParameterRanges.of_json in
       make ?categoricalHyperParameterRanges ?continuousHyperParameterRanges
         ?integerHyperParameterRanges ()
@@ -3340,6 +4638,8 @@ module ResourceConfig =
                        (ParameterValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3375,11 +4675,31 @@ module InvalidInputException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provide a valid value for the field or parameter."]
+module LimitExceededException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The limit on the number of requests per second has been exceeded."]
 module ResourceInUseException =
   struct
     type nonrec t = {
@@ -3394,8 +4714,8 @@ module ResourceInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource is in use."]
@@ -3413,11 +4733,88 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Could not find the specified resource."]
+module ResourceAlreadyExistsException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified resource already exists."]
+module MetricAttributes =
+  struct
+    type nonrec t = MetricAttribute.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricAttribute.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricAttribute.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricAttributes" ~of_json:MetricAttribute.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricAttributesNamesList =
+  struct
+    type nonrec t = MetricName.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricAttributesNamesList"
+        ~of_json:MetricName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TooManyTagKeysException =
   struct
     type nonrec t = {
@@ -3432,8 +4829,8 @@ module TooManyTagKeysException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3447,6 +4844,9 @@ module TagKeys =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3466,26 +4866,6 @@ module TagKeys =
     let of_json j = list_of_json ~kind:"TagKeys" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
-module LimitExceededException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The limit on the number of requests per second has been exceeded."]
 module TooManyTagsException =
   struct
     type nonrec t = {
@@ -3500,8 +4880,8 @@ module TooManyTagsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3515,6 +4895,9 @@ module Tags =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3548,8 +4931,8 @@ module InvalidNextTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The token is not valid."]
@@ -3558,7 +4941,11 @@ module NextToken =
     type nonrec t = string
     let context_ = "NextToken"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:1500); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1500) >>=
+             (fun () -> check_pattern i ~pattern:"\\p{ASCII}{0,1500}"));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -3572,6 +4959,9 @@ module Solutions =
     type nonrec t = SolutionSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SolutionSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3615,6 +5005,9 @@ module SolutionVersions =
     type nonrec t = SolutionVersionSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SolutionVersionSummary.to_value)) |>
         (fun x -> `List x)
@@ -3642,6 +5035,9 @@ module Schemas =
     type nonrec t = DatasetSchemaSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatasetSchemaSummary.to_value)) |>
         (fun x -> `List x)
@@ -3668,6 +5064,9 @@ module Recommenders =
     type nonrec t = RecommenderSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecommenderSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3693,6 +5092,9 @@ module Recipes =
     type nonrec t = RecipeSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecipeSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3729,11 +5131,44 @@ module RecipeProvider =
     let of_json j = of_string (string_of_json ~kind:"RecipeProvider" j)
     let to_json = simple_to_json to_value
   end
+module MetricAttributions =
+  struct
+    type nonrec t = MetricAttributionSummary.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricAttributionSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricAttributionSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricAttributions"
+        ~of_json:MetricAttributionSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Filters =
   struct
     type nonrec t = FilterSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3759,6 +5194,9 @@ module EventTrackers =
     type nonrec t = EventTrackerSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventTrackerSummary.to_value)) |>
         (fun x -> `List x)
@@ -3786,6 +5224,9 @@ module Datasets =
     type nonrec t = DatasetSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatasetSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3811,6 +5252,9 @@ module DatasetImportJobs =
     type nonrec t = DatasetImportJobSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatasetImportJobSummary.to_value)) |>
         (fun x -> `List x)
@@ -3838,6 +5282,9 @@ module DatasetGroups =
     type nonrec t = DatasetGroupSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatasetGroupSummary.to_value)) |>
         (fun x -> `List x)
@@ -3865,6 +5312,9 @@ module DatasetExportJobs =
     type nonrec t = DatasetExportJobSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DatasetExportJobSummary.to_value)) |>
         (fun x -> `List x)
@@ -3887,11 +5337,44 @@ module DatasetExportJobs =
         ~of_json:DatasetExportJobSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DataDeletionJobs =
+  struct
+    type nonrec t = DataDeletionJobSummary.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataDeletionJobSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataDeletionJobSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataDeletionJobs"
+        ~of_json:DataDeletionJobSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Campaigns =
   struct
     type nonrec t = CampaignSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CampaignSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3917,6 +5400,9 @@ module BatchSegmentJobs =
     type nonrec t = BatchSegmentJobSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchSegmentJobSummary.to_value)) |>
         (fun x -> `List x)
@@ -3944,6 +5430,9 @@ module BatchInferenceJobs =
     type nonrec t = BatchInferenceJobSummary.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchInferenceJobSummary.to_value)) |>
         (fun x -> `List x)
@@ -3966,39 +5455,11 @@ module BatchInferenceJobs =
         ~of_json:BatchInferenceJobSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Metrics =
-  struct
-    type nonrec t = (MetricName.t * MetricValue.t) list
-    let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:100); i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((MetricName.of_string chopped),
-                              (MetricValue.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (MetricName.to_value x) |>
-                    (fun x -> (MetricValue.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:MetricName.of_string
-        ~of_json:MetricValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module SolutionVersion =
   struct
     type nonrec t =
       {
+      name: Name.t option [@ocaml.doc "The name of the solution version."];
       solutionVersionArn: Arn.t option
         [@ocaml.doc "The ARN of the solution version."];
       solutionArn: Arn.t option [@ocaml.doc "The ARN of the solution."];
@@ -4008,6 +5469,9 @@ module SolutionVersion =
       performAutoML: PerformAutoML.t option
         [@ocaml.doc
           "When true, Amazon Personalize searches for the most optimal recipe according to the solution configuration. When false (the default), Amazon Personalize uses recipeArn."];
+      performIncrementalUpdate: PerformIncrementalUpdate.t option
+        [@ocaml.doc
+          "Whether the solution version should perform an incremental update. When set to true, the training will process only the data that has changed since the latest training, similar to when trainingMode is set to UPDATE. This can only be used with solution versions that use the User-Personalization recipe."];
       recipeArn: Arn.t option
         [@ocaml.doc "The ARN of the recipe used in the solution."];
       eventType: EventType.t option
@@ -4024,7 +5488,7 @@ module SolutionVersion =
           "The time used to train the model. You are billed for the time it takes to train a model. This field is visible only after Amazon Personalize successfully trains a model."];
       trainingMode: TrainingMode.t option
         [@ocaml.doc
-          "The scope of training to be performed when creating the solution version. The FULL option trains the solution version based on the entirety of the input solution's training data, while the UPDATE option processes only the data that has changed in comparison to the input solution. Choose UPDATE when you want to incrementally update your solution version instead of creating an entirely new one. The UPDATE option can only be used when you already have an active solution version created from the input solution using the FULL option and the input solution was trained with the User-Personalization recipe or the HRNN-Coldstart recipe."];
+          "The scope of training to be performed when creating the solution version. A FULL training considers all of the data in your dataset group. An UPDATE processes only the data that has changed since the latest training. Only solution versions created with the User-Personalization recipe can use UPDATE."];
       tunedHPOParams: TunedHPOParams.t option
         [@ocaml.doc
           "If hyperparameter optimization was performed, contains the hyperparameter values of the best performing model."];
@@ -4039,48 +5503,61 @@ module SolutionVersion =
           "The date and time (in Unix time) that this version of the solution was created."];
       lastUpdatedDateTime: Date.t option
         [@ocaml.doc
-          "The date and time (in Unix time) that the solution was last updated."]}
-    let make ?solutionVersionArn =
-      fun ?solutionArn ->
-        fun ?performHPO ->
-          fun ?performAutoML ->
-            fun ?recipeArn ->
-              fun ?eventType ->
-                fun ?datasetGroupArn ->
-                  fun ?solutionConfig ->
-                    fun ?trainingHours ->
-                      fun ?trainingMode ->
-                        fun ?tunedHPOParams ->
-                          fun ?status ->
-                            fun ?failureReason ->
-                              fun ?creationDateTime ->
-                                fun ?lastUpdatedDateTime ->
-                                  fun () ->
-                                    {
-                                      solutionVersionArn;
-                                      solutionArn;
-                                      performHPO;
-                                      performAutoML;
-                                      recipeArn;
-                                      eventType;
-                                      datasetGroupArn;
-                                      solutionConfig;
-                                      trainingHours;
-                                      trainingMode;
-                                      tunedHPOParams;
-                                      status;
-                                      failureReason;
-                                      creationDateTime;
-                                      lastUpdatedDateTime
-                                    }
+          "The date and time (in Unix time) that the solution was last updated."];
+      trainingType: TrainingType.t option
+        [@ocaml.doc
+          "Whether the solution version was created automatically or manually."]}
+    let make ?name =
+      fun ?solutionVersionArn ->
+        fun ?solutionArn ->
+          fun ?performHPO ->
+            fun ?performAutoML ->
+              fun ?performIncrementalUpdate ->
+                fun ?recipeArn ->
+                  fun ?eventType ->
+                    fun ?datasetGroupArn ->
+                      fun ?solutionConfig ->
+                        fun ?trainingHours ->
+                          fun ?trainingMode ->
+                            fun ?tunedHPOParams ->
+                              fun ?status ->
+                                fun ?failureReason ->
+                                  fun ?creationDateTime ->
+                                    fun ?lastUpdatedDateTime ->
+                                      fun ?trainingType ->
+                                        fun () ->
+                                          {
+                                            name;
+                                            solutionVersionArn;
+                                            solutionArn;
+                                            performHPO;
+                                            performAutoML;
+                                            performIncrementalUpdate;
+                                            recipeArn;
+                                            eventType;
+                                            datasetGroupArn;
+                                            solutionConfig;
+                                            trainingHours;
+                                            trainingMode;
+                                            tunedHPOParams;
+                                            status;
+                                            failureReason;
+                                            creationDateTime;
+                                            lastUpdatedDateTime;
+                                            trainingType
+                                          }
     let to_value x =
       structure_to_value
-        [("solutionVersionArn",
-           (Option.map x.solutionVersionArn ~f:Arn.to_value));
+        [("name", (Option.map x.name ~f:Name.to_value));
+        ("solutionVersionArn",
+          (Option.map x.solutionVersionArn ~f:Arn.to_value));
         ("solutionArn", (Option.map x.solutionArn ~f:Arn.to_value));
         ("performHPO", (Option.map x.performHPO ~f:PerformHPO.to_value));
         ("performAutoML",
           (Option.map x.performAutoML ~f:PerformAutoML.to_value));
+        ("performIncrementalUpdate",
+          (Option.map x.performIncrementalUpdate
+             ~f:PerformIncrementalUpdate.to_value));
         ("recipeArn", (Option.map x.recipeArn ~f:Arn.to_value));
         ("eventType", (Option.map x.eventType ~f:EventType.to_value));
         ("datasetGroupArn", (Option.map x.datasetGroupArn ~f:Arn.to_value));
@@ -4098,9 +5575,14 @@ module SolutionVersion =
         ("creationDateTime",
           (Option.map x.creationDateTime ~f:Date.to_value));
         ("lastUpdatedDateTime",
-          (Option.map x.lastUpdatedDateTime ~f:Date.to_value))]
+          (Option.map x.lastUpdatedDateTime ~f:Date.to_value));
+        ("trainingType",
+          (Option.map x.trainingType ~f:TrainingType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let trainingType =
+        (Option.map ~f:TrainingType.of_xml)
+          (Xml.child xml_arg0 "trainingType") in
       let lastUpdatedDateTime =
         (Option.map ~f:Date.of_xml)
           (Xml.child xml_arg0 "lastUpdatedDateTime") in
@@ -4129,6 +5611,9 @@ module SolutionVersion =
         (Option.map ~f:EventType.of_xml) (Xml.child xml_arg0 "eventType") in
       let recipeArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "recipeArn") in
+      let performIncrementalUpdate =
+        (Option.map ~f:PerformIncrementalUpdate.of_xml)
+          (Xml.child xml_arg0 "performIncrementalUpdate") in
       let performAutoML =
         (Option.map ~f:PerformAutoML.of_xml)
           (Xml.child xml_arg0 "performAutoML") in
@@ -4138,38 +5623,46 @@ module SolutionVersion =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionArn") in
       let solutionVersionArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionVersionArn") in
-      make ?lastUpdatedDateTime ?creationDateTime ?failureReason ?status
-        ?tunedHPOParams ?trainingMode ?trainingHours ?solutionConfig
-        ?datasetGroupArn ?eventType ?recipeArn ?performAutoML ?performHPO
-        ?solutionArn ?solutionVersionArn ()
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      make ?trainingType ?lastUpdatedDateTime ?creationDateTime
+        ?failureReason ?status ?tunedHPOParams ?trainingMode ?trainingHours
+        ?solutionConfig ?datasetGroupArn ?eventType ?recipeArn
+        ?performIncrementalUpdate ?performAutoML ?performHPO ?solutionArn
+        ?solutionVersionArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let trainingType = field_map json__ "trainingType" TrainingType.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
-      let status = field_map json "status" Status.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
+      let status = field_map json__ "status" Status.of_json in
       let tunedHPOParams =
-        field_map json "tunedHPOParams" TunedHPOParams.of_json in
-      let trainingMode = field_map json "trainingMode" TrainingMode.of_json in
+        field_map json__ "tunedHPOParams" TunedHPOParams.of_json in
+      let trainingMode = field_map json__ "trainingMode" TrainingMode.of_json in
       let trainingHours =
-        field_map json "trainingHours" TrainingHours.of_json in
+        field_map json__ "trainingHours" TrainingHours.of_json in
       let solutionConfig =
-        field_map json "solutionConfig" SolutionConfig.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
-      let eventType = field_map json "eventType" EventType.of_json in
-      let recipeArn = field_map json "recipeArn" Arn.of_json in
+        field_map json__ "solutionConfig" SolutionConfig.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
+      let eventType = field_map json__ "eventType" EventType.of_json in
+      let recipeArn = field_map json__ "recipeArn" Arn.of_json in
+      let performIncrementalUpdate =
+        field_map json__ "performIncrementalUpdate"
+          PerformIncrementalUpdate.of_json in
       let performAutoML =
-        field_map json "performAutoML" PerformAutoML.of_json in
-      let performHPO = field_map json "performHPO" PerformHPO.of_json in
-      let solutionArn = field_map json "solutionArn" Arn.of_json in
+        field_map json__ "performAutoML" PerformAutoML.of_json in
+      let performHPO = field_map json__ "performHPO" PerformHPO.of_json in
+      let solutionArn = field_map json__ "solutionArn" Arn.of_json in
       let solutionVersionArn =
-        field_map json "solutionVersionArn" Arn.of_json in
-      make ?lastUpdatedDateTime ?creationDateTime ?failureReason ?status
-        ?tunedHPOParams ?trainingMode ?trainingHours ?solutionConfig
-        ?datasetGroupArn ?eventType ?recipeArn ?performAutoML ?performHPO
-        ?solutionArn ?solutionVersionArn ()
+        field_map json__ "solutionVersionArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      make ?trainingType ?lastUpdatedDateTime ?creationDateTime
+        ?failureReason ?status ?tunedHPOParams ?trainingMode ?trainingHours
+        ?solutionConfig ?datasetGroupArn ?eventType ?recipeArn
+        ?performIncrementalUpdate ?performAutoML ?performHPO ?solutionArn
+        ?solutionVersionArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that provides information about a specific version of a Solution in a Custom dataset group."]
@@ -4184,9 +5677,16 @@ module Solution =
           "Whether to perform hyperparameter optimization (HPO) on the chosen recipe. The default is false."];
       performAutoML: PerformAutoML.t option
         [@ocaml.doc
-          "When true, Amazon Personalize performs a search for the best USER_PERSONALIZATION recipe from the list specified in the solution configuration (recipeArn must not be specified). When false (the default), Amazon Personalize uses recipeArn for training."];
+          "We don't recommend enabling automated machine learning. Instead, match your use case to the available Amazon Personalize recipes. For more information, see Determining your use case. When true, Amazon Personalize performs a search for the best USER_PERSONALIZATION recipe from the list specified in the solution configuration (recipeArn must not be specified). When false (the default), Amazon Personalize uses recipeArn for training."];
+      performAutoTraining: PerformAutoTraining.t option
+        [@ocaml.doc
+          "Specifies whether the solution automatically creates solution versions. The default is True and the solution automatically creates new solution versions every 7 days. For more information about auto training, see Creating and configuring a solution."];
+      performIncrementalUpdate: PerformIncrementalUpdate.t option
+        [@ocaml.doc
+          "A Boolean value that indicates whether incremental training updates are performed on the model. When enabled, this allows the model to learn from new data more frequently without requiring full retraining, which enables near real-time personalization. This parameter is supported only for solutions that use the semantic-similarity recipe"];
       recipeArn: Arn.t option
-        [@ocaml.doc "The ARN of the recipe used to create the solution."];
+        [@ocaml.doc
+          "The ARN of the recipe used to create the solution. This is required when performAutoML is false."];
       datasetGroupArn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the dataset group that provides the training data."];
@@ -4210,36 +5710,45 @@ module Solution =
           "The date and time (in Unix time) that the solution was last updated."];
       latestSolutionVersion: SolutionVersionSummary.t option
         [@ocaml.doc
-          "Describes the latest version of the solution, including the status and the ARN."]}
+          "Describes the latest version of the solution, including the status and the ARN."];
+      latestSolutionUpdate: SolutionUpdateSummary.t option
+        [@ocaml.doc
+          "Provides a summary of the latest updates to the solution."]}
     let make ?name =
       fun ?solutionArn ->
         fun ?performHPO ->
           fun ?performAutoML ->
-            fun ?recipeArn ->
-              fun ?datasetGroupArn ->
-                fun ?eventType ->
-                  fun ?solutionConfig ->
-                    fun ?autoMLResult ->
-                      fun ?status ->
-                        fun ?creationDateTime ->
-                          fun ?lastUpdatedDateTime ->
-                            fun ?latestSolutionVersion ->
-                              fun () ->
-                                {
-                                  name;
-                                  solutionArn;
-                                  performHPO;
-                                  performAutoML;
-                                  recipeArn;
-                                  datasetGroupArn;
-                                  eventType;
-                                  solutionConfig;
-                                  autoMLResult;
-                                  status;
-                                  creationDateTime;
-                                  lastUpdatedDateTime;
-                                  latestSolutionVersion
-                                }
+            fun ?performAutoTraining ->
+              fun ?performIncrementalUpdate ->
+                fun ?recipeArn ->
+                  fun ?datasetGroupArn ->
+                    fun ?eventType ->
+                      fun ?solutionConfig ->
+                        fun ?autoMLResult ->
+                          fun ?status ->
+                            fun ?creationDateTime ->
+                              fun ?lastUpdatedDateTime ->
+                                fun ?latestSolutionVersion ->
+                                  fun ?latestSolutionUpdate ->
+                                    fun () ->
+                                      {
+                                        name;
+                                        solutionArn;
+                                        performHPO;
+                                        performAutoML;
+                                        performAutoTraining;
+                                        performIncrementalUpdate;
+                                        recipeArn;
+                                        datasetGroupArn;
+                                        eventType;
+                                        solutionConfig;
+                                        autoMLResult;
+                                        status;
+                                        creationDateTime;
+                                        lastUpdatedDateTime;
+                                        latestSolutionVersion;
+                                        latestSolutionUpdate
+                                      }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:Name.to_value));
@@ -4247,6 +5756,11 @@ module Solution =
         ("performHPO", (Option.map x.performHPO ~f:PerformHPO.to_value));
         ("performAutoML",
           (Option.map x.performAutoML ~f:PerformAutoML.to_value));
+        ("performAutoTraining",
+          (Option.map x.performAutoTraining ~f:PerformAutoTraining.to_value));
+        ("performIncrementalUpdate",
+          (Option.map x.performIncrementalUpdate
+             ~f:PerformIncrementalUpdate.to_value));
         ("recipeArn", (Option.map x.recipeArn ~f:Arn.to_value));
         ("datasetGroupArn", (Option.map x.datasetGroupArn ~f:Arn.to_value));
         ("eventType", (Option.map x.eventType ~f:EventType.to_value));
@@ -4261,9 +5775,15 @@ module Solution =
           (Option.map x.lastUpdatedDateTime ~f:Date.to_value));
         ("latestSolutionVersion",
           (Option.map x.latestSolutionVersion
-             ~f:SolutionVersionSummary.to_value))]
+             ~f:SolutionVersionSummary.to_value));
+        ("latestSolutionUpdate",
+          (Option.map x.latestSolutionUpdate
+             ~f:SolutionUpdateSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let latestSolutionUpdate =
+        (Option.map ~f:SolutionUpdateSummary.of_xml)
+          (Xml.child xml_arg0 "latestSolutionUpdate") in
       let latestSolutionVersion =
         (Option.map ~f:SolutionVersionSummary.of_xml)
           (Xml.child xml_arg0 "latestSolutionVersion") in
@@ -4286,6 +5806,12 @@ module Solution =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetGroupArn") in
       let recipeArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "recipeArn") in
+      let performIncrementalUpdate =
+        (Option.map ~f:PerformIncrementalUpdate.of_xml)
+          (Xml.child xml_arg0 "performIncrementalUpdate") in
+      let performAutoTraining =
+        (Option.map ~f:PerformAutoTraining.of_xml)
+          (Xml.child xml_arg0 "performAutoTraining") in
       let performAutoML =
         (Option.map ~f:PerformAutoML.of_xml)
           (Xml.child xml_arg0 "performAutoML") in
@@ -4294,34 +5820,44 @@ module Solution =
       let solutionArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionArn") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
-      make ?latestSolutionVersion ?lastUpdatedDateTime ?creationDateTime
-        ?status ?autoMLResult ?solutionConfig ?eventType ?datasetGroupArn
-        ?recipeArn ?performAutoML ?performHPO ?solutionArn ?name ()
+      make ?latestSolutionUpdate ?latestSolutionVersion ?lastUpdatedDateTime
+        ?creationDateTime ?status ?autoMLResult ?solutionConfig ?eventType
+        ?datasetGroupArn ?recipeArn ?performIncrementalUpdate
+        ?performAutoTraining ?performAutoML ?performHPO ?solutionArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let latestSolutionUpdate =
+        field_map json__ "latestSolutionUpdate" SolutionUpdateSummary.of_json in
       let latestSolutionVersion =
-        field_map json "latestSolutionVersion" SolutionVersionSummary.of_json in
+        field_map json__ "latestSolutionVersion"
+          SolutionVersionSummary.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let autoMLResult = field_map json "autoMLResult" AutoMLResult.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let autoMLResult = field_map json__ "autoMLResult" AutoMLResult.of_json in
       let solutionConfig =
-        field_map json "solutionConfig" SolutionConfig.of_json in
-      let eventType = field_map json "eventType" EventType.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
-      let recipeArn = field_map json "recipeArn" Arn.of_json in
+        field_map json__ "solutionConfig" SolutionConfig.of_json in
+      let eventType = field_map json__ "eventType" EventType.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
+      let recipeArn = field_map json__ "recipeArn" Arn.of_json in
+      let performIncrementalUpdate =
+        field_map json__ "performIncrementalUpdate"
+          PerformIncrementalUpdate.of_json in
+      let performAutoTraining =
+        field_map json__ "performAutoTraining" PerformAutoTraining.of_json in
       let performAutoML =
-        field_map json "performAutoML" PerformAutoML.of_json in
-      let performHPO = field_map json "performHPO" PerformHPO.of_json in
-      let solutionArn = field_map json "solutionArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
-      make ?latestSolutionVersion ?lastUpdatedDateTime ?creationDateTime
-        ?status ?autoMLResult ?solutionConfig ?eventType ?datasetGroupArn
-        ?recipeArn ?performAutoML ?performHPO ?solutionArn ?name ()
+        field_map json__ "performAutoML" PerformAutoML.of_json in
+      let performHPO = field_map json__ "performHPO" PerformHPO.of_json in
+      let solutionArn = field_map json__ "solutionArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      make ?latestSolutionUpdate ?latestSolutionVersion ?lastUpdatedDateTime
+        ?creationDateTime ?status ?autoMLResult ?solutionConfig ?eventType
+        ?datasetGroupArn ?recipeArn ?performIncrementalUpdate
+        ?performAutoTraining ?performAutoML ?performHPO ?solutionArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that provides information about a solution. A solution is a trained model that can be deployed as a campaign."]
+       "By default, all new solutions use automatic training. With automatic training, you incur training costs while your solution is active. To avoid unnecessary costs, when you are finished you can update the solution to turn off automatic training. For information about training costs, see Amazon Personalize pricing. An object that provides information about a solution. A solution includes the custom recipe, customized parameters, and trained models (Solution Versions) that Amazon Personalize uses to generate recommendations. After you create a solution, you can\226\128\153t change its configuration. If you need to make changes, you can clone the solution with the Amazon Personalize console or create a new one."]
 module DatasetSchema =
   struct
     type nonrec t =
@@ -4381,14 +5917,14 @@ module DatasetSchema =
       make ?domain ?lastUpdatedDateTime ?creationDateTime ?schema ?schemaArn
         ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "domain" Domain.of_json in
+    let of_json json__ =
+      let domain = field_map json__ "domain" Domain.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let schema = field_map json "schema" AvroSchema.of_json in
-      let schemaArn = field_map json "schemaArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let schema = field_map json__ "schema" AvroSchema.of_json in
+      let schemaArn = field_map json__ "schemaArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?domain ?lastUpdatedDateTime ?creationDateTime ?schema ?schemaArn
         ?name ()
     let to_json v = composed_to_json to_value v
@@ -4417,12 +5953,15 @@ module Recommender =
           "The date and time (in Unix format) that the recommender was last updated."];
       status: Status.t option
         [@ocaml.doc
-          "The status of the recommender. A recommender can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS"];
+          "The status of the recommender. A recommender can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED STOP PENDING > STOP IN_PROGRESS > INACTIVE > START PENDING > START IN_PROGRESS > ACTIVE DELETE PENDING > DELETE IN_PROGRESS"];
       failureReason: FailureReason.t option
         [@ocaml.doc "If a recommender fails, the reason behind the failure."];
       latestRecommenderUpdate: RecommenderUpdateSummary.t option
         [@ocaml.doc
-          "Provides a summary of the latest updates to the recommender."]}
+          "Provides a summary of the latest updates to the recommender."];
+      modelMetrics: Metrics.t option
+        [@ocaml.doc
+          "Provides evaluation metrics that help you determine the performance of a recommender. For more information, see Evaluating a recommender."]}
     let make ?recommenderArn =
       fun ?datasetGroupArn ->
         fun ?name ->
@@ -4433,19 +5972,21 @@ module Recommender =
                   fun ?status ->
                     fun ?failureReason ->
                       fun ?latestRecommenderUpdate ->
-                        fun () ->
-                          {
-                            recommenderArn;
-                            datasetGroupArn;
-                            name;
-                            recipeArn;
-                            recommenderConfig;
-                            creationDateTime;
-                            lastUpdatedDateTime;
-                            status;
-                            failureReason;
-                            latestRecommenderUpdate
-                          }
+                        fun ?modelMetrics ->
+                          fun () ->
+                            {
+                              recommenderArn;
+                              datasetGroupArn;
+                              name;
+                              recipeArn;
+                              recommenderConfig;
+                              creationDateTime;
+                              lastUpdatedDateTime;
+                              status;
+                              failureReason;
+                              latestRecommenderUpdate;
+                              modelMetrics
+                            }
     let to_value x =
       structure_to_value
         [("recommenderArn", (Option.map x.recommenderArn ~f:Arn.to_value));
@@ -4463,9 +6004,12 @@ module Recommender =
           (Option.map x.failureReason ~f:FailureReason.to_value));
         ("latestRecommenderUpdate",
           (Option.map x.latestRecommenderUpdate
-             ~f:RecommenderUpdateSummary.to_value))]
+             ~f:RecommenderUpdateSummary.to_value));
+        ("modelMetrics", (Option.map x.modelMetrics ~f:Metrics.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let modelMetrics =
+        (Option.map ~f:Metrics.of_xml) (Xml.child xml_arg0 "modelMetrics") in
       let latestRecommenderUpdate =
         (Option.map ~f:RecommenderUpdateSummary.of_xml)
           (Xml.child xml_arg0 "latestRecommenderUpdate") in
@@ -4489,27 +6033,28 @@ module Recommender =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetGroupArn") in
       let recommenderArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "recommenderArn") in
-      make ?latestRecommenderUpdate ?failureReason ?status
+      make ?modelMetrics ?latestRecommenderUpdate ?failureReason ?status
         ?lastUpdatedDateTime ?creationDateTime ?recommenderConfig ?recipeArn
         ?name ?datasetGroupArn ?recommenderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let modelMetrics = field_map json__ "modelMetrics" Metrics.of_json in
       let latestRecommenderUpdate =
-        field_map json "latestRecommenderUpdate"
+        field_map json__ "latestRecommenderUpdate"
           RecommenderUpdateSummary.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
-      let status = field_map json "status" Status.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
+      let status = field_map json__ "status" Status.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
       let recommenderConfig =
-        field_map json "recommenderConfig" RecommenderConfig.of_json in
-      let recipeArn = field_map json "recipeArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
-      let recommenderArn = field_map json "recommenderArn" Arn.of_json in
-      make ?latestRecommenderUpdate ?failureReason ?status
+        field_map json__ "recommenderConfig" RecommenderConfig.of_json in
+      let recipeArn = field_map json__ "recipeArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
+      let recommenderArn = field_map json__ "recommenderArn" Arn.of_json in
+      make ?modelMetrics ?latestRecommenderUpdate ?failureReason ?status
         ?lastUpdatedDateTime ?creationDateTime ?recommenderConfig ?recipeArn
         ?name ?datasetGroupArn ?recommenderArn ()
     let to_json v = composed_to_json to_value v
@@ -4598,23 +6143,120 @@ module Recipe =
       make ?lastUpdatedDateTime ?recipeType ?creationDateTime ?description
         ?status ?featureTransformationArn ?algorithmArn ?recipeArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let recipeType = field_map json "recipeType" RecipeType.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let description = field_map json "description" Description.of_json in
-      let status = field_map json "status" Status.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let recipeType = field_map json__ "recipeType" RecipeType.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let status = field_map json__ "status" Status.of_json in
       let featureTransformationArn =
-        field_map json "featureTransformationArn" Arn.of_json in
-      let algorithmArn = field_map json "algorithmArn" Arn.of_json in
-      let recipeArn = field_map json "recipeArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "featureTransformationArn" Arn.of_json in
+      let algorithmArn = field_map json__ "algorithmArn" Arn.of_json in
+      let recipeArn = field_map json__ "recipeArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?lastUpdatedDateTime ?recipeType ?creationDateTime ?description
         ?status ?featureTransformationArn ?algorithmArn ?recipeArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about a recipe. Each recipe provides an algorithm that Amazon Personalize uses in model training when you use the CreateSolution operation."]
+module MetricAttribution =
+  struct
+    type nonrec t =
+      {
+      name: Name.t option [@ocaml.doc "The metric attribution's name."];
+      metricAttributionArn: Arn.t option
+        [@ocaml.doc "The metric attribution's Amazon Resource Name (ARN)."];
+      datasetGroupArn: Arn.t option
+        [@ocaml.doc
+          "The metric attribution's dataset group Amazon Resource Name (ARN)."];
+      metricsOutputConfig: MetricAttributionOutput.t option
+        [@ocaml.doc "The metric attribution's output configuration."];
+      status: Status.t option [@ocaml.doc "The metric attribution's status."];
+      creationDateTime: Date.t option
+        [@ocaml.doc "The metric attribution's creation date time."];
+      lastUpdatedDateTime: Date.t option
+        [@ocaml.doc "The metric attribution's last updated date time."];
+      failureReason: FailureReason.t option
+        [@ocaml.doc "The metric attribution's failure reason."]}
+    let make ?name =
+      fun ?metricAttributionArn ->
+        fun ?datasetGroupArn ->
+          fun ?metricsOutputConfig ->
+            fun ?status ->
+              fun ?creationDateTime ->
+                fun ?lastUpdatedDateTime ->
+                  fun ?failureReason ->
+                    fun () ->
+                      {
+                        name;
+                        metricAttributionArn;
+                        datasetGroupArn;
+                        metricsOutputConfig;
+                        status;
+                        creationDateTime;
+                        lastUpdatedDateTime;
+                        failureReason
+                      }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:Name.to_value));
+        ("metricAttributionArn",
+          (Option.map x.metricAttributionArn ~f:Arn.to_value));
+        ("datasetGroupArn", (Option.map x.datasetGroupArn ~f:Arn.to_value));
+        ("metricsOutputConfig",
+          (Option.map x.metricsOutputConfig
+             ~f:MetricAttributionOutput.to_value));
+        ("status", (Option.map x.status ~f:Status.to_value));
+        ("creationDateTime",
+          (Option.map x.creationDateTime ~f:Date.to_value));
+        ("lastUpdatedDateTime",
+          (Option.map x.lastUpdatedDateTime ~f:Date.to_value));
+        ("failureReason",
+          (Option.map x.failureReason ~f:FailureReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureReason =
+        (Option.map ~f:FailureReason.of_xml)
+          (Xml.child xml_arg0 "failureReason") in
+      let lastUpdatedDateTime =
+        (Option.map ~f:Date.of_xml)
+          (Xml.child xml_arg0 "lastUpdatedDateTime") in
+      let creationDateTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "creationDateTime") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
+      let metricsOutputConfig =
+        (Option.map ~f:MetricAttributionOutput.of_xml)
+          (Xml.child xml_arg0 "metricsOutputConfig") in
+      let datasetGroupArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetGroupArn") in
+      let metricAttributionArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "metricAttributionArn") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
+        ?metricsOutputConfig ?datasetGroupArn ?metricAttributionArn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureReason =
+        field_map json__ "failureReason" FailureReason.of_json in
+      let lastUpdatedDateTime =
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let metricsOutputConfig =
+        field_map json__ "metricsOutputConfig"
+          MetricAttributionOutput.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
+      let metricAttributionArn =
+        field_map json__ "metricAttributionArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
+        ?metricsOutputConfig ?datasetGroupArn ?metricAttributionArn ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information on a metric attribution. A metric attribution creates reports on the data that you import into Amazon Personalize. Depending on how you import the data, you can view reports in Amazon CloudWatch or Amazon S3. For more information, see Measuring impact of recommendations."]
 module Filter =
   struct
     type nonrec t =
@@ -4690,18 +6332,18 @@ module Filter =
       make ?status ?filterExpression ?failureReason ?datasetGroupArn
         ?lastUpdatedDateTime ?creationDateTime ?filterArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" Status.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" Status.of_json in
       let filterExpression =
-        field_map json "filterExpression" FilterExpression.of_json in
+        field_map json__ "filterExpression" FilterExpression.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let filterArn = field_map json "filterArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let filterArn = field_map json__ "filterArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?status ?filterExpression ?failureReason ?datasetGroupArn
         ?lastUpdatedDateTime ?creationDateTime ?filterArn ?name ()
     let to_json v = composed_to_json to_value v
@@ -4774,16 +6416,16 @@ module FeatureTransformation =
       make ?status ?lastUpdatedDateTime ?creationDateTime ?defaultParameters
         ?featureTransformationArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" Status.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" Status.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
       let defaultParameters =
-        field_map json "defaultParameters" FeaturizationParameters.of_json in
+        field_map json__ "defaultParameters" FeaturizationParameters.of_json in
       let featureTransformationArn =
-        field_map json "featureTransformationArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "featureTransformationArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?status ?lastUpdatedDateTime ?creationDateTime ?defaultParameters
         ?featureTransformationArn ?name ()
     let to_json v = composed_to_json to_value v
@@ -4866,16 +6508,16 @@ module EventTracker =
       make ?lastUpdatedDateTime ?creationDateTime ?status ?datasetGroupArn
         ?trackingId ?accountId ?eventTrackerArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
-      let trackingId = field_map json "trackingId" TrackingId.of_json in
-      let accountId = field_map json "accountId" AccountId.of_json in
-      let eventTrackerArn = field_map json "eventTrackerArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
+      let trackingId = field_map json__ "trackingId" TrackingId.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
+      let eventTrackerArn = field_map json__ "eventTrackerArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?lastUpdatedDateTime ?creationDateTime ?status ?datasetGroupArn
         ?trackingId ?accountId ?eventTrackerArn ?name ()
     let to_json v = composed_to_json to_value v
@@ -4891,7 +6533,8 @@ module Dataset =
       datasetGroupArn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the dataset group."];
       datasetType: DatasetType.t option
-        [@ocaml.doc "One of the following values: Interactions Items Users"];
+        [@ocaml.doc
+          "One of the following values: Interactions Items Users Actions Action_Interactions"];
       schemaArn: Arn.t option
         [@ocaml.doc "The ARN of the associated schema."];
       status: Status.t option
@@ -4901,7 +6544,12 @@ module Dataset =
         [@ocaml.doc
           "The creation date and time (in Unix time) of the dataset."];
       lastUpdatedDateTime: Date.t option
-        [@ocaml.doc "A time stamp that shows when the dataset was updated."]}
+        [@ocaml.doc "A time stamp that shows when the dataset was updated."];
+      latestDatasetUpdate: DatasetUpdateSummary.t option
+        [@ocaml.doc "Describes the latest update to the dataset."];
+      trackingId: TrackingId.t option
+        [@ocaml.doc
+          "The ID of the event tracker for an Action interactions dataset. You specify the tracker's ID in the PutActionInteractions API operation. Amazon Personalize uses it to direct new data to the Action interactions dataset in your dataset group."]}
     let make ?name =
       fun ?datasetArn ->
         fun ?datasetGroupArn ->
@@ -4910,17 +6558,21 @@ module Dataset =
               fun ?status ->
                 fun ?creationDateTime ->
                   fun ?lastUpdatedDateTime ->
-                    fun () ->
-                      {
-                        name;
-                        datasetArn;
-                        datasetGroupArn;
-                        datasetType;
-                        schemaArn;
-                        status;
-                        creationDateTime;
-                        lastUpdatedDateTime
-                      }
+                    fun ?latestDatasetUpdate ->
+                      fun ?trackingId ->
+                        fun () ->
+                          {
+                            name;
+                            datasetArn;
+                            datasetGroupArn;
+                            datasetType;
+                            schemaArn;
+                            status;
+                            creationDateTime;
+                            lastUpdatedDateTime;
+                            latestDatasetUpdate;
+                            trackingId
+                          }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:Name.to_value));
@@ -4932,9 +6584,17 @@ module Dataset =
         ("creationDateTime",
           (Option.map x.creationDateTime ~f:Date.to_value));
         ("lastUpdatedDateTime",
-          (Option.map x.lastUpdatedDateTime ~f:Date.to_value))]
+          (Option.map x.lastUpdatedDateTime ~f:Date.to_value));
+        ("latestDatasetUpdate",
+          (Option.map x.latestDatasetUpdate ~f:DatasetUpdateSummary.to_value));
+        ("trackingId", (Option.map x.trackingId ~f:TrackingId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let trackingId =
+        (Option.map ~f:TrackingId.of_xml) (Xml.child xml_arg0 "trackingId") in
+      let latestDatasetUpdate =
+        (Option.map ~f:DatasetUpdateSummary.of_xml)
+          (Xml.child xml_arg0 "latestDatasetUpdate") in
       let lastUpdatedDateTime =
         (Option.map ~f:Date.of_xml)
           (Xml.child xml_arg0 "lastUpdatedDateTime") in
@@ -4951,21 +6611,26 @@ module Dataset =
       let datasetArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetArn") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
-      make ?lastUpdatedDateTime ?creationDateTime ?status ?schemaArn
-        ?datasetType ?datasetGroupArn ?datasetArn ?name ()
+      make ?trackingId ?latestDatasetUpdate ?lastUpdatedDateTime
+        ?creationDateTime ?status ?schemaArn ?datasetType ?datasetGroupArn
+        ?datasetArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let trackingId = field_map json__ "trackingId" TrackingId.of_json in
+      let latestDatasetUpdate =
+        field_map json__ "latestDatasetUpdate" DatasetUpdateSummary.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let schemaArn = field_map json "schemaArn" Arn.of_json in
-      let datasetType = field_map json "datasetType" DatasetType.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
-      let datasetArn = field_map json "datasetArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
-      make ?lastUpdatedDateTime ?creationDateTime ?status ?schemaArn
-        ?datasetType ?datasetGroupArn ?datasetArn ?name ()
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let schemaArn = field_map json__ "schemaArn" Arn.of_json in
+      let datasetType = field_map json__ "datasetType" DatasetType.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
+      let datasetArn = field_map json__ "datasetArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      make ?trackingId ?latestDatasetUpdate ?lastUpdatedDateTime
+        ?creationDateTime ?status ?schemaArn ?datasetType ?datasetGroupArn
+        ?datasetArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides metadata for a dataset."]
 module DatasetImportJob =
@@ -4995,7 +6660,13 @@ module DatasetImportJob =
           "The date and time (in Unix time) the dataset was last updated."];
       failureReason: FailureReason.t option
         [@ocaml.doc
-          "If a dataset import job fails, provides the reason why."]}
+          "If a dataset import job fails, provides the reason why."];
+      importMode: ImportMode.t option
+        [@ocaml.doc
+          "The import mode used by the dataset import job to import new records."];
+      publishAttributionMetricsToS3: Boolean.t option
+        [@ocaml.doc
+          "Whether the job publishes metrics to Amazon S3 for a metric attribution."]}
     let make ?jobName =
       fun ?datasetImportJobArn ->
         fun ?datasetArn ->
@@ -5005,18 +6676,22 @@ module DatasetImportJob =
                 fun ?creationDateTime ->
                   fun ?lastUpdatedDateTime ->
                     fun ?failureReason ->
-                      fun () ->
-                        {
-                          jobName;
-                          datasetImportJobArn;
-                          datasetArn;
-                          dataSource;
-                          roleArn;
-                          status;
-                          creationDateTime;
-                          lastUpdatedDateTime;
-                          failureReason
-                        }
+                      fun ?importMode ->
+                        fun ?publishAttributionMetricsToS3 ->
+                          fun () ->
+                            {
+                              jobName;
+                              datasetImportJobArn;
+                              datasetArn;
+                              dataSource;
+                              roleArn;
+                              status;
+                              creationDateTime;
+                              lastUpdatedDateTime;
+                              failureReason;
+                              importMode;
+                              publishAttributionMetricsToS3
+                            }
     let to_value x =
       structure_to_value
         [("jobName", (Option.map x.jobName ~f:Name.to_value));
@@ -5031,9 +6706,17 @@ module DatasetImportJob =
         ("lastUpdatedDateTime",
           (Option.map x.lastUpdatedDateTime ~f:Date.to_value));
         ("failureReason",
-          (Option.map x.failureReason ~f:FailureReason.to_value))]
+          (Option.map x.failureReason ~f:FailureReason.to_value));
+        ("importMode", (Option.map x.importMode ~f:ImportMode.to_value));
+        ("publishAttributionMetricsToS3",
+          (Option.map x.publishAttributionMetricsToS3 ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let publishAttributionMetricsToS3 =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "publishAttributionMetricsToS3") in
+      let importMode =
+        (Option.map ~f:ImportMode.of_xml) (Xml.child xml_arg0 "importMode") in
       let failureReason =
         (Option.map ~f:FailureReason.of_xml)
           (Xml.child xml_arg0 "failureReason") in
@@ -5053,24 +6736,29 @@ module DatasetImportJob =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetImportJobArn") in
       let jobName =
         (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "jobName") in
-      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
-        ?roleArn ?dataSource ?datasetArn ?datasetImportJobArn ?jobName ()
+      make ?publishAttributionMetricsToS3 ?importMode ?failureReason
+        ?lastUpdatedDateTime ?creationDateTime ?status ?roleArn ?dataSource
+        ?datasetArn ?datasetImportJobArn ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let publishAttributionMetricsToS3 =
+        field_map json__ "publishAttributionMetricsToS3" Boolean.of_json in
+      let importMode = field_map json__ "importMode" ImportMode.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let roleArn = field_map json "roleArn" Arn.of_json in
-      let dataSource = field_map json "dataSource" DataSource.of_json in
-      let datasetArn = field_map json "datasetArn" Arn.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let roleArn = field_map json__ "roleArn" Arn.of_json in
+      let dataSource = field_map json__ "dataSource" DataSource.of_json in
+      let datasetArn = field_map json__ "datasetArn" Arn.of_json in
       let datasetImportJobArn =
-        field_map json "datasetImportJobArn" Arn.of_json in
-      let jobName = field_map json "jobName" Name.of_json in
-      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?status
-        ?roleArn ?dataSource ?datasetArn ?datasetImportJobArn ?jobName ()
+        field_map json__ "datasetImportJobArn" Arn.of_json in
+      let jobName = field_map json__ "jobName" Name.of_json in
+      make ?publishAttributionMetricsToS3 ?importMode ?failureReason
+        ?lastUpdatedDateTime ?creationDateTime ?status ?roleArn ?dataSource
+        ?datasetArn ?datasetImportJobArn ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a job that imports training data from a data source (Amazon S3 bucket) to an Amazon Personalize dataset. For more information, see CreateDatasetImportJob. A dataset import job can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED"]
@@ -5086,7 +6774,7 @@ module DatasetGroup =
           "The current status of the dataset group. A dataset group can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING"];
       roleArn: RoleArn.t option
         [@ocaml.doc
-          "The ARN of the IAM role that has permissions to create the dataset group."];
+          "The ARN of the Identity and Access Management (IAM) role that has permissions to access the Key Management Service (KMS) key. Supplying an IAM role is only valid when also specifying a KMS key."];
       kmsKeyArn: KmsKeyArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Key Management Service (KMS) key used to encrypt the datasets."];
@@ -5160,23 +6848,23 @@ module DatasetGroup =
       make ?domain ?failureReason ?lastUpdatedDateTime ?creationDateTime
         ?kmsKeyArn ?roleArn ?status ?datasetGroupArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "domain" Domain.of_json in
+    let of_json json__ =
+      let domain = field_map json__ "domain" Domain.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let kmsKeyArn = field_map json "kmsKeyArn" KmsKeyArn.of_json in
-      let roleArn = field_map json "roleArn" RoleArn.of_json in
-      let status = field_map json "status" Status.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let kmsKeyArn = field_map json__ "kmsKeyArn" KmsKeyArn.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?domain ?failureReason ?lastUpdatedDateTime ?creationDateTime
         ?kmsKeyArn ?roleArn ?status ?datasetGroupArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A dataset group is a collection of related datasets (Interactions, User, and Item). You create a dataset group by calling CreateDatasetGroup. You then create a dataset and add it to a dataset group by calling CreateDataset. The dataset group is used to create and train a solution by calling CreateSolution. A dataset group can contain only one of each type of dataset. You can specify an Key Management Service (KMS) key to encrypt the datasets in the group."]
+       "A dataset group is a collection of related datasets (Item interactions, Users, Items, Actions, Action interactions). You create a dataset group by calling CreateDatasetGroup. You then create a dataset and add it to a dataset group by calling CreateDataset. The dataset group is used to create and train a solution by calling CreateSolution. A dataset group can contain only one of each type of dataset. You can specify an Key Management Service (KMS) key to encrypt the datasets in the group."]
 module DatasetExportJob =
   struct
     type nonrec t =
@@ -5279,28 +6967,144 @@ module DatasetExportJob =
         ?status ?roleArn ?ingestionMode ?datasetArn ?datasetExportJobArn
         ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
       let jobOutput =
-        field_map json "jobOutput" DatasetExportJobOutput.of_json in
-      let status = field_map json "status" Status.of_json in
-      let roleArn = field_map json "roleArn" Arn.of_json in
+        field_map json__ "jobOutput" DatasetExportJobOutput.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let roleArn = field_map json__ "roleArn" Arn.of_json in
       let ingestionMode =
-        field_map json "ingestionMode" IngestionMode.of_json in
-      let datasetArn = field_map json "datasetArn" Arn.of_json in
+        field_map json__ "ingestionMode" IngestionMode.of_json in
+      let datasetArn = field_map json__ "datasetArn" Arn.of_json in
       let datasetExportJobArn =
-        field_map json "datasetExportJobArn" Arn.of_json in
-      let jobName = field_map json "jobName" Name.of_json in
+        field_map json__ "datasetExportJobArn" Arn.of_json in
+      let jobName = field_map json__ "jobName" Name.of_json in
       make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?jobOutput
         ?status ?roleArn ?ingestionMode ?datasetArn ?datasetExportJobArn
         ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a job that exports a dataset to an Amazon S3 bucket. For more information, see CreateDatasetExportJob. A dataset export job can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED"]
+module DataDeletionJob =
+  struct
+    type nonrec t =
+      {
+      jobName: Name.t option
+        [@ocaml.doc "The name of the data deletion job."];
+      dataDeletionJobArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the data deletion job."];
+      datasetGroupArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the dataset group the job deletes records from."];
+      dataSource: DataSource.t option ;
+      roleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role that has permissions to read from the Amazon S3 data source."];
+      status: Status.t option
+        [@ocaml.doc
+          "The status of the data deletion job. A data deletion job can have one of the following statuses: PENDING > IN_PROGRESS > COMPLETED -or- FAILED"];
+      numDeleted: Integer.t option
+        [@ocaml.doc "The number of records deleted by a COMPLETED job."];
+      creationDateTime: Date.t option
+        [@ocaml.doc
+          "The creation date and time (in Unix time) of the data deletion job."];
+      lastUpdatedDateTime: Date.t option
+        [@ocaml.doc
+          "The date and time (in Unix time) the data deletion job was last updated."];
+      failureReason: FailureReason.t option
+        [@ocaml.doc "If a data deletion job fails, provides the reason why."]}
+    let make ?jobName =
+      fun ?dataDeletionJobArn ->
+        fun ?datasetGroupArn ->
+          fun ?dataSource ->
+            fun ?roleArn ->
+              fun ?status ->
+                fun ?numDeleted ->
+                  fun ?creationDateTime ->
+                    fun ?lastUpdatedDateTime ->
+                      fun ?failureReason ->
+                        fun () ->
+                          {
+                            jobName;
+                            dataDeletionJobArn;
+                            datasetGroupArn;
+                            dataSource;
+                            roleArn;
+                            status;
+                            numDeleted;
+                            creationDateTime;
+                            lastUpdatedDateTime;
+                            failureReason
+                          }
+    let to_value x =
+      structure_to_value
+        [("jobName", (Option.map x.jobName ~f:Name.to_value));
+        ("dataDeletionJobArn",
+          (Option.map x.dataDeletionJobArn ~f:Arn.to_value));
+        ("datasetGroupArn", (Option.map x.datasetGroupArn ~f:Arn.to_value));
+        ("dataSource", (Option.map x.dataSource ~f:DataSource.to_value));
+        ("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
+        ("status", (Option.map x.status ~f:Status.to_value));
+        ("numDeleted", (Option.map x.numDeleted ~f:Integer.to_value));
+        ("creationDateTime",
+          (Option.map x.creationDateTime ~f:Date.to_value));
+        ("lastUpdatedDateTime",
+          (Option.map x.lastUpdatedDateTime ~f:Date.to_value));
+        ("failureReason",
+          (Option.map x.failureReason ~f:FailureReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureReason =
+        (Option.map ~f:FailureReason.of_xml)
+          (Xml.child xml_arg0 "failureReason") in
+      let lastUpdatedDateTime =
+        (Option.map ~f:Date.of_xml)
+          (Xml.child xml_arg0 "lastUpdatedDateTime") in
+      let creationDateTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "creationDateTime") in
+      let numDeleted =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "numDeleted") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      let dataSource =
+        (Option.map ~f:DataSource.of_xml) (Xml.child xml_arg0 "dataSource") in
+      let datasetGroupArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetGroupArn") in
+      let dataDeletionJobArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "dataDeletionJobArn") in
+      let jobName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "jobName") in
+      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?numDeleted
+        ?status ?roleArn ?dataSource ?datasetGroupArn ?dataDeletionJobArn
+        ?jobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureReason =
+        field_map json__ "failureReason" FailureReason.of_json in
+      let lastUpdatedDateTime =
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let numDeleted = field_map json__ "numDeleted" Integer.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      let dataSource = field_map json__ "dataSource" DataSource.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
+      let dataDeletionJobArn =
+        field_map json__ "dataDeletionJobArn" Arn.of_json in
+      let jobName = field_map json__ "jobName" Name.of_json in
+      make ?failureReason ?lastUpdatedDateTime ?creationDateTime ?numDeleted
+        ?status ?roleArn ?dataSource ?datasetGroupArn ?dataDeletionJobArn
+        ?jobName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a job that deletes all references to specific users from an Amazon Personalize dataset group in batches. For information about creating a data deletion job, see Deleting users."]
 module Campaign =
   struct
     type nonrec t =
@@ -5310,10 +7114,10 @@ module Campaign =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the campaign."];
       solutionVersionArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a specific version of the solution."];
+          "The Amazon Resource Name (ARN) of the solution version the campaign uses."];
       minProvisionedTPS: TransactionsPerSecond.t option
         [@ocaml.doc
-          "Specifies the requested minimum provisioned transactions (recommendations) per second."];
+          "Specifies the requested minimum provisioned transactions (recommendations) per second. A high minProvisionedTPS will increase your bill. We recommend starting with 1 for minProvisionedTPS (the default). Track your usage using Amazon CloudWatch metrics, and increase the minProvisionedTPS as necessary."];
       campaignConfig: CampaignConfig.t option
         [@ocaml.doc "The configuration details of a campaign."];
       status: Status.t option
@@ -5327,7 +7131,9 @@ module Campaign =
       lastUpdatedDateTime: Date.t option
         [@ocaml.doc
           "The date and time (in Unix format) that the campaign was last updated."];
-      latestCampaignUpdate: CampaignUpdateSummary.t option }
+      latestCampaignUpdate: CampaignUpdateSummary.t option
+        [@ocaml.doc
+          "Provides a summary of the properties of a campaign update. For a complete listing, call the DescribeCampaign API. The latestCampaignUpdate field is only returned when the campaign has had at least one UpdateCampaign call."]}
     let make ?name =
       fun ?campaignArn ->
         fun ?solutionVersionArn ->
@@ -5401,23 +7207,23 @@ module Campaign =
         ?failureReason ?status ?campaignConfig ?minProvisionedTPS
         ?solutionVersionArn ?campaignArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let latestCampaignUpdate =
-        field_map json "latestCampaignUpdate" CampaignUpdateSummary.of_json in
+        field_map json__ "latestCampaignUpdate" CampaignUpdateSummary.of_json in
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
-      let status = field_map json "status" Status.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
+      let status = field_map json__ "status" Status.of_json in
       let campaignConfig =
-        field_map json "campaignConfig" CampaignConfig.of_json in
+        field_map json__ "campaignConfig" CampaignConfig.of_json in
       let minProvisionedTPS =
-        field_map json "minProvisionedTPS" TransactionsPerSecond.of_json in
+        field_map json__ "minProvisionedTPS" TransactionsPerSecond.of_json in
       let solutionVersionArn =
-        field_map json "solutionVersionArn" Arn.of_json in
-      let campaignArn = field_map json "campaignArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "solutionVersionArn" Arn.of_json in
+      let campaignArn = field_map json__ "campaignArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?latestCampaignUpdate ?lastUpdatedDateTime ?creationDateTime
         ?failureReason ?status ?campaignConfig ?minProvisionedTPS
         ?solutionVersionArn ?campaignArn ?name ()
@@ -5443,7 +7249,7 @@ module BatchSegmentJob =
           "The Amazon Resource Name (ARN) of the solution version used by the batch segment job to generate batch segments."];
       numResults: NumBatchResults.t option
         [@ocaml.doc
-          "The number of predicted users generated by the batch segment job for each line of input data."];
+          "The number of predicted users generated by the batch segment job for each line of input data. The maximum number of users per segment is 5 million."];
       jobInput: BatchSegmentJobInput.t option
         [@ocaml.doc
           "The Amazon S3 path that leads to the input data used to generate the batch segment job."];
@@ -5543,24 +7349,24 @@ module BatchSegmentJob =
         ?jobInput ?numResults ?solutionVersionArn ?failureReason ?filterArn
         ?batchSegmentJobArn ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let roleArn = field_map json "roleArn" RoleArn.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
       let jobOutput =
-        field_map json "jobOutput" BatchSegmentJobOutput.of_json in
-      let jobInput = field_map json "jobInput" BatchSegmentJobInput.of_json in
-      let numResults = field_map json "numResults" NumBatchResults.of_json in
+        field_map json__ "jobOutput" BatchSegmentJobOutput.of_json in
+      let jobInput = field_map json__ "jobInput" BatchSegmentJobInput.of_json in
+      let numResults = field_map json__ "numResults" NumBatchResults.of_json in
       let solutionVersionArn =
-        field_map json "solutionVersionArn" Arn.of_json in
+        field_map json__ "solutionVersionArn" Arn.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
-      let filterArn = field_map json "filterArn" Arn.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
+      let filterArn = field_map json__ "filterArn" Arn.of_json in
       let batchSegmentJobArn =
-        field_map json "batchSegmentJobArn" Arn.of_json in
-      let jobName = field_map json "jobName" Name.of_json in
+        field_map json__ "batchSegmentJobArn" Arn.of_json in
+      let jobName = field_map json__ "jobName" Name.of_json in
       make ?lastUpdatedDateTime ?creationDateTime ?status ?roleArn ?jobOutput
         ?jobInput ?numResults ?solutionVersionArn ?failureReason ?filterArn
         ?batchSegmentJobArn ?jobName ()
@@ -5598,6 +7404,10 @@ module BatchInferenceJob =
       roleArn: RoleArn.t option
         [@ocaml.doc
           "The ARN of the Amazon Identity and Access Management (IAM) role that requested the batch inference job."];
+      batchInferenceJobMode: BatchInferenceJobMode.t option
+        [@ocaml.doc "The job's mode."];
+      themeGenerationConfig: ThemeGenerationConfig.t option
+        [@ocaml.doc "The job's theme generation settings."];
       status: Status.t option
         [@ocaml.doc
           "The status of the batch inference job. The status is one of the following values: PENDING IN PROGRESS ACTIVE CREATE FAILED"];
@@ -5616,25 +7426,29 @@ module BatchInferenceJob =
                   fun ?jobOutput ->
                     fun ?batchInferenceJobConfig ->
                       fun ?roleArn ->
-                        fun ?status ->
-                          fun ?creationDateTime ->
-                            fun ?lastUpdatedDateTime ->
-                              fun () ->
-                                {
-                                  jobName;
-                                  batchInferenceJobArn;
-                                  filterArn;
-                                  failureReason;
-                                  solutionVersionArn;
-                                  numResults;
-                                  jobInput;
-                                  jobOutput;
-                                  batchInferenceJobConfig;
-                                  roleArn;
-                                  status;
-                                  creationDateTime;
-                                  lastUpdatedDateTime
-                                }
+                        fun ?batchInferenceJobMode ->
+                          fun ?themeGenerationConfig ->
+                            fun ?status ->
+                              fun ?creationDateTime ->
+                                fun ?lastUpdatedDateTime ->
+                                  fun () ->
+                                    {
+                                      jobName;
+                                      batchInferenceJobArn;
+                                      filterArn;
+                                      failureReason;
+                                      solutionVersionArn;
+                                      numResults;
+                                      jobInput;
+                                      jobOutput;
+                                      batchInferenceJobConfig;
+                                      roleArn;
+                                      batchInferenceJobMode;
+                                      themeGenerationConfig;
+                                      status;
+                                      creationDateTime;
+                                      lastUpdatedDateTime
+                                    }
     let to_value x =
       structure_to_value
         [("jobName", (Option.map x.jobName ~f:Name.to_value));
@@ -5654,6 +7468,12 @@ module BatchInferenceJob =
           (Option.map x.batchInferenceJobConfig
              ~f:BatchInferenceJobConfig.to_value));
         ("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
+        ("batchInferenceJobMode",
+          (Option.map x.batchInferenceJobMode
+             ~f:BatchInferenceJobMode.to_value));
+        ("themeGenerationConfig",
+          (Option.map x.themeGenerationConfig
+             ~f:ThemeGenerationConfig.to_value));
         ("status", (Option.map x.status ~f:Status.to_value));
         ("creationDateTime",
           (Option.map x.creationDateTime ~f:Date.to_value));
@@ -5668,6 +7488,12 @@ module BatchInferenceJob =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "creationDateTime") in
       let status =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
+      let themeGenerationConfig =
+        (Option.map ~f:ThemeGenerationConfig.of_xml)
+          (Xml.child xml_arg0 "themeGenerationConfig") in
+      let batchInferenceJobMode =
+        (Option.map ~f:BatchInferenceJobMode.of_xml)
+          (Xml.child xml_arg0 "batchInferenceJobMode") in
       let roleArn =
         (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
       let batchInferenceJobConfig =
@@ -5694,33 +7520,42 @@ module BatchInferenceJob =
           (Xml.child xml_arg0 "batchInferenceJobArn") in
       let jobName =
         (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "jobName") in
-      make ?lastUpdatedDateTime ?creationDateTime ?status ?roleArn
+      make ?lastUpdatedDateTime ?creationDateTime ?status
+        ?themeGenerationConfig ?batchInferenceJobMode ?roleArn
         ?batchInferenceJobConfig ?jobOutput ?jobInput ?numResults
         ?solutionVersionArn ?failureReason ?filterArn ?batchInferenceJobArn
         ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let status = field_map json "status" Status.of_json in
-      let roleArn = field_map json "roleArn" RoleArn.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let themeGenerationConfig =
+        field_map json__ "themeGenerationConfig"
+          ThemeGenerationConfig.of_json in
+      let batchInferenceJobMode =
+        field_map json__ "batchInferenceJobMode"
+          BatchInferenceJobMode.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
       let batchInferenceJobConfig =
-        field_map json "batchInferenceJobConfig"
+        field_map json__ "batchInferenceJobConfig"
           BatchInferenceJobConfig.of_json in
       let jobOutput =
-        field_map json "jobOutput" BatchInferenceJobOutput.of_json in
-      let jobInput = field_map json "jobInput" BatchInferenceJobInput.of_json in
-      let numResults = field_map json "numResults" NumBatchResults.of_json in
+        field_map json__ "jobOutput" BatchInferenceJobOutput.of_json in
+      let jobInput =
+        field_map json__ "jobInput" BatchInferenceJobInput.of_json in
+      let numResults = field_map json__ "numResults" NumBatchResults.of_json in
       let solutionVersionArn =
-        field_map json "solutionVersionArn" Arn.of_json in
+        field_map json__ "solutionVersionArn" Arn.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
-      let filterArn = field_map json "filterArn" Arn.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
+      let filterArn = field_map json__ "filterArn" Arn.of_json in
       let batchInferenceJobArn =
-        field_map json "batchInferenceJobArn" Arn.of_json in
-      let jobName = field_map json "jobName" Name.of_json in
-      make ?lastUpdatedDateTime ?creationDateTime ?status ?roleArn
+        field_map json__ "batchInferenceJobArn" Arn.of_json in
+      let jobName = field_map json__ "jobName" Name.of_json in
+      make ?lastUpdatedDateTime ?creationDateTime ?status
+        ?themeGenerationConfig ?batchInferenceJobMode ?roleArn
         ?batchInferenceJobConfig ?jobOutput ?jobInput ?numResults
         ?solutionVersionArn ?failureReason ?filterArn ?batchInferenceJobArn
         ?jobName ()
@@ -5827,61 +7662,173 @@ module Algorithm =
         ?defaultResourceConfig ?defaultHyperParameterRanges
         ?defaultHyperParameters ?algorithmImage ?algorithmArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedDateTime =
-        field_map json "lastUpdatedDateTime" Date.of_json in
-      let creationDateTime = field_map json "creationDateTime" Date.of_json in
-      let roleArn = field_map json "roleArn" Arn.of_json in
+        field_map json__ "lastUpdatedDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "creationDateTime" Date.of_json in
+      let roleArn = field_map json__ "roleArn" Arn.of_json in
       let trainingInputMode =
-        field_map json "trainingInputMode" TrainingInputMode.of_json in
+        field_map json__ "trainingInputMode" TrainingInputMode.of_json in
       let defaultResourceConfig =
-        field_map json "defaultResourceConfig" ResourceConfig.of_json in
+        field_map json__ "defaultResourceConfig" ResourceConfig.of_json in
       let defaultHyperParameterRanges =
-        field_map json "defaultHyperParameterRanges"
+        field_map json__ "defaultHyperParameterRanges"
           DefaultHyperParameterRanges.of_json in
       let defaultHyperParameters =
-        field_map json "defaultHyperParameters" HyperParameters.of_json in
+        field_map json__ "defaultHyperParameters" HyperParameters.of_json in
       let algorithmImage =
-        field_map json "algorithmImage" AlgorithmImage.of_json in
-      let algorithmArn = field_map json "algorithmArn" Arn.of_json in
-      let name = field_map json "name" Name.of_json in
+        field_map json__ "algorithmImage" AlgorithmImage.of_json in
+      let algorithmArn = field_map json__ "algorithmArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
       make ?lastUpdatedDateTime ?creationDateTime ?roleArn ?trainingInputMode
         ?defaultResourceConfig ?defaultHyperParameterRanges
         ?defaultHyperParameters ?algorithmImage ?algorithmArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a custom algorithm."]
-module ResourceAlreadyExistsException =
+module UpdateSolutionResponse =
   struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
+    type nonrec t =
+      {
+      solutionArn: Arn.t option
+        [@ocaml.doc
+          "The same solution Amazon Resource Name (ARN) as given in the request."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?solutionArn = fun () -> { solutionArn }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("solutionArn", (Option.map x.solutionArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
+      let solutionArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionArn") in
+      make ?solutionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
+    let of_json json__ =
+      let solutionArn = field_map json__ "solutionArn" Arn.of_json in
+      make ?solutionArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified resource already exists."]
-module Boolean =
+  end[@@ocaml.doc
+       "Updates an Amazon Personalize solution to use a different automatic training configuration. When you update a solution, you can change whether the solution uses automatic training, and you can change the training frequency. For more information about updating a solution, see Updating a solution. A solution update can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED To get the status of a solution update, call the DescribeSolution API operation and find the status in the latestSolutionUpdate."]
+module UpdateSolutionRequest =
   struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
+    type nonrec t =
+      {
+      solutionArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the solution to update."];
+      performAutoTraining: PerformAutoTraining.t option
+        [@ocaml.doc
+          "Whether the solution uses automatic training to create new solution versions (trained models). You can change the training frequency by specifying a schedulingExpression in the AutoTrainingConfig as part of solution configuration. If you turn on automatic training, the first automatic training starts within one hour after the solution update completes. If you manually create a solution version within the hour, the solution skips the first automatic training. For more information about automatic training, see Configuring automatic training. After training starts, you can get the solution version's Amazon Resource Name (ARN) with the ListSolutionVersions API operation. To get its status, use the DescribeSolutionVersion."];
+      performIncrementalUpdate: PerformIncrementalUpdate.t option
+        [@ocaml.doc
+          "Whether to perform incremental training updates on your model. When enabled, this allows the model to learn from new data more frequently without requiring full retraining, which enables near real-time personalization. This parameter is supported only for solutions that use the semantic-similarity recipe."];
+      solutionUpdateConfig: SolutionUpdateConfig.t option
+        [@ocaml.doc "The new configuration details of the solution."]}
+    let context_ = "UpdateSolutionRequest"
+    let make ?performAutoTraining =
+      fun ?performIncrementalUpdate ->
+        fun ?solutionUpdateConfig ->
+          fun ~solutionArn ->
+            fun () ->
+              {
+                performAutoTraining;
+                performIncrementalUpdate;
+                solutionUpdateConfig;
+                solutionArn
+              }
+    let to_value x =
+      structure_to_value
+        [("solutionArn", (Some (Arn.to_value x.solutionArn)));
+        ("performAutoTraining",
+          (Option.map x.performAutoTraining ~f:PerformAutoTraining.to_value));
+        ("performIncrementalUpdate",
+          (Option.map x.performIncrementalUpdate
+             ~f:PerformIncrementalUpdate.to_value));
+        ("solutionUpdateConfig",
+          (Option.map x.solutionUpdateConfig ~f:SolutionUpdateConfig.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
     let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
-    let to_json = simple_to_json to_value
-  end
+      let solutionUpdateConfig =
+        (Option.map ~f:SolutionUpdateConfig.of_xml)
+          (Xml.child xml_arg0 "solutionUpdateConfig") in
+      let performIncrementalUpdate =
+        (Option.map ~f:PerformIncrementalUpdate.of_xml)
+          (Xml.child xml_arg0 "performIncrementalUpdate") in
+      let performAutoTraining =
+        (Option.map ~f:PerformAutoTraining.of_xml)
+          (Xml.child xml_arg0 "performAutoTraining") in
+      let solutionArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "solutionArn") in
+      make ?solutionUpdateConfig ?performIncrementalUpdate
+        ?performAutoTraining ~solutionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let solutionUpdateConfig =
+        field_map json__ "solutionUpdateConfig" SolutionUpdateConfig.of_json in
+      let performIncrementalUpdate =
+        field_map json__ "performIncrementalUpdate"
+          PerformIncrementalUpdate.of_json in
+      let performAutoTraining =
+        field_map json__ "performAutoTraining" PerformAutoTraining.of_json in
+      let solutionArn = field_map_exn json__ "solutionArn" Arn.of_json in
+      make ?solutionUpdateConfig ?performIncrementalUpdate
+        ?performAutoTraining ~solutionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an Amazon Personalize solution to use a different automatic training configuration. When you update a solution, you can change whether the solution uses automatic training, and you can change the training frequency. For more information about updating a solution, see Updating a solution. A solution update can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED To get the status of a solution update, call the DescribeSolution API operation and find the status in the latestSolutionUpdate."]
 module UpdateRecommenderResponse =
   struct
     type nonrec t =
@@ -5944,12 +7891,12 @@ module UpdateRecommenderResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "recommenderArn") in
       make ?recommenderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recommenderArn = field_map json "recommenderArn" Arn.of_json in
+    let of_json json__ =
+      let recommenderArn = field_map json__ "recommenderArn" Arn.of_json in
       make ?recommenderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the recommender to modify the recommender configuration."]
+       "Updates the recommender to modify the recommender configuration. If you update the recommender to modify the columns used in training, Amazon Personalize automatically starts a full retraining of the models backing your recommender. While the update completes, you can still get recommendations from the recommender. The recommender uses the previous configuration until the update completes. To track the status of this update, use the latestRecommenderUpdate returned in the DescribeRecommender operation."]
 module UpdateRecommenderRequest =
   struct
     type nonrec t =
@@ -5978,14 +7925,260 @@ module UpdateRecommenderRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "recommenderArn") in
       make ~recommenderConfig ~recommenderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommenderConfig =
-        field_map_exn json "recommenderConfig" RecommenderConfig.of_json in
-      let recommenderArn = field_map_exn json "recommenderArn" Arn.of_json in
+        field_map_exn json__ "recommenderConfig" RecommenderConfig.of_json in
+      let recommenderArn = field_map_exn json__ "recommenderArn" Arn.of_json in
       make ~recommenderConfig ~recommenderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the recommender to modify the recommender configuration."]
+       "Updates the recommender to modify the recommender configuration. If you update the recommender to modify the columns used in training, Amazon Personalize automatically starts a full retraining of the models backing your recommender. While the update completes, you can still get recommendations from the recommender. The recommender uses the previous configuration until the update completes. To track the status of this update, use the latestRecommenderUpdate returned in the DescribeRecommender operation."]
+module UpdateMetricAttributionResponse =
+  struct
+    type nonrec t =
+      {
+      metricAttributionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the metric attribution that you updated."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?metricAttributionArn = fun () -> { metricAttributionArn }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("metricAttributionArn",
+           (Option.map x.metricAttributionArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricAttributionArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "metricAttributionArn") in
+      make ?metricAttributionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricAttributionArn =
+        field_map json__ "metricAttributionArn" Arn.of_json in
+      make ?metricAttributionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a metric attribution."]
+module UpdateMetricAttributionRequest =
+  struct
+    type nonrec t =
+      {
+      addMetrics: MetricAttributes.t option
+        [@ocaml.doc "Add new metric attributes to the metric attribution."];
+      removeMetrics: MetricAttributesNamesList.t option
+        [@ocaml.doc "Remove metric attributes from the metric attribution."];
+      metricsOutputConfig: MetricAttributionOutput.t option
+        [@ocaml.doc "An output config for the metric attribution."];
+      metricAttributionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the metric attribution to update."]}
+    let make ?addMetrics =
+      fun ?removeMetrics ->
+        fun ?metricsOutputConfig ->
+          fun ?metricAttributionArn ->
+            fun () ->
+              {
+                addMetrics;
+                removeMetrics;
+                metricsOutputConfig;
+                metricAttributionArn
+              }
+    let to_value x =
+      structure_to_value
+        [("addMetrics",
+           (Option.map x.addMetrics ~f:MetricAttributes.to_value));
+        ("removeMetrics",
+          (Option.map x.removeMetrics ~f:MetricAttributesNamesList.to_value));
+        ("metricsOutputConfig",
+          (Option.map x.metricsOutputConfig
+             ~f:MetricAttributionOutput.to_value));
+        ("metricAttributionArn",
+          (Option.map x.metricAttributionArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricAttributionArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "metricAttributionArn") in
+      let metricsOutputConfig =
+        (Option.map ~f:MetricAttributionOutput.of_xml)
+          (Xml.child xml_arg0 "metricsOutputConfig") in
+      let removeMetrics =
+        (Option.map ~f:MetricAttributesNamesList.of_xml)
+          (Xml.child xml_arg0 "removeMetrics") in
+      let addMetrics =
+        (Option.map ~f:MetricAttributes.of_xml)
+          (Xml.child xml_arg0 "addMetrics") in
+      make ?metricAttributionArn ?metricsOutputConfig ?removeMetrics
+        ?addMetrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricAttributionArn =
+        field_map json__ "metricAttributionArn" Arn.of_json in
+      let metricsOutputConfig =
+        field_map json__ "metricsOutputConfig"
+          MetricAttributionOutput.of_json in
+      let removeMetrics =
+        field_map json__ "removeMetrics" MetricAttributesNamesList.of_json in
+      let addMetrics = field_map json__ "addMetrics" MetricAttributes.of_json in
+      make ?metricAttributionArn ?metricsOutputConfig ?removeMetrics
+        ?addMetrics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a metric attribution."]
+module UpdateDatasetResponse =
+  struct
+    type nonrec t =
+      {
+      datasetArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the dataset you updated."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?datasetArn = fun () -> { datasetArn }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("datasetArn", (Option.map x.datasetArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let datasetArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetArn") in
+      make ?datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let datasetArn = field_map json__ "datasetArn" Arn.of_json in
+      make ?datasetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update a dataset to replace its schema with a new or existing one. For more information, see Replacing a dataset's schema."]
+module UpdateDatasetRequest =
+  struct
+    type nonrec t =
+      {
+      datasetArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the dataset that you want to update."];
+      schemaArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the new schema you want use."]}
+    let context_ = "UpdateDatasetRequest"
+    let make ~datasetArn =
+      fun ~schemaArn -> fun () -> { datasetArn; schemaArn }
+    let to_value x =
+      structure_to_value
+        [("datasetArn", (Some (Arn.to_value x.datasetArn)));
+        ("schemaArn", (Some (Arn.to_value x.schemaArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let schemaArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "schemaArn") in
+      let datasetArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "datasetArn") in
+      make ~schemaArn ~datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let schemaArn = field_map_exn json__ "schemaArn" Arn.of_json in
+      let datasetArn = field_map_exn json__ "datasetArn" Arn.of_json in
+      make ~schemaArn ~datasetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update a dataset to replace its schema with a new or existing one. For more information, see Replacing a dataset's schema."]
 module UpdateCampaignResponse =
   struct
     type nonrec t =
@@ -6047,12 +8240,12 @@ module UpdateCampaignResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "campaignArn") in
       make ?campaignArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let campaignArn = field_map json "campaignArn" Arn.of_json in
+    let of_json json__ =
+      let campaignArn = field_map json__ "campaignArn" Arn.of_json in
       make ?campaignArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a campaign by either deploying a new solution or changing the value of the campaign's minProvisionedTPS parameter. To update a campaign, the campaign status must be ACTIVE or CREATE FAILED. Check the campaign status using the DescribeCampaign operation. You must wait until the status of the updated campaign is ACTIVE before asking the campaign for recommendations. For more information on campaigns, see CreateCampaign."]
+       "Updates a campaign to deploy a retrained solution version with an existing campaign, change your campaign's minProvisionedTPS, or modify your campaign's configuration. For example, you can set enableMetadataWithRecommendations to true for an existing campaign. To update a campaign to start automatically using the latest solution version, specify the following: For the SolutionVersionArn parameter, specify the Amazon Resource Name (ARN) of your solution in SolutionArn/$LATEST format. In the campaignConfig, set syncWithLatestSolutionVersion to true. To update a campaign, the campaign status must be ACTIVE or CREATE FAILED. Check the campaign status using the DescribeCampaign operation. You can still get recommendations from a campaign while an update is in progress. The campaign will use the previous solution version and campaign configuration to generate recommendations until the latest campaign update status is Active. For more information about updating a campaign, including code samples, see Updating a campaign. For more information about campaigns, see Creating a campaign."]
 module UpdateCampaignRequest =
   struct
     type nonrec t =
@@ -6060,10 +8253,11 @@ module UpdateCampaignRequest =
       campaignArn: Arn.t
         [@ocaml.doc "The Amazon Resource Name (ARN) of the campaign."];
       solutionVersionArn: Arn.t option
-        [@ocaml.doc "The ARN of a new solution version to deploy."];
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of a new model to deploy. To specify the latest solution version of your solution, specify the ARN of your solution in SolutionArn/$LATEST format. You must use this format if you set syncWithLatestSolutionVersion to True in the CampaignConfig. To deploy a model that isn't the latest solution version of your solution, specify the ARN of the solution version. For more information about automatic campaign updates, see Enabling automatic campaign updates."];
       minProvisionedTPS: TransactionsPerSecond.t option
         [@ocaml.doc
-          "Specifies the requested minimum provisioned transactions (recommendations) per second that Amazon Personalize will support."];
+          "Specifies the requested minimum provisioned transactions (recommendations) per second that Amazon Personalize will support. A high minProvisionedTPS will increase your bill. We recommend starting with 1 for minProvisionedTPS (the default). Track your usage using Amazon CloudWatch metrics, and increase the minProvisionedTPS as necessary."];
       campaignConfig: CampaignConfig.t option
         [@ocaml.doc "The configuration details of a campaign."]}
     let context_ = "UpdateCampaignRequest"
@@ -6102,19 +8296,19 @@ module UpdateCampaignRequest =
       make ?campaignConfig ?minProvisionedTPS ?solutionVersionArn
         ~campaignArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let campaignConfig =
-        field_map json "campaignConfig" CampaignConfig.of_json in
+        field_map json__ "campaignConfig" CampaignConfig.of_json in
       let minProvisionedTPS =
-        field_map json "minProvisionedTPS" TransactionsPerSecond.of_json in
+        field_map json__ "minProvisionedTPS" TransactionsPerSecond.of_json in
       let solutionVersionArn =
-        field_map json "solutionVersionArn" Arn.of_json in
-      let campaignArn = field_map_exn json "campaignArn" Arn.of_json in
+        field_map json__ "solutionVersionArn" Arn.of_json in
+      let campaignArn = field_map_exn json__ "campaignArn" Arn.of_json in
       make ?campaignConfig ?minProvisionedTPS ?solutionVersionArn
         ~campaignArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a campaign by either deploying a new solution or changing the value of the campaign's minProvisionedTPS parameter. To update a campaign, the campaign status must be ACTIVE or CREATE FAILED. Check the campaign status using the DescribeCampaign operation. You must wait until the status of the updated campaign is ACTIVE before asking the campaign for recommendations. For more information on campaigns, see CreateCampaign."]
+       "Updates a campaign to deploy a retrained solution version with an existing campaign, change your campaign's minProvisionedTPS, or modify your campaign's configuration. For example, you can set enableMetadataWithRecommendations to true for an existing campaign. To update a campaign to start automatically using the latest solution version, specify the following: For the SolutionVersionArn parameter, specify the Amazon Resource Name (ARN) of your solution in SolutionArn/$LATEST format. In the campaignConfig, set syncWithLatestSolutionVersion to true. To update a campaign, the campaign status must be ACTIVE or CREATE FAILED. Check the campaign status using the DescribeCampaign operation. You can still get recommendations from a campaign while an update is in progress. The campaign will use the previous solution version and campaign configuration to generate recommendations until the latest campaign update status is Active. For more information about updating a campaign, including code samples, see Updating a campaign. For more information about campaigns, see Creating a campaign."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -6180,15 +8374,15 @@ module UntagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Remove tags that are attached to a resource."]
+  end[@@ocaml.doc
+       "Removes the specified tags that are attached to a resource. For more information, see Removing tags from Amazon Personalize resources."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: Arn.t
         [@ocaml.doc "The resource's Amazon Resource Name (ARN)."];
-      tagKeys: TagKeys.t
-        [@ocaml.doc "Keys to remove from the resource's tags."]}
+      tagKeys: TagKeys.t [@ocaml.doc "The keys of the tags to be removed."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn =
       fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
@@ -6204,12 +8398,13 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeys.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Remove tags that are attached to a resource."]
+  end[@@ocaml.doc
+       "Removes the specified tags that are attached to a resource. For more information, see Removing tags from Amazon Personalize resources."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -6293,7 +8488,7 @@ module TagResourceRequest =
         [@ocaml.doc "The resource's Amazon Resource Name (ARN)."];
       tags: Tags.t
         [@ocaml.doc
-          "Tags to apply to the resource. For more information see Tagging Personalize resources."]}
+          "Tags to apply to the resource. For more information see Tagging Amazon Personalize resources."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -6308,9 +8503,9 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" Tags.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" Tags.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Add a list of tags to a resource."]
@@ -6333,13 +8528,199 @@ module StopSolutionVersionCreationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "solutionVersionArn") in
       make ~solutionVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let solutionVersionArn =
-        field_map_exn json "solutionVersionArn" Arn.of_json in
+        field_map_exn json__ "solutionVersionArn" Arn.of_json in
       make ~solutionVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stops creating a solution version that is in a state of CREATE_PENDING or CREATE IN_PROGRESS. Depending on the current state of the solution version, the solution version state changes as follows: CREATE_PENDING > CREATE_STOPPED or CREATE_IN_PROGRESS > CREATE_STOPPING > CREATE_STOPPED You are billed for all of the training completed up until you stop the solution version creation. You cannot resume creating a solution version once it has been stopped."]
+module StopRecommenderResponse =
+  struct
+    type nonrec t =
+      {
+      recommenderArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the recommender you stopped."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?recommenderArn = fun () -> { recommenderArn }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("recommenderArn", (Option.map x.recommenderArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommenderArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "recommenderArn") in
+      make ?recommenderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommenderArn = field_map json__ "recommenderArn" Arn.of_json in
+      make ?recommenderArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stops a recommender that is ACTIVE. Stopping a recommender halts billing and automatic retraining for the recommender."]
+module StopRecommenderRequest =
+  struct
+    type nonrec t =
+      {
+      recommenderArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the recommender to stop."]}
+    let context_ = "StopRecommenderRequest"
+    let make ~recommenderArn = fun () -> { recommenderArn }
+    let to_value x =
+      structure_to_value
+        [("recommenderArn", (Some (Arn.to_value x.recommenderArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommenderArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "recommenderArn") in
+      make ~recommenderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommenderArn = field_map_exn json__ "recommenderArn" Arn.of_json in
+      make ~recommenderArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Stops a recommender that is ACTIVE. Stopping a recommender halts billing and automatic retraining for the recommender."]
+module StartRecommenderResponse =
+  struct
+    type nonrec t =
+      {
+      recommenderArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the recommender you started."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?recommenderArn = fun () -> { recommenderArn }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("recommenderArn", (Option.map x.recommenderArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommenderArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "recommenderArn") in
+      make ?recommenderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommenderArn = field_map json__ "recommenderArn" Arn.of_json in
+      make ?recommenderArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts a recommender that is INACTIVE. Starting a recommender does not create any new models, but resumes billing and automatic retraining for the recommender."]
+module StartRecommenderRequest =
+  struct
+    type nonrec t =
+      {
+      recommenderArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the recommender to start."]}
+    let context_ = "StartRecommenderRequest"
+    let make ~recommenderArn = fun () -> { recommenderArn }
+    let to_value x =
+      structure_to_value
+        [("recommenderArn", (Some (Arn.to_value x.recommenderArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommenderArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "recommenderArn") in
+      make ~recommenderArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommenderArn = field_map_exn json__ "recommenderArn" Arn.of_json in
+      make ~recommenderArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts a recommender that is INACTIVE. Starting a recommender does not create any new models, but resumes billing and automatic retraining for the recommender."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t = {
@@ -6397,15 +8778,16 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get a list of tags attached to a resource."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
       {
-      resourceArn: Arn.t [@ocaml.doc "The resource's Amazon Resource Name."]}
+      resourceArn: Arn.t
+        [@ocaml.doc "The resource's Amazon Resource Name (ARN)."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -6417,8 +8799,8 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Get a list of tags attached to a resource."]
@@ -6481,13 +8863,13 @@ module ListSolutionsResponse =
         (Option.map ~f:Solutions.of_xml) (Xml.child xml_arg0 "solutions") in
       make ?nextToken ?solutions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let solutions = field_map json "solutions" Solutions.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let solutions = field_map json__ "solutions" Solutions.of_json in
       make ?nextToken ?solutions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of solutions that use the given dataset group. When a dataset group is not specified, all the solutions associated with the account are listed. The response provides the properties for each solution, including the Amazon Resource Name (ARN). For more information on solutions, see CreateSolution."]
+       "Returns a list of solutions in a given dataset group. When a dataset group is not specified, all the solutions associated with the account are listed. The response provides the properties for each solution, including the Amazon Resource Name (ARN). For more information on solutions, see CreateSolution."]
 module ListSolutionsRequest =
   struct
     type nonrec t =
@@ -6518,14 +8900,14 @@ module ListSolutionsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetGroupArn") in
       make ?maxResults ?nextToken ?datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
       make ?maxResults ?nextToken ?datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of solutions that use the given dataset group. When a dataset group is not specified, all the solutions associated with the account are listed. The response provides the properties for each solution, including the Amazon Resource Name (ARN). For more information on solutions, see CreateSolution."]
+       "Returns a list of solutions in a given dataset group. When a dataset group is not specified, all the solutions associated with the account are listed. The response provides the properties for each solution, including the Amazon Resource Name (ARN). For more information on solutions, see CreateSolution."]
 module ListSolutionVersionsResponse =
   struct
     type nonrec t =
@@ -6597,10 +8979,10 @@ module ListSolutionVersionsResponse =
           (Xml.child xml_arg0 "solutionVersions") in
       make ?nextToken ?solutionVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let solutionVersions =
-        field_map json "solutionVersions" SolutionVersions.of_json in
+        field_map json__ "solutionVersions" SolutionVersions.of_json in
       make ?nextToken ?solutionVersions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6634,10 +9016,10 @@ module ListSolutionVersionsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionArn") in
       make ?maxResults ?nextToken ?solutionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let solutionArn = field_map json "solutionArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let solutionArn = field_map json__ "solutionArn" Arn.of_json in
       make ?maxResults ?nextToken ?solutionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6690,9 +9072,9 @@ module ListSchemasResponse =
         (Option.map ~f:Schemas.of_xml) (Xml.child xml_arg0 "schemas") in
       make ?nextToken ?schemas ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let schemas = field_map json "schemas" Schemas.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let schemas = field_map json__ "schemas" Schemas.of_json in
       make ?nextToken ?schemas ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6720,9 +9102,9 @@ module ListSchemasRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6788,9 +9170,9 @@ module ListRecommendersResponse =
           (Xml.child xml_arg0 "recommenders") in
       make ?nextToken ?recommenders ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let recommenders = field_map json "recommenders" Recommenders.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let recommenders = field_map json__ "recommenders" Recommenders.of_json in
       make ?nextToken ?recommenders ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6826,10 +9208,10 @@ module ListRecommendersRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetGroupArn") in
       make ?maxResults ?nextToken ?datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
       make ?maxResults ?nextToken ?datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6890,9 +9272,9 @@ module ListRecipesResponse =
         (Option.map ~f:Recipes.of_xml) (Xml.child xml_arg0 "recipes") in
       make ?nextToken ?recipes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let recipes = field_map json "recipes" Recipes.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let recipes = field_map json__ "recipes" Recipes.of_json in
       make ?nextToken ?recipes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6936,16 +9318,230 @@ module ListRecipesRequest =
           (Xml.child xml_arg0 "recipeProvider") in
       make ?domain ?maxResults ?nextToken ?recipeProvider ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "domain" Domain.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let domain = field_map json__ "domain" Domain.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let recipeProvider =
-        field_map json "recipeProvider" RecipeProvider.of_json in
+        field_map json__ "recipeProvider" RecipeProvider.of_json in
       make ?domain ?maxResults ?nextToken ?recipeProvider ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of available recipes. The response provides the properties for each recipe, including the recipe's Amazon Resource Name (ARN)."]
+module ListMetricAttributionsResponse =
+  struct
+    type nonrec t =
+      {
+      metricAttributions: MetricAttributions.t option
+        [@ocaml.doc "The list of metric attributions."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Specify the pagination token from a previous request to retrieve the next page of results."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?metricAttributions =
+      fun ?nextToken -> fun () -> { metricAttributions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("metricAttributions",
+           (Option.map x.metricAttributions ~f:MetricAttributions.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let metricAttributions =
+        (Option.map ~f:MetricAttributions.of_xml)
+          (Xml.child xml_arg0 "metricAttributions") in
+      make ?nextToken ?metricAttributions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let metricAttributions =
+        field_map json__ "metricAttributions" MetricAttributions.of_json in
+      make ?nextToken ?metricAttributions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists metric attributions."]
+module ListMetricAttributionsRequest =
+  struct
+    type nonrec t =
+      {
+      datasetGroupArn: Arn.t option
+        [@ocaml.doc
+          "The metric attributions' dataset group Amazon Resource Name (ARN)."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Specify the pagination token from a previous request to retrieve the next page of results."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of metric attributions to return in one page of results."]}
+    let make ?datasetGroupArn =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun () -> { datasetGroupArn; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("datasetGroupArn", (Option.map x.datasetGroupArn ~f:Arn.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let datasetGroupArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetGroupArn") in
+      make ?maxResults ?nextToken ?datasetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
+      make ?maxResults ?nextToken ?datasetGroupArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists metric attributions."]
+module ListMetricAttributionMetricsResponse =
+  struct
+    type nonrec t =
+      {
+      metrics: MetricAttributes.t option
+        [@ocaml.doc "The metrics for the specified metric attribution."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Specify the pagination token from a previous ListMetricAttributionMetricsResponse request to retrieve the next page of results."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?metrics = fun ?nextToken -> fun () -> { metrics; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("metrics", (Option.map x.metrics ~f:MetricAttributes.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let metrics =
+        (Option.map ~f:MetricAttributes.of_xml)
+          (Xml.child xml_arg0 "metrics") in
+      make ?nextToken ?metrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let metrics = field_map json__ "metrics" MetricAttributes.of_json in
+      make ?nextToken ?metrics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the metrics for the metric attribution."]
+module ListMetricAttributionMetricsRequest =
+  struct
+    type nonrec t =
+      {
+      metricAttributionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the metric attribution to retrieve attributes for."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Specify the pagination token from a previous request to retrieve the next page of results."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of metrics to return in one page of results."]}
+    let make ?metricAttributionArn =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun () -> { metricAttributionArn; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("metricAttributionArn",
+           (Option.map x.metricAttributionArn ~f:Arn.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let metricAttributionArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "metricAttributionArn") in
+      make ?maxResults ?nextToken ?metricAttributionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let metricAttributionArn =
+        field_map json__ "metricAttributionArn" Arn.of_json in
+      make ?maxResults ?nextToken ?metricAttributionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the metrics for the metric attribution."]
 module ListFiltersResponse =
   struct
     type nonrec t =
@@ -7003,9 +9599,9 @@ module ListFiltersResponse =
         (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?nextToken ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let filters = field_map json "Filters" Filters.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let filters = field_map json__ "Filters" Filters.of_json in
       make ?nextToken ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all filters that belong to a given dataset group."]
@@ -7040,10 +9636,10 @@ module ListFiltersRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetGroupArn") in
       make ?maxResults ?nextToken ?datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
       make ?maxResults ?nextToken ?datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all filters that belong to a given dataset group."]
@@ -7108,10 +9704,10 @@ module ListEventTrackersResponse =
           (Xml.child xml_arg0 "eventTrackers") in
       make ?nextToken ?eventTrackers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let eventTrackers =
-        field_map json "eventTrackers" EventTrackers.of_json in
+        field_map json__ "eventTrackers" EventTrackers.of_json in
       make ?nextToken ?eventTrackers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7147,10 +9743,10 @@ module ListEventTrackersRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetGroupArn") in
       make ?maxResults ?nextToken ?datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
       make ?maxResults ?nextToken ?datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7214,9 +9810,9 @@ module ListDatasetsResponse =
         (Option.map ~f:Datasets.of_xml) (Xml.child xml_arg0 "datasets") in
       make ?nextToken ?datasets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let datasets = field_map json "datasets" Datasets.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let datasets = field_map json__ "datasets" Datasets.of_json in
       make ?nextToken ?datasets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7230,7 +9826,7 @@ module ListDatasetsRequest =
           "The Amazon Resource Name (ARN) of the dataset group that contains the datasets to list."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "A token returned from the previous call to ListDatasetImportJobs for getting the next set of dataset import jobs (if they exist)."];
+          "A token returned from the previous call to ListDatasets for getting the next set of dataset import jobs (if they exist)."];
       maxResults: MaxResults.t option
         [@ocaml.doc "The maximum number of datasets to return."]}
     let make ?datasetGroupArn =
@@ -7252,10 +9848,10 @@ module ListDatasetsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetGroupArn") in
       make ?maxResults ?nextToken ?datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
       make ?maxResults ?nextToken ?datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7321,10 +9917,10 @@ module ListDatasetImportJobsResponse =
           (Xml.child xml_arg0 "datasetImportJobs") in
       make ?nextToken ?datasetImportJobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let datasetImportJobs =
-        field_map json "datasetImportJobs" DatasetImportJobs.of_json in
+        field_map json__ "datasetImportJobs" DatasetImportJobs.of_json in
       make ?nextToken ?datasetImportJobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7359,10 +9955,10 @@ module ListDatasetImportJobsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetArn") in
       make ?maxResults ?nextToken ?datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let datasetArn = field_map json "datasetArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let datasetArn = field_map json__ "datasetArn" Arn.of_json in
       make ?maxResults ?nextToken ?datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7419,10 +10015,10 @@ module ListDatasetGroupsResponse =
           (Xml.child xml_arg0 "datasetGroups") in
       make ?nextToken ?datasetGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let datasetGroups =
-        field_map json "datasetGroups" DatasetGroups.of_json in
+        field_map json__ "datasetGroups" DatasetGroups.of_json in
       make ?nextToken ?datasetGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7450,9 +10046,9 @@ module ListDatasetGroupsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7518,10 +10114,10 @@ module ListDatasetExportJobsResponse =
           (Xml.child xml_arg0 "datasetExportJobs") in
       make ?nextToken ?datasetExportJobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let datasetExportJobs =
-        field_map json "datasetExportJobs" DatasetExportJobs.of_json in
+        field_map json__ "datasetExportJobs" DatasetExportJobs.of_json in
       make ?nextToken ?datasetExportJobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7556,14 +10152,122 @@ module ListDatasetExportJobsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetArn") in
       make ?maxResults ?nextToken ?datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let datasetArn = field_map json "datasetArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let datasetArn = field_map json__ "datasetArn" Arn.of_json in
       make ?maxResults ?nextToken ?datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of dataset export jobs that use the given dataset. When a dataset is not specified, all the dataset export jobs associated with the account are listed. The response provides the properties for each dataset export job, including the Amazon Resource Name (ARN). For more information on dataset export jobs, see CreateDatasetExportJob. For more information on datasets, see CreateDataset."]
+module ListDataDeletionJobsResponse =
+  struct
+    type nonrec t =
+      {
+      dataDeletionJobs: DataDeletionJobs.t option
+        [@ocaml.doc "The list of data deletion jobs."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token for getting the next set of data deletion jobs (if they exist)."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataDeletionJobs =
+      fun ?nextToken -> fun () -> { dataDeletionJobs; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("dataDeletionJobs",
+           (Option.map x.dataDeletionJobs ~f:DataDeletionJobs.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let dataDeletionJobs =
+        (Option.map ~f:DataDeletionJobs.of_xml)
+          (Xml.child xml_arg0 "dataDeletionJobs") in
+      make ?nextToken ?dataDeletionJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let dataDeletionJobs =
+        field_map json__ "dataDeletionJobs" DataDeletionJobs.of_json in
+      make ?nextToken ?dataDeletionJobs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of data deletion jobs for a dataset group ordered by creation time, with the most recent first. When a dataset group is not specified, all the data deletion jobs associated with the account are listed. The response provides the properties for each job, including the Amazon Resource Name (ARN). For more information on data deletion jobs, see Deleting users."]
+module ListDataDeletionJobsRequest =
+  struct
+    type nonrec t =
+      {
+      datasetGroupArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the dataset group to list data deletion jobs for."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token returned from the previous call to ListDataDeletionJobs for getting the next set of jobs (if they exist)."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of data deletion jobs to return."]}
+    let make ?datasetGroupArn =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun () -> { datasetGroupArn; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("datasetGroupArn", (Option.map x.datasetGroupArn ~f:Arn.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let datasetGroupArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetGroupArn") in
+      make ?maxResults ?nextToken ?datasetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
+      make ?maxResults ?nextToken ?datasetGroupArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of data deletion jobs for a dataset group ordered by creation time, with the most recent first. When a dataset group is not specified, all the data deletion jobs associated with the account are listed. The response provides the properties for each job, including the Amazon Resource Name (ARN). For more information on data deletion jobs, see Deleting users."]
 module ListCampaignsResponse =
   struct
     type nonrec t =
@@ -7622,9 +10326,9 @@ module ListCampaignsResponse =
         (Option.map ~f:Campaigns.of_xml) (Xml.child xml_arg0 "campaigns") in
       make ?nextToken ?campaigns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let campaigns = field_map json "campaigns" Campaigns.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let campaigns = field_map json__ "campaigns" Campaigns.of_json in
       make ?nextToken ?campaigns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7659,10 +10363,10 @@ module ListCampaignsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionArn") in
       make ?maxResults ?nextToken ?solutionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let solutionArn = field_map json "solutionArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let solutionArn = field_map json__ "solutionArn" Arn.of_json in
       make ?maxResults ?nextToken ?solutionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7729,10 +10433,10 @@ module ListBatchSegmentJobsResponse =
           (Xml.child xml_arg0 "batchSegmentJobs") in
       make ?nextToken ?batchSegmentJobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let batchSegmentJobs =
-        field_map json "batchSegmentJobs" BatchSegmentJobs.of_json in
+        field_map json__ "batchSegmentJobs" BatchSegmentJobs.of_json in
       make ?nextToken ?batchSegmentJobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7769,11 +10473,11 @@ module ListBatchSegmentJobsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionVersionArn") in
       make ?maxResults ?nextToken ?solutionVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let solutionVersionArn =
-        field_map json "solutionVersionArn" Arn.of_json in
+        field_map json__ "solutionVersionArn" Arn.of_json in
       make ?maxResults ?nextToken ?solutionVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7840,10 +10544,10 @@ module ListBatchInferenceJobsResponse =
           (Xml.child xml_arg0 "batchInferenceJobs") in
       make ?nextToken ?batchInferenceJobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let batchInferenceJobs =
-        field_map json "batchInferenceJobs" BatchInferenceJobs.of_json in
+        field_map json__ "batchInferenceJobs" BatchInferenceJobs.of_json in
       make ?nextToken ?batchInferenceJobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7880,11 +10584,11 @@ module ListBatchInferenceJobsRequest =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionVersionArn") in
       make ?maxResults ?nextToken ?solutionVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let solutionVersionArn =
-        field_map json "solutionVersionArn" Arn.of_json in
+        field_map json__ "solutionVersionArn" Arn.of_json in
       make ?maxResults ?nextToken ?solutionVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7897,7 +10601,8 @@ module GetSolutionMetricsResponse =
         [@ocaml.doc
           "The same solution version ARN as specified in the request."];
       metrics: Metrics.t option
-        [@ocaml.doc "The metrics for the solution version."]}
+        [@ocaml.doc
+          "The metrics for the solution version. For more information, see Evaluating a solution version with metrics ."]}
     type nonrec error =
       [ `InvalidInputException of InvalidInputException.t 
       | `ResourceInUseException of ResourceInUseException.t 
@@ -7958,10 +10663,10 @@ module GetSolutionMetricsResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionVersionArn") in
       make ?metrics ?solutionVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metrics = field_map json "metrics" Metrics.of_json in
+    let of_json json__ =
+      let metrics = field_map json__ "metrics" Metrics.of_json in
       let solutionVersionArn =
-        field_map json "solutionVersionArn" Arn.of_json in
+        field_map json__ "solutionVersionArn" Arn.of_json in
       make ?metrics ?solutionVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the metrics for the specified solution version."]
@@ -7984,9 +10689,9 @@ module GetSolutionMetricsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "solutionVersionArn") in
       make ~solutionVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let solutionVersionArn =
-        field_map_exn json "solutionVersionArn" Arn.of_json in
+        field_map_exn json__ "solutionVersionArn" Arn.of_json in
       make ~solutionVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the metrics for the specified solution version."]
@@ -8044,9 +10749,9 @@ module DescribeSolutionVersionResponse =
           (Xml.child xml_arg0 "solutionVersion") in
       make ?solutionVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let solutionVersion =
-        field_map json "solutionVersion" SolutionVersion.of_json in
+        field_map json__ "solutionVersion" SolutionVersion.of_json in
       make ?solutionVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8070,9 +10775,9 @@ module DescribeSolutionVersionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "solutionVersionArn") in
       make ~solutionVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let solutionVersionArn =
-        field_map_exn json "solutionVersionArn" Arn.of_json in
+        field_map_exn json__ "solutionVersionArn" Arn.of_json in
       make ~solutionVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8129,8 +10834,8 @@ module DescribeSolutionResponse =
         (Option.map ~f:Solution.of_xml) (Xml.child xml_arg0 "solution") in
       make ?solution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let solution = field_map json "solution" Solution.of_json in
+    let of_json json__ =
+      let solution = field_map json__ "solution" Solution.of_json in
       make ?solution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8153,8 +10858,8 @@ module DescribeSolutionRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "solutionArn") in
       make ~solutionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let solutionArn = field_map_exn json "solutionArn" Arn.of_json in
+    let of_json json__ =
+      let solutionArn = field_map_exn json__ "solutionArn" Arn.of_json in
       make ~solutionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8210,8 +10915,8 @@ module DescribeSchemaResponse =
         (Option.map ~f:DatasetSchema.of_xml) (Xml.child xml_arg0 "schema") in
       make ?schema ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schema = field_map json "schema" DatasetSchema.of_json in
+    let of_json json__ =
+      let schema = field_map json__ "schema" DatasetSchema.of_json in
       make ?schema ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8233,8 +10938,8 @@ module DescribeSchemaRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "schemaArn") in
       make ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaArn = field_map_exn json "schemaArn" Arn.of_json in
+    let of_json json__ =
+      let schemaArn = field_map_exn json__ "schemaArn" Arn.of_json in
       make ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8291,12 +10996,12 @@ module DescribeRecommenderResponse =
         (Option.map ~f:Recommender.of_xml) (Xml.child xml_arg0 "recommender") in
       make ?recommender ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recommender = field_map json "recommender" Recommender.of_json in
+    let of_json json__ =
+      let recommender = field_map json__ "recommender" Recommender.of_json in
       make ?recommender ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the given recommender, including its status. A recommender can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS When the status is CREATE FAILED, the response includes the failureReason key, which describes why. For more information on recommenders, see CreateRecommender."]
+       "Describes the given recommender, including its status. A recommender can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED STOP PENDING > STOP IN_PROGRESS > INACTIVE > START PENDING > START IN_PROGRESS > ACTIVE DELETE PENDING > DELETE IN_PROGRESS When the status is CREATE FAILED, the response includes the failureReason key, which describes why. The modelMetrics key is null when the recommender is being created or deleted. For more information on recommenders, see CreateRecommender."]
 module DescribeRecommenderRequest =
   struct
     type nonrec t =
@@ -8316,12 +11021,12 @@ module DescribeRecommenderRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "recommenderArn") in
       make ~recommenderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recommenderArn = field_map_exn json "recommenderArn" Arn.of_json in
+    let of_json json__ =
+      let recommenderArn = field_map_exn json__ "recommenderArn" Arn.of_json in
       make ~recommenderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the given recommender, including its status. A recommender can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS When the status is CREATE FAILED, the response includes the failureReason key, which describes why. For more information on recommenders, see CreateRecommender."]
+       "Describes the given recommender, including its status. A recommender can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED STOP PENDING > STOP IN_PROGRESS > INACTIVE > START PENDING > START IN_PROGRESS > ACTIVE DELETE PENDING > DELETE IN_PROGRESS When the status is CREATE FAILED, the response includes the failureReason key, which describes why. The modelMetrics key is null when the recommender is being created or deleted. For more information on recommenders, see CreateRecommender."]
 module DescribeRecipeResponse =
   struct
     type nonrec t =
@@ -8374,8 +11079,9 @@ module DescribeRecipeResponse =
         (Option.map ~f:Recipe.of_xml) (Xml.child xml_arg0 "recipe") in
       make ?recipe ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recipe = field_map json "recipe" Recipe.of_json in make ?recipe ()
+    let of_json json__ =
+      let recipe = field_map json__ "recipe" Recipe.of_json in
+      make ?recipe ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a recipe. A recipe contains three items: An algorithm that trains a model. Hyperparameters that govern the training. Feature transformation information for modifying the input data before training. Amazon Personalize provides a set of predefined recipes. You specify a recipe when you create a solution with the CreateSolution API. CreateSolution trains a model by using the algorithm in the specified recipe and a training dataset. The solution, when deployed as a campaign, can provide recommendations using the GetRecommendations API."]
@@ -8396,12 +11102,97 @@ module DescribeRecipeRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "recipeArn") in
       make ~recipeArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recipeArn = field_map_exn json "recipeArn" Arn.of_json in
+    let of_json json__ =
+      let recipeArn = field_map_exn json__ "recipeArn" Arn.of_json in
       make ~recipeArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a recipe. A recipe contains three items: An algorithm that trains a model. Hyperparameters that govern the training. Feature transformation information for modifying the input data before training. Amazon Personalize provides a set of predefined recipes. You specify a recipe when you create a solution with the CreateSolution API. CreateSolution trains a model by using the algorithm in the specified recipe and a training dataset. The solution, when deployed as a campaign, can provide recommendations using the GetRecommendations API."]
+module DescribeMetricAttributionResponse =
+  struct
+    type nonrec t =
+      {
+      metricAttribution: MetricAttribution.t option
+        [@ocaml.doc "The details of the metric attribution."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?metricAttribution = fun () -> { metricAttribution }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("metricAttribution",
+           (Option.map x.metricAttribution ~f:MetricAttribution.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricAttribution =
+        (Option.map ~f:MetricAttribution.of_xml)
+          (Xml.child xml_arg0 "metricAttribution") in
+      make ?metricAttribution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricAttribution =
+        field_map json__ "metricAttribution" MetricAttribution.of_json in
+      make ?metricAttribution ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a metric attribution."]
+module DescribeMetricAttributionRequest =
+  struct
+    type nonrec t =
+      {
+      metricAttributionArn: Arn.t
+        [@ocaml.doc "The metric attribution's Amazon Resource Name (ARN)."]}
+    let context_ = "DescribeMetricAttributionRequest"
+    let make ~metricAttributionArn = fun () -> { metricAttributionArn }
+    let to_value x =
+      structure_to_value
+        [("metricAttributionArn",
+           (Some (Arn.to_value x.metricAttributionArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricAttributionArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "metricAttributionArn") in
+      make ~metricAttributionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricAttributionArn =
+        field_map_exn json__ "metricAttributionArn" Arn.of_json in
+      make ~metricAttributionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a metric attribution."]
 module DescribeFilterResponse =
   struct
     type nonrec t =
@@ -8453,8 +11244,9 @@ module DescribeFilterResponse =
         (Option.map ~f:Filter.of_xml) (Xml.child xml_arg0 "filter") in
       make ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filter = field_map json "filter" Filter.of_json in make ?filter ()
+    let of_json json__ =
+      let filter = field_map json__ "filter" Filter.of_json in
+      make ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a filter's properties."]
 module DescribeFilterRequest =
@@ -8472,8 +11264,8 @@ module DescribeFilterRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filterArn") in
       make ~filterArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filterArn = field_map_exn json "filterArn" Arn.of_json in
+    let of_json json__ =
+      let filterArn = field_map_exn json__ "filterArn" Arn.of_json in
       make ~filterArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a filter's properties."]
@@ -8532,9 +11324,10 @@ module DescribeFeatureTransformationResponse =
           (Xml.child xml_arg0 "featureTransformation") in
       make ?featureTransformation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let featureTransformation =
-        field_map json "featureTransformation" FeatureTransformation.of_json in
+        field_map json__ "featureTransformation"
+          FeatureTransformation.of_json in
       make ?featureTransformation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the given feature transformation."]
@@ -8560,9 +11353,9 @@ module DescribeFeatureTransformationRequest =
              "featureTransformationArn") in
       make ~featureTransformationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let featureTransformationArn =
-        field_map_exn json "featureTransformationArn" Arn.of_json in
+        field_map_exn json__ "featureTransformationArn" Arn.of_json in
       make ~featureTransformationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the given feature transformation."]
@@ -8620,8 +11413,8 @@ module DescribeEventTrackerResponse =
           (Xml.child xml_arg0 "eventTracker") in
       make ?eventTracker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eventTracker = field_map json "eventTracker" EventTracker.of_json in
+    let of_json json__ =
+      let eventTracker = field_map json__ "eventTracker" EventTracker.of_json in
       make ?eventTracker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8645,8 +11438,9 @@ module DescribeEventTrackerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "eventTrackerArn") in
       make ~eventTrackerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eventTrackerArn = field_map_exn json "eventTrackerArn" Arn.of_json in
+    let of_json json__ =
+      let eventTrackerArn =
+        field_map_exn json__ "eventTrackerArn" Arn.of_json in
       make ~eventTrackerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8703,8 +11497,8 @@ module DescribeDatasetResponse =
         (Option.map ~f:Dataset.of_xml) (Xml.child xml_arg0 "dataset") in
       make ?dataset ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataset = field_map json "dataset" Dataset.of_json in
+    let of_json json__ =
+      let dataset = field_map json__ "dataset" Dataset.of_json in
       make ?dataset ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8726,8 +11520,8 @@ module DescribeDatasetRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "datasetArn") in
       make ~datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetArn = field_map_exn json "datasetArn" Arn.of_json in
+    let of_json json__ =
+      let datasetArn = field_map_exn json__ "datasetArn" Arn.of_json in
       make ~datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8787,9 +11581,9 @@ module DescribeDatasetImportJobResponse =
           (Xml.child xml_arg0 "datasetImportJob") in
       make ?datasetImportJob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetImportJob =
-        field_map json "datasetImportJob" DatasetImportJob.of_json in
+        field_map json__ "datasetImportJob" DatasetImportJob.of_json in
       make ?datasetImportJob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8813,9 +11607,9 @@ module DescribeDatasetImportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "datasetImportJobArn") in
       make ~datasetImportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetImportJobArn =
-        field_map_exn json "datasetImportJobArn" Arn.of_json in
+        field_map_exn json__ "datasetImportJobArn" Arn.of_json in
       make ~datasetImportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8874,8 +11668,8 @@ module DescribeDatasetGroupResponse =
           (Xml.child xml_arg0 "datasetGroup") in
       make ?datasetGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetGroup = field_map json "datasetGroup" DatasetGroup.of_json in
+    let of_json json__ =
+      let datasetGroup = field_map json__ "datasetGroup" DatasetGroup.of_json in
       make ?datasetGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8899,8 +11693,9 @@ module DescribeDatasetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "datasetGroupArn") in
       make ~datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetGroupArn = field_map_exn json "datasetGroupArn" Arn.of_json in
+    let of_json json__ =
+      let datasetGroupArn =
+        field_map_exn json__ "datasetGroupArn" Arn.of_json in
       make ~datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8960,9 +11755,9 @@ module DescribeDatasetExportJobResponse =
           (Xml.child xml_arg0 "datasetExportJob") in
       make ?datasetExportJob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetExportJob =
-        field_map json "datasetExportJob" DatasetExportJob.of_json in
+        field_map json__ "datasetExportJob" DatasetExportJob.of_json in
       make ?datasetExportJob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8986,19 +11781,108 @@ module DescribeDatasetExportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "datasetExportJobArn") in
       make ~datasetExportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetExportJobArn =
-        field_map_exn json "datasetExportJobArn" Arn.of_json in
+        field_map_exn json__ "datasetExportJobArn" Arn.of_json in
       make ~datasetExportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the dataset export job created by CreateDatasetExportJob, including the export job status."]
+module DescribeDataDeletionJobResponse =
+  struct
+    type nonrec t =
+      {
+      dataDeletionJob: DataDeletionJob.t option
+        [@ocaml.doc
+          "Information about the data deletion job, including the status. The status is one of the following values: PENDING IN_PROGRESS COMPLETED FAILED"]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataDeletionJob = fun () -> { dataDeletionJob }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("dataDeletionJob",
+           (Option.map x.dataDeletionJob ~f:DataDeletionJob.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataDeletionJob =
+        (Option.map ~f:DataDeletionJob.of_xml)
+          (Xml.child xml_arg0 "dataDeletionJob") in
+      make ?dataDeletionJob ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataDeletionJob =
+        field_map json__ "dataDeletionJob" DataDeletionJob.of_json in
+      make ?dataDeletionJob ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the data deletion job created by CreateDataDeletionJob, including the job status."]
+module DescribeDataDeletionJobRequest =
+  struct
+    type nonrec t =
+      {
+      dataDeletionJobArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the data deletion job."]}
+    let context_ = "DescribeDataDeletionJobRequest"
+    let make ~dataDeletionJobArn = fun () -> { dataDeletionJobArn }
+    let to_value x =
+      structure_to_value
+        [("dataDeletionJobArn", (Some (Arn.to_value x.dataDeletionJobArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataDeletionJobArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataDeletionJobArn") in
+      make ~dataDeletionJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataDeletionJobArn =
+        field_map_exn json__ "dataDeletionJobArn" Arn.of_json in
+      make ~dataDeletionJobArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the data deletion job created by CreateDataDeletionJob, including the job status."]
 module DescribeCampaignResponse =
   struct
     type nonrec t =
       {
       campaign: Campaign.t option
-        [@ocaml.doc "The properties of the campaign."]}
+        [@ocaml.doc
+          "The latestCampaignUpdate field is only returned when the campaign has had at least one UpdateCampaign call. The properties of the campaign. The latestCampaignUpdate field is only returned when the campaign has had at least one UpdateCampaign call."]}
     type nonrec error =
       [ `InvalidInputException of InvalidInputException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -9045,8 +11929,8 @@ module DescribeCampaignResponse =
         (Option.map ~f:Campaign.of_xml) (Xml.child xml_arg0 "campaign") in
       make ?campaign ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let campaign = field_map json "campaign" Campaign.of_json in
+    let of_json json__ =
+      let campaign = field_map json__ "campaign" Campaign.of_json in
       make ?campaign ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9068,8 +11952,8 @@ module DescribeCampaignRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "campaignArn") in
       make ~campaignArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let campaignArn = field_map_exn json "campaignArn" Arn.of_json in
+    let of_json json__ =
+      let campaignArn = field_map_exn json__ "campaignArn" Arn.of_json in
       make ~campaignArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9128,9 +12012,9 @@ module DescribeBatchSegmentJobResponse =
           (Xml.child xml_arg0 "batchSegmentJob") in
       make ?batchSegmentJob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchSegmentJob =
-        field_map json "batchSegmentJob" BatchSegmentJob.of_json in
+        field_map json__ "batchSegmentJob" BatchSegmentJob.of_json in
       make ?batchSegmentJob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9153,9 +12037,9 @@ module DescribeBatchSegmentJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "batchSegmentJobArn") in
       make ~batchSegmentJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchSegmentJobArn =
-        field_map_exn json "batchSegmentJobArn" Arn.of_json in
+        field_map_exn json__ "batchSegmentJobArn" Arn.of_json in
       make ~batchSegmentJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9214,9 +12098,9 @@ module DescribeBatchInferenceJobResponse =
           (Xml.child xml_arg0 "batchInferenceJob") in
       make ?batchInferenceJob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchInferenceJob =
-        field_map json "batchInferenceJob" BatchInferenceJob.of_json in
+        field_map json__ "batchInferenceJob" BatchInferenceJob.of_json in
       make ?batchInferenceJob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9240,9 +12124,9 @@ module DescribeBatchInferenceJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "batchInferenceJobArn") in
       make ~batchInferenceJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchInferenceJobArn =
-        field_map_exn json "batchInferenceJobArn" Arn.of_json in
+        field_map_exn json__ "batchInferenceJobArn" Arn.of_json in
       make ~batchInferenceJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9299,8 +12183,8 @@ module DescribeAlgorithmResponse =
         (Option.map ~f:Algorithm.of_xml) (Xml.child xml_arg0 "algorithm") in
       make ?algorithm ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let algorithm = field_map json "algorithm" Algorithm.of_json in
+    let of_json json__ =
+      let algorithm = field_map json__ "algorithm" Algorithm.of_json in
       make ?algorithm ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the given algorithm."]
@@ -9322,8 +12206,8 @@ module DescribeAlgorithmRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "algorithmArn") in
       make ~algorithmArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let algorithmArn = field_map_exn json "algorithmArn" Arn.of_json in
+    let of_json json__ =
+      let algorithmArn = field_map_exn json__ "algorithmArn" Arn.of_json in
       make ~algorithmArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the given algorithm."]
@@ -9343,8 +12227,8 @@ module DeleteSolutionRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "solutionArn") in
       make ~solutionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let solutionArn = field_map_exn json "solutionArn" Arn.of_json in
+    let of_json json__ =
+      let solutionArn = field_map_exn json__ "solutionArn" Arn.of_json in
       make ~solutionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9366,8 +12250,8 @@ module DeleteSchemaRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "schemaArn") in
       make ~schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaArn = field_map_exn json "schemaArn" Arn.of_json in
+    let of_json json__ =
+      let schemaArn = field_map_exn json__ "schemaArn" Arn.of_json in
       make ~schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9391,12 +12275,37 @@ module DeleteRecommenderRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "recommenderArn") in
       make ~recommenderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recommenderArn = field_map_exn json "recommenderArn" Arn.of_json in
+    let of_json json__ =
+      let recommenderArn = field_map_exn json__ "recommenderArn" Arn.of_json in
       make ~recommenderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deactivates and removes a recommender. A deleted recommender can no longer be specified in a GetRecommendations request."]
+module DeleteMetricAttributionRequest =
+  struct
+    type nonrec t =
+      {
+      metricAttributionArn: Arn.t
+        [@ocaml.doc "The metric attribution's Amazon Resource Name (ARN)."]}
+    let context_ = "DeleteMetricAttributionRequest"
+    let make ~metricAttributionArn = fun () -> { metricAttributionArn }
+    let to_value x =
+      structure_to_value
+        [("metricAttributionArn",
+           (Some (Arn.to_value x.metricAttributionArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricAttributionArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "metricAttributionArn") in
+      make ~metricAttributionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricAttributionArn =
+        field_map_exn json__ "metricAttributionArn" Arn.of_json in
+      make ~metricAttributionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a metric attribution."]
 module DeleteFilterRequest =
   struct
     type nonrec t =
@@ -9412,8 +12321,8 @@ module DeleteFilterRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filterArn") in
       make ~filterArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filterArn = field_map_exn json "filterArn" Arn.of_json in
+    let of_json json__ =
+      let filterArn = field_map_exn json__ "filterArn" Arn.of_json in
       make ~filterArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a filter."]
@@ -9436,12 +12345,13 @@ module DeleteEventTrackerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "eventTrackerArn") in
       make ~eventTrackerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eventTrackerArn = field_map_exn json "eventTrackerArn" Arn.of_json in
+    let of_json json__ =
+      let eventTrackerArn =
+        field_map_exn json__ "eventTrackerArn" Arn.of_json in
       make ~eventTrackerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the event tracker. Does not delete the event-interactions dataset from the associated dataset group. For more information on event trackers, see CreateEventTracker."]
+       "Deletes the event tracker. Does not delete the dataset from the dataset group. For more information on event trackers, see CreateEventTracker."]
 module DeleteDatasetRequest =
   struct
     type nonrec t =
@@ -9459,12 +12369,12 @@ module DeleteDatasetRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "datasetArn") in
       make ~datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetArn = field_map_exn json "datasetArn" Arn.of_json in
+    let of_json json__ =
+      let datasetArn = field_map_exn json__ "datasetArn" Arn.of_json in
       make ~datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a dataset. You can't delete a dataset if an associated DatasetImportJob or SolutionVersion is in the CREATE PENDING or IN PROGRESS state. For more information on datasets, see CreateDataset."]
+       "Deletes a dataset. You can't delete a dataset if an associated DatasetImportJob or SolutionVersion is in the CREATE PENDING or IN PROGRESS state. For more information about deleting datasets, see Deleting a dataset."]
 module DeleteDatasetGroupRequest =
   struct
     type nonrec t =
@@ -9483,8 +12393,9 @@ module DeleteDatasetGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "datasetGroupArn") in
       make ~datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetGroupArn = field_map_exn json "datasetGroupArn" Arn.of_json in
+    let of_json json__ =
+      let datasetGroupArn =
+        field_map_exn json__ "datasetGroupArn" Arn.of_json in
       make ~datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9507,8 +12418,8 @@ module DeleteCampaignRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "campaignArn") in
       make ~campaignArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let campaignArn = field_map_exn json "campaignArn" Arn.of_json in
+    let of_json json__ =
+      let campaignArn = field_map_exn json__ "campaignArn" Arn.of_json in
       make ~campaignArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9522,6 +12433,7 @@ module CreateSolutionVersionResponse =
     type nonrec error =
       [ `InvalidInputException of InvalidInputException.t 
       | `LimitExceededException of LimitExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `TooManyTagsException of TooManyTagsException.t 
@@ -9533,6 +12445,9 @@ module CreateSolutionVersionResponse =
           `InvalidInputException (InvalidInputException.of_json json)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
       | "ResourceInUseException" ->
           `ResourceInUseException (ResourceInUseException.of_json json)
       | "ResourceNotFoundException" ->
@@ -9548,6 +12463,9 @@ module CreateSolutionVersionResponse =
           `InvalidInputException (InvalidInputException.of_xml xml)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
       | "ResourceInUseException" ->
           `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -9566,6 +12484,10 @@ module CreateSolutionVersionResponse =
           `Assoc
             [("error", (`String "LimitExceededException"));
             ("details", (LimitExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
       | `ResourceInUseException e ->
           `Assoc
             [("error", (`String "ResourceInUseException"));
@@ -9593,9 +12515,9 @@ module CreateSolutionVersionResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionVersionArn") in
       make ?solutionVersionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let solutionVersionArn =
-        field_map json "solutionVersionArn" Arn.of_json in
+        field_map json__ "solutionVersionArn" Arn.of_json in
       make ?solutionVersionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9604,21 +12526,25 @@ module CreateSolutionVersionRequest =
   struct
     type nonrec t =
       {
+      name: Name.t option [@ocaml.doc "The name of the solution version."];
       solutionArn: Arn.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the solution containing the training configuration information."];
       trainingMode: TrainingMode.t option
         [@ocaml.doc
-          "The scope of training to be performed when creating the solution version. The FULL option trains the solution version based on the entirety of the input solution's training data, while the UPDATE option processes only the data that has changed in comparison to the input solution. Choose UPDATE when you want to incrementally update your solution version instead of creating an entirely new one. The UPDATE option can only be used when you already have an active solution version created from the input solution using the FULL option and the input solution was trained with the User-Personalization recipe or the HRNN-Coldstart recipe."];
+          "The scope of training to be performed when creating the solution version. The default is FULL. This creates a completely new model based on the entirety of the training data from the datasets in your dataset group. If you use User-Personalization, you can specify a training mode of UPDATE. This updates the model to consider new items for recommendations. It is not a full retraining. You should still complete a full retraining weekly. If you specify UPDATE, Amazon Personalize will stop automatic updates for the solution version. To resume updates, create a new solution with training mode set to FULL and deploy it in a campaign. For more information about automatic updates, see Automatic updates. The UPDATE option can only be used when you already have an active solution version created from the input solution using the FULL option and the input solution was trained with the User-Personalization recipe or the legacy HRNN-Coldstart recipe."];
       tags: Tags.t option
         [@ocaml.doc "A list of tags to apply to the solution version."]}
     let context_ = "CreateSolutionVersionRequest"
-    let make ?trainingMode =
-      fun ?tags ->
-        fun ~solutionArn -> fun () -> { trainingMode; tags; solutionArn }
+    let make ?name =
+      fun ?trainingMode ->
+        fun ?tags ->
+          fun ~solutionArn ->
+            fun () -> { name; trainingMode; tags; solutionArn }
     let to_value x =
       structure_to_value
-        [("solutionArn", (Some (Arn.to_value x.solutionArn)));
+        [("name", (Option.map x.name ~f:Name.to_value));
+        ("solutionArn", (Some (Arn.to_value x.solutionArn)));
         ("trainingMode",
           (Option.map x.trainingMode ~f:TrainingMode.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value))]
@@ -9630,13 +12556,15 @@ module CreateSolutionVersionRequest =
           (Xml.child xml_arg0 "trainingMode") in
       let solutionArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "solutionArn") in
-      make ?tags ?trainingMode ~solutionArn ()
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      make ?tags ?trainingMode ~solutionArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let trainingMode = field_map json "trainingMode" TrainingMode.of_json in
-      let solutionArn = field_map_exn json "solutionArn" Arn.of_json in
-      make ?tags ?trainingMode ~solutionArn ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let trainingMode = field_map json__ "trainingMode" TrainingMode.of_json in
+      let solutionArn = field_map_exn json__ "solutionArn" Arn.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      make ?tags ?trainingMode ~solutionArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Trains or retrains an active solution in a Custom dataset group. A solution is created using the CreateSolution operation and must be in the ACTIVE state before calling CreateSolutionVersion. A new version of the solution is created every time you call this operation. Status A solution version can be in one of the following states: CREATE PENDING CREATE IN_PROGRESS ACTIVE CREATE FAILED CREATE STOPPING CREATE STOPPED To get the status of the version, call DescribeSolutionVersion. Wait until the status shows as ACTIVE before calling CreateCampaign. If the status shows as CREATE FAILED, the response includes a failureReason key, which describes why the job failed. Related APIs ListSolutionVersions DescribeSolutionVersion ListSolutions CreateSolution DescribeSolution DeleteSolution"]
@@ -9729,12 +12657,12 @@ module CreateSolutionResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "solutionArn") in
       make ?solutionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let solutionArn = field_map json "solutionArn" Arn.of_json in
+    let of_json json__ =
+      let solutionArn = field_map json__ "solutionArn" Arn.of_json in
       make ?solutionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates the configuration for training a model. A trained model is known as a solution. After the configuration is created, you train the model (create a solution) by calling the CreateSolutionVersion operation. Every time you call CreateSolutionVersion, a new version of the solution is created. After creating a solution version, you check its accuracy by calling GetSolutionMetrics. When you are satisfied with the version, you deploy it using CreateCampaign. The campaign provides recommendations to a client through the GetRecommendations API. To train a model, Amazon Personalize requires training data and a recipe. The training data comes from the dataset group that you provide in the request. A recipe specifies the training algorithm and a feature transformation. You can specify one of the predefined recipes provided by Amazon Personalize. Alternatively, you can specify performAutoML and Amazon Personalize will analyze your data and select the optimum USER_PERSONALIZATION recipe for you. Amazon Personalize doesn't support configuring the hpoObjective for solution hyperparameter optimization at this time. Status A solution can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the status of the solution, call DescribeSolution. Wait until the status shows as ACTIVE before calling CreateSolutionVersion. Related APIs ListSolutions CreateSolutionVersion DescribeSolution DeleteSolution ListSolutionVersions DescribeSolutionVersion"]
+       "By default, all new solutions use automatic training. With automatic training, you incur training costs while your solution is active. To avoid unnecessary costs, when you are finished you can update the solution to turn off automatic training. For information about training costs, see Amazon Personalize pricing. Creates the configuration for training a model (creating a solution version). This configuration includes the recipe to use for model training and optional training configuration, such as columns to use in training and feature transformation parameters. For more information about configuring a solution, see Creating and configuring a solution. By default, new solutions use automatic training to create solution versions every 7 days. You can change the training frequency. Automatic solution version creation starts within one hour after the solution is ACTIVE. If you manually create a solution version within the hour, the solution skips the first automatic training. For more information, see Configuring automatic training. To turn off automatic training, set performAutoTraining to false. If you turn off automatic training, you must manually create a solution version by calling the CreateSolutionVersion operation. After training starts, you can get the solution version's Amazon Resource Name (ARN) with the ListSolutionVersions API operation. To get its status, use the DescribeSolutionVersion. After training completes you can evaluate model accuracy by calling GetSolutionMetrics. When you are satisfied with the solution version, you deploy it using CreateCampaign. The campaign provides recommendations to a client through the GetRecommendations API. Amazon Personalize doesn't support configuring the hpoObjective for solution hyperparameter optimization at this time. Status A solution can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the status of the solution, call DescribeSolution. If you use manual training, the status must be ACTIVE before you call CreateSolutionVersion. Related APIs UpdateSolution ListSolutions CreateSolutionVersion DescribeSolution DeleteSolution ListSolutionVersions DescribeSolutionVersion"]
 module CreateSolutionRequest =
   struct
     type nonrec t =
@@ -9745,10 +12673,16 @@ module CreateSolutionRequest =
           "Whether to perform hyperparameter optimization (HPO) on the specified or selected recipe. The default is false. When performing AutoML, this parameter is always true and you should not set it to false."];
       performAutoML: PerformAutoML.t option
         [@ocaml.doc
-          "Whether to perform automated machine learning (AutoML). The default is false. For this case, you must specify recipeArn. When set to true, Amazon Personalize analyzes your training data and selects the optimal USER_PERSONALIZATION recipe and hyperparameters. In this case, you must omit recipeArn. Amazon Personalize determines the optimal recipe by running tests with different values for the hyperparameters. AutoML lengthens the training process as compared to selecting a specific recipe."];
+          "We don't recommend enabling automated machine learning. Instead, match your use case to the available Amazon Personalize recipes. For more information, see Choosing a recipe. Whether to perform automated machine learning (AutoML). The default is false. For this case, you must specify recipeArn. When set to true, Amazon Personalize analyzes your training data and selects the optimal USER_PERSONALIZATION recipe and hyperparameters. In this case, you must omit recipeArn. Amazon Personalize determines the optimal recipe by running tests with different values for the hyperparameters. AutoML lengthens the training process as compared to selecting a specific recipe."];
+      performAutoTraining: PerformAutoTraining.t option
+        [@ocaml.doc
+          "Whether the solution uses automatic training to create new solution versions (trained models). The default is True and the solution automatically creates new solution versions every 7 days. You can change the training frequency by specifying a schedulingExpression in the AutoTrainingConfig as part of solution configuration. For more information about automatic training, see Configuring automatic training. Automatic solution version creation starts within one hour after the solution is ACTIVE. If you manually create a solution version within the hour, the solution skips the first automatic training. After training starts, you can get the solution version's Amazon Resource Name (ARN) with the ListSolutionVersions API operation. To get its status, use the DescribeSolutionVersion."];
+      performIncrementalUpdate: PerformIncrementalUpdate.t option
+        [@ocaml.doc
+          "Whether to perform incremental training updates on your model. When enabled, this allows the model to learn from new data more frequently without requiring full retraining, which enables near real-time personalization. This parameter is supported only for solutions that use the semantic-similarity recipe."];
       recipeArn: Arn.t option
         [@ocaml.doc
-          "The ARN of the recipe to use for model training. Only specified when performAutoML is false."];
+          "The Amazon Resource Name (ARN) of the recipe to use for model training. This is required when performAutoML is false. For information about different Amazon Personalize recipes and their ARNs, see Choosing a recipe."];
       datasetGroupArn: Arn.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the dataset group that provides the training data."];
@@ -9757,35 +12691,44 @@ module CreateSolutionRequest =
           "When your have multiple event types (using an EVENT_TYPE schema field), this parameter specifies which event type (for example, 'click' or 'like') is used for training the model. If you do not provide an eventType, Amazon Personalize will use all interactions for training with equal weight regardless of type."];
       solutionConfig: SolutionConfig.t option
         [@ocaml.doc
-          "The configuration to use with the solution. When performAutoML is set to true, Amazon Personalize only evaluates the autoMLConfig section of the solution configuration. Amazon Personalize doesn't support configuring the hpoObjective at this time."];
+          "The configuration properties for the solution. When performAutoML is set to true, Amazon Personalize only evaluates the autoMLConfig section of the solution configuration. Amazon Personalize doesn't support configuring the hpoObjective at this time."];
       tags: Tags.t option
         [@ocaml.doc "A list of tags to apply to the solution."]}
     let context_ = "CreateSolutionRequest"
     let make ?performHPO =
       fun ?performAutoML ->
-        fun ?recipeArn ->
-          fun ?eventType ->
-            fun ?solutionConfig ->
-              fun ?tags ->
-                fun ~name ->
-                  fun ~datasetGroupArn ->
-                    fun () ->
-                      {
-                        performHPO;
-                        performAutoML;
-                        recipeArn;
-                        eventType;
-                        solutionConfig;
-                        tags;
-                        name;
-                        datasetGroupArn
-                      }
+        fun ?performAutoTraining ->
+          fun ?performIncrementalUpdate ->
+            fun ?recipeArn ->
+              fun ?eventType ->
+                fun ?solutionConfig ->
+                  fun ?tags ->
+                    fun ~name ->
+                      fun ~datasetGroupArn ->
+                        fun () ->
+                          {
+                            performHPO;
+                            performAutoML;
+                            performAutoTraining;
+                            performIncrementalUpdate;
+                            recipeArn;
+                            eventType;
+                            solutionConfig;
+                            tags;
+                            name;
+                            datasetGroupArn
+                          }
     let to_value x =
       structure_to_value
         [("name", (Some (Name.to_value x.name)));
         ("performHPO", (Option.map x.performHPO ~f:Boolean.to_value));
         ("performAutoML",
           (Option.map x.performAutoML ~f:PerformAutoML.to_value));
+        ("performAutoTraining",
+          (Option.map x.performAutoTraining ~f:PerformAutoTraining.to_value));
+        ("performIncrementalUpdate",
+          (Option.map x.performIncrementalUpdate
+             ~f:PerformIncrementalUpdate.to_value));
         ("recipeArn", (Option.map x.recipeArn ~f:Arn.to_value));
         ("datasetGroupArn", (Some (Arn.to_value x.datasetGroupArn)));
         ("eventType", (Option.map x.eventType ~f:EventType.to_value));
@@ -9805,6 +12748,12 @@ module CreateSolutionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "datasetGroupArn") in
       let recipeArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "recipeArn") in
+      let performIncrementalUpdate =
+        (Option.map ~f:PerformIncrementalUpdate.of_xml)
+          (Xml.child xml_arg0 "performIncrementalUpdate") in
+      let performAutoTraining =
+        (Option.map ~f:PerformAutoTraining.of_xml)
+          (Xml.child xml_arg0 "performAutoTraining") in
       let performAutoML =
         (Option.map ~f:PerformAutoML.of_xml)
           (Xml.child xml_arg0 "performAutoML") in
@@ -9813,24 +12762,32 @@ module CreateSolutionRequest =
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ?solutionConfig ?eventType ~datasetGroupArn ?recipeArn
-        ?performAutoML ?performHPO ~name ()
+        ?performIncrementalUpdate ?performAutoTraining ?performAutoML
+        ?performHPO ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
       let solutionConfig =
-        field_map json "solutionConfig" SolutionConfig.of_json in
-      let eventType = field_map json "eventType" EventType.of_json in
-      let datasetGroupArn = field_map_exn json "datasetGroupArn" Arn.of_json in
-      let recipeArn = field_map json "recipeArn" Arn.of_json in
+        field_map json__ "solutionConfig" SolutionConfig.of_json in
+      let eventType = field_map json__ "eventType" EventType.of_json in
+      let datasetGroupArn =
+        field_map_exn json__ "datasetGroupArn" Arn.of_json in
+      let recipeArn = field_map json__ "recipeArn" Arn.of_json in
+      let performIncrementalUpdate =
+        field_map json__ "performIncrementalUpdate"
+          PerformIncrementalUpdate.of_json in
+      let performAutoTraining =
+        field_map json__ "performAutoTraining" PerformAutoTraining.of_json in
       let performAutoML =
-        field_map json "performAutoML" PerformAutoML.of_json in
-      let performHPO = field_map json "performHPO" Boolean.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+        field_map json__ "performAutoML" PerformAutoML.of_json in
+      let performHPO = field_map json__ "performHPO" Boolean.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       make ?tags ?solutionConfig ?eventType ~datasetGroupArn ?recipeArn
-        ?performAutoML ?performHPO ~name ()
+        ?performIncrementalUpdate ?performAutoTraining ?performAutoML
+        ?performHPO ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates the configuration for training a model. A trained model is known as a solution. After the configuration is created, you train the model (create a solution) by calling the CreateSolutionVersion operation. Every time you call CreateSolutionVersion, a new version of the solution is created. After creating a solution version, you check its accuracy by calling GetSolutionMetrics. When you are satisfied with the version, you deploy it using CreateCampaign. The campaign provides recommendations to a client through the GetRecommendations API. To train a model, Amazon Personalize requires training data and a recipe. The training data comes from the dataset group that you provide in the request. A recipe specifies the training algorithm and a feature transformation. You can specify one of the predefined recipes provided by Amazon Personalize. Alternatively, you can specify performAutoML and Amazon Personalize will analyze your data and select the optimum USER_PERSONALIZATION recipe for you. Amazon Personalize doesn't support configuring the hpoObjective for solution hyperparameter optimization at this time. Status A solution can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the status of the solution, call DescribeSolution. Wait until the status shows as ACTIVE before calling CreateSolutionVersion. Related APIs ListSolutions CreateSolutionVersion DescribeSolution DeleteSolution ListSolutionVersions DescribeSolutionVersion"]
+       "By default, all new solutions use automatic training. With automatic training, you incur training costs while your solution is active. To avoid unnecessary costs, when you are finished you can update the solution to turn off automatic training. For information about training costs, see Amazon Personalize pricing. Creates the configuration for training a model (creating a solution version). This configuration includes the recipe to use for model training and optional training configuration, such as columns to use in training and feature transformation parameters. For more information about configuring a solution, see Creating and configuring a solution. By default, new solutions use automatic training to create solution versions every 7 days. You can change the training frequency. Automatic solution version creation starts within one hour after the solution is ACTIVE. If you manually create a solution version within the hour, the solution skips the first automatic training. For more information, see Configuring automatic training. To turn off automatic training, set performAutoTraining to false. If you turn off automatic training, you must manually create a solution version by calling the CreateSolutionVersion operation. After training starts, you can get the solution version's Amazon Resource Name (ARN) with the ListSolutionVersions API operation. To get its status, use the DescribeSolutionVersion. After training completes you can evaluate model accuracy by calling GetSolutionMetrics. When you are satisfied with the solution version, you deploy it using CreateCampaign. The campaign provides recommendations to a client through the GetRecommendations API. Amazon Personalize doesn't support configuring the hpoObjective for solution hyperparameter optimization at this time. Status A solution can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the status of the solution, call DescribeSolution. If you use manual training, the status must be ACTIVE before you call CreateSolutionVersion. Related APIs UpdateSolution ListSolutions CreateSolutionVersion DescribeSolution DeleteSolution ListSolutionVersions DescribeSolutionVersion"]
 module CreateSchemaResponse =
   struct
     type nonrec t =
@@ -9894,8 +12851,8 @@ module CreateSchemaResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "schemaArn") in
       make ?schemaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let schemaArn = field_map json "schemaArn" Arn.of_json in
+    let of_json json__ =
+      let schemaArn = field_map json__ "schemaArn" Arn.of_json in
       make ?schemaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9927,10 +12884,10 @@ module CreateSchemaRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?domain ~schema ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "domain" Domain.of_json in
-      let schema = field_map_exn json "schema" AvroSchema.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+    let of_json json__ =
+      let domain = field_map json__ "domain" Domain.of_json in
+      let schema = field_map_exn json__ "schema" AvroSchema.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       make ?domain ~schema ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9945,6 +12902,7 @@ module CreateRecommenderResponse =
       [ `InvalidInputException of InvalidInputException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -9958,6 +12916,8 @@ module CreateRecommenderResponse =
       | "ResourceAlreadyExistsException" ->
           `ResourceAlreadyExistsException
             (ResourceAlreadyExistsException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "TooManyTagsException" ->
@@ -9974,6 +12934,8 @@ module CreateRecommenderResponse =
       | "ResourceAlreadyExistsException" ->
           `ResourceAlreadyExistsException
             (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "TooManyTagsException" ->
@@ -9994,6 +12956,10 @@ module CreateRecommenderResponse =
           `Assoc
             [("error", (`String "ResourceAlreadyExistsException"));
             ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -10016,12 +12982,12 @@ module CreateRecommenderResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "recommenderArn") in
       make ?recommenderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recommenderArn = field_map json "recommenderArn" Arn.of_json in
+    let of_json json__ =
+      let recommenderArn = field_map json__ "recommenderArn" Arn.of_json in
       make ?recommenderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a recommender with the recipe (a Domain dataset group use case) you specify. You create recommenders for a Domain dataset group and specify the recommender's Amazon Resource Name (ARN) when you make a GetRecommendations request. Minimum recommendation requests per second When you create a recommender, you can configure the recommender's minimum recommendation requests per second. The minimum recommendation requests per second (minRecommendationRequestsPerSecond) specifies the baseline recommendation request throughput provisioned by Amazon Personalize. The default minRecommendationRequestsPerSecond is 1. A recommendation request is a single GetRecommendations operation. Request throughput is measured in requests per second and Amazon Personalize uses your requests per second to derive your requests per hour and the price of your recommender usage. If your requests per second increases beyond minRecommendationRequestsPerSecond, Amazon Personalize auto-scales the provisioned capacity up and down, but never below minRecommendationRequestsPerSecond. There's a short time delay while the capacity is increased that might cause loss of requests. Your bill is the greater of either the minimum requests per hour (based on minRecommendationRequestsPerSecond) or the actual number of requests. The actual request throughput used is calculated as the average requests/second within a one-hour window. We recommend starting with the default minRecommendationRequestsPerSecond, track your usage using Amazon CloudWatch metrics, and then increase the minRecommendationRequestsPerSecond as necessary. Status A recommender can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the recommender status, call DescribeRecommender. Wait until the status of the recommender is ACTIVE before asking the recommender for recommendations. Related APIs ListRecommenders DescribeRecommender UpdateRecommender DeleteRecommender"]
+       "Creates a recommender with the recipe (a Domain dataset group use case) you specify. You create recommenders for a Domain dataset group and specify the recommender's Amazon Resource Name (ARN) when you make a GetRecommendations request. Minimum recommendation requests per second A high minRecommendationRequestsPerSecond will increase your bill. We recommend starting with 1 for minRecommendationRequestsPerSecond (the default). Track your usage using Amazon CloudWatch metrics, and increase the minRecommendationRequestsPerSecond as necessary. When you create a recommender, you can configure the recommender's minimum recommendation requests per second. The minimum recommendation requests per second (minRecommendationRequestsPerSecond) specifies the baseline recommendation request throughput provisioned by Amazon Personalize. The default minRecommendationRequestsPerSecond is 1. A recommendation request is a single GetRecommendations operation. Request throughput is measured in requests per second and Amazon Personalize uses your requests per second to derive your requests per hour and the price of your recommender usage. If your requests per second increases beyond minRecommendationRequestsPerSecond, Amazon Personalize auto-scales the provisioned capacity up and down, but never below minRecommendationRequestsPerSecond. There's a short time delay while the capacity is increased that might cause loss of requests. Your bill is the greater of either the minimum requests per hour (based on minRecommendationRequestsPerSecond) or the actual number of requests. The actual request throughput used is calculated as the average requests/second within a one-hour window. We recommend starting with the default minRecommendationRequestsPerSecond, track your usage using Amazon CloudWatch metrics, and then increase the minRecommendationRequestsPerSecond as necessary. Status A recommender can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED STOP PENDING > STOP IN_PROGRESS > INACTIVE > START PENDING > START IN_PROGRESS > ACTIVE DELETE PENDING > DELETE IN_PROGRESS To get the recommender status, call DescribeRecommender. Wait until the status of the recommender is ACTIVE before asking the recommender for recommendations. Related APIs ListRecommenders DescribeRecommender UpdateRecommender DeleteRecommender"]
 module CreateRecommenderRequest =
   struct
     type nonrec t =
@@ -10068,17 +13034,163 @@ module CreateRecommenderRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ?recommenderConfig ~recipeArn ~datasetGroupArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
       let recommenderConfig =
-        field_map json "recommenderConfig" RecommenderConfig.of_json in
-      let recipeArn = field_map_exn json "recipeArn" Arn.of_json in
-      let datasetGroupArn = field_map_exn json "datasetGroupArn" Arn.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+        field_map json__ "recommenderConfig" RecommenderConfig.of_json in
+      let recipeArn = field_map_exn json__ "recipeArn" Arn.of_json in
+      let datasetGroupArn =
+        field_map_exn json__ "datasetGroupArn" Arn.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       make ?tags ?recommenderConfig ~recipeArn ~datasetGroupArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a recommender with the recipe (a Domain dataset group use case) you specify. You create recommenders for a Domain dataset group and specify the recommender's Amazon Resource Name (ARN) when you make a GetRecommendations request. Minimum recommendation requests per second When you create a recommender, you can configure the recommender's minimum recommendation requests per second. The minimum recommendation requests per second (minRecommendationRequestsPerSecond) specifies the baseline recommendation request throughput provisioned by Amazon Personalize. The default minRecommendationRequestsPerSecond is 1. A recommendation request is a single GetRecommendations operation. Request throughput is measured in requests per second and Amazon Personalize uses your requests per second to derive your requests per hour and the price of your recommender usage. If your requests per second increases beyond minRecommendationRequestsPerSecond, Amazon Personalize auto-scales the provisioned capacity up and down, but never below minRecommendationRequestsPerSecond. There's a short time delay while the capacity is increased that might cause loss of requests. Your bill is the greater of either the minimum requests per hour (based on minRecommendationRequestsPerSecond) or the actual number of requests. The actual request throughput used is calculated as the average requests/second within a one-hour window. We recommend starting with the default minRecommendationRequestsPerSecond, track your usage using Amazon CloudWatch metrics, and then increase the minRecommendationRequestsPerSecond as necessary. Status A recommender can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the recommender status, call DescribeRecommender. Wait until the status of the recommender is ACTIVE before asking the recommender for recommendations. Related APIs ListRecommenders DescribeRecommender UpdateRecommender DeleteRecommender"]
+       "Creates a recommender with the recipe (a Domain dataset group use case) you specify. You create recommenders for a Domain dataset group and specify the recommender's Amazon Resource Name (ARN) when you make a GetRecommendations request. Minimum recommendation requests per second A high minRecommendationRequestsPerSecond will increase your bill. We recommend starting with 1 for minRecommendationRequestsPerSecond (the default). Track your usage using Amazon CloudWatch metrics, and increase the minRecommendationRequestsPerSecond as necessary. When you create a recommender, you can configure the recommender's minimum recommendation requests per second. The minimum recommendation requests per second (minRecommendationRequestsPerSecond) specifies the baseline recommendation request throughput provisioned by Amazon Personalize. The default minRecommendationRequestsPerSecond is 1. A recommendation request is a single GetRecommendations operation. Request throughput is measured in requests per second and Amazon Personalize uses your requests per second to derive your requests per hour and the price of your recommender usage. If your requests per second increases beyond minRecommendationRequestsPerSecond, Amazon Personalize auto-scales the provisioned capacity up and down, but never below minRecommendationRequestsPerSecond. There's a short time delay while the capacity is increased that might cause loss of requests. Your bill is the greater of either the minimum requests per hour (based on minRecommendationRequestsPerSecond) or the actual number of requests. The actual request throughput used is calculated as the average requests/second within a one-hour window. We recommend starting with the default minRecommendationRequestsPerSecond, track your usage using Amazon CloudWatch metrics, and then increase the minRecommendationRequestsPerSecond as necessary. Status A recommender can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED STOP PENDING > STOP IN_PROGRESS > INACTIVE > START PENDING > START IN_PROGRESS > ACTIVE DELETE PENDING > DELETE IN_PROGRESS To get the recommender status, call DescribeRecommender. Wait until the status of the recommender is ACTIVE before asking the recommender for recommendations. Related APIs ListRecommenders DescribeRecommender UpdateRecommender DeleteRecommender"]
+module CreateMetricAttributionResponse =
+  struct
+    type nonrec t =
+      {
+      metricAttributionArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the new metric attribution."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?metricAttributionArn = fun () -> { metricAttributionArn }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("metricAttributionArn",
+           (Option.map x.metricAttributionArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricAttributionArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "metricAttributionArn") in
+      make ?metricAttributionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricAttributionArn =
+        field_map json__ "metricAttributionArn" Arn.of_json in
+      make ?metricAttributionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a metric attribution. A metric attribution creates reports on the data that you import into Amazon Personalize. Depending on how you imported the data, you can view reports in Amazon CloudWatch or Amazon S3. For more information, see Measuring impact of recommendations."]
+module CreateMetricAttributionRequest =
+  struct
+    type nonrec t =
+      {
+      name: Name.t [@ocaml.doc "A name for the metric attribution."];
+      datasetGroupArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the destination dataset group for the metric attribution."];
+      metrics: MetricAttributes.t
+        [@ocaml.doc
+          "A list of metric attributes for the metric attribution. Each metric attribute specifies an event type to track and a function. Available functions are SUM() or SAMPLECOUNT(). For SUM() functions, provide the dataset type (either Interactions or Items) and column to sum as a parameter. For example SUM(Items.PRICE)."];
+      metricsOutputConfig: MetricAttributionOutput.t
+        [@ocaml.doc
+          "The output configuration details for the metric attribution."]}
+    let context_ = "CreateMetricAttributionRequest"
+    let make ~name =
+      fun ~datasetGroupArn ->
+        fun ~metrics ->
+          fun ~metricsOutputConfig ->
+            fun () -> { name; datasetGroupArn; metrics; metricsOutputConfig }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (Name.to_value x.name)));
+        ("datasetGroupArn", (Some (Arn.to_value x.datasetGroupArn)));
+        ("metrics", (Some (MetricAttributes.to_value x.metrics)));
+        ("metricsOutputConfig",
+          (Some (MetricAttributionOutput.to_value x.metricsOutputConfig)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricsOutputConfig =
+        MetricAttributionOutput.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "metricsOutputConfig") in
+      let metrics =
+        MetricAttributes.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "metrics") in
+      let datasetGroupArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "datasetGroupArn") in
+      let name =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~metricsOutputConfig ~metrics ~datasetGroupArn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricsOutputConfig =
+        field_map_exn json__ "metricsOutputConfig"
+          MetricAttributionOutput.of_json in
+      let metrics = field_map_exn json__ "metrics" MetricAttributes.of_json in
+      let datasetGroupArn =
+        field_map_exn json__ "datasetGroupArn" Arn.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
+      make ~metricsOutputConfig ~metrics ~datasetGroupArn ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a metric attribution. A metric attribution creates reports on the data that you import into Amazon Personalize. Depending on how you imported the data, you can view reports in Amazon CloudWatch or Amazon S3. For more information, see Measuring impact of recommendations."]
 module CreateFilterResponse =
   struct
     type nonrec t =
@@ -10159,8 +13271,8 @@ module CreateFilterResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "filterArn") in
       make ?filterArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filterArn = field_map json "filterArn" Arn.of_json in
+    let of_json json__ =
+      let filterArn = field_map json__ "filterArn" Arn.of_json in
       make ?filterArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10204,12 +13316,13 @@ module CreateFilterRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~filterExpression ~datasetGroupArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
       let filterExpression =
-        field_map_exn json "filterExpression" FilterExpression.of_json in
-      let datasetGroupArn = field_map_exn json "datasetGroupArn" Arn.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+        field_map_exn json__ "filterExpression" FilterExpression.of_json in
+      let datasetGroupArn =
+        field_map_exn json__ "datasetGroupArn" Arn.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       make ?tags ~filterExpression ~datasetGroupArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10311,13 +13424,13 @@ module CreateEventTrackerResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "eventTrackerArn") in
       make ?trackingId ?eventTrackerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackingId = field_map json "trackingId" TrackingId.of_json in
-      let eventTrackerArn = field_map json "eventTrackerArn" Arn.of_json in
+    let of_json json__ =
+      let trackingId = field_map json__ "trackingId" TrackingId.of_json in
+      let eventTrackerArn = field_map json__ "eventTrackerArn" Arn.of_json in
       make ?trackingId ?eventTrackerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an event tracker that you use when adding event data to a specified dataset group using the PutEvents API. Only one event tracker can be associated with a dataset group. You will get an error if you call CreateEventTracker using the same dataset group as an existing event tracker. When you create an event tracker, the response includes a tracking ID, which you pass as a parameter when you use the PutEvents operation. Amazon Personalize then appends the event data to the Interactions dataset of the dataset group you specify in your event tracker. The event tracker can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the status of the event tracker, call DescribeEventTracker. The event tracker must be in the ACTIVE state before using the tracking ID. Related APIs ListEventTrackers DescribeEventTracker DeleteEventTracker"]
+       "Creates an event tracker that you use when adding event data to a specified dataset group using the PutEvents API. Only one event tracker can be associated with a dataset group. You will get an error if you call CreateEventTracker using the same dataset group as an existing event tracker. When you create an event tracker, the response includes a tracking ID, which you pass as a parameter when you use the PutEvents operation. Amazon Personalize then appends the event data to the Item interactions dataset of the dataset group you specify in your event tracker. The event tracker can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the status of the event tracker, call DescribeEventTracker. The event tracker must be in the ACTIVE state before using the tracking ID. Related APIs ListEventTrackers DescribeEventTracker DeleteEventTracker"]
 module CreateEventTrackerRequest =
   struct
     type nonrec t =
@@ -10347,14 +13460,15 @@ module CreateEventTrackerRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~datasetGroupArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let datasetGroupArn = field_map_exn json "datasetGroupArn" Arn.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let datasetGroupArn =
+        field_map_exn json__ "datasetGroupArn" Arn.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       make ?tags ~datasetGroupArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an event tracker that you use when adding event data to a specified dataset group using the PutEvents API. Only one event tracker can be associated with a dataset group. You will get an error if you call CreateEventTracker using the same dataset group as an existing event tracker. When you create an event tracker, the response includes a tracking ID, which you pass as a parameter when you use the PutEvents operation. Amazon Personalize then appends the event data to the Interactions dataset of the dataset group you specify in your event tracker. The event tracker can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the status of the event tracker, call DescribeEventTracker. The event tracker must be in the ACTIVE state before using the tracking ID. Related APIs ListEventTrackers DescribeEventTracker DeleteEventTracker"]
+       "Creates an event tracker that you use when adding event data to a specified dataset group using the PutEvents API. Only one event tracker can be associated with a dataset group. You will get an error if you call CreateEventTracker using the same dataset group as an existing event tracker. When you create an event tracker, the response includes a tracking ID, which you pass as a parameter when you use the PutEvents operation. Amazon Personalize then appends the event data to the Item interactions dataset of the dataset group you specify in your event tracker. The event tracker can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the status of the event tracker, call DescribeEventTracker. The event tracker must be in the ACTIVE state before using the tracking ID. Related APIs ListEventTrackers DescribeEventTracker DeleteEventTracker"]
 module CreateDatasetResponse =
   struct
     type nonrec t =
@@ -10444,12 +13558,12 @@ module CreateDatasetResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetArn") in
       make ?datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetArn = field_map json "datasetArn" Arn.of_json in
+    let of_json json__ =
+      let datasetArn = field_map json__ "datasetArn" Arn.of_json in
       make ?datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an empty dataset and adds it to the specified dataset group. Use CreateDatasetImportJob to import your training data to a dataset. There are three types of datasets: Interactions Items Users Each dataset type has an associated schema with required field types. Only the Interactions dataset is required in order to train a model (also referred to as creating a solution). A dataset can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the status of the dataset, call DescribeDataset. Related APIs CreateDatasetGroup ListDatasets DescribeDataset DeleteDataset"]
+       "Creates an empty dataset and adds it to the specified dataset group. Use CreateDatasetImportJob to import your training data to a dataset. There are 5 types of datasets: Item interactions Items Users Action interactions Actions Each dataset type has an associated schema with required field types. Only the Item interactions dataset is required in order to train a model (also referred to as creating a solution). A dataset can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the status of the dataset, call DescribeDataset. Related APIs CreateDatasetGroup ListDatasets DescribeDataset DeleteDataset"]
 module CreateDatasetRequest =
   struct
     type nonrec t =
@@ -10463,7 +13577,7 @@ module CreateDatasetRequest =
           "The Amazon Resource Name (ARN) of the dataset group to add the dataset to."];
       datasetType: DatasetType.t
         [@ocaml.doc
-          "The type of dataset. One of the following (case insensitive) values: Interactions Items Users"];
+          "The type of dataset. One of the following (case insensitive) values: Interactions Items Users Actions Action_Interactions"];
       tags: Tags.t option
         [@ocaml.doc "A list of tags to apply to the dataset."]}
     let context_ = "CreateDatasetRequest"
@@ -10496,16 +13610,18 @@ module CreateDatasetRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~datasetType ~datasetGroupArn ~schemaArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let datasetType = field_map_exn json "datasetType" DatasetType.of_json in
-      let datasetGroupArn = field_map_exn json "datasetGroupArn" Arn.of_json in
-      let schemaArn = field_map_exn json "schemaArn" Arn.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let datasetType =
+        field_map_exn json__ "datasetType" DatasetType.of_json in
+      let datasetGroupArn =
+        field_map_exn json__ "datasetGroupArn" Arn.of_json in
+      let schemaArn = field_map_exn json__ "schemaArn" Arn.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       make ?tags ~datasetType ~datasetGroupArn ~schemaArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an empty dataset and adds it to the specified dataset group. Use CreateDatasetImportJob to import your training data to a dataset. There are three types of datasets: Interactions Items Users Each dataset type has an associated schema with required field types. Only the Interactions dataset is required in order to train a model (also referred to as creating a solution). A dataset can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the status of the dataset, call DescribeDataset. Related APIs CreateDatasetGroup ListDatasets DescribeDataset DeleteDataset"]
+       "Creates an empty dataset and adds it to the specified dataset group. Use CreateDatasetImportJob to import your training data to a dataset. There are 5 types of datasets: Item interactions Items Users Action interactions Actions Each dataset type has an associated schema with required field types. Only the Item interactions dataset is required in order to train a model (also referred to as creating a solution). A dataset can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the status of the dataset, call DescribeDataset. Related APIs CreateDatasetGroup ListDatasets DescribeDataset DeleteDataset"]
 module CreateDatasetImportJobResponse =
   struct
     type nonrec t =
@@ -10597,13 +13713,13 @@ module CreateDatasetImportJobResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetImportJobArn") in
       make ?datasetImportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetImportJobArn =
-        field_map json "datasetImportJobArn" Arn.of_json in
+        field_map json__ "datasetImportJobArn" Arn.of_json in
       make ?datasetImportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a job that imports training data from your data source (an Amazon S3 bucket) to an Amazon Personalize dataset. To allow Amazon Personalize to import the training data, you must specify an IAM service role that has permission to read from the data source, as Amazon Personalize makes a copy of your data and processes it internally. For information on granting access to your Amazon S3 bucket, see Giving Amazon Personalize Access to Amazon S3 Resources. The dataset import job replaces any existing data in the dataset that you imported in bulk. Status A dataset import job can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED To get the status of the import job, call DescribeDatasetImportJob, providing the Amazon Resource Name (ARN) of the dataset import job. The dataset import is complete when the status shows as ACTIVE. If the status shows as CREATE FAILED, the response includes a failureReason key, which describes why the job failed. Importing takes time. You must wait until the status shows as ACTIVE before training a model using the dataset. Related APIs ListDatasetImportJobs DescribeDatasetImportJob"]
+       "Creates a job that imports training data from your data source (an Amazon S3 bucket) to an Amazon Personalize dataset. To allow Amazon Personalize to import the training data, you must specify an IAM service role that has permission to read from the data source, as Amazon Personalize makes a copy of your data and processes it internally. For information on granting access to your Amazon S3 bucket, see Giving Amazon Personalize Access to Amazon S3 Resources. If you already created a recommender or deployed a custom solution version with a campaign, how new bulk records influence recommendations depends on the domain use case or recipe that you use. For more information, see How new data influences real-time recommendations. By default, a dataset import job replaces any existing data in the dataset that you imported in bulk. To add new records without replacing existing data, specify INCREMENTAL for the import mode in the CreateDatasetImportJob operation. Status A dataset import job can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED To get the status of the import job, call DescribeDatasetImportJob, providing the Amazon Resource Name (ARN) of the dataset import job. The dataset import is complete when the status shows as ACTIVE. If the status shows as CREATE FAILED, the response includes a failureReason key, which describes why the job failed. Importing takes time. You must wait until the status shows as ACTIVE before training a model using the dataset. Related APIs ListDatasetImportJobs DescribeDatasetImportJob"]
 module CreateDatasetImportJobRequest =
   struct
     type nonrec t =
@@ -10615,30 +13731,55 @@ module CreateDatasetImportJobRequest =
       dataSource: DataSource.t
         [@ocaml.doc
           "The Amazon S3 bucket that contains the training data to import."];
-      roleArn: RoleArn.t
+      roleArn: RoleArn.t option
         [@ocaml.doc
           "The ARN of the IAM role that has permissions to read from the Amazon S3 data source."];
       tags: Tags.t option
-        [@ocaml.doc "A list of tags to apply to the dataset import job."]}
+        [@ocaml.doc "A list of tags to apply to the dataset import job."];
+      importMode: ImportMode.t option
+        [@ocaml.doc
+          "Specify how to add the new records to an existing dataset. The default import mode is FULL. If you haven't imported bulk records into the dataset previously, you can only specify FULL. Specify FULL to overwrite all existing bulk data in your dataset. Data you imported individually is not replaced. Specify INCREMENTAL to append the new records to the existing data in your dataset. Amazon Personalize replaces any record with the same ID with the new one."];
+      publishAttributionMetricsToS3: Boolean.t option
+        [@ocaml.doc
+          "If you created a metric attribution, specify whether to publish metrics for this import job to Amazon S3"]}
     let context_ = "CreateDatasetImportJobRequest"
-    let make ?tags =
-      fun ~jobName ->
-        fun ~datasetArn ->
-          fun ~dataSource ->
-            fun ~roleArn ->
-              fun () -> { tags; jobName; datasetArn; dataSource; roleArn }
+    let make ?roleArn =
+      fun ?tags ->
+        fun ?importMode ->
+          fun ?publishAttributionMetricsToS3 ->
+            fun ~jobName ->
+              fun ~datasetArn ->
+                fun ~dataSource ->
+                  fun () ->
+                    {
+                      roleArn;
+                      tags;
+                      importMode;
+                      publishAttributionMetricsToS3;
+                      jobName;
+                      datasetArn;
+                      dataSource
+                    }
     let to_value x =
       structure_to_value
         [("jobName", (Some (Name.to_value x.jobName)));
         ("datasetArn", (Some (Arn.to_value x.datasetArn)));
         ("dataSource", (Some (DataSource.to_value x.dataSource)));
-        ("roleArn", (Some (RoleArn.to_value x.roleArn)));
-        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
+        ("tags", (Option.map x.tags ~f:Tags.to_value));
+        ("importMode", (Option.map x.importMode ~f:ImportMode.to_value));
+        ("publishAttributionMetricsToS3",
+          (Option.map x.publishAttributionMetricsToS3 ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let publishAttributionMetricsToS3 =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "publishAttributionMetricsToS3") in
+      let importMode =
+        (Option.map ~f:ImportMode.of_xml) (Xml.child xml_arg0 "importMode") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let roleArn =
-        RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
       let dataSource =
         DataSource.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "dataSource") in
@@ -10646,18 +13787,23 @@ module CreateDatasetImportJobRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "datasetArn") in
       let jobName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobName") in
-      make ?tags ~roleArn ~dataSource ~datasetArn ~jobName ()
+      make ?publishAttributionMetricsToS3 ?importMode ?tags ?roleArn
+        ~dataSource ~datasetArn ~jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
-      let dataSource = field_map_exn json "dataSource" DataSource.of_json in
-      let datasetArn = field_map_exn json "datasetArn" Arn.of_json in
-      let jobName = field_map_exn json "jobName" Name.of_json in
-      make ?tags ~roleArn ~dataSource ~datasetArn ~jobName ()
+    let of_json json__ =
+      let publishAttributionMetricsToS3 =
+        field_map json__ "publishAttributionMetricsToS3" Boolean.of_json in
+      let importMode = field_map json__ "importMode" ImportMode.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      let dataSource = field_map_exn json__ "dataSource" DataSource.of_json in
+      let datasetArn = field_map_exn json__ "datasetArn" Arn.of_json in
+      let jobName = field_map_exn json__ "jobName" Name.of_json in
+      make ?publishAttributionMetricsToS3 ?importMode ?tags ?roleArn
+        ~dataSource ~datasetArn ~jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a job that imports training data from your data source (an Amazon S3 bucket) to an Amazon Personalize dataset. To allow Amazon Personalize to import the training data, you must specify an IAM service role that has permission to read from the data source, as Amazon Personalize makes a copy of your data and processes it internally. For information on granting access to your Amazon S3 bucket, see Giving Amazon Personalize Access to Amazon S3 Resources. The dataset import job replaces any existing data in the dataset that you imported in bulk. Status A dataset import job can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED To get the status of the import job, call DescribeDatasetImportJob, providing the Amazon Resource Name (ARN) of the dataset import job. The dataset import is complete when the status shows as ACTIVE. If the status shows as CREATE FAILED, the response includes a failureReason key, which describes why the job failed. Importing takes time. You must wait until the status shows as ACTIVE before training a model using the dataset. Related APIs ListDatasetImportJobs DescribeDatasetImportJob"]
+       "Creates a job that imports training data from your data source (an Amazon S3 bucket) to an Amazon Personalize dataset. To allow Amazon Personalize to import the training data, you must specify an IAM service role that has permission to read from the data source, as Amazon Personalize makes a copy of your data and processes it internally. For information on granting access to your Amazon S3 bucket, see Giving Amazon Personalize Access to Amazon S3 Resources. If you already created a recommender or deployed a custom solution version with a campaign, how new bulk records influence recommendations depends on the domain use case or recipe that you use. For more information, see How new data influences real-time recommendations. By default, a dataset import job replaces any existing data in the dataset that you imported in bulk. To add new records without replacing existing data, specify INCREMENTAL for the import mode in the CreateDatasetImportJob operation. Status A dataset import job can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED To get the status of the import job, call DescribeDatasetImportJob, providing the Amazon Resource Name (ARN) of the dataset import job. The dataset import is complete when the status shows as ACTIVE. If the status shows as CREATE FAILED, the response includes a failureReason key, which describes why the job failed. Importing takes time. You must wait until the status shows as ACTIVE before training a model using the dataset. Related APIs ListDatasetImportJobs DescribeDatasetImportJob"]
 module CreateDatasetGroupResponse =
   struct
     type nonrec t =
@@ -10737,13 +13883,13 @@ module CreateDatasetGroupResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetGroupArn") in
       make ?domain ?datasetGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "domain" Domain.of_json in
-      let datasetGroupArn = field_map json "datasetGroupArn" Arn.of_json in
+    let of_json json__ =
+      let domain = field_map json__ "domain" Domain.of_json in
+      let datasetGroupArn = field_map json__ "datasetGroupArn" Arn.of_json in
       make ?domain ?datasetGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an empty dataset group. A dataset group is a container for Amazon Personalize resources. A dataset group can contain at most three datasets, one for each type of dataset: Interactions Items Users A dataset group can be a Domain dataset group, where you specify a domain and use pre-configured resources like recommenders, or a Custom dataset group, where you use custom resources, such as a solution with a solution version, that you deploy with a campaign. If you start with a Domain dataset group, you can still add custom resources such as solutions and solution versions trained with recipes for custom use cases and deployed with campaigns. A dataset group can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING To get the status of the dataset group, call DescribeDatasetGroup. If the status shows as CREATE FAILED, the response includes a failureReason key, which describes why the creation failed. You must wait until the status of the dataset group is ACTIVE before adding a dataset to the group. You can specify an Key Management Service (KMS) key to encrypt the datasets in the group. If you specify a KMS key, you must also include an Identity and Access Management (IAM) role that has permission to access the key. APIs that require a dataset group ARN in the request CreateDataset CreateEventTracker CreateSolution Related APIs ListDatasetGroups DescribeDatasetGroup DeleteDatasetGroup"]
+       "Creates an empty dataset group. A dataset group is a container for Amazon Personalize resources. A dataset group can contain at most three datasets, one for each type of dataset: Item interactions Items Users Actions Action interactions A dataset group can be a Domain dataset group, where you specify a domain and use pre-configured resources like recommenders, or a Custom dataset group, where you use custom resources, such as a solution with a solution version, that you deploy with a campaign. If you start with a Domain dataset group, you can still add custom resources such as solutions and solution versions trained with recipes for custom use cases and deployed with campaigns. A dataset group can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING To get the status of the dataset group, call DescribeDatasetGroup. If the status shows as CREATE FAILED, the response includes a failureReason key, which describes why the creation failed. You must wait until the status of the dataset group is ACTIVE before adding a dataset to the group. You can specify an Key Management Service (KMS) key to encrypt the datasets in the group. If you specify a KMS key, you must also include an Identity and Access Management (IAM) role that has permission to access the key. APIs that require a dataset group ARN in the request CreateDataset CreateEventTracker CreateSolution Related APIs ListDatasetGroups DescribeDatasetGroup DeleteDatasetGroup"]
 module CreateDatasetGroupRequest =
   struct
     type nonrec t =
@@ -10786,16 +13932,16 @@ module CreateDatasetGroupRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ?domain ?kmsKeyArn ?roleArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let domain = field_map json "domain" Domain.of_json in
-      let kmsKeyArn = field_map json "kmsKeyArn" KmsKeyArn.of_json in
-      let roleArn = field_map json "roleArn" RoleArn.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let domain = field_map json__ "domain" Domain.of_json in
+      let kmsKeyArn = field_map json__ "kmsKeyArn" KmsKeyArn.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       make ?tags ?domain ?kmsKeyArn ?roleArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an empty dataset group. A dataset group is a container for Amazon Personalize resources. A dataset group can contain at most three datasets, one for each type of dataset: Interactions Items Users A dataset group can be a Domain dataset group, where you specify a domain and use pre-configured resources like recommenders, or a Custom dataset group, where you use custom resources, such as a solution with a solution version, that you deploy with a campaign. If you start with a Domain dataset group, you can still add custom resources such as solutions and solution versions trained with recipes for custom use cases and deployed with campaigns. A dataset group can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING To get the status of the dataset group, call DescribeDatasetGroup. If the status shows as CREATE FAILED, the response includes a failureReason key, which describes why the creation failed. You must wait until the status of the dataset group is ACTIVE before adding a dataset to the group. You can specify an Key Management Service (KMS) key to encrypt the datasets in the group. If you specify a KMS key, you must also include an Identity and Access Management (IAM) role that has permission to access the key. APIs that require a dataset group ARN in the request CreateDataset CreateEventTracker CreateSolution Related APIs ListDatasetGroups DescribeDatasetGroup DeleteDatasetGroup"]
+       "Creates an empty dataset group. A dataset group is a container for Amazon Personalize resources. A dataset group can contain at most three datasets, one for each type of dataset: Item interactions Items Users Actions Action interactions A dataset group can be a Domain dataset group, where you specify a domain and use pre-configured resources like recommenders, or a Custom dataset group, where you use custom resources, such as a solution with a solution version, that you deploy with a campaign. If you start with a Domain dataset group, you can still add custom resources such as solutions and solution versions trained with recipes for custom use cases and deployed with campaigns. A dataset group can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING To get the status of the dataset group, call DescribeDatasetGroup. If the status shows as CREATE FAILED, the response includes a failureReason key, which describes why the creation failed. You must wait until the status of the dataset group is ACTIVE before adding a dataset to the group. You can specify an Key Management Service (KMS) key to encrypt the datasets in the group. If you specify a KMS key, you must also include an Identity and Access Management (IAM) role that has permission to access the key. APIs that require a dataset group ARN in the request CreateDataset CreateEventTracker CreateSolution Related APIs ListDatasetGroups DescribeDatasetGroup DeleteDatasetGroup"]
 module CreateDatasetExportJobResponse =
   struct
     type nonrec t =
@@ -10888,9 +14034,9 @@ module CreateDatasetExportJobResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "datasetExportJobArn") in
       make ?datasetExportJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetExportJobArn =
-        field_map json "datasetExportJobArn" Arn.of_json in
+        field_map json__ "datasetExportJobArn" Arn.of_json in
       make ?datasetExportJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10956,19 +14102,175 @@ module CreateDatasetExportJobRequest =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobName") in
       make ?tags ~jobOutput ~roleArn ?ingestionMode ~datasetArn ~jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
       let jobOutput =
-        field_map_exn json "jobOutput" DatasetExportJobOutput.of_json in
-      let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
+        field_map_exn json__ "jobOutput" DatasetExportJobOutput.of_json in
+      let roleArn = field_map_exn json__ "roleArn" RoleArn.of_json in
       let ingestionMode =
-        field_map json "ingestionMode" IngestionMode.of_json in
-      let datasetArn = field_map_exn json "datasetArn" Arn.of_json in
-      let jobName = field_map_exn json "jobName" Name.of_json in
+        field_map json__ "ingestionMode" IngestionMode.of_json in
+      let datasetArn = field_map_exn json__ "datasetArn" Arn.of_json in
+      let jobName = field_map_exn json__ "jobName" Name.of_json in
       make ?tags ~jobOutput ~roleArn ?ingestionMode ~datasetArn ~jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a job that exports data from your dataset to an Amazon S3 bucket. To allow Amazon Personalize to export the training data, you must specify an service-linked IAM role that gives Amazon Personalize PutObject permissions for your Amazon S3 bucket. For information, see Exporting a dataset in the Amazon Personalize developer guide. Status A dataset export job can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED To get the status of the export job, call DescribeDatasetExportJob, and specify the Amazon Resource Name (ARN) of the dataset export job. The dataset export is complete when the status shows as ACTIVE. If the status shows as CREATE FAILED, the response includes a failureReason key, which describes why the job failed."]
+module CreateDataDeletionJobResponse =
+  struct
+    type nonrec t =
+      {
+      dataDeletionJobArn: Arn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the data deletion job."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyTagsException of TooManyTagsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataDeletionJobArn = fun () -> { dataDeletionJobArn }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyTagsException e ->
+          `Assoc
+            [("error", (`String "TooManyTagsException"));
+            ("details", (TooManyTagsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("dataDeletionJobArn",
+           (Option.map x.dataDeletionJobArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataDeletionJobArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "dataDeletionJobArn") in
+      make ?dataDeletionJobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataDeletionJobArn =
+        field_map json__ "dataDeletionJobArn" Arn.of_json in
+      make ?dataDeletionJobArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a batch job that deletes all references to specific users from an Amazon Personalize dataset group in batches. You specify the users to delete in a CSV file of userIds in an Amazon S3 bucket. After a job completes, Amazon Personalize no longer trains on the users\226\128\153 data and no longer considers the users when generating user segments. For more information about creating a data deletion job, see Deleting users. Your input file must be a CSV file with a single USER_ID column that lists the users IDs. For more information about preparing the CSV file, see Preparing your data deletion file and uploading it to Amazon S3. To give Amazon Personalize permission to access your input CSV file of userIds, you must specify an IAM service role that has permission to read from the data source. This role needs GetObject and ListBucket permissions for the bucket and its content. These permissions are the same as importing data. For information on granting access to your Amazon S3 bucket, see Giving Amazon Personalize Access to Amazon S3 Resources. After you create a job, it can take up to a day to delete all references to the users from datasets and models. Until the job completes, Amazon Personalize continues to use the data when training. And if you use a User Segmentation recipe, the users might appear in user segments. Status A data deletion job can have one of the following statuses: PENDING > IN_PROGRESS > COMPLETED -or- FAILED To get the status of the data deletion job, call DescribeDataDeletionJob API operation and specify the Amazon Resource Name (ARN) of the job. If the status is FAILED, the response includes a failureReason key, which describes why the job failed. Related APIs ListDataDeletionJobs DescribeDataDeletionJob"]
+module CreateDataDeletionJobRequest =
+  struct
+    type nonrec t =
+      {
+      jobName: Name.t [@ocaml.doc "The name for the data deletion job."];
+      datasetGroupArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the dataset group that has the datasets you want to delete records from."];
+      dataSource: DataSource.t
+        [@ocaml.doc
+          "The Amazon S3 bucket that contains the list of userIds of the users to delete."];
+      roleArn: RoleArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role that has permissions to read from the Amazon S3 data source."];
+      tags: Tags.t option
+        [@ocaml.doc "A list of tags to apply to the data deletion job."]}
+    let context_ = "CreateDataDeletionJobRequest"
+    let make ?tags =
+      fun ~jobName ->
+        fun ~datasetGroupArn ->
+          fun ~dataSource ->
+            fun ~roleArn ->
+              fun () ->
+                { tags; jobName; datasetGroupArn; dataSource; roleArn }
+    let to_value x =
+      structure_to_value
+        [("jobName", (Some (Name.to_value x.jobName)));
+        ("datasetGroupArn", (Some (Arn.to_value x.datasetGroupArn)));
+        ("dataSource", (Some (DataSource.to_value x.dataSource)));
+        ("roleArn", (Some (RoleArn.to_value x.roleArn)));
+        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
+      let roleArn =
+        RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+      let dataSource =
+        DataSource.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataSource") in
+      let datasetGroupArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "datasetGroupArn") in
+      let jobName =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobName") in
+      make ?tags ~roleArn ~dataSource ~datasetGroupArn ~jobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let roleArn = field_map_exn json__ "roleArn" RoleArn.of_json in
+      let dataSource = field_map_exn json__ "dataSource" DataSource.of_json in
+      let datasetGroupArn =
+        field_map_exn json__ "datasetGroupArn" Arn.of_json in
+      let jobName = field_map_exn json__ "jobName" Name.of_json in
+      make ?tags ~roleArn ~dataSource ~datasetGroupArn ~jobName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a batch job that deletes all references to specific users from an Amazon Personalize dataset group in batches. You specify the users to delete in a CSV file of userIds in an Amazon S3 bucket. After a job completes, Amazon Personalize no longer trains on the users\226\128\153 data and no longer considers the users when generating user segments. For more information about creating a data deletion job, see Deleting users. Your input file must be a CSV file with a single USER_ID column that lists the users IDs. For more information about preparing the CSV file, see Preparing your data deletion file and uploading it to Amazon S3. To give Amazon Personalize permission to access your input CSV file of userIds, you must specify an IAM service role that has permission to read from the data source. This role needs GetObject and ListBucket permissions for the bucket and its content. These permissions are the same as importing data. For information on granting access to your Amazon S3 bucket, see Giving Amazon Personalize Access to Amazon S3 Resources. After you create a job, it can take up to a day to delete all references to the users from datasets and models. Until the job completes, Amazon Personalize continues to use the data when training. And if you use a User Segmentation recipe, the users might appear in user segments. Status A data deletion job can have one of the following statuses: PENDING > IN_PROGRESS > COMPLETED -or- FAILED To get the status of the data deletion job, call DescribeDataDeletionJob API operation and specify the Amazon Resource Name (ARN) of the job. If the status is FAILED, the response includes a failureReason key, which describes why the job failed. Related APIs ListDataDeletionJobs DescribeDataDeletionJob"]
 module CreateCampaignResponse =
   struct
     type nonrec t =
@@ -11059,12 +14361,12 @@ module CreateCampaignResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "campaignArn") in
       make ?campaignArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let campaignArn = field_map json "campaignArn" Arn.of_json in
+    let of_json json__ =
+      let campaignArn = field_map json__ "campaignArn" Arn.of_json in
       make ?campaignArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a campaign that deploys a solution version. When a client calls the GetRecommendations and GetPersonalizedRanking APIs, a campaign is specified in the request. Minimum Provisioned TPS and Auto-Scaling A transaction is a single GetRecommendations or GetPersonalizedRanking call. Transactions per second (TPS) is the throughput and unit of billing for Amazon Personalize. The minimum provisioned TPS (minProvisionedTPS) specifies the baseline throughput provisioned by Amazon Personalize, and thus, the minimum billing charge. If your TPS increases beyond minProvisionedTPS, Amazon Personalize auto-scales the provisioned capacity up and down, but never below minProvisionedTPS. There's a short time delay while the capacity is increased that might cause loss of transactions. The actual TPS used is calculated as the average requests/second within a 5-minute window. You pay for maximum of either the minimum provisioned TPS or the actual TPS. We recommend starting with a low minProvisionedTPS, track your usage using Amazon CloudWatch metrics, and then increase the minProvisionedTPS as necessary. Status A campaign can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the campaign status, call DescribeCampaign. Wait until the status of the campaign is ACTIVE before asking the campaign for recommendations. Related APIs ListCampaigns DescribeCampaign UpdateCampaign DeleteCampaign"]
+       "You incur campaign costs while it is active. To avoid unnecessary costs, make sure to delete the campaign when you are finished. For information about campaign costs, see Amazon Personalize pricing. Creates a campaign that deploys a solution version. When a client calls the GetRecommendations and GetPersonalizedRanking APIs, a campaign is specified in the request. Minimum Provisioned TPS and Auto-Scaling A high minProvisionedTPS will increase your cost. We recommend starting with 1 for minProvisionedTPS (the default). Track your usage using Amazon CloudWatch metrics, and increase the minProvisionedTPS as necessary. When you create an Amazon Personalize campaign, you can specify the minimum provisioned transactions per second (minProvisionedTPS) for the campaign. This is the baseline transaction throughput for the campaign provisioned by Amazon Personalize. It sets the minimum billing charge for the campaign while it is active. A transaction is a single GetRecommendations or GetPersonalizedRanking request. The default minProvisionedTPS is 1. If your TPS increases beyond the minProvisionedTPS, Amazon Personalize auto-scales the provisioned capacity up and down, but never below minProvisionedTPS. There's a short time delay while the capacity is increased that might cause loss of transactions. When your traffic reduces, capacity returns to the minProvisionedTPS. You are charged for the the minimum provisioned TPS or, if your requests exceed the minProvisionedTPS, the actual TPS. The actual TPS is the total number of recommendation requests you make. We recommend starting with a low minProvisionedTPS, track your usage using Amazon CloudWatch metrics, and then increase the minProvisionedTPS as necessary. For more information about campaign costs, see Amazon Personalize pricing. Status A campaign can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the campaign status, call DescribeCampaign. Wait until the status of the campaign is ACTIVE before asking the campaign for recommendations. Related APIs ListCampaigns DescribeCampaign UpdateCampaign DeleteCampaign"]
 module CreateCampaignRequest =
   struct
     type nonrec t =
@@ -11074,10 +14376,10 @@ module CreateCampaignRequest =
           "A name for the new campaign. The campaign name must be unique within your account."];
       solutionVersionArn: Arn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the solution version to deploy."];
+          "The Amazon Resource Name (ARN) of the trained model to deploy with the campaign. To specify the latest solution version of your solution, specify the ARN of your solution in SolutionArn/$LATEST format. You must use this format if you set syncWithLatestSolutionVersion to True in the CampaignConfig. To deploy a model that isn't the latest solution version of your solution, specify the ARN of the solution version. For more information about automatic campaign updates, see Enabling automatic campaign updates."];
       minProvisionedTPS: TransactionsPerSecond.t option
         [@ocaml.doc
-          "Specifies the requested minimum provisioned transactions (recommendations) per second that Amazon Personalize will support."];
+          "Specifies the requested minimum provisioned transactions (recommendations) per second that Amazon Personalize will support. A high minProvisionedTPS will increase your bill. We recommend starting with 1 for minProvisionedTPS (the default). Track your usage using Amazon CloudWatch metrics, and increase the minProvisionedTPS as necessary."];
       campaignConfig: CampaignConfig.t option
         [@ocaml.doc "The configuration details of a campaign."];
       tags: Tags.t option
@@ -11122,20 +14424,20 @@ module CreateCampaignRequest =
       make ?tags ?campaignConfig ?minProvisionedTPS ~solutionVersionArn ~name
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
       let campaignConfig =
-        field_map json "campaignConfig" CampaignConfig.of_json in
+        field_map json__ "campaignConfig" CampaignConfig.of_json in
       let minProvisionedTPS =
-        field_map json "minProvisionedTPS" TransactionsPerSecond.of_json in
+        field_map json__ "minProvisionedTPS" TransactionsPerSecond.of_json in
       let solutionVersionArn =
-        field_map_exn json "solutionVersionArn" Arn.of_json in
-      let name = field_map_exn json "name" Name.of_json in
+        field_map_exn json__ "solutionVersionArn" Arn.of_json in
+      let name = field_map_exn json__ "name" Name.of_json in
       make ?tags ?campaignConfig ?minProvisionedTPS ~solutionVersionArn ~name
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a campaign that deploys a solution version. When a client calls the GetRecommendations and GetPersonalizedRanking APIs, a campaign is specified in the request. Minimum Provisioned TPS and Auto-Scaling A transaction is a single GetRecommendations or GetPersonalizedRanking call. Transactions per second (TPS) is the throughput and unit of billing for Amazon Personalize. The minimum provisioned TPS (minProvisionedTPS) specifies the baseline throughput provisioned by Amazon Personalize, and thus, the minimum billing charge. If your TPS increases beyond minProvisionedTPS, Amazon Personalize auto-scales the provisioned capacity up and down, but never below minProvisionedTPS. There's a short time delay while the capacity is increased that might cause loss of transactions. The actual TPS used is calculated as the average requests/second within a 5-minute window. You pay for maximum of either the minimum provisioned TPS or the actual TPS. We recommend starting with a low minProvisionedTPS, track your usage using Amazon CloudWatch metrics, and then increase the minProvisionedTPS as necessary. Status A campaign can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the campaign status, call DescribeCampaign. Wait until the status of the campaign is ACTIVE before asking the campaign for recommendations. Related APIs ListCampaigns DescribeCampaign UpdateCampaign DeleteCampaign"]
+       "You incur campaign costs while it is active. To avoid unnecessary costs, make sure to delete the campaign when you are finished. For information about campaign costs, see Amazon Personalize pricing. Creates a campaign that deploys a solution version. When a client calls the GetRecommendations and GetPersonalizedRanking APIs, a campaign is specified in the request. Minimum Provisioned TPS and Auto-Scaling A high minProvisionedTPS will increase your cost. We recommend starting with 1 for minProvisionedTPS (the default). Track your usage using Amazon CloudWatch metrics, and increase the minProvisionedTPS as necessary. When you create an Amazon Personalize campaign, you can specify the minimum provisioned transactions per second (minProvisionedTPS) for the campaign. This is the baseline transaction throughput for the campaign provisioned by Amazon Personalize. It sets the minimum billing charge for the campaign while it is active. A transaction is a single GetRecommendations or GetPersonalizedRanking request. The default minProvisionedTPS is 1. If your TPS increases beyond the minProvisionedTPS, Amazon Personalize auto-scales the provisioned capacity up and down, but never below minProvisionedTPS. There's a short time delay while the capacity is increased that might cause loss of transactions. When your traffic reduces, capacity returns to the minProvisionedTPS. You are charged for the the minimum provisioned TPS or, if your requests exceed the minProvisionedTPS, the actual TPS. The actual TPS is the total number of recommendation requests you make. We recommend starting with a low minProvisionedTPS, track your usage using Amazon CloudWatch metrics, and then increase the minProvisionedTPS as necessary. For more information about campaign costs, see Amazon Personalize pricing. Status A campaign can be in one of the following states: CREATE PENDING > CREATE IN_PROGRESS > ACTIVE -or- CREATE FAILED DELETE PENDING > DELETE IN_PROGRESS To get the campaign status, call DescribeCampaign. Wait until the status of the campaign is ACTIVE before asking the campaign for recommendations. Related APIs ListCampaigns DescribeCampaign UpdateCampaign DeleteCampaign"]
 module CreateBatchSegmentJobResponse =
   struct
     type nonrec t =
@@ -11227,9 +14529,9 @@ module CreateBatchSegmentJobResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "batchSegmentJobArn") in
       make ?batchSegmentJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchSegmentJobArn =
-        field_map json "batchSegmentJobArn" Arn.of_json in
+        field_map json__ "batchSegmentJobArn" Arn.of_json in
       make ?batchSegmentJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11248,7 +14550,7 @@ module CreateBatchSegmentJobRequest =
           "The ARN of the filter to apply to the batch segment job. For more information on using filters, see Filtering batch recommendations."];
       numResults: NumBatchResults.t option
         [@ocaml.doc
-          "The number of predicted users generated by the batch segment job for each line of input data."];
+          "The number of predicted users generated by the batch segment job for each line of input data. The maximum number of users per segment is 5 million."];
       jobInput: BatchSegmentJobInput.t
         [@ocaml.doc
           "The Amazon S3 path for the input data used to generate the batch segment job."];
@@ -11314,18 +14616,18 @@ module CreateBatchSegmentJobRequest =
       make ?tags ~roleArn ~jobOutput ~jobInput ?numResults ?filterArn
         ~solutionVersionArn ~jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
-      let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" Tags.of_json in
+      let roleArn = field_map_exn json__ "roleArn" RoleArn.of_json in
       let jobOutput =
-        field_map_exn json "jobOutput" BatchSegmentJobOutput.of_json in
+        field_map_exn json__ "jobOutput" BatchSegmentJobOutput.of_json in
       let jobInput =
-        field_map_exn json "jobInput" BatchSegmentJobInput.of_json in
-      let numResults = field_map json "numResults" NumBatchResults.of_json in
-      let filterArn = field_map json "filterArn" Arn.of_json in
+        field_map_exn json__ "jobInput" BatchSegmentJobInput.of_json in
+      let numResults = field_map json__ "numResults" NumBatchResults.of_json in
+      let filterArn = field_map json__ "filterArn" Arn.of_json in
       let solutionVersionArn =
-        field_map_exn json "solutionVersionArn" Arn.of_json in
-      let jobName = field_map_exn json "jobName" Name.of_json in
+        field_map_exn json__ "solutionVersionArn" Arn.of_json in
+      let jobName = field_map_exn json__ "jobName" Name.of_json in
       make ?tags ~roleArn ~jobOutput ~jobInput ?numResults ?filterArn
         ~solutionVersionArn ~jobName ()
     let to_json v = composed_to_json to_value v
@@ -11423,13 +14725,13 @@ module CreateBatchInferenceJobResponse =
           (Xml.child xml_arg0 "batchInferenceJobArn") in
       make ?batchInferenceJobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchInferenceJobArn =
-        field_map json "batchInferenceJobArn" Arn.of_json in
+        field_map json__ "batchInferenceJobArn" Arn.of_json in
       make ?batchInferenceJobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a batch inference job. The operation can handle up to 50 million records and the input file must be in JSON format. For more information, see Creating a batch inference job."]
+       "Generates batch recommendations based on a list of items or users stored in Amazon S3 and exports the recommendations to an Amazon S3 bucket. To generate batch recommendations, specify the ARN of a solution version and an Amazon S3 URI for the input and output data. For user personalization, popular items, and personalized ranking solutions, the batch inference job generates a list of recommended items for each user ID in the input file. For related items solutions, the job generates a list of recommended items for each item ID in the input file. For more information, see Creating a batch inference job . If you use the Similar-Items recipe, Amazon Personalize can add descriptive themes to batch recommendations. To generate themes, set the job's mode to THEME_GENERATION and specify the name of the field that contains item names in the input data. For more information about generating themes, see Batch recommendations with themes from Content Generator . You can't get batch recommendations with the Trending-Now or Next-Best-Action recipes."]
 module CreateBatchInferenceJobRequest =
   struct
     type nonrec t =
@@ -11456,29 +14758,39 @@ module CreateBatchInferenceJobRequest =
       batchInferenceJobConfig: BatchInferenceJobConfig.t option
         [@ocaml.doc "The configuration details of a batch inference job."];
       tags: Tags.t option
-        [@ocaml.doc "A list of tags to apply to the batch inference job."]}
+        [@ocaml.doc "A list of tags to apply to the batch inference job."];
+      batchInferenceJobMode: BatchInferenceJobMode.t option
+        [@ocaml.doc
+          "The mode of the batch inference job. To generate descriptive themes for groups of similar items, set the job mode to THEME_GENERATION. If you don't want to generate themes, use the default BATCH_INFERENCE. When you get batch recommendations with themes, you will incur additional costs. For more information, see Amazon Personalize pricing."];
+      themeGenerationConfig: ThemeGenerationConfig.t option
+        [@ocaml.doc
+          "For theme generation jobs, specify the name of the column in your Items dataset that contains each item's name."]}
     let context_ = "CreateBatchInferenceJobRequest"
     let make ?filterArn =
       fun ?numResults ->
         fun ?batchInferenceJobConfig ->
           fun ?tags ->
-            fun ~jobName ->
-              fun ~solutionVersionArn ->
-                fun ~jobInput ->
-                  fun ~jobOutput ->
-                    fun ~roleArn ->
-                      fun () ->
-                        {
-                          filterArn;
-                          numResults;
-                          batchInferenceJobConfig;
-                          tags;
-                          jobName;
-                          solutionVersionArn;
-                          jobInput;
-                          jobOutput;
-                          roleArn
-                        }
+            fun ?batchInferenceJobMode ->
+              fun ?themeGenerationConfig ->
+                fun ~jobName ->
+                  fun ~solutionVersionArn ->
+                    fun ~jobInput ->
+                      fun ~jobOutput ->
+                        fun ~roleArn ->
+                          fun () ->
+                            {
+                              filterArn;
+                              numResults;
+                              batchInferenceJobConfig;
+                              tags;
+                              batchInferenceJobMode;
+                              themeGenerationConfig;
+                              jobName;
+                              solutionVersionArn;
+                              jobInput;
+                              jobOutput;
+                              roleArn
+                            }
     let to_value x =
       structure_to_value
         [("jobName", (Some (Name.to_value x.jobName)));
@@ -11491,9 +14803,21 @@ module CreateBatchInferenceJobRequest =
         ("batchInferenceJobConfig",
           (Option.map x.batchInferenceJobConfig
              ~f:BatchInferenceJobConfig.to_value));
-        ("tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("tags", (Option.map x.tags ~f:Tags.to_value));
+        ("batchInferenceJobMode",
+          (Option.map x.batchInferenceJobMode
+             ~f:BatchInferenceJobMode.to_value));
+        ("themeGenerationConfig",
+          (Option.map x.themeGenerationConfig
+             ~f:ThemeGenerationConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let themeGenerationConfig =
+        (Option.map ~f:ThemeGenerationConfig.of_xml)
+          (Xml.child xml_arg0 "themeGenerationConfig") in
+      let batchInferenceJobMode =
+        (Option.map ~f:BatchInferenceJobMode.of_xml)
+          (Xml.child xml_arg0 "batchInferenceJobMode") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let batchInferenceJobConfig =
         (Option.map ~f:BatchInferenceJobConfig.of_xml)
@@ -11516,26 +14840,34 @@ module CreateBatchInferenceJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "solutionVersionArn") in
       let jobName =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobName") in
-      make ?tags ?batchInferenceJobConfig ~roleArn ~jobOutput ~jobInput
-        ?numResults ?filterArn ~solutionVersionArn ~jobName ()
+      make ?themeGenerationConfig ?batchInferenceJobMode ?tags
+        ?batchInferenceJobConfig ~roleArn ~jobOutput ~jobInput ?numResults
+        ?filterArn ~solutionVersionArn ~jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" Tags.of_json in
+    let of_json json__ =
+      let themeGenerationConfig =
+        field_map json__ "themeGenerationConfig"
+          ThemeGenerationConfig.of_json in
+      let batchInferenceJobMode =
+        field_map json__ "batchInferenceJobMode"
+          BatchInferenceJobMode.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
       let batchInferenceJobConfig =
-        field_map json "batchInferenceJobConfig"
+        field_map json__ "batchInferenceJobConfig"
           BatchInferenceJobConfig.of_json in
-      let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
+      let roleArn = field_map_exn json__ "roleArn" RoleArn.of_json in
       let jobOutput =
-        field_map_exn json "jobOutput" BatchInferenceJobOutput.of_json in
+        field_map_exn json__ "jobOutput" BatchInferenceJobOutput.of_json in
       let jobInput =
-        field_map_exn json "jobInput" BatchInferenceJobInput.of_json in
-      let numResults = field_map json "numResults" NumBatchResults.of_json in
-      let filterArn = field_map json "filterArn" Arn.of_json in
+        field_map_exn json__ "jobInput" BatchInferenceJobInput.of_json in
+      let numResults = field_map json__ "numResults" NumBatchResults.of_json in
+      let filterArn = field_map json__ "filterArn" Arn.of_json in
       let solutionVersionArn =
-        field_map_exn json "solutionVersionArn" Arn.of_json in
-      let jobName = field_map_exn json "jobName" Name.of_json in
-      make ?tags ?batchInferenceJobConfig ~roleArn ~jobOutput ~jobInput
-        ?numResults ?filterArn ~solutionVersionArn ~jobName ()
+        field_map_exn json__ "solutionVersionArn" Arn.of_json in
+      let jobName = field_map_exn json__ "jobName" Name.of_json in
+      make ?themeGenerationConfig ?batchInferenceJobMode ?tags
+        ?batchInferenceJobConfig ~roleArn ~jobOutput ~jobInput ?numResults
+        ?filterArn ~solutionVersionArn ~jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a batch inference job. The operation can handle up to 50 million records and the input file must be in JSON format. For more information, see Creating a batch inference job."]
+       "Generates batch recommendations based on a list of items or users stored in Amazon S3 and exports the recommendations to an Amazon S3 bucket. To generate batch recommendations, specify the ARN of a solution version and an Amazon S3 URI for the input and output data. For user personalization, popular items, and personalized ranking solutions, the batch inference job generates a list of recommended items for each user ID in the input file. For related items solutions, the job generates a list of recommended items for each item ID in the input file. For more information, see Creating a batch inference job . If you use the Similar-Items recipe, Amazon Personalize can add descriptive themes to batch recommendations. To generate themes, set the job's mode to THEME_GENERATION and specify the name of the field that contains item names in the input data. For more information about generating themes, see Batch recommendations with themes from Content Generator . You can't get batch recommendations with the Trending-Now or Next-Best-Action recipes."]

@@ -23,6 +23,19 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module SensitiveString =
+  struct
+    type nonrec t = string
+    let context_ = "SensitiveString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SensitiveString" j
+    let to_json = simple_to_json to_value
+  end
 module String_ =
   struct
     type nonrec t = string
@@ -36,6 +49,357 @@ module String_ =
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
+module ValidationExceptionField =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc "The field name where the invalid entry was detected."];
+      message: SensitiveString.t option
+        [@ocaml.doc "A message about the validation exception."]}
+    let make ?name = fun ?message -> fun () -> { name; message }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:SensitiveString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "message") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?message ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" SensitiveString.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?message ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The input failed to meet the constraints specified by the Amazon Web Services service in a specified field."]
+module RegionName =
+  struct
+    type nonrec t = string
+    let context_ = "RegionName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RegionName" j
+    let to_json = simple_to_json to_value
+  end
+module RegionOptStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | ENABLING 
+      | DISABLING 
+      | DISABLED 
+      | ENABLED_BY_DEFAULT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | ENABLING -> "ENABLING"
+      | DISABLING -> "DISABLING"
+      | DISABLED -> "DISABLED"
+      | ENABLED_BY_DEFAULT -> "ENABLED_BY_DEFAULT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "ENABLING" -> ENABLING
+      | "DISABLING" -> DISABLING
+      | "DISABLED" -> DISABLED
+      | "ENABLED_BY_DEFAULT" -> ENABLED_BY_DEFAULT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RegionOptStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RegionOptStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ValidationExceptionFieldList =
+  struct
+    type nonrec t = ValidationExceptionField.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ValidationExceptionField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ValidationExceptionFieldList"
+        ~of_json:ValidationExceptionField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ValidationExceptionReason =
+  struct
+    type nonrec t =
+      | InvalidRegionOptTarget 
+      | FieldValidationFailed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | InvalidRegionOptTarget -> "invalidRegionOptTarget"
+      | FieldValidationFailed -> "fieldValidationFailed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "invalidRegionOptTarget" -> InvalidRegionOptTarget
+      | "fieldValidationFailed" -> FieldValidationFailed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ValidationExceptionReason" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ValidationExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module AddressLine =
+  struct
+    type nonrec t = string
+    let context_ = "AddressLine"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:60) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AddressLine" j
+    let to_json = simple_to_json to_value
+  end
+module City =
+  struct
+    type nonrec t = string
+    let context_ = "City"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"City" j
+    let to_json = simple_to_json to_value
+  end
+module CompanyName =
+  struct
+    type nonrec t = string
+    let context_ = "CompanyName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CompanyName" j
+    let to_json = simple_to_json to_value
+  end
+module ContactInformationPhoneNumber =
+  struct
+    type nonrec t = string
+    let context_ = "ContactInformationPhoneNumber"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:20) >>=
+                  (fun () -> check_pattern i ~pattern:"[+][\\s0-9()-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ContactInformationPhoneNumber" j
+    let to_json = simple_to_json to_value
+  end
+module CountryCode =
+  struct
+    type nonrec t = string
+    let context_ = "CountryCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2) >>=
+             (fun () -> check_string_min i ~min:2));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CountryCode" j
+    let to_json = simple_to_json to_value
+  end
+module DistrictOrCounty =
+  struct
+    type nonrec t = string
+    let context_ = "DistrictOrCounty"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DistrictOrCounty" j
+    let to_json = simple_to_json to_value
+  end
+module FullName =
+  struct
+    type nonrec t = string
+    let context_ = "FullName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FullName" j
+    let to_json = simple_to_json to_value
+  end
+module PostalCode =
+  struct
+    type nonrec t = string
+    let context_ = "PostalCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:20) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PostalCode" j
+    let to_json = simple_to_json to_value
+  end
+module StateOrRegion =
+  struct
+    type nonrec t = string
+    let context_ = "StateOrRegion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StateOrRegion" j
+    let to_json = simple_to_json to_value
+  end
+module WebsiteUrl =
+  struct
+    type nonrec t = string
+    let context_ = "WebsiteUrl"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WebsiteUrl" j
+    let to_json = simple_to_json to_value
+  end
+module Region =
+  struct
+    type nonrec t =
+      {
+      regionName: RegionName.t option
+        [@ocaml.doc
+          "The Region code of a given Region (for example, us-east-1)."];
+      regionOptStatus: RegionOptStatus.t option
+        [@ocaml.doc
+          "One of potential statuses a Region can undergo (Enabled, Enabling, Disabled, Disabling, Enabled_By_Default)."]}
+    let make ?regionName =
+      fun ?regionOptStatus -> fun () -> { regionName; regionOptStatus }
+    let to_value x =
+      structure_to_value
+        [("RegionName", (Option.map x.regionName ~f:RegionName.to_value));
+        ("RegionOptStatus",
+          (Option.map x.regionOptStatus ~f:RegionOptStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let regionOptStatus =
+        (Option.map ~f:RegionOptStatus.of_xml)
+          (Xml.child xml_arg0 "RegionOptStatus") in
+      let regionName =
+        (Option.map ~f:RegionName.of_xml) (Xml.child xml_arg0 "RegionName") in
+      make ?regionOptStatus ?regionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let regionOptStatus =
+        field_map json__ "RegionOptStatus" RegionOptStatus.of_json in
+      let regionName = field_map json__ "RegionName" RegionName.of_json in
+      make ?regionOptStatus ?regionName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This is a structure that expresses the Region for a given account, consisting of a name and opt-in status."]
 module AlternateContactType =
   struct
     type nonrec t =
@@ -74,9 +438,10 @@ module EmailAddress =
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:64) >>=
+                (check_string_max i ~max:254) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"[\\w+=,.-]+@[\\w.-]+\\.[\\w]+")));
+                     check_pattern i
+                       ~pattern:"[\\s]*[\\w+=.#|!&-]+@[\\w.-]+\\.[\\w]+[\\s]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -114,7 +479,7 @@ module PhoneNumber =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:25) >>=
-                  (fun () -> check_pattern i ~pattern:"^[\\s0-9()+-]+$")));
+                  (fun () -> check_pattern i ~pattern:"[\\s0-9()+-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -142,13 +507,228 @@ module Title =
     let of_json j = string_of_json ~kind:"Title" j
     let to_json = simple_to_json to_value
   end
+module AccessDeniedException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      errorType: String_.t option
+        [@ocaml.doc
+          "The value populated to the x-amzn-ErrorType response header by API Gateway."]}
+    let make ?message = fun ?errorType -> fun () -> { message; errorType }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("x-amzn-ErrorType", (Option.map x.errorType ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?errorType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorType = field_map json__ "errorType" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?errorType ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation failed because the calling identity doesn't have the minimum required permissions."]
+module ConflictException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      errorType: String_.t option
+        [@ocaml.doc
+          "The value populated to the x-amzn-ErrorType response header by API Gateway."]}
+    let make ?message = fun ?errorType -> fun () -> { message; errorType }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("x-amzn-ErrorType", (Option.map x.errorType ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?errorType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorType = field_map json__ "errorType" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?errorType ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request could not be processed because of a conflict in the current status of the resource. For example, this happens if you try to enable a Region that is currently being disabled (in a status of DISABLING) or if you try to change an account\226\128\153s root user email to an email address which is already in use."]
+module InternalServerException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      errorType: String_.t option
+        [@ocaml.doc
+          "The value populated to the x-amzn-ErrorType response header by API Gateway."]}
+    let make ?message = fun ?errorType -> fun () -> { message; errorType }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("x-amzn-ErrorType", (Option.map x.errorType ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?errorType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorType = field_map json__ "errorType" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?errorType ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation failed because of an error internal to Amazon Web Services. Try your operation again later."]
+module PrimaryEmailUpdateStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | ACCEPTED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | ACCEPTED -> "ACCEPTED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "ACCEPTED" -> ACCEPTED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PrimaryEmailUpdateStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PrimaryEmailUpdateStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceNotFoundException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      errorType: String_.t option
+        [@ocaml.doc
+          "The value populated to the x-amzn-ErrorType response header by API Gateway."]}
+    let make ?message = fun ?errorType -> fun () -> { message; errorType }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("x-amzn-ErrorType", (Option.map x.errorType ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?errorType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorType = field_map json__ "errorType" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?errorType ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation failed because it specified a resource that can't be found."]
+module TooManyRequestsException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      errorType: String_.t option
+        [@ocaml.doc
+          "The value populated to the x-amzn-ErrorType response header by API Gateway."]}
+    let make ?message = fun ?errorType -> fun () -> { message; errorType }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("x-amzn-ErrorType", (Option.map x.errorType ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?errorType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorType = field_map json__ "errorType" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?errorType ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation failed because it was called too frequently and exceeded a throttle limit."]
+module ValidationException =
+  struct
+    type nonrec t =
+      {
+      message: SensitiveString.t option
+        [@ocaml.doc
+          "The message that informs you about what was invalid about the request."];
+      reason: ValidationExceptionReason.t option
+        [@ocaml.doc "The reason that validation failed."];
+      fieldList: ValidationExceptionFieldList.t option
+        [@ocaml.doc "The field where the invalid entry was detected."]}
+    let make ?message =
+      fun ?reason ->
+        fun ?fieldList -> fun () -> { message; reason; fieldList }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:SensitiveString.to_value));
+        ("reason",
+          (Option.map x.reason ~f:ValidationExceptionReason.to_value));
+        ("fieldList",
+          (Option.map x.fieldList ~f:ValidationExceptionFieldList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fieldList =
+        (Option.map ~f:ValidationExceptionFieldList.of_xml)
+          (Xml.child xml_arg0 "fieldList") in
+      let reason =
+        (Option.map ~f:ValidationExceptionReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
+      let message =
+        (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "message") in
+      make ?fieldList ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fieldList =
+        field_map json__ "fieldList" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "message" SensitiveString.of_json in
+      make ?fieldList ?reason ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation failed because one of the input parameters was invalid."]
 module AccountId =
   struct
     type nonrec t = string
     let context_ = "AccountId"
     let make i =
       let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"^\\d{12}$"); i
+        ok_or_failwith (check_pattern i ~pattern:"\\d{12}"); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -157,247 +737,1366 @@ module AccountId =
     let of_json j = string_of_json ~kind:"AccountId" j
     let to_json = simple_to_json to_value
   end
-module AccessDeniedException =
+module PrimaryEmailAddress =
   struct
-    type nonrec t = {
-      message: String_.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+    type nonrec t = string
+    let context_ = "PrimaryEmailAddress"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:5));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PrimaryEmailAddress" j
+    let to_json = simple_to_json to_value
+  end
+module ContactInformation =
+  struct
+    type nonrec t =
+      {
+      fullName: FullName.t
+        [@ocaml.doc "The full name of the primary contact address."];
+      addressLine1: AddressLine.t
+        [@ocaml.doc "The first line of the primary contact address."];
+      addressLine2: AddressLine.t option
+        [@ocaml.doc
+          "The second line of the primary contact address, if any."];
+      addressLine3: AddressLine.t option
+        [@ocaml.doc "The third line of the primary contact address, if any."];
+      city: City.t [@ocaml.doc "The city of the primary contact address."];
+      stateOrRegion: StateOrRegion.t option
+        [@ocaml.doc
+          "The state or region of the primary contact address. If the mailing address is within the United States (US), the value in this field can be either a two character state code (for example, NJ) or the full state name (for example, New Jersey). This field is required in the following countries: US, CA, GB, DE, JP, IN, and BR."];
+      districtOrCounty: DistrictOrCounty.t option
+        [@ocaml.doc
+          "The district or county of the primary contact address, if any."];
+      postalCode: PostalCode.t
+        [@ocaml.doc "The postal code of the primary contact address."];
+      countryCode: CountryCode.t
+        [@ocaml.doc
+          "The ISO-3166 two-letter country code for the primary contact address."];
+      phoneNumber: ContactInformationPhoneNumber.t
+        [@ocaml.doc
+          "The phone number of the primary contact information. The number will be validated and, in some countries, checked for activation."];
+      companyName: CompanyName.t option
+        [@ocaml.doc
+          "The name of the company associated with the primary contact information, if any."];
+      websiteUrl: WebsiteUrl.t option
+        [@ocaml.doc
+          "The URL of the website associated with the primary contact information, if any."]}
+    let context_ = "ContactInformation"
+    let make ?addressLine2 =
+      fun ?addressLine3 ->
+        fun ?stateOrRegion ->
+          fun ?districtOrCounty ->
+            fun ?companyName ->
+              fun ?websiteUrl ->
+                fun ~fullName ->
+                  fun ~addressLine1 ->
+                    fun ~city ->
+                      fun ~postalCode ->
+                        fun ~countryCode ->
+                          fun ~phoneNumber ->
+                            fun () ->
+                              {
+                                addressLine2;
+                                addressLine3;
+                                stateOrRegion;
+                                districtOrCounty;
+                                companyName;
+                                websiteUrl;
+                                fullName;
+                                addressLine1;
+                                city;
+                                postalCode;
+                                countryCode;
+                                phoneNumber
+                              }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("FullName", (Some (FullName.to_value x.fullName)));
+        ("AddressLine1", (Some (AddressLine.to_value x.addressLine1)));
+        ("AddressLine2", (Option.map x.addressLine2 ~f:AddressLine.to_value));
+        ("AddressLine3", (Option.map x.addressLine3 ~f:AddressLine.to_value));
+        ("City", (Some (City.to_value x.city)));
+        ("StateOrRegion",
+          (Option.map x.stateOrRegion ~f:StateOrRegion.to_value));
+        ("DistrictOrCounty",
+          (Option.map x.districtOrCounty ~f:DistrictOrCounty.to_value));
+        ("PostalCode", (Some (PostalCode.to_value x.postalCode)));
+        ("CountryCode", (Some (CountryCode.to_value x.countryCode)));
+        ("PhoneNumber",
+          (Some (ContactInformationPhoneNumber.to_value x.phoneNumber)));
+        ("CompanyName", (Option.map x.companyName ~f:CompanyName.to_value));
+        ("WebsiteUrl", (Option.map x.websiteUrl ~f:WebsiteUrl.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+      let websiteUrl =
+        (Option.map ~f:WebsiteUrl.of_xml) (Xml.child xml_arg0 "WebsiteUrl") in
+      let companyName =
+        (Option.map ~f:CompanyName.of_xml) (Xml.child xml_arg0 "CompanyName") in
+      let phoneNumber =
+        ContactInformationPhoneNumber.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PhoneNumber") in
+      let countryCode =
+        CountryCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CountryCode") in
+      let postalCode =
+        PostalCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PostalCode") in
+      let districtOrCounty =
+        (Option.map ~f:DistrictOrCounty.of_xml)
+          (Xml.child xml_arg0 "DistrictOrCounty") in
+      let stateOrRegion =
+        (Option.map ~f:StateOrRegion.of_xml)
+          (Xml.child xml_arg0 "StateOrRegion") in
+      let city =
+        City.of_xml (Xml.child_exn ~context:context_ xml_arg0 "City") in
+      let addressLine3 =
+        (Option.map ~f:AddressLine.of_xml)
+          (Xml.child xml_arg0 "AddressLine3") in
+      let addressLine2 =
+        (Option.map ~f:AddressLine.of_xml)
+          (Xml.child xml_arg0 "AddressLine2") in
+      let addressLine1 =
+        AddressLine.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AddressLine1") in
+      let fullName =
+        FullName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FullName") in
+      make ?websiteUrl ?companyName ~phoneNumber ~countryCode ~postalCode
+        ?districtOrCounty ?stateOrRegion ~city ?addressLine3 ?addressLine2
+        ~addressLine1 ~fullName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let websiteUrl = field_map json__ "WebsiteUrl" WebsiteUrl.of_json in
+      let companyName = field_map json__ "CompanyName" CompanyName.of_json in
+      let phoneNumber =
+        field_map_exn json__ "PhoneNumber"
+          ContactInformationPhoneNumber.of_json in
+      let countryCode =
+        field_map_exn json__ "CountryCode" CountryCode.of_json in
+      let postalCode = field_map_exn json__ "PostalCode" PostalCode.of_json in
+      let districtOrCounty =
+        field_map json__ "DistrictOrCounty" DistrictOrCounty.of_json in
+      let stateOrRegion =
+        field_map json__ "StateOrRegion" StateOrRegion.of_json in
+      let city = field_map_exn json__ "City" City.of_json in
+      let addressLine3 = field_map json__ "AddressLine3" AddressLine.of_json in
+      let addressLine2 = field_map json__ "AddressLine2" AddressLine.of_json in
+      let addressLine1 =
+        field_map_exn json__ "AddressLine1" AddressLine.of_json in
+      let fullName = field_map_exn json__ "FullName" FullName.of_json in
+      make ?websiteUrl ?companyName ~phoneNumber ~countryCode ~postalCode
+        ?districtOrCounty ?stateOrRegion ~city ?addressLine3 ?addressLine2
+        ~addressLine1 ~fullName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The operation failed because the calling identity doesn't have the minimum required permissions."]
+       "Contains the details of the primary contact information associated with an Amazon Web Services account."]
+module AccountName =
+  struct
+    type nonrec t = string
+    let context_ = "AccountName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"[ -;=?-~]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccountName" j
+    let to_json = simple_to_json to_value
+  end
+module RegionOptList =
+  struct
+    type nonrec t = Region.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Region.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Region.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RegionOptList" ~of_json:Region.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListRegionsRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListRegionsRequestMaxResultsInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListRegionsRequestNextTokenString =
+  struct
+    type nonrec t = string
+    let context_ = "ListRegionsRequestNextTokenString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ListRegionsRequestNextTokenString" j
+    let to_json = simple_to_json to_value
+  end
+module RegionOptStatusList =
+  struct
+    type nonrec t = RegionOptStatus.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RegionOptStatus.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RegionOptStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RegionOptStatusList"
+        ~of_json:RegionOptStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AwsAccountState =
+  struct
+    type nonrec t =
+      | PENDING_ACTIVATION 
+      | ACTIVE 
+      | SUSPENDED 
+      | CLOSED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING_ACTIVATION -> "PENDING_ACTIVATION"
+      | ACTIVE -> "ACTIVE"
+      | SUSPENDED -> "SUSPENDED"
+      | CLOSED -> "CLOSED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING_ACTIVATION" -> PENDING_ACTIVATION
+      | "ACTIVE" -> ACTIVE
+      | "SUSPENDED" -> SUSPENDED
+      | "CLOSED" -> CLOSED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AwsAccountState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AwsAccountState" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceUnavailableException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      errorType: String_.t option
+        [@ocaml.doc
+          "The value populated to the x-amzn-ErrorType response header by API Gateway."]}
+    let make ?message = fun ?errorType -> fun () -> { message; errorType }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("x-amzn-ErrorType", (Option.map x.errorType ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "x-amzn-ErrorType") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?errorType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorType = field_map json__ "errorType" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?errorType ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation failed because it specified a resource that is not currently available."]
 module AlternateContact =
   struct
     type nonrec t =
       {
-      alternateContactType: AlternateContactType.t option
-        [@ocaml.doc "The type of alternate contact."];
+      name: Name.t option
+        [@ocaml.doc "The name associated with this alternate contact."];
+      title: Title.t option
+        [@ocaml.doc "The title associated with this alternate contact."];
       emailAddress: EmailAddress.t option
         [@ocaml.doc
           "The email address associated with this alternate contact."];
-      name: Name.t option
-        [@ocaml.doc "The name associated with this alternate contact."];
       phoneNumber: PhoneNumber.t option
         [@ocaml.doc
           "The phone number associated with this alternate contact."];
-      title: Title.t option
-        [@ocaml.doc "The title associated with this alternate contact."]}
-    let make ?alternateContactType =
-      fun ?emailAddress ->
-        fun ?name ->
+      alternateContactType: AlternateContactType.t option
+        [@ocaml.doc "The type of alternate contact."]}
+    let make ?name =
+      fun ?title ->
+        fun ?emailAddress ->
           fun ?phoneNumber ->
-            fun ?title ->
+            fun ?alternateContactType ->
               fun () ->
                 {
-                  alternateContactType;
-                  emailAddress;
                   name;
+                  title;
+                  emailAddress;
                   phoneNumber;
-                  title
+                  alternateContactType
                 }
     let to_value x =
       structure_to_value
-        [("AlternateContactType",
-           (Option.map x.alternateContactType
-              ~f:AlternateContactType.to_value));
+        [("Name", (Option.map x.name ~f:Name.to_value));
+        ("Title", (Option.map x.title ~f:Title.to_value));
         ("EmailAddress",
           (Option.map x.emailAddress ~f:EmailAddress.to_value));
-        ("Name", (Option.map x.name ~f:Name.to_value));
         ("PhoneNumber", (Option.map x.phoneNumber ~f:PhoneNumber.to_value));
-        ("Title", (Option.map x.title ~f:Title.to_value))]
+        ("AlternateContactType",
+          (Option.map x.alternateContactType ~f:AlternateContactType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let title = (Option.map ~f:Title.of_xml) (Xml.child xml_arg0 "Title") in
-      let phoneNumber =
-        (Option.map ~f:PhoneNumber.of_xml) (Xml.child xml_arg0 "PhoneNumber") in
-      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
-      let emailAddress =
-        (Option.map ~f:EmailAddress.of_xml)
-          (Xml.child xml_arg0 "EmailAddress") in
       let alternateContactType =
         (Option.map ~f:AlternateContactType.of_xml)
           (Xml.child xml_arg0 "AlternateContactType") in
-      make ?title ?phoneNumber ?name ?emailAddress ?alternateContactType ()
+      let phoneNumber =
+        (Option.map ~f:PhoneNumber.of_xml) (Xml.child xml_arg0 "PhoneNumber") in
+      let emailAddress =
+        (Option.map ~f:EmailAddress.of_xml)
+          (Xml.child xml_arg0 "EmailAddress") in
+      let title = (Option.map ~f:Title.of_xml) (Xml.child xml_arg0 "Title") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?alternateContactType ?phoneNumber ?emailAddress ?title ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let title = field_map json "Title" Title.of_json in
-      let phoneNumber = field_map json "PhoneNumber" PhoneNumber.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let emailAddress = field_map json "EmailAddress" EmailAddress.of_json in
+    let of_json json__ =
       let alternateContactType =
-        field_map json "AlternateContactType" AlternateContactType.of_json in
-      make ?title ?phoneNumber ?name ?emailAddress ?alternateContactType ()
+        field_map json__ "AlternateContactType" AlternateContactType.of_json in
+      let phoneNumber = field_map json__ "PhoneNumber" PhoneNumber.of_json in
+      let emailAddress = field_map json__ "EmailAddress" EmailAddress.of_json in
+      let title = field_map json__ "Title" Title.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      make ?alternateContactType ?phoneNumber ?emailAddress ?title ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains the details of an alternate contact associated with an Amazon Web Services account"]
-module InternalServerException =
+module AccountCreatedDate =
   struct
-    type nonrec t = {
-      message: String_.t }
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module AccountState =
+  struct
+    type nonrec t =
+      | PENDING_ACTIVATION 
+      | ACTIVE 
+      | SUSPENDED 
+      | CLOSED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING_ACTIVATION -> "PENDING_ACTIVATION"
+      | ACTIVE -> "ACTIVE"
+      | SUSPENDED -> "SUSPENDED"
+      | CLOSED -> "CLOSED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING_ACTIVATION" -> PENDING_ACTIVATION
+      | "ACTIVE" -> ACTIVE
+      | "SUSPENDED" -> SUSPENDED
+      | "CLOSED" -> CLOSED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AccountState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AccountState" j)
+    let to_json = simple_to_json to_value
+  end
+module Otp =
+  struct
+    type nonrec t = string
+    let context_ = "Otp"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"[a-zA-Z0-9]{6}"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Otp" j
+    let to_json = simple_to_json to_value
+  end
+module StartPrimaryEmailUpdateResponse =
+  struct
+    type nonrec t =
+      {
+      status: PrimaryEmailUpdateStatus.t option
+        [@ocaml.doc "The status of the primary email update request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status = fun () -> { status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("Status",
+           (Option.map x.status ~f:PrimaryEmailUpdateStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+      let status =
+        (Option.map ~f:PrimaryEmailUpdateStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let status = field_map json__ "Status" PrimaryEmailUpdateStatus.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The operation failed because of an error internal to Amazon Web Services. Try your operation again later."]
-module ResourceNotFoundException =
+       "Starts the process to update the primary email address for the specified account."]
+module StartPrimaryEmailUpdateRequest =
   struct
-    type nonrec t = {
-      message: String_.t }
-    let context_ = "ResourceNotFoundException"
-    let make ~message = fun () -> { message }
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "Specifies the 12-digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account. The specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated admin account assigned. This operation can only be called from the management account or the delegated administrator account of an organization for a member account. The management account can't specify its own AccountId."];
+      primaryEmail: PrimaryEmailAddress.t
+        [@ocaml.doc
+          "The new primary email address (also known as the root user email address) to use in the specified account."]}
+    let context_ = "StartPrimaryEmailUpdateRequest"
+    let make ~accountId =
+      fun ~primaryEmail -> fun () -> { accountId; primaryEmail }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("PrimaryEmail",
+          (Some (PrimaryEmailAddress.to_value x.primaryEmail)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+      let primaryEmail =
+        PrimaryEmailAddress.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PrimaryEmail") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ~primaryEmail ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let primaryEmail =
+        field_map_exn json__ "PrimaryEmail" PrimaryEmailAddress.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~primaryEmail ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The operation failed because it specified a resource that can't be found."]
-module TooManyRequestsException =
+       "Starts the process to update the primary email address for the specified account."]
+module PutContactInformationRequest =
   struct
-    type nonrec t = {
-      message: String_.t }
-    let context_ = "TooManyRequestsException"
-    let make ~message = fun () -> { message }
+    type nonrec t =
+      {
+      contactInformation: ContactInformation.t
+        [@ocaml.doc
+          "Contains the details of the primary contact information associated with an Amazon Web Services account."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "Specifies the 12-digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you don't specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account. The specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated administrator account assigned. The management account can't specify its own AccountId. It must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, don't specify this parameter. Instead, call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."]}
+    let context_ = "PutContactInformationRequest"
+    let make ?accountId =
+      fun ~contactInformation -> fun () -> { accountId; contactInformation }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("ContactInformation",
+           (Some (ContactInformation.to_value x.contactInformation)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let contactInformation =
+        ContactInformation.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ContactInformation") in
+      make ?accountId ~contactInformation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let contactInformation =
+        field_map_exn json__ "ContactInformation" ContactInformation.of_json in
+      make ?accountId ~contactInformation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The operation failed because it was called too frequently and exceeded a throttle limit."]
-module ValidationException =
-  struct
-    type nonrec t = {
-      message: String_.t }
-    let context_ = "ValidationException"
-    let make ~message = fun () -> { message }
-    let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The operation failed because one of the input parameters was invalid."]
+       "Updates the primary contact information of an Amazon Web Services account. For complete details about how to use the primary contact operations, see Update the primary contact for your Amazon Web Services account."]
 module PutAlternateContactRequest =
+  struct
+    type nonrec t =
+      {
+      name: Name.t [@ocaml.doc "Specifies a name for the alternate contact."];
+      title: Title.t
+        [@ocaml.doc "Specifies a title for the alternate contact."];
+      emailAddress: EmailAddress.t
+        [@ocaml.doc "Specifies an email address for the alternate contact."];
+      phoneNumber: PhoneNumber.t
+        [@ocaml.doc "Specifies a phone number for the alternate contact."];
+      alternateContactType: AlternateContactType.t
+        [@ocaml.doc
+          "Specifies which alternate contact you want to create or update."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "Specifies the 12 digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you do not specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account, and the specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated administrator account assigned. The management account can't specify its own AccountId; it must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, then don't specify this parameter, and call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."]}
+    let context_ = "PutAlternateContactRequest"
+    let make ?accountId =
+      fun ~name ->
+        fun ~title ->
+          fun ~emailAddress ->
+            fun ~phoneNumber ->
+              fun ~alternateContactType ->
+                fun () ->
+                  {
+                    accountId;
+                    name;
+                    title;
+                    emailAddress;
+                    phoneNumber;
+                    alternateContactType
+                  }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (Name.to_value x.name)));
+        ("Title", (Some (Title.to_value x.title)));
+        ("EmailAddress", (Some (EmailAddress.to_value x.emailAddress)));
+        ("PhoneNumber", (Some (PhoneNumber.to_value x.phoneNumber)));
+        ("AlternateContactType",
+          (Some (AlternateContactType.to_value x.alternateContactType)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let alternateContactType =
+        AlternateContactType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AlternateContactType") in
+      let phoneNumber =
+        PhoneNumber.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PhoneNumber") in
+      let emailAddress =
+        EmailAddress.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
+      let title =
+        Title.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Title") in
+      let name =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?accountId ~alternateContactType ~phoneNumber ~emailAddress ~title
+        ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let alternateContactType =
+        field_map_exn json__ "AlternateContactType"
+          AlternateContactType.of_json in
+      let phoneNumber =
+        field_map_exn json__ "PhoneNumber" PhoneNumber.of_json in
+      let emailAddress =
+        field_map_exn json__ "EmailAddress" EmailAddress.of_json in
+      let title = field_map_exn json__ "Title" Title.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
+      make ?accountId ~alternateContactType ~phoneNumber ~emailAddress ~title
+        ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the specified alternate contact attached to an Amazon Web Services account. For complete details about how to use the alternate contact operations, see Update the alternate contacts for your Amazon Web Services account. Before you can update the alternate contact information for an Amazon Web Services account that is managed by Organizations, you must first enable integration between Amazon Web Services Account Management and Organizations. For more information, see Enable trusted access for Amazon Web Services Account Management."]
+module PutAccountNameRequest =
+  struct
+    type nonrec t =
+      {
+      accountName: AccountName.t [@ocaml.doc "The name of the account."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "Specifies the 12 digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you do not specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account, and the specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated administrator account assigned. The management account can't specify its own AccountId; it must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, then don't specify this parameter, and call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."]}
+    let context_ = "PutAccountNameRequest"
+    let make ?accountId =
+      fun ~accountName -> fun () -> { accountId; accountName }
+    let to_value x =
+      structure_to_value
+        [("AccountName", (Some (AccountName.to_value x.accountName)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let accountName =
+        AccountName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountName") in
+      make ?accountId ~accountName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let accountName =
+        field_map_exn json__ "AccountName" AccountName.of_json in
+      make ?accountId ~accountName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the account name of the specified account. To use this API, IAM principals must have the account:PutAccountName IAM permission."]
+module ListRegionsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "If there is more data to be returned, this will be populated. It should be passed into the next-token request parameter of list-regions."];
+      regions: RegionOptList.t option
+        [@ocaml.doc
+          "This is a list of Regions for a given account, or if the filtered parameter was used, a list of Regions that match the filter criteria set in the filter parameter."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken = fun ?regions -> fun () -> { nextToken; regions }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("Regions", (Option.map x.regions ~f:RegionOptList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let regions =
+        (Option.map ~f:RegionOptList.of_xml) (Xml.child xml_arg0 "Regions") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?regions ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let regions = field_map json__ "Regions" RegionOptList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?regions ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the Regions for a given account and their respective opt-in statuses. Optionally, this list can be filtered by the region-opt-status-contains parameter."]
+module ListRegionsRequest =
   struct
     type nonrec t =
       {
       accountId: AccountId.t option
         [@ocaml.doc
-          "Specifies the 12 digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you do not specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account, and the specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated admin account assigned. The management account can't specify its own AccountId; it must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, then don't specify this parameter, and call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."];
-      alternateContactType: AlternateContactType.t
+          "Specifies the 12-digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you don't specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account. The specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated admin account assigned. The management account can't specify its own AccountId. It must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, don't specify this parameter. Instead, call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."];
+      maxResults: ListRegionsRequestMaxResultsInteger.t option
         [@ocaml.doc
-          "Specifies which alternate contact you want to create or update."];
-      emailAddress: EmailAddress.t
-        [@ocaml.doc "Specifies an email address for the alternate contact."];
-      name: Name.t [@ocaml.doc "Specifies a name for the alternate contact."];
-      phoneNumber: PhoneNumber.t
-        [@ocaml.doc "Specifies a phone number for the alternate contact."];
-      title: Title.t
-        [@ocaml.doc "Specifies a title for the alternate contact."]}
-    let context_ = "PutAlternateContactRequest"
+          "The total number of items to return in the command\226\128\153s output. If the total number of items available is more than the value specified, a NextToken is provided in the command\226\128\153s output. To resume pagination, provide the NextToken value in the starting-token argument of a subsequent command. Do not use the NextToken response element directly outside of the Amazon Web Services CLI. For usage examples, see Pagination in the Amazon Web Services Command Line Interface User Guide."];
+      nextToken: ListRegionsRequestNextTokenString.t option
+        [@ocaml.doc
+          "A token used to specify where to start paginating. This is the NextToken from a previously truncated response. For usage examples, see Pagination in the Amazon Web Services Command Line Interface User Guide."];
+      regionOptStatusContains: RegionOptStatusList.t option
+        [@ocaml.doc
+          "A list of Region statuses (Enabling, Enabled, Disabling, Disabled, Enabled_by_default) to use to filter the list of Regions for a given account. For example, passing in a value of ENABLING will only return a list of Regions with a Region status of ENABLING."]}
     let make ?accountId =
-      fun ~alternateContactType ->
-        fun ~emailAddress ->
-          fun ~name ->
-            fun ~phoneNumber ->
-              fun ~title ->
-                fun () ->
-                  {
-                    accountId;
-                    alternateContactType;
-                    emailAddress;
-                    name;
-                    phoneNumber;
-                    title
-                  }
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?regionOptStatusContains ->
+            fun () ->
+              { accountId; maxResults; nextToken; regionOptStatusContains }
     let to_value x =
       structure_to_value
         [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
-        ("AlternateContactType",
-          (Some (AlternateContactType.to_value x.alternateContactType)));
-        ("EmailAddress", (Some (EmailAddress.to_value x.emailAddress)));
-        ("Name", (Some (Name.to_value x.name)));
-        ("PhoneNumber", (Some (PhoneNumber.to_value x.phoneNumber)));
-        ("Title", (Some (Title.to_value x.title)))]
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:ListRegionsRequestMaxResultsInteger.to_value));
+        ("NextToken",
+          (Option.map x.nextToken
+             ~f:ListRegionsRequestNextTokenString.to_value));
+        ("RegionOptStatusContains",
+          (Option.map x.regionOptStatusContains
+             ~f:RegionOptStatusList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let title =
-        Title.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Title") in
-      let phoneNumber =
-        PhoneNumber.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PhoneNumber") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      let emailAddress =
-        EmailAddress.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
-      let alternateContactType =
-        AlternateContactType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AlternateContactType") in
+      let regionOptStatusContains =
+        (Option.map ~f:RegionOptStatusList.of_xml)
+          (Xml.child xml_arg0 "RegionOptStatusContains") in
+      let nextToken =
+        (Option.map ~f:ListRegionsRequestNextTokenString.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:ListRegionsRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
-      make ~title ~phoneNumber ~name ~emailAddress ~alternateContactType
-        ?accountId ()
+      make ?regionOptStatusContains ?nextToken ?maxResults ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let title = field_map_exn json "Title" Title.of_json in
-      let phoneNumber = field_map_exn json "PhoneNumber" PhoneNumber.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
-      let emailAddress =
-        field_map_exn json "EmailAddress" EmailAddress.of_json in
-      let alternateContactType =
-        field_map_exn json "AlternateContactType"
-          AlternateContactType.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      make ~title ~phoneNumber ~name ~emailAddress ~alternateContactType
-        ?accountId ()
+    let of_json json__ =
+      let regionOptStatusContains =
+        field_map json__ "RegionOptStatusContains"
+          RegionOptStatusList.of_json in
+      let nextToken =
+        field_map json__ "NextToken"
+          ListRegionsRequestNextTokenString.of_json in
+      let maxResults =
+        field_map json__ "MaxResults"
+          ListRegionsRequestMaxResultsInteger.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?regionOptStatusContains ?nextToken ?maxResults ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies the specified alternate contact attached to an Amazon Web Services account. For complete details about how to use the alternate contact operations, see Access or updating the alternate contacts."]
+       "Lists all the Regions for a given account and their respective opt-in statuses. Optionally, this list can be filtered by the region-opt-status-contains parameter."]
+module GetRegionOptStatusResponse =
+  struct
+    type nonrec t =
+      {
+      regionName: RegionName.t option
+        [@ocaml.doc "The Region code that was passed in."];
+      regionOptStatus: RegionOptStatus.t option
+        [@ocaml.doc
+          "One of the potential statuses a Region can undergo (Enabled, Enabling, Disabled, Disabling, Enabled_By_Default)."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?regionName =
+      fun ?regionOptStatus -> fun () -> { regionName; regionOptStatus }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RegionName", (Option.map x.regionName ~f:RegionName.to_value));
+        ("RegionOptStatus",
+          (Option.map x.regionOptStatus ~f:RegionOptStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let regionOptStatus =
+        (Option.map ~f:RegionOptStatus.of_xml)
+          (Xml.child xml_arg0 "RegionOptStatus") in
+      let regionName =
+        (Option.map ~f:RegionName.of_xml) (Xml.child xml_arg0 "RegionName") in
+      make ?regionOptStatus ?regionName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let regionOptStatus =
+        field_map json__ "RegionOptStatus" RegionOptStatus.of_json in
+      let regionName = field_map json__ "RegionName" RegionName.of_json in
+      make ?regionOptStatus ?regionName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the opt-in status of a particular Region."]
+module GetRegionOptStatusRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "Specifies the 12-digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you don't specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account. The specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated admin account assigned. The management account can't specify its own AccountId. It must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, don't specify this parameter. Instead, call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."];
+      regionName: RegionName.t
+        [@ocaml.doc
+          "Specifies the Region-code for a given Region name (for example, af-south-1). This function will return the status of whatever Region you pass into this parameter."]}
+    let context_ = "GetRegionOptStatusRequest"
+    let make ?accountId =
+      fun ~regionName -> fun () -> { accountId; regionName }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("RegionName", (Some (RegionName.to_value x.regionName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let regionName =
+        RegionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RegionName") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ~regionName ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let regionName = field_map_exn json__ "RegionName" RegionName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ~regionName ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the opt-in status of a particular Region."]
+module GetPrimaryEmailResponse =
+  struct
+    type nonrec t =
+      {
+      primaryEmail: PrimaryEmailAddress.t option
+        [@ocaml.doc
+          "Retrieves the primary email address associated with the specified account."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?primaryEmail = fun () -> { primaryEmail }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PrimaryEmail",
+           (Option.map x.primaryEmail ~f:PrimaryEmailAddress.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let primaryEmail =
+        (Option.map ~f:PrimaryEmailAddress.of_xml)
+          (Xml.child xml_arg0 "PrimaryEmail") in
+      make ?primaryEmail ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let primaryEmail =
+        field_map json__ "PrimaryEmail" PrimaryEmailAddress.of_json in
+      make ?primaryEmail ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the primary email address for the specified account."]
+module GetPrimaryEmailRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "Specifies the 12-digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account. The specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated admin account assigned. This operation can only be called from the management account or the delegated administrator account of an organization for a member account. The management account can't specify its own AccountId."]}
+    let context_ = "GetPrimaryEmailRequest"
+    let make ~accountId = fun () -> { accountId }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the primary email address for the specified account."]
+module GetGovCloudAccountInformationResponse =
+  struct
+    type nonrec t =
+      {
+      govCloudAccountId: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account ID number of the linked GovCloud account."];
+      accountState: AwsAccountState.t option
+        [@ocaml.doc "The account state of the linked GovCloud account."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ResourceUnavailableException of ResourceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?govCloudAccountId =
+      fun ?accountState -> fun () -> { govCloudAccountId; accountState }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ResourceUnavailableException" ->
+          `ResourceUnavailableException
+            (ResourceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ResourceUnavailableException" ->
+          `ResourceUnavailableException
+            (ResourceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ResourceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ResourceUnavailableException"));
+            ("details", (ResourceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("GovCloudAccountId",
+           (Option.map x.govCloudAccountId ~f:AccountId.to_value));
+        ("AccountState",
+          (Option.map x.accountState ~f:AwsAccountState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountState =
+        (Option.map ~f:AwsAccountState.of_xml)
+          (Xml.child xml_arg0 "AccountState") in
+      let govCloudAccountId =
+        (Option.map ~f:AccountId.of_xml)
+          (Xml.child xml_arg0 "GovCloudAccountId") in
+      make ?accountState ?govCloudAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountState =
+        field_map json__ "AccountState" AwsAccountState.of_json in
+      let govCloudAccountId =
+        field_map json__ "GovCloudAccountId" AccountId.of_json in
+      make ?accountState ?govCloudAccountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about the GovCloud account linked to the specified standard account (if it exists) including the GovCloud account ID and state. To use this API, an IAM user or role must have the account:GetGovCloudAccountInformation IAM permission."]
+module GetGovCloudAccountInformationRequest =
+  struct
+    type nonrec t =
+      {
+      standardAccountId: AccountId.t option
+        [@ocaml.doc
+          "Specifies the 12 digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you do not specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account, and the specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated administrator account assigned. The management account can't specify its own AccountId; it must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, then don't specify this parameter, and call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."]}
+    let make ?standardAccountId = fun () -> { standardAccountId }
+    let to_value x =
+      structure_to_value
+        [("StandardAccountId",
+           (Option.map x.standardAccountId ~f:AccountId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let standardAccountId =
+        (Option.map ~f:AccountId.of_xml)
+          (Xml.child xml_arg0 "StandardAccountId") in
+      make ?standardAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let standardAccountId =
+        field_map json__ "StandardAccountId" AccountId.of_json in
+      make ?standardAccountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about the GovCloud account linked to the specified standard account (if it exists) including the GovCloud account ID and state. To use this API, an IAM user or role must have the account:GetGovCloudAccountInformation IAM permission."]
+module GetContactInformationResponse =
+  struct
+    type nonrec t =
+      {
+      contactInformation: ContactInformation.t option
+        [@ocaml.doc
+          "Contains the details of the primary contact information associated with an Amazon Web Services account."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?contactInformation = fun () -> { contactInformation }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ContactInformation",
+           (Option.map x.contactInformation ~f:ContactInformation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contactInformation =
+        (Option.map ~f:ContactInformation.of_xml)
+          (Xml.child xml_arg0 "ContactInformation") in
+      make ?contactInformation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contactInformation =
+        field_map json__ "ContactInformation" ContactInformation.of_json in
+      make ?contactInformation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the primary contact information of an Amazon Web Services account. For complete details about how to use the primary contact operations, see Update the primary contact for your Amazon Web Services account."]
+module GetContactInformationRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "Specifies the 12-digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you don't specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account. The specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated admin account assigned. The management account can't specify its own AccountId. It must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, don't specify this parameter. Instead, call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."]}
+    let make ?accountId = fun () -> { accountId }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the primary contact information of an Amazon Web Services account. For complete details about how to use the primary contact operations, see Update the primary contact for your Amazon Web Services account."]
 module GetAlternateContactResponse =
   struct
     type nonrec t =
@@ -480,83 +2179,417 @@ module GetAlternateContactResponse =
           (Xml.child xml_arg0 "AlternateContact") in
       make ?alternateContact ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let alternateContact =
-        field_map json "AlternateContact" AlternateContact.of_json in
+        field_map json__ "AlternateContact" AlternateContact.of_json in
       make ?alternateContact ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the specified alternate contact attached to an Amazon Web Services account. For complete details about how to use the alternate contact operations, see Access or updating the alternate contacts."]
+       "Retrieves the specified alternate contact attached to an Amazon Web Services account. For complete details about how to use the alternate contact operations, see Update the alternate contacts for your Amazon Web Services account. Before you can update the alternate contact information for an Amazon Web Services account that is managed by Organizations, you must first enable integration between Amazon Web Services Account Management and Organizations. For more information, see Enable trusted access for Amazon Web Services Account Management."]
 module GetAlternateContactRequest =
   struct
     type nonrec t =
       {
-      accountId: AccountId.t option
-        [@ocaml.doc
-          "Specifies the 12 digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you do not specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account, and the specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated admin account assigned. The management account can't specify its own AccountId; it must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, then don't specify this parameter, and call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."];
       alternateContactType: AlternateContactType.t
         [@ocaml.doc
-          "Specifies which alternate contact you want to retrieve."]}
+          "Specifies which alternate contact you want to retrieve."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "Specifies the 12 digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you do not specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account, and the specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated administrator account assigned. The management account can't specify its own AccountId; it must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, then don't specify this parameter, and call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."]}
     let context_ = "GetAlternateContactRequest"
     let make ?accountId =
       fun ~alternateContactType ->
         fun () -> { accountId; alternateContactType }
     let to_value x =
       structure_to_value
-        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
-        ("AlternateContactType",
-          (Some (AlternateContactType.to_value x.alternateContactType)))]
+        [("AlternateContactType",
+           (Some (AlternateContactType.to_value x.alternateContactType)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let alternateContactType =
         AlternateContactType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AlternateContactType") in
-      let accountId =
-        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
-      make ~alternateContactType ?accountId ()
+      make ?accountId ~alternateContactType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let alternateContactType =
-        field_map_exn json "AlternateContactType"
+        field_map_exn json__ "AlternateContactType"
           AlternateContactType.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      make ~alternateContactType ?accountId ()
+      make ?accountId ~alternateContactType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the specified alternate contact attached to an Amazon Web Services account. For complete details about how to use the alternate contact operations, see Access or updating the alternate contacts."]
-module DeleteAlternateContactRequest =
+       "Retrieves the specified alternate contact attached to an Amazon Web Services account. For complete details about how to use the alternate contact operations, see Update the alternate contacts for your Amazon Web Services account. Before you can update the alternate contact information for an Amazon Web Services account that is managed by Organizations, you must first enable integration between Amazon Web Services Account Management and Organizations. For more information, see Enable trusted access for Amazon Web Services Account Management."]
+module GetAccountInformationResponse =
   struct
     type nonrec t =
       {
       accountId: AccountId.t option
         [@ocaml.doc
-          "Specifies the 12 digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you do not specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account, and the specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated admin account assigned. The management account can't specify its own AccountId; it must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, then don't specify this parameter, and call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."];
+          "Specifies the 12-digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account. The specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated admin account assigned. This operation can only be called from the management account or the delegated administrator account of an organization for a member account. The management account can't specify its own AccountId."];
+      accountName: AccountName.t option
+        [@ocaml.doc "The name of the account."];
+      accountCreatedDate: AccountCreatedDate.t option
+        [@ocaml.doc "The date and time the account was created."];
+      accountState: AccountState.t option
+        [@ocaml.doc
+          "The state of the account. Each account state represents a specific phase in the account lifecycle. Use this information to manage account access, automate workflows, or trigger actions based on account state changes. Valid values: PENDING_ACTIVATION | ACTIVE | SUSPENDED | CLOSED"]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?accountId =
+      fun ?accountName ->
+        fun ?accountCreatedDate ->
+          fun ?accountState ->
+            fun () ->
+              { accountId; accountName; accountCreatedDate; accountState }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("AccountName", (Option.map x.accountName ~f:AccountName.to_value));
+        ("AccountCreatedDate",
+          (Option.map x.accountCreatedDate ~f:AccountCreatedDate.to_value));
+        ("AccountState",
+          (Option.map x.accountState ~f:AccountState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountState =
+        (Option.map ~f:AccountState.of_xml)
+          (Xml.child xml_arg0 "AccountState") in
+      let accountCreatedDate =
+        (Option.map ~f:AccountCreatedDate.of_xml)
+          (Xml.child xml_arg0 "AccountCreatedDate") in
+      let accountName =
+        (Option.map ~f:AccountName.of_xml) (Xml.child xml_arg0 "AccountName") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?accountState ?accountCreatedDate ?accountName ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountState = field_map json__ "AccountState" AccountState.of_json in
+      let accountCreatedDate =
+        field_map json__ "AccountCreatedDate" AccountCreatedDate.of_json in
+      let accountName = field_map json__ "AccountName" AccountName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?accountState ?accountCreatedDate ?accountName ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about the specified account including its account name, account ID, account creation date and time, and account state. To use this API, an IAM user or role must have the account:GetAccountInformation IAM permission."]
+module GetAccountInformationRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "Specifies the 12 digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you do not specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account, and the specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated administrator account assigned. The management account can't specify its own AccountId; it must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, then don't specify this parameter, and call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."]}
+    let make ?accountId = fun () -> { accountId }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about the specified account including its account name, account ID, account creation date and time, and account state. To use this API, an IAM user or role must have the account:GetAccountInformation IAM permission."]
+module EnableRegionRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "Specifies the 12-digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you don't specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account. The specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated admin account assigned. The management account can't specify its own AccountId. It must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, don't specify this parameter. Instead, call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."];
+      regionName: RegionName.t
+        [@ocaml.doc
+          "Specifies the Region-code for a given Region name (for example, af-south-1). When you enable a Region, Amazon Web Services performs actions to prepare your account in that Region, such as distributing your IAM resources to the Region. This process takes a few minutes for most accounts, but it can take several hours. You cannot use the Region until this process is complete. Furthermore, you cannot disable the Region until the enabling process is fully completed."]}
+    let context_ = "EnableRegionRequest"
+    let make ?accountId =
+      fun ~regionName -> fun () -> { accountId; regionName }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("RegionName", (Some (RegionName.to_value x.regionName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let regionName =
+        RegionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RegionName") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ~regionName ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let regionName = field_map_exn json__ "RegionName" RegionName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ~regionName ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Enables (opts-in) a particular Region for an account."]
+module DisableRegionRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "Specifies the 12-digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you don't specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account. The specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated admin account assigned. The management account can't specify its own AccountId. It must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, don't specify this parameter. Instead, call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."];
+      regionName: RegionName.t
+        [@ocaml.doc
+          "Specifies the Region-code for a given Region name (for example, af-south-1). When you disable a Region, Amazon Web Services performs actions to deactivate that Region in your account, such as destroying IAM resources in the Region. This process takes a few minutes for most accounts, but this can take several hours. You cannot enable the Region until the disabling process is fully completed."]}
+    let context_ = "DisableRegionRequest"
+    let make ?accountId =
+      fun ~regionName -> fun () -> { accountId; regionName }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("RegionName", (Some (RegionName.to_value x.regionName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let regionName =
+        RegionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RegionName") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ~regionName ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let regionName = field_map_exn json__ "RegionName" RegionName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ~regionName ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disables (opts-out) a particular Region for an account. The act of disabling a Region will remove all IAM access to any resources that reside in that Region."]
+module DeleteAlternateContactRequest =
+  struct
+    type nonrec t =
+      {
       alternateContactType: AlternateContactType.t
-        [@ocaml.doc "Specifies which of the alternate contacts to delete."]}
+        [@ocaml.doc "Specifies which of the alternate contacts to delete."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "Specifies the 12 digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. If you do not specify this parameter, it defaults to the Amazon Web Services account of the identity used to call the operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account, and the specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated administrator account assigned. The management account can't specify its own AccountId; it must call the operation in standalone context by not including the AccountId parameter. To call this operation on an account that is not a member of an organization, then don't specify this parameter, and call the operation using an identity belonging to the account whose contacts you wish to retrieve or modify."]}
     let context_ = "DeleteAlternateContactRequest"
     let make ?accountId =
       fun ~alternateContactType ->
         fun () -> { accountId; alternateContactType }
     let to_value x =
       structure_to_value
-        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
-        ("AlternateContactType",
-          (Some (AlternateContactType.to_value x.alternateContactType)))]
+        [("AlternateContactType",
+           (Some (AlternateContactType.to_value x.alternateContactType)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let alternateContactType =
         AlternateContactType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AlternateContactType") in
-      let accountId =
-        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
-      make ~alternateContactType ?accountId ()
+      make ?accountId ~alternateContactType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let alternateContactType =
-        field_map_exn json "AlternateContactType"
+        field_map_exn json__ "AlternateContactType"
           AlternateContactType.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      make ~alternateContactType ?accountId ()
+      make ?accountId ~alternateContactType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified alternate contact from an Amazon Web Services account. For complete details about how to use the alternate contact operations, see Access or updating the alternate contacts."]
+       "Deletes the specified alternate contact from an Amazon Web Services account. For complete details about how to use the alternate contact operations, see Update the alternate contacts for your Amazon Web Services account. Before you can update the alternate contact information for an Amazon Web Services account that is managed by Organizations, you must first enable integration between Amazon Web Services Account Management and Organizations. For more information, see Enable trusted access for Amazon Web Services Account Management."]
+module AcceptPrimaryEmailUpdateResponse =
+  struct
+    type nonrec t =
+      {
+      status: PrimaryEmailUpdateStatus.t option
+        [@ocaml.doc
+          "Retrieves the status of the accepted primary email update request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status = fun () -> { status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Status",
+           (Option.map x.status ~f:PrimaryEmailUpdateStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:PrimaryEmailUpdateStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" PrimaryEmailUpdateStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Accepts the request that originated from StartPrimaryEmailUpdate to update the primary email address (also known as the root user email address) for the specified account."]
+module AcceptPrimaryEmailUpdateRequest =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t
+        [@ocaml.doc
+          "Specifies the 12-digit account ID number of the Amazon Web Services account that you want to access or modify with this operation. To use this parameter, the caller must be an identity in the organization's management account or a delegated administrator account. The specified account ID must be a member account in the same organization. The organization must have all features enabled, and the organization must have trusted access enabled for the Account Management service, and optionally a delegated admin account assigned. This operation can only be called from the management account or the delegated administrator account of an organization for a member account. The management account can't specify its own AccountId."];
+      primaryEmail: PrimaryEmailAddress.t
+        [@ocaml.doc
+          "The new primary email address for use with the specified account. This must match the PrimaryEmail from the StartPrimaryEmailUpdate API call."];
+      otp: Otp.t
+        [@ocaml.doc
+          "The OTP code sent to the PrimaryEmail specified on the StartPrimaryEmailUpdate API call."]}
+    let context_ = "AcceptPrimaryEmailUpdateRequest"
+    let make ~accountId =
+      fun ~primaryEmail ->
+        fun ~otp -> fun () -> { accountId; primaryEmail; otp }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Some (AccountId.to_value x.accountId)));
+        ("PrimaryEmail",
+          (Some (PrimaryEmailAddress.to_value x.primaryEmail)));
+        ("Otp", (Some (Otp.to_value x.otp)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let otp = Otp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Otp") in
+      let primaryEmail =
+        PrimaryEmailAddress.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PrimaryEmail") in
+      let accountId =
+        AccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
+      make ~otp ~primaryEmail ~accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let otp = field_map_exn json__ "Otp" Otp.of_json in
+      let primaryEmail =
+        field_map_exn json__ "PrimaryEmail" PrimaryEmailAddress.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      make ~otp ~primaryEmail ~accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Accepts the request that originated from StartPrimaryEmailUpdate to update the primary email address (also known as the root user email address) for the specified account."]

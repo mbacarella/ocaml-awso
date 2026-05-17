@@ -114,6 +114,18 @@ val list_long_term_pricing :
       ListLongTermPricingRequest.t ->
         (ListLongTermPricingResult.t, ListLongTermPricingResult.error)
           Result.t Lwt.t
+val list_pickup_locations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPickupLocationsRequest.t ->
+        (ListPickupLocationsResult.t, ListPickupLocationsResult.error)
+          Result.t Lwt.t
+val list_service_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListServiceVersionsRequest.t ->
+        (ListServiceVersionsResult.t, ListServiceVersionsResult.error)
+          Result.t Lwt.t
 val update_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

@@ -5,12 +5,14 @@
     "endpointPrefix":"route53resolver",
     "jsonVersion":"1.1",
     "protocol":"json",
+    "protocols":["json"],
     "serviceAbbreviation":"Route53Resolver",
     "serviceFullName":"Amazon Route 53 Resolver",
     "serviceId":"Route53Resolver",
     "signatureVersion":"v4",
     "targetPrefix":"Route53Resolver",
-    "uid":"route53resolver-2018-04-01"
+    "uid":"route53resolver-2018-04-01",
+    "auth":["aws.auth#sigv4"]
   },
   "operations":{
     "AssociateFirewallRuleGroup":{
@@ -143,6 +145,24 @@
       ],
       "documentation":"<p>Creates an empty DNS Firewall rule group for filtering DNS network traffic in a VPC. You can add rules to the new rule group by calling <a>CreateFirewallRule</a>. </p>"
     },
+    "CreateOutpostResolver":{
+      "name":"CreateOutpostResolver",
+      "http":{
+        "method":"POST",
+        "requestUri":"/"
+      },
+      "input":{"shape":"CreateOutpostResolverRequest"},
+      "output":{"shape":"CreateOutpostResolverResponse"},
+      "errors":[
+        {"shape":"AccessDeniedException"},
+        {"shape":"InternalServiceErrorException"},
+        {"shape":"ResourceNotFoundException"},
+        {"shape":"ServiceQuotaExceededException"},
+        {"shape":"ThrottlingException"},
+        {"shape":"ValidationException"}
+      ],
+      "documentation":"<p>Creates a Route 53 Resolver on an Outpost.</p>"
+    },
     "CreateResolverEndpoint":{
       "name":"CreateResolverEndpoint",
       "http":{
@@ -156,6 +176,7 @@
         {"shape":"ResourceNotFoundException"},
         {"shape":"InvalidRequestException"},
         {"shape":"ResourceExistsException"},
+        {"shape":"AccessDeniedException"},
         {"shape":"LimitExceededException"},
         {"shape":"InternalServiceErrorException"},
         {"shape":"ThrottlingException"}
@@ -198,6 +219,7 @@
         {"shape":"ResourceExistsException"},
         {"shape":"ResourceUnavailableException"},
         {"shape":"InternalServiceErrorException"},
+        {"shape":"AccessDeniedException"},
         {"shape":"ThrottlingException"}
       ],
       "documentation":"<p>For DNS queries that originate in your VPCs, specifies which Resolver endpoint the queries pass through, one domain name that you want to forward to your network, and the IP addresses of the DNS resolvers in your network.</p>"
@@ -231,6 +253,7 @@
         {"shape":"ResourceNotFoundException"},
         {"shape":"AccessDeniedException"},
         {"shape":"InternalServiceErrorException"},
+        {"shape":"ValidationException"},
         {"shape":"ThrottlingException"}
       ],
       "documentation":"<p>Deletes the specified firewall rule.</p>"
@@ -252,6 +275,24 @@
         {"shape":"ThrottlingException"}
       ],
       "documentation":"<p>Deletes the specified firewall rule group. </p>"
+    },
+    "DeleteOutpostResolver":{
+      "name":"DeleteOutpostResolver",
+      "http":{
+        "method":"POST",
+        "requestUri":"/"
+      },
+      "input":{"shape":"DeleteOutpostResolverRequest"},
+      "output":{"shape":"DeleteOutpostResolverResponse"},
+      "errors":[
+        {"shape":"AccessDeniedException"},
+        {"shape":"ConflictException"},
+        {"shape":"InternalServiceErrorException"},
+        {"shape":"ResourceNotFoundException"},
+        {"shape":"ThrottlingException"},
+        {"shape":"ValidationException"}
+      ],
+      "documentation":"<p>Deletes a Resolver on the Outpost.</p>"
     },
     "DeleteResolverEndpoint":{
       "name":"DeleteResolverEndpoint",
@@ -297,6 +338,7 @@
       "input":{"shape":"DeleteResolverRuleRequest"},
       "output":{"shape":"DeleteResolverRuleResponse"},
       "errors":[
+        {"shape":"InvalidRequestException"},
         {"shape":"InvalidParameterException"},
         {"shape":"ResourceNotFoundException"},
         {"shape":"ResourceInUseException"},
@@ -369,6 +411,7 @@
       "output":{"shape":"DisassociateResolverRuleResponse"},
       "errors":[
         {"shape":"ResourceNotFoundException"},
+        {"shape":"InvalidRequestException"},
         {"shape":"InvalidParameterException"},
         {"shape":"InternalServiceErrorException"},
         {"shape":"ThrottlingException"}
@@ -457,6 +500,23 @@
       ],
       "documentation":"<p>Returns the Identity and Access Management (Amazon Web Services IAM) policy for sharing the specified rule group. You can use the policy to share the rule group using Resource Access Manager (RAM). </p>"
     },
+    "GetOutpostResolver":{
+      "name":"GetOutpostResolver",
+      "http":{
+        "method":"POST",
+        "requestUri":"/"
+      },
+      "input":{"shape":"GetOutpostResolverRequest"},
+      "output":{"shape":"GetOutpostResolverResponse"},
+      "errors":[
+        {"shape":"AccessDeniedException"},
+        {"shape":"InternalServiceErrorException"},
+        {"shape":"ResourceNotFoundException"},
+        {"shape":"ThrottlingException"},
+        {"shape":"ValidationException"}
+      ],
+      "documentation":"<p>Gets information about a specified Resolver on the Outpost, such as its instance count and type, name, and the current status of the Resolver.</p>"
+    },
     "GetResolverConfig":{
       "name":"GetResolverConfig",
       "http":{
@@ -470,9 +530,10 @@
         {"shape":"InvalidParameterException"},
         {"shape":"InternalServiceErrorException"},
         {"shape":"ThrottlingException"},
-        {"shape":"AccessDeniedException"}
+        {"shape":"AccessDeniedException"},
+        {"shape":"ValidationException"}
       ],
-      "documentation":"<p>Retrieves the behavior configuration of Route 53 Resolver behavior for a single VPC from Amazon Virtual Private Cloud.</p>"
+      "documentation":"<p>Retrieves the behavior configuration of Route 53 Resolver behavior for a single VPC from Amazon Virtual Private Cloud.</p>"
     },
     "GetResolverDnssecConfig":{
       "name":"GetResolverDnssecConfig",
@@ -604,7 +665,8 @@
       "errors":[
         {"shape":"InvalidParameterException"},
         {"shape":"UnknownResourceException"},
-        {"shape":"InternalServiceErrorException"}
+        {"shape":"InternalServiceErrorException"},
+        {"shape":"AccessDeniedException"}
       ],
       "documentation":"<p>Gets information about the Resolver rule policy for a specified rule. A Resolver rule policy includes the rule that you want to share with another account, the account that you want to share the rule with, and the Resolver operations that you want to allow the account to use. </p>"
     },
@@ -725,6 +787,23 @@
       ],
       "documentation":"<p>Retrieves the firewall rules that you have defined for the specified firewall rule group. DNS Firewall uses the rules in a rule group to filter DNS network traffic for a VPC. </p> <p>A single call might return only a partial list of the rules. For information, see <code>MaxResults</code>. </p>"
     },
+    "ListOutpostResolvers":{
+      "name":"ListOutpostResolvers",
+      "http":{
+        "method":"POST",
+        "requestUri":"/"
+      },
+      "input":{"shape":"ListOutpostResolversRequest"},
+      "output":{"shape":"ListOutpostResolversResponse"},
+      "errors":[
+        {"shape":"AccessDeniedException"},
+        {"shape":"InternalServiceErrorException"},
+        {"shape":"ResourceNotFoundException"},
+        {"shape":"ThrottlingException"},
+        {"shape":"ValidationException"}
+      ],
+      "documentation":"<p>Lists all the Resolvers on Outposts that were created using the current Amazon Web Services account.</p>"
+    },
     "ListResolverConfigs":{
       "name":"ListResolverConfigs",
       "http":{
@@ -739,9 +818,10 @@
         {"shape":"InvalidParameterException"},
         {"shape":"InternalServiceErrorException"},
         {"shape":"ThrottlingException"},
-        {"shape":"AccessDeniedException"}
+        {"shape":"AccessDeniedException"},
+        {"shape":"ValidationException"}
       ],
-      "documentation":"<p>Retrieves the Resolver configurations that you have defined. Route 53 Resolver uses the configurations to manage DNS resolution behavior for your VPCs.</p>"
+      "documentation":"<p>Retrieves the Resolver configurations that you have defined. Route 53 Resolver uses the configurations to manage DNS resolution behavior for your VPCs.</p>"
     },
     "ListResolverDnssecConfigs":{
       "name":"ListResolverDnssecConfigs",
@@ -930,7 +1010,8 @@
         {"shape":"InvalidPolicyDocument"},
         {"shape":"InvalidParameterException"},
         {"shape":"UnknownResourceException"},
-        {"shape":"InternalServiceErrorException"}
+        {"shape":"InternalServiceErrorException"},
+        {"shape":"AccessDeniedException"}
       ],
       "documentation":"<p>Specifies an Amazon Web Services rule that you want to share with another account, the account that you want to share the rule with, and the operations that you want the account to be able to perform on the rule.</p>"
     },
@@ -1042,6 +1123,25 @@
       ],
       "documentation":"<p>Changes the association of a <a>FirewallRuleGroup</a> with a VPC. The association enables DNS filtering for the VPC. </p>"
     },
+    "UpdateOutpostResolver":{
+      "name":"UpdateOutpostResolver",
+      "http":{
+        "method":"POST",
+        "requestUri":"/"
+      },
+      "input":{"shape":"UpdateOutpostResolverRequest"},
+      "output":{"shape":"UpdateOutpostResolverResponse"},
+      "errors":[
+        {"shape":"AccessDeniedException"},
+        {"shape":"ConflictException"},
+        {"shape":"InternalServiceErrorException"},
+        {"shape":"ResourceNotFoundException"},
+        {"shape":"ServiceQuotaExceededException"},
+        {"shape":"ThrottlingException"},
+        {"shape":"ValidationException"}
+      ],
+      "documentation":"<p>You can use <code>UpdateOutpostResolver</code> to update the instance count, type, or name of a Resolver on an Outpost.</p>"
+    },
     "UpdateResolverConfig":{
       "name":"UpdateResolverConfig",
       "http":{
@@ -1058,9 +1158,10 @@
         {"shape":"LimitExceededException"},
         {"shape":"InternalServiceErrorException"},
         {"shape":"ThrottlingException"},
-        {"shape":"AccessDeniedException"}
+        {"shape":"AccessDeniedException"},
+        {"shape":"ValidationException"}
       ],
-      "documentation":"<p>Updates the behavior configuration of Route 53 Resolver behavior for a single VPC from Amazon Virtual Private Cloud.</p>"
+      "documentation":"<p>Updates the behavior configuration of Route 53 Resolver behavior for a single VPC from Amazon Virtual Private Cloud.</p>"
     },
     "UpdateResolverDnssecConfig":{
       "name":"UpdateResolverDnssecConfig",
@@ -1092,10 +1193,11 @@
         {"shape":"ResourceNotFoundException"},
         {"shape":"InvalidParameterException"},
         {"shape":"InvalidRequestException"},
+        {"shape":"AccessDeniedException"},
         {"shape":"InternalServiceErrorException"},
         {"shape":"ThrottlingException"}
       ],
-      "documentation":"<p>Updates the name of an inbound or an outbound Resolver endpoint. </p>"
+      "documentation":"<p>Updates the name, or endpoint type for an inbound or an outbound Resolver endpoint. You can only update between IPV4 and DUALSTACK, IPV6 endpoint type can't be updated to other type. </p>"
     },
     "UpdateResolverRule":{
       "name":"UpdateResolverRule",
@@ -1112,7 +1214,8 @@
         {"shape":"ResourceUnavailableException"},
         {"shape":"LimitExceededException"},
         {"shape":"InternalServiceErrorException"},
-        {"shape":"ThrottlingException"}
+        {"shape":"ThrottlingException"},
+        {"shape":"AccessDeniedException"}
       ],
       "documentation":"<p>Updates settings for a specified Resolver rule. <code>ResolverRuleId</code> is required, and all other parameters are optional. If you don't specify a parameter, it retains its current value.</p>"
     }
@@ -1123,7 +1226,7 @@
       "members":{
         "Message":{"shape":"ExceptionMessage"}
       },
-      "documentation":"<p>The current account doesn't have the IAM permissions required to perform the specified Resolver operation.</p>",
+      "documentation":"<p>The current account doesn't have the IAM permissions required to perform the specified Resolver operation.</p> <p>This error can also be thrown when a customer has reached the 5120 character limit for a resource policy for CloudWatch Logs.</p>",
       "exception":true
     },
     "AccountId":{
@@ -1261,7 +1364,7 @@
         },
         "Name":{
           "shape":"Name",
-          "documentation":"<p>A name for the association that you're creating between a Resolver rule and a VPC.</p>"
+          "documentation":"<p>A name for the association that you're creating between a Resolver rule and a VPC.</p> <p>The name can be up to 64 characters long and can contain letters (a-z, A-Z), numbers (0-9), hyphens (-), underscores (_), and spaces. The name cannot consist of only numbers.</p>"
         },
         "VPCId":{
           "shape":"ResourceId",
@@ -1282,7 +1385,8 @@
       "type":"string",
       "enum":[
         "ENABLE",
-        "DISABLE"
+        "DISABLE",
+        "USE_LOCAL_RESOURCE_SETTING"
       ]
     },
     "BlockOverrideDnsType":{
@@ -1308,12 +1412,20 @@
       ]
     },
     "Boolean":{"type":"boolean"},
+    "ConfidenceThreshold":{
+      "type":"string",
+      "enum":[
+        "LOW",
+        "MEDIUM",
+        "HIGH"
+      ]
+    },
     "ConflictException":{
       "type":"structure",
       "members":{
         "Message":{"shape":"ExceptionMessage"}
       },
-      "documentation":"<p/>",
+      "documentation":"<p>The requested state transition isn't valid. For example, you can't delete a firewall domain list if it is in the process of being deleted, or you can't import domains into a domain list that is in the process of being deleted.</p>",
       "exception":true
     },
     "Count":{"type":"integer"},
@@ -1386,7 +1498,6 @@
       "required":[
         "CreatorRequestId",
         "FirewallRuleGroupId",
-        "FirewallDomainListId",
         "Priority",
         "Action",
         "Name"
@@ -1403,7 +1514,8 @@
         },
         "FirewallDomainListId":{
           "shape":"ResourceId",
-          "documentation":"<p>The ID of the domain list that you want to use in the rule. </p>"
+          "documentation":"<p>The ID of the domain list that you want to use in the rule. Can't be used together with <code>DnsThreatProtecton</code>.</p>",
+          "box":true
         },
         "Priority":{
           "shape":"Priority",
@@ -1411,7 +1523,7 @@
         },
         "Action":{
           "shape":"Action",
-          "documentation":"<p>The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list:</p> <ul> <li> <p> <code>ALLOW</code> - Permit the request to go through.</p> </li> <li> <p> <code>ALERT</code> - Permit the request and send metrics and logs to Cloud Watch.</p> </li> <li> <p> <code>BLOCK</code> - Disallow the request. This option requires additional details in the rule's <code>BlockResponse</code>. </p> </li> </ul>"
+          "documentation":"<p>The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list, or a threat in a DNS Firewall Advanced rule:</p> <ul> <li> <p> <code>ALLOW</code> - Permit the request to go through. Not available for DNS Firewall Advanced rules.</p> </li> <li> <p> <code>ALERT</code> - Permit the request and send metrics and logs to Cloud Watch.</p> </li> <li> <p> <code>BLOCK</code> - Disallow the request. This option requires additional details in the rule's <code>BlockResponse</code>. </p> </li> </ul>"
         },
         "BlockResponse":{
           "shape":"BlockResponse",
@@ -1436,6 +1548,26 @@
         "Name":{
           "shape":"Name",
           "documentation":"<p>A name that lets you identify the rule in the rule group.</p>"
+        },
+        "FirewallDomainRedirectionAction":{
+          "shape":"FirewallDomainRedirectionAction",
+          "documentation":"<p> How you want the the rule to evaluate DNS redirection in the DNS redirection chain, such as CNAME or DNAME. </p> <p> <code>INSPECT_REDIRECTION_DOMAIN</code>: (Default) inspects all domains in the redirection chain. The individual domains in the redirection chain must be added to the domain list.</p> <p> <code>TRUST_REDIRECTION_DOMAIN</code>: Inspects only the first domain in the redirection chain. You don't need to add the subsequent domains in the domain in the redirection list to the domain list.</p>",
+          "box":true
+        },
+        "Qtype":{
+          "shape":"Qtype",
+          "documentation":"<p> The DNS query type you want the rule to evaluate. Allowed values are; </p> <ul> <li> <p> A: Returns an IPv4 address.</p> </li> <li> <p>AAAA: Returns an Ipv6 address.</p> </li> <li> <p>CAA: Restricts CAs that can create SSL/TLS certifications for the domain.</p> </li> <li> <p>CNAME: Returns another domain name.</p> </li> <li> <p>DS: Record that identifies the DNSSEC signing key of a delegated zone.</p> </li> <li> <p>MX: Specifies mail servers.</p> </li> <li> <p>NAPTR: Regular-expression-based rewriting of domain names.</p> </li> <li> <p>NS: Authoritative name servers.</p> </li> <li> <p>PTR: Maps an IP address to a domain name.</p> </li> <li> <p>SOA: Start of authority record for the zone.</p> </li> <li> <p>SPF: Lists the servers authorized to send emails from a domain.</p> </li> <li> <p>SRV: Application specific values that identify servers.</p> </li> <li> <p>TXT: Verifies email senders and application-specific values.</p> </li> <li> <p>A query type you define by using the DNS type ID, for example 28 for AAAA. The values must be defined as TYPENUMBER, where the NUMBER can be 1-65334, for example, TYPE28. For more information, see <a href=\"https://en.wikipedia.org/wiki/List_of_DNS_record_types\">List of DNS record types</a>.</p> </li> </ul>",
+          "box":true
+        },
+        "DnsThreatProtection":{
+          "shape":"DnsThreatProtection",
+          "documentation":"<p> Use to create a DNS Firewall Advanced rule. </p>",
+          "box":true
+        },
+        "ConfidenceThreshold":{
+          "shape":"ConfidenceThreshold",
+          "documentation":"<p> The confidence threshold for DNS Firewall Advanced. You must provide this value when you create a DNS Firewall Advanced rule. The confidence level values mean: </p> <ul> <li> <p> <code>LOW</code>: Provides the highest detection rate for threats, but also increases false positives.</p> </li> <li> <p> <code>MEDIUM</code>: Provides a balance between detecting threats and false positives.</p> </li> <li> <p> <code>HIGH</code>: Detects only the most well corroborated threats with a low rate of false positives. </p> </li> </ul>",
+          "box":true
         }
       }
     },
@@ -1445,6 +1577,52 @@
         "FirewallRule":{
           "shape":"FirewallRule",
           "documentation":"<p>The firewall rule that you just created. </p>"
+        }
+      }
+    },
+    "CreateOutpostResolverRequest":{
+      "type":"structure",
+      "required":[
+        "CreatorRequestId",
+        "Name",
+        "PreferredInstanceType",
+        "OutpostArn"
+      ],
+      "members":{
+        "CreatorRequestId":{
+          "shape":"CreatorRequestId",
+          "documentation":"<p>A unique string that identifies the request and that allows failed requests to be retried without the risk of running the operation twice. </p> <p> <code>CreatorRequestId</code> can be any unique string, for example, a date/time stamp.</p>"
+        },
+        "Name":{
+          "shape":"OutpostResolverName",
+          "documentation":"<p>A friendly name that lets you easily find a configuration in the Resolver dashboard in the Route 53 console.</p>"
+        },
+        "InstanceCount":{
+          "shape":"InstanceCount",
+          "documentation":"<p>Number of Amazon EC2 instances for the Resolver on Outpost. The default and minimal value is 4.</p>",
+          "box":true
+        },
+        "PreferredInstanceType":{
+          "shape":"OutpostInstanceType",
+          "documentation":"<p> The Amazon EC2 instance type. If you specify this, you must also specify a value for the <code>OutpostArn</code>. </p>"
+        },
+        "OutpostArn":{
+          "shape":"OutpostArn",
+          "documentation":"<p>The Amazon Resource Name (ARN) of the Outpost. If you specify this, you must also specify a value for the <code>PreferredInstanceType</code>.</p>"
+        },
+        "Tags":{
+          "shape":"TagList",
+          "documentation":"<p> A string that helps identify the Route 53 Resolvers on Outpost. </p>",
+          "box":true
+        }
+      }
+    },
+    "CreateOutpostResolverResponse":{
+      "type":"structure",
+      "members":{
+        "OutpostResolver":{
+          "shape":"OutpostResolver",
+          "documentation":"<p>Information about the <code>CreateOutpostResolver</code> request, including the status of the request.</p>"
         }
       }
     },
@@ -1467,20 +1645,60 @@
         },
         "SecurityGroupIds":{
           "shape":"SecurityGroupIds",
-          "documentation":"<p>The ID of one or more security groups that you want to use to control access to this VPC. The security group that you specify must include one or more inbound rules (for inbound Resolver endpoints) or outbound rules (for outbound Resolver endpoints). Inbound and outbound rules must allow TCP and UDP access. For inbound access, open port 53. For outbound access, open the port that you're using for DNS queries on your network.</p>",
+          "documentation":"<p>The ID of one or more security groups that you want to use to control access to this VPC. The security group that you specify must include one or more inbound rules (for inbound Resolver endpoints) or outbound rules (for outbound Resolver endpoints). Inbound and outbound rules must allow TCP and UDP access. For inbound access, open port 53. For outbound access, open the port that you're using for DNS queries on your network.</p> <p>Some security group rules will cause your connection to be tracked. For outbound resolver endpoint, it can potentially impact the maximum queries per second from outbound endpoint to your target name server. For inbound resolver endpoint, it can bring down the overall maximum queries per second per IP address to as low as 1500. To avoid connection tracking caused by security group, see <a href=\"https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/security-group-connection-tracking.html#untracked-connectionsl\">Untracked connections</a>.</p>",
           "box":true
         },
         "Direction":{
           "shape":"ResolverEndpointDirection",
-          "documentation":"<p>Specify the applicable value:</p> <ul> <li> <p> <code>INBOUND</code>: Resolver forwards DNS queries to the DNS service for a VPC from your network</p> </li> <li> <p> <code>OUTBOUND</code>: Resolver forwards DNS queries from the DNS service for a VPC to your network</p> </li> </ul>"
+          "documentation":"<p>Specify the applicable value:</p> <ul> <li> <p> <code>INBOUND</code>: Resolver forwards DNS queries to the DNS service for a VPC from your network.</p> </li> <li> <p> <code>OUTBOUND</code>: Resolver forwards DNS queries from the DNS service for a VPC to your network.</p> </li> <li> <p> <code>INBOUND_DELEGATION</code>: Resolver delegates queries to Route 53 private hosted zones from your network.</p> </li> </ul>"
         },
         "IpAddresses":{
           "shape":"IpAddressesRequest",
-          "documentation":"<p>The subnets and IP addresses in your VPC that DNS queries originate from (for outbound endpoints) or that you forward DNS queries to (for inbound endpoints). The subnet ID uniquely identifies a VPC. </p>"
+          "documentation":"<p>The subnets and IP addresses in your VPC that DNS queries originate from (for outbound endpoints) or that you forward DNS queries to (for inbound endpoints). The subnet ID uniquely identifies a VPC. </p> <note> <p>Even though the minimum is 1, Route 53 requires that you create at least two.</p> </note>"
+        },
+        "OutpostArn":{
+          "shape":"OutpostArn",
+          "documentation":"<p>The Amazon Resource Name (ARN) of the Outpost. If you specify this, you must also specify a value for the <code>PreferredInstanceType</code>. </p>",
+          "box":true
+        },
+        "PreferredInstanceType":{
+          "shape":"OutpostInstanceType",
+          "documentation":"<p>The instance type. If you specify this, you must also specify a value for the <code>OutpostArn</code>.</p>",
+          "box":true
         },
         "Tags":{
           "shape":"TagList",
           "documentation":"<p>A list of the tag keys and values that you want to associate with the endpoint.</p>",
+          "box":true
+        },
+        "ResolverEndpointType":{
+          "shape":"ResolverEndpointType",
+          "documentation":"<p> For the endpoint type you can choose either IPv4, IPv6, or dual-stack. A dual-stack endpoint means that it will resolve via both IPv4 and IPv6. This endpoint type is applied to all IP addresses. </p>",
+          "box":true
+        },
+        "Protocols":{
+          "shape":"ProtocolList",
+          "documentation":"<p> The protocols you want to use for the endpoint. DoH-FIPS is applicable for default inbound endpoints only. </p> <p>For a default inbound endpoint you can apply the protocols as follows:</p> <ul> <li> <p> Do53 and DoH in combination.</p> </li> <li> <p>Do53 and DoH-FIPS in combination.</p> </li> <li> <p>Do53 alone.</p> </li> <li> <p>DoH alone.</p> </li> <li> <p>DoH-FIPS alone.</p> </li> <li> <p>None, which is treated as Do53.</p> </li> </ul> <p>For a delegation inbound endpoint you can use Do53 only.</p> <p>For an outbound endpoint you can apply the protocols as follows:</p> <ul> <li> <p> Do53 and DoH in combination.</p> </li> <li> <p>Do53 alone.</p> </li> <li> <p>DoH alone.</p> </li> <li> <p>None, which is treated as Do53.</p> </li> </ul>",
+          "box":true
+        },
+        "RniEnhancedMetricsEnabled":{
+          "shape":"RniEnhancedMetricsEnabled",
+          "documentation":"<p>Specifies whether RNI enhanced metrics are enabled for the Resolver endpoints. When set to true, one-minute granular metrics are published in CloudWatch for each RNI associated with this endpoint. When set to false, metrics are not published. Default is false.</p> <note> <p>Standard CloudWatch pricing and charges are applied for using the Route 53 Resolver endpoint RNI enhanced metrics. For more information, see <a href=\"https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/monitoring-resolver-with-cloudwatch.html\">Detailed metrics</a>.</p> </note>",
+          "box":true
+        },
+        "TargetNameServerMetricsEnabled":{
+          "shape":"TargetNameServerMetricsEnabled",
+          "documentation":"<p>Specifies whether target name server metrics are enabled for the outbound Resolver endpoints. When set to true, one-minute granular metrics are published in CloudWatch for each target name server associated with this endpoint. When set to false, metrics are not published. Default is false. This is not supported for inbound Resolver endpoints.</p> <note> <p>Standard CloudWatch pricing and charges are applied for using the Route 53 Resolver endpoint target name server metrics. For more information, see <a href=\"https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/monitoring-resolver-with-cloudwatch.html\">Detailed metrics</a>.</p> </note>",
+          "box":true
+        },
+        "Dns64Enabled":{
+          "shape":"Dns64Enabled",
+          "documentation":"<p>Specifies whether DNS64 is enabled for the inbound Resolver endpoint. When set to <code>true</code>, Route 53 Resolver synthesizes AAAA (IPv6) records for IPv4-only services by prepending the <code>64:ff9b::/96</code> prefix to the IPv4 address. This enables IPv6-only clients that send queries through the inbound endpoint to reach IPv4-only services. DNS64 works with NAT64 to provide complete IPv6-to-IPv4 translation. Default is false.</p>",
+          "box":true
+        },
+        "Ipv6InternetAccessEnabled":{
+          "shape":"Ipv6InternetAccessEnabled",
+          "documentation":"<p>Specifies whether IPv6 internet access is enabled for the outbound Resolver endpoint. When set to <code>true</code>, the endpoint elastic network interfaces (ENIs) can forward DNS queries to public IPv6 targets through an internet gateway. Default is false.</p> <important> <p>When you enable IPv6 internet access, use network controls like security groups, NACLs, or egress-only internet gateways to protect the endpoint ENIs from unsolicited ingress traffic. Be aware that some network controls can affect DNS query throughput due to connection tracking. For more information, see <a href=\"https://docs.aws.amazon.com/ec2/latest/userguide/security-group-connection-tracking.html\">Amazon EC2 security group connection tracking</a> and <a href=\"https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/best-practices-resolver-endpoint-scaling.html\">Resolver endpoint scaling</a>.</p> </important>",
           "box":true
         }
       }
@@ -1508,7 +1726,7 @@
         },
         "DestinationArn":{
           "shape":"DestinationArn",
-          "documentation":"<p>The ARN of the resource that you want Resolver to send query logs. You can send query logs to an S3 bucket, a CloudWatch Logs log group, or a Kinesis Data Firehose delivery stream. Examples of valid values include the following:</p> <ul> <li> <p> <b>S3 bucket</b>: </p> <p> <code>arn:aws:s3:::examplebucket</code> </p> <p>You can optionally append a file prefix to the end of the ARN.</p> <p> <code>arn:aws:s3:::examplebucket/development/</code> </p> </li> <li> <p> <b>CloudWatch Logs log group</b>: </p> <p> <code>arn:aws:logs:us-west-1:123456789012:log-group:/mystack-testgroup-12ABC1AB12A1:*</code> </p> </li> <li> <p> <b>Kinesis Data Firehose delivery stream</b>:</p> <p> <code>arn:aws:kinesis:us-east-2:0123456789:stream/my_stream_name</code> </p> </li> </ul>"
+          "documentation":"<p>The ARN of the resource that you want Resolver to send query logs. You can send query logs to an S3 bucket, a CloudWatch Logs log group, or a Kinesis Data Firehose delivery stream. Examples of valid values include the following:</p> <ul> <li> <p> <b>S3 bucket</b>: </p> <p> <code>arn:aws:s3:::amzn-s3-demo-bucket</code> </p> <p>You can optionally append a file prefix to the end of the ARN.</p> <p> <code>arn:aws:s3:::amzn-s3-demo-bucket/development/</code> </p> </li> <li> <p> <b>CloudWatch Logs log group</b>: </p> <p> <code>arn:aws:logs:us-west-1:123456789012:log-group:/mystack-testgroup-12ABC1AB12A1:*</code> </p> </li> <li> <p> <b>Kinesis Data Firehose delivery stream</b>:</p> <p> <code>arn:aws:kinesis:us-east-2:0123456789:stream/my_stream_name</code> </p> </li> </ul>"
         },
         "CreatorRequestId":{
           "shape":"CreatorRequestId",
@@ -1535,8 +1753,7 @@
       "type":"structure",
       "required":[
         "CreatorRequestId",
-        "RuleType",
-        "DomainName"
+        "RuleType"
       ],
       "members":{
         "CreatorRequestId":{
@@ -1545,19 +1762,20 @@
         },
         "Name":{
           "shape":"Name",
-          "documentation":"<p>A friendly name that lets you easily find a rule in the Resolver dashboard in the Route 53 console.</p>"
+          "documentation":"<p>A friendly name that lets you easily find a rule in the Resolver dashboard in the Route 53 console.</p> <p>The name can be up to 64 characters long and can contain letters (a-z, A-Z), numbers (0-9), hyphens (-), underscores (_), and spaces. The name cannot consist of only numbers.</p>"
         },
         "RuleType":{
           "shape":"RuleTypeOption",
-          "documentation":"<p>When you want to forward DNS queries for specified domain name to resolvers on your network, specify <code>FORWARD</code>.</p> <p>When you have a forwarding rule to forward DNS queries for a domain to your network and you want Resolver to process queries for a subdomain of that domain, specify <code>SYSTEM</code>.</p> <p>For example, to forward DNS queries for example.com to resolvers on your network, you create a rule and specify <code>FORWARD</code> for <code>RuleType</code>. To then have Resolver process queries for apex.example.com, you create a rule and specify <code>SYSTEM</code> for <code>RuleType</code>.</p> <p>Currently, only Resolver can create rules that have a value of <code>RECURSIVE</code> for <code>RuleType</code>.</p>"
+          "documentation":"<p>When you want to forward DNS queries for specified domain name to resolvers on your network, specify <code>FORWARD</code> or <code>DELEGATE</code>.</p> <p>When you have a forwarding rule to forward DNS queries for a domain to your network and you want Resolver to process queries for a subdomain of that domain, specify <code>SYSTEM</code>.</p> <p>For example, to forward DNS queries for example.com to resolvers on your network, you create a rule and specify <code>FORWARD</code> for <code>RuleType</code>. To then have Resolver process queries for apex.example.com, you create a rule and specify <code>SYSTEM</code> for <code>RuleType</code>.</p> <p>Currently, only Resolver can create rules that have a value of <code>RECURSIVE</code> for <code>RuleType</code>.</p>"
         },
         "DomainName":{
           "shape":"DomainName",
-          "documentation":"<p>DNS queries for this domain name are forwarded to the IP addresses that you specify in <code>TargetIps</code>. If a query matches multiple Resolver rules (example.com and www.example.com), outbound DNS queries are routed using the Resolver rule that contains the most specific domain name (www.example.com).</p>"
+          "documentation":"<p>DNS queries for this domain name are forwarded to the IP addresses that you specify in <code>TargetIps</code>. If a query matches multiple Resolver rules (example.com and www.example.com), outbound DNS queries are routed using the Resolver rule that contains the most specific domain name (www.example.com).</p>",
+          "box":true
         },
         "TargetIps":{
           "shape":"TargetList",
-          "documentation":"<p>The IPs that you want Resolver to forward DNS queries to. You can specify only IPv4 addresses. Separate IP addresses with a space.</p> <p> <code>TargetIps</code> is available only when the value of <code>Rule type</code> is <code>FORWARD</code>.</p>",
+          "documentation":"<p>The IPs that you want Resolver to forward DNS queries to. You can specify either Ipv4 or Ipv6 addresses but not both in the same rule. Separate IP addresses with a space.</p> <p> <code>TargetIps</code> is available only when the value of <code>Rule type</code> is <code>FORWARD</code>. You should not provide TargetIps when the Rule type is <code>DELEGATE</code>.</p> <note> <p>when creating a DELEGATE rule, you must not provide the <code>TargetIps</code> parameter. If you provide the <code>TargetIps</code>, you may receive an ERROR message similar to \"Delegate resolver rules need to specify a nameserver name\". This error means you should not provide <code>TargetIps</code>.</p> </note>",
           "box":true
         },
         "ResolverEndpointId":{
@@ -1568,6 +1786,11 @@
         "Tags":{
           "shape":"TagList",
           "documentation":"<p>A list of the tag keys and values that you want to associate with the endpoint.</p>",
+          "box":true
+        },
+        "DelegationRecord":{
+          "shape":"DelegationRecord",
+          "documentation":"<p> DNS queries with the delegation records that match this domain name are forwarded to the resolvers on your network. </p>",
           "box":true
         }
       }
@@ -1584,6 +1807,11 @@
     "CreatorRequestId":{
       "type":"string",
       "max":255,
+      "min":1
+    },
+    "DelegationRecord":{
+      "type":"string",
+      "max":256,
       "min":1
     },
     "DeleteFirewallDomainListRequest":{
@@ -1626,10 +1854,7 @@
     },
     "DeleteFirewallRuleRequest":{
       "type":"structure",
-      "required":[
-        "FirewallRuleGroupId",
-        "FirewallDomainListId"
-      ],
+      "required":["FirewallRuleGroupId"],
       "members":{
         "FirewallRuleGroupId":{
           "shape":"ResourceId",
@@ -1637,7 +1862,17 @@
         },
         "FirewallDomainListId":{
           "shape":"ResourceId",
-          "documentation":"<p>The ID of the domain list that's used in the rule. </p>"
+          "documentation":"<p>The ID of the domain list that's used in the rule. </p>",
+          "box":true
+        },
+        "FirewallThreatProtectionId":{
+          "shape":"ResourceId",
+          "documentation":"<p> The ID that is created for a DNS Firewall Advanced rule. </p>",
+          "box":true
+        },
+        "Qtype":{
+          "shape":"Qtype",
+          "documentation":"<p> The DNS query type that the rule you are deleting evaluates. Allowed values are; </p> <ul> <li> <p> A: Returns an IPv4 address.</p> </li> <li> <p>AAAA: Returns an Ipv6 address.</p> </li> <li> <p>CAA: Restricts CAs that can create SSL/TLS certifications for the domain.</p> </li> <li> <p>CNAME: Returns another domain name.</p> </li> <li> <p>DS: Record that identifies the DNSSEC signing key of a delegated zone.</p> </li> <li> <p>MX: Specifies mail servers.</p> </li> <li> <p>NAPTR: Regular-expression-based rewriting of domain names.</p> </li> <li> <p>NS: Authoritative name servers.</p> </li> <li> <p>PTR: Maps an IP address to a domain name.</p> </li> <li> <p>SOA: Start of authority record for the zone.</p> </li> <li> <p>SPF: Lists the servers authorized to send emails from a domain.</p> </li> <li> <p>SRV: Application specific values that identify servers.</p> </li> <li> <p>TXT: Verifies email senders and application-specific values.</p> </li> <li> <p>A query type you define by using the DNS type ID, for example 28 for AAAA. The values must be defined as TYPENUMBER, where the NUMBER can be 1-65334, for example, TYPE28. For more information, see <a href=\"https://en.wikipedia.org/wiki/List_of_DNS_record_types\">List of DNS record types</a>.</p> </li> </ul>"
         }
       }
     },
@@ -1647,6 +1882,25 @@
         "FirewallRule":{
           "shape":"FirewallRule",
           "documentation":"<p>The specification for the firewall rule that you just deleted.</p>"
+        }
+      }
+    },
+    "DeleteOutpostResolverRequest":{
+      "type":"structure",
+      "required":["Id"],
+      "members":{
+        "Id":{
+          "shape":"ResourceId",
+          "documentation":"<p>A unique string that identifies the Resolver on the Outpost.</p>"
+        }
+      }
+    },
+    "DeleteOutpostResolverResponse":{
+      "type":"structure",
+      "members":{
+        "OutpostResolver":{
+          "shape":"OutpostResolver",
+          "documentation":"<p>Information about the <code>DeleteOutpostResolver</code> request, including the status of the request.</p>"
         }
       }
     },
@@ -1808,6 +2062,15 @@
           "documentation":"<p>Information about the <code>DisassociateResolverRule</code> request, including the status of the request.</p>"
         }
       }
+    },
+    "Dns64Enabled":{"type":"boolean"},
+    "DnsThreatProtection":{
+      "type":"string",
+      "enum":[
+        "DGA",
+        "DNS_TUNNELING",
+        "DICTIONARY_DGA"
+      ]
     },
     "DomainListFileUrl":{
       "type":"string",
@@ -1973,6 +2236,13 @@
       "max":255,
       "min":1
     },
+    "FirewallDomainRedirectionAction":{
+      "type":"string",
+      "enum":[
+        "INSPECT_REDIRECTION_DOMAIN",
+        "TRUST_REDIRECTION_DOMAIN"
+      ]
+    },
     "FirewallDomainUpdateOperation":{
       "type":"string",
       "enum":[
@@ -1989,7 +2259,8 @@
       "type":"string",
       "enum":[
         "ENABLED",
-        "DISABLED"
+        "DISABLED",
+        "USE_LOCAL_RESOURCE_SETTING"
       ]
     },
     "FirewallRule":{
@@ -1997,11 +2268,15 @@
       "members":{
         "FirewallRuleGroupId":{
           "shape":"ResourceId",
-          "documentation":"<p>The unique identifier of the firewall rule group of the rule. </p>"
+          "documentation":"<p>The unique identifier of the Firewall rule group of the rule. </p>"
         },
         "FirewallDomainListId":{
           "shape":"ResourceId",
           "documentation":"<p>The ID of the domain list that's used in the rule. </p>"
+        },
+        "FirewallThreatProtectionId":{
+          "shape":"ResourceId",
+          "documentation":"<p> ID of the DNS Firewall Advanced rule. </p>"
         },
         "Name":{
           "shape":"Name",
@@ -2013,7 +2288,7 @@
         },
         "Action":{
           "shape":"Action",
-          "documentation":"<p>The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list:</p> <ul> <li> <p> <code>ALLOW</code> - Permit the request to go through.</p> </li> <li> <p> <code>ALERT</code> - Permit the request to go through but send an alert to the logs.</p> </li> <li> <p> <code>BLOCK</code> - Disallow the request. If this is specified, additional handling details are provided in the rule's <code>BlockResponse</code> setting. </p> </li> </ul>"
+          "documentation":"<p>The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list, or a threat in a DNS Firewall Advanced rule:</p> <ul> <li> <p> <code>ALLOW</code> - Permit the request to go through. Not available for DNS Firewall Advanced rules.</p> </li> <li> <p> <code>ALERT</code> - Permit the request to go through but send an alert to the logs.</p> </li> <li> <p> <code>BLOCK</code> - Disallow the request. If this is specified, additional handling details are provided in the rule's <code>BlockResponse</code> setting. </p> </li> </ul>"
         },
         "BlockResponse":{
           "shape":"BlockResponse",
@@ -2042,6 +2317,22 @@
         "ModificationTime":{
           "shape":"Rfc3339TimeString",
           "documentation":"<p>The date and time that the rule was last modified, in Unix time format and Coordinated Universal Time (UTC).</p>"
+        },
+        "FirewallDomainRedirectionAction":{
+          "shape":"FirewallDomainRedirectionAction",
+          "documentation":"<p> How you want the the rule to evaluate DNS redirection in the DNS redirection chain, such as CNAME or DNAME. </p> <p> <code>INSPECT_REDIRECTION_DOMAIN</code>: (Default) inspects all domains in the redirection chain. The individual domains in the redirection chain must be added to the domain list.</p> <p> <code>TRUST_REDIRECTION_DOMAIN</code>: Inspects only the first domain in the redirection chain. You don't need to add the subsequent domains in the domain in the redirection list to the domain list.</p>"
+        },
+        "Qtype":{
+          "shape":"Qtype",
+          "documentation":"<p> The DNS query type you want the rule to evaluate. Allowed values are; </p> <ul> <li> <p> A: Returns an IPv4 address.</p> </li> <li> <p>AAAA: Returns an Ipv6 address.</p> </li> <li> <p>CAA: Restricts CAs that can create SSL/TLS certifications for the domain.</p> </li> <li> <p>CNAME: Returns another domain name.</p> </li> <li> <p>DS: Record that identifies the DNSSEC signing key of a delegated zone.</p> </li> <li> <p>MX: Specifies mail servers.</p> </li> <li> <p>NAPTR: Regular-expression-based rewriting of domain names.</p> </li> <li> <p>NS: Authoritative name servers.</p> </li> <li> <p>PTR: Maps an IP address to a domain name.</p> </li> <li> <p>SOA: Start of authority record for the zone.</p> </li> <li> <p>SPF: Lists the servers authorized to send emails from a domain.</p> </li> <li> <p>SRV: Application specific values that identify servers.</p> </li> <li> <p>TXT: Verifies email senders and application-specific values.</p> </li> <li> <p>A query type you define by using the DNS type ID, for example 28 for AAAA. The values must be defined as TYPENUMBER, where the NUMBER can be 1-65334, for example, TYPE28. For more information, see <a href=\"https://en.wikipedia.org/wiki/List_of_DNS_record_types\">List of DNS record types</a>.</p> </li> </ul>"
+        },
+        "DnsThreatProtection":{
+          "shape":"DnsThreatProtection",
+          "documentation":"<p> The type of the DNS Firewall Advanced rule. Valid values are: </p> <ul> <li> <p> <code>DGA</code>: Domain generation algorithms detection. DGAs are used by attackers to generate a large number of domains to to launch malware attacks.</p> </li> <li> <p> <code>DNS_TUNNELING</code>: DNS tunneling detection. DNS tunneling is used by attackers to exfiltrate data from the client by using the DNS tunnel without making a network connection to the client.</p> </li> </ul>"
+        },
+        "ConfidenceThreshold":{
+          "shape":"ConfidenceThreshold",
+          "documentation":"<p> The confidence threshold for DNS Firewall Advanced. You must provide this value when you create a DNS Firewall Advanced rule. The confidence level values mean: </p> <ul> <li> <p> <code>LOW</code>: Provides the highest detection rate for threats, but also increases false positives.</p> </li> <li> <p> <code>MEDIUM</code>: Provides a balance between detecting threats and false positives.</p> </li> <li> <p> <code>HIGH</code>: Detects only the most well corroborated threats with a low rate of false positives. </p> </li> </ul>"
         }
       },
       "documentation":"<p>A single firewall rule in a rule group.</p>"
@@ -2311,6 +2602,25 @@
         }
       }
     },
+    "GetOutpostResolverRequest":{
+      "type":"structure",
+      "required":["Id"],
+      "members":{
+        "Id":{
+          "shape":"ResourceId",
+          "documentation":"<p>The ID of the Resolver on the Outpost.</p>"
+        }
+      }
+    },
+    "GetOutpostResolverResponse":{
+      "type":"structure",
+      "members":{
+        "OutpostResolver":{
+          "shape":"OutpostResolver",
+          "documentation":"<p>Information about the <code>GetOutpostResolver</code> request, including the status of the request.</p>"
+        }
+      }
+    },
     "GetResolverConfigRequest":{
       "type":"structure",
       "required":["ResourceId"],
@@ -2326,7 +2636,7 @@
       "members":{
         "ResolverConfig":{
           "shape":"ResolverConfig",
-          "documentation":"<p>Information about the behavior configuration of Route 53 Resolver behavior for the VPC you specified in the <code>GetResolverConfig</code> request.</p>"
+          "documentation":"<p>Information about the behavior configuration of Route 53 Resolver behavior for the VPC you specified in the <code>GetResolverConfig</code> request.</p>"
         }
       }
     },
@@ -2517,7 +2827,7 @@
         },
         "Status":{
           "shape":"FirewallDomainListStatus",
-          "documentation":"<p> </p>"
+          "documentation":"<p>Status of the import request.</p>"
         },
         "StatusMessage":{
           "shape":"StatusMessage",
@@ -2525,6 +2835,7 @@
         }
       }
     },
+    "InstanceCount":{"type":"integer"},
     "InternalServiceErrorException":{
       "type":"structure",
       "members":{
@@ -2594,7 +2905,12 @@
         },
         "Ip":{
           "shape":"Ip",
-          "documentation":"<p>The IP address that you want to use for DNS queries.</p>",
+          "documentation":"<p>The IPv4 address that you want to use for DNS queries.</p>",
+          "box":true
+        },
+        "Ipv6":{
+          "shape":"Ipv6",
+          "documentation":"<p> The IPv6 address that you want to use for DNS queries. </p>",
           "box":true
         }
       },
@@ -2613,7 +2929,11 @@
         },
         "Ip":{
           "shape":"Ip",
-          "documentation":"<p>One IP address that the Resolver endpoint uses for DNS queries.</p>"
+          "documentation":"<p>One IPv4 address that the Resolver endpoint uses for DNS queries.</p>"
+        },
+        "Ipv6":{
+          "shape":"Ipv6",
+          "documentation":"<p> One IPv6 address that the Resolver endpoint uses for DNS queries. </p>"
         },
         "Status":{
           "shape":"IpAddressStatus",
@@ -2646,7 +2966,10 @@
         "DETACHING",
         "FAILED_RESOURCE_GONE",
         "DELETING",
-        "DELETE_FAILED_FAS_EXPIRED"
+        "DELETE_FAILED_FAS_EXPIRED",
+        "UPDATING",
+        "UPDATE_FAILED",
+        "ISOLATED"
       ]
     },
     "IpAddressUpdate":{
@@ -2664,7 +2987,12 @@
         },
         "Ip":{
           "shape":"Ip",
-          "documentation":"<p>The new IP address.</p>",
+          "documentation":"<p>The new IPv4 address.</p>",
+          "box":true
+        },
+        "Ipv6":{
+          "shape":"Ipv6",
+          "documentation":"<p> The new IPv6 address. </p>",
           "box":true
         }
       },
@@ -2673,13 +3001,19 @@
     "IpAddressesRequest":{
       "type":"list",
       "member":{"shape":"IpAddressRequest"},
-      "max":10,
-      "min":1
+      "max":20,
+      "min":2
     },
     "IpAddressesResponse":{
       "type":"list",
       "member":{"shape":"IpAddressResponse"}
     },
+    "Ipv6":{
+      "type":"string",
+      "max":39,
+      "min":7
+    },
+    "Ipv6InternetAccessEnabled":{"type":"boolean"},
     "LimitExceededException":{
       "type":"structure",
       "members":{
@@ -2882,7 +3216,7 @@
         },
         "Action":{
           "shape":"Action",
-          "documentation":"<p>Optional additional filter for the rules to retrieve.</p> <p>The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list:</p> <ul> <li> <p> <code>ALLOW</code> - Permit the request to go through.</p> </li> <li> <p> <code>ALERT</code> - Permit the request to go through but send an alert to the logs.</p> </li> <li> <p> <code>BLOCK</code> - Disallow the request. If this is specified, additional handling details are provided in the rule's <code>BlockResponse</code> setting. </p> </li> </ul>",
+          "documentation":"<p>Optional additional filter for the rules to retrieve.</p> <p>The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list, or a threat in a DNS Firewall Advanced rule:</p> <ul> <li> <p> <code>ALLOW</code> - Permit the request to go through. Not availabe for DNS Firewall Advanced rules.</p> </li> <li> <p> <code>ALERT</code> - Permit the request to go through but send an alert to the logs.</p> </li> <li> <p> <code>BLOCK</code> - Disallow the request. If this is specified, additional handling details are provided in the rule's <code>BlockResponse</code> setting. </p> </li> </ul>",
           "box":true
         },
         "MaxResults":{
@@ -2907,6 +3241,39 @@
         "FirewallRules":{
           "shape":"FirewallRules",
           "documentation":"<p>A list of the rules that you have defined. </p> <p>This might be a partial list of the firewall rules that you've defined. For information, see <code>MaxResults</code>. </p>"
+        }
+      }
+    },
+    "ListOutpostResolversRequest":{
+      "type":"structure",
+      "members":{
+        "OutpostArn":{
+          "shape":"OutpostArn",
+          "documentation":"<p>The Amazon Resource Name (ARN) of the Outpost.</p>",
+          "box":true
+        },
+        "MaxResults":{
+          "shape":"MaxResults",
+          "documentation":"<p>The maximum number of Resolvers on the Outpost that you want to return in the response to a <code>ListOutpostResolver</code> request. If you don't specify a value for <code>MaxResults</code>, the request returns up to 100 Resolvers.</p>",
+          "box":true
+        },
+        "NextToken":{
+          "shape":"NextToken",
+          "documentation":"<p>For the first <code>ListOutpostResolver</code> request, omit this value.</p> <p/>",
+          "box":true
+        }
+      }
+    },
+    "ListOutpostResolversResponse":{
+      "type":"structure",
+      "members":{
+        "OutpostResolvers":{
+          "shape":"OutpostResolverList",
+          "documentation":"<p>The Resolvers on Outposts that were created by using the current Amazon Web Services account, and that match the specified filters, if any.</p>"
+        },
+        "NextToken":{
+          "shape":"NextToken",
+          "documentation":"<p>If more than <code>MaxResults</code> Resolvers match the specified criteria, you can submit another <code>ListOutpostResolver</code> request to get the next group of results. In the next request, specify the value of <code>NextToken</code> from the previous response.</p>"
         }
       }
     },
@@ -2935,7 +3302,7 @@
       "members":{
         "NextToken":{
           "shape":"NextToken",
-          "documentation":"<p>If a response includes the last of the Resolver configurations that are associated with the current Amazon Web Services account, <code>NextToken</code> doesn't appear in the response.</p> <p>If a response doesn't include the last of the configurations, you can get more configurations by submitting another <code>ListResolverConfigs</code> request. Get the value of <code>NextToken</code> that Amazon Route 53 returned in the previous response and include it in <code>NextToken</code> in the next request.</p>"
+          "documentation":"<p>If a response includes the last of the Resolver configurations that are associated with the current Amazon Web Services account, <code>NextToken</code> doesn't appear in the response.</p> <p>If a response doesn't include the last of the configurations, you can get more configurations by submitting another <code>ListResolverConfigs</code> request. Get the value of <code>NextToken</code> that Amazon Route 53 returned in the previous response and include it in <code>NextToken</code> in the next request.</p>"
         },
         "ResolverConfigs":{
           "shape":"ResolverConfigList",
@@ -2972,7 +3339,7 @@
         },
         "ResolverDnssecConfigs":{
           "shape":"ResolverDnssecConfigList",
-          "documentation":"<p>An array that contains one <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_ResolverDnssecConfig.html\">ResolverDnssecConfig</a> element for each configuration for DNSSEC validation that is associated with the current Amazon Web Services account.</p>"
+          "documentation":"<p>An array that contains one <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_ResolverDnssecConfig.html\">ResolverDnssecConfig</a> element for each configuration for DNSSEC validation that is associated with the current Amazon Web Services account. It doesn't contain disabled DNSSEC configurations for the resource.</p>"
         }
       }
     },
@@ -3270,12 +3637,112 @@
       "pattern":"(?!^[0-9]+$)([a-zA-Z0-9\\-_' ']+)"
     },
     "NextToken":{"type":"string"},
+    "OutpostArn":{
+      "type":"string",
+      "max":255,
+      "min":1,
+      "pattern":"^arn:aws([a-z-]+)?:outposts:[a-z\\d-]+:\\d{12}:outpost/op-[a-f0-9]{17}$"
+    },
+    "OutpostInstanceType":{
+      "type":"string",
+      "max":255,
+      "min":1
+    },
+    "OutpostResolver":{
+      "type":"structure",
+      "members":{
+        "Arn":{
+          "shape":"Arn",
+          "documentation":"<p>The ARN (Amazon Resource Name) for the Resolver on an Outpost.</p>"
+        },
+        "CreationTime":{
+          "shape":"Rfc3339TimeString",
+          "documentation":"<p>The date and time that the Outpost Resolver was created, in Unix time format and Coordinated Universal Time (UTC).</p>"
+        },
+        "ModificationTime":{
+          "shape":"Rfc3339TimeString",
+          "documentation":"<p>The date and time that the Outpost Resolver was modified, in Unix time format and Coordinated Universal Time (UTC).</p>"
+        },
+        "CreatorRequestId":{
+          "shape":"CreatorRequestId",
+          "documentation":"<p>A unique string that identifies the request that created the Resolver endpoint. The <code>CreatorRequestId</code> allows failed requests to be retried without the risk of running the operation twice.</p>"
+        },
+        "Id":{
+          "shape":"ResourceId",
+          "documentation":"<p>The ID of the Resolver on Outpost.</p>"
+        },
+        "InstanceCount":{
+          "shape":"InstanceCount",
+          "documentation":"<p>Amazon EC2 instance count for the Resolver on the Outpost.</p>"
+        },
+        "PreferredInstanceType":{
+          "shape":"OutpostInstanceType",
+          "documentation":"<p> The Amazon EC2 instance type. </p>"
+        },
+        "Name":{
+          "shape":"OutpostResolverName",
+          "documentation":"<p>Name of the Resolver.</p>"
+        },
+        "Status":{
+          "shape":"OutpostResolverStatus",
+          "documentation":"<p>Status of the Resolver.</p>"
+        },
+        "StatusMessage":{
+          "shape":"OutpostResolverStatusMessage",
+          "documentation":"<p>A detailed description of the Resolver.</p>"
+        },
+        "OutpostArn":{
+          "shape":"OutpostArn",
+          "documentation":"<p>The ARN (Amazon Resource Name) for the Outpost.</p>"
+        }
+      },
+      "documentation":"<p>A complex type that contains settings for an existing Resolver on an Outpost.</p>"
+    },
+    "OutpostResolverList":{
+      "type":"list",
+      "member":{"shape":"OutpostResolver"}
+    },
+    "OutpostResolverName":{
+      "type":"string",
+      "max":255,
+      "min":1
+    },
+    "OutpostResolverStatus":{
+      "type":"string",
+      "enum":[
+        "CREATING",
+        "OPERATIONAL",
+        "UPDATING",
+        "DELETING",
+        "ACTION_NEEDED",
+        "FAILED_CREATION",
+        "FAILED_DELETION"
+      ]
+    },
+    "OutpostResolverStatusMessage":{
+      "type":"string",
+      "max":4096
+    },
     "Port":{
       "type":"integer",
       "max":65535,
       "min":0
     },
     "Priority":{"type":"integer"},
+    "Protocol":{
+      "type":"string",
+      "enum":[
+        "DoH",
+        "Do53",
+        "DoH-FIPS"
+      ]
+    },
+    "ProtocolList":{
+      "type":"list",
+      "member":{"shape":"Protocol"},
+      "max":2,
+      "min":1
+    },
     "PutFirewallRuleGroupPolicyRequest":{
       "type":"structure",
       "required":[
@@ -3315,7 +3782,7 @@
         },
         "ResolverQueryLogConfigPolicy":{
           "shape":"ResolverQueryLogConfigPolicy",
-          "documentation":"<p>An Identity and Access Management policy statement that lists the query logging configurations that you want to share with another Amazon Web Services account and the operations that you want the account to be able to perform. You can specify the following operations in the <code>Actions</code> section of the statement:</p> <ul> <li> <p> <code>route53resolver:AssociateResolverQueryLogConfig</code> </p> </li> <li> <p> <code>route53resolver:DisassociateResolverQueryLogConfig</code> </p> </li> <li> <p> <code>route53resolver:ListResolverQueryLogConfigAssociations</code> </p> </li> <li> <p> <code>route53resolver:ListResolverQueryLogConfigs</code> </p> </li> </ul> <p>In the <code>Resource</code> section of the statement, you specify the ARNs for the query logging configurations that you want to share with the account that you specified in <code>Arn</code>. </p>"
+          "documentation":"<p>An Identity and Access Management policy statement that lists the query logging configurations that you want to share with another Amazon Web Services account and the operations that you want the account to be able to perform. You can specify the following operations in the <code>Actions</code> section of the statement:</p> <ul> <li> <p> <code>route53resolver:AssociateResolverQueryLogConfig</code> </p> </li> <li> <p> <code>route53resolver:DisassociateResolverQueryLogConfig</code> </p> </li> <li> <p> <code>route53resolver:ListResolverQueryLogConfigs</code> </p> </li> </ul> <p>In the <code>Resource</code> section of the statement, you specify the ARNs for the query logging configurations that you want to share with the account that you specified in <code>Arn</code>. </p>"
         }
       }
     },
@@ -3356,13 +3823,20 @@
       },
       "documentation":"<p>The response to a <code>PutResolverRulePolicy</code> request.</p>"
     },
+    "Qtype":{
+      "type":"string",
+      "max":16,
+      "min":1
+    },
     "ResolverAutodefinedReverseStatus":{
       "type":"string",
       "enum":[
         "ENABLING",
         "ENABLED",
         "DISABLING",
-        "DISABLED"
+        "DISABLED",
+        "UPDATING_TO_USE_LOCAL_RESOURCE_SETTING",
+        "USE_LOCAL_RESOURCE_SETTING"
       ]
     },
     "ResolverConfig":{
@@ -3374,7 +3848,7 @@
         },
         "ResourceId":{
           "shape":"ResourceId",
-          "documentation":"<p>The ID of the Amazon Virtual Private Cloud VPC that you're configuring Resolver for.</p>"
+          "documentation":"<p>The ID of the Amazon Virtual Private Cloud VPC or a Route 53 Profile that you're configuring Resolver for.</p>"
         },
         "OwnerId":{
           "shape":"AccountId",
@@ -3382,7 +3856,7 @@
         },
         "AutodefinedReverse":{
           "shape":"ResolverAutodefinedReverseStatus",
-          "documentation":"<p> The status of whether or not the Resolver will create autodefined rules for reverse DNS lookups. This is enabled by default. The status can be one of following:</p> <p> Status of the rules generated by VPCs based on CIDR/Region for reverse DNS resolution. The status can be one of following:</p> <ul> <li> <p> <b>ENABLING:</b> Autodefined rules for reverse DNS lookups are being enabled but are not complete.</p> </li> <li> <p> <b>ENABLED:</b> Autodefined rules for reverse DNS lookups are enabled.</p> </li> <li> <p> <b>DISABLING:</b> Autodefined rules for reverse DNS lookups are being disabled but are not complete.</p> </li> <li> <p> <b>DISABLED:</b> Autodefined rules for reverse DNS lookups are disabled.</p> </li> </ul>"
+          "documentation":"<p> The status of whether or not the Resolver will create autodefined rules for reverse DNS lookups. This is enabled by default. The status can be one of following:</p> <ul> <li> <p> <b>ENABLING:</b> Autodefined rules for reverse DNS lookups are being enabled but are not complete.</p> </li> <li> <p> <b>ENABLED:</b> Autodefined rules for reverse DNS lookups are enabled.</p> </li> <li> <p> <b>DISABLING:</b> Autodefined rules for reverse DNS lookups are being disabled but are not complete.</p> </li> <li> <p> <b>DISABLED:</b> Autodefined rules for reverse DNS lookups are disabled.</p> </li> </ul>"
         }
       },
       "documentation":"<p>A complex type that contains information about a Resolver configuration for a VPC.</p>"
@@ -3397,7 +3871,9 @@
         "ENABLING",
         "ENABLED",
         "DISABLING",
-        "DISABLED"
+        "DISABLED",
+        "UPDATING_TO_USE_LOCAL_RESOURCE_SETTING",
+        "USE_LOCAL_RESOURCE_SETTING"
       ]
     },
     "ResolverDnssecConfig":{
@@ -3451,7 +3927,7 @@
         },
         "Direction":{
           "shape":"ResolverEndpointDirection",
-          "documentation":"<p>Indicates whether the Resolver endpoint allows inbound or outbound DNS queries:</p> <ul> <li> <p> <code>INBOUND</code>: allows DNS queries to your VPC from your network</p> </li> <li> <p> <code>OUTBOUND</code>: allows DNS queries from your VPC to your network</p> </li> </ul>"
+          "documentation":"<p>Indicates whether the Resolver endpoint allows inbound or outbound DNS queries:</p> <ul> <li> <p> <code>INBOUND</code>: allows DNS queries to your VPC from your network</p> </li> <li> <p> <code>OUTBOUND</code>: allows DNS queries from your VPC to your network</p> </li> <li> <p> <code>INBOUND_DELEGATION</code>: Resolver delegates queries to Route 53 private hosted zones from your network.</p> </li> </ul>"
         },
         "IpAddressCount":{
           "shape":"IpAddressCount",
@@ -3476,15 +3952,48 @@
         "ModificationTime":{
           "shape":"Rfc3339TimeString",
           "documentation":"<p>The date and time that the endpoint was last modified, in Unix time format and Coordinated Universal Time (UTC).</p>"
+        },
+        "OutpostArn":{
+          "shape":"OutpostArn",
+          "documentation":"<p>The ARN (Amazon Resource Name) for the Outpost.</p>"
+        },
+        "PreferredInstanceType":{
+          "shape":"OutpostInstanceType",
+          "documentation":"<p> The Amazon EC2 instance type. </p>"
+        },
+        "ResolverEndpointType":{
+          "shape":"ResolverEndpointType",
+          "documentation":"<p> The Resolver endpoint IP address type. </p>"
+        },
+        "Protocols":{
+          "shape":"ProtocolList",
+          "documentation":"<p> Protocols used for the endpoint. DoH-FIPS is applicable for a default inbound endpoints only. </p> <p>For an inbound endpoint you can apply the protocols as follows:</p> <ul> <li> <p> Do53 and DoH in combination.</p> </li> <li> <p>Do53 and DoH-FIPS in combination.</p> </li> <li> <p>Do53 alone.</p> </li> <li> <p>DoH alone.</p> </li> <li> <p>DoH-FIPS alone.</p> </li> <li> <p>None, which is treated as Do53.</p> </li> </ul> <p>For a delegation inbound endpoint you can use Do53 only.</p> <p>For an outbound endpoint you can apply the protocols as follows:</p> <ul> <li> <p> Do53 and DoH in combination.</p> </li> <li> <p>Do53 alone.</p> </li> <li> <p>DoH alone.</p> </li> <li> <p>None, which is treated as Do53.</p> </li> </ul>"
+        },
+        "RniEnhancedMetricsEnabled":{
+          "shape":"RniEnhancedMetricsEnabled",
+          "documentation":"<p>Indicates whether RNI enhanced metrics are enabled for the Resolver endpoint. When enabled, one-minute granular metrics are published in CloudWatch for each RNI associated with this endpoint. When disabled, these metrics are not published.</p>"
+        },
+        "TargetNameServerMetricsEnabled":{
+          "shape":"TargetNameServerMetricsEnabled",
+          "documentation":"<p>Indicates whether target name server metrics are enabled for the outbound Resolver endpoint. When enabled, one-minute granular metrics are published in CloudWatch for each target name server associated with this endpoint. When disabled, these metrics are not published. This feature is not supported for inbound Resolver endpoint.</p>"
+        },
+        "Dns64Enabled":{
+          "shape":"Dns64Enabled",
+          "documentation":"<p>Indicates whether DNS64 is enabled for the inbound Resolver endpoint. When <code>true</code>, Route 53 Resolver synthesizes AAAA (IPv6) records for IPv4-only services by prepending the <code>64:ff9b::/96</code> prefix to the IPv4 address.</p>"
+        },
+        "Ipv6InternetAccessEnabled":{
+          "shape":"Ipv6InternetAccessEnabled",
+          "documentation":"<p>Indicates whether IPv6 internet access is enabled for the outbound Resolver endpoint. When <code>true</code>, the endpoint elastic network interfaces (ENIs) can forward DNS queries to public IPv6 targets through an internet gateway.</p>"
         }
       },
-      "documentation":"<p>In the response to a <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_CreateResolverEndpoint.html\">CreateResolverEndpoint</a>, <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_DeleteResolverEndpoint.html\">DeleteResolverEndpoint</a>, <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_GetResolverEndpoint.html\">GetResolverEndpoint</a>, <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_ListResolverEndpoints.html\">ListResolverEndpoints</a>, or <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_UpdateResolverEndpoint.html\">UpdateResolverEndpoint</a> request, a complex type that contains settings for an existing inbound or outbound Resolver endpoint.</p>"
+      "documentation":"<p>In the response to a <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_CreateResolverEndpoint.html\">CreateResolverEndpoint</a>, <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_DeleteResolverEndpoint.html\">DeleteResolverEndpoint</a>, <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_GetResolverEndpoint.html\">GetResolverEndpoint</a>, Updates the name, or ResolverEndpointType for an endpoint, or <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_UpdateResolverEndpoint.html\">UpdateResolverEndpoint</a> request, a complex type that contains settings for an existing inbound or outbound Resolver endpoint.</p>"
     },
     "ResolverEndpointDirection":{
       "type":"string",
       "enum":[
         "INBOUND",
-        "OUTBOUND"
+        "OUTBOUND",
+        "INBOUND_DELEGATION"
       ]
     },
     "ResolverEndpointStatus":{
@@ -3496,6 +4005,14 @@
         "AUTO_RECOVERING",
         "ACTION_NEEDED",
         "DELETING"
+      ]
+    },
+    "ResolverEndpointType":{
+      "type":"string",
+      "enum":[
+        "IPV6",
+        "IPV4",
+        "DUALSTACK"
       ]
     },
     "ResolverEndpoints":{
@@ -3565,7 +4082,7 @@
         },
         "Status":{
           "shape":"ResolverQueryLogConfigAssociationStatus",
-          "documentation":"<p>The status of the specified query logging association. Valid values include the following:</p> <ul> <li> <p> <code>CREATING</code>: Resolver is creating an association between an Amazon VPC and a query logging configuration.</p> </li> <li> <p> <code>CREATED</code>: The association between an Amazon VPC and a query logging configuration was successfully created. Resolver is logging queries that originate in the specified VPC.</p> </li> <li> <p> <code>DELETING</code>: Resolver is deleting this query logging association.</p> </li> <li> <p> <code>FAILED</code>: Resolver either couldn't create or couldn't delete the query logging association.</p> </li> </ul>"
+          "documentation":"<p>The status of the specified query logging association. Valid values include the following:</p> <ul> <li> <p> <code>CREATING</code>: Resolver is creating an association between an Amazon VPC and a query logging configuration.</p> </li> <li> <p> <code>ACTIVE</code>: The association between an Amazon VPC and a query logging configuration was successfully created. Resolver is logging queries that originate in the specified VPC.</p> </li> <li> <p> <code>DELETING</code>: Resolver is deleting this query logging association.</p> </li> <li> <p> <code>FAILED</code>: Resolver either couldn't create or couldn't delete the query logging association.</p> </li> </ul>"
         },
         "Error":{
           "shape":"ResolverQueryLogConfigAssociationError",
@@ -3658,15 +4175,15 @@
         },
         "RuleType":{
           "shape":"RuleTypeOption",
-          "documentation":"<p>When you want to forward DNS queries for specified domain name to resolvers on your network, specify <code>FORWARD</code>.</p> <p>When you have a forwarding rule to forward DNS queries for a domain to your network and you want Resolver to process queries for a subdomain of that domain, specify <code>SYSTEM</code>.</p> <p>For example, to forward DNS queries for example.com to resolvers on your network, you create a rule and specify <code>FORWARD</code> for <code>RuleType</code>. To then have Resolver process queries for apex.example.com, you create a rule and specify <code>SYSTEM</code> for <code>RuleType</code>.</p> <p>Currently, only Resolver can create rules that have a value of <code>RECURSIVE</code> for <code>RuleType</code>.</p>"
+          "documentation":"<p>When you want to forward DNS queries for specified domain name to resolvers on your network, specify <code>FORWARD</code> or <code>DELEGATE</code>. If a query matches multiple Resolver rules (example.com and www.example.com), outbound DNS queries are routed using the Resolver rule that contains the most specific domain name (www.example.com).</p> <p>When you have a forwarding rule to forward DNS queries for a domain to your network and you want Resolver to process queries for a subdomain of that domain, specify <code>SYSTEM</code>.</p> <p>For example, to forward DNS queries for example.com to resolvers on your network, you create a rule and specify <code>FORWARD</code> for <code>RuleType</code>. To then have Resolver process queries for apex.example.com, you create a rule and specify <code>SYSTEM</code> for <code>RuleType</code>.</p> <p>Currently, only Resolver can create rules that have a value of <code>RECURSIVE</code> for <code>RuleType</code>.</p>"
         },
         "Name":{
           "shape":"Name",
-          "documentation":"<p>The name for the Resolver rule, which you specified when you created the Resolver rule.</p>"
+          "documentation":"<p>The name for the Resolver rule, which you specified when you created the Resolver rule.</p> <p>The name can be up to 64 characters long and can contain letters (a-z, A-Z), numbers (0-9), hyphens (-), underscores (_), and spaces. The name cannot consist of only numbers.</p>"
         },
         "TargetIps":{
           "shape":"TargetList",
-          "documentation":"<p>An array that contains the IP addresses and ports that an outbound endpoint forwards DNS queries to. Typically, these are the IP addresses of DNS resolvers on your network. Specify IPv4 addresses. IPv6 is not supported.</p>"
+          "documentation":"<p>An array that contains the IP addresses and ports that an outbound endpoint forwards DNS queries to. Typically, these are the IP addresses of DNS resolvers on your network. </p>"
         },
         "ResolverEndpointId":{
           "shape":"ResourceId",
@@ -3687,6 +4204,10 @@
         "ModificationTime":{
           "shape":"Rfc3339TimeString",
           "documentation":"<p>The date and time that the Resolver rule was last updated, in Unix time format and Coordinated Universal Time (UTC).</p>"
+        },
+        "DelegationRecord":{
+          "shape":"DelegationRecord",
+          "documentation":"<p> DNS queries with delegation records that point to this domain name are forwarded to resolvers on your network. </p>"
         }
       },
       "documentation":"<p>For queries that originate in your VPC, detailed information about a Resolver rule, which specifies how to route DNS queries out of the VPC. The <code>ResolverRule</code> parameter appears in the response to a <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_CreateResolverRule.html\">CreateResolverRule</a>, <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_DeleteResolverRule.html\">DeleteResolverRule</a>, <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_GetResolverRule.html\">GetResolverRule</a>, <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_ListResolverRules.html\">ListResolverRules</a>, or <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_UpdateResolverRule.html\">UpdateResolverRule</a> request.</p>"
@@ -3704,7 +4225,7 @@
         },
         "Name":{
           "shape":"Name",
-          "documentation":"<p>The name of an association between a Resolver rule and a VPC.</p>"
+          "documentation":"<p>The name of an association between a Resolver rule and a VPC.</p> <p>The name can be up to 64 characters long and can contain letters (a-z, A-Z), numbers (0-9), hyphens (-), underscores (_), and spaces. The name cannot consist of only numbers.</p>"
         },
         "VPCId":{
           "shape":"ResourceId",
@@ -3740,7 +4261,7 @@
       "members":{
         "Name":{
           "shape":"Name",
-          "documentation":"<p>The new name for the Resolver rule. The name that you specify appears in the Resolver dashboard in the Route 53 console. </p>"
+          "documentation":"<p>The new name for the Resolver rule. The name that you specify appears in the Resolver dashboard in the Route 53 console. </p> <p>The name can be up to 64 characters long and can contain letters (a-z, A-Z), numbers (0-9), hyphens (-), underscores (_), and spaces. The name cannot consist of only numbers.</p>"
         },
         "TargetIps":{
           "shape":"TargetList",
@@ -3755,7 +4276,7 @@
     },
     "ResolverRulePolicy":{
       "type":"string",
-      "max":5000
+      "max":30000
     },
     "ResolverRuleStatus":{
       "type":"string",
@@ -3828,22 +4349,37 @@
       "max":40,
       "min":20
     },
+    "RniEnhancedMetricsEnabled":{"type":"boolean"},
     "RuleTypeOption":{
       "type":"string",
       "enum":[
         "FORWARD",
         "SYSTEM",
-        "RECURSIVE"
+        "RECURSIVE",
+        "DELEGATE"
       ]
     },
     "SecurityGroupIds":{
       "type":"list",
       "member":{"shape":"ResourceId"}
     },
+    "ServerNameIndication":{
+      "type":"string",
+      "max":255,
+      "min":0
+    },
     "ServicePrinciple":{
       "type":"string",
       "max":512,
       "min":1
+    },
+    "ServiceQuotaExceededException":{
+      "type":"structure",
+      "members":{
+        "Message":{"shape":"ExceptionMessage"}
+      },
+      "documentation":"<p>Fulfilling the request would cause one or more quotas to be exceeded.</p>",
+      "exception":true
     },
     "ShareStatus":{
       "type":"string",
@@ -3927,8 +4463,7 @@
     },
     "TagResourceResponse":{
       "type":"structure",
-      "members":{
-      }
+      "members":{}
     },
     "TagValue":{
       "type":"string",
@@ -3937,15 +4472,30 @@
     },
     "TargetAddress":{
       "type":"structure",
-      "required":["Ip"],
       "members":{
         "Ip":{
           "shape":"Ip",
-          "documentation":"<p>One IP address that you want to forward DNS queries to. You can specify only IPv4 addresses.</p>"
+          "documentation":"<p>One IPv4 address that you want to forward DNS queries to.</p>",
+          "box":true
         },
         "Port":{
           "shape":"Port",
           "documentation":"<p>The port at <code>Ip</code> that you want to forward DNS queries to.</p>",
+          "box":true
+        },
+        "Ipv6":{
+          "shape":"Ipv6",
+          "documentation":"<p> One IPv6 address that you want to forward DNS queries to. </p>",
+          "box":true
+        },
+        "Protocol":{
+          "shape":"Protocol",
+          "documentation":"<p> The protocols for the target address. The protocol you choose needs to be supported by the outbound endpoint of the Resolver rule.</p>",
+          "box":true
+        },
+        "ServerNameIndication":{
+          "shape":"ServerNameIndication",
+          "documentation":"<p> The Server Name Indication of the DoH server that you want to forward queries to. This is only used if the Protocol of the <code>TargetAddress</code> is <code>DoH</code>. </p>",
           "box":true
         }
       },
@@ -3956,6 +4506,7 @@
       "member":{"shape":"TargetAddress"},
       "min":1
     },
+    "TargetNameServerMetricsEnabled":{"type":"boolean"},
     "ThrottlingException":{
       "type":"structure",
       "members":{
@@ -3992,8 +4543,7 @@
     },
     "UntagResourceResponse":{
       "type":"structure",
-      "members":{
-      }
+      "members":{}
     },
     "UpdateFirewallConfigRequest":{
       "type":"structure",
@@ -4039,7 +4589,7 @@
         },
         "Domains":{
           "shape":"FirewallDomains",
-          "documentation":"<p>A list of domains to use in the update operation.</p> <p>Each domain specification in your domain list must satisfy the following requirements: </p> <ul> <li> <p>It can optionally start with <code>*</code> (asterisk).</p> </li> <li> <p>With the exception of the optional starting asterisk, it must only contain the following characters: <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>-</code> (hyphen).</p> </li> <li> <p>It must be from 1-255 characters in length. </p> </li> </ul>"
+          "documentation":"<p>A list of domains to use in the update operation.</p> <important> <p>There is a limit of 1000 domains per request.</p> </important> <p>Each domain specification in your domain list must satisfy the following requirements: </p> <ul> <li> <p>It can optionally start with <code>*</code> (asterisk).</p> </li> <li> <p>With the exception of the optional starting asterisk, it must only contain the following characters: <code>A-Z</code>, <code>a-z</code>, <code>0-9</code>, <code>-</code> (hyphen).</p> </li> <li> <p>It must be from 1-255 characters in length. </p> </li> </ul>"
         }
       }
     },
@@ -4056,7 +4606,7 @@
         },
         "Status":{
           "shape":"FirewallDomainListStatus",
-          "documentation":"<p> </p>"
+          "documentation":"<p>Status of the <code>UpdateFirewallDomains</code> request.</p>"
         },
         "StatusMessage":{
           "shape":"StatusMessage",
@@ -4100,10 +4650,7 @@
     },
     "UpdateFirewallRuleRequest":{
       "type":"structure",
-      "required":[
-        "FirewallRuleGroupId",
-        "FirewallDomainListId"
-      ],
+      "required":["FirewallRuleGroupId"],
       "members":{
         "FirewallRuleGroupId":{
           "shape":"ResourceId",
@@ -4111,7 +4658,13 @@
         },
         "FirewallDomainListId":{
           "shape":"ResourceId",
-          "documentation":"<p>The ID of the domain list to use in the rule. </p>"
+          "documentation":"<p>The ID of the domain list to use in the rule. </p>",
+          "box":true
+        },
+        "FirewallThreatProtectionId":{
+          "shape":"ResourceId",
+          "documentation":"<p> The DNS Firewall Advanced rule ID. </p>",
+          "box":true
         },
         "Priority":{
           "shape":"Priority",
@@ -4120,7 +4673,7 @@
         },
         "Action":{
           "shape":"Action",
-          "documentation":"<p>The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list:</p> <ul> <li> <p> <code>ALLOW</code> - Permit the request to go through.</p> </li> <li> <p> <code>ALERT</code> - Permit the request to go through but send an alert to the logs.</p> </li> <li> <p> <code>BLOCK</code> - Disallow the request. This option requires additional details in the rule's <code>BlockResponse</code>. </p> </li> </ul>",
+          "documentation":"<p>The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list, or a threat in a DNS Firewall Advanced rule:</p> <ul> <li> <p> <code>ALLOW</code> - Permit the request to go through. Not available for DNS Firewall Advanced rules.</p> </li> <li> <p> <code>ALERT</code> - Permit the request to go through but send an alert to the logs.</p> </li> <li> <p> <code>BLOCK</code> - Disallow the request. This option requires additional details in the rule's <code>BlockResponse</code>. </p> </li> </ul>",
           "box":true
         },
         "BlockResponse":{
@@ -4147,6 +4700,25 @@
           "shape":"Name",
           "documentation":"<p>The name of the rule.</p>",
           "box":true
+        },
+        "FirewallDomainRedirectionAction":{
+          "shape":"FirewallDomainRedirectionAction",
+          "documentation":"<p> How you want the the rule to evaluate DNS redirection in the DNS redirection chain, such as CNAME or DNAME. </p> <p> <code>INSPECT_REDIRECTION_DOMAIN</code>: (Default) inspects all domains in the redirection chain. The individual domains in the redirection chain must be added to the domain list.</p> <p> <code>TRUST_REDIRECTION_DOMAIN</code>: Inspects only the first domain in the redirection chain. You don't need to add the subsequent domains in the domain in the redirection list to the domain list.</p>",
+          "box":true
+        },
+        "Qtype":{
+          "shape":"Qtype",
+          "documentation":"<p> The DNS query type you want the rule to evaluate. Allowed values are; </p> <ul> <li> <p> A: Returns an IPv4 address.</p> </li> <li> <p>AAAA: Returns an Ipv6 address.</p> </li> <li> <p>CAA: Restricts CAs that can create SSL/TLS certifications for the domain.</p> </li> <li> <p>CNAME: Returns another domain name.</p> </li> <li> <p>DS: Record that identifies the DNSSEC signing key of a delegated zone.</p> </li> <li> <p>MX: Specifies mail servers.</p> </li> <li> <p>NAPTR: Regular-expression-based rewriting of domain names.</p> </li> <li> <p>NS: Authoritative name servers.</p> </li> <li> <p>PTR: Maps an IP address to a domain name.</p> </li> <li> <p>SOA: Start of authority record for the zone.</p> </li> <li> <p>SPF: Lists the servers authorized to send emails from a domain.</p> </li> <li> <p>SRV: Application specific values that identify servers.</p> </li> <li> <p>TXT: Verifies email senders and application-specific values.</p> </li> <li> <p>A query type you define by using the DNS type ID, for example 28 for AAAA. The values must be defined as TYPENUMBER, where the NUMBER can be 1-65334, for example, TYPE28. For more information, see <a href=\"https://en.wikipedia.org/wiki/List_of_DNS_record_types\">List of DNS record types</a>.</p> <note> <p>If you set up a firewall BLOCK rule with action NXDOMAIN on query type equals AAAA, this action will not be applied to synthetic IPv6 addresses generated when DNS64 is enabled. </p> </note> </li> </ul>"
+        },
+        "DnsThreatProtection":{
+          "shape":"DnsThreatProtection",
+          "documentation":"<p> The type of the DNS Firewall Advanced rule. Valid values are: </p> <ul> <li> <p> <code>DGA</code>: Domain generation algorithms detection. DGAs are used by attackers to generate a large number of domains to to launch malware attacks.</p> </li> <li> <p> <code>DNS_TUNNELING</code>: DNS tunneling detection. DNS tunneling is used by attackers to exfiltrate data from the client by using the DNS tunnel without making a network connection to the client.</p> </li> </ul>",
+          "box":true
+        },
+        "ConfidenceThreshold":{
+          "shape":"ConfidenceThreshold",
+          "documentation":"<p> The confidence threshold for DNS Firewall Advanced. You must provide this value when you create a DNS Firewall Advanced rule. The confidence level values mean: </p> <ul> <li> <p> <code>LOW</code>: Provides the highest detection rate for threats, but also increases false positives.</p> </li> <li> <p> <code>MEDIUM</code>: Provides a balance between detecting threats and false positives.</p> </li> <li> <p> <code>HIGH</code>: Detects only the most well corroborated threats with a low rate of false positives. </p> </li> </ul>",
+          "box":true
         }
       }
     },
@@ -4159,6 +4731,64 @@
         }
       }
     },
+    "UpdateIpAddress":{
+      "type":"structure",
+      "required":[
+        "IpId",
+        "Ipv6"
+      ],
+      "members":{
+        "IpId":{
+          "shape":"ResourceId",
+          "documentation":"<p> The ID of the IP address, specified by the <code>ResolverEndpointId</code>. </p>"
+        },
+        "Ipv6":{
+          "shape":"Ipv6",
+          "documentation":"<p> The IPv6 address that you want to use for DNS queries. </p>"
+        }
+      },
+      "documentation":"<p> Provides information about the IP address type in response to <a href=\"https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_UpdateResolverEndpoint.html\">UpdateResolverEndpoint</a>. </p>"
+    },
+    "UpdateIpAddresses":{
+      "type":"list",
+      "member":{"shape":"UpdateIpAddress"},
+      "max":50,
+      "min":0
+    },
+    "UpdateOutpostResolverRequest":{
+      "type":"structure",
+      "required":["Id"],
+      "members":{
+        "Id":{
+          "shape":"ResourceId",
+          "documentation":"<p>A unique string that identifies Resolver on an Outpost.</p>"
+        },
+        "Name":{
+          "shape":"OutpostResolverName",
+          "documentation":"<p>Name of the Resolver on the Outpost.</p>",
+          "box":true
+        },
+        "InstanceCount":{
+          "shape":"InstanceCount",
+          "documentation":"<p>The Amazon EC2 instance count for a Resolver on the Outpost.</p>",
+          "box":true
+        },
+        "PreferredInstanceType":{
+          "shape":"OutpostInstanceType",
+          "documentation":"<p> Amazon EC2 instance type. </p>",
+          "box":true
+        }
+      }
+    },
+    "UpdateOutpostResolverResponse":{
+      "type":"structure",
+      "members":{
+        "OutpostResolver":{
+          "shape":"OutpostResolver",
+          "documentation":"<p>The response to an <code>UpdateOutpostResolver</code> request.</p>"
+        }
+      }
+    },
     "UpdateResolverConfigRequest":{
       "type":"structure",
       "required":[
@@ -4168,11 +4798,11 @@
       "members":{
         "ResourceId":{
           "shape":"ResourceId",
-          "documentation":"<p>Resource ID of the Amazon VPC that you want to update the Resolver configuration for.</p>"
+          "documentation":"<p>The ID of the Amazon Virtual Private Cloud VPC or a Route 53 Profile that you're configuring Resolver for.</p>"
         },
         "AutodefinedReverseFlag":{
           "shape":"AutodefinedReverseFlag",
-          "documentation":"<p>Indicates whether or not the Resolver will create autodefined rules for reverse DNS lookups. This is enabled by default. Disabling this option will also affect EC2-Classic instances using ClassicLink. For more information, see <a href=\"https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/vpc-classiclink.html\">ClassicLink</a> in the <i>Amazon EC2 guide</i>.</p> <note> <p>It can take some time for the status change to be completed.</p> </note> <p/>"
+          "documentation":"<p>Indicates whether or not the Resolver will create autodefined rules for reverse DNS lookups. This is enabled by default. Disabling this option will also affect EC2-Classic instances using ClassicLink. For more information, see <a href=\"https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/vpc-classiclink.html\">ClassicLink</a> in the <i>Amazon EC2 guide</i>.</p> <important> <p>We are retiring EC2-Classic on August 15, 2022. We recommend that you migrate from EC2-Classic to a VPC. For more information, see <a href=\"https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/vpc-migrate.html\">Migrate from EC2-Classic to a VPC</a> in the <i>Amazon EC2 guide</i> and the blog <a href=\"http://aws.amazon.com/blogs/aws/ec2-classic-is-retiring-heres-how-to-prepare/\">EC2-Classic Networking is Retiring – Here’s How to Prepare</a>.</p> </important> <note> <p>It can take some time for the status change to be completed.</p> </note> <p/>"
         }
       }
     },
@@ -4223,6 +4853,41 @@
           "shape":"Name",
           "documentation":"<p>The name of the Resolver endpoint that you want to update.</p>",
           "box":true
+        },
+        "ResolverEndpointType":{
+          "shape":"ResolverEndpointType",
+          "documentation":"<p> Specifies the endpoint type for what type of IP address the endpoint uses to forward DNS queries. </p> <p>Updating to <code>IPV6</code> type isn't currently supported.</p>",
+          "box":true
+        },
+        "UpdateIpAddresses":{
+          "shape":"UpdateIpAddresses",
+          "documentation":"<p> Specifies the IPv6 address when you update the Resolver endpoint from IPv4 to dual-stack. If you don't specify an IPv6 address, one will be automatically chosen from your subnet. </p>",
+          "box":true
+        },
+        "Protocols":{
+          "shape":"ProtocolList",
+          "documentation":"<p> The protocols you want to use for the endpoint. DoH-FIPS is applicable for default inbound endpoints only. </p> <p>For a default inbound endpoint you can apply the protocols as follows:</p> <ul> <li> <p> Do53 and DoH in combination.</p> </li> <li> <p>Do53 and DoH-FIPS in combination.</p> </li> <li> <p>Do53 alone.</p> </li> <li> <p>DoH alone.</p> </li> <li> <p>DoH-FIPS alone.</p> </li> <li> <p>None, which is treated as Do53.</p> </li> </ul> <p>For a delegation inbound endpoint you can use Do53 only.</p> <p>For an outbound endpoint you can apply the protocols as follows:</p> <ul> <li> <p> Do53 and DoH in combination.</p> </li> <li> <p>Do53 alone.</p> </li> <li> <p>DoH alone.</p> </li> <li> <p>None, which is treated as Do53.</p> </li> </ul> <important> <p> You can't change the protocol of an inbound endpoint directly from only Do53 to only DoH, or DoH-FIPS. This is to prevent a sudden disruption to incoming traffic that relies on Do53. To change the protocol from Do53 to DoH, or DoH-FIPS, you must first enable both Do53 and DoH, or Do53 and DoH-FIPS, to make sure that all incoming traffic has transferred to using the DoH protocol, or DoH-FIPS, and then remove the Do53.</p> </important>",
+          "box":true
+        },
+        "RniEnhancedMetricsEnabled":{
+          "shape":"RniEnhancedMetricsEnabled",
+          "documentation":"<p>Updates whether RNI enhanced metrics are enabled for the Resolver endpoints. When set to true, one-minute granular metrics are published in CloudWatch for each RNI associated with this endpoint. When set to false, metrics are not published.</p> <note> <p>Standard CloudWatch pricing and charges are applied for using the Route 53 Resolver endpoint RNI enhanced metrics. For more information, see <a href=\"https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/monitoring-resolver-with-cloudwatch.html\">Detailed metrics</a>.</p> </note>",
+          "box":true
+        },
+        "TargetNameServerMetricsEnabled":{
+          "shape":"TargetNameServerMetricsEnabled",
+          "documentation":"<p>Updates whether target name server metrics are enabled for the outbound Resolver endpoints. When set to true, one-minute granular metrics are published in CloudWatch for each target name server associated with this endpoint. When set to false, metrics are not published. This setting is not supported for inbound Resolver endpoints.</p> <note> <p>Standard CloudWatch pricing and charges are applied for using the Route 53 Resolver endpoint target name server metrics. For more information, see <a href=\"https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/monitoring-resolver-with-cloudwatch.html\">Detailed metrics</a>.</p> </note>",
+          "box":true
+        },
+        "Dns64Enabled":{
+          "shape":"Dns64Enabled",
+          "documentation":"<p>Specifies whether DNS64 is enabled for the inbound Resolver endpoint. When set to <code>true</code>, Route 53 Resolver synthesizes AAAA (IPv6) records for IPv4-only services by prepending the <code>64:ff9b::/96</code> prefix to the IPv4 address. This enables IPv6-only clients that send queries through the inbound endpoint to reach IPv4-only services. DNS64 works with NAT64 to provide complete IPv6-to-IPv4 translation.</p>",
+          "box":true
+        },
+        "Ipv6InternetAccessEnabled":{
+          "shape":"Ipv6InternetAccessEnabled",
+          "documentation":"<p>Specifies whether IPv6 internet access is enabled for the outbound Resolver endpoint. When set to <code>true</code>, the endpoint elastic network interfaces (ENIs) can forward DNS queries to public IPv6 targets through an internet gateway.</p> <important> <p>When you enable IPv6 internet access, use network controls like security groups, NACLs, or egress-only internet gateways to protect the endpoint ENIs from unsolicited ingress traffic. Be aware that some network controls can affect DNS query throughput due to connection tracking. For more information, see <a href=\"https://docs.aws.amazon.com/ec2/latest/userguide/security-group-connection-tracking.html\">Amazon EC2 security group connection tracking</a> and <a href=\"https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/best-practices-resolver-endpoint-scaling.html\">Resolver endpoint scaling</a>.</p> </important>",
+          "box":true
         }
       }
     },
@@ -4265,7 +4930,8 @@
       "type":"string",
       "enum":[
         "ENABLE",
-        "DISABLE"
+        "DISABLE",
+        "USE_LOCAL_RESOURCE_SETTING"
       ]
     },
     "ValidationException":{
@@ -4273,7 +4939,7 @@
       "members":{
         "Message":{"shape":"ExceptionMessage"}
       },
-      "documentation":"<p/>",
+      "documentation":"<p>You have provided an invalid command. If you ran the <code>UpdateFirewallDomains</code> request. supported values are <code>ADD</code>, <code>REMOVE</code>, or <code>REPLACE</code> a domain.</p>",
       "exception":true
     }
   },

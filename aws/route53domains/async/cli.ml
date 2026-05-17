@@ -40,7 +40,8 @@ let accept_domain_transfer_from_another_aws_account =
            ~doc:"URL override endpoint url"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING DomainName"
-       and password = flag "password" (required string) ~doc:"STRING String" in
+       and password =
+         flag "password" (required string) ~doc:"STRING Password" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.accept_domain_transfer_from_another_aws_account
@@ -50,6 +51,30 @@ let accept_domain_transfer_from_another_aws_account =
               Values.AcceptDomainTransferFromAnotherAwsAccountResponse.to_json)
            (Some
               Values.AcceptDomainTransferFromAnotherAwsAccountResponse.error_to_json)])
+let associate_delegation_signer_to_domain =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and signingAttributes =
+         flag "signing-attributes" (required json_arg)
+           ~doc:"JSON DnssecSigningAttributes" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_delegation_signer_to_domain
+           (Values.AssociateDelegationSignerToDomainRequest.make ~domainName
+              ~signingAttributes:(Values.DnssecSigningAttributes.of_json
+                                    signingAttributes) ())
+           (Some Values.AssociateDelegationSignerToDomainResponse.to_json)
+           (Some
+              Values.AssociateDelegationSignerToDomainResponse.error_to_json)])
 let cancel_domain_transfer_to_another_aws_account =
   Command.async ~summary:""
     ([%map_open.Command
@@ -187,6 +212,28 @@ let disable_domain_transfer_lock =
            (Values.DisableDomainTransferLockRequest.make ~domainName ())
            (Some Values.DisableDomainTransferLockResponse.to_json)
            (Some Values.DisableDomainTransferLockResponse.error_to_json)])
+let disassociate_delegation_signer_from_domain =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and id = flag "id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_delegation_signer_from_domain
+           (Values.DisassociateDelegationSignerFromDomainRequest.make
+              ~domainName ~id ())
+           (Some
+              Values.DisassociateDelegationSignerFromDomainResponse.to_json)
+           (Some
+              Values.DisassociateDelegationSignerFromDomainResponse.error_to_json)])
 let enable_domain_auto_renew =
   Command.async ~summary:""
     ([%map_open.Command
@@ -341,14 +388,30 @@ let list_operations =
        and submittedSince =
          flag "submitted-since" (optional json_arg) ~doc:"JSON Timestamp"
        and marker = flag "marker" (optional string) ~doc:"STRING PageMarker"
-       and maxItems = flag "max-items" (optional int) ~doc:"INT PageMaxItems" in
+       and maxItems = flag "max-items" (optional int) ~doc:"INT PageMaxItems"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON OperationStatusList"
+       and type_ =
+         flag "type-" (optional json_arg) ~doc:"JSON OperationTypeList"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON ListOperationsSortAttributeName"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_operations
            (Values.ListOperationsRequest.make
               ?submittedSince:(Option.map ~f:Values.Timestamp.of_json
-                                 submittedSince) ?marker ?maxItems ())
-           (Some Values.ListOperationsResponse.to_json)
+                                 submittedSince) ?marker ?maxItems
+              ?status:(Option.map ~f:Values.OperationStatusList.of_json
+                         status)
+              ?type_:(Option.map ~f:Values.OperationTypeList.of_json type_)
+              ?sortBy:(Option.map
+                         ~f:Values.ListOperationsSortAttributeName.of_json
+                         sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ()) (Some Values.ListOperationsResponse.to_json)
            (Some Values.ListOperationsResponse.error_to_json)])
 let list_prices =
   Command.async ~summary:""
@@ -362,7 +425,8 @@ let list_prices =
            ~doc:"URL override endpoint url"
        and tld = flag "tld" (optional string) ~doc:"STRING TldName"
        and marker = flag "marker" (optional string) ~doc:"STRING PageMarker"
-       and maxItems = flag "max-items" (optional int) ~doc:"INT PageMaxItems" in
+       and maxItems =
+         flag "max-items" (optional int) ~doc:"INT ListPricesPageMaxItems" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_prices
@@ -387,6 +451,23 @@ let list_tags_for_domain =
            (Values.ListTagsForDomainRequest.make ~domainName ())
            (Some Values.ListTagsForDomainResponse.to_json)
            (Some Values.ListTagsForDomainResponse.error_to_json)])
+let push_domain =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING DomainName"
+       and target = flag "target" (required string) ~doc:"STRING Label" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.push_domain
+           (Values.PushDomainRequest.make ~domainName ~target ()) None None])
 let register_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -409,6 +490,11 @@ let register_domain =
        and privacyProtectTechContact =
          flag "privacy-protect-tech-contact" (optional bool)
            ~doc:"BOOL Boolean"
+       and billingContact =
+         flag "billing-contact" (optional json_arg) ~doc:"JSON ContactDetail"
+       and privacyProtectBillingContact =
+         flag "privacy-protect-billing-contact" (optional bool)
+           ~doc:"BOOL Boolean"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING DomainName"
        and durationInYears =
@@ -425,7 +511,10 @@ let register_domain =
            Io.register_domain
            (Values.RegisterDomainRequest.make ?idnLangCode ?autoRenew
               ?privacyProtectAdminContact ?privacyProtectRegistrantContact
-              ?privacyProtectTechContact ~domainName ~durationInYears
+              ?privacyProtectTechContact
+              ?billingContact:(Option.map ~f:Values.ContactDetail.of_json
+                                 billingContact)
+              ?privacyProtectBillingContact ~domainName ~durationInYears
               ~adminContact:(Values.ContactDetail.of_json adminContact)
               ~registrantContact:(Values.ContactDetail.of_json
                                     registrantContact)
@@ -495,6 +584,23 @@ let resend_contact_reachability_email =
            (Values.ResendContactReachabilityEmailRequest.make ?domainName ())
            (Some Values.ResendContactReachabilityEmailResponse.to_json)
            (Some Values.ResendContactReachabilityEmailResponse.error_to_json)])
+let resend_operation_authorization =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and operationId =
+         flag "operation-id" (required string) ~doc:"STRING OperationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.resend_operation_authorization
+           (Values.ResendOperationAuthorizationRequest.make ~operationId ())
+           None None])
 let retrieve_domain_auth_code =
   Command.async ~summary:""
     ([%map_open.Command
@@ -525,6 +631,8 @@ let transfer_domain =
            ~doc:"URL override endpoint url"
        and idnLangCode =
          flag "idn-lang-code" (optional string) ~doc:"STRING LangCode"
+       and durationInYears =
+         flag "duration-in-years" (optional int) ~doc:"INT DurationInYears"
        and nameservers =
          flag "nameservers" (optional json_arg) ~doc:"JSON NameserverList"
        and authCode =
@@ -539,10 +647,13 @@ let transfer_domain =
        and privacyProtectTechContact =
          flag "privacy-protect-tech-contact" (optional bool)
            ~doc:"BOOL Boolean"
+       and billingContact =
+         flag "billing-contact" (optional json_arg) ~doc:"JSON ContactDetail"
+       and privacyProtectBillingContact =
+         flag "privacy-protect-billing-contact" (optional bool)
+           ~doc:"BOOL Boolean"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING DomainName"
-       and durationInYears =
-         flag "duration-in-years" (required int) ~doc:"INT DurationInYears"
        and adminContact =
          flag "admin-contact" (required json_arg) ~doc:"JSON ContactDetail"
        and registrantContact =
@@ -553,11 +664,14 @@ let transfer_domain =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.transfer_domain
-           (Values.TransferDomainRequest.make ?idnLangCode
+           (Values.TransferDomainRequest.make ?idnLangCode ?durationInYears
               ?nameservers:(Option.map ~f:Values.NameserverList.of_json
                               nameservers) ?authCode ?autoRenew
               ?privacyProtectAdminContact ?privacyProtectRegistrantContact
-              ?privacyProtectTechContact ~domainName ~durationInYears
+              ?privacyProtectTechContact
+              ?billingContact:(Option.map ~f:Values.ContactDetail.of_json
+                                 billingContact)
+              ?privacyProtectBillingContact ~domainName
               ~adminContact:(Values.ContactDetail.of_json adminContact)
               ~registrantContact:(Values.ContactDetail.of_json
                                     registrantContact)
@@ -603,6 +717,9 @@ let update_domain_contact =
            ~doc:"JSON ContactDetail"
        and techContact =
          flag "tech-contact" (optional json_arg) ~doc:"JSON ContactDetail"
+       and consent = flag "consent" (optional json_arg) ~doc:"JSON Consent"
+       and billingContact =
+         flag "billing-contact" (optional json_arg) ~doc:"JSON ContactDetail"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING DomainName" in
        fun () ->
@@ -614,7 +731,10 @@ let update_domain_contact =
               ?registrantContact:(Option.map ~f:Values.ContactDetail.of_json
                                     registrantContact)
               ?techContact:(Option.map ~f:Values.ContactDetail.of_json
-                              techContact) ~domainName ())
+                              techContact)
+              ?consent:(Option.map ~f:Values.Consent.of_json consent)
+              ?billingContact:(Option.map ~f:Values.ContactDetail.of_json
+                                 billingContact) ~domainName ())
            (Some Values.UpdateDomainContactResponse.to_json)
            (Some Values.UpdateDomainContactResponse.error_to_json)])
 let update_domain_contact_privacy =
@@ -633,13 +753,15 @@ let update_domain_contact_privacy =
          flag "registrant-privacy" (optional bool) ~doc:"BOOL Boolean"
        and techPrivacy =
          flag "tech-privacy" (optional bool) ~doc:"BOOL Boolean"
+       and billingPrivacy =
+         flag "billing-privacy" (optional bool) ~doc:"BOOL Boolean"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING DomainName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_domain_contact_privacy
            (Values.UpdateDomainContactPrivacyRequest.make ?adminPrivacy
-              ?registrantPrivacy ?techPrivacy ~domainName ())
+              ?registrantPrivacy ?techPrivacy ?billingPrivacy ~domainName ())
            (Some Values.UpdateDomainContactPrivacyResponse.to_json)
            (Some Values.UpdateDomainContactPrivacyResponse.error_to_json)])
 let update_domain_nameservers =
@@ -714,6 +836,8 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-domain-transfer-from-another-aws-account",
        accept_domain_transfer_from_another_aws_account);
+    ("associate-delegation-signer-to-domain",
+      associate_delegation_signer_to_domain);
     ("cancel-domain-transfer-to-another-aws-account",
       cancel_domain_transfer_to_another_aws_account);
     ("check-domain-availability", check_domain_availability);
@@ -722,6 +846,8 @@ let main =
     ("delete-tags-for-domain", delete_tags_for_domain);
     ("disable-domain-auto-renew", disable_domain_auto_renew);
     ("disable-domain-transfer-lock", disable_domain_transfer_lock);
+    ("disassociate-delegation-signer-from-domain",
+      disassociate_delegation_signer_from_domain);
     ("enable-domain-auto-renew", enable_domain_auto_renew);
     ("enable-domain-transfer-lock", enable_domain_transfer_lock);
     ("get-contact-reachability-status", get_contact_reachability_status);
@@ -732,11 +858,13 @@ let main =
     ("list-operations", list_operations);
     ("list-prices", list_prices);
     ("list-tags-for-domain", list_tags_for_domain);
+    ("push-domain", push_domain);
     ("register-domain", register_domain);
     ("reject-domain-transfer-from-another-aws-account",
       reject_domain_transfer_from_another_aws_account);
     ("renew-domain", renew_domain);
     ("resend-contact-reachability-email", resend_contact_reachability_email);
+    ("resend-operation-authorization", resend_operation_authorization);
     ("retrieve-domain-auth-code", retrieve_domain_auth_code);
     ("transfer-domain", transfer_domain);
     ("transfer-domain-to-another-aws-account",

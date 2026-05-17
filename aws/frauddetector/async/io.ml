@@ -25,6 +25,8 @@ let create_batch_prediction_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateBatchPredictionJob input
 let create_detector_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDetectorVersion input
+let create_list ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateList input
 let create_model ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateModel input
 let create_model_version ?endpoint_url ?cfg input =
@@ -53,6 +55,8 @@ let delete_external_model ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteExternalModel input
 let delete_label ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteLabel input
+let delete_list ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteList input
 let delete_model ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteModel input
 let delete_model_version ?endpoint_url ?cfg input =
@@ -93,6 +97,10 @@ let get_k_m_s_encryption_key ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetKMSEncryptionKey input
 let get_labels ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLabels input
+let get_list_elements ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetListElements input
+let get_lists_metadata ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetListsMetadata input
 let get_model_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetModelVersion input
 let get_models ?endpoint_url ?cfg input =
@@ -135,6 +143,8 @@ let update_detector_version_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDetectorVersionStatus input
 let update_event_label ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateEventLabel input
+let update_list ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateList input
 let update_model ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateModel input
 let update_model_version ?endpoint_url ?cfg input =

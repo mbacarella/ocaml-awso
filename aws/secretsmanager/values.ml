@@ -24,6 +24,44 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module ExternalSecretRotationMetadataItemKeyType =
+  struct
+    type nonrec t = string
+    let context_ = "ExternalSecretRotationMetadataItemKeyType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ExternalSecretRotationMetadataItemKeyType" j
+    let to_json = simple_to_json to_value
+  end
+module ExternalSecretRotationMetadataItemValueType =
+  struct
+    type nonrec t = string
+    let context_ = "ExternalSecretRotationMetadataItemValueType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ExternalSecretRotationMetadataItemValueType" j
+    let to_json = simple_to_json to_value
+  end
 module SecretVersionStageType =
   struct
     type nonrec t = string
@@ -78,6 +116,44 @@ module TagValueType =
     let of_json j = string_of_json ~kind:"TagValueType" j
     let to_json = simple_to_json to_value
   end
+module ExternalSecretRotationMetadataItem =
+  struct
+    type nonrec t =
+      {
+      key: ExternalSecretRotationMetadataItemKeyType.t option
+        [@ocaml.doc "The key that identifies the item."];
+      value: ExternalSecretRotationMetadataItemValueType.t option
+        [@ocaml.doc "The value of the specified item."]}
+    let make ?key = fun ?value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key",
+           (Option.map x.key
+              ~f:ExternalSecretRotationMetadataItemKeyType.to_value));
+        ("Value",
+          (Option.map x.value
+             ~f:ExternalSecretRotationMetadataItemValueType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:ExternalSecretRotationMetadataItemValueType.of_xml)
+          (Xml.child xml_arg0 "Value") in
+      let key =
+        (Option.map ~f:ExternalSecretRotationMetadataItemKeyType.of_xml)
+          (Xml.child xml_arg0 "Key") in
+      make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value =
+        field_map json__ "Value"
+          ExternalSecretRotationMetadataItemValueType.of_json in
+      let key =
+        field_map json__ "Key"
+          ExternalSecretRotationMetadataItemKeyType.of_json in
+      make ?value ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The metadata needed to successfully rotate a managed external secret. A list of key value pairs in JSON format specified by the partner. For more information, see Managed external secret partners."]
 module AutomaticallyRotateAfterDaysType =
   struct
     type nonrec t = Int64.t
@@ -106,7 +182,7 @@ module DurationType =
           ((check_string_min i ~min:2) >>=
              (fun () ->
                 (check_string_max i ~max:3) >>=
-                  (fun () -> check_pattern i ~pattern:"[0-9h]+")));
+                  (fun () -> check_pattern i ~pattern:"[0-9]+h")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -164,6 +240,9 @@ module SecretVersionStagesType =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecretVersionStageType.to_value)) |>
         (fun x -> `List x)
@@ -206,9 +285,9 @@ module Tag =
       let key = (Option.map ~f:TagKeyType.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValueType.of_json in
-      let key = field_map json "Key" TagKeyType.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValueType.of_json in
+      let key = field_map json__ "Key" TagKeyType.of_json in
       make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure that contains information about a tag."]
@@ -222,7 +301,7 @@ module FilterValueStringType =
           ((check_string_max i ~max:512) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^\\!?[a-zA-Z0-9 :_@\\/\\+\\=\\.\\-]*$"));
+                  ~pattern:"^\\!?[a-zA-Z0-9 :_@\\/\\+\\=\\.\\-\\!]*$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -385,6 +464,36 @@ module DescriptionType =
     let of_json j = string_of_json ~kind:"DescriptionType" j
     let to_json = simple_to_json to_value
   end
+module ExternalSecretRotationMetadataType =
+  struct
+    type nonrec t = ExternalSecretRotationMetadataItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExternalSecretRotationMetadataItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ExternalSecretRotationMetadataItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExternalSecretRotationMetadataType"
+        ~of_json:ExternalSecretRotationMetadataItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module LastChangedDateType =
   struct
     type nonrec t = string
@@ -398,6 +507,36 @@ module LastChangedDateType =
     let to_json = simple_to_json to_value
   end
 module LastRotatedDateType =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module MedeaTypeType =
+  struct
+    type nonrec t = string
+    let context_ = "MedeaTypeType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MedeaTypeType" j
+    let to_json = simple_to_json to_value
+  end
+module NextRotationDateType =
   struct
     type nonrec t = string
     let make i = i
@@ -425,6 +564,24 @@ module OwningServiceType =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"OwningServiceType" j
+    let to_json = simple_to_json to_value
+  end
+module RoleARNType =
+  struct
+    type nonrec t = string
+    let context_ = "RoleARNType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:20));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RoleARNType" j
     let to_json = simple_to_json to_value
   end
 module RotationEnabledType =
@@ -464,13 +621,13 @@ module RotationRulesType =
       {
       automaticallyAfterDays: AutomaticallyRotateAfterDaysType.t option
         [@ocaml.doc
-          "The number of days between automatic scheduled rotations of the secret. You can use this value to check that your secret meets your compliance guidelines for how often secrets must be rotated. In DescribeSecret and ListSecrets, this value is calculated from the rotation schedule after every successful rotation. In RotateSecret, you can set the rotation schedule in RotationRules with AutomaticallyAfterDays or ScheduleExpression, but not both."];
+          "The number of days between rotations of the secret. You can use this value to check that your secret meets your compliance guidelines for how often secrets must be rotated. If you use this field to set the rotation schedule, Secrets Manager calculates the next rotation date based on the previous rotation. Manually updating the secret value by calling PutSecretValue or UpdateSecret is considered a valid rotation. In DescribeSecret and ListSecrets, this value is calculated from the rotation schedule after every successful rotation. In RotateSecret, you can set the rotation schedule in RotationRules with AutomaticallyAfterDays or ScheduleExpression, but not both. To set a rotation schedule in hours, use ScheduleExpression."];
       duration: DurationType.t option
         [@ocaml.doc
-          "The length of the rotation window in hours, for example 3h for a three hour window. Secrets Manager rotates your secret at any time during this window. The window must not go into the next UTC day. If you don't specify this value, the window automatically ends at the end of the UTC day. The window begins according to the ScheduleExpression. For more information, including examples, see Schedule expressions in Secrets Manager rotation."];
+          "The length of the rotation window in hours, for example 3h for a three hour window. Secrets Manager rotates your secret at any time during this window. The window must not extend into the next rotation window or the next UTC day. The window starts according to the ScheduleExpression. If you don't specify a Duration, for a ScheduleExpression in hours, the window automatically closes after one hour. For a ScheduleExpression in days, the window automatically closes at the end of the UTC day. For more information, including examples, see Schedule expressions in Secrets Manager rotation in the Secrets Manager Users Guide."];
       scheduleExpression: ScheduleExpressionType.t option
         [@ocaml.doc
-          "A cron() or rate() expression that defines the schedule for rotating your secret. Secrets Manager rotation schedules use UTC time zone. Secrets Manager rate() expressions represent the interval in days that you want to rotate your secret, for example rate(10 days). If you use a rate() expression, the rotation window opens at midnight, and Secrets Manager rotates your secret any time that day after midnight. You can set a Duration to shorten the rotation window. You can use a cron() expression to create rotation schedules that are more detailed than a rotation interval. For more information, including examples, see Schedule expressions in Secrets Manager rotation. If you use a cron() expression, Secrets Manager rotates your secret any time during that day after the window opens. For example, cron(0 8 1 * ? *) represents a rotation window that occurs on the first day of every month beginning at 8:00 AM UTC. Secrets Manager rotates the secret any time that day after 8:00 AM. You can set a Duration to shorten the rotation window."]}
+          "A cron() or rate() expression that defines the schedule for rotating your secret. Secrets Manager rotation schedules use UTC time zone. Secrets Manager rotates your secret any time during a rotation window. Secrets Manager rate() expressions represent the interval in hours or days that you want to rotate your secret, for example rate(12 hours) or rate(10 days). You can rotate a secret as often as every four hours. If you use a rate() expression, the rotation window starts at midnight. For a rate in hours, the default rotation window closes after one hour. For a rate in days, the default rotation window closes at the end of the day. You can set the Duration to change the rotation window. The rotation window must not extend into the next UTC day or into the next rotation window. You can use a cron() expression to create a rotation schedule that is more detailed than a rotation interval. For more information, including examples, see Schedule expressions in Secrets Manager rotation in the Secrets Manager Users Guide. For a cron expression that represents a schedule in hours, the default rotation window closes after one hour. For a cron expression that represents a schedule in days, the default rotation window closes at the end of the day. You can set the Duration to change the rotation window. The rotation window must not extend into the next UTC day or into the next rotation window."]}
     let make ?automaticallyAfterDays =
       fun ?duration ->
         fun ?scheduleExpression ->
@@ -495,12 +652,12 @@ module RotationRulesType =
           (Xml.child xml_arg0 "AutomaticallyAfterDays") in
       make ?scheduleExpression ?duration ?automaticallyAfterDays ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduleExpression =
-        field_map json "ScheduleExpression" ScheduleExpressionType.of_json in
-      let duration = field_map json "Duration" DurationType.of_json in
+        field_map json__ "ScheduleExpression" ScheduleExpressionType.of_json in
+      let duration = field_map json__ "Duration" DurationType.of_json in
       let automaticallyAfterDays =
-        field_map json "AutomaticallyAfterDays"
+        field_map json__ "AutomaticallyAfterDays"
           AutomaticallyRotateAfterDaysType.of_json in
       make ?scheduleExpression ?duration ?automaticallyAfterDays ()
     let to_json v = composed_to_json to_value v
@@ -567,6 +724,8 @@ module SecretVersionsToStagesMapType =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -578,6 +737,9 @@ module TagListType =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -617,6 +779,7 @@ module FilterNameStringType =
       | Tag_key 
       | Tag_value 
       | Primary_region 
+      | Owning_service 
       | All 
       | Non_static_id of string 
     let make i = i
@@ -627,6 +790,7 @@ module FilterNameStringType =
       | Tag_key -> "tag-key"
       | Tag_value -> "tag-value"
       | Primary_region -> "primary-region"
+      | Owning_service -> "owning-service"
       | All -> "all"
       | Non_static_id s -> s
     let of_string =
@@ -636,6 +800,7 @@ module FilterNameStringType =
       | "tag-key" -> Tag_key
       | "tag-value" -> Tag_value
       | "primary-region" -> Primary_region
+      | "owning-service" -> Owning_service
       | "all" -> All
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
@@ -655,6 +820,9 @@ module FilterValuesStringList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterValueStringType.to_value)) |>
         (fun x -> `List x)
@@ -693,6 +861,9 @@ module KmsKeyIdListType =
   struct
     type nonrec t = KmsKeyIdType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KmsKeyIdType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -712,6 +883,67 @@ module KmsKeyIdListType =
     let of_json j =
       list_of_json ~kind:"KmsKeyIdListType" ~of_json:KmsKeyIdType.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module ErrorCode =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorCode"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorCode" j
+    let to_json = simple_to_json to_value
+  end
+module SecretIdType =
+  struct
+    type nonrec t = string
+    let context_ = "SecretIdType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecretIdType" j
+    let to_json = simple_to_json to_value
+  end
+module SecretBinaryType =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module SecretStringType =
+  struct
+    type nonrec t = string
+    let context_ = "SecretStringType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:65536) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecretStringType" j
+    let to_json = simple_to_json to_value
   end
 module ValidationErrorsEntry =
   struct
@@ -738,9 +970,9 @@ module ValidationErrorsEntry =
         (Option.map ~f:NameType.of_xml) (Xml.child xml_arg0 "CheckName") in
       make ?errorMessage ?checkName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let checkName = field_map json "CheckName" NameType.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let checkName = field_map json__ "CheckName" NameType.of_json in
       make ?errorMessage ?checkName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -760,7 +992,7 @@ module ReplicationStatusType =
           "Status message such as \"Secret with this name already exists in this region\"."];
       lastAccessedDate: LastAccessedDateType.t option
         [@ocaml.doc
-          "The date that you last accessed the secret in the Region."]}
+          "The date that the secret was last accessed in the Region. This field is omitted if the secret has never been retrieved in the Region."]}
     let make ?region =
       fun ?kmsKeyId ->
         fun ?status ->
@@ -793,14 +1025,14 @@ module ReplicationStatusType =
         (Option.map ~f:RegionType.of_xml) (Xml.child xml_arg0 "Region") in
       make ?lastAccessedDate ?statusMessage ?status ?kmsKeyId ?region ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastAccessedDate =
-        field_map json "LastAccessedDate" LastAccessedDateType.of_json in
+        field_map json__ "LastAccessedDate" LastAccessedDateType.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessageType.of_json in
-      let status = field_map json "Status" StatusType.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyIdType.of_json in
-      let region = field_map json "Region" RegionType.of_json in
+        field_map json__ "StatusMessage" StatusMessageType.of_json in
+      let status = field_map json__ "Status" StatusType.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyIdType.of_json in
+      let region = field_map json__ "Region" RegionType.of_json in
       make ?lastAccessedDate ?statusMessage ?status ?kmsKeyId ?region ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -828,9 +1060,9 @@ module ReplicaRegionType =
         (Option.map ~f:RegionType.of_xml) (Xml.child xml_arg0 "Region") in
       make ?kmsKeyId ?region ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyIdType.of_json in
-      let region = field_map json "Region" RegionType.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyIdType.of_json in
+      let region = field_map json__ "Region" RegionType.of_json in
       make ?kmsKeyId ?region ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -842,8 +1074,10 @@ module SecretListEntry =
       aRN: SecretARNType.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the secret."];
       name: SecretNameType.t option
+        [@ocaml.doc "The friendly name of the secret."];
+      type_: MedeaTypeType.t option
         [@ocaml.doc
-          "The friendly name of the secret. You can use forward slashes in the name to represent a path hierarchy. For example, /prod/databases/dbserver1 could represent the secret for a server named dbserver1 in the folder databases in the folder prod."];
+          "The exact string that identifies the third-party partner that holds the external secret. For more information, see Managed external secret partners."];
       description: DescriptionType.t option
         [@ocaml.doc "The user-provided description of the secret."];
       kmsKeyId: KmsKeyIdType.t option
@@ -858,6 +1092,13 @@ module SecretListEntry =
       rotationRules: RotationRulesType.t option
         [@ocaml.doc
           "A structure that defines the rotation configuration for the secret."];
+      externalSecretRotationMetadata:
+        ExternalSecretRotationMetadataType.t option
+        [@ocaml.doc
+          "The metadata needed to successfully rotate a managed external secret. A list of key value pairs in JSON format specified by the partner. For more information about the required information, see Managed external secrets partners."];
+      externalSecretRotationRoleArn: RoleARNType.t option
+        [@ocaml.doc
+          "The role that Secrets Manager assumes to call APIs required to perform the rotation. For more information about the required information, see Managed external secrets partners."];
       lastRotatedDate: LastRotatedDateType.t option
         [@ocaml.doc
           "The most recent date and time that the Secrets Manager rotation process was successfully completed. This value is null if the secret hasn't ever rotated."];
@@ -866,10 +1107,13 @@ module SecretListEntry =
           "The last date and time that this secret was modified in any way."];
       lastAccessedDate: LastAccessedDateType.t option
         [@ocaml.doc
-          "The last date that this secret was accessed. This value is truncated to midnight of the date and therefore shows only the date, not the time."];
+          "The date that the secret was last accessed in the Region. This field is omitted if the secret has never been retrieved in the Region."];
       deletedDate: DeletedDateType.t option
         [@ocaml.doc
           "The date and time the deletion of the secret occurred. Not present on active secrets. The secret can be recovered until the number of days in the recovery window has passed, as specified in the RecoveryWindowInDays parameter of the DeleteSecret operation."];
+      nextRotationDate: NextRotationDateType.t option
+        [@ocaml.doc
+          "The next rotation is scheduled to occur on or before this date. If the secret isn't configured for rotation or rotation has been disabled, Secrets Manager returns null."];
       tags: TagListType.t option
         [@ocaml.doc
           "The list of user-defined tags associated with the secret. To add tags to a secret, use TagResource . To remove tags, use UntagResource ."];
@@ -886,43 +1130,52 @@ module SecretListEntry =
           "The Region where Secrets Manager originated the secret."]}
     let make ?aRN =
       fun ?name ->
-        fun ?description ->
-          fun ?kmsKeyId ->
-            fun ?rotationEnabled ->
-              fun ?rotationLambdaARN ->
-                fun ?rotationRules ->
-                  fun ?lastRotatedDate ->
-                    fun ?lastChangedDate ->
-                      fun ?lastAccessedDate ->
-                        fun ?deletedDate ->
-                          fun ?tags ->
-                            fun ?secretVersionsToStages ->
-                              fun ?owningService ->
-                                fun ?createdDate ->
-                                  fun ?primaryRegion ->
-                                    fun () ->
-                                      {
-                                        aRN;
-                                        name;
-                                        description;
-                                        kmsKeyId;
-                                        rotationEnabled;
-                                        rotationLambdaARN;
-                                        rotationRules;
-                                        lastRotatedDate;
-                                        lastChangedDate;
-                                        lastAccessedDate;
-                                        deletedDate;
-                                        tags;
-                                        secretVersionsToStages;
-                                        owningService;
-                                        createdDate;
-                                        primaryRegion
-                                      }
+        fun ?type_ ->
+          fun ?description ->
+            fun ?kmsKeyId ->
+              fun ?rotationEnabled ->
+                fun ?rotationLambdaARN ->
+                  fun ?rotationRules ->
+                    fun ?externalSecretRotationMetadata ->
+                      fun ?externalSecretRotationRoleArn ->
+                        fun ?lastRotatedDate ->
+                          fun ?lastChangedDate ->
+                            fun ?lastAccessedDate ->
+                              fun ?deletedDate ->
+                                fun ?nextRotationDate ->
+                                  fun ?tags ->
+                                    fun ?secretVersionsToStages ->
+                                      fun ?owningService ->
+                                        fun ?createdDate ->
+                                          fun ?primaryRegion ->
+                                            fun () ->
+                                              {
+                                                aRN;
+                                                name;
+                                                type_;
+                                                description;
+                                                kmsKeyId;
+                                                rotationEnabled;
+                                                rotationLambdaARN;
+                                                rotationRules;
+                                                externalSecretRotationMetadata;
+                                                externalSecretRotationRoleArn;
+                                                lastRotatedDate;
+                                                lastChangedDate;
+                                                lastAccessedDate;
+                                                deletedDate;
+                                                nextRotationDate;
+                                                tags;
+                                                secretVersionsToStages;
+                                                owningService;
+                                                createdDate;
+                                                primaryRegion
+                                              }
     let to_value x =
       structure_to_value
         [("ARN", (Option.map x.aRN ~f:SecretARNType.to_value));
         ("Name", (Option.map x.name ~f:SecretNameType.to_value));
+        ("Type", (Option.map x.type_ ~f:MedeaTypeType.to_value));
         ("Description",
           (Option.map x.description ~f:DescriptionType.to_value));
         ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyIdType.to_value));
@@ -932,6 +1185,11 @@ module SecretListEntry =
           (Option.map x.rotationLambdaARN ~f:RotationLambdaARNType.to_value));
         ("RotationRules",
           (Option.map x.rotationRules ~f:RotationRulesType.to_value));
+        ("ExternalSecretRotationMetadata",
+          (Option.map x.externalSecretRotationMetadata
+             ~f:ExternalSecretRotationMetadataType.to_value));
+        ("ExternalSecretRotationRoleArn",
+          (Option.map x.externalSecretRotationRoleArn ~f:RoleARNType.to_value));
         ("LastRotatedDate",
           (Option.map x.lastRotatedDate ~f:LastRotatedDateType.to_value));
         ("LastChangedDate",
@@ -940,6 +1198,8 @@ module SecretListEntry =
           (Option.map x.lastAccessedDate ~f:LastAccessedDateType.to_value));
         ("DeletedDate",
           (Option.map x.deletedDate ~f:DeletedDateType.to_value));
+        ("NextRotationDate",
+          (Option.map x.nextRotationDate ~f:NextRotationDateType.to_value));
         ("Tags", (Option.map x.tags ~f:TagListType.to_value));
         ("SecretVersionsToStages",
           (Option.map x.secretVersionsToStages
@@ -965,6 +1225,9 @@ module SecretListEntry =
           (Xml.child xml_arg0 "SecretVersionsToStages") in
       let tags =
         (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
+      let nextRotationDate =
+        (Option.map ~f:NextRotationDateType.of_xml)
+          (Xml.child xml_arg0 "NextRotationDate") in
       let deletedDate =
         (Option.map ~f:DeletedDateType.of_xml)
           (Xml.child xml_arg0 "DeletedDate") in
@@ -977,6 +1240,12 @@ module SecretListEntry =
       let lastRotatedDate =
         (Option.map ~f:LastRotatedDateType.of_xml)
           (Xml.child xml_arg0 "LastRotatedDate") in
+      let externalSecretRotationRoleArn =
+        (Option.map ~f:RoleARNType.of_xml)
+          (Xml.child xml_arg0 "ExternalSecretRotationRoleArn") in
+      let externalSecretRotationMetadata =
+        (Option.map ~f:ExternalSecretRotationMetadataType.of_xml)
+          (Xml.child xml_arg0 "ExternalSecretRotationMetadata") in
       let rotationRules =
         (Option.map ~f:RotationRulesType.of_xml)
           (Xml.child xml_arg0 "RotationRules") in
@@ -991,45 +1260,59 @@ module SecretListEntry =
       let description =
         (Option.map ~f:DescriptionType.of_xml)
           (Xml.child xml_arg0 "Description") in
+      let type_ =
+        (Option.map ~f:MedeaTypeType.of_xml) (Xml.child xml_arg0 "Type") in
       let name =
         (Option.map ~f:SecretNameType.of_xml) (Xml.child xml_arg0 "Name") in
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?primaryRegion ?createdDate ?owningService ?secretVersionsToStages
-        ?tags ?deletedDate ?lastAccessedDate ?lastChangedDate
-        ?lastRotatedDate ?rotationRules ?rotationLambdaARN ?rotationEnabled
-        ?kmsKeyId ?description ?name ?aRN ()
+        ?tags ?nextRotationDate ?deletedDate ?lastAccessedDate
+        ?lastChangedDate ?lastRotatedDate ?externalSecretRotationRoleArn
+        ?externalSecretRotationMetadata ?rotationRules ?rotationLambdaARN
+        ?rotationEnabled ?kmsKeyId ?description ?type_ ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let primaryRegion = field_map json "PrimaryRegion" RegionType.of_json in
-      let createdDate = field_map json "CreatedDate" TimestampType.of_json in
+    let of_json json__ =
+      let primaryRegion = field_map json__ "PrimaryRegion" RegionType.of_json in
+      let createdDate = field_map json__ "CreatedDate" TimestampType.of_json in
       let owningService =
-        field_map json "OwningService" OwningServiceType.of_json in
+        field_map json__ "OwningService" OwningServiceType.of_json in
       let secretVersionsToStages =
-        field_map json "SecretVersionsToStages"
+        field_map json__ "SecretVersionsToStages"
           SecretVersionsToStagesMapType.of_json in
-      let tags = field_map json "Tags" TagListType.of_json in
-      let deletedDate = field_map json "DeletedDate" DeletedDateType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      let nextRotationDate =
+        field_map json__ "NextRotationDate" NextRotationDateType.of_json in
+      let deletedDate =
+        field_map json__ "DeletedDate" DeletedDateType.of_json in
       let lastAccessedDate =
-        field_map json "LastAccessedDate" LastAccessedDateType.of_json in
+        field_map json__ "LastAccessedDate" LastAccessedDateType.of_json in
       let lastChangedDate =
-        field_map json "LastChangedDate" LastChangedDateType.of_json in
+        field_map json__ "LastChangedDate" LastChangedDateType.of_json in
       let lastRotatedDate =
-        field_map json "LastRotatedDate" LastRotatedDateType.of_json in
+        field_map json__ "LastRotatedDate" LastRotatedDateType.of_json in
+      let externalSecretRotationRoleArn =
+        field_map json__ "ExternalSecretRotationRoleArn" RoleARNType.of_json in
+      let externalSecretRotationMetadata =
+        field_map json__ "ExternalSecretRotationMetadata"
+          ExternalSecretRotationMetadataType.of_json in
       let rotationRules =
-        field_map json "RotationRules" RotationRulesType.of_json in
+        field_map json__ "RotationRules" RotationRulesType.of_json in
       let rotationLambdaARN =
-        field_map json "RotationLambdaARN" RotationLambdaARNType.of_json in
+        field_map json__ "RotationLambdaARN" RotationLambdaARNType.of_json in
       let rotationEnabled =
-        field_map json "RotationEnabled" RotationEnabledType.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyIdType.of_json in
-      let description = field_map json "Description" DescriptionType.of_json in
-      let name = field_map json "Name" SecretNameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+        field_map json__ "RotationEnabled" RotationEnabledType.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyIdType.of_json in
+      let description =
+        field_map json__ "Description" DescriptionType.of_json in
+      let type_ = field_map json__ "Type" MedeaTypeType.of_json in
+      let name = field_map json__ "Name" SecretNameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?primaryRegion ?createdDate ?owningService ?secretVersionsToStages
-        ?tags ?deletedDate ?lastAccessedDate ?lastChangedDate
-        ?lastRotatedDate ?rotationRules ?rotationLambdaARN ?rotationEnabled
-        ?kmsKeyId ?description ?name ?aRN ()
+        ?tags ?nextRotationDate ?deletedDate ?lastAccessedDate
+        ?lastChangedDate ?lastRotatedDate ?externalSecretRotationRoleArn
+        ?externalSecretRotationMetadata ?rotationRules ?rotationLambdaARN
+        ?rotationEnabled ?kmsKeyId ?description ?type_ ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains the details about a secret. It does not include the encrypted SecretString and SecretBinary values. To get those values, use GetSecretValue ."]
@@ -1039,7 +1322,7 @@ module Filter =
       {
       key: FilterNameStringType.t option
         [@ocaml.doc
-          "The following are keys you can use: description: Prefix match, not case-sensitive. name: Prefix match, case-sensitive. tag-key: Prefix match, case-sensitive. tag-value: Prefix match, case-sensitive. primary-region: Prefix match, case-sensitive. all: Breaks the filter value string into words and then searches all attributes for matches. Not case-sensitive."];
+          "The following are keys you can use: description: Prefix match, not case-sensitive. name: Prefix match, case-sensitive. tag-key: Prefix match, case-sensitive. tag-value: Prefix match, case-sensitive. primary-region: Prefix match, case-sensitive. owning-service: Prefix match, case-sensitive. all: Breaks the filter value string into words and then searches all attributes for matches. Not case-sensitive."];
       values: FilterValuesStringList.t option
         [@ocaml.doc
           "The keyword to filter for. You can prefix your search value with an exclamation mark (!) in order to perform negation filters."]}
@@ -1058,9 +1341,9 @@ module Filter =
           (Xml.child xml_arg0 "Key") in
       make ?values ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" FilterValuesStringList.of_json in
-      let key = field_map json "Key" FilterNameStringType.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" FilterValuesStringList.of_json in
+      let key = field_map json__ "Key" FilterNameStringType.of_json in
       make ?values ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1127,19 +1410,153 @@ module SecretVersionsListEntry =
       make ?kmsKeyIds ?createdDate ?lastAccessedDate ?versionStages
         ?versionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyIds = field_map json "KmsKeyIds" KmsKeyIdListType.of_json in
-      let createdDate = field_map json "CreatedDate" CreatedDateType.of_json in
+    let of_json json__ =
+      let kmsKeyIds = field_map json__ "KmsKeyIds" KmsKeyIdListType.of_json in
+      let createdDate =
+        field_map json__ "CreatedDate" CreatedDateType.of_json in
       let lastAccessedDate =
-        field_map json "LastAccessedDate" LastAccessedDateType.of_json in
+        field_map json__ "LastAccessedDate" LastAccessedDateType.of_json in
       let versionStages =
-        field_map json "VersionStages" SecretVersionStagesType.of_json in
-      let versionId = field_map json "VersionId" SecretVersionIdType.of_json in
+        field_map json__ "VersionStages" SecretVersionStagesType.of_json in
+      let versionId =
+        field_map json__ "VersionId" SecretVersionIdType.of_json in
       make ?kmsKeyIds ?createdDate ?lastAccessedDate ?versionStages
         ?versionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains information about one version of a secret."]
+module APIErrorType =
+  struct
+    type nonrec t =
+      {
+      secretId: SecretIdType.t option
+        [@ocaml.doc "The ARN or name of the secret."];
+      errorCode: ErrorCode.t option
+        [@ocaml.doc
+          "The error Secrets Manager encountered while retrieving an individual secret as part of BatchGetSecretValue, for example ResourceNotFoundException,InvalidParameterException, InvalidRequestException, DecryptionFailure, or AccessDeniedException."];
+      message: ErrorMessage.t option
+        [@ocaml.doc "A message describing the error."]}
+    let make ?secretId =
+      fun ?errorCode ->
+        fun ?message -> fun () -> { secretId; errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("SecretId", (Option.map x.secretId ~f:SecretIdType.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let secretId =
+        (Option.map ~f:SecretIdType.of_xml) (Xml.child xml_arg0 "SecretId") in
+      make ?message ?errorCode ?secretId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let secretId = field_map json__ "SecretId" SecretIdType.of_json in
+      make ?message ?errorCode ?secretId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The error Secrets Manager encountered while retrieving an individual secret as part of BatchGetSecretValue."]
+module SecretValueEntry =
+  struct
+    type nonrec t =
+      {
+      aRN: SecretARNType.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the secret."];
+      name: SecretNameType.t option
+        [@ocaml.doc "The friendly name of the secret."];
+      versionId: SecretVersionIdType.t option
+        [@ocaml.doc
+          "The unique version identifier of this version of the secret."];
+      secretBinary: SecretBinaryType.t option
+        [@ocaml.doc
+          "The decrypted secret value, if the secret value was originally provided as binary data in the form of a byte array. The parameter represents the binary data as a base64-encoded string."];
+      secretString: SecretStringType.t option
+        [@ocaml.doc
+          "The decrypted secret value, if the secret value was originally provided as a string or through the Secrets Manager console."];
+      versionStages: SecretVersionStagesType.t option
+        [@ocaml.doc
+          "A list of all of the staging labels currently attached to this version of the secret."];
+      createdDate: CreatedDateType.t option
+        [@ocaml.doc "The date the secret was created."]}
+    let make ?aRN =
+      fun ?name ->
+        fun ?versionId ->
+          fun ?secretBinary ->
+            fun ?secretString ->
+              fun ?versionStages ->
+                fun ?createdDate ->
+                  fun () ->
+                    {
+                      aRN;
+                      name;
+                      versionId;
+                      secretBinary;
+                      secretString;
+                      versionStages;
+                      createdDate
+                    }
+    let to_value x =
+      structure_to_value
+        [("ARN", (Option.map x.aRN ~f:SecretARNType.to_value));
+        ("Name", (Option.map x.name ~f:SecretNameType.to_value));
+        ("VersionId",
+          (Option.map x.versionId ~f:SecretVersionIdType.to_value));
+        ("SecretBinary",
+          (Option.map x.secretBinary ~f:SecretBinaryType.to_value));
+        ("SecretString",
+          (Option.map x.secretString ~f:SecretStringType.to_value));
+        ("VersionStages",
+          (Option.map x.versionStages ~f:SecretVersionStagesType.to_value));
+        ("CreatedDate",
+          (Option.map x.createdDate ~f:CreatedDateType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdDate =
+        (Option.map ~f:CreatedDateType.of_xml)
+          (Xml.child xml_arg0 "CreatedDate") in
+      let versionStages =
+        (Option.map ~f:SecretVersionStagesType.of_xml)
+          (Xml.child xml_arg0 "VersionStages") in
+      let secretString =
+        (Option.map ~f:SecretStringType.of_xml)
+          (Xml.child xml_arg0 "SecretString") in
+      let secretBinary =
+        (Option.map ~f:SecretBinaryType.of_xml)
+          (Xml.child xml_arg0 "SecretBinary") in
+      let versionId =
+        (Option.map ~f:SecretVersionIdType.of_xml)
+          (Xml.child xml_arg0 "VersionId") in
+      let name =
+        (Option.map ~f:SecretNameType.of_xml) (Xml.child xml_arg0 "Name") in
+      let aRN =
+        (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
+      make ?createdDate ?versionStages ?secretString ?secretBinary ?versionId
+        ?name ?aRN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdDate =
+        field_map json__ "CreatedDate" CreatedDateType.of_json in
+      let versionStages =
+        field_map json__ "VersionStages" SecretVersionStagesType.of_json in
+      let secretString =
+        field_map json__ "SecretString" SecretStringType.of_json in
+      let secretBinary =
+        field_map json__ "SecretBinary" SecretBinaryType.of_json in
+      let versionId =
+        field_map json__ "VersionId" SecretVersionIdType.of_json in
+      let name = field_map json__ "Name" SecretNameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
+      make ?createdDate ?versionStages ?secretString ?secretBinary ?versionId
+        ?name ?aRN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains the secret value and other details for a secret."]
 module BooleanType =
   struct
     type nonrec t = bool
@@ -1167,8 +1584,8 @@ module InternalServiceError =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An error occurred on the server side."]
@@ -1186,8 +1603,8 @@ module InvalidParameterException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The parameter name or value is invalid."]
@@ -1205,12 +1622,12 @@ module InvalidRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A parameter value is not valid for the current state of the resource. Possible causes: The secret is scheduled for deletion. You tried to enable rotation on a secret that doesn't already have a Lambda function ARN configured and you didn't include such an ARN as a parameter in this call."]
+       "A parameter value is not valid for the current state of the resource. Possible causes: The secret is scheduled for deletion. You tried to enable rotation on a secret that doesn't already have a Lambda function ARN configured and you didn't include such an ARN as a parameter in this call. The secret is managed by another service, and you must use that service to update it. For more information, see Secrets managed by other Amazon Web Services services."]
 module MalformedPolicyDocumentException =
   struct
     type nonrec t = {
@@ -1225,8 +1642,8 @@ module MalformedPolicyDocumentException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource policy has syntax errors."]
@@ -1244,8 +1661,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1254,6 +1671,9 @@ module ValidationErrorsType =
   struct
     type nonrec t = ValidationErrorsEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationErrorsEntry.to_value)) |>
         (fun x -> `List x)
@@ -1294,24 +1714,6 @@ module NonEmptyResourcePolicyType =
     let of_json j = string_of_json ~kind:"NonEmptyResourcePolicyType" j
     let to_json = simple_to_json to_value
   end
-module SecretIdType =
-  struct
-    type nonrec t = string
-    let context_ = "SecretIdType"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SecretIdType" j
-    let to_json = simple_to_json to_value
-  end
 module LimitExceededException =
   struct
     type nonrec t = {
@@ -1326,8 +1728,8 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1346,8 +1748,8 @@ module DecryptionFailure =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1366,8 +1768,8 @@ module EncryptionFailure =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1386,8 +1788,8 @@ module PreconditionNotMetException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1406,8 +1808,8 @@ module ResourceExistsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A resource with the ID you requested already exists."]
@@ -1429,40 +1831,13 @@ module ClientRequestTokenType =
     let of_json j = string_of_json ~kind:"ClientRequestTokenType" j
     let to_json = simple_to_json to_value
   end
-module SecretBinaryType =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Blob x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
-    let of_json j = string_of_json ~kind:"a blob" j
-    let to_json = simple_to_json to_value
-  end
-module SecretStringType =
-  struct
-    type nonrec t = string
-    let context_ = "SecretStringType"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:65536) >>=
-             (fun () -> check_string_min i ~min:0));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SecretStringType" j
-    let to_json = simple_to_json to_value
-  end
 module TagKeyListType =
   struct
     type nonrec t = TagKeyType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKeyType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1487,6 +1862,9 @@ module ReplicationStatusListType =
   struct
     type nonrec t = ReplicationStatusType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicationStatusType.to_value)) |>
         (fun x -> `List x)
@@ -1514,6 +1892,9 @@ module AddReplicaRegionListType =
     type nonrec t = ReplicaRegionType.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicaRegionType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1540,6 +1921,9 @@ module RemoveReplicaRegionListType =
     type nonrec t = RegionType.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RegionType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1561,6 +1945,26 @@ module RemoveReplicaRegionListType =
         ~of_json:RegionType.of_json j
     let to_json v = composed_to_json to_value v
   end
+module RotationTokenType =
+  struct
+    type nonrec t = string
+    let context_ = "RotationTokenType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9\\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RotationTokenType" j
+    let to_json = simple_to_json to_value
+  end
 module PublicPolicyException =
   struct
     type nonrec t = {
@@ -1575,8 +1979,8 @@ module PublicPolicyException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1595,8 +1999,8 @@ module InvalidNextTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The NextToken value is invalid."]
@@ -1622,6 +2026,9 @@ module SecretListType =
   struct
     type nonrec t = SecretListEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecretListEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1647,6 +2054,9 @@ module FiltersListType =
     type nonrec t = Filter.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1685,6 +2095,37 @@ module MaxResultsType =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module SortByType =
+  struct
+    type nonrec t =
+      | Created_date 
+      | Last_accessed_date 
+      | Last_changed_date 
+      | Name 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Created_date -> "created-date"
+      | Last_accessed_date -> "last-accessed-date"
+      | Last_changed_date -> "last-changed-date"
+      | Name -> "name"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "created-date" -> Created_date
+      | "last-accessed-date" -> Last_accessed_date
+      | "last-changed-date" -> Last_changed_date
+      | "name" -> Name
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SortByType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SortByType" j)
+    let to_json = simple_to_json to_value
+  end
 module SortOrderType =
   struct
     type nonrec t =
@@ -1708,6 +2149,9 @@ module SecretVersionsListType =
   struct
     type nonrec t = SecretVersionsListEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecretVersionsListEntry.to_value)) |>
         (fun x -> `List x)
@@ -1887,6 +2331,110 @@ module RecoveryWindowInDaysType =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
+module APIErrorListType =
+  struct
+    type nonrec t = APIErrorType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:APIErrorType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:APIErrorType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"APIErrorListType" ~of_json:APIErrorType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SecretValuesType =
+  struct
+    type nonrec t = SecretValueEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecretValueEntry.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecretValueEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecretValuesType" ~of_json:SecretValueEntry.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResultsBatchType =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:20) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResultsBatchType" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SecretIdListType =
+  struct
+    type nonrec t = SecretIdType.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecretIdType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecretIdType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecretIdListType" ~of_json:SecretIdType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ValidateResourcePolicyResponse =
   struct
     type nonrec t =
@@ -1982,21 +2530,22 @@ module ValidateResourcePolicyResponse =
           (Xml.child xml_arg0 "PolicyValidationPassed") in
       make ?validationErrors ?policyValidationPassed ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validationErrors =
-        field_map json "ValidationErrors" ValidationErrorsType.of_json in
+        field_map json__ "ValidationErrors" ValidationErrorsType.of_json in
       let policyValidationPassed =
-        field_map json "PolicyValidationPassed" BooleanType.of_json in
+        field_map json__ "PolicyValidationPassed" BooleanType.of_json in
       make ?validationErrors ?policyValidationPassed ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Validates that a resource policy does not grant a wide range of principals access to your secret. A resource-based policy is optional for secrets. The API performs three checks when validating the policy: Sends a call to Zelkova, an automated reasoning engine, to ensure your resource policy does not allow broad access to your secret, for example policies that use a wildcard for the principal. Checks for correct syntax in a policy. Verifies the policy does not lock out a caller. Required permissions: secretsmanager:ValidateResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Validates that a resource policy does not grant a wide range of principals access to your secret. A resource-based policy is optional for secrets. The API performs three checks when validating the policy: Sends a call to Zelkova, an automated reasoning engine, to ensure your resource policy does not allow broad access to your secret, for example policies that use a wildcard for the principal. Checks for correct syntax in a policy. Verifies the policy does not lock out a caller. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:ValidateResourcePolicy and secretsmanager:PutResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module ValidateResourcePolicyRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t option
-        [@ocaml.doc "This field is reserved for internal use."];
+        [@ocaml.doc
+          "The ARN or name of the secret with the resource-based policy you want to validate."];
       resourcePolicy: NonEmptyResourcePolicyType.t
         [@ocaml.doc
           "A JSON-formatted string that contains an Amazon Web Services resource-based policy. The policy in the string identifies who can access or manage this secret and its versions. For example policies, see Permissions policy examples."]}
@@ -2017,15 +2566,15 @@ module ValidateResourcePolicyRequest =
         (Option.map ~f:SecretIdType.of_xml) (Xml.child xml_arg0 "SecretId") in
       make ~resourcePolicy ?secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourcePolicy =
-        field_map_exn json "ResourcePolicy"
+        field_map_exn json__ "ResourcePolicy"
           NonEmptyResourcePolicyType.of_json in
-      let secretId = field_map json "SecretId" SecretIdType.of_json in
+      let secretId = field_map json__ "SecretId" SecretIdType.of_json in
       make ~resourcePolicy ?secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Validates that a resource policy does not grant a wide range of principals access to your secret. A resource-based policy is optional for secrets. The API performs three checks when validating the policy: Sends a call to Zelkova, an automated reasoning engine, to ensure your resource policy does not allow broad access to your secret, for example policies that use a wildcard for the principal. Checks for correct syntax in a policy. Verifies the policy does not lock out a caller. Required permissions: secretsmanager:ValidateResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Validates that a resource policy does not grant a wide range of principals access to your secret. A resource-based policy is optional for secrets. The API performs three checks when validating the policy: Sends a call to Zelkova, an automated reasoning engine, to ensure your resource policy does not allow broad access to your secret, for example policies that use a wildcard for the principal. Checks for correct syntax in a policy. Verifies the policy does not lock out a caller. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:ValidateResourcePolicy and secretsmanager:PutResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module UpdateSecretVersionStageResponse =
   struct
     type nonrec t =
@@ -2110,20 +2659,20 @@ module UpdateSecretVersionStageResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" SecretNameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" SecretNameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies the staging labels attached to a version of a secret. Secrets Manager uses staging labels to track a version as it progresses through the secret rotation process. Each staging label can be attached to only one version at a time. To add a staging label to a version when it is already attached to another version, Secrets Manager first removes it from the other version first and then attaches it to this one. For more information about versions and staging labels, see Concepts: Version. The staging labels that you specify in the VersionStage parameter are added to the existing list of staging labels for the version. You can move the AWSCURRENT staging label to this version by including it in this call. Whenever you move AWSCURRENT, Secrets Manager automatically moves the label AWSPREVIOUS to the version that AWSCURRENT was removed from. If this action results in the last label being removed from a version, then the version is considered to be 'deprecated' and can be deleted by Secrets Manager. Required permissions: secretsmanager:UpdateSecretVersionStage. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Modifies the staging labels attached to a version of a secret. Secrets Manager uses staging labels to track a version as it progresses through the secret rotation process. Each staging label can be attached to only one version at a time. To add a staging label to a version when it is already attached to another version, Secrets Manager first removes it from the other version first and then attaches it to this one. For more information about versions and staging labels, see Concepts: Version. The staging labels that you specify in the VersionStage parameter are added to the existing list of staging labels for the version. You can move the AWSCURRENT staging label to this version by including it in this call. Whenever you move AWSCURRENT, Secrets Manager automatically moves the label AWSPREVIOUS to the version that AWSCURRENT was removed from. If this action results in the last label being removed from a version, then the version is considered to be 'deprecated' and can be deleted by Secrets Manager. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:UpdateSecretVersionStage. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module UpdateSecretVersionStageRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or the name of the secret with the version and staging labelsto modify. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."];
+          "The ARN or the name of the secret with the version and staging labelsto modify. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."];
       versionStage: SecretVersionStageType.t
         [@ocaml.doc "The staging label to add to this version."];
       removeFromVersionId: SecretVersionIdType.t option
@@ -2165,18 +2714,18 @@ module UpdateSecretVersionStageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?moveToVersionId ?removeFromVersionId ~versionStage ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let moveToVersionId =
-        field_map json "MoveToVersionId" SecretVersionIdType.of_json in
+        field_map json__ "MoveToVersionId" SecretVersionIdType.of_json in
       let removeFromVersionId =
-        field_map json "RemoveFromVersionId" SecretVersionIdType.of_json in
+        field_map json__ "RemoveFromVersionId" SecretVersionIdType.of_json in
       let versionStage =
-        field_map_exn json "VersionStage" SecretVersionStageType.of_json in
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+        field_map_exn json__ "VersionStage" SecretVersionStageType.of_json in
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ?moveToVersionId ?removeFromVersionId ~versionStage ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies the staging labels attached to a version of a secret. Secrets Manager uses staging labels to track a version as it progresses through the secret rotation process. Each staging label can be attached to only one version at a time. To add a staging label to a version when it is already attached to another version, Secrets Manager first removes it from the other version first and then attaches it to this one. For more information about versions and staging labels, see Concepts: Version. The staging labels that you specify in the VersionStage parameter are added to the existing list of staging labels for the version. You can move the AWSCURRENT staging label to this version by including it in this call. Whenever you move AWSCURRENT, Secrets Manager automatically moves the label AWSPREVIOUS to the version that AWSCURRENT was removed from. If this action results in the last label being removed from a version, then the version is considered to be 'deprecated' and can be deleted by Secrets Manager. Required permissions: secretsmanager:UpdateSecretVersionStage. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Modifies the staging labels attached to a version of a secret. Secrets Manager uses staging labels to track a version as it progresses through the secret rotation process. Each staging label can be attached to only one version at a time. To add a staging label to a version when it is already attached to another version, Secrets Manager first removes it from the other version first and then attaches it to this one. For more information about versions and staging labels, see Concepts: Version. The staging labels that you specify in the VersionStage parameter are added to the existing list of staging labels for the version. You can move the AWSCURRENT staging label to this version by including it in this call. Whenever you move AWSCURRENT, Secrets Manager automatically moves the label AWSPREVIOUS to the version that AWSCURRENT was removed from. If this action results in the last label being removed from a version, then the version is considered to be 'deprecated' and can be deleted by Secrets Manager. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:UpdateSecretVersionStage. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module UpdateSecretResponse =
   struct
     type nonrec t =
@@ -2320,51 +2869,57 @@ module UpdateSecretResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?versionId ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let versionId = field_map json "VersionId" SecretVersionIdType.of_json in
-      let name = field_map json "Name" SecretNameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+    let of_json json__ =
+      let versionId =
+        field_map json__ "VersionId" SecretVersionIdType.of_json in
+      let name = field_map json__ "Name" SecretNameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?versionId ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies the details of a secret, including metadata and the secret value. To change the secret value, you can also use PutSecretValue. To change the rotation configuration of a secret, use RotateSecret instead. We recommend you avoid calling UpdateSecret at a sustained rate of more than once every 10 minutes. When you call UpdateSecret to update the secret value, Secrets Manager creates a new version of the secret. Secrets Manager removes outdated versions when there are more than 100, but it does not remove versions created less than 24 hours ago. If you update the secret value more than once every 10 minutes, you create more versions than Secrets Manager removes, and you will reach the quota for secret versions. If you include SecretString or SecretBinary to create a new secret version, Secrets Manager automatically attaches the staging label AWSCURRENT to the new version. If you call this operation with a VersionId that matches an existing version's ClientRequestToken, the operation results in an error. You can't modify an existing version, you can only create a new version. To remove a version, remove all staging labels from it. See UpdateSecretVersionStage. If you don't specify an KMS encryption key, Secrets Manager uses the Amazon Web Services managed key aws/secretsmanager. If this key doesn't already exist in your account, then Secrets Manager creates it for you automatically. All users and roles in the Amazon Web Services account automatically have access to use aws/secretsmanager. Creating aws/secretsmanager can result in a one-time significant delay in returning the result. If the secret is in a different Amazon Web Services account from the credentials calling the API, then you can't use aws/secretsmanager to encrypt the secret, and you must create and use a customer managed key. Required permissions: secretsmanager:UpdateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager. If you use a customer managed key, you must also have kms:GenerateDataKey and kms:Decrypt permissions on the key. For more information, see Secret encryption and decryption."]
+       "Modifies the details of a secret, including metadata and the secret value. To change the secret value, you can also use PutSecretValue. To change the rotation configuration of a secret, use RotateSecret instead. To change a secret so that it is managed by another service, you need to recreate the secret in that service. See Secrets Manager secrets managed by other Amazon Web Services services. We recommend you avoid calling UpdateSecret at a sustained rate of more than once every 10 minutes. When you call UpdateSecret to update the secret value, Secrets Manager creates a new version of the secret. Secrets Manager removes outdated versions when there are more than 100, but it does not remove versions created less than 24 hours ago. If you update the secret value more than once every 10 minutes, you create more versions than Secrets Manager removes, and you will reach the quota for secret versions. If you include SecretString or SecretBinary to create a new secret version, Secrets Manager automatically moves the staging label AWSCURRENT to the new version. Then it attaches the label AWSPREVIOUS to the version that AWSCURRENT was removed from. If you call this operation with a ClientRequestToken that matches an existing version's VersionId, the operation results in an error. You can't modify an existing version, you can only create a new version. To remove a version, remove all staging labels from it. See UpdateSecretVersionStage. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters except SecretBinary or SecretString because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:UpdateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager. If you use a customer managed key, you must also have kms:GenerateDataKey, kms:Encrypt, and kms:Decrypt permissions on the key. If you change the KMS key and you don't have kms:Encrypt permission to the new key, Secrets Manager does not re-encrypt existing secret versions with the new key. For more information, see Secret encryption and decryption. When you enter commands in a command shell, there is a risk of the command history being accessed or utilities having access to your command parameters. This is a concern if the command includes the value of a secret. Learn how to Mitigate the risks of using command-line tools to store Secrets Manager secrets."]
 module UpdateSecretRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or name of the secret. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."];
+          "The ARN or name of the secret. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."];
       clientRequestToken: ClientRequestTokenType.t option
         [@ocaml.doc
-          "If you include SecretString or SecretBinary, then Secrets Manager creates a new version for the secret, and this parameter specifies the unique identifier for the new version. If you use the Amazon Web Services CLI or one of the Amazon Web Services SDKs to call this operation, then you can leave this parameter empty. The CLI or SDK generates a random UUID for you and includes it as the value for this parameter in the request. If you don't use the SDK and instead generate a raw HTTP request to the Secrets Manager service endpoint, then you must generate a ClientRequestToken yourself for the new version and include the value in the request. This value becomes the VersionId of the new version."];
+          "If you include SecretString or SecretBinary, then Secrets Manager creates a new version for the secret, and this parameter specifies the unique identifier for the new version. If you use the Amazon Web Services CLI or one of the Amazon Web Services SDKs to call this operation, then you can leave this parameter empty. The CLI or SDK generates a random UUID for you and includes it as the value for this parameter in the request. If you generate a raw HTTP request to the Secrets Manager service endpoint, then you must generate a ClientRequestToken and include it in the request. This value helps ensure idempotency. Secrets Manager uses this value to prevent the accidental creation of duplicate versions if there are failures and retries during a rotation. We recommend that you generate a UUID-type value to ensure uniqueness of your versions within the specified secret."];
       description: DescriptionType.t option
         [@ocaml.doc "The description of the secret."];
       kmsKeyId: KmsKeyIdType.t option
         [@ocaml.doc
-          "The ARN, key ID, or alias of the KMS key that Secrets Manager uses to encrypt new secret versions as well as any existing versions the staging labels AWSCURRENT, AWSPENDING, or AWSPREVIOUS. For more information about versions and staging labels, see Concepts: Version. You can only use the Amazon Web Services managed key aws/secretsmanager if you call this operation using credentials from the same Amazon Web Services account that owns the secret. If the secret is in a different account, then you must use a customer managed key and provide the ARN of that KMS key in this field. The user making the call must have permissions to both the secret and the KMS key in their respective accounts."];
+          "The ARN, key ID, or alias of the KMS key that Secrets Manager uses to encrypt new secret versions as well as any existing versions with the staging labels AWSCURRENT, AWSPENDING, or AWSPREVIOUS. If you don't have kms:Encrypt permission to the new key, Secrets Manager does not re-encrypt existing secret versions with the new key. For more information about versions and staging labels, see Concepts: Version. A key alias is always prefixed by alias/, for example alias/aws/secretsmanager. For more information, see About aliases. If you set this to an empty string, Secrets Manager uses the Amazon Web Services managed key aws/secretsmanager. If this key doesn't already exist in your account, then Secrets Manager creates it for you automatically. All users and roles in the Amazon Web Services account automatically have access to use aws/secretsmanager. Creating aws/secretsmanager can result in a one-time significant delay in returning the result. You can only use the Amazon Web Services managed key aws/secretsmanager if you call this operation using credentials from the same Amazon Web Services account that owns the secret. If the secret is in a different account, then you must use a customer managed key and provide the ARN of that KMS key in this field. The user making the call must have permissions to both the secret and the KMS key in their respective accounts."];
       secretBinary: SecretBinaryType.t option
         [@ocaml.doc
-          "The binary data to encrypt and store in the new version of the secret. We recommend that you store your binary data in a file and then pass the contents of the file as a parameter. Either SecretBinary or SecretString must have a value, but not both. You can't access this parameter in the Secrets Manager console."];
+          "The binary data to encrypt and store in the new version of the secret. We recommend that you store your binary data in a file and then pass the contents of the file as a parameter. Either SecretBinary or SecretString must have a value, but not both. You can't access this parameter in the Secrets Manager console. Sensitive: This field contains sensitive information, so the service does not include it in CloudTrail log entries. If you create your own log entries, you must also avoid logging the information in this field."];
       secretString: SecretStringType.t option
         [@ocaml.doc
-          "The text data to encrypt and store in the new version of the secret. We recommend you use a JSON structure of key/value pairs for your secret value. Either SecretBinary or SecretString must have a value, but not both."]}
+          "The text data to encrypt and store in the new version of the secret. We recommend you use a JSON structure of key/value pairs for your secret value. Either SecretBinary or SecretString must have a value, but not both. Sensitive: This field contains sensitive information, so the service does not include it in CloudTrail log entries. If you create your own log entries, you must also avoid logging the information in this field."];
+      type_: MedeaTypeType.t option
+        [@ocaml.doc
+          "The exact string that identifies the third-party partner that holds the external secret. For more information, see Managed external secret partners."]}
     let context_ = "UpdateSecretRequest"
     let make ?clientRequestToken =
       fun ?description ->
         fun ?kmsKeyId ->
           fun ?secretBinary ->
             fun ?secretString ->
-              fun ~secretId ->
-                fun () ->
-                  {
-                    clientRequestToken;
-                    description;
-                    kmsKeyId;
-                    secretBinary;
-                    secretString;
-                    secretId
-                  }
+              fun ?type_ ->
+                fun ~secretId ->
+                  fun () ->
+                    {
+                      clientRequestToken;
+                      description;
+                      kmsKeyId;
+                      secretBinary;
+                      secretString;
+                      type_;
+                      secretId
+                    }
     let to_value x =
       structure_to_value
         [("SecretId", (Some (SecretIdType.to_value x.secretId)));
@@ -2376,9 +2931,12 @@ module UpdateSecretRequest =
         ("SecretBinary",
           (Option.map x.secretBinary ~f:SecretBinaryType.to_value));
         ("SecretString",
-          (Option.map x.secretString ~f:SecretStringType.to_value))]
+          (Option.map x.secretString ~f:SecretStringType.to_value));
+        ("Type", (Option.map x.type_ ~f:MedeaTypeType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:MedeaTypeType.of_xml) (Xml.child xml_arg0 "Type") in
       let secretString =
         (Option.map ~f:SecretStringType.of_xml)
           (Xml.child xml_arg0 "SecretString") in
@@ -2396,31 +2954,33 @@ module UpdateSecretRequest =
       let secretId =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
-      make ?secretString ?secretBinary ?kmsKeyId ?description
+      make ?type_ ?secretString ?secretBinary ?kmsKeyId ?description
         ?clientRequestToken ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let type_ = field_map json__ "Type" MedeaTypeType.of_json in
       let secretString =
-        field_map json "SecretString" SecretStringType.of_json in
+        field_map json__ "SecretString" SecretStringType.of_json in
       let secretBinary =
-        field_map json "SecretBinary" SecretBinaryType.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyIdType.of_json in
-      let description = field_map json "Description" DescriptionType.of_json in
+        field_map json__ "SecretBinary" SecretBinaryType.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyIdType.of_json in
+      let description =
+        field_map json__ "Description" DescriptionType.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenType.of_json in
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
-      make ?secretString ?secretBinary ?kmsKeyId ?description
+        field_map json__ "ClientRequestToken" ClientRequestTokenType.of_json in
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
+      make ?type_ ?secretString ?secretBinary ?kmsKeyId ?description
         ?clientRequestToken ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies the details of a secret, including metadata and the secret value. To change the secret value, you can also use PutSecretValue. To change the rotation configuration of a secret, use RotateSecret instead. We recommend you avoid calling UpdateSecret at a sustained rate of more than once every 10 minutes. When you call UpdateSecret to update the secret value, Secrets Manager creates a new version of the secret. Secrets Manager removes outdated versions when there are more than 100, but it does not remove versions created less than 24 hours ago. If you update the secret value more than once every 10 minutes, you create more versions than Secrets Manager removes, and you will reach the quota for secret versions. If you include SecretString or SecretBinary to create a new secret version, Secrets Manager automatically attaches the staging label AWSCURRENT to the new version. If you call this operation with a VersionId that matches an existing version's ClientRequestToken, the operation results in an error. You can't modify an existing version, you can only create a new version. To remove a version, remove all staging labels from it. See UpdateSecretVersionStage. If you don't specify an KMS encryption key, Secrets Manager uses the Amazon Web Services managed key aws/secretsmanager. If this key doesn't already exist in your account, then Secrets Manager creates it for you automatically. All users and roles in the Amazon Web Services account automatically have access to use aws/secretsmanager. Creating aws/secretsmanager can result in a one-time significant delay in returning the result. If the secret is in a different Amazon Web Services account from the credentials calling the API, then you can't use aws/secretsmanager to encrypt the secret, and you must create and use a customer managed key. Required permissions: secretsmanager:UpdateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager. If you use a customer managed key, you must also have kms:GenerateDataKey and kms:Decrypt permissions on the key. For more information, see Secret encryption and decryption."]
+       "Modifies the details of a secret, including metadata and the secret value. To change the secret value, you can also use PutSecretValue. To change the rotation configuration of a secret, use RotateSecret instead. To change a secret so that it is managed by another service, you need to recreate the secret in that service. See Secrets Manager secrets managed by other Amazon Web Services services. We recommend you avoid calling UpdateSecret at a sustained rate of more than once every 10 minutes. When you call UpdateSecret to update the secret value, Secrets Manager creates a new version of the secret. Secrets Manager removes outdated versions when there are more than 100, but it does not remove versions created less than 24 hours ago. If you update the secret value more than once every 10 minutes, you create more versions than Secrets Manager removes, and you will reach the quota for secret versions. If you include SecretString or SecretBinary to create a new secret version, Secrets Manager automatically moves the staging label AWSCURRENT to the new version. Then it attaches the label AWSPREVIOUS to the version that AWSCURRENT was removed from. If you call this operation with a ClientRequestToken that matches an existing version's VersionId, the operation results in an error. You can't modify an existing version, you can only create a new version. To remove a version, remove all staging labels from it. See UpdateSecretVersionStage. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters except SecretBinary or SecretString because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:UpdateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager. If you use a customer managed key, you must also have kms:GenerateDataKey, kms:Encrypt, and kms:Decrypt permissions on the key. If you change the KMS key and you don't have kms:Encrypt permission to the new key, Secrets Manager does not re-encrypt existing secret versions with the new key. For more information, see Secret encryption and decryption. When you enter commands in a command shell, there is a risk of the command history being accessed or utilities having access to your command parameters. This is a concern if the command includes the value of a secret. Learn how to Mitigate the risks of using command-line tools to store Secrets Manager secrets."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or name of the secret. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."];
+          "The ARN or name of the secret. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."];
       tagKeys: TagKeyListType.t
         [@ocaml.doc
           "A list of tag key names to remove from the secret. You don't specify the value. Both the key and its associated value are removed. This parameter requires a JSON text string argument. For storing multiple values, we recommend that you use a JSON text string argument and specify key/value pairs. For more information, see Specifying parameter values for the Amazon Web Services CLI in the Amazon Web Services CLI User Guide."]}
@@ -2440,20 +3000,20 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~tagKeys ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyListType.of_json in
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyListType.of_json in
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ~tagKeys ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes specific tags from a secret. This operation is idempotent. If a requested tag is not attached to the secret, no error is returned and the secret metadata is unchanged. If you use tags as part of your security strategy, then removing a tag can change permissions. If successfully completing this operation would result in you losing your permissions for this secret, then the operation is blocked and returns an Access Denied error. Required permissions: secretsmanager:UntagResource. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Removes specific tags from a secret. This operation is idempotent. If a requested tag is not attached to the secret, no error is returned and the secret metadata is unchanged. If you use tags as part of your security strategy, then removing a tag can change permissions. If successfully completing this operation would result in you losing your permissions for this secret, then the operation is blocked and returns an Access Denied error. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:UntagResource. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The identifier for the secret to attach tags to. You can specify either the Amazon Resource Name (ARN) or the friendly name of the secret. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."];
+          "The identifier for the secret to attach tags to. You can specify either the Amazon Resource Name (ARN) or the friendly name of the secret. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."];
       tags: TagListType.t
         [@ocaml.doc
           "The tags to attach to the secret as a JSON text string argument. Each element in the list consists of a Key and a Value. For storing multiple values, we recommend that you use a JSON text string argument and specify key/value pairs. For more information, see Specifying parameter values for the Amazon Web Services CLI in the Amazon Web Services CLI User Guide."]}
@@ -2472,13 +3032,13 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~tags ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagListType.of_json in
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagListType.of_json in
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ~tags ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches tags to a secret. Tags consist of a key name and a value. Tags are part of the secret's metadata. They are not associated with specific versions of the secret. This operation appends tags to the existing list of tags. The following restrictions apply to tags: Maximum number of tags per secret: 50 Maximum key length: 127 Unicode characters in UTF-8 Maximum value length: 255 Unicode characters in UTF-8 Tag keys and values are case sensitive. Do not use the aws: prefix in your tag names or values because Amazon Web Services reserves it for Amazon Web Services use. You can't edit or delete tag names or values with this prefix. Tags with this prefix do not count against your tags per secret limit. If you use your tagging schema across multiple services and resources, other services might have restrictions on allowed characters. Generally allowed characters: letters, spaces, and numbers representable in UTF-8, plus the following special characters: + - = . _ : / \\@. If you use tags as part of your security strategy, then adding or removing a tag can change permissions. If successfully completing this operation would result in you losing your permissions for this secret, then the operation is blocked and returns an Access Denied error. Required permissions: secretsmanager:TagResource. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Attaches tags to a secret. Tags consist of a key name and a value. Tags are part of the secret's metadata. They are not associated with specific versions of the secret. This operation appends tags to the existing list of tags. For tag quotas and naming restrictions, see Service quotas for Tagging in the Amazon Web Services General Reference guide. If you use tags as part of your security strategy, then adding or removing a tag can change permissions. If successfully completing this operation would result in you losing your permissions for this secret, then the operation is blocked and returns an Access Denied error. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:TagResource. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module StopReplicationToReplicaResponse =
   struct
     type nonrec t =
@@ -2550,16 +3110,18 @@ module StopReplicationToReplicaResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" SecretARNType.of_json in make ?aRN ()
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in make ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the link between the replica secret and the primary secret and promotes the replica to a primary secret in the replica Region. You must call this operation from the Region in which you want to promote the replica to a primary secret. Required permissions: secretsmanager:StopReplicationToReplica. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Removes the link between the replica secret and the primary secret and promotes the replica to a primary secret in the replica Region. You must call this operation from the Region in which you want to promote the replica to a primary secret. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:StopReplicationToReplica. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module StopReplicationToReplicaRequest =
   struct
     type nonrec t =
       {
-      secretId: SecretIdType.t [@ocaml.doc "The ARN of the primary secret."]}
+      secretId: SecretIdType.t
+        [@ocaml.doc
+          "The name of the secret or the replica ARN. The replica ARN is the same as the original primary secret ARN expect the Region is changed to the replica Region."]}
     let context_ = "StopReplicationToReplicaRequest"
     let make ~secretId = fun () -> { secretId }
     let to_value x =
@@ -2572,12 +3134,12 @@ module StopReplicationToReplicaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+    let of_json json__ =
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the link between the replica secret and the primary secret and promotes the replica to a primary secret in the replica Region. You must call this operation from the Region in which you want to promote the replica to a primary secret. Required permissions: secretsmanager:StopReplicationToReplica. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Removes the link between the replica secret and the primary secret and promotes the replica to a primary secret in the replica Region. You must call this operation from the Region in which you want to promote the replica to a primary secret. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:StopReplicationToReplica. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module RotateSecretResponse =
   struct
     type nonrec t =
@@ -2659,47 +3221,59 @@ module RotateSecretResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?versionId ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let versionId = field_map json "VersionId" SecretVersionIdType.of_json in
-      let name = field_map json "Name" SecretNameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+    let of_json json__ =
+      let versionId =
+        field_map json__ "VersionId" SecretVersionIdType.of_json in
+      let name = field_map json__ "Name" SecretNameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?versionId ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configures and starts the asynchronous process of rotating the secret. If you include the configuration parameters, the operation sets the values for the secret and then immediately starts a rotation. If you don't include the configuration parameters, the operation starts a rotation with the values already stored in the secret. For more information about rotation, see Rotate secrets. To configure rotation, you include the ARN of an Amazon Web Services Lambda function and the schedule for the rotation. The Lambda rotation function creates a new version of the secret and creates or updates the credentials on the database or service to match. After testing the new credentials, the function marks the new secret version with the staging label AWSCURRENT. Then anyone who retrieves the secret gets the new version. For more information, see How rotation works. When rotation is successful, the AWSPENDING staging label might be attached to the same version as the AWSCURRENT version, or it might not be attached to any version. If the AWSPENDING staging label is present but not attached to the same version as AWSCURRENT, then any later invocation of RotateSecret assumes that a previous rotation request is still in progress and returns an error. Required permissions: secretsmanager:RotateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager. You also need lambda:InvokeFunction permissions on the rotation function. For more information, see Permissions for rotation."]
+       "Configures and starts the asynchronous process of rotating the secret. For information about rotation, see Rotate secrets in the Secrets Manager User Guide. If you include the configuration parameters, the operation sets the values for the secret and then immediately starts a rotation. If you don't include the configuration parameters, the operation starts a rotation with the values already stored in the secret. When rotation is successful, the AWSPENDING staging label might be attached to the same version as the AWSCURRENT version, or it might not be attached to any version. If the AWSPENDING staging label is present but not attached to the same version as AWSCURRENT, then any later invocation of RotateSecret assumes that a previous rotation request is still in progress and returns an error. When rotation is unsuccessful, the AWSPENDING staging label might be attached to an empty secret version. For more information, see Troubleshoot rotation in the Secrets Manager User Guide. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:RotateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager. You also need lambda:InvokeFunction permissions on the rotation function. For more information, see Permissions for rotation."]
 module RotateSecretRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or name of the secret to rotate. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."];
+          "The ARN or name of the secret to rotate. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."];
       clientRequestToken: ClientRequestTokenType.t option
         [@ocaml.doc
-          "A unique identifier for the new version of the secret that helps ensure idempotency. Secrets Manager uses this value to prevent the accidental creation of duplicate versions if there are failures and retries during rotation. This value becomes the VersionId of the new version. If you use the Amazon Web Services CLI or one of the Amazon Web Services SDK to call this operation, then you can leave this parameter empty. The CLI or SDK generates a random UUID for you and includes that in the request for this parameter. If you don't use the SDK and instead generate a raw HTTP request to the Secrets Manager service endpoint, then you must generate a ClientRequestToken yourself for new versions and include that value in the request. You only need to specify this value if you implement your own retry logic and you want to ensure that Secrets Manager doesn't attempt to create a secret version twice. We recommend that you generate a UUID-type value to ensure uniqueness within the specified secret."];
+          "A unique identifier for the new version of the secret. You only need to specify this value if you implement your own retry logic and you want to ensure that Secrets Manager doesn't attempt to create a secret version twice. If you use the Amazon Web Services CLI or one of the Amazon Web Services SDKs to call this operation, then you can leave this parameter empty. The CLI or SDK generates a random UUID for you and includes it as the value for this parameter in the request. If you generate a raw HTTP request to the Secrets Manager service endpoint, then you must generate a ClientRequestToken and include it in the request. This value helps ensure idempotency. Secrets Manager uses this value to prevent the accidental creation of duplicate versions if there are failures and retries during a rotation. We recommend that you generate a UUID-type value to ensure uniqueness of your versions within the specified secret."];
       rotationLambdaARN: RotationLambdaARNType.t option
         [@ocaml.doc
-          "The ARN of the Lambda rotation function that can rotate the secret."];
+          "For secrets that use a Lambda rotation function to rotate, the ARN of the Lambda rotation function. For secrets that use managed rotation, omit this field. For more information, see Managed rotation in the Secrets Manager User Guide."];
       rotationRules: RotationRulesType.t option
         [@ocaml.doc
-          "A structure that defines the rotation configuration for this secret."];
+          "A structure that defines the rotation configuration for this secret. When changing an existing rotation schedule and setting RotateImmediately to false: If using AutomaticallyAfterDays or a ScheduleExpression with rate(), the previously scheduled rotation might still occur. To prevent unintended rotations, use a ScheduleExpression with cron() for granular control over rotation windows."];
+      externalSecretRotationMetadata:
+        ExternalSecretRotationMetadataType.t option
+        [@ocaml.doc
+          "The metadata needed to successfully rotate a managed external secret. A list of key value pairs in JSON format specified by the partner. For more information about the required information, see Using Secrets Manager managed external secrets"];
+      externalSecretRotationRoleArn: RoleARNType.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the role that allows Secrets Manager to rotate a secret held by a third-party partner. For more information, see Security and permissions."];
       rotateImmediately: BooleanType.t option
         [@ocaml.doc
-          "Specifies whether to rotate the secret immediately or wait until the next scheduled rotation window. The rotation schedule is defined in RotateSecretRequest$RotationRules. If you don't immediately rotate the secret, Secrets Manager tests the rotation configuration by running the testSecret step of the Lambda rotation function. The test creates an AWSPENDING version of the secret and then removes it. If you don't specify this value, then by default, Secrets Manager rotates the secret immediately."]}
+          "Specifies whether to rotate the secret immediately or wait until the next scheduled rotation window. The rotation schedule is defined in RotateSecretRequest$RotationRules. The default for RotateImmediately is true. If you don't specify this value, Secrets Manager rotates the secret immediately. If you set RotateImmediately to false, Secrets Manager tests the rotation configuration by running the testSecret step of the Lambda rotation function. This test creates an AWSPENDING version of the secret and then removes it. When changing an existing rotation schedule and setting RotateImmediately to false: If using AutomaticallyAfterDays or a ScheduleExpression with rate(), the previously scheduled rotation might still occur. To prevent unintended rotations, use a ScheduleExpression with cron() for granular control over rotation windows. Rotation is an asynchronous process. For more information, see How rotation works."]}
     let context_ = "RotateSecretRequest"
     let make ?clientRequestToken =
       fun ?rotationLambdaARN ->
         fun ?rotationRules ->
-          fun ?rotateImmediately ->
-            fun ~secretId ->
-              fun () ->
-                {
-                  clientRequestToken;
-                  rotationLambdaARN;
-                  rotationRules;
-                  rotateImmediately;
-                  secretId
-                }
+          fun ?externalSecretRotationMetadata ->
+            fun ?externalSecretRotationRoleArn ->
+              fun ?rotateImmediately ->
+                fun ~secretId ->
+                  fun () ->
+                    {
+                      clientRequestToken;
+                      rotationLambdaARN;
+                      rotationRules;
+                      externalSecretRotationMetadata;
+                      externalSecretRotationRoleArn;
+                      rotateImmediately;
+                      secretId
+                    }
     let to_value x =
       structure_to_value
         [("SecretId", (Some (SecretIdType.to_value x.secretId)));
@@ -2709,6 +3283,11 @@ module RotateSecretRequest =
           (Option.map x.rotationLambdaARN ~f:RotationLambdaARNType.to_value));
         ("RotationRules",
           (Option.map x.rotationRules ~f:RotationRulesType.to_value));
+        ("ExternalSecretRotationMetadata",
+          (Option.map x.externalSecretRotationMetadata
+             ~f:ExternalSecretRotationMetadataType.to_value));
+        ("ExternalSecretRotationRoleArn",
+          (Option.map x.externalSecretRotationRoleArn ~f:RoleARNType.to_value));
         ("RotateImmediately",
           (Option.map x.rotateImmediately ~f:BooleanType.to_value))]
     let to_query v = to_query to_value v
@@ -2716,6 +3295,12 @@ module RotateSecretRequest =
       let rotateImmediately =
         (Option.map ~f:BooleanType.of_xml)
           (Xml.child xml_arg0 "RotateImmediately") in
+      let externalSecretRotationRoleArn =
+        (Option.map ~f:RoleARNType.of_xml)
+          (Xml.child xml_arg0 "ExternalSecretRotationRoleArn") in
+      let externalSecretRotationMetadata =
+        (Option.map ~f:ExternalSecretRotationMetadataType.of_xml)
+          (Xml.child xml_arg0 "ExternalSecretRotationMetadata") in
       let rotationRules =
         (Option.map ~f:RotationRulesType.of_xml)
           (Xml.child xml_arg0 "RotationRules") in
@@ -2728,24 +3313,31 @@ module RotateSecretRequest =
       let secretId =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
-      make ?rotateImmediately ?rotationRules ?rotationLambdaARN
+      make ?rotateImmediately ?externalSecretRotationRoleArn
+        ?externalSecretRotationMetadata ?rotationRules ?rotationLambdaARN
         ?clientRequestToken ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rotateImmediately =
-        field_map json "RotateImmediately" BooleanType.of_json in
+        field_map json__ "RotateImmediately" BooleanType.of_json in
+      let externalSecretRotationRoleArn =
+        field_map json__ "ExternalSecretRotationRoleArn" RoleARNType.of_json in
+      let externalSecretRotationMetadata =
+        field_map json__ "ExternalSecretRotationMetadata"
+          ExternalSecretRotationMetadataType.of_json in
       let rotationRules =
-        field_map json "RotationRules" RotationRulesType.of_json in
+        field_map json__ "RotationRules" RotationRulesType.of_json in
       let rotationLambdaARN =
-        field_map json "RotationLambdaARN" RotationLambdaARNType.of_json in
+        field_map json__ "RotationLambdaARN" RotationLambdaARNType.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenType.of_json in
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
-      make ?rotateImmediately ?rotationRules ?rotationLambdaARN
+        field_map json__ "ClientRequestToken" ClientRequestTokenType.of_json in
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
+      make ?rotateImmediately ?externalSecretRotationRoleArn
+        ?externalSecretRotationMetadata ?rotationRules ?rotationLambdaARN
         ?clientRequestToken ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configures and starts the asynchronous process of rotating the secret. If you include the configuration parameters, the operation sets the values for the secret and then immediately starts a rotation. If you don't include the configuration parameters, the operation starts a rotation with the values already stored in the secret. For more information about rotation, see Rotate secrets. To configure rotation, you include the ARN of an Amazon Web Services Lambda function and the schedule for the rotation. The Lambda rotation function creates a new version of the secret and creates or updates the credentials on the database or service to match. After testing the new credentials, the function marks the new secret version with the staging label AWSCURRENT. Then anyone who retrieves the secret gets the new version. For more information, see How rotation works. When rotation is successful, the AWSPENDING staging label might be attached to the same version as the AWSCURRENT version, or it might not be attached to any version. If the AWSPENDING staging label is present but not attached to the same version as AWSCURRENT, then any later invocation of RotateSecret assumes that a previous rotation request is still in progress and returns an error. Required permissions: secretsmanager:RotateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager. You also need lambda:InvokeFunction permissions on the rotation function. For more information, see Permissions for rotation."]
+       "Configures and starts the asynchronous process of rotating the secret. For information about rotation, see Rotate secrets in the Secrets Manager User Guide. If you include the configuration parameters, the operation sets the values for the secret and then immediately starts a rotation. If you don't include the configuration parameters, the operation starts a rotation with the values already stored in the secret. When rotation is successful, the AWSPENDING staging label might be attached to the same version as the AWSCURRENT version, or it might not be attached to any version. If the AWSPENDING staging label is present but not attached to the same version as AWSCURRENT, then any later invocation of RotateSecret assumes that a previous rotation request is still in progress and returns an error. When rotation is unsuccessful, the AWSPENDING staging label might be attached to an empty secret version. For more information, see Troubleshoot rotation in the Secrets Manager User Guide. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:RotateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager. You also need lambda:InvokeFunction permissions on the rotation function. For more information, see Permissions for rotation."]
 module RestoreSecretResponse =
   struct
     type nonrec t =
@@ -2821,20 +3413,20 @@ module RestoreSecretResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" SecretNameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" SecretNameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Cancels the scheduled deletion of a secret by removing the DeletedDate time stamp. You can access a secret again after it has been restored. Required permissions: secretsmanager:RestoreSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Cancels the scheduled deletion of a secret by removing the DeletedDate time stamp. You can access a secret again after it has been restored. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:RestoreSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module RestoreSecretRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or name of the secret to restore. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."]}
+          "The ARN or name of the secret to restore. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."]}
     let context_ = "RestoreSecretRequest"
     let make ~secretId = fun () -> { secretId }
     let to_value x =
@@ -2847,12 +3439,12 @@ module RestoreSecretRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+    let of_json json__ =
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Cancels the scheduled deletion of a secret by removing the DeletedDate time stamp. You can access a secret again after it has been restored. Required permissions: secretsmanager:RestoreSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Cancels the scheduled deletion of a secret by removing the DeletedDate time stamp. You can access a secret again after it has been restored. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:RestoreSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module ReplicateSecretToRegionsResponse =
   struct
     type nonrec t =
@@ -2932,14 +3524,15 @@ module ReplicateSecretToRegionsResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?replicationStatus ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationStatus =
-        field_map json "ReplicationStatus" ReplicationStatusListType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+        field_map json__ "ReplicationStatus"
+          ReplicationStatusListType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?replicationStatus ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Replicates the secret to a new Regions. See Multi-Region secrets. Required permissions: secretsmanager:ReplicateSecretToRegions. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Replicates the secret to a new Regions. See Multi-Region secrets. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:ReplicateSecretToRegions. If the primary secret is encrypted with a KMS key other than aws/secretsmanager, you also need kms:Decrypt permission to the key. To encrypt the replicated secret with a KMS key other than aws/secretsmanager, you need kms:GenerateDataKey and kms:Encrypt to the key. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module ReplicateSecretToRegionsRequest =
   struct
     type nonrec t =
@@ -2950,7 +3543,7 @@ module ReplicateSecretToRegionsRequest =
         [@ocaml.doc "A list of Regions in which to replicate the secret."];
       forceOverwriteReplicaSecret: BooleanType.t option
         [@ocaml.doc
-          "Specifies whether to overwrite a secret with the same name in the destination Region."]}
+          "Specifies whether to overwrite a secret with the same name in the destination Region. By default, secrets aren't overwritten."]}
     let context_ = "ReplicateSecretToRegionsRequest"
     let make ?forceOverwriteReplicaSecret =
       fun ~secretId ->
@@ -2977,17 +3570,17 @@ module ReplicateSecretToRegionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?forceOverwriteReplicaSecret ~addReplicaRegions ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let forceOverwriteReplicaSecret =
-        field_map json "ForceOverwriteReplicaSecret" BooleanType.of_json in
+        field_map json__ "ForceOverwriteReplicaSecret" BooleanType.of_json in
       let addReplicaRegions =
-        field_map_exn json "AddReplicaRegions"
+        field_map_exn json__ "AddReplicaRegions"
           AddReplicaRegionListType.of_json in
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ?forceOverwriteReplicaSecret ~addReplicaRegions ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Replicates the secret to a new Regions. See Multi-Region secrets. Required permissions: secretsmanager:ReplicateSecretToRegions. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Replicates the secret to a new Regions. See Multi-Region secrets. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:ReplicateSecretToRegions. If the primary secret is encrypted with a KMS key other than aws/secretsmanager, you also need kms:Decrypt permission to the key. To encrypt the replicated secret with a KMS key other than aws/secretsmanager, you need kms:GenerateDataKey and kms:Encrypt to the key. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module RemoveRegionsFromReplicationResponse =
   struct
     type nonrec t =
@@ -3068,14 +3661,15 @@ module RemoveRegionsFromReplicationResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?replicationStatus ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationStatus =
-        field_map json "ReplicationStatus" ReplicationStatusListType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+        field_map json__ "ReplicationStatus"
+          ReplicationStatusListType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?replicationStatus ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For a secret that is replicated to other Regions, deletes the secret replicas from the Regions you specify. Required permissions: secretsmanager:RemoveRegionsFromReplication. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "For a secret that is replicated to other Regions, deletes the secret replicas from the Regions you specify. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:RemoveRegionsFromReplication. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module RemoveRegionsFromReplicationRequest =
   struct
     type nonrec t =
@@ -3102,15 +3696,15 @@ module RemoveRegionsFromReplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~removeReplicaRegions ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let removeReplicaRegions =
-        field_map_exn json "RemoveReplicaRegions"
+        field_map_exn json__ "RemoveReplicaRegions"
           RemoveReplicaRegionListType.of_json in
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ~removeReplicaRegions ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For a secret that is replicated to other Regions, deletes the secret replicas from the Regions you specify. Required permissions: secretsmanager:RemoveRegionsFromReplication. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "For a secret that is replicated to other Regions, deletes the secret replicas from the Regions you specify. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:RemoveRegionsFromReplication. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module PutSecretValueResponse =
   struct
     type nonrec t =
@@ -3239,49 +3833,55 @@ module PutSecretValueResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?versionStages ?versionId ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionStages =
-        field_map json "VersionStages" SecretVersionStagesType.of_json in
-      let versionId = field_map json "VersionId" SecretVersionIdType.of_json in
-      let name = field_map json "Name" SecretNameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+        field_map json__ "VersionStages" SecretVersionStagesType.of_json in
+      let versionId =
+        field_map json__ "VersionId" SecretVersionIdType.of_json in
+      let name = field_map json__ "Name" SecretNameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?versionStages ?versionId ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new version with a new encrypted secret value and attaches it to the secret. The version can contain a new SecretString value or a new SecretBinary value. We recommend you avoid calling PutSecretValue at a sustained rate of more than once every 10 minutes. When you update the secret value, Secrets Manager creates a new version of the secret. Secrets Manager removes outdated versions when there are more than 100, but it does not remove versions created less than 24 hours ago. If you call PutSecretValue more than once every 10 minutes, you create more versions than Secrets Manager removes, and you will reach the quota for secret versions. You can specify the staging labels to attach to the new version in VersionStages. If you don't include VersionStages, then Secrets Manager automatically moves the staging label AWSCURRENT to this version. If this operation creates the first version for the secret, then Secrets Manager automatically attaches the staging label AWSCURRENT to it . If this operation moves the staging label AWSCURRENT from another version to this version, then Secrets Manager also automatically moves the staging label AWSPREVIOUS to the version that AWSCURRENT was removed from. This operation is idempotent. If a version with a VersionId with the same value as the ClientRequestToken parameter already exists, and you specify the same secret data, the operation succeeds but does nothing. However, if the secret data is different, then the operation fails because you can't modify an existing version; you can only create new ones. Required permissions: secretsmanager:PutSecretValue. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Creates a new version of your secret by creating a new encrypted value and attaching it to the secret. version can contain a new SecretString value or a new SecretBinary value. Do not call PutSecretValue at a sustained rate of more than once every 10 minutes. When you update the secret value, Secrets Manager creates a new version of the secret. Secrets Manager keeps 100 of the most recent versions, but it keeps all secret versions created in the last 24 hours. If you call PutSecretValue more than once every 10 minutes, you will create more versions than Secrets Manager removes, and you will reach the quota for secret versions. You can specify the staging labels to attach to the new version in VersionStages. If you don't include VersionStages, then Secrets Manager automatically moves the staging label AWSCURRENT to this version. If this operation creates the first version for the secret, then Secrets Manager automatically attaches the staging label AWSCURRENT to it. If this operation moves the staging label AWSCURRENT from another version to this version, then Secrets Manager also automatically moves the staging label AWSPREVIOUS to the version that AWSCURRENT was removed from. This operation is idempotent. If you call this operation with a ClientRequestToken that matches an existing version's VersionId, and you specify the same secret data, the operation succeeds but does nothing. However, if the secret data is different, then the operation fails because you can't modify an existing version; you can only create new ones. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters except SecretBinary, SecretString, or RotationToken because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:PutSecretValue. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager. When you enter commands in a command shell, there is a risk of the command history being accessed or utilities having access to your command parameters. This is a concern if the command includes the value of a secret. Learn how to Mitigate the risks of using command-line tools to store Secrets Manager secrets."]
 module PutSecretValueRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or name of the secret to add a new version to. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. If the secret doesn't already exist, use CreateSecret instead."];
+          "The ARN or name of the secret to add a new version to. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN. If the secret doesn't already exist, use CreateSecret instead."];
       clientRequestToken: ClientRequestTokenType.t option
         [@ocaml.doc
-          "A unique identifier for the new version of the secret. If you use the Amazon Web Services CLI or one of the Amazon Web Services SDKs to call this operation, then you can leave this parameter empty because they generate a random UUID for you. If you don't use the SDK and instead generate a raw HTTP request to the Secrets Manager service endpoint, then you must generate a ClientRequestToken yourself for new versions and include that value in the request. This value helps ensure idempotency. Secrets Manager uses this value to prevent the accidental creation of duplicate versions if there are failures and retries during the Lambda rotation function processing. We recommend that you generate a UUID-type value to ensure uniqueness within the specified secret. If the ClientRequestToken value isn't already associated with a version of the secret then a new version of the secret is created. If a version with this value already exists and that version's SecretString or SecretBinary values are the same as those in the request then the request is ignored. The operation is idempotent. If a version with this value already exists and the version of the SecretString and SecretBinary values are different from those in the request, then the request fails because you can't modify a secret version. You can only create new versions to store new secret values. This value becomes the VersionId of the new version."];
+          "A unique identifier for the new version of the secret. If you use the Amazon Web Services CLI or one of the Amazon Web Services SDKs to call this operation, then you can leave this parameter empty. The CLI or SDK generates a random UUID for you and includes it as the value for this parameter in the request. If you generate a raw HTTP request to the Secrets Manager service endpoint, then you must generate a ClientRequestToken and include it in the request. This value helps ensure idempotency. Secrets Manager uses this value to prevent the accidental creation of duplicate versions if there are failures and retries during a rotation. We recommend that you generate a UUID-type value to ensure uniqueness of your versions within the specified secret. If the ClientRequestToken value isn't already associated with a version of the secret then a new version of the secret is created. If a version with this value already exists and that version's SecretString or SecretBinary values are the same as those in the request then the request is ignored. The operation is idempotent. If a version with this value already exists and the version of the SecretString and SecretBinary values are different from those in the request, then the request fails because you can't modify a secret version. You can only create new versions to store new secret values. This value becomes the VersionId of the new version."];
       secretBinary: SecretBinaryType.t option
         [@ocaml.doc
-          "The binary data to encrypt and store in the new version of the secret. To use this parameter in the command-line tools, we recommend that you store your binary data in a file and then pass the contents of the file as a parameter. You must include SecretBinary or SecretString, but not both. You can't access this value from the Secrets Manager console."];
+          "The binary data to encrypt and store in the new version of the secret. To use this parameter in the command-line tools, we recommend that you store your binary data in a file and then pass the contents of the file as a parameter. You must include SecretBinary or SecretString, but not both. You can't access this value from the Secrets Manager console. Sensitive: This field contains sensitive information, so the service does not include it in CloudTrail log entries. If you create your own log entries, you must also avoid logging the information in this field."];
       secretString: SecretStringType.t option
         [@ocaml.doc
-          "The text to encrypt and store in the new version of the secret. You must include SecretBinary or SecretString, but not both. We recommend you create the secret string as JSON key/value pairs, as shown in the example."];
+          "The text to encrypt and store in the new version of the secret. You must include SecretBinary or SecretString, but not both. We recommend you create the secret string as JSON key/value pairs, as shown in the example. Sensitive: This field contains sensitive information, so the service does not include it in CloudTrail log entries. If you create your own log entries, you must also avoid logging the information in this field."];
       versionStages: SecretVersionStagesType.t option
         [@ocaml.doc
-          "A list of staging labels to attach to this version of the secret. Secrets Manager uses staging labels to track versions of a secret through the rotation process. If you specify a staging label that's already associated with a different version of the same secret, then Secrets Manager removes the label from the other version and attaches it to this version. If you specify AWSCURRENT, and it is already attached to another version, then Secrets Manager also moves the staging label AWSPREVIOUS to the version that AWSCURRENT was removed from. If you don't include VersionStages, then Secrets Manager automatically moves the staging label AWSCURRENT to this version."]}
+          "A list of staging labels to attach to this version of the secret. Secrets Manager uses staging labels to track versions of a secret through the rotation process. If you specify a staging label that's already associated with a different version of the same secret, then Secrets Manager removes the label from the other version and attaches it to this version. If you specify AWSCURRENT, and it is already attached to another version, then Secrets Manager also moves the staging label AWSPREVIOUS to the version that AWSCURRENT was removed from. If you don't include VersionStages, then Secrets Manager automatically moves the staging label AWSCURRENT to this version."];
+      rotationToken: RotationTokenType.t option
+        [@ocaml.doc
+          "A unique identifier that indicates the source of the request. Required for secret rotations using an IAM assumed role or cross-account rotation, in which you rotate a secret in one account by using a Lambda rotation function in another account. In both cases, the rotation function assumes an IAM role to call Secrets Manager, and then Secrets Manager validates the identity using the token. For more information, see How rotation works and Rotation by Lambda functions. Sensitive: This field contains sensitive information, so the service does not include it in CloudTrail log entries. If you create your own log entries, you must also avoid logging the information in this field."]}
     let context_ = "PutSecretValueRequest"
     let make ?clientRequestToken =
       fun ?secretBinary ->
         fun ?secretString ->
           fun ?versionStages ->
-            fun ~secretId ->
-              fun () ->
-                {
-                  clientRequestToken;
-                  secretBinary;
-                  secretString;
-                  versionStages;
-                  secretId
-                }
+            fun ?rotationToken ->
+              fun ~secretId ->
+                fun () ->
+                  {
+                    clientRequestToken;
+                    secretBinary;
+                    secretString;
+                    versionStages;
+                    rotationToken;
+                    secretId
+                  }
     let to_value x =
       structure_to_value
         [("SecretId", (Some (SecretIdType.to_value x.secretId)));
@@ -3292,9 +3892,14 @@ module PutSecretValueRequest =
         ("SecretString",
           (Option.map x.secretString ~f:SecretStringType.to_value));
         ("VersionStages",
-          (Option.map x.versionStages ~f:SecretVersionStagesType.to_value))]
+          (Option.map x.versionStages ~f:SecretVersionStagesType.to_value));
+        ("RotationToken",
+          (Option.map x.rotationToken ~f:RotationTokenType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let rotationToken =
+        (Option.map ~f:RotationTokenType.of_xml)
+          (Xml.child xml_arg0 "RotationToken") in
       let versionStages =
         (Option.map ~f:SecretVersionStagesType.of_xml)
           (Xml.child xml_arg0 "VersionStages") in
@@ -3310,24 +3915,26 @@ module PutSecretValueRequest =
       let secretId =
         SecretIdType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
-      make ?versionStages ?secretString ?secretBinary ?clientRequestToken
-        ~secretId ()
+      make ?rotationToken ?versionStages ?secretString ?secretBinary
+        ?clientRequestToken ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let rotationToken =
+        field_map json__ "RotationToken" RotationTokenType.of_json in
       let versionStages =
-        field_map json "VersionStages" SecretVersionStagesType.of_json in
+        field_map json__ "VersionStages" SecretVersionStagesType.of_json in
       let secretString =
-        field_map json "SecretString" SecretStringType.of_json in
+        field_map json__ "SecretString" SecretStringType.of_json in
       let secretBinary =
-        field_map json "SecretBinary" SecretBinaryType.of_json in
+        field_map json__ "SecretBinary" SecretBinaryType.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenType.of_json in
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
-      make ?versionStages ?secretString ?secretBinary ?clientRequestToken
-        ~secretId ()
+        field_map json__ "ClientRequestToken" ClientRequestTokenType.of_json in
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
+      make ?rotationToken ?versionStages ?secretString ?secretBinary
+        ?clientRequestToken ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new version with a new encrypted secret value and attaches it to the secret. The version can contain a new SecretString value or a new SecretBinary value. We recommend you avoid calling PutSecretValue at a sustained rate of more than once every 10 minutes. When you update the secret value, Secrets Manager creates a new version of the secret. Secrets Manager removes outdated versions when there are more than 100, but it does not remove versions created less than 24 hours ago. If you call PutSecretValue more than once every 10 minutes, you create more versions than Secrets Manager removes, and you will reach the quota for secret versions. You can specify the staging labels to attach to the new version in VersionStages. If you don't include VersionStages, then Secrets Manager automatically moves the staging label AWSCURRENT to this version. If this operation creates the first version for the secret, then Secrets Manager automatically attaches the staging label AWSCURRENT to it . If this operation moves the staging label AWSCURRENT from another version to this version, then Secrets Manager also automatically moves the staging label AWSPREVIOUS to the version that AWSCURRENT was removed from. This operation is idempotent. If a version with a VersionId with the same value as the ClientRequestToken parameter already exists, and you specify the same secret data, the operation succeeds but does nothing. However, if the secret data is different, then the operation fails because you can't modify an existing version; you can only create new ones. Required permissions: secretsmanager:PutSecretValue. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Creates a new version of your secret by creating a new encrypted value and attaching it to the secret. version can contain a new SecretString value or a new SecretBinary value. Do not call PutSecretValue at a sustained rate of more than once every 10 minutes. When you update the secret value, Secrets Manager creates a new version of the secret. Secrets Manager keeps 100 of the most recent versions, but it keeps all secret versions created in the last 24 hours. If you call PutSecretValue more than once every 10 minutes, you will create more versions than Secrets Manager removes, and you will reach the quota for secret versions. You can specify the staging labels to attach to the new version in VersionStages. If you don't include VersionStages, then Secrets Manager automatically moves the staging label AWSCURRENT to this version. If this operation creates the first version for the secret, then Secrets Manager automatically attaches the staging label AWSCURRENT to it. If this operation moves the staging label AWSCURRENT from another version to this version, then Secrets Manager also automatically moves the staging label AWSPREVIOUS to the version that AWSCURRENT was removed from. This operation is idempotent. If you call this operation with a ClientRequestToken that matches an existing version's VersionId, and you specify the same secret data, the operation succeeds but does nothing. However, if the secret data is different, then the operation fails because you can't modify an existing version; you can only create new ones. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters except SecretBinary, SecretString, or RotationToken because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:PutSecretValue. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager. When you enter commands in a command shell, there is a risk of the command history being accessed or utilities having access to your command parameters. This is a concern if the command includes the value of a secret. Learn how to Mitigate the risks of using command-line tools to store Secrets Manager secrets."]
 module PutResourcePolicyResponse =
   struct
     type nonrec t =
@@ -3421,26 +4028,26 @@ module PutResourcePolicyResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" NameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" NameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches a resource-based permission policy to a secret. A resource-based policy is optional. For more information, see Authentication and access control for Secrets Manager For information about attaching a policy in the console, see Attach a permissions policy to a secret. Required permissions: secretsmanager:PutResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Attaches a resource-based permission policy to a secret. A resource-based policy is optional. For more information, see Authentication and access control for Secrets Manager For information about attaching a policy in the console, see Attach a permissions policy to a secret. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:PutResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module PutResourcePolicyRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or name of the secret to attach the resource-based policy. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."];
+          "The ARN or name of the secret to attach the resource-based policy. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."];
       resourcePolicy: NonEmptyResourcePolicyType.t
         [@ocaml.doc
           "A JSON-formatted string for an Amazon Web Services resource-based policy. For example policies, see Permissions policy examples."];
       blockPublicPolicy: BooleanType.t option
         [@ocaml.doc
-          "Specifies whether to block resource-based policies that allow broad access to the secret. By default, Secrets Manager blocks policies that allow broad access, for example those that use a wildcard for the principal."]}
+          "Specifies whether to block resource-based policies that allow broad access to the secret, for example those that use a wildcard for the principal. By default, public policies aren't blocked. Resource policy validation and the BlockPublicPolicy parameter help protect your resources by preventing public access from being granted through the resource policies that are directly attached to your secrets. In addition to using these features, carefully inspect the following policies to confirm that they do not grant public access: Identity-based policies attached to associated Amazon Web Services principals (for example, IAM roles) Resource-based policies attached to associated Amazon Web Services resources (for example, Key Management Service (KMS) keys) To review permissions to your secrets, see Determine who has permissions to your secrets."]}
     let context_ = "PutResourcePolicyRequest"
     let make ?blockPublicPolicy =
       fun ~secretId ->
@@ -3466,17 +4073,17 @@ module PutResourcePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?blockPublicPolicy ~resourcePolicy ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let blockPublicPolicy =
-        field_map json "BlockPublicPolicy" BooleanType.of_json in
+        field_map json__ "BlockPublicPolicy" BooleanType.of_json in
       let resourcePolicy =
-        field_map_exn json "ResourcePolicy"
+        field_map_exn json__ "ResourcePolicy"
           NonEmptyResourcePolicyType.of_json in
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ?blockPublicPolicy ~resourcePolicy ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches a resource-based permission policy to a secret. A resource-based policy is optional. For more information, see Authentication and access control for Secrets Manager For information about attaching a policy in the console, see Attach a permissions policy to a secret. Required permissions: secretsmanager:PutResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Attaches a resource-based permission policy to a secret. A resource-based policy is optional. For more information, see Authentication and access control for Secrets Manager For information about attaching a policy in the console, see Attach a permissions policy to a secret. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:PutResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module ListSecretsResponse =
   struct
     type nonrec t =
@@ -3490,6 +4097,7 @@ module ListSecretsResponse =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?secretList =
       fun ?nextToken -> fun () -> { secretList; nextToken }
@@ -3501,6 +4109,8 @@ module ListSecretsResponse =
           `InvalidNextTokenException (InvalidNextTokenException.of_json json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3512,6 +4122,8 @@ module ListSecretsResponse =
           `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3528,6 +4140,10 @@ module ListSecretsResponse =
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3546,17 +4162,20 @@ module ListSecretsResponse =
           (Xml.child xml_arg0 "SecretList") in
       make ?nextToken ?secretList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextTokenType.of_json in
-      let secretList = field_map json "SecretList" SecretListType.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextTokenType.of_json in
+      let secretList = field_map json__ "SecretList" SecretListType.of_json in
       make ?nextToken ?secretList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the secrets that are stored by Secrets Manager in the Amazon Web Services account, not including secrets that are marked for deletion. To see secrets marked for deletion, use the Secrets Manager console. To list the versions of a secret, use ListSecretVersionIds. To get the secret value from SecretString or SecretBinary, call GetSecretValue. For information about finding secrets in the console, see Enhanced search capabilities for secrets in Secrets Manager. Required permissions: secretsmanager:ListSecrets. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Lists the secrets that are stored by Secrets Manager in the Amazon Web Services account, not including secrets that are marked for deletion. To see secrets marked for deletion, use the Secrets Manager console. All Secrets Manager operations are eventually consistent. ListSecrets might not reflect changes from the last five minutes. You can get more recent information for a specific secret by calling DescribeSecret. To list the versions of a secret, use ListSecretVersionIds. To retrieve the values for the secrets, call BatchGetSecretValue or GetSecretValue. For information about finding secrets in the console, see Find secrets in Secrets Manager. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:ListSecrets. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module ListSecretsRequest =
   struct
     type nonrec t =
       {
+      includePlannedDeletion: BooleanType.t option
+        [@ocaml.doc
+          "Specifies whether to include secrets scheduled for deletion. By default, secrets scheduled for deletion aren't included."];
       maxResults: MaxResultsType.t option
         [@ocaml.doc
           "The number of results to include in the response. If there are more results available, in the response, Secrets Manager includes NextToken. To get the next results, call ListSecrets again with the value from NextToken."];
@@ -3566,20 +4185,37 @@ module ListSecretsRequest =
       filters: FiltersListType.t option
         [@ocaml.doc "The filters to apply to the list of secrets."];
       sortOrder: SortOrderType.t option
-        [@ocaml.doc "Lists secrets in the requested order."]}
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ?filters ->
-          fun ?sortOrder ->
-            fun () -> { maxResults; nextToken; filters; sortOrder }
+        [@ocaml.doc "Secrets are listed by CreatedDate."];
+      sortBy: SortByType.t option
+        [@ocaml.doc "If not specified, secrets are listed by CreatedDate."]}
+    let make ?includePlannedDeletion =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?filters ->
+            fun ?sortOrder ->
+              fun ?sortBy ->
+                fun () ->
+                  {
+                    includePlannedDeletion;
+                    maxResults;
+                    nextToken;
+                    filters;
+                    sortOrder;
+                    sortBy
+                  }
     let to_value x =
       structure_to_value
-        [("MaxResults", (Option.map x.maxResults ~f:MaxResultsType.to_value));
+        [("IncludePlannedDeletion",
+           (Option.map x.includePlannedDeletion ~f:BooleanType.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResultsType.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextTokenType.to_value));
         ("Filters", (Option.map x.filters ~f:FiltersListType.to_value));
-        ("SortOrder", (Option.map x.sortOrder ~f:SortOrderType.to_value))]
+        ("SortOrder", (Option.map x.sortOrder ~f:SortOrderType.to_value));
+        ("SortBy", (Option.map x.sortBy ~f:SortByType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sortBy =
+        (Option.map ~f:SortByType.of_xml) (Xml.child xml_arg0 "SortBy") in
       let sortOrder =
         (Option.map ~f:SortOrderType.of_xml) (Xml.child xml_arg0 "SortOrder") in
       let filters =
@@ -3589,17 +4225,25 @@ module ListSecretsRequest =
       let maxResults =
         (Option.map ~f:MaxResultsType.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
-      make ?sortOrder ?filters ?nextToken ?maxResults ()
+      let includePlannedDeletion =
+        (Option.map ~f:BooleanType.of_xml)
+          (Xml.child xml_arg0 "IncludePlannedDeletion") in
+      make ?sortBy ?sortOrder ?filters ?nextToken ?maxResults
+        ?includePlannedDeletion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortOrder = field_map json "SortOrder" SortOrderType.of_json in
-      let filters = field_map json "Filters" FiltersListType.of_json in
-      let nextToken = field_map json "NextToken" NextTokenType.of_json in
-      let maxResults = field_map json "MaxResults" MaxResultsType.of_json in
-      make ?sortOrder ?filters ?nextToken ?maxResults ()
+    let of_json json__ =
+      let sortBy = field_map json__ "SortBy" SortByType.of_json in
+      let sortOrder = field_map json__ "SortOrder" SortOrderType.of_json in
+      let filters = field_map json__ "Filters" FiltersListType.of_json in
+      let nextToken = field_map json__ "NextToken" NextTokenType.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResultsType.of_json in
+      let includePlannedDeletion =
+        field_map json__ "IncludePlannedDeletion" BooleanType.of_json in
+      make ?sortBy ?sortOrder ?filters ?nextToken ?maxResults
+        ?includePlannedDeletion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the secrets that are stored by Secrets Manager in the Amazon Web Services account, not including secrets that are marked for deletion. To see secrets marked for deletion, use the Secrets Manager console. To list the versions of a secret, use ListSecretVersionIds. To get the secret value from SecretString or SecretBinary, call GetSecretValue. For information about finding secrets in the console, see Enhanced search capabilities for secrets in Secrets Manager. Required permissions: secretsmanager:ListSecrets. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Lists the secrets that are stored by Secrets Manager in the Amazon Web Services account, not including secrets that are marked for deletion. To see secrets marked for deletion, use the Secrets Manager console. All Secrets Manager operations are eventually consistent. ListSecrets might not reflect changes from the last five minutes. You can get more recent information for a specific secret by calling DescribeSecret. To list the versions of a secret, use ListSecretVersionIds. To retrieve the values for the secrets, call BatchGetSecretValue or GetSecretValue. For information about finding secrets in the console, see Find secrets in Secrets Manager. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:ListSecrets. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module ListSecretVersionIdsResponse =
   struct
     type nonrec t =
@@ -3688,22 +4332,23 @@ module ListSecretVersionIdsResponse =
           (Xml.child xml_arg0 "Versions") in
       make ?name ?aRN ?nextToken ?versions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" SecretNameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
-      let nextToken = field_map json "NextToken" NextTokenType.of_json in
-      let versions = field_map json "Versions" SecretVersionsListType.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" SecretNameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
+      let nextToken = field_map json__ "NextToken" NextTokenType.of_json in
+      let versions =
+        field_map json__ "Versions" SecretVersionsListType.of_json in
       make ?name ?aRN ?nextToken ?versions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the versions for a secret. To list the secrets in the account, use ListSecrets. To get the secret value from SecretString or SecretBinary, call GetSecretValue. Required permissions: secretsmanager:ListSecretVersionIds. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Lists the versions of a secret. Secrets Manager uses staging labels to indicate the different versions of a secret. For more information, see Secrets Manager concepts: Versions. To list the secrets in the account, use ListSecrets. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:ListSecretVersionIds. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module ListSecretVersionIdsRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or name of the secret whose versions you want to list. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."];
+          "The ARN or name of the secret whose versions you want to list. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."];
       maxResults: MaxResultsType.t option
         [@ocaml.doc
           "The number of results to include in the response. If there are more results available, in the response, Secrets Manager includes NextToken. To get the next results, call ListSecretVersionIds again with the value from NextToken."];
@@ -3712,7 +4357,7 @@ module ListSecretVersionIdsRequest =
           "A token that indicates where the output should continue from, if a previous call did not show all results. To get the next results, call ListSecretVersionIds again with this value."];
       includeDeprecated: BooleanType.t option
         [@ocaml.doc
-          "Specifies whether to include versions of secrets that don't have any staging labels attached to them. Versions without staging labels are considered deprecated and are subject to deletion by Secrets Manager."]}
+          "Specifies whether to include versions of secrets that don't have any staging labels attached to them. Versions without staging labels are considered deprecated and are subject to deletion by Secrets Manager. By default, versions without staging labels aren't included."]}
     let context_ = "ListSecretVersionIdsRequest"
     let make ?maxResults =
       fun ?nextToken ->
@@ -3741,16 +4386,16 @@ module ListSecretVersionIdsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?includeDeprecated ?nextToken ?maxResults ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeDeprecated =
-        field_map json "IncludeDeprecated" BooleanType.of_json in
-      let nextToken = field_map json "NextToken" NextTokenType.of_json in
-      let maxResults = field_map json "MaxResults" MaxResultsType.of_json in
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+        field_map json__ "IncludeDeprecated" BooleanType.of_json in
+      let nextToken = field_map json__ "NextToken" NextTokenType.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResultsType.of_json in
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ?includeDeprecated ?nextToken ?maxResults ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the versions for a secret. To list the secrets in the account, use ListSecrets. To get the secret value from SecretString or SecretBinary, call GetSecretValue. Required permissions: secretsmanager:ListSecretVersionIds. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Lists the versions of a secret. Secrets Manager uses staging labels to indicate the different versions of a secret. For more information, see Secrets Manager concepts: Versions. To list the secrets in the account, use ListSecrets. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:ListSecretVersionIds. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module GetSecretValueResponse =
   struct
     type nonrec t =
@@ -3762,10 +4407,10 @@ module GetSecretValueResponse =
         [@ocaml.doc "The unique identifier of this version of the secret."];
       secretBinary: SecretBinaryType.t option
         [@ocaml.doc
-          "The decrypted secret value, if the secret value was originally provided as binary data in the form of a byte array. The response parameter represents the binary data as a base64-encoded string. If the secret was created by using the Secrets Manager console, or if the secret value was originally provided as a string, then this field is omitted. The secret value appears in SecretString instead."];
+          "The decrypted secret value, if the secret value was originally provided as binary data in the form of a byte array. When you retrieve a SecretBinary using the HTTP API, the Python SDK, or the Amazon Web Services CLI, the value is Base64-encoded. Otherwise, it is not encoded. If the secret was created by using the Secrets Manager console, or if the secret value was originally provided as a string, then this field is omitted. The secret value appears in SecretString instead. Sensitive: This field contains sensitive information, so the service does not include it in CloudTrail log entries. If you create your own log entries, you must also avoid logging the information in this field."];
       secretString: SecretStringType.t option
         [@ocaml.doc
-          "The decrypted secret value, if the secret value was originally provided as a string or through the Secrets Manager console. If this secret was created by using the console, then Secrets Manager stores the information as a JSON structure of key/value pairs."];
+          "The decrypted secret value, if the secret value was originally provided as a string or through the Secrets Manager console. If this secret was created by using the console, then Secrets Manager stores the information as a JSON structure of key/value pairs. Sensitive: This field contains sensitive information, so the service does not include it in CloudTrail log entries. If you create your own log entries, you must also avoid logging the information in this field."];
       versionStages: SecretVersionStagesType.t option
         [@ocaml.doc
           "A list of all of the staging labels currently attached to this version of the secret."];
@@ -3890,29 +4535,31 @@ module GetSecretValueResponse =
       make ?createdDate ?versionStages ?secretString ?secretBinary ?versionId
         ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdDate = field_map json "CreatedDate" CreatedDateType.of_json in
+    let of_json json__ =
+      let createdDate =
+        field_map json__ "CreatedDate" CreatedDateType.of_json in
       let versionStages =
-        field_map json "VersionStages" SecretVersionStagesType.of_json in
+        field_map json__ "VersionStages" SecretVersionStagesType.of_json in
       let secretString =
-        field_map json "SecretString" SecretStringType.of_json in
+        field_map json__ "SecretString" SecretStringType.of_json in
       let secretBinary =
-        field_map json "SecretBinary" SecretBinaryType.of_json in
-      let versionId = field_map json "VersionId" SecretVersionIdType.of_json in
-      let name = field_map json "Name" SecretNameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+        field_map json__ "SecretBinary" SecretBinaryType.of_json in
+      let versionId =
+        field_map json__ "VersionId" SecretVersionIdType.of_json in
+      let name = field_map json__ "Name" SecretNameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?createdDate ?versionStages ?secretString ?secretBinary ?versionId
         ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the contents of the encrypted fields SecretString or SecretBinary from the specified version of a secret, whichever contains content. We recommend that you cache your secret values by using client-side caching. Caching secrets improves speed and reduces your costs. For more information, see Cache secrets for your applications. Required permissions: secretsmanager:GetSecretValue. If the secret is encrypted using a customer-managed key instead of the Amazon Web Services managed key aws/secretsmanager, then you also need kms:Decrypt permissions for that key. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Retrieves the contents of the encrypted fields SecretString or SecretBinary from the specified version of a secret, whichever contains content. To retrieve the values for a group of secrets, call BatchGetSecretValue. We recommend that you cache your secret values by using client-side caching. Caching secrets improves speed and reduces your costs. For more information, see Cache secrets for your applications. To retrieve the previous version of a secret, use VersionStage and specify AWSPREVIOUS. To revert to the previous version of a secret, call UpdateSecretVersionStage. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:GetSecretValue. If the secret is encrypted using a customer-managed key instead of the Amazon Web Services managed key aws/secretsmanager, then you also need kms:Decrypt permissions for that key. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module GetSecretValueRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or name of the secret to retrieve. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."];
+          "The ARN or name of the secret to retrieve. To retrieve a secret from another account, you must use an ARN. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."];
       versionId: SecretVersionIdType.t option
         [@ocaml.doc
           "The unique identifier of the version of the secret to retrieve. If you include both this parameter and VersionStage, the two parameters must refer to the same secret version. If you don't specify either a VersionStage or VersionId, then Secrets Manager returns the AWSCURRENT version. This value is typically a UUID-type value with 32 hexadecimal digits."];
@@ -3943,15 +4590,16 @@ module GetSecretValueRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?versionStage ?versionId ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionStage =
-        field_map json "VersionStage" SecretVersionStageType.of_json in
-      let versionId = field_map json "VersionId" SecretVersionIdType.of_json in
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+        field_map json__ "VersionStage" SecretVersionStageType.of_json in
+      let versionId =
+        field_map json__ "VersionId" SecretVersionIdType.of_json in
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ?versionStage ?versionId ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the contents of the encrypted fields SecretString or SecretBinary from the specified version of a secret, whichever contains content. We recommend that you cache your secret values by using client-side caching. Caching secrets improves speed and reduces your costs. For more information, see Cache secrets for your applications. Required permissions: secretsmanager:GetSecretValue. If the secret is encrypted using a customer-managed key instead of the Amazon Web Services managed key aws/secretsmanager, then you also need kms:Decrypt permissions for that key. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Retrieves the contents of the encrypted fields SecretString or SecretBinary from the specified version of a secret, whichever contains content. To retrieve the values for a group of secrets, call BatchGetSecretValue. We recommend that you cache your secret values by using client-side caching. Caching secrets improves speed and reduces your costs. For more information, see Cache secrets for your applications. To retrieve the previous version of a secret, use VersionStage and specify AWSPREVIOUS. To revert to the previous version of a secret, call UpdateSecretVersionStage. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:GetSecretValue. If the secret is encrypted using a customer-managed key instead of the Amazon Web Services managed key aws/secretsmanager, then you also need kms:Decrypt permissions for that key. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module GetResourcePolicyResponse =
   struct
     type nonrec t =
@@ -4038,22 +4686,22 @@ module GetResourcePolicyResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?resourcePolicy ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourcePolicy =
-        field_map json "ResourcePolicy" NonEmptyResourcePolicyType.of_json in
-      let name = field_map json "Name" NameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+        field_map json__ "ResourcePolicy" NonEmptyResourcePolicyType.of_json in
+      let name = field_map json__ "Name" NameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?resourcePolicy ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the JSON text of the resource-based policy document attached to the secret. For more information about permissions policies attached to a secret, see Permissions policies attached to a secret. Required permissions: secretsmanager:GetResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Retrieves the JSON text of the resource-based policy document attached to the secret. For more information about permissions policies attached to a secret, see Permissions policies attached to a secret. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:GetResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module GetResourcePolicyRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or name of the secret to retrieve the attached resource-based policy for. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."]}
+          "The ARN or name of the secret to retrieve the attached resource-based policy for. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."]}
     let context_ = "GetResourcePolicyRequest"
     let make ~secretId = fun () -> { secretId }
     let to_value x =
@@ -4066,12 +4714,12 @@ module GetResourcePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+    let of_json json__ =
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the JSON text of the resource-based policy document attached to the secret. For more information about permissions policies attached to a secret, see Permissions policies attached to a secret. Required permissions: secretsmanager:GetResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Retrieves the JSON text of the resource-based policy document attached to the secret. For more information about permissions policies attached to a secret, see Permissions policies attached to a secret. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:GetResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module GetRandomPasswordResponse =
   struct
     type nonrec t =
@@ -4135,13 +4783,13 @@ module GetRandomPasswordResponse =
           (Xml.child xml_arg0 "RandomPassword") in
       make ?randomPassword ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let randomPassword =
-        field_map json "RandomPassword" RandomPasswordType.of_json in
+        field_map json__ "RandomPassword" RandomPasswordType.of_json in
       make ?randomPassword ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a random password. We recommend that you specify the maximum length and include every character type that the system you are generating a password for can support. Required permissions: secretsmanager:GetRandomPassword. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Generates a random password. We recommend that you specify the maximum length and include every character type that the system you are generating a password for can support. By default, Secrets Manager uses uppercase and lowercase letters, numbers, and the following characters in passwords: !\\\"#$%&'()*+,-./:;<=>?\\@\\[\\\\\\]^_`\\{|\\}~ Secrets Manager generates a CloudTrail log entry when you call this action. Required permissions: secretsmanager:GetRandomPassword. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module GetRandomPasswordRequest =
   struct
     type nonrec t =
@@ -4238,62 +4886,75 @@ module GetRandomPasswordRequest =
         ?excludeUppercase ?excludePunctuation ?excludeNumbers
         ?excludeCharacters ?passwordLength ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requireEachIncludedType =
-        field_map json "RequireEachIncludedType"
+        field_map json__ "RequireEachIncludedType"
           RequireEachIncludedTypeType.of_json in
       let includeSpace =
-        field_map json "IncludeSpace" IncludeSpaceType.of_json in
+        field_map json__ "IncludeSpace" IncludeSpaceType.of_json in
       let excludeLowercase =
-        field_map json "ExcludeLowercase" ExcludeLowercaseType.of_json in
+        field_map json__ "ExcludeLowercase" ExcludeLowercaseType.of_json in
       let excludeUppercase =
-        field_map json "ExcludeUppercase" ExcludeUppercaseType.of_json in
+        field_map json__ "ExcludeUppercase" ExcludeUppercaseType.of_json in
       let excludePunctuation =
-        field_map json "ExcludePunctuation" ExcludePunctuationType.of_json in
+        field_map json__ "ExcludePunctuation" ExcludePunctuationType.of_json in
       let excludeNumbers =
-        field_map json "ExcludeNumbers" ExcludeNumbersType.of_json in
+        field_map json__ "ExcludeNumbers" ExcludeNumbersType.of_json in
       let excludeCharacters =
-        field_map json "ExcludeCharacters" ExcludeCharactersType.of_json in
+        field_map json__ "ExcludeCharacters" ExcludeCharactersType.of_json in
       let passwordLength =
-        field_map json "PasswordLength" PasswordLengthType.of_json in
+        field_map json__ "PasswordLength" PasswordLengthType.of_json in
       make ?requireEachIncludedType ?includeSpace ?excludeLowercase
         ?excludeUppercase ?excludePunctuation ?excludeNumbers
         ?excludeCharacters ?passwordLength ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a random password. We recommend that you specify the maximum length and include every character type that the system you are generating a password for can support. Required permissions: secretsmanager:GetRandomPassword. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Generates a random password. We recommend that you specify the maximum length and include every character type that the system you are generating a password for can support. By default, Secrets Manager uses uppercase and lowercase letters, numbers, and the following characters in passwords: !\\\"#$%&'()*+,-./:;<=>?\\@\\[\\\\\\]^_`\\{|\\}~ Secrets Manager generates a CloudTrail log entry when you call this action. Required permissions: secretsmanager:GetRandomPassword. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module DescribeSecretResponse =
   struct
     type nonrec t =
       {
       aRN: SecretARNType.t option [@ocaml.doc "The ARN of the secret."];
       name: SecretNameType.t option [@ocaml.doc "The name of the secret."];
+      type_: MedeaTypeType.t option
+        [@ocaml.doc
+          "The exact string that identifies the partner that holds the external secret. For more information, see Using Secrets Manager managed external secrets."];
       description: DescriptionType.t option
         [@ocaml.doc "The description of the secret."];
       kmsKeyId: KmsKeyIdType.t option
         [@ocaml.doc
-          "The ARN of the KMS key that Secrets Manager uses to encrypt the secret value. If the secret is encrypted with the Amazon Web Services managed key aws/secretsmanager, this field is omitted."];
+          "The key ID or alias ARN of the KMS key that Secrets Manager uses to encrypt the secret value. If the secret is encrypted with the Amazon Web Services managed key aws/secretsmanager, this field is omitted. Secrets created using the console use an KMS key ID."];
       rotationEnabled: RotationEnabledType.t option
         [@ocaml.doc
-          "Specifies whether automatic rotation is turned on for this secret. To turn on rotation, use RotateSecret. To turn off rotation, use CancelRotateSecret."];
+          "Specifies whether automatic rotation is turned on for this secret. If the secret has never been configured for rotation, Secrets Manager returns null. To turn on rotation, use RotateSecret. To turn off rotation, use CancelRotateSecret."];
       rotationLambdaARN: RotationLambdaARNType.t option
         [@ocaml.doc
           "The ARN of the Lambda function that Secrets Manager invokes to rotate the secret."];
       rotationRules: RotationRulesType.t option
         [@ocaml.doc
           "The rotation schedule and Lambda function for this secret. If the secret previously had rotation turned on, but it is now turned off, this field shows the previous rotation schedule and rotation function. If the secret never had rotation turned on, this field is omitted."];
+      externalSecretRotationMetadata:
+        ExternalSecretRotationMetadataType.t option
+        [@ocaml.doc
+          "The metadata needed to successfully rotate a managed external secret. A list of key value pairs in JSON format specified by the partner. For more information about the required information, see Managed external secrets partners."];
+      externalSecretRotationRoleArn: RoleARNType.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the role that allows Secrets Manager to rotate a secret held by a third-party partner. For more information, see Security and permissions."];
       lastRotatedDate: LastRotatedDateType.t option
         [@ocaml.doc
-          "The last date and time that Secrets Manager rotated the secret. If the secret isn't configured for rotation, Secrets Manager returns null."];
+          "The last date and time that Secrets Manager rotated the secret. If the secret isn't configured for rotation or rotation has been disabled, Secrets Manager returns null."];
       lastChangedDate: LastChangedDateType.t option
         [@ocaml.doc
           "The last date and time that this secret was modified in any way."];
       lastAccessedDate: LastAccessedDateType.t option
         [@ocaml.doc
-          "The last date that the secret value was retrieved. This value does not include the time. This field is omitted if the secret has never been retrieved."];
+          "The date that the secret was last accessed in the Region. This field is omitted if the secret has never been retrieved in the Region."];
       deletedDate: DeletedDateType.t option
         [@ocaml.doc
           "The date the secret is scheduled for deletion. If it is not scheduled for deletion, this field is omitted. When you delete a secret, Secrets Manager requires a recovery window of at least 7 days before deleting the secret. Some time after the deleted date, Secrets Manager deletes the secret, including all of its versions. If a secret is scheduled for deletion, then its details, including the encrypted secret value, is not accessible. To cancel a scheduled deletion and restore access to the secret, use RestoreSecret."];
+      nextRotationDate: NextRotationDateType.t option
+        [@ocaml.doc
+          "The next rotation is scheduled to occur on or before this date. If the secret isn't configured for rotation or rotation has been disabled, Secrets Manager returns null. If rotation fails, Secrets Manager retries the entire rotation process multiple times. If rotation is unsuccessful, this date may be in the past. This date represents the latest date that rotation will occur, but it is not an approximate rotation date. In some cases, for example if you turn off automatic rotation and then turn it back on, the next rotation may occur much sooner than this date."];
       tags: TagListType.t option
         [@ocaml.doc
           "The list of tags attached to the secret. To add tags to a secret, use TagResource. To remove tags, use UntagResource."];
@@ -4301,7 +4962,8 @@ module DescribeSecretResponse =
         [@ocaml.doc
           "A list of the versions of the secret that have staging labels attached. Versions that don't have staging labels are considered deprecated and Secrets Manager can delete them. Secrets Manager uses staging labels to indicate the status of a secret version during rotation. The three staging labels for rotation are: AWSCURRENT, which indicates the current version of the secret. AWSPENDING, which indicates the version of the secret that contains new secret information that will become the next current version when rotation finishes. During rotation, Secrets Manager creates an AWSPENDING version ID before creating the new secret version. To check if a secret version exists, call GetSecretValue. AWSPREVIOUS, which indicates the previous current version of the secret. You can use this as the last known good version. For more information about rotation and staging labels, see How rotation works."];
       owningService: OwningServiceType.t option
-        [@ocaml.doc "The name of the service that created this secret."];
+        [@ocaml.doc
+          "The ID of the service that created this secret. For more information, see Secrets managed by other Amazon Web Services services."];
       createdDate: TimestampType.t option
         [@ocaml.doc "The date the secret was created."];
       primaryRegion: RegionType.t option
@@ -4317,41 +4979,49 @@ module DescribeSecretResponse =
       | `Unknown_operation_error of (string * string option) ]
     let make ?aRN =
       fun ?name ->
-        fun ?description ->
-          fun ?kmsKeyId ->
-            fun ?rotationEnabled ->
-              fun ?rotationLambdaARN ->
-                fun ?rotationRules ->
-                  fun ?lastRotatedDate ->
-                    fun ?lastChangedDate ->
-                      fun ?lastAccessedDate ->
-                        fun ?deletedDate ->
-                          fun ?tags ->
-                            fun ?versionIdsToStages ->
-                              fun ?owningService ->
-                                fun ?createdDate ->
-                                  fun ?primaryRegion ->
-                                    fun ?replicationStatus ->
-                                      fun () ->
-                                        {
-                                          aRN;
-                                          name;
-                                          description;
-                                          kmsKeyId;
-                                          rotationEnabled;
-                                          rotationLambdaARN;
-                                          rotationRules;
-                                          lastRotatedDate;
-                                          lastChangedDate;
-                                          lastAccessedDate;
-                                          deletedDate;
-                                          tags;
-                                          versionIdsToStages;
-                                          owningService;
-                                          createdDate;
-                                          primaryRegion;
-                                          replicationStatus
-                                        }
+        fun ?type_ ->
+          fun ?description ->
+            fun ?kmsKeyId ->
+              fun ?rotationEnabled ->
+                fun ?rotationLambdaARN ->
+                  fun ?rotationRules ->
+                    fun ?externalSecretRotationMetadata ->
+                      fun ?externalSecretRotationRoleArn ->
+                        fun ?lastRotatedDate ->
+                          fun ?lastChangedDate ->
+                            fun ?lastAccessedDate ->
+                              fun ?deletedDate ->
+                                fun ?nextRotationDate ->
+                                  fun ?tags ->
+                                    fun ?versionIdsToStages ->
+                                      fun ?owningService ->
+                                        fun ?createdDate ->
+                                          fun ?primaryRegion ->
+                                            fun ?replicationStatus ->
+                                              fun () ->
+                                                {
+                                                  aRN;
+                                                  name;
+                                                  type_;
+                                                  description;
+                                                  kmsKeyId;
+                                                  rotationEnabled;
+                                                  rotationLambdaARN;
+                                                  rotationRules;
+                                                  externalSecretRotationMetadata;
+                                                  externalSecretRotationRoleArn;
+                                                  lastRotatedDate;
+                                                  lastChangedDate;
+                                                  lastAccessedDate;
+                                                  deletedDate;
+                                                  nextRotationDate;
+                                                  tags;
+                                                  versionIdsToStages;
+                                                  owningService;
+                                                  createdDate;
+                                                  primaryRegion;
+                                                  replicationStatus
+                                                }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -4396,6 +5066,7 @@ module DescribeSecretResponse =
       structure_to_value
         [("ARN", (Option.map x.aRN ~f:SecretARNType.to_value));
         ("Name", (Option.map x.name ~f:SecretNameType.to_value));
+        ("Type", (Option.map x.type_ ~f:MedeaTypeType.to_value));
         ("Description",
           (Option.map x.description ~f:DescriptionType.to_value));
         ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyIdType.to_value));
@@ -4405,6 +5076,11 @@ module DescribeSecretResponse =
           (Option.map x.rotationLambdaARN ~f:RotationLambdaARNType.to_value));
         ("RotationRules",
           (Option.map x.rotationRules ~f:RotationRulesType.to_value));
+        ("ExternalSecretRotationMetadata",
+          (Option.map x.externalSecretRotationMetadata
+             ~f:ExternalSecretRotationMetadataType.to_value));
+        ("ExternalSecretRotationRoleArn",
+          (Option.map x.externalSecretRotationRoleArn ~f:RoleARNType.to_value));
         ("LastRotatedDate",
           (Option.map x.lastRotatedDate ~f:LastRotatedDateType.to_value));
         ("LastChangedDate",
@@ -4413,6 +5089,8 @@ module DescribeSecretResponse =
           (Option.map x.lastAccessedDate ~f:LastAccessedDateType.to_value));
         ("DeletedDate",
           (Option.map x.deletedDate ~f:DeletedDateType.to_value));
+        ("NextRotationDate",
+          (Option.map x.nextRotationDate ~f:NextRotationDateType.to_value));
         ("Tags", (Option.map x.tags ~f:TagListType.to_value));
         ("VersionIdsToStages",
           (Option.map x.versionIdsToStages
@@ -4444,6 +5122,9 @@ module DescribeSecretResponse =
           (Xml.child xml_arg0 "VersionIdsToStages") in
       let tags =
         (Option.map ~f:TagListType.of_xml) (Xml.child xml_arg0 "Tags") in
+      let nextRotationDate =
+        (Option.map ~f:NextRotationDateType.of_xml)
+          (Xml.child xml_arg0 "NextRotationDate") in
       let deletedDate =
         (Option.map ~f:DeletedDateType.of_xml)
           (Xml.child xml_arg0 "DeletedDate") in
@@ -4456,6 +5137,12 @@ module DescribeSecretResponse =
       let lastRotatedDate =
         (Option.map ~f:LastRotatedDateType.of_xml)
           (Xml.child xml_arg0 "LastRotatedDate") in
+      let externalSecretRotationRoleArn =
+        (Option.map ~f:RoleARNType.of_xml)
+          (Xml.child xml_arg0 "ExternalSecretRotationRoleArn") in
+      let externalSecretRotationMetadata =
+        (Option.map ~f:ExternalSecretRotationMetadataType.of_xml)
+          (Xml.child xml_arg0 "ExternalSecretRotationMetadata") in
       let rotationRules =
         (Option.map ~f:RotationRulesType.of_xml)
           (Xml.child xml_arg0 "RotationRules") in
@@ -4470,57 +5157,74 @@ module DescribeSecretResponse =
       let description =
         (Option.map ~f:DescriptionType.of_xml)
           (Xml.child xml_arg0 "Description") in
+      let type_ =
+        (Option.map ~f:MedeaTypeType.of_xml) (Xml.child xml_arg0 "Type") in
       let name =
         (Option.map ~f:SecretNameType.of_xml) (Xml.child xml_arg0 "Name") in
       let aRN =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?replicationStatus ?primaryRegion ?createdDate ?owningService
-        ?versionIdsToStages ?tags ?deletedDate ?lastAccessedDate
-        ?lastChangedDate ?lastRotatedDate ?rotationRules ?rotationLambdaARN
-        ?rotationEnabled ?kmsKeyId ?description ?name ?aRN ()
+        ?versionIdsToStages ?tags ?nextRotationDate ?deletedDate
+        ?lastAccessedDate ?lastChangedDate ?lastRotatedDate
+        ?externalSecretRotationRoleArn ?externalSecretRotationMetadata
+        ?rotationRules ?rotationLambdaARN ?rotationEnabled ?kmsKeyId
+        ?description ?type_ ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationStatus =
-        field_map json "ReplicationStatus" ReplicationStatusListType.of_json in
-      let primaryRegion = field_map json "PrimaryRegion" RegionType.of_json in
-      let createdDate = field_map json "CreatedDate" TimestampType.of_json in
+        field_map json__ "ReplicationStatus"
+          ReplicationStatusListType.of_json in
+      let primaryRegion = field_map json__ "PrimaryRegion" RegionType.of_json in
+      let createdDate = field_map json__ "CreatedDate" TimestampType.of_json in
       let owningService =
-        field_map json "OwningService" OwningServiceType.of_json in
+        field_map json__ "OwningService" OwningServiceType.of_json in
       let versionIdsToStages =
-        field_map json "VersionIdsToStages"
+        field_map json__ "VersionIdsToStages"
           SecretVersionsToStagesMapType.of_json in
-      let tags = field_map json "Tags" TagListType.of_json in
-      let deletedDate = field_map json "DeletedDate" DeletedDateType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
+      let nextRotationDate =
+        field_map json__ "NextRotationDate" NextRotationDateType.of_json in
+      let deletedDate =
+        field_map json__ "DeletedDate" DeletedDateType.of_json in
       let lastAccessedDate =
-        field_map json "LastAccessedDate" LastAccessedDateType.of_json in
+        field_map json__ "LastAccessedDate" LastAccessedDateType.of_json in
       let lastChangedDate =
-        field_map json "LastChangedDate" LastChangedDateType.of_json in
+        field_map json__ "LastChangedDate" LastChangedDateType.of_json in
       let lastRotatedDate =
-        field_map json "LastRotatedDate" LastRotatedDateType.of_json in
+        field_map json__ "LastRotatedDate" LastRotatedDateType.of_json in
+      let externalSecretRotationRoleArn =
+        field_map json__ "ExternalSecretRotationRoleArn" RoleARNType.of_json in
+      let externalSecretRotationMetadata =
+        field_map json__ "ExternalSecretRotationMetadata"
+          ExternalSecretRotationMetadataType.of_json in
       let rotationRules =
-        field_map json "RotationRules" RotationRulesType.of_json in
+        field_map json__ "RotationRules" RotationRulesType.of_json in
       let rotationLambdaARN =
-        field_map json "RotationLambdaARN" RotationLambdaARNType.of_json in
+        field_map json__ "RotationLambdaARN" RotationLambdaARNType.of_json in
       let rotationEnabled =
-        field_map json "RotationEnabled" RotationEnabledType.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyIdType.of_json in
-      let description = field_map json "Description" DescriptionType.of_json in
-      let name = field_map json "Name" SecretNameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+        field_map json__ "RotationEnabled" RotationEnabledType.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyIdType.of_json in
+      let description =
+        field_map json__ "Description" DescriptionType.of_json in
+      let type_ = field_map json__ "Type" MedeaTypeType.of_json in
+      let name = field_map json__ "Name" SecretNameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?replicationStatus ?primaryRegion ?createdDate ?owningService
-        ?versionIdsToStages ?tags ?deletedDate ?lastAccessedDate
-        ?lastChangedDate ?lastRotatedDate ?rotationRules ?rotationLambdaARN
-        ?rotationEnabled ?kmsKeyId ?description ?name ?aRN ()
+        ?versionIdsToStages ?tags ?nextRotationDate ?deletedDate
+        ?lastAccessedDate ?lastChangedDate ?lastRotatedDate
+        ?externalSecretRotationRoleArn ?externalSecretRotationMetadata
+        ?rotationRules ?rotationLambdaARN ?rotationEnabled ?kmsKeyId
+        ?description ?type_ ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the details of a secret. It does not include the encrypted secret value. Secrets Manager only returns fields that have a value in the response. Required permissions: secretsmanager:DescribeSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Retrieves the details of a secret. It does not include the encrypted secret value. Secrets Manager only returns fields that have a value in the response. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:DescribeSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module DescribeSecretRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or name of the secret. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."]}
+          "The ARN or name of the secret. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."]}
     let context_ = "DescribeSecretRequest"
     let make ~secretId = fun () -> { secretId }
     let to_value x =
@@ -4533,12 +5237,12 @@ module DescribeSecretRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+    let of_json json__ =
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the details of a secret. It does not include the encrypted secret value. Secrets Manager only returns fields that have a value in the response. Required permissions: secretsmanager:DescribeSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Retrieves the details of a secret. It does not include the encrypted secret value. Secrets Manager only returns fields that have a value in the response. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:DescribeSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module DeleteSecretResponse =
   struct
     type nonrec t =
@@ -4621,28 +5325,28 @@ module DeleteSecretResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?deletionDate ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deletionDate =
-        field_map json "DeletionDate" DeletionDateType.of_json in
-      let name = field_map json "Name" SecretNameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+        field_map json__ "DeletionDate" DeletionDateType.of_json in
+      let name = field_map json__ "Name" SecretNameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?deletionDate ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a secret and all of its versions. You can specify a recovery window during which you can restore the secret. The minimum recovery window is 7 days. The default recovery window is 30 days. Secrets Manager attaches a DeletionDate stamp to the secret that specifies the end of the recovery window. At the end of the recovery window, Secrets Manager deletes the secret permanently. For information about deleting a secret in the console, see https://docs.aws.amazon.com/secretsmanager/latest/userguide/manage_delete-secret.html. Secrets Manager performs the permanent secret deletion at the end of the waiting period as a background task with low priority. There is no guarantee of a specific time after the recovery window for the permanent delete to occur. At any time before recovery window ends, you can use RestoreSecret to remove the DeletionDate and cancel the deletion of the secret. In a secret scheduled for deletion, you cannot access the encrypted secret value. To access that information, first cancel the deletion with RestoreSecret and then retrieve the information. Required permissions: secretsmanager:DeleteSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Deletes a secret and all of its versions. You can specify a recovery window during which you can restore the secret. The minimum recovery window is 7 days. The default recovery window is 30 days. Secrets Manager attaches a DeletionDate stamp to the secret that specifies the end of the recovery window. At the end of the recovery window, Secrets Manager deletes the secret permanently. You can't delete a primary secret that is replicated to other Regions. You must first delete the replicas using RemoveRegionsFromReplication, and then delete the primary secret. When you delete a replica, it is deleted immediately. You can't directly delete a version of a secret. Instead, you remove all staging labels from the version using UpdateSecretVersionStage. This marks the version as deprecated, and then Secrets Manager can automatically delete the version in the background. To determine whether an application still uses a secret, you can create an Amazon CloudWatch alarm to alert you to any attempts to access a secret during the recovery window. For more information, see Monitor secrets scheduled for deletion. Secrets Manager performs the permanent secret deletion at the end of the waiting period as a background task with low priority. There is no guarantee of a specific time after the recovery window for the permanent delete to occur. At any time before recovery window ends, you can use RestoreSecret to remove the DeletionDate and cancel the deletion of the secret. When a secret is scheduled for deletion, you cannot retrieve the secret value. You must first cancel the deletion with RestoreSecret and then you can retrieve the secret. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:DeleteSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module DeleteSecretRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or name of the secret to delete. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."];
+          "The ARN or name of the secret to delete. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."];
       recoveryWindowInDays: RecoveryWindowInDaysType.t option
         [@ocaml.doc
-          "The number of days from 7 to 30 that Secrets Manager waits before permanently deleting the secret. You can't use both this parameter and ForceDeleteWithoutRecovery in the same call. If you don't use either, then Secrets Manager defaults to a 30 day recovery window."];
+          "The number of days from 7 to 30 that Secrets Manager waits before permanently deleting the secret. You can't use both this parameter and ForceDeleteWithoutRecovery in the same call. If you don't use either, then by default Secrets Manager uses a 30 day recovery window."];
       forceDeleteWithoutRecovery: BooleanType.t option
         [@ocaml.doc
-          "Specifies whether to delete the secret without any recovery window. You can't use both this parameter and RecoveryWindowInDays in the same call. If you don't use either, then Secrets Manager defaults to a 30 day recovery window. Secrets Manager performs the actual deletion with an asynchronous background process, so there might be a short delay before the secret is permanently deleted. If you delete a secret and then immediately create a secret with the same name, use appropriate back off and retry logic. Use this parameter with caution. This parameter causes the operation to skip the normal recovery window before the permanent deletion that Secrets Manager would normally impose with the RecoveryWindowInDays parameter. If you delete a secret with the ForceDeleteWithouRecovery parameter, then you have no opportunity to recover the secret. You lose the secret permanently."]}
+          "Specifies whether to delete the secret without any recovery window. You can't use both this parameter and RecoveryWindowInDays in the same call. If you don't use either, then by default Secrets Manager uses a 30 day recovery window. Secrets Manager performs the actual deletion with an asynchronous background process, so there might be a short delay before the secret is permanently deleted. If you delete a secret and then immediately create a secret with the same name, use appropriate back off and retry logic. If you forcibly delete an already deleted or nonexistent secret, the operation does not return ResourceNotFoundException. Use this parameter with caution. This parameter causes the operation to skip the normal recovery window before the permanent deletion that Secrets Manager would normally impose with the RecoveryWindowInDays parameter. If you delete a secret with the ForceDeleteWithoutRecovery parameter, then you have no opportunity to recover the secret. You lose the secret permanently."]}
     let context_ = "DeleteSecretRequest"
     let make ?recoveryWindowInDays =
       fun ?forceDeleteWithoutRecovery ->
@@ -4670,17 +5374,17 @@ module DeleteSecretRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ?forceDeleteWithoutRecovery ?recoveryWindowInDays ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let forceDeleteWithoutRecovery =
-        field_map json "ForceDeleteWithoutRecovery" BooleanType.of_json in
+        field_map json__ "ForceDeleteWithoutRecovery" BooleanType.of_json in
       let recoveryWindowInDays =
-        field_map json "RecoveryWindowInDays"
+        field_map json__ "RecoveryWindowInDays"
           RecoveryWindowInDaysType.of_json in
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ?forceDeleteWithoutRecovery ?recoveryWindowInDays ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a secret and all of its versions. You can specify a recovery window during which you can restore the secret. The minimum recovery window is 7 days. The default recovery window is 30 days. Secrets Manager attaches a DeletionDate stamp to the secret that specifies the end of the recovery window. At the end of the recovery window, Secrets Manager deletes the secret permanently. For information about deleting a secret in the console, see https://docs.aws.amazon.com/secretsmanager/latest/userguide/manage_delete-secret.html. Secrets Manager performs the permanent secret deletion at the end of the waiting period as a background task with low priority. There is no guarantee of a specific time after the recovery window for the permanent delete to occur. At any time before recovery window ends, you can use RestoreSecret to remove the DeletionDate and cancel the deletion of the secret. In a secret scheduled for deletion, you cannot access the encrypted secret value. To access that information, first cancel the deletion with RestoreSecret and then retrieve the information. Required permissions: secretsmanager:DeleteSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Deletes a secret and all of its versions. You can specify a recovery window during which you can restore the secret. The minimum recovery window is 7 days. The default recovery window is 30 days. Secrets Manager attaches a DeletionDate stamp to the secret that specifies the end of the recovery window. At the end of the recovery window, Secrets Manager deletes the secret permanently. You can't delete a primary secret that is replicated to other Regions. You must first delete the replicas using RemoveRegionsFromReplication, and then delete the primary secret. When you delete a replica, it is deleted immediately. You can't directly delete a version of a secret. Instead, you remove all staging labels from the version using UpdateSecretVersionStage. This marks the version as deprecated, and then Secrets Manager can automatically delete the version in the background. To determine whether an application still uses a secret, you can create an Amazon CloudWatch alarm to alert you to any attempts to access a secret during the recovery window. For more information, see Monitor secrets scheduled for deletion. Secrets Manager performs the permanent secret deletion at the end of the waiting period as a background task with low priority. There is no guarantee of a specific time after the recovery window for the permanent delete to occur. At any time before recovery window ends, you can use RestoreSecret to remove the DeletionDate and cancel the deletion of the secret. When a secret is scheduled for deletion, you cannot retrieve the secret value. You must first cancel the deletion with RestoreSecret and then you can retrieve the secret. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:DeleteSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module DeleteResourcePolicyResponse =
   struct
     type nonrec t =
@@ -4757,20 +5461,20 @@ module DeleteResourcePolicyResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" NameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" NameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the resource-based permission policy attached to the secret. To attach a policy to a secret, use PutResourcePolicy. Required permissions: secretsmanager:DeleteResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Deletes the resource-based permission policy attached to the secret. To attach a policy to a secret, use PutResourcePolicy. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:DeleteResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module DeleteResourcePolicyRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or name of the secret to delete the attached resource-based policy for. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."]}
+          "The ARN or name of the secret to delete the attached resource-based policy for. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."]}
     let context_ = "DeleteResourcePolicyRequest"
     let make ~secretId = fun () -> { secretId }
     let to_value x =
@@ -4783,12 +5487,12 @@ module DeleteResourcePolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+    let of_json json__ =
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the resource-based permission policy attached to the secret. To attach a policy to a secret, use PutResourcePolicy. Required permissions: secretsmanager:DeleteResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Deletes the resource-based permission policy attached to the secret. To attach a policy to a secret, use PutResourcePolicy. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:DeleteResourcePolicy. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module CreateSecretResponse =
   struct
     type nonrec t =
@@ -4945,16 +5649,18 @@ module CreateSecretResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?replicationStatus ?versionId ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationStatus =
-        field_map json "ReplicationStatus" ReplicationStatusListType.of_json in
-      let versionId = field_map json "VersionId" SecretVersionIdType.of_json in
-      let name = field_map json "Name" SecretNameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+        field_map json__ "ReplicationStatus"
+          ReplicationStatusListType.of_json in
+      let versionId =
+        field_map json__ "VersionId" SecretVersionIdType.of_json in
+      let name = field_map json__ "Name" SecretNameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?replicationStatus ?versionId ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new secret. A secret is a set of credentials, such as a user name and password, that you store in an encrypted form in Secrets Manager. The secret also includes the connection information to access a database or other service, which Secrets Manager doesn't encrypt. A secret in Secrets Manager consists of both the protected secret data and the important information needed to manage the secret. For information about creating a secret in the console, see Create a secret. To create a secret, you can provide the secret value to be encrypted in either the SecretString parameter or the SecretBinary parameter, but not both. If you include SecretString or SecretBinary then Secrets Manager creates an initial secret version and automatically attaches the staging label AWSCURRENT to it. If you don't specify an KMS encryption key, Secrets Manager uses the Amazon Web Services managed key aws/secretsmanager. If this key doesn't already exist in your account, then Secrets Manager creates it for you automatically. All users and roles in the Amazon Web Services account automatically have access to use aws/secretsmanager. Creating aws/secretsmanager can result in a one-time significant delay in returning the result. If the secret is in a different Amazon Web Services account from the credentials calling the API, then you can't use aws/secretsmanager to encrypt the secret, and you must create and use a customer managed KMS key. Required permissions: secretsmanager:CreateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Creates a new secret. A secret can be a password, a set of credentials such as a user name and password, an OAuth token, or other secret information that you store in an encrypted form in Secrets Manager. The secret also includes the connection information to access a database or other service, which Secrets Manager doesn't encrypt. A secret in Secrets Manager consists of both the protected secret data and the important information needed to manage the secret. For secrets that use managed rotation, you need to create the secret through the managing service. For more information, see Secrets Manager secrets managed by other Amazon Web Services services. For information about creating a secret in the console, see Create a secret. To create a secret, you can provide the secret value to be encrypted in either the SecretString parameter or the SecretBinary parameter, but not both. If you include SecretString or SecretBinary then Secrets Manager creates an initial secret version and automatically attaches the staging label AWSCURRENT to it. For database credentials you want to rotate, for Secrets Manager to be able to rotate the secret, you must make sure the JSON you store in the SecretString matches the JSON structure of a database secret. If you don't specify an KMS encryption key, Secrets Manager uses the Amazon Web Services managed key aws/secretsmanager. If this key doesn't already exist in your account, then Secrets Manager creates it for you automatically. All users and roles in the Amazon Web Services account automatically have access to use aws/secretsmanager. Creating aws/secretsmanager can result in a one-time significant delay in returning the result. If the secret is in a different Amazon Web Services account from the credentials calling the API, then you can't use aws/secretsmanager to encrypt the secret, and you must create and use a customer managed KMS key. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters except SecretBinary or SecretString because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:CreateSecret. If you include tags in the secret, you also need secretsmanager:TagResource. To add replica Regions, you must also have secretsmanager:ReplicateSecretToRegions. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager. To encrypt the secret with a KMS key other than aws/secretsmanager, you need kms:GenerateDataKey and kms:Decrypt permission to the key. When you enter commands in a command shell, there is a risk of the command history being accessed or utilities having access to your command parameters. This is a concern if the command includes the value of a secret. Learn how to Mitigate the risks of using command-line tools to store Secrets Manager secrets."]
 module CreateSecretRequest =
   struct
     type nonrec t =
@@ -4964,26 +5670,29 @@ module CreateSecretRequest =
           "The name of the new secret. The secret name can contain ASCII letters, numbers, and the following characters: /_+=.\\@- Do not end your secret name with a hyphen followed by six characters. If you do so, you risk confusion and unexpected results when searching for a secret by partial ARN. Secrets Manager automatically adds a hyphen and six random characters after the secret name at the end of the ARN."];
       clientRequestToken: ClientRequestTokenType.t option
         [@ocaml.doc
-          "If you include SecretString or SecretBinary, then Secrets Manager creates an initial version for the secret, and this parameter specifies the unique identifier for the new version. If you use the Amazon Web Services CLI or one of the Amazon Web Services SDKs to call this operation, then you can leave this parameter empty. The CLI or SDK generates a random UUID for you and includes it as the value for this parameter in the request. If you don't use the SDK and instead generate a raw HTTP request to the Secrets Manager service endpoint, then you must generate a ClientRequestToken yourself for the new version and include the value in the request. This value helps ensure idempotency. Secrets Manager uses this value to prevent the accidental creation of duplicate versions if there are failures and retries during a rotation. We recommend that you generate a UUID-type value to ensure uniqueness of your versions within the specified secret. If the ClientRequestToken value isn't already associated with a version of the secret then a new version of the secret is created. If a version with this value already exists and the version SecretString and SecretBinary values are the same as those in the request, then the request is ignored. If a version with this value already exists and that version's SecretString and SecretBinary values are different from those in the request, then the request fails because you cannot modify an existing version. Instead, use PutSecretValue to create a new version. This value becomes the VersionId of the new version."];
+          "If you include SecretString or SecretBinary, then Secrets Manager creates an initial version for the secret, and this parameter specifies the unique identifier for the new version. If you use the Amazon Web Services CLI or one of the Amazon Web Services SDKs to call this operation, then you can leave this parameter empty. The CLI or SDK generates a random UUID for you and includes it as the value for this parameter in the request. If you generate a raw HTTP request to the Secrets Manager service endpoint, then you must generate a ClientRequestToken and include it in the request. This value helps ensure idempotency. Secrets Manager uses this value to prevent the accidental creation of duplicate versions if there are failures and retries during a rotation. We recommend that you generate a UUID-type value to ensure uniqueness of your versions within the specified secret. If the ClientRequestToken value isn't already associated with a version of the secret then a new version of the secret is created. If a version with this value already exists and the version SecretString and SecretBinary values are the same as those in the request, then the request is ignored. If a version with this value already exists and that version's SecretString and SecretBinary values are different from those in the request, then the request fails because you cannot modify an existing version. Instead, use PutSecretValue to create a new version. This value becomes the VersionId of the new version."];
       description: DescriptionType.t option
         [@ocaml.doc "The description of the secret."];
       kmsKeyId: KmsKeyIdType.t option
         [@ocaml.doc
-          "The ARN, key ID, or alias of the KMS key that Secrets Manager uses to encrypt the secret value in the secret. To use a KMS key in a different account, use the key ARN or the alias ARN. If you don't specify this value, then Secrets Manager uses the key aws/secretsmanager. If that key doesn't yet exist, then Secrets Manager creates it for you automatically the first time it encrypts the secret value. If the secret is in a different Amazon Web Services account from the credentials calling the API, then you can't use aws/secretsmanager to encrypt the secret, and you must create and use a customer managed KMS key."];
+          "The ARN, key ID, or alias of the KMS key that Secrets Manager uses to encrypt the secret value in the secret. An alias is always prefixed by alias/, for example alias/aws/secretsmanager. For more information, see About aliases. To use a KMS key in a different account, use the key ARN or the alias ARN. If you don't specify this value, then Secrets Manager uses the key aws/secretsmanager. If that key doesn't yet exist, then Secrets Manager creates it for you automatically the first time it encrypts the secret value. If the secret is in a different Amazon Web Services account from the credentials calling the API, then you can't use aws/secretsmanager to encrypt the secret, and you must create and use a customer managed KMS key."];
       secretBinary: SecretBinaryType.t option
         [@ocaml.doc
-          "The binary data to encrypt and store in the new version of the secret. We recommend that you store your binary data in a file and then pass the contents of the file as a parameter. Either SecretString or SecretBinary must have a value, but not both. This parameter is not available in the Secrets Manager console."];
+          "The binary data to encrypt and store in the new version of the secret. We recommend that you store your binary data in a file and then pass the contents of the file as a parameter. Either SecretString or SecretBinary must have a value, but not both. This parameter is not available in the Secrets Manager console. Sensitive: This field contains sensitive information, so the service does not include it in CloudTrail log entries. If you create your own log entries, you must also avoid logging the information in this field."];
       secretString: SecretStringType.t option
         [@ocaml.doc
-          "The text data to encrypt and store in this new version of the secret. We recommend you use a JSON structure of key/value pairs for your secret value. Either SecretString or SecretBinary must have a value, but not both. If you create a secret by using the Secrets Manager console then Secrets Manager puts the protected secret text in only the SecretString parameter. The Secrets Manager console stores the information as a JSON structure of key/value pairs that a Lambda rotation function can parse."];
+          "The text data to encrypt and store in this new version of the secret. We recommend you use a JSON structure of key/value pairs for your secret value. Either SecretString or SecretBinary must have a value, but not both. If you create a secret by using the Secrets Manager console then Secrets Manager puts the protected secret text in only the SecretString parameter. The Secrets Manager console stores the information as a JSON structure of key/value pairs that a Lambda rotation function can parse. Sensitive: This field contains sensitive information, so the service does not include it in CloudTrail log entries. If you create your own log entries, you must also avoid logging the information in this field."];
       tags: TagListType.t option
         [@ocaml.doc
-          "A list of tags to attach to the secret. Each tag is a key and value pair of strings in a JSON text string, for example: \\[\\{\"Key\":\"CostCenter\",\"Value\":\"12345\"\\},\\{\"Key\":\"environment\",\"Value\":\"production\"\\}\\] Secrets Manager tag key names are case sensitive. A tag with the key \"ABC\" is a different tag from one with key \"abc\". If you check tags in permissions policies as part of your security strategy, then adding or removing a tag can change permissions. If the completion of this operation would result in you losing your permissions for this secret, then Secrets Manager blocks the operation and returns an Access Denied error. For more information, see Control access to secrets using tags and Limit access to identities with tags that match secrets' tags. For information about how to format a JSON parameter for the various command line tool environments, see Using JSON for Parameters. If your command-line tool or SDK requires quotation marks around the parameter, you should use single quotes to avoid confusion with the double quotes required in the JSON text. The following restrictions apply to tags: Maximum number of tags per secret: 50 Maximum key length: 127 Unicode characters in UTF-8 Maximum value length: 255 Unicode characters in UTF-8 Tag keys and values are case sensitive. Do not use the aws: prefix in your tag names or values because Amazon Web Services reserves it for Amazon Web Services use. You can't edit or delete tag names or values with this prefix. Tags with this prefix do not count against your tags per secret limit. If you use your tagging schema across multiple services and resources, other services might have restrictions on allowed characters. Generally allowed characters: letters, spaces, and numbers representable in UTF-8, plus the following special characters: + - = . _ : / \\@."];
+          "A list of tags to attach to the secret. Each tag is a key and value pair of strings in a JSON text string, for example: \\[\\{\"Key\":\"CostCenter\",\"Value\":\"12345\"\\},\\{\"Key\":\"environment\",\"Value\":\"production\"\\}\\] Secrets Manager tag key names are case sensitive. A tag with the key \"ABC\" is a different tag from one with key \"abc\". If you check tags in permissions policies as part of your security strategy, then adding or removing a tag can change permissions. If the completion of this operation would result in you losing your permissions for this secret, then Secrets Manager blocks the operation and returns an Access Denied error. For more information, see Control access to secrets using tags and Limit access to identities with tags that match secrets' tags. For information about how to format a JSON parameter for the various command line tool environments, see Using JSON for Parameters. If your command-line tool or SDK requires quotation marks around the parameter, you should use single quotes to avoid confusion with the double quotes required in the JSON text. For tag quotas and naming restrictions, see Service quotas for Tagging in the Amazon Web Services General Reference guide."];
       addReplicaRegions: AddReplicaRegionListType.t option
         [@ocaml.doc "A list of Regions and KMS keys to replicate secrets."];
       forceOverwriteReplicaSecret: BooleanType.t option
         [@ocaml.doc
-          "Specifies whether to overwrite a secret with the same name in the destination Region."]}
+          "Specifies whether to overwrite a secret with the same name in the destination Region. By default, secrets aren't overwritten."];
+      type_: MedeaTypeType.t option
+        [@ocaml.doc
+          "The exact string that identifies the partner that holds the external secret. For more information, see Using Secrets Manager managed external secrets."]}
     let context_ = "CreateSecretRequest"
     let make ?clientRequestToken =
       fun ?description ->
@@ -4993,19 +5702,21 @@ module CreateSecretRequest =
               fun ?tags ->
                 fun ?addReplicaRegions ->
                   fun ?forceOverwriteReplicaSecret ->
-                    fun ~name ->
-                      fun () ->
-                        {
-                          clientRequestToken;
-                          description;
-                          kmsKeyId;
-                          secretBinary;
-                          secretString;
-                          tags;
-                          addReplicaRegions;
-                          forceOverwriteReplicaSecret;
-                          name
-                        }
+                    fun ?type_ ->
+                      fun ~name ->
+                        fun () ->
+                          {
+                            clientRequestToken;
+                            description;
+                            kmsKeyId;
+                            secretBinary;
+                            secretString;
+                            tags;
+                            addReplicaRegions;
+                            forceOverwriteReplicaSecret;
+                            type_;
+                            name
+                          }
     let to_value x =
       structure_to_value
         [("Name", (Some (NameType.to_value x.name)));
@@ -5023,9 +5734,12 @@ module CreateSecretRequest =
           (Option.map x.addReplicaRegions
              ~f:AddReplicaRegionListType.to_value));
         ("ForceOverwriteReplicaSecret",
-          (Option.map x.forceOverwriteReplicaSecret ~f:BooleanType.to_value))]
+          (Option.map x.forceOverwriteReplicaSecret ~f:BooleanType.to_value));
+        ("Type", (Option.map x.type_ ~f:MedeaTypeType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:MedeaTypeType.of_xml) (Xml.child xml_arg0 "Type") in
       let forceOverwriteReplicaSecret =
         (Option.map ~f:BooleanType.of_xml)
           (Xml.child xml_arg0 "ForceOverwriteReplicaSecret") in
@@ -5050,31 +5764,33 @@ module CreateSecretRequest =
           (Xml.child xml_arg0 "ClientRequestToken") in
       let name =
         NameType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?forceOverwriteReplicaSecret ?addReplicaRegions ?tags
+      make ?type_ ?forceOverwriteReplicaSecret ?addReplicaRegions ?tags
         ?secretString ?secretBinary ?kmsKeyId ?description
         ?clientRequestToken ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let type_ = field_map json__ "Type" MedeaTypeType.of_json in
       let forceOverwriteReplicaSecret =
-        field_map json "ForceOverwriteReplicaSecret" BooleanType.of_json in
+        field_map json__ "ForceOverwriteReplicaSecret" BooleanType.of_json in
       let addReplicaRegions =
-        field_map json "AddReplicaRegions" AddReplicaRegionListType.of_json in
-      let tags = field_map json "Tags" TagListType.of_json in
+        field_map json__ "AddReplicaRegions" AddReplicaRegionListType.of_json in
+      let tags = field_map json__ "Tags" TagListType.of_json in
       let secretString =
-        field_map json "SecretString" SecretStringType.of_json in
+        field_map json__ "SecretString" SecretStringType.of_json in
       let secretBinary =
-        field_map json "SecretBinary" SecretBinaryType.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyIdType.of_json in
-      let description = field_map json "Description" DescriptionType.of_json in
+        field_map json__ "SecretBinary" SecretBinaryType.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyIdType.of_json in
+      let description =
+        field_map json__ "Description" DescriptionType.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenType.of_json in
-      let name = field_map_exn json "Name" NameType.of_json in
-      make ?forceOverwriteReplicaSecret ?addReplicaRegions ?tags
+        field_map json__ "ClientRequestToken" ClientRequestTokenType.of_json in
+      let name = field_map_exn json__ "Name" NameType.of_json in
+      make ?type_ ?forceOverwriteReplicaSecret ?addReplicaRegions ?tags
         ?secretString ?secretBinary ?kmsKeyId ?description
         ?clientRequestToken ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new secret. A secret is a set of credentials, such as a user name and password, that you store in an encrypted form in Secrets Manager. The secret also includes the connection information to access a database or other service, which Secrets Manager doesn't encrypt. A secret in Secrets Manager consists of both the protected secret data and the important information needed to manage the secret. For information about creating a secret in the console, see Create a secret. To create a secret, you can provide the secret value to be encrypted in either the SecretString parameter or the SecretBinary parameter, but not both. If you include SecretString or SecretBinary then Secrets Manager creates an initial secret version and automatically attaches the staging label AWSCURRENT to it. If you don't specify an KMS encryption key, Secrets Manager uses the Amazon Web Services managed key aws/secretsmanager. If this key doesn't already exist in your account, then Secrets Manager creates it for you automatically. All users and roles in the Amazon Web Services account automatically have access to use aws/secretsmanager. Creating aws/secretsmanager can result in a one-time significant delay in returning the result. If the secret is in a different Amazon Web Services account from the credentials calling the API, then you can't use aws/secretsmanager to encrypt the secret, and you must create and use a customer managed KMS key. Required permissions: secretsmanager:CreateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Creates a new secret. A secret can be a password, a set of credentials such as a user name and password, an OAuth token, or other secret information that you store in an encrypted form in Secrets Manager. The secret also includes the connection information to access a database or other service, which Secrets Manager doesn't encrypt. A secret in Secrets Manager consists of both the protected secret data and the important information needed to manage the secret. For secrets that use managed rotation, you need to create the secret through the managing service. For more information, see Secrets Manager secrets managed by other Amazon Web Services services. For information about creating a secret in the console, see Create a secret. To create a secret, you can provide the secret value to be encrypted in either the SecretString parameter or the SecretBinary parameter, but not both. If you include SecretString or SecretBinary then Secrets Manager creates an initial secret version and automatically attaches the staging label AWSCURRENT to it. For database credentials you want to rotate, for Secrets Manager to be able to rotate the secret, you must make sure the JSON you store in the SecretString matches the JSON structure of a database secret. If you don't specify an KMS encryption key, Secrets Manager uses the Amazon Web Services managed key aws/secretsmanager. If this key doesn't already exist in your account, then Secrets Manager creates it for you automatically. All users and roles in the Amazon Web Services account automatically have access to use aws/secretsmanager. Creating aws/secretsmanager can result in a one-time significant delay in returning the result. If the secret is in a different Amazon Web Services account from the credentials calling the API, then you can't use aws/secretsmanager to encrypt the secret, and you must create and use a customer managed KMS key. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters except SecretBinary or SecretString because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:CreateSecret. If you include tags in the secret, you also need secretsmanager:TagResource. To add replica Regions, you must also have secretsmanager:ReplicateSecretToRegions. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager. To encrypt the secret with a KMS key other than aws/secretsmanager, you need kms:GenerateDataKey and kms:Decrypt permission to the key. When you enter commands in a command shell, there is a risk of the command history being accessed or utilities having access to your command parameters. This is a concern if the command includes the value of a secret. Learn how to Mitigate the risks of using command-line tools to store Secrets Manager secrets."]
 module CancelRotateSecretResponse =
   struct
     type nonrec t =
@@ -5157,21 +5873,22 @@ module CancelRotateSecretResponse =
         (Option.map ~f:SecretARNType.of_xml) (Xml.child xml_arg0 "ARN") in
       make ?versionId ?name ?aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let versionId = field_map json "VersionId" SecretVersionIdType.of_json in
-      let name = field_map json "Name" SecretNameType.of_json in
-      let aRN = field_map json "ARN" SecretARNType.of_json in
+    let of_json json__ =
+      let versionId =
+        field_map json__ "VersionId" SecretVersionIdType.of_json in
+      let name = field_map json__ "Name" SecretNameType.of_json in
+      let aRN = field_map json__ "ARN" SecretARNType.of_json in
       make ?versionId ?name ?aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Turns off automatic rotation, and if a rotation is currently in progress, cancels the rotation. To turn on automatic rotation again, call RotateSecret. If you cancel a rotation in progress, it can leave the VersionStage labels in an unexpected state. Depending on the step of the rotation in progress, you might need to remove the staging label AWSPENDING from the partially created version, specified by the VersionId response value. We recommend you also evaluate the partially rotated new version to see if it should be deleted. You can delete a version by removing all staging labels from it. Required permissions: secretsmanager:CancelRotateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Turns off automatic rotation, and if a rotation is currently in progress, cancels the rotation. If you cancel a rotation in progress, it can leave the VersionStage labels in an unexpected state. You might need to remove the staging label AWSPENDING from the partially created version. You also need to determine whether to roll back to the previous version of the secret by moving the staging label AWSCURRENT to the version that has AWSPENDING. To determine which version has a specific staging label, call ListSecretVersionIds. Then use UpdateSecretVersionStage to change staging labels. For more information, see How rotation works. To turn on automatic rotation again, call RotateSecret. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:CancelRotateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
 module CancelRotateSecretRequest =
   struct
     type nonrec t =
       {
       secretId: SecretIdType.t
         [@ocaml.doc
-          "The ARN or name of the secret. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN."]}
+          "The ARN or name of the secret. For an ARN, we recommend that you specify a complete ARN rather than a partial ARN. See Finding a secret from a partial ARN."]}
     let context_ = "CancelRotateSecretRequest"
     let make ~secretId = fun () -> { secretId }
     let to_value x =
@@ -5184,9 +5901,176 @@ module CancelRotateSecretRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SecretId") in
       make ~secretId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretId = field_map_exn json "SecretId" SecretIdType.of_json in
+    let of_json json__ =
+      let secretId = field_map_exn json__ "SecretId" SecretIdType.of_json in
       make ~secretId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Turns off automatic rotation, and if a rotation is currently in progress, cancels the rotation. To turn on automatic rotation again, call RotateSecret. If you cancel a rotation in progress, it can leave the VersionStage labels in an unexpected state. Depending on the step of the rotation in progress, you might need to remove the staging label AWSPENDING from the partially created version, specified by the VersionId response value. We recommend you also evaluate the partially rotated new version to see if it should be deleted. You can delete a version by removing all staging labels from it. Required permissions: secretsmanager:CancelRotateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+       "Turns off automatic rotation, and if a rotation is currently in progress, cancels the rotation. If you cancel a rotation in progress, it can leave the VersionStage labels in an unexpected state. You might need to remove the staging label AWSPENDING from the partially created version. You also need to determine whether to roll back to the previous version of the secret by moving the staging label AWSCURRENT to the version that has AWSPENDING. To determine which version has a specific staging label, call ListSecretVersionIds. Then use UpdateSecretVersionStage to change staging labels. For more information, see How rotation works. To turn on automatic rotation again, call RotateSecret. Secrets Manager generates a CloudTrail log entry when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:CancelRotateSecret. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+module BatchGetSecretValueResponse =
+  struct
+    type nonrec t =
+      {
+      secretValues: SecretValuesType.t option
+        [@ocaml.doc "A list of secret values."];
+      nextToken: NextTokenType.t option
+        [@ocaml.doc
+          "Secrets Manager includes this value if there's more output available than what is included in the current response. This can occur even when the response includes no values at all, such as when you ask for a filtered view of a long list. To get the next results, call BatchGetSecretValue again with this value."];
+      errors: APIErrorListType.t option
+        [@ocaml.doc
+          "A list of errors Secrets Manager encountered while attempting to retrieve individual secrets."]}
+    type nonrec error =
+      [ `DecryptionFailure of DecryptionFailure.t 
+      | `InternalServiceError of InternalServiceError.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?secretValues =
+      fun ?nextToken ->
+        fun ?errors -> fun () -> { secretValues; nextToken; errors }
+    let error_of_json name json =
+      match name with
+      | "DecryptionFailure" ->
+          `DecryptionFailure (DecryptionFailure.of_json json)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DecryptionFailure" ->
+          `DecryptionFailure (DecryptionFailure.of_xml xml)
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DecryptionFailure e ->
+          `Assoc
+            [("error", (`String "DecryptionFailure"));
+            ("details", (DecryptionFailure.to_json e))]
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SecretValues",
+           (Option.map x.secretValues ~f:SecretValuesType.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextTokenType.to_value));
+        ("Errors", (Option.map x.errors ~f:APIErrorListType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:APIErrorListType.of_xml) (Xml.child xml_arg0 "Errors") in
+      let nextToken =
+        (Option.map ~f:NextTokenType.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let secretValues =
+        (Option.map ~f:SecretValuesType.of_xml)
+          (Xml.child xml_arg0 "SecretValues") in
+      make ?errors ?nextToken ?secretValues ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors = field_map json__ "Errors" APIErrorListType.of_json in
+      let nextToken = field_map json__ "NextToken" NextTokenType.of_json in
+      let secretValues =
+        field_map json__ "SecretValues" SecretValuesType.of_json in
+      make ?errors ?nextToken ?secretValues ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the contents of the encrypted fields SecretString or SecretBinary for up to 20 secrets. To retrieve a single secret, call GetSecretValue. To choose which secrets to retrieve, you can specify a list of secrets by name or ARN, or you can use filters. If Secrets Manager encounters errors such as AccessDeniedException while attempting to retrieve any of the secrets, you can see the errors in Errors in the response. Secrets Manager generates CloudTrail GetSecretValue log entries for each secret you request when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:BatchGetSecretValue, and you must have secretsmanager:GetSecretValue for each secret. If you use filters, you must also have secretsmanager:ListSecrets. If the secrets are encrypted using customer-managed keys instead of the Amazon Web Services managed key aws/secretsmanager, then you also need kms:Decrypt permissions for the keys. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]
+module BatchGetSecretValueRequest =
+  struct
+    type nonrec t =
+      {
+      secretIdList: SecretIdListType.t option
+        [@ocaml.doc
+          "The ARN or names of the secrets to retrieve. You must include Filters or SecretIdList, but not both."];
+      filters: FiltersListType.t option
+        [@ocaml.doc
+          "The filters to choose which secrets to retrieve. You must include Filters or SecretIdList, but not both."];
+      maxResults: MaxResultsBatchType.t option
+        [@ocaml.doc
+          "The number of results to include in the response. If there are more results available, in the response, Secrets Manager includes NextToken. To get the next results, call BatchGetSecretValue again with the value from NextToken. To use this parameter, you must also use the Filters parameter."];
+      nextToken: NextTokenType.t option
+        [@ocaml.doc
+          "A token that indicates where the output should continue from, if a previous call did not show all results. To get the next results, call BatchGetSecretValue again with this value."]}
+    let make ?secretIdList =
+      fun ?filters ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun () -> { secretIdList; filters; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("SecretIdList",
+           (Option.map x.secretIdList ~f:SecretIdListType.to_value));
+        ("Filters", (Option.map x.filters ~f:FiltersListType.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxResultsBatchType.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextTokenType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextTokenType.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultsBatchType.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let filters =
+        (Option.map ~f:FiltersListType.of_xml) (Xml.child xml_arg0 "Filters") in
+      let secretIdList =
+        (Option.map ~f:SecretIdListType.of_xml)
+          (Xml.child xml_arg0 "SecretIdList") in
+      make ?nextToken ?maxResults ?filters ?secretIdList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextTokenType.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsBatchType.of_json in
+      let filters = field_map json__ "Filters" FiltersListType.of_json in
+      let secretIdList =
+        field_map json__ "SecretIdList" SecretIdListType.of_json in
+      make ?nextToken ?maxResults ?filters ?secretIdList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the contents of the encrypted fields SecretString or SecretBinary for up to 20 secrets. To retrieve a single secret, call GetSecretValue. To choose which secrets to retrieve, you can specify a list of secrets by name or ARN, or you can use filters. If Secrets Manager encounters errors such as AccessDeniedException while attempting to retrieve any of the secrets, you can see the errors in Errors in the response. Secrets Manager generates CloudTrail GetSecretValue log entries for each secret you request when you call this action. Do not include sensitive information in request parameters because it might be logged. For more information, see Logging Secrets Manager events with CloudTrail. Required permissions: secretsmanager:BatchGetSecretValue, and you must have secretsmanager:GetSecretValue for each secret. If you use filters, you must also have secretsmanager:ListSecrets. If the secrets are encrypted using customer-managed keys instead of the Amazon Web Services managed key aws/secretsmanager, then you also need kms:Decrypt permissions for the keys. For more information, see IAM policy actions for Secrets Manager and Authentication and access control in Secrets Manager."]

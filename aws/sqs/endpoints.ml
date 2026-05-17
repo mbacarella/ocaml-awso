@@ -3,6 +3,8 @@ open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
   | AddPermission: (AddPermissionRequest.t, unit, unit) t 
+  | CancelMessageMoveTask: (CancelMessageMoveTaskRequest.t,
+  CancelMessageMoveTaskResult.t, CancelMessageMoveTaskResult.error) t 
   | ChangeMessageVisibility: (ChangeMessageVisibilityRequest.t, unit, 
   unit) t 
   | ChangeMessageVisibilityBatch: (ChangeMessageVisibilityBatchRequest.t,
@@ -21,6 +23,8 @@ type ('i, 'o, 'e) t =
   | ListDeadLetterSourceQueues: (ListDeadLetterSourceQueuesRequest.t,
   ListDeadLetterSourceQueuesResult.t, ListDeadLetterSourceQueuesResult.error)
   t 
+  | ListMessageMoveTasks: (ListMessageMoveTasksRequest.t,
+  ListMessageMoveTasksResult.t, ListMessageMoveTasksResult.error) t 
   | ListQueueTags: (ListQueueTagsRequest.t, ListQueueTagsResult.t,
   ListQueueTagsResult.error) t 
   | ListQueues: (ListQueuesRequest.t, ListQueuesResult.t,
@@ -34,11 +38,14 @@ type ('i, 'o, 'e) t =
   | SendMessageBatch: (SendMessageBatchRequest.t, SendMessageBatchResult.t,
   SendMessageBatchResult.error) t 
   | SetQueueAttributes: (SetQueueAttributesRequest.t, unit, unit) t 
+  | StartMessageMoveTask: (StartMessageMoveTaskRequest.t,
+  StartMessageMoveTaskResult.t, StartMessageMoveTaskResult.error) t 
   | TagQueue: (TagQueueRequest.t, unit, unit) t 
   | UntagQueue: (UntagQueueRequest.t, unit, unit) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddPermission -> `POST
+  | CancelMessageMoveTask -> `POST
   | ChangeMessageVisibility -> `POST
   | ChangeMessageVisibilityBatch -> `POST
   | CreateQueue -> `POST
@@ -48,6 +55,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetQueueAttributes -> `POST
   | GetQueueUrl -> `POST
   | ListDeadLetterSourceQueues -> `POST
+  | ListMessageMoveTasks -> `POST
   | ListQueueTags -> `POST
   | ListQueues -> `POST
   | PurgeQueue -> `POST
@@ -56,12 +64,14 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | SendMessage -> `POST
   | SendMessageBatch -> `POST
   | SetQueueAttributes -> `POST
+  | StartMessageMoveTask -> `POST
   | TagQueue -> `POST
   | UntagQueue -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AddPermission -> (Format.kasprintf Uri.of_string) "/"
+      | CancelMessageMoveTask -> (Format.kasprintf Uri.of_string) "/"
       | ChangeMessageVisibility -> (Format.kasprintf Uri.of_string) "/"
       | ChangeMessageVisibilityBatch -> (Format.kasprintf Uri.of_string) "/"
       | CreateQueue -> (Format.kasprintf Uri.of_string) "/"
@@ -71,6 +81,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetQueueAttributes -> (Format.kasprintf Uri.of_string) "/"
       | GetQueueUrl -> (Format.kasprintf Uri.of_string) "/"
       | ListDeadLetterSourceQueues -> (Format.kasprintf Uri.of_string) "/"
+      | ListMessageMoveTasks -> (Format.kasprintf Uri.of_string) "/"
       | ListQueueTags -> (Format.kasprintf Uri.of_string) "/"
       | ListQueues -> (Format.kasprintf Uri.of_string) "/"
       | PurgeQueue -> (Format.kasprintf Uri.of_string) "/"
@@ -79,366 +90,329 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | SendMessage -> (Format.kasprintf Uri.of_string) "/"
       | SendMessageBatch -> (Format.kasprintf Uri.of_string) "/"
       | SetQueueAttributes -> (Format.kasprintf Uri.of_string) "/"
+      | StartMessageMoveTask -> (Format.kasprintf Uri.of_string) "/"
       | TagQueue -> (Format.kasprintf Uri.of_string) "/"
       | UntagQueue -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
-  let _req = req in
   match endp with
   | AddPermission ->
+      let json = AddPermissionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta = [("Action", ["AddPermission"]); ("Version", [apiVersion])] in
-        let query =
-          (AddPermissionRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.AddPermission")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CancelMessageMoveTask ->
+      let json = CancelMessageMoveTaskRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.CancelMessageMoveTask")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ChangeMessageVisibility ->
+      let json = ChangeMessageVisibilityRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta =
-          [("Action", ["ChangeMessageVisibility"]);
-          ("Version", [apiVersion])] in
-        let query =
-          (ChangeMessageVisibilityRequest.to_query req) |>
-            Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.ChangeMessageVisibility")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ChangeMessageVisibilityBatch ->
+      let json = ChangeMessageVisibilityBatchRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta =
-          [("Action", ["ChangeMessageVisibilityBatch"]);
-          ("Version", [apiVersion])] in
-        let query =
-          (ChangeMessageVisibilityBatchRequest.to_query req) |>
-            Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.ChangeMessageVisibilityBatch")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateQueue ->
+      let json = CreateQueueRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta = [("Action", ["CreateQueue"]); ("Version", [apiVersion])] in
-        let query =
-          (CreateQueueRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.CreateQueue")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteMessage ->
+      let json = DeleteMessageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta = [("Action", ["DeleteMessage"]); ("Version", [apiVersion])] in
-        let query =
-          (DeleteMessageRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.DeleteMessage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteMessageBatch ->
+      let json = DeleteMessageBatchRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta =
-          [("Action", ["DeleteMessageBatch"]); ("Version", [apiVersion])] in
-        let query =
-          (DeleteMessageBatchRequest.to_query req) |>
-            Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.DeleteMessageBatch")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteQueue ->
+      let json = DeleteQueueRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta = [("Action", ["DeleteQueue"]); ("Version", [apiVersion])] in
-        let query =
-          (DeleteQueueRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.DeleteQueue")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetQueueAttributes ->
+      let json = GetQueueAttributesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta =
-          [("Action", ["GetQueueAttributes"]); ("Version", [apiVersion])] in
-        let query =
-          (GetQueueAttributesRequest.to_query req) |>
-            Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.GetQueueAttributes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetQueueUrl ->
+      let json = GetQueueUrlRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta = [("Action", ["GetQueueUrl"]); ("Version", [apiVersion])] in
-        let query =
-          (GetQueueUrlRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.GetQueueUrl")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListDeadLetterSourceQueues ->
+      let json = ListDeadLetterSourceQueuesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta =
-          [("Action", ["ListDeadLetterSourceQueues"]);
-          ("Version", [apiVersion])] in
-        let query =
-          (ListDeadLetterSourceQueuesRequest.to_query req) |>
-            Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.ListDeadLetterSourceQueues")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMessageMoveTasks ->
+      let json = ListMessageMoveTasksRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.ListMessageMoveTasks")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListQueueTags ->
+      let json = ListQueueTagsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta = [("Action", ["ListQueueTags"]); ("Version", [apiVersion])] in
-        let query =
-          (ListQueueTagsRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.ListQueueTags")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListQueues ->
+      let json = ListQueuesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta = [("Action", ["ListQueues"]); ("Version", [apiVersion])] in
-        let query =
-          (ListQueuesRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.ListQueues")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PurgeQueue ->
+      let json = PurgeQueueRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta = [("Action", ["PurgeQueue"]); ("Version", [apiVersion])] in
-        let query =
-          (PurgeQueueRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.PurgeQueue")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ReceiveMessage ->
+      let json = ReceiveMessageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta =
-          [("Action", ["ReceiveMessage"]); ("Version", [apiVersion])] in
-        let query =
-          (ReceiveMessageRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.ReceiveMessage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RemovePermission ->
+      let json = RemovePermissionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta =
-          [("Action", ["RemovePermission"]); ("Version", [apiVersion])] in
-        let query =
-          (RemovePermissionRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.RemovePermission")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | SendMessage ->
+      let json = SendMessageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta = [("Action", ["SendMessage"]); ("Version", [apiVersion])] in
-        let query =
-          (SendMessageRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.SendMessage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | SendMessageBatch ->
+      let json = SendMessageBatchRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta =
-          [("Action", ["SendMessageBatch"]); ("Version", [apiVersion])] in
-        let query =
-          (SendMessageBatchRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.SendMessageBatch")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | SetQueueAttributes ->
+      let json = SetQueueAttributesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta =
-          [("Action", ["SetQueueAttributes"]); ("Version", [apiVersion])] in
-        let query =
-          (SetQueueAttributesRequest.to_query req) |>
-            Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.SetQueueAttributes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartMessageMoveTask ->
+      let json = StartMessageMoveTaskRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.StartMessageMoveTask")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagQueue ->
+      let json = TagQueueRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta = [("Action", ["TagQueue"]); ("Version", [apiVersion])] in
-        let query =
-          (TagQueueRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.TagQueue")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UntagQueue ->
+      let json = UntagQueueRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
       let headers =
         Awso.Http.Headers.of_list
-          [("content-type",
-             "application/x-www-form-urlencoded; charset=utf-8")] in
-      let body =
-        let meta = [("Action", ["UntagQueue"]); ("Version", [apiVersion])] in
-        let query =
-          (UntagQueueRequest.to_query req) |> Awso.Client.Query.render in
-        Some (Uri.encoded_of_query (meta @ query)) in
-      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AmazonSQS.UntagQueue")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
   let is_success = (code >= 200) && (code < 300) in
-  let parse_aws_error error_of_xml =
+  let parse_aws_error error_of_json =
     let body = Awso.Http.Response.body resp in
     let bail () =
       raise
         (Awso.Http.Io.Error.Bad_response
            { Awso.Http.Io.Error.code = code; body; x_amzn_error_type = None }) in
-    match (error_of_xml, ((code >= 400) && (code <= 599))) with
-    | (None, _) | (_, false) -> bail ()
-    | (Some error_of_xml, true) ->
-        (match Awso.Xml.parse_response body with
-         | `Data _ -> bail ()
-         | `El (((_, "ErrorResponse"), _), _) as error_response_xml ->
-             let error_xml = Awso.Xml.child_exn error_response_xml "Error" in
-             (try
-                let error_code =
-                  match Awso.Xml.child_exn error_xml "Code" with
-                  | `Data error_code -> error_code
-                  | `El (_, children) ->
-                      (List.map children
-                         ~f:(function | `Data s -> s | `El _ -> ""))
-                        |> (String.concat ~sep:"") in
-                error_of_xml (String.strip error_code) error_xml
-              with | Failure _ -> bail ())
-         | `El _ -> bail ()) in
+    match (error_of_json, ((code >= 400) && (code <= 599))) with
+    | (Some error_of_json, true) ->
+        let json = Yojson.Safe.from_string body in
+        (match json |> (Yojson.Safe.Util.member "__type") with
+         | `String error_type -> error_of_json error_type json
+         | `Null -> bail ()
+         | _ ->
+             failwith
+               (sprintf "Error '__type' did not have string type: %s" body))
+    | (None, _) | (_, false) -> bail () in
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
   | AddPermission ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | CancelMessageMoveTask ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelMessageMoveTaskResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CancelMessageMoveTaskResult.error_of_json))
   | ChangeMessageVisibility ->
       if is_success then Ok () else Error (parse_aws_error None)
   | ChangeMessageVisibilityBatch ->
       if is_success
       then
-        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (ChangeMessageVisibilityBatchResult.of_xml xml)
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ChangeMessageVisibilityBatchResult.of_json json)
       else
         Error
           (parse_aws_error
-             (Some ChangeMessageVisibilityBatchResult.error_of_xml))
+             (Some ChangeMessageVisibilityBatchResult.error_of_json))
   | CreateQueue ->
       if is_success
       then
-        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (CreateQueueResult.of_xml xml)
-      else Error (parse_aws_error (Some CreateQueueResult.error_of_xml))
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateQueueResult.of_json json)
+      else Error (parse_aws_error (Some CreateQueueResult.error_of_json))
   | DeleteMessage ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteMessageBatch ->
       if is_success
       then
-        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (DeleteMessageBatchResult.of_xml xml)
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteMessageBatchResult.of_json json)
       else
-        Error (parse_aws_error (Some DeleteMessageBatchResult.error_of_xml))
+        Error (parse_aws_error (Some DeleteMessageBatchResult.error_of_json))
   | DeleteQueue -> if is_success then Ok () else Error (parse_aws_error None)
   | GetQueueAttributes ->
       if is_success
       then
-        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (GetQueueAttributesResult.of_xml xml)
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetQueueAttributesResult.of_json json)
       else
-        Error (parse_aws_error (Some GetQueueAttributesResult.error_of_xml))
+        Error (parse_aws_error (Some GetQueueAttributesResult.error_of_json))
   | GetQueueUrl ->
       if is_success
       then
-        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (GetQueueUrlResult.of_xml xml)
-      else Error (parse_aws_error (Some GetQueueUrlResult.error_of_xml))
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetQueueUrlResult.of_json json)
+      else Error (parse_aws_error (Some GetQueueUrlResult.error_of_json))
   | ListDeadLetterSourceQueues ->
       if is_success
       then
-        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (ListDeadLetterSourceQueuesResult.of_xml xml)
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDeadLetterSourceQueuesResult.of_json json)
       else
         Error
           (parse_aws_error
-             (Some ListDeadLetterSourceQueuesResult.error_of_xml))
+             (Some ListDeadLetterSourceQueuesResult.error_of_json))
+  | ListMessageMoveTasks ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMessageMoveTasksResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListMessageMoveTasksResult.error_of_json))
   | ListQueueTags ->
       if is_success
       then
-        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (ListQueueTagsResult.of_xml xml)
-      else Error (parse_aws_error None)
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListQueueTagsResult.of_json json)
+      else Error (parse_aws_error (Some ListQueueTagsResult.error_of_json))
   | ListQueues ->
       if is_success
       then
-        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (ListQueuesResult.of_xml xml)
-      else Error (parse_aws_error None)
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListQueuesResult.of_json json)
+      else Error (parse_aws_error (Some ListQueuesResult.error_of_json))
   | PurgeQueue -> if is_success then Ok () else Error (parse_aws_error None)
   | ReceiveMessage ->
       if is_success
       then
-        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (ReceiveMessageResult.of_xml xml)
-      else Error (parse_aws_error (Some ReceiveMessageResult.error_of_xml))
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ReceiveMessageResult.of_json json)
+      else Error (parse_aws_error (Some ReceiveMessageResult.error_of_json))
   | RemovePermission ->
       if is_success then Ok () else Error (parse_aws_error None)
   | SendMessage ->
       if is_success
       then
-        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (SendMessageResult.of_xml xml)
-      else Error (parse_aws_error (Some SendMessageResult.error_of_xml))
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SendMessageResult.of_json json)
+      else Error (parse_aws_error (Some SendMessageResult.error_of_json))
   | SendMessageBatch ->
       if is_success
       then
-        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
-        Ok (SendMessageBatchResult.of_xml xml)
-      else Error (parse_aws_error (Some SendMessageBatchResult.error_of_xml))
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SendMessageBatchResult.of_json json)
+      else
+        Error (parse_aws_error (Some SendMessageBatchResult.error_of_json))
   | SetQueueAttributes ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | StartMessageMoveTask ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMessageMoveTaskResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartMessageMoveTaskResult.error_of_json))
   | TagQueue -> if is_success then Ok () else Error (parse_aws_error None)
   | UntagQueue -> if is_success then Ok () else Error (parse_aws_error None)

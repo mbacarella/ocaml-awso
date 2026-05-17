@@ -48,6 +48,36 @@ let cancel_job_run =
            (Values.CancelJobRunRequest.make ~id ~virtualClusterId ())
            (Some Values.CancelJobRunResponse.to_json)
            (Some Values.CancelJobRunResponse.error_to_json)])
+let create_job_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and kmsKeyArn =
+         flag "kms-key-arn" (optional string) ~doc:"STRING KmsKeyArn"
+       and name =
+         flag "name" (required string) ~doc:"STRING ResourceNameString"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken"
+       and jobTemplateData =
+         flag "job-template-data" (required json_arg)
+           ~doc:"JSON JobTemplateData" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_job_template
+           (Values.CreateJobTemplateRequest.make
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?kmsKeyArn
+              ~name ~clientToken
+              ~jobTemplateData:(Values.JobTemplateData.of_json
+                                  jobTemplateData) ())
+           (Some Values.CreateJobTemplateResponse.to_json)
+           (Some Values.CreateJobTemplateResponse.error_to_json)])
 let create_managed_endpoint =
   Command.async ~summary:""
     ([%map_open.Command
@@ -88,6 +118,40 @@ let create_managed_endpoint =
               ~clientToken ())
            (Some Values.CreateManagedEndpointResponse.to_json)
            (Some Values.CreateManagedEndpointResponse.error_to_json)])
+let create_security_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and containerProvider =
+         flag "container-provider" (optional json_arg)
+           ~doc:"JSON ContainerProvider"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken"
+       and name =
+         flag "name" (required string) ~doc:"STRING ResourceNameString"
+       and securityConfigurationData =
+         flag "security-configuration-data" (required json_arg)
+           ~doc:"JSON SecurityConfigurationData" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_security_configuration
+           (Values.CreateSecurityConfigurationRequest.make
+              ?containerProvider:(Option.map
+                                    ~f:Values.ContainerProvider.of_json
+                                    containerProvider)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~clientToken
+              ~name
+              ~securityConfigurationData:(Values.SecurityConfigurationData.of_json
+                                            securityConfigurationData) ())
+           (Some Values.CreateSecurityConfigurationResponse.to_json)
+           (Some Values.CreateSecurityConfigurationResponse.error_to_json)])
 let create_virtual_cluster =
   Command.async ~summary:""
     ([%map_open.Command
@@ -99,6 +163,9 @@ let create_virtual_cluster =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and securityConfigurationId =
+         flag "security-configuration-id" (optional string)
+           ~doc:"STRING ResourceIdString"
        and name =
          flag "name" (required string) ~doc:"STRING ResourceNameString"
        and containerProvider =
@@ -110,11 +177,29 @@ let create_virtual_cluster =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_virtual_cluster
            (Values.CreateVirtualClusterRequest.make
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~name
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?securityConfigurationId ~name
               ~containerProvider:(Values.ContainerProvider.of_json
                                     containerProvider) ~clientToken ())
            (Some Values.CreateVirtualClusterResponse.to_json)
            (Some Values.CreateVirtualClusterResponse.error_to_json)])
+let delete_job_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING ResourceIdString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_job_template
+           (Values.DeleteJobTemplateRequest.make ~id ())
+           (Some Values.DeleteJobTemplateResponse.to_json)
+           (Some Values.DeleteJobTemplateResponse.error_to_json)])
 let delete_managed_endpoint =
   Command.async ~summary:""
     ([%map_open.Command
@@ -172,6 +257,23 @@ let describe_job_run =
            (Values.DescribeJobRunRequest.make ~id ~virtualClusterId ())
            (Some Values.DescribeJobRunResponse.to_json)
            (Some Values.DescribeJobRunResponse.error_to_json)])
+let describe_job_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING ResourceIdString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_job_template
+           (Values.DescribeJobTemplateRequest.make ~id ())
+           (Some Values.DescribeJobTemplateResponse.to_json)
+           (Some Values.DescribeJobTemplateResponse.error_to_json)])
 let describe_managed_endpoint =
   Command.async ~summary:""
     ([%map_open.Command
@@ -192,6 +294,23 @@ let describe_managed_endpoint =
            (Values.DescribeManagedEndpointRequest.make ~id ~virtualClusterId
               ()) (Some Values.DescribeManagedEndpointResponse.to_json)
            (Some Values.DescribeManagedEndpointResponse.error_to_json)])
+let describe_security_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING ResourceIdString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_security_configuration
+           (Values.DescribeSecurityConfigurationRequest.make ~id ())
+           (Some Values.DescribeSecurityConfigurationResponse.to_json)
+           (Some Values.DescribeSecurityConfigurationResponse.error_to_json)])
 let describe_virtual_cluster =
   Command.async ~summary:""
     ([%map_open.Command
@@ -209,6 +328,42 @@ let describe_virtual_cluster =
            (Values.DescribeVirtualClusterRequest.make ~id ())
            (Some Values.DescribeVirtualClusterResponse.to_json)
            (Some Values.DescribeVirtualClusterResponse.error_to_json)])
+let get_managed_endpoint_session_credentials =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and durationInSeconds =
+         flag "duration-in-seconds" (optional int) ~doc:"INT JavaInteger"
+       and logContext =
+         flag "log-context" (optional string) ~doc:"STRING LogContext"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and endpointIdentifier =
+         flag "endpoint-identifier" (required string)
+           ~doc:"STRING String2048"
+       and virtualClusterIdentifier =
+         flag "virtual-cluster-identifier" (required string)
+           ~doc:"STRING String2048"
+       and executionRoleArn =
+         flag "execution-role-arn" (required string) ~doc:"STRING IAMRoleArn"
+       and credentialType =
+         flag "credential-type" (required string)
+           ~doc:"STRING CredentialType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_managed_endpoint_session_credentials
+           (Values.GetManagedEndpointSessionCredentialsRequest.make
+              ?durationInSeconds ?logContext ?clientToken ~endpointIdentifier
+              ~virtualClusterIdentifier ~executionRoleArn ~credentialType ())
+           (Some Values.GetManagedEndpointSessionCredentialsResponse.to_json)
+           (Some
+              Values.GetManagedEndpointSessionCredentialsResponse.error_to_json)])
 let list_job_runs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -245,6 +400,33 @@ let list_job_runs =
               ?maxResults ?nextToken ~virtualClusterId ())
            (Some Values.ListJobRunsResponse.to_json)
            (Some Values.ListJobRunsResponse.error_to_json)])
+let list_job_templates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and createdAfter =
+         flag "created-after" (optional json_arg) ~doc:"JSON Date"
+       and createdBefore =
+         flag "created-before" (optional json_arg) ~doc:"JSON Date"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT JavaInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_job_templates
+           (Values.ListJobTemplatesRequest.make
+              ?createdAfter:(Option.map ~f:Values.Date.of_json createdAfter)
+              ?createdBefore:(Option.map ~f:Values.Date.of_json createdBefore)
+              ?maxResults ?nextToken ())
+           (Some Values.ListJobTemplatesResponse.to_json)
+           (Some Values.ListJobTemplatesResponse.error_to_json)])
 let list_managed_endpoints =
   Command.async ~summary:""
     ([%map_open.Command
@@ -280,6 +462,33 @@ let list_managed_endpoints =
               ?maxResults ?nextToken ~virtualClusterId ())
            (Some Values.ListManagedEndpointsResponse.to_json)
            (Some Values.ListManagedEndpointsResponse.error_to_json)])
+let list_security_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and createdAfter =
+         flag "created-after" (optional json_arg) ~doc:"JSON Date"
+       and createdBefore =
+         flag "created-before" (optional json_arg) ~doc:"JSON Date"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT JavaInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_security_configurations
+           (Values.ListSecurityConfigurationsRequest.make
+              ?createdAfter:(Option.map ~f:Values.Date.of_json createdAfter)
+              ?createdBefore:(Option.map ~f:Values.Date.of_json createdBefore)
+              ?maxResults ?nextToken ())
+           (Some Values.ListSecurityConfigurationsResponse.to_json)
+           (Some Values.ListSecurityConfigurationsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -323,7 +532,10 @@ let list_virtual_clusters =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT JavaInteger"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and eksAccessEntryIntegrated =
+         flag "eks-access-entry-integrated" (optional bool)
+           ~doc:"BOOL Boolean" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_virtual_clusters
@@ -334,7 +546,8 @@ let list_virtual_clusters =
               ?createdAfter:(Option.map ~f:Values.Date.of_json createdAfter)
               ?createdBefore:(Option.map ~f:Values.Date.of_json createdBefore)
               ?states:(Option.map ~f:Values.VirtualClusterStates.of_json
-                         states) ?maxResults ?nextToken ())
+                         states) ?maxResults ?nextToken
+              ?eksAccessEntryIntegrated ())
            (Some Values.ListVirtualClustersResponse.to_json)
            (Some Values.ListVirtualClustersResponse.error_to_json)])
 let start_job_run =
@@ -349,31 +562,47 @@ let start_job_run =
            ~doc:"URL override endpoint url"
        and name =
          flag "name" (optional string) ~doc:"STRING ResourceNameString"
+       and executionRoleArn =
+         flag "execution-role-arn" (optional string) ~doc:"STRING IAMRoleArn"
+       and releaseLabel =
+         flag "release-label" (optional string) ~doc:"STRING ReleaseLabel"
+       and jobDriver =
+         flag "job-driver" (optional json_arg) ~doc:"JSON JobDriver"
        and configurationOverrides =
          flag "configuration-overrides" (optional json_arg)
            ~doc:"JSON ConfigurationOverrides"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and jobTemplateId =
+         flag "job-template-id" (optional string)
+           ~doc:"STRING ResourceIdString"
+       and jobTemplateParameters =
+         flag "job-template-parameters" (optional json_arg)
+           ~doc:"JSON TemplateParameterInputMap"
+       and retryPolicyConfiguration =
+         flag "retry-policy-configuration" (optional json_arg)
+           ~doc:"JSON RetryPolicyConfiguration"
        and virtualClusterId =
          flag "virtual-cluster-id" (required string)
            ~doc:"STRING ResourceIdString"
        and clientToken =
-         flag "client-token" (required string) ~doc:"STRING ClientToken"
-       and executionRoleArn =
-         flag "execution-role-arn" (required string) ~doc:"STRING IAMRoleArn"
-       and releaseLabel =
-         flag "release-label" (required string) ~doc:"STRING ReleaseLabel"
-       and jobDriver =
-         flag "job-driver" (required json_arg) ~doc:"JSON JobDriver" in
+         flag "client-token" (required string) ~doc:"STRING ClientToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_job_run
-           (Values.StartJobRunRequest.make ?name
+           (Values.StartJobRunRequest.make ?name ?executionRoleArn
+              ?releaseLabel
+              ?jobDriver:(Option.map ~f:Values.JobDriver.of_json jobDriver)
               ?configurationOverrides:(Option.map
                                          ~f:Values.ConfigurationOverrides.of_json
                                          configurationOverrides)
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
-              ~virtualClusterId ~clientToken ~executionRoleArn ~releaseLabel
-              ~jobDriver:(Values.JobDriver.of_json jobDriver) ())
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?jobTemplateId
+              ?jobTemplateParameters:(Option.map
+                                        ~f:Values.TemplateParameterInputMap.of_json
+                                        jobTemplateParameters)
+              ?retryPolicyConfiguration:(Option.map
+                                           ~f:Values.RetryPolicyConfiguration.of_json
+                                           retryPolicyConfiguration)
+              ~virtualClusterId ~clientToken ())
            (Some Values.StartJobRunResponse.to_json)
            (Some Values.StartJobRunResponse.error_to_json)])
 let tag_resource =
@@ -421,15 +650,24 @@ let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-job-run", cancel_job_run);
+    ("create-job-template", create_job_template);
     ("create-managed-endpoint", create_managed_endpoint);
+    ("create-security-configuration", create_security_configuration);
     ("create-virtual-cluster", create_virtual_cluster);
+    ("delete-job-template", delete_job_template);
     ("delete-managed-endpoint", delete_managed_endpoint);
     ("delete-virtual-cluster", delete_virtual_cluster);
     ("describe-job-run", describe_job_run);
+    ("describe-job-template", describe_job_template);
     ("describe-managed-endpoint", describe_managed_endpoint);
+    ("describe-security-configuration", describe_security_configuration);
     ("describe-virtual-cluster", describe_virtual_cluster);
+    ("get-managed-endpoint-session-credentials",
+      get_managed_endpoint_session_credentials);
     ("list-job-runs", list_job_runs);
+    ("list-job-templates", list_job_templates);
     ("list-managed-endpoints", list_managed_endpoints);
+    ("list-security-configurations", list_security_configurations);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-virtual-clusters", list_virtual_clusters);
     ("start-job-run", start_job_run);

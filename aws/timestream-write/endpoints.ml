@@ -2,24 +2,32 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | CreateBatchLoadTask: (CreateBatchLoadTaskRequest.t,
+  CreateBatchLoadTaskResponse.t, CreateBatchLoadTaskResponse.error) t 
   | CreateDatabase: (CreateDatabaseRequest.t, CreateDatabaseResponse.t,
   CreateDatabaseResponse.error) t 
   | CreateTable: (CreateTableRequest.t, CreateTableResponse.t,
   CreateTableResponse.error) t 
   | DeleteDatabase: (DeleteDatabaseRequest.t, unit, unit) t 
   | DeleteTable: (DeleteTableRequest.t, unit, unit) t 
+  | DescribeBatchLoadTask: (DescribeBatchLoadTaskRequest.t,
+  DescribeBatchLoadTaskResponse.t, DescribeBatchLoadTaskResponse.error) t 
   | DescribeDatabase: (DescribeDatabaseRequest.t, DescribeDatabaseResponse.t,
   DescribeDatabaseResponse.error) t 
   | DescribeEndpoints: (DescribeEndpointsRequest.t,
   DescribeEndpointsResponse.t, DescribeEndpointsResponse.error) t 
   | DescribeTable: (DescribeTableRequest.t, DescribeTableResponse.t,
   DescribeTableResponse.error) t 
+  | ListBatchLoadTasks: (ListBatchLoadTasksRequest.t,
+  ListBatchLoadTasksResponse.t, ListBatchLoadTasksResponse.error) t 
   | ListDatabases: (ListDatabasesRequest.t, ListDatabasesResponse.t,
   ListDatabasesResponse.error) t 
   | ListTables: (ListTablesRequest.t, ListTablesResponse.t,
   ListTablesResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ResumeBatchLoadTask: (ResumeBatchLoadTaskRequest.t,
+  ResumeBatchLoadTaskResponse.t, ResumeBatchLoadTaskResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -32,16 +40,20 @@ type ('i, 'o, 'e) t =
   WriteRecordsResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | CreateBatchLoadTask -> `POST
   | CreateDatabase -> `POST
   | CreateTable -> `POST
   | DeleteDatabase -> `POST
   | DeleteTable -> `POST
+  | DescribeBatchLoadTask -> `POST
   | DescribeDatabase -> `POST
   | DescribeEndpoints -> `POST
   | DescribeTable -> `POST
+  | ListBatchLoadTasks -> `POST
   | ListDatabases -> `POST
   | ListTables -> `POST
   | ListTagsForResource -> `POST
+  | ResumeBatchLoadTask -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateDatabase -> `POST
@@ -50,16 +62,20 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | CreateBatchLoadTask -> (Format.kasprintf Uri.of_string) "/"
       | CreateDatabase -> (Format.kasprintf Uri.of_string) "/"
       | CreateTable -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDatabase -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTable -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeBatchLoadTask -> (Format.kasprintf Uri.of_string) "/"
       | DescribeDatabase -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEndpoints -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTable -> (Format.kasprintf Uri.of_string) "/"
+      | ListBatchLoadTasks -> (Format.kasprintf Uri.of_string) "/"
       | ListDatabases -> (Format.kasprintf Uri.of_string) "/"
       | ListTables -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | ResumeBatchLoadTask -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateDatabase -> (Format.kasprintf Uri.of_string) "/"
@@ -68,6 +84,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
+  | CreateBatchLoadTask ->
+      let json = CreateBatchLoadTaskRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "Timestream_20181101.CreateBatchLoadTask")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateDatabase ->
       let json = CreateDatabaseRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -100,6 +124,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "Timestream_20181101.DeleteTable")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeBatchLoadTask ->
+      let json = DescribeBatchLoadTaskRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "Timestream_20181101.DescribeBatchLoadTask")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeDatabase ->
       let json = DescribeDatabaseRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -124,6 +156,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "Timestream_20181101.DescribeTable")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListBatchLoadTasks ->
+      let json = ListBatchLoadTasksRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "Timestream_20181101.ListBatchLoadTasks")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListDatabases ->
       let json = ListDatabasesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -147,6 +187,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "Timestream_20181101.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ResumeBatchLoadTask ->
+      let json = ResumeBatchLoadTaskRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "Timestream_20181101.ResumeBatchLoadTask")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagResource ->
       let json = TagResourceRequest.to_json req in
@@ -211,6 +259,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | CreateBatchLoadTask ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateBatchLoadTaskResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateBatchLoadTaskResponse.error_of_json))
   | CreateDatabase ->
       if is_success
       then
@@ -227,6 +283,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteDatabase ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteTable -> if is_success then Ok () else Error (parse_aws_error None)
+  | DescribeBatchLoadTask ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeBatchLoadTaskResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeBatchLoadTaskResponse.error_of_json))
   | DescribeDatabase ->
       if is_success
       then
@@ -248,6 +312,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeTableResponse.of_json json)
       else Error (parse_aws_error (Some DescribeTableResponse.error_of_json))
+  | ListBatchLoadTasks ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListBatchLoadTasksResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListBatchLoadTasksResponse.error_of_json))
   | ListDatabases ->
       if is_success
       then
@@ -268,6 +340,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ResumeBatchLoadTask ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ResumeBatchLoadTaskResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ResumeBatchLoadTaskResponse.error_of_json))
   | TagResource ->
       if is_success
       then

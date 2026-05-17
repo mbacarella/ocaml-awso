@@ -24,6 +24,82 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module CodeStarConnectionArn =
+  struct
+    type nonrec t = string
+    let context_ = "CodeStarConnectionArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1224) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[a-z0-9][-.a-z0-9]{0,62}:codestar-connections:([a-z0-9][-.a-z0-9]{0,62})?:([a-z0-9][-.a-z0-9]{0,62})?:[^/].{0,1023}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CodeStarConnectionArn" j
+    let to_json = simple_to_json to_value
+  end
+module Repository =
+  struct
+    type nonrec t = string
+    let context_ = "Repository"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Repository" j
+    let to_json = simple_to_json to_value
+  end
+module RepositoryArtifactPath =
+  struct
+    type nonrec t = string
+    let context_ = "RepositoryArtifactPath"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:4096) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RepositoryArtifactPath" j
+    let to_json = simple_to_json to_value
+  end
+module RepositoryBranch =
+  struct
+    type nonrec t = string
+    let context_ = "RepositoryBranch"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:250) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RepositoryBranch" j
+    let to_json = simple_to_json to_value
+  end
 module PropertyName =
   struct
     type nonrec t = string
@@ -148,6 +224,144 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
+module Id =
+  struct
+    type nonrec t = string
+    let context_ = "Id"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9_\\-]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Id" j
+    let to_json = simple_to_json to_value
+  end
+module LastSuccessfulSyncTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module LastSyncStatus =
+  struct
+    type nonrec t =
+      | SUCCEEDED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCEEDED -> "SUCCEEDED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCEEDED" -> SUCCEEDED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LastSyncStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LastSyncStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module LastSyncStatusMessage =
+  struct
+    type nonrec t = string
+    let context_ = "LastSyncStatusMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LastSyncStatusMessage" j
+    let to_json = simple_to_json to_value
+  end
+module LastSyncTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module CodeStarParameters =
+  struct
+    type nonrec t =
+      {
+      connectionArn: CodeStarConnectionArn.t
+        [@ocaml.doc
+          "The CodeStar ARN, which is the connection between Service Catalog and the external repository."];
+      repository: Repository.t
+        [@ocaml.doc
+          "The specific repository where the product\226\128\153s artifact-to-be-synced resides, formatted as \"Account/Repo.\""];
+      branch: RepositoryBranch.t
+        [@ocaml.doc "The specific branch where the artifact resides."];
+      artifactPath: RepositoryArtifactPath.t
+        [@ocaml.doc
+          "The absolute path wehre the artifact resides within the repo and branch, formatted as \"folder/file.json.\""]}
+    let context_ = "CodeStarParameters"
+    let make ~connectionArn =
+      fun ~repository ->
+        fun ~branch ->
+          fun ~artifactPath ->
+            fun () -> { connectionArn; repository; branch; artifactPath }
+    let to_value x =
+      structure_to_value
+        [("ConnectionArn",
+           (Some (CodeStarConnectionArn.to_value x.connectionArn)));
+        ("Repository", (Some (Repository.to_value x.repository)));
+        ("Branch", (Some (RepositoryBranch.to_value x.branch)));
+        ("ArtifactPath",
+          (Some (RepositoryArtifactPath.to_value x.artifactPath)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let artifactPath =
+        RepositoryArtifactPath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ArtifactPath") in
+      let branch =
+        RepositoryBranch.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Branch") in
+      let repository =
+        Repository.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Repository") in
+      let connectionArn =
+        CodeStarConnectionArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConnectionArn") in
+      make ~artifactPath ~branch ~repository ~connectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let artifactPath =
+        field_map_exn json__ "ArtifactPath" RepositoryArtifactPath.of_json in
+      let branch = field_map_exn json__ "Branch" RepositoryBranch.of_json in
+      let repository = field_map_exn json__ "Repository" Repository.of_json in
+      let connectionArn =
+        field_map_exn json__ "ConnectionArn" CodeStarConnectionArn.of_json in
+      make ~artifactPath ~branch ~repository ~connectionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The subtype containing details about the Codestar connection Type."]
 module ErrorCode =
   struct
     type nonrec t = string
@@ -336,11 +550,11 @@ module ResourceTargetDefinition =
           (Xml.child xml_arg0 "Attribute") in
       make ?requiresRecreation ?name ?attribute ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requiresRecreation =
-        field_map json "RequiresRecreation" RequiresRecreation.of_json in
-      let name = field_map json "Name" PropertyName.of_json in
-      let attribute = field_map json "Attribute" ResourceAttribute.of_json in
+        field_map json__ "RequiresRecreation" RequiresRecreation.of_json in
+      let name = field_map json__ "Name" PropertyName.of_json in
+      let attribute = field_map json__ "Attribute" ResourceAttribute.of_json in
       make ?requiresRecreation ?name ?attribute ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a change to a resource attribute."]
@@ -379,9 +593,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -426,42 +640,31 @@ module HasDefaultPath =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
-module Id =
-  struct
-    type nonrec t = string
-    let context_ = "Id"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:100) >>=
-                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9_\\-]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Id" j
-    let to_json = simple_to_json to_value
-  end
 module ProductType =
   struct
     type nonrec t =
       | CLOUD_FORMATION_TEMPLATE 
       | MARKETPLACE 
+      | TERRAFORM_OPEN_SOURCE 
+      | TERRAFORM_CLOUD 
+      | EXTERNAL 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | CLOUD_FORMATION_TEMPLATE -> "CLOUD_FORMATION_TEMPLATE"
       | MARKETPLACE -> "MARKETPLACE"
+      | TERRAFORM_OPEN_SOURCE -> "TERRAFORM_OPEN_SOURCE"
+      | TERRAFORM_CLOUD -> "TERRAFORM_CLOUD"
+      | EXTERNAL -> "EXTERNAL"
       | Non_static_id s -> s
     let of_string =
       function
       | "CLOUD_FORMATION_TEMPLATE" -> CLOUD_FORMATION_TEMPLATE
       | "MARKETPLACE" -> MARKETPLACE
+      | "TERRAFORM_OPEN_SOURCE" -> TERRAFORM_OPEN_SOURCE
+      | "TERRAFORM_CLOUD" -> TERRAFORM_CLOUD
+      | "EXTERNAL" -> EXTERNAL
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -568,6 +771,128 @@ module SupportUrl =
     let of_json j = string_of_json ~kind:"SupportUrl" j
     let to_json = simple_to_json to_value
   end
+module LastSync =
+  struct
+    type nonrec t =
+      {
+      lastSyncTime: LastSyncTime.t option
+        [@ocaml.doc
+          "The time of the last attempted sync from the repository to the Service Catalog product."];
+      lastSyncStatus: LastSyncStatus.t option
+        [@ocaml.doc
+          "The current status of the sync. Responses include SUCCEEDED or FAILED."];
+      lastSyncStatusMessage: LastSyncStatusMessage.t option
+        [@ocaml.doc "The sync's status message."];
+      lastSuccessfulSyncTime: LastSuccessfulSyncTime.t option
+        [@ocaml.doc
+          "The time of the latest successful sync from the source repo artifact to the Service Catalog product."];
+      lastSuccessfulSyncProvisioningArtifactId: Id.t option
+        [@ocaml.doc
+          "The ProvisioningArtifactID of the ProvisioningArtifact created from the latest successful sync."]}
+    let make ?lastSyncTime =
+      fun ?lastSyncStatus ->
+        fun ?lastSyncStatusMessage ->
+          fun ?lastSuccessfulSyncTime ->
+            fun ?lastSuccessfulSyncProvisioningArtifactId ->
+              fun () ->
+                {
+                  lastSyncTime;
+                  lastSyncStatus;
+                  lastSyncStatusMessage;
+                  lastSuccessfulSyncTime;
+                  lastSuccessfulSyncProvisioningArtifactId
+                }
+    let to_value x =
+      structure_to_value
+        [("LastSyncTime",
+           (Option.map x.lastSyncTime ~f:LastSyncTime.to_value));
+        ("LastSyncStatus",
+          (Option.map x.lastSyncStatus ~f:LastSyncStatus.to_value));
+        ("LastSyncStatusMessage",
+          (Option.map x.lastSyncStatusMessage
+             ~f:LastSyncStatusMessage.to_value));
+        ("LastSuccessfulSyncTime",
+          (Option.map x.lastSuccessfulSyncTime
+             ~f:LastSuccessfulSyncTime.to_value));
+        ("LastSuccessfulSyncProvisioningArtifactId",
+          (Option.map x.lastSuccessfulSyncProvisioningArtifactId
+             ~f:Id.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastSuccessfulSyncProvisioningArtifactId =
+        (Option.map ~f:Id.of_xml)
+          (Xml.child xml_arg0 "LastSuccessfulSyncProvisioningArtifactId") in
+      let lastSuccessfulSyncTime =
+        (Option.map ~f:LastSuccessfulSyncTime.of_xml)
+          (Xml.child xml_arg0 "LastSuccessfulSyncTime") in
+      let lastSyncStatusMessage =
+        (Option.map ~f:LastSyncStatusMessage.of_xml)
+          (Xml.child xml_arg0 "LastSyncStatusMessage") in
+      let lastSyncStatus =
+        (Option.map ~f:LastSyncStatus.of_xml)
+          (Xml.child xml_arg0 "LastSyncStatus") in
+      let lastSyncTime =
+        (Option.map ~f:LastSyncTime.of_xml)
+          (Xml.child xml_arg0 "LastSyncTime") in
+      make ?lastSuccessfulSyncProvisioningArtifactId ?lastSuccessfulSyncTime
+        ?lastSyncStatusMessage ?lastSyncStatus ?lastSyncTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastSuccessfulSyncProvisioningArtifactId =
+        field_map json__ "LastSuccessfulSyncProvisioningArtifactId"
+          Id.of_json in
+      let lastSuccessfulSyncTime =
+        field_map json__ "LastSuccessfulSyncTime"
+          LastSuccessfulSyncTime.of_json in
+      let lastSyncStatusMessage =
+        field_map json__ "LastSyncStatusMessage"
+          LastSyncStatusMessage.of_json in
+      let lastSyncStatus =
+        field_map json__ "LastSyncStatus" LastSyncStatus.of_json in
+      let lastSyncTime = field_map json__ "LastSyncTime" LastSyncTime.of_json in
+      make ?lastSuccessfulSyncProvisioningArtifactId ?lastSuccessfulSyncTime
+        ?lastSyncStatusMessage ?lastSyncStatus ?lastSyncTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides details about the product's connection sync and contains the following sub-fields. LastSyncTime LastSyncStatus LastSyncStatusMessage LastSuccessfulSyncTime LastSuccessfulSyncProvisioningArtifactID"]
+module SourceConnectionParameters =
+  struct
+    type nonrec t =
+      {
+      codeStar: CodeStarParameters.t option
+        [@ocaml.doc "Provides ConnectionType details."]}
+    let make ?codeStar = fun () -> { codeStar }
+    let to_value x =
+      structure_to_value
+        [("CodeStar", (Option.map x.codeStar ~f:CodeStarParameters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let codeStar =
+        (Option.map ~f:CodeStarParameters.of_xml)
+          (Xml.child xml_arg0 "CodeStar") in
+      make ?codeStar ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let codeStar = field_map json__ "CodeStar" CodeStarParameters.of_json in
+      make ?codeStar ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides connection details."]
+module SourceType =
+  struct
+    type nonrec t =
+      | CODESTAR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | CODESTAR -> "CODESTAR" | Non_static_id s -> s
+    let of_string = function | "CODESTAR" -> CODESTAR | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SourceType" j)
+    let to_json = simple_to_json to_value
+  end
 module RecordError =
   struct
     type nonrec t =
@@ -589,9 +914,10 @@ module RecordError =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?description ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" ErrorDescription.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let description =
+        field_map json__ "Description" ErrorDescription.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?description ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -615,9 +941,9 @@ module RecordTag =
         (Option.map ~f:RecordTagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" RecordTagValue.of_json in
-      let key = field_map json "Key" RecordTagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" RecordTagValue.of_json in
+      let key = field_map json__ "Key" RecordTagKey.of_json in
       make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a tag, which is a key-value pair."]
@@ -713,10 +1039,10 @@ module ConstraintSummary =
         (Option.map ~f:ConstraintType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?description ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" ConstraintDescription.of_json in
-      let type_ = field_map json "Type" ConstraintType.of_json in
+        field_map json__ "Description" ConstraintDescription.of_json in
+      let type_ = field_map json__ "Type" ConstraintType.of_json in
       make ?description ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about a constraint."]
@@ -742,6 +1068,9 @@ module AllowedValues =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -864,11 +1193,11 @@ module ResourceChangeDetail =
           (Xml.child xml_arg0 "Target") in
       make ?causingEntity ?evaluation ?target ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let causingEntity =
-        field_map json "CausingEntity" CausingEntity.of_json in
-      let evaluation = field_map json "Evaluation" EvaluationType.of_json in
-      let target = field_map json "Target" ResourceTargetDefinition.of_json in
+        field_map json__ "CausingEntity" CausingEntity.of_json in
+      let evaluation = field_map json__ "Evaluation" EvaluationType.of_json in
+      let target = field_map json__ "Target" ResourceTargetDefinition.of_json in
       make ?causingEntity ?evaluation ?target ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a change to a resource attribute."]
@@ -928,6 +1257,9 @@ module Namespaces =
   struct
     type nonrec t = AccountId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1203,6 +1535,9 @@ module Tags =
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1287,10 +1622,10 @@ module ProductViewAggregationValue =
         (Option.map ~f:AttributeValue.of_xml) (Xml.child xml_arg0 "Value") in
       make ?approximateCount ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approximateCount =
-        field_map json "ApproximateCount" ApproximateCount.of_json in
-      let value = field_map json "Value" AttributeValue.of_json in
+        field_map json__ "ApproximateCount" ApproximateCount.of_json in
+      let value = field_map json__ "Value" AttributeValue.of_json in
       make ?approximateCount ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1322,7 +1657,7 @@ module ProductViewSummary =
         [@ocaml.doc "Short description of the product."];
       type_: ProductType.t option
         [@ocaml.doc
-          "The product type. Contact the product administrator for the significance of this value. If this value is MARKETPLACE, the product was created by AWS Marketplace."];
+          "The product type. Contact the product administrator for the significance of this value. If this value is MARKETPLACE, the product was created by Amazon Web Services Marketplace."];
       distributor: ProductViewDistributor.t option
         [@ocaml.doc
           "The distributor of the product. Contact the product administrator for the significance of this value."];
@@ -1412,22 +1747,23 @@ module ProductViewSummary =
       make ?supportUrl ?supportDescription ?supportEmail ?hasDefaultPath
         ?distributor ?type_ ?shortDescription ?owner ?name ?productId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let supportUrl = field_map json "SupportUrl" SupportUrl.of_json in
+    let of_json json__ =
+      let supportUrl = field_map json__ "SupportUrl" SupportUrl.of_json in
       let supportDescription =
-        field_map json "SupportDescription" SupportDescription.of_json in
-      let supportEmail = field_map json "SupportEmail" SupportEmail.of_json in
+        field_map json__ "SupportDescription" SupportDescription.of_json in
+      let supportEmail = field_map json__ "SupportEmail" SupportEmail.of_json in
       let hasDefaultPath =
-        field_map json "HasDefaultPath" HasDefaultPath.of_json in
+        field_map json__ "HasDefaultPath" HasDefaultPath.of_json in
       let distributor =
-        field_map json "Distributor" ProductViewDistributor.of_json in
-      let type_ = field_map json "Type" ProductType.of_json in
+        field_map json__ "Distributor" ProductViewDistributor.of_json in
+      let type_ = field_map json__ "Type" ProductType.of_json in
       let shortDescription =
-        field_map json "ShortDescription" ProductViewShortDescription.of_json in
-      let owner = field_map json "Owner" ProductViewOwner.of_json in
-      let name = field_map json "Name" ProductViewName.of_json in
-      let productId = field_map json "ProductId" Id.of_json in
-      let id = field_map json "Id" Id.of_json in
+        field_map json__ "ShortDescription"
+          ProductViewShortDescription.of_json in
+      let owner = field_map json__ "Owner" ProductViewOwner.of_json in
+      let name = field_map json__ "Name" ProductViewName.of_json in
+      let productId = field_map json__ "ProductId" Id.of_json in
+      let id = field_map json__ "Id" Id.of_json in
       make ?supportUrl ?supportDescription ?supportEmail ?hasDefaultPath
         ?distributor ?type_ ?shortDescription ?owner ?name ?productId ?id ()
     let to_json v = composed_to_json to_value v
@@ -1450,6 +1786,47 @@ module ResourceARN =
     let of_json j = string_of_json ~kind:"ResourceARN" j
     let to_json = simple_to_json to_value
   end
+module SourceConnectionDetail =
+  struct
+    type nonrec t =
+      {
+      type_: SourceType.t option
+        [@ocaml.doc "The only supported SourceConnection type is Codestar."];
+      connectionParameters: SourceConnectionParameters.t option
+        [@ocaml.doc "The connection details based on the connection Type."];
+      lastSync: LastSync.t option
+        [@ocaml.doc
+          "Provides details about the product's connection sync and contains the following sub-fields. LastSyncTime LastSyncStatus LastSyncStatusMessage LastSuccessfulSyncTime LastSuccessfulSyncProvisioningArtifactID"]}
+    let make ?type_ =
+      fun ?connectionParameters ->
+        fun ?lastSync -> fun () -> { type_; connectionParameters; lastSync }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:SourceType.to_value));
+        ("ConnectionParameters",
+          (Option.map x.connectionParameters
+             ~f:SourceConnectionParameters.to_value));
+        ("LastSync", (Option.map x.lastSync ~f:LastSync.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastSync =
+        (Option.map ~f:LastSync.of_xml) (Xml.child xml_arg0 "LastSync") in
+      let connectionParameters =
+        (Option.map ~f:SourceConnectionParameters.of_xml)
+          (Xml.child xml_arg0 "ConnectionParameters") in
+      let type_ =
+        (Option.map ~f:SourceType.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?lastSync ?connectionParameters ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastSync = field_map json__ "LastSync" LastSync.of_json in
+      let connectionParameters =
+        field_map json__ "ConnectionParameters"
+          SourceConnectionParameters.of_json in
+      let type_ = field_map json__ "Type" SourceType.of_json in
+      make ?lastSync ?connectionParameters ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides details about the configured SourceConnection."]
 module Status =
   struct
     type nonrec t =
@@ -1524,6 +1901,89 @@ module RoleArn =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"RoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module Description =
+  struct
+    type nonrec t = string
+    let context_ = "Description"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Description" j
+    let to_json = simple_to_json to_value
+  end
+module OutputKey =
+  struct
+    type nonrec t = string
+    let context_ = "OutputKey"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OutputKey" j
+    let to_json = simple_to_json to_value
+  end
+module OutputValue =
+  struct
+    type nonrec t = string
+    let context_ = "OutputValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OutputValue" j
+    let to_json = simple_to_json to_value
+  end
+module UniqueTagKey =
+  struct
+    type nonrec t = string
+    let context_ = "UniqueTagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:\\/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UniqueTagKey" j
+    let to_json = simple_to_json to_value
+  end
+module UniqueTagValue =
+  struct
+    type nonrec t = string
+    let context_ = "UniqueTagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:\\/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UniqueTagValue" j
     let to_json = simple_to_json to_value
   end
 module Owner =
@@ -1710,6 +2170,9 @@ module RecordErrors =
   struct
     type nonrec t = RecordError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecordError.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1769,6 +2232,9 @@ module RecordTags =
     type nonrec t = RecordTag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecordTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1845,6 +2311,9 @@ module ProvisioningArtifactType =
       | CLOUD_FORMATION_TEMPLATE 
       | MARKETPLACE_AMI 
       | MARKETPLACE_CAR 
+      | TERRAFORM_OPEN_SOURCE 
+      | TERRAFORM_CLOUD 
+      | EXTERNAL 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1852,12 +2321,18 @@ module ProvisioningArtifactType =
       | CLOUD_FORMATION_TEMPLATE -> "CLOUD_FORMATION_TEMPLATE"
       | MARKETPLACE_AMI -> "MARKETPLACE_AMI"
       | MARKETPLACE_CAR -> "MARKETPLACE_CAR"
+      | TERRAFORM_OPEN_SOURCE -> "TERRAFORM_OPEN_SOURCE"
+      | TERRAFORM_CLOUD -> "TERRAFORM_CLOUD"
+      | EXTERNAL -> "EXTERNAL"
       | Non_static_id s -> s
     let of_string =
       function
       | "CLOUD_FORMATION_TEMPLATE" -> CLOUD_FORMATION_TEMPLATE
       | "MARKETPLACE_AMI" -> MARKETPLACE_AMI
       | "MARKETPLACE_CAR" -> MARKETPLACE_CAR
+      | "TERRAFORM_OPEN_SOURCE" -> TERRAFORM_OPEN_SOURCE
+      | "TERRAFORM_CLOUD" -> TERRAFORM_CLOUD
+      | "EXTERNAL" -> EXTERNAL
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1867,6 +2342,24 @@ module ProvisioningArtifactType =
         (string_of_xml ~kind:"enumeration ProvisioningArtifactType" xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"ProvisioningArtifactType" j)
+    let to_json = simple_to_json to_value
+  end
+module SourceRevision =
+  struct
+    type nonrec t = string
+    let context_ = "SourceRevision"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SourceRevision" j
     let to_json = simple_to_json to_value
   end
 module ProvisioningArtifact =
@@ -1919,15 +2412,17 @@ module ProvisioningArtifact =
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?guidance ?createdTime ?description ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let guidance =
-        field_map json "Guidance" ProvisioningArtifactGuidance.of_json in
+        field_map json__ "Guidance" ProvisioningArtifactGuidance.of_json in
       let createdTime =
-        field_map json "CreatedTime" ProvisioningArtifactCreatedTime.of_json in
+        field_map json__ "CreatedTime"
+          ProvisioningArtifactCreatedTime.of_json in
       let description =
-        field_map json "Description" ProvisioningArtifactDescription.of_json in
-      let name = field_map json "Name" ProvisioningArtifactName.of_json in
-      let id = field_map json "Id" Id.of_json in
+        field_map json__ "Description"
+          ProvisioningArtifactDescription.of_json in
+      let name = field_map json__ "Name" ProvisioningArtifactName.of_json in
+      let id = field_map json__ "Id" Id.of_json in
       make ?guidance ?createdTime ?description ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1988,10 +2483,19 @@ module PrincipalType =
   struct
     type nonrec t =
       | IAM 
+      | IAM_PATTERN 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | IAM -> "IAM" | Non_static_id s -> s
-    let of_string = function | "IAM" -> IAM | x -> Non_static_id x
+    let to_string =
+      function
+      | IAM -> "IAM"
+      | IAM_PATTERN -> "IAM_PATTERN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IAM" -> IAM
+      | "IAM_PATTERN" -> IAM_PATTERN
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -2101,6 +2605,9 @@ module ConstraintSummaries =
   struct
     type nonrec t = ConstraintSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConstraintSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2153,45 +2660,6 @@ module BudgetName =
     let of_json j = string_of_json ~kind:"BudgetName" j
     let to_json = simple_to_json to_value
   end
-module Description =
-  struct
-    type nonrec t = string
-    let context_ = "Description"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Description" j
-    let to_json = simple_to_json to_value
-  end
-module OutputKey =
-  struct
-    type nonrec t = string
-    let context_ = "OutputKey"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"OutputKey" j
-    let to_json = simple_to_json to_value
-  end
-module OutputValue =
-  struct
-    type nonrec t = string
-    let context_ = "OutputValue"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"OutputValue" j
-    let to_json = simple_to_json to_value
-  end
 module ExecutionParameterKey =
   struct
     type nonrec t = string
@@ -2236,6 +2704,9 @@ module ExecutionParameterValueList =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExecutionParameterValue.to_value)) |>
         (fun x -> `List x)
@@ -2392,16 +2863,16 @@ module ParameterConstraints =
       make ?minValue ?maxValue ?minLength ?maxLength ?constraintDescription
         ?allowedPattern ?allowedValues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let minValue = field_map json "MinValue" String_.of_json in
-      let maxValue = field_map json "MaxValue" String_.of_json in
-      let minLength = field_map json "MinLength" String_.of_json in
-      let maxLength = field_map json "MaxLength" String_.of_json in
+    let of_json json__ =
+      let minValue = field_map json__ "MinValue" String_.of_json in
+      let maxValue = field_map json__ "MaxValue" String_.of_json in
+      let minLength = field_map json__ "MinLength" String_.of_json in
+      let maxLength = field_map json__ "MaxLength" String_.of_json in
       let constraintDescription =
-        field_map json "ConstraintDescription" String_.of_json in
-      let allowedPattern = field_map json "AllowedPattern" String_.of_json in
+        field_map json__ "ConstraintDescription" String_.of_json in
+      let allowedPattern = field_map json__ "AllowedPattern" String_.of_json in
       let allowedValues =
-        field_map json "AllowedValues" AllowedValues.of_json in
+        field_map json__ "AllowedValues" AllowedValues.of_json in
       make ?minValue ?maxValue ?minLength ?maxLength ?constraintDescription
         ?allowedPattern ?allowedValues ()
     let to_json v = composed_to_json to_value v
@@ -2424,6 +2895,9 @@ module TagOptionValues =
   struct
     type nonrec t = TagOptionValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagOptionValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2521,11 +2995,11 @@ module UpdateProvisioningParameter =
         (Option.map ~f:ParameterKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?usePreviousValue ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let usePreviousValue =
-        field_map json "UsePreviousValue" UsePreviousValue.of_json in
-      let value = field_map json "Value" ParameterValue.of_json in
-      let key = field_map json "Key" ParameterKey.of_json in
+        field_map json__ "UsePreviousValue" UsePreviousValue.of_json in
+      let value = field_map json__ "Value" ParameterValue.of_json in
+      let key = field_map json__ "Key" ParameterKey.of_json in
       make ?usePreviousValue ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2634,6 +3108,9 @@ module ResourceChangeDetails =
   struct
     type nonrec t = ResourceChangeDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceChangeDetail.to_value)) |>
         (fun x -> `List x)
@@ -2660,6 +3137,9 @@ module Scope =
   struct
     type nonrec t = ResourceAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2722,6 +3202,8 @@ module ProvisioningArtifactInfo =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2802,10 +3284,10 @@ module ShareError =
         (Option.map ~f:Namespaces.of_xml) (Xml.child xml_arg0 "Accounts") in
       make ?error ?message ?accounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "Error" Error.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let accounts = field_map json "Accounts" Namespaces.of_json in
+    let of_json json__ =
+      let error = field_map json__ "Error" Error.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let accounts = field_map json__ "Accounts" Namespaces.of_json in
       make ?error ?message ?accounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2851,6 +3333,7 @@ module ServiceActionAssociationErrorCode =
       | LIMIT_EXCEEDED 
       | RESOURCE_NOT_FOUND 
       | THROTTLING 
+      | INVALID_PARAMETER 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2860,6 +3343,7 @@ module ServiceActionAssociationErrorCode =
       | LIMIT_EXCEEDED -> "LIMIT_EXCEEDED"
       | RESOURCE_NOT_FOUND -> "RESOURCE_NOT_FOUND"
       | THROTTLING -> "THROTTLING"
+      | INVALID_PARAMETER -> "INVALID_PARAMETER"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2868,6 +3352,7 @@ module ServiceActionAssociationErrorCode =
       | "LIMIT_EXCEEDED" -> LIMIT_EXCEEDED
       | "RESOURCE_NOT_FOUND" -> RESOURCE_NOT_FOUND
       | "THROTTLING" -> THROTTLING
+      | "INVALID_PARAMETER" -> INVALID_PARAMETER
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2928,6 +3413,8 @@ module ServiceActionDefinitionMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2974,13 +3461,13 @@ module ServiceActionSummary =
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?definitionType ?description ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let definitionType =
-        field_map json "DefinitionType" ServiceActionDefinitionType.of_json in
+        field_map json__ "DefinitionType" ServiceActionDefinitionType.of_json in
       let description =
-        field_map json "Description" ServiceActionDescription.of_json in
-      let name = field_map json "Name" ServiceActionName.of_json in
-      let id = field_map json "Id" Id.of_json in
+        field_map json__ "Description" ServiceActionDescription.of_json in
+      let name = field_map json__ "Name" ServiceActionName.of_json in
+      let id = field_map json__ "Id" Id.of_json in
       make ?definitionType ?description ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detailed information about the self-service action."]
@@ -3031,6 +3518,9 @@ module StackSetAccounts =
   struct
     type nonrec t = AccountId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3155,6 +3645,9 @@ module StackSetRegions =
   struct
     type nonrec t = Region.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Region.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3185,7 +3678,7 @@ module ProvisionedProductAttribute =
         [@ocaml.doc "The ARN of the provisioned product."];
       type_: ProvisionedProductType.t option
         [@ocaml.doc
-          "The type of provisioned product. The supported values are CFN_STACK and CFN_STACKSET."];
+          "The type of provisioned product. The supported values are CFN_STACK, CFN_STACKSET, TERRAFORM_OPEN_SOURCE, TERRAFORM_CLOUD, and EXTERNAL."];
       id: Id.t option
         [@ocaml.doc "The identifier of the provisioned product."];
       status: ProvisionedProductStatus.t option
@@ -3203,10 +3696,10 @@ module ProvisionedProductAttribute =
           "The record identifier of the last request performed on this provisioned product."];
       lastProvisioningRecordId: Id.t option
         [@ocaml.doc
-          "The record identifier of the last request performed on this provisioned product of the following types: ProvisionedProduct UpdateProvisionedProduct ExecuteProvisionedProductPlan TerminateProvisionedProduct"];
+          "The record identifier of the last request performed on this provisioned product of the following types: ProvisionProduct UpdateProvisionedProduct ExecuteProvisionedProductPlan TerminateProvisionedProduct"];
       lastSuccessfulProvisioningRecordId: Id.t option
         [@ocaml.doc
-          "The record identifier of the last successful request performed on this provisioned product of the following types: ProvisionedProduct UpdateProvisionedProduct ExecuteProvisionedProductPlan TerminateProvisionedProduct"];
+          "The record identifier of the last successful request performed on this provisioned product of the following types: ProvisionProduct UpdateProvisionedProduct ExecuteProvisionedProductPlan TerminateProvisionedProduct"];
       tags: Tags.t option [@ocaml.doc "One or more tags."];
       physicalId: PhysicalId.t option
         [@ocaml.doc
@@ -3219,10 +3712,10 @@ module ProvisionedProductAttribute =
       provisioningArtifactName: ProvisioningArtifactName.t option
         [@ocaml.doc "The name of the provisioning artifact."];
       userArn: UserArn.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the IAM user."];
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the user."];
       userArnSession: UserArnSession.t option
         [@ocaml.doc
-          "The ARN of the IAM user in the session. This ARN might contain a session ID."]}
+          "The ARN of the user in the session. This ARN might contain a session ID."]}
     let make ?name =
       fun ?arn ->
         fun ?type_ ->
@@ -3353,35 +3846,36 @@ module ProvisionedProductAttribute =
         ?lastRecordId ?idempotencyToken ?createdTime ?statusMessage ?status
         ?id ?type_ ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let userArnSession =
-        field_map json "UserArnSession" UserArnSession.of_json in
-      let userArn = field_map json "UserArn" UserArn.of_json in
+        field_map json__ "UserArnSession" UserArnSession.of_json in
+      let userArn = field_map json__ "UserArn" UserArn.of_json in
       let provisioningArtifactName =
-        field_map json "ProvisioningArtifactName"
+        field_map json__ "ProvisioningArtifactName"
           ProvisioningArtifactName.of_json in
       let provisioningArtifactId =
-        field_map json "ProvisioningArtifactId" Id.of_json in
-      let productName = field_map json "ProductName" ProductViewName.of_json in
-      let productId = field_map json "ProductId" Id.of_json in
-      let physicalId = field_map json "PhysicalId" PhysicalId.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "ProvisioningArtifactId" Id.of_json in
+      let productName =
+        field_map json__ "ProductName" ProductViewName.of_json in
+      let productId = field_map json__ "ProductId" Id.of_json in
+      let physicalId = field_map json__ "PhysicalId" PhysicalId.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let lastSuccessfulProvisioningRecordId =
-        field_map json "LastSuccessfulProvisioningRecordId" Id.of_json in
+        field_map json__ "LastSuccessfulProvisioningRecordId" Id.of_json in
       let lastProvisioningRecordId =
-        field_map json "LastProvisioningRecordId" Id.of_json in
-      let lastRecordId = field_map json "LastRecordId" Id.of_json in
+        field_map json__ "LastProvisioningRecordId" Id.of_json in
+      let lastRecordId = field_map json__ "LastRecordId" Id.of_json in
       let idempotencyToken =
-        field_map json "IdempotencyToken" IdempotencyToken.of_json in
-      let createdTime = field_map json "CreatedTime" CreatedTime.of_json in
+        field_map json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let createdTime = field_map json__ "CreatedTime" CreatedTime.of_json in
       let statusMessage =
-        field_map json "StatusMessage"
+        field_map json__ "StatusMessage"
           ProvisionedProductStatusMessage.of_json in
-      let status = field_map json "Status" ProvisionedProductStatus.of_json in
-      let id = field_map json "Id" Id.of_json in
-      let type_ = field_map json "Type" ProvisionedProductType.of_json in
-      let arn = field_map json "Arn" ProvisionedProductNameOrArn.of_json in
-      let name = field_map json "Name" ProvisionedProductNameOrArn.of_json in
+      let status = field_map json__ "Status" ProvisionedProductStatus.of_json in
+      let id = field_map json__ "Id" Id.of_json in
+      let type_ = field_map json__ "Type" ProvisionedProductType.of_json in
+      let arn = field_map json__ "Arn" ProvisionedProductNameOrArn.of_json in
+      let name = field_map json__ "Name" ProvisionedProductNameOrArn.of_json in
       make ?userArnSession ?userArn ?provisioningArtifactName
         ?provisioningArtifactId ?productName ?productId ?physicalId ?tags
         ?lastSuccessfulProvisioningRecordId ?lastProvisioningRecordId
@@ -3456,6 +3950,9 @@ module ProvisionedProductViewFilterValues =
   struct
     type nonrec t = ProvisionedProductViewFilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProvisionedProductViewFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -3496,6 +3993,9 @@ module ProductViewAggregationValues =
   struct
     type nonrec t = ProductViewAggregationValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProductViewAggregationValue.to_value)) |>
         (fun x -> `List x)
@@ -3554,6 +4054,9 @@ module ProductViewFilterValues =
   struct
     type nonrec t = ProductViewFilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProductViewFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -3587,21 +4090,37 @@ module ProductViewDetail =
           "The status of the product. AVAILABLE - The product is ready for use. CREATING - Product creation has started; the product is not ready for use. FAILED - An action failed."];
       productARN: ResourceARN.t option [@ocaml.doc "The ARN of the product."];
       createdTime: CreatedTime.t option
-        [@ocaml.doc "The UTC time stamp of the creation time."]}
+        [@ocaml.doc "The UTC time stamp of the creation time."];
+      sourceConnection: SourceConnectionDetail.t option
+        [@ocaml.doc
+          "A top level ProductViewDetail response containing details about the product\226\128\153s connection. Service Catalog returns this field for the CreateProduct, UpdateProduct, DescribeProductAsAdmin, and SearchProductAsAdmin APIs. This response contains the same fields as the ConnectionParameters request, with the addition of the LastSync response."]}
     let make ?productViewSummary =
       fun ?status ->
         fun ?productARN ->
           fun ?createdTime ->
-            fun () -> { productViewSummary; status; productARN; createdTime }
+            fun ?sourceConnection ->
+              fun () ->
+                {
+                  productViewSummary;
+                  status;
+                  productARN;
+                  createdTime;
+                  sourceConnection
+                }
     let to_value x =
       structure_to_value
         [("ProductViewSummary",
            (Option.map x.productViewSummary ~f:ProductViewSummary.to_value));
         ("Status", (Option.map x.status ~f:Status.to_value));
         ("ProductARN", (Option.map x.productARN ~f:ResourceARN.to_value));
-        ("CreatedTime", (Option.map x.createdTime ~f:CreatedTime.to_value))]
+        ("CreatedTime", (Option.map x.createdTime ~f:CreatedTime.to_value));
+        ("SourceConnection",
+          (Option.map x.sourceConnection ~f:SourceConnectionDetail.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceConnection =
+        (Option.map ~f:SourceConnectionDetail.of_xml)
+          (Xml.child xml_arg0 "SourceConnection") in
       let createdTime =
         (Option.map ~f:CreatedTime.of_xml) (Xml.child xml_arg0 "CreatedTime") in
       let productARN =
@@ -3611,15 +4130,19 @@ module ProductViewDetail =
       let productViewSummary =
         (Option.map ~f:ProductViewSummary.of_xml)
           (Xml.child xml_arg0 "ProductViewSummary") in
-      make ?createdTime ?productARN ?status ?productViewSummary ()
+      make ?sourceConnection ?createdTime ?productARN ?status
+        ?productViewSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdTime = field_map json "CreatedTime" CreatedTime.of_json in
-      let productARN = field_map json "ProductARN" ResourceARN.of_json in
-      let status = field_map json "Status" Status.of_json in
+    let of_json json__ =
+      let sourceConnection =
+        field_map json__ "SourceConnection" SourceConnectionDetail.of_json in
+      let createdTime = field_map json__ "CreatedTime" CreatedTime.of_json in
+      let productARN = field_map json__ "ProductARN" ResourceARN.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       let productViewSummary =
-        field_map json "ProductViewSummary" ProductViewSummary.of_json in
-      make ?createdTime ?productARN ?status ?productViewSummary ()
+        field_map json__ "ProductViewSummary" ProductViewSummary.of_json in
+      make ?sourceConnection ?createdTime ?productARN ?status
+        ?productViewSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a product view."]
 module ProvisionedProductDetail =
@@ -3632,7 +4155,7 @@ module ProvisionedProductDetail =
         [@ocaml.doc "The ARN of the provisioned product."];
       type_: ProvisionedProductType.t option
         [@ocaml.doc
-          "The type of provisioned product. The supported values are CFN_STACK and CFN_STACKSET."];
+          "The type of provisioned product. The supported values are CFN_STACK, CFN_STACKSET, TERRAFORM_OPEN_SOURCE, TERRAFORM_CLOUD, and EXTERNAL."];
       id: ProvisionedProductId.t option
         [@ocaml.doc "The identifier of the provisioned product."];
       status: ProvisionedProductStatus.t option
@@ -3650,10 +4173,10 @@ module ProvisionedProductDetail =
           "The record identifier of the last request performed on this provisioned product."];
       lastProvisioningRecordId: Id.t option
         [@ocaml.doc
-          "The record identifier of the last request performed on this provisioned product of the following types: ProvisionedProduct UpdateProvisionedProduct ExecuteProvisionedProductPlan TerminateProvisionedProduct"];
+          "The record identifier of the last request performed on this provisioned product of the following types: ProvisionProduct UpdateProvisionedProduct ExecuteProvisionedProductPlan TerminateProvisionedProduct"];
       lastSuccessfulProvisioningRecordId: Id.t option
         [@ocaml.doc
-          "The record identifier of the last successful request performed on this provisioned product of the following types: ProvisionedProduct UpdateProvisionedProduct ExecuteProvisionedProductPlan TerminateProvisionedProduct"];
+          "The record identifier of the last successful request performed on this provisioned product of the following types: ProvisionProduct UpdateProvisionedProduct ExecuteProvisionedProductPlan TerminateProvisionedProduct"];
       productId: Id.t option
         [@ocaml.doc
           "The product identifier. For example, prod-abcdzk7xy33qa."];
@@ -3764,27 +4287,28 @@ module ProvisionedProductDetail =
         ?lastRecordId ?idempotencyToken ?createdTime ?statusMessage ?status
         ?id ?type_ ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let launchRoleArn = field_map json "LaunchRoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let launchRoleArn = field_map json__ "LaunchRoleArn" RoleArn.of_json in
       let provisioningArtifactId =
-        field_map json "ProvisioningArtifactId" Id.of_json in
-      let productId = field_map json "ProductId" Id.of_json in
+        field_map json__ "ProvisioningArtifactId" Id.of_json in
+      let productId = field_map json__ "ProductId" Id.of_json in
       let lastSuccessfulProvisioningRecordId =
-        field_map json "LastSuccessfulProvisioningRecordId" Id.of_json in
+        field_map json__ "LastSuccessfulProvisioningRecordId" Id.of_json in
       let lastProvisioningRecordId =
-        field_map json "LastProvisioningRecordId" Id.of_json in
-      let lastRecordId = field_map json "LastRecordId" LastRequestId.of_json in
+        field_map json__ "LastProvisioningRecordId" Id.of_json in
+      let lastRecordId =
+        field_map json__ "LastRecordId" LastRequestId.of_json in
       let idempotencyToken =
-        field_map json "IdempotencyToken" IdempotencyToken.of_json in
-      let createdTime = field_map json "CreatedTime" CreatedTime.of_json in
+        field_map json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let createdTime = field_map json__ "CreatedTime" CreatedTime.of_json in
       let statusMessage =
-        field_map json "StatusMessage"
+        field_map json__ "StatusMessage"
           ProvisionedProductStatusMessage.of_json in
-      let status = field_map json "Status" ProvisionedProductStatus.of_json in
-      let id = field_map json "Id" ProvisionedProductId.of_json in
-      let type_ = field_map json "Type" ProvisionedProductType.of_json in
-      let arn = field_map json "Arn" ProvisionedProductNameOrArn.of_json in
-      let name = field_map json "Name" ProvisionedProductNameOrArn.of_json in
+      let status = field_map json__ "Status" ProvisionedProductStatus.of_json in
+      let id = field_map json__ "Id" ProvisionedProductId.of_json in
+      let type_ = field_map json__ "Type" ProvisionedProductType.of_json in
+      let arn = field_map json__ "Arn" ProvisionedProductNameOrArn.of_json in
+      let name = field_map json__ "Name" ProvisionedProductNameOrArn.of_json in
       make ?launchRoleArn ?provisioningArtifactId ?productId
         ?lastSuccessfulProvisioningRecordId ?lastProvisioningRecordId
         ?lastRecordId ?idempotencyToken ?createdTime ?statusMessage ?status
@@ -3810,13 +4334,75 @@ module ProvisioningParameter =
         (Option.map ~f:ParameterKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" ParameterValue.of_json in
-      let key = field_map json "Key" ParameterKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" ParameterValue.of_json in
+      let key = field_map json__ "Key" ParameterKey.of_json in
       make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a parameter used to provision a product."]
+module RecordOutput =
+  struct
+    type nonrec t =
+      {
+      outputKey: OutputKey.t option [@ocaml.doc "The output key."];
+      outputValue: OutputValue.t option [@ocaml.doc "The output value."];
+      description: Description.t option
+        [@ocaml.doc "The description of the output."]}
+    let make ?outputKey =
+      fun ?outputValue ->
+        fun ?description -> fun () -> { outputKey; outputValue; description }
+    let to_value x =
+      structure_to_value
+        [("OutputKey", (Option.map x.outputKey ~f:OutputKey.to_value));
+        ("OutputValue", (Option.map x.outputValue ~f:OutputValue.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let outputValue =
+        (Option.map ~f:OutputValue.of_xml) (Xml.child xml_arg0 "OutputValue") in
+      let outputKey =
+        (Option.map ~f:OutputKey.of_xml) (Xml.child xml_arg0 "OutputKey") in
+      make ?description ?outputValue ?outputKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
+      let outputValue = field_map json__ "OutputValue" OutputValue.of_json in
+      let outputKey = field_map json__ "OutputKey" OutputKey.of_json in
+      make ?description ?outputValue ?outputKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The output for the product created as the result of a request. For example, the output for a CloudFormation-backed product that creates an S3 bucket would include the S3 bucket URL."]
+module UniqueTagResourceIdentifier =
+  struct
+    type nonrec t =
+      {
+      key: UniqueTagKey.t option
+        [@ocaml.doc "A unique key that's attached to a resource."];
+      value: UniqueTagValue.t option
+        [@ocaml.doc "A unique value that's attached to a resource."]}
+    let make ?key = fun ?value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Option.map x.key ~f:UniqueTagKey.to_value));
+        ("Value", (Option.map x.value ~f:UniqueTagValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:UniqueTagValue.of_xml) (Xml.child xml_arg0 "Value") in
+      let key =
+        (Option.map ~f:UniqueTagKey.of_xml) (Xml.child xml_arg0 "Key") in
+      make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" UniqueTagValue.of_json in
+      let key = field_map json__ "Key" UniqueTagKey.of_json in
+      make ?value ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The unique key-value pair for a tag that identifies provisioned product resources."]
 module TagOptionDetail =
   struct
     type nonrec t =
@@ -3828,7 +4414,7 @@ module TagOptionDetail =
       id: TagOptionId.t option [@ocaml.doc "The TagOption identifier."];
       owner: Owner.t option
         [@ocaml.doc
-          "The AWS account Id of the owner account that created the TagOption."]}
+          "The Amazon Web Services account Id of the owner account that created the TagOption."]}
     let make ?key =
       fun ?value ->
         fun ?active ->
@@ -3853,12 +4439,12 @@ module TagOptionDetail =
         (Option.map ~f:TagOptionKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?owner ?id ?active ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let owner = field_map json "Owner" Owner.of_json in
-      let id = field_map json "Id" TagOptionId.of_json in
-      let active = field_map json "Active" TagOptionActive.of_json in
-      let value = field_map json "Value" TagOptionValue.of_json in
-      let key = field_map json "Key" TagOptionKey.of_json in
+    let of_json json__ =
+      let owner = field_map json__ "Owner" Owner.of_json in
+      let id = field_map json__ "Id" TagOptionId.of_json in
+      let active = field_map json__ "Active" TagOptionActive.of_json in
+      let value = field_map json__ "Value" TagOptionValue.of_json in
+      let key = field_map json__ "Key" TagOptionKey.of_json in
       make ?owner ?id ?active ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a TagOption."]
@@ -3868,10 +4454,10 @@ module StackInstance =
       {
       account: AccountId.t option
         [@ocaml.doc
-          "The name of the AWS account that the stack instance is associated with."];
+          "The name of the Amazon Web Services account that the stack instance is associated with."];
       region: Region.t option
         [@ocaml.doc
-          "The name of the AWS region that the stack instance is associated with."];
+          "The name of the Amazon Web Services Region that the stack instance is associated with."];
       stackInstanceStatus: StackInstanceStatus.t option
         [@ocaml.doc
           "The status of the stack instance, in terms of its synchronization with its associated stack set. INOPERABLE: A DeleteStackInstances operation has failed and left the stack in an unstable state. Stacks in this state are excluded from further UpdateStackSet operations. You might need to perform a DeleteStackInstances operation, with RetainStacks set to true, to delete the stack instance, and then delete the stack manually. OUTDATED: The stack isn't currently up to date with the stack set because either the associated stack failed during a CreateStackSet or UpdateStackSet operation, or the stack was part of a CreateStackSet or UpdateStackSet operation that failed or was stopped before the stack was created or updated. CURRENT: The stack is currently up to date with the stack set."]}
@@ -3896,15 +4482,15 @@ module StackInstance =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "Account") in
       make ?stackInstanceStatus ?region ?account ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stackInstanceStatus =
-        field_map json "StackInstanceStatus" StackInstanceStatus.of_json in
-      let region = field_map json "Region" Region.of_json in
-      let account = field_map json "Account" AccountId.of_json in
+        field_map json__ "StackInstanceStatus" StackInstanceStatus.of_json in
+      let region = field_map json__ "Region" Region.of_json in
+      let account = field_map json__ "Account" AccountId.of_json in
       make ?stackInstanceStatus ?region ?account ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An AWS CloudFormation stack, in a specific account and region, that's part of a stack set operation. A stack instance is a reference to an attempted or actual stack in a given account within a given region. A stack instance can exist without a stack\226\128\148for example, if the stack couldn't be created for some reason. A stack instance is associated with only one stack set. Each stack instance contains the ID of its associated stack set, as well as the ID of the actual stack and the stack status."]
+       "An CloudFormation stack, in a specific account and Region, that's part of a stack set operation. A stack instance is a reference to an attempted or actual stack in a given account within a given Region. A stack instance can exist without a stack\226\128\148for example, if the stack couldn't be created for some reason. A stack instance is associated with only one stack set. Each stack instance contains the ID of its associated stack set, as well as the ID of the actual stack and the stack status."]
 module ResourceDetail =
   struct
     type nonrec t =
@@ -3949,14 +4535,14 @@ module ResourceDetail =
         (Option.map ~f:ResourceDetailId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?createdTime ?description ?name ?aRN ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let createdTime =
-        field_map json "CreatedTime" ResourceDetailCreatedTime.of_json in
+        field_map json__ "CreatedTime" ResourceDetailCreatedTime.of_json in
       let description =
-        field_map json "Description" ResourceDetailDescription.of_json in
-      let name = field_map json "Name" ResourceDetailName.of_json in
-      let aRN = field_map json "ARN" ResourceDetailARN.of_json in
-      let id = field_map json "Id" ResourceDetailId.of_json in
+        field_map json__ "Description" ResourceDetailDescription.of_json in
+      let name = field_map json__ "Name" ResourceDetailName.of_json in
+      let aRN = field_map json__ "ARN" ResourceDetailARN.of_json in
+      let id = field_map json__ "Id" ResourceDetailId.of_json in
       make ?createdTime ?description ?name ?aRN ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a resource."]
@@ -3976,7 +4562,7 @@ module RecordDetail =
         [@ocaml.doc "The time when the record was last updated."];
       provisionedProductType: ProvisionedProductType.t option
         [@ocaml.doc
-          "The type of provisioned product. The supported values are CFN_STACK and CFN_STACKSET."];
+          "The type of provisioned product. The supported values are CFN_STACK, CFN_STACKSET, TERRAFORM_OPEN_SOURCE, TERRAFORM_CLOUD, and EXTERNAL."];
       recordType: RecordType.t option
         [@ocaml.doc
           "The record type. PROVISION_PRODUCT UPDATE_PROVISIONED_PRODUCT TERMINATE_PROVISIONED_PRODUCT"];
@@ -4084,27 +4670,27 @@ module RecordDetail =
         ?provisionedProductType ?updatedTime ?createdTime ?status
         ?provisionedProductName ?recordId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let launchRoleArn = field_map json "LaunchRoleArn" RoleArn.of_json in
-      let recordTags = field_map json "RecordTags" RecordTags.of_json in
-      let recordErrors = field_map json "RecordErrors" RecordErrors.of_json in
-      let pathId = field_map json "PathId" Id.of_json in
+    let of_json json__ =
+      let launchRoleArn = field_map json__ "LaunchRoleArn" RoleArn.of_json in
+      let recordTags = field_map json__ "RecordTags" RecordTags.of_json in
+      let recordErrors = field_map json__ "RecordErrors" RecordErrors.of_json in
+      let pathId = field_map json__ "PathId" Id.of_json in
       let provisioningArtifactId =
-        field_map json "ProvisioningArtifactId" Id.of_json in
-      let productId = field_map json "ProductId" Id.of_json in
+        field_map json__ "ProvisioningArtifactId" Id.of_json in
+      let productId = field_map json__ "ProductId" Id.of_json in
       let provisionedProductId =
-        field_map json "ProvisionedProductId" Id.of_json in
-      let recordType = field_map json "RecordType" RecordType.of_json in
+        field_map json__ "ProvisionedProductId" Id.of_json in
+      let recordType = field_map json__ "RecordType" RecordType.of_json in
       let provisionedProductType =
-        field_map json "ProvisionedProductType"
+        field_map json__ "ProvisionedProductType"
           ProvisionedProductType.of_json in
-      let updatedTime = field_map json "UpdatedTime" UpdatedTime.of_json in
-      let createdTime = field_map json "CreatedTime" CreatedTime.of_json in
-      let status = field_map json "Status" RecordStatus.of_json in
+      let updatedTime = field_map json__ "UpdatedTime" UpdatedTime.of_json in
+      let createdTime = field_map json__ "CreatedTime" CreatedTime.of_json in
+      let status = field_map json__ "Status" RecordStatus.of_json in
       let provisionedProductName =
-        field_map json "ProvisionedProductName"
+        field_map json__ "ProvisionedProductName"
           ProvisionedProductName.of_json in
-      let recordId = field_map json "RecordId" Id.of_json in
+      let recordId = field_map json__ "RecordId" Id.of_json in
       make ?launchRoleArn ?recordTags ?recordErrors ?pathId
         ?provisioningArtifactId ?productId ?provisionedProductId ?recordType
         ?provisionedProductType ?updatedTime ?createdTime ?status
@@ -4149,14 +4735,17 @@ module ProvisioningArtifactDetail =
         [@ocaml.doc "The description of the provisioning artifact."];
       type_: ProvisioningArtifactType.t option
         [@ocaml.doc
-          "The type of provisioning artifact. CLOUD_FORMATION_TEMPLATE - AWS CloudFormation template MARKETPLACE_AMI - AWS Marketplace AMI MARKETPLACE_CAR - AWS Marketplace Clusters and AWS Resources"];
+          "The type of provisioning artifact. CLOUD_FORMATION_TEMPLATE - CloudFormation template TERRAFORM_OPEN_SOURCE - Terraform Open Source configuration file TERRAFORM_CLOUD - Terraform Cloud configuration file EXTERNAL - External configuration file"];
       createdTime: CreationTime.t option
         [@ocaml.doc "The UTC time stamp of the creation time."];
       active: ProvisioningArtifactActive.t option
         [@ocaml.doc "Indicates whether the product version is active."];
       guidance: ProvisioningArtifactGuidance.t option
         [@ocaml.doc
-          "Information set by the administrator to provide guidance to end users about which provisioning artifacts to use."]}
+          "Information set by the administrator to provide guidance to end users about which provisioning artifacts to use."];
+      sourceRevision: SourceRevision.t option
+        [@ocaml.doc
+          "Specifies the revision of the external artifact that was used to automatically sync the Service Catalog product and create the provisioning artifact. Service Catalog includes this response parameter as a high level field to the existing ProvisioningArtifactDetail type, which is returned as part of the response for CreateProduct, UpdateProduct, DescribeProductAsAdmin, DescribeProvisioningArtifact, ListProvisioningArtifact, and UpdateProvisioningArticat APIs. This field only exists for Repo-Synced products."]}
     let make ?id =
       fun ?name ->
         fun ?description ->
@@ -4164,16 +4753,18 @@ module ProvisioningArtifactDetail =
             fun ?createdTime ->
               fun ?active ->
                 fun ?guidance ->
-                  fun () ->
-                    {
-                      id;
-                      name;
-                      description;
-                      type_;
-                      createdTime;
-                      active;
-                      guidance
-                    }
+                  fun ?sourceRevision ->
+                    fun () ->
+                      {
+                        id;
+                        name;
+                        description;
+                        type_;
+                        createdTime;
+                        active;
+                        guidance;
+                        sourceRevision
+                      }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:Id.to_value));
@@ -4185,9 +4776,14 @@ module ProvisioningArtifactDetail =
         ("Active",
           (Option.map x.active ~f:ProvisioningArtifactActive.to_value));
         ("Guidance",
-          (Option.map x.guidance ~f:ProvisioningArtifactGuidance.to_value))]
+          (Option.map x.guidance ~f:ProvisioningArtifactGuidance.to_value));
+        ("SourceRevision",
+          (Option.map x.sourceRevision ~f:SourceRevision.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceRevision =
+        (Option.map ~f:SourceRevision.of_xml)
+          (Xml.child xml_arg0 "SourceRevision") in
       let guidance =
         (Option.map ~f:ProvisioningArtifactGuidance.of_xml)
           (Xml.child xml_arg0 "Guidance") in
@@ -4207,19 +4803,24 @@ module ProvisioningArtifactDetail =
         (Option.map ~f:ProvisioningArtifactName.of_xml)
           (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?guidance ?active ?createdTime ?type_ ?description ?name ?id ()
+      make ?sourceRevision ?guidance ?active ?createdTime ?type_ ?description
+        ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let sourceRevision =
+        field_map json__ "SourceRevision" SourceRevision.of_json in
       let guidance =
-        field_map json "Guidance" ProvisioningArtifactGuidance.of_json in
-      let active = field_map json "Active" ProvisioningArtifactActive.of_json in
-      let createdTime = field_map json "CreatedTime" CreationTime.of_json in
-      let type_ = field_map json "Type" ProvisioningArtifactType.of_json in
+        field_map json__ "Guidance" ProvisioningArtifactGuidance.of_json in
+      let active =
+        field_map json__ "Active" ProvisioningArtifactActive.of_json in
+      let createdTime = field_map json__ "CreatedTime" CreationTime.of_json in
+      let type_ = field_map json__ "Type" ProvisioningArtifactType.of_json in
       let description =
-        field_map json "Description" ProvisioningArtifactName.of_json in
-      let name = field_map json "Name" ProvisioningArtifactName.of_json in
-      let id = field_map json "Id" Id.of_json in
-      make ?guidance ?active ?createdTime ?type_ ?description ?name ?id ()
+        field_map json__ "Description" ProvisioningArtifactName.of_json in
+      let name = field_map json__ "Name" ProvisioningArtifactName.of_json in
+      let id = field_map json__ "Id" Id.of_json in
+      make ?sourceRevision ?guidance ?active ?createdTime ?type_ ?description
+        ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a provisioning artifact (also known as a version) for a product."]
@@ -4251,11 +4852,11 @@ module ProvisioningArtifactView =
           (Xml.child xml_arg0 "ProductViewSummary") in
       make ?provisioningArtifact ?productViewSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisioningArtifact =
-        field_map json "ProvisioningArtifact" ProvisioningArtifact.of_json in
+        field_map json__ "ProvisioningArtifact" ProvisioningArtifact.of_json in
       let productViewSummary =
-        field_map json "ProductViewSummary" ProductViewSummary.of_json in
+        field_map json__ "ProductViewSummary" ProductViewSummary.of_json in
       make ?provisioningArtifact ?productViewSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4323,17 +4924,19 @@ module ProvisionedProductPlanSummary =
       make ?provisioningArtifactId ?planType ?provisionProductName
         ?provisionProductId ?planId ?planName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisioningArtifactId =
-        field_map json "ProvisioningArtifactId" Id.of_json in
+        field_map json__ "ProvisioningArtifactId" Id.of_json in
       let planType =
-        field_map json "PlanType" ProvisionedProductPlanType.of_json in
+        field_map json__ "PlanType" ProvisionedProductPlanType.of_json in
       let provisionProductName =
-        field_map json "ProvisionProductName" ProvisionedProductName.of_json in
-      let provisionProductId = field_map json "ProvisionProductId" Id.of_json in
-      let planId = field_map json "PlanId" Id.of_json in
+        field_map json__ "ProvisionProductName"
+          ProvisionedProductName.of_json in
+      let provisionProductId =
+        field_map json__ "ProvisionProductId" Id.of_json in
+      let planId = field_map json__ "PlanId" Id.of_json in
       let planName =
-        field_map json "PlanName" ProvisionedProductPlanName.of_json in
+        field_map json__ "PlanName" ProvisionedProductPlanName.of_json in
       make ?provisioningArtifactId ?planType ?provisionProductName
         ?provisionProductId ?planId ?planName ()
     let to_json v = composed_to_json to_value v
@@ -4343,9 +4946,11 @@ module Principal =
     type nonrec t =
       {
       principalARN: PrincipalARN.t option
-        [@ocaml.doc "The ARN of the principal (IAM user, role, or group)."];
+        [@ocaml.doc
+          "The ARN of the principal (user, role, or group). This field allows for an ARN with no accountID, with or without wildcard characters if the PrincipalType is an IAM_PATTERN. For more information, review associate-principal-with-portfolio in the Amazon Web Services CLI Command Reference."];
       principalType: PrincipalType.t option
-        [@ocaml.doc "The principal type. The supported value is IAM."]}
+        [@ocaml.doc
+          "The principal type. The supported value is IAM if you use a fully defined ARN, or IAM_PATTERN if you use an ARN with no accountID, with or without wildcard characters."]}
     let make ?principalARN =
       fun ?principalType -> fun () -> { principalARN; principalType }
     let to_value x =
@@ -4364,10 +4969,10 @@ module Principal =
           (Xml.child xml_arg0 "PrincipalARN") in
       make ?principalType ?principalARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let principalType =
-        field_map json "PrincipalType" PrincipalType.of_json in
-      let principalARN = field_map json "PrincipalARN" PrincipalARN.of_json in
+        field_map json__ "PrincipalType" PrincipalType.of_json in
+      let principalARN = field_map json__ "PrincipalARN" PrincipalARN.of_json in
       make ?principalType ?principalARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a principal."]
@@ -4430,15 +5035,15 @@ module PortfolioDetail =
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?providerName ?createdTime ?description ?displayName ?aRN ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let providerName = field_map json "ProviderName" ProviderName.of_json in
-      let createdTime = field_map json "CreatedTime" CreationTime.of_json in
+    let of_json json__ =
+      let providerName = field_map json__ "ProviderName" ProviderName.of_json in
+      let createdTime = field_map json__ "CreatedTime" CreationTime.of_json in
       let description =
-        field_map json "Description" PortfolioDescription.of_json in
+        field_map json__ "Description" PortfolioDescription.of_json in
       let displayName =
-        field_map json "DisplayName" PortfolioDisplayName.of_json in
-      let aRN = field_map json "ARN" ResourceARN.of_json in
-      let id = field_map json "Id" Id.of_json in
+        field_map json__ "DisplayName" PortfolioDisplayName.of_json in
+      let aRN = field_map json__ "ARN" ResourceARN.of_json in
+      let id = field_map json__ "Id" Id.of_json in
       make ?providerName ?createdTime ?description ?displayName ?aRN ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a portfolio."]
@@ -4465,9 +5070,9 @@ module OrganizationNode =
           (Xml.child xml_arg0 "Type") in
       make ?value ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" OrganizationNodeValue.of_json in
-      let type_ = field_map json "Type" OrganizationNodeType.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" OrganizationNodeValue.of_json in
+      let type_ = field_map json__ "Type" OrganizationNodeType.of_json in
       make ?value ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the organization node."]
@@ -4481,8 +5086,7 @@ module LaunchPathSummary =
       tags: Tags.t option
         [@ocaml.doc "The tags associated with this product path."];
       name: PortfolioName.t option
-        [@ocaml.doc
-          "The name of the portfolio to which the user was assigned."]}
+        [@ocaml.doc "The name of the portfolio that contains the product."]}
     let make ?id =
       fun ?constraintSummaries ->
         fun ?tags ->
@@ -4505,12 +5109,12 @@ module LaunchPathSummary =
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?tags ?constraintSummaries ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" PortfolioName.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" PortfolioName.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let constraintSummaries =
-        field_map json "ConstraintSummaries" ConstraintSummaries.of_json in
-      let id = field_map json "Id" Id.of_json in
+        field_map json__ "ConstraintSummaries" ConstraintSummaries.of_json in
+      let id = field_map json__ "Id" Id.of_json in
       make ?name ?tags ?constraintSummaries ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about a product path for a user."]
@@ -4574,14 +5178,14 @@ module ConstraintDetail =
       make ?portfolioId ?productId ?owner ?description ?type_ ?constraintId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portfolioId = field_map json "PortfolioId" Id.of_json in
-      let productId = field_map json "ProductId" Id.of_json in
-      let owner = field_map json "Owner" AccountId.of_json in
+    let of_json json__ =
+      let portfolioId = field_map json__ "PortfolioId" Id.of_json in
+      let productId = field_map json__ "ProductId" Id.of_json in
+      let owner = field_map json__ "Owner" AccountId.of_json in
       let description =
-        field_map json "Description" ConstraintDescription.of_json in
-      let type_ = field_map json "Type" ConstraintType.of_json in
-      let constraintId = field_map json "ConstraintId" Id.of_json in
+        field_map json__ "Description" ConstraintDescription.of_json in
+      let type_ = field_map json__ "Type" ConstraintType.of_json in
+      let constraintId = field_map json__ "ConstraintId" Id.of_json in
       make ?portfolioId ?productId ?owner ?description ?type_ ?constraintId
         ()
     let to_json v = composed_to_json to_value v
@@ -4602,45 +5206,11 @@ module BudgetDetail =
         (Option.map ~f:BudgetName.of_xml) (Xml.child xml_arg0 "BudgetName") in
       make ?budgetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let budgetName = field_map json "BudgetName" BudgetName.of_json in
+    let of_json json__ =
+      let budgetName = field_map json__ "BudgetName" BudgetName.of_json in
       make ?budgetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a budget."]
-module RecordOutput =
-  struct
-    type nonrec t =
-      {
-      outputKey: OutputKey.t option [@ocaml.doc "The output key."];
-      outputValue: OutputValue.t option [@ocaml.doc "The output value."];
-      description: Description.t option
-        [@ocaml.doc "The description of the output."]}
-    let make ?outputKey =
-      fun ?outputValue ->
-        fun ?description -> fun () -> { outputKey; outputValue; description }
-    let to_value x =
-      structure_to_value
-        [("OutputKey", (Option.map x.outputKey ~f:OutputKey.to_value));
-        ("OutputValue", (Option.map x.outputValue ~f:OutputValue.to_value));
-        ("Description", (Option.map x.description ~f:Description.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let description =
-        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
-      let outputValue =
-        (Option.map ~f:OutputValue.of_xml) (Xml.child xml_arg0 "OutputValue") in
-      let outputKey =
-        (Option.map ~f:OutputKey.of_xml) (Xml.child xml_arg0 "OutputKey") in
-      make ?description ?outputValue ?outputKey ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" Description.of_json in
-      let outputValue = field_map json "OutputValue" OutputValue.of_json in
-      let outputKey = field_map json "OutputKey" OutputKey.of_json in
-      make ?description ?outputValue ?outputKey ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The output for the product created as the result of a request. For example, the output for a CloudFormation-backed product that creates an S3 bucket would include the S3 bucket URL."]
 module ExecutionParameter =
   struct
     type nonrec t =
@@ -4673,11 +5243,11 @@ module ExecutionParameter =
           (Xml.child xml_arg0 "Name") in
       make ?defaultValues ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultValues =
-        field_map json "DefaultValues" ExecutionParameterValueList.of_json in
-      let type_ = field_map json "Type" ExecutionParameterType.of_json in
-      let name = field_map json "Name" ExecutionParameterKey.of_json in
+        field_map json__ "DefaultValues" ExecutionParameterValueList.of_json in
+      let type_ = field_map json__ "Type" ExecutionParameterType.of_json in
+      let name = field_map json__ "Name" ExecutionParameterKey.of_json in
       make ?defaultValues ?type_ ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4707,10 +5277,10 @@ module ProvisioningArtifactOutput =
           (Xml.child xml_arg0 "Key") in
       make ?description ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" OutputDescription.of_json in
-      let key = field_map json "Key" ProvisioningArtifactOutputKey.of_json in
+        field_map json__ "Description" OutputDescription.of_json in
+      let key = field_map json__ "Key" ProvisioningArtifactOutputKey.of_json in
       make ?description ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provisioning artifact output."]
@@ -4778,15 +5348,15 @@ module ProvisioningArtifactParameter =
       make ?parameterConstraints ?description ?isNoEcho ?parameterType
         ?defaultValue ?parameterKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterConstraints =
-        field_map json "ParameterConstraints" ParameterConstraints.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let isNoEcho = field_map json "IsNoEcho" NoEcho.of_json in
+        field_map json__ "ParameterConstraints" ParameterConstraints.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let isNoEcho = field_map json__ "IsNoEcho" NoEcho.of_json in
       let parameterType =
-        field_map json "ParameterType" ParameterType.of_json in
-      let defaultValue = field_map json "DefaultValue" DefaultValue.of_json in
-      let parameterKey = field_map json "ParameterKey" ParameterKey.of_json in
+        field_map json__ "ParameterType" ParameterType.of_json in
+      let defaultValue = field_map json__ "DefaultValue" DefaultValue.of_json in
+      let parameterKey = field_map json__ "ParameterKey" ParameterKey.of_json in
       make ?parameterConstraints ?description ?isNoEcho ?parameterType
         ?defaultValue ?parameterKey ()
     let to_json v = composed_to_json to_value v
@@ -4811,9 +5381,9 @@ module TagOptionSummary =
         (Option.map ~f:TagOptionKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?values ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" TagOptionValues.of_json in
-      let key = field_map json "Key" TagOptionKey.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" TagOptionValues.of_json in
+      let key = field_map json__ "Key" TagOptionKey.of_json in
       make ?values ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about a TagOption."]
@@ -4838,9 +5408,9 @@ module UsageInstruction =
         (Option.map ~f:InstructionType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?value ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" InstructionValue.of_json in
-      let type_ = field_map json "Type" InstructionType.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" InstructionValue.of_json in
+      let type_ = field_map json__ "Type" InstructionType.of_json in
       make ?value ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Additional information provided by the administrator."]
@@ -4849,6 +5419,9 @@ module NotificationArns =
     type nonrec t = NotificationArn.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NotificationArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4932,6 +5505,9 @@ module UpdateProvisioningParameters =
   struct
     type nonrec t = UpdateProvisioningParameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpdateProvisioningParameter.to_value)) |>
         (fun x -> `List x)
@@ -5023,17 +5599,17 @@ module ResourceChange =
       make ?details ?scope ?replacement ?resourceType ?physicalResourceId
         ?logicalResourceId ?action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "Details" ResourceChangeDetails.of_json in
-      let scope = field_map json "Scope" Scope.of_json in
-      let replacement = field_map json "Replacement" Replacement.of_json in
+    let of_json json__ =
+      let details = field_map json__ "Details" ResourceChangeDetails.of_json in
+      let scope = field_map json__ "Scope" Scope.of_json in
+      let replacement = field_map json__ "Replacement" Replacement.of_json in
       let resourceType =
-        field_map json "ResourceType" PlanResourceType.of_json in
+        field_map json__ "ResourceType" PlanResourceType.of_json in
       let physicalResourceId =
-        field_map json "PhysicalResourceId" PhysicalResourceId.of_json in
+        field_map json__ "PhysicalResourceId" PhysicalResourceId.of_json in
       let logicalResourceId =
-        field_map json "LogicalResourceId" LogicalResourceId.of_json in
-      let action = field_map json "Action" ChangeAction.of_json in
+        field_map json__ "LogicalResourceId" LogicalResourceId.of_json in
+      let action = field_map json__ "Action" ChangeAction.of_json in
       make ?details ?scope ?replacement ?resourceType ?physicalResourceId
         ?logicalResourceId ?action ()
     let to_json v = composed_to_json to_value v
@@ -5056,8 +5632,8 @@ module CloudWatchDashboard =
           (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" CloudWatchDashboardName.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" CloudWatchDashboardName.of_json in
       make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a CloudWatch dashboard."]
@@ -5080,9 +5656,9 @@ module LaunchPath =
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
       make ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" PortfolioName.of_json in
-      let id = field_map json "Id" Id.of_json in make ?name ?id ()
+    let of_json json__ =
+      let name = field_map json__ "Name" PortfolioName.of_json in
+      let id = field_map json__ "Id" Id.of_json in make ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A launch path object."]
 module ProvisioningArtifactSummary =
@@ -5099,7 +5675,7 @@ module ProvisioningArtifactSummary =
         [@ocaml.doc "The UTC time stamp of the creation time."];
       provisioningArtifactMetadata: ProvisioningArtifactInfo.t option
         [@ocaml.doc
-          "The metadata for the provisioning artifact. This is used with AWS Marketplace products."]}
+          "The metadata for the provisioning artifact. This is used with Amazon Web Services Marketplace products."]}
     let make ?id =
       fun ?name ->
         fun ?description ->
@@ -5144,16 +5720,18 @@ module ProvisioningArtifactSummary =
       make ?provisioningArtifactMetadata ?createdTime ?description ?name ?id
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisioningArtifactMetadata =
-        field_map json "ProvisioningArtifactMetadata"
+        field_map json__ "ProvisioningArtifactMetadata"
           ProvisioningArtifactInfo.of_json in
       let createdTime =
-        field_map json "CreatedTime" ProvisioningArtifactCreatedTime.of_json in
+        field_map json__ "CreatedTime"
+          ProvisioningArtifactCreatedTime.of_json in
       let description =
-        field_map json "Description" ProvisioningArtifactDescription.of_json in
-      let name = field_map json "Name" ProvisioningArtifactName.of_json in
-      let id = field_map json "Id" Id.of_json in
+        field_map json__ "Description"
+          ProvisioningArtifactDescription.of_json in
+      let name = field_map json__ "Name" ProvisioningArtifactName.of_json in
+      let id = field_map json__ "Id" Id.of_json in
       make ?provisioningArtifactMetadata ?createdTime ?description ?name ?id
         ()
     let to_json v = composed_to_json to_value v
@@ -5165,7 +5743,7 @@ module PortfolioShareDetail =
       {
       principalId: Id.t option
         [@ocaml.doc
-          "The identifier of the recipient entity that received the portfolio share. The recipient entities can be one of the following: 1. An external account. 2. An organziation member account. 3. An organzational unit (OU). 4. The organization itself. (This shares with every account in the organization)."];
+          "The identifier of the recipient entity that received the portfolio share. The recipient entity can be one of the following: 1. An external account. 2. An organziation member account. 3. An organzational unit (OU). 4. The organization itself. (This shares with every account in the organization)."];
       type_: DescribePortfolioShareType.t option
         [@ocaml.doc "The type of the portfolio share."];
       accepted: Boolean.t option
@@ -5173,21 +5751,36 @@ module PortfolioShareDetail =
           "Indicates whether the shared portfolio is imported by the recipient account. If the recipient is in an organization node, the share is automatically imported, and the field is always set to true."];
       shareTagOptions: Boolean.t option
         [@ocaml.doc
-          "Indicates whether TagOptions sharing is enabled or disabled for the portfolio share."]}
+          "Indicates whether TagOptions sharing is enabled or disabled for the portfolio share."];
+      sharePrincipals: Boolean.t option
+        [@ocaml.doc
+          "Indicates if Principal sharing is enabled or disabled for the portfolio share."]}
     let make ?principalId =
       fun ?type_ ->
         fun ?accepted ->
           fun ?shareTagOptions ->
-            fun () -> { principalId; type_; accepted; shareTagOptions }
+            fun ?sharePrincipals ->
+              fun () ->
+                {
+                  principalId;
+                  type_;
+                  accepted;
+                  shareTagOptions;
+                  sharePrincipals
+                }
     let to_value x =
       structure_to_value
         [("PrincipalId", (Option.map x.principalId ~f:Id.to_value));
         ("Type", (Option.map x.type_ ~f:DescribePortfolioShareType.to_value));
         ("Accepted", (Option.map x.accepted ~f:Boolean.to_value));
         ("ShareTagOptions",
-          (Option.map x.shareTagOptions ~f:Boolean.to_value))]
+          (Option.map x.shareTagOptions ~f:Boolean.to_value));
+        ("SharePrincipals",
+          (Option.map x.sharePrincipals ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sharePrincipals =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "SharePrincipals") in
       let shareTagOptions =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ShareTagOptions") in
       let accepted =
@@ -5197,20 +5790,26 @@ module PortfolioShareDetail =
           (Xml.child xml_arg0 "Type") in
       let principalId =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "PrincipalId") in
-      make ?shareTagOptions ?accepted ?type_ ?principalId ()
+      make ?sharePrincipals ?shareTagOptions ?accepted ?type_ ?principalId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shareTagOptions = field_map json "ShareTagOptions" Boolean.of_json in
-      let accepted = field_map json "Accepted" Boolean.of_json in
-      let type_ = field_map json "Type" DescribePortfolioShareType.of_json in
-      let principalId = field_map json "PrincipalId" Id.of_json in
-      make ?shareTagOptions ?accepted ?type_ ?principalId ()
+    let of_json json__ =
+      let sharePrincipals =
+        field_map json__ "SharePrincipals" Boolean.of_json in
+      let shareTagOptions =
+        field_map json__ "ShareTagOptions" Boolean.of_json in
+      let accepted = field_map json__ "Accepted" Boolean.of_json in
+      let type_ = field_map json__ "Type" DescribePortfolioShareType.of_json in
+      let principalId = field_map json__ "PrincipalId" Id.of_json in
+      make ?sharePrincipals ?shareTagOptions ?accepted ?type_ ?principalId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the portfolio share."]
 module ShareErrors =
   struct
     type nonrec t = ShareError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ShareError.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5235,6 +5834,9 @@ module SuccessfulShares =
   struct
     type nonrec t = AccountId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5310,6 +5912,8 @@ module SourceProvisioningArtifactPropertiesMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -5378,16 +5982,17 @@ module FailedServiceActionAssociation =
       make ?errorMessage ?errorCode ?provisioningArtifactId ?productId
         ?serviceActionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorMessage =
-        field_map json "ErrorMessage"
+        field_map json__ "ErrorMessage"
           ServiceActionAssociationErrorMessage.of_json in
       let errorCode =
-        field_map json "ErrorCode" ServiceActionAssociationErrorCode.of_json in
+        field_map json__ "ErrorCode"
+          ServiceActionAssociationErrorCode.of_json in
       let provisioningArtifactId =
-        field_map json "ProvisioningArtifactId" Id.of_json in
-      let productId = field_map json "ProductId" Id.of_json in
-      let serviceActionId = field_map json "ServiceActionId" Id.of_json in
+        field_map json__ "ProvisioningArtifactId" Id.of_json in
+      let productId = field_map json__ "ProductId" Id.of_json in
+      let serviceActionId = field_map json__ "ServiceActionId" Id.of_json in
       make ?errorMessage ?errorCode ?provisioningArtifactId ?productId
         ?serviceActionId ()
     let to_json v = composed_to_json to_value v
@@ -5429,11 +6034,11 @@ module ServiceActionAssociation =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceActionId") in
       make ~provisioningArtifactId ~productId ~serviceActionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisioningArtifactId =
-        field_map_exn json "ProvisioningArtifactId" Id.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
-      let serviceActionId = field_map_exn json "ServiceActionId" Id.of_json in
+        field_map_exn json__ "ProvisioningArtifactId" Id.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
+      let serviceActionId = field_map_exn json__ "ServiceActionId" Id.of_json in
       make ~provisioningArtifactId ~productId ~serviceActionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5487,7 +6092,7 @@ module TagOptionNotMigratedException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An operation requiring TagOptions failed because the TagOptions migration process has not been performed for this account. Please use the AWS console to perform the migration process before retrying the operation."]
+       "An operation requiring TagOptions failed because the TagOptions migration process has not been performed for this account. Use the Amazon Web Services Management Console to perform the migration process before retrying the operation."]
 module ServiceActionDetail =
   struct
     type nonrec t =
@@ -5515,11 +6120,11 @@ module ServiceActionDetail =
           (Xml.child xml_arg0 "ServiceActionSummary") in
       make ?definition ?serviceActionSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let definition =
-        field_map json "Definition" ServiceActionDefinitionMap.of_json in
+        field_map json__ "Definition" ServiceActionDefinitionMap.of_json in
       let serviceActionSummary =
-        field_map json "ServiceActionSummary" ServiceActionSummary.of_json in
+        field_map json__ "ServiceActionSummary" ServiceActionSummary.of_json in
       make ?definition ?serviceActionSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5577,6 +6182,8 @@ module ProvisionedProductProperties =
                     (fun x -> (PropertyValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -5590,27 +6197,27 @@ module UpdateProvisioningPreferences =
       {
       stackSetAccounts: StackSetAccounts.t option
         [@ocaml.doc
-          "One or more AWS accounts that will have access to the provisioned product. Applicable only to a CFN_STACKSET provisioned product type. The AWS accounts specified should be within the list of accounts in the STACKSET constraint. To get the list of accounts in the STACKSET constraint, use the DescribeProvisioningParameters operation. If no values are specified, the default value is all accounts from the STACKSET constraint."];
+          "One or more Amazon Web Services accounts that will have access to the provisioned product. Applicable only to a CFN_STACKSET provisioned product type. The Amazon Web Services accounts specified should be within the list of accounts in the STACKSET constraint. To get the list of accounts in the STACKSET constraint, use the DescribeProvisioningParameters operation. If no values are specified, the default value is all accounts from the STACKSET constraint."];
       stackSetRegions: StackSetRegions.t option
         [@ocaml.doc
-          "One or more AWS Regions where the provisioned product will be available. Applicable only to a CFN_STACKSET provisioned product type. The specified regions should be within the list of regions from the STACKSET constraint. To get the list of regions in the STACKSET constraint, use the DescribeProvisioningParameters operation. If no values are specified, the default value is all regions from the STACKSET constraint."];
+          "One or more Amazon Web Services Regions where the provisioned product will be available. Applicable only to a CFN_STACKSET provisioned product type. The specified Regions should be within the list of Regions from the STACKSET constraint. To get the list of Regions in the STACKSET constraint, use the DescribeProvisioningParameters operation. If no values are specified, the default value is all Regions from the STACKSET constraint."];
       stackSetFailureToleranceCount: StackSetFailureToleranceCount.t option
         [@ocaml.doc
-          "The number of accounts, per region, for which this operation can fail before AWS Service Catalog stops the operation in that region. If the operation is stopped in a region, AWS Service Catalog doesn't attempt the operation in any subsequent regions. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetFailureToleranceCount or StackSetFailureTolerancePercentage, but not both. The default value is 0 if no value is specified."];
+          "The number of accounts, per Region, for which this operation can fail before Service Catalog stops the operation in that Region. If the operation is stopped in a Region, Service Catalog doesn't attempt the operation in any subsequent Regions. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetFailureToleranceCount or StackSetFailureTolerancePercentage, but not both. The default value is 0 if no value is specified."];
       stackSetFailureTolerancePercentage:
         StackSetFailureTolerancePercentage.t option
         [@ocaml.doc
-          "The percentage of accounts, per region, for which this stack operation can fail before AWS Service Catalog stops the operation in that region. If the operation is stopped in a region, AWS Service Catalog doesn't attempt the operation in any subsequent regions. When calculating the number of accounts based on the specified percentage, AWS Service Catalog rounds down to the next whole number. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetFailureToleranceCount or StackSetFailureTolerancePercentage, but not both."];
+          "The percentage of accounts, per Region, for which this stack operation can fail before Service Catalog stops the operation in that Region. If the operation is stopped in a Region, Service Catalog doesn't attempt the operation in any subsequent Regions. When calculating the number of accounts based on the specified percentage, Service Catalog rounds down to the next whole number. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetFailureToleranceCount or StackSetFailureTolerancePercentage, but not both."];
       stackSetMaxConcurrencyCount: StackSetMaxConcurrencyCount.t option
         [@ocaml.doc
           "The maximum number of accounts in which to perform this operation at one time. This is dependent on the value of StackSetFailureToleranceCount. StackSetMaxConcurrentCount is at most one more than the StackSetFailureToleranceCount. Note that this setting lets you specify the maximum for operations. For large deployments, under certain circumstances the actual number of accounts acted upon concurrently may be lower due to service throttling. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetMaxConcurrentCount or StackSetMaxConcurrentPercentage, but not both."];
       stackSetMaxConcurrencyPercentage:
         StackSetMaxConcurrencyPercentage.t option
         [@ocaml.doc
-          "The maximum percentage of accounts in which to perform this operation at one time. When calculating the number of accounts based on the specified percentage, AWS Service Catalog rounds down to the next whole number. This is true except in cases where rounding down would result is zero. In this case, AWS Service Catalog sets the number as 1 instead. Note that this setting lets you specify the maximum for operations. For large deployments, under certain circumstances the actual number of accounts acted upon concurrently may be lower due to service throttling. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetMaxConcurrentCount or StackSetMaxConcurrentPercentage, but not both."];
+          "The maximum percentage of accounts in which to perform this operation at one time. When calculating the number of accounts based on the specified percentage, Service Catalog rounds down to the next whole number. This is true except in cases where rounding down would result is zero. In this case, Service Catalog sets the number as 1 instead. Note that this setting lets you specify the maximum for operations. For large deployments, under certain circumstances the actual number of accounts acted upon concurrently may be lower due to service throttling. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetMaxConcurrentCount or StackSetMaxConcurrentPercentage, but not both."];
       stackSetOperationType: StackSetOperationType.t option
         [@ocaml.doc
-          "Determines what action AWS Service Catalog performs to a stack set or a stack instance represented by the provisioned product. The default value is UPDATE if nothing is specified. Applicable only to a CFN_STACKSET provisioned product type. CREATE Creates a new stack instance in the stack set represented by the provisioned product. In this case, only new stack instances are created based on accounts and regions; if new ProductId or ProvisioningArtifactID are passed, they will be ignored. UPDATE Updates the stack set represented by the provisioned product and also its stack instances. DELETE Deletes a stack instance in the stack set represented by the provisioned product."]}
+          "Determines what action Service Catalog performs to a stack set or a stack instance represented by the provisioned product. The default value is UPDATE if nothing is specified. Applicable only to a CFN_STACKSET provisioned product type. CREATE Creates a new stack instance in the stack set represented by the provisioned product. In this case, only new stack instances are created based on accounts and Regions; if new ProductId or ProvisioningArtifactID are passed, they will be ignored. UPDATE Updates the stack set represented by the provisioned product and also its stack instances. DELETE Deletes a stack instance in the stack set represented by the provisioned product."]}
     let make ?stackSetAccounts =
       fun ?stackSetRegions ->
         fun ?stackSetFailureToleranceCount ->
@@ -5676,25 +6283,26 @@ module UpdateProvisioningPreferences =
         ?stackSetMaxConcurrencyCount ?stackSetFailureTolerancePercentage
         ?stackSetFailureToleranceCount ?stackSetRegions ?stackSetAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stackSetOperationType =
-        field_map json "StackSetOperationType" StackSetOperationType.of_json in
+        field_map json__ "StackSetOperationType"
+          StackSetOperationType.of_json in
       let stackSetMaxConcurrencyPercentage =
-        field_map json "StackSetMaxConcurrencyPercentage"
+        field_map json__ "StackSetMaxConcurrencyPercentage"
           StackSetMaxConcurrencyPercentage.of_json in
       let stackSetMaxConcurrencyCount =
-        field_map json "StackSetMaxConcurrencyCount"
+        field_map json__ "StackSetMaxConcurrencyCount"
           StackSetMaxConcurrencyCount.of_json in
       let stackSetFailureTolerancePercentage =
-        field_map json "StackSetFailureTolerancePercentage"
+        field_map json__ "StackSetFailureTolerancePercentage"
           StackSetFailureTolerancePercentage.of_json in
       let stackSetFailureToleranceCount =
-        field_map json "StackSetFailureToleranceCount"
+        field_map json__ "StackSetFailureToleranceCount"
           StackSetFailureToleranceCount.of_json in
       let stackSetRegions =
-        field_map json "StackSetRegions" StackSetRegions.of_json in
+        field_map json__ "StackSetRegions" StackSetRegions.of_json in
       let stackSetAccounts =
-        field_map json "StackSetAccounts" StackSetAccounts.of_json in
+        field_map json__ "StackSetAccounts" StackSetAccounts.of_json in
       make ?stackSetOperationType ?stackSetMaxConcurrencyPercentage
         ?stackSetMaxConcurrencyCount ?stackSetFailureTolerancePercentage
         ?stackSetFailureToleranceCount ?stackSetRegions ?stackSetAccounts ()
@@ -5706,6 +6314,9 @@ module AddTags =
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:20); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5725,10 +6336,47 @@ module AddTags =
     let of_json j = list_of_json ~kind:"AddTags" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SourceConnection =
+  struct
+    type nonrec t =
+      {
+      type_: SourceType.t option
+        [@ocaml.doc "The only supported SourceConnection type is Codestar."];
+      connectionParameters: SourceConnectionParameters.t
+        [@ocaml.doc "The connection details based on the connection Type."]}
+    let context_ = "SourceConnection"
+    let make ?type_ =
+      fun ~connectionParameters -> fun () -> { type_; connectionParameters }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:SourceType.to_value));
+        ("ConnectionParameters",
+          (Some (SourceConnectionParameters.to_value x.connectionParameters)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connectionParameters =
+        SourceConnectionParameters.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConnectionParameters") in
+      let type_ =
+        (Option.map ~f:SourceType.of_xml) (Xml.child xml_arg0 "Type") in
+      make ~connectionParameters ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connectionParameters =
+        field_map_exn json__ "ConnectionParameters"
+          SourceConnectionParameters.of_json in
+      let type_ = field_map json__ "Type" SourceType.of_json in
+      make ~connectionParameters ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A top level ProductViewDetail response containing details about the product\226\128\153s connection. Service Catalog returns this field for the CreateProduct, UpdateProduct, DescribeProductAsAdmin, and SearchProductAsAdmin APIs. This response contains the same fields as the ConnectionParameters request, with the addition of the LastSync response."]
 module TagKeys =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5883,6 +6531,9 @@ module ProvisionedProductAttributes =
   struct
     type nonrec t = ProvisionedProductAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProvisionedProductAttribute.to_value)) |>
         (fun x -> `List x)
@@ -5928,7 +6579,7 @@ module AccessLevelFilter =
           "The access level. Account - Filter results based on the account. Role - Filter results based on the federated role of the specified user. User - Filter results based on the specified user."];
       value: AccessLevelFilterValue.t option
         [@ocaml.doc
-          "The user to which the access level applies. The only supported value is Self."]}
+          "The user to which the access level applies. The only supported value is self."]}
     let make ?key = fun ?value -> fun () -> { key; value }
     let to_value x =
       structure_to_value
@@ -5944,9 +6595,9 @@ module AccessLevelFilter =
           (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" AccessLevelFilterValue.of_json in
-      let key = field_map json "Key" AccessLevelFilterKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" AccessLevelFilterValue.of_json in
+      let key = field_map json__ "Key" AccessLevelFilterKey.of_json in
       make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The access level to use to filter results."]
@@ -5977,6 +6628,8 @@ module ProvisionedProductFilters =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -6067,6 +6720,8 @@ module ProductViewAggregations =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -6078,6 +6733,9 @@ module ProductViewSummaries =
   struct
     type nonrec t = ProductViewSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProductViewSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6142,6 +6800,8 @@ module ProductViewFilters =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -6182,6 +6842,9 @@ module ProductViewDetails =
   struct
     type nonrec t = ProductViewDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProductViewDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6240,6 +6903,9 @@ module ProvisionedProductDetails =
   struct
     type nonrec t = ProvisionedProductDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProvisionedProductDetail.to_value)) |>
         (fun x -> `List x)
@@ -6295,6 +6961,9 @@ module ProvisioningParameters =
   struct
     type nonrec t = ProvisioningParameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProvisioningParameter.to_value)) |>
         (fun x -> `List x)
@@ -6323,24 +6992,24 @@ module ProvisioningPreferences =
       {
       stackSetAccounts: StackSetAccounts.t option
         [@ocaml.doc
-          "One or more AWS accounts where the provisioned product will be available. Applicable only to a CFN_STACKSET provisioned product type. The specified accounts should be within the list of accounts from the STACKSET constraint. To get the list of accounts in the STACKSET constraint, use the DescribeProvisioningParameters operation. If no values are specified, the default value is all acounts from the STACKSET constraint."];
+          "One or more Amazon Web Services accounts where the provisioned product will be available. Applicable only to a CFN_STACKSET provisioned product type. The specified accounts should be within the list of accounts from the STACKSET constraint. To get the list of accounts in the STACKSET constraint, use the DescribeProvisioningParameters operation. If no values are specified, the default value is all acounts from the STACKSET constraint."];
       stackSetRegions: StackSetRegions.t option
         [@ocaml.doc
-          "One or more AWS Regions where the provisioned product will be available. Applicable only to a CFN_STACKSET provisioned product type. The specified regions should be within the list of regions from the STACKSET constraint. To get the list of regions in the STACKSET constraint, use the DescribeProvisioningParameters operation. If no values are specified, the default value is all regions from the STACKSET constraint."];
+          "One or more Amazon Web Services Regions where the provisioned product will be available. Applicable only to a CFN_STACKSET provisioned product type. The specified Regions should be within the list of Regions from the STACKSET constraint. To get the list of Regions in the STACKSET constraint, use the DescribeProvisioningParameters operation. If no values are specified, the default value is all Regions from the STACKSET constraint."];
       stackSetFailureToleranceCount: StackSetFailureToleranceCount.t option
         [@ocaml.doc
-          "The number of accounts, per region, for which this operation can fail before AWS Service Catalog stops the operation in that region. If the operation is stopped in a region, AWS Service Catalog doesn't attempt the operation in any subsequent regions. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetFailureToleranceCount or StackSetFailureTolerancePercentage, but not both. The default value is 0 if no value is specified."];
+          "The number of accounts, per Region, for which this operation can fail before Service Catalog stops the operation in that Region. If the operation is stopped in a Region, Service Catalog doesn't attempt the operation in any subsequent Regions. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetFailureToleranceCount or StackSetFailureTolerancePercentage, but not both. The default value is 0 if no value is specified."];
       stackSetFailureTolerancePercentage:
         StackSetFailureTolerancePercentage.t option
         [@ocaml.doc
-          "The percentage of accounts, per region, for which this stack operation can fail before AWS Service Catalog stops the operation in that region. If the operation is stopped in a region, AWS Service Catalog doesn't attempt the operation in any subsequent regions. When calculating the number of accounts based on the specified percentage, AWS Service Catalog rounds down to the next whole number. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetFailureToleranceCount or StackSetFailureTolerancePercentage, but not both."];
+          "The percentage of accounts, per Region, for which this stack operation can fail before Service Catalog stops the operation in that Region. If the operation is stopped in a Region, Service Catalog doesn't attempt the operation in any subsequent Regions. When calculating the number of accounts based on the specified percentage, Service Catalog rounds down to the next whole number. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetFailureToleranceCount or StackSetFailureTolerancePercentage, but not both."];
       stackSetMaxConcurrencyCount: StackSetMaxConcurrencyCount.t option
         [@ocaml.doc
           "The maximum number of accounts in which to perform this operation at one time. This is dependent on the value of StackSetFailureToleranceCount. StackSetMaxConcurrentCount is at most one more than the StackSetFailureToleranceCount. Note that this setting lets you specify the maximum for operations. For large deployments, under certain circumstances the actual number of accounts acted upon concurrently may be lower due to service throttling. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetMaxConcurrentCount or StackSetMaxConcurrentPercentage, but not both."];
       stackSetMaxConcurrencyPercentage:
         StackSetMaxConcurrencyPercentage.t option
         [@ocaml.doc
-          "The maximum percentage of accounts in which to perform this operation at one time. When calculating the number of accounts based on the specified percentage, AWS Service Catalog rounds down to the next whole number. This is true except in cases where rounding down would result is zero. In this case, AWS Service Catalog sets the number as 1 instead. Note that this setting lets you specify the maximum for operations. For large deployments, under certain circumstances the actual number of accounts acted upon concurrently may be lower due to service throttling. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetMaxConcurrentCount or StackSetMaxConcurrentPercentage, but not both."]}
+          "The maximum percentage of accounts in which to perform this operation at one time. When calculating the number of accounts based on the specified percentage, Service Catalog rounds down to the next whole number. This is true except in cases where rounding down would result is zero. In this case, Service Catalog sets the number as 1 instead. Note that this setting lets you specify the maximum for operations. For large deployments, under certain circumstances the actual number of accounts acted upon concurrently may be lower due to service throttling. Applicable only to a CFN_STACKSET provisioned product type. Conditional: You must specify either StackSetMaxConcurrentCount or StackSetMaxConcurrentPercentage, but not both."]}
     let make ?stackSetAccounts =
       fun ?stackSetRegions ->
         fun ?stackSetFailureToleranceCount ->
@@ -6398,33 +7067,157 @@ module ProvisioningPreferences =
         ?stackSetFailureTolerancePercentage ?stackSetFailureToleranceCount
         ?stackSetRegions ?stackSetAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stackSetMaxConcurrencyPercentage =
-        field_map json "StackSetMaxConcurrencyPercentage"
+        field_map json__ "StackSetMaxConcurrencyPercentage"
           StackSetMaxConcurrencyPercentage.of_json in
       let stackSetMaxConcurrencyCount =
-        field_map json "StackSetMaxConcurrencyCount"
+        field_map json__ "StackSetMaxConcurrencyCount"
           StackSetMaxConcurrencyCount.of_json in
       let stackSetFailureTolerancePercentage =
-        field_map json "StackSetFailureTolerancePercentage"
+        field_map json__ "StackSetFailureTolerancePercentage"
           StackSetFailureTolerancePercentage.of_json in
       let stackSetFailureToleranceCount =
-        field_map json "StackSetFailureToleranceCount"
+        field_map json__ "StackSetFailureToleranceCount"
           StackSetFailureToleranceCount.of_json in
       let stackSetRegions =
-        field_map json "StackSetRegions" StackSetRegions.of_json in
+        field_map json__ "StackSetRegions" StackSetRegions.of_json in
       let stackSetAccounts =
-        field_map json "StackSetAccounts" StackSetAccounts.of_json in
+        field_map json__ "StackSetAccounts" StackSetAccounts.of_json in
       make ?stackSetMaxConcurrencyPercentage ?stackSetMaxConcurrencyCount
         ?stackSetFailureTolerancePercentage ?stackSetFailureToleranceCount
         ?stackSetRegions ?stackSetAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The user-defined preferences that will be applied when updating a provisioned product. Not all preferences are applicable to all provisioned product type One or more AWS accounts that will have access to the provisioned product. Applicable only to a CFN_STACKSET provisioned product type. The AWS accounts specified should be within the list of accounts in the STACKSET constraint. To get the list of accounts in the STACKSET constraint, use the DescribeProvisioningParameters operation. If no values are specified, the default value is all accounts from the STACKSET constraint."]
+       "The user-defined preferences that will be applied when updating a provisioned product. Not all preferences are applicable to all provisioned product type One or more Amazon Web Services accounts that will have access to the provisioned product. Applicable only to a CFN_STACKSET provisioned product type. The Amazon Web Services accounts specified should be within the list of accounts in the STACKSET constraint. To get the list of accounts in the STACKSET constraint, use the DescribeProvisioningParameters operation. If no values are specified, the default value is all accounts from the STACKSET constraint."]
+module EngineWorkflowFailureReason =
+  struct
+    type nonrec t = string
+    let context_ = "EngineWorkflowFailureReason"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0009\\u000a\\u000d\\u0020-\\uD7FF\\uE000-\\uFFFD]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EngineWorkflowFailureReason" j
+    let to_json = simple_to_json to_value
+  end
+module EngineWorkflowStatus =
+  struct
+    type nonrec t =
+      | SUCCEEDED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCEEDED -> "SUCCEEDED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCEEDED" -> SUCCEEDED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EngineWorkflowStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EngineWorkflowStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module EngineWorkflowToken =
+  struct
+    type nonrec t = string
+    let context_ = "EngineWorkflowToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:20000) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9A-Za-z+\\/=]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EngineWorkflowToken" j
+    let to_json = simple_to_json to_value
+  end
+module RecordOutputs =
+  struct
+    type nonrec t = RecordOutput.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RecordOutput.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RecordOutput.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RecordOutputs" ~of_json:RecordOutput.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EngineWorkflowResourceIdentifier =
+  struct
+    type nonrec t =
+      {
+      uniqueTag: UniqueTagResourceIdentifier.t option
+        [@ocaml.doc
+          "The unique key-value pair for a tag that identifies provisioned product resources."]}
+    let make ?uniqueTag = fun () -> { uniqueTag }
+    let to_value x =
+      structure_to_value
+        [("UniqueTag",
+           (Option.map x.uniqueTag ~f:UniqueTagResourceIdentifier.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let uniqueTag =
+        (Option.map ~f:UniqueTagResourceIdentifier.of_xml)
+          (Xml.child xml_arg0 "UniqueTag") in
+      make ?uniqueTag ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let uniqueTag =
+        field_map json__ "UniqueTag" UniqueTagResourceIdentifier.of_json in
+      make ?uniqueTag ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The ID for the provisioned product resources that are part of a resource group."]
 module TagOptionDetails =
   struct
     type nonrec t = TagOptionDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagOptionDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6470,10 +7263,10 @@ module ListTagOptionsFilters =
         (Option.map ~f:TagOptionKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?active ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let active = field_map json "Active" TagOptionActive.of_json in
-      let value = field_map json "Value" TagOptionValue.of_json in
-      let key = field_map json "Key" TagOptionKey.of_json in
+    let of_json json__ =
+      let active = field_map json__ "Active" TagOptionActive.of_json in
+      let value = field_map json__ "Value" TagOptionValue.of_json in
+      let key = field_map json__ "Key" TagOptionKey.of_json in
       make ?active ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Filters to use when listing TagOptions."]
@@ -6481,6 +7274,9 @@ module StackInstances =
   struct
     type nonrec t = StackInstance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StackInstance.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6505,6 +7301,9 @@ module ServiceActionSummaries =
   struct
     type nonrec t = ServiceActionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceActionSummary.to_value)) |>
         (fun x -> `List x)
@@ -6531,6 +7330,9 @@ module ResourceDetails =
   struct
     type nonrec t = ResourceDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6568,6 +7370,9 @@ module RecordDetails =
   struct
     type nonrec t = RecordDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecordDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6609,9 +7414,9 @@ module ListRecordHistorySearchFilter =
         (Option.map ~f:SearchFilterKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" SearchFilterValue.of_json in
-      let key = field_map json "Key" SearchFilterKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" SearchFilterValue.of_json in
+      let key = field_map json__ "Key" SearchFilterKey.of_json in
       make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The search filter to use when listing history records."]
@@ -6619,6 +7424,9 @@ module ProvisioningArtifactDetails =
   struct
     type nonrec t = ProvisioningArtifactDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProvisioningArtifactDetail.to_value)) |>
         (fun x -> `List x)
@@ -6645,6 +7453,9 @@ module ProvisioningArtifactViews =
   struct
     type nonrec t = ProvisioningArtifactView.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProvisioningArtifactView.to_value)) |>
         (fun x -> `List x)
@@ -6671,6 +7482,9 @@ module ProvisionedProductPlans =
   struct
     type nonrec t = ProvisionedProductPlanSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProvisionedProductPlanSummary.to_value)) |>
         (fun x -> `List x)
@@ -6697,6 +7511,9 @@ module Principals =
   struct
     type nonrec t = Principal.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Principal.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6721,6 +7538,9 @@ module PortfolioDetails =
   struct
     type nonrec t = PortfolioDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PortfolioDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6746,6 +7566,9 @@ module AccountIds =
   struct
     type nonrec t = AccountId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6770,6 +7593,9 @@ module OrganizationNodes =
   struct
     type nonrec t = OrganizationNode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationNode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6795,6 +7621,9 @@ module LaunchPathSummaries =
   struct
     type nonrec t = LaunchPathSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LaunchPathSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6820,6 +7649,9 @@ module ConstraintDetails =
   struct
     type nonrec t = ConstraintDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConstraintDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6845,6 +7677,9 @@ module Budgets =
   struct
     type nonrec t = BudgetDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BudgetDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6865,35 +7700,14 @@ module Budgets =
       list_of_json ~kind:"Budgets" ~of_json:BudgetDetail.of_json j
     let to_json v = composed_to_json to_value v
   end
-module RecordOutputs =
-  struct
-    type nonrec t = RecordOutput.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:RecordOutput.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:RecordOutput.of_xml)
-    let of_json j =
-      list_of_json ~kind:"RecordOutputs" ~of_json:RecordOutput.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module OutputKeys =
   struct
     type nonrec t = OutputKey.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:60); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OutputKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6973,6 +7787,8 @@ module ExecutionParameterMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -7010,6 +7826,9 @@ module ExecutionParameters =
   struct
     type nonrec t = ExecutionParameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExecutionParameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7036,6 +7855,9 @@ module ProvisioningArtifactOutputs =
     type nonrec t = ProvisioningArtifactOutput.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:60); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProvisioningArtifactOutput.to_value)) |>
         (fun x -> `List x)
@@ -7062,6 +7884,9 @@ module ProvisioningArtifactParameters =
   struct
     type nonrec t = ProvisioningArtifactParameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProvisioningArtifactParameter.to_value)) |>
         (fun x -> `List x)
@@ -7090,10 +7915,10 @@ module ProvisioningArtifactPreferences =
       {
       stackSetAccounts: StackSetAccounts.t option
         [@ocaml.doc
-          "One or more AWS accounts where stack instances are deployed from the stack set. These accounts can be scoped in ProvisioningPreferences$StackSetAccounts and UpdateProvisioningPreferences$StackSetAccounts. Applicable only to a CFN_STACKSET provisioned product type."];
+          "One or more Amazon Web Services accounts where stack instances are deployed from the stack set. These accounts can be scoped in ProvisioningPreferences$StackSetAccounts and UpdateProvisioningPreferences$StackSetAccounts. Applicable only to a CFN_STACKSET provisioned product type."];
       stackSetRegions: StackSetRegions.t option
         [@ocaml.doc
-          "One or more AWS Regions where stack instances are deployed from the stack set. These regions can be scoped in ProvisioningPreferences$StackSetRegions and UpdateProvisioningPreferences$StackSetRegions. Applicable only to a CFN_STACKSET provisioned product type."]}
+          "One or more Amazon Web Services Regions where stack instances are deployed from the stack set. These Regions can be scoped in ProvisioningPreferences$StackSetRegions and UpdateProvisioningPreferences$StackSetRegions. Applicable only to a CFN_STACKSET provisioned product type."]}
     let make ?stackSetAccounts =
       fun ?stackSetRegions -> fun () -> { stackSetAccounts; stackSetRegions }
     let to_value x =
@@ -7112,19 +7937,22 @@ module ProvisioningArtifactPreferences =
           (Xml.child xml_arg0 "StackSetAccounts") in
       make ?stackSetRegions ?stackSetAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stackSetRegions =
-        field_map json "StackSetRegions" StackSetRegions.of_json in
+        field_map json__ "StackSetRegions" StackSetRegions.of_json in
       let stackSetAccounts =
-        field_map json "StackSetAccounts" StackSetAccounts.of_json in
+        field_map json__ "StackSetAccounts" StackSetAccounts.of_json in
       make ?stackSetRegions ?stackSetAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The user-defined preferences that will be applied during product provisioning, unless overridden by ProvisioningPreferences or UpdateProvisioningPreferences. For more information on maximum concurrent accounts and failure tolerance, see Stack set operation options in the AWS CloudFormation User Guide."]
+       "The user-defined preferences that will be applied during product provisioning, unless overridden by ProvisioningPreferences or UpdateProvisioningPreferences. For more information on maximum concurrent accounts and failure tolerance, see Stack set operation options in the CloudFormation User Guide."]
 module TagOptionSummaries =
   struct
     type nonrec t = TagOptionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagOptionSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7150,6 +7978,9 @@ module UsageInstructions =
   struct
     type nonrec t = UsageInstruction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UsageInstruction.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7207,7 +8038,7 @@ module ProvisionedProductPlanDetails =
       status: ProvisionedProductPlanStatus.t option
         [@ocaml.doc "The status."];
       updatedTime: UpdatedTime.t option
-        [@ocaml.doc "The time when the plan was last updated."];
+        [@ocaml.doc "The UTC time stamp when the plan was last updated."];
       notificationArns: NotificationArns.t option
         [@ocaml.doc
           "Passed to CloudFormation. The SNS topic ARNs to which to publish stack-related events."];
@@ -7320,31 +8151,33 @@ module ProvisionedProductPlanDetails =
         ?provisionProductName ?provisionProductId ?planId ?planName
         ?productId ?pathId ?createdTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let provisioningParameters =
-        field_map json "ProvisioningParameters"
+        field_map json__ "ProvisioningParameters"
           UpdateProvisioningParameters.of_json in
       let notificationArns =
-        field_map json "NotificationArns" NotificationArns.of_json in
-      let updatedTime = field_map json "UpdatedTime" UpdatedTime.of_json in
+        field_map json__ "NotificationArns" NotificationArns.of_json in
+      let updatedTime = field_map json__ "UpdatedTime" UpdatedTime.of_json in
       let status =
-        field_map json "Status" ProvisionedProductPlanStatus.of_json in
+        field_map json__ "Status" ProvisionedProductPlanStatus.of_json in
       let provisioningArtifactId =
-        field_map json "ProvisioningArtifactId" Id.of_json in
+        field_map json__ "ProvisioningArtifactId" Id.of_json in
       let planType =
-        field_map json "PlanType" ProvisionedProductPlanType.of_json in
+        field_map json__ "PlanType" ProvisionedProductPlanType.of_json in
       let provisionProductName =
-        field_map json "ProvisionProductName" ProvisionedProductName.of_json in
-      let provisionProductId = field_map json "ProvisionProductId" Id.of_json in
-      let planId = field_map json "PlanId" Id.of_json in
+        field_map json__ "ProvisionProductName"
+          ProvisionedProductName.of_json in
+      let provisionProductId =
+        field_map json__ "ProvisionProductId" Id.of_json in
+      let planId = field_map json__ "PlanId" Id.of_json in
       let planName =
-        field_map json "PlanName" ProvisionedProductPlanName.of_json in
-      let productId = field_map json "ProductId" Id.of_json in
-      let pathId = field_map json "PathId" Id.of_json in
-      let createdTime = field_map json "CreatedTime" CreatedTime.of_json in
+        field_map json__ "PlanName" ProvisionedProductPlanName.of_json in
+      let productId = field_map json__ "ProductId" Id.of_json in
+      let pathId = field_map json__ "PathId" Id.of_json in
+      let createdTime = field_map json__ "CreatedTime" CreatedTime.of_json in
       make ?statusMessage ?tags ?provisioningParameters ?notificationArns
         ?updatedTime ?status ?provisioningArtifactId ?planType
         ?provisionProductName ?provisionProductId ?planId ?planName
@@ -7355,6 +8188,9 @@ module ResourceChanges =
   struct
     type nonrec t = ResourceChange.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceChange.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7379,6 +8215,9 @@ module CloudWatchDashboards =
   struct
     type nonrec t = CloudWatchDashboard.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CloudWatchDashboard.to_value)) |>
         (fun x -> `List x)
@@ -7405,6 +8244,9 @@ module ProvisioningArtifacts =
   struct
     type nonrec t = ProvisioningArtifact.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProvisioningArtifact.to_value)) |>
         (fun x -> `List x)
@@ -7431,6 +8273,9 @@ module LaunchPaths =
   struct
     type nonrec t = LaunchPath.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LaunchPath.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7455,6 +8300,9 @@ module ProvisioningArtifactSummaries =
   struct
     type nonrec t = ProvisioningArtifactSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProvisioningArtifactSummary.to_value)) |>
         (fun x -> `List x)
@@ -7481,6 +8329,9 @@ module PortfolioShareDetails =
   struct
     type nonrec t = PortfolioShareDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PortfolioShareDetail.to_value)) |>
         (fun x -> `List x)
@@ -7526,10 +8377,10 @@ module ShareDetails =
           (Xml.child xml_arg0 "SuccessfulShares") in
       make ?shareErrors ?successfulShares ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shareErrors = field_map json "ShareErrors" ShareErrors.of_json in
+    let of_json json__ =
+      let shareErrors = field_map json__ "ShareErrors" ShareErrors.of_json in
       let successfulShares =
-        field_map json "SuccessfulShares" SuccessfulShares.of_json in
+        field_map json__ "SuccessfulShares" SuccessfulShares.of_json in
       make ?shareErrors ?successfulShares ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the portfolio share operation."]
@@ -7585,30 +8436,29 @@ module ProvisioningArtifactProperties =
       description: ProvisioningArtifactDescription.t option
         [@ocaml.doc
           "The description of the provisioning artifact, including how it differs from the previous provisioning artifact."];
-      info: ProvisioningArtifactInfo.t
+      info: ProvisioningArtifactInfo.t option
         [@ocaml.doc
-          "Specify the template source with one of the following options, but not both. Keys accepted: \\[ LoadTemplateFromURL, ImportFromPhysicalId \\] The URL of the CloudFormation template in Amazon S3. Specify the URL in JSON format as follows: \"LoadTemplateFromURL\": \"https://s3.amazonaws.com/cf-templates-ozkq9d3hgiq2-us-east-1/...\" ImportFromPhysicalId: The physical id of the resource that contains the template. Currently only supports CloudFormation stack arn. Specify the physical id in JSON format as follows: ImportFromPhysicalId: \226\128\156arn:aws:cloudformation:\\[us-east-1\\]:\\[accountId\\]:stack/\\[StackName\\]/\\[resourceId\\]"];
+          "Specify the template source with one of the following options, but not both. Keys accepted: \\[ LoadTemplateFromURL, ImportFromPhysicalId \\] The URL of the CloudFormation template in Amazon S3 or GitHub in JSON format. Specify the URL in JSON format as follows: \"LoadTemplateFromURL\": \"https://s3.amazonaws.com/cf-templates-ozkq9d3hgiq2-us-east-1/...\" ImportFromPhysicalId: The physical id of the resource that contains the template. Currently only supports CloudFormation stack arn. Specify the physical id in JSON format as follows: ImportFromPhysicalId: \226\128\156arn:aws:cloudformation:\\[us-east-1\\]:\\[accountId\\]:stack/\\[StackName\\]/\\[resourceId\\]"];
       type_: ProvisioningArtifactType.t option
         [@ocaml.doc
-          "The type of provisioning artifact. CLOUD_FORMATION_TEMPLATE - AWS CloudFormation template MARKETPLACE_AMI - AWS Marketplace AMI MARKETPLACE_CAR - AWS Marketplace Clusters and AWS Resources"];
+          "The type of provisioning artifact. CLOUD_FORMATION_TEMPLATE - CloudFormation template TERRAFORM_OPEN_SOURCE - Terraform Open Source configuration file TERRAFORM_CLOUD - Terraform Cloud configuration file EXTERNAL - External configuration file"];
       disableTemplateValidation: DisableTemplateValidation.t option
         [@ocaml.doc
-          "If set to true, AWS Service Catalog stops validating the specified provisioning artifact even if it is invalid."]}
-    let context_ = "ProvisioningArtifactProperties"
+          "If set to true, Service Catalog stops validating the specified provisioning artifact even if it is invalid. Service Catalog does not support template validation for the TERRAFORM_OS product type."]}
     let make ?name =
       fun ?description ->
-        fun ?type_ ->
-          fun ?disableTemplateValidation ->
-            fun ~info ->
+        fun ?info ->
+          fun ?type_ ->
+            fun ?disableTemplateValidation ->
               fun () ->
-                { name; description; type_; disableTemplateValidation; info }
+                { name; description; info; type_; disableTemplateValidation }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:ProvisioningArtifactName.to_value));
         ("Description",
           (Option.map x.description
              ~f:ProvisioningArtifactDescription.to_value));
-        ("Info", (Some (ProvisioningArtifactInfo.to_value x.info)));
+        ("Info", (Option.map x.info ~f:ProvisioningArtifactInfo.to_value));
         ("Type", (Option.map x.type_ ~f:ProvisioningArtifactType.to_value));
         ("DisableTemplateValidation",
           (Option.map x.disableTemplateValidation
@@ -7622,26 +8472,27 @@ module ProvisioningArtifactProperties =
         (Option.map ~f:ProvisioningArtifactType.of_xml)
           (Xml.child xml_arg0 "Type") in
       let info =
-        ProvisioningArtifactInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Info") in
+        (Option.map ~f:ProvisioningArtifactInfo.of_xml)
+          (Xml.child xml_arg0 "Info") in
       let description =
         (Option.map ~f:ProvisioningArtifactDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       let name =
         (Option.map ~f:ProvisioningArtifactName.of_xml)
           (Xml.child xml_arg0 "Name") in
-      make ?disableTemplateValidation ?type_ ~info ?description ?name ()
+      make ?disableTemplateValidation ?type_ ?info ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let disableTemplateValidation =
-        field_map json "DisableTemplateValidation"
+        field_map json__ "DisableTemplateValidation"
           DisableTemplateValidation.of_json in
-      let type_ = field_map json "Type" ProvisioningArtifactType.of_json in
-      let info = field_map_exn json "Info" ProvisioningArtifactInfo.of_json in
+      let type_ = field_map json__ "Type" ProvisioningArtifactType.of_json in
+      let info = field_map json__ "Info" ProvisioningArtifactInfo.of_json in
       let description =
-        field_map json "Description" ProvisioningArtifactDescription.of_json in
-      let name = field_map json "Name" ProvisioningArtifactName.of_json in
-      make ?disableTemplateValidation ?type_ ~info ?description ?name ()
+        field_map json__ "Description"
+          ProvisioningArtifactDescription.of_json in
+      let name = field_map json__ "Name" ProvisioningArtifactName.of_json in
+      make ?disableTemplateValidation ?type_ ?info ?description ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a provisioning artifact (also known as a version) for a product."]
@@ -7649,6 +8500,9 @@ module CopyOptions =
   struct
     type nonrec t = CopyOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CopyOption.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7695,6 +8549,9 @@ module SourceProvisioningArtifactProperties =
   struct
     type nonrec t = SourceProvisioningArtifactPropertiesMap.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SourceProvisioningArtifactPropertiesMap.to_value))
         |> (fun x -> `List x)
@@ -7723,6 +8580,9 @@ module FailedServiceActionAssociations =
     type nonrec t = FailedServiceActionAssociation.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:50); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FailedServiceActionAssociation.to_value)) |>
         (fun x -> `List x)
@@ -7753,6 +8613,9 @@ module ServiceActionAssociations =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceActionAssociation.to_value)) |>
         (fun x -> `List x)
@@ -7851,9 +8714,9 @@ module UpdateTagOptionOutput =
           (Xml.child xml_arg0 "TagOptionDetail") in
       make ?tagOptionDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagOptionDetail =
-        field_map json "TagOptionDetail" TagOptionDetail.of_json in
+        field_map json__ "TagOptionDetail" TagOptionDetail.of_json in
       make ?tagOptionDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified TagOption."]
@@ -7883,10 +8746,10 @@ module UpdateTagOptionInput =
         TagOptionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?active ?value ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let active = field_map json "Active" TagOptionActive.of_json in
-      let value = field_map json "Value" TagOptionValue.of_json in
-      let id = field_map_exn json "Id" TagOptionId.of_json in
+    let of_json json__ =
+      let active = field_map json__ "Active" TagOptionActive.of_json in
+      let value = field_map json__ "Value" TagOptionValue.of_json in
+      let id = field_map_exn json__ "Id" TagOptionId.of_json in
       make ?active ?value ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified TagOption."]
@@ -7945,9 +8808,9 @@ module UpdateServiceActionOutput =
           (Xml.child xml_arg0 "ServiceActionDetail") in
       make ?serviceActionDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceActionDetail =
-        field_map json "ServiceActionDetail" ServiceActionDetail.of_json in
+        field_map json__ "ServiceActionDetail" ServiceActionDetail.of_json in
       make ?serviceActionDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a self-service action."]
@@ -7963,8 +8826,7 @@ module UpdateServiceActionInput =
       description: ServiceActionDescription.t option
         [@ocaml.doc "The self-service action description."];
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"]}
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"]}
     let context_ = "UpdateServiceActionInput"
     let make ?name =
       fun ?definition ->
@@ -7998,15 +8860,15 @@ module UpdateServiceActionInput =
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?acceptLanguage ?description ?definition ?name ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       let description =
-        field_map json "Description" ServiceActionDescription.of_json in
+        field_map json__ "Description" ServiceActionDescription.of_json in
       let definition =
-        field_map json "Definition" ServiceActionDefinitionMap.of_json in
-      let name = field_map json "Name" ServiceActionName.of_json in
-      let id = field_map_exn json "Id" Id.of_json in
+        field_map json__ "Definition" ServiceActionDefinitionMap.of_json in
+      let name = field_map json__ "Name" ServiceActionName.of_json in
+      let id = field_map_exn json__ "Id" Id.of_json in
       make ?acceptLanguage ?description ?definition ?name ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a self-service action."]
@@ -8017,7 +8879,8 @@ module UpdateProvisioningArtifactOutput =
       provisioningArtifactDetail: ProvisioningArtifactDetail.t option
         [@ocaml.doc "Information about the provisioning artifact."];
       info: ProvisioningArtifactInfo.t option
-        [@ocaml.doc "The URL of the CloudFormation template in Amazon S3."];
+        [@ocaml.doc
+          "The URL of the CloudFormation template in Amazon S3 or GitHub in JSON format."];
       status: Status.t option
         [@ocaml.doc "The status of the current request."]}
     type nonrec error =
@@ -8079,11 +8942,11 @@ module UpdateProvisioningArtifactOutput =
           (Xml.child xml_arg0 "ProvisioningArtifactDetail") in
       make ?status ?info ?provisioningArtifactDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
-      let info = field_map json "Info" ProvisioningArtifactInfo.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Status.of_json in
+      let info = field_map json__ "Info" ProvisioningArtifactInfo.of_json in
       let provisioningArtifactDetail =
-        field_map json "ProvisioningArtifactDetail"
+        field_map json__ "ProvisioningArtifactDetail"
           ProvisioningArtifactDetail.of_json in
       make ?status ?info ?provisioningArtifactDetail ()
     let to_json v = composed_to_json to_value v
@@ -8094,8 +8957,7 @@ module UpdateProvisioningArtifactInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       productId: Id.t [@ocaml.doc "The product identifier."];
       provisioningArtifactId: Id.t
         [@ocaml.doc "The identifier of the provisioning artifact."];
@@ -8167,18 +9029,20 @@ module UpdateProvisioningArtifactInput =
       make ?guidance ?active ?description ?name ~provisioningArtifactId
         ~productId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let guidance =
-        field_map json "Guidance" ProvisioningArtifactGuidance.of_json in
-      let active = field_map json "Active" ProvisioningArtifactActive.of_json in
+        field_map json__ "Guidance" ProvisioningArtifactGuidance.of_json in
+      let active =
+        field_map json__ "Active" ProvisioningArtifactActive.of_json in
       let description =
-        field_map json "Description" ProvisioningArtifactDescription.of_json in
-      let name = field_map json "Name" ProvisioningArtifactName.of_json in
+        field_map json__ "Description"
+          ProvisioningArtifactDescription.of_json in
+      let name = field_map json__ "Name" ProvisioningArtifactName.of_json in
       let provisioningArtifactId =
-        field_map_exn json "ProvisioningArtifactId" Id.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
+        field_map_exn json__ "ProvisioningArtifactId" Id.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?guidance ?active ?description ?name ~provisioningArtifactId
         ~productId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
@@ -8274,14 +9138,14 @@ module UpdateProvisionedProductPropertiesOutput =
       make ?status ?recordId ?provisionedProductProperties
         ?provisionedProductId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" RecordStatus.of_json in
-      let recordId = field_map json "RecordId" Id.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" RecordStatus.of_json in
+      let recordId = field_map json__ "RecordId" Id.of_json in
       let provisionedProductProperties =
-        field_map json "ProvisionedProductProperties"
+        field_map json__ "ProvisionedProductProperties"
           ProvisionedProductProperties.of_json in
       let provisionedProductId =
-        field_map json "ProvisionedProductId" Id.of_json in
+        field_map json__ "ProvisionedProductId" Id.of_json in
       make ?status ?recordId ?provisionedProductProperties
         ?provisionedProductId ()
     let to_json v = composed_to_json to_value v
@@ -8292,13 +9156,12 @@ module UpdateProvisionedProductPropertiesInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       provisionedProductId: Id.t
         [@ocaml.doc "The identifier of the provisioned product."];
       provisionedProductProperties: ProvisionedProductProperties.t
         [@ocaml.doc
-          "A map that contains the provisioned product properties to be updated. The LAUNCH_ROLE key accepts role ARNs. This key allows an administrator to call UpdateProvisionedProductProperties to update the launch role that is associated with a provisioned product. This role is used when an end user calls a provisioning operation such as UpdateProvisionedProduct, TerminateProvisionedProduct, or ExecuteProvisionedProductServiceAction. Only a role ARN is valid. A user ARN is invalid. The OWNER key accepts user ARNs and role ARNs. The owner is the user that has permission to see, update, terminate, and execute service actions in the provisioned product. The administrator can change the owner of a provisioned product to another IAM user within the same account. Both end user owners and administrators can see ownership history of the provisioned product using the ListRecordHistory API. The new owner can describe all past records for the provisioned product using the DescribeRecord API. The previous owner can no longer use DescribeRecord, but can still see the product's history from when he was an owner using ListRecordHistory. If a provisioned product ownership is assigned to an end user, they can see and perform any action through the API or Service Catalog console such as update, terminate, and execute service actions. If an end user provisions a product and the owner is updated to someone else, they will no longer be able to see or perform any actions through API or the Service Catalog console on that provisioned product."];
+          "A map that contains the provisioned product properties to be updated. The LAUNCH_ROLE key accepts role ARNs. This key allows an administrator to call UpdateProvisionedProductProperties to update the launch role that is associated with a provisioned product. This role is used when an end user calls a provisioning operation such as UpdateProvisionedProduct, TerminateProvisionedProduct, or ExecuteProvisionedProductServiceAction. Only a role ARN is valid. A user ARN is invalid. The OWNER key accepts user ARNs, IAM role ARNs, and STS assumed-role ARNs. The owner is the user that has permission to see, update, terminate, and execute service actions in the provisioned product. The administrator can change the owner of a provisioned product to another IAM or STS entity within the same account. Both end user owners and administrators can see ownership history of the provisioned product using the ListRecordHistory API. The new owner can describe all past records for the provisioned product using the DescribeRecord API. The previous owner can no longer use DescribeRecord, but can still see the product's history from when he was an owner using ListRecordHistory. If a provisioned product ownership is assigned to an end user, they can see and perform any action through the API or Service Catalog console such as update, terminate, and execute service actions. If an end user provisions a product and the owner is updated to someone else, they will no longer be able to see or perform any actions through API or the Service Catalog console on that provisioned product."];
       idempotencyToken: IdempotencyToken.t
         [@ocaml.doc
           "The idempotency token that uniquely identifies the provisioning product update request."]}
@@ -8343,16 +9206,16 @@ module UpdateProvisionedProductPropertiesInput =
       make ~idempotencyToken ~provisionedProductProperties
         ~provisionedProductId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
       let provisionedProductProperties =
-        field_map_exn json "ProvisionedProductProperties"
+        field_map_exn json__ "ProvisionedProductProperties"
           ProvisionedProductProperties.of_json in
       let provisionedProductId =
-        field_map_exn json "ProvisionedProductId" Id.of_json in
+        field_map_exn json__ "ProvisionedProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~idempotencyToken ~provisionedProductProperties
         ~provisionedProductId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
@@ -8413,8 +9276,8 @@ module UpdateProvisionedProductOutput =
           (Xml.child xml_arg0 "RecordDetail") in
       make ?recordDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recordDetail = field_map json "RecordDetail" RecordDetail.of_json in
+    let of_json json__ =
+      let recordDetail = field_map json__ "RecordDetail" RecordDetail.of_json in
       make ?recordDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8424,8 +9287,7 @@ module UpdateProvisionedProductInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       provisionedProductName: ProvisionedProductNameOrArn.t option
         [@ocaml.doc
           "The name of the provisioned product. You cannot specify both ProvisionedProductName and ProvisionedProductId."];
@@ -8558,32 +9420,33 @@ module UpdateProvisionedProductInput =
         ?provisioningArtifactId ?productName ?productId ?provisionedProductId
         ?provisionedProductName ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updateToken =
-        field_map_exn json "UpdateToken" IdempotencyToken.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map_exn json__ "UpdateToken" IdempotencyToken.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let provisioningPreferences =
-        field_map json "ProvisioningPreferences"
+        field_map json__ "ProvisioningPreferences"
           UpdateProvisioningPreferences.of_json in
       let provisioningParameters =
-        field_map json "ProvisioningParameters"
+        field_map json__ "ProvisioningParameters"
           UpdateProvisioningParameters.of_json in
-      let pathName = field_map json "PathName" PortfolioDisplayName.of_json in
-      let pathId = field_map json "PathId" Id.of_json in
+      let pathName = field_map json__ "PathName" PortfolioDisplayName.of_json in
+      let pathId = field_map json__ "PathId" Id.of_json in
       let provisioningArtifactName =
-        field_map json "ProvisioningArtifactName"
+        field_map json__ "ProvisioningArtifactName"
           ProvisioningArtifactName.of_json in
       let provisioningArtifactId =
-        field_map json "ProvisioningArtifactId" Id.of_json in
-      let productName = field_map json "ProductName" ProductViewName.of_json in
-      let productId = field_map json "ProductId" Id.of_json in
+        field_map json__ "ProvisioningArtifactId" Id.of_json in
+      let productName =
+        field_map json__ "ProductName" ProductViewName.of_json in
+      let productId = field_map json__ "ProductId" Id.of_json in
       let provisionedProductId =
-        field_map json "ProvisionedProductId" Id.of_json in
+        field_map json__ "ProvisionedProductId" Id.of_json in
       let provisionedProductName =
-        field_map json "ProvisionedProductName"
+        field_map json__ "ProvisionedProductName"
           ProvisionedProductNameOrArn.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~updateToken ?tags ?provisioningPreferences
         ?provisioningParameters ?pathName ?pathId ?provisioningArtifactName
         ?provisioningArtifactId ?productName ?productId ?provisionedProductId
@@ -8663,10 +9526,10 @@ module UpdateProductOutput =
           (Xml.child xml_arg0 "ProductViewDetail") in
       make ?tags ?productViewDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let productViewDetail =
-        field_map json "ProductViewDetail" ProductViewDetail.of_json in
+        field_map json__ "ProductViewDetail" ProductViewDetail.of_json in
       make ?tags ?productViewDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified product."]
@@ -8675,8 +9538,7 @@ module UpdateProductInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       id: Id.t [@ocaml.doc "The product identifier."];
       name: ProductViewName.t option [@ocaml.doc "The updated product name."];
       owner: ProductViewOwner.t option
@@ -8694,7 +9556,10 @@ module UpdateProductInput =
       addTags: AddTags.t option
         [@ocaml.doc "The tags to add to the product."];
       removeTags: TagKeys.t option
-        [@ocaml.doc "The tags to remove from the product."]}
+        [@ocaml.doc "The tags to remove from the product."];
+      sourceConnection: SourceConnection.t option
+        [@ocaml.doc
+          "Specifies connection details for the updated product and syncs the product to the connection source artifact. This automatically manages the product's artifacts based on changes to the source. The SourceConnection parameter consists of the following sub-fields. Type ConnectionParamters"]}
     let context_ = "UpdateProductInput"
     let make ?acceptLanguage =
       fun ?name ->
@@ -8706,21 +9571,23 @@ module UpdateProductInput =
                   fun ?supportUrl ->
                     fun ?addTags ->
                       fun ?removeTags ->
-                        fun ~id ->
-                          fun () ->
-                            {
-                              acceptLanguage;
-                              name;
-                              owner;
-                              description;
-                              distributor;
-                              supportDescription;
-                              supportEmail;
-                              supportUrl;
-                              addTags;
-                              removeTags;
-                              id
-                            }
+                        fun ?sourceConnection ->
+                          fun ~id ->
+                            fun () ->
+                              {
+                                acceptLanguage;
+                                name;
+                                owner;
+                                description;
+                                distributor;
+                                supportDescription;
+                                supportEmail;
+                                supportUrl;
+                                addTags;
+                                removeTags;
+                                sourceConnection;
+                                id
+                              }
     let to_value x =
       structure_to_value
         [("AcceptLanguage",
@@ -8738,9 +9605,14 @@ module UpdateProductInput =
           (Option.map x.supportEmail ~f:SupportEmail.to_value));
         ("SupportUrl", (Option.map x.supportUrl ~f:SupportUrl.to_value));
         ("AddTags", (Option.map x.addTags ~f:AddTags.to_value));
-        ("RemoveTags", (Option.map x.removeTags ~f:TagKeys.to_value))]
+        ("RemoveTags", (Option.map x.removeTags ~f:TagKeys.to_value));
+        ("SourceConnection",
+          (Option.map x.sourceConnection ~f:SourceConnection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceConnection =
+        (Option.map ~f:SourceConnection.of_xml)
+          (Xml.child xml_arg0 "SourceConnection") in
       let removeTags =
         (Option.map ~f:TagKeys.of_xml) (Xml.child xml_arg0 "RemoveTags") in
       let addTags =
@@ -8767,26 +9639,31 @@ module UpdateProductInput =
       let acceptLanguage =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
-      make ?removeTags ?addTags ?supportUrl ?supportEmail ?supportDescription
-        ?distributor ?description ?owner ?name ~id ?acceptLanguage ()
+      make ?sourceConnection ?removeTags ?addTags ?supportUrl ?supportEmail
+        ?supportDescription ?distributor ?description ?owner ?name ~id
+        ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let removeTags = field_map json "RemoveTags" TagKeys.of_json in
-      let addTags = field_map json "AddTags" AddTags.of_json in
-      let supportUrl = field_map json "SupportUrl" SupportUrl.of_json in
-      let supportEmail = field_map json "SupportEmail" SupportEmail.of_json in
+    let of_json json__ =
+      let sourceConnection =
+        field_map json__ "SourceConnection" SourceConnection.of_json in
+      let removeTags = field_map json__ "RemoveTags" TagKeys.of_json in
+      let addTags = field_map json__ "AddTags" AddTags.of_json in
+      let supportUrl = field_map json__ "SupportUrl" SupportUrl.of_json in
+      let supportEmail = field_map json__ "SupportEmail" SupportEmail.of_json in
       let supportDescription =
-        field_map json "SupportDescription" SupportDescription.of_json in
-      let distributor = field_map json "Distributor" ProductViewOwner.of_json in
+        field_map json__ "SupportDescription" SupportDescription.of_json in
+      let distributor =
+        field_map json__ "Distributor" ProductViewOwner.of_json in
       let description =
-        field_map json "Description" ProductViewShortDescription.of_json in
-      let owner = field_map json "Owner" ProductViewOwner.of_json in
-      let name = field_map json "Name" ProductViewName.of_json in
-      let id = field_map_exn json "Id" Id.of_json in
+        field_map json__ "Description" ProductViewShortDescription.of_json in
+      let owner = field_map json__ "Owner" ProductViewOwner.of_json in
+      let name = field_map json__ "Name" ProductViewName.of_json in
+      let id = field_map_exn json__ "Id" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      make ?removeTags ?addTags ?supportUrl ?supportEmail ?supportDescription
-        ?distributor ?description ?owner ?name ~id ?acceptLanguage ()
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      make ?sourceConnection ?removeTags ?addTags ?supportUrl ?supportEmail
+        ?supportDescription ?distributor ?description ?owner ?name ~id
+        ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified product."]
 module UpdatePortfolioShareOutput =
@@ -8871,45 +9748,49 @@ module UpdatePortfolioShareOutput =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "PortfolioShareToken") in
       make ?status ?portfolioShareToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ShareStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ShareStatus.of_json in
       let portfolioShareToken =
-        field_map json "PortfolioShareToken" Id.of_json in
+        field_map json__ "PortfolioShareToken" Id.of_json in
       make ?status ?portfolioShareToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified portfolio share. You can use this API to enable or disable TagOptions sharing for an existing portfolio share. The portfolio share cannot be updated if the CreatePortfolioShare operation is IN_PROGRESS, as the share is not available to recipient entities. In this case, you must wait for the portfolio share to be COMPLETED. You must provide the accountId or organization node in the input, but not both. If the portfolio is shared to both an external account and an organization node, and both shares need to be updated, you must invoke UpdatePortfolioShare separately for each share type. This API cannot be used for removing the portfolio share. You must use DeletePortfolioShare API for that action."]
+       "Updates the specified portfolio share. You can use this API to enable or disable TagOptions sharing or Principal sharing for an existing portfolio share. The portfolio share cannot be updated if the CreatePortfolioShare operation is IN_PROGRESS, as the share is not available to recipient entities. In this case, you must wait for the portfolio share to be completed. You must provide the accountId or organization node in the input, but not both. If the portfolio is shared to both an external account and an organization node, and both shares need to be updated, you must invoke UpdatePortfolioShare separately for each share type. This API cannot be used for removing the portfolio share. You must use DeletePortfolioShare API for that action. When you associate a principal with portfolio, a potential privilege escalation path may occur when that portfolio is then shared with other accounts. For a user in a recipient account who is not an Service Catalog Admin, but still has the ability to create Principals (Users/Groups/Roles), that user could create a role that matches a principal name association for the portfolio. Although this user may not know which principal names are associated through Service Catalog, they may be able to guess the user. If this potential escalation path is a concern, then Service Catalog recommends using PrincipalType as IAM. With this configuration, the PrincipalARN must already exist in the recipient account before it can be associated."]
 module UpdatePortfolioShareInput =
   struct
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       portfolioId: Id.t
         [@ocaml.doc
           "The unique identifier of the portfolio for which the share will be updated."];
       accountId: AccountId.t option
         [@ocaml.doc
-          "The AWS Account Id of the recipient account. This field is required when updating an external account to account type share."];
+          "The Amazon Web Services account Id of the recipient account. This field is required when updating an external account to account type share."];
       organizationNode: OrganizationNode.t option ;
       shareTagOptions: NullableBoolean.t option
         [@ocaml.doc
-          "A flag to enable or disable TagOptions sharing for the portfolio share. If this field is not provided, the current state of TagOptions sharing on the portfolio share will not be modified."]}
+          "Enables or disables TagOptions sharing for the portfolio share. If this field is not provided, the current state of TagOptions sharing on the portfolio share will not be modified."];
+      sharePrincipals: NullableBoolean.t option
+        [@ocaml.doc
+          "A flag to enables or disables Principals sharing in the portfolio. If this field is not provided, the current state of the Principals sharing on the portfolio share will not be modified."]}
     let context_ = "UpdatePortfolioShareInput"
     let make ?acceptLanguage =
       fun ?accountId ->
         fun ?organizationNode ->
           fun ?shareTagOptions ->
-            fun ~portfolioId ->
-              fun () ->
-                {
-                  acceptLanguage;
-                  accountId;
-                  organizationNode;
-                  shareTagOptions;
-                  portfolioId
-                }
+            fun ?sharePrincipals ->
+              fun ~portfolioId ->
+                fun () ->
+                  {
+                    acceptLanguage;
+                    accountId;
+                    organizationNode;
+                    shareTagOptions;
+                    sharePrincipals;
+                    portfolioId
+                  }
     let to_value x =
       structure_to_value
         [("AcceptLanguage",
@@ -8919,9 +9800,14 @@ module UpdatePortfolioShareInput =
         ("OrganizationNode",
           (Option.map x.organizationNode ~f:OrganizationNode.to_value));
         ("ShareTagOptions",
-          (Option.map x.shareTagOptions ~f:NullableBoolean.to_value))]
+          (Option.map x.shareTagOptions ~f:NullableBoolean.to_value));
+        ("SharePrincipals",
+          (Option.map x.sharePrincipals ~f:NullableBoolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sharePrincipals =
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "SharePrincipals") in
       let shareTagOptions =
         (Option.map ~f:NullableBoolean.of_xml)
           (Xml.child xml_arg0 "ShareTagOptions") in
@@ -8935,23 +9821,25 @@ module UpdatePortfolioShareInput =
       let acceptLanguage =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
-      make ?shareTagOptions ?organizationNode ?accountId ~portfolioId
-        ?acceptLanguage ()
+      make ?sharePrincipals ?shareTagOptions ?organizationNode ?accountId
+        ~portfolioId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let sharePrincipals =
+        field_map json__ "SharePrincipals" NullableBoolean.of_json in
       let shareTagOptions =
-        field_map json "ShareTagOptions" NullableBoolean.of_json in
+        field_map json__ "ShareTagOptions" NullableBoolean.of_json in
       let organizationNode =
-        field_map json "OrganizationNode" OrganizationNode.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
+        field_map json__ "OrganizationNode" OrganizationNode.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      make ?shareTagOptions ?organizationNode ?accountId ~portfolioId
-        ?acceptLanguage ()
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      make ?sharePrincipals ?shareTagOptions ?organizationNode ?accountId
+        ~portfolioId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified portfolio share. You can use this API to enable or disable TagOptions sharing for an existing portfolio share. The portfolio share cannot be updated if the CreatePortfolioShare operation is IN_PROGRESS, as the share is not available to recipient entities. In this case, you must wait for the portfolio share to be COMPLETED. You must provide the accountId or organization node in the input, but not both. If the portfolio is shared to both an external account and an organization node, and both shares need to be updated, you must invoke UpdatePortfolioShare separately for each share type. This API cannot be used for removing the portfolio share. You must use DeletePortfolioShare API for that action."]
+       "Updates the specified portfolio share. You can use this API to enable or disable TagOptions sharing or Principal sharing for an existing portfolio share. The portfolio share cannot be updated if the CreatePortfolioShare operation is IN_PROGRESS, as the share is not available to recipient entities. In this case, you must wait for the portfolio share to be completed. You must provide the accountId or organization node in the input, but not both. If the portfolio is shared to both an external account and an organization node, and both shares need to be updated, you must invoke UpdatePortfolioShare separately for each share type. This API cannot be used for removing the portfolio share. You must use DeletePortfolioShare API for that action. When you associate a principal with portfolio, a potential privilege escalation path may occur when that portfolio is then shared with other accounts. For a user in a recipient account who is not an Service Catalog Admin, but still has the ability to create Principals (Users/Groups/Roles), that user could create a role that matches a principal name association for the portfolio. Although this user may not know which principal names are associated through Service Catalog, they may be able to guess the user. If this potential escalation path is a concern, then Service Catalog recommends using PrincipalType as IAM. With this configuration, the PrincipalARN must already exist in the recipient account before it can be associated."]
 module UpdatePortfolioOutput =
   struct
     type nonrec t =
@@ -9033,10 +9921,10 @@ module UpdatePortfolioOutput =
           (Xml.child xml_arg0 "PortfolioDetail") in
       make ?tags ?portfolioDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let portfolioDetail =
-        field_map json "PortfolioDetail" PortfolioDetail.of_json in
+        field_map json__ "PortfolioDetail" PortfolioDetail.of_json in
       make ?tags ?portfolioDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9046,8 +9934,7 @@ module UpdatePortfolioInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       id: Id.t [@ocaml.doc "The portfolio identifier."];
       displayName: PortfolioDisplayName.t option
         [@ocaml.doc "The name to use for display purposes."];
@@ -9110,17 +9997,17 @@ module UpdatePortfolioInput =
       make ?removeTags ?addTags ?providerName ?description ?displayName ~id
         ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let removeTags = field_map json "RemoveTags" TagKeys.of_json in
-      let addTags = field_map json "AddTags" AddTags.of_json in
-      let providerName = field_map json "ProviderName" ProviderName.of_json in
+    let of_json json__ =
+      let removeTags = field_map json__ "RemoveTags" TagKeys.of_json in
+      let addTags = field_map json__ "AddTags" AddTags.of_json in
+      let providerName = field_map json__ "ProviderName" ProviderName.of_json in
       let description =
-        field_map json "Description" PortfolioDescription.of_json in
+        field_map json__ "Description" PortfolioDescription.of_json in
       let displayName =
-        field_map json "DisplayName" PortfolioDisplayName.of_json in
-      let id = field_map_exn json "Id" Id.of_json in
+        field_map json__ "DisplayName" PortfolioDisplayName.of_json in
+      let id = field_map_exn json__ "Id" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?removeTags ?addTags ?providerName ?description ?displayName ~id
         ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
@@ -9196,12 +10083,12 @@ module UpdateConstraintOutput =
           (Xml.child xml_arg0 "ConstraintDetail") in
       make ?status ?constraintParameters ?constraintDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Status.of_json in
       let constraintParameters =
-        field_map json "ConstraintParameters" ConstraintParameters.of_json in
+        field_map json__ "ConstraintParameters" ConstraintParameters.of_json in
       let constraintDetail =
-        field_map json "ConstraintDetail" ConstraintDetail.of_json in
+        field_map json__ "ConstraintDetail" ConstraintDetail.of_json in
       make ?status ?constraintParameters ?constraintDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified constraint."]
@@ -9210,14 +10097,13 @@ module UpdateConstraintInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       id: Id.t [@ocaml.doc "The identifier of the constraint."];
       description: ConstraintDescription.t option
         [@ocaml.doc "The updated description of the constraint."];
       parameters: ConstraintParameters.t option
         [@ocaml.doc
-          "The constraint parameters, in JSON format. The syntax depends on the constraint type as follows: LAUNCH You are required to specify either the RoleArn or the LocalRoleName but can't use both. Specify the RoleArn property as follows: \\{\"RoleArn\" : \"arn:aws:iam::123456789012:role/LaunchRole\"\\} Specify the LocalRoleName property as follows: \\{\"LocalRoleName\": \"SCBasicLaunchRole\"\\} If you specify the LocalRoleName property, when an account uses the launch constraint, the IAM role with that name in the account will be used. This allows launch-role constraints to be account-agnostic so the administrator can create fewer resources per shared account. The given role name must exist in the account used to create the launch constraint and the account of the user who launches a product with this launch constraint. You cannot have both a LAUNCH and a STACKSET constraint. You also cannot have more than one LAUNCH constraint on a product and portfolio. NOTIFICATION Specify the NotificationArns property as follows: \\{\"NotificationArns\" : \\[\"arn:aws:sns:us-east-1:123456789012:Topic\"\\]\\} RESOURCE_UPDATE Specify the TagUpdatesOnProvisionedProduct property as follows: \\{\"Version\":\"2.0\",\"Properties\":\\{\"TagUpdateOnProvisionedProduct\":\"String\"\\}\\} The TagUpdatesOnProvisionedProduct property accepts a string value of ALLOWED or NOT_ALLOWED. STACKSET Specify the Parameters property as follows: \\{\"Version\": \"String\", \"Properties\": \\{\"AccountList\": \\[ \"String\" \\], \"RegionList\": \\[ \"String\" \\], \"AdminRole\": \"String\", \"ExecutionRole\": \"String\"\\}\\} You cannot have both a LAUNCH and a STACKSET constraint. You also cannot have more than one STACKSET constraint on a product and portfolio. Products with a STACKSET constraint will launch an AWS CloudFormation stack set. TEMPLATE Specify the Rules property. For more information, see Template Constraint Rules."]}
+          "The constraint parameters, in JSON format. The syntax depends on the constraint type as follows: LAUNCH You are required to specify either the RoleArn or the LocalRoleName but can't use both. Specify the RoleArn property as follows: \\{\"RoleArn\" : \"arn:aws:iam::123456789012:role/LaunchRole\"\\} Specify the LocalRoleName property as follows: \\{\"LocalRoleName\": \"SCBasicLaunchRole\"\\} If you specify the LocalRoleName property, when an account uses the launch constraint, the IAM role with that name in the account will be used. This allows launch-role constraints to be account-agnostic so the administrator can create fewer resources per shared account. The given role name must exist in the account used to create the launch constraint and the account of the user who launches a product with this launch constraint. You cannot have both a LAUNCH and a STACKSET constraint. You also cannot have more than one LAUNCH constraint on a product and portfolio. NOTIFICATION Specify the NotificationArns property as follows: \\{\"NotificationArns\" : \\[\"arn:aws:sns:us-east-1:123456789012:Topic\"\\]\\} RESOURCE_UPDATE Specify the TagUpdatesOnProvisionedProduct property as follows: \\{\"Version\":\"2.0\",\"Properties\":\\{\"TagUpdateOnProvisionedProduct\":\"String\"\\}\\} The TagUpdatesOnProvisionedProduct property accepts a string value of ALLOWED or NOT_ALLOWED. STACKSET Specify the Parameters property as follows: \\{\"Version\": \"String\", \"Properties\": \\{\"AccountList\": \\[ \"String\" \\], \"RegionList\": \\[ \"String\" \\], \"AdminRole\": \"String\", \"ExecutionRole\": \"String\"\\}\\} You cannot have both a LAUNCH and a STACKSET constraint. You also cannot have more than one STACKSET constraint on a product and portfolio. Products with a STACKSET constraint will launch an CloudFormation stack set. TEMPLATE Specify the Rules property. For more information, see Template Constraint Rules."]}
     let context_ = "UpdateConstraintInput"
     let make ?acceptLanguage =
       fun ?description ->
@@ -9247,14 +10133,14 @@ module UpdateConstraintInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?parameters ?description ~id ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map json "Parameters" ConstraintParameters.of_json in
+        field_map json__ "Parameters" ConstraintParameters.of_json in
       let description =
-        field_map json "Description" ConstraintDescription.of_json in
-      let id = field_map_exn json "Id" Id.of_json in
+        field_map json__ "Description" ConstraintDescription.of_json in
+      let id = field_map_exn json__ "Id" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?parameters ?description ~id ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified constraint."]
@@ -9303,8 +10189,8 @@ module TerminateProvisionedProductOutput =
           (Xml.child xml_arg0 "RecordDetail") in
       make ?recordDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recordDetail = field_map json "RecordDetail" RecordDetail.of_json in
+    let of_json json__ =
+      let recordDetail = field_map json__ "RecordDetail" RecordDetail.of_json in
       make ?recordDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9324,10 +10210,9 @@ module TerminateProvisionedProductInput =
           "An idempotency token that uniquely identifies the termination request. This token is only valid during the termination process. After the provisioned product is terminated, subsequent requests to terminate the same provisioned product always return ResourceNotFound."];
       ignoreErrors: IgnoreErrors.t option
         [@ocaml.doc
-          "If set to true, AWS Service Catalog stops managing the specified provisioned product even if it cannot delete the underlying resources."];
+          "If set to true, Service Catalog stops managing the specified provisioned product even if it cannot delete the underlying resources."];
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       retainPhysicalResources: RetainPhysicalResources.t option
         [@ocaml.doc
           "When this boolean parameter is set to true, the TerminateProvisionedProduct API deletes the Service Catalog provisioned product. However, it does not remove the CloudFormation stack, stack set, or the underlying resources of the deleted provisioned product. The default value is false."]}
@@ -9385,19 +10270,19 @@ module TerminateProvisionedProductInput =
       make ?retainPhysicalResources ?acceptLanguage ?ignoreErrors
         ~terminateToken ?provisionedProductId ?provisionedProductName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retainPhysicalResources =
-        field_map json "RetainPhysicalResources"
+        field_map json__ "RetainPhysicalResources"
           RetainPhysicalResources.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      let ignoreErrors = field_map json "IgnoreErrors" IgnoreErrors.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      let ignoreErrors = field_map json__ "IgnoreErrors" IgnoreErrors.of_json in
       let terminateToken =
-        field_map_exn json "TerminateToken" IdempotencyToken.of_json in
+        field_map_exn json__ "TerminateToken" IdempotencyToken.of_json in
       let provisionedProductId =
-        field_map json "ProvisionedProductId" Id.of_json in
+        field_map json__ "ProvisionedProductId" Id.of_json in
       let provisionedProductName =
-        field_map json "ProvisionedProductName"
+        field_map json__ "ProvisionedProductName"
           ProvisionedProductNameOrArn.of_json in
       make ?retainPhysicalResources ?acceptLanguage ?ignoreErrors
         ~terminateToken ?provisionedProductId ?provisionedProductName ()
@@ -9467,12 +10352,12 @@ module SearchProvisionedProductsOutput =
           (Xml.child xml_arg0 "ProvisionedProducts") in
       make ?nextPageToken ?totalResultsCount ?provisionedProducts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let totalResultsCount =
-        field_map json "TotalResultsCount" TotalResultsCount.of_json in
+        field_map json__ "TotalResultsCount" TotalResultsCount.of_json in
       let provisionedProducts =
-        field_map json "ProvisionedProducts"
+        field_map json__ "ProvisionedProducts"
           ProvisionedProductAttributes.of_json in
       make ?nextPageToken ?totalResultsCount ?provisionedProducts ()
     let to_json v = composed_to_json to_value v
@@ -9483,14 +10368,13 @@ module SearchProvisionedProductsInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       accessLevelFilter: AccessLevelFilter.t option
         [@ocaml.doc
-          "The access level to use to obtain results. The default is User."];
+          "The access level to use to obtain results. The default is Account."];
       filters: ProvisionedProductFilters.t option
         [@ocaml.doc
-          "The search filters. When the key is SearchQuery, the searchable fields are arn, createdTime, id, lastRecordId, idempotencyToken, name, physicalId, productId, provisioningArtifact, type, status, tags, userArn, userArnSession, lastProvisioningRecordId, lastSuccessfulProvisioningRecordId, productName, and provisioningArtifactName. Example: \"SearchQuery\":\\[\"status:AVAILABLE\"\\]"];
+          "The search filters. When the key is SearchQuery, the searchable fields are arn, createdTime, id, lastRecordId, idempotencyToken, name, physicalId, productId, provisioningArtifactId, type, status, tags, userArn, userArnSession, lastProvisioningRecordId, lastSuccessfulProvisioningRecordId, productName, and provisioningArtifactName. Example: \"SearchQuery\":\\[\"status:AVAILABLE\"\\]"];
       sortBy: SortField.t option
         [@ocaml.doc
           "The sort field. If no value is specified, the results are not sorted. The valid values are arn, id, name, and lastRecordId."];
@@ -9556,18 +10440,18 @@ module SearchProvisionedProductsInput =
       make ?pageToken ?pageSize ?sortOrder ?sortBy ?filters
         ?accessLevelFilter ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
       let pageSize =
-        field_map json "PageSize" SearchProvisionedProductsPageSize.of_json in
-      let sortOrder = field_map json "SortOrder" SortOrder.of_json in
-      let sortBy = field_map json "SortBy" SortField.of_json in
+        field_map json__ "PageSize" SearchProvisionedProductsPageSize.of_json in
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" SortField.of_json in
       let filters =
-        field_map json "Filters" ProvisionedProductFilters.of_json in
+        field_map json__ "Filters" ProvisionedProductFilters.of_json in
       let accessLevelFilter =
-        field_map json "AccessLevelFilter" AccessLevelFilter.of_json in
+        field_map json__ "AccessLevelFilter" AccessLevelFilter.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageToken ?pageSize ?sortOrder ?sortBy ?filters
         ?accessLevelFilter ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
@@ -9638,13 +10522,13 @@ module SearchProductsOutput =
           (Xml.child xml_arg0 "ProductViewSummaries") in
       make ?nextPageToken ?productViewAggregations ?productViewSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let productViewAggregations =
-        field_map json "ProductViewAggregations"
+        field_map json__ "ProductViewAggregations"
           ProductViewAggregations.of_json in
       let productViewSummaries =
-        field_map json "ProductViewSummaries" ProductViewSummaries.of_json in
+        field_map json__ "ProductViewSummaries" ProductViewSummaries.of_json in
       make ?nextPageToken ?productViewAggregations ?productViewSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9654,8 +10538,7 @@ module SearchProductsInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       filters: ProductViewFilters.t option
         [@ocaml.doc
           "The search filters. If no search filters are specified, the output includes all products to which the caller has access."];
@@ -9714,14 +10597,14 @@ module SearchProductsInput =
       make ?pageToken ?sortOrder ?sortBy ?pageSize ?filters ?acceptLanguage
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let sortOrder = field_map json "SortOrder" SortOrder.of_json in
-      let sortBy = field_map json "SortBy" ProductViewSortBy.of_json in
-      let pageSize = field_map json "PageSize" PageSizeMax100.of_json in
-      let filters = field_map json "Filters" ProductViewFilters.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" ProductViewSortBy.of_json in
+      let pageSize = field_map json__ "PageSize" PageSizeMax100.of_json in
+      let filters = field_map json__ "Filters" ProductViewFilters.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageToken ?sortOrder ?sortBy ?pageSize ?filters ?acceptLanguage
         ()
     let to_json v = composed_to_json to_value v
@@ -9789,10 +10672,10 @@ module SearchProductsAsAdminOutput =
           (Xml.child xml_arg0 "ProductViewDetails") in
       make ?nextPageToken ?productViewDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let productViewDetails =
-        field_map json "ProductViewDetails" ProductViewDetails.of_json in
+        field_map json__ "ProductViewDetails" ProductViewDetails.of_json in
       make ?nextPageToken ?productViewDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9802,8 +10685,7 @@ module SearchProductsAsAdminInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       portfolioId: Id.t option [@ocaml.doc "The portfolio identifier."];
       filters: ProductViewFilters.t option
         [@ocaml.doc
@@ -9877,17 +10759,17 @@ module SearchProductsAsAdminInput =
       make ?productSource ?pageSize ?pageToken ?sortOrder ?sortBy ?filters
         ?portfolioId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let productSource =
-        field_map json "ProductSource" ProductSource.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let sortOrder = field_map json "SortOrder" SortOrder.of_json in
-      let sortBy = field_map json "SortBy" ProductViewSortBy.of_json in
-      let filters = field_map json "Filters" ProductViewFilters.of_json in
-      let portfolioId = field_map json "PortfolioId" Id.of_json in
+        field_map json__ "ProductSource" ProductSource.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" ProductViewSortBy.of_json in
+      let filters = field_map json__ "Filters" ProductViewFilters.of_json in
+      let portfolioId = field_map json__ "PortfolioId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?productSource ?pageSize ?pageToken ?sortOrder ?sortBy ?filters
         ?portfolioId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
@@ -9947,10 +10829,10 @@ module ScanProvisionedProductsOutput =
           (Xml.child xml_arg0 "ProvisionedProducts") in
       make ?nextPageToken ?provisionedProducts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let provisionedProducts =
-        field_map json "ProvisionedProducts"
+        field_map json__ "ProvisionedProducts"
           ProvisionedProductDetails.of_json in
       make ?nextPageToken ?provisionedProducts ()
     let to_json v = composed_to_json to_value v
@@ -9961,8 +10843,7 @@ module ScanProvisionedProductsInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       accessLevelFilter: AccessLevelFilter.t option
         [@ocaml.doc
           "The access level to use to obtain results. The default is User."];
@@ -9999,13 +10880,13 @@ module ScanProvisionedProductsInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ?accessLevelFilter ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
       let accessLevelFilter =
-        field_map json "AccessLevelFilter" AccessLevelFilter.of_json in
+        field_map json__ "AccessLevelFilter" AccessLevelFilter.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageToken ?pageSize ?accessLevelFilter ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10054,8 +10935,7 @@ module RejectPortfolioShareInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       portfolioId: Id.t [@ocaml.doc "The portfolio identifier."];
       portfolioShareType: PortfolioShareType.t option
         [@ocaml.doc
@@ -10084,12 +10964,12 @@ module RejectPortfolioShareInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?portfolioShareType ~portfolioId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let portfolioShareType =
-        field_map json "PortfolioShareType" PortfolioShareType.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
+        field_map json__ "PortfolioShareType" PortfolioShareType.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?portfolioShareType ~portfolioId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Rejects an offer to share the specified portfolio."]
@@ -10159,19 +11039,18 @@ module ProvisionProductOutput =
           (Xml.child xml_arg0 "RecordDetail") in
       make ?recordDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recordDetail = field_map json "RecordDetail" RecordDetail.of_json in
+    let of_json json__ =
+      let recordDetail = field_map json__ "RecordDetail" RecordDetail.of_json in
       make ?recordDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provisions the specified product. A provisioned product is a resourced instance of a product. For example, provisioning a product based on a CloudFormation template launches a CloudFormation stack and its underlying resources. You can check the status of this request using DescribeRecord. If the request contains a tag key with an empty list of values, there is a tag conflict for that key. Do not include conflicted keys as tags, or this causes the error \"Parameter validation failed: Missing required parameter in Tags\\[N\\]:Value\"."]
+       "Provisions the specified product. A provisioned product is a resourced instance of a product. For example, provisioning a product that's based on an CloudFormation template launches an CloudFormation stack and its underlying resources. You can check the status of this request using DescribeRecord. If the request contains a tag key with an empty list of values, there's a tag conflict for that key. Don't include conflicted keys as tags, or this will cause the error \"Parameter validation failed: Missing required parameter in Tags\\[N\\]:Value\". When provisioning a product that's been added to a portfolio, you must grant your user, group, or role access to the portfolio. For more information, see Granting users access in the Service Catalog User Guide."]
 module ProvisionProductInput =
   struct
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       productId: Id.t option
         [@ocaml.doc
           "The product identifier. You must provide the name or ID, but not both."];
@@ -10192,7 +11071,7 @@ module ProvisionProductInput =
           "The name of the path. You must provide the name or ID, but not both."];
       provisionedProductName: ProvisionedProductName.t
         [@ocaml.doc
-          "A user-friendly name for the provisioned product. This value must be unique for the AWS account and cannot be updated after the product is provisioned."];
+          "A user-friendly name for the provisioned product. This value must be unique for the Amazon Web Services account and cannot be updated after the product is provisioned."];
       provisioningParameters: ProvisioningParameters.t option
         [@ocaml.doc
           "Parameters specified by the administrator that are required for provisioning the product."];
@@ -10305,39 +11184,434 @@ module ProvisionProductInput =
         ?provisioningArtifactName ?provisioningArtifactId ?productName
         ?productId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionToken =
-        field_map_exn json "ProvisionToken" IdempotencyToken.of_json in
+        field_map_exn json__ "ProvisionToken" IdempotencyToken.of_json in
       let notificationArns =
-        field_map json "NotificationArns" NotificationArns.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "NotificationArns" NotificationArns.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let provisioningPreferences =
-        field_map json "ProvisioningPreferences"
+        field_map json__ "ProvisioningPreferences"
           ProvisioningPreferences.of_json in
       let provisioningParameters =
-        field_map json "ProvisioningParameters"
+        field_map json__ "ProvisioningParameters"
           ProvisioningParameters.of_json in
       let provisionedProductName =
-        field_map_exn json "ProvisionedProductName"
+        field_map_exn json__ "ProvisionedProductName"
           ProvisionedProductName.of_json in
-      let pathName = field_map json "PathName" PortfolioDisplayName.of_json in
-      let pathId = field_map json "PathId" Id.of_json in
+      let pathName = field_map json__ "PathName" PortfolioDisplayName.of_json in
+      let pathId = field_map json__ "PathId" Id.of_json in
       let provisioningArtifactName =
-        field_map json "ProvisioningArtifactName"
+        field_map json__ "ProvisioningArtifactName"
           ProvisioningArtifactName.of_json in
       let provisioningArtifactId =
-        field_map json "ProvisioningArtifactId" Id.of_json in
-      let productName = field_map json "ProductName" ProductViewName.of_json in
-      let productId = field_map json "ProductId" Id.of_json in
+        field_map json__ "ProvisioningArtifactId" Id.of_json in
+      let productName =
+        field_map json__ "ProductName" ProductViewName.of_json in
+      let productId = field_map json__ "ProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~provisionToken ?notificationArns ?tags ?provisioningPreferences
         ?provisioningParameters ~provisionedProductName ?pathName ?pathId
         ?provisioningArtifactName ?provisioningArtifactId ?productName
         ?productId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provisions the specified product. A provisioned product is a resourced instance of a product. For example, provisioning a product based on a CloudFormation template launches a CloudFormation stack and its underlying resources. You can check the status of this request using DescribeRecord. If the request contains a tag key with an empty list of values, there is a tag conflict for that key. Do not include conflicted keys as tags, or this causes the error \"Parameter validation failed: Missing required parameter in Tags\\[N\\]:Value\"."]
+       "Provisions the specified product. A provisioned product is a resourced instance of a product. For example, provisioning a product that's based on an CloudFormation template launches an CloudFormation stack and its underlying resources. You can check the status of this request using DescribeRecord. If the request contains a tag key with an empty list of values, there's a tag conflict for that key. Don't include conflicted keys as tags, or this will cause the error \"Parameter validation failed: Missing required parameter in Tags\\[N\\]:Value\". When provisioning a product that's been added to a portfolio, you must grant your user, group, or role access to the portfolio. For more information, see Granting users access in the Service Catalog User Guide."]
+module NotifyUpdateProvisionedProductEngineWorkflowResultOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidParametersException of InvalidParametersException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidParametersException" ->
+          `InvalidParametersException
+            (InvalidParametersException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParametersException" ->
+          `InvalidParametersException (InvalidParametersException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParametersException e ->
+          `Assoc
+            [("error", (`String "InvalidParametersException"));
+            ("details", (InvalidParametersException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Notifies the result of the update engine execution."]
+module NotifyUpdateProvisionedProductEngineWorkflowResultInput =
+  struct
+    type nonrec t =
+      {
+      workflowToken: EngineWorkflowToken.t
+        [@ocaml.doc
+          "The encrypted contents of the update engine execution payload that Service Catalog sends after the Terraform product update workflow starts."];
+      recordId: Id.t [@ocaml.doc "The identifier of the record."];
+      status: EngineWorkflowStatus.t
+        [@ocaml.doc "The status of the update engine execution."];
+      failureReason: EngineWorkflowFailureReason.t option
+        [@ocaml.doc "The reason why the update engine execution failed."];
+      outputs: RecordOutputs.t option
+        [@ocaml.doc "The output of the update engine execution."];
+      idempotencyToken: IdempotencyToken.t
+        [@ocaml.doc
+          "The idempotency token that identifies the update engine execution."]}
+    let context_ = "NotifyUpdateProvisionedProductEngineWorkflowResultInput"
+    let make ?failureReason =
+      fun ?outputs ->
+        fun ~workflowToken ->
+          fun ~recordId ->
+            fun ~status ->
+              fun ~idempotencyToken ->
+                fun () ->
+                  {
+                    failureReason;
+                    outputs;
+                    workflowToken;
+                    recordId;
+                    status;
+                    idempotencyToken
+                  }
+    let to_value x =
+      structure_to_value
+        [("WorkflowToken",
+           (Some (EngineWorkflowToken.to_value x.workflowToken)));
+        ("RecordId", (Some (Id.to_value x.recordId)));
+        ("Status", (Some (EngineWorkflowStatus.to_value x.status)));
+        ("FailureReason",
+          (Option.map x.failureReason ~f:EngineWorkflowFailureReason.to_value));
+        ("Outputs", (Option.map x.outputs ~f:RecordOutputs.to_value));
+        ("IdempotencyToken",
+          (Some (IdempotencyToken.to_value x.idempotencyToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let idempotencyToken =
+        IdempotencyToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdempotencyToken") in
+      let outputs =
+        (Option.map ~f:RecordOutputs.of_xml) (Xml.child xml_arg0 "Outputs") in
+      let failureReason =
+        (Option.map ~f:EngineWorkflowFailureReason.of_xml)
+          (Xml.child xml_arg0 "FailureReason") in
+      let status =
+        EngineWorkflowStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+      let recordId =
+        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RecordId") in
+      let workflowToken =
+        EngineWorkflowToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkflowToken") in
+      make ~idempotencyToken ?outputs ?failureReason ~status ~recordId
+        ~workflowToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let idempotencyToken =
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let outputs = field_map json__ "Outputs" RecordOutputs.of_json in
+      let failureReason =
+        field_map json__ "FailureReason" EngineWorkflowFailureReason.of_json in
+      let status = field_map_exn json__ "Status" EngineWorkflowStatus.of_json in
+      let recordId = field_map_exn json__ "RecordId" Id.of_json in
+      let workflowToken =
+        field_map_exn json__ "WorkflowToken" EngineWorkflowToken.of_json in
+      make ~idempotencyToken ?outputs ?failureReason ~status ~recordId
+        ~workflowToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Notifies the result of the update engine execution."]
+module NotifyTerminateProvisionedProductEngineWorkflowResultOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidParametersException of InvalidParametersException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidParametersException" ->
+          `InvalidParametersException
+            (InvalidParametersException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParametersException" ->
+          `InvalidParametersException (InvalidParametersException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParametersException e ->
+          `Assoc
+            [("error", (`String "InvalidParametersException"));
+            ("details", (InvalidParametersException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Notifies the result of the terminate engine execution."]
+module NotifyTerminateProvisionedProductEngineWorkflowResultInput =
+  struct
+    type nonrec t =
+      {
+      workflowToken: EngineWorkflowToken.t
+        [@ocaml.doc
+          "The encrypted contents of the terminate engine execution payload that Service Catalog sends after the Terraform product terminate workflow starts."];
+      recordId: Id.t [@ocaml.doc "The identifier of the record."];
+      status: EngineWorkflowStatus.t
+        [@ocaml.doc "The status of the terminate engine execution."];
+      failureReason: EngineWorkflowFailureReason.t option
+        [@ocaml.doc "The reason why the terminate engine execution failed."];
+      idempotencyToken: IdempotencyToken.t
+        [@ocaml.doc
+          "The idempotency token that identifies the terminate engine execution."]}
+    let context_ =
+      "NotifyTerminateProvisionedProductEngineWorkflowResultInput"
+    let make ?failureReason =
+      fun ~workflowToken ->
+        fun ~recordId ->
+          fun ~status ->
+            fun ~idempotencyToken ->
+              fun () ->
+                {
+                  failureReason;
+                  workflowToken;
+                  recordId;
+                  status;
+                  idempotencyToken
+                }
+    let to_value x =
+      structure_to_value
+        [("WorkflowToken",
+           (Some (EngineWorkflowToken.to_value x.workflowToken)));
+        ("RecordId", (Some (Id.to_value x.recordId)));
+        ("Status", (Some (EngineWorkflowStatus.to_value x.status)));
+        ("FailureReason",
+          (Option.map x.failureReason ~f:EngineWorkflowFailureReason.to_value));
+        ("IdempotencyToken",
+          (Some (IdempotencyToken.to_value x.idempotencyToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let idempotencyToken =
+        IdempotencyToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdempotencyToken") in
+      let failureReason =
+        (Option.map ~f:EngineWorkflowFailureReason.of_xml)
+          (Xml.child xml_arg0 "FailureReason") in
+      let status =
+        EngineWorkflowStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+      let recordId =
+        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RecordId") in
+      let workflowToken =
+        EngineWorkflowToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkflowToken") in
+      make ~idempotencyToken ?failureReason ~status ~recordId ~workflowToken
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let idempotencyToken =
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let failureReason =
+        field_map json__ "FailureReason" EngineWorkflowFailureReason.of_json in
+      let status = field_map_exn json__ "Status" EngineWorkflowStatus.of_json in
+      let recordId = field_map_exn json__ "RecordId" Id.of_json in
+      let workflowToken =
+        field_map_exn json__ "WorkflowToken" EngineWorkflowToken.of_json in
+      make ~idempotencyToken ?failureReason ~status ~recordId ~workflowToken
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Notifies the result of the terminate engine execution."]
+module NotifyProvisionProductEngineWorkflowResultOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidParametersException of InvalidParametersException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidParametersException" ->
+          `InvalidParametersException
+            (InvalidParametersException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParametersException" ->
+          `InvalidParametersException (InvalidParametersException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParametersException e ->
+          `Assoc
+            [("error", (`String "InvalidParametersException"));
+            ("details", (InvalidParametersException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Notifies the result of the provisioning engine execution."]
+module NotifyProvisionProductEngineWorkflowResultInput =
+  struct
+    type nonrec t =
+      {
+      workflowToken: EngineWorkflowToken.t
+        [@ocaml.doc
+          "The encrypted contents of the provisioning engine execution payload that Service Catalog sends after the Terraform product provisioning workflow starts."];
+      recordId: Id.t [@ocaml.doc "The identifier of the record."];
+      status: EngineWorkflowStatus.t
+        [@ocaml.doc "The status of the provisioning engine execution."];
+      failureReason: EngineWorkflowFailureReason.t option
+        [@ocaml.doc
+          "The reason why the provisioning engine execution failed."];
+      resourceIdentifier: EngineWorkflowResourceIdentifier.t option
+        [@ocaml.doc
+          "The ID for the provisioned product resources that are part of a resource group."];
+      outputs: RecordOutputs.t option
+        [@ocaml.doc "The output of the provisioning engine execution."];
+      idempotencyToken: IdempotencyToken.t
+        [@ocaml.doc
+          "The idempotency token that identifies the provisioning engine execution."]}
+    let context_ = "NotifyProvisionProductEngineWorkflowResultInput"
+    let make ?failureReason =
+      fun ?resourceIdentifier ->
+        fun ?outputs ->
+          fun ~workflowToken ->
+            fun ~recordId ->
+              fun ~status ->
+                fun ~idempotencyToken ->
+                  fun () ->
+                    {
+                      failureReason;
+                      resourceIdentifier;
+                      outputs;
+                      workflowToken;
+                      recordId;
+                      status;
+                      idempotencyToken
+                    }
+    let to_value x =
+      structure_to_value
+        [("WorkflowToken",
+           (Some (EngineWorkflowToken.to_value x.workflowToken)));
+        ("RecordId", (Some (Id.to_value x.recordId)));
+        ("Status", (Some (EngineWorkflowStatus.to_value x.status)));
+        ("FailureReason",
+          (Option.map x.failureReason ~f:EngineWorkflowFailureReason.to_value));
+        ("ResourceIdentifier",
+          (Option.map x.resourceIdentifier
+             ~f:EngineWorkflowResourceIdentifier.to_value));
+        ("Outputs", (Option.map x.outputs ~f:RecordOutputs.to_value));
+        ("IdempotencyToken",
+          (Some (IdempotencyToken.to_value x.idempotencyToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let idempotencyToken =
+        IdempotencyToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdempotencyToken") in
+      let outputs =
+        (Option.map ~f:RecordOutputs.of_xml) (Xml.child xml_arg0 "Outputs") in
+      let resourceIdentifier =
+        (Option.map ~f:EngineWorkflowResourceIdentifier.of_xml)
+          (Xml.child xml_arg0 "ResourceIdentifier") in
+      let failureReason =
+        (Option.map ~f:EngineWorkflowFailureReason.of_xml)
+          (Xml.child xml_arg0 "FailureReason") in
+      let status =
+        EngineWorkflowStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+      let recordId =
+        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RecordId") in
+      let workflowToken =
+        EngineWorkflowToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkflowToken") in
+      make ~idempotencyToken ?outputs ?resourceIdentifier ?failureReason
+        ~status ~recordId ~workflowToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let idempotencyToken =
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let outputs = field_map json__ "Outputs" RecordOutputs.of_json in
+      let resourceIdentifier =
+        field_map json__ "ResourceIdentifier"
+          EngineWorkflowResourceIdentifier.of_json in
+      let failureReason =
+        field_map json__ "FailureReason" EngineWorkflowFailureReason.of_json in
+      let status = field_map_exn json__ "Status" EngineWorkflowStatus.of_json in
+      let recordId = field_map_exn json__ "RecordId" Id.of_json in
+      let workflowToken =
+        field_map_exn json__ "WorkflowToken" EngineWorkflowToken.of_json in
+      make ~idempotencyToken ?outputs ?resourceIdentifier ?failureReason
+        ~status ~recordId ~workflowToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Notifies the result of the provisioning engine execution."]
 module ListTagOptionsOutput =
   struct
     type nonrec t =
@@ -10402,10 +11676,10 @@ module ListTagOptionsOutput =
           (Xml.child xml_arg0 "TagOptionDetails") in
       make ?pageToken ?tagOptionDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
       let tagOptionDetails =
-        field_map json "TagOptionDetails" TagOptionDetails.of_json in
+        field_map json__ "TagOptionDetails" TagOptionDetails.of_json in
       make ?pageToken ?tagOptionDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the specified TagOptions or all TagOptions."]
@@ -10441,10 +11715,10 @@ module ListTagOptionsInput =
           (Xml.child xml_arg0 "Filters") in
       make ?pageToken ?pageSize ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let filters = field_map json "Filters" ListTagOptionsFilters.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let filters = field_map json__ "Filters" ListTagOptionsFilters.of_json in
       make ?pageToken ?pageSize ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the specified TagOptions or all TagOptions."]
@@ -10510,21 +11784,20 @@ module ListStackInstancesForProvisionedProductOutput =
           (Xml.child xml_arg0 "StackInstances") in
       make ?nextPageToken ?stackInstances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let stackInstances =
-        field_map json "StackInstances" StackInstances.of_json in
+        field_map json__ "StackInstances" StackInstances.of_json in
       make ?nextPageToken ?stackInstances ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns summary information about stack instances that are associated with the specified CFN_STACKSET type provisioned product. You can filter for stack instances that are associated with a specific AWS account name or region."]
+       "Returns summary information about stack instances that are associated with the specified CFN_STACKSET type provisioned product. You can filter for stack instances that are associated with a specific Amazon Web Services account name or Region."]
 module ListStackInstancesForProvisionedProductInput =
   struct
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       provisionedProductId: Id.t
         [@ocaml.doc "The identifier of the provisioned product."];
       pageToken: PageToken.t option
@@ -10560,17 +11833,17 @@ module ListStackInstancesForProvisionedProductInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageSize ?pageToken ~provisionedProductId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let pageToken = field_map json "PageToken" PageToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
       let provisionedProductId =
-        field_map_exn json "ProvisionedProductId" Id.of_json in
+        field_map_exn json__ "ProvisionedProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageSize ?pageToken ~provisionedProductId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns summary information about stack instances that are associated with the specified CFN_STACKSET type provisioned product. You can filter for stack instances that are associated with a specific AWS account name or region."]
+       "Returns summary information about stack instances that are associated with the specified CFN_STACKSET type provisioned product. You can filter for stack instances that are associated with a specific Amazon Web Services account name or Region."]
 module ListServiceActionsOutput =
   struct
     type nonrec t =
@@ -10627,10 +11900,10 @@ module ListServiceActionsOutput =
           (Xml.child xml_arg0 "ServiceActionSummaries") in
       make ?nextPageToken ?serviceActionSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let serviceActionSummaries =
-        field_map json "ServiceActionSummaries"
+        field_map json__ "ServiceActionSummaries"
           ServiceActionSummaries.of_json in
       make ?nextPageToken ?serviceActionSummaries ()
     let to_json v = composed_to_json to_value v
@@ -10640,8 +11913,7 @@ module ListServiceActionsInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       pageSize: PageSize.t option
         [@ocaml.doc "The maximum number of items to return with this call."];
       pageToken: PageToken.t option
@@ -10667,11 +11939,11 @@ module ListServiceActionsInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageToken ?pageSize ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all self-service actions."]
@@ -10740,10 +12012,10 @@ module ListServiceActionsForProvisioningArtifactOutput =
           (Xml.child xml_arg0 "ServiceActionSummaries") in
       make ?nextPageToken ?serviceActionSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let serviceActionSummaries =
-        field_map json "ServiceActionSummaries"
+        field_map json__ "ServiceActionSummaries"
           ServiceActionSummaries.of_json in
       make ?nextPageToken ?serviceActionSummaries ()
     let to_json v = composed_to_json to_value v
@@ -10765,8 +12037,7 @@ module ListServiceActionsForProvisioningArtifactInput =
         [@ocaml.doc
           "The page token for the next set of results. To retrieve the first set of results, use null."];
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"]}
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"]}
     let context_ = "ListServiceActionsForProvisioningArtifactInput"
     let make ?pageSize =
       fun ?pageToken ->
@@ -10807,14 +12078,14 @@ module ListServiceActionsForProvisioningArtifactInput =
       make ?acceptLanguage ?pageToken ?pageSize ~provisioningArtifactId
         ~productId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
       let provisioningArtifactId =
-        field_map_exn json "ProvisioningArtifactId" Id.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
+        field_map_exn json__ "ProvisioningArtifactId" Id.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
       make ?acceptLanguage ?pageToken ?pageSize ~provisioningArtifactId
         ~productId ()
     let to_json v = composed_to_json to_value v
@@ -10893,10 +12164,10 @@ module ListResourcesForTagOptionOutput =
           (Xml.child xml_arg0 "ResourceDetails") in
       make ?pageToken ?resourceDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
       let resourceDetails =
-        field_map json "ResourceDetails" ResourceDetails.of_json in
+        field_map json__ "ResourceDetails" ResourceDetails.of_json in
       make ?pageToken ?resourceDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10940,11 +12211,12 @@ module ListResourcesForTagOptionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TagOptionId") in
       make ?pageToken ?pageSize ?resourceType ~tagOptionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let tagOptionId = field_map_exn json "TagOptionId" TagOptionId.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let tagOptionId =
+        field_map_exn json__ "TagOptionId" TagOptionId.of_json in
       make ?pageToken ?pageSize ?resourceType ~tagOptionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11002,10 +12274,10 @@ module ListRecordHistoryOutput =
           (Xml.child xml_arg0 "RecordDetails") in
       make ?nextPageToken ?recordDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let recordDetails =
-        field_map json "RecordDetails" RecordDetails.of_json in
+        field_map json__ "RecordDetails" RecordDetails.of_json in
       make ?nextPageToken ?recordDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the specified requests or all performed requests."]
@@ -11014,8 +12286,7 @@ module ListRecordHistoryInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       accessLevelFilter: AccessLevelFilter.t option
         [@ocaml.doc
           "The access level to use to obtain results. The default is User."];
@@ -11068,15 +12339,15 @@ module ListRecordHistoryInput =
       make ?pageToken ?pageSize ?searchFilter ?accessLevelFilter
         ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
       let searchFilter =
-        field_map json "SearchFilter" ListRecordHistorySearchFilter.of_json in
+        field_map json__ "SearchFilter" ListRecordHistorySearchFilter.of_json in
       let accessLevelFilter =
-        field_map json "AccessLevelFilter" AccessLevelFilter.of_json in
+        field_map json__ "AccessLevelFilter" AccessLevelFilter.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageToken ?pageSize ?searchFilter ?accessLevelFilter
         ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
@@ -11145,10 +12416,10 @@ module ListProvisioningArtifactsOutput =
           (Xml.child xml_arg0 "ProvisioningArtifactDetails") in
       make ?nextPageToken ?provisioningArtifactDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let provisioningArtifactDetails =
-        field_map json "ProvisioningArtifactDetails"
+        field_map json__ "ProvisioningArtifactDetails"
           ProvisioningArtifactDetails.of_json in
       make ?nextPageToken ?provisioningArtifactDetails ()
     let to_json v = composed_to_json to_value v
@@ -11159,8 +12430,7 @@ module ListProvisioningArtifactsInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       productId: Id.t [@ocaml.doc "The product identifier."]}
     let context_ = "ListProvisioningArtifactsInput"
     let make ?acceptLanguage =
@@ -11179,10 +12449,10 @@ module ListProvisioningArtifactsInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~productId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let productId = field_map_exn json "ProductId" Id.of_json in
+    let of_json json__ =
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~productId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11252,10 +12522,10 @@ module ListProvisioningArtifactsForServiceActionOutput =
           (Xml.child xml_arg0 "ProvisioningArtifactViews") in
       make ?nextPageToken ?provisioningArtifactViews ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let provisioningArtifactViews =
-        field_map json "ProvisioningArtifactViews"
+        field_map json__ "ProvisioningArtifactViews"
           ProvisioningArtifactViews.of_json in
       make ?nextPageToken ?provisioningArtifactViews ()
     let to_json v = composed_to_json to_value v
@@ -11274,8 +12544,7 @@ module ListProvisioningArtifactsForServiceActionInput =
         [@ocaml.doc
           "The page token for the next set of results. To retrieve the first set of results, use null."];
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"]}
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"]}
     let context_ = "ListProvisioningArtifactsForServiceActionInput"
     let make ?pageSize =
       fun ?pageToken ->
@@ -11304,12 +12573,12 @@ module ListProvisioningArtifactsForServiceActionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceActionId") in
       make ?acceptLanguage ?pageToken ?pageSize ~serviceActionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let serviceActionId = field_map_exn json "ServiceActionId" Id.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let serviceActionId = field_map_exn json__ "ServiceActionId" Id.of_json in
       make ?acceptLanguage ?pageToken ?pageSize ~serviceActionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11378,10 +12647,10 @@ module ListProvisionedProductPlansOutput =
           (Xml.child xml_arg0 "ProvisionedProductPlans") in
       make ?nextPageToken ?provisionedProductPlans ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let provisionedProductPlans =
-        field_map json "ProvisionedProductPlans"
+        field_map json__ "ProvisionedProductPlans"
           ProvisionedProductPlans.of_json in
       make ?nextPageToken ?provisionedProductPlans ()
     let to_json v = composed_to_json to_value v
@@ -11392,8 +12661,7 @@ module ListProvisionedProductPlansInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       provisionProductId: Id.t option [@ocaml.doc "The product identifier."];
       pageSize: PageSize.t option
         [@ocaml.doc "The maximum number of items to return with this call."];
@@ -11443,14 +12711,15 @@ module ListProvisionedProductPlansInput =
       make ?accessLevelFilter ?pageToken ?pageSize ?provisionProductId
         ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessLevelFilter =
-        field_map json "AccessLevelFilter" AccessLevelFilter.of_json in
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let provisionProductId = field_map json "ProvisionProductId" Id.of_json in
+        field_map json__ "AccessLevelFilter" AccessLevelFilter.of_json in
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let provisionProductId =
+        field_map json__ "ProvisionProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?accessLevelFilter ?pageToken ?pageSize ?provisionProductId
         ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
@@ -11462,7 +12731,7 @@ module ListPrincipalsForPortfolioOutput =
       {
       principals: Principals.t option
         [@ocaml.doc
-          "The IAM principals (users or roles) associated with the portfolio."];
+          "The PrincipalARNs and corresponding PrincipalTypes associated with the portfolio."];
       nextPageToken: PageToken.t option
         [@ocaml.doc
           "The page token to use to retrieve the next set of results. If there are no additional results, this value is null."]}
@@ -11517,20 +12786,19 @@ module ListPrincipalsForPortfolioOutput =
         (Option.map ~f:Principals.of_xml) (Xml.child xml_arg0 "Principals") in
       make ?nextPageToken ?principals ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
-      let principals = field_map json "Principals" Principals.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
+      let principals = field_map json__ "Principals" Principals.of_json in
       make ?nextPageToken ?principals ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all principal ARNs associated with the specified portfolio."]
+       "Lists all PrincipalARNs and corresponding PrincipalTypes associated with the specified portfolio."]
 module ListPrincipalsForPortfolioInput =
   struct
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       portfolioId: Id.t [@ocaml.doc "The portfolio identifier."];
       pageSize: PageSize.t option
         [@ocaml.doc "The maximum number of items to return with this call."];
@@ -11563,16 +12831,16 @@ module ListPrincipalsForPortfolioInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ~portfolioId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageToken ?pageSize ~portfolioId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all principal ARNs associated with the specified portfolio."]
+       "Lists all PrincipalARNs and corresponding PrincipalTypes associated with the specified portfolio."]
 module ListPortfoliosOutput =
   struct
     type nonrec t =
@@ -11626,10 +12894,10 @@ module ListPortfoliosOutput =
           (Xml.child xml_arg0 "PortfolioDetails") in
       make ?nextPageToken ?portfolioDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let portfolioDetails =
-        field_map json "PortfolioDetails" PortfolioDetails.of_json in
+        field_map json__ "PortfolioDetails" PortfolioDetails.of_json in
       make ?nextPageToken ?portfolioDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all portfolios in the catalog."]
@@ -11638,8 +12906,7 @@ module ListPortfoliosInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       pageToken: PageToken.t option
         [@ocaml.doc
           "The page token for the next set of results. To retrieve the first set of results, use null."];
@@ -11665,11 +12932,11 @@ module ListPortfoliosInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageSize ?pageToken ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSizeMax100.of_json in
-      let pageToken = field_map json "PageToken" PageToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSizeMax100.of_json in
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageSize ?pageToken ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all portfolios in the catalog."]
@@ -11735,10 +13002,10 @@ module ListPortfoliosForProductOutput =
           (Xml.child xml_arg0 "PortfolioDetails") in
       make ?nextPageToken ?portfolioDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let portfolioDetails =
-        field_map json "PortfolioDetails" PortfolioDetails.of_json in
+        field_map json__ "PortfolioDetails" PortfolioDetails.of_json in
       make ?nextPageToken ?portfolioDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11748,8 +13015,7 @@ module ListPortfoliosForProductInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       productId: Id.t [@ocaml.doc "The product identifier."];
       pageToken: PageToken.t option
         [@ocaml.doc
@@ -11782,12 +13048,12 @@ module ListPortfoliosForProductInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageSize ?pageToken ~productId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSizeMax100.of_json in
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSizeMax100.of_json in
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageSize ?pageToken ~productId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11798,7 +13064,7 @@ module ListPortfolioAccessOutput =
       {
       accountIds: AccountIds.t option
         [@ocaml.doc
-          "Information about the AWS accounts with access to the portfolio."];
+          "Information about the Amazon Web Services accounts with access to the portfolio."];
       nextPageToken: PageToken.t option
         [@ocaml.doc
           "The page token to use to retrieve the next set of results. If there are no additional results, this value is null."]}
@@ -11853,9 +13119,9 @@ module ListPortfolioAccessOutput =
         (Option.map ~f:AccountIds.of_xml) (Xml.child xml_arg0 "AccountIds") in
       make ?nextPageToken ?accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
-      let accountIds = field_map json "AccountIds" AccountIds.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
+      let accountIds = field_map json__ "AccountIds" AccountIds.of_json in
       make ?nextPageToken ?accountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11865,8 +13131,7 @@ module ListPortfolioAccessInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       portfolioId: Id.t [@ocaml.doc "The portfolio identifier."];
       organizationParentId: Id.t option
         [@ocaml.doc
@@ -11915,14 +13180,14 @@ module ListPortfolioAccessInput =
       make ?pageSize ?pageToken ?organizationParentId ~portfolioId
         ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSizeMax100.of_json in
-      let pageToken = field_map json "PageToken" PageToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSizeMax100.of_json in
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
       let organizationParentId =
-        field_map json "OrganizationParentId" Id.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
+        field_map json__ "OrganizationParentId" Id.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageSize ?pageToken ?organizationParentId ~portfolioId
         ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
@@ -12001,10 +13266,10 @@ module ListOrganizationPortfolioAccessOutput =
           (Xml.child xml_arg0 "OrganizationNodes") in
       make ?nextPageToken ?organizationNodes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let organizationNodes =
-        field_map json "OrganizationNodes" OrganizationNodes.of_json in
+        field_map json__ "OrganizationNodes" OrganizationNodes.of_json in
       make ?nextPageToken ?organizationNodes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12014,8 +13279,7 @@ module ListOrganizationPortfolioAccessInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       portfolioId: Id.t
         [@ocaml.doc
           "The portfolio identifier. For example, port-2abcdext3y5fk."];
@@ -12067,15 +13331,15 @@ module ListOrganizationPortfolioAccessInput =
       make ?pageSize ?pageToken ~organizationNodeType ~portfolioId
         ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let pageToken = field_map json "PageToken" PageToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
       let organizationNodeType =
-        field_map_exn json "OrganizationNodeType"
+        field_map_exn json__ "OrganizationNodeType"
           OrganizationNodeType.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageSize ?pageToken ~organizationNodeType ~portfolioId
         ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
@@ -12143,21 +13407,20 @@ module ListLaunchPathsOutput =
           (Xml.child xml_arg0 "LaunchPathSummaries") in
       make ?nextPageToken ?launchPathSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let launchPathSummaries =
-        field_map json "LaunchPathSummaries" LaunchPathSummaries.of_json in
+        field_map json__ "LaunchPathSummaries" LaunchPathSummaries.of_json in
       make ?nextPageToken ?launchPathSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the paths to the specified product. A path is how the user has access to a specified product, and is necessary when provisioning a product. A path also determines the constraints put on the product."]
+       "Lists the paths to the specified product. A path describes how the user gets access to a specified product and is necessary when provisioning a product. A path also determines the constraints that are put on a product. A path is dependent on a specific product, porfolio, and principal. When provisioning a product that's been added to a portfolio, you must grant your user, group, or role access to the portfolio. For more information, see Granting users access in the Service Catalog User Guide."]
 module ListLaunchPathsInput =
   struct
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       productId: Id.t [@ocaml.doc "The product identifier."];
       pageSize: PageSize.t option
         [@ocaml.doc "The maximum number of items to return with this call."];
@@ -12190,16 +13453,16 @@ module ListLaunchPathsInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ~productId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageToken ?pageSize ~productId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the paths to the specified product. A path is how the user has access to a specified product, and is necessary when provisioning a product. A path also determines the constraints put on the product."]
+       "Lists the paths to the specified product. A path describes how the user gets access to a specified product and is necessary when provisioning a product. A path also determines the constraints that are put on a product. A path is dependent on a specific product, porfolio, and principal. When provisioning a product that's been added to a portfolio, you must grant your user, group, or role access to the portfolio. For more information, see Granting users access in the Service Catalog User Guide."]
 module ListConstraintsForPortfolioOutput =
   struct
     type nonrec t =
@@ -12262,10 +13525,10 @@ module ListConstraintsForPortfolioOutput =
           (Xml.child xml_arg0 "ConstraintDetails") in
       make ?nextPageToken ?constraintDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let constraintDetails =
-        field_map json "ConstraintDetails" ConstraintDetails.of_json in
+        field_map json__ "ConstraintDetails" ConstraintDetails.of_json in
       make ?nextPageToken ?constraintDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12275,8 +13538,7 @@ module ListConstraintsForPortfolioInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       portfolioId: Id.t [@ocaml.doc "The portfolio identifier."];
       productId: Id.t option [@ocaml.doc "The product identifier."];
       pageSize: PageSize.t option
@@ -12316,13 +13578,13 @@ module ListConstraintsForPortfolioInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ?productId ~portfolioId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let productId = field_map json "ProductId" Id.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let productId = field_map json__ "ProductId" Id.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageToken ?pageSize ?productId ~portfolioId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12387,9 +13649,9 @@ module ListBudgetsForResourceOutput =
         (Option.map ~f:Budgets.of_xml) (Xml.child xml_arg0 "Budgets") in
       make ?nextPageToken ?budgets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
-      let budgets = field_map json "Budgets" Budgets.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
+      let budgets = field_map json__ "Budgets" Budgets.of_json in
       make ?nextPageToken ?budgets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12399,8 +13661,7 @@ module ListBudgetsForResourceInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       resourceId: Id.t [@ocaml.doc "The resource identifier."];
       pageSize: PageSize.t option
         [@ocaml.doc "The maximum number of items to return with this call."];
@@ -12433,12 +13694,12 @@ module ListBudgetsForResourceInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ~resourceId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let resourceId = field_map_exn json "ResourceId" Id.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageToken ?pageSize ~resourceId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12507,21 +13768,20 @@ module ListAcceptedPortfolioSharesOutput =
           (Xml.child xml_arg0 "PortfolioDetails") in
       make ?nextPageToken ?portfolioDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let portfolioDetails =
-        field_map json "PortfolioDetails" PortfolioDetails.of_json in
+        field_map json__ "PortfolioDetails" PortfolioDetails.of_json in
       make ?nextPageToken ?portfolioDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all portfolios for which sharing was accepted by this account."]
+       "Lists all imported portfolios for which account-to-account shares were accepted by this account. By specifying the PortfolioShareType, you can list portfolios for which organizational shares were accepted by this account."]
 module ListAcceptedPortfolioSharesInput =
   struct
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       pageToken: PageToken.t option
         [@ocaml.doc
           "The page token for the next set of results. To retrieve the first set of results, use null."];
@@ -12529,7 +13789,7 @@ module ListAcceptedPortfolioSharesInput =
         [@ocaml.doc "The maximum number of items to return with this call."];
       portfolioShareType: PortfolioShareType.t option
         [@ocaml.doc
-          "The type of shared portfolios to list. The default is to list imported portfolios. AWS_ORGANIZATIONS - List portfolios shared by the management account of your organization AWS_SERVICECATALOG - List default portfolios IMPORTED - List imported portfolios"]}
+          "The type of shared portfolios to list. The default is to list imported portfolios. AWS_ORGANIZATIONS - List portfolios accepted and shared via organizational sharing by the management account or delegated administrator of your organization. AWS_SERVICECATALOG - Deprecated type. IMPORTED - List imported portfolios that have been accepted and shared through account-to-account sharing."]}
     let make ?acceptLanguage =
       fun ?pageToken ->
         fun ?pageSize ->
@@ -12558,17 +13818,17 @@ module ListAcceptedPortfolioSharesInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?portfolioShareType ?pageSize ?pageToken ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let portfolioShareType =
-        field_map json "PortfolioShareType" PortfolioShareType.of_json in
-      let pageSize = field_map json "PageSize" PageSizeMax100.of_json in
-      let pageToken = field_map json "PageToken" PageToken.of_json in
+        field_map json__ "PortfolioShareType" PortfolioShareType.of_json in
+      let pageSize = field_map json__ "PageSize" PageSizeMax100.of_json in
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?portfolioShareType ?pageSize ?pageToken ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all portfolios for which sharing was accepted by this account."]
+       "Lists all imported portfolios for which account-to-account shares were accepted by this account. By specifying the PortfolioShareType, you can list portfolios for which organizational shares were accepted by this account."]
 module ImportAsProvisionedProductOutput =
   struct
     type nonrec t = {
@@ -12641,25 +13901,24 @@ module ImportAsProvisionedProductOutput =
           (Xml.child xml_arg0 "RecordDetail") in
       make ?recordDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recordDetail = field_map json "RecordDetail" RecordDetail.of_json in
+    let of_json json__ =
+      let recordDetail = field_map json__ "RecordDetail" RecordDetail.of_json in
       make ?recordDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Requests the import of a resource as a Service Catalog provisioned product that is associated to a Service Catalog product and provisioning artifact. Once imported, all supported Service Catalog governance actions are supported on the provisioned product. Resource import only supports CloudFormation stack ARNs. CloudFormation StackSets and non-root nested stacks are not supported. The CloudFormation stack must have one of the following statuses to be imported: CREATE_COMPLETE, UPDATE_COMPLETE, UPDATE_ROLLBACK_COMPLETE, IMPORT_COMPLETE, IMPORT_ROLLBACK_COMPLETE. Import of the resource requires that the CloudFormation stack template matches the associated Service Catalog product provisioning artifact. The user or role that performs this operation must have the cloudformation:GetTemplate and cloudformation:DescribeStacks IAM policy permissions."]
+       "Requests the import of a resource as an Service Catalog provisioned product that is associated to an Service Catalog product and provisioning artifact. Once imported, all supported governance actions are supported on the provisioned product. Resource import only supports CloudFormation stack ARNs. CloudFormation StackSets, and non-root nested stacks, are not supported. The CloudFormation stack must have one of the following statuses to be imported: CREATE_COMPLETE, UPDATE_COMPLETE, UPDATE_ROLLBACK_COMPLETE, IMPORT_COMPLETE, and IMPORT_ROLLBACK_COMPLETE. Import of the resource requires that the CloudFormation stack template matches the associated Service Catalog product provisioning artifact. When you import an existing CloudFormation stack into a portfolio, Service Catalog does not apply the product's associated constraints during the import process. Service Catalog applies the constraints after you call UpdateProvisionedProduct for the provisioned product. The user or role that performs this operation must have the cloudformation:GetTemplate and cloudformation:DescribeStacks IAM policy permissions. You can only import one provisioned product at a time. The product's CloudFormation stack must have the IMPORT_COMPLETE status before you import another."]
 module ImportAsProvisionedProductInput =
   struct
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       productId: Id.t [@ocaml.doc "The product identifier."];
       provisioningArtifactId: Id.t
         [@ocaml.doc "The identifier of the provisioning artifact."];
       provisionedProductName: ProvisionedProductName.t
         [@ocaml.doc
-          "The user-friendly name of the provisioned product. The value must be unique for the AWS account. The name cannot be updated after the product is provisioned."];
+          "The user-friendly name of the provisioned product. The value must be unique for the Amazon Web Services account. The name cannot be updated after the product is provisioned."];
       physicalId: PhysicalId.t
         [@ocaml.doc
           "The unique identifier of the resource to be imported. It only currently supports CloudFormation stack IDs."];
@@ -12716,23 +13975,23 @@ module ImportAsProvisionedProductInput =
       make ~idempotencyToken ~physicalId ~provisionedProductName
         ~provisioningArtifactId ~productId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
-      let physicalId = field_map_exn json "PhysicalId" PhysicalId.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let physicalId = field_map_exn json__ "PhysicalId" PhysicalId.of_json in
       let provisionedProductName =
-        field_map_exn json "ProvisionedProductName"
+        field_map_exn json__ "ProvisionedProductName"
           ProvisionedProductName.of_json in
       let provisioningArtifactId =
-        field_map_exn json "ProvisioningArtifactId" Id.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
+        field_map_exn json__ "ProvisioningArtifactId" Id.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~idempotencyToken ~physicalId ~provisionedProductName
         ~provisioningArtifactId ~productId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Requests the import of a resource as a Service Catalog provisioned product that is associated to a Service Catalog product and provisioning artifact. Once imported, all supported Service Catalog governance actions are supported on the provisioned product. Resource import only supports CloudFormation stack ARNs. CloudFormation StackSets and non-root nested stacks are not supported. The CloudFormation stack must have one of the following statuses to be imported: CREATE_COMPLETE, UPDATE_COMPLETE, UPDATE_ROLLBACK_COMPLETE, IMPORT_COMPLETE, IMPORT_ROLLBACK_COMPLETE. Import of the resource requires that the CloudFormation stack template matches the associated Service Catalog product provisioning artifact. The user or role that performs this operation must have the cloudformation:GetTemplate and cloudformation:DescribeStacks IAM policy permissions."]
+       "Requests the import of a resource as an Service Catalog provisioned product that is associated to an Service Catalog product and provisioning artifact. Once imported, all supported governance actions are supported on the provisioned product. Resource import only supports CloudFormation stack ARNs. CloudFormation StackSets, and non-root nested stacks, are not supported. The CloudFormation stack must have one of the following statuses to be imported: CREATE_COMPLETE, UPDATE_COMPLETE, UPDATE_ROLLBACK_COMPLETE, IMPORT_COMPLETE, and IMPORT_ROLLBACK_COMPLETE. Import of the resource requires that the CloudFormation stack template matches the associated Service Catalog product provisioning artifact. When you import an existing CloudFormation stack into a portfolio, Service Catalog does not apply the product's associated constraints during the import process. Service Catalog applies the constraints after you call UpdateProvisionedProduct for the provisioned product. The user or role that performs this operation must have the cloudformation:GetTemplate and cloudformation:DescribeStacks IAM policy permissions. You can only import one provisioned product at a time. The product's CloudFormation stack must have the IMPORT_COMPLETE status before you import another."]
 module GetProvisionedProductOutputsOutput =
   struct
     type nonrec t =
@@ -12794,9 +14053,9 @@ module GetProvisionedProductOutputsOutput =
         (Option.map ~f:RecordOutputs.of_xml) (Xml.child xml_arg0 "Outputs") in
       make ?nextPageToken ?outputs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
-      let outputs = field_map json "Outputs" RecordOutputs.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
+      let outputs = field_map json__ "Outputs" RecordOutputs.of_json in
       make ?nextPageToken ?outputs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12806,8 +14065,7 @@ module GetProvisionedProductOutputsInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       provisionedProductId: Id.t option
         [@ocaml.doc
           "The identifier of the provisioned product that you want the outputs from."];
@@ -12868,17 +14126,17 @@ module GetProvisionedProductOutputsInput =
       make ?pageToken ?pageSize ?outputKeys ?provisionedProductName
         ?provisionedProductId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let outputKeys = field_map json "OutputKeys" OutputKeys.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let outputKeys = field_map json__ "OutputKeys" OutputKeys.of_json in
       let provisionedProductName =
-        field_map json "ProvisionedProductName"
+        field_map json__ "ProvisionedProductName"
           ProvisionedProductName.of_json in
       let provisionedProductId =
-        field_map json "ProvisionedProductId" Id.of_json in
+        field_map json__ "ProvisionedProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageToken ?pageSize ?outputKeys ?provisionedProductName
         ?provisionedProductId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
@@ -12940,12 +14198,12 @@ module GetAWSOrganizationsAccessStatusOutput =
           (Xml.child xml_arg0 "AccessStatus") in
       make ?accessStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accessStatus = field_map json "AccessStatus" AccessStatus.of_json in
+    let of_json json__ =
+      let accessStatus = field_map json__ "AccessStatus" AccessStatus.of_json in
       make ?accessStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get the Access Status for AWS Organization portfolio share feature. This API can only be called by the management account in the organization or by a delegated admin."]
+       "Get the Access Status for Organizations portfolio share feature. This API can only be called by the management account in the organization or by a delegated admin."]
 module GetAWSOrganizationsAccessStatusInput =
   struct
     type nonrec t = unit
@@ -12958,7 +14216,7 @@ module GetAWSOrganizationsAccessStatusInput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Get the Access Status for AWS Organization portfolio share feature. This API can only be called by the management account in the organization or by a delegated admin."]
+       "Get the Access Status for Organizations portfolio share feature. This API can only be called by the management account in the organization or by a delegated admin."]
 module ExecuteProvisionedProductServiceActionOutput =
   struct
     type nonrec t =
@@ -13024,8 +14282,8 @@ module ExecuteProvisionedProductServiceActionOutput =
           (Xml.child xml_arg0 "RecordDetail") in
       make ?recordDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recordDetail = field_map json "RecordDetail" RecordDetail.of_json in
+    let of_json json__ =
+      let recordDetail = field_map json__ "RecordDetail" RecordDetail.of_json in
       make ?recordDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13043,11 +14301,10 @@ module ExecuteProvisionedProductServiceActionInput =
         [@ocaml.doc
           "An idempotency token that uniquely identifies the execute request."];
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       parameters: ExecutionParameterMap.t option
         [@ocaml.doc
-          "A map of all self-service action parameters and their values. If a provided parameter is of a special type, such as TARGET, the provided value will override the default value generated by AWS Service Catalog. If the parameters field is not provided, no additional parameters are passed and default values will be used for any special parameters such as TARGET."]}
+          "A map of all self-service action parameters and their values. If a provided parameter is of a special type, such as TARGET, the provided value will override the default value generated by Service Catalog. If the parameters field is not provided, no additional parameters are passed and default values will be used for any special parameters such as TARGET."]}
     let context_ = "ExecuteProvisionedProductServiceActionInput"
     let make ?acceptLanguage =
       fun ?parameters ->
@@ -13092,16 +14349,16 @@ module ExecuteProvisionedProductServiceActionInput =
       make ?parameters ?acceptLanguage ~executeToken ~serviceActionId
         ~provisionedProductId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map json "Parameters" ExecutionParameterMap.of_json in
+        field_map json__ "Parameters" ExecutionParameterMap.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       let executeToken =
-        field_map_exn json "ExecuteToken" IdempotencyToken.of_json in
-      let serviceActionId = field_map_exn json "ServiceActionId" Id.of_json in
+        field_map_exn json__ "ExecuteToken" IdempotencyToken.of_json in
+      let serviceActionId = field_map_exn json__ "ServiceActionId" Id.of_json in
       let provisionedProductId =
-        field_map_exn json "ProvisionedProductId" Id.of_json in
+        field_map_exn json__ "ProvisionedProductId" Id.of_json in
       make ?parameters ?acceptLanguage ~executeToken ~serviceActionId
         ~provisionedProductId ()
     let to_json v = composed_to_json to_value v
@@ -13172,8 +14429,8 @@ module ExecuteProvisionedProductPlanOutput =
           (Xml.child xml_arg0 "RecordDetail") in
       make ?recordDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recordDetail = field_map json "RecordDetail" RecordDetail.of_json in
+    let of_json json__ =
+      let recordDetail = field_map json__ "RecordDetail" RecordDetail.of_json in
       make ?recordDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13183,8 +14440,7 @@ module ExecuteProvisionedProductPlanInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       planId: Id.t [@ocaml.doc "The plan identifier."];
       idempotencyToken: IdempotencyToken.t
         [@ocaml.doc
@@ -13213,12 +14469,12 @@ module ExecuteProvisionedProductPlanInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~idempotencyToken ~planId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
-      let planId = field_map_exn json "PlanId" Id.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let planId = field_map_exn json__ "PlanId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~idempotencyToken ~planId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13282,7 +14538,7 @@ module EnableAWSOrganizationsAccessOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enable portfolio sharing feature through AWS Organizations. This API will allow Service Catalog to receive updates on your organization in order to sync your shares with the current structure. This API can only be called by the management account in the organization. By calling this API Service Catalog will make a call to organizations:EnableAWSServiceAccess on your behalf so that your shares can be in sync with any changes in your AWS Organizations structure. Note that a delegated administrator is not authorized to invoke EnableAWSOrganizationsAccess."]
+       "Enable portfolio sharing feature through Organizations. This API will allow Service Catalog to receive updates on your organization in order to sync your shares with the current structure. This API can only be called by the management account in the organization. When you call this API, Service Catalog calls organizations:EnableAWSServiceAccess on your behalf so that your shares stay in sync with any changes in your Organizations structure. Note that a delegated administrator is not authorized to invoke EnableAWSOrganizationsAccess. If you have previously disabled Organizations access for Service Catalog, and then enable access again, the portfolio access permissions might not sync with the latest changes to the organization structure. Specifically, accounts that you removed from the organization after disabling Service Catalog access, and before you enabled access again, can retain access to the previously shared portfolio. As a result, an account that has been removed from the organization might still be able to create or manage Amazon Web Services resources when it is no longer authorized to do so. Amazon Web Services is working to resolve this issue."]
 module EnableAWSOrganizationsAccessInput =
   struct
     type nonrec t = unit
@@ -13295,7 +14551,7 @@ module EnableAWSOrganizationsAccessInput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enable portfolio sharing feature through AWS Organizations. This API will allow Service Catalog to receive updates on your organization in order to sync your shares with the current structure. This API can only be called by the management account in the organization. By calling this API Service Catalog will make a call to organizations:EnableAWSServiceAccess on your behalf so that your shares can be in sync with any changes in your AWS Organizations structure. Note that a delegated administrator is not authorized to invoke EnableAWSOrganizationsAccess."]
+       "Enable portfolio sharing feature through Organizations. This API will allow Service Catalog to receive updates on your organization in order to sync your shares with the current structure. This API can only be called by the management account in the organization. When you call this API, Service Catalog calls organizations:EnableAWSServiceAccess on your behalf so that your shares stay in sync with any changes in your Organizations structure. Note that a delegated administrator is not authorized to invoke EnableAWSOrganizationsAccess. If you have previously disabled Organizations access for Service Catalog, and then enable access again, the portfolio access permissions might not sync with the latest changes to the organization structure. Specifically, accounts that you removed from the organization after disabling Service Catalog access, and before you enabled access again, can retain access to the previously shared portfolio. As a result, an account that has been removed from the organization might still be able to create or manage Amazon Web Services resources when it is no longer authorized to do so. Amazon Web Services is working to resolve this issue."]
 module DisassociateTagOptionFromResourceOutput =
   struct
     type nonrec t = unit
@@ -13370,9 +14626,10 @@ module DisassociateTagOptionFromResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagOptionId ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagOptionId = field_map_exn json "TagOptionId" TagOptionId.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let tagOptionId =
+        field_map_exn json__ "TagOptionId" TagOptionId.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~tagOptionId ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13381,11 +14638,15 @@ module DisassociateServiceActionFromProvisioningArtifactOutput =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      [ `InvalidParametersException of InvalidParametersException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
+      | "InvalidParametersException" ->
+          `InvalidParametersException
+            (InvalidParametersException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | name ->
@@ -13393,12 +14654,18 @@ module DisassociateServiceActionFromProvisioningArtifactOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InvalidParametersException" ->
+          `InvalidParametersException (InvalidParametersException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InvalidParametersException e ->
+          `Assoc
+            [("error", (`String "InvalidParametersException"));
+            ("details", (InvalidParametersException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -13431,20 +14698,24 @@ module DisassociateServiceActionFromProvisioningArtifactInput =
         [@ocaml.doc
           "The self-service action identifier. For example, act-fs7abcd89wxyz."];
       acceptLanguage: AcceptLanguage.t option
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
+      idempotencyToken: IdempotencyToken.t option
         [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"]}
+          "A unique identifier that you provide to ensure idempotency. If multiple requests from the same Amazon Web Services account use the same idempotency token, the same response is returned for each repeated request."]}
     let context_ = "DisassociateServiceActionFromProvisioningArtifactInput"
     let make ?acceptLanguage =
-      fun ~productId ->
-        fun ~provisioningArtifactId ->
-          fun ~serviceActionId ->
-            fun () ->
-              {
-                acceptLanguage;
-                productId;
-                provisioningArtifactId;
-                serviceActionId
-              }
+      fun ?idempotencyToken ->
+        fun ~productId ->
+          fun ~provisioningArtifactId ->
+            fun ~serviceActionId ->
+              fun () ->
+                {
+                  acceptLanguage;
+                  idempotencyToken;
+                  productId;
+                  provisioningArtifactId;
+                  serviceActionId
+                }
     let to_value x =
       structure_to_value
         [("ProductId", (Some (Id.to_value x.productId)));
@@ -13452,9 +14723,14 @@ module DisassociateServiceActionFromProvisioningArtifactInput =
           (Some (Id.to_value x.provisioningArtifactId)));
         ("ServiceActionId", (Some (Id.to_value x.serviceActionId)));
         ("AcceptLanguage",
-          (Option.map x.acceptLanguage ~f:AcceptLanguage.to_value))]
+          (Option.map x.acceptLanguage ~f:AcceptLanguage.to_value));
+        ("IdempotencyToken",
+          (Option.map x.idempotencyToken ~f:IdempotencyToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let idempotencyToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "IdempotencyToken") in
       let acceptLanguage =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
@@ -13466,18 +14742,20 @@ module DisassociateServiceActionFromProvisioningArtifactInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ProvisioningArtifactId") in
       let productId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ProductId") in
-      make ?acceptLanguage ~serviceActionId ~provisioningArtifactId
-        ~productId ()
+      make ?idempotencyToken ?acceptLanguage ~serviceActionId
+        ~provisioningArtifactId ~productId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let idempotencyToken =
+        field_map json__ "IdempotencyToken" IdempotencyToken.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      let serviceActionId = field_map_exn json "ServiceActionId" Id.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      let serviceActionId = field_map_exn json__ "ServiceActionId" Id.of_json in
       let provisioningArtifactId =
-        field_map_exn json "ProvisioningArtifactId" Id.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
-      make ?acceptLanguage ~serviceActionId ~provisioningArtifactId
-        ~productId ()
+        field_map_exn json__ "ProvisioningArtifactId" Id.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
+      make ?idempotencyToken ?acceptLanguage ~serviceActionId
+        ~provisioningArtifactId ~productId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Disassociates the specified self-service action association from the specified provisioning artifact."]
@@ -13545,8 +14823,7 @@ module DisassociateProductFromPortfolioInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       productId: Id.t [@ocaml.doc "The product identifier."];
       portfolioId: Id.t [@ocaml.doc "The portfolio identifier."]}
     let context_ = "DisassociateProductFromPortfolioInput"
@@ -13571,11 +14848,11 @@ module DisassociateProductFromPortfolioInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~portfolioId ~productId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
+    let of_json json__ =
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~portfolioId ~productId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13629,30 +14906,40 @@ module DisassociatePrincipalFromPortfolioOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates a previously associated principal ARN from a specified portfolio."]
+       "Disassociates a previously associated principal ARN from a specified portfolio. The PrincipalType and PrincipalARN must match the AssociatePrincipalWithPortfolio call request details. For example, to disassociate an association created with a PrincipalARN of PrincipalType IAM you must use the PrincipalType IAM when calling DisassociatePrincipalFromPortfolio. For portfolios that have been shared with principal name sharing enabled: after disassociating a principal, share recipient accounts will no longer be able to provision products in this portfolio using a role matching the name of the associated principal. For more information, review associate-principal-with-portfolio in the Amazon Web Services CLI Command Reference. If you disassociate a principal from a portfolio, with PrincipalType as IAM, the same principal will still have access to the portfolio if it matches one of the associated principals of type IAM_PATTERN. To fully remove access for a principal, verify all the associated Principals of type IAM_PATTERN, and then ensure you disassociate any IAM_PATTERN principals that match the principal whose access you are removing."]
 module DisassociatePrincipalFromPortfolioInput =
   struct
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       portfolioId: Id.t [@ocaml.doc "The portfolio identifier."];
       principalARN: PrincipalARN.t
-        [@ocaml.doc "The ARN of the principal (IAM user, role, or group)."]}
+        [@ocaml.doc
+          "The ARN of the principal (user, role, or group). This field allows an ARN with no accountID with or without wildcard characters if PrincipalType is IAM_PATTERN."];
+      principalType: PrincipalType.t option
+        [@ocaml.doc
+          "The supported value is IAM if you use a fully defined ARN, or IAM_PATTERN if you specify an IAM ARN with no AccountId, with or without wildcard characters."]}
     let context_ = "DisassociatePrincipalFromPortfolioInput"
     let make ?acceptLanguage =
-      fun ~portfolioId ->
-        fun ~principalARN ->
-          fun () -> { acceptLanguage; portfolioId; principalARN }
+      fun ?principalType ->
+        fun ~portfolioId ->
+          fun ~principalARN ->
+            fun () ->
+              { acceptLanguage; principalType; portfolioId; principalARN }
     let to_value x =
       structure_to_value
         [("AcceptLanguage",
            (Option.map x.acceptLanguage ~f:AcceptLanguage.to_value));
         ("PortfolioId", (Some (Id.to_value x.portfolioId)));
-        ("PrincipalARN", (Some (PrincipalARN.to_value x.principalARN)))]
+        ("PrincipalARN", (Some (PrincipalARN.to_value x.principalARN)));
+        ("PrincipalType",
+          (Option.map x.principalType ~f:PrincipalType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let principalType =
+        (Option.map ~f:PrincipalType.of_xml)
+          (Xml.child xml_arg0 "PrincipalType") in
       let principalARN =
         PrincipalARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PrincipalARN") in
@@ -13661,18 +14948,20 @@ module DisassociatePrincipalFromPortfolioInput =
       let acceptLanguage =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
-      make ~principalARN ~portfolioId ?acceptLanguage ()
+      make ?principalType ~principalARN ~portfolioId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let principalType =
+        field_map json__ "PrincipalType" PrincipalType.of_json in
       let principalARN =
-        field_map_exn json "PrincipalARN" PrincipalARN.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
+        field_map_exn json__ "PrincipalARN" PrincipalARN.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      make ~principalARN ~portfolioId ?acceptLanguage ()
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      make ?principalType ~principalARN ~portfolioId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates a previously associated principal ARN from a specified portfolio."]
+       "Disassociates a previously associated principal ARN from a specified portfolio. The PrincipalType and PrincipalARN must match the AssociatePrincipalWithPortfolio call request details. For example, to disassociate an association created with a PrincipalARN of PrincipalType IAM you must use the PrincipalType IAM when calling DisassociatePrincipalFromPortfolio. For portfolios that have been shared with principal name sharing enabled: after disassociating a principal, share recipient accounts will no longer be able to provision products in this portfolio using a role matching the name of the associated principal. For more information, review associate-principal-with-portfolio in the Amazon Web Services CLI Command Reference. If you disassociate a principal from a portfolio, with PrincipalType as IAM, the same principal will still have access to the portfolio if it matches one of the associated principals of type IAM_PATTERN. To fully remove access for a principal, verify all the associated Principals of type IAM_PATTERN, and then ensure you disassociate any IAM_PATTERN principals that match the principal whose access you are removing."]
 module DisassociateBudgetFromResourceOutput =
   struct
     type nonrec t = unit
@@ -13738,9 +15027,9 @@ module DisassociateBudgetFromResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
       make ~resourceId ~budgetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" Id.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
+    let of_json json__ =
+      let resourceId = field_map_exn json__ "ResourceId" Id.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
       make ~resourceId ~budgetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13804,7 +15093,7 @@ module DisableAWSOrganizationsAccessOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disable portfolio sharing through AWS Organizations feature. This feature will not delete your current shares but it will prevent you from creating new shares throughout your organization. Current shares will not be in sync with your organization structure if it changes after calling this API. This API can only be called by the management account in the organization. This API can't be invoked if there are active delegated administrators in the organization. Note that a delegated administrator is not authorized to invoke DisableAWSOrganizationsAccess."]
+       "Disable portfolio sharing through the Organizations service. This command will not delete your current shares, but prevents you from creating new shares throughout your organization. Current shares are not kept in sync with your organization structure if the structure changes after calling this API. Only the management account in the organization can call this API. You cannot call this API if there are active delegated administrators in the organization. Note that a delegated administrator is not authorized to invoke DisableAWSOrganizationsAccess. If you share an Service Catalog portfolio in an organization within Organizations, and then disable Organizations access for Service Catalog, the portfolio access permissions will not sync with the latest changes to the organization structure. Specifically, accounts that you removed from the organization after disabling Service Catalog access will retain access to the previously shared portfolio."]
 module DisableAWSOrganizationsAccessInput =
   struct
     type nonrec t = unit
@@ -13817,7 +15106,7 @@ module DisableAWSOrganizationsAccessInput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disable portfolio sharing through AWS Organizations feature. This feature will not delete your current shares but it will prevent you from creating new shares throughout your organization. Current shares will not be in sync with your organization structure if it changes after calling this API. This API can only be called by the management account in the organization. This API can't be invoked if there are active delegated administrators in the organization. Note that a delegated administrator is not authorized to invoke DisableAWSOrganizationsAccess."]
+       "Disable portfolio sharing through the Organizations service. This command will not delete your current shares, but prevents you from creating new shares throughout your organization. Current shares are not kept in sync with your organization structure if the structure changes after calling this API. Only the management account in the organization can call this API. You cannot call this API if there are active delegated administrators in the organization. Note that a delegated administrator is not authorized to invoke DisableAWSOrganizationsAccess. If you share an Service Catalog portfolio in an organization within Organizations, and then disable Organizations access for Service Catalog, the portfolio access permissions will not sync with the latest changes to the organization structure. Specifically, accounts that you removed from the organization after disabling Service Catalog access will retain access to the previously shared portfolio."]
 module DescribeTagOptionOutput =
   struct
     type nonrec t =
@@ -13874,9 +15163,9 @@ module DescribeTagOptionOutput =
           (Xml.child xml_arg0 "TagOptionDetail") in
       make ?tagOptionDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagOptionDetail =
-        field_map json "TagOptionDetail" TagOptionDetail.of_json in
+        field_map json__ "TagOptionDetail" TagOptionDetail.of_json in
       make ?tagOptionDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified TagOption."]
@@ -13895,8 +15184,8 @@ module DescribeTagOptionInput =
         TagOptionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" TagOptionId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" TagOptionId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified TagOption."]
 module DescribeServiceActionOutput =
@@ -13944,9 +15233,9 @@ module DescribeServiceActionOutput =
           (Xml.child xml_arg0 "ServiceActionDetail") in
       make ?serviceActionDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceActionDetail =
-        field_map json "ServiceActionDetail" ServiceActionDetail.of_json in
+        field_map json__ "ServiceActionDetail" ServiceActionDetail.of_json in
       make ?serviceActionDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a self-service action."]
@@ -13956,8 +15245,7 @@ module DescribeServiceActionInput =
       {
       id: Id.t [@ocaml.doc "The self-service action identifier."];
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"]}
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"]}
     let context_ = "DescribeServiceActionInput"
     let make ?acceptLanguage = fun ~id -> fun () -> { acceptLanguage; id }
     let to_value x =
@@ -13973,10 +15261,10 @@ module DescribeServiceActionInput =
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ?acceptLanguage ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      let id = field_map_exn json "Id" Id.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      let id = field_map_exn json__ "Id" Id.of_json in
       make ?acceptLanguage ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a self-service action."]
@@ -14036,9 +15324,10 @@ module DescribeServiceActionExecutionParametersOutput =
           (Xml.child xml_arg0 "ServiceActionParameters") in
       make ?serviceActionParameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceActionParameters =
-        field_map json "ServiceActionParameters" ExecutionParameters.of_json in
+        field_map json__ "ServiceActionParameters"
+          ExecutionParameters.of_json in
       make ?serviceActionParameters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14052,8 +15341,7 @@ module DescribeServiceActionExecutionParametersInput =
       serviceActionId: Id.t
         [@ocaml.doc "The self-service action identifier."];
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"]}
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"]}
     let context_ = "DescribeServiceActionExecutionParametersInput"
     let make ?acceptLanguage =
       fun ~provisionedProductId ->
@@ -14079,12 +15367,12 @@ module DescribeServiceActionExecutionParametersInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ProvisionedProductId") in
       make ?acceptLanguage ~serviceActionId ~provisionedProductId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      let serviceActionId = field_map_exn json "ServiceActionId" Id.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      let serviceActionId = field_map_exn json__ "ServiceActionId" Id.of_json in
       let provisionedProductId =
-        field_map_exn json "ProvisionedProductId" Id.of_json in
+        field_map_exn json__ "ProvisionedProductId" Id.of_json in
       make ?acceptLanguage ~serviceActionId ~provisionedProductId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14151,11 +15439,11 @@ module DescribeRecordOutput =
           (Xml.child xml_arg0 "RecordDetail") in
       make ?nextPageToken ?recordOutputs ?recordDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let recordOutputs =
-        field_map json "RecordOutputs" RecordOutputs.of_json in
-      let recordDetail = field_map json "RecordDetail" RecordDetail.of_json in
+        field_map json__ "RecordOutputs" RecordOutputs.of_json in
+      let recordDetail = field_map json__ "RecordDetail" RecordDetail.of_json in
       make ?nextPageToken ?recordOutputs ?recordDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14165,8 +15453,7 @@ module DescribeRecordInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       id: Id.t
         [@ocaml.doc
           "The record identifier of the provisioned product. This identifier is returned by the request operation."];
@@ -14199,12 +15486,12 @@ module DescribeRecordInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageSize ?pageToken ~id ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let id = field_map_exn json "Id" Id.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let id = field_map_exn json__ "Id" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageSize ?pageToken ~id ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14228,7 +15515,7 @@ module DescribeProvisioningParametersOutput =
       provisioningArtifactPreferences:
         ProvisioningArtifactPreferences.t option
         [@ocaml.doc
-          "An object that contains information about preferences, such as regions and accounts, for the provisioning artifact."];
+          "An object that contains information about preferences, such as Regions and accounts, for the provisioning artifact."];
       provisioningArtifactOutputs: ProvisioningArtifactOutputs.t option
         [@ocaml.doc "The output of the provisioning artifact."];
       provisioningArtifactOutputKeys: ProvisioningArtifactOutputs.t option
@@ -14335,23 +15622,24 @@ module DescribeProvisioningParametersOutput =
         ?provisioningArtifactPreferences ?tagOptions ?usageInstructions
         ?constraintSummaries ?provisioningArtifactParameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisioningArtifactOutputKeys =
-        field_map json "ProvisioningArtifactOutputKeys"
+        field_map json__ "ProvisioningArtifactOutputKeys"
           ProvisioningArtifactOutputs.of_json in
       let provisioningArtifactOutputs =
-        field_map json "ProvisioningArtifactOutputs"
+        field_map json__ "ProvisioningArtifactOutputs"
           ProvisioningArtifactOutputs.of_json in
       let provisioningArtifactPreferences =
-        field_map json "ProvisioningArtifactPreferences"
+        field_map json__ "ProvisioningArtifactPreferences"
           ProvisioningArtifactPreferences.of_json in
-      let tagOptions = field_map json "TagOptions" TagOptionSummaries.of_json in
+      let tagOptions =
+        field_map json__ "TagOptions" TagOptionSummaries.of_json in
       let usageInstructions =
-        field_map json "UsageInstructions" UsageInstructions.of_json in
+        field_map json__ "UsageInstructions" UsageInstructions.of_json in
       let constraintSummaries =
-        field_map json "ConstraintSummaries" ConstraintSummaries.of_json in
+        field_map json__ "ConstraintSummaries" ConstraintSummaries.of_json in
       let provisioningArtifactParameters =
-        field_map json "ProvisioningArtifactParameters"
+        field_map json__ "ProvisioningArtifactParameters"
           ProvisioningArtifactParameters.of_json in
       make ?provisioningArtifactOutputKeys ?provisioningArtifactOutputs
         ?provisioningArtifactPreferences ?tagOptions ?usageInstructions
@@ -14364,8 +15652,7 @@ module DescribeProvisioningParametersInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       productId: Id.t option
         [@ocaml.doc
           "The product identifier. You must provide the product name or ID, but not both."];
@@ -14439,18 +15726,19 @@ module DescribeProvisioningParametersInput =
       make ?pathName ?pathId ?provisioningArtifactName
         ?provisioningArtifactId ?productName ?productId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pathName = field_map json "PathName" PortfolioDisplayName.of_json in
-      let pathId = field_map json "PathId" Id.of_json in
+    let of_json json__ =
+      let pathName = field_map json__ "PathName" PortfolioDisplayName.of_json in
+      let pathId = field_map json__ "PathId" Id.of_json in
       let provisioningArtifactName =
-        field_map json "ProvisioningArtifactName"
+        field_map json__ "ProvisioningArtifactName"
           ProvisioningArtifactName.of_json in
       let provisioningArtifactId =
-        field_map json "ProvisioningArtifactId" Id.of_json in
-      let productName = field_map json "ProductName" ProductViewName.of_json in
-      let productId = field_map json "ProductId" Id.of_json in
+        field_map json__ "ProvisioningArtifactId" Id.of_json in
+      let productName =
+        field_map json__ "ProductName" ProductViewName.of_json in
+      let productId = field_map json__ "ProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pathName ?pathId ?provisioningArtifactName
         ?provisioningArtifactId ?productName ?productId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
@@ -14463,16 +15751,28 @@ module DescribeProvisioningArtifactOutput =
       provisioningArtifactDetail: ProvisioningArtifactDetail.t option
         [@ocaml.doc "Information about the provisioning artifact."];
       info: ProvisioningArtifactInfo.t option
-        [@ocaml.doc "The URL of the CloudFormation template in Amazon S3."];
+        [@ocaml.doc
+          "The URL of the CloudFormation template in Amazon S3 or GitHub in JSON format."];
       status: Status.t option
-        [@ocaml.doc "The status of the current request."]}
+        [@ocaml.doc "The status of the current request."];
+      provisioningArtifactParameters: ProvisioningArtifactParameters.t option
+        [@ocaml.doc
+          "Information about the parameters used to provision the product."]}
     type nonrec error =
       [ `InvalidParametersException of InvalidParametersException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?provisioningArtifactDetail =
       fun ?info ->
-        fun ?status -> fun () -> { provisioningArtifactDetail; info; status }
+        fun ?status ->
+          fun ?provisioningArtifactParameters ->
+            fun () ->
+              {
+                provisioningArtifactDetail;
+                info;
+                status;
+                provisioningArtifactParameters
+              }
     let error_of_json name json =
       match name with
       | "InvalidParametersException" ->
@@ -14512,9 +15812,15 @@ module DescribeProvisioningArtifactOutput =
            (Option.map x.provisioningArtifactDetail
               ~f:ProvisioningArtifactDetail.to_value));
         ("Info", (Option.map x.info ~f:ProvisioningArtifactInfo.to_value));
-        ("Status", (Option.map x.status ~f:Status.to_value))]
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("ProvisioningArtifactParameters",
+          (Option.map x.provisioningArtifactParameters
+             ~f:ProvisioningArtifactParameters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let provisioningArtifactParameters =
+        (Option.map ~f:ProvisioningArtifactParameters.of_xml)
+          (Xml.child xml_arg0 "ProvisioningArtifactParameters") in
       let status =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
       let info =
@@ -14523,15 +15829,20 @@ module DescribeProvisioningArtifactOutput =
       let provisioningArtifactDetail =
         (Option.map ~f:ProvisioningArtifactDetail.of_xml)
           (Xml.child xml_arg0 "ProvisioningArtifactDetail") in
-      make ?status ?info ?provisioningArtifactDetail ()
+      make ?provisioningArtifactParameters ?status ?info
+        ?provisioningArtifactDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
-      let info = field_map json "Info" ProvisioningArtifactInfo.of_json in
+    let of_json json__ =
+      let provisioningArtifactParameters =
+        field_map json__ "ProvisioningArtifactParameters"
+          ProvisioningArtifactParameters.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let info = field_map json__ "Info" ProvisioningArtifactInfo.of_json in
       let provisioningArtifactDetail =
-        field_map json "ProvisioningArtifactDetail"
+        field_map json__ "ProvisioningArtifactDetail"
           ProvisioningArtifactDetail.of_json in
-      make ?status ?info ?provisioningArtifactDetail ()
+      make ?provisioningArtifactParameters ?status ?info
+        ?provisioningArtifactDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about the specified provisioning artifact (also known as a version) for the specified product."]
@@ -14540,8 +15851,7 @@ module DescribeProvisioningArtifactInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       provisioningArtifactId: Id.t option
         [@ocaml.doc "The identifier of the provisioning artifact."];
       productId: Id.t option [@ocaml.doc "The product identifier."];
@@ -14550,22 +15860,27 @@ module DescribeProvisioningArtifactInput =
       productName: ProductViewName.t option [@ocaml.doc "The product name."];
       verbose: Verbose.t option
         [@ocaml.doc
-          "Indicates whether a verbose level of detail is enabled."]}
+          "Indicates whether a verbose level of detail is enabled."];
+      includeProvisioningArtifactParameters: Boolean.t option
+        [@ocaml.doc
+          "Indicates if the API call response does or does not include additional details about the provisioning parameters."]}
     let make ?acceptLanguage =
       fun ?provisioningArtifactId ->
         fun ?productId ->
           fun ?provisioningArtifactName ->
             fun ?productName ->
               fun ?verbose ->
-                fun () ->
-                  {
-                    acceptLanguage;
-                    provisioningArtifactId;
-                    productId;
-                    provisioningArtifactName;
-                    productName;
-                    verbose
-                  }
+                fun ?includeProvisioningArtifactParameters ->
+                  fun () ->
+                    {
+                      acceptLanguage;
+                      provisioningArtifactId;
+                      productId;
+                      provisioningArtifactName;
+                      productName;
+                      verbose;
+                      includeProvisioningArtifactParameters
+                    }
     let to_value x =
       structure_to_value
         [("AcceptLanguage",
@@ -14578,9 +15893,15 @@ module DescribeProvisioningArtifactInput =
              ~f:ProvisioningArtifactName.to_value));
         ("ProductName",
           (Option.map x.productName ~f:ProductViewName.to_value));
-        ("Verbose", (Option.map x.verbose ~f:Verbose.to_value))]
+        ("Verbose", (Option.map x.verbose ~f:Verbose.to_value));
+        ("IncludeProvisioningArtifactParameters",
+          (Option.map x.includeProvisioningArtifactParameters
+             ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let includeProvisioningArtifactParameters =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "IncludeProvisioningArtifactParameters") in
       let verbose =
         (Option.map ~f:Verbose.of_xml) (Xml.child xml_arg0 "Verbose") in
       let productName =
@@ -14597,22 +15918,28 @@ module DescribeProvisioningArtifactInput =
       let acceptLanguage =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
-      make ?verbose ?productName ?provisioningArtifactName ?productId
-        ?provisioningArtifactId ?acceptLanguage ()
+      make ?includeProvisioningArtifactParameters ?verbose ?productName
+        ?provisioningArtifactName ?productId ?provisioningArtifactId
+        ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let verbose = field_map json "Verbose" Verbose.of_json in
-      let productName = field_map json "ProductName" ProductViewName.of_json in
+    let of_json json__ =
+      let includeProvisioningArtifactParameters =
+        field_map json__ "IncludeProvisioningArtifactParameters"
+          Boolean.of_json in
+      let verbose = field_map json__ "Verbose" Verbose.of_json in
+      let productName =
+        field_map json__ "ProductName" ProductViewName.of_json in
       let provisioningArtifactName =
-        field_map json "ProvisioningArtifactName"
+        field_map json__ "ProvisioningArtifactName"
           ProvisioningArtifactName.of_json in
-      let productId = field_map json "ProductId" Id.of_json in
+      let productId = field_map json__ "ProductId" Id.of_json in
       let provisioningArtifactId =
-        field_map json "ProvisioningArtifactId" Id.of_json in
+        field_map json__ "ProvisioningArtifactId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      make ?verbose ?productName ?provisioningArtifactName ?productId
-        ?provisioningArtifactId ?acceptLanguage ()
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      make ?includeProvisioningArtifactParameters ?verbose ?productName
+        ?provisioningArtifactName ?productId ?provisioningArtifactId
+        ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about the specified provisioning artifact (also known as a version) for the specified product."]
@@ -14690,12 +16017,12 @@ module DescribeProvisionedProductPlanOutput =
           (Xml.child xml_arg0 "ProvisionedProductPlanDetails") in
       make ?nextPageToken ?resourceChanges ?provisionedProductPlanDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+    let of_json json__ =
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       let resourceChanges =
-        field_map json "ResourceChanges" ResourceChanges.of_json in
+        field_map json__ "ResourceChanges" ResourceChanges.of_json in
       let provisionedProductPlanDetails =
-        field_map json "ProvisionedProductPlanDetails"
+        field_map json__ "ProvisionedProductPlanDetails"
           ProvisionedProductPlanDetails.of_json in
       make ?nextPageToken ?resourceChanges ?provisionedProductPlanDetails ()
     let to_json v = composed_to_json to_value v
@@ -14706,8 +16033,7 @@ module DescribeProvisionedProductPlanInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       planId: Id.t [@ocaml.doc "The plan identifier."];
       pageSize: PageSize.t option
         [@ocaml.doc "The maximum number of items to return with this call."];
@@ -14740,12 +16066,12 @@ module DescribeProvisionedProductPlanInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?pageToken ?pageSize ~planId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageToken = field_map json "PageToken" PageToken.of_json in
-      let pageSize = field_map json "PageSize" PageSize.of_json in
-      let planId = field_map_exn json "PlanId" Id.of_json in
+    let of_json json__ =
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
+      let pageSize = field_map json__ "PageSize" PageSize.of_json in
+      let planId = field_map_exn json__ "PlanId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?pageToken ?pageSize ~planId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14816,11 +16142,11 @@ module DescribeProvisionedProductOutput =
           (Xml.child xml_arg0 "ProvisionedProductDetail") in
       make ?cloudWatchDashboards ?provisionedProductDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchDashboards =
-        field_map json "CloudWatchDashboards" CloudWatchDashboards.of_json in
+        field_map json__ "CloudWatchDashboards" CloudWatchDashboards.of_json in
       let provisionedProductDetail =
-        field_map json "ProvisionedProductDetail"
+        field_map json__ "ProvisionedProductDetail"
           ProvisionedProductDetail.of_json in
       make ?cloudWatchDashboards ?provisionedProductDetail ()
     let to_json v = composed_to_json to_value v
@@ -14831,8 +16157,7 @@ module DescribeProvisionedProductInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       id: Id.t option
         [@ocaml.doc
           "The provisioned product identifier. You must provide the name or ID, but not both. If you do not provide a name or ID, or you provide both name and ID, an InvalidParametersException will occur."];
@@ -14858,11 +16183,11 @@ module DescribeProvisionedProductInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?name ?id ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" ProvisionedProductName.of_json in
-      let id = field_map json "Id" Id.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" ProvisionedProductName.of_json in
+      let id = field_map json__ "Id" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?name ?id ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14933,11 +16258,12 @@ module DescribeProductViewOutput =
           (Xml.child xml_arg0 "ProductViewSummary") in
       make ?provisioningArtifacts ?productViewSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisioningArtifacts =
-        field_map json "ProvisioningArtifacts" ProvisioningArtifacts.of_json in
+        field_map json__ "ProvisioningArtifacts"
+          ProvisioningArtifacts.of_json in
       let productViewSummary =
-        field_map json "ProductViewSummary" ProductViewSummary.of_json in
+        field_map json__ "ProductViewSummary" ProductViewSummary.of_json in
       make ?provisioningArtifacts ?productViewSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified product."]
@@ -14946,8 +16272,7 @@ module DescribeProductViewInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       id: Id.t [@ocaml.doc "The product view identifier."]}
     let context_ = "DescribeProductViewInput"
     let make ?acceptLanguage = fun ~id -> fun () -> { acceptLanguage; id }
@@ -14964,10 +16289,10 @@ module DescribeProductViewInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~id ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Id.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~id ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified product."]
@@ -15056,24 +16381,25 @@ module DescribeProductOutput =
       make ?launchPaths ?budgets ?provisioningArtifacts ?productViewSummary
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let launchPaths = field_map json "LaunchPaths" LaunchPaths.of_json in
-      let budgets = field_map json "Budgets" Budgets.of_json in
+    let of_json json__ =
+      let launchPaths = field_map json__ "LaunchPaths" LaunchPaths.of_json in
+      let budgets = field_map json__ "Budgets" Budgets.of_json in
       let provisioningArtifacts =
-        field_map json "ProvisioningArtifacts" ProvisioningArtifacts.of_json in
+        field_map json__ "ProvisioningArtifacts"
+          ProvisioningArtifacts.of_json in
       let productViewSummary =
-        field_map json "ProductViewSummary" ProductViewSummary.of_json in
+        field_map json__ "ProductViewSummary" ProductViewSummary.of_json in
       make ?launchPaths ?budgets ?provisioningArtifacts ?productViewSummary
         ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about the specified product."]
+  end[@@ocaml.doc
+       "Gets information about the specified product. Running this operation with administrator access results in a failure. DescribeProductAsAdmin should be used instead."]
 module DescribeProductInput =
   struct
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       id: Id.t option [@ocaml.doc "The product identifier."];
       name: ProductViewName.t option [@ocaml.doc "The product name."]}
     let make ?acceptLanguage =
@@ -15094,14 +16420,15 @@ module DescribeProductInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?name ?id ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" ProductViewName.of_json in
-      let id = field_map json "Id" Id.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" ProductViewName.of_json in
+      let id = field_map json__ "Id" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?name ?id ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Gets information about the specified product."]
+  end[@@ocaml.doc
+       "Gets information about the specified product. Running this operation with administrator access results in a failure. DescribeProductAsAdmin should be used instead."]
 module DescribeProductAsAdminOutput =
   struct
     type nonrec t =
@@ -15197,15 +16524,15 @@ module DescribeProductAsAdminOutput =
       make ?budgets ?tagOptions ?tags ?provisioningArtifactSummaries
         ?productViewDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let budgets = field_map json "Budgets" Budgets.of_json in
-      let tagOptions = field_map json "TagOptions" TagOptionDetails.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let budgets = field_map json__ "Budgets" Budgets.of_json in
+      let tagOptions = field_map json__ "TagOptions" TagOptionDetails.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let provisioningArtifactSummaries =
-        field_map json "ProvisioningArtifactSummaries"
+        field_map json__ "ProvisioningArtifactSummaries"
           ProvisioningArtifactSummaries.of_json in
       let productViewDetail =
-        field_map json "ProductViewDetail" ProductViewDetail.of_json in
+        field_map json__ "ProductViewDetail" ProductViewDetail.of_json in
       make ?budgets ?tagOptions ?tags ?provisioningArtifactSummaries
         ?productViewDetail ()
     let to_json v = composed_to_json to_value v
@@ -15216,8 +16543,7 @@ module DescribeProductAsAdminInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       id: Id.t option [@ocaml.doc "The product identifier."];
       name: ProductViewName.t option [@ocaml.doc "The product name."];
       sourcePortfolioId: Id.t option
@@ -15248,12 +16574,12 @@ module DescribeProductAsAdminInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?sourcePortfolioId ?name ?id ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourcePortfolioId = field_map json "SourcePortfolioId" Id.of_json in
-      let name = field_map json "Name" ProductViewName.of_json in
-      let id = field_map json "Id" Id.of_json in
+    let of_json json__ =
+      let sourcePortfolioId = field_map json__ "SourcePortfolioId" Id.of_json in
+      let name = field_map json__ "Name" ProductViewName.of_json in
+      let id = field_map json__ "Id" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?sourcePortfolioId ?name ?id ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15323,10 +16649,11 @@ module DescribePortfolioSharesOutput =
         (Option.map ~f:PageToken.of_xml) (Xml.child xml_arg0 "NextPageToken") in
       make ?portfolioShareDetails ?nextPageToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let portfolioShareDetails =
-        field_map json "PortfolioShareDetails" PortfolioShareDetails.of_json in
-      let nextPageToken = field_map json "NextPageToken" PageToken.of_json in
+        field_map json__ "PortfolioShareDetails"
+          PortfolioShareDetails.of_json in
+      let nextPageToken = field_map json__ "NextPageToken" PageToken.of_json in
       make ?portfolioShareDetails ?nextPageToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15370,12 +16697,12 @@ module DescribePortfolioSharesInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PortfolioId") in
       make ?pageSize ?pageToken ~type_ ~portfolioId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" PageSizeMax100.of_json in
-      let pageToken = field_map json "PageToken" PageToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSizeMax100.of_json in
+      let pageToken = field_map json__ "PageToken" PageToken.of_json in
       let type_ =
-        field_map_exn json "Type" DescribePortfolioShareType.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
+        field_map_exn json__ "Type" DescribePortfolioShareType.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
       make ?pageSize ?pageToken ~type_ ~portfolioId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15484,14 +16811,15 @@ module DescribePortfolioShareStatusOutput =
       make ?shareDetails ?status ?organizationNodeValue ?portfolioId
         ?portfolioShareToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shareDetails = field_map json "ShareDetails" ShareDetails.of_json in
-      let status = field_map json "Status" ShareStatus.of_json in
+    let of_json json__ =
+      let shareDetails = field_map json__ "ShareDetails" ShareDetails.of_json in
+      let status = field_map json__ "Status" ShareStatus.of_json in
       let organizationNodeValue =
-        field_map json "OrganizationNodeValue" OrganizationNodeValue.of_json in
-      let portfolioId = field_map json "PortfolioId" Id.of_json in
+        field_map json__ "OrganizationNodeValue"
+          OrganizationNodeValue.of_json in
+      let portfolioId = field_map json__ "PortfolioId" Id.of_json in
       let portfolioShareToken =
-        field_map json "PortfolioShareToken" Id.of_json in
+        field_map json__ "PortfolioShareToken" Id.of_json in
       make ?shareDetails ?status ?organizationNodeValue ?portfolioId
         ?portfolioShareToken ()
     let to_json v = composed_to_json to_value v
@@ -15516,9 +16844,9 @@ module DescribePortfolioShareStatusInput =
           (Xml.child_exn ~context:context_ xml_arg0 "PortfolioShareToken") in
       make ~portfolioShareToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let portfolioShareToken =
-        field_map_exn json "PortfolioShareToken" Id.of_json in
+        field_map_exn json__ "PortfolioShareToken" Id.of_json in
       make ~portfolioShareToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15590,12 +16918,12 @@ module DescribePortfolioOutput =
           (Xml.child xml_arg0 "PortfolioDetail") in
       make ?budgets ?tagOptions ?tags ?portfolioDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let budgets = field_map json "Budgets" Budgets.of_json in
-      let tagOptions = field_map json "TagOptions" TagOptionDetails.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let budgets = field_map json__ "Budgets" Budgets.of_json in
+      let tagOptions = field_map json__ "TagOptions" TagOptionDetails.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let portfolioDetail =
-        field_map json "PortfolioDetail" PortfolioDetail.of_json in
+        field_map json__ "PortfolioDetail" PortfolioDetail.of_json in
       make ?budgets ?tagOptions ?tags ?portfolioDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15605,8 +16933,7 @@ module DescribePortfolioInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       id: Id.t [@ocaml.doc "The portfolio identifier."]}
     let context_ = "DescribePortfolioInput"
     let make ?acceptLanguage = fun ~id -> fun () -> { acceptLanguage; id }
@@ -15623,10 +16950,10 @@ module DescribePortfolioInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~id ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Id.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~id ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15690,11 +17017,11 @@ module DescribeCopyProductStatusOutput =
           (Xml.child xml_arg0 "CopyProductStatus") in
       make ?statusDetail ?targetProductId ?copyProductStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusDetail = field_map json "StatusDetail" StatusDetail.of_json in
-      let targetProductId = field_map json "TargetProductId" Id.of_json in
+    let of_json json__ =
+      let statusDetail = field_map json__ "StatusDetail" StatusDetail.of_json in
+      let targetProductId = field_map json__ "TargetProductId" Id.of_json in
       let copyProductStatus =
-        field_map json "CopyProductStatus" CopyProductStatus.of_json in
+        field_map json__ "CopyProductStatus" CopyProductStatus.of_json in
       make ?statusDetail ?targetProductId ?copyProductStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the status of the specified copy product operation."]
@@ -15703,8 +17030,7 @@ module DescribeCopyProductStatusInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       copyProductToken: Id.t
         [@ocaml.doc
           "The token for the copy product operation. This token is returned by CopyProduct."]}
@@ -15726,10 +17052,11 @@ module DescribeCopyProductStatusInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~copyProductToken ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let copyProductToken = field_map_exn json "CopyProductToken" Id.of_json in
+    let of_json json__ =
+      let copyProductToken =
+        field_map_exn json__ "CopyProductToken" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~copyProductToken ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the status of the specified copy product operation."]
@@ -15793,12 +17120,12 @@ module DescribeConstraintOutput =
           (Xml.child xml_arg0 "ConstraintDetail") in
       make ?status ?constraintParameters ?constraintDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Status.of_json in
       let constraintParameters =
-        field_map json "ConstraintParameters" ConstraintParameters.of_json in
+        field_map json__ "ConstraintParameters" ConstraintParameters.of_json in
       let constraintDetail =
-        field_map json "ConstraintDetail" ConstraintDetail.of_json in
+        field_map json__ "ConstraintDetail" ConstraintDetail.of_json in
       make ?status ?constraintParameters ?constraintDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified constraint."]
@@ -15807,8 +17134,7 @@ module DescribeConstraintInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       id: Id.t [@ocaml.doc "The identifier of the constraint."]}
     let context_ = "DescribeConstraintInput"
     let make ?acceptLanguage = fun ~id -> fun () -> { acceptLanguage; id }
@@ -15825,10 +17151,10 @@ module DescribeConstraintInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~id ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Id.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~id ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified constraint."]
@@ -15907,8 +17233,8 @@ module DeleteTagOptionInput =
         TagOptionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" TagOptionId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" TagOptionId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the specified TagOption. You cannot delete a TagOption if it is associated with a product or portfolio."]
@@ -15916,12 +17242,16 @@ module DeleteServiceActionOutput =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `ResourceInUseException of ResourceInUseException.t 
+      [ `InvalidParametersException of InvalidParametersException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
+      | "InvalidParametersException" ->
+          `InvalidParametersException
+            (InvalidParametersException.of_json json)
       | "ResourceInUseException" ->
           `ResourceInUseException (ResourceInUseException.of_json json)
       | "ResourceNotFoundException" ->
@@ -15931,6 +17261,8 @@ module DeleteServiceActionOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InvalidParametersException" ->
+          `InvalidParametersException (InvalidParametersException.of_xml xml)
       | "ResourceInUseException" ->
           `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -15939,6 +17271,10 @@ module DeleteServiceActionOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InvalidParametersException e ->
+          `Assoc
+            [("error", (`String "InvalidParametersException"));
+            ("details", (InvalidParametersException.to_json e))]
       | `ResourceInUseException e ->
           `Assoc
             [("error", (`String "ResourceInUseException"));
@@ -15968,28 +17304,39 @@ module DeleteServiceActionInput =
         [@ocaml.doc
           "The self-service action identifier. For example, act-fs7abcd89wxyz."];
       acceptLanguage: AcceptLanguage.t option
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
+      idempotencyToken: IdempotencyToken.t option
         [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"]}
+          "A unique identifier that you provide to ensure idempotency. If multiple requests from the same Amazon Web Services account use the same idempotency token, the same response is returned for each repeated request."]}
     let context_ = "DeleteServiceActionInput"
-    let make ?acceptLanguage = fun ~id -> fun () -> { acceptLanguage; id }
+    let make ?acceptLanguage =
+      fun ?idempotencyToken ->
+        fun ~id -> fun () -> { acceptLanguage; idempotencyToken; id }
     let to_value x =
       structure_to_value
         [("Id", (Some (Id.to_value x.id)));
         ("AcceptLanguage",
-          (Option.map x.acceptLanguage ~f:AcceptLanguage.to_value))]
+          (Option.map x.acceptLanguage ~f:AcceptLanguage.to_value));
+        ("IdempotencyToken",
+          (Option.map x.idempotencyToken ~f:IdempotencyToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let idempotencyToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "IdempotencyToken") in
       let acceptLanguage =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?acceptLanguage ~id ()
+      make ?idempotencyToken ?acceptLanguage ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let idempotencyToken =
+        field_map json__ "IdempotencyToken" IdempotencyToken.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      let id = field_map_exn json "Id" Id.of_json in
-      make ?acceptLanguage ~id ()
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      let id = field_map_exn json__ "Id" Id.of_json in
+      make ?idempotencyToken ?acceptLanguage ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a self-service action."]
 module DeleteProvisioningArtifactOutput =
@@ -16056,8 +17403,7 @@ module DeleteProvisioningArtifactInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       productId: Id.t [@ocaml.doc "The product identifier."];
       provisioningArtifactId: Id.t
         [@ocaml.doc "The identifier of the provisioning artifact."]}
@@ -16085,12 +17431,12 @@ module DeleteProvisioningArtifactInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~provisioningArtifactId ~productId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisioningArtifactId =
-        field_map_exn json "ProvisioningArtifactId" Id.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
+        field_map_exn json__ "ProvisioningArtifactId" Id.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~provisioningArtifactId ~productId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16149,12 +17495,11 @@ module DeleteProvisionedProductPlanInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       planId: Id.t [@ocaml.doc "The plan identifier."];
       ignoreErrors: IgnoreErrors.t option
         [@ocaml.doc
-          "If set to true, AWS Service Catalog stops managing the specified provisioned product even if it cannot delete the underlying resources."]}
+          "If set to true, Service Catalog stops managing the specified provisioned product even if it cannot delete the underlying resources."]}
     let context_ = "DeleteProvisionedProductPlanInput"
     let make ?acceptLanguage =
       fun ?ignoreErrors ->
@@ -16178,11 +17523,11 @@ module DeleteProvisionedProductPlanInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?ignoreErrors ~planId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ignoreErrors = field_map json "IgnoreErrors" IgnoreErrors.of_json in
-      let planId = field_map_exn json "PlanId" Id.of_json in
+    let of_json json__ =
+      let ignoreErrors = field_map json__ "IgnoreErrors" IgnoreErrors.of_json in
+      let planId = field_map_exn json__ "PlanId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?ignoreErrors ~planId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified plan."]
@@ -16261,8 +17606,7 @@ module DeleteProductInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       id: Id.t [@ocaml.doc "The product identifier."]}
     let context_ = "DeleteProductInput"
     let make ?acceptLanguage = fun ~id -> fun () -> { acceptLanguage; id }
@@ -16279,10 +17623,10 @@ module DeleteProductInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~id ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Id.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~id ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16362,9 +17706,9 @@ module DeletePortfolioShareOutput =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "PortfolioShareToken") in
       make ?portfolioShareToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let portfolioShareToken =
-        field_map json "PortfolioShareToken" Id.of_json in
+        field_map json__ "PortfolioShareToken" Id.of_json in
       make ?portfolioShareToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16374,10 +17718,10 @@ module DeletePortfolioShareInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       portfolioId: Id.t [@ocaml.doc "The portfolio identifier."];
-      accountId: AccountId.t option [@ocaml.doc "The AWS account ID."];
+      accountId: AccountId.t option
+        [@ocaml.doc "The Amazon Web Services account ID."];
       organizationNode: OrganizationNode.t option
         [@ocaml.doc
           "The organization node to whom you are going to stop sharing."]}
@@ -16410,13 +17754,13 @@ module DeletePortfolioShareInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?organizationNode ?accountId ~portfolioId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationNode =
-        field_map json "OrganizationNode" OrganizationNode.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
+        field_map json__ "OrganizationNode" OrganizationNode.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?organizationNode ?accountId ~portfolioId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16496,8 +17840,7 @@ module DeletePortfolioInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       id: Id.t [@ocaml.doc "The portfolio identifier."]}
     let context_ = "DeletePortfolioInput"
     let make ?acceptLanguage = fun ~id -> fun () -> { acceptLanguage; id }
@@ -16514,10 +17857,10 @@ module DeletePortfolioInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~id ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Id.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~id ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16577,8 +17920,7 @@ module DeleteConstraintInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       id: Id.t [@ocaml.doc "The identifier of the constraint."]}
     let context_ = "DeleteConstraintInput"
     let make ?acceptLanguage = fun ~id -> fun () -> { acceptLanguage; id }
@@ -16595,10 +17937,10 @@ module DeleteConstraintInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~id ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" Id.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~id ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16669,9 +18011,9 @@ module CreateTagOptionOutput =
           (Xml.child xml_arg0 "TagOptionDetail") in
       make ?tagOptionDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagOptionDetail =
-        field_map json "TagOptionDetail" TagOptionDetail.of_json in
+        field_map json__ "TagOptionDetail" TagOptionDetail.of_json in
       make ?tagOptionDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a TagOption."]
@@ -16696,9 +18038,9 @@ module CreateTagOptionInput =
         TagOptionKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagOptionValue.of_json in
-      let key = field_map_exn json "Key" TagOptionKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagOptionValue.of_json in
+      let key = field_map_exn json__ "Key" TagOptionKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a TagOption."]
@@ -16758,9 +18100,9 @@ module CreateServiceActionOutput =
           (Xml.child xml_arg0 "ServiceActionDetail") in
       make ?serviceActionDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceActionDetail =
-        field_map json "ServiceActionDetail" ServiceActionDetail.of_json in
+        field_map json__ "ServiceActionDetail" ServiceActionDetail.of_json in
       make ?serviceActionDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a self-service action."]
@@ -16774,12 +18116,11 @@ module CreateServiceActionInput =
           "The service action definition type. For example, SSM_AUTOMATION."];
       definition: ServiceActionDefinitionMap.t
         [@ocaml.doc
-          "The self-service action definition. Can be one of the following: Name The name of the AWS Systems Manager document (SSM document). For example, AWS-RestartEC2Instance. If you are using a shared SSM document, you must provide the ARN instead of the name. Version The AWS Systems Manager automation document version. For example, \"Version\": \"1\" AssumeRole The Amazon Resource Name (ARN) of the role that performs the self-service actions on your behalf. For example, \"AssumeRole\": \"arn:aws:iam::12345678910:role/ActionRole\". To reuse the provisioned product launch role, set to \"AssumeRole\": \"LAUNCH_ROLE\". Parameters The list of parameters in JSON format. For example: \\[\\{\\\"Name\\\":\\\"InstanceId\\\",\\\"Type\\\":\\\"TARGET\\\"\\}\\] or \\[\\{\\\"Name\\\":\\\"InstanceId\\\",\\\"Type\\\":\\\"TEXT_VALUE\\\"\\}\\]."];
+          "The self-service action definition. Can be one of the following: Name The name of the Amazon Web Services Systems Manager document (SSM document). For example, AWS-RestartEC2Instance. If you are using a shared SSM document, you must provide the ARN instead of the name. Version The Amazon Web Services Systems Manager automation document version. For example, \"Version\": \"1\" AssumeRole The Amazon Resource Name (ARN) of the role that performs the self-service actions on your behalf. For example, \"AssumeRole\": \"arn:aws:iam::12345678910:role/ActionRole\". To reuse the provisioned product launch role, set to \"AssumeRole\": \"LAUNCH_ROLE\". Parameters The list of parameters in JSON format. For example: \\[\\{\\\"Name\\\":\\\"InstanceId\\\",\\\"Type\\\":\\\"TARGET\\\"\\}\\] or \\[\\{\\\"Name\\\":\\\"InstanceId\\\",\\\"Type\\\":\\\"TEXT_VALUE\\\"\\}\\]."];
       description: ServiceActionDescription.t option
         [@ocaml.doc "The self-service action description."];
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       idempotencyToken: IdempotencyToken.t
         [@ocaml.doc
           "A unique identifier that you provide to ensure idempotency. If multiple requests differ only by the idempotency token, the same response is returned for each repeated request."]}
@@ -16835,19 +18176,19 @@ module CreateServiceActionInput =
       make ~idempotencyToken ?acceptLanguage ?description ~definition
         ~definitionType ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       let description =
-        field_map json "Description" ServiceActionDescription.of_json in
+        field_map json__ "Description" ServiceActionDescription.of_json in
       let definition =
-        field_map_exn json "Definition" ServiceActionDefinitionMap.of_json in
+        field_map_exn json__ "Definition" ServiceActionDefinitionMap.of_json in
       let definitionType =
-        field_map_exn json "DefinitionType"
+        field_map_exn json__ "DefinitionType"
           ServiceActionDefinitionType.of_json in
-      let name = field_map_exn json "Name" ServiceActionName.of_json in
+      let name = field_map_exn json__ "Name" ServiceActionName.of_json in
       make ~idempotencyToken ?acceptLanguage ?description ~definition
         ~definitionType ~name ()
     let to_json v = composed_to_json to_value v
@@ -16860,7 +18201,7 @@ module CreateProvisioningArtifactOutput =
         [@ocaml.doc "Information about the provisioning artifact."];
       info: ProvisioningArtifactInfo.t option
         [@ocaml.doc
-          "Specify the template source with one of the following options, but not both. Keys accepted: \\[ LoadTemplateFromURL, ImportFromPhysicalId \\]. The URL of the CloudFormation template in Amazon S3, in JSON format. LoadTemplateFromURL Use the URL of the CloudFormation template in Amazon S3 in JSON format. ImportFromPhysicalId Use the physical id of the resource that contains the template; currently supports CloudFormation stack ARN."];
+          "Specify the template source with one of the following options, but not both. Keys accepted: \\[ LoadTemplateFromURL, ImportFromPhysicalId \\]. Use the URL of the CloudFormation template in Amazon S3 or GitHub in JSON format. LoadTemplateFromURL Use the URL of the CloudFormation template in Amazon S3 or GitHub in JSON format. ImportFromPhysicalId Use the physical id of the resource that contains the template; currently supports CloudFormation stack ARN."];
       status: Status.t option
         [@ocaml.doc "The status of the current request."]}
     type nonrec error =
@@ -16931,11 +18272,11 @@ module CreateProvisioningArtifactOutput =
           (Xml.child xml_arg0 "ProvisioningArtifactDetail") in
       make ?status ?info ?provisioningArtifactDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
-      let info = field_map json "Info" ProvisioningArtifactInfo.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Status.of_json in
+      let info = field_map json__ "Info" ProvisioningArtifactInfo.of_json in
       let provisioningArtifactDetail =
-        field_map json "ProvisioningArtifactDetail"
+        field_map json__ "ProvisioningArtifactDetail"
           ProvisioningArtifactDetail.of_json in
       make ?status ?info ?provisioningArtifactDetail ()
     let to_json v = composed_to_json to_value v
@@ -16946,8 +18287,7 @@ module CreateProvisioningArtifactInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       productId: Id.t [@ocaml.doc "The product identifier."];
       parameters: ProvisioningArtifactProperties.t
         [@ocaml.doc "The configuration for the provisioning artifact."];
@@ -16985,15 +18325,15 @@ module CreateProvisioningArtifactInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~idempotencyToken ~parameters ~productId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
       let parameters =
-        field_map_exn json "Parameters"
+        field_map_exn json__ "Parameters"
           ProvisioningArtifactProperties.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~idempotencyToken ~parameters ~productId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17098,28 +18438,28 @@ module CreateProvisionedProductPlanOutput =
       make ?provisioningArtifactId ?provisionedProductName
         ?provisionProductId ?planId ?planName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisioningArtifactId =
-        field_map json "ProvisioningArtifactId" Id.of_json in
+        field_map json__ "ProvisioningArtifactId" Id.of_json in
       let provisionedProductName =
-        field_map json "ProvisionedProductName"
+        field_map json__ "ProvisionedProductName"
           ProvisionedProductName.of_json in
-      let provisionProductId = field_map json "ProvisionProductId" Id.of_json in
-      let planId = field_map json "PlanId" Id.of_json in
+      let provisionProductId =
+        field_map json__ "ProvisionProductId" Id.of_json in
+      let planId = field_map json__ "PlanId" Id.of_json in
       let planName =
-        field_map json "PlanName" ProvisionedProductPlanName.of_json in
+        field_map json__ "PlanName" ProvisionedProductPlanName.of_json in
       make ?provisioningArtifactId ?provisionedProductName
         ?provisionProductId ?planId ?planName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a plan. A plan includes the list of resources to be created (when provisioning a new product) or modified (when updating a provisioned product) when the plan is executed. You can create one plan per provisioned product. To create a plan for an existing provisioned product, the product status must be AVAILBLE or TAINTED. To view the resource changes in the change set, use DescribeProvisionedProductPlan. To create or modify the provisioned product, use ExecuteProvisionedProductPlan."]
+       "Creates a plan. A plan includes the list of resources to be created (when provisioning a new product) or modified (when updating a provisioned product) when the plan is executed. You can create one plan for each provisioned product. To create a plan for an existing provisioned product, the product status must be AVAILABLE or TAINTED. To view the resource changes in the change set, use DescribeProvisionedProductPlan. To create or modify the provisioned product, use ExecuteProvisionedProductPlan."]
 module CreateProvisionedProductPlanInput =
   struct
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       planName: ProvisionedProductPlanName.t
         [@ocaml.doc "The name of the plan."];
       planType: ProvisionedProductPlanType.t [@ocaml.doc "The plan type."];
@@ -17132,7 +18472,7 @@ module CreateProvisionedProductPlanInput =
       productId: Id.t [@ocaml.doc "The product identifier."];
       provisionedProductName: ProvisionedProductName.t
         [@ocaml.doc
-          "A user-friendly name for the provisioned product. This value must be unique for the AWS account and cannot be updated after the product is provisioned."];
+          "A user-friendly name for the provisioned product. This value must be unique for the Amazon Web Services account and cannot be updated after the product is provisioned."];
       provisioningArtifactId: Id.t
         [@ocaml.doc "The identifier of the provisioning artifact."];
       provisioningParameters: UpdateProvisioningParameters.t option
@@ -17224,34 +18564,34 @@ module CreateProvisionedProductPlanInput =
         ~provisioningArtifactId ~provisionedProductName ~productId ?pathId
         ?notificationArns ~planType ~planName ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
       let provisioningParameters =
-        field_map json "ProvisioningParameters"
+        field_map json__ "ProvisioningParameters"
           UpdateProvisioningParameters.of_json in
       let provisioningArtifactId =
-        field_map_exn json "ProvisioningArtifactId" Id.of_json in
+        field_map_exn json__ "ProvisioningArtifactId" Id.of_json in
       let provisionedProductName =
-        field_map_exn json "ProvisionedProductName"
+        field_map_exn json__ "ProvisionedProductName"
           ProvisionedProductName.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
-      let pathId = field_map json "PathId" Id.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
+      let pathId = field_map json__ "PathId" Id.of_json in
       let notificationArns =
-        field_map json "NotificationArns" NotificationArns.of_json in
+        field_map json__ "NotificationArns" NotificationArns.of_json in
       let planType =
-        field_map_exn json "PlanType" ProvisionedProductPlanType.of_json in
+        field_map_exn json__ "PlanType" ProvisionedProductPlanType.of_json in
       let planName =
-        field_map_exn json "PlanName" ProvisionedProductPlanName.of_json in
+        field_map_exn json__ "PlanName" ProvisionedProductPlanName.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?tags ~idempotencyToken ?provisioningParameters
         ~provisioningArtifactId ~provisionedProductName ~productId ?pathId
         ?notificationArns ~planType ~planName ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a plan. A plan includes the list of resources to be created (when provisioning a new product) or modified (when updating a provisioned product) when the plan is executed. You can create one plan per provisioned product. To create a plan for an existing provisioned product, the product status must be AVAILBLE or TAINTED. To view the resource changes in the change set, use DescribeProvisionedProductPlan. To create or modify the provisioned product, use ExecuteProvisionedProductPlan."]
+       "Creates a plan. A plan includes the list of resources to be created (when provisioning a new product) or modified (when updating a provisioned product) when the plan is executed. You can create one plan for each provisioned product. To create a plan for an existing provisioned product, the product status must be AVAILABLE or TAINTED. To view the resource changes in the change set, use DescribeProvisionedProductPlan. To create or modify the provisioned product, use ExecuteProvisionedProductPlan."]
 module CreateProductOutput =
   struct
     type nonrec t =
@@ -17334,13 +18674,13 @@ module CreateProductOutput =
           (Xml.child xml_arg0 "ProductViewDetail") in
       make ?tags ?provisioningArtifactDetail ?productViewDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let provisioningArtifactDetail =
-        field_map json "ProvisioningArtifactDetail"
+        field_map json__ "ProvisioningArtifactDetail"
           ProvisioningArtifactDetail.of_json in
       let productViewDetail =
-        field_map json "ProductViewDetail" ProductViewDetail.of_json in
+        field_map json__ "ProductViewDetail" ProductViewDetail.of_json in
       make ?tags ?provisioningArtifactDetail ?productViewDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17350,8 +18690,7 @@ module CreateProductInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       name: ProductViewName.t [@ocaml.doc "The name of the product."];
       owner: ProductViewOwner.t [@ocaml.doc "The owner of the product."];
       description: ProductViewShortDescription.t option
@@ -17367,11 +18706,14 @@ module CreateProductInput =
           "The contact URL for product support. ^https?:\\/\\// / is the pattern used to validate SupportUrl."];
       productType: ProductType.t [@ocaml.doc "The type of product."];
       tags: AddTags.t option [@ocaml.doc "One or more tags."];
-      provisioningArtifactParameters: ProvisioningArtifactProperties.t
+      provisioningArtifactParameters: ProvisioningArtifactProperties.t option
         [@ocaml.doc "The configuration of the provisioning artifact."];
       idempotencyToken: IdempotencyToken.t
         [@ocaml.doc
-          "A unique identifier that you provide to ensure idempotency. If multiple requests differ only by the idempotency token, the same response is returned for each repeated request."]}
+          "A unique identifier that you provide to ensure idempotency. If multiple requests differ only by the idempotency token, the same response is returned for each repeated request."];
+      sourceConnection: SourceConnection.t option
+        [@ocaml.doc
+          "Specifies connection details for the created product and syncs the product to the connection source artifact. This automatically manages the product's artifacts based on changes to the source. The SourceConnection parameter consists of the following sub-fields. Type ConnectionParamters"]}
     let context_ = "CreateProductInput"
     let make ?acceptLanguage =
       fun ?description ->
@@ -17380,26 +18722,28 @@ module CreateProductInput =
             fun ?supportEmail ->
               fun ?supportUrl ->
                 fun ?tags ->
-                  fun ~name ->
-                    fun ~owner ->
-                      fun ~productType ->
-                        fun ~provisioningArtifactParameters ->
-                          fun ~idempotencyToken ->
-                            fun () ->
-                              {
-                                acceptLanguage;
-                                description;
-                                distributor;
-                                supportDescription;
-                                supportEmail;
-                                supportUrl;
-                                tags;
-                                name;
-                                owner;
-                                productType;
-                                provisioningArtifactParameters;
-                                idempotencyToken
-                              }
+                  fun ?provisioningArtifactParameters ->
+                    fun ?sourceConnection ->
+                      fun ~name ->
+                        fun ~owner ->
+                          fun ~productType ->
+                            fun ~idempotencyToken ->
+                              fun () ->
+                                {
+                                  acceptLanguage;
+                                  description;
+                                  distributor;
+                                  supportDescription;
+                                  supportEmail;
+                                  supportUrl;
+                                  tags;
+                                  provisioningArtifactParameters;
+                                  sourceConnection;
+                                  name;
+                                  owner;
+                                  productType;
+                                  idempotencyToken
+                                }
     let to_value x =
       structure_to_value
         [("AcceptLanguage",
@@ -17418,20 +18762,23 @@ module CreateProductInput =
         ("ProductType", (Some (ProductType.to_value x.productType)));
         ("Tags", (Option.map x.tags ~f:AddTags.to_value));
         ("ProvisioningArtifactParameters",
-          (Some
-             (ProvisioningArtifactProperties.to_value
-                x.provisioningArtifactParameters)));
+          (Option.map x.provisioningArtifactParameters
+             ~f:ProvisioningArtifactProperties.to_value));
         ("IdempotencyToken",
-          (Some (IdempotencyToken.to_value x.idempotencyToken)))]
+          (Some (IdempotencyToken.to_value x.idempotencyToken)));
+        ("SourceConnection",
+          (Option.map x.sourceConnection ~f:SourceConnection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceConnection =
+        (Option.map ~f:SourceConnection.of_xml)
+          (Xml.child xml_arg0 "SourceConnection") in
       let idempotencyToken =
         IdempotencyToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdempotencyToken") in
       let provisioningArtifactParameters =
-        ProvisioningArtifactProperties.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ProvisioningArtifactParameters") in
+        (Option.map ~f:ProvisioningArtifactProperties.of_xml)
+          (Xml.child xml_arg0 "ProvisioningArtifactParameters") in
       let tags = (Option.map ~f:AddTags.of_xml) (Xml.child xml_arg0 "Tags") in
       let productType =
         ProductType.of_xml
@@ -17459,32 +18806,38 @@ module CreateProductInput =
       let acceptLanguage =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
-      make ~idempotencyToken ~provisioningArtifactParameters ?tags
-        ~productType ?supportUrl ?supportEmail ?supportDescription
-        ?distributor ?description ~owner ~name ?acceptLanguage ()
+      make ?sourceConnection ~idempotencyToken
+        ?provisioningArtifactParameters ?tags ~productType ?supportUrl
+        ?supportEmail ?supportDescription ?distributor ?description ~owner
+        ~name ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let sourceConnection =
+        field_map json__ "SourceConnection" SourceConnection.of_json in
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
       let provisioningArtifactParameters =
-        field_map_exn json "ProvisioningArtifactParameters"
+        field_map json__ "ProvisioningArtifactParameters"
           ProvisioningArtifactProperties.of_json in
-      let tags = field_map json "Tags" AddTags.of_json in
-      let productType = field_map_exn json "ProductType" ProductType.of_json in
-      let supportUrl = field_map json "SupportUrl" SupportUrl.of_json in
-      let supportEmail = field_map json "SupportEmail" SupportEmail.of_json in
+      let tags = field_map json__ "Tags" AddTags.of_json in
+      let productType =
+        field_map_exn json__ "ProductType" ProductType.of_json in
+      let supportUrl = field_map json__ "SupportUrl" SupportUrl.of_json in
+      let supportEmail = field_map json__ "SupportEmail" SupportEmail.of_json in
       let supportDescription =
-        field_map json "SupportDescription" SupportDescription.of_json in
-      let distributor = field_map json "Distributor" ProductViewOwner.of_json in
+        field_map json__ "SupportDescription" SupportDescription.of_json in
+      let distributor =
+        field_map json__ "Distributor" ProductViewOwner.of_json in
       let description =
-        field_map json "Description" ProductViewShortDescription.of_json in
-      let owner = field_map_exn json "Owner" ProductViewOwner.of_json in
-      let name = field_map_exn json "Name" ProductViewName.of_json in
+        field_map json__ "Description" ProductViewShortDescription.of_json in
+      let owner = field_map_exn json__ "Owner" ProductViewOwner.of_json in
+      let name = field_map_exn json__ "Name" ProductViewName.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      make ~idempotencyToken ~provisioningArtifactParameters ?tags
-        ~productType ?supportUrl ?supportEmail ?supportDescription
-        ?distributor ?description ~owner ~name ?acceptLanguage ()
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      make ?sourceConnection ~idempotencyToken
+        ?provisioningArtifactParameters ?tags ~productType ?supportUrl
+        ?supportEmail ?supportDescription ?distributor ?description ~owner
+        ~name ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a product. A delegated admin is authorized to invoke this command. The user or role that performs this operation must have the cloudformation:GetTemplate IAM policy permission. This policy permission is required when using the ImportFromPhysicalId template source in the information data section."]
@@ -17572,43 +18925,48 @@ module CreatePortfolioShareOutput =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "PortfolioShareToken") in
       make ?portfolioShareToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let portfolioShareToken =
-        field_map json "PortfolioShareToken" Id.of_json in
+        field_map json__ "PortfolioShareToken" Id.of_json in
       make ?portfolioShareToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Shares the specified portfolio with the specified account or organization node. Shares to an organization node can only be created by the management account of an organization or by a delegated administrator. You can share portfolios to an organization, an organizational unit, or a specific account. Note that if a delegated admin is de-registered, they can no longer create portfolio shares. AWSOrganizationsAccess must be enabled in order to create a portfolio share to an organization node. You can't share a shared resource, including portfolios that contain a shared product. If the portfolio share with the specified account or organization node already exists, this action will have no effect and will not return an error. To update an existing share, you must use the UpdatePortfolioShare API instead."]
+       "Shares the specified portfolio with the specified account or organization node. Shares to an organization node can only be created by the management account of an organization or by a delegated administrator. You can share portfolios to an organization, an organizational unit, or a specific account. Note that if a delegated admin is de-registered, they can no longer create portfolio shares. AWSOrganizationsAccess must be enabled in order to create a portfolio share to an organization node. You can't share a shared resource, including portfolios that contain a shared product. If the portfolio share with the specified account or organization node already exists, this action will have no effect and will not return an error. To update an existing share, you must use the UpdatePortfolioShare API instead. When you associate a principal with portfolio, a potential privilege escalation path may occur when that portfolio is then shared with other accounts. For a user in a recipient account who is not an Service Catalog Admin, but still has the ability to create Principals (Users/Groups/Roles), that user could create a role that matches a principal name association for the portfolio. Although this user may not know which principal names are associated through Service Catalog, they may be able to guess the user. If this potential escalation path is a concern, then Service Catalog recommends using PrincipalType as IAM. With this configuration, the PrincipalARN must already exist in the recipient account before it can be associated."]
 module CreatePortfolioShareInput =
   struct
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       portfolioId: Id.t [@ocaml.doc "The portfolio identifier."];
       accountId: AccountId.t option
-        [@ocaml.doc "The AWS account ID. For example, 123456789012."];
+        [@ocaml.doc
+          "The Amazon Web Services account ID. For example, 123456789012."];
       organizationNode: OrganizationNode.t option
         [@ocaml.doc
-          "The organization node to whom you are going to share. If OrganizationNode is passed in, PortfolioShare will be created for the node an ListOrganizationPortfolioAccessd its children (when applies), and a PortfolioShareToken will be returned in the output in order for the administrator to monitor the status of the PortfolioShare creation process."];
+          "The organization node to whom you are going to share. When you pass OrganizationNode, it creates PortfolioShare for all of the Amazon Web Services accounts that are associated to the OrganizationNode. The output returns a PortfolioShareToken, which enables the administrator to monitor the status of the PortfolioShare creation process."];
       shareTagOptions: Boolean.t option
         [@ocaml.doc
-          "Enables or disables TagOptions sharing when creating the portfolio share. If this flag is not provided, TagOptions sharing is disabled."]}
+          "Enables or disables TagOptions sharing when creating the portfolio share. If this flag is not provided, TagOptions sharing is disabled."];
+      sharePrincipals: Boolean.t option
+        [@ocaml.doc
+          "This parameter is only supported for portfolios with an OrganizationalNode Type of ORGANIZATION or ORGANIZATIONAL_UNIT. Enables or disables Principal sharing when creating the portfolio share. If you do not provide this flag, principal sharing is disabled. When you enable Principal Name Sharing for a portfolio share, the share recipient account end users with a principal that matches any of the associated IAM patterns can provision products from the portfolio. Once shared, the share recipient can view associations of PrincipalType: IAM_PATTERN on their portfolio. You can create the principals in the recipient account before or after creating the share."]}
     let context_ = "CreatePortfolioShareInput"
     let make ?acceptLanguage =
       fun ?accountId ->
         fun ?organizationNode ->
           fun ?shareTagOptions ->
-            fun ~portfolioId ->
-              fun () ->
-                {
-                  acceptLanguage;
-                  accountId;
-                  organizationNode;
-                  shareTagOptions;
-                  portfolioId
-                }
+            fun ?sharePrincipals ->
+              fun ~portfolioId ->
+                fun () ->
+                  {
+                    acceptLanguage;
+                    accountId;
+                    organizationNode;
+                    shareTagOptions;
+                    sharePrincipals;
+                    portfolioId
+                  }
     let to_value x =
       structure_to_value
         [("AcceptLanguage",
@@ -17618,9 +18976,13 @@ module CreatePortfolioShareInput =
         ("OrganizationNode",
           (Option.map x.organizationNode ~f:OrganizationNode.to_value));
         ("ShareTagOptions",
-          (Option.map x.shareTagOptions ~f:Boolean.to_value))]
+          (Option.map x.shareTagOptions ~f:Boolean.to_value));
+        ("SharePrincipals",
+          (Option.map x.sharePrincipals ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sharePrincipals =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "SharePrincipals") in
       let shareTagOptions =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ShareTagOptions") in
       let organizationNode =
@@ -17633,22 +18995,25 @@ module CreatePortfolioShareInput =
       let acceptLanguage =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
-      make ?shareTagOptions ?organizationNode ?accountId ~portfolioId
-        ?acceptLanguage ()
+      make ?sharePrincipals ?shareTagOptions ?organizationNode ?accountId
+        ~portfolioId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shareTagOptions = field_map json "ShareTagOptions" Boolean.of_json in
+    let of_json json__ =
+      let sharePrincipals =
+        field_map json__ "SharePrincipals" Boolean.of_json in
+      let shareTagOptions =
+        field_map json__ "ShareTagOptions" Boolean.of_json in
       let organizationNode =
-        field_map json "OrganizationNode" OrganizationNode.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
+        field_map json__ "OrganizationNode" OrganizationNode.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      make ?shareTagOptions ?organizationNode ?accountId ~portfolioId
-        ?acceptLanguage ()
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      make ?sharePrincipals ?shareTagOptions ?organizationNode ?accountId
+        ~portfolioId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Shares the specified portfolio with the specified account or organization node. Shares to an organization node can only be created by the management account of an organization or by a delegated administrator. You can share portfolios to an organization, an organizational unit, or a specific account. Note that if a delegated admin is de-registered, they can no longer create portfolio shares. AWSOrganizationsAccess must be enabled in order to create a portfolio share to an organization node. You can't share a shared resource, including portfolios that contain a shared product. If the portfolio share with the specified account or organization node already exists, this action will have no effect and will not return an error. To update an existing share, you must use the UpdatePortfolioShare API instead."]
+       "Shares the specified portfolio with the specified account or organization node. Shares to an organization node can only be created by the management account of an organization or by a delegated administrator. You can share portfolios to an organization, an organizational unit, or a specific account. Note that if a delegated admin is de-registered, they can no longer create portfolio shares. AWSOrganizationsAccess must be enabled in order to create a portfolio share to an organization node. You can't share a shared resource, including portfolios that contain a shared product. If the portfolio share with the specified account or organization node already exists, this action will have no effect and will not return an error. To update an existing share, you must use the UpdatePortfolioShare API instead. When you associate a principal with portfolio, a potential privilege escalation path may occur when that portfolio is then shared with other accounts. For a user in a recipient account who is not an Service Catalog Admin, but still has the ability to create Principals (Users/Groups/Roles), that user could create a role that matches a principal name association for the portfolio. Although this user may not know which principal names are associated through Service Catalog, they may be able to guess the user. If this potential escalation path is a concern, then Service Catalog recommends using PrincipalType as IAM. With this configuration, the PrincipalARN must already exist in the recipient account before it can be associated."]
 module CreatePortfolioOutput =
   struct
     type nonrec t =
@@ -17721,10 +19086,10 @@ module CreatePortfolioOutput =
           (Xml.child xml_arg0 "PortfolioDetail") in
       make ?tags ?portfolioDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let portfolioDetail =
-        field_map json "PortfolioDetail" PortfolioDetail.of_json in
+        field_map json__ "PortfolioDetail" PortfolioDetail.of_json in
       make ?tags ?portfolioDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17734,8 +19099,7 @@ module CreatePortfolioInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       displayName: PortfolioDisplayName.t
         [@ocaml.doc "The name to use for display purposes."];
       description: PortfolioDescription.t option
@@ -17794,18 +19158,18 @@ module CreatePortfolioInput =
       make ~idempotencyToken ?tags ~providerName ?description ~displayName
         ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
-      let tags = field_map json "Tags" AddTags.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let tags = field_map json__ "Tags" AddTags.of_json in
       let providerName =
-        field_map_exn json "ProviderName" ProviderName.of_json in
+        field_map_exn json__ "ProviderName" ProviderName.of_json in
       let description =
-        field_map json "Description" PortfolioDescription.of_json in
+        field_map json__ "Description" PortfolioDescription.of_json in
       let displayName =
-        field_map_exn json "DisplayName" PortfolioDisplayName.of_json in
+        field_map_exn json__ "DisplayName" PortfolioDisplayName.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~idempotencyToken ?tags ~providerName ?description ~displayName
         ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
@@ -17900,12 +19264,12 @@ module CreateConstraintOutput =
           (Xml.child xml_arg0 "ConstraintDetail") in
       make ?status ?constraintParameters ?constraintDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" Status.of_json in
       let constraintParameters =
-        field_map json "ConstraintParameters" ConstraintParameters.of_json in
+        field_map json__ "ConstraintParameters" ConstraintParameters.of_json in
       let constraintDetail =
-        field_map json "ConstraintDetail" ConstraintDetail.of_json in
+        field_map json__ "ConstraintDetail" ConstraintDetail.of_json in
       make ?status ?constraintParameters ?constraintDetail ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17915,13 +19279,12 @@ module CreateConstraintInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       portfolioId: Id.t [@ocaml.doc "The portfolio identifier."];
       productId: Id.t [@ocaml.doc "The product identifier."];
       parameters: ConstraintParameters.t
         [@ocaml.doc
-          "The constraint parameters, in JSON format. The syntax depends on the constraint type as follows: LAUNCH You are required to specify either the RoleArn or the LocalRoleName but can't use both. Specify the RoleArn property as follows: \\{\"RoleArn\" : \"arn:aws:iam::123456789012:role/LaunchRole\"\\} Specify the LocalRoleName property as follows: \\{\"LocalRoleName\": \"SCBasicLaunchRole\"\\} If you specify the LocalRoleName property, when an account uses the launch constraint, the IAM role with that name in the account will be used. This allows launch-role constraints to be account-agnostic so the administrator can create fewer resources per shared account. The given role name must exist in the account used to create the launch constraint and the account of the user who launches a product with this launch constraint. You cannot have both a LAUNCH and a STACKSET constraint. You also cannot have more than one LAUNCH constraint on a product and portfolio. NOTIFICATION Specify the NotificationArns property as follows: \\{\"NotificationArns\" : \\[\"arn:aws:sns:us-east-1:123456789012:Topic\"\\]\\} RESOURCE_UPDATE Specify the TagUpdatesOnProvisionedProduct property as follows: \\{\"Version\":\"2.0\",\"Properties\":\\{\"TagUpdateOnProvisionedProduct\":\"String\"\\}\\} The TagUpdatesOnProvisionedProduct property accepts a string value of ALLOWED or NOT_ALLOWED. STACKSET Specify the Parameters property as follows: \\{\"Version\": \"String\", \"Properties\": \\{\"AccountList\": \\[ \"String\" \\], \"RegionList\": \\[ \"String\" \\], \"AdminRole\": \"String\", \"ExecutionRole\": \"String\"\\}\\} You cannot have both a LAUNCH and a STACKSET constraint. You also cannot have more than one STACKSET constraint on a product and portfolio. Products with a STACKSET constraint will launch an AWS CloudFormation stack set. TEMPLATE Specify the Rules property. For more information, see Template Constraint Rules."];
+          "The constraint parameters, in JSON format. The syntax depends on the constraint type as follows: LAUNCH You are required to specify either the RoleArn or the LocalRoleName but can't use both. Specify the RoleArn property as follows: \\{\"RoleArn\" : \"arn:aws:iam::123456789012:role/LaunchRole\"\\} Specify the LocalRoleName property as follows: \\{\"LocalRoleName\": \"SCBasicLaunchRole\"\\} If you specify the LocalRoleName property, when an account uses the launch constraint, the IAM role with that name in the account will be used. This allows launch-role constraints to be account-agnostic so the administrator can create fewer resources per shared account. The given role name must exist in the account used to create the launch constraint and the account of the user who launches a product with this launch constraint. You cannot have both a LAUNCH and a STACKSET constraint. You also cannot have more than one LAUNCH constraint on a product and portfolio. NOTIFICATION Specify the NotificationArns property as follows: \\{\"NotificationArns\" : \\[\"arn:aws:sns:us-east-1:123456789012:Topic\"\\]\\} RESOURCE_UPDATE Specify the TagUpdatesOnProvisionedProduct property as follows: \\{\"Version\":\"2.0\",\"Properties\":\\{\"TagUpdateOnProvisionedProduct\":\"String\"\\}\\} The TagUpdatesOnProvisionedProduct property accepts a string value of ALLOWED or NOT_ALLOWED. STACKSET Specify the Parameters property as follows: \\{\"Version\": \"String\", \"Properties\": \\{\"AccountList\": \\[ \"String\" \\], \"RegionList\": \\[ \"String\" \\], \"AdminRole\": \"String\", \"ExecutionRole\": \"String\"\\}\\} You cannot have both a LAUNCH and a STACKSET constraint. You also cannot have more than one STACKSET constraint on a product and portfolio. Products with a STACKSET constraint will launch an CloudFormation stack set. TEMPLATE Specify the Rules property. For more information, see Template Constraint Rules."];
       type_: ConstraintType.t
         [@ocaml.doc
           "The type of constraint. LAUNCH NOTIFICATION RESOURCE_UPDATE STACKSET TEMPLATE"];
@@ -17984,18 +19347,18 @@ module CreateConstraintInput =
       make ~idempotencyToken ?description ~type_ ~parameters ~productId
         ~portfolioId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
       let description =
-        field_map json "Description" ConstraintDescription.of_json in
-      let type_ = field_map_exn json "Type" ConstraintType.of_json in
+        field_map json__ "Description" ConstraintDescription.of_json in
+      let type_ = field_map_exn json__ "Type" ConstraintType.of_json in
       let parameters =
-        field_map_exn json "Parameters" ConstraintParameters.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
+        field_map_exn json__ "Parameters" ConstraintParameters.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~idempotencyToken ?description ~type_ ~parameters ~productId
         ~portfolioId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
@@ -18055,19 +19418,18 @@ module CopyProductOutput =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "CopyProductToken") in
       make ?copyProductToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let copyProductToken = field_map json "CopyProductToken" Id.of_json in
+    let of_json json__ =
+      let copyProductToken = field_map json__ "CopyProductToken" Id.of_json in
       make ?copyProductToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Copies the specified source product to the specified target product or a new product. You can copy a product to the same account or another account. You can copy a product to the same region or another region. This operation is performed asynchronously. To track the progress of the operation, use DescribeCopyProductStatus."]
+       "Copies the specified source product to the specified target product or a new product. You can copy a product to the same account or another account. You can copy a product to the same Region or another Region. If you copy a product to another account, you must first share the product in a portfolio using CreatePortfolioShare. This operation is performed asynchronously. To track the progress of the operation, use DescribeCopyProductStatus."]
 module CopyProductInput =
   struct
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       sourceProductArn: ProductArn.t
         [@ocaml.doc "The Amazon Resource Name (ARN) of the source product."];
       targetProductId: Id.t option
@@ -18143,26 +19505,26 @@ module CopyProductInput =
         ?sourceProvisioningArtifactIdentifiers ?targetProductName
         ?targetProductId ~sourceProductArn ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let idempotencyToken =
-        field_map_exn json "IdempotencyToken" IdempotencyToken.of_json in
-      let copyOptions = field_map json "CopyOptions" CopyOptions.of_json in
+        field_map_exn json__ "IdempotencyToken" IdempotencyToken.of_json in
+      let copyOptions = field_map json__ "CopyOptions" CopyOptions.of_json in
       let sourceProvisioningArtifactIdentifiers =
-        field_map json "SourceProvisioningArtifactIdentifiers"
+        field_map json__ "SourceProvisioningArtifactIdentifiers"
           SourceProvisioningArtifactProperties.of_json in
       let targetProductName =
-        field_map json "TargetProductName" ProductViewName.of_json in
-      let targetProductId = field_map json "TargetProductId" Id.of_json in
+        field_map json__ "TargetProductName" ProductViewName.of_json in
+      let targetProductId = field_map json__ "TargetProductId" Id.of_json in
       let sourceProductArn =
-        field_map_exn json "SourceProductArn" ProductArn.of_json in
+        field_map_exn json__ "SourceProductArn" ProductArn.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~idempotencyToken ?copyOptions
         ?sourceProvisioningArtifactIdentifiers ?targetProductName
         ?targetProductId ~sourceProductArn ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Copies the specified source product to the specified target product or a new product. You can copy a product to the same account or another account. You can copy a product to the same region or another region. This operation is performed asynchronously. To track the progress of the operation, use DescribeCopyProductStatus."]
+       "Copies the specified source product to the specified target product or a new product. You can copy a product to the same account or another account. You can copy a product to the same Region or another Region. If you copy a product to another account, you must first share the product in a portfolio using CreatePortfolioShare. This operation is performed asynchronously. To track the progress of the operation, use DescribeCopyProductStatus."]
 module BatchDisassociateServiceActionFromProvisioningArtifactOutput =
   struct
     type nonrec t =
@@ -18213,9 +19575,9 @@ module BatchDisassociateServiceActionFromProvisioningArtifactOutput =
           (Xml.child xml_arg0 "FailedServiceActionAssociations") in
       make ?failedServiceActionAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedServiceActionAssociations =
-        field_map json "FailedServiceActionAssociations"
+        field_map json__ "FailedServiceActionAssociations"
           FailedServiceActionAssociations.of_json in
       make ?failedServiceActionAssociations ()
     let to_json v = composed_to_json to_value v
@@ -18229,8 +19591,7 @@ module BatchDisassociateServiceActionFromProvisioningArtifactInput =
         [@ocaml.doc
           "One or more associations, each consisting of the Action ID, the Product ID, and the Provisioning Artifact ID."];
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"]}
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"]}
     let context_ =
       "BatchDisassociateServiceActionFromProvisioningArtifactInput"
     let make ?acceptLanguage =
@@ -18254,11 +19615,11 @@ module BatchDisassociateServiceActionFromProvisioningArtifactInput =
              "ServiceActionAssociations") in
       make ?acceptLanguage ~serviceActionAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       let serviceActionAssociations =
-        field_map_exn json "ServiceActionAssociations"
+        field_map_exn json__ "ServiceActionAssociations"
           ServiceActionAssociations.of_json in
       make ?acceptLanguage ~serviceActionAssociations ()
     let to_json v = composed_to_json to_value v
@@ -18314,9 +19675,9 @@ module BatchAssociateServiceActionWithProvisioningArtifactOutput =
           (Xml.child xml_arg0 "FailedServiceActionAssociations") in
       make ?failedServiceActionAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedServiceActionAssociations =
-        field_map json "FailedServiceActionAssociations"
+        field_map json__ "FailedServiceActionAssociations"
           FailedServiceActionAssociations.of_json in
       make ?failedServiceActionAssociations ()
     let to_json v = composed_to_json to_value v
@@ -18330,8 +19691,7 @@ module BatchAssociateServiceActionWithProvisioningArtifactInput =
         [@ocaml.doc
           "One or more associations, each consisting of the Action ID, the Product ID, and the Provisioning Artifact ID."];
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"]}
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"]}
     let context_ = "BatchAssociateServiceActionWithProvisioningArtifactInput"
     let make ?acceptLanguage =
       fun ~serviceActionAssociations ->
@@ -18354,11 +19714,11 @@ module BatchAssociateServiceActionWithProvisioningArtifactInput =
              "ServiceActionAssociations") in
       make ?acceptLanguage ~serviceActionAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       let serviceActionAssociations =
-        field_map_exn json "ServiceActionAssociations"
+        field_map_exn json__ "ServiceActionAssociations"
           ServiceActionAssociations.of_json in
       make ?acceptLanguage ~serviceActionAssociations ()
     let to_json v = composed_to_json to_value v
@@ -18476,9 +19836,10 @@ module AssociateTagOptionWithResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagOptionId ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagOptionId = field_map_exn json "TagOptionId" TagOptionId.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let tagOptionId =
+        field_map_exn json__ "TagOptionId" TagOptionId.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~tagOptionId ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18488,6 +19849,7 @@ module AssociateServiceActionWithProvisioningArtifactOutput =
     type nonrec t = unit
     type nonrec error =
       [ `DuplicateResourceException of DuplicateResourceException.t 
+      | `InvalidParametersException of InvalidParametersException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -18497,6 +19859,9 @@ module AssociateServiceActionWithProvisioningArtifactOutput =
       | "DuplicateResourceException" ->
           `DuplicateResourceException
             (DuplicateResourceException.of_json json)
+      | "InvalidParametersException" ->
+          `InvalidParametersException
+            (InvalidParametersException.of_json json)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_json json)
       | "ResourceNotFoundException" ->
@@ -18508,6 +19873,8 @@ module AssociateServiceActionWithProvisioningArtifactOutput =
       match name with
       | "DuplicateResourceException" ->
           `DuplicateResourceException (DuplicateResourceException.of_xml xml)
+      | "InvalidParametersException" ->
+          `InvalidParametersException (InvalidParametersException.of_xml xml)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -18520,6 +19887,10 @@ module AssociateServiceActionWithProvisioningArtifactOutput =
           `Assoc
             [("error", (`String "DuplicateResourceException"));
             ("details", (DuplicateResourceException.to_json e))]
+      | `InvalidParametersException e ->
+          `Assoc
+            [("error", (`String "InvalidParametersException"));
+            ("details", (InvalidParametersException.to_json e))]
       | `LimitExceededException e ->
           `Assoc
             [("error", (`String "LimitExceededException"));
@@ -18556,20 +19927,24 @@ module AssociateServiceActionWithProvisioningArtifactInput =
         [@ocaml.doc
           "The self-service action identifier. For example, act-fs7abcd89wxyz."];
       acceptLanguage: AcceptLanguage.t option
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
+      idempotencyToken: IdempotencyToken.t option
         [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"]}
+          "A unique identifier that you provide to ensure idempotency. If multiple requests from the same Amazon Web Services account use the same idempotency token, the same response is returned for each repeated request."]}
     let context_ = "AssociateServiceActionWithProvisioningArtifactInput"
     let make ?acceptLanguage =
-      fun ~productId ->
-        fun ~provisioningArtifactId ->
-          fun ~serviceActionId ->
-            fun () ->
-              {
-                acceptLanguage;
-                productId;
-                provisioningArtifactId;
-                serviceActionId
-              }
+      fun ?idempotencyToken ->
+        fun ~productId ->
+          fun ~provisioningArtifactId ->
+            fun ~serviceActionId ->
+              fun () ->
+                {
+                  acceptLanguage;
+                  idempotencyToken;
+                  productId;
+                  provisioningArtifactId;
+                  serviceActionId
+                }
     let to_value x =
       structure_to_value
         [("ProductId", (Some (Id.to_value x.productId)));
@@ -18577,9 +19952,14 @@ module AssociateServiceActionWithProvisioningArtifactInput =
           (Some (Id.to_value x.provisioningArtifactId)));
         ("ServiceActionId", (Some (Id.to_value x.serviceActionId)));
         ("AcceptLanguage",
-          (Option.map x.acceptLanguage ~f:AcceptLanguage.to_value))]
+          (Option.map x.acceptLanguage ~f:AcceptLanguage.to_value));
+        ("IdempotencyToken",
+          (Option.map x.idempotencyToken ~f:IdempotencyToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let idempotencyToken =
+        (Option.map ~f:IdempotencyToken.of_xml)
+          (Xml.child xml_arg0 "IdempotencyToken") in
       let acceptLanguage =
         (Option.map ~f:AcceptLanguage.of_xml)
           (Xml.child xml_arg0 "AcceptLanguage") in
@@ -18591,18 +19971,20 @@ module AssociateServiceActionWithProvisioningArtifactInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ProvisioningArtifactId") in
       let productId =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ProductId") in
-      make ?acceptLanguage ~serviceActionId ~provisioningArtifactId
-        ~productId ()
+      make ?idempotencyToken ?acceptLanguage ~serviceActionId
+        ~provisioningArtifactId ~productId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let idempotencyToken =
+        field_map json__ "IdempotencyToken" IdempotencyToken.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
-      let serviceActionId = field_map_exn json "ServiceActionId" Id.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      let serviceActionId = field_map_exn json__ "ServiceActionId" Id.of_json in
       let provisioningArtifactId =
-        field_map_exn json "ProvisioningArtifactId" Id.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
-      make ?acceptLanguage ~serviceActionId ~provisioningArtifactId
-        ~productId ()
+        field_map_exn json__ "ProvisioningArtifactId" Id.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
+      make ?idempotencyToken ?acceptLanguage ~serviceActionId
+        ~provisioningArtifactId ~productId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Associates a self-service action with a provisioning artifact."]
@@ -18670,8 +20052,7 @@ module AssociateProductWithPortfolioInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       productId: Id.t [@ocaml.doc "The product identifier."];
       portfolioId: Id.t [@ocaml.doc "The portfolio identifier."];
       sourcePortfolioId: Id.t option
@@ -18704,12 +20085,12 @@ module AssociateProductWithPortfolioInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?sourcePortfolioId ~portfolioId ~productId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourcePortfolioId = field_map json "SourcePortfolioId" Id.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
-      let productId = field_map_exn json "ProductId" Id.of_json in
+    let of_json json__ =
+      let sourcePortfolioId = field_map json__ "SourcePortfolioId" Id.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
+      let productId = field_map_exn json__ "ProductId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?sourcePortfolioId ~portfolioId ~productId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18772,19 +20153,20 @@ module AssociatePrincipalWithPortfolioOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates the specified principal ARN with the specified portfolio."]
+       "Associates the specified principal ARN with the specified portfolio. If you share the portfolio with principal name sharing enabled, the PrincipalARN association is included in the share. The PortfolioID, PrincipalARN, and PrincipalType parameters are required. You can associate a maximum of 10 Principals with a portfolio using PrincipalType as IAM_PATTERN. When you associate a principal with portfolio, a potential privilege escalation path may occur when that portfolio is then shared with other accounts. For a user in a recipient account who is not an Service Catalog Admin, but still has the ability to create Principals (Users/Groups/Roles), that user could create a role that matches a principal name association for the portfolio. Although this user may not know which principal names are associated through Service Catalog, they may be able to guess the user. If this potential escalation path is a concern, then Service Catalog recommends using PrincipalType as IAM. With this configuration, the PrincipalARN must already exist in the recipient account before it can be associated."]
 module AssociatePrincipalWithPortfolioInput =
   struct
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       portfolioId: Id.t [@ocaml.doc "The portfolio identifier."];
       principalARN: PrincipalARN.t
-        [@ocaml.doc "The ARN of the principal (IAM user, role, or group)."];
+        [@ocaml.doc
+          "The ARN of the principal (user, role, or group). If the PrincipalType is IAM, the supported value is a fully defined IAM Amazon Resource Name (ARN). If the PrincipalType is IAM_PATTERN, the supported value is an IAM ARN without an AccountID in the following format: arn:partition:iam:::resource-type/resource-id The ARN resource-id can be either: A fully formed resource-id. For example, arn:aws:iam:::role/resource-name or arn:aws:iam:::role/resource-path/resource-name A wildcard ARN. The wildcard ARN accepts IAM_PATTERN values with a \"*\" or \"?\" in the resource-id segment of the ARN. For example arn:partition:service:::resource-type/resource-path/resource-name. The new symbols are exclusive to the resource-path and resource-name and cannot replace the resource-type or other ARN values. The ARN path and principal name allow unlimited wildcard characters. Examples of an acceptable wildcard ARN: arn:aws:iam:::role/ResourceName_* arn:aws:iam:::role/*/ResourceName_? Examples of an unacceptable wildcard ARN: arn:aws:iam:::*/ResourceName You can associate multiple IAM_PATTERNs even if the account has no principal with that name. The \"?\" wildcard character matches zero or one of any character. This is similar to \".?\" in regular regex context. The \"*\" wildcard character matches any number of any characters. This is similar to \".*\" in regular regex context. In the IAM Principal ARN format (arn:partition:iam:::resource-type/resource-path/resource-name), valid resource-type values include user/, group/, or role/. The \"?\" and \"*\" characters are allowed only after the resource-type in the resource-id segment. You can use special characters anywhere within the resource-id. The \"*\" character also matches the \"/\" character, allowing paths to be formed within the resource-id. For example, arn:aws:iam:::role/*/ResourceName_? matches both arn:aws:iam:::role/pathA/pathB/ResourceName_1 and arn:aws:iam:::role/pathA/ResourceName_1."];
       principalType: PrincipalType.t
-        [@ocaml.doc "The principal type. The supported value is IAM."]}
+        [@ocaml.doc
+          "The principal type. The supported value is IAM if you use a fully defined Amazon Resource Name (ARN), or IAM_PATTERN if you use an ARN with no accountID, with or without wildcard characters."]}
     let context_ = "AssociatePrincipalWithPortfolioInput"
     let make ?acceptLanguage =
       fun ~portfolioId ->
@@ -18814,18 +20196,18 @@ module AssociatePrincipalWithPortfolioInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ~principalType ~principalARN ~portfolioId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let principalType =
-        field_map_exn json "PrincipalType" PrincipalType.of_json in
+        field_map_exn json__ "PrincipalType" PrincipalType.of_json in
       let principalARN =
-        field_map_exn json "PrincipalARN" PrincipalARN.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
+        field_map_exn json__ "PrincipalARN" PrincipalARN.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ~principalType ~principalARN ~portfolioId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates the specified principal ARN with the specified portfolio."]
+       "Associates the specified principal ARN with the specified portfolio. If you share the portfolio with principal name sharing enabled, the PrincipalARN association is included in the share. The PortfolioID, PrincipalARN, and PrincipalType parameters are required. You can associate a maximum of 10 Principals with a portfolio using PrincipalType as IAM_PATTERN. When you associate a principal with portfolio, a potential privilege escalation path may occur when that portfolio is then shared with other accounts. For a user in a recipient account who is not an Service Catalog Admin, but still has the ability to create Principals (Users/Groups/Roles), that user could create a role that matches a principal name association for the portfolio. Although this user may not know which principal names are associated through Service Catalog, they may be able to guess the user. If this potential escalation path is a concern, then Service Catalog recommends using PrincipalType as IAM. With this configuration, the PrincipalARN must already exist in the recipient account before it can be associated."]
 module AssociateBudgetWithResourceOutput =
   struct
     type nonrec t = unit
@@ -18920,9 +20302,9 @@ module AssociateBudgetWithResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "BudgetName") in
       make ~resourceId ~budgetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" Id.of_json in
-      let budgetName = field_map_exn json "BudgetName" BudgetName.of_json in
+    let of_json json__ =
+      let resourceId = field_map_exn json__ "ResourceId" Id.of_json in
+      let budgetName = field_map_exn json__ "BudgetName" BudgetName.of_json in
       make ~resourceId ~budgetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18990,8 +20372,7 @@ module AcceptPortfolioShareInput =
     type nonrec t =
       {
       acceptLanguage: AcceptLanguage.t option
-        [@ocaml.doc
-          "The language code. en - English (default) jp - Japanese zh - Chinese"];
+        [@ocaml.doc "The language code. jp - Japanese zh - Chinese"];
       portfolioId: Id.t [@ocaml.doc "The portfolio identifier."];
       portfolioShareType: PortfolioShareType.t option
         [@ocaml.doc
@@ -19020,12 +20401,12 @@ module AcceptPortfolioShareInput =
           (Xml.child xml_arg0 "AcceptLanguage") in
       make ?portfolioShareType ~portfolioId ?acceptLanguage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let portfolioShareType =
-        field_map json "PortfolioShareType" PortfolioShareType.of_json in
-      let portfolioId = field_map_exn json "PortfolioId" Id.of_json in
+        field_map json__ "PortfolioShareType" PortfolioShareType.of_json in
+      let portfolioId = field_map_exn json__ "PortfolioId" Id.of_json in
       let acceptLanguage =
-        field_map json "AcceptLanguage" AcceptLanguage.of_json in
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
       make ?portfolioShareType ~portfolioId ?acceptLanguage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Accepts an offer to share the specified portfolio."]

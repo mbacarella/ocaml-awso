@@ -13,12 +13,16 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let batch_get_traces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetTraces input
+let cancel_trace_retrieval ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelTraceRetrieval input
 let create_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGroup input
 let create_sampling_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSamplingRule input
 let delete_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteGroup input
+let delete_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
 let delete_sampling_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSamplingRule input
 let get_encryption_config ?endpoint_url ?cfg input =
@@ -27,6 +31,8 @@ let get_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetGroup input
 let get_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetGroups input
+let get_indexing_rules ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIndexingRules input
 let get_insight ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetInsight input
 let get_insight_events ?endpoint_url ?cfg input =
@@ -35,6 +41,8 @@ let get_insight_impact_graph ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetInsightImpactGraph input
 let get_insight_summaries ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetInsightSummaries input
+let get_retrieved_traces_graph ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRetrievedTracesGraph input
 let get_sampling_rules ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSamplingRules input
 let get_sampling_statistic_summaries ?endpoint_url ?cfg input =
@@ -47,21 +55,35 @@ let get_time_series_service_statistics ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTimeSeriesServiceStatistics input
 let get_trace_graph ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTraceGraph input
+let get_trace_segment_destination ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTraceSegmentDestination input
 let get_trace_summaries ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTraceSummaries input
+let list_resource_policies ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListResourcePolicies input
+let list_retrieved_traces ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRetrievedTraces input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let put_encryption_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutEncryptionConfig input
+let put_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutResourcePolicy input
 let put_telemetry_records ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutTelemetryRecords input
 let put_trace_segments ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutTraceSegments input
+let start_trace_retrieval ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartTraceRetrieval input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateGroup input
+let update_indexing_rule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateIndexingRule input
 let update_sampling_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateSamplingRule input
+let update_trace_segment_destination ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateTraceSegmentDestination input

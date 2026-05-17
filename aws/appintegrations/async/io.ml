@@ -11,18 +11,30 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let create_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateApplication input
 let create_data_integration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDataIntegration input
+let create_data_integration_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDataIntegrationAssociation input
 let create_event_integration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateEventIntegration input
+let delete_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteApplication input
 let delete_data_integration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDataIntegration input
 let delete_event_integration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEventIntegration input
+let get_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetApplication input
 let get_data_integration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDataIntegration input
 let get_event_integration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEventIntegration input
+let list_application_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListApplicationAssociations input
+let list_applications ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListApplications input
 let list_data_integration_associations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDataIntegrationAssociations input
 let list_data_integrations ?endpoint_url ?cfg input =
@@ -37,7 +49,11 @@ let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateApplication input
 let update_data_integration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDataIntegration input
+let update_data_integration_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDataIntegrationAssociation input
 let update_event_integration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateEventIntegration input

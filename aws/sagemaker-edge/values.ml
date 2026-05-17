@@ -23,6 +23,43 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module ChecksumString =
+  struct
+    type nonrec t = string
+    let context_ = "ChecksumString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-z0-9](-*[a-z0-9])*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ChecksumString" j
+    let to_json = simple_to_json to_value
+  end
+module ChecksumType =
+  struct
+    type nonrec t =
+      | SHA1 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | SHA1 -> "SHA1" | Non_static_id s -> s
+    let of_string = function | "SHA1" -> SHA1 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ChecksumType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ChecksumType" j)
+    let to_json = simple_to_json to_value
+  end
 module Dimension =
   struct
     type nonrec t = string
@@ -91,6 +128,169 @@ module Value =
     let of_json j = float_of_json ~kind:"a double" j
     let to_json = simple_to_json to_value
   end
+module Checksum =
+  struct
+    type nonrec t =
+      {
+      type_: ChecksumType.t option [@ocaml.doc "The type of the checksum."];
+      sum: ChecksumString.t option [@ocaml.doc "The checksum of the model."]}
+    let make ?type_ = fun ?sum -> fun () -> { type_; sum }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:ChecksumType.to_value));
+        ("Sum", (Option.map x.sum ~f:ChecksumString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sum =
+        (Option.map ~f:ChecksumString.of_xml) (Xml.child xml_arg0 "Sum") in
+      let type_ =
+        (Option.map ~f:ChecksumType.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?sum ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sum = field_map json__ "Sum" ChecksumString.of_json in
+      let type_ = field_map json__ "Type" ChecksumType.of_json in
+      make ?sum ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the checksum of a model deployed on a device."]
+module EntityName =
+  struct
+    type nonrec t = string
+    let context_ = "EntityName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9](-*[a-zA-Z0-9])*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EntityName" j
+    let to_json = simple_to_json to_value
+  end
+module ModelState =
+  struct
+    type nonrec t =
+      | DEPLOY 
+      | UNDEPLOY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DEPLOY -> "DEPLOY"
+      | UNDEPLOY -> "UNDEPLOY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DEPLOY" -> DEPLOY
+      | "UNDEPLOY" -> UNDEPLOY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ModelState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ModelState" j)
+    let to_json = simple_to_json to_value
+  end
+module S3Uri =
+  struct
+    type nonrec t = string
+    let context_ = "S3Uri"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_pattern i ~pattern:"^s3://([^/]+)/?(.*)$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Uri" j
+    let to_json = simple_to_json to_value
+  end
+module DeploymentStatus =
+  struct
+    type nonrec t =
+      | SUCCESS 
+      | FAIL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | SUCCESS -> "SUCCESS" | FAIL -> "FAIL" | Non_static_id s -> s
+    let of_string =
+      function | "SUCCESS" -> SUCCESS | "FAIL" -> FAIL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DeploymentStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeploymentStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ModelName =
+  struct
+    type nonrec t = string
+    let context_ = "ModelName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:4) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9](-*[a-zA-Z0-9])*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ModelName" j
+    let to_json = simple_to_json to_value
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module Version =
+  struct
+    type nonrec t = string
+    let context_ = "Version"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9\\ \\_\\.]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Version" j
+    let to_json = simple_to_json to_value
+  end
 module EdgeMetric =
   struct
     type nonrec t =
@@ -124,18 +324,147 @@ module EdgeMetric =
         (Option.map ~f:Dimension.of_xml) (Xml.child xml_arg0 "Dimension") in
       make ?timestamp ?value ?metricName ?dimension ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
-      let value = field_map json "Value" Value.of_json in
-      let metricName = field_map json "MetricName" Metric.of_json in
-      let dimension = field_map json "Dimension" Dimension.of_json in
+    let of_json json__ =
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
+      let value = field_map json__ "Value" Value.of_json in
+      let metricName = field_map json__ "MetricName" Metric.of_json in
+      let dimension = field_map json__ "Dimension" Dimension.of_json in
       make ?timestamp ?value ?metricName ?dimension ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information required for edge device metrics."]
+module Definition =
+  struct
+    type nonrec t =
+      {
+      modelHandle: EntityName.t option
+        [@ocaml.doc "The unique model handle."];
+      s3Url: S3Uri.t option
+        [@ocaml.doc "The absolute S3 location of the model."];
+      checksum: Checksum.t option
+        [@ocaml.doc "The checksum information of the model."];
+      state: ModelState.t option
+        [@ocaml.doc "The desired state of the model."]}
+    let make ?modelHandle =
+      fun ?s3Url ->
+        fun ?checksum ->
+          fun ?state -> fun () -> { modelHandle; s3Url; checksum; state }
+    let to_value x =
+      structure_to_value
+        [("ModelHandle", (Option.map x.modelHandle ~f:EntityName.to_value));
+        ("S3Url", (Option.map x.s3Url ~f:S3Uri.to_value));
+        ("Checksum", (Option.map x.checksum ~f:Checksum.to_value));
+        ("State", (Option.map x.state ~f:ModelState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:ModelState.of_xml) (Xml.child xml_arg0 "State") in
+      let checksum =
+        (Option.map ~f:Checksum.of_xml) (Xml.child xml_arg0 "Checksum") in
+      let s3Url = (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "S3Url") in
+      let modelHandle =
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "ModelHandle") in
+      make ?state ?checksum ?s3Url ?modelHandle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "State" ModelState.of_json in
+      let checksum = field_map json__ "Checksum" Checksum.of_json in
+      let s3Url = field_map json__ "S3Url" S3Uri.of_json in
+      let modelHandle = field_map json__ "ModelHandle" EntityName.of_json in
+      make ?state ?checksum ?s3Url ?modelHandle ()
+    let to_json v = composed_to_json to_value v
+  end
+module DeploymentModel =
+  struct
+    type nonrec t =
+      {
+      modelHandle: EntityName.t option
+        [@ocaml.doc "The unique handle of the model."];
+      modelName: ModelName.t option [@ocaml.doc "The name of the model."];
+      modelVersion: Version.t option [@ocaml.doc "The version of the model."];
+      desiredState: ModelState.t option
+        [@ocaml.doc "The desired state of the model."];
+      state: ModelState.t option
+        [@ocaml.doc "Returns the current state of the model."];
+      status: DeploymentStatus.t option
+        [@ocaml.doc "Returns the deployment status of the model."];
+      statusReason: String_.t option
+        [@ocaml.doc
+          "Returns the error message for the deployment status result."];
+      rollbackFailureReason: String_.t option
+        [@ocaml.doc "Returns the error message if there is a rollback."]}
+    let make ?modelHandle =
+      fun ?modelName ->
+        fun ?modelVersion ->
+          fun ?desiredState ->
+            fun ?state ->
+              fun ?status ->
+                fun ?statusReason ->
+                  fun ?rollbackFailureReason ->
+                    fun () ->
+                      {
+                        modelHandle;
+                        modelName;
+                        modelVersion;
+                        desiredState;
+                        state;
+                        status;
+                        statusReason;
+                        rollbackFailureReason
+                      }
+    let to_value x =
+      structure_to_value
+        [("ModelHandle", (Option.map x.modelHandle ~f:EntityName.to_value));
+        ("ModelName", (Option.map x.modelName ~f:ModelName.to_value));
+        ("ModelVersion", (Option.map x.modelVersion ~f:Version.to_value));
+        ("DesiredState", (Option.map x.desiredState ~f:ModelState.to_value));
+        ("State", (Option.map x.state ~f:ModelState.to_value));
+        ("Status", (Option.map x.status ~f:DeploymentStatus.to_value));
+        ("StatusReason", (Option.map x.statusReason ~f:String_.to_value));
+        ("RollbackFailureReason",
+          (Option.map x.rollbackFailureReason ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rollbackFailureReason =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "RollbackFailureReason") in
+      let statusReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StatusReason") in
+      let status =
+        (Option.map ~f:DeploymentStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let state =
+        (Option.map ~f:ModelState.of_xml) (Xml.child xml_arg0 "State") in
+      let desiredState =
+        (Option.map ~f:ModelState.of_xml) (Xml.child xml_arg0 "DesiredState") in
+      let modelVersion =
+        (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "ModelVersion") in
+      let modelName =
+        (Option.map ~f:ModelName.of_xml) (Xml.child xml_arg0 "ModelName") in
+      let modelHandle =
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "ModelHandle") in
+      make ?rollbackFailureReason ?statusReason ?status ?state ?desiredState
+        ?modelVersion ?modelName ?modelHandle ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rollbackFailureReason =
+        field_map json__ "RollbackFailureReason" String_.of_json in
+      let statusReason = field_map json__ "StatusReason" String_.of_json in
+      let status = field_map json__ "Status" DeploymentStatus.of_json in
+      let state = field_map json__ "State" ModelState.of_json in
+      let desiredState = field_map json__ "DesiredState" ModelState.of_json in
+      let modelVersion = field_map json__ "ModelVersion" Version.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
+      let modelHandle = field_map json__ "ModelHandle" EntityName.of_json in
+      make ?rollbackFailureReason ?statusReason ?status ?state ?desiredState
+        ?modelVersion ?modelName ?modelHandle ()
+    let to_json v = composed_to_json to_value v
+  end
 module EdgeMetrics =
   struct
     type nonrec t = EdgeMetric.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EdgeMetric.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -156,46 +485,103 @@ module EdgeMetrics =
       list_of_json ~kind:"EdgeMetrics" ~of_json:EdgeMetric.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ModelName =
+module Definitions =
   struct
-    type nonrec t = string
-    let context_ = "ModelName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:4) >>=
-             (fun () ->
-                (check_string_max i ~max:255) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^[a-zA-Z0-9](-*[a-zA-Z0-9])*$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = Definition.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Definition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ModelName" j
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Definition.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Definitions" ~of_json:Definition.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DeploymentType =
+  struct
+    type nonrec t =
+      | Model 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Model -> "Model" | Non_static_id s -> s
+    let of_string = function | "Model" -> Model | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DeploymentType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeploymentType" j)
     let to_json = simple_to_json to_value
   end
-module Version =
+module FailureHandlingPolicy =
   struct
-    type nonrec t = string
-    let context_ = "Version"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9\\ \\_\\.]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | ROLLBACK_ON_FAILURE 
+      | DO_NOTHING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ROLLBACK_ON_FAILURE -> "ROLLBACK_ON_FAILURE"
+      | DO_NOTHING -> "DO_NOTHING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ROLLBACK_ON_FAILURE" -> ROLLBACK_ON_FAILURE
+      | "DO_NOTHING" -> DO_NOTHING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Version" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FailureHandlingPolicy" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"FailureHandlingPolicy" j)
     let to_json = simple_to_json to_value
+  end
+module DeploymentModels =
+  struct
+    type nonrec t = DeploymentModel.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeploymentModel.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeploymentModel.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DeploymentModels" ~of_json:DeploymentModel.of_json
+        j
+    let to_json v = composed_to_json to_value v
   end
 module Model =
   struct
@@ -249,14 +635,14 @@ module Model =
       make ?modelMetrics ?latestInference ?latestSampleTime ?modelVersion
         ?modelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelMetrics = field_map json "ModelMetrics" EdgeMetrics.of_json in
+    let of_json json__ =
+      let modelMetrics = field_map json__ "ModelMetrics" EdgeMetrics.of_json in
       let latestInference =
-        field_map json "LatestInference" Timestamp.of_json in
+        field_map json__ "LatestInference" Timestamp.of_json in
       let latestSampleTime =
-        field_map json "LatestSampleTime" Timestamp.of_json in
-      let modelVersion = field_map json "ModelVersion" Version.of_json in
-      let modelName = field_map json "ModelName" ModelName.of_json in
+        field_map json__ "LatestSampleTime" Timestamp.of_json in
+      let modelVersion = field_map json__ "ModelVersion" Version.of_json in
+      let modelName = field_map json__ "ModelName" ModelName.of_json in
       make ?modelMetrics ?latestInference ?latestSampleTime ?modelVersion
         ?modelName ()
     let to_json v = composed_to_json to_value v
@@ -275,6 +661,148 @@ module ErrorMessage =
     let of_json j = string_of_json ~kind:"ErrorMessage" j
     let to_json = simple_to_json to_value
   end
+module EdgeDeployment =
+  struct
+    type nonrec t =
+      {
+      deploymentName: EntityName.t option
+        [@ocaml.doc "The name and unique ID of the deployment."];
+      type_: DeploymentType.t option
+        [@ocaml.doc "The type of the deployment."];
+      failureHandlingPolicy: FailureHandlingPolicy.t option
+        [@ocaml.doc
+          "Determines whether to rollback to previous configuration if deployment fails."];
+      definitions: Definitions.t option
+        [@ocaml.doc "Returns a list of Definition objects."]}
+    let make ?deploymentName =
+      fun ?type_ ->
+        fun ?failureHandlingPolicy ->
+          fun ?definitions ->
+            fun () ->
+              { deploymentName; type_; failureHandlingPolicy; definitions }
+    let to_value x =
+      structure_to_value
+        [("DeploymentName",
+           (Option.map x.deploymentName ~f:EntityName.to_value));
+        ("Type", (Option.map x.type_ ~f:DeploymentType.to_value));
+        ("FailureHandlingPolicy",
+          (Option.map x.failureHandlingPolicy
+             ~f:FailureHandlingPolicy.to_value));
+        ("Definitions", (Option.map x.definitions ~f:Definitions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let definitions =
+        (Option.map ~f:Definitions.of_xml) (Xml.child xml_arg0 "Definitions") in
+      let failureHandlingPolicy =
+        (Option.map ~f:FailureHandlingPolicy.of_xml)
+          (Xml.child xml_arg0 "FailureHandlingPolicy") in
+      let type_ =
+        (Option.map ~f:DeploymentType.of_xml) (Xml.child xml_arg0 "Type") in
+      let deploymentName =
+        (Option.map ~f:EntityName.of_xml)
+          (Xml.child xml_arg0 "DeploymentName") in
+      make ?definitions ?failureHandlingPolicy ?type_ ?deploymentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let definitions = field_map json__ "Definitions" Definitions.of_json in
+      let failureHandlingPolicy =
+        field_map json__ "FailureHandlingPolicy"
+          FailureHandlingPolicy.of_json in
+      let type_ = field_map json__ "Type" DeploymentType.of_json in
+      let deploymentName =
+        field_map json__ "DeploymentName" EntityName.of_json in
+      make ?definitions ?failureHandlingPolicy ?type_ ?deploymentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a deployment on an edge device that is registered with SageMaker Edge Manager."]
+module DeploymentResult =
+  struct
+    type nonrec t =
+      {
+      deploymentName: EntityName.t option
+        [@ocaml.doc "The name and unique ID of the deployment."];
+      deploymentStatus: EntityName.t option
+        [@ocaml.doc "Returns the bucket error code."];
+      deploymentStatusMessage: String_.t option
+        [@ocaml.doc "Returns the detailed error message."];
+      deploymentStartTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp of when the deployment was started on the agent."];
+      deploymentEndTime: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp of when the deployment was ended, and the agent got the deployment results."];
+      deploymentModels: DeploymentModels.t option
+        [@ocaml.doc "Returns a list of models deployed on the agent."]}
+    let make ?deploymentName =
+      fun ?deploymentStatus ->
+        fun ?deploymentStatusMessage ->
+          fun ?deploymentStartTime ->
+            fun ?deploymentEndTime ->
+              fun ?deploymentModels ->
+                fun () ->
+                  {
+                    deploymentName;
+                    deploymentStatus;
+                    deploymentStatusMessage;
+                    deploymentStartTime;
+                    deploymentEndTime;
+                    deploymentModels
+                  }
+    let to_value x =
+      structure_to_value
+        [("DeploymentName",
+           (Option.map x.deploymentName ~f:EntityName.to_value));
+        ("DeploymentStatus",
+          (Option.map x.deploymentStatus ~f:EntityName.to_value));
+        ("DeploymentStatusMessage",
+          (Option.map x.deploymentStatusMessage ~f:String_.to_value));
+        ("DeploymentStartTime",
+          (Option.map x.deploymentStartTime ~f:Timestamp.to_value));
+        ("DeploymentEndTime",
+          (Option.map x.deploymentEndTime ~f:Timestamp.to_value));
+        ("DeploymentModels",
+          (Option.map x.deploymentModels ~f:DeploymentModels.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deploymentModels =
+        (Option.map ~f:DeploymentModels.of_xml)
+          (Xml.child xml_arg0 "DeploymentModels") in
+      let deploymentEndTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "DeploymentEndTime") in
+      let deploymentStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "DeploymentStartTime") in
+      let deploymentStatusMessage =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "DeploymentStatusMessage") in
+      let deploymentStatus =
+        (Option.map ~f:EntityName.of_xml)
+          (Xml.child xml_arg0 "DeploymentStatus") in
+      let deploymentName =
+        (Option.map ~f:EntityName.of_xml)
+          (Xml.child xml_arg0 "DeploymentName") in
+      make ?deploymentModels ?deploymentEndTime ?deploymentStartTime
+        ?deploymentStatusMessage ?deploymentStatus ?deploymentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deploymentModels =
+        field_map json__ "DeploymentModels" DeploymentModels.of_json in
+      let deploymentEndTime =
+        field_map json__ "DeploymentEndTime" Timestamp.of_json in
+      let deploymentStartTime =
+        field_map json__ "DeploymentStartTime" Timestamp.of_json in
+      let deploymentStatusMessage =
+        field_map json__ "DeploymentStatusMessage" String_.of_json in
+      let deploymentStatus =
+        field_map json__ "DeploymentStatus" EntityName.of_json in
+      let deploymentName =
+        field_map json__ "DeploymentName" EntityName.of_json in
+      make ?deploymentModels ?deploymentEndTime ?deploymentStartTime
+        ?deploymentStatusMessage ?deploymentStatus ?deploymentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the result of a deployment on an edge device that is registered with SageMaker Edge Manager."]
 module DeviceFleetName =
   struct
     type nonrec t = string
@@ -323,6 +851,9 @@ module Models =
   struct
     type nonrec t = Model.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Model.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -392,12 +923,39 @@ module InternalServiceException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An internal failure occurred. Try your request again. If the problem persists, contact AWS customer support."]
+       "An internal failure occurred. Try your request again. If the problem persists, contact Amazon Web Services customer support."]
+module EdgeDeployments =
+  struct
+    type nonrec t = EdgeDeployment.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EdgeDeployment.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EdgeDeployment.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EdgeDeployments" ~of_json:EdgeDeployment.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SendHeartbeatRequest =
   struct
     type nonrec t =
@@ -411,21 +969,25 @@ module SendHeartbeatRequest =
         [@ocaml.doc "Returns the version of the agent."];
       deviceName: DeviceName.t [@ocaml.doc "The unique name of the device."];
       deviceFleetName: DeviceFleetName.t
-        [@ocaml.doc "The name of the fleet that the device belongs to."]}
+        [@ocaml.doc "The name of the fleet that the device belongs to."];
+      deploymentResult: DeploymentResult.t option
+        [@ocaml.doc "Returns the result of a deployment on the device."]}
     let context_ = "SendHeartbeatRequest"
     let make ?agentMetrics =
       fun ?models ->
-        fun ~agentVersion ->
-          fun ~deviceName ->
-            fun ~deviceFleetName ->
-              fun () ->
-                {
-                  agentMetrics;
-                  models;
-                  agentVersion;
-                  deviceName;
-                  deviceFleetName
-                }
+        fun ?deploymentResult ->
+          fun ~agentVersion ->
+            fun ~deviceName ->
+              fun ~deviceFleetName ->
+                fun () ->
+                  {
+                    agentMetrics;
+                    models;
+                    deploymentResult;
+                    agentVersion;
+                    deviceName;
+                    deviceFleetName
+                  }
     let to_value x =
       structure_to_value
         [("AgentMetrics",
@@ -434,9 +996,14 @@ module SendHeartbeatRequest =
         ("AgentVersion", (Some (Version.to_value x.agentVersion)));
         ("DeviceName", (Some (DeviceName.to_value x.deviceName)));
         ("DeviceFleetName",
-          (Some (DeviceFleetName.to_value x.deviceFleetName)))]
+          (Some (DeviceFleetName.to_value x.deviceFleetName)));
+        ("DeploymentResult",
+          (Option.map x.deploymentResult ~f:DeploymentResult.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let deploymentResult =
+        (Option.map ~f:DeploymentResult.of_xml)
+          (Xml.child xml_arg0 "DeploymentResult") in
       let deviceFleetName =
         DeviceFleetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceFleetName") in
@@ -451,18 +1018,20 @@ module SendHeartbeatRequest =
       let agentMetrics =
         (Option.map ~f:EdgeMetrics.of_xml)
           (Xml.child xml_arg0 "AgentMetrics") in
-      make ~deviceFleetName ~deviceName ~agentVersion ?models ?agentMetrics
-        ()
+      make ?deploymentResult ~deviceFleetName ~deviceName ~agentVersion
+        ?models ?agentMetrics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let deploymentResult =
+        field_map json__ "DeploymentResult" DeploymentResult.of_json in
       let deviceFleetName =
-        field_map_exn json "DeviceFleetName" DeviceFleetName.of_json in
-      let deviceName = field_map_exn json "DeviceName" DeviceName.of_json in
-      let agentVersion = field_map_exn json "AgentVersion" Version.of_json in
-      let models = field_map json "Models" Models.of_json in
-      let agentMetrics = field_map json "AgentMetrics" EdgeMetrics.of_json in
-      make ~deviceFleetName ~deviceName ~agentVersion ?models ?agentMetrics
-        ()
+        field_map_exn json__ "DeviceFleetName" DeviceFleetName.of_json in
+      let deviceName = field_map_exn json__ "DeviceName" DeviceName.of_json in
+      let agentVersion = field_map_exn json__ "AgentVersion" Version.of_json in
+      let models = field_map json__ "Models" Models.of_json in
+      let agentMetrics = field_map json__ "AgentMetrics" EdgeMetrics.of_json in
+      make ?deploymentResult ~deviceFleetName ~deviceName ~agentVersion
+        ?models ?agentMetrics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Use to get the current status of devices registered on SageMaker Edge Manager."]
@@ -520,10 +1089,10 @@ module GetDeviceRegistrationResult =
           (Xml.child xml_arg0 "DeviceRegistration") in
       make ?cacheTTL ?deviceRegistration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cacheTTL = field_map json "CacheTTL" CacheTTLSeconds.of_json in
+    let of_json json__ =
+      let cacheTTL = field_map json__ "CacheTTL" CacheTTLSeconds.of_json in
       let deviceRegistration =
-        field_map json "DeviceRegistration" DeviceRegistration.of_json in
+        field_map json__ "DeviceRegistration" DeviceRegistration.of_json in
       make ?cacheTTL ?deviceRegistration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -555,11 +1124,97 @@ module GetDeviceRegistrationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DeviceName") in
       make ~deviceFleetName ~deviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deviceFleetName =
-        field_map_exn json "DeviceFleetName" DeviceFleetName.of_json in
-      let deviceName = field_map_exn json "DeviceName" DeviceName.of_json in
+        field_map_exn json__ "DeviceFleetName" DeviceFleetName.of_json in
+      let deviceName = field_map_exn json__ "DeviceName" DeviceName.of_json in
       make ~deviceFleetName ~deviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Use to check if a device is registered with SageMaker Edge Manager."]
+module GetDeploymentsResult =
+  struct
+    type nonrec t =
+      {
+      deployments: EdgeDeployments.t option
+        [@ocaml.doc
+          "Returns a list of the configurations of the active deployments on the device."]}
+    type nonrec error =
+      [ `InternalServiceException of InternalServiceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?deployments = fun () -> { deployments }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceException" ->
+          `InternalServiceException (InternalServiceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceException e ->
+          `Assoc
+            [("error", (`String "InternalServiceException"));
+            ("details", (InternalServiceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Deployments",
+           (Option.map x.deployments ~f:EdgeDeployments.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deployments =
+        (Option.map ~f:EdgeDeployments.of_xml)
+          (Xml.child xml_arg0 "Deployments") in
+      make ?deployments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deployments =
+        field_map json__ "Deployments" EdgeDeployments.of_json in
+      make ?deployments ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Use to get the active deployments from a device."]
+module GetDeploymentsRequest =
+  struct
+    type nonrec t =
+      {
+      deviceName: DeviceName.t
+        [@ocaml.doc
+          "The unique name of the device you want to get the configuration of active deployments from."];
+      deviceFleetName: DeviceFleetName.t
+        [@ocaml.doc "The name of the fleet that the device belongs to."]}
+    let context_ = "GetDeploymentsRequest"
+    let make ~deviceName =
+      fun ~deviceFleetName -> fun () -> { deviceName; deviceFleetName }
+    let to_value x =
+      structure_to_value
+        [("DeviceName", (Some (DeviceName.to_value x.deviceName)));
+        ("DeviceFleetName",
+          (Some (DeviceFleetName.to_value x.deviceFleetName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deviceFleetName =
+        DeviceFleetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DeviceFleetName") in
+      let deviceName =
+        DeviceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DeviceName") in
+      make ~deviceFleetName ~deviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deviceFleetName =
+        field_map_exn json__ "DeviceFleetName" DeviceFleetName.of_json in
+      let deviceName = field_map_exn json__ "DeviceName" DeviceName.of_json in
+      make ~deviceFleetName ~deviceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Use to get the active deployments from a device."]

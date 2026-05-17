@@ -2,28 +2,55 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | CancelCapacityTask: (CancelCapacityTaskInput.t,
+  CancelCapacityTaskOutput.t, CancelCapacityTaskOutput.error) t 
   | CancelOrder: (CancelOrderInput.t, CancelOrderOutput.t,
   CancelOrderOutput.error) t 
   | CreateOrder: (CreateOrderInput.t, CreateOrderOutput.t,
   CreateOrderOutput.error) t 
   | CreateOutpost: (CreateOutpostInput.t, CreateOutpostOutput.t,
   CreateOutpostOutput.error) t 
+  | CreateRenewal: (CreateRenewalInput.t, CreateRenewalOutput.t,
+  CreateRenewalOutput.error) t 
   | CreateSite: (CreateSiteInput.t, CreateSiteOutput.t,
   CreateSiteOutput.error) t 
   | DeleteOutpost: (DeleteOutpostInput.t, DeleteOutpostOutput.t,
   DeleteOutpostOutput.error) t 
   | DeleteSite: (DeleteSiteInput.t, DeleteSiteOutput.t,
   DeleteSiteOutput.error) t 
+  | GetCapacityTask: (GetCapacityTaskInput.t, GetCapacityTaskOutput.t,
+  GetCapacityTaskOutput.error) t 
   | GetCatalogItem: (GetCatalogItemInput.t, GetCatalogItemOutput.t,
   GetCatalogItemOutput.error) t 
+  | GetConnection: (GetConnectionRequest.t, GetConnectionResponse.t,
+  GetConnectionResponse.error) t 
   | GetOrder: (GetOrderInput.t, GetOrderOutput.t, GetOrderOutput.error) t 
   | GetOutpost: (GetOutpostInput.t, GetOutpostOutput.t,
   GetOutpostOutput.error) t 
+  | GetOutpostBillingInformation: (GetOutpostBillingInformationInput.t,
+  GetOutpostBillingInformationOutput.t,
+  GetOutpostBillingInformationOutput.error) t 
   | GetOutpostInstanceTypes: (GetOutpostInstanceTypesInput.t,
   GetOutpostInstanceTypesOutput.t, GetOutpostInstanceTypesOutput.error) t 
+  | GetOutpostSupportedInstanceTypes:
+  (GetOutpostSupportedInstanceTypesInput.t,
+  GetOutpostSupportedInstanceTypesOutput.t,
+  GetOutpostSupportedInstanceTypesOutput.error) t 
+  | GetRenewalPricing: (GetRenewalPricingInput.t, GetRenewalPricingOutput.t,
+  GetRenewalPricingOutput.error) t 
   | GetSite: (GetSiteInput.t, GetSiteOutput.t, GetSiteOutput.error) t 
   | GetSiteAddress: (GetSiteAddressInput.t, GetSiteAddressOutput.t,
   GetSiteAddressOutput.error) t 
+  | ListAssetInstances: (ListAssetInstancesInput.t,
+  ListAssetInstancesOutput.t, ListAssetInstancesOutput.error) t 
+  | ListAssets: (ListAssetsInput.t, ListAssetsOutput.t,
+  ListAssetsOutput.error) t 
+  | ListBlockingInstancesForCapacityTask:
+  (ListBlockingInstancesForCapacityTaskInput.t,
+  ListBlockingInstancesForCapacityTaskOutput.t,
+  ListBlockingInstancesForCapacityTaskOutput.error) t 
+  | ListCapacityTasks: (ListCapacityTasksInput.t, ListCapacityTasksOutput.t,
+  ListCapacityTasksOutput.error) t 
   | ListCatalogItems: (ListCatalogItemsInput.t, ListCatalogItemsOutput.t,
   ListCatalogItemsOutput.error) t 
   | ListOrders: (ListOrdersInput.t, ListOrdersOutput.t,
@@ -34,6 +61,12 @@ type ('i, 'o, 'e) t =
   
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | StartCapacityTask: (StartCapacityTaskInput.t, StartCapacityTaskOutput.t,
+  StartCapacityTaskOutput.error) t 
+  | StartConnection: (StartConnectionRequest.t, StartConnectionResponse.t,
+  StartConnectionResponse.error) t 
+  | StartOutpostDecommission: (StartOutpostDecommissionInput.t,
+  StartOutpostDecommissionOutput.t, StartOutpostDecommissionOutput.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -50,23 +83,37 @@ type ('i, 'o, 'e) t =
   UpdateSiteRackPhysicalPropertiesOutput.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | CancelCapacityTask -> `POST
   | CancelOrder -> `POST
   | CreateOrder -> `POST
   | CreateOutpost -> `POST
+  | CreateRenewal -> `POST
   | CreateSite -> `POST
   | DeleteOutpost -> `DELETE
   | DeleteSite -> `DELETE
+  | GetCapacityTask -> `GET
   | GetCatalogItem -> `GET
+  | GetConnection -> `GET
   | GetOrder -> `GET
   | GetOutpost -> `GET
+  | GetOutpostBillingInformation -> `GET
   | GetOutpostInstanceTypes -> `GET
+  | GetOutpostSupportedInstanceTypes -> `GET
+  | GetRenewalPricing -> `GET
   | GetSite -> `GET
   | GetSiteAddress -> `GET
+  | ListAssetInstances -> `GET
+  | ListAssets -> `GET
+  | ListBlockingInstancesForCapacityTask -> `GET
+  | ListCapacityTasks -> `GET
   | ListCatalogItems -> `GET
   | ListOrders -> `GET
   | ListOutposts -> `GET
   | ListSites -> `GET
   | ListTagsForResource -> `GET
+  | StartCapacityTask -> `POST
+  | StartConnection -> `POST
+  | StartOutpostDecommission -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateOutpost -> `PATCH
@@ -76,11 +123,18 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | CancelCapacityTask ->
+          (Format.kasprintf Uri.of_string) "/outposts/%s/capacity/%s"
+            (OutpostIdentifier.to_header
+               x.CancelCapacityTaskInput.outpostIdentifier)
+            (CapacityTaskId.to_header
+               x.CancelCapacityTaskInput.capacityTaskId)
       | CancelOrder ->
           (Format.kasprintf Uri.of_string) "/orders/%s/cancel"
             (OrderId.to_header x.CancelOrderInput.orderId)
       | CreateOrder -> (Format.kasprintf Uri.of_string) "/orders"
       | CreateOutpost -> (Format.kasprintf Uri.of_string) "/outposts"
+      | CreateRenewal -> (Format.kasprintf Uri.of_string) "/renewals"
       | CreateSite -> (Format.kasprintf Uri.of_string) "/sites"
       | DeleteOutpost ->
           (Format.kasprintf Uri.of_string) "/outposts/%s"
@@ -88,15 +142,35 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteSite ->
           (Format.kasprintf Uri.of_string) "/sites/%s"
             (SiteId.to_header x.DeleteSiteInput.siteId)
+      | GetCapacityTask ->
+          (Format.kasprintf Uri.of_string) "/outposts/%s/capacity/%s"
+            (OutpostIdentifier.to_header
+               x.GetCapacityTaskInput.outpostIdentifier)
+            (CapacityTaskId.to_header x.GetCapacityTaskInput.capacityTaskId)
       | GetCatalogItem ->
           (Format.kasprintf Uri.of_string) "/catalog/item/%s"
             (SkuCode.to_header x.GetCatalogItemInput.catalogItemId)
+      | GetConnection ->
+          (Format.kasprintf Uri.of_string) "/connections/%s"
+            (ConnectionId.to_header x.GetConnectionRequest.connectionId)
       | GetOrder ->
           (Format.kasprintf Uri.of_string) "/orders/%s"
             (OrderId.to_header x.GetOrderInput.orderId)
       | GetOutpost ->
           (Format.kasprintf Uri.of_string) "/outposts/%s"
             (OutpostId.to_header x.GetOutpostInput.outpostId)
+      | GetOutpostBillingInformation ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/outpost/%s/billing-information"
+               (OutpostIdentifier.to_header
+                  x.GetOutpostBillingInformationInput.outpostIdentifier))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("NextToken", (Token.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults1000.to_header v)))
+                 x.maxResults])
       | GetOutpostInstanceTypes ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/outposts/%s/instanceTypes"
@@ -107,6 +181,27 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("MaxResults", (MaxResults1000.to_header v)))
                  x.maxResults])
+      | GetOutpostSupportedInstanceTypes ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/outposts/%s/supportedInstanceTypes"
+               (OutpostIdentifier.to_header
+                  x.GetOutpostSupportedInstanceTypesInput.outpostIdentifier))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("OrderId", (OrderId.to_header v)))
+                  x.orderId;
+               Option.map
+                 ~f:(fun v -> ("AssetId", (AssetIdInput.to_header v)))
+                 x.assetId;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults1000.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("NextToken", (Token.to_header v)))
+                 x.nextToken])
+      | GetRenewalPricing ->
+          (Format.kasprintf Uri.of_string) "/outpost/%s/renewal-pricing"
+            (OutpostIdentifier.to_header
+               x.GetRenewalPricingInput.outpostIdentifier)
       | GetSite ->
           (Format.kasprintf Uri.of_string) "/sites/%s"
             (SiteId.to_header x.GetSiteInput.siteId)
@@ -116,6 +211,87 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (SiteId.to_header x.GetSiteAddressInput.siteId))
             (List.filter_opt
                [Some ("AddressType", (AddressType.to_header x.addressType))])
+      | ListAssetInstances ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/outposts/%s/assetInstances"
+               (OutpostIdentifier.to_header
+                  x.ListAssetInstancesInput.outpostIdentifier))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("AssetIdFilter", (AssetIdList.to_header v)))
+                  x.assetIdFilter;
+               Option.map
+                 ~f:(fun v ->
+                       ("InstanceTypeFilter",
+                         (OutpostInstanceTypeList.to_header v)))
+                 x.instanceTypeFilter;
+               Option.map
+                 ~f:(fun v ->
+                       ("AccountIdFilter", (AccountIdList.to_header v)))
+                 x.accountIdFilter;
+               Option.map
+                 ~f:(fun v ->
+                       ("AwsServiceFilter", (AWSServiceNameList.to_header v)))
+                 x.awsServiceFilter;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults1000.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("NextToken", (Token.to_header v)))
+                 x.nextToken])
+      | ListAssets ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/outposts/%s/assets"
+               (OutpostIdentifier.to_header
+                  x.ListAssetsInput.outpostIdentifier))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("HostIdFilter", (HostIdList.to_header v)))
+                  x.hostIdFilter;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults1000.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("NextToken", (Token.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("StatusFilter", (StatusList.to_header v)))
+                 x.statusFilter;
+               Option.map
+                 ~f:(fun v ->
+                       ("AssetTypeFilter", (AssetTypeList.to_header v)))
+                 x.assetTypeFilter])
+      | ListBlockingInstancesForCapacityTask ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/outposts/%s/capacity/%s/blockingInstances"
+               (OutpostIdentifier.to_header
+                  x.ListBlockingInstancesForCapacityTaskInput.outpostIdentifier)
+               (CapacityTaskId.to_header
+                  x.ListBlockingInstancesForCapacityTaskInput.capacityTaskId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("MaxResults", (MaxResults1000.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("NextToken", (Token.to_header v)))
+                 x.nextToken])
+      | ListCapacityTasks ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/capacity/tasks")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("OutpostIdentifierFilter",
+                          (OutpostIdentifier.to_header v)))
+                  x.outpostIdentifierFilter;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults1000.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("NextToken", (Token.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("CapacityTaskStatusFilter",
+                         (CapacityTaskStatusList.to_header v)))
+                 x.capacityTaskStatusFilter])
       | ListCatalogItems ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/catalog/items")
@@ -202,6 +378,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (Arn.to_header x.ListTagsForResourceRequest.resourceArn)
+      | StartCapacityTask ->
+          (Format.kasprintf Uri.of_string) "/outposts/%s/capacity"
+            (OutpostIdentifier.to_header
+               x.StartCapacityTaskInput.outpostIdentifier)
+      | StartConnection -> (Format.kasprintf Uri.of_string) "/connections"
+      | StartOutpostDecommission ->
+          (Format.kasprintf Uri.of_string) "/outposts/%s/decommission"
+            (OutpostIdentifier.to_header
+               x.StartOutpostDecommissionInput.outpostIdentifier)
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (Arn.to_header x.TagResourceRequest.resourceArn)
@@ -227,6 +412,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | CancelCapacityTask ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CancelOrder ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -243,10 +431,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("OutpostIdentifier",
                            (OutpostIdentifier.to_value
                               req.CreateOrderInput.outpostIdentifier));
-                      Some
-                        ("LineItems",
-                          (LineItemRequestListDefinition.to_value
-                             req.CreateOrderInput.lineItems));
+                      Option.map req.CreateOrderInput.lineItems
+                        ~f:(fun x ->
+                              ("LineItems",
+                                (LineItemRequestListDefinition.to_value x)));
                       Some
                         ("PaymentOption",
                           (PaymentOption.to_value
@@ -301,6 +489,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateRenewal ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("PaymentOption",
+                           (PaymentOption.to_value
+                              req.CreateRenewalInput.paymentOption));
+                      Some
+                        ("PaymentTerm",
+                          (PaymentTerm.to_value
+                             req.CreateRenewalInput.paymentTerm));
+                      Some
+                        ("OutpostIdentifier",
+                          (OutpostIdentifier.to_value
+                             req.CreateRenewalInput.outpostIdentifier));
+                      Option.map req.CreateRenewalInput.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken",
+                                (AutoFillIdempotencyToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateSite ->
       let (headers, body) =
         let headers =
@@ -339,7 +559,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteOutpost -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteSite -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetCapacityTask ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetCatalogItem ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetConnection ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetOrder ->
@@ -348,13 +574,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetOutpost ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetOutpostBillingInformation ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetOutpostInstanceTypes ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetOutpostSupportedInstanceTypes ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRenewalPricing ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetSite ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetSiteAddress ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAssetInstances ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAssets ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListBlockingInstancesForCapacityTask ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCapacityTasks ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListCatalogItems ->
@@ -371,6 +618,95 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartCapacityTask ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.StartCapacityTaskInput.orderId
+                         ~f:(fun x -> ("OrderId", (OrderId.to_value x)));
+                      Option.map req.StartCapacityTaskInput.assetId
+                        ~f:(fun x -> ("AssetId", (AssetIdInput.to_value x)));
+                      Some
+                        ("InstancePools",
+                          (RequestedInstancePools.to_value
+                             req.StartCapacityTaskInput.instancePools));
+                      Option.map
+                        req.StartCapacityTaskInput.instancesToExclude
+                        ~f:(fun x ->
+                              ("InstancesToExclude",
+                                (InstancesToExclude.to_value x)));
+                      Option.map req.StartCapacityTaskInput.dryRun
+                        ~f:(fun x -> ("DryRun", (DryRun.to_value x)));
+                      Option.map
+                        req.StartCapacityTaskInput.taskActionOnBlockingInstances
+                        ~f:(fun x ->
+                              ("TaskActionOnBlockingInstances",
+                                (TaskActionOnBlockingInstances.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartConnection ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.StartConnectionRequest.deviceSerialNumber
+                         ~f:(fun x ->
+                               ("DeviceSerialNumber",
+                                 (DeviceSerialNumber.to_value x)));
+                      Some
+                        ("AssetId",
+                          (AssetId.to_value
+                             req.StartConnectionRequest.assetId));
+                      Some
+                        ("ClientPublicKey",
+                          (WireGuardPublicKey.to_value
+                             req.StartConnectionRequest.clientPublicKey));
+                      Some
+                        ("NetworkInterfaceDeviceIndex",
+                          (NetworkInterfaceDeviceIndex.to_value
+                             req.StartConnectionRequest.networkInterfaceDeviceIndex))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartOutpostDecommission ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.StartOutpostDecommissionInput.validateOnly
+                         ~f:(fun x ->
+                               ("ValidateOnly", (ValidateOnly.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
@@ -445,6 +781,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | CancelCapacityTask ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CancelCapacityTaskOutput.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some CancelCapacityTaskOutput.error_of_json))
   | CancelOrder ->
       if is_success
       then
@@ -460,6 +804,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreateOutpostOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateOutpostOutput.error_of_json))
+  | CreateRenewal ->
+      if is_success
+      then Ok (CreateRenewalOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateRenewalOutput.error_of_json))
   | CreateSite ->
       if is_success
       then Ok (CreateSiteOutput.of_json (response_to_json resp))
@@ -478,10 +826,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteSiteOutput.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some DeleteSiteOutput.error_of_json))
+  | GetCapacityTask ->
+      if is_success
+      then Ok (GetCapacityTaskOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetCapacityTaskOutput.error_of_json))
   | GetCatalogItem ->
       if is_success
       then Ok (GetCatalogItemOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetCatalogItemOutput.error_of_json))
+  | GetConnection ->
+      if is_success
+      then Ok (GetConnectionResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetConnectionResponse.error_of_json))
   | GetOrder ->
       if is_success
       then Ok (GetOrderOutput.of_json (response_to_json resp))
@@ -490,12 +846,36 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetOutpostOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetOutpostOutput.error_of_json))
+  | GetOutpostBillingInformation ->
+      if is_success
+      then
+        Ok
+          (GetOutpostBillingInformationOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetOutpostBillingInformationOutput.error_of_json))
   | GetOutpostInstanceTypes ->
       if is_success
       then Ok (GetOutpostInstanceTypesOutput.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetOutpostInstanceTypesOutput.error_of_json))
+  | GetOutpostSupportedInstanceTypes ->
+      if is_success
+      then
+        Ok
+          (GetOutpostSupportedInstanceTypesOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetOutpostSupportedInstanceTypesOutput.error_of_json))
+  | GetRenewalPricing ->
+      if is_success
+      then Ok (GetRenewalPricingOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetRenewalPricingOutput.error_of_json))
   | GetSite ->
       if is_success
       then Ok (GetSiteOutput.of_json (response_to_json resp))
@@ -504,6 +884,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetSiteAddressOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetSiteAddressOutput.error_of_json))
+  | ListAssetInstances ->
+      if is_success
+      then Ok (ListAssetInstancesOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListAssetInstancesOutput.error_of_json))
+  | ListAssets ->
+      if is_success
+      then Ok (ListAssetsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAssetsOutput.error_of_json))
+  | ListBlockingInstancesForCapacityTask ->
+      if is_success
+      then
+        Ok
+          (ListBlockingInstancesForCapacityTaskOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListBlockingInstancesForCapacityTaskOutput.error_of_json))
+  | ListCapacityTasks ->
+      if is_success
+      then Ok (ListCapacityTasksOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListCapacityTasksOutput.error_of_json))
   | ListCatalogItems ->
       if is_success
       then Ok (ListCatalogItemsOutput.of_json (response_to_json resp))
@@ -527,6 +931,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | StartCapacityTask ->
+      if is_success
+      then Ok (StartCapacityTaskOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StartCapacityTaskOutput.error_of_json))
+  | StartConnection ->
+      if is_success
+      then Ok (StartConnectionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StartConnectionResponse.error_of_json))
+  | StartOutpostDecommission ->
+      if is_success
+      then
+        Ok (StartOutpostDecommissionOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartOutpostDecommissionOutput.error_of_json))
   | TagResource ->
       if is_success
       then

@@ -7,12 +7,37 @@ val create_alert_manager_definition :
         (CreateAlertManagerDefinitionResponse.t,
           CreateAlertManagerDefinitionResponse.error) Result.t
           Async.Deferred.t
+val create_anomaly_detector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAnomalyDetectorRequest.t ->
+        (CreateAnomalyDetectorResponse.t,
+          CreateAnomalyDetectorResponse.error) Result.t Async.Deferred.t
+val create_logging_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLoggingConfigurationRequest.t ->
+        (CreateLoggingConfigurationResponse.t,
+          CreateLoggingConfigurationResponse.error) Result.t Async.Deferred.t
+val create_query_logging_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateQueryLoggingConfigurationRequest.t ->
+        (CreateQueryLoggingConfigurationResponse.t,
+          CreateQueryLoggingConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val create_rule_groups_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateRuleGroupsNamespaceRequest.t ->
         (CreateRuleGroupsNamespaceResponse.t,
           CreateRuleGroupsNamespaceResponse.error) Result.t Async.Deferred.t
+val create_scraper :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateScraperRequest.t ->
+        (CreateScraperResponse.t, CreateScraperResponse.error) Result.t
+          Async.Deferred.t
 val create_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -24,10 +49,40 @@ val delete_alert_manager_definition :
     ?cfg:Awso.Cfg.t ->
       DeleteAlertManagerDefinitionRequest.t ->
         (unit, unit) Result.t Async.Deferred.t
+val delete_anomaly_detector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAnomalyDetectorRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
+val delete_logging_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteLoggingConfigurationRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
+val delete_query_logging_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteQueryLoggingConfigurationRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
+val delete_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteResourcePolicyRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_rule_groups_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRuleGroupsNamespaceRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
+val delete_scraper :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteScraperRequest.t ->
+        (DeleteScraperResponse.t, DeleteScraperResponse.error) Result.t
+          Async.Deferred.t
+val delete_scraper_logging_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteScraperLoggingConfigurationRequest.t ->
         (unit, unit) Result.t Async.Deferred.t
 val delete_workspace :
   ?endpoint_url:string ->
@@ -40,6 +95,32 @@ val describe_alert_manager_definition :
         (DescribeAlertManagerDefinitionResponse.t,
           DescribeAlertManagerDefinitionResponse.error) Result.t
           Async.Deferred.t
+val describe_anomaly_detector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAnomalyDetectorRequest.t ->
+        (DescribeAnomalyDetectorResponse.t,
+          DescribeAnomalyDetectorResponse.error) Result.t Async.Deferred.t
+val describe_logging_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeLoggingConfigurationRequest.t ->
+        (DescribeLoggingConfigurationResponse.t,
+          DescribeLoggingConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val describe_query_logging_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeQueryLoggingConfigurationRequest.t ->
+        (DescribeQueryLoggingConfigurationResponse.t,
+          DescribeQueryLoggingConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val describe_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeResourcePolicyRequest.t ->
+        (DescribeResourcePolicyResponse.t,
+          DescribeResourcePolicyResponse.error) Result.t Async.Deferred.t
 val describe_rule_groups_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -47,11 +128,44 @@ val describe_rule_groups_namespace :
         (DescribeRuleGroupsNamespaceResponse.t,
           DescribeRuleGroupsNamespaceResponse.error) Result.t
           Async.Deferred.t
+val describe_scraper :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeScraperRequest.t ->
+        (DescribeScraperResponse.t, DescribeScraperResponse.error) Result.t
+          Async.Deferred.t
+val describe_scraper_logging_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeScraperLoggingConfigurationRequest.t ->
+        (DescribeScraperLoggingConfigurationResponse.t,
+          DescribeScraperLoggingConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val describe_workspace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeWorkspaceRequest.t ->
         (DescribeWorkspaceResponse.t, DescribeWorkspaceResponse.error)
+          Result.t Async.Deferred.t
+val describe_workspace_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeWorkspaceConfigurationRequest.t ->
+        (DescribeWorkspaceConfigurationResponse.t,
+          DescribeWorkspaceConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val get_default_scraper_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDefaultScraperConfigurationRequest.t ->
+        (GetDefaultScraperConfigurationResponse.t,
+          GetDefaultScraperConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val list_anomaly_detectors :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAnomalyDetectorsRequest.t ->
+        (ListAnomalyDetectorsResponse.t, ListAnomalyDetectorsResponse.error)
           Result.t Async.Deferred.t
 val list_rule_groups_namespaces :
   ?endpoint_url:string ->
@@ -59,6 +173,12 @@ val list_rule_groups_namespaces :
       ListRuleGroupsNamespacesRequest.t ->
         (ListRuleGroupsNamespacesResponse.t,
           ListRuleGroupsNamespacesResponse.error) Result.t Async.Deferred.t
+val list_scrapers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListScrapersRequest.t ->
+        (ListScrapersResponse.t, ListScrapersResponse.error) Result.t
+          Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -77,6 +197,18 @@ val put_alert_manager_definition :
       PutAlertManagerDefinitionRequest.t ->
         (PutAlertManagerDefinitionResponse.t,
           PutAlertManagerDefinitionResponse.error) Result.t Async.Deferred.t
+val put_anomaly_detector :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutAnomalyDetectorRequest.t ->
+        (PutAnomalyDetectorResponse.t, PutAnomalyDetectorResponse.error)
+          Result.t Async.Deferred.t
+val put_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutResourcePolicyRequest.t ->
+        (PutResourcePolicyResponse.t, PutResourcePolicyResponse.error)
+          Result.t Async.Deferred.t
 val put_rule_groups_namespace :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -95,7 +227,40 @@ val untag_resource :
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
+val update_logging_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLoggingConfigurationRequest.t ->
+        (UpdateLoggingConfigurationResponse.t,
+          UpdateLoggingConfigurationResponse.error) Result.t Async.Deferred.t
+val update_query_logging_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateQueryLoggingConfigurationRequest.t ->
+        (UpdateQueryLoggingConfigurationResponse.t,
+          UpdateQueryLoggingConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val update_scraper :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateScraperRequest.t ->
+        (UpdateScraperResponse.t, UpdateScraperResponse.error) Result.t
+          Async.Deferred.t
+val update_scraper_logging_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateScraperLoggingConfigurationRequest.t ->
+        (UpdateScraperLoggingConfigurationResponse.t,
+          UpdateScraperLoggingConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val update_workspace_alias :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateWorkspaceAliasRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val update_workspace_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateWorkspaceConfigurationRequest.t ->
+        (UpdateWorkspaceConfigurationResponse.t,
+          UpdateWorkspaceConfigurationResponse.error) Result.t
+          Async.Deferred.t

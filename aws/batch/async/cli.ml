@@ -64,6 +64,10 @@ let create_compute_environment =
        and serviceRole =
          flag "service-role" (optional string) ~doc:"STRING String"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagrisTagsMap"
+       and eksConfiguration =
+         flag "eks-configuration" (optional json_arg)
+           ~doc:"JSON EksConfiguration"
+       and context = flag "context" (optional string) ~doc:"STRING String"
        and computeEnvironmentName =
          flag "compute-environment-name" (required string)
            ~doc:"STRING String"
@@ -77,9 +81,40 @@ let create_compute_environment =
               ?computeResources:(Option.map ~f:Values.ComputeResource.of_json
                                    computeResources) ?serviceRole
               ?tags:(Option.map ~f:Values.TagrisTagsMap.of_json tags)
+              ?eksConfiguration:(Option.map
+                                   ~f:Values.EksConfiguration.of_json
+                                   eksConfiguration) ?context
               ~computeEnvironmentName ~type_:(Values.CEType.of_json type_) ())
            (Some Values.CreateComputeEnvironmentResponse.to_json)
            (Some Values.CreateComputeEnvironmentResponse.error_to_json)])
+let create_consumable_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and totalQuantity =
+         flag "total-quantity" (optional json_arg) ~doc:"JSON Long"
+       and resourceType =
+         flag "resource-type" (optional string) ~doc:"STRING String"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagrisTagsMap"
+       and consumableResourceName =
+         flag "consumable-resource-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_consumable_resource
+           (Values.CreateConsumableResourceRequest.make
+              ?totalQuantity:(Option.map ~f:Values.Long.of_json totalQuantity)
+              ?resourceType
+              ?tags:(Option.map ~f:Values.TagrisTagsMap.of_json tags)
+              ~consumableResourceName ())
+           (Some Values.CreateConsumableResourceResponse.to_json)
+           (Some Values.CreateConsumableResourceResponse.error_to_json)])
 let create_job_queue =
   Command.async ~summary:""
     ([%map_open.Command
@@ -93,25 +128,82 @@ let create_job_queue =
        and state = flag "state" (optional json_arg) ~doc:"JSON JQState"
        and schedulingPolicyArn =
          flag "scheduling-policy-arn" (optional string) ~doc:"STRING String"
+       and computeEnvironmentOrder =
+         flag "compute-environment-order" (optional json_arg)
+           ~doc:"JSON ComputeEnvironmentOrders"
+       and serviceEnvironmentOrder =
+         flag "service-environment-order" (optional json_arg)
+           ~doc:"JSON ServiceEnvironmentOrders"
+       and jobQueueType =
+         flag "job-queue-type" (optional json_arg) ~doc:"JSON JobQueueType"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagrisTagsMap"
+       and jobStateTimeLimitActions =
+         flag "job-state-time-limit-actions" (optional json_arg)
+           ~doc:"JSON JobStateTimeLimitActions"
        and jobQueueName =
          flag "job-queue-name" (required string) ~doc:"STRING String"
-       and priority = flag "priority" (required int) ~doc:"INT Integer"
-       and computeEnvironmentOrder =
-         flag "compute-environment-order" (required json_arg)
-           ~doc:"JSON ComputeEnvironmentOrders" in
+       and priority = flag "priority" (required int) ~doc:"INT Integer" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_job_queue
            (Values.CreateJobQueueRequest.make
               ?state:(Option.map ~f:Values.JQState.of_json state)
               ?schedulingPolicyArn
+              ?computeEnvironmentOrder:(Option.map
+                                          ~f:Values.ComputeEnvironmentOrders.of_json
+                                          computeEnvironmentOrder)
+              ?serviceEnvironmentOrder:(Option.map
+                                          ~f:Values.ServiceEnvironmentOrders.of_json
+                                          serviceEnvironmentOrder)
+              ?jobQueueType:(Option.map ~f:Values.JobQueueType.of_json
+                               jobQueueType)
               ?tags:(Option.map ~f:Values.TagrisTagsMap.of_json tags)
-              ~jobQueueName ~priority
-              ~computeEnvironmentOrder:(Values.ComputeEnvironmentOrders.of_json
-                                          computeEnvironmentOrder) ())
+              ?jobStateTimeLimitActions:(Option.map
+                                           ~f:Values.JobStateTimeLimitActions.of_json
+                                           jobStateTimeLimitActions)
+              ~jobQueueName ~priority ())
            (Some Values.CreateJobQueueResponse.to_json)
            (Some Values.CreateJobQueueResponse.error_to_json)])
+let create_quota_share =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and state =
+         flag "state" (optional json_arg) ~doc:"JSON QuotaShareState"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagrisTagsMap"
+       and quotaShareName =
+         flag "quota-share-name" (required string) ~doc:"STRING String"
+       and jobQueue = flag "job-queue" (required string) ~doc:"STRING String"
+       and capacityLimits =
+         flag "capacity-limits" (required json_arg)
+           ~doc:"JSON QuotaShareCapacityLimits"
+       and resourceSharingConfiguration =
+         flag "resource-sharing-configuration" (required json_arg)
+           ~doc:"JSON QuotaShareResourceSharingConfiguration"
+       and preemptionConfiguration =
+         flag "preemption-configuration" (required json_arg)
+           ~doc:"JSON QuotaSharePreemptionConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_quota_share
+           (Values.CreateQuotaShareRequest.make
+              ?state:(Option.map ~f:Values.QuotaShareState.of_json state)
+              ?tags:(Option.map ~f:Values.TagrisTagsMap.of_json tags)
+              ~quotaShareName ~jobQueue
+              ~capacityLimits:(Values.QuotaShareCapacityLimits.of_json
+                                 capacityLimits)
+              ~resourceSharingConfiguration:(Values.QuotaShareResourceSharingConfiguration.of_json
+                                               resourceSharingConfiguration)
+              ~preemptionConfiguration:(Values.QuotaSharePreemptionConfiguration.of_json
+                                          preemptionConfiguration) ())
+           (Some Values.CreateQuotaShareResponse.to_json)
+           (Some Values.CreateQuotaShareResponse.error_to_json)])
 let create_scheduling_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -122,6 +214,9 @@ let create_scheduling_policy =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and quotaSharePolicy =
+         flag "quota-share-policy" (optional json_arg)
+           ~doc:"JSON QuotaSharePolicy"
        and fairsharePolicy =
          flag "fairshare-policy" (optional json_arg)
            ~doc:"JSON FairsharePolicy"
@@ -131,11 +226,49 @@ let create_scheduling_policy =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_scheduling_policy
            (Values.CreateSchedulingPolicyRequest.make
+              ?quotaSharePolicy:(Option.map
+                                   ~f:Values.QuotaSharePolicy.of_json
+                                   quotaSharePolicy)
               ?fairsharePolicy:(Option.map ~f:Values.FairsharePolicy.of_json
                                   fairsharePolicy)
               ?tags:(Option.map ~f:Values.TagrisTagsMap.of_json tags) ~name
               ()) (Some Values.CreateSchedulingPolicyResponse.to_json)
            (Some Values.CreateSchedulingPolicyResponse.error_to_json)])
+let create_service_environment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and state =
+         flag "state" (optional json_arg) ~doc:"JSON ServiceEnvironmentState"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagrisTagsMap"
+       and serviceEnvironmentName =
+         flag "service-environment-name" (required string)
+           ~doc:"STRING String"
+       and serviceEnvironmentType =
+         flag "service-environment-type" (required json_arg)
+           ~doc:"JSON ServiceEnvironmentType"
+       and capacityLimits =
+         flag "capacity-limits" (required json_arg)
+           ~doc:"JSON CapacityLimits" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_service_environment
+           (Values.CreateServiceEnvironmentRequest.make
+              ?state:(Option.map ~f:Values.ServiceEnvironmentState.of_json
+                        state)
+              ?tags:(Option.map ~f:Values.TagrisTagsMap.of_json tags)
+              ~serviceEnvironmentName
+              ~serviceEnvironmentType:(Values.ServiceEnvironmentType.of_json
+                                         serviceEnvironmentType)
+              ~capacityLimits:(Values.CapacityLimits.of_json capacityLimits)
+              ()) (Some Values.CreateServiceEnvironmentResponse.to_json)
+           (Some Values.CreateServiceEnvironmentResponse.error_to_json)])
 let delete_compute_environment =
   Command.async ~summary:""
     ([%map_open.Command
@@ -154,6 +287,24 @@ let delete_compute_environment =
            (Values.DeleteComputeEnvironmentRequest.make ~computeEnvironment
               ()) (Some Values.DeleteComputeEnvironmentResponse.to_json)
            (Some Values.DeleteComputeEnvironmentResponse.error_to_json)])
+let delete_consumable_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and consumableResource =
+         flag "consumable-resource" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_consumable_resource
+           (Values.DeleteConsumableResourceRequest.make ~consumableResource
+              ()) (Some Values.DeleteConsumableResourceResponse.to_json)
+           (Some Values.DeleteConsumableResourceResponse.error_to_json)])
 let delete_job_queue =
   Command.async ~summary:""
     ([%map_open.Command
@@ -171,6 +322,24 @@ let delete_job_queue =
            (Values.DeleteJobQueueRequest.make ~jobQueue ())
            (Some Values.DeleteJobQueueResponse.to_json)
            (Some Values.DeleteJobQueueResponse.error_to_json)])
+let delete_quota_share =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and quotaShareArn =
+         flag "quota-share-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_quota_share
+           (Values.DeleteQuotaShareRequest.make ~quotaShareArn ())
+           (Some Values.DeleteQuotaShareResponse.to_json)
+           (Some Values.DeleteQuotaShareResponse.error_to_json)])
 let delete_scheduling_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -188,6 +357,24 @@ let delete_scheduling_policy =
            (Values.DeleteSchedulingPolicyRequest.make ~arn ())
            (Some Values.DeleteSchedulingPolicyResponse.to_json)
            (Some Values.DeleteSchedulingPolicyResponse.error_to_json)])
+let delete_service_environment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceEnvironment =
+         flag "service-environment" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_service_environment
+           (Values.DeleteServiceEnvironmentRequest.make ~serviceEnvironment
+              ()) (Some Values.DeleteServiceEnvironmentResponse.to_json)
+           (Some Values.DeleteServiceEnvironmentResponse.error_to_json)])
 let deregister_job_definition =
   Command.async ~summary:""
     ([%map_open.Command
@@ -231,6 +418,24 @@ let describe_compute_environments =
               ?nextToken ())
            (Some Values.DescribeComputeEnvironmentsResponse.to_json)
            (Some Values.DescribeComputeEnvironmentsResponse.error_to_json)])
+let describe_consumable_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and consumableResource =
+         flag "consumable-resource" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_consumable_resource
+           (Values.DescribeConsumableResourceRequest.make ~consumableResource
+              ()) (Some Values.DescribeConsumableResourceResponse.to_json)
+           (Some Values.DescribeConsumableResourceResponse.error_to_json)])
 let describe_job_definitions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -299,6 +504,24 @@ let describe_jobs =
               ~jobs:(Values.StringList.of_json jobs) ())
            (Some Values.DescribeJobsResponse.to_json)
            (Some Values.DescribeJobsResponse.error_to_json)])
+let describe_quota_share =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and quotaShareArn =
+         flag "quota-share-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_quota_share
+           (Values.DescribeQuotaShareRequest.make ~quotaShareArn ())
+           (Some Values.DescribeQuotaShareResponse.to_json)
+           (Some Values.DescribeQuotaShareResponse.error_to_json)])
 let describe_scheduling_policies =
   Command.async ~summary:""
     ([%map_open.Command
@@ -317,6 +540,90 @@ let describe_scheduling_policies =
               ~arns:(Values.StringList.of_json arns) ())
            (Some Values.DescribeSchedulingPoliciesResponse.to_json)
            (Some Values.DescribeSchedulingPoliciesResponse.error_to_json)])
+let describe_service_environments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceEnvironments =
+         flag "service-environments" (optional json_arg)
+           ~doc:"JSON StringList"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_service_environments
+           (Values.DescribeServiceEnvironmentsRequest.make
+              ?serviceEnvironments:(Option.map ~f:Values.StringList.of_json
+                                      serviceEnvironments) ?maxResults
+              ?nextToken ())
+           (Some Values.DescribeServiceEnvironmentsResponse.to_json)
+           (Some Values.DescribeServiceEnvironmentsResponse.error_to_json)])
+let describe_service_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobId = flag "job-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_service_job
+           (Values.DescribeServiceJobRequest.make ~jobId ())
+           (Some Values.DescribeServiceJobResponse.to_json)
+           (Some Values.DescribeServiceJobResponse.error_to_json)])
+let get_job_queue_snapshot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobQueue = flag "job-queue" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_job_queue_snapshot
+           (Values.GetJobQueueSnapshotRequest.make ~jobQueue ())
+           (Some Values.GetJobQueueSnapshotResponse.to_json)
+           (Some Values.GetJobQueueSnapshotResponse.error_to_json)])
+let list_consumable_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListConsumableResourcesFilterList"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_consumable_resources
+           (Values.ListConsumableResourcesRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListConsumableResourcesFilterList.of_json
+                          filters) ?maxResults ?nextToken ())
+           (Some Values.ListConsumableResourcesResponse.to_json)
+           (Some Values.ListConsumableResourcesResponse.error_to_json)])
 let list_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -348,6 +655,53 @@ let list_jobs =
               ?filters:(Option.map ~f:Values.ListJobsFilterList.of_json
                           filters) ()) (Some Values.ListJobsResponse.to_json)
            (Some Values.ListJobsResponse.error_to_json)])
+let list_jobs_by_consumable_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListJobsByConsumableResourceFilterList"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and consumableResource =
+         flag "consumable-resource" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_jobs_by_consumable_resource
+           (Values.ListJobsByConsumableResourceRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ListJobsByConsumableResourceFilterList.of_json
+                          filters) ?maxResults ?nextToken ~consumableResource
+              ()) (Some Values.ListJobsByConsumableResourceResponse.to_json)
+           (Some Values.ListJobsByConsumableResourceResponse.error_to_json)])
+let list_quota_shares =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and jobQueue = flag "job-queue" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_quota_shares
+           (Values.ListQuotaSharesRequest.make ?maxResults ?nextToken
+              ~jobQueue ()) (Some Values.ListQuotaSharesResponse.to_json)
+           (Some Values.ListQuotaSharesResponse.error_to_json)])
 let list_scheduling_policies =
   Command.async ~summary:""
     ([%map_open.Command
@@ -367,6 +721,34 @@ let list_scheduling_policies =
            (Values.ListSchedulingPoliciesRequest.make ?maxResults ?nextToken
               ()) (Some Values.ListSchedulingPoliciesResponse.to_json)
            (Some Values.ListSchedulingPoliciesResponse.error_to_json)])
+let list_service_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobQueue = flag "job-queue" (optional string) ~doc:"STRING String"
+       and jobStatus =
+         flag "job-status" (optional json_arg) ~doc:"JSON ServiceJobStatus"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON ListJobsFilterList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_service_jobs
+           (Values.ListServiceJobsRequest.make ?jobQueue
+              ?jobStatus:(Option.map ~f:Values.ServiceJobStatus.of_json
+                            jobStatus) ?maxResults ?nextToken
+              ?filters:(Option.map ~f:Values.ListJobsFilterList.of_json
+                          filters) ())
+           (Some Values.ListServiceJobsResponse.to_json)
+           (Some Values.ListServiceJobsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -415,6 +797,13 @@ let register_job_definition =
        and platformCapabilities =
          flag "platform-capabilities" (optional json_arg)
            ~doc:"JSON PlatformCapabilityList"
+       and eksProperties =
+         flag "eks-properties" (optional json_arg) ~doc:"JSON EksProperties"
+       and ecsProperties =
+         flag "ecs-properties" (optional json_arg) ~doc:"JSON EcsProperties"
+       and consumableResourceProperties =
+         flag "consumable-resource-properties" (optional json_arg)
+           ~doc:"JSON ConsumableResourceProperties"
        and jobDefinitionName =
          flag "job-definition-name" (required string) ~doc:"STRING String"
        and type_ =
@@ -437,6 +826,13 @@ let register_job_definition =
               ?platformCapabilities:(Option.map
                                        ~f:Values.PlatformCapabilityList.of_json
                                        platformCapabilities)
+              ?eksProperties:(Option.map ~f:Values.EksProperties.of_json
+                                eksProperties)
+              ?ecsProperties:(Option.map ~f:Values.EcsProperties.of_json
+                                ecsProperties)
+              ?consumableResourceProperties:(Option.map
+                                               ~f:Values.ConsumableResourceProperties.of_json
+                                               consumableResourceProperties)
               ~jobDefinitionName
               ~type_:(Values.JobDefinitionType.of_json type_) ())
            (Some Values.RegisterJobDefinitionResponse.to_json)
@@ -475,6 +871,15 @@ let submit_job =
        and timeout =
          flag "timeout" (optional json_arg) ~doc:"JSON JobTimeout"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagrisTagsMap"
+       and eksPropertiesOverride =
+         flag "eks-properties-override" (optional json_arg)
+           ~doc:"JSON EksPropertiesOverride"
+       and ecsPropertiesOverride =
+         flag "ecs-properties-override" (optional json_arg)
+           ~doc:"JSON EcsPropertiesOverride"
+       and consumableResourcePropertiesOverride =
+         flag "consumable-resource-properties-override" (optional json_arg)
+           ~doc:"JSON ConsumableResourceProperties"
        and jobName = flag "job-name" (required string) ~doc:"STRING String"
        and jobQueue = flag "job-queue" (required string) ~doc:"STRING String"
        and jobDefinition =
@@ -499,9 +904,73 @@ let submit_job =
                                 retryStrategy) ?propagateTags
               ?timeout:(Option.map ~f:Values.JobTimeout.of_json timeout)
               ?tags:(Option.map ~f:Values.TagrisTagsMap.of_json tags)
+              ?eksPropertiesOverride:(Option.map
+                                        ~f:Values.EksPropertiesOverride.of_json
+                                        eksPropertiesOverride)
+              ?ecsPropertiesOverride:(Option.map
+                                        ~f:Values.EcsPropertiesOverride.of_json
+                                        ecsPropertiesOverride)
+              ?consumableResourcePropertiesOverride:(Option.map
+                                                       ~f:Values.ConsumableResourceProperties.of_json
+                                                       consumableResourcePropertiesOverride)
               ~jobName ~jobQueue ~jobDefinition ())
            (Some Values.SubmitJobResponse.to_json)
            (Some Values.SubmitJobResponse.error_to_json)])
+let submit_service_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and retryStrategy =
+         flag "retry-strategy" (optional json_arg)
+           ~doc:"JSON ServiceJobRetryStrategy"
+       and schedulingPriority =
+         flag "scheduling-priority" (optional int) ~doc:"INT Integer"
+       and shareIdentifier =
+         flag "share-identifier" (optional string) ~doc:"STRING String"
+       and quotaShareName =
+         flag "quota-share-name" (optional string) ~doc:"STRING String"
+       and preemptionConfiguration =
+         flag "preemption-configuration" (optional json_arg)
+           ~doc:"JSON ServiceJobPreemptionConfiguration"
+       and timeoutConfig =
+         flag "timeout-config" (optional json_arg)
+           ~doc:"JSON ServiceJobTimeout"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagrisTagsMap"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and jobName = flag "job-name" (required string) ~doc:"STRING String"
+       and jobQueue = flag "job-queue" (required string) ~doc:"STRING String"
+       and serviceRequestPayload =
+         flag "service-request-payload" (required string)
+           ~doc:"STRING String"
+       and serviceJobType =
+         flag "service-job-type" (required json_arg)
+           ~doc:"JSON ServiceJobType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.submit_service_job
+           (Values.SubmitServiceJobRequest.make
+              ?retryStrategy:(Option.map
+                                ~f:Values.ServiceJobRetryStrategy.of_json
+                                retryStrategy) ?schedulingPriority
+              ?shareIdentifier ?quotaShareName
+              ?preemptionConfiguration:(Option.map
+                                          ~f:Values.ServiceJobPreemptionConfiguration.of_json
+                                          preemptionConfiguration)
+              ?timeoutConfig:(Option.map ~f:Values.ServiceJobTimeout.of_json
+                                timeoutConfig)
+              ?tags:(Option.map ~f:Values.TagrisTagsMap.of_json tags)
+              ?clientToken ~jobName ~jobQueue ~serviceRequestPayload
+              ~serviceJobType:(Values.ServiceJobType.of_json serviceJobType)
+              ()) (Some Values.SubmitServiceJobResponse.to_json)
+           (Some Values.SubmitServiceJobResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -540,6 +1009,24 @@ let terminate_job =
            (Values.TerminateJobRequest.make ~jobId ~reason ())
            (Some Values.TerminateJobResponse.to_json)
            (Some Values.TerminateJobResponse.error_to_json)])
+let terminate_service_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobId = flag "job-id" (required string) ~doc:"STRING String"
+       and reason = flag "reason" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.terminate_service_job
+           (Values.TerminateServiceJobRequest.make ~jobId ~reason ())
+           (Some Values.TerminateServiceJobResponse.to_json)
+           (Some Values.TerminateServiceJobResponse.error_to_json)])
 let untag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -579,6 +1066,9 @@ let update_compute_environment =
            ~doc:"JSON ComputeResourceUpdate"
        and serviceRole =
          flag "service-role" (optional string) ~doc:"STRING String"
+       and updatePolicy =
+         flag "update-policy" (optional json_arg) ~doc:"JSON UpdatePolicy"
+       and context = flag "context" (optional string) ~doc:"STRING String"
        and computeEnvironment =
          flag "compute-environment" (required string) ~doc:"STRING String" in
        fun () ->
@@ -590,9 +1080,36 @@ let update_compute_environment =
               ?computeResources:(Option.map
                                    ~f:Values.ComputeResourceUpdate.of_json
                                    computeResources) ?serviceRole
-              ~computeEnvironment ())
+              ?updatePolicy:(Option.map ~f:Values.UpdatePolicy.of_json
+                               updatePolicy) ?context ~computeEnvironment ())
            (Some Values.UpdateComputeEnvironmentResponse.to_json)
            (Some Values.UpdateComputeEnvironmentResponse.error_to_json)])
+let update_consumable_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and operation =
+         flag "operation" (optional string) ~doc:"STRING String"
+       and quantity = flag "quantity" (optional json_arg) ~doc:"JSON Long"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and consumableResource =
+         flag "consumable-resource" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_consumable_resource
+           (Values.UpdateConsumableResourceRequest.make ?operation
+              ?quantity:(Option.map ~f:Values.Long.of_json quantity)
+              ?clientToken ~consumableResource ())
+           (Some Values.UpdateConsumableResourceResponse.to_json)
+           (Some Values.UpdateConsumableResourceResponse.error_to_json)])
 let update_job_queue =
   Command.async ~summary:""
     ([%map_open.Command
@@ -610,6 +1127,12 @@ let update_job_queue =
        and computeEnvironmentOrder =
          flag "compute-environment-order" (optional json_arg)
            ~doc:"JSON ComputeEnvironmentOrders"
+       and serviceEnvironmentOrder =
+         flag "service-environment-order" (optional json_arg)
+           ~doc:"JSON ServiceEnvironmentOrders"
+       and jobStateTimeLimitActions =
+         flag "job-state-time-limit-actions" (optional json_arg)
+           ~doc:"JSON JobStateTimeLimitActions"
        and jobQueue = flag "job-queue" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -619,9 +1142,55 @@ let update_job_queue =
               ?schedulingPolicyArn ?priority
               ?computeEnvironmentOrder:(Option.map
                                           ~f:Values.ComputeEnvironmentOrders.of_json
-                                          computeEnvironmentOrder) ~jobQueue
-              ()) (Some Values.UpdateJobQueueResponse.to_json)
+                                          computeEnvironmentOrder)
+              ?serviceEnvironmentOrder:(Option.map
+                                          ~f:Values.ServiceEnvironmentOrders.of_json
+                                          serviceEnvironmentOrder)
+              ?jobStateTimeLimitActions:(Option.map
+                                           ~f:Values.JobStateTimeLimitActions.of_json
+                                           jobStateTimeLimitActions)
+              ~jobQueue ()) (Some Values.UpdateJobQueueResponse.to_json)
            (Some Values.UpdateJobQueueResponse.error_to_json)])
+let update_quota_share =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and capacityLimits =
+         flag "capacity-limits" (optional json_arg)
+           ~doc:"JSON QuotaShareCapacityLimits"
+       and resourceSharingConfiguration =
+         flag "resource-sharing-configuration" (optional json_arg)
+           ~doc:"JSON QuotaShareResourceSharingConfiguration"
+       and preemptionConfiguration =
+         flag "preemption-configuration" (optional json_arg)
+           ~doc:"JSON QuotaSharePreemptionConfiguration"
+       and state =
+         flag "state" (optional json_arg) ~doc:"JSON QuotaShareState"
+       and quotaShareArn =
+         flag "quota-share-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_quota_share
+           (Values.UpdateQuotaShareRequest.make
+              ?capacityLimits:(Option.map
+                                 ~f:Values.QuotaShareCapacityLimits.of_json
+                                 capacityLimits)
+              ?resourceSharingConfiguration:(Option.map
+                                               ~f:Values.QuotaShareResourceSharingConfiguration.of_json
+                                               resourceSharingConfiguration)
+              ?preemptionConfiguration:(Option.map
+                                          ~f:Values.QuotaSharePreemptionConfiguration.of_json
+                                          preemptionConfiguration)
+              ?state:(Option.map ~f:Values.QuotaShareState.of_json state)
+              ~quotaShareArn ())
+           (Some Values.UpdateQuotaShareResponse.to_json)
+           (Some Values.UpdateQuotaShareResponse.error_to_json)])
 let update_scheduling_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -632,6 +1201,9 @@ let update_scheduling_policy =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and quotaSharePolicy =
+         flag "quota-share-policy" (optional json_arg)
+           ~doc:"JSON QuotaSharePolicy"
        and fairsharePolicy =
          flag "fairshare-policy" (optional json_arg)
            ~doc:"JSON FairsharePolicy"
@@ -640,34 +1212,104 @@ let update_scheduling_policy =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_scheduling_policy
            (Values.UpdateSchedulingPolicyRequest.make
+              ?quotaSharePolicy:(Option.map
+                                   ~f:Values.QuotaSharePolicy.of_json
+                                   quotaSharePolicy)
               ?fairsharePolicy:(Option.map ~f:Values.FairsharePolicy.of_json
                                   fairsharePolicy) ~arn ())
            (Some Values.UpdateSchedulingPolicyResponse.to_json)
            (Some Values.UpdateSchedulingPolicyResponse.error_to_json)])
+let update_service_environment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and state =
+         flag "state" (optional json_arg) ~doc:"JSON ServiceEnvironmentState"
+       and capacityLimits =
+         flag "capacity-limits" (optional json_arg)
+           ~doc:"JSON CapacityLimits"
+       and serviceEnvironment =
+         flag "service-environment" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_service_environment
+           (Values.UpdateServiceEnvironmentRequest.make
+              ?state:(Option.map ~f:Values.ServiceEnvironmentState.of_json
+                        state)
+              ?capacityLimits:(Option.map ~f:Values.CapacityLimits.of_json
+                                 capacityLimits) ~serviceEnvironment ())
+           (Some Values.UpdateServiceEnvironmentResponse.to_json)
+           (Some Values.UpdateServiceEnvironmentResponse.error_to_json)])
+let update_service_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobId = flag "job-id" (required string) ~doc:"STRING String"
+       and schedulingPriority =
+         flag "scheduling-priority" (required int) ~doc:"INT Integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_service_job
+           (Values.UpdateServiceJobRequest.make ~jobId ~schedulingPriority ())
+           (Some Values.UpdateServiceJobResponse.to_json)
+           (Some Values.UpdateServiceJobResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-job", cancel_job);
     ("create-compute-environment", create_compute_environment);
+    ("create-consumable-resource", create_consumable_resource);
     ("create-job-queue", create_job_queue);
+    ("create-quota-share", create_quota_share);
     ("create-scheduling-policy", create_scheduling_policy);
+    ("create-service-environment", create_service_environment);
     ("delete-compute-environment", delete_compute_environment);
+    ("delete-consumable-resource", delete_consumable_resource);
     ("delete-job-queue", delete_job_queue);
+    ("delete-quota-share", delete_quota_share);
     ("delete-scheduling-policy", delete_scheduling_policy);
+    ("delete-service-environment", delete_service_environment);
     ("deregister-job-definition", deregister_job_definition);
     ("describe-compute-environments", describe_compute_environments);
+    ("describe-consumable-resource", describe_consumable_resource);
     ("describe-job-definitions", describe_job_definitions);
     ("describe-job-queues", describe_job_queues);
     ("describe-jobs", describe_jobs);
+    ("describe-quota-share", describe_quota_share);
     ("describe-scheduling-policies", describe_scheduling_policies);
+    ("describe-service-environments", describe_service_environments);
+    ("describe-service-job", describe_service_job);
+    ("get-job-queue-snapshot", get_job_queue_snapshot);
+    ("list-consumable-resources", list_consumable_resources);
     ("list-jobs", list_jobs);
+    ("list-jobs-by-consumable-resource", list_jobs_by_consumable_resource);
+    ("list-quota-shares", list_quota_shares);
     ("list-scheduling-policies", list_scheduling_policies);
+    ("list-service-jobs", list_service_jobs);
     ("list-tags-for-resource", list_tags_for_resource);
     ("register-job-definition", register_job_definition);
     ("submit-job", submit_job);
+    ("submit-service-job", submit_service_job);
     ("tag-resource", tag_resource);
     ("terminate-job", terminate_job);
+    ("terminate-service-job", terminate_service_job);
     ("untag-resource", untag_resource);
     ("update-compute-environment", update_compute_environment);
+    ("update-consumable-resource", update_consumable_resource);
     ("update-job-queue", update_job_queue);
-    ("update-scheduling-policy", update_scheduling_policy)]
+    ("update-quota-share", update_quota_share);
+    ("update-scheduling-policy", update_scheduling_policy);
+    ("update-service-environment", update_service_environment);
+    ("update-service-job", update_service_job)]

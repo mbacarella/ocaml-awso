@@ -4,6 +4,8 @@ open Values
 type ('i, 'o, 'e) t =
   | CreateHomeRegionControl: (CreateHomeRegionControlRequest.t,
   CreateHomeRegionControlResult.t, CreateHomeRegionControlResult.error) t 
+  | DeleteHomeRegionControl: (DeleteHomeRegionControlRequest.t,
+  DeleteHomeRegionControlResult.t, DeleteHomeRegionControlResult.error) t 
   | DescribeHomeRegionControls: (DescribeHomeRegionControlsRequest.t,
   DescribeHomeRegionControlsResult.t, DescribeHomeRegionControlsResult.error)
   t 
@@ -12,12 +14,14 @@ type ('i, 'o, 'e) t =
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateHomeRegionControl -> `POST
+  | DeleteHomeRegionControl -> `POST
   | DescribeHomeRegionControls -> `POST
   | GetHomeRegion -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CreateHomeRegionControl -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteHomeRegionControl -> (Format.kasprintf Uri.of_string) "/"
       | DescribeHomeRegionControls -> (Format.kasprintf Uri.of_string) "/"
       | GetHomeRegion -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
@@ -31,6 +35,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSMigrationHubMultiAccountService.CreateHomeRegionControl")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteHomeRegionControl ->
+      let json = DeleteHomeRegionControlRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSMigrationHubMultiAccountService.DeleteHomeRegionControl")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeHomeRegionControls ->
       let json = DescribeHomeRegionControlsRequest.to_json req in
@@ -81,6 +94,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateHomeRegionControlResult.error_of_json))
+  | DeleteHomeRegionControl ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteHomeRegionControlResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteHomeRegionControlResult.error_of_json))
   | DescribeHomeRegionControls ->
       if is_success
       then

@@ -2,46 +2,155 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | ActivateEvaluationForm: (ActivateEvaluationFormRequest.t,
+  ActivateEvaluationFormResponse.t, ActivateEvaluationFormResponse.error) t 
+  | AssociateAnalyticsDataSet: (AssociateAnalyticsDataSetRequest.t,
+  AssociateAnalyticsDataSetResponse.t,
+  AssociateAnalyticsDataSetResponse.error) t 
   | AssociateApprovedOrigin: (AssociateApprovedOriginRequest.t, unit, 
   unit) t 
   | AssociateBot: (AssociateBotRequest.t, unit, unit) t 
+  | AssociateContactWithUser: (AssociateContactWithUserRequest.t,
+  AssociateContactWithUserResponse.t, AssociateContactWithUserResponse.error)
+  t 
   | AssociateDefaultVocabulary: (AssociateDefaultVocabularyRequest.t,
   AssociateDefaultVocabularyResponse.t,
   AssociateDefaultVocabularyResponse.error) t 
+  | AssociateEmailAddressAlias: (AssociateEmailAddressAliasRequest.t,
+  AssociateEmailAddressAliasResponse.t,
+  AssociateEmailAddressAliasResponse.error) t 
+  | AssociateFlow: (AssociateFlowRequest.t, AssociateFlowResponse.t,
+  AssociateFlowResponse.error) t 
+  | AssociateHoursOfOperations: (AssociateHoursOfOperationsRequest.t, 
+  unit, unit) t 
   | AssociateInstanceStorageConfig: (AssociateInstanceStorageConfigRequest.t,
   AssociateInstanceStorageConfigResponse.t,
   AssociateInstanceStorageConfigResponse.error) t 
   | AssociateLambdaFunction: (AssociateLambdaFunctionRequest.t, unit, 
   unit) t 
   | AssociateLexBot: (AssociateLexBotRequest.t, unit, unit) t 
+  | AssociatePhoneNumberContactFlow:
+  (AssociatePhoneNumberContactFlowRequest.t, unit, unit) t 
+  | AssociateQueueEmailAddresses: (AssociateQueueEmailAddressesRequest.t,
+  unit, unit) t 
   | AssociateQueueQuickConnects: (AssociateQueueQuickConnectsRequest.t, 
   unit, unit) t 
   | AssociateRoutingProfileQueues: (AssociateRoutingProfileQueuesRequest.t,
   unit, unit) t 
   | AssociateSecurityKey: (AssociateSecurityKeyRequest.t,
   AssociateSecurityKeyResponse.t, AssociateSecurityKeyResponse.error) t 
+  | AssociateSecurityProfiles: (AssociateSecurityProfilesRequest.t, unit,
+  unit) t 
+  | AssociateTrafficDistributionGroupUser:
+  (AssociateTrafficDistributionGroupUserRequest.t,
+  AssociateTrafficDistributionGroupUserResponse.t,
+  AssociateTrafficDistributionGroupUserResponse.error) t 
+  | AssociateUserProficiencies: (AssociateUserProficienciesRequest.t, 
+  unit, unit) t 
+  | AssociateWorkspace: (AssociateWorkspaceRequest.t,
+  AssociateWorkspaceResponse.t, AssociateWorkspaceResponse.error) t 
+  | BatchAssociateAnalyticsDataSet: (BatchAssociateAnalyticsDataSetRequest.t,
+  BatchAssociateAnalyticsDataSetResponse.t,
+  BatchAssociateAnalyticsDataSetResponse.error) t 
+  | BatchCreateDataTableValue: (BatchCreateDataTableValueRequest.t,
+  BatchCreateDataTableValueResponse.t,
+  BatchCreateDataTableValueResponse.error) t 
+  | BatchDeleteDataTableValue: (BatchDeleteDataTableValueRequest.t,
+  BatchDeleteDataTableValueResponse.t,
+  BatchDeleteDataTableValueResponse.error) t 
+  | BatchDescribeDataTableValue: (BatchDescribeDataTableValueRequest.t,
+  BatchDescribeDataTableValueResponse.t,
+  BatchDescribeDataTableValueResponse.error) t 
+  | BatchDisassociateAnalyticsDataSet:
+  (BatchDisassociateAnalyticsDataSetRequest.t,
+  BatchDisassociateAnalyticsDataSetResponse.t,
+  BatchDisassociateAnalyticsDataSetResponse.error) t 
+  | BatchGetAttachedFileMetadata: (BatchGetAttachedFileMetadataRequest.t,
+  BatchGetAttachedFileMetadataResponse.t,
+  BatchGetAttachedFileMetadataResponse.error) t 
+  | BatchGetFlowAssociation: (BatchGetFlowAssociationRequest.t,
+  BatchGetFlowAssociationResponse.t, BatchGetFlowAssociationResponse.error) t
+  
+  | BatchPutContact: (BatchPutContactRequest.t, BatchPutContactResponse.t,
+  BatchPutContactResponse.error) t 
+  | BatchUpdateDataTableValue: (BatchUpdateDataTableValueRequest.t,
+  BatchUpdateDataTableValueResponse.t,
+  BatchUpdateDataTableValueResponse.error) t 
+  | ClaimPhoneNumber: (ClaimPhoneNumberRequest.t, ClaimPhoneNumberResponse.t,
+  ClaimPhoneNumberResponse.error) t 
+  | CompleteAttachedFileUpload: (CompleteAttachedFileUploadRequest.t,
+  CompleteAttachedFileUploadResponse.t,
+  CompleteAttachedFileUploadResponse.error) t 
   | CreateAgentStatus: (CreateAgentStatusRequest.t,
   CreateAgentStatusResponse.t, CreateAgentStatusResponse.error) t 
+  | CreateContact: (CreateContactRequest.t, CreateContactResponse.t,
+  CreateContactResponse.error) t 
   | CreateContactFlow: (CreateContactFlowRequest.t,
   CreateContactFlowResponse.t, CreateContactFlowResponse.error) t 
   | CreateContactFlowModule: (CreateContactFlowModuleRequest.t,
   CreateContactFlowModuleResponse.t, CreateContactFlowModuleResponse.error) t
   
+  | CreateContactFlowModuleAlias: (CreateContactFlowModuleAliasRequest.t,
+  CreateContactFlowModuleAliasResponse.t,
+  CreateContactFlowModuleAliasResponse.error) t 
+  | CreateContactFlowModuleVersion: (CreateContactFlowModuleVersionRequest.t,
+  CreateContactFlowModuleVersionResponse.t,
+  CreateContactFlowModuleVersionResponse.error) t 
+  | CreateContactFlowVersion: (CreateContactFlowVersionRequest.t,
+  CreateContactFlowVersionResponse.t, CreateContactFlowVersionResponse.error)
+  t 
+  | CreateDataTable: (CreateDataTableRequest.t, CreateDataTableResponse.t,
+  CreateDataTableResponse.error) t 
+  | CreateDataTableAttribute: (CreateDataTableAttributeRequest.t,
+  CreateDataTableAttributeResponse.t, CreateDataTableAttributeResponse.error)
+  t 
+  | CreateEmailAddress: (CreateEmailAddressRequest.t,
+  CreateEmailAddressResponse.t, CreateEmailAddressResponse.error) t 
+  | CreateEvaluationForm: (CreateEvaluationFormRequest.t,
+  CreateEvaluationFormResponse.t, CreateEvaluationFormResponse.error) t 
   | CreateHoursOfOperation: (CreateHoursOfOperationRequest.t,
   CreateHoursOfOperationResponse.t, CreateHoursOfOperationResponse.error) t 
+  | CreateHoursOfOperationOverride: (CreateHoursOfOperationOverrideRequest.t,
+  CreateHoursOfOperationOverrideResponse.t,
+  CreateHoursOfOperationOverrideResponse.error) t 
   | CreateInstance: (CreateInstanceRequest.t, CreateInstanceResponse.t,
   CreateInstanceResponse.error) t 
   | CreateIntegrationAssociation: (CreateIntegrationAssociationRequest.t,
   CreateIntegrationAssociationResponse.t,
   CreateIntegrationAssociationResponse.error) t 
+  | CreateNotification: (CreateNotificationRequest.t,
+  CreateNotificationResponse.t, CreateNotificationResponse.error) t 
+  | CreateParticipant: (CreateParticipantRequest.t,
+  CreateParticipantResponse.t, CreateParticipantResponse.error) t 
+  | CreatePersistentContactAssociation:
+  (CreatePersistentContactAssociationRequest.t,
+  CreatePersistentContactAssociationResponse.t,
+  CreatePersistentContactAssociationResponse.error) t 
+  | CreatePredefinedAttribute: (CreatePredefinedAttributeRequest.t, unit,
+  unit) t 
+  | CreatePrompt: (CreatePromptRequest.t, CreatePromptResponse.t,
+  CreatePromptResponse.error) t 
+  | CreatePushNotificationRegistration:
+  (CreatePushNotificationRegistrationRequest.t,
+  CreatePushNotificationRegistrationResponse.t,
+  CreatePushNotificationRegistrationResponse.error) t 
   | CreateQueue: (CreateQueueRequest.t, CreateQueueResponse.t,
   CreateQueueResponse.error) t 
   | CreateQuickConnect: (CreateQuickConnectRequest.t,
   CreateQuickConnectResponse.t, CreateQuickConnectResponse.error) t 
   | CreateRoutingProfile: (CreateRoutingProfileRequest.t,
   CreateRoutingProfileResponse.t, CreateRoutingProfileResponse.error) t 
+  | CreateRule: (CreateRuleRequest.t, CreateRuleResponse.t,
+  CreateRuleResponse.error) t 
   | CreateSecurityProfile: (CreateSecurityProfileRequest.t,
   CreateSecurityProfileResponse.t, CreateSecurityProfileResponse.error) t 
+  | CreateTaskTemplate: (CreateTaskTemplateRequest.t,
+  CreateTaskTemplateResponse.t, CreateTaskTemplateResponse.error) t 
+  | CreateTestCase: (CreateTestCaseRequest.t, CreateTestCaseResponse.t,
+  CreateTestCaseResponse.error) t 
+  | CreateTrafficDistributionGroup: (CreateTrafficDistributionGroupRequest.t,
+  CreateTrafficDistributionGroupResponse.t,
+  CreateTrafficDistributionGroupResponse.error) t 
   | CreateUseCase: (CreateUseCaseRequest.t, CreateUseCaseResponse.t,
   CreateUseCaseResponse.error) t 
   | CreateUser: (CreateUserRequest.t, CreateUserResponse.t,
@@ -49,36 +158,126 @@ type ('i, 'o, 'e) t =
   | CreateUserHierarchyGroup: (CreateUserHierarchyGroupRequest.t,
   CreateUserHierarchyGroupResponse.t, CreateUserHierarchyGroupResponse.error)
   t 
+  | CreateView: (CreateViewRequest.t, CreateViewResponse.t,
+  CreateViewResponse.error) t 
+  | CreateViewVersion: (CreateViewVersionRequest.t,
+  CreateViewVersionResponse.t, CreateViewVersionResponse.error) t 
   | CreateVocabulary: (CreateVocabularyRequest.t, CreateVocabularyResponse.t,
   CreateVocabularyResponse.error) t 
-  | DeleteContactFlow: (DeleteContactFlowRequest.t, unit, unit) t 
+  | CreateWorkspace: (CreateWorkspaceRequest.t, CreateWorkspaceResponse.t,
+  CreateWorkspaceResponse.error) t 
+  | CreateWorkspacePage: (CreateWorkspacePageRequest.t,
+  CreateWorkspacePageResponse.t, CreateWorkspacePageResponse.error) t 
+  | DeactivateEvaluationForm: (DeactivateEvaluationFormRequest.t,
+  DeactivateEvaluationFormResponse.t, DeactivateEvaluationFormResponse.error)
+  t 
+  | DeleteAttachedFile: (DeleteAttachedFileRequest.t,
+  DeleteAttachedFileResponse.t, DeleteAttachedFileResponse.error) t 
+  | DeleteContactEvaluation: (DeleteContactEvaluationRequest.t, unit, 
+  unit) t 
+  | DeleteContactFlow: (DeleteContactFlowRequest.t,
+  DeleteContactFlowResponse.t, DeleteContactFlowResponse.error) t 
   | DeleteContactFlowModule: (DeleteContactFlowModuleRequest.t,
   DeleteContactFlowModuleResponse.t, DeleteContactFlowModuleResponse.error) t
   
+  | DeleteContactFlowModuleAlias: (DeleteContactFlowModuleAliasRequest.t,
+  DeleteContactFlowModuleAliasResponse.t,
+  DeleteContactFlowModuleAliasResponse.error) t 
+  | DeleteContactFlowModuleVersion: (DeleteContactFlowModuleVersionRequest.t,
+  DeleteContactFlowModuleVersionResponse.t,
+  DeleteContactFlowModuleVersionResponse.error) t 
+  | DeleteContactFlowVersion: (DeleteContactFlowVersionRequest.t,
+  DeleteContactFlowVersionResponse.t, DeleteContactFlowVersionResponse.error)
+  t 
+  | DeleteDataTable: (DeleteDataTableRequest.t, DeleteDataTableResponse.t,
+  DeleteDataTableResponse.error) t 
+  | DeleteDataTableAttribute: (DeleteDataTableAttributeRequest.t,
+  DeleteDataTableAttributeResponse.t, DeleteDataTableAttributeResponse.error)
+  t 
+  | DeleteEmailAddress: (DeleteEmailAddressRequest.t,
+  DeleteEmailAddressResponse.t, DeleteEmailAddressResponse.error) t 
+  | DeleteEvaluationForm: (DeleteEvaluationFormRequest.t, unit, unit) t 
   | DeleteHoursOfOperation: (DeleteHoursOfOperationRequest.t, unit, unit) t 
+  | DeleteHoursOfOperationOverride: (DeleteHoursOfOperationOverrideRequest.t,
+  unit, unit) t 
   | DeleteInstance: (DeleteInstanceRequest.t, unit, unit) t 
   | DeleteIntegrationAssociation: (DeleteIntegrationAssociationRequest.t,
   unit, unit) t 
+  | DeleteNotification: (DeleteNotificationRequest.t,
+  DeleteNotificationResponse.t, DeleteNotificationResponse.error) t 
+  | DeletePredefinedAttribute: (DeletePredefinedAttributeRequest.t, unit,
+  unit) t 
+  | DeletePrompt: (DeletePromptRequest.t, unit, unit) t 
+  | DeletePushNotificationRegistration:
+  (DeletePushNotificationRegistrationRequest.t,
+  DeletePushNotificationRegistrationResponse.t,
+  DeletePushNotificationRegistrationResponse.error) t 
+  | DeleteQueue: (DeleteQueueRequest.t, unit, unit) t 
   | DeleteQuickConnect: (DeleteQuickConnectRequest.t, unit, unit) t 
+  | DeleteRoutingProfile: (DeleteRoutingProfileRequest.t, unit, unit) t 
+  | DeleteRule: (DeleteRuleRequest.t, unit, unit) t 
   | DeleteSecurityProfile: (DeleteSecurityProfileRequest.t, unit, unit) t 
+  | DeleteTaskTemplate: (DeleteTaskTemplateRequest.t,
+  DeleteTaskTemplateResponse.t, DeleteTaskTemplateResponse.error) t 
+  | DeleteTestCase: (DeleteTestCaseRequest.t, DeleteTestCaseResponse.t,
+  DeleteTestCaseResponse.error) t 
+  | DeleteTrafficDistributionGroup: (DeleteTrafficDistributionGroupRequest.t,
+  DeleteTrafficDistributionGroupResponse.t,
+  DeleteTrafficDistributionGroupResponse.error) t 
   | DeleteUseCase: (DeleteUseCaseRequest.t, unit, unit) t 
   | DeleteUser: (DeleteUserRequest.t, unit, unit) t 
   | DeleteUserHierarchyGroup: (DeleteUserHierarchyGroupRequest.t, unit, 
   unit) t 
+  | DeleteView: (DeleteViewRequest.t, DeleteViewResponse.t,
+  DeleteViewResponse.error) t 
+  | DeleteViewVersion: (DeleteViewVersionRequest.t,
+  DeleteViewVersionResponse.t, DeleteViewVersionResponse.error) t 
   | DeleteVocabulary: (DeleteVocabularyRequest.t, DeleteVocabularyResponse.t,
   DeleteVocabularyResponse.error) t 
+  | DeleteWorkspace: (DeleteWorkspaceRequest.t, DeleteWorkspaceResponse.t,
+  DeleteWorkspaceResponse.error) t 
+  | DeleteWorkspaceMedia: (DeleteWorkspaceMediaRequest.t,
+  DeleteWorkspaceMediaResponse.t, DeleteWorkspaceMediaResponse.error) t 
+  | DeleteWorkspacePage: (DeleteWorkspacePageRequest.t,
+  DeleteWorkspacePageResponse.t, DeleteWorkspacePageResponse.error) t 
   | DescribeAgentStatus: (DescribeAgentStatusRequest.t,
   DescribeAgentStatusResponse.t, DescribeAgentStatusResponse.error) t 
+  | DescribeAttachedFilesConfiguration:
+  (DescribeAttachedFilesConfigurationRequest.t,
+  DescribeAttachedFilesConfigurationResponse.t,
+  DescribeAttachedFilesConfigurationResponse.error) t 
+  | DescribeAuthenticationProfile: (DescribeAuthenticationProfileRequest.t,
+  DescribeAuthenticationProfileResponse.t,
+  DescribeAuthenticationProfileResponse.error) t 
   | DescribeContact: (DescribeContactRequest.t, DescribeContactResponse.t,
   DescribeContactResponse.error) t 
+  | DescribeContactEvaluation: (DescribeContactEvaluationRequest.t,
+  DescribeContactEvaluationResponse.t,
+  DescribeContactEvaluationResponse.error) t 
   | DescribeContactFlow: (DescribeContactFlowRequest.t,
   DescribeContactFlowResponse.t, DescribeContactFlowResponse.error) t 
   | DescribeContactFlowModule: (DescribeContactFlowModuleRequest.t,
   DescribeContactFlowModuleResponse.t,
   DescribeContactFlowModuleResponse.error) t 
+  | DescribeContactFlowModuleAlias: (DescribeContactFlowModuleAliasRequest.t,
+  DescribeContactFlowModuleAliasResponse.t,
+  DescribeContactFlowModuleAliasResponse.error) t 
+  | DescribeDataTable: (DescribeDataTableRequest.t,
+  DescribeDataTableResponse.t, DescribeDataTableResponse.error) t 
+  | DescribeDataTableAttribute: (DescribeDataTableAttributeRequest.t,
+  DescribeDataTableAttributeResponse.t,
+  DescribeDataTableAttributeResponse.error) t 
+  | DescribeEmailAddress: (DescribeEmailAddressRequest.t,
+  DescribeEmailAddressResponse.t, DescribeEmailAddressResponse.error) t 
+  | DescribeEvaluationForm: (DescribeEvaluationFormRequest.t,
+  DescribeEvaluationFormResponse.t, DescribeEvaluationFormResponse.error) t 
   | DescribeHoursOfOperation: (DescribeHoursOfOperationRequest.t,
   DescribeHoursOfOperationResponse.t, DescribeHoursOfOperationResponse.error)
   t 
+  | DescribeHoursOfOperationOverride:
+  (DescribeHoursOfOperationOverrideRequest.t,
+  DescribeHoursOfOperationOverrideResponse.t,
+  DescribeHoursOfOperationOverrideResponse.error) t 
   | DescribeInstance: (DescribeInstanceRequest.t, DescribeInstanceResponse.t,
   DescribeInstanceResponse.error) t 
   | DescribeInstanceAttribute: (DescribeInstanceAttributeRequest.t,
@@ -87,15 +286,32 @@ type ('i, 'o, 'e) t =
   | DescribeInstanceStorageConfig: (DescribeInstanceStorageConfigRequest.t,
   DescribeInstanceStorageConfigResponse.t,
   DescribeInstanceStorageConfigResponse.error) t 
+  | DescribeNotification: (DescribeNotificationRequest.t,
+  DescribeNotificationResponse.t, DescribeNotificationResponse.error) t 
+  | DescribePhoneNumber: (DescribePhoneNumberRequest.t,
+  DescribePhoneNumberResponse.t, DescribePhoneNumberResponse.error) t 
+  | DescribePredefinedAttribute: (DescribePredefinedAttributeRequest.t,
+  DescribePredefinedAttributeResponse.t,
+  DescribePredefinedAttributeResponse.error) t 
+  | DescribePrompt: (DescribePromptRequest.t, DescribePromptResponse.t,
+  DescribePromptResponse.error) t 
   | DescribeQueue: (DescribeQueueRequest.t, DescribeQueueResponse.t,
   DescribeQueueResponse.error) t 
   | DescribeQuickConnect: (DescribeQuickConnectRequest.t,
   DescribeQuickConnectResponse.t, DescribeQuickConnectResponse.error) t 
   | DescribeRoutingProfile: (DescribeRoutingProfileRequest.t,
   DescribeRoutingProfileResponse.t, DescribeRoutingProfileResponse.error) t 
+  | DescribeRule: (DescribeRuleRequest.t, DescribeRuleResponse.t,
+  DescribeRuleResponse.error) t 
   | DescribeSecurityProfile: (DescribeSecurityProfileRequest.t,
   DescribeSecurityProfileResponse.t, DescribeSecurityProfileResponse.error) t
   
+  | DescribeTestCase: (DescribeTestCaseRequest.t, DescribeTestCaseResponse.t,
+  DescribeTestCaseResponse.error) t 
+  | DescribeTrafficDistributionGroup:
+  (DescribeTrafficDistributionGroupRequest.t,
+  DescribeTrafficDistributionGroupResponse.t,
+  DescribeTrafficDistributionGroupResponse.error) t 
   | DescribeUser: (DescribeUserRequest.t, DescribeUserResponse.t,
   DescribeUserResponse.error) t 
   | DescribeUserHierarchyGroup: (DescribeUserHierarchyGroupRequest.t,
@@ -104,45 +320,155 @@ type ('i, 'o, 'e) t =
   | DescribeUserHierarchyStructure: (DescribeUserHierarchyStructureRequest.t,
   DescribeUserHierarchyStructureResponse.t,
   DescribeUserHierarchyStructureResponse.error) t 
+  | DescribeView: (DescribeViewRequest.t, DescribeViewResponse.t,
+  DescribeViewResponse.error) t 
   | DescribeVocabulary: (DescribeVocabularyRequest.t,
   DescribeVocabularyResponse.t, DescribeVocabularyResponse.error) t 
+  | DescribeWorkspace: (DescribeWorkspaceRequest.t,
+  DescribeWorkspaceResponse.t, DescribeWorkspaceResponse.error) t 
+  | DisassociateAnalyticsDataSet: (DisassociateAnalyticsDataSetRequest.t,
+  unit, unit) t 
   | DisassociateApprovedOrigin: (DisassociateApprovedOriginRequest.t, 
   unit, unit) t 
   | DisassociateBot: (DisassociateBotRequest.t, unit, unit) t 
+  | DisassociateEmailAddressAlias: (DisassociateEmailAddressAliasRequest.t,
+  DisassociateEmailAddressAliasResponse.t,
+  DisassociateEmailAddressAliasResponse.error) t 
+  | DisassociateFlow: (DisassociateFlowRequest.t, DisassociateFlowResponse.t,
+  DisassociateFlowResponse.error) t 
+  | DisassociateHoursOfOperations: (DisassociateHoursOfOperationsRequest.t,
+  unit, unit) t 
   | DisassociateInstanceStorageConfig:
   (DisassociateInstanceStorageConfigRequest.t, unit, unit) t 
   | DisassociateLambdaFunction: (DisassociateLambdaFunctionRequest.t, 
   unit, unit) t 
   | DisassociateLexBot: (DisassociateLexBotRequest.t, unit, unit) t 
+  | DisassociatePhoneNumberContactFlow:
+  (DisassociatePhoneNumberContactFlowRequest.t, unit, unit) t 
+  | DisassociateQueueEmailAddresses:
+  (DisassociateQueueEmailAddressesRequest.t, unit, unit) t 
   | DisassociateQueueQuickConnects: (DisassociateQueueQuickConnectsRequest.t,
   unit, unit) t 
   | DisassociateRoutingProfileQueues:
   (DisassociateRoutingProfileQueuesRequest.t, unit, unit) t 
   | DisassociateSecurityKey: (DisassociateSecurityKeyRequest.t, unit, 
   unit) t 
+  | DisassociateSecurityProfiles: (DisassociateSecurityProfilesRequest.t,
+  unit, unit) t 
+  | DisassociateTrafficDistributionGroupUser:
+  (DisassociateTrafficDistributionGroupUserRequest.t,
+  DisassociateTrafficDistributionGroupUserResponse.t,
+  DisassociateTrafficDistributionGroupUserResponse.error) t 
+  | DisassociateUserProficiencies: (DisassociateUserProficienciesRequest.t,
+  unit, unit) t 
+  | DisassociateWorkspace: (DisassociateWorkspaceRequest.t,
+  DisassociateWorkspaceResponse.t, DisassociateWorkspaceResponse.error) t 
+  | DismissUserContact: (DismissUserContactRequest.t,
+  DismissUserContactResponse.t, DismissUserContactResponse.error) t 
+  | EvaluateDataTableValues: (EvaluateDataTableValuesRequest.t,
+  EvaluateDataTableValuesResponse.t, EvaluateDataTableValuesResponse.error) t
+  
+  | GetAttachedFile: (GetAttachedFileRequest.t, GetAttachedFileResponse.t,
+  GetAttachedFileResponse.error) t 
   | GetContactAttributes: (GetContactAttributesRequest.t,
   GetContactAttributesResponse.t, GetContactAttributesResponse.error) t 
+  | GetContactMetrics: (GetContactMetricsRequest.t,
+  GetContactMetricsResponse.t, GetContactMetricsResponse.error) t 
   | GetCurrentMetricData: (GetCurrentMetricDataRequest.t,
   GetCurrentMetricDataResponse.t, GetCurrentMetricDataResponse.error) t 
+  | GetCurrentUserData: (GetCurrentUserDataRequest.t,
+  GetCurrentUserDataResponse.t, GetCurrentUserDataResponse.error) t 
+  | GetEffectiveHoursOfOperations: (GetEffectiveHoursOfOperationsRequest.t,
+  GetEffectiveHoursOfOperationsResponse.t,
+  GetEffectiveHoursOfOperationsResponse.error) t 
   | GetFederationToken: (GetFederationTokenRequest.t,
   GetFederationTokenResponse.t, GetFederationTokenResponse.error) t 
+  | GetFlowAssociation: (GetFlowAssociationRequest.t,
+  GetFlowAssociationResponse.t, GetFlowAssociationResponse.error) t 
   | GetMetricData: (GetMetricDataRequest.t, GetMetricDataResponse.t,
   GetMetricDataResponse.error) t 
+  | GetMetricDataV2: (GetMetricDataV2Request.t, GetMetricDataV2Response.t,
+  GetMetricDataV2Response.error) t 
+  | GetPromptFile: (GetPromptFileRequest.t, GetPromptFileResponse.t,
+  GetPromptFileResponse.error) t 
+  | GetTaskTemplate: (GetTaskTemplateRequest.t, GetTaskTemplateResponse.t,
+  GetTaskTemplateResponse.error) t 
+  | GetTestCaseExecutionSummary: (GetTestCaseExecutionSummaryRequest.t,
+  GetTestCaseExecutionSummaryResponse.t,
+  GetTestCaseExecutionSummaryResponse.error) t 
+  | GetTrafficDistribution: (GetTrafficDistributionRequest.t,
+  GetTrafficDistributionResponse.t, GetTrafficDistributionResponse.error) t 
+  | ImportPhoneNumber: (ImportPhoneNumberRequest.t,
+  ImportPhoneNumberResponse.t, ImportPhoneNumberResponse.error) t 
+  | ImportWorkspaceMedia: (ImportWorkspaceMediaRequest.t,
+  ImportWorkspaceMediaResponse.t, ImportWorkspaceMediaResponse.error) t 
   | ListAgentStatuses: (ListAgentStatusRequest.t, ListAgentStatusResponse.t,
   ListAgentStatusResponse.error) t 
+  | ListAnalyticsDataAssociations: (ListAnalyticsDataAssociationsRequest.t,
+  ListAnalyticsDataAssociationsResponse.t,
+  ListAnalyticsDataAssociationsResponse.error) t 
+  | ListAnalyticsDataLakeDataSets: (ListAnalyticsDataLakeDataSetsRequest.t,
+  ListAnalyticsDataLakeDataSetsResponse.t,
+  ListAnalyticsDataLakeDataSetsResponse.error) t 
   | ListApprovedOrigins: (ListApprovedOriginsRequest.t,
   ListApprovedOriginsResponse.t, ListApprovedOriginsResponse.error) t 
+  | ListAssociatedContacts: (ListAssociatedContactsRequest.t,
+  ListAssociatedContactsResponse.t, ListAssociatedContactsResponse.error) t 
+  | ListAttachedFilesConfigurations:
+  (ListAttachedFilesConfigurationsRequest.t,
+  ListAttachedFilesConfigurationsResponse.t,
+  ListAttachedFilesConfigurationsResponse.error) t 
+  | ListAuthenticationProfiles: (ListAuthenticationProfilesRequest.t,
+  ListAuthenticationProfilesResponse.t,
+  ListAuthenticationProfilesResponse.error) t 
   | ListBots: (ListBotsRequest.t, ListBotsResponse.t, ListBotsResponse.error)
   t 
+  | ListChildHoursOfOperations: (ListChildHoursOfOperationsRequest.t,
+  ListChildHoursOfOperationsResponse.t,
+  ListChildHoursOfOperationsResponse.error) t 
+  | ListContactEvaluations: (ListContactEvaluationsRequest.t,
+  ListContactEvaluationsResponse.t, ListContactEvaluationsResponse.error) t 
+  | ListContactFlowModuleAliases: (ListContactFlowModuleAliasesRequest.t,
+  ListContactFlowModuleAliasesResponse.t,
+  ListContactFlowModuleAliasesResponse.error) t 
+  | ListContactFlowModuleVersions: (ListContactFlowModuleVersionsRequest.t,
+  ListContactFlowModuleVersionsResponse.t,
+  ListContactFlowModuleVersionsResponse.error) t 
   | ListContactFlowModules: (ListContactFlowModulesRequest.t,
   ListContactFlowModulesResponse.t, ListContactFlowModulesResponse.error) t 
+  | ListContactFlowVersions: (ListContactFlowVersionsRequest.t,
+  ListContactFlowVersionsResponse.t, ListContactFlowVersionsResponse.error) t
+  
   | ListContactFlows: (ListContactFlowsRequest.t, ListContactFlowsResponse.t,
   ListContactFlowsResponse.error) t 
   | ListContactReferences: (ListContactReferencesRequest.t,
   ListContactReferencesResponse.t, ListContactReferencesResponse.error) t 
+  | ListDataTableAttributes: (ListDataTableAttributesRequest.t,
+  ListDataTableAttributesResponse.t, ListDataTableAttributesResponse.error) t
+  
+  | ListDataTablePrimaryValues: (ListDataTablePrimaryValuesRequest.t,
+  ListDataTablePrimaryValuesResponse.t,
+  ListDataTablePrimaryValuesResponse.error) t 
+  | ListDataTableValues: (ListDataTableValuesRequest.t,
+  ListDataTableValuesResponse.t, ListDataTableValuesResponse.error) t 
+  | ListDataTables: (ListDataTablesRequest.t, ListDataTablesResponse.t,
+  ListDataTablesResponse.error) t 
   | ListDefaultVocabularies: (ListDefaultVocabulariesRequest.t,
   ListDefaultVocabulariesResponse.t, ListDefaultVocabulariesResponse.error) t
   
+  | ListEntitySecurityProfiles: (ListEntitySecurityProfilesRequest.t,
+  ListEntitySecurityProfilesResponse.t,
+  ListEntitySecurityProfilesResponse.error) t 
+  | ListEvaluationFormVersions: (ListEvaluationFormVersionsRequest.t,
+  ListEvaluationFormVersionsResponse.t,
+  ListEvaluationFormVersionsResponse.error) t 
+  | ListEvaluationForms: (ListEvaluationFormsRequest.t,
+  ListEvaluationFormsResponse.t, ListEvaluationFormsResponse.error) t 
+  | ListFlowAssociations: (ListFlowAssociationsRequest.t,
+  ListFlowAssociationsResponse.t, ListFlowAssociationsResponse.error) t 
+  | ListHoursOfOperationOverrides: (ListHoursOfOperationOverridesRequest.t,
+  ListHoursOfOperationOverridesResponse.t,
+  ListHoursOfOperationOverridesResponse.error) t 
   | ListHoursOfOperations: (ListHoursOfOperationsRequest.t,
   ListHoursOfOperationsResponse.t, ListHoursOfOperationsResponse.error) t 
   | ListInstanceAttributes: (ListInstanceAttributesRequest.t,
@@ -159,23 +485,50 @@ type ('i, 'o, 'e) t =
   ListLambdaFunctionsResponse.t, ListLambdaFunctionsResponse.error) t 
   | ListLexBots: (ListLexBotsRequest.t, ListLexBotsResponse.t,
   ListLexBotsResponse.error) t 
+  | ListNotifications: (ListNotificationsRequest.t,
+  ListNotificationsResponse.t, ListNotificationsResponse.error) t 
   | ListPhoneNumbers: (ListPhoneNumbersRequest.t, ListPhoneNumbersResponse.t,
   ListPhoneNumbersResponse.error) t 
+  | ListPhoneNumbersV2: (ListPhoneNumbersV2Request.t,
+  ListPhoneNumbersV2Response.t, ListPhoneNumbersV2Response.error) t 
+  | ListPredefinedAttributes: (ListPredefinedAttributesRequest.t,
+  ListPredefinedAttributesResponse.t, ListPredefinedAttributesResponse.error)
+  t 
   | ListPrompts: (ListPromptsRequest.t, ListPromptsResponse.t,
   ListPromptsResponse.error) t 
+  | ListQueueEmailAddresses: (ListQueueEmailAddressesRequest.t,
+  ListQueueEmailAddressesResponse.t, ListQueueEmailAddressesResponse.error) t
+  
   | ListQueueQuickConnects: (ListQueueQuickConnectsRequest.t,
   ListQueueQuickConnectsResponse.t, ListQueueQuickConnectsResponse.error) t 
   | ListQueues: (ListQueuesRequest.t, ListQueuesResponse.t,
   ListQueuesResponse.error) t 
   | ListQuickConnects: (ListQuickConnectsRequest.t,
   ListQuickConnectsResponse.t, ListQuickConnectsResponse.error) t 
+  | ListRealtimeContactAnalysisSegmentsV2:
+  (ListRealtimeContactAnalysisSegmentsV2Request.t,
+  ListRealtimeContactAnalysisSegmentsV2Response.t,
+  ListRealtimeContactAnalysisSegmentsV2Response.error) t 
+  | ListRoutingProfileManualAssignmentQueues:
+  (ListRoutingProfileManualAssignmentQueuesRequest.t,
+  ListRoutingProfileManualAssignmentQueuesResponse.t,
+  ListRoutingProfileManualAssignmentQueuesResponse.error) t 
   | ListRoutingProfileQueues: (ListRoutingProfileQueuesRequest.t,
   ListRoutingProfileQueuesResponse.t, ListRoutingProfileQueuesResponse.error)
   t 
   | ListRoutingProfiles: (ListRoutingProfilesRequest.t,
   ListRoutingProfilesResponse.t, ListRoutingProfilesResponse.error) t 
+  | ListRules: (ListRulesRequest.t, ListRulesResponse.t,
+  ListRulesResponse.error) t 
   | ListSecurityKeys: (ListSecurityKeysRequest.t, ListSecurityKeysResponse.t,
   ListSecurityKeysResponse.error) t 
+  | ListSecurityProfileApplications:
+  (ListSecurityProfileApplicationsRequest.t,
+  ListSecurityProfileApplicationsResponse.t,
+  ListSecurityProfileApplicationsResponse.error) t 
+  | ListSecurityProfileFlowModules: (ListSecurityProfileFlowModulesRequest.t,
+  ListSecurityProfileFlowModulesResponse.t,
+  ListSecurityProfileFlowModulesResponse.error) t 
   | ListSecurityProfilePermissions: (ListSecurityProfilePermissionsRequest.t,
   ListSecurityProfilePermissionsResponse.t,
   ListSecurityProfilePermissionsResponse.error) t 
@@ -183,49 +536,204 @@ type ('i, 'o, 'e) t =
   ListSecurityProfilesResponse.t, ListSecurityProfilesResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListTaskTemplates: (ListTaskTemplatesRequest.t,
+  ListTaskTemplatesResponse.t, ListTaskTemplatesResponse.error) t 
+  | ListTestCaseExecutionRecords: (ListTestCaseExecutionRecordsRequest.t,
+  ListTestCaseExecutionRecordsResponse.t,
+  ListTestCaseExecutionRecordsResponse.error) t 
+  | ListTestCaseExecutions: (ListTestCaseExecutionsRequest.t,
+  ListTestCaseExecutionsResponse.t, ListTestCaseExecutionsResponse.error) t 
+  | ListTestCases: (ListTestCasesRequest.t, ListTestCasesResponse.t,
+  ListTestCasesResponse.error) t 
+  | ListTrafficDistributionGroupUsers:
+  (ListTrafficDistributionGroupUsersRequest.t,
+  ListTrafficDistributionGroupUsersResponse.t,
+  ListTrafficDistributionGroupUsersResponse.error) t 
+  | ListTrafficDistributionGroups: (ListTrafficDistributionGroupsRequest.t,
+  ListTrafficDistributionGroupsResponse.t,
+  ListTrafficDistributionGroupsResponse.error) t 
   | ListUseCases: (ListUseCasesRequest.t, ListUseCasesResponse.t,
   ListUseCasesResponse.error) t 
   | ListUserHierarchyGroups: (ListUserHierarchyGroupsRequest.t,
   ListUserHierarchyGroupsResponse.t, ListUserHierarchyGroupsResponse.error) t
   
+  | ListUserNotifications: (ListUserNotificationsRequest.t,
+  ListUserNotificationsResponse.t, ListUserNotificationsResponse.error) t 
+  | ListUserProficiencies: (ListUserProficienciesRequest.t,
+  ListUserProficienciesResponse.t, ListUserProficienciesResponse.error) t 
   | ListUsers: (ListUsersRequest.t, ListUsersResponse.t,
   ListUsersResponse.error) t 
+  | ListViewVersions: (ListViewVersionsRequest.t, ListViewVersionsResponse.t,
+  ListViewVersionsResponse.error) t 
+  | ListViews: (ListViewsRequest.t, ListViewsResponse.t,
+  ListViewsResponse.error) t 
+  | ListWorkspaceMedia: (ListWorkspaceMediaRequest.t,
+  ListWorkspaceMediaResponse.t, ListWorkspaceMediaResponse.error) t 
+  | ListWorkspacePages: (ListWorkspacePagesRequest.t,
+  ListWorkspacePagesResponse.t, ListWorkspacePagesResponse.error) t 
+  | ListWorkspaces: (ListWorkspacesRequest.t, ListWorkspacesResponse.t,
+  ListWorkspacesResponse.error) t 
+  | MonitorContact: (MonitorContactRequest.t, MonitorContactResponse.t,
+  MonitorContactResponse.error) t 
+  | PauseContact: (PauseContactRequest.t, PauseContactResponse.t,
+  PauseContactResponse.error) t 
+  | PutUserStatus: (PutUserStatusRequest.t, PutUserStatusResponse.t,
+  PutUserStatusResponse.error) t 
+  | ReleasePhoneNumber: (ReleasePhoneNumberRequest.t, unit, unit) t 
+  | ReplicateInstance: (ReplicateInstanceRequest.t,
+  ReplicateInstanceResponse.t, ReplicateInstanceResponse.error) t 
+  | ResumeContact: (ResumeContactRequest.t, ResumeContactResponse.t,
+  ResumeContactResponse.error) t 
   | ResumeContactRecording: (ResumeContactRecordingRequest.t,
   ResumeContactRecordingResponse.t, ResumeContactRecordingResponse.error) t 
+  | SearchAgentStatuses: (SearchAgentStatusesRequest.t,
+  SearchAgentStatusesResponse.t, SearchAgentStatusesResponse.error) t 
+  | SearchAvailablePhoneNumbers: (SearchAvailablePhoneNumbersRequest.t,
+  SearchAvailablePhoneNumbersResponse.t,
+  SearchAvailablePhoneNumbersResponse.error) t 
+  | SearchContactEvaluations: (SearchContactEvaluationsRequest.t,
+  SearchContactEvaluationsResponse.t, SearchContactEvaluationsResponse.error)
+  t 
+  | SearchContactFlowModules: (SearchContactFlowModulesRequest.t,
+  SearchContactFlowModulesResponse.t, SearchContactFlowModulesResponse.error)
+  t 
+  | SearchContactFlows: (SearchContactFlowsRequest.t,
+  SearchContactFlowsResponse.t, SearchContactFlowsResponse.error) t 
+  | SearchContacts: (SearchContactsRequest.t, SearchContactsResponse.t,
+  SearchContactsResponse.error) t 
+  | SearchDataTables: (SearchDataTablesRequest.t, SearchDataTablesResponse.t,
+  SearchDataTablesResponse.error) t 
+  | SearchEmailAddresses: (SearchEmailAddressesRequest.t,
+  SearchEmailAddressesResponse.t, SearchEmailAddressesResponse.error) t 
+  | SearchEvaluationForms: (SearchEvaluationFormsRequest.t,
+  SearchEvaluationFormsResponse.t, SearchEvaluationFormsResponse.error) t 
+  | SearchHoursOfOperationOverrides:
+  (SearchHoursOfOperationOverridesRequest.t,
+  SearchHoursOfOperationOverridesResponse.t,
+  SearchHoursOfOperationOverridesResponse.error) t 
+  | SearchHoursOfOperations: (SearchHoursOfOperationsRequest.t,
+  SearchHoursOfOperationsResponse.t, SearchHoursOfOperationsResponse.error) t
+  
+  | SearchNotifications: (SearchNotificationsRequest.t,
+  SearchNotificationsResponse.t, SearchNotificationsResponse.error) t 
+  | SearchPredefinedAttributes: (SearchPredefinedAttributesRequest.t,
+  SearchPredefinedAttributesResponse.t,
+  SearchPredefinedAttributesResponse.error) t 
+  | SearchPrompts: (SearchPromptsRequest.t, SearchPromptsResponse.t,
+  SearchPromptsResponse.error) t 
+  | SearchQueues: (SearchQueuesRequest.t, SearchQueuesResponse.t,
+  SearchQueuesResponse.error) t 
+  | SearchQuickConnects: (SearchQuickConnectsRequest.t,
+  SearchQuickConnectsResponse.t, SearchQuickConnectsResponse.error) t 
+  | SearchResourceTags: (SearchResourceTagsRequest.t,
+  SearchResourceTagsResponse.t, SearchResourceTagsResponse.error) t 
+  | SearchRoutingProfiles: (SearchRoutingProfilesRequest.t,
+  SearchRoutingProfilesResponse.t, SearchRoutingProfilesResponse.error) t 
+  | SearchSecurityProfiles: (SearchSecurityProfilesRequest.t,
+  SearchSecurityProfilesResponse.t, SearchSecurityProfilesResponse.error) t 
+  | SearchTestCases: (SearchTestCasesRequest.t, SearchTestCasesResponse.t,
+  SearchTestCasesResponse.error) t 
+  | SearchUserHierarchyGroups: (SearchUserHierarchyGroupsRequest.t,
+  SearchUserHierarchyGroupsResponse.t,
+  SearchUserHierarchyGroupsResponse.error) t 
+  | SearchUsers: (SearchUsersRequest.t, SearchUsersResponse.t,
+  SearchUsersResponse.error) t 
+  | SearchViews: (SearchViewsRequest.t, SearchViewsResponse.t,
+  SearchViewsResponse.error) t 
   | SearchVocabularies: (SearchVocabulariesRequest.t,
   SearchVocabulariesResponse.t, SearchVocabulariesResponse.error) t 
+  | SearchWorkspaceAssociations: (SearchWorkspaceAssociationsRequest.t,
+  SearchWorkspaceAssociationsResponse.t,
+  SearchWorkspaceAssociationsResponse.error) t 
+  | SearchWorkspaces: (SearchWorkspacesRequest.t, SearchWorkspacesResponse.t,
+  SearchWorkspacesResponse.error) t 
+  | SendChatIntegrationEvent: (SendChatIntegrationEventRequest.t,
+  SendChatIntegrationEventResponse.t, SendChatIntegrationEventResponse.error)
+  t 
+  | SendOutboundEmail: (SendOutboundEmailRequest.t,
+  SendOutboundEmailResponse.t, SendOutboundEmailResponse.error) t 
+  | StartAttachedFileUpload: (StartAttachedFileUploadRequest.t,
+  StartAttachedFileUploadResponse.t, StartAttachedFileUploadResponse.error) t
+  
   | StartChatContact: (StartChatContactRequest.t, StartChatContactResponse.t,
   StartChatContactResponse.error) t 
+  | StartContactEvaluation: (StartContactEvaluationRequest.t,
+  StartContactEvaluationResponse.t, StartContactEvaluationResponse.error) t 
+  | StartContactMediaProcessing: (StartContactMediaProcessingRequest.t,
+  StartContactMediaProcessingResponse.t,
+  StartContactMediaProcessingResponse.error) t 
   | StartContactRecording: (StartContactRecordingRequest.t,
   StartContactRecordingResponse.t, StartContactRecordingResponse.error) t 
   | StartContactStreaming: (StartContactStreamingRequest.t,
   StartContactStreamingResponse.t, StartContactStreamingResponse.error) t 
+  | StartEmailContact: (StartEmailContactRequest.t,
+  StartEmailContactResponse.t, StartEmailContactResponse.error) t 
+  | StartOutboundChatContact: (StartOutboundChatContactRequest.t,
+  StartOutboundChatContactResponse.t, StartOutboundChatContactResponse.error)
+  t 
+  | StartOutboundEmailContact: (StartOutboundEmailContactRequest.t,
+  StartOutboundEmailContactResponse.t,
+  StartOutboundEmailContactResponse.error) t 
   | StartOutboundVoiceContact: (StartOutboundVoiceContactRequest.t,
   StartOutboundVoiceContactResponse.t,
   StartOutboundVoiceContactResponse.error) t 
+  | StartScreenSharing: (StartScreenSharingRequest.t,
+  StartScreenSharingResponse.t, StartScreenSharingResponse.error) t 
   | StartTaskContact: (StartTaskContactRequest.t, StartTaskContactResponse.t,
   StartTaskContactResponse.error) t 
+  | StartTestCaseExecution: (StartTestCaseExecutionRequest.t,
+  StartTestCaseExecutionResponse.t, StartTestCaseExecutionResponse.error) t 
+  | StartWebRTCContact: (StartWebRTCContactRequest.t,
+  StartWebRTCContactResponse.t, StartWebRTCContactResponse.error) t 
   | StopContact: (StopContactRequest.t, StopContactResponse.t,
   StopContactResponse.error) t 
+  | StopContactMediaProcessing: (StopContactMediaProcessingRequest.t,
+  StopContactMediaProcessingResponse.t,
+  StopContactMediaProcessingResponse.error) t 
   | StopContactRecording: (StopContactRecordingRequest.t,
   StopContactRecordingResponse.t, StopContactRecordingResponse.error) t 
   | StopContactStreaming: (StopContactStreamingRequest.t,
   StopContactStreamingResponse.t, StopContactStreamingResponse.error) t 
+  | StopTestCaseExecution: (StopTestCaseExecutionRequest.t,
+  StopTestCaseExecutionResponse.t, StopTestCaseExecutionResponse.error) t 
+  | SubmitContactEvaluation: (SubmitContactEvaluationRequest.t,
+  SubmitContactEvaluationResponse.t, SubmitContactEvaluationResponse.error) t
+  
   | SuspendContactRecording: (SuspendContactRecordingRequest.t,
   SuspendContactRecordingResponse.t, SuspendContactRecordingResponse.error) t
   
+  | TagContact: (TagContactRequest.t, TagContactResponse.t,
+  TagContactResponse.error) t 
   | TagResource: (TagResourceRequest.t, unit, unit) t 
+  | TransferContact: (TransferContactRequest.t, TransferContactResponse.t,
+  TransferContactResponse.error) t 
+  | UntagContact: (UntagContactRequest.t, UntagContactResponse.t,
+  UntagContactResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, unit, unit) t 
   | UpdateAgentStatus: (UpdateAgentStatusRequest.t, unit, unit) t 
+  | UpdateAttachedFilesConfiguration:
+  (UpdateAttachedFilesConfigurationRequest.t,
+  UpdateAttachedFilesConfigurationResponse.t,
+  UpdateAttachedFilesConfigurationResponse.error) t 
+  | UpdateAuthenticationProfile: (UpdateAuthenticationProfileRequest.t, 
+  unit, unit) t 
   | UpdateContact: (UpdateContactRequest.t, UpdateContactResponse.t,
   UpdateContactResponse.error) t 
   | UpdateContactAttributes: (UpdateContactAttributesRequest.t,
   UpdateContactAttributesResponse.t, UpdateContactAttributesResponse.error) t
   
-  | UpdateContactFlowContent: (UpdateContactFlowContentRequest.t, unit, 
-  unit) t 
-  | UpdateContactFlowMetadata: (UpdateContactFlowMetadataRequest.t, unit,
-  unit) t 
+  | UpdateContactEvaluation: (UpdateContactEvaluationRequest.t,
+  UpdateContactEvaluationResponse.t, UpdateContactEvaluationResponse.error) t
+  
+  | UpdateContactFlowContent: (UpdateContactFlowContentRequest.t,
+  UpdateContactFlowContentResponse.t, UpdateContactFlowContentResponse.error)
+  t 
+  | UpdateContactFlowMetadata: (UpdateContactFlowMetadataRequest.t,
+  UpdateContactFlowMetadataResponse.t,
+  UpdateContactFlowMetadataResponse.error) t 
+  | UpdateContactFlowModuleAlias: (UpdateContactFlowModuleAliasRequest.t,
+  UpdateContactFlowModuleAliasResponse.t,
+  UpdateContactFlowModuleAliasResponse.error) t 
   | UpdateContactFlowModuleContent: (UpdateContactFlowModuleContentRequest.t,
   UpdateContactFlowModuleContentResponse.t,
   UpdateContactFlowModuleContentResponse.error) t 
@@ -233,24 +741,66 @@ type ('i, 'o, 'e) t =
   (UpdateContactFlowModuleMetadataRequest.t,
   UpdateContactFlowModuleMetadataResponse.t,
   UpdateContactFlowModuleMetadataResponse.error) t 
-  | UpdateContactFlowName: (UpdateContactFlowNameRequest.t, unit, unit) t 
+  | UpdateContactFlowName: (UpdateContactFlowNameRequest.t,
+  UpdateContactFlowNameResponse.t, UpdateContactFlowNameResponse.error) t 
+  | UpdateContactRoutingData: (UpdateContactRoutingDataRequest.t,
+  UpdateContactRoutingDataResponse.t, UpdateContactRoutingDataResponse.error)
+  t 
   | UpdateContactSchedule: (UpdateContactScheduleRequest.t,
   UpdateContactScheduleResponse.t, UpdateContactScheduleResponse.error) t 
+  | UpdateDataTableAttribute: (UpdateDataTableAttributeRequest.t,
+  UpdateDataTableAttributeResponse.t, UpdateDataTableAttributeResponse.error)
+  t 
+  | UpdateDataTableMetadata: (UpdateDataTableMetadataRequest.t,
+  UpdateDataTableMetadataResponse.t, UpdateDataTableMetadataResponse.error) t
+  
+  | UpdateDataTablePrimaryValues: (UpdateDataTablePrimaryValuesRequest.t,
+  UpdateDataTablePrimaryValuesResponse.t,
+  UpdateDataTablePrimaryValuesResponse.error) t 
+  | UpdateEmailAddressMetadata: (UpdateEmailAddressMetadataRequest.t,
+  UpdateEmailAddressMetadataResponse.t,
+  UpdateEmailAddressMetadataResponse.error) t 
+  | UpdateEvaluationForm: (UpdateEvaluationFormRequest.t,
+  UpdateEvaluationFormResponse.t, UpdateEvaluationFormResponse.error) t 
   | UpdateHoursOfOperation: (UpdateHoursOfOperationRequest.t, unit, unit) t 
+  | UpdateHoursOfOperationOverride: (UpdateHoursOfOperationOverrideRequest.t,
+  unit, unit) t 
   | UpdateInstanceAttribute: (UpdateInstanceAttributeRequest.t, unit, 
   unit) t 
   | UpdateInstanceStorageConfig: (UpdateInstanceStorageConfigRequest.t, 
   unit, unit) t 
+  | UpdateNotificationContent: (UpdateNotificationContentRequest.t,
+  UpdateNotificationContentResponse.t,
+  UpdateNotificationContentResponse.error) t 
+  | UpdateParticipantAuthentication:
+  (UpdateParticipantAuthenticationRequest.t,
+  UpdateParticipantAuthenticationResponse.t,
+  UpdateParticipantAuthenticationResponse.error) t 
+  | UpdateParticipantRoleConfig: (UpdateParticipantRoleConfigRequest.t,
+  UpdateParticipantRoleConfigResponse.t,
+  UpdateParticipantRoleConfigResponse.error) t 
+  | UpdatePhoneNumber: (UpdatePhoneNumberRequest.t,
+  UpdatePhoneNumberResponse.t, UpdatePhoneNumberResponse.error) t 
+  | UpdatePhoneNumberMetadata: (UpdatePhoneNumberMetadataRequest.t, unit,
+  unit) t 
+  | UpdatePredefinedAttribute: (UpdatePredefinedAttributeRequest.t, unit,
+  unit) t 
+  | UpdatePrompt: (UpdatePromptRequest.t, UpdatePromptResponse.t,
+  UpdatePromptResponse.error) t 
   | UpdateQueueHoursOfOperation: (UpdateQueueHoursOfOperationRequest.t, 
   unit, unit) t 
   | UpdateQueueMaxContacts: (UpdateQueueMaxContactsRequest.t, unit, unit) t 
   | UpdateQueueName: (UpdateQueueNameRequest.t, unit, unit) t 
   | UpdateQueueOutboundCallerConfig:
   (UpdateQueueOutboundCallerConfigRequest.t, unit, unit) t 
+  | UpdateQueueOutboundEmailConfig: (UpdateQueueOutboundEmailConfigRequest.t,
+  unit, unit) t 
   | UpdateQueueStatus: (UpdateQueueStatusRequest.t, unit, unit) t 
   | UpdateQuickConnectConfig: (UpdateQuickConnectConfigRequest.t, unit, 
   unit) t 
   | UpdateQuickConnectName: (UpdateQuickConnectNameRequest.t, unit, unit) t 
+  | UpdateRoutingProfileAgentAvailabilityTimer:
+  (UpdateRoutingProfileAgentAvailabilityTimerRequest.t, unit, unit) t 
   | UpdateRoutingProfileConcurrency:
   (UpdateRoutingProfileConcurrencyRequest.t, unit, unit) t 
   | UpdateRoutingProfileDefaultOutboundQueue:
@@ -259,89 +809,250 @@ type ('i, 'o, 'e) t =
   unit) t 
   | UpdateRoutingProfileQueues: (UpdateRoutingProfileQueuesRequest.t, 
   unit, unit) t 
+  | UpdateRule: (UpdateRuleRequest.t, unit, unit) t 
   | UpdateSecurityProfile: (UpdateSecurityProfileRequest.t, unit, unit) t 
+  | UpdateTaskTemplate: (UpdateTaskTemplateRequest.t,
+  UpdateTaskTemplateResponse.t, UpdateTaskTemplateResponse.error) t 
+  | UpdateTestCase: (UpdateTestCaseRequest.t, UpdateTestCaseResponse.t,
+  UpdateTestCaseResponse.error) t 
+  | UpdateTrafficDistribution: (UpdateTrafficDistributionRequest.t,
+  UpdateTrafficDistributionResponse.t,
+  UpdateTrafficDistributionResponse.error) t 
+  | UpdateUserConfig: (UpdateUserConfigRequest.t, unit, unit) t 
   | UpdateUserHierarchy: (UpdateUserHierarchyRequest.t, unit, unit) t 
   | UpdateUserHierarchyGroupName: (UpdateUserHierarchyGroupNameRequest.t,
   unit, unit) t 
   | UpdateUserHierarchyStructure: (UpdateUserHierarchyStructureRequest.t,
   unit, unit) t 
   | UpdateUserIdentityInfo: (UpdateUserIdentityInfoRequest.t, unit, unit) t 
+  | UpdateUserNotificationStatus: (UpdateUserNotificationStatusRequest.t,
+  UpdateUserNotificationStatusResponse.t,
+  UpdateUserNotificationStatusResponse.error) t 
   | UpdateUserPhoneConfig: (UpdateUserPhoneConfigRequest.t, unit, unit) t 
+  | UpdateUserProficiencies: (UpdateUserProficienciesRequest.t, unit, 
+  unit) t 
   | UpdateUserRoutingProfile: (UpdateUserRoutingProfileRequest.t, unit, 
   unit) t 
   | UpdateUserSecurityProfiles: (UpdateUserSecurityProfilesRequest.t, 
   unit, unit) t 
+  | UpdateViewContent: (UpdateViewContentRequest.t,
+  UpdateViewContentResponse.t, UpdateViewContentResponse.error) t 
+  | UpdateViewMetadata: (UpdateViewMetadataRequest.t,
+  UpdateViewMetadataResponse.t, UpdateViewMetadataResponse.error) t 
+  | UpdateWorkspaceMetadata: (UpdateWorkspaceMetadataRequest.t,
+  UpdateWorkspaceMetadataResponse.t, UpdateWorkspaceMetadataResponse.error) t
+  
+  | UpdateWorkspacePage: (UpdateWorkspacePageRequest.t,
+  UpdateWorkspacePageResponse.t, UpdateWorkspacePageResponse.error) t 
+  | UpdateWorkspaceTheme: (UpdateWorkspaceThemeRequest.t,
+  UpdateWorkspaceThemeResponse.t, UpdateWorkspaceThemeResponse.error) t 
+  | UpdateWorkspaceVisibility: (UpdateWorkspaceVisibilityRequest.t,
+  UpdateWorkspaceVisibilityResponse.t,
+  UpdateWorkspaceVisibilityResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | ActivateEvaluationForm -> `POST
+  | AssociateAnalyticsDataSet -> `PUT
   | AssociateApprovedOrigin -> `PUT
   | AssociateBot -> `PUT
+  | AssociateContactWithUser -> `POST
   | AssociateDefaultVocabulary -> `PUT
+  | AssociateEmailAddressAlias -> `POST
+  | AssociateFlow -> `PUT
+  | AssociateHoursOfOperations -> `POST
   | AssociateInstanceStorageConfig -> `PUT
   | AssociateLambdaFunction -> `PUT
   | AssociateLexBot -> `PUT
+  | AssociatePhoneNumberContactFlow -> `PUT
+  | AssociateQueueEmailAddresses -> `POST
   | AssociateQueueQuickConnects -> `POST
   | AssociateRoutingProfileQueues -> `POST
   | AssociateSecurityKey -> `PUT
+  | AssociateSecurityProfiles -> `POST
+  | AssociateTrafficDistributionGroupUser -> `PUT
+  | AssociateUserProficiencies -> `POST
+  | AssociateWorkspace -> `POST
+  | BatchAssociateAnalyticsDataSet -> `PUT
+  | BatchCreateDataTableValue -> `POST
+  | BatchDeleteDataTableValue -> `POST
+  | BatchDescribeDataTableValue -> `POST
+  | BatchDisassociateAnalyticsDataSet -> `POST
+  | BatchGetAttachedFileMetadata -> `POST
+  | BatchGetFlowAssociation -> `POST
+  | BatchPutContact -> `PUT
+  | BatchUpdateDataTableValue -> `POST
+  | ClaimPhoneNumber -> `POST
+  | CompleteAttachedFileUpload -> `POST
   | CreateAgentStatus -> `PUT
+  | CreateContact -> `PUT
   | CreateContactFlow -> `PUT
   | CreateContactFlowModule -> `PUT
+  | CreateContactFlowModuleAlias -> `PUT
+  | CreateContactFlowModuleVersion -> `PUT
+  | CreateContactFlowVersion -> `PUT
+  | CreateDataTable -> `PUT
+  | CreateDataTableAttribute -> `PUT
+  | CreateEmailAddress -> `PUT
+  | CreateEvaluationForm -> `PUT
   | CreateHoursOfOperation -> `PUT
+  | CreateHoursOfOperationOverride -> `PUT
   | CreateInstance -> `PUT
   | CreateIntegrationAssociation -> `PUT
+  | CreateNotification -> `PUT
+  | CreateParticipant -> `POST
+  | CreatePersistentContactAssociation -> `POST
+  | CreatePredefinedAttribute -> `PUT
+  | CreatePrompt -> `PUT
+  | CreatePushNotificationRegistration -> `PUT
   | CreateQueue -> `PUT
   | CreateQuickConnect -> `PUT
   | CreateRoutingProfile -> `PUT
+  | CreateRule -> `POST
   | CreateSecurityProfile -> `PUT
+  | CreateTaskTemplate -> `PUT
+  | CreateTestCase -> `PUT
+  | CreateTrafficDistributionGroup -> `PUT
   | CreateUseCase -> `PUT
   | CreateUser -> `PUT
   | CreateUserHierarchyGroup -> `PUT
+  | CreateView -> `PUT
+  | CreateViewVersion -> `PUT
   | CreateVocabulary -> `POST
+  | CreateWorkspace -> `PUT
+  | CreateWorkspacePage -> `PUT
+  | DeactivateEvaluationForm -> `POST
+  | DeleteAttachedFile -> `DELETE
+  | DeleteContactEvaluation -> `DELETE
   | DeleteContactFlow -> `DELETE
   | DeleteContactFlowModule -> `DELETE
+  | DeleteContactFlowModuleAlias -> `DELETE
+  | DeleteContactFlowModuleVersion -> `DELETE
+  | DeleteContactFlowVersion -> `DELETE
+  | DeleteDataTable -> `DELETE
+  | DeleteDataTableAttribute -> `DELETE
+  | DeleteEmailAddress -> `DELETE
+  | DeleteEvaluationForm -> `DELETE
   | DeleteHoursOfOperation -> `DELETE
+  | DeleteHoursOfOperationOverride -> `DELETE
   | DeleteInstance -> `DELETE
   | DeleteIntegrationAssociation -> `DELETE
+  | DeleteNotification -> `DELETE
+  | DeletePredefinedAttribute -> `DELETE
+  | DeletePrompt -> `DELETE
+  | DeletePushNotificationRegistration -> `DELETE
+  | DeleteQueue -> `DELETE
   | DeleteQuickConnect -> `DELETE
+  | DeleteRoutingProfile -> `DELETE
+  | DeleteRule -> `DELETE
   | DeleteSecurityProfile -> `DELETE
+  | DeleteTaskTemplate -> `DELETE
+  | DeleteTestCase -> `DELETE
+  | DeleteTrafficDistributionGroup -> `DELETE
   | DeleteUseCase -> `DELETE
   | DeleteUser -> `DELETE
   | DeleteUserHierarchyGroup -> `DELETE
+  | DeleteView -> `DELETE
+  | DeleteViewVersion -> `DELETE
   | DeleteVocabulary -> `POST
+  | DeleteWorkspace -> `DELETE
+  | DeleteWorkspaceMedia -> `DELETE
+  | DeleteWorkspacePage -> `DELETE
   | DescribeAgentStatus -> `GET
+  | DescribeAttachedFilesConfiguration -> `GET
+  | DescribeAuthenticationProfile -> `GET
   | DescribeContact -> `GET
+  | DescribeContactEvaluation -> `GET
   | DescribeContactFlow -> `GET
   | DescribeContactFlowModule -> `GET
+  | DescribeContactFlowModuleAlias -> `GET
+  | DescribeDataTable -> `GET
+  | DescribeDataTableAttribute -> `GET
+  | DescribeEmailAddress -> `GET
+  | DescribeEvaluationForm -> `GET
   | DescribeHoursOfOperation -> `GET
+  | DescribeHoursOfOperationOverride -> `GET
   | DescribeInstance -> `GET
   | DescribeInstanceAttribute -> `GET
   | DescribeInstanceStorageConfig -> `GET
+  | DescribeNotification -> `GET
+  | DescribePhoneNumber -> `GET
+  | DescribePredefinedAttribute -> `GET
+  | DescribePrompt -> `GET
   | DescribeQueue -> `GET
   | DescribeQuickConnect -> `GET
   | DescribeRoutingProfile -> `GET
+  | DescribeRule -> `GET
   | DescribeSecurityProfile -> `GET
+  | DescribeTestCase -> `GET
+  | DescribeTrafficDistributionGroup -> `GET
   | DescribeUser -> `GET
   | DescribeUserHierarchyGroup -> `GET
   | DescribeUserHierarchyStructure -> `GET
+  | DescribeView -> `GET
   | DescribeVocabulary -> `GET
+  | DescribeWorkspace -> `GET
+  | DisassociateAnalyticsDataSet -> `POST
   | DisassociateApprovedOrigin -> `DELETE
   | DisassociateBot -> `POST
+  | DisassociateEmailAddressAlias -> `POST
+  | DisassociateFlow -> `DELETE
+  | DisassociateHoursOfOperations -> `POST
   | DisassociateInstanceStorageConfig -> `DELETE
   | DisassociateLambdaFunction -> `DELETE
   | DisassociateLexBot -> `DELETE
+  | DisassociatePhoneNumberContactFlow -> `DELETE
+  | DisassociateQueueEmailAddresses -> `POST
   | DisassociateQueueQuickConnects -> `POST
   | DisassociateRoutingProfileQueues -> `POST
   | DisassociateSecurityKey -> `DELETE
+  | DisassociateSecurityProfiles -> `POST
+  | DisassociateTrafficDistributionGroupUser -> `DELETE
+  | DisassociateUserProficiencies -> `POST
+  | DisassociateWorkspace -> `POST
+  | DismissUserContact -> `POST
+  | EvaluateDataTableValues -> `POST
+  | GetAttachedFile -> `GET
   | GetContactAttributes -> `GET
+  | GetContactMetrics -> `POST
   | GetCurrentMetricData -> `POST
+  | GetCurrentUserData -> `POST
+  | GetEffectiveHoursOfOperations -> `GET
   | GetFederationToken -> `GET
+  | GetFlowAssociation -> `GET
   | GetMetricData -> `POST
+  | GetMetricDataV2 -> `POST
+  | GetPromptFile -> `GET
+  | GetTaskTemplate -> `GET
+  | GetTestCaseExecutionSummary -> `GET
+  | GetTrafficDistribution -> `GET
+  | ImportPhoneNumber -> `POST
+  | ImportWorkspaceMedia -> `POST
   | ListAgentStatuses -> `GET
+  | ListAnalyticsDataAssociations -> `GET
+  | ListAnalyticsDataLakeDataSets -> `GET
   | ListApprovedOrigins -> `GET
+  | ListAssociatedContacts -> `GET
+  | ListAttachedFilesConfigurations -> `GET
+  | ListAuthenticationProfiles -> `GET
   | ListBots -> `GET
+  | ListChildHoursOfOperations -> `GET
+  | ListContactEvaluations -> `GET
+  | ListContactFlowModuleAliases -> `GET
+  | ListContactFlowModuleVersions -> `GET
   | ListContactFlowModules -> `GET
+  | ListContactFlowVersions -> `GET
   | ListContactFlows -> `GET
   | ListContactReferences -> `GET
+  | ListDataTableAttributes -> `POST
+  | ListDataTablePrimaryValues -> `POST
+  | ListDataTableValues -> `POST
+  | ListDataTables -> `GET
   | ListDefaultVocabularies -> `POST
+  | ListEntitySecurityProfiles -> `POST
+  | ListEvaluationFormVersions -> `GET
+  | ListEvaluationForms -> `GET
+  | ListFlowAssociations -> `GET
+  | ListHoursOfOperationOverrides -> `GET
   | ListHoursOfOperations -> `GET
   | ListInstanceAttributes -> `GET
   | ListInstanceStorageConfigs -> `GET
@@ -349,79 +1060,214 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListIntegrationAssociations -> `GET
   | ListLambdaFunctions -> `GET
   | ListLexBots -> `GET
+  | ListNotifications -> `GET
   | ListPhoneNumbers -> `GET
+  | ListPhoneNumbersV2 -> `POST
+  | ListPredefinedAttributes -> `GET
   | ListPrompts -> `GET
+  | ListQueueEmailAddresses -> `GET
   | ListQueueQuickConnects -> `GET
   | ListQueues -> `GET
   | ListQuickConnects -> `GET
+  | ListRealtimeContactAnalysisSegmentsV2 -> `POST
+  | ListRoutingProfileManualAssignmentQueues -> `GET
   | ListRoutingProfileQueues -> `GET
   | ListRoutingProfiles -> `GET
+  | ListRules -> `GET
   | ListSecurityKeys -> `GET
+  | ListSecurityProfileApplications -> `GET
+  | ListSecurityProfileFlowModules -> `GET
   | ListSecurityProfilePermissions -> `GET
   | ListSecurityProfiles -> `GET
   | ListTagsForResource -> `GET
+  | ListTaskTemplates -> `GET
+  | ListTestCaseExecutionRecords -> `GET
+  | ListTestCaseExecutions -> `GET
+  | ListTestCases -> `GET
+  | ListTrafficDistributionGroupUsers -> `GET
+  | ListTrafficDistributionGroups -> `GET
   | ListUseCases -> `GET
   | ListUserHierarchyGroups -> `GET
+  | ListUserNotifications -> `GET
+  | ListUserProficiencies -> `GET
   | ListUsers -> `GET
+  | ListViewVersions -> `GET
+  | ListViews -> `GET
+  | ListWorkspaceMedia -> `GET
+  | ListWorkspacePages -> `GET
+  | ListWorkspaces -> `GET
+  | MonitorContact -> `POST
+  | PauseContact -> `POST
+  | PutUserStatus -> `PUT
+  | ReleasePhoneNumber -> `DELETE
+  | ReplicateInstance -> `POST
+  | ResumeContact -> `POST
   | ResumeContactRecording -> `POST
+  | SearchAgentStatuses -> `POST
+  | SearchAvailablePhoneNumbers -> `POST
+  | SearchContactEvaluations -> `POST
+  | SearchContactFlowModules -> `POST
+  | SearchContactFlows -> `POST
+  | SearchContacts -> `POST
+  | SearchDataTables -> `POST
+  | SearchEmailAddresses -> `POST
+  | SearchEvaluationForms -> `POST
+  | SearchHoursOfOperationOverrides -> `POST
+  | SearchHoursOfOperations -> `POST
+  | SearchNotifications -> `POST
+  | SearchPredefinedAttributes -> `POST
+  | SearchPrompts -> `POST
+  | SearchQueues -> `POST
+  | SearchQuickConnects -> `POST
+  | SearchResourceTags -> `POST
+  | SearchRoutingProfiles -> `POST
+  | SearchSecurityProfiles -> `POST
+  | SearchTestCases -> `POST
+  | SearchUserHierarchyGroups -> `POST
+  | SearchUsers -> `POST
+  | SearchViews -> `POST
   | SearchVocabularies -> `POST
+  | SearchWorkspaceAssociations -> `POST
+  | SearchWorkspaces -> `POST
+  | SendChatIntegrationEvent -> `POST
+  | SendOutboundEmail -> `PUT
+  | StartAttachedFileUpload -> `PUT
   | StartChatContact -> `PUT
+  | StartContactEvaluation -> `PUT
+  | StartContactMediaProcessing -> `POST
   | StartContactRecording -> `POST
   | StartContactStreaming -> `POST
+  | StartEmailContact -> `PUT
+  | StartOutboundChatContact -> `PUT
+  | StartOutboundEmailContact -> `PUT
   | StartOutboundVoiceContact -> `PUT
+  | StartScreenSharing -> `PUT
   | StartTaskContact -> `PUT
+  | StartTestCaseExecution -> `PUT
+  | StartWebRTCContact -> `PUT
   | StopContact -> `POST
+  | StopContactMediaProcessing -> `POST
   | StopContactRecording -> `POST
   | StopContactStreaming -> `POST
+  | StopTestCaseExecution -> `POST
+  | SubmitContactEvaluation -> `POST
   | SuspendContactRecording -> `POST
+  | TagContact -> `POST
   | TagResource -> `POST
+  | TransferContact -> `POST
+  | UntagContact -> `DELETE
   | UntagResource -> `DELETE
   | UpdateAgentStatus -> `POST
+  | UpdateAttachedFilesConfiguration -> `POST
+  | UpdateAuthenticationProfile -> `POST
   | UpdateContact -> `POST
   | UpdateContactAttributes -> `POST
+  | UpdateContactEvaluation -> `POST
   | UpdateContactFlowContent -> `POST
   | UpdateContactFlowMetadata -> `POST
+  | UpdateContactFlowModuleAlias -> `POST
   | UpdateContactFlowModuleContent -> `POST
   | UpdateContactFlowModuleMetadata -> `POST
   | UpdateContactFlowName -> `POST
+  | UpdateContactRoutingData -> `POST
   | UpdateContactSchedule -> `POST
+  | UpdateDataTableAttribute -> `POST
+  | UpdateDataTableMetadata -> `POST
+  | UpdateDataTablePrimaryValues -> `POST
+  | UpdateEmailAddressMetadata -> `POST
+  | UpdateEvaluationForm -> `PUT
   | UpdateHoursOfOperation -> `POST
+  | UpdateHoursOfOperationOverride -> `POST
   | UpdateInstanceAttribute -> `POST
   | UpdateInstanceStorageConfig -> `POST
+  | UpdateNotificationContent -> `POST
+  | UpdateParticipantAuthentication -> `POST
+  | UpdateParticipantRoleConfig -> `PUT
+  | UpdatePhoneNumber -> `PUT
+  | UpdatePhoneNumberMetadata -> `PUT
+  | UpdatePredefinedAttribute -> `POST
+  | UpdatePrompt -> `POST
   | UpdateQueueHoursOfOperation -> `POST
   | UpdateQueueMaxContacts -> `POST
   | UpdateQueueName -> `POST
   | UpdateQueueOutboundCallerConfig -> `POST
+  | UpdateQueueOutboundEmailConfig -> `POST
   | UpdateQueueStatus -> `POST
   | UpdateQuickConnectConfig -> `POST
   | UpdateQuickConnectName -> `POST
+  | UpdateRoutingProfileAgentAvailabilityTimer -> `POST
   | UpdateRoutingProfileConcurrency -> `POST
   | UpdateRoutingProfileDefaultOutboundQueue -> `POST
   | UpdateRoutingProfileName -> `POST
   | UpdateRoutingProfileQueues -> `POST
+  | UpdateRule -> `PUT
   | UpdateSecurityProfile -> `POST
+  | UpdateTaskTemplate -> `POST
+  | UpdateTestCase -> `POST
+  | UpdateTrafficDistribution -> `PUT
+  | UpdateUserConfig -> `POST
   | UpdateUserHierarchy -> `POST
   | UpdateUserHierarchyGroupName -> `POST
   | UpdateUserHierarchyStructure -> `POST
   | UpdateUserIdentityInfo -> `POST
+  | UpdateUserNotificationStatus -> `POST
   | UpdateUserPhoneConfig -> `POST
+  | UpdateUserProficiencies -> `POST
   | UpdateUserRoutingProfile -> `POST
   | UpdateUserSecurityProfiles -> `POST
+  | UpdateViewContent -> `POST
+  | UpdateViewMetadata -> `POST
+  | UpdateWorkspaceMetadata -> `POST
+  | UpdateWorkspacePage -> `POST
+  | UpdateWorkspaceTheme -> `POST
+  | UpdateWorkspaceVisibility -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | ActivateEvaluationForm ->
+          (Format.kasprintf Uri.of_string) "/evaluation-forms/%s/%s/activate"
+            (InstanceId.to_header x.ActivateEvaluationFormRequest.instanceId)
+            (ResourceId.to_header
+               x.ActivateEvaluationFormRequest.evaluationFormId)
+      | AssociateAnalyticsDataSet ->
+          (Format.kasprintf Uri.of_string)
+            "/analytics-data/instance/%s/association"
+            (InstanceId.to_header
+               x.AssociateAnalyticsDataSetRequest.instanceId)
       | AssociateApprovedOrigin ->
           (Format.kasprintf Uri.of_string) "/instance/%s/approved-origin"
             (InstanceId.to_header x.AssociateApprovedOriginRequest.instanceId)
       | AssociateBot ->
           (Format.kasprintf Uri.of_string) "/instance/%s/bot"
             (InstanceId.to_header x.AssociateBotRequest.instanceId)
+      | AssociateContactWithUser ->
+          (Format.kasprintf Uri.of_string) "/contacts/%s/%s/associate-user"
+            (InstanceId.to_header
+               x.AssociateContactWithUserRequest.instanceId)
+            (ContactId.to_header x.AssociateContactWithUserRequest.contactId)
       | AssociateDefaultVocabulary ->
           (Format.kasprintf Uri.of_string) "/default-vocabulary/%s/%s"
             (InstanceId.to_header
                x.AssociateDefaultVocabularyRequest.instanceId)
             (VocabularyLanguageCode.to_header
                x.AssociateDefaultVocabularyRequest.languageCode)
+      | AssociateEmailAddressAlias ->
+          (Format.kasprintf Uri.of_string)
+            "/email-addresses/%s/%s/associate-alias"
+            (InstanceId.to_header
+               x.AssociateEmailAddressAliasRequest.instanceId)
+            (EmailAddressId.to_header
+               x.AssociateEmailAddressAliasRequest.emailAddressId)
+      | AssociateFlow ->
+          (Format.kasprintf Uri.of_string) "/flow-associations/%s"
+            (InstanceId.to_header x.AssociateFlowRequest.instanceId)
+      | AssociateHoursOfOperations ->
+          (Format.kasprintf Uri.of_string)
+            "/hours-of-operations/%s/%s/associate-hours"
+            (InstanceId.to_header
+               x.AssociateHoursOfOperationsRequest.instanceId)
+            (HoursOfOperationId.to_header
+               x.AssociateHoursOfOperationsRequest.hoursOfOperationId)
       | AssociateInstanceStorageConfig ->
           (Format.kasprintf Uri.of_string) "/instance/%s/storage-config"
             (InstanceId.to_header
@@ -432,6 +1278,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | AssociateLexBot ->
           (Format.kasprintf Uri.of_string) "/instance/%s/lex-bot"
             (InstanceId.to_header x.AssociateLexBotRequest.instanceId)
+      | AssociatePhoneNumberContactFlow ->
+          (Format.kasprintf Uri.of_string) "/phone-number/%s/contact-flow"
+            (PhoneNumberId.to_header
+               x.AssociatePhoneNumberContactFlowRequest.phoneNumberId)
+      | AssociateQueueEmailAddresses ->
+          (Format.kasprintf Uri.of_string)
+            "/queues/%s/%s/associate-email-addresses"
+            (InstanceId.to_header
+               x.AssociateQueueEmailAddressesRequest.instanceId)
+            (QueueId.to_header x.AssociateQueueEmailAddressesRequest.queueId)
       | AssociateQueueQuickConnects ->
           (Format.kasprintf Uri.of_string)
             "/queues/%s/%s/associate-quick-connects"
@@ -448,24 +1304,172 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | AssociateSecurityKey ->
           (Format.kasprintf Uri.of_string) "/instance/%s/security-key"
             (InstanceId.to_header x.AssociateSecurityKeyRequest.instanceId)
+      | AssociateSecurityProfiles ->
+          (Format.kasprintf Uri.of_string) "/associate-security-profiles/%s"
+            (InstanceId.to_header
+               x.AssociateSecurityProfilesRequest.instanceId)
+      | AssociateTrafficDistributionGroupUser ->
+          (Format.kasprintf Uri.of_string)
+            "/traffic-distribution-group/%s/user"
+            (TrafficDistributionGroupIdOrArn.to_header
+               x.AssociateTrafficDistributionGroupUserRequest.trafficDistributionGroupId)
+      | AssociateUserProficiencies ->
+          (Format.kasprintf Uri.of_string)
+            "/users/%s/%s/associate-proficiencies"
+            (InstanceId.to_header
+               x.AssociateUserProficienciesRequest.instanceId)
+            (UserId.to_header x.AssociateUserProficienciesRequest.userId)
+      | AssociateWorkspace ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/%s/associate"
+            (InstanceId.to_header x.AssociateWorkspaceRequest.instanceId)
+            (WorkspaceId.to_header x.AssociateWorkspaceRequest.workspaceId)
+      | BatchAssociateAnalyticsDataSet ->
+          (Format.kasprintf Uri.of_string)
+            "/analytics-data/instance/%s/associations"
+            (InstanceId.to_header
+               x.BatchAssociateAnalyticsDataSetRequest.instanceId)
+      | BatchCreateDataTableValue ->
+          (Format.kasprintf Uri.of_string) "/data-tables/%s/%s/values/create"
+            (InstanceId.to_header
+               x.BatchCreateDataTableValueRequest.instanceId)
+            (DataTableId.to_header
+               x.BatchCreateDataTableValueRequest.dataTableId)
+      | BatchDeleteDataTableValue ->
+          (Format.kasprintf Uri.of_string) "/data-tables/%s/%s/values/delete"
+            (InstanceId.to_header
+               x.BatchDeleteDataTableValueRequest.instanceId)
+            (DataTableId.to_header
+               x.BatchDeleteDataTableValueRequest.dataTableId)
+      | BatchDescribeDataTableValue ->
+          (Format.kasprintf Uri.of_string)
+            "/data-tables/%s/%s/values/describe"
+            (InstanceId.to_header
+               x.BatchDescribeDataTableValueRequest.instanceId)
+            (DataTableId.to_header
+               x.BatchDescribeDataTableValueRequest.dataTableId)
+      | BatchDisassociateAnalyticsDataSet ->
+          (Format.kasprintf Uri.of_string)
+            "/analytics-data/instance/%s/associations"
+            (InstanceId.to_header
+               x.BatchDisassociateAnalyticsDataSetRequest.instanceId)
+      | BatchGetAttachedFileMetadata ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/attached-files/%s"
+               (InstanceId.to_header
+                  x.BatchGetAttachedFileMetadataRequest.instanceId))
+            (List.filter_opt
+               [Some
+                  ("associatedResourceArn",
+                    (ARN.to_header x.associatedResourceArn))])
+      | BatchGetFlowAssociation ->
+          (Format.kasprintf Uri.of_string) "/flow-associations-batch/%s"
+            (InstanceId.to_header x.BatchGetFlowAssociationRequest.instanceId)
+      | BatchPutContact ->
+          (Format.kasprintf Uri.of_string) "/contact/batch/%s"
+            (InstanceId.to_header x.BatchPutContactRequest.instanceId)
+      | BatchUpdateDataTableValue ->
+          (Format.kasprintf Uri.of_string) "/data-tables/%s/%s/values/update"
+            (InstanceId.to_header
+               x.BatchUpdateDataTableValueRequest.instanceId)
+            (DataTableId.to_header
+               x.BatchUpdateDataTableValueRequest.dataTableId)
+      | ClaimPhoneNumber ->
+          (Format.kasprintf Uri.of_string) "/phone-number/claim"
+      | CompleteAttachedFileUpload ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/attached-files/%s/%s"
+               (InstanceId.to_header
+                  x.CompleteAttachedFileUploadRequest.instanceId)
+               (FileId.to_header x.CompleteAttachedFileUploadRequest.fileId))
+            (List.filter_opt
+               [Some
+                  ("associatedResourceArn",
+                    (ARN.to_header x.associatedResourceArn))])
       | CreateAgentStatus ->
           (Format.kasprintf Uri.of_string) "/agent-status/%s"
             (InstanceId.to_header x.CreateAgentStatusRequest.instanceId)
+      | CreateContact ->
+          (Format.kasprintf Uri.of_string) "/contact/create-contact"
       | CreateContactFlow ->
           (Format.kasprintf Uri.of_string) "/contact-flows/%s"
             (InstanceId.to_header x.CreateContactFlowRequest.instanceId)
       | CreateContactFlowModule ->
           (Format.kasprintf Uri.of_string) "/contact-flow-modules/%s"
             (InstanceId.to_header x.CreateContactFlowModuleRequest.instanceId)
+      | CreateContactFlowModuleAlias ->
+          (Format.kasprintf Uri.of_string)
+            "/contact-flow-modules/%s/%s/alias"
+            (InstanceIdOrArn.to_header
+               x.CreateContactFlowModuleAliasRequest.instanceId)
+            (ContactFlowModuleId.to_header
+               x.CreateContactFlowModuleAliasRequest.contactFlowModuleId)
+      | CreateContactFlowModuleVersion ->
+          (Format.kasprintf Uri.of_string)
+            "/contact-flow-modules/%s/%s/version"
+            (InstanceId.to_header
+               x.CreateContactFlowModuleVersionRequest.instanceId)
+            (ARN.to_header
+               x.CreateContactFlowModuleVersionRequest.contactFlowModuleId)
+      | CreateContactFlowVersion ->
+          (Format.kasprintf Uri.of_string) "/contact-flows/%s/%s/version"
+            (InstanceId.to_header
+               x.CreateContactFlowVersionRequest.instanceId)
+            (ARN.to_header x.CreateContactFlowVersionRequest.contactFlowId)
+      | CreateDataTable ->
+          (Format.kasprintf Uri.of_string) "/data-tables/%s"
+            (InstanceId.to_header x.CreateDataTableRequest.instanceId)
+      | CreateDataTableAttribute ->
+          (Format.kasprintf Uri.of_string) "/data-tables/%s/%s/attributes"
+            (InstanceId.to_header
+               x.CreateDataTableAttributeRequest.instanceId)
+            (DataTableId.to_header
+               x.CreateDataTableAttributeRequest.dataTableId)
+      | CreateEmailAddress ->
+          (Format.kasprintf Uri.of_string) "/email-addresses/%s"
+            (InstanceId.to_header x.CreateEmailAddressRequest.instanceId)
+      | CreateEvaluationForm ->
+          (Format.kasprintf Uri.of_string) "/evaluation-forms/%s"
+            (InstanceId.to_header x.CreateEvaluationFormRequest.instanceId)
       | CreateHoursOfOperation ->
           (Format.kasprintf Uri.of_string) "/hours-of-operations/%s"
             (InstanceId.to_header x.CreateHoursOfOperationRequest.instanceId)
+      | CreateHoursOfOperationOverride ->
+          (Format.kasprintf Uri.of_string)
+            "/hours-of-operations/%s/%s/overrides"
+            (InstanceId.to_header
+               x.CreateHoursOfOperationOverrideRequest.instanceId)
+            (HoursOfOperationId.to_header
+               x.CreateHoursOfOperationOverrideRequest.hoursOfOperationId)
       | CreateInstance -> (Format.kasprintf Uri.of_string) "/instance"
       | CreateIntegrationAssociation ->
           (Format.kasprintf Uri.of_string)
             "/instance/%s/integration-associations"
             (InstanceId.to_header
                x.CreateIntegrationAssociationRequest.instanceId)
+      | CreateNotification ->
+          (Format.kasprintf Uri.of_string) "/notifications/%s"
+            (InstanceId.to_header x.CreateNotificationRequest.instanceId)
+      | CreateParticipant ->
+          (Format.kasprintf Uri.of_string) "/contact/create-participant"
+      | CreatePersistentContactAssociation ->
+          (Format.kasprintf Uri.of_string)
+            "/contact/persistent-contact-association/%s/%s"
+            (InstanceId.to_header
+               x.CreatePersistentContactAssociationRequest.instanceId)
+            (ContactId.to_header
+               x.CreatePersistentContactAssociationRequest.initialContactId)
+      | CreatePredefinedAttribute ->
+          (Format.kasprintf Uri.of_string) "/predefined-attributes/%s"
+            (InstanceId.to_header
+               x.CreatePredefinedAttributeRequest.instanceId)
+      | CreatePrompt ->
+          (Format.kasprintf Uri.of_string) "/prompts/%s"
+            (InstanceId.to_header x.CreatePromptRequest.instanceId)
+      | CreatePushNotificationRegistration ->
+          (Format.kasprintf Uri.of_string)
+            "/push-notification/%s/registrations"
+            (InstanceId.to_header
+               x.CreatePushNotificationRegistrationRequest.instanceId)
       | CreateQueue ->
           (Format.kasprintf Uri.of_string) "/queues/%s"
             (InstanceId.to_header x.CreateQueueRequest.instanceId)
@@ -475,9 +1479,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateRoutingProfile ->
           (Format.kasprintf Uri.of_string) "/routing-profiles/%s"
             (InstanceId.to_header x.CreateRoutingProfileRequest.instanceId)
+      | CreateRule ->
+          (Format.kasprintf Uri.of_string) "/rules/%s"
+            (InstanceId.to_header x.CreateRuleRequest.instanceId)
       | CreateSecurityProfile ->
           (Format.kasprintf Uri.of_string) "/security-profiles/%s"
             (InstanceId.to_header x.CreateSecurityProfileRequest.instanceId)
+      | CreateTaskTemplate ->
+          (Format.kasprintf Uri.of_string) "/instance/%s/task/template"
+            (InstanceId.to_header x.CreateTaskTemplateRequest.instanceId)
+      | CreateTestCase ->
+          (Format.kasprintf Uri.of_string) "/test-cases/%s"
+            (InstanceIdOrArn.to_header x.CreateTestCaseRequest.instanceId)
+      | CreateTrafficDistributionGroup ->
+          (Format.kasprintf Uri.of_string) "/traffic-distribution-group"
       | CreateUseCase ->
           (Format.kasprintf Uri.of_string)
             "/instance/%s/integration-associations/%s/use-cases"
@@ -491,9 +1506,44 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/user-hierarchy-groups/%s"
             (InstanceId.to_header
                x.CreateUserHierarchyGroupRequest.instanceId)
+      | CreateView ->
+          (Format.kasprintf Uri.of_string) "/views/%s"
+            (ViewsInstanceId.to_header x.CreateViewRequest.instanceId)
+      | CreateViewVersion ->
+          (Format.kasprintf Uri.of_string) "/views/%s/%s/versions"
+            (ViewsInstanceId.to_header x.CreateViewVersionRequest.instanceId)
+            (ViewId.to_header x.CreateViewVersionRequest.viewId)
       | CreateVocabulary ->
           (Format.kasprintf Uri.of_string) "/vocabulary/%s"
             (InstanceId.to_header x.CreateVocabularyRequest.instanceId)
+      | CreateWorkspace ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s"
+            (InstanceId.to_header x.CreateWorkspaceRequest.instanceId)
+      | CreateWorkspacePage ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/%s/pages"
+            (InstanceId.to_header x.CreateWorkspacePageRequest.instanceId)
+            (WorkspaceId.to_header x.CreateWorkspacePageRequest.workspaceId)
+      | DeactivateEvaluationForm ->
+          (Format.kasprintf Uri.of_string)
+            "/evaluation-forms/%s/%s/deactivate"
+            (InstanceId.to_header
+               x.DeactivateEvaluationFormRequest.instanceId)
+            (ResourceId.to_header
+               x.DeactivateEvaluationFormRequest.evaluationFormId)
+      | DeleteAttachedFile ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/attached-files/%s/%s"
+               (InstanceId.to_header x.DeleteAttachedFileRequest.instanceId)
+               (FileId.to_header x.DeleteAttachedFileRequest.fileId))
+            (List.filter_opt
+               [Some
+                  ("associatedResourceArn",
+                    (ARN.to_header x.associatedResourceArn))])
+      | DeleteContactEvaluation ->
+          (Format.kasprintf Uri.of_string) "/contact-evaluations/%s/%s"
+            (InstanceId.to_header x.DeleteContactEvaluationRequest.instanceId)
+            (ResourceId.to_header
+               x.DeleteContactEvaluationRequest.evaluationId)
       | DeleteContactFlow ->
           (Format.kasprintf Uri.of_string) "/contact-flows/%s/%s"
             (InstanceId.to_header x.DeleteContactFlowRequest.instanceId)
@@ -503,14 +1553,80 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (InstanceId.to_header x.DeleteContactFlowModuleRequest.instanceId)
             (ContactFlowModuleId.to_header
                x.DeleteContactFlowModuleRequest.contactFlowModuleId)
+      | DeleteContactFlowModuleAlias ->
+          (Format.kasprintf Uri.of_string)
+            "/contact-flow-modules/%s/%s/alias/%s"
+            (InstanceIdOrArn.to_header
+               x.DeleteContactFlowModuleAliasRequest.instanceId)
+            (ResourceId.to_header
+               x.DeleteContactFlowModuleAliasRequest.contactFlowModuleId)
+            (ResourceId.to_header
+               x.DeleteContactFlowModuleAliasRequest.aliasId)
+      | DeleteContactFlowModuleVersion ->
+          (Format.kasprintf Uri.of_string)
+            "/contact-flow-modules/%s/%s/version/%s"
+            (InstanceId.to_header
+               x.DeleteContactFlowModuleVersionRequest.instanceId)
+            (ARN.to_header
+               x.DeleteContactFlowModuleVersionRequest.contactFlowModuleId)
+            (ResourceVersion.to_header
+               x.DeleteContactFlowModuleVersionRequest.contactFlowModuleVersion)
+      | DeleteContactFlowVersion ->
+          (Format.kasprintf Uri.of_string) "/contact-flows/%s/%s/version/%s"
+            (InstanceId.to_header
+               x.DeleteContactFlowVersionRequest.instanceId)
+            (ARN.to_header x.DeleteContactFlowVersionRequest.contactFlowId)
+            (ResourceVersion.to_header
+               x.DeleteContactFlowVersionRequest.contactFlowVersion)
+      | DeleteDataTable ->
+          (Format.kasprintf Uri.of_string) "/data-tables/%s/%s"
+            (InstanceId.to_header x.DeleteDataTableRequest.instanceId)
+            (DataTableId.to_header x.DeleteDataTableRequest.dataTableId)
+      | DeleteDataTableAttribute ->
+          (Format.kasprintf Uri.of_string) "/data-tables/%s/%s/attributes/%s"
+            (InstanceId.to_header
+               x.DeleteDataTableAttributeRequest.instanceId)
+            (DataTableId.to_header
+               x.DeleteDataTableAttributeRequest.dataTableId)
+            (DataTableName.to_header
+               x.DeleteDataTableAttributeRequest.attributeName)
+      | DeleteEmailAddress ->
+          (Format.kasprintf Uri.of_string) "/email-addresses/%s/%s"
+            (InstanceId.to_header x.DeleteEmailAddressRequest.instanceId)
+            (EmailAddressId.to_header
+               x.DeleteEmailAddressRequest.emailAddressId)
+      | DeleteEvaluationForm ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/evaluation-forms/%s/%s"
+               (InstanceId.to_header x.DeleteEvaluationFormRequest.instanceId)
+               (ResourceId.to_header
+                  x.DeleteEvaluationFormRequest.evaluationFormId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("version", (VersionNumber.to_header v)))
+                  x.evaluationFormVersion])
       | DeleteHoursOfOperation ->
           (Format.kasprintf Uri.of_string) "/hours-of-operations/%s/%s"
             (InstanceId.to_header x.DeleteHoursOfOperationRequest.instanceId)
             (HoursOfOperationId.to_header
                x.DeleteHoursOfOperationRequest.hoursOfOperationId)
+      | DeleteHoursOfOperationOverride ->
+          (Format.kasprintf Uri.of_string)
+            "/hours-of-operations/%s/%s/overrides/%s"
+            (InstanceId.to_header
+               x.DeleteHoursOfOperationOverrideRequest.instanceId)
+            (HoursOfOperationId.to_header
+               x.DeleteHoursOfOperationOverrideRequest.hoursOfOperationId)
+            (HoursOfOperationOverrideId.to_header
+               x.DeleteHoursOfOperationOverrideRequest.hoursOfOperationOverrideId)
       | DeleteInstance ->
-          (Format.kasprintf Uri.of_string) "/instance/%s"
-            (InstanceId.to_header x.DeleteInstanceRequest.instanceId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/instance/%s"
+               (InstanceId.to_header x.DeleteInstanceRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
       | DeleteIntegrationAssociation ->
           (Format.kasprintf Uri.of_string)
             "/instance/%s/integration-associations/%s"
@@ -518,16 +1634,67 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DeleteIntegrationAssociationRequest.instanceId)
             (IntegrationAssociationId.to_header
                x.DeleteIntegrationAssociationRequest.integrationAssociationId)
+      | DeleteNotification ->
+          (Format.kasprintf Uri.of_string) "/notifications/%s/%s"
+            (InstanceId.to_header x.DeleteNotificationRequest.instanceId)
+            (NotificationId.to_header
+               x.DeleteNotificationRequest.notificationId)
+      | DeletePredefinedAttribute ->
+          (Format.kasprintf Uri.of_string) "/predefined-attributes/%s/%s"
+            (InstanceId.to_header
+               x.DeletePredefinedAttributeRequest.instanceId)
+            (PredefinedAttributeName.to_header
+               x.DeletePredefinedAttributeRequest.name)
+      | DeletePrompt ->
+          (Format.kasprintf Uri.of_string) "/prompts/%s/%s"
+            (InstanceId.to_header x.DeletePromptRequest.instanceId)
+            (PromptId.to_header x.DeletePromptRequest.promptId)
+      | DeletePushNotificationRegistration ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/push-notification/%s/registrations/%s"
+               (InstanceId.to_header
+                  x.DeletePushNotificationRegistrationRequest.instanceId)
+               (RegistrationId.to_header
+                  x.DeletePushNotificationRegistrationRequest.registrationId))
+            (List.filter_opt
+               [Some ("contactId", (ContactId.to_header x.contactId))])
+      | DeleteQueue ->
+          (Format.kasprintf Uri.of_string) "/queues/%s/%s"
+            (InstanceId.to_header x.DeleteQueueRequest.instanceId)
+            (QueueId.to_header x.DeleteQueueRequest.queueId)
       | DeleteQuickConnect ->
           (Format.kasprintf Uri.of_string) "/quick-connects/%s/%s"
             (InstanceId.to_header x.DeleteQuickConnectRequest.instanceId)
             (QuickConnectId.to_header
                x.DeleteQuickConnectRequest.quickConnectId)
+      | DeleteRoutingProfile ->
+          (Format.kasprintf Uri.of_string) "/routing-profiles/%s/%s"
+            (InstanceId.to_header x.DeleteRoutingProfileRequest.instanceId)
+            (RoutingProfileId.to_header
+               x.DeleteRoutingProfileRequest.routingProfileId)
+      | DeleteRule ->
+          (Format.kasprintf Uri.of_string) "/rules/%s/%s"
+            (InstanceId.to_header x.DeleteRuleRequest.instanceId)
+            (RuleId.to_header x.DeleteRuleRequest.ruleId)
       | DeleteSecurityProfile ->
           (Format.kasprintf Uri.of_string) "/security-profiles/%s/%s"
             (InstanceId.to_header x.DeleteSecurityProfileRequest.instanceId)
             (SecurityProfileId.to_header
                x.DeleteSecurityProfileRequest.securityProfileId)
+      | DeleteTaskTemplate ->
+          (Format.kasprintf Uri.of_string) "/instance/%s/task/template/%s"
+            (InstanceId.to_header x.DeleteTaskTemplateRequest.instanceId)
+            (TaskTemplateId.to_header
+               x.DeleteTaskTemplateRequest.taskTemplateId)
+      | DeleteTestCase ->
+          (Format.kasprintf Uri.of_string) "/test-cases/%s/%s"
+            (InstanceIdOrArn.to_header x.DeleteTestCaseRequest.instanceId)
+            (TestCaseId.to_header x.DeleteTestCaseRequest.testCaseId)
+      | DeleteTrafficDistributionGroup ->
+          (Format.kasprintf Uri.of_string) "/traffic-distribution-group/%s"
+            (TrafficDistributionGroupIdOrArn.to_header
+               x.DeleteTrafficDistributionGroupRequest.trafficDistributionGroupId)
       | DeleteUseCase ->
           (Format.kasprintf Uri.of_string)
             "/instance/%s/integration-associations/%s/use-cases/%s"
@@ -545,19 +1712,64 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DeleteUserHierarchyGroupRequest.instanceId)
             (HierarchyGroupId.to_header
                x.DeleteUserHierarchyGroupRequest.hierarchyGroupId)
+      | DeleteView ->
+          (Format.kasprintf Uri.of_string) "/views/%s/%s"
+            (ViewsInstanceId.to_header x.DeleteViewRequest.instanceId)
+            (ViewId.to_header x.DeleteViewRequest.viewId)
+      | DeleteViewVersion ->
+          (Format.kasprintf Uri.of_string) "/views/%s/%s/versions/%s"
+            (ViewsInstanceId.to_header x.DeleteViewVersionRequest.instanceId)
+            (ViewId.to_header x.DeleteViewVersionRequest.viewId)
+            (ViewVersion.to_header x.DeleteViewVersionRequest.viewVersion)
       | DeleteVocabulary ->
           (Format.kasprintf Uri.of_string) "/vocabulary-remove/%s/%s"
             (InstanceId.to_header x.DeleteVocabularyRequest.instanceId)
             (VocabularyId.to_header x.DeleteVocabularyRequest.vocabularyId)
+      | DeleteWorkspace ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/%s"
+            (InstanceId.to_header x.DeleteWorkspaceRequest.instanceId)
+            (WorkspaceId.to_header x.DeleteWorkspaceRequest.workspaceId)
+      | DeleteWorkspaceMedia ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/workspaces/%s/%s/media"
+               (InstanceId.to_header x.DeleteWorkspaceMediaRequest.instanceId)
+               (WorkspaceId.to_header
+                  x.DeleteWorkspaceMediaRequest.workspaceId))
+            (List.filter_opt
+               [Some ("mediaType", (MediaType.to_header x.mediaType))])
+      | DeleteWorkspacePage ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/%s/pages/%s"
+            (InstanceId.to_header x.DeleteWorkspacePageRequest.instanceId)
+            (WorkspaceId.to_header x.DeleteWorkspacePageRequest.workspaceId)
+            (Page.to_header x.DeleteWorkspacePageRequest.page)
       | DescribeAgentStatus ->
           (Format.kasprintf Uri.of_string) "/agent-status/%s/%s"
             (InstanceId.to_header x.DescribeAgentStatusRequest.instanceId)
             (AgentStatusId.to_header
                x.DescribeAgentStatusRequest.agentStatusId)
+      | DescribeAttachedFilesConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/attached-files-configurations/%s/%s"
+            (InstanceId.to_header
+               x.DescribeAttachedFilesConfigurationRequest.instanceId)
+            (AttachmentScope.to_header
+               x.DescribeAttachedFilesConfigurationRequest.attachmentScope)
+      | DescribeAuthenticationProfile ->
+          (Format.kasprintf Uri.of_string) "/authentication-profiles/%s/%s"
+            (InstanceId.to_header
+               x.DescribeAuthenticationProfileRequest.instanceId)
+            (AuthenticationProfileId.to_header
+               x.DescribeAuthenticationProfileRequest.authenticationProfileId)
       | DescribeContact ->
           (Format.kasprintf Uri.of_string) "/contacts/%s/%s"
             (InstanceId.to_header x.DescribeContactRequest.instanceId)
             (ContactId.to_header x.DescribeContactRequest.contactId)
+      | DescribeContactEvaluation ->
+          (Format.kasprintf Uri.of_string) "/contact-evaluations/%s/%s"
+            (InstanceId.to_header
+               x.DescribeContactEvaluationRequest.instanceId)
+            (ResourceId.to_header
+               x.DescribeContactEvaluationRequest.evaluationId)
       | DescribeContactFlow ->
           (Format.kasprintf Uri.of_string) "/contact-flows/%s/%s"
             (InstanceId.to_header x.DescribeContactFlowRequest.instanceId)
@@ -569,12 +1781,58 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DescribeContactFlowModuleRequest.instanceId)
             (ContactFlowModuleId.to_header
                x.DescribeContactFlowModuleRequest.contactFlowModuleId)
+      | DescribeContactFlowModuleAlias ->
+          (Format.kasprintf Uri.of_string)
+            "/contact-flow-modules/%s/%s/alias/%s"
+            (InstanceIdOrArn.to_header
+               x.DescribeContactFlowModuleAliasRequest.instanceId)
+            (ContactFlowModuleId.to_header
+               x.DescribeContactFlowModuleAliasRequest.contactFlowModuleId)
+            (ResourceId.to_header
+               x.DescribeContactFlowModuleAliasRequest.aliasId)
+      | DescribeDataTable ->
+          (Format.kasprintf Uri.of_string) "/data-tables/%s/%s"
+            (InstanceId.to_header x.DescribeDataTableRequest.instanceId)
+            (DataTableId.to_header x.DescribeDataTableRequest.dataTableId)
+      | DescribeDataTableAttribute ->
+          (Format.kasprintf Uri.of_string) "/data-tables/%s/%s/attributes/%s"
+            (InstanceId.to_header
+               x.DescribeDataTableAttributeRequest.instanceId)
+            (DataTableId.to_header
+               x.DescribeDataTableAttributeRequest.dataTableId)
+            (DataTableName.to_header
+               x.DescribeDataTableAttributeRequest.attributeName)
+      | DescribeEmailAddress ->
+          (Format.kasprintf Uri.of_string) "/email-addresses/%s/%s"
+            (InstanceId.to_header x.DescribeEmailAddressRequest.instanceId)
+            (EmailAddressId.to_header
+               x.DescribeEmailAddressRequest.emailAddressId)
+      | DescribeEvaluationForm ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/evaluation-forms/%s/%s"
+               (InstanceId.to_header
+                  x.DescribeEvaluationFormRequest.instanceId)
+               (ResourceId.to_header
+                  x.DescribeEvaluationFormRequest.evaluationFormId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("version", (VersionNumber.to_header v)))
+                  x.evaluationFormVersion])
       | DescribeHoursOfOperation ->
           (Format.kasprintf Uri.of_string) "/hours-of-operations/%s/%s"
             (InstanceId.to_header
                x.DescribeHoursOfOperationRequest.instanceId)
             (HoursOfOperationId.to_header
                x.DescribeHoursOfOperationRequest.hoursOfOperationId)
+      | DescribeHoursOfOperationOverride ->
+          (Format.kasprintf Uri.of_string)
+            "/hours-of-operations/%s/%s/overrides/%s"
+            (InstanceId.to_header
+               x.DescribeHoursOfOperationOverrideRequest.instanceId)
+            (HoursOfOperationId.to_header
+               x.DescribeHoursOfOperationOverrideRequest.hoursOfOperationId)
+            (HoursOfOperationOverrideId.to_header
+               x.DescribeHoursOfOperationOverrideRequest.hoursOfOperationOverrideId)
       | DescribeInstance ->
           (Format.kasprintf Uri.of_string) "/instance/%s"
             (InstanceId.to_header x.DescribeInstanceRequest.instanceId)
@@ -596,6 +1854,25 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some
                   ("resourceType",
                     (InstanceStorageResourceType.to_header x.resourceType))])
+      | DescribeNotification ->
+          (Format.kasprintf Uri.of_string) "/notifications/%s/%s"
+            (InstanceId.to_header x.DescribeNotificationRequest.instanceId)
+            (NotificationId.to_header
+               x.DescribeNotificationRequest.notificationId)
+      | DescribePhoneNumber ->
+          (Format.kasprintf Uri.of_string) "/phone-number/%s"
+            (PhoneNumberId.to_header
+               x.DescribePhoneNumberRequest.phoneNumberId)
+      | DescribePredefinedAttribute ->
+          (Format.kasprintf Uri.of_string) "/predefined-attributes/%s/%s"
+            (InstanceId.to_header
+               x.DescribePredefinedAttributeRequest.instanceId)
+            (PredefinedAttributeName.to_header
+               x.DescribePredefinedAttributeRequest.name)
+      | DescribePrompt ->
+          (Format.kasprintf Uri.of_string) "/prompts/%s/%s"
+            (InstanceId.to_header x.DescribePromptRequest.instanceId)
+            (PromptId.to_header x.DescribePromptRequest.promptId)
       | DescribeQueue ->
           (Format.kasprintf Uri.of_string) "/queues/%s/%s"
             (InstanceId.to_header x.DescribeQueueRequest.instanceId)
@@ -610,11 +1887,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (InstanceId.to_header x.DescribeRoutingProfileRequest.instanceId)
             (RoutingProfileId.to_header
                x.DescribeRoutingProfileRequest.routingProfileId)
+      | DescribeRule ->
+          (Format.kasprintf Uri.of_string) "/rules/%s/%s"
+            (InstanceId.to_header x.DescribeRuleRequest.instanceId)
+            (RuleId.to_header x.DescribeRuleRequest.ruleId)
       | DescribeSecurityProfile ->
           (Format.kasprintf Uri.of_string) "/security-profiles/%s/%s"
             (InstanceId.to_header x.DescribeSecurityProfileRequest.instanceId)
             (SecurityProfileId.to_header
                x.DescribeSecurityProfileRequest.securityProfileId)
+      | DescribeTestCase ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/test-cases/%s/%s"
+               (InstanceIdOrArn.to_header
+                  x.DescribeTestCaseRequest.instanceId)
+               (TestCaseId.to_header x.DescribeTestCaseRequest.testCaseId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("status", (TestCaseStatus.to_header v)))
+                  x.status])
+      | DescribeTrafficDistributionGroup ->
+          (Format.kasprintf Uri.of_string) "/traffic-distribution-group/%s"
+            (TrafficDistributionGroupIdOrArn.to_header
+               x.DescribeTrafficDistributionGroupRequest.trafficDistributionGroupId)
       | DescribeUser ->
           (Format.kasprintf Uri.of_string) "/users/%s/%s"
             (InstanceId.to_header x.DescribeUserRequest.instanceId)
@@ -629,19 +1924,56 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/user-hierarchy-structure/%s"
             (InstanceId.to_header
                x.DescribeUserHierarchyStructureRequest.instanceId)
+      | DescribeView ->
+          (Format.kasprintf Uri.of_string) "/views/%s/%s"
+            (ViewsInstanceId.to_header x.DescribeViewRequest.instanceId)
+            (ViewId.to_header x.DescribeViewRequest.viewId)
       | DescribeVocabulary ->
           (Format.kasprintf Uri.of_string) "/vocabulary/%s/%s"
             (InstanceId.to_header x.DescribeVocabularyRequest.instanceId)
             (VocabularyId.to_header x.DescribeVocabularyRequest.vocabularyId)
+      | DescribeWorkspace ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/%s"
+            (InstanceId.to_header x.DescribeWorkspaceRequest.instanceId)
+            (WorkspaceId.to_header x.DescribeWorkspaceRequest.workspaceId)
+      | DisassociateAnalyticsDataSet ->
+          (Format.kasprintf Uri.of_string)
+            "/analytics-data/instance/%s/association"
+            (InstanceId.to_header
+               x.DisassociateAnalyticsDataSetRequest.instanceId)
       | DisassociateApprovedOrigin ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/instance/%s/approved-origin"
                (InstanceId.to_header
                   x.DisassociateApprovedOriginRequest.instanceId))
-            (List.filter_opt [Some ("origin", (Origin.to_header x.origin))])
+            (List.filter_opt
+               [Some ("origin", (Origin.to_header x.origin));
+               Option.map
+                 ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                 x.clientToken])
       | DisassociateBot ->
           (Format.kasprintf Uri.of_string) "/instance/%s/bot"
             (InstanceId.to_header x.DisassociateBotRequest.instanceId)
+      | DisassociateEmailAddressAlias ->
+          (Format.kasprintf Uri.of_string)
+            "/email-addresses/%s/%s/disassociate-alias"
+            (InstanceId.to_header
+               x.DisassociateEmailAddressAliasRequest.instanceId)
+            (EmailAddressId.to_header
+               x.DisassociateEmailAddressAliasRequest.emailAddressId)
+      | DisassociateFlow ->
+          (Format.kasprintf Uri.of_string) "/flow-associations/%s/%s/%s"
+            (InstanceId.to_header x.DisassociateFlowRequest.instanceId)
+            (ARN.to_header x.DisassociateFlowRequest.resourceId)
+            (FlowAssociationResourceType.to_header
+               x.DisassociateFlowRequest.resourceType)
+      | DisassociateHoursOfOperations ->
+          (Format.kasprintf Uri.of_string)
+            "/hours-of-operations/%s/%s/disassociate-hours"
+            (InstanceId.to_header
+               x.DisassociateHoursOfOperationsRequest.instanceId)
+            (HoursOfOperationId.to_header
+               x.DisassociateHoursOfOperationsRequest.hoursOfOperationId)
       | DisassociateInstanceStorageConfig ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -653,21 +1985,44 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (List.filter_opt
                [Some
                   ("resourceType",
-                    (InstanceStorageResourceType.to_header x.resourceType))])
+                    (InstanceStorageResourceType.to_header x.resourceType));
+               Option.map
+                 ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                 x.clientToken])
       | DisassociateLambdaFunction ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/instance/%s/lambda-function"
                (InstanceId.to_header
                   x.DisassociateLambdaFunctionRequest.instanceId))
             (List.filter_opt
-               [Some ("functionArn", (FunctionArn.to_header x.functionArn))])
+               [Some ("functionArn", (FunctionArn.to_header x.functionArn));
+               Option.map
+                 ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                 x.clientToken])
       | DisassociateLexBot ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/instance/%s/lex-bot"
                (InstanceId.to_header x.DisassociateLexBotRequest.instanceId))
             (List.filter_opt
                [Some ("botName", (BotName.to_header x.botName));
-               Some ("lexRegion", (LexRegion.to_header x.lexRegion))])
+               Some ("lexRegion", (LexRegion.to_header x.lexRegion));
+               Option.map
+                 ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                 x.clientToken])
+      | DisassociatePhoneNumberContactFlow ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/phone-number/%s/contact-flow"
+               (PhoneNumberId.to_header
+                  x.DisassociatePhoneNumberContactFlowRequest.phoneNumberId))
+            (List.filter_opt
+               [Some ("instanceId", (InstanceId.to_header x.instanceId))])
+      | DisassociateQueueEmailAddresses ->
+          (Format.kasprintf Uri.of_string)
+            "/queues/%s/%s/disassociate-email-addresses"
+            (InstanceId.to_header
+               x.DisassociateQueueEmailAddressesRequest.instanceId)
+            (QueueId.to_header
+               x.DisassociateQueueEmailAddressesRequest.queueId)
       | DisassociateQueueQuickConnects ->
           (Format.kasprintf Uri.of_string)
             "/queues/%s/%s/disassociate-quick-connects"
@@ -683,24 +2038,149 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (RoutingProfileId.to_header
                x.DisassociateRoutingProfileQueuesRequest.routingProfileId)
       | DisassociateSecurityKey ->
-          (Format.kasprintf Uri.of_string) "/instance/%s/security-key/%s"
-            (InstanceId.to_header x.DisassociateSecurityKeyRequest.instanceId)
-            (AssociationId.to_header
-               x.DisassociateSecurityKeyRequest.associationId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/instance/%s/security-key/%s"
+               (InstanceId.to_header
+                  x.DisassociateSecurityKeyRequest.instanceId)
+               (AssociationId.to_header
+                  x.DisassociateSecurityKeyRequest.associationId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
+      | DisassociateSecurityProfiles ->
+          (Format.kasprintf Uri.of_string)
+            "/disassociate-security-profiles/%s"
+            (InstanceId.to_header
+               x.DisassociateSecurityProfilesRequest.instanceId)
+      | DisassociateTrafficDistributionGroupUser ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/traffic-distribution-group/%s/user"
+               (TrafficDistributionGroupIdOrArn.to_header
+                  x.DisassociateTrafficDistributionGroupUserRequest.trafficDistributionGroupId))
+            (List.filter_opt
+               [Some ("UserId", (UserId.to_header x.userId));
+               Some ("InstanceId", (InstanceId.to_header x.instanceId))])
+      | DisassociateUserProficiencies ->
+          (Format.kasprintf Uri.of_string)
+            "/users/%s/%s/disassociate-proficiencies"
+            (InstanceId.to_header
+               x.DisassociateUserProficienciesRequest.instanceId)
+            (UserId.to_header x.DisassociateUserProficienciesRequest.userId)
+      | DisassociateWorkspace ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/%s/disassociate"
+            (InstanceId.to_header x.DisassociateWorkspaceRequest.instanceId)
+            (WorkspaceId.to_header x.DisassociateWorkspaceRequest.workspaceId)
+      | DismissUserContact ->
+          (Format.kasprintf Uri.of_string) "/users/%s/%s/contact"
+            (InstanceId.to_header x.DismissUserContactRequest.instanceId)
+            (UserId.to_header x.DismissUserContactRequest.userId)
+      | EvaluateDataTableValues ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/data-tables/%s/%s/values/evaluate"
+               (InstanceId.to_header
+                  x.EvaluateDataTableValuesRequest.instanceId)
+               (DataTableId.to_header
+                  x.EvaluateDataTableValuesRequest.dataTableId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                 x.maxResults])
+      | GetAttachedFile ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/attached-files/%s/%s"
+               (InstanceId.to_header x.GetAttachedFileRequest.instanceId)
+               (FileId.to_header x.GetAttachedFileRequest.fileId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("urlExpiryInSeconds",
+                          (URLExpiryInSeconds.to_header v)))
+                  x.urlExpiryInSeconds;
+               Some
+                 ("associatedResourceArn",
+                   (ARN.to_header x.associatedResourceArn))])
       | GetContactAttributes ->
           (Format.kasprintf Uri.of_string) "/contact/attributes/%s/%s"
             (InstanceId.to_header x.GetContactAttributesRequest.instanceId)
             (ContactId.to_header
                x.GetContactAttributesRequest.initialContactId)
+      | GetContactMetrics ->
+          (Format.kasprintf Uri.of_string) "/metrics/contact"
       | GetCurrentMetricData ->
           (Format.kasprintf Uri.of_string) "/metrics/current/%s"
             (InstanceId.to_header x.GetCurrentMetricDataRequest.instanceId)
+      | GetCurrentUserData ->
+          (Format.kasprintf Uri.of_string) "/metrics/userdata/%s"
+            (InstanceId.to_header x.GetCurrentUserDataRequest.instanceId)
+      | GetEffectiveHoursOfOperations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/effective-hours-of-operations/%s/%s"
+               (InstanceId.to_header
+                  x.GetEffectiveHoursOfOperationsRequest.instanceId)
+               (HoursOfOperationId.to_header
+                  x.GetEffectiveHoursOfOperationsRequest.hoursOfOperationId))
+            (List.filter_opt
+               [Some
+                  ("fromDate",
+                    (HoursOfOperationOverrideYearMonthDayDateFormat.to_header
+                       x.fromDate));
+               Some
+                 ("toDate",
+                   (HoursOfOperationOverrideYearMonthDayDateFormat.to_header
+                      x.toDate))])
       | GetFederationToken ->
           (Format.kasprintf Uri.of_string) "/user/federate/%s"
             (InstanceId.to_header x.GetFederationTokenRequest.instanceId)
+      | GetFlowAssociation ->
+          (Format.kasprintf Uri.of_string) "/flow-associations/%s/%s/%s"
+            (InstanceId.to_header x.GetFlowAssociationRequest.instanceId)
+            (ARN.to_header x.GetFlowAssociationRequest.resourceId)
+            (FlowAssociationResourceType.to_header
+               x.GetFlowAssociationRequest.resourceType)
       | GetMetricData ->
           (Format.kasprintf Uri.of_string) "/metrics/historical/%s"
             (InstanceId.to_header x.GetMetricDataRequest.instanceId)
+      | GetMetricDataV2 -> (Format.kasprintf Uri.of_string) "/metrics/data"
+      | GetPromptFile ->
+          (Format.kasprintf Uri.of_string) "/prompts/%s/%s/file"
+            (InstanceId.to_header x.GetPromptFileRequest.instanceId)
+            (PromptId.to_header x.GetPromptFileRequest.promptId)
+      | GetTaskTemplate ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/instance/%s/task/template/%s"
+               (InstanceId.to_header x.GetTaskTemplateRequest.instanceId)
+               (TaskTemplateId.to_header
+                  x.GetTaskTemplateRequest.taskTemplateId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("snapshotVersion", (SnapshotVersion.to_header v)))
+                  x.snapshotVersion])
+      | GetTestCaseExecutionSummary ->
+          (Format.kasprintf Uri.of_string) "/test-cases/%s/%s/%s/summary"
+            (InstanceId.to_header
+               x.GetTestCaseExecutionSummaryRequest.instanceId)
+            (TestCaseId.to_header
+               x.GetTestCaseExecutionSummaryRequest.testCaseId)
+            (TestCaseExecutionId.to_header
+               x.GetTestCaseExecutionSummaryRequest.testCaseExecutionId)
+      | GetTrafficDistribution ->
+          (Format.kasprintf Uri.of_string) "/traffic-distribution/%s"
+            (TrafficDistributionGroupIdOrArn.to_header
+               x.GetTrafficDistributionRequest.id)
+      | ImportPhoneNumber ->
+          (Format.kasprintf Uri.of_string) "/phone-number/import"
+      | ImportWorkspaceMedia ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/%s/media"
+            (InstanceId.to_header x.ImportWorkspaceMediaRequest.instanceId)
+            (WorkspaceId.to_header x.ImportWorkspaceMediaRequest.workspaceId)
       | ListAgentStatuses ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/agent-status/%s"
@@ -716,6 +2196,35 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("AgentStatusTypes", (AgentStatusTypes.to_header v)))
                  x.agentStatusTypes])
+      | ListAnalyticsDataAssociations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/analytics-data/instance/%s/association"
+               (InstanceId.to_header
+                  x.ListAnalyticsDataAssociationsRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("DataSetId", (DataSetId.to_header v)))
+                  x.dataSetId;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
+      | ListAnalyticsDataLakeDataSets ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/analytics-data/instance/%s/datasets"
+               (InstanceId.to_header
+                  x.ListAnalyticsDataLakeDataSetsRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
       | ListApprovedOrigins ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/instance/%s/approved-origins"
@@ -727,6 +2236,47 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResult25.to_header v)))
                  x.maxResults])
+      | ListAssociatedContacts ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/contact/associated/%s"
+               (InstanceId.to_header
+                  x.ListAssociatedContactsRequest.instanceId))
+            (List.filter_opt
+               [Some ("contactId", (ContactId.to_header x.contactId));
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (ListAssociatedContactsRequestMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
+      | ListAttachedFilesConfigurations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/attached-files-configurations/%s"
+               (InstanceId.to_header
+                  x.ListAttachedFilesConfigurationsRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
+      | ListAuthenticationProfiles ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/authentication-profiles-summary/%s"
+               (InstanceId.to_header
+                  x.ListAuthenticationProfilesRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListBots ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/instance/%s/bots"
@@ -739,6 +2289,61 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v -> ("maxResults", (MaxResult25.to_header v)))
                  x.maxResults;
                Some ("lexVersion", (LexVersion.to_header x.lexVersion))])
+      | ListChildHoursOfOperations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/hours-of-operations/%s/%s/hours"
+               (InstanceId.to_header
+                  x.ListChildHoursOfOperationsRequest.instanceId)
+               (HoursOfOperationId.to_header
+                  x.ListChildHoursOfOperationsRequest.hoursOfOperationId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                 x.maxResults])
+      | ListContactEvaluations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/contact-evaluations/%s"
+               (InstanceId.to_header
+                  x.ListContactEvaluationsRequest.instanceId))
+            (List.filter_opt
+               [Some ("contactId", (ContactId.to_header x.contactId));
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
+      | ListContactFlowModuleAliases ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/contact-flow-modules/%s/%s/aliases"
+               (InstanceIdOrArn.to_header
+                  x.ListContactFlowModuleAliasesRequest.instanceId)
+               (ARN.to_header
+                  x.ListContactFlowModuleAliasesRequest.contactFlowModuleId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
+      | ListContactFlowModuleVersions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/contact-flow-modules/%s/%s/versions"
+               (InstanceId.to_header
+                  x.ListContactFlowModuleVersionsRequest.instanceId)
+               (ARN.to_header
+                  x.ListContactFlowModuleVersionsRequest.contactFlowModuleId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
       | ListContactFlowModules ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -755,6 +2360,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("state", (ContactFlowModuleState.to_header v)))
                  x.contactFlowModuleState])
+      | ListContactFlowVersions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/contact-flows/%s/%s/versions"
+               (InstanceId.to_header
+                  x.ListContactFlowVersionsRequest.instanceId)
+               (ARN.to_header x.ListContactFlowVersionsRequest.contactFlowId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
       | ListContactFlows ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/contact-flows-summary/%s"
@@ -783,9 +2401,125 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | ListDataTableAttributes ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/data-tables/%s/%s/attributes"
+               (InstanceId.to_header
+                  x.ListDataTableAttributesRequest.instanceId)
+               (DataTableId.to_header
+                  x.ListDataTableAttributesRequest.dataTableId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
+      | ListDataTablePrimaryValues ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/data-tables/%s/%s/values/list-primary"
+               (InstanceId.to_header
+                  x.ListDataTablePrimaryValuesRequest.instanceId)
+               (DataTableId.to_header
+                  x.ListDataTablePrimaryValuesRequest.dataTableId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
+      | ListDataTableValues ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/data-tables/%s/%s/values/list"
+               (InstanceId.to_header x.ListDataTableValuesRequest.instanceId)
+               (DataTableId.to_header
+                  x.ListDataTableValuesRequest.dataTableId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
+      | ListDataTables ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/data-tables/%s"
+               (InstanceId.to_header x.ListDataTablesRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
       | ListDefaultVocabularies ->
           (Format.kasprintf Uri.of_string) "/default-vocabulary-summary/%s"
             (InstanceId.to_header x.ListDefaultVocabulariesRequest.instanceId)
+      | ListEntitySecurityProfiles ->
+          (Format.kasprintf Uri.of_string)
+            "/entity-security-profiles-summary/%s"
+            (InstanceId.to_header
+               x.ListEntitySecurityProfilesRequest.instanceId)
+      | ListEvaluationFormVersions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/evaluation-forms/%s/%s/versions"
+               (InstanceId.to_header
+                  x.ListEvaluationFormVersionsRequest.instanceId)
+               (ResourceId.to_header
+                  x.ListEvaluationFormVersionsRequest.evaluationFormId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
+      | ListEvaluationForms ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/evaluation-forms/%s"
+               (InstanceId.to_header x.ListEvaluationFormsRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
+      | ListFlowAssociations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/flow-associations-summary/%s"
+               (InstanceId.to_header x.ListFlowAssociationsRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("ResourceType",
+                          (ListFlowAssociationResourceType.to_header v)))
+                  x.resourceType;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
+      | ListHoursOfOperationOverrides ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/hours-of-operations/%s/%s/overrides"
+               (InstanceId.to_header
+                  x.ListHoursOfOperationOverridesRequest.instanceId)
+               (HoursOfOperationId.to_header
+                  x.ListHoursOfOperationOverridesRequest.hoursOfOperationId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                 x.maxResults])
       | ListHoursOfOperations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -852,7 +2586,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
-                 x.maxResults])
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("integrationArn", (ARN.to_header v)))
+                 x.integrationArn])
       | ListLambdaFunctions ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/instance/%s/lambda-functions"
@@ -875,6 +2611,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResult25.to_header v)))
                  x.maxResults])
+      | ListNotifications ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/notifications/%s"
+               (InstanceId.to_header x.ListNotificationsRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                 x.maxResults])
       | ListPhoneNumbers ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/phone-numbers-summary/%s"
@@ -895,6 +2642,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
                  x.maxResults])
+      | ListPhoneNumbersV2 ->
+          (Format.kasprintf Uri.of_string) "/phone-number/list"
+      | ListPredefinedAttributes ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/predefined-attributes/%s"
+               (InstanceId.to_header
+                  x.ListPredefinedAttributesRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                 x.maxResults])
       | ListPrompts ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/prompts-summary/%s"
@@ -905,6 +2666,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
+      | ListQueueEmailAddresses ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/queues/%s/%s/email-addresses"
+               (InstanceId.to_header
+                  x.ListQueueEmailAddressesRequest.instanceId)
+               (QueueId.to_header x.ListQueueEmailAddressesRequest.queueId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
                  x.maxResults])
       | ListQueueQuickConnects ->
           Uri.add_query_params'
@@ -948,6 +2722,28 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("QuickConnectTypes", (QuickConnectTypes.to_header v)))
                  x.quickConnectTypes])
+      | ListRealtimeContactAnalysisSegmentsV2 ->
+          (Format.kasprintf Uri.of_string)
+            "/contact/list-real-time-analysis-segments-v2/%s/%s"
+            (InstanceId.to_header
+               x.ListRealtimeContactAnalysisSegmentsV2Request.instanceId)
+            (ContactId.to_header
+               x.ListRealtimeContactAnalysisSegmentsV2Request.contactId)
+      | ListRoutingProfileManualAssignmentQueues ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/routing-profiles/%s/%s/manual-assignment-queues"
+               (InstanceId.to_header
+                  x.ListRoutingProfileManualAssignmentQueuesRequest.instanceId)
+               (RoutingProfileId.to_header
+                  x.ListRoutingProfileManualAssignmentQueuesRequest.routingProfileId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                 x.maxResults])
       | ListRoutingProfileQueues ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -974,6 +2770,25 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
                  x.maxResults])
+      | ListRules ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/rules/%s"
+               (InstanceId.to_header x.ListRulesRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("publishStatus", (RulePublishStatus.to_header v)))
+                  x.publishStatus;
+               Option.map
+                 ~f:(fun v ->
+                       ("eventSourceName", (EventSourceName.to_header v)))
+                 x.eventSourceName;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult200.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListSecurityKeys ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/instance/%s/security-keys"
@@ -984,6 +2799,36 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResult2.to_header v)))
+                 x.maxResults])
+      | ListSecurityProfileApplications ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/security-profiles-applications/%s/%s"
+               (InstanceId.to_header
+                  x.ListSecurityProfileApplicationsRequest.instanceId)
+               (SecurityProfileId.to_header
+                  x.ListSecurityProfileApplicationsRequest.securityProfileId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
+      | ListSecurityProfileFlowModules ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/security-profiles-flow-modules/%s/%s"
+               (InstanceId.to_header
+                  x.ListSecurityProfileFlowModulesRequest.instanceId)
+               (SecurityProfileId.to_header
+                  x.ListSecurityProfileFlowModulesRequest.securityProfileId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
                  x.maxResults])
       | ListSecurityProfilePermissions ->
           Uri.add_query_params'
@@ -1014,6 +2859,108 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ARN.to_header x.ListTagsForResourceRequest.resourceArn)
+      | ListTaskTemplates ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/instance/%s/task/template"
+               (InstanceId.to_header x.ListTaskTemplatesRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("status", (TaskTemplateStatus.to_header v)))
+                 x.status;
+               Option.map
+                 ~f:(fun v -> ("name", (TaskTemplateName.to_header v)))
+                 x.name])
+      | ListTestCaseExecutionRecords ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/test-cases/%s/%s/%s/records"
+               (InstanceId.to_header
+                  x.ListTestCaseExecutionRecordsRequest.instanceId)
+               (TestCaseId.to_header
+                  x.ListTestCaseExecutionRecordsRequest.testCaseId)
+               (TestCaseExecutionId.to_header
+                  x.ListTestCaseExecutionRecordsRequest.testCaseExecutionId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("status", (TestCaseExecutionStatus.to_header v)))
+                  x.status;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                 x.maxResults])
+      | ListTestCaseExecutions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/test-case-executions/%s"
+               (InstanceId.to_header
+                  x.ListTestCaseExecutionsRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("testCaseId", (TestCaseId.to_header v)))
+                  x.testCaseId;
+               Option.map
+                 ~f:(fun v -> ("testCaseName", (TestCaseName.to_header v)))
+                 x.testCaseName;
+               Option.map
+                 ~f:(fun v -> ("startTime", (EpochMilliseconds.to_header v)))
+                 x.startTime;
+               Option.map
+                 ~f:(fun v -> ("endTime", (EpochMilliseconds.to_header v)))
+                 x.endTime;
+               Option.map
+                 ~f:(fun v ->
+                       ("status", (TestCaseExecutionStatus.to_header v)))
+                 x.status;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                 x.maxResults])
+      | ListTestCases ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/test-cases-summary/%s"
+               (InstanceId.to_header x.ListTestCasesRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
+      | ListTrafficDistributionGroupUsers ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/traffic-distribution-group/%s/user"
+               (TrafficDistributionGroupIdOrArn.to_header
+                  x.ListTrafficDistributionGroupUsersRequest.trafficDistributionGroupId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResult10.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
+      | ListTrafficDistributionGroups ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/traffic-distribution-groups")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResult10.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("instanceId", (InstanceIdOrArn.to_header v)))
+                 x.instanceId])
       | ListUseCases ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -1041,6 +2988,32 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
                  x.maxResults])
+      | ListUserNotifications ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/users/%s/%s/notifications"
+               (InstanceId.to_header
+                  x.ListUserNotificationsRequest.instanceId)
+               (UserId.to_header x.ListUserNotificationsRequest.userId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
+                 x.maxResults])
+      | ListUserProficiencies ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/users/%s/%s/proficiencies"
+               (InstanceId.to_header
+                  x.ListUserProficienciesRequest.instanceId)
+               (UserId.to_header x.ListUserProficienciesRequest.userId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                 x.maxResults])
       | ListUsers ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/users-summary/%s"
@@ -1052,29 +3025,208 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResult1000.to_header v)))
                  x.maxResults])
+      | ListViewVersions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/views/%s/%s/versions"
+               (ViewsInstanceId.to_header
+                  x.ListViewVersionsRequest.instanceId)
+               (ViewId.to_header x.ListViewVersionsRequest.viewId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (ViewsNextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListViews ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/views/%s"
+               (ViewsInstanceId.to_header x.ListViewsRequest.instanceId))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("type", (ViewType.to_header v)))
+                  x.type_;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (ViewsNextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListWorkspaceMedia ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/%s/media"
+            (InstanceId.to_header x.ListWorkspaceMediaRequest.instanceId)
+            (WorkspaceId.to_header x.ListWorkspaceMediaRequest.workspaceId)
+      | ListWorkspacePages ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/workspaces/%s/%s/pages"
+               (InstanceId.to_header x.ListWorkspacePagesRequest.instanceId)
+               (WorkspaceId.to_header x.ListWorkspacePagesRequest.workspaceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                 x.maxResults])
+      | ListWorkspaces ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/workspaces/%s"
+               (InstanceId.to_header x.ListWorkspacesRequest.instanceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResult100.to_header v)))
+                 x.maxResults])
+      | MonitorContact -> (Format.kasprintf Uri.of_string) "/contact/monitor"
+      | PauseContact -> (Format.kasprintf Uri.of_string) "/contact/pause"
+      | PutUserStatus ->
+          (Format.kasprintf Uri.of_string) "/users/%s/%s/status"
+            (InstanceId.to_header x.PutUserStatusRequest.instanceId)
+            (UserId.to_header x.PutUserStatusRequest.userId)
+      | ReleasePhoneNumber ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/phone-number/%s"
+               (PhoneNumberId.to_header
+                  x.ReleasePhoneNumberRequest.phoneNumberId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
+      | ReplicateInstance ->
+          (Format.kasprintf Uri.of_string) "/instance/%s/replicate"
+            (InstanceIdOrArn.to_header x.ReplicateInstanceRequest.instanceId)
+      | ResumeContact -> (Format.kasprintf Uri.of_string) "/contact/resume"
       | ResumeContactRecording ->
           (Format.kasprintf Uri.of_string) "/contact/resume-recording"
+      | SearchAgentStatuses ->
+          (Format.kasprintf Uri.of_string) "/search-agent-statuses"
+      | SearchAvailablePhoneNumbers ->
+          (Format.kasprintf Uri.of_string) "/phone-number/search-available"
+      | SearchContactEvaluations ->
+          (Format.kasprintf Uri.of_string) "/search-contact-evaluations"
+      | SearchContactFlowModules ->
+          (Format.kasprintf Uri.of_string) "/search-contact-flow-modules"
+      | SearchContactFlows ->
+          (Format.kasprintf Uri.of_string) "/search-contact-flows"
+      | SearchContacts -> (Format.kasprintf Uri.of_string) "/search-contacts"
+      | SearchDataTables ->
+          (Format.kasprintf Uri.of_string) "/search-data-tables"
+      | SearchEmailAddresses ->
+          (Format.kasprintf Uri.of_string) "/search-email-addresses"
+      | SearchEvaluationForms ->
+          (Format.kasprintf Uri.of_string) "/search-evaluation-forms"
+      | SearchHoursOfOperationOverrides ->
+          (Format.kasprintf Uri.of_string)
+            "/search-hours-of-operation-overrides"
+      | SearchHoursOfOperations ->
+          (Format.kasprintf Uri.of_string) "/search-hours-of-operations"
+      | SearchNotifications ->
+          (Format.kasprintf Uri.of_string) "/search-notifications"
+      | SearchPredefinedAttributes ->
+          (Format.kasprintf Uri.of_string) "/search-predefined-attributes"
+      | SearchPrompts -> (Format.kasprintf Uri.of_string) "/search-prompts"
+      | SearchQueues -> (Format.kasprintf Uri.of_string) "/search-queues"
+      | SearchQuickConnects ->
+          (Format.kasprintf Uri.of_string) "/search-quick-connects"
+      | SearchResourceTags ->
+          (Format.kasprintf Uri.of_string) "/search-resource-tags"
+      | SearchRoutingProfiles ->
+          (Format.kasprintf Uri.of_string) "/search-routing-profiles"
+      | SearchSecurityProfiles ->
+          (Format.kasprintf Uri.of_string) "/search-security-profiles"
+      | SearchTestCases ->
+          (Format.kasprintf Uri.of_string) "/search-test-cases"
+      | SearchUserHierarchyGroups ->
+          (Format.kasprintf Uri.of_string) "/search-user-hierarchy-groups"
+      | SearchUsers -> (Format.kasprintf Uri.of_string) "/search-users"
+      | SearchViews -> (Format.kasprintf Uri.of_string) "/search-views"
       | SearchVocabularies ->
           (Format.kasprintf Uri.of_string) "/vocabulary-summary/%s"
             (InstanceId.to_header x.SearchVocabulariesRequest.instanceId)
+      | SearchWorkspaceAssociations ->
+          (Format.kasprintf Uri.of_string) "/search-workspace-associations"
+      | SearchWorkspaces ->
+          (Format.kasprintf Uri.of_string) "/search-workspaces"
+      | SendChatIntegrationEvent ->
+          (Format.kasprintf Uri.of_string) "/chat-integration-event"
+      | SendOutboundEmail ->
+          (Format.kasprintf Uri.of_string) "/instance/%s/outbound-email"
+            (InstanceId.to_header x.SendOutboundEmailRequest.instanceId)
+      | StartAttachedFileUpload ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/attached-files/%s"
+               (InstanceId.to_header
+                  x.StartAttachedFileUploadRequest.instanceId))
+            (List.filter_opt
+               [Some
+                  ("associatedResourceArn",
+                    (ARN.to_header x.associatedResourceArn))])
       | StartChatContact -> (Format.kasprintf Uri.of_string) "/contact/chat"
+      | StartContactEvaluation ->
+          (Format.kasprintf Uri.of_string) "/contact-evaluations/%s"
+            (InstanceId.to_header x.StartContactEvaluationRequest.instanceId)
+      | StartContactMediaProcessing ->
+          (Format.kasprintf Uri.of_string)
+            "/contact/start-contact-media-processing"
       | StartContactRecording ->
           (Format.kasprintf Uri.of_string) "/contact/start-recording"
       | StartContactStreaming ->
           (Format.kasprintf Uri.of_string) "/contact/start-streaming"
+      | StartEmailContact ->
+          (Format.kasprintf Uri.of_string) "/contact/email"
+      | StartOutboundChatContact ->
+          (Format.kasprintf Uri.of_string) "/contact/outbound-chat"
+      | StartOutboundEmailContact ->
+          (Format.kasprintf Uri.of_string) "/contact/outbound-email"
       | StartOutboundVoiceContact ->
           (Format.kasprintf Uri.of_string) "/contact/outbound-voice"
+      | StartScreenSharing ->
+          (Format.kasprintf Uri.of_string) "/contact/screen-sharing"
       | StartTaskContact -> (Format.kasprintf Uri.of_string) "/contact/task"
+      | StartTestCaseExecution ->
+          (Format.kasprintf Uri.of_string)
+            "/test-cases/%s/%s/start-execution"
+            (InstanceId.to_header x.StartTestCaseExecutionRequest.instanceId)
+            (TestCaseId.to_header x.StartTestCaseExecutionRequest.testCaseId)
+      | StartWebRTCContact ->
+          (Format.kasprintf Uri.of_string) "/contact/webrtc"
       | StopContact -> (Format.kasprintf Uri.of_string) "/contact/stop"
+      | StopContactMediaProcessing ->
+          (Format.kasprintf Uri.of_string)
+            "/contact/stop-contact-media-processing"
       | StopContactRecording ->
           (Format.kasprintf Uri.of_string) "/contact/stop-recording"
       | StopContactStreaming ->
           (Format.kasprintf Uri.of_string) "/contact/stop-streaming"
+      | StopTestCaseExecution ->
+          (Format.kasprintf Uri.of_string)
+            "/test-cases/%s/%s/%s/stop-execution"
+            (InstanceId.to_header x.StopTestCaseExecutionRequest.instanceId)
+            (TestCaseId.to_header x.StopTestCaseExecutionRequest.testCaseId)
+            (TestCaseExecutionId.to_header
+               x.StopTestCaseExecutionRequest.testCaseExecutionId)
+      | SubmitContactEvaluation ->
+          (Format.kasprintf Uri.of_string)
+            "/contact-evaluations/%s/%s/submit"
+            (InstanceId.to_header x.SubmitContactEvaluationRequest.instanceId)
+            (ResourceId.to_header
+               x.SubmitContactEvaluationRequest.evaluationId)
       | SuspendContactRecording ->
           (Format.kasprintf Uri.of_string) "/contact/suspend-recording"
+      | TagContact -> (Format.kasprintf Uri.of_string) "/contact/tags"
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ARN.to_header x.TagResourceRequest.resourceArn)
+      | TransferContact ->
+          (Format.kasprintf Uri.of_string) "/contact/transfer"
+      | UntagContact ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/contact/tags/%s/%s"
+               (InstanceId.to_header x.UntagContactRequest.instanceId)
+               (ContactId.to_header x.UntagContactRequest.contactId))
+            (List.filter_opt
+               [Some ("TagKeys", (ContactTagKeys.to_header x.tagKeys))])
       | UntagResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/tags/%s"
@@ -1085,12 +3237,30 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/agent-status/%s/%s"
             (InstanceId.to_header x.UpdateAgentStatusRequest.instanceId)
             (AgentStatusId.to_header x.UpdateAgentStatusRequest.agentStatusId)
+      | UpdateAttachedFilesConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/attached-files-configurations/%s/%s"
+            (InstanceId.to_header
+               x.UpdateAttachedFilesConfigurationRequest.instanceId)
+            (AttachmentScope.to_header
+               x.UpdateAttachedFilesConfigurationRequest.attachmentScope)
+      | UpdateAuthenticationProfile ->
+          (Format.kasprintf Uri.of_string) "/authentication-profiles/%s/%s"
+            (InstanceId.to_header
+               x.UpdateAuthenticationProfileRequest.instanceId)
+            (AuthenticationProfileId.to_header
+               x.UpdateAuthenticationProfileRequest.authenticationProfileId)
       | UpdateContact ->
           (Format.kasprintf Uri.of_string) "/contacts/%s/%s"
             (InstanceId.to_header x.UpdateContactRequest.instanceId)
             (ContactId.to_header x.UpdateContactRequest.contactId)
       | UpdateContactAttributes ->
           (Format.kasprintf Uri.of_string) "/contact/attributes"
+      | UpdateContactEvaluation ->
+          (Format.kasprintf Uri.of_string) "/contact-evaluations/%s/%s"
+            (InstanceId.to_header x.UpdateContactEvaluationRequest.instanceId)
+            (ResourceId.to_header
+               x.UpdateContactEvaluationRequest.evaluationId)
       | UpdateContactFlowContent ->
           (Format.kasprintf Uri.of_string) "/contact-flows/%s/%s/content"
             (InstanceId.to_header
@@ -1103,6 +3273,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.UpdateContactFlowMetadataRequest.instanceId)
             (ContactFlowId.to_header
                x.UpdateContactFlowMetadataRequest.contactFlowId)
+      | UpdateContactFlowModuleAlias ->
+          (Format.kasprintf Uri.of_string)
+            "/contact-flow-modules/%s/%s/alias/%s"
+            (InstanceIdOrArn.to_header
+               x.UpdateContactFlowModuleAliasRequest.instanceId)
+            (ContactFlowModuleId.to_header
+               x.UpdateContactFlowModuleAliasRequest.contactFlowModuleId)
+            (ResourceId.to_header
+               x.UpdateContactFlowModuleAliasRequest.aliasId)
       | UpdateContactFlowModuleContent ->
           (Format.kasprintf Uri.of_string)
             "/contact-flow-modules/%s/%s/content"
@@ -1122,13 +3301,58 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (InstanceId.to_header x.UpdateContactFlowNameRequest.instanceId)
             (ContactFlowId.to_header
                x.UpdateContactFlowNameRequest.contactFlowId)
+      | UpdateContactRoutingData ->
+          (Format.kasprintf Uri.of_string) "/contacts/%s/%s/routing-data"
+            (InstanceId.to_header
+               x.UpdateContactRoutingDataRequest.instanceId)
+            (ContactId.to_header x.UpdateContactRoutingDataRequest.contactId)
       | UpdateContactSchedule ->
           (Format.kasprintf Uri.of_string) "/contact/schedule"
+      | UpdateDataTableAttribute ->
+          (Format.kasprintf Uri.of_string) "/data-tables/%s/%s/attributes/%s"
+            (InstanceId.to_header
+               x.UpdateDataTableAttributeRequest.instanceId)
+            (DataTableId.to_header
+               x.UpdateDataTableAttributeRequest.dataTableId)
+            (DataTableName.to_header
+               x.UpdateDataTableAttributeRequest.attributeName)
+      | UpdateDataTableMetadata ->
+          (Format.kasprintf Uri.of_string) "/data-tables/%s/%s"
+            (InstanceId.to_header x.UpdateDataTableMetadataRequest.instanceId)
+            (DataTableId.to_header
+               x.UpdateDataTableMetadataRequest.dataTableId)
+      | UpdateDataTablePrimaryValues ->
+          (Format.kasprintf Uri.of_string)
+            "/data-tables/%s/%s/values/update-primary"
+            (InstanceId.to_header
+               x.UpdateDataTablePrimaryValuesRequest.instanceId)
+            (DataTableId.to_header
+               x.UpdateDataTablePrimaryValuesRequest.dataTableId)
+      | UpdateEmailAddressMetadata ->
+          (Format.kasprintf Uri.of_string) "/email-addresses/%s/%s"
+            (InstanceId.to_header
+               x.UpdateEmailAddressMetadataRequest.instanceId)
+            (EmailAddressId.to_header
+               x.UpdateEmailAddressMetadataRequest.emailAddressId)
+      | UpdateEvaluationForm ->
+          (Format.kasprintf Uri.of_string) "/evaluation-forms/%s/%s"
+            (InstanceId.to_header x.UpdateEvaluationFormRequest.instanceId)
+            (ResourceId.to_header
+               x.UpdateEvaluationFormRequest.evaluationFormId)
       | UpdateHoursOfOperation ->
           (Format.kasprintf Uri.of_string) "/hours-of-operations/%s/%s"
             (InstanceId.to_header x.UpdateHoursOfOperationRequest.instanceId)
             (HoursOfOperationId.to_header
                x.UpdateHoursOfOperationRequest.hoursOfOperationId)
+      | UpdateHoursOfOperationOverride ->
+          (Format.kasprintf Uri.of_string)
+            "/hours-of-operations/%s/%s/overrides/%s"
+            (InstanceId.to_header
+               x.UpdateHoursOfOperationOverrideRequest.instanceId)
+            (HoursOfOperationId.to_header
+               x.UpdateHoursOfOperationOverrideRequest.hoursOfOperationId)
+            (HoursOfOperationOverrideId.to_header
+               x.UpdateHoursOfOperationOverrideRequest.hoursOfOperationOverrideId)
       | UpdateInstanceAttribute ->
           (Format.kasprintf Uri.of_string) "/instance/%s/attribute/%s"
             (InstanceId.to_header x.UpdateInstanceAttributeRequest.instanceId)
@@ -1146,6 +3370,39 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some
                   ("resourceType",
                     (InstanceStorageResourceType.to_header x.resourceType))])
+      | UpdateNotificationContent ->
+          (Format.kasprintf Uri.of_string) "/notifications/%s/%s"
+            (InstanceId.to_header
+               x.UpdateNotificationContentRequest.instanceId)
+            (NotificationId.to_header
+               x.UpdateNotificationContentRequest.notificationId)
+      | UpdateParticipantAuthentication ->
+          (Format.kasprintf Uri.of_string)
+            "/contact/update-participant-authentication"
+      | UpdateParticipantRoleConfig ->
+          (Format.kasprintf Uri.of_string)
+            "/contact/participant-role-config/%s/%s"
+            (InstanceId.to_header
+               x.UpdateParticipantRoleConfigRequest.instanceId)
+            (ContactId.to_header
+               x.UpdateParticipantRoleConfigRequest.contactId)
+      | UpdatePhoneNumber ->
+          (Format.kasprintf Uri.of_string) "/phone-number/%s"
+            (PhoneNumberId.to_header x.UpdatePhoneNumberRequest.phoneNumberId)
+      | UpdatePhoneNumberMetadata ->
+          (Format.kasprintf Uri.of_string) "/phone-number/%s/metadata"
+            (PhoneNumberId.to_header
+               x.UpdatePhoneNumberMetadataRequest.phoneNumberId)
+      | UpdatePredefinedAttribute ->
+          (Format.kasprintf Uri.of_string) "/predefined-attributes/%s/%s"
+            (InstanceId.to_header
+               x.UpdatePredefinedAttributeRequest.instanceId)
+            (PredefinedAttributeName.to_header
+               x.UpdatePredefinedAttributeRequest.name)
+      | UpdatePrompt ->
+          (Format.kasprintf Uri.of_string) "/prompts/%s/%s"
+            (InstanceId.to_header x.UpdatePromptRequest.instanceId)
+            (PromptId.to_header x.UpdatePromptRequest.promptId)
       | UpdateQueueHoursOfOperation ->
           (Format.kasprintf Uri.of_string) "/queues/%s/%s/hours-of-operation"
             (InstanceId.to_header
@@ -1166,6 +3423,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.UpdateQueueOutboundCallerConfigRequest.instanceId)
             (QueueId.to_header
                x.UpdateQueueOutboundCallerConfigRequest.queueId)
+      | UpdateQueueOutboundEmailConfig ->
+          (Format.kasprintf Uri.of_string)
+            "/queues/%s/%s/outbound-email-config"
+            (InstanceId.to_header
+               x.UpdateQueueOutboundEmailConfigRequest.instanceId)
+            (QueueId.to_header
+               x.UpdateQueueOutboundEmailConfigRequest.queueId)
       | UpdateQueueStatus ->
           (Format.kasprintf Uri.of_string) "/queues/%s/%s/status"
             (InstanceId.to_header x.UpdateQueueStatusRequest.instanceId)
@@ -1181,6 +3445,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (InstanceId.to_header x.UpdateQuickConnectNameRequest.instanceId)
             (QuickConnectId.to_header
                x.UpdateQuickConnectNameRequest.quickConnectId)
+      | UpdateRoutingProfileAgentAvailabilityTimer ->
+          (Format.kasprintf Uri.of_string)
+            "/routing-profiles/%s/%s/agent-availability-timer"
+            (InstanceId.to_header
+               x.UpdateRoutingProfileAgentAvailabilityTimerRequest.instanceId)
+            (RoutingProfileId.to_header
+               x.UpdateRoutingProfileAgentAvailabilityTimerRequest.routingProfileId)
       | UpdateRoutingProfileConcurrency ->
           (Format.kasprintf Uri.of_string)
             "/routing-profiles/%s/%s/concurrency"
@@ -1207,11 +3478,32 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.UpdateRoutingProfileQueuesRequest.instanceId)
             (RoutingProfileId.to_header
                x.UpdateRoutingProfileQueuesRequest.routingProfileId)
+      | UpdateRule ->
+          (Format.kasprintf Uri.of_string) "/rules/%s/%s"
+            (InstanceId.to_header x.UpdateRuleRequest.instanceId)
+            (RuleId.to_header x.UpdateRuleRequest.ruleId)
       | UpdateSecurityProfile ->
           (Format.kasprintf Uri.of_string) "/security-profiles/%s/%s"
             (InstanceId.to_header x.UpdateSecurityProfileRequest.instanceId)
             (SecurityProfileId.to_header
                x.UpdateSecurityProfileRequest.securityProfileId)
+      | UpdateTaskTemplate ->
+          (Format.kasprintf Uri.of_string) "/instance/%s/task/template/%s"
+            (InstanceId.to_header x.UpdateTaskTemplateRequest.instanceId)
+            (TaskTemplateId.to_header
+               x.UpdateTaskTemplateRequest.taskTemplateId)
+      | UpdateTestCase ->
+          (Format.kasprintf Uri.of_string) "/test-cases/%s/%s"
+            (InstanceIdOrArn.to_header x.UpdateTestCaseRequest.instanceId)
+            (TestCaseId.to_header x.UpdateTestCaseRequest.testCaseId)
+      | UpdateTrafficDistribution ->
+          (Format.kasprintf Uri.of_string) "/traffic-distribution/%s"
+            (TrafficDistributionGroupIdOrArn.to_header
+               x.UpdateTrafficDistributionRequest.id)
+      | UpdateUserConfig ->
+          (Format.kasprintf Uri.of_string) "/users/%s/%s/config"
+            (InstanceId.to_header x.UpdateUserConfigRequest.instanceId)
+            (UserId.to_header x.UpdateUserConfigRequest.userId)
       | UpdateUserHierarchy ->
           (Format.kasprintf Uri.of_string) "/users/%s/%s/hierarchy"
             (InstanceId.to_header x.UpdateUserHierarchyRequest.instanceId)
@@ -1231,10 +3523,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/users/%s/%s/identity-info"
             (InstanceId.to_header x.UpdateUserIdentityInfoRequest.instanceId)
             (UserId.to_header x.UpdateUserIdentityInfoRequest.userId)
+      | UpdateUserNotificationStatus ->
+          (Format.kasprintf Uri.of_string) "/users/%s/%s/notifications/%s"
+            (InstanceId.to_header
+               x.UpdateUserNotificationStatusRequest.instanceId)
+            (UserId.to_header x.UpdateUserNotificationStatusRequest.userId)
+            (NotificationId.to_header
+               x.UpdateUserNotificationStatusRequest.notificationId)
       | UpdateUserPhoneConfig ->
           (Format.kasprintf Uri.of_string) "/users/%s/%s/phone-config"
             (InstanceId.to_header x.UpdateUserPhoneConfigRequest.instanceId)
             (UserId.to_header x.UpdateUserPhoneConfigRequest.userId)
+      | UpdateUserProficiencies ->
+          (Format.kasprintf Uri.of_string) "/users/%s/%s/proficiencies"
+            (InstanceId.to_header x.UpdateUserProficienciesRequest.instanceId)
+            (UserId.to_header x.UpdateUserProficienciesRequest.userId)
       | UpdateUserRoutingProfile ->
           (Format.kasprintf Uri.of_string) "/users/%s/%s/routing-profile"
             (InstanceId.to_header
@@ -1244,21 +3547,162 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/users/%s/%s/security-profiles"
             (InstanceId.to_header
                x.UpdateUserSecurityProfilesRequest.instanceId)
-            (UserId.to_header x.UpdateUserSecurityProfilesRequest.userId))
+            (UserId.to_header x.UpdateUserSecurityProfilesRequest.userId)
+      | UpdateViewContent ->
+          (Format.kasprintf Uri.of_string) "/views/%s/%s"
+            (ViewsInstanceId.to_header x.UpdateViewContentRequest.instanceId)
+            (ViewId.to_header x.UpdateViewContentRequest.viewId)
+      | UpdateViewMetadata ->
+          (Format.kasprintf Uri.of_string) "/views/%s/%s/metadata"
+            (ViewsInstanceId.to_header x.UpdateViewMetadataRequest.instanceId)
+            (ViewId.to_header x.UpdateViewMetadataRequest.viewId)
+      | UpdateWorkspaceMetadata ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/%s/metadata"
+            (InstanceId.to_header x.UpdateWorkspaceMetadataRequest.instanceId)
+            (WorkspaceId.to_header
+               x.UpdateWorkspaceMetadataRequest.workspaceId)
+      | UpdateWorkspacePage ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/%s/pages/%s"
+            (InstanceId.to_header x.UpdateWorkspacePageRequest.instanceId)
+            (WorkspaceId.to_header x.UpdateWorkspacePageRequest.workspaceId)
+            (Page.to_header x.UpdateWorkspacePageRequest.page)
+      | UpdateWorkspaceTheme ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/%s/theme"
+            (InstanceId.to_header x.UpdateWorkspaceThemeRequest.instanceId)
+            (WorkspaceId.to_header x.UpdateWorkspaceThemeRequest.workspaceId)
+      | UpdateWorkspaceVisibility ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/%s/visibility"
+            (InstanceId.to_header
+               x.UpdateWorkspaceVisibilityRequest.instanceId)
+            (WorkspaceId.to_header
+               x.UpdateWorkspaceVisibilityRequest.workspaceId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | ActivateEvaluationForm ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("EvaluationFormVersion",
+                           (VersionNumber.to_value
+                              req.ActivateEvaluationFormRequest.evaluationFormVersion))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | AssociateAnalyticsDataSet ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | AssociateApprovedOrigin ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | AssociateBot -> Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateContactWithUser ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("UserId",
+                           (AgentResourceId.to_value
+                              req.AssociateContactWithUserRequest.userId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | AssociateDefaultVocabulary ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateEmailAddressAlias ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("AliasConfiguration",
+                           (AliasConfiguration.to_value
+                              req.AssociateEmailAddressAliasRequest.aliasConfiguration));
+                      Option.map
+                        req.AssociateEmailAddressAliasRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | AssociateFlow -> Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateHoursOfOperations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ParentHoursOfOperationConfigs",
+                           (ParentHoursOfOperationConfigList.to_value
+                              req.AssociateHoursOfOperationsRequest.parentHoursOfOperationConfigs))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | AssociateInstanceStorageConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | AssociateLambdaFunction ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | AssociateLexBot -> Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociatePhoneNumberContactFlow ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateQueueEmailAddresses ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("EmailAddressesConfig",
+                           (EmailAddressConfigList.to_value
+                              req.AssociateQueueEmailAddressesRequest.emailAddressesConfig));
+                      Option.map
+                        req.AssociateQueueEmailAddressesRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | AssociateQueueQuickConnects ->
       let (headers, body) =
         let headers =
@@ -1288,10 +3732,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("QueueConfigs",
-                           (RoutingProfileQueueConfigList.to_value
-                              req.AssociateRoutingProfileQueuesRequest.queueConfigs))])
+                      [Option.map
+                         req.AssociateRoutingProfileQueuesRequest.queueConfigs
+                         ~f:(fun x ->
+                               ("QueueConfigs",
+                                 (RoutingProfileQueueConfigList.to_value x)));
+                      Option.map
+                        req.AssociateRoutingProfileQueuesRequest.manualAssignmentQueueConfigs
+                        ~f:(fun x ->
+                              ("ManualAssignmentQueueConfigs",
+                                (RoutingProfileManualAssignmentQueueConfigList.to_value
+                                   x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1300,23 +3751,404 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | AssociateSecurityKey -> Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateSecurityProfiles ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("SecurityProfiles",
+                           (SecurityProfiles.to_value
+                              req.AssociateSecurityProfilesRequest.securityProfiles));
+                      Some
+                        ("EntityType",
+                          (EntityType.to_value
+                             req.AssociateSecurityProfilesRequest.entityType));
+                      Some
+                        ("EntityArn",
+                          (EntityArn.to_value
+                             req.AssociateSecurityProfilesRequest.entityArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | AssociateTrafficDistributionGroupUser ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateUserProficiencies ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("UserProficiencies",
+                           (UserProficiencyList.to_value
+                              req.AssociateUserProficienciesRequest.userProficiencies))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | AssociateWorkspace ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ResourceArns",
+                           (WorkspaceResourceArnList.to_value
+                              req.AssociateWorkspaceRequest.resourceArns))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchAssociateAnalyticsDataSet ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | BatchCreateDataTableValue ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Values",
+                           (DataTableValueList.to_value
+                              req.BatchCreateDataTableValueRequest.values))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchDeleteDataTableValue ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Values",
+                           (DataTableDeleteValueIdentifierList.to_value
+                              req.BatchDeleteDataTableValueRequest.values))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchDescribeDataTableValue ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Values",
+                           (DataTableValueIdentifierList.to_value
+                              req.BatchDescribeDataTableValueRequest.values))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchDisassociateAnalyticsDataSet ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DataSetIds",
+                           (DataSetIds.to_value
+                              req.BatchDisassociateAnalyticsDataSetRequest.dataSetIds));
+                      Option.map
+                        req.BatchDisassociateAnalyticsDataSetRequest.targetAccountId
+                        ~f:(fun x ->
+                              ("TargetAccountId", (AWSAccountId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetAttachedFileMetadata ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("FileIds",
+                           (FileIdList.to_value
+                              req.BatchGetAttachedFileMetadataRequest.fileIds))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetFlowAssociation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ResourceIds",
+                           (ResourceArnListMaxLimit100.to_value
+                              req.BatchGetFlowAssociationRequest.resourceIds));
+                      Option.map
+                        req.BatchGetFlowAssociationRequest.resourceType
+                        ~f:(fun x ->
+                              ("ResourceType",
+                                (ListFlowAssociationResourceType.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchPutContact -> Awso.Http.Request.make (method_of_endpoint endp)
+  | BatchUpdateDataTableValue ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Values",
+                           (DataTableValueList.to_value
+                              req.BatchUpdateDataTableValueRequest.values))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ClaimPhoneNumber ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ClaimPhoneNumberRequest.targetArn
+                         ~f:(fun x -> ("TargetArn", (ARN.to_value x)));
+                      Option.map req.ClaimPhoneNumberRequest.instanceId
+                        ~f:(fun x -> ("InstanceId", (InstanceId.to_value x)));
+                      Some
+                        ("PhoneNumber",
+                          (PhoneNumber.to_value
+                             req.ClaimPhoneNumberRequest.phoneNumber));
+                      Option.map
+                        req.ClaimPhoneNumberRequest.phoneNumberDescription
+                        ~f:(fun x ->
+                              ("PhoneNumberDescription",
+                                (PhoneNumberDescription.to_value x)));
+                      Option.map req.ClaimPhoneNumberRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)));
+                      Option.map req.ClaimPhoneNumberRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CompleteAttachedFileUpload ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateAgentStatus -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateContact -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateContactFlow -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateContactFlowModule ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateContactFlowModuleAlias ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateContactFlowModuleVersion ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateContactFlowVersion ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateDataTable -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateDataTableAttribute ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateEmailAddress -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateEvaluationForm -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateHoursOfOperation ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateHoursOfOperationOverride ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | CreateInstance -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateIntegrationAssociation ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateNotification -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateParticipant ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.CreateParticipantRequest.instanceId));
+                      Some
+                        ("ContactId",
+                          (ContactId.to_value
+                             req.CreateParticipantRequest.contactId));
+                      Option.map req.CreateParticipantRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)));
+                      Some
+                        ("ParticipantDetails",
+                          (ParticipantDetailsToAdd.to_value
+                             req.CreateParticipantRequest.participantDetails))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreatePersistentContactAssociation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("RehydrationType",
+                           (RehydrationType.to_value
+                              req.CreatePersistentContactAssociationRequest.rehydrationType));
+                      Some
+                        ("SourceContactId",
+                          (ContactId.to_value
+                             req.CreatePersistentContactAssociationRequest.sourceContactId));
+                      Option.map
+                        req.CreatePersistentContactAssociationRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreatePredefinedAttribute ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | CreatePrompt -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreatePushNotificationRegistration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | CreateQueue -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateQuickConnect -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateRoutingProfile -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateRule ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (RuleName.to_value req.CreateRuleRequest.name));
+                      Some
+                        ("TriggerEventSource",
+                          (RuleTriggerEventSource.to_value
+                             req.CreateRuleRequest.triggerEventSource));
+                      Some
+                        ("Function",
+                          (RuleFunction.to_value
+                             req.CreateRuleRequest.function_));
+                      Some
+                        ("Actions",
+                          (RuleActions.to_value req.CreateRuleRequest.actions));
+                      Some
+                        ("PublishStatus",
+                          (RulePublishStatus.to_value
+                             req.CreateRuleRequest.publishStatus));
+                      Option.map req.CreateRuleRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateSecurityProfile -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateTaskTemplate -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateTestCase -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateTrafficDistributionGroup ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | CreateUseCase -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateUser -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateUserHierarchyGroup ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateView -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateViewVersion -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateVocabulary ->
       let (headers, body) =
         let headers =
@@ -1350,27 +4182,92 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateWorkspace -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateWorkspacePage -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeactivateEvaluationForm ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("EvaluationFormVersion",
+                           (VersionNumber.to_value
+                              req.DeactivateEvaluationFormRequest.evaluationFormVersion))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteAttachedFile -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteContactEvaluation ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteContactFlow -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteContactFlowModule ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteContactFlowModuleAlias ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteContactFlowModuleVersion ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteContactFlowVersion ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDataTable -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDataTableAttribute ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteEmailAddress -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteEvaluationForm -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteHoursOfOperation ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteHoursOfOperationOverride ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteInstance -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteIntegrationAssociation ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteNotification -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeletePredefinedAttribute ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeletePrompt -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeletePushNotificationRegistration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteQueue -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteQuickConnect -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteRoutingProfile -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteRule -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteSecurityProfile -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteTaskTemplate -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteTestCase -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteTrafficDistributionGroup ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteUseCase -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteUser -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteUserHierarchyGroup ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteView -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteViewVersion -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteVocabulary ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteWorkspace -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteWorkspaceMedia -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteWorkspacePage -> Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeAgentStatus ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAttachedFilesConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAuthenticationProfile ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeContact ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeContactEvaluation ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeContactFlow ->
@@ -1379,7 +4276,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeContactFlowModule ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeContactFlowModuleAlias ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeDataTable ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeDataTableAttribute ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeEmailAddress ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeEvaluationForm ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeHoursOfOperation ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeHoursOfOperationOverride ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeInstance ->
@@ -1391,6 +4306,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeInstanceStorageConfig ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeNotification ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribePhoneNumber ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribePredefinedAttribute ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribePrompt ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeQueue ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -1400,7 +4327,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeRoutingProfile ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeRule ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeSecurityProfile ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeTestCase ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeTrafficDistributionGroup ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeUser ->
@@ -1412,8 +4348,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeUserHierarchyStructure ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeView ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeVocabulary ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeWorkspace ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateAnalyticsDataSet ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DataSetId",
+                           (DataSetId.to_value
+                              req.DisassociateAnalyticsDataSetRequest.dataSetId));
+                      Option.map
+                        req.DisassociateAnalyticsDataSetRequest.targetAccountId
+                        ~f:(fun x ->
+                              ("TargetAccountId", (AWSAccountId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DisassociateApprovedOrigin ->
       Awso.Http.Request.make (method_of_endpoint endp)
@@ -1429,7 +4395,55 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.DisassociateBotRequest.lexBot
                          ~f:(fun x -> ("LexBot", (LexBot.to_value x)));
                       Option.map req.DisassociateBotRequest.lexV2Bot
-                        ~f:(fun x -> ("LexV2Bot", (LexV2Bot.to_value x)))])
+                        ~f:(fun x -> ("LexV2Bot", (LexV2Bot.to_value x)));
+                      Option.map req.DisassociateBotRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateEmailAddressAlias ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("AliasConfiguration",
+                           (AliasConfiguration.to_value
+                              req.DisassociateEmailAddressAliasRequest.aliasConfiguration));
+                      Option.map
+                        req.DisassociateEmailAddressAliasRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateFlow -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DisassociateHoursOfOperations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ParentHoursOfOperationIds",
+                           (ParentHoursOfOperationIdList.to_value
+                              req.DisassociateHoursOfOperationsRequest.parentHoursOfOperationIds))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1442,6 +4456,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DisassociateLambdaFunction ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DisassociateLexBot -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DisassociatePhoneNumberContactFlow ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DisassociateQueueEmailAddresses ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("EmailAddressesId",
+                           (EmailAddressIdList.to_value
+                              req.DisassociateQueueEmailAddressesRequest.emailAddressesId));
+                      Option.map
+                        req.DisassociateQueueEmailAddressesRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DisassociateQueueQuickConnects ->
       let (headers, body) =
         let headers =
@@ -1471,10 +4511,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("QueueReferences",
-                           (RoutingProfileQueueReferenceList.to_value
-                              req.DisassociateRoutingProfileQueuesRequest.queueReferences))])
+                      [Option.map
+                         req.DisassociateRoutingProfileQueuesRequest.queueReferences
+                         ~f:(fun x ->
+                               ("QueueReferences",
+                                 (RoutingProfileQueueReferenceList.to_value x)));
+                      Option.map
+                        req.DisassociateRoutingProfileQueuesRequest.manualAssignmentQueueReferences
+                        ~f:(fun x ->
+                              ("ManualAssignmentQueueReferences",
+                                (RoutingProfileQueueReferenceList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1484,8 +4530,151 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DisassociateSecurityKey ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DisassociateSecurityProfiles ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("SecurityProfiles",
+                           (SecurityProfiles.to_value
+                              req.DisassociateSecurityProfilesRequest.securityProfiles));
+                      Some
+                        ("EntityType",
+                          (EntityType.to_value
+                             req.DisassociateSecurityProfilesRequest.entityType));
+                      Some
+                        ("EntityArn",
+                          (EntityArn.to_value
+                             req.DisassociateSecurityProfilesRequest.entityArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateTrafficDistributionGroupUser ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DisassociateUserProficiencies ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("UserProficiencies",
+                           (UserProficiencyDisassociateList.to_value
+                              req.DisassociateUserProficienciesRequest.userProficiencies))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateWorkspace ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ResourceArns",
+                           (WorkspaceResourceArnList.to_value
+                              req.DisassociateWorkspaceRequest.resourceArns))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DismissUserContact ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ContactId",
+                           (ContactId.to_value
+                              req.DismissUserContactRequest.contactId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | EvaluateDataTableValues ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Values",
+                           (DataTableValueEvaluationSetList.to_value
+                              req.EvaluateDataTableValuesRequest.values));
+                      Option.map req.EvaluateDataTableValuesRequest.timeZone
+                        ~f:(fun x -> ("TimeZone", (TimeZone.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetAttachedFile ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetContactAttributes ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetContactMetrics ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceIdOrArn.to_value
+                              req.GetContactMetricsRequest.instanceId));
+                      Some
+                        ("ContactId",
+                          (InstanceIdOrArn.to_value
+                             req.GetContactMetricsRequest.contactId));
+                      Some
+                        ("Metrics",
+                          (ContactMetrics.to_value
+                             req.GetContactMetricsRequest.metrics))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetCurrentMetricData ->
       let (headers, body) =
@@ -1510,6 +4699,35 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
                       Option.map req.GetCurrentMetricDataRequest.maxResults
                         ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map req.GetCurrentMetricDataRequest.sortCriteria
+                        ~f:(fun x ->
+                              ("SortCriteria",
+                                (CurrentMetricSortCriteriaMaxOne.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCurrentUserData ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Filters",
+                           (UserDataFilters.to_value
+                              req.GetCurrentUserDataRequest.filters));
+                      Option.map req.GetCurrentUserDataRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.GetCurrentUserDataRequest.maxResults
+                        ~f:(fun x ->
                               ("MaxResults", (MaxResult100.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -1518,7 +4736,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetEffectiveHoursOfOperations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetFederationToken ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetFlowAssociation ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetMetricData ->
@@ -1559,22 +4783,239 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetMetricDataV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ResourceArn",
+                           (ARN.to_value
+                              req.GetMetricDataV2Request.resourceArn));
+                      Some
+                        ("StartTime",
+                          (Timestamp.to_value
+                             req.GetMetricDataV2Request.startTime));
+                      Some
+                        ("EndTime",
+                          (Timestamp.to_value
+                             req.GetMetricDataV2Request.endTime));
+                      Option.map req.GetMetricDataV2Request.interval
+                        ~f:(fun x ->
+                              ("Interval", (IntervalDetails.to_value x)));
+                      Some
+                        ("Filters",
+                          (FiltersV2List.to_value
+                             req.GetMetricDataV2Request.filters));
+                      Option.map req.GetMetricDataV2Request.groupings
+                        ~f:(fun x -> ("Groupings", (GroupingsV2.to_value x)));
+                      Some
+                        ("Metrics",
+                          (MetricsV2.to_value
+                             req.GetMetricDataV2Request.metrics));
+                      Option.map req.GetMetricDataV2Request.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map req.GetMetricDataV2Request.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetPromptFile ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetTaskTemplate ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetTestCaseExecutionSummary ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetTrafficDistribution ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ImportPhoneNumber ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.ImportPhoneNumberRequest.instanceId));
+                      Some
+                        ("SourcePhoneNumberArn",
+                          (ARN.to_value
+                             req.ImportPhoneNumberRequest.sourcePhoneNumberArn));
+                      Option.map
+                        req.ImportPhoneNumberRequest.phoneNumberDescription
+                        ~f:(fun x ->
+                              ("PhoneNumberDescription",
+                                (PhoneNumberDescription.to_value x)));
+                      Option.map req.ImportPhoneNumberRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)));
+                      Option.map req.ImportPhoneNumberRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ImportWorkspaceMedia ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("MediaType",
+                           (MediaType.to_value
+                              req.ImportWorkspaceMediaRequest.mediaType));
+                      Some
+                        ("MediaSource",
+                          (MediaSource.to_value
+                             req.ImportWorkspaceMediaRequest.mediaSource))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAgentStatuses ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAnalyticsDataAssociations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAnalyticsDataLakeDataSets ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListApprovedOrigins ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAssociatedContacts ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAttachedFilesConfigurations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAuthenticationProfiles ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListBots ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListChildHoursOfOperations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListContactEvaluations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListContactFlowModuleAliases ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListContactFlowModuleVersions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListContactFlowModules ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListContactFlowVersions ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListContactFlows ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListContactReferences ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDataTableAttributes ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListDataTableAttributesRequest.attributeIds
+                         ~f:(fun x ->
+                               ("AttributeIds", (AttributeIds.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDataTablePrimaryValues ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListDataTablePrimaryValuesRequest.recordIds
+                         ~f:(fun x -> ("RecordIds", (RecordIds.to_value x)));
+                      Option.map
+                        req.ListDataTablePrimaryValuesRequest.primaryAttributeValues
+                        ~f:(fun x ->
+                              ("PrimaryAttributeValues",
+                                (PrimaryAttributeValueFilters.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDataTableValues ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListDataTableValuesRequest.recordIds
+                         ~f:(fun x -> ("RecordIds", (RecordIds.to_value x)));
+                      Option.map
+                        req.ListDataTableValuesRequest.primaryAttributeValues
+                        ~f:(fun x ->
+                              ("PrimaryAttributeValues",
+                                (PrimaryAttributeValueFilters.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDataTables ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListDefaultVocabularies ->
@@ -1605,6 +5046,50 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListEntitySecurityProfiles ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("EntityType",
+                           (EntityType.to_value
+                              req.ListEntitySecurityProfilesRequest.entityType));
+                      Some
+                        ("EntityArn",
+                          (EntityArn.to_value
+                             req.ListEntitySecurityProfilesRequest.entityArn));
+                      Option.map
+                        req.ListEntitySecurityProfilesRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map
+                        req.ListEntitySecurityProfilesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListEvaluationFormVersions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListEvaluationForms ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListFlowAssociations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListHoursOfOperationOverrides ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListHoursOfOperations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -1626,10 +5111,60 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListLexBots ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListNotifications ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListPhoneNumbers ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListPhoneNumbersV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListPhoneNumbersV2Request.targetArn
+                         ~f:(fun x -> ("TargetArn", (ARN.to_value x)));
+                      Option.map req.ListPhoneNumbersV2Request.instanceId
+                        ~f:(fun x -> ("InstanceId", (InstanceId.to_value x)));
+                      Option.map req.ListPhoneNumbersV2Request.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult1000.to_value x)));
+                      Option.map req.ListPhoneNumbersV2Request.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (LargeNextToken.to_value x)));
+                      Option.map
+                        req.ListPhoneNumbersV2Request.phoneNumberCountryCodes
+                        ~f:(fun x ->
+                              ("PhoneNumberCountryCodes",
+                                (PhoneNumberCountryCodes.to_value x)));
+                      Option.map
+                        req.ListPhoneNumbersV2Request.phoneNumberTypes
+                        ~f:(fun x ->
+                              ("PhoneNumberTypes",
+                                (PhoneNumberTypes.to_value x)));
+                      Option.map
+                        req.ListPhoneNumbersV2Request.phoneNumberPrefix
+                        ~f:(fun x ->
+                              ("PhoneNumberPrefix",
+                                (PhoneNumberPrefix.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListPredefinedAttributes ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListPrompts ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListQueueEmailAddresses ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListQueueQuickConnects ->
@@ -1641,13 +5176,57 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListQuickConnects ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRealtimeContactAnalysisSegmentsV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListRealtimeContactAnalysisSegmentsV2Request.maxResults
+                         ~f:(fun x ->
+                               ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map
+                        req.ListRealtimeContactAnalysisSegmentsV2Request.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (LargeNextToken.to_value x)));
+                      Some
+                        ("OutputType",
+                          (RealTimeContactAnalysisOutputType.to_value
+                             req.ListRealtimeContactAnalysisSegmentsV2Request.outputType));
+                      Some
+                        ("SegmentTypes",
+                          (RealTimeContactAnalysisSegmentTypes.to_value
+                             req.ListRealtimeContactAnalysisSegmentsV2Request.segmentTypes))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRoutingProfileManualAssignmentQueues ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListRoutingProfileQueues ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListRoutingProfiles ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRules ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListSecurityKeys ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSecurityProfileApplications ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSecurityProfileFlowModules ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListSecurityProfilePermissions ->
@@ -1659,14 +5238,172 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTaskTemplates ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTestCaseExecutionRecords ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTestCaseExecutions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTestCases ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTrafficDistributionGroupUsers ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTrafficDistributionGroups ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListUseCases ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListUserHierarchyGroups ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListUserNotifications ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListUserProficiencies ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListUsers ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListViewVersions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListViews ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListWorkspaceMedia ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListWorkspacePages ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListWorkspaces ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | MonitorContact ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.MonitorContactRequest.instanceId));
+                      Some
+                        ("ContactId",
+                          (ContactId.to_value
+                             req.MonitorContactRequest.contactId));
+                      Some
+                        ("UserId",
+                          (AgentResourceId.to_value
+                             req.MonitorContactRequest.userId));
+                      Option.map
+                        req.MonitorContactRequest.allowedMonitorCapabilities
+                        ~f:(fun x ->
+                              ("AllowedMonitorCapabilities",
+                                (AllowedMonitorCapabilities.to_value x)));
+                      Option.map req.MonitorContactRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PauseContact ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ContactId",
+                           (ContactId.to_value
+                              req.PauseContactRequest.contactId));
+                      Some
+                        ("InstanceId",
+                          (InstanceId.to_value
+                             req.PauseContactRequest.instanceId));
+                      Option.map req.PauseContactRequest.contactFlowId
+                        ~f:(fun x ->
+                              ("ContactFlowId", (ContactFlowId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutUserStatus -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ReleasePhoneNumber -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ReplicateInstance ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ReplicaRegion",
+                           (AwsRegion.to_value
+                              req.ReplicateInstanceRequest.replicaRegion));
+                      Option.map req.ReplicateInstanceRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)));
+                      Some
+                        ("ReplicaAlias",
+                          (DirectoryAlias.to_value
+                             req.ReplicateInstanceRequest.replicaAlias))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ResumeContact ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ContactId",
+                           (ContactId.to_value
+                              req.ResumeContactRequest.contactId));
+                      Some
+                        ("InstanceId",
+                          (InstanceId.to_value
+                             req.ResumeContactRequest.instanceId));
+                      Option.map req.ResumeContactRequest.contactFlowId
+                        ~f:(fun x ->
+                              ("ContactFlowId", (ContactFlowId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ResumeContactRecording ->
       let (headers, body) =
@@ -1688,7 +5425,826 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("InitialContactId",
                           (ContactId.to_value
-                             req.ResumeContactRecordingRequest.initialContactId))])
+                             req.ResumeContactRecordingRequest.initialContactId));
+                      Option.map
+                        req.ResumeContactRecordingRequest.contactRecordingType
+                        ~f:(fun x ->
+                              ("ContactRecordingType",
+                                (ContactRecordingType.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchAgentStatuses ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchAgentStatusesRequest.instanceId));
+                      Option.map req.SearchAgentStatusesRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map req.SearchAgentStatusesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map req.SearchAgentStatusesRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (AgentStatusSearchFilter.to_value x)));
+                      Option.map
+                        req.SearchAgentStatusesRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (AgentStatusSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchAvailablePhoneNumbers ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.SearchAvailablePhoneNumbersRequest.targetArn
+                         ~f:(fun x -> ("TargetArn", (ARN.to_value x)));
+                      Option.map
+                        req.SearchAvailablePhoneNumbersRequest.instanceId
+                        ~f:(fun x -> ("InstanceId", (InstanceId.to_value x)));
+                      Some
+                        ("PhoneNumberCountryCode",
+                          (PhoneNumberCountryCode.to_value
+                             req.SearchAvailablePhoneNumbersRequest.phoneNumberCountryCode));
+                      Some
+                        ("PhoneNumberType",
+                          (PhoneNumberType.to_value
+                             req.SearchAvailablePhoneNumbersRequest.phoneNumberType));
+                      Option.map
+                        req.SearchAvailablePhoneNumbersRequest.phoneNumberPrefix
+                        ~f:(fun x ->
+                              ("PhoneNumberPrefix",
+                                (PhoneNumberPrefix.to_value x)));
+                      Option.map
+                        req.SearchAvailablePhoneNumbersRequest.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResult10.to_value x)));
+                      Option.map
+                        req.SearchAvailablePhoneNumbersRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (LargeNextToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchContactEvaluations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchContactEvaluationsRequest.instanceId));
+                      Option.map
+                        req.SearchContactEvaluationsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map
+                        req.SearchContactEvaluationsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map
+                        req.SearchContactEvaluationsRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (EvaluationSearchCriteria.to_value x)));
+                      Option.map
+                        req.SearchContactEvaluationsRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (EvaluationSearchFilter.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchContactFlowModules ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchContactFlowModulesRequest.instanceId));
+                      Option.map
+                        req.SearchContactFlowModulesRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map
+                        req.SearchContactFlowModulesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map
+                        req.SearchContactFlowModulesRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (ContactFlowModuleSearchFilter.to_value x)));
+                      Option.map
+                        req.SearchContactFlowModulesRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (ContactFlowModuleSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchContactFlows ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchContactFlowsRequest.instanceId));
+                      Option.map req.SearchContactFlowsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map req.SearchContactFlowsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map req.SearchContactFlowsRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (ContactFlowSearchFilter.to_value x)));
+                      Option.map req.SearchContactFlowsRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (ContactFlowSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchContacts ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchContactsRequest.instanceId));
+                      Some
+                        ("TimeRange",
+                          (SearchContactsTimeRange.to_value
+                             req.SearchContactsRequest.timeRange));
+                      Option.map req.SearchContactsRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria", (SearchCriteria.to_value x)));
+                      Option.map req.SearchContactsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map req.SearchContactsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (LargeNextToken.to_value x)));
+                      Option.map req.SearchContactsRequest.sort
+                        ~f:(fun x -> ("Sort", (Sort.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchDataTables ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchDataTablesRequest.instanceId));
+                      Option.map req.SearchDataTablesRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.SearchDataTablesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult1000.to_value x)));
+                      Option.map req.SearchDataTablesRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (DataTableSearchFilter.to_value x)));
+                      Option.map req.SearchDataTablesRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (DataTableSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchEmailAddresses ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchEmailAddressesRequest.instanceId));
+                      Option.map req.SearchEmailAddressesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map req.SearchEmailAddressesRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map
+                        req.SearchEmailAddressesRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (EmailAddressSearchCriteria.to_value x)));
+                      Option.map req.SearchEmailAddressesRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (EmailAddressSearchFilter.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchEvaluationForms ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchEvaluationFormsRequest.instanceId));
+                      Option.map req.SearchEvaluationFormsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.SearchEvaluationFormsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map
+                        req.SearchEvaluationFormsRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (EvaluationFormSearchCriteria.to_value x)));
+                      Option.map
+                        req.SearchEvaluationFormsRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (EvaluationFormSearchFilter.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchHoursOfOperationOverrides ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchHoursOfOperationOverridesRequest.instanceId));
+                      Option.map
+                        req.SearchHoursOfOperationOverridesRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map
+                        req.SearchHoursOfOperationOverridesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map
+                        req.SearchHoursOfOperationOverridesRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (HoursOfOperationSearchFilter.to_value x)));
+                      Option.map
+                        req.SearchHoursOfOperationOverridesRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (HoursOfOperationOverrideSearchCriteria.to_value
+                                   x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchHoursOfOperations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchHoursOfOperationsRequest.instanceId));
+                      Option.map req.SearchHoursOfOperationsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map
+                        req.SearchHoursOfOperationsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map
+                        req.SearchHoursOfOperationsRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (HoursOfOperationSearchFilter.to_value x)));
+                      Option.map
+                        req.SearchHoursOfOperationsRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (HoursOfOperationSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchNotifications ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchNotificationsRequest.instanceId));
+                      Option.map req.SearchNotificationsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.SearchNotificationsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map req.SearchNotificationsRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (NotificationSearchFilter.to_value x)));
+                      Option.map
+                        req.SearchNotificationsRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (NotificationSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchPredefinedAttributes ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchPredefinedAttributesRequest.instanceId));
+                      Option.map
+                        req.SearchPredefinedAttributesRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map
+                        req.SearchPredefinedAttributesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map
+                        req.SearchPredefinedAttributesRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (PredefinedAttributeSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchPrompts ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchPromptsRequest.instanceId));
+                      Option.map req.SearchPromptsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map req.SearchPromptsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map req.SearchPromptsRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (PromptSearchFilter.to_value x)));
+                      Option.map req.SearchPromptsRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (PromptSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchQueues ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchQueuesRequest.instanceId));
+                      Option.map req.SearchQueuesRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map req.SearchQueuesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult500.to_value x)));
+                      Option.map req.SearchQueuesRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (QueueSearchFilter.to_value x)));
+                      Option.map req.SearchQueuesRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (QueueSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchQuickConnects ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchQuickConnectsRequest.instanceId));
+                      Option.map req.SearchQuickConnectsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map req.SearchQuickConnectsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map req.SearchQuickConnectsRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (QuickConnectSearchFilter.to_value x)));
+                      Option.map
+                        req.SearchQuickConnectsRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (QuickConnectSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchResourceTags ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceIdOrArn.to_value
+                              req.SearchResourceTagsRequest.instanceId));
+                      Option.map req.SearchResourceTagsRequest.resourceTypes
+                        ~f:(fun x ->
+                              ("ResourceTypes",
+                                (ResourceTypeList.to_value x)));
+                      Option.map req.SearchResourceTagsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map req.SearchResourceTagsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map req.SearchResourceTagsRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (ResourceTagsSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchRoutingProfiles ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchRoutingProfilesRequest.instanceId));
+                      Option.map req.SearchRoutingProfilesRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map req.SearchRoutingProfilesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult500.to_value x)));
+                      Option.map
+                        req.SearchRoutingProfilesRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (RoutingProfileSearchFilter.to_value x)));
+                      Option.map
+                        req.SearchRoutingProfilesRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (RoutingProfileSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchSecurityProfiles ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchSecurityProfilesRequest.instanceId));
+                      Option.map req.SearchSecurityProfilesRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map req.SearchSecurityProfilesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map
+                        req.SearchSecurityProfilesRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (SecurityProfileSearchCriteria.to_value x)));
+                      Option.map
+                        req.SearchSecurityProfilesRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (SecurityProfilesSearchFilter.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchTestCases ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceIdOrArn.to_value
+                              req.SearchTestCasesRequest.instanceId));
+                      Option.map req.SearchTestCasesRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map req.SearchTestCasesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map req.SearchTestCasesRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (TestCaseSearchFilter.to_value x)));
+                      Option.map req.SearchTestCasesRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (TestCaseSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchUserHierarchyGroups ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchUserHierarchyGroupsRequest.instanceId));
+                      Option.map
+                        req.SearchUserHierarchyGroupsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map
+                        req.SearchUserHierarchyGroupsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map
+                        req.SearchUserHierarchyGroupsRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (UserHierarchyGroupSearchFilter.to_value x)));
+                      Option.map
+                        req.SearchUserHierarchyGroupsRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (UserHierarchyGroupSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchUsers ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchUsersRequest.instanceId));
+                      Option.map req.SearchUsersRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map req.SearchUsersRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult500.to_value x)));
+                      Option.map req.SearchUsersRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter", (UserSearchFilter.to_value x)));
+                      Option.map req.SearchUsersRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (UserSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchViews ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceIdOrArn.to_value
+                              req.SearchViewsRequest.instanceId));
+                      Option.map req.SearchViewsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map req.SearchViewsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult100.to_value x)));
+                      Option.map req.SearchViewsRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter", (ViewSearchFilter.to_value x)));
+                      Option.map req.SearchViewsRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (ViewSearchCriteria.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1727,7 +6283,150 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchWorkspaceAssociations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchWorkspaceAssociationsRequest.instanceId));
+                      Option.map
+                        req.SearchWorkspaceAssociationsRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map
+                        req.SearchWorkspaceAssociationsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult500.to_value x)));
+                      Option.map
+                        req.SearchWorkspaceAssociationsRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (WorkspaceAssociationSearchFilter.to_value x)));
+                      Option.map
+                        req.SearchWorkspaceAssociationsRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (WorkspaceAssociationSearchCriteria.to_value
+                                   x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchWorkspaces ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.SearchWorkspacesRequest.instanceId));
+                      Option.map req.SearchWorkspacesRequest.nextToken
+                        ~f:(fun x ->
+                              ("NextToken", (NextToken2500.to_value x)));
+                      Option.map req.SearchWorkspacesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxResult500.to_value x)));
+                      Option.map req.SearchWorkspacesRequest.searchFilter
+                        ~f:(fun x ->
+                              ("SearchFilter",
+                                (WorkspaceSearchFilter.to_value x)));
+                      Option.map req.SearchWorkspacesRequest.searchCriteria
+                        ~f:(fun x ->
+                              ("SearchCriteria",
+                                (WorkspaceSearchCriteria.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SendChatIntegrationEvent ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("SourceId",
+                           (SourceId.to_value
+                              req.SendChatIntegrationEventRequest.sourceId));
+                      Some
+                        ("DestinationId",
+                          (DestinationId.to_value
+                             req.SendChatIntegrationEventRequest.destinationId));
+                      Option.map req.SendChatIntegrationEventRequest.subtype
+                        ~f:(fun x -> ("Subtype", (Subtype.to_value x)));
+                      Some
+                        ("Event",
+                          (ChatEvent.to_value
+                             req.SendChatIntegrationEventRequest.event));
+                      Option.map
+                        req.SendChatIntegrationEventRequest.newSessionDetails
+                        ~f:(fun x ->
+                              ("NewSessionDetails",
+                                (NewSessionDetails.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SendOutboundEmail -> Awso.Http.Request.make (method_of_endpoint endp)
+  | StartAttachedFileUpload ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | StartChatContact -> Awso.Http.Request.make (method_of_endpoint endp)
+  | StartContactEvaluation ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | StartContactMediaProcessing ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.StartContactMediaProcessingRequest.instanceId
+                         ~f:(fun x -> ("InstanceId", (InstanceId.to_value x)));
+                      Option.map
+                        req.StartContactMediaProcessingRequest.contactId
+                        ~f:(fun x -> ("ContactId", (ContactId.to_value x)));
+                      Option.map
+                        req.StartContactMediaProcessingRequest.processorArn
+                        ~f:(fun x -> ("ProcessorArn", (ARN.to_value x)));
+                      Option.map
+                        req.StartContactMediaProcessingRequest.failureMode
+                        ~f:(fun x ->
+                              ("FailureMode",
+                                (ContactMediaProcessingFailureMode.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | StartContactRecording ->
       let (headers, body) =
         let headers =
@@ -1792,9 +6491,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartEmailContact -> Awso.Http.Request.make (method_of_endpoint endp)
+  | StartOutboundChatContact ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | StartOutboundEmailContact ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | StartOutboundVoiceContact ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | StartScreenSharing -> Awso.Http.Request.make (method_of_endpoint endp)
   | StartTaskContact -> Awso.Http.Request.make (method_of_endpoint endp)
+  | StartTestCaseExecution ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | StartWebRTCContact -> Awso.Http.Request.make (method_of_endpoint endp)
   | StopContact ->
       let (headers, body) =
         let headers =
@@ -1811,7 +6519,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("InstanceId",
                           (InstanceId.to_value
-                             req.StopContactRequest.instanceId))])
+                             req.StopContactRequest.instanceId));
+                      Option.map req.StopContactRequest.disconnectReason
+                        ~f:(fun x ->
+                              ("DisconnectReason",
+                                (DisconnectReason.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StopContactMediaProcessing ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.StopContactMediaProcessingRequest.instanceId
+                         ~f:(fun x -> ("InstanceId", (InstanceId.to_value x)));
+                      Option.map
+                        req.StopContactMediaProcessingRequest.contactId
+                        ~f:(fun x -> ("ContactId", (ContactId.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1839,7 +6573,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("InitialContactId",
                           (ContactId.to_value
-                             req.StopContactRecordingRequest.initialContactId))])
+                             req.StopContactRecordingRequest.initialContactId));
+                      Option.map
+                        req.StopContactRecordingRequest.contactRecordingType
+                        ~f:(fun x ->
+                              ("ContactRecordingType",
+                                (ContactRecordingType.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1875,6 +6614,54 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StopTestCaseExecution ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.StopTestCaseExecutionRequest.clientToken
+                         ~f:(fun x ->
+                               ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SubmitContactEvaluation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.SubmitContactEvaluationRequest.answers
+                         ~f:(fun x ->
+                               ("Answers",
+                                 (EvaluationAnswersInputMap.to_value x)));
+                      Option.map req.SubmitContactEvaluationRequest.notes
+                        ~f:(fun x ->
+                              ("Notes", (EvaluationNotesMap.to_value x)));
+                      Option.map
+                        req.SubmitContactEvaluationRequest.submittedBy
+                        ~f:(fun x ->
+                              ("SubmittedBy",
+                                (EvaluatorUserUnion.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | SuspendContactRecording ->
       let (headers, body) =
         let headers =
@@ -1895,7 +6682,39 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("InitialContactId",
                           (ContactId.to_value
-                             req.SuspendContactRecordingRequest.initialContactId))])
+                             req.SuspendContactRecordingRequest.initialContactId));
+                      Option.map
+                        req.SuspendContactRecordingRequest.contactRecordingType
+                        ~f:(fun x ->
+                              ("ContactRecordingType",
+                                (ContactRecordingType.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | TagContact ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ContactId",
+                           (ContactId.to_value
+                              req.TagContactRequest.contactId));
+                      Some
+                        ("InstanceId",
+                          (InstanceId.to_value
+                             req.TagContactRequest.instanceId));
+                      Some
+                        ("Tags",
+                          (ContactTagMap.to_value req.TagContactRequest.tags))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1922,6 +6741,42 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | TransferContact ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("InstanceId",
+                           (InstanceId.to_value
+                              req.TransferContactRequest.instanceId));
+                      Some
+                        ("ContactId",
+                          (ContactId.to_value
+                             req.TransferContactRequest.contactId));
+                      Option.map req.TransferContactRequest.queueId
+                        ~f:(fun x -> ("QueueId", (QueueId.to_value x)));
+                      Option.map req.TransferContactRequest.userId
+                        ~f:(fun x -> ("UserId", (AgentResourceId.to_value x)));
+                      Some
+                        ("ContactFlowId",
+                          (ContactFlowId.to_value
+                             req.TransferContactRequest.contactFlowId));
+                      Option.map req.TransferContactRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UntagContact -> Awso.Http.Request.make (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateAgentStatus ->
       let (headers, body) =
@@ -1955,6 +6810,78 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateAttachedFilesConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateAttachedFilesConfigurationRequest.maximumSizeLimitInBytes
+                         ~f:(fun x ->
+                               ("MaximumSizeLimitInBytes",
+                                 (MaximumSizeLimitInBytes.to_value x)));
+                      Option.map
+                        req.UpdateAttachedFilesConfigurationRequest.extensionConfiguration
+                        ~f:(fun x ->
+                              ("ExtensionConfiguration",
+                                (ExtensionConfiguration.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateAuthenticationProfile ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateAuthenticationProfileRequest.name
+                         ~f:(fun x ->
+                               ("Name",
+                                 (AuthenticationProfileName.to_value x)));
+                      Option.map
+                        req.UpdateAuthenticationProfileRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (AuthenticationProfileDescription.to_value x)));
+                      Option.map
+                        req.UpdateAuthenticationProfileRequest.allowedIps
+                        ~f:(fun x -> ("AllowedIps", (IpCidrList.to_value x)));
+                      Option.map
+                        req.UpdateAuthenticationProfileRequest.blockedIps
+                        ~f:(fun x -> ("BlockedIps", (IpCidrList.to_value x)));
+                      Option.map
+                        req.UpdateAuthenticationProfileRequest.periodicSessionDuration
+                        ~f:(fun x ->
+                              ("PeriodicSessionDuration",
+                                (AccessTokenDuration.to_value x)));
+                      Option.map
+                        req.UpdateAuthenticationProfileRequest.sessionInactivityDuration
+                        ~f:(fun x ->
+                              ("SessionInactivityDuration",
+                                (InactivityDuration.to_value x)));
+                      Option.map
+                        req.UpdateAuthenticationProfileRequest.sessionInactivityHandlingEnabled
+                        ~f:(fun x ->
+                              ("SessionInactivityHandlingEnabled",
+                                (Boolean.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateContact ->
       let (headers, body) =
         let headers =
@@ -1971,7 +6898,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("Description", (Description.to_value x)));
                       Option.map req.UpdateContactRequest.references
                         ~f:(fun x ->
-                              ("References", (ContactReferences.to_value x)))])
+                              ("References", (ContactReferences.to_value x)));
+                      Option.map req.UpdateContactRequest.segmentAttributes
+                        ~f:(fun x ->
+                              ("SegmentAttributes",
+                                (SegmentAttributes.to_value x)));
+                      Option.map req.UpdateContactRequest.queueInfo
+                        ~f:(fun x ->
+                              ("QueueInfo", (QueueInfoInput.to_value x)));
+                      Option.map req.UpdateContactRequest.userInfo
+                        ~f:(fun x -> ("UserInfo", (UserInfo.to_value x)));
+                      Option.map req.UpdateContactRequest.customerEndpoint
+                        ~f:(fun x ->
+                              ("CustomerEndpoint", (Endpoint.to_value x)));
+                      Option.map req.UpdateContactRequest.systemEndpoint
+                        ~f:(fun x ->
+                              ("SystemEndpoint", (Endpoint.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2000,6 +6942,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("Attributes",
                           (Attributes.to_value
                              req.UpdateContactAttributesRequest.attributes))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateContactEvaluation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateContactEvaluationRequest.answers
+                         ~f:(fun x ->
+                               ("Answers",
+                                 (EvaluationAnswersInputMap.to_value x)));
+                      Option.map req.UpdateContactEvaluationRequest.notes
+                        ~f:(fun x ->
+                              ("Notes", (EvaluationNotesMap.to_value x)));
+                      Option.map req.UpdateContactEvaluationRequest.updatedBy
+                        ~f:(fun x ->
+                              ("UpdatedBy", (EvaluatorUserUnion.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2055,6 +7023,36 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateContactFlowModuleAlias ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateContactFlowModuleAliasRequest.name
+                         ~f:(fun x ->
+                               ("Name", (ContactFlowModuleName.to_value x)));
+                      Option.map
+                        req.UpdateContactFlowModuleAliasRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (ContactFlowModuleDescription.to_value x)));
+                      Option.map
+                        req.UpdateContactFlowModuleAliasRequest.contactFlowModuleVersion
+                        ~f:(fun x ->
+                              ("ContactFlowModuleVersion",
+                                (ResourceVersion.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateContactFlowModuleContent ->
       let (headers, body) =
         let headers =
@@ -2064,10 +7062,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("Content",
-                           (ContactFlowModuleContent.to_value
-                              req.UpdateContactFlowModuleContentRequest.content))])
+                      [Option.map
+                         req.UpdateContactFlowModuleContentRequest.content
+                         ~f:(fun x ->
+                               ("Content",
+                                 (ContactFlowModuleContent.to_value x)));
+                      Option.map
+                        req.UpdateContactFlowModuleContentRequest.settings
+                        ~f:(fun x ->
+                              ("Settings", (FlowModuleSettings.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2126,6 +7129,36 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateContactRoutingData ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateContactRoutingDataRequest.queueTimeAdjustmentSeconds
+                         ~f:(fun x ->
+                               ("QueueTimeAdjustmentSeconds",
+                                 (QueueTimeAdjustmentSeconds.to_value x)));
+                      Option.map
+                        req.UpdateContactRoutingDataRequest.queuePriority
+                        ~f:(fun x ->
+                              ("QueuePriority", (QueuePriority.to_value x)));
+                      Option.map
+                        req.UpdateContactRoutingDataRequest.routingCriteria
+                        ~f:(fun x ->
+                              ("RoutingCriteria",
+                                (RoutingCriteriaInput.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateContactSchedule ->
       let (headers, body) =
         let headers =
@@ -2154,6 +7187,131 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateDataTableAttribute ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (DataTableName.to_value
+                              req.UpdateDataTableAttributeRequest.name));
+                      Some
+                        ("ValueType",
+                          (DataTableAttributeValueType.to_value
+                             req.UpdateDataTableAttributeRequest.valueType));
+                      Option.map
+                        req.UpdateDataTableAttributeRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (DataTableDescription.to_value x)));
+                      Option.map req.UpdateDataTableAttributeRequest.primary
+                        ~f:(fun x -> ("Primary", (Boolean.to_value x)));
+                      Option.map
+                        req.UpdateDataTableAttributeRequest.validation
+                        ~f:(fun x -> ("Validation", (Validation.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateDataTableMetadata ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (DataTableName.to_value
+                              req.UpdateDataTableMetadataRequest.name));
+                      Option.map
+                        req.UpdateDataTableMetadataRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (DataTableDescription.to_value x)));
+                      Some
+                        ("ValueLockLevel",
+                          (DataTableLockLevel.to_value
+                             req.UpdateDataTableMetadataRequest.valueLockLevel));
+                      Some
+                        ("TimeZone",
+                          (TimeZone.to_value
+                             req.UpdateDataTableMetadataRequest.timeZone))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateDataTablePrimaryValues ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("PrimaryValues",
+                           (PrimaryValuesSet.to_value
+                              req.UpdateDataTablePrimaryValuesRequest.primaryValues));
+                      Some
+                        ("NewPrimaryValues",
+                          (PrimaryValuesSet.to_value
+                             req.UpdateDataTablePrimaryValuesRequest.newPrimaryValues));
+                      Some
+                        ("LockVersion",
+                          (DataTableLockVersion.to_value
+                             req.UpdateDataTablePrimaryValuesRequest.lockVersion))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateEmailAddressMetadata ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateEmailAddressMetadataRequest.description
+                         ~f:(fun x ->
+                               ("Description", (Description.to_value x)));
+                      Option.map
+                        req.UpdateEmailAddressMetadataRequest.displayName
+                        ~f:(fun x ->
+                              ("DisplayName",
+                                (EmailAddressDisplayName.to_value x)));
+                      Option.map
+                        req.UpdateEmailAddressMetadataRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateEvaluationForm -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateHoursOfOperation ->
       let (headers, body) =
         let headers =
@@ -2184,6 +7342,58 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateHoursOfOperationOverride ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateHoursOfOperationOverrideRequest.name
+                         ~f:(fun x ->
+                               ("Name", (CommonHumanReadableName.to_value x)));
+                      Option.map
+                        req.UpdateHoursOfOperationOverrideRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (CommonHumanReadableDescription.to_value x)));
+                      Option.map
+                        req.UpdateHoursOfOperationOverrideRequest.config
+                        ~f:(fun x ->
+                              ("Config",
+                                (HoursOfOperationOverrideConfigList.to_value
+                                   x)));
+                      Option.map
+                        req.UpdateHoursOfOperationOverrideRequest.effectiveFrom
+                        ~f:(fun x ->
+                              ("EffectiveFrom",
+                                (HoursOfOperationOverrideYearMonthDayDateFormat.to_value
+                                   x)));
+                      Option.map
+                        req.UpdateHoursOfOperationOverrideRequest.effectiveTill
+                        ~f:(fun x ->
+                              ("EffectiveTill",
+                                (HoursOfOperationOverrideYearMonthDayDateFormat.to_value
+                                   x)));
+                      Option.map
+                        req.UpdateHoursOfOperationOverrideRequest.recurrenceConfig
+                        ~f:(fun x ->
+                              ("RecurrenceConfig",
+                                (RecurrenceConfig.to_value x)));
+                      Option.map
+                        req.UpdateHoursOfOperationOverrideRequest.overrideType
+                        ~f:(fun x ->
+                              ("OverrideType", (OverrideType.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateInstanceAttribute ->
       let (headers, body) =
         let headers =
@@ -2196,7 +7406,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("Value",
                            (InstanceAttributeValue.to_value
-                              req.UpdateInstanceAttributeRequest.value))])
+                              req.UpdateInstanceAttributeRequest.value));
+                      Option.map
+                        req.UpdateInstanceAttributeRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2216,7 +7430,128 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("StorageConfig",
                            (InstanceStorageConfig.to_value
-                              req.UpdateInstanceStorageConfigRequest.storageConfig))])
+                              req.UpdateInstanceStorageConfigRequest.storageConfig));
+                      Option.map
+                        req.UpdateInstanceStorageConfigRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateNotificationContent ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Content",
+                           (NotificationContent.to_value
+                              req.UpdateNotificationContentRequest.content))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateParticipantAuthentication ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("State",
+                           (ParticipantToken.to_value
+                              req.UpdateParticipantAuthenticationRequest.state));
+                      Some
+                        ("InstanceId",
+                          (InstanceId.to_value
+                             req.UpdateParticipantAuthenticationRequest.instanceId));
+                      Option.map
+                        req.UpdateParticipantAuthenticationRequest.code
+                        ~f:(fun x -> ("Code", (AuthorizationCode.to_value x)));
+                      Option.map
+                        req.UpdateParticipantAuthenticationRequest.error
+                        ~f:(fun x ->
+                              ("Error", (AuthenticationError.to_value x)));
+                      Option.map
+                        req.UpdateParticipantAuthenticationRequest.errorDescription
+                        ~f:(fun x ->
+                              ("ErrorDescription",
+                                (AuthenticationErrorDescription.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateParticipantRoleConfig ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdatePhoneNumber -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdatePhoneNumberMetadata ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdatePredefinedAttribute ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdatePredefinedAttributeRequest.values
+                         ~f:(fun x ->
+                               ("Values",
+                                 (PredefinedAttributeValues.to_value x)));
+                      Option.map
+                        req.UpdatePredefinedAttributeRequest.purposes
+                        ~f:(fun x ->
+                              ("Purposes",
+                                (PredefinedAttributePurposeNameList.to_value
+                                   x)));
+                      Option.map
+                        req.UpdatePredefinedAttributeRequest.attributeConfiguration
+                        ~f:(fun x ->
+                              ("AttributeConfiguration",
+                                (InputPredefinedAttributeConfiguration.to_value
+                                   x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdatePrompt ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdatePromptRequest.name
+                         ~f:(fun x ->
+                               ("Name", (CommonNameLength127.to_value x)));
+                      Option.map req.UpdatePromptRequest.description
+                        ~f:(fun x ->
+                              ("Description", (PromptDescription.to_value x)));
+                      Option.map req.UpdatePromptRequest.s3Uri
+                        ~f:(fun x -> ("S3Uri", (S3Uri.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2306,6 +7641,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateQueueOutboundEmailConfig ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("OutboundEmailConfig",
+                           (OutboundEmailConfig.to_value
+                              req.UpdateQueueOutboundEmailConfigRequest.outboundEmailConfig))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateQueueStatus ->
       let (headers, body) =
         let headers =
@@ -2362,6 +7717,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("Description",
                                 (UpdateQuickConnectDescription.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateRoutingProfileAgentAvailabilityTimer ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("AgentAvailabilityTimer",
+                           (AgentAvailabilityTimer.to_value
+                              req.UpdateRoutingProfileAgentAvailabilityTimerRequest.agentAvailabilityTimer))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2453,6 +7828,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateRule -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateSecurityProfile ->
       let (headers, body) =
         let headers =
@@ -2469,7 +7845,172 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                                  (SecurityProfileDescription.to_value x)));
                       Option.map req.UpdateSecurityProfileRequest.permissions
                         ~f:(fun x ->
-                              ("Permissions", (PermissionsList.to_value x)))])
+                              ("Permissions", (PermissionsList.to_value x)));
+                      Option.map
+                        req.UpdateSecurityProfileRequest.allowedAccessControlTags
+                        ~f:(fun x ->
+                              ("AllowedAccessControlTags",
+                                (AllowedAccessControlTags.to_value x)));
+                      Option.map
+                        req.UpdateSecurityProfileRequest.tagRestrictedResources
+                        ~f:(fun x ->
+                              ("TagRestrictedResources",
+                                (TagRestrictedResourceList.to_value x)));
+                      Option.map
+                        req.UpdateSecurityProfileRequest.applications
+                        ~f:(fun x ->
+                              ("Applications", (Applications.to_value x)));
+                      Option.map
+                        req.UpdateSecurityProfileRequest.hierarchyRestrictedResources
+                        ~f:(fun x ->
+                              ("HierarchyRestrictedResources",
+                                (HierarchyRestrictedResourceList.to_value x)));
+                      Option.map
+                        req.UpdateSecurityProfileRequest.allowedAccessControlHierarchyGroupId
+                        ~f:(fun x ->
+                              ("AllowedAccessControlHierarchyGroupId",
+                                (HierarchyGroupId.to_value x)));
+                      Option.map
+                        req.UpdateSecurityProfileRequest.allowedFlowModules
+                        ~f:(fun x ->
+                              ("AllowedFlowModules",
+                                (AllowedFlowModules.to_value x)));
+                      Option.map
+                        req.UpdateSecurityProfileRequest.granularAccessControlConfiguration
+                        ~f:(fun x ->
+                              ("GranularAccessControlConfiguration",
+                                (GranularAccessControlConfiguration.to_value
+                                   x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateTaskTemplate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateTaskTemplateRequest.name
+                         ~f:(fun x -> ("Name", (TaskTemplateName.to_value x)));
+                      Option.map req.UpdateTaskTemplateRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (TaskTemplateDescription.to_value x)));
+                      Option.map req.UpdateTaskTemplateRequest.contactFlowId
+                        ~f:(fun x ->
+                              ("ContactFlowId", (ContactFlowId.to_value x)));
+                      Option.map
+                        req.UpdateTaskTemplateRequest.selfAssignFlowId
+                        ~f:(fun x ->
+                              ("SelfAssignFlowId",
+                                (ContactFlowId.to_value x)));
+                      Option.map req.UpdateTaskTemplateRequest.constraints
+                        ~f:(fun x ->
+                              ("Constraints",
+                                (TaskTemplateConstraints.to_value x)));
+                      Option.map req.UpdateTaskTemplateRequest.defaults
+                        ~f:(fun x ->
+                              ("Defaults", (TaskTemplateDefaults.to_value x)));
+                      Option.map req.UpdateTaskTemplateRequest.status
+                        ~f:(fun x ->
+                              ("Status", (TaskTemplateStatus.to_value x)));
+                      Option.map req.UpdateTaskTemplateRequest.fields
+                        ~f:(fun x ->
+                              ("Fields", (TaskTemplateFields.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateTestCase ->
+      let (headers, body) =
+        let headers =
+          Some
+            ((List.filter_opt
+                [Option.map req.UpdateTestCaseRequest.lastModifiedTime
+                   ~f:(fun x ->
+                         ("x-amz-last-modified-time",
+                           (Timestamp.to_header x)));
+                Option.map req.UpdateTestCaseRequest.lastModifiedRegion
+                  ~f:(fun x ->
+                        ("x-amz-last-modified-region",
+                          (RegionName.to_header x)))])
+               |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateTestCaseRequest.content
+                         ~f:(fun x ->
+                               ("Content", (TestCaseContent.to_value x)));
+                      Option.map req.UpdateTestCaseRequest.entryPoint
+                        ~f:(fun x ->
+                              ("EntryPoint", (TestCaseEntryPoint.to_value x)));
+                      Option.map req.UpdateTestCaseRequest.initializationData
+                        ~f:(fun x ->
+                              ("InitializationData",
+                                (TestCaseInitializationData.to_value x)));
+                      Option.map req.UpdateTestCaseRequest.name
+                        ~f:(fun x -> ("Name", (TestCaseName.to_value x)));
+                      Option.map req.UpdateTestCaseRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (TestCaseDescription.to_value x)));
+                      Option.map req.UpdateTestCaseRequest.status
+                        ~f:(fun x -> ("Status", (TestCaseStatus.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateTrafficDistribution ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateUserConfig ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateUserConfigRequest.autoAcceptConfigs
+                         ~f:(fun x ->
+                               ("AutoAcceptConfigs",
+                                 (AutoAcceptConfigs.to_value x)));
+                      Option.map
+                        req.UpdateUserConfigRequest.afterContactWorkConfigs
+                        ~f:(fun x ->
+                              ("AfterContactWorkConfigs",
+                                (AfterContactWorkConfigs.to_value x)));
+                      Option.map
+                        req.UpdateUserConfigRequest.phoneNumberConfigs
+                        ~f:(fun x ->
+                              ("PhoneNumberConfigs",
+                                (PhoneNumberConfigs.to_value x)));
+                      Option.map
+                        req.UpdateUserConfigRequest.persistentConnectionConfigs
+                        ~f:(fun x ->
+                              ("PersistentConnectionConfigs",
+                                (PersistentConnectionConfigs.to_value x)));
+                      Option.map
+                        req.UpdateUserConfigRequest.voiceEnhancementConfigs
+                        ~f:(fun x ->
+                              ("VoiceEnhancementConfigs",
+                                (VoiceEnhancementConfigs.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2558,6 +8099,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateUserNotificationStatus ->
+      let (headers, body) =
+        let headers =
+          Some
+            ((List.filter_opt
+                [Option.map
+                   req.UpdateUserNotificationStatusRequest.lastModifiedTime
+                   ~f:(fun x ->
+                         ("x-amz-last-modified-time",
+                           (Timestamp.to_header x)));
+                Option.map
+                  req.UpdateUserNotificationStatusRequest.lastModifiedRegion
+                  ~f:(fun x ->
+                        ("x-amz-last-modified-region",
+                          (RegionName.to_header x)))])
+               |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Status",
+                           (NotificationStatus.to_value
+                              req.UpdateUserNotificationStatusRequest.status))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateUserPhoneConfig ->
       let (headers, body) =
         let headers =
@@ -2571,6 +8144,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("PhoneConfig",
                            (UserPhoneConfig.to_value
                               req.UpdateUserPhoneConfigRequest.phoneConfig))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateUserProficiencies ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("UserProficiencies",
+                           (UserProficiencyList.to_value
+                              req.UpdateUserProficienciesRequest.userProficiencies))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2611,6 +8204,138 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("SecurityProfileIds",
                            (SecurityProfileIds.to_value
                               req.UpdateUserSecurityProfilesRequest.securityProfileIds))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateViewContent ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Status",
+                           (ViewStatus.to_value
+                              req.UpdateViewContentRequest.status));
+                      Some
+                        ("Content",
+                          (ViewInputContent.to_value
+                             req.UpdateViewContentRequest.content))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateViewMetadata ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateViewMetadataRequest.name
+                         ~f:(fun x -> ("Name", (ViewName.to_value x)));
+                      Option.map req.UpdateViewMetadataRequest.description
+                        ~f:(fun x ->
+                              ("Description", (ViewDescription.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateWorkspaceMetadata ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateWorkspaceMetadataRequest.name
+                         ~f:(fun x -> ("Name", (WorkspaceName.to_value x)));
+                      Option.map
+                        req.UpdateWorkspaceMetadataRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (WorkspaceDescription.to_value x)));
+                      Option.map req.UpdateWorkspaceMetadataRequest.title
+                        ~f:(fun x -> ("Title", (WorkspaceTitle.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateWorkspacePage ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateWorkspacePageRequest.newPage
+                         ~f:(fun x -> ("NewPage", (Page.to_value x)));
+                      Option.map req.UpdateWorkspacePageRequest.resourceArn
+                        ~f:(fun x -> ("ResourceArn", (ARN.to_value x)));
+                      Option.map req.UpdateWorkspacePageRequest.slug
+                        ~f:(fun x -> ("Slug", (Slug.to_value x)));
+                      Option.map req.UpdateWorkspacePageRequest.inputData
+                        ~f:(fun x -> ("InputData", (InputData.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateWorkspaceTheme ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateWorkspaceThemeRequest.theme
+                         ~f:(fun x -> ("Theme", (WorkspaceTheme.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateWorkspaceVisibility ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Visibility",
+                           (Visibility.to_value
+                              req.UpdateWorkspaceVisibilityRequest.visibility))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2666,10 +8391,38 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | ActivateEvaluationForm ->
+      if is_success
+      then
+        Ok (ActivateEvaluationFormResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ActivateEvaluationFormResponse.error_of_json))
+  | AssociateAnalyticsDataSet ->
+      if is_success
+      then
+        Ok
+          (AssociateAnalyticsDataSetResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateAnalyticsDataSetResponse.error_of_json))
   | AssociateApprovedOrigin ->
       if is_success then Ok () else Error (parse_aws_error None)
   | AssociateBot ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | AssociateContactWithUser ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (AssociateContactWithUserResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateContactWithUserResponse.error_of_json))
   | AssociateDefaultVocabulary ->
       if is_success
       then
@@ -2682,6 +8435,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssociateDefaultVocabularyResponse.error_of_json))
+  | AssociateEmailAddressAlias ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (AssociateEmailAddressAliasResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateEmailAddressAliasResponse.error_of_json))
+  | AssociateFlow ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (AssociateFlowResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some AssociateFlowResponse.error_of_json))
+  | AssociateHoursOfOperations ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | AssociateInstanceStorageConfig ->
       if is_success
       then
@@ -2696,6 +8470,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | AssociateLexBot ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | AssociatePhoneNumberContactFlow ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | AssociateQueueEmailAddresses ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | AssociateQueueQuickConnects ->
       if is_success then Ok () else Error (parse_aws_error None)
   | AssociateRoutingProfileQueues ->
@@ -2706,12 +8484,136 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some AssociateSecurityKeyResponse.error_of_json))
+  | AssociateSecurityProfiles ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | AssociateTrafficDistributionGroupUser ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (AssociateTrafficDistributionGroupUserResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                AssociateTrafficDistributionGroupUserResponse.error_of_json))
+  | AssociateUserProficiencies ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | AssociateWorkspace ->
+      if is_success
+      then Ok (AssociateWorkspaceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some AssociateWorkspaceResponse.error_of_json))
+  | BatchAssociateAnalyticsDataSet ->
+      if is_success
+      then
+        Ok
+          (BatchAssociateAnalyticsDataSetResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchAssociateAnalyticsDataSetResponse.error_of_json))
+  | BatchCreateDataTableValue ->
+      if is_success
+      then
+        Ok
+          (BatchCreateDataTableValueResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchCreateDataTableValueResponse.error_of_json))
+  | BatchDeleteDataTableValue ->
+      if is_success
+      then
+        Ok
+          (BatchDeleteDataTableValueResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDeleteDataTableValueResponse.error_of_json))
+  | BatchDescribeDataTableValue ->
+      if is_success
+      then
+        Ok
+          (BatchDescribeDataTableValueResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDescribeDataTableValueResponse.error_of_json))
+  | BatchDisassociateAnalyticsDataSet ->
+      if is_success
+      then
+        Ok
+          (BatchDisassociateAnalyticsDataSetResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDisassociateAnalyticsDataSetResponse.error_of_json))
+  | BatchGetAttachedFileMetadata ->
+      if is_success
+      then
+        Ok
+          (BatchGetAttachedFileMetadataResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetAttachedFileMetadataResponse.error_of_json))
+  | BatchGetFlowAssociation ->
+      if is_success
+      then
+        Ok (BatchGetFlowAssociationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetFlowAssociationResponse.error_of_json))
+  | BatchPutContact ->
+      if is_success
+      then Ok (BatchPutContactResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BatchPutContactResponse.error_of_json))
+  | BatchUpdateDataTableValue ->
+      if is_success
+      then
+        Ok
+          (BatchUpdateDataTableValueResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchUpdateDataTableValueResponse.error_of_json))
+  | ClaimPhoneNumber ->
+      if is_success
+      then Ok (ClaimPhoneNumberResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ClaimPhoneNumberResponse.error_of_json))
+  | CompleteAttachedFileUpload ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CompleteAttachedFileUploadResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some CompleteAttachedFileUploadResponse.error_of_json))
   | CreateAgentStatus ->
       if is_success
       then Ok (CreateAgentStatusResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some CreateAgentStatusResponse.error_of_json))
+  | CreateContact ->
+      if is_success
+      then Ok (CreateContactResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateContactResponse.error_of_json))
   | CreateContactFlow ->
       if is_success
       then Ok (CreateContactFlowResponse.of_json (response_to_json resp))
@@ -2726,6 +8628,59 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateContactFlowModuleResponse.error_of_json))
+  | CreateContactFlowModuleAlias ->
+      if is_success
+      then
+        Ok
+          (CreateContactFlowModuleAliasResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateContactFlowModuleAliasResponse.error_of_json))
+  | CreateContactFlowModuleVersion ->
+      if is_success
+      then
+        Ok
+          (CreateContactFlowModuleVersionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateContactFlowModuleVersionResponse.error_of_json))
+  | CreateContactFlowVersion ->
+      if is_success
+      then
+        Ok (CreateContactFlowVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateContactFlowVersionResponse.error_of_json))
+  | CreateDataTable ->
+      if is_success
+      then Ok (CreateDataTableResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateDataTableResponse.error_of_json))
+  | CreateDataTableAttribute ->
+      if is_success
+      then
+        Ok (CreateDataTableAttributeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateDataTableAttributeResponse.error_of_json))
+  | CreateEmailAddress ->
+      if is_success
+      then Ok (CreateEmailAddressResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateEmailAddressResponse.error_of_json))
+  | CreateEvaluationForm ->
+      if is_success
+      then Ok (CreateEvaluationFormResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateEvaluationFormResponse.error_of_json))
   | CreateHoursOfOperation ->
       if is_success
       then
@@ -2734,6 +8689,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateHoursOfOperationResponse.error_of_json))
+  | CreateHoursOfOperationOverride ->
+      if is_success
+      then
+        Ok
+          (CreateHoursOfOperationOverrideResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateHoursOfOperationOverrideResponse.error_of_json))
   | CreateInstance ->
       if is_success
       then Ok (CreateInstanceResponse.of_json (response_to_json resp))
@@ -2749,6 +8714,44 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateIntegrationAssociationResponse.error_of_json))
+  | CreateNotification ->
+      if is_success
+      then Ok (CreateNotificationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateNotificationResponse.error_of_json))
+  | CreateParticipant ->
+      if is_success
+      then Ok (CreateParticipantResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateParticipantResponse.error_of_json))
+  | CreatePersistentContactAssociation ->
+      if is_success
+      then
+        Ok
+          (CreatePersistentContactAssociationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePersistentContactAssociationResponse.error_of_json))
+  | CreatePredefinedAttribute ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | CreatePrompt ->
+      if is_success
+      then Ok (CreatePromptResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreatePromptResponse.error_of_json))
+  | CreatePushNotificationRegistration ->
+      if is_success
+      then
+        Ok
+          (CreatePushNotificationRegistrationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePushNotificationRegistrationResponse.error_of_json))
   | CreateQueue ->
       if is_success
       then Ok (CreateQueueResponse.of_json (response_to_json resp))
@@ -2765,12 +8768,37 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateRoutingProfileResponse.error_of_json))
+  | CreateRule ->
+      if is_success
+      then Ok (CreateRuleResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateRuleResponse.error_of_json))
   | CreateSecurityProfile ->
       if is_success
       then Ok (CreateSecurityProfileResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some CreateSecurityProfileResponse.error_of_json))
+  | CreateTaskTemplate ->
+      if is_success
+      then Ok (CreateTaskTemplateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateTaskTemplateResponse.error_of_json))
+  | CreateTestCase ->
+      if is_success
+      then Ok (CreateTestCaseResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateTestCaseResponse.error_of_json))
+  | CreateTrafficDistributionGroup ->
+      if is_success
+      then
+        Ok
+          (CreateTrafficDistributionGroupResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateTrafficDistributionGroupResponse.error_of_json))
   | CreateUseCase ->
       if is_success
       then Ok (CreateUseCaseResponse.of_json (response_to_json resp))
@@ -2787,13 +8815,63 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateUserHierarchyGroupResponse.error_of_json))
+  | CreateView ->
+      if is_success
+      then Ok (CreateViewResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateViewResponse.error_of_json))
+  | CreateViewVersion ->
+      if is_success
+      then Ok (CreateViewVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateViewVersionResponse.error_of_json))
   | CreateVocabulary ->
       if is_success
       then Ok (CreateVocabularyResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateVocabularyResponse.error_of_json))
-  | DeleteContactFlow ->
+  | CreateWorkspace ->
+      if is_success
+      then Ok (CreateWorkspaceResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateWorkspaceResponse.error_of_json))
+  | CreateWorkspacePage ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateWorkspacePageResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some CreateWorkspacePageResponse.error_of_json))
+  | DeactivateEvaluationForm ->
+      if is_success
+      then
+        Ok (DeactivateEvaluationFormResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeactivateEvaluationFormResponse.error_of_json))
+  | DeleteAttachedFile ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteAttachedFileResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteAttachedFileResponse.error_of_json))
+  | DeleteContactEvaluation ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteContactFlow ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteContactFlowResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteContactFlowResponse.error_of_json))
   | DeleteContactFlowModule ->
       if is_success
       then
@@ -2804,37 +8882,230 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteContactFlowModuleResponse.error_of_json))
+  | DeleteContactFlowModuleAlias ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteContactFlowModuleAliasResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteContactFlowModuleAliasResponse.error_of_json))
+  | DeleteContactFlowModuleVersion ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteContactFlowModuleVersionResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteContactFlowModuleVersionResponse.error_of_json))
+  | DeleteContactFlowVersion ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteContactFlowVersionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteContactFlowVersionResponse.error_of_json))
+  | DeleteDataTable ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteDataTableResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteDataTableResponse.error_of_json))
+  | DeleteDataTableAttribute ->
+      if is_success
+      then
+        Ok (DeleteDataTableAttributeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteDataTableAttributeResponse.error_of_json))
+  | DeleteEmailAddress ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteEmailAddressResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteEmailAddressResponse.error_of_json))
+  | DeleteEvaluationForm ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteHoursOfOperation ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteHoursOfOperationOverride ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteInstance ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteIntegrationAssociation ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteNotification ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteNotificationResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteNotificationResponse.error_of_json))
+  | DeletePredefinedAttribute ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeletePrompt ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeletePushNotificationRegistration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeletePushNotificationRegistrationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeletePushNotificationRegistrationResponse.error_of_json))
+  | DeleteQueue -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteQuickConnect ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRoutingProfile ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRule -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteSecurityProfile ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteTaskTemplate ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteTaskTemplateResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteTaskTemplateResponse.error_of_json))
+  | DeleteTestCase ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteTestCaseResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteTestCaseResponse.error_of_json))
+  | DeleteTrafficDistributionGroup ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteTrafficDistributionGroupResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteTrafficDistributionGroupResponse.error_of_json))
   | DeleteUseCase ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteUser -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteUserHierarchyGroup ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteView ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteViewResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteViewResponse.error_of_json))
+  | DeleteViewVersion ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteViewVersionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteViewVersionResponse.error_of_json))
   | DeleteVocabulary ->
       if is_success
       then Ok (DeleteVocabularyResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DeleteVocabularyResponse.error_of_json))
+  | DeleteWorkspace ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteWorkspaceResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteWorkspaceResponse.error_of_json))
+  | DeleteWorkspaceMedia ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteWorkspaceMediaResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteWorkspaceMediaResponse.error_of_json))
+  | DeleteWorkspacePage ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteWorkspacePageResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteWorkspacePageResponse.error_of_json))
   | DescribeAgentStatus ->
       if is_success
       then Ok (DescribeAgentStatusResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DescribeAgentStatusResponse.error_of_json))
+  | DescribeAttachedFilesConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeAttachedFilesConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAttachedFilesConfigurationResponse.error_of_json))
+  | DescribeAuthenticationProfile ->
+      if is_success
+      then
+        Ok
+          (DescribeAuthenticationProfileResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAuthenticationProfileResponse.error_of_json))
   | DescribeContact ->
       if is_success
       then Ok (DescribeContactResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DescribeContactResponse.error_of_json))
+  | DescribeContactEvaluation ->
+      if is_success
+      then
+        Ok
+          (DescribeContactEvaluationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeContactEvaluationResponse.error_of_json))
   | DescribeContactFlow ->
       if is_success
       then Ok (DescribeContactFlowResponse.of_json (response_to_json resp))
@@ -2850,6 +9121,45 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeContactFlowModuleResponse.error_of_json))
+  | DescribeContactFlowModuleAlias ->
+      if is_success
+      then
+        Ok
+          (DescribeContactFlowModuleAliasResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeContactFlowModuleAliasResponse.error_of_json))
+  | DescribeDataTable ->
+      if is_success
+      then Ok (DescribeDataTableResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeDataTableResponse.error_of_json))
+  | DescribeDataTableAttribute ->
+      if is_success
+      then
+        Ok
+          (DescribeDataTableAttributeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDataTableAttributeResponse.error_of_json))
+  | DescribeEmailAddress ->
+      if is_success
+      then Ok (DescribeEmailAddressResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeEmailAddressResponse.error_of_json))
+  | DescribeEvaluationForm ->
+      if is_success
+      then
+        Ok (DescribeEvaluationFormResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeEvaluationFormResponse.error_of_json))
   | DescribeHoursOfOperation ->
       if is_success
       then
@@ -2858,6 +9168,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeHoursOfOperationResponse.error_of_json))
+  | DescribeHoursOfOperationOverride ->
+      if is_success
+      then
+        Ok
+          (DescribeHoursOfOperationOverrideResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeHoursOfOperationOverrideResponse.error_of_json))
   | DescribeInstance ->
       if is_success
       then Ok (DescribeInstanceResponse.of_json (response_to_json resp))
@@ -2882,6 +9202,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeInstanceStorageConfigResponse.error_of_json))
+  | DescribeNotification ->
+      if is_success
+      then Ok (DescribeNotificationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeNotificationResponse.error_of_json))
+  | DescribePhoneNumber ->
+      if is_success
+      then Ok (DescribePhoneNumberResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribePhoneNumberResponse.error_of_json))
+  | DescribePredefinedAttribute ->
+      if is_success
+      then
+        Ok
+          (DescribePredefinedAttributeResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribePredefinedAttributeResponse.error_of_json))
+  | DescribePrompt ->
+      if is_success
+      then Ok (DescribePromptResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribePromptResponse.error_of_json))
   | DescribeQueue ->
       if is_success
       then Ok (DescribeQueueResponse.of_json (response_to_json resp))
@@ -2900,6 +9247,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeRoutingProfileResponse.error_of_json))
+  | DescribeRule ->
+      if is_success
+      then Ok (DescribeRuleResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeRuleResponse.error_of_json))
   | DescribeSecurityProfile ->
       if is_success
       then
@@ -2908,6 +9259,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeSecurityProfileResponse.error_of_json))
+  | DescribeTestCase ->
+      if is_success
+      then Ok (DescribeTestCaseResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeTestCaseResponse.error_of_json))
+  | DescribeTrafficDistributionGroup ->
+      if is_success
+      then
+        Ok
+          (DescribeTrafficDistributionGroupResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTrafficDistributionGroupResponse.error_of_json))
   | DescribeUser ->
       if is_success
       then Ok (DescribeUserResponse.of_json (response_to_json resp))
@@ -2931,15 +9297,49 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeUserHierarchyStructureResponse.error_of_json))
+  | DescribeView ->
+      if is_success
+      then Ok (DescribeViewResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeViewResponse.error_of_json))
   | DescribeVocabulary ->
       if is_success
       then Ok (DescribeVocabularyResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DescribeVocabularyResponse.error_of_json))
+  | DescribeWorkspace ->
+      if is_success
+      then Ok (DescribeWorkspaceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeWorkspaceResponse.error_of_json))
+  | DisassociateAnalyticsDataSet ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DisassociateApprovedOrigin ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DisassociateBot ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DisassociateEmailAddressAlias ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateEmailAddressAliasResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateEmailAddressAliasResponse.error_of_json))
+  | DisassociateFlow ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DisassociateFlowResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DisassociateFlowResponse.error_of_json))
+  | DisassociateHoursOfOperations ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DisassociateInstanceStorageConfig ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -2947,49 +9347,257 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DisassociateLexBot ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DisassociatePhoneNumberContactFlow ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DisassociateQueueEmailAddresses ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DisassociateQueueQuickConnects ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DisassociateRoutingProfileQueues ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DisassociateSecurityKey ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DisassociateSecurityProfiles ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DisassociateTrafficDistributionGroupUser ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateTrafficDistributionGroupUserResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DisassociateTrafficDistributionGroupUserResponse.error_of_json))
+  | DisassociateUserProficiencies ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DisassociateWorkspace ->
+      if is_success
+      then Ok (DisassociateWorkspaceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DisassociateWorkspaceResponse.error_of_json))
+  | DismissUserContact ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DismissUserContactResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DismissUserContactResponse.error_of_json))
+  | EvaluateDataTableValues ->
+      if is_success
+      then
+        Ok (EvaluateDataTableValuesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some EvaluateDataTableValuesResponse.error_of_json))
+  | GetAttachedFile ->
+      if is_success
+      then Ok (GetAttachedFileResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetAttachedFileResponse.error_of_json))
   | GetContactAttributes ->
       if is_success
       then Ok (GetContactAttributesResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetContactAttributesResponse.error_of_json))
+  | GetContactMetrics ->
+      if is_success
+      then Ok (GetContactMetricsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetContactMetricsResponse.error_of_json))
   | GetCurrentMetricData ->
       if is_success
       then Ok (GetCurrentMetricDataResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetCurrentMetricDataResponse.error_of_json))
+  | GetCurrentUserData ->
+      if is_success
+      then Ok (GetCurrentUserDataResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetCurrentUserDataResponse.error_of_json))
+  | GetEffectiveHoursOfOperations ->
+      if is_success
+      then
+        Ok
+          (GetEffectiveHoursOfOperationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetEffectiveHoursOfOperationsResponse.error_of_json))
   | GetFederationToken ->
       if is_success
       then Ok (GetFederationTokenResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetFederationTokenResponse.error_of_json))
+  | GetFlowAssociation ->
+      if is_success
+      then Ok (GetFlowAssociationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetFlowAssociationResponse.error_of_json))
   | GetMetricData ->
       if is_success
       then Ok (GetMetricDataResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetMetricDataResponse.error_of_json))
+  | GetMetricDataV2 ->
+      if is_success
+      then Ok (GetMetricDataV2Response.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetMetricDataV2Response.error_of_json))
+  | GetPromptFile ->
+      if is_success
+      then Ok (GetPromptFileResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetPromptFileResponse.error_of_json))
+  | GetTaskTemplate ->
+      if is_success
+      then Ok (GetTaskTemplateResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetTaskTemplateResponse.error_of_json))
+  | GetTestCaseExecutionSummary ->
+      if is_success
+      then
+        Ok
+          (GetTestCaseExecutionSummaryResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTestCaseExecutionSummaryResponse.error_of_json))
+  | GetTrafficDistribution ->
+      if is_success
+      then
+        Ok (GetTrafficDistributionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTrafficDistributionResponse.error_of_json))
+  | ImportPhoneNumber ->
+      if is_success
+      then Ok (ImportPhoneNumberResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ImportPhoneNumberResponse.error_of_json))
+  | ImportWorkspaceMedia ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ImportWorkspaceMediaResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some ImportWorkspaceMediaResponse.error_of_json))
   | ListAgentStatuses ->
       if is_success
       then Ok (ListAgentStatusResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListAgentStatusResponse.error_of_json))
+  | ListAnalyticsDataAssociations ->
+      if is_success
+      then
+        Ok
+          (ListAnalyticsDataAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAnalyticsDataAssociationsResponse.error_of_json))
+  | ListAnalyticsDataLakeDataSets ->
+      if is_success
+      then
+        Ok
+          (ListAnalyticsDataLakeDataSetsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAnalyticsDataLakeDataSetsResponse.error_of_json))
   | ListApprovedOrigins ->
       if is_success
       then Ok (ListApprovedOriginsResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListApprovedOriginsResponse.error_of_json))
+  | ListAssociatedContacts ->
+      if is_success
+      then
+        Ok (ListAssociatedContactsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAssociatedContactsResponse.error_of_json))
+  | ListAttachedFilesConfigurations ->
+      if is_success
+      then
+        Ok
+          (ListAttachedFilesConfigurationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAttachedFilesConfigurationsResponse.error_of_json))
+  | ListAuthenticationProfiles ->
+      if is_success
+      then
+        Ok
+          (ListAuthenticationProfilesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAuthenticationProfilesResponse.error_of_json))
   | ListBots ->
       if is_success
       then Ok (ListBotsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListBotsResponse.error_of_json))
+  | ListChildHoursOfOperations ->
+      if is_success
+      then
+        Ok
+          (ListChildHoursOfOperationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListChildHoursOfOperationsResponse.error_of_json))
+  | ListContactEvaluations ->
+      if is_success
+      then
+        Ok (ListContactEvaluationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListContactEvaluationsResponse.error_of_json))
+  | ListContactFlowModuleAliases ->
+      if is_success
+      then
+        Ok
+          (ListContactFlowModuleAliasesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListContactFlowModuleAliasesResponse.error_of_json))
+  | ListContactFlowModuleVersions ->
+      if is_success
+      then
+        Ok
+          (ListContactFlowModuleVersionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListContactFlowModuleVersionsResponse.error_of_json))
   | ListContactFlowModules ->
       if is_success
       then
@@ -2998,6 +9606,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListContactFlowModulesResponse.error_of_json))
+  | ListContactFlowVersions ->
+      if is_success
+      then
+        Ok (ListContactFlowVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListContactFlowVersionsResponse.error_of_json))
   | ListContactFlows ->
       if is_success
       then Ok (ListContactFlowsResponse.of_json (response_to_json resp))
@@ -3009,6 +9625,34 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListContactReferencesResponse.error_of_json))
+  | ListDataTableAttributes ->
+      if is_success
+      then
+        Ok (ListDataTableAttributesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDataTableAttributesResponse.error_of_json))
+  | ListDataTablePrimaryValues ->
+      if is_success
+      then
+        Ok
+          (ListDataTablePrimaryValuesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDataTablePrimaryValuesResponse.error_of_json))
+  | ListDataTableValues ->
+      if is_success
+      then Ok (ListDataTableValuesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListDataTableValuesResponse.error_of_json))
+  | ListDataTables ->
+      if is_success
+      then Ok (ListDataTablesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListDataTablesResponse.error_of_json))
   | ListDefaultVocabularies ->
       if is_success
       then
@@ -3017,6 +9661,46 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListDefaultVocabulariesResponse.error_of_json))
+  | ListEntitySecurityProfiles ->
+      if is_success
+      then
+        Ok
+          (ListEntitySecurityProfilesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListEntitySecurityProfilesResponse.error_of_json))
+  | ListEvaluationFormVersions ->
+      if is_success
+      then
+        Ok
+          (ListEvaluationFormVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListEvaluationFormVersionsResponse.error_of_json))
+  | ListEvaluationForms ->
+      if is_success
+      then Ok (ListEvaluationFormsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListEvaluationFormsResponse.error_of_json))
+  | ListFlowAssociations ->
+      if is_success
+      then Ok (ListFlowAssociationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListFlowAssociationsResponse.error_of_json))
+  | ListHoursOfOperationOverrides ->
+      if is_success
+      then
+        Ok
+          (ListHoursOfOperationOverridesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListHoursOfOperationOverridesResponse.error_of_json))
   | ListHoursOfOperations ->
       if is_success
       then Ok (ListHoursOfOperationsResponse.of_json (response_to_json resp))
@@ -3064,15 +9748,43 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListLexBotsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListLexBotsResponse.error_of_json))
+  | ListNotifications ->
+      if is_success
+      then Ok (ListNotificationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListNotificationsResponse.error_of_json))
   | ListPhoneNumbers ->
       if is_success
       then Ok (ListPhoneNumbersResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListPhoneNumbersResponse.error_of_json))
+  | ListPhoneNumbersV2 ->
+      if is_success
+      then Ok (ListPhoneNumbersV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListPhoneNumbersV2Response.error_of_json))
+  | ListPredefinedAttributes ->
+      if is_success
+      then
+        Ok (ListPredefinedAttributesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListPredefinedAttributesResponse.error_of_json))
   | ListPrompts ->
       if is_success
       then Ok (ListPromptsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListPromptsResponse.error_of_json))
+  | ListQueueEmailAddresses ->
+      if is_success
+      then
+        Ok (ListQueueEmailAddressesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListQueueEmailAddressesResponse.error_of_json))
   | ListQueueQuickConnects ->
       if is_success
       then
@@ -3091,6 +9803,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListQuickConnectsResponse.error_of_json))
+  | ListRealtimeContactAnalysisSegmentsV2 ->
+      if is_success
+      then
+        Ok
+          (ListRealtimeContactAnalysisSegmentsV2Response.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListRealtimeContactAnalysisSegmentsV2Response.error_of_json))
+  | ListRoutingProfileManualAssignmentQueues ->
+      if is_success
+      then
+        Ok
+          (ListRoutingProfileManualAssignmentQueuesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListRoutingProfileManualAssignmentQueuesResponse.error_of_json))
   | ListRoutingProfileQueues ->
       if is_success
       then
@@ -3105,11 +9839,35 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListRoutingProfilesResponse.error_of_json))
+  | ListRules ->
+      if is_success
+      then Ok (ListRulesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListRulesResponse.error_of_json))
   | ListSecurityKeys ->
       if is_success
       then Ok (ListSecurityKeysResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListSecurityKeysResponse.error_of_json))
+  | ListSecurityProfileApplications ->
+      if is_success
+      then
+        Ok
+          (ListSecurityProfileApplicationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSecurityProfileApplicationsResponse.error_of_json))
+  | ListSecurityProfileFlowModules ->
+      if is_success
+      then
+        Ok
+          (ListSecurityProfileFlowModulesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSecurityProfileFlowModulesResponse.error_of_json))
   | ListSecurityProfilePermissions ->
       if is_success
       then
@@ -3132,6 +9890,54 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListTaskTemplates ->
+      if is_success
+      then Ok (ListTaskTemplatesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTaskTemplatesResponse.error_of_json))
+  | ListTestCaseExecutionRecords ->
+      if is_success
+      then
+        Ok
+          (ListTestCaseExecutionRecordsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTestCaseExecutionRecordsResponse.error_of_json))
+  | ListTestCaseExecutions ->
+      if is_success
+      then
+        Ok (ListTestCaseExecutionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTestCaseExecutionsResponse.error_of_json))
+  | ListTestCases ->
+      if is_success
+      then Ok (ListTestCasesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListTestCasesResponse.error_of_json))
+  | ListTrafficDistributionGroupUsers ->
+      if is_success
+      then
+        Ok
+          (ListTrafficDistributionGroupUsersResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTrafficDistributionGroupUsersResponse.error_of_json))
+  | ListTrafficDistributionGroups ->
+      if is_success
+      then
+        Ok
+          (ListTrafficDistributionGroupsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTrafficDistributionGroupsResponse.error_of_json))
   | ListUseCases ->
       if is_success
       then Ok (ListUseCasesResponse.of_json (response_to_json resp))
@@ -3144,10 +9950,82 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListUserHierarchyGroupsResponse.error_of_json))
+  | ListUserNotifications ->
+      if is_success
+      then Ok (ListUserNotificationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListUserNotificationsResponse.error_of_json))
+  | ListUserProficiencies ->
+      if is_success
+      then Ok (ListUserProficienciesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListUserProficienciesResponse.error_of_json))
   | ListUsers ->
       if is_success
       then Ok (ListUsersResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListUsersResponse.error_of_json))
+  | ListViewVersions ->
+      if is_success
+      then Ok (ListViewVersionsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListViewVersionsResponse.error_of_json))
+  | ListViews ->
+      if is_success
+      then Ok (ListViewsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListViewsResponse.error_of_json))
+  | ListWorkspaceMedia ->
+      if is_success
+      then Ok (ListWorkspaceMediaResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListWorkspaceMediaResponse.error_of_json))
+  | ListWorkspacePages ->
+      if is_success
+      then Ok (ListWorkspacePagesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListWorkspacePagesResponse.error_of_json))
+  | ListWorkspaces ->
+      if is_success
+      then Ok (ListWorkspacesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListWorkspacesResponse.error_of_json))
+  | MonitorContact ->
+      if is_success
+      then Ok (MonitorContactResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some MonitorContactResponse.error_of_json))
+  | PauseContact ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PauseContactResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some PauseContactResponse.error_of_json))
+  | PutUserStatus ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (PutUserStatusResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some PutUserStatusResponse.error_of_json))
+  | ReleasePhoneNumber ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | ReplicateInstance ->
+      if is_success
+      then Ok (ReplicateInstanceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ReplicateInstanceResponse.error_of_json))
+  | ResumeContact ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ResumeContactResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some ResumeContactResponse.error_of_json))
   | ResumeContactRecording ->
       if is_success
       then
@@ -3158,17 +10036,226 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ResumeContactRecordingResponse.error_of_json))
+  | SearchAgentStatuses ->
+      if is_success
+      then Ok (SearchAgentStatusesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SearchAgentStatusesResponse.error_of_json))
+  | SearchAvailablePhoneNumbers ->
+      if is_success
+      then
+        Ok
+          (SearchAvailablePhoneNumbersResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchAvailablePhoneNumbersResponse.error_of_json))
+  | SearchContactEvaluations ->
+      if is_success
+      then
+        Ok (SearchContactEvaluationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchContactEvaluationsResponse.error_of_json))
+  | SearchContactFlowModules ->
+      if is_success
+      then
+        Ok (SearchContactFlowModulesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchContactFlowModulesResponse.error_of_json))
+  | SearchContactFlows ->
+      if is_success
+      then Ok (SearchContactFlowsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SearchContactFlowsResponse.error_of_json))
+  | SearchContacts ->
+      if is_success
+      then Ok (SearchContactsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some SearchContactsResponse.error_of_json))
+  | SearchDataTables ->
+      if is_success
+      then Ok (SearchDataTablesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some SearchDataTablesResponse.error_of_json))
+  | SearchEmailAddresses ->
+      if is_success
+      then Ok (SearchEmailAddressesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SearchEmailAddressesResponse.error_of_json))
+  | SearchEvaluationForms ->
+      if is_success
+      then Ok (SearchEvaluationFormsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SearchEvaluationFormsResponse.error_of_json))
+  | SearchHoursOfOperationOverrides ->
+      if is_success
+      then
+        Ok
+          (SearchHoursOfOperationOverridesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchHoursOfOperationOverridesResponse.error_of_json))
+  | SearchHoursOfOperations ->
+      if is_success
+      then
+        Ok (SearchHoursOfOperationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchHoursOfOperationsResponse.error_of_json))
+  | SearchNotifications ->
+      if is_success
+      then Ok (SearchNotificationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SearchNotificationsResponse.error_of_json))
+  | SearchPredefinedAttributes ->
+      if is_success
+      then
+        Ok
+          (SearchPredefinedAttributesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchPredefinedAttributesResponse.error_of_json))
+  | SearchPrompts ->
+      if is_success
+      then Ok (SearchPromptsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SearchPromptsResponse.error_of_json))
+  | SearchQueues ->
+      if is_success
+      then Ok (SearchQueuesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SearchQueuesResponse.error_of_json))
+  | SearchQuickConnects ->
+      if is_success
+      then Ok (SearchQuickConnectsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SearchQuickConnectsResponse.error_of_json))
+  | SearchResourceTags ->
+      if is_success
+      then Ok (SearchResourceTagsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SearchResourceTagsResponse.error_of_json))
+  | SearchRoutingProfiles ->
+      if is_success
+      then Ok (SearchRoutingProfilesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SearchRoutingProfilesResponse.error_of_json))
+  | SearchSecurityProfiles ->
+      if is_success
+      then
+        Ok (SearchSecurityProfilesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchSecurityProfilesResponse.error_of_json))
+  | SearchTestCases ->
+      if is_success
+      then Ok (SearchTestCasesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some SearchTestCasesResponse.error_of_json))
+  | SearchUserHierarchyGroups ->
+      if is_success
+      then
+        Ok
+          (SearchUserHierarchyGroupsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchUserHierarchyGroupsResponse.error_of_json))
+  | SearchUsers ->
+      if is_success
+      then Ok (SearchUsersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SearchUsersResponse.error_of_json))
+  | SearchViews ->
+      if is_success
+      then Ok (SearchViewsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SearchViewsResponse.error_of_json))
   | SearchVocabularies ->
       if is_success
       then Ok (SearchVocabulariesResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some SearchVocabulariesResponse.error_of_json))
+  | SearchWorkspaceAssociations ->
+      if is_success
+      then
+        Ok
+          (SearchWorkspaceAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchWorkspaceAssociationsResponse.error_of_json))
+  | SearchWorkspaces ->
+      if is_success
+      then Ok (SearchWorkspacesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some SearchWorkspacesResponse.error_of_json))
+  | SendChatIntegrationEvent ->
+      if is_success
+      then
+        Ok (SendChatIntegrationEventResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SendChatIntegrationEventResponse.error_of_json))
+  | SendOutboundEmail ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (SendOutboundEmailResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some SendOutboundEmailResponse.error_of_json))
+  | StartAttachedFileUpload ->
+      if is_success
+      then
+        Ok (StartAttachedFileUploadResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartAttachedFileUploadResponse.error_of_json))
   | StartChatContact ->
       if is_success
       then Ok (StartChatContactResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some StartChatContactResponse.error_of_json))
+  | StartContactEvaluation ->
+      if is_success
+      then
+        Ok (StartContactEvaluationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartContactEvaluationResponse.error_of_json))
+  | StartContactMediaProcessing ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (StartContactMediaProcessingResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some StartContactMediaProcessingResponse.error_of_json))
   | StartContactRecording ->
       if is_success
       then
@@ -3184,6 +10271,29 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some StartContactStreamingResponse.error_of_json))
+  | StartEmailContact ->
+      if is_success
+      then Ok (StartEmailContactResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartEmailContactResponse.error_of_json))
+  | StartOutboundChatContact ->
+      if is_success
+      then
+        Ok (StartOutboundChatContactResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartOutboundChatContactResponse.error_of_json))
+  | StartOutboundEmailContact ->
+      if is_success
+      then
+        Ok
+          (StartOutboundEmailContactResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartOutboundEmailContactResponse.error_of_json))
   | StartOutboundVoiceContact ->
       if is_success
       then
@@ -3193,11 +10303,34 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some StartOutboundVoiceContactResponse.error_of_json))
+  | StartScreenSharing ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (StartScreenSharingResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some StartScreenSharingResponse.error_of_json))
   | StartTaskContact ->
       if is_success
       then Ok (StartTaskContactResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some StartTaskContactResponse.error_of_json))
+  | StartTestCaseExecution ->
+      if is_success
+      then
+        Ok (StartTestCaseExecutionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartTestCaseExecutionResponse.error_of_json))
+  | StartWebRTCContact ->
+      if is_success
+      then Ok (StartWebRTCContactResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartWebRTCContactResponse.error_of_json))
   | StopContact ->
       if is_success
       then
@@ -3205,6 +10338,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (StopContactResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some StopContactResponse.error_of_json))
+  | StopContactMediaProcessing ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (StopContactMediaProcessingResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some StopContactMediaProcessingResponse.error_of_json))
   | StopContactRecording ->
       if is_success
       then
@@ -3223,6 +10368,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some StopContactStreamingResponse.error_of_json))
+  | StopTestCaseExecution ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (StopTestCaseExecutionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some StopTestCaseExecutionResponse.error_of_json))
+  | SubmitContactEvaluation ->
+      if is_success
+      then
+        Ok (SubmitContactEvaluationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SubmitContactEvaluationResponse.error_of_json))
   | SuspendContactRecording ->
       if is_success
       then
@@ -3233,10 +10395,41 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some SuspendContactRecordingResponse.error_of_json))
+  | TagContact ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagContactResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagContactResponse.error_of_json))
   | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | TransferContact ->
+      if is_success
+      then Ok (TransferContactResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some TransferContactResponse.error_of_json))
+  | UntagContact ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagContactResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagContactResponse.error_of_json))
   | UntagResource ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateAgentStatus ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateAttachedFilesConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateAttachedFilesConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAttachedFilesConfigurationResponse.error_of_json))
+  | UpdateAuthenticationProfile ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateContact ->
       if is_success
@@ -3255,10 +10448,48 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateContactAttributesResponse.error_of_json))
+  | UpdateContactEvaluation ->
+      if is_success
+      then
+        Ok (UpdateContactEvaluationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateContactEvaluationResponse.error_of_json))
   | UpdateContactFlowContent ->
-      if is_success then Ok () else Error (parse_aws_error None)
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateContactFlowContentResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateContactFlowContentResponse.error_of_json))
   | UpdateContactFlowMetadata ->
-      if is_success then Ok () else Error (parse_aws_error None)
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateContactFlowMetadataResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateContactFlowMetadataResponse.error_of_json))
+  | UpdateContactFlowModuleAlias ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateContactFlowModuleAliasResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateContactFlowModuleAliasResponse.error_of_json))
   | UpdateContactFlowModuleContent ->
       if is_success
       then
@@ -3284,7 +10515,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some UpdateContactFlowModuleMetadataResponse.error_of_json))
   | UpdateContactFlowName ->
-      if is_success then Ok () else Error (parse_aws_error None)
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateContactFlowNameResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateContactFlowNameResponse.error_of_json))
+  | UpdateContactRoutingData ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateContactRoutingDataResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateContactRoutingDataResponse.error_of_json))
   | UpdateContactSchedule ->
       if is_success
       then
@@ -3294,12 +10543,104 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateContactScheduleResponse.error_of_json))
+  | UpdateDataTableAttribute ->
+      if is_success
+      then
+        Ok (UpdateDataTableAttributeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDataTableAttributeResponse.error_of_json))
+  | UpdateDataTableMetadata ->
+      if is_success
+      then
+        Ok (UpdateDataTableMetadataResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDataTableMetadataResponse.error_of_json))
+  | UpdateDataTablePrimaryValues ->
+      if is_success
+      then
+        Ok
+          (UpdateDataTablePrimaryValuesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDataTablePrimaryValuesResponse.error_of_json))
+  | UpdateEmailAddressMetadata ->
+      if is_success
+      then
+        Ok
+          (UpdateEmailAddressMetadataResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateEmailAddressMetadataResponse.error_of_json))
+  | UpdateEvaluationForm ->
+      if is_success
+      then Ok (UpdateEvaluationFormResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateEvaluationFormResponse.error_of_json))
   | UpdateHoursOfOperation ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateHoursOfOperationOverride ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateInstanceAttribute ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateInstanceStorageConfig ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateNotificationContent ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateNotificationContentResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateNotificationContentResponse.error_of_json))
+  | UpdateParticipantAuthentication ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateParticipantAuthenticationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateParticipantAuthenticationResponse.error_of_json))
+  | UpdateParticipantRoleConfig ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateParticipantRoleConfigResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateParticipantRoleConfigResponse.error_of_json))
+  | UpdatePhoneNumber ->
+      if is_success
+      then Ok (UpdatePhoneNumberResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdatePhoneNumberResponse.error_of_json))
+  | UpdatePhoneNumberMetadata ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdatePredefinedAttribute ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdatePrompt ->
+      if is_success
+      then Ok (UpdatePromptResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdatePromptResponse.error_of_json))
   | UpdateQueueHoursOfOperation ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateQueueMaxContacts ->
@@ -3308,11 +10649,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateQueueOutboundCallerConfig ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateQueueOutboundEmailConfig ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateQueueStatus ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateQuickConnectConfig ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateQuickConnectName ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateRoutingProfileAgentAvailabilityTimer ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateRoutingProfileConcurrency ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -3322,7 +10667,35 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateRoutingProfileQueues ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateRule -> if is_success then Ok () else Error (parse_aws_error None)
   | UpdateSecurityProfile ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateTaskTemplate ->
+      if is_success
+      then Ok (UpdateTaskTemplateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateTaskTemplateResponse.error_of_json))
+  | UpdateTestCase ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateTestCaseResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some UpdateTestCaseResponse.error_of_json))
+  | UpdateTrafficDistribution ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateTrafficDistributionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateTrafficDistributionResponse.error_of_json))
+  | UpdateUserConfig ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateUserHierarchy ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -3332,9 +10705,77 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateUserIdentityInfo ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateUserNotificationStatus ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateUserNotificationStatusResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateUserNotificationStatusResponse.error_of_json))
   | UpdateUserPhoneConfig ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateUserProficiencies ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateUserRoutingProfile ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateUserSecurityProfiles ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateViewContent ->
+      if is_success
+      then Ok (UpdateViewContentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateViewContentResponse.error_of_json))
+  | UpdateViewMetadata ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateViewMetadataResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateViewMetadataResponse.error_of_json))
+  | UpdateWorkspaceMetadata ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateWorkspaceMetadataResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateWorkspaceMetadataResponse.error_of_json))
+  | UpdateWorkspacePage ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateWorkspacePageResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateWorkspacePageResponse.error_of_json))
+  | UpdateWorkspaceTheme ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateWorkspaceThemeResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateWorkspaceThemeResponse.error_of_json))
+  | UpdateWorkspaceVisibility ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateWorkspaceVisibilityResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateWorkspaceVisibilityResponse.error_of_json))

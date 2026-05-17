@@ -25,6 +25,418 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module BooleanType =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module SensitiveStringType =
+  struct
+    type nonrec t = string
+    let context_ = "SensitiveStringType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\p{L}\\p{M}\\p{S}\\p{N}\\p{P}\\t\\n\\r \194\160\227\128\128]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SensitiveStringType" j
+    let to_json = simple_to_json to_value
+  end
+module ExternalIdIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "ExternalIdIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\p{L}\\p{M}\\p{S}\\p{N}\\p{P}]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExternalIdIdentifier" j
+    let to_json = simple_to_json to_value
+  end
+module ExternalIdIssuer =
+  struct
+    type nonrec t = string
+    let context_ = "ExternalIdIssuer"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\p{L}\\p{M}\\p{S}\\p{N}\\p{P}]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExternalIdIssuer" j
+    let to_json = simple_to_json to_value
+  end
+module Address =
+  struct
+    type nonrec t =
+      {
+      streetAddress: SensitiveStringType.t option
+        [@ocaml.doc "The street of the address."];
+      locality: SensitiveStringType.t option
+        [@ocaml.doc "A string of the address locality."];
+      region: SensitiveStringType.t option
+        [@ocaml.doc "The region of the address."];
+      postalCode: SensitiveStringType.t option
+        [@ocaml.doc "The postal code of the address."];
+      country: SensitiveStringType.t option
+        [@ocaml.doc "The country of the address."];
+      formatted: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing a formatted version of the address for display."];
+      type_: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string representing the type of address. For example, \"Home.\""];
+      primary: BooleanType.t option
+        [@ocaml.doc
+          "A Boolean value representing whether this is the primary address for the associated resource."]}
+    let make ?streetAddress =
+      fun ?locality ->
+        fun ?region ->
+          fun ?postalCode ->
+            fun ?country ->
+              fun ?formatted ->
+                fun ?type_ ->
+                  fun ?primary ->
+                    fun () ->
+                      {
+                        streetAddress;
+                        locality;
+                        region;
+                        postalCode;
+                        country;
+                        formatted;
+                        type_;
+                        primary
+                      }
+    let to_value x =
+      structure_to_value
+        [("StreetAddress",
+           (Option.map x.streetAddress ~f:SensitiveStringType.to_value));
+        ("Locality", (Option.map x.locality ~f:SensitiveStringType.to_value));
+        ("Region", (Option.map x.region ~f:SensitiveStringType.to_value));
+        ("PostalCode",
+          (Option.map x.postalCode ~f:SensitiveStringType.to_value));
+        ("Country", (Option.map x.country ~f:SensitiveStringType.to_value));
+        ("Formatted",
+          (Option.map x.formatted ~f:SensitiveStringType.to_value));
+        ("Type", (Option.map x.type_ ~f:SensitiveStringType.to_value));
+        ("Primary", (Option.map x.primary ~f:BooleanType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let primary =
+        (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "Primary") in
+      let type_ =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let formatted =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Formatted") in
+      let country =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Country") in
+      let postalCode =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "PostalCode") in
+      let region =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Region") in
+      let locality =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Locality") in
+      let streetAddress =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "StreetAddress") in
+      make ?primary ?type_ ?formatted ?country ?postalCode ?region ?locality
+        ?streetAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let primary = field_map json__ "Primary" BooleanType.of_json in
+      let type_ = field_map json__ "Type" SensitiveStringType.of_json in
+      let formatted =
+        field_map json__ "Formatted" SensitiveStringType.of_json in
+      let country = field_map json__ "Country" SensitiveStringType.of_json in
+      let postalCode =
+        field_map json__ "PostalCode" SensitiveStringType.of_json in
+      let region = field_map json__ "Region" SensitiveStringType.of_json in
+      let locality = field_map json__ "Locality" SensitiveStringType.of_json in
+      let streetAddress =
+        field_map json__ "StreetAddress" SensitiveStringType.of_json in
+      make ?primary ?type_ ?formatted ?country ?postalCode ?region ?locality
+        ?streetAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The address associated with the specified user."]
+module Email =
+  struct
+    type nonrec t =
+      {
+      value: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing an email address. For example, \"johndoe\\@amazon.com.\""];
+      type_: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string representing the type of address. For example, \"Work.\""];
+      primary: BooleanType.t option
+        [@ocaml.doc
+          "A Boolean value representing whether this is the primary email address for the associated resource."]}
+    let make ?value =
+      fun ?type_ -> fun ?primary -> fun () -> { value; type_; primary }
+    let to_value x =
+      structure_to_value
+        [("Value", (Option.map x.value ~f:SensitiveStringType.to_value));
+        ("Type", (Option.map x.type_ ~f:SensitiveStringType.to_value));
+        ("Primary", (Option.map x.primary ~f:BooleanType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let primary =
+        (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "Primary") in
+      let type_ =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let value =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Value") in
+      make ?primary ?type_ ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let primary = field_map json__ "Primary" BooleanType.of_json in
+      let type_ = field_map json__ "Type" SensitiveStringType.of_json in
+      let value = field_map json__ "Value" SensitiveStringType.of_json in
+      make ?primary ?type_ ?value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The email address associated with the user."]
+module AttributeValue =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The value of the attribute. This is a Document type. This type is not supported by Java V1, Go V1, and older versions of the CLI."]
+module ExtensionName =
+  struct
+    type nonrec t = string
+    let context_ = "ExtensionName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"aws:identitystore:[a-z]{1,20}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExtensionName" j
+    let to_json = simple_to_json to_value
+  end
+module ExternalId =
+  struct
+    type nonrec t =
+      {
+      issuer: ExternalIdIssuer.t
+        [@ocaml.doc "The issuer for an external identifier."];
+      id: ExternalIdIdentifier.t
+        [@ocaml.doc
+          "The identifier issued to this resource by an external identity provider."]}
+    let context_ = "ExternalId"
+    let make ~issuer = fun ~id -> fun () -> { issuer; id }
+    let to_value x =
+      structure_to_value
+        [("Issuer", (Some (ExternalIdIssuer.to_value x.issuer)));
+        ("Id", (Some (ExternalIdIdentifier.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        ExternalIdIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let issuer =
+        ExternalIdIssuer.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Issuer") in
+      make ~id ~issuer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ExternalIdIdentifier.of_json in
+      let issuer = field_map_exn json__ "Issuer" ExternalIdIssuer.of_json in
+      make ~id ~issuer ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The identifier issued to this resource by an external identity provider."]
+module PhoneNumber =
+  struct
+    type nonrec t =
+      {
+      value: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing a phone number. For example, \"8675309\" or \"+1 (800) 123-4567\"."];
+      type_: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string representing the type of a phone number. For example, \"Mobile.\""];
+      primary: BooleanType.t option
+        [@ocaml.doc
+          "A Boolean value representing whether this is the primary phone number for the associated resource."]}
+    let make ?value =
+      fun ?type_ -> fun ?primary -> fun () -> { value; type_; primary }
+    let to_value x =
+      structure_to_value
+        [("Value", (Option.map x.value ~f:SensitiveStringType.to_value));
+        ("Type", (Option.map x.type_ ~f:SensitiveStringType.to_value));
+        ("Primary", (Option.map x.primary ~f:BooleanType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let primary =
+        (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "Primary") in
+      let type_ =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let value =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Value") in
+      make ?primary ?type_ ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let primary = field_map json__ "Primary" BooleanType.of_json in
+      let type_ = field_map json__ "Type" SensitiveStringType.of_json in
+      let value = field_map json__ "Value" SensitiveStringType.of_json in
+      make ?primary ?type_ ?value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The phone number associated with the user."]
+module Photo =
+  struct
+    type nonrec t =
+      {
+      value: SensitiveStringType.t
+        [@ocaml.doc
+          "The photo data or URL. Supported formats include jpg, jpeg, png, and gif. This field is required for all photo entries."];
+      type_: SensitiveStringType.t option
+        [@ocaml.doc
+          "The type of photo. This field is optional and can be used to categorize different types of photos."];
+      display: SensitiveStringType.t option
+        [@ocaml.doc
+          "A human-readable description of the photo for display purposes. This optional field provides context about the photo."];
+      primary: BooleanType.t option
+        [@ocaml.doc
+          "Specifies whether this is the user's primary photo. Default value is false. Only one photo can be designated as primary per user."]}
+    let context_ = "Photo"
+    let make ?type_ =
+      fun ?display ->
+        fun ?primary ->
+          fun ~value -> fun () -> { type_; display; primary; value }
+    let to_value x =
+      structure_to_value
+        [("Value", (Some (SensitiveStringType.to_value x.value)));
+        ("Type", (Option.map x.type_ ~f:SensitiveStringType.to_value));
+        ("Display", (Option.map x.display ~f:SensitiveStringType.to_value));
+        ("Primary", (Option.map x.primary ~f:BooleanType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let primary =
+        (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "Primary") in
+      let display =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Display") in
+      let type_ =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let value =
+        SensitiveStringType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      make ?primary ?display ?type_ ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let primary = field_map json__ "Primary" BooleanType.of_json in
+      let display = field_map json__ "Display" SensitiveStringType.of_json in
+      let type_ = field_map json__ "Type" SensitiveStringType.of_json in
+      let value = field_map_exn json__ "Value" SensitiveStringType.of_json in
+      make ?primary ?display ?type_ ~value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about a user's photo. Users can have up to 3 photos, with one designated as primary. Supports common image formats, including jpg, jpeg, png, and gif."]
+module Role =
+  struct
+    type nonrec t =
+      {
+      value: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing a role name. For example, \"Researcher.\""];
+      type_: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string representing the type of role. For example, \"Work.\""];
+      primary: BooleanType.t option
+        [@ocaml.doc
+          "A Boolean value representing whether this is the primary role for the associated resource."]}
+    let make ?value =
+      fun ?type_ -> fun ?primary -> fun () -> { value; type_; primary }
+    let to_value x =
+      structure_to_value
+        [("Value", (Option.map x.value ~f:SensitiveStringType.to_value));
+        ("Type", (Option.map x.type_ ~f:SensitiveStringType.to_value));
+        ("Primary", (Option.map x.primary ~f:BooleanType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let primary =
+        (Option.map ~f:BooleanType.of_xml) (Xml.child xml_arg0 "Primary") in
+      let type_ =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let value =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Value") in
+      make ?primary ?type_ ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let primary = field_map json__ "Primary" BooleanType.of_json in
+      let type_ = field_map json__ "Type" SensitiveStringType.of_json in
+      let value = field_map json__ "Value" SensitiveStringType.of_json in
+      make ?primary ?type_ ?value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The role associated with the user."]
 module ResourceId =
   struct
     type nonrec t = string
@@ -37,7 +449,7 @@ module ResourceId =
                 (check_string_max i ~max:47) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([0-9a-f]{10}-|)[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$")));
+                       ~pattern:"([0-9a-f]{10}-|)[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -45,6 +457,381 @@ module ResourceId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ResourceId" j
+    let to_json = simple_to_json to_value
+  end
+module AttributePath =
+  struct
+    type nonrec t = string
+    let context_ = "AttributePath"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(?:\\p{L}+:\\p{L}+:\\p{L}+(?:\\.\\p{L}+){0,3}|\\p{L}+(?:\\.\\p{L}+){0,2})")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AttributePath" j
+    let to_json = simple_to_json to_value
+  end
+module Addresses =
+  struct
+    type nonrec t = Address.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Address.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Address.of_xml)
+    let of_json j = list_of_json ~kind:"Addresses" ~of_json:Address.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DateType =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module Emails =
+  struct
+    type nonrec t = Email.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Email.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Email.of_xml)
+    let of_json j = list_of_json ~kind:"Emails" ~of_json:Email.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Extensions =
+  struct
+    type nonrec t = (ExtensionName.t * AttributeValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types ExtensionName AttributeValue"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ExtensionName.to_value x) |>
+                    (fun x ->
+                       (AttributeValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ExtensionName.of_string
+        ~of_json:AttributeValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExternalIds =
+  struct
+    type nonrec t = ExternalId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExternalId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExternalId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExternalIds" ~of_json:ExternalId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IdentityStoreId =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityStoreId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"d-[0-9a-f]{10}$|^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityStoreId" j
+    let to_json = simple_to_json to_value
+  end
+module Name =
+  struct
+    type nonrec t =
+      {
+      formatted: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing a formatted version of the name for display."];
+      familyName: SensitiveStringType.t option
+        [@ocaml.doc "The family name of the user."];
+      givenName: SensitiveStringType.t option
+        [@ocaml.doc "The given name of the user."];
+      middleName: SensitiveStringType.t option
+        [@ocaml.doc "The middle name of the user."];
+      honorificPrefix: SensitiveStringType.t option
+        [@ocaml.doc "The honorific prefix of the user. For example, \"Dr.\""];
+      honorificSuffix: SensitiveStringType.t option
+        [@ocaml.doc
+          "The honorific suffix of the user. For example, \"M.D.\""]}
+    let make ?formatted =
+      fun ?familyName ->
+        fun ?givenName ->
+          fun ?middleName ->
+            fun ?honorificPrefix ->
+              fun ?honorificSuffix ->
+                fun () ->
+                  {
+                    formatted;
+                    familyName;
+                    givenName;
+                    middleName;
+                    honorificPrefix;
+                    honorificSuffix
+                  }
+    let to_value x =
+      structure_to_value
+        [("Formatted",
+           (Option.map x.formatted ~f:SensitiveStringType.to_value));
+        ("FamilyName",
+          (Option.map x.familyName ~f:SensitiveStringType.to_value));
+        ("GivenName",
+          (Option.map x.givenName ~f:SensitiveStringType.to_value));
+        ("MiddleName",
+          (Option.map x.middleName ~f:SensitiveStringType.to_value));
+        ("HonorificPrefix",
+          (Option.map x.honorificPrefix ~f:SensitiveStringType.to_value));
+        ("HonorificSuffix",
+          (Option.map x.honorificSuffix ~f:SensitiveStringType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let honorificSuffix =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "HonorificSuffix") in
+      let honorificPrefix =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "HonorificPrefix") in
+      let middleName =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "MiddleName") in
+      let givenName =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "GivenName") in
+      let familyName =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "FamilyName") in
+      let formatted =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Formatted") in
+      make ?honorificSuffix ?honorificPrefix ?middleName ?givenName
+        ?familyName ?formatted ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let honorificSuffix =
+        field_map json__ "HonorificSuffix" SensitiveStringType.of_json in
+      let honorificPrefix =
+        field_map json__ "HonorificPrefix" SensitiveStringType.of_json in
+      let middleName =
+        field_map json__ "MiddleName" SensitiveStringType.of_json in
+      let givenName =
+        field_map json__ "GivenName" SensitiveStringType.of_json in
+      let familyName =
+        field_map json__ "FamilyName" SensitiveStringType.of_json in
+      let formatted =
+        field_map json__ "Formatted" SensitiveStringType.of_json in
+      make ?honorificSuffix ?honorificPrefix ?middleName ?givenName
+        ?familyName ?formatted ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The full name of the user."]
+module PhoneNumbers =
+  struct
+    type nonrec t = PhoneNumber.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PhoneNumber.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PhoneNumber.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PhoneNumbers" ~of_json:PhoneNumber.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Photos =
+  struct
+    type nonrec t = Photo.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Photo.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Photo.of_xml)
+    let of_json j = list_of_json ~kind:"Photos" ~of_json:Photo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Roles =
+  struct
+    type nonrec t = Role.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Role.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Role.of_xml)
+    let of_json j = list_of_json ~kind:"Roles" ~of_json:Role.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module StringType =
+  struct
+    type nonrec t = string
+    let context_ = "StringType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StringType" j
     let to_json = simple_to_json to_value
   end
 module UserName =
@@ -69,48 +856,29 @@ module UserName =
     let of_json j = string_of_json ~kind:"UserName" j
     let to_json = simple_to_json to_value
   end
-module AttributePath =
+module UserStatus =
   struct
-    type nonrec t = string
-    let context_ = "AttributePath"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:255) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[\\p{L}\\p{M}\\p{S}\\p{N}\\p{P} \194\160]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AttributePath" j
-    let to_json = simple_to_json to_value
-  end
-module SensitiveStringType =
-  struct
-    type nonrec t = string
-    let context_ = "SensitiveStringType"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[\\p{L}\\p{M}\\p{S}\\p{N}\\p{P}\\t\\n\\r \194\160]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SensitiveStringType" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration UserStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UserStatus" j)
     let to_json = simple_to_json to_value
   end
 module GroupDisplayName =
@@ -135,22 +903,64 @@ module GroupDisplayName =
     let of_json j = string_of_json ~kind:"GroupDisplayName" j
     let to_json = simple_to_json to_value
   end
-module Message =
+module MemberId =
+  struct
+    type nonrec t =
+      {
+      userId: ResourceId.t option
+        [@ocaml.doc
+          "An object containing the identifiers of resources that can be members."]}
+    let make ?userId = fun () -> { userId }
+    let to_value x =
+      structure_to_value
+        [("UserId", (Option.map x.userId ~f:ResourceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "UserId") in
+      make ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userId = field_map json__ "UserId" ResourceId.of_json in
+      make ?userId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An object containing the identifier of a group member."]
+module AccessDeniedExceptionReason =
+  struct
+    type nonrec t =
+      | KMS_ACCESS_DENIED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | KMS_ACCESS_DENIED -> "KMS_ACCESS_DENIED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "KMS_ACCESS_DENIED" -> KMS_ACCESS_DENIED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AccessDeniedExceptionReason"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AccessDeniedExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module ExceptionMessage =
   struct
     type nonrec t = string
-    let context_ = "Message"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:65535) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
+    let context_ = "ExceptionMessage"
+    let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Message" j
+    let of_json j = string_of_json ~kind:"ExceptionMessage" j
     let to_json = simple_to_json to_value
   end
 module RequestId =
@@ -160,8 +970,12 @@ module RequestId =
     let make i =
       let open Result in
         ok_or_failwith
-          (check_pattern i
-             ~pattern:"[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}");
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -171,12 +985,80 @@ module RequestId =
     let of_json j = string_of_json ~kind:"RequestId" j
     let to_json = simple_to_json to_value
   end
+module ConflictExceptionReason =
+  struct
+    type nonrec t =
+      | UNIQUENESS_CONSTRAINT_VIOLATION 
+      | CONCURRENT_MODIFICATION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UNIQUENESS_CONSTRAINT_VIOLATION -> "UNIQUENESS_CONSTRAINT_VIOLATION"
+      | CONCURRENT_MODIFICATION -> "CONCURRENT_MODIFICATION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UNIQUENESS_CONSTRAINT_VIOLATION" -> UNIQUENESS_CONSTRAINT_VIOLATION
+      | "CONCURRENT_MODIFICATION" -> CONCURRENT_MODIFICATION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConflictExceptionReason" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ConflictExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module RetryAfterSeconds =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RetryAfterSeconds" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceNotFoundExceptionReason =
+  struct
+    type nonrec t =
+      | KMS_KEY_NOT_FOUND 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | KMS_KEY_NOT_FOUND -> "KMS_KEY_NOT_FOUND"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "KMS_KEY_NOT_FOUND" -> KMS_KEY_NOT_FOUND
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResourceNotFoundExceptionReason"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ResourceNotFoundExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
 module ResourceType =
   struct
     type nonrec t =
       | GROUP 
       | USER 
       | IDENTITY_STORE 
+      | GROUP_MEMBERSHIP 
+      | RESOURCE_POLICY 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -184,12 +1066,16 @@ module ResourceType =
       | GROUP -> "GROUP"
       | USER -> "USER"
       | IDENTITY_STORE -> "IDENTITY_STORE"
+      | GROUP_MEMBERSHIP -> "GROUP_MEMBERSHIP"
+      | RESOURCE_POLICY -> "RESOURCE_POLICY"
       | Non_static_id s -> s
     let of_string =
       function
       | "GROUP" -> GROUP
       | "USER" -> USER
       | "IDENTITY_STORE" -> IDENTITY_STORE
+      | "GROUP_MEMBERSHIP" -> GROUP_MEMBERSHIP
+      | "RESOURCE_POLICY" -> RESOURCE_POLICY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -199,36 +1085,369 @@ module ResourceType =
     let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
     let to_json = simple_to_json to_value
   end
+module ThrottlingExceptionReason =
+  struct
+    type nonrec t =
+      | KMS_THROTTLING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | KMS_THROTTLING -> "KMS_THROTTLING" | Non_static_id s -> s
+    let of_string =
+      function | "KMS_THROTTLING" -> KMS_THROTTLING | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ThrottlingExceptionReason" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ThrottlingExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module ValidationExceptionReason =
+  struct
+    type nonrec t =
+      | KMS_INVALID_ARN 
+      | KMS_INVALID_KEY_USAGE 
+      | KMS_INVALID_STATE 
+      | KMS_DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | KMS_INVALID_ARN -> "KMS_INVALID_ARN"
+      | KMS_INVALID_KEY_USAGE -> "KMS_INVALID_KEY_USAGE"
+      | KMS_INVALID_STATE -> "KMS_INVALID_STATE"
+      | KMS_DISABLED -> "KMS_DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "KMS_INVALID_ARN" -> KMS_INVALID_ARN
+      | "KMS_INVALID_KEY_USAGE" -> KMS_INVALID_KEY_USAGE
+      | "KMS_INVALID_STATE" -> KMS_INVALID_STATE
+      | "KMS_DISABLED" -> KMS_DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ValidationExceptionReason" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ValidationExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module AttributeOperation =
+  struct
+    type nonrec t =
+      {
+      attributePath: AttributePath.t
+        [@ocaml.doc
+          "A string representation of the path to a given attribute or sub-attribute. Supports JMESPath."];
+      attributeValue: AttributeValue.t option
+        [@ocaml.doc
+          "The value of the attribute. This is a Document type. This type is not supported by Java V1, Go V1, and older versions of the CLI."]}
+    let context_ = "AttributeOperation"
+    let make ?attributeValue =
+      fun ~attributePath -> fun () -> { attributeValue; attributePath }
+    let to_value x =
+      structure_to_value
+        [("AttributePath", (Some (AttributePath.to_value x.attributePath)));
+        ("AttributeValue",
+          (Option.map x.attributeValue ~f:AttributeValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attributeValue =
+        (Option.map ~f:AttributeValue.of_xml)
+          (Xml.child xml_arg0 "AttributeValue") in
+      let attributePath =
+        AttributePath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttributePath") in
+      make ?attributeValue ~attributePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributeValue =
+        field_map json__ "AttributeValue" AttributeValue.of_json in
+      let attributePath =
+        field_map_exn json__ "AttributePath" AttributePath.of_json in
+      make ?attributeValue ~attributePath ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An operation that applies to the requested group. This operation might add, replace, or remove an attribute."]
 module User =
   struct
     type nonrec t =
       {
-      userName: UserName.t
+      identityStoreId: IdentityStoreId.t option
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      userId: ResourceId.t option
+        [@ocaml.doc "The identifier for a user in the identity store."];
+      userName: UserName.t option
         [@ocaml.doc
-          "Contains the user\226\128\153s user name value. The length limit is 128 characters. This value can consist of letters, accented characters, symbols, numbers, and punctuation. The characters <>;:% are excluded. This value is specified at the time the user is created and stored as an attribute of the user object in the identity store."];
-      userId: ResourceId.t
-        [@ocaml.doc "The identifier for a user in the identity store."]}
-    let context_ = "User"
-    let make ~userName = fun ~userId -> fun () -> { userName; userId }
+          "A unique string used to identify the user. The length limit is 128 characters. This value can consist of letters, accented characters, symbols, numbers, and punctuation. This value is specified at the time the user is created and stored as an attribute of the user object in the identity store."];
+      externalIds: ExternalIds.t option
+        [@ocaml.doc
+          "A list of ExternalId objects that contains the identifiers issued to this resource by an external identity provider."];
+      name: Name.t option
+        [@ocaml.doc "An object containing the name of the user."];
+      displayName: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing the name of the user that is formatted for display when the user is referenced. For example, \"John Doe.\" Prefix search supports a maximum of 1,000 characters for the string."];
+      nickName: SensitiveStringType.t option
+        [@ocaml.doc "A string containing an alternate name for the user."];
+      profileUrl: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing a URL that might be associated with the user."];
+      emails: Emails.t option
+        [@ocaml.doc
+          "A list of Email objects containing email addresses associated with the user."];
+      addresses: Addresses.t option
+        [@ocaml.doc
+          "A list of Address objects containing addresses associated with the user."];
+      phoneNumbers: PhoneNumbers.t option
+        [@ocaml.doc
+          "A list of PhoneNumber objects containing phone numbers associated with the user."];
+      userType: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string indicating the type of user. Possible values are left unspecified. The value can vary based on your specific use case."];
+      title: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing the title of the user. Possible values are left unspecified. The value can vary based on your specific use case."];
+      preferredLanguage: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing the preferred language of the user. For example, \"American English\" or \"en-us.\""];
+      locale: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing the geographical region or location of the user."];
+      timezone: SensitiveStringType.t option
+        [@ocaml.doc "A string containing the time zone of the user."];
+      userStatus: UserStatus.t option
+        [@ocaml.doc "The current status of the user account."];
+      photos: Photos.t option
+        [@ocaml.doc
+          "A list of photos associated with the user. Users can have up to 3 photos with metadata including type, display name, and primary designation."];
+      website: SensitiveStringType.t option
+        [@ocaml.doc
+          "The user's personal website or blog URL. This field stores website information for personal or professional use."];
+      birthdate: SensitiveStringType.t option
+        [@ocaml.doc
+          "The user's birthdate in YYYY-MM-DD format. This field stores personal birthdate information for the user."];
+      roles: Roles.t option
+        [@ocaml.doc
+          "A list of Role objects containing roles associated with the user."];
+      createdAt: DateType.t option
+        [@ocaml.doc "The date and time the user was created."];
+      createdBy: StringType.t option
+        [@ocaml.doc
+          "The identifier of the user or system that created the user."];
+      updatedAt: DateType.t option
+        [@ocaml.doc "The date and time the user was last updated."];
+      updatedBy: StringType.t option
+        [@ocaml.doc
+          "The identifier of the user or system that last updated the user."];
+      extensions: Extensions.t option
+        [@ocaml.doc
+          "A map of explicitly requested attribute extensions associated with the user. Not populated if the user has no requested extensions."]}
+    let make ?identityStoreId =
+      fun ?userId ->
+        fun ?userName ->
+          fun ?externalIds ->
+            fun ?name ->
+              fun ?displayName ->
+                fun ?nickName ->
+                  fun ?profileUrl ->
+                    fun ?emails ->
+                      fun ?addresses ->
+                        fun ?phoneNumbers ->
+                          fun ?userType ->
+                            fun ?title ->
+                              fun ?preferredLanguage ->
+                                fun ?locale ->
+                                  fun ?timezone ->
+                                    fun ?userStatus ->
+                                      fun ?photos ->
+                                        fun ?website ->
+                                          fun ?birthdate ->
+                                            fun ?roles ->
+                                              fun ?createdAt ->
+                                                fun ?createdBy ->
+                                                  fun ?updatedAt ->
+                                                    fun ?updatedBy ->
+                                                      fun ?extensions ->
+                                                        fun () ->
+                                                          {
+                                                            identityStoreId;
+                                                            userId;
+                                                            userName;
+                                                            externalIds;
+                                                            name;
+                                                            displayName;
+                                                            nickName;
+                                                            profileUrl;
+                                                            emails;
+                                                            addresses;
+                                                            phoneNumbers;
+                                                            userType;
+                                                            title;
+                                                            preferredLanguage;
+                                                            locale;
+                                                            timezone;
+                                                            userStatus;
+                                                            photos;
+                                                            website;
+                                                            birthdate;
+                                                            roles;
+                                                            createdAt;
+                                                            createdBy;
+                                                            updatedAt;
+                                                            updatedBy;
+                                                            extensions
+                                                          }
     let to_value x =
       structure_to_value
-        [("UserName", (Some (UserName.to_value x.userName)));
-        ("UserId", (Some (ResourceId.to_value x.userId)))]
+        [("IdentityStoreId",
+           (Option.map x.identityStoreId ~f:IdentityStoreId.to_value));
+        ("UserId", (Option.map x.userId ~f:ResourceId.to_value));
+        ("UserName", (Option.map x.userName ~f:UserName.to_value));
+        ("ExternalIds", (Option.map x.externalIds ~f:ExternalIds.to_value));
+        ("Name", (Option.map x.name ~f:Name.to_value));
+        ("DisplayName",
+          (Option.map x.displayName ~f:SensitiveStringType.to_value));
+        ("NickName", (Option.map x.nickName ~f:SensitiveStringType.to_value));
+        ("ProfileUrl",
+          (Option.map x.profileUrl ~f:SensitiveStringType.to_value));
+        ("Emails", (Option.map x.emails ~f:Emails.to_value));
+        ("Addresses", (Option.map x.addresses ~f:Addresses.to_value));
+        ("PhoneNumbers",
+          (Option.map x.phoneNumbers ~f:PhoneNumbers.to_value));
+        ("UserType", (Option.map x.userType ~f:SensitiveStringType.to_value));
+        ("Title", (Option.map x.title ~f:SensitiveStringType.to_value));
+        ("PreferredLanguage",
+          (Option.map x.preferredLanguage ~f:SensitiveStringType.to_value));
+        ("Locale", (Option.map x.locale ~f:SensitiveStringType.to_value));
+        ("Timezone", (Option.map x.timezone ~f:SensitiveStringType.to_value));
+        ("UserStatus", (Option.map x.userStatus ~f:UserStatus.to_value));
+        ("Photos", (Option.map x.photos ~f:Photos.to_value));
+        ("Website", (Option.map x.website ~f:SensitiveStringType.to_value));
+        ("Birthdate",
+          (Option.map x.birthdate ~f:SensitiveStringType.to_value));
+        ("Roles", (Option.map x.roles ~f:Roles.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:DateType.to_value));
+        ("CreatedBy", (Option.map x.createdBy ~f:StringType.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:DateType.to_value));
+        ("UpdatedBy", (Option.map x.updatedBy ~f:StringType.to_value));
+        ("Extensions", (Option.map x.extensions ~f:Extensions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let userId =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
+      let extensions =
+        (Option.map ~f:Extensions.of_xml) (Xml.child xml_arg0 "Extensions") in
+      let updatedBy =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "UpdatedBy") in
+      let updatedAt =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdBy =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "CreatedBy") in
+      let createdAt =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let roles = (Option.map ~f:Roles.of_xml) (Xml.child xml_arg0 "Roles") in
+      let birthdate =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Birthdate") in
+      let website =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Website") in
+      let photos =
+        (Option.map ~f:Photos.of_xml) (Xml.child xml_arg0 "Photos") in
+      let userStatus =
+        (Option.map ~f:UserStatus.of_xml) (Xml.child xml_arg0 "UserStatus") in
+      let timezone =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Timezone") in
+      let locale =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Locale") in
+      let preferredLanguage =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "PreferredLanguage") in
+      let title =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Title") in
+      let userType =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "UserType") in
+      let phoneNumbers =
+        (Option.map ~f:PhoneNumbers.of_xml)
+          (Xml.child xml_arg0 "PhoneNumbers") in
+      let addresses =
+        (Option.map ~f:Addresses.of_xml) (Xml.child xml_arg0 "Addresses") in
+      let emails =
+        (Option.map ~f:Emails.of_xml) (Xml.child xml_arg0 "Emails") in
+      let profileUrl =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "ProfileUrl") in
+      let nickName =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "NickName") in
+      let displayName =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "DisplayName") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
+      let externalIds =
+        (Option.map ~f:ExternalIds.of_xml) (Xml.child xml_arg0 "ExternalIds") in
       let userName =
-        UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ~userId ~userName ()
+        (Option.map ~f:UserName.of_xml) (Xml.child xml_arg0 "UserName") in
+      let userId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "UserId") in
+      let identityStoreId =
+        (Option.map ~f:IdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityStoreId") in
+      make ?extensions ?updatedBy ?updatedAt ?createdBy ?createdAt ?roles
+        ?birthdate ?website ?photos ?userStatus ?timezone ?locale
+        ?preferredLanguage ?title ?userType ?phoneNumbers ?addresses ?emails
+        ?profileUrl ?nickName ?displayName ?name ?externalIds ?userName
+        ?userId ?identityStoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map_exn json "UserId" ResourceId.of_json in
-      let userName = field_map_exn json "UserName" UserName.of_json in
-      make ~userId ~userName ()
+    let of_json json__ =
+      let extensions = field_map json__ "Extensions" Extensions.of_json in
+      let updatedBy = field_map json__ "UpdatedBy" StringType.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" DateType.of_json in
+      let createdBy = field_map json__ "CreatedBy" StringType.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateType.of_json in
+      let roles = field_map json__ "Roles" Roles.of_json in
+      let birthdate =
+        field_map json__ "Birthdate" SensitiveStringType.of_json in
+      let website = field_map json__ "Website" SensitiveStringType.of_json in
+      let photos = field_map json__ "Photos" Photos.of_json in
+      let userStatus = field_map json__ "UserStatus" UserStatus.of_json in
+      let timezone = field_map json__ "Timezone" SensitiveStringType.of_json in
+      let locale = field_map json__ "Locale" SensitiveStringType.of_json in
+      let preferredLanguage =
+        field_map json__ "PreferredLanguage" SensitiveStringType.of_json in
+      let title = field_map json__ "Title" SensitiveStringType.of_json in
+      let userType = field_map json__ "UserType" SensitiveStringType.of_json in
+      let phoneNumbers = field_map json__ "PhoneNumbers" PhoneNumbers.of_json in
+      let addresses = field_map json__ "Addresses" Addresses.of_json in
+      let emails = field_map json__ "Emails" Emails.of_json in
+      let profileUrl =
+        field_map json__ "ProfileUrl" SensitiveStringType.of_json in
+      let nickName = field_map json__ "NickName" SensitiveStringType.of_json in
+      let displayName =
+        field_map json__ "DisplayName" SensitiveStringType.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let externalIds = field_map json__ "ExternalIds" ExternalIds.of_json in
+      let userName = field_map json__ "UserName" UserName.of_json in
+      let userId = field_map json__ "UserId" ResourceId.of_json in
+      let identityStoreId =
+        field_map json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ?extensions ?updatedBy ?updatedAt ?createdBy ?createdAt ?roles
+        ?birthdate ?website ?photos ?userStatus ?timezone ?locale
+        ?preferredLanguage ?title ?userType ?phoneNumbers ?addresses ?emails
+        ?profileUrl ?nickName ?displayName ?name ?externalIds ?userName
+        ?userId ?identityStoreId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A user object, which contains a specified user\226\128\153s metadata and attributes."]
+       "A user object that contains the metadata and attributes for a specified user."]
 module Filter =
   struct
     type nonrec t =
@@ -257,105 +1476,626 @@ module Filter =
           (Xml.child_exn ~context:context_ xml_arg0 "AttributePath") in
       make ~attributeValue ~attributePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeValue =
-        field_map_exn json "AttributeValue" SensitiveStringType.of_json in
+        field_map_exn json__ "AttributeValue" SensitiveStringType.of_json in
       let attributePath =
-        field_map_exn json "AttributePath" AttributePath.of_json in
+        field_map_exn json__ "AttributePath" AttributePath.of_json in
       make ~attributeValue ~attributePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A query filter used by ListUsers and ListGroup. This filter object provides the attribute name and attribute value to search users or groups."]
+       "A query filter used by ListUsers and ListGroups. This filter object provides the attribute name and attribute value to search users or groups."]
 module Group =
   struct
     type nonrec t =
       {
-      groupId: ResourceId.t
+      groupId: ResourceId.t option
         [@ocaml.doc "The identifier for a group in the identity store."];
-      displayName: GroupDisplayName.t
+      displayName: GroupDisplayName.t option
         [@ocaml.doc
-          "Contains the group\226\128\153s display name value. The length limit is 1,024 characters. This value can consist of letters, accented characters, symbols, numbers, punctuation, tab, new line, carriage return, space, and nonbreaking space in this attribute. The characters <>;:% are excluded. This value is specified at the time the group is created and stored as an attribute of the group object in the identity store."]}
-    let context_ = "Group"
-    let make ~groupId =
-      fun ~displayName -> fun () -> { groupId; displayName }
+          "The display name value for the group. The length limit is 1,024 characters. This value can consist of letters, accented characters, symbols, numbers, punctuation, tab, new line, carriage return, space, and nonbreaking space in this attribute. This value is specified at the time the group is created and stored as an attribute of the group object in the identity store. Prefix search supports a maximum of 1,000 characters for the string."];
+      externalIds: ExternalIds.t option
+        [@ocaml.doc
+          "A list of ExternalId objects that contains the identifiers issued to this resource by an external identity provider."];
+      description: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing a description of the specified group."];
+      createdAt: DateType.t option
+        [@ocaml.doc "The date and time the group was created."];
+      updatedAt: DateType.t option
+        [@ocaml.doc "The date and time the group was last updated."];
+      createdBy: StringType.t option
+        [@ocaml.doc
+          "The identifier of the user or system that created the group."];
+      updatedBy: StringType.t option
+        [@ocaml.doc
+          "The identifier of the user or system that last updated the group."];
+      identityStoreId: IdentityStoreId.t option
+        [@ocaml.doc "The globally unique identifier for the identity store."]}
+    let make ?groupId =
+      fun ?displayName ->
+        fun ?externalIds ->
+          fun ?description ->
+            fun ?createdAt ->
+              fun ?updatedAt ->
+                fun ?createdBy ->
+                  fun ?updatedBy ->
+                    fun ?identityStoreId ->
+                      fun () ->
+                        {
+                          groupId;
+                          displayName;
+                          externalIds;
+                          description;
+                          createdAt;
+                          updatedAt;
+                          createdBy;
+                          updatedBy;
+                          identityStoreId
+                        }
     let to_value x =
       structure_to_value
-        [("GroupId", (Some (ResourceId.to_value x.groupId)));
-        ("DisplayName", (Some (GroupDisplayName.to_value x.displayName)))]
+        [("GroupId", (Option.map x.groupId ~f:ResourceId.to_value));
+        ("DisplayName",
+          (Option.map x.displayName ~f:GroupDisplayName.to_value));
+        ("ExternalIds", (Option.map x.externalIds ~f:ExternalIds.to_value));
+        ("Description",
+          (Option.map x.description ~f:SensitiveStringType.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:DateType.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:DateType.to_value));
+        ("CreatedBy", (Option.map x.createdBy ~f:StringType.to_value));
+        ("UpdatedBy", (Option.map x.updatedBy ~f:StringType.to_value));
+        ("IdentityStoreId",
+          (Option.map x.identityStoreId ~f:IdentityStoreId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let identityStoreId =
+        (Option.map ~f:IdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityStoreId") in
+      let updatedBy =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "UpdatedBy") in
+      let createdBy =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "CreatedBy") in
+      let updatedAt =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdAt =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let description =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let externalIds =
+        (Option.map ~f:ExternalIds.of_xml) (Xml.child xml_arg0 "ExternalIds") in
       let displayName =
-        GroupDisplayName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DisplayName") in
+        (Option.map ~f:GroupDisplayName.of_xml)
+          (Xml.child xml_arg0 "DisplayName") in
       let groupId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
-      make ~displayName ~groupId ()
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "GroupId") in
+      make ?identityStoreId ?updatedBy ?createdBy ?updatedAt ?createdAt
+        ?description ?externalIds ?displayName ?groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let identityStoreId =
+        field_map json__ "IdentityStoreId" IdentityStoreId.of_json in
+      let updatedBy = field_map json__ "UpdatedBy" StringType.of_json in
+      let createdBy = field_map json__ "CreatedBy" StringType.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" DateType.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateType.of_json in
+      let description =
+        field_map json__ "Description" SensitiveStringType.of_json in
+      let externalIds = field_map json__ "ExternalIds" ExternalIds.of_json in
       let displayName =
-        field_map_exn json "DisplayName" GroupDisplayName.of_json in
-      let groupId = field_map_exn json "GroupId" ResourceId.of_json in
-      make ~displayName ~groupId ()
+        field_map json__ "DisplayName" GroupDisplayName.of_json in
+      let groupId = field_map json__ "GroupId" ResourceId.of_json in
+      make ?identityStoreId ?updatedBy ?createdBy ?updatedAt ?createdAt
+        ?description ?externalIds ?displayName ?groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A group object, which contains a specified group\226\128\153s metadata and attributes."]
+       "A group object that contains the metadata and attributes for a specified group."]
+module GroupMembership =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t option
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      membershipId: ResourceId.t option
+        [@ocaml.doc
+          "The identifier for a GroupMembership object in an identity store."];
+      groupId: ResourceId.t option
+        [@ocaml.doc "The identifier for a group in the identity store."];
+      memberId: MemberId.t option
+        [@ocaml.doc
+          "An object that contains the identifier of a group member. Setting the UserID field to the specific identifier for a user indicates that the user is a member of the group."];
+      createdAt: DateType.t option
+        [@ocaml.doc "The date and time the group membership was created."];
+      updatedAt: DateType.t option
+        [@ocaml.doc
+          "The date and time the group membership was last updated."];
+      createdBy: StringType.t option
+        [@ocaml.doc
+          "The identifier of the user or system that created the group membership."];
+      updatedBy: StringType.t option
+        [@ocaml.doc
+          "The identifier of the user or system that last updated the group membership."]}
+    let make ?identityStoreId =
+      fun ?membershipId ->
+        fun ?groupId ->
+          fun ?memberId ->
+            fun ?createdAt ->
+              fun ?updatedAt ->
+                fun ?createdBy ->
+                  fun ?updatedBy ->
+                    fun () ->
+                      {
+                        identityStoreId;
+                        membershipId;
+                        groupId;
+                        memberId;
+                        createdAt;
+                        updatedAt;
+                        createdBy;
+                        updatedBy
+                      }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Option.map x.identityStoreId ~f:IdentityStoreId.to_value));
+        ("MembershipId", (Option.map x.membershipId ~f:ResourceId.to_value));
+        ("GroupId", (Option.map x.groupId ~f:ResourceId.to_value));
+        ("MemberId", (Option.map x.memberId ~f:MemberId.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:DateType.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:DateType.to_value));
+        ("CreatedBy", (Option.map x.createdBy ~f:StringType.to_value));
+        ("UpdatedBy", (Option.map x.updatedBy ~f:StringType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedBy =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "UpdatedBy") in
+      let createdBy =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "CreatedBy") in
+      let updatedAt =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdAt =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let memberId =
+        (Option.map ~f:MemberId.of_xml) (Xml.child xml_arg0 "MemberId") in
+      let groupId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "GroupId") in
+      let membershipId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "MembershipId") in
+      let identityStoreId =
+        (Option.map ~f:IdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityStoreId") in
+      make ?updatedBy ?createdBy ?updatedAt ?createdAt ?memberId ?groupId
+        ?membershipId ?identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedBy = field_map json__ "UpdatedBy" StringType.of_json in
+      let createdBy = field_map json__ "CreatedBy" StringType.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" DateType.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateType.of_json in
+      let memberId = field_map json__ "MemberId" MemberId.of_json in
+      let groupId = field_map json__ "GroupId" ResourceId.of_json in
+      let membershipId = field_map json__ "MembershipId" ResourceId.of_json in
+      let identityStoreId =
+        field_map json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ?updatedBy ?createdBy ?updatedAt ?createdAt ?memberId ?groupId
+        ?membershipId ?identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the identifiers for a group, a group member, and a GroupMembership object in the identity store."]
+module GroupMembershipExistenceResult =
+  struct
+    type nonrec t =
+      {
+      groupId: ResourceId.t option
+        [@ocaml.doc "The identifier for a group in the identity store."];
+      memberId: MemberId.t option
+        [@ocaml.doc
+          "An object that contains the identifier of a group member. Setting the UserID field to the specific identifier for a user indicates that the user is a member of the group."];
+      membershipExists: BooleanType.t option
+        [@ocaml.doc "Indicates whether a membership relation exists or not."]}
+    let make ?groupId =
+      fun ?memberId ->
+        fun ?membershipExists ->
+          fun () -> { groupId; memberId; membershipExists }
+    let to_value x =
+      structure_to_value
+        [("GroupId", (Option.map x.groupId ~f:ResourceId.to_value));
+        ("MemberId", (Option.map x.memberId ~f:MemberId.to_value));
+        ("MembershipExists",
+          (Option.map x.membershipExists ~f:BooleanType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let membershipExists =
+        (Option.map ~f:BooleanType.of_xml)
+          (Xml.child xml_arg0 "MembershipExists") in
+      let memberId =
+        (Option.map ~f:MemberId.of_xml) (Xml.child xml_arg0 "MemberId") in
+      let groupId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "GroupId") in
+      make ?membershipExists ?memberId ?groupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let membershipExists =
+        field_map json__ "MembershipExists" BooleanType.of_json in
+      let memberId = field_map json__ "MemberId" MemberId.of_json in
+      let groupId = field_map json__ "GroupId" ResourceId.of_json in
+      make ?membershipExists ?memberId ?groupId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates whether a resource is a member of a group in the identity store."]
+module UniqueAttribute =
+  struct
+    type nonrec t =
+      {
+      attributePath: AttributePath.t
+        [@ocaml.doc
+          "A string representation of the path to a given attribute or sub-attribute. Supports JMESPath."];
+      attributeValue: AttributeValue.t
+        [@ocaml.doc
+          "The value of the attribute. This is a Document type. This type is not supported by Java V1, Go V1, and older versions of the CLI."]}
+    let context_ = "UniqueAttribute"
+    let make ~attributePath =
+      fun ~attributeValue -> fun () -> { attributePath; attributeValue }
+    let to_value x =
+      structure_to_value
+        [("AttributePath", (Some (AttributePath.to_value x.attributePath)));
+        ("AttributeValue", (Some (AttributeValue.to_value x.attributeValue)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attributeValue =
+        AttributeValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttributeValue") in
+      let attributePath =
+        AttributePath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AttributePath") in
+      make ~attributeValue ~attributePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributeValue =
+        field_map_exn json__ "AttributeValue" AttributeValue.of_json in
+      let attributePath =
+        field_map_exn json__ "AttributePath" AttributePath.of_json in
+      make ~attributeValue ~attributePath ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An entity attribute that's unique to a specific entity."]
 module AccessDeniedException =
   struct
     type nonrec t =
       {
-      message: Message.t option ;
+      message: ExceptionMessage.t option ;
       requestId: RequestId.t option
         [@ocaml.doc
-          "The identifier for each request. This value is a globally unique ID that is generated by the Identity Store service for each sent request, and is then returned inside the exception if the request fails."]}
-    let make ?message = fun ?requestId -> fun () -> { message; requestId }
+          "The identifier for each request. This value is a globally unique ID that is generated by the identity store service for each sent request, and is then returned inside the exception if the request fails."];
+      reason: AccessDeniedExceptionReason.t option
+        [@ocaml.doc
+          "Indicates the reason for an access denial when returned by KMS while accessing a Customer Managed KMS key. For non-KMS access-denied errors, this field is not included."]}
+    let make ?message =
+      fun ?requestId ->
+        fun ?reason -> fun () -> { message; requestId; reason }
     let to_value x =
       structure_to_value
-        [("Message", (Option.map x.message ~f:Message.to_value));
-        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value));
+        ("Reason",
+          (Option.map x.reason ~f:AccessDeniedExceptionReason.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:AccessDeniedExceptionReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
       let requestId =
         (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
       let message =
-        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?requestId ?message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?reason ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" Message.of_json in
-      make ?requestId ?message ()
+    let of_json json__ =
+      let reason =
+        field_map json__ "Reason" AccessDeniedExceptionReason.of_json in
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?reason ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You do not have sufficient access to perform this action."]
+module ConflictException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option
+        [@ocaml.doc
+          "The identifier for each request. This value is a globally unique ID that is generated by the identity store service for each sent request, and is then returned inside the exception if the request fails."];
+      reason: ConflictExceptionReason.t option
+        [@ocaml.doc
+          "Indicates the reason for a conflict error when the service is unable to access a Customer Managed KMS key. For non-KMS permission errors, this field is not included."]}
+    let make ?message =
+      fun ?requestId ->
+        fun ?reason -> fun () -> { message; requestId; reason }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value));
+        ("Reason", (Option.map x.reason ~f:ConflictExceptionReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:ConflictExceptionReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?reason ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "Reason" ConflictExceptionReason.of_json in
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?reason ?requestId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This request cannot be completed for one of the following reasons: Performing the requested operation would violate an existing uniqueness claim in the identity store. Resolve the conflict before retrying this request. The requested resource was being concurrently modified by another request."]
 module InternalServerException =
   struct
     type nonrec t =
       {
-      message: Message.t option ;
+      message: ExceptionMessage.t option ;
       requestId: RequestId.t option
         [@ocaml.doc
-          "The identifier for each request. This value is a globally unique ID that is generated by the Identity Store service for each sent request, and is then returned inside the exception if the request fails."]}
-    let make ?message = fun ?requestId -> fun () -> { message; requestId }
+          "The identifier for each request. This value is a globally unique ID that is generated by the identity store service for each sent request, and is then returned inside the exception if the request fails."];
+      retryAfterSeconds: RetryAfterSeconds.t option
+        [@ocaml.doc
+          "The number of seconds to wait before retrying the next request."]}
+    let make ?message =
+      fun ?requestId ->
+        fun ?retryAfterSeconds ->
+          fun () -> { message; requestId; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("Message", (Option.map x.message ~f:Message.to_value));
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value));
+        ("RetryAfterSeconds",
+          (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retryAfterSeconds =
+        (Option.map ~f:RetryAfterSeconds.of_xml)
+          (Xml.child xml_arg0 "RetryAfterSeconds") in
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?retryAfterSeconds ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retryAfterSeconds =
+        field_map json__ "RetryAfterSeconds" RetryAfterSeconds.of_json in
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?retryAfterSeconds ?requestId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request processing has failed because of an unknown error, exception or failure with an internal server."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t =
+      {
+      resourceType: ResourceType.t option
+        [@ocaml.doc
+          "An enum object indicating the type of resource in the identity store service. Valid values include USER, GROUP, and IDENTITY_STORE."];
+      resourceId: ResourceId.t option
+        [@ocaml.doc
+          "The identifier for a resource in the identity store that can be used as UserId or GroupId. The format for ResourceId is either UUID or 1234567890-UUID, where UUID is a randomly generated value for each resource when it is created and 1234567890 represents the IdentityStoreId string value. In the case that the identity store is migrated from a legacy SSO identity store, the ResourceId for that identity store will be in the format of UUID. Otherwise, it will be in the 1234567890-UUID format."];
+      reason: ResourceNotFoundExceptionReason.t option
+        [@ocaml.doc
+          "Indicates the reason for a resource not found error when the service is unable to access a Customer Managed KMS key. For non-KMS permission errors, this field is not included."];
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option
+        [@ocaml.doc
+          "The identifier for each request. This value is a globally unique ID that is generated by the identity store service for each sent request, and is then returned inside the exception if the request fails."]}
+    let make ?resourceType =
+      fun ?resourceId ->
+        fun ?reason ->
+          fun ?message ->
+            fun ?requestId ->
+              fun () ->
+                { resourceType; resourceId; reason; message; requestId }
+    let to_value x =
+      structure_to_value
+        [("ResourceType",
+           (Option.map x.resourceType ~f:ResourceType.to_value));
+        ("ResourceId", (Option.map x.resourceId ~f:ResourceId.to_value));
+        ("Reason",
+          (Option.map x.reason ~f:ResourceNotFoundExceptionReason.to_value));
+        ("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
         ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let requestId =
         (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
       let message =
-        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      let reason =
+        (Option.map ~f:ResourceNotFoundExceptionReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
+      let resourceId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ResourceId") in
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      make ?requestId ?message ?reason ?resourceId ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      let reason =
+        field_map json__ "Reason" ResourceNotFoundExceptionReason.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      make ?requestId ?message ?reason ?resourceId ?resourceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Indicates that a requested resource is not found."]
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option
+        [@ocaml.doc
+          "The identifier for each request. This value is a globally unique ID that is generated by the identity store service for each sent request, and is then returned inside the exception if the request fails."]}
+    let make ?message = fun ?requestId -> fun () -> { message; requestId }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The request processing has failed because of an unknown error, exception or failure with an internal server."]
+       "The request would cause the number of users or groups in the identity store to exceed the maximum allowed."]
+module ThrottlingException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option
+        [@ocaml.doc
+          "The identifier for each request. This value is a globally unique ID that is generated by the identity store service for each sent request, and is then returned inside the exception if the request fails."];
+      retryAfterSeconds: RetryAfterSeconds.t option
+        [@ocaml.doc
+          "The number of seconds to wait before retrying the next request."];
+      reason: ThrottlingExceptionReason.t option
+        [@ocaml.doc
+          "Indicates the reason for the throttling error when the service is unable to access a Customer Managed KMS key. For non-KMS permission errors, this field is not included."]}
+    let make ?message =
+      fun ?requestId ->
+        fun ?retryAfterSeconds ->
+          fun ?reason ->
+            fun () -> { message; requestId; retryAfterSeconds; reason }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value));
+        ("RetryAfterSeconds",
+          (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value));
+        ("Reason",
+          (Option.map x.reason ~f:ThrottlingExceptionReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:ThrottlingExceptionReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
+      let retryAfterSeconds =
+        (Option.map ~f:RetryAfterSeconds.of_xml)
+          (Xml.child xml_arg0 "RetryAfterSeconds") in
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?reason ?retryAfterSeconds ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason =
+        field_map json__ "Reason" ThrottlingExceptionReason.of_json in
+      let retryAfterSeconds =
+        field_map json__ "RetryAfterSeconds" RetryAfterSeconds.of_json in
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?reason ?retryAfterSeconds ?requestId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates that the principal has crossed the throttling limits of the API operations."]
+module ValidationException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option
+        [@ocaml.doc
+          "The identifier for each request. This value is a globally unique ID that is generated by the identity store service for each sent request, and is then returned inside the exception if the request fails."];
+      reason: ValidationExceptionReason.t option
+        [@ocaml.doc
+          "Indicates the reason for the validation error when the service is unable to access a Customer Managed KMS key. For non-KMS permission errors, this field is not included."]}
+    let make ?message =
+      fun ?requestId ->
+        fun ?reason -> fun () -> { message; requestId; reason }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value));
+        ("Reason",
+          (Option.map x.reason ~f:ValidationExceptionReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:ValidationExceptionReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?reason ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason =
+        field_map json__ "Reason" ValidationExceptionReason.of_json in
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?reason ?requestId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request failed because it contains a syntax error."]
+module AttributeOperations =
+  struct
+    type nonrec t = AttributeOperation.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AttributeOperation.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AttributeOperation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AttributeOperations"
+        ~of_json:AttributeOperation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module NextToken =
   struct
     type nonrec t = string
@@ -366,7 +2106,7 @@ module NextToken =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:65535) >>=
-                  (fun () -> check_pattern i ~pattern:"^[-a-zA-Z0-9+=/:]*")));
+                  (fun () -> check_pattern i ~pattern:"[-a-zA-Z0-9+=/:_]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -376,85 +2116,13 @@ module NextToken =
     let of_json j = string_of_json ~kind:"NextToken" j
     let to_json = simple_to_json to_value
   end
-module ResourceNotFoundException =
-  struct
-    type nonrec t =
-      {
-      resourceType: ResourceType.t option
-        [@ocaml.doc
-          "The type of resource in the Identity Store service, which is an enum object. Valid values include USER, GROUP, and IDENTITY_STORE."];
-      resourceId: ResourceId.t option
-        [@ocaml.doc
-          "The identifier for a resource in the identity store, which can be used as UserId or GroupId. The format for ResourceId is either UUID or 1234567890-UUID, where UUID is a randomly generated value for each resource when it is created and 1234567890 represents the IdentityStoreId string value. In the case that the identity store is migrated from a legacy SSO identity store, the ResourceId for that identity store will be in the format of UUID. Otherwise, it will be in the 1234567890-UUID format."];
-      message: Message.t option ;
-      requestId: RequestId.t option
-        [@ocaml.doc
-          "The identifier for each request. This value is a globally unique ID that is generated by the Identity Store service for each sent request, and is then returned inside the exception if the request fails."]}
-    let make ?resourceType =
-      fun ?resourceId ->
-        fun ?message ->
-          fun ?requestId ->
-            fun () -> { resourceType; resourceId; message; requestId }
-    let to_value x =
-      structure_to_value
-        [("ResourceType",
-           (Option.map x.resourceType ~f:ResourceType.to_value));
-        ("ResourceId", (Option.map x.resourceId ~f:ResourceId.to_value));
-        ("Message", (Option.map x.message ~f:Message.to_value));
-        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let requestId =
-        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
-      let message =
-        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
-      let resourceId =
-        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ResourceId") in
-      let resourceType =
-        (Option.map ~f:ResourceType.of_xml)
-          (Xml.child xml_arg0 "ResourceType") in
-      make ?requestId ?message ?resourceId ?resourceType ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" Message.of_json in
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      make ?requestId ?message ?resourceId ?resourceType ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Indicates that a requested resource is not found."]
-module ThrottlingException =
-  struct
-    type nonrec t =
-      {
-      message: Message.t option ;
-      requestId: RequestId.t option
-        [@ocaml.doc
-          "The identifier for each request. This value is a globally unique ID that is generated by the Identity Store service for each sent request, and is then returned inside the exception if the request fails."]}
-    let make ?message = fun ?requestId -> fun () -> { message; requestId }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:Message.to_value));
-        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let requestId =
-        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
-      let message =
-        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?requestId ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" Message.of_json in
-      make ?requestId ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Indicates that the principal has crossed the throttling limits of the API operations."]
 module Users =
   struct
     type nonrec t = User.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:User.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -474,37 +2142,48 @@ module Users =
     let of_json j = list_of_json ~kind:"Users" ~of_json:User.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ValidationException =
+module ExtensionNames =
   struct
-    type nonrec t =
-      {
-      message: Message.t option ;
-      requestId: RequestId.t option
-        [@ocaml.doc
-          "The identifier for each request. This value is a globally unique ID that is generated by the Identity Store service for each sent request, and is then returned inside the exception if the request fails."]}
-    let make ?message = fun ?requestId -> fun () -> { message; requestId }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:Message.to_value));
-        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
+    type nonrec t = ExtensionName.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExtensionName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let requestId =
-        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
-      let message =
-        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?requestId ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" Message.of_json in
-      make ?requestId ?message ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExtensionName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExtensionNames" ~of_json:ExtensionName.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The request failed because it contains a syntax error."]
+  end
 module Filters =
   struct
     type nonrec t = Filter.t list
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -524,33 +2203,13 @@ module Filters =
     let of_json j = list_of_json ~kind:"Filters" ~of_json:Filter.of_json j
     let to_json v = composed_to_json to_value v
   end
-module IdentityStoreId =
-  struct
-    type nonrec t = string
-    let context_ = "IdentityStoreId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:12) >>=
-                  (fun () -> check_pattern i ~pattern:"^d-[0-9a-f]{10}$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"IdentityStoreId" j
-    let to_json = simple_to_json to_value
-  end
 module MaxResults =
   struct
     type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -566,6 +2225,9 @@ module Groups =
   struct
     type nonrec t = Group.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Group.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -585,11 +2247,413 @@ module Groups =
     let of_json j = list_of_json ~kind:"Groups" ~of_json:Group.of_json j
     let to_json v = composed_to_json to_value v
   end
+module GroupMemberships =
+  struct
+    type nonrec t = GroupMembership.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GroupMembership.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GroupMembership.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GroupMemberships" ~of_json:GroupMembership.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module GroupMembershipExistenceResults =
+  struct
+    type nonrec t = GroupMembershipExistenceResult.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GroupMembershipExistenceResult.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GroupMembershipExistenceResult.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GroupMembershipExistenceResults"
+        ~of_json:GroupMembershipExistenceResult.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GroupIds =
+  struct
+    type nonrec t = ResourceId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GroupIds" ~of_json:ResourceId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AlternateIdentifier =
+  struct
+    type nonrec t =
+      {
+      externalId: ExternalId.t option
+        [@ocaml.doc
+          "The identifier issued to this resource by an external identity provider."];
+      uniqueAttribute: UniqueAttribute.t option
+        [@ocaml.doc
+          "An entity attribute that's unique to a specific entity."]}
+    let make ?externalId =
+      fun ?uniqueAttribute -> fun () -> { externalId; uniqueAttribute }
+    let to_value x =
+      structure_to_value
+        [("ExternalId", (Option.map x.externalId ~f:ExternalId.to_value));
+        ("UniqueAttribute",
+          (Option.map x.uniqueAttribute ~f:UniqueAttribute.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let uniqueAttribute =
+        (Option.map ~f:UniqueAttribute.of_xml)
+          (Xml.child xml_arg0 "UniqueAttribute") in
+      let externalId =
+        (Option.map ~f:ExternalId.of_xml) (Xml.child xml_arg0 "ExternalId") in
+      make ?uniqueAttribute ?externalId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let uniqueAttribute =
+        field_map json__ "UniqueAttribute" UniqueAttribute.of_json in
+      let externalId = field_map json__ "ExternalId" ExternalId.of_json in
+      make ?uniqueAttribute ?externalId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A unique identifier for a user or group that is not the primary identifier. This value can be an identifier from an external identity provider (IdP) that is associated with the user, the group, or a unique attribute."]
+module UpdateUserResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the specified user metadata and attributes in the specified identity store."]
+module UpdateUserRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      userId: ResourceId.t
+        [@ocaml.doc "The identifier for a user in the identity store."];
+      operations: AttributeOperations.t
+        [@ocaml.doc
+          "A list of AttributeOperation objects to apply to the requested user. These operations might add, replace, or remove an attribute. For more information on the attributes that can be added, replaced, or removed, see User."]}
+    let context_ = "UpdateUserRequest"
+    let make ~identityStoreId =
+      fun ~userId ->
+        fun ~operations -> fun () -> { identityStoreId; userId; operations }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("UserId", (Some (ResourceId.to_value x.userId)));
+        ("Operations", (Some (AttributeOperations.to_value x.operations)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operations =
+        AttributeOperations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Operations") in
+      let userId =
+        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ~operations ~userId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operations =
+        field_map_exn json__ "Operations" AttributeOperations.of_json in
+      let userId = field_map_exn json__ "UserId" ResourceId.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ~operations ~userId ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the specified user metadata and attributes in the specified identity store."]
+module UpdateGroupResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the specified group metadata and attributes in the specified identity store."]
+module UpdateGroupRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      groupId: ResourceId.t
+        [@ocaml.doc "The identifier for a group in the identity store."];
+      operations: AttributeOperations.t
+        [@ocaml.doc
+          "A list of AttributeOperation objects to apply to the requested group. These operations might add, replace, or remove an attribute. For more information on the attributes that can be added, replaced, or removed, see Group."]}
+    let context_ = "UpdateGroupRequest"
+    let make ~identityStoreId =
+      fun ~groupId ->
+        fun ~operations -> fun () -> { identityStoreId; groupId; operations }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("GroupId", (Some (ResourceId.to_value x.groupId)));
+        ("Operations", (Some (AttributeOperations.to_value x.operations)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operations =
+        AttributeOperations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Operations") in
+      let groupId =
+        ResourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ~operations ~groupId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operations =
+        field_map_exn json__ "Operations" AttributeOperations.of_json in
+      let groupId = field_map_exn json__ "GroupId" ResourceId.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ~operations ~groupId ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the specified group metadata and attributes in the specified identity store."]
 module ListUsersResponse =
   struct
     type nonrec t =
       {
-      users: Users.t
+      users: Users.t option
         [@ocaml.doc "A list of User objects in the identity store."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -601,8 +2665,7 @@ module ListUsersResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListUsersResponse"
-    let make ?nextToken = fun ~users -> fun () -> { nextToken; users }
+    let make ?users = fun ?nextToken -> fun () -> { users; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -661,49 +2724,55 @@ module ListUsersResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Users", (Some (Users.to_value x.users)));
+        [("Users", (Option.map x.users ~f:Users.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let users =
-        Users.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Users") in
-      make ?nextToken ~users ()
+      let users = (Option.map ~f:Users.of_xml) (Xml.child xml_arg0 "Users") in
+      make ?nextToken ?users ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let users = field_map_exn json "Users" Users.of_json in
-      make ?nextToken ~users ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let users = field_map json__ "Users" Users.of_json in
+      make ?nextToken ?users ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the attribute name and value of the user that you specified in the search. We only support UserName as a valid filter attribute path currently, and filter is required. This API returns minimum attributes, including UserId and UserName in the response."]
+       "Lists all users in the identity store. Returns a paginated list of complete User objects. Filtering for a User by the UserName attribute is deprecated. Instead, use the GetUserId API action. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
 module ListUsersRequest =
   struct
     type nonrec t =
       {
       identityStoreId: IdentityStoreId.t
         [@ocaml.doc
-          "The globally unique identifier for the identity store, such as d-1234567890. In this example, d- is a fixed prefix, and 1234567890 is a randomly generated string that contains number and lower case letters. This value is generated at the time that a new identity store is created."];
+          "The globally unique identifier for the identity store, such as d-1234567890. In this example, d- is a fixed prefix, and 1234567890 is a randomly generated string that contains numbers and lower case letters. This value is generated at the time that a new identity store is created."];
+      extensions: ExtensionNames.t option
+        [@ocaml.doc
+          "A collection of extension names indicating what extensions the service should retrieve alongside other user attributes. aws:identitystore:enterprise is the only supported extension name."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to be returned per request. This parameter is used in the ListUsers and ListGroups request to specify how many results to return in one page. The length limit is 50 characters."];
+          "The maximum number of results to be returned per request. This parameter is used in the ListUsers and ListGroups requests to specify how many results to return in one page. The length limit is 50 characters."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The pagination token used for the ListUsers and ListGroups API operations. This value is generated by the identity store service. It is returned in the API response if the total results are more than the size of one page. This token is also returned when it is used in the API request to search for the next page."];
       filters: Filters.t option
         [@ocaml.doc
-          "A list of Filter objects, which is used in the ListUsers and ListGroups request."]}
+          "A list of Filter objects, which is used in the ListUsers and ListGroups requests."]}
     let context_ = "ListUsersRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ?filters ->
-          fun ~identityStoreId ->
-            fun () -> { maxResults; nextToken; filters; identityStoreId }
+    let make ?extensions =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?filters ->
+            fun ~identityStoreId ->
+              fun () ->
+                { extensions; maxResults; nextToken; filters; identityStoreId
+                }
     let to_value x =
       structure_to_value
         [("IdentityStoreId",
            (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("Extensions", (Option.map x.extensions ~f:ExtensionNames.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("Filters", (Option.map x.filters ~f:Filters.to_value))]
@@ -715,30 +2784,34 @@ module ListUsersRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let extensions =
+        (Option.map ~f:ExtensionNames.of_xml)
+          (Xml.child xml_arg0 "Extensions") in
       let identityStoreId =
         IdentityStoreId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
-      make ?filters ?nextToken ?maxResults ~identityStoreId ()
+      make ?filters ?nextToken ?maxResults ?extensions ~identityStoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let extensions = field_map json__ "Extensions" ExtensionNames.of_json in
       let identityStoreId =
-        field_map_exn json "IdentityStoreId" IdentityStoreId.of_json in
-      make ?filters ?nextToken ?maxResults ~identityStoreId ()
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ?filters ?nextToken ?maxResults ?extensions ~identityStoreId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the attribute name and value of the user that you specified in the search. We only support UserName as a valid filter attribute path currently, and filter is required. This API returns minimum attributes, including UserId and UserName in the response."]
+       "Lists all users in the identity store. Returns a paginated list of complete User objects. Filtering for a User by the UserName attribute is deprecated. Instead, use the GetUserId API action. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
 module ListGroupsResponse =
   struct
     type nonrec t =
       {
-      groups: Groups.t
+      groups: Groups.t option
         [@ocaml.doc "A list of Group objects in the identity store."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The pagination token used for the ListUsers and ListGroups API operations. This value is generated by the identity store service. It is returned in the API response if the total results are more than the size of one page. This token is also returned when it1 is used in the API request to search for the next page."]}
+          "The pagination token used for the ListUsers and ListGroups API operations. This value is generated by the identity store service. It is returned in the API response if the total results are more than the size of one page. This token is also returned when it is used in the API request to search for the next page."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -746,8 +2819,7 @@ module ListGroupsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListGroupsResponse"
-    let make ?nextToken = fun ~groups -> fun () -> { nextToken; groups }
+    let make ?groups = fun ?nextToken -> fun () -> { groups; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -806,39 +2878,39 @@ module ListGroupsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Groups", (Some (Groups.to_value x.groups)));
+        [("Groups", (Option.map x.groups ~f:Groups.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let groups =
-        Groups.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Groups") in
-      make ?nextToken ~groups ()
+        (Option.map ~f:Groups.of_xml) (Xml.child xml_arg0 "Groups") in
+      make ?nextToken ?groups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let groups = field_map_exn json "Groups" Groups.of_json in
-      make ?nextToken ~groups ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let groups = field_map json__ "Groups" Groups.of_json in
+      make ?nextToken ?groups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the attribute name and value of the group that you specified in the search. We only support DisplayName as a valid filter attribute path currently, and filter is required. This API returns minimum attributes, including GroupId and group DisplayName in the response."]
+       "Lists all groups in the identity store. Returns a paginated list of complete Group objects. Filtering for a Group by the DisplayName attribute is deprecated. Instead, use the GetGroupId API action. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
 module ListGroupsRequest =
   struct
     type nonrec t =
       {
       identityStoreId: IdentityStoreId.t
         [@ocaml.doc
-          "The globally unique identifier for the identity store, such as d-1234567890. In this example, d- is a fixed prefix, and 1234567890 is a randomly generated string that contains number and lower case letters. This value is generated at the time that a new identity store is created."];
+          "The globally unique identifier for the identity store, such as d-1234567890. In this example, d- is a fixed prefix, and 1234567890 is a randomly generated string that contains numbers and lower case letters. This value is generated at the time that a new identity store is created."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to be returned per request. This parameter is used in the ListUsers and ListGroups request to specify how many results to return in one page. The length limit is 50 characters."];
+          "The maximum number of results to be returned per request. This parameter is used in the ListUsers and ListGroups requests to specify how many results to return in one page. The length limit is 50 characters."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The pagination token used for the ListUsers and ListGroups API operations. This value is generated by the identity store service. It is returned in the API response if the total results are more than the size of one page. This token is also returned when it is used in the API request to search for the next page."];
       filters: Filters.t option
         [@ocaml.doc
-          "A list of Filter objects, which is used in the ListUsers and ListGroups request."]}
+          "A list of Filter objects, which is used in the ListUsers and ListGroups requests."]}
     let context_ = "ListGroupsRequest"
     let make ?maxResults =
       fun ?nextToken ->
@@ -865,25 +2937,25 @@ module ListGroupsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
       make ?filters ?nextToken ?maxResults ~identityStoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let identityStoreId =
-        field_map_exn json "IdentityStoreId" IdentityStoreId.of_json in
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
       make ?filters ?nextToken ?maxResults ~identityStoreId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the attribute name and value of the group that you specified in the search. We only support DisplayName as a valid filter attribute path currently, and filter is required. This API returns minimum attributes, including GroupId and group DisplayName in the response."]
-module DescribeUserResponse =
+       "Lists all groups in the identity store. Returns a paginated list of complete Group objects. Filtering for a Group by the DisplayName attribute is deprecated. Instead, use the GetGroupId API action. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module ListGroupMembershipsResponse =
   struct
     type nonrec t =
       {
-      userName: UserName.t
+      groupMemberships: GroupMemberships.t option
+        [@ocaml.doc "A list of GroupMembership objects in the group."];
+      nextToken: NextToken.t option
         [@ocaml.doc
-          "Contains the user\226\128\153s user name value. The length limit is 128 characters. This value can consist of letters, accented characters, symbols, numbers, and punctuation. The characters <>;:% are excluded. This value is specified at the time the user is created and stored as an attribute of the user object in the identity store."];
-      userId: ResourceId.t
-        [@ocaml.doc "The identifier for a user in the identity store."]}
+          "The pagination token used for the ListUsers, ListGroups, and ListGroupMemberships API operations. This value is generated by the identity store service. It is returned in the API response if the total results are more than the size of one page. This token is also returned when it is used in the API request to search for the next page."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -891,8 +2963,8 @@ module DescribeUserResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeUserResponse"
-    let make ~userName = fun ~userId -> fun () -> { userName; userId }
+    let make ?groupMemberships =
+      fun ?nextToken -> fun () -> { groupMemberships; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -951,66 +3023,1154 @@ module DescribeUserResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("UserName", (Some (UserName.to_value x.userName)));
-        ("UserId", (Some (ResourceId.to_value x.userId)))]
+        [("GroupMemberships",
+           (Option.map x.groupMemberships ~f:GroupMemberships.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let groupMemberships =
+        (Option.map ~f:GroupMemberships.of_xml)
+          (Xml.child xml_arg0 "GroupMemberships") in
+      make ?nextToken ?groupMemberships ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let groupMemberships =
+        field_map json__ "GroupMemberships" GroupMemberships.of_json in
+      make ?nextToken ?groupMemberships ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For the specified group in the specified identity store, returns the list of all GroupMembership objects and returns results in paginated form. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module ListGroupMembershipsRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      groupId: ResourceId.t
+        [@ocaml.doc "The identifier for a group in the identity store."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be returned per request. This parameter is used in all List requests to specify how many results to return in one page."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The pagination token used for the ListUsers, ListGroups and ListGroupMemberships API operations. This value is generated by the identity store service. It is returned in the API response if the total results are more than the size of one page. This token is also returned when it is used in the API request to search for the next page."]}
+    let context_ = "ListGroupMembershipsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~identityStoreId ->
+          fun ~groupId ->
+            fun () -> { maxResults; nextToken; identityStoreId; groupId }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("GroupId", (Some (ResourceId.to_value x.groupId)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let groupId =
+        ResourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ?nextToken ?maxResults ~groupId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let groupId = field_map_exn json__ "GroupId" ResourceId.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ?nextToken ?maxResults ~groupId ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For the specified group in the specified identity store, returns the list of all GroupMembership objects and returns results in paginated form. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module ListGroupMembershipsForMemberResponse =
+  struct
+    type nonrec t =
+      {
+      groupMemberships: GroupMemberships.t option
+        [@ocaml.doc
+          "A list of GroupMembership objects in the group for a specified member."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The pagination token used for the ListUsers, ListGroups, and ListGroupMemberships API operations. This value is generated by the identity store service. It is returned in the API response if the total results are more than the size of one page. This token is also returned when it is used in the API request to search for the next page."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?groupMemberships =
+      fun ?nextToken -> fun () -> { groupMemberships; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("GroupMemberships",
+           (Option.map x.groupMemberships ~f:GroupMemberships.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let groupMemberships =
+        (Option.map ~f:GroupMemberships.of_xml)
+          (Xml.child xml_arg0 "GroupMemberships") in
+      make ?nextToken ?groupMemberships ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let groupMemberships =
+        field_map json__ "GroupMemberships" GroupMemberships.of_json in
+      make ?nextToken ?groupMemberships ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For the specified member in the specified identity store, returns the list of all GroupMembership objects and returns results in paginated form. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module ListGroupMembershipsForMemberRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      memberId: MemberId.t
+        [@ocaml.doc
+          "An object that contains the identifier of a group member. Setting the UserID field to the specific identifier for a user indicates that the user is a member of the group."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to be returned per request. This parameter is used in the ListUsers and ListGroups requests to specify how many results to return in one page. The length limit is 50 characters."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The pagination token used for the ListUsers, ListGroups, and ListGroupMemberships API operations. This value is generated by the identity store service. It is returned in the API response if the total results are more than the size of one page. This token is also returned when it is used in the API request to search for the next page."]}
+    let context_ = "ListGroupMembershipsForMemberRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~identityStoreId ->
+          fun ~memberId ->
+            fun () -> { maxResults; nextToken; identityStoreId; memberId }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("MemberId", (Some (MemberId.to_value x.memberId)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let memberId =
+        MemberId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MemberId") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ?nextToken ?maxResults ~memberId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let memberId = field_map_exn json__ "MemberId" MemberId.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ?nextToken ?maxResults ~memberId ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For the specified member in the specified identity store, returns the list of all GroupMembership objects and returns results in paginated form. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module IsMemberInGroupsResponse =
+  struct
+    type nonrec t =
+      {
+      results: GroupMembershipExistenceResults.t option
+        [@ocaml.doc
+          "A list containing the results of membership existence checks."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?results = fun () -> { results }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Results",
+           (Option.map x.results ~f:GroupMembershipExistenceResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let results =
+        (Option.map ~f:GroupMembershipExistenceResults.of_xml)
+          (Xml.child xml_arg0 "Results") in
+      make ?results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let results =
+        field_map json__ "Results" GroupMembershipExistenceResults.of_json in
+      make ?results ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Checks the user's membership in all requested groups and returns if the member exists in all queried groups. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module IsMemberInGroupsRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      memberId: MemberId.t
+        [@ocaml.doc "An object containing the identifier of a group member."];
+      groupIds: GroupIds.t
+        [@ocaml.doc
+          "A list of identifiers for groups in the identity store."]}
+    let context_ = "IsMemberInGroupsRequest"
+    let make ~identityStoreId =
+      fun ~memberId ->
+        fun ~groupIds -> fun () -> { identityStoreId; memberId; groupIds }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("MemberId", (Some (MemberId.to_value x.memberId)));
+        ("GroupIds", (Some (GroupIds.to_value x.groupIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupIds =
+        GroupIds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GroupIds") in
+      let memberId =
+        MemberId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MemberId") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ~groupIds ~memberId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupIds = field_map_exn json__ "GroupIds" GroupIds.of_json in
+      let memberId = field_map_exn json__ "MemberId" MemberId.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ~groupIds ~memberId ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Checks the user's membership in all requested groups and returns if the member exists in all queried groups. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module GetUserIdResponse =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t option
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      userId: ResourceId.t option
+        [@ocaml.doc "The identifier for a user in the identity store."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?identityStoreId =
+      fun ?userId -> fun () -> { identityStoreId; userId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Option.map x.identityStoreId ~f:IdentityStoreId.to_value));
+        ("UserId", (Option.map x.userId ~f:ResourceId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userId =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
-      let userName =
-        UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserName") in
-      make ~userId ~userName ()
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "UserId") in
+      let identityStoreId =
+        (Option.map ~f:IdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityStoreId") in
+      make ?userId ?identityStoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map_exn json "UserId" ResourceId.of_json in
-      let userName = field_map_exn json "UserName" UserName.of_json in
-      make ~userId ~userName ()
+    let of_json json__ =
+      let userId = field_map json__ "UserId" ResourceId.of_json in
+      let identityStoreId =
+        field_map json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ?userId ?identityStoreId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the user metadata and attributes from UserId in an identity store."]
+       "Retrieves the UserId in an identity store. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module GetUserIdRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      alternateIdentifier: AlternateIdentifier.t
+        [@ocaml.doc
+          "A unique identifier for a user or group that is not the primary identifier. This value can be an identifier from an external identity provider (IdP) that is associated with the user, the group, or a unique attribute. For the unique attribute, the only valid paths are userName and emails.value."]}
+    let context_ = "GetUserIdRequest"
+    let make ~identityStoreId =
+      fun ~alternateIdentifier ->
+        fun () -> { identityStoreId; alternateIdentifier }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("AlternateIdentifier",
+          (Some (AlternateIdentifier.to_value x.alternateIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let alternateIdentifier =
+        AlternateIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AlternateIdentifier") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ~alternateIdentifier ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let alternateIdentifier =
+        field_map_exn json__ "AlternateIdentifier"
+          AlternateIdentifier.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ~alternateIdentifier ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the UserId in an identity store. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module GetGroupMembershipIdResponse =
+  struct
+    type nonrec t =
+      {
+      membershipId: ResourceId.t option
+        [@ocaml.doc
+          "The identifier for a GroupMembership in an identity store."];
+      identityStoreId: IdentityStoreId.t option
+        [@ocaml.doc "The globally unique identifier for the identity store."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?membershipId =
+      fun ?identityStoreId -> fun () -> { membershipId; identityStoreId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MembershipId", (Option.map x.membershipId ~f:ResourceId.to_value));
+        ("IdentityStoreId",
+          (Option.map x.identityStoreId ~f:IdentityStoreId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityStoreId =
+        (Option.map ~f:IdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityStoreId") in
+      let membershipId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "MembershipId") in
+      make ?identityStoreId ?membershipId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityStoreId =
+        field_map json__ "IdentityStoreId" IdentityStoreId.of_json in
+      let membershipId = field_map json__ "MembershipId" ResourceId.of_json in
+      make ?identityStoreId ?membershipId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the MembershipId in an identity store. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module GetGroupMembershipIdRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      groupId: ResourceId.t
+        [@ocaml.doc "The identifier for a group in the identity store."];
+      memberId: MemberId.t
+        [@ocaml.doc
+          "An object that contains the identifier of a group member. Setting the UserID field to the specific identifier for a user indicates that the user is a member of the group."]}
+    let context_ = "GetGroupMembershipIdRequest"
+    let make ~identityStoreId =
+      fun ~groupId ->
+        fun ~memberId -> fun () -> { identityStoreId; groupId; memberId }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("GroupId", (Some (ResourceId.to_value x.groupId)));
+        ("MemberId", (Some (MemberId.to_value x.memberId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let memberId =
+        MemberId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MemberId") in
+      let groupId =
+        ResourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ~memberId ~groupId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let memberId = field_map_exn json__ "MemberId" MemberId.of_json in
+      let groupId = field_map_exn json__ "GroupId" ResourceId.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ~memberId ~groupId ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the MembershipId in an identity store. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module GetGroupIdResponse =
+  struct
+    type nonrec t =
+      {
+      groupId: ResourceId.t option
+        [@ocaml.doc "The identifier for a group in the identity store."];
+      identityStoreId: IdentityStoreId.t option
+        [@ocaml.doc "The globally unique identifier for the identity store."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?groupId =
+      fun ?identityStoreId -> fun () -> { groupId; identityStoreId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("GroupId", (Option.map x.groupId ~f:ResourceId.to_value));
+        ("IdentityStoreId",
+          (Option.map x.identityStoreId ~f:IdentityStoreId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityStoreId =
+        (Option.map ~f:IdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityStoreId") in
+      let groupId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "GroupId") in
+      make ?identityStoreId ?groupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityStoreId =
+        field_map json__ "IdentityStoreId" IdentityStoreId.of_json in
+      let groupId = field_map json__ "GroupId" ResourceId.of_json in
+      make ?identityStoreId ?groupId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves GroupId in an identity store. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module GetGroupIdRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      alternateIdentifier: AlternateIdentifier.t
+        [@ocaml.doc
+          "A unique identifier for a user or group that is not the primary identifier. This value can be an identifier from an external identity provider (IdP) that is associated with the user, the group, or a unique attribute. For the unique attribute, the only valid path is displayName."]}
+    let context_ = "GetGroupIdRequest"
+    let make ~identityStoreId =
+      fun ~alternateIdentifier ->
+        fun () -> { identityStoreId; alternateIdentifier }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("AlternateIdentifier",
+          (Some (AlternateIdentifier.to_value x.alternateIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let alternateIdentifier =
+        AlternateIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AlternateIdentifier") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ~alternateIdentifier ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let alternateIdentifier =
+        field_map_exn json__ "AlternateIdentifier"
+          AlternateIdentifier.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ~alternateIdentifier ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves GroupId in an identity store. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module DescribeUserResponse =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t option
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      userId: ResourceId.t option
+        [@ocaml.doc "The identifier for a user in the identity store."];
+      userName: UserName.t option
+        [@ocaml.doc
+          "A unique string used to identify the user. The length limit is 128 characters. This value can consist of letters, accented characters, symbols, numbers, and punctuation. This value is specified at the time the user is created and stored as an attribute of the user object in the identity store."];
+      externalIds: ExternalIds.t option
+        [@ocaml.doc
+          "A list of ExternalId objects that contains the identifiers issued to this resource by an external identity provider."];
+      name: Name.t option [@ocaml.doc "The name of the user."];
+      displayName: SensitiveStringType.t option
+        [@ocaml.doc "The display name of the user."];
+      nickName: SensitiveStringType.t option
+        [@ocaml.doc "An alternative descriptive name for the user."];
+      profileUrl: SensitiveStringType.t option
+        [@ocaml.doc "A URL link for the user's profile."];
+      emails: Emails.t option [@ocaml.doc "The email address of the user."];
+      addresses: Addresses.t option
+        [@ocaml.doc "The physical address of the user."];
+      phoneNumbers: PhoneNumbers.t option
+        [@ocaml.doc "A list of PhoneNumber objects associated with a user."];
+      userType: SensitiveStringType.t option
+        [@ocaml.doc "A string indicating the type of user."];
+      title: SensitiveStringType.t option
+        [@ocaml.doc "A string containing the title of the user."];
+      preferredLanguage: SensitiveStringType.t option
+        [@ocaml.doc "The preferred language of the user."];
+      locale: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing the geographical region or location of the user."];
+      timezone: SensitiveStringType.t option
+        [@ocaml.doc "The time zone for a user."];
+      userStatus: UserStatus.t option
+        [@ocaml.doc "The current status of the user account."];
+      photos: Photos.t option
+        [@ocaml.doc
+          "A list of photos associated with the user. Returns up to 3 photos with their associated metadata including type, display name, and primary designation."];
+      website: SensitiveStringType.t option
+        [@ocaml.doc
+          "The user's personal website or blog URL. Returns the stored website information for the user."];
+      birthdate: SensitiveStringType.t option
+        [@ocaml.doc
+          "The user's birthdate in YYYY-MM-DD format. This field returns the stored birthdate information for the user."];
+      roles: Roles.t option [@ocaml.doc "The roles of the user."];
+      createdAt: DateType.t option
+        [@ocaml.doc "The date and time the user was created."];
+      createdBy: StringType.t option
+        [@ocaml.doc
+          "The identifier of the user or system that created the user."];
+      updatedAt: DateType.t option
+        [@ocaml.doc "The date and time the user was last updated."];
+      updatedBy: StringType.t option
+        [@ocaml.doc
+          "The identifier of the user or system that last updated the user."];
+      extensions: Extensions.t option
+        [@ocaml.doc
+          "A map of explicitly requested attribute extensions associated with the user. Not populated if the user has no requested extensions."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?identityStoreId =
+      fun ?userId ->
+        fun ?userName ->
+          fun ?externalIds ->
+            fun ?name ->
+              fun ?displayName ->
+                fun ?nickName ->
+                  fun ?profileUrl ->
+                    fun ?emails ->
+                      fun ?addresses ->
+                        fun ?phoneNumbers ->
+                          fun ?userType ->
+                            fun ?title ->
+                              fun ?preferredLanguage ->
+                                fun ?locale ->
+                                  fun ?timezone ->
+                                    fun ?userStatus ->
+                                      fun ?photos ->
+                                        fun ?website ->
+                                          fun ?birthdate ->
+                                            fun ?roles ->
+                                              fun ?createdAt ->
+                                                fun ?createdBy ->
+                                                  fun ?updatedAt ->
+                                                    fun ?updatedBy ->
+                                                      fun ?extensions ->
+                                                        fun () ->
+                                                          {
+                                                            identityStoreId;
+                                                            userId;
+                                                            userName;
+                                                            externalIds;
+                                                            name;
+                                                            displayName;
+                                                            nickName;
+                                                            profileUrl;
+                                                            emails;
+                                                            addresses;
+                                                            phoneNumbers;
+                                                            userType;
+                                                            title;
+                                                            preferredLanguage;
+                                                            locale;
+                                                            timezone;
+                                                            userStatus;
+                                                            photos;
+                                                            website;
+                                                            birthdate;
+                                                            roles;
+                                                            createdAt;
+                                                            createdBy;
+                                                            updatedAt;
+                                                            updatedBy;
+                                                            extensions
+                                                          }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Option.map x.identityStoreId ~f:IdentityStoreId.to_value));
+        ("UserId", (Option.map x.userId ~f:ResourceId.to_value));
+        ("UserName", (Option.map x.userName ~f:UserName.to_value));
+        ("ExternalIds", (Option.map x.externalIds ~f:ExternalIds.to_value));
+        ("Name", (Option.map x.name ~f:Name.to_value));
+        ("DisplayName",
+          (Option.map x.displayName ~f:SensitiveStringType.to_value));
+        ("NickName", (Option.map x.nickName ~f:SensitiveStringType.to_value));
+        ("ProfileUrl",
+          (Option.map x.profileUrl ~f:SensitiveStringType.to_value));
+        ("Emails", (Option.map x.emails ~f:Emails.to_value));
+        ("Addresses", (Option.map x.addresses ~f:Addresses.to_value));
+        ("PhoneNumbers",
+          (Option.map x.phoneNumbers ~f:PhoneNumbers.to_value));
+        ("UserType", (Option.map x.userType ~f:SensitiveStringType.to_value));
+        ("Title", (Option.map x.title ~f:SensitiveStringType.to_value));
+        ("PreferredLanguage",
+          (Option.map x.preferredLanguage ~f:SensitiveStringType.to_value));
+        ("Locale", (Option.map x.locale ~f:SensitiveStringType.to_value));
+        ("Timezone", (Option.map x.timezone ~f:SensitiveStringType.to_value));
+        ("UserStatus", (Option.map x.userStatus ~f:UserStatus.to_value));
+        ("Photos", (Option.map x.photos ~f:Photos.to_value));
+        ("Website", (Option.map x.website ~f:SensitiveStringType.to_value));
+        ("Birthdate",
+          (Option.map x.birthdate ~f:SensitiveStringType.to_value));
+        ("Roles", (Option.map x.roles ~f:Roles.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:DateType.to_value));
+        ("CreatedBy", (Option.map x.createdBy ~f:StringType.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:DateType.to_value));
+        ("UpdatedBy", (Option.map x.updatedBy ~f:StringType.to_value));
+        ("Extensions", (Option.map x.extensions ~f:Extensions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let extensions =
+        (Option.map ~f:Extensions.of_xml) (Xml.child xml_arg0 "Extensions") in
+      let updatedBy =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "UpdatedBy") in
+      let updatedAt =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdBy =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "CreatedBy") in
+      let createdAt =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let roles = (Option.map ~f:Roles.of_xml) (Xml.child xml_arg0 "Roles") in
+      let birthdate =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Birthdate") in
+      let website =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Website") in
+      let photos =
+        (Option.map ~f:Photos.of_xml) (Xml.child xml_arg0 "Photos") in
+      let userStatus =
+        (Option.map ~f:UserStatus.of_xml) (Xml.child xml_arg0 "UserStatus") in
+      let timezone =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Timezone") in
+      let locale =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Locale") in
+      let preferredLanguage =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "PreferredLanguage") in
+      let title =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Title") in
+      let userType =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "UserType") in
+      let phoneNumbers =
+        (Option.map ~f:PhoneNumbers.of_xml)
+          (Xml.child xml_arg0 "PhoneNumbers") in
+      let addresses =
+        (Option.map ~f:Addresses.of_xml) (Xml.child xml_arg0 "Addresses") in
+      let emails =
+        (Option.map ~f:Emails.of_xml) (Xml.child xml_arg0 "Emails") in
+      let profileUrl =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "ProfileUrl") in
+      let nickName =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "NickName") in
+      let displayName =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "DisplayName") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
+      let externalIds =
+        (Option.map ~f:ExternalIds.of_xml) (Xml.child xml_arg0 "ExternalIds") in
+      let userName =
+        (Option.map ~f:UserName.of_xml) (Xml.child xml_arg0 "UserName") in
+      let userId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "UserId") in
+      let identityStoreId =
+        (Option.map ~f:IdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityStoreId") in
+      make ?extensions ?updatedBy ?updatedAt ?createdBy ?createdAt ?roles
+        ?birthdate ?website ?photos ?userStatus ?timezone ?locale
+        ?preferredLanguage ?title ?userType ?phoneNumbers ?addresses ?emails
+        ?profileUrl ?nickName ?displayName ?name ?externalIds ?userName
+        ?userId ?identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let extensions = field_map json__ "Extensions" Extensions.of_json in
+      let updatedBy = field_map json__ "UpdatedBy" StringType.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" DateType.of_json in
+      let createdBy = field_map json__ "CreatedBy" StringType.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateType.of_json in
+      let roles = field_map json__ "Roles" Roles.of_json in
+      let birthdate =
+        field_map json__ "Birthdate" SensitiveStringType.of_json in
+      let website = field_map json__ "Website" SensitiveStringType.of_json in
+      let photos = field_map json__ "Photos" Photos.of_json in
+      let userStatus = field_map json__ "UserStatus" UserStatus.of_json in
+      let timezone = field_map json__ "Timezone" SensitiveStringType.of_json in
+      let locale = field_map json__ "Locale" SensitiveStringType.of_json in
+      let preferredLanguage =
+        field_map json__ "PreferredLanguage" SensitiveStringType.of_json in
+      let title = field_map json__ "Title" SensitiveStringType.of_json in
+      let userType = field_map json__ "UserType" SensitiveStringType.of_json in
+      let phoneNumbers = field_map json__ "PhoneNumbers" PhoneNumbers.of_json in
+      let addresses = field_map json__ "Addresses" Addresses.of_json in
+      let emails = field_map json__ "Emails" Emails.of_json in
+      let profileUrl =
+        field_map json__ "ProfileUrl" SensitiveStringType.of_json in
+      let nickName = field_map json__ "NickName" SensitiveStringType.of_json in
+      let displayName =
+        field_map json__ "DisplayName" SensitiveStringType.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let externalIds = field_map json__ "ExternalIds" ExternalIds.of_json in
+      let userName = field_map json__ "UserName" UserName.of_json in
+      let userId = field_map json__ "UserId" ResourceId.of_json in
+      let identityStoreId =
+        field_map json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ?extensions ?updatedBy ?updatedAt ?createdBy ?createdAt ?roles
+        ?birthdate ?website ?photos ?userStatus ?timezone ?locale
+        ?preferredLanguage ?title ?userType ?phoneNumbers ?addresses ?emails
+        ?profileUrl ?nickName ?displayName ?name ?externalIds ?userName
+        ?userId ?identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the user metadata and attributes from the UserId in an identity store. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
 module DescribeUserRequest =
   struct
     type nonrec t =
       {
       identityStoreId: IdentityStoreId.t
         [@ocaml.doc
-          "The globally unique identifier for the identity store, such as d-1234567890. In this example, d- is a fixed prefix, and 1234567890 is a randomly generated string that contains number and lower case letters. This value is generated at the time that a new identity store is created."];
+          "The globally unique identifier for the identity store, such as d-1234567890. In this example, d- is a fixed prefix, and 1234567890 is a randomly generated string that contains numbers and lower case letters. This value is generated at the time that a new identity store is created."];
       userId: ResourceId.t
-        [@ocaml.doc "The identifier for a user in the identity store."]}
+        [@ocaml.doc "The identifier for a user in the identity store."];
+      extensions: ExtensionNames.t option
+        [@ocaml.doc
+          "A collection of extension names indicating what extensions the service should retrieve alongside other user attributes. aws:identitystore:enterprise is the only supported extension name."]}
     let context_ = "DescribeUserRequest"
-    let make ~identityStoreId =
-      fun ~userId -> fun () -> { identityStoreId; userId }
+    let make ?extensions =
+      fun ~identityStoreId ->
+        fun ~userId -> fun () -> { extensions; identityStoreId; userId }
     let to_value x =
       structure_to_value
         [("IdentityStoreId",
            (Some (IdentityStoreId.to_value x.identityStoreId)));
-        ("UserId", (Some (ResourceId.to_value x.userId)))]
+        ("UserId", (Some (ResourceId.to_value x.userId)));
+        ("Extensions", (Option.map x.extensions ~f:ExtensionNames.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let extensions =
+        (Option.map ~f:ExtensionNames.of_xml)
+          (Xml.child xml_arg0 "Extensions") in
       let userId =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       let identityStoreId =
         IdentityStoreId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
-      make ~userId ~identityStoreId ()
+      make ?extensions ~userId ~identityStoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map_exn json "UserId" ResourceId.of_json in
+    let of_json json__ =
+      let extensions = field_map json__ "Extensions" ExtensionNames.of_json in
+      let userId = field_map_exn json__ "UserId" ResourceId.of_json in
       let identityStoreId =
-        field_map_exn json "IdentityStoreId" IdentityStoreId.of_json in
-      make ~userId ~identityStoreId ()
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ?extensions ~userId ~identityStoreId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the user metadata and attributes from UserId in an identity store."]
+       "Retrieves the user metadata and attributes from the UserId in an identity store. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
 module DescribeGroupResponse =
   struct
     type nonrec t =
       {
-      groupId: ResourceId.t
+      groupId: ResourceId.t option
         [@ocaml.doc "The identifier for a group in the identity store."];
-      displayName: GroupDisplayName.t
+      displayName: GroupDisplayName.t option
         [@ocaml.doc
-          "Contains the group\226\128\153s display name value. The length limit is 1,024 characters. This value can consist of letters, accented characters, symbols, numbers, punctuation, tab, new line, carriage return, space, and nonbreaking space in this attribute. The characters <>;:% are excluded. This value is specified at the time that the group is created and stored as an attribute of the group object in the identity store."]}
+          "The group\226\128\153s display name value. The length limit is 1,024 characters. This value can consist of letters, accented characters, symbols, numbers, punctuation, tab, new line, carriage return, space, and nonbreaking space in this attribute. This value is specified at the time that the group is created and stored as an attribute of the group object in the identity store."];
+      externalIds: ExternalIds.t option
+        [@ocaml.doc
+          "A list of ExternalId objects that contains the identifiers issued to this resource by an external identity provider."];
+      description: SensitiveStringType.t option
+        [@ocaml.doc "A string containing a description of the group."];
+      createdAt: DateType.t option
+        [@ocaml.doc "The date and time the group was created."];
+      updatedAt: DateType.t option
+        [@ocaml.doc "The date and time the group was last updated."];
+      createdBy: StringType.t option
+        [@ocaml.doc
+          "The identifier of the user or system that created the group."];
+      updatedBy: StringType.t option
+        [@ocaml.doc
+          "The identifier of the user or system that last updated the group."];
+      identityStoreId: IdentityStoreId.t option
+        [@ocaml.doc "The globally unique identifier for the identity store."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -1018,9 +4178,27 @@ module DescribeGroupResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeGroupResponse"
-    let make ~groupId =
-      fun ~displayName -> fun () -> { groupId; displayName }
+    let make ?groupId =
+      fun ?displayName ->
+        fun ?externalIds ->
+          fun ?description ->
+            fun ?createdAt ->
+              fun ?updatedAt ->
+                fun ?createdBy ->
+                  fun ?updatedBy ->
+                    fun ?identityStoreId ->
+                      fun () ->
+                        {
+                          groupId;
+                          displayName;
+                          externalIds;
+                          description;
+                          createdAt;
+                          updatedAt;
+                          createdBy;
+                          updatedBy;
+                          identityStoreId
+                        }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1079,33 +4257,69 @@ module DescribeGroupResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("GroupId", (Some (ResourceId.to_value x.groupId)));
-        ("DisplayName", (Some (GroupDisplayName.to_value x.displayName)))]
+        [("GroupId", (Option.map x.groupId ~f:ResourceId.to_value));
+        ("DisplayName",
+          (Option.map x.displayName ~f:GroupDisplayName.to_value));
+        ("ExternalIds", (Option.map x.externalIds ~f:ExternalIds.to_value));
+        ("Description",
+          (Option.map x.description ~f:SensitiveStringType.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:DateType.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:DateType.to_value));
+        ("CreatedBy", (Option.map x.createdBy ~f:StringType.to_value));
+        ("UpdatedBy", (Option.map x.updatedBy ~f:StringType.to_value));
+        ("IdentityStoreId",
+          (Option.map x.identityStoreId ~f:IdentityStoreId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let identityStoreId =
+        (Option.map ~f:IdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityStoreId") in
+      let updatedBy =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "UpdatedBy") in
+      let createdBy =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "CreatedBy") in
+      let updatedAt =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdAt =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let description =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let externalIds =
+        (Option.map ~f:ExternalIds.of_xml) (Xml.child xml_arg0 "ExternalIds") in
       let displayName =
-        GroupDisplayName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DisplayName") in
+        (Option.map ~f:GroupDisplayName.of_xml)
+          (Xml.child xml_arg0 "DisplayName") in
       let groupId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
-      make ~displayName ~groupId ()
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "GroupId") in
+      make ?identityStoreId ?updatedBy ?createdBy ?updatedAt ?createdAt
+        ?description ?externalIds ?displayName ?groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let identityStoreId =
+        field_map json__ "IdentityStoreId" IdentityStoreId.of_json in
+      let updatedBy = field_map json__ "UpdatedBy" StringType.of_json in
+      let createdBy = field_map json__ "CreatedBy" StringType.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" DateType.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateType.of_json in
+      let description =
+        field_map json__ "Description" SensitiveStringType.of_json in
+      let externalIds = field_map json__ "ExternalIds" ExternalIds.of_json in
       let displayName =
-        field_map_exn json "DisplayName" GroupDisplayName.of_json in
-      let groupId = field_map_exn json "GroupId" ResourceId.of_json in
-      make ~displayName ~groupId ()
+        field_map json__ "DisplayName" GroupDisplayName.of_json in
+      let groupId = field_map json__ "GroupId" ResourceId.of_json in
+      make ?identityStoreId ?updatedBy ?createdBy ?updatedAt ?createdAt
+        ?description ?externalIds ?displayName ?groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the group metadata and attributes from GroupId in an identity store."]
+       "Retrieves the group metadata and attributes from GroupId in an identity store. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
 module DescribeGroupRequest =
   struct
     type nonrec t =
       {
       identityStoreId: IdentityStoreId.t
         [@ocaml.doc
-          "The globally unique identifier for the identity store, such as d-1234567890. In this example, d- is a fixed prefix, and 1234567890 is a randomly generated string that contains number and lower case letters. This value is generated at the time that a new identity store is created."];
+          "The globally unique identifier for the identity store, such as d-1234567890. In this example, d- is a fixed prefix, and 1234567890 is a randomly generated string that contains numbers and lower case letters. This value is generated at the time that a new identity store is created."];
       groupId: ResourceId.t
         [@ocaml.doc "The identifier for a group in the identity store."]}
     let context_ = "DescribeGroupRequest"
@@ -1126,11 +4340,1200 @@ module DescribeGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
       make ~groupId ~identityStoreId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" ResourceId.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" ResourceId.of_json in
       let identityStoreId =
-        field_map_exn json "IdentityStoreId" IdentityStoreId.of_json in
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
       make ~groupId ~identityStoreId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the group metadata and attributes from GroupId in an identity store."]
+       "Retrieves the group metadata and attributes from GroupId in an identity store. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module DescribeGroupMembershipResponse =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t option
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      membershipId: ResourceId.t option
+        [@ocaml.doc
+          "The identifier for a GroupMembership in an identity store."];
+      groupId: ResourceId.t option
+        [@ocaml.doc "The identifier for a group in the identity store."];
+      memberId: MemberId.t option ;
+      createdAt: DateType.t option
+        [@ocaml.doc "The date and time the group membership was created."];
+      updatedAt: DateType.t option
+        [@ocaml.doc
+          "The date and time the group membership was last updated."];
+      createdBy: StringType.t option
+        [@ocaml.doc
+          "The identifier of the user or system that created the group membership."];
+      updatedBy: StringType.t option
+        [@ocaml.doc
+          "The identifier of the user or system that last updated the group membership."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?identityStoreId =
+      fun ?membershipId ->
+        fun ?groupId ->
+          fun ?memberId ->
+            fun ?createdAt ->
+              fun ?updatedAt ->
+                fun ?createdBy ->
+                  fun ?updatedBy ->
+                    fun () ->
+                      {
+                        identityStoreId;
+                        membershipId;
+                        groupId;
+                        memberId;
+                        createdAt;
+                        updatedAt;
+                        createdBy;
+                        updatedBy
+                      }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Option.map x.identityStoreId ~f:IdentityStoreId.to_value));
+        ("MembershipId", (Option.map x.membershipId ~f:ResourceId.to_value));
+        ("GroupId", (Option.map x.groupId ~f:ResourceId.to_value));
+        ("MemberId", (Option.map x.memberId ~f:MemberId.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:DateType.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:DateType.to_value));
+        ("CreatedBy", (Option.map x.createdBy ~f:StringType.to_value));
+        ("UpdatedBy", (Option.map x.updatedBy ~f:StringType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedBy =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "UpdatedBy") in
+      let createdBy =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "CreatedBy") in
+      let updatedAt =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let createdAt =
+        (Option.map ~f:DateType.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let memberId =
+        (Option.map ~f:MemberId.of_xml) (Xml.child xml_arg0 "MemberId") in
+      let groupId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "GroupId") in
+      let membershipId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "MembershipId") in
+      let identityStoreId =
+        (Option.map ~f:IdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityStoreId") in
+      make ?updatedBy ?createdBy ?updatedAt ?createdAt ?memberId ?groupId
+        ?membershipId ?identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedBy = field_map json__ "UpdatedBy" StringType.of_json in
+      let createdBy = field_map json__ "CreatedBy" StringType.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" DateType.of_json in
+      let createdAt = field_map json__ "CreatedAt" DateType.of_json in
+      let memberId = field_map json__ "MemberId" MemberId.of_json in
+      let groupId = field_map json__ "GroupId" ResourceId.of_json in
+      let membershipId = field_map json__ "MembershipId" ResourceId.of_json in
+      let identityStoreId =
+        field_map json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ?updatedBy ?createdBy ?updatedAt ?createdAt ?memberId ?groupId
+        ?membershipId ?identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves membership metadata and attributes from MembershipId in an identity store. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module DescribeGroupMembershipRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      membershipId: ResourceId.t
+        [@ocaml.doc
+          "The identifier for a GroupMembership in an identity store."]}
+    let context_ = "DescribeGroupMembershipRequest"
+    let make ~identityStoreId =
+      fun ~membershipId -> fun () -> { identityStoreId; membershipId }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("MembershipId", (Some (ResourceId.to_value x.membershipId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let membershipId =
+        ResourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MembershipId") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ~membershipId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let membershipId =
+        field_map_exn json__ "MembershipId" ResourceId.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ~membershipId ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves membership metadata and attributes from MembershipId in an identity store. If you have access to a member account, you can use this API operation from the member account. For more information, see Limiting access to the identity store from member accounts in the IAM Identity Center User Guide."]
+module DeleteUserResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a user within an identity store given UserId."]
+module DeleteUserRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      userId: ResourceId.t
+        [@ocaml.doc "The identifier for a user in the identity store."]}
+    let context_ = "DeleteUserRequest"
+    let make ~identityStoreId =
+      fun ~userId -> fun () -> { identityStoreId; userId }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("UserId", (Some (ResourceId.to_value x.userId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userId =
+        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ~userId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userId = field_map_exn json__ "UserId" ResourceId.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ~userId ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a user within an identity store given UserId."]
+module DeleteGroupResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete a group within an identity store given GroupId."]
+module DeleteGroupRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      groupId: ResourceId.t
+        [@ocaml.doc "The identifier for a group in the identity store."]}
+    let context_ = "DeleteGroupRequest"
+    let make ~identityStoreId =
+      fun ~groupId -> fun () -> { identityStoreId; groupId }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("GroupId", (Some (ResourceId.to_value x.groupId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupId =
+        ResourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ~groupId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" ResourceId.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ~groupId ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete a group within an identity store given GroupId."]
+module DeleteGroupMembershipResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete a membership within a group given MembershipId."]
+module DeleteGroupMembershipRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      membershipId: ResourceId.t
+        [@ocaml.doc
+          "The identifier for a GroupMembership in an identity store."]}
+    let context_ = "DeleteGroupMembershipRequest"
+    let make ~identityStoreId =
+      fun ~membershipId -> fun () -> { identityStoreId; membershipId }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("MembershipId", (Some (ResourceId.to_value x.membershipId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let membershipId =
+        ResourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MembershipId") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ~membershipId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let membershipId =
+        field_map_exn json__ "MembershipId" ResourceId.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ~membershipId ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Delete a membership within a group given MembershipId."]
+module CreateUserResponse =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t option
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      userId: ResourceId.t option
+        [@ocaml.doc
+          "The identifier of the newly created user in the identity store."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?identityStoreId =
+      fun ?userId -> fun () -> { identityStoreId; userId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Option.map x.identityStoreId ~f:IdentityStoreId.to_value));
+        ("UserId", (Option.map x.userId ~f:ResourceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "UserId") in
+      let identityStoreId =
+        (Option.map ~f:IdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityStoreId") in
+      make ?userId ?identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userId = field_map json__ "UserId" ResourceId.of_json in
+      let identityStoreId =
+        field_map json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ?userId ?identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a user within the specified identity store."]
+module CreateUserRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      userName: UserName.t option
+        [@ocaml.doc
+          "A unique string used to identify the user. The length limit is 128 characters. This value can consist of letters, accented characters, symbols, numbers, and punctuation. This value is specified at the time the user is created and stored as an attribute of the user object in the identity store. Administrator and AWSAdministrators are reserved names and can't be used for users or groups."];
+      name: Name.t option
+        [@ocaml.doc
+          "An object containing the name of the user. When used in IAM Identity Center, this parameter is required."];
+      displayName: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing the name of the user. This value is typically formatted for display when the user is referenced. For example, \"John Doe.\" When used in IAM Identity Center, this parameter is required."];
+      nickName: SensitiveStringType.t option
+        [@ocaml.doc "A string containing an alternate name for the user."];
+      profileUrl: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing a URL that might be associated with the user."];
+      emails: Emails.t option
+        [@ocaml.doc
+          "A list of Email objects containing email addresses associated with the user."];
+      addresses: Addresses.t option
+        [@ocaml.doc
+          "A list of Address objects containing addresses associated with the user."];
+      phoneNumbers: PhoneNumbers.t option
+        [@ocaml.doc
+          "A list of PhoneNumber objects containing phone numbers associated with the user."];
+      userType: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string indicating the type of user. Possible values are left unspecified. The value can vary based on your specific use case."];
+      title: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing the title of the user. Possible values are left unspecified. The value can vary based on your specific use case."];
+      preferredLanguage: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing the preferred language of the user. For example, \"American English\" or \"en-us.\""];
+      locale: SensitiveStringType.t option
+        [@ocaml.doc
+          "A string containing the geographical region or location of the user."];
+      timezone: SensitiveStringType.t option
+        [@ocaml.doc "A string containing the time zone of the user."];
+      photos: Photos.t option
+        [@ocaml.doc
+          "A list of photos associated with the user. You can add up to 3 photos per user. Each photo can include a value, type, display name, and primary designation."];
+      website: SensitiveStringType.t option
+        [@ocaml.doc
+          "The user's personal website or blog URL. This field allows users to provide a link to their personal or professional website."];
+      birthdate: SensitiveStringType.t option
+        [@ocaml.doc
+          "The user's birthdate in YYYY-MM-DD format. This field supports standard date format for storing personal information."];
+      roles: Roles.t option
+        [@ocaml.doc
+          "A list of Role objects containing roles associated with the user."];
+      extensions: Extensions.t option
+        [@ocaml.doc
+          "A map with additional attribute extensions for the user. Each map key corresponds to an extension name, while map values represent extension data in Document type (not supported by Java V1, Go V1 and older versions of the CLI). aws:identitystore:enterprise is the only supported extension name."]}
+    let context_ = "CreateUserRequest"
+    let make ?userName =
+      fun ?name ->
+        fun ?displayName ->
+          fun ?nickName ->
+            fun ?profileUrl ->
+              fun ?emails ->
+                fun ?addresses ->
+                  fun ?phoneNumbers ->
+                    fun ?userType ->
+                      fun ?title ->
+                        fun ?preferredLanguage ->
+                          fun ?locale ->
+                            fun ?timezone ->
+                              fun ?photos ->
+                                fun ?website ->
+                                  fun ?birthdate ->
+                                    fun ?roles ->
+                                      fun ?extensions ->
+                                        fun ~identityStoreId ->
+                                          fun () ->
+                                            {
+                                              userName;
+                                              name;
+                                              displayName;
+                                              nickName;
+                                              profileUrl;
+                                              emails;
+                                              addresses;
+                                              phoneNumbers;
+                                              userType;
+                                              title;
+                                              preferredLanguage;
+                                              locale;
+                                              timezone;
+                                              photos;
+                                              website;
+                                              birthdate;
+                                              roles;
+                                              extensions;
+                                              identityStoreId
+                                            }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("UserName", (Option.map x.userName ~f:UserName.to_value));
+        ("Name", (Option.map x.name ~f:Name.to_value));
+        ("DisplayName",
+          (Option.map x.displayName ~f:SensitiveStringType.to_value));
+        ("NickName", (Option.map x.nickName ~f:SensitiveStringType.to_value));
+        ("ProfileUrl",
+          (Option.map x.profileUrl ~f:SensitiveStringType.to_value));
+        ("Emails", (Option.map x.emails ~f:Emails.to_value));
+        ("Addresses", (Option.map x.addresses ~f:Addresses.to_value));
+        ("PhoneNumbers",
+          (Option.map x.phoneNumbers ~f:PhoneNumbers.to_value));
+        ("UserType", (Option.map x.userType ~f:SensitiveStringType.to_value));
+        ("Title", (Option.map x.title ~f:SensitiveStringType.to_value));
+        ("PreferredLanguage",
+          (Option.map x.preferredLanguage ~f:SensitiveStringType.to_value));
+        ("Locale", (Option.map x.locale ~f:SensitiveStringType.to_value));
+        ("Timezone", (Option.map x.timezone ~f:SensitiveStringType.to_value));
+        ("Photos", (Option.map x.photos ~f:Photos.to_value));
+        ("Website", (Option.map x.website ~f:SensitiveStringType.to_value));
+        ("Birthdate",
+          (Option.map x.birthdate ~f:SensitiveStringType.to_value));
+        ("Roles", (Option.map x.roles ~f:Roles.to_value));
+        ("Extensions", (Option.map x.extensions ~f:Extensions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let extensions =
+        (Option.map ~f:Extensions.of_xml) (Xml.child xml_arg0 "Extensions") in
+      let roles = (Option.map ~f:Roles.of_xml) (Xml.child xml_arg0 "Roles") in
+      let birthdate =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Birthdate") in
+      let website =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Website") in
+      let photos =
+        (Option.map ~f:Photos.of_xml) (Xml.child xml_arg0 "Photos") in
+      let timezone =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Timezone") in
+      let locale =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Locale") in
+      let preferredLanguage =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "PreferredLanguage") in
+      let title =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Title") in
+      let userType =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "UserType") in
+      let phoneNumbers =
+        (Option.map ~f:PhoneNumbers.of_xml)
+          (Xml.child xml_arg0 "PhoneNumbers") in
+      let addresses =
+        (Option.map ~f:Addresses.of_xml) (Xml.child xml_arg0 "Addresses") in
+      let emails =
+        (Option.map ~f:Emails.of_xml) (Xml.child xml_arg0 "Emails") in
+      let profileUrl =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "ProfileUrl") in
+      let nickName =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "NickName") in
+      let displayName =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "DisplayName") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
+      let userName =
+        (Option.map ~f:UserName.of_xml) (Xml.child xml_arg0 "UserName") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ?extensions ?roles ?birthdate ?website ?photos ?timezone ?locale
+        ?preferredLanguage ?title ?userType ?phoneNumbers ?addresses ?emails
+        ?profileUrl ?nickName ?displayName ?name ?userName ~identityStoreId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let extensions = field_map json__ "Extensions" Extensions.of_json in
+      let roles = field_map json__ "Roles" Roles.of_json in
+      let birthdate =
+        field_map json__ "Birthdate" SensitiveStringType.of_json in
+      let website = field_map json__ "Website" SensitiveStringType.of_json in
+      let photos = field_map json__ "Photos" Photos.of_json in
+      let timezone = field_map json__ "Timezone" SensitiveStringType.of_json in
+      let locale = field_map json__ "Locale" SensitiveStringType.of_json in
+      let preferredLanguage =
+        field_map json__ "PreferredLanguage" SensitiveStringType.of_json in
+      let title = field_map json__ "Title" SensitiveStringType.of_json in
+      let userType = field_map json__ "UserType" SensitiveStringType.of_json in
+      let phoneNumbers = field_map json__ "PhoneNumbers" PhoneNumbers.of_json in
+      let addresses = field_map json__ "Addresses" Addresses.of_json in
+      let emails = field_map json__ "Emails" Emails.of_json in
+      let profileUrl =
+        field_map json__ "ProfileUrl" SensitiveStringType.of_json in
+      let nickName = field_map json__ "NickName" SensitiveStringType.of_json in
+      let displayName =
+        field_map json__ "DisplayName" SensitiveStringType.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let userName = field_map json__ "UserName" UserName.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ?extensions ?roles ?birthdate ?website ?photos ?timezone ?locale
+        ?preferredLanguage ?title ?userType ?phoneNumbers ?addresses ?emails
+        ?profileUrl ?nickName ?displayName ?name ?userName ~identityStoreId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a user within the specified identity store."]
+module CreateGroupResponse =
+  struct
+    type nonrec t =
+      {
+      groupId: ResourceId.t option
+        [@ocaml.doc
+          "The identifier of the newly created group in the identity store."];
+      identityStoreId: IdentityStoreId.t option
+        [@ocaml.doc "The globally unique identifier for the identity store."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?groupId =
+      fun ?identityStoreId -> fun () -> { groupId; identityStoreId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("GroupId", (Option.map x.groupId ~f:ResourceId.to_value));
+        ("IdentityStoreId",
+          (Option.map x.identityStoreId ~f:IdentityStoreId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityStoreId =
+        (Option.map ~f:IdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityStoreId") in
+      let groupId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "GroupId") in
+      make ?identityStoreId ?groupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityStoreId =
+        field_map json__ "IdentityStoreId" IdentityStoreId.of_json in
+      let groupId = field_map json__ "GroupId" ResourceId.of_json in
+      make ?identityStoreId ?groupId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a group within the specified identity store."]
+module CreateGroupRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      displayName: GroupDisplayName.t option
+        [@ocaml.doc
+          "A string containing the name of the group. This value is commonly displayed when the group is referenced. Administrator and AWSAdministrators are reserved names and can't be used for users or groups."];
+      description: SensitiveStringType.t option
+        [@ocaml.doc "A string containing the description of the group."]}
+    let context_ = "CreateGroupRequest"
+    let make ?displayName =
+      fun ?description ->
+        fun ~identityStoreId ->
+          fun () -> { displayName; description; identityStoreId }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("DisplayName",
+          (Option.map x.displayName ~f:GroupDisplayName.to_value));
+        ("Description",
+          (Option.map x.description ~f:SensitiveStringType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:SensitiveStringType.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let displayName =
+        (Option.map ~f:GroupDisplayName.of_xml)
+          (Xml.child xml_arg0 "DisplayName") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ?description ?displayName ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "Description" SensitiveStringType.of_json in
+      let displayName =
+        field_map json__ "DisplayName" GroupDisplayName.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ?description ?displayName ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a group within the specified identity store."]
+module CreateGroupMembershipResponse =
+  struct
+    type nonrec t =
+      {
+      membershipId: ResourceId.t option
+        [@ocaml.doc
+          "The identifier for a newly created GroupMembership in an identity store."];
+      identityStoreId: IdentityStoreId.t option
+        [@ocaml.doc "The globally unique identifier for the identity store."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?membershipId =
+      fun ?identityStoreId -> fun () -> { membershipId; identityStoreId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MembershipId", (Option.map x.membershipId ~f:ResourceId.to_value));
+        ("IdentityStoreId",
+          (Option.map x.identityStoreId ~f:IdentityStoreId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityStoreId =
+        (Option.map ~f:IdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityStoreId") in
+      let membershipId =
+        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "MembershipId") in
+      make ?identityStoreId ?membershipId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityStoreId =
+        field_map json__ "IdentityStoreId" IdentityStoreId.of_json in
+      let membershipId = field_map json__ "MembershipId" ResourceId.of_json in
+      make ?identityStoreId ?membershipId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a relationship between a member and a group. The following identifiers must be specified: GroupId, IdentityStoreId, and MemberId."]
+module CreateGroupMembershipRequest =
+  struct
+    type nonrec t =
+      {
+      identityStoreId: IdentityStoreId.t
+        [@ocaml.doc "The globally unique identifier for the identity store."];
+      groupId: ResourceId.t
+        [@ocaml.doc "The identifier for a group in the identity store."];
+      memberId: MemberId.t
+        [@ocaml.doc
+          "An object that contains the identifier of a group member. Setting the UserID field to the specific identifier for a user indicates that the user is a member of the group."]}
+    let context_ = "CreateGroupMembershipRequest"
+    let make ~identityStoreId =
+      fun ~groupId ->
+        fun ~memberId -> fun () -> { identityStoreId; groupId; memberId }
+    let to_value x =
+      structure_to_value
+        [("IdentityStoreId",
+           (Some (IdentityStoreId.to_value x.identityStoreId)));
+        ("GroupId", (Some (ResourceId.to_value x.groupId)));
+        ("MemberId", (Some (MemberId.to_value x.memberId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let memberId =
+        MemberId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MemberId") in
+      let groupId =
+        ResourceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
+      let identityStoreId =
+        IdentityStoreId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdentityStoreId") in
+      make ~memberId ~groupId ~identityStoreId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let memberId = field_map_exn json__ "MemberId" MemberId.of_json in
+      let groupId = field_map_exn json__ "GroupId" ResourceId.of_json in
+      let identityStoreId =
+        field_map_exn json__ "IdentityStoreId" IdentityStoreId.of_json in
+      make ~memberId ~groupId ~identityStoreId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a relationship between a member and a group. The following identifiers must be specified: GroupId, IdentityStoreId, and MemberId."]

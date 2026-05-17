@@ -17,6 +17,18 @@ val copy_backup :
     ?cfg:Awso.Cfg.t ->
       CopyBackupRequest.t ->
         (CopyBackupResponse.t, CopyBackupResponse.error) Result.t
+val copy_snapshot_and_update_volume :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CopySnapshotAndUpdateVolumeRequest.t ->
+        (CopySnapshotAndUpdateVolumeResponse.t,
+          CopySnapshotAndUpdateVolumeResponse.error) Result.t
+val create_and_attach_s3_access_point :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAndAttachS3AccessPointRequest.t ->
+        (CreateAndAttachS3AccessPointResponse.t,
+          CreateAndAttachS3AccessPointResponse.error) Result.t
 val create_backup :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -34,6 +46,11 @@ val create_data_repository_task :
       CreateDataRepositoryTaskRequest.t ->
         (CreateDataRepositoryTaskResponse.t,
           CreateDataRepositoryTaskResponse.error) Result.t
+val create_file_cache :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateFileCacheRequest.t ->
+        (CreateFileCacheResponse.t, CreateFileCacheResponse.error) Result.t
 val create_file_system :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -78,6 +95,11 @@ val delete_data_repository_association :
       DeleteDataRepositoryAssociationRequest.t ->
         (DeleteDataRepositoryAssociationResponse.t,
           DeleteDataRepositoryAssociationResponse.error) Result.t
+val delete_file_cache :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteFileCacheRequest.t ->
+        (DeleteFileCacheResponse.t, DeleteFileCacheResponse.error) Result.t
 val delete_file_system :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -116,6 +138,12 @@ val describe_data_repository_tasks :
       DescribeDataRepositoryTasksRequest.t ->
         (DescribeDataRepositoryTasksResponse.t,
           DescribeDataRepositoryTasksResponse.error) Result.t
+val describe_file_caches :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeFileCachesRequest.t ->
+        (DescribeFileCachesResponse.t, DescribeFileCachesResponse.error)
+          Result.t
 val describe_file_system_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -128,6 +156,18 @@ val describe_file_systems :
       DescribeFileSystemsRequest.t ->
         (DescribeFileSystemsResponse.t, DescribeFileSystemsResponse.error)
           Result.t
+val describe_s3_access_point_attachments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeS3AccessPointAttachmentsRequest.t ->
+        (DescribeS3AccessPointAttachmentsResponse.t,
+          DescribeS3AccessPointAttachmentsResponse.error) Result.t
+val describe_shared_vpc_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeSharedVpcConfigurationRequest.t ->
+        (DescribeSharedVpcConfigurationResponse.t,
+          DescribeSharedVpcConfigurationResponse.error) Result.t
 val describe_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -145,6 +185,12 @@ val describe_volumes :
     ?cfg:Awso.Cfg.t ->
       DescribeVolumesRequest.t ->
         (DescribeVolumesResponse.t, DescribeVolumesResponse.error) Result.t
+val detach_and_delete_s3_access_point :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DetachAndDeleteS3AccessPointRequest.t ->
+        (DetachAndDeleteS3AccessPointResponse.t,
+          DetachAndDeleteS3AccessPointResponse.error) Result.t
 val disassociate_file_system_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -169,6 +215,12 @@ val restore_volume_from_snapshot :
       RestoreVolumeFromSnapshotRequest.t ->
         (RestoreVolumeFromSnapshotResponse.t,
           RestoreVolumeFromSnapshotResponse.error) Result.t
+val start_misconfigured_state_recovery :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartMisconfiguredStateRecoveryRequest.t ->
+        (StartMisconfiguredStateRecoveryResponse.t,
+          StartMisconfiguredStateRecoveryResponse.error) Result.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -185,11 +237,22 @@ val update_data_repository_association :
       UpdateDataRepositoryAssociationRequest.t ->
         (UpdateDataRepositoryAssociationResponse.t,
           UpdateDataRepositoryAssociationResponse.error) Result.t
+val update_file_cache :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateFileCacheRequest.t ->
+        (UpdateFileCacheResponse.t, UpdateFileCacheResponse.error) Result.t
 val update_file_system :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateFileSystemRequest.t ->
         (UpdateFileSystemResponse.t, UpdateFileSystemResponse.error) Result.t
+val update_shared_vpc_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSharedVpcConfigurationRequest.t ->
+        (UpdateSharedVpcConfigurationResponse.t,
+          UpdateSharedVpcConfigurationResponse.error) Result.t
 val update_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

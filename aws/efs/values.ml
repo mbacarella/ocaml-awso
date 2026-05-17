@@ -24,6 +24,25 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module AwsAccountId =
+  struct
+    type nonrec t = string
+    let context_ = "AwsAccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:14) >>=
+             (fun () ->
+                check_pattern i ~pattern:"^(\\d{12})|(\\d{4}-\\d{4}-\\d{4})$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AwsAccountId" j
+    let to_json = simple_to_json to_value
+  end
 module FileSystemId =
   struct
     type nonrec t = string
@@ -73,6 +92,8 @@ module ReplicationStatus =
       | ENABLING 
       | DELETING 
       | ERROR 
+      | PAUSED 
+      | PAUSING 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -81,6 +102,8 @@ module ReplicationStatus =
       | ENABLING -> "ENABLING"
       | DELETING -> "DELETING"
       | ERROR -> "ERROR"
+      | PAUSED -> "PAUSED"
+      | PAUSING -> "PAUSING"
       | Non_static_id s -> s
     let of_string =
       function
@@ -88,6 +111,8 @@ module ReplicationStatus =
       | "ENABLING" -> ENABLING
       | "DELETING" -> DELETING
       | "ERROR" -> ERROR
+      | "PAUSED" -> PAUSED
+      | "PAUSING" -> PAUSING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -96,6 +121,39 @@ module ReplicationStatus =
       of_string
         (string_of_xml ~kind:"enumeration ReplicationStatus" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"ReplicationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module RoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "RoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"arn:(aws[a-zA-Z-]*)?:iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module StatusMessage =
+  struct
+    type nonrec t = string
+    let context_ = "StatusMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StatusMessage" j
     let to_json = simple_to_json to_value
   end
 module Timestamp =
@@ -110,6 +168,37 @@ module Timestamp =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module ErrorCode =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The error code is a string that uniquely identifies an error condition. It is meant to be read and understood by programs that detect and handle errors by type."]
+    let context_ = "ErrorCode"
+    let make i =
+      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorCode" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The error code is a string that uniquely identifies an error condition. It is meant to be read and understood by programs that detect and handle errors by type."]
+module ErrorMessage =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The error message contains a generic description of the error condition in English. It is intended for a human audience. Simple programs display the message directly to the end user if they encounter an error condition they don't know how or don't care to handle. Sophisticated programs with more exhaustive error handling and proper internationalization are more likely to ignore the error message."]
+    let context_ = "ErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The error message contains a generic description of the error condition in English. It is intended for a human audience. Simple programs display the message directly to the end user if they encounter an error condition they don't know how or don't care to handle. Sophisticated programs with more exhaustive error handling and proper internationalization are more likely to ignore the error message."]
 module TagKey =
   struct
     type nonrec t = string
@@ -226,92 +315,335 @@ module Permissions =
     let of_json j = string_of_json ~kind:"Permissions" j
     let to_json = simple_to_json to_value
   end
-module ErrorCode =
-  struct
-    type nonrec t = string[@@ocaml.doc
-                            "The error code is a string that uniquely identifies an error condition. It is meant to be read and understood by programs that detect and handle errors by type."]
-    let context_ = "ErrorCode"
-    let make i =
-      let open Result in ok_or_failwith (check_string_min i ~min:1); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorCode" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "The error code is a string that uniquely identifies an error condition. It is meant to be read and understood by programs that detect and handle errors by type."]
-module ErrorMessage =
-  struct
-    type nonrec t = string[@@ocaml.doc
-                            "The error message contains a generic description of the error condition in English. It is intended for a human audience. Simple programs display the message directly to the end user if they encounter an error condition they don't know how or don't care to handle. Sophisticated programs with more exhaustive error handling and proper internationalization are more likely to ignore the error message."]
-    let context_ = "ErrorMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorMessage" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "The error message contains a generic description of the error condition in English. It is intended for a human audience. Simple programs display the message directly to the end user if they encounter an error condition they don't know how or don't care to handle. Sophisticated programs with more exhaustive error handling and proper internationalization are more likely to ignore the error message."]
 module Destination =
   struct
     type nonrec t =
       {
-      status: ReplicationStatus.t
+      status: ReplicationStatus.t option
         [@ocaml.doc
-          "Describes the status of the destination Amazon EFS file system. If the status is ERROR, the destination file system in the replication configuration is in a failed state and is unrecoverable. To access the file system data, restore a backup of the failed file system to a new file system."];
-      fileSystemId: FileSystemId.t
+          "Describes the status of the replication configuration. For more information about replication status, see Viewing replication details in the Amazon EFS User Guide."];
+      fileSystemId: FileSystemId.t option
         [@ocaml.doc "The ID of the destination Amazon EFS file system."];
-      region: RegionName.t
+      region: RegionName.t option
         [@ocaml.doc
           "The Amazon Web Services Region in which the destination file system is located."];
       lastReplicatedTimestamp: Timestamp.t option
         [@ocaml.doc
-          "The time when the most recent sync was successfully completed on the destination file system. Any changes to data on the source file system that occurred before this time have been successfully replicated to the destination file system. Any changes that occurred after this time might not be fully replicated."]}
-    let context_ = "Destination"
-    let make ?lastReplicatedTimestamp =
-      fun ~status ->
-        fun ~fileSystemId ->
-          fun ~region ->
-            fun () ->
-              { lastReplicatedTimestamp; status; fileSystemId; region }
+          "The time when the most recent sync was successfully completed on the destination file system. Any changes to data on the source file system that occurred before this time have been successfully replicated to the destination file system. Any changes that occurred after this time might not be fully replicated."];
+      ownerId: AwsAccountId.t option
+        [@ocaml.doc
+          "ID of the Amazon Web Services account in which the destination file system resides."];
+      statusMessage: StatusMessage.t option
+        [@ocaml.doc
+          "Message that provides details about the PAUSED or ERRROR state of the replication destination configuration. For more information about replication status messages, see Viewing replication details in the Amazon EFS User Guide."];
+      roleArn: RoleArn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the IAM role in the source account that allows Amazon EFS to perform replication on its behalf. This is optional for same-account replication and required for cross-account replication."]}
+    let make ?status =
+      fun ?fileSystemId ->
+        fun ?region ->
+          fun ?lastReplicatedTimestamp ->
+            fun ?ownerId ->
+              fun ?statusMessage ->
+                fun ?roleArn ->
+                  fun () ->
+                    {
+                      status;
+                      fileSystemId;
+                      region;
+                      lastReplicatedTimestamp;
+                      ownerId;
+                      statusMessage;
+                      roleArn
+                    }
     let to_value x =
       structure_to_value
-        [("Status", (Some (ReplicationStatus.to_value x.status)));
-        ("FileSystemId", (Some (FileSystemId.to_value x.fileSystemId)));
-        ("Region", (Some (RegionName.to_value x.region)));
+        [("Status", (Option.map x.status ~f:ReplicationStatus.to_value));
+        ("FileSystemId",
+          (Option.map x.fileSystemId ~f:FileSystemId.to_value));
+        ("Region", (Option.map x.region ~f:RegionName.to_value));
         ("LastReplicatedTimestamp",
-          (Option.map x.lastReplicatedTimestamp ~f:Timestamp.to_value))]
+          (Option.map x.lastReplicatedTimestamp ~f:Timestamp.to_value));
+        ("OwnerId", (Option.map x.ownerId ~f:AwsAccountId.to_value));
+        ("StatusMessage",
+          (Option.map x.statusMessage ~f:StatusMessage.to_value));
+        ("RoleArn", (Option.map x.roleArn ~f:RoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
+      let statusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "StatusMessage") in
+      let ownerId =
+        (Option.map ~f:AwsAccountId.of_xml) (Xml.child xml_arg0 "OwnerId") in
       let lastReplicatedTimestamp =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "LastReplicatedTimestamp") in
       let region =
-        RegionName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Region") in
+        (Option.map ~f:RegionName.of_xml) (Xml.child xml_arg0 "Region") in
       let fileSystemId =
-        FileSystemId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
+        (Option.map ~f:FileSystemId.of_xml)
+          (Xml.child xml_arg0 "FileSystemId") in
       let status =
-        ReplicationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
-      make ?lastReplicatedTimestamp ~region ~fileSystemId ~status ()
+        (Option.map ~f:ReplicationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?roleArn ?statusMessage ?ownerId ?lastReplicatedTimestamp ?region
+        ?fileSystemId ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let statusMessage =
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let ownerId = field_map json__ "OwnerId" AwsAccountId.of_json in
       let lastReplicatedTimestamp =
-        field_map json "LastReplicatedTimestamp" Timestamp.of_json in
-      let region = field_map_exn json "Region" RegionName.of_json in
-      let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
-      let status = field_map_exn json "Status" ReplicationStatus.of_json in
-      make ?lastReplicatedTimestamp ~region ~fileSystemId ~status ()
+        field_map json__ "LastReplicatedTimestamp" Timestamp.of_json in
+      let region = field_map json__ "Region" RegionName.of_json in
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
+      let status = field_map json__ "Status" ReplicationStatus.of_json in
+      make ?roleArn ?statusMessage ?ownerId ?lastReplicatedTimestamp ?region
+        ?fileSystemId ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the destination file system in the replication configuration."]
+module BadRequest =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
+      message: ErrorMessage.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returned if the request is malformed or contains an error such as an invalid parameter value or a missing required parameter."]
+module FileSystemNotFound =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
+      message: ErrorMessage.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returned if the specified FileSystemId value doesn't exist in the requester's Amazon Web Services account."]
+module IncorrectFileSystemLifeCycleState =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
+      message: ErrorMessage.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returned if the file system's lifecycle state is not \"available\"."]
+module InsufficientThroughputCapacity =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
+      message: ErrorMessage.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returned if there's not enough capacity to provision additional throughput. This value might be returned when you try to create a file system in provisioned throughput mode, when you attempt to increase the provisioned throughput of an existing file system, or when you attempt to change an existing file system from Bursting Throughput to Provisioned Throughput mode. Try again later."]
+module InternalServerError =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
+      message: ErrorMessage.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returned if an error occurred on the server side."]
+module ReplicationAlreadyExists =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
+      message: ErrorMessage.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returned if the file system is already included in a replication configuration.>"]
+module ReplicationOverwriteProtection =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | REPLICATING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | REPLICATING -> "REPLICATING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | "REPLICATING" -> REPLICATING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ReplicationOverwriteProtection"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ReplicationOverwriteProtection" j)
+    let to_json = simple_to_json to_value
+  end
+module ThroughputLimitExceeded =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
+      message: ErrorMessage.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returned if the throughput mode or amount of provisioned throughput can't be changed because the throughput limit of 1024 MiB/s has been reached."]
+module TooManyRequests =
+  struct
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
+      message: ErrorMessage.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returned if you don\226\128\153t wait at least 24 hours before either changing the throughput mode, or decreasing the Provisioned Throughput value."]
 module FileSystemNullableSizeValue =
   struct
     type nonrec t = Int64.t
@@ -361,9 +693,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -396,6 +728,9 @@ module SecondaryGids =
         ok_or_failwith
           ((check_list_max i ~max:16) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Gid.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -466,10 +801,11 @@ module CreationInfo =
         OwnerUid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OwnerUid") in
       make ~permissions ~ownerGid ~ownerUid ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let permissions = field_map_exn json "Permissions" Permissions.of_json in
-      let ownerGid = field_map_exn json "OwnerGid" OwnerGid.of_json in
-      let ownerUid = field_map_exn json "OwnerUid" OwnerUid.of_json in
+    let of_json json__ =
+      let permissions =
+        field_map_exn json__ "Permissions" Permissions.of_json in
+      let ownerGid = field_map_exn json__ "OwnerGid" OwnerGid.of_json in
+      let ownerUid = field_map_exn json__ "OwnerUid" OwnerUid.of_json in
       make ~permissions ~ownerGid ~ownerUid ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -496,6 +832,54 @@ module Path =
     let of_json j = string_of_json ~kind:"Path" j
     let to_json = simple_to_json to_value
   end
+module TransitionToArchiveRules =
+  struct
+    type nonrec t =
+      | AFTER_1_DAY 
+      | AFTER_7_DAYS 
+      | AFTER_14_DAYS 
+      | AFTER_30_DAYS 
+      | AFTER_60_DAYS 
+      | AFTER_90_DAYS 
+      | AFTER_180_DAYS 
+      | AFTER_270_DAYS 
+      | AFTER_365_DAYS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AFTER_1_DAY -> "AFTER_1_DAY"
+      | AFTER_7_DAYS -> "AFTER_7_DAYS"
+      | AFTER_14_DAYS -> "AFTER_14_DAYS"
+      | AFTER_30_DAYS -> "AFTER_30_DAYS"
+      | AFTER_60_DAYS -> "AFTER_60_DAYS"
+      | AFTER_90_DAYS -> "AFTER_90_DAYS"
+      | AFTER_180_DAYS -> "AFTER_180_DAYS"
+      | AFTER_270_DAYS -> "AFTER_270_DAYS"
+      | AFTER_365_DAYS -> "AFTER_365_DAYS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AFTER_1_DAY" -> AFTER_1_DAY
+      | "AFTER_7_DAYS" -> AFTER_7_DAYS
+      | "AFTER_14_DAYS" -> AFTER_14_DAYS
+      | "AFTER_30_DAYS" -> AFTER_30_DAYS
+      | "AFTER_60_DAYS" -> AFTER_60_DAYS
+      | "AFTER_90_DAYS" -> AFTER_90_DAYS
+      | "AFTER_180_DAYS" -> AFTER_180_DAYS
+      | "AFTER_270_DAYS" -> AFTER_270_DAYS
+      | "AFTER_365_DAYS" -> AFTER_365_DAYS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TransitionToArchiveRules" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TransitionToArchiveRules" j)
+    let to_json = simple_to_json to_value
+  end
 module TransitionToIARules =
   struct
     type nonrec t =
@@ -504,6 +888,10 @@ module TransitionToIARules =
       | AFTER_30_DAYS 
       | AFTER_60_DAYS 
       | AFTER_90_DAYS 
+      | AFTER_1_DAY 
+      | AFTER_180_DAYS 
+      | AFTER_270_DAYS 
+      | AFTER_365_DAYS 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -513,6 +901,10 @@ module TransitionToIARules =
       | AFTER_30_DAYS -> "AFTER_30_DAYS"
       | AFTER_60_DAYS -> "AFTER_60_DAYS"
       | AFTER_90_DAYS -> "AFTER_90_DAYS"
+      | AFTER_1_DAY -> "AFTER_1_DAY"
+      | AFTER_180_DAYS -> "AFTER_180_DAYS"
+      | AFTER_270_DAYS -> "AFTER_270_DAYS"
+      | AFTER_365_DAYS -> "AFTER_365_DAYS"
       | Non_static_id s -> s
     let of_string =
       function
@@ -521,6 +913,10 @@ module TransitionToIARules =
       | "AFTER_30_DAYS" -> AFTER_30_DAYS
       | "AFTER_60_DAYS" -> AFTER_60_DAYS
       | "AFTER_90_DAYS" -> AFTER_90_DAYS
+      | "AFTER_1_DAY" -> AFTER_1_DAY
+      | "AFTER_180_DAYS" -> AFTER_180_DAYS
+      | "AFTER_270_DAYS" -> AFTER_270_DAYS
+      | "AFTER_365_DAYS" -> AFTER_365_DAYS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -578,37 +974,39 @@ module Resource =
     let of_json j = of_string (string_of_json ~kind:"Resource" j)
     let to_json = simple_to_json to_value
   end
-module BadRequest =
+module ConflictException =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "BadRequest"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returned if the request is malformed or contains an error such as an invalid parameter value or a missing required parameter."]
+       "Returned if the source file system in a replication is encrypted but the destination file system is unencrypted."]
 module Destinations =
   struct
     type nonrec t = Destination.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Destination.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -644,138 +1042,30 @@ module FileSystemArn =
   end
 module FileSystemLimitExceeded =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "FileSystemLimitExceeded"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if the Amazon Web Services account has already created the maximum number of file systems allowed per account."]
-module FileSystemNotFound =
-  struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
-      message: ErrorMessage.t option }
-    let context_ = "FileSystemNotFound"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
-    let to_value x =
-      structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
-        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returned if the specified FileSystemId value doesn't exist in the requester's Amazon Web Services account."]
-module IncorrectFileSystemLifeCycleState =
-  struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
-      message: ErrorMessage.t option }
-    let context_ = "IncorrectFileSystemLifeCycleState"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
-    let to_value x =
-      structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
-        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returned if the file system's lifecycle state is not \"available\"."]
-module InsufficientThroughputCapacity =
-  struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
-      message: ErrorMessage.t option }
-    let context_ = "InsufficientThroughputCapacity"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
-    let to_value x =
-      structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
-        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returned if there's not enough capacity to provision additional throughput. This value might be returned when you try to create a file system in provisioned throughput mode, when you attempt to increase the provisioned throughput of an existing file system, or when you attempt to change an existing file system from Bursting Throughput to Provisioned Throughput mode. Try again later."]
-module InternalServerError =
-  struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
-      message: ErrorMessage.t option }
-    let context_ = "InternalServerError"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
-    let to_value x =
-      structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
-        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returned if an error occurred on the server side."]
 module ReplicationNotFound =
   struct
     type nonrec t =
@@ -795,91 +1085,62 @@ module ReplicationNotFound =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if the specified file system does not have a replication configuration."]
-module ThroughputLimitExceeded =
-  struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
-      message: ErrorMessage.t option }
-    let context_ = "ThroughputLimitExceeded"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
-    let to_value x =
-      structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
-        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returned if the throughput mode or amount of provisioned throughput can't be changed because the throughput limit of 1024 MiB/s has been reached."]
 module UnsupportedAvailabilityZone =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "UnsupportedAvailabilityZone"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if the requested Amazon EFS functionality is not available in the specified Availability Zone."]
 module ValidationException =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "ValidationException"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if the Backup service is not available in the Amazon Web Services Region in which the request was made."]
@@ -935,32 +1196,13 @@ module AvailabilityZonesMismatch =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if the Availability Zone that was specified for a mount target is different from the Availability Zone that was specified for One Zone storage. For more information, see Regional and One Zone storage redundancy."]
-module AwsAccountId =
-  struct
-    type nonrec t = string
-    let context_ = "AwsAccountId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:14) >>=
-             (fun () ->
-                check_pattern i ~pattern:"^(\\d{12})|(\\d{4}-\\d{4}-\\d{4})$"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AwsAccountId" j
-    let to_json = simple_to_json to_value
-  end
 module IpAddress =
   struct
     type nonrec t = string
@@ -985,31 +1227,48 @@ module IpAddress =
   end
 module IpAddressInUse =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "IpAddressInUse"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if the request specified an IpAddress that is already in use in the subnet."]
+module Ipv6Address =
+  struct
+    type nonrec t = string
+    let context_ = "Ipv6Address"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:39) >>=
+             (fun () -> check_string_min i ~min:3));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Ipv6Address" j
+    let to_json = simple_to_json to_value
+  end
 module LifeCycleState =
   struct
     type nonrec t =
@@ -1049,28 +1308,27 @@ module LifeCycleState =
   end
 module MountTargetConflict =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "MountTargetConflict"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if the mount target would violate one of the specified restrictions based on the file system's existing mount targets."]
@@ -1109,109 +1367,105 @@ module NetworkInterfaceId =
   end
 module NetworkInterfaceLimitExceeded =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "NetworkInterfaceLimitExceeded"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The calling account has reached the limit for elastic network interfaces for the specific Amazon Web Services Region. Either delete some network interfaces or request that the account quota be raised. For more information, see Amazon VPC Quotas in the Amazon VPC User Guide (see the Network interfaces per Region entry in the Network interfaces table)."]
 module NoFreeAddressesInSubnet =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "NoFreeAddressesInSubnet"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if IpAddress was not specified in the request and there are no free IP addresses in the subnet."]
 module SecurityGroupLimitExceeded =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "SecurityGroupLimitExceeded"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returned if the size of SecurityGroups specified in the request is greater than five."]
+       "Returned if the number of SecurityGroups specified in the request is greater than the limit, which is based on account quota. Either delete some security groups or request that the account quota be raised. For more information, see Amazon VPC Quotas in the Amazon VPC User Guide (see the Security Groups table)."]
 module SecurityGroupNotFound =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "SecurityGroupNotFound"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if one of the specified security groups doesn't exist in the subnet's virtual private cloud (VPC)."]
@@ -1238,28 +1492,27 @@ module SubnetId =
   end
 module SubnetNotFound =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "SubnetNotFound"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if there is no subnet with ID SubnetId provided in the request."]
@@ -1313,44 +1566,161 @@ module FileSystemAlreadyExists =
   struct
     type nonrec t =
       {
-      errorCode: ErrorCode.t ;
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option ;
-      fileSystemId: FileSystemId.t }
-    let context_ = "FileSystemAlreadyExists"
-    let make ?message =
-      fun ~errorCode ->
-        fun ~fileSystemId -> fun () -> { message; errorCode; fileSystemId }
+      fileSystemId: FileSystemId.t option }
+    let make ?errorCode =
+      fun ?message ->
+        fun ?fileSystemId -> fun () -> { errorCode; message; fileSystemId }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value));
-        ("FileSystemId", (Some (FileSystemId.to_value x.fileSystemId)))]
+        ("FileSystemId",
+          (Option.map x.fileSystemId ~f:FileSystemId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let fileSystemId =
-        FileSystemId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
+        (Option.map ~f:FileSystemId.of_xml)
+          (Xml.child xml_arg0 "FileSystemId") in
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ~fileSystemId ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?fileSystemId ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ~fileSystemId ?message ~errorCode ()
+    let of_json json__ =
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?fileSystemId ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if the file system you are trying to create already exists, with the creation token you provided."]
+module FileSystemProtectionDescription =
+  struct
+    type nonrec t =
+      {
+      replicationOverwriteProtection: ReplicationOverwriteProtection.t option
+        [@ocaml.doc
+          "The status of the file system's replication overwrite protection. ENABLED \226\128\147 The file system cannot be used as the destination file system in a replication configuration. The file system is writeable. Replication overwrite protection is ENABLED by default. DISABLED \226\128\147 The file system can be used as the destination file system in a replication configuration. The file system is read-only and can only be modified by EFS replication. REPLICATING \226\128\147 The file system is being used as the destination file system in a replication configuration. The file system is read-only and is modified only by EFS replication. If the replication configuration is deleted, the file system's replication overwrite protection is re-enabled, the file system becomes writeable."]}
+    type nonrec error =
+      [ `BadRequest of BadRequest.t 
+      | `FileSystemNotFound of FileSystemNotFound.t 
+      | `IncorrectFileSystemLifeCycleState of
+          IncorrectFileSystemLifeCycleState.t 
+      | `InsufficientThroughputCapacity of InsufficientThroughputCapacity.t 
+      | `InternalServerError of InternalServerError.t 
+      | `ReplicationAlreadyExists of ReplicationAlreadyExists.t 
+      | `ThroughputLimitExceeded of ThroughputLimitExceeded.t 
+      | `TooManyRequests of TooManyRequests.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?replicationOverwriteProtection =
+      fun () -> { replicationOverwriteProtection }
+    let error_of_json name json =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_json json)
+      | "FileSystemNotFound" ->
+          `FileSystemNotFound (FileSystemNotFound.of_json json)
+      | "IncorrectFileSystemLifeCycleState" ->
+          `IncorrectFileSystemLifeCycleState
+            (IncorrectFileSystemLifeCycleState.of_json json)
+      | "InsufficientThroughputCapacity" ->
+          `InsufficientThroughputCapacity
+            (InsufficientThroughputCapacity.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "ReplicationAlreadyExists" ->
+          `ReplicationAlreadyExists (ReplicationAlreadyExists.of_json json)
+      | "ThroughputLimitExceeded" ->
+          `ThroughputLimitExceeded (ThroughputLimitExceeded.of_json json)
+      | "TooManyRequests" -> `TooManyRequests (TooManyRequests.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequest" -> `BadRequest (BadRequest.of_xml xml)
+      | "FileSystemNotFound" ->
+          `FileSystemNotFound (FileSystemNotFound.of_xml xml)
+      | "IncorrectFileSystemLifeCycleState" ->
+          `IncorrectFileSystemLifeCycleState
+            (IncorrectFileSystemLifeCycleState.of_xml xml)
+      | "InsufficientThroughputCapacity" ->
+          `InsufficientThroughputCapacity
+            (InsufficientThroughputCapacity.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "ReplicationAlreadyExists" ->
+          `ReplicationAlreadyExists (ReplicationAlreadyExists.of_xml xml)
+      | "ThroughputLimitExceeded" ->
+          `ThroughputLimitExceeded (ThroughputLimitExceeded.of_xml xml)
+      | "TooManyRequests" -> `TooManyRequests (TooManyRequests.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequest e ->
+          `Assoc
+            [("error", (`String "BadRequest"));
+            ("details", (BadRequest.to_json e))]
+      | `FileSystemNotFound e ->
+          `Assoc
+            [("error", (`String "FileSystemNotFound"));
+            ("details", (FileSystemNotFound.to_json e))]
+      | `IncorrectFileSystemLifeCycleState e ->
+          `Assoc
+            [("error", (`String "IncorrectFileSystemLifeCycleState"));
+            ("details", (IncorrectFileSystemLifeCycleState.to_json e))]
+      | `InsufficientThroughputCapacity e ->
+          `Assoc
+            [("error", (`String "InsufficientThroughputCapacity"));
+            ("details", (InsufficientThroughputCapacity.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `ReplicationAlreadyExists e ->
+          `Assoc
+            [("error", (`String "ReplicationAlreadyExists"));
+            ("details", (ReplicationAlreadyExists.to_json e))]
+      | `ThroughputLimitExceeded e ->
+          `Assoc
+            [("error", (`String "ThroughputLimitExceeded"));
+            ("details", (ThroughputLimitExceeded.to_json e))]
+      | `TooManyRequests e ->
+          `Assoc
+            [("error", (`String "TooManyRequests"));
+            ("details", (TooManyRequests.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ReplicationOverwriteProtection",
+           (Option.map x.replicationOverwriteProtection
+              ~f:ReplicationOverwriteProtection.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let replicationOverwriteProtection =
+        (Option.map ~f:ReplicationOverwriteProtection.of_xml)
+          (Xml.child xml_arg0 "ReplicationOverwriteProtection") in
+      make ?replicationOverwriteProtection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let replicationOverwriteProtection =
+        field_map json__ "ReplicationOverwriteProtection"
+          ReplicationOverwriteProtection.of_json in
+      make ?replicationOverwriteProtection ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the protection on a file system."]
 module FileSystemSize =
   struct
     type nonrec t =
       {
-      value: FileSystemSizeValue.t
+      value: FileSystemSizeValue.t option
         [@ocaml.doc
           "The latest known metered size (in bytes) of data stored in the file system."];
       timestamp: Timestamp.t option
@@ -1361,24 +1731,40 @@ module FileSystemSize =
           "The latest known metered size (in bytes) of data stored in the Infrequent Access storage class."];
       valueInStandard: FileSystemNullableSizeValue.t option
         [@ocaml.doc
-          "The latest known metered size (in bytes) of data stored in the Standard storage class."]}
-    let context_ = "FileSystemSize"
-    let make ?timestamp =
-      fun ?valueInIA ->
-        fun ?valueInStandard ->
-          fun ~value ->
-            fun () -> { timestamp; valueInIA; valueInStandard; value }
+          "The latest known metered size (in bytes) of data stored in the Standard storage class."];
+      valueInArchive: FileSystemNullableSizeValue.t option
+        [@ocaml.doc
+          "The latest known metered size (in bytes) of data stored in the Archive storage class."]}
+    let make ?value =
+      fun ?timestamp ->
+        fun ?valueInIA ->
+          fun ?valueInStandard ->
+            fun ?valueInArchive ->
+              fun () ->
+                {
+                  value;
+                  timestamp;
+                  valueInIA;
+                  valueInStandard;
+                  valueInArchive
+                }
     let to_value x =
       structure_to_value
-        [("Value", (Some (FileSystemSizeValue.to_value x.value)));
+        [("Value", (Option.map x.value ~f:FileSystemSizeValue.to_value));
         ("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value));
         ("ValueInIA",
           (Option.map x.valueInIA ~f:FileSystemNullableSizeValue.to_value));
         ("ValueInStandard",
           (Option.map x.valueInStandard
+             ~f:FileSystemNullableSizeValue.to_value));
+        ("ValueInArchive",
+          (Option.map x.valueInArchive
              ~f:FileSystemNullableSizeValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let valueInArchive =
+        (Option.map ~f:FileSystemNullableSizeValue.of_xml)
+          (Xml.child xml_arg0 "ValueInArchive") in
       let valueInStandard =
         (Option.map ~f:FileSystemNullableSizeValue.of_xml)
           (Xml.child xml_arg0 "ValueInStandard") in
@@ -1388,18 +1774,21 @@ module FileSystemSize =
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       let value =
-        FileSystemSizeValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
-      make ?valueInStandard ?valueInIA ?timestamp ~value ()
+        (Option.map ~f:FileSystemSizeValue.of_xml)
+          (Xml.child xml_arg0 "Value") in
+      make ?valueInArchive ?valueInStandard ?valueInIA ?timestamp ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let valueInArchive =
+        field_map json__ "ValueInArchive" FileSystemNullableSizeValue.of_json in
       let valueInStandard =
-        field_map json "ValueInStandard" FileSystemNullableSizeValue.of_json in
+        field_map json__ "ValueInStandard"
+          FileSystemNullableSizeValue.of_json in
       let valueInIA =
-        field_map json "ValueInIA" FileSystemNullableSizeValue.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
-      let value = field_map_exn json "Value" FileSystemSizeValue.of_json in
-      make ?valueInStandard ?valueInIA ?timestamp ~value ()
+        field_map json__ "ValueInIA" FileSystemNullableSizeValue.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
+      let value = field_map json__ "Value" FileSystemSizeValue.of_json in
+      make ?valueInArchive ?valueInStandard ?valueInIA ?timestamp ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The latest known metered size (in bytes) of data stored in the file system, in its Value field, and the time at which that size was determined in its Timestamp field. The value doesn't represent the size of a consistent snapshot of the file system, but it is eventually consistent when there are no writes to the file system. That is, the value represents the actual size only if the file system is not modified for a period longer than a couple of hours. Otherwise, the value is not necessarily the exact size the file system was at any instant in time."]
@@ -1481,6 +1870,9 @@ module Tags =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1505,17 +1897,20 @@ module ThroughputMode =
     type nonrec t =
       | Bursting 
       | Provisioned 
+      | Elastic 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Bursting -> "bursting"
       | Provisioned -> "provisioned"
+      | Elastic -> "elastic"
       | Non_static_id s -> s
     let of_string =
       function
       | "bursting" -> Bursting
       | "provisioned" -> Provisioned
+      | "elastic" -> Elastic
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1525,67 +1920,39 @@ module ThroughputMode =
     let of_json j = of_string (string_of_json ~kind:"ThroughputMode" j)
     let to_json = simple_to_json to_value
   end
-module TooManyRequests =
-  struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
-      message: ErrorMessage.t option }
-    let context_ = "TooManyRequests"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
-    let to_value x =
-      structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
-        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Returned if you don\226\128\153t wait at least 24 hours before either changing the throughput mode, or decreasing the Provisioned Throughput value."]
 module AccessPointAlreadyExists =
   struct
     type nonrec t =
       {
-      errorCode: ErrorCode.t ;
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option ;
-      accessPointId: AccessPointId.t }
-    let context_ = "AccessPointAlreadyExists"
-    let make ?message =
-      fun ~errorCode ->
-        fun ~accessPointId -> fun () -> { message; errorCode; accessPointId }
+      accessPointId: AccessPointId.t option }
+    let make ?errorCode =
+      fun ?message ->
+        fun ?accessPointId -> fun () -> { errorCode; message; accessPointId }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value));
-        ("AccessPointId", (Some (AccessPointId.to_value x.accessPointId)))]
+        ("AccessPointId",
+          (Option.map x.accessPointId ~f:AccessPointId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let accessPointId =
-        AccessPointId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AccessPointId") in
+        (Option.map ~f:AccessPointId.of_xml)
+          (Xml.child xml_arg0 "AccessPointId") in
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ~accessPointId ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?accessPointId ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessPointId =
-        field_map_exn json "AccessPointId" AccessPointId.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ~accessPointId ?message ~errorCode ()
+        field_map json__ "AccessPointId" AccessPointId.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?accessPointId ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if the access point that you are trying to create already exists, with the creation token you provided in the request."]
@@ -1611,28 +1978,27 @@ module AccessPointArn =
   end
 module AccessPointLimitExceeded =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "AccessPointLimitExceeded"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if the Amazon Web Services account has already created the maximum number of access points allowed per file system. For more informaton, see https://docs.aws.amazon.com/efs/latest/ug/limits.html#limits-efs-resources-per-account-per-region."]
@@ -1700,11 +2066,11 @@ module PosixUser =
       let uid = Uid.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Uid") in
       make ?secondaryGids ~gid ~uid ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secondaryGids =
-        field_map json "SecondaryGids" SecondaryGids.of_json in
-      let gid = field_map_exn json "Gid" Gid.of_json in
-      let uid = field_map_exn json "Uid" Uid.of_json in
+        field_map json__ "SecondaryGids" SecondaryGids.of_json in
+      let gid = field_map_exn json__ "Gid" Gid.of_json in
+      let uid = field_map_exn json__ "Uid" Uid.of_json in
       make ?secondaryGids ~gid ~uid ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1733,13 +2099,13 @@ module RootDirectory =
       let path = (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "Path") in
       make ?creationInfo ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationInfo = field_map json "CreationInfo" CreationInfo.of_json in
-      let path = field_map json "Path" Path.of_json in
+    let of_json json__ =
+      let creationInfo = field_map json__ "CreationInfo" CreationInfo.of_json in
+      let path = field_map json__ "Path" Path.of_json in
       make ?creationInfo ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the directory on the Amazon EFS file system that the access point provides access to. The access point exposes the specified file system path as the root directory of your file system to applications using the access point. NFS clients using the access point can only access data in the access point's RootDirectory and it's subdirectories."]
+       "Specifies the directory on the Amazon EFS file system that the access point provides access to. The access point exposes the specified file system path as the root directory of your file system to applications using the access point. NFS clients using the access point can only access data in the access point's RootDirectory and its subdirectories."]
 module ThrottlingException =
   struct
     type nonrec t =
@@ -1759,54 +2125,74 @@ module ThrottlingException =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returned when the CreateAccessPoint API action is called too quickly and the number of Access Points in the account is nearing the limit of 120."]
+       "Returned when the CreateAccessPoint API action is called too quickly and the number of Access Points on the file system is nearing the limit of 120."]
 module LifecyclePolicy =
   struct
     type nonrec t =
       {
       transitionToIA: TransitionToIARules.t option
         [@ocaml.doc
-          "Describes the period of time that a file is not accessed, after which it transitions to IA storage. Metadata operations such as listing the contents of a directory don't count as file access events."];
+          "The number of days after files were last accessed in primary storage (the Standard storage class) at which to move them to Infrequent Access (IA) storage. Metadata operations such as listing the contents of a directory don't count as file access events."];
       transitionToPrimaryStorageClass:
         TransitionToPrimaryStorageClassRules.t option
         [@ocaml.doc
-          "Describes when to transition a file from IA storage to primary storage. Metadata operations such as listing the contents of a directory don't count as file access events."]}
+          "Whether to move files back to primary (Standard) storage after they are accessed in IA or Archive storage. Metadata operations such as listing the contents of a directory don't count as file access events."];
+      transitionToArchive: TransitionToArchiveRules.t option
+        [@ocaml.doc
+          "The number of days after files were last accessed in primary storage (the Standard storage class) at which to move them to Archive storage. Metadata operations such as listing the contents of a directory don't count as file access events."]}
     let make ?transitionToIA =
       fun ?transitionToPrimaryStorageClass ->
-        fun () -> { transitionToIA; transitionToPrimaryStorageClass }
+        fun ?transitionToArchive ->
+          fun () ->
+            {
+              transitionToIA;
+              transitionToPrimaryStorageClass;
+              transitionToArchive
+            }
     let to_value x =
       structure_to_value
         [("TransitionToIA",
            (Option.map x.transitionToIA ~f:TransitionToIARules.to_value));
         ("TransitionToPrimaryStorageClass",
           (Option.map x.transitionToPrimaryStorageClass
-             ~f:TransitionToPrimaryStorageClassRules.to_value))]
+             ~f:TransitionToPrimaryStorageClassRules.to_value));
+        ("TransitionToArchive",
+          (Option.map x.transitionToArchive
+             ~f:TransitionToArchiveRules.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let transitionToArchive =
+        (Option.map ~f:TransitionToArchiveRules.of_xml)
+          (Xml.child xml_arg0 "TransitionToArchive") in
       let transitionToPrimaryStorageClass =
         (Option.map ~f:TransitionToPrimaryStorageClassRules.of_xml)
           (Xml.child xml_arg0 "TransitionToPrimaryStorageClass") in
       let transitionToIA =
         (Option.map ~f:TransitionToIARules.of_xml)
           (Xml.child xml_arg0 "TransitionToIA") in
-      make ?transitionToPrimaryStorageClass ?transitionToIA ()
+      make ?transitionToArchive ?transitionToPrimaryStorageClass
+        ?transitionToIA ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let transitionToArchive =
+        field_map json__ "TransitionToArchive"
+          TransitionToArchiveRules.of_json in
       let transitionToPrimaryStorageClass =
-        field_map json "TransitionToPrimaryStorageClass"
+        field_map json__ "TransitionToPrimaryStorageClass"
           TransitionToPrimaryStorageClassRules.of_json in
       let transitionToIA =
-        field_map json "TransitionToIA" TransitionToIARules.of_json in
-      make ?transitionToPrimaryStorageClass ?transitionToIA ()
+        field_map json__ "TransitionToIA" TransitionToIARules.of_json in
+      make ?transitionToArchive ?transitionToPrimaryStorageClass
+        ?transitionToIA ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a policy used by EFS lifecycle management and EFS Intelligent-Tiering that specifies when to transition files into and out of the file system's Infrequent Access (IA) storage class. For more information, see EFS Intelligent\226\128\144Tiering and EFS Lifecycle Management. When using the put-lifecycle-configuration CLI command or the PutLifecycleConfiguration API action, Amazon EFS requires that each LifecyclePolicy object have only a single transition. This means that in a request body, LifecyclePolicies must be structured as an array of LifecyclePolicy objects, one object for each transition, TransitionToIA, TransitionToPrimaryStorageClass. For more information, see the request examples in PutLifecycleConfiguration."]
+       "Describes a policy used by lifecycle management that specifies when to transition files into and out of storage classes. For more information, see Managing file system storage. When using the put-lifecycle-configuration CLI command or the PutLifecycleConfiguration API action, Amazon EFS requires that each LifecyclePolicy object have only a single transition. This means that in a request body, LifecyclePolicies must be structured as an array of LifecyclePolicy objects, one object for each transition. For more information, see the request examples in PutLifecycleConfiguration."]
 module Status =
   struct
     type nonrec t =
@@ -1867,6 +2253,9 @@ module Resources =
   struct
     type nonrec t = Resource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Resource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1911,26 +2300,30 @@ module ReplicationConfigurationDescription =
   struct
     type nonrec t =
       {
-      sourceFileSystemId: FileSystemId.t
+      sourceFileSystemId: FileSystemId.t option
         [@ocaml.doc
           "The ID of the source Amazon EFS file system that is being replicated."];
-      sourceFileSystemRegion: RegionName.t
+      sourceFileSystemRegion: RegionName.t option
         [@ocaml.doc
-          "The Amazon Web Services Region in which the source Amazon EFS file system is located."];
-      sourceFileSystemArn: FileSystemArn.t
+          "The Amazon Web Services Region in which the source EFS file system is located."];
+      sourceFileSystemArn: FileSystemArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the current source file system in the replication configuration."];
-      originalSourceFileSystemArn: FileSystemArn.t
+      originalSourceFileSystemArn: FileSystemArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the original source Amazon EFS file system in the replication configuration."];
-      creationTime: Timestamp.t
+          "The Amazon Resource Name (ARN) of the original source EFS file system in the replication configuration."];
+      creationTime: Timestamp.t option
         [@ocaml.doc
           "Describes when the replication configuration was created."];
-      destinations: Destinations.t
+      destinations: Destinations.t option
         [@ocaml.doc
-          "An array of destination objects. Only one destination object is supported."]}
+          "An array of destination objects. Only one destination object is supported."];
+      sourceFileSystemOwnerId: AwsAccountId.t option
+        [@ocaml.doc
+          "ID of the Amazon Web Services account in which the source file system resides."]}
     type nonrec error =
       [ `BadRequest of BadRequest.t 
+      | `ConflictException of ConflictException.t 
       | `FileSystemLimitExceeded of FileSystemLimitExceeded.t 
       | `FileSystemNotFound of FileSystemNotFound.t 
       | `IncorrectFileSystemLifeCycleState of
@@ -1942,25 +2335,28 @@ module ReplicationConfigurationDescription =
       | `UnsupportedAvailabilityZone of UnsupportedAvailabilityZone.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ReplicationConfigurationDescription"
-    let make ~sourceFileSystemId =
-      fun ~sourceFileSystemRegion ->
-        fun ~sourceFileSystemArn ->
-          fun ~originalSourceFileSystemArn ->
-            fun ~creationTime ->
-              fun ~destinations ->
-                fun () ->
-                  {
-                    sourceFileSystemId;
-                    sourceFileSystemRegion;
-                    sourceFileSystemArn;
-                    originalSourceFileSystemArn;
-                    creationTime;
-                    destinations
-                  }
+    let make ?sourceFileSystemId =
+      fun ?sourceFileSystemRegion ->
+        fun ?sourceFileSystemArn ->
+          fun ?originalSourceFileSystemArn ->
+            fun ?creationTime ->
+              fun ?destinations ->
+                fun ?sourceFileSystemOwnerId ->
+                  fun () ->
+                    {
+                      sourceFileSystemId;
+                      sourceFileSystemRegion;
+                      sourceFileSystemArn;
+                      originalSourceFileSystemArn;
+                      creationTime;
+                      destinations;
+                      sourceFileSystemOwnerId
+                    }
     let error_of_json name json =
       match name with
       | "BadRequest" -> `BadRequest (BadRequest.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "FileSystemLimitExceeded" ->
           `FileSystemLimitExceeded (FileSystemLimitExceeded.of_json json)
       | "FileSystemNotFound" ->
@@ -1988,6 +2384,8 @@ module ReplicationConfigurationDescription =
     let error_of_xml name xml =
       match name with
       | "BadRequest" -> `BadRequest (BadRequest.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "FileSystemLimitExceeded" ->
           `FileSystemLimitExceeded (FileSystemLimitExceeded.of_xml xml)
       | "FileSystemNotFound" ->
@@ -2017,6 +2415,10 @@ module ReplicationConfigurationDescription =
           `Assoc
             [("error", (`String "BadRequest"));
             ("details", (BadRequest.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `FileSystemLimitExceeded e ->
           `Assoc
             [("error", (`String "FileSystemLimitExceeded"));
@@ -2061,75 +2463,83 @@ module ReplicationConfigurationDescription =
     let to_value x =
       structure_to_value
         [("SourceFileSystemId",
-           (Some (FileSystemId.to_value x.sourceFileSystemId)));
+           (Option.map x.sourceFileSystemId ~f:FileSystemId.to_value));
         ("SourceFileSystemRegion",
-          (Some (RegionName.to_value x.sourceFileSystemRegion)));
+          (Option.map x.sourceFileSystemRegion ~f:RegionName.to_value));
         ("SourceFileSystemArn",
-          (Some (FileSystemArn.to_value x.sourceFileSystemArn)));
+          (Option.map x.sourceFileSystemArn ~f:FileSystemArn.to_value));
         ("OriginalSourceFileSystemArn",
-          (Some (FileSystemArn.to_value x.originalSourceFileSystemArn)));
-        ("CreationTime", (Some (Timestamp.to_value x.creationTime)));
-        ("Destinations", (Some (Destinations.to_value x.destinations)))]
+          (Option.map x.originalSourceFileSystemArn ~f:FileSystemArn.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("Destinations",
+          (Option.map x.destinations ~f:Destinations.to_value));
+        ("SourceFileSystemOwnerId",
+          (Option.map x.sourceFileSystemOwnerId ~f:AwsAccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceFileSystemOwnerId =
+        (Option.map ~f:AwsAccountId.of_xml)
+          (Xml.child xml_arg0 "SourceFileSystemOwnerId") in
       let destinations =
-        Destinations.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Destinations") in
+        (Option.map ~f:Destinations.of_xml)
+          (Xml.child xml_arg0 "Destinations") in
       let creationTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationTime") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
       let originalSourceFileSystemArn =
-        FileSystemArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "OriginalSourceFileSystemArn") in
+        (Option.map ~f:FileSystemArn.of_xml)
+          (Xml.child xml_arg0 "OriginalSourceFileSystemArn") in
       let sourceFileSystemArn =
-        FileSystemArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SourceFileSystemArn") in
+        (Option.map ~f:FileSystemArn.of_xml)
+          (Xml.child xml_arg0 "SourceFileSystemArn") in
       let sourceFileSystemRegion =
-        RegionName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SourceFileSystemRegion") in
+        (Option.map ~f:RegionName.of_xml)
+          (Xml.child xml_arg0 "SourceFileSystemRegion") in
       let sourceFileSystemId =
-        FileSystemId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SourceFileSystemId") in
-      make ~destinations ~creationTime ~originalSourceFileSystemArn
-        ~sourceFileSystemArn ~sourceFileSystemRegion ~sourceFileSystemId ()
+        (Option.map ~f:FileSystemId.of_xml)
+          (Xml.child xml_arg0 "SourceFileSystemId") in
+      make ?sourceFileSystemOwnerId ?destinations ?creationTime
+        ?originalSourceFileSystemArn ?sourceFileSystemArn
+        ?sourceFileSystemRegion ?sourceFileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let destinations =
-        field_map_exn json "Destinations" Destinations.of_json in
-      let creationTime = field_map_exn json "CreationTime" Timestamp.of_json in
+    let of_json json__ =
+      let sourceFileSystemOwnerId =
+        field_map json__ "SourceFileSystemOwnerId" AwsAccountId.of_json in
+      let destinations = field_map json__ "Destinations" Destinations.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let originalSourceFileSystemArn =
-        field_map_exn json "OriginalSourceFileSystemArn"
-          FileSystemArn.of_json in
+        field_map json__ "OriginalSourceFileSystemArn" FileSystemArn.of_json in
       let sourceFileSystemArn =
-        field_map_exn json "SourceFileSystemArn" FileSystemArn.of_json in
+        field_map json__ "SourceFileSystemArn" FileSystemArn.of_json in
       let sourceFileSystemRegion =
-        field_map_exn json "SourceFileSystemRegion" RegionName.of_json in
+        field_map json__ "SourceFileSystemRegion" RegionName.of_json in
       let sourceFileSystemId =
-        field_map_exn json "SourceFileSystemId" FileSystemId.of_json in
-      make ~destinations ~creationTime ~originalSourceFileSystemArn
-        ~sourceFileSystemArn ~sourceFileSystemRegion ~sourceFileSystemId ()
+        field_map json__ "SourceFileSystemId" FileSystemId.of_json in
+      make ?sourceFileSystemOwnerId ?destinations ?creationTime
+        ?originalSourceFileSystemArn ?sourceFileSystemArn
+        ?sourceFileSystemRegion ?sourceFileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a replication configuration that replicates an existing EFS file system to a new, read-only file system. For more information, see Amazon EFS replication in the Amazon EFS User Guide. The replication configuration specifies the following: Source file system - An existing EFS file system that you want replicated. The source file system cannot be a destination file system in an existing replication configuration. Destination file system configuration - The configuration of the destination file system to which the source file system will be replicated. There can only be one destination file system in a replication configuration. The destination file system configuration consists of the following properties: Amazon Web Services Region - The Amazon Web Services Region in which the destination file system is created. Amazon EFS replication is available in all Amazon Web Services Regions that Amazon EFS is available in, except Africa (Cape Town), Asia Pacific (Hong Kong), Asia Pacific (Jakarta), Europe (Milan), and Middle East (Bahrain). Availability Zone - If you want the destination file system to use EFS One Zone availability and durability, you must specify the Availability Zone to create the file system in. For more information about EFS storage classes, see Amazon EFS storage classes in the Amazon EFS User Guide. Encryption - All destination file systems are created with encryption at rest enabled. You can specify the Key Management Service (KMS) key that is used to encrypt the destination file system. If you don't specify a KMS key, your service-managed KMS key for Amazon EFS is used. After the file system is created, you cannot change the KMS key. The following properties are set by default: Performance mode - The destination file system's performance mode matches that of the source file system, unless the destination file system uses EFS One Zone storage. In that case, the General Purpose performance mode is used. The performance mode cannot be changed. Throughput mode - The destination file system uses the Bursting Throughput mode by default. After the file system is created, you can modify the throughput mode. The following properties are turned off by default: Lifecycle management - EFS lifecycle management and EFS Intelligent-Tiering are not enabled on the destination file system. After the destination file system is created, you can enable EFS lifecycle management and EFS Intelligent-Tiering. Automatic backups - Automatic daily backups not enabled on the destination file system. After the file system is created, you can change this setting. For more information, see Amazon EFS replication in the Amazon EFS User Guide."]
+       "Describes the replication configuration for a specific file system."]
 module MountTargetDescription =
   struct
     type nonrec t =
       {
       ownerId: AwsAccountId.t option
         [@ocaml.doc "Amazon Web Services account ID that owns the resource."];
-      mountTargetId: MountTargetId.t
+      mountTargetId: MountTargetId.t option
         [@ocaml.doc "System-assigned mount target ID."];
-      fileSystemId: FileSystemId.t
+      fileSystemId: FileSystemId.t option
         [@ocaml.doc
           "The ID of the file system for which the mount target is intended."];
-      subnetId: SubnetId.t
+      subnetId: SubnetId.t option
         [@ocaml.doc "The ID of the mount target's subnet."];
-      lifeCycleState: LifeCycleState.t
+      lifeCycleState: LifeCycleState.t option
         [@ocaml.doc "Lifecycle state of the mount target."];
       ipAddress: IpAddress.t option
         [@ocaml.doc
           "Address at which the file system can be mounted by using the mount target."];
+      ipv6Address: Ipv6Address.t option
+        [@ocaml.doc "The IPv6 address for the mount target."];
       networkInterfaceId: NetworkInterfaceId.t option
         [@ocaml.doc
           "The ID of the network interface that Amazon EFS created when it created the mount target."];
@@ -2158,30 +2568,31 @@ module MountTargetDescription =
       | `SubnetNotFound of SubnetNotFound.t 
       | `UnsupportedAvailabilityZone of UnsupportedAvailabilityZone.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "MountTargetDescription"
     let make ?ownerId =
-      fun ?ipAddress ->
-        fun ?networkInterfaceId ->
-          fun ?availabilityZoneId ->
-            fun ?availabilityZoneName ->
-              fun ?vpcId ->
-                fun ~mountTargetId ->
-                  fun ~fileSystemId ->
-                    fun ~subnetId ->
-                      fun ~lifeCycleState ->
-                        fun () ->
-                          {
-                            ownerId;
-                            ipAddress;
-                            networkInterfaceId;
-                            availabilityZoneId;
-                            availabilityZoneName;
-                            vpcId;
-                            mountTargetId;
-                            fileSystemId;
-                            subnetId;
-                            lifeCycleState
-                          }
+      fun ?mountTargetId ->
+        fun ?fileSystemId ->
+          fun ?subnetId ->
+            fun ?lifeCycleState ->
+              fun ?ipAddress ->
+                fun ?ipv6Address ->
+                  fun ?networkInterfaceId ->
+                    fun ?availabilityZoneId ->
+                      fun ?availabilityZoneName ->
+                        fun ?vpcId ->
+                          fun () ->
+                            {
+                              ownerId;
+                              mountTargetId;
+                              fileSystemId;
+                              subnetId;
+                              lifeCycleState;
+                              ipAddress;
+                              ipv6Address;
+                              networkInterfaceId;
+                              availabilityZoneId;
+                              availabilityZoneName;
+                              vpcId
+                            }
     let error_of_json name json =
       match name with
       | "AvailabilityZonesMismatch" ->
@@ -2306,11 +2717,15 @@ module MountTargetDescription =
     let to_value x =
       structure_to_value
         [("OwnerId", (Option.map x.ownerId ~f:AwsAccountId.to_value));
-        ("MountTargetId", (Some (MountTargetId.to_value x.mountTargetId)));
-        ("FileSystemId", (Some (FileSystemId.to_value x.fileSystemId)));
-        ("SubnetId", (Some (SubnetId.to_value x.subnetId)));
-        ("LifeCycleState", (Some (LifeCycleState.to_value x.lifeCycleState)));
+        ("MountTargetId",
+          (Option.map x.mountTargetId ~f:MountTargetId.to_value));
+        ("FileSystemId",
+          (Option.map x.fileSystemId ~f:FileSystemId.to_value));
+        ("SubnetId", (Option.map x.subnetId ~f:SubnetId.to_value));
+        ("LifeCycleState",
+          (Option.map x.lifeCycleState ~f:LifeCycleState.to_value));
         ("IpAddress", (Option.map x.ipAddress ~f:IpAddress.to_value));
+        ("Ipv6Address", (Option.map x.ipv6Address ~f:Ipv6Address.to_value));
         ("NetworkInterfaceId",
           (Option.map x.networkInterfaceId ~f:NetworkInterfaceId.to_value));
         ("AvailabilityZoneId",
@@ -2330,76 +2745,78 @@ module MountTargetDescription =
       let networkInterfaceId =
         (Option.map ~f:NetworkInterfaceId.of_xml)
           (Xml.child xml_arg0 "NetworkInterfaceId") in
+      let ipv6Address =
+        (Option.map ~f:Ipv6Address.of_xml) (Xml.child xml_arg0 "Ipv6Address") in
       let ipAddress =
         (Option.map ~f:IpAddress.of_xml) (Xml.child xml_arg0 "IpAddress") in
       let lifeCycleState =
-        LifeCycleState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LifeCycleState") in
+        (Option.map ~f:LifeCycleState.of_xml)
+          (Xml.child xml_arg0 "LifeCycleState") in
       let subnetId =
-        SubnetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SubnetId") in
+        (Option.map ~f:SubnetId.of_xml) (Xml.child xml_arg0 "SubnetId") in
       let fileSystemId =
-        FileSystemId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
+        (Option.map ~f:FileSystemId.of_xml)
+          (Xml.child xml_arg0 "FileSystemId") in
       let mountTargetId =
-        MountTargetId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MountTargetId") in
+        (Option.map ~f:MountTargetId.of_xml)
+          (Xml.child xml_arg0 "MountTargetId") in
       let ownerId =
         (Option.map ~f:AwsAccountId.of_xml) (Xml.child xml_arg0 "OwnerId") in
       make ?vpcId ?availabilityZoneName ?availabilityZoneId
-        ?networkInterfaceId ?ipAddress ~lifeCycleState ~subnetId
-        ~fileSystemId ~mountTargetId ?ownerId ()
+        ?networkInterfaceId ?ipv6Address ?ipAddress ?lifeCycleState ?subnetId
+        ?fileSystemId ?mountTargetId ?ownerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" VpcId.of_json in
+    let of_json json__ =
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
       let availabilityZoneName =
-        field_map json "AvailabilityZoneName" AvailabilityZoneName.of_json in
+        field_map json__ "AvailabilityZoneName" AvailabilityZoneName.of_json in
       let availabilityZoneId =
-        field_map json "AvailabilityZoneId" AvailabilityZoneId.of_json in
+        field_map json__ "AvailabilityZoneId" AvailabilityZoneId.of_json in
       let networkInterfaceId =
-        field_map json "NetworkInterfaceId" NetworkInterfaceId.of_json in
-      let ipAddress = field_map json "IpAddress" IpAddress.of_json in
+        field_map json__ "NetworkInterfaceId" NetworkInterfaceId.of_json in
+      let ipv6Address = field_map json__ "Ipv6Address" Ipv6Address.of_json in
+      let ipAddress = field_map json__ "IpAddress" IpAddress.of_json in
       let lifeCycleState =
-        field_map_exn json "LifeCycleState" LifeCycleState.of_json in
-      let subnetId = field_map_exn json "SubnetId" SubnetId.of_json in
-      let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map json__ "LifeCycleState" LifeCycleState.of_json in
+      let subnetId = field_map json__ "SubnetId" SubnetId.of_json in
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
       let mountTargetId =
-        field_map_exn json "MountTargetId" MountTargetId.of_json in
-      let ownerId = field_map json "OwnerId" AwsAccountId.of_json in
+        field_map json__ "MountTargetId" MountTargetId.of_json in
+      let ownerId = field_map json__ "OwnerId" AwsAccountId.of_json in
       make ?vpcId ?availabilityZoneName ?availabilityZoneId
-        ?networkInterfaceId ?ipAddress ~lifeCycleState ~subnetId
-        ~fileSystemId ~mountTargetId ?ownerId ()
+        ?networkInterfaceId ?ipv6Address ?ipAddress ?lifeCycleState ?subnetId
+        ?fileSystemId ?mountTargetId ?ownerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides a description of a mount target."]
 module FileSystemDescription =
   struct
     type nonrec t =
       {
-      ownerId: AwsAccountId.t
+      ownerId: AwsAccountId.t option
         [@ocaml.doc
-          "The Amazon Web Services account that created the file system. If the file system was created by an IAM user, the parent account to which the user belongs is the owner."];
-      creationToken: CreationToken.t
+          "The Amazon Web Services account that created the file system."];
+      creationToken: CreationToken.t option
         [@ocaml.doc "The opaque string specified in the request."];
-      fileSystemId: FileSystemId.t
+      fileSystemId: FileSystemId.t option
         [@ocaml.doc "The ID of the file system, assigned by Amazon EFS."];
       fileSystemArn: FileSystemArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for the EFS file system, in the format arn:aws:elasticfilesystem:region:account-id:file-system/file-system-id . Example with sample data: arn:aws:elasticfilesystem:us-west-2:1111333322228888:file-system/fs-01234567"];
-      creationTime: Timestamp.t
+      creationTime: Timestamp.t option
         [@ocaml.doc
           "The time that the file system was created, in seconds (since 1970-01-01T00:00:00Z)."];
-      lifeCycleState: LifeCycleState.t
+      lifeCycleState: LifeCycleState.t option
         [@ocaml.doc "The lifecycle phase of the file system."];
       name: TagValue.t option
         [@ocaml.doc
           "You can add tags to a file system, including a Name tag. For more information, see CreateFileSystem. If the file system has a Name tag, Amazon EFS returns the value in this field."];
-      numberOfMountTargets: MountTargetCount.t
+      numberOfMountTargets: MountTargetCount.t option
         [@ocaml.doc
           "The current number of mount targets that the file system has. For more information, see CreateMountTarget."];
-      sizeInBytes: FileSystemSize.t
+      sizeInBytes: FileSystemSize.t option
         [@ocaml.doc
           "The latest known metered size (in bytes) of data stored in the file system, in its Value field, and the time at which that size was determined in its Timestamp field. The Timestamp value is the integer number of seconds since 1970-01-01T00:00:00Z. The SizeInBytes value doesn't represent the size of a consistent snapshot of the file system, but it is eventually consistent when there are no writes to the file system. That is, SizeInBytes represents actual size only if the file system is not modified for a period longer than a couple of hours. Otherwise, the value is not the exact size that the file system was at any point in time."];
-      performanceMode: PerformanceMode.t
+      performanceMode: PerformanceMode.t option
         [@ocaml.doc "The performance mode of the file system."];
       encrypted: Encrypted.t option
         [@ocaml.doc
@@ -2412,16 +2829,18 @@ module FileSystemDescription =
           "Displays the file system's throughput mode. For more information, see Throughput modes in the Amazon EFS User Guide."];
       provisionedThroughputInMibps: ProvisionedThroughputInMibps.t option
         [@ocaml.doc
-          "The amount of provisioned throughput, measured in MiB/s, for the file system. Valid for file systems using ThroughputMode set to provisioned."];
+          "The amount of provisioned throughput, measured in MiBps, for the file system. Valid for file systems using ThroughputMode set to provisioned."];
       availabilityZoneName: AvailabilityZoneName.t option
         [@ocaml.doc
-          "Describes the Amazon Web Services Availability Zone in which the file system is located, and is valid only for file systems using One Zone storage classes. For more information, see Using EFS storage classes in the Amazon EFS User Guide."];
+          "Describes the Amazon Web Services Availability Zone in which the file system is located, and is valid only for One Zone file systems. For more information, see Using EFS storage classes in the Amazon EFS User Guide."];
       availabilityZoneId: AvailabilityZoneId.t option
         [@ocaml.doc
-          "The unique and consistent identifier of the Availability Zone in which the file system's One Zone storage classes exist. For example, use1-az1 is an Availability Zone ID for the us-east-1 Amazon Web Services Region, and it has the same location in every Amazon Web Services account."];
-      tags: Tags.t
+          "The unique and consistent identifier of the Availability Zone in which the file system is located, and is valid only for One Zone file systems. For example, use1-az1 is an Availability Zone ID for the us-east-1 Amazon Web Services Region, and it has the same location in every Amazon Web Services account."];
+      tags: Tags.t option
         [@ocaml.doc
-          "The tags associated with the file system, presented as an array of Tag objects."]}
+          "The tags associated with the file system, presented as an array of Tag objects."];
+      fileSystemProtection: FileSystemProtectionDescription.t option
+        [@ocaml.doc "Describes the protection on the file system."]}
     type nonrec error =
       [ `BadRequest of BadRequest.t 
       | `FileSystemAlreadyExists of FileSystemAlreadyExists.t 
@@ -2431,44 +2850,45 @@ module FileSystemDescription =
       | `ThroughputLimitExceeded of ThroughputLimitExceeded.t 
       | `UnsupportedAvailabilityZone of UnsupportedAvailabilityZone.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "FileSystemDescription"
-    let make ?fileSystemArn =
-      fun ?name ->
-        fun ?encrypted ->
-          fun ?kmsKeyId ->
-            fun ?throughputMode ->
-              fun ?provisionedThroughputInMibps ->
-                fun ?availabilityZoneName ->
-                  fun ?availabilityZoneId ->
-                    fun ~ownerId ->
-                      fun ~creationToken ->
-                        fun ~fileSystemId ->
-                          fun ~creationTime ->
-                            fun ~lifeCycleState ->
-                              fun ~numberOfMountTargets ->
-                                fun ~sizeInBytes ->
-                                  fun ~performanceMode ->
-                                    fun ~tags ->
-                                      fun () ->
-                                        {
-                                          fileSystemArn;
-                                          name;
-                                          encrypted;
-                                          kmsKeyId;
-                                          throughputMode;
-                                          provisionedThroughputInMibps;
-                                          availabilityZoneName;
-                                          availabilityZoneId;
-                                          ownerId;
-                                          creationToken;
-                                          fileSystemId;
-                                          creationTime;
-                                          lifeCycleState;
-                                          numberOfMountTargets;
-                                          sizeInBytes;
-                                          performanceMode;
-                                          tags
-                                        }
+    let make ?ownerId =
+      fun ?creationToken ->
+        fun ?fileSystemId ->
+          fun ?fileSystemArn ->
+            fun ?creationTime ->
+              fun ?lifeCycleState ->
+                fun ?name ->
+                  fun ?numberOfMountTargets ->
+                    fun ?sizeInBytes ->
+                      fun ?performanceMode ->
+                        fun ?encrypted ->
+                          fun ?kmsKeyId ->
+                            fun ?throughputMode ->
+                              fun ?provisionedThroughputInMibps ->
+                                fun ?availabilityZoneName ->
+                                  fun ?availabilityZoneId ->
+                                    fun ?tags ->
+                                      fun ?fileSystemProtection ->
+                                        fun () ->
+                                          {
+                                            ownerId;
+                                            creationToken;
+                                            fileSystemId;
+                                            fileSystemArn;
+                                            creationTime;
+                                            lifeCycleState;
+                                            name;
+                                            numberOfMountTargets;
+                                            sizeInBytes;
+                                            performanceMode;
+                                            encrypted;
+                                            kmsKeyId;
+                                            throughputMode;
+                                            provisionedThroughputInMibps;
+                                            availabilityZoneName;
+                                            availabilityZoneId;
+                                            tags;
+                                            fileSystemProtection
+                                          }
     let error_of_json name json =
       match name with
       | "BadRequest" -> `BadRequest (BadRequest.of_json json)
@@ -2545,19 +2965,23 @@ module FileSystemDescription =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("OwnerId", (Some (AwsAccountId.to_value x.ownerId)));
-        ("CreationToken", (Some (CreationToken.to_value x.creationToken)));
-        ("FileSystemId", (Some (FileSystemId.to_value x.fileSystemId)));
+        [("OwnerId", (Option.map x.ownerId ~f:AwsAccountId.to_value));
+        ("CreationToken",
+          (Option.map x.creationToken ~f:CreationToken.to_value));
+        ("FileSystemId",
+          (Option.map x.fileSystemId ~f:FileSystemId.to_value));
         ("FileSystemArn",
           (Option.map x.fileSystemArn ~f:FileSystemArn.to_value));
-        ("CreationTime", (Some (Timestamp.to_value x.creationTime)));
-        ("LifeCycleState", (Some (LifeCycleState.to_value x.lifeCycleState)));
+        ("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
+        ("LifeCycleState",
+          (Option.map x.lifeCycleState ~f:LifeCycleState.to_value));
         ("Name", (Option.map x.name ~f:TagValue.to_value));
         ("NumberOfMountTargets",
-          (Some (MountTargetCount.to_value x.numberOfMountTargets)));
-        ("SizeInBytes", (Some (FileSystemSize.to_value x.sizeInBytes)));
+          (Option.map x.numberOfMountTargets ~f:MountTargetCount.to_value));
+        ("SizeInBytes",
+          (Option.map x.sizeInBytes ~f:FileSystemSize.to_value));
         ("PerformanceMode",
-          (Some (PerformanceMode.to_value x.performanceMode)));
+          (Option.map x.performanceMode ~f:PerformanceMode.to_value));
         ("Encrypted", (Option.map x.encrypted ~f:Encrypted.to_value));
         ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
         ("ThroughputMode",
@@ -2569,11 +2993,16 @@ module FileSystemDescription =
           (Option.map x.availabilityZoneName ~f:AvailabilityZoneName.to_value));
         ("AvailabilityZoneId",
           (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
-        ("Tags", (Some (Tags.to_value x.tags)))]
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("FileSystemProtection",
+          (Option.map x.fileSystemProtection
+             ~f:FileSystemProtectionDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags =
-        Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let fileSystemProtection =
+        (Option.map ~f:FileSystemProtectionDescription.of_xml)
+          (Xml.child xml_arg0 "FileSystemProtection") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let availabilityZoneId =
         (Option.map ~f:AvailabilityZoneId.of_xml)
           (Xml.child xml_arg0 "AvailabilityZoneId") in
@@ -2591,74 +3020,73 @@ module FileSystemDescription =
       let encrypted =
         (Option.map ~f:Encrypted.of_xml) (Xml.child xml_arg0 "Encrypted") in
       let performanceMode =
-        PerformanceMode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PerformanceMode") in
+        (Option.map ~f:PerformanceMode.of_xml)
+          (Xml.child xml_arg0 "PerformanceMode") in
       let sizeInBytes =
-        FileSystemSize.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SizeInBytes") in
+        (Option.map ~f:FileSystemSize.of_xml)
+          (Xml.child xml_arg0 "SizeInBytes") in
       let numberOfMountTargets =
-        MountTargetCount.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NumberOfMountTargets") in
+        (Option.map ~f:MountTargetCount.of_xml)
+          (Xml.child xml_arg0 "NumberOfMountTargets") in
       let name = (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Name") in
       let lifeCycleState =
-        LifeCycleState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LifeCycleState") in
+        (Option.map ~f:LifeCycleState.of_xml)
+          (Xml.child xml_arg0 "LifeCycleState") in
       let creationTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationTime") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
       let fileSystemArn =
         (Option.map ~f:FileSystemArn.of_xml)
           (Xml.child xml_arg0 "FileSystemArn") in
       let fileSystemId =
-        FileSystemId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
+        (Option.map ~f:FileSystemId.of_xml)
+          (Xml.child xml_arg0 "FileSystemId") in
       let creationToken =
-        CreationToken.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationToken") in
+        (Option.map ~f:CreationToken.of_xml)
+          (Xml.child xml_arg0 "CreationToken") in
       let ownerId =
-        AwsAccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OwnerId") in
-      make ~tags ?availabilityZoneId ?availabilityZoneName
-        ?provisionedThroughputInMibps ?throughputMode ?kmsKeyId ?encrypted
-        ~performanceMode ~sizeInBytes ~numberOfMountTargets ?name
-        ~lifeCycleState ~creationTime ?fileSystemArn ~fileSystemId
-        ~creationToken ~ownerId ()
+        (Option.map ~f:AwsAccountId.of_xml) (Xml.child xml_arg0 "OwnerId") in
+      make ?fileSystemProtection ?tags ?availabilityZoneId
+        ?availabilityZoneName ?provisionedThroughputInMibps ?throughputMode
+        ?kmsKeyId ?encrypted ?performanceMode ?sizeInBytes
+        ?numberOfMountTargets ?name ?lifeCycleState ?creationTime
+        ?fileSystemArn ?fileSystemId ?creationToken ?ownerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
+    let of_json json__ =
+      let fileSystemProtection =
+        field_map json__ "FileSystemProtection"
+          FileSystemProtectionDescription.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let availabilityZoneId =
-        field_map json "AvailabilityZoneId" AvailabilityZoneId.of_json in
+        field_map json__ "AvailabilityZoneId" AvailabilityZoneId.of_json in
       let availabilityZoneName =
-        field_map json "AvailabilityZoneName" AvailabilityZoneName.of_json in
+        field_map json__ "AvailabilityZoneName" AvailabilityZoneName.of_json in
       let provisionedThroughputInMibps =
-        field_map json "ProvisionedThroughputInMibps"
+        field_map json__ "ProvisionedThroughputInMibps"
           ProvisionedThroughputInMibps.of_json in
       let throughputMode =
-        field_map json "ThroughputMode" ThroughputMode.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let encrypted = field_map json "Encrypted" Encrypted.of_json in
+        field_map json__ "ThroughputMode" ThroughputMode.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let encrypted = field_map json__ "Encrypted" Encrypted.of_json in
       let performanceMode =
-        field_map_exn json "PerformanceMode" PerformanceMode.of_json in
-      let sizeInBytes =
-        field_map_exn json "SizeInBytes" FileSystemSize.of_json in
+        field_map json__ "PerformanceMode" PerformanceMode.of_json in
+      let sizeInBytes = field_map json__ "SizeInBytes" FileSystemSize.of_json in
       let numberOfMountTargets =
-        field_map_exn json "NumberOfMountTargets" MountTargetCount.of_json in
-      let name = field_map json "Name" TagValue.of_json in
+        field_map json__ "NumberOfMountTargets" MountTargetCount.of_json in
+      let name = field_map json__ "Name" TagValue.of_json in
       let lifeCycleState =
-        field_map_exn json "LifeCycleState" LifeCycleState.of_json in
-      let creationTime = field_map_exn json "CreationTime" Timestamp.of_json in
+        field_map json__ "LifeCycleState" LifeCycleState.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let fileSystemArn =
-        field_map json "FileSystemArn" FileSystemArn.of_json in
-      let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map json__ "FileSystemArn" FileSystemArn.of_json in
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
       let creationToken =
-        field_map_exn json "CreationToken" CreationToken.of_json in
-      let ownerId = field_map_exn json "OwnerId" AwsAccountId.of_json in
-      make ~tags ?availabilityZoneId ?availabilityZoneName
-        ?provisionedThroughputInMibps ?throughputMode ?kmsKeyId ?encrypted
-        ~performanceMode ~sizeInBytes ~numberOfMountTargets ?name
-        ~lifeCycleState ~creationTime ?fileSystemArn ~fileSystemId
-        ~creationToken ~ownerId ()
+        field_map json__ "CreationToken" CreationToken.of_json in
+      let ownerId = field_map json__ "OwnerId" AwsAccountId.of_json in
+      make ?fileSystemProtection ?tags ?availabilityZoneId
+        ?availabilityZoneName ?provisionedThroughputInMibps ?throughputMode
+        ?kmsKeyId ?encrypted ?performanceMode ?sizeInBytes
+        ?numberOfMountTargets ?name ?lifeCycleState ?creationTime
+        ?fileSystemArn ?fileSystemId ?creationToken ?ownerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A description of the file system."]
 module AccessPointDescription =
@@ -2687,10 +3115,10 @@ module AccessPointDescription =
           "The full POSIX identity, including the user ID, group ID, and secondary group IDs on the access point that is used for all file operations by NFS clients using the access point."];
       rootDirectory: RootDirectory.t option
         [@ocaml.doc
-          "The directory on the Amazon EFS file system that the access point exposes as the root directory to NFS clients using the access point."];
+          "The directory on the EFS file system that the access point exposes as the root directory to NFS clients using the access point."];
       ownerId: AwsAccountId.t option
         [@ocaml.doc
-          "Identified the Amazon Web Services account that owns the access point resource."];
+          "Identifies the Amazon Web Services account that owns the access point resource."];
       lifeCycleState: LifeCycleState.t option
         [@ocaml.doc "Identifies the lifecycle phase of the access point."]}
     type nonrec error =
@@ -2843,21 +3271,21 @@ module AccessPointDescription =
       make ?lifeCycleState ?ownerId ?rootDirectory ?posixUser ?fileSystemId
         ?accessPointArn ?accessPointId ?tags ?name ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lifeCycleState =
-        field_map json "LifeCycleState" LifeCycleState.of_json in
-      let ownerId = field_map json "OwnerId" AwsAccountId.of_json in
+        field_map json__ "LifeCycleState" LifeCycleState.of_json in
+      let ownerId = field_map json__ "OwnerId" AwsAccountId.of_json in
       let rootDirectory =
-        field_map json "RootDirectory" RootDirectory.of_json in
-      let posixUser = field_map json "PosixUser" PosixUser.of_json in
-      let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
+        field_map json__ "RootDirectory" RootDirectory.of_json in
+      let posixUser = field_map json__ "PosixUser" PosixUser.of_json in
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
       let accessPointArn =
-        field_map json "AccessPointArn" AccessPointArn.of_json in
+        field_map json__ "AccessPointArn" AccessPointArn.of_json in
       let accessPointId =
-        field_map json "AccessPointId" AccessPointId.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
+        field_map json__ "AccessPointId" AccessPointId.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       make ?lifeCycleState ?ownerId ?rootDirectory ?posixUser ?fileSystemId
         ?accessPointArn ?accessPointId ?tags ?name ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -2869,24 +3297,48 @@ module DestinationToCreate =
       {
       region: RegionName.t option
         [@ocaml.doc
-          "To create a file system that uses Regional storage, specify the Amazon Web Services Region in which to create the destination file system."];
+          "To create a file system that uses Regional storage, specify the Amazon Web Services Region in which to create the destination file system. The Region must be enabled for the Amazon Web Services account that owns the source file system. For more information, see Managing Amazon Web Services Regions in the Amazon Web Services General Reference Reference Guide."];
       availabilityZoneName: AvailabilityZoneName.t option
         [@ocaml.doc
-          "To create a file system that uses EFS One Zone storage, specify the name of the Availability Zone in which to create the destination file system."];
+          "To create a file system that uses One Zone storage, specify the name of the Availability Zone in which to create the destination file system."];
       kmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "Specifies the Key Management Service (KMS) key that you want to use to encrypt the destination file system. If you do not specify a KMS key, Amazon EFS uses your default KMS key for Amazon EFS, /aws/elasticfilesystem. This ID can be in one of the following formats: Key ID - The unique identifier of the key, for example 1234abcd-12ab-34cd-56ef-1234567890ab. ARN - The Amazon Resource Name (ARN) for the key, for example arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab. Key alias - A previously created display name for a key, for example alias/projectKey1. Key alias ARN - The ARN for a key alias, for example arn:aws:kms:us-west-2:444455556666:alias/projectKey1."]}
+          "Specify the Key Management Service (KMS) key that you want to use to encrypt the destination file system. If you do not specify a KMS key, Amazon EFS uses your default KMS key for Amazon EFS, /aws/elasticfilesystem. This ID can be in one of the following formats: Key ID - The unique identifier of the key, for example 1234abcd-12ab-34cd-56ef-1234567890ab. ARN - The ARN for the key, for example arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab. Key alias - A previously created display name for a key, for example alias/projectKey1. Key alias ARN - The ARN for a key alias, for example arn:aws:kms:us-west-2:444455556666:alias/projectKey1."];
+      fileSystemId: FileSystemId.t option
+        [@ocaml.doc
+          "The ID or ARN of the file system to use for the destination. For cross-account replication, this must be an ARN. The file system's replication overwrite replication must be disabled. If no ID or ARN is specified, then a new file system is created. When you initially configure replication to an existing file system, Amazon EFS writes data to or removes existing data from the destination file system to match data in the source file system. If you don't want to change data in the destination file system, then you should replicate to a new file system instead. For more information, see https://docs.aws.amazon.com/efs/latest/ug/create-replication.html."];
+      roleArn: RoleArn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the IAM role in the source account that allows Amazon EFS to perform replication on its behalf. This is optional for same-account replication and required for cross-account replication."]}
     let make ?region =
       fun ?availabilityZoneName ->
-        fun ?kmsKeyId -> fun () -> { region; availabilityZoneName; kmsKeyId }
+        fun ?kmsKeyId ->
+          fun ?fileSystemId ->
+            fun ?roleArn ->
+              fun () ->
+                {
+                  region;
+                  availabilityZoneName;
+                  kmsKeyId;
+                  fileSystemId;
+                  roleArn
+                }
     let to_value x =
       structure_to_value
         [("Region", (Option.map x.region ~f:RegionName.to_value));
         ("AvailabilityZoneName",
           (Option.map x.availabilityZoneName ~f:AvailabilityZoneName.to_value));
-        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value))]
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("FileSystemId",
+          (Option.map x.fileSystemId ~f:FileSystemId.to_value));
+        ("RoleArn", (Option.map x.roleArn ~f:RoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
+      let fileSystemId =
+        (Option.map ~f:FileSystemId.of_xml)
+          (Xml.child xml_arg0 "FileSystemId") in
       let kmsKeyId =
         (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       let availabilityZoneName =
@@ -2894,17 +3346,19 @@ module DestinationToCreate =
           (Xml.child xml_arg0 "AvailabilityZoneName") in
       let region =
         (Option.map ~f:RegionName.of_xml) (Xml.child xml_arg0 "Region") in
-      make ?kmsKeyId ?availabilityZoneName ?region ()
+      make ?roleArn ?fileSystemId ?kmsKeyId ?availabilityZoneName ?region ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
       let availabilityZoneName =
-        field_map json "AvailabilityZoneName" AvailabilityZoneName.of_json in
-      let region = field_map json "Region" RegionName.of_json in
-      make ?kmsKeyId ?availabilityZoneName ?region ()
+        field_map json__ "AvailabilityZoneName" AvailabilityZoneName.of_json in
+      let region = field_map json__ "Region" RegionName.of_json in
+      make ?roleArn ?fileSystemId ?kmsKeyId ?availabilityZoneName ?region ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the destination file system to create in the replication configuration."]
+       "Describes the new or existing destination file system for the replication configuration. If you want to replicate to a new file system, do not specify the File System ID for the destination file system. Amazon EFS creates a new, empty file system. For One Zone storage, specify the Availability Zone to create the file system in. To use an Key Management Service key other than the default KMS key, then specify it. For more information, see Configuring replication to new Amazon EFS file system in the Amazon EFS User Guide. After the file system is created, you cannot change the KMS key or the performance mode. If you want to replicate to an existing file system that's in the same account as the source file system, then you need to provide the ID or Amazon Resource Name (ARN) of the file system to which to replicate. The file system's replication overwrite protection must be disabled. For more information, see Replicating to an existing file system in the Amazon EFS User Guide. If you are replicating the file system to a file system that's in a different account than the source file system (cross-account replication), you need to provide the ARN for the file system and the IAM role that allows Amazon EFS to perform replication on the destination account. The file system's replication overwrite protection must be disabled. For more information, see Replicating across Amazon Web Services accounts in the Amazon EFS User Guide."]
 module ResourceId =
   struct
     type nonrec t = string
@@ -2933,6 +3387,9 @@ module TagKeys =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2956,7 +3413,10 @@ module LifecyclePolicies =
   struct
     type nonrec t = LifecyclePolicy.t list
     let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:2); i
+      let open Result in ok_or_failwith (check_list_max i ~max:3); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LifecyclePolicy.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3017,7 +3477,7 @@ module BackupPolicy =
       {
       status: Status.t
         [@ocaml.doc
-          "Describes the status of the file system's backup policy. ENABLED - EFS is automatically backing up the file system. ENABLING - EFS is turning on automatic backups for the file system. DISABLED - Automatic back ups are turned off for the file system. DISABLING - EFS is turning off automatic backups for the file system."]}
+          "Describes the status of the file system's backup policy. ENABLED \226\128\147 EFS is automatically backing up the file system. ENABLING \226\128\147 EFS is turning on automatic backups for the file system. DISABLED \226\128\147 Automatic back ups are turned off for the file system. DISABLING \226\128\147 EFS is turning off automatic backups for the file system."]}
     let context_ = "BackupPolicy"
     let make ~status = fun () -> { status }
     let to_value x =
@@ -3028,8 +3488,8 @@ module BackupPolicy =
         Status.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
       make ~status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" Status.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "Status" Status.of_json in
       make ~status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3060,10 +3520,10 @@ module ResourceIdPreference =
           (Xml.child xml_arg0 "ResourceIdType") in
       make ?resources ?resourceIdType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resources = field_map json "Resources" Resources.of_json in
+    let of_json json__ =
+      let resources = field_map json__ "Resources" Resources.of_json in
       let resourceIdType =
-        field_map json "ResourceIdType" ResourceIdType.of_json in
+        field_map json__ "ResourceIdType" ResourceIdType.of_json in
       make ?resources ?resourceIdType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3073,6 +3533,9 @@ module SecurityGroups =
     type nonrec t = SecurityGroup.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3095,28 +3558,27 @@ module SecurityGroups =
   end
 module AccessPointNotFound =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "AccessPointNotFound"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if the specified AccessPointId value doesn't exist in the requester's Amazon Web Services account."]
@@ -3174,9 +3636,9 @@ module InvalidPolicyException =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3200,13 +3662,13 @@ module PolicyNotFound =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returned if the default file system policy is in effect for the EFS file system specified."]
+       "Returned if no backup is specified for a One Zone EFS file system."]
 module Marker =
   struct
     type nonrec t = string
@@ -3245,6 +3707,9 @@ module ReplicationConfigurationDescriptions =
   struct
     type nonrec t = ReplicationConfigurationDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicationConfigurationDescription.to_value)) |>
         (fun x -> `List x)
@@ -3272,6 +3737,9 @@ module MountTargetDescriptions =
   struct
     type nonrec t = MountTargetDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MountTargetDescription.to_value)) |>
         (fun x -> `List x)
@@ -3296,55 +3764,53 @@ module MountTargetDescriptions =
   end
 module MountTargetNotFound =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "MountTargetNotFound"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if there is no mount target with the specified ID found in the caller's Amazon Web Services account."]
 module IncorrectMountTargetState =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "IncorrectMountTargetState"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returned if the mount target is not in the correct state for the operation."]
@@ -3352,6 +3818,9 @@ module FileSystemDescriptions =
   struct
     type nonrec t = FileSystemDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FileSystemDescription.to_value)) |>
         (fun x -> `List x)
@@ -3378,6 +3847,9 @@ module AccessPointDescriptions =
   struct
     type nonrec t = AccessPointDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessPointDescription.to_value)) |>
         (fun x -> `List x)
@@ -3400,10 +3872,38 @@ module AccessPointDescriptions =
         ~of_json:AccessPointDescription.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DeletionMode =
+  struct
+    type nonrec t =
+      | ALL_CONFIGURATIONS 
+      | LOCAL_CONFIGURATION_ONLY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALL_CONFIGURATIONS -> "ALL_CONFIGURATIONS"
+      | LOCAL_CONFIGURATION_ONLY -> "LOCAL_CONFIGURATION_ONLY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALL_CONFIGURATIONS" -> ALL_CONFIGURATIONS
+      | "LOCAL_CONFIGURATION_ONLY" -> LOCAL_CONFIGURATION_ONLY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DeletionMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeletionMode" j)
+    let to_json = simple_to_json to_value
+  end
 module DestinationsToCreate =
   struct
     type nonrec t = DestinationToCreate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DestinationToCreate.to_value)) |>
         (fun x -> `List x)
@@ -3425,6 +3925,34 @@ module DestinationsToCreate =
       list_of_json ~kind:"DestinationsToCreate"
         ~of_json:DestinationToCreate.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module IpAddressType =
+  struct
+    type nonrec t =
+      | IPV4_ONLY 
+      | IPV6_ONLY 
+      | DUAL_STACK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IPV4_ONLY -> "IPV4_ONLY"
+      | IPV6_ONLY -> "IPV6_ONLY"
+      | DUAL_STACK -> "DUAL_STACK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IPV4_ONLY" -> IPV4_ONLY
+      | "IPV6_ONLY" -> IPV6_ONLY
+      | "DUAL_STACK" -> DUAL_STACK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IpAddressType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IpAddressType" j)
+    let to_json = simple_to_json to_value
   end
 module Backup =
   struct
@@ -3450,7 +3978,7 @@ module UpdateFileSystemRequest =
           "(Optional) Updates the file system's throughput mode. If you're not updating your throughput mode, you don't need to provide this value in your request. If you are changing the ThroughputMode to provisioned, you must also set a value for ProvisionedThroughputInMibps."];
       provisionedThroughputInMibps: ProvisionedThroughputInMibps.t option
         [@ocaml.doc
-          "(Optional) Sets the amount of provisioned throughput, in MiB/s, for the file system. Valid values are 1-1024. If you are changing the throughput mode to provisioned, you must also provide the amount of provisioned throughput. Required if ThroughputMode is changed to provisioned on update."]}
+          "(Optional) The throughput, measured in mebibytes per second (MiBps), that you want to provision for a file system that you're creating. Required if ThroughputMode is set to provisioned. Valid values are 1-3414 MiBps, with the upper limit depending on Region. To increase this limit, contact Amazon Web ServicesSupport. For more information, see Amazon EFS quotas that you can increase in the Amazon EFS User Guide."]}
     let context_ = "UpdateFileSystemRequest"
     let make ?throughputMode =
       fun ?provisionedThroughputInMibps ->
@@ -3478,18 +4006,57 @@ module UpdateFileSystemRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ?provisionedThroughputInMibps ?throughputMode ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let provisionedThroughputInMibps =
-        field_map json "ProvisionedThroughputInMibps"
+        field_map json__ "ProvisionedThroughputInMibps"
           ProvisionedThroughputInMibps.of_json in
       let throughputMode =
-        field_map json "ThroughputMode" ThroughputMode.of_json in
+        field_map json__ "ThroughputMode" ThroughputMode.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ?provisionedThroughputInMibps ?throughputMode ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the throughput mode or the amount of provisioned throughput of an existing file system."]
+module UpdateFileSystemProtectionRequest =
+  struct
+    type nonrec t =
+      {
+      fileSystemId: FileSystemId.t
+        [@ocaml.doc "The ID of the file system to update."];
+      replicationOverwriteProtection: ReplicationOverwriteProtection.t option
+        [@ocaml.doc
+          "The status of the file system's replication overwrite protection. ENABLED \226\128\147 The file system cannot be used as the destination file system in a replication configuration. The file system is writeable. Replication overwrite protection is ENABLED by default. DISABLED \226\128\147 The file system can be used as the destination file system in a replication configuration. The file system is read-only and can only be modified by EFS replication. REPLICATING \226\128\147 The file system is being used as the destination file system in a replication configuration. The file system is read-only and is only modified only by EFS replication. If the replication configuration is deleted, the file system's replication overwrite protection is re-enabled and the file system becomes writeable."]}
+    let context_ = "UpdateFileSystemProtectionRequest"
+    let make ?replicationOverwriteProtection =
+      fun ~fileSystemId ->
+        fun () -> { replicationOverwriteProtection; fileSystemId }
+    let to_value x =
+      structure_to_value
+        [("FileSystemId", (Some (FileSystemId.to_value x.fileSystemId)));
+        ("ReplicationOverwriteProtection",
+          (Option.map x.replicationOverwriteProtection
+             ~f:ReplicationOverwriteProtection.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let replicationOverwriteProtection =
+        (Option.map ~f:ReplicationOverwriteProtection.of_xml)
+          (Xml.child xml_arg0 "ReplicationOverwriteProtection") in
+      let fileSystemId =
+        FileSystemId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
+      make ?replicationOverwriteProtection ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let replicationOverwriteProtection =
+        field_map json__ "ReplicationOverwriteProtection"
+          ReplicationOverwriteProtection.of_json in
+      let fileSystemId =
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
+      make ?replicationOverwriteProtection ~fileSystemId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates protection on the file system. This operation requires permissions for the elasticfilesystem:UpdateFileSystemProtection action."]
 module UntagResourceRequest =
   struct
     type nonrec t =
@@ -3515,9 +4082,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagKeys ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~tagKeys ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3547,9 +4114,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tags ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~tags ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3563,7 +4130,7 @@ module PutLifecycleConfigurationRequest =
           "The ID of the file system for which you are creating the LifecycleConfiguration object (String)."];
       lifecyclePolicies: LifecyclePolicies.t
         [@ocaml.doc
-          "An array of LifecyclePolicy objects that define the file system's LifecycleConfiguration object. A LifecycleConfiguration object informs EFS lifecycle management and EFS Intelligent-Tiering of the following: When to move files in the file system from primary storage to the IA storage class. When to move files that are in IA storage to primary storage. When using the put-lifecycle-configuration CLI command or the PutLifecycleConfiguration API action, Amazon EFS requires that each LifecyclePolicy object have only a single transition. This means that in a request body, LifecyclePolicies must be structured as an array of LifecyclePolicy objects, one object for each transition, TransitionToIA, TransitionToPrimaryStorageClass. See the example requests in the following section for more information."]}
+          "An array of LifecyclePolicy objects that define the file system's LifecycleConfiguration object. A LifecycleConfiguration object informs lifecycle management of the following: TransitionToIA \226\128\147 When to move files in the file system from primary storage (Standard storage class) into the Infrequent Access (IA) storage. TransitionToArchive \226\128\147 When to move files in the file system from their current storage class (either IA or Standard storage) into the Archive storage. File systems cannot transition into Archive storage before transitioning into IA storage. Therefore, TransitionToArchive must either not be set or must be later than TransitionToIA. The Archive storage class is available only for file systems that use the Elastic throughput mode and the General Purpose performance mode. TransitionToPrimaryStorageClass \226\128\147 Whether to move files in the file system back to primary storage (Standard storage class) after they are accessed in IA or Archive storage. When using the put-lifecycle-configuration CLI command or the PutLifecycleConfiguration API action, Amazon EFS requires that each LifecyclePolicy object have only a single transition. This means that in a request body, LifecyclePolicies must be structured as an array of LifecyclePolicy objects, one object for each storage transition. See the example requests in the following section for more information."]}
     let context_ = "PutLifecycleConfigurationRequest"
     let make ~fileSystemId =
       fun ~lifecyclePolicies -> fun () -> { fileSystemId; lifecyclePolicies }
@@ -3582,15 +4149,15 @@ module PutLifecycleConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~lifecyclePolicies ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lifecyclePolicies =
-        field_map_exn json "LifecyclePolicies" LifecyclePolicies.of_json in
+        field_map_exn json__ "LifecyclePolicies" LifecyclePolicies.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ~lifecyclePolicies ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Use this action to manage EFS lifecycle management and intelligent tiering. A LifecycleConfiguration consists of one or more LifecyclePolicy objects that define the following: EFS Lifecycle management - When Amazon EFS automatically transitions files in a file system into the lower-cost Infrequent Access (IA) storage class. To enable EFS Lifecycle management, set the value of TransitionToIA to one of the available options. EFS Intelligent tiering - When Amazon EFS automatically transitions files from IA back into the file system's primary storage class (Standard or One Zone Standard. To enable EFS Intelligent Tiering, set the value of TransitionToPrimaryStorageClass to AFTER_1_ACCESS. For more information, see EFS Lifecycle Management. Each Amazon EFS file system supports one lifecycle configuration, which applies to all files in the file system. If a LifecycleConfiguration object already exists for the specified file system, a PutLifecycleConfiguration call modifies the existing configuration. A PutLifecycleConfiguration call with an empty LifecyclePolicies array in the request body deletes any existing LifecycleConfiguration and turns off lifecycle management and intelligent tiering for the file system. In the request, specify the following: The ID for the file system for which you are enabling, disabling, or modifying lifecycle management and intelligent tiering. A LifecyclePolicies array of LifecyclePolicy objects that define when files are moved into IA storage, and when they are moved back to Standard storage. Amazon EFS requires that each LifecyclePolicy object have only have a single transition, so the LifecyclePolicies array needs to be structured with separate LifecyclePolicy objects. See the example requests in the following section for more information. This operation requires permissions for the elasticfilesystem:PutLifecycleConfiguration operation. To apply a LifecycleConfiguration object to an encrypted file system, you need the same Key Management Service permissions as when you created the encrypted file system."]
+       "Use this action to manage storage for your file system. A LifecycleConfiguration consists of one or more LifecyclePolicy objects that define the following: TransitionToIA \226\128\147 When to move files in the file system from primary storage (Standard storage class) into the Infrequent Access (IA) storage. TransitionToArchive \226\128\147 When to move files in the file system from their current storage class (either IA or Standard storage) into the Archive storage. File systems cannot transition into Archive storage before transitioning into IA storage. Therefore, TransitionToArchive must either not be set or must be later than TransitionToIA. The Archive storage class is available only for file systems that use the Elastic throughput mode and the General Purpose performance mode. TransitionToPrimaryStorageClass \226\128\147 Whether to move files in the file system back to primary storage (Standard storage class) after they are accessed in IA or Archive storage. For more information, see Managing file system storage. Each Amazon EFS file system supports one lifecycle configuration, which applies to all files in the file system. If a LifecycleConfiguration object already exists for the specified file system, a PutLifecycleConfiguration call modifies the existing configuration. A PutLifecycleConfiguration call with an empty LifecyclePolicies array in the request body deletes any existing LifecycleConfiguration. In the request, specify the following: The ID for the file system for which you are enabling, disabling, or modifying lifecycle management. A LifecyclePolicies array of LifecyclePolicy objects that define when to move files to IA storage, to Archive storage, and back to primary storage. Amazon EFS requires that each LifecyclePolicy object have only have a single transition, so the LifecyclePolicies array needs to be structured with separate LifecyclePolicy objects. See the example requests in the following section for more information. This operation requires permissions for the elasticfilesystem:PutLifecycleConfiguration operation. To apply a LifecycleConfiguration object to an encrypted file system, you need the same Key Management Service permissions as when you created the encrypted file system."]
 module PutFileSystemPolicyRequest =
   struct
     type nonrec t =
@@ -3600,7 +4167,7 @@ module PutFileSystemPolicyRequest =
           "The ID of the EFS file system that you want to create or update the FileSystemPolicy for."];
       policy: Policy.t
         [@ocaml.doc
-          "The FileSystemPolicy that you're creating. Accepts a JSON formatted policy definition. EFS file system policies have a 20,000 character limit. To find out more about the elements that make up a file system policy, see EFS Resource-based Policies."];
+          "The FileSystemPolicy that you're creating. Accepts a JSON formatted policy definition. EFS file system policies have a 20,000 character limit. To find out more about the elements that make up a file system policy, see Resource-based policies within Amazon EFS."];
       bypassPolicyLockoutSafetyCheck: BypassPolicyLockoutSafetyCheck.t option
         [@ocaml.doc
           "(Optional) A boolean that specifies whether or not to bypass the FileSystemPolicy lockout safety check. The lockout safety check determines whether the policy in the request will lock out, or prevent, the IAM principal that is making the request from making future PutFileSystemPolicy requests on this file system. Set BypassPolicyLockoutSafetyCheck to True only when you intend to prevent the IAM principal that is making the request from making subsequent PutFileSystemPolicy requests on this file system. The default value is False."]}
@@ -3628,17 +4195,17 @@ module PutFileSystemPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ?bypassPolicyLockoutSafetyCheck ~policy ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bypassPolicyLockoutSafetyCheck =
-        field_map json "BypassPolicyLockoutSafetyCheck"
+        field_map json__ "BypassPolicyLockoutSafetyCheck"
           BypassPolicyLockoutSafetyCheck.of_json in
-      let policy = field_map_exn json "Policy" Policy.of_json in
+      let policy = field_map_exn json__ "Policy" Policy.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ?bypassPolicyLockoutSafetyCheck ~policy ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Applies an Amazon EFS FileSystemPolicy to an Amazon EFS file system. A file system policy is an IAM resource-based policy and can contain multiple policy statements. A file system always has exactly one file system policy, which can be the default policy or an explicit policy set or updated using this API operation. EFS file system policies have a 20,000 character limit. When an explicit policy is set, it overrides the default policy. For more information about the default file system policy, see Default EFS File System Policy. EFS file system policies have a 20,000 character limit. This operation requires permissions for the elasticfilesystem:PutFileSystemPolicy action."]
+       "Applies an Amazon EFS FileSystemPolicy to an Amazon EFS file system. A file system policy is an IAM resource-based policy and can contain multiple policy statements. A file system always has exactly one file system policy, which can be the default policy or an explicit policy set or updated using this API operation. EFS file system policies have a 20,000 character limit. When an explicit policy is set, it overrides the default policy. For more information about the default file system policy, see Default EFS file system policy. EFS file system policies have a 20,000 character limit. This operation requires permissions for the elasticfilesystem:PutFileSystemPolicy action."]
 module PutBackupPolicyRequest =
   struct
     type nonrec t =
@@ -3666,11 +4233,11 @@ module PutBackupPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~backupPolicy ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let backupPolicy =
-        field_map_exn json "BackupPolicy" BackupPolicy.of_json in
+        field_map_exn json__ "BackupPolicy" BackupPolicy.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ~backupPolicy ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3726,9 +4293,9 @@ module PutAccountPreferencesResponse =
           (Xml.child xml_arg0 "ResourceIdPreference") in
       make ?resourceIdPreference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceIdPreference =
-        field_map json "ResourceIdPreference" ResourceIdPreference.of_json in
+        field_map json__ "ResourceIdPreference" ResourceIdPreference.of_json in
       make ?resourceIdPreference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3753,9 +4320,9 @@ module PutAccountPreferencesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceIdType") in
       make ~resourceIdType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceIdType =
-        field_map_exn json "ResourceIdType" ResourceIdType.of_json in
+        field_map_exn json__ "ResourceIdType" ResourceIdType.of_json in
       make ~resourceIdType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3768,7 +4335,7 @@ module ModifyMountTargetSecurityGroupsRequest =
         [@ocaml.doc
           "The ID of the mount target whose security groups you want to modify."];
       securityGroups: SecurityGroups.t option
-        [@ocaml.doc "An array of up to five VPC security group IDs."]}
+        [@ocaml.doc "An array of VPC security group IDs."]}
     let context_ = "ModifyMountTargetSecurityGroupsRequest"
     let make ?securityGroups =
       fun ~mountTargetId -> fun () -> { securityGroups; mountTargetId }
@@ -3787,11 +4354,11 @@ module ModifyMountTargetSecurityGroupsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MountTargetId") in
       make ?securityGroups ~mountTargetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroups =
-        field_map json "SecurityGroups" SecurityGroups.of_json in
+        field_map json__ "SecurityGroups" SecurityGroups.of_json in
       let mountTargetId =
-        field_map_exn json "MountTargetId" MountTargetId.of_json in
+        field_map_exn json__ "MountTargetId" MountTargetId.of_json in
       make ?securityGroups ~mountTargetId ()
     let to_json v = composed_to_json to_value v
   end
@@ -3868,9 +4435,9 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3908,10 +4475,10 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ?nextToken ?maxResults ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ?nextToken ?maxResults ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3978,13 +4545,13 @@ module LifecycleConfigurationDescription =
           (Xml.child xml_arg0 "LifecyclePolicies") in
       make ?lifecyclePolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lifecyclePolicies =
-        field_map json "LifecyclePolicies" LifecyclePolicies.of_json in
+        field_map json__ "LifecyclePolicies" LifecyclePolicies.of_json in
       make ?lifecyclePolicies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the current LifecycleConfiguration object for the specified Amazon EFS file system. EFS lifecycle management uses the LifecycleConfiguration object to identify which files to move to the EFS Infrequent Access (IA) storage class. For a file system without a LifecycleConfiguration object, the call returns an empty array in the response. When EFS Intelligent-Tiering is enabled, TransitionToPrimaryStorageClass has a value of AFTER_1_ACCESS. This operation requires permissions for the elasticfilesystem:DescribeLifecycleConfiguration operation."]
+       "Returns the current LifecycleConfiguration object for the specified EFS file system. Lifecycle management uses the LifecycleConfiguration object to identify when to move files between storage classes. For a file system without a LifecycleConfiguration object, the call returns an empty array in the response. This operation requires permissions for the elasticfilesystem:DescribeLifecycleConfiguration operation."]
 module FileSystemPolicyDescription =
   struct
     type nonrec t =
@@ -4061,37 +4628,36 @@ module FileSystemPolicyDescription =
           (Xml.child xml_arg0 "FileSystemId") in
       make ?policy ?fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" Policy.of_json in
-      let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "Policy" Policy.of_json in
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
       make ?policy ?fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the FileSystemPolicy for the specified EFS file system. This operation requires permissions for the elasticfilesystem:DescribeFileSystemPolicy action."]
 module FileSystemInUse =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "FileSystemInUse"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returned if a file system has mount targets."]
 module DescribeTagsResponse =
@@ -4101,7 +4667,7 @@ module DescribeTagsResponse =
       marker: Marker.t option
         [@ocaml.doc
           "If the request included a Marker, the response returns that value in this field."];
-      tags: Tags.t
+      tags: Tags.t option
         [@ocaml.doc
           "Returns tags associated with the file system as an array of Tag objects."];
       nextMarker: Marker.t option
@@ -4112,9 +4678,8 @@ module DescribeTagsResponse =
       | `FileSystemNotFound of FileSystemNotFound.t 
       | `InternalServerError of InternalServerError.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeTagsResponse"
     let make ?marker =
-      fun ?nextMarker -> fun ~tags -> fun () -> { marker; nextMarker; tags }
+      fun ?tags -> fun ?nextMarker -> fun () -> { marker; tags; nextMarker }
     let error_of_json name json =
       match name with
       | "BadRequest" -> `BadRequest (BadRequest.of_json json)
@@ -4156,23 +4721,22 @@ module DescribeTagsResponse =
     let to_value x =
       structure_to_value
         [("Marker", (Option.map x.marker ~f:Marker.to_value));
-        ("Tags", (Some (Tags.to_value x.tags)));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
         ("NextMarker", (Option.map x.nextMarker ~f:Marker.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextMarker =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "NextMarker") in
-      let tags =
-        Tags.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let marker =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
-      make ?nextMarker ~tags ?marker ()
+      make ?nextMarker ?tags ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
-      let tags = field_map_exn json "Tags" Tags.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      make ?nextMarker ~tags ?marker ()
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      make ?nextMarker ?tags ?marker ()
     let to_json v = composed_to_json to_value v
   end
 module DescribeTagsRequest =
@@ -4208,11 +4772,11 @@ module DescribeTagsRequest =
         (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       make ~fileSystemId ?marker ?maxItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let maxItems = field_map json "MaxItems" MaxItems.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItems.of_json in
       make ~fileSystemId ?marker ?maxItems ()
     let to_json v = composed_to_json to_value v
   end
@@ -4304,10 +4868,10 @@ module DescribeReplicationConfigurationsResponse =
           (Xml.child xml_arg0 "Replications") in
       make ?nextToken ?replications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let replications =
-        field_map json "Replications"
+        field_map json__ "Replications"
           ReplicationConfigurationDescriptions.of_json in
       make ?nextToken ?replications ()
     let to_json v = composed_to_json to_value v
@@ -4319,7 +4883,7 @@ module DescribeReplicationConfigurationsRequest =
       {
       fileSystemId: FileSystemId.t option
         [@ocaml.doc
-          "You can retrieve the replication configuration for a specific file system by providing its file system ID."];
+          "You can retrieve the replication configuration for a specific file system by providing its file system ID. For cross-account,cross-region replication, an account can only describe the replication configuration for a file system in its own Region."];
       nextToken: Token.t option
         [@ocaml.doc
           "NextToken is present if the response is paginated. You can use NextToken in a subsequent request to fetch the next page of output."];
@@ -4346,10 +4910,10 @@ module DescribeReplicationConfigurationsRequest =
           (Xml.child xml_arg0 "FileSystemId") in
       make ?maxResults ?nextToken ?fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
       make ?maxResults ?nextToken ?fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4448,11 +5012,11 @@ module DescribeMountTargetsResponse =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?nextMarker ?mountTargets ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
       let mountTargets =
-        field_map json "MountTargets" MountTargetDescriptions.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
+        field_map json__ "MountTargets" MountTargetDescriptions.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
       make ?nextMarker ?mountTargets ?marker ()
     let to_json v = composed_to_json to_value v
   end
@@ -4515,14 +5079,14 @@ module DescribeMountTargetsRequest =
         (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       make ?accessPointId ?mountTargetId ?fileSystemId ?marker ?maxItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessPointId =
-        field_map json "AccessPointId" AccessPointId.of_json in
+        field_map json__ "AccessPointId" AccessPointId.of_json in
       let mountTargetId =
-        field_map json "MountTargetId" MountTargetId.of_json in
-      let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let maxItems = field_map json "MaxItems" MaxItems.of_json in
+        field_map json__ "MountTargetId" MountTargetId.of_json in
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItems.of_json in
       make ?accessPointId ?mountTargetId ?fileSystemId ?marker ?maxItems ()
     let to_json v = composed_to_json to_value v
   end
@@ -4530,7 +5094,7 @@ module DescribeMountTargetSecurityGroupsResponse =
   struct
     type nonrec t =
       {
-      securityGroups: SecurityGroups.t
+      securityGroups: SecurityGroups.t option
         [@ocaml.doc "An array of security groups."]}
     type nonrec error =
       [ `BadRequest of BadRequest.t 
@@ -4538,8 +5102,7 @@ module DescribeMountTargetSecurityGroupsResponse =
       | `InternalServerError of InternalServerError.t 
       | `MountTargetNotFound of MountTargetNotFound.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeMountTargetSecurityGroupsResponse"
-    let make ~securityGroups = fun () -> { securityGroups }
+    let make ?securityGroups = fun () -> { securityGroups }
     let error_of_json name json =
       match name with
       | "BadRequest" -> `BadRequest (BadRequest.of_json json)
@@ -4589,18 +5152,18 @@ module DescribeMountTargetSecurityGroupsResponse =
     let to_value x =
       structure_to_value
         [("SecurityGroups",
-           (Some (SecurityGroups.to_value x.securityGroups)))]
+           (Option.map x.securityGroups ~f:SecurityGroups.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let securityGroups =
-        SecurityGroups.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SecurityGroups") in
-      make ~securityGroups ()
+        (Option.map ~f:SecurityGroups.of_xml)
+          (Xml.child xml_arg0 "SecurityGroups") in
+      make ?securityGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroups =
-        field_map_exn json "SecurityGroups" SecurityGroups.of_json in
-      make ~securityGroups ()
+        field_map json__ "SecurityGroups" SecurityGroups.of_json in
+      make ?securityGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the security groups currently in effect for a mount target. This operation requires that the network interface of the mount target has been created and the lifecycle state of the mount target is not deleted. This operation requires permissions for the following actions: elasticfilesystem:DescribeMountTargetSecurityGroups action on the mount target's file system. ec2:DescribeNetworkInterfaceAttribute action on the mount target's network interface."]
@@ -4623,9 +5186,9 @@ module DescribeMountTargetSecurityGroupsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MountTargetId") in
       make ~mountTargetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mountTargetId =
-        field_map_exn json "MountTargetId" MountTargetId.of_json in
+        field_map_exn json__ "MountTargetId" MountTargetId.of_json in
       make ~mountTargetId ()
     let to_json v = composed_to_json to_value v
   end
@@ -4648,13 +5211,13 @@ module DescribeLifecycleConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the current LifecycleConfiguration object for the specified Amazon EFS file system. EFS lifecycle management uses the LifecycleConfiguration object to identify which files to move to the EFS Infrequent Access (IA) storage class. For a file system without a LifecycleConfiguration object, the call returns an empty array in the response. When EFS Intelligent-Tiering is enabled, TransitionToPrimaryStorageClass has a value of AFTER_1_ACCESS. This operation requires permissions for the elasticfilesystem:DescribeLifecycleConfiguration operation."]
+       "Returns the current LifecycleConfiguration object for the specified EFS file system. Lifecycle management uses the LifecycleConfiguration object to identify when to move files between storage classes. For a file system without a LifecycleConfiguration object, the call returns an empty array in the response. This operation requires permissions for the elasticfilesystem:DescribeLifecycleConfiguration operation."]
 module DescribeFileSystemsResponse =
   struct
     type nonrec t =
@@ -4729,15 +5292,15 @@ module DescribeFileSystemsResponse =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?nextMarker ?fileSystems ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
       let fileSystems =
-        field_map json "FileSystems" FileSystemDescriptions.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
+        field_map json__ "FileSystems" FileSystemDescriptions.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
       make ?nextMarker ?fileSystems ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the description of a specific Amazon EFS file system if either the file system CreationToken or the FileSystemId is provided. Otherwise, it returns descriptions of all file systems owned by the caller's Amazon Web Services account in the Amazon Web Services Region of the endpoint that you're calling. When retrieving all file system descriptions, you can optionally specify the MaxItems parameter to limit the number of descriptions in a response. Currently, this number is automatically set to 10. If more file system descriptions remain, Amazon EFS returns a NextMarker, an opaque token, in the response. In this case, you should send a subsequent request with the Marker request parameter set to the value of NextMarker. To retrieve a list of your file system descriptions, this operation is used in an iterative process, where DescribeFileSystems is called first without the Marker and then the operation continues to call it with the Marker parameter set to the value of the NextMarker from the previous response until the response has no NextMarker. The order of file systems returned in the response of one DescribeFileSystems call and the order of file systems returned across the responses of a multi-call iteration is unspecified. This operation requires permissions for the elasticfilesystem:DescribeFileSystems action."]
+       "Returns the description of a specific Amazon EFS file system if either the file system CreationToken or the FileSystemId is provided. Otherwise, it returns descriptions of all file systems owned by the caller's Amazon Web Services account in the Amazon Web Services Region of the endpoint that you're calling. When retrieving all file system descriptions, you can optionally specify the MaxItems parameter to limit the number of descriptions in a response. This number is automatically set to 100. If more file system descriptions remain, Amazon EFS returns a NextMarker, an opaque token, in the response. In this case, you should send a subsequent request with the Marker request parameter set to the value of NextMarker. To retrieve a list of your file system descriptions, this operation is used in an iterative process, where DescribeFileSystems is called first without the Marker and then the operation continues to call it with the Marker parameter set to the value of the NextMarker from the previous response until the response has no NextMarker. The order of file systems returned in the response of one DescribeFileSystems call and the order of file systems returned across the responses of a multi-call iteration is unspecified. This operation requires permissions for the elasticfilesystem:DescribeFileSystems action."]
 module DescribeFileSystemsRequest =
   struct
     type nonrec t =
@@ -4781,12 +5344,12 @@ module DescribeFileSystemsRequest =
         (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       make ?fileSystemId ?creationToken ?marker ?maxItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
+    let of_json json__ =
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
       let creationToken =
-        field_map json "CreationToken" CreationToken.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let maxItems = field_map json "MaxItems" MaxItems.of_json in
+        field_map json__ "CreationToken" CreationToken.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let maxItems = field_map json__ "MaxItems" MaxItems.of_json in
       make ?fileSystemId ?creationToken ?marker ?maxItems ()
     let to_json v = composed_to_json to_value v
   end
@@ -4809,9 +5372,9 @@ module DescribeFileSystemPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4822,7 +5385,7 @@ module DescribeBackupPolicyRequest =
       {
       fileSystemId: FileSystemId.t
         [@ocaml.doc
-          "Specifies which EFS file system to retrieve the BackupPolicy for."]}
+          "Specifies which EFS file system for which to retrieve the BackupPolicy."]}
     let context_ = "DescribeBackupPolicyRequest"
     let make ~fileSystemId = fun () -> { fileSystemId }
     let to_value x =
@@ -4835,9 +5398,9 @@ module DescribeBackupPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4896,14 +5459,14 @@ module DescribeAccountPreferencesResponse =
           (Xml.child xml_arg0 "ResourceIdPreference") in
       make ?nextToken ?resourceIdPreference ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let resourceIdPreference =
-        field_map json "ResourceIdPreference" ResourceIdPreference.of_json in
+        field_map json__ "ResourceIdPreference" ResourceIdPreference.of_json in
       make ?nextToken ?resourceIdPreference ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the account preferences settings for the Amazon Web Services account associated with the user making the request, in the current Amazon Web Services Region. For more information, see Managing Amazon EFS resource IDs."]
+       "Returns the account preferences settings for the Amazon Web Services account associated with the user making the request, in the current Amazon Web Services Region."]
 module DescribeAccountPreferencesRequest =
   struct
     type nonrec t =
@@ -4928,13 +5491,13 @@ module DescribeAccountPreferencesRequest =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the account preferences settings for the Amazon Web Services account associated with the user making the request, in the current Amazon Web Services Region. For more information, see Managing Amazon EFS resource IDs."]
+       "Returns the account preferences settings for the Amazon Web Services account associated with the user making the request, in the current Amazon Web Services Region."]
 module DescribeAccessPointsResponse =
   struct
     type nonrec t =
@@ -5012,10 +5575,10 @@ module DescribeAccessPointsResponse =
           (Xml.child xml_arg0 "AccessPoints") in
       make ?nextToken ?accessPoints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let accessPoints =
-        field_map json "AccessPoints" AccessPointDescriptions.of_json in
+        field_map json__ "AccessPoints" AccessPointDescriptions.of_json in
       make ?nextToken ?accessPoints ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5063,40 +5626,39 @@ module DescribeAccessPointsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?fileSystemId ?accessPointId ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileSystemId = field_map json "FileSystemId" FileSystemId.of_json in
+    let of_json json__ =
+      let fileSystemId = field_map json__ "FileSystemId" FileSystemId.of_json in
       let accessPointId =
-        field_map json "AccessPointId" AccessPointId.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+        field_map json__ "AccessPointId" AccessPointId.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?fileSystemId ?accessPointId ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the description of a specific Amazon EFS access point if the AccessPointId is provided. If you provide an EFS FileSystemId, it returns descriptions of all access points for that file system. You can provide either an AccessPointId or a FileSystemId in the request, but not both. This operation requires permissions for the elasticfilesystem:DescribeAccessPoints action."]
 module DependencyTimeout =
   struct
-    type nonrec t = {
-      errorCode: ErrorCode.t ;
+    type nonrec t =
+      {
+      errorCode: ErrorCode.t option ;
       message: ErrorMessage.t option }
-    let context_ = "DependencyTimeout"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (ErrorCode.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        ErrorCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map_exn json "ErrorCode" ErrorCode.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The service timed out trying to fulfill the request, and the client should try the call again."]
@@ -5124,10 +5686,10 @@ module DeleteTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~tagKeys ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ~tagKeys ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end
@@ -5137,27 +5699,38 @@ module DeleteReplicationConfigurationRequest =
       {
       sourceFileSystemId: FileSystemId.t
         [@ocaml.doc
-          "The ID of the source file system in the replication configuration."]}
+          "The ID of the source file system in the replication configuration."];
+      deletionMode: DeletionMode.t option
+        [@ocaml.doc
+          "When replicating across Amazon Web Services accounts or across Amazon Web Services Regions, Amazon EFS deletes the replication configuration from both the source and destination account or Region (ALL_CONFIGURATIONS) by default. If there's a configuration or permissions issue that prevents Amazon EFS from deleting the replication configuration from both sides, you can use the LOCAL_CONFIGURATION_ONLY mode to delete the replication configuration from only the local side (the account or Region from which the delete is performed). Only use the LOCAL_CONFIGURATION_ONLY mode in the case that Amazon EFS is unable to delete the replication configuration in both the source and destination account or Region. Deleting the local configuration leaves the configuration in the other account or Region unrecoverable. Additionally, do not use this mode for same-account, same-region replication as doing so results in a BadRequest exception error."]}
     let context_ = "DeleteReplicationConfigurationRequest"
-    let make ~sourceFileSystemId = fun () -> { sourceFileSystemId }
+    let make ?deletionMode =
+      fun ~sourceFileSystemId ->
+        fun () -> { deletionMode; sourceFileSystemId }
     let to_value x =
       structure_to_value
         [("SourceFileSystemId",
-           (Some (FileSystemId.to_value x.sourceFileSystemId)))]
+           (Some (FileSystemId.to_value x.sourceFileSystemId)));
+        ("deletionMode",
+          (Option.map x.deletionMode ~f:DeletionMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let deletionMode =
+        (Option.map ~f:DeletionMode.of_xml)
+          (Xml.child xml_arg0 "deletionMode") in
       let sourceFileSystemId =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SourceFileSystemId") in
-      make ~sourceFileSystemId ()
+      make ?deletionMode ~sourceFileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let deletionMode = field_map json__ "DeletionMode" DeletionMode.of_json in
       let sourceFileSystemId =
-        field_map_exn json "SourceFileSystemId" FileSystemId.of_json in
-      make ~sourceFileSystemId ()
+        field_map_exn json__ "SourceFileSystemId" FileSystemId.of_json in
+      make ?deletionMode ~sourceFileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an existing replication configuration. To delete a replication configuration, you must make the request from the Amazon Web Services Region in which the destination file system is located. Deleting a replication configuration ends the replication process. After a replication configuration is deleted, the destination file system is no longer read-only. You can write to the destination file system after its status becomes Writeable."]
+       "Deletes a replication configuration. Deleting a replication configuration ends the replication process. After a replication configuration is deleted, the destination file system becomes Writeable and its replication overwrite protection is re-enabled. For more information, see Delete a replication configuration. This operation requires permissions for the elasticfilesystem:DeleteReplicationConfiguration action."]
 module DeleteMountTargetRequest =
   struct
     type nonrec t =
@@ -5176,9 +5749,9 @@ module DeleteMountTargetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MountTargetId") in
       make ~mountTargetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mountTargetId =
-        field_map_exn json "MountTargetId" MountTargetId.of_json in
+        field_map_exn json__ "MountTargetId" MountTargetId.of_json in
       make ~mountTargetId ()
     let to_json v = composed_to_json to_value v
   end
@@ -5200,9 +5773,9 @@ module DeleteFileSystemRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end
@@ -5225,9 +5798,9 @@ module DeleteFileSystemPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5250,9 +5823,9 @@ module DeleteAccessPointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccessPointId") in
       make ~accessPointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessPointId =
-        field_map_exn json "AccessPointId" AccessPointId.of_json in
+        field_map_exn json__ "AccessPointId" AccessPointId.of_json in
       make ~accessPointId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5282,10 +5855,10 @@ module CreateTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
       make ~tags ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
       make ~tags ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end
@@ -5318,15 +5891,15 @@ module CreateReplicationConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SourceFileSystemId") in
       make ~destinations ~sourceFileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinations =
-        field_map_exn json "Destinations" DestinationsToCreate.of_json in
+        field_map_exn json__ "Destinations" DestinationsToCreate.of_json in
       let sourceFileSystemId =
-        field_map_exn json "SourceFileSystemId" FileSystemId.of_json in
+        field_map_exn json__ "SourceFileSystemId" FileSystemId.of_json in
       make ~destinations ~sourceFileSystemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a replication configuration that replicates an existing EFS file system to a new, read-only file system. For more information, see Amazon EFS replication in the Amazon EFS User Guide. The replication configuration specifies the following: Source file system - An existing EFS file system that you want replicated. The source file system cannot be a destination file system in an existing replication configuration. Destination file system configuration - The configuration of the destination file system to which the source file system will be replicated. There can only be one destination file system in a replication configuration. The destination file system configuration consists of the following properties: Amazon Web Services Region - The Amazon Web Services Region in which the destination file system is created. Amazon EFS replication is available in all Amazon Web Services Regions that Amazon EFS is available in, except Africa (Cape Town), Asia Pacific (Hong Kong), Asia Pacific (Jakarta), Europe (Milan), and Middle East (Bahrain). Availability Zone - If you want the destination file system to use EFS One Zone availability and durability, you must specify the Availability Zone to create the file system in. For more information about EFS storage classes, see Amazon EFS storage classes in the Amazon EFS User Guide. Encryption - All destination file systems are created with encryption at rest enabled. You can specify the Key Management Service (KMS) key that is used to encrypt the destination file system. If you don't specify a KMS key, your service-managed KMS key for Amazon EFS is used. After the file system is created, you cannot change the KMS key. The following properties are set by default: Performance mode - The destination file system's performance mode matches that of the source file system, unless the destination file system uses EFS One Zone storage. In that case, the General Purpose performance mode is used. The performance mode cannot be changed. Throughput mode - The destination file system uses the Bursting Throughput mode by default. After the file system is created, you can modify the throughput mode. The following properties are turned off by default: Lifecycle management - EFS lifecycle management and EFS Intelligent-Tiering are not enabled on the destination file system. After the destination file system is created, you can enable EFS lifecycle management and EFS Intelligent-Tiering. Automatic backups - Automatic daily backups not enabled on the destination file system. After the file system is created, you can change this setting. For more information, see Amazon EFS replication in the Amazon EFS User Guide."]
+       "Creates a replication con\239\172\129guration to either a new or existing EFS file system. For more information, see Amazon EFS replication in the Amazon EFS User Guide. The replication configuration specifies the following: Source file system \226\128\147 The EFS file system that you want to replicate. Destination file system \226\128\147 The destination file system to which the source file system is replicated. There can only be one destination file system in a replication configuration. A file system can be part of only one replication configuration. The destination parameters for the replication configuration depend on whether you are replicating to a new file system or to an existing file system, and if you are replicating across Amazon Web Services accounts. See DestinationToCreate for more information. This operation requires permissions for the elasticfilesystem:CreateReplicationConfiguration action. Additionally, other permissions are required depending on how you are replicating file systems. For more information, see Required permissions for replication in the Amazon EFS User Guide."]
 module CreateMountTargetRequest =
   struct
     type nonrec t =
@@ -5336,24 +5909,43 @@ module CreateMountTargetRequest =
           "The ID of the file system for which to create the mount target."];
       subnetId: SubnetId.t
         [@ocaml.doc
-          "The ID of the subnet to add the mount target in. For file systems that use One Zone storage classes, use the subnet that is associated with the file system's Availability Zone."];
+          "The ID of the subnet to add the mount target in. For One Zone file systems, use the subnet that is associated with the file system's Availability Zone."];
       ipAddress: IpAddress.t option
         [@ocaml.doc
-          "Valid IPv4 address within the address range of the specified subnet."];
+          "If the IP address type for the mount target is IPv4, then specify the IPv4 address within the address range of the specified subnet."];
+      ipv6Address: Ipv6Address.t option
+        [@ocaml.doc
+          "If the IP address type for the mount target is IPv6, then specify the IPv6 address within the address range of the specified subnet."];
+      ipAddressType: IpAddressType.t option
+        [@ocaml.doc
+          "Specify the type of IP address of the mount target you are creating. Options are IPv4, dual stack, or IPv6. If you don\226\128\153t specify an IpAddressType, then IPv4 is used. IPV4_ONLY \226\128\147 Create mount target with IPv4 only subnet or dual-stack subnet. DUAL_STACK \226\128\147 Create mount target with dual-stack subnet. IPV6_ONLY \226\128\147 Create mount target with IPv6 only subnet. Creating IPv6 mount target only ENI in dual-stack subnet is not supported."];
       securityGroups: SecurityGroups.t option
         [@ocaml.doc
-          "Up to five VPC security group IDs, of the form sg-xxxxxxxx. These must be for the same VPC as subnet specified."]}
+          "VPC security group IDs, of the form sg-xxxxxxxx. These must be for the same VPC as the subnet specified. The maximum number of security groups depends on account quota. For more information, see Amazon VPC Quotas in the Amazon VPC User Guide (see the Security Groups table)."]}
     let context_ = "CreateMountTargetRequest"
     let make ?ipAddress =
-      fun ?securityGroups ->
-        fun ~fileSystemId ->
-          fun ~subnetId ->
-            fun () -> { ipAddress; securityGroups; fileSystemId; subnetId }
+      fun ?ipv6Address ->
+        fun ?ipAddressType ->
+          fun ?securityGroups ->
+            fun ~fileSystemId ->
+              fun ~subnetId ->
+                fun () ->
+                  {
+                    ipAddress;
+                    ipv6Address;
+                    ipAddressType;
+                    securityGroups;
+                    fileSystemId;
+                    subnetId
+                  }
     let to_value x =
       structure_to_value
         [("FileSystemId", (Some (FileSystemId.to_value x.fileSystemId)));
         ("SubnetId", (Some (SubnetId.to_value x.subnetId)));
         ("IpAddress", (Option.map x.ipAddress ~f:IpAddress.to_value));
+        ("Ipv6Address", (Option.map x.ipv6Address ~f:Ipv6Address.to_value));
+        ("IpAddressType",
+          (Option.map x.ipAddressType ~f:IpAddressType.to_value));
         ("SecurityGroups",
           (Option.map x.securityGroups ~f:SecurityGroups.to_value))]
     let to_query v = to_query to_value v
@@ -5361,6 +5953,11 @@ module CreateMountTargetRequest =
       let securityGroups =
         (Option.map ~f:SecurityGroups.of_xml)
           (Xml.child xml_arg0 "SecurityGroups") in
+      let ipAddressType =
+        (Option.map ~f:IpAddressType.of_xml)
+          (Xml.child xml_arg0 "IpAddressType") in
+      let ipv6Address =
+        (Option.map ~f:Ipv6Address.of_xml) (Xml.child xml_arg0 "Ipv6Address") in
       let ipAddress =
         (Option.map ~f:IpAddress.of_xml) (Xml.child xml_arg0 "IpAddress") in
       let subnetId =
@@ -5368,16 +5965,21 @@ module CreateMountTargetRequest =
       let fileSystemId =
         FileSystemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileSystemId") in
-      make ?securityGroups ?ipAddress ~subnetId ~fileSystemId ()
+      make ?securityGroups ?ipAddressType ?ipv6Address ?ipAddress ~subnetId
+        ~fileSystemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroups =
-        field_map json "SecurityGroups" SecurityGroups.of_json in
-      let ipAddress = field_map json "IpAddress" IpAddress.of_json in
-      let subnetId = field_map_exn json "SubnetId" SubnetId.of_json in
+        field_map json__ "SecurityGroups" SecurityGroups.of_json in
+      let ipAddressType =
+        field_map json__ "IpAddressType" IpAddressType.of_json in
+      let ipv6Address = field_map json__ "Ipv6Address" Ipv6Address.of_json in
+      let ipAddress = field_map json__ "IpAddress" IpAddress.of_json in
+      let subnetId = field_map_exn json__ "SubnetId" SubnetId.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
-      make ?securityGroups ?ipAddress ~subnetId ~fileSystemId ()
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
+      make ?securityGroups ?ipAddressType ?ipv6Address ?ipAddress ~subnetId
+        ~fileSystemId ()
     let to_json v = composed_to_json to_value v
   end
 module CreateFileSystemRequest =
@@ -5389,7 +5991,7 @@ module CreateFileSystemRequest =
           "A string of up to 64 ASCII characters. Amazon EFS uses this to ensure idempotent creation."];
       performanceMode: PerformanceMode.t option
         [@ocaml.doc
-          "The performance mode of the file system. We recommend generalPurpose performance mode for most file systems. File systems using the maxIO performance mode can scale to higher levels of aggregate throughput and operations per second with a tradeoff of slightly higher latencies for most file operations. The performance mode can't be changed after the file system has been created. The maxIO mode is not supported on file systems using One Zone storage classes."];
+          "The performance mode of the file system. We recommend generalPurpose performance mode for all file systems. File systems using the maxIO performance mode can scale to higher levels of aggregate throughput and operations per second with a tradeoff of slightly higher latencies for most file operations. The performance mode can't be changed after the file system has been created. The maxIO mode is not supported on One Zone file systems. Due to the higher per-operation latencies with Max I/O, we recommend using General Purpose performance mode for all file systems. Default is generalPurpose."];
       encrypted: Encrypted.t option
         [@ocaml.doc
           "A Boolean value that, if true, creates an encrypted file system. When creating an encrypted file system, you have the option of specifying an existing Key Management Service key (KMS key). If you don't specify a KMS key, then the default KMS key for Amazon EFS, /aws/elasticfilesystem, is used to protect the encrypted file system."];
@@ -5398,16 +6000,16 @@ module CreateFileSystemRequest =
           "The ID of the KMS key that you want to use to protect the encrypted file system. This parameter is required only if you want to use a non-default KMS key. If this parameter is not specified, the default KMS key for Amazon EFS is used. You can specify a KMS key ID using the following formats: Key ID - A unique identifier of the key, for example 1234abcd-12ab-34cd-56ef-1234567890ab. ARN - An Amazon Resource Name (ARN) for the key, for example arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab. Key alias - A previously created display name for a key, for example alias/projectKey1. Key alias ARN - An ARN for a key alias, for example arn:aws:kms:us-west-2:444455556666:alias/projectKey1. If you use KmsKeyId, you must set the CreateFileSystemRequest$Encrypted parameter to true. EFS accepts only symmetric KMS keys. You cannot use asymmetric KMS keys with Amazon EFS file systems."];
       throughputMode: ThroughputMode.t option
         [@ocaml.doc
-          "Specifies the throughput mode for the file system, either bursting or provisioned. If you set ThroughputMode to provisioned, you must also set a value for ProvisionedThroughputInMibps. After you create the file system, you can decrease your file system's throughput in Provisioned Throughput mode or change between the throughput modes, as long as it\226\128\153s been more than 24 hours since the last decrease or throughput mode change. For more information, see Specifying throughput with provisioned mode in the Amazon EFS User Guide. Default is bursting."];
+          "Specifies the throughput mode for the file system. The mode can be bursting, provisioned, or elastic. If you set ThroughputMode to provisioned, you must also set a value for ProvisionedThroughputInMibps. After you create the file system, you can decrease your file system's Provisioned throughput or change between the throughput modes, with certain time restrictions. For more information, see Specifying throughput with provisioned mode in the Amazon EFS User Guide. Default is bursting."];
       provisionedThroughputInMibps: ProvisionedThroughputInMibps.t option
         [@ocaml.doc
-          "The throughput, measured in MiB/s, that you want to provision for a file system that you're creating. Valid values are 1-1024. Required if ThroughputMode is set to provisioned. The upper limit for throughput is 1024 MiB/s. To increase this limit, contact Amazon Web Services Support. For more information, see Amazon EFS quotas that you can increase in the Amazon EFS User Guide."];
+          "The throughput, measured in mebibytes per second (MiBps), that you want to provision for a file system that you're creating. Required if ThroughputMode is set to provisioned. Valid values are 1-3414 MiBps, with the upper limit depending on Region. To increase this limit, contact Amazon Web ServicesSupport. For more information, see Amazon EFS quotas that you can increase in the Amazon EFS User Guide."];
       availabilityZoneName: AvailabilityZoneName.t option
         [@ocaml.doc
-          "Used to create a file system that uses One Zone storage classes. It specifies the Amazon Web Services Availability Zone in which to create the file system. Use the format us-east-1a to specify the Availability Zone. For more information about One Zone storage classes, see Using EFS storage classes in the Amazon EFS User Guide. One Zone storage classes are not available in all Availability Zones in Amazon Web Services Regions where Amazon EFS is available."];
+          "For One Zone file systems, specify the Amazon Web Services Availability Zone in which to create the file system. Use the format us-east-1a to specify the Availability Zone. For more information about One Zone file systems, see EFS file system types in the Amazon EFS User Guide. One Zone file systems are not available in all Availability Zones in Amazon Web Services Regions where Amazon EFS is available."];
       backup: Backup.t option
         [@ocaml.doc
-          "Specifies whether automatic backups are enabled on the file system that you are creating. Set the value to true to enable automatic backups. If you are creating a file system that uses One Zone storage classes, automatic backups are enabled by default. For more information, see Automatic backups in the Amazon EFS User Guide. Default is false. However, if you specify an AvailabilityZoneName, the default is true. Backup is not available in all Amazon Web Services Regions where Amazon EFS is available."];
+          "Specifies whether automatic backups are enabled on the file system that you are creating. Set the value to true to enable automatic backups. If you are creating a One Zone file system, automatic backups are enabled by default. For more information, see Automatic backups in the Amazon EFS User Guide. Default is false. However, if you specify an AvailabilityZoneName, the default is true. Backup is not available in all Amazon Web Services Regions where Amazon EFS is available."];
       tags: Tags.t option
         [@ocaml.doc
           "Use to create one or more tags associated with the file system. Each tag is a user-defined key-value pair. Name your file system on creation by including a \"Key\":\"Name\",\"Value\":\"\\{value\\}\" key-value pair. Each key must be unique. For more information, see Tagging Amazon Web Services resources in the Amazon Web Services General Reference Guide."]}
@@ -5477,28 +6079,28 @@ module CreateFileSystemRequest =
         ?throughputMode ?kmsKeyId ?encrypted ?performanceMode ~creationToken
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let backup = field_map json "Backup" Backup.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let backup = field_map json__ "Backup" Backup.of_json in
       let availabilityZoneName =
-        field_map json "AvailabilityZoneName" AvailabilityZoneName.of_json in
+        field_map json__ "AvailabilityZoneName" AvailabilityZoneName.of_json in
       let provisionedThroughputInMibps =
-        field_map json "ProvisionedThroughputInMibps"
+        field_map json__ "ProvisionedThroughputInMibps"
           ProvisionedThroughputInMibps.of_json in
       let throughputMode =
-        field_map json "ThroughputMode" ThroughputMode.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let encrypted = field_map json "Encrypted" Encrypted.of_json in
+        field_map json__ "ThroughputMode" ThroughputMode.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let encrypted = field_map json__ "Encrypted" Encrypted.of_json in
       let performanceMode =
-        field_map json "PerformanceMode" PerformanceMode.of_json in
+        field_map json__ "PerformanceMode" PerformanceMode.of_json in
       let creationToken =
-        field_map_exn json "CreationToken" CreationToken.of_json in
+        field_map_exn json__ "CreationToken" CreationToken.of_json in
       make ?tags ?backup ?availabilityZoneName ?provisionedThroughputInMibps
         ?throughputMode ?kmsKeyId ?encrypted ?performanceMode ~creationToken
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new, empty file system. The operation requires a creation token in the request that Amazon EFS uses to ensure idempotent creation (calling the operation with same creation token has no effect). If a file system does not currently exist that is owned by the caller's Amazon Web Services account with the specified creation token, this operation does the following: Creates a new, empty file system. The file system will have an Amazon EFS assigned ID, and an initial lifecycle state creating. Returns with the description of the created file system. Otherwise, this operation returns a FileSystemAlreadyExists error with the ID of the existing file system. For basic use cases, you can use a randomly generated UUID for the creation token. The idempotent operation allows you to retry a CreateFileSystem call without risk of creating an extra file system. This can happen when an initial call fails in a way that leaves it uncertain whether or not a file system was actually created. An example might be that a transport level timeout occurred or your connection was reset. As long as you use the same creation token, if the initial call had succeeded in creating a file system, the client can learn of its existence from the FileSystemAlreadyExists error. For more information, see Creating a file system in the Amazon EFS User Guide. The CreateFileSystem call returns while the file system's lifecycle state is still creating. You can check the file system creation status by calling the DescribeFileSystems operation, which among other things returns the file system state. This operation accepts an optional PerformanceMode parameter that you choose for your file system. We recommend generalPurpose performance mode for most file systems. File systems using the maxIO performance mode can scale to higher levels of aggregate throughput and operations per second with a tradeoff of slightly higher latencies for most file operations. The performance mode can't be changed after the file system has been created. For more information, see Amazon EFS performance modes. You can set the throughput mode for the file system using the ThroughputMode parameter. After the file system is fully created, Amazon EFS sets its lifecycle state to available, at which point you can create one or more mount targets for the file system in your VPC. For more information, see CreateMountTarget. You mount your Amazon EFS file system on an EC2 instances in your VPC by using the mount target. For more information, see Amazon EFS: How it Works. This operation requires permissions for the elasticfilesystem:CreateFileSystem action."]
+       "Creates a new, empty file system. The operation requires a creation token in the request that Amazon EFS uses to ensure idempotent creation (calling the operation with same creation token has no effect). If a file system does not currently exist that is owned by the caller's Amazon Web Services account with the specified creation token, this operation does the following: Creates a new, empty file system. The file system will have an Amazon EFS assigned ID, and an initial lifecycle state creating. Returns with the description of the created file system. Otherwise, this operation returns a FileSystemAlreadyExists error with the ID of the existing file system. For basic use cases, you can use a randomly generated UUID for the creation token. The idempotent operation allows you to retry a CreateFileSystem call without risk of creating an extra file system. This can happen when an initial call fails in a way that leaves it uncertain whether or not a file system was actually created. An example might be that a transport level timeout occurred or your connection was reset. As long as you use the same creation token, if the initial call had succeeded in creating a file system, the client can learn of its existence from the FileSystemAlreadyExists error. For more information, see Creating a file system in the Amazon EFS User Guide. The CreateFileSystem call returns while the file system's lifecycle state is still creating. You can check the file system creation status by calling the DescribeFileSystems operation, which among other things returns the file system state. This operation accepts an optional PerformanceMode parameter that you choose for your file system. We recommend generalPurpose PerformanceMode for all file systems. The maxIO mode is a previous generation performance type that is designed for highly parallelized workloads that can tolerate higher latencies than the generalPurpose mode. MaxIO mode is not supported for One Zone file systems or file systems that use Elastic throughput. The PerformanceMode can't be changed after the file system has been created. For more information, see Amazon EFS performance modes. You can set the throughput mode for the file system using the ThroughputMode parameter. After the file system is fully created, Amazon EFS sets its lifecycle state to available, at which point you can create one or more mount targets for the file system in your VPC. For more information, see CreateMountTarget. You mount your Amazon EFS file system on an EC2 instances in your VPC by using the mount target. For more information, see Amazon EFS: How it Works. This operation requires permissions for the elasticfilesystem:CreateFileSystem action. File systems can be tagged on creation. If tags are specified in the creation action, IAM performs additional authorization on the elasticfilesystem:TagResource action to verify if users have permissions to create tags. Therefore, you must grant explicit permissions to use the elasticfilesystem:TagResource action. For more information, see Granting permissions to tag resources during creation."]
 module CreateAccessPointRequest =
   struct
     type nonrec t =
@@ -5517,7 +6119,7 @@ module CreateAccessPointRequest =
           "The operating system user and group applied to all file system requests made using the access point."];
       rootDirectory: RootDirectory.t option
         [@ocaml.doc
-          "Specifies the directory on the Amazon EFS file system that the access point exposes as the root directory of your file system to NFS clients using the access point. The clients using the access point can only access the root directory and below. If the RootDirectory > Path specified does not exist, EFS creates it and applies the CreationInfo settings when a client connects to an access point. When specifying a RootDirectory, you must provide the Path, and the CreationInfo. Amazon EFS creates a root directory only if you have provided the CreationInfo: OwnUid, OwnGID, and permissions for the directory. If you do not provide this information, Amazon EFS does not create the root directory. If the root directory does not exist, attempts to mount using the access point will fail."]}
+          "Specifies the directory on the EFS file system that the access point exposes as the root directory of your file system to NFS clients using the access point. The clients using the access point can only access the root directory and below. If the RootDirectory > Path specified does not exist, Amazon EFS creates it and applies the CreationInfo settings when a client connects to an access point. When specifying a RootDirectory, you must provide the Path, and the CreationInfo. Amazon EFS creates a root directory only if you have provided the CreationInfo: OwnUid, OwnGID, and permissions for the directory. If you do not provide this information, Amazon EFS does not create the root directory. If the root directory does not exist, attempts to mount using the access point will fail."]}
     let context_ = "CreateAccessPointRequest"
     let make ?tags =
       fun ?posixUser ->
@@ -5550,18 +6152,19 @@ module CreateAccessPointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
       make ?rootDirectory ?posixUser ~fileSystemId ?tags ~clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rootDirectory =
-        field_map json "RootDirectory" RootDirectory.of_json in
-      let posixUser = field_map json "PosixUser" PosixUser.of_json in
+        field_map json__ "RootDirectory" RootDirectory.of_json in
+      let posixUser = field_map json__ "PosixUser" PosixUser.of_json in
       let fileSystemId =
-        field_map_exn json "FileSystemId" FileSystemId.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
+        field_map_exn json__ "FileSystemId" FileSystemId.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
       make ?rootDirectory ?posixUser ~fileSystemId ?tags ~clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an EFS access point. An access point is an application-specific view into an EFS file system that applies an operating system user and group, and a file system path, to any file system request made through the access point. The operating system user and group override any identity information provided by the NFS client. The file system path is exposed as the access point's root directory. Applications using the access point can only access data in the application's own directory and any subdirectories. To learn more, see Mounting a file system using EFS access points. This operation requires permissions for the elasticfilesystem:CreateAccessPoint action."]
+       "Creates an EFS access point. An access point is an application-specific view into an EFS file system that applies an operating system user and group, and a file system path, to any file system request made through the access point. The operating system user and group override any identity information provided by the NFS client. The file system path is exposed as the access point's root directory. Applications using the access point can only access data in the application's own directory and any subdirectories. A file system can have a maximum of 10,000 access points unless you request an increase. To learn more, see Mounting a file system using EFS access points. If multiple requests to create access points on the same file system are sent in quick succession, and the file system is near the limit of access points, you may experience a throttling response for these requests. This is to ensure that the file system does not exceed the stated access point limit. This operation requires permissions for the elasticfilesystem:CreateAccessPoint action. Access points can be tagged on creation. If tags are specified in the creation action, IAM performs additional authorization on the elasticfilesystem:TagResource action to verify if users have permissions to create tags. Therefore, you must grant explicit permissions to use the elasticfilesystem:TagResource action. For more information, see Granting permissions to tag resources during creation."]
 module BackupPolicyDescription =
   struct
     type nonrec t =
@@ -5640,8 +6243,8 @@ module BackupPolicyDescription =
           (Xml.child xml_arg0 "BackupPolicy") in
       make ?backupPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let backupPolicy = field_map json "BackupPolicy" BackupPolicy.of_json in
+    let of_json json__ =
+      let backupPolicy = field_map json__ "BackupPolicy" BackupPolicy.of_json in
       make ?backupPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

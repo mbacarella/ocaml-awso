@@ -25,6 +25,42 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module AssessmentInstanceId =
+  struct
+    type nonrec t = string
+    let context_ = "AssessmentInstanceId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^(i-[0-9a-f]{8}|i-[0-9a-f]{17}|mi-[0-9a-f]{8}|mi-[0-9a-f]{17})$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssessmentInstanceId" j
+    let to_json = simple_to_json to_value
+  end
+module IpAddr =
+  struct
+    type nonrec t = string
+    let context_ = "IpAddr"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IpAddr" j
+    let to_json = simple_to_json to_value
+  end
 module AvailabilityZone =
   struct
     type nonrec t = string
@@ -74,28 +110,120 @@ module Server =
     let of_json j = string_of_json ~kind:"Server" j
     let to_json = simple_to_json to_value
   end
-module IpAddr =
+module OSVersion =
+  struct
+    type nonrec t =
+      | SERVER_2012 
+      | SERVER_2019 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SERVER_2012 -> "SERVER_2012"
+      | SERVER_2019 -> "SERVER_2019"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SERVER_2012" -> SERVER_2012
+      | "SERVER_2019" -> SERVER_2019
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OSVersion" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OSVersion" j)
+    let to_json = simple_to_json to_value
+  end
+module AssessmentInstanceIds =
+  struct
+    type nonrec t = AssessmentInstanceId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:2));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssessmentInstanceId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssessmentInstanceId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssessmentInstanceIds"
+        ~of_json:AssessmentInstanceId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CustomerDnsIps =
+  struct
+    type nonrec t = IpAddr.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:2));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpAddr.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpAddr.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CustomerDnsIps" ~of_json:IpAddr.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Ipv6Addr =
   struct
     type nonrec t = string
-    let context_ = "IpAddr"
+    let context_ = "Ipv6Addr"
     let make i =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
+             ~pattern:"^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$");
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"IpAddr" j
+    let of_json j = string_of_json ~kind:"Ipv6Addr" j
     let to_json = simple_to_json to_value
   end
 module AvailabilityZones =
   struct
     type nonrec t = AvailabilityZone.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AvailabilityZone.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -138,6 +266,9 @@ module SubnetIds =
   struct
     type nonrec t = SubnetId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -291,7 +422,7 @@ module RadiusTimeout =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:20) >>= (fun () -> check_int_min i ~min:1));
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -307,6 +438,9 @@ module Servers =
   struct
     type nonrec t = Server.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Server.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -357,10 +491,274 @@ module RegionName =
     let of_json j = string_of_json ~kind:"RegionName" j
     let to_json = simple_to_json to_value
   end
+module AssessmentValidationCategory =
+  struct
+    type nonrec t = string
+    let context_ = "AssessmentValidationCategory"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssessmentValidationCategory" j
+    let to_json = simple_to_json to_value
+  end
+module AssessmentValidationName =
+  struct
+    type nonrec t = string
+    let context_ = "AssessmentValidationName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssessmentValidationName" j
+    let to_json = simple_to_json to_value
+  end
+module AssessmentValidationStatus =
+  struct
+    type nonrec t = string
+    let context_ = "AssessmentValidationStatus"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssessmentValidationStatus" j
+    let to_json = simple_to_json to_value
+  end
+module AssessmentValidationStatusCode =
+  struct
+    type nonrec t = string
+    let context_ = "AssessmentValidationStatusCode"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssessmentValidationStatusCode" j
+    let to_json = simple_to_json to_value
+  end
+module AssessmentValidationStatusReason =
+  struct
+    type nonrec t = string
+    let context_ = "AssessmentValidationStatusReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssessmentValidationStatusReason" j
+    let to_json = simple_to_json to_value
+  end
+module AssessmentValidationTimeStamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module OSUpdateSettings =
+  struct
+    type nonrec t =
+      {
+      oSVersion: OSVersion.t option
+        [@ocaml.doc "OS version that the directory needs to be updated to."]}
+    let make ?oSVersion = fun () -> { oSVersion }
+    let to_value x =
+      structure_to_value
+        [("OSVersion", (Option.map x.oSVersion ~f:OSVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let oSVersion =
+        (Option.map ~f:OSVersion.of_xml) (Xml.child xml_arg0 "OSVersion") in
+      make ?oSVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let oSVersion = field_map json__ "OSVersion" OSVersion.of_json in
+      make ?oSVersion ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "OS version that the directory needs to be updated to."]
+module DirectoryConfigurationStatus =
+  struct
+    type nonrec t =
+      | Requested 
+      | Updating 
+      | Updated 
+      | Failed 
+      | Default 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Requested -> "Requested"
+      | Updating -> "Updating"
+      | Updated -> "Updated"
+      | Failed -> "Failed"
+      | Default -> "Default"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Requested" -> Requested
+      | "Updating" -> Updating
+      | "Updated" -> Updated
+      | "Failed" -> Failed
+      | "Default" -> Default
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DirectoryConfigurationStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DirectoryConfigurationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module AssessmentId =
+  struct
+    type nonrec t = string
+    let context_ = "AssessmentId"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^da-[0-9a-f]{18}$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssessmentId" j
+    let to_json = simple_to_json to_value
+  end
+module HybridUpdateValue =
+  struct
+    type nonrec t =
+      {
+      instanceIds: AssessmentInstanceIds.t option
+        [@ocaml.doc
+          "The identifiers of the self-managed instances with SSM in the hybrid directory configuration."];
+      dnsIps: CustomerDnsIps.t option
+        [@ocaml.doc
+          "The IP addresses of the DNS servers or domain controllers in the hybrid directory configuration."]}
+    let make ?instanceIds = fun ?dnsIps -> fun () -> { instanceIds; dnsIps }
+    let to_value x =
+      structure_to_value
+        [("InstanceIds",
+           (Option.map x.instanceIds ~f:AssessmentInstanceIds.to_value));
+        ("DnsIps", (Option.map x.dnsIps ~f:CustomerDnsIps.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dnsIps =
+        (Option.map ~f:CustomerDnsIps.of_xml) (Xml.child xml_arg0 "DnsIps") in
+      let instanceIds =
+        (Option.map ~f:AssessmentInstanceIds.of_xml)
+          (Xml.child xml_arg0 "InstanceIds") in
+      make ?dnsIps ?instanceIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dnsIps = field_map json__ "DnsIps" CustomerDnsIps.of_json in
+      let instanceIds =
+        field_map json__ "InstanceIds" AssessmentInstanceIds.of_json in
+      make ?dnsIps ?instanceIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the configuration values for a hybrid directory update, including Amazon Web Services System Manager managed node and DNS information."]
+module InitiatedBy =
+  struct
+    type nonrec t = string
+    let context_ = "InitiatedBy"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InitiatedBy" j
+    let to_json = simple_to_json to_value
+  end
+module LastUpdatedDateTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module StartDateTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module UpdateStatus =
+  struct
+    type nonrec t =
+      | Updated 
+      | Updating 
+      | UpdateFailed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Updated -> "Updated"
+      | Updating -> "Updating"
+      | UpdateFailed -> "UpdateFailed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Updated" -> Updated
+      | "Updating" -> Updating
+      | "UpdateFailed" -> UpdateFailed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration UpdateStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UpdateStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module UpdateStatusReason =
+  struct
+    type nonrec t = string
+    let context_ = "UpdateStatusReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UpdateStatusReason" j
+    let to_json = simple_to_json to_value
+  end
 module IpAddrs =
   struct
     type nonrec t = IpAddr.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpAddr.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -378,6 +776,33 @@ module IpAddrs =
                           | _ -> true)
                      | _ -> true))) ~f:IpAddr.of_xml)
     let of_json j = list_of_json ~kind:"IpAddrs" ~of_json:IpAddr.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IpV6Addrs =
+  struct
+    type nonrec t = Ipv6Addr.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Ipv6Addr.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Ipv6Addr.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpV6Addrs" ~of_json:Ipv6Addr.of_json j
     let to_json v = composed_to_json to_value v
   end
 module UserName =
@@ -470,13 +895,13 @@ module DirectoryVpcSettingsDescription =
       let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
       make ?availabilityZones ?securityGroupId ?subnetIds ?vpcId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
       let securityGroupId =
-        field_map json "SecurityGroupId" SecurityGroupId.of_json in
-      let subnetIds = field_map json "SubnetIds" SubnetIds.of_json in
-      let vpcId = field_map json "VpcId" VpcId.of_json in
+        field_map json__ "SecurityGroupId" SecurityGroupId.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
       make ?availabilityZones ?securityGroupId ?subnetIds ?vpcId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the directory."]
@@ -484,6 +909,9 @@ module DnsIpAddrs =
   struct
     type nonrec t = IpAddr.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpAddr.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -503,13 +931,71 @@ module DnsIpAddrs =
     let of_json j = list_of_json ~kind:"DnsIpAddrs" ~of_json:IpAddr.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DnsIpv6Addrs =
+  struct
+    type nonrec t = Ipv6Addr.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Ipv6Addr.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Ipv6Addr.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DnsIpv6Addrs" ~of_json:Ipv6Addr.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NetworkType =
+  struct
+    type nonrec t =
+      | Dual_stack 
+      | IPv4 
+      | IPv6 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Dual_stack -> "Dual-stack"
+      | IPv4 -> "IPv4"
+      | IPv6 -> "IPv6"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Dual-stack" -> Dual_stack
+      | "IPv4" -> IPv4
+      | "IPv6" -> IPv6
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NetworkType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NetworkType" j)
+    let to_json = simple_to_json to_value
+  end
 module RadiusSettings =
   struct
     type nonrec t =
       {
       radiusServers: Servers.t option
         [@ocaml.doc
-          "An array of strings that contains the fully qualified domain name (FQDN) or IP addresses of the RADIUS server endpoints, or the FQDN or IP addresses of your RADIUS server load balancer."];
+          "The fully qualified domain name (FQDN) or IP addresses of the RADIUS server endpoints, or the FQDN or IP addresses of your RADIUS server load balancer."];
+      radiusServersIpv6: Servers.t option
+        [@ocaml.doc
+          "The IPv6 addresses of the RADIUS server endpoints or RADIUS server load balancer."];
       radiusPort: PortNumber.t option
         [@ocaml.doc
           "The port that your RADIUS server is using for communications. Your self-managed network must allow inbound traffic over this port from the Directory Service servers."];
@@ -518,7 +1004,7 @@ module RadiusSettings =
           "The amount of time, in seconds, to wait for the RADIUS server to respond."];
       radiusRetries: RadiusRetries.t option
         [@ocaml.doc
-          "The maximum number of times that communication with the RADIUS server is attempted."];
+          "The maximum number of times that communication with the RADIUS server is retried after the initial attempt."];
       sharedSecret: RadiusSharedSecret.t option
         [@ocaml.doc "Required for enabling RADIUS on the directory."];
       authenticationProtocol: RadiusAuthenticationProtocol.t option
@@ -528,27 +1014,31 @@ module RadiusSettings =
       useSameUsername: UseSameUsername.t option
         [@ocaml.doc "Not currently used."]}
     let make ?radiusServers =
-      fun ?radiusPort ->
-        fun ?radiusTimeout ->
-          fun ?radiusRetries ->
-            fun ?sharedSecret ->
-              fun ?authenticationProtocol ->
-                fun ?displayLabel ->
-                  fun ?useSameUsername ->
-                    fun () ->
-                      {
-                        radiusServers;
-                        radiusPort;
-                        radiusTimeout;
-                        radiusRetries;
-                        sharedSecret;
-                        authenticationProtocol;
-                        displayLabel;
-                        useSameUsername
-                      }
+      fun ?radiusServersIpv6 ->
+        fun ?radiusPort ->
+          fun ?radiusTimeout ->
+            fun ?radiusRetries ->
+              fun ?sharedSecret ->
+                fun ?authenticationProtocol ->
+                  fun ?displayLabel ->
+                    fun ?useSameUsername ->
+                      fun () ->
+                        {
+                          radiusServers;
+                          radiusServersIpv6;
+                          radiusPort;
+                          radiusTimeout;
+                          radiusRetries;
+                          sharedSecret;
+                          authenticationProtocol;
+                          displayLabel;
+                          useSameUsername
+                        }
     let to_value x =
       structure_to_value
         [("RadiusServers", (Option.map x.radiusServers ~f:Servers.to_value));
+        ("RadiusServersIpv6",
+          (Option.map x.radiusServersIpv6 ~f:Servers.to_value));
         ("RadiusPort", (Option.map x.radiusPort ~f:PortNumber.to_value));
         ("RadiusTimeout",
           (Option.map x.radiusTimeout ~f:RadiusTimeout.to_value));
@@ -585,31 +1075,36 @@ module RadiusSettings =
           (Xml.child xml_arg0 "RadiusTimeout") in
       let radiusPort =
         (Option.map ~f:PortNumber.of_xml) (Xml.child xml_arg0 "RadiusPort") in
+      let radiusServersIpv6 =
+        (Option.map ~f:Servers.of_xml)
+          (Xml.child xml_arg0 "RadiusServersIpv6") in
       let radiusServers =
         (Option.map ~f:Servers.of_xml) (Xml.child xml_arg0 "RadiusServers") in
       make ?useSameUsername ?displayLabel ?authenticationProtocol
         ?sharedSecret ?radiusRetries ?radiusTimeout ?radiusPort
-        ?radiusServers ()
+        ?radiusServersIpv6 ?radiusServers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let useSameUsername =
-        field_map json "UseSameUsername" UseSameUsername.of_json in
+        field_map json__ "UseSameUsername" UseSameUsername.of_json in
       let displayLabel =
-        field_map json "DisplayLabel" RadiusDisplayLabel.of_json in
+        field_map json__ "DisplayLabel" RadiusDisplayLabel.of_json in
       let authenticationProtocol =
-        field_map json "AuthenticationProtocol"
+        field_map json__ "AuthenticationProtocol"
           RadiusAuthenticationProtocol.of_json in
       let sharedSecret =
-        field_map json "SharedSecret" RadiusSharedSecret.of_json in
+        field_map json__ "SharedSecret" RadiusSharedSecret.of_json in
       let radiusRetries =
-        field_map json "RadiusRetries" RadiusRetries.of_json in
+        field_map json__ "RadiusRetries" RadiusRetries.of_json in
       let radiusTimeout =
-        field_map json "RadiusTimeout" RadiusTimeout.of_json in
-      let radiusPort = field_map json "RadiusPort" PortNumber.of_json in
-      let radiusServers = field_map json "RadiusServers" Servers.of_json in
+        field_map json__ "RadiusTimeout" RadiusTimeout.of_json in
+      let radiusPort = field_map json__ "RadiusPort" PortNumber.of_json in
+      let radiusServersIpv6 =
+        field_map json__ "RadiusServersIpv6" Servers.of_json in
+      let radiusServers = field_map json__ "RadiusServers" Servers.of_json in
       make ?useSameUsername ?displayLabel ?authenticationProtocol
         ?sharedSecret ?radiusRetries ?radiusTimeout ?radiusPort
-        ?radiusServers ()
+        ?radiusServersIpv6 ?radiusServers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about a Remote Authentication Dial In User Service (RADIUS) server."]
@@ -645,6 +1140,9 @@ module AdditionalRegions =
   struct
     type nonrec t = RegionName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RegionName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -665,6 +1163,111 @@ module AdditionalRegions =
       list_of_json ~kind:"AdditionalRegions" ~of_json:RegionName.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AssessmentValidation =
+  struct
+    type nonrec t =
+      {
+      category: AssessmentValidationCategory.t option
+        [@ocaml.doc "The category of the validation test."];
+      name: AssessmentValidationName.t option
+        [@ocaml.doc
+          "The name of the specific validation test performed within the category."];
+      status: AssessmentValidationStatus.t option
+        [@ocaml.doc
+          "The result status of the validation test. Valid values include SUCCESS, FAILED, PENDING, and IN_PROGRESS."];
+      statusCode: AssessmentValidationStatusCode.t option
+        [@ocaml.doc
+          "A detailed status code providing additional information about the validation result."];
+      statusReason: AssessmentValidationStatusReason.t option
+        [@ocaml.doc
+          "A human-readable description of the validation result, including any error details or recommendations."];
+      startTime: AssessmentValidationTimeStamp.t option
+        [@ocaml.doc
+          "The date and time when the validation test was started."];
+      lastUpdateDateTime: AssessmentValidationTimeStamp.t option
+        [@ocaml.doc
+          "The date and time when the validation test was completed or last updated."]}
+    let make ?category =
+      fun ?name ->
+        fun ?status ->
+          fun ?statusCode ->
+            fun ?statusReason ->
+              fun ?startTime ->
+                fun ?lastUpdateDateTime ->
+                  fun () ->
+                    {
+                      category;
+                      name;
+                      status;
+                      statusCode;
+                      statusReason;
+                      startTime;
+                      lastUpdateDateTime
+                    }
+    let to_value x =
+      structure_to_value
+        [("Category",
+           (Option.map x.category ~f:AssessmentValidationCategory.to_value));
+        ("Name", (Option.map x.name ~f:AssessmentValidationName.to_value));
+        ("Status",
+          (Option.map x.status ~f:AssessmentValidationStatus.to_value));
+        ("StatusCode",
+          (Option.map x.statusCode ~f:AssessmentValidationStatusCode.to_value));
+        ("StatusReason",
+          (Option.map x.statusReason
+             ~f:AssessmentValidationStatusReason.to_value));
+        ("StartTime",
+          (Option.map x.startTime ~f:AssessmentValidationTimeStamp.to_value));
+        ("LastUpdateDateTime",
+          (Option.map x.lastUpdateDateTime
+             ~f:AssessmentValidationTimeStamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdateDateTime =
+        (Option.map ~f:AssessmentValidationTimeStamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdateDateTime") in
+      let startTime =
+        (Option.map ~f:AssessmentValidationTimeStamp.of_xml)
+          (Xml.child xml_arg0 "StartTime") in
+      let statusReason =
+        (Option.map ~f:AssessmentValidationStatusReason.of_xml)
+          (Xml.child xml_arg0 "StatusReason") in
+      let statusCode =
+        (Option.map ~f:AssessmentValidationStatusCode.of_xml)
+          (Xml.child xml_arg0 "StatusCode") in
+      let status =
+        (Option.map ~f:AssessmentValidationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let name =
+        (Option.map ~f:AssessmentValidationName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let category =
+        (Option.map ~f:AssessmentValidationCategory.of_xml)
+          (Xml.child xml_arg0 "Category") in
+      make ?lastUpdateDateTime ?startTime ?statusReason ?statusCode ?status
+        ?name ?category ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdateDateTime =
+        field_map json__ "LastUpdateDateTime"
+          AssessmentValidationTimeStamp.of_json in
+      let startTime =
+        field_map json__ "StartTime" AssessmentValidationTimeStamp.of_json in
+      let statusReason =
+        field_map json__ "StatusReason"
+          AssessmentValidationStatusReason.of_json in
+      let statusCode =
+        field_map json__ "StatusCode" AssessmentValidationStatusCode.of_json in
+      let status =
+        field_map json__ "Status" AssessmentValidationStatus.of_json in
+      let name = field_map json__ "Name" AssessmentValidationName.of_json in
+      let category =
+        field_map json__ "Category" AssessmentValidationCategory.of_json in
+      make ?lastUpdateDateTime ?startTime ?statusReason ?statusCode ?status
+        ?name ?category ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about a specific validation test performed during a directory assessment."]
 module AttributeName =
   struct
     type nonrec t = string
@@ -690,6 +1293,48 @@ module AttributeValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"AttributeValue" j
+    let to_json = simple_to_json to_value
+  end
+module DirectoryConfigurationSettingName =
+  struct
+    type nonrec t = string
+    let context_ = "DirectoryConfigurationSettingName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9-/. _]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"DirectoryConfigurationSettingName" j
+    let to_json = simple_to_json to_value
+  end
+module DirectoryConfigurationSettingValue =
+  struct
+    type nonrec t = string
+    let context_ = "DirectoryConfigurationSettingValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9_]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"DirectoryConfigurationSettingValue" j
     let to_json = simple_to_json to_value
   end
 module TagKey =
@@ -846,18 +1491,6 @@ module SchemaExtensionStatusReason =
     let of_json j = string_of_json ~kind:"SchemaExtensionStatusReason" j
     let to_json = simple_to_json to_value
   end
-module StartDateTime =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
 module LogGroupName =
   struct
     type nonrec t = string
@@ -918,6 +1551,24 @@ module CidrIp =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"CidrIp" j
+    let to_json = simple_to_json to_value
+  end
+module CidrIpv6 =
+  struct
+    type nonrec t = string
+    let context_ = "CidrIpv6"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^((([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,7}:)|(([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4})|(([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2})|(([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3})|(([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4})|(([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5})|([0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}))|(:((:[0-9a-fA-F]{1,4}){1,7}|:)))\\/(12[0-8]|1[01][0-9]|[1-9]?[0-9])$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CidrIpv6" j
     let to_json = simple_to_json to_value
   end
 module IpRouteStatusMsg =
@@ -1072,7 +1723,20 @@ module CertificateType =
     let of_json j = of_string (string_of_json ~kind:"CertificateType" j)
     let to_json = simple_to_json to_value
   end
-module CreatedDateTime =
+module AssessmentReportType =
+  struct
+    type nonrec t = string
+    let context_ = "AssessmentReportType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssessmentReportType" j
+    let to_json = simple_to_json to_value
+  end
+module AssessmentStartTime =
   struct
     type nonrec t = string
     let make i = i
@@ -1084,7 +1748,73 @@ module CreatedDateTime =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
-module LastUpdatedDateTime =
+module AssessmentStatus =
+  struct
+    type nonrec t = string
+    let context_ = "AssessmentStatus"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssessmentStatus" j
+    let to_json = simple_to_json to_value
+  end
+module DirectoryName =
+  struct
+    type nonrec t = string
+    let context_ = "DirectoryName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"^([a-zA-Z0-9]+[\\\\.-])+([a-zA-Z0-9])+$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DirectoryName" j
+    let to_json = simple_to_json to_value
+  end
+module LastUpdateDateTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module UpdateValue =
+  struct
+    type nonrec t =
+      {
+      oSUpdateSettings: OSUpdateSettings.t option
+        [@ocaml.doc "The OS update related settings."]}
+    let make ?oSUpdateSettings = fun () -> { oSUpdateSettings }
+    let to_value x =
+      structure_to_value
+        [("OSUpdateSettings",
+           (Option.map x.oSUpdateSettings ~f:OSUpdateSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let oSUpdateSettings =
+        (Option.map ~f:OSUpdateSettings.of_xml)
+          (Xml.child xml_arg0 "OSUpdateSettings") in
+      make ?oSUpdateSettings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let oSUpdateSettings =
+        field_map json__ "OSUpdateSettings" OSUpdateSettings.of_json in
+      make ?oSUpdateSettings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The value for a given type of UpdateSettings."]
+module CreatedDateTime =
   struct
     type nonrec t = string
     let make i = i
@@ -1103,8 +1833,10 @@ module RemoteDomainName =
     let make i =
       let open Result in
         ok_or_failwith
-          (check_pattern i
-             ~pattern:"^([a-zA-Z0-9]+[\\\\.-])+([a-zA-Z0-9])+[.]?$");
+          ((check_string_max i ~max:1024) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^([a-zA-Z0-9]+[\\\\.-])+([a-zA-Z0-9])+[.]?$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1465,6 +2197,119 @@ module ShareStatus =
     let of_json j = of_string (string_of_json ~kind:"ShareStatus" j)
     let to_json = simple_to_json to_value
   end
+module DirectoryConfigurationSettingAllowedValues =
+  struct
+    type nonrec t = string
+    let context_ = "DirectoryConfigurationSettingAllowedValues"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"DirectoryConfigurationSettingAllowedValues" j
+    let to_json = simple_to_json to_value
+  end
+module DirectoryConfigurationSettingDataType =
+  struct
+    type nonrec t = string
+    let context_ = "DirectoryConfigurationSettingDataType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"DirectoryConfigurationSettingDataType" j
+    let to_json = simple_to_json to_value
+  end
+module DirectoryConfigurationSettingLastRequestedDateTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module DirectoryConfigurationSettingLastUpdatedDateTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module DirectoryConfigurationSettingRequestDetailedStatus =
+  struct
+    type nonrec t = (RegionName.t * DirectoryConfigurationStatus.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((RegionName.of_string chopped),
+                              (DirectoryConfigurationStatus.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (RegionName.to_value x) |>
+                    (fun x ->
+                       (DirectoryConfigurationStatus.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:RegionName.of_string
+        ~of_json:DirectoryConfigurationStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DirectoryConfigurationSettingRequestStatusMessage =
+  struct
+    type nonrec t = string
+    let context_ = "DirectoryConfigurationSettingRequestStatusMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json
+        ~kind:"DirectoryConfigurationSettingRequestStatusMessage" j
+    let to_json = simple_to_json to_value
+  end
+module DirectoryConfigurationSettingType =
+  struct
+    type nonrec t = string
+    let context_ = "DirectoryConfigurationSettingType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"DirectoryConfigurationSettingType" j
+    let to_json = simple_to_json to_value
+  end
 module DesiredNumberOfDomainControllers =
   struct
     type nonrec t = int
@@ -1495,6 +2340,7 @@ module DirectoryStage =
       | Deleting 
       | Deleted 
       | Failed 
+      | Updating 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1510,6 +2356,7 @@ module DirectoryStage =
       | Deleting -> "Deleting"
       | Deleted -> "Deleted"
       | Failed -> "Failed"
+      | Updating -> "Updating"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1524,6 +2371,7 @@ module DirectoryStage =
       | "Deleting" -> Deleting
       | "Deleted" -> Deleted
       | "Failed" -> Failed
+      | "Updating" -> Updating
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1558,13 +2406,13 @@ module DirectoryVpcSettings =
         VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
       make ~subnetIds ~vpcId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetIds = field_map_exn json "SubnetIds" SubnetIds.of_json in
-      let vpcId = field_map_exn json "VpcId" VpcId.of_json in
+    let of_json json__ =
+      let subnetIds = field_map_exn json__ "SubnetIds" SubnetIds.of_json in
+      let vpcId = field_map_exn json__ "VpcId" VpcId.of_json in
       make ~subnetIds ~vpcId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains VPC information for the CreateDirectory or CreateMicrosoftAD operation."]
+       "Contains VPC information for the CreateDirectory, CreateMicrosoftAD, or CreateHybridAD operation."]
 module LaunchTime =
   struct
     type nonrec t = string
@@ -1646,6 +2494,110 @@ module LDAPSStatusReason =
     let of_json j = string_of_json ~kind:"LDAPSStatusReason" j
     let to_json = simple_to_json to_value
   end
+module HybridUpdateInfoEntry =
+  struct
+    type nonrec t =
+      {
+      status: UpdateStatus.t option
+        [@ocaml.doc
+          "The current status of the update activity. Valid values include UPDATED, UPDATING, and UPDATE_FAILED."];
+      statusReason: UpdateStatusReason.t option
+        [@ocaml.doc
+          "A human-readable description of the update status, including any error details or progress information."];
+      initiatedBy: InitiatedBy.t option
+        [@ocaml.doc
+          "Specifies if the update was initiated by the customer or Amazon Web Services."];
+      newValue: HybridUpdateValue.t option
+        [@ocaml.doc
+          "The new configuration values being applied in this update."];
+      previousValue: HybridUpdateValue.t option
+        [@ocaml.doc
+          "The previous configuration values before this update was applied."];
+      startTime: StartDateTime.t option
+        [@ocaml.doc
+          "The date and time when the update activity was initiated."];
+      lastUpdatedDateTime: LastUpdatedDateTime.t option
+        [@ocaml.doc
+          "The date and time when the update activity status was last updated."];
+      assessmentId: AssessmentId.t option
+        [@ocaml.doc
+          "The identifier of the assessment performed to validate this update configuration."]}
+    let make ?status =
+      fun ?statusReason ->
+        fun ?initiatedBy ->
+          fun ?newValue ->
+            fun ?previousValue ->
+              fun ?startTime ->
+                fun ?lastUpdatedDateTime ->
+                  fun ?assessmentId ->
+                    fun () ->
+                      {
+                        status;
+                        statusReason;
+                        initiatedBy;
+                        newValue;
+                        previousValue;
+                        startTime;
+                        lastUpdatedDateTime;
+                        assessmentId
+                      }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:UpdateStatus.to_value));
+        ("StatusReason",
+          (Option.map x.statusReason ~f:UpdateStatusReason.to_value));
+        ("InitiatedBy", (Option.map x.initiatedBy ~f:InitiatedBy.to_value));
+        ("NewValue", (Option.map x.newValue ~f:HybridUpdateValue.to_value));
+        ("PreviousValue",
+          (Option.map x.previousValue ~f:HybridUpdateValue.to_value));
+        ("StartTime", (Option.map x.startTime ~f:StartDateTime.to_value));
+        ("LastUpdatedDateTime",
+          (Option.map x.lastUpdatedDateTime ~f:LastUpdatedDateTime.to_value));
+        ("AssessmentId",
+          (Option.map x.assessmentId ~f:AssessmentId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let assessmentId =
+        (Option.map ~f:AssessmentId.of_xml)
+          (Xml.child xml_arg0 "AssessmentId") in
+      let lastUpdatedDateTime =
+        (Option.map ~f:LastUpdatedDateTime.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedDateTime") in
+      let startTime =
+        (Option.map ~f:StartDateTime.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let previousValue =
+        (Option.map ~f:HybridUpdateValue.of_xml)
+          (Xml.child xml_arg0 "PreviousValue") in
+      let newValue =
+        (Option.map ~f:HybridUpdateValue.of_xml)
+          (Xml.child xml_arg0 "NewValue") in
+      let initiatedBy =
+        (Option.map ~f:InitiatedBy.of_xml) (Xml.child xml_arg0 "InitiatedBy") in
+      let statusReason =
+        (Option.map ~f:UpdateStatusReason.of_xml)
+          (Xml.child xml_arg0 "StatusReason") in
+      let status =
+        (Option.map ~f:UpdateStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      make ?assessmentId ?lastUpdatedDateTime ?startTime ?previousValue
+        ?newValue ?initiatedBy ?statusReason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let assessmentId = field_map json__ "AssessmentId" AssessmentId.of_json in
+      let lastUpdatedDateTime =
+        field_map json__ "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
+      let startTime = field_map json__ "StartTime" StartDateTime.of_json in
+      let previousValue =
+        field_map json__ "PreviousValue" HybridUpdateValue.of_json in
+      let newValue = field_map json__ "NewValue" HybridUpdateValue.of_json in
+      let initiatedBy = field_map json__ "InitiatedBy" InitiatedBy.of_json in
+      let statusReason =
+        field_map json__ "StatusReason" UpdateStatusReason.of_json in
+      let status = field_map json__ "Status" UpdateStatus.of_json in
+      make ?assessmentId ?lastUpdatedDateTime ?startTime ?previousValue
+        ?newValue ?initiatedBy ?statusReason ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains detailed information about a specific update activity for a hybrid directory component."]
 module TopicArn =
   struct
     type nonrec t = string
@@ -1735,6 +2687,7 @@ module DomainControllerStatus =
       | Deleting 
       | Deleted 
       | Failed 
+      | Updating 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1746,6 +2699,7 @@ module DomainControllerStatus =
       | Deleting -> "Deleting"
       | Deleted -> "Deleted"
       | Failed -> "Failed"
+      | Updating -> "Updating"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1756,6 +2710,7 @@ module DomainControllerStatus =
       | "Deleting" -> Deleting
       | "Deleted" -> Deleted
       | "Failed" -> Failed
+      | "Updating" -> Updating
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1836,25 +2791,28 @@ module DirectoryConnectSettingsDescription =
         [@ocaml.doc
           "The security group identifier for the AD Connector directory."];
       availabilityZones: AvailabilityZones.t option
-        [@ocaml.doc
-          "A list of the Availability Zones that the directory is in."];
+        [@ocaml.doc "The Availability Zones that the directory is in."];
       connectIps: IpAddrs.t option
-        [@ocaml.doc "The IP addresses of the AD Connector servers."]}
+        [@ocaml.doc "The IP addresses of the AD Connector servers."];
+      connectIpsV6: IpV6Addrs.t option
+        [@ocaml.doc "The IPv6 addresses of the AD Connector servers."]}
     let make ?vpcId =
       fun ?subnetIds ->
         fun ?customerUserName ->
           fun ?securityGroupId ->
             fun ?availabilityZones ->
               fun ?connectIps ->
-                fun () ->
-                  {
-                    vpcId;
-                    subnetIds;
-                    customerUserName;
-                    securityGroupId;
-                    availabilityZones;
-                    connectIps
-                  }
+                fun ?connectIpsV6 ->
+                  fun () ->
+                    {
+                      vpcId;
+                      subnetIds;
+                      customerUserName;
+                      securityGroupId;
+                      availabilityZones;
+                      connectIps;
+                      connectIpsV6
+                    }
     let to_value x =
       structure_to_value
         [("VpcId", (Option.map x.vpcId ~f:VpcId.to_value));
@@ -1865,9 +2823,12 @@ module DirectoryConnectSettingsDescription =
           (Option.map x.securityGroupId ~f:SecurityGroupId.to_value));
         ("AvailabilityZones",
           (Option.map x.availabilityZones ~f:AvailabilityZones.to_value));
-        ("ConnectIps", (Option.map x.connectIps ~f:IpAddrs.to_value))]
+        ("ConnectIps", (Option.map x.connectIps ~f:IpAddrs.to_value));
+        ("ConnectIpsV6", (Option.map x.connectIpsV6 ~f:IpV6Addrs.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let connectIpsV6 =
+        (Option.map ~f:IpV6Addrs.of_xml) (Xml.child xml_arg0 "ConnectIpsV6") in
       let connectIps =
         (Option.map ~f:IpAddrs.of_xml) (Xml.child xml_arg0 "ConnectIps") in
       let availabilityZones =
@@ -1882,21 +2843,22 @@ module DirectoryConnectSettingsDescription =
       let subnetIds =
         (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
       let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
-      make ?connectIps ?availabilityZones ?securityGroupId ?customerUserName
-        ?subnetIds ?vpcId ()
+      make ?connectIpsV6 ?connectIps ?availabilityZones ?securityGroupId
+        ?customerUserName ?subnetIds ?vpcId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connectIps = field_map json "ConnectIps" IpAddrs.of_json in
+    let of_json json__ =
+      let connectIpsV6 = field_map json__ "ConnectIpsV6" IpV6Addrs.of_json in
+      let connectIps = field_map json__ "ConnectIps" IpAddrs.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZones.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZones.of_json in
       let securityGroupId =
-        field_map json "SecurityGroupId" SecurityGroupId.of_json in
+        field_map json__ "SecurityGroupId" SecurityGroupId.of_json in
       let customerUserName =
-        field_map json "CustomerUserName" UserName.of_json in
-      let subnetIds = field_map json "SubnetIds" SubnetIds.of_json in
-      let vpcId = field_map json "VpcId" VpcId.of_json in
-      make ?connectIps ?availabilityZones ?securityGroupId ?customerUserName
-        ?subnetIds ?vpcId ()
+        field_map json__ "CustomerUserName" UserName.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      make ?connectIpsV6 ?connectIps ?availabilityZones ?securityGroupId
+        ?customerUserName ?subnetIds ?vpcId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about an AD Connector directory."]
 module DirectoryEdition =
@@ -1904,17 +2866,20 @@ module DirectoryEdition =
     type nonrec t =
       | Enterprise 
       | Standard 
+      | Hybrid 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Enterprise -> "Enterprise"
       | Standard -> "Standard"
+      | Hybrid -> "Hybrid"
       | Non_static_id s -> s
     let of_string =
       function
       | "Enterprise" -> Enterprise
       | "Standard" -> Standard
+      | "Hybrid" -> Hybrid
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1922,23 +2887,6 @@ module DirectoryEdition =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration DirectoryEdition" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"DirectoryEdition" j)
-    let to_json = simple_to_json to_value
-  end
-module DirectoryName =
-  struct
-    type nonrec t = string
-    let context_ = "DirectoryName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i ~pattern:"^([a-zA-Z0-9]+[\\\\.-])+([a-zA-Z0-9])+$");
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DirectoryName" j
     let to_json = simple_to_json to_value
   end
 module DirectoryShortName =
@@ -2008,6 +2956,46 @@ module DirectoryType =
     let of_json j = of_string (string_of_json ~kind:"DirectoryType" j)
     let to_json = simple_to_json to_value
   end
+module HybridSettingsDescription =
+  struct
+    type nonrec t =
+      {
+      selfManagedDnsIpAddrs: IpAddrs.t option
+        [@ocaml.doc
+          "The IP addresses of the DNS servers in your self-managed AD environment."];
+      selfManagedInstanceIds: AssessmentInstanceIds.t option
+        [@ocaml.doc
+          "The identifiers of the self-managed instances with SSM used for hybrid directory operations."]}
+    let make ?selfManagedDnsIpAddrs =
+      fun ?selfManagedInstanceIds ->
+        fun () -> { selfManagedDnsIpAddrs; selfManagedInstanceIds }
+    let to_value x =
+      structure_to_value
+        [("SelfManagedDnsIpAddrs",
+           (Option.map x.selfManagedDnsIpAddrs ~f:IpAddrs.to_value));
+        ("SelfManagedInstanceIds",
+          (Option.map x.selfManagedInstanceIds
+             ~f:AssessmentInstanceIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let selfManagedInstanceIds =
+        (Option.map ~f:AssessmentInstanceIds.of_xml)
+          (Xml.child xml_arg0 "SelfManagedInstanceIds") in
+      let selfManagedDnsIpAddrs =
+        (Option.map ~f:IpAddrs.of_xml)
+          (Xml.child xml_arg0 "SelfManagedDnsIpAddrs") in
+      make ?selfManagedInstanceIds ?selfManagedDnsIpAddrs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let selfManagedInstanceIds =
+        field_map json__ "SelfManagedInstanceIds"
+          AssessmentInstanceIds.of_json in
+      let selfManagedDnsIpAddrs =
+        field_map json__ "SelfManagedDnsIpAddrs" IpAddrs.of_json in
+      make ?selfManagedInstanceIds ?selfManagedDnsIpAddrs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the current hybrid directory configuration settings for a directory."]
 module OwnerDirectoryDescription =
   struct
     type nonrec t =
@@ -2020,42 +3008,57 @@ module OwnerDirectoryDescription =
       dnsIpAddrs: DnsIpAddrs.t option
         [@ocaml.doc
           "IP address of the directory\226\128\153s domain controllers."];
+      dnsIpv6Addrs: DnsIpv6Addrs.t option
+        [@ocaml.doc
+          "IPv6 addresses of the directory\226\128\153s domain controllers."];
       vpcSettings: DirectoryVpcSettingsDescription.t option
         [@ocaml.doc "Information about the VPC settings for the directory."];
       radiusSettings: RadiusSettings.t option
         [@ocaml.doc
-          "A RadiusSettings object that contains information about the RADIUS server."];
+          "Information about the RadiusSettings object server configuration."];
       radiusStatus: RadiusStatus.t option
-        [@ocaml.doc "Information about the status of the RADIUS server."]}
+        [@ocaml.doc "The status of the RADIUS server."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "Network type of the directory in the directory owner account."]}
     let make ?directoryId =
       fun ?accountId ->
         fun ?dnsIpAddrs ->
-          fun ?vpcSettings ->
-            fun ?radiusSettings ->
-              fun ?radiusStatus ->
-                fun () ->
-                  {
-                    directoryId;
-                    accountId;
-                    dnsIpAddrs;
-                    vpcSettings;
-                    radiusSettings;
-                    radiusStatus
-                  }
+          fun ?dnsIpv6Addrs ->
+            fun ?vpcSettings ->
+              fun ?radiusSettings ->
+                fun ?radiusStatus ->
+                  fun ?networkType ->
+                    fun () ->
+                      {
+                        directoryId;
+                        accountId;
+                        dnsIpAddrs;
+                        dnsIpv6Addrs;
+                        vpcSettings;
+                        radiusSettings;
+                        radiusStatus;
+                        networkType
+                      }
     let to_value x =
       structure_to_value
         [("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value));
         ("AccountId", (Option.map x.accountId ~f:CustomerId.to_value));
         ("DnsIpAddrs", (Option.map x.dnsIpAddrs ~f:DnsIpAddrs.to_value));
+        ("DnsIpv6Addrs",
+          (Option.map x.dnsIpv6Addrs ~f:DnsIpv6Addrs.to_value));
         ("VpcSettings",
           (Option.map x.vpcSettings
              ~f:DirectoryVpcSettingsDescription.to_value));
         ("RadiusSettings",
           (Option.map x.radiusSettings ~f:RadiusSettings.to_value));
         ("RadiusStatus",
-          (Option.map x.radiusStatus ~f:RadiusStatus.to_value))]
+          (Option.map x.radiusStatus ~f:RadiusStatus.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
       let radiusStatus =
         (Option.map ~f:RadiusStatus.of_xml)
           (Xml.child xml_arg0 "RadiusStatus") in
@@ -2065,29 +3068,35 @@ module OwnerDirectoryDescription =
       let vpcSettings =
         (Option.map ~f:DirectoryVpcSettingsDescription.of_xml)
           (Xml.child xml_arg0 "VpcSettings") in
+      let dnsIpv6Addrs =
+        (Option.map ~f:DnsIpv6Addrs.of_xml)
+          (Xml.child xml_arg0 "DnsIpv6Addrs") in
       let dnsIpAddrs =
         (Option.map ~f:DnsIpAddrs.of_xml) (Xml.child xml_arg0 "DnsIpAddrs") in
       let accountId =
         (Option.map ~f:CustomerId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
-      make ?radiusStatus ?radiusSettings ?vpcSettings ?dnsIpAddrs ?accountId
-        ?directoryId ()
+      make ?networkType ?radiusStatus ?radiusSettings ?vpcSettings
+        ?dnsIpv6Addrs ?dnsIpAddrs ?accountId ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let radiusStatus = field_map json "RadiusStatus" RadiusStatus.of_json in
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let radiusStatus = field_map json__ "RadiusStatus" RadiusStatus.of_json in
       let radiusSettings =
-        field_map json "RadiusSettings" RadiusSettings.of_json in
+        field_map json__ "RadiusSettings" RadiusSettings.of_json in
       let vpcSettings =
-        field_map json "VpcSettings" DirectoryVpcSettingsDescription.of_json in
-      let dnsIpAddrs = field_map json "DnsIpAddrs" DnsIpAddrs.of_json in
-      let accountId = field_map json "AccountId" CustomerId.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
-      make ?radiusStatus ?radiusSettings ?vpcSettings ?dnsIpAddrs ?accountId
-        ?directoryId ()
+        field_map json__ "VpcSettings"
+          DirectoryVpcSettingsDescription.of_json in
+      let dnsIpv6Addrs = field_map json__ "DnsIpv6Addrs" DnsIpv6Addrs.of_json in
+      let dnsIpAddrs = field_map json__ "DnsIpAddrs" DnsIpAddrs.of_json in
+      let accountId = field_map json__ "AccountId" CustomerId.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
+      make ?networkType ?radiusStatus ?radiusSettings ?vpcSettings
+        ?dnsIpv6Addrs ?dnsIpAddrs ?accountId ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the directory owner account details that have been shared to the directory consumer account."]
+       "Contains the directory owner account details shared with the directory consumer account."]
 module RegionsInfo =
   struct
     type nonrec t =
@@ -2117,10 +3126,10 @@ module RegionsInfo =
           (Xml.child xml_arg0 "PrimaryRegion") in
       make ?additionalRegions ?primaryRegion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let additionalRegions =
-        field_map json "AdditionalRegions" AdditionalRegions.of_json in
-      let primaryRegion = field_map json "PrimaryRegion" RegionName.of_json in
+        field_map json__ "AdditionalRegions" AdditionalRegions.of_json in
+      let primaryRegion = field_map json__ "PrimaryRegion" RegionName.of_json in
       make ?additionalRegions ?primaryRegion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2199,12 +3208,19 @@ module ClientAuthenticationType =
   struct
     type nonrec t =
       | SmartCard 
+      | SmartCardOrPassword 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | SmartCard -> "SmartCard" | Non_static_id s -> s
+      function
+      | SmartCard -> "SmartCard"
+      | SmartCardOrPassword -> "SmartCardOrPassword"
+      | Non_static_id s -> s
     let of_string =
-      function | "SmartCard" -> SmartCard | x -> Non_static_id x
+      function
+      | "SmartCard" -> SmartCard
+      | "SmartCardOrPassword" -> SmartCardOrPassword
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -2237,6 +3253,35 @@ module OCSPUrl =
     let of_json j = string_of_json ~kind:"OCSPUrl" j
     let to_json = simple_to_json to_value
   end
+module AssessmentValidations =
+  struct
+    type nonrec t = AssessmentValidation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssessmentValidation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssessmentValidation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssessmentValidations"
+        ~of_json:AssessmentValidation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Attribute =
   struct
     type nonrec t =
@@ -2257,9 +3302,9 @@ module Attribute =
         (Option.map ~f:AttributeName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" AttributeValue.of_json in
-      let name = field_map json "Name" AttributeName.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" AttributeValue.of_json in
+      let name = field_map json__ "Name" AttributeName.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents a named directory attribute."]
@@ -2296,6 +3341,61 @@ module RequestId =
     let of_json j = string_of_json ~kind:"RequestId" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "The Amazon Web Services request identifier."]
+module Setting =
+  struct
+    type nonrec t =
+      {
+      name: DirectoryConfigurationSettingName.t
+        [@ocaml.doc
+          "The name of the directory setting. For example: TLS_1_0"];
+      value: DirectoryConfigurationSettingValue.t
+        [@ocaml.doc
+          "The value of the directory setting for which to retrieve information. For example, for TLS_1_0, the valid values are: Enable and Disable."]}
+    let context_ = "Setting"
+    let make ~name = fun ~value -> fun () -> { name; value }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (DirectoryConfigurationSettingName.to_value x.name)));
+        ("Value",
+          (Some (DirectoryConfigurationSettingValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        DirectoryConfigurationSettingValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let name =
+        DirectoryConfigurationSettingName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value =
+        field_map_exn json__ "Value"
+          DirectoryConfigurationSettingValue.of_json in
+      let name =
+        field_map_exn json__ "Name" DirectoryConfigurationSettingName.of_json in
+      make ~value ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the configurable settings for a directory."]
+module SecretArn =
+  struct
+    type nonrec t = string
+    let context_ = "SecretArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:aws:secretsmanager:[a-z0-9-]+:\\d{12}:secret:[a-zA-Z0-9/_+=.@-]+-[a-zA-Z0-9]{6}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecretArn" j
+    let to_json = simple_to_json to_value
+  end
 module TargetId =
   struct
     type nonrec t = string
@@ -2330,16 +3430,48 @@ module TargetType =
     let of_json j = of_string (string_of_json ~kind:"TargetType" j)
     let to_json = simple_to_json to_value
   end
+module SecurityGroupIds =
+  struct
+    type nonrec t = SecurityGroupId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecurityGroupId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecurityGroupIds" ~of_json:SecurityGroupId.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module Tag =
   struct
     type nonrec t =
       {
       key: TagKey.t
         [@ocaml.doc
-          "Required name of the tag. The string value can be Unicode characters and cannot be prefixed with \"aws:\". The string can contain only the set of Unicode letters, digits, white-space, '_', '.', '/', '=', '+', '-' (Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\]*)$\")."];
+          "Required name of the tag. The string value can be Unicode characters and cannot be prefixed with \"aws:\". The string can contain only the set of Unicode letters, digits, white-space, '_', '.', '/', '=', '+', '-', ':', '\\@'(Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\]*)$\")."];
       value: TagValue.t
         [@ocaml.doc
-          "The optional value of the tag. The string value can be Unicode characters. The string can contain only the set of Unicode letters, digits, white-space, '_', '.', '/', '=', '+', '-' (Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\]*)$\")."]}
+          "The optional value of the tag. The string value can be Unicode characters. The string can contain only the set of Unicode letters, digits, white-space, '_', '.', '/', '=', '+', '-', ':', '\\@' (Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\]*)$\")."]}
     let context_ = "Tag"
     let make ~key = fun ~value -> fun () -> { key; value }
     let to_value x =
@@ -2354,9 +3486,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2438,19 +3570,20 @@ module SchemaExtensionInfo =
         ?schemaExtensionStatus ?description ?schemaExtensionId ?directoryId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endDateTime = field_map json "EndDateTime" EndDateTime.of_json in
+    let of_json json__ =
+      let endDateTime = field_map json__ "EndDateTime" EndDateTime.of_json in
       let startDateTime =
-        field_map json "StartDateTime" StartDateTime.of_json in
+        field_map json__ "StartDateTime" StartDateTime.of_json in
       let schemaExtensionStatusReason =
-        field_map json "SchemaExtensionStatusReason"
+        field_map json__ "SchemaExtensionStatusReason"
           SchemaExtensionStatusReason.of_json in
       let schemaExtensionStatus =
-        field_map json "SchemaExtensionStatus" SchemaExtensionStatus.of_json in
-      let description = field_map json "Description" Description.of_json in
+        field_map json__ "SchemaExtensionStatus"
+          SchemaExtensionStatus.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let schemaExtensionId =
-        field_map json "SchemaExtensionId" SchemaExtensionId.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+        field_map json__ "SchemaExtensionId" SchemaExtensionId.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?endDateTime ?startDateTime ?schemaExtensionStatusReason
         ?schemaExtensionStatus ?description ?schemaExtensionId ?directoryId
         ()
@@ -2493,12 +3626,12 @@ module LogSubscription =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?subscriptionCreatedDateTime ?logGroupName ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionCreatedDateTime =
-        field_map json "SubscriptionCreatedDateTime"
+        field_map json__ "SubscriptionCreatedDateTime"
           SubscriptionCreatedDateTime.of_json in
-      let logGroupName = field_map json "LogGroupName" LogGroupName.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+      let logGroupName = field_map json__ "LogGroupName" LogGroupName.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?subscriptionCreatedDateTime ?logGroupName ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2511,6 +3644,8 @@ module IpRouteInfo =
         [@ocaml.doc
           "Identifier (ID) of the directory associated with the IP addresses."];
       cidrIp: CidrIp.t option [@ocaml.doc "IP address block in the IpRoute."];
+      cidrIpv6: CidrIpv6.t option
+        [@ocaml.doc "IPv6 address block in the IpRoute."];
       ipRouteStatusMsg: IpRouteStatusMsg.t option
         [@ocaml.doc "The status of the IP address block."];
       addedDateTime: AddedDateTime.t option
@@ -2522,23 +3657,26 @@ module IpRouteInfo =
         [@ocaml.doc "Description of the IpRouteInfo."]}
     let make ?directoryId =
       fun ?cidrIp ->
-        fun ?ipRouteStatusMsg ->
-          fun ?addedDateTime ->
-            fun ?ipRouteStatusReason ->
-              fun ?description ->
-                fun () ->
-                  {
-                    directoryId;
-                    cidrIp;
-                    ipRouteStatusMsg;
-                    addedDateTime;
-                    ipRouteStatusReason;
-                    description
-                  }
+        fun ?cidrIpv6 ->
+          fun ?ipRouteStatusMsg ->
+            fun ?addedDateTime ->
+              fun ?ipRouteStatusReason ->
+                fun ?description ->
+                  fun () ->
+                    {
+                      directoryId;
+                      cidrIp;
+                      cidrIpv6;
+                      ipRouteStatusMsg;
+                      addedDateTime;
+                      ipRouteStatusReason;
+                      description
+                    }
     let to_value x =
       structure_to_value
         [("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value));
         ("CidrIp", (Option.map x.cidrIp ~f:CidrIp.to_value));
+        ("CidrIpv6", (Option.map x.cidrIpv6 ~f:CidrIpv6.to_value));
         ("IpRouteStatusMsg",
           (Option.map x.ipRouteStatusMsg ~f:IpRouteStatusMsg.to_value));
         ("AddedDateTime",
@@ -2559,25 +3697,28 @@ module IpRouteInfo =
       let ipRouteStatusMsg =
         (Option.map ~f:IpRouteStatusMsg.of_xml)
           (Xml.child xml_arg0 "IpRouteStatusMsg") in
+      let cidrIpv6 =
+        (Option.map ~f:CidrIpv6.of_xml) (Xml.child xml_arg0 "CidrIpv6") in
       let cidrIp =
         (Option.map ~f:CidrIp.of_xml) (Xml.child xml_arg0 "CidrIp") in
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?description ?ipRouteStatusReason ?addedDateTime ?ipRouteStatusMsg
-        ?cidrIp ?directoryId ()
+        ?cidrIpv6 ?cidrIp ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" Description.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
       let ipRouteStatusReason =
-        field_map json "IpRouteStatusReason" IpRouteStatusReason.of_json in
+        field_map json__ "IpRouteStatusReason" IpRouteStatusReason.of_json in
       let addedDateTime =
-        field_map json "AddedDateTime" AddedDateTime.of_json in
+        field_map json__ "AddedDateTime" AddedDateTime.of_json in
       let ipRouteStatusMsg =
-        field_map json "IpRouteStatusMsg" IpRouteStatusMsg.of_json in
-      let cidrIp = field_map json "CidrIp" CidrIp.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+        field_map json__ "IpRouteStatusMsg" IpRouteStatusMsg.of_json in
+      let cidrIpv6 = field_map json__ "CidrIpv6" CidrIpv6.of_json in
+      let cidrIp = field_map json__ "CidrIp" CidrIp.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?description ?ipRouteStatusReason ?addedDateTime ?ipRouteStatusMsg
-        ?cidrIp ?directoryId ()
+        ?cidrIpv6 ?cidrIp ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about one or more IP address blocks."]
 module CertificateInfo =
@@ -2628,17 +3769,121 @@ module CertificateInfo =
           (Xml.child xml_arg0 "CertificateId") in
       make ?type_ ?expiryDateTime ?state ?commonName ?certificateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" CertificateType.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" CertificateType.of_json in
       let expiryDateTime =
-        field_map json "ExpiryDateTime" CertificateExpiryDateTime.of_json in
-      let state = field_map json "State" CertificateState.of_json in
-      let commonName = field_map json "CommonName" CertificateCN.of_json in
+        field_map json__ "ExpiryDateTime" CertificateExpiryDateTime.of_json in
+      let state = field_map json__ "State" CertificateState.of_json in
+      let commonName = field_map json__ "CommonName" CertificateCN.of_json in
       let certificateId =
-        field_map json "CertificateId" CertificateId.of_json in
+        field_map json__ "CertificateId" CertificateId.of_json in
       make ?type_ ?expiryDateTime ?state ?commonName ?certificateId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains general information about a certificate."]
+module AssessmentSummary =
+  struct
+    type nonrec t =
+      {
+      assessmentId: AssessmentId.t option
+        [@ocaml.doc "The unique identifier of the directory assessment."];
+      directoryId: DirectoryId.t option
+        [@ocaml.doc
+          "The identifier of the directory associated with this assessment."];
+      dnsName: DirectoryName.t option
+        [@ocaml.doc
+          "The fully qualified domain name (FQDN) of the Active Directory domain being assessed."];
+      startTime: AssessmentStartTime.t option
+        [@ocaml.doc "The date and time when the assessment was initiated."];
+      lastUpdateDateTime: LastUpdateDateTime.t option
+        [@ocaml.doc
+          "The date and time when the assessment status was last updated."];
+      status: AssessmentStatus.t option
+        [@ocaml.doc
+          "The current status of the assessment. Valid values include SUCCESS, FAILED, PENDING, and IN_PROGRESS."];
+      customerDnsIps: CustomerDnsIps.t option
+        [@ocaml.doc
+          "The IP addresses of the DNS servers or domain controllers in your self-managed AD environment."];
+      reportType: AssessmentReportType.t option
+        [@ocaml.doc
+          "The type of assessment report generated. Valid values include CUSTOMER and SYSTEM."]}
+    let make ?assessmentId =
+      fun ?directoryId ->
+        fun ?dnsName ->
+          fun ?startTime ->
+            fun ?lastUpdateDateTime ->
+              fun ?status ->
+                fun ?customerDnsIps ->
+                  fun ?reportType ->
+                    fun () ->
+                      {
+                        assessmentId;
+                        directoryId;
+                        dnsName;
+                        startTime;
+                        lastUpdateDateTime;
+                        status;
+                        customerDnsIps;
+                        reportType
+                      }
+    let to_value x =
+      structure_to_value
+        [("AssessmentId",
+           (Option.map x.assessmentId ~f:AssessmentId.to_value));
+        ("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value));
+        ("DnsName", (Option.map x.dnsName ~f:DirectoryName.to_value));
+        ("StartTime",
+          (Option.map x.startTime ~f:AssessmentStartTime.to_value));
+        ("LastUpdateDateTime",
+          (Option.map x.lastUpdateDateTime ~f:LastUpdateDateTime.to_value));
+        ("Status", (Option.map x.status ~f:AssessmentStatus.to_value));
+        ("CustomerDnsIps",
+          (Option.map x.customerDnsIps ~f:CustomerDnsIps.to_value));
+        ("ReportType",
+          (Option.map x.reportType ~f:AssessmentReportType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reportType =
+        (Option.map ~f:AssessmentReportType.of_xml)
+          (Xml.child xml_arg0 "ReportType") in
+      let customerDnsIps =
+        (Option.map ~f:CustomerDnsIps.of_xml)
+          (Xml.child xml_arg0 "CustomerDnsIps") in
+      let status =
+        (Option.map ~f:AssessmentStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let lastUpdateDateTime =
+        (Option.map ~f:LastUpdateDateTime.of_xml)
+          (Xml.child xml_arg0 "LastUpdateDateTime") in
+      let startTime =
+        (Option.map ~f:AssessmentStartTime.of_xml)
+          (Xml.child xml_arg0 "StartTime") in
+      let dnsName =
+        (Option.map ~f:DirectoryName.of_xml) (Xml.child xml_arg0 "DnsName") in
+      let directoryId =
+        (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
+      let assessmentId =
+        (Option.map ~f:AssessmentId.of_xml)
+          (Xml.child xml_arg0 "AssessmentId") in
+      make ?reportType ?customerDnsIps ?status ?lastUpdateDateTime ?startTime
+        ?dnsName ?directoryId ?assessmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reportType =
+        field_map json__ "ReportType" AssessmentReportType.of_json in
+      let customerDnsIps =
+        field_map json__ "CustomerDnsIps" CustomerDnsIps.of_json in
+      let status = field_map json__ "Status" AssessmentStatus.of_json in
+      let lastUpdateDateTime =
+        field_map json__ "LastUpdateDateTime" LastUpdateDateTime.of_json in
+      let startTime =
+        field_map json__ "StartTime" AssessmentStartTime.of_json in
+      let dnsName = field_map json__ "DnsName" DirectoryName.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
+      let assessmentId = field_map json__ "AssessmentId" AssessmentId.of_json in
+      make ?reportType ?customerDnsIps ?status ?lastUpdateDateTime ?startTime
+        ?dnsName ?directoryId ?assessmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains summary information about a directory assessment, providing a high-level overview without detailed validation results."]
 module Limit =
   struct
     type nonrec t = int
@@ -2692,6 +3937,102 @@ module ConnectedDirectoriesLimitReached =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module UpdateInfoEntry =
+  struct
+    type nonrec t =
+      {
+      region: RegionName.t option [@ocaml.doc "The name of the Region."];
+      status: UpdateStatus.t option
+        [@ocaml.doc "The status of the update performed on the directory."];
+      statusReason: UpdateStatusReason.t option
+        [@ocaml.doc
+          "The reason for the current status of the update type activity."];
+      initiatedBy: InitiatedBy.t option
+        [@ocaml.doc
+          "This specifies if the update was initiated by the customer or by the service team."];
+      newValue: UpdateValue.t option
+        [@ocaml.doc "The new value of the target setting."];
+      previousValue: UpdateValue.t option
+        [@ocaml.doc "The old value of the target setting."];
+      startTime: StartDateTime.t option
+        [@ocaml.doc
+          "The start time of the UpdateDirectorySetup for the particular type."];
+      lastUpdatedDateTime: LastUpdatedDateTime.t option
+        [@ocaml.doc
+          "The last updated date and time of a particular directory setting."]}
+    let make ?region =
+      fun ?status ->
+        fun ?statusReason ->
+          fun ?initiatedBy ->
+            fun ?newValue ->
+              fun ?previousValue ->
+                fun ?startTime ->
+                  fun ?lastUpdatedDateTime ->
+                    fun () ->
+                      {
+                        region;
+                        status;
+                        statusReason;
+                        initiatedBy;
+                        newValue;
+                        previousValue;
+                        startTime;
+                        lastUpdatedDateTime
+                      }
+    let to_value x =
+      structure_to_value
+        [("Region", (Option.map x.region ~f:RegionName.to_value));
+        ("Status", (Option.map x.status ~f:UpdateStatus.to_value));
+        ("StatusReason",
+          (Option.map x.statusReason ~f:UpdateStatusReason.to_value));
+        ("InitiatedBy", (Option.map x.initiatedBy ~f:InitiatedBy.to_value));
+        ("NewValue", (Option.map x.newValue ~f:UpdateValue.to_value));
+        ("PreviousValue",
+          (Option.map x.previousValue ~f:UpdateValue.to_value));
+        ("StartTime", (Option.map x.startTime ~f:StartDateTime.to_value));
+        ("LastUpdatedDateTime",
+          (Option.map x.lastUpdatedDateTime ~f:LastUpdatedDateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedDateTime =
+        (Option.map ~f:LastUpdatedDateTime.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedDateTime") in
+      let startTime =
+        (Option.map ~f:StartDateTime.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let previousValue =
+        (Option.map ~f:UpdateValue.of_xml)
+          (Xml.child xml_arg0 "PreviousValue") in
+      let newValue =
+        (Option.map ~f:UpdateValue.of_xml) (Xml.child xml_arg0 "NewValue") in
+      let initiatedBy =
+        (Option.map ~f:InitiatedBy.of_xml) (Xml.child xml_arg0 "InitiatedBy") in
+      let statusReason =
+        (Option.map ~f:UpdateStatusReason.of_xml)
+          (Xml.child xml_arg0 "StatusReason") in
+      let status =
+        (Option.map ~f:UpdateStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let region =
+        (Option.map ~f:RegionName.of_xml) (Xml.child xml_arg0 "Region") in
+      make ?lastUpdatedDateTime ?startTime ?previousValue ?newValue
+        ?initiatedBy ?statusReason ?status ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedDateTime =
+        field_map json__ "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
+      let startTime = field_map json__ "StartTime" StartDateTime.of_json in
+      let previousValue =
+        field_map json__ "PreviousValue" UpdateValue.of_json in
+      let newValue = field_map json__ "NewValue" UpdateValue.of_json in
+      let initiatedBy = field_map json__ "InitiatedBy" InitiatedBy.of_json in
+      let statusReason =
+        field_map json__ "StatusReason" UpdateStatusReason.of_json in
+      let status = field_map json__ "Status" UpdateStatus.of_json in
+      let region = field_map json__ "Region" RegionName.of_json in
+      make ?lastUpdatedDateTime ?startTime ?previousValue ?newValue
+        ?initiatedBy ?statusReason ?status ?region ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An entry of update information related to a requested update type."]
 module Trust =
   struct
     type nonrec t =
@@ -2805,26 +4146,26 @@ module Trust =
         ?lastUpdatedDateTime ?createdDateTime ?trustState ?trustDirection
         ?trustType ?remoteDomainName ?trustId ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let selectiveAuth =
-        field_map json "SelectiveAuth" SelectiveAuth.of_json in
+        field_map json__ "SelectiveAuth" SelectiveAuth.of_json in
       let trustStateReason =
-        field_map json "TrustStateReason" TrustStateReason.of_json in
+        field_map json__ "TrustStateReason" TrustStateReason.of_json in
       let stateLastUpdatedDateTime =
-        field_map json "StateLastUpdatedDateTime"
+        field_map json__ "StateLastUpdatedDateTime"
           StateLastUpdatedDateTime.of_json in
       let lastUpdatedDateTime =
-        field_map json "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
+        field_map json__ "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
       let createdDateTime =
-        field_map json "CreatedDateTime" CreatedDateTime.of_json in
-      let trustState = field_map json "TrustState" TrustState.of_json in
+        field_map json__ "CreatedDateTime" CreatedDateTime.of_json in
+      let trustState = field_map json__ "TrustState" TrustState.of_json in
       let trustDirection =
-        field_map json "TrustDirection" TrustDirection.of_json in
-      let trustType = field_map json "TrustType" TrustType.of_json in
+        field_map json__ "TrustDirection" TrustDirection.of_json in
+      let trustType = field_map json__ "TrustType" TrustType.of_json in
       let remoteDomainName =
-        field_map json "RemoteDomainName" RemoteDomainName.of_json in
-      let trustId = field_map json "TrustId" TrustId.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+        field_map json__ "RemoteDomainName" RemoteDomainName.of_json in
+      let trustId = field_map json__ "TrustId" TrustId.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?selectiveAuth ?trustStateReason ?stateLastUpdatedDateTime
         ?lastUpdatedDateTime ?createdDateTime ?trustState ?trustDirection
         ?trustType ?remoteDomainName ?trustId ?directoryId ()
@@ -2876,13 +4217,13 @@ module Snapshot =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?startTime ?status ?name ?type_ ?snapshotId ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startTime = field_map json "StartTime" StartTime.of_json in
-      let status = field_map json "Status" SnapshotStatus.of_json in
-      let name = field_map json "Name" SnapshotName.of_json in
-      let type_ = field_map json "Type" SnapshotType.of_json in
-      let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let startTime = field_map json__ "StartTime" StartTime.of_json in
+      let status = field_map json__ "Status" SnapshotStatus.of_json in
+      let name = field_map json__ "Name" SnapshotName.of_json in
+      let type_ = field_map json__ "Type" SnapshotType.of_json in
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?startTime ?status ?name ?type_ ?snapshotId ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a directory snapshot."]
@@ -2985,27 +4326,207 @@ module SharedDirectory =
         ?sharedDirectoryId ?sharedAccountId ?shareMethod ?ownerDirectoryId
         ?ownerAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedDateTime =
-        field_map json "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
+        field_map json__ "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
       let createdDateTime =
-        field_map json "CreatedDateTime" CreatedDateTime.of_json in
-      let shareNotes = field_map json "ShareNotes" Notes.of_json in
-      let shareStatus = field_map json "ShareStatus" ShareStatus.of_json in
+        field_map json__ "CreatedDateTime" CreatedDateTime.of_json in
+      let shareNotes = field_map json__ "ShareNotes" Notes.of_json in
+      let shareStatus = field_map json__ "ShareStatus" ShareStatus.of_json in
       let sharedDirectoryId =
-        field_map json "SharedDirectoryId" DirectoryId.of_json in
+        field_map json__ "SharedDirectoryId" DirectoryId.of_json in
       let sharedAccountId =
-        field_map json "SharedAccountId" CustomerId.of_json in
-      let shareMethod = field_map json "ShareMethod" ShareMethod.of_json in
+        field_map json__ "SharedAccountId" CustomerId.of_json in
+      let shareMethod = field_map json__ "ShareMethod" ShareMethod.of_json in
       let ownerDirectoryId =
-        field_map json "OwnerDirectoryId" DirectoryId.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" CustomerId.of_json in
+        field_map json__ "OwnerDirectoryId" DirectoryId.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" CustomerId.of_json in
       make ?lastUpdatedDateTime ?createdDateTime ?shareNotes ?shareStatus
         ?sharedDirectoryId ?sharedAccountId ?shareMethod ?ownerDirectoryId
         ?ownerAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Details about the shared directory in the directory owner account for which the share request in the directory consumer account has been accepted."]
+module SettingEntry =
+  struct
+    type nonrec t =
+      {
+      type_: DirectoryConfigurationSettingType.t option
+        [@ocaml.doc
+          "The type, or category, of a directory setting. Similar settings have the same type. For example, Protocol, Cipher, or Certificate-Based Authentication."];
+      name: DirectoryConfigurationSettingName.t option
+        [@ocaml.doc
+          "The name of the directory setting. For example: TLS_1_0"];
+      allowedValues: DirectoryConfigurationSettingAllowedValues.t option
+        [@ocaml.doc
+          "The valid range of values for the directory setting. These values depend on the DataType of your directory."];
+      appliedValue: DirectoryConfigurationSettingValue.t option
+        [@ocaml.doc
+          "The value of the directory setting that is applied to the directory."];
+      requestedValue: DirectoryConfigurationSettingValue.t option
+        [@ocaml.doc
+          "The value that was last requested for the directory setting."];
+      requestStatus: DirectoryConfigurationStatus.t option
+        [@ocaml.doc
+          "The overall status of the request to update the directory setting request. If the directory setting is deployed in more than one region, and the request fails in any region, the overall status is Failed."];
+      requestDetailedStatus:
+        DirectoryConfigurationSettingRequestDetailedStatus.t option
+        [@ocaml.doc
+          "Details about the status of the request to update the directory setting. If the directory setting is deployed in more than one region, status is returned for the request in each region where the setting is deployed."];
+      requestStatusMessage:
+        DirectoryConfigurationSettingRequestStatusMessage.t option
+        [@ocaml.doc
+          "The last status message for the directory status request."];
+      lastUpdatedDateTime:
+        DirectoryConfigurationSettingLastUpdatedDateTime.t option
+        [@ocaml.doc
+          "The date and time when the directory setting was last updated."];
+      lastRequestedDateTime:
+        DirectoryConfigurationSettingLastRequestedDateTime.t option
+        [@ocaml.doc
+          "The date and time when the request to update a directory setting was last submitted."];
+      dataType: DirectoryConfigurationSettingDataType.t option
+        [@ocaml.doc
+          "The data type of a directory setting. This is used to define the AllowedValues of a setting. For example a data type can be Boolean, DurationInSeconds, or Enum."]}
+    let make ?type_ =
+      fun ?name ->
+        fun ?allowedValues ->
+          fun ?appliedValue ->
+            fun ?requestedValue ->
+              fun ?requestStatus ->
+                fun ?requestDetailedStatus ->
+                  fun ?requestStatusMessage ->
+                    fun ?lastUpdatedDateTime ->
+                      fun ?lastRequestedDateTime ->
+                        fun ?dataType ->
+                          fun () ->
+                            {
+                              type_;
+                              name;
+                              allowedValues;
+                              appliedValue;
+                              requestedValue;
+                              requestStatus;
+                              requestDetailedStatus;
+                              requestStatusMessage;
+                              lastUpdatedDateTime;
+                              lastRequestedDateTime;
+                              dataType
+                            }
+    let to_value x =
+      structure_to_value
+        [("Type",
+           (Option.map x.type_ ~f:DirectoryConfigurationSettingType.to_value));
+        ("Name",
+          (Option.map x.name ~f:DirectoryConfigurationSettingName.to_value));
+        ("AllowedValues",
+          (Option.map x.allowedValues
+             ~f:DirectoryConfigurationSettingAllowedValues.to_value));
+        ("AppliedValue",
+          (Option.map x.appliedValue
+             ~f:DirectoryConfigurationSettingValue.to_value));
+        ("RequestedValue",
+          (Option.map x.requestedValue
+             ~f:DirectoryConfigurationSettingValue.to_value));
+        ("RequestStatus",
+          (Option.map x.requestStatus
+             ~f:DirectoryConfigurationStatus.to_value));
+        ("RequestDetailedStatus",
+          (Option.map x.requestDetailedStatus
+             ~f:DirectoryConfigurationSettingRequestDetailedStatus.to_value));
+        ("RequestStatusMessage",
+          (Option.map x.requestStatusMessage
+             ~f:DirectoryConfigurationSettingRequestStatusMessage.to_value));
+        ("LastUpdatedDateTime",
+          (Option.map x.lastUpdatedDateTime
+             ~f:DirectoryConfigurationSettingLastUpdatedDateTime.to_value));
+        ("LastRequestedDateTime",
+          (Option.map x.lastRequestedDateTime
+             ~f:DirectoryConfigurationSettingLastRequestedDateTime.to_value));
+        ("DataType",
+          (Option.map x.dataType
+             ~f:DirectoryConfigurationSettingDataType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataType =
+        (Option.map ~f:DirectoryConfigurationSettingDataType.of_xml)
+          (Xml.child xml_arg0 "DataType") in
+      let lastRequestedDateTime =
+        (Option.map
+           ~f:DirectoryConfigurationSettingLastRequestedDateTime.of_xml)
+          (Xml.child xml_arg0 "LastRequestedDateTime") in
+      let lastUpdatedDateTime =
+        (Option.map
+           ~f:DirectoryConfigurationSettingLastUpdatedDateTime.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedDateTime") in
+      let requestStatusMessage =
+        (Option.map
+           ~f:DirectoryConfigurationSettingRequestStatusMessage.of_xml)
+          (Xml.child xml_arg0 "RequestStatusMessage") in
+      let requestDetailedStatus =
+        (Option.map
+           ~f:DirectoryConfigurationSettingRequestDetailedStatus.of_xml)
+          (Xml.child xml_arg0 "RequestDetailedStatus") in
+      let requestStatus =
+        (Option.map ~f:DirectoryConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "RequestStatus") in
+      let requestedValue =
+        (Option.map ~f:DirectoryConfigurationSettingValue.of_xml)
+          (Xml.child xml_arg0 "RequestedValue") in
+      let appliedValue =
+        (Option.map ~f:DirectoryConfigurationSettingValue.of_xml)
+          (Xml.child xml_arg0 "AppliedValue") in
+      let allowedValues =
+        (Option.map ~f:DirectoryConfigurationSettingAllowedValues.of_xml)
+          (Xml.child xml_arg0 "AllowedValues") in
+      let name =
+        (Option.map ~f:DirectoryConfigurationSettingName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let type_ =
+        (Option.map ~f:DirectoryConfigurationSettingType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      make ?dataType ?lastRequestedDateTime ?lastUpdatedDateTime
+        ?requestStatusMessage ?requestDetailedStatus ?requestStatus
+        ?requestedValue ?appliedValue ?allowedValues ?name ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataType =
+        field_map json__ "DataType"
+          DirectoryConfigurationSettingDataType.of_json in
+      let lastRequestedDateTime =
+        field_map json__ "LastRequestedDateTime"
+          DirectoryConfigurationSettingLastRequestedDateTime.of_json in
+      let lastUpdatedDateTime =
+        field_map json__ "LastUpdatedDateTime"
+          DirectoryConfigurationSettingLastUpdatedDateTime.of_json in
+      let requestStatusMessage =
+        field_map json__ "RequestStatusMessage"
+          DirectoryConfigurationSettingRequestStatusMessage.of_json in
+      let requestDetailedStatus =
+        field_map json__ "RequestDetailedStatus"
+          DirectoryConfigurationSettingRequestDetailedStatus.of_json in
+      let requestStatus =
+        field_map json__ "RequestStatus" DirectoryConfigurationStatus.of_json in
+      let requestedValue =
+        field_map json__ "RequestedValue"
+          DirectoryConfigurationSettingValue.of_json in
+      let appliedValue =
+        field_map json__ "AppliedValue"
+          DirectoryConfigurationSettingValue.of_json in
+      let allowedValues =
+        field_map json__ "AllowedValues"
+          DirectoryConfigurationSettingAllowedValues.of_json in
+      let name =
+        field_map json__ "Name" DirectoryConfigurationSettingName.of_json in
+      let type_ =
+        field_map json__ "Type" DirectoryConfigurationSettingType.of_json in
+      make ?dataType ?lastRequestedDateTime ?lastUpdatedDateTime
+        ?requestStatusMessage ?requestDetailedStatus ?requestStatus
+        ?requestedValue ?appliedValue ?allowedValues ?name ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the specified configurable setting for a directory."]
 module RegionDescription =
   struct
     type nonrec t =
@@ -3099,22 +4620,22 @@ module RegionDescription =
         ?desiredNumberOfDomainControllers ?vpcSettings ?status ?regionType
         ?regionName ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedDateTime =
-        field_map json "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
+        field_map json__ "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
       let statusLastUpdatedDateTime =
-        field_map json "StatusLastUpdatedDateTime"
+        field_map json__ "StatusLastUpdatedDateTime"
           StateLastUpdatedDateTime.of_json in
-      let launchTime = field_map json "LaunchTime" LaunchTime.of_json in
+      let launchTime = field_map json__ "LaunchTime" LaunchTime.of_json in
       let desiredNumberOfDomainControllers =
-        field_map json "DesiredNumberOfDomainControllers"
+        field_map json__ "DesiredNumberOfDomainControllers"
           DesiredNumberOfDomainControllers.of_json in
       let vpcSettings =
-        field_map json "VpcSettings" DirectoryVpcSettings.of_json in
-      let status = field_map json "Status" DirectoryStage.of_json in
-      let regionType = field_map json "RegionType" RegionType.of_json in
-      let regionName = field_map json "RegionName" RegionName.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+        field_map json__ "VpcSettings" DirectoryVpcSettings.of_json in
+      let status = field_map json__ "Status" DirectoryStage.of_json in
+      let regionType = field_map json__ "RegionType" RegionType.of_json in
+      let regionName = field_map json__ "RegionName" RegionName.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?lastUpdatedDateTime ?statusLastUpdatedDateTime ?launchTime
         ?desiredNumberOfDomainControllers ?vpcSettings ?status ?regionType
         ?regionName ?directoryId ()
@@ -3154,15 +4675,44 @@ module LDAPSSettingInfo =
         (Option.map ~f:LDAPSStatus.of_xml) (Xml.child xml_arg0 "LDAPSStatus") in
       make ?lastUpdatedDateTime ?lDAPSStatusReason ?lDAPSStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedDateTime =
-        field_map json "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
+        field_map json__ "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
       let lDAPSStatusReason =
-        field_map json "LDAPSStatusReason" LDAPSStatusReason.of_json in
-      let lDAPSStatus = field_map json "LDAPSStatus" LDAPSStatus.of_json in
+        field_map json__ "LDAPSStatusReason" LDAPSStatusReason.of_json in
+      let lDAPSStatus = field_map json__ "LDAPSStatus" LDAPSStatus.of_json in
       make ?lastUpdatedDateTime ?lDAPSStatusReason ?lDAPSStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains general information about the LDAPS settings."]
+module HybridUpdateInfoEntries =
+  struct
+    type nonrec t = HybridUpdateInfoEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:HybridUpdateInfoEntry.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:HybridUpdateInfoEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"HybridUpdateInfoEntries"
+        ~of_json:HybridUpdateInfoEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module EventTopic =
   struct
     type nonrec t =
@@ -3210,13 +4760,13 @@ module EventTopic =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?status ?createdDateTime ?topicArn ?topicName ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" TopicStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" TopicStatus.of_json in
       let createdDateTime =
-        field_map json "CreatedDateTime" CreatedDateTime.of_json in
-      let topicArn = field_map json "TopicArn" TopicArn.of_json in
-      let topicName = field_map json "TopicName" TopicName.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+        field_map json__ "CreatedDateTime" CreatedDateTime.of_json in
+      let topicArn = field_map json__ "TopicArn" TopicArn.of_json in
+      let topicName = field_map json__ "TopicName" TopicName.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?status ?createdDateTime ?topicArn ?topicName ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3233,6 +4783,8 @@ module DomainController =
           "Identifies a specific domain controller in the directory."];
       dnsIpAddr: IpAddr.t option
         [@ocaml.doc "The IP address of the domain controller."];
+      dnsIpv6Addr: Ipv6Addr.t option
+        [@ocaml.doc "The IPv6 address of the domain controller."];
       vpcId: VpcId.t option
         [@ocaml.doc
           "The identifier of the VPC that contains the domain controller."];
@@ -3253,32 +4805,35 @@ module DomainController =
     let make ?directoryId =
       fun ?domainControllerId ->
         fun ?dnsIpAddr ->
-          fun ?vpcId ->
-            fun ?subnetId ->
-              fun ?availabilityZone ->
-                fun ?status ->
-                  fun ?statusReason ->
-                    fun ?launchTime ->
-                      fun ?statusLastUpdatedDateTime ->
-                        fun () ->
-                          {
-                            directoryId;
-                            domainControllerId;
-                            dnsIpAddr;
-                            vpcId;
-                            subnetId;
-                            availabilityZone;
-                            status;
-                            statusReason;
-                            launchTime;
-                            statusLastUpdatedDateTime
-                          }
+          fun ?dnsIpv6Addr ->
+            fun ?vpcId ->
+              fun ?subnetId ->
+                fun ?availabilityZone ->
+                  fun ?status ->
+                    fun ?statusReason ->
+                      fun ?launchTime ->
+                        fun ?statusLastUpdatedDateTime ->
+                          fun () ->
+                            {
+                              directoryId;
+                              domainControllerId;
+                              dnsIpAddr;
+                              dnsIpv6Addr;
+                              vpcId;
+                              subnetId;
+                              availabilityZone;
+                              status;
+                              statusReason;
+                              launchTime;
+                              statusLastUpdatedDateTime
+                            }
     let to_value x =
       structure_to_value
         [("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value));
         ("DomainControllerId",
           (Option.map x.domainControllerId ~f:DomainControllerId.to_value));
         ("DnsIpAddr", (Option.map x.dnsIpAddr ~f:IpAddr.to_value));
+        ("DnsIpv6Addr", (Option.map x.dnsIpv6Addr ~f:Ipv6Addr.to_value));
         ("VpcId", (Option.map x.vpcId ~f:VpcId.to_value));
         ("SubnetId", (Option.map x.subnetId ~f:SubnetId.to_value));
         ("AvailabilityZone",
@@ -3309,6 +4864,8 @@ module DomainController =
       let subnetId =
         (Option.map ~f:SubnetId.of_xml) (Xml.child xml_arg0 "SubnetId") in
       let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
+      let dnsIpv6Addr =
+        (Option.map ~f:Ipv6Addr.of_xml) (Xml.child xml_arg0 "DnsIpv6Addr") in
       let dnsIpAddr =
         (Option.map ~f:IpAddr.of_xml) (Xml.child xml_arg0 "DnsIpAddr") in
       let domainControllerId =
@@ -3317,28 +4874,29 @@ module DomainController =
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?statusLastUpdatedDateTime ?launchTime ?statusReason ?status
-        ?availabilityZone ?subnetId ?vpcId ?dnsIpAddr ?domainControllerId
-        ?directoryId ()
+        ?availabilityZone ?subnetId ?vpcId ?dnsIpv6Addr ?dnsIpAddr
+        ?domainControllerId ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusLastUpdatedDateTime =
-        field_map json "StatusLastUpdatedDateTime"
+        field_map json__ "StatusLastUpdatedDateTime"
           LastUpdatedDateTime.of_json in
-      let launchTime = field_map json "LaunchTime" LaunchTime.of_json in
+      let launchTime = field_map json__ "LaunchTime" LaunchTime.of_json in
       let statusReason =
-        field_map json "StatusReason" DomainControllerStatusReason.of_json in
-      let status = field_map json "Status" DomainControllerStatus.of_json in
+        field_map json__ "StatusReason" DomainControllerStatusReason.of_json in
+      let status = field_map json__ "Status" DomainControllerStatus.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" AvailabilityZone.of_json in
-      let subnetId = field_map json "SubnetId" SubnetId.of_json in
-      let vpcId = field_map json "VpcId" VpcId.of_json in
-      let dnsIpAddr = field_map json "DnsIpAddr" IpAddr.of_json in
+        field_map json__ "AvailabilityZone" AvailabilityZone.of_json in
+      let subnetId = field_map json__ "SubnetId" SubnetId.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let dnsIpv6Addr = field_map json__ "DnsIpv6Addr" Ipv6Addr.of_json in
+      let dnsIpAddr = field_map json__ "DnsIpAddr" IpAddr.of_json in
       let domainControllerId =
-        field_map json "DomainControllerId" DomainControllerId.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+        field_map json__ "DomainControllerId" DomainControllerId.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?statusLastUpdatedDateTime ?launchTime ?statusReason ?status
-        ?availabilityZone ?subnetId ?vpcId ?dnsIpAddr ?domainControllerId
-        ?directoryId ()
+        ?availabilityZone ?subnetId ?vpcId ?dnsIpv6Addr ?dnsIpAddr
+        ?domainControllerId ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about the domain controllers for a specified directory."]
@@ -3357,15 +4915,18 @@ module DirectoryDescription =
         [@ocaml.doc "The edition associated with this directory."];
       alias: AliasName.t option
         [@ocaml.doc
-          "The alias for the directory. If no alias has been created for the directory, the alias is the directory identifier, such as d-XXXXXXXXXX."];
+          "The alias for the directory. If no alias exists, the alias is the directory identifier, such as d-XXXXXXXXXX."];
       accessUrl: AccessUrl.t option
         [@ocaml.doc
-          "The access URL for the directory, such as http://<alias>.awsapps.com. If no alias has been created for the directory, <alias> is the directory identifier, such as d-XXXXXXXXXX."];
+          "The access URL for the directory, such as http://<alias>.awsapps.com. If no alias exists, <alias> is the directory identifier, such as d-XXXXXXXXXX."];
       description: Description.t option
         [@ocaml.doc "The description for the directory."];
       dnsIpAddrs: DnsIpAddrs.t option
         [@ocaml.doc
-          "The IP addresses of the DNS servers for the directory. For a Simple AD or Microsoft AD directory, these are the IP addresses of the Simple AD or Microsoft AD directory servers. For an AD Connector directory, these are the IP addresses of the DNS servers or domain controllers in your self-managed directory to which the AD Connector is connected."];
+          "The IP addresses of the DNS servers for the directory. For a Simple AD or Microsoft AD directory, these are the IP addresses of the Simple AD or Microsoft AD directory servers. For an AD Connector directory, these are the IP addresses of self-managed directory to which the AD Connector is connected."];
+      dnsIpv6Addrs: DnsIpv6Addrs.t option
+        [@ocaml.doc
+          "The IPv6 addresses of the DNS servers for the directory. For a Simple AD or Microsoft AD directory, these are the IPv6 addresses of the Simple AD or Microsoft AD directory servers. For an AD Connector directory, these are the IPv6 addresses of the DNS servers or domain controllers in your self-managed directory to which the AD Connector is connected."];
       stage: DirectoryStage.t option
         [@ocaml.doc "The current stage of the directory."];
       shareStatus: ShareStatus.t option
@@ -3378,26 +4939,26 @@ module DirectoryDescription =
         [@ocaml.doc
           "A directory share request that is sent by the directory owner to the directory consumer. The request includes a typed message to help the directory consumer administrator determine whether to approve or reject the share invitation."];
       launchTime: LaunchTime.t option
-        [@ocaml.doc "Specifies when the directory was created."];
+        [@ocaml.doc "The date and time when the directory was created."];
       stageLastUpdatedDateTime: LastUpdatedDateTime.t option
-        [@ocaml.doc "The date and time that the stage was last updated."];
-      type_: DirectoryType.t option [@ocaml.doc "The directory size."];
+        [@ocaml.doc "The date and time when the stage was last updated."];
+      type_: DirectoryType.t option [@ocaml.doc "The directory type."];
       vpcSettings: DirectoryVpcSettingsDescription.t option
         [@ocaml.doc
-          "A DirectoryVpcSettingsDescription object that contains additional information about a directory. This member is only present if the directory is a Simple AD or Managed Microsoft AD directory."];
+          "A DirectoryVpcSettingsDescription object that contains additional information about a directory. Present only for Simple AD and Managed Microsoft AD directories."];
       connectSettings: DirectoryConnectSettingsDescription.t option
         [@ocaml.doc
-          "A DirectoryConnectSettingsDescription object that contains additional information about an AD Connector directory. This member is only present if the directory is an AD Connector directory."];
+          "DirectoryConnectSettingsDescription object that contains additional information about an AD Connector directory. Present only for AD Connector directories."];
       radiusSettings: RadiusSettings.t option
         [@ocaml.doc
-          "A RadiusSettings object that contains information about the RADIUS server configured for this directory."];
+          "Information about the RadiusSettings object configured for this directory."];
       radiusStatus: RadiusStatus.t option
         [@ocaml.doc "The status of the RADIUS MFA server connection."];
       stageReason: StageReason.t option
         [@ocaml.doc "Additional information about the directory stage."];
       ssoEnabled: SsoEnabled.t option
         [@ocaml.doc
-          "Indicates if single sign-on is enabled for the directory. For more information, see EnableSso and DisableSso."];
+          "Indicates whether single sign-on is enabled for the directory. For more information, see EnableSso and DisableSso."];
       desiredNumberOfDomainControllers:
         DesiredNumberOfDomainControllers.t option
         [@ocaml.doc
@@ -3406,7 +4967,14 @@ module DirectoryDescription =
         [@ocaml.doc
           "Describes the Managed Microsoft AD directory in the directory owner account."];
       regionsInfo: RegionsInfo.t option
-        [@ocaml.doc "Lists the Regions where the directory has replicated."]}
+        [@ocaml.doc "Lists the Regions where the directory has replicated."];
+      osVersion: OSVersion.t option
+        [@ocaml.doc "The operating system (OS) version of the directory."];
+      hybridSettings: HybridSettingsDescription.t option
+        [@ocaml.doc
+          "Contains information about the hybrid directory configuration for the directory, including Amazon Web Services System Manager managed node identifiers and DNS IPs."];
+      networkType: NetworkType.t option
+        [@ocaml.doc "The network type of the directory."]}
     let make ?directoryId =
       fun ?name ->
         fun ?shortName ->
@@ -3416,54 +4984,64 @@ module DirectoryDescription =
                 fun ?accessUrl ->
                   fun ?description ->
                     fun ?dnsIpAddrs ->
-                      fun ?stage ->
-                        fun ?shareStatus ->
-                          fun ?shareMethod ->
-                            fun ?shareNotes ->
-                              fun ?launchTime ->
-                                fun ?stageLastUpdatedDateTime ->
-                                  fun ?type_ ->
-                                    fun ?vpcSettings ->
-                                      fun ?connectSettings ->
-                                        fun ?radiusSettings ->
-                                          fun ?radiusStatus ->
-                                            fun ?stageReason ->
-                                              fun ?ssoEnabled ->
-                                                fun
-                                                  ?desiredNumberOfDomainControllers
-                                                  ->
+                      fun ?dnsIpv6Addrs ->
+                        fun ?stage ->
+                          fun ?shareStatus ->
+                            fun ?shareMethod ->
+                              fun ?shareNotes ->
+                                fun ?launchTime ->
+                                  fun ?stageLastUpdatedDateTime ->
+                                    fun ?type_ ->
+                                      fun ?vpcSettings ->
+                                        fun ?connectSettings ->
+                                          fun ?radiusSettings ->
+                                            fun ?radiusStatus ->
+                                              fun ?stageReason ->
+                                                fun ?ssoEnabled ->
                                                   fun
-                                                    ?ownerDirectoryDescription
+                                                    ?desiredNumberOfDomainControllers
                                                     ->
-                                                    fun ?regionsInfo ->
-                                                      fun () ->
-                                                        {
-                                                          directoryId;
-                                                          name;
-                                                          shortName;
-                                                          size;
-                                                          edition;
-                                                          alias;
-                                                          accessUrl;
-                                                          description;
-                                                          dnsIpAddrs;
-                                                          stage;
-                                                          shareStatus;
-                                                          shareMethod;
-                                                          shareNotes;
-                                                          launchTime;
-                                                          stageLastUpdatedDateTime;
-                                                          type_;
-                                                          vpcSettings;
-                                                          connectSettings;
-                                                          radiusSettings;
-                                                          radiusStatus;
-                                                          stageReason;
-                                                          ssoEnabled;
-                                                          desiredNumberOfDomainControllers;
-                                                          ownerDirectoryDescription;
-                                                          regionsInfo
-                                                        }
+                                                    fun
+                                                      ?ownerDirectoryDescription
+                                                      ->
+                                                      fun ?regionsInfo ->
+                                                        fun ?osVersion ->
+                                                          fun ?hybridSettings
+                                                            ->
+                                                            fun ?networkType
+                                                              ->
+                                                              fun () ->
+                                                                {
+                                                                  directoryId;
+                                                                  name;
+                                                                  shortName;
+                                                                  size;
+                                                                  edition;
+                                                                  alias;
+                                                                  accessUrl;
+                                                                  description;
+                                                                  dnsIpAddrs;
+                                                                  dnsIpv6Addrs;
+                                                                  stage;
+                                                                  shareStatus;
+                                                                  shareMethod;
+                                                                  shareNotes;
+                                                                  launchTime;
+                                                                  stageLastUpdatedDateTime;
+                                                                  type_;
+                                                                  vpcSettings;
+                                                                  connectSettings;
+                                                                  radiusSettings;
+                                                                  radiusStatus;
+                                                                  stageReason;
+                                                                  ssoEnabled;
+                                                                  desiredNumberOfDomainControllers;
+                                                                  ownerDirectoryDescription;
+                                                                  regionsInfo;
+                                                                  osVersion;
+                                                                  hybridSettings;
+                                                                  networkType
+                                                                }
     let to_value x =
       structure_to_value
         [("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value));
@@ -3476,6 +5054,8 @@ module DirectoryDescription =
         ("AccessUrl", (Option.map x.accessUrl ~f:AccessUrl.to_value));
         ("Description", (Option.map x.description ~f:Description.to_value));
         ("DnsIpAddrs", (Option.map x.dnsIpAddrs ~f:DnsIpAddrs.to_value));
+        ("DnsIpv6Addrs",
+          (Option.map x.dnsIpv6Addrs ~f:DnsIpv6Addrs.to_value));
         ("Stage", (Option.map x.stage ~f:DirectoryStage.to_value));
         ("ShareStatus", (Option.map x.shareStatus ~f:ShareStatus.to_value));
         ("ShareMethod", (Option.map x.shareMethod ~f:ShareMethod.to_value));
@@ -3503,9 +5083,20 @@ module DirectoryDescription =
         ("OwnerDirectoryDescription",
           (Option.map x.ownerDirectoryDescription
              ~f:OwnerDirectoryDescription.to_value));
-        ("RegionsInfo", (Option.map x.regionsInfo ~f:RegionsInfo.to_value))]
+        ("RegionsInfo", (Option.map x.regionsInfo ~f:RegionsInfo.to_value));
+        ("OsVersion", (Option.map x.osVersion ~f:OSVersion.to_value));
+        ("HybridSettings",
+          (Option.map x.hybridSettings ~f:HybridSettingsDescription.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let hybridSettings =
+        (Option.map ~f:HybridSettingsDescription.of_xml)
+          (Xml.child xml_arg0 "HybridSettings") in
+      let osVersion =
+        (Option.map ~f:OSVersion.of_xml) (Xml.child xml_arg0 "OsVersion") in
       let regionsInfo =
         (Option.map ~f:RegionsInfo.of_xml) (Xml.child xml_arg0 "RegionsInfo") in
       let ownerDirectoryDescription =
@@ -3545,6 +5136,9 @@ module DirectoryDescription =
         (Option.map ~f:ShareStatus.of_xml) (Xml.child xml_arg0 "ShareStatus") in
       let stage =
         (Option.map ~f:DirectoryStage.of_xml) (Xml.child xml_arg0 "Stage") in
+      let dnsIpv6Addrs =
+        (Option.map ~f:DnsIpv6Addrs.of_xml)
+          (Xml.child xml_arg0 "DnsIpv6Addrs") in
       let dnsIpAddrs =
         (Option.map ~f:DnsIpAddrs.of_xml) (Xml.child xml_arg0 "DnsIpAddrs") in
       let description =
@@ -3565,54 +5159,63 @@ module DirectoryDescription =
         (Option.map ~f:DirectoryName.of_xml) (Xml.child xml_arg0 "Name") in
       let directoryId =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
-      make ?regionsInfo ?ownerDirectoryDescription
-        ?desiredNumberOfDomainControllers ?ssoEnabled ?stageReason
-        ?radiusStatus ?radiusSettings ?connectSettings ?vpcSettings ?type_
-        ?stageLastUpdatedDateTime ?launchTime ?shareNotes ?shareMethod
-        ?shareStatus ?stage ?dnsIpAddrs ?description ?accessUrl ?alias
-        ?edition ?size ?shortName ?name ?directoryId ()
+      make ?networkType ?hybridSettings ?osVersion ?regionsInfo
+        ?ownerDirectoryDescription ?desiredNumberOfDomainControllers
+        ?ssoEnabled ?stageReason ?radiusStatus ?radiusSettings
+        ?connectSettings ?vpcSettings ?type_ ?stageLastUpdatedDateTime
+        ?launchTime ?shareNotes ?shareMethod ?shareStatus ?stage
+        ?dnsIpv6Addrs ?dnsIpAddrs ?description ?accessUrl ?alias ?edition
+        ?size ?shortName ?name ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regionsInfo = field_map json "RegionsInfo" RegionsInfo.of_json in
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let hybridSettings =
+        field_map json__ "HybridSettings" HybridSettingsDescription.of_json in
+      let osVersion = field_map json__ "OsVersion" OSVersion.of_json in
+      let regionsInfo = field_map json__ "RegionsInfo" RegionsInfo.of_json in
       let ownerDirectoryDescription =
-        field_map json "OwnerDirectoryDescription"
+        field_map json__ "OwnerDirectoryDescription"
           OwnerDirectoryDescription.of_json in
       let desiredNumberOfDomainControllers =
-        field_map json "DesiredNumberOfDomainControllers"
+        field_map json__ "DesiredNumberOfDomainControllers"
           DesiredNumberOfDomainControllers.of_json in
-      let ssoEnabled = field_map json "SsoEnabled" SsoEnabled.of_json in
-      let stageReason = field_map json "StageReason" StageReason.of_json in
-      let radiusStatus = field_map json "RadiusStatus" RadiusStatus.of_json in
+      let ssoEnabled = field_map json__ "SsoEnabled" SsoEnabled.of_json in
+      let stageReason = field_map json__ "StageReason" StageReason.of_json in
+      let radiusStatus = field_map json__ "RadiusStatus" RadiusStatus.of_json in
       let radiusSettings =
-        field_map json "RadiusSettings" RadiusSettings.of_json in
+        field_map json__ "RadiusSettings" RadiusSettings.of_json in
       let connectSettings =
-        field_map json "ConnectSettings"
+        field_map json__ "ConnectSettings"
           DirectoryConnectSettingsDescription.of_json in
       let vpcSettings =
-        field_map json "VpcSettings" DirectoryVpcSettingsDescription.of_json in
-      let type_ = field_map json "Type" DirectoryType.of_json in
+        field_map json__ "VpcSettings"
+          DirectoryVpcSettingsDescription.of_json in
+      let type_ = field_map json__ "Type" DirectoryType.of_json in
       let stageLastUpdatedDateTime =
-        field_map json "StageLastUpdatedDateTime" LastUpdatedDateTime.of_json in
-      let launchTime = field_map json "LaunchTime" LaunchTime.of_json in
-      let shareNotes = field_map json "ShareNotes" Notes.of_json in
-      let shareMethod = field_map json "ShareMethod" ShareMethod.of_json in
-      let shareStatus = field_map json "ShareStatus" ShareStatus.of_json in
-      let stage = field_map json "Stage" DirectoryStage.of_json in
-      let dnsIpAddrs = field_map json "DnsIpAddrs" DnsIpAddrs.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let accessUrl = field_map json "AccessUrl" AccessUrl.of_json in
-      let alias = field_map json "Alias" AliasName.of_json in
-      let edition = field_map json "Edition" DirectoryEdition.of_json in
-      let size = field_map json "Size" DirectorySize.of_json in
-      let shortName = field_map json "ShortName" DirectoryShortName.of_json in
-      let name = field_map json "Name" DirectoryName.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
-      make ?regionsInfo ?ownerDirectoryDescription
-        ?desiredNumberOfDomainControllers ?ssoEnabled ?stageReason
-        ?radiusStatus ?radiusSettings ?connectSettings ?vpcSettings ?type_
-        ?stageLastUpdatedDateTime ?launchTime ?shareNotes ?shareMethod
-        ?shareStatus ?stage ?dnsIpAddrs ?description ?accessUrl ?alias
-        ?edition ?size ?shortName ?name ?directoryId ()
+        field_map json__ "StageLastUpdatedDateTime"
+          LastUpdatedDateTime.of_json in
+      let launchTime = field_map json__ "LaunchTime" LaunchTime.of_json in
+      let shareNotes = field_map json__ "ShareNotes" Notes.of_json in
+      let shareMethod = field_map json__ "ShareMethod" ShareMethod.of_json in
+      let shareStatus = field_map json__ "ShareStatus" ShareStatus.of_json in
+      let stage = field_map json__ "Stage" DirectoryStage.of_json in
+      let dnsIpv6Addrs = field_map json__ "DnsIpv6Addrs" DnsIpv6Addrs.of_json in
+      let dnsIpAddrs = field_map json__ "DnsIpAddrs" DnsIpAddrs.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let accessUrl = field_map json__ "AccessUrl" AccessUrl.of_json in
+      let alias = field_map json__ "Alias" AliasName.of_json in
+      let edition = field_map json__ "Edition" DirectoryEdition.of_json in
+      let size = field_map json__ "Size" DirectorySize.of_json in
+      let shortName = field_map json__ "ShortName" DirectoryShortName.of_json in
+      let name = field_map json__ "Name" DirectoryName.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
+      make ?networkType ?hybridSettings ?osVersion ?regionsInfo
+        ?ownerDirectoryDescription ?desiredNumberOfDomainControllers
+        ?ssoEnabled ?stageReason ?radiusStatus ?radiusSettings
+        ?connectSettings ?vpcSettings ?type_ ?stageLastUpdatedDateTime
+        ?launchTime ?shareNotes ?shareMethod ?shareStatus ?stage
+        ?dnsIpv6Addrs ?dnsIpAddrs ?description ?accessUrl ?alias ?edition
+        ?size ?shortName ?name ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about an Directory Service directory."]
@@ -3626,18 +5229,26 @@ module ConditionalForwarder =
       dnsIpAddrs: DnsIpAddrs.t option
         [@ocaml.doc
           "The IP addresses of the remote DNS server associated with RemoteDomainName. This is the IP address of the DNS server that your conditional forwarder points to."];
+      dnsIpv6Addrs: DnsIpv6Addrs.t option
+        [@ocaml.doc
+          "The IPv6 addresses of the remote DNS server associated with RemoteDomainName. This is the IPv6 address of the DNS server that your conditional forwarder points to."];
       replicationScope: ReplicationScope.t option
         [@ocaml.doc
           "The replication scope of the conditional forwarder. The only allowed value is Domain, which will replicate the conditional forwarder to all of the domain controllers for your Amazon Web Services directory."]}
     let make ?remoteDomainName =
       fun ?dnsIpAddrs ->
-        fun ?replicationScope ->
-          fun () -> { remoteDomainName; dnsIpAddrs; replicationScope }
+        fun ?dnsIpv6Addrs ->
+          fun ?replicationScope ->
+            fun () ->
+              { remoteDomainName; dnsIpAddrs; dnsIpv6Addrs; replicationScope
+              }
     let to_value x =
       structure_to_value
         [("RemoteDomainName",
            (Option.map x.remoteDomainName ~f:RemoteDomainName.to_value));
         ("DnsIpAddrs", (Option.map x.dnsIpAddrs ~f:DnsIpAddrs.to_value));
+        ("DnsIpv6Addrs",
+          (Option.map x.dnsIpv6Addrs ~f:DnsIpv6Addrs.to_value));
         ("ReplicationScope",
           (Option.map x.replicationScope ~f:ReplicationScope.to_value))]
     let to_query v = to_query to_value v
@@ -3645,20 +5256,24 @@ module ConditionalForwarder =
       let replicationScope =
         (Option.map ~f:ReplicationScope.of_xml)
           (Xml.child xml_arg0 "ReplicationScope") in
+      let dnsIpv6Addrs =
+        (Option.map ~f:DnsIpv6Addrs.of_xml)
+          (Xml.child xml_arg0 "DnsIpv6Addrs") in
       let dnsIpAddrs =
         (Option.map ~f:DnsIpAddrs.of_xml) (Xml.child xml_arg0 "DnsIpAddrs") in
       let remoteDomainName =
         (Option.map ~f:RemoteDomainName.of_xml)
           (Xml.child xml_arg0 "RemoteDomainName") in
-      make ?replicationScope ?dnsIpAddrs ?remoteDomainName ()
+      make ?replicationScope ?dnsIpv6Addrs ?dnsIpAddrs ?remoteDomainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationScope =
-        field_map json "ReplicationScope" ReplicationScope.of_json in
-      let dnsIpAddrs = field_map json "DnsIpAddrs" DnsIpAddrs.of_json in
+        field_map json__ "ReplicationScope" ReplicationScope.of_json in
+      let dnsIpv6Addrs = field_map json__ "DnsIpv6Addrs" DnsIpv6Addrs.of_json in
+      let dnsIpAddrs = field_map json__ "DnsIpAddrs" DnsIpAddrs.of_json in
       let remoteDomainName =
-        field_map json "RemoteDomainName" RemoteDomainName.of_json in
-      make ?replicationScope ?dnsIpAddrs ?remoteDomainName ()
+        field_map json__ "RemoteDomainName" RemoteDomainName.of_json in
+      make ?replicationScope ?dnsIpv6Addrs ?dnsIpAddrs ?remoteDomainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Points to a remote domain with which you are setting up a trust relationship. Conditional forwarders are required in order to set up a trust relationship with another domain."]
@@ -3699,11 +5314,12 @@ module ClientAuthenticationSettingInfo =
           (Xml.child xml_arg0 "Type") in
       make ?lastUpdatedDateTime ?status ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedDateTime =
-        field_map json "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
-      let status = field_map json "Status" ClientAuthenticationStatus.of_json in
-      let type_ = field_map json "Type" ClientAuthenticationType.of_json in
+        field_map json__ "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
+      let status =
+        field_map json__ "Status" ClientAuthenticationStatus.of_json in
+      let type_ = field_map json__ "Type" ClientAuthenticationType.of_json in
       make ?lastUpdatedDateTime ?status ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3750,16 +5366,95 @@ module ClientCertAuthSettings =
         (Option.map ~f:OCSPUrl.of_xml) (Xml.child xml_arg0 "OCSPUrl") in
       make ?oCSPUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let oCSPUrl = field_map json "OCSPUrl" OCSPUrl.of_json in
+    let of_json json__ =
+      let oCSPUrl = field_map json__ "OCSPUrl" OCSPUrl.of_json in
       make ?oCSPUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about the client certificate authentication settings for the RegisterCertificate and DescribeCertificate operations."]
+module AssessmentStatusCode =
+  struct
+    type nonrec t = string
+    let context_ = "AssessmentStatusCode"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssessmentStatusCode" j
+    let to_json = simple_to_json to_value
+  end
+module AssessmentStatusReason =
+  struct
+    type nonrec t = string
+    let context_ = "AssessmentStatusReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssessmentStatusReason" j
+    let to_json = simple_to_json to_value
+  end
+module AssessmentVersion =
+  struct
+    type nonrec t = string
+    let context_ = "AssessmentVersion"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssessmentVersion" j
+    let to_json = simple_to_json to_value
+  end
+module AssessmentReport =
+  struct
+    type nonrec t =
+      {
+      domainControllerIp: IpAddr.t option
+        [@ocaml.doc
+          "The IP address of the domain controller that was tested during the assessment."];
+      validations: AssessmentValidations.t option
+        [@ocaml.doc
+          "A list of validation results for different test categories performed against this domain controller."]}
+    let make ?domainControllerIp =
+      fun ?validations -> fun () -> { domainControllerIp; validations }
+    let to_value x =
+      structure_to_value
+        [("DomainControllerIp",
+           (Option.map x.domainControllerIp ~f:IpAddr.to_value));
+        ("Validations",
+          (Option.map x.validations ~f:AssessmentValidations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let validations =
+        (Option.map ~f:AssessmentValidations.of_xml)
+          (Xml.child xml_arg0 "Validations") in
+      let domainControllerIp =
+        (Option.map ~f:IpAddr.of_xml)
+          (Xml.child xml_arg0 "DomainControllerIp") in
+      make ?validations ?domainControllerIp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let validations =
+        field_map json__ "Validations" AssessmentValidations.of_json in
+      let domainControllerIp =
+        field_map json__ "DomainControllerIp" IpAddr.of_json in
+      make ?validations ?domainControllerIp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the results of validation tests performed against a specific domain controller during a directory assessment."]
 module Attributes =
   struct
     type nonrec t = Attribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Attribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3824,29 +5519,38 @@ module IpRoute =
       {
       cidrIp: CidrIp.t option
         [@ocaml.doc
-          "IP address block using CIDR format, for example 10.0.0.0/24. This is often the address block of the DNS server used for your self-managed domain. For a single IP address use a CIDR address block with /32. For example 10.0.0.0/32."];
+          "IP address block in CIDR format, such as 10.0.0.0/24. This is often the address block of the DNS server used for your self-managed domain. For a single IP address, use a CIDR address block with /32. For example, 10.0.0.0/32."];
+      cidrIpv6: CidrIpv6.t option
+        [@ocaml.doc
+          "IPv6 address block in CIDR format, such as 2001:db8::/32. This is often the address block of the DNS server used for your self-managed domain. For a single IPv6 address, use a CIDR address block with /128. For example, 2001:db8::1/128."];
       description: Description.t option
         [@ocaml.doc "Description of the address block."]}
-    let make ?cidrIp = fun ?description -> fun () -> { cidrIp; description }
+    let make ?cidrIp =
+      fun ?cidrIpv6 ->
+        fun ?description -> fun () -> { cidrIp; cidrIpv6; description }
     let to_value x =
       structure_to_value
         [("CidrIp", (Option.map x.cidrIp ~f:CidrIp.to_value));
+        ("CidrIpv6", (Option.map x.cidrIpv6 ~f:CidrIpv6.to_value));
         ("Description", (Option.map x.description ~f:Description.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let cidrIpv6 =
+        (Option.map ~f:CidrIpv6.of_xml) (Xml.child xml_arg0 "CidrIpv6") in
       let cidrIp =
         (Option.map ~f:CidrIp.of_xml) (Xml.child xml_arg0 "CidrIp") in
-      make ?description ?cidrIp ()
+      make ?description ?cidrIpv6 ?cidrIp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" Description.of_json in
-      let cidrIp = field_map json "CidrIp" CidrIp.of_json in
-      make ?description ?cidrIp ()
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
+      let cidrIpv6 = field_map json__ "CidrIpv6" CidrIpv6.of_json in
+      let cidrIp = field_map json__ "CidrIp" CidrIp.of_json in
+      make ?description ?cidrIpv6 ?cidrIp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "IP address block. This is often the address block of the DNS server used for your self-managed domain."]
+       "Contains the IP address block. This is often the address block of the DNS server used for your self-managed domain."]
 module ClientException =
   struct
     type nonrec t =
@@ -3867,9 +5571,9 @@ module ClientException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A client exception has occurred."]
@@ -3893,9 +5597,9 @@ module EntityDoesNotExistException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified entity could not be found."]
@@ -3919,9 +5623,9 @@ module InvalidParameterException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more parameters are not valid."]
@@ -3945,9 +5649,9 @@ module ServiceException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An exception has occurred in Directory Service."]
@@ -3971,12 +5675,38 @@ module UnsupportedOperationException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The operation is not supported."]
+module DirectoryDoesNotExistException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option }
+    let make ?message = fun ?requestId -> fun () -> { message; requestId }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?requestId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified directory does not exist in the system."]
 module DirectoryUnavailableException =
   struct
     type nonrec t =
@@ -3997,13 +5727,91 @@ module DirectoryUnavailableException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?requestId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified directory is unavailable."]
+module IncompatibleSettingsException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option }
+    let make ?message = fun ?requestId -> fun () -> { message; requestId }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified directory is unavailable or could not be found."]
+       "The specified directory setting is not compatible with other settings."]
+module UnsupportedSettingsException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option }
+    let make ?message = fun ?requestId -> fun () -> { message; requestId }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?requestId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified directory setting is not supported."]
+module Settings =
+  struct
+    type nonrec t = Setting.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Setting.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Setting.of_xml)
+    let of_json j = list_of_json ~kind:"Settings" ~of_json:Setting.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DomainControllerLimitExceededException =
   struct
     type nonrec t =
@@ -4024,13 +5832,283 @@ module DomainControllerLimitExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The maximum allowed number of domain controllers per directory was exceeded. The default limit per directory is 20 domain controllers."]
+module ADAssessmentLimitExceededException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option }
+    let make ?message = fun ?requestId -> fun () -> { message; requestId }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?requestId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A directory assessment is automatically created when you create a hybrid directory. There are two types of assessments: CUSTOMER and SYSTEM. Your Amazon Web Services account has a limit of 100 CUSTOMER directory assessments. If you attempt to create a hybrid directory; and you already have 100 CUSTOMER directory assessments;, you will encounter an error. Delete assessments to free up capacity before trying again. You can request an increase to your CUSTOMER directory assessment quota by contacting customer support or delete existing CUSTOMER directory assessments; to free up capacity."]
+module HybridAdministratorAccountUpdate =
+  struct
+    type nonrec t =
+      {
+      secretArn: SecretArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret that contains the credentials for the AD administrator user, and enables hybrid domain controllers to join the managed AD domain. For example: \\{\"customerAdAdminDomainUsername\":\"carlos_salazar\",\"customerAdAdminDomainPassword\":\"ExamplePassword123!\"\\}."]}
+    let context_ = "HybridAdministratorAccountUpdate"
+    let make ~secretArn = fun () -> { secretArn }
+    let to_value x =
+      structure_to_value
+        [("SecretArn", (Some (SecretArn.to_value x.secretArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let secretArn =
+        SecretArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SecretArn") in
+      make ~secretArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
+      make ~secretArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use to recover to the hybrid directory administrator account credentials."]
+module HybridCustomerInstancesSettings =
+  struct
+    type nonrec t =
+      {
+      customerDnsIps: CustomerDnsIps.t
+        [@ocaml.doc
+          "The IP addresses of the DNS servers or domain controllers in your self-managed AD environment."];
+      instanceIds: AssessmentInstanceIds.t
+        [@ocaml.doc
+          "The identifiers of the self-managed instances with SSM used in hybrid directory."]}
+    let context_ = "HybridCustomerInstancesSettings"
+    let make ~customerDnsIps =
+      fun ~instanceIds -> fun () -> { customerDnsIps; instanceIds }
+    let to_value x =
+      structure_to_value
+        [("CustomerDnsIps",
+           (Some (CustomerDnsIps.to_value x.customerDnsIps)));
+        ("InstanceIds",
+          (Some (AssessmentInstanceIds.to_value x.instanceIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let instanceIds =
+        AssessmentInstanceIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InstanceIds") in
+      let customerDnsIps =
+        CustomerDnsIps.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CustomerDnsIps") in
+      make ~instanceIds ~customerDnsIps ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let instanceIds =
+        field_map_exn json__ "InstanceIds" AssessmentInstanceIds.of_json in
+      let customerDnsIps =
+        field_map_exn json__ "CustomerDnsIps" CustomerDnsIps.of_json in
+      make ~instanceIds ~customerDnsIps ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains configuration settings for self-managed instances with SSM used in hybrid directory operations."]
+module AccessDeniedException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option }
+    let make ?message = fun ?requestId -> fun () -> { message; requestId }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?requestId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You do not have sufficient access to perform this action."]
+module DirectoryInDesiredStateException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option }
+    let make ?message = fun ?requestId -> fun () -> { message; requestId }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?requestId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The directory is already updated to desired update type settings."]
+module SnapshotLimitExceededException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option }
+    let make ?message = fun ?requestId -> fun () -> { message; requestId }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?requestId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The maximum number of manual snapshots for the directory has been reached. You can use the GetSnapshotLimits operation to determine the snapshot limits for a directory."]
+module CreateSnapshotBeforeUpdate =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module DirectorySizeUpdateSettings =
+  struct
+    type nonrec t =
+      {
+      directorySize: DirectorySize.t option
+        [@ocaml.doc "The target directory size for the update operation."]}
+    let make ?directorySize = fun () -> { directorySize }
+    let to_value x =
+      structure_to_value
+        [("DirectorySize",
+           (Option.map x.directorySize ~f:DirectorySize.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directorySize =
+        (Option.map ~f:DirectorySize.of_xml)
+          (Xml.child xml_arg0 "DirectorySize") in
+      make ?directorySize ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directorySize =
+        field_map json__ "DirectorySize" DirectorySize.of_json in
+      make ?directorySize ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the directory size configuration for update operations."]
+module NetworkUpdateSettings =
+  struct
+    type nonrec t =
+      {
+      networkType: NetworkType.t option
+        [@ocaml.doc "The target network type for the directory update."];
+      customerDnsIpsV6: DnsIpv6Addrs.t option
+        [@ocaml.doc
+          "IPv6 addresses of DNS servers or domain controllers in the self-managed directory. Required only when updating an AD Connector directory."]}
+    let make ?networkType =
+      fun ?customerDnsIpsV6 -> fun () -> { networkType; customerDnsIpsV6 }
+    let to_value x =
+      structure_to_value
+        [("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value));
+        ("CustomerDnsIpsV6",
+          (Option.map x.customerDnsIpsV6 ~f:DnsIpv6Addrs.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customerDnsIpsV6 =
+        (Option.map ~f:DnsIpv6Addrs.of_xml)
+          (Xml.child xml_arg0 "CustomerDnsIpsV6") in
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      make ?customerDnsIpsV6 ?networkType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customerDnsIpsV6 =
+        field_map json__ "CustomerDnsIpsV6" DnsIpv6Addrs.of_json in
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      make ?customerDnsIpsV6 ?networkType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the network configuration for directory update operations."]
+module UpdateType =
+  struct
+    type nonrec t =
+      | OS 
+      | NETWORK 
+      | SIZE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | OS -> "OS"
+      | NETWORK -> "NETWORK"
+      | SIZE -> "SIZE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "OS" -> OS
+      | "NETWORK" -> NETWORK
+      | "SIZE" -> SIZE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration UpdateType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UpdateType" j)
+    let to_json = simple_to_json to_value
+  end
 module DirectoryNotSharedException =
   struct
     type nonrec t =
@@ -4051,9 +6129,9 @@ module DirectoryNotSharedException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4078,9 +6156,9 @@ module InvalidTargetException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified shared target is not valid."]
@@ -4106,39 +6184,13 @@ module UnshareTarget =
         TargetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~type_ ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" TargetType.of_json in
-      let id = field_map_exn json "Id" TargetId.of_json in make ~type_ ~id ()
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" TargetType.of_json in
+      let id = field_map_exn json__ "Id" TargetId.of_json in
+      make ~type_ ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Identifier that contains details about the directory consumer account with whom the directory is being unshared."]
-module SnapshotLimitExceededException =
-  struct
-    type nonrec t =
-      {
-      message: ExceptionMessage.t option ;
-      requestId: RequestId.t option }
-    let make ?message = fun ?requestId -> fun () -> { message; requestId }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
-        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let requestId =
-        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
-      let message =
-        (Option.map ~f:ExceptionMessage.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?requestId ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
-      make ?requestId ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The maximum number of manual snapshots for the directory has been reached. You can use the GetSnapshotLimits operation to determine the snapshot limits for a directory."]
 module CreateSnapshotBeforeSchemaExtension =
   struct
     type nonrec t = bool
@@ -4170,33 +6222,82 @@ module LdifContent =
     let of_json j = string_of_json ~kind:"LdifContent" j
     let to_json = simple_to_json to_value
   end
-module AccessDeniedException =
+module AssessmentConfiguration =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t option ;
-      requestId: RequestId.t option }
-    let make ?message = fun ?requestId -> fun () -> { message; requestId }
+      customerDnsIps: CustomerDnsIps.t
+        [@ocaml.doc
+          "A list of IP addresses for the DNS servers or domain controllers in your self-managed AD that are tested during the assessment."];
+      dnsName: DirectoryName.t
+        [@ocaml.doc
+          "The fully qualified domain name (FQDN) of the self-managed AD domain to assess."];
+      vpcSettings: DirectoryVpcSettings.t ;
+      instanceIds: AssessmentInstanceIds.t
+        [@ocaml.doc
+          "The identifiers of the self-managed instances with SSM that are used to perform connectivity and validation tests."];
+      securityGroupIds: SecurityGroupIds.t option
+        [@ocaml.doc
+          "By default, the service attaches a security group to allow network access to the self-managed nodes in your Amazon VPC. You can optionally supply your own security group that allows network traffic to and from your self-managed domain controllers outside of your Amazon VPC."]}
+    let context_ = "AssessmentConfiguration"
+    let make ?securityGroupIds =
+      fun ~customerDnsIps ->
+        fun ~dnsName ->
+          fun ~vpcSettings ->
+            fun ~instanceIds ->
+              fun () ->
+                {
+                  securityGroupIds;
+                  customerDnsIps;
+                  dnsName;
+                  vpcSettings;
+                  instanceIds
+                }
     let to_value x =
       structure_to_value
-        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
-        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
+        [("CustomerDnsIps",
+           (Some (CustomerDnsIps.to_value x.customerDnsIps)));
+        ("DnsName", (Some (DirectoryName.to_value x.dnsName)));
+        ("VpcSettings", (Some (DirectoryVpcSettings.to_value x.vpcSettings)));
+        ("InstanceIds",
+          (Some (AssessmentInstanceIds.to_value x.instanceIds)));
+        ("SecurityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupIds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let requestId =
-        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
-      let message =
-        (Option.map ~f:ExceptionMessage.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?requestId ?message ()
+      let securityGroupIds =
+        (Option.map ~f:SecurityGroupIds.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupIds") in
+      let instanceIds =
+        AssessmentInstanceIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InstanceIds") in
+      let vpcSettings =
+        DirectoryVpcSettings.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VpcSettings") in
+      let dnsName =
+        DirectoryName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DnsName") in
+      let customerDnsIps =
+        CustomerDnsIps.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CustomerDnsIps") in
+      make ?securityGroupIds ~instanceIds ~vpcSettings ~dnsName
+        ~customerDnsIps ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
-      make ?requestId ?message ()
+    let of_json json__ =
+      let securityGroupIds =
+        field_map json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let instanceIds =
+        field_map_exn json__ "InstanceIds" AssessmentInstanceIds.of_json in
+      let vpcSettings =
+        field_map_exn json__ "VpcSettings" DirectoryVpcSettings.of_json in
+      let dnsName = field_map_exn json__ "DnsName" DirectoryName.of_json in
+      let customerDnsIps =
+        field_map_exn json__ "CustomerDnsIps" CustomerDnsIps.of_json in
+      make ?securityGroupIds ~instanceIds ~vpcSettings ~dnsName
+        ~customerDnsIps ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Client authentication is not available in this region at this time."]
+       "Contains configuration parameters required to perform a directory assessment."]
 module DirectoryAlreadySharedException =
   struct
     type nonrec t =
@@ -4217,9 +6318,9 @@ module DirectoryAlreadySharedException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4244,9 +6345,9 @@ module OrganizationsException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4271,9 +6372,9 @@ module ShareLimitExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4300,9 +6401,10 @@ module ShareTarget =
         TargetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~type_ ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" TargetType.of_json in
-      let id = field_map_exn json "Id" TargetId.of_json in make ~type_ ~id ()
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" TargetType.of_json in
+      let id = field_map_exn json__ "Id" TargetId.of_json in
+      make ~type_ ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Identifier that contains details about the directory consumer account."]
@@ -4326,9 +6428,9 @@ module InvalidPasswordException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4353,9 +6455,9 @@ module UserDoesNotExistException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4419,6 +6521,9 @@ module TagKeys =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4438,36 +6543,13 @@ module TagKeys =
     let of_json j = list_of_json ~kind:"TagKeys" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
-module DirectoryDoesNotExistException =
-  struct
-    type nonrec t =
-      {
-      message: ExceptionMessage.t option ;
-      requestId: RequestId.t option }
-    let make ?message = fun ?requestId -> fun () -> { message; requestId }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
-        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let requestId =
-        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
-      let message =
-        (Option.map ~f:ExceptionMessage.of_xml)
-          (Xml.child xml_arg0 "Message") in
-      make ?requestId ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
-      make ?requestId ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified directory does not exist in the system."]
 module CidrIps =
   struct
     type nonrec t = CidrIp.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CidrIp.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4485,6 +6567,33 @@ module CidrIps =
                           | _ -> true)
                      | _ -> true))) ~f:CidrIp.of_xml)
     let of_json j = list_of_json ~kind:"CidrIps" ~of_json:CidrIp.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CidrIpv6s =
+  struct
+    type nonrec t = CidrIpv6.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CidrIpv6.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CidrIpv6.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CidrIpv6s" ~of_json:CidrIpv6.of_json j
     let to_json v = composed_to_json to_value v
   end
 module CertificateAlreadyExistsException =
@@ -4507,9 +6616,9 @@ module CertificateAlreadyExistsException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4534,9 +6643,9 @@ module CertificateLimitExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4561,9 +6670,9 @@ module InvalidCertificateException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4606,9 +6715,9 @@ module InvalidNextTokenException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The NextToken value is not valid."]
@@ -4629,6 +6738,9 @@ module Tags =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4652,6 +6764,9 @@ module SchemaExtensionsInfo =
   struct
     type nonrec t = SchemaExtensionInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SchemaExtensionInfo.to_value)) |>
         (fun x -> `List x)
@@ -4678,6 +6793,9 @@ module LogSubscriptions =
   struct
     type nonrec t = LogSubscription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LogSubscription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4703,6 +6821,9 @@ module IpRoutesInfo =
   struct
     type nonrec t = IpRouteInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpRouteInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4727,6 +6848,9 @@ module CertificatesInfo =
   struct
     type nonrec t = CertificateInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CertificateInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4762,6 +6886,51 @@ module PageLimit =
     let to_header x = Int.to_string x
     let of_xml xml_arg0 =
       Int.of_string (string_of_xml ~kind:"an integer for PageLimit" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Assessments =
+  struct
+    type nonrec t = AssessmentSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssessmentSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssessmentSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Assessments" ~of_json:AssessmentSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AssessmentLimit =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for AssessmentLimit" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
@@ -4809,14 +6978,14 @@ module SnapshotLimits =
       make ?manualSnapshotsLimitReached ?manualSnapshotsCurrentCount
         ?manualSnapshotsLimit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let manualSnapshotsLimitReached =
-        field_map json "ManualSnapshotsLimitReached"
+        field_map json__ "ManualSnapshotsLimitReached"
           ManualSnapshotsLimitReached.of_json in
       let manualSnapshotsCurrentCount =
-        field_map json "ManualSnapshotsCurrentCount" Limit.of_json in
+        field_map json__ "ManualSnapshotsCurrentCount" Limit.of_json in
       let manualSnapshotsLimit =
-        field_map json "ManualSnapshotsLimit" Limit.of_json in
+        field_map json__ "ManualSnapshotsLimit" Limit.of_json in
       make ?manualSnapshotsLimitReached ?manualSnapshotsCurrentCount
         ?manualSnapshotsLimit ()
     let to_json v = composed_to_json to_value v
@@ -4934,28 +7103,28 @@ module DirectoryLimits =
         ?cloudOnlyMicrosoftADLimit ?cloudOnlyDirectoriesLimitReached
         ?cloudOnlyDirectoriesCurrentCount ?cloudOnlyDirectoriesLimit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectedDirectoriesLimitReached =
-        field_map json "ConnectedDirectoriesLimitReached"
+        field_map json__ "ConnectedDirectoriesLimitReached"
           ConnectedDirectoriesLimitReached.of_json in
       let connectedDirectoriesCurrentCount =
-        field_map json "ConnectedDirectoriesCurrentCount" Limit.of_json in
+        field_map json__ "ConnectedDirectoriesCurrentCount" Limit.of_json in
       let connectedDirectoriesLimit =
-        field_map json "ConnectedDirectoriesLimit" Limit.of_json in
+        field_map json__ "ConnectedDirectoriesLimit" Limit.of_json in
       let cloudOnlyMicrosoftADLimitReached =
-        field_map json "CloudOnlyMicrosoftADLimitReached"
+        field_map json__ "CloudOnlyMicrosoftADLimitReached"
           CloudOnlyDirectoriesLimitReached.of_json in
       let cloudOnlyMicrosoftADCurrentCount =
-        field_map json "CloudOnlyMicrosoftADCurrentCount" Limit.of_json in
+        field_map json__ "CloudOnlyMicrosoftADCurrentCount" Limit.of_json in
       let cloudOnlyMicrosoftADLimit =
-        field_map json "CloudOnlyMicrosoftADLimit" Limit.of_json in
+        field_map json__ "CloudOnlyMicrosoftADLimit" Limit.of_json in
       let cloudOnlyDirectoriesLimitReached =
-        field_map json "CloudOnlyDirectoriesLimitReached"
+        field_map json__ "CloudOnlyDirectoriesLimitReached"
           CloudOnlyDirectoriesLimitReached.of_json in
       let cloudOnlyDirectoriesCurrentCount =
-        field_map json "CloudOnlyDirectoriesCurrentCount" Limit.of_json in
+        field_map json__ "CloudOnlyDirectoriesCurrentCount" Limit.of_json in
       let cloudOnlyDirectoriesLimit =
-        field_map json "CloudOnlyDirectoriesLimit" Limit.of_json in
+        field_map json__ "CloudOnlyDirectoriesLimit" Limit.of_json in
       make ?connectedDirectoriesLimitReached
         ?connectedDirectoriesCurrentCount ?connectedDirectoriesLimit
         ?cloudOnlyMicrosoftADLimitReached ?cloudOnlyMicrosoftADCurrentCount
@@ -4986,9 +7155,9 @@ module AuthenticationFailedException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An authentication error occurred."]
@@ -5012,9 +7181,9 @@ module InsufficientPermissionsException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5057,9 +7226,9 @@ module EntityAlreadyExistsException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified entity already exists."]
@@ -5083,9 +7252,9 @@ module InvalidLDAPSStatusException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5110,9 +7279,9 @@ module NoAvailableCertificateException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5153,16 +7322,119 @@ module InvalidClientAuthStatusException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Client authentication is already enabled."]
+module EnableAlreadyInProgressException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option }
+    let make ?message = fun ?requestId -> fun () -> { message; requestId }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?requestId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An enable operation for CA enrollment policy is already in progress for this directory."]
+module PcaConnectorArn =
+  struct
+    type nonrec t = string
+    let context_ = "PcaConnectorArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:[\\w-]+:pca-connector-ad:[\\w-]+:[0-9]+:connector\\/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PcaConnectorArn" j
+    let to_json = simple_to_json to_value
+  end
+module DisableAlreadyInProgressException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option ;
+      requestId: RequestId.t option }
+    let make ?message = fun ?requestId -> fun () -> { message; requestId }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
+        ("RequestId", (Option.map x.requestId ~f:RequestId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?requestId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?requestId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A disable operation for CA enrollment policy is already in progress for this directory."]
+module UpdateActivities =
+  struct
+    type nonrec t = UpdateInfoEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UpdateInfoEntry.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UpdateInfoEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UpdateActivities" ~of_json:UpdateInfoEntry.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module Trusts =
   struct
     type nonrec t = Trust.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Trust.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5186,6 +7458,9 @@ module TrustIds =
   struct
     type nonrec t = TrustId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrustId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5209,6 +7484,9 @@ module Snapshots =
   struct
     type nonrec t = Snapshot.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Snapshot.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5233,6 +7511,9 @@ module SnapshotIds =
   struct
     type nonrec t = SnapshotId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5257,6 +7538,9 @@ module SharedDirectories =
   struct
     type nonrec t = SharedDirectory.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SharedDirectory.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5282,6 +7566,9 @@ module DirectoryIds =
   struct
     type nonrec t = DirectoryId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DirectoryId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5302,10 +7589,40 @@ module DirectoryIds =
       list_of_json ~kind:"DirectoryIds" ~of_json:DirectoryId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SettingEntries =
+  struct
+    type nonrec t = SettingEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SettingEntry.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SettingEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SettingEntries" ~of_json:SettingEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module RegionsDescription =
   struct
     type nonrec t = RegionDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RegionDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5331,6 +7648,9 @@ module LDAPSSettingsInfo =
   struct
     type nonrec t = LDAPSSettingInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LDAPSSettingInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5352,10 +7672,80 @@ module LDAPSSettingsInfo =
         ~of_json:LDAPSSettingInfo.of_json j
     let to_json v = composed_to_json to_value v
   end
+module HybridUpdateActivities =
+  struct
+    type nonrec t =
+      {
+      selfManagedInstances: HybridUpdateInfoEntries.t option
+        [@ocaml.doc
+          "A list of update activities related to the self-managed instances with SSM in the self-managed instances with SSM hybrid directory configuration."];
+      hybridAdministratorAccount: HybridUpdateInfoEntries.t option
+        [@ocaml.doc
+          "A list of update activities related to hybrid directory administrator account changes."]}
+    let make ?selfManagedInstances =
+      fun ?hybridAdministratorAccount ->
+        fun () -> { selfManagedInstances; hybridAdministratorAccount }
+    let to_value x =
+      structure_to_value
+        [("SelfManagedInstances",
+           (Option.map x.selfManagedInstances
+              ~f:HybridUpdateInfoEntries.to_value));
+        ("HybridAdministratorAccount",
+          (Option.map x.hybridAdministratorAccount
+             ~f:HybridUpdateInfoEntries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hybridAdministratorAccount =
+        (Option.map ~f:HybridUpdateInfoEntries.of_xml)
+          (Xml.child xml_arg0 "HybridAdministratorAccount") in
+      let selfManagedInstances =
+        (Option.map ~f:HybridUpdateInfoEntries.of_xml)
+          (Xml.child xml_arg0 "SelfManagedInstances") in
+      make ?hybridAdministratorAccount ?selfManagedInstances ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hybridAdministratorAccount =
+        field_map json__ "HybridAdministratorAccount"
+          HybridUpdateInfoEntries.of_json in
+      let selfManagedInstances =
+        field_map json__ "SelfManagedInstances"
+          HybridUpdateInfoEntries.of_json in
+      make ?hybridAdministratorAccount ?selfManagedInstances ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about update activities for different components of a hybrid directory."]
+module HybridUpdateType =
+  struct
+    type nonrec t =
+      | SelfManagedInstances 
+      | HybridAdministratorAccount 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SelfManagedInstances -> "SelfManagedInstances"
+      | HybridAdministratorAccount -> "HybridAdministratorAccount"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SelfManagedInstances" -> SelfManagedInstances
+      | "HybridAdministratorAccount" -> HybridAdministratorAccount
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration HybridUpdateType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"HybridUpdateType" j)
+    let to_json = simple_to_json to_value
+  end
 module EventTopics =
   struct
     type nonrec t = EventTopic.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventTopic.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5380,6 +7770,9 @@ module TopicNames =
   struct
     type nonrec t = TopicName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TopicName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5404,6 +7797,9 @@ module DomainControllers =
   struct
     type nonrec t = DomainController.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainController.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5429,6 +7825,9 @@ module DomainControllerIds =
   struct
     type nonrec t = DomainControllerId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainControllerId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5450,10 +7849,47 @@ module DomainControllerIds =
         ~of_json:DomainControllerId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DataAccessStatus =
+  struct
+    type nonrec t =
+      | Disabled 
+      | Disabling 
+      | Enabled 
+      | Enabling 
+      | Failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Disabled -> "Disabled"
+      | Disabling -> "Disabling"
+      | Enabled -> "Enabled"
+      | Enabling -> "Enabling"
+      | Failed -> "Failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Disabled" -> Disabled
+      | "Disabling" -> Disabling
+      | "Enabled" -> Enabled
+      | "Enabling" -> Enabling
+      | "Failed" -> Failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DataAccessStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DataAccessStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module DirectoryDescriptions =
   struct
     type nonrec t = DirectoryDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DirectoryDescription.to_value)) |>
         (fun x -> `List x)
@@ -5480,6 +7916,9 @@ module ConditionalForwarders =
   struct
     type nonrec t = ConditionalForwarder.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConditionalForwarder.to_value)) |>
         (fun x -> `List x)
@@ -5506,6 +7945,9 @@ module RemoteDomainNames =
   struct
     type nonrec t = RemoteDomainName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RemoteDomainName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5531,6 +7973,9 @@ module ClientAuthenticationSettingsInfo =
   struct
     type nonrec t = ClientAuthenticationSettingInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClientAuthenticationSettingInfo.to_value)) |>
         (fun x -> `List x)
@@ -5638,22 +8083,22 @@ module Certificate =
       make ?clientCertAuthSettings ?type_ ?expiryDateTime ?registeredDateTime
         ?commonName ?stateReason ?state ?certificateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientCertAuthSettings =
-        field_map json "ClientCertAuthSettings"
+        field_map json__ "ClientCertAuthSettings"
           ClientCertAuthSettings.of_json in
-      let type_ = field_map json "Type" CertificateType.of_json in
+      let type_ = field_map json__ "Type" CertificateType.of_json in
       let expiryDateTime =
-        field_map json "ExpiryDateTime" CertificateExpiryDateTime.of_json in
+        field_map json__ "ExpiryDateTime" CertificateExpiryDateTime.of_json in
       let registeredDateTime =
-        field_map json "RegisteredDateTime"
+        field_map json__ "RegisteredDateTime"
           CertificateRegisteredDateTime.of_json in
-      let commonName = field_map json "CommonName" CertificateCN.of_json in
+      let commonName = field_map json__ "CommonName" CertificateCN.of_json in
       let stateReason =
-        field_map json "StateReason" CertificateStateReason.of_json in
-      let state = field_map json "State" CertificateState.of_json in
+        field_map json__ "StateReason" CertificateStateReason.of_json in
+      let state = field_map json__ "State" CertificateState.of_json in
       let certificateId =
-        field_map json "CertificateId" CertificateId.of_json in
+        field_map json__ "CertificateId" CertificateId.of_json in
       make ?clientCertAuthSettings ?type_ ?expiryDateTime ?registeredDateTime
         ?commonName ?stateReason ?state ?certificateId ()
     let to_json v = composed_to_json to_value v
@@ -5678,13 +8123,276 @@ module CertificateDoesNotExistException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The certificate is not present in the system for describe or deregister activities."]
+module CaEnrollmentPolicyStatus =
+  struct
+    type nonrec t =
+      | InProgress 
+      | Success 
+      | Failed 
+      | Disabling 
+      | Disabled 
+      | Impaired 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | InProgress -> "InProgress"
+      | Success -> "Success"
+      | Failed -> "Failed"
+      | Disabling -> "Disabling"
+      | Disabled -> "Disabled"
+      | Impaired -> "Impaired"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "InProgress" -> InProgress
+      | "Success" -> Success
+      | "Failed" -> Failed
+      | "Disabling" -> Disabling
+      | "Disabled" -> Disabled
+      | "Impaired" -> Impaired
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CaEnrollmentPolicyStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CaEnrollmentPolicyStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CaEnrollmentPolicyStatusReason =
+  struct
+    type nonrec t = string
+    let context_ = "CaEnrollmentPolicyStatusReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CaEnrollmentPolicyStatusReason" j
+    let to_json = simple_to_json to_value
+  end
+module Assessment =
+  struct
+    type nonrec t =
+      {
+      assessmentId: AssessmentId.t option
+        [@ocaml.doc "The unique identifier of the directory assessment."];
+      directoryId: DirectoryId.t option
+        [@ocaml.doc
+          "The identifier of the directory associated with this assessment."];
+      dnsName: DirectoryName.t option
+        [@ocaml.doc
+          "The fully qualified domain name (FQDN) of the Active Directory domain being assessed."];
+      startTime: AssessmentStartTime.t option
+        [@ocaml.doc "The date and time when the assessment was initiated."];
+      lastUpdateDateTime: LastUpdateDateTime.t option
+        [@ocaml.doc
+          "The date and time when the assessment status was last updated."];
+      status: AssessmentStatus.t option
+        [@ocaml.doc
+          "The current status of the assessment. Valid values include SUCCESS, FAILED, PENDING, and IN_PROGRESS."];
+      statusCode: AssessmentStatusCode.t option
+        [@ocaml.doc
+          "A detailed status code providing additional information about the assessment state."];
+      statusReason: AssessmentStatusReason.t option
+        [@ocaml.doc
+          "A human-readable description of the current assessment status, including any error details or progress information."];
+      customerDnsIps: CustomerDnsIps.t option
+        [@ocaml.doc
+          "The IP addresses of the DNS servers or domain controllers in your self-managed AD environment."];
+      vpcId: VpcId.t option
+        [@ocaml.doc
+          "Contains Amazon VPC information for the StartADAssessment operation."];
+      subnetIds: SubnetIds.t option
+        [@ocaml.doc
+          "A list of subnet identifiers in the Amazon VPC in which the hybrid directory is created."];
+      securityGroupIds: SecurityGroupIds.t option
+        [@ocaml.doc
+          "The security groups identifiers attached to the network interfaces."];
+      selfManagedInstanceIds: AssessmentInstanceIds.t option
+        [@ocaml.doc
+          "The identifiers of the self-managed AD instances used to perform the assessment."];
+      reportType: AssessmentReportType.t option
+        [@ocaml.doc
+          "The type of assessment report generated. Valid values are CUSTOMER and SYSTEM."];
+      version: AssessmentVersion.t option
+        [@ocaml.doc
+          "The version of the assessment framework used to evaluate your self-managed AD environment."]}
+    let make ?assessmentId =
+      fun ?directoryId ->
+        fun ?dnsName ->
+          fun ?startTime ->
+            fun ?lastUpdateDateTime ->
+              fun ?status ->
+                fun ?statusCode ->
+                  fun ?statusReason ->
+                    fun ?customerDnsIps ->
+                      fun ?vpcId ->
+                        fun ?subnetIds ->
+                          fun ?securityGroupIds ->
+                            fun ?selfManagedInstanceIds ->
+                              fun ?reportType ->
+                                fun ?version ->
+                                  fun () ->
+                                    {
+                                      assessmentId;
+                                      directoryId;
+                                      dnsName;
+                                      startTime;
+                                      lastUpdateDateTime;
+                                      status;
+                                      statusCode;
+                                      statusReason;
+                                      customerDnsIps;
+                                      vpcId;
+                                      subnetIds;
+                                      securityGroupIds;
+                                      selfManagedInstanceIds;
+                                      reportType;
+                                      version
+                                    }
+    let to_value x =
+      structure_to_value
+        [("AssessmentId",
+           (Option.map x.assessmentId ~f:AssessmentId.to_value));
+        ("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value));
+        ("DnsName", (Option.map x.dnsName ~f:DirectoryName.to_value));
+        ("StartTime",
+          (Option.map x.startTime ~f:AssessmentStartTime.to_value));
+        ("LastUpdateDateTime",
+          (Option.map x.lastUpdateDateTime ~f:LastUpdateDateTime.to_value));
+        ("Status", (Option.map x.status ~f:AssessmentStatus.to_value));
+        ("StatusCode",
+          (Option.map x.statusCode ~f:AssessmentStatusCode.to_value));
+        ("StatusReason",
+          (Option.map x.statusReason ~f:AssessmentStatusReason.to_value));
+        ("CustomerDnsIps",
+          (Option.map x.customerDnsIps ~f:CustomerDnsIps.to_value));
+        ("VpcId", (Option.map x.vpcId ~f:VpcId.to_value));
+        ("SubnetIds", (Option.map x.subnetIds ~f:SubnetIds.to_value));
+        ("SecurityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupIds.to_value));
+        ("SelfManagedInstanceIds",
+          (Option.map x.selfManagedInstanceIds
+             ~f:AssessmentInstanceIds.to_value));
+        ("ReportType",
+          (Option.map x.reportType ~f:AssessmentReportType.to_value));
+        ("Version", (Option.map x.version ~f:AssessmentVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:AssessmentVersion.of_xml)
+          (Xml.child xml_arg0 "Version") in
+      let reportType =
+        (Option.map ~f:AssessmentReportType.of_xml)
+          (Xml.child xml_arg0 "ReportType") in
+      let selfManagedInstanceIds =
+        (Option.map ~f:AssessmentInstanceIds.of_xml)
+          (Xml.child xml_arg0 "SelfManagedInstanceIds") in
+      let securityGroupIds =
+        (Option.map ~f:SecurityGroupIds.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupIds") in
+      let subnetIds =
+        (Option.map ~f:SubnetIds.of_xml) (Xml.child xml_arg0 "SubnetIds") in
+      let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "VpcId") in
+      let customerDnsIps =
+        (Option.map ~f:CustomerDnsIps.of_xml)
+          (Xml.child xml_arg0 "CustomerDnsIps") in
+      let statusReason =
+        (Option.map ~f:AssessmentStatusReason.of_xml)
+          (Xml.child xml_arg0 "StatusReason") in
+      let statusCode =
+        (Option.map ~f:AssessmentStatusCode.of_xml)
+          (Xml.child xml_arg0 "StatusCode") in
+      let status =
+        (Option.map ~f:AssessmentStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let lastUpdateDateTime =
+        (Option.map ~f:LastUpdateDateTime.of_xml)
+          (Xml.child xml_arg0 "LastUpdateDateTime") in
+      let startTime =
+        (Option.map ~f:AssessmentStartTime.of_xml)
+          (Xml.child xml_arg0 "StartTime") in
+      let dnsName =
+        (Option.map ~f:DirectoryName.of_xml) (Xml.child xml_arg0 "DnsName") in
+      let directoryId =
+        (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
+      let assessmentId =
+        (Option.map ~f:AssessmentId.of_xml)
+          (Xml.child xml_arg0 "AssessmentId") in
+      make ?version ?reportType ?selfManagedInstanceIds ?securityGroupIds
+        ?subnetIds ?vpcId ?customerDnsIps ?statusReason ?statusCode ?status
+        ?lastUpdateDateTime ?startTime ?dnsName ?directoryId ?assessmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map json__ "Version" AssessmentVersion.of_json in
+      let reportType =
+        field_map json__ "ReportType" AssessmentReportType.of_json in
+      let selfManagedInstanceIds =
+        field_map json__ "SelfManagedInstanceIds"
+          AssessmentInstanceIds.of_json in
+      let securityGroupIds =
+        field_map json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIds.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let customerDnsIps =
+        field_map json__ "CustomerDnsIps" CustomerDnsIps.of_json in
+      let statusReason =
+        field_map json__ "StatusReason" AssessmentStatusReason.of_json in
+      let statusCode =
+        field_map json__ "StatusCode" AssessmentStatusCode.of_json in
+      let status = field_map json__ "Status" AssessmentStatus.of_json in
+      let lastUpdateDateTime =
+        field_map json__ "LastUpdateDateTime" LastUpdateDateTime.of_json in
+      let startTime =
+        field_map json__ "StartTime" AssessmentStartTime.of_json in
+      let dnsName = field_map json__ "DnsName" DirectoryName.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
+      let assessmentId = field_map json__ "AssessmentId" AssessmentId.of_json in
+      make ?version ?reportType ?selfManagedInstanceIds ?securityGroupIds
+        ?subnetIds ?vpcId ?customerDnsIps ?statusReason ?statusCode ?status
+        ?lastUpdateDateTime ?startTime ?dnsName ?directoryId ?assessmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains detailed information about a directory assessment, including configuration parameters, status, and validation results."]
+module AssessmentReports =
+  struct
+    type nonrec t = AssessmentReport.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssessmentReport.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssessmentReport.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssessmentReports"
+        ~of_json:AssessmentReport.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CertificateInUseException =
   struct
     type nonrec t =
@@ -5705,9 +8413,9 @@ module CertificateInUseException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5735,7 +8443,8 @@ module TrustPassword =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"(.|\\s)*\\S(.|\\s)*")));
+                  (fun () ->
+                     check_pattern i ~pattern:"^(\\p{LD}|\\p{Punct}| )+$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -5765,9 +8474,9 @@ module DirectoryLimitExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5822,11 +8531,11 @@ module Computer =
         (Option.map ~f:SID.of_xml) (Xml.child xml_arg0 "ComputerId") in
       make ?computerAttributes ?computerName ?computerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let computerAttributes =
-        field_map json "ComputerAttributes" Attributes.of_json in
-      let computerName = field_map json "ComputerName" ComputerName.of_json in
-      let computerId = field_map json "ComputerId" SID.of_json in
+        field_map json__ "ComputerAttributes" Attributes.of_json in
+      let computerName = field_map json__ "ComputerName" ComputerName.of_json in
+      let computerId = field_map json__ "ComputerId" SID.of_json in
       make ?computerAttributes ?computerName ?computerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5879,50 +8588,71 @@ module DirectoryConnectSettings =
       subnetIds: SubnetIds.t
         [@ocaml.doc
           "A list of subnet identifiers in the VPC in which the AD Connector is created."];
-      customerDnsIps: DnsIpAddrs.t
+      customerDnsIps: DnsIpAddrs.t option
         [@ocaml.doc
-          "A list of one or more IP addresses of DNS servers or domain controllers in your self-managed directory."];
+          "The IP addresses of DNS servers or domain controllers in your self-managed directory."];
+      customerDnsIpsV6: DnsIpv6Addrs.t option
+        [@ocaml.doc
+          "The IPv6 addresses of DNS servers or domain controllers in your self-managed directory."];
       customerUserName: UserName.t
         [@ocaml.doc
           "The user name of an account in your self-managed directory that is used to connect to the directory. This account must have the following permissions: Read users and groups Create computer objects Join computers to the domain"]}
     let context_ = "DirectoryConnectSettings"
-    let make ~vpcId =
-      fun ~subnetIds ->
-        fun ~customerDnsIps ->
-          fun ~customerUserName ->
-            fun () -> { vpcId; subnetIds; customerDnsIps; customerUserName }
+    let make ?customerDnsIps =
+      fun ?customerDnsIpsV6 ->
+        fun ~vpcId ->
+          fun ~subnetIds ->
+            fun ~customerUserName ->
+              fun () ->
+                {
+                  customerDnsIps;
+                  customerDnsIpsV6;
+                  vpcId;
+                  subnetIds;
+                  customerUserName
+                }
     let to_value x =
       structure_to_value
         [("VpcId", (Some (VpcId.to_value x.vpcId)));
         ("SubnetIds", (Some (SubnetIds.to_value x.subnetIds)));
-        ("CustomerDnsIps", (Some (DnsIpAddrs.to_value x.customerDnsIps)));
+        ("CustomerDnsIps",
+          (Option.map x.customerDnsIps ~f:DnsIpAddrs.to_value));
+        ("CustomerDnsIpsV6",
+          (Option.map x.customerDnsIpsV6 ~f:DnsIpv6Addrs.to_value));
         ("CustomerUserName", (Some (UserName.to_value x.customerUserName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let customerUserName =
         UserName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CustomerUserName") in
+      let customerDnsIpsV6 =
+        (Option.map ~f:DnsIpv6Addrs.of_xml)
+          (Xml.child xml_arg0 "CustomerDnsIpsV6") in
       let customerDnsIps =
-        DnsIpAddrs.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CustomerDnsIps") in
+        (Option.map ~f:DnsIpAddrs.of_xml)
+          (Xml.child xml_arg0 "CustomerDnsIps") in
       let subnetIds =
         SubnetIds.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubnetIds") in
       let vpcId =
         VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
-      make ~customerUserName ~customerDnsIps ~subnetIds ~vpcId ()
+      make ~customerUserName ?customerDnsIpsV6 ?customerDnsIps ~subnetIds
+        ~vpcId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customerUserName =
-        field_map_exn json "CustomerUserName" UserName.of_json in
+        field_map_exn json__ "CustomerUserName" UserName.of_json in
+      let customerDnsIpsV6 =
+        field_map json__ "CustomerDnsIpsV6" DnsIpv6Addrs.of_json in
       let customerDnsIps =
-        field_map_exn json "CustomerDnsIps" DnsIpAddrs.of_json in
-      let subnetIds = field_map_exn json "SubnetIds" SubnetIds.of_json in
-      let vpcId = field_map_exn json "VpcId" VpcId.of_json in
-      make ~customerUserName ~customerDnsIps ~subnetIds ~vpcId ()
+        field_map json__ "CustomerDnsIps" DnsIpAddrs.of_json in
+      let subnetIds = field_map_exn json__ "SubnetIds" SubnetIds.of_json in
+      let vpcId = field_map_exn json__ "VpcId" VpcId.of_json in
+      make ~customerUserName ?customerDnsIpsV6 ?customerDnsIps ~subnetIds
+        ~vpcId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains information for the ConnectDirectory operation when an AD Connector directory is being created."]
+       "Contains connection settings for creating an AD Connector with the ConnectDirectory action."]
 module TagLimitExceededException =
   struct
     type nonrec t =
@@ -5943,9 +8673,9 @@ module TagLimitExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The maximum allowed number of tags was exceeded."]
@@ -5969,9 +8699,9 @@ module DirectoryAlreadyInRegionException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5996,9 +8726,9 @@ module RegionLimitExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6023,9 +8753,9 @@ module IpRouteLimitExceededException =
           (Xml.child xml_arg0 "Message") in
       make ?requestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestId = field_map json "RequestId" RequestId.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?requestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6034,6 +8764,9 @@ module IpRoutes =
   struct
     type nonrec t = IpRoute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpRoute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6147,8 +8880,8 @@ module VerifyTrustResult =
         (Option.map ~f:TrustId.of_xml) (Xml.child xml_arg0 "TrustId") in
       make ?trustId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustId = field_map json "TrustId" TrustId.of_json in
+    let of_json json__ =
+      let trustId = field_map json__ "TrustId" TrustId.of_json in
       make ?trustId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Result of a VerifyTrust request."]
@@ -6169,8 +8902,8 @@ module VerifyTrustRequest =
         TrustId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrustId") in
       make ~trustId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustId = field_map_exn json "TrustId" TrustId.of_json in
+    let of_json json__ =
+      let trustId = field_map_exn json__ "TrustId" TrustId.of_json in
       make ~trustId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6248,9 +8981,9 @@ module UpdateTrustResult =
         (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "RequestId") in
       make ?trustId ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustId = field_map json "TrustId" TrustId.of_json in
-      let requestId = field_map json "RequestId" RequestId.of_json in
+    let of_json json__ =
+      let trustId = field_map json__ "TrustId" TrustId.of_json in
+      let requestId = field_map json__ "RequestId" RequestId.of_json in
       make ?trustId ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6279,14 +9012,165 @@ module UpdateTrustRequest =
         TrustId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrustId") in
       make ?selectiveAuth ~trustId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let selectiveAuth =
-        field_map json "SelectiveAuth" SelectiveAuth.of_json in
-      let trustId = field_map_exn json "TrustId" TrustId.of_json in
+        field_map json__ "SelectiveAuth" SelectiveAuth.of_json in
+      let trustId = field_map_exn json__ "TrustId" TrustId.of_json in
       make ?selectiveAuth ~trustId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the trust that has been set up between your Managed Microsoft AD directory and an self-managed Active Directory."]
+module UpdateSettingsResult =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t option
+        [@ocaml.doc "The identifier of the directory."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `DirectoryUnavailableException of DirectoryUnavailableException.t 
+      | `IncompatibleSettingsException of IncompatibleSettingsException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServiceException of ServiceException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `UnsupportedSettingsException of UnsupportedSettingsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?directoryId = fun () -> { directoryId }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_json json)
+      | "IncompatibleSettingsException" ->
+          `IncompatibleSettingsException
+            (IncompatibleSettingsException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | "UnsupportedSettingsException" ->
+          `UnsupportedSettingsException
+            (UnsupportedSettingsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_xml xml)
+      | "IncompatibleSettingsException" ->
+          `IncompatibleSettingsException
+            (IncompatibleSettingsException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | "UnsupportedSettingsException" ->
+          `UnsupportedSettingsException
+            (UnsupportedSettingsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `DirectoryUnavailableException e ->
+          `Assoc
+            [("error", (`String "DirectoryUnavailableException"));
+            ("details", (DirectoryUnavailableException.to_json e))]
+      | `IncompatibleSettingsException e ->
+          `Assoc
+            [("error", (`String "IncompatibleSettingsException"));
+            ("details", (IncompatibleSettingsException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `UnsupportedSettingsException e ->
+          `Assoc
+            [("error", (`String "UnsupportedSettingsException"));
+            ("details", (UnsupportedSettingsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directoryId =
+        (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
+      make ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
+      make ?directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the configurable settings for the specified directory."]
+module UpdateSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t
+        [@ocaml.doc
+          "The identifier of the directory for which to update settings."];
+      settings: Settings.t [@ocaml.doc "The list of Setting objects."]}
+    let context_ = "UpdateSettingsRequest"
+    let make ~directoryId =
+      fun ~settings -> fun () -> { directoryId; settings }
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)));
+        ("Settings", (Some (Settings.to_value x.settings)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let settings =
+        Settings.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Settings") in
+      let directoryId =
+        DirectoryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
+      make ~settings ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let settings = field_map_exn json__ "Settings" Settings.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ~settings ~directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the configurable settings for the specified directory."]
 module UpdateRadiusResult =
   struct
     type nonrec t = unit
@@ -6379,10 +9263,11 @@ module UpdateRadiusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~radiusSettings ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let radiusSettings =
-        field_map_exn json "RadiusSettings" RadiusSettings.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "RadiusSettings" RadiusSettings.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~radiusSettings ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the inputs for the UpdateRadius operation."]
@@ -6514,15 +9399,401 @@ module UpdateNumberOfDomainControllersRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~desiredNumber ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let desiredNumber =
-        field_map_exn json "DesiredNumber"
+        field_map_exn json__ "DesiredNumber"
           DesiredNumberOfDomainControllers.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~desiredNumber ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Adds or removes domain controllers to or from the directory. Based on the difference between current value and new value (provided through this API call), domain controllers will be added or removed. It may take up to 45 minutes for any new domain controllers to become fully active once the requested number of domain controllers is updated. During this time, you cannot make another update request."]
+module UpdateHybridADResult =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t option
+        [@ocaml.doc "The identifier of the updated hybrid directory."];
+      assessmentId: AssessmentId.t option
+        [@ocaml.doc
+          "The identifier of the assessment performed to validate the update configuration. This assessment ensures the updated settings are compatible with your environment."]}
+    type nonrec error =
+      [
+        `ADAssessmentLimitExceededException of
+          ADAssessmentLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServiceException of ServiceException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?directoryId =
+      fun ?assessmentId -> fun () -> { directoryId; assessmentId }
+    let error_of_json name json =
+      match name with
+      | "ADAssessmentLimitExceededException" ->
+          `ADAssessmentLimitExceededException
+            (ADAssessmentLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ADAssessmentLimitExceededException" ->
+          `ADAssessmentLimitExceededException
+            (ADAssessmentLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ADAssessmentLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ADAssessmentLimitExceededException"));
+            ("details", (ADAssessmentLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value));
+        ("AssessmentId",
+          (Option.map x.assessmentId ~f:AssessmentId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let assessmentId =
+        (Option.map ~f:AssessmentId.of_xml)
+          (Xml.child xml_arg0 "AssessmentId") in
+      let directoryId =
+        (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
+      make ?assessmentId ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let assessmentId = field_map json__ "AssessmentId" AssessmentId.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
+      make ?assessmentId ?directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the configuration of an existing hybrid directory. You can recover hybrid directory administrator account or modify self-managed instance settings. Updates are applied asynchronously. Use DescribeHybridADUpdate to monitor the progress of configuration changes. The InstanceIds must have a one-to-one correspondence with CustomerDnsIps, meaning that if the IP address for instance i-10243410 is 10.24.34.100 and the IP address for instance i-10243420 is 10.24.34.200, then the input arrays must maintain the same order relationship, either \\[10.24.34.100, 10.24.34.200\\] paired with \\[i-10243410, i-10243420\\] or \\[10.24.34.200, 10.24.34.100\\] paired with \\[i-10243420, i-10243410\\]. You must provide at least one update to UpdateHybridADRequest$HybridAdministratorAccountUpdate or UpdateHybridADRequest$SelfManagedInstancesSettings."]
+module UpdateHybridADRequest =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t
+        [@ocaml.doc "The identifier of the hybrid directory to update."];
+      hybridAdministratorAccountUpdate:
+        HybridAdministratorAccountUpdate.t option
+        [@ocaml.doc
+          "We create a hybrid directory administrator account when we create a hybrid directory. Use HybridAdministratorAccountUpdate to recover the hybrid directory administrator account if you have deleted it. To recover your hybrid directory administrator account, we need temporary access to a user in your self-managed AD with administrator permissions in the form of a secret from Amazon Web Services Secrets Manager. We use these credentials once during recovery and don't store them. If your hybrid directory administrator account exists, then you don\226\128\153t need to use HybridAdministratorAccountUpdate, even if you have updated your self-managed AD administrator user."];
+      selfManagedInstancesSettings: HybridCustomerInstancesSettings.t option
+        [@ocaml.doc
+          "Updates to the self-managed AD configuration, including DNS server IP addresses and Amazon Web Services System Manager managed node identifiers."]}
+    let context_ = "UpdateHybridADRequest"
+    let make ?hybridAdministratorAccountUpdate =
+      fun ?selfManagedInstancesSettings ->
+        fun ~directoryId ->
+          fun () ->
+            {
+              hybridAdministratorAccountUpdate;
+              selfManagedInstancesSettings;
+              directoryId
+            }
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)));
+        ("HybridAdministratorAccountUpdate",
+          (Option.map x.hybridAdministratorAccountUpdate
+             ~f:HybridAdministratorAccountUpdate.to_value));
+        ("SelfManagedInstancesSettings",
+          (Option.map x.selfManagedInstancesSettings
+             ~f:HybridCustomerInstancesSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let selfManagedInstancesSettings =
+        (Option.map ~f:HybridCustomerInstancesSettings.of_xml)
+          (Xml.child xml_arg0 "SelfManagedInstancesSettings") in
+      let hybridAdministratorAccountUpdate =
+        (Option.map ~f:HybridAdministratorAccountUpdate.of_xml)
+          (Xml.child xml_arg0 "HybridAdministratorAccountUpdate") in
+      let directoryId =
+        DirectoryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
+      make ?selfManagedInstancesSettings ?hybridAdministratorAccountUpdate
+        ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let selfManagedInstancesSettings =
+        field_map json__ "SelfManagedInstancesSettings"
+          HybridCustomerInstancesSettings.of_json in
+      let hybridAdministratorAccountUpdate =
+        field_map json__ "HybridAdministratorAccountUpdate"
+          HybridAdministratorAccountUpdate.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ?selfManagedInstancesSettings ?hybridAdministratorAccountUpdate
+        ~directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the configuration of an existing hybrid directory. You can recover hybrid directory administrator account or modify self-managed instance settings. Updates are applied asynchronously. Use DescribeHybridADUpdate to monitor the progress of configuration changes. The InstanceIds must have a one-to-one correspondence with CustomerDnsIps, meaning that if the IP address for instance i-10243410 is 10.24.34.100 and the IP address for instance i-10243420 is 10.24.34.200, then the input arrays must maintain the same order relationship, either \\[10.24.34.100, 10.24.34.200\\] paired with \\[i-10243410, i-10243420\\] or \\[10.24.34.200, 10.24.34.100\\] paired with \\[i-10243420, i-10243410\\]. You must provide at least one update to UpdateHybridADRequest$HybridAdministratorAccountUpdate or UpdateHybridADRequest$SelfManagedInstancesSettings."]
+module UpdateDirectorySetupResult =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `DirectoryInDesiredStateException of
+          DirectoryInDesiredStateException.t 
+      | `DirectoryUnavailableException of DirectoryUnavailableException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServiceException of ServiceException.t 
+      | `SnapshotLimitExceededException of SnapshotLimitExceededException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "DirectoryInDesiredStateException" ->
+          `DirectoryInDesiredStateException
+            (DirectoryInDesiredStateException.of_json json)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "SnapshotLimitExceededException" ->
+          `SnapshotLimitExceededException
+            (SnapshotLimitExceededException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "DirectoryInDesiredStateException" ->
+          `DirectoryInDesiredStateException
+            (DirectoryInDesiredStateException.of_xml xml)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "SnapshotLimitExceededException" ->
+          `SnapshotLimitExceededException
+            (SnapshotLimitExceededException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `DirectoryInDesiredStateException e ->
+          `Assoc
+            [("error", (`String "DirectoryInDesiredStateException"));
+            ("details", (DirectoryInDesiredStateException.to_json e))]
+      | `DirectoryUnavailableException e ->
+          `Assoc
+            [("error", (`String "DirectoryUnavailableException"));
+            ("details", (DirectoryUnavailableException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `SnapshotLimitExceededException e ->
+          `Assoc
+            [("error", (`String "SnapshotLimitExceededException"));
+            ("details", (SnapshotLimitExceededException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates directory configuration for the specified update type."]
+module UpdateDirectorySetupRequest =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t
+        [@ocaml.doc "The identifier of the directory to update."];
+      updateType: UpdateType.t
+        [@ocaml.doc "The type of update to perform on the directory."];
+      oSUpdateSettings: OSUpdateSettings.t option
+        [@ocaml.doc
+          "Operating system configuration to apply during the directory update operation."];
+      directorySizeUpdateSettings: DirectorySizeUpdateSettings.t option
+        [@ocaml.doc
+          "Directory size configuration to apply during the update operation."];
+      networkUpdateSettings: NetworkUpdateSettings.t option
+        [@ocaml.doc
+          "Network configuration to apply during the directory update operation."];
+      createSnapshotBeforeUpdate: CreateSnapshotBeforeUpdate.t option
+        [@ocaml.doc
+          "Specifies whether to create a directory snapshot before performing the update."]}
+    let context_ = "UpdateDirectorySetupRequest"
+    let make ?oSUpdateSettings =
+      fun ?directorySizeUpdateSettings ->
+        fun ?networkUpdateSettings ->
+          fun ?createSnapshotBeforeUpdate ->
+            fun ~directoryId ->
+              fun ~updateType ->
+                fun () ->
+                  {
+                    oSUpdateSettings;
+                    directorySizeUpdateSettings;
+                    networkUpdateSettings;
+                    createSnapshotBeforeUpdate;
+                    directoryId;
+                    updateType
+                  }
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)));
+        ("UpdateType", (Some (UpdateType.to_value x.updateType)));
+        ("OSUpdateSettings",
+          (Option.map x.oSUpdateSettings ~f:OSUpdateSettings.to_value));
+        ("DirectorySizeUpdateSettings",
+          (Option.map x.directorySizeUpdateSettings
+             ~f:DirectorySizeUpdateSettings.to_value));
+        ("NetworkUpdateSettings",
+          (Option.map x.networkUpdateSettings
+             ~f:NetworkUpdateSettings.to_value));
+        ("CreateSnapshotBeforeUpdate",
+          (Option.map x.createSnapshotBeforeUpdate
+             ~f:CreateSnapshotBeforeUpdate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createSnapshotBeforeUpdate =
+        (Option.map ~f:CreateSnapshotBeforeUpdate.of_xml)
+          (Xml.child xml_arg0 "CreateSnapshotBeforeUpdate") in
+      let networkUpdateSettings =
+        (Option.map ~f:NetworkUpdateSettings.of_xml)
+          (Xml.child xml_arg0 "NetworkUpdateSettings") in
+      let directorySizeUpdateSettings =
+        (Option.map ~f:DirectorySizeUpdateSettings.of_xml)
+          (Xml.child xml_arg0 "DirectorySizeUpdateSettings") in
+      let oSUpdateSettings =
+        (Option.map ~f:OSUpdateSettings.of_xml)
+          (Xml.child xml_arg0 "OSUpdateSettings") in
+      let updateType =
+        UpdateType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "UpdateType") in
+      let directoryId =
+        DirectoryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
+      make ?createSnapshotBeforeUpdate ?networkUpdateSettings
+        ?directorySizeUpdateSettings ?oSUpdateSettings ~updateType
+        ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createSnapshotBeforeUpdate =
+        field_map json__ "CreateSnapshotBeforeUpdate"
+          CreateSnapshotBeforeUpdate.of_json in
+      let networkUpdateSettings =
+        field_map json__ "NetworkUpdateSettings"
+          NetworkUpdateSettings.of_json in
+      let directorySizeUpdateSettings =
+        field_map json__ "DirectorySizeUpdateSettings"
+          DirectorySizeUpdateSettings.of_json in
+      let oSUpdateSettings =
+        field_map json__ "OSUpdateSettings" OSUpdateSettings.of_json in
+      let updateType = field_map_exn json__ "UpdateType" UpdateType.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ?createSnapshotBeforeUpdate ?networkUpdateSettings
+        ?directorySizeUpdateSettings ?oSUpdateSettings ~updateType
+        ~directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates directory configuration for the specified update type."]
 module UpdateConditionalForwarderResult =
   struct
     type nonrec t = unit
@@ -6620,39 +9891,50 @@ module UpdateConditionalForwarderRequest =
       remoteDomainName: RemoteDomainName.t
         [@ocaml.doc
           "The fully qualified domain name (FQDN) of the remote domain with which you will set up a trust relationship."];
-      dnsIpAddrs: DnsIpAddrs.t
+      dnsIpAddrs: DnsIpAddrs.t option
         [@ocaml.doc
-          "The updated IP addresses of the remote DNS server associated with the conditional forwarder."]}
+          "The updated IP addresses of the remote DNS server associated with the conditional forwarder."];
+      dnsIpv6Addrs: DnsIpv6Addrs.t option
+        [@ocaml.doc
+          "The updated IPv6 addresses of the remote DNS server associated with the conditional forwarder."]}
     let context_ = "UpdateConditionalForwarderRequest"
-    let make ~directoryId =
-      fun ~remoteDomainName ->
-        fun ~dnsIpAddrs ->
-          fun () -> { directoryId; remoteDomainName; dnsIpAddrs }
+    let make ?dnsIpAddrs =
+      fun ?dnsIpv6Addrs ->
+        fun ~directoryId ->
+          fun ~remoteDomainName ->
+            fun () ->
+              { dnsIpAddrs; dnsIpv6Addrs; directoryId; remoteDomainName }
     let to_value x =
       structure_to_value
         [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)));
         ("RemoteDomainName",
           (Some (RemoteDomainName.to_value x.remoteDomainName)));
-        ("DnsIpAddrs", (Some (DnsIpAddrs.to_value x.dnsIpAddrs)))]
+        ("DnsIpAddrs", (Option.map x.dnsIpAddrs ~f:DnsIpAddrs.to_value));
+        ("DnsIpv6Addrs",
+          (Option.map x.dnsIpv6Addrs ~f:DnsIpv6Addrs.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dnsIpv6Addrs =
+        (Option.map ~f:DnsIpv6Addrs.of_xml)
+          (Xml.child xml_arg0 "DnsIpv6Addrs") in
       let dnsIpAddrs =
-        DnsIpAddrs.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DnsIpAddrs") in
+        (Option.map ~f:DnsIpAddrs.of_xml) (Xml.child xml_arg0 "DnsIpAddrs") in
       let remoteDomainName =
         RemoteDomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RemoteDomainName") in
       let directoryId =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
-      make ~dnsIpAddrs ~remoteDomainName ~directoryId ()
+      make ?dnsIpv6Addrs ?dnsIpAddrs ~remoteDomainName ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dnsIpAddrs = field_map_exn json "DnsIpAddrs" DnsIpAddrs.of_json in
+    let of_json json__ =
+      let dnsIpv6Addrs = field_map json__ "DnsIpv6Addrs" DnsIpv6Addrs.of_json in
+      let dnsIpAddrs = field_map json__ "DnsIpAddrs" DnsIpAddrs.of_json in
       let remoteDomainName =
-        field_map_exn json "RemoteDomainName" RemoteDomainName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
-      make ~dnsIpAddrs ~remoteDomainName ~directoryId ()
+        field_map_exn json__ "RemoteDomainName" RemoteDomainName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ?dnsIpv6Addrs ?dnsIpAddrs ~remoteDomainName ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a conditional forwarder."]
 module UnshareDirectoryResult =
@@ -6738,9 +10020,9 @@ module UnshareDirectoryResult =
           (Xml.child xml_arg0 "SharedDirectoryId") in
       make ?sharedDirectoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sharedDirectoryId =
-        field_map json "SharedDirectoryId" DirectoryId.of_json in
+        field_map json__ "SharedDirectoryId" DirectoryId.of_json in
       make ?sharedDirectoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6772,10 +10054,11 @@ module UnshareDirectoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~unshareTarget ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unshareTarget =
-        field_map_exn json "UnshareTarget" UnshareTarget.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "UnshareTarget" UnshareTarget.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~unshareTarget ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6874,9 +10157,9 @@ module StartSchemaExtensionResult =
           (Xml.child xml_arg0 "SchemaExtensionId") in
       make ?schemaExtensionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schemaExtensionId =
-        field_map json "SchemaExtensionId" SchemaExtensionId.of_json in
+        field_map json__ "SchemaExtensionId" SchemaExtensionId.of_json in
       make ?schemaExtensionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Applies a schema extension to a Microsoft AD directory."]
@@ -6935,17 +10218,158 @@ module StartSchemaExtensionRequest =
       make ~description ~ldifContent ~createSnapshotBeforeSchemaExtension
         ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map_exn json "Description" Description.of_json in
-      let ldifContent = field_map_exn json "LdifContent" LdifContent.of_json in
+    let of_json json__ =
+      let description =
+        field_map_exn json__ "Description" Description.of_json in
+      let ldifContent =
+        field_map_exn json__ "LdifContent" LdifContent.of_json in
       let createSnapshotBeforeSchemaExtension =
-        field_map_exn json "CreateSnapshotBeforeSchemaExtension"
+        field_map_exn json__ "CreateSnapshotBeforeSchemaExtension"
           CreateSnapshotBeforeSchemaExtension.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~description ~ldifContent ~createSnapshotBeforeSchemaExtension
         ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Applies a schema extension to a Microsoft AD directory."]
+module StartADAssessmentResult =
+  struct
+    type nonrec t =
+      {
+      assessmentId: AssessmentId.t option
+        [@ocaml.doc
+          "The unique identifier of the newly started directory assessment. Use this identifier to monitor assessment progress and retrieve results."]}
+    type nonrec error =
+      [
+        `ADAssessmentLimitExceededException of
+          ADAssessmentLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServiceException of ServiceException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?assessmentId = fun () -> { assessmentId }
+    let error_of_json name json =
+      match name with
+      | "ADAssessmentLimitExceededException" ->
+          `ADAssessmentLimitExceededException
+            (ADAssessmentLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ADAssessmentLimitExceededException" ->
+          `ADAssessmentLimitExceededException
+            (ADAssessmentLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ADAssessmentLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ADAssessmentLimitExceededException"));
+            ("details", (ADAssessmentLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AssessmentId",
+           (Option.map x.assessmentId ~f:AssessmentId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let assessmentId =
+        (Option.map ~f:AssessmentId.of_xml)
+          (Xml.child xml_arg0 "AssessmentId") in
+      make ?assessmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let assessmentId = field_map json__ "AssessmentId" AssessmentId.of_json in
+      make ?assessmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Initiates a directory assessment to validate your self-managed AD environment for hybrid domain join. The assessment checks compatibility and connectivity of the self-managed AD environment. A directory assessment is automatically created when you create a hybrid directory. There are two types of assessments: CUSTOMER and SYSTEM. Your Amazon Web Services account has a limit of 100 CUSTOMER directory assessments. The assessment process typically takes 30 minutes or more to complete. The assessment process is asynchronous and you can monitor it with DescribeADAssessment. The InstanceIds must have a one-to-one correspondence with CustomerDnsIps, meaning that if the IP address for instance i-10243410 is 10.24.34.100 and the IP address for instance i-10243420 is 10.24.34.200, then the input arrays must maintain the same order relationship, either \\[10.24.34.100, 10.24.34.200\\] paired with \\[i-10243410, i-10243420\\] or \\[10.24.34.200, 10.24.34.100\\] paired with \\[i-10243420, i-10243410\\]. Note: You must provide exactly one DirectoryId or AssessmentConfiguration."]
+module StartADAssessmentRequest =
+  struct
+    type nonrec t =
+      {
+      assessmentConfiguration: AssessmentConfiguration.t option
+        [@ocaml.doc
+          "Configuration parameters for the directory assessment, including DNS server information, domain name, Amazon VPC subnet, and Amazon Web Services System Manager managed node details."];
+      directoryId: DirectoryId.t option
+        [@ocaml.doc
+          "The identifier of the directory for which to perform the assessment. This should be an existing directory. If the assessment is not for an existing directory, this parameter should be omitted."]}
+    let make ?assessmentConfiguration =
+      fun ?directoryId -> fun () -> { assessmentConfiguration; directoryId }
+    let to_value x =
+      structure_to_value
+        [("AssessmentConfiguration",
+           (Option.map x.assessmentConfiguration
+              ~f:AssessmentConfiguration.to_value));
+        ("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directoryId =
+        (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
+      let assessmentConfiguration =
+        (Option.map ~f:AssessmentConfiguration.of_xml)
+          (Xml.child xml_arg0 "AssessmentConfiguration") in
+      make ?directoryId ?assessmentConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
+      let assessmentConfiguration =
+        field_map json__ "AssessmentConfiguration"
+          AssessmentConfiguration.of_json in
+      make ?directoryId ?assessmentConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Initiates a directory assessment to validate your self-managed AD environment for hybrid domain join. The assessment checks compatibility and connectivity of the self-managed AD environment. A directory assessment is automatically created when you create a hybrid directory. There are two types of assessments: CUSTOMER and SYSTEM. Your Amazon Web Services account has a limit of 100 CUSTOMER directory assessments. The assessment process typically takes 30 minutes or more to complete. The assessment process is asynchronous and you can monitor it with DescribeADAssessment. The InstanceIds must have a one-to-one correspondence with CustomerDnsIps, meaning that if the IP address for instance i-10243410 is 10.24.34.100 and the IP address for instance i-10243420 is 10.24.34.200, then the input arrays must maintain the same order relationship, either \\[10.24.34.100, 10.24.34.200\\] paired with \\[i-10243410, i-10243420\\] or \\[10.24.34.200, 10.24.34.100\\] paired with \\[i-10243420, i-10243410\\]. Note: You must provide exactly one DirectoryId or AssessmentConfiguration."]
 module ShareDirectoryResult =
   struct
     type nonrec t =
@@ -7078,9 +10502,9 @@ module ShareDirectoryResult =
           (Xml.child xml_arg0 "SharedDirectoryId") in
       make ?sharedDirectoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sharedDirectoryId =
-        field_map json "SharedDirectoryId" DirectoryId.of_json in
+        field_map json__ "SharedDirectoryId" DirectoryId.of_json in
       make ?sharedDirectoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7128,11 +10552,14 @@ module ShareDirectoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~shareMethod ~shareTarget ?shareNotes ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shareMethod = field_map_exn json "ShareMethod" ShareMethod.of_json in
-      let shareTarget = field_map_exn json "ShareTarget" ShareTarget.of_json in
-      let shareNotes = field_map json "ShareNotes" Notes.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let shareMethod =
+        field_map_exn json__ "ShareMethod" ShareMethod.of_json in
+      let shareTarget =
+        field_map_exn json__ "ShareTarget" ShareTarget.of_json in
+      let shareNotes = field_map json__ "ShareNotes" Notes.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~shareMethod ~shareTarget ?shareNotes ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7221,8 +10648,8 @@ module RestoreFromSnapshotRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotId") in
       make ~snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
+    let of_json json__ =
+      let snapshotId = field_map_exn json__ "SnapshotId" SnapshotId.of_json in
       make ~snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7323,7 +10750,7 @@ module ResetUserPasswordResult =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Resets the password for any user in your Managed Microsoft AD or Simple AD directory. You can reset the password for any user in your directory with the following exceptions: For Simple AD, you cannot reset the password for any user that is a member of either the Domain Admins or Enterprise Admins group except for the administrator user. For Managed Microsoft AD, you can only reset the password for a user that is in an OU based off of the NetBIOS name that you typed when you created your directory. For example, you cannot reset the password for a user in the Amazon Web Services Reserved OU. For more information about the OU structure for an Managed Microsoft AD directory, see What Gets Created in the Directory Service Administration Guide."]
+       "Resets the password for any user in your Managed Microsoft AD or Simple AD directory. Disabled users will become enabled and can be authenticated following the API call. You can reset the password for any user in your directory with the following exceptions: For Simple AD, you cannot reset the password for any user that is a member of either the Domain Admins or Enterprise Admins group except for the administrator user. For Managed Microsoft AD, you can only reset the password for a user that is in an OU based off of the NetBIOS name that you typed when you created your directory. For example, you cannot reset the password for a user in the Amazon Web Services Reserved OU. For more information about the OU structure for an Managed Microsoft AD directory, see What Gets Created in the Directory Service Administration Guide."]
 module ResetUserPasswordRequest =
   struct
     type nonrec t =
@@ -7358,14 +10785,16 @@ module ResetUserPasswordRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~newPassword ~userName ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let newPassword = field_map_exn json "NewPassword" UserPassword.of_json in
-      let userName = field_map_exn json "UserName" CustomerUserName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let newPassword =
+        field_map_exn json__ "NewPassword" UserPassword.of_json in
+      let userName = field_map_exn json__ "UserName" CustomerUserName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~newPassword ~userName ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Resets the password for any user in your Managed Microsoft AD or Simple AD directory. You can reset the password for any user in your directory with the following exceptions: For Simple AD, you cannot reset the password for any user that is a member of either the Domain Admins or Enterprise Admins group except for the administrator user. For Managed Microsoft AD, you can only reset the password for a user that is in an OU based off of the NetBIOS name that you typed when you created your directory. For example, you cannot reset the password for a user in the Amazon Web Services Reserved OU. For more information about the OU structure for an Managed Microsoft AD directory, see What Gets Created in the Directory Service Administration Guide."]
+       "Resets the password for any user in your Managed Microsoft AD or Simple AD directory. Disabled users will become enabled and can be authenticated following the API call. You can reset the password for any user in your directory with the following exceptions: For Simple AD, you cannot reset the password for any user that is a member of either the Domain Admins or Enterprise Admins group except for the administrator user. For Managed Microsoft AD, you can only reset the password for a user that is in an OU based off of the NetBIOS name that you typed when you created your directory. For example, you cannot reset the password for a user in the Amazon Web Services Reserved OU. For more information about the OU structure for an Managed Microsoft AD directory, see What Gets Created in the Directory Service Administration Guide."]
 module RemoveTagsFromResourceResult =
   struct
     type nonrec t = unit
@@ -7455,9 +10884,9 @@ module RemoveTagsFromResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagKeys ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~tagKeys ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a directory."]
@@ -7568,8 +10997,9 @@ module RemoveRegionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7657,28 +11087,36 @@ module RemoveIpRoutesRequest =
       directoryId: DirectoryId.t
         [@ocaml.doc
           "Identifier (ID) of the directory from which you want to remove the IP addresses."];
-      cidrIps: CidrIps.t
-        [@ocaml.doc "IP address blocks that you want to remove."]}
+      cidrIps: CidrIps.t option
+        [@ocaml.doc "IP address blocks that you want to remove."];
+      cidrIpv6s: CidrIpv6s.t option
+        [@ocaml.doc "IPv6 address blocks that you want to remove."]}
     let context_ = "RemoveIpRoutesRequest"
-    let make ~directoryId =
-      fun ~cidrIps -> fun () -> { directoryId; cidrIps }
+    let make ?cidrIps =
+      fun ?cidrIpv6s ->
+        fun ~directoryId -> fun () -> { cidrIps; cidrIpv6s; directoryId }
     let to_value x =
       structure_to_value
         [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)));
-        ("CidrIps", (Some (CidrIps.to_value x.cidrIps)))]
+        ("CidrIps", (Option.map x.cidrIps ~f:CidrIps.to_value));
+        ("CidrIpv6s", (Option.map x.cidrIpv6s ~f:CidrIpv6s.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let cidrIpv6s =
+        (Option.map ~f:CidrIpv6s.of_xml) (Xml.child xml_arg0 "CidrIpv6s") in
       let cidrIps =
-        CidrIps.of_xml (Xml.child_exn ~context:context_ xml_arg0 "CidrIps") in
+        (Option.map ~f:CidrIps.of_xml) (Xml.child xml_arg0 "CidrIps") in
       let directoryId =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
-      make ~cidrIps ~directoryId ()
+      make ?cidrIpv6s ?cidrIps ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cidrIps = field_map_exn json "CidrIps" CidrIps.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
-      make ~cidrIps ~directoryId ()
+    let of_json json__ =
+      let cidrIpv6s = field_map json__ "CidrIpv6s" CidrIpv6s.of_json in
+      let cidrIps = field_map json__ "CidrIps" CidrIps.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ?cidrIpv6s ?cidrIps ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes IP address blocks from a directory."]
 module RejectSharedDirectoryResult =
@@ -7764,9 +11202,9 @@ module RejectSharedDirectoryResult =
           (Xml.child xml_arg0 "SharedDirectoryId") in
       make ?sharedDirectoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sharedDirectoryId =
-        field_map json "SharedDirectoryId" DirectoryId.of_json in
+        field_map json__ "SharedDirectoryId" DirectoryId.of_json in
       make ?sharedDirectoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7791,9 +11229,9 @@ module RejectSharedDirectoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SharedDirectoryId") in
       make ~sharedDirectoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sharedDirectoryId =
-        field_map_exn json "SharedDirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "SharedDirectoryId" DirectoryId.of_json in
       make ~sharedDirectoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7890,9 +11328,10 @@ module RegisterEventTopicRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~topicName ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicName = field_map_exn json "TopicName" TopicName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let topicName = field_map_exn json__ "TopicName" TopicName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~topicName ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Registers a new event topic."]
@@ -8025,9 +11464,9 @@ module RegisterCertificateResult =
           (Xml.child xml_arg0 "CertificateId") in
       make ?certificateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateId =
-        field_map json "CertificateId" CertificateId.of_json in
+        field_map json__ "CertificateId" CertificateId.of_json in
       make ?certificateId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8078,14 +11517,15 @@ module RegisterCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?clientCertAuthSettings ?type_ ~certificateData ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientCertAuthSettings =
-        field_map json "ClientCertAuthSettings"
+        field_map json__ "ClientCertAuthSettings"
           ClientCertAuthSettings.of_json in
-      let type_ = field_map json "Type" CertificateType.of_json in
+      let type_ = field_map json__ "Type" CertificateType.of_json in
       let certificateData =
-        field_map_exn json "CertificateData" CertificateData.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "CertificateData" CertificateData.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?clientCertAuthSettings ?type_ ~certificateData ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8172,9 +11612,9 @@ module ListTagsForResourceResult =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all tags on a directory."]
@@ -8206,10 +11646,10 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ?limit ?nextToken ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" Limit.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ?limit ?nextToken ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all tags on a directory."]
@@ -8293,10 +11733,10 @@ module ListSchemaExtensionsResult =
           (Xml.child xml_arg0 "SchemaExtensionsInfo") in
       make ?nextToken ?schemaExtensionsInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let schemaExtensionsInfo =
-        field_map json "SchemaExtensionsInfo" SchemaExtensionsInfo.of_json in
+        field_map json__ "SchemaExtensionsInfo" SchemaExtensionsInfo.of_json in
       make ?nextToken ?schemaExtensionsInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8332,10 +11772,11 @@ module ListSchemaExtensionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" Limit.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?limit ?nextToken ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8418,10 +11859,10 @@ module ListLogSubscriptionsResult =
           (Xml.child xml_arg0 "LogSubscriptions") in
       make ?nextToken ?logSubscriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let logSubscriptions =
-        field_map json "LogSubscriptions" LogSubscriptions.of_json in
+        field_map json__ "LogSubscriptions" LogSubscriptions.of_json in
       make ?nextToken ?logSubscriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8454,10 +11895,10 @@ module ListLogSubscriptionsRequest =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" Limit.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?limit ?nextToken ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8548,9 +11989,9 @@ module ListIpRoutesResult =
           (Xml.child xml_arg0 "IpRoutesInfo") in
       make ?nextToken ?ipRoutesInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let ipRoutesInfo = field_map json "IpRoutesInfo" IpRoutesInfo.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let ipRoutesInfo = field_map json__ "IpRoutesInfo" IpRoutesInfo.of_json in
       make ?nextToken ?ipRoutesInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8587,10 +12028,11 @@ module ListIpRoutesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" Limit.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?limit ?nextToken ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8694,10 +12136,10 @@ module ListCertificatesResult =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?certificatesInfo ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificatesInfo =
-        field_map json "CertificatesInfo" CertificatesInfo.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "CertificatesInfo" CertificatesInfo.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?certificatesInfo ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8733,14 +12175,148 @@ module ListCertificatesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PageLimit.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PageLimit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?limit ?nextToken ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For the specified directory, lists all the certificates registered for a secure LDAP or client certificate authentication."]
+module ListADAssessmentsResult =
+  struct
+    type nonrec t =
+      {
+      assessments: Assessments.t option
+        [@ocaml.doc
+          "A list of assessment summaries containing basic information about each directory assessment."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If not null, more results are available. Pass this value for the NextToken parameter in a subsequent request to retrieve the next set of items."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServiceException of ServiceException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?assessments =
+      fun ?nextToken -> fun () -> { assessments; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Assessments", (Option.map x.assessments ~f:Assessments.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let assessments =
+        (Option.map ~f:Assessments.of_xml) (Xml.child xml_arg0 "Assessments") in
+      make ?nextToken ?assessments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let assessments = field_map json__ "Assessments" Assessments.of_json in
+      make ?nextToken ?assessments ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of directory assessments for the specified directory or all assessments in your account. Use this operation to monitor assessment status and manage multiple assessments."]
+module ListADAssessmentsRequest =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t option
+        [@ocaml.doc
+          "The identifier of the directory for which to list assessments. If not specified, all assessments in your account are returned."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The pagination token from a previous request to ListADAssessments. Pass null if this is the first request."];
+      limit: AssessmentLimit.t option
+        [@ocaml.doc "The maximum number of assessment summaries to return."]}
+    let make ?directoryId =
+      fun ?nextToken ->
+        fun ?limit -> fun () -> { directoryId; nextToken; limit }
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("Limit", (Option.map x.limit ~f:AssessmentLimit.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let limit =
+        (Option.map ~f:AssessmentLimit.of_xml) (Xml.child xml_arg0 "Limit") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let directoryId =
+        (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
+      make ?limit ?nextToken ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let limit = field_map json__ "Limit" AssessmentLimit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
+      make ?limit ?nextToken ?directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of directory assessments for the specified directory or all assessments in your account. Use this operation to monitor assessment status and manage multiple assessments."]
 module GetSnapshotLimitsResult =
   struct
     type nonrec t =
@@ -8804,9 +12380,9 @@ module GetSnapshotLimitsResult =
           (Xml.child xml_arg0 "SnapshotLimits") in
       make ?snapshotLimits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotLimits =
-        field_map json "SnapshotLimits" SnapshotLimits.of_json in
+        field_map json__ "SnapshotLimits" SnapshotLimits.of_json in
       make ?snapshotLimits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results of the GetSnapshotLimits operation."]
@@ -8829,8 +12405,9 @@ module GetSnapshotLimitsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the inputs for the GetSnapshotLimits operation."]
@@ -8897,9 +12474,9 @@ module GetDirectoryLimitsResult =
           (Xml.child xml_arg0 "DirectoryLimits") in
       make ?directoryLimits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directoryLimits =
-        field_map json "DirectoryLimits" DirectoryLimits.of_json in
+        field_map json__ "DirectoryLimits" DirectoryLimits.of_json in
       make ?directoryLimits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9030,10 +12607,11 @@ module EnableSsoRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?password ?userName ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map json "Password" ConnectPassword.of_json in
-      let userName = field_map json "UserName" UserName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let password = field_map json__ "Password" ConnectPassword.of_json in
+      let userName = field_map json__ "UserName" UserName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?password ?userName ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the inputs for the EnableSso operation."]
@@ -9140,10 +12718,11 @@ module EnableRadiusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~radiusSettings ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let radiusSettings =
-        field_map_exn json "RadiusSettings" RadiusSettings.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "RadiusSettings" RadiusSettings.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~radiusSettings ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the inputs for the EnableRadius operation."]
@@ -9281,13 +12860,138 @@ module EnableLDAPSRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~type_ ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" LDAPSType.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" LDAPSType.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~type_ ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Activates the switch for the specific directory to always use LDAP secure calls."]
+module EnableDirectoryDataAccessResult =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `DirectoryInDesiredStateException of
+          DirectoryInDesiredStateException.t 
+      | `DirectoryUnavailableException of DirectoryUnavailableException.t 
+      | `ServiceException of ServiceException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "DirectoryInDesiredStateException" ->
+          `DirectoryInDesiredStateException
+            (DirectoryInDesiredStateException.of_json json)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "DirectoryInDesiredStateException" ->
+          `DirectoryInDesiredStateException
+            (DirectoryInDesiredStateException.of_xml xml)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `DirectoryInDesiredStateException e ->
+          `Assoc
+            [("error", (`String "DirectoryInDesiredStateException"));
+            ("details", (DirectoryInDesiredStateException.to_json e))]
+      | `DirectoryUnavailableException e ->
+          `Assoc
+            [("error", (`String "DirectoryUnavailableException"));
+            ("details", (DirectoryUnavailableException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables access to directory data via the Directory Service Data API for the specified directory. For more information, see Directory Service Data API Reference."]
+module EnableDirectoryDataAccessRequest =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t [@ocaml.doc "The directory identifier."]}
+    let context_ = "EnableDirectoryDataAccessRequest"
+    let make ~directoryId = fun () -> { directoryId }
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directoryId =
+        DirectoryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
+      make ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ~directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables access to directory data via the Directory Service Data API for the specified directory. For more information, see Directory Service Data API Reference."]
 module EnableClientAuthenticationResult =
   struct
     type nonrec t = unit
@@ -9413,13 +13117,172 @@ module EnableClientAuthenticationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~type_ ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" ClientAuthenticationType.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let type_ =
+        field_map_exn json__ "Type" ClientAuthenticationType.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~type_ ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Enables alternative client authentication methods for the specified directory."]
+module EnableCAEnrollmentPolicyResult =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `DirectoryUnavailableException of DirectoryUnavailableException.t 
+      | `EnableAlreadyInProgressException of
+          EnableAlreadyInProgressException.t 
+      | `EntityAlreadyExistsException of EntityAlreadyExistsException.t 
+      | `EntityDoesNotExistException of EntityDoesNotExistException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServiceException of ServiceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_json json)
+      | "EnableAlreadyInProgressException" ->
+          `EnableAlreadyInProgressException
+            (EnableAlreadyInProgressException.of_json json)
+      | "EntityAlreadyExistsException" ->
+          `EntityAlreadyExistsException
+            (EntityAlreadyExistsException.of_json json)
+      | "EntityDoesNotExistException" ->
+          `EntityDoesNotExistException
+            (EntityDoesNotExistException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_xml xml)
+      | "EnableAlreadyInProgressException" ->
+          `EnableAlreadyInProgressException
+            (EnableAlreadyInProgressException.of_xml xml)
+      | "EntityAlreadyExistsException" ->
+          `EntityAlreadyExistsException
+            (EntityAlreadyExistsException.of_xml xml)
+      | "EntityDoesNotExistException" ->
+          `EntityDoesNotExistException
+            (EntityDoesNotExistException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `DirectoryUnavailableException e ->
+          `Assoc
+            [("error", (`String "DirectoryUnavailableException"));
+            ("details", (DirectoryUnavailableException.to_json e))]
+      | `EnableAlreadyInProgressException e ->
+          `Assoc
+            [("error", (`String "EnableAlreadyInProgressException"));
+            ("details", (EnableAlreadyInProgressException.to_json e))]
+      | `EntityAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "EntityAlreadyExistsException"));
+            ("details", (EntityAlreadyExistsException.to_json e))]
+      | `EntityDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "EntityDoesNotExistException"));
+            ("details", (EntityDoesNotExistException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the results of the EnableCAEnrollmentPolicy operation."]
+module EnableCAEnrollmentPolicyRequest =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t
+        [@ocaml.doc
+          "The identifier of the directory for which to enable the CA enrollment policy."];
+      pcaConnectorArn: PcaConnectorArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Private Certificate Authority (PCA) connector to use for automatic certificate enrollment. This connector must be properly configured and accessible from the directory. The ARN format is: arn:aws:pca-connector-ad:region:account-id:connector/connector-id"]}
+    let context_ = "EnableCAEnrollmentPolicyRequest"
+    let make ~directoryId =
+      fun ~pcaConnectorArn -> fun () -> { directoryId; pcaConnectorArn }
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)));
+        ("PcaConnectorArn",
+          (Some (PcaConnectorArn.to_value x.pcaConnectorArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pcaConnectorArn =
+        PcaConnectorArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PcaConnectorArn") in
+      let directoryId =
+        DirectoryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
+      make ~pcaConnectorArn ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pcaConnectorArn =
+        field_map_exn json__ "PcaConnectorArn" PcaConnectorArn.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ~pcaConnectorArn ~directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the inputs for the EnableCAEnrollmentPolicy operation."]
 module DisableSsoResult =
   struct
     type nonrec t = unit
@@ -9533,10 +13396,11 @@ module DisableSsoRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?password ?userName ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map json "Password" ConnectPassword.of_json in
-      let userName = field_map json "UserName" UserName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let password = field_map json__ "Password" ConnectPassword.of_json in
+      let userName = field_map json__ "UserName" UserName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?password ?userName ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the inputs for the DisableSso operation."]
@@ -9615,8 +13479,9 @@ module DisableRadiusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the inputs for the DisableRadius operation."]
@@ -9743,13 +13608,138 @@ module DisableLDAPSRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~type_ ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" LDAPSType.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" LDAPSType.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~type_ ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deactivates LDAP secure calls for the specified directory."]
+module DisableDirectoryDataAccessResult =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `DirectoryInDesiredStateException of
+          DirectoryInDesiredStateException.t 
+      | `DirectoryUnavailableException of DirectoryUnavailableException.t 
+      | `ServiceException of ServiceException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "DirectoryInDesiredStateException" ->
+          `DirectoryInDesiredStateException
+            (DirectoryInDesiredStateException.of_json json)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "DirectoryInDesiredStateException" ->
+          `DirectoryInDesiredStateException
+            (DirectoryInDesiredStateException.of_xml xml)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `DirectoryInDesiredStateException e ->
+          `Assoc
+            [("error", (`String "DirectoryInDesiredStateException"));
+            ("details", (DirectoryInDesiredStateException.to_json e))]
+      | `DirectoryUnavailableException e ->
+          `Assoc
+            [("error", (`String "DirectoryUnavailableException"));
+            ("details", (DirectoryUnavailableException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deactivates access to directory data via the Directory Service Data API for the specified directory. For more information, see Directory Service Data API Reference."]
+module DisableDirectoryDataAccessRequest =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t [@ocaml.doc "The directory identifier."]}
+    let context_ = "DisableDirectoryDataAccessRequest"
+    let make ~directoryId = fun () -> { directoryId }
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directoryId =
+        DirectoryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
+      make ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ~directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deactivates access to directory data via the Directory Service Data API for the specified directory. For more information, see Directory Service Data API Reference."]
 module DisableClientAuthenticationResult =
   struct
     type nonrec t = unit
@@ -9847,7 +13837,7 @@ module DisableClientAuthenticationRequest =
         [@ocaml.doc "The identifier of the directory"];
       type_: ClientAuthenticationType.t
         [@ocaml.doc
-          "The type of client authentication to disable. Currently, only the parameter, SmartCard is supported."]}
+          "The type of client authentication to disable. Currently the only parameter \"SmartCard\" is supported."]}
     let context_ = "DisableClientAuthenticationRequest"
     let make ~directoryId = fun ~type_ -> fun () -> { directoryId; type_ }
     let to_value x =
@@ -9864,13 +13854,304 @@ module DisableClientAuthenticationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~type_ ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" ClientAuthenticationType.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let type_ =
+        field_map_exn json__ "Type" ClientAuthenticationType.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~type_ ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Disables alternative client authentication methods for the specified directory."]
+module DisableCAEnrollmentPolicyResult =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `DirectoryUnavailableException of DirectoryUnavailableException.t 
+      | `DisableAlreadyInProgressException of
+          DisableAlreadyInProgressException.t 
+      | `EntityDoesNotExistException of EntityDoesNotExistException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServiceException of ServiceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_json json)
+      | "DisableAlreadyInProgressException" ->
+          `DisableAlreadyInProgressException
+            (DisableAlreadyInProgressException.of_json json)
+      | "EntityDoesNotExistException" ->
+          `EntityDoesNotExistException
+            (EntityDoesNotExistException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_xml xml)
+      | "DisableAlreadyInProgressException" ->
+          `DisableAlreadyInProgressException
+            (DisableAlreadyInProgressException.of_xml xml)
+      | "EntityDoesNotExistException" ->
+          `EntityDoesNotExistException
+            (EntityDoesNotExistException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `DirectoryUnavailableException e ->
+          `Assoc
+            [("error", (`String "DirectoryUnavailableException"));
+            ("details", (DirectoryUnavailableException.to_json e))]
+      | `DisableAlreadyInProgressException e ->
+          `Assoc
+            [("error", (`String "DisableAlreadyInProgressException"));
+            ("details", (DisableAlreadyInProgressException.to_json e))]
+      | `EntityDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "EntityDoesNotExistException"));
+            ("details", (EntityDoesNotExistException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the results of the DisableCAEnrollmentPolicy operation."]
+module DisableCAEnrollmentPolicyRequest =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t
+        [@ocaml.doc
+          "The identifier of the directory for which to disable the CA enrollment policy."]}
+    let context_ = "DisableCAEnrollmentPolicyRequest"
+    let make ~directoryId = fun () -> { directoryId }
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directoryId =
+        DirectoryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
+      make ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ~directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the inputs for the DisableCAEnrollmentPolicy operation."]
+module DescribeUpdateDirectoryResult =
+  struct
+    type nonrec t =
+      {
+      updateActivities: UpdateActivities.t option
+        [@ocaml.doc
+          "The list of update activities on a directory for the requested update type."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If not null, more results are available. Pass this value for the NextToken parameter."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServiceException of ServiceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?updateActivities =
+      fun ?nextToken -> fun () -> { updateActivities; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("UpdateActivities",
+           (Option.map x.updateActivities ~f:UpdateActivities.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let updateActivities =
+        (Option.map ~f:UpdateActivities.of_xml)
+          (Xml.child xml_arg0 "UpdateActivities") in
+      make ?nextToken ?updateActivities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let updateActivities =
+        field_map json__ "UpdateActivities" UpdateActivities.of_json in
+      make ?nextToken ?updateActivities ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the updates of a directory for a particular update type."]
+module DescribeUpdateDirectoryRequest =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t
+        [@ocaml.doc "The unique identifier of the directory."];
+      updateType: UpdateType.t
+        [@ocaml.doc
+          "The type of updates you want to describe for the directory."];
+      regionName: RegionName.t option [@ocaml.doc "The name of the Region."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The DescribeUpdateDirectoryResult. NextToken value from a previous call to DescribeUpdateDirectory. Pass null if this is the first call."]}
+    let context_ = "DescribeUpdateDirectoryRequest"
+    let make ?regionName =
+      fun ?nextToken ->
+        fun ~directoryId ->
+          fun ~updateType ->
+            fun () -> { regionName; nextToken; directoryId; updateType }
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)));
+        ("UpdateType", (Some (UpdateType.to_value x.updateType)));
+        ("RegionName", (Option.map x.regionName ~f:RegionName.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let regionName =
+        (Option.map ~f:RegionName.of_xml) (Xml.child xml_arg0 "RegionName") in
+      let updateType =
+        UpdateType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "UpdateType") in
+      let directoryId =
+        DirectoryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
+      make ?nextToken ?regionName ~updateType ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let regionName = field_map json__ "RegionName" RegionName.of_json in
+      let updateType = field_map_exn json__ "UpdateType" UpdateType.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ?nextToken ?regionName ~updateType ~directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the updates of a directory for a particular update type."]
 module DescribeTrustsResult =
   struct
     type nonrec t =
@@ -9967,9 +14248,9 @@ module DescribeTrustsResult =
         (Option.map ~f:Trusts.of_xml) (Xml.child xml_arg0 "Trusts") in
       make ?nextToken ?trusts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let trusts = field_map json "Trusts" Trusts.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let trusts = field_map json__ "Trusts" Trusts.of_json in
       make ?nextToken ?trusts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of a DescribeTrust request."]
@@ -10009,11 +14290,11 @@ module DescribeTrustsRequest =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ?trustIds ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" Limit.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let trustIds = field_map json "TrustIds" TrustIds.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let trustIds = field_map json__ "TrustIds" TrustIds.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?limit ?nextToken ?trustIds ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10104,9 +14385,9 @@ module DescribeSnapshotsResult =
         (Option.map ~f:Snapshots.of_xml) (Xml.child xml_arg0 "Snapshots") in
       make ?nextToken ?snapshots ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let snapshots = field_map json "Snapshots" Snapshots.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let snapshots = field_map json__ "Snapshots" Snapshots.of_json in
       make ?nextToken ?snapshots ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results of the DescribeSnapshots operation."]
@@ -10147,11 +14428,11 @@ module DescribeSnapshotsRequest =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ?snapshotIds ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" Limit.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let snapshotIds = field_map json "SnapshotIds" SnapshotIds.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let snapshotIds = field_map json__ "SnapshotIds" SnapshotIds.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?limit ?nextToken ?snapshotIds ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the inputs for the DescribeSnapshots operation."]
@@ -10253,10 +14534,10 @@ module DescribeSharedDirectoriesResult =
           (Xml.child xml_arg0 "SharedDirectories") in
       make ?nextToken ?sharedDirectories ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let sharedDirectories =
-        field_map json "SharedDirectories" SharedDirectories.of_json in
+        field_map json__ "SharedDirectories" SharedDirectories.of_json in
       make ?nextToken ?sharedDirectories ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the shared directories in your account."]
@@ -10304,16 +14585,176 @@ module DescribeSharedDirectoriesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OwnerDirectoryId") in
       make ?limit ?nextToken ?sharedDirectoryIds ~ownerDirectoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" Limit.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let sharedDirectoryIds =
-        field_map json "SharedDirectoryIds" DirectoryIds.of_json in
+        field_map json__ "SharedDirectoryIds" DirectoryIds.of_json in
       let ownerDirectoryId =
-        field_map_exn json "OwnerDirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "OwnerDirectoryId" DirectoryId.of_json in
       make ?limit ?nextToken ?sharedDirectoryIds ~ownerDirectoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the shared directories in your account."]
+module DescribeSettingsResult =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t option
+        [@ocaml.doc "The identifier of the directory."];
+      settingEntries: SettingEntries.t option
+        [@ocaml.doc
+          "The list of SettingEntry objects that were retrieved. It is possible that this list contains less than the number of items specified in the Limit member of the request. This occurs if there are less than the requested number of items left to retrieve, or if the limitations of the operation have been exceeded."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If not null, token that indicates that more results are available. Pass this value for the NextToken parameter in a subsequent call to DescribeSettings to retrieve the next set of items."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServiceException of ServiceException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?directoryId =
+      fun ?settingEntries ->
+        fun ?nextToken ->
+          fun () -> { directoryId; settingEntries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value));
+        ("SettingEntries",
+          (Option.map x.settingEntries ~f:SettingEntries.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let settingEntries =
+        (Option.map ~f:SettingEntries.of_xml)
+          (Xml.child xml_arg0 "SettingEntries") in
+      let directoryId =
+        (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
+      make ?nextToken ?settingEntries ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let settingEntries =
+        field_map json__ "SettingEntries" SettingEntries.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
+      make ?nextToken ?settingEntries ?directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about the configurable settings for the specified directory."]
+module DescribeSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t
+        [@ocaml.doc
+          "The identifier of the directory for which to retrieve information."];
+      status: DirectoryConfigurationStatus.t option
+        [@ocaml.doc
+          "The status of the directory settings for which to retrieve information."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The DescribeSettingsResult.NextToken value from a previous call to DescribeSettings. Pass null if this is the first call."]}
+    let context_ = "DescribeSettingsRequest"
+    let make ?status =
+      fun ?nextToken ->
+        fun ~directoryId -> fun () -> { status; nextToken; directoryId }
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)));
+        ("Status",
+          (Option.map x.status ~f:DirectoryConfigurationStatus.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let status =
+        (Option.map ~f:DirectoryConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let directoryId =
+        DirectoryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
+      make ?nextToken ?status ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let status =
+        field_map json__ "Status" DirectoryConfigurationStatus.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ?nextToken ?status ~directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about the configurable settings for the specified directory."]
 module DescribeRegionsResult =
   struct
     type nonrec t =
@@ -10422,10 +14863,10 @@ module DescribeRegionsResult =
           (Xml.child xml_arg0 "RegionsDescription") in
       make ?nextToken ?regionsDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let regionsDescription =
-        field_map json "RegionsDescription" RegionsDescription.of_json in
+        field_map json__ "RegionsDescription" RegionsDescription.of_json in
       make ?nextToken ?regionsDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10461,10 +14902,11 @@ module DescribeRegionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?nextToken ?regionName ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let regionName = field_map json "RegionName" RegionName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let regionName = field_map json__ "RegionName" RegionName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?nextToken ?regionName ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10568,10 +15010,10 @@ module DescribeLDAPSSettingsResult =
           (Xml.child xml_arg0 "LDAPSSettingsInfo") in
       make ?nextToken ?lDAPSSettingsInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let lDAPSSettingsInfo =
-        field_map json "LDAPSSettingsInfo" LDAPSSettingsInfo.of_json in
+        field_map json__ "LDAPSSettingsInfo" LDAPSSettingsInfo.of_json in
       make ?nextToken ?lDAPSSettingsInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10615,15 +15057,167 @@ module DescribeLDAPSSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ?type_ ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PageLimit.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let type_ = field_map json "Type" LDAPSType.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PageLimit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let type_ = field_map json__ "Type" LDAPSType.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?limit ?nextToken ?type_ ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the status of LDAP security for the specified directory."]
+module DescribeHybridADUpdateResult =
+  struct
+    type nonrec t =
+      {
+      updateActivities: HybridUpdateActivities.t option
+        [@ocaml.doc
+          "Information about update activities for the hybrid directory, organized by update type."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If not null, more results are available. Pass this value for the NextToken parameter in a subsequent request to retrieve the next set of items."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServiceException of ServiceException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?updateActivities =
+      fun ?nextToken -> fun () -> { updateActivities; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("UpdateActivities",
+           (Option.map x.updateActivities ~f:HybridUpdateActivities.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let updateActivities =
+        (Option.map ~f:HybridUpdateActivities.of_xml)
+          (Xml.child xml_arg0 "UpdateActivities") in
+      make ?nextToken ?updateActivities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let updateActivities =
+        field_map json__ "UpdateActivities" HybridUpdateActivities.of_json in
+      make ?nextToken ?updateActivities ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about update activities for a hybrid directory. This operation provides details about configuration changes, administrator account updates, and self-managed instance settings (IDs and DNS IPs)."]
+module DescribeHybridADUpdateRequest =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t
+        [@ocaml.doc
+          "The identifier of the hybrid directory for which to retrieve update information."];
+      updateType: HybridUpdateType.t option
+        [@ocaml.doc
+          "The type of update activities to retrieve. Valid values include SelfManagedInstances and HybridAdministratorAccount."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The pagination token from a previous request to DescribeHybridADUpdate. Pass null if this is the first request."]}
+    let context_ = "DescribeHybridADUpdateRequest"
+    let make ?updateType =
+      fun ?nextToken ->
+        fun ~directoryId -> fun () -> { updateType; nextToken; directoryId }
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)));
+        ("UpdateType",
+          (Option.map x.updateType ~f:HybridUpdateType.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let updateType =
+        (Option.map ~f:HybridUpdateType.of_xml)
+          (Xml.child xml_arg0 "UpdateType") in
+      let directoryId =
+        DirectoryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
+      make ?nextToken ?updateType ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let updateType = field_map json__ "UpdateType" HybridUpdateType.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ?nextToken ?updateType ~directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about update activities for a hybrid directory. This operation provides details about configuration changes, administrator account updates, and self-managed instance settings (IDs and DNS IPs)."]
 module DescribeEventTopicsResult =
   struct
     type nonrec t =
@@ -10694,8 +15288,8 @@ module DescribeEventTopicsResult =
         (Option.map ~f:EventTopics.of_xml) (Xml.child xml_arg0 "EventTopics") in
       make ?eventTopics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eventTopics = field_map json "EventTopics" EventTopics.of_json in
+    let of_json json__ =
+      let eventTopics = field_map json__ "EventTopics" EventTopics.of_json in
       make ?eventTopics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of a DescribeEventTopic request."]
@@ -10723,9 +15317,9 @@ module DescribeEventTopicsRequest =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?topicNames ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicNames = field_map json "TopicNames" TopicNames.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let topicNames = field_map json__ "TopicNames" TopicNames.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?topicNames ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes event topics."]
@@ -10828,10 +15422,10 @@ module DescribeDomainControllersResult =
           (Xml.child xml_arg0 "DomainControllers") in
       make ?nextToken ?domainControllers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let domainControllers =
-        field_map json "DomainControllers" DomainControllers.of_json in
+        field_map json__ "DomainControllers" DomainControllers.of_json in
       make ?nextToken ?domainControllers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10877,23 +15471,138 @@ module DescribeDomainControllersRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ?domainControllerIds ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" Limit.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let domainControllerIds =
-        field_map json "DomainControllerIds" DomainControllerIds.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+        field_map json__ "DomainControllerIds" DomainControllerIds.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?limit ?nextToken ?domainControllerIds ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about any domain controllers in your directory."]
+module DescribeDirectoryDataAccessResult =
+  struct
+    type nonrec t =
+      {
+      dataAccessStatus: DataAccessStatus.t option
+        [@ocaml.doc
+          "The current status of data access through the Directory Service Data API."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `ServiceException of ServiceException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataAccessStatus = fun () -> { dataAccessStatus }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DataAccessStatus",
+           (Option.map x.dataAccessStatus ~f:DataAccessStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataAccessStatus =
+        (Option.map ~f:DataAccessStatus.of_xml)
+          (Xml.child xml_arg0 "DataAccessStatus") in
+      make ?dataAccessStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataAccessStatus =
+        field_map json__ "DataAccessStatus" DataAccessStatus.of_json in
+      make ?dataAccessStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Obtains status of directory data access enablement through the Directory Service Data API for the specified directory."]
+module DescribeDirectoryDataAccessRequest =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t [@ocaml.doc "The directory identifier."]}
+    let context_ = "DescribeDirectoryDataAccessRequest"
+    let make ~directoryId = fun () -> { directoryId }
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directoryId =
+        DirectoryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
+      make ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ~directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Obtains status of directory data access enablement through the Directory Service Data API for the specified directory."]
 module DescribeDirectoriesResult =
   struct
     type nonrec t =
       {
       directoryDescriptions: DirectoryDescriptions.t option
         [@ocaml.doc
-          "The list of DirectoryDescription objects that were retrieved. It is possible that this list contains less than the number of items specified in the Limit member of the request. This occurs if there are less than the requested number of items left to retrieve, or if the limitations of the operation have been exceeded."];
+          "The list of available DirectoryDescription objects that were retrieved. It is possible that this list contains less than the number of items specified in the Limit member of the request. This occurs if there are less than the requested number of items left to retrieve, or if the limitations of the operation have been exceeded."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If not null, more results are available. Pass this value for the NextToken parameter in a subsequent call to DescribeDirectories to retrieve the next set of items."]}
@@ -10976,10 +15685,11 @@ module DescribeDirectoriesResult =
           (Xml.child xml_arg0 "DirectoryDescriptions") in
       make ?nextToken ?directoryDescriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let directoryDescriptions =
-        field_map json "DirectoryDescriptions" DirectoryDescriptions.of_json in
+        field_map json__ "DirectoryDescriptions"
+          DirectoryDescriptions.of_json in
       make ?nextToken ?directoryDescriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11016,10 +15726,10 @@ module DescribeDirectoriesRequest =
           (Xml.child xml_arg0 "DirectoryIds") in
       make ?limit ?nextToken ?directoryIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" Limit.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let directoryIds = field_map json "DirectoryIds" DirectoryIds.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let directoryIds = field_map json__ "DirectoryIds" DirectoryIds.of_json in
       make ?limit ?nextToken ?directoryIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11119,9 +15829,10 @@ module DescribeConditionalForwardersResult =
           (Xml.child xml_arg0 "ConditionalForwarders") in
       make ?conditionalForwarders ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conditionalForwarders =
-        field_map json "ConditionalForwarders" ConditionalForwarders.of_json in
+        field_map json__ "ConditionalForwarders"
+          ConditionalForwarders.of_json in
       make ?conditionalForwarders ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of a DescribeConditionalForwarder request."]
@@ -11153,10 +15864,11 @@ module DescribeConditionalForwardersRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?remoteDomainNames ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let remoteDomainNames =
-        field_map json "RemoteDomainNames" RemoteDomainNames.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+        field_map json__ "RemoteDomainNames" RemoteDomainNames.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?remoteDomainNames ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a conditional forwarder."]
@@ -11262,10 +15974,10 @@ module DescribeClientAuthenticationSettingsResult =
           (Xml.child xml_arg0 "ClientAuthenticationSettingsInfo") in
       make ?nextToken ?clientAuthenticationSettingsInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let clientAuthenticationSettingsInfo =
-        field_map json "ClientAuthenticationSettingsInfo"
+        field_map json__ "ClientAuthenticationSettingsInfo"
           ClientAuthenticationSettingsInfo.of_json in
       make ?nextToken ?clientAuthenticationSettingsInfo ()
     let to_json v = composed_to_json to_value v
@@ -11313,11 +16025,12 @@ module DescribeClientAuthenticationSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?limit ?nextToken ?type_ ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PageLimit.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let type_ = field_map json "Type" ClientAuthenticationType.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PageLimit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let type_ = field_map json__ "Type" ClientAuthenticationType.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?limit ?nextToken ?type_ ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11416,8 +16129,8 @@ module DescribeCertificateResult =
         (Option.map ~f:Certificate.of_xml) (Xml.child xml_arg0 "Certificate") in
       make ?certificate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificate = field_map json "Certificate" Certificate.of_json in
+    let of_json json__ =
+      let certificate = field_map json__ "Certificate" Certificate.of_json in
       make ?certificate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11447,14 +16160,301 @@ module DescribeCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~certificateId ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateId =
-        field_map_exn json "CertificateId" CertificateId.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "CertificateId" CertificateId.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~certificateId ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Displays information about the certificate registered for secure LDAP or client certificate authentication."]
+module DescribeCAEnrollmentPolicyResult =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t option
+        [@ocaml.doc
+          "The identifier of the directory associated with this CA enrollment policy."];
+      pcaConnectorArn: PcaConnectorArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services Private Certificate Authority (PCA) connector that is configured for automatic certificate enrollment in this directory."];
+      caEnrollmentPolicyStatus: CaEnrollmentPolicyStatus.t option
+        [@ocaml.doc
+          "The current status of the CA enrollment policy. This indicates if automatic certificate enrollment is currently active, inactive, or in a transitional state. Valid values: IN_PROGRESS - The policy is being activated T SUCCESS - The policy is active and automatic certificate enrollment is operational FAILED - The policy activation or deactivation failed DISABLING - The policy is being deactivated DISABLED - The policy is inactive and automatic certificate enrollment is not available IMPAIRED - Network connectivity is impaired."];
+      lastUpdatedDateTime: LastUpdatedDateTime.t option
+        [@ocaml.doc
+          "The date and time when the CA enrollment policy was last modified or updated."];
+      caEnrollmentPolicyStatusReason: CaEnrollmentPolicyStatusReason.t option
+        [@ocaml.doc
+          "Additional information explaining the current status of the CA enrollment policy, particularly useful when the policy is in an error or transitional state."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `DirectoryDoesNotExistException of DirectoryDoesNotExistException.t 
+      | `ServiceException of ServiceException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?directoryId =
+      fun ?pcaConnectorArn ->
+        fun ?caEnrollmentPolicyStatus ->
+          fun ?lastUpdatedDateTime ->
+            fun ?caEnrollmentPolicyStatusReason ->
+              fun () ->
+                {
+                  directoryId;
+                  pcaConnectorArn;
+                  caEnrollmentPolicyStatus;
+                  lastUpdatedDateTime;
+                  caEnrollmentPolicyStatusReason
+                }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryDoesNotExistException" ->
+          `DirectoryDoesNotExistException
+            (DirectoryDoesNotExistException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "DirectoryDoesNotExistException"));
+            ("details", (DirectoryDoesNotExistException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value));
+        ("PcaConnectorArn",
+          (Option.map x.pcaConnectorArn ~f:PcaConnectorArn.to_value));
+        ("CaEnrollmentPolicyStatus",
+          (Option.map x.caEnrollmentPolicyStatus
+             ~f:CaEnrollmentPolicyStatus.to_value));
+        ("LastUpdatedDateTime",
+          (Option.map x.lastUpdatedDateTime ~f:LastUpdatedDateTime.to_value));
+        ("CaEnrollmentPolicyStatusReason",
+          (Option.map x.caEnrollmentPolicyStatusReason
+             ~f:CaEnrollmentPolicyStatusReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let caEnrollmentPolicyStatusReason =
+        (Option.map ~f:CaEnrollmentPolicyStatusReason.of_xml)
+          (Xml.child xml_arg0 "CaEnrollmentPolicyStatusReason") in
+      let lastUpdatedDateTime =
+        (Option.map ~f:LastUpdatedDateTime.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedDateTime") in
+      let caEnrollmentPolicyStatus =
+        (Option.map ~f:CaEnrollmentPolicyStatus.of_xml)
+          (Xml.child xml_arg0 "CaEnrollmentPolicyStatus") in
+      let pcaConnectorArn =
+        (Option.map ~f:PcaConnectorArn.of_xml)
+          (Xml.child xml_arg0 "PcaConnectorArn") in
+      let directoryId =
+        (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
+      make ?caEnrollmentPolicyStatusReason ?lastUpdatedDateTime
+        ?caEnrollmentPolicyStatus ?pcaConnectorArn ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let caEnrollmentPolicyStatusReason =
+        field_map json__ "CaEnrollmentPolicyStatusReason"
+          CaEnrollmentPolicyStatusReason.of_json in
+      let lastUpdatedDateTime =
+        field_map json__ "LastUpdatedDateTime" LastUpdatedDateTime.of_json in
+      let caEnrollmentPolicyStatus =
+        field_map json__ "CaEnrollmentPolicyStatus"
+          CaEnrollmentPolicyStatus.of_json in
+      let pcaConnectorArn =
+        field_map json__ "PcaConnectorArn" PcaConnectorArn.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
+      make ?caEnrollmentPolicyStatusReason ?lastUpdatedDateTime
+        ?caEnrollmentPolicyStatus ?pcaConnectorArn ?directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the results of the DescribeCAEnrollmentPolicy operation."]
+module DescribeCAEnrollmentPolicyRequest =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t
+        [@ocaml.doc
+          "The identifier of the directory for which to retrieve the CA enrollment policy information."]}
+    let context_ = "DescribeCAEnrollmentPolicyRequest"
+    let make ~directoryId = fun () -> { directoryId }
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directoryId =
+        DirectoryId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
+      make ~directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ~directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the inputs for the DescribeCAEnrollmentPolicy operation."]
+module DescribeADAssessmentResult =
+  struct
+    type nonrec t =
+      {
+      assessment: Assessment.t option
+        [@ocaml.doc
+          "Detailed information about the self-managed instance settings (IDs and DNS IPs)."];
+      assessmentReports: AssessmentReports.t option
+        [@ocaml.doc
+          "A list of assessment reports containing validation results for each domain controller and test category. Each report includes specific validation details and outcomes."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `EntityDoesNotExistException of EntityDoesNotExistException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServiceException of ServiceException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?assessment =
+      fun ?assessmentReports -> fun () -> { assessment; assessmentReports }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "EntityDoesNotExistException" ->
+          `EntityDoesNotExistException
+            (EntityDoesNotExistException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "EntityDoesNotExistException" ->
+          `EntityDoesNotExistException
+            (EntityDoesNotExistException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `EntityDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "EntityDoesNotExistException"));
+            ("details", (EntityDoesNotExistException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Assessment", (Option.map x.assessment ~f:Assessment.to_value));
+        ("AssessmentReports",
+          (Option.map x.assessmentReports ~f:AssessmentReports.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let assessmentReports =
+        (Option.map ~f:AssessmentReports.of_xml)
+          (Xml.child xml_arg0 "AssessmentReports") in
+      let assessment =
+        (Option.map ~f:Assessment.of_xml) (Xml.child xml_arg0 "Assessment") in
+      make ?assessmentReports ?assessment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let assessmentReports =
+        field_map json__ "AssessmentReports" AssessmentReports.of_json in
+      let assessment = field_map json__ "Assessment" Assessment.of_json in
+      make ?assessmentReports ?assessment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves detailed information about a directory assessment, including its current status, validation results, and configuration details. Use this operation to monitor assessment progress and review results."]
+module DescribeADAssessmentRequest =
+  struct
+    type nonrec t =
+      {
+      assessmentId: AssessmentId.t
+        [@ocaml.doc
+          "The identifier of the directory assessment to describe."]}
+    let context_ = "DescribeADAssessmentRequest"
+    let make ~assessmentId = fun () -> { assessmentId }
+    let to_value x =
+      structure_to_value
+        [("AssessmentId", (Some (AssessmentId.to_value x.assessmentId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let assessmentId =
+        AssessmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AssessmentId") in
+      make ~assessmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let assessmentId =
+        field_map_exn json__ "AssessmentId" AssessmentId.of_json in
+      make ~assessmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves detailed information about a directory assessment, including its current status, validation results, and configuration details. Use this operation to monitor assessment progress and review results."]
 module DeregisterEventTopicResult =
   struct
     type nonrec t = unit
@@ -11547,9 +16547,10 @@ module DeregisterEventTopicRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~topicName ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicName = field_map_exn json "TopicName" TopicName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let topicName = field_map_exn json__ "TopicName" TopicName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~topicName ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11689,10 +16690,11 @@ module DeregisterCertificateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~certificateId ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateId =
-        field_map_exn json "CertificateId" CertificateId.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "CertificateId" CertificateId.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~certificateId ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11778,8 +16780,8 @@ module DeleteTrustResult =
         (Option.map ~f:TrustId.of_xml) (Xml.child xml_arg0 "TrustId") in
       make ?trustId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustId = field_map json "TrustId" TrustId.of_json in
+    let of_json json__ =
+      let trustId = field_map json__ "TrustId" TrustId.of_json in
       make ?trustId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of a DeleteTrust request."]
@@ -11812,11 +16814,11 @@ module DeleteTrustRequest =
         TrustId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TrustId") in
       make ?deleteAssociatedConditionalForwarder ~trustId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deleteAssociatedConditionalForwarder =
-        field_map json "DeleteAssociatedConditionalForwarder"
+        field_map json__ "DeleteAssociatedConditionalForwarder"
           DeleteAssociatedConditionalForwarder.of_json in
-      let trustId = field_map_exn json "TrustId" TrustId.of_json in
+      let trustId = field_map_exn json__ "TrustId" TrustId.of_json in
       make ?deleteAssociatedConditionalForwarder ~trustId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11891,8 +16893,8 @@ module DeleteSnapshotResult =
         (Option.map ~f:SnapshotId.of_xml) (Xml.child xml_arg0 "SnapshotId") in
       make ?snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
+    let of_json json__ =
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
       make ?snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results of the DeleteSnapshot operation."]
@@ -11915,8 +16917,8 @@ module DeleteSnapshotRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotId") in
       make ~snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
+    let of_json json__ =
+      let snapshotId = field_map_exn json__ "SnapshotId" SnapshotId.of_json in
       make ~snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the inputs for the DeleteSnapshot operation."]
@@ -12006,8 +17008,9 @@ module DeleteLogSubscriptionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified log subscription."]
@@ -12071,8 +17074,8 @@ module DeleteDirectoryResult =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results of the DeleteDirectory operation."]
@@ -12094,8 +17097,9 @@ module DeleteDirectoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the inputs for the DeleteDirectory operation."]
@@ -12214,13 +17218,129 @@ module DeleteConditionalForwarderRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~remoteDomainName ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let remoteDomainName =
-        field_map_exn json "RemoteDomainName" RemoteDomainName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "RemoteDomainName" RemoteDomainName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~remoteDomainName ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a conditional forwarder."]
+module DeleteADAssessmentResult =
+  struct
+    type nonrec t =
+      {
+      assessmentId: AssessmentId.t option
+        [@ocaml.doc
+          "The unique identifier of the deleted directory assessment."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `EntityDoesNotExistException of EntityDoesNotExistException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServiceException of ServiceException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?assessmentId = fun () -> { assessmentId }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "EntityDoesNotExistException" ->
+          `EntityDoesNotExistException
+            (EntityDoesNotExistException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "EntityDoesNotExistException" ->
+          `EntityDoesNotExistException
+            (EntityDoesNotExistException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `EntityDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "EntityDoesNotExistException"));
+            ("details", (EntityDoesNotExistException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AssessmentId",
+           (Option.map x.assessmentId ~f:AssessmentId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let assessmentId =
+        (Option.map ~f:AssessmentId.of_xml)
+          (Xml.child xml_arg0 "AssessmentId") in
+      make ?assessmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let assessmentId = field_map json__ "AssessmentId" AssessmentId.of_json in
+      make ?assessmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a directory assessment and all associated data. This operation permanently removes the assessment results, validation reports, and configuration information. You cannot delete system-initiated assessments. You can delete customer-created assessments even if they are in progress."]
+module DeleteADAssessmentRequest =
+  struct
+    type nonrec t =
+      {
+      assessmentId: AssessmentId.t
+        [@ocaml.doc
+          "The unique identifier of the directory assessment to delete."]}
+    let context_ = "DeleteADAssessmentRequest"
+    let make ~assessmentId = fun () -> { assessmentId }
+    let to_value x =
+      structure_to_value
+        [("AssessmentId", (Some (AssessmentId.to_value x.assessmentId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let assessmentId =
+        AssessmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AssessmentId") in
+      make ~assessmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let assessmentId =
+        field_map_exn json__ "AssessmentId" AssessmentId.of_json in
+      make ~assessmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a directory assessment and all associated data. This operation permanently removes the assessment results, validation reports, and configuration information. You cannot delete system-initiated assessments. You can delete customer-created assessments even if they are in progress."]
 module CreateTrustResult =
   struct
     type nonrec t =
@@ -12313,8 +17433,8 @@ module CreateTrustResult =
         (Option.map ~f:TrustId.of_xml) (Xml.child xml_arg0 "TrustId") in
       make ?trustId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trustId = field_map json "TrustId" TrustId.of_json in
+    let of_json json__ =
+      let trustId = field_map json__ "TrustId" TrustId.of_json in
       make ?trustId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of a CreateTrust request."]
@@ -12330,7 +17450,7 @@ module CreateTrustRequest =
           "The Fully Qualified Domain Name (FQDN) of the external domain for which to create the trust relationship."];
       trustPassword: TrustPassword.t
         [@ocaml.doc
-          "The trust password. The must be the same password that was used when creating the trust relationship on the external domain."];
+          "The trust password. The trust password must be the same password that was used when creating the trust relationship on the external domain."];
       trustDirection: TrustDirection.t
         [@ocaml.doc "The direction of the trust relationship."];
       trustType: TrustType.t option
@@ -12338,27 +17458,32 @@ module CreateTrustRequest =
       conditionalForwarderIpAddrs: DnsIpAddrs.t option
         [@ocaml.doc
           "The IP addresses of the remote DNS server associated with RemoteDomainName."];
+      conditionalForwarderIpv6Addrs: DnsIpv6Addrs.t option
+        [@ocaml.doc
+          "The IPv6 addresses of the remote DNS server associated with RemoteDomainName."];
       selectiveAuth: SelectiveAuth.t option
         [@ocaml.doc
           "Optional parameter to enable selective authentication for the trust."]}
     let context_ = "CreateTrustRequest"
     let make ?trustType =
       fun ?conditionalForwarderIpAddrs ->
-        fun ?selectiveAuth ->
-          fun ~directoryId ->
-            fun ~remoteDomainName ->
-              fun ~trustPassword ->
-                fun ~trustDirection ->
-                  fun () ->
-                    {
-                      trustType;
-                      conditionalForwarderIpAddrs;
-                      selectiveAuth;
-                      directoryId;
-                      remoteDomainName;
-                      trustPassword;
-                      trustDirection
-                    }
+        fun ?conditionalForwarderIpv6Addrs ->
+          fun ?selectiveAuth ->
+            fun ~directoryId ->
+              fun ~remoteDomainName ->
+                fun ~trustPassword ->
+                  fun ~trustDirection ->
+                    fun () ->
+                      {
+                        trustType;
+                        conditionalForwarderIpAddrs;
+                        conditionalForwarderIpv6Addrs;
+                        selectiveAuth;
+                        directoryId;
+                        remoteDomainName;
+                        trustPassword;
+                        trustDirection
+                      }
     let to_value x =
       structure_to_value
         [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)));
@@ -12369,6 +17494,9 @@ module CreateTrustRequest =
         ("TrustType", (Option.map x.trustType ~f:TrustType.to_value));
         ("ConditionalForwarderIpAddrs",
           (Option.map x.conditionalForwarderIpAddrs ~f:DnsIpAddrs.to_value));
+        ("ConditionalForwarderIpv6Addrs",
+          (Option.map x.conditionalForwarderIpv6Addrs
+             ~f:DnsIpv6Addrs.to_value));
         ("SelectiveAuth",
           (Option.map x.selectiveAuth ~f:SelectiveAuth.to_value))]
     let to_query v = to_query to_value v
@@ -12376,6 +17504,9 @@ module CreateTrustRequest =
       let selectiveAuth =
         (Option.map ~f:SelectiveAuth.of_xml)
           (Xml.child xml_arg0 "SelectiveAuth") in
+      let conditionalForwarderIpv6Addrs =
+        (Option.map ~f:DnsIpv6Addrs.of_xml)
+          (Xml.child xml_arg0 "ConditionalForwarderIpv6Addrs") in
       let conditionalForwarderIpAddrs =
         (Option.map ~f:DnsIpAddrs.of_xml)
           (Xml.child xml_arg0 "ConditionalForwarderIpAddrs") in
@@ -12393,24 +17524,29 @@ module CreateTrustRequest =
       let directoryId =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
-      make ?selectiveAuth ?conditionalForwarderIpAddrs ?trustType
-        ~trustDirection ~trustPassword ~remoteDomainName ~directoryId ()
+      make ?selectiveAuth ?conditionalForwarderIpv6Addrs
+        ?conditionalForwarderIpAddrs ?trustType ~trustDirection
+        ~trustPassword ~remoteDomainName ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let selectiveAuth =
-        field_map json "SelectiveAuth" SelectiveAuth.of_json in
+        field_map json__ "SelectiveAuth" SelectiveAuth.of_json in
+      let conditionalForwarderIpv6Addrs =
+        field_map json__ "ConditionalForwarderIpv6Addrs" DnsIpv6Addrs.of_json in
       let conditionalForwarderIpAddrs =
-        field_map json "ConditionalForwarderIpAddrs" DnsIpAddrs.of_json in
-      let trustType = field_map json "TrustType" TrustType.of_json in
+        field_map json__ "ConditionalForwarderIpAddrs" DnsIpAddrs.of_json in
+      let trustType = field_map json__ "TrustType" TrustType.of_json in
       let trustDirection =
-        field_map_exn json "TrustDirection" TrustDirection.of_json in
+        field_map_exn json__ "TrustDirection" TrustDirection.of_json in
       let trustPassword =
-        field_map_exn json "TrustPassword" TrustPassword.of_json in
+        field_map_exn json__ "TrustPassword" TrustPassword.of_json in
       let remoteDomainName =
-        field_map_exn json "RemoteDomainName" RemoteDomainName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
-      make ?selectiveAuth ?conditionalForwarderIpAddrs ?trustType
-        ~trustDirection ~trustPassword ~remoteDomainName ~directoryId ()
+        field_map_exn json__ "RemoteDomainName" RemoteDomainName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ?selectiveAuth ?conditionalForwarderIpv6Addrs
+        ?conditionalForwarderIpAddrs ?trustType ~trustDirection
+        ~trustPassword ~remoteDomainName ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Directory Service for Microsoft Active Directory allows you to configure trust relationships. For example, you can establish a trust between your Managed Microsoft AD directory, and your existing self-managed Microsoft Active Directory. This would allow you to provide users and groups access to resources in either domain, with a single set of credentials. This action initiates the creation of the Amazon Web Services side of a trust relationship between an Managed Microsoft AD directory and an external domain."]
@@ -12494,8 +17630,8 @@ module CreateSnapshotResult =
         (Option.map ~f:SnapshotId.of_xml) (Xml.child xml_arg0 "SnapshotId") in
       make ?snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
+    let of_json json__ =
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
       make ?snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results of the CreateSnapshot operation."]
@@ -12523,9 +17659,10 @@ module CreateSnapshotRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ?name ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" SnapshotName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" SnapshotName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?name ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the inputs for the CreateSnapshot operation."]
@@ -12609,8 +17746,8 @@ module CreateMicrosoftADResult =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Result of a CreateMicrosoftAD request."]
@@ -12638,25 +17775,30 @@ module CreateMicrosoftADRequest =
           "Managed Microsoft AD is available in two editions: Standard and Enterprise. Enterprise is the default."];
       tags: Tags.t option
         [@ocaml.doc
-          "The tags to be assigned to the Managed Microsoft AD directory."]}
+          "The tags to be assigned to the Managed Microsoft AD directory."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The network type for your domain. The default value is IPv4 or IPv6 based on the provided subnet capabilities."]}
     let context_ = "CreateMicrosoftADRequest"
     let make ?shortName =
       fun ?description ->
         fun ?edition ->
           fun ?tags ->
-            fun ~name ->
-              fun ~password ->
-                fun ~vpcSettings ->
-                  fun () ->
-                    {
-                      shortName;
-                      description;
-                      edition;
-                      tags;
-                      name;
-                      password;
-                      vpcSettings
-                    }
+            fun ?networkType ->
+              fun ~name ->
+                fun ~password ->
+                  fun ~vpcSettings ->
+                    fun () ->
+                      {
+                        shortName;
+                        description;
+                        edition;
+                        tags;
+                        networkType;
+                        name;
+                        password;
+                        vpcSettings
+                      }
     let to_value x =
       structure_to_value
         [("Name", (Some (DirectoryName.to_value x.name)));
@@ -12666,9 +17808,12 @@ module CreateMicrosoftADRequest =
         ("Description", (Option.map x.description ~f:Description.to_value));
         ("VpcSettings", (Some (DirectoryVpcSettings.to_value x.vpcSettings)));
         ("Edition", (Option.map x.edition ~f:DirectoryEdition.to_value));
-        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let edition =
         (Option.map ~f:DirectoryEdition.of_xml)
@@ -12686,20 +17831,21 @@ module CreateMicrosoftADRequest =
       let name =
         DirectoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?tags ?edition ~vpcSettings ?description ~password ?shortName
-        ~name ()
+      make ?networkType ?tags ?edition ~vpcSettings ?description ~password
+        ?shortName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let edition = field_map json "Edition" DirectoryEdition.of_json in
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let edition = field_map json__ "Edition" DirectoryEdition.of_json in
       let vpcSettings =
-        field_map_exn json "VpcSettings" DirectoryVpcSettings.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let password = field_map_exn json "Password" Password.of_json in
-      let shortName = field_map json "ShortName" DirectoryShortName.of_json in
-      let name = field_map_exn json "Name" DirectoryName.of_json in
-      make ?tags ?edition ~vpcSettings ?description ~password ?shortName
-        ~name ()
+        field_map_exn json__ "VpcSettings" DirectoryVpcSettings.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let password = field_map_exn json__ "Password" Password.of_json in
+      let shortName = field_map json__ "ShortName" DirectoryShortName.of_json in
+      let name = field_map_exn json__ "Name" DirectoryName.of_json in
+      make ?networkType ?tags ?edition ~vpcSettings ?description ~password
+        ?shortName ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an Managed Microsoft AD directory."]
 module CreateLogSubscriptionResult =
@@ -12820,14 +17966,168 @@ module CreateLogSubscriptionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~logGroupName ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logGroupName =
-        field_map_exn json "LogGroupName" LogGroupName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "LogGroupName" LogGroupName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~logGroupName ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a subscription to forward real-time Directory Service domain controller security logs to the specified Amazon CloudWatch log group in your Amazon Web Services account."]
+module CreateHybridADResult =
+  struct
+    type nonrec t =
+      {
+      directoryId: DirectoryId.t option
+        [@ocaml.doc
+          "The unique identifier of the newly created hybrid directory."]}
+    type nonrec error =
+      [
+        `ADAssessmentLimitExceededException of
+          ADAssessmentLimitExceededException.t 
+      | `ClientException of ClientException.t 
+      | `DirectoryLimitExceededException of DirectoryLimitExceededException.t 
+      | `EntityDoesNotExistException of EntityDoesNotExistException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `ServiceException of ServiceException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?directoryId = fun () -> { directoryId }
+    let error_of_json name json =
+      match name with
+      | "ADAssessmentLimitExceededException" ->
+          `ADAssessmentLimitExceededException
+            (ADAssessmentLimitExceededException.of_json json)
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "DirectoryLimitExceededException" ->
+          `DirectoryLimitExceededException
+            (DirectoryLimitExceededException.of_json json)
+      | "EntityDoesNotExistException" ->
+          `EntityDoesNotExistException
+            (EntityDoesNotExistException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServiceException" ->
+          `ServiceException (ServiceException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ADAssessmentLimitExceededException" ->
+          `ADAssessmentLimitExceededException
+            (ADAssessmentLimitExceededException.of_xml xml)
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "DirectoryLimitExceededException" ->
+          `DirectoryLimitExceededException
+            (DirectoryLimitExceededException.of_xml xml)
+      | "EntityDoesNotExistException" ->
+          `EntityDoesNotExistException
+            (EntityDoesNotExistException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServiceException" -> `ServiceException (ServiceException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ADAssessmentLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ADAssessmentLimitExceededException"));
+            ("details", (ADAssessmentLimitExceededException.to_json e))]
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `DirectoryLimitExceededException e ->
+          `Assoc
+            [("error", (`String "DirectoryLimitExceededException"));
+            ("details", (DirectoryLimitExceededException.to_json e))]
+      | `EntityDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "EntityDoesNotExistException"));
+            ("details", (EntityDoesNotExistException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServiceException e ->
+          `Assoc
+            [("error", (`String "ServiceException"));
+            ("details", (ServiceException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DirectoryId", (Option.map x.directoryId ~f:DirectoryId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let directoryId =
+        (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
+      make ?directoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
+      make ?directoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a hybrid directory that connects your self-managed Active Directory (AD) infrastructure and Amazon Web Services. You must have a successful directory assessment using StartADAssessment to validate your environment compatibility before you use this operation. Updates are applied asynchronously. Use DescribeDirectories to monitor the progress of directory creation."]
+module CreateHybridADRequest =
+  struct
+    type nonrec t =
+      {
+      secretArn: SecretArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret that contains the credentials for the service account used to join hybrid domain controllers to your self-managed AD domain. This secret is used once and not stored. The secret must contain key-value pairs with keys matching customerAdAdminDomainUsername and customerAdAdminDomainPassword. For example: \\{\"customerAdAdminDomainUsername\":\"carlos_salazar\",\"customerAdAdminDomainPassword\":\"ExamplePassword123!\"\\}."];
+      assessmentId: AssessmentId.t
+        [@ocaml.doc
+          "The unique identifier of the successful directory assessment that validates your self-managed AD environment. You must have a successful directory assessment before you create a hybrid directory."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "The tags to be assigned to the directory. Each tag consists of a key and value pair. You can specify multiple tags as a list."]}
+    let context_ = "CreateHybridADRequest"
+    let make ?tags =
+      fun ~secretArn ->
+        fun ~assessmentId -> fun () -> { tags; secretArn; assessmentId }
+    let to_value x =
+      structure_to_value
+        [("SecretArn", (Some (SecretArn.to_value x.secretArn)));
+        ("AssessmentId", (Some (AssessmentId.to_value x.assessmentId)));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let assessmentId =
+        AssessmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AssessmentId") in
+      let secretArn =
+        SecretArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SecretArn") in
+      make ?tags ~assessmentId ~secretArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let assessmentId =
+        field_map_exn json__ "AssessmentId" AssessmentId.of_json in
+      let secretArn = field_map_exn json__ "SecretArn" SecretArn.of_json in
+      make ?tags ~assessmentId ~secretArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a hybrid directory that connects your self-managed Active Directory (AD) infrastructure and Amazon Web Services. You must have a successful directory assessment using StartADAssessment to validate your environment compatibility before you use this operation. Updates are applied asynchronously. Use DescribeDirectories to monitor the progress of directory creation."]
 module CreateDirectoryResult =
   struct
     type nonrec t =
@@ -12897,8 +18197,8 @@ module CreateDirectoryResult =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results of the CreateDirectory operation."]
@@ -12921,25 +18221,30 @@ module CreateDirectoryRequest =
         [@ocaml.doc
           "A DirectoryVpcSettings object that contains additional information for the operation."];
       tags: Tags.t option
-        [@ocaml.doc "The tags to be assigned to the Simple AD directory."]}
+        [@ocaml.doc "The tags to be assigned to the Simple AD directory."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The network type for your directory. Simple AD supports IPv4 and Dual-stack only."]}
     let context_ = "CreateDirectoryRequest"
     let make ?shortName =
       fun ?description ->
         fun ?vpcSettings ->
           fun ?tags ->
-            fun ~name ->
-              fun ~password ->
-                fun ~size ->
-                  fun () ->
-                    {
-                      shortName;
-                      description;
-                      vpcSettings;
-                      tags;
-                      name;
-                      password;
-                      size
-                    }
+            fun ?networkType ->
+              fun ~name ->
+                fun ~password ->
+                  fun ~size ->
+                    fun () ->
+                      {
+                        shortName;
+                        description;
+                        vpcSettings;
+                        tags;
+                        networkType;
+                        name;
+                        password;
+                        size
+                      }
     let to_value x =
       structure_to_value
         [("Name", (Some (DirectoryName.to_value x.name)));
@@ -12950,9 +18255,12 @@ module CreateDirectoryRequest =
         ("Size", (Some (DirectorySize.to_value x.size)));
         ("VpcSettings",
           (Option.map x.vpcSettings ~f:DirectoryVpcSettings.to_value));
-        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let vpcSettings =
         (Option.map ~f:DirectoryVpcSettings.of_xml)
@@ -12970,20 +18278,21 @@ module CreateDirectoryRequest =
       let name =
         DirectoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?tags ?vpcSettings ~size ?description ~password ?shortName ~name
-        ()
+      make ?networkType ?tags ?vpcSettings ~size ?description ~password
+        ?shortName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let vpcSettings =
-        field_map json "VpcSettings" DirectoryVpcSettings.of_json in
-      let size = field_map_exn json "Size" DirectorySize.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let password = field_map_exn json "Password" Password.of_json in
-      let shortName = field_map json "ShortName" DirectoryShortName.of_json in
-      let name = field_map_exn json "Name" DirectoryName.of_json in
-      make ?tags ?vpcSettings ~size ?description ~password ?shortName ~name
-        ()
+        field_map json__ "VpcSettings" DirectoryVpcSettings.of_json in
+      let size = field_map_exn json__ "Size" DirectorySize.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let password = field_map_exn json__ "Password" Password.of_json in
+      let shortName = field_map json__ "ShortName" DirectoryShortName.of_json in
+      let name = field_map_exn json__ "Name" DirectoryName.of_json in
+      make ?networkType ?tags ?vpcSettings ~size ?description ~password
+        ?shortName ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the inputs for the CreateDirectory operation."]
 module CreateConditionalForwarderResult =
@@ -13094,39 +18403,50 @@ module CreateConditionalForwarderRequest =
       remoteDomainName: RemoteDomainName.t
         [@ocaml.doc
           "The fully qualified domain name (FQDN) of the remote domain with which you will set up a trust relationship."];
-      dnsIpAddrs: DnsIpAddrs.t
+      dnsIpAddrs: DnsIpAddrs.t option
         [@ocaml.doc
-          "The IP addresses of the remote DNS server associated with RemoteDomainName."]}
+          "The IP addresses of the remote DNS server associated with RemoteDomainName."];
+      dnsIpv6Addrs: DnsIpv6Addrs.t option
+        [@ocaml.doc
+          "The IPv6 addresses of the remote DNS server associated with RemoteDomainName."]}
     let context_ = "CreateConditionalForwarderRequest"
-    let make ~directoryId =
-      fun ~remoteDomainName ->
-        fun ~dnsIpAddrs ->
-          fun () -> { directoryId; remoteDomainName; dnsIpAddrs }
+    let make ?dnsIpAddrs =
+      fun ?dnsIpv6Addrs ->
+        fun ~directoryId ->
+          fun ~remoteDomainName ->
+            fun () ->
+              { dnsIpAddrs; dnsIpv6Addrs; directoryId; remoteDomainName }
     let to_value x =
       structure_to_value
         [("DirectoryId", (Some (DirectoryId.to_value x.directoryId)));
         ("RemoteDomainName",
           (Some (RemoteDomainName.to_value x.remoteDomainName)));
-        ("DnsIpAddrs", (Some (DnsIpAddrs.to_value x.dnsIpAddrs)))]
+        ("DnsIpAddrs", (Option.map x.dnsIpAddrs ~f:DnsIpAddrs.to_value));
+        ("DnsIpv6Addrs",
+          (Option.map x.dnsIpv6Addrs ~f:DnsIpv6Addrs.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dnsIpv6Addrs =
+        (Option.map ~f:DnsIpv6Addrs.of_xml)
+          (Xml.child xml_arg0 "DnsIpv6Addrs") in
       let dnsIpAddrs =
-        DnsIpAddrs.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DnsIpAddrs") in
+        (Option.map ~f:DnsIpAddrs.of_xml) (Xml.child xml_arg0 "DnsIpAddrs") in
       let remoteDomainName =
         RemoteDomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RemoteDomainName") in
       let directoryId =
         DirectoryId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
-      make ~dnsIpAddrs ~remoteDomainName ~directoryId ()
+      make ?dnsIpv6Addrs ?dnsIpAddrs ~remoteDomainName ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dnsIpAddrs = field_map_exn json "DnsIpAddrs" DnsIpAddrs.of_json in
+    let of_json json__ =
+      let dnsIpv6Addrs = field_map json__ "DnsIpv6Addrs" DnsIpv6Addrs.of_json in
+      let dnsIpAddrs = field_map json__ "DnsIpAddrs" DnsIpAddrs.of_json in
       let remoteDomainName =
-        field_map_exn json "RemoteDomainName" RemoteDomainName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
-      make ~dnsIpAddrs ~remoteDomainName ~directoryId ()
+        field_map_exn json__ "RemoteDomainName" RemoteDomainName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
+      make ?dnsIpv6Addrs ?dnsIpAddrs ~remoteDomainName ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Initiates the creation of a conditional forwarder for your Directory Service for Microsoft Active Directory. Conditional forwarders are required in order to set up a trust relationship with another domain."]
@@ -13244,8 +18564,8 @@ module CreateComputerResult =
         (Option.map ~f:Computer.of_xml) (Xml.child xml_arg0 "Computer") in
       make ?computer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let computer = field_map json "Computer" Computer.of_json in
+    let of_json json__ =
+      let computer = field_map json__ "Computer" Computer.of_json in
       make ?computer ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results for the CreateComputer operation."]
@@ -13311,16 +18631,17 @@ module CreateComputerRequest =
       make ?computerAttributes ?organizationalUnitDistinguishedName ~password
         ~computerName ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let computerAttributes =
-        field_map json "ComputerAttributes" Attributes.of_json in
+        field_map json__ "ComputerAttributes" Attributes.of_json in
       let organizationalUnitDistinguishedName =
-        field_map json "OrganizationalUnitDistinguishedName"
+        field_map json__ "OrganizationalUnitDistinguishedName"
           OrganizationalUnitDN.of_json in
-      let password = field_map_exn json "Password" ComputerPassword.of_json in
+      let password = field_map_exn json__ "Password" ComputerPassword.of_json in
       let computerName =
-        field_map_exn json "ComputerName" ComputerName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "ComputerName" ComputerName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?computerAttributes ?organizationalUnitDistinguishedName ~password
         ~computerName ~directoryId ()
     let to_json v = composed_to_json to_value v
@@ -13409,9 +18730,9 @@ module CreateAliasResult =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?alias ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alias = field_map json "Alias" AliasName.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let alias = field_map json__ "Alias" AliasName.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?alias ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results of the CreateAlias operation."]
@@ -13440,9 +18761,10 @@ module CreateAliasRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~alias ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alias = field_map_exn json "Alias" AliasName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let alias = field_map_exn json__ "Alias" AliasName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~alias ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the inputs for the CreateAlias operation."]
@@ -13515,8 +18837,8 @@ module ConnectDirectoryResult =
         (Option.map ~f:DirectoryId.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+    let of_json json__ =
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the results of the ConnectDirectory operation."]
@@ -13539,25 +18861,30 @@ module ConnectDirectoryRequest =
         [@ocaml.doc
           "A DirectoryConnectSettings object that contains additional information for the operation."];
       tags: Tags.t option
-        [@ocaml.doc "The tags to be assigned to AD Connector."]}
+        [@ocaml.doc "The tags to be assigned to AD Connector."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The network type for your directory. The default value is IPv4 or IPv6 based on the provided subnet capabilities."]}
     let context_ = "ConnectDirectoryRequest"
     let make ?shortName =
       fun ?description ->
         fun ?tags ->
-          fun ~name ->
-            fun ~password ->
-              fun ~size ->
-                fun ~connectSettings ->
-                  fun () ->
-                    {
-                      shortName;
-                      description;
-                      tags;
-                      name;
-                      password;
-                      size;
-                      connectSettings
-                    }
+          fun ?networkType ->
+            fun ~name ->
+              fun ~password ->
+                fun ~size ->
+                  fun ~connectSettings ->
+                    fun () ->
+                      {
+                        shortName;
+                        description;
+                        tags;
+                        networkType;
+                        name;
+                        password;
+                        size;
+                        connectSettings
+                      }
     let to_value x =
       structure_to_value
         [("Name", (Some (DirectoryName.to_value x.name)));
@@ -13568,9 +18895,12 @@ module ConnectDirectoryRequest =
         ("Size", (Some (DirectorySize.to_value x.size)));
         ("ConnectSettings",
           (Some (DirectoryConnectSettings.to_value x.connectSettings)));
-        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+        ("Tags", (Option.map x.tags ~f:Tags.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       let connectSettings =
         DirectoryConnectSettings.of_xml
@@ -13589,20 +18919,22 @@ module ConnectDirectoryRequest =
       let name =
         DirectoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?tags ~connectSettings ~size ?description ~password ?shortName
-        ~name ()
+      make ?networkType ?tags ~connectSettings ~size ?description ~password
+        ?shortName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let connectSettings =
-        field_map_exn json "ConnectSettings" DirectoryConnectSettings.of_json in
-      let size = field_map_exn json "Size" DirectorySize.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let password = field_map_exn json "Password" ConnectPassword.of_json in
-      let shortName = field_map json "ShortName" DirectoryShortName.of_json in
-      let name = field_map_exn json "Name" DirectoryName.of_json in
-      make ?tags ~connectSettings ~size ?description ~password ?shortName
-        ~name ()
+        field_map_exn json__ "ConnectSettings"
+          DirectoryConnectSettings.of_json in
+      let size = field_map_exn json__ "Size" DirectorySize.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let password = field_map_exn json__ "Password" ConnectPassword.of_json in
+      let shortName = field_map json__ "ShortName" DirectoryShortName.of_json in
+      let name = field_map_exn json__ "Name" DirectoryName.of_json in
+      make ?networkType ?tags ~connectSettings ~size ?description ~password
+        ?shortName ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the inputs for the ConnectDirectory operation."]
 module CancelSchemaExtensionResult =
@@ -13690,10 +19022,11 @@ module CancelSchemaExtensionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~schemaExtensionId ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schemaExtensionId =
-        field_map_exn json "SchemaExtensionId" SchemaExtensionId.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "SchemaExtensionId" SchemaExtensionId.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~schemaExtensionId ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13796,9 +19129,9 @@ module AddTagsToResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tags ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~tags ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13968,11 +19301,12 @@ module AddRegionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DirectoryId") in
       make ~vPCSettings ~regionName ~directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vPCSettings =
-        field_map_exn json "VPCSettings" DirectoryVpcSettings.of_json in
-      let regionName = field_map_exn json "RegionName" RegionName.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "VPCSettings" DirectoryVpcSettings.of_json in
+      let regionName = field_map_exn json__ "RegionName" RegionName.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ~vPCSettings ~regionName ~directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14089,7 +19423,7 @@ module AddIpRoutesRequest =
       updateSecurityGroupForDirectoryControllers:
         UpdateSecurityGroupForDirectoryControllers.t option
         [@ocaml.doc
-          "If set to true, updates the inbound and outbound rules of the security group that has the description: \"Amazon Web Services created security group for directory ID directory controllers.\" Following are the new rules: Inbound: Type: Custom UDP Rule, Protocol: UDP, Range: 88, Source: 0.0.0.0/0 Type: Custom UDP Rule, Protocol: UDP, Range: 123, Source: 0.0.0.0/0 Type: Custom UDP Rule, Protocol: UDP, Range: 138, Source: 0.0.0.0/0 Type: Custom UDP Rule, Protocol: UDP, Range: 389, Source: 0.0.0.0/0 Type: Custom UDP Rule, Protocol: UDP, Range: 464, Source: 0.0.0.0/0 Type: Custom UDP Rule, Protocol: UDP, Range: 445, Source: 0.0.0.0/0 Type: Custom TCP Rule, Protocol: TCP, Range: 88, Source: 0.0.0.0/0 Type: Custom TCP Rule, Protocol: TCP, Range: 135, Source: 0.0.0.0/0 Type: Custom TCP Rule, Protocol: TCP, Range: 445, Source: 0.0.0.0/0 Type: Custom TCP Rule, Protocol: TCP, Range: 464, Source: 0.0.0.0/0 Type: Custom TCP Rule, Protocol: TCP, Range: 636, Source: 0.0.0.0/0 Type: Custom TCP Rule, Protocol: TCP, Range: 1024-65535, Source: 0.0.0.0/0 Type: Custom TCP Rule, Protocol: TCP, Range: 3268-33269, Source: 0.0.0.0/0 Type: DNS (UDP), Protocol: UDP, Range: 53, Source: 0.0.0.0/0 Type: DNS (TCP), Protocol: TCP, Range: 53, Source: 0.0.0.0/0 Type: LDAP, Protocol: TCP, Range: 389, Source: 0.0.0.0/0 Type: All ICMP, Protocol: All, Range: N/A, Source: 0.0.0.0/0 Outbound: Type: All traffic, Protocol: All, Range: All, Destination: 0.0.0.0/0 These security rules impact an internal network interface that is not exposed publicly."]}
+          "If set to true, updates the inbound and outbound rules of the security group that has the description: \"Amazon Web Services created security group for directory ID directory controllers.\" Following are the new rules: Inbound: Type: Custom UDP Rule, Protocol: UDP, Range: 88, Source: Managed Microsoft AD VPC IPv4 CIDR Type: Custom UDP Rule, Protocol: UDP, Range: 123, Source: Managed Microsoft AD VPC IPv4 CIDR Type: Custom UDP Rule, Protocol: UDP, Range: 138, Source: Managed Microsoft AD VPC IPv4 CIDR Type: Custom UDP Rule, Protocol: UDP, Range: 389, Source: Managed Microsoft AD VPC IPv4 CIDR Type: Custom UDP Rule, Protocol: UDP, Range: 464, Source: Managed Microsoft AD VPC IPv4 CIDR Type: Custom UDP Rule, Protocol: UDP, Range: 445, Source: Managed Microsoft AD VPC IPv4 CIDR Type: Custom TCP Rule, Protocol: TCP, Range: 88, Source: Managed Microsoft AD VPC IPv4 CIDR Type: Custom TCP Rule, Protocol: TCP, Range: 135, Source: Managed Microsoft AD VPC IPv4 CIDR Type: Custom TCP Rule, Protocol: TCP, Range: 445, Source: Managed Microsoft AD VPC IPv4 CIDR Type: Custom TCP Rule, Protocol: TCP, Range: 464, Source: Managed Microsoft AD VPC IPv4 CIDR Type: Custom TCP Rule, Protocol: TCP, Range: 636, Source: Managed Microsoft AD VPC IPv4 CIDR Type: Custom TCP Rule, Protocol: TCP, Range: 1024-65535, Source: Managed Microsoft AD VPC IPv4 CIDR Type: Custom TCP Rule, Protocol: TCP, Range: 3268-33269, Source: Managed Microsoft AD VPC IPv4 CIDR Type: DNS (UDP), Protocol: UDP, Range: 53, Source: Managed Microsoft AD VPC IPv4 CIDR Type: DNS (TCP), Protocol: TCP, Range: 53, Source: Managed Microsoft AD VPC IPv4 CIDR Type: LDAP, Protocol: TCP, Range: 389, Source: Managed Microsoft AD VPC IPv4 CIDR Type: All ICMP, Protocol: All, Range: N/A, Source: Managed Microsoft AD VPC IPv4 CIDR Outbound: Type: All traffic, Protocol: All, Range: All, Destination: 0.0.0.0/0 These security rules impact an internal network interface that is not exposed publicly."]}
     let context_ = "AddIpRoutesRequest"
     let make ?updateSecurityGroupForDirectoryControllers =
       fun ~directoryId ->
@@ -14120,12 +19454,13 @@ module AddIpRoutesRequest =
       make ?updateSecurityGroupForDirectoryControllers ~ipRoutes ~directoryId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updateSecurityGroupForDirectoryControllers =
-        field_map json "UpdateSecurityGroupForDirectoryControllers"
+        field_map json__ "UpdateSecurityGroupForDirectoryControllers"
           UpdateSecurityGroupForDirectoryControllers.of_json in
-      let ipRoutes = field_map_exn json "IpRoutes" IpRoutes.of_json in
-      let directoryId = field_map_exn json "DirectoryId" DirectoryId.of_json in
+      let ipRoutes = field_map_exn json__ "IpRoutes" IpRoutes.of_json in
+      let directoryId =
+        field_map_exn json__ "DirectoryId" DirectoryId.of_json in
       make ?updateSecurityGroupForDirectoryControllers ~ipRoutes ~directoryId
         ()
     let to_json v = composed_to_json to_value v
@@ -14214,9 +19549,9 @@ module AcceptSharedDirectoryResult =
           (Xml.child xml_arg0 "SharedDirectory") in
       make ?sharedDirectory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sharedDirectory =
-        field_map json "SharedDirectory" SharedDirectory.of_json in
+        field_map json__ "SharedDirectory" SharedDirectory.of_json in
       make ?sharedDirectory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14241,9 +19576,9 @@ module AcceptSharedDirectoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SharedDirectoryId") in
       make ~sharedDirectoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sharedDirectoryId =
-        field_map_exn json "SharedDirectoryId" DirectoryId.of_json in
+        field_map_exn json__ "SharedDirectoryId" DirectoryId.of_json in
       make ~sharedDirectoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

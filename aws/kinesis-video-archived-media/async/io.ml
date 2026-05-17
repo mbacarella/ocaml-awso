@@ -17,6 +17,8 @@ let get_d_a_s_h_streaming_session_u_r_l ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDASHStreamingSessionURL input
 let get_h_l_s_streaming_session_u_r_l ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetHLSStreamingSessionURL input
+let get_images ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetImages input
 let get_media_for_fragment_list ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMediaForFragmentList input
 let list_fragments ?endpoint_url ?cfg input =

@@ -27,6 +27,8 @@ let delete_backup ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBackup input
 let delete_item ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteItem input
+let delete_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
 let delete_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTable input
 let describe_backup ?endpoint_url ?cfg input =
@@ -43,6 +45,8 @@ let describe_global_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeGlobalTable input
 let describe_global_table_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeGlobalTableSettings input
+let describe_import ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeImport input
 let describe_kinesis_streaming_destination ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeKinesisStreamingDestination input
 let describe_limits ?endpoint_url ?cfg input =
@@ -65,6 +69,10 @@ let export_table_to_point_in_time ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExportTableToPointInTime input
 let get_item ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetItem input
+let get_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourcePolicy input
+let import_table ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ImportTable input
 let list_backups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBackups input
 let list_contributor_insights ?endpoint_url ?cfg input =
@@ -73,12 +81,16 @@ let list_exports ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListExports input
 let list_global_tables ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGlobalTables input
+let list_imports ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListImports input
 let list_tables ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTables input
 let list_tags_of_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsOfResource input
 let put_item ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutItem input
+let put_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutResourcePolicy input
 let query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.Query input
 let restore_table_from_backup ?endpoint_url ?cfg input =
@@ -105,6 +117,8 @@ let update_global_table_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateGlobalTableSettings input
 let update_item ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateItem input
+let update_kinesis_streaming_destination ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateKinesisStreamingDestination input
 let update_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateTable input
 let update_table_replica_auto_scaling ?endpoint_url ?cfg input =

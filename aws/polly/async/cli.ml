@@ -161,6 +161,45 @@ let put_lexicon =
            Io.put_lexicon (Values.PutLexiconInput.make ~name ~content ())
            (Some Values.PutLexiconOutput.to_json)
            (Some Values.PutLexiconOutput.error_to_json)])
+let start_speech_synthesis_stream =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and languageCode =
+         flag "language-code" (optional json_arg) ~doc:"JSON LanguageCode"
+       and lexiconNames =
+         flag "lexicon-names" (optional json_arg) ~doc:"JSON LexiconNameList"
+       and sampleRate =
+         flag "sample-rate" (optional string) ~doc:"STRING SampleRate"
+       and actionStream =
+         flag "action-stream" (optional json_arg)
+           ~doc:"JSON StartSpeechSynthesisStreamActionStream"
+       and engine = flag "engine" (required json_arg) ~doc:"JSON Engine"
+       and outputFormat =
+         flag "output-format" (required json_arg) ~doc:"JSON OutputFormat"
+       and voiceId = flag "voice-id" (required json_arg) ~doc:"JSON VoiceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_speech_synthesis_stream
+           (Values.StartSpeechSynthesisStreamInput.make
+              ?languageCode:(Option.map ~f:Values.LanguageCode.of_json
+                               languageCode)
+              ?lexiconNames:(Option.map ~f:Values.LexiconNameList.of_json
+                               lexiconNames) ?sampleRate
+              ?actionStream:(Option.map
+                               ~f:Values.StartSpeechSynthesisStreamActionStream.of_json
+                               actionStream)
+              ~engine:(Values.Engine.of_json engine)
+              ~outputFormat:(Values.OutputFormat.of_json outputFormat)
+              ~voiceId:(Values.VoiceId.of_json voiceId) ())
+           (Some Values.StartSpeechSynthesisStreamOutput.to_json)
+           (Some Values.StartSpeechSynthesisStreamOutput.error_to_json)])
 let start_speech_synthesis_task =
   Command.async ~summary:""
     ([%map_open.Command
@@ -267,5 +306,6 @@ let main =
     ("list-lexicons", list_lexicons);
     ("list-speech-synthesis-tasks", list_speech_synthesis_tasks);
     ("put-lexicon", put_lexicon);
+    ("start-speech-synthesis-stream", start_speech_synthesis_stream);
     ("start-speech-synthesis-task", start_speech_synthesis_task);
     ("synthesize-speech", synthesize_speech)]

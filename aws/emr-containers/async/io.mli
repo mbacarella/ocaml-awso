@@ -6,17 +6,36 @@ val cancel_job_run :
       CancelJobRunRequest.t ->
         (CancelJobRunResponse.t, CancelJobRunResponse.error) Result.t
           Async.Deferred.t
+val create_job_template :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateJobTemplateRequest.t ->
+        (CreateJobTemplateResponse.t, CreateJobTemplateResponse.error)
+          Result.t Async.Deferred.t
 val create_managed_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateManagedEndpointRequest.t ->
         (CreateManagedEndpointResponse.t,
           CreateManagedEndpointResponse.error) Result.t Async.Deferred.t
+val create_security_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateSecurityConfigurationRequest.t ->
+        (CreateSecurityConfigurationResponse.t,
+          CreateSecurityConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val create_virtual_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateVirtualClusterRequest.t ->
         (CreateVirtualClusterResponse.t, CreateVirtualClusterResponse.error)
+          Result.t Async.Deferred.t
+val delete_job_template :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteJobTemplateRequest.t ->
+        (DeleteJobTemplateResponse.t, DeleteJobTemplateResponse.error)
           Result.t Async.Deferred.t
 val delete_managed_endpoint :
   ?endpoint_url:string ->
@@ -36,23 +55,49 @@ val describe_job_run :
       DescribeJobRunRequest.t ->
         (DescribeJobRunResponse.t, DescribeJobRunResponse.error) Result.t
           Async.Deferred.t
+val describe_job_template :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeJobTemplateRequest.t ->
+        (DescribeJobTemplateResponse.t, DescribeJobTemplateResponse.error)
+          Result.t Async.Deferred.t
 val describe_managed_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeManagedEndpointRequest.t ->
         (DescribeManagedEndpointResponse.t,
           DescribeManagedEndpointResponse.error) Result.t Async.Deferred.t
+val describe_security_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeSecurityConfigurationRequest.t ->
+        (DescribeSecurityConfigurationResponse.t,
+          DescribeSecurityConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val describe_virtual_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeVirtualClusterRequest.t ->
         (DescribeVirtualClusterResponse.t,
           DescribeVirtualClusterResponse.error) Result.t Async.Deferred.t
+val get_managed_endpoint_session_credentials :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetManagedEndpointSessionCredentialsRequest.t ->
+        (GetManagedEndpointSessionCredentialsResponse.t,
+          GetManagedEndpointSessionCredentialsResponse.error) Result.t
+          Async.Deferred.t
 val list_job_runs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobRunsRequest.t ->
         (ListJobRunsResponse.t, ListJobRunsResponse.error) Result.t
+          Async.Deferred.t
+val list_job_templates :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListJobTemplatesRequest.t ->
+        (ListJobTemplatesResponse.t, ListJobTemplatesResponse.error) Result.t
           Async.Deferred.t
 val list_managed_endpoints :
   ?endpoint_url:string ->
@@ -60,6 +105,12 @@ val list_managed_endpoints :
       ListManagedEndpointsRequest.t ->
         (ListManagedEndpointsResponse.t, ListManagedEndpointsResponse.error)
           Result.t Async.Deferred.t
+val list_security_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSecurityConfigurationsRequest.t ->
+        (ListSecurityConfigurationsResponse.t,
+          ListSecurityConfigurationsResponse.error) Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

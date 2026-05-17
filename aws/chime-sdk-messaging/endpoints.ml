@@ -26,6 +26,8 @@ type ('i, 'o, 'e) t =
   unit) t 
   | DeleteChannelMessage: (DeleteChannelMessageRequest.t, unit, unit) t 
   | DeleteChannelModerator: (DeleteChannelModeratorRequest.t, unit, unit) t 
+  | DeleteMessagingStreamingConfigurations:
+  (DeleteMessagingStreamingConfigurationsRequest.t, unit, unit) t 
   | DescribeChannel: (DescribeChannelRequest.t, DescribeChannelResponse.t,
   DescribeChannelResponse.error) t 
   | DescribeChannelBan: (DescribeChannelBanRequest.t,
@@ -60,6 +62,10 @@ type ('i, 'o, 'e) t =
   | GetMessagingSessionEndpoint: (GetMessagingSessionEndpointRequest.t,
   GetMessagingSessionEndpointResponse.t,
   GetMessagingSessionEndpointResponse.error) t 
+  | GetMessagingStreamingConfigurations:
+  (GetMessagingStreamingConfigurationsRequest.t,
+  GetMessagingStreamingConfigurationsResponse.t,
+  GetMessagingStreamingConfigurationsResponse.error) t 
   | ListChannelBans: (ListChannelBansRequest.t, ListChannelBansResponse.t,
   ListChannelBansResponse.error) t 
   | ListChannelFlows: (ListChannelFlowsRequest.t, ListChannelFlowsResponse.t,
@@ -84,14 +90,25 @@ type ('i, 'o, 'e) t =
   (ListChannelsModeratedByAppInstanceUserRequest.t,
   ListChannelsModeratedByAppInstanceUserResponse.t,
   ListChannelsModeratedByAppInstanceUserResponse.error) t 
+  | ListSubChannels: (ListSubChannelsRequest.t, ListSubChannelsResponse.t,
+  ListSubChannelsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | PutChannelExpirationSettings: (PutChannelExpirationSettingsRequest.t,
+  PutChannelExpirationSettingsResponse.t,
+  PutChannelExpirationSettingsResponse.error) t 
   | PutChannelMembershipPreferences:
   (PutChannelMembershipPreferencesRequest.t,
   PutChannelMembershipPreferencesResponse.t,
   PutChannelMembershipPreferencesResponse.error) t 
+  | PutMessagingStreamingConfigurations:
+  (PutMessagingStreamingConfigurationsRequest.t,
+  PutMessagingStreamingConfigurationsResponse.t,
+  PutMessagingStreamingConfigurationsResponse.error) t 
   | RedactChannelMessage: (RedactChannelMessageRequest.t,
   RedactChannelMessageResponse.t, RedactChannelMessageResponse.error) t 
+  | SearchChannels: (SearchChannelsRequest.t, SearchChannelsResponse.t,
+  SearchChannelsResponse.error) t 
   | SendChannelMessage: (SendChannelMessageRequest.t,
   SendChannelMessageResponse.t, SendChannelMessageResponse.error) t 
   | TagResource: (TagResourceRequest.t, unit, unit) t 
@@ -120,6 +137,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteChannelMembership -> `DELETE
   | DeleteChannelMessage -> `DELETE
   | DeleteChannelModerator -> `DELETE
+  | DeleteMessagingStreamingConfigurations -> `DELETE
   | DescribeChannel -> `GET
   | DescribeChannelBan -> `GET
   | DescribeChannelFlow -> `GET
@@ -132,6 +150,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetChannelMessage -> `GET
   | GetChannelMessageStatus -> `GET
   | GetMessagingSessionEndpoint -> `GET
+  | GetMessagingStreamingConfigurations -> `GET
   | ListChannelBans -> `GET
   | ListChannelFlows -> `GET
   | ListChannelMemberships -> `GET
@@ -141,9 +160,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListChannels -> `GET
   | ListChannelsAssociatedWithChannelFlow -> `GET
   | ListChannelsModeratedByAppInstanceUser -> `GET
+  | ListSubChannels -> `GET
   | ListTagsForResource -> `GET
+  | PutChannelExpirationSettings -> `PUT
   | PutChannelMembershipPreferences -> `PUT
+  | PutMessagingStreamingConfigurations -> `PUT
   | RedactChannelMessage -> `POST
+  | SearchChannels -> `POST
   | SendChannelMessage -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
@@ -189,18 +212,34 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/channel-flows/%s"
             (ChimeArn.to_header x.DeleteChannelFlowRequest.channelFlowArn)
       | DeleteChannelMembership ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/memberships/%s"
-            (ChimeArn.to_header x.DeleteChannelMembershipRequest.channelArn)
-            (ChimeArn.to_header x.DeleteChannelMembershipRequest.memberArn)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/channels/%s/memberships/%s"
+               (ChimeArn.to_header
+                  x.DeleteChannelMembershipRequest.channelArn)
+               (ChimeArn.to_header x.DeleteChannelMembershipRequest.memberArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("sub-channel-id", (SubChannelId.to_header v)))
+                  x.subChannelId])
       | DeleteChannelMessage ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/messages/%s"
-            (ChimeArn.to_header x.DeleteChannelMessageRequest.channelArn)
-            (MessageId.to_header x.DeleteChannelMessageRequest.messageId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/channels/%s/messages/%s"
+               (ChimeArn.to_header x.DeleteChannelMessageRequest.channelArn)
+               (MessageId.to_header x.DeleteChannelMessageRequest.messageId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("sub-channel-id", (SubChannelId.to_header v)))
+                  x.subChannelId])
       | DeleteChannelModerator ->
           (Format.kasprintf Uri.of_string) "/channels/%s/moderators/%s"
             (ChimeArn.to_header x.DeleteChannelModeratorRequest.channelArn)
             (ChimeArn.to_header
                x.DeleteChannelModeratorRequest.channelModeratorArn)
+      | DeleteMessagingStreamingConfigurations ->
+          (Format.kasprintf Uri.of_string)
+            "/app-instances/%s/streaming-configurations"
+            (ChimeArn.to_header
+               x.DeleteMessagingStreamingConfigurationsRequest.appInstanceArn)
       | DescribeChannel ->
           (Format.kasprintf Uri.of_string) "/channels/%s"
             (ChimeArn.to_header x.DescribeChannelRequest.channelArn)
@@ -212,9 +251,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/channel-flows/%s"
             (ChimeArn.to_header x.DescribeChannelFlowRequest.channelFlowArn)
       | DescribeChannelMembership ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/memberships/%s"
-            (ChimeArn.to_header x.DescribeChannelMembershipRequest.channelArn)
-            (ChimeArn.to_header x.DescribeChannelMembershipRequest.memberArn)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/channels/%s/memberships/%s"
+               (ChimeArn.to_header
+                  x.DescribeChannelMembershipRequest.channelArn)
+               (ChimeArn.to_header
+                  x.DescribeChannelMembershipRequest.memberArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("sub-channel-id", (SubChannelId.to_header v)))
+                  x.subChannelId])
       | DescribeChannelMembershipForAppInstanceUser ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -253,16 +299,38 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (ChimeArn.to_header
                x.GetChannelMembershipPreferencesRequest.memberArn)
       | GetChannelMessage ->
-          (Format.kasprintf Uri.of_string) "/channels/%s/messages/%s"
-            (ChimeArn.to_header x.GetChannelMessageRequest.channelArn)
-            (MessageId.to_header x.GetChannelMessageRequest.messageId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/channels/%s/messages/%s"
+               (ChimeArn.to_header x.GetChannelMessageRequest.channelArn)
+               (MessageId.to_header x.GetChannelMessageRequest.messageId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("sub-channel-id", (SubChannelId.to_header v)))
+                  x.subChannelId])
       | GetChannelMessageStatus ->
-          (Format.kasprintf Uri.of_string)
-            "/channels/%s/messages/%s?scope=message-status"
-            (ChimeArn.to_header x.GetChannelMessageStatusRequest.channelArn)
-            (MessageId.to_header x.GetChannelMessageStatusRequest.messageId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/channels/%s/messages/%s?scope=message-status"
+               (ChimeArn.to_header
+                  x.GetChannelMessageStatusRequest.channelArn)
+               (MessageId.to_header
+                  x.GetChannelMessageStatusRequest.messageId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("sub-channel-id", (SubChannelId.to_header v)))
+                  x.subChannelId])
       | GetMessagingSessionEndpoint ->
-          (Format.kasprintf Uri.of_string) "/endpoints/messaging-session"
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/endpoints/messaging-session")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("network-type", (NetworkType.to_header v)))
+                  x.networkType])
+      | GetMessagingStreamingConfigurations ->
+          (Format.kasprintf Uri.of_string)
+            "/app-instances/%s/streaming-configurations"
+            (ChimeArn.to_header
+               x.GetMessagingStreamingConfigurationsRequest.appInstanceArn)
       | ListChannelBans ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/channels/%s/bans"
@@ -299,7 +367,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults;
                Option.map
                  ~f:(fun v -> ("next-token", (NextToken.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("sub-channel-id", (SubChannelId.to_header v)))
+                 x.subChannelId])
       | ListChannelMembershipsForAppInstanceUser ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -334,7 +405,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults;
                Option.map
                  ~f:(fun v -> ("next-token", (NextToken.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("sub-channel-id", (SubChannelId.to_header v)))
+                 x.subChannelId])
       | ListChannelModerators ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/channels/%s/moderators"
@@ -389,10 +463,25 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("next-token", (NextToken.to_header v)))
                  x.nextToken])
+      | ListSubChannels ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/channels/%s/subchannels"
+               (ChimeArn.to_header x.ListSubChannelsRequest.channelArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("next-token", (NextToken.to_header v)))
+                 x.nextToken])
       | ListTagsForResource ->
           Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/tags")
             (List.filter_opt
                [Some ("arn", (ChimeArn.to_header x.resourceARN))])
+      | PutChannelExpirationSettings ->
+          (Format.kasprintf Uri.of_string) "/channels/%s/expiration-settings"
+            (ChimeArn.to_header
+               x.PutChannelExpirationSettingsRequest.channelArn)
       | PutChannelMembershipPreferences ->
           (Format.kasprintf Uri.of_string)
             "/channels/%s/memberships/%s/preferences"
@@ -400,11 +489,26 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.PutChannelMembershipPreferencesRequest.channelArn)
             (ChimeArn.to_header
                x.PutChannelMembershipPreferencesRequest.memberArn)
+      | PutMessagingStreamingConfigurations ->
+          (Format.kasprintf Uri.of_string)
+            "/app-instances/%s/streaming-configurations"
+            (ChimeArn.to_header
+               x.PutMessagingStreamingConfigurationsRequest.appInstanceArn)
       | RedactChannelMessage ->
           (Format.kasprintf Uri.of_string)
             "/channels/%s/messages/%s?operation=redact"
             (ChimeArn.to_header x.RedactChannelMessageRequest.channelArn)
             (MessageId.to_header x.RedactChannelMessageRequest.messageId)
+      | SearchChannels ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/channels?operation=search")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("next-token", (NextToken.to_header v)))
+                 x.nextToken])
       | SendChannelMessage ->
           (Format.kasprintf Uri.of_string) "/channels/%s/messages"
             (ChimeArn.to_header x.SendChannelMessageRequest.channelArn)
@@ -452,7 +556,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("MemberArns",
                           (MemberArns.to_value
-                             req.BatchCreateChannelMembershipRequest.memberArns))])
+                             req.BatchCreateChannelMembershipRequest.memberArns));
+                      Option.map
+                        req.BatchCreateChannelMembershipRequest.subChannelId
+                        ~f:(fun x ->
+                              ("SubChannelId", (SubChannelId.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -522,7 +630,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                           (ClientRequestToken.to_value
                              req.CreateChannelRequest.clientRequestToken));
                       Option.map req.CreateChannelRequest.tags
-                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map req.CreateChannelRequest.channelId
+                        ~f:(fun x -> ("ChannelId", (ChannelId.to_value x)));
+                      Option.map req.CreateChannelRequest.memberArns
+                        ~f:(fun x ->
+                              ("MemberArns", (ChannelMemberArns.to_value x)));
+                      Option.map req.CreateChannelRequest.moderatorArns
+                        ~f:(fun x ->
+                              ("ModeratorArns",
+                                (ChannelModeratorArns.to_value x)));
+                      Option.map
+                        req.CreateChannelRequest.elasticChannelConfiguration
+                        ~f:(fun x ->
+                              ("ElasticChannelConfiguration",
+                                (ElasticChannelConfiguration.to_value x)));
+                      Option.map req.CreateChannelRequest.expirationSettings
+                        ~f:(fun x ->
+                              ("ExpirationSettings",
+                                (ExpirationSettings.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -612,7 +738,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("Type",
                           (ChannelMembershipType.to_value
-                             req.CreateChannelMembershipRequest.type_))])
+                             req.CreateChannelMembershipRequest.type_));
+                      Option.map
+                        req.CreateChannelMembershipRequest.subChannelId
+                        ~f:(fun x ->
+                              ("SubChannelId", (SubChannelId.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -653,6 +783,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteChannelMessage -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteChannelModerator ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteMessagingStreamingConfigurations ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeChannel ->
       let (headers, body) =
@@ -851,6 +983,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetMessagingSessionEndpoint ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetMessagingStreamingConfigurations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListChannelBans ->
       let (headers, body) =
         let headers =
@@ -1003,10 +1138,35 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSubChannels ->
+      let (headers, body) =
+        let headers =
+          Some
+            ((List.filter_opt
+                [Some
+                   ("x-amz-chime-bearer",
+                     (ChimeArn.to_header
+                        req.ListSubChannelsRequest.chimeBearer))])
+               |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map (List.filter_opt [])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutChannelExpirationSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | PutChannelMembershipPreferences ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | PutMessagingStreamingConfigurations ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | RedactChannelMessage ->
       let (headers, body) =
@@ -1021,7 +1181,37 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let body =
           Some
             ((`Assoc
-                (List.map (List.filter_opt [])
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.RedactChannelMessageRequest.subChannelId
+                         ~f:(fun x ->
+                               ("SubChannelId", (SubChannelId.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchChannels ->
+      let (headers, body) =
+        let headers =
+          Some
+            ((List.filter_opt
+                [Option.map req.SearchChannelsRequest.chimeBearer
+                   ~f:(fun x ->
+                         ("x-amz-chime-bearer", (ChimeArn.to_header x)))])
+               |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Fields",
+                           (SearchFields.to_value
+                              req.SearchChannelsRequest.fields))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1071,7 +1261,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.SendChannelMessageRequest.messageAttributes
                         ~f:(fun x ->
                               ("MessageAttributes",
-                                (MessageAttributeMap.to_value x)))])
+                                (MessageAttributeMap.to_value x)));
+                      Option.map req.SendChannelMessageRequest.subChannelId
+                        ~f:(fun x ->
+                              ("SubChannelId", (SubChannelId.to_value x)));
+                      Option.map req.SendChannelMessageRequest.contentType
+                        ~f:(fun x ->
+                              ("ContentType", (ContentType.to_value x)));
+                      Option.map req.SendChannelMessageRequest.target
+                        ~f:(fun x -> ("Target", (TargetList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1240,6 +1438,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteChannelModerator ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteMessagingStreamingConfigurations ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DescribeChannel ->
       if is_success
       then Ok (DescribeChannelResponse.of_json (response_to_json resp))
@@ -1332,6 +1532,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetMessagingSessionEndpointResponse.error_of_json))
+  | GetMessagingStreamingConfigurations ->
+      if is_success
+      then
+        Ok
+          (GetMessagingStreamingConfigurationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetMessagingStreamingConfigurationsResponse.error_of_json))
   | ListChannelBans ->
       if is_success
       then Ok (ListChannelBansResponse.of_json (response_to_json resp))
@@ -1399,12 +1609,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 ListChannelsModeratedByAppInstanceUserResponse.error_of_json))
+  | ListSubChannels ->
+      if is_success
+      then Ok (ListSubChannelsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListSubChannelsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | PutChannelExpirationSettings ->
+      if is_success
+      then
+        Ok
+          (PutChannelExpirationSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutChannelExpirationSettingsResponse.error_of_json))
   | PutChannelMembershipPreferences ->
       if is_success
       then
@@ -1415,12 +1640,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PutChannelMembershipPreferencesResponse.error_of_json))
+  | PutMessagingStreamingConfigurations ->
+      if is_success
+      then
+        Ok
+          (PutMessagingStreamingConfigurationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutMessagingStreamingConfigurationsResponse.error_of_json))
   | RedactChannelMessage ->
       if is_success
       then Ok (RedactChannelMessageResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some RedactChannelMessageResponse.error_of_json))
+  | SearchChannels ->
+      if is_success
+      then Ok (SearchChannelsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some SearchChannelsResponse.error_of_json))
   | SendChannelMessage ->
       if is_success
       then Ok (SendChannelMessageResponse.of_json (response_to_json resp))

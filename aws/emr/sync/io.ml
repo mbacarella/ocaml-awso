@@ -21,6 +21,8 @@ let add_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddTags input
 let cancel_steps ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelSteps input
+let create_persistent_app_u_i ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreatePersistentAppUI input
 let create_security_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSecurityConfiguration input
 let create_studio ?endpoint_url ?cfg input =
@@ -39,6 +41,8 @@ let describe_job_flows ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeJobFlows input
 let describe_notebook_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeNotebookExecution input
+let describe_persistent_app_u_i ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribePersistentAppUI input
 let describe_release_label ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeReleaseLabel input
 let describe_security_configuration ?endpoint_url ?cfg input =
@@ -51,8 +55,14 @@ let get_auto_termination_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAutoTerminationPolicy input
 let get_block_public_access_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBlockPublicAccessConfiguration input
+let get_cluster_session_credentials ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetClusterSessionCredentials input
 let get_managed_scaling_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetManagedScalingPolicy input
+let get_on_cluster_app_u_i_presigned_u_r_l ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetOnClusterAppUIPresignedURL input
+let get_persistent_app_u_i_presigned_u_r_l ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPersistentAppUIPresignedURL input
 let get_studio_session_mapping ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetStudioSessionMapping input
 let list_bootstrap_actions ?endpoint_url ?cfg input =
@@ -77,6 +87,8 @@ let list_studio_session_mappings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListStudioSessionMappings input
 let list_studios ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListStudios input
+let list_supported_instance_types ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSupportedInstanceTypes input
 let modify_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyCluster input
 let modify_instance_fleet ?endpoint_url ?cfg input =
@@ -101,8 +113,12 @@ let remove_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemoveTags input
 let run_job_flow ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RunJobFlow input
+let set_keep_job_flow_alive_when_no_steps ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SetKeepJobFlowAliveWhenNoSteps input
 let set_termination_protection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SetTerminationProtection input
+let set_unhealthy_node_replacement ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SetUnhealthyNodeReplacement input
 let set_visible_to_all_users ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SetVisibleToAllUsers input
 let start_notebook_execution ?endpoint_url ?cfg input =

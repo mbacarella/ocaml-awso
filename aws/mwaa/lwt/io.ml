@@ -21,6 +21,8 @@ let delete_environment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEnvironment input
 let get_environment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEnvironment input
+let invoke_rest_api ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.InvokeRestApi input
 let list_environments ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEnvironments input
 let list_tags_for_resource ?endpoint_url ?cfg input =

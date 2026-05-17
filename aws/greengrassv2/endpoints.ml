@@ -21,6 +21,7 @@ type ('i, 'o, 'e) t =
   CreateDeploymentResponse.error) t 
   | DeleteComponent: (DeleteComponentRequest.t, unit, unit) t 
   | DeleteCoreDevice: (DeleteCoreDeviceRequest.t, unit, unit) t 
+  | DeleteDeployment: (DeleteDeploymentRequest.t, unit, unit) t 
   | DescribeComponent: (DescribeComponentRequest.t,
   DescribeComponentResponse.t, DescribeComponentResponse.error) t 
   | DisassociateServiceRoleFromAccount:
@@ -80,6 +81,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateDeployment -> `POST
   | DeleteComponent -> `DELETE
   | DeleteCoreDevice -> `DELETE
+  | DeleteDeployment -> `DELETE
   | DescribeComponent -> `GET
   | DisassociateServiceRoleFromAccount -> `DELETE
   | GetComponent -> `GET
@@ -131,6 +133,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/greengrass/v2/coreDevices/%s"
             (CoreDeviceThingName.to_header
                x.DeleteCoreDeviceRequest.coreDeviceThingName)
+      | DeleteDeployment ->
+          (Format.kasprintf Uri.of_string) "/greengrass/v2/deployments/%s"
+            (NonEmptyString.to_header x.DeleteDeploymentRequest.deploymentId)
       | DescribeComponent ->
           (Format.kasprintf Uri.of_string)
             "/greengrass/v2/components/%s/metadata"
@@ -148,12 +153,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                           (RecipeOutputFormat.to_header v)))
                   x.recipeOutputFormat])
       | GetComponentVersionArtifact ->
-          (Format.kasprintf Uri.of_string)
-            "/greengrass/v2/components/%s/artifacts/%s"
-            (ComponentVersionARN.to_header
-               x.GetComponentVersionArtifactRequest.arn)
-            (NonEmptyString.to_header
-               x.GetComponentVersionArtifactRequest.artifactName)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/greengrass/v2/components/%s/artifacts/%s"
+               (ComponentVersionARN.to_header
+                  x.GetComponentVersionArtifactRequest.arn)
+               (NonEmptyString.to_header
+                  x.GetComponentVersionArtifactRequest.artifactName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("s3EndpointType", (S3EndpointType.to_header v)))
+                  x.s3EndpointType])
       | GetConnectivityInfo ->
           (Format.kasprintf Uri.of_string)
             "/greengrass/things/%s/connectivityInfo"
@@ -224,7 +235,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults;
                Option.map
                  ~f:(fun v -> ("nextToken", (NextTokenString.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("runtime", (CoreDeviceRuntimeString.to_header v)))
+                 x.runtime])
       | ListDeployments ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/greengrass/v2/deployments")
@@ -237,6 +252,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                        ("historyFilter",
                          (DeploymentHistoryFilter.to_header v)))
                  x.historyFilter;
+               Option.map
+                 ~f:(fun v ->
+                       ("parentTargetArn", (ThingGroupARN.to_header v)))
+                 x.parentTargetArn;
                Option.map
                  ~f:(fun v -> ("maxResults", (DefaultMaxResults.to_header v)))
                  x.maxResults;
@@ -270,7 +289,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.maxResults;
                Option.map
                  ~f:(fun v -> ("nextToken", (NextTokenString.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("topologyFilter",
+                         (InstalledComponentTopologyFilter.to_header v)))
+                 x.topologyFilter])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (GenericV2ARN.to_header x.ListTagsForResourceRequest.resourceArn)
@@ -390,7 +414,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               req.CreateDeploymentRequest.targetArn));
                       Option.map req.CreateDeploymentRequest.deploymentName
                         ~f:(fun x ->
-                              ("deploymentName", (NonEmptyString.to_value x)));
+                              ("deploymentName",
+                                (DeploymentNameString.to_value x)));
                       Option.map req.CreateDeploymentRequest.components
                         ~f:(fun x ->
                               ("components",
@@ -405,6 +430,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("deploymentPolicies",
                                 (DeploymentPolicies.to_value x)));
+                      Option.map req.CreateDeploymentRequest.parentTargetArn
+                        ~f:(fun x ->
+                              ("parentTargetArn", (ThingGroupARN.to_value x)));
                       Option.map req.CreateDeploymentRequest.tags
                         ~f:(fun x -> ("tags", (TagMap.to_value x)));
                       Option.map req.CreateDeploymentRequest.clientToken
@@ -419,6 +447,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteComponent -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteCoreDevice -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDeployment -> Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeComponent ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -428,7 +457,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetComponentVersionArtifact ->
-      let (headers, body) = (None, None) in
+      let (headers, body) =
+        let headers =
+          Some
+            ((List.filter_opt
+                [Option.map
+                   req.GetComponentVersionArtifactRequest.iotEndpointType
+                   ~f:(fun x ->
+                         ("x-amz-iot-endpoint-type",
+                           (IotEndpointType.to_header x)))])
+               |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map (List.filter_opt [])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetConnectivityInfo ->
       let (headers, body) = (None, None) in
@@ -475,14 +523,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("platform",
-                           (ComponentPlatform.to_value
-                              req.ResolveComponentCandidatesRequest.platform));
-                      Some
-                        ("componentCandidates",
-                          (ComponentCandidateList.to_value
-                             req.ResolveComponentCandidatesRequest.componentCandidates))])
+                      [Option.map
+                         req.ResolveComponentCandidatesRequest.platform
+                         ~f:(fun x ->
+                               ("platform", (ComponentPlatform.to_value x)));
+                      Option.map
+                        req.ResolveComponentCandidatesRequest.componentCandidates
+                        ~f:(fun x ->
+                              ("componentCandidates",
+                                (ComponentCandidateList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -613,6 +662,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteComponent ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteCoreDevice ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteDeployment ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DescribeComponent ->
       if is_success

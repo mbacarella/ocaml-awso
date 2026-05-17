@@ -19,7 +19,7 @@ let main =
     ("copy-d-b-parameter-group", copy_d_b_parameter_group);
     ("copy-d-b-snapshot", copy_d_b_snapshot);
     ("copy-option-group", copy_option_group);
-    ("create-custom-availability-zone", create_custom_availability_zone);
+    ("create-blue-green-deployment", create_blue_green_deployment);
     ("create-custom-d-b-engine-version", create_custom_d_b_engine_version);
     ("create-d-b-cluster", create_d_b_cluster);
     ("create-d-b-cluster-endpoint", create_d_b_cluster_endpoint);
@@ -32,14 +32,19 @@ let main =
     ("create-d-b-proxy", create_d_b_proxy);
     ("create-d-b-proxy-endpoint", create_d_b_proxy_endpoint);
     ("create-d-b-security-group", create_d_b_security_group);
+    ("create-d-b-shard-group", create_d_b_shard_group);
     ("create-d-b-snapshot", create_d_b_snapshot);
     ("create-d-b-subnet-group", create_d_b_subnet_group);
     ("create-event-subscription", create_event_subscription);
     ("create-global-cluster", create_global_cluster);
+    ("create-integration", create_integration);
     ("create-option-group", create_option_group);
-    ("delete-custom-availability-zone", delete_custom_availability_zone);
+    ("create-tenant-database", create_tenant_database);
+    ("delete-blue-green-deployment", delete_blue_green_deployment);
     ("delete-custom-d-b-engine-version", delete_custom_d_b_engine_version);
     ("delete-d-b-cluster", delete_d_b_cluster);
+    ("delete-d-b-cluster-automated-backup",
+      delete_d_b_cluster_automated_backup);
     ("delete-d-b-cluster-endpoint", delete_d_b_cluster_endpoint);
     ("delete-d-b-cluster-parameter-group",
       delete_d_b_cluster_parameter_group);
@@ -51,17 +56,20 @@ let main =
     ("delete-d-b-proxy", delete_d_b_proxy);
     ("delete-d-b-proxy-endpoint", delete_d_b_proxy_endpoint);
     ("delete-d-b-security-group", delete_d_b_security_group);
+    ("delete-d-b-shard-group", delete_d_b_shard_group);
     ("delete-d-b-snapshot", delete_d_b_snapshot);
     ("delete-d-b-subnet-group", delete_d_b_subnet_group);
     ("delete-event-subscription", delete_event_subscription);
     ("delete-global-cluster", delete_global_cluster);
-    ("delete-installation-media", delete_installation_media);
+    ("delete-integration", delete_integration);
     ("delete-option-group", delete_option_group);
+    ("delete-tenant-database", delete_tenant_database);
     ("deregister-d-b-proxy-targets", deregister_d_b_proxy_targets);
     ("describe-account-attributes", describe_account_attributes);
+    ("describe-blue-green-deployments", describe_blue_green_deployments);
     ("describe-certificates", describe_certificates);
-    ("describe-custom-availability-zones",
-      describe_custom_availability_zones);
+    ("describe-d-b-cluster-automated-backups",
+      describe_d_b_cluster_automated_backups);
     ("describe-d-b-cluster-backtracks", describe_d_b_cluster_backtracks);
     ("describe-d-b-cluster-endpoints", describe_d_b_cluster_endpoints);
     ("describe-d-b-cluster-parameter-groups",
@@ -76,14 +84,20 @@ let main =
       describe_d_b_instance_automated_backups);
     ("describe-d-b-instances", describe_d_b_instances);
     ("describe-d-b-log-files", describe_d_b_log_files);
+    ("describe-d-b-major-engine-versions",
+      describe_d_b_major_engine_versions);
     ("describe-d-b-parameter-groups", describe_d_b_parameter_groups);
     ("describe-d-b-parameters", describe_d_b_parameters);
     ("describe-d-b-proxies", describe_d_b_proxies);
     ("describe-d-b-proxy-endpoints", describe_d_b_proxy_endpoints);
     ("describe-d-b-proxy-target-groups", describe_d_b_proxy_target_groups);
     ("describe-d-b-proxy-targets", describe_d_b_proxy_targets);
+    ("describe-d-b-recommendations", describe_d_b_recommendations);
     ("describe-d-b-security-groups", describe_d_b_security_groups);
+    ("describe-d-b-shard-groups", describe_d_b_shard_groups);
     ("describe-d-b-snapshot-attributes", describe_d_b_snapshot_attributes);
+    ("describe-d-b-snapshot-tenant-databases",
+      describe_d_b_snapshot_tenant_databases);
     ("describe-d-b-snapshots", describe_d_b_snapshots);
     ("describe-d-b-subnet-groups", describe_d_b_subnet_groups);
     ("describe-engine-default-cluster-parameters",
@@ -95,7 +109,7 @@ let main =
     ("describe-events", describe_events);
     ("describe-export-tasks", describe_export_tasks);
     ("describe-global-clusters", describe_global_clusters);
-    ("describe-installation-media", describe_installation_media);
+    ("describe-integrations", describe_integrations);
     ("describe-option-group-options", describe_option_group_options);
     ("describe-option-groups", describe_option_groups);
     ("describe-orderable-d-b-instance-options",
@@ -105,14 +119,19 @@ let main =
     ("describe-reserved-d-b-instances", describe_reserved_d_b_instances);
     ("describe-reserved-d-b-instances-offerings",
       describe_reserved_d_b_instances_offerings);
+    ("describe-serverless-v2-platform-versions",
+      describe_serverless_v2_platform_versions);
     ("describe-source-regions", describe_source_regions);
+    ("describe-tenant-databases", describe_tenant_databases);
     ("describe-valid-d-b-instance-modifications",
       describe_valid_d_b_instance_modifications);
+    ("disable-http-endpoint", disable_http_endpoint);
     ("download-d-b-log-file-portion", download_d_b_log_file_portion);
+    ("enable-http-endpoint", enable_http_endpoint);
     ("failover-d-b-cluster", failover_d_b_cluster);
     ("failover-global-cluster", failover_global_cluster);
-    ("import-installation-media", import_installation_media);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("modify-activity-stream", modify_activity_stream);
     ("modify-certificates", modify_certificates);
     ("modify-current-d-b-cluster-capacity",
       modify_current_d_b_cluster_capacity);
@@ -128,18 +147,23 @@ let main =
     ("modify-d-b-proxy", modify_d_b_proxy);
     ("modify-d-b-proxy-endpoint", modify_d_b_proxy_endpoint);
     ("modify-d-b-proxy-target-group", modify_d_b_proxy_target_group);
+    ("modify-d-b-recommendation", modify_d_b_recommendation);
+    ("modify-d-b-shard-group", modify_d_b_shard_group);
     ("modify-d-b-snapshot", modify_d_b_snapshot);
     ("modify-d-b-snapshot-attribute", modify_d_b_snapshot_attribute);
     ("modify-d-b-subnet-group", modify_d_b_subnet_group);
     ("modify-event-subscription", modify_event_subscription);
     ("modify-global-cluster", modify_global_cluster);
+    ("modify-integration", modify_integration);
     ("modify-option-group", modify_option_group);
+    ("modify-tenant-database", modify_tenant_database);
     ("promote-read-replica", promote_read_replica);
     ("promote-read-replica-d-b-cluster", promote_read_replica_d_b_cluster);
     ("purchase-reserved-d-b-instances-offering",
       purchase_reserved_d_b_instances_offering);
     ("reboot-d-b-cluster", reboot_d_b_cluster);
     ("reboot-d-b-instance", reboot_d_b_instance);
+    ("reboot-d-b-shard-group", reboot_d_b_shard_group);
     ("register-d-b-proxy-targets", register_d_b_proxy_targets);
     ("remove-from-global-cluster", remove_from_global_cluster);
     ("remove-role-from-d-b-cluster", remove_role_from_d_b_cluster);
@@ -169,4 +193,7 @@ let main =
     ("stop-d-b-cluster", stop_d_b_cluster);
     ("stop-d-b-instance", stop_d_b_instance);
     ("stop-d-b-instance-automated-backups-replication",
-      stop_d_b_instance_automated_backups_replication)]
+      stop_d_b_instance_automated_backups_replication);
+    ("switchover-blue-green-deployment", switchover_blue_green_deployment);
+    ("switchover-global-cluster", switchover_global_cluster);
+    ("switchover-read-replica", switchover_read_replica)]

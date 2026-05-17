@@ -38,14 +38,19 @@ let create_call_analytics_category =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and inputType =
+         flag "input-type" (optional json_arg) ~doc:"JSON InputType"
        and categoryName =
          flag "category-name" (required string) ~doc:"STRING CategoryName"
        and rules = flag "rules" (required json_arg) ~doc:"JSON RuleList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_call_analytics_category
-           (Values.CreateCallAnalyticsCategoryRequest.make ~categoryName
-              ~rules:(Values.RuleList.of_json rules) ())
+           (Values.CreateCallAnalyticsCategoryRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?inputType:(Option.map ~f:Values.InputType.of_json inputType)
+              ~categoryName ~rules:(Values.RuleList.of_json rules) ())
            (Some Values.CreateCallAnalyticsCategoryResponse.to_json)
            (Some Values.CreateCallAnalyticsCategoryResponse.error_to_json)])
 let create_language_model =
@@ -122,6 +127,9 @@ let create_vocabulary =
        and vocabularyFileUri =
          flag "vocabulary-file-uri" (optional string) ~doc:"STRING Uri"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and dataAccessRoleArn =
+         flag "data-access-role-arn" (optional string)
+           ~doc:"STRING DataAccessRoleArn"
        and vocabularyName =
          flag "vocabulary-name" (required string)
            ~doc:"STRING VocabularyName"
@@ -134,7 +142,7 @@ let create_vocabulary =
               ?phrases:(Option.map ~f:Values.Phrases.of_json phrases)
               ?vocabularyFileUri
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ~vocabularyName
+              ?dataAccessRoleArn ~vocabularyName
               ~languageCode:(Values.LanguageCode.of_json languageCode) ())
            (Some Values.CreateVocabularyResponse.to_json)
            (Some Values.CreateVocabularyResponse.error_to_json)])
@@ -153,6 +161,9 @@ let create_vocabulary_filter =
          flag "vocabulary-filter-file-uri" (optional string)
            ~doc:"STRING Uri"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and dataAccessRoleArn =
+         flag "data-access-role-arn" (optional string)
+           ~doc:"STRING DataAccessRoleArn"
        and vocabularyFilterName =
          flag "vocabulary-filter-name" (required string)
            ~doc:"STRING VocabularyFilterName"
@@ -165,7 +176,7 @@ let create_vocabulary_filter =
               ?words:(Option.map ~f:Values.Words.of_json words)
               ?vocabularyFilterFileUri
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ~vocabularyFilterName
+              ?dataAccessRoleArn ~vocabularyFilterName
               ~languageCode:(Values.LanguageCode.of_json languageCode) ())
            (Some Values.CreateVocabularyFilterResponse.to_json)
            (Some Values.CreateVocabularyFilterResponse.error_to_json)])
@@ -222,6 +233,24 @@ let delete_language_model =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_language_model
            (Values.DeleteLanguageModelRequest.make ~modelName ()) None None])
+let delete_medical_scribe_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and medicalScribeJobName =
+         flag "medical-scribe-job-name" (required string)
+           ~doc:"STRING TranscriptionJobName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_medical_scribe_job
+           (Values.DeleteMedicalScribeJobRequest.make ~medicalScribeJobName
+              ()) None None])
 let delete_medical_transcription_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -366,6 +395,25 @@ let get_call_analytics_job =
            (Values.GetCallAnalyticsJobRequest.make ~callAnalyticsJobName ())
            (Some Values.GetCallAnalyticsJobResponse.to_json)
            (Some Values.GetCallAnalyticsJobResponse.error_to_json)])
+let get_medical_scribe_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and medicalScribeJobName =
+         flag "medical-scribe-job-name" (required string)
+           ~doc:"STRING TranscriptionJobName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_medical_scribe_job
+           (Values.GetMedicalScribeJobRequest.make ~medicalScribeJobName ())
+           (Some Values.GetMedicalScribeJobResponse.to_json)
+           (Some Values.GetMedicalScribeJobResponse.error_to_json)])
 let get_medical_transcription_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -537,6 +585,33 @@ let list_language_models =
               ?maxResults ())
            (Some Values.ListLanguageModelsResponse.to_json)
            (Some Values.ListLanguageModelsResponse.error_to_json)])
+let list_medical_scribe_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON MedicalScribeJobStatus"
+       and jobNameContains =
+         flag "job-name-contains" (optional string)
+           ~doc:"STRING TranscriptionJobName"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_medical_scribe_jobs
+           (Values.ListMedicalScribeJobsRequest.make
+              ?status:(Option.map ~f:Values.MedicalScribeJobStatus.of_json
+                         status) ?jobNameContains ?nextToken ?maxResults ())
+           (Some Values.ListMedicalScribeJobsResponse.to_json)
+           (Some Values.ListMedicalScribeJobsResponse.error_to_json)])
 let list_medical_transcription_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -700,34 +775,91 @@ let start_call_analytics_job =
        and outputEncryptionKMSKeyId =
          flag "output-encryption-k-m-s-key-id" (optional string)
            ~doc:"STRING KMSKeyId"
+       and dataAccessRoleArn =
+         flag "data-access-role-arn" (optional string)
+           ~doc:"STRING DataAccessRoleArn"
        and settings =
          flag "settings" (optional json_arg)
            ~doc:"JSON CallAnalyticsJobSettings"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and channelDefinitions =
          flag "channel-definitions" (optional json_arg)
            ~doc:"JSON ChannelDefinitions"
        and callAnalyticsJobName =
          flag "call-analytics-job-name" (required string)
            ~doc:"STRING CallAnalyticsJobName"
-       and media = flag "media" (required json_arg) ~doc:"JSON Media"
-       and dataAccessRoleArn =
-         flag "data-access-role-arn" (required string)
-           ~doc:"STRING DataAccessRoleArn" in
+       and media = flag "media" (required json_arg) ~doc:"JSON Media" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_call_analytics_job
            (Values.StartCallAnalyticsJobRequest.make ?outputLocation
-              ?outputEncryptionKMSKeyId
+              ?outputEncryptionKMSKeyId ?dataAccessRoleArn
               ?settings:(Option.map
                            ~f:Values.CallAnalyticsJobSettings.of_json
                            settings)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?channelDefinitions:(Option.map
                                      ~f:Values.ChannelDefinitions.of_json
                                      channelDefinitions)
-              ~callAnalyticsJobName ~media:(Values.Media.of_json media)
-              ~dataAccessRoleArn ())
+              ~callAnalyticsJobName ~media:(Values.Media.of_json media) ())
            (Some Values.StartCallAnalyticsJobResponse.to_json)
            (Some Values.StartCallAnalyticsJobResponse.error_to_json)])
+let start_medical_scribe_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and outputEncryptionKMSKeyId =
+         flag "output-encryption-k-m-s-key-id" (optional string)
+           ~doc:"STRING KMSKeyId"
+       and kMSEncryptionContext =
+         flag "k-m-s-encryption-context" (optional json_arg)
+           ~doc:"JSON KMSEncryptionContextMap"
+       and channelDefinitions =
+         flag "channel-definitions" (optional json_arg)
+           ~doc:"JSON MedicalScribeChannelDefinitions"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and medicalScribeContext =
+         flag "medical-scribe-context" (optional json_arg)
+           ~doc:"JSON MedicalScribeContext"
+       and medicalScribeJobName =
+         flag "medical-scribe-job-name" (required string)
+           ~doc:"STRING TranscriptionJobName"
+       and media = flag "media" (required json_arg) ~doc:"JSON Media"
+       and outputBucketName =
+         flag "output-bucket-name" (required string)
+           ~doc:"STRING OutputBucketName"
+       and dataAccessRoleArn =
+         flag "data-access-role-arn" (required string)
+           ~doc:"STRING DataAccessRoleArn"
+       and settings =
+         flag "settings" (required json_arg)
+           ~doc:"JSON MedicalScribeSettings" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_medical_scribe_job
+           (Values.StartMedicalScribeJobRequest.make
+              ?outputEncryptionKMSKeyId
+              ?kMSEncryptionContext:(Option.map
+                                       ~f:Values.KMSEncryptionContextMap.of_json
+                                       kMSEncryptionContext)
+              ?channelDefinitions:(Option.map
+                                     ~f:Values.MedicalScribeChannelDefinitions.of_json
+                                     channelDefinitions)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?medicalScribeContext:(Option.map
+                                       ~f:Values.MedicalScribeContext.of_json
+                                       medicalScribeContext)
+              ~medicalScribeJobName ~media:(Values.Media.of_json media)
+              ~outputBucketName ~dataAccessRoleArn
+              ~settings:(Values.MedicalScribeSettings.of_json settings) ())
+           (Some Values.StartMedicalScribeJobResponse.to_json)
+           (Some Values.StartMedicalScribeJobResponse.error_to_json)])
 let start_medical_transcription_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -835,6 +967,9 @@ let start_transcription_job =
            ~doc:"JSON ContentRedaction"
        and identifyLanguage =
          flag "identify-language" (optional bool) ~doc:"BOOL Boolean"
+       and identifyMultipleLanguages =
+         flag "identify-multiple-languages" (optional bool)
+           ~doc:"BOOL Boolean"
        and languageOptions =
          flag "language-options" (optional json_arg)
            ~doc:"JSON LanguageOptions"
@@ -844,6 +979,9 @@ let start_transcription_job =
        and languageIdSettings =
          flag "language-id-settings" (optional json_arg)
            ~doc:"JSON LanguageIdSettingsMap"
+       and toxicityDetection =
+         flag "toxicity-detection" (optional json_arg)
+           ~doc:"JSON ToxicityDetection"
        and transcriptionJobName =
          flag "transcription-job-name" (required string)
            ~doc:"STRING TranscriptionJobName"
@@ -869,6 +1007,7 @@ let start_transcription_job =
               ?contentRedaction:(Option.map
                                    ~f:Values.ContentRedaction.of_json
                                    contentRedaction) ?identifyLanguage
+              ?identifyMultipleLanguages
               ?languageOptions:(Option.map ~f:Values.LanguageOptions.of_json
                                   languageOptions)
               ?subtitles:(Option.map ~f:Values.Subtitles.of_json subtitles)
@@ -876,7 +1015,10 @@ let start_transcription_job =
               ?languageIdSettings:(Option.map
                                      ~f:Values.LanguageIdSettingsMap.of_json
                                      languageIdSettings)
-              ~transcriptionJobName ~media:(Values.Media.of_json media) ())
+              ?toxicityDetection:(Option.map
+                                    ~f:Values.ToxicityDetection.of_json
+                                    toxicityDetection) ~transcriptionJobName
+              ~media:(Values.Media.of_json media) ())
            (Some Values.StartTranscriptionJobResponse.to_json)
            (Some Values.StartTranscriptionJobResponse.error_to_json)])
 let tag_resource =
@@ -930,14 +1072,17 @@ let update_call_analytics_category =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and inputType =
+         flag "input-type" (optional json_arg) ~doc:"JSON InputType"
        and categoryName =
          flag "category-name" (required string) ~doc:"STRING CategoryName"
        and rules = flag "rules" (required json_arg) ~doc:"JSON RuleList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_call_analytics_category
-           (Values.UpdateCallAnalyticsCategoryRequest.make ~categoryName
-              ~rules:(Values.RuleList.of_json rules) ())
+           (Values.UpdateCallAnalyticsCategoryRequest.make
+              ?inputType:(Option.map ~f:Values.InputType.of_json inputType)
+              ~categoryName ~rules:(Values.RuleList.of_json rules) ())
            (Some Values.UpdateCallAnalyticsCategoryResponse.to_json)
            (Some Values.UpdateCallAnalyticsCategoryResponse.error_to_json)])
 let update_medical_vocabulary =
@@ -950,19 +1095,19 @@ let update_medical_vocabulary =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and vocabularyFileUri =
-         flag "vocabulary-file-uri" (optional string) ~doc:"STRING Uri"
        and vocabularyName =
          flag "vocabulary-name" (required string)
            ~doc:"STRING VocabularyName"
        and languageCode =
-         flag "language-code" (required json_arg) ~doc:"JSON LanguageCode" in
+         flag "language-code" (required json_arg) ~doc:"JSON LanguageCode"
+       and vocabularyFileUri =
+         flag "vocabulary-file-uri" (required string) ~doc:"STRING Uri" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_medical_vocabulary
-           (Values.UpdateMedicalVocabularyRequest.make ?vocabularyFileUri
-              ~vocabularyName
-              ~languageCode:(Values.LanguageCode.of_json languageCode) ())
+           (Values.UpdateMedicalVocabularyRequest.make ~vocabularyName
+              ~languageCode:(Values.LanguageCode.of_json languageCode)
+              ~vocabularyFileUri ())
            (Some Values.UpdateMedicalVocabularyResponse.to_json)
            (Some Values.UpdateMedicalVocabularyResponse.error_to_json)])
 let update_vocabulary =
@@ -978,6 +1123,9 @@ let update_vocabulary =
        and phrases = flag "phrases" (optional json_arg) ~doc:"JSON Phrases"
        and vocabularyFileUri =
          flag "vocabulary-file-uri" (optional string) ~doc:"STRING Uri"
+       and dataAccessRoleArn =
+         flag "data-access-role-arn" (optional string)
+           ~doc:"STRING DataAccessRoleArn"
        and vocabularyName =
          flag "vocabulary-name" (required string)
            ~doc:"STRING VocabularyName"
@@ -988,7 +1136,7 @@ let update_vocabulary =
            Io.update_vocabulary
            (Values.UpdateVocabularyRequest.make
               ?phrases:(Option.map ~f:Values.Phrases.of_json phrases)
-              ?vocabularyFileUri ~vocabularyName
+              ?vocabularyFileUri ?dataAccessRoleArn ~vocabularyName
               ~languageCode:(Values.LanguageCode.of_json languageCode) ())
            (Some Values.UpdateVocabularyResponse.to_json)
            (Some Values.UpdateVocabularyResponse.error_to_json)])
@@ -1006,6 +1154,9 @@ let update_vocabulary_filter =
        and vocabularyFilterFileUri =
          flag "vocabulary-filter-file-uri" (optional string)
            ~doc:"STRING Uri"
+       and dataAccessRoleArn =
+         flag "data-access-role-arn" (optional string)
+           ~doc:"STRING DataAccessRoleArn"
        and vocabularyFilterName =
          flag "vocabulary-filter-name" (required string)
            ~doc:"STRING VocabularyFilterName" in
@@ -1014,7 +1165,8 @@ let update_vocabulary_filter =
            Io.update_vocabulary_filter
            (Values.UpdateVocabularyFilterRequest.make
               ?words:(Option.map ~f:Values.Words.of_json words)
-              ?vocabularyFilterFileUri ~vocabularyFilterName ())
+              ?vocabularyFilterFileUri ?dataAccessRoleArn
+              ~vocabularyFilterName ())
            (Some Values.UpdateVocabularyFilterResponse.to_json)
            (Some Values.UpdateVocabularyFilterResponse.error_to_json)])
 let main =
@@ -1028,6 +1180,7 @@ let main =
     ("delete-call-analytics-category", delete_call_analytics_category);
     ("delete-call-analytics-job", delete_call_analytics_job);
     ("delete-language-model", delete_language_model);
+    ("delete-medical-scribe-job", delete_medical_scribe_job);
     ("delete-medical-transcription-job", delete_medical_transcription_job);
     ("delete-medical-vocabulary", delete_medical_vocabulary);
     ("delete-transcription-job", delete_transcription_job);
@@ -1036,6 +1189,7 @@ let main =
     ("describe-language-model", describe_language_model);
     ("get-call-analytics-category", get_call_analytics_category);
     ("get-call-analytics-job", get_call_analytics_job);
+    ("get-medical-scribe-job", get_medical_scribe_job);
     ("get-medical-transcription-job", get_medical_transcription_job);
     ("get-medical-vocabulary", get_medical_vocabulary);
     ("get-transcription-job", get_transcription_job);
@@ -1044,6 +1198,7 @@ let main =
     ("list-call-analytics-categories", list_call_analytics_categories);
     ("list-call-analytics-jobs", list_call_analytics_jobs);
     ("list-language-models", list_language_models);
+    ("list-medical-scribe-jobs", list_medical_scribe_jobs);
     ("list-medical-transcription-jobs", list_medical_transcription_jobs);
     ("list-medical-vocabularies", list_medical_vocabularies);
     ("list-tags-for-resource", list_tags_for_resource);
@@ -1051,6 +1206,7 @@ let main =
     ("list-vocabularies", list_vocabularies);
     ("list-vocabulary-filters", list_vocabulary_filters);
     ("start-call-analytics-job", start_call_analytics_job);
+    ("start-medical-scribe-job", start_medical_scribe_job);
     ("start-medical-transcription-job", start_medical_transcription_job);
     ("start-transcription-job", start_transcription_job);
     ("tag-resource", tag_resource);

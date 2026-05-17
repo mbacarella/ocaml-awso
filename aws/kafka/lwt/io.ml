@@ -19,28 +19,56 @@ let create_cluster_v2 ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateClusterV2 input
 let create_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateConfiguration input
+let create_replicator ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateReplicator input
+let create_topic ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTopic input
+let create_vpc_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateVpcConnection input
 let delete_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCluster input
+let delete_cluster_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteClusterPolicy input
 let delete_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteConfiguration input
+let delete_replicator ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteReplicator input
+let delete_topic ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTopic input
+let delete_vpc_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteVpcConnection input
 let describe_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCluster input
 let describe_cluster_v2 ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeClusterV2 input
 let describe_cluster_operation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeClusterOperation input
+let describe_cluster_operation_v2 ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeClusterOperationV2 input
 let describe_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeConfiguration input
 let describe_configuration_revision ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeConfigurationRevision input
+let describe_replicator ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeReplicator input
+let describe_topic ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTopic input
+let describe_topic_partitions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTopicPartitions input
+let describe_vpc_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeVpcConnection input
 let batch_disassociate_scram_secret ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchDisassociateScramSecret input
 let get_bootstrap_brokers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBootstrapBrokers input
 let get_compatible_kafka_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCompatibleKafkaVersions input
+let get_cluster_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetClusterPolicy input
 let list_cluster_operations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListClusterOperations input
+let list_cluster_operations_v2 ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListClusterOperationsV2 input
 let list_clusters ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListClusters input
 let list_clusters_v2 ?endpoint_url ?cfg input =
@@ -53,10 +81,22 @@ let list_kafka_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListKafkaVersions input
 let list_nodes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListNodes input
+let list_replicators ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListReplicators input
 let list_scram_secrets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListScramSecrets input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_client_vpc_connections ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListClientVpcConnections input
+let list_topics ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTopics input
+let list_vpc_connections ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListVpcConnections input
+let reject_client_vpc_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RejectClientVpcConnection input
+let put_cluster_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutClusterPolicy input
 let reboot_broker ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RebootBroker input
 let tag_resource ?endpoint_url ?cfg input =
@@ -79,5 +119,13 @@ let update_cluster_kafka_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateClusterKafkaVersion input
 let update_monitoring ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateMonitoring input
+let update_rebalancing ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateRebalancing input
+let update_replication_info ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateReplicationInfo input
 let update_security ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateSecurity input
+let update_storage ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateStorage input
+let update_topic ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateTopic input

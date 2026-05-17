@@ -24,6 +24,25 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module StageValues =
+  struct
+    type nonrec t =
+      | PRE 
+      | POST 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | PRE -> "PRE" | POST -> "POST" | Non_static_id s -> s
+    let of_string =
+      function | "PRE" -> PRE | "POST" -> POST | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration StageValues" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"StageValues" j)
+    let to_json = simple_to_json to_value
+  end
 module Interval =
   struct
     type nonrec t = int
@@ -107,6 +126,151 @@ module Encrypted =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module Count =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Count" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ExecuteOperationOnScriptFailure =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ExecutionHandler =
+  struct
+    type nonrec t = string
+    let context_ = "ExecutionHandler"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([a-zA-Z0-9_\\-.]{3,128}|[a-zA-Z0-9_\\-.:/]{3,200}|[A-Z0-9_]+)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExecutionHandler" j
+    let to_json = simple_to_json to_value
+  end
+module ExecutionHandlerServiceValues =
+  struct
+    type nonrec t =
+      | AWS_SYSTEMS_MANAGER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWS_SYSTEMS_MANAGER -> "AWS_SYSTEMS_MANAGER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWS_SYSTEMS_MANAGER" -> AWS_SYSTEMS_MANAGER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExecutionHandlerServiceValues"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ExecutionHandlerServiceValues" j)
+    let to_json = simple_to_json to_value
+  end
+module ScriptExecutionTimeout =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:120) >>= (fun () -> check_int_min i ~min:10));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ScriptExecutionTimeout" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ScriptMaximumRetryCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:3) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ScriptMaximumRetryCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module StagesList =
+  struct
+    type nonrec t = StageValues.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:StageValues.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:StageValues.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StagesList" ~of_json:StageValues.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AwsAccountId =
   struct
     type nonrec t = string
@@ -133,9 +297,10 @@ module CrossRegionCopyRetainRule =
       {
       interval: Interval.t option
         [@ocaml.doc
-          "The amount of time to retain each snapshot. The maximum is 100 years. This is equivalent to 1200 months, 5200 weeks, or 36500 days."];
+          "The amount of time to retain a cross-Region snapshot or AMI copy. The maximum is 100 years. This is equivalent to 1200 months, 5200 weeks, or 36500 days."];
       intervalUnit: RetentionIntervalUnitValues.t option
-        [@ocaml.doc "The unit of time for time-based retention."]}
+        [@ocaml.doc
+          "The unit of time for time-based retention. For example, to retain a cross-Region copy for 3 months, specify Interval=3 and IntervalUnit=MONTHS."]}
     let make ?interval =
       fun ?intervalUnit -> fun () -> { interval; intervalUnit }
     let to_value x =
@@ -152,14 +317,14 @@ module CrossRegionCopyRetainRule =
         (Option.map ~f:Interval.of_xml) (Xml.child xml_arg0 "Interval") in
       make ?intervalUnit ?interval ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let intervalUnit =
-        field_map json "IntervalUnit" RetentionIntervalUnitValues.of_json in
-      let interval = field_map json "Interval" Interval.of_json in
+        field_map json__ "IntervalUnit" RetentionIntervalUnitValues.of_json in
+      let interval = field_map json__ "Interval" Interval.of_json in
       make ?intervalUnit ?interval ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the retention rule for cross-Region snapshot copies."]
+       "Specifies a retention rule for cross-Region snapshot copies created by snapshot or event-based policies, or cross-Region AMI copies created by AMI policies. After the retention period expires, the cross-Region copy is deleted."]
 module EncryptionConfiguration =
   struct
     type nonrec t =
@@ -185,13 +350,13 @@ module EncryptionConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "Encrypted") in
       make ?cmkArn ~encrypted ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cmkArn = field_map json "CmkArn" CmkArn.of_json in
-      let encrypted = field_map_exn json "Encrypted" Encrypted.of_json in
+    let of_json json__ =
+      let cmkArn = field_map json__ "CmkArn" CmkArn.of_json in
+      let encrypted = field_map_exn json__ "Encrypted" Encrypted.of_json in
       make ?cmkArn ~encrypted ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the encryption settings for shared snapshots that are copied across Regions."]
+       "\\[Event-based policies only\\] Specifies the encryption settings for cross-Region snapshot copies created by event-based policies."]
 module Target =
   struct
     type nonrec t = string
@@ -212,6 +377,144 @@ module Target =
     let of_json j = string_of_json ~kind:"Target" j
     let to_json = simple_to_json to_value
   end
+module RetentionArchiveTier =
+  struct
+    type nonrec t =
+      {
+      count: Count.t option
+        [@ocaml.doc
+          "The maximum number of snapshots to retain in the archive storage tier for each volume. The count must ensure that each snapshot remains in the archive tier for at least 90 days. For example, if the schedule creates snapshots every 30 days, you must specify a count of 3 or more to ensure that each snapshot is archived for at least 90 days."];
+      interval: Interval.t option
+        [@ocaml.doc
+          "Specifies the period of time to retain snapshots in the archive tier. After this period expires, the snapshot is permanently deleted."];
+      intervalUnit: RetentionIntervalUnitValues.t option
+        [@ocaml.doc
+          "The unit of time in which to measure the Interval. For example, to retain a snapshots in the archive tier for 6 months, specify Interval=6 and IntervalUnit=MONTHS."]}
+    let make ?count =
+      fun ?interval ->
+        fun ?intervalUnit -> fun () -> { count; interval; intervalUnit }
+    let to_value x =
+      structure_to_value
+        [("Count", (Option.map x.count ~f:Count.to_value));
+        ("Interval", (Option.map x.interval ~f:Interval.to_value));
+        ("IntervalUnit",
+          (Option.map x.intervalUnit ~f:RetentionIntervalUnitValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let intervalUnit =
+        (Option.map ~f:RetentionIntervalUnitValues.of_xml)
+          (Xml.child xml_arg0 "IntervalUnit") in
+      let interval =
+        (Option.map ~f:Interval.of_xml) (Xml.child xml_arg0 "Interval") in
+      let count = (Option.map ~f:Count.of_xml) (Xml.child xml_arg0 "Count") in
+      make ?intervalUnit ?interval ?count ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let intervalUnit =
+        field_map json__ "IntervalUnit" RetentionIntervalUnitValues.of_json in
+      let interval = field_map json__ "Interval" Interval.of_json in
+      let count = field_map json__ "Count" Count.of_json in
+      make ?intervalUnit ?interval ?count ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "\\[Custom snapshot policies only\\] Describes the retention rule for archived snapshots. Once the archive retention threshold is met, the snapshots are permanently deleted from the archive tier. The archive retention rule must retain snapshots in the archive tier for a minimum of 90 days. For count-based schedules, you must specify Count. For age-based schedules, you must specify Interval and IntervalUnit. For more information about using snapshot archiving, see Considerations for snapshot lifecycle policies."]
+module Script =
+  struct
+    type nonrec t =
+      {
+      stages: StagesList.t option
+        [@ocaml.doc
+          "Indicate which scripts Amazon Data Lifecycle Manager should run on target instances. Pre scripts run before Amazon Data Lifecycle Manager initiates snapshot creation. Post scripts run after Amazon Data Lifecycle Manager initiates snapshot creation. To run a pre script only, specify PRE. In this case, Amazon Data Lifecycle Manager calls the SSM document with the pre-script parameter before initiating snapshot creation. To run a post script only, specify POST. In this case, Amazon Data Lifecycle Manager calls the SSM document with the post-script parameter after initiating snapshot creation. To run both pre and post scripts, specify both PRE and POST. In this case, Amazon Data Lifecycle Manager calls the SSM document with the pre-script parameter before initiating snapshot creation, and then it calls the SSM document again with the post-script parameter after initiating snapshot creation. If you are automating VSS Backups, omit this parameter. Default: PRE and POST"];
+      executionHandlerService: ExecutionHandlerServiceValues.t option
+        [@ocaml.doc
+          "Indicates the service used to execute the pre and/or post scripts. If you are using custom SSM documents or automating application-consistent snapshots of SAP HANA workloads, specify AWS_SYSTEMS_MANAGER. If you are automating VSS Backups, omit this parameter. Default: AWS_SYSTEMS_MANAGER"];
+      executionHandler: ExecutionHandler.t
+        [@ocaml.doc
+          "The SSM document that includes the pre and/or post scripts to run. If you are automating VSS backups, specify AWS_VSS_BACKUP. In this case, Amazon Data Lifecycle Manager automatically uses the AWSEC2-CreateVssSnapshot SSM document. If you are automating application-consistent snapshots for SAP HANA workloads, specify AWSSystemsManagerSAP-CreateDLMSnapshotForSAPHANA. If you are using a custom SSM document that you own, specify either the name or ARN of the SSM document. If you are using a custom SSM document that is shared with you, specify the ARN of the SSM document."];
+      executeOperationOnScriptFailure:
+        ExecuteOperationOnScriptFailure.t option
+        [@ocaml.doc
+          "Indicates whether Amazon Data Lifecycle Manager should default to crash-consistent snapshots if the pre script fails. To default to crash consistent snapshot if the pre script fails, specify true. To skip the instance for snapshot creation if the pre script fails, specify false. This parameter is supported only if you run a pre script. If you run a post script only, omit this parameter. Default: true"];
+      executionTimeout: ScriptExecutionTimeout.t option
+        [@ocaml.doc
+          "Specifies a timeout period, in seconds, after which Amazon Data Lifecycle Manager fails the script run attempt if it has not completed. If a script does not complete within its timeout period, Amazon Data Lifecycle Manager fails the attempt. The timeout period applies to the pre and post scripts individually. If you are automating VSS Backups, omit this parameter. Default: 10"];
+      maximumRetryCount: ScriptMaximumRetryCount.t option
+        [@ocaml.doc
+          "Specifies the number of times Amazon Data Lifecycle Manager should retry scripts that fail. If the pre script fails, Amazon Data Lifecycle Manager retries the entire snapshot creation process, including running the pre and post scripts. If the post script fails, Amazon Data Lifecycle Manager retries the post script only; in this case, the pre script will have completed and the snapshot might have been created. If you do not want Amazon Data Lifecycle Manager to retry failed scripts, specify 0. Default: 0"]}
+    let context_ = "Script"
+    let make ?stages =
+      fun ?executionHandlerService ->
+        fun ?executeOperationOnScriptFailure ->
+          fun ?executionTimeout ->
+            fun ?maximumRetryCount ->
+              fun ~executionHandler ->
+                fun () ->
+                  {
+                    stages;
+                    executionHandlerService;
+                    executeOperationOnScriptFailure;
+                    executionTimeout;
+                    maximumRetryCount;
+                    executionHandler
+                  }
+    let to_value x =
+      structure_to_value
+        [("Stages", (Option.map x.stages ~f:StagesList.to_value));
+        ("ExecutionHandlerService",
+          (Option.map x.executionHandlerService
+             ~f:ExecutionHandlerServiceValues.to_value));
+        ("ExecutionHandler",
+          (Some (ExecutionHandler.to_value x.executionHandler)));
+        ("ExecuteOperationOnScriptFailure",
+          (Option.map x.executeOperationOnScriptFailure
+             ~f:ExecuteOperationOnScriptFailure.to_value));
+        ("ExecutionTimeout",
+          (Option.map x.executionTimeout ~f:ScriptExecutionTimeout.to_value));
+        ("MaximumRetryCount",
+          (Option.map x.maximumRetryCount ~f:ScriptMaximumRetryCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maximumRetryCount =
+        (Option.map ~f:ScriptMaximumRetryCount.of_xml)
+          (Xml.child xml_arg0 "MaximumRetryCount") in
+      let executionTimeout =
+        (Option.map ~f:ScriptExecutionTimeout.of_xml)
+          (Xml.child xml_arg0 "ExecutionTimeout") in
+      let executeOperationOnScriptFailure =
+        (Option.map ~f:ExecuteOperationOnScriptFailure.of_xml)
+          (Xml.child xml_arg0 "ExecuteOperationOnScriptFailure") in
+      let executionHandler =
+        ExecutionHandler.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionHandler") in
+      let executionHandlerService =
+        (Option.map ~f:ExecutionHandlerServiceValues.of_xml)
+          (Xml.child xml_arg0 "ExecutionHandlerService") in
+      let stages =
+        (Option.map ~f:StagesList.of_xml) (Xml.child xml_arg0 "Stages") in
+      make ?maximumRetryCount ?executionTimeout
+        ?executeOperationOnScriptFailure ~executionHandler
+        ?executionHandlerService ?stages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maximumRetryCount =
+        field_map json__ "MaximumRetryCount" ScriptMaximumRetryCount.of_json in
+      let executionTimeout =
+        field_map json__ "ExecutionTimeout" ScriptExecutionTimeout.of_json in
+      let executeOperationOnScriptFailure =
+        field_map json__ "ExecuteOperationOnScriptFailure"
+          ExecuteOperationOnScriptFailure.of_json in
+      let executionHandler =
+        field_map_exn json__ "ExecutionHandler" ExecutionHandler.of_json in
+      let executionHandlerService =
+        field_map json__ "ExecutionHandlerService"
+          ExecutionHandlerServiceValues.of_json in
+      let stages = field_map json__ "Stages" StagesList.of_json in
+      make ?maximumRetryCount ?executionTimeout
+        ?executeOperationOnScriptFailure ~executionHandler
+        ?executionHandlerService ?stages ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "\\[Custom snapshot policies that target instances only\\] Information about pre and/or post scripts for a snapshot lifecycle policy that targets instances. For more information, see Automating application-consistent snapshots with pre and post scripts."]
 module Time =
   struct
     type nonrec t = string
@@ -255,7 +558,8 @@ module CrossRegionCopyDeprecateRule =
         [@ocaml.doc
           "The period after which to deprecate the cross-Region AMI copies. The period must be less than or equal to the cross-Region AMI copy retention period, and it can't be greater than 10 years. This is equivalent to 120 months, 520 weeks, or 3650 days."];
       intervalUnit: RetentionIntervalUnitValues.t option
-        [@ocaml.doc "The unit of time in which to measure the Interval."]}
+        [@ocaml.doc
+          "The unit of time in which to measure the Interval. For example, to deprecate a cross-Region AMI copy after 3 months, specify Interval=3 and IntervalUnit=MONTHS."]}
     let make ?interval =
       fun ?intervalUnit -> fun () -> { interval; intervalUnit }
     let to_value x =
@@ -272,14 +576,14 @@ module CrossRegionCopyDeprecateRule =
         (Option.map ~f:Interval.of_xml) (Xml.child xml_arg0 "Interval") in
       make ?intervalUnit ?interval ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let intervalUnit =
-        field_map json "IntervalUnit" RetentionIntervalUnitValues.of_json in
-      let interval = field_map json "Interval" Interval.of_json in
+        field_map json__ "IntervalUnit" RetentionIntervalUnitValues.of_json in
+      let interval = field_map json__ "Interval" Interval.of_json in
       make ?intervalUnit ?interval ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies an AMI deprecation rule for cross-Region AMI copies created by a cross-Region copy rule."]
+       "\\[Custom AMI policies only\\] Specifies an AMI deprecation rule for cross-Region AMI copies created by an AMI policy."]
 module TargetRegion =
   struct
     type nonrec t = string
@@ -298,6 +602,26 @@ module TargetRegion =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TargetRegion" j
+    let to_json = simple_to_json to_value
+  end
+module AvailabilityZoneId =
+  struct
+    type nonrec t = string
+    let context_ = "AvailabilityZoneId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:16) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-z]{3,4}\\d-az\\d+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AvailabilityZoneId" j
     let to_json = simple_to_json to_value
   end
 module AvailabilityZone =
@@ -326,6 +650,9 @@ module ShareTargetAccountList =
     type nonrec t = AwsAccountId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AwsAccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -399,17 +726,45 @@ module CrossRegionCopyAction =
         Target.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Target") in
       make ?retainRule ~encryptionConfiguration ~target ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retainRule =
-        field_map json "RetainRule" CrossRegionCopyRetainRule.of_json in
+        field_map json__ "RetainRule" CrossRegionCopyRetainRule.of_json in
       let encryptionConfiguration =
-        field_map_exn json "EncryptionConfiguration"
+        field_map_exn json__ "EncryptionConfiguration"
           EncryptionConfiguration.of_json in
-      let target = field_map_exn json "Target" Target.of_json in
+      let target = field_map_exn json__ "Target" Target.of_json in
       make ?retainRule ~encryptionConfiguration ~target ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies a rule for copying shared snapshots across Regions."]
+       "\\[Event-based policies only\\] Specifies a cross-Region copy action for event-based policies. To specify a cross-Region copy rule for snapshot and AMI policies, use CrossRegionCopyRule."]
+module ArchiveRetainRule =
+  struct
+    type nonrec t =
+      {
+      retentionArchiveTier: RetentionArchiveTier.t
+        [@ocaml.doc
+          "Information about retention period in the Amazon EBS Snapshots Archive. For more information, see Archive Amazon EBS snapshots."]}
+    let context_ = "ArchiveRetainRule"
+    let make ~retentionArchiveTier = fun () -> { retentionArchiveTier }
+    let to_value x =
+      structure_to_value
+        [("RetentionArchiveTier",
+           (Some (RetentionArchiveTier.to_value x.retentionArchiveTier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retentionArchiveTier =
+        RetentionArchiveTier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RetentionArchiveTier") in
+      make ~retentionArchiveTier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retentionArchiveTier =
+        field_map_exn json__ "RetentionArchiveTier"
+          RetentionArchiveTier.of_json in
+      make ~retentionArchiveTier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "\\[Custom snapshot policies only\\] Specifies information about the archive storage tier retention period."]
 module CronExpression =
   struct
     type nonrec t = string
@@ -453,17 +808,20 @@ module LocationValues =
     type nonrec t =
       | CLOUD 
       | OUTPOST_LOCAL 
+      | LOCAL_ZONE 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | CLOUD -> "CLOUD"
       | OUTPOST_LOCAL -> "OUTPOST_LOCAL"
+      | LOCAL_ZONE -> "LOCAL_ZONE"
       | Non_static_id s -> s
     let of_string =
       function
       | "CLOUD" -> CLOUD
       | "OUTPOST_LOCAL" -> OUTPOST_LOCAL
+      | "LOCAL_ZONE" -> LOCAL_ZONE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -473,11 +831,45 @@ module LocationValues =
     let of_json j = of_string (string_of_json ~kind:"LocationValues" j)
     let to_json = simple_to_json to_value
   end
+module ScriptsList =
+  struct
+    type nonrec t = Script.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Script.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Script.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ScriptsList" ~of_json:Script.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TimesList =
   struct
     type nonrec t = Time.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Time.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -503,10 +895,10 @@ module CrossRegionCopyRule =
       {
       targetRegion: TargetRegion.t option
         [@ocaml.doc
-          "Avoid using this parameter when creating new policies. Instead, use Target to specify a target Region or a target Outpost for snapshot copies. For policies created before the Target parameter was introduced, this parameter indicates the target Region for snapshot copies."];
+          "Use this parameter for AMI policies only. For snapshot policies, use Target instead. For snapshot policies created before the Target parameter was introduced, this parameter indicates the target Region for snapshot copies. \\[Custom AMI policies only\\] The target Region or the Amazon Resource Name (ARN) of the target Outpost for the snapshot copies."];
       target: Target.t option
         [@ocaml.doc
-          "The target Region or the Amazon Resource Name (ARN) of the target Outpost for the snapshot copies. Use this parameter instead of TargetRegion. Do not specify both."];
+          "Use this parameter for snapshot policies only. For AMI policies, use TargetRegion instead. \\[Custom snapshot policies only\\] The target Region or the Amazon Resource Name (ARN) of the target Outpost for the snapshot copies."];
       encrypted: Encrypted.t
         [@ocaml.doc
           "To encrypt a copy of an unencrypted snapshot if encryption by default is not enabled, enable encryption using this parameter. Copies of encrypted snapshots are encrypted, even if this parameter is false or if encryption by default is not enabled."];
@@ -515,13 +907,13 @@ module CrossRegionCopyRule =
           "The Amazon Resource Name (ARN) of the KMS key to use for EBS encryption. If this parameter is not specified, the default KMS key for the account is used."];
       copyTags: CopyTagsNullable.t option
         [@ocaml.doc
-          "Indicates whether to copy all user-defined tags from the source snapshot to the cross-Region snapshot copy."];
+          "Indicates whether to copy all user-defined tags from the source snapshot or AMI to the cross-Region copy."];
       retainRule: CrossRegionCopyRetainRule.t option
         [@ocaml.doc
-          "The retention rule that indicates how long snapshot copies are to be retained in the destination Region."];
+          "The retention rule that indicates how long the cross-Region snapshot or AMI copies are to be retained in the destination Region."];
       deprecateRule: CrossRegionCopyDeprecateRule.t option
         [@ocaml.doc
-          "The AMI deprecation rule for cross-Region AMI copies created by the rule."]}
+          "\\[Custom AMI policies only\\] The AMI deprecation rule for cross-Region AMI copies created by the rule."]}
     let context_ = "CrossRegionCopyRule"
     let make ?targetRegion =
       fun ?target ->
@@ -577,36 +969,52 @@ module CrossRegionCopyRule =
       make ?deprecateRule ?retainRule ?copyTags ?cmkArn ~encrypted ?target
         ?targetRegion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deprecateRule =
-        field_map json "DeprecateRule" CrossRegionCopyDeprecateRule.of_json in
+        field_map json__ "DeprecateRule" CrossRegionCopyDeprecateRule.of_json in
       let retainRule =
-        field_map json "RetainRule" CrossRegionCopyRetainRule.of_json in
-      let copyTags = field_map json "CopyTags" CopyTagsNullable.of_json in
-      let cmkArn = field_map json "CmkArn" CmkArn.of_json in
-      let encrypted = field_map_exn json "Encrypted" Encrypted.of_json in
-      let target = field_map json "Target" Target.of_json in
-      let targetRegion = field_map json "TargetRegion" TargetRegion.of_json in
+        field_map json__ "RetainRule" CrossRegionCopyRetainRule.of_json in
+      let copyTags = field_map json__ "CopyTags" CopyTagsNullable.of_json in
+      let cmkArn = field_map json__ "CmkArn" CmkArn.of_json in
+      let encrypted = field_map_exn json__ "Encrypted" Encrypted.of_json in
+      let target = field_map json__ "Target" Target.of_json in
+      let targetRegion = field_map json__ "TargetRegion" TargetRegion.of_json in
       make ?deprecateRule ?retainRule ?copyTags ?cmkArn ~encrypted ?target
         ?targetRegion ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Specifies a rule for cross-Region snapshot copies."]
-module Count =
+  end[@@ocaml.doc
+       "\\[Custom snapshot and AMI policies only\\] Specifies a cross-Region copy rule for a snapshot and AMI policies. To specify a cross-Region copy action for event-based polices, use CrossRegionCopyAction."]
+module AvailabilityZoneIdList =
   struct
-    type nonrec t = int
+    type nonrec t = AvailabilityZoneId.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AvailabilityZoneId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for Count" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AvailabilityZoneId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AvailabilityZoneIdList"
+        ~of_json:AvailabilityZoneId.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module AvailabilityZoneList =
   struct
@@ -616,6 +1024,9 @@ module AvailabilityZoneList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AvailabilityZone.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -636,6 +1047,41 @@ module AvailabilityZoneList =
       list_of_json ~kind:"AvailabilityZoneList"
         ~of_json:AvailabilityZone.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module StandardTierRetainRuleCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for StandardTierRetainRuleCount"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module StandardTierRetainRuleInterval =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for StandardTierRetainRuleInterval"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
   end
 module ShareRule =
   struct
@@ -676,17 +1122,18 @@ module ShareRule =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetAccounts") in
       make ?unshareIntervalUnit ?unshareInterval ~targetAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unshareIntervalUnit =
-        field_map json "UnshareIntervalUnit"
+        field_map json__ "UnshareIntervalUnit"
           RetentionIntervalUnitValues.of_json in
-      let unshareInterval = field_map json "UnshareInterval" Interval.of_json in
+      let unshareInterval =
+        field_map json__ "UnshareInterval" Interval.of_json in
       let targetAccounts =
-        field_map_exn json "TargetAccounts" ShareTargetAccountList.of_json in
+        field_map_exn json__ "TargetAccounts" ShareTargetAccountList.of_json in
       make ?unshareIntervalUnit ?unshareInterval ~targetAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies a rule for sharing snapshots across Amazon Web Services accounts."]
+       "\\[Custom snapshot policies only\\] Specifies a rule for sharing snapshots across Amazon Web Services accounts."]
 module Tag =
   struct
     type nonrec t =
@@ -707,9 +1154,9 @@ module Tag =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" String_.of_json in
-      let key = field_map_exn json "Key" String_.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" String_.of_json in
+      let key = field_map_exn json__ "Key" String_.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies a tag for a resource."]
@@ -741,6 +1188,9 @@ module CrossRegionCopyActionList =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CrossRegionCopyAction.to_value)) |>
         (fun x -> `List x)
@@ -809,6 +1259,9 @@ module SnapshotOwnerList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AwsAccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -829,6 +1282,45 @@ module SnapshotOwnerList =
       list_of_json ~kind:"SnapshotOwnerList" ~of_json:AwsAccountId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module VolumeTypeValues =
+  struct
+    type nonrec t = string
+    let context_ = "VolumeTypeValues"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VolumeTypeValues" j
+    let to_json = simple_to_json to_value
+  end
+module ArchiveRule =
+  struct
+    type nonrec t =
+      {
+      retainRule: ArchiveRetainRule.t
+        [@ocaml.doc
+          "Information about the retention period for the snapshot archiving rule."]}
+    let context_ = "ArchiveRule"
+    let make ~retainRule = fun () -> { retainRule }
+    let to_value x =
+      structure_to_value
+        [("RetainRule", (Some (ArchiveRetainRule.to_value x.retainRule)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retainRule =
+        ArchiveRetainRule.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RetainRule") in
+      make ~retainRule ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retainRule =
+        field_map_exn json__ "RetainRule" ArchiveRetainRule.of_json in
+      make ~retainRule ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "\\[Custom snapshot policies only\\] Specifies a snapshot archiving rule for a schedule."]
 module CopyTags =
   struct
     type nonrec t = bool
@@ -848,7 +1340,7 @@ module CreateRule =
       {
       location: LocationValues.t option
         [@ocaml.doc
-          "Specifies the destination for snapshots created by the policy. To create snapshots in the same Region as the source resource, specify CLOUD. To create snapshots on the same Outpost as the source resource, specify OUTPOST_LOCAL. If you omit this parameter, CLOUD is used by default. If the policy targets resources in an Amazon Web Services Region, then you must create snapshots in the same Region as the source resource. If the policy targets resources on an Outpost, then you can create snapshots on the same Outpost as the source resource, or in the Region of that Outpost."];
+          "\\[Custom snapshot policies only\\] Specifies the destination for snapshots created by the policy. The allowed destinations depend on the location of the targeted resources. If the policy targets resources in a Region, then you must create snapshots in the same Region as the source resource. If the policy targets resources in a Local Zone, you can create snapshots in the same Local Zone or in its parent Region. If the policy targets resources on an Outpost, then you can create snapshots on the same Outpost or in its parent Region. Specify one of the following values: To create snapshots in the same Region as the source resource, specify CLOUD. To create snapshots in the same Local Zone as the source resource, specify LOCAL_ZONE. To create snapshots on the same Outpost as the source resource, specify OUTPOST_LOCAL. Default: CLOUD"];
       interval: Interval.t option
         [@ocaml.doc
           "The interval between snapshots. The supported values are 1, 2, 3, 4, 6, 8, 12, and 24."];
@@ -856,17 +1348,28 @@ module CreateRule =
         [@ocaml.doc "The interval unit."];
       times: TimesList.t option
         [@ocaml.doc
-          "The time, in UTC, to start the operation. The supported format is hh:mm. The operation occurs within a one-hour window following the specified time. If you do not specify a time, Amazon DLM selects a time within the next 24 hours."];
+          "The time, in UTC, to start the operation. The supported format is hh:mm. The operation occurs within a one-hour window following the specified time. If you do not specify a time, Amazon Data Lifecycle Manager selects a time within the next 24 hours."];
       cronExpression: CronExpression.t option
         [@ocaml.doc
-          "The schedule, as a Cron expression. The schedule interval must be between 1 hour and 1 year. For more information, see Cron expressions in the Amazon CloudWatch User Guide."]}
+          "The schedule, as a Cron expression. The schedule interval must be between 1 hour and 1 year. For more information, see the Cron expressions reference in the Amazon EventBridge User Guide."];
+      scripts: ScriptsList.t option
+        [@ocaml.doc
+          "\\[Custom snapshot policies that target instances only\\] Specifies pre and/or post scripts for a snapshot lifecycle policy that targets instances. This is useful for creating application-consistent snapshots, or for performing specific administrative tasks before or after Amazon Data Lifecycle Manager initiates snapshot creation. For more information, see Automating application-consistent snapshots with pre and post scripts."]}
     let make ?location =
       fun ?interval ->
         fun ?intervalUnit ->
           fun ?times ->
             fun ?cronExpression ->
-              fun () ->
-                { location; interval; intervalUnit; times; cronExpression }
+              fun ?scripts ->
+                fun () ->
+                  {
+                    location;
+                    interval;
+                    intervalUnit;
+                    times;
+                    cronExpression;
+                    scripts
+                  }
     let to_value x =
       structure_to_value
         [("Location", (Option.map x.location ~f:LocationValues.to_value));
@@ -875,9 +1378,12 @@ module CreateRule =
           (Option.map x.intervalUnit ~f:IntervalUnitValues.to_value));
         ("Times", (Option.map x.times ~f:TimesList.to_value));
         ("CronExpression",
-          (Option.map x.cronExpression ~f:CronExpression.to_value))]
+          (Option.map x.cronExpression ~f:CronExpression.to_value));
+        ("Scripts", (Option.map x.scripts ~f:ScriptsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let scripts =
+        (Option.map ~f:ScriptsList.of_xml) (Xml.child xml_arg0 "Scripts") in
       let cronExpression =
         (Option.map ~f:CronExpression.of_xml)
           (Xml.child xml_arg0 "CronExpression") in
@@ -890,20 +1396,23 @@ module CreateRule =
         (Option.map ~f:Interval.of_xml) (Xml.child xml_arg0 "Interval") in
       let location =
         (Option.map ~f:LocationValues.of_xml) (Xml.child xml_arg0 "Location") in
-      make ?cronExpression ?times ?intervalUnit ?interval ?location ()
+      make ?scripts ?cronExpression ?times ?intervalUnit ?interval ?location
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let scripts = field_map json__ "Scripts" ScriptsList.of_json in
       let cronExpression =
-        field_map json "CronExpression" CronExpression.of_json in
-      let times = field_map json "Times" TimesList.of_json in
+        field_map json__ "CronExpression" CronExpression.of_json in
+      let times = field_map json__ "Times" TimesList.of_json in
       let intervalUnit =
-        field_map json "IntervalUnit" IntervalUnitValues.of_json in
-      let interval = field_map json "Interval" Interval.of_json in
-      let location = field_map json "Location" LocationValues.of_json in
-      make ?cronExpression ?times ?intervalUnit ?interval ?location ()
+        field_map json__ "IntervalUnit" IntervalUnitValues.of_json in
+      let interval = field_map json__ "Interval" Interval.of_json in
+      let location = field_map json__ "Location" LocationValues.of_json in
+      make ?scripts ?cronExpression ?times ?intervalUnit ?interval ?location
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies when to create snapshots of EBS volumes. You must specify either a Cron expression or an interval, interval unit, and start time. You cannot specify both."]
+       "\\[Custom snapshot and AMI policies only\\] Specifies when the policy should create snapshots or AMIs. You must specify either CronExpression, or Interval, IntervalUnit, and Times. If you need to specify an ArchiveRule for the schedule, then you must specify a creation frequency of at least 28 days."]
 module CrossRegionCopyRules =
   struct
     type nonrec t = CrossRegionCopyRule.t list
@@ -912,6 +1421,9 @@ module CrossRegionCopyRules =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CrossRegionCopyRule.to_value)) |>
         (fun x -> `List x)
@@ -965,14 +1477,15 @@ module DeprecateRule =
       let count = (Option.map ~f:Count.of_xml) (Xml.child xml_arg0 "Count") in
       make ?intervalUnit ?interval ?count ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let intervalUnit =
-        field_map json "IntervalUnit" RetentionIntervalUnitValues.of_json in
-      let interval = field_map json "Interval" Interval.of_json in
-      let count = field_map json "Count" Count.of_json in
+        field_map json__ "IntervalUnit" RetentionIntervalUnitValues.of_json in
+      let interval = field_map json__ "Interval" Interval.of_json in
+      let count = field_map json__ "Count" Count.of_json in
       make ?intervalUnit ?interval ?count ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Specifies an AMI deprecation rule for a schedule."]
+  end[@@ocaml.doc
+       "\\[Custom AMI policies only\\] Specifies an AMI deprecation rule for AMIs created by an AMI lifecycle policy. For age-based schedules, you must specify Interval and IntervalUnit. For count-based schedules, you must specify Count."]
 module FastRestoreRule =
   struct
     type nonrec t =
@@ -985,15 +1498,25 @@ module FastRestoreRule =
           "The amount of time to enable fast snapshot restore. The maximum is 100 years. This is equivalent to 1200 months, 5200 weeks, or 36500 days."];
       intervalUnit: RetentionIntervalUnitValues.t option
         [@ocaml.doc "The unit of time for enabling fast snapshot restore."];
-      availabilityZones: AvailabilityZoneList.t
+      availabilityZones: AvailabilityZoneList.t option
         [@ocaml.doc
-          "The Availability Zones in which to enable fast snapshot restore."]}
-    let context_ = "FastRestoreRule"
+          "The Availability Zones in which to enable fast snapshot restore."];
+      availabilityZoneIds: AvailabilityZoneIdList.t option
+        [@ocaml.doc
+          "The Availability Zone Ids in which to enable fast snapshot restore."]}
     let make ?count =
       fun ?interval ->
         fun ?intervalUnit ->
-          fun ~availabilityZones ->
-            fun () -> { count; interval; intervalUnit; availabilityZones }
+          fun ?availabilityZones ->
+            fun ?availabilityZoneIds ->
+              fun () ->
+                {
+                  count;
+                  interval;
+                  intervalUnit;
+                  availabilityZones;
+                  availabilityZoneIds
+                }
     let to_value x =
       structure_to_value
         [("Count", (Option.map x.count ~f:Count.to_value));
@@ -1001,50 +1524,63 @@ module FastRestoreRule =
         ("IntervalUnit",
           (Option.map x.intervalUnit ~f:RetentionIntervalUnitValues.to_value));
         ("AvailabilityZones",
-          (Some (AvailabilityZoneList.to_value x.availabilityZones)))]
+          (Option.map x.availabilityZones ~f:AvailabilityZoneList.to_value));
+        ("AvailabilityZoneIds",
+          (Option.map x.availabilityZoneIds
+             ~f:AvailabilityZoneIdList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let availabilityZoneIds =
+        (Option.map ~f:AvailabilityZoneIdList.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZoneIds") in
       let availabilityZones =
-        AvailabilityZoneList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AvailabilityZones") in
+        (Option.map ~f:AvailabilityZoneList.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZones") in
       let intervalUnit =
         (Option.map ~f:RetentionIntervalUnitValues.of_xml)
           (Xml.child xml_arg0 "IntervalUnit") in
       let interval =
         (Option.map ~f:Interval.of_xml) (Xml.child xml_arg0 "Interval") in
       let count = (Option.map ~f:Count.of_xml) (Xml.child xml_arg0 "Count") in
-      make ~availabilityZones ?intervalUnit ?interval ?count ()
+      make ?availabilityZoneIds ?availabilityZones ?intervalUnit ?interval
+        ?count ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let availabilityZoneIds =
+        field_map json__ "AvailabilityZoneIds" AvailabilityZoneIdList.of_json in
       let availabilityZones =
-        field_map_exn json "AvailabilityZones" AvailabilityZoneList.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZoneList.of_json in
       let intervalUnit =
-        field_map json "IntervalUnit" RetentionIntervalUnitValues.of_json in
-      let interval = field_map json "Interval" Interval.of_json in
-      let count = field_map json "Count" Count.of_json in
-      make ~availabilityZones ?intervalUnit ?interval ?count ()
+        field_map json__ "IntervalUnit" RetentionIntervalUnitValues.of_json in
+      let interval = field_map json__ "Interval" Interval.of_json in
+      let count = field_map json__ "Count" Count.of_json in
+      make ?availabilityZoneIds ?availabilityZones ?intervalUnit ?interval
+        ?count ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies a rule for enabling fast snapshot restore. You can enable fast snapshot restore based on either a count or a time interval."]
+       "\\[Custom snapshot policies only\\] Specifies a rule for enabling fast snapshot restore for snapshots created by snapshot policies. You can enable fast snapshot restore based on either a count or a time interval."]
 module RetainRule =
   struct
     type nonrec t =
       {
-      count: Count.t option
+      count: StandardTierRetainRuleCount.t option
         [@ocaml.doc
-          "The number of snapshots to retain for each volume, up to a maximum of 1000."];
-      interval: Interval.t option
+          "The number of snapshots to retain for each volume, up to a maximum of 1000. For example if you want to retain a maximum of three snapshots, specify 3. When the fourth snapshot is created, the oldest retained snapshot is deleted, or it is moved to the archive tier if you have specified an ArchiveRule."];
+      interval: StandardTierRetainRuleInterval.t option
         [@ocaml.doc
           "The amount of time to retain each snapshot. The maximum is 100 years. This is equivalent to 1200 months, 5200 weeks, or 36500 days."];
       intervalUnit: RetentionIntervalUnitValues.t option
-        [@ocaml.doc "The unit of time for time-based retention."]}
+        [@ocaml.doc
+          "The unit of time for time-based retention. For example, to retain snapshots for 3 months, specify Interval=3 and IntervalUnit=MONTHS. Once the snapshot has been retained for 3 months, it is deleted, or it is moved to the archive tier if you have specified an ArchiveRule."]}
     let make ?count =
       fun ?interval ->
         fun ?intervalUnit -> fun () -> { count; interval; intervalUnit }
     let to_value x =
       structure_to_value
-        [("Count", (Option.map x.count ~f:Count.to_value));
-        ("Interval", (Option.map x.interval ~f:Interval.to_value));
+        [("Count",
+           (Option.map x.count ~f:StandardTierRetainRuleCount.to_value));
+        ("Interval",
+          (Option.map x.interval ~f:StandardTierRetainRuleInterval.to_value));
         ("IntervalUnit",
           (Option.map x.intervalUnit ~f:RetentionIntervalUnitValues.to_value))]
     let to_query v = to_query to_value v
@@ -1053,19 +1589,24 @@ module RetainRule =
         (Option.map ~f:RetentionIntervalUnitValues.of_xml)
           (Xml.child xml_arg0 "IntervalUnit") in
       let interval =
-        (Option.map ~f:Interval.of_xml) (Xml.child xml_arg0 "Interval") in
-      let count = (Option.map ~f:Count.of_xml) (Xml.child xml_arg0 "Count") in
+        (Option.map ~f:StandardTierRetainRuleInterval.of_xml)
+          (Xml.child xml_arg0 "Interval") in
+      let count =
+        (Option.map ~f:StandardTierRetainRuleCount.of_xml)
+          (Xml.child xml_arg0 "Count") in
       make ?intervalUnit ?interval ?count ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let intervalUnit =
-        field_map json "IntervalUnit" RetentionIntervalUnitValues.of_json in
-      let interval = field_map json "Interval" Interval.of_json in
-      let count = field_map json "Count" Count.of_json in
+        field_map json__ "IntervalUnit" RetentionIntervalUnitValues.of_json in
+      let interval =
+        field_map json__ "Interval" StandardTierRetainRuleInterval.of_json in
+      let count =
+        field_map json__ "Count" StandardTierRetainRuleCount.of_json in
       make ?intervalUnit ?interval ?count ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the retention rule for a lifecycle policy. You can retain snapshots based on either a count or a time interval."]
+       "\\[Custom snapshot and AMI policies only\\] Specifies a retention rule for snapshots created by snapshot policies, or for AMIs created by AMI policies. For snapshot policies that have an ArchiveRule, this retention rule applies to standard tier retention. When the retention threshold is met, snapshots are moved from the standard to the archive tier. For snapshot policies that do not have an ArchiveRule, snapshots are permanently deleted when this retention threshold is met. You can retain snapshots based on either a count or a time interval. Count-based retention You must specify Count. If you specify an ArchiveRule for the schedule, then you can specify a retention count of 0 to archive snapshots immediately after creation. If you specify a FastRestoreRule, ShareRule, or a CrossRegionCopyRule, then you must specify a retention count of 1 or more. Age-based retention You must specify Interval and IntervalUnit. If you specify an ArchiveRule for the schedule, then you can specify a retention interval of 0 days to archive snapshots immediately after creation. If you specify a FastRestoreRule, ShareRule, or a CrossRegionCopyRule, then you must specify a retention interval of 1 day or more."]
 module ScheduleName =
   struct
     type nonrec t = string
@@ -1094,6 +1635,9 @@ module ShareRules =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ShareRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1122,6 +1666,9 @@ module TagsToAddList =
         ok_or_failwith
           ((check_list_max i ~max:45) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1149,6 +1696,9 @@ module VariableTagsList =
         ok_or_failwith
           ((check_list_max i ~max:45) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1193,14 +1743,39 @@ module Action =
         ActionName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~crossRegionCopy ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let crossRegionCopy =
-        field_map_exn json "CrossRegionCopy"
+        field_map_exn json__ "CrossRegionCopy"
           CrossRegionCopyActionList.of_json in
-      let name = field_map_exn json "Name" ActionName.of_json in
+      let name = field_map_exn json__ "Name" ActionName.of_json in
       make ~crossRegionCopy ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Specifies an action for an event-based policy."]
+  end[@@ocaml.doc
+       "\\[Event-based policies only\\] Specifies an action for an event-based policy."]
+module CrossRegionCopyTarget =
+  struct
+    type nonrec t =
+      {
+      targetRegion: TargetRegion.t option
+        [@ocaml.doc "The target Region, for example us-east-1."]}
+    let make ?targetRegion = fun () -> { targetRegion }
+    let to_value x =
+      structure_to_value
+        [("TargetRegion",
+           (Option.map x.targetRegion ~f:TargetRegion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetRegion =
+        (Option.map ~f:TargetRegion.of_xml)
+          (Xml.child xml_arg0 "TargetRegion") in
+      make ?targetRegion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetRegion = field_map json__ "TargetRegion" TargetRegion.of_json in
+      make ?targetRegion ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "\\[Default policies only\\] Specifies a destination Region for cross-Region copy actions."]
 module EventParameters =
   struct
     type nonrec t =
@@ -1239,15 +1814,17 @@ module EventParameters =
           (Xml.child_exn ~context:context_ xml_arg0 "EventType") in
       make ~descriptionRegex ~snapshotOwner ~eventType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let descriptionRegex =
-        field_map_exn json "DescriptionRegex" DescriptionRegex.of_json in
+        field_map_exn json__ "DescriptionRegex" DescriptionRegex.of_json in
       let snapshotOwner =
-        field_map_exn json "SnapshotOwner" SnapshotOwnerList.of_json in
-      let eventType = field_map_exn json "EventType" EventTypeValues.of_json in
+        field_map_exn json__ "SnapshotOwner" SnapshotOwnerList.of_json in
+      let eventType =
+        field_map_exn json__ "EventType" EventTypeValues.of_json in
       make ~descriptionRegex ~snapshotOwner ~eventType ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Specifies an event that triggers an event-based policy."]
+  end[@@ocaml.doc
+       "\\[Event-based policies only\\] Specifies an event that activates an event-based policy."]
 module EventSourceValues =
   struct
     type nonrec t =
@@ -1267,6 +1844,82 @@ module EventSourceValues =
     let of_json j = of_string (string_of_json ~kind:"EventSourceValues" j)
     let to_json = simple_to_json to_value
   end
+module ExcludeBootVolumes =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ExcludeTagsList =
+  struct
+    type nonrec t = Tag.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExcludeTagsList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExcludeVolumeTypesList =
+  struct
+    type nonrec t = VolumeTypeValues.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:6) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VolumeTypeValues.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VolumeTypeValues.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExcludeVolumeTypesList"
+        ~of_json:VolumeTypeValues.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ExcludeBootVolume =
   struct
     type nonrec t = bool
@@ -1279,6 +1932,37 @@ module ExcludeBootVolume =
       Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
+  end
+module ExcludeDataVolumeTagList =
+  struct
+    type nonrec t = Tag.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExcludeDataVolumeTagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module NoReboot =
   struct
@@ -1298,17 +1982,20 @@ module ResourceLocationValues =
     type nonrec t =
       | CLOUD 
       | OUTPOST 
+      | LOCAL_ZONE 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | CLOUD -> "CLOUD"
       | OUTPOST -> "OUTPOST"
+      | LOCAL_ZONE -> "LOCAL_ZONE"
       | Non_static_id s -> s
     let of_string =
       function
       | "CLOUD" -> CLOUD
       | "OUTPOST" -> OUTPOST
+      | "LOCAL_ZONE" -> LOCAL_ZONE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1359,19 +2046,26 @@ module Schedule =
           "The tags to apply to policy-created resources. These user-defined tags are in addition to the Amazon Web Services-added lifecycle tags."];
       variableTags: VariableTagsList.t option
         [@ocaml.doc
-          "A collection of key/value pairs with values determined dynamically when the policy is executed. Keys may be any valid Amazon EC2 tag key. Values must be in one of the two following formats: $(instance-id) or $(timestamp). Variable tags are only valid for EBS Snapshot Management \226\128\147 Instance policies."];
+          "\\[AMI policies and snapshot policies that target instances only\\] A collection of key/value pairs with values determined dynamically when the policy is executed. Keys may be any valid Amazon EC2 tag key. Values must be in one of the two following formats: $(instance-id) or $(timestamp). Variable tags are only valid for EBS Snapshot Management \226\128\147 Instance policies."];
       createRule: CreateRule.t option [@ocaml.doc "The creation rule."];
-      retainRule: RetainRule.t option [@ocaml.doc "The retention rule."];
+      retainRule: RetainRule.t option
+        [@ocaml.doc
+          "The retention rule for snapshots or AMIs created by the policy."];
       fastRestoreRule: FastRestoreRule.t option
-        [@ocaml.doc "The rule for enabling fast snapshot restore."];
+        [@ocaml.doc
+          "\\[Custom snapshot policies only\\] The rule for enabling fast snapshot restore."];
       crossRegionCopyRules: CrossRegionCopyRules.t option
         [@ocaml.doc
-          "The rule for cross-Region snapshot copies. You can only specify cross-Region copy rules for policies that create snapshots in a Region. If the policy creates snapshots on an Outpost, then you cannot copy the snapshots to a Region or to an Outpost. If the policy creates snapshots in a Region, then snapshots can be copied to up to three Regions or Outposts."];
+          "Specifies a rule for copying snapshots or AMIs across Regions. You can't specify cross-Region copy rules for policies that create snapshots on an Outpost or in a Local Zone. If the policy creates snapshots in a Region, then snapshots can be copied to up to three Regions or Outposts."];
       shareRules: ShareRules.t option
         [@ocaml.doc
-          "The rule for sharing snapshots with other Amazon Web Services accounts."];
+          "\\[Custom snapshot policies only\\] The rule for sharing snapshots with other Amazon Web Services accounts."];
       deprecateRule: DeprecateRule.t option
-        [@ocaml.doc "The AMI deprecation rule for the schedule."]}
+        [@ocaml.doc
+          "\\[Custom AMI policies only\\] The AMI deprecation rule for the schedule."];
+      archiveRule: ArchiveRule.t option
+        [@ocaml.doc
+          "\\[Custom snapshot policies that target volumes only\\] The snapshot archiving rule for the schedule. When you specify an archiving rule, snapshots are automatically moved from the standard tier to the archive tier once the schedule's retention threshold is met. Snapshots are then retained in the archive tier for the archive retention period that you specify. For more information about using snapshot archiving, see Considerations for snapshot lifecycle policies."]}
     let make ?name =
       fun ?copyTags ->
         fun ?tagsToAdd ->
@@ -1382,19 +2076,21 @@ module Schedule =
                   fun ?crossRegionCopyRules ->
                     fun ?shareRules ->
                       fun ?deprecateRule ->
-                        fun () ->
-                          {
-                            name;
-                            copyTags;
-                            tagsToAdd;
-                            variableTags;
-                            createRule;
-                            retainRule;
-                            fastRestoreRule;
-                            crossRegionCopyRules;
-                            shareRules;
-                            deprecateRule
-                          }
+                        fun ?archiveRule ->
+                          fun () ->
+                            {
+                              name;
+                              copyTags;
+                              tagsToAdd;
+                              variableTags;
+                              createRule;
+                              retainRule;
+                              fastRestoreRule;
+                              crossRegionCopyRules;
+                              shareRules;
+                              deprecateRule;
+                              archiveRule
+                            }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:ScheduleName.to_value));
@@ -1410,9 +2106,12 @@ module Schedule =
           (Option.map x.crossRegionCopyRules ~f:CrossRegionCopyRules.to_value));
         ("ShareRules", (Option.map x.shareRules ~f:ShareRules.to_value));
         ("DeprecateRule",
-          (Option.map x.deprecateRule ~f:DeprecateRule.to_value))]
+          (Option.map x.deprecateRule ~f:DeprecateRule.to_value));
+        ("ArchiveRule", (Option.map x.archiveRule ~f:ArchiveRule.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let archiveRule =
+        (Option.map ~f:ArchiveRule.of_xml) (Xml.child xml_arg0 "ArchiveRule") in
       let deprecateRule =
         (Option.map ~f:DeprecateRule.of_xml)
           (Xml.child xml_arg0 "DeprecateRule") in
@@ -1437,29 +2136,32 @@ module Schedule =
         (Option.map ~f:CopyTags.of_xml) (Xml.child xml_arg0 "CopyTags") in
       let name =
         (Option.map ~f:ScheduleName.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?deprecateRule ?shareRules ?crossRegionCopyRules ?fastRestoreRule
-        ?retainRule ?createRule ?variableTags ?tagsToAdd ?copyTags ?name ()
+      make ?archiveRule ?deprecateRule ?shareRules ?crossRegionCopyRules
+        ?fastRestoreRule ?retainRule ?createRule ?variableTags ?tagsToAdd
+        ?copyTags ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let archiveRule = field_map json__ "ArchiveRule" ArchiveRule.of_json in
       let deprecateRule =
-        field_map json "DeprecateRule" DeprecateRule.of_json in
-      let shareRules = field_map json "ShareRules" ShareRules.of_json in
+        field_map json__ "DeprecateRule" DeprecateRule.of_json in
+      let shareRules = field_map json__ "ShareRules" ShareRules.of_json in
       let crossRegionCopyRules =
-        field_map json "CrossRegionCopyRules" CrossRegionCopyRules.of_json in
+        field_map json__ "CrossRegionCopyRules" CrossRegionCopyRules.of_json in
       let fastRestoreRule =
-        field_map json "FastRestoreRule" FastRestoreRule.of_json in
-      let retainRule = field_map json "RetainRule" RetainRule.of_json in
-      let createRule = field_map json "CreateRule" CreateRule.of_json in
+        field_map json__ "FastRestoreRule" FastRestoreRule.of_json in
+      let retainRule = field_map json__ "RetainRule" RetainRule.of_json in
+      let createRule = field_map json__ "CreateRule" CreateRule.of_json in
       let variableTags =
-        field_map json "VariableTags" VariableTagsList.of_json in
-      let tagsToAdd = field_map json "TagsToAdd" TagsToAddList.of_json in
-      let copyTags = field_map json "CopyTags" CopyTags.of_json in
-      let name = field_map json "Name" ScheduleName.of_json in
-      make ?deprecateRule ?shareRules ?crossRegionCopyRules ?fastRestoreRule
-        ?retainRule ?createRule ?variableTags ?tagsToAdd ?copyTags ?name ()
+        field_map json__ "VariableTags" VariableTagsList.of_json in
+      let tagsToAdd = field_map json__ "TagsToAdd" TagsToAddList.of_json in
+      let copyTags = field_map json__ "CopyTags" CopyTags.of_json in
+      let name = field_map json__ "Name" ScheduleName.of_json in
+      make ?archiveRule ?deprecateRule ?shareRules ?crossRegionCopyRules
+        ?fastRestoreRule ?retainRule ?createRule ?variableTags ?tagsToAdd
+        ?copyTags ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies a backup schedule for a snapshot or AMI lifecycle policy."]
+       "\\[Custom snapshot and AMI policies only\\] Specifies a schedule for a snapshot or AMI lifecycle policy."]
 module TagKey =
   struct
     type nonrec t = string
@@ -1522,7 +2224,7 @@ module PolicyId =
           ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"policy-[A-Za-z0-9]+")));
+                  (fun () -> check_pattern i ~pattern:"policy-[a-f0-9]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1540,6 +2242,9 @@ module ActionList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Action.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1557,6 +2262,54 @@ module ActionList =
                           | _ -> true)
                      | _ -> true))) ~f:Action.of_xml)
     let of_json j = list_of_json ~kind:"ActionList" ~of_json:Action.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CreateInterval =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for CreateInterval" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module CrossRegionCopyTargetList =
+  struct
+    type nonrec t = CrossRegionCopyTarget.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CrossRegionCopyTarget.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CrossRegionCopyTarget.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CrossRegionCopyTargetList"
+        ~of_json:CrossRegionCopyTarget.of_json j
     let to_json v = composed_to_json to_value v
   end
 module EventSource =
@@ -1584,46 +2337,149 @@ module EventSource =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?parameters ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" EventParameters.of_json in
-      let type_ = field_map_exn json "Type" EventSourceValues.of_json in
+    let of_json json__ =
+      let parameters = field_map json__ "Parameters" EventParameters.of_json in
+      let type_ = field_map_exn json__ "Type" EventSourceValues.of_json in
       make ?parameters ~type_ ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Specifies an event that triggers an event-based policy."]
+  end[@@ocaml.doc
+       "\\[Event-based policies only\\] Specifies an event that activates an event-based policy."]
+module Exclusions =
+  struct
+    type nonrec t =
+      {
+      excludeBootVolumes: ExcludeBootVolumes.t option
+        [@ocaml.doc
+          "\\[Default policies for EBS snapshots only\\] Indicates whether to exclude volumes that are attached to instances as the boot volume. If you exclude boot volumes, only volumes attached as data (non-boot) volumes will be backed up by the policy. To exclude boot volumes, specify true."];
+      excludeVolumeTypes: ExcludeVolumeTypesList.t option
+        [@ocaml.doc
+          "\\[Default policies for EBS snapshots only\\] Specifies the volume types to exclude. Volumes of the specified types will not be targeted by the policy."];
+      excludeTags: ExcludeTagsList.t option
+        [@ocaml.doc
+          "\\[Default policies for EBS-backed AMIs only\\] Specifies whether to exclude volumes that have specific tags."]}
+    let make ?excludeBootVolumes =
+      fun ?excludeVolumeTypes ->
+        fun ?excludeTags ->
+          fun () -> { excludeBootVolumes; excludeVolumeTypes; excludeTags }
+    let to_value x =
+      structure_to_value
+        [("ExcludeBootVolumes",
+           (Option.map x.excludeBootVolumes ~f:ExcludeBootVolumes.to_value));
+        ("ExcludeVolumeTypes",
+          (Option.map x.excludeVolumeTypes ~f:ExcludeVolumeTypesList.to_value));
+        ("ExcludeTags",
+          (Option.map x.excludeTags ~f:ExcludeTagsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludeTags =
+        (Option.map ~f:ExcludeTagsList.of_xml)
+          (Xml.child xml_arg0 "ExcludeTags") in
+      let excludeVolumeTypes =
+        (Option.map ~f:ExcludeVolumeTypesList.of_xml)
+          (Xml.child xml_arg0 "ExcludeVolumeTypes") in
+      let excludeBootVolumes =
+        (Option.map ~f:ExcludeBootVolumes.of_xml)
+          (Xml.child xml_arg0 "ExcludeBootVolumes") in
+      make ?excludeTags ?excludeVolumeTypes ?excludeBootVolumes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludeTags =
+        field_map json__ "ExcludeTags" ExcludeTagsList.of_json in
+      let excludeVolumeTypes =
+        field_map json__ "ExcludeVolumeTypes" ExcludeVolumeTypesList.of_json in
+      let excludeBootVolumes =
+        field_map json__ "ExcludeBootVolumes" ExcludeBootVolumes.of_json in
+      make ?excludeTags ?excludeVolumeTypes ?excludeBootVolumes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "\\[Default policies only\\] Specifies exclusion parameters for volumes or instances for which you do not want to create snapshots or AMIs. The policy will not create snapshots or AMIs for target resources that match any of the specified exclusion parameters."]
+module ExtendDeletion =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module Parameters =
   struct
     type nonrec t =
       {
       excludeBootVolume: ExcludeBootVolume.t option
         [@ocaml.doc
-          "\\[EBS Snapshot Management \226\128\147 Instance policies only\\] Indicates whether to exclude the root volume from snapshots created using CreateSnapshots. The default is false."];
+          "\\[Custom snapshot policies that target instances only\\] Indicates whether to exclude the root volume from multi-volume snapshot sets. The default is false. If you specify true, then the root volumes attached to targeted instances will be excluded from the multi-volume snapshot sets created by the policy."];
       noReboot: NoReboot.t option
         [@ocaml.doc
-          "Applies to AMI lifecycle policies only. Indicates whether targeted instances are rebooted when the lifecycle policy runs. true indicates that targeted instances are not rebooted when the policy runs. false indicates that target instances are rebooted when the policy runs. The default is true (instances are not rebooted)."]}
+          "\\[Custom AMI policies only\\] Indicates whether targeted instances are rebooted when the lifecycle policy runs. true indicates that targeted instances are not rebooted when the policy runs. false indicates that target instances are rebooted when the policy runs. The default is true (instances are not rebooted)."];
+      excludeDataVolumeTags: ExcludeDataVolumeTagList.t option
+        [@ocaml.doc
+          "\\[Custom snapshot policies that target instances only\\] The tags used to identify data (non-root) volumes to exclude from multi-volume snapshot sets. If you create a snapshot lifecycle policy that targets instances and you specify tags for this parameter, then data volumes with the specified tags that are attached to targeted instances will be excluded from the multi-volume snapshot sets created by the policy."]}
     let make ?excludeBootVolume =
-      fun ?noReboot -> fun () -> { excludeBootVolume; noReboot }
+      fun ?noReboot ->
+        fun ?excludeDataVolumeTags ->
+          fun () -> { excludeBootVolume; noReboot; excludeDataVolumeTags }
     let to_value x =
       structure_to_value
         [("ExcludeBootVolume",
            (Option.map x.excludeBootVolume ~f:ExcludeBootVolume.to_value));
-        ("NoReboot", (Option.map x.noReboot ~f:NoReboot.to_value))]
+        ("NoReboot", (Option.map x.noReboot ~f:NoReboot.to_value));
+        ("ExcludeDataVolumeTags",
+          (Option.map x.excludeDataVolumeTags
+             ~f:ExcludeDataVolumeTagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let excludeDataVolumeTags =
+        (Option.map ~f:ExcludeDataVolumeTagList.of_xml)
+          (Xml.child xml_arg0 "ExcludeDataVolumeTags") in
       let noReboot =
         (Option.map ~f:NoReboot.of_xml) (Xml.child xml_arg0 "NoReboot") in
       let excludeBootVolume =
         (Option.map ~f:ExcludeBootVolume.of_xml)
           (Xml.child xml_arg0 "ExcludeBootVolume") in
-      make ?noReboot ?excludeBootVolume ()
+      make ?excludeDataVolumeTags ?noReboot ?excludeBootVolume ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let noReboot = field_map json "NoReboot" NoReboot.of_json in
+    let of_json json__ =
+      let excludeDataVolumeTags =
+        field_map json__ "ExcludeDataVolumeTags"
+          ExcludeDataVolumeTagList.of_json in
+      let noReboot = field_map json__ "NoReboot" NoReboot.of_json in
       let excludeBootVolume =
-        field_map json "ExcludeBootVolume" ExcludeBootVolume.of_json in
-      make ?noReboot ?excludeBootVolume ()
+        field_map json__ "ExcludeBootVolume" ExcludeBootVolume.of_json in
+      make ?excludeDataVolumeTags ?noReboot ?excludeBootVolume ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies optional parameters to add to a policy. The set of valid parameters depends on the combination of policy type and resource type."]
+       "\\[Custom snapshot and AMI policies only\\] Specifies optional parameters for snapshot and AMI policies. The set of valid parameters depends on the combination of policy type and target resource type. If you choose to exclude boot volumes and you specify tags that consequently exclude all of the additional data volumes attached to an instance, then Amazon Data Lifecycle Manager will not create any snapshots for the affected instance, and it will emit a SnapshotsCreateFailed Amazon CloudWatch metric. For more information, see Monitor your policies using Amazon CloudWatch."]
+module PolicyLanguageValues =
+  struct
+    type nonrec t =
+      | SIMPLIFIED 
+      | STANDARD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SIMPLIFIED -> "SIMPLIFIED"
+      | STANDARD -> "STANDARD"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SIMPLIFIED" -> SIMPLIFIED
+      | "STANDARD" -> STANDARD
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PolicyLanguageValues" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PolicyLanguageValues" j)
+    let to_json = simple_to_json to_value
+  end
 module PolicyTypeValues =
   struct
     type nonrec t =
@@ -1660,6 +2516,9 @@ module ResourceLocationList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceLocationValues.to_value)) |>
         (fun x -> `List x)
@@ -1690,6 +2549,9 @@ module ResourceTypeValuesList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceTypeValues.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1711,6 +2573,21 @@ module ResourceTypeValuesList =
         ~of_json:ResourceTypeValues.of_json j
     let to_json v = composed_to_json to_value v
   end
+module RetainInterval =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RetainInterval" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ScheduleList =
   struct
     type nonrec t = Schedule.t list
@@ -1719,6 +2596,9 @@ module ScheduleList =
         ok_or_failwith
           ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Schedule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1747,6 +2627,9 @@ module TargetTagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1765,6 +2648,19 @@ module TargetTagList =
                      | _ -> true))) ~f:Tag.of_xml)
     let of_json j = list_of_json ~kind:"TargetTagList" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module DefaultPolicy =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
   end
 module GettablePolicyStateValues =
   struct
@@ -1842,6 +2738,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1879,6 +2777,9 @@ module ParameterList =
   struct
     type nonrec t = Parameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Parameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1903,6 +2804,9 @@ module PolicyIdList =
   struct
     type nonrec t = PolicyId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1973,28 +2877,52 @@ module PolicyDetails =
       {
       policyType: PolicyTypeValues.t option
         [@ocaml.doc
-          "The valid target resource types and actions a policy can manage. Specify EBS_SNAPSHOT_MANAGEMENT to create a lifecycle policy that manages the lifecycle of Amazon EBS snapshots. Specify IMAGE_MANAGEMENT to create a lifecycle policy that manages the lifecycle of EBS-backed AMIs. Specify EVENT_BASED_POLICY to create an event-based policy that performs specific actions when a defined event occurs in your Amazon Web Services account. The default is EBS_SNAPSHOT_MANAGEMENT."];
+          "The type of policy. Specify EBS_SNAPSHOT_MANAGEMENT to create a lifecycle policy that manages the lifecycle of Amazon EBS snapshots. Specify IMAGE_MANAGEMENT to create a lifecycle policy that manages the lifecycle of EBS-backed AMIs. Specify EVENT_BASED_POLICY to create an event-based policy that performs specific actions when a defined event occurs in your Amazon Web Services account. The default is EBS_SNAPSHOT_MANAGEMENT."];
       resourceTypes: ResourceTypeValuesList.t option
         [@ocaml.doc
-          "The target resource type for snapshot and AMI lifecycle policies. Use VOLUME to create snapshots of individual volumes or use INSTANCE to create multi-volume snapshots from the volumes for an instance. This parameter is required for snapshot and AMI policies only. If you are creating an event-based policy, omit this parameter."];
+          "\\[Custom snapshot policies only\\] The target resource type for snapshot and AMI lifecycle policies. Use VOLUME to create snapshots of individual volumes or use INSTANCE to create multi-volume snapshots from the volumes for an instance."];
       resourceLocations: ResourceLocationList.t option
         [@ocaml.doc
-          "The location of the resources to backup. If the source resources are located in an Amazon Web Services Region, specify CLOUD. If the source resources are located on an Outpost in your account, specify OUTPOST. If you specify OUTPOST, Amazon Data Lifecycle Manager backs up all resources of the specified type with matching target tags across all of the Outposts in your account."];
+          "\\[Custom snapshot and AMI policies only\\] The location of the resources to backup. If the source resources are located in a Region, specify CLOUD. In this case, the policy targets all resources of the specified type with matching target tags across all Availability Zones in the Region. \\[Custom snapshot policies only\\] If the source resources are located in a Local Zone, specify LOCAL_ZONE. In this case, the policy targets all resources of the specified type with matching target tags across all Local Zones in the Region. If the source resources are located on an Outpost in your account, specify OUTPOST. In this case, the policy targets all resources of the specified type with matching target tags across all of the Outposts in your account."];
       targetTags: TargetTagList.t option
         [@ocaml.doc
-          "The single tag that identifies targeted resources for this policy. This parameter is required for snapshot and AMI policies only. If you are creating an event-based policy, omit this parameter."];
+          "\\[Custom snapshot and AMI policies only\\] The single tag that identifies targeted resources for this policy."];
       schedules: ScheduleList.t option
         [@ocaml.doc
-          "The schedules of policy-defined actions for snapshot and AMI lifecycle policies. A policy can have up to four schedules\226\128\148one mandatory schedule and up to three optional schedules. This parameter is required for snapshot and AMI policies only. If you are creating an event-based policy, omit this parameter."];
+          "\\[Custom snapshot and AMI policies only\\] The schedules of policy-defined actions for snapshot and AMI lifecycle policies. A policy can have up to four schedules\226\128\148one mandatory schedule and up to three optional schedules."];
       parameters: Parameters.t option
         [@ocaml.doc
-          "A set of optional parameters for snapshot and AMI lifecycle policies. This parameter is required for snapshot and AMI policies only. If you are creating an event-based policy, omit this parameter."];
+          "\\[Custom snapshot and AMI policies only\\] A set of optional parameters for snapshot and AMI lifecycle policies. If you are modifying a policy that was created or previously modified using the Amazon Data Lifecycle Manager console, then you must include this parameter and specify either the default values or the new values that you require. You can't omit this parameter or set its values to null."];
       eventSource: EventSource.t option
         [@ocaml.doc
-          "The event that triggers the event-based policy. This parameter is required for event-based policies only. If you are creating a snapshot or AMI policy, omit this parameter."];
+          "\\[Event-based policies only\\] The event that activates the event-based policy."];
       actions: ActionList.t option
         [@ocaml.doc
-          "The actions to be performed when the event-based policy is triggered. You can specify only one action per policy. This parameter is required for event-based policies only. If you are creating a snapshot or AMI policy, omit this parameter."]}
+          "\\[Event-based policies only\\] The actions to be performed when the event-based policy is activated. You can specify only one action per policy."];
+      policyLanguage: PolicyLanguageValues.t option
+        [@ocaml.doc
+          "The type of policy to create. Specify one of the following: SIMPLIFIED To create a default policy. STANDARD To create a custom policy."];
+      resourceType: ResourceTypeValues.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specify the type of default policy to create. To create a default policy for EBS snapshots, that creates snapshots of all volumes in the Region that do not have recent backups, specify VOLUME. To create a default policy for EBS-backed AMIs, that creates EBS-backed AMIs from all instances in the Region that do not have recent backups, specify INSTANCE."];
+      createInterval: CreateInterval.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specifies how often the policy should run and create snapshots or AMIs. The creation frequency can range from 1 to 7 days. If you do not specify a value, the default is 1. Default: 1"];
+      retainInterval: RetainInterval.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specifies how long the policy should retain snapshots or AMIs before deleting them. The retention period can range from 2 to 14 days, but it must be greater than the creation frequency to ensure that the policy retains at least 1 snapshot or AMI at any given time. If you do not specify a value, the default is 7. Default: 7"];
+      copyTags: CopyTagsNullable.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Indicates whether the policy should copy tags from the source resource to the snapshot or AMI. If you do not specify a value, the default is false. Default: false"];
+      crossRegionCopyTargets: CrossRegionCopyTargetList.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specifies destination Regions for snapshot or AMI copies. You can specify up to 3 destination Regions. If you do not want to create cross-Region copies, omit this parameter."];
+      extendDeletion: ExtendDeletion.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Defines the snapshot or AMI retention behavior for the policy if the source volume or instance is deleted, or if the policy enters the error, disabled, or deleted state. By default (ExtendDeletion=false): If a source resource is deleted, Amazon Data Lifecycle Manager will continue to delete previously created snapshots or AMIs, up to but not including the last one, based on the specified retention period. If you want Amazon Data Lifecycle Manager to delete all snapshots or AMIs, including the last one, specify true. If a policy enters the error, disabled, or deleted state, Amazon Data Lifecycle Manager stops deleting snapshots and AMIs. If you want Amazon Data Lifecycle Manager to continue deleting snapshots or AMIs, including the last one, if the policy enters one of these states, specify true. If you enable extended deletion (ExtendDeletion=true), you override both default behaviors simultaneously. If you do not specify a value, the default is false. Default: false"];
+      exclusions: Exclusions.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specifies exclusion parameters for volumes or instances for which you do not want to create snapshots or AMIs. The policy will not create snapshots or AMIs for target resources that match any of the specified exclusion parameters."]}
     let make ?policyType =
       fun ?resourceTypes ->
         fun ?resourceLocations ->
@@ -2003,17 +2931,33 @@ module PolicyDetails =
               fun ?parameters ->
                 fun ?eventSource ->
                   fun ?actions ->
-                    fun () ->
-                      {
-                        policyType;
-                        resourceTypes;
-                        resourceLocations;
-                        targetTags;
-                        schedules;
-                        parameters;
-                        eventSource;
-                        actions
-                      }
+                    fun ?policyLanguage ->
+                      fun ?resourceType ->
+                        fun ?createInterval ->
+                          fun ?retainInterval ->
+                            fun ?copyTags ->
+                              fun ?crossRegionCopyTargets ->
+                                fun ?extendDeletion ->
+                                  fun ?exclusions ->
+                                    fun () ->
+                                      {
+                                        policyType;
+                                        resourceTypes;
+                                        resourceLocations;
+                                        targetTags;
+                                        schedules;
+                                        parameters;
+                                        eventSource;
+                                        actions;
+                                        policyLanguage;
+                                        resourceType;
+                                        createInterval;
+                                        retainInterval;
+                                        copyTags;
+                                        crossRegionCopyTargets;
+                                        extendDeletion;
+                                        exclusions
+                                      }
     let to_value x =
       structure_to_value
         [("PolicyType",
@@ -2026,9 +2970,47 @@ module PolicyDetails =
         ("Schedules", (Option.map x.schedules ~f:ScheduleList.to_value));
         ("Parameters", (Option.map x.parameters ~f:Parameters.to_value));
         ("EventSource", (Option.map x.eventSource ~f:EventSource.to_value));
-        ("Actions", (Option.map x.actions ~f:ActionList.to_value))]
+        ("Actions", (Option.map x.actions ~f:ActionList.to_value));
+        ("PolicyLanguage",
+          (Option.map x.policyLanguage ~f:PolicyLanguageValues.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:ResourceTypeValues.to_value));
+        ("CreateInterval",
+          (Option.map x.createInterval ~f:CreateInterval.to_value));
+        ("RetainInterval",
+          (Option.map x.retainInterval ~f:RetainInterval.to_value));
+        ("CopyTags", (Option.map x.copyTags ~f:CopyTagsNullable.to_value));
+        ("CrossRegionCopyTargets",
+          (Option.map x.crossRegionCopyTargets
+             ~f:CrossRegionCopyTargetList.to_value));
+        ("ExtendDeletion",
+          (Option.map x.extendDeletion ~f:ExtendDeletion.to_value));
+        ("Exclusions", (Option.map x.exclusions ~f:Exclusions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let exclusions =
+        (Option.map ~f:Exclusions.of_xml) (Xml.child xml_arg0 "Exclusions") in
+      let extendDeletion =
+        (Option.map ~f:ExtendDeletion.of_xml)
+          (Xml.child xml_arg0 "ExtendDeletion") in
+      let crossRegionCopyTargets =
+        (Option.map ~f:CrossRegionCopyTargetList.of_xml)
+          (Xml.child xml_arg0 "CrossRegionCopyTargets") in
+      let copyTags =
+        (Option.map ~f:CopyTagsNullable.of_xml)
+          (Xml.child xml_arg0 "CopyTags") in
+      let retainInterval =
+        (Option.map ~f:RetainInterval.of_xml)
+          (Xml.child xml_arg0 "RetainInterval") in
+      let createInterval =
+        (Option.map ~f:CreateInterval.of_xml)
+          (Xml.child xml_arg0 "CreateInterval") in
+      let resourceType =
+        (Option.map ~f:ResourceTypeValues.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      let policyLanguage =
+        (Option.map ~f:PolicyLanguageValues.of_xml)
+          (Xml.child xml_arg0 "PolicyLanguage") in
       let actions =
         (Option.map ~f:ActionList.of_xml) (Xml.child xml_arg0 "Actions") in
       let eventSource =
@@ -2049,21 +3031,40 @@ module PolicyDetails =
       let policyType =
         (Option.map ~f:PolicyTypeValues.of_xml)
           (Xml.child xml_arg0 "PolicyType") in
-      make ?actions ?eventSource ?parameters ?schedules ?targetTags
+      make ?exclusions ?extendDeletion ?crossRegionCopyTargets ?copyTags
+        ?retainInterval ?createInterval ?resourceType ?policyLanguage
+        ?actions ?eventSource ?parameters ?schedules ?targetTags
         ?resourceLocations ?resourceTypes ?policyType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let actions = field_map json "Actions" ActionList.of_json in
-      let eventSource = field_map json "EventSource" EventSource.of_json in
-      let parameters = field_map json "Parameters" Parameters.of_json in
-      let schedules = field_map json "Schedules" ScheduleList.of_json in
-      let targetTags = field_map json "TargetTags" TargetTagList.of_json in
+    let of_json json__ =
+      let exclusions = field_map json__ "Exclusions" Exclusions.of_json in
+      let extendDeletion =
+        field_map json__ "ExtendDeletion" ExtendDeletion.of_json in
+      let crossRegionCopyTargets =
+        field_map json__ "CrossRegionCopyTargets"
+          CrossRegionCopyTargetList.of_json in
+      let copyTags = field_map json__ "CopyTags" CopyTagsNullable.of_json in
+      let retainInterval =
+        field_map json__ "RetainInterval" RetainInterval.of_json in
+      let createInterval =
+        field_map json__ "CreateInterval" CreateInterval.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" ResourceTypeValues.of_json in
+      let policyLanguage =
+        field_map json__ "PolicyLanguage" PolicyLanguageValues.of_json in
+      let actions = field_map json__ "Actions" ActionList.of_json in
+      let eventSource = field_map json__ "EventSource" EventSource.of_json in
+      let parameters = field_map json__ "Parameters" Parameters.of_json in
+      let schedules = field_map json__ "Schedules" ScheduleList.of_json in
+      let targetTags = field_map json__ "TargetTags" TargetTagList.of_json in
       let resourceLocations =
-        field_map json "ResourceLocations" ResourceLocationList.of_json in
+        field_map json__ "ResourceLocations" ResourceLocationList.of_json in
       let resourceTypes =
-        field_map json "ResourceTypes" ResourceTypeValuesList.of_json in
-      let policyType = field_map json "PolicyType" PolicyTypeValues.of_json in
-      make ?actions ?eventSource ?parameters ?schedules ?targetTags
+        field_map json__ "ResourceTypes" ResourceTypeValuesList.of_json in
+      let policyType = field_map json__ "PolicyType" PolicyTypeValues.of_json in
+      make ?exclusions ?extendDeletion ?crossRegionCopyTargets ?copyTags
+        ?retainInterval ?createInterval ?resourceType ?policyLanguage
+        ?actions ?eventSource ?parameters ?schedules ?targetTags
         ?resourceLocations ?resourceTypes ?policyType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies the configuration of a lifecycle policy."]
@@ -2112,13 +3113,25 @@ module LifecyclePolicySummary =
       tags: TagMap.t option [@ocaml.doc "The tags."];
       policyType: PolicyTypeValues.t option
         [@ocaml.doc
-          "The type of policy. EBS_SNAPSHOT_MANAGEMENT indicates that the policy manages the lifecycle of Amazon EBS snapshots. IMAGE_MANAGEMENT indicates that the policy manages the lifecycle of EBS-backed AMIs."]}
+          "The type of policy. EBS_SNAPSHOT_MANAGEMENT indicates that the policy manages the lifecycle of Amazon EBS snapshots. IMAGE_MANAGEMENT indicates that the policy manages the lifecycle of EBS-backed AMIs. EVENT_BASED_POLICY indicates that the policy automates cross-account snapshot copies for snapshots that are shared with your account."];
+      defaultPolicy: DefaultPolicy.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] The type of default policy. Values include: VOLUME - Default policy for EBS snapshots INSTANCE - Default policy for EBS-backed AMIs"]}
     let make ?policyId =
       fun ?description ->
         fun ?state ->
           fun ?tags ->
             fun ?policyType ->
-              fun () -> { policyId; description; state; tags; policyType }
+              fun ?defaultPolicy ->
+                fun () ->
+                  {
+                    policyId;
+                    description;
+                    state;
+                    tags;
+                    policyType;
+                    defaultPolicy
+                  }
     let to_value x =
       structure_to_value
         [("PolicyId", (Option.map x.policyId ~f:PolicyId.to_value));
@@ -2127,9 +3140,14 @@ module LifecyclePolicySummary =
         ("State", (Option.map x.state ~f:GettablePolicyStateValues.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
         ("PolicyType",
-          (Option.map x.policyType ~f:PolicyTypeValues.to_value))]
+          (Option.map x.policyType ~f:PolicyTypeValues.to_value));
+        ("DefaultPolicy",
+          (Option.map x.defaultPolicy ~f:DefaultPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let defaultPolicy =
+        (Option.map ~f:DefaultPolicy.of_xml)
+          (Xml.child xml_arg0 "DefaultPolicy") in
       let policyType =
         (Option.map ~f:PolicyTypeValues.of_xml)
           (Xml.child xml_arg0 "PolicyType") in
@@ -2142,16 +3160,18 @@ module LifecyclePolicySummary =
           (Xml.child xml_arg0 "Description") in
       let policyId =
         (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "PolicyId") in
-      make ?policyType ?tags ?state ?description ?policyId ()
+      make ?defaultPolicy ?policyType ?tags ?state ?description ?policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyType = field_map json "PolicyType" PolicyTypeValues.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" GettablePolicyStateValues.of_json in
+    let of_json json__ =
+      let defaultPolicy =
+        field_map json__ "DefaultPolicy" DefaultPolicy.of_json in
+      let policyType = field_map json__ "PolicyType" PolicyTypeValues.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let state = field_map json__ "State" GettablePolicyStateValues.of_json in
       let description =
-        field_map json "Description" PolicyDescription.of_json in
-      let policyId = field_map json "PolicyId" PolicyId.of_json in
-      make ?policyType ?tags ?state ?description ?policyId ()
+        field_map json__ "Description" PolicyDescription.of_json in
+      let policyId = field_map json__ "PolicyId" PolicyId.of_json in
+      make ?defaultPolicy ?policyType ?tags ?state ?description ?policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about a lifecycle policy."]
 module TagFilter =
@@ -2192,9 +3212,9 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "Code" ErrorCode.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "Code" ErrorCode.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service failed in an unexpected way."]
@@ -2241,13 +3261,13 @@ module InvalidRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?mutuallyExclusiveParameters ?requiredParameters ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mutuallyExclusiveParameters =
-        field_map json "MutuallyExclusiveParameters" ParameterList.of_json in
+        field_map json__ "MutuallyExclusiveParameters" ParameterList.of_json in
       let requiredParameters =
-        field_map json "RequiredParameters" ParameterList.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+        field_map json__ "RequiredParameters" ParameterList.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?mutuallyExclusiveParameters ?requiredParameters ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2278,10 +3298,10 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?resourceType ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request failed because a limit was exceeded."]
@@ -2318,11 +3338,11 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceIds ?resourceType ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceIds = field_map json "ResourceIds" PolicyIdList.of_json in
-      let resourceType = field_map json "ResourceType" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let resourceIds = field_map json__ "ResourceIds" PolicyIdList.of_json in
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?resourceIds ?resourceType ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A requested resource was not found."]
@@ -2362,6 +3382,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2406,7 +3429,10 @@ module LifecyclePolicy =
         [@ocaml.doc "The configuration of the lifecycle policy"];
       tags: TagMap.t option [@ocaml.doc "The tags."];
       policyArn: PolicyArn.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the policy."]}
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the policy."];
+      defaultPolicy: DefaultPolicy.t option
+        [@ocaml.doc
+          "Indicates whether the policy is a default lifecycle policy or a custom lifecycle policy. true - the policy is a default policy. false - the policy is a custom policy."]}
     let make ?policyId =
       fun ?description ->
         fun ?state ->
@@ -2417,19 +3443,21 @@ module LifecyclePolicy =
                   fun ?policyDetails ->
                     fun ?tags ->
                       fun ?policyArn ->
-                        fun () ->
-                          {
-                            policyId;
-                            description;
-                            state;
-                            statusMessage;
-                            executionRoleArn;
-                            dateCreated;
-                            dateModified;
-                            policyDetails;
-                            tags;
-                            policyArn
-                          }
+                        fun ?defaultPolicy ->
+                          fun () ->
+                            {
+                              policyId;
+                              description;
+                              state;
+                              statusMessage;
+                              executionRoleArn;
+                              dateCreated;
+                              dateModified;
+                              policyDetails;
+                              tags;
+                              policyArn;
+                              defaultPolicy
+                            }
     let to_value x =
       structure_to_value
         [("PolicyId", (Option.map x.policyId ~f:PolicyId.to_value));
@@ -2445,9 +3473,14 @@ module LifecyclePolicy =
         ("PolicyDetails",
           (Option.map x.policyDetails ~f:PolicyDetails.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
-        ("PolicyArn", (Option.map x.policyArn ~f:PolicyArn.to_value))]
+        ("PolicyArn", (Option.map x.policyArn ~f:PolicyArn.to_value));
+        ("DefaultPolicy",
+          (Option.map x.defaultPolicy ~f:DefaultPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let defaultPolicy =
+        (Option.map ~f:DefaultPolicy.of_xml)
+          (Xml.child xml_arg0 "DefaultPolicy") in
       let policyArn =
         (Option.map ~f:PolicyArn.of_xml) (Xml.child xml_arg0 "PolicyArn") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
@@ -2472,32 +3505,39 @@ module LifecyclePolicy =
           (Xml.child xml_arg0 "Description") in
       let policyId =
         (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "PolicyId") in
-      make ?policyArn ?tags ?policyDetails ?dateModified ?dateCreated
-        ?executionRoleArn ?statusMessage ?state ?description ?policyId ()
+      make ?defaultPolicy ?policyArn ?tags ?policyDetails ?dateModified
+        ?dateCreated ?executionRoleArn ?statusMessage ?state ?description
+        ?policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyArn = field_map json "PolicyArn" PolicyArn.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let defaultPolicy =
+        field_map json__ "DefaultPolicy" DefaultPolicy.of_json in
+      let policyArn = field_map json__ "PolicyArn" PolicyArn.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let policyDetails =
-        field_map json "PolicyDetails" PolicyDetails.of_json in
-      let dateModified = field_map json "DateModified" Timestamp.of_json in
-      let dateCreated = field_map json "DateCreated" Timestamp.of_json in
+        field_map json__ "PolicyDetails" PolicyDetails.of_json in
+      let dateModified = field_map json__ "DateModified" Timestamp.of_json in
+      let dateCreated = field_map json__ "DateCreated" Timestamp.of_json in
       let executionRoleArn =
-        field_map json "ExecutionRoleArn" ExecutionRoleArn.of_json in
+        field_map json__ "ExecutionRoleArn" ExecutionRoleArn.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let state = field_map json "State" GettablePolicyStateValues.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let state = field_map json__ "State" GettablePolicyStateValues.of_json in
       let description =
-        field_map json "Description" PolicyDescription.of_json in
-      let policyId = field_map json "PolicyId" PolicyId.of_json in
-      make ?policyArn ?tags ?policyDetails ?dateModified ?dateCreated
-        ?executionRoleArn ?statusMessage ?state ?description ?policyId ()
+        field_map json__ "Description" PolicyDescription.of_json in
+      let policyId = field_map json__ "PolicyId" PolicyId.of_json in
+      make ?defaultPolicy ?policyArn ?tags ?policyDetails ?dateModified
+        ?dateCreated ?executionRoleArn ?statusMessage ?state ?description
+        ?policyId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Detailed information about a lifecycle policy."]
+  end[@@ocaml.doc "Information about a lifecycle policy."]
 module LifecyclePolicySummaryList =
   struct
     type nonrec t = LifecyclePolicySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LifecyclePolicySummary.to_value)) |>
         (fun x -> `List x)
@@ -2520,6 +3560,36 @@ module LifecyclePolicySummaryList =
         ~of_json:LifecyclePolicySummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DefaultPoliciesTypeValues =
+  struct
+    type nonrec t =
+      | VOLUME 
+      | INSTANCE 
+      | ALL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | VOLUME -> "VOLUME"
+      | INSTANCE -> "INSTANCE"
+      | ALL -> "ALL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "VOLUME" -> VOLUME
+      | "INSTANCE" -> INSTANCE
+      | "ALL" -> ALL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DefaultPoliciesTypeValues" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DefaultPoliciesTypeValues" j)
+    let to_json = simple_to_json to_value
+  end
 module TagsToAddFilterList =
   struct
     type nonrec t = TagFilter.t list
@@ -2528,6 +3598,9 @@ module TagsToAddFilterList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2556,6 +3629,9 @@ module TargetTagsFilterList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2575,6 +3651,33 @@ module TargetTagsFilterList =
     let of_json j =
       list_of_json ~kind:"TargetTagsFilterList" ~of_json:TagFilter.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module DefaultPolicyTypeValues =
+  struct
+    type nonrec t =
+      | VOLUME 
+      | INSTANCE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | VOLUME -> "VOLUME"
+      | INSTANCE -> "INSTANCE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "VOLUME" -> VOLUME
+      | "INSTANCE" -> INSTANCE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DefaultPolicyTypeValues" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DefaultPolicyTypeValues" j)
+    let to_json = simple_to_json to_value
   end
 module UpdateLifecyclePolicyResponse =
   struct
@@ -2641,7 +3744,8 @@ module UpdateLifecyclePolicyResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the specified lifecycle policy."]
+  end[@@ocaml.doc
+       "Updates the specified lifecycle policy. For more information about updating a policy, see Modify lifecycle policies."]
 module UpdateLifecyclePolicyRequest =
   struct
     type nonrec t =
@@ -2658,21 +3762,51 @@ module UpdateLifecyclePolicyRequest =
         [@ocaml.doc "A description of the lifecycle policy."];
       policyDetails: PolicyDetails.t option
         [@ocaml.doc
-          "The configuration of the lifecycle policy. You cannot update the policy type or the resource type."]}
+          "The configuration of the lifecycle policy. You cannot update the policy type or the resource type."];
+      createInterval: CreateInterval.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specifies how often the policy should run and create snapshots or AMIs. The creation frequency can range from 1 to 7 days."];
+      retainInterval: RetainInterval.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specifies how long the policy should retain snapshots or AMIs before deleting them. The retention period can range from 2 to 14 days, but it must be greater than the creation frequency to ensure that the policy retains at least 1 snapshot or AMI at any given time."];
+      copyTags: CopyTagsNullable.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Indicates whether the policy should copy tags from the source resource to the snapshot or AMI."];
+      extendDeletion: ExtendDeletion.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Defines the snapshot or AMI retention behavior for the policy if the source volume or instance is deleted, or if the policy enters the error, disabled, or deleted state. By default (ExtendDeletion=false): If a source resource is deleted, Amazon Data Lifecycle Manager will continue to delete previously created snapshots or AMIs, up to but not including the last one, based on the specified retention period. If you want Amazon Data Lifecycle Manager to delete all snapshots or AMIs, including the last one, specify true. If a policy enters the error, disabled, or deleted state, Amazon Data Lifecycle Manager stops deleting snapshots and AMIs. If you want Amazon Data Lifecycle Manager to continue deleting snapshots or AMIs, including the last one, if the policy enters one of these states, specify true. If you enable extended deletion (ExtendDeletion=true), you override both default behaviors simultaneously. Default: false"];
+      crossRegionCopyTargets: CrossRegionCopyTargetList.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specifies destination Regions for snapshot or AMI copies. You can specify up to 3 destination Regions. If you do not want to create cross-Region copies, omit this parameter."];
+      exclusions: Exclusions.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specifies exclusion parameters for volumes or instances for which you do not want to create snapshots or AMIs. The policy will not create snapshots or AMIs for target resources that match any of the specified exclusion parameters."]}
     let context_ = "UpdateLifecyclePolicyRequest"
     let make ?executionRoleArn =
       fun ?state ->
         fun ?description ->
           fun ?policyDetails ->
-            fun ~policyId ->
-              fun () ->
-                {
-                  executionRoleArn;
-                  state;
-                  description;
-                  policyDetails;
-                  policyId
-                }
+            fun ?createInterval ->
+              fun ?retainInterval ->
+                fun ?copyTags ->
+                  fun ?extendDeletion ->
+                    fun ?crossRegionCopyTargets ->
+                      fun ?exclusions ->
+                        fun ~policyId ->
+                          fun () ->
+                            {
+                              executionRoleArn;
+                              state;
+                              description;
+                              policyDetails;
+                              createInterval;
+                              retainInterval;
+                              copyTags;
+                              extendDeletion;
+                              crossRegionCopyTargets;
+                              exclusions;
+                              policyId
+                            }
     let to_value x =
       structure_to_value
         [("policyId", (Some (PolicyId.to_value x.policyId)));
@@ -2682,9 +3816,37 @@ module UpdateLifecyclePolicyRequest =
         ("Description",
           (Option.map x.description ~f:PolicyDescription.to_value));
         ("PolicyDetails",
-          (Option.map x.policyDetails ~f:PolicyDetails.to_value))]
+          (Option.map x.policyDetails ~f:PolicyDetails.to_value));
+        ("CreateInterval",
+          (Option.map x.createInterval ~f:CreateInterval.to_value));
+        ("RetainInterval",
+          (Option.map x.retainInterval ~f:RetainInterval.to_value));
+        ("CopyTags", (Option.map x.copyTags ~f:CopyTagsNullable.to_value));
+        ("ExtendDeletion",
+          (Option.map x.extendDeletion ~f:ExtendDeletion.to_value));
+        ("CrossRegionCopyTargets",
+          (Option.map x.crossRegionCopyTargets
+             ~f:CrossRegionCopyTargetList.to_value));
+        ("Exclusions", (Option.map x.exclusions ~f:Exclusions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let exclusions =
+        (Option.map ~f:Exclusions.of_xml) (Xml.child xml_arg0 "Exclusions") in
+      let crossRegionCopyTargets =
+        (Option.map ~f:CrossRegionCopyTargetList.of_xml)
+          (Xml.child xml_arg0 "CrossRegionCopyTargets") in
+      let extendDeletion =
+        (Option.map ~f:ExtendDeletion.of_xml)
+          (Xml.child xml_arg0 "ExtendDeletion") in
+      let copyTags =
+        (Option.map ~f:CopyTagsNullable.of_xml)
+          (Xml.child xml_arg0 "CopyTags") in
+      let retainInterval =
+        (Option.map ~f:RetainInterval.of_xml)
+          (Xml.child xml_arg0 "RetainInterval") in
+      let createInterval =
+        (Option.map ~f:CreateInterval.of_xml)
+          (Xml.child xml_arg0 "CreateInterval") in
       let policyDetails =
         (Option.map ~f:PolicyDetails.of_xml)
           (Xml.child xml_arg0 "PolicyDetails") in
@@ -2699,20 +3861,36 @@ module UpdateLifecyclePolicyRequest =
           (Xml.child xml_arg0 "ExecutionRoleArn") in
       let policyId =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyId") in
-      make ?policyDetails ?description ?state ?executionRoleArn ~policyId ()
+      make ?exclusions ?crossRegionCopyTargets ?extendDeletion ?copyTags
+        ?retainInterval ?createInterval ?policyDetails ?description ?state
+        ?executionRoleArn ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let exclusions = field_map json__ "Exclusions" Exclusions.of_json in
+      let crossRegionCopyTargets =
+        field_map json__ "CrossRegionCopyTargets"
+          CrossRegionCopyTargetList.of_json in
+      let extendDeletion =
+        field_map json__ "ExtendDeletion" ExtendDeletion.of_json in
+      let copyTags = field_map json__ "CopyTags" CopyTagsNullable.of_json in
+      let retainInterval =
+        field_map json__ "RetainInterval" RetainInterval.of_json in
+      let createInterval =
+        field_map json__ "CreateInterval" CreateInterval.of_json in
       let policyDetails =
-        field_map json "PolicyDetails" PolicyDetails.of_json in
+        field_map json__ "PolicyDetails" PolicyDetails.of_json in
       let description =
-        field_map json "Description" PolicyDescription.of_json in
-      let state = field_map json "State" SettablePolicyStateValues.of_json in
+        field_map json__ "Description" PolicyDescription.of_json in
+      let state = field_map json__ "State" SettablePolicyStateValues.of_json in
       let executionRoleArn =
-        field_map json "ExecutionRoleArn" ExecutionRoleArn.of_json in
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
-      make ?policyDetails ?description ?state ?executionRoleArn ~policyId ()
+        field_map json__ "ExecutionRoleArn" ExecutionRoleArn.of_json in
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
+      make ?exclusions ?crossRegionCopyTargets ?extendDeletion ?copyTags
+        ?retainInterval ?createInterval ?policyDetails ?description ?state
+        ?executionRoleArn ~policyId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the specified lifecycle policy."]
+  end[@@ocaml.doc
+       "Updates the specified lifecycle policy. For more information about updating a policy, see Modify lifecycle policies."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -2794,9 +3972,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" PolicyArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" PolicyArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified tags from the specified resource."]
@@ -2879,9 +4057,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" PolicyArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" PolicyArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds the specified tags to the specified resource."]
@@ -2943,8 +4121,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
 module ListTagsForResourceRequest =
@@ -2965,8 +4143,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" PolicyArn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" PolicyArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
@@ -3031,8 +4209,8 @@ module GetLifecyclePolicyResponse =
         (Option.map ~f:LifecyclePolicy.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" LifecyclePolicy.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "Policy" LifecyclePolicy.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3054,8 +4232,8 @@ module GetLifecyclePolicyRequest =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyId") in
       make ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+    let of_json json__ =
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ~policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3132,9 +4310,9 @@ module GetLifecyclePoliciesResponse =
           (Xml.child xml_arg0 "Policies") in
       make ?policies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policies =
-        field_map json "Policies" LifecyclePolicySummaryList.of_json in
+        field_map json__ "Policies" LifecyclePolicySummaryList.of_json in
       make ?policies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3154,14 +4332,25 @@ module GetLifecyclePoliciesRequest =
           "The target tag for a policy. Tags are strings in the format key=value."];
       tagsToAdd: TagsToAddFilterList.t option
         [@ocaml.doc
-          "The tags to add to objects created by the policy. Tags are strings in the format key=value. These user-defined tags are added in addition to the Amazon Web Services-added lifecycle tags."]}
+          "The tags to add to objects created by the policy. Tags are strings in the format key=value. These user-defined tags are added in addition to the Amazon Web Services-added lifecycle tags."];
+      defaultPolicyType: DefaultPoliciesTypeValues.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specifies the type of default policy to get. Specify one of the following: VOLUME - To get only the default policy for EBS snapshots INSTANCE - To get only the default policy for EBS-backed AMIs ALL - To get all default policies"]}
     let make ?policyIds =
       fun ?state ->
         fun ?resourceTypes ->
           fun ?targetTags ->
             fun ?tagsToAdd ->
-              fun () ->
-                { policyIds; state; resourceTypes; targetTags; tagsToAdd }
+              fun ?defaultPolicyType ->
+                fun () ->
+                  {
+                    policyIds;
+                    state;
+                    resourceTypes;
+                    targetTags;
+                    tagsToAdd;
+                    defaultPolicyType
+                  }
     let to_value x =
       structure_to_value
         [("policyIds", (Option.map x.policyIds ~f:PolicyIdList.to_value));
@@ -3171,9 +4360,15 @@ module GetLifecyclePoliciesRequest =
         ("targetTags",
           (Option.map x.targetTags ~f:TargetTagsFilterList.to_value));
         ("tagsToAdd",
-          (Option.map x.tagsToAdd ~f:TagsToAddFilterList.to_value))]
+          (Option.map x.tagsToAdd ~f:TagsToAddFilterList.to_value));
+        ("defaultPolicyType",
+          (Option.map x.defaultPolicyType
+             ~f:DefaultPoliciesTypeValues.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let defaultPolicyType =
+        (Option.map ~f:DefaultPoliciesTypeValues.of_xml)
+          (Xml.child xml_arg0 "defaultPolicyType") in
       let tagsToAdd =
         (Option.map ~f:TagsToAddFilterList.of_xml)
           (Xml.child xml_arg0 "tagsToAdd") in
@@ -3188,17 +4383,23 @@ module GetLifecyclePoliciesRequest =
           (Xml.child xml_arg0 "state") in
       let policyIds =
         (Option.map ~f:PolicyIdList.of_xml) (Xml.child xml_arg0 "policyIds") in
-      make ?tagsToAdd ?targetTags ?resourceTypes ?state ?policyIds ()
+      make ?defaultPolicyType ?tagsToAdd ?targetTags ?resourceTypes ?state
+        ?policyIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagsToAdd = field_map json "TagsToAdd" TagsToAddFilterList.of_json in
+    let of_json json__ =
+      let defaultPolicyType =
+        field_map json__ "DefaultPolicyType"
+          DefaultPoliciesTypeValues.of_json in
+      let tagsToAdd =
+        field_map json__ "TagsToAdd" TagsToAddFilterList.of_json in
       let targetTags =
-        field_map json "TargetTags" TargetTagsFilterList.of_json in
+        field_map json__ "TargetTags" TargetTagsFilterList.of_json in
       let resourceTypes =
-        field_map json "ResourceTypes" ResourceTypeValuesList.of_json in
-      let state = field_map json "State" GettablePolicyStateValues.of_json in
-      let policyIds = field_map json "PolicyIds" PolicyIdList.of_json in
-      make ?tagsToAdd ?targetTags ?resourceTypes ?state ?policyIds ()
+        field_map json__ "ResourceTypes" ResourceTypeValuesList.of_json in
+      let state = field_map json__ "State" GettablePolicyStateValues.of_json in
+      let policyIds = field_map json__ "PolicyIds" PolicyIdList.of_json in
+      make ?defaultPolicyType ?tagsToAdd ?targetTags ?resourceTypes ?state
+        ?policyIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets summary information about all or the specified data lifecycle policies. To get complete information about a policy, use GetLifecyclePolicy."]
@@ -3259,7 +4460,7 @@ module DeleteLifecyclePolicyResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified lifecycle policy and halts the automated operations that the policy specified."]
+       "Deletes the specified lifecycle policy and halts the automated operations that the policy specified. For more information about deleting a policy, see Delete lifecycle policies."]
 module DeleteLifecyclePolicyRequest =
   struct
     type nonrec t =
@@ -3277,12 +4478,12 @@ module DeleteLifecyclePolicyRequest =
         PolicyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "policyId") in
       make ~policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyId = field_map_exn json "PolicyId" PolicyId.of_json in
+    let of_json json__ =
+      let policyId = field_map_exn json__ "PolicyId" PolicyId.of_json in
       make ~policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified lifecycle policy and halts the automated operations that the policy specified."]
+       "Deletes the specified lifecycle policy and halts the automated operations that the policy specified. For more information about deleting a policy, see Delete lifecycle policies."]
 module CreateLifecyclePolicyResponse =
   struct
     type nonrec t =
@@ -3344,12 +4545,12 @@ module CreateLifecyclePolicyResponse =
         (Option.map ~f:PolicyId.of_xml) (Xml.child xml_arg0 "PolicyId") in
       make ?policyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyId = field_map json "PolicyId" PolicyId.of_json in
+    let of_json json__ =
+      let policyId = field_map json__ "PolicyId" PolicyId.of_json in
       make ?policyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a policy to manage the lifecycle of the specified Amazon Web Services resources. You can create up to 100 lifecycle policies."]
+       "Creates an Amazon Data Lifecycle Manager lifecycle policy. Amazon Data Lifecycle Manager supports the following policy types: Custom EBS snapshot policy Custom EBS-backed AMI policy Cross-account copy event policy Default policy for EBS snapshots Default policy for EBS-backed AMIs For more information, see Default policies vs custom policies. If you create a default policy, you can specify the request parameters either in the request body, or in the PolicyDetails request structure, but not both."]
 module CreateLifecyclePolicyRequest =
   struct
     type nonrec t =
@@ -3362,34 +4563,110 @@ module CreateLifecyclePolicyRequest =
           "A description of the lifecycle policy. The characters ^\\[0-9A-Za-z _-\\]+$ are supported."];
       state: SettablePolicyStateValues.t
         [@ocaml.doc
-          "The desired activation state of the lifecycle policy after creation."];
-      policyDetails: PolicyDetails.t
-        [@ocaml.doc "The configuration details of the lifecycle policy."];
+          "The activation state of the lifecycle policy after creation."];
+      policyDetails: PolicyDetails.t option
+        [@ocaml.doc
+          "The configuration details of the lifecycle policy. If you create a default policy, you can specify the request parameters either in the request body, or in the PolicyDetails request structure, but not both."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The tags to apply to the lifecycle policy during creation."]}
+          "The tags to apply to the lifecycle policy during creation."];
+      defaultPolicy: DefaultPolicyTypeValues.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specify the type of default policy to create. To create a default policy for EBS snapshots, that creates snapshots of all volumes in the Region that do not have recent backups, specify VOLUME. To create a default policy for EBS-backed AMIs, that creates EBS-backed AMIs from all instances in the Region that do not have recent backups, specify INSTANCE."];
+      createInterval: CreateInterval.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specifies how often the policy should run and create snapshots or AMIs. The creation frequency can range from 1 to 7 days. If you do not specify a value, the default is 1. Default: 1"];
+      retainInterval: RetainInterval.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specifies how long the policy should retain snapshots or AMIs before deleting them. The retention period can range from 2 to 14 days, but it must be greater than the creation frequency to ensure that the policy retains at least 1 snapshot or AMI at any given time. If you do not specify a value, the default is 7. Default: 7"];
+      copyTags: CopyTagsNullable.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Indicates whether the policy should copy tags from the source resource to the snapshot or AMI. If you do not specify a value, the default is false. Default: false"];
+      extendDeletion: ExtendDeletion.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Defines the snapshot or AMI retention behavior for the policy if the source volume or instance is deleted, or if the policy enters the error, disabled, or deleted state. By default (ExtendDeletion=false): If a source resource is deleted, Amazon Data Lifecycle Manager will continue to delete previously created snapshots or AMIs, up to but not including the last one, based on the specified retention period. If you want Amazon Data Lifecycle Manager to delete all snapshots or AMIs, including the last one, specify true. If a policy enters the error, disabled, or deleted state, Amazon Data Lifecycle Manager stops deleting snapshots and AMIs. If you want Amazon Data Lifecycle Manager to continue deleting snapshots or AMIs, including the last one, if the policy enters one of these states, specify true. If you enable extended deletion (ExtendDeletion=true), you override both default behaviors simultaneously. If you do not specify a value, the default is false. Default: false"];
+      crossRegionCopyTargets: CrossRegionCopyTargetList.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specifies destination Regions for snapshot or AMI copies. You can specify up to 3 destination Regions. If you do not want to create cross-Region copies, omit this parameter."];
+      exclusions: Exclusions.t option
+        [@ocaml.doc
+          "\\[Default policies only\\] Specifies exclusion parameters for volumes or instances for which you do not want to create snapshots or AMIs. The policy will not create snapshots or AMIs for target resources that match any of the specified exclusion parameters."]}
     let context_ = "CreateLifecyclePolicyRequest"
-    let make ?tags =
-      fun ~executionRoleArn ->
-        fun ~description ->
-          fun ~state ->
-            fun ~policyDetails ->
-              fun () ->
-                { tags; executionRoleArn; description; state; policyDetails }
+    let make ?policyDetails =
+      fun ?tags ->
+        fun ?defaultPolicy ->
+          fun ?createInterval ->
+            fun ?retainInterval ->
+              fun ?copyTags ->
+                fun ?extendDeletion ->
+                  fun ?crossRegionCopyTargets ->
+                    fun ?exclusions ->
+                      fun ~executionRoleArn ->
+                        fun ~description ->
+                          fun ~state ->
+                            fun () ->
+                              {
+                                policyDetails;
+                                tags;
+                                defaultPolicy;
+                                createInterval;
+                                retainInterval;
+                                copyTags;
+                                extendDeletion;
+                                crossRegionCopyTargets;
+                                exclusions;
+                                executionRoleArn;
+                                description;
+                                state
+                              }
     let to_value x =
       structure_to_value
         [("ExecutionRoleArn",
            (Some (ExecutionRoleArn.to_value x.executionRoleArn)));
         ("Description", (Some (PolicyDescription.to_value x.description)));
         ("State", (Some (SettablePolicyStateValues.to_value x.state)));
-        ("PolicyDetails", (Some (PolicyDetails.to_value x.policyDetails)));
-        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("PolicyDetails",
+          (Option.map x.policyDetails ~f:PolicyDetails.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("DefaultPolicy",
+          (Option.map x.defaultPolicy ~f:DefaultPolicyTypeValues.to_value));
+        ("CreateInterval",
+          (Option.map x.createInterval ~f:CreateInterval.to_value));
+        ("RetainInterval",
+          (Option.map x.retainInterval ~f:RetainInterval.to_value));
+        ("CopyTags", (Option.map x.copyTags ~f:CopyTagsNullable.to_value));
+        ("ExtendDeletion",
+          (Option.map x.extendDeletion ~f:ExtendDeletion.to_value));
+        ("CrossRegionCopyTargets",
+          (Option.map x.crossRegionCopyTargets
+             ~f:CrossRegionCopyTargetList.to_value));
+        ("Exclusions", (Option.map x.exclusions ~f:Exclusions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let exclusions =
+        (Option.map ~f:Exclusions.of_xml) (Xml.child xml_arg0 "Exclusions") in
+      let crossRegionCopyTargets =
+        (Option.map ~f:CrossRegionCopyTargetList.of_xml)
+          (Xml.child xml_arg0 "CrossRegionCopyTargets") in
+      let extendDeletion =
+        (Option.map ~f:ExtendDeletion.of_xml)
+          (Xml.child xml_arg0 "ExtendDeletion") in
+      let copyTags =
+        (Option.map ~f:CopyTagsNullable.of_xml)
+          (Xml.child xml_arg0 "CopyTags") in
+      let retainInterval =
+        (Option.map ~f:RetainInterval.of_xml)
+          (Xml.child xml_arg0 "RetainInterval") in
+      let createInterval =
+        (Option.map ~f:CreateInterval.of_xml)
+          (Xml.child xml_arg0 "CreateInterval") in
+      let defaultPolicy =
+        (Option.map ~f:DefaultPolicyTypeValues.of_xml)
+          (Xml.child xml_arg0 "DefaultPolicy") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let policyDetails =
-        PolicyDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PolicyDetails") in
+        (Option.map ~f:PolicyDetails.of_xml)
+          (Xml.child xml_arg0 "PolicyDetails") in
       let state =
         SettablePolicyStateValues.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "State") in
@@ -3399,19 +4676,36 @@ module CreateLifecyclePolicyRequest =
       let executionRoleArn =
         ExecutionRoleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ExecutionRoleArn") in
-      make ?tags ~policyDetails ~state ~description ~executionRoleArn ()
+      make ?exclusions ?crossRegionCopyTargets ?extendDeletion ?copyTags
+        ?retainInterval ?createInterval ?defaultPolicy ?tags ?policyDetails
+        ~state ~description ~executionRoleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let exclusions = field_map json__ "Exclusions" Exclusions.of_json in
+      let crossRegionCopyTargets =
+        field_map json__ "CrossRegionCopyTargets"
+          CrossRegionCopyTargetList.of_json in
+      let extendDeletion =
+        field_map json__ "ExtendDeletion" ExtendDeletion.of_json in
+      let copyTags = field_map json__ "CopyTags" CopyTagsNullable.of_json in
+      let retainInterval =
+        field_map json__ "RetainInterval" RetainInterval.of_json in
+      let createInterval =
+        field_map json__ "CreateInterval" CreateInterval.of_json in
+      let defaultPolicy =
+        field_map json__ "DefaultPolicy" DefaultPolicyTypeValues.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let policyDetails =
-        field_map_exn json "PolicyDetails" PolicyDetails.of_json in
+        field_map json__ "PolicyDetails" PolicyDetails.of_json in
       let state =
-        field_map_exn json "State" SettablePolicyStateValues.of_json in
+        field_map_exn json__ "State" SettablePolicyStateValues.of_json in
       let description =
-        field_map_exn json "Description" PolicyDescription.of_json in
+        field_map_exn json__ "Description" PolicyDescription.of_json in
       let executionRoleArn =
-        field_map_exn json "ExecutionRoleArn" ExecutionRoleArn.of_json in
-      make ?tags ~policyDetails ~state ~description ~executionRoleArn ()
+        field_map_exn json__ "ExecutionRoleArn" ExecutionRoleArn.of_json in
+      make ?exclusions ?crossRegionCopyTargets ?extendDeletion ?copyTags
+        ?retainInterval ?createInterval ?defaultPolicy ?tags ?policyDetails
+        ~state ~description ~executionRoleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a policy to manage the lifecycle of the specified Amazon Web Services resources. You can create up to 100 lifecycle policies."]
+       "Creates an Amazon Data Lifecycle Manager lifecycle policy. Amazon Data Lifecycle Manager supports the following policy types: Custom EBS snapshot policy Custom EBS-backed AMI policy Cross-account copy event policy Default policy for EBS snapshots Default policy for EBS-backed AMIs For more information, see Default policies vs custom policies. If you create a default policy, you can specify the request parameters either in the request body, or in the PolicyDetails request structure, but not both."]

@@ -10,6 +10,10 @@ type ('i, 'o, 'e) t =
   CreateJobResponse.error) t 
   | CreateQuantumTask: (CreateQuantumTaskRequest.t,
   CreateQuantumTaskResponse.t, CreateQuantumTaskResponse.error) t 
+  | CreateSpendingLimit: (CreateSpendingLimitRequest.t,
+  CreateSpendingLimitResponse.t, CreateSpendingLimitResponse.error) t 
+  | DeleteSpendingLimit: (DeleteSpendingLimitRequest.t,
+  DeleteSpendingLimitResponse.t, DeleteSpendingLimitResponse.error) t 
   | GetDevice: (GetDeviceRequest.t, GetDeviceResponse.t,
   GetDeviceResponse.error) t 
   | GetJob: (GetJobRequest.t, GetJobResponse.t, GetJobResponse.error) t 
@@ -23,16 +27,22 @@ type ('i, 'o, 'e) t =
   SearchJobsResponse.error) t 
   | SearchQuantumTasks: (SearchQuantumTasksRequest.t,
   SearchQuantumTasksResponse.t, SearchQuantumTasksResponse.error) t 
+  | SearchSpendingLimits: (SearchSpendingLimitsRequest.t,
+  SearchSpendingLimitsResponse.t, SearchSpendingLimitsResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateSpendingLimit: (UpdateSpendingLimitRequest.t,
+  UpdateSpendingLimitResponse.t, UpdateSpendingLimitResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CancelJob -> `PUT
   | CancelQuantumTask -> `PUT
   | CreateJob -> `POST
   | CreateQuantumTask -> `POST
+  | CreateSpendingLimit -> `POST
+  | DeleteSpendingLimit -> `DELETE
   | GetDevice -> `GET
   | GetJob -> `GET
   | GetQuantumTask -> `GET
@@ -40,8 +50,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | SearchDevices -> `POST
   | SearchJobs -> `POST
   | SearchQuantumTasks -> `POST
+  | SearchSpendingLimits -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
+  | UpdateSpendingLimit -> `PATCH
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -54,15 +66,36 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.CancelQuantumTaskRequest.quantumTaskArn)
       | CreateJob -> (Format.kasprintf Uri.of_string) "/job"
       | CreateQuantumTask -> (Format.kasprintf Uri.of_string) "/quantum-task"
+      | CreateSpendingLimit ->
+          (Format.kasprintf Uri.of_string) "/spending-limit"
+      | DeleteSpendingLimit ->
+          (Format.kasprintf Uri.of_string) "/spending-limit/%s/delete"
+            (SpendingLimitArn.to_header
+               x.DeleteSpendingLimitRequest.spendingLimitArn)
       | GetDevice ->
           (Format.kasprintf Uri.of_string) "/device/%s"
             (DeviceArn.to_header x.GetDeviceRequest.deviceArn)
       | GetJob ->
-          (Format.kasprintf Uri.of_string) "/job/%s"
-            (JobArn.to_header x.GetJobRequest.jobArn)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/job/%s"
+               (JobArn.to_header x.GetJobRequest.jobArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("additionalAttributeNames",
+                          (HybridJobAdditionalAttributeNamesList.to_header v)))
+                  x.additionalAttributeNames])
       | GetQuantumTask ->
-          (Format.kasprintf Uri.of_string) "/quantum-task/%s"
-            (QuantumTaskArn.to_header x.GetQuantumTaskRequest.quantumTaskArn)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/quantum-task/%s"
+               (QuantumTaskArn.to_header
+                  x.GetQuantumTaskRequest.quantumTaskArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("additionalAttributeNames",
+                          (QuantumTaskAdditionalAttributeNamesList.to_header
+                             v))) x.additionalAttributeNames])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (String_.to_header x.ListTagsForResourceRequest.resourceArn)
@@ -70,6 +103,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | SearchJobs -> (Format.kasprintf Uri.of_string) "/jobs"
       | SearchQuantumTasks ->
           (Format.kasprintf Uri.of_string) "/quantum-tasks"
+      | SearchSpendingLimits ->
+          (Format.kasprintf Uri.of_string) "/spending-limits"
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (String_.to_header x.TagResourceRequest.resourceArn)
@@ -78,7 +113,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string) "/tags/%s"
                (String_.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
-               [Some ("tagKeys", (TagKeys.to_header x.tagKeys))]))
+               [Some ("tagKeys", (TagKeys.to_header x.tagKeys))])
+      | UpdateSpendingLimit ->
+          (Format.kasprintf Uri.of_string) "/spending-limit/%s/update"
+            (SpendingLimitArn.to_header
+               x.UpdateSpendingLimitRequest.spendingLimitArn))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -95,41 +134,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Some
-                         ("algorithmSpecification",
-                           (AlgorithmSpecification.to_value
-                              req.CreateJobRequest.algorithmSpecification));
-                      Option.map req.CreateJobRequest.checkpointConfig
-                        ~f:(fun x ->
-                              ("checkpointConfig",
-                                (JobCheckpointConfig.to_value x)));
+                         ("clientToken",
+                           (String64.to_value
+                              req.CreateJobRequest.clientToken));
                       Some
-                        ("clientToken",
-                          (String64.to_value req.CreateJobRequest.clientToken));
-                      Some
-                        ("deviceConfig",
-                          (DeviceConfig.to_value
-                             req.CreateJobRequest.deviceConfig));
-                      Option.map req.CreateJobRequest.hyperParameters
-                        ~f:(fun x ->
-                              ("hyperParameters",
-                                (HyperParameters.to_value x)));
+                        ("algorithmSpecification",
+                          (AlgorithmSpecification.to_value
+                             req.CreateJobRequest.algorithmSpecification));
                       Option.map req.CreateJobRequest.inputDataConfig
                         ~f:(fun x ->
                               ("inputDataConfig",
                                 (CreateJobRequestInputDataConfigList.to_value
                                    x)));
                       Some
-                        ("instanceConfig",
-                          (InstanceConfig.to_value
-                             req.CreateJobRequest.instanceConfig));
+                        ("outputDataConfig",
+                          (JobOutputDataConfig.to_value
+                             req.CreateJobRequest.outputDataConfig));
+                      Option.map req.CreateJobRequest.checkpointConfig
+                        ~f:(fun x ->
+                              ("checkpointConfig",
+                                (JobCheckpointConfig.to_value x)));
                       Some
                         ("jobName",
                           (CreateJobRequestJobNameString.to_value
                              req.CreateJobRequest.jobName));
-                      Some
-                        ("outputDataConfig",
-                          (JobOutputDataConfig.to_value
-                             req.CreateJobRequest.outputDataConfig));
                       Some
                         ("roleArn",
                           (RoleArn.to_value req.CreateJobRequest.roleArn));
@@ -137,8 +165,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("stoppingCondition",
                                 (JobStoppingCondition.to_value x)));
+                      Some
+                        ("instanceConfig",
+                          (InstanceConfig.to_value
+                             req.CreateJobRequest.instanceConfig));
+                      Option.map req.CreateJobRequest.hyperParameters
+                        ~f:(fun x ->
+                              ("hyperParameters",
+                                (HyperParameters.to_value x)));
+                      Some
+                        ("deviceConfig",
+                          (DeviceConfig.to_value
+                             req.CreateJobRequest.deviceConfig));
                       Option.map req.CreateJobRequest.tags
-                        ~f:(fun x -> ("tags", (TagsMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
+                      Option.map req.CreateJobRequest.associations
+                        ~f:(fun x ->
+                              ("associations",
+                                (CreateJobRequestAssociationsList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -156,13 +200,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Some
-                         ("action",
-                           (JsonValue.to_value
-                              req.CreateQuantumTaskRequest.action));
-                      Some
-                        ("clientToken",
-                          (String64.to_value
-                             req.CreateQuantumTaskRequest.clientToken));
+                         ("clientToken",
+                           (String64.to_value
+                              req.CreateQuantumTaskRequest.clientToken));
                       Some
                         ("deviceArn",
                           (DeviceArn.to_value
@@ -173,8 +213,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("deviceParameters",
                                 (CreateQuantumTaskRequestDeviceParametersString.to_value
                                    x)));
-                      Option.map req.CreateQuantumTaskRequest.jobToken
-                        ~f:(fun x -> ("jobToken", (JobToken.to_value x)));
+                      Some
+                        ("shots",
+                          (CreateQuantumTaskRequestShotsLong.to_value
+                             req.CreateQuantumTaskRequest.shots));
                       Some
                         ("outputS3Bucket",
                           (CreateQuantumTaskRequestOutputS3BucketString.to_value
@@ -184,10 +226,54 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                           (CreateQuantumTaskRequestOutputS3KeyPrefixString.to_value
                              req.CreateQuantumTaskRequest.outputS3KeyPrefix));
                       Some
-                        ("shots",
-                          (CreateQuantumTaskRequestShotsLong.to_value
-                             req.CreateQuantumTaskRequest.shots));
+                        ("action",
+                          (JsonValue.to_value
+                             req.CreateQuantumTaskRequest.action));
                       Option.map req.CreateQuantumTaskRequest.tags
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
+                      Option.map req.CreateQuantumTaskRequest.jobToken
+                        ~f:(fun x -> ("jobToken", (JobToken.to_value x)));
+                      Option.map req.CreateQuantumTaskRequest.associations
+                        ~f:(fun x ->
+                              ("associations",
+                                (CreateQuantumTaskRequestAssociationsList.to_value
+                                   x)));
+                      Option.map
+                        req.CreateQuantumTaskRequest.experimentalCapabilities
+                        ~f:(fun x ->
+                              ("experimentalCapabilities",
+                                (ExperimentalCapabilities.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateSpendingLimit ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("clientToken",
+                           (String64.to_value
+                              req.CreateSpendingLimitRequest.clientToken));
+                      Some
+                        ("deviceArn",
+                          (DeviceArn.to_value
+                             req.CreateSpendingLimitRequest.deviceArn));
+                      Some
+                        ("spendingLimit",
+                          (CreateSpendingLimitRequestSpendingLimitString.to_value
+                             req.CreateSpendingLimitRequest.spendingLimit));
+                      Option.map req.CreateSpendingLimitRequest.timePeriod
+                        ~f:(fun x -> ("timePeriod", (TimePeriod.to_value x)));
+                      Option.map req.CreateSpendingLimitRequest.tags
                         ~f:(fun x -> ("tags", (TagsMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -196,6 +282,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteSpendingLimit -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetDevice ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -217,17 +304,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("filters",
-                           (SearchDevicesRequestFiltersList.to_value
-                              req.SearchDevicesRequest.filters));
+                      [Option.map req.SearchDevicesRequest.nextToken
+                         ~f:(fun x -> ("nextToken", (String_.to_value x)));
                       Option.map req.SearchDevicesRequest.maxResults
                         ~f:(fun x ->
                               ("maxResults",
                                 (SearchDevicesRequestMaxResultsInteger.to_value
                                    x)));
-                      Option.map req.SearchDevicesRequest.nextToken
-                        ~f:(fun x -> ("nextToken", (String_.to_value x)))])
+                      Some
+                        ("filters",
+                          (SearchDevicesRequestFiltersList.to_value
+                             req.SearchDevicesRequest.filters))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -244,17 +331,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("filters",
-                           (SearchJobsRequestFiltersList.to_value
-                              req.SearchJobsRequest.filters));
+                      [Option.map req.SearchJobsRequest.nextToken
+                         ~f:(fun x -> ("nextToken", (String_.to_value x)));
                       Option.map req.SearchJobsRequest.maxResults
                         ~f:(fun x ->
                               ("maxResults",
                                 (SearchJobsRequestMaxResultsInteger.to_value
                                    x)));
-                      Option.map req.SearchJobsRequest.nextToken
-                        ~f:(fun x -> ("nextToken", (String_.to_value x)))])
+                      Some
+                        ("filters",
+                          (SearchJobsRequestFiltersList.to_value
+                             req.SearchJobsRequest.filters))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -271,17 +358,45 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("filters",
-                           (SearchQuantumTasksRequestFiltersList.to_value
-                              req.SearchQuantumTasksRequest.filters));
+                      [Option.map req.SearchQuantumTasksRequest.nextToken
+                         ~f:(fun x -> ("nextToken", (String_.to_value x)));
                       Option.map req.SearchQuantumTasksRequest.maxResults
                         ~f:(fun x ->
                               ("maxResults",
                                 (SearchQuantumTasksRequestMaxResultsInteger.to_value
                                    x)));
-                      Option.map req.SearchQuantumTasksRequest.nextToken
-                        ~f:(fun x -> ("nextToken", (String_.to_value x)))])
+                      Some
+                        ("filters",
+                          (SearchQuantumTasksRequestFiltersList.to_value
+                             req.SearchQuantumTasksRequest.filters))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchSpendingLimits ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.SearchSpendingLimitsRequest.nextToken
+                         ~f:(fun x -> ("nextToken", (String_.to_value x)));
+                      Option.map req.SearchSpendingLimitsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (SearchSpendingLimitsRequestMaxResultsInteger.to_value
+                                   x)));
+                      Option.map req.SearchSpendingLimitsRequest.filters
+                        ~f:(fun x ->
+                              ("filters",
+                                (SearchSpendingLimitsRequestFiltersList.to_value
+                                   x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -309,6 +424,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateSpendingLimit -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -377,6 +493,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateQuantumTaskResponse.error_of_json))
+  | CreateSpendingLimit ->
+      if is_success
+      then Ok (CreateSpendingLimitResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateSpendingLimitResponse.error_of_json))
+  | DeleteSpendingLimit ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteSpendingLimitResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteSpendingLimitResponse.error_of_json))
   | GetDevice ->
       if is_success
       then Ok (GetDeviceResponse.of_json (response_to_json resp))
@@ -410,6 +541,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some SearchQuantumTasksResponse.error_of_json))
+  | SearchSpendingLimits ->
+      if is_success
+      then Ok (SearchSpendingLimitsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SearchSpendingLimitsResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -424,3 +561,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UntagResourceResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateSpendingLimit ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateSpendingLimitResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateSpendingLimitResponse.error_of_json))

@@ -331,6 +331,60 @@
       "limit_key": "maxResults",
       "output_token": "nextToken",
       "result_key": "metricDatumList"
+    },
+    "ListManagedJobTemplates": {
+      "input_token": "nextToken",
+      "limit_key": "maxResults",
+      "output_token": "nextToken",
+      "result_key": "managedJobTemplates"
+    },
+    "ListRelatedResourcesForAuditFinding": {
+      "input_token": "nextToken",
+      "limit_key": "maxResults",
+      "output_token": "nextToken",
+      "result_key": "relatedResources"
+    },
+    "ListPackageVersions": {
+      "input_token": "nextToken",
+      "limit_key": "maxResults",
+      "output_token": "nextToken",
+      "result_key": "packageVersionSummaries"
+    },
+    "ListPackages": {
+      "input_token": "nextToken",
+      "limit_key": "maxResults",
+      "output_token": "nextToken",
+      "result_key": "packageSummaries"
+    },
+    "ListSbomValidationResults": {
+      "input_token": "nextToken",
+      "limit_key": "maxResults",
+      "output_token": "nextToken",
+      "result_key": "validationResultSummaries"
+    },
+    "ListPrincipalThingsV2": {
+      "input_token": "nextToken",
+      "limit_key": "maxResults",
+      "output_token": "nextToken",
+      "result_key": "principalThingObjects"
+    },
+    "ListThingPrincipalsV2": {
+      "input_token": "nextToken",
+      "limit_key": "maxResults",
+      "output_token": "nextToken",
+      "result_key": "thingPrincipalObjects"
+    },
+    "ListCommandExecutions": {
+      "input_token": "nextToken",
+      "limit_key": "maxResults",
+      "output_token": "nextToken",
+      "result_key": "commandExecutions"
+    },
+    "ListCommands": {
+      "input_token": "nextToken",
+      "limit_key": "maxResults",
+      "output_token": "nextToken",
+      "result_key": "commands"
     }
   }
 }

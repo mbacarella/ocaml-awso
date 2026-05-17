@@ -7,6 +7,8 @@ type ('i, 'o, 'e) t =
   | CancelSigningProfile: (CancelSigningProfileRequest.t, unit, unit) t 
   | DescribeSigningJob: (DescribeSigningJobRequest.t,
   DescribeSigningJobResponse.t, DescribeSigningJobResponse.error) t 
+  | GetRevocationStatus: (GetRevocationStatusRequest.t,
+  GetRevocationStatusResponse.t, GetRevocationStatusResponse.error) t 
   | GetSigningPlatform: (GetSigningPlatformRequest.t,
   GetSigningPlatformResponse.t, GetSigningPlatformResponse.error) t 
   | GetSigningProfile: (GetSigningProfileRequest.t,
@@ -28,6 +30,8 @@ type ('i, 'o, 'e) t =
   
   | RevokeSignature: (RevokeSignatureRequest.t, unit, unit) t 
   | RevokeSigningProfile: (RevokeSigningProfileRequest.t, unit, unit) t 
+  | SignPayload: (SignPayloadRequest.t, SignPayloadResponse.t,
+  SignPayloadResponse.error) t 
   | StartSigningJob: (StartSigningJobRequest.t, StartSigningJobResponse.t,
   StartSigningJobResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
@@ -39,6 +43,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | AddProfilePermission -> `POST
   | CancelSigningProfile -> `DELETE
   | DescribeSigningJob -> `GET
+  | GetRevocationStatus -> `GET
   | GetSigningPlatform -> `GET
   | GetSigningProfile -> `GET
   | ListProfilePermissions -> `GET
@@ -50,6 +55,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | RemoveProfilePermission -> `DELETE
   | RevokeSignature -> `PUT
   | RevokeSigningProfile -> `PUT
+  | SignPayload -> `POST
   | StartSigningJob -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
@@ -65,6 +71,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeSigningJob ->
           (Format.kasprintf Uri.of_string) "/signing-jobs/%s"
             (JobId.to_header x.DescribeSigningJobRequest.jobId)
+      | GetRevocationStatus ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/revocations")
+            (List.filter_opt
+               [Some
+                  ("signatureTimestamp",
+                    (Timestamp.to_header x.signatureTimestamp));
+               Some ("platformId", (PlatformId.to_header x.platformId));
+               Some
+                 ("profileVersionArn", (Arn.to_header x.profileVersionArn));
+               Some ("jobArn", (Arn.to_header x.jobArn));
+               Some
+                 ("certificateHashes",
+                   (CertificateHashes.to_header x.certificateHashes))])
       | GetSigningPlatform ->
           (Format.kasprintf Uri.of_string) "/signing-platforms/%s"
             (PlatformId.to_header x.GetSigningPlatformRequest.platformId)
@@ -104,7 +124,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken;
-               Option.map ~f:(fun v -> ("isRevoked", (Bool.to_header v)))
+               Option.map ~f:(fun v -> ("isRevoked", (Bool_.to_header v)))
                  x.isRevoked;
                Option.map
                  ~f:(fun v ->
@@ -137,7 +157,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string) "/signing-profiles")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("includeCanceled", (Bool.to_header v)))
+                  ~f:(fun v -> ("includeCanceled", (Bool_.to_header v)))
                   x.includeCanceled;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
@@ -172,6 +192,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RevokeSigningProfile ->
           (Format.kasprintf Uri.of_string) "/signing-profiles/%s/revoke"
             (ProfileName.to_header x.RevokeSigningProfileRequest.profileName)
+      | SignPayload ->
+          (Format.kasprintf Uri.of_string) "/signing-jobs/with-payload"
       | StartSigningJob -> (Format.kasprintf Uri.of_string) "/signing-jobs"
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
@@ -225,6 +247,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeSigningJob ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRevocationStatus ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetSigningPlatform ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -251,6 +276,35 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make (method_of_endpoint endp)
   | RevokeSignature -> Awso.Http.Request.make (method_of_endpoint endp)
   | RevokeSigningProfile -> Awso.Http.Request.make (method_of_endpoint endp)
+  | SignPayload ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("profileName",
+                           (ProfileName.to_value
+                              req.SignPayloadRequest.profileName));
+                      Option.map req.SignPayloadRequest.profileOwner
+                        ~f:(fun x -> ("profileOwner", (AccountId.to_value x)));
+                      Some
+                        ("payload",
+                          (Payload.to_value req.SignPayloadRequest.payload));
+                      Some
+                        ("payloadFormat",
+                          (String_.to_value
+                             req.SignPayloadRequest.payloadFormat))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | StartSigningJob ->
       let (headers, body) =
         let headers =
@@ -366,6 +420,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeSigningJobResponse.error_of_json))
+  | GetRevocationStatus ->
+      if is_success
+      then Ok (GetRevocationStatusResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetRevocationStatusResponse.error_of_json))
   | GetSigningPlatform ->
       if is_success
       then Ok (GetSigningPlatformResponse.of_json (response_to_json resp))
@@ -427,6 +487,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | RevokeSigningProfile ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | SignPayload ->
+      if is_success
+      then Ok (SignPayloadResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SignPayloadResponse.error_of_json))
   | StartSigningJob ->
       if is_success
       then Ok (StartSigningJobResponse.of_json (response_to_json resp))

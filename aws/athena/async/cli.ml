@@ -48,6 +48,29 @@ let batch_get_named_query =
               ~namedQueryIds:(Values.NamedQueryIdList.of_json namedQueryIds)
               ()) (Some Values.BatchGetNamedQueryOutput.to_json)
            (Some Values.BatchGetNamedQueryOutput.error_to_json)])
+let batch_get_prepared_statement =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and preparedStatementNames =
+         flag "prepared-statement-names" (required json_arg)
+           ~doc:"JSON PreparedStatementNameList"
+       and workGroup =
+         flag "work-group" (required string) ~doc:"STRING WorkGroupName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_prepared_statement
+           (Values.BatchGetPreparedStatementInput.make
+              ~preparedStatementNames:(Values.PreparedStatementNameList.of_json
+                                         preparedStatementNames) ~workGroup
+              ()) (Some Values.BatchGetPreparedStatementOutput.to_json)
+           (Some Values.BatchGetPreparedStatementOutput.error_to_json)])
 let batch_get_query_execution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -69,6 +92,46 @@ let batch_get_query_execution =
                                     queryExecutionIds) ())
            (Some Values.BatchGetQueryExecutionOutput.to_json)
            (Some Values.BatchGetQueryExecutionOutput.error_to_json)])
+let cancel_capacity_reservation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING CapacityReservationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_capacity_reservation
+           (Values.CancelCapacityReservationInput.make ~name ())
+           (Some Values.CancelCapacityReservationOutput.to_json)
+           (Some Values.CancelCapacityReservationOutput.error_to_json)])
+let create_capacity_reservation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and targetDpus =
+         flag "target-dpus" (required int) ~doc:"INT TargetDpusInteger"
+       and name =
+         flag "name" (required string) ~doc:"STRING CapacityReservationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_capacity_reservation
+           (Values.CreateCapacityReservationInput.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~targetDpus
+              ~name ()) (Some Values.CreateCapacityReservationOutput.to_json)
+           (Some Values.CreateCapacityReservationOutput.error_to_json)])
 let create_data_catalog =
   Command.async ~summary:""
     ([%map_open.Command
@@ -127,6 +190,28 @@ let create_named_query =
               ?clientRequestToken ?workGroup ~name ~database ~queryString ())
            (Some Values.CreateNamedQueryOutput.to_json)
            (Some Values.CreateNamedQueryOutput.error_to_json)])
+let create_notebook =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and workGroup =
+         flag "work-group" (required string) ~doc:"STRING WorkGroupName"
+       and name = flag "name" (required string) ~doc:"STRING NotebookName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_notebook
+           (Values.CreateNotebookInput.make ?clientRequestToken ~workGroup
+              ~name ()) (Some Values.CreateNotebookOutput.to_json)
+           (Some Values.CreateNotebookOutput.error_to_json)])
 let create_prepared_statement =
   Command.async ~summary:""
     ([%map_open.Command
@@ -152,6 +237,24 @@ let create_prepared_statement =
               ~statementName ~workGroup ~queryStatement ())
            (Some Values.CreatePreparedStatementOutput.to_json)
            (Some Values.CreatePreparedStatementOutput.error_to_json)])
+let create_presigned_notebook_url =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING SessionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_presigned_notebook_url
+           (Values.CreatePresignedNotebookUrlRequest.make ~sessionId ())
+           (Some Values.CreatePresignedNotebookUrlResponse.to_json)
+           (Some Values.CreatePresignedNotebookUrlResponse.error_to_json)])
 let create_work_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -180,7 +283,7 @@ let create_work_group =
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name ())
            (Some Values.CreateWorkGroupOutput.to_json)
            (Some Values.CreateWorkGroupOutput.error_to_json)])
-let delete_data_catalog =
+let delete_capacity_reservation =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -191,11 +294,31 @@ let delete_data_catalog =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and name =
+         flag "name" (required string) ~doc:"STRING CapacityReservationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_capacity_reservation
+           (Values.DeleteCapacityReservationInput.make ~name ())
+           (Some Values.DeleteCapacityReservationOutput.to_json)
+           (Some Values.DeleteCapacityReservationOutput.error_to_json)])
+let delete_data_catalog =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deleteCatalogOnly =
+         flag "delete-catalog-only" (optional bool) ~doc:"BOOL Boolean"
+       and name =
          flag "name" (required string) ~doc:"STRING CatalogNameString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_data_catalog
-           (Values.DeleteDataCatalogInput.make ~name ())
+           (Values.DeleteDataCatalogInput.make ?deleteCatalogOnly ~name ())
            (Some Values.DeleteDataCatalogOutput.to_json)
            (Some Values.DeleteDataCatalogOutput.error_to_json)])
 let delete_named_query =
@@ -216,6 +339,24 @@ let delete_named_query =
            (Values.DeleteNamedQueryInput.make ~namedQueryId ())
            (Some Values.DeleteNamedQueryOutput.to_json)
            (Some Values.DeleteNamedQueryOutput.error_to_json)])
+let delete_notebook =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and notebookId =
+         flag "notebook-id" (required string) ~doc:"STRING NotebookId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_notebook
+           (Values.DeleteNotebookInput.make ~notebookId ())
+           (Some Values.DeleteNotebookOutput.to_json)
+           (Some Values.DeleteNotebookOutput.error_to_json)])
 let delete_prepared_statement =
   Command.async ~summary:""
     ([%map_open.Command
@@ -258,7 +399,106 @@ let delete_work_group =
            (Values.DeleteWorkGroupInput.make ?recursiveDeleteOption
               ~workGroup ()) (Some Values.DeleteWorkGroupOutput.to_json)
            (Some Values.DeleteWorkGroupOutput.error_to_json)])
-let get_data_catalog =
+let export_notebook =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and notebookId =
+         flag "notebook-id" (required string) ~doc:"STRING NotebookId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.export_notebook
+           (Values.ExportNotebookInput.make ~notebookId ())
+           (Some Values.ExportNotebookOutput.to_json)
+           (Some Values.ExportNotebookOutput.error_to_json)])
+let get_calculation_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and calculationExecutionId =
+         flag "calculation-execution-id" (required string)
+           ~doc:"STRING CalculationExecutionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_calculation_execution
+           (Values.GetCalculationExecutionRequest.make
+              ~calculationExecutionId ())
+           (Some Values.GetCalculationExecutionResponse.to_json)
+           (Some Values.GetCalculationExecutionResponse.error_to_json)])
+let get_calculation_execution_code =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and calculationExecutionId =
+         flag "calculation-execution-id" (required string)
+           ~doc:"STRING CalculationExecutionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_calculation_execution_code
+           (Values.GetCalculationExecutionCodeRequest.make
+              ~calculationExecutionId ())
+           (Some Values.GetCalculationExecutionCodeResponse.to_json)
+           (Some Values.GetCalculationExecutionCodeResponse.error_to_json)])
+let get_calculation_execution_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and calculationExecutionId =
+         flag "calculation-execution-id" (required string)
+           ~doc:"STRING CalculationExecutionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_calculation_execution_status
+           (Values.GetCalculationExecutionStatusRequest.make
+              ~calculationExecutionId ())
+           (Some Values.GetCalculationExecutionStatusResponse.to_json)
+           (Some Values.GetCalculationExecutionStatusResponse.error_to_json)])
+let get_capacity_assignment_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and capacityReservationName =
+         flag "capacity-reservation-name" (required string)
+           ~doc:"STRING CapacityReservationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_capacity_assignment_configuration
+           (Values.GetCapacityAssignmentConfigurationInput.make
+              ~capacityReservationName ())
+           (Some Values.GetCapacityAssignmentConfigurationOutput.to_json)
+           (Some
+              Values.GetCapacityAssignmentConfigurationOutput.error_to_json)])
+let get_capacity_reservation =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -269,10 +509,31 @@ let get_data_catalog =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and name =
+         flag "name" (required string) ~doc:"STRING CapacityReservationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_capacity_reservation
+           (Values.GetCapacityReservationInput.make ~name ())
+           (Some Values.GetCapacityReservationOutput.to_json)
+           (Some Values.GetCapacityReservationOutput.error_to_json)])
+let get_data_catalog =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workGroup =
+         flag "work-group" (optional string) ~doc:"STRING WorkGroupName"
+       and name =
          flag "name" (required string) ~doc:"STRING CatalogNameString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_data_catalog (Values.GetDataCatalogInput.make ~name ())
+           Io.get_data_catalog
+           (Values.GetDataCatalogInput.make ?workGroup ~name ())
            (Some Values.GetDataCatalogOutput.to_json)
            (Some Values.GetDataCatalogOutput.error_to_json)])
 let get_database =
@@ -285,6 +546,8 @@ let get_database =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and workGroup =
+         flag "work-group" (optional string) ~doc:"STRING WorkGroupName"
        and catalogName =
          flag "catalog-name" (required string)
            ~doc:"STRING CatalogNameString"
@@ -293,8 +556,8 @@ let get_database =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_database
-           (Values.GetDatabaseInput.make ~catalogName ~databaseName ())
-           (Some Values.GetDatabaseOutput.to_json)
+           (Values.GetDatabaseInput.make ?workGroup ~catalogName
+              ~databaseName ()) (Some Values.GetDatabaseOutput.to_json)
            (Some Values.GetDatabaseOutput.error_to_json)])
 let get_named_query =
   Command.async ~summary:""
@@ -314,6 +577,24 @@ let get_named_query =
            (Values.GetNamedQueryInput.make ~namedQueryId ())
            (Some Values.GetNamedQueryOutput.to_json)
            (Some Values.GetNamedQueryOutput.error_to_json)])
+let get_notebook_metadata =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and notebookId =
+         flag "notebook-id" (required string) ~doc:"STRING NotebookId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_notebook_metadata
+           (Values.GetNotebookMetadataInput.make ~notebookId ())
+           (Some Values.GetNotebookMetadataOutput.to_json)
+           (Some Values.GetNotebookMetadataOutput.error_to_json)])
 let get_prepared_statement =
   Command.async ~summary:""
     ([%map_open.Command
@@ -367,6 +648,9 @@ let get_query_results =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxQueryResults"
+       and queryResultType =
+         flag "query-result-type" (optional json_arg)
+           ~doc:"JSON QueryResultType"
        and queryExecutionId =
          flag "query-execution-id" (required string)
            ~doc:"STRING QueryExecutionId" in
@@ -374,9 +658,101 @@ let get_query_results =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_query_results
            (Values.GetQueryResultsInput.make ?nextToken ?maxResults
-              ~queryExecutionId ())
+              ?queryResultType:(Option.map ~f:Values.QueryResultType.of_json
+                                  queryResultType) ~queryExecutionId ())
            (Some Values.GetQueryResultsOutput.to_json)
            (Some Values.GetQueryResultsOutput.error_to_json)])
+let get_query_runtime_statistics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and queryExecutionId =
+         flag "query-execution-id" (required string)
+           ~doc:"STRING QueryExecutionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_query_runtime_statistics
+           (Values.GetQueryRuntimeStatisticsInput.make ~queryExecutionId ())
+           (Some Values.GetQueryRuntimeStatisticsOutput.to_json)
+           (Some Values.GetQueryRuntimeStatisticsOutput.error_to_json)])
+let get_resource_dashboard =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_dashboard
+           (Values.GetResourceDashboardRequest.make ~resourceARN ())
+           (Some Values.GetResourceDashboardResponse.to_json)
+           (Some Values.GetResourceDashboardResponse.error_to_json)])
+let get_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING SessionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_session (Values.GetSessionRequest.make ~sessionId ())
+           (Some Values.GetSessionResponse.to_json)
+           (Some Values.GetSessionResponse.error_to_json)])
+let get_session_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING SessionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_session_endpoint
+           (Values.GetSessionEndpointRequest.make ~sessionId ())
+           (Some Values.GetSessionEndpointResponse.to_json)
+           (Some Values.GetSessionEndpointResponse.error_to_json)])
+let get_session_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING SessionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_session_status
+           (Values.GetSessionStatusRequest.make ~sessionId ())
+           (Some Values.GetSessionStatusResponse.to_json)
+           (Some Values.GetSessionStatusResponse.error_to_json)])
 let get_table_metadata =
   Command.async ~summary:""
     ([%map_open.Command
@@ -387,6 +763,8 @@ let get_table_metadata =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and workGroup =
+         flag "work-group" (optional string) ~doc:"STRING WorkGroupName"
        and catalogName =
          flag "catalog-name" (required string)
            ~doc:"STRING CatalogNameString"
@@ -397,8 +775,9 @@ let get_table_metadata =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_table_metadata
-           (Values.GetTableMetadataInput.make ~catalogName ~databaseName
-              ~tableName ()) (Some Values.GetTableMetadataOutput.to_json)
+           (Values.GetTableMetadataInput.make ?workGroup ~catalogName
+              ~databaseName ~tableName ())
+           (Some Values.GetTableMetadataOutput.to_json)
            (Some Values.GetTableMetadataOutput.error_to_json)])
 let get_work_group =
   Command.async ~summary:""
@@ -417,6 +796,106 @@ let get_work_group =
            Io.get_work_group (Values.GetWorkGroupInput.make ~workGroup ())
            (Some Values.GetWorkGroupOutput.to_json)
            (Some Values.GetWorkGroupOutput.error_to_json)])
+let import_notebook =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and payload = flag "payload" (optional string) ~doc:"STRING Payload"
+       and notebookS3LocationUri =
+         flag "notebook-s3-location-uri" (optional string)
+           ~doc:"STRING S3Uri"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and workGroup =
+         flag "work-group" (required string) ~doc:"STRING WorkGroupName"
+       and name = flag "name" (required string) ~doc:"STRING NotebookName"
+       and type_ = flag "type-" (required json_arg) ~doc:"JSON NotebookType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.import_notebook
+           (Values.ImportNotebookInput.make ?payload ?notebookS3LocationUri
+              ?clientRequestToken ~workGroup ~name
+              ~type_:(Values.NotebookType.of_json type_) ())
+           (Some Values.ImportNotebookOutput.to_json)
+           (Some Values.ImportNotebookOutput.error_to_json)])
+let list_application_d_p_u_sizes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT MaxApplicationDPUSizesCount"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_application_d_p_u_sizes
+           (Values.ListApplicationDPUSizesInput.make ?maxResults ?nextToken
+              ()) (Some Values.ListApplicationDPUSizesOutput.to_json)
+           (Some Values.ListApplicationDPUSizesOutput.error_to_json)])
+let list_calculation_executions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stateFilter =
+         flag "state-filter" (optional json_arg)
+           ~doc:"JSON CalculationExecutionState"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxCalculationsCount"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING SessionManagerToken"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING SessionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_calculation_executions
+           (Values.ListCalculationExecutionsRequest.make
+              ?stateFilter:(Option.map
+                              ~f:Values.CalculationExecutionState.of_json
+                              stateFilter) ?maxResults ?nextToken ~sessionId
+              ()) (Some Values.ListCalculationExecutionsResponse.to_json)
+           (Some Values.ListCalculationExecutionsResponse.error_to_json)])
+let list_capacity_reservations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT MaxCapacityReservationsCount" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_capacity_reservations
+           (Values.ListCapacityReservationsInput.make ?nextToken ?maxResults
+              ()) (Some Values.ListCapacityReservationsOutput.to_json)
+           (Some Values.ListCapacityReservationsOutput.error_to_json)])
 let list_data_catalogs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -430,12 +909,14 @@ let list_data_catalogs =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxDataCatalogsCount" in
+         flag "max-results" (optional int) ~doc:"INT MaxDataCatalogsCount"
+       and workGroup =
+         flag "work-group" (optional string) ~doc:"STRING WorkGroupName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_data_catalogs
-           (Values.ListDataCatalogsInput.make ?nextToken ?maxResults ())
-           (Some Values.ListDataCatalogsOutput.to_json)
+           (Values.ListDataCatalogsInput.make ?nextToken ?maxResults
+              ?workGroup ()) (Some Values.ListDataCatalogsOutput.to_json)
            (Some Values.ListDataCatalogsOutput.error_to_json)])
 let list_databases =
   Command.async ~summary:""
@@ -451,13 +932,15 @@ let list_databases =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxDatabasesCount"
+       and workGroup =
+         flag "work-group" (optional string) ~doc:"STRING WorkGroupName"
        and catalogName =
          flag "catalog-name" (required string)
            ~doc:"STRING CatalogNameString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_databases
-           (Values.ListDatabasesInput.make ?nextToken ?maxResults
+           (Values.ListDatabasesInput.make ?nextToken ?maxResults ?workGroup
               ~catalogName ()) (Some Values.ListDatabasesOutput.to_json)
            (Some Values.ListDatabasesOutput.error_to_json)])
 let list_engine_versions =
@@ -480,6 +963,36 @@ let list_engine_versions =
            (Values.ListEngineVersionsInput.make ?nextToken ?maxResults ())
            (Some Values.ListEngineVersionsOutput.to_json)
            (Some Values.ListEngineVersionsOutput.error_to_json)])
+let list_executors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and executorStateFilter =
+         flag "executor-state-filter" (optional json_arg)
+           ~doc:"JSON ExecutorState"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxListExecutorsCount"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING SessionManagerToken"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING SessionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_executors
+           (Values.ListExecutorsRequest.make
+              ?executorStateFilter:(Option.map
+                                      ~f:Values.ExecutorState.of_json
+                                      executorStateFilter) ?maxResults
+              ?nextToken ~sessionId ())
+           (Some Values.ListExecutorsResponse.to_json)
+           (Some Values.ListExecutorsResponse.error_to_json)])
 let list_named_queries =
   Command.async ~summary:""
     ([%map_open.Command
@@ -502,6 +1015,55 @@ let list_named_queries =
            (Values.ListNamedQueriesInput.make ?nextToken ?maxResults
               ?workGroup ()) (Some Values.ListNamedQueriesOutput.to_json)
            (Some Values.ListNamedQueriesOutput.error_to_json)])
+let list_notebook_metadata =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterDefinition"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxNotebooksCount"
+       and workGroup =
+         flag "work-group" (required string) ~doc:"STRING WorkGroupName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_notebook_metadata
+           (Values.ListNotebookMetadataInput.make
+              ?filters:(Option.map ~f:Values.FilterDefinition.of_json filters)
+              ?nextToken ?maxResults ~workGroup ())
+           (Some Values.ListNotebookMetadataOutput.to_json)
+           (Some Values.ListNotebookMetadataOutput.error_to_json)])
+let list_notebook_sessions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxSessionsCount"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and notebookId =
+         flag "notebook-id" (required string) ~doc:"STRING NotebookId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_notebook_sessions
+           (Values.ListNotebookSessionsRequest.make ?maxResults ?nextToken
+              ~notebookId ())
+           (Some Values.ListNotebookSessionsResponse.to_json)
+           (Some Values.ListNotebookSessionsResponse.error_to_json)])
 let list_prepared_statements =
   Command.async ~summary:""
     ([%map_open.Command
@@ -548,6 +1110,33 @@ let list_query_executions =
            (Values.ListQueryExecutionsInput.make ?nextToken ?maxResults
               ?workGroup ()) (Some Values.ListQueryExecutionsOutput.to_json)
            (Some Values.ListQueryExecutionsOutput.error_to_json)])
+let list_sessions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stateFilter =
+         flag "state-filter" (optional json_arg) ~doc:"JSON SessionState"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxSessionsCount"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING SessionManagerToken"
+       and workGroup =
+         flag "work-group" (required string) ~doc:"STRING WorkGroupName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_sessions
+           (Values.ListSessionsRequest.make
+              ?stateFilter:(Option.map ~f:Values.SessionState.of_json
+                              stateFilter) ?maxResults ?nextToken ~workGroup
+              ()) (Some Values.ListSessionsResponse.to_json)
+           (Some Values.ListSessionsResponse.error_to_json)])
 let list_table_metadata =
   Command.async ~summary:""
     ([%map_open.Command
@@ -564,6 +1153,8 @@ let list_table_metadata =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxTableMetadataCount"
+       and workGroup =
+         flag "work-group" (optional string) ~doc:"STRING WorkGroupName"
        and catalogName =
          flag "catalog-name" (required string)
            ~doc:"STRING CatalogNameString"
@@ -573,7 +1164,7 @@ let list_table_metadata =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_table_metadata
            (Values.ListTableMetadataInput.make ?expression ?nextToken
-              ?maxResults ~catalogName ~databaseName ())
+              ?maxResults ?workGroup ~catalogName ~databaseName ())
            (Some Values.ListTableMetadataOutput.to_json)
            (Some Values.ListTableMetadataOutput.error_to_json)])
 let list_tags_for_resource =
@@ -620,6 +1211,64 @@ let list_work_groups =
            (Values.ListWorkGroupsInput.make ?nextToken ?maxResults ())
            (Some Values.ListWorkGroupsOutput.to_json)
            (Some Values.ListWorkGroupsOutput.error_to_json)])
+let put_capacity_assignment_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and capacityReservationName =
+         flag "capacity-reservation-name" (required string)
+           ~doc:"STRING CapacityReservationName"
+       and capacityAssignments =
+         flag "capacity-assignments" (required json_arg)
+           ~doc:"JSON CapacityAssignmentsList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_capacity_assignment_configuration
+           (Values.PutCapacityAssignmentConfigurationInput.make
+              ~capacityReservationName
+              ~capacityAssignments:(Values.CapacityAssignmentsList.of_json
+                                      capacityAssignments) ())
+           (Some Values.PutCapacityAssignmentConfigurationOutput.to_json)
+           (Some
+              Values.PutCapacityAssignmentConfigurationOutput.error_to_json)])
+let start_calculation_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING DescriptionString"
+       and calculationConfiguration =
+         flag "calculation-configuration" (optional json_arg)
+           ~doc:"JSON CalculationConfiguration"
+       and codeBlock =
+         flag "code-block" (optional string) ~doc:"STRING CodeBlock"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING IdempotencyToken"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING SessionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_calculation_execution
+           (Values.StartCalculationExecutionRequest.make ?description
+              ?calculationConfiguration:(Option.map
+                                           ~f:Values.CalculationConfiguration.of_json
+                                           calculationConfiguration)
+              ?codeBlock ?clientRequestToken ~sessionId ())
+           (Some Values.StartCalculationExecutionResponse.to_json)
+           (Some Values.StartCalculationExecutionResponse.error_to_json)])
 let start_query_execution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -641,6 +1290,15 @@ let start_query_execution =
            ~doc:"JSON ResultConfiguration"
        and workGroup =
          flag "work-group" (optional string) ~doc:"STRING WorkGroupName"
+       and executionParameters =
+         flag "execution-parameters" (optional json_arg)
+           ~doc:"JSON ExecutionParameters"
+       and resultReuseConfiguration =
+         flag "result-reuse-configuration" (optional json_arg)
+           ~doc:"JSON ResultReuseConfiguration"
+       and engineConfiguration =
+         flag "engine-configuration" (optional json_arg)
+           ~doc:"JSON EngineConfiguration"
        and queryString =
          flag "query-string" (required string) ~doc:"STRING QueryString" in
        fun () ->
@@ -653,9 +1311,85 @@ let start_query_execution =
               ?resultConfiguration:(Option.map
                                       ~f:Values.ResultConfiguration.of_json
                                       resultConfiguration) ?workGroup
-              ~queryString ())
+              ?executionParameters:(Option.map
+                                      ~f:Values.ExecutionParameters.of_json
+                                      executionParameters)
+              ?resultReuseConfiguration:(Option.map
+                                           ~f:Values.ResultReuseConfiguration.of_json
+                                           resultReuseConfiguration)
+              ?engineConfiguration:(Option.map
+                                      ~f:Values.EngineConfiguration.of_json
+                                      engineConfiguration) ~queryString ())
            (Some Values.StartQueryExecutionOutput.to_json)
            (Some Values.StartQueryExecutionOutput.error_to_json)])
+let start_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING DescriptionString"
+       and executionRole =
+         flag "execution-role" (optional string) ~doc:"STRING RoleArn"
+       and monitoringConfiguration =
+         flag "monitoring-configuration" (optional json_arg)
+           ~doc:"JSON MonitoringConfiguration"
+       and notebookVersion =
+         flag "notebook-version" (optional string) ~doc:"STRING NameString"
+       and sessionIdleTimeoutInMinutes =
+         flag "session-idle-timeout-in-minutes" (optional int)
+           ~doc:"INT SessionIdleTimeoutInMinutes"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING IdempotencyToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and copyWorkGroupTags =
+         flag "copy-work-group-tags" (optional bool) ~doc:"BOOL BoxedBoolean"
+       and workGroup =
+         flag "work-group" (required string) ~doc:"STRING WorkGroupName"
+       and engineConfiguration =
+         flag "engine-configuration" (required json_arg)
+           ~doc:"JSON EngineConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_session
+           (Values.StartSessionRequest.make ?description ?executionRole
+              ?monitoringConfiguration:(Option.map
+                                          ~f:Values.MonitoringConfiguration.of_json
+                                          monitoringConfiguration)
+              ?notebookVersion ?sessionIdleTimeoutInMinutes
+              ?clientRequestToken
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?copyWorkGroupTags ~workGroup
+              ~engineConfiguration:(Values.EngineConfiguration.of_json
+                                      engineConfiguration) ())
+           (Some Values.StartSessionResponse.to_json)
+           (Some Values.StartSessionResponse.error_to_json)])
+let stop_calculation_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and calculationExecutionId =
+         flag "calculation-execution-id" (required string)
+           ~doc:"STRING CalculationExecutionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_calculation_execution
+           (Values.StopCalculationExecutionRequest.make
+              ~calculationExecutionId ())
+           (Some Values.StopCalculationExecutionResponse.to_json)
+           (Some Values.StopCalculationExecutionResponse.error_to_json)])
 let stop_query_execution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -696,6 +1430,24 @@ let tag_resource =
               ~tags:(Values.TagList.of_json tags) ())
            (Some Values.TagResourceOutput.to_json)
            (Some Values.TagResourceOutput.error_to_json)])
+let terminate_session =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING SessionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.terminate_session
+           (Values.TerminateSessionRequest.make ~sessionId ())
+           (Some Values.TerminateSessionResponse.to_json)
+           (Some Values.TerminateSessionResponse.error_to_json)])
 let untag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -718,6 +1470,26 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceOutput.to_json)
            (Some Values.UntagResourceOutput.error_to_json)])
+let update_capacity_reservation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and targetDpus =
+         flag "target-dpus" (required int) ~doc:"INT TargetDpusInteger"
+       and name =
+         flag "name" (required string) ~doc:"STRING CapacityReservationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_capacity_reservation
+           (Values.UpdateCapacityReservationInput.make ~targetDpus ~name ())
+           (Some Values.UpdateCapacityReservationOutput.to_json)
+           (Some Values.UpdateCapacityReservationOutput.error_to_json)])
 let update_data_catalog =
   Command.async ~summary:""
     ([%map_open.Command
@@ -770,6 +1542,55 @@ let update_named_query =
               ~name ~queryString ())
            (Some Values.UpdateNamedQueryOutput.to_json)
            (Some Values.UpdateNamedQueryOutput.error_to_json)])
+let update_notebook =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionId =
+         flag "session-id" (optional string) ~doc:"STRING SessionId"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and notebookId =
+         flag "notebook-id" (required string) ~doc:"STRING NotebookId"
+       and payload = flag "payload" (required string) ~doc:"STRING Payload"
+       and type_ = flag "type-" (required json_arg) ~doc:"JSON NotebookType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_notebook
+           (Values.UpdateNotebookInput.make ?sessionId ?clientRequestToken
+              ~notebookId ~payload ~type_:(Values.NotebookType.of_json type_)
+              ()) (Some Values.UpdateNotebookOutput.to_json)
+           (Some Values.UpdateNotebookOutput.error_to_json)])
+let update_notebook_metadata =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and notebookId =
+         flag "notebook-id" (required string) ~doc:"STRING NotebookId"
+       and name = flag "name" (required string) ~doc:"STRING NotebookName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_notebook_metadata
+           (Values.UpdateNotebookMetadataInput.make ?clientRequestToken
+              ~notebookId ~name ())
+           (Some Values.UpdateNotebookMetadataOutput.to_json)
+           (Some Values.UpdateNotebookMetadataOutput.error_to_json)])
 let update_prepared_statement =
   Command.async ~summary:""
     ([%map_open.Command
@@ -829,37 +1650,74 @@ let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-get-named-query", batch_get_named_query);
+    ("batch-get-prepared-statement", batch_get_prepared_statement);
     ("batch-get-query-execution", batch_get_query_execution);
+    ("cancel-capacity-reservation", cancel_capacity_reservation);
+    ("create-capacity-reservation", create_capacity_reservation);
     ("create-data-catalog", create_data_catalog);
     ("create-named-query", create_named_query);
+    ("create-notebook", create_notebook);
     ("create-prepared-statement", create_prepared_statement);
+    ("create-presigned-notebook-url", create_presigned_notebook_url);
     ("create-work-group", create_work_group);
+    ("delete-capacity-reservation", delete_capacity_reservation);
     ("delete-data-catalog", delete_data_catalog);
     ("delete-named-query", delete_named_query);
+    ("delete-notebook", delete_notebook);
     ("delete-prepared-statement", delete_prepared_statement);
     ("delete-work-group", delete_work_group);
+    ("export-notebook", export_notebook);
+    ("get-calculation-execution", get_calculation_execution);
+    ("get-calculation-execution-code", get_calculation_execution_code);
+    ("get-calculation-execution-status", get_calculation_execution_status);
+    ("get-capacity-assignment-configuration",
+      get_capacity_assignment_configuration);
+    ("get-capacity-reservation", get_capacity_reservation);
     ("get-data-catalog", get_data_catalog);
     ("get-database", get_database);
     ("get-named-query", get_named_query);
+    ("get-notebook-metadata", get_notebook_metadata);
     ("get-prepared-statement", get_prepared_statement);
     ("get-query-execution", get_query_execution);
     ("get-query-results", get_query_results);
+    ("get-query-runtime-statistics", get_query_runtime_statistics);
+    ("get-resource-dashboard", get_resource_dashboard);
+    ("get-session", get_session);
+    ("get-session-endpoint", get_session_endpoint);
+    ("get-session-status", get_session_status);
     ("get-table-metadata", get_table_metadata);
     ("get-work-group", get_work_group);
+    ("import-notebook", import_notebook);
+    ("list-application-d-p-u-sizes", list_application_d_p_u_sizes);
+    ("list-calculation-executions", list_calculation_executions);
+    ("list-capacity-reservations", list_capacity_reservations);
     ("list-data-catalogs", list_data_catalogs);
     ("list-databases", list_databases);
     ("list-engine-versions", list_engine_versions);
+    ("list-executors", list_executors);
     ("list-named-queries", list_named_queries);
+    ("list-notebook-metadata", list_notebook_metadata);
+    ("list-notebook-sessions", list_notebook_sessions);
     ("list-prepared-statements", list_prepared_statements);
     ("list-query-executions", list_query_executions);
+    ("list-sessions", list_sessions);
     ("list-table-metadata", list_table_metadata);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-work-groups", list_work_groups);
+    ("put-capacity-assignment-configuration",
+      put_capacity_assignment_configuration);
+    ("start-calculation-execution", start_calculation_execution);
     ("start-query-execution", start_query_execution);
+    ("start-session", start_session);
+    ("stop-calculation-execution", stop_calculation_execution);
     ("stop-query-execution", stop_query_execution);
     ("tag-resource", tag_resource);
+    ("terminate-session", terminate_session);
     ("untag-resource", untag_resource);
+    ("update-capacity-reservation", update_capacity_reservation);
     ("update-data-catalog", update_data_catalog);
     ("update-named-query", update_named_query);
+    ("update-notebook", update_notebook);
+    ("update-notebook-metadata", update_notebook_metadata);
     ("update-prepared-statement", update_prepared_statement);
     ("update-work-group", update_work_group)]

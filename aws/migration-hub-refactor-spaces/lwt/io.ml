@@ -57,3 +57,5 @@ let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_route ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateRoute input

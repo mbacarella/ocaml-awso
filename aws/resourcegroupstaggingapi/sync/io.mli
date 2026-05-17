@@ -27,6 +27,11 @@ val get_tag_values :
     ?cfg:Awso.Cfg.t ->
       GetTagValuesInput.t ->
         (GetTagValuesOutput.t, GetTagValuesOutput.error) Result.t
+val list_required_tags :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRequiredTagsInput.t ->
+        (ListRequiredTagsOutput.t, ListRequiredTagsOutput.error) Result.t
 val start_report_creation :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

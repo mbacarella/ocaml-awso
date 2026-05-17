@@ -28,6 +28,28 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let cancel_participant_authentication =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING SessionId"
+       and connectionToken =
+         flag "connection-token" (required string)
+           ~doc:"STRING ParticipantToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_participant_authentication
+           (Values.CancelParticipantAuthenticationRequest.make ~sessionId
+              ~connectionToken ())
+           (Some Values.CancelParticipantAuthenticationResponse.to_json)
+           (Some Values.CancelParticipantAuthenticationResponse.error_to_json)])
 let complete_attachment_upload =
   Command.async ~summary:""
     ([%map_open.Command
@@ -65,10 +87,10 @@ let create_participant_connection =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and type_ =
+         flag "type-" (optional json_arg) ~doc:"JSON ConnectionTypeList"
        and connectParticipant =
          flag "connect-participant" (optional bool) ~doc:"BOOL Bool"
-       and type_ =
-         flag "type-" (required json_arg) ~doc:"JSON ConnectionTypeList"
        and participantToken =
          flag "participant-token" (required string)
            ~doc:"STRING ParticipantToken" in
@@ -76,11 +98,31 @@ let create_participant_connection =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_participant_connection
            (Values.CreateParticipantConnectionRequest.make
-              ?connectParticipant
-              ~type_:(Values.ConnectionTypeList.of_json type_)
-              ~participantToken ())
+              ?type_:(Option.map ~f:Values.ConnectionTypeList.of_json type_)
+              ?connectParticipant ~participantToken ())
            (Some Values.CreateParticipantConnectionResponse.to_json)
            (Some Values.CreateParticipantConnectionResponse.error_to_json)])
+let describe_view =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and viewToken =
+         flag "view-token" (required string) ~doc:"STRING ViewToken"
+       and connectionToken =
+         flag "connection-token" (required string)
+           ~doc:"STRING ParticipantToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_view
+           (Values.DescribeViewRequest.make ~viewToken ~connectionToken ())
+           (Some Values.DescribeViewResponse.to_json)
+           (Some Values.DescribeViewResponse.error_to_json)])
 let disconnect_participant =
   Command.async ~summary:""
     ([%map_open.Command
@@ -113,6 +155,9 @@ let get_attachment =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and urlExpiryInSeconds =
+         flag "url-expiry-in-seconds" (optional int)
+           ~doc:"INT URLExpiryInSeconds"
        and attachmentId =
          flag "attachment-id" (required string) ~doc:"STRING ArtifactId"
        and connectionToken =
@@ -121,9 +166,34 @@ let get_attachment =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_attachment
-           (Values.GetAttachmentRequest.make ~attachmentId ~connectionToken
-              ()) (Some Values.GetAttachmentResponse.to_json)
+           (Values.GetAttachmentRequest.make ?urlExpiryInSeconds
+              ~attachmentId ~connectionToken ())
+           (Some Values.GetAttachmentResponse.to_json)
            (Some Values.GetAttachmentResponse.error_to_json)])
+let get_authentication_url =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sessionId =
+         flag "session-id" (required string) ~doc:"STRING SessionId"
+       and redirectUri =
+         flag "redirect-uri" (required string) ~doc:"STRING RedirectURI"
+       and connectionToken =
+         flag "connection-token" (required string)
+           ~doc:"STRING ParticipantToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_authentication_url
+           (Values.GetAuthenticationUrlRequest.make ~sessionId ~redirectUri
+              ~connectionToken ())
+           (Some Values.GetAuthenticationUrlResponse.to_json)
+           (Some Values.GetAuthenticationUrlResponse.error_to_json)])
 let get_transcript =
   Command.async ~summary:""
     ([%map_open.Command
@@ -247,10 +317,13 @@ let start_attachment_upload =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("complete-attachment-upload", complete_attachment_upload);
+    [("cancel-participant-authentication", cancel_participant_authentication);
+    ("complete-attachment-upload", complete_attachment_upload);
     ("create-participant-connection", create_participant_connection);
+    ("describe-view", describe_view);
     ("disconnect-participant", disconnect_participant);
     ("get-attachment", get_attachment);
+    ("get-authentication-url", get_authentication_url);
     ("get-transcript", get_transcript);
     ("send-event", send_event);
     ("send-message", send_message);

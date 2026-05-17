@@ -141,8 +141,8 @@ module ClientLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -161,8 +161,8 @@ module ConnectionLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -201,8 +201,8 @@ module InvalidArgumentException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The value for this input parameter is invalid."]
@@ -220,8 +220,8 @@ module InvalidEndpointException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -240,8 +240,8 @@ module NotAuthorizedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -272,8 +272,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -355,14 +355,15 @@ module StartSelector =
       make ?continuationToken ?startTimestamp ?afterFragmentNumber
         ~startSelectorType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let continuationToken =
-        field_map json "ContinuationToken" ContinuationToken.of_json in
-      let startTimestamp = field_map json "StartTimestamp" Timestamp.of_json in
+        field_map json__ "ContinuationToken" ContinuationToken.of_json in
+      let startTimestamp =
+        field_map json__ "StartTimestamp" Timestamp.of_json in
       let afterFragmentNumber =
-        field_map json "AfterFragmentNumber" FragmentNumberString.of_json in
+        field_map json__ "AfterFragmentNumber" FragmentNumberString.of_json in
       let startSelectorType =
-        field_map_exn json "StartSelectorType" StartSelectorType.of_json in
+        field_map_exn json__ "StartSelectorType" StartSelectorType.of_json in
       make ?continuationToken ?startTimestamp ?afterFragmentNumber
         ~startSelectorType ()
     let to_json v = composed_to_json to_value v
@@ -497,9 +498,9 @@ module GetMediaOutput =
           (Xml.child xml_arg0 "Content-Type") in
       make ?payload ?contentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let payload = field_map json "Payload" Payload.of_json in
-      let contentType = field_map json "ContentType" ContentType.of_json in
+    let of_json json__ =
+      let payload = field_map json__ "Payload" Payload.of_json in
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
       make ?payload ?contentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -538,11 +539,11 @@ module GetMediaInput =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       make ~startSelector ?streamARN ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let startSelector =
-        field_map_exn json "StartSelector" StartSelector.of_json in
-      let streamARN = field_map json "StreamARN" ResourceARN.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
+        field_map_exn json__ "StartSelector" StartSelector.of_json in
+      let streamARN = field_map json__ "StreamARN" ResourceARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
       make ~startSelector ?streamARN ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

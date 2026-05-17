@@ -10,8 +10,14 @@ type ('i, 'o, 'e) t =
   CopyObjectOutput.error) t 
   | CreateBucket: (CreateBucketRequest.t, CreateBucketOutput.t,
   CreateBucketOutput.error) t 
+  | CreateBucketMetadataConfiguration:
+  (CreateBucketMetadataConfigurationRequest.t, unit, unit) t 
+  | CreateBucketMetadataTableConfiguration:
+  (CreateBucketMetadataTableConfigurationRequest.t, unit, unit) t 
   | CreateMultipartUpload: (CreateMultipartUploadRequest.t,
   CreateMultipartUploadOutput.t, CreateMultipartUploadOutput.error) t 
+  | CreateSession: (CreateSessionRequest.t, CreateSessionOutput.t,
+  CreateSessionOutput.error) t 
   | DeleteBucket: (DeleteBucketRequest.t, unit, unit) t 
   | DeleteBucketAnalyticsConfiguration:
   (DeleteBucketAnalyticsConfigurationRequest.t, unit, unit) t 
@@ -22,6 +28,10 @@ type ('i, 'o, 'e) t =
   | DeleteBucketInventoryConfiguration:
   (DeleteBucketInventoryConfigurationRequest.t, unit, unit) t 
   | DeleteBucketLifecycle: (DeleteBucketLifecycleRequest.t, unit, unit) t 
+  | DeleteBucketMetadataConfiguration:
+  (DeleteBucketMetadataConfigurationRequest.t, unit, unit) t 
+  | DeleteBucketMetadataTableConfiguration:
+  (DeleteBucketMetadataTableConfigurationRequest.t, unit, unit) t 
   | DeleteBucketMetricsConfiguration:
   (DeleteBucketMetricsConfigurationRequest.t, unit, unit) t 
   | DeleteBucketOwnershipControls: (DeleteBucketOwnershipControlsRequest.t,
@@ -39,6 +49,8 @@ type ('i, 'o, 'e) t =
   DeleteObjectsOutput.error) t 
   | DeletePublicAccessBlock: (DeletePublicAccessBlockRequest.t, unit, 
   unit) t 
+  | GetBucketAbac: (GetBucketAbacRequest.t, GetBucketAbacOutput.t,
+  GetBucketAbacOutput.error) t 
   | GetBucketAccelerateConfiguration:
   (GetBucketAccelerateConfigurationRequest.t,
   GetBucketAccelerateConfigurationOutput.t,
@@ -71,6 +83,13 @@ type ('i, 'o, 'e) t =
   GetBucketLocationOutput.t, GetBucketLocationOutput.error) t 
   | GetBucketLogging: (GetBucketLoggingRequest.t, GetBucketLoggingOutput.t,
   GetBucketLoggingOutput.error) t 
+  | GetBucketMetadataConfiguration: (GetBucketMetadataConfigurationRequest.t,
+  GetBucketMetadataConfigurationOutput.t,
+  GetBucketMetadataConfigurationOutput.error) t 
+  | GetBucketMetadataTableConfiguration:
+  (GetBucketMetadataTableConfigurationRequest.t,
+  GetBucketMetadataTableConfigurationOutput.t,
+  GetBucketMetadataTableConfigurationOutput.error) t 
   | GetBucketMetricsConfiguration: (GetBucketMetricsConfigurationRequest.t,
   GetBucketMetricsConfigurationOutput.t,
   GetBucketMetricsConfigurationOutput.error) t 
@@ -116,7 +135,8 @@ type ('i, 'o, 'e) t =
   GetObjectTorrentOutput.error) t 
   | GetPublicAccessBlock: (GetPublicAccessBlockRequest.t,
   GetPublicAccessBlockOutput.t, GetPublicAccessBlockOutput.error) t 
-  | HeadBucket: (HeadBucketRequest.t, unit, unit) t 
+  | HeadBucket: (HeadBucketRequest.t, HeadBucketOutput.t,
+  HeadBucketOutput.error) t 
   | HeadObject: (HeadObjectRequest.t, HeadObjectOutput.t,
   HeadObjectOutput.error) t 
   | ListBucketAnalyticsConfigurations:
@@ -135,7 +155,10 @@ type ('i, 'o, 'e) t =
   (ListBucketMetricsConfigurationsRequest.t,
   ListBucketMetricsConfigurationsOutput.t,
   ListBucketMetricsConfigurationsOutput.error) t 
-  | ListBuckets: (unit, ListBucketsOutput.t, ListBucketsOutput.error) t 
+  | ListBuckets: (ListBucketsRequest.t, ListBucketsOutput.t,
+  ListBucketsOutput.error) t 
+  | ListDirectoryBuckets: (ListDirectoryBucketsRequest.t,
+  ListDirectoryBucketsOutput.t, ListDirectoryBucketsOutput.error) t 
   | ListMultipartUploads: (ListMultipartUploadsRequest.t,
   ListMultipartUploadsOutput.t, ListMultipartUploadsOutput.error) t 
   | ListObjectVersions: (ListObjectVersionsRequest.t,
@@ -146,6 +169,7 @@ type ('i, 'o, 'e) t =
   ListObjectsV2Output.error) t 
   | ListParts: (ListPartsRequest.t, ListPartsOutput.t, ListPartsOutput.error)
   t 
+  | PutBucketAbac: (PutBucketAbacRequest.t, unit, unit) t 
   | PutBucketAccelerateConfiguration:
   (PutBucketAccelerateConfigurationRequest.t, unit, unit) t 
   | PutBucketAcl: (PutBucketAclRequest.t, unit, unit) t 
@@ -159,7 +183,9 @@ type ('i, 'o, 'e) t =
   (PutBucketInventoryConfigurationRequest.t, unit, unit) t 
   | PutBucketLifecycle: (PutBucketLifecycleRequest.t, unit, unit) t 
   | PutBucketLifecycleConfiguration:
-  (PutBucketLifecycleConfigurationRequest.t, unit, unit) t 
+  (PutBucketLifecycleConfigurationRequest.t,
+  PutBucketLifecycleConfigurationOutput.t,
+  PutBucketLifecycleConfigurationOutput.error) t 
   | PutBucketLogging: (PutBucketLoggingRequest.t, unit, unit) t 
   | PutBucketMetricsConfiguration: (PutBucketMetricsConfigurationRequest.t,
   unit, unit) t 
@@ -189,10 +215,18 @@ type ('i, 'o, 'e) t =
   | PutObjectTagging: (PutObjectTaggingRequest.t, PutObjectTaggingOutput.t,
   PutObjectTaggingOutput.error) t 
   | PutPublicAccessBlock: (PutPublicAccessBlockRequest.t, unit, unit) t 
+  | RenameObject: (RenameObjectRequest.t, RenameObjectOutput.t,
+  RenameObjectOutput.error) t 
   | RestoreObject: (RestoreObjectRequest.t, RestoreObjectOutput.t,
   RestoreObjectOutput.error) t 
   | SelectObjectContent: (SelectObjectContentRequest.t,
   SelectObjectContentOutput.t, SelectObjectContentOutput.error) t 
+  | UpdateBucketMetadataInventoryTableConfiguration:
+  (UpdateBucketMetadataInventoryTableConfigurationRequest.t, unit, unit) t 
+  | UpdateBucketMetadataJournalTableConfiguration:
+  (UpdateBucketMetadataJournalTableConfigurationRequest.t, unit, unit) t 
+  | UpdateObjectEncryption: (UpdateObjectEncryptionRequest.t,
+  UpdateObjectEncryptionResponse.t, UpdateObjectEncryptionResponse.error) t 
   | UploadPart: (UploadPartRequest.t, UploadPartOutput.t,
   UploadPartOutput.error) t 
   | UploadPartCopy: (UploadPartCopyRequest.t, UploadPartCopyOutput.t,
@@ -204,7 +238,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CompleteMultipartUpload -> `POST
   | CopyObject -> `PUT
   | CreateBucket -> `PUT
+  | CreateBucketMetadataConfiguration -> `POST
+  | CreateBucketMetadataTableConfiguration -> `POST
   | CreateMultipartUpload -> `POST
+  | CreateSession -> `GET
   | DeleteBucket -> `DELETE
   | DeleteBucketAnalyticsConfiguration -> `DELETE
   | DeleteBucketCors -> `DELETE
@@ -212,6 +249,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteBucketIntelligentTieringConfiguration -> `DELETE
   | DeleteBucketInventoryConfiguration -> `DELETE
   | DeleteBucketLifecycle -> `DELETE
+  | DeleteBucketMetadataConfiguration -> `DELETE
+  | DeleteBucketMetadataTableConfiguration -> `DELETE
   | DeleteBucketMetricsConfiguration -> `DELETE
   | DeleteBucketOwnershipControls -> `DELETE
   | DeleteBucketPolicy -> `DELETE
@@ -222,6 +261,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteObjectTagging -> `DELETE
   | DeleteObjects -> `POST
   | DeletePublicAccessBlock -> `DELETE
+  | GetBucketAbac -> `GET
   | GetBucketAccelerateConfiguration -> `GET
   | GetBucketAcl -> `GET
   | GetBucketAnalyticsConfiguration -> `GET
@@ -233,6 +273,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetBucketLifecycleConfiguration -> `GET
   | GetBucketLocation -> `GET
   | GetBucketLogging -> `GET
+  | GetBucketMetadataConfiguration -> `GET
+  | GetBucketMetadataTableConfiguration -> `GET
   | GetBucketMetricsConfiguration -> `GET
   | GetBucketNotification -> `GET
   | GetBucketNotificationConfiguration -> `GET
@@ -260,11 +302,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListBucketInventoryConfigurations -> `GET
   | ListBucketMetricsConfigurations -> `GET
   | ListBuckets -> `GET
+  | ListDirectoryBuckets -> `GET
   | ListMultipartUploads -> `GET
   | ListObjectVersions -> `GET
   | ListObjects -> `GET
   | ListObjectsV2 -> `GET
   | ListParts -> `GET
+  | PutBucketAbac -> `PUT
   | PutBucketAccelerateConfiguration -> `PUT
   | PutBucketAcl -> `PUT
   | PutBucketAnalyticsConfiguration -> `PUT
@@ -292,8 +336,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | PutObjectRetention -> `PUT
   | PutObjectTagging -> `PUT
   | PutPublicAccessBlock -> `PUT
+  | RenameObject -> `PUT
   | RestoreObject -> `POST
   | SelectObjectContent -> `POST
+  | UpdateBucketMetadataInventoryTableConfiguration -> `PUT
+  | UpdateBucketMetadataJournalTableConfiguration -> `PUT
+  | UpdateObjectEncryption -> `PUT
   | UploadPart -> `PUT
   | UploadPartCopy -> `PUT
   | WriteGetObjectResponse -> `POST
@@ -321,10 +369,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateBucket ->
           (Format.kasprintf Uri.of_string) "/%s"
             (BucketName.to_header x.CreateBucketRequest.bucket)
+      | CreateBucketMetadataConfiguration ->
+          (Format.kasprintf Uri.of_string) "/%s?metadataConfiguration"
+            (BucketName.to_header
+               x.CreateBucketMetadataConfigurationRequest.bucket)
+      | CreateBucketMetadataTableConfiguration ->
+          (Format.kasprintf Uri.of_string) "/%s?metadataTable"
+            (BucketName.to_header
+               x.CreateBucketMetadataTableConfigurationRequest.bucket)
       | CreateMultipartUpload ->
           (Format.kasprintf Uri.of_string) "/%s/%s?uploads"
             (BucketName.to_header x.CreateMultipartUploadRequest.bucket)
             (ObjectKey.to_header x.CreateMultipartUploadRequest.key)
+      | CreateSession ->
+          (Format.kasprintf Uri.of_string) "/%s?session"
+            (BucketName.to_header x.CreateSessionRequest.bucket)
       | DeleteBucket ->
           (Format.kasprintf Uri.of_string) "/%s"
             (BucketName.to_header x.DeleteBucketRequest.bucket)
@@ -356,6 +415,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteBucketLifecycle ->
           (Format.kasprintf Uri.of_string) "/%s?lifecycle"
             (BucketName.to_header x.DeleteBucketLifecycleRequest.bucket)
+      | DeleteBucketMetadataConfiguration ->
+          (Format.kasprintf Uri.of_string) "/%s?metadataConfiguration"
+            (BucketName.to_header
+               x.DeleteBucketMetadataConfigurationRequest.bucket)
+      | DeleteBucketMetadataTableConfiguration ->
+          (Format.kasprintf Uri.of_string) "/%s?metadataTable"
+            (BucketName.to_header
+               x.DeleteBucketMetadataTableConfigurationRequest.bucket)
       | DeleteBucketMetricsConfiguration ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/%s?metrics"
@@ -402,6 +469,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeletePublicAccessBlock ->
           (Format.kasprintf Uri.of_string) "/%s?publicAccessBlock"
             (BucketName.to_header x.DeletePublicAccessBlockRequest.bucket)
+      | GetBucketAbac ->
+          (Format.kasprintf Uri.of_string) "/%s?abac"
+            (BucketName.to_header x.GetBucketAbacRequest.bucket)
       | GetBucketAccelerateConfiguration ->
           (Format.kasprintf Uri.of_string) "/%s?accelerate"
             (BucketName.to_header
@@ -447,6 +517,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetBucketLogging ->
           (Format.kasprintf Uri.of_string) "/%s?logging"
             (BucketName.to_header x.GetBucketLoggingRequest.bucket)
+      | GetBucketMetadataConfiguration ->
+          (Format.kasprintf Uri.of_string) "/%s?metadataConfiguration"
+            (BucketName.to_header
+               x.GetBucketMetadataConfigurationRequest.bucket)
+      | GetBucketMetadataTableConfiguration ->
+          (Format.kasprintf Uri.of_string) "/%s?metadataTable"
+            (BucketName.to_header
+               x.GetBucketMetadataTableConfigurationRequest.bucket)
       | GetBucketMetricsConfiguration ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/%s?metrics"
@@ -591,8 +669,37 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (ObjectKey.to_header x.HeadObjectRequest.key))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("versionId", (ObjectVersionId.to_header v)))
-                  x.versionId;
+                  ~f:(fun v ->
+                        ("response-cache-control",
+                          (ResponseCacheControl.to_header v)))
+                  x.responseCacheControl;
+               Option.map
+                 ~f:(fun v ->
+                       ("response-content-disposition",
+                         (ResponseContentDisposition.to_header v)))
+                 x.responseContentDisposition;
+               Option.map
+                 ~f:(fun v ->
+                       ("response-content-encoding",
+                         (ResponseContentEncoding.to_header v)))
+                 x.responseContentEncoding;
+               Option.map
+                 ~f:(fun v ->
+                       ("response-content-language",
+                         (ResponseContentLanguage.to_header v)))
+                 x.responseContentLanguage;
+               Option.map
+                 ~f:(fun v ->
+                       ("response-content-type",
+                         (ResponseContentType.to_header v)))
+                 x.responseContentType;
+               Option.map
+                 ~f:(fun v ->
+                       ("response-expires", (ResponseExpires.to_header v)))
+                 x.responseExpires;
+               Option.map
+                 ~f:(fun v -> ("versionId", (ObjectVersionId.to_header v)))
+                 x.versionId;
                Option.map
                  ~f:(fun v -> ("partNumber", (PartNumber.to_header v)))
                  x.partNumber])
@@ -632,7 +739,33 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("continuation-token", (Token.to_header v)))
                   x.continuationToken])
-      | ListBuckets -> (Format.kasprintf Uri.of_string) "/"
+      | ListBuckets ->
+          Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("max-buckets", (MaxBuckets.to_header v)))
+                  x.maxBuckets;
+               Option.map
+                 ~f:(fun v -> ("continuation-token", (Token.to_header v)))
+                 x.continuationToken;
+               Option.map ~f:(fun v -> ("prefix", (Prefix.to_header v)))
+                 x.prefix;
+               Option.map
+                 ~f:(fun v -> ("bucket-region", (BucketRegion.to_header v)))
+                 x.bucketRegion])
+      | ListDirectoryBuckets ->
+          Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("continuation-token",
+                          (DirectoryBucketToken.to_header v)))
+                  x.continuationToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("max-directory-buckets",
+                         (MaxDirectoryBuckets.to_header v)))
+                 x.maxDirectoryBuckets])
       | ListMultipartUploads ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/%s?uploads"
@@ -733,6 +866,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                        ("part-number-marker", (PartNumberMarker.to_header v)))
                  x.partNumberMarker;
                Some ("uploadId", (MultipartUploadId.to_header x.uploadId))])
+      | PutBucketAbac ->
+          (Format.kasprintf Uri.of_string) "/%s?abac"
+            (BucketName.to_header x.PutBucketAbacRequest.bucket)
       | PutBucketAccelerateConfiguration ->
           (Format.kasprintf Uri.of_string) "/%s?accelerate"
             (BucketName.to_header
@@ -855,6 +991,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | PutPublicAccessBlock ->
           (Format.kasprintf Uri.of_string) "/%s?publicAccessBlock"
             (BucketName.to_header x.PutPublicAccessBlockRequest.bucket)
+      | RenameObject ->
+          (Format.kasprintf Uri.of_string) "/%s/%s?renameObject"
+            (BucketName.to_header x.RenameObjectRequest.bucket)
+            (ObjectKey.to_header x.RenameObjectRequest.key)
       | RestoreObject ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/%s/%s?restore"
@@ -868,6 +1008,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/%s/%s?select&select-type=2"
             (BucketName.to_header x.SelectObjectContentRequest.bucket)
             (ObjectKey.to_header x.SelectObjectContentRequest.key)
+      | UpdateBucketMetadataInventoryTableConfiguration ->
+          (Format.kasprintf Uri.of_string) "/%s?metadataInventoryTable"
+            (BucketName.to_header
+               x.UpdateBucketMetadataInventoryTableConfigurationRequest.bucket)
+      | UpdateBucketMetadataJournalTableConfiguration ->
+          (Format.kasprintf Uri.of_string) "/%s?metadataJournalTable"
+            (BucketName.to_header
+               x.UpdateBucketMetadataJournalTableConfigurationRequest.bucket)
+      | UpdateObjectEncryption ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/%s/%s?encryption"
+               (BucketName.to_header x.UpdateObjectEncryptionRequest.bucket)
+               (ObjectKey.to_header x.UpdateObjectEncryptionRequest.key))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("versionId", (ObjectVersionId.to_header v)))
+                  x.versionId])
       | UploadPart ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/%s/%s"
@@ -910,7 +1067,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    |> (List.map ~f:Awso.Xml.to_string))
                   |> (String.concat ~sep:"")) in
       Awso.Http.Request.make ?body (method_of_endpoint endp)
+  | CreateBucketMetadataConfiguration ->
+      let body =
+        (fun param ->
+           (((param |> MetadataConfiguration.to_value) |>
+               (Awso.Xml.of_value "CreateBucketMetadataConfiguration"))
+              |> (List.map ~f:Awso.Xml.to_string))
+             |> (String.concat ~sep:"")) req.metadataConfiguration in
+      Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | CreateBucketMetadataTableConfiguration ->
+      let body =
+        (fun param ->
+           (((param |> MetadataTableConfiguration.to_value) |>
+               (Awso.Xml.of_value "CreateBucketMetadataTableConfiguration"))
+              |> (List.map ~f:Awso.Xml.to_string))
+             |> (String.concat ~sep:"")) req.metadataTableConfiguration in
+      Awso.Http.Request.make ~body (method_of_endpoint endp)
   | CreateMultipartUpload -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateSession -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteBucket -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteBucketAnalyticsConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
@@ -922,6 +1096,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteBucketInventoryConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteBucketLifecycle -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteBucketMetadataConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteBucketMetadataTableConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteBucketMetricsConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteBucketOwnershipControls ->
@@ -943,6 +1121,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ~body (method_of_endpoint endp)
   | DeletePublicAccessBlock ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | GetBucketAbac -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetBucketAccelerateConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | GetBucketAcl -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -959,6 +1138,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make (method_of_endpoint endp)
   | GetBucketLocation -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetBucketLogging -> Awso.Http.Request.make (method_of_endpoint endp)
+  | GetBucketMetadataConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | GetBucketMetadataTableConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | GetBucketMetricsConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | GetBucketNotification -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -995,11 +1178,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListBucketMetricsConfigurations ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | ListBuckets -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListDirectoryBuckets -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListMultipartUploads -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListObjectVersions -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListObjects -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListObjectsV2 -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListParts -> Awso.Http.Request.make (method_of_endpoint endp)
+  | PutBucketAbac ->
+      let body =
+        (fun param ->
+           (((param |> AbacStatus.to_value) |>
+               (Awso.Xml.of_value "PutBucketAbac"))
+              |> (List.map ~f:Awso.Xml.to_string))
+             |> (String.concat ~sep:"")) req.abacStatus in
+      Awso.Http.Request.make ~body (method_of_endpoint endp)
   | PutBucketAccelerateConfiguration ->
       let body =
         (fun param ->
@@ -1214,6 +1406,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
               |> (List.map ~f:Awso.Xml.to_string))
              |> (String.concat ~sep:"")) req.publicAccessBlockConfiguration in
       Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | RenameObject -> Awso.Http.Request.make (method_of_endpoint endp)
   | RestoreObject ->
       let body =
         Option.map req.restoreRequest
@@ -1224,6 +1417,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                   |> (String.concat ~sep:"")) in
       Awso.Http.Request.make ?body (method_of_endpoint endp)
   | SelectObjectContent -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateBucketMetadataInventoryTableConfiguration ->
+      let body =
+        (fun param ->
+           (((param |> InventoryTableConfigurationUpdates.to_value) |>
+               (Awso.Xml.of_value
+                  "UpdateBucketMetadataInventoryTableConfiguration"))
+              |> (List.map ~f:Awso.Xml.to_string))
+             |> (String.concat ~sep:"")) req.inventoryTableConfiguration in
+      Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | UpdateBucketMetadataJournalTableConfiguration ->
+      let body =
+        (fun param ->
+           (((param |> JournalTableConfigurationUpdates.to_value) |>
+               (Awso.Xml.of_value
+                  "UpdateBucketMetadataJournalTableConfiguration"))
+              |> (List.map ~f:Awso.Xml.to_string))
+             |> (String.concat ~sep:"")) req.journalTableConfiguration in
+      Awso.Http.Request.make ~body (method_of_endpoint endp)
+  | UpdateObjectEncryption ->
+      let body =
+        (fun param ->
+           (((param |> ObjectEncryption.to_value) |>
+               (Awso.Xml.of_value "UpdateObjectEncryption"))
+              |> (List.map ~f:Awso.Xml.to_string))
+             |> (String.concat ~sep:"")) req.objectEncryption in
+      Awso.Http.Request.make ~body (method_of_endpoint endp)
   | UploadPart ->
       let body = Option.map req.body ~f:Body.to_header in
       Awso.Http.Request.make ?body (method_of_endpoint endp)
@@ -1292,10 +1511,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (CreateBucketOutput.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some CreateBucketOutput.error_of_xml))
+  | CreateBucketMetadataConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | CreateBucketMetadataTableConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CreateMultipartUpload ->
       if is_success
       then Ok (CreateMultipartUploadOutput.of_xml (response_to_xml resp))
       else Error (parse_aws_error None)
+  | CreateSession ->
+      if is_success
+      then Ok (CreateSessionOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some CreateSessionOutput.error_of_xml))
   | DeleteBucket ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteBucketAnalyticsConfiguration ->
@@ -1309,6 +1536,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteBucketInventoryConfiguration ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteBucketLifecycle ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketMetadataConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteBucketMetadataTableConfiguration ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteBucketMetricsConfiguration ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -1342,6 +1573,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error None)
   | DeletePublicAccessBlock ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | GetBucketAbac ->
+      if is_success
+      then
+        let body = AbacStatus.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (GetBucketAbacOutput.of_header_and_body (headers, body))
+      else Error (parse_aws_error None)
   | GetBucketAccelerateConfiguration ->
       if is_success
       then
@@ -1419,6 +1658,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | GetBucketLogging ->
       if is_success
       then Ok (GetBucketLoggingOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
+  | GetBucketMetadataConfiguration ->
+      if is_success
+      then
+        let body =
+          GetBucketMetadataConfigurationResult.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetBucketMetadataConfigurationOutput.of_header_and_body
+             (headers, body))
+      else Error (parse_aws_error None)
+  | GetBucketMetadataTableConfiguration ->
+      if is_success
+      then
+        let body =
+          GetBucketMetadataTableConfigurationResult.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetBucketMetadataTableConfigurationOutput.of_header_and_body
+             (headers, body))
       else Error (parse_aws_error None)
   | GetBucketMetricsConfiguration ->
       if is_success
@@ -1560,7 +1823,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (GetPublicAccessBlockOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error None)
-  | HeadBucket -> if is_success then Ok () else Error (parse_aws_error None)
+  | HeadBucket ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (HeadBucketOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some HeadBucketOutput.error_of_xml))
   | HeadObject ->
       if is_success
       then
@@ -1600,6 +1869,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListBucketsOutput.of_xml (response_to_xml resp))
       else Error (parse_aws_error None)
+  | ListDirectoryBuckets ->
+      if is_success
+      then Ok (ListDirectoryBucketsOutput.of_xml (response_to_xml resp))
+      else Error (parse_aws_error None)
   | ListMultipartUploads ->
       if is_success
       then Ok (ListMultipartUploadsOutput.of_xml (response_to_xml resp))
@@ -1620,6 +1893,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListPartsOutput.of_xml (response_to_xml resp))
       else Error (parse_aws_error None)
+  | PutBucketAbac ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutBucketAccelerateConfiguration ->
       if is_success then Ok () else Error (parse_aws_error None)
   | PutBucketAcl ->
@@ -1637,7 +1912,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | PutBucketLifecycle ->
       if is_success then Ok () else Error (parse_aws_error None)
   | PutBucketLifecycleConfiguration ->
-      if is_success then Ok () else Error (parse_aws_error None)
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (PutBucketLifecycleConfigurationOutput.of_header_and_body
+             (headers, ()))
+      else Error (parse_aws_error None)
   | PutBucketLogging ->
       if is_success then Ok () else Error (parse_aws_error None)
   | PutBucketMetricsConfiguration ->
@@ -1666,7 +1948,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let headers =
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (PutObjectOutput.of_header_and_body (headers, ()))
-      else Error (parse_aws_error None)
+      else Error (parse_aws_error (Some PutObjectOutput.error_of_xml))
   | PutObjectAcl ->
       if is_success
       then
@@ -1705,6 +1987,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error None)
   | PutPublicAccessBlock ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | RenameObject ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (RenameObjectOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some RenameObjectOutput.error_of_xml))
   | RestoreObject ->
       if is_success
       then
@@ -1722,6 +2011,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (SelectObjectContentOutput.of_header_and_body (headers, body))
       else Error (parse_aws_error None)
+  | UpdateBucketMetadataInventoryTableConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateBucketMetadataJournalTableConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateObjectEncryption ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateObjectEncryptionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateObjectEncryptionResponse.error_of_xml))
   | UploadPart ->
       if is_success
       then

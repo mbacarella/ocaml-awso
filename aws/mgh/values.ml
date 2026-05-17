@@ -24,6 +24,75 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module ProgressPercent =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ProgressPercent" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Status =
+  struct
+    type nonrec t =
+      | NOT_STARTED 
+      | IN_PROGRESS 
+      | FAILED 
+      | COMPLETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NOT_STARTED -> "NOT_STARTED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | FAILED -> "FAILED"
+      | COMPLETED -> "COMPLETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NOT_STARTED" -> NOT_STARTED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "FAILED" -> FAILED
+      | "COMPLETED" -> COMPLETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Status" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Status" j)
+    let to_json = simple_to_json to_value
+  end
+module StatusDetail =
+  struct
+    type nonrec t = string
+    let context_ = "StatusDetail"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:2500) >>=
+                  (fun () -> check_pattern i ~pattern:"^.{0,2500}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StatusDetail" j
+    let to_json = simple_to_json to_value
+  end
 module ResourceAttributeType =
   struct
     type nonrec t =
@@ -95,6 +164,44 @@ module ResourceAttributeValue =
     let of_json j = string_of_json ~kind:"ResourceAttributeValue" j
     let to_json = simple_to_json to_value
   end
+module SourceResourceDescription =
+  struct
+    type nonrec t = string
+    let context_ = "SourceResourceDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () -> check_pattern i ~pattern:"^.{0,500}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SourceResourceDescription" j
+    let to_json = simple_to_json to_value
+  end
+module SourceResourceName =
+  struct
+    type nonrec t = string
+    let context_ = "SourceResourceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1600) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SourceResourceName" j
+    let to_json = simple_to_json to_value
+  end
 module ProgressUpdateStream =
   struct
     type nonrec t = string
@@ -135,75 +242,6 @@ module MigrationTaskName =
     let of_json j = string_of_json ~kind:"MigrationTaskName" j
     let to_json = simple_to_json to_value
   end
-module ProgressPercent =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for ProgressPercent" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module Status =
-  struct
-    type nonrec t =
-      | NOT_STARTED 
-      | IN_PROGRESS 
-      | FAILED 
-      | COMPLETED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | NOT_STARTED -> "NOT_STARTED"
-      | IN_PROGRESS -> "IN_PROGRESS"
-      | FAILED -> "FAILED"
-      | COMPLETED -> "COMPLETED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "NOT_STARTED" -> NOT_STARTED
-      | "IN_PROGRESS" -> IN_PROGRESS
-      | "FAILED" -> FAILED
-      | "COMPLETED" -> COMPLETED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration Status" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"Status" j)
-    let to_json = simple_to_json to_value
-  end
-module StatusDetail =
-  struct
-    type nonrec t = string
-    let context_ = "StatusDetail"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:500) >>=
-                  (fun () -> check_pattern i ~pattern:"^.{0,500}$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"StatusDetail" j
-    let to_json = simple_to_json to_value
-  end
 module UpdateDateTime =
   struct
     type nonrec t = string
@@ -214,6 +252,71 @@ module UpdateDateTime =
     let to_header x = x
     let of_xml = string_of_xml ~kind:"a timestamp"
     let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module Task =
+  struct
+    type nonrec t =
+      {
+      status: Status.t
+        [@ocaml.doc
+          "Status of the task - Not Started, In-Progress, Complete."];
+      statusDetail: StatusDetail.t option
+        [@ocaml.doc
+          "Details of task status as notified by a migration tool. A tool might use this field to provide clarifying information about the status that is unique to that tool or that explains an error state."];
+      progressPercent: ProgressPercent.t option
+        [@ocaml.doc "Indication of the percentage completion of the task."]}
+    let context_ = "Task"
+    let make ?statusDetail =
+      fun ?progressPercent ->
+        fun ~status -> fun () -> { statusDetail; progressPercent; status }
+    let to_value x =
+      structure_to_value
+        [("Status", (Some (Status.to_value x.status)));
+        ("StatusDetail",
+          (Option.map x.statusDetail ~f:StatusDetail.to_value));
+        ("ProgressPercent",
+          (Option.map x.progressPercent ~f:ProgressPercent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let progressPercent =
+        (Option.map ~f:ProgressPercent.of_xml)
+          (Xml.child xml_arg0 "ProgressPercent") in
+      let statusDetail =
+        (Option.map ~f:StatusDetail.of_xml)
+          (Xml.child xml_arg0 "StatusDetail") in
+      let status =
+        Status.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+      make ?progressPercent ?statusDetail ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let progressPercent =
+        field_map json__ "ProgressPercent" ProgressPercent.of_json in
+      let statusDetail = field_map json__ "StatusDetail" StatusDetail.of_json in
+      let status = field_map_exn json__ "Status" Status.of_json in
+      make ?progressPercent ?statusDetail ~status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Task object encapsulating task information."]
+module UpdateType =
+  struct
+    type nonrec t =
+      | MIGRATION_TASK_STATE_UPDATED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MIGRATION_TASK_STATE_UPDATED -> "MIGRATION_TASK_STATE_UPDATED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MIGRATION_TASK_STATE_UPDATED" -> MIGRATION_TASK_STATE_UPDATED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration UpdateType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UpdateType" j)
     let to_json = simple_to_json to_value
   end
 module ConfigurationId =
@@ -370,9 +473,9 @@ module ResourceAttribute =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~value ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" ResourceAttributeValue.of_json in
-      let type_ = field_map_exn json "Type" ResourceAttributeType.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" ResourceAttributeValue.of_json in
+      let type_ = field_map_exn json__ "Type" ResourceAttributeType.of_json in
       make ~value ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -404,6 +507,51 @@ module RetryAfterSeconds =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module SourceResource =
+  struct
+    type nonrec t =
+      {
+      name: SourceResourceName.t
+        [@ocaml.doc
+          "This is the name that you want to use to identify the resource. If the resource is an AWS resource, we recommend that you set this parameter to the ARN of the resource."];
+      description: SourceResourceDescription.t option
+        [@ocaml.doc
+          "A description that can be free-form text to record additional detail about the resource for clarity or later reference."];
+      statusDetail: StatusDetail.t option
+        [@ocaml.doc "A free-form description of the status of the resource."]}
+    let context_ = "SourceResource"
+    let make ?description =
+      fun ?statusDetail ->
+        fun ~name -> fun () -> { description; statusDetail; name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (SourceResourceName.to_value x.name)));
+        ("Description",
+          (Option.map x.description ~f:SourceResourceDescription.to_value));
+        ("StatusDetail",
+          (Option.map x.statusDetail ~f:StatusDetail.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusDetail =
+        (Option.map ~f:StatusDetail.of_xml)
+          (Xml.child xml_arg0 "StatusDetail") in
+      let description =
+        (Option.map ~f:SourceResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        SourceResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?statusDetail ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusDetail = field_map json__ "StatusDetail" StatusDetail.of_json in
+      let description =
+        field_map json__ "Description" SourceResourceDescription.of_json in
+      let name = field_map_exn json__ "Name" SourceResourceName.of_json in
+      make ?statusDetail ?description ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A source resource can be a source server, a migration wave, an application, or any other resource that you track."]
 module ProgressUpdateStreamSummary =
   struct
     type nonrec t =
@@ -425,9 +573,9 @@ module ProgressUpdateStreamSummary =
           (Xml.child xml_arg0 "ProgressUpdateStreamName") in
       make ?progressUpdateStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let progressUpdateStreamName =
-        field_map json "ProgressUpdateStreamName"
+        field_map json__ "ProgressUpdateStreamName"
           ProgressUpdateStream.of_json in
       make ?progressUpdateStreamName ()
     let to_json v = composed_to_json to_value v
@@ -502,22 +650,61 @@ module MigrationTaskSummary =
       make ?updateDateTime ?statusDetail ?progressPercent ?status
         ?migrationTaskName ?progressUpdateStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updateDateTime =
-        field_map json "UpdateDateTime" UpdateDateTime.of_json in
-      let statusDetail = field_map json "StatusDetail" StatusDetail.of_json in
+        field_map json__ "UpdateDateTime" UpdateDateTime.of_json in
+      let statusDetail = field_map json__ "StatusDetail" StatusDetail.of_json in
       let progressPercent =
-        field_map json "ProgressPercent" ProgressPercent.of_json in
-      let status = field_map json "Status" Status.of_json in
+        field_map json__ "ProgressPercent" ProgressPercent.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       let migrationTaskName =
-        field_map json "MigrationTaskName" MigrationTaskName.of_json in
+        field_map json__ "MigrationTaskName" MigrationTaskName.of_json in
       let progressUpdateStream =
-        field_map json "ProgressUpdateStream" ProgressUpdateStream.of_json in
+        field_map json__ "ProgressUpdateStream" ProgressUpdateStream.of_json in
       make ?updateDateTime ?statusDetail ?progressPercent ?status
         ?migrationTaskName ?progressUpdateStream ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "MigrationTaskSummary includes MigrationTaskName, ProgressPercent, ProgressUpdateStream, Status, and UpdateDateTime for each task."]
+module MigrationTaskUpdate =
+  struct
+    type nonrec t =
+      {
+      updateDateTime: UpdateDateTime.t option
+        [@ocaml.doc "The timestamp for the update."];
+      updateType: UpdateType.t option [@ocaml.doc "The type of the update."];
+      migrationTaskState: Task.t option }
+    let make ?updateDateTime =
+      fun ?updateType ->
+        fun ?migrationTaskState ->
+          fun () -> { updateDateTime; updateType; migrationTaskState }
+    let to_value x =
+      structure_to_value
+        [("UpdateDateTime",
+           (Option.map x.updateDateTime ~f:UpdateDateTime.to_value));
+        ("UpdateType", (Option.map x.updateType ~f:UpdateType.to_value));
+        ("MigrationTaskState",
+          (Option.map x.migrationTaskState ~f:Task.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let migrationTaskState =
+        (Option.map ~f:Task.of_xml) (Xml.child xml_arg0 "MigrationTaskState") in
+      let updateType =
+        (Option.map ~f:UpdateType.of_xml) (Xml.child xml_arg0 "UpdateType") in
+      let updateDateTime =
+        (Option.map ~f:UpdateDateTime.of_xml)
+          (Xml.child xml_arg0 "UpdateDateTime") in
+      make ?migrationTaskState ?updateType ?updateDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let migrationTaskState =
+        field_map json__ "MigrationTaskState" Task.of_json in
+      let updateType = field_map json__ "UpdateType" UpdateType.of_json in
+      let updateDateTime =
+        field_map json__ "UpdateDateTime" UpdateDateTime.of_json in
+      make ?migrationTaskState ?updateType ?updateDateTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A migration-task progress update."]
 module DiscoveredResource =
   struct
     type nonrec t =
@@ -547,11 +734,11 @@ module DiscoveredResource =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationId") in
       make ?description ~configurationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" DiscoveredResourceDescription.of_json in
+        field_map json__ "Description" DiscoveredResourceDescription.of_json in
       let configurationId =
-        field_map_exn json "ConfigurationId" ConfigurationId.of_json in
+        field_map_exn json__ "ConfigurationId" ConfigurationId.of_json in
       make ?description ~configurationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -583,10 +770,10 @@ module CreatedArtifact =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" CreatedArtifactDescription.of_json in
-      let name = field_map_exn json "Name" CreatedArtifactName.of_json in
+        field_map json__ "Description" CreatedArtifactDescription.of_json in
+      let name = field_map_exn json__ "Name" CreatedArtifactName.of_json in
       make ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -628,13 +815,13 @@ module ApplicationState =
           (Xml.child xml_arg0 "ApplicationId") in
       make ?lastUpdatedTime ?applicationStatus ?applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" UpdateDateTime.of_json in
+        field_map json__ "LastUpdatedTime" UpdateDateTime.of_json in
       let applicationStatus =
-        field_map json "ApplicationStatus" ApplicationStatus.of_json in
+        field_map json__ "ApplicationStatus" ApplicationStatus.of_json in
       let applicationId =
-        field_map json "ApplicationId" ApplicationId.of_json in
+        field_map json__ "ApplicationId" ApplicationId.of_json in
       make ?lastUpdatedTime ?applicationStatus ?applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -648,6 +835,9 @@ module LatestResourceAttributeList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -669,49 +859,6 @@ module LatestResourceAttributeList =
         ~of_json:ResourceAttribute.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Task =
-  struct
-    type nonrec t =
-      {
-      status: Status.t
-        [@ocaml.doc
-          "Status of the task - Not Started, In-Progress, Complete."];
-      statusDetail: StatusDetail.t option
-        [@ocaml.doc
-          "Details of task status as notified by a migration tool. A tool might use this field to provide clarifying information about the status that is unique to that tool or that explains an error state."];
-      progressPercent: ProgressPercent.t option
-        [@ocaml.doc "Indication of the percentage completion of the task."]}
-    let context_ = "Task"
-    let make ?statusDetail =
-      fun ?progressPercent ->
-        fun ~status -> fun () -> { statusDetail; progressPercent; status }
-    let to_value x =
-      structure_to_value
-        [("Status", (Some (Status.to_value x.status)));
-        ("StatusDetail",
-          (Option.map x.statusDetail ~f:StatusDetail.to_value));
-        ("ProgressPercent",
-          (Option.map x.progressPercent ~f:ProgressPercent.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let progressPercent =
-        (Option.map ~f:ProgressPercent.of_xml)
-          (Xml.child xml_arg0 "ProgressPercent") in
-      let statusDetail =
-        (Option.map ~f:StatusDetail.of_xml)
-          (Xml.child xml_arg0 "StatusDetail") in
-      let status =
-        Status.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
-      make ?progressPercent ?statusDetail ~status ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let progressPercent =
-        field_map json "ProgressPercent" ProgressPercent.of_json in
-      let statusDetail = field_map json "StatusDetail" StatusDetail.of_json in
-      let status = field_map_exn json "Status" Status.of_json in
-      make ?progressPercent ?statusDetail ~status ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Task object encapsulating task information."]
 module AccessDeniedException =
   struct
     type nonrec t = {
@@ -726,8 +873,8 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -746,8 +893,8 @@ module DryRunOperation =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -766,8 +913,8 @@ module HomeRegionNotSetException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -786,8 +933,8 @@ module InternalServerError =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -806,8 +953,8 @@ module InvalidInputException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -826,8 +973,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -846,8 +993,8 @@ module ServiceUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -856,18 +1003,17 @@ module ThrottlingException =
   struct
     type nonrec t =
       {
-      message: ErrorMessage.t
+      message: ErrorMessage.t option
         [@ocaml.doc
           "A message that provides information about the exception."];
       retryAfterSeconds: RetryAfterSeconds.t option
         [@ocaml.doc
           "The number of seconds the caller should wait before retrying."]}
-    let context_ = "ThrottlingException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ErrorMessage.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
         ("RetryAfterSeconds",
           (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value))]
     let to_query v = to_query to_value v
@@ -876,15 +1022,14 @@ module ThrottlingException =
         (Option.map ~f:RetryAfterSeconds.of_xml)
           (Xml.child xml_arg0 "RetryAfterSeconds") in
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
-      let message = field_map_exn json "Message" ErrorMessage.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "RetryAfterSeconds" RetryAfterSeconds.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
 module UnauthorizedOperation =
@@ -901,8 +1046,8 @@ module UnauthorizedOperation =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -929,6 +1074,9 @@ module ResourceAttributeList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -979,19 +1127,21 @@ module PolicyErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Exception raised when there are problems accessing Application Discovery Service (Application Discovery Service); most likely due to a misconfigured policy or the migrationhub-discovery role is missing or not configured correctly."]
-module ProgressUpdateStreamSummaryList =
+module SourceResourceList =
   struct
-    type nonrec t = ProgressUpdateStreamSummary.t list
+    type nonrec t = SourceResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:ProgressUpdateStreamSummary.to_value)) |>
-        (fun x -> `List x)
+      (xs |> (List.map ~f:SourceResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -1005,10 +1155,10 @@ module ProgressUpdateStreamSummaryList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:ProgressUpdateStreamSummary.of_xml)
+                     | _ -> true))) ~f:SourceResource.of_xml)
     let of_json j =
-      list_of_json ~kind:"ProgressUpdateStreamSummaryList"
-        ~of_json:ProgressUpdateStreamSummary.of_json j
+      list_of_json ~kind:"SourceResourceList" ~of_json:SourceResource.of_json
+        j
     let to_json v = composed_to_json to_value v
   end
 module Token =
@@ -1033,6 +1183,54 @@ module Token =
     let of_json j = string_of_json ~kind:"Token" j
     let to_json = simple_to_json to_value
   end
+module MaxResultsSourceResources =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResultsSourceResources"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ProgressUpdateStreamSummaryList =
+  struct
+    type nonrec t = ProgressUpdateStreamSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProgressUpdateStreamSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProgressUpdateStreamSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProgressUpdateStreamSummaryList"
+        ~of_json:ProgressUpdateStreamSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module MaxResults =
   struct
     type nonrec t = int
@@ -1055,6 +1253,9 @@ module MigrationTaskSummaryList =
   struct
     type nonrec t = MigrationTaskSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MigrationTaskSummary.to_value)) |>
         (fun x -> `List x)
@@ -1097,10 +1298,42 @@ module ResourceName =
     let of_json j = string_of_json ~kind:"ResourceName" j
     let to_json = simple_to_json to_value
   end
+module MigrationTaskUpdateList =
+  struct
+    type nonrec t = MigrationTaskUpdate.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MigrationTaskUpdate.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MigrationTaskUpdate.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MigrationTaskUpdateList"
+        ~of_json:MigrationTaskUpdate.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DiscoveredResourceList =
   struct
     type nonrec t = DiscoveredResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DiscoveredResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1144,6 +1377,9 @@ module CreatedArtifactList =
   struct
     type nonrec t = CreatedArtifact.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CreatedArtifact.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1193,6 +1429,9 @@ module ApplicationStateList =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1223,6 +1462,9 @@ module ApplicationIds =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1304,17 +1546,17 @@ module MigrationTask =
       make ?resourceAttributeList ?updateDateTime ?task ?migrationTaskName
         ?progressUpdateStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceAttributeList =
-        field_map json "ResourceAttributeList"
+        field_map json__ "ResourceAttributeList"
           LatestResourceAttributeList.of_json in
       let updateDateTime =
-        field_map json "UpdateDateTime" UpdateDateTime.of_json in
-      let task = field_map json "Task" Task.of_json in
+        field_map json__ "UpdateDateTime" UpdateDateTime.of_json in
+      let task = field_map json__ "Task" Task.of_json in
       let migrationTaskName =
-        field_map json "MigrationTaskName" MigrationTaskName.of_json in
+        field_map json__ "MigrationTaskName" MigrationTaskName.of_json in
       let progressUpdateStream =
-        field_map json "ProgressUpdateStream" ProgressUpdateStream.of_json in
+        field_map json__ "ProgressUpdateStream" ProgressUpdateStream.of_json in
       make ?resourceAttributeList ?updateDateTime ?task ?migrationTaskName
         ?progressUpdateStream ()
     let to_json v = composed_to_json to_value v
@@ -1483,15 +1725,15 @@ module PutResourceAttributesRequest =
       make ?dryRun ~resourceAttributeList ~migrationTaskName
         ~progressUpdateStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" DryRun.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
       let resourceAttributeList =
-        field_map_exn json "ResourceAttributeList"
+        field_map_exn json__ "ResourceAttributeList"
           ResourceAttributeList.of_json in
       let migrationTaskName =
-        field_map_exn json "MigrationTaskName" MigrationTaskName.of_json in
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
       let progressUpdateStream =
-        field_map_exn json "ProgressUpdateStream"
+        field_map_exn json__ "ProgressUpdateStream"
           ProgressUpdateStream.of_json in
       make ?dryRun ~resourceAttributeList ~migrationTaskName
         ~progressUpdateStream ()
@@ -1677,17 +1919,17 @@ module NotifyMigrationTaskStateRequest =
       make ?dryRun ~nextUpdateSeconds ~updateDateTime ~task
         ~migrationTaskName ~progressUpdateStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" DryRun.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
       let nextUpdateSeconds =
-        field_map_exn json "NextUpdateSeconds" NextUpdateSeconds.of_json in
+        field_map_exn json__ "NextUpdateSeconds" NextUpdateSeconds.of_json in
       let updateDateTime =
-        field_map_exn json "UpdateDateTime" UpdateDateTime.of_json in
-      let task = field_map_exn json "Task" Task.of_json in
+        field_map_exn json__ "UpdateDateTime" UpdateDateTime.of_json in
+      let task = field_map_exn json__ "Task" Task.of_json in
       let migrationTaskName =
-        field_map_exn json "MigrationTaskName" MigrationTaskName.of_json in
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
       let progressUpdateStream =
-        field_map_exn json "ProgressUpdateStream"
+        field_map_exn json__ "ProgressUpdateStream"
           ProgressUpdateStream.of_json in
       make ?dryRun ~nextUpdateSeconds ~updateDateTime ~task
         ~migrationTaskName ~progressUpdateStream ()
@@ -1858,17 +2100,189 @@ module NotifyApplicationStateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationId") in
       make ?dryRun ?updateDateTime ~status ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" DryRun.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
       let updateDateTime =
-        field_map json "UpdateDateTime" UpdateDateTime.of_json in
-      let status = field_map_exn json "Status" ApplicationStatus.of_json in
+        field_map json__ "UpdateDateTime" UpdateDateTime.of_json in
+      let status = field_map_exn json__ "Status" ApplicationStatus.of_json in
       let applicationId =
-        field_map_exn json "ApplicationId" ApplicationId.of_json in
+        field_map_exn json__ "ApplicationId" ApplicationId.of_json in
       make ?dryRun ?updateDateTime ~status ~applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Sets the migration state of an application. For a given application identified by the value passed to ApplicationId, its status is set or updated by passing one of three values to Status: NOT_STARTED | IN_PROGRESS | COMPLETED."]
+module ListSourceResourcesResult =
+  struct
+    type nonrec t =
+      {
+      nextToken: Token.t option
+        [@ocaml.doc
+          "If the response includes a NextToken value, that means that there are more results available. The value of NextToken is a unique pagination token for each page. To retrieve the next page of results, call this API again and specify this NextToken value in the request. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."];
+      sourceResourceList: SourceResourceList.t option
+        [@ocaml.doc "The list of source resources."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?sourceResourceList -> fun () -> { nextToken; sourceResourceList }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("SourceResourceList",
+          (Option.map x.sourceResourceList ~f:SourceResourceList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceResourceList =
+        (Option.map ~f:SourceResourceList.of_xml)
+          (Xml.child xml_arg0 "SourceResourceList") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?sourceResourceList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceResourceList =
+        field_map json__ "SourceResourceList" SourceResourceList.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?sourceResourceList ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the source resource that are associated with the specified MigrationTaskName and ProgressUpdateStream."]
+module ListSourceResourcesRequest =
+  struct
+    type nonrec t =
+      {
+      progressUpdateStream: ProgressUpdateStream.t
+        [@ocaml.doc
+          "The name of the progress-update stream, which is used for access control as well as a namespace for migration-task names that is implicitly linked to your AWS account. The progress-update stream must uniquely identify the migration tool as it is used for all updates made by the tool; however, it does not need to be unique for each AWS account because it is scoped to the AWS account."];
+      migrationTaskName: MigrationTaskName.t
+        [@ocaml.doc
+          "A unique identifier that references the migration task. Do not store confidential data in this field."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "If NextToken was returned by a previous call, there are more results available. The value of NextToken is a unique pagination token for each page. To retrieve the next page of results, specify the NextToken value that the previous call returned. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."];
+      maxResults: MaxResultsSourceResources.t option
+        [@ocaml.doc
+          "The maximum number of results to include in the response. If more results exist than the value that you specify here for MaxResults, the response will include a token that you can use to retrieve the next set of results."]}
+    let context_ = "ListSourceResourcesRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~progressUpdateStream ->
+          fun ~migrationTaskName ->
+            fun () ->
+              {
+                nextToken;
+                maxResults;
+                progressUpdateStream;
+                migrationTaskName
+              }
+    let to_value x =
+      structure_to_value
+        [("ProgressUpdateStream",
+           (Some (ProgressUpdateStream.to_value x.progressUpdateStream)));
+        ("MigrationTaskName",
+          (Some (MigrationTaskName.to_value x.migrationTaskName)));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxResultsSourceResources.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResultsSourceResources.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let migrationTaskName =
+        MigrationTaskName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MigrationTaskName") in
+      let progressUpdateStream =
+        ProgressUpdateStream.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
+      make ?maxResults ?nextToken ~migrationTaskName ~progressUpdateStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsSourceResources.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let migrationTaskName =
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
+      let progressUpdateStream =
+        field_map_exn json__ "ProgressUpdateStream"
+          ProgressUpdateStream.of_json in
+      make ?maxResults ?nextToken ~migrationTaskName ~progressUpdateStream ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the source resource that are associated with the specified MigrationTaskName and ProgressUpdateStream."]
 module ListProgressUpdateStreamsResult =
   struct
     type nonrec t =
@@ -1972,10 +2386,10 @@ module ListProgressUpdateStreamsResult =
           (Xml.child xml_arg0 "ProgressUpdateStreamSummaryList") in
       make ?nextToken ?progressUpdateStreamSummaryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let progressUpdateStreamSummaryList =
-        field_map json "ProgressUpdateStreamSummaryList"
+        field_map json__ "ProgressUpdateStreamSummaryList"
           ProgressUpdateStreamSummaryList.of_json in
       make ?nextToken ?progressUpdateStreamSummaryList ()
     let to_json v = composed_to_json to_value v
@@ -2005,9 +2419,9 @@ module ListProgressUpdateStreamsRequest =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2132,11 +2546,11 @@ module ListMigrationTasksResult =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?migrationTaskSummaryList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let migrationTaskSummaryList =
-        field_map json "MigrationTaskSummaryList"
+        field_map json__ "MigrationTaskSummaryList"
           MigrationTaskSummaryList.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?migrationTaskSummaryList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2174,14 +2588,186 @@ module ListMigrationTasksRequest =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resourceName ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" ResourceName.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" ResourceName.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?resourceName ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all, or filtered by resource name, migration tasks associated with the user account making this call. This API has the following traits: Can show a summary list of the most recent migration tasks. Can show a summary list of migration tasks associated with a given discovered resource. Lists migration tasks in a paginated interface."]
+module ListMigrationTaskUpdatesResult =
+  struct
+    type nonrec t =
+      {
+      nextToken: Token.t option
+        [@ocaml.doc
+          "If the response includes a NextToken value, that means that there are more results available. The value of NextToken is a unique pagination token for each page. To retrieve the next page of results, call this API again and specify this NextToken value in the request. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."];
+      migrationTaskUpdateList: MigrationTaskUpdateList.t option
+        [@ocaml.doc "The list of migration-task updates."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?migrationTaskUpdateList ->
+        fun () -> { nextToken; migrationTaskUpdateList }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("MigrationTaskUpdateList",
+          (Option.map x.migrationTaskUpdateList
+             ~f:MigrationTaskUpdateList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let migrationTaskUpdateList =
+        (Option.map ~f:MigrationTaskUpdateList.of_xml)
+          (Xml.child xml_arg0 "MigrationTaskUpdateList") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?migrationTaskUpdateList ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let migrationTaskUpdateList =
+        field_map json__ "MigrationTaskUpdateList"
+          MigrationTaskUpdateList.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?migrationTaskUpdateList ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This is a paginated API that returns all the migration-task states for the specified MigrationTaskName and ProgressUpdateStream."]
+module ListMigrationTaskUpdatesRequest =
+  struct
+    type nonrec t =
+      {
+      progressUpdateStream: ProgressUpdateStream.t
+        [@ocaml.doc
+          "The name of the progress-update stream, which is used for access control as well as a namespace for migration-task names that is implicitly linked to your AWS account. The progress-update stream must uniquely identify the migration tool as it is used for all updates made by the tool; however, it does not need to be unique for each AWS account because it is scoped to the AWS account."];
+      migrationTaskName: MigrationTaskName.t
+        [@ocaml.doc
+          "A unique identifier that references the migration task. Do not include sensitive data in this field."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "If NextToken was returned by a previous call, there are more results available. The value of NextToken is a unique pagination token for each page. To retrieve the next page of results, specify the NextToken value that the previous call returned. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return an HTTP 400 InvalidToken error."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to include in the response. If more results exist than the value that you specify here for MaxResults, the response will include a token that you can use to retrieve the next set of results."]}
+    let context_ = "ListMigrationTaskUpdatesRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~progressUpdateStream ->
+          fun ~migrationTaskName ->
+            fun () ->
+              {
+                nextToken;
+                maxResults;
+                progressUpdateStream;
+                migrationTaskName
+              }
+    let to_value x =
+      structure_to_value
+        [("ProgressUpdateStream",
+           (Some (ProgressUpdateStream.to_value x.progressUpdateStream)));
+        ("MigrationTaskName",
+          (Some (MigrationTaskName.to_value x.migrationTaskName)));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let migrationTaskName =
+        MigrationTaskName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MigrationTaskName") in
+      let progressUpdateStream =
+        ProgressUpdateStream.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
+      make ?maxResults ?nextToken ~migrationTaskName ~progressUpdateStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let migrationTaskName =
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
+      let progressUpdateStream =
+        field_map_exn json__ "ProgressUpdateStream"
+          ProgressUpdateStream.of_json in
+      make ?maxResults ?nextToken ~migrationTaskName ~progressUpdateStream ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This is a paginated API that returns all the migration-task states for the specified MigrationTaskName and ProgressUpdateStream."]
 module ListDiscoveredResourcesResult =
   struct
     type nonrec t =
@@ -2293,11 +2879,11 @@ module ListDiscoveredResourcesResult =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?discoveredResourceList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let discoveredResourceList =
-        field_map json "DiscoveredResourceList"
+        field_map json__ "DiscoveredResourceList"
           DiscoveredResourceList.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?discoveredResourceList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2352,14 +2938,14 @@ module ListDiscoveredResourcesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ?maxResults ?nextToken ~migrationTaskName ~progressUpdateStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" MaxResultsResources.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+        field_map json__ "MaxResults" MaxResultsResources.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let migrationTaskName =
-        field_map_exn json "MigrationTaskName" MigrationTaskName.of_json in
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
       let progressUpdateStream =
-        field_map_exn json "ProgressUpdateStream"
+        field_map_exn json__ "ProgressUpdateStream"
           ProgressUpdateStream.of_json in
       make ?maxResults ?nextToken ~migrationTaskName ~progressUpdateStream ()
     let to_json v = composed_to_json to_value v
@@ -2475,10 +3061,10 @@ module ListCreatedArtifactsResult =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?createdArtifactList ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let createdArtifactList =
-        field_map json "CreatedArtifactList" CreatedArtifactList.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+        field_map json__ "CreatedArtifactList" CreatedArtifactList.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       make ?createdArtifactList ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2533,14 +3119,14 @@ module ListCreatedArtifactsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ?maxResults ?nextToken ~migrationTaskName ~progressUpdateStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" MaxResultsCreatedArtifacts.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+        field_map json__ "MaxResults" MaxResultsCreatedArtifacts.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let migrationTaskName =
-        field_map_exn json "MigrationTaskName" MigrationTaskName.of_json in
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
       let progressUpdateStream =
-        field_map_exn json "ProgressUpdateStream"
+        field_map_exn json__ "ProgressUpdateStream"
           ProgressUpdateStream.of_json in
       make ?maxResults ?nextToken ~migrationTaskName ~progressUpdateStream ()
     let to_json v = composed_to_json to_value v
@@ -2647,10 +3233,10 @@ module ListApplicationStatesResult =
           (Xml.child xml_arg0 "ApplicationStateList") in
       make ?nextToken ?applicationStateList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let applicationStateList =
-        field_map json "ApplicationStateList" ApplicationStateList.of_json in
+        field_map json__ "ApplicationStateList" ApplicationStateList.of_json in
       make ?nextToken ?applicationStateList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2688,11 +3274,11 @@ module ListApplicationStatesRequest =
           (Xml.child xml_arg0 "ApplicationIds") in
       make ?maxResults ?nextToken ?applicationIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let applicationIds =
-        field_map json "ApplicationIds" ApplicationIds.of_json in
+        field_map json__ "ApplicationIds" ApplicationIds.of_json in
       make ?maxResults ?nextToken ?applicationIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2845,17 +3431,186 @@ module ImportMigrationTaskRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ?dryRun ~migrationTaskName ~progressUpdateStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" DryRun.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
       let migrationTaskName =
-        field_map_exn json "MigrationTaskName" MigrationTaskName.of_json in
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
       let progressUpdateStream =
-        field_map_exn json "ProgressUpdateStream"
+        field_map_exn json__ "ProgressUpdateStream"
           ProgressUpdateStream.of_json in
       make ?dryRun ~migrationTaskName ~progressUpdateStream ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Registers a new migration task which represents a server, database, etc., being migrated to AWS by a migration tool. This API is a prerequisite to calling the NotifyMigrationTaskState API as the migration tool must first register the migration task with Migration Hub."]
+module DisassociateSourceResourceResult =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `DryRunOperation of DryRunOperation.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnauthorizedOperation of UnauthorizedOperation.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "DryRunOperation" -> `DryRunOperation (DryRunOperation.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnauthorizedOperation" ->
+          `UnauthorizedOperation (UnauthorizedOperation.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "DryRunOperation" -> `DryRunOperation (DryRunOperation.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnauthorizedOperation" ->
+          `UnauthorizedOperation (UnauthorizedOperation.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `DryRunOperation e ->
+          `Assoc
+            [("error", (`String "DryRunOperation"));
+            ("details", (DryRunOperation.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnauthorizedOperation e ->
+          `Assoc
+            [("error", (`String "UnauthorizedOperation"));
+            ("details", (UnauthorizedOperation.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes the association between a source resource and a migration task."]
+module DisassociateSourceResourceRequest =
+  struct
+    type nonrec t =
+      {
+      progressUpdateStream: ProgressUpdateStream.t
+        [@ocaml.doc
+          "The name of the progress-update stream, which is used for access control as well as a namespace for migration-task names that is implicitly linked to your AWS account. The progress-update stream must uniquely identify the migration tool as it is used for all updates made by the tool; however, it does not need to be unique for each AWS account because it is scoped to the AWS account."];
+      migrationTaskName: MigrationTaskName.t
+        [@ocaml.doc
+          "A unique identifier that references the migration task. Do not include sensitive data in this field."];
+      sourceResourceName: SourceResourceName.t
+        [@ocaml.doc "The name that was specified for the source resource."];
+      dryRun: DryRun.t option
+        [@ocaml.doc
+          "This is an optional parameter that you can use to test whether the call will succeed. Set this parameter to true to verify that you have the permissions that are required to make the call, and that you have specified the other parameters in the call correctly."]}
+    let context_ = "DisassociateSourceResourceRequest"
+    let make ?dryRun =
+      fun ~progressUpdateStream ->
+        fun ~migrationTaskName ->
+          fun ~sourceResourceName ->
+            fun () ->
+              {
+                dryRun;
+                progressUpdateStream;
+                migrationTaskName;
+                sourceResourceName
+              }
+    let to_value x =
+      structure_to_value
+        [("ProgressUpdateStream",
+           (Some (ProgressUpdateStream.to_value x.progressUpdateStream)));
+        ("MigrationTaskName",
+          (Some (MigrationTaskName.to_value x.migrationTaskName)));
+        ("SourceResourceName",
+          (Some (SourceResourceName.to_value x.sourceResourceName)));
+        ("DryRun", (Option.map x.dryRun ~f:DryRun.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dryRun =
+        (Option.map ~f:DryRun.of_xml) (Xml.child xml_arg0 "DryRun") in
+      let sourceResourceName =
+        SourceResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceResourceName") in
+      let migrationTaskName =
+        MigrationTaskName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MigrationTaskName") in
+      let progressUpdateStream =
+        ProgressUpdateStream.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
+      make ?dryRun ~sourceResourceName ~migrationTaskName
+        ~progressUpdateStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
+      let sourceResourceName =
+        field_map_exn json__ "SourceResourceName" SourceResourceName.of_json in
+      let migrationTaskName =
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
+      let progressUpdateStream =
+        field_map_exn json__ "ProgressUpdateStream"
+          ProgressUpdateStream.of_json in
+      make ?dryRun ~sourceResourceName ~migrationTaskName
+        ~progressUpdateStream ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes the association between a source resource and a migration task."]
 module DisassociateDiscoveredResourceResult =
   struct
     type nonrec t = unit
@@ -3020,14 +3775,14 @@ module DisassociateDiscoveredResourceRequest =
       make ?dryRun ~configurationId ~migrationTaskName ~progressUpdateStream
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" DryRun.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
       let configurationId =
-        field_map_exn json "ConfigurationId" ConfigurationId.of_json in
+        field_map_exn json__ "ConfigurationId" ConfigurationId.of_json in
       let migrationTaskName =
-        field_map_exn json "MigrationTaskName" MigrationTaskName.of_json in
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
       let progressUpdateStream =
-        field_map_exn json "ProgressUpdateStream"
+        field_map_exn json__ "ProgressUpdateStream"
           ProgressUpdateStream.of_json in
       make ?dryRun ~configurationId ~migrationTaskName ~progressUpdateStream
         ()
@@ -3198,14 +3953,15 @@ module DisassociateCreatedArtifactRequest =
       make ?dryRun ~createdArtifactName ~migrationTaskName
         ~progressUpdateStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" DryRun.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
       let createdArtifactName =
-        field_map_exn json "CreatedArtifactName" CreatedArtifactName.of_json in
+        field_map_exn json__ "CreatedArtifactName"
+          CreatedArtifactName.of_json in
       let migrationTaskName =
-        field_map_exn json "MigrationTaskName" MigrationTaskName.of_json in
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
       let progressUpdateStream =
-        field_map_exn json "ProgressUpdateStream"
+        field_map_exn json__ "ProgressUpdateStream"
           ProgressUpdateStream.of_json in
       make ?dryRun ~createdArtifactName ~migrationTaskName
         ~progressUpdateStream ()
@@ -3314,9 +4070,9 @@ module DescribeMigrationTaskResult =
           (Xml.child xml_arg0 "MigrationTask") in
       make ?migrationTask ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let migrationTask =
-        field_map json "MigrationTask" MigrationTask.of_json in
+        field_map json__ "MigrationTask" MigrationTask.of_json in
       make ?migrationTask ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3350,11 +4106,11 @@ module DescribeMigrationTaskRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
       make ~migrationTaskName ~progressUpdateStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let migrationTaskName =
-        field_map_exn json "MigrationTaskName" MigrationTaskName.of_json in
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
       let progressUpdateStream =
-        field_map_exn json "ProgressUpdateStream"
+        field_map_exn json__ "ProgressUpdateStream"
           ProgressUpdateStream.of_json in
       make ~migrationTaskName ~progressUpdateStream ()
     let to_json v = composed_to_json to_value v
@@ -3481,11 +4237,11 @@ module DescribeApplicationStateResult =
           (Xml.child xml_arg0 "ApplicationStatus") in
       make ?lastUpdatedTime ?applicationStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedTime =
-        field_map json "LastUpdatedTime" UpdateDateTime.of_json in
+        field_map json__ "LastUpdatedTime" UpdateDateTime.of_json in
       let applicationStatus =
-        field_map json "ApplicationStatus" ApplicationStatus.of_json in
+        field_map json__ "ApplicationStatus" ApplicationStatus.of_json in
       make ?lastUpdatedTime ?applicationStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the migration status of an application."]
@@ -3508,9 +4264,9 @@ module DescribeApplicationStateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationId") in
       make ~applicationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationId =
-        field_map_exn json "ApplicationId" ApplicationId.of_json in
+        field_map_exn json__ "ApplicationId" ApplicationId.of_json in
       make ~applicationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the migration status of an application."]
@@ -3655,10 +4411,10 @@ module DeleteProgressUpdateStreamRequest =
              "ProgressUpdateStreamName") in
       make ?dryRun ~progressUpdateStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" DryRun.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
       let progressUpdateStreamName =
-        field_map_exn json "ProgressUpdateStreamName"
+        field_map_exn json__ "ProgressUpdateStreamName"
           ProgressUpdateStream.of_json in
       make ?dryRun ~progressUpdateStreamName ()
     let to_json v = composed_to_json to_value v
@@ -3796,15 +4552,183 @@ module CreateProgressUpdateStreamRequest =
              "ProgressUpdateStreamName") in
       make ?dryRun ~progressUpdateStreamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" DryRun.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
       let progressUpdateStreamName =
-        field_map_exn json "ProgressUpdateStreamName"
+        field_map_exn json__ "ProgressUpdateStreamName"
           ProgressUpdateStream.of_json in
       make ?dryRun ~progressUpdateStreamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a progress update stream which is an AWS resource used for access control as well as a namespace for migration task names that is implicitly linked to your AWS account. It must uniquely identify the migration tool as it is used for all updates made by the tool; however, it does not need to be unique for each AWS account because it is scoped to the AWS account."]
+module AssociateSourceResourceResult =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `DryRunOperation of DryRunOperation.t 
+      | `InternalServerError of InternalServerError.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnauthorizedOperation of UnauthorizedOperation.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "DryRunOperation" -> `DryRunOperation (DryRunOperation.of_json json)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnauthorizedOperation" ->
+          `UnauthorizedOperation (UnauthorizedOperation.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "DryRunOperation" -> `DryRunOperation (DryRunOperation.of_xml xml)
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnauthorizedOperation" ->
+          `UnauthorizedOperation (UnauthorizedOperation.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `DryRunOperation e ->
+          `Assoc
+            [("error", (`String "DryRunOperation"));
+            ("details", (DryRunOperation.to_json e))]
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnauthorizedOperation e ->
+          `Assoc
+            [("error", (`String "UnauthorizedOperation"));
+            ("details", (UnauthorizedOperation.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a source resource with a migration task. For example, the source resource can be a source server, an application, or a migration wave."]
+module AssociateSourceResourceRequest =
+  struct
+    type nonrec t =
+      {
+      progressUpdateStream: ProgressUpdateStream.t
+        [@ocaml.doc
+          "The name of the progress-update stream, which is used for access control as well as a namespace for migration-task names that is implicitly linked to your AWS account. The progress-update stream must uniquely identify the migration tool as it is used for all updates made by the tool; however, it does not need to be unique for each AWS account because it is scoped to the AWS account."];
+      migrationTaskName: MigrationTaskName.t
+        [@ocaml.doc
+          "A unique identifier that references the migration task. Do not include sensitive data in this field."];
+      sourceResource: SourceResource.t
+        [@ocaml.doc "The source resource that you want to associate."];
+      dryRun: DryRun.t option
+        [@ocaml.doc
+          "This is an optional parameter that you can use to test whether the call will succeed. Set this parameter to true to verify that you have the permissions that are required to make the call, and that you have specified the other parameters in the call correctly."]}
+    let context_ = "AssociateSourceResourceRequest"
+    let make ?dryRun =
+      fun ~progressUpdateStream ->
+        fun ~migrationTaskName ->
+          fun ~sourceResource ->
+            fun () ->
+              {
+                dryRun;
+                progressUpdateStream;
+                migrationTaskName;
+                sourceResource
+              }
+    let to_value x =
+      structure_to_value
+        [("ProgressUpdateStream",
+           (Some (ProgressUpdateStream.to_value x.progressUpdateStream)));
+        ("MigrationTaskName",
+          (Some (MigrationTaskName.to_value x.migrationTaskName)));
+        ("SourceResource", (Some (SourceResource.to_value x.sourceResource)));
+        ("DryRun", (Option.map x.dryRun ~f:DryRun.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dryRun =
+        (Option.map ~f:DryRun.of_xml) (Xml.child xml_arg0 "DryRun") in
+      let sourceResource =
+        SourceResource.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceResource") in
+      let migrationTaskName =
+        MigrationTaskName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MigrationTaskName") in
+      let progressUpdateStream =
+        ProgressUpdateStream.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProgressUpdateStream") in
+      make ?dryRun ~sourceResource ~migrationTaskName ~progressUpdateStream
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
+      let sourceResource =
+        field_map_exn json__ "SourceResource" SourceResource.of_json in
+      let migrationTaskName =
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
+      let progressUpdateStream =
+        field_map_exn json__ "ProgressUpdateStream"
+          ProgressUpdateStream.of_json in
+      make ?dryRun ~sourceResource ~migrationTaskName ~progressUpdateStream
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a source resource with a migration task. For example, the source resource can be a source server, an application, or a migration wave."]
 module AssociateDiscoveredResourceResult =
   struct
     type nonrec t = unit
@@ -3977,14 +4901,14 @@ module AssociateDiscoveredResourceRequest =
       make ?dryRun ~discoveredResource ~migrationTaskName
         ~progressUpdateStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" DryRun.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
       let discoveredResource =
-        field_map_exn json "DiscoveredResource" DiscoveredResource.of_json in
+        field_map_exn json__ "DiscoveredResource" DiscoveredResource.of_json in
       let migrationTaskName =
-        field_map_exn json "MigrationTaskName" MigrationTaskName.of_json in
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
       let progressUpdateStream =
-        field_map_exn json "ProgressUpdateStream"
+        field_map_exn json__ "ProgressUpdateStream"
           ProgressUpdateStream.of_json in
       make ?dryRun ~discoveredResource ~migrationTaskName
         ~progressUpdateStream ()
@@ -4155,14 +5079,14 @@ module AssociateCreatedArtifactRequest =
       make ?dryRun ~createdArtifact ~migrationTaskName ~progressUpdateStream
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" DryRun.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
       let createdArtifact =
-        field_map_exn json "CreatedArtifact" CreatedArtifact.of_json in
+        field_map_exn json__ "CreatedArtifact" CreatedArtifact.of_json in
       let migrationTaskName =
-        field_map_exn json "MigrationTaskName" MigrationTaskName.of_json in
+        field_map_exn json__ "MigrationTaskName" MigrationTaskName.of_json in
       let progressUpdateStream =
-        field_map_exn json "ProgressUpdateStream"
+        field_map_exn json__ "ProgressUpdateStream"
           ProgressUpdateStream.of_json in
       make ?dryRun ~createdArtifact ~migrationTaskName ~progressUpdateStream
         ()

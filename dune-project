@@ -14,12 +14,16 @@
 
 (homepage "https://github.com/mbacarella/awso")
 
+(documentation "https://mbacarella.github.io/awso/")
+
 (source
  (github mbacarella/awso))
 
 (package
  (name awso)
- (synopsis "AWS API base library")
+ (synopsis "AWS API base library (400+ services, auto-generated from botocore)")
+ (description
+  "Logic-only runtime for the awso family of packages: request signing (SigV4), HTTP plumbing, credential discovery, region/endpoint tables, and shared types. I/O bindings live in sibling packages (awso-async, awso-lwt, awso-sync).")
  (depends
   (ocaml
    (>= 4.14))
@@ -36,7 +40,9 @@
 
 (package
  (name awso-async)
- (synopsis "AWS API base library Async")
+ (synopsis "AWS client for Async (400+ services, auto-generated from botocore)")
+ (description
+  "AWS service bindings backed by Jane Street's Async I/O library. Generated from botocore for ~400 services. Use this if your codebase is already Async-flavored.")
  (depends
   (ocaml
    (>= 4.14))
@@ -51,7 +57,9 @@
 
 (package
  (name awso-lwt)
- (synopsis "AWS API base library Lwt")
+ (synopsis "AWS client for Lwt (400+ services, auto-generated from botocore)")
+ (description
+  "AWS service bindings backed by the Lwt I/O library. Generated from botocore for ~400 services. Use this if your codebase is Lwt-flavored.")
  (depends
   (ocaml
    (>= 4.14))
@@ -63,6 +71,8 @@
 (package
  (name awso-common)
  (synopsis "AWSO common library")
+ (description
+  "Small compatibility shim providing Jane Street Core-like helpers (Result, Option, List combinators) without dragging Core itself into non-Async/Lwt builds. Used by awso and the codegen.")
  (depends
   (ocaml
    (>= 4.14))
@@ -70,7 +80,9 @@
 
 (package
  (name awso-sync)
- (synopsis "Synchronous (blocking) AWS client")
+ (synopsis "Synchronous (blocking) AWS client (400+ services, auto-generated from botocore)")
+ (description
+  "AWS service bindings with a synchronous (blocking) I/O backend implemented over libcurl. Generated from botocore for ~400 services. Useful for scripts, CLIs, and any context where pulling in a concurrent scheduler is overkill.")
  (depends
   (ocaml
    (>= 4.14))
@@ -80,7 +92,9 @@
 
 (package
  (name awso-cli)
- (synopsis "A pure OCaml aws-cli")
+ (synopsis "A pure OCaml aws-cli covering 400+ services")
+ (description
+  "For fun, an umbrella command-line binary that exposes every awso-async service as a subcommand, similar in spirit to the Python aws-cli. Ships as bytecode because linking ~400 native service libraries exceeds ARM64 executable sizes. Fast enough for interactive use.")
  (depends
   (ocaml
    (>= 4.14))

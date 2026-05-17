@@ -58,6 +58,8 @@ val delete_organizational_unit :
 val delete_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeletePolicyRequest.t -> (unit, unit) Result.t
+val delete_resource_policy :
+  ?endpoint_url:string -> ?cfg:Awso.Cfg.t -> unit -> (unit, unit) Result.t
 val deregister_delegated_administrator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -102,6 +104,18 @@ val describe_policy :
     ?cfg:Awso.Cfg.t ->
       DescribePolicyRequest.t ->
         (DescribePolicyResponse.t, DescribePolicyResponse.error) Result.t
+val describe_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      unit ->
+        (DescribeResourcePolicyResponse.t,
+          DescribeResourcePolicyResponse.error) Result.t
+val describe_responsibility_transfer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeResponsibilityTransferRequest.t ->
+        (DescribeResponsibilityTransferResponse.t,
+          DescribeResponsibilityTransferResponse.error) Result.t
 val detach_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DetachPolicyRequest.t -> (unit, unit) Result.t
@@ -136,6 +150,12 @@ val invite_account_to_organization :
       InviteAccountToOrganizationRequest.t ->
         (InviteAccountToOrganizationResponse.t,
           InviteAccountToOrganizationResponse.error) Result.t
+val invite_organization_to_transfer_responsibility :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      InviteOrganizationToTransferResponsibilityRequest.t ->
+        (InviteOrganizationToTransferResponsibilityResponse.t,
+          InviteOrganizationToTransferResponsibilityResponse.error) Result.t
 val leave_organization :
   ?endpoint_url:string -> ?cfg:Awso.Cfg.t -> unit -> (unit, unit) Result.t
 val list_a_w_s_service_access_for_organization :
@@ -155,6 +175,12 @@ val list_accounts_for_parent :
       ListAccountsForParentRequest.t ->
         (ListAccountsForParentResponse.t,
           ListAccountsForParentResponse.error) Result.t
+val list_accounts_with_invalid_effective_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAccountsWithInvalidEffectivePolicyRequest.t ->
+        (ListAccountsWithInvalidEffectivePolicyResponse.t,
+          ListAccountsWithInvalidEffectivePolicyResponse.error) Result.t
 val list_children :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -178,6 +204,12 @@ val list_delegated_services_for_account :
       ListDelegatedServicesForAccountRequest.t ->
         (ListDelegatedServicesForAccountResponse.t,
           ListDelegatedServicesForAccountResponse.error) Result.t
+val list_effective_policy_validation_errors :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListEffectivePolicyValidationErrorsRequest.t ->
+        (ListEffectivePolicyValidationErrorsResponse.t,
+          ListEffectivePolicyValidationErrorsResponse.error) Result.t
 val list_handshakes_for_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -190,12 +222,24 @@ val list_handshakes_for_organization :
       ListHandshakesForOrganizationRequest.t ->
         (ListHandshakesForOrganizationResponse.t,
           ListHandshakesForOrganizationResponse.error) Result.t
+val list_inbound_responsibility_transfers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListInboundResponsibilityTransfersRequest.t ->
+        (ListInboundResponsibilityTransfersResponse.t,
+          ListInboundResponsibilityTransfersResponse.error) Result.t
 val list_organizational_units_for_parent :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListOrganizationalUnitsForParentRequest.t ->
         (ListOrganizationalUnitsForParentResponse.t,
           ListOrganizationalUnitsForParentResponse.error) Result.t
+val list_outbound_responsibility_transfers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListOutboundResponsibilityTransfersRequest.t ->
+        (ListOutboundResponsibilityTransfersResponse.t,
+          ListOutboundResponsibilityTransfersResponse.error) Result.t
 val list_parents :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -232,6 +276,12 @@ val list_targets_for_policy :
 val move_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> MoveAccountRequest.t -> (unit, unit) Result.t
+val put_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutResourcePolicyRequest.t ->
+        (PutResourcePolicyResponse.t, PutResourcePolicyResponse.error)
+          Result.t
 val register_delegated_administrator :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -243,6 +293,12 @@ val remove_account_from_organization :
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t
+val terminate_responsibility_transfer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TerminateResponsibilityTransferRequest.t ->
+        (TerminateResponsibilityTransferResponse.t,
+          TerminateResponsibilityTransferResponse.error) Result.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> UntagResourceRequest.t -> (unit, unit) Result.t
@@ -257,3 +313,9 @@ val update_policy :
     ?cfg:Awso.Cfg.t ->
       UpdatePolicyRequest.t ->
         (UpdatePolicyResponse.t, UpdatePolicyResponse.error) Result.t
+val update_responsibility_transfer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateResponsibilityTransferRequest.t ->
+        (UpdateResponsibilityTransferResponse.t,
+          UpdateResponsibilityTransferResponse.error) Result.t

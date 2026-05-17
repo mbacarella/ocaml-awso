@@ -28,6 +28,29 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let accept_administrator_invitation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId"
+       and administratorId =
+         flag "administrator-id" (required string) ~doc:"STRING String"
+       and invitationId =
+         flag "invitation-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.accept_administrator_invitation
+           (Values.AcceptAdministratorInvitationRequest.make ~detectorId
+              ~administratorId ~invitationId ())
+           (Some Values.AcceptAdministratorInvitationResponse.to_json)
+           (Some Values.AcceptAdministratorInvitationResponse.error_to_json)])
 let accept_invitation =
   Command.async ~summary:""
     ([%map_open.Command
@@ -90,6 +113,9 @@ let create_detector =
          flag "data-sources" (optional json_arg)
            ~doc:"JSON DataSourceConfigurations"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and features =
+         flag "features" (optional json_arg)
+           ~doc:"JSON DetectorFeatureConfigurations"
        and enable = flag "enable" (required bool) ~doc:"BOOL Boolean" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -101,7 +127,10 @@ let create_detector =
               ?dataSources:(Option.map
                               ~f:Values.DataSourceConfigurations.of_json
                               dataSources)
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~enable ())
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?features:(Option.map
+                           ~f:Values.DetectorFeatureConfigurations.of_json
+                           features) ~enable ())
            (Some Values.CreateDetectorResponse.to_json)
            (Some Values.CreateDetectorResponse.error_to_json)])
 let create_filter =
@@ -153,6 +182,9 @@ let create_i_p_set =
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
        and detectorId =
          flag "detector-id" (required string) ~doc:"STRING DetectorId"
        and name = flag "name" (required string) ~doc:"STRING Name"
@@ -164,10 +196,43 @@ let create_i_p_set =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_i_p_set
            (Values.CreateIPSetRequest.make ?clientToken
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~detectorId
-              ~name ~format:(Values.IpSetFormat.of_json format) ~location
-              ~activate ()) (Some Values.CreateIPSetResponse.to_json)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?expectedBucketOwner ~detectorId ~name
+              ~format:(Values.IpSetFormat.of_json format) ~location ~activate
+              ()) (Some Values.CreateIPSetResponse.to_json)
            (Some Values.CreateIPSetResponse.error_to_json)])
+let create_malware_protection_plan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and actions =
+         flag "actions" (optional json_arg)
+           ~doc:"JSON MalwareProtectionPlanActions"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and role = flag "role" (required string) ~doc:"STRING String"
+       and protectedResource =
+         flag "protected-resource" (required json_arg)
+           ~doc:"JSON CreateProtectedResource" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_malware_protection_plan
+           (Values.CreateMalwareProtectionPlanRequest.make ?clientToken
+              ?actions:(Option.map
+                          ~f:Values.MalwareProtectionPlanActions.of_json
+                          actions)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~role
+              ~protectedResource:(Values.CreateProtectedResource.of_json
+                                    protectedResource) ())
+           (Some Values.CreateMalwareProtectionPlanResponse.to_json)
+           (Some Values.CreateMalwareProtectionPlanResponse.error_to_json)])
 let create_members =
   Command.async ~summary:""
     ([%map_open.Command
@@ -202,6 +267,7 @@ let create_publishing_destination =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and detectorId =
          flag "detector-id" (required string) ~doc:"STRING DetectorId"
        and destinationType =
@@ -214,7 +280,7 @@ let create_publishing_destination =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_publishing_destination
            (Values.CreatePublishingDestinationRequest.make ?clientToken
-              ~detectorId
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~detectorId
               ~destinationType:(Values.DestinationType.of_json
                                   destinationType)
               ~destinationProperties:(Values.DestinationProperties.of_json
@@ -243,6 +309,40 @@ let create_sample_findings =
                                findingTypes) ~detectorId ())
            (Some Values.CreateSampleFindingsResponse.to_json)
            (Some Values.CreateSampleFindingsResponse.error_to_json)])
+let create_threat_entity_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING ExpectedBucketOwner"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId"
+       and name = flag "name" (required string) ~doc:"STRING Name"
+       and format =
+         flag "format" (required json_arg) ~doc:"JSON ThreatEntitySetFormat"
+       and location =
+         flag "location" (required string) ~doc:"STRING Location"
+       and activate = flag "activate" (required bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_threat_entity_set
+           (Values.CreateThreatEntitySetRequest.make ?expectedBucketOwner
+              ?clientToken ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ~detectorId ~name
+              ~format:(Values.ThreatEntitySetFormat.of_json format) ~location
+              ~activate ())
+           (Some Values.CreateThreatEntitySetResponse.to_json)
+           (Some Values.CreateThreatEntitySetResponse.error_to_json)])
 let create_threat_intel_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -256,6 +356,9 @@ let create_threat_intel_set =
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
        and detectorId =
          flag "detector-id" (required string) ~doc:"STRING DetectorId"
        and name = flag "name" (required string) ~doc:"STRING Name"
@@ -268,11 +371,46 @@ let create_threat_intel_set =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_threat_intel_set
            (Values.CreateThreatIntelSetRequest.make ?clientToken
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~detectorId
-              ~name ~format:(Values.ThreatIntelSetFormat.of_json format)
-              ~location ~activate ())
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?expectedBucketOwner ~detectorId ~name
+              ~format:(Values.ThreatIntelSetFormat.of_json format) ~location
+              ~activate ())
            (Some Values.CreateThreatIntelSetResponse.to_json)
            (Some Values.CreateThreatIntelSetResponse.error_to_json)])
+let create_trusted_entity_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING ExpectedBucketOwner"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId"
+       and name = flag "name" (required string) ~doc:"STRING Name"
+       and format =
+         flag "format" (required json_arg) ~doc:"JSON TrustedEntitySetFormat"
+       and location =
+         flag "location" (required string) ~doc:"STRING Location"
+       and activate = flag "activate" (required bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_trusted_entity_set
+           (Values.CreateTrustedEntitySetRequest.make ?expectedBucketOwner
+              ?clientToken ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ~detectorId ~name
+              ~format:(Values.TrustedEntitySetFormat.of_json format)
+              ~location ~activate ())
+           (Some Values.CreateTrustedEntitySetResponse.to_json)
+           (Some Values.CreateTrustedEntitySetResponse.error_to_json)])
 let decline_invitations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -368,6 +506,24 @@ let delete_invitations =
               ~accountIds:(Values.AccountIds.of_json accountIds) ())
            (Some Values.DeleteInvitationsResponse.to_json)
            (Some Values.DeleteInvitationsResponse.error_to_json)])
+let delete_malware_protection_plan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and malwareProtectionPlanId =
+         flag "malware-protection-plan-id" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_malware_protection_plan
+           (Values.DeleteMalwareProtectionPlanRequest.make
+              ~malwareProtectionPlanId ()) None None])
 let delete_members =
   Command.async ~summary:""
     ([%map_open.Command
@@ -410,6 +566,27 @@ let delete_publishing_destination =
               ~destinationId ())
            (Some Values.DeletePublishingDestinationResponse.to_json)
            (Some Values.DeletePublishingDestinationResponse.error_to_json)])
+let delete_threat_entity_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId"
+       and threatEntitySetId =
+         flag "threat-entity-set-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_threat_entity_set
+           (Values.DeleteThreatEntitySetRequest.make ~detectorId
+              ~threatEntitySetId ())
+           (Some Values.DeleteThreatEntitySetResponse.to_json)
+           (Some Values.DeleteThreatEntitySetResponse.error_to_json)])
 let delete_threat_intel_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -431,7 +608,7 @@ let delete_threat_intel_set =
               ~threatIntelSetId ())
            (Some Values.DeleteThreatIntelSetResponse.to_json)
            (Some Values.DeleteThreatIntelSetResponse.error_to_json)])
-let describe_organization_configuration =
+let delete_trusted_entity_set =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -442,12 +619,68 @@ let describe_organization_configuration =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId"
+       and trustedEntitySetId =
+         flag "trusted-entity-set-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_trusted_entity_set
+           (Values.DeleteTrustedEntitySetRequest.make ~detectorId
+              ~trustedEntitySetId ())
+           (Some Values.DeleteTrustedEntitySetResponse.to_json)
+           (Some Values.DeleteTrustedEntitySetResponse.error_to_json)])
+let describe_malware_scans =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IntegerValueWithMax"
+       and filterCriteria =
+         flag "filter-criteria" (optional json_arg)
+           ~doc:"JSON FilterCriteria"
+       and sortCriteria =
+         flag "sort-criteria" (optional json_arg) ~doc:"JSON SortCriteria"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_malware_scans
+           (Values.DescribeMalwareScansRequest.make ?nextToken ?maxResults
+              ?filterCriteria:(Option.map ~f:Values.FilterCriteria.of_json
+                                 filterCriteria)
+              ?sortCriteria:(Option.map ~f:Values.SortCriteria.of_json
+                               sortCriteria) ~detectorId ())
+           (Some Values.DescribeMalwareScansResponse.to_json)
+           (Some Values.DescribeMalwareScansResponse.error_to_json)])
+let describe_organization_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and detectorId =
          flag "detector-id" (required string) ~doc:"STRING DetectorId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_organization_configuration
-           (Values.DescribeOrganizationConfigurationRequest.make ~detectorId
-              ())
+           (Values.DescribeOrganizationConfigurationRequest.make ?maxResults
+              ?nextToken ~detectorId ())
            (Some Values.DescribeOrganizationConfigurationResponse.to_json)
            (Some
               Values.DescribeOrganizationConfigurationResponse.error_to_json)])
@@ -491,6 +724,26 @@ let disable_organization_admin_account =
               ~adminAccountId ())
            (Some Values.DisableOrganizationAdminAccountResponse.to_json)
            (Some Values.DisableOrganizationAdminAccountResponse.error_to_json)])
+let disassociate_from_administrator_account =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_from_administrator_account
+           (Values.DisassociateFromAdministratorAccountRequest.make
+              ~detectorId ())
+           (Some Values.DisassociateFromAdministratorAccountResponse.to_json)
+           (Some
+              Values.DisassociateFromAdministratorAccountResponse.error_to_json)])
 let disassociate_from_master_account =
   Command.async ~summary:""
     ([%map_open.Command
@@ -549,6 +802,53 @@ let enable_organization_admin_account =
               ())
            (Some Values.EnableOrganizationAdminAccountResponse.to_json)
            (Some Values.EnableOrganizationAdminAccountResponse.error_to_json)])
+let get_administrator_account =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_administrator_account
+           (Values.GetAdministratorAccountRequest.make ~detectorId ())
+           (Some Values.GetAdministratorAccountResponse.to_json)
+           (Some Values.GetAdministratorAccountResponse.error_to_json)])
+let get_coverage_statistics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filterCriteria =
+         flag "filter-criteria" (optional json_arg)
+           ~doc:"JSON CoverageFilterCriteria"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId"
+       and statisticsType =
+         flag "statistics-type" (required json_arg)
+           ~doc:"JSON CoverageStatisticsTypeList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_coverage_statistics
+           (Values.GetCoverageStatisticsRequest.make
+              ?filterCriteria:(Option.map
+                                 ~f:Values.CoverageFilterCriteria.of_json
+                                 filterCriteria) ~detectorId
+              ~statisticsType:(Values.CoverageStatisticsTypeList.of_json
+                                 statisticsType) ())
+           (Some Values.GetCoverageStatisticsResponse.to_json)
+           (Some Values.GetCoverageStatisticsResponse.error_to_json)])
 let get_detector =
   Command.async ~summary:""
     ([%map_open.Command
@@ -621,22 +921,31 @@ let get_findings_statistics =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and findingStatisticTypes =
+         flag "finding-statistic-types" (optional json_arg)
+           ~doc:"JSON FindingStatisticTypes"
        and findingCriteria =
          flag "finding-criteria" (optional json_arg)
            ~doc:"JSON FindingCriteria"
+       and groupBy =
+         flag "group-by" (optional json_arg) ~doc:"JSON GroupByType"
+       and orderBy = flag "order-by" (optional json_arg) ~doc:"JSON OrderBy"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults100"
        and detectorId =
-         flag "detector-id" (required string) ~doc:"STRING DetectorId"
-       and findingStatisticTypes =
-         flag "finding-statistic-types" (required json_arg)
-           ~doc:"JSON FindingStatisticTypes" in
+         flag "detector-id" (required string) ~doc:"STRING DetectorId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_findings_statistics
            (Values.GetFindingsStatisticsRequest.make
+              ?findingStatisticTypes:(Option.map
+                                        ~f:Values.FindingStatisticTypes.of_json
+                                        findingStatisticTypes)
               ?findingCriteria:(Option.map ~f:Values.FindingCriteria.of_json
-                                  findingCriteria) ~detectorId
-              ~findingStatisticTypes:(Values.FindingStatisticTypes.of_json
-                                        findingStatisticTypes) ())
+                                  findingCriteria)
+              ?groupBy:(Option.map ~f:Values.GroupByType.of_json groupBy)
+              ?orderBy:(Option.map ~f:Values.OrderBy.of_json orderBy)
+              ?maxResults ~detectorId ())
            (Some Values.GetFindingsStatisticsResponse.to_json)
            (Some Values.GetFindingsStatisticsResponse.error_to_json)])
 let get_i_p_set =
@@ -675,6 +984,60 @@ let get_invitations_count =
            (Values.GetInvitationsCountRequest.make ())
            (Some Values.GetInvitationsCountResponse.to_json)
            (Some Values.GetInvitationsCountResponse.error_to_json)])
+let get_malware_protection_plan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and malwareProtectionPlanId =
+         flag "malware-protection-plan-id" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_malware_protection_plan
+           (Values.GetMalwareProtectionPlanRequest.make
+              ~malwareProtectionPlanId ())
+           (Some Values.GetMalwareProtectionPlanResponse.to_json)
+           (Some Values.GetMalwareProtectionPlanResponse.error_to_json)])
+let get_malware_scan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanId = flag "scan-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_malware_scan (Values.GetMalwareScanRequest.make ~scanId ())
+           (Some Values.GetMalwareScanResponse.to_json)
+           (Some Values.GetMalwareScanResponse.error_to_json)])
+let get_malware_scan_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_malware_scan_settings
+           (Values.GetMalwareScanSettingsRequest.make ~detectorId ())
+           (Some Values.GetMalwareScanSettingsResponse.to_json)
+           (Some Values.GetMalwareScanSettingsResponse.error_to_json)])
 let get_master_account =
   Command.async ~summary:""
     ([%map_open.Command
@@ -735,6 +1098,64 @@ let get_members =
               ~accountIds:(Values.AccountIds.of_json accountIds) ())
            (Some Values.GetMembersResponse.to_json)
            (Some Values.GetMembersResponse.error_to_json)])
+let get_organization_statistics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_organization_statistics (Fn.id ())
+           (Some Values.GetOrganizationStatisticsResponse.to_json)
+           (Some Values.GetOrganizationStatisticsResponse.error_to_json)])
+let get_remaining_free_trial_days =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId"
+       and accountIds =
+         flag "account-ids" (required json_arg) ~doc:"JSON AccountIds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_remaining_free_trial_days
+           (Values.GetRemainingFreeTrialDaysRequest.make ~detectorId
+              ~accountIds:(Values.AccountIds.of_json accountIds) ())
+           (Some Values.GetRemainingFreeTrialDaysResponse.to_json)
+           (Some Values.GetRemainingFreeTrialDaysResponse.error_to_json)])
+let get_threat_entity_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId"
+       and threatEntitySetId =
+         flag "threat-entity-set-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_threat_entity_set
+           (Values.GetThreatEntitySetRequest.make ~detectorId
+              ~threatEntitySetId ())
+           (Some Values.GetThreatEntitySetResponse.to_json)
+           (Some Values.GetThreatEntitySetResponse.error_to_json)])
 let get_threat_intel_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -756,6 +1177,27 @@ let get_threat_intel_set =
               ~threatIntelSetId ())
            (Some Values.GetThreatIntelSetResponse.to_json)
            (Some Values.GetThreatIntelSetResponse.error_to_json)])
+let get_trusted_entity_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId"
+       and trustedEntitySetId =
+         flag "trusted-entity-set-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_trusted_entity_set
+           (Values.GetTrustedEntitySetRequest.make ~detectorId
+              ~trustedEntitySetId ())
+           (Some Values.GetTrustedEntitySetResponse.to_json)
+           (Some Values.GetTrustedEntitySetResponse.error_to_json)])
 let get_usage_statistics =
   Command.async ~summary:""
     ([%map_open.Command
@@ -814,6 +1256,40 @@ let invite_members =
               ~accountIds:(Values.AccountIds.of_json accountIds) ())
            (Some Values.InviteMembersResponse.to_json)
            (Some Values.InviteMembersResponse.error_to_json)])
+let list_coverage =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filterCriteria =
+         flag "filter-criteria" (optional json_arg)
+           ~doc:"JSON CoverageFilterCriteria"
+       and sortCriteria =
+         flag "sort-criteria" (optional json_arg)
+           ~doc:"JSON CoverageSortCriteria"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_coverage
+           (Values.ListCoverageRequest.make ?nextToken ?maxResults
+              ?filterCriteria:(Option.map
+                                 ~f:Values.CoverageFilterCriteria.of_json
+                                 filterCriteria)
+              ?sortCriteria:(Option.map
+                               ~f:Values.CoverageSortCriteria.of_json
+                               sortCriteria) ~detectorId ())
+           (Some Values.ListCoverageResponse.to_json)
+           (Some Values.ListCoverageResponse.error_to_json)])
 let list_detectors =
   Command.async ~summary:""
     ([%map_open.Command
@@ -929,6 +1405,54 @@ let list_invitations =
            (Values.ListInvitationsRequest.make ?maxResults ?nextToken ())
            (Some Values.ListInvitationsResponse.to_json)
            (Some Values.ListInvitationsResponse.error_to_json)])
+let list_malware_protection_plans =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_malware_protection_plans
+           (Values.ListMalwareProtectionPlansRequest.make ?nextToken ())
+           (Some Values.ListMalwareProtectionPlansResponse.to_json)
+           (Some Values.ListMalwareProtectionPlansResponse.error_to_json)])
+let list_malware_scans =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and filterCriteria =
+         flag "filter-criteria" (optional json_arg)
+           ~doc:"JSON ListMalwareScansFilterCriteria"
+       and sortCriteria =
+         flag "sort-criteria" (optional json_arg) ~doc:"JSON SortCriteria" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_malware_scans
+           (Values.ListMalwareScansRequest.make ?maxResults ?nextToken
+              ?filterCriteria:(Option.map
+                                 ~f:Values.ListMalwareScansFilterCriteria.of_json
+                                 filterCriteria)
+              ?sortCriteria:(Option.map ~f:Values.SortCriteria.of_json
+                               sortCriteria) ())
+           (Some Values.ListMalwareScansResponse.to_json)
+           (Some Values.ListMalwareScansResponse.error_to_json)])
 let list_members =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1016,6 +1540,29 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_threat_entity_sets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_threat_entity_sets
+           (Values.ListThreatEntitySetsRequest.make ?maxResults ?nextToken
+              ~detectorId ())
+           (Some Values.ListThreatEntitySetsResponse.to_json)
+           (Some Values.ListThreatEntitySetsResponse.error_to_json)])
 let list_threat_intel_sets =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1039,6 +1586,77 @@ let list_threat_intel_sets =
               ~detectorId ())
            (Some Values.ListThreatIntelSetsResponse.to_json)
            (Some Values.ListThreatIntelSetsResponse.error_to_json)])
+let list_trusted_entity_sets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_trusted_entity_sets
+           (Values.ListTrustedEntitySetsRequest.make ?maxResults ?nextToken
+              ~detectorId ())
+           (Some Values.ListTrustedEntitySetsResponse.to_json)
+           (Some Values.ListTrustedEntitySetsResponse.error_to_json)])
+let send_object_malware_scan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and s3Object =
+         flag "s3-object" (optional json_arg)
+           ~doc:"JSON S3ObjectForSendObjectMalwareScan" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.send_object_malware_scan
+           (Values.SendObjectMalwareScanRequest.make
+              ?s3Object:(Option.map
+                           ~f:Values.S3ObjectForSendObjectMalwareScan.of_json
+                           s3Object) ())
+           (Some Values.SendObjectMalwareScanResponse.to_json)
+           (Some Values.SendObjectMalwareScanResponse.error_to_json)])
+let start_malware_scan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and scanConfiguration =
+         flag "scan-configuration" (optional json_arg)
+           ~doc:"JSON StartMalwareScanConfiguration"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_malware_scan
+           (Values.StartMalwareScanRequest.make ?clientToken
+              ?scanConfiguration:(Option.map
+                                    ~f:Values.StartMalwareScanConfiguration.of_json
+                                    scanConfiguration) ~resourceArn ())
+           (Some Values.StartMalwareScanResponse.to_json)
+           (Some Values.StartMalwareScanResponse.error_to_json)])
 let start_monitoring_members =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1160,6 +1778,9 @@ let update_detector =
        and dataSources =
          flag "data-sources" (optional json_arg)
            ~doc:"JSON DataSourceConfigurations"
+       and features =
+         flag "features" (optional json_arg)
+           ~doc:"JSON DetectorFeatureConfigurations"
        and detectorId =
          flag "detector-id" (required string) ~doc:"STRING DetectorId" in
        fun () ->
@@ -1171,7 +1792,10 @@ let update_detector =
                                              findingPublishingFrequency)
               ?dataSources:(Option.map
                               ~f:Values.DataSourceConfigurations.of_json
-                              dataSources) ~detectorId ())
+                              dataSources)
+              ?features:(Option.map
+                           ~f:Values.DetectorFeatureConfigurations.of_json
+                           features) ~detectorId ())
            (Some Values.UpdateDetectorResponse.to_json)
            (Some Values.UpdateDetectorResponse.error_to_json)])
 let update_filter =
@@ -1216,7 +1840,8 @@ let update_findings_feedback =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and comments = flag "comments" (optional string) ~doc:"STRING String"
+       and comments =
+         flag "comments" (optional string) ~doc:"STRING SensitiveString"
        and detectorId =
          flag "detector-id" (required string) ~doc:"STRING DetectorId"
        and findingIds =
@@ -1245,6 +1870,9 @@ let update_i_p_set =
        and location =
          flag "location" (optional string) ~doc:"STRING Location"
        and activate = flag "activate" (optional bool) ~doc:"BOOL Boolean"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
        and detectorId =
          flag "detector-id" (required string) ~doc:"STRING DetectorId"
        and ipSetId = flag "ip-set-id" (required string) ~doc:"STRING String" in
@@ -1252,9 +1880,71 @@ let update_i_p_set =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_i_p_set
            (Values.UpdateIPSetRequest.make ?name ?location ?activate
-              ~detectorId ~ipSetId ())
+              ?expectedBucketOwner ~detectorId ~ipSetId ())
            (Some Values.UpdateIPSetResponse.to_json)
            (Some Values.UpdateIPSetResponse.error_to_json)])
+let update_malware_protection_plan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and role = flag "role" (optional string) ~doc:"STRING String"
+       and actions =
+         flag "actions" (optional json_arg)
+           ~doc:"JSON MalwareProtectionPlanActions"
+       and protectedResource =
+         flag "protected-resource" (optional json_arg)
+           ~doc:"JSON UpdateProtectedResource"
+       and malwareProtectionPlanId =
+         flag "malware-protection-plan-id" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_malware_protection_plan
+           (Values.UpdateMalwareProtectionPlanRequest.make ?role
+              ?actions:(Option.map
+                          ~f:Values.MalwareProtectionPlanActions.of_json
+                          actions)
+              ?protectedResource:(Option.map
+                                    ~f:Values.UpdateProtectedResource.of_json
+                                    protectedResource)
+              ~malwareProtectionPlanId ()) None None])
+let update_malware_scan_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scanResourceCriteria =
+         flag "scan-resource-criteria" (optional json_arg)
+           ~doc:"JSON ScanResourceCriteria"
+       and ebsSnapshotPreservation =
+         flag "ebs-snapshot-preservation" (optional json_arg)
+           ~doc:"JSON EbsSnapshotPreservation"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_malware_scan_settings
+           (Values.UpdateMalwareScanSettingsRequest.make
+              ?scanResourceCriteria:(Option.map
+                                       ~f:Values.ScanResourceCriteria.of_json
+                                       scanResourceCriteria)
+              ?ebsSnapshotPreservation:(Option.map
+                                          ~f:Values.EbsSnapshotPreservation.of_json
+                                          ebsSnapshotPreservation)
+              ~detectorId ())
+           (Some Values.UpdateMalwareScanSettingsResponse.to_json)
+           (Some Values.UpdateMalwareScanSettingsResponse.error_to_json)])
 let update_member_detectors =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1268,6 +1958,9 @@ let update_member_detectors =
        and dataSources =
          flag "data-sources" (optional json_arg)
            ~doc:"JSON DataSourceConfigurations"
+       and features =
+         flag "features" (optional json_arg)
+           ~doc:"JSON MemberFeaturesConfigurations"
        and detectorId =
          flag "detector-id" (required string) ~doc:"STRING DetectorId"
        and accountIds =
@@ -1278,7 +1971,10 @@ let update_member_detectors =
            (Values.UpdateMemberDetectorsRequest.make
               ?dataSources:(Option.map
                               ~f:Values.DataSourceConfigurations.of_json
-                              dataSources) ~detectorId
+                              dataSources)
+              ?features:(Option.map
+                           ~f:Values.MemberFeaturesConfigurations.of_json
+                           features) ~detectorId
               ~accountIds:(Values.AccountIds.of_json accountIds) ())
            (Some Values.UpdateMemberDetectorsResponse.to_json)
            (Some Values.UpdateMemberDetectorsResponse.error_to_json)])
@@ -1292,20 +1988,33 @@ let update_organization_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and autoEnable =
+         flag "auto-enable" (optional bool) ~doc:"BOOL Boolean"
        and dataSources =
          flag "data-sources" (optional json_arg)
            ~doc:"JSON OrganizationDataSourceConfigurations"
+       and features =
+         flag "features" (optional json_arg)
+           ~doc:"JSON OrganizationFeaturesConfigurations"
+       and autoEnableOrganizationMembers =
+         flag "auto-enable-organization-members" (optional json_arg)
+           ~doc:"JSON AutoEnableMembers"
        and detectorId =
-         flag "detector-id" (required string) ~doc:"STRING DetectorId"
-       and autoEnable =
-         flag "auto-enable" (required bool) ~doc:"BOOL Boolean" in
+         flag "detector-id" (required string) ~doc:"STRING DetectorId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_organization_configuration
-           (Values.UpdateOrganizationConfigurationRequest.make
+           (Values.UpdateOrganizationConfigurationRequest.make ?autoEnable
               ?dataSources:(Option.map
                               ~f:Values.OrganizationDataSourceConfigurations.of_json
-                              dataSources) ~detectorId ~autoEnable ())
+                              dataSources)
+              ?features:(Option.map
+                           ~f:Values.OrganizationFeaturesConfigurations.of_json
+                           features)
+              ?autoEnableOrganizationMembers:(Option.map
+                                                ~f:Values.AutoEnableMembers.of_json
+                                                autoEnableOrganizationMembers)
+              ~detectorId ())
            (Some Values.UpdateOrganizationConfigurationResponse.to_json)
            (Some Values.UpdateOrganizationConfigurationResponse.error_to_json)])
 let update_publishing_destination =
@@ -1335,6 +2044,34 @@ let update_publishing_destination =
               ~destinationId ())
            (Some Values.UpdatePublishingDestinationResponse.to_json)
            (Some Values.UpdatePublishingDestinationResponse.error_to_json)])
+let update_threat_entity_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING Name"
+       and location =
+         flag "location" (optional string) ~doc:"STRING Location"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING ExpectedBucketOwner"
+       and activate = flag "activate" (optional bool) ~doc:"BOOL Boolean"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId"
+       and threatEntitySetId =
+         flag "threat-entity-set-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_threat_entity_set
+           (Values.UpdateThreatEntitySetRequest.make ?name ?location
+              ?expectedBucketOwner ?activate ~detectorId ~threatEntitySetId
+              ()) (Some Values.UpdateThreatEntitySetResponse.to_json)
+           (Some Values.UpdateThreatEntitySetResponse.error_to_json)])
 let update_threat_intel_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1349,6 +2086,9 @@ let update_threat_intel_set =
        and location =
          flag "location" (optional string) ~doc:"STRING Location"
        and activate = flag "activate" (optional bool) ~doc:"BOOL Boolean"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING AccountId"
        and detectorId =
          flag "detector-id" (required string) ~doc:"STRING DetectorId"
        and threatIntelSetId =
@@ -1357,59 +2097,113 @@ let update_threat_intel_set =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_threat_intel_set
            (Values.UpdateThreatIntelSetRequest.make ?name ?location ?activate
-              ~detectorId ~threatIntelSetId ())
+              ?expectedBucketOwner ~detectorId ~threatIntelSetId ())
            (Some Values.UpdateThreatIntelSetResponse.to_json)
            (Some Values.UpdateThreatIntelSetResponse.error_to_json)])
+let update_trusted_entity_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING Name"
+       and location =
+         flag "location" (optional string) ~doc:"STRING Location"
+       and expectedBucketOwner =
+         flag "expected-bucket-owner" (optional string)
+           ~doc:"STRING ExpectedBucketOwner"
+       and activate = flag "activate" (optional bool) ~doc:"BOOL Boolean"
+       and detectorId =
+         flag "detector-id" (required string) ~doc:"STRING DetectorId"
+       and trustedEntitySetId =
+         flag "trusted-entity-set-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_trusted_entity_set
+           (Values.UpdateTrustedEntitySetRequest.make ?name ?location
+              ?expectedBucketOwner ?activate ~detectorId ~trustedEntitySetId
+              ()) (Some Values.UpdateTrustedEntitySetResponse.to_json)
+           (Some Values.UpdateTrustedEntitySetResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("accept-invitation", accept_invitation);
+    [("accept-administrator-invitation", accept_administrator_invitation);
+    ("accept-invitation", accept_invitation);
     ("archive-findings", archive_findings);
     ("create-detector", create_detector);
     ("create-filter", create_filter);
     ("create-i-p-set", create_i_p_set);
+    ("create-malware-protection-plan", create_malware_protection_plan);
     ("create-members", create_members);
     ("create-publishing-destination", create_publishing_destination);
     ("create-sample-findings", create_sample_findings);
+    ("create-threat-entity-set", create_threat_entity_set);
     ("create-threat-intel-set", create_threat_intel_set);
+    ("create-trusted-entity-set", create_trusted_entity_set);
     ("decline-invitations", decline_invitations);
     ("delete-detector", delete_detector);
     ("delete-filter", delete_filter);
     ("delete-i-p-set", delete_i_p_set);
     ("delete-invitations", delete_invitations);
+    ("delete-malware-protection-plan", delete_malware_protection_plan);
     ("delete-members", delete_members);
     ("delete-publishing-destination", delete_publishing_destination);
+    ("delete-threat-entity-set", delete_threat_entity_set);
     ("delete-threat-intel-set", delete_threat_intel_set);
+    ("delete-trusted-entity-set", delete_trusted_entity_set);
+    ("describe-malware-scans", describe_malware_scans);
     ("describe-organization-configuration",
       describe_organization_configuration);
     ("describe-publishing-destination", describe_publishing_destination);
     ("disable-organization-admin-account",
       disable_organization_admin_account);
+    ("disassociate-from-administrator-account",
+      disassociate_from_administrator_account);
     ("disassociate-from-master-account", disassociate_from_master_account);
     ("disassociate-members", disassociate_members);
     ("enable-organization-admin-account", enable_organization_admin_account);
+    ("get-administrator-account", get_administrator_account);
+    ("get-coverage-statistics", get_coverage_statistics);
     ("get-detector", get_detector);
     ("get-filter", get_filter);
     ("get-findings", get_findings);
     ("get-findings-statistics", get_findings_statistics);
     ("get-i-p-set", get_i_p_set);
     ("get-invitations-count", get_invitations_count);
+    ("get-malware-protection-plan", get_malware_protection_plan);
+    ("get-malware-scan", get_malware_scan);
+    ("get-malware-scan-settings", get_malware_scan_settings);
     ("get-master-account", get_master_account);
     ("get-member-detectors", get_member_detectors);
     ("get-members", get_members);
+    ("get-organization-statistics", get_organization_statistics);
+    ("get-remaining-free-trial-days", get_remaining_free_trial_days);
+    ("get-threat-entity-set", get_threat_entity_set);
     ("get-threat-intel-set", get_threat_intel_set);
+    ("get-trusted-entity-set", get_trusted_entity_set);
     ("get-usage-statistics", get_usage_statistics);
     ("invite-members", invite_members);
+    ("list-coverage", list_coverage);
     ("list-detectors", list_detectors);
     ("list-filters", list_filters);
     ("list-findings", list_findings);
     ("list-i-p-sets", list_i_p_sets);
     ("list-invitations", list_invitations);
+    ("list-malware-protection-plans", list_malware_protection_plans);
+    ("list-malware-scans", list_malware_scans);
     ("list-members", list_members);
     ("list-organization-admin-accounts", list_organization_admin_accounts);
     ("list-publishing-destinations", list_publishing_destinations);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-threat-entity-sets", list_threat_entity_sets);
     ("list-threat-intel-sets", list_threat_intel_sets);
+    ("list-trusted-entity-sets", list_trusted_entity_sets);
+    ("send-object-malware-scan", send_object_malware_scan);
+    ("start-malware-scan", start_malware_scan);
     ("start-monitoring-members", start_monitoring_members);
     ("stop-monitoring-members", stop_monitoring_members);
     ("tag-resource", tag_resource);
@@ -1419,7 +2213,11 @@ let main =
     ("update-filter", update_filter);
     ("update-findings-feedback", update_findings_feedback);
     ("update-i-p-set", update_i_p_set);
+    ("update-malware-protection-plan", update_malware_protection_plan);
+    ("update-malware-scan-settings", update_malware_scan_settings);
     ("update-member-detectors", update_member_detectors);
     ("update-organization-configuration", update_organization_configuration);
     ("update-publishing-destination", update_publishing_destination);
-    ("update-threat-intel-set", update_threat_intel_set)]
+    ("update-threat-entity-set", update_threat_entity_set);
+    ("update-threat-intel-set", update_threat_intel_set);
+    ("update-trusted-entity-set", update_trusted_entity_set)]

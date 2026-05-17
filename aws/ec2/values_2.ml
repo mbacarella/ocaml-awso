@@ -3,10 +3,1066 @@ open Awso
 open! Import
 open Values_0[@@warning "-33"]
 open Values_1[@@warning "-33"]
+module TrunkInterfaceAssociationId =
+  struct
+    type nonrec t = string
+    let context_ = "TrunkInterfaceAssociationId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TrunkInterfaceAssociationId" j
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayOptions =
+  struct
+    type nonrec t =
+      {
+      amazonSideAsn: Long.t option
+        [@ocaml.doc
+          "A private Autonomous System Number (ASN) for the Amazon side of a BGP session. The range is 64512 to 65534 for 16-bit ASNs and 4200000000 to 4294967294 for 32-bit ASNs."];
+      transitGatewayCidrBlocks: ValueStringList.t option
+        [@ocaml.doc "The transit gateway CIDR blocks."];
+      autoAcceptSharedAttachments: AutoAcceptSharedAttachmentsValue.t option
+        [@ocaml.doc
+          "Indicates whether attachment requests are automatically accepted."];
+      defaultRouteTableAssociation:
+        DefaultRouteTableAssociationValue.t option
+        [@ocaml.doc
+          "Indicates whether resource attachments are automatically associated with the default association route table. Enabled by default. Either defaultRouteTableAssociation or defaultRouteTablePropagation must be set to enable for Amazon Web Services Transit Gateway to create the default transit gateway route table."];
+      associationDefaultRouteTableId: String_.t option
+        [@ocaml.doc "The ID of the default association route table."];
+      defaultRouteTablePropagation:
+        DefaultRouteTablePropagationValue.t option
+        [@ocaml.doc
+          "Indicates whether resource attachments automatically propagate routes to the default propagation route table. Enabled by default. If defaultRouteTablePropagation is set to enable, Amazon Web Services Transit Gateway creates the default transit gateway route table."];
+      propagationDefaultRouteTableId: String_.t option
+        [@ocaml.doc "The ID of the default propagation route table."];
+      vpnEcmpSupport: VpnEcmpSupportValue.t option
+        [@ocaml.doc
+          "Indicates whether Equal Cost Multipath Protocol support is enabled."];
+      dnsSupport: DnsSupportValue.t option
+        [@ocaml.doc "Indicates whether DNS support is enabled."];
+      securityGroupReferencingSupport:
+        SecurityGroupReferencingSupportValue.t option
+        [@ocaml.doc
+          "Enables you to reference a security group across VPCs attached to a transit gateway to simplify security group management. This option is disabled by default."];
+      multicastSupport: MulticastSupportValue.t option
+        [@ocaml.doc
+          "Indicates whether multicast is enabled on the transit gateway"];
+      encryptionSupport: EncryptionSupport.t option
+        [@ocaml.doc
+          "Defines if the Transit Gateway supports VPC Encryption Control."]}
+    let make ?amazonSideAsn =
+      fun ?transitGatewayCidrBlocks ->
+        fun ?autoAcceptSharedAttachments ->
+          fun ?defaultRouteTableAssociation ->
+            fun ?associationDefaultRouteTableId ->
+              fun ?defaultRouteTablePropagation ->
+                fun ?propagationDefaultRouteTableId ->
+                  fun ?vpnEcmpSupport ->
+                    fun ?dnsSupport ->
+                      fun ?securityGroupReferencingSupport ->
+                        fun ?multicastSupport ->
+                          fun ?encryptionSupport ->
+                            fun () ->
+                              {
+                                amazonSideAsn;
+                                transitGatewayCidrBlocks;
+                                autoAcceptSharedAttachments;
+                                defaultRouteTableAssociation;
+                                associationDefaultRouteTableId;
+                                defaultRouteTablePropagation;
+                                propagationDefaultRouteTableId;
+                                vpnEcmpSupport;
+                                dnsSupport;
+                                securityGroupReferencingSupport;
+                                multicastSupport;
+                                encryptionSupport
+                              }
+    let to_value x =
+      structure_to_value
+        [("amazonSideAsn", (Option.map x.amazonSideAsn ~f:Long.to_value));
+        ("transitGatewayCidrBlocks",
+          (Option.map x.transitGatewayCidrBlocks ~f:ValueStringList.to_value));
+        ("autoAcceptSharedAttachments",
+          (Option.map x.autoAcceptSharedAttachments
+             ~f:AutoAcceptSharedAttachmentsValue.to_value));
+        ("defaultRouteTableAssociation",
+          (Option.map x.defaultRouteTableAssociation
+             ~f:DefaultRouteTableAssociationValue.to_value));
+        ("associationDefaultRouteTableId",
+          (Option.map x.associationDefaultRouteTableId ~f:String_.to_value));
+        ("defaultRouteTablePropagation",
+          (Option.map x.defaultRouteTablePropagation
+             ~f:DefaultRouteTablePropagationValue.to_value));
+        ("propagationDefaultRouteTableId",
+          (Option.map x.propagationDefaultRouteTableId ~f:String_.to_value));
+        ("vpnEcmpSupport",
+          (Option.map x.vpnEcmpSupport ~f:VpnEcmpSupportValue.to_value));
+        ("dnsSupport", (Option.map x.dnsSupport ~f:DnsSupportValue.to_value));
+        ("securityGroupReferencingSupport",
+          (Option.map x.securityGroupReferencingSupport
+             ~f:SecurityGroupReferencingSupportValue.to_value));
+        ("multicastSupport",
+          (Option.map x.multicastSupport ~f:MulticastSupportValue.to_value));
+        ("encryptionSupport",
+          (Option.map x.encryptionSupport ~f:EncryptionSupport.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let encryptionSupport =
+        (Option.map ~f:EncryptionSupport.of_xml)
+          (Xml.child xml_arg0 "encryptionSupport") in
+      let multicastSupport =
+        (Option.map ~f:MulticastSupportValue.of_xml)
+          (Xml.child xml_arg0 "multicastSupport") in
+      let securityGroupReferencingSupport =
+        (Option.map ~f:SecurityGroupReferencingSupportValue.of_xml)
+          (Xml.child xml_arg0 "securityGroupReferencingSupport") in
+      let dnsSupport =
+        (Option.map ~f:DnsSupportValue.of_xml)
+          (Xml.child xml_arg0 "dnsSupport") in
+      let vpnEcmpSupport =
+        (Option.map ~f:VpnEcmpSupportValue.of_xml)
+          (Xml.child xml_arg0 "vpnEcmpSupport") in
+      let propagationDefaultRouteTableId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "propagationDefaultRouteTableId") in
+      let defaultRouteTablePropagation =
+        (Option.map ~f:DefaultRouteTablePropagationValue.of_xml)
+          (Xml.child xml_arg0 "defaultRouteTablePropagation") in
+      let associationDefaultRouteTableId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "associationDefaultRouteTableId") in
+      let defaultRouteTableAssociation =
+        (Option.map ~f:DefaultRouteTableAssociationValue.of_xml)
+          (Xml.child xml_arg0 "defaultRouteTableAssociation") in
+      let autoAcceptSharedAttachments =
+        (Option.map ~f:AutoAcceptSharedAttachmentsValue.of_xml)
+          (Xml.child xml_arg0 "autoAcceptSharedAttachments") in
+      let transitGatewayCidrBlocks =
+        (Option.map ~f:ValueStringList.of_xml)
+          (Xml.child xml_arg0 "transitGatewayCidrBlocks") in
+      let amazonSideAsn =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "amazonSideAsn") in
+      make ?encryptionSupport ?multicastSupport
+        ?securityGroupReferencingSupport ?dnsSupport ?vpnEcmpSupport
+        ?propagationDefaultRouteTableId ?defaultRouteTablePropagation
+        ?associationDefaultRouteTableId ?defaultRouteTableAssociation
+        ?autoAcceptSharedAttachments ?transitGatewayCidrBlocks ?amazonSideAsn
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let encryptionSupport =
+        field_map json__ "EncryptionSupport" EncryptionSupport.of_json in
+      let multicastSupport =
+        field_map json__ "MulticastSupport" MulticastSupportValue.of_json in
+      let securityGroupReferencingSupport =
+        field_map json__ "SecurityGroupReferencingSupport"
+          SecurityGroupReferencingSupportValue.of_json in
+      let dnsSupport = field_map json__ "DnsSupport" DnsSupportValue.of_json in
+      let vpnEcmpSupport =
+        field_map json__ "VpnEcmpSupport" VpnEcmpSupportValue.of_json in
+      let propagationDefaultRouteTableId =
+        field_map json__ "PropagationDefaultRouteTableId" String_.of_json in
+      let defaultRouteTablePropagation =
+        field_map json__ "DefaultRouteTablePropagation"
+          DefaultRouteTablePropagationValue.of_json in
+      let associationDefaultRouteTableId =
+        field_map json__ "AssociationDefaultRouteTableId" String_.of_json in
+      let defaultRouteTableAssociation =
+        field_map json__ "DefaultRouteTableAssociation"
+          DefaultRouteTableAssociationValue.of_json in
+      let autoAcceptSharedAttachments =
+        field_map json__ "AutoAcceptSharedAttachments"
+          AutoAcceptSharedAttachmentsValue.of_json in
+      let transitGatewayCidrBlocks =
+        field_map json__ "TransitGatewayCidrBlocks" ValueStringList.of_json in
+      let amazonSideAsn = field_map json__ "AmazonSideAsn" Long.of_json in
+      make ?encryptionSupport ?multicastSupport
+        ?securityGroupReferencingSupport ?dnsSupport ?vpnEcmpSupport
+        ?propagationDefaultRouteTableId ?defaultRouteTablePropagation
+        ?associationDefaultRouteTableId ?defaultRouteTableAssociation
+        ?autoAcceptSharedAttachments ?transitGatewayCidrBlocks ?amazonSideAsn
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the options for a transit gateway."]
+module TransitGatewayState =
+  struct
+    type nonrec t =
+      | Pending 
+      | Available 
+      | Modifying 
+      | Deleting 
+      | Deleted 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Available -> "available"
+      | Modifying -> "modifying"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "available" -> Available
+      | "modifying" -> Modifying
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TransitGatewayState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TransitGatewayState" j)
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayAttachmentState =
+  struct
+    type nonrec t =
+      | Initiating 
+      | InitiatingRequest 
+      | PendingAcceptance 
+      | RollingBack 
+      | Pending 
+      | Available 
+      | Modifying 
+      | Deleting 
+      | Deleted 
+      | Failed 
+      | Rejected 
+      | Rejecting 
+      | Failing 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Initiating -> "initiating"
+      | InitiatingRequest -> "initiatingRequest"
+      | PendingAcceptance -> "pendingAcceptance"
+      | RollingBack -> "rollingBack"
+      | Pending -> "pending"
+      | Available -> "available"
+      | Modifying -> "modifying"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Failed -> "failed"
+      | Rejected -> "rejected"
+      | Rejecting -> "rejecting"
+      | Failing -> "failing"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "initiating" -> Initiating
+      | "initiatingRequest" -> InitiatingRequest
+      | "pendingAcceptance" -> PendingAcceptance
+      | "rollingBack" -> RollingBack
+      | "pending" -> Pending
+      | "available" -> Available
+      | "modifying" -> Modifying
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | "failed" -> Failed
+      | "rejected" -> Rejected
+      | "rejecting" -> Rejecting
+      | "failing" -> Failing
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TransitGatewayAttachmentState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TransitGatewayAttachmentState" j)
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayVpcAttachmentOptions =
+  struct
+    type nonrec t =
+      {
+      dnsSupport: DnsSupportValue.t option
+        [@ocaml.doc "Indicates whether DNS support is enabled."];
+      securityGroupReferencingSupport:
+        SecurityGroupReferencingSupportValue.t option
+        [@ocaml.doc
+          "Enables you to reference a security group across VPCs attached to a transit gateway to simplify security group management. This option is enabled by default. For more information about security group referencing, see Security group referencing in the Amazon Web Services Transit Gateways Guide."];
+      ipv6Support: Ipv6SupportValue.t option
+        [@ocaml.doc "Indicates whether IPv6 support is disabled."];
+      applianceModeSupport: ApplianceModeSupportValue.t option
+        [@ocaml.doc "Indicates whether appliance mode support is enabled."]}
+    let make ?dnsSupport =
+      fun ?securityGroupReferencingSupport ->
+        fun ?ipv6Support ->
+          fun ?applianceModeSupport ->
+            fun () ->
+              {
+                dnsSupport;
+                securityGroupReferencingSupport;
+                ipv6Support;
+                applianceModeSupport
+              }
+    let to_value x =
+      structure_to_value
+        [("dnsSupport",
+           (Option.map x.dnsSupport ~f:DnsSupportValue.to_value));
+        ("securityGroupReferencingSupport",
+          (Option.map x.securityGroupReferencingSupport
+             ~f:SecurityGroupReferencingSupportValue.to_value));
+        ("ipv6Support",
+          (Option.map x.ipv6Support ~f:Ipv6SupportValue.to_value));
+        ("applianceModeSupport",
+          (Option.map x.applianceModeSupport
+             ~f:ApplianceModeSupportValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let applianceModeSupport =
+        (Option.map ~f:ApplianceModeSupportValue.of_xml)
+          (Xml.child xml_arg0 "applianceModeSupport") in
+      let ipv6Support =
+        (Option.map ~f:Ipv6SupportValue.of_xml)
+          (Xml.child xml_arg0 "ipv6Support") in
+      let securityGroupReferencingSupport =
+        (Option.map ~f:SecurityGroupReferencingSupportValue.of_xml)
+          (Xml.child xml_arg0 "securityGroupReferencingSupport") in
+      let dnsSupport =
+        (Option.map ~f:DnsSupportValue.of_xml)
+          (Xml.child xml_arg0 "dnsSupport") in
+      make ?applianceModeSupport ?ipv6Support
+        ?securityGroupReferencingSupport ?dnsSupport ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applianceModeSupport =
+        field_map json__ "ApplianceModeSupport"
+          ApplianceModeSupportValue.of_json in
+      let ipv6Support =
+        field_map json__ "Ipv6Support" Ipv6SupportValue.of_json in
+      let securityGroupReferencingSupport =
+        field_map json__ "SecurityGroupReferencingSupport"
+          SecurityGroupReferencingSupportValue.of_json in
+      let dnsSupport = field_map json__ "DnsSupport" DnsSupportValue.of_json in
+      make ?applianceModeSupport ?ipv6Support
+        ?securityGroupReferencingSupport ?dnsSupport ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the VPC attachment options."]
+module TransitGatewayRouteTableState =
+  struct
+    type nonrec t =
+      | Pending 
+      | Available 
+      | Deleting 
+      | Deleted 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Available -> "available"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "available" -> Available
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TransitGatewayRouteTableState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TransitGatewayRouteTableState" j)
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayRouteTableAnnouncementDirection =
+  struct
+    type nonrec t =
+      | Outgoing 
+      | Incoming 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Outgoing -> "outgoing"
+      | Incoming -> "incoming"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "outgoing" -> Outgoing
+      | "incoming" -> Incoming
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration TransitGatewayRouteTableAnnouncementDirection"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"TransitGatewayRouteTableAnnouncementDirection"
+           j)
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayRouteTableAnnouncementState =
+  struct
+    type nonrec t =
+      | Available 
+      | Pending 
+      | Failing 
+      | Failed 
+      | Deleting 
+      | Deleted 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Available -> "available"
+      | Pending -> "pending"
+      | Failing -> "failing"
+      | Failed -> "failed"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "available" -> Available
+      | "pending" -> Pending
+      | "failing" -> Failing
+      | "failed" -> Failed
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration TransitGatewayRouteTableAnnouncementState"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"TransitGatewayRouteTableAnnouncementState" j)
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayPolicyTableState =
+  struct
+    type nonrec t =
+      | Pending 
+      | Available 
+      | Deleting 
+      | Deleted 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Available -> "available"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "available" -> Available
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TransitGatewayPolicyTableState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TransitGatewayPolicyTableState" j)
+    let to_json = simple_to_json to_value
+  end
+module PeeringAttachmentStatus =
+  struct
+    type nonrec t =
+      {
+      code: String_.t option [@ocaml.doc "The status code."];
+      message: String_.t option
+        [@ocaml.doc "The status message, if applicable."]}
+    let make ?code = fun ?message -> fun () -> { code; message }
+    let to_value x =
+      structure_to_value
+        [("code", (Option.map x.code ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
+      make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
+      make ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The status of the transit gateway peering attachment."]
+module PeeringTgwInfo =
+  struct
+    type nonrec t =
+      {
+      transitGatewayId: String_.t option
+        [@ocaml.doc "The ID of the transit gateway."];
+      coreNetworkId: String_.t option
+        [@ocaml.doc
+          "The ID of the core network where the transit gateway peer is located."];
+      ownerId: String_.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that owns the transit gateway."];
+      region: String_.t option
+        [@ocaml.doc "The Region of the transit gateway."]}
+    let make ?transitGatewayId =
+      fun ?coreNetworkId ->
+        fun ?ownerId ->
+          fun ?region ->
+            fun () -> { transitGatewayId; coreNetworkId; ownerId; region }
+    let to_value x =
+      structure_to_value
+        [("transitGatewayId",
+           (Option.map x.transitGatewayId ~f:String_.to_value));
+        ("coreNetworkId", (Option.map x.coreNetworkId ~f:String_.to_value));
+        ("ownerId", (Option.map x.ownerId ~f:String_.to_value));
+        ("region", (Option.map x.region ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let region =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "region") in
+      let ownerId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ownerId") in
+      let coreNetworkId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "coreNetworkId") in
+      let transitGatewayId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "transitGatewayId") in
+      make ?region ?ownerId ?coreNetworkId ?transitGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let region = field_map json__ "Region" String_.of_json in
+      let ownerId = field_map json__ "OwnerId" String_.of_json in
+      let coreNetworkId = field_map json__ "CoreNetworkId" String_.of_json in
+      let transitGatewayId =
+        field_map json__ "TransitGatewayId" String_.of_json in
+      make ?region ?ownerId ?coreNetworkId ?transitGatewayId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the transit gateway in the peering attachment."]
+module TransitGatewayPeeringAttachmentOptions =
+  struct
+    type nonrec t =
+      {
+      dynamicRouting: DynamicRoutingValue.t option
+        [@ocaml.doc
+          "Describes whether dynamic routing is enabled or disabled for the transit gateway peering attachment."]}
+    let make ?dynamicRouting = fun () -> { dynamicRouting }
+    let to_value x =
+      structure_to_value
+        [("dynamicRouting",
+           (Option.map x.dynamicRouting ~f:DynamicRoutingValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dynamicRouting =
+        (Option.map ~f:DynamicRoutingValue.of_xml)
+          (Xml.child xml_arg0 "dynamicRouting") in
+      make ?dynamicRouting ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dynamicRouting =
+        field_map json__ "DynamicRouting" DynamicRoutingValue.of_json in
+      make ?dynamicRouting ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes dynamic routing for the transit gateway peering attachment."]
+module TransitGatewayMulticastDomainOptions =
+  struct
+    type nonrec t =
+      {
+      igmpv2Support: Igmpv2SupportValue.t option
+        [@ocaml.doc
+          "Indicates whether Internet Group Management Protocol (IGMP) version 2 is turned on for the transit gateway multicast domain."];
+      staticSourcesSupport: StaticSourcesSupportValue.t option
+        [@ocaml.doc
+          "Indicates whether support for statically configuring transit gateway multicast group sources is turned on."];
+      autoAcceptSharedAssociations:
+        AutoAcceptSharedAssociationsValue.t option
+        [@ocaml.doc
+          "Indicates whether to automatically cross-account subnet associations that are associated with the transit gateway multicast domain."]}
+    let make ?igmpv2Support =
+      fun ?staticSourcesSupport ->
+        fun ?autoAcceptSharedAssociations ->
+          fun () ->
+            {
+              igmpv2Support;
+              staticSourcesSupport;
+              autoAcceptSharedAssociations
+            }
+    let to_value x =
+      structure_to_value
+        [("igmpv2Support",
+           (Option.map x.igmpv2Support ~f:Igmpv2SupportValue.to_value));
+        ("staticSourcesSupport",
+          (Option.map x.staticSourcesSupport
+             ~f:StaticSourcesSupportValue.to_value));
+        ("autoAcceptSharedAssociations",
+          (Option.map x.autoAcceptSharedAssociations
+             ~f:AutoAcceptSharedAssociationsValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let autoAcceptSharedAssociations =
+        (Option.map ~f:AutoAcceptSharedAssociationsValue.of_xml)
+          (Xml.child xml_arg0 "autoAcceptSharedAssociations") in
+      let staticSourcesSupport =
+        (Option.map ~f:StaticSourcesSupportValue.of_xml)
+          (Xml.child xml_arg0 "staticSourcesSupport") in
+      let igmpv2Support =
+        (Option.map ~f:Igmpv2SupportValue.of_xml)
+          (Xml.child xml_arg0 "igmpv2Support") in
+      make ?autoAcceptSharedAssociations ?staticSourcesSupport ?igmpv2Support
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let autoAcceptSharedAssociations =
+        field_map json__ "AutoAcceptSharedAssociations"
+          AutoAcceptSharedAssociationsValue.of_json in
+      let staticSourcesSupport =
+        field_map json__ "StaticSourcesSupport"
+          StaticSourcesSupportValue.of_json in
+      let igmpv2Support =
+        field_map json__ "Igmpv2Support" Igmpv2SupportValue.of_json in
+      make ?autoAcceptSharedAssociations ?staticSourcesSupport ?igmpv2Support
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the options for a transit gateway multicast domain."]
+module TransitGatewayMulticastDomainState =
+  struct
+    type nonrec t =
+      | Pending 
+      | Available 
+      | Deleting 
+      | Deleted 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Available -> "available"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "available" -> Available
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TransitGatewayMulticastDomainState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TransitGatewayMulticastDomainState" j)
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayMeteringPolicyId =
+  struct
+    type nonrec t = string
+    let context_ = "TransitGatewayMeteringPolicyId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TransitGatewayMeteringPolicyId" j
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayMeteringPolicyState =
+  struct
+    type nonrec t =
+      | Available 
+      | Deleted 
+      | Pending 
+      | Modifying 
+      | Deleting 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Available -> "available"
+      | Deleted -> "deleted"
+      | Pending -> "pending"
+      | Modifying -> "modifying"
+      | Deleting -> "deleting"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "available" -> Available
+      | "deleted" -> Deleted
+      | "pending" -> Pending
+      | "modifying" -> Modifying
+      | "deleting" -> Deleting
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TransitGatewayMeteringPolicyState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TransitGatewayMeteringPolicyState" j)
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayConnectOptions =
+  struct
+    type nonrec t =
+      {
+      protocol: ProtocolValue.t option [@ocaml.doc "The tunnel protocol."]}
+    let make ?protocol = fun () -> { protocol }
+    let to_value x =
+      structure_to_value
+        [("protocol", (Option.map x.protocol ~f:ProtocolValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let protocol =
+        (Option.map ~f:ProtocolValue.of_xml) (Xml.child xml_arg0 "protocol") in
+      make ?protocol ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let protocol = field_map json__ "Protocol" ProtocolValue.of_json in
+      make ?protocol ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the Connect attachment options."]
+module TransitGatewayConnectPeerConfiguration =
+  struct
+    type nonrec t =
+      {
+      transitGatewayAddress: String_.t option
+        [@ocaml.doc
+          "The Connect peer IP address on the transit gateway side of the tunnel."];
+      peerAddress: String_.t option
+        [@ocaml.doc
+          "The Connect peer IP address on the appliance side of the tunnel."];
+      insideCidrBlocks: InsideCidrBlocksStringList.t option
+        [@ocaml.doc "The range of interior BGP peer IP addresses."];
+      protocol: ProtocolValue.t option [@ocaml.doc "The tunnel protocol."];
+      bgpConfigurations:
+        TransitGatewayAttachmentBgpConfigurationList.t option
+        [@ocaml.doc "The BGP configuration details."]}
+    let make ?transitGatewayAddress =
+      fun ?peerAddress ->
+        fun ?insideCidrBlocks ->
+          fun ?protocol ->
+            fun ?bgpConfigurations ->
+              fun () ->
+                {
+                  transitGatewayAddress;
+                  peerAddress;
+                  insideCidrBlocks;
+                  protocol;
+                  bgpConfigurations
+                }
+    let to_value x =
+      structure_to_value
+        [("transitGatewayAddress",
+           (Option.map x.transitGatewayAddress ~f:String_.to_value));
+        ("peerAddress", (Option.map x.peerAddress ~f:String_.to_value));
+        ("insideCidrBlocks",
+          (Option.map x.insideCidrBlocks
+             ~f:InsideCidrBlocksStringList.to_value));
+        ("protocol", (Option.map x.protocol ~f:ProtocolValue.to_value));
+        ("bgpConfigurations",
+          (Option.map x.bgpConfigurations
+             ~f:TransitGatewayAttachmentBgpConfigurationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bgpConfigurations =
+        (Option.map ~f:TransitGatewayAttachmentBgpConfigurationList.of_xml)
+          (Xml.child xml_arg0 "bgpConfigurations") in
+      let protocol =
+        (Option.map ~f:ProtocolValue.of_xml) (Xml.child xml_arg0 "protocol") in
+      let insideCidrBlocks =
+        (Option.map ~f:InsideCidrBlocksStringList.of_xml)
+          (Xml.child xml_arg0 "insideCidrBlocks") in
+      let peerAddress =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "peerAddress") in
+      let transitGatewayAddress =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "transitGatewayAddress") in
+      make ?bgpConfigurations ?protocol ?insideCidrBlocks ?peerAddress
+        ?transitGatewayAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bgpConfigurations =
+        field_map json__ "BgpConfigurations"
+          TransitGatewayAttachmentBgpConfigurationList.of_json in
+      let protocol = field_map json__ "Protocol" ProtocolValue.of_json in
+      let insideCidrBlocks =
+        field_map json__ "InsideCidrBlocks"
+          InsideCidrBlocksStringList.of_json in
+      let peerAddress = field_map json__ "PeerAddress" String_.of_json in
+      let transitGatewayAddress =
+        field_map json__ "TransitGatewayAddress" String_.of_json in
+      make ?bgpConfigurations ?protocol ?insideCidrBlocks ?peerAddress
+        ?transitGatewayAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the Connect peer details."]
+module TransitGatewayConnectPeerId =
+  struct
+    type nonrec t = string
+    let context_ = "TransitGatewayConnectPeerId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TransitGatewayConnectPeerId" j
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayConnectPeerState =
+  struct
+    type nonrec t =
+      | Pending 
+      | Available 
+      | Deleting 
+      | Deleted 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Available -> "available"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "available" -> Available
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TransitGatewayConnectPeerState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TransitGatewayConnectPeerState" j)
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayAttachmentAssociation =
+  struct
+    type nonrec t =
+      {
+      transitGatewayRouteTableId: String_.t option
+        [@ocaml.doc "The ID of the route table for the transit gateway."];
+      state: TransitGatewayAssociationState.t option
+        [@ocaml.doc "The state of the association."]}
+    let make ?transitGatewayRouteTableId =
+      fun ?state -> fun () -> { transitGatewayRouteTableId; state }
+    let to_value x =
+      structure_to_value
+        [("transitGatewayRouteTableId",
+           (Option.map x.transitGatewayRouteTableId ~f:String_.to_value));
+        ("state",
+          (Option.map x.state ~f:TransitGatewayAssociationState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:TransitGatewayAssociationState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let transitGatewayRouteTableId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "transitGatewayRouteTableId") in
+      make ?state ?transitGatewayRouteTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state =
+        field_map json__ "State" TransitGatewayAssociationState.of_json in
+      let transitGatewayRouteTableId =
+        field_map json__ "TransitGatewayRouteTableId" String_.of_json in
+      make ?state ?transitGatewayRouteTableId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an association."]
+module TrafficMirrorTargetType =
+  struct
+    type nonrec t =
+      | Network_interface 
+      | Network_load_balancer 
+      | Gateway_load_balancer_endpoint 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Network_interface -> "network-interface"
+      | Network_load_balancer -> "network-load-balancer"
+      | Gateway_load_balancer_endpoint -> "gateway-load-balancer-endpoint"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "network-interface" -> Network_interface
+      | "network-load-balancer" -> Network_load_balancer
+      | "gateway-load-balancer-endpoint" -> Gateway_load_balancer_endpoint
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TrafficMirrorTargetType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TrafficMirrorTargetType" j)
+    let to_json = simple_to_json to_value
+  end
+module TrafficMirrorFilterRuleList =
+  struct
+    type nonrec t = TrafficMirrorFilterRule.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TrafficMirrorFilterRule.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TrafficMirrorFilterRule.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TrafficMirrorFilterRuleList"
+        ~of_json:TrafficMirrorFilterRule.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TrafficMirrorNetworkServiceList =
+  struct
+    type nonrec t = TrafficMirrorNetworkService.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TrafficMirrorNetworkService.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TrafficMirrorNetworkService.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TrafficMirrorNetworkServiceList"
+        ~of_json:TrafficMirrorNetworkService.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PrivateDnsNameOptionsOnLaunch =
+  struct
+    type nonrec t =
+      {
+      hostnameType: HostnameType.t option
+        [@ocaml.doc
+          "The type of hostname for EC2 instances. For IPv4 only subnets, an instance DNS name must be based on the instance IPv4 address. For IPv6 only subnets, an instance DNS name must be based on the instance ID. For dual-stack subnets, you can specify whether DNS names use the instance IPv4 address or the instance ID."];
+      enableResourceNameDnsARecord: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether to respond to DNS queries for instance hostnames with DNS A records."];
+      enableResourceNameDnsAAAARecord: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether to respond to DNS queries for instance hostname with DNS AAAA records."]}
+    let make ?hostnameType =
+      fun ?enableResourceNameDnsARecord ->
+        fun ?enableResourceNameDnsAAAARecord ->
+          fun () ->
+            {
+              hostnameType;
+              enableResourceNameDnsARecord;
+              enableResourceNameDnsAAAARecord
+            }
+    let to_value x =
+      structure_to_value
+        [("hostnameType",
+           (Option.map x.hostnameType ~f:HostnameType.to_value));
+        ("enableResourceNameDnsARecord",
+          (Option.map x.enableResourceNameDnsARecord ~f:Boolean.to_value));
+        ("enableResourceNameDnsAAAARecord",
+          (Option.map x.enableResourceNameDnsAAAARecord ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enableResourceNameDnsAAAARecord =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "enableResourceNameDnsAAAARecord") in
+      let enableResourceNameDnsARecord =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "enableResourceNameDnsARecord") in
+      let hostnameType =
+        (Option.map ~f:HostnameType.of_xml)
+          (Xml.child xml_arg0 "hostnameType") in
+      make ?enableResourceNameDnsAAAARecord ?enableResourceNameDnsARecord
+        ?hostnameType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enableResourceNameDnsAAAARecord =
+        field_map json__ "EnableResourceNameDnsAAAARecord" Boolean.of_json in
+      let enableResourceNameDnsARecord =
+        field_map json__ "EnableResourceNameDnsARecord" Boolean.of_json in
+      let hostnameType = field_map json__ "HostnameType" HostnameType.of_json in
+      make ?enableResourceNameDnsAAAARecord ?enableResourceNameDnsARecord
+        ?hostnameType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the options for instance hostnames."]
 module SubnetIpv6CidrBlockAssociationSet =
   struct
     type nonrec t = SubnetIpv6CidrBlockAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetIpv6CidrBlockAssociation.to_value)) |>
         (fun x -> `List x)
@@ -34,17 +1090,26 @@ module SubnetState =
     type nonrec t =
       | Pending 
       | Available 
+      | Unavailable 
+      | Failed 
+      | Failed_insufficient_capacity 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Pending -> "pending"
       | Available -> "available"
+      | Unavailable -> "unavailable"
+      | Failed -> "failed"
+      | Failed_insufficient_capacity -> "failed-insufficient-capacity"
       | Non_static_id s -> s
     let of_string =
       function
       | "pending" -> Pending
       | "available" -> Available
+      | "unavailable" -> Unavailable
+      | "failed" -> Failed
+      | "failed-insufficient-capacity" -> Failed_insufficient_capacity
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -58,6 +1123,9 @@ module StaleIpPermissionSet =
   struct
     type nonrec t = StaleIpPermission.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StaleIpPermission.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -156,7 +1224,7 @@ module SpotFleetRequestConfigData =
       {
       allocationStrategy: AllocationStrategy.t option
         [@ocaml.doc
-          "Indicates how to allocate the target Spot Instance capacity across the Spot Instance pools specified by the Spot Fleet request. If the allocation strategy is lowestPrice, Spot Fleet launches instances from the Spot Instance pools with the lowest price. This is the default allocation strategy. If the allocation strategy is diversified, Spot Fleet launches instances from all the Spot Instance pools that you specify. If the allocation strategy is capacityOptimized (recommended), Spot Fleet launches instances from Spot Instance pools with optimal capacity for the number of instances that are launching. To give certain instance types a higher chance of launching first, use capacityOptimizedPrioritized. Set a priority for each instance type by using the Priority parameter for LaunchTemplateOverrides. You can assign the same priority to different LaunchTemplateOverrides. EC2 implements the priorities on a best-effort basis, but optimizes for capacity first. capacityOptimizedPrioritized is supported only if your Spot Fleet uses a launch template. Note that if the OnDemandAllocationStrategy is set to prioritized, the same priority is applied when fulfilling On-Demand capacity."];
+          "The strategy that determines how to allocate the target Spot Instance capacity across the Spot Instance pools specified by the Spot Fleet launch configuration. For more information, see Allocation strategies for Spot Instances in the Amazon EC2 User Guide. priceCapacityOptimized (recommended) Spot Fleet identifies the pools with the highest capacity availability for the number of instances that are launching. This means that we will request Spot Instances from the pools that we believe have the lowest chance of interruption in the near term. Spot Fleet then requests Spot Instances from the lowest priced of these pools. capacityOptimized Spot Fleet identifies the pools with the highest capacity availability for the number of instances that are launching. This means that we will request Spot Instances from the pools that we believe have the lowest chance of interruption in the near term. To give certain instance types a higher chance of launching first, use capacityOptimizedPrioritized. Set a priority for each instance type by using the Priority parameter for LaunchTemplateOverrides. You can assign the same priority to different LaunchTemplateOverrides. EC2 implements the priorities on a best-effort basis, but optimizes for capacity first. capacityOptimizedPrioritized is supported only if your Spot Fleet uses a launch template. Note that if the OnDemandAllocationStrategy is set to prioritized, the same priority is applied when fulfilling On-Demand capacity. diversified Spot Fleet requests instances from all of the Spot Instance pools that you specify. lowestPrice (not recommended) We don't recommend the lowestPrice allocation strategy because it has the highest risk of interruption for your Spot Instances. Spot Fleet requests instances from the lowest priced Spot Instance pool that has available capacity. If the lowest priced pool doesn't have available capacity, the Spot Instances come from the next lowest priced pool that has available capacity. If a pool runs out of capacity before fulfilling your desired capacity, Spot Fleet will continue to fulfill your request by drawing from the next lowest priced pool. To ensure that your desired capacity is met, you might receive Spot Instances from several pools. Because this strategy only considers instance price and not capacity availability, it might lead to high interruption rates. Default: lowestPrice"];
       onDemandAllocationStrategy: OnDemandAllocationStrategy.t option
         [@ocaml.doc
           "The order of the launch template overrides to use in fulfilling On-Demand capacity. If you specify lowestPrice, Spot Fleet uses price to determine the order, launching the lowest price first. If you specify prioritized, Spot Fleet uses the priority that you assign to each Spot Fleet launch template override, launching the highest priority first. If you do not specify a value, Spot Fleet defaults to lowestPrice."];
@@ -169,7 +1237,7 @@ module SpotFleetRequestConfigData =
       excessCapacityTerminationPolicy:
         ExcessCapacityTerminationPolicy.t option
         [@ocaml.doc
-          "Indicates whether running Spot Instances should be terminated if you decrease the target capacity of the Spot Fleet request below the current size of the Spot Fleet."];
+          "Indicates whether running instances should be terminated if you decrease the target capacity of the Spot Fleet request below the current size of the Spot Fleet. Supported only for fleets of type maintain."];
       fulfilledCapacity: Double.t option
         [@ocaml.doc
           "The number of units fulfilled by this request compared to the set target capacity. You cannot set this value."];
@@ -178,16 +1246,16 @@ module SpotFleetRequestConfigData =
           "The number of On-Demand units fulfilled by this request compared to the set target On-Demand capacity."];
       iamFleetRole: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of an Identity and Access Management (IAM) role that grants the Spot Fleet the permission to request, launch, terminate, and tag instances on your behalf. For more information, see Spot Fleet prerequisites in the Amazon EC2 User Guide for Linux Instances. Spot Fleet can terminate Spot Instances on your behalf when you cancel its Spot Fleet request using CancelSpotFleetRequests or when the Spot Fleet request expires, if you set TerminateInstancesWithExpiration."];
+          "The Amazon Resource Name (ARN) of an Identity and Access Management (IAM) role that grants the Spot Fleet the permission to request, launch, terminate, and tag instances on your behalf. For more information, see Spot Fleet prerequisites in the Amazon EC2 User Guide. Spot Fleet can terminate Spot Instances on your behalf when you cancel its Spot Fleet request using CancelSpotFleetRequests or when the Spot Fleet request expires, if you set TerminateInstancesWithExpiration."];
       launchSpecifications: LaunchSpecsList.t option
         [@ocaml.doc
-          "The launch specifications for the Spot Fleet request. If you specify LaunchSpecifications, you can't specify LaunchTemplateConfigs. If you include On-Demand capacity in your request, you must use LaunchTemplateConfigs."];
+          "The launch specifications for the Spot Fleet request. If you specify LaunchSpecifications, you can't specify LaunchTemplateConfigs. If you include On-Demand capacity in your request, you must use LaunchTemplateConfigs. If an AMI specified in a launch specification is deregistered or disabled, no new instances can be launched from the AMI. For fleets of type maintain, the target capacity will not be maintained."];
       launchTemplateConfigs: LaunchTemplateConfigList.t option
         [@ocaml.doc
           "The launch template and overrides. If you specify LaunchTemplateConfigs, you can't specify LaunchSpecifications. If you include On-Demand capacity in your request, you must use LaunchTemplateConfigs."];
       spotPrice: String_.t option
         [@ocaml.doc
-          "The maximum price per unit hour that you are willing to pay for a Spot Instance. The default is the On-Demand price."];
+          "The maximum price per unit hour that you are willing to pay for a Spot Instance. We do not recommend using this parameter because it can lead to increased interruptions. If you do not specify this parameter, you will pay the current Spot price. If you specify a maximum price, your instances will be interrupted more frequently than if you do not specify this parameter."];
       targetCapacity: Integer.t
         [@ocaml.doc
           "The number of units to request for the Spot Fleet. You can choose to set the target capacity in terms of instances or a performance characteristic that is important to your application workload, such as vCPUs, memory, or I/O. If the request type is maintain, you can specify a target capacity of 0 and add capacity later."];
@@ -196,10 +1264,10 @@ module SpotFleetRequestConfigData =
           "The number of On-Demand units to request. You can choose to set the target capacity in terms of instances or a performance characteristic that is important to your application workload, such as vCPUs, memory, or I/O. If the request type is maintain, you can specify a target capacity of 0 and add capacity later."];
       onDemandMaxTotalPrice: String_.t option
         [@ocaml.doc
-          "The maximum amount per hour for On-Demand Instances that you're willing to pay. You can use the onDemandMaxTotalPrice parameter, the spotMaxTotalPrice parameter, or both parameters to ensure that your fleet cost does not exceed your budget. If you set a maximum price per hour for the On-Demand Instances and Spot Instances in your request, Spot Fleet will launch instances until it reaches the maximum amount you're willing to pay. When the maximum amount you're willing to pay is reached, the fleet stops launching instances even if it hasn\226\128\153t met the target capacity."];
+          "The maximum amount per hour for On-Demand Instances that you're willing to pay. You can use the onDemandMaxTotalPrice parameter, the spotMaxTotalPrice parameter, or both parameters to ensure that your fleet cost does not exceed your budget. If you set a maximum price per hour for the On-Demand Instances and Spot Instances in your request, Spot Fleet will launch instances until it reaches the maximum amount you're willing to pay. When the maximum amount you're willing to pay is reached, the fleet stops launching instances even if it hasn\226\128\153t met the target capacity. If your fleet includes T instances that are configured as unlimited, and if their average CPU usage exceeds the baseline utilization, you will incur a charge for surplus credits. The onDemandMaxTotalPrice does not account for surplus credits, and, if you use surplus credits, your final cost might be higher than what you specified for onDemandMaxTotalPrice. For more information, see Surplus credits can incur charges in the Amazon EC2 User Guide."];
       spotMaxTotalPrice: String_.t option
         [@ocaml.doc
-          "The maximum amount per hour for Spot Instances that you're willing to pay. You can use the spotdMaxTotalPrice parameter, the onDemandMaxTotalPrice parameter, or both parameters to ensure that your fleet cost does not exceed your budget. If you set a maximum price per hour for the On-Demand Instances and Spot Instances in your request, Spot Fleet will launch instances until it reaches the maximum amount you're willing to pay. When the maximum amount you're willing to pay is reached, the fleet stops launching instances even if it hasn\226\128\153t met the target capacity."];
+          "The maximum amount per hour for Spot Instances that you're willing to pay. You can use the spotMaxTotalPrice parameter, the onDemandMaxTotalPrice parameter, or both parameters to ensure that your fleet cost does not exceed your budget. If you set a maximum price per hour for the On-Demand Instances and Spot Instances in your request, Spot Fleet will launch instances until it reaches the maximum amount you're willing to pay. When the maximum amount you're willing to pay is reached, the fleet stops launching instances even if it hasn\226\128\153t met the target capacity. If your fleet includes T instances that are configured as unlimited, and if their average CPU usage exceeds the baseline utilization, you will incur a charge for surplus credits. The spotMaxTotalPrice does not account for surplus credits, and, if you use surplus credits, your final cost might be higher than what you specified for spotMaxTotalPrice. For more information, see Surplus credits can incur charges in the Amazon EC2 User Guide."];
       terminateInstancesWithExpiration: Boolean.t option
         [@ocaml.doc
           "Indicates whether running Spot Instances are terminated when the Spot Fleet request expires."];
@@ -227,10 +1295,10 @@ module SpotFleetRequestConfigData =
       context: String_.t option [@ocaml.doc "Reserved."];
       targetCapacityUnitType: TargetCapacityUnitType.t option
         [@ocaml.doc
-          "The unit for the target capacity. Default: units (translates to number of instances)"];
+          "The unit for the target capacity. You can specify this parameter only when using attribute-based instance type selection. Default: units (the number of instances)"];
       tagSpecifications: TagSpecificationList.t option
         [@ocaml.doc
-          "The key-value pair for tagging the Spot Fleet request on creation. The value for ResourceType must be spot-fleet-request, otherwise the Spot Fleet request fails. To tag instances at launch, specify the tags in the launch template (valid only if you use LaunchTemplateConfigs) or in the SpotFleetTagSpecification (valid only if you use LaunchSpecifications). For information about tagging after launch, see Tagging Your Resources."]}
+          "The key-value pair for tagging the Spot Fleet request on creation. The value for ResourceType must be spot-fleet-request, otherwise the Spot Fleet request fails. To tag instances at launch, specify the tags in the launch template (valid only if you use LaunchTemplateConfigs) or in the SpotFleetTagSpecification (valid only if you use LaunchSpecifications). For information about tagging after launch, see Tag your resources."]}
     let context_ = "SpotFleetRequestConfigData"
     let make ?allocationStrategy =
       fun ?onDemandAllocationStrategy ->
@@ -425,58 +1493,58 @@ module SpotFleetRequestConfigData =
         ?spotMaintenanceStrategies ?onDemandAllocationStrategy
         ?allocationStrategy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagSpecifications =
-        field_map json "TagSpecifications" TagSpecificationList.of_json in
+        field_map json__ "TagSpecifications" TagSpecificationList.of_json in
       let targetCapacityUnitType =
-        field_map json "TargetCapacityUnitType"
+        field_map json__ "TargetCapacityUnitType"
           TargetCapacityUnitType.of_json in
-      let context = field_map json "Context" String_.of_json in
+      let context = field_map json__ "Context" String_.of_json in
       let instancePoolsToUseCount =
-        field_map json "InstancePoolsToUseCount" Integer.of_json in
+        field_map json__ "InstancePoolsToUseCount" Integer.of_json in
       let loadBalancersConfig =
-        field_map json "LoadBalancersConfig" LoadBalancersConfig.of_json in
+        field_map json__ "LoadBalancersConfig" LoadBalancersConfig.of_json in
       let instanceInterruptionBehavior =
-        field_map json "InstanceInterruptionBehavior"
+        field_map json__ "InstanceInterruptionBehavior"
           InstanceInterruptionBehavior.of_json in
       let replaceUnhealthyInstances =
-        field_map json "ReplaceUnhealthyInstances" Boolean.of_json in
-      let validUntil = field_map json "ValidUntil" DateTime.of_json in
-      let validFrom = field_map json "ValidFrom" DateTime.of_json in
-      let type_ = field_map json "Type" FleetType.of_json in
+        field_map json__ "ReplaceUnhealthyInstances" Boolean.of_json in
+      let validUntil = field_map json__ "ValidUntil" DateTime.of_json in
+      let validFrom = field_map json__ "ValidFrom" DateTime.of_json in
+      let type_ = field_map json__ "Type" FleetType.of_json in
       let terminateInstancesWithExpiration =
-        field_map json "TerminateInstancesWithExpiration" Boolean.of_json in
+        field_map json__ "TerminateInstancesWithExpiration" Boolean.of_json in
       let spotMaxTotalPrice =
-        field_map json "SpotMaxTotalPrice" String_.of_json in
+        field_map json__ "SpotMaxTotalPrice" String_.of_json in
       let onDemandMaxTotalPrice =
-        field_map json "OnDemandMaxTotalPrice" String_.of_json in
+        field_map json__ "OnDemandMaxTotalPrice" String_.of_json in
       let onDemandTargetCapacity =
-        field_map json "OnDemandTargetCapacity" Integer.of_json in
+        field_map json__ "OnDemandTargetCapacity" Integer.of_json in
       let targetCapacity =
-        field_map_exn json "TargetCapacity" Integer.of_json in
-      let spotPrice = field_map json "SpotPrice" String_.of_json in
+        field_map_exn json__ "TargetCapacity" Integer.of_json in
+      let spotPrice = field_map json__ "SpotPrice" String_.of_json in
       let launchTemplateConfigs =
-        field_map json "LaunchTemplateConfigs"
+        field_map json__ "LaunchTemplateConfigs"
           LaunchTemplateConfigList.of_json in
       let launchSpecifications =
-        field_map json "LaunchSpecifications" LaunchSpecsList.of_json in
-      let iamFleetRole = field_map_exn json "IamFleetRole" String_.of_json in
+        field_map json__ "LaunchSpecifications" LaunchSpecsList.of_json in
+      let iamFleetRole = field_map_exn json__ "IamFleetRole" String_.of_json in
       let onDemandFulfilledCapacity =
-        field_map json "OnDemandFulfilledCapacity" Double.of_json in
+        field_map json__ "OnDemandFulfilledCapacity" Double.of_json in
       let fulfilledCapacity =
-        field_map json "FulfilledCapacity" Double.of_json in
+        field_map json__ "FulfilledCapacity" Double.of_json in
       let excessCapacityTerminationPolicy =
-        field_map json "ExcessCapacityTerminationPolicy"
+        field_map json__ "ExcessCapacityTerminationPolicy"
           ExcessCapacityTerminationPolicy.of_json in
-      let clientToken = field_map json "ClientToken" String_.of_json in
+      let clientToken = field_map json__ "ClientToken" String_.of_json in
       let spotMaintenanceStrategies =
-        field_map json "SpotMaintenanceStrategies"
+        field_map json__ "SpotMaintenanceStrategies"
           SpotMaintenanceStrategies.of_json in
       let onDemandAllocationStrategy =
-        field_map json "OnDemandAllocationStrategy"
+        field_map json__ "OnDemandAllocationStrategy"
           OnDemandAllocationStrategy.of_json in
       let allocationStrategy =
-        field_map json "AllocationStrategy" AllocationStrategy.of_json in
+        field_map json__ "AllocationStrategy" AllocationStrategy.of_json in
       make ?tagSpecifications ?targetCapacityUnitType ?context
         ?instancePoolsToUseCount ?loadBalancersConfig
         ?instanceInterruptionBehavior ?replaceUnhealthyInstances ?validUntil
@@ -497,7 +1565,7 @@ module EventInformation =
         [@ocaml.doc "The description of the event."];
       eventSubType: String_.t option
         [@ocaml.doc
-          "The event. error events: iamFleetRoleInvalid - The EC2 Fleet or Spot Fleet does not have the required permissions either to launch or terminate an instance. allLaunchSpecsTemporarilyBlacklisted - None of the configurations are valid, and several attempts to launch instances have failed. For more information, see the description of the event. spotInstanceCountLimitExceeded - You've reached the limit on the number of Spot Instances that you can launch. spotFleetRequestConfigurationInvalid - The configuration is not valid. For more information, see the description of the event. fleetRequestChange events: active - The EC2 Fleet or Spot Fleet request has been validated and Amazon EC2 is attempting to maintain the target number of running instances. cancelled - The EC2 Fleet or Spot Fleet request is canceled and has no running instances. The EC2 Fleet or Spot Fleet will be deleted two days after its instances are terminated. cancelled_running - The EC2 Fleet or Spot Fleet request is canceled and does not launch additional instances. Its existing instances continue to run until they are interrupted or terminated. The request remains in this state until all instances are interrupted or terminated. cancelled_terminating - The EC2 Fleet or Spot Fleet request is canceled and its instances are terminating. The request remains in this state until all instances are terminated. expired - The EC2 Fleet or Spot Fleet request has expired. If the request was created with TerminateInstancesWithExpiration set, a subsequent terminated event indicates that the instances are terminated. modify_in_progress - The EC2 Fleet or Spot Fleet request is being modified. The request remains in this state until the modification is fully processed. modify_succeeded - The EC2 Fleet or Spot Fleet request was modified. submitted - The EC2 Fleet or Spot Fleet request is being evaluated and Amazon EC2 is preparing to launch the target number of instances. progress - The EC2 Fleet or Spot Fleet request is in the process of being fulfilled. instanceChange events: launched - A new instance was launched. terminated - An instance was terminated by the user. termination_notified - An instance termination notification was sent when a Spot Instance was terminated by Amazon EC2 during scale-down, when the target capacity of the fleet was modified down, for example, from a target capacity of 4 to a target capacity of 3. Information events: fleetProgressHalted - The price in every launch specification is not valid because it is below the Spot price (all the launch specifications have produced launchSpecUnusable events). A launch specification might become valid if the Spot price changes. launchSpecTemporarilyBlacklisted - The configuration is not valid and several attempts to launch instances have failed. For more information, see the description of the event. launchSpecUnusable - The price in a launch specification is not valid because it is below the Spot price. registerWithLoadBalancersFailed - An attempt to register instances with load balancers failed. For more information, see the description of the event."];
+          "The event. error events: iamFleetRoleInvalid - The EC2 Fleet or Spot Fleet does not have the required permissions either to launch or terminate an instance. allLaunchSpecsTemporarilyBlacklisted - None of the configurations are valid, and several attempts to launch instances have failed. For more information, see the description of the event. spotInstanceCountLimitExceeded - You've reached the limit on the number of Spot Instances that you can launch. spotFleetRequestConfigurationInvalid - The configuration is not valid. For more information, see the description of the event. fleetRequestChange events: active - The EC2 Fleet or Spot Fleet request has been validated and Amazon EC2 is attempting to maintain the target number of running instances. deleted (EC2 Fleet) / cancelled (Spot Fleet) - The EC2 Fleet is deleted or the Spot Fleet request is canceled and has no running instances. The EC2 Fleet or Spot Fleet will be deleted two days after its instances are terminated. deleted_running (EC2 Fleet) / cancelled_running (Spot Fleet) - The EC2 Fleet is deleted or the Spot Fleet request is canceled and does not launch additional instances. Its existing instances continue to run until they are interrupted or terminated. The request remains in this state until all instances are interrupted or terminated. deleted_terminating (EC2 Fleet) / cancelled_terminating (Spot Fleet) - The EC2 Fleet is deleted or the Spot Fleet request is canceled and its instances are terminating. The request remains in this state until all instances are terminated. expired - The EC2 Fleet or Spot Fleet request has expired. If the request was created with TerminateInstancesWithExpiration set, a subsequent terminated event indicates that the instances are terminated. modify_in_progress - The EC2 Fleet or Spot Fleet request is being modified. The request remains in this state until the modification is fully processed. modify_succeeded - The EC2 Fleet or Spot Fleet request was modified. submitted - The EC2 Fleet or Spot Fleet request is being evaluated and Amazon EC2 is preparing to launch the target number of instances. progress - The EC2 Fleet or Spot Fleet request is in the process of being fulfilled. instanceChange events: launched - A new instance was launched. terminated - An instance was terminated by the user. termination_notified - An instance termination notification was sent when a Spot Instance was terminated by Amazon EC2 during scale-down, when the target capacity of the fleet was modified down, for example, from a target capacity of 4 to a target capacity of 3. Information events: fleetProgressHalted - The price in every launch specification is not valid because it is below the Spot price (all the launch specifications have produced launchSpecUnusable events). A launch specification might become valid if the Spot price changes. launchSpecTemporarilyBlacklisted - The configuration is not valid and several attempts to launch instances have failed. For more information, see the description of the event. launchSpecUnusable - The price specified in a launch specification is not valid because it is below the Spot price for the requested Spot pools. Note: Even if a fleet with the maintain request type is in the process of being canceled, it may still publish a launchSpecUnusable event. This does not mean that the canceled fleet is attempting to launch a new instance. registerWithLoadBalancersFailed - An attempt to register instances with load balancers failed. For more information, see the description of the event."];
       instanceId: String_.t option
         [@ocaml.doc
           "The ID of the instance. This information is available only for instanceChange events."]}
@@ -522,11 +1590,11 @@ module EventInformation =
           (Xml.child xml_arg0 "eventDescription") in
       make ?instanceId ?eventSubType ?eventDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceId = field_map json "InstanceId" String_.of_json in
-      let eventSubType = field_map json "EventSubType" String_.of_json in
+    let of_json json__ =
+      let instanceId = field_map json__ "InstanceId" String_.of_json in
+      let eventSubType = field_map json__ "EventSubType" String_.of_json in
       let eventDescription =
-        field_map json "EventDescription" String_.of_json in
+        field_map json__ "EventDescription" String_.of_json in
       make ?instanceId ?eventSubType ?eventDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an EC2 Fleet or Spot Fleet event."]
@@ -585,6 +1653,22 @@ module InstanceHealthStatus =
       of_string
         (string_of_xml ~kind:"enumeration InstanceHealthStatus" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"InstanceHealthStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module SnapshotCompletionDurationMinutesResponse =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for SnapshotCompletionDurationMinutesResponse"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module SnapshotState =
@@ -646,6 +1730,31 @@ module StorageTier =
     let of_json j = of_string (string_of_json ~kind:"StorageTier" j)
     let to_json = simple_to_json to_value
   end
+module TransferType =
+  struct
+    type nonrec t =
+      | Time_based 
+      | Standard 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Time_based -> "time-based"
+      | Standard -> "standard"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "time-based" -> Time_based
+      | "standard" -> Standard
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TransferType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TransferType" j)
+    let to_json = simple_to_json to_value
+  end
 module TieringOperationStatus =
   struct
     type nonrec t =
@@ -694,10 +1803,63 @@ module TieringOperationStatus =
       of_string (string_of_json ~kind:"TieringOperationStatus" j)
     let to_json = simple_to_json to_value
   end
+module OutpostLagId =
+  struct
+    type nonrec t = string
+    let context_ = "OutpostLagId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OutpostLagId" j
+    let to_json = simple_to_json to_value
+  end
+module ServiceLinkVirtualInterfaceConfigurationState =
+  struct
+    type nonrec t =
+      | Pending 
+      | Available 
+      | Deleting 
+      | Deleted 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Available -> "available"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "available" -> Available
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration ServiceLinkVirtualInterfaceConfigurationState"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"ServiceLinkVirtualInterfaceConfigurationState"
+           j)
+    let to_json = simple_to_json to_value
+  end
 module IpPermissionList =
   struct
     type nonrec t = IpPermission.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpPermission.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -718,6 +1880,46 @@ module IpPermissionList =
       list_of_json ~kind:"IpPermissionList" ~of_json:IpPermission.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SecurityGroupVpcAssociationState =
+  struct
+    type nonrec t =
+      | Associating 
+      | Associated 
+      | Association_failed 
+      | Disassociating 
+      | Disassociated 
+      | Disassociation_failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Associating -> "associating"
+      | Associated -> "associated"
+      | Association_failed -> "association-failed"
+      | Disassociating -> "disassociating"
+      | Disassociated -> "disassociated"
+      | Disassociation_failed -> "disassociation-failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "associating" -> Associating
+      | "associated" -> Associated
+      | "association-failed" -> Association_failed
+      | "disassociating" -> Disassociating
+      | "disassociated" -> Disassociated
+      | "disassociation-failed" -> Disassociation_failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SecurityGroupVpcAssociationState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SecurityGroupVpcAssociationState" j)
+    let to_json = simple_to_json to_value
+  end
 module ReferencedSecurityGroup =
   struct
     type nonrec t =
@@ -729,7 +1931,7 @@ module ReferencedSecurityGroup =
         [@ocaml.doc "The Amazon Web Services account ID."];
       vpcId: String_.t option [@ocaml.doc "The ID of the VPC."];
       vpcPeeringConnectionId: String_.t option
-        [@ocaml.doc "The ID of the VPC peering connection."]}
+        [@ocaml.doc "The ID of the VPC peering connection (if applicable)."]}
     let make ?groupId =
       fun ?peeringStatus ->
         fun ?userId ->
@@ -765,21 +1967,303 @@ module ReferencedSecurityGroup =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupId") in
       make ?vpcPeeringConnectionId ?vpcId ?userId ?peeringStatus ?groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vpcPeeringConnectionId =
-        field_map json "VpcPeeringConnectionId" String_.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let userId = field_map json "UserId" String_.of_json in
-      let peeringStatus = field_map json "PeeringStatus" String_.of_json in
-      let groupId = field_map json "GroupId" String_.of_json in
+        field_map json__ "VpcPeeringConnectionId" String_.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
+      let userId = field_map json__ "UserId" String_.of_json in
+      let peeringStatus = field_map json__ "PeeringStatus" String_.of_json in
+      let groupId = field_map json__ "GroupId" String_.of_json in
       make ?vpcPeeringConnectionId ?vpcId ?userId ?peeringStatus ?groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the security group that is referenced in the security group rule."]
+module SecondaryNetworkType =
+  struct
+    type nonrec t =
+      | Rdma 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Rdma -> "rdma" | Non_static_id s -> s
+    let of_string = function | "rdma" -> Rdma | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SecondaryNetworkType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SecondaryNetworkType" j)
+    let to_json = simple_to_json to_value
+  end
+module SecondarySubnetIpv4CidrBlockAssociationList =
+  struct
+    type nonrec t = SecondarySubnetIpv4CidrBlockAssociation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecondarySubnetIpv4CidrBlockAssociation.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:SecondarySubnetIpv4CidrBlockAssociation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecondarySubnetIpv4CidrBlockAssociationList"
+        ~of_json:SecondarySubnetIpv4CidrBlockAssociation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SecondarySubnetState =
+  struct
+    type nonrec t =
+      | Create_in_progress 
+      | Create_complete 
+      | Create_failed 
+      | Delete_in_progress 
+      | Delete_complete 
+      | Delete_failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Create_in_progress -> "create-in-progress"
+      | Create_complete -> "create-complete"
+      | Create_failed -> "create-failed"
+      | Delete_in_progress -> "delete-in-progress"
+      | Delete_complete -> "delete-complete"
+      | Delete_failed -> "delete-failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "create-in-progress" -> Create_in_progress
+      | "create-complete" -> Create_complete
+      | "create-failed" -> Create_failed
+      | "delete-in-progress" -> Delete_in_progress
+      | "delete-complete" -> Delete_complete
+      | "delete-failed" -> Delete_failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SecondarySubnetState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SecondarySubnetState" j)
+    let to_json = simple_to_json to_value
+  end
+module SecondaryNetworkIpv4CidrBlockAssociationList =
+  struct
+    type nonrec t = SecondaryNetworkIpv4CidrBlockAssociation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecondaryNetworkIpv4CidrBlockAssociation.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:SecondaryNetworkIpv4CidrBlockAssociation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecondaryNetworkIpv4CidrBlockAssociationList"
+        ~of_json:SecondaryNetworkIpv4CidrBlockAssociation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SecondaryNetworkState =
+  struct
+    type nonrec t =
+      | Create_in_progress 
+      | Create_complete 
+      | Create_failed 
+      | Delete_in_progress 
+      | Delete_complete 
+      | Delete_failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Create_in_progress -> "create-in-progress"
+      | Create_complete -> "create-complete"
+      | Create_failed -> "create-failed"
+      | Delete_in_progress -> "delete-in-progress"
+      | Delete_complete -> "delete-complete"
+      | Delete_failed -> "delete-failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "create-in-progress" -> Create_in_progress
+      | "create-complete" -> Create_complete
+      | "create-failed" -> Create_failed
+      | "delete-in-progress" -> Delete_in_progress
+      | "delete-complete" -> Delete_complete
+      | "delete-failed" -> Delete_failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SecondaryNetworkState" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SecondaryNetworkState" j)
+    let to_json = simple_to_json to_value
+  end
+module SecondaryInterfaceAttachment =
+  struct
+    type nonrec t =
+      {
+      attachmentId: String_.t option [@ocaml.doc "The ID of the attachment."];
+      attachTime: MillisecondDateTime.t option
+        [@ocaml.doc "The timestamp when the attachment was created."];
+      deleteOnTermination: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the secondary interface is deleted when the instance is terminated. The only supported value for this field is true."];
+      deviceIndex: Integer.t option
+        [@ocaml.doc "The device index of the secondary interface."];
+      instanceId: String_.t option
+        [@ocaml.doc
+          "The ID of the instance to which the secondary interface is attached."];
+      instanceOwnerId: String_.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the owner of the instance."];
+      networkCardIndex: Integer.t option
+        [@ocaml.doc "The index of the network card."];
+      status: AttachmentStatus.t option [@ocaml.doc "The attachment state."]}
+    let make ?attachmentId =
+      fun ?attachTime ->
+        fun ?deleteOnTermination ->
+          fun ?deviceIndex ->
+            fun ?instanceId ->
+              fun ?instanceOwnerId ->
+                fun ?networkCardIndex ->
+                  fun ?status ->
+                    fun () ->
+                      {
+                        attachmentId;
+                        attachTime;
+                        deleteOnTermination;
+                        deviceIndex;
+                        instanceId;
+                        instanceOwnerId;
+                        networkCardIndex;
+                        status
+                      }
+    let to_value x =
+      structure_to_value
+        [("attachmentId", (Option.map x.attachmentId ~f:String_.to_value));
+        ("attachTime",
+          (Option.map x.attachTime ~f:MillisecondDateTime.to_value));
+        ("deleteOnTermination",
+          (Option.map x.deleteOnTermination ~f:Boolean.to_value));
+        ("deviceIndex", (Option.map x.deviceIndex ~f:Integer.to_value));
+        ("instanceId", (Option.map x.instanceId ~f:String_.to_value));
+        ("instanceOwnerId",
+          (Option.map x.instanceOwnerId ~f:String_.to_value));
+        ("networkCardIndex",
+          (Option.map x.networkCardIndex ~f:Integer.to_value));
+        ("status", (Option.map x.status ~f:AttachmentStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:AttachmentStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let networkCardIndex =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "networkCardIndex") in
+      let instanceOwnerId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceOwnerId") in
+      let instanceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceId") in
+      let deviceIndex =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "deviceIndex") in
+      let deleteOnTermination =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "deleteOnTermination") in
+      let attachTime =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "attachTime") in
+      let attachmentId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "attachmentId") in
+      make ?status ?networkCardIndex ?instanceOwnerId ?instanceId
+        ?deviceIndex ?deleteOnTermination ?attachTime ?attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" AttachmentStatus.of_json in
+      let networkCardIndex =
+        field_map json__ "NetworkCardIndex" Integer.of_json in
+      let instanceOwnerId =
+        field_map json__ "InstanceOwnerId" String_.of_json in
+      let instanceId = field_map json__ "InstanceId" String_.of_json in
+      let deviceIndex = field_map json__ "DeviceIndex" Integer.of_json in
+      let deleteOnTermination =
+        field_map json__ "DeleteOnTermination" Boolean.of_json in
+      let attachTime =
+        field_map json__ "AttachTime" MillisecondDateTime.of_json in
+      let attachmentId = field_map json__ "AttachmentId" String_.of_json in
+      make ?status ?networkCardIndex ?instanceOwnerId ?instanceId
+        ?deviceIndex ?deleteOnTermination ?attachTime ?attachmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the attachment of a secondary interface to an instance."]
+module SecondaryInterfaceIpv4AddressList =
+  struct
+    type nonrec t = SecondaryInterfaceIpv4Address.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecondaryInterfaceIpv4Address.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecondaryInterfaceIpv4Address.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecondaryInterfaceIpv4AddressList"
+        ~of_json:SecondaryInterfaceIpv4Address.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PropagatingVgwList =
   struct
     type nonrec t = PropagatingVgw.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PropagatingVgw.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -805,6 +2289,9 @@ module RouteList =
   struct
     type nonrec t = Route.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Route.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -828,6 +2315,9 @@ module RouteTableAssociationList =
   struct
     type nonrec t = RouteTableAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RouteTableAssociation.to_value)) |>
         (fun x -> `List x)
@@ -850,17 +2340,253 @@ module RouteTableAssociationList =
         ~of_json:RouteTableAssociation.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Float =
+module BoxedLong =
   struct
-    type nonrec t = float
+    type nonrec t = Int64.t
     let make i = i
-    let of_string = Float.of_string
-    let to_value x = `Float x
+    let of_string = Int64.of_string
+    let to_value x = `Long x
     let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
+    let to_header x = Int64.to_string x
     let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
-    let of_json j = float_of_json ~kind:"a float" j
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module RouteServerPersistRoutesState =
+  struct
+    type nonrec t =
+      | Enabling 
+      | Enabled 
+      | Resetting 
+      | Disabling 
+      | Disabled 
+      | Modifying 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Enabling -> "enabling"
+      | Enabled -> "enabled"
+      | Resetting -> "resetting"
+      | Disabling -> "disabling"
+      | Disabled -> "disabled"
+      | Modifying -> "modifying"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "enabling" -> Enabling
+      | "enabled" -> Enabled
+      | "resetting" -> Resetting
+      | "disabling" -> Disabling
+      | "disabled" -> Disabled
+      | "modifying" -> Modifying
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RouteServerPersistRoutesState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RouteServerPersistRoutesState" j)
+    let to_json = simple_to_json to_value
+  end
+module RouteServerState =
+  struct
+    type nonrec t =
+      | Pending 
+      | Available 
+      | Modifying 
+      | Deleting 
+      | Deleted 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Available -> "available"
+      | Modifying -> "modifying"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "available" -> Available
+      | "modifying" -> Modifying
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RouteServerState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RouteServerState" j)
+    let to_json = simple_to_json to_value
+  end
+module RouteServerBfdStatus =
+  struct
+    type nonrec t =
+      {
+      status: RouteServerBfdState.t option
+        [@ocaml.doc "The operational status of the BFD session."]}
+    let make ?status = fun () -> { status }
+    let to_value x =
+      structure_to_value
+        [("status", (Option.map x.status ~f:RouteServerBfdState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:RouteServerBfdState.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" RouteServerBfdState.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The current status of Bidirectional Forwarding Detection (BFD) for a BGP session."]
+module RouteServerBgpOptions =
+  struct
+    type nonrec t =
+      {
+      peerAsn: Long.t option
+        [@ocaml.doc
+          "The Border Gateway Protocol (BGP) Autonomous System Number (ASN) for the appliance. Valid values are from 1 to 4294967295. We recommend using a private ASN in the 64512\226\128\14765534 (16-bit ASN) or 4200000000\226\128\1474294967294 (32-bit ASN) range."];
+      peerLivenessDetection: RouteServerPeerLivenessMode.t option
+        [@ocaml.doc
+          "The liveness detection protocol used for the BGP peer. The requested liveness detection protocol for the BGP peer. bgp-keepalive: The standard BGP keep alive mechanism (RFC4271) that is stable but may take longer to fail-over in cases of network impact or router failure. bfd: An additional Bidirectional Forwarding Detection (BFD) protocol (RFC5880) that enables fast failover by using more sensitive liveness detection. Defaults to bgp-keepalive."]}
+    let make ?peerAsn =
+      fun ?peerLivenessDetection ->
+        fun () -> { peerAsn; peerLivenessDetection }
+    let to_value x =
+      structure_to_value
+        [("peerAsn", (Option.map x.peerAsn ~f:Long.to_value));
+        ("peerLivenessDetection",
+          (Option.map x.peerLivenessDetection
+             ~f:RouteServerPeerLivenessMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let peerLivenessDetection =
+        (Option.map ~f:RouteServerPeerLivenessMode.of_xml)
+          (Xml.child xml_arg0 "peerLivenessDetection") in
+      let peerAsn =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "peerAsn") in
+      make ?peerLivenessDetection ?peerAsn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let peerLivenessDetection =
+        field_map json__ "PeerLivenessDetection"
+          RouteServerPeerLivenessMode.of_json in
+      let peerAsn = field_map json__ "PeerAsn" Long.of_json in
+      make ?peerLivenessDetection ?peerAsn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The BGP configuration options for a route server peer."]
+module RouteServerBgpStatus =
+  struct
+    type nonrec t =
+      {
+      status: RouteServerBgpState.t option
+        [@ocaml.doc
+          "The operational status of the BGP session. The status enables you to monitor session liveness if you lack monitoring on your router/appliance."]}
+    let make ?status = fun () -> { status }
+    let to_value x =
+      structure_to_value
+        [("status", (Option.map x.status ~f:RouteServerBgpState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:RouteServerBgpState.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" RouteServerBgpState.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The current status of a BGP session."]
+module RouteServerPeerState =
+  struct
+    type nonrec t =
+      | Pending 
+      | Available 
+      | Deleting 
+      | Deleted 
+      | Failing 
+      | Failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Available -> "available"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Failing -> "failing"
+      | Failed -> "failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "available" -> Available
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | "failing" -> Failing
+      | "failed" -> Failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RouteServerPeerState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RouteServerPeerState" j)
+    let to_json = simple_to_json to_value
+  end
+module RouteServerEndpointState =
+  struct
+    type nonrec t =
+      | Pending 
+      | Available 
+      | Deleting 
+      | Deleted 
+      | Failing 
+      | Failed 
+      | Delete_failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Available -> "available"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Failing -> "failing"
+      | Failed -> "failed"
+      | Delete_failed -> "delete-failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "available" -> Available
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | "failing" -> Failing
+      | "failed" -> Failed
+      | "delete-failed" -> Delete_failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RouteServerEndpointState" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RouteServerEndpointState" j)
     let to_json = simple_to_json to_value
   end
 module OfferingClassType =
@@ -931,6 +2657,9 @@ module RecurringChargesList =
   struct
     type nonrec t = RecurringCharge.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecurringCharge.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -995,6 +2724,9 @@ module PricingDetailsList =
   struct
     type nonrec t = PricingDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PricingDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1020,6 +2752,9 @@ module ReservedInstancesModificationResultList =
   struct
     type nonrec t = ReservedInstancesModificationResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedInstancesModificationResult.to_value)) |>
         (fun x -> `List x)
@@ -1047,6 +2782,9 @@ module ReservedIntancesIds =
   struct
     type nonrec t = ReservedInstancesId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedInstancesId.to_value)) |>
         (fun x -> `List x)
@@ -1073,6 +2811,9 @@ module InstanceCountList =
   struct
     type nonrec t = InstanceCount.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceCount.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1128,6 +2869,9 @@ module PriceScheduleList =
   struct
     type nonrec t = PriceSchedule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PriceSchedule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1201,10 +2945,41 @@ module ReplaceRootVolumeTaskState =
       of_string (string_of_json ~kind:"ReplaceRootVolumeTaskState" j)
     let to_json = simple_to_json to_value
   end
+module RegionGeographyList =
+  struct
+    type nonrec t = RegionGeography.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RegionGeography.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RegionGeography.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RegionGeographyList"
+        ~of_json:RegionGeography.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PublicIpv4PoolRangeSet =
   struct
     type nonrec t = PublicIpv4PoolRange.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PublicIpv4PoolRange.to_value)) |>
         (fun x -> `List x)
@@ -1231,6 +3006,9 @@ module IdFormatList =
   struct
     type nonrec t = IdFormat.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IdFormat.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1312,10 +3090,163 @@ module PlacementStrategy =
     let of_json j = of_string (string_of_json ~kind:"PlacementStrategy" j)
     let to_json = simple_to_json to_value
   end
+module SpreadLevel =
+  struct
+    type nonrec t =
+      | Host 
+      | Rack 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Host -> "host" | Rack -> "rack" | Non_static_id s -> s
+    let of_string =
+      function | "host" -> Host | "rack" -> Rack | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SpreadLevel" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SpreadLevel" j)
+    let to_json = simple_to_json to_value
+  end
+module LocalGatewayVirtualInterfaceIdSet =
+  struct
+    type nonrec t = LocalGatewayVirtualInterfaceId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LocalGatewayVirtualInterfaceId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LocalGatewayVirtualInterfaceId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LocalGatewayVirtualInterfaceIdSet"
+        ~of_json:LocalGatewayVirtualInterfaceId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceLinkVirtualInterfaceIdSet =
+  struct
+    type nonrec t = ServiceLinkVirtualInterfaceId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceLinkVirtualInterfaceId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceLinkVirtualInterfaceId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceLinkVirtualInterfaceIdSet"
+        ~of_json:ServiceLinkVirtualInterfaceId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AssociatedSubnetList =
+  struct
+    type nonrec t = SubnetId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SubnetId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssociatedSubnetList" ~of_json:SubnetId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ConnectionTrackingConfiguration =
+  struct
+    type nonrec t =
+      {
+      tcpEstablishedTimeout: Integer.t option
+        [@ocaml.doc
+          "Timeout (in seconds) for idle TCP connections in an established state. Min: 60 seconds. Max: 432000 seconds (5 days). Default: 432000 seconds. Recommended: Less than 432000 seconds."];
+      udpStreamTimeout: Integer.t option
+        [@ocaml.doc
+          "Timeout (in seconds) for idle UDP flows classified as streams which have seen more than one request-response transaction. Min: 60 seconds. Max: 180 seconds (3 minutes). Default: 180 seconds."];
+      udpTimeout: Integer.t option
+        [@ocaml.doc
+          "Timeout (in seconds) for idle UDP flows that have seen traffic only in a single direction or a single request-response transaction. Min: 30 seconds. Max: 60 seconds. Default: 30 seconds."]}
+    let make ?tcpEstablishedTimeout =
+      fun ?udpStreamTimeout ->
+        fun ?udpTimeout ->
+          fun () -> { tcpEstablishedTimeout; udpStreamTimeout; udpTimeout }
+    let to_value x =
+      structure_to_value
+        [("tcpEstablishedTimeout",
+           (Option.map x.tcpEstablishedTimeout ~f:Integer.to_value));
+        ("udpStreamTimeout",
+          (Option.map x.udpStreamTimeout ~f:Integer.to_value));
+        ("udpTimeout", (Option.map x.udpTimeout ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let udpTimeout =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "udpTimeout") in
+      let udpStreamTimeout =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "udpStreamTimeout") in
+      let tcpEstablishedTimeout =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "tcpEstablishedTimeout") in
+      make ?udpTimeout ?udpStreamTimeout ?tcpEstablishedTimeout ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let udpTimeout = field_map json__ "UdpTimeout" Integer.of_json in
+      let udpStreamTimeout =
+        field_map json__ "UdpStreamTimeout" Integer.of_json in
+      let tcpEstablishedTimeout =
+        field_map json__ "TcpEstablishedTimeout" Integer.of_json in
+      make ?udpTimeout ?udpStreamTimeout ?tcpEstablishedTimeout ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A security group connection tracking configuration that enables you to set the idle timeout for connection tracking on an Elastic network interface. For more information, see Connection tracking timeouts in the Amazon EC2 User Guide."]
 module Ipv4PrefixesList =
   struct
     type nonrec t = Ipv4PrefixSpecification.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ipv4PrefixSpecification.to_value)) |>
         (fun x -> `List x)
@@ -1342,6 +3273,9 @@ module Ipv6PrefixesList =
   struct
     type nonrec t = Ipv6PrefixSpecification.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ipv6PrefixSpecification.to_value)) |>
         (fun x -> `List x)
@@ -1385,7 +3319,12 @@ module NetworkInterfaceAttachment =
       instanceOwnerId: String_.t option
         [@ocaml.doc
           "The Amazon Web Services account ID of the owner of the instance."];
-      status: AttachmentStatus.t option [@ocaml.doc "The attachment state."]}
+      status: AttachmentStatus.t option [@ocaml.doc "The attachment state."];
+      enaSrdSpecification: AttachmentEnaSrdSpecification.t option
+        [@ocaml.doc
+          "Configures ENA Express for the network interface that this action attaches to the instance."];
+      enaQueueCount: Integer.t option
+        [@ocaml.doc "The number of ENA queues created with the instance."]}
     let make ?attachTime =
       fun ?attachmentId ->
         fun ?deleteOnTermination ->
@@ -1394,17 +3333,21 @@ module NetworkInterfaceAttachment =
               fun ?instanceId ->
                 fun ?instanceOwnerId ->
                   fun ?status ->
-                    fun () ->
-                      {
-                        attachTime;
-                        attachmentId;
-                        deleteOnTermination;
-                        deviceIndex;
-                        networkCardIndex;
-                        instanceId;
-                        instanceOwnerId;
-                        status
-                      }
+                    fun ?enaSrdSpecification ->
+                      fun ?enaQueueCount ->
+                        fun () ->
+                          {
+                            attachTime;
+                            attachmentId;
+                            deleteOnTermination;
+                            deviceIndex;
+                            networkCardIndex;
+                            instanceId;
+                            instanceOwnerId;
+                            status;
+                            enaSrdSpecification;
+                            enaQueueCount
+                          }
     let to_value x =
       structure_to_value
         [("attachTime", (Option.map x.attachTime ~f:DateTime.to_value));
@@ -1417,9 +3360,18 @@ module NetworkInterfaceAttachment =
         ("instanceId", (Option.map x.instanceId ~f:String_.to_value));
         ("instanceOwnerId",
           (Option.map x.instanceOwnerId ~f:String_.to_value));
-        ("status", (Option.map x.status ~f:AttachmentStatus.to_value))]
+        ("status", (Option.map x.status ~f:AttachmentStatus.to_value));
+        ("enaSrdSpecification",
+          (Option.map x.enaSrdSpecification
+             ~f:AttachmentEnaSrdSpecification.to_value));
+        ("enaQueueCount", (Option.map x.enaQueueCount ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let enaQueueCount =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "enaQueueCount") in
+      let enaSrdSpecification =
+        (Option.map ~f:AttachmentEnaSrdSpecification.of_xml)
+          (Xml.child xml_arg0 "enaSrdSpecification") in
       let status =
         (Option.map ~f:AttachmentStatus.of_xml) (Xml.child xml_arg0 "status") in
       let instanceOwnerId =
@@ -1438,28 +3390,38 @@ module NetworkInterfaceAttachment =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "attachmentId") in
       let attachTime =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "attachTime") in
-      make ?status ?instanceOwnerId ?instanceId ?networkCardIndex
-        ?deviceIndex ?deleteOnTermination ?attachmentId ?attachTime ()
+      make ?enaQueueCount ?enaSrdSpecification ?status ?instanceOwnerId
+        ?instanceId ?networkCardIndex ?deviceIndex ?deleteOnTermination
+        ?attachmentId ?attachTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" AttachmentStatus.of_json in
-      let instanceOwnerId = field_map json "InstanceOwnerId" String_.of_json in
-      let instanceId = field_map json "InstanceId" String_.of_json in
+    let of_json json__ =
+      let enaQueueCount = field_map json__ "EnaQueueCount" Integer.of_json in
+      let enaSrdSpecification =
+        field_map json__ "EnaSrdSpecification"
+          AttachmentEnaSrdSpecification.of_json in
+      let status = field_map json__ "Status" AttachmentStatus.of_json in
+      let instanceOwnerId =
+        field_map json__ "InstanceOwnerId" String_.of_json in
+      let instanceId = field_map json__ "InstanceId" String_.of_json in
       let networkCardIndex =
-        field_map json "NetworkCardIndex" Integer.of_json in
-      let deviceIndex = field_map json "DeviceIndex" Integer.of_json in
+        field_map json__ "NetworkCardIndex" Integer.of_json in
+      let deviceIndex = field_map json__ "DeviceIndex" Integer.of_json in
       let deleteOnTermination =
-        field_map json "DeleteOnTermination" Boolean.of_json in
-      let attachmentId = field_map json "AttachmentId" String_.of_json in
-      let attachTime = field_map json "AttachTime" DateTime.of_json in
-      make ?status ?instanceOwnerId ?instanceId ?networkCardIndex
-        ?deviceIndex ?deleteOnTermination ?attachmentId ?attachTime ()
+        field_map json__ "DeleteOnTermination" Boolean.of_json in
+      let attachmentId = field_map json__ "AttachmentId" String_.of_json in
+      let attachTime = field_map json__ "AttachTime" DateTime.of_json in
+      make ?enaQueueCount ?enaSrdSpecification ?status ?instanceOwnerId
+        ?instanceId ?networkCardIndex ?deviceIndex ?deleteOnTermination
+        ?attachmentId ?attachTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a network interface attachment."]
 module NetworkInterfaceIpv6AddressesList =
   struct
     type nonrec t = NetworkInterfaceIpv6Address.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterfaceIpv6Address.to_value)) |>
         (fun x -> `List x)
@@ -1486,6 +3448,9 @@ module NetworkInterfacePrivateIpAddressList =
   struct
     type nonrec t = NetworkInterfacePrivateIpAddress.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterfacePrivateIpAddress.to_value)) |>
         (fun x -> `List x)
@@ -1515,6 +3480,7 @@ module NetworkInterfaceType =
       | Interface 
       | NatGateway 
       | Efa 
+      | Efa_only 
       | Trunk 
       | Load_balancer 
       | Network_load_balancer 
@@ -1536,6 +3502,7 @@ module NetworkInterfaceType =
       | Interface -> "interface"
       | NatGateway -> "natGateway"
       | Efa -> "efa"
+      | Efa_only -> "efa-only"
       | Trunk -> "trunk"
       | Load_balancer -> "load_balancer"
       | Network_load_balancer -> "network_load_balancer"
@@ -1557,6 +3524,7 @@ module NetworkInterfaceType =
       | "interface" -> Interface
       | "natGateway" -> NatGateway
       | "efa" -> Efa
+      | "efa-only" -> Efa_only
       | "trunk" -> Trunk
       | "load_balancer" -> Load_balancer
       | "network_load_balancer" -> Network_load_balancer
@@ -1582,6 +3550,73 @@ module NetworkInterfaceType =
     let of_json j = of_string (string_of_json ~kind:"NetworkInterfaceType" j)
     let to_json = simple_to_json to_value
   end
+module PublicIpDnsNameOptions =
+  struct
+    type nonrec t =
+      {
+      dnsHostnameType: String_.t option
+        [@ocaml.doc
+          "The public hostname type. For more information, see EC2 instance hostnames, DNS names, and domains in the Amazon EC2 User Guide."];
+      publicIpv4DnsName: String_.t option
+        [@ocaml.doc
+          "An IPv4-enabled public hostname for a network interface. Requests from within the VPC resolve to the private primary IPv4 address of the network interface. Requests from the internet resolve to the public IPv4 address of the network interface."];
+      publicIpv6DnsName: String_.t option
+        [@ocaml.doc
+          "An IPv6-enabled public hostname for a network interface. Requests from within the VPC or from the internet resolve to the IPv6 GUA of the network interface."];
+      publicDualStackDnsName: String_.t option
+        [@ocaml.doc
+          "A dual-stack public hostname for a network interface. Requests from within the VPC resolve to both the private IPv4 address and the IPv6 Global Unicast Address of the network interface. Requests from the internet resolve to both the public IPv4 and the IPv6 GUA address of the network interface."]}
+    let make ?dnsHostnameType =
+      fun ?publicIpv4DnsName ->
+        fun ?publicIpv6DnsName ->
+          fun ?publicDualStackDnsName ->
+            fun () ->
+              {
+                dnsHostnameType;
+                publicIpv4DnsName;
+                publicIpv6DnsName;
+                publicDualStackDnsName
+              }
+    let to_value x =
+      structure_to_value
+        [("dnsHostnameType",
+           (Option.map x.dnsHostnameType ~f:String_.to_value));
+        ("publicIpv4DnsName",
+          (Option.map x.publicIpv4DnsName ~f:String_.to_value));
+        ("publicIpv6DnsName",
+          (Option.map x.publicIpv6DnsName ~f:String_.to_value));
+        ("publicDualStackDnsName",
+          (Option.map x.publicDualStackDnsName ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let publicDualStackDnsName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "publicDualStackDnsName") in
+      let publicIpv6DnsName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "publicIpv6DnsName") in
+      let publicIpv4DnsName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "publicIpv4DnsName") in
+      let dnsHostnameType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "dnsHostnameType") in
+      make ?publicDualStackDnsName ?publicIpv6DnsName ?publicIpv4DnsName
+        ?dnsHostnameType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let publicDualStackDnsName =
+        field_map json__ "PublicDualStackDnsName" String_.of_json in
+      let publicIpv6DnsName =
+        field_map json__ "PublicIpv6DnsName" String_.of_json in
+      let publicIpv4DnsName =
+        field_map json__ "PublicIpv4DnsName" String_.of_json in
+      let dnsHostnameType =
+        field_map json__ "DnsHostnameType" String_.of_json in
+      make ?publicDualStackDnsName ?publicIpv6DnsName ?publicIpv4DnsName
+        ?dnsHostnameType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Public hostname type options. For more information, see EC2 instance hostnames, DNS names, and domains in the Amazon EC2 User Guide."]
 module InterfacePermissionType =
   struct
     type nonrec t =
@@ -1634,10 +3669,10 @@ module NetworkInterfacePermissionState =
           (Xml.child xml_arg0 "state") in
       make ?statusMessage ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusMessage = field_map json "StatusMessage" String_.of_json in
+    let of_json json__ =
+      let statusMessage = field_map json__ "StatusMessage" String_.of_json in
       let state =
-        field_map json "State" NetworkInterfacePermissionStateCode.of_json in
+        field_map json__ "State" NetworkInterfacePermissionStateCode.of_json in
       make ?statusMessage ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the state of a network interface permission."]
@@ -1654,10 +3689,75 @@ module NetworkInsightsPathId =
     let of_json j = string_of_json ~kind:"NetworkInsightsPathId" j
     let to_json = simple_to_json to_value
   end
+module PathFilter =
+  struct
+    type nonrec t =
+      {
+      sourceAddress: IpAddress.t option
+        [@ocaml.doc "The source IPv4 address."];
+      sourcePortRange: FilterPortRange.t option
+        [@ocaml.doc "The source port range."];
+      destinationAddress: IpAddress.t option
+        [@ocaml.doc "The destination IPv4 address."];
+      destinationPortRange: FilterPortRange.t option
+        [@ocaml.doc "The destination port range."]}
+    let make ?sourceAddress =
+      fun ?sourcePortRange ->
+        fun ?destinationAddress ->
+          fun ?destinationPortRange ->
+            fun () ->
+              {
+                sourceAddress;
+                sourcePortRange;
+                destinationAddress;
+                destinationPortRange
+              }
+    let to_value x =
+      structure_to_value
+        [("sourceAddress",
+           (Option.map x.sourceAddress ~f:IpAddress.to_value));
+        ("sourcePortRange",
+          (Option.map x.sourcePortRange ~f:FilterPortRange.to_value));
+        ("destinationAddress",
+          (Option.map x.destinationAddress ~f:IpAddress.to_value));
+        ("destinationPortRange",
+          (Option.map x.destinationPortRange ~f:FilterPortRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destinationPortRange =
+        (Option.map ~f:FilterPortRange.of_xml)
+          (Xml.child xml_arg0 "destinationPortRange") in
+      let destinationAddress =
+        (Option.map ~f:IpAddress.of_xml)
+          (Xml.child xml_arg0 "destinationAddress") in
+      let sourcePortRange =
+        (Option.map ~f:FilterPortRange.of_xml)
+          (Xml.child xml_arg0 "sourcePortRange") in
+      let sourceAddress =
+        (Option.map ~f:IpAddress.of_xml) (Xml.child xml_arg0 "sourceAddress") in
+      make ?destinationPortRange ?destinationAddress ?sourcePortRange
+        ?sourceAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destinationPortRange =
+        field_map json__ "DestinationPortRange" FilterPortRange.of_json in
+      let destinationAddress =
+        field_map json__ "DestinationAddress" IpAddress.of_json in
+      let sourcePortRange =
+        field_map json__ "SourcePortRange" FilterPortRange.of_json in
+      let sourceAddress = field_map json__ "SourceAddress" IpAddress.of_json in
+      make ?destinationPortRange ?destinationAddress ?sourcePortRange
+        ?sourceAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a set of filters for a path analysis. Use path filters to scope the analysis when there can be multiple resulting paths."]
 module AlternatePathHintList =
   struct
     type nonrec t = AlternatePathHint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AlternatePathHint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1711,6 +3811,9 @@ module ArnList =
   struct
     type nonrec t = ResourceArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1729,30 +3832,6 @@ module ArnList =
                      | _ -> true))) ~f:ResourceArn.of_xml)
     let of_json j =
       list_of_json ~kind:"ArnList" ~of_json:ResourceArn.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ExplanationList =
-  struct
-    type nonrec t = Explanation.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Explanation.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Explanation.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ExplanationList" ~of_json:Explanation.of_json j
     let to_json v = composed_to_json to_value v
   end
 module NetworkInsightsAnalysisId =
@@ -1800,6 +3879,9 @@ module NetworkAclAssociationList =
   struct
     type nonrec t = NetworkAclAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkAclAssociation.to_value)) |>
         (fun x -> `List x)
@@ -1826,6 +3908,9 @@ module NetworkAclEntryList =
   struct
     type nonrec t = NetworkAclEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkAclEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1846,6 +3931,84 @@ module NetworkAclEntryList =
       list_of_json ~kind:"NetworkAclEntryList"
         ~of_json:NetworkAclEntry.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module AutoProvisionZonesState =
+  struct
+    type nonrec t =
+      | Enabled 
+      | Disabled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Enabled -> "enabled"
+      | Disabled -> "disabled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "enabled" -> Enabled
+      | "disabled" -> Disabled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AutoProvisionZonesState" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AutoProvisionZonesState" j)
+    let to_json = simple_to_json to_value
+  end
+module AutoScalingIpsState =
+  struct
+    type nonrec t =
+      | Enabled 
+      | Disabled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Enabled -> "enabled"
+      | Disabled -> "disabled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "enabled" -> Enabled
+      | "disabled" -> Disabled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AutoScalingIpsState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AutoScalingIpsState" j)
+    let to_json = simple_to_json to_value
+  end
+module AvailabilityMode =
+  struct
+    type nonrec t =
+      | Zonal 
+      | Regional 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Zonal -> "zonal"
+      | Regional -> "regional"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "zonal" -> Zonal
+      | "regional" -> Regional
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AvailabilityMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AvailabilityMode" j)
+    let to_json = simple_to_json to_value
   end
 module ConnectivityType =
   struct
@@ -1876,6 +4039,9 @@ module NatGatewayAddressList =
   struct
     type nonrec t = NatGatewayAddress.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NatGatewayAddress.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1895,6 +4061,35 @@ module NatGatewayAddressList =
     let of_json j =
       list_of_json ~kind:"NatGatewayAddressList"
         ~of_json:NatGatewayAddress.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NatGatewayAttachedApplianceList =
+  struct
+    type nonrec t = NatGatewayAttachedAppliance.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NatGatewayAttachedAppliance.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NatGatewayAttachedAppliance.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NatGatewayAttachedApplianceList"
+        ~of_json:NatGatewayAttachedAppliance.of_json j
     let to_json v = composed_to_json to_value v
   end
 module NatGatewayState =
@@ -1935,21 +4130,11 @@ module ProvisionedBandwidth =
   struct
     type nonrec t =
       {
-      provisionTime: DateTime.t option
-        [@ocaml.doc
-          "Reserved. If you need to sustain traffic greater than the documented limits, contact us through the Support Center."];
-      provisioned: String_.t option
-        [@ocaml.doc
-          "Reserved. If you need to sustain traffic greater than the documented limits, contact us through the Support Center."];
-      requestTime: DateTime.t option
-        [@ocaml.doc
-          "Reserved. If you need to sustain traffic greater than the documented limits, contact us through the Support Center."];
-      requested: String_.t option
-        [@ocaml.doc
-          "Reserved. If you need to sustain traffic greater than the documented limits, contact us through the Support Center."];
-      status: String_.t option
-        [@ocaml.doc
-          "Reserved. If you need to sustain traffic greater than the documented limits, contact us through the Support Center."]}
+      provisionTime: DateTime.t option [@ocaml.doc "Reserved."];
+      provisioned: String_.t option [@ocaml.doc "Reserved."];
+      requestTime: DateTime.t option [@ocaml.doc "Reserved."];
+      requested: String_.t option [@ocaml.doc "Reserved."];
+      status: String_.t option [@ocaml.doc "Reserved."]}
     let make ?provisionTime =
       fun ?provisioned ->
         fun ?requestTime ->
@@ -1979,16 +4164,16 @@ module ProvisionedBandwidth =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "provisionTime") in
       make ?status ?requested ?requestTime ?provisioned ?provisionTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
-      let requested = field_map json "Requested" String_.of_json in
-      let requestTime = field_map json "RequestTime" DateTime.of_json in
-      let provisioned = field_map json "Provisioned" String_.of_json in
-      let provisionTime = field_map json "ProvisionTime" DateTime.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
+      let requested = field_map json__ "Requested" String_.of_json in
+      let requestTime = field_map json__ "RequestTime" DateTime.of_json in
+      let provisioned = field_map json__ "Provisioned" String_.of_json in
+      let provisionTime = field_map json__ "ProvisionTime" DateTime.of_json in
       make ?status ?requested ?requestTime ?provisioned ?provisionTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Reserved. If you need to sustain traffic greater than the documented limits, contact us through the Support Center."]
+       "Reserved. If you need to sustain traffic greater than the documented limits, contact Amazon Web Services Support."]
 module MoveStatus =
   struct
     type nonrec t =
@@ -2069,26 +4254,223 @@ module PrefixListState =
     let of_json j = of_string (string_of_json ~kind:"PrefixListState" j)
     let to_json = simple_to_json to_value
   end
-module LocalGatewayId =
+module MacModificationTaskId =
   struct
     type nonrec t = string
-    let context_ = "LocalGatewayId"
+    let context_ = "MacModificationTaskId"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"LocalGatewayId" j
+    let of_json j = string_of_json ~kind:"MacModificationTaskId" j
     let to_json = simple_to_json to_value
   end
-module LocalGatewayVirtualInterfaceIdSet =
+module MacModificationTaskState =
   struct
-    type nonrec t = LocalGatewayVirtualInterfaceId.t list
+    type nonrec t =
+      | Successful 
+      | Failed 
+      | In_progress 
+      | Pending 
+      | Non_static_id of string 
     let make i = i
+    let to_string =
+      function
+      | Successful -> "successful"
+      | Failed -> "failed"
+      | In_progress -> "in-progress"
+      | Pending -> "pending"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "successful" -> Successful
+      | "failed" -> Failed
+      | "in-progress" -> In_progress
+      | "pending" -> Pending
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MacModificationTaskState" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MacModificationTaskState" j)
+    let to_json = simple_to_json to_value
+  end
+module MacModificationTaskType =
+  struct
+    type nonrec t =
+      | Sip_modification 
+      | Volume_ownership_delegation 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Sip_modification -> "sip-modification"
+      | Volume_ownership_delegation -> "volume-ownership-delegation"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "sip-modification" -> Sip_modification
+      | "volume-ownership-delegation" -> Volume_ownership_delegation
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MacModificationTaskType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"MacModificationTaskType" j)
+    let to_json = simple_to_json to_value
+  end
+module MacSystemIntegrityProtectionConfiguration =
+  struct
+    type nonrec t =
+      {
+      appleInternal: MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc
+          "Indicates whether Apple Internal was enabled or disabled by the task."];
+      baseSystem: MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc
+          "Indicates whether Base System was enabled or disabled by the task."];
+      debuggingRestrictions:
+        MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc
+          "Indicates whether Debugging Restrictions was enabled or disabled by the task."];
+      dTraceRestrictions: MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc
+          "Indicates whether Dtrace Restrictions was enabled or disabled by the task."];
+      filesystemProtections:
+        MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc
+          "Indicates whether Filesystem Protections was enabled or disabled by the task."];
+      kextSigning: MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc
+          "Indicates whether Kext Signing was enabled or disabled by the task."];
+      nvramProtections: MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc
+          "Indicates whether NVRAM Protections was enabled or disabled by the task."];
+      status: MacSystemIntegrityProtectionSettingStatus.t option
+        [@ocaml.doc "Indicates SIP was enabled or disabled by the task."]}
+    let make ?appleInternal =
+      fun ?baseSystem ->
+        fun ?debuggingRestrictions ->
+          fun ?dTraceRestrictions ->
+            fun ?filesystemProtections ->
+              fun ?kextSigning ->
+                fun ?nvramProtections ->
+                  fun ?status ->
+                    fun () ->
+                      {
+                        appleInternal;
+                        baseSystem;
+                        debuggingRestrictions;
+                        dTraceRestrictions;
+                        filesystemProtections;
+                        kextSigning;
+                        nvramProtections;
+                        status
+                      }
+    let to_value x =
+      structure_to_value
+        [("appleInternal",
+           (Option.map x.appleInternal
+              ~f:MacSystemIntegrityProtectionSettingStatus.to_value));
+        ("baseSystem",
+          (Option.map x.baseSystem
+             ~f:MacSystemIntegrityProtectionSettingStatus.to_value));
+        ("debuggingRestrictions",
+          (Option.map x.debuggingRestrictions
+             ~f:MacSystemIntegrityProtectionSettingStatus.to_value));
+        ("dTraceRestrictions",
+          (Option.map x.dTraceRestrictions
+             ~f:MacSystemIntegrityProtectionSettingStatus.to_value));
+        ("filesystemProtections",
+          (Option.map x.filesystemProtections
+             ~f:MacSystemIntegrityProtectionSettingStatus.to_value));
+        ("kextSigning",
+          (Option.map x.kextSigning
+             ~f:MacSystemIntegrityProtectionSettingStatus.to_value));
+        ("nvramProtections",
+          (Option.map x.nvramProtections
+             ~f:MacSystemIntegrityProtectionSettingStatus.to_value));
+        ("status",
+          (Option.map x.status
+             ~f:MacSystemIntegrityProtectionSettingStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let nvramProtections =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "nvramProtections") in
+      let kextSigning =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "kextSigning") in
+      let filesystemProtections =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "filesystemProtections") in
+      let dTraceRestrictions =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "dTraceRestrictions") in
+      let debuggingRestrictions =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "debuggingRestrictions") in
+      let baseSystem =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "baseSystem") in
+      let appleInternal =
+        (Option.map ~f:MacSystemIntegrityProtectionSettingStatus.of_xml)
+          (Xml.child xml_arg0 "appleInternal") in
+      make ?status ?nvramProtections ?kextSigning ?filesystemProtections
+        ?dTraceRestrictions ?debuggingRestrictions ?baseSystem ?appleInternal
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "Status"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      let nvramProtections =
+        field_map json__ "NvramProtections"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      let kextSigning =
+        field_map json__ "KextSigning"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      let filesystemProtections =
+        field_map json__ "FilesystemProtections"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      let dTraceRestrictions =
+        field_map json__ "DTraceRestrictions"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      let debuggingRestrictions =
+        field_map json__ "DebuggingRestrictions"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      let baseSystem =
+        field_map json__ "BaseSystem"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      let appleInternal =
+        field_map json__ "AppleInternal"
+          MacSystemIntegrityProtectionSettingStatus.of_json in
+      make ?status ?nvramProtections ?kextSigning ?filesystemProtections
+        ?dTraceRestrictions ?debuggingRestrictions ?baseSystem ?appleInternal
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration for a System Integrity Protection (SIP) modification task."]
+module MacOSVersionStringList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:LocalGatewayVirtualInterfaceId.to_value)) |>
-        (fun x -> `List x)
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -2102,11 +4484,189 @@ module LocalGatewayVirtualInterfaceIdSet =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:LocalGatewayVirtualInterfaceId.of_xml)
+                     | _ -> true))) ~f:String_.of_xml)
     let of_json j =
-      list_of_json ~kind:"LocalGatewayVirtualInterfaceIdSet"
-        ~of_json:LocalGatewayVirtualInterfaceId.of_json j
+      list_of_json ~kind:"MacOSVersionStringList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module CoolOffPeriodResponseHours =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for CoolOffPeriodResponseHours"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LockState =
+  struct
+    type nonrec t =
+      | Compliance 
+      | Governance 
+      | Compliance_cooloff 
+      | Expired 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Compliance -> "compliance"
+      | Governance -> "governance"
+      | Compliance_cooloff -> "compliance-cooloff"
+      | Expired -> "expired"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "compliance" -> Compliance
+      | "governance" -> Governance
+      | "compliance-cooloff" -> Compliance_cooloff
+      | "expired" -> Expired
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LockState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LockState" j)
+    let to_json = simple_to_json to_value
+  end
+module RetentionPeriodResponseDays =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RetentionPeriodResponseDays"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LocalGatewayId =
+  struct
+    type nonrec t = string
+    let context_ = "LocalGatewayId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LocalGatewayId" j
+    let to_json = simple_to_json to_value
+  end
+module LocalGatewayVirtualInterfaceConfigurationState =
+  struct
+    type nonrec t =
+      | Pending 
+      | Available 
+      | Deleting 
+      | Deleted 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Available -> "available"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "available" -> Available
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration LocalGatewayVirtualInterfaceConfigurationState"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json
+           ~kind:"LocalGatewayVirtualInterfaceConfigurationState" j)
+    let to_json = simple_to_json to_value
+  end
+module LocalGatewayVirtualInterfaceGroupConfigurationState =
+  struct
+    type nonrec t =
+      | Pending 
+      | Incomplete 
+      | Available 
+      | Deleting 
+      | Deleted 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Incomplete -> "incomplete"
+      | Available -> "available"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "incomplete" -> Incomplete
+      | "available" -> Available
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration LocalGatewayVirtualInterfaceGroupConfigurationState"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json
+           ~kind:"LocalGatewayVirtualInterfaceGroupConfigurationState" j)
+    let to_json = simple_to_json to_value
+  end
+module LocalGatewayRouteTableMode =
+  struct
+    type nonrec t =
+      | Direct_vpc_routing 
+      | Coip 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Direct_vpc_routing -> "direct-vpc-routing"
+      | Coip -> "coip"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "direct-vpc-routing" -> Direct_vpc_routing
+      | "coip" -> Coip
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LocalGatewayRouteTableMode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LocalGatewayRouteTableMode" j)
+    let to_json = simple_to_json to_value
   end
 module LocalGatewayRouteTableVpcAssociationId =
   struct
@@ -2156,7 +4716,7 @@ module ResponseLaunchTemplateData =
         [@ocaml.doc "The network interfaces."];
       imageId: String_.t option
         [@ocaml.doc
-          "The ID of the AMI that was used to launch the instance."];
+          "The ID of the AMI or a Systems Manager parameter. The Systems Manager parameter will resolve to the ID of the AMI at instance launch. The value depends on what you specified in the request. The possible values are: If an AMI ID was specified in the request, then this is the AMI ID. If a Systems Manager parameter was specified in the request, and ResolveAlias was configured as true, then this is the AMI ID that the parameter is mapped to in the Parameter Store. If a Systems Manager parameter was specified in the request, and ResolveAlias was configured as false, then this is the parameter value. For more information, see Use a Systems Manager parameter instead of an AMI ID in the Amazon EC2 User Guide."];
       instanceType: InstanceType.t option [@ocaml.doc "The instance type."];
       keyName: String_.t option [@ocaml.doc "The name of the key pair."];
       monitoring: LaunchTemplatesMonitoring.t option
@@ -2171,15 +4731,18 @@ module ResponseLaunchTemplateData =
       instanceInitiatedShutdownBehavior: ShutdownBehavior.t option
         [@ocaml.doc
           "Indicates whether an instance stops or terminates when you initiate shutdown from the instance (using the operating system command for system shutdown)."];
-      userData: String_.t option
+      userData: SensitiveUserData.t option
         [@ocaml.doc "The user data for the instance."];
       tagSpecifications: LaunchTemplateTagSpecificationList.t option
-        [@ocaml.doc "The tags."];
+        [@ocaml.doc
+          "The tags that are applied to the resources that are created during instance launch."];
       elasticGpuSpecifications: ElasticGpuSpecificationResponseList.t option
-        [@ocaml.doc "The elastic GPU specification."];
+        [@ocaml.doc
+          "Deprecated. Amazon Elastic Graphics reached end of life on January 8, 2024."];
       elasticInferenceAccelerators:
         LaunchTemplateElasticInferenceAcceleratorResponseList.t option
-        [@ocaml.doc "The elastic inference accelerator for the instance."];
+        [@ocaml.doc
+          "Amazon Elastic Inference is no longer available. An elastic inference accelerator to associate with the instance. Elastic inference accelerators are a resource you can attach to your Amazon EC2 instances to accelerate your Deep Learning (DL) inference workloads. You cannot specify accelerators from different generations in the same request."];
       securityGroupIds: ValueStringList.t option
         [@ocaml.doc "The security group IDs."];
       securityGroups: ValueStringList.t option
@@ -2190,7 +4753,7 @@ module ResponseLaunchTemplateData =
         [@ocaml.doc "The credit option for CPU usage of the instance."];
       cpuOptions: LaunchTemplateCpuOptions.t option
         [@ocaml.doc
-          "The CPU options for the instance. For more information, see Optimizing CPU options in the Amazon Elastic Compute Cloud User Guide."];
+          "The CPU options for the instance. For more information, see CPU options for Amazon EC2 instances in the Amazon EC2 User Guide."];
       capacityReservationSpecification:
         LaunchTemplateCapacityReservationSpecificationResponse.t option
         [@ocaml.doc
@@ -2199,10 +4762,10 @@ module ResponseLaunchTemplateData =
         [@ocaml.doc "The license configurations."];
       hibernationOptions: LaunchTemplateHibernationOptions.t option
         [@ocaml.doc
-          "Indicates whether an instance is configured for hibernation. For more information, see Hibernate your instance in the Amazon Elastic Compute Cloud User Guide."];
+          "Indicates whether an instance is configured for hibernation. For more information, see Hibernate your Amazon EC2 instance in the Amazon EC2 User Guide."];
       metadataOptions: LaunchTemplateInstanceMetadataOptions.t option
         [@ocaml.doc
-          "The metadata options for the instance. For more information, see Instance metadata and user data in the Amazon Elastic Compute Cloud User Guide."];
+          "The metadata options for the instance. For more information, see Configure the Instance Metadata Service options in the Amazon EC2 User Guide."];
       enclaveOptions: LaunchTemplateEnclaveOptions.t option
         [@ocaml.doc
           "Indicates whether the instance is enabled for Amazon Web Services Nitro Enclaves."];
@@ -2212,7 +4775,20 @@ module ResponseLaunchTemplateData =
       privateDnsNameOptions: LaunchTemplatePrivateDnsNameOptions.t option
         [@ocaml.doc "The options for the instance hostname."];
       maintenanceOptions: LaunchTemplateInstanceMaintenanceOptions.t option
-        [@ocaml.doc "The maintenance options for your instance."]}
+        [@ocaml.doc "The maintenance options for your instance."];
+      disableApiStop: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the instance is enabled for stop protection. For more information, see Enable stop protection for your EC2 instances in the Amazon EC2 User Guide."];
+      operator: OperatorResponse.t option
+        [@ocaml.doc "The entity that manages the launch template."];
+      networkPerformanceOptions:
+        LaunchTemplateNetworkPerformanceOptions.t option
+        [@ocaml.doc
+          "Contains the launch template settings for network performance options for your instance."];
+      secondaryInterfaces:
+        LaunchTemplateInstanceSecondaryInterfaceSpecificationList.t option
+        [@ocaml.doc
+          "The secondary interfaces associated with the launch template."]}
     let make ?kernelId =
       fun ?ebsOptimized ->
         fun ?iamInstanceProfile ->
@@ -2254,8 +4830,20 @@ module ResponseLaunchTemplateData =
                                                               fun
                                                                 ?maintenanceOptions
                                                                 ->
-                                                                fun () ->
-                                                                  {
+                                                                fun
+                                                                  ?disableApiStop
+                                                                  ->
+                                                                  fun
+                                                                    ?operator
+                                                                    ->
+                                                                    fun
+                                                                    ?networkPerformanceOptions
+                                                                    ->
+                                                                    fun
+                                                                    ?secondaryInterfaces
+                                                                    ->
+                                                                    fun () ->
+                                                                    {
                                                                     kernelId;
                                                                     ebsOptimized;
                                                                     iamInstanceProfile;
@@ -2285,8 +4873,12 @@ module ResponseLaunchTemplateData =
                                                                     enclaveOptions;
                                                                     instanceRequirements;
                                                                     privateDnsNameOptions;
-                                                                    maintenanceOptions
-                                                                  }
+                                                                    maintenanceOptions;
+                                                                    disableApiStop;
+                                                                    operator;
+                                                                    networkPerformanceOptions;
+                                                                    secondaryInterfaces
+                                                                    }
     let to_value x =
       structure_to_value
         [("kernelId", (Option.map x.kernelId ~f:String_.to_value));
@@ -2314,7 +4906,7 @@ module ResponseLaunchTemplateData =
         ("instanceInitiatedShutdownBehavior",
           (Option.map x.instanceInitiatedShutdownBehavior
              ~f:ShutdownBehavior.to_value));
-        ("userData", (Option.map x.userData ~f:String_.to_value));
+        ("userData", (Option.map x.userData ~f:SensitiveUserData.to_value));
         ("tagSpecificationSet",
           (Option.map x.tagSpecifications
              ~f:LaunchTemplateTagSpecificationList.to_value));
@@ -2357,9 +4949,29 @@ module ResponseLaunchTemplateData =
              ~f:LaunchTemplatePrivateDnsNameOptions.to_value));
         ("maintenanceOptions",
           (Option.map x.maintenanceOptions
-             ~f:LaunchTemplateInstanceMaintenanceOptions.to_value))]
+             ~f:LaunchTemplateInstanceMaintenanceOptions.to_value));
+        ("disableApiStop", (Option.map x.disableApiStop ~f:Boolean.to_value));
+        ("operator", (Option.map x.operator ~f:OperatorResponse.to_value));
+        ("networkPerformanceOptions",
+          (Option.map x.networkPerformanceOptions
+             ~f:LaunchTemplateNetworkPerformanceOptions.to_value));
+        ("secondaryInterfaceSet",
+          (Option.map x.secondaryInterfaces
+             ~f:LaunchTemplateInstanceSecondaryInterfaceSpecificationList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let secondaryInterfaces =
+        (Option.map
+           ~f:LaunchTemplateInstanceSecondaryInterfaceSpecificationList.of_xml)
+          (Xml.child xml_arg0 "secondaryInterfaceSet") in
+      let networkPerformanceOptions =
+        (Option.map ~f:LaunchTemplateNetworkPerformanceOptions.of_xml)
+          (Xml.child xml_arg0 "networkPerformanceOptions") in
+      let operator =
+        (Option.map ~f:OperatorResponse.of_xml)
+          (Xml.child xml_arg0 "operator") in
+      let disableApiStop =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "disableApiStop") in
       let maintenanceOptions =
         (Option.map ~f:LaunchTemplateInstanceMaintenanceOptions.of_xml)
           (Xml.child xml_arg0 "maintenanceOptions") in
@@ -2411,7 +5023,8 @@ module ResponseLaunchTemplateData =
         (Option.map ~f:LaunchTemplateTagSpecificationList.of_xml)
           (Xml.child xml_arg0 "tagSpecificationSet") in
       let userData =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "userData") in
+        (Option.map ~f:SensitiveUserData.of_xml)
+          (Xml.child xml_arg0 "userData") in
       let instanceInitiatedShutdownBehavior =
         (Option.map ~f:ShutdownBehavior.of_xml)
           (Xml.child xml_arg0 "instanceInitiatedShutdownBehavior") in
@@ -2447,95 +5060,106 @@ module ResponseLaunchTemplateData =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ebsOptimized") in
       let kernelId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "kernelId") in
-      make ?maintenanceOptions ?privateDnsNameOptions ?instanceRequirements
-        ?enclaveOptions ?metadataOptions ?hibernationOptions
-        ?licenseSpecifications ?capacityReservationSpecification ?cpuOptions
-        ?creditSpecification ?instanceMarketOptions ?securityGroups
-        ?securityGroupIds ?elasticInferenceAccelerators
-        ?elasticGpuSpecifications ?tagSpecifications ?userData
-        ?instanceInitiatedShutdownBehavior ?disableApiTermination ?ramDiskId
-        ?placement ?monitoring ?keyName ?instanceType ?imageId
-        ?networkInterfaces ?blockDeviceMappings ?iamInstanceProfile
-        ?ebsOptimized ?kernelId ()
+      make ?secondaryInterfaces ?networkPerformanceOptions ?operator
+        ?disableApiStop ?maintenanceOptions ?privateDnsNameOptions
+        ?instanceRequirements ?enclaveOptions ?metadataOptions
+        ?hibernationOptions ?licenseSpecifications
+        ?capacityReservationSpecification ?cpuOptions ?creditSpecification
+        ?instanceMarketOptions ?securityGroups ?securityGroupIds
+        ?elasticInferenceAccelerators ?elasticGpuSpecifications
+        ?tagSpecifications ?userData ?instanceInitiatedShutdownBehavior
+        ?disableApiTermination ?ramDiskId ?placement ?monitoring ?keyName
+        ?instanceType ?imageId ?networkInterfaces ?blockDeviceMappings
+        ?iamInstanceProfile ?ebsOptimized ?kernelId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let secondaryInterfaces =
+        field_map json__ "SecondaryInterfaces"
+          LaunchTemplateInstanceSecondaryInterfaceSpecificationList.of_json in
+      let networkPerformanceOptions =
+        field_map json__ "NetworkPerformanceOptions"
+          LaunchTemplateNetworkPerformanceOptions.of_json in
+      let operator = field_map json__ "Operator" OperatorResponse.of_json in
+      let disableApiStop = field_map json__ "DisableApiStop" Boolean.of_json in
       let maintenanceOptions =
-        field_map json "MaintenanceOptions"
+        field_map json__ "MaintenanceOptions"
           LaunchTemplateInstanceMaintenanceOptions.of_json in
       let privateDnsNameOptions =
-        field_map json "PrivateDnsNameOptions"
+        field_map json__ "PrivateDnsNameOptions"
           LaunchTemplatePrivateDnsNameOptions.of_json in
       let instanceRequirements =
-        field_map json "InstanceRequirements" InstanceRequirements.of_json in
+        field_map json__ "InstanceRequirements" InstanceRequirements.of_json in
       let enclaveOptions =
-        field_map json "EnclaveOptions" LaunchTemplateEnclaveOptions.of_json in
+        field_map json__ "EnclaveOptions"
+          LaunchTemplateEnclaveOptions.of_json in
       let metadataOptions =
-        field_map json "MetadataOptions"
+        field_map json__ "MetadataOptions"
           LaunchTemplateInstanceMetadataOptions.of_json in
       let hibernationOptions =
-        field_map json "HibernationOptions"
+        field_map json__ "HibernationOptions"
           LaunchTemplateHibernationOptions.of_json in
       let licenseSpecifications =
-        field_map json "LicenseSpecifications"
+        field_map json__ "LicenseSpecifications"
           LaunchTemplateLicenseList.of_json in
       let capacityReservationSpecification =
-        field_map json "CapacityReservationSpecification"
+        field_map json__ "CapacityReservationSpecification"
           LaunchTemplateCapacityReservationSpecificationResponse.of_json in
       let cpuOptions =
-        field_map json "CpuOptions" LaunchTemplateCpuOptions.of_json in
+        field_map json__ "CpuOptions" LaunchTemplateCpuOptions.of_json in
       let creditSpecification =
-        field_map json "CreditSpecification" CreditSpecification.of_json in
+        field_map json__ "CreditSpecification" CreditSpecification.of_json in
       let instanceMarketOptions =
-        field_map json "InstanceMarketOptions"
+        field_map json__ "InstanceMarketOptions"
           LaunchTemplateInstanceMarketOptions.of_json in
       let securityGroups =
-        field_map json "SecurityGroups" ValueStringList.of_json in
+        field_map json__ "SecurityGroups" ValueStringList.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" ValueStringList.of_json in
+        field_map json__ "SecurityGroupIds" ValueStringList.of_json in
       let elasticInferenceAccelerators =
-        field_map json "ElasticInferenceAccelerators"
+        field_map json__ "ElasticInferenceAccelerators"
           LaunchTemplateElasticInferenceAcceleratorResponseList.of_json in
       let elasticGpuSpecifications =
-        field_map json "ElasticGpuSpecifications"
+        field_map json__ "ElasticGpuSpecifications"
           ElasticGpuSpecificationResponseList.of_json in
       let tagSpecifications =
-        field_map json "TagSpecifications"
+        field_map json__ "TagSpecifications"
           LaunchTemplateTagSpecificationList.of_json in
-      let userData = field_map json "UserData" String_.of_json in
+      let userData = field_map json__ "UserData" SensitiveUserData.of_json in
       let instanceInitiatedShutdownBehavior =
-        field_map json "InstanceInitiatedShutdownBehavior"
+        field_map json__ "InstanceInitiatedShutdownBehavior"
           ShutdownBehavior.of_json in
       let disableApiTermination =
-        field_map json "DisableApiTermination" Boolean.of_json in
-      let ramDiskId = field_map json "RamDiskId" String_.of_json in
+        field_map json__ "DisableApiTermination" Boolean.of_json in
+      let ramDiskId = field_map json__ "RamDiskId" String_.of_json in
       let placement =
-        field_map json "Placement" LaunchTemplatePlacement.of_json in
+        field_map json__ "Placement" LaunchTemplatePlacement.of_json in
       let monitoring =
-        field_map json "Monitoring" LaunchTemplatesMonitoring.of_json in
-      let keyName = field_map json "KeyName" String_.of_json in
-      let instanceType = field_map json "InstanceType" InstanceType.of_json in
-      let imageId = field_map json "ImageId" String_.of_json in
+        field_map json__ "Monitoring" LaunchTemplatesMonitoring.of_json in
+      let keyName = field_map json__ "KeyName" String_.of_json in
+      let instanceType = field_map json__ "InstanceType" InstanceType.of_json in
+      let imageId = field_map json__ "ImageId" String_.of_json in
       let networkInterfaces =
-        field_map json "NetworkInterfaces"
+        field_map json__ "NetworkInterfaces"
           LaunchTemplateInstanceNetworkInterfaceSpecificationList.of_json in
       let blockDeviceMappings =
-        field_map json "BlockDeviceMappings"
+        field_map json__ "BlockDeviceMappings"
           LaunchTemplateBlockDeviceMappingList.of_json in
       let iamInstanceProfile =
-        field_map json "IamInstanceProfile"
+        field_map json__ "IamInstanceProfile"
           LaunchTemplateIamInstanceProfileSpecification.of_json in
-      let ebsOptimized = field_map json "EbsOptimized" Boolean.of_json in
-      let kernelId = field_map json "KernelId" String_.of_json in
-      make ?maintenanceOptions ?privateDnsNameOptions ?instanceRequirements
-        ?enclaveOptions ?metadataOptions ?hibernationOptions
-        ?licenseSpecifications ?capacityReservationSpecification ?cpuOptions
-        ?creditSpecification ?instanceMarketOptions ?securityGroups
-        ?securityGroupIds ?elasticInferenceAccelerators
-        ?elasticGpuSpecifications ?tagSpecifications ?userData
-        ?instanceInitiatedShutdownBehavior ?disableApiTermination ?ramDiskId
-        ?placement ?monitoring ?keyName ?instanceType ?imageId
-        ?networkInterfaces ?blockDeviceMappings ?iamInstanceProfile
-        ?ebsOptimized ?kernelId ()
+      let ebsOptimized = field_map json__ "EbsOptimized" Boolean.of_json in
+      let kernelId = field_map json__ "KernelId" String_.of_json in
+      make ?secondaryInterfaces ?networkPerformanceOptions ?operator
+        ?disableApiStop ?maintenanceOptions ?privateDnsNameOptions
+        ?instanceRequirements ?enclaveOptions ?metadataOptions
+        ?hibernationOptions ?licenseSpecifications
+        ?capacityReservationSpecification ?cpuOptions ?creditSpecification
+        ?instanceMarketOptions ?securityGroups ?securityGroupIds
+        ?elasticInferenceAccelerators ?elasticGpuSpecifications
+        ?tagSpecifications ?userData ?instanceInitiatedShutdownBehavior
+        ?disableApiTermination ?ramDiskId ?placement ?monitoring ?keyName
+        ?instanceType ?imageId ?networkInterfaces ?blockDeviceMappings
+        ?iamInstanceProfile ?ebsOptimized ?kernelId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The information for a launch template."]
 module VersionDescription =
@@ -2579,6 +5203,9 @@ module PoolCidrBlocksSet =
   struct
     type nonrec t = PoolCidrBlock.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PoolCidrBlock.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2599,10 +5226,39 @@ module PoolCidrBlocksSet =
       list_of_json ~kind:"PoolCidrBlocksSet" ~of_json:PoolCidrBlock.of_json j
     let to_json v = composed_to_json to_value v
   end
+module IpamMeteredAccount =
+  struct
+    type nonrec t =
+      | Ipam_owner 
+      | Resource_owner 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Ipam_owner -> "ipam-owner"
+      | Resource_owner -> "resource-owner"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ipam-owner" -> Ipam_owner
+      | "resource-owner" -> Resource_owner
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IpamMeteredAccount" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IpamMeteredAccount" j)
+    let to_json = simple_to_json to_value
+  end
 module IpamOperatingRegionSet =
   struct
     type nonrec t = IpamOperatingRegion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpamOperatingRegion.to_value)) |>
         (fun x -> `List x)
@@ -2625,6 +5281,20 @@ module IpamOperatingRegionSet =
         ~of_json:IpamOperatingRegion.of_json j
     let to_json v = composed_to_json to_value v
   end
+module IpamResourceDiscoveryAssociationId =
+  struct
+    type nonrec t = string
+    let context_ = "IpamResourceDiscoveryAssociationId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"IpamResourceDiscoveryAssociationId" j
+    let to_json = simple_to_json to_value
+  end
 module IpamState =
   struct
     type nonrec t =
@@ -2637,6 +5307,9 @@ module IpamState =
       | Delete_in_progress 
       | Delete_complete 
       | Delete_failed 
+      | Isolate_in_progress 
+      | Isolate_complete 
+      | Restore_in_progress 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2650,6 +5323,9 @@ module IpamState =
       | Delete_in_progress -> "delete-in-progress"
       | Delete_complete -> "delete-complete"
       | Delete_failed -> "delete-failed"
+      | Isolate_in_progress -> "isolate-in-progress"
+      | Isolate_complete -> "isolate-complete"
+      | Restore_in_progress -> "restore-in-progress"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2662,6 +5338,9 @@ module IpamState =
       | "delete-in-progress" -> Delete_in_progress
       | "delete-complete" -> Delete_complete
       | "delete-failed" -> Delete_failed
+      | "isolate-in-progress" -> Isolate_in_progress
+      | "isolate-complete" -> Isolate_complete
+      | "restore-in-progress" -> Restore_in_progress
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2671,6 +5350,69 @@ module IpamState =
     let of_json j = of_string (string_of_json ~kind:"IpamState" j)
     let to_json = simple_to_json to_value
   end
+module IpamTier =
+  struct
+    type nonrec t =
+      | Free 
+      | Advanced 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Free -> "free"
+      | Advanced -> "advanced"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "free" -> Free
+      | "advanced" -> Advanced
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IpamTier" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IpamTier" j)
+    let to_json = simple_to_json to_value
+  end
+module IpamScopeExternalAuthorityConfiguration =
+  struct
+    type nonrec t =
+      {
+      type_: IpamScopeExternalAuthorityType.t option
+        [@ocaml.doc
+          "The type of external authority managing this scope. Currently supports Infoblox for integration with Infoblox Universal DDI."];
+      externalResourceIdentifier: String_.t option
+        [@ocaml.doc
+          "The identifier for the external resource managing this scope. For Infoblox integrations, this is the Infoblox resource identifier in the format <version>.identity.account.<entity_realm>.<entity_id>."]}
+    let make ?type_ =
+      fun ?externalResourceIdentifier ->
+        fun () -> { type_; externalResourceIdentifier }
+    let to_value x =
+      structure_to_value
+        [("type",
+           (Option.map x.type_ ~f:IpamScopeExternalAuthorityType.to_value));
+        ("externalResourceIdentifier",
+          (Option.map x.externalResourceIdentifier ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let externalResourceIdentifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "externalResourceIdentifier") in
+      let type_ =
+        (Option.map ~f:IpamScopeExternalAuthorityType.of_xml)
+          (Xml.child xml_arg0 "type") in
+      make ?externalResourceIdentifier ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let externalResourceIdentifier =
+        field_map json__ "ExternalResourceIdentifier" String_.of_json in
+      let type_ =
+        field_map json__ "Type" IpamScopeExternalAuthorityType.of_json in
+      make ?externalResourceIdentifier ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration that links an Amazon VPC IPAM scope to an external authority system. It specifies the type of external system and the external resource identifier that identifies your account or instance in that system. In IPAM, an external authority is a third-party IP address management system that provides CIDR blocks when you provision address space for top-level IPAM pools. This allows you to use your existing IP management system to control which address ranges are allocated to Amazon Web Services while using Amazon VPC IPAM to manage subnets within those ranges."]
 module IpamScopeState =
   struct
     type nonrec t =
@@ -2683,6 +5425,9 @@ module IpamScopeState =
       | Delete_in_progress 
       | Delete_complete 
       | Delete_failed 
+      | Isolate_in_progress 
+      | Isolate_complete 
+      | Restore_in_progress 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2696,6 +5441,9 @@ module IpamScopeState =
       | Delete_in_progress -> "delete-in-progress"
       | Delete_complete -> "delete-complete"
       | Delete_failed -> "delete-failed"
+      | Isolate_in_progress -> "isolate-in-progress"
+      | Isolate_complete -> "isolate-complete"
+      | Restore_in_progress -> "restore-in-progress"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2708,6 +5456,9 @@ module IpamScopeState =
       | "delete-in-progress" -> Delete_in_progress
       | "delete-complete" -> Delete_complete
       | "delete-failed" -> Delete_failed
+      | "isolate-in-progress" -> Isolate_in_progress
+      | "isolate-complete" -> Isolate_complete
+      | "restore-in-progress" -> Restore_in_progress
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2742,6 +5493,172 @@ module IpamScopeType =
     let of_json j = of_string (string_of_json ~kind:"IpamScopeType" j)
     let to_json = simple_to_json to_value
   end
+module IpamAssociatedResourceDiscoveryStatus =
+  struct
+    type nonrec t =
+      | Active 
+      | Not_found 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Active -> "active"
+      | Not_found -> "not-found"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "active" -> Active
+      | "not-found" -> Not_found
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration IpamAssociatedResourceDiscoveryStatus" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"IpamAssociatedResourceDiscoveryStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module IpamResourceDiscoveryAssociationState =
+  struct
+    type nonrec t =
+      | Associate_in_progress 
+      | Associate_complete 
+      | Associate_failed 
+      | Disassociate_in_progress 
+      | Disassociate_complete 
+      | Disassociate_failed 
+      | Isolate_in_progress 
+      | Isolate_complete 
+      | Restore_in_progress 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Associate_in_progress -> "associate-in-progress"
+      | Associate_complete -> "associate-complete"
+      | Associate_failed -> "associate-failed"
+      | Disassociate_in_progress -> "disassociate-in-progress"
+      | Disassociate_complete -> "disassociate-complete"
+      | Disassociate_failed -> "disassociate-failed"
+      | Isolate_in_progress -> "isolate-in-progress"
+      | Isolate_complete -> "isolate-complete"
+      | Restore_in_progress -> "restore-in-progress"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "associate-in-progress" -> Associate_in_progress
+      | "associate-complete" -> Associate_complete
+      | "associate-failed" -> Associate_failed
+      | "disassociate-in-progress" -> Disassociate_in_progress
+      | "disassociate-complete" -> Disassociate_complete
+      | "disassociate-failed" -> Disassociate_failed
+      | "isolate-in-progress" -> Isolate_in_progress
+      | "isolate-complete" -> Isolate_complete
+      | "restore-in-progress" -> Restore_in_progress
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration IpamResourceDiscoveryAssociationState" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"IpamResourceDiscoveryAssociationState" j)
+    let to_json = simple_to_json to_value
+  end
+module IpamOrganizationalUnitExclusionSet =
+  struct
+    type nonrec t = IpamOrganizationalUnitExclusion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IpamOrganizationalUnitExclusion.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IpamOrganizationalUnitExclusion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IpamOrganizationalUnitExclusionSet"
+        ~of_json:IpamOrganizationalUnitExclusion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IpamResourceDiscoveryState =
+  struct
+    type nonrec t =
+      | Create_in_progress 
+      | Create_complete 
+      | Create_failed 
+      | Modify_in_progress 
+      | Modify_complete 
+      | Modify_failed 
+      | Delete_in_progress 
+      | Delete_complete 
+      | Delete_failed 
+      | Isolate_in_progress 
+      | Isolate_complete 
+      | Restore_in_progress 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Create_in_progress -> "create-in-progress"
+      | Create_complete -> "create-complete"
+      | Create_failed -> "create-failed"
+      | Modify_in_progress -> "modify-in-progress"
+      | Modify_complete -> "modify-complete"
+      | Modify_failed -> "modify-failed"
+      | Delete_in_progress -> "delete-in-progress"
+      | Delete_complete -> "delete-complete"
+      | Delete_failed -> "delete-failed"
+      | Isolate_in_progress -> "isolate-in-progress"
+      | Isolate_complete -> "isolate-complete"
+      | Restore_in_progress -> "restore-in-progress"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "create-in-progress" -> Create_in_progress
+      | "create-complete" -> Create_complete
+      | "create-failed" -> Create_failed
+      | "modify-in-progress" -> Modify_in_progress
+      | "modify-complete" -> Modify_complete
+      | "modify-failed" -> Modify_failed
+      | "delete-in-progress" -> Delete_in_progress
+      | "delete-complete" -> Delete_complete
+      | "delete-failed" -> Delete_failed
+      | "isolate-in-progress" -> Isolate_in_progress
+      | "isolate-complete" -> Isolate_complete
+      | "restore-in-progress" -> Restore_in_progress
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IpamResourceDiscoveryState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"IpamResourceDiscoveryState" j)
+    let to_json = simple_to_json to_value
+  end
 module AddressFamily =
   struct
     type nonrec t =
@@ -2759,6 +5676,190 @@ module AddressFamily =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration AddressFamily" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"AddressFamily" j)
+    let to_json = simple_to_json to_value
+  end
+module IpamPrefixListResolverId =
+  struct
+    type nonrec t = string
+    let context_ = "IpamPrefixListResolverId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IpamPrefixListResolverId" j
+    let to_json = simple_to_json to_value
+  end
+module IpamPrefixListResolverState =
+  struct
+    type nonrec t =
+      | Create_in_progress 
+      | Create_complete 
+      | Create_failed 
+      | Modify_in_progress 
+      | Modify_complete 
+      | Modify_failed 
+      | Delete_in_progress 
+      | Delete_complete 
+      | Delete_failed 
+      | Isolate_in_progress 
+      | Isolate_complete 
+      | Restore_in_progress 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Create_in_progress -> "create-in-progress"
+      | Create_complete -> "create-complete"
+      | Create_failed -> "create-failed"
+      | Modify_in_progress -> "modify-in-progress"
+      | Modify_complete -> "modify-complete"
+      | Modify_failed -> "modify-failed"
+      | Delete_in_progress -> "delete-in-progress"
+      | Delete_complete -> "delete-complete"
+      | Delete_failed -> "delete-failed"
+      | Isolate_in_progress -> "isolate-in-progress"
+      | Isolate_complete -> "isolate-complete"
+      | Restore_in_progress -> "restore-in-progress"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "create-in-progress" -> Create_in_progress
+      | "create-complete" -> Create_complete
+      | "create-failed" -> Create_failed
+      | "modify-in-progress" -> Modify_in_progress
+      | "modify-complete" -> Modify_complete
+      | "modify-failed" -> Modify_failed
+      | "delete-in-progress" -> Delete_in_progress
+      | "delete-complete" -> Delete_complete
+      | "delete-failed" -> Delete_failed
+      | "isolate-in-progress" -> Isolate_in_progress
+      | "isolate-complete" -> Isolate_complete
+      | "restore-in-progress" -> Restore_in_progress
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IpamPrefixListResolverState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"IpamPrefixListResolverState" j)
+    let to_json = simple_to_json to_value
+  end
+module IpamPrefixListResolverVersionCreationStatus =
+  struct
+    type nonrec t =
+      | Pending 
+      | Success 
+      | Failure 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Success -> "success"
+      | Failure -> "failure"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "success" -> Success
+      | "failure" -> Failure
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration IpamPrefixListResolverVersionCreationStatus"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"IpamPrefixListResolverVersionCreationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module IpamPrefixListResolverTargetId =
+  struct
+    type nonrec t = string
+    let context_ = "IpamPrefixListResolverTargetId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IpamPrefixListResolverTargetId" j
+    let to_json = simple_to_json to_value
+  end
+module IpamPrefixListResolverTargetState =
+  struct
+    type nonrec t =
+      | Create_in_progress 
+      | Create_complete 
+      | Create_failed 
+      | Modify_in_progress 
+      | Modify_complete 
+      | Modify_failed 
+      | Sync_in_progress 
+      | Sync_complete 
+      | Sync_failed 
+      | Delete_in_progress 
+      | Delete_complete 
+      | Delete_failed 
+      | Isolate_in_progress 
+      | Isolate_complete 
+      | Restore_in_progress 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Create_in_progress -> "create-in-progress"
+      | Create_complete -> "create-complete"
+      | Create_failed -> "create-failed"
+      | Modify_in_progress -> "modify-in-progress"
+      | Modify_complete -> "modify-complete"
+      | Modify_failed -> "modify-failed"
+      | Sync_in_progress -> "sync-in-progress"
+      | Sync_complete -> "sync-complete"
+      | Sync_failed -> "sync-failed"
+      | Delete_in_progress -> "delete-in-progress"
+      | Delete_complete -> "delete-complete"
+      | Delete_failed -> "delete-failed"
+      | Isolate_in_progress -> "isolate-in-progress"
+      | Isolate_complete -> "isolate-complete"
+      | Restore_in_progress -> "restore-in-progress"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "create-in-progress" -> Create_in_progress
+      | "create-complete" -> Create_complete
+      | "create-failed" -> Create_failed
+      | "modify-in-progress" -> Modify_in_progress
+      | "modify-complete" -> Modify_complete
+      | "modify-failed" -> Modify_failed
+      | "sync-in-progress" -> Sync_in_progress
+      | "sync-complete" -> Sync_complete
+      | "sync-failed" -> Sync_failed
+      | "delete-in-progress" -> Delete_in_progress
+      | "delete-complete" -> Delete_complete
+      | "delete-failed" -> Delete_failed
+      | "isolate-in-progress" -> Isolate_in_progress
+      | "isolate-complete" -> Isolate_complete
+      | "restore-in-progress" -> Restore_in_progress
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IpamPrefixListResolverTargetState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"IpamPrefixListResolverTargetState" j)
     let to_json = simple_to_json to_value
   end
 module IpamNetmaskLength =
@@ -2783,10 +5884,19 @@ module IpamPoolAwsService =
   struct
     type nonrec t =
       | Ec2 
+      | Global_services 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | Ec2 -> "ec2" | Non_static_id s -> s
-    let of_string = function | "ec2" -> Ec2 | x -> Non_static_id x
+    let to_string =
+      function
+      | Ec2 -> "ec2"
+      | Global_services -> "global-services"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ec2" -> Ec2
+      | "global-services" -> Global_services
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -2796,6 +5906,74 @@ module IpamPoolAwsService =
     let of_json j = of_string (string_of_json ~kind:"IpamPoolAwsService" j)
     let to_json = simple_to_json to_value
   end
+module IpamPoolPublicIpSource =
+  struct
+    type nonrec t =
+      | Amazon 
+      | Byoip 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Amazon -> "amazon" | Byoip -> "byoip" | Non_static_id s -> s
+    let of_string =
+      function | "amazon" -> Amazon | "byoip" -> Byoip | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IpamPoolPublicIpSource" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"IpamPoolPublicIpSource" j)
+    let to_json = simple_to_json to_value
+  end
+module IpamPoolSourceResource =
+  struct
+    type nonrec t =
+      {
+      resourceId: String_.t option [@ocaml.doc "The source resource ID."];
+      resourceType: IpamPoolSourceResourceType.t option
+        [@ocaml.doc "The source resource type."];
+      resourceRegion: String_.t option
+        [@ocaml.doc "The source resource Region."];
+      resourceOwner: String_.t option
+        [@ocaml.doc "The source resource owner."]}
+    let make ?resourceId =
+      fun ?resourceType ->
+        fun ?resourceRegion ->
+          fun ?resourceOwner ->
+            fun () ->
+              { resourceId; resourceType; resourceRegion; resourceOwner }
+    let to_value x =
+      structure_to_value
+        [("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:IpamPoolSourceResourceType.to_value));
+        ("resourceRegion", (Option.map x.resourceRegion ~f:String_.to_value));
+        ("resourceOwner", (Option.map x.resourceOwner ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceOwner =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceOwner") in
+      let resourceRegion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceRegion") in
+      let resourceType =
+        (Option.map ~f:IpamPoolSourceResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let resourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
+      make ?resourceOwner ?resourceRegion ?resourceType ?resourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceOwner = field_map json__ "ResourceOwner" String_.of_json in
+      let resourceRegion = field_map json__ "ResourceRegion" String_.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" IpamPoolSourceResourceType.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      make ?resourceOwner ?resourceRegion ?resourceType ?resourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The resource used to provision CIDRs to a resource planning pool."]
 module IpamPoolState =
   struct
     type nonrec t =
@@ -2808,6 +5986,9 @@ module IpamPoolState =
       | Delete_in_progress 
       | Delete_complete 
       | Delete_failed 
+      | Isolate_in_progress 
+      | Isolate_complete 
+      | Restore_in_progress 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2821,6 +6002,9 @@ module IpamPoolState =
       | Delete_in_progress -> "delete-in-progress"
       | Delete_complete -> "delete-complete"
       | Delete_failed -> "delete-failed"
+      | Isolate_in_progress -> "isolate-in-progress"
+      | Isolate_complete -> "isolate-complete"
+      | Restore_in_progress -> "restore-in-progress"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2833,6 +6017,9 @@ module IpamPoolState =
       | "delete-in-progress" -> Delete_in_progress
       | "delete-complete" -> Delete_complete
       | "delete-failed" -> Delete_failed
+      | "isolate-in-progress" -> Isolate_in_progress
+      | "isolate-complete" -> Isolate_complete
+      | "restore-in-progress" -> Restore_in_progress
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2842,10 +6029,186 @@ module IpamPoolState =
     let of_json j = of_string (string_of_json ~kind:"IpamPoolState" j)
     let to_json = simple_to_json to_value
   end
+module IpamPolicyState =
+  struct
+    type nonrec t =
+      | Create_in_progress 
+      | Create_complete 
+      | Create_failed 
+      | Modify_in_progress 
+      | Modify_complete 
+      | Modify_failed 
+      | Delete_in_progress 
+      | Delete_complete 
+      | Delete_failed 
+      | Isolate_in_progress 
+      | Isolate_complete 
+      | Restore_in_progress 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Create_in_progress -> "create-in-progress"
+      | Create_complete -> "create-complete"
+      | Create_failed -> "create-failed"
+      | Modify_in_progress -> "modify-in-progress"
+      | Modify_complete -> "modify-complete"
+      | Modify_failed -> "modify-failed"
+      | Delete_in_progress -> "delete-in-progress"
+      | Delete_complete -> "delete-complete"
+      | Delete_failed -> "delete-failed"
+      | Isolate_in_progress -> "isolate-in-progress"
+      | Isolate_complete -> "isolate-complete"
+      | Restore_in_progress -> "restore-in-progress"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "create-in-progress" -> Create_in_progress
+      | "create-complete" -> Create_complete
+      | "create-failed" -> Create_failed
+      | "modify-in-progress" -> Modify_in_progress
+      | "modify-complete" -> Modify_complete
+      | "modify-failed" -> Modify_failed
+      | "delete-in-progress" -> Delete_in_progress
+      | "delete-complete" -> Delete_complete
+      | "delete-failed" -> Delete_failed
+      | "isolate-in-progress" -> Isolate_in_progress
+      | "isolate-complete" -> Isolate_complete
+      | "restore-in-progress" -> Restore_in_progress
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IpamPolicyState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IpamPolicyState" j)
+    let to_json = simple_to_json to_value
+  end
+module IpamExternalResourceVerificationTokenId =
+  struct
+    type nonrec t = string
+    let context_ = "IpamExternalResourceVerificationTokenId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"IpamExternalResourceVerificationTokenId" j
+    let to_json = simple_to_json to_value
+  end
+module IpamExternalResourceVerificationTokenState =
+  struct
+    type nonrec t =
+      | Create_in_progress 
+      | Create_complete 
+      | Create_failed 
+      | Delete_in_progress 
+      | Delete_complete 
+      | Delete_failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Create_in_progress -> "create-in-progress"
+      | Create_complete -> "create-complete"
+      | Create_failed -> "create-failed"
+      | Delete_in_progress -> "delete-in-progress"
+      | Delete_complete -> "delete-complete"
+      | Delete_failed -> "delete-failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "create-in-progress" -> Create_in_progress
+      | "create-complete" -> Create_complete
+      | "create-failed" -> Create_failed
+      | "delete-in-progress" -> Delete_in_progress
+      | "delete-complete" -> Delete_complete
+      | "delete-failed" -> Delete_failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration IpamExternalResourceVerificationTokenState"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"IpamExternalResourceVerificationTokenState" j)
+    let to_json = simple_to_json to_value
+  end
+module TokenState =
+  struct
+    type nonrec t =
+      | Valid 
+      | Expired 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Valid -> "valid"
+      | Expired -> "expired"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "valid" -> Valid
+      | "expired" -> Expired
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TokenState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TokenState" j)
+    let to_json = simple_to_json to_value
+  end
+module AsnState =
+  struct
+    type nonrec t =
+      | Deprovisioned 
+      | Failed_deprovision 
+      | Failed_provision 
+      | Pending_deprovision 
+      | Pending_provision 
+      | Provisioned 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Deprovisioned -> "deprovisioned"
+      | Failed_deprovision -> "failed-deprovision"
+      | Failed_provision -> "failed-provision"
+      | Pending_deprovision -> "pending-deprovision"
+      | Pending_provision -> "pending-provision"
+      | Provisioned -> "provisioned"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "deprovisioned" -> Deprovisioned
+      | "failed-deprovision" -> Failed_deprovision
+      | "failed-provision" -> Failed_provision
+      | "pending-deprovision" -> Pending_deprovision
+      | "pending-provision" -> Pending_provision
+      | "provisioned" -> Provisioned
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AsnState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AsnState" j)
+    let to_json = simple_to_json to_value
+  end
 module InternetGatewayAttachmentList =
   struct
     type nonrec t = InternetGatewayAttachment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InternetGatewayAttachment.to_value)) |>
         (fun x -> `List x)
@@ -2872,6 +6235,9 @@ module InstanceList =
   struct
     type nonrec t = Instance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Instance.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2922,6 +6288,9 @@ module BootModeTypeList =
   struct
     type nonrec t = BootModeType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BootModeType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2995,18 +6364,38 @@ module EbsInfo =
           "Describes the optimized EBS performance for the instance type."];
       nvmeSupport: EbsNvmeSupport.t option
         [@ocaml.doc
-          "Indicates whether non-volatile memory express (NVMe) is supported."]}
+          "Indicates whether non-volatile memory express (NVMe) is supported."];
+      maximumEbsAttachments: MaximumEbsAttachments.t option
+        [@ocaml.doc
+          "Indicates the maximum number of Amazon EBS volumes that can be attached to the instance type. For more information, see Amazon EBS volume limits for Amazon EC2 instances in the Amazon EC2 User Guide."];
+      attachmentLimitType: AttachmentLimitType.t option
+        [@ocaml.doc
+          "Indicates whether the instance type features a shared or dedicated Amazon EBS volume attachment limit. For more information, see Amazon EBS volume limits for Amazon EC2 instances in the Amazon EC2 User Guide."];
+      maximumEbsCards: MaximumEbsCards.t option
+        [@ocaml.doc
+          "Indicates the number of EBS cards supported by the instance type."];
+      ebsCards: EbsCardInfoList.t option
+        [@ocaml.doc
+          "Describes the EBS cards available for the instance type."]}
     let make ?ebsOptimizedSupport =
       fun ?encryptionSupport ->
         fun ?ebsOptimizedInfo ->
           fun ?nvmeSupport ->
-            fun () ->
-              {
-                ebsOptimizedSupport;
-                encryptionSupport;
-                ebsOptimizedInfo;
-                nvmeSupport
-              }
+            fun ?maximumEbsAttachments ->
+              fun ?attachmentLimitType ->
+                fun ?maximumEbsCards ->
+                  fun ?ebsCards ->
+                    fun () ->
+                      {
+                        ebsOptimizedSupport;
+                        encryptionSupport;
+                        ebsOptimizedInfo;
+                        nvmeSupport;
+                        maximumEbsAttachments;
+                        attachmentLimitType;
+                        maximumEbsCards;
+                        ebsCards
+                      }
     let to_value x =
       structure_to_value
         [("ebsOptimizedSupport",
@@ -3016,9 +6405,29 @@ module EbsInfo =
         ("ebsOptimizedInfo",
           (Option.map x.ebsOptimizedInfo ~f:EbsOptimizedInfo.to_value));
         ("nvmeSupport",
-          (Option.map x.nvmeSupport ~f:EbsNvmeSupport.to_value))]
+          (Option.map x.nvmeSupport ~f:EbsNvmeSupport.to_value));
+        ("maximumEbsAttachments",
+          (Option.map x.maximumEbsAttachments
+             ~f:MaximumEbsAttachments.to_value));
+        ("attachmentLimitType",
+          (Option.map x.attachmentLimitType ~f:AttachmentLimitType.to_value));
+        ("maximumEbsCards",
+          (Option.map x.maximumEbsCards ~f:MaximumEbsCards.to_value));
+        ("ebsCardSet", (Option.map x.ebsCards ~f:EbsCardInfoList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ebsCards =
+        (Option.map ~f:EbsCardInfoList.of_xml)
+          (Xml.child xml_arg0 "ebsCardSet") in
+      let maximumEbsCards =
+        (Option.map ~f:MaximumEbsCards.of_xml)
+          (Xml.child xml_arg0 "maximumEbsCards") in
+      let attachmentLimitType =
+        (Option.map ~f:AttachmentLimitType.of_xml)
+          (Xml.child xml_arg0 "attachmentLimitType") in
+      let maximumEbsAttachments =
+        (Option.map ~f:MaximumEbsAttachments.of_xml)
+          (Xml.child xml_arg0 "maximumEbsAttachments") in
       let nvmeSupport =
         (Option.map ~f:EbsNvmeSupport.of_xml)
           (Xml.child xml_arg0 "nvmeSupport") in
@@ -3031,19 +6440,29 @@ module EbsInfo =
       let ebsOptimizedSupport =
         (Option.map ~f:EbsOptimizedSupport.of_xml)
           (Xml.child xml_arg0 "ebsOptimizedSupport") in
-      make ?nvmeSupport ?ebsOptimizedInfo ?encryptionSupport
-        ?ebsOptimizedSupport ()
+      make ?ebsCards ?maximumEbsCards ?attachmentLimitType
+        ?maximumEbsAttachments ?nvmeSupport ?ebsOptimizedInfo
+        ?encryptionSupport ?ebsOptimizedSupport ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nvmeSupport = field_map json "NvmeSupport" EbsNvmeSupport.of_json in
+    let of_json json__ =
+      let ebsCards = field_map json__ "EbsCards" EbsCardInfoList.of_json in
+      let maximumEbsCards =
+        field_map json__ "MaximumEbsCards" MaximumEbsCards.of_json in
+      let attachmentLimitType =
+        field_map json__ "AttachmentLimitType" AttachmentLimitType.of_json in
+      let maximumEbsAttachments =
+        field_map json__ "MaximumEbsAttachments"
+          MaximumEbsAttachments.of_json in
+      let nvmeSupport = field_map json__ "NvmeSupport" EbsNvmeSupport.of_json in
       let ebsOptimizedInfo =
-        field_map json "EbsOptimizedInfo" EbsOptimizedInfo.of_json in
+        field_map json__ "EbsOptimizedInfo" EbsOptimizedInfo.of_json in
       let encryptionSupport =
-        field_map json "EncryptionSupport" EbsEncryptionSupport.of_json in
+        field_map json__ "EncryptionSupport" EbsEncryptionSupport.of_json in
       let ebsOptimizedSupport =
-        field_map json "EbsOptimizedSupport" EbsOptimizedSupport.of_json in
-      make ?nvmeSupport ?ebsOptimizedInfo ?encryptionSupport
-        ?ebsOptimizedSupport ()
+        field_map json__ "EbsOptimizedSupport" EbsOptimizedSupport.of_json in
+      make ?ebsCards ?maximumEbsCards ?attachmentLimitType
+        ?maximumEbsAttachments ?nvmeSupport ?ebsOptimizedInfo
+        ?encryptionSupport ?ebsOptimizedSupport ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the Amazon EBS features supported by the instance type."]
@@ -3073,10 +6492,10 @@ module FpgaInfo =
           (Xml.child xml_arg0 "fpgas") in
       make ?totalFpgaMemoryInMiB ?fpgas ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let totalFpgaMemoryInMiB =
-        field_map json "TotalFpgaMemoryInMiB" TotalFpgaMemory.of_json in
-      let fpgas = field_map json "Fpgas" FpgaDeviceInfoList.of_json in
+        field_map json__ "TotalFpgaMemoryInMiB" TotalFpgaMemory.of_json in
+      let fpgas = field_map json__ "Fpgas" FpgaDeviceInfoList.of_json in
       make ?totalFpgaMemoryInMiB ?fpgas ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the FPGAs for the instance type."]
@@ -3118,10 +6537,10 @@ module GpuInfo =
         (Option.map ~f:GpuDeviceInfoList.of_xml) (Xml.child xml_arg0 "gpus") in
       make ?totalGpuMemoryInMiB ?gpus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let totalGpuMemoryInMiB =
-        field_map json "TotalGpuMemoryInMiB" TotalGpuMemory.of_json in
-      let gpus = field_map json "Gpus" GpuDeviceInfoList.of_json in
+        field_map json__ "TotalGpuMemoryInMiB" TotalGpuMemory.of_json in
+      let gpus = field_map json__ "Gpus" GpuDeviceInfoList.of_json in
       make ?totalGpuMemoryInMiB ?gpus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the GPU accelerators for the instance type."]
@@ -3144,26 +6563,40 @@ module InferenceAcceleratorInfo =
       {
       accelerators: InferenceDeviceInfoList.t option
         [@ocaml.doc
-          "Describes the Inference accelerators for the instance type."]}
-    let make ?accelerators = fun () -> { accelerators }
+          "Describes the Inference accelerators for the instance type."];
+      totalInferenceMemoryInMiB: TotalInferenceMemory.t option
+        [@ocaml.doc
+          "The total size of the memory for the inference accelerators for the instance type, in MiB."]}
+    let make ?accelerators =
+      fun ?totalInferenceMemoryInMiB ->
+        fun () -> { accelerators; totalInferenceMemoryInMiB }
     let to_value x =
       structure_to_value
         [("accelerators",
-           (Option.map x.accelerators ~f:InferenceDeviceInfoList.to_value))]
+           (Option.map x.accelerators ~f:InferenceDeviceInfoList.to_value));
+        ("totalInferenceMemoryInMiB",
+          (Option.map x.totalInferenceMemoryInMiB
+             ~f:TotalInferenceMemory.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let totalInferenceMemoryInMiB =
+        (Option.map ~f:TotalInferenceMemory.of_xml)
+          (Xml.child xml_arg0 "totalInferenceMemoryInMiB") in
       let accelerators =
         (Option.map ~f:InferenceDeviceInfoList.of_xml)
           (Xml.child xml_arg0 "accelerators") in
-      make ?accelerators ()
+      make ?totalInferenceMemoryInMiB ?accelerators ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let totalInferenceMemoryInMiB =
+        field_map json__ "TotalInferenceMemoryInMiB"
+          TotalInferenceMemory.of_json in
       let accelerators =
-        field_map json "Accelerators" InferenceDeviceInfoList.of_json in
-      make ?accelerators ()
+        field_map json__ "Accelerators" InferenceDeviceInfoList.of_json in
+      make ?totalInferenceMemoryInMiB ?accelerators ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes the Inference accelerators for the instance type."]
+       "Amazon Elastic Inference is no longer available. Describes the Inference accelerators for the instance type."]
 module InstanceStorageFlag =
   struct
     type nonrec t = bool
@@ -3220,14 +6653,14 @@ module InstanceStorageInfo =
         (Option.map ~f:DiskSize.of_xml) (Xml.child xml_arg0 "totalSizeInGB") in
       make ?encryptionSupport ?nvmeSupport ?disks ?totalSizeInGB ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionSupport =
-        field_map json "EncryptionSupport"
+        field_map json__ "EncryptionSupport"
           InstanceStorageEncryptionSupport.of_json in
       let nvmeSupport =
-        field_map json "NvmeSupport" EphemeralNvmeSupport.of_json in
-      let disks = field_map json "Disks" DiskInfoList.of_json in
-      let totalSizeInGB = field_map json "TotalSizeInGB" DiskSize.of_json in
+        field_map json__ "NvmeSupport" EphemeralNvmeSupport.of_json in
+      let disks = field_map json__ "Disks" DiskInfoList.of_json in
+      let totalSizeInGB = field_map json__ "TotalSizeInGB" DiskSize.of_json in
       make ?encryptionSupport ?nvmeSupport ?disks ?totalSizeInGB ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3253,6 +6686,43 @@ module InstanceTypeHypervisor =
       of_string (string_of_json ~kind:"InstanceTypeHypervisor" j)
     let to_json = simple_to_json to_value
   end
+module MediaAcceleratorInfo =
+  struct
+    type nonrec t =
+      {
+      accelerators: MediaDeviceInfoList.t option
+        [@ocaml.doc
+          "Describes the media accelerators for the instance type."];
+      totalMediaMemoryInMiB: TotalMediaMemory.t option
+        [@ocaml.doc
+          "The total size of the memory for the media accelerators for the instance type, in MiB."]}
+    let make ?accelerators =
+      fun ?totalMediaMemoryInMiB ->
+        fun () -> { accelerators; totalMediaMemoryInMiB }
+    let to_value x =
+      structure_to_value
+        [("accelerators",
+           (Option.map x.accelerators ~f:MediaDeviceInfoList.to_value));
+        ("totalMediaMemoryInMiB",
+          (Option.map x.totalMediaMemoryInMiB ~f:TotalMediaMemory.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalMediaMemoryInMiB =
+        (Option.map ~f:TotalMediaMemory.of_xml)
+          (Xml.child xml_arg0 "totalMediaMemoryInMiB") in
+      let accelerators =
+        (Option.map ~f:MediaDeviceInfoList.of_xml)
+          (Xml.child xml_arg0 "accelerators") in
+      make ?totalMediaMemoryInMiB ?accelerators ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalMediaMemoryInMiB =
+        field_map json__ "TotalMediaMemoryInMiB" TotalMediaMemory.of_json in
+      let accelerators =
+        field_map json__ "Accelerators" MediaDeviceInfoList.of_json in
+      make ?totalMediaMemoryInMiB ?accelerators ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the media accelerators for the instance type."]
 module MemoryInfo =
   struct
     type nonrec t =
@@ -3269,8 +6739,8 @@ module MemoryInfo =
         (Option.map ~f:MemorySize.of_xml) (Xml.child xml_arg0 "sizeInMiB") in
       make ?sizeInMiB ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sizeInMiB = field_map json "SizeInMiB" MemorySize.of_json in
+    let of_json json__ =
+      let sizeInMiB = field_map json__ "SizeInMiB" MemorySize.of_json in
       make ?sizeInMiB ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the memory for the instance type."]
@@ -3309,7 +6779,30 @@ module NetworkInfo =
           "Describes the Elastic Fabric Adapters for the instance type."];
       encryptionInTransitSupported: EncryptionInTransitSupported.t option
         [@ocaml.doc
-          "Indicates whether the instance type automatically encrypts in-transit traffic between instances."]}
+          "Indicates whether the instance type automatically encrypts in-transit traffic between instances."];
+      enaSrdSupported: EnaSrdSupported.t option
+        [@ocaml.doc
+          "Indicates whether the instance type supports ENA Express. ENA Express uses Amazon Web Services Scalable Reliable Datagram (SRD) technology to increase the maximum bandwidth used per stream and minimize tail latency of network traffic between EC2 instances."];
+      bandwidthWeightings: BandwidthWeightingTypeList.t option
+        [@ocaml.doc
+          "A list of valid settings for configurable bandwidth weighting for the instance type, if supported."];
+      flexibleEnaQueuesSupport: FlexibleEnaQueuesSupport.t option
+        [@ocaml.doc
+          "Indicates whether changing the number of ENA queues is supported."];
+      connectionTrackingConfiguration:
+        DefaultConnectionTrackingConfiguration.t option
+        [@ocaml.doc "Indicates conntrack information for the instance type"];
+      secondaryNetworkSupported: SecondaryNetworkSupportedFlag.t option
+        [@ocaml.doc
+          "Indicates whether secondary interface attachments from secondary network are supported."];
+      maximumSecondaryNetworkInterfaces:
+        MaximumSecondaryNetworkInterfaces.t option
+        [@ocaml.doc
+          "The maximum number of secondary interfaces for the instance type."];
+      ipv4AddressesPerSecondaryInterface:
+        Ipv4AddressesPerSecondaryInterface.t option
+        [@ocaml.doc
+          "The maximum number of IPv4 addresses per secondary interface."]}
     let make ?networkPerformance =
       fun ?maximumNetworkInterfaces ->
         fun ?maximumNetworkCards ->
@@ -3322,21 +6815,38 @@ module NetworkInfo =
                       fun ?efaSupported ->
                         fun ?efaInfo ->
                           fun ?encryptionInTransitSupported ->
-                            fun () ->
-                              {
-                                networkPerformance;
-                                maximumNetworkInterfaces;
-                                maximumNetworkCards;
-                                defaultNetworkCardIndex;
-                                networkCards;
-                                ipv4AddressesPerInterface;
-                                ipv6AddressesPerInterface;
-                                ipv6Supported;
-                                enaSupport;
-                                efaSupported;
-                                efaInfo;
-                                encryptionInTransitSupported
-                              }
+                            fun ?enaSrdSupported ->
+                              fun ?bandwidthWeightings ->
+                                fun ?flexibleEnaQueuesSupport ->
+                                  fun ?connectionTrackingConfiguration ->
+                                    fun ?secondaryNetworkSupported ->
+                                      fun ?maximumSecondaryNetworkInterfaces
+                                        ->
+                                        fun
+                                          ?ipv4AddressesPerSecondaryInterface
+                                          ->
+                                          fun () ->
+                                            {
+                                              networkPerformance;
+                                              maximumNetworkInterfaces;
+                                              maximumNetworkCards;
+                                              defaultNetworkCardIndex;
+                                              networkCards;
+                                              ipv4AddressesPerInterface;
+                                              ipv6AddressesPerInterface;
+                                              ipv6Supported;
+                                              enaSupport;
+                                              efaSupported;
+                                              efaInfo;
+                                              encryptionInTransitSupported;
+                                              enaSrdSupported;
+                                              bandwidthWeightings;
+                                              flexibleEnaQueuesSupport;
+                                              connectionTrackingConfiguration;
+                                              secondaryNetworkSupported;
+                                              maximumSecondaryNetworkInterfaces;
+                                              ipv4AddressesPerSecondaryInterface
+                                            }
     let to_value x =
       structure_to_value
         [("networkPerformance",
@@ -3364,9 +6874,50 @@ module NetworkInfo =
         ("efaInfo", (Option.map x.efaInfo ~f:EfaInfo.to_value));
         ("encryptionInTransitSupported",
           (Option.map x.encryptionInTransitSupported
-             ~f:EncryptionInTransitSupported.to_value))]
+             ~f:EncryptionInTransitSupported.to_value));
+        ("enaSrdSupported",
+          (Option.map x.enaSrdSupported ~f:EnaSrdSupported.to_value));
+        ("bandwidthWeightings",
+          (Option.map x.bandwidthWeightings
+             ~f:BandwidthWeightingTypeList.to_value));
+        ("flexibleEnaQueuesSupport",
+          (Option.map x.flexibleEnaQueuesSupport
+             ~f:FlexibleEnaQueuesSupport.to_value));
+        ("connectionTrackingConfiguration",
+          (Option.map x.connectionTrackingConfiguration
+             ~f:DefaultConnectionTrackingConfiguration.to_value));
+        ("secondaryNetworkSupported",
+          (Option.map x.secondaryNetworkSupported
+             ~f:SecondaryNetworkSupportedFlag.to_value));
+        ("maximumSecondaryNetworkInterfaces",
+          (Option.map x.maximumSecondaryNetworkInterfaces
+             ~f:MaximumSecondaryNetworkInterfaces.to_value));
+        ("ipv4AddressesPerSecondaryInterface",
+          (Option.map x.ipv4AddressesPerSecondaryInterface
+             ~f:Ipv4AddressesPerSecondaryInterface.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipv4AddressesPerSecondaryInterface =
+        (Option.map ~f:Ipv4AddressesPerSecondaryInterface.of_xml)
+          (Xml.child xml_arg0 "ipv4AddressesPerSecondaryInterface") in
+      let maximumSecondaryNetworkInterfaces =
+        (Option.map ~f:MaximumSecondaryNetworkInterfaces.of_xml)
+          (Xml.child xml_arg0 "maximumSecondaryNetworkInterfaces") in
+      let secondaryNetworkSupported =
+        (Option.map ~f:SecondaryNetworkSupportedFlag.of_xml)
+          (Xml.child xml_arg0 "secondaryNetworkSupported") in
+      let connectionTrackingConfiguration =
+        (Option.map ~f:DefaultConnectionTrackingConfiguration.of_xml)
+          (Xml.child xml_arg0 "connectionTrackingConfiguration") in
+      let flexibleEnaQueuesSupport =
+        (Option.map ~f:FlexibleEnaQueuesSupport.of_xml)
+          (Xml.child xml_arg0 "flexibleEnaQueuesSupport") in
+      let bandwidthWeightings =
+        (Option.map ~f:BandwidthWeightingTypeList.of_xml)
+          (Xml.child xml_arg0 "bandwidthWeightings") in
+      let enaSrdSupported =
+        (Option.map ~f:EnaSrdSupported.of_xml)
+          (Xml.child xml_arg0 "enaSrdSupported") in
       let encryptionInTransitSupported =
         (Option.map ~f:EncryptionInTransitSupported.of_xml)
           (Xml.child xml_arg0 "encryptionInTransitSupported") in
@@ -3400,44 +6951,214 @@ module NetworkInfo =
       let networkPerformance =
         (Option.map ~f:NetworkPerformance.of_xml)
           (Xml.child xml_arg0 "networkPerformance") in
-      make ?encryptionInTransitSupported ?efaInfo ?efaSupported ?enaSupport
-        ?ipv6Supported ?ipv6AddressesPerInterface ?ipv4AddressesPerInterface
-        ?networkCards ?defaultNetworkCardIndex ?maximumNetworkCards
+      make ?ipv4AddressesPerSecondaryInterface
+        ?maximumSecondaryNetworkInterfaces ?secondaryNetworkSupported
+        ?connectionTrackingConfiguration ?flexibleEnaQueuesSupport
+        ?bandwidthWeightings ?enaSrdSupported ?encryptionInTransitSupported
+        ?efaInfo ?efaSupported ?enaSupport ?ipv6Supported
+        ?ipv6AddressesPerInterface ?ipv4AddressesPerInterface ?networkCards
+        ?defaultNetworkCardIndex ?maximumNetworkCards
         ?maximumNetworkInterfaces ?networkPerformance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipv4AddressesPerSecondaryInterface =
+        field_map json__ "Ipv4AddressesPerSecondaryInterface"
+          Ipv4AddressesPerSecondaryInterface.of_json in
+      let maximumSecondaryNetworkInterfaces =
+        field_map json__ "MaximumSecondaryNetworkInterfaces"
+          MaximumSecondaryNetworkInterfaces.of_json in
+      let secondaryNetworkSupported =
+        field_map json__ "SecondaryNetworkSupported"
+          SecondaryNetworkSupportedFlag.of_json in
+      let connectionTrackingConfiguration =
+        field_map json__ "ConnectionTrackingConfiguration"
+          DefaultConnectionTrackingConfiguration.of_json in
+      let flexibleEnaQueuesSupport =
+        field_map json__ "FlexibleEnaQueuesSupport"
+          FlexibleEnaQueuesSupport.of_json in
+      let bandwidthWeightings =
+        field_map json__ "BandwidthWeightings"
+          BandwidthWeightingTypeList.of_json in
+      let enaSrdSupported =
+        field_map json__ "EnaSrdSupported" EnaSrdSupported.of_json in
       let encryptionInTransitSupported =
-        field_map json "EncryptionInTransitSupported"
+        field_map json__ "EncryptionInTransitSupported"
           EncryptionInTransitSupported.of_json in
-      let efaInfo = field_map json "EfaInfo" EfaInfo.of_json in
+      let efaInfo = field_map json__ "EfaInfo" EfaInfo.of_json in
       let efaSupported =
-        field_map json "EfaSupported" EfaSupportedFlag.of_json in
-      let enaSupport = field_map json "EnaSupport" EnaSupport.of_json in
-      let ipv6Supported = field_map json "Ipv6Supported" Ipv6Flag.of_json in
+        field_map json__ "EfaSupported" EfaSupportedFlag.of_json in
+      let enaSupport = field_map json__ "EnaSupport" EnaSupport.of_json in
+      let ipv6Supported = field_map json__ "Ipv6Supported" Ipv6Flag.of_json in
       let ipv6AddressesPerInterface =
-        field_map json "Ipv6AddressesPerInterface"
+        field_map json__ "Ipv6AddressesPerInterface"
           MaxIpv6AddrPerInterface.of_json in
       let ipv4AddressesPerInterface =
-        field_map json "Ipv4AddressesPerInterface"
+        field_map json__ "Ipv4AddressesPerInterface"
           MaxIpv4AddrPerInterface.of_json in
       let networkCards =
-        field_map json "NetworkCards" NetworkCardInfoList.of_json in
+        field_map json__ "NetworkCards" NetworkCardInfoList.of_json in
       let defaultNetworkCardIndex =
-        field_map json "DefaultNetworkCardIndex"
+        field_map json__ "DefaultNetworkCardIndex"
           DefaultNetworkCardIndex.of_json in
       let maximumNetworkCards =
-        field_map json "MaximumNetworkCards" MaximumNetworkCards.of_json in
+        field_map json__ "MaximumNetworkCards" MaximumNetworkCards.of_json in
       let maximumNetworkInterfaces =
-        field_map json "MaximumNetworkInterfaces"
+        field_map json__ "MaximumNetworkInterfaces"
           MaxNetworkInterfaces.of_json in
       let networkPerformance =
-        field_map json "NetworkPerformance" NetworkPerformance.of_json in
-      make ?encryptionInTransitSupported ?efaInfo ?efaSupported ?enaSupport
-        ?ipv6Supported ?ipv6AddressesPerInterface ?ipv4AddressesPerInterface
-        ?networkCards ?defaultNetworkCardIndex ?maximumNetworkCards
+        field_map json__ "NetworkPerformance" NetworkPerformance.of_json in
+      make ?ipv4AddressesPerSecondaryInterface
+        ?maximumSecondaryNetworkInterfaces ?secondaryNetworkSupported
+        ?connectionTrackingConfiguration ?flexibleEnaQueuesSupport
+        ?bandwidthWeightings ?enaSrdSupported ?encryptionInTransitSupported
+        ?efaInfo ?efaSupported ?enaSupport ?ipv6Supported
+        ?ipv6AddressesPerInterface ?ipv4AddressesPerInterface ?networkCards
+        ?defaultNetworkCardIndex ?maximumNetworkCards
         ?maximumNetworkInterfaces ?networkPerformance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the networking features of the instance type."]
+module NeuronInfo =
+  struct
+    type nonrec t =
+      {
+      neuronDevices: NeuronDeviceInfoList.t option
+        [@ocaml.doc
+          "Describes the neuron accelerators for the instance type."];
+      totalNeuronDeviceMemoryInMiB: TotalNeuronMemory.t option
+        [@ocaml.doc
+          "The total size of the memory for the neuron accelerators for the instance type, in MiB."]}
+    let make ?neuronDevices =
+      fun ?totalNeuronDeviceMemoryInMiB ->
+        fun () -> { neuronDevices; totalNeuronDeviceMemoryInMiB }
+    let to_value x =
+      structure_to_value
+        [("neuronDevices",
+           (Option.map x.neuronDevices ~f:NeuronDeviceInfoList.to_value));
+        ("totalNeuronDeviceMemoryInMiB",
+          (Option.map x.totalNeuronDeviceMemoryInMiB
+             ~f:TotalNeuronMemory.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalNeuronDeviceMemoryInMiB =
+        (Option.map ~f:TotalNeuronMemory.of_xml)
+          (Xml.child xml_arg0 "totalNeuronDeviceMemoryInMiB") in
+      let neuronDevices =
+        (Option.map ~f:NeuronDeviceInfoList.of_xml)
+          (Xml.child xml_arg0 "neuronDevices") in
+      make ?totalNeuronDeviceMemoryInMiB ?neuronDevices ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalNeuronDeviceMemoryInMiB =
+        field_map json__ "TotalNeuronDeviceMemoryInMiB"
+          TotalNeuronMemory.of_json in
+      let neuronDevices =
+        field_map json__ "NeuronDevices" NeuronDeviceInfoList.of_json in
+      make ?totalNeuronDeviceMemoryInMiB ?neuronDevices ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the neuron accelerators for the instance type."]
+module NitroEnclavesSupport =
+  struct
+    type nonrec t =
+      | Unsupported 
+      | Supported 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Unsupported -> "unsupported"
+      | Supported -> "supported"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "unsupported" -> Unsupported
+      | "supported" -> Supported
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration NitroEnclavesSupport" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NitroEnclavesSupport" j)
+    let to_json = simple_to_json to_value
+  end
+module NitroTpmInfo =
+  struct
+    type nonrec t =
+      {
+      supportedVersions: NitroTpmSupportedVersionsList.t option
+        [@ocaml.doc "Indicates the supported NitroTPM versions."]}
+    let make ?supportedVersions = fun () -> { supportedVersions }
+    let to_value x =
+      structure_to_value
+        [("supportedVersions",
+           (Option.map x.supportedVersions
+              ~f:NitroTpmSupportedVersionsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let supportedVersions =
+        (Option.map ~f:NitroTpmSupportedVersionsList.of_xml)
+          (Xml.child xml_arg0 "supportedVersions") in
+      make ?supportedVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let supportedVersions =
+        field_map json__ "SupportedVersions"
+          NitroTpmSupportedVersionsList.of_json in
+      make ?supportedVersions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the supported NitroTPM versions for the instance type."]
+module NitroTpmSupport =
+  struct
+    type nonrec t =
+      | Unsupported 
+      | Supported 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Unsupported -> "unsupported"
+      | Supported -> "supported"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "unsupported" -> Unsupported
+      | "supported" -> Supported
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NitroTpmSupport" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NitroTpmSupport" j)
+    let to_json = simple_to_json to_value
+  end
+module PhcSupport =
+  struct
+    type nonrec t =
+      | Unsupported 
+      | Supported 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Unsupported -> "unsupported"
+      | Supported -> "supported"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "unsupported" -> Unsupported
+      | "supported" -> Supported
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PhcSupport" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PhcSupport" j)
+    let to_json = simple_to_json to_value
+  end
 module PlacementGroupInfo =
   struct
     type nonrec t =
@@ -3457,9 +7178,9 @@ module PlacementGroupInfo =
           (Xml.child xml_arg0 "supportedStrategies") in
       make ?supportedStrategies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supportedStrategies =
-        field_map json "SupportedStrategies"
+        field_map json__ "SupportedStrategies"
           PlacementGroupStrategyList.of_json in
       make ?supportedStrategies ()
     let to_json v = composed_to_json to_value v
@@ -3472,10 +7193,23 @@ module ProcessorInfo =
       supportedArchitectures: ArchitectureTypeList.t option
         [@ocaml.doc "The architectures supported by the instance type."];
       sustainedClockSpeedInGhz: ProcessorSustainedClockSpeed.t option
-        [@ocaml.doc "The speed of the processor, in GHz."]}
+        [@ocaml.doc "The speed of the processor, in GHz."];
+      supportedFeatures: SupportedAdditionalProcessorFeatureList.t option
+        [@ocaml.doc
+          "Indicates whether the instance type supports AMD SEV-SNP. If the request returns amd-sev-snp, AMD SEV-SNP is supported. Otherwise, it is not supported. For more information, see AMD SEV-SNP."];
+      manufacturer: CpuManufacturerName.t option
+        [@ocaml.doc "The manufacturer of the processor."]}
     let make ?supportedArchitectures =
       fun ?sustainedClockSpeedInGhz ->
-        fun () -> { supportedArchitectures; sustainedClockSpeedInGhz }
+        fun ?supportedFeatures ->
+          fun ?manufacturer ->
+            fun () ->
+              {
+                supportedArchitectures;
+                sustainedClockSpeedInGhz;
+                supportedFeatures;
+                manufacturer
+              }
     let to_value x =
       structure_to_value
         [("supportedArchitectures",
@@ -3483,30 +7217,79 @@ module ProcessorInfo =
               ~f:ArchitectureTypeList.to_value));
         ("sustainedClockSpeedInGhz",
           (Option.map x.sustainedClockSpeedInGhz
-             ~f:ProcessorSustainedClockSpeed.to_value))]
+             ~f:ProcessorSustainedClockSpeed.to_value));
+        ("supportedFeatures",
+          (Option.map x.supportedFeatures
+             ~f:SupportedAdditionalProcessorFeatureList.to_value));
+        ("manufacturer",
+          (Option.map x.manufacturer ~f:CpuManufacturerName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let manufacturer =
+        (Option.map ~f:CpuManufacturerName.of_xml)
+          (Xml.child xml_arg0 "manufacturer") in
+      let supportedFeatures =
+        (Option.map ~f:SupportedAdditionalProcessorFeatureList.of_xml)
+          (Xml.child xml_arg0 "supportedFeatures") in
       let sustainedClockSpeedInGhz =
         (Option.map ~f:ProcessorSustainedClockSpeed.of_xml)
           (Xml.child xml_arg0 "sustainedClockSpeedInGhz") in
       let supportedArchitectures =
         (Option.map ~f:ArchitectureTypeList.of_xml)
           (Xml.child xml_arg0 "supportedArchitectures") in
-      make ?sustainedClockSpeedInGhz ?supportedArchitectures ()
+      make ?manufacturer ?supportedFeatures ?sustainedClockSpeedInGhz
+        ?supportedArchitectures ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let manufacturer =
+        field_map json__ "Manufacturer" CpuManufacturerName.of_json in
+      let supportedFeatures =
+        field_map json__ "SupportedFeatures"
+          SupportedAdditionalProcessorFeatureList.of_json in
       let sustainedClockSpeedInGhz =
-        field_map json "SustainedClockSpeedInGhz"
+        field_map json__ "SustainedClockSpeedInGhz"
           ProcessorSustainedClockSpeed.of_json in
       let supportedArchitectures =
-        field_map json "SupportedArchitectures" ArchitectureTypeList.of_json in
-      make ?sustainedClockSpeedInGhz ?supportedArchitectures ()
+        field_map json__ "SupportedArchitectures"
+          ArchitectureTypeList.of_json in
+      make ?manufacturer ?supportedFeatures ?sustainedClockSpeedInGhz
+        ?supportedArchitectures ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the processor used by the instance type."]
+module RebootMigrationSupport =
+  struct
+    type nonrec t =
+      | Unsupported 
+      | Supported 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Unsupported -> "unsupported"
+      | Supported -> "supported"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "unsupported" -> Unsupported
+      | "supported" -> Supported
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RebootMigrationSupport" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RebootMigrationSupport" j)
+    let to_json = simple_to_json to_value
+  end
 module RootDeviceTypeList =
   struct
     type nonrec t = RootDeviceType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RootDeviceType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3528,10 +7311,26 @@ module RootDeviceTypeList =
         j
     let to_json v = composed_to_json to_value v
   end
+module SupportedInRegion =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module UsageClassTypeList =
   struct
     type nonrec t = UsageClassType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UsageClassType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3610,14 +7409,14 @@ module VCpuInfo =
       make ?validThreadsPerCore ?validCores ?defaultThreadsPerCore
         ?defaultCores ?defaultVCpus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validThreadsPerCore =
-        field_map json "ValidThreadsPerCore" ThreadsPerCoreList.of_json in
-      let validCores = field_map json "ValidCores" CoreCountList.of_json in
+        field_map json__ "ValidThreadsPerCore" ThreadsPerCoreList.of_json in
+      let validCores = field_map json__ "ValidCores" CoreCountList.of_json in
       let defaultThreadsPerCore =
-        field_map json "DefaultThreadsPerCore" ThreadsPerCore.of_json in
-      let defaultCores = field_map json "DefaultCores" CoreCount.of_json in
-      let defaultVCpus = field_map json "DefaultVCpus" VCpuCount.of_json in
+        field_map json__ "DefaultThreadsPerCore" ThreadsPerCore.of_json in
+      let defaultCores = field_map json__ "DefaultCores" CoreCount.of_json in
+      let defaultVCpus = field_map json__ "DefaultVCpus" VCpuCount.of_json in
       make ?validThreadsPerCore ?validCores ?defaultThreadsPerCore
         ?defaultCores ?defaultVCpus ()
     let to_json v = composed_to_json to_value v
@@ -3626,6 +7425,9 @@ module VirtualizationTypeList =
   struct
     type nonrec t = VirtualizationType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualizationType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3666,6 +7468,7 @@ module LocationType =
       | Region 
       | Availability_zone 
       | Availability_zone_id 
+      | Outpost 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3673,12 +7476,14 @@ module LocationType =
       | Region -> "region"
       | Availability_zone -> "availability-zone"
       | Availability_zone_id -> "availability-zone-id"
+      | Outpost -> "outpost"
       | Non_static_id s -> s
     let of_string =
       function
       | "region" -> Region
       | "availability-zone" -> Availability_zone
       | "availability-zone-id" -> Availability_zone_id
+      | "outpost" -> Outpost
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3688,10 +7493,69 @@ module LocationType =
     let of_json j = of_string (string_of_json ~kind:"LocationType" j)
     let to_json = simple_to_json to_value
   end
+module NetworkNodesList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NetworkNodesList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EbsStatusSummary =
+  struct
+    type nonrec t =
+      {
+      details: EbsStatusDetailsList.t option
+        [@ocaml.doc
+          "Details about the attached EBS status check for an instance."];
+      status: SummaryStatus.t option [@ocaml.doc "The current status."]}
+    let make ?details = fun ?status -> fun () -> { details; status }
+    let to_value x =
+      structure_to_value
+        [("details", (Option.map x.details ~f:EbsStatusDetailsList.to_value));
+        ("status", (Option.map x.status ~f:SummaryStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:SummaryStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let details =
+        (Option.map ~f:EbsStatusDetailsList.of_xml)
+          (Xml.child xml_arg0 "details") in
+      make ?status ?details ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" SummaryStatus.of_json in
+      let details = field_map json__ "Details" EbsStatusDetailsList.of_json in
+      make ?status ?details ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a summary of the attached EBS volume status for an instance."]
 module InstanceStatusEventList =
   struct
     type nonrec t = InstanceStatusEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceStatusEvent.to_value)) |>
         (fun x -> `List x)
@@ -3737,13 +7601,111 @@ module InstanceStatusSummary =
           (Xml.child xml_arg0 "details") in
       make ?status ?details ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" SummaryStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" SummaryStatus.of_json in
       let details =
-        field_map json "Details" InstanceStatusDetailsList.of_json in
+        field_map json__ "Details" InstanceStatusDetailsList.of_json in
       make ?status ?details ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the status of an instance."]
+module ImageMetadata =
+  struct
+    type nonrec t =
+      {
+      imageId: ImageId.t option [@ocaml.doc "The ID of the AMI."];
+      name: String_.t option [@ocaml.doc "The name of the AMI."];
+      ownerId: String_.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that owns the AMI."];
+      state: ImageState.t option
+        [@ocaml.doc
+          "The current state of the AMI. If the state is available, the AMI is successfully registered and can be used to launch an instance."];
+      imageOwnerAlias: String_.t option
+        [@ocaml.doc
+          "The alias of the AMI owner. Valid values: amazon | aws-backup-vault | aws-marketplace"];
+      creationDate: String_.t option
+        [@ocaml.doc "The date and time the AMI was created."];
+      deprecationTime: String_.t option
+        [@ocaml.doc
+          "The deprecation date and time of the AMI, in UTC, in the following format: YYYY-MM-DDTHH:MM:SSZ."];
+      imageAllowed: Boolean.t option
+        [@ocaml.doc
+          "If true, the AMI satisfies the criteria for Allowed AMIs and can be discovered and used in the account. If false, the AMI can't be discovered or used in the account. For more information, see Control the discovery and use of AMIs in Amazon EC2 with Allowed AMIs in Amazon EC2 User Guide."];
+      isPublic: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the AMI has public launch permissions. A value of true means this AMI has public launch permissions, while false means it has only implicit (AMI owner) or explicit (shared with your account) launch permissions."]}
+    let make ?imageId =
+      fun ?name ->
+        fun ?ownerId ->
+          fun ?state ->
+            fun ?imageOwnerAlias ->
+              fun ?creationDate ->
+                fun ?deprecationTime ->
+                  fun ?imageAllowed ->
+                    fun ?isPublic ->
+                      fun () ->
+                        {
+                          imageId;
+                          name;
+                          ownerId;
+                          state;
+                          imageOwnerAlias;
+                          creationDate;
+                          deprecationTime;
+                          imageAllowed;
+                          isPublic
+                        }
+    let to_value x =
+      structure_to_value
+        [("imageId", (Option.map x.imageId ~f:ImageId.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("imageOwnerId", (Option.map x.ownerId ~f:String_.to_value));
+        ("imageState", (Option.map x.state ~f:ImageState.to_value));
+        ("imageOwnerAlias",
+          (Option.map x.imageOwnerAlias ~f:String_.to_value));
+        ("creationDate", (Option.map x.creationDate ~f:String_.to_value));
+        ("deprecationTime",
+          (Option.map x.deprecationTime ~f:String_.to_value));
+        ("imageAllowed", (Option.map x.imageAllowed ~f:Boolean.to_value));
+        ("isPublic", (Option.map x.isPublic ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let isPublic =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isPublic") in
+      let imageAllowed =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "imageAllowed") in
+      let deprecationTime =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "deprecationTime") in
+      let creationDate =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "creationDate") in
+      let imageOwnerAlias =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "imageOwnerAlias") in
+      let state =
+        (Option.map ~f:ImageState.of_xml) (Xml.child xml_arg0 "imageState") in
+      let ownerId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "imageOwnerId") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let imageId =
+        (Option.map ~f:ImageId.of_xml) (Xml.child xml_arg0 "imageId") in
+      make ?isPublic ?imageAllowed ?deprecationTime ?creationDate
+        ?imageOwnerAlias ?state ?ownerId ?name ?imageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let isPublic = field_map json__ "IsPublic" Boolean.of_json in
+      let imageAllowed = field_map json__ "ImageAllowed" Boolean.of_json in
+      let deprecationTime =
+        field_map json__ "DeprecationTime" String_.of_json in
+      let creationDate = field_map json__ "CreationDate" String_.of_json in
+      let imageOwnerAlias =
+        field_map json__ "ImageOwnerAlias" String_.of_json in
+      let state = field_map json__ "State" ImageState.of_json in
+      let ownerId = field_map json__ "OwnerId" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let imageId = field_map json__ "ImageId" ImageId.of_json in
+      make ?isPublic ?imageAllowed ?deprecationTime ?creationDate
+        ?imageOwnerAlias ?state ?ownerId ?name ?imageId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the AMI."]
 module InstanceEventWindowAssociationTarget =
   struct
     type nonrec t =
@@ -3753,7 +7715,7 @@ module InstanceEventWindowAssociationTarget =
           "The IDs of the instances associated with the event window."];
       tags: TagList.t option
         [@ocaml.doc
-          "The instance tags associated with the event window. Any instances associated with the tags will be associated with the event window."];
+          "The instance tags associated with the event window. Any instances associated with the tags will be associated with the event window. Note that while you can't create tag keys beginning with aws:, you can specify existing Amazon Web Services managed tag keys (with the aws: prefix) when specifying them as targets to associate with the event window."];
       dedicatedHostIds: DedicatedHostIdList.t option
         [@ocaml.doc
           "The IDs of the Dedicated Hosts associated with the event window."]}
@@ -3779,11 +7741,11 @@ module InstanceEventWindowAssociationTarget =
           (Xml.child xml_arg0 "instanceIdSet") in
       make ?dedicatedHostIds ?tags ?instanceIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dedicatedHostIds =
-        field_map json "DedicatedHostIds" DedicatedHostIdList.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let instanceIds = field_map json "InstanceIds" InstanceIdList.of_json in
+        field_map json__ "DedicatedHostIds" DedicatedHostIdList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let instanceIds = field_map json__ "InstanceIds" InstanceIdList.of_json in
       make ?dedicatedHostIds ?tags ?instanceIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more targets associated with the event window."]
@@ -3851,6 +7813,9 @@ module InstanceEventWindowTimeRangeList =
   struct
     type nonrec t = InstanceEventWindowTimeRange.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceEventWindowTimeRange.to_value)) |>
         (fun x -> `List x)
@@ -3873,12 +7838,165 @@ module InstanceEventWindowTimeRangeList =
         ~of_json:InstanceEventWindowTimeRange.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Ec2InstanceConnectEndpointState =
+  struct
+    type nonrec t =
+      | Create_in_progress 
+      | Create_complete 
+      | Create_failed 
+      | Delete_in_progress 
+      | Delete_complete 
+      | Delete_failed 
+      | Update_in_progress 
+      | Update_complete 
+      | Update_failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Create_in_progress -> "create-in-progress"
+      | Create_complete -> "create-complete"
+      | Create_failed -> "create-failed"
+      | Delete_in_progress -> "delete-in-progress"
+      | Delete_complete -> "delete-complete"
+      | Delete_failed -> "delete-failed"
+      | Update_in_progress -> "update-in-progress"
+      | Update_complete -> "update-complete"
+      | Update_failed -> "update-failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "create-in-progress" -> Create_in_progress
+      | "create-complete" -> Create_complete
+      | "create-failed" -> Create_failed
+      | "delete-in-progress" -> Delete_in_progress
+      | "delete-complete" -> Delete_complete
+      | "delete-failed" -> Delete_failed
+      | "update-in-progress" -> Update_in_progress
+      | "update-complete" -> Update_complete
+      | "update-failed" -> Update_failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration Ec2InstanceConnectEndpointState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"Ec2InstanceConnectEndpointState" j)
+    let to_json = simple_to_json to_value
+  end
+module InstanceConnectEndpointId =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceConnectEndpointId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceConnectEndpointId" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceConnectEndpointPublicDnsNames =
+  struct
+    type nonrec t =
+      {
+      ipv4: InstanceConnectEndpointDnsNames.t option
+        [@ocaml.doc
+          "The IPv4-only DNS name of the EC2 Instance Connect Endpoint."];
+      dualstack: InstanceConnectEndpointDnsNames.t option
+        [@ocaml.doc
+          "The dualstack DNS name of the EC2 Instance Connect Endpoint. A dualstack DNS name supports connections from both IPv4 and IPv6 clients."]}
+    let make ?ipv4 = fun ?dualstack -> fun () -> { ipv4; dualstack }
+    let to_value x =
+      structure_to_value
+        [("ipv4",
+           (Option.map x.ipv4 ~f:InstanceConnectEndpointDnsNames.to_value));
+        ("dualstack",
+          (Option.map x.dualstack ~f:InstanceConnectEndpointDnsNames.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dualstack =
+        (Option.map ~f:InstanceConnectEndpointDnsNames.of_xml)
+          (Xml.child xml_arg0 "dualstack") in
+      let ipv4 =
+        (Option.map ~f:InstanceConnectEndpointDnsNames.of_xml)
+          (Xml.child xml_arg0 "ipv4") in
+      make ?dualstack ?ipv4 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dualstack =
+        field_map json__ "Dualstack" InstanceConnectEndpointDnsNames.of_json in
+      let ipv4 =
+        field_map json__ "Ipv4" InstanceConnectEndpointDnsNames.of_json in
+      make ?dualstack ?ipv4 ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The public DNS names of the endpoint, including IPv4-only and dualstack DNS names."]
+module NetworkInterfaceIdSet =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NetworkInterfaceIdSet" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SecurityGroupIdSet =
+  struct
+    type nonrec t = SecurityGroupId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecurityGroupId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecurityGroupIdSet"
+        ~of_json:SecurityGroupId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SnapshotTaskDetail =
   struct
     type nonrec t =
       {
       description: String_.t option
-        [@ocaml.doc "The description of the snapshot."];
+        [@ocaml.doc "The description of the disk image being imported."];
       diskImageSize: Double.t option
         [@ocaml.doc "The size of the disk in the snapshot, in GiB."];
       encrypted: Boolean.t option
@@ -3899,7 +8017,7 @@ module SnapshotTaskDetail =
       statusMessage: String_.t option
         [@ocaml.doc
           "A detailed status message for the import snapshot task."];
-      url: String_.t option
+      url: SensitiveUrl.t option
         [@ocaml.doc
           "The URL of the disk image from which the snapshot is created."];
       userBucket: UserBucketDetails.t option
@@ -3940,7 +8058,7 @@ module SnapshotTaskDetail =
         ("snapshotId", (Option.map x.snapshotId ~f:String_.to_value));
         ("status", (Option.map x.status ~f:String_.to_value));
         ("statusMessage", (Option.map x.statusMessage ~f:String_.to_value));
-        ("url", (Option.map x.url ~f:String_.to_value));
+        ("url", (Option.map x.url ~f:SensitiveUrl.to_value));
         ("userBucket",
           (Option.map x.userBucket ~f:UserBucketDetails.to_value))]
     let to_query v = to_query to_value v
@@ -3948,7 +8066,8 @@ module SnapshotTaskDetail =
       let userBucket =
         (Option.map ~f:UserBucketDetails.of_xml)
           (Xml.child xml_arg0 "userBucket") in
-      let url = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "url") in
+      let url =
+        (Option.map ~f:SensitiveUrl.of_xml) (Xml.child xml_arg0 "url") in
       let statusMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusMessage") in
       let status =
@@ -3970,18 +8089,19 @@ module SnapshotTaskDetail =
       make ?userBucket ?url ?statusMessage ?status ?snapshotId ?progress
         ?kmsKeyId ?format ?encrypted ?diskImageSize ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userBucket = field_map json "UserBucket" UserBucketDetails.of_json in
-      let url = field_map json "Url" String_.of_json in
-      let statusMessage = field_map json "StatusMessage" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let snapshotId = field_map json "SnapshotId" String_.of_json in
-      let progress = field_map json "Progress" String_.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let format = field_map json "Format" String_.of_json in
-      let encrypted = field_map json "Encrypted" Boolean.of_json in
-      let diskImageSize = field_map json "DiskImageSize" Double.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let userBucket =
+        field_map json__ "UserBucket" UserBucketDetails.of_json in
+      let url = field_map json__ "Url" SensitiveUrl.of_json in
+      let statusMessage = field_map json__ "StatusMessage" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let snapshotId = field_map json__ "SnapshotId" String_.of_json in
+      let progress = field_map json__ "Progress" String_.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let format = field_map json__ "Format" String_.of_json in
+      let encrypted = field_map json__ "Encrypted" Boolean.of_json in
+      let diskImageSize = field_map json__ "DiskImageSize" Double.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       make ?userBucket ?url ?statusMessage ?status ?snapshotId ?progress
         ?kmsKeyId ?format ?encrypted ?diskImageSize ?description ()
     let to_json v = composed_to_json to_value v
@@ -3990,6 +8110,9 @@ module ImportImageLicenseSpecificationListResponse =
   struct
     type nonrec t = ImportImageLicenseConfigurationResponse.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImportImageLicenseConfigurationResponse.to_value))
         |> (fun x -> `List x)
@@ -4017,6 +8140,9 @@ module SnapshotDetailList =
   struct
     type nonrec t = SnapshotDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4037,46 +8163,6 @@ module SnapshotDetailList =
       list_of_json ~kind:"SnapshotDetailList" ~of_json:SnapshotDetail.of_json
         j
     let to_json v = composed_to_json to_value v
-  end
-module ImageState =
-  struct
-    type nonrec t =
-      | Pending 
-      | Available 
-      | Invalid 
-      | Deregistered 
-      | Transient 
-      | Failed 
-      | Error 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | Pending -> "pending"
-      | Available -> "available"
-      | Invalid -> "invalid"
-      | Deregistered -> "deregistered"
-      | Transient -> "transient"
-      | Failed -> "failed"
-      | Error -> "error"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "pending" -> Pending
-      | "available" -> Available
-      | "invalid" -> Invalid
-      | "deregistered" -> Deregistered
-      | "transient" -> Transient
-      | "failed" -> Failed
-      | "error" -> Error
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ImageState" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ImageState" j)
-    let to_json = simple_to_json to_value
   end
 module ImageTypeValues =
   struct
@@ -4105,6 +8191,199 @@ module ImageTypeValues =
       of_string (string_of_xml ~kind:"enumeration ImageTypeValues" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"ImageTypeValues" j)
     let to_json = simple_to_json to_value
+  end
+module ImdsSupportValues =
+  struct
+    type nonrec t =
+      | V2_0 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | V2_0 -> "v2.0" | Non_static_id s -> s
+    let of_string = function | "v2.0" -> V2_0 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ImdsSupportValues" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImdsSupportValues" j)
+    let to_json = simple_to_json to_value
+  end
+module TpmSupportValues =
+  struct
+    type nonrec t =
+      | V2_0 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | V2_0 -> "v2.0" | Non_static_id s -> s
+    let of_string = function | "v2.0" -> V2_0 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TpmSupportValues" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TpmSupportValues" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageUsageReportId =
+  struct
+    type nonrec t = string
+    let context_ = "ImageUsageReportId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImageUsageReportId" j
+    let to_json = simple_to_json to_value
+  end
+module ImageUsageReportState =
+  struct
+    type nonrec t = string
+    let context_ = "ImageUsageReportState"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImageUsageReportState" j
+    let to_json = simple_to_json to_value
+  end
+module ImageUsageReportStateReason =
+  struct
+    type nonrec t = string
+    let context_ = "ImageUsageReportStateReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImageUsageReportStateReason" j
+    let to_json = simple_to_json to_value
+  end
+module ImageUsageResourceTypeList =
+  struct
+    type nonrec t = ImageUsageResourceType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageUsageResourceType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageUsageResourceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageUsageResourceTypeList"
+        ~of_json:ImageUsageResourceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UserIdList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UserIdList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ImageReferenceResourceType =
+  struct
+    type nonrec t =
+      | Ec2_Instance 
+      | Ec2_LaunchTemplate 
+      | Ssm_Parameter 
+      | Imagebuilder_ImageRecipe 
+      | Imagebuilder_ContainerRecipe 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Ec2_Instance -> "ec2:Instance"
+      | Ec2_LaunchTemplate -> "ec2:LaunchTemplate"
+      | Ssm_Parameter -> "ssm:Parameter"
+      | Imagebuilder_ImageRecipe -> "imagebuilder:ImageRecipe"
+      | Imagebuilder_ContainerRecipe -> "imagebuilder:ContainerRecipe"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ec2:Instance" -> Ec2_Instance
+      | "ec2:LaunchTemplate" -> Ec2_LaunchTemplate
+      | "ssm:Parameter" -> Ssm_Parameter
+      | "imagebuilder:ImageRecipe" -> Imagebuilder_ImageRecipe
+      | "imagebuilder:ContainerRecipe" -> Imagebuilder_ContainerRecipe
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ImageReferenceResourceType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ImageReferenceResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceTypeOptionList =
+  struct
+    type nonrec t = ResourceTypeOption.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceTypeOption.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceTypeOption.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceTypeOptionList"
+        ~of_json:ResourceTypeOption.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module IamInstanceProfileAssociationState =
   struct
@@ -4199,6 +8478,19 @@ module AllowsMultipleInstanceTypes =
       of_string (string_of_json ~kind:"AllowsMultipleInstanceTypes" j)
     let to_json = simple_to_json to_value
   end
+module AssetId =
+  struct
+    type nonrec t = string
+    let context_ = "AssetId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AssetId" j
+    let to_json = simple_to_json to_value
+  end
 module AutoPlacement =
   struct
     type nonrec t =
@@ -4246,10 +8538,10 @@ module AvailableCapacity =
           (Xml.child xml_arg0 "availableInstanceCapacity") in
       make ?availableVCpus ?availableInstanceCapacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let availableVCpus = field_map json "AvailableVCpus" Integer.of_json in
+    let of_json json__ =
+      let availableVCpus = field_map json__ "AvailableVCpus" Integer.of_json in
       let availableInstanceCapacity =
-        field_map json "AvailableInstanceCapacity"
+        field_map json__ "AvailableInstanceCapacity"
           AvailableInstanceCapacityList.of_json in
       make ?availableVCpus ?availableInstanceCapacity ()
     let to_json v = composed_to_json to_value v
@@ -4259,6 +8551,9 @@ module HostInstanceList =
   struct
     type nonrec t = HostInstance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HostInstance.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4278,6 +8573,25 @@ module HostInstanceList =
     let of_json j =
       list_of_json ~kind:"HostInstanceList" ~of_json:HostInstance.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module HostMaintenance =
+  struct
+    type nonrec t =
+      | On 
+      | Off 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | On -> "on" | Off -> "off" | Non_static_id s -> s
+    let of_string =
+      function | "on" -> On | "off" -> Off | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration HostMaintenance" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"HostMaintenance" j)
+    let to_json = simple_to_json to_value
   end
 module HostProperties =
   struct
@@ -4322,12 +8636,12 @@ module HostProperties =
       let cores = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "cores") in
       make ?totalVCpus ?sockets ?instanceFamily ?instanceType ?cores ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let totalVCpus = field_map json "TotalVCpus" Integer.of_json in
-      let sockets = field_map json "Sockets" Integer.of_json in
-      let instanceFamily = field_map json "InstanceFamily" String_.of_json in
-      let instanceType = field_map json "InstanceType" String_.of_json in
-      let cores = field_map json "Cores" Integer.of_json in
+    let of_json json__ =
+      let totalVCpus = field_map json__ "TotalVCpus" Integer.of_json in
+      let sockets = field_map json__ "Sockets" Integer.of_json in
+      let instanceFamily = field_map json__ "InstanceFamily" String_.of_json in
+      let instanceType = field_map json__ "InstanceType" String_.of_json in
+      let cores = field_map json__ "Cores" Integer.of_json in
       make ?totalVCpus ?sockets ?instanceFamily ?instanceType ?cores ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the properties of a Dedicated Host."]
@@ -4348,50 +8662,6 @@ module HostRecovery =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration HostRecovery" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"HostRecovery" j)
-    let to_json = simple_to_json to_value
-  end
-module OfferingId =
-  struct
-    type nonrec t = string
-    let context_ = "OfferingId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"OfferingId" j
-    let to_json = simple_to_json to_value
-  end
-module ReservationState =
-  struct
-    type nonrec t =
-      | Payment_pending 
-      | Payment_failed 
-      | Active 
-      | Retired 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | Payment_pending -> "payment-pending"
-      | Payment_failed -> "payment-failed"
-      | Active -> "active"
-      | Retired -> "retired"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "payment-pending" -> Payment_pending
-      | "payment-failed" -> Payment_failed
-      | "active" -> Active
-      | "retired" -> Retired
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ReservationState" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ReservationState" j)
     let to_json = simple_to_json to_value
   end
 module FpgaImageState =
@@ -4416,13 +8686,40 @@ module FpgaImageState =
         (Option.map ~f:FpgaImageStateCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" FpgaImageStateCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" FpgaImageStateCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the state of the bitstream generation process for an Amazon FPGA image (AFI)."]
+module InstanceTypesList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InstanceTypesList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PciId =
   struct
     type nonrec t =
@@ -4457,12 +8754,12 @@ module PciId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DeviceId") in
       make ?subsystemVendorId ?subsystemId ?vendorId ?deviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subsystemVendorId =
-        field_map json "SubsystemVendorId" String_.of_json in
-      let subsystemId = field_map json "SubsystemId" String_.of_json in
-      let vendorId = field_map json "VendorId" String_.of_json in
-      let deviceId = field_map json "DeviceId" String_.of_json in
+        field_map json__ "SubsystemVendorId" String_.of_json in
+      let subsystemId = field_map json__ "SubsystemId" String_.of_json in
+      let vendorId = field_map json__ "VendorId" String_.of_json in
+      let deviceId = field_map json__ "DeviceId" String_.of_json in
       make ?subsystemVendorId ?subsystemId ?vendorId ?deviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4504,13 +8801,13 @@ module DestinationOptionsResponse =
           (Xml.child xml_arg0 "fileFormat") in
       make ?perHourPartition ?hiveCompatiblePartitions ?fileFormat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let perHourPartition =
-        field_map json "PerHourPartition" Boolean.of_json in
+        field_map json__ "PerHourPartition" Boolean.of_json in
       let hiveCompatiblePartitions =
-        field_map json "HiveCompatiblePartitions" Boolean.of_json in
+        field_map json__ "HiveCompatiblePartitions" Boolean.of_json in
       let fileFormat =
-        field_map json "FileFormat" DestinationFileFormat.of_json in
+        field_map json__ "FileFormat" DestinationFileFormat.of_json in
       make ?perHourPartition ?hiveCompatiblePartitions ?fileFormat ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the destination options for a flow log."]
@@ -4519,17 +8816,20 @@ module LogDestinationType =
     type nonrec t =
       | Cloud_watch_logs 
       | S3 
+      | Kinesis_data_firehose 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Cloud_watch_logs -> "cloud-watch-logs"
       | S3 -> "s3"
+      | Kinesis_data_firehose -> "kinesis-data-firehose"
       | Non_static_id s -> s
     let of_string =
       function
       | "cloud-watch-logs" -> Cloud_watch_logs
       | "s3" -> S3
+      | "kinesis-data-firehose" -> Kinesis_data_firehose
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4572,6 +8872,9 @@ module DescribeFleetsErrorSet =
   struct
     type nonrec t = DescribeFleetError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DescribeFleetError.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4597,6 +8900,9 @@ module DescribeFleetsInstancesSet =
   struct
     type nonrec t = DescribeFleetsInstances.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DescribeFleetsInstances.to_value)) |>
         (fun x -> `List x)
@@ -4697,6 +9003,9 @@ module FleetLaunchTemplateConfigList =
   struct
     type nonrec t = FleetLaunchTemplateConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FleetLaunchTemplateConfig.to_value)) |>
         (fun x -> `List x)
@@ -4777,10 +9086,10 @@ module OnDemandOptions =
           "Indicates that the fleet launches all On-Demand Instances into a single Availability Zone. Supported only for fleets of type instant."];
       minTargetCapacity: Integer.t option
         [@ocaml.doc
-          "The minimum target capacity for On-Demand Instances in the fleet. If the minimum target capacity is not reached, the fleet launches no instances. Supported only for fleets of type instant. At least one of the following must be specified: SingleAvailabilityZone | SingleInstanceType"];
+          "The minimum target capacity for On-Demand Instances in the fleet. If this minimum capacity isn't reached, no instances are launched. Constraints: Maximum value of 1000. Supported only for fleets of type instant. At least one of the following must be specified: SingleAvailabilityZone | SingleInstanceType"];
       maxTotalPrice: String_.t option
         [@ocaml.doc
-          "The maximum amount per hour for On-Demand Instances that you're willing to pay."]}
+          "The maximum amount per hour for On-Demand Instances that you're willing to pay. If your fleet includes T instances that are configured as unlimited, and if their average CPU usage exceeds the baseline utilization, you will incur a charge for surplus credits. The maxTotalPrice does not account for surplus credits, and, if you use surplus credits, your final cost might be higher than what you specified for maxTotalPrice. For more information, see Surplus credits can incur charges in the Amazon EC2 User Guide."]}
     let make ?allocationStrategy =
       fun ?capacityReservationOptions ->
         fun ?singleInstanceType ->
@@ -4834,19 +9143,19 @@ module OnDemandOptions =
         ?singleInstanceType ?capacityReservationOptions ?allocationStrategy
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxTotalPrice = field_map json "MaxTotalPrice" String_.of_json in
+    let of_json json__ =
+      let maxTotalPrice = field_map json__ "MaxTotalPrice" String_.of_json in
       let minTargetCapacity =
-        field_map json "MinTargetCapacity" Integer.of_json in
+        field_map json__ "MinTargetCapacity" Integer.of_json in
       let singleAvailabilityZone =
-        field_map json "SingleAvailabilityZone" Boolean.of_json in
+        field_map json__ "SingleAvailabilityZone" Boolean.of_json in
       let singleInstanceType =
-        field_map json "SingleInstanceType" Boolean.of_json in
+        field_map json__ "SingleInstanceType" Boolean.of_json in
       let capacityReservationOptions =
-        field_map json "CapacityReservationOptions"
+        field_map json__ "CapacityReservationOptions"
           CapacityReservationOptions.of_json in
       let allocationStrategy =
-        field_map json "AllocationStrategy"
+        field_map json__ "AllocationStrategy"
           FleetOnDemandAllocationStrategy.of_json in
       make ?maxTotalPrice ?minTargetCapacity ?singleAvailabilityZone
         ?singleInstanceType ?capacityReservationOptions ?allocationStrategy
@@ -4854,13 +9163,39 @@ module OnDemandOptions =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the configuration of On-Demand Instances in an EC2 Fleet."]
+module ReservedCapacityOptions =
+  struct
+    type nonrec t =
+      {
+      reservationTypes: ReservationTypeList.t option
+        [@ocaml.doc
+          "The types of Capacity Reservations used for fulfilling the EC2 Fleet request."]}
+    let make ?reservationTypes = fun () -> { reservationTypes }
+    let to_value x =
+      structure_to_value
+        [("reservationTypeSet",
+           (Option.map x.reservationTypes ~f:ReservationTypeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reservationTypes =
+        (Option.map ~f:ReservationTypeList.of_xml)
+          (Xml.child xml_arg0 "reservationTypeSet") in
+      make ?reservationTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reservationTypes =
+        field_map json__ "ReservationTypes" ReservationTypeList.of_json in
+      make ?reservationTypes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines EC2 Fleet preferences for utilizing reserved capacity when DefaultTargetCapacityType is set to reserved-capacity."]
 module SpotOptions =
   struct
     type nonrec t =
       {
       allocationStrategy: SpotAllocationStrategy.t option
         [@ocaml.doc
-          "The strategy that determines how to allocate the target Spot Instance capacity across the Spot Instance pools specified by the EC2 Fleet. lowest-price - EC2 Fleet launches instances from the Spot Instance pools with the lowest price. diversified - EC2 Fleet launches instances from all of the Spot Instance pools that you specify. capacity-optimized (recommended) - EC2 Fleet launches instances from Spot Instance pools with optimal capacity for the number of instances that are launching. To give certain instance types a higher chance of launching first, use capacity-optimized-prioritized. Set a priority for each instance type by using the Priority parameter for LaunchTemplateOverrides. You can assign the same priority to different LaunchTemplateOverrides. EC2 implements the priorities on a best-effort basis, but optimizes for capacity first. capacity-optimized-prioritized is supported only if your fleet uses a launch template. Note that if the On-Demand AllocationStrategy is set to prioritized, the same priority is applied when fulfilling On-Demand capacity. Default: lowest-price"];
+          "The strategy that determines how to allocate the target Spot Instance capacity across the Spot Instance pools specified by the EC2 Fleet launch configuration. For more information, see Allocation strategies for Spot Instances in the Amazon EC2 User Guide. price-capacity-optimized (recommended) EC2 Fleet identifies the pools with the highest capacity availability for the number of instances that are launching. This means that we will request Spot Instances from the pools that we believe have the lowest chance of interruption in the near term. EC2 Fleet then requests Spot Instances from the lowest priced of these pools. capacity-optimized EC2 Fleet identifies the pools with the highest capacity availability for the number of instances that are launching. This means that we will request Spot Instances from the pools that we believe have the lowest chance of interruption in the near term. To give certain instance types a higher chance of launching first, use capacity-optimized-prioritized. Set a priority for each instance type by using the Priority parameter for LaunchTemplateOverrides. You can assign the same priority to different LaunchTemplateOverrides. EC2 implements the priorities on a best-effort basis, but optimizes for capacity first. capacity-optimized-prioritized is supported only if your EC2 Fleet uses a launch template. Note that if the On-Demand AllocationStrategy is set to prioritized, the same priority is applied when fulfilling On-Demand capacity. diversified EC2 Fleet requests instances from all of the Spot Instance pools that you specify. lowest-price (not recommended) We don't recommend the lowest-price allocation strategy because it has the highest risk of interruption for your Spot Instances. EC2 Fleet requests instances from the lowest priced Spot Instance pool that has available capacity. If the lowest priced pool doesn't have available capacity, the Spot Instances come from the next lowest priced pool that has available capacity. If a pool runs out of capacity before fulfilling your desired capacity, EC2 Fleet will continue to fulfill your request by drawing from the next lowest priced pool. To ensure that your desired capacity is met, you might receive Spot Instances from several pools. Because this strategy only considers instance price and not capacity availability, it might lead to high interruption rates. Default: lowest-price"];
       maintenanceStrategies: FleetSpotMaintenanceStrategies.t option
         [@ocaml.doc
           "The strategies for managing your workloads on your Spot Instances that will be interrupted. Currently only the capacity rebalance strategy is available."];
@@ -4878,10 +9213,10 @@ module SpotOptions =
           "Indicates that the fleet launches all Spot Instances into a single Availability Zone. Supported only for fleets of type instant."];
       minTargetCapacity: Integer.t option
         [@ocaml.doc
-          "The minimum target capacity for Spot Instances in the fleet. If the minimum target capacity is not reached, the fleet launches no instances. Supported only for fleets of type instant. At least one of the following must be specified: SingleAvailabilityZone | SingleInstanceType"];
+          "The minimum target capacity for Spot Instances in the fleet. If this minimum capacity isn't reached, no instances are launched. Constraints: Maximum value of 1000. Supported only for fleets of type instant. At least one of the following must be specified: SingleAvailabilityZone | SingleInstanceType"];
       maxTotalPrice: String_.t option
         [@ocaml.doc
-          "The maximum amount per hour for Spot Instances that you're willing to pay."]}
+          "The maximum amount per hour for Spot Instances that you're willing to pay. We do not recommend using this parameter because it can lead to increased interruptions. If you do not specify this parameter, you will pay the current Spot price. If you specify a maximum price, your Spot Instances will be interrupted more frequently than if you do not specify this parameter. If your fleet includes T instances that are configured as unlimited, and if their average CPU usage exceeds the baseline utilization, you will incur a charge for surplus credits. The maxTotalPrice does not account for surplus credits, and, if you use surplus credits, your final cost might be higher than what you specified for maxTotalPrice. For more information, see Surplus credits can incur charges in the Amazon EC2 User Guide."]}
     let make ?allocationStrategy =
       fun ?maintenanceStrategies ->
         fun ?instanceInterruptionBehavior ->
@@ -4951,24 +9286,24 @@ module SpotOptions =
         ?instanceInterruptionBehavior ?maintenanceStrategies
         ?allocationStrategy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxTotalPrice = field_map json "MaxTotalPrice" String_.of_json in
+    let of_json json__ =
+      let maxTotalPrice = field_map json__ "MaxTotalPrice" String_.of_json in
       let minTargetCapacity =
-        field_map json "MinTargetCapacity" Integer.of_json in
+        field_map json__ "MinTargetCapacity" Integer.of_json in
       let singleAvailabilityZone =
-        field_map json "SingleAvailabilityZone" Boolean.of_json in
+        field_map json__ "SingleAvailabilityZone" Boolean.of_json in
       let singleInstanceType =
-        field_map json "SingleInstanceType" Boolean.of_json in
+        field_map json__ "SingleInstanceType" Boolean.of_json in
       let instancePoolsToUseCount =
-        field_map json "InstancePoolsToUseCount" Integer.of_json in
+        field_map json__ "InstancePoolsToUseCount" Integer.of_json in
       let instanceInterruptionBehavior =
-        field_map json "InstanceInterruptionBehavior"
+        field_map json__ "InstanceInterruptionBehavior"
           SpotInstanceInterruptionBehavior.of_json in
       let maintenanceStrategies =
-        field_map json "MaintenanceStrategies"
+        field_map json__ "MaintenanceStrategies"
           FleetSpotMaintenanceStrategies.of_json in
       let allocationStrategy =
-        field_map json "AllocationStrategy" SpotAllocationStrategy.of_json in
+        field_map json__ "AllocationStrategy" SpotAllocationStrategy.of_json in
       make ?maxTotalPrice ?minTargetCapacity ?singleAvailabilityZone
         ?singleInstanceType ?instancePoolsToUseCount
         ?instanceInterruptionBehavior ?maintenanceStrategies
@@ -4982,7 +9317,7 @@ module TargetCapacitySpecification =
       {
       totalTargetCapacity: Integer.t option
         [@ocaml.doc
-          "The number of units to request, filled using DefaultTargetCapacityType."];
+          "The number of units to request, filled the default target capacity type."];
       onDemandTargetCapacity: Integer.t option
         [@ocaml.doc
           "The number of On-Demand units to request. If you specify a target capacity for Spot units, you cannot specify a target capacity for On-Demand units."];
@@ -4990,11 +9325,9 @@ module TargetCapacitySpecification =
         [@ocaml.doc
           "The maximum number of Spot units to launch. If you specify a target capacity for On-Demand units, you cannot specify a target capacity for Spot units."];
       defaultTargetCapacityType: DefaultTargetCapacityType.t option
-        [@ocaml.doc
-          "The default TotalTargetCapacity, which is either Spot or On-Demand."];
+        [@ocaml.doc "The default target capacity type."];
       targetCapacityUnitType: TargetCapacityUnitType.t option
-        [@ocaml.doc
-          "The unit for the target capacity. Default: units (translates to number of instances)"]}
+        [@ocaml.doc "The unit for the target capacity."]}
     let make ?totalTargetCapacity =
       fun ?onDemandTargetCapacity ->
         fun ?spotTargetCapacity ->
@@ -5042,19 +9375,19 @@ module TargetCapacitySpecification =
       make ?targetCapacityUnitType ?defaultTargetCapacityType
         ?spotTargetCapacity ?onDemandTargetCapacity ?totalTargetCapacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetCapacityUnitType =
-        field_map json "TargetCapacityUnitType"
+        field_map json__ "TargetCapacityUnitType"
           TargetCapacityUnitType.of_json in
       let defaultTargetCapacityType =
-        field_map json "DefaultTargetCapacityType"
+        field_map json__ "DefaultTargetCapacityType"
           DefaultTargetCapacityType.of_json in
       let spotTargetCapacity =
-        field_map json "SpotTargetCapacity" Integer.of_json in
+        field_map json__ "SpotTargetCapacity" Integer.of_json in
       let onDemandTargetCapacity =
-        field_map json "OnDemandTargetCapacity" Integer.of_json in
+        field_map json__ "OnDemandTargetCapacity" Integer.of_json in
       let totalTargetCapacity =
-        field_map json "TotalTargetCapacity" Integer.of_json in
+        field_map json__ "TotalTargetCapacity" Integer.of_json in
       make ?targetCapacityUnitType ?defaultTargetCapacityType
         ?spotTargetCapacity ?onDemandTargetCapacity ?totalTargetCapacity ()
     let to_json v = composed_to_json to_value v
@@ -5094,13 +9427,13 @@ module FastLaunchLaunchTemplateSpecificationResponse =
       {
       launchTemplateId: LaunchTemplateId.t option
         [@ocaml.doc
-          "The ID of the launch template for faster launching of the associated Windows AMI."];
+          "The ID of the launch template that the AMI uses for Windows fast launch."];
       launchTemplateName: String_.t option
         [@ocaml.doc
-          "The name of the launch template for faster launching of the associated Windows AMI."];
+          "The name of the launch template that the AMI uses for Windows fast launch."];
       version: String_.t option
         [@ocaml.doc
-          "The version of the launch template for faster launching of the associated Windows AMI."]}
+          "The version of the launch template that the AMI uses for Windows fast launch."]}
     let make ?launchTemplateId =
       fun ?launchTemplateName ->
         fun ?version ->
@@ -5124,16 +9457,16 @@ module FastLaunchLaunchTemplateSpecificationResponse =
           (Xml.child xml_arg0 "launchTemplateId") in
       make ?version ?launchTemplateName ?launchTemplateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" String_.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" String_.of_json in
       let launchTemplateName =
-        field_map json "LaunchTemplateName" String_.of_json in
+        field_map json__ "LaunchTemplateName" String_.of_json in
       let launchTemplateId =
-        field_map json "LaunchTemplateId" LaunchTemplateId.of_json in
+        field_map json__ "LaunchTemplateId" LaunchTemplateId.of_json in
       make ?version ?launchTemplateName ?launchTemplateId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Identifies the launch template to use for faster launching of the Windows AMI."]
+       "Identifies the launch template that the AMI uses for Windows fast launch."]
 module FastLaunchResourceType =
   struct
     type nonrec t =
@@ -5158,7 +9491,7 @@ module FastLaunchSnapshotConfigurationResponse =
       {
       targetResourceCount: Integer.t option
         [@ocaml.doc
-          "The number of pre-provisioned snapshots requested to keep on hand for a fast-launch enabled Windows AMI."]}
+          "The number of pre-provisioned snapshots requested to keep on hand for a Windows fast launch enabled AMI."]}
     let make ?targetResourceCount = fun () -> { targetResourceCount }
     let to_value x =
       structure_to_value
@@ -5171,13 +9504,13 @@ module FastLaunchSnapshotConfigurationResponse =
           (Xml.child xml_arg0 "targetResourceCount") in
       make ?targetResourceCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetResourceCount =
-        field_map json "TargetResourceCount" Integer.of_json in
+        field_map json__ "TargetResourceCount" Integer.of_json in
       make ?targetResourceCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configuration settings for creating and managing pre-provisioned snapshots for a fast-launch enabled Windows AMI."]
+       "Configuration settings for creating and managing pre-provisioned snapshots for a Windows fast launch enabled Windows AMI."]
 module FastLaunchStateCode =
   struct
     type nonrec t =
@@ -5258,7 +9591,7 @@ module ExportToS3Task =
         [@ocaml.doc "The format for the exported image."];
       s3Bucket: String_.t option
         [@ocaml.doc
-          "The Amazon S3 bucket for the destination image. The destination bucket must exist and grant WRITE and READ_ACP permissions to the Amazon Web Services account vm-import-export\\@amazon.com."];
+          "The Amazon S3 bucket for the destination image. The destination bucket must exist and have an access control list (ACL) attached that specifies the Region-specific canonical account ID for the Grantee. For more information about the ACL to your S3 bucket, see Prerequisites in the VM Import/Export User Guide."];
       s3Key: String_.t option
         [@ocaml.doc "The encryption key for your S3 bucket."]}
     let make ?containerFormat =
@@ -5287,13 +9620,13 @@ module ExportToS3Task =
           (Xml.child xml_arg0 "containerFormat") in
       make ?s3Key ?s3Bucket ?diskImageFormat ?containerFormat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Key = field_map json "S3Key" String_.of_json in
-      let s3Bucket = field_map json "S3Bucket" String_.of_json in
+    let of_json json__ =
+      let s3Key = field_map json__ "S3Key" String_.of_json in
+      let s3Bucket = field_map json__ "S3Bucket" String_.of_json in
       let diskImageFormat =
-        field_map json "DiskImageFormat" DiskImageFormat.of_json in
+        field_map json__ "DiskImageFormat" DiskImageFormat.of_json in
       let containerFormat =
-        field_map json "ContainerFormat" ContainerFormat.of_json in
+        field_map json__ "ContainerFormat" ContainerFormat.of_json in
       make ?s3Key ?s3Bucket ?diskImageFormat ?containerFormat ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the format and location for the export task."]
@@ -5321,10 +9654,10 @@ module InstanceExportDetails =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceId") in
       make ?targetEnvironment ?instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetEnvironment =
-        field_map json "TargetEnvironment" ExportEnvironment.of_json in
-      let instanceId = field_map json "InstanceId" String_.of_json in
+        field_map json__ "TargetEnvironment" ExportEnvironment.of_json in
+      let instanceId = field_map json__ "InstanceId" String_.of_json in
       make ?targetEnvironment ?instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an instance to export."]
@@ -5349,9 +9682,9 @@ module ExportTaskS3Location =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "s3Bucket") in
       make ?s3Prefix ?s3Bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Prefix = field_map json "S3Prefix" String_.of_json in
-      let s3Bucket = field_map json "S3Bucket" String_.of_json in
+    let of_json json__ =
+      let s3Prefix = field_map json__ "S3Prefix" String_.of_json in
+      let s3Bucket = field_map json__ "S3Bucket" String_.of_json in
       make ?s3Prefix ?s3Bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the destination for an export image task."]
@@ -5370,11 +9703,12 @@ module ElasticGpuHealth =
         (Option.map ~f:ElasticGpuStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ElasticGpuStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ElasticGpuStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the status of an Elastic Graphics accelerator."]
+  end[@@ocaml.doc
+       "Amazon Elastic Graphics reached end of life on January 8, 2024. Describes the status of an Elastic Graphics accelerator."]
 module ElasticGpuState =
   struct
     type nonrec t =
@@ -5408,6 +9742,9 @@ module DhcpConfigurationList =
   struct
     type nonrec t = DhcpConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DhcpConfiguration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5428,6 +9765,37 @@ module DhcpConfigurationList =
       list_of_json ~kind:"DhcpConfigurationList"
         ~of_json:DhcpConfiguration.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module ReportState =
+  struct
+    type nonrec t =
+      | Running 
+      | Cancelled 
+      | Complete 
+      | Error 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Running -> "running"
+      | Cancelled -> "cancelled"
+      | Complete -> "complete"
+      | Error -> "error"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "running" -> Running
+      | "cancelled" -> Cancelled
+      | "complete" -> Complete
+      | "error" -> Error
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ReportState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ReportState" j)
+    let to_json = simple_to_json to_value
   end
 module ConversionTaskState =
   struct
@@ -5496,12 +9864,12 @@ module ImportInstanceTaskDetails =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
       make ?volumes ?platform ?instanceId ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let volumes =
-        field_map json "Volumes" ImportInstanceVolumeDetailSet.of_json in
-      let platform = field_map json "Platform" PlatformValues.of_json in
-      let instanceId = field_map json "InstanceId" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map json__ "Volumes" ImportInstanceVolumeDetailSet.of_json in
+      let platform = field_map json__ "Platform" PlatformValues.of_json in
+      let instanceId = field_map json__ "InstanceId" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       make ?volumes ?platform ?instanceId ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an import instance task."]
@@ -5512,6 +9880,9 @@ module ImportVolumeTaskDetails =
       availabilityZone: String_.t option
         [@ocaml.doc
           "The Availability Zone where the resulting volume will reside."];
+      availabilityZoneId: String_.t option
+        [@ocaml.doc
+          "The ID of the Availability Zone where the resulting volume will reside."];
       bytesConverted: Long.t option
         [@ocaml.doc "The number of bytes converted so far."];
       description: String_.t option
@@ -5520,22 +9891,26 @@ module ImportVolumeTaskDetails =
       image: DiskImageDescription.t option [@ocaml.doc "The image."];
       volume: DiskImageVolumeDescription.t option [@ocaml.doc "The volume."]}
     let make ?availabilityZone =
-      fun ?bytesConverted ->
-        fun ?description ->
-          fun ?image ->
-            fun ?volume ->
-              fun () ->
-                {
-                  availabilityZone;
-                  bytesConverted;
-                  description;
-                  image;
-                  volume
-                }
+      fun ?availabilityZoneId ->
+        fun ?bytesConverted ->
+          fun ?description ->
+            fun ?image ->
+              fun ?volume ->
+                fun () ->
+                  {
+                    availabilityZone;
+                    availabilityZoneId;
+                    bytesConverted;
+                    description;
+                    image;
+                    volume
+                  }
     let to_value x =
       structure_to_value
         [("availabilityZone",
            (Option.map x.availabilityZone ~f:String_.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:String_.to_value));
         ("bytesConverted", (Option.map x.bytesConverted ~f:Long.to_value));
         ("description", (Option.map x.description ~f:String_.to_value));
         ("image", (Option.map x.image ~f:DiskImageDescription.to_value));
@@ -5553,19 +9928,27 @@ module ImportVolumeTaskDetails =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
       let bytesConverted =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "bytesConverted") in
+      let availabilityZoneId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
       let availabilityZone =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "availabilityZone") in
-      make ?volume ?image ?description ?bytesConverted ?availabilityZone ()
+      make ?volume ?image ?description ?bytesConverted ?availabilityZoneId
+        ?availabilityZone ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volume = field_map json "Volume" DiskImageVolumeDescription.of_json in
-      let image = field_map json "Image" DiskImageDescription.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let bytesConverted = field_map json "BytesConverted" Long.of_json in
+    let of_json json__ =
+      let volume =
+        field_map json__ "Volume" DiskImageVolumeDescription.of_json in
+      let image = field_map json__ "Image" DiskImageDescription.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let bytesConverted = field_map json__ "BytesConverted" Long.of_json in
+      let availabilityZoneId =
+        field_map json__ "AvailabilityZoneId" String_.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
-      make ?volume ?image ?description ?bytesConverted ?availabilityZone ()
+        field_map json__ "AvailabilityZone" String_.of_json in
+      make ?volume ?image ?description ?bytesConverted ?availabilityZoneId
+        ?availabilityZone ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an import volume task."]
 module Ipv4PoolCoipId =
@@ -5604,9 +9987,9 @@ module AssociationStatus =
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" AssociationStatusCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" AssociationStatusCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the state of a target network association."]
@@ -5633,9 +10016,9 @@ module ClientVpnRouteStatus =
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ClientVpnRouteStatusCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ClientVpnRouteStatusCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the state of a Client VPN endpoint route."]
@@ -5643,6 +10026,9 @@ module AssociatedTargetNetworkSet =
   struct
     type nonrec t = AssociatedTargetNetwork.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssociatedTargetNetwork.to_value)) |>
         (fun x -> `List x)
@@ -5699,12 +10085,12 @@ module ClientConnectResponseOptions =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?status ?lambdaFunctionArn ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map json "Status" ClientVpnEndpointAttributeStatus.of_json in
+        field_map json__ "Status" ClientVpnEndpointAttributeStatus.of_json in
       let lambdaFunctionArn =
-        field_map json "LambdaFunctionArn" String_.of_json in
-      let enabled = field_map json "Enabled" Boolean.of_json in
+        field_map json__ "LambdaFunctionArn" String_.of_json in
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
       make ?status ?lambdaFunctionArn ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5732,17 +10118,42 @@ module ClientLoginBannerResponseOptions =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enabled") in
       make ?bannerText ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bannerText = field_map json "BannerText" String_.of_json in
-      let enabled = field_map json "Enabled" Boolean.of_json in
+    let of_json json__ =
+      let bannerText = field_map json__ "BannerText" String_.of_json in
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
       make ?bannerText ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Current state of options for customizable text banner that will be displayed on Amazon Web Services provided clients when a VPN session is established."]
+module ClientRouteEnforcementResponseOptions =
+  struct
+    type nonrec t =
+      {
+      enforced: Boolean.t option
+        [@ocaml.doc
+          "Status of the client route enforcement feature, indicating whether Client Route Enforcement is true (enabled) or false (disabled). Valid values: true | false Default value: false"]}
+    let make ?enforced = fun () -> { enforced }
+    let to_value x =
+      structure_to_value
+        [("enforced", (Option.map x.enforced ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enforced =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "enforced") in
+      make ?enforced ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enforced = field_map json__ "Enforced" Boolean.of_json in
+      make ?enforced ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The current status of Client Route Enforcement."]
 module ClientVpnAuthenticationList =
   struct
     type nonrec t = ClientVpnAuthentication.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClientVpnAuthentication.to_value)) |>
         (fun x -> `List x)
@@ -5771,7 +10182,7 @@ module ClientVpnEndpointStatus =
       {
       code: ClientVpnEndpointStatusCode.t option
         [@ocaml.doc
-          "The state of the Client VPN endpoint. Possible states include: pending-associate - The Client VPN endpoint has been created but no target networks have been associated. The Client VPN endpoint cannot accept connections. available - The Client VPN endpoint has been created and a target network has been associated. The Client VPN endpoint can accept connections. deleting - The Client VPN endpoint is being deleted. The Client VPN endpoint cannot accept connections. deleted - The Client VPN endpoint has been deleted. The Client VPN endpoint cannot accept connections."];
+          "The state of the Client VPN endpoint. Possible states include: pending-associate - The Client VPN endpoint has been created but no target networks have been associated. The Client VPN endpoint cannot accept connections. available - The Client VPN endpoint has been created and a target network has been associated. The Client VPN endpoint can accept connections. deleting - The Client VPN endpoint is being deleted. The Client VPN endpoint cannot accept connections. deleted - The Client VPN endpoint has been deleted. The Client VPN endpoint cannot accept connections. pending - The Client VPN endpoint has been created with a Transit Gateway configuration and is waiting for the Transit Gateway attachment to be accepted. The Client VPN endpoint cannot accept connections."];
       message: String_.t option
         [@ocaml.doc "A message about the status of the Client VPN endpoint."]}
     let make ?code = fun ?message -> fun () -> { code; message }
@@ -5789,9 +10200,9 @@ module ClientVpnEndpointStatus =
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ClientVpnEndpointStatusCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ClientVpnEndpointStatusCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the state of a Client VPN endpoint."]
@@ -5799,6 +10210,9 @@ module ClientVpnSecurityGroupIdSet =
   struct
     type nonrec t = SecurityGroupId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5856,16 +10270,147 @@ module ConnectionLogResponseOptions =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?cloudwatchLogStream ?cloudwatchLogGroup ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudwatchLogStream =
-        field_map json "CloudwatchLogStream" String_.of_json in
+        field_map json__ "CloudwatchLogStream" String_.of_json in
       let cloudwatchLogGroup =
-        field_map json "CloudwatchLogGroup" String_.of_json in
-      let enabled = field_map json "Enabled" Boolean.of_json in
+        field_map json__ "CloudwatchLogGroup" String_.of_json in
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
       make ?cloudwatchLogStream ?cloudwatchLogGroup ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the client connection logging options for a Client VPN endpoint."]
+module EndpointIpAddressType =
+  struct
+    type nonrec t =
+      | Ipv4 
+      | Ipv6 
+      | Dual_stack 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Ipv4 -> "ipv4"
+      | Ipv6 -> "ipv6"
+      | Dual_stack -> "dual-stack"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ipv4" -> Ipv4
+      | "ipv6" -> Ipv6
+      | "dual-stack" -> Dual_stack
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EndpointIpAddressType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EndpointIpAddressType" j)
+    let to_json = simple_to_json to_value
+  end
+module TrafficIpAddressType =
+  struct
+    type nonrec t =
+      | Ipv4 
+      | Ipv6 
+      | Dual_stack 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Ipv4 -> "ipv4"
+      | Ipv6 -> "ipv6"
+      | Dual_stack -> "dual-stack"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ipv4" -> Ipv4
+      | "ipv6" -> Ipv6
+      | "dual-stack" -> Dual_stack
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TrafficIpAddressType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TrafficIpAddressType" j)
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayConfigurationDescribeEndpointStructure =
+  struct
+    type nonrec t =
+      {
+      transitGatewayId: TransitGatewayId.t option
+        [@ocaml.doc "The ID of the Transit Gateway."];
+      transitGatewayAttachmentId: TransitGatewayAttachmentId.t option
+        [@ocaml.doc "The ID of the Transit Gateway attachment."];
+      availabilityZones: ClientVpnAvailabilityZoneSet.t option
+        [@ocaml.doc
+          "The Availability Zone names for the Transit Gateway association."];
+      availabilityZoneIds: ClientVpnAvailabilityZoneIdSet.t option
+        [@ocaml.doc
+          "The Availability Zone IDs for the Transit Gateway association."]}
+    let make ?transitGatewayId =
+      fun ?transitGatewayAttachmentId ->
+        fun ?availabilityZones ->
+          fun ?availabilityZoneIds ->
+            fun () ->
+              {
+                transitGatewayId;
+                transitGatewayAttachmentId;
+                availabilityZones;
+                availabilityZoneIds
+              }
+    let to_value x =
+      structure_to_value
+        [("transitGatewayId",
+           (Option.map x.transitGatewayId ~f:TransitGatewayId.to_value));
+        ("transitGatewayAttachmentId",
+          (Option.map x.transitGatewayAttachmentId
+             ~f:TransitGatewayAttachmentId.to_value));
+        ("availabilityZoneSet",
+          (Option.map x.availabilityZones
+             ~f:ClientVpnAvailabilityZoneSet.to_value));
+        ("availabilityZoneIdSet",
+          (Option.map x.availabilityZoneIds
+             ~f:ClientVpnAvailabilityZoneIdSet.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let availabilityZoneIds =
+        (Option.map ~f:ClientVpnAvailabilityZoneIdSet.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneIdSet") in
+      let availabilityZones =
+        (Option.map ~f:ClientVpnAvailabilityZoneSet.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneSet") in
+      let transitGatewayAttachmentId =
+        (Option.map ~f:TransitGatewayAttachmentId.of_xml)
+          (Xml.child xml_arg0 "transitGatewayAttachmentId") in
+      let transitGatewayId =
+        (Option.map ~f:TransitGatewayId.of_xml)
+          (Xml.child xml_arg0 "transitGatewayId") in
+      make ?availabilityZoneIds ?availabilityZones
+        ?transitGatewayAttachmentId ?transitGatewayId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let availabilityZoneIds =
+        field_map json__ "AvailabilityZoneIds"
+          ClientVpnAvailabilityZoneIdSet.of_json in
+      let availabilityZones =
+        field_map json__ "AvailabilityZones"
+          ClientVpnAvailabilityZoneSet.of_json in
+      let transitGatewayAttachmentId =
+        field_map json__ "TransitGatewayAttachmentId"
+          TransitGatewayAttachmentId.of_json in
+      let transitGatewayId =
+        field_map json__ "TransitGatewayId" TransitGatewayId.of_json in
+      make ?availabilityZoneIds ?availabilityZones
+        ?transitGatewayAttachmentId ?transitGatewayId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the Transit Gateway configuration for a Client VPN endpoint."]
 module TransportProtocol =
   struct
     type nonrec t =
@@ -5884,19 +10429,6 @@ module TransportProtocol =
       of_string
         (string_of_xml ~kind:"enumeration TransportProtocol" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"TransportProtocol" j)
-    let to_json = simple_to_json to_value
-  end
-module VpcId =
-  struct
-    type nonrec t = string
-    let context_ = "VpcId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"VpcId" j
     let to_json = simple_to_json to_value
   end
 module VpnProtocol =
@@ -5940,10 +10472,10 @@ module ClientVpnAuthorizationRuleStatus =
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       let code =
-        field_map json "Code" ClientVpnAuthorizationRuleStatusCode.of_json in
+        field_map json__ "Code" ClientVpnAuthorizationRuleStatusCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the state of an authorization rule."]
@@ -5979,6 +10511,134 @@ module CarrierGatewayState =
     let of_json j = of_string (string_of_json ~kind:"CarrierGatewayState" j)
     let to_json = simple_to_json to_value
   end
+module AccountID =
+  struct
+    type nonrec t = string
+    let context_ = "AccountID"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccountID" j
+    let to_json = simple_to_json to_value
+  end
+module BoxedBoolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module CapacityAllocations =
+  struct
+    type nonrec t = CapacityAllocation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityAllocation.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityAllocation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityAllocations"
+        ~of_json:CapacityAllocation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CapacityReservationCommitmentInfo =
+  struct
+    type nonrec t =
+      {
+      committedInstanceCount: Integer.t option
+        [@ocaml.doc
+          "The instance capacity that you committed to when you requested the future-dated Capacity Reservation."];
+      commitmentEndDate: MillisecondDateTime.t option
+        [@ocaml.doc
+          "The date and time at which the commitment duration expires, in the ISO8601 format in the UTC time zone (YYYY-MM-DDThh:mm:ss.sssZ). You can't decrease the instance count or cancel the Capacity Reservation before this date and time."]}
+    let make ?committedInstanceCount =
+      fun ?commitmentEndDate ->
+        fun () -> { committedInstanceCount; commitmentEndDate }
+    let to_value x =
+      structure_to_value
+        [("committedInstanceCount",
+           (Option.map x.committedInstanceCount ~f:Integer.to_value));
+        ("commitmentEndDate",
+          (Option.map x.commitmentEndDate ~f:MillisecondDateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let commitmentEndDate =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "commitmentEndDate") in
+      let committedInstanceCount =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "committedInstanceCount") in
+      make ?commitmentEndDate ?committedInstanceCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let commitmentEndDate =
+        field_map json__ "CommitmentEndDate" MillisecondDateTime.of_json in
+      let committedInstanceCount =
+        field_map json__ "CommittedInstanceCount" Integer.of_json in
+      make ?commitmentEndDate ?committedInstanceCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about your commitment for a future-dated Capacity Reservation."]
+module CapacityReservationDeliveryPreference =
+  struct
+    type nonrec t =
+      | Fixed 
+      | Incremental 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Fixed -> "fixed"
+      | Incremental -> "incremental"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "fixed" -> Fixed
+      | "incremental" -> Incremental
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration CapacityReservationDeliveryPreference" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"CapacityReservationDeliveryPreference" j)
+    let to_json = simple_to_json to_value
+  end
 module CapacityReservationState =
   struct
     type nonrec t =
@@ -5987,6 +10647,13 @@ module CapacityReservationState =
       | Cancelled 
       | Pending 
       | Failed 
+      | Scheduled 
+      | Payment_pending 
+      | Payment_failed 
+      | Assessing 
+      | Delayed 
+      | Unsupported 
+      | Unavailable 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -5996,6 +10663,13 @@ module CapacityReservationState =
       | Cancelled -> "cancelled"
       | Pending -> "pending"
       | Failed -> "failed"
+      | Scheduled -> "scheduled"
+      | Payment_pending -> "payment-pending"
+      | Payment_failed -> "payment-failed"
+      | Assessing -> "assessing"
+      | Delayed -> "delayed"
+      | Unsupported -> "unsupported"
+      | Unavailable -> "unavailable"
       | Non_static_id s -> s
     let of_string =
       function
@@ -6004,6 +10678,13 @@ module CapacityReservationState =
       | "cancelled" -> Cancelled
       | "pending" -> Pending
       | "failed" -> Failed
+      | "scheduled" -> Scheduled
+      | "payment-pending" -> Payment_pending
+      | "payment-failed" -> Payment_failed
+      | "assessing" -> Assessing
+      | "delayed" -> Delayed
+      | "unsupported" -> Unsupported
+      | "unavailable" -> Unavailable
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -6015,32 +10696,31 @@ module CapacityReservationState =
       of_string (string_of_json ~kind:"CapacityReservationState" j)
     let to_json = simple_to_json to_value
   end
-module CapacityReservationTenancy =
+module CapacityReservationType =
   struct
     type nonrec t =
       | Default 
-      | Dedicated 
+      | Capacity_block 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Default -> "default"
-      | Dedicated -> "dedicated"
+      | Capacity_block -> "capacity-block"
       | Non_static_id s -> s
     let of_string =
       function
       | "default" -> Default
-      | "dedicated" -> Dedicated
+      | "capacity-block" -> Capacity_block
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
       of_string
-        (string_of_xml ~kind:"enumeration CapacityReservationTenancy"
-           xml_arg0)
+        (string_of_xml ~kind:"enumeration CapacityReservationType" xml_arg0)
     let of_json j =
-      of_string (string_of_json ~kind:"CapacityReservationTenancy" j)
+      of_string (string_of_json ~kind:"CapacityReservationType" j)
     let to_json = simple_to_json to_value
   end
 module EndDateType =
@@ -6095,6 +10775,125 @@ module InstanceMatchCriteria =
       of_string (string_of_json ~kind:"InstanceMatchCriteria" j)
     let to_json = simple_to_json to_value
   end
+module InterruptibleCapacityAllocation =
+  struct
+    type nonrec t =
+      {
+      instanceCount: Integer.t option
+        [@ocaml.doc
+          "The current number of instances allocated to the interruptible reservation."];
+      targetInstanceCount: Integer.t option
+        [@ocaml.doc
+          "After your modify request, the requested number of instances allocated to interruptible reservation."];
+      status: InterruptibleCapacityReservationAllocationStatus.t option
+        [@ocaml.doc
+          "The current status of the allocation (updating during reclamation, active when complete)."];
+      interruptibleCapacityReservationId: String_.t option
+        [@ocaml.doc
+          "The ID of the interruptible Capacity Reservation created from the allocation."];
+      interruptionType: InterruptionType.t option
+        [@ocaml.doc
+          "The type of interruption policy applied to the interruptible reservation."]}
+    let make ?instanceCount =
+      fun ?targetInstanceCount ->
+        fun ?status ->
+          fun ?interruptibleCapacityReservationId ->
+            fun ?interruptionType ->
+              fun () ->
+                {
+                  instanceCount;
+                  targetInstanceCount;
+                  status;
+                  interruptibleCapacityReservationId;
+                  interruptionType
+                }
+    let to_value x =
+      structure_to_value
+        [("instanceCount", (Option.map x.instanceCount ~f:Integer.to_value));
+        ("targetInstanceCount",
+          (Option.map x.targetInstanceCount ~f:Integer.to_value));
+        ("status",
+          (Option.map x.status
+             ~f:InterruptibleCapacityReservationAllocationStatus.to_value));
+        ("interruptibleCapacityReservationId",
+          (Option.map x.interruptibleCapacityReservationId
+             ~f:String_.to_value));
+        ("interruptionType",
+          (Option.map x.interruptionType ~f:InterruptionType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let interruptionType =
+        (Option.map ~f:InterruptionType.of_xml)
+          (Xml.child xml_arg0 "interruptionType") in
+      let interruptibleCapacityReservationId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "interruptibleCapacityReservationId") in
+      let status =
+        (Option.map
+           ~f:InterruptibleCapacityReservationAllocationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let targetInstanceCount =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "targetInstanceCount") in
+      let instanceCount =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "instanceCount") in
+      make ?interruptionType ?interruptibleCapacityReservationId ?status
+        ?targetInstanceCount ?instanceCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let interruptionType =
+        field_map json__ "InterruptionType" InterruptionType.of_json in
+      let interruptibleCapacityReservationId =
+        field_map json__ "InterruptibleCapacityReservationId" String_.of_json in
+      let status =
+        field_map json__ "Status"
+          InterruptibleCapacityReservationAllocationStatus.of_json in
+      let targetInstanceCount =
+        field_map json__ "TargetInstanceCount" Integer.of_json in
+      let instanceCount = field_map json__ "InstanceCount" Integer.of_json in
+      make ?interruptionType ?interruptibleCapacityReservationId ?status
+        ?targetInstanceCount ?instanceCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the allocation of capacity from a source reservation to an interruptible reservation, tracking current and target instance counts for allocation management."]
+module InterruptionInfo =
+  struct
+    type nonrec t =
+      {
+      sourceCapacityReservationId: String_.t option
+        [@ocaml.doc
+          "The ID of the source Capacity Reservation from which the interruptible reservation was created."];
+      interruptionType: InterruptionType.t option
+        [@ocaml.doc
+          "The interruption type that determines how instances are terminated when capacity is reclaimed."]}
+    let make ?sourceCapacityReservationId =
+      fun ?interruptionType ->
+        fun () -> { sourceCapacityReservationId; interruptionType }
+    let to_value x =
+      structure_to_value
+        [("sourceCapacityReservationId",
+           (Option.map x.sourceCapacityReservationId ~f:String_.to_value));
+        ("interruptionType",
+          (Option.map x.interruptionType ~f:InterruptionType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let interruptionType =
+        (Option.map ~f:InterruptionType.of_xml)
+          (Xml.child xml_arg0 "interruptionType") in
+      let sourceCapacityReservationId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "sourceCapacityReservationId") in
+      make ?interruptionType ?sourceCapacityReservationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let interruptionType =
+        field_map json__ "InterruptionType" InterruptionType.of_json in
+      let sourceCapacityReservationId =
+        field_map json__ "SourceCapacityReservationId" String_.of_json in
+      make ?interruptionType ?sourceCapacityReservationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about how and when instances in an interruptible reservation can be terminated when capacity is reclaimed."]
 module OutpostArn =
   struct
     type nonrec t = string
@@ -6121,7 +10920,7 @@ module PlacementGroupArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^arn:aws([a-z-]+)?:ec2:[a-z\\d-]+:\\d{12}:placement-group/([^\\s].+[^\\s]){1,255}$");
+             ~pattern:"^arn:aws([a-z-]+)?:ec2:[a-z\\d-]+:\\d{12}:placement-group/^.{1,255}$");
         i
     let of_string x = x
     let to_value x = `String x
@@ -6130,6 +10929,33 @@ module PlacementGroupArn =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"PlacementGroupArn" j
     let to_json = simple_to_json to_value
+  end
+module NetworkNodeSet =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NetworkNodeSet" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module CapacityReservationFleetId =
   struct
@@ -6197,6 +11023,9 @@ module FleetCapacityReservationSet =
   struct
     type nonrec t = FleetCapacityReservation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FleetCapacityReservation.to_value)) |>
         (fun x -> `List x)
@@ -6257,6 +11086,285 @@ module FleetInstanceMatchCriteria =
       of_string (string_of_json ~kind:"FleetInstanceMatchCriteria" j)
     let to_json = simple_to_json to_value
   end
+module CapacityReservationBillingRequestStatus =
+  struct
+    type nonrec t =
+      | Pending 
+      | Accepted 
+      | Rejected 
+      | Cancelled 
+      | Revoked 
+      | Expired 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Accepted -> "accepted"
+      | Rejected -> "rejected"
+      | Cancelled -> "cancelled"
+      | Revoked -> "revoked"
+      | Expired -> "expired"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "accepted" -> Accepted
+      | "rejected" -> Rejected
+      | "cancelled" -> Cancelled
+      | "revoked" -> Revoked
+      | "expired" -> Expired
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration CapacityReservationBillingRequestStatus"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"CapacityReservationBillingRequestStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityReservationInfo =
+  struct
+    type nonrec t =
+      {
+      instanceType: String_.t option
+        [@ocaml.doc "The instance type for the Capacity Reservation."];
+      availabilityZone: AvailabilityZoneName.t option
+        [@ocaml.doc "The Availability Zone for the Capacity Reservation."];
+      tenancy: CapacityReservationTenancy.t option
+        [@ocaml.doc "The tenancy of the Capacity Reservation."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc "The ID of the Availability Zone."]}
+    let make ?instanceType =
+      fun ?availabilityZone ->
+        fun ?tenancy ->
+          fun ?availabilityZoneId ->
+            fun () ->
+              { instanceType; availabilityZone; tenancy; availabilityZoneId }
+    let to_value x =
+      structure_to_value
+        [("instanceType", (Option.map x.instanceType ~f:String_.to_value));
+        ("availabilityZone",
+          (Option.map x.availabilityZone ~f:AvailabilityZoneName.to_value));
+        ("tenancy",
+          (Option.map x.tenancy ~f:CapacityReservationTenancy.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let tenancy =
+        (Option.map ~f:CapacityReservationTenancy.of_xml)
+          (Xml.child xml_arg0 "tenancy") in
+      let availabilityZone =
+        (Option.map ~f:AvailabilityZoneName.of_xml)
+          (Xml.child xml_arg0 "availabilityZone") in
+      let instanceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceType") in
+      make ?availabilityZoneId ?tenancy ?availabilityZone ?instanceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let availabilityZoneId =
+        field_map json__ "AvailabilityZoneId" AvailabilityZoneId.of_json in
+      let tenancy =
+        field_map json__ "Tenancy" CapacityReservationTenancy.of_json in
+      let availabilityZone =
+        field_map json__ "AvailabilityZone" AvailabilityZoneName.of_json in
+      let instanceType = field_map json__ "InstanceType" String_.of_json in
+      make ?availabilityZoneId ?tenancy ?availabilityZone ?instanceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a Capacity Reservation."]
+module CapacityManagerDataExportId =
+  struct
+    type nonrec t = string
+    let context_ = "CapacityManagerDataExportId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CapacityManagerDataExportId" j
+    let to_json = simple_to_json to_value
+  end
+module CapacityManagerDataExportStatus =
+  struct
+    type nonrec t =
+      | Pending 
+      | In_progress 
+      | Delivered 
+      | Failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | In_progress -> "in-progress"
+      | Delivered -> "delivered"
+      | Failed -> "failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "in-progress" -> In_progress
+      | "delivered" -> Delivered
+      | "failed" -> Failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CapacityManagerDataExportStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CapacityManagerDataExportStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module OutputFormat =
+  struct
+    type nonrec t =
+      | Csv 
+      | Parquet 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Csv -> "csv" | Parquet -> "parquet" | Non_static_id s -> s
+    let of_string =
+      function | "csv" -> Csv | "parquet" -> Parquet | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OutputFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OutputFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module Schedule =
+  struct
+    type nonrec t =
+      | Hourly 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Hourly -> "hourly" | Non_static_id s -> s
+    let of_string = function | "hourly" -> Hourly | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Schedule" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Schedule" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityBlockInterconnectStatus =
+  struct
+    type nonrec t =
+      | Ok 
+      | Impaired 
+      | Insufficient_data 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Ok -> "ok"
+      | Impaired -> "impaired"
+      | Insufficient_data -> "insufficient-data"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ok" -> Ok
+      | "impaired" -> Impaired
+      | "insufficient-data" -> Insufficient_data
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CapacityBlockInterconnectStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CapacityBlockInterconnectStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CapacityReservationStatusSet =
+  struct
+    type nonrec t = CapacityReservationStatus.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityReservationStatus.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityReservationStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityReservationStatusSet"
+        ~of_json:CapacityReservationStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BoxedInteger =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for BoxedInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AsnAssociationSet =
+  struct
+    type nonrec t = AsnAssociation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AsnAssociation.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AsnAssociation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AsnAssociationSet" ~of_json:AsnAssociation.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module ByoipCidrState =
   struct
     type nonrec t =
@@ -6264,8 +11372,10 @@ module ByoipCidrState =
       | Deprovisioned 
       | Failed_deprovision 
       | Failed_provision 
+      | Pending_advertising 
       | Pending_deprovision 
       | Pending_provision 
+      | Pending_withdrawal 
       | Provisioned 
       | Provisioned_not_publicly_advertisable 
       | Non_static_id of string 
@@ -6276,8 +11386,10 @@ module ByoipCidrState =
       | Deprovisioned -> "deprovisioned"
       | Failed_deprovision -> "failed-deprovision"
       | Failed_provision -> "failed-provision"
+      | Pending_advertising -> "pending-advertising"
       | Pending_deprovision -> "pending-deprovision"
       | Pending_provision -> "pending-provision"
+      | Pending_withdrawal -> "pending-withdrawal"
       | Provisioned -> "provisioned"
       | Provisioned_not_publicly_advertisable ->
           "provisioned-not-publicly-advertisable"
@@ -6288,8 +11400,10 @@ module ByoipCidrState =
       | "deprovisioned" -> Deprovisioned
       | "failed-deprovision" -> Failed_deprovision
       | "failed-provision" -> Failed_provision
+      | "pending-advertising" -> Pending_advertising
       | "pending-deprovision" -> Pending_deprovision
       | "pending-provision" -> Pending_provision
+      | "pending-withdrawal" -> Pending_withdrawal
       | "provisioned" -> Provisioned
       | "provisioned-not-publicly-advertisable" ->
           Provisioned_not_publicly_advertisable
@@ -6320,9 +11434,9 @@ module BundleTaskError =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an error for BundleInstance."]
@@ -6379,15 +11493,47 @@ module Storage =
       let s3 = (Option.map ~f:S3Storage.of_xml) (Xml.child xml_arg0 "S3") in
       make ?s3 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3 = field_map json "S3" S3Storage.of_json in make ?s3 ()
+    let of_json json__ =
+      let s3 = field_map json__ "S3" S3Storage.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the storage location for an instance store-backed AMI."]
+module AvailabilityZoneGeographyList =
+  struct
+    type nonrec t = AvailabilityZoneGeography.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AvailabilityZoneGeography.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AvailabilityZoneGeography.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AvailabilityZoneGeographyList"
+        ~of_json:AvailabilityZoneGeography.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AvailabilityZoneMessageList =
   struct
     type nonrec t = AvailabilityZoneMessage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AvailabilityZoneMessage.to_value)) |>
         (fun x -> `List x)
@@ -6448,6 +11594,7 @@ module AvailabilityZoneState =
       | Information 
       | Impaired 
       | Unavailable 
+      | Constrained 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -6456,6 +11603,7 @@ module AvailabilityZoneState =
       | Information -> "information"
       | Impaired -> "impaired"
       | Unavailable -> "unavailable"
+      | Constrained -> "constrained"
       | Non_static_id s -> s
     let of_string =
       function
@@ -6463,6 +11611,7 @@ module AvailabilityZoneState =
       | "information" -> Information
       | "impaired" -> Impaired
       | "unavailable" -> Unavailable
+      | "constrained" -> Constrained
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -6473,6 +11622,35 @@ module AvailabilityZoneState =
     let of_json j =
       of_string (string_of_json ~kind:"AvailabilityZoneState" j)
     let to_json = simple_to_json to_value
+  end
+module AvailabilityZoneSubGeographyList =
+  struct
+    type nonrec t = AvailabilityZoneSubGeography.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AvailabilityZoneSubGeography.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AvailabilityZoneSubGeography.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AvailabilityZoneSubGeographyList"
+        ~of_json:AvailabilityZoneSubGeography.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module DomainType =
   struct
@@ -6493,17 +11671,35 @@ module DomainType =
     let of_json j = of_string (string_of_json ~kind:"DomainType" j)
     let to_json = simple_to_json to_value
   end
-module AllocationId =
+module ServiceManaged =
   struct
-    type nonrec t = string
-    let context_ = "AllocationId"
+    type nonrec t =
+      | Alb 
+      | Nlb 
+      | Rnat 
+      | Rds 
+      | Non_static_id of string 
     let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    let to_string =
+      function
+      | Alb -> "alb"
+      | Nlb -> "nlb"
+      | Rnat -> "rnat"
+      | Rds -> "rds"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "alb" -> Alb
+      | "nlb" -> Nlb
+      | "rnat" -> Rnat
+      | "rds" -> Rds
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AllocationId" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ServiceManaged" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ServiceManaged" j)
     let to_json = simple_to_json to_value
   end
 module PtrUpdateStatus =
@@ -6532,10 +11728,10 @@ module PtrUpdateStatus =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
       make ?reason ?status ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let value = field_map json "Value" String_.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "Reason" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let value = field_map json__ "Value" String_.of_json in
       make ?reason ?status ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6553,10 +11749,43 @@ module PublicIpAddress =
     let of_json j = string_of_json ~kind:"PublicIpAddress" j
     let to_json = simple_to_json to_value
   end
+module AddressTransferStatus =
+  struct
+    type nonrec t =
+      | Pending 
+      | Disabled 
+      | Accepted 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Disabled -> "disabled"
+      | Accepted -> "accepted"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "disabled" -> Disabled
+      | "accepted" -> Accepted
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AddressTransferStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AddressTransferStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module AccountAttributeValueList =
   struct
     type nonrec t = AccountAttributeValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountAttributeValue.to_value)) |>
         (fun x -> `List x)
@@ -6578,6 +11807,41 @@ module AccountAttributeValueList =
       list_of_json ~kind:"AccountAttributeValueList"
         ~of_json:AccountAttributeValue.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module SnapshotReturnCodes =
+  struct
+    type nonrec t =
+      | Success 
+      | Skipped 
+      | Missing_permissions 
+      | Internal_error 
+      | Client_error 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Success -> "success"
+      | Skipped -> "skipped"
+      | Missing_permissions -> "missing-permissions"
+      | Internal_error -> "internal-error"
+      | Client_error -> "client-error"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "success" -> Success
+      | "skipped" -> Skipped
+      | "missing-permissions" -> Missing_permissions
+      | "internal-error" -> Internal_error
+      | "client-error" -> Client_error
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SnapshotReturnCodes" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SnapshotReturnCodes" j)
+    let to_json = simple_to_json to_value
   end
 module DeleteQueuedReservedInstancesError =
   struct
@@ -6602,10 +11866,11 @@ module DeleteQueuedReservedInstancesError =
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       let code =
-        field_map json "Code" DeleteQueuedReservedInstancesErrorCode.of_json in
+        field_map json__ "Code"
+          DeleteQueuedReservedInstancesErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6631,9 +11896,9 @@ module ResponseError =
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" LaunchTemplateErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" LaunchTemplateErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6659,9 +11924,9 @@ module DeleteFleetError =
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" DeleteFleetErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" DeleteFleetErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an EC2 Fleet error."]
@@ -6675,7 +11940,7 @@ module VpnTunnelOptionsSpecification =
       tunnelInsideIpv6Cidr: String_.t option
         [@ocaml.doc
           "The range of inside IPv6 addresses for the tunnel. Any specified CIDR blocks must be unique across all VPN connections that use the same transit gateway. Constraints: A size /126 CIDR block from the local fd00::/8 range."];
-      preSharedKey: String_.t option
+      preSharedKey: PreSharedKey.t option
         [@ocaml.doc
           "The pre-shared key (PSK) to establish initial authentication between the virtual private gateway and customer gateway. Constraints: Allowed characters are alphanumeric characters, periods (.), and underscores (_). Must be between 8 and 64 characters in length and cannot start with zero (0)."];
       phase1LifetimeSeconds: Integer.t option
@@ -6686,7 +11951,7 @@ module VpnTunnelOptionsSpecification =
           "The lifetime for phase 2 of the IKE negotiation, in seconds. Constraints: A value between 900 and 3,600. The value must be less than the value for Phase1LifetimeSeconds. Default: 3600"];
       rekeyMarginTimeSeconds: Integer.t option
         [@ocaml.doc
-          "The margin time, in seconds, before the phase 2 lifetime expires, during which the Amazon Web Services side of the VPN connection performs an IKE rekey. The exact time of the rekey is randomly selected based on the value for RekeyFuzzPercentage. Constraints: A value between 60 and half of Phase2LifetimeSeconds. Default: 540"];
+          "The margin time, in seconds, before the phase 2 lifetime expires, during which the Amazon Web Services side of the VPN connection performs an IKE rekey. The exact time of the rekey is randomly selected based on the value for RekeyFuzzPercentage. Constraints: A value between 60 and half of Phase2LifetimeSeconds. Default: 270"];
       rekeyFuzzPercentage: Integer.t option
         [@ocaml.doc
           "The percentage of the rekey window (determined by RekeyMarginTimeSeconds) during which the rekey time is randomly selected. Constraints: A value between 0 and 100. Default: 100"];
@@ -6726,7 +11991,12 @@ module VpnTunnelOptionsSpecification =
           "The IKE versions that are permitted for the VPN tunnel. Valid values: ikev1 | ikev2"];
       startupAction: String_.t option
         [@ocaml.doc
-          "The action to take when the establishing the tunnel for the VPN connection. By default, your customer gateway device must initiate the IKE negotiation and bring up the tunnel. Specify start for Amazon Web Services to initiate the IKE negotiation. Valid Values: add | start Default: add"]}
+          "The action to take when the establishing the tunnel for the VPN connection. By default, your customer gateway device must initiate the IKE negotiation and bring up the tunnel. Specify start for Amazon Web Services to initiate the IKE negotiation. Valid Values: add | start Default: add"];
+      logOptions: VpnTunnelLogOptionsSpecification.t option
+        [@ocaml.doc "Options for logging VPN tunnel activity."];
+      enableTunnelLifecycleControl: Boolean.t option
+        [@ocaml.doc
+          "Turn on or off tunnel endpoint lifecycle control feature."]}
     let make ?tunnelInsideCidr =
       fun ?tunnelInsideIpv6Cidr ->
         fun ?preSharedKey ->
@@ -6745,34 +12015,40 @@ module VpnTunnelOptionsSpecification =
                                   fun ?phase2DHGroupNumbers ->
                                     fun ?iKEVersions ->
                                       fun ?startupAction ->
-                                        fun () ->
-                                          {
-                                            tunnelInsideCidr;
-                                            tunnelInsideIpv6Cidr;
-                                            preSharedKey;
-                                            phase1LifetimeSeconds;
-                                            phase2LifetimeSeconds;
-                                            rekeyMarginTimeSeconds;
-                                            rekeyFuzzPercentage;
-                                            replayWindowSize;
-                                            dPDTimeoutSeconds;
-                                            dPDTimeoutAction;
-                                            phase1EncryptionAlgorithms;
-                                            phase2EncryptionAlgorithms;
-                                            phase1IntegrityAlgorithms;
-                                            phase2IntegrityAlgorithms;
-                                            phase1DHGroupNumbers;
-                                            phase2DHGroupNumbers;
-                                            iKEVersions;
-                                            startupAction
-                                          }
+                                        fun ?logOptions ->
+                                          fun ?enableTunnelLifecycleControl
+                                            ->
+                                            fun () ->
+                                              {
+                                                tunnelInsideCidr;
+                                                tunnelInsideIpv6Cidr;
+                                                preSharedKey;
+                                                phase1LifetimeSeconds;
+                                                phase2LifetimeSeconds;
+                                                rekeyMarginTimeSeconds;
+                                                rekeyFuzzPercentage;
+                                                replayWindowSize;
+                                                dPDTimeoutSeconds;
+                                                dPDTimeoutAction;
+                                                phase1EncryptionAlgorithms;
+                                                phase2EncryptionAlgorithms;
+                                                phase1IntegrityAlgorithms;
+                                                phase2IntegrityAlgorithms;
+                                                phase1DHGroupNumbers;
+                                                phase2DHGroupNumbers;
+                                                iKEVersions;
+                                                startupAction;
+                                                logOptions;
+                                                enableTunnelLifecycleControl
+                                              }
     let to_value x =
       structure_to_value
         [("TunnelInsideCidr",
            (Option.map x.tunnelInsideCidr ~f:String_.to_value));
         ("TunnelInsideIpv6Cidr",
           (Option.map x.tunnelInsideIpv6Cidr ~f:String_.to_value));
-        ("PreSharedKey", (Option.map x.preSharedKey ~f:String_.to_value));
+        ("PreSharedKey",
+          (Option.map x.preSharedKey ~f:PreSharedKey.to_value));
         ("Phase1LifetimeSeconds",
           (Option.map x.phase1LifetimeSeconds ~f:Integer.to_value));
         ("Phase2LifetimeSeconds",
@@ -6807,9 +12083,20 @@ module VpnTunnelOptionsSpecification =
              ~f:Phase2DHGroupNumbersRequestList.to_value));
         ("IKEVersion",
           (Option.map x.iKEVersions ~f:IKEVersionsRequestList.to_value));
-        ("StartupAction", (Option.map x.startupAction ~f:String_.to_value))]
+        ("StartupAction", (Option.map x.startupAction ~f:String_.to_value));
+        ("LogOptions",
+          (Option.map x.logOptions
+             ~f:VpnTunnelLogOptionsSpecification.to_value));
+        ("EnableTunnelLifecycleControl",
+          (Option.map x.enableTunnelLifecycleControl ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let enableTunnelLifecycleControl =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "EnableTunnelLifecycleControl") in
+      let logOptions =
+        (Option.map ~f:VpnTunnelLogOptionsSpecification.of_xml)
+          (Xml.child xml_arg0 "LogOptions") in
       let startupAction =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StartupAction") in
       let iKEVersions =
@@ -6855,71 +12142,113 @@ module VpnTunnelOptionsSpecification =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "Phase1LifetimeSeconds") in
       let preSharedKey =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PreSharedKey") in
+        (Option.map ~f:PreSharedKey.of_xml)
+          (Xml.child xml_arg0 "PreSharedKey") in
       let tunnelInsideIpv6Cidr =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "TunnelInsideIpv6Cidr") in
       let tunnelInsideCidr =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "TunnelInsideCidr") in
-      make ?startupAction ?iKEVersions ?phase2DHGroupNumbers
-        ?phase1DHGroupNumbers ?phase2IntegrityAlgorithms
-        ?phase1IntegrityAlgorithms ?phase2EncryptionAlgorithms
-        ?phase1EncryptionAlgorithms ?dPDTimeoutAction ?dPDTimeoutSeconds
-        ?replayWindowSize ?rekeyFuzzPercentage ?rekeyMarginTimeSeconds
-        ?phase2LifetimeSeconds ?phase1LifetimeSeconds ?preSharedKey
-        ?tunnelInsideIpv6Cidr ?tunnelInsideCidr ()
+      make ?enableTunnelLifecycleControl ?logOptions ?startupAction
+        ?iKEVersions ?phase2DHGroupNumbers ?phase1DHGroupNumbers
+        ?phase2IntegrityAlgorithms ?phase1IntegrityAlgorithms
+        ?phase2EncryptionAlgorithms ?phase1EncryptionAlgorithms
+        ?dPDTimeoutAction ?dPDTimeoutSeconds ?replayWindowSize
+        ?rekeyFuzzPercentage ?rekeyMarginTimeSeconds ?phase2LifetimeSeconds
+        ?phase1LifetimeSeconds ?preSharedKey ?tunnelInsideIpv6Cidr
+        ?tunnelInsideCidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startupAction = field_map json "StartupAction" String_.of_json in
+    let of_json json__ =
+      let enableTunnelLifecycleControl =
+        field_map json__ "EnableTunnelLifecycleControl" Boolean.of_json in
+      let logOptions =
+        field_map json__ "LogOptions"
+          VpnTunnelLogOptionsSpecification.of_json in
+      let startupAction = field_map json__ "StartupAction" String_.of_json in
       let iKEVersions =
-        field_map json "IKEVersions" IKEVersionsRequestList.of_json in
+        field_map json__ "IKEVersions" IKEVersionsRequestList.of_json in
       let phase2DHGroupNumbers =
-        field_map json "Phase2DHGroupNumbers"
+        field_map json__ "Phase2DHGroupNumbers"
           Phase2DHGroupNumbersRequestList.of_json in
       let phase1DHGroupNumbers =
-        field_map json "Phase1DHGroupNumbers"
+        field_map json__ "Phase1DHGroupNumbers"
           Phase1DHGroupNumbersRequestList.of_json in
       let phase2IntegrityAlgorithms =
-        field_map json "Phase2IntegrityAlgorithms"
+        field_map json__ "Phase2IntegrityAlgorithms"
           Phase2IntegrityAlgorithmsRequestList.of_json in
       let phase1IntegrityAlgorithms =
-        field_map json "Phase1IntegrityAlgorithms"
+        field_map json__ "Phase1IntegrityAlgorithms"
           Phase1IntegrityAlgorithmsRequestList.of_json in
       let phase2EncryptionAlgorithms =
-        field_map json "Phase2EncryptionAlgorithms"
+        field_map json__ "Phase2EncryptionAlgorithms"
           Phase2EncryptionAlgorithmsRequestList.of_json in
       let phase1EncryptionAlgorithms =
-        field_map json "Phase1EncryptionAlgorithms"
+        field_map json__ "Phase1EncryptionAlgorithms"
           Phase1EncryptionAlgorithmsRequestList.of_json in
       let dPDTimeoutAction =
-        field_map json "DPDTimeoutAction" String_.of_json in
+        field_map json__ "DPDTimeoutAction" String_.of_json in
       let dPDTimeoutSeconds =
-        field_map json "DPDTimeoutSeconds" Integer.of_json in
+        field_map json__ "DPDTimeoutSeconds" Integer.of_json in
       let replayWindowSize =
-        field_map json "ReplayWindowSize" Integer.of_json in
+        field_map json__ "ReplayWindowSize" Integer.of_json in
       let rekeyFuzzPercentage =
-        field_map json "RekeyFuzzPercentage" Integer.of_json in
+        field_map json__ "RekeyFuzzPercentage" Integer.of_json in
       let rekeyMarginTimeSeconds =
-        field_map json "RekeyMarginTimeSeconds" Integer.of_json in
+        field_map json__ "RekeyMarginTimeSeconds" Integer.of_json in
       let phase2LifetimeSeconds =
-        field_map json "Phase2LifetimeSeconds" Integer.of_json in
+        field_map json__ "Phase2LifetimeSeconds" Integer.of_json in
       let phase1LifetimeSeconds =
-        field_map json "Phase1LifetimeSeconds" Integer.of_json in
-      let preSharedKey = field_map json "PreSharedKey" String_.of_json in
+        field_map json__ "Phase1LifetimeSeconds" Integer.of_json in
+      let preSharedKey = field_map json__ "PreSharedKey" PreSharedKey.of_json in
       let tunnelInsideIpv6Cidr =
-        field_map json "TunnelInsideIpv6Cidr" String_.of_json in
+        field_map json__ "TunnelInsideIpv6Cidr" String_.of_json in
       let tunnelInsideCidr =
-        field_map json "TunnelInsideCidr" String_.of_json in
-      make ?startupAction ?iKEVersions ?phase2DHGroupNumbers
-        ?phase1DHGroupNumbers ?phase2IntegrityAlgorithms
-        ?phase1IntegrityAlgorithms ?phase2EncryptionAlgorithms
-        ?phase1EncryptionAlgorithms ?dPDTimeoutAction ?dPDTimeoutSeconds
-        ?replayWindowSize ?rekeyFuzzPercentage ?rekeyMarginTimeSeconds
-        ?phase2LifetimeSeconds ?phase1LifetimeSeconds ?preSharedKey
-        ?tunnelInsideIpv6Cidr ?tunnelInsideCidr ()
+        field_map json__ "TunnelInsideCidr" String_.of_json in
+      make ?enableTunnelLifecycleControl ?logOptions ?startupAction
+        ?iKEVersions ?phase2DHGroupNumbers ?phase1DHGroupNumbers
+        ?phase2IntegrityAlgorithms ?phase1IntegrityAlgorithms
+        ?phase2EncryptionAlgorithms ?phase1EncryptionAlgorithms
+        ?dPDTimeoutAction ?dPDTimeoutSeconds ?replayWindowSize
+        ?rekeyFuzzPercentage ?rekeyMarginTimeSeconds ?phase2LifetimeSeconds
+        ?phase1LifetimeSeconds ?preSharedKey ?tunnelInsideIpv6Cidr
+        ?tunnelInsideCidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The tunnel options for a single VPN tunnel."]
+module CreateVerifiedAccessEndpointPortRange =
+  struct
+    type nonrec t =
+      {
+      fromPort: VerifiedAccessEndpointPortNumber.t option
+        [@ocaml.doc "The start of the port range."];
+      toPort: VerifiedAccessEndpointPortNumber.t option
+        [@ocaml.doc "The end of the port range."]}
+    let make ?fromPort = fun ?toPort -> fun () -> { fromPort; toPort }
+    let to_value x =
+      structure_to_value
+        [("FromPort",
+           (Option.map x.fromPort
+              ~f:VerifiedAccessEndpointPortNumber.to_value));
+        ("ToPort",
+          (Option.map x.toPort ~f:VerifiedAccessEndpointPortNumber.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let toPort =
+        (Option.map ~f:VerifiedAccessEndpointPortNumber.of_xml)
+          (Xml.child xml_arg0 "ToPort") in
+      let fromPort =
+        (Option.map ~f:VerifiedAccessEndpointPortNumber.of_xml)
+          (Xml.child xml_arg0 "FromPort") in
+      make ?toPort ?fromPort ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let toPort =
+        field_map json__ "ToPort" VerifiedAccessEndpointPortNumber.of_json in
+      let fromPort =
+        field_map json__ "FromPort" VerifiedAccessEndpointPortNumber.of_json in
+      make ?toPort ?fromPort ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the port range for a Verified Access endpoint."]
 module PathStatementRequest =
   struct
     type nonrec t =
@@ -6949,11 +12278,11 @@ module PathStatementRequest =
           (Xml.child xml_arg0 "PacketHeaderStatement") in
       make ?resourceStatement ?packetHeaderStatement ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceStatement =
-        field_map json "ResourceStatement" ResourceStatementRequest.of_json in
+        field_map json__ "ResourceStatement" ResourceStatementRequest.of_json in
       let packetHeaderStatement =
-        field_map json "PacketHeaderStatement"
+        field_map json__ "PacketHeaderStatement"
           PacketHeaderStatementRequest.of_json in
       make ?resourceStatement ?packetHeaderStatement ()
     let to_json v = composed_to_json to_value v
@@ -6962,6 +12291,9 @@ module ThroughResourcesStatementRequestList =
   struct
     type nonrec t = ThroughResourcesStatementRequest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ThroughResourcesStatementRequest.to_value)) |>
         (fun x -> `List x)
@@ -6985,16 +12317,43 @@ module ThroughResourcesStatementRequestList =
         ~of_json:ThroughResourcesStatementRequest.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AllocationIdList =
+  struct
+    type nonrec t = AllocationId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AllocationId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AllocationId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AllocationIdList" ~of_json:AllocationId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ValidationError =
   struct
     type nonrec t =
       {
       code: String_.t option
         [@ocaml.doc
-          "The error code that indicates why the parameter or parameter combination is not valid. For more information about error codes, see Error Codes."];
+          "The error code that indicates why the parameter or parameter combination is not valid. For more information about error codes, see Error codes."];
       message: String_.t option
         [@ocaml.doc
-          "The error message that describes why the parameter or parameter combination is not valid. For more information about error messages, see Error Codes."]}
+          "The error message that describes why the parameter or parameter combination is not valid. For more information about error messages, see Error codes."]}
     let make ?code = fun ?message -> fun () -> { code; message }
     let to_value x =
       structure_to_value
@@ -7007,9 +12366,9 @@ module ValidationError =
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7019,8 +12378,7 @@ module ElasticGpuSpecification =
     type nonrec t =
       {
       type_: String_.t
-        [@ocaml.doc
-          "The type of Elastic Graphics accelerator. For more information about the values to specify for Type, see Elastic Graphics Basics, specifically the Elastic Graphics accelerator column, in the Amazon Elastic Compute Cloud User Guide for Windows Instances."]}
+        [@ocaml.doc "The type of Elastic Graphics accelerator."]}
     let context_ = "ElasticGpuSpecification"
     let make ~type_ = fun () -> { type_ }
     let to_value x =
@@ -7031,10 +12389,12 @@ module ElasticGpuSpecification =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" String_.of_json in make ~type_ ()
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" String_.of_json in
+      make ~type_ ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A specification for an Elastic Graphics accelerator."]
+  end[@@ocaml.doc
+       "Amazon Elastic Graphics reached end of life on January 8, 2024. A specification for an Elastic Graphics accelerator."]
 module LaunchTemplateBlockDeviceMappingRequest =
   struct
     type nonrec t =
@@ -7075,12 +12435,12 @@ module LaunchTemplateBlockDeviceMappingRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DeviceName") in
       make ?noDevice ?ebs ?virtualName ?deviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let noDevice = field_map json "NoDevice" String_.of_json in
+    let of_json json__ =
+      let noDevice = field_map json__ "NoDevice" String_.of_json in
       let ebs =
-        field_map json "Ebs" LaunchTemplateEbsBlockDeviceRequest.of_json in
-      let virtualName = field_map json "VirtualName" String_.of_json in
-      let deviceName = field_map json "DeviceName" String_.of_json in
+        field_map json__ "Ebs" LaunchTemplateEbsBlockDeviceRequest.of_json in
+      let virtualName = field_map json__ "VirtualName" String_.of_json in
+      let deviceName = field_map json__ "DeviceName" String_.of_json in
       make ?noDevice ?ebs ?virtualName ?deviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a block device mapping."]
@@ -7116,11 +12476,13 @@ module CapacityReservationTarget =
           (Xml.child xml_arg0 "CapacityReservationId") in
       make ?capacityReservationResourceGroupArn ?capacityReservationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let capacityReservationResourceGroupArn =
-        field_map json "CapacityReservationResourceGroupArn" String_.of_json in
+        field_map json__ "CapacityReservationResourceGroupArn"
+          String_.of_json in
       let capacityReservationId =
-        field_map json "CapacityReservationId" CapacityReservationId.of_json in
+        field_map json__ "CapacityReservationId"
+          CapacityReservationId.of_json in
       make ?capacityReservationResourceGroupArn ?capacityReservationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7134,7 +12496,7 @@ module LaunchTemplateElasticInferenceAccelerator =
           "The type of elastic inference accelerator. The possible values are eia1.medium, eia1.large, and eia1.xlarge."];
       count: LaunchTemplateElasticInferenceAcceleratorCount.t option
         [@ocaml.doc
-          "The number of elastic inference accelerators to attach to the instance. Default: 1"]}
+          "The number of elastic inference accelerators to attach to the instance."]}
     let context_ = "LaunchTemplateElasticInferenceAccelerator"
     let make ?count = fun ~type_ -> fun () -> { count; type_ }
     let to_value x =
@@ -7152,29 +12514,28 @@ module LaunchTemplateElasticInferenceAccelerator =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?count ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let count =
-        field_map json "Count"
+        field_map json__ "Count"
           LaunchTemplateElasticInferenceAcceleratorCount.of_json in
-      let type_ = field_map_exn json "Type" String_.of_json in
+      let type_ = field_map_exn json__ "Type" String_.of_json in
       make ?count ~type_ ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes an elastic inference accelerator."]
+  end[@@ocaml.doc
+       "Amazon Elastic Inference is no longer available. Describes an elastic inference accelerator."]
 module LaunchTemplateSpotMarketOptionsRequest =
   struct
     type nonrec t =
       {
       maxPrice: String_.t option
         [@ocaml.doc
-          "The maximum hourly price you're willing to pay for the Spot Instances."];
+          "The maximum hourly price you're willing to pay for a Spot Instance. We do not recommend using this parameter because it can lead to increased interruptions. If you do not specify this parameter, you will pay the current Spot price. If you do specify this parameter, it must be more than USD $0.001. Specifying a value below USD $0.001 will result in an InvalidParameterValue error message when the launch template is used to launch an instance. If you specify a maximum price, your Spot Instances will be interrupted more frequently than if you do not specify this parameter."];
       spotInstanceType: SpotInstanceType.t option
         [@ocaml.doc "The Spot Instance request type."];
-      blockDurationMinutes: Integer.t option
-        [@ocaml.doc
-          "The required duration for the Spot Instances (also known as Spot blocks), in minutes. This value must be a multiple of 60 (60, 120, 180, 240, 300, or 360)."];
+      blockDurationMinutes: Integer.t option [@ocaml.doc "Deprecated."];
       validUntil: DateTime.t option
         [@ocaml.doc
-          "The end date of the request. For a one-time request, the request remains active until all instances launch, the request is canceled, or this date is reached. If the request is persistent, it remains active until it is canceled or this date and time is reached. The default end date is 7 days from the current date."];
+          "The end date of the request, in UTC format (YYYY-MM-DDTHH:MM:SSZ). Supported only for persistent requests. For a persistent request, the request remains active until the ValidUntil date and time is reached. Otherwise, the request remains active until you cancel it. For a one-time request, ValidUntil is not supported. The request remains active until all instances launch or you cancel the request. Default: 7 days from the current date"];
       instanceInterruptionBehavior: InstanceInterruptionBehavior.t option
         [@ocaml.doc
           "The behavior when a Spot Instance is interrupted. The default is terminate."]}
@@ -7220,16 +12581,16 @@ module LaunchTemplateSpotMarketOptionsRequest =
       make ?instanceInterruptionBehavior ?validUntil ?blockDurationMinutes
         ?spotInstanceType ?maxPrice ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceInterruptionBehavior =
-        field_map json "InstanceInterruptionBehavior"
+        field_map json__ "InstanceInterruptionBehavior"
           InstanceInterruptionBehavior.of_json in
-      let validUntil = field_map json "ValidUntil" DateTime.of_json in
+      let validUntil = field_map json__ "ValidUntil" DateTime.of_json in
       let blockDurationMinutes =
-        field_map json "BlockDurationMinutes" Integer.of_json in
+        field_map json__ "BlockDurationMinutes" Integer.of_json in
       let spotInstanceType =
-        field_map json "SpotInstanceType" SpotInstanceType.of_json in
-      let maxPrice = field_map json "MaxPrice" String_.of_json in
+        field_map json__ "SpotInstanceType" SpotInstanceType.of_json in
+      let maxPrice = field_map json__ "MaxPrice" String_.of_json in
       make ?instanceInterruptionBehavior ?validUntil ?blockDurationMinutes
         ?spotInstanceType ?maxPrice ()
     let to_json v = composed_to_json to_value v
@@ -7243,19 +12604,20 @@ module LaunchTemplateInstanceNetworkInterfaceSpecificationRequest =
           "Associates a Carrier IP address with eth0 for a new network interface. Use this option when you launch an instance in a Wavelength Zone and want to associate a Carrier IP address with the network interface. For more information about Carrier IP addresses, see Carrier IP addresses in the Wavelength Developer Guide."];
       associatePublicIpAddress: Boolean.t option
         [@ocaml.doc
-          "Associates a public IPv4 address with eth0 for a new network interface."];
+          "Associates a public IPv4 address with eth0 for a new network interface. Amazon Web Services charges for all public IPv4 addresses, including public IPv4 addresses associated with running instances and Elastic IP addresses. For more information, see the Public IPv4 Address tab on the Amazon VPC pricing page."];
       deleteOnTermination: Boolean.t option
         [@ocaml.doc
           "Indicates whether the network interface is deleted when the instance is terminated."];
       description: String_.t option
         [@ocaml.doc "A description for the network interface."];
       deviceIndex: Integer.t option
-        [@ocaml.doc "The device index for the network interface attachment."];
+        [@ocaml.doc
+          "The device index for the network interface attachment. The primary network interface has a device index of 0. Each network interface is of type interface, you must specify a device index. If you create a launch template that includes secondary network interfaces but not a primary network interface, then you must add a primary network interface as a launch parameter when you launch an instance from the template."];
       groups: SecurityGroupIdStringList.t option
         [@ocaml.doc "The IDs of one or more security groups."];
       interfaceType: String_.t option
         [@ocaml.doc
-          "The type of network interface. To create an Elastic Fabric Adapter (EFA), specify efa. For more information, see Elastic Fabric Adapter in the Amazon Elastic Compute Cloud User Guide. If you are not creating an EFA, specify interface or omit this parameter. Valid values: interface | efa"];
+          "The type of network interface. To create an Elastic Fabric Adapter (EFA), specify efa or efa. For more information, see Elastic Fabric Adapter for AI/ML and HPC workloads on Amazon EC2 in the Amazon EC2 User Guide. If you are not creating an EFA, specify interface or omit this parameter. If you specify efa-only, do not assign any IP addresses to the network interface. EFA-only network interfaces do not support IP addresses. Valid values: interface | efa | efa-only"];
       ipv6AddressCount: Integer.t option
         [@ocaml.doc
           "The number of IPv6 addresses to assign to a network interface. Amazon EC2 automatically selects the IPv6 addresses from the subnet range. You can't use this option if specifying specific IPv6 addresses."];
@@ -7288,7 +12650,20 @@ module LaunchTemplateInstanceNetworkInterfaceSpecificationRequest =
           "One or more IPv6 prefixes to be assigned to the network interface. You cannot use this option if you use the Ipv6PrefixCount option."];
       ipv6PrefixCount: Integer.t option
         [@ocaml.doc
-          "The number of IPv6 prefixes to be automatically assigned to the network interface. You cannot use this option if you use the Ipv6Prefix option."]}
+          "The number of IPv6 prefixes to be automatically assigned to the network interface. You cannot use this option if you use the Ipv6Prefix option."];
+      primaryIpv6: Boolean.t option
+        [@ocaml.doc
+          "The primary IPv6 address of the network interface. When you enable an IPv6 GUA address to be a primary IPv6, the first IPv6 GUA will be made the primary IPv6 address until the instance is terminated or the network interface is detached. For more information about primary IPv6 addresses, see RunInstances."];
+      enaSrdSpecification: EnaSrdSpecificationRequest.t option
+        [@ocaml.doc
+          "Configure ENA Express settings for your launch template."];
+      connectionTrackingSpecification:
+        ConnectionTrackingSpecificationRequest.t option
+        [@ocaml.doc
+          "A security group connection tracking specification that enables you to set the timeout for connection tracking on an Elastic network interface. For more information, see Idle connection tracking timeout in the Amazon EC2 User Guide."];
+      enaQueueCount: Integer.t option
+        [@ocaml.doc
+          "The number of ENA queues to be created with the instance."]}
     let make ?associateCarrierIpAddress =
       fun ?associatePublicIpAddress ->
         fun ?deleteOnTermination ->
@@ -7308,28 +12683,38 @@ module LaunchTemplateInstanceNetworkInterfaceSpecificationRequest =
                                     fun ?ipv4PrefixCount ->
                                       fun ?ipv6Prefixes ->
                                         fun ?ipv6PrefixCount ->
-                                          fun () ->
-                                            {
-                                              associateCarrierIpAddress;
-                                              associatePublicIpAddress;
-                                              deleteOnTermination;
-                                              description;
-                                              deviceIndex;
-                                              groups;
-                                              interfaceType;
-                                              ipv6AddressCount;
-                                              ipv6Addresses;
-                                              networkInterfaceId;
-                                              privateIpAddress;
-                                              privateIpAddresses;
-                                              secondaryPrivateIpAddressCount;
-                                              subnetId;
-                                              networkCardIndex;
-                                              ipv4Prefixes;
-                                              ipv4PrefixCount;
-                                              ipv6Prefixes;
-                                              ipv6PrefixCount
-                                            }
+                                          fun ?primaryIpv6 ->
+                                            fun ?enaSrdSpecification ->
+                                              fun
+                                                ?connectionTrackingSpecification
+                                                ->
+                                                fun ?enaQueueCount ->
+                                                  fun () ->
+                                                    {
+                                                      associateCarrierIpAddress;
+                                                      associatePublicIpAddress;
+                                                      deleteOnTermination;
+                                                      description;
+                                                      deviceIndex;
+                                                      groups;
+                                                      interfaceType;
+                                                      ipv6AddressCount;
+                                                      ipv6Addresses;
+                                                      networkInterfaceId;
+                                                      privateIpAddress;
+                                                      privateIpAddresses;
+                                                      secondaryPrivateIpAddressCount;
+                                                      subnetId;
+                                                      networkCardIndex;
+                                                      ipv4Prefixes;
+                                                      ipv4PrefixCount;
+                                                      ipv6Prefixes;
+                                                      ipv6PrefixCount;
+                                                      primaryIpv6;
+                                                      enaSrdSpecification;
+                                                      connectionTrackingSpecification;
+                                                      enaQueueCount
+                                                    }
     let to_value x =
       structure_to_value
         [("AssociateCarrierIpAddress",
@@ -7367,9 +12752,27 @@ module LaunchTemplateInstanceNetworkInterfaceSpecificationRequest =
         ("Ipv6Prefix",
           (Option.map x.ipv6Prefixes ~f:Ipv6PrefixList.to_value));
         ("Ipv6PrefixCount",
-          (Option.map x.ipv6PrefixCount ~f:Integer.to_value))]
+          (Option.map x.ipv6PrefixCount ~f:Integer.to_value));
+        ("PrimaryIpv6", (Option.map x.primaryIpv6 ~f:Boolean.to_value));
+        ("EnaSrdSpecification",
+          (Option.map x.enaSrdSpecification
+             ~f:EnaSrdSpecificationRequest.to_value));
+        ("ConnectionTrackingSpecification",
+          (Option.map x.connectionTrackingSpecification
+             ~f:ConnectionTrackingSpecificationRequest.to_value));
+        ("EnaQueueCount", (Option.map x.enaQueueCount ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let enaQueueCount =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "EnaQueueCount") in
+      let connectionTrackingSpecification =
+        (Option.map ~f:ConnectionTrackingSpecificationRequest.of_xml)
+          (Xml.child xml_arg0 "ConnectionTrackingSpecification") in
+      let enaSrdSpecification =
+        (Option.map ~f:EnaSrdSpecificationRequest.of_xml)
+          (Xml.child xml_arg0 "EnaSrdSpecification") in
+      let primaryIpv6 =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "PrimaryIpv6") in
       let ipv6PrefixCount =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Ipv6PrefixCount") in
       let ipv6Prefixes =
@@ -7421,52 +12824,172 @@ module LaunchTemplateInstanceNetworkInterfaceSpecificationRequest =
       let associateCarrierIpAddress =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "AssociateCarrierIpAddress") in
-      make ?ipv6PrefixCount ?ipv6Prefixes ?ipv4PrefixCount ?ipv4Prefixes
-        ?networkCardIndex ?subnetId ?secondaryPrivateIpAddressCount
-        ?privateIpAddresses ?privateIpAddress ?networkInterfaceId
-        ?ipv6Addresses ?ipv6AddressCount ?interfaceType ?groups ?deviceIndex
-        ?description ?deleteOnTermination ?associatePublicIpAddress
-        ?associateCarrierIpAddress ()
+      make ?enaQueueCount ?connectionTrackingSpecification
+        ?enaSrdSpecification ?primaryIpv6 ?ipv6PrefixCount ?ipv6Prefixes
+        ?ipv4PrefixCount ?ipv4Prefixes ?networkCardIndex ?subnetId
+        ?secondaryPrivateIpAddressCount ?privateIpAddresses ?privateIpAddress
+        ?networkInterfaceId ?ipv6Addresses ?ipv6AddressCount ?interfaceType
+        ?groups ?deviceIndex ?description ?deleteOnTermination
+        ?associatePublicIpAddress ?associateCarrierIpAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipv6PrefixCount = field_map json "Ipv6PrefixCount" Integer.of_json in
-      let ipv6Prefixes = field_map json "Ipv6Prefixes" Ipv6PrefixList.of_json in
-      let ipv4PrefixCount = field_map json "Ipv4PrefixCount" Integer.of_json in
-      let ipv4Prefixes = field_map json "Ipv4Prefixes" Ipv4PrefixList.of_json in
+    let of_json json__ =
+      let enaQueueCount = field_map json__ "EnaQueueCount" Integer.of_json in
+      let connectionTrackingSpecification =
+        field_map json__ "ConnectionTrackingSpecification"
+          ConnectionTrackingSpecificationRequest.of_json in
+      let enaSrdSpecification =
+        field_map json__ "EnaSrdSpecification"
+          EnaSrdSpecificationRequest.of_json in
+      let primaryIpv6 = field_map json__ "PrimaryIpv6" Boolean.of_json in
+      let ipv6PrefixCount =
+        field_map json__ "Ipv6PrefixCount" Integer.of_json in
+      let ipv6Prefixes =
+        field_map json__ "Ipv6Prefixes" Ipv6PrefixList.of_json in
+      let ipv4PrefixCount =
+        field_map json__ "Ipv4PrefixCount" Integer.of_json in
+      let ipv4Prefixes =
+        field_map json__ "Ipv4Prefixes" Ipv4PrefixList.of_json in
       let networkCardIndex =
-        field_map json "NetworkCardIndex" Integer.of_json in
-      let subnetId = field_map json "SubnetId" SubnetId.of_json in
+        field_map json__ "NetworkCardIndex" Integer.of_json in
+      let subnetId = field_map json__ "SubnetId" SubnetId.of_json in
       let secondaryPrivateIpAddressCount =
-        field_map json "SecondaryPrivateIpAddressCount" Integer.of_json in
+        field_map json__ "SecondaryPrivateIpAddressCount" Integer.of_json in
       let privateIpAddresses =
-        field_map json "PrivateIpAddresses"
+        field_map json__ "PrivateIpAddresses"
           PrivateIpAddressSpecificationList.of_json in
       let privateIpAddress =
-        field_map json "PrivateIpAddress" String_.of_json in
+        field_map json__ "PrivateIpAddress" String_.of_json in
       let networkInterfaceId =
-        field_map json "NetworkInterfaceId" NetworkInterfaceId.of_json in
+        field_map json__ "NetworkInterfaceId" NetworkInterfaceId.of_json in
       let ipv6Addresses =
-        field_map json "Ipv6Addresses" InstanceIpv6AddressListRequest.of_json in
+        field_map json__ "Ipv6Addresses"
+          InstanceIpv6AddressListRequest.of_json in
       let ipv6AddressCount =
-        field_map json "Ipv6AddressCount" Integer.of_json in
-      let interfaceType = field_map json "InterfaceType" String_.of_json in
-      let groups = field_map json "Groups" SecurityGroupIdStringList.of_json in
-      let deviceIndex = field_map json "DeviceIndex" Integer.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map json__ "Ipv6AddressCount" Integer.of_json in
+      let interfaceType = field_map json__ "InterfaceType" String_.of_json in
+      let groups =
+        field_map json__ "Groups" SecurityGroupIdStringList.of_json in
+      let deviceIndex = field_map json__ "DeviceIndex" Integer.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let deleteOnTermination =
-        field_map json "DeleteOnTermination" Boolean.of_json in
+        field_map json__ "DeleteOnTermination" Boolean.of_json in
       let associatePublicIpAddress =
-        field_map json "AssociatePublicIpAddress" Boolean.of_json in
+        field_map json__ "AssociatePublicIpAddress" Boolean.of_json in
       let associateCarrierIpAddress =
-        field_map json "AssociateCarrierIpAddress" Boolean.of_json in
-      make ?ipv6PrefixCount ?ipv6Prefixes ?ipv4PrefixCount ?ipv4Prefixes
-        ?networkCardIndex ?subnetId ?secondaryPrivateIpAddressCount
-        ?privateIpAddresses ?privateIpAddress ?networkInterfaceId
-        ?ipv6Addresses ?ipv6AddressCount ?interfaceType ?groups ?deviceIndex
-        ?description ?deleteOnTermination ?associatePublicIpAddress
-        ?associateCarrierIpAddress ()
+        field_map json__ "AssociateCarrierIpAddress" Boolean.of_json in
+      make ?enaQueueCount ?connectionTrackingSpecification
+        ?enaSrdSpecification ?primaryIpv6 ?ipv6PrefixCount ?ipv6Prefixes
+        ?ipv4PrefixCount ?ipv4Prefixes ?networkCardIndex ?subnetId
+        ?secondaryPrivateIpAddressCount ?privateIpAddresses ?privateIpAddress
+        ?networkInterfaceId ?ipv6Addresses ?ipv6AddressCount ?interfaceType
+        ?groups ?deviceIndex ?description ?deleteOnTermination
+        ?associatePublicIpAddress ?associateCarrierIpAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The parameters for a network interface."]
+module LaunchTemplateInstanceSecondaryInterfaceSpecificationRequest =
+  struct
+    type nonrec t =
+      {
+      deleteOnTermination: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the secondary interface is deleted when the instance is terminated. The only supported value for this field is true."];
+      deviceIndex: Integer.t option
+        [@ocaml.doc
+          "The device index for the secondary interface attachment."];
+      privateIpAddresses:
+        SecondaryInterfacePrivateIpAddressSpecificationListRequest.t option
+        [@ocaml.doc
+          "The private IPv4 addresses to assign to the secondary interface."];
+      privateIpAddressCount: Integer.t option
+        [@ocaml.doc
+          "The number of private IPv4 addresses to assign to the secondary interface."];
+      secondarySubnetId: SecondarySubnetId.t option
+        [@ocaml.doc "The ID of the secondary subnet."];
+      interfaceType: SecondaryInterfaceType.t option
+        [@ocaml.doc "The type of secondary interface."];
+      networkCardIndex: Integer.t option
+        [@ocaml.doc "The index of the network card."]}
+    let make ?deleteOnTermination =
+      fun ?deviceIndex ->
+        fun ?privateIpAddresses ->
+          fun ?privateIpAddressCount ->
+            fun ?secondarySubnetId ->
+              fun ?interfaceType ->
+                fun ?networkCardIndex ->
+                  fun () ->
+                    {
+                      deleteOnTermination;
+                      deviceIndex;
+                      privateIpAddresses;
+                      privateIpAddressCount;
+                      secondarySubnetId;
+                      interfaceType;
+                      networkCardIndex
+                    }
+    let to_value x =
+      structure_to_value
+        [("DeleteOnTermination",
+           (Option.map x.deleteOnTermination ~f:Boolean.to_value));
+        ("DeviceIndex", (Option.map x.deviceIndex ~f:Integer.to_value));
+        ("PrivateIpAddress",
+          (Option.map x.privateIpAddresses
+             ~f:SecondaryInterfacePrivateIpAddressSpecificationListRequest.to_value));
+        ("PrivateIpAddressCount",
+          (Option.map x.privateIpAddressCount ~f:Integer.to_value));
+        ("SecondarySubnetId",
+          (Option.map x.secondarySubnetId ~f:SecondarySubnetId.to_value));
+        ("InterfaceType",
+          (Option.map x.interfaceType ~f:SecondaryInterfaceType.to_value));
+        ("NetworkCardIndex",
+          (Option.map x.networkCardIndex ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkCardIndex =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "NetworkCardIndex") in
+      let interfaceType =
+        (Option.map ~f:SecondaryInterfaceType.of_xml)
+          (Xml.child xml_arg0 "InterfaceType") in
+      let secondarySubnetId =
+        (Option.map ~f:SecondarySubnetId.of_xml)
+          (Xml.child xml_arg0 "SecondarySubnetId") in
+      let privateIpAddressCount =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "PrivateIpAddressCount") in
+      let privateIpAddresses =
+        (Option.map
+           ~f:SecondaryInterfacePrivateIpAddressSpecificationListRequest.of_xml)
+          (Xml.child xml_arg0 "PrivateIpAddress") in
+      let deviceIndex =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "DeviceIndex") in
+      let deleteOnTermination =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "DeleteOnTermination") in
+      make ?networkCardIndex ?interfaceType ?secondarySubnetId
+        ?privateIpAddressCount ?privateIpAddresses ?deviceIndex
+        ?deleteOnTermination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkCardIndex =
+        field_map json__ "NetworkCardIndex" Integer.of_json in
+      let interfaceType =
+        field_map json__ "InterfaceType" SecondaryInterfaceType.of_json in
+      let secondarySubnetId =
+        field_map json__ "SecondarySubnetId" SecondarySubnetId.of_json in
+      let privateIpAddressCount =
+        field_map json__ "PrivateIpAddressCount" Integer.of_json in
+      let privateIpAddresses =
+        field_map json__ "PrivateIpAddresses"
+          SecondaryInterfacePrivateIpAddressSpecificationListRequest.of_json in
+      let deviceIndex = field_map json__ "DeviceIndex" Integer.of_json in
+      let deleteOnTermination =
+        field_map json__ "DeleteOnTermination" Boolean.of_json in
+      make ?networkCardIndex ?interfaceType ?secondarySubnetId
+        ?privateIpAddressCount ?privateIpAddresses ?deviceIndex
+        ?deleteOnTermination ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a secondary interface specification for a launch template request."]
 module LaunchTemplateLicenseConfigurationRequest =
   struct
     type nonrec t =
@@ -7486,9 +13009,9 @@ module LaunchTemplateLicenseConfigurationRequest =
           (Xml.child xml_arg0 "LicenseConfigurationArn") in
       make ?licenseConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let licenseConfigurationArn =
-        field_map json "LicenseConfigurationArn" String_.of_json in
+        field_map json__ "LicenseConfigurationArn" String_.of_json in
       make ?licenseConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a license configuration."]
@@ -7498,7 +13021,7 @@ module LaunchTemplateTagSpecificationRequest =
       {
       resourceType: ResourceType.t option
         [@ocaml.doc
-          "The type of resource to tag. Currently, the resource types that support tagging on creation are instance, volume, elastic-gpu, network-interface, and spot-instances-request. To tag a resource after it has been created, see CreateTags."];
+          "The type of resource to tag. Valid Values lists all resource types for Amazon EC2 that can be tagged. When you create a launch template, you can specify tags for the following resource types only: instance | volume | network-interface | spot-instances-request. If the instance does not include the resource type that you specify, the instance launch fails. For example, not all instance types include a volume. To tag a resource after it has been created, see CreateTags."];
       tags: TagList.t option
         [@ocaml.doc "The tags to apply to the resource."]}
     let make ?resourceType = fun ?tags -> fun () -> { resourceType; tags }
@@ -7515,12 +13038,43 @@ module LaunchTemplateTagSpecificationRequest =
           (Xml.child xml_arg0 "ResourceType") in
       make ?tags ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
       make ?tags ?resourceType ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The tags specification for the launch template."]
+  end[@@ocaml.doc
+       "The tags specification for the resources that are created during instance launch."]
+module ImageUsageResourceTypeOptionRequestList =
+  struct
+    type nonrec t = ImageUsageResourceTypeOptionRequest.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageUsageResourceTypeOptionRequest.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ImageUsageResourceTypeOptionRequest.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageUsageResourceTypeOptionRequestList"
+        ~of_json:ImageUsageResourceTypeOptionRequest.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module FleetSpotCapacityRebalanceRequest =
   struct
     type nonrec t =
@@ -7551,11 +13105,12 @@ module FleetSpotCapacityRebalanceRequest =
           (Xml.child xml_arg0 "ReplacementStrategy") in
       make ?terminationDelay ?replacementStrategy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let terminationDelay =
-        field_map json "TerminationDelay" Integer.of_json in
+        field_map json__ "TerminationDelay" Integer.of_json in
       let replacementStrategy =
-        field_map json "ReplacementStrategy" FleetReplacementStrategy.of_json in
+        field_map json__ "ReplacementStrategy"
+          FleetReplacementStrategy.of_json in
       make ?terminationDelay ?replacementStrategy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7580,9 +13135,9 @@ module CertificateAuthenticationRequest =
           (Xml.child xml_arg0 "ClientRootCertificateChainArn") in
       make ?clientRootCertificateChainArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRootCertificateChainArn =
-        field_map json "ClientRootCertificateChainArn" String_.of_json in
+        field_map json__ "ClientRootCertificateChainArn" String_.of_json in
       make ?clientRootCertificateChainArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7604,8 +13159,8 @@ module DirectoryServiceAuthenticationRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DirectoryId") in
       make ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let directoryId = field_map json "DirectoryId" String_.of_json in
+    let of_json json__ =
+      let directoryId = field_map json__ "DirectoryId" String_.of_json in
       make ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7638,10 +13193,11 @@ module FederatedAuthenticationRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SAMLProviderArn") in
       make ?selfServiceSAMLProviderArn ?sAMLProviderArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let selfServiceSAMLProviderArn =
-        field_map json "SelfServiceSAMLProviderArn" String_.of_json in
-      let sAMLProviderArn = field_map json "SAMLProviderArn" String_.of_json in
+        field_map json__ "SelfServiceSAMLProviderArn" String_.of_json in
+      let sAMLProviderArn =
+        field_map json__ "SAMLProviderArn" String_.of_json in
       make ?selfServiceSAMLProviderArn ?sAMLProviderArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7704,9 +13260,9 @@ module CancelSpotFleetRequestsError =
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" CancelBatchErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" CancelBatchErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a Spot Fleet error."]
@@ -7737,12 +13293,13 @@ module CancelCapacityReservationFleetError =
           (Xml.child xml_arg0 "code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "Message"
+        field_map json__ "Message"
           CancelCapacityReservationFleetErrorMessage.of_json in
       let code =
-        field_map json "Code" CancelCapacityReservationFleetErrorCode.of_json in
+        field_map json__ "Code"
+          CancelCapacityReservationFleetErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7771,14 +13328,90 @@ module SecurityGroupRuleDescription =
           (Xml.child xml_arg0 "SecurityGroupRuleId") in
       make ?description ?securityGroupRuleId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" String_.of_json in
       let securityGroupRuleId =
-        field_map json "SecurityGroupRuleId" String_.of_json in
+        field_map json__ "SecurityGroupRuleId" String_.of_json in
       make ?description ?securityGroupRuleId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the description of a security group rule. You can use this when you want to update the security group rule description for either an inbound or outbound rule."]
+module CapacityManagerMonitoredTagKey =
+  struct
+    type nonrec t =
+      {
+      tagKey: String_.t option [@ocaml.doc "The tag key being monitored."];
+      status: CapacityManagerMonitoredTagKeyStatus.t option
+        [@ocaml.doc
+          "The current status of the monitored tag key. Valid values are activating, activated, deactivating, and suspended."];
+      statusMessage: String_.t option
+        [@ocaml.doc
+          "A message providing additional details about the current status of the monitored tag key."];
+      capacityManagerProvided: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether this tag key is provided by Capacity Manager by default, rather than being user-activated."];
+      earliestDatapointTimestamp: MillisecondDateTime.t option
+        [@ocaml.doc
+          "The earliest timestamp from which tag data is available for queries, in UTC ISO 8601 format."]}
+    let make ?tagKey =
+      fun ?status ->
+        fun ?statusMessage ->
+          fun ?capacityManagerProvided ->
+            fun ?earliestDatapointTimestamp ->
+              fun () ->
+                {
+                  tagKey;
+                  status;
+                  statusMessage;
+                  capacityManagerProvided;
+                  earliestDatapointTimestamp
+                }
+    let to_value x =
+      structure_to_value
+        [("tagKey", (Option.map x.tagKey ~f:String_.to_value));
+        ("status",
+          (Option.map x.status
+             ~f:CapacityManagerMonitoredTagKeyStatus.to_value));
+        ("statusMessage", (Option.map x.statusMessage ~f:String_.to_value));
+        ("capacityManagerProvided",
+          (Option.map x.capacityManagerProvided ~f:Boolean.to_value));
+        ("earliestDatapointTimestamp",
+          (Option.map x.earliestDatapointTimestamp
+             ~f:MillisecondDateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let earliestDatapointTimestamp =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "earliestDatapointTimestamp") in
+      let capacityManagerProvided =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "capacityManagerProvided") in
+      let statusMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusMessage") in
+      let status =
+        (Option.map ~f:CapacityManagerMonitoredTagKeyStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let tagKey =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "tagKey") in
+      make ?earliestDatapointTimestamp ?capacityManagerProvided
+        ?statusMessage ?status ?tagKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let earliestDatapointTimestamp =
+        field_map json__ "EarliestDatapointTimestamp"
+          MillisecondDateTime.of_json in
+      let capacityManagerProvided =
+        field_map json__ "CapacityManagerProvided" Boolean.of_json in
+      let statusMessage = field_map json__ "StatusMessage" String_.of_json in
+      let status =
+        field_map json__ "Status"
+          CapacityManagerMonitoredTagKeyStatus.of_json in
+      let tagKey = field_map json__ "TagKey" String_.of_json in
+      make ?earliestDatapointTimestamp ?capacityManagerProvided
+        ?statusMessage ?status ?tagKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a tag key that is being monitored by Capacity Manager, including its activation status and the earliest available data point."]
 module InstanceMonitoring =
   struct
     type nonrec t =
@@ -7800,9 +13433,9 @@ module InstanceMonitoring =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceId") in
       make ?monitoring ?instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let monitoring = field_map json "Monitoring" Monitoring.of_json in
-      let instanceId = field_map json "InstanceId" String_.of_json in
+    let of_json json__ =
+      let monitoring = field_map json__ "Monitoring" Monitoring.of_json in
+      let instanceId = field_map json__ "InstanceId" String_.of_json in
       make ?monitoring ?instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the monitoring of an instance."]
@@ -7810,20 +13443,20 @@ module InstanceStateChange =
   struct
     type nonrec t =
       {
+      instanceId: String_.t option [@ocaml.doc "The ID of the instance."];
       currentState: InstanceState.t option
         [@ocaml.doc "The current state of the instance."];
-      instanceId: String_.t option [@ocaml.doc "The ID of the instance."];
       previousState: InstanceState.t option
         [@ocaml.doc "The previous state of the instance."]}
-    let make ?currentState =
-      fun ?instanceId ->
+    let make ?instanceId =
+      fun ?currentState ->
         fun ?previousState ->
-          fun () -> { currentState; instanceId; previousState }
+          fun () -> { instanceId; currentState; previousState }
     let to_value x =
       structure_to_value
-        [("currentState",
-           (Option.map x.currentState ~f:InstanceState.to_value));
-        ("instanceId", (Option.map x.instanceId ~f:String_.to_value));
+        [("instanceId", (Option.map x.instanceId ~f:String_.to_value));
+        ("currentState",
+          (Option.map x.currentState ~f:InstanceState.to_value));
         ("previousState",
           (Option.map x.previousState ~f:InstanceState.to_value))]
     let to_query v = to_query to_value v
@@ -7831,19 +13464,20 @@ module InstanceStateChange =
       let previousState =
         (Option.map ~f:InstanceState.of_xml)
           (Xml.child xml_arg0 "previousState") in
-      let instanceId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceId") in
       let currentState =
         (Option.map ~f:InstanceState.of_xml)
           (Xml.child xml_arg0 "currentState") in
-      make ?previousState ?instanceId ?currentState ()
+      let instanceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceId") in
+      make ?previousState ?currentState ?instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let previousState =
-        field_map json "PreviousState" InstanceState.of_json in
-      let instanceId = field_map json "InstanceId" String_.of_json in
-      let currentState = field_map json "CurrentState" InstanceState.of_json in
-      make ?previousState ?instanceId ?currentState ()
+        field_map json__ "PreviousState" InstanceState.of_json in
+      let currentState =
+        field_map json__ "CurrentState" InstanceState.of_json in
+      let instanceId = field_map json__ "InstanceId" String_.of_json in
+      make ?previousState ?currentState ?instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an instance state change."]
 module TerminateConnectionStatus =
@@ -7880,12 +13514,12 @@ module TerminateConnectionStatus =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "connectionId") in
       make ?currentStatus ?previousStatus ?connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let currentStatus =
-        field_map json "CurrentStatus" ClientVpnConnectionStatus.of_json in
+        field_map json__ "CurrentStatus" ClientVpnConnectionStatus.of_json in
       let previousStatus =
-        field_map json "PreviousStatus" ClientVpnConnectionStatus.of_json in
-      let connectionId = field_map json "ConnectionId" String_.of_json in
+        field_map json__ "PreviousStatus" ClientVpnConnectionStatus.of_json in
+      let connectionId = field_map json__ "ConnectionId" String_.of_json in
       make ?currentStatus ?previousStatus ?connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7899,6 +13533,10 @@ module TransitGatewayRoute =
       prefixListId: PrefixListResourceId.t option
         [@ocaml.doc
           "The ID of the prefix list used for destination matches."];
+      transitGatewayRouteTableAnnouncementId:
+        TransitGatewayRouteTableAnnouncementId.t option
+        [@ocaml.doc
+          "The ID of the transit gateway route table announcement."];
       transitGatewayAttachments: TransitGatewayRouteAttachmentList.t option
         [@ocaml.doc "The attachments."];
       type_: TransitGatewayRouteType.t option [@ocaml.doc "The route type."];
@@ -7906,23 +13544,28 @@ module TransitGatewayRoute =
         [@ocaml.doc "The state of the route."]}
     let make ?destinationCidrBlock =
       fun ?prefixListId ->
-        fun ?transitGatewayAttachments ->
-          fun ?type_ ->
-            fun ?state ->
-              fun () ->
-                {
-                  destinationCidrBlock;
-                  prefixListId;
-                  transitGatewayAttachments;
-                  type_;
-                  state
-                }
+        fun ?transitGatewayRouteTableAnnouncementId ->
+          fun ?transitGatewayAttachments ->
+            fun ?type_ ->
+              fun ?state ->
+                fun () ->
+                  {
+                    destinationCidrBlock;
+                    prefixListId;
+                    transitGatewayRouteTableAnnouncementId;
+                    transitGatewayAttachments;
+                    type_;
+                    state
+                  }
     let to_value x =
       structure_to_value
         [("destinationCidrBlock",
            (Option.map x.destinationCidrBlock ~f:String_.to_value));
         ("prefixListId",
           (Option.map x.prefixListId ~f:PrefixListResourceId.to_value));
+        ("transitGatewayRouteTableAnnouncementId",
+          (Option.map x.transitGatewayRouteTableAnnouncementId
+             ~f:TransitGatewayRouteTableAnnouncementId.to_value));
         ("transitGatewayAttachments",
           (Option.map x.transitGatewayAttachments
              ~f:TransitGatewayRouteAttachmentList.to_value));
@@ -7939,26 +13582,34 @@ module TransitGatewayRoute =
       let transitGatewayAttachments =
         (Option.map ~f:TransitGatewayRouteAttachmentList.of_xml)
           (Xml.child xml_arg0 "transitGatewayAttachments") in
+      let transitGatewayRouteTableAnnouncementId =
+        (Option.map ~f:TransitGatewayRouteTableAnnouncementId.of_xml)
+          (Xml.child xml_arg0 "transitGatewayRouteTableAnnouncementId") in
       let prefixListId =
         (Option.map ~f:PrefixListResourceId.of_xml)
           (Xml.child xml_arg0 "prefixListId") in
       let destinationCidrBlock =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "destinationCidrBlock") in
-      make ?state ?type_ ?transitGatewayAttachments ?prefixListId
+      make ?state ?type_ ?transitGatewayAttachments
+        ?transitGatewayRouteTableAnnouncementId ?prefixListId
         ?destinationCidrBlock ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" TransitGatewayRouteState.of_json in
-      let type_ = field_map json "Type" TransitGatewayRouteType.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" TransitGatewayRouteState.of_json in
+      let type_ = field_map json__ "Type" TransitGatewayRouteType.of_json in
       let transitGatewayAttachments =
-        field_map json "TransitGatewayAttachments"
+        field_map json__ "TransitGatewayAttachments"
           TransitGatewayRouteAttachmentList.of_json in
+      let transitGatewayRouteTableAnnouncementId =
+        field_map json__ "TransitGatewayRouteTableAnnouncementId"
+          TransitGatewayRouteTableAnnouncementId.of_json in
       let prefixListId =
-        field_map json "PrefixListId" PrefixListResourceId.of_json in
+        field_map json__ "PrefixListId" PrefixListResourceId.of_json in
       let destinationCidrBlock =
-        field_map json "DestinationCidrBlock" String_.of_json in
-      make ?state ?type_ ?transitGatewayAttachments ?prefixListId
+        field_map json__ "DestinationCidrBlock" String_.of_json in
+      make ?state ?type_ ?transitGatewayAttachments
+        ?transitGatewayRouteTableAnnouncementId ?prefixListId
         ?destinationCidrBlock ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a route for a transit gateway route table."]
@@ -7984,13 +13635,13 @@ module Filter =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" ValueStringList.of_json in
-      let name = field_map json "Name" String_.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" ValueStringList.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A filter name and value pair that is used to return a more specific list of results from a describe operation. Filters can be used to match a set of resources by specific criteria, such as tags, attributes, or IDs. If you specify multiple filters, the filters are joined with an AND, and the request returns only results that match all of the specified filters."]
+       "A filter name and value pair that is used to return a more specific list of results from a describe operation. Filters can be used to match a set of resources by specific criteria, such as tags, attributes, or IDs. If you specify multiple filters, the filters are joined with an AND, and the request returns only results that match all of the specified filters. For more information, see List and filter using the CLI and API in the Amazon EC2 User Guide."]
 module TransitGatewayMulticastGroup =
   struct
     type nonrec t =
@@ -8095,22 +13746,23 @@ module TransitGatewayMulticastGroup =
         ?networkInterfaceId ?resourceOwnerId ?resourceType ?resourceId
         ?subnetId ?transitGatewayAttachmentId ?groupIpAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceType = field_map json "SourceType" MembershipType.of_json in
-      let memberType = field_map json "MemberType" MembershipType.of_json in
-      let groupSource = field_map json "GroupSource" Boolean.of_json in
-      let groupMember = field_map json "GroupMember" Boolean.of_json in
+    let of_json json__ =
+      let sourceType = field_map json__ "SourceType" MembershipType.of_json in
+      let memberType = field_map json__ "MemberType" MembershipType.of_json in
+      let groupSource = field_map json__ "GroupSource" Boolean.of_json in
+      let groupMember = field_map json__ "GroupMember" Boolean.of_json in
       let networkInterfaceId =
-        field_map json "NetworkInterfaceId" String_.of_json in
-      let resourceOwnerId = field_map json "ResourceOwnerId" String_.of_json in
+        field_map json__ "NetworkInterfaceId" String_.of_json in
+      let resourceOwnerId =
+        field_map json__ "ResourceOwnerId" String_.of_json in
       let resourceType =
-        field_map json "ResourceType"
+        field_map json__ "ResourceType"
           TransitGatewayAttachmentResourceType.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
-      let subnetId = field_map json "SubnetId" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let subnetId = field_map json__ "SubnetId" String_.of_json in
       let transitGatewayAttachmentId =
-        field_map json "TransitGatewayAttachmentId" String_.of_json in
-      let groupIpAddress = field_map json "GroupIpAddress" String_.of_json in
+        field_map json__ "TransitGatewayAttachmentId" String_.of_json in
+      let groupIpAddress = field_map json__ "GroupIpAddress" String_.of_json in
       make ?sourceType ?memberType ?groupSource ?groupMember
         ?networkInterfaceId ?resourceOwnerId ?resourceType ?resourceId
         ?subnetId ?transitGatewayAttachmentId ?groupIpAddress ()
@@ -8135,7 +13787,14 @@ module LocalGatewayRoute =
           "The Amazon Resource Name (ARN) of the local gateway route table."];
       ownerId: String_.t option
         [@ocaml.doc
-          "The ID of the Amazon Web Services account that owns the local gateway route."]}
+          "The ID of the Amazon Web Services account that owns the local gateway route."];
+      subnetId: SubnetId.t option [@ocaml.doc "The ID of the subnet."];
+      coipPoolId: CoipPoolId.t option
+        [@ocaml.doc "The ID of the customer-owned address pool."];
+      networkInterfaceId: NetworkInterfaceId.t option
+        [@ocaml.doc "The ID of the network interface."];
+      destinationPrefixListId: PrefixListResourceId.t option
+        [@ocaml.doc "The ID of the prefix list."]}
     let make ?destinationCidrBlock =
       fun ?localGatewayVirtualInterfaceGroupId ->
         fun ?type_ ->
@@ -8143,16 +13802,24 @@ module LocalGatewayRoute =
             fun ?localGatewayRouteTableId ->
               fun ?localGatewayRouteTableArn ->
                 fun ?ownerId ->
-                  fun () ->
-                    {
-                      destinationCidrBlock;
-                      localGatewayVirtualInterfaceGroupId;
-                      type_;
-                      state;
-                      localGatewayRouteTableId;
-                      localGatewayRouteTableArn;
-                      ownerId
-                    }
+                  fun ?subnetId ->
+                    fun ?coipPoolId ->
+                      fun ?networkInterfaceId ->
+                        fun ?destinationPrefixListId ->
+                          fun () ->
+                            {
+                              destinationCidrBlock;
+                              localGatewayVirtualInterfaceGroupId;
+                              type_;
+                              state;
+                              localGatewayRouteTableId;
+                              localGatewayRouteTableArn;
+                              ownerId;
+                              subnetId;
+                              coipPoolId;
+                              networkInterfaceId;
+                              destinationPrefixListId
+                            }
     let to_value x =
       structure_to_value
         [("destinationCidrBlock",
@@ -8167,9 +13834,26 @@ module LocalGatewayRoute =
              ~f:LocalGatewayRoutetableId.to_value));
         ("localGatewayRouteTableArn",
           (Option.map x.localGatewayRouteTableArn ~f:ResourceArn.to_value));
-        ("ownerId", (Option.map x.ownerId ~f:String_.to_value))]
+        ("ownerId", (Option.map x.ownerId ~f:String_.to_value));
+        ("subnetId", (Option.map x.subnetId ~f:SubnetId.to_value));
+        ("coipPoolId", (Option.map x.coipPoolId ~f:CoipPoolId.to_value));
+        ("networkInterfaceId",
+          (Option.map x.networkInterfaceId ~f:NetworkInterfaceId.to_value));
+        ("destinationPrefixListId",
+          (Option.map x.destinationPrefixListId
+             ~f:PrefixListResourceId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let destinationPrefixListId =
+        (Option.map ~f:PrefixListResourceId.of_xml)
+          (Xml.child xml_arg0 "destinationPrefixListId") in
+      let networkInterfaceId =
+        (Option.map ~f:NetworkInterfaceId.of_xml)
+          (Xml.child xml_arg0 "networkInterfaceId") in
+      let coipPoolId =
+        (Option.map ~f:CoipPoolId.of_xml) (Xml.child xml_arg0 "coipPoolId") in
+      let subnetId =
+        (Option.map ~f:SubnetId.of_xml) (Xml.child xml_arg0 "subnetId") in
       let ownerId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ownerId") in
       let localGatewayRouteTableArn =
@@ -8190,27 +13874,34 @@ module LocalGatewayRoute =
       let destinationCidrBlock =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "destinationCidrBlock") in
-      make ?ownerId ?localGatewayRouteTableArn ?localGatewayRouteTableId
-        ?state ?type_ ?localGatewayVirtualInterfaceGroupId
-        ?destinationCidrBlock ()
+      make ?destinationPrefixListId ?networkInterfaceId ?coipPoolId ?subnetId
+        ?ownerId ?localGatewayRouteTableArn ?localGatewayRouteTableId ?state
+        ?type_ ?localGatewayVirtualInterfaceGroupId ?destinationCidrBlock ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ownerId = field_map json "OwnerId" String_.of_json in
+    let of_json json__ =
+      let destinationPrefixListId =
+        field_map json__ "DestinationPrefixListId"
+          PrefixListResourceId.of_json in
+      let networkInterfaceId =
+        field_map json__ "NetworkInterfaceId" NetworkInterfaceId.of_json in
+      let coipPoolId = field_map json__ "CoipPoolId" CoipPoolId.of_json in
+      let subnetId = field_map json__ "SubnetId" SubnetId.of_json in
+      let ownerId = field_map json__ "OwnerId" String_.of_json in
       let localGatewayRouteTableArn =
-        field_map json "LocalGatewayRouteTableArn" ResourceArn.of_json in
+        field_map json__ "LocalGatewayRouteTableArn" ResourceArn.of_json in
       let localGatewayRouteTableId =
-        field_map json "LocalGatewayRouteTableId"
+        field_map json__ "LocalGatewayRouteTableId"
           LocalGatewayRoutetableId.of_json in
-      let state = field_map json "State" LocalGatewayRouteState.of_json in
-      let type_ = field_map json "Type" LocalGatewayRouteType.of_json in
+      let state = field_map json__ "State" LocalGatewayRouteState.of_json in
+      let type_ = field_map json__ "Type" LocalGatewayRouteType.of_json in
       let localGatewayVirtualInterfaceGroupId =
-        field_map json "LocalGatewayVirtualInterfaceGroupId"
+        field_map json__ "LocalGatewayVirtualInterfaceGroupId"
           LocalGatewayVirtualInterfaceGroupId.of_json in
       let destinationCidrBlock =
-        field_map json "DestinationCidrBlock" String_.of_json in
-      make ?ownerId ?localGatewayRouteTableArn ?localGatewayRouteTableId
-        ?state ?type_ ?localGatewayVirtualInterfaceGroupId
-        ?destinationCidrBlock ()
+        field_map json__ "DestinationCidrBlock" String_.of_json in
+      make ?destinationPrefixListId ?networkInterfaceId ?coipPoolId ?subnetId
+        ?ownerId ?localGatewayRouteTableArn ?localGatewayRouteTableId ?state
+        ?type_ ?localGatewayVirtualInterfaceGroupId ?destinationCidrBlock ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a route for a local gateway route table."]
 module KernelId =
@@ -8243,6 +13934,9 @@ module ScheduledInstancesBlockDeviceMappingSet =
   struct
     type nonrec t = ScheduledInstancesBlockDeviceMapping.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduledInstancesBlockDeviceMapping.to_value)) |>
         (fun x -> `List x)
@@ -8283,9 +13977,9 @@ module ScheduledInstancesIamInstanceProfile =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" String_.of_json in
-      let arn = field_map json "Arn" String_.of_json in make ?name ?arn ()
+    let of_json json__ =
+      let name = field_map json__ "Name" String_.of_json in
+      let arn = field_map json__ "Arn" String_.of_json in make ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes an IAM instance profile for a Scheduled Instance."]
@@ -8305,8 +13999,8 @@ module ScheduledInstancesMonitoring =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" Boolean.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
       make ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8315,6 +14009,9 @@ module ScheduledInstancesNetworkInterfaceSet =
   struct
     type nonrec t = ScheduledInstancesNetworkInterface.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduledInstancesNetworkInterface.to_value)) |>
         (fun x -> `List x)
@@ -8364,10 +14061,10 @@ module ScheduledInstancesPlacement =
           (Xml.child xml_arg0 "AvailabilityZone") in
       make ?groupName ?availabilityZone ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupName = field_map json "GroupName" PlacementGroupName.of_json in
+    let of_json json__ =
+      let groupName = field_map json__ "GroupName" PlacementGroupName.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
       make ?groupName ?availabilityZone ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the placement for a Scheduled Instance."]
@@ -8397,20 +14094,21 @@ module ElasticInferenceAccelerator =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?count ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let count =
-        field_map json "Count" ElasticInferenceAcceleratorCount.of_json in
-      let type_ = field_map_exn json "Type" String_.of_json in
+        field_map json__ "Count" ElasticInferenceAcceleratorCount.of_json in
+      let type_ = field_map_exn json__ "Type" String_.of_json in
       make ?count ~type_ ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes an elastic inference accelerator."]
+  end[@@ocaml.doc
+       "Amazon Elastic Inference is no longer available. Describes an elastic inference accelerator."]
 module SpotMarketOptions =
   struct
     type nonrec t =
       {
       maxPrice: String_.t option
         [@ocaml.doc
-          "The maximum hourly price you're willing to pay for the Spot Instances. The default is the On-Demand price."];
+          "The maximum hourly price that you're willing to pay for a Spot Instance. We do not recommend using this parameter because it can lead to increased interruptions. If you do not specify this parameter, you will pay the current Spot price. If you specify a maximum price, your Spot Instances will be interrupted more frequently than if you do not specify this parameter. If you specify a maximum price, it must be more than USD $0.001. Specifying a value below USD $0.001 will result in an InvalidParameterValue error message."];
       spotInstanceType: SpotInstanceType.t option
         [@ocaml.doc
           "The Spot Instance request type. For RunInstances, persistent Spot Instance requests are only supported when the instance interruption behavior is either hibernate or stop."];
@@ -8420,7 +14118,7 @@ module SpotMarketOptions =
           "The end date of the request, in UTC format (YYYY-MM-DDTHH:MM:SSZ). Supported only for persistent requests. For a persistent request, the request remains active until the ValidUntil date and time is reached. Otherwise, the request remains active until you cancel it. For a one-time request, ValidUntil is not supported. The request remains active until all instances launch or you cancel the request."];
       instanceInterruptionBehavior: InstanceInterruptionBehavior.t option
         [@ocaml.doc
-          "The behavior when a Spot Instance is interrupted. The default is terminate."]}
+          "The behavior when a Spot Instance is interrupted. If Configured (for HibernationOptions ) is set to true, the InstanceInterruptionBehavior parameter is automatically set to hibernate. If you set it to stop or terminate, you'll get an error. If Configured (for HibernationOptions ) is set to false or null, the InstanceInterruptionBehavior parameter is automatically set to terminate. You can also set it to stop or hibernate. For more information, see Interruption behavior in the Amazon EC2 User Guide."]}
     let make ?maxPrice =
       fun ?spotInstanceType ->
         fun ?blockDurationMinutes ->
@@ -8463,20 +14161,125 @@ module SpotMarketOptions =
       make ?instanceInterruptionBehavior ?validUntil ?blockDurationMinutes
         ?spotInstanceType ?maxPrice ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceInterruptionBehavior =
-        field_map json "InstanceInterruptionBehavior"
+        field_map json__ "InstanceInterruptionBehavior"
           InstanceInterruptionBehavior.of_json in
-      let validUntil = field_map json "ValidUntil" DateTime.of_json in
+      let validUntil = field_map json__ "ValidUntil" DateTime.of_json in
       let blockDurationMinutes =
-        field_map json "BlockDurationMinutes" Integer.of_json in
+        field_map json__ "BlockDurationMinutes" Integer.of_json in
       let spotInstanceType =
-        field_map json "SpotInstanceType" SpotInstanceType.of_json in
-      let maxPrice = field_map json "MaxPrice" String_.of_json in
+        field_map json__ "SpotInstanceType" SpotInstanceType.of_json in
+      let maxPrice = field_map json__ "MaxPrice" String_.of_json in
       make ?instanceInterruptionBehavior ?validUntil ?blockDurationMinutes
         ?spotInstanceType ?maxPrice ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The options for Spot Instances."]
+module InstanceSecondaryInterfaceSpecificationRequest =
+  struct
+    type nonrec t =
+      {
+      deleteOnTermination: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the secondary interface is deleted when the instance is terminated. The only supported value for this field is true."];
+      deviceIndex: Integer.t option
+        [@ocaml.doc
+          "The device index for the secondary interface attachment."];
+      privateIpAddresses:
+        InstanceSecondaryInterfacePrivateIpAddressListRequest.t option
+        [@ocaml.doc
+          "The private IPv4 addresses to assign to the secondary interface."];
+      privateIpAddressCount: Integer.t option
+        [@ocaml.doc
+          "The number of private IPv4 addresses to assign to the secondary interface."];
+      secondarySubnetId: SecondarySubnetId.t option
+        [@ocaml.doc "The ID of the secondary subnet."];
+      interfaceType: SecondaryInterfaceType.t option
+        [@ocaml.doc "The type of secondary interface."];
+      networkCardIndex: Integer.t option
+        [@ocaml.doc
+          "The index of the network card. The network card must support secondary interfaces."]}
+    let make ?deleteOnTermination =
+      fun ?deviceIndex ->
+        fun ?privateIpAddresses ->
+          fun ?privateIpAddressCount ->
+            fun ?secondarySubnetId ->
+              fun ?interfaceType ->
+                fun ?networkCardIndex ->
+                  fun () ->
+                    {
+                      deleteOnTermination;
+                      deviceIndex;
+                      privateIpAddresses;
+                      privateIpAddressCount;
+                      secondarySubnetId;
+                      interfaceType;
+                      networkCardIndex
+                    }
+    let to_value x =
+      structure_to_value
+        [("DeleteOnTermination",
+           (Option.map x.deleteOnTermination ~f:Boolean.to_value));
+        ("DeviceIndex", (Option.map x.deviceIndex ~f:Integer.to_value));
+        ("PrivateIpAddress",
+          (Option.map x.privateIpAddresses
+             ~f:InstanceSecondaryInterfacePrivateIpAddressListRequest.to_value));
+        ("PrivateIpAddressCount",
+          (Option.map x.privateIpAddressCount ~f:Integer.to_value));
+        ("SecondarySubnetId",
+          (Option.map x.secondarySubnetId ~f:SecondarySubnetId.to_value));
+        ("InterfaceType",
+          (Option.map x.interfaceType ~f:SecondaryInterfaceType.to_value));
+        ("NetworkCardIndex",
+          (Option.map x.networkCardIndex ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkCardIndex =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "NetworkCardIndex") in
+      let interfaceType =
+        (Option.map ~f:SecondaryInterfaceType.of_xml)
+          (Xml.child xml_arg0 "InterfaceType") in
+      let secondarySubnetId =
+        (Option.map ~f:SecondarySubnetId.of_xml)
+          (Xml.child xml_arg0 "SecondarySubnetId") in
+      let privateIpAddressCount =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "PrivateIpAddressCount") in
+      let privateIpAddresses =
+        (Option.map
+           ~f:InstanceSecondaryInterfacePrivateIpAddressListRequest.of_xml)
+          (Xml.child xml_arg0 "PrivateIpAddress") in
+      let deviceIndex =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "DeviceIndex") in
+      let deleteOnTermination =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "DeleteOnTermination") in
+      make ?networkCardIndex ?interfaceType ?secondarySubnetId
+        ?privateIpAddressCount ?privateIpAddresses ?deviceIndex
+        ?deleteOnTermination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkCardIndex =
+        field_map json__ "NetworkCardIndex" Integer.of_json in
+      let interfaceType =
+        field_map json__ "InterfaceType" SecondaryInterfaceType.of_json in
+      let secondarySubnetId =
+        field_map json__ "SecondarySubnetId" SecondarySubnetId.of_json in
+      let privateIpAddressCount =
+        field_map json__ "PrivateIpAddressCount" Integer.of_json in
+      let privateIpAddresses =
+        field_map json__ "PrivateIpAddresses"
+          InstanceSecondaryInterfacePrivateIpAddressListRequest.of_json in
+      let deviceIndex = field_map json__ "DeviceIndex" Integer.of_json in
+      let deleteOnTermination =
+        field_map json__ "DeleteOnTermination" Boolean.of_json in
+      make ?networkCardIndex ?interfaceType ?secondarySubnetId
+        ?privateIpAddressCount ?privateIpAddresses ?deviceIndex
+        ?deleteOnTermination ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a secondary interface specification for launching an instance."]
 module LicenseConfigurationRequest =
   struct
     type nonrec t =
@@ -8496,12 +14299,130 @@ module LicenseConfigurationRequest =
           (Xml.child xml_arg0 "LicenseConfigurationArn") in
       make ?licenseConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let licenseConfigurationArn =
-        field_map json "LicenseConfigurationArn" String_.of_json in
+        field_map json__ "LicenseConfigurationArn" String_.of_json in
       make ?licenseConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a license configuration."]
+module RevokedSecurityGroupRule =
+  struct
+    type nonrec t =
+      {
+      securityGroupRuleId: SecurityGroupRuleId.t option
+        [@ocaml.doc "A security group rule ID."];
+      groupId: SecurityGroupId.t option [@ocaml.doc "A security group ID."];
+      isEgress: Boolean.t option
+        [@ocaml.doc "Defines if a security group rule is an outbound rule."];
+      ipProtocol: String_.t option
+        [@ocaml.doc "The security group rule's protocol."];
+      fromPort: Integer.t option
+        [@ocaml.doc "The 'from' port number of the security group rule."];
+      toPort: Integer.t option
+        [@ocaml.doc "The 'to' port number of the security group rule."];
+      cidrIpv4: String_.t option
+        [@ocaml.doc "The IPv4 CIDR of the traffic source."];
+      cidrIpv6: String_.t option
+        [@ocaml.doc "The IPv6 CIDR of the traffic source."];
+      prefixListId: PrefixListResourceId.t option
+        [@ocaml.doc "The ID of a prefix list that's the traffic source."];
+      referencedGroupId: SecurityGroupId.t option
+        [@ocaml.doc "The ID of a referenced security group."];
+      description: String_.t option
+        [@ocaml.doc "A description of the revoked security group rule."]}
+    let make ?securityGroupRuleId =
+      fun ?groupId ->
+        fun ?isEgress ->
+          fun ?ipProtocol ->
+            fun ?fromPort ->
+              fun ?toPort ->
+                fun ?cidrIpv4 ->
+                  fun ?cidrIpv6 ->
+                    fun ?prefixListId ->
+                      fun ?referencedGroupId ->
+                        fun ?description ->
+                          fun () ->
+                            {
+                              securityGroupRuleId;
+                              groupId;
+                              isEgress;
+                              ipProtocol;
+                              fromPort;
+                              toPort;
+                              cidrIpv4;
+                              cidrIpv6;
+                              prefixListId;
+                              referencedGroupId;
+                              description
+                            }
+    let to_value x =
+      structure_to_value
+        [("securityGroupRuleId",
+           (Option.map x.securityGroupRuleId ~f:SecurityGroupRuleId.to_value));
+        ("groupId", (Option.map x.groupId ~f:SecurityGroupId.to_value));
+        ("isEgress", (Option.map x.isEgress ~f:Boolean.to_value));
+        ("ipProtocol", (Option.map x.ipProtocol ~f:String_.to_value));
+        ("fromPort", (Option.map x.fromPort ~f:Integer.to_value));
+        ("toPort", (Option.map x.toPort ~f:Integer.to_value));
+        ("cidrIpv4", (Option.map x.cidrIpv4 ~f:String_.to_value));
+        ("cidrIpv6", (Option.map x.cidrIpv6 ~f:String_.to_value));
+        ("prefixListId",
+          (Option.map x.prefixListId ~f:PrefixListResourceId.to_value));
+        ("referencedGroupId",
+          (Option.map x.referencedGroupId ~f:SecurityGroupId.to_value));
+        ("description", (Option.map x.description ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
+      let referencedGroupId =
+        (Option.map ~f:SecurityGroupId.of_xml)
+          (Xml.child xml_arg0 "referencedGroupId") in
+      let prefixListId =
+        (Option.map ~f:PrefixListResourceId.of_xml)
+          (Xml.child xml_arg0 "prefixListId") in
+      let cidrIpv6 =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cidrIpv6") in
+      let cidrIpv4 =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cidrIpv4") in
+      let toPort =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "toPort") in
+      let fromPort =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "fromPort") in
+      let ipProtocol =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ipProtocol") in
+      let isEgress =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isEgress") in
+      let groupId =
+        (Option.map ~f:SecurityGroupId.of_xml) (Xml.child xml_arg0 "groupId") in
+      let securityGroupRuleId =
+        (Option.map ~f:SecurityGroupRuleId.of_xml)
+          (Xml.child xml_arg0 "securityGroupRuleId") in
+      make ?description ?referencedGroupId ?prefixListId ?cidrIpv6 ?cidrIpv4
+        ?toPort ?fromPort ?ipProtocol ?isEgress ?groupId ?securityGroupRuleId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description = field_map json__ "Description" String_.of_json in
+      let referencedGroupId =
+        field_map json__ "ReferencedGroupId" SecurityGroupId.of_json in
+      let prefixListId =
+        field_map json__ "PrefixListId" PrefixListResourceId.of_json in
+      let cidrIpv6 = field_map json__ "CidrIpv6" String_.of_json in
+      let cidrIpv4 = field_map json__ "CidrIpv4" String_.of_json in
+      let toPort = field_map json__ "ToPort" Integer.of_json in
+      let fromPort = field_map json__ "FromPort" Integer.of_json in
+      let ipProtocol = field_map json__ "IpProtocol" String_.of_json in
+      let isEgress = field_map json__ "IsEgress" Boolean.of_json in
+      let groupId = field_map json__ "GroupId" SecurityGroupId.of_json in
+      let securityGroupRuleId =
+        field_map json__ "SecurityGroupRuleId" SecurityGroupRuleId.of_json in
+      make ?description ?referencedGroupId ?prefixListId ?cidrIpv6 ?cidrIpv4
+        ?toPort ?fromPort ?ipProtocol ?isEgress ?groupId ?securityGroupRuleId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A security group rule removed with RevokeSecurityGroupEgress or RevokeSecurityGroupIngress."]
 module SpotInstanceRequest =
   struct
     type nonrec t =
@@ -8526,7 +14447,10 @@ module SpotInstanceRequest =
         [@ocaml.doc "Additional information for launching instances."];
       launchedAvailabilityZone: String_.t option
         [@ocaml.doc
-          "The Availability Zone in which the request is launched."];
+          "The Availability Zone in which the request is launched. Either launchedAvailabilityZone or launchedAvailabilityZoneId can be specified, but not both"];
+      launchedAvailabilityZoneId: String_.t option
+        [@ocaml.doc
+          "The ID of the Availability Zone in which the request is launched. Either launchedAvailabilityZone or launchedAvailabilityZoneId can be specified, but not both"];
       productDescription: RIProductDescription.t option
         [@ocaml.doc
           "The product description associated with the Spot Instance."];
@@ -8534,10 +14458,10 @@ module SpotInstanceRequest =
         [@ocaml.doc "The ID of the Spot Instance request."];
       spotPrice: String_.t option
         [@ocaml.doc
-          "The maximum price per hour that you are willing to pay for a Spot Instance."];
+          "The maximum price per unit hour that you are willing to pay for a Spot Instance. We do not recommend using this parameter because it can lead to increased interruptions. If you do not specify this parameter, you will pay the current Spot price. If you specify a maximum price, your instances will be interrupted more frequently than if you do not specify this parameter."];
       state: SpotInstanceState.t option
         [@ocaml.doc
-          "The state of the Spot Instance request. Spot status information helps track your Spot Instance requests. For more information, see Spot status in the Amazon EC2 User Guide for Linux Instances."];
+          "The state of the Spot Instance request. Spot request status information helps track your Spot Instance requests. For more information, see Spot request status in the Amazon EC2 User Guide."];
       status: SpotInstanceStatus.t option
         [@ocaml.doc
           "The status code and status message describing the Spot Instance request."];
@@ -8562,38 +14486,41 @@ module SpotInstanceRequest =
                 fun ?launchGroup ->
                   fun ?launchSpecification ->
                     fun ?launchedAvailabilityZone ->
-                      fun ?productDescription ->
-                        fun ?spotInstanceRequestId ->
-                          fun ?spotPrice ->
-                            fun ?state ->
-                              fun ?status ->
-                                fun ?tags ->
-                                  fun ?type_ ->
-                                    fun ?validFrom ->
-                                      fun ?validUntil ->
-                                        fun ?instanceInterruptionBehavior ->
-                                          fun () ->
-                                            {
-                                              actualBlockHourlyPrice;
-                                              availabilityZoneGroup;
-                                              blockDurationMinutes;
-                                              createTime;
-                                              fault;
-                                              instanceId;
-                                              launchGroup;
-                                              launchSpecification;
-                                              launchedAvailabilityZone;
-                                              productDescription;
-                                              spotInstanceRequestId;
-                                              spotPrice;
-                                              state;
-                                              status;
-                                              tags;
-                                              type_;
-                                              validFrom;
-                                              validUntil;
-                                              instanceInterruptionBehavior
-                                            }
+                      fun ?launchedAvailabilityZoneId ->
+                        fun ?productDescription ->
+                          fun ?spotInstanceRequestId ->
+                            fun ?spotPrice ->
+                              fun ?state ->
+                                fun ?status ->
+                                  fun ?tags ->
+                                    fun ?type_ ->
+                                      fun ?validFrom ->
+                                        fun ?validUntil ->
+                                          fun ?instanceInterruptionBehavior
+                                            ->
+                                            fun () ->
+                                              {
+                                                actualBlockHourlyPrice;
+                                                availabilityZoneGroup;
+                                                blockDurationMinutes;
+                                                createTime;
+                                                fault;
+                                                instanceId;
+                                                launchGroup;
+                                                launchSpecification;
+                                                launchedAvailabilityZone;
+                                                launchedAvailabilityZoneId;
+                                                productDescription;
+                                                spotInstanceRequestId;
+                                                spotPrice;
+                                                state;
+                                                status;
+                                                tags;
+                                                type_;
+                                                validFrom;
+                                                validUntil;
+                                                instanceInterruptionBehavior
+                                              }
     let to_value x =
       structure_to_value
         [("actualBlockHourlyPrice",
@@ -8610,6 +14537,8 @@ module SpotInstanceRequest =
           (Option.map x.launchSpecification ~f:LaunchSpecification.to_value));
         ("launchedAvailabilityZone",
           (Option.map x.launchedAvailabilityZone ~f:String_.to_value));
+        ("launchedAvailabilityZoneId",
+          (Option.map x.launchedAvailabilityZoneId ~f:String_.to_value));
         ("productDescription",
           (Option.map x.productDescription ~f:RIProductDescription.to_value));
         ("spotInstanceRequestId",
@@ -8649,6 +14578,9 @@ module SpotInstanceRequest =
       let productDescription =
         (Option.map ~f:RIProductDescription.of_xml)
           (Xml.child xml_arg0 "productDescription") in
+      let launchedAvailabilityZoneId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "launchedAvailabilityZoneId") in
       let launchedAvailabilityZone =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "launchedAvailabilityZone") in
@@ -8675,50 +14607,70 @@ module SpotInstanceRequest =
           (Xml.child xml_arg0 "actualBlockHourlyPrice") in
       make ?instanceInterruptionBehavior ?validUntil ?validFrom ?type_ ?tags
         ?status ?state ?spotPrice ?spotInstanceRequestId ?productDescription
-        ?launchedAvailabilityZone ?launchSpecification ?launchGroup
-        ?instanceId ?fault ?createTime ?blockDurationMinutes
-        ?availabilityZoneGroup ?actualBlockHourlyPrice ()
+        ?launchedAvailabilityZoneId ?launchedAvailabilityZone
+        ?launchSpecification ?launchGroup ?instanceId ?fault ?createTime
+        ?blockDurationMinutes ?availabilityZoneGroup ?actualBlockHourlyPrice
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceInterruptionBehavior =
-        field_map json "InstanceInterruptionBehavior"
+        field_map json__ "InstanceInterruptionBehavior"
           InstanceInterruptionBehavior.of_json in
-      let validUntil = field_map json "ValidUntil" DateTime.of_json in
-      let validFrom = field_map json "ValidFrom" DateTime.of_json in
-      let type_ = field_map json "Type" SpotInstanceType.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let status = field_map json "Status" SpotInstanceStatus.of_json in
-      let state = field_map json "State" SpotInstanceState.of_json in
-      let spotPrice = field_map json "SpotPrice" String_.of_json in
+      let validUntil = field_map json__ "ValidUntil" DateTime.of_json in
+      let validFrom = field_map json__ "ValidFrom" DateTime.of_json in
+      let type_ = field_map json__ "Type" SpotInstanceType.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let status = field_map json__ "Status" SpotInstanceStatus.of_json in
+      let state = field_map json__ "State" SpotInstanceState.of_json in
+      let spotPrice = field_map json__ "SpotPrice" String_.of_json in
       let spotInstanceRequestId =
-        field_map json "SpotInstanceRequestId" String_.of_json in
+        field_map json__ "SpotInstanceRequestId" String_.of_json in
       let productDescription =
-        field_map json "ProductDescription" RIProductDescription.of_json in
+        field_map json__ "ProductDescription" RIProductDescription.of_json in
+      let launchedAvailabilityZoneId =
+        field_map json__ "LaunchedAvailabilityZoneId" String_.of_json in
       let launchedAvailabilityZone =
-        field_map json "LaunchedAvailabilityZone" String_.of_json in
+        field_map json__ "LaunchedAvailabilityZone" String_.of_json in
       let launchSpecification =
-        field_map json "LaunchSpecification" LaunchSpecification.of_json in
-      let launchGroup = field_map json "LaunchGroup" String_.of_json in
-      let instanceId = field_map json "InstanceId" InstanceId.of_json in
-      let fault = field_map json "Fault" SpotInstanceStateFault.of_json in
-      let createTime = field_map json "CreateTime" DateTime.of_json in
+        field_map json__ "LaunchSpecification" LaunchSpecification.of_json in
+      let launchGroup = field_map json__ "LaunchGroup" String_.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
+      let fault = field_map json__ "Fault" SpotInstanceStateFault.of_json in
+      let createTime = field_map json__ "CreateTime" DateTime.of_json in
       let blockDurationMinutes =
-        field_map json "BlockDurationMinutes" Integer.of_json in
+        field_map json__ "BlockDurationMinutes" Integer.of_json in
       let availabilityZoneGroup =
-        field_map json "AvailabilityZoneGroup" String_.of_json in
+        field_map json__ "AvailabilityZoneGroup" String_.of_json in
       let actualBlockHourlyPrice =
-        field_map json "ActualBlockHourlyPrice" String_.of_json in
+        field_map json__ "ActualBlockHourlyPrice" String_.of_json in
       make ?instanceInterruptionBehavior ?validUntil ?validFrom ?type_ ?tags
         ?status ?state ?spotPrice ?spotInstanceRequestId ?productDescription
-        ?launchedAvailabilityZone ?launchSpecification ?launchGroup
-        ?instanceId ?fault ?createTime ?blockDurationMinutes
-        ?availabilityZoneGroup ?actualBlockHourlyPrice ()
+        ?launchedAvailabilityZoneId ?launchedAvailabilityZone
+        ?launchSpecification ?launchGroup ?instanceId ?fault ?createTime
+        ?blockDurationMinutes ?availabilityZoneGroup ?actualBlockHourlyPrice
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a Spot Instance request."]
+module KeyPairNameWithResolver =
+  struct
+    type nonrec t = string
+    let context_ = "KeyPairNameWithResolver"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KeyPairNameWithResolver" j
+    let to_json = simple_to_json to_value
+  end
 module RequestSpotLaunchSpecificationSecurityGroupIdList =
   struct
     type nonrec t = SecurityGroupId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8744,6 +14696,9 @@ module RequestSpotLaunchSpecificationSecurityGroupList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8813,6 +14768,91 @@ module ReportInstanceReasonCodes =
       of_string (string_of_json ~kind:"ReportInstanceReasonCodes" j)
     let to_json = simple_to_json to_value
   end
+module ImageCriterionRequest =
+  struct
+    type nonrec t =
+      {
+      imageProviders: ImageProviderRequestList.t option
+        [@ocaml.doc
+          "The image providers whose images are allowed. Possible values: amazon: Allow AMIs created by Amazon or verified providers. aws-marketplace: Allow AMIs created by verified providers in the Amazon Web Services Marketplace. aws-backup-vault: Allow AMIs created by Amazon Web Services Backup. 12-digit account ID: Allow AMIs created by the specified accounts. One or more account IDs can be specified. none: Allow AMIs created by your own account only. When none is specified, no other values can be specified. Maximum: 200 values"];
+      marketplaceProductCodes: MarketplaceProductCodeRequestList.t option
+        [@ocaml.doc
+          "The Amazon Web Services Marketplace product codes for allowed images. Length: 1-25 characters Valid characters: Letters (A\226\128\147Z, a\226\128\147z) and numbers (0\226\128\1479) Maximum: 50 values"];
+      imageNames: ImageNameCriteriaRequestList.t option
+        [@ocaml.doc
+          "The names of allowed images. Names can include wildcards (? and *). Length: 1\226\128\147128 characters. With ?, the minimum is 3 characters. Valid characters: Letters: A\226\128\147Z, a\226\128\147z Numbers: 0\226\128\1479 Special characters: ( ) \\[ \\] . / - ' \\@ _ * ? Spaces Maximum: 50 values"];
+      deprecationTimeCondition: DeprecationTimeConditionRequest.t option
+        [@ocaml.doc
+          "The maximum period since deprecation for allowed images."];
+      creationDateCondition: CreationDateConditionRequest.t option
+        [@ocaml.doc "The maximum age for allowed images."]}
+    let make ?imageProviders =
+      fun ?marketplaceProductCodes ->
+        fun ?imageNames ->
+          fun ?deprecationTimeCondition ->
+            fun ?creationDateCondition ->
+              fun () ->
+                {
+                  imageProviders;
+                  marketplaceProductCodes;
+                  imageNames;
+                  deprecationTimeCondition;
+                  creationDateCondition
+                }
+    let to_value x =
+      structure_to_value
+        [("ImageProvider",
+           (Option.map x.imageProviders ~f:ImageProviderRequestList.to_value));
+        ("MarketplaceProductCode",
+          (Option.map x.marketplaceProductCodes
+             ~f:MarketplaceProductCodeRequestList.to_value));
+        ("ImageName",
+          (Option.map x.imageNames ~f:ImageNameCriteriaRequestList.to_value));
+        ("DeprecationTimeCondition",
+          (Option.map x.deprecationTimeCondition
+             ~f:DeprecationTimeConditionRequest.to_value));
+        ("CreationDateCondition",
+          (Option.map x.creationDateCondition
+             ~f:CreationDateConditionRequest.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationDateCondition =
+        (Option.map ~f:CreationDateConditionRequest.of_xml)
+          (Xml.child xml_arg0 "CreationDateCondition") in
+      let deprecationTimeCondition =
+        (Option.map ~f:DeprecationTimeConditionRequest.of_xml)
+          (Xml.child xml_arg0 "DeprecationTimeCondition") in
+      let imageNames =
+        (Option.map ~f:ImageNameCriteriaRequestList.of_xml)
+          (Xml.child xml_arg0 "ImageName") in
+      let marketplaceProductCodes =
+        (Option.map ~f:MarketplaceProductCodeRequestList.of_xml)
+          (Xml.child xml_arg0 "MarketplaceProductCode") in
+      let imageProviders =
+        (Option.map ~f:ImageProviderRequestList.of_xml)
+          (Xml.child xml_arg0 "ImageProvider") in
+      make ?creationDateCondition ?deprecationTimeCondition ?imageNames
+        ?marketplaceProductCodes ?imageProviders ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationDateCondition =
+        field_map json__ "CreationDateCondition"
+          CreationDateConditionRequest.of_json in
+      let deprecationTimeCondition =
+        field_map json__ "DeprecationTimeCondition"
+          DeprecationTimeConditionRequest.of_json in
+      let imageNames =
+        field_map json__ "ImageNames" ImageNameCriteriaRequestList.of_json in
+      let marketplaceProductCodes =
+        field_map json__ "MarketplaceProductCodes"
+          MarketplaceProductCodeRequestList.of_json in
+      let imageProviders =
+        field_map json__ "ImageProviders" ImageProviderRequestList.of_json in
+      make ?creationDateCondition ?deprecationTimeCondition ?imageNames
+        ?marketplaceProductCodes ?imageProviders ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The criteria that are evaluated to determine which AMIs are discoverable and usable in your account for the specified Amazon Web Services Region. The ImageCriteria can include up to: 10 ImageCriterion Each ImageCriterion can include up to: 200 values for ImageProviders 50 values for ImageNames 50 values for MarketplaceProductCodes For more information, see How Allowed AMIs works in the Amazon EC2 User Guide."]
 module UnsuccessfulItem =
   struct
     type nonrec t =
@@ -8834,30 +14874,20 @@ module UnsuccessfulItem =
           (Xml.child xml_arg0 "error") in
       make ?resourceId ?error ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map json "ResourceId" String_.of_json in
-      let error = field_map json "Error" UnsuccessfulItemError.of_json in
+    let of_json json__ =
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let error = field_map json__ "Error" UnsuccessfulItemError.of_json in
       make ?resourceId ?error ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about items that were not successfully processed in a batch call."]
-module VpcEndpointId =
-  struct
-    type nonrec t = string
-    let context_ = "VpcEndpointId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"VpcEndpointId" j
-    let to_json = simple_to_json to_value
-  end
 module SubnetAssociationList =
   struct
     type nonrec t = SubnetAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetAssociation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8879,10 +14909,66 @@ module SubnetAssociationList =
         ~of_json:SubnetAssociation.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ClientVpnEndpointId =
+  struct
+    type nonrec t = string
+    let context_ = "ClientVpnEndpointId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientVpnEndpointId" j
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayAttachmentStatusType =
+  struct
+    type nonrec t =
+      | Pending_acceptance 
+      | Pending 
+      | Rejected 
+      | Available 
+      | Deleting 
+      | Deleted 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending_acceptance -> "pending-acceptance"
+      | Pending -> "pending"
+      | Rejected -> "rejected"
+      | Available -> "available"
+      | Deleting -> "deleting"
+      | Deleted -> "deleted"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending-acceptance" -> Pending_acceptance
+      | "pending" -> Pending
+      | "rejected" -> Rejected
+      | "available" -> Available
+      | "deleting" -> Deleting
+      | "deleted" -> Deleted
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TransitGatewayAttachmentStatusType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TransitGatewayAttachmentStatusType" j)
+    let to_json = simple_to_json to_value
+  end
 module InstanceTagKeySet =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8915,8 +15001,7 @@ module ScheduledInstance =
         [@ocaml.doc "The hourly price for a single instance."];
       instanceCount: Integer.t option [@ocaml.doc "The number of instances."];
       instanceType: String_.t option [@ocaml.doc "The instance type."];
-      networkPlatform: String_.t option
-        [@ocaml.doc "The network platform (EC2-Classic or EC2-VPC)."];
+      networkPlatform: String_.t option [@ocaml.doc "The network platform."];
       nextSlotStartTime: DateTime.t option
         [@ocaml.doc "The time for the next schedule to start."];
       platform: String_.t option
@@ -9039,29 +15124,30 @@ module ScheduledInstance =
         ?instanceType ?instanceCount ?hourlyPrice ?createDate
         ?availabilityZone ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let totalScheduledInstanceHours =
-        field_map json "TotalScheduledInstanceHours" Integer.of_json in
-      let termStartDate = field_map json "TermStartDate" DateTime.of_json in
-      let termEndDate = field_map json "TermEndDate" DateTime.of_json in
+        field_map json__ "TotalScheduledInstanceHours" Integer.of_json in
+      let termStartDate = field_map json__ "TermStartDate" DateTime.of_json in
+      let termEndDate = field_map json__ "TermEndDate" DateTime.of_json in
       let slotDurationInHours =
-        field_map json "SlotDurationInHours" Integer.of_json in
+        field_map json__ "SlotDurationInHours" Integer.of_json in
       let scheduledInstanceId =
-        field_map json "ScheduledInstanceId" String_.of_json in
+        field_map json__ "ScheduledInstanceId" String_.of_json in
       let recurrence =
-        field_map json "Recurrence" ScheduledInstanceRecurrence.of_json in
+        field_map json__ "Recurrence" ScheduledInstanceRecurrence.of_json in
       let previousSlotEndTime =
-        field_map json "PreviousSlotEndTime" DateTime.of_json in
-      let platform = field_map json "Platform" String_.of_json in
+        field_map json__ "PreviousSlotEndTime" DateTime.of_json in
+      let platform = field_map json__ "Platform" String_.of_json in
       let nextSlotStartTime =
-        field_map json "NextSlotStartTime" DateTime.of_json in
-      let networkPlatform = field_map json "NetworkPlatform" String_.of_json in
-      let instanceType = field_map json "InstanceType" String_.of_json in
-      let instanceCount = field_map json "InstanceCount" Integer.of_json in
-      let hourlyPrice = field_map json "HourlyPrice" String_.of_json in
-      let createDate = field_map json "CreateDate" DateTime.of_json in
+        field_map json__ "NextSlotStartTime" DateTime.of_json in
+      let networkPlatform =
+        field_map json__ "NetworkPlatform" String_.of_json in
+      let instanceType = field_map json__ "InstanceType" String_.of_json in
+      let instanceCount = field_map json__ "InstanceCount" Integer.of_json in
+      let hourlyPrice = field_map json__ "HourlyPrice" String_.of_json in
+      let createDate = field_map json__ "CreateDate" DateTime.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
       make ?totalScheduledInstanceHours ?termStartDate ?termEndDate
         ?slotDurationInHours ?scheduledInstanceId ?recurrence
         ?previousSlotEndTime ?platform ?nextSlotStartTime ?networkPlatform
@@ -9092,9 +15178,11 @@ module PurchaseRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceCount") in
       make ~purchaseToken ~instanceCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let purchaseToken = field_map_exn json "PurchaseToken" String_.of_json in
-      let instanceCount = field_map_exn json "InstanceCount" Integer.of_json in
+    let of_json json__ =
+      let purchaseToken =
+        field_map_exn json__ "PurchaseToken" String_.of_json in
+      let instanceCount =
+        field_map_exn json__ "InstanceCount" Integer.of_json in
       make ~purchaseToken ~instanceCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a request to purchase Scheduled Instances."]
@@ -9178,39 +15266,725 @@ module Purchase =
       make ?upfrontPrice ?paymentOption ?instanceFamily ?hourlyPrice
         ?hostReservationId ?hostIdSet ?duration ?currencyCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let upfrontPrice = field_map json "UpfrontPrice" String_.of_json in
+    let of_json json__ =
+      let upfrontPrice = field_map json__ "UpfrontPrice" String_.of_json in
       let paymentOption =
-        field_map json "PaymentOption" PaymentOption.of_json in
-      let instanceFamily = field_map json "InstanceFamily" String_.of_json in
-      let hourlyPrice = field_map json "HourlyPrice" String_.of_json in
+        field_map json__ "PaymentOption" PaymentOption.of_json in
+      let instanceFamily = field_map json__ "InstanceFamily" String_.of_json in
+      let hourlyPrice = field_map json__ "HourlyPrice" String_.of_json in
       let hostReservationId =
-        field_map json "HostReservationId" HostReservationId.of_json in
-      let hostIdSet = field_map json "HostIdSet" ResponseHostIdSet.of_json in
-      let duration = field_map json "Duration" Integer.of_json in
+        field_map json__ "HostReservationId" HostReservationId.of_json in
+      let hostIdSet = field_map json__ "HostIdSet" ResponseHostIdSet.of_json in
+      let duration = field_map json__ "Duration" Integer.of_json in
       let currencyCode =
-        field_map json "CurrencyCode" CurrencyCodeValues.of_json in
+        field_map json__ "CurrencyCode" CurrencyCodeValues.of_json in
       make ?upfrontPrice ?paymentOption ?instanceFamily ?hourlyPrice
         ?hostReservationId ?hostIdSet ?duration ?currencyCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the result of the purchase."]
-module RouteTableId =
+module CapacityBlock =
   struct
-    type nonrec t = string
-    let context_ = "RouteTableId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      capacityBlockId: CapacityBlockId.t option
+        [@ocaml.doc "The ID of the Capacity Block."];
+      ultraserverType: String_.t option
+        [@ocaml.doc "The EC2 UltraServer type of the Capacity Block."];
+      availabilityZone: String_.t option
+        [@ocaml.doc "The Availability Zone of the Capacity Block."];
+      availabilityZoneId: String_.t option
+        [@ocaml.doc "The Availability Zone ID of the Capacity Block."];
+      capacityReservationIds: CapacityReservationIdSet.t option
+        [@ocaml.doc "The ID of the Capacity Reservation."];
+      startDate: MillisecondDateTime.t option
+        [@ocaml.doc
+          "The date and time at which the Capacity Block was started."];
+      endDate: MillisecondDateTime.t option
+        [@ocaml.doc
+          "The date and time at which the Capacity Block expires. When a Capacity Block expires, all instances in the Capacity Block are terminated."];
+      createDate: MillisecondDateTime.t option
+        [@ocaml.doc
+          "The date and time at which the Capacity Block was created."];
+      state: CapacityBlockResourceState.t option
+        [@ocaml.doc "The state of the Capacity Block."];
+      tags: TagList.t option
+        [@ocaml.doc "The tags assigned to the Capacity Block."]}
+    let make ?capacityBlockId =
+      fun ?ultraserverType ->
+        fun ?availabilityZone ->
+          fun ?availabilityZoneId ->
+            fun ?capacityReservationIds ->
+              fun ?startDate ->
+                fun ?endDate ->
+                  fun ?createDate ->
+                    fun ?state ->
+                      fun ?tags ->
+                        fun () ->
+                          {
+                            capacityBlockId;
+                            ultraserverType;
+                            availabilityZone;
+                            availabilityZoneId;
+                            capacityReservationIds;
+                            startDate;
+                            endDate;
+                            createDate;
+                            state;
+                            tags
+                          }
+    let to_value x =
+      structure_to_value
+        [("capacityBlockId",
+           (Option.map x.capacityBlockId ~f:CapacityBlockId.to_value));
+        ("ultraserverType",
+          (Option.map x.ultraserverType ~f:String_.to_value));
+        ("availabilityZone",
+          (Option.map x.availabilityZone ~f:String_.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:String_.to_value));
+        ("capacityReservationIdSet",
+          (Option.map x.capacityReservationIds
+             ~f:CapacityReservationIdSet.to_value));
+        ("startDate",
+          (Option.map x.startDate ~f:MillisecondDateTime.to_value));
+        ("endDate", (Option.map x.endDate ~f:MillisecondDateTime.to_value));
+        ("createDate",
+          (Option.map x.createDate ~f:MillisecondDateTime.to_value));
+        ("state",
+          (Option.map x.state ~f:CapacityBlockResourceState.to_value));
+        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RouteTableId" j
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
+      let state =
+        (Option.map ~f:CapacityBlockResourceState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let createDate =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "createDate") in
+      let endDate =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "endDate") in
+      let startDate =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "startDate") in
+      let capacityReservationIds =
+        (Option.map ~f:CapacityReservationIdSet.of_xml)
+          (Xml.child xml_arg0 "capacityReservationIdSet") in
+      let availabilityZoneId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let availabilityZone =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "availabilityZone") in
+      let ultraserverType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ultraserverType") in
+      let capacityBlockId =
+        (Option.map ~f:CapacityBlockId.of_xml)
+          (Xml.child xml_arg0 "capacityBlockId") in
+      make ?tags ?state ?createDate ?endDate ?startDate
+        ?capacityReservationIds ?availabilityZoneId ?availabilityZone
+        ?ultraserverType ?capacityBlockId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let state = field_map json__ "State" CapacityBlockResourceState.of_json in
+      let createDate =
+        field_map json__ "CreateDate" MillisecondDateTime.of_json in
+      let endDate = field_map json__ "EndDate" MillisecondDateTime.of_json in
+      let startDate =
+        field_map json__ "StartDate" MillisecondDateTime.of_json in
+      let capacityReservationIds =
+        field_map json__ "CapacityReservationIds"
+          CapacityReservationIdSet.of_json in
+      let availabilityZoneId =
+        field_map json__ "AvailabilityZoneId" String_.of_json in
+      let availabilityZone =
+        field_map json__ "AvailabilityZone" String_.of_json in
+      let ultraserverType =
+        field_map json__ "UltraserverType" String_.of_json in
+      let capacityBlockId =
+        field_map json__ "CapacityBlockId" CapacityBlockId.of_json in
+      make ?tags ?state ?createDate ?endDate ?startDate
+        ?capacityReservationIds ?availabilityZoneId ?availabilityZone
+        ?ultraserverType ?capacityBlockId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Reserve powerful GPU instances on a future date to support your short duration machine learning (ML) workloads. Instances that run inside a Capacity Block are automatically placed close together inside Amazon EC2 UltraClusters, for low-latency, petabit-scale, non-blocking networking. You can also reserve Amazon EC2 UltraServers. UltraServers connect multiple EC2 instances using a low-latency, high-bandwidth accelerator interconnect (NeuronLink). They are built to tackle very large-scale AI/ML workloads that require significant processing power. For more information, see Amazon EC2 UltraServers."]
+module CapacityBlockExtension =
+  struct
+    type nonrec t =
+      {
+      capacityReservationId: CapacityReservationId.t option
+        [@ocaml.doc "The reservation ID of the Capacity Block extension."];
+      instanceType: String_.t option
+        [@ocaml.doc "The instance type of the Capacity Block extension."];
+      instanceCount: Integer.t option
+        [@ocaml.doc
+          "The number of instances in the Capacity Block extension."];
+      availabilityZone: AvailabilityZoneName.t option
+        [@ocaml.doc "The Availability Zone of the Capacity Block extension."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc
+          "The Availability Zone ID of the Capacity Block extension."];
+      capacityBlockExtensionOfferingId: OfferingId.t option
+        [@ocaml.doc "The ID of the Capacity Block extension offering."];
+      capacityBlockExtensionDurationHours: Integer.t option
+        [@ocaml.doc "The duration of the Capacity Block extension in hours."];
+      capacityBlockExtensionStatus: CapacityBlockExtensionStatus.t option
+        [@ocaml.doc
+          "The status of the Capacity Block extension. A Capacity Block extension can have one of the following statuses: payment-pending - The Capacity Block extension payment is processing. If your payment can't be processed within 12 hours, the Capacity Block extension is failed. payment-failed - Payment for the Capacity Block extension request was not successful. payment-succeeded - Payment for the Capacity Block extension request was successful. You receive an invoice that reflects the one-time upfront payment. In the invoice, you can associate the paid amount with the Capacity Block reservation ID."];
+      capacityBlockExtensionPurchaseDate: MillisecondDateTime.t option
+        [@ocaml.doc
+          "The date when the Capacity Block extension was purchased."];
+      capacityBlockExtensionStartDate: MillisecondDateTime.t option
+        [@ocaml.doc "The start date of the Capacity Block extension."];
+      capacityBlockExtensionEndDate: MillisecondDateTime.t option
+        [@ocaml.doc "The end date of the Capacity Block extension."];
+      upfrontFee: String_.t option
+        [@ocaml.doc "The total price to be paid up front."];
+      currencyCode: String_.t option
+        [@ocaml.doc
+          "The currency of the payment for the Capacity Block extension."];
+      zoneType: String_.t option
+        [@ocaml.doc
+          "The type of zone where the Capacity Block extension is located."]}
+    let make ?capacityReservationId =
+      fun ?instanceType ->
+        fun ?instanceCount ->
+          fun ?availabilityZone ->
+            fun ?availabilityZoneId ->
+              fun ?capacityBlockExtensionOfferingId ->
+                fun ?capacityBlockExtensionDurationHours ->
+                  fun ?capacityBlockExtensionStatus ->
+                    fun ?capacityBlockExtensionPurchaseDate ->
+                      fun ?capacityBlockExtensionStartDate ->
+                        fun ?capacityBlockExtensionEndDate ->
+                          fun ?upfrontFee ->
+                            fun ?currencyCode ->
+                              fun ?zoneType ->
+                                fun () ->
+                                  {
+                                    capacityReservationId;
+                                    instanceType;
+                                    instanceCount;
+                                    availabilityZone;
+                                    availabilityZoneId;
+                                    capacityBlockExtensionOfferingId;
+                                    capacityBlockExtensionDurationHours;
+                                    capacityBlockExtensionStatus;
+                                    capacityBlockExtensionPurchaseDate;
+                                    capacityBlockExtensionStartDate;
+                                    capacityBlockExtensionEndDate;
+                                    upfrontFee;
+                                    currencyCode;
+                                    zoneType
+                                  }
+    let to_value x =
+      structure_to_value
+        [("capacityReservationId",
+           (Option.map x.capacityReservationId
+              ~f:CapacityReservationId.to_value));
+        ("instanceType", (Option.map x.instanceType ~f:String_.to_value));
+        ("instanceCount", (Option.map x.instanceCount ~f:Integer.to_value));
+        ("availabilityZone",
+          (Option.map x.availabilityZone ~f:AvailabilityZoneName.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("capacityBlockExtensionOfferingId",
+          (Option.map x.capacityBlockExtensionOfferingId
+             ~f:OfferingId.to_value));
+        ("capacityBlockExtensionDurationHours",
+          (Option.map x.capacityBlockExtensionDurationHours
+             ~f:Integer.to_value));
+        ("capacityBlockExtensionStatus",
+          (Option.map x.capacityBlockExtensionStatus
+             ~f:CapacityBlockExtensionStatus.to_value));
+        ("capacityBlockExtensionPurchaseDate",
+          (Option.map x.capacityBlockExtensionPurchaseDate
+             ~f:MillisecondDateTime.to_value));
+        ("capacityBlockExtensionStartDate",
+          (Option.map x.capacityBlockExtensionStartDate
+             ~f:MillisecondDateTime.to_value));
+        ("capacityBlockExtensionEndDate",
+          (Option.map x.capacityBlockExtensionEndDate
+             ~f:MillisecondDateTime.to_value));
+        ("upfrontFee", (Option.map x.upfrontFee ~f:String_.to_value));
+        ("currencyCode", (Option.map x.currencyCode ~f:String_.to_value));
+        ("zoneType", (Option.map x.zoneType ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let zoneType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "zoneType") in
+      let currencyCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "currencyCode") in
+      let upfrontFee =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "upfrontFee") in
+      let capacityBlockExtensionEndDate =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "capacityBlockExtensionEndDate") in
+      let capacityBlockExtensionStartDate =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "capacityBlockExtensionStartDate") in
+      let capacityBlockExtensionPurchaseDate =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "capacityBlockExtensionPurchaseDate") in
+      let capacityBlockExtensionStatus =
+        (Option.map ~f:CapacityBlockExtensionStatus.of_xml)
+          (Xml.child xml_arg0 "capacityBlockExtensionStatus") in
+      let capacityBlockExtensionDurationHours =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "capacityBlockExtensionDurationHours") in
+      let capacityBlockExtensionOfferingId =
+        (Option.map ~f:OfferingId.of_xml)
+          (Xml.child xml_arg0 "capacityBlockExtensionOfferingId") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let availabilityZone =
+        (Option.map ~f:AvailabilityZoneName.of_xml)
+          (Xml.child xml_arg0 "availabilityZone") in
+      let instanceCount =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "instanceCount") in
+      let instanceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceType") in
+      let capacityReservationId =
+        (Option.map ~f:CapacityReservationId.of_xml)
+          (Xml.child xml_arg0 "capacityReservationId") in
+      make ?zoneType ?currencyCode ?upfrontFee ?capacityBlockExtensionEndDate
+        ?capacityBlockExtensionStartDate ?capacityBlockExtensionPurchaseDate
+        ?capacityBlockExtensionStatus ?capacityBlockExtensionDurationHours
+        ?capacityBlockExtensionOfferingId ?availabilityZoneId
+        ?availabilityZone ?instanceCount ?instanceType ?capacityReservationId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let zoneType = field_map json__ "ZoneType" String_.of_json in
+      let currencyCode = field_map json__ "CurrencyCode" String_.of_json in
+      let upfrontFee = field_map json__ "UpfrontFee" String_.of_json in
+      let capacityBlockExtensionEndDate =
+        field_map json__ "CapacityBlockExtensionEndDate"
+          MillisecondDateTime.of_json in
+      let capacityBlockExtensionStartDate =
+        field_map json__ "CapacityBlockExtensionStartDate"
+          MillisecondDateTime.of_json in
+      let capacityBlockExtensionPurchaseDate =
+        field_map json__ "CapacityBlockExtensionPurchaseDate"
+          MillisecondDateTime.of_json in
+      let capacityBlockExtensionStatus =
+        field_map json__ "CapacityBlockExtensionStatus"
+          CapacityBlockExtensionStatus.of_json in
+      let capacityBlockExtensionDurationHours =
+        field_map json__ "CapacityBlockExtensionDurationHours"
+          Integer.of_json in
+      let capacityBlockExtensionOfferingId =
+        field_map json__ "CapacityBlockExtensionOfferingId"
+          OfferingId.of_json in
+      let availabilityZoneId =
+        field_map json__ "AvailabilityZoneId" AvailabilityZoneId.of_json in
+      let availabilityZone =
+        field_map json__ "AvailabilityZone" AvailabilityZoneName.of_json in
+      let instanceCount = field_map json__ "InstanceCount" Integer.of_json in
+      let instanceType = field_map json__ "InstanceType" String_.of_json in
+      let capacityReservationId =
+        field_map json__ "CapacityReservationId"
+          CapacityReservationId.of_json in
+      make ?zoneType ?currencyCode ?upfrontFee ?capacityBlockExtensionEndDate
+        ?capacityBlockExtensionStartDate ?capacityBlockExtensionPurchaseDate
+        ?capacityBlockExtensionStatus ?capacityBlockExtensionDurationHours
+        ?capacityBlockExtensionOfferingId ?availabilityZoneId
+        ?availabilityZone ?instanceCount ?instanceType ?capacityReservationId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a Capacity Block extension. With an extension, you can extend the duration of time for an existing Capacity Block."]
+module AddedPrincipal =
+  struct
+    type nonrec t =
+      {
+      principalType: PrincipalType.t option
+        [@ocaml.doc "The type of principal."];
+      principal: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the principal."];
+      servicePermissionId: String_.t option
+        [@ocaml.doc "The ID of the service permission."];
+      serviceId: String_.t option [@ocaml.doc "The ID of the service."]}
+    let make ?principalType =
+      fun ?principal ->
+        fun ?servicePermissionId ->
+          fun ?serviceId ->
+            fun () ->
+              { principalType; principal; servicePermissionId; serviceId }
+    let to_value x =
+      structure_to_value
+        [("principalType",
+           (Option.map x.principalType ~f:PrincipalType.to_value));
+        ("principal", (Option.map x.principal ~f:String_.to_value));
+        ("servicePermissionId",
+          (Option.map x.servicePermissionId ~f:String_.to_value));
+        ("serviceId", (Option.map x.serviceId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceId") in
+      let servicePermissionId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "servicePermissionId") in
+      let principal =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "principal") in
+      let principalType =
+        (Option.map ~f:PrincipalType.of_xml)
+          (Xml.child xml_arg0 "principalType") in
+      make ?serviceId ?servicePermissionId ?principal ?principalType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceId = field_map json__ "ServiceId" String_.of_json in
+      let servicePermissionId =
+        field_map json__ "ServicePermissionId" String_.of_json in
+      let principal = field_map json__ "Principal" String_.of_json in
+      let principalType =
+        field_map json__ "PrincipalType" PrincipalType.of_json in
+      make ?serviceId ?servicePermissionId ?principal ?principalType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a principal."]
+module SubnetConfiguration =
+  struct
+    type nonrec t =
+      {
+      subnetId: SubnetId.t option [@ocaml.doc "The ID of the subnet."];
+      ipv4: String_.t option
+        [@ocaml.doc
+          "The IPv4 address to assign to the endpoint network interface in the subnet. You must provide an IPv4 address if the VPC endpoint supports IPv4. If you specify an IPv4 address when modifying a VPC endpoint, we replace the existing endpoint network interface with a new endpoint network interface with this IP address. This process temporarily disconnects the subnet and the VPC endpoint."];
+      ipv6: String_.t option
+        [@ocaml.doc
+          "The IPv6 address to assign to the endpoint network interface in the subnet. You must provide an IPv6 address if the VPC endpoint supports IPv6. If you specify an IPv6 address when modifying a VPC endpoint, we replace the existing endpoint network interface with a new endpoint network interface with this IP address. This process temporarily disconnects the subnet and the VPC endpoint."]}
+    let make ?subnetId =
+      fun ?ipv4 -> fun ?ipv6 -> fun () -> { subnetId; ipv4; ipv6 }
+    let to_value x =
+      structure_to_value
+        [("SubnetId", (Option.map x.subnetId ~f:SubnetId.to_value));
+        ("Ipv4", (Option.map x.ipv4 ~f:String_.to_value));
+        ("Ipv6", (Option.map x.ipv6 ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipv6 = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Ipv6") in
+      let ipv4 = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Ipv4") in
+      let subnetId =
+        (Option.map ~f:SubnetId.of_xml) (Xml.child xml_arg0 "SubnetId") in
+      make ?ipv6 ?ipv4 ?subnetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipv6 = field_map json__ "Ipv6" String_.of_json in
+      let ipv4 = field_map json__ "Ipv4" String_.of_json in
+      let subnetId = field_map json__ "SubnetId" SubnetId.of_json in
+      make ?ipv6 ?ipv4 ?subnetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the configuration of a subnet for a VPC endpoint."]
+module InternetGatewayBlockMode =
+  struct
+    type nonrec t =
+      | Off 
+      | Block_bidirectional 
+      | Block_ingress 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Off -> "off"
+      | Block_bidirectional -> "block-bidirectional"
+      | Block_ingress -> "block-ingress"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "off" -> Off
+      | "block-bidirectional" -> Block_bidirectional
+      | "block-ingress" -> Block_ingress
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration InternetGatewayBlockMode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"InternetGatewayBlockMode" j)
+    let to_json = simple_to_json to_value
+  end
+module ManagedBy =
+  struct
+    type nonrec t =
+      | Account 
+      | Declarative_policy 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Account -> "account"
+      | Declarative_policy -> "declarative-policy"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "account" -> Account
+      | "declarative-policy" -> Declarative_policy
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ManagedBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ManagedBy" j)
+    let to_json = simple_to_json to_value
+  end
+module VpcBlockPublicAccessExclusionsAllowed =
+  struct
+    type nonrec t =
+      | Allowed 
+      | Not_allowed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Allowed -> "allowed"
+      | Not_allowed -> "not-allowed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "allowed" -> Allowed
+      | "not-allowed" -> Not_allowed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration VpcBlockPublicAccessExclusionsAllowed" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"VpcBlockPublicAccessExclusionsAllowed" j)
+    let to_json = simple_to_json to_value
+  end
+module VpcBlockPublicAccessState =
+  struct
+    type nonrec t =
+      | Default_state 
+      | Update_in_progress 
+      | Update_complete 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Default_state -> "default-state"
+      | Update_in_progress -> "update-in-progress"
+      | Update_complete -> "update-complete"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "default-state" -> Default_state
+      | "update-in-progress" -> Update_in_progress
+      | "update-complete" -> Update_complete
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration VpcBlockPublicAccessState" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"VpcBlockPublicAccessState" j)
+    let to_json = simple_to_json to_value
+  end
+module VerifiedAccessLogCloudWatchLogsDestinationOptions =
+  struct
+    type nonrec t =
+      {
+      enabled: Boolean.t [@ocaml.doc "Indicates whether logging is enabled."];
+      logGroup: String_.t option
+        [@ocaml.doc "The ID of the CloudWatch Logs log group."]}
+    let context_ = "VerifiedAccessLogCloudWatchLogsDestinationOptions"
+    let make ?logGroup = fun ~enabled -> fun () -> { logGroup; enabled }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Some (Boolean.to_value x.enabled)));
+        ("LogGroup", (Option.map x.logGroup ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logGroup =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "LogGroup") in
+      let enabled =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
+      make ?logGroup ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logGroup = field_map json__ "LogGroup" String_.of_json in
+      let enabled = field_map_exn json__ "Enabled" Boolean.of_json in
+      make ?logGroup ~enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Options for CloudWatch Logs as a logging destination."]
+module VerifiedAccessLogKinesisDataFirehoseDestinationOptions =
+  struct
+    type nonrec t =
+      {
+      enabled: Boolean.t [@ocaml.doc "Indicates whether logging is enabled."];
+      deliveryStream: String_.t option
+        [@ocaml.doc "The ID of the delivery stream."]}
+    let context_ = "VerifiedAccessLogKinesisDataFirehoseDestinationOptions"
+    let make ?deliveryStream =
+      fun ~enabled -> fun () -> { deliveryStream; enabled }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Some (Boolean.to_value x.enabled)));
+        ("DeliveryStream", (Option.map x.deliveryStream ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deliveryStream =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DeliveryStream") in
+      let enabled =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
+      make ?deliveryStream ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deliveryStream = field_map json__ "DeliveryStream" String_.of_json in
+      let enabled = field_map_exn json__ "Enabled" Boolean.of_json in
+      make ?deliveryStream ~enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes Amazon Kinesis Data Firehose logging options."]
+module VerifiedAccessLogS3DestinationOptions =
+  struct
+    type nonrec t =
+      {
+      enabled: Boolean.t [@ocaml.doc "Indicates whether logging is enabled."];
+      bucketName: String_.t option [@ocaml.doc "The bucket name."];
+      prefix: String_.t option [@ocaml.doc "The bucket prefix."];
+      bucketOwner: String_.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that owns the Amazon S3 bucket."]}
+    let context_ = "VerifiedAccessLogS3DestinationOptions"
+    let make ?bucketName =
+      fun ?prefix ->
+        fun ?bucketOwner ->
+          fun ~enabled ->
+            fun () -> { bucketName; prefix; bucketOwner; enabled }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Some (Boolean.to_value x.enabled)));
+        ("BucketName", (Option.map x.bucketName ~f:String_.to_value));
+        ("Prefix", (Option.map x.prefix ~f:String_.to_value));
+        ("BucketOwner", (Option.map x.bucketOwner ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bucketOwner =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BucketOwner") in
+      let prefix =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Prefix") in
+      let bucketName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BucketName") in
+      let enabled =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
+      make ?bucketOwner ?prefix ?bucketName ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bucketOwner = field_map json__ "BucketOwner" String_.of_json in
+      let prefix = field_map json__ "Prefix" String_.of_json in
+      let bucketName = field_map json__ "BucketName" String_.of_json in
+      let enabled = field_map_exn json__ "Enabled" Boolean.of_json in
+      make ?bucketOwner ?prefix ?bucketName ~enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Options for Amazon S3 as a logging destination."]
+module ModifyVerifiedAccessEndpointPortRangeList =
+  struct
+    type nonrec t = ModifyVerifiedAccessEndpointPortRange.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ModifyVerifiedAccessEndpointPortRange.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ModifyVerifiedAccessEndpointPortRange.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ModifyVerifiedAccessEndpointPortRangeList"
+        ~of_json:ModifyVerifiedAccessEndpointPortRange.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ModifyVerifiedAccessEndpointSubnetIdList =
+  struct
+    type nonrec t = SubnetId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SubnetId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ModifyVerifiedAccessEndpointSubnetIdList"
+        ~of_json:SubnetId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EncryptionSupportOptionValue =
+  struct
+    type nonrec t =
+      | Enable 
+      | Disable 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Enable -> "enable"
+      | Disable -> "disable"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "enable" -> Enable
+      | "disable" -> Disable
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EncryptionSupportOptionValue"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EncryptionSupportOptionValue" j)
     let to_json = simple_to_json to_value
   end
 module TransitGatewayCidrBlockStringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9300,6 +16074,9 @@ module CreateVolumePermissionList =
   struct
     type nonrec t = CreateVolumePermission.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CreateVolumePermission.to_value)) |>
         (fun x -> `List x)
@@ -9326,17 +16103,18 @@ module SecurityGroupRuleUpdate =
   struct
     type nonrec t =
       {
-      securityGroupRuleId: SecurityGroupRuleId.t option
+      securityGroupRuleId: SecurityGroupRuleId.t
         [@ocaml.doc "The ID of the security group rule."];
       securityGroupRule: SecurityGroupRuleRequest.t option
         [@ocaml.doc "Information about the security group rule."]}
-    let make ?securityGroupRuleId =
-      fun ?securityGroupRule ->
-        fun () -> { securityGroupRuleId; securityGroupRule }
+    let context_ = "SecurityGroupRuleUpdate"
+    let make ?securityGroupRule =
+      fun ~securityGroupRuleId ->
+        fun () -> { securityGroupRule; securityGroupRuleId }
     let to_value x =
       structure_to_value
         [("SecurityGroupRuleId",
-           (Option.map x.securityGroupRuleId ~f:SecurityGroupRuleId.to_value));
+           (Some (SecurityGroupRuleId.to_value x.securityGroupRuleId)));
         ("SecurityGroupRule",
           (Option.map x.securityGroupRule
              ~f:SecurityGroupRuleRequest.to_value))]
@@ -9346,16 +16124,17 @@ module SecurityGroupRuleUpdate =
         (Option.map ~f:SecurityGroupRuleRequest.of_xml)
           (Xml.child xml_arg0 "SecurityGroupRule") in
       let securityGroupRuleId =
-        (Option.map ~f:SecurityGroupRuleId.of_xml)
-          (Xml.child xml_arg0 "SecurityGroupRuleId") in
-      make ?securityGroupRule ?securityGroupRuleId ()
+        SecurityGroupRuleId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SecurityGroupRuleId") in
+      make ?securityGroupRule ~securityGroupRuleId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroupRule =
-        field_map json "SecurityGroupRule" SecurityGroupRuleRequest.of_json in
+        field_map json__ "SecurityGroupRule" SecurityGroupRuleRequest.of_json in
       let securityGroupRuleId =
-        field_map json "SecurityGroupRuleId" SecurityGroupRuleId.of_json in
-      make ?securityGroupRule ?securityGroupRuleId ()
+        field_map_exn json__ "SecurityGroupRuleId"
+          SecurityGroupRuleId.of_json in
+      make ?securityGroupRule ~securityGroupRuleId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an update to a security group rule."]
 module ReservationId =
@@ -9371,6 +16150,32 @@ module ReservationId =
     let of_json j = string_of_json ~kind:"ReservationId" j
     let to_json = simple_to_json to_value
   end
+module EnaSrdUdpSpecification =
+  struct
+    type nonrec t =
+      {
+      enaSrdUdpEnabled: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether UDP traffic to and from the instance uses ENA Express. To specify this setting, you must first enable ENA Express."]}
+    let make ?enaSrdUdpEnabled = fun () -> { enaSrdUdpEnabled }
+    let to_value x =
+      structure_to_value
+        [("EnaSrdUdpEnabled",
+           (Option.map x.enaSrdUdpEnabled ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enaSrdUdpEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "EnaSrdUdpEnabled") in
+      make ?enaSrdUdpEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enaSrdUdpEnabled =
+        field_map json__ "EnaSrdUdpEnabled" Boolean.of_json in
+      make ?enaSrdUdpEnabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "ENA Express is compatible with both TCP and UDP transport protocols. When it's enabled, TCP traffic automatically uses it. However, some UDP-based applications are designed to handle network packets that are out of order, without a need for retransmission, such as live video broadcasting or other near-real-time applications. For UDP traffic, you can specify whether to use ENA Express, based on your application environment needs."]
 module NetworkInterfaceAttachmentId =
   struct
     type nonrec t = string
@@ -9382,6 +16187,34 @@ module NetworkInterfaceAttachmentId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"NetworkInterfaceAttachmentId" j
+    let to_json = simple_to_json to_value
+  end
+module ManagedResourceDefaultVisibility =
+  struct
+    type nonrec t =
+      | Hidden 
+      | Visible 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Hidden -> "hidden"
+      | Visible -> "visible"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "hidden" -> Hidden
+      | "visible" -> Visible
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ManagedResourceDefaultVisibility"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ManagedResourceDefaultVisibility" j)
     let to_json = simple_to_json to_value
   end
 module AddPrefixListEntry =
@@ -9406,9 +16239,9 @@ module AddPrefixListEntry =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ?description ~cidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" String_.of_json in
-      let cidr = field_map_exn json "Cidr" String_.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" String_.of_json in
+      let cidr = field_map_exn json__ "Cidr" String_.of_json in
       make ?description ~cidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An entry for a prefix list."]
@@ -9426,8 +16259,8 @@ module RemovePrefixListEntry =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Cidr") in
       make ~cidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cidr = field_map_exn json "Cidr" String_.of_json in make ~cidr ()
+    let of_json json__ =
+      let cidr = field_map_exn json__ "Cidr" String_.of_json in make ~cidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An entry for a prefix list."]
 module AddIpamOperatingRegion =
@@ -9446,12 +16279,38 @@ module AddIpamOperatingRegion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RegionName") in
       make ?regionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regionName = field_map json "RegionName" String_.of_json in
+    let of_json json__ =
+      let regionName = field_map json__ "RegionName" String_.of_json in
       make ?regionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Add an operating Region to an IPAM. Operating Regions are Amazon Web Services Regions where the IPAM is allowed to manage IP address CIDRs. IPAM only discovers and monitors resources in the Amazon Web Services Regions you select as operating Regions. For more information about operating Regions, see Create an IPAM in the Amazon VPC IPAM User Guide."]
+module AddIpamOrganizationalUnitExclusion =
+  struct
+    type nonrec t =
+      {
+      organizationsEntityPath: String_.t option
+        [@ocaml.doc
+          "An Amazon Web Services Organizations entity path. Build the path for the OU(s) using Amazon Web Services Organizations IDs separated by a /. Include all child OUs by ending the path with /*. Example 1 Path to a child OU: o-a1b2c3d4e5/r-f6g7h8i9j0example/ou-ghi0-awsccccc/ou-jkl0-awsddddd/ In this example, o-a1b2c3d4e5 is the organization ID, r-f6g7h8i9j0example is the root ID , ou-ghi0-awsccccc is an OU ID, and ou-jkl0-awsddddd is a child OU ID. IPAM will not manage the IP addresses in accounts in the child OU. Example 2 Path where all child OUs will be part of the exclusion: o-a1b2c3d4e5/r-f6g7h8i9j0example/ou-ghi0-awsccccc/* In this example, IPAM will not manage the IP addresses in accounts in the OU (ou-ghi0-awsccccc) or in accounts in any OUs that are children of the OU. For more information on how to construct an entity path, see Understand the Amazon Web Services Organizations entity path in the Amazon Web Services Identity and Access Management User Guide."]}
+    let make ?organizationsEntityPath = fun () -> { organizationsEntityPath }
+    let to_value x =
+      structure_to_value
+        [("OrganizationsEntityPath",
+           (Option.map x.organizationsEntityPath ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let organizationsEntityPath =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "OrganizationsEntityPath") in
+      make ?organizationsEntityPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let organizationsEntityPath =
+        field_map json__ "OrganizationsEntityPath" String_.of_json in
+      make ?organizationsEntityPath ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Add an Organizational Unit (OU) exclusion to your IPAM. If your IPAM is integrated with Amazon Web Services Organizations and you add an organizational unit (OU) exclusion, IPAM will not manage the IP addresses in accounts in that OU exclusion. There is a limit on the number of exclusions you can create. For more information, see Quotas for your IPAM in the Amazon VPC IPAM User Guide."]
 module RemoveIpamOperatingRegion =
   struct
     type nonrec t =
@@ -9468,36 +16327,135 @@ module RemoveIpamOperatingRegion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RegionName") in
       make ?regionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regionName = field_map json "RegionName" String_.of_json in
+    let of_json json__ =
+      let regionName = field_map json__ "RegionName" String_.of_json in
       make ?regionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Remove an operating Region from an IPAM. Operating Regions are Amazon Web Services Regions where the IPAM is allowed to manage IP address CIDRs. IPAM only discovers and monitors resources in the Amazon Web Services Regions you select as operating Regions. For more information about operating Regions, see Create an IPAM in the Amazon VPC IPAM User Guide"]
-module RequestIpamResourceTag =
+module RemoveIpamOrganizationalUnitExclusion =
   struct
     type nonrec t =
       {
-      key: String_.t option
+      organizationsEntityPath: String_.t option
         [@ocaml.doc
-          "The key of a tag assigned to the resource. Use this filter to find all resources assigned a tag with a specific key, regardless of the tag value."];
-      value: String_.t option [@ocaml.doc "The value for the tag."]}
-    let make ?key = fun ?value -> fun () -> { key; value }
+          "An Amazon Web Services Organizations entity path. Build the path for the OU(s) using Amazon Web Services Organizations IDs separated by a /. Include all child OUs by ending the path with /*. Example 1 Path to a child OU: o-a1b2c3d4e5/r-f6g7h8i9j0example/ou-ghi0-awsccccc/ou-jkl0-awsddddd/ In this example, o-a1b2c3d4e5 is the organization ID, r-f6g7h8i9j0example is the root ID , ou-ghi0-awsccccc is an OU ID, and ou-jkl0-awsddddd is a child OU ID. IPAM will not manage the IP addresses in accounts in the child OU. Example 2 Path where all child OUs will be part of the exclusion: o-a1b2c3d4e5/r-f6g7h8i9j0example/ou-ghi0-awsccccc/* In this example, IPAM will not manage the IP addresses in accounts in the OU (ou-ghi0-awsccccc) or in accounts in any OUs that are children of the OU. For more information on how to construct an entity path, see Understand the Amazon Web Services Organizations entity path in the Amazon Web Services Identity and Access Management User Guide."]}
+    let make ?organizationsEntityPath = fun () -> { organizationsEntityPath }
     let to_value x =
       structure_to_value
-        [("Key", (Option.map x.key ~f:String_.to_value));
-        ("Value", (Option.map x.value ~f:String_.to_value))]
+        [("OrganizationsEntityPath",
+           (Option.map x.organizationsEntityPath ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
-      let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
-      make ?value ?key ()
+      let organizationsEntityPath =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "OrganizationsEntityPath") in
+      make ?organizationsEntityPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let key = field_map json "Key" String_.of_json in make ?value ?key ()
+    let of_json json__ =
+      let organizationsEntityPath =
+        field_map json__ "OrganizationsEntityPath" String_.of_json in
+      make ?organizationsEntityPath ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A tag on an IPAM resource."]
+  end[@@ocaml.doc
+       "Remove an Organizational Unit (OU) exclusion to your IPAM. If your IPAM is integrated with Amazon Web Services Organizations and you add an organizational unit (OU) exclusion, IPAM will not manage the IP addresses in accounts in that OU exclusion. There is a limit on the number of exclusions you can create. For more information, see Quotas for your IPAM in the Amazon VPC IPAM User Guide."]
+module IpamPrefixListResolverRuleRequest =
+  struct
+    type nonrec t =
+      {
+      ruleType: IpamPrefixListResolverRuleType.t
+        [@ocaml.doc
+          "The type of CIDR selection rule. Valid values include include for selecting CIDRs that match the conditions, and exclude for excluding CIDRs that match the conditions."];
+      staticCidr: String_.t option
+        [@ocaml.doc
+          "A fixed list of CIDRs that do not change (like a manual list replicated across Regions)."];
+      ipamScopeId: IpamScopeId.t option
+        [@ocaml.doc
+          "The ID of the IPAM scope from which to select CIDRs. This determines whether to select from public or private IP address space."];
+      resourceType: IpamResourceType.t option
+        [@ocaml.doc
+          "For rules of type ipam-resource-cidr, this is the resource type."];
+      conditions: IpamPrefixListResolverRuleConditionRequestSet.t option
+        [@ocaml.doc
+          "The conditions that determine which CIDRs are selected by this rule. Conditions specify criteria such as resource type, tags, account IDs, and Regions."]}
+    let context_ = "IpamPrefixListResolverRuleRequest"
+    let make ?staticCidr =
+      fun ?ipamScopeId ->
+        fun ?resourceType ->
+          fun ?conditions ->
+            fun ~ruleType ->
+              fun () ->
+                { staticCidr; ipamScopeId; resourceType; conditions; ruleType
+                }
+    let to_value x =
+      structure_to_value
+        [("RuleType",
+           (Some (IpamPrefixListResolverRuleType.to_value x.ruleType)));
+        ("StaticCidr", (Option.map x.staticCidr ~f:String_.to_value));
+        ("IpamScopeId", (Option.map x.ipamScopeId ~f:IpamScopeId.to_value));
+        ("ResourceType",
+          (Option.map x.resourceType ~f:IpamResourceType.to_value));
+        ("Condition",
+          (Option.map x.conditions
+             ~f:IpamPrefixListResolverRuleConditionRequestSet.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let conditions =
+        (Option.map ~f:IpamPrefixListResolverRuleConditionRequestSet.of_xml)
+          (Xml.child xml_arg0 "Condition") in
+      let resourceType =
+        (Option.map ~f:IpamResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      let ipamScopeId =
+        (Option.map ~f:IpamScopeId.of_xml) (Xml.child xml_arg0 "IpamScopeId") in
+      let staticCidr =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StaticCidr") in
+      let ruleType =
+        IpamPrefixListResolverRuleType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RuleType") in
+      make ?conditions ?resourceType ?ipamScopeId ?staticCidr ~ruleType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let conditions =
+        field_map json__ "Conditions"
+          IpamPrefixListResolverRuleConditionRequestSet.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" IpamResourceType.of_json in
+      let ipamScopeId = field_map json__ "IpamScopeId" IpamScopeId.of_json in
+      let staticCidr = field_map json__ "StaticCidr" String_.of_json in
+      let ruleType =
+        field_map_exn json__ "RuleType"
+          IpamPrefixListResolverRuleType.of_json in
+      make ?conditions ?resourceType ?ipamScopeId ?staticCidr ~ruleType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a CIDR selection rule to include in a request. This is used when creating or modifying resolver rules. CIDR selection rules define the business logic for selecting CIDRs from IPAM. If a CIDR matches any of the rules, it will be included. If a rule has multiple conditions, the CIDR has to match every condition of that rule. You can create a prefix list resolver without any CIDR selection rules, but it will generate empty versions (containing no CIDRs) until you add rules. There are three rule types. Only 2 of the 3 rule types support conditions - IPAM pool CIDR and Scope resource CIDR. Static CIDR rules cannot have conditions. Static CIDR: A fixed list of CIDRs that do not change (like a manual list replicated across Regions) IPAM pool CIDR: CIDRs from specific IPAM pools (like all CIDRs from your IPAM production pool) If you choose this option, choose the following: IPAM scope: Select the IPAM scope to search for resources Conditions: Property IPAM pool ID: Select an IPAM pool that contains the resources CIDR (like 10.24.34.0/23) Operation: Equals/Not equals Value: The value on which to match the condition Scope resource CIDR: CIDRs from Amazon Web Services resources like VPCs, subnets, EIPs within an IPAM scope If you choose this option, choose the following: IPAM scope: Select the IPAM scope to search for resources Resource type: Select a resource, like a VPC or subnet. Conditions: Property: Resource ID: The unique ID of a resource (like vpc-1234567890abcdef0) Resource owner (like 111122223333) Resource region (like us-east-1) Resource tag (like key: name, value: dev-vpc-1) CIDR (like 10.24.34.0/23) Operation: Equals/Not equals Value: The value on which to match the condition"]
+module IpamPolicyAllocationRuleRequest =
+  struct
+    type nonrec t =
+      {
+      sourceIpamPoolId: IpamPoolId.t option
+        [@ocaml.doc
+          "The ID of the source IPAM pool for the requested allocation rule. An IPAM pool is a collection of IP addresses in IPAM that can be allocated to Amazon Web Services resources."]}
+    let make ?sourceIpamPoolId = fun () -> { sourceIpamPoolId }
+    let to_value x =
+      structure_to_value
+        [("SourceIpamPoolId",
+           (Option.map x.sourceIpamPoolId ~f:IpamPoolId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceIpamPoolId =
+        (Option.map ~f:IpamPoolId.of_xml)
+          (Xml.child xml_arg0 "SourceIpamPoolId") in
+      make ?sourceIpamPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceIpamPoolId =
+        field_map json__ "SourceIpamPoolId" IpamPoolId.of_json in
+      make ?sourceIpamPoolId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a requested IPAM policy allocation rule. Allocation rules are optional configurations within an IPAM policy that map Amazon Web Services resource types to specific IPAM pools. If no rules are defined, the resource types default to using Amazon-provided IP addresses."]
 module InstanceEventWindowTimeRangeRequest =
   struct
     type nonrec t =
@@ -9533,11 +16491,11 @@ module InstanceEventWindowTimeRangeRequest =
         (Option.map ~f:WeekDay.of_xml) (Xml.child xml_arg0 "StartWeekDay") in
       make ?endHour ?endWeekDay ?startHour ?startWeekDay ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endHour = field_map json "EndHour" Hour.of_json in
-      let endWeekDay = field_map json "EndWeekDay" WeekDay.of_json in
-      let startHour = field_map json "StartHour" Hour.of_json in
-      let startWeekDay = field_map json "StartWeekDay" WeekDay.of_json in
+    let of_json json__ =
+      let endHour = field_map json__ "EndHour" Hour.of_json in
+      let endWeekDay = field_map json__ "EndWeekDay" WeekDay.of_json in
+      let startHour = field_map json__ "StartHour" Hour.of_json in
+      let startWeekDay = field_map json__ "StartWeekDay" WeekDay.of_json in
       make ?endHour ?endWeekDay ?startHour ?startWeekDay ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9557,8 +16515,8 @@ module SuccessfulInstanceCreditSpecificationItem =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceId") in
       make ?instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceId = field_map json "InstanceId" String_.of_json in
+    let of_json json__ =
+      let instanceId = field_map json__ "InstanceId" String_.of_json in
       make ?instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9588,11 +16546,11 @@ module UnsuccessfulInstanceCreditSpecificationItem =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceId") in
       make ?error ?instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let error =
-        field_map json "Error"
+        field_map json__ "Error"
           UnsuccessfulInstanceCreditSpecificationItemError.of_json in
-      let instanceId = field_map json "InstanceId" String_.of_json in
+      let instanceId = field_map json__ "InstanceId" String_.of_json in
       make ?error ?instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9601,28 +16559,30 @@ module InstanceCreditSpecificationRequest =
   struct
     type nonrec t =
       {
-      instanceId: InstanceId.t option [@ocaml.doc "The ID of the instance."];
+      instanceId: InstanceId.t [@ocaml.doc "The ID of the instance."];
       cpuCredits: String_.t option
         [@ocaml.doc
-          "The credit option for CPU usage of the instance. Valid values are standard and unlimited. T3 instances with host tenancy do not support the unlimited CPU credit option."]}
-    let make ?instanceId =
-      fun ?cpuCredits -> fun () -> { instanceId; cpuCredits }
+          "The credit option for CPU usage of the instance. Valid values: standard | unlimited T3 instances with host tenancy do not support the unlimited CPU credit option."]}
+    let context_ = "InstanceCreditSpecificationRequest"
+    let make ?cpuCredits =
+      fun ~instanceId -> fun () -> { cpuCredits; instanceId }
     let to_value x =
       structure_to_value
-        [("InstanceId", (Option.map x.instanceId ~f:InstanceId.to_value));
+        [("InstanceId", (Some (InstanceId.to_value x.instanceId)));
         ("CpuCredits", (Option.map x.cpuCredits ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let cpuCredits =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CpuCredits") in
       let instanceId =
-        (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "InstanceId") in
-      make ?cpuCredits ?instanceId ()
+        InstanceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
+      make ?cpuCredits ~instanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cpuCredits = field_map json "CpuCredits" String_.of_json in
-      let instanceId = field_map json "InstanceId" InstanceId.of_json in
-      make ?cpuCredits ?instanceId ()
+    let of_json json__ =
+      let cpuCredits = field_map json__ "CpuCredits" String_.of_json in
+      let instanceId = field_map_exn json__ "InstanceId" InstanceId.of_json in
+      make ?cpuCredits ~instanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the credit option for CPU usage of a burstable performance instance."]
@@ -9631,52 +16591,56 @@ module InstanceBlockDeviceMappingSpecification =
     type nonrec t =
       {
       deviceName: String_.t option
-        [@ocaml.doc "The device name (for example, /dev/sdh or xvdh)."];
+        [@ocaml.doc
+          "The device name. For available device names, see Device names for volumes."];
       ebs: EbsInstanceBlockDeviceSpecification.t option
         [@ocaml.doc
           "Parameters used to automatically set up EBS volumes when the instance is launched."];
+      virtualName: String_.t option [@ocaml.doc "The virtual device name."];
       noDevice: String_.t option
         [@ocaml.doc
-          "suppress the specified device included in the block device mapping."];
-      virtualName: String_.t option [@ocaml.doc "The virtual device name."]}
+          "Suppresses the specified device included in the block device mapping."]}
     let make ?deviceName =
       fun ?ebs ->
-        fun ?noDevice ->
-          fun ?virtualName ->
-            fun () -> { deviceName; ebs; noDevice; virtualName }
+        fun ?virtualName ->
+          fun ?noDevice ->
+            fun () -> { deviceName; ebs; virtualName; noDevice }
     let to_value x =
       structure_to_value
         [("deviceName", (Option.map x.deviceName ~f:String_.to_value));
         ("ebs",
           (Option.map x.ebs ~f:EbsInstanceBlockDeviceSpecification.to_value));
-        ("noDevice", (Option.map x.noDevice ~f:String_.to_value));
-        ("virtualName", (Option.map x.virtualName ~f:String_.to_value))]
+        ("virtualName", (Option.map x.virtualName ~f:String_.to_value));
+        ("noDevice", (Option.map x.noDevice ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let virtualName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "virtualName") in
       let noDevice =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "noDevice") in
+      let virtualName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "virtualName") in
       let ebs =
         (Option.map ~f:EbsInstanceBlockDeviceSpecification.of_xml)
           (Xml.child xml_arg0 "ebs") in
       let deviceName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "deviceName") in
-      make ?virtualName ?noDevice ?ebs ?deviceName ()
+      make ?noDevice ?virtualName ?ebs ?deviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualName = field_map json "VirtualName" String_.of_json in
-      let noDevice = field_map json "NoDevice" String_.of_json in
+    let of_json json__ =
+      let noDevice = field_map json__ "NoDevice" String_.of_json in
+      let virtualName = field_map json__ "VirtualName" String_.of_json in
       let ebs =
-        field_map json "Ebs" EbsInstanceBlockDeviceSpecification.of_json in
-      let deviceName = field_map json "DeviceName" String_.of_json in
-      make ?virtualName ?noDevice ?ebs ?deviceName ()
+        field_map json__ "Ebs" EbsInstanceBlockDeviceSpecification.of_json in
+      let deviceName = field_map json__ "DeviceName" String_.of_json in
+      make ?noDevice ?virtualName ?ebs ?deviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a block device mapping entry."]
 module LaunchPermissionList =
   struct
     type nonrec t = LaunchPermission.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LaunchPermission.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9702,6 +16666,9 @@ module LoadPermissionList =
   struct
     type nonrec t = LoadPermission.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LoadPermission.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9727,6 +16694,9 @@ module LoadPermissionListRequest =
   struct
     type nonrec t = LoadPermissionRequest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LoadPermissionRequest.to_value)) |>
         (fun x -> `List x)
@@ -9780,12 +16750,12 @@ module FleetLaunchTemplateConfigRequest =
           (Xml.child xml_arg0 "LaunchTemplateSpecification") in
       make ?overrides ?launchTemplateSpecification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let overrides =
-        field_map json "Overrides"
+        field_map json__ "Overrides"
           FleetLaunchTemplateOverridesListRequest.of_json in
       let launchTemplateSpecification =
-        field_map json "LaunchTemplateSpecification"
+        field_map json__ "LaunchTemplateSpecification"
           FleetLaunchTemplateSpecificationRequest.of_json in
       make ?overrides ?launchTemplateSpecification ()
     let to_json v = composed_to_json to_value v
@@ -9824,6 +16794,160 @@ module UnlimitedSupportedInstanceFamily =
       of_string (string_of_json ~kind:"UnlimitedSupportedInstanceFamily" j)
     let to_json = simple_to_json to_value
   end
+module VolumeRecycleBinInfo =
+  struct
+    type nonrec t =
+      {
+      volumeId: VolumeId.t option [@ocaml.doc "The ID of the volume."];
+      volumeType: VolumeType.t option [@ocaml.doc "The volume type."];
+      state: VolumeState.t option [@ocaml.doc "The state of the volume."];
+      size: Integer.t option [@ocaml.doc "The size of the volume, in GiB."];
+      iops: Integer.t option
+        [@ocaml.doc
+          "The number of I/O operations per second (IOPS) for the volume."];
+      throughput: Integer.t option
+        [@ocaml.doc "The throughput that the volume supports, in MiB/s."];
+      outpostArn: String_.t option
+        [@ocaml.doc
+          "The ARN of the Outpost on which the volume is stored. For more information, see Amazon EBS volumes on Outposts in the Amazon EBS User Guide."];
+      availabilityZone: String_.t option
+        [@ocaml.doc "The Availability Zone for the volume."];
+      availabilityZoneId: String_.t option
+        [@ocaml.doc "The ID of the Availability Zone for the volume."];
+      sourceVolumeId: String_.t option
+        [@ocaml.doc "The ID of the source volume."];
+      snapshotId: String_.t option
+        [@ocaml.doc
+          "The snapshot from which the volume was created, if applicable."];
+      operator: OperatorResponse.t option
+        [@ocaml.doc "The service provider that manages the volume."];
+      createTime: DateTime.t option
+        [@ocaml.doc "The time stamp when volume creation was initiated."];
+      recycleBinEnterTime: MillisecondDateTime.t option
+        [@ocaml.doc
+          "The date and time when the volume entered the Recycle Bin."];
+      recycleBinExitTime: MillisecondDateTime.t option
+        [@ocaml.doc
+          "The date and time when the volume is to be permanently deleted from the Recycle Bin."]}
+    let make ?volumeId =
+      fun ?volumeType ->
+        fun ?state ->
+          fun ?size ->
+            fun ?iops ->
+              fun ?throughput ->
+                fun ?outpostArn ->
+                  fun ?availabilityZone ->
+                    fun ?availabilityZoneId ->
+                      fun ?sourceVolumeId ->
+                        fun ?snapshotId ->
+                          fun ?operator ->
+                            fun ?createTime ->
+                              fun ?recycleBinEnterTime ->
+                                fun ?recycleBinExitTime ->
+                                  fun () ->
+                                    {
+                                      volumeId;
+                                      volumeType;
+                                      state;
+                                      size;
+                                      iops;
+                                      throughput;
+                                      outpostArn;
+                                      availabilityZone;
+                                      availabilityZoneId;
+                                      sourceVolumeId;
+                                      snapshotId;
+                                      operator;
+                                      createTime;
+                                      recycleBinEnterTime;
+                                      recycleBinExitTime
+                                    }
+    let to_value x =
+      structure_to_value
+        [("volumeId", (Option.map x.volumeId ~f:VolumeId.to_value));
+        ("volumeType", (Option.map x.volumeType ~f:VolumeType.to_value));
+        ("state", (Option.map x.state ~f:VolumeState.to_value));
+        ("size", (Option.map x.size ~f:Integer.to_value));
+        ("iops", (Option.map x.iops ~f:Integer.to_value));
+        ("throughput", (Option.map x.throughput ~f:Integer.to_value));
+        ("outpostArn", (Option.map x.outpostArn ~f:String_.to_value));
+        ("availabilityZone",
+          (Option.map x.availabilityZone ~f:String_.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:String_.to_value));
+        ("sourceVolumeId", (Option.map x.sourceVolumeId ~f:String_.to_value));
+        ("snapshotId", (Option.map x.snapshotId ~f:String_.to_value));
+        ("operator", (Option.map x.operator ~f:OperatorResponse.to_value));
+        ("createTime", (Option.map x.createTime ~f:DateTime.to_value));
+        ("recycleBinEnterTime",
+          (Option.map x.recycleBinEnterTime ~f:MillisecondDateTime.to_value));
+        ("recycleBinExitTime",
+          (Option.map x.recycleBinExitTime ~f:MillisecondDateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recycleBinExitTime =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "recycleBinExitTime") in
+      let recycleBinEnterTime =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "recycleBinEnterTime") in
+      let createTime =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "createTime") in
+      let operator =
+        (Option.map ~f:OperatorResponse.of_xml)
+          (Xml.child xml_arg0 "operator") in
+      let snapshotId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "snapshotId") in
+      let sourceVolumeId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourceVolumeId") in
+      let availabilityZoneId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let availabilityZone =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "availabilityZone") in
+      let outpostArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "outpostArn") in
+      let throughput =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "throughput") in
+      let iops = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "iops") in
+      let size = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "size") in
+      let state =
+        (Option.map ~f:VolumeState.of_xml) (Xml.child xml_arg0 "state") in
+      let volumeType =
+        (Option.map ~f:VolumeType.of_xml) (Xml.child xml_arg0 "volumeType") in
+      let volumeId =
+        (Option.map ~f:VolumeId.of_xml) (Xml.child xml_arg0 "volumeId") in
+      make ?recycleBinExitTime ?recycleBinEnterTime ?createTime ?operator
+        ?snapshotId ?sourceVolumeId ?availabilityZoneId ?availabilityZone
+        ?outpostArn ?throughput ?iops ?size ?state ?volumeType ?volumeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recycleBinExitTime =
+        field_map json__ "RecycleBinExitTime" MillisecondDateTime.of_json in
+      let recycleBinEnterTime =
+        field_map json__ "RecycleBinEnterTime" MillisecondDateTime.of_json in
+      let createTime = field_map json__ "CreateTime" DateTime.of_json in
+      let operator = field_map json__ "Operator" OperatorResponse.of_json in
+      let snapshotId = field_map json__ "SnapshotId" String_.of_json in
+      let sourceVolumeId = field_map json__ "SourceVolumeId" String_.of_json in
+      let availabilityZoneId =
+        field_map json__ "AvailabilityZoneId" String_.of_json in
+      let availabilityZone =
+        field_map json__ "AvailabilityZone" String_.of_json in
+      let outpostArn = field_map json__ "OutpostArn" String_.of_json in
+      let throughput = field_map json__ "Throughput" Integer.of_json in
+      let iops = field_map json__ "Iops" Integer.of_json in
+      let size = field_map json__ "Size" Integer.of_json in
+      let state = field_map json__ "State" VolumeState.of_json in
+      let volumeType = field_map json__ "VolumeType" VolumeType.of_json in
+      let volumeId = field_map json__ "VolumeId" VolumeId.of_json in
+      make ?recycleBinExitTime ?recycleBinEnterTime ?createTime ?operator
+        ?snapshotId ?sourceVolumeId ?availabilityZoneId ?availabilityZone
+        ?outpostArn ?throughput ?iops ?size ?state ?volumeType ?volumeId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a volume that is currently in the Recycle Bin."]
 module SnapshotRecycleBinInfo =
   struct
     type nonrec t =
@@ -9831,7 +16955,7 @@ module SnapshotRecycleBinInfo =
       snapshotId: String_.t option [@ocaml.doc "The ID of the snapshot."];
       recycleBinEnterTime: MillisecondDateTime.t option
         [@ocaml.doc
-          "The date and time when the snaphsot entered the Recycle Bin."];
+          "The date and time when the snapshot entered the Recycle Bin."];
       recycleBinExitTime: MillisecondDateTime.t option
         [@ocaml.doc
           "The date and time when the snapshot is to be permanently deleted from the Recycle Bin."];
@@ -9879,14 +17003,14 @@ module SnapshotRecycleBinInfo =
       make ?volumeId ?description ?recycleBinExitTime ?recycleBinEnterTime
         ?snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeId = field_map json "VolumeId" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let volumeId = field_map json__ "VolumeId" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let recycleBinExitTime =
-        field_map json "RecycleBinExitTime" MillisecondDateTime.of_json in
+        field_map json__ "RecycleBinExitTime" MillisecondDateTime.of_json in
       let recycleBinEnterTime =
-        field_map json "RecycleBinEnterTime" MillisecondDateTime.of_json in
-      let snapshotId = field_map json "SnapshotId" String_.of_json in
+        field_map json__ "RecycleBinEnterTime" MillisecondDateTime.of_json in
+      let snapshotId = field_map json__ "SnapshotId" String_.of_json in
       make ?volumeId ?description ?recycleBinExitTime ?recycleBinEnterTime
         ?snapshotId ()
     let to_json v = composed_to_json to_value v
@@ -9944,14 +17068,14 @@ module ImageRecycleBinInfo =
       make ?recycleBinExitTime ?recycleBinEnterTime ?description ?name
         ?imageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recycleBinExitTime =
-        field_map json "RecycleBinExitTime" MillisecondDateTime.of_json in
+        field_map json__ "RecycleBinExitTime" MillisecondDateTime.of_json in
       let recycleBinEnterTime =
-        field_map json "RecycleBinEnterTime" MillisecondDateTime.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let imageId = field_map json "ImageId" String_.of_json in
+        field_map json__ "RecycleBinEnterTime" MillisecondDateTime.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let imageId = field_map json__ "ImageId" String_.of_json in
       make ?recycleBinExitTime ?recycleBinEnterTime ?description ?name
         ?imageId ()
     let to_json v = composed_to_json to_value v
@@ -9984,10 +17108,10 @@ module DiskImage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?volume ?image ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volume = field_map json "Volume" VolumeDetail.of_json in
-      let image = field_map json "Image" DiskImageDetail.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let volume = field_map json__ "Volume" VolumeDetail.of_json in
+      let image = field_map json__ "Image" DiskImageDetail.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       make ?volume ?image ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a disk image."]
@@ -9995,6 +17119,9 @@ module SecurityGroupStringList =
   struct
     type nonrec t = SecurityGroupName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10031,8 +17158,8 @@ module UserData =
       let data = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "data") in
       make ?data ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let data = field_map json "Data" String_.of_json in make ?data ()
+    let of_json json__ =
+      let data = field_map json__ "Data" String_.of_json in make ?data ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the user data for an instance."]
 module ImageDiskContainer =
@@ -10049,7 +17176,7 @@ module ImageDiskContainer =
       snapshotId: SnapshotId.t option
         [@ocaml.doc
           "The ID of the EBS snapshot to be used for importing the snapshot."];
-      url: String_.t option
+      url: SensitiveUrl.t option
         [@ocaml.doc
           "The URL to the Amazon S3-based disk image being imported. The URL can either be a https URL (https://..) or an Amazon S3 URL (s3://..)"];
       userBucket: UserBucket.t option
@@ -10075,13 +17202,14 @@ module ImageDiskContainer =
         ("DeviceName", (Option.map x.deviceName ~f:String_.to_value));
         ("Format", (Option.map x.format ~f:String_.to_value));
         ("SnapshotId", (Option.map x.snapshotId ~f:SnapshotId.to_value));
-        ("Url", (Option.map x.url ~f:String_.to_value));
+        ("Url", (Option.map x.url ~f:SensitiveUrl.to_value));
         ("UserBucket", (Option.map x.userBucket ~f:UserBucket.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userBucket =
         (Option.map ~f:UserBucket.of_xml) (Xml.child xml_arg0 "UserBucket") in
-      let url = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Url") in
+      let url =
+        (Option.map ~f:SensitiveUrl.of_xml) (Xml.child xml_arg0 "Url") in
       let snapshotId =
         (Option.map ~f:SnapshotId.of_xml) (Xml.child xml_arg0 "SnapshotId") in
       let format =
@@ -10092,13 +17220,13 @@ module ImageDiskContainer =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?userBucket ?url ?snapshotId ?format ?deviceName ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userBucket = field_map json "UserBucket" UserBucket.of_json in
-      let url = field_map json "Url" String_.of_json in
-      let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
-      let format = field_map json "Format" String_.of_json in
-      let deviceName = field_map json "DeviceName" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let userBucket = field_map json__ "UserBucket" UserBucket.of_json in
+      let url = field_map json__ "Url" SensitiveUrl.of_json in
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
+      let format = field_map json__ "Format" String_.of_json in
+      let deviceName = field_map json__ "DeviceName" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       make ?userBucket ?url ?snapshotId ?format ?deviceName ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10121,9 +17249,9 @@ module ImportImageLicenseConfigurationRequest =
           (Xml.child xml_arg0 "LicenseConfigurationArn") in
       make ?licenseConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let licenseConfigurationArn =
-        field_map json "LicenseConfigurationArn" String_.of_json in
+        field_map json__ "LicenseConfigurationArn" String_.of_json in
       make ?licenseConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request information of license configurations."]
@@ -10164,16 +17292,116 @@ module VpnConnectionDeviceType =
           (Xml.child xml_arg0 "vpnConnectionDeviceTypeId") in
       make ?software ?platform ?vendor ?vpnConnectionDeviceTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let software = field_map json "Software" String_.of_json in
-      let platform = field_map json "Platform" String_.of_json in
-      let vendor = field_map json "Vendor" String_.of_json in
+    let of_json json__ =
+      let software = field_map json__ "Software" String_.of_json in
+      let platform = field_map json__ "Platform" String_.of_json in
+      let vendor = field_map json__ "Vendor" String_.of_json in
       let vpnConnectionDeviceTypeId =
-        field_map json "VpnConnectionDeviceTypeId" String_.of_json in
+        field_map json__ "VpnConnectionDeviceTypeId" String_.of_json in
       make ?software ?platform ?vendor ?vpnConnectionDeviceTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List of customer gateway devices that have a sample configuration file available for use. You can also see the list of device types with sample configuration files available under Your customer gateway device in the Amazon Web Services Site-to-Site VPN User Guide."]
+module VpcEncryptionNonCompliantResource =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option
+        [@ocaml.doc "The ID of the non-compliant resource."];
+      type_: String_.t option
+        [@ocaml.doc "The type of the non-compliant resource."];
+      description: String_.t option
+        [@ocaml.doc "A description of the non-compliant resource."];
+      isExcludable: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the resource can be excluded from encryption enforcement."]}
+    let make ?id =
+      fun ?type_ ->
+        fun ?description ->
+          fun ?isExcludable ->
+            fun () -> { id; type_; description; isExcludable }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:String_.to_value));
+        ("type", (Option.map x.type_ ~f:String_.to_value));
+        ("description", (Option.map x.description ~f:String_.to_value));
+        ("isExcludable", (Option.map x.isExcludable ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let isExcludable =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isExcludable") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
+      make ?isExcludable ?description ?type_ ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let isExcludable = field_map json__ "IsExcludable" Boolean.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let type_ = field_map json__ "Type" String_.of_json in
+      let id = field_map json__ "Id" String_.of_json in
+      make ?isExcludable ?description ?type_ ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a resource that is not compliant with VPC encryption requirements. For more information, see Enforce VPC encryption in transit in the Amazon VPC User Guide."]
+module VerifiedAccessEndpointTarget =
+  struct
+    type nonrec t =
+      {
+      verifiedAccessEndpointId: VerifiedAccessEndpointId.t option
+        [@ocaml.doc "The ID of the Verified Access endpoint."];
+      verifiedAccessEndpointTargetIpAddress: String_.t option
+        [@ocaml.doc "The IP address of the target."];
+      verifiedAccessEndpointTargetDns: String_.t option
+        [@ocaml.doc "The DNS name of the target."]}
+    let make ?verifiedAccessEndpointId =
+      fun ?verifiedAccessEndpointTargetIpAddress ->
+        fun ?verifiedAccessEndpointTargetDns ->
+          fun () ->
+            {
+              verifiedAccessEndpointId;
+              verifiedAccessEndpointTargetIpAddress;
+              verifiedAccessEndpointTargetDns
+            }
+    let to_value x =
+      structure_to_value
+        [("verifiedAccessEndpointId",
+           (Option.map x.verifiedAccessEndpointId
+              ~f:VerifiedAccessEndpointId.to_value));
+        ("verifiedAccessEndpointTargetIpAddress",
+          (Option.map x.verifiedAccessEndpointTargetIpAddress
+             ~f:String_.to_value));
+        ("verifiedAccessEndpointTargetDns",
+          (Option.map x.verifiedAccessEndpointTargetDns ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let verifiedAccessEndpointTargetDns =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "verifiedAccessEndpointTargetDns") in
+      let verifiedAccessEndpointTargetIpAddress =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "verifiedAccessEndpointTargetIpAddress") in
+      let verifiedAccessEndpointId =
+        (Option.map ~f:VerifiedAccessEndpointId.of_xml)
+          (Xml.child xml_arg0 "verifiedAccessEndpointId") in
+      make ?verifiedAccessEndpointTargetDns
+        ?verifiedAccessEndpointTargetIpAddress ?verifiedAccessEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let verifiedAccessEndpointTargetDns =
+        field_map json__ "VerifiedAccessEndpointTargetDns" String_.of_json in
+      let verifiedAccessEndpointTargetIpAddress =
+        field_map json__ "VerifiedAccessEndpointTargetIpAddress"
+          String_.of_json in
+      let verifiedAccessEndpointId =
+        field_map json__ "VerifiedAccessEndpointId"
+          VerifiedAccessEndpointId.of_json in
+      make ?verifiedAccessEndpointTargetDns
+        ?verifiedAccessEndpointTargetIpAddress ?verifiedAccessEndpointId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the targets for the specified Verified Access endpoint."]
 module TransitGatewayRouteTablePropagation =
   struct
     type nonrec t =
@@ -10185,13 +17413,24 @@ module TransitGatewayRouteTablePropagation =
         [@ocaml.doc
           "The type of resource. Note that the tgw-peering resource type has been deprecated."];
       state: TransitGatewayPropagationState.t option
-        [@ocaml.doc "The state of the resource."]}
+        [@ocaml.doc "The state of the resource."];
+      transitGatewayRouteTableAnnouncementId:
+        TransitGatewayRouteTableAnnouncementId.t option
+        [@ocaml.doc
+          "The ID of the transit gateway route table announcement."]}
     let make ?transitGatewayAttachmentId =
       fun ?resourceId ->
         fun ?resourceType ->
           fun ?state ->
-            fun () ->
-              { transitGatewayAttachmentId; resourceId; resourceType; state }
+            fun ?transitGatewayRouteTableAnnouncementId ->
+              fun () ->
+                {
+                  transitGatewayAttachmentId;
+                  resourceId;
+                  resourceType;
+                  state;
+                  transitGatewayRouteTableAnnouncementId
+                }
     let to_value x =
       structure_to_value
         [("transitGatewayAttachmentId",
@@ -10201,9 +17440,15 @@ module TransitGatewayRouteTablePropagation =
           (Option.map x.resourceType
              ~f:TransitGatewayAttachmentResourceType.to_value));
         ("state",
-          (Option.map x.state ~f:TransitGatewayPropagationState.to_value))]
+          (Option.map x.state ~f:TransitGatewayPropagationState.to_value));
+        ("transitGatewayRouteTableAnnouncementId",
+          (Option.map x.transitGatewayRouteTableAnnouncementId
+             ~f:TransitGatewayRouteTableAnnouncementId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let transitGatewayRouteTableAnnouncementId =
+        (Option.map ~f:TransitGatewayRouteTableAnnouncementId.of_xml)
+          (Xml.child xml_arg0 "transitGatewayRouteTableAnnouncementId") in
       let state =
         (Option.map ~f:TransitGatewayPropagationState.of_xml)
           (Xml.child xml_arg0 "state") in
@@ -10215,18 +17460,23 @@ module TransitGatewayRouteTablePropagation =
       let transitGatewayAttachmentId =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "transitGatewayAttachmentId") in
-      make ?state ?resourceType ?resourceId ?transitGatewayAttachmentId ()
+      make ?transitGatewayRouteTableAnnouncementId ?state ?resourceType
+        ?resourceId ?transitGatewayAttachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let transitGatewayRouteTableAnnouncementId =
+        field_map json__ "TransitGatewayRouteTableAnnouncementId"
+          TransitGatewayRouteTableAnnouncementId.of_json in
       let state =
-        field_map json "State" TransitGatewayPropagationState.of_json in
+        field_map json__ "State" TransitGatewayPropagationState.of_json in
       let resourceType =
-        field_map json "ResourceType"
+        field_map json__ "ResourceType"
           TransitGatewayAttachmentResourceType.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
       let transitGatewayAttachmentId =
-        field_map json "TransitGatewayAttachmentId" String_.of_json in
-      make ?state ?resourceType ?resourceId ?transitGatewayAttachmentId ()
+        field_map json__ "TransitGatewayAttachmentId" String_.of_json in
+      make ?transitGatewayRouteTableAnnouncementId ?state ?resourceType
+        ?resourceId ?transitGatewayAttachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a route table propagation."]
 module TransitGatewayRouteTableAssociation =
@@ -10272,15 +17522,15 @@ module TransitGatewayRouteTableAssociation =
           (Xml.child xml_arg0 "transitGatewayAttachmentId") in
       make ?state ?resourceType ?resourceId ?transitGatewayAttachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let state =
-        field_map json "State" TransitGatewayAssociationState.of_json in
+        field_map json__ "State" TransitGatewayAssociationState.of_json in
       let resourceType =
-        field_map json "ResourceType"
+        field_map json__ "ResourceType"
           TransitGatewayAttachmentResourceType.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
       let transitGatewayAttachmentId =
-        field_map json "TransitGatewayAttachmentId" String_.of_json in
+        field_map json__ "TransitGatewayAttachmentId" String_.of_json in
       make ?state ?resourceType ?resourceId ?transitGatewayAttachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10355,24 +17605,153 @@ module TransitGatewayPrefixListReference =
       make ?transitGatewayAttachment ?blackhole ?state ?prefixListOwnerId
         ?prefixListId ?transitGatewayRouteTableId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transitGatewayAttachment =
-        field_map json "TransitGatewayAttachment"
+        field_map json__ "TransitGatewayAttachment"
           TransitGatewayPrefixListAttachment.of_json in
-      let blackhole = field_map json "Blackhole" Boolean.of_json in
+      let blackhole = field_map json__ "Blackhole" Boolean.of_json in
       let state =
-        field_map json "State" TransitGatewayPrefixListReferenceState.of_json in
+        field_map json__ "State"
+          TransitGatewayPrefixListReferenceState.of_json in
       let prefixListOwnerId =
-        field_map json "PrefixListOwnerId" String_.of_json in
+        field_map json__ "PrefixListOwnerId" String_.of_json in
       let prefixListId =
-        field_map json "PrefixListId" PrefixListResourceId.of_json in
+        field_map json__ "PrefixListId" PrefixListResourceId.of_json in
       let transitGatewayRouteTableId =
-        field_map json "TransitGatewayRouteTableId"
+        field_map json__ "TransitGatewayRouteTableId"
           TransitGatewayRouteTableId.of_json in
       make ?transitGatewayAttachment ?blackhole ?state ?prefixListOwnerId
         ?prefixListId ?transitGatewayRouteTableId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a prefix list reference."]
+module TransitGatewayPolicyTableEntry =
+  struct
+    type nonrec t =
+      {
+      policyRuleNumber: String_.t option
+        [@ocaml.doc
+          "The rule number for the transit gateway policy table entry."];
+      policyRule: TransitGatewayPolicyRule.t option
+        [@ocaml.doc
+          "The policy rule associated with the transit gateway policy table."];
+      targetRouteTableId: TransitGatewayRouteTableId.t option
+        [@ocaml.doc "The ID of the target route table."]}
+    let make ?policyRuleNumber =
+      fun ?policyRule ->
+        fun ?targetRouteTableId ->
+          fun () -> { policyRuleNumber; policyRule; targetRouteTableId }
+    let to_value x =
+      structure_to_value
+        [("policyRuleNumber",
+           (Option.map x.policyRuleNumber ~f:String_.to_value));
+        ("policyRule",
+          (Option.map x.policyRule ~f:TransitGatewayPolicyRule.to_value));
+        ("targetRouteTableId",
+          (Option.map x.targetRouteTableId
+             ~f:TransitGatewayRouteTableId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetRouteTableId =
+        (Option.map ~f:TransitGatewayRouteTableId.of_xml)
+          (Xml.child xml_arg0 "targetRouteTableId") in
+      let policyRule =
+        (Option.map ~f:TransitGatewayPolicyRule.of_xml)
+          (Xml.child xml_arg0 "policyRule") in
+      let policyRuleNumber =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "policyRuleNumber") in
+      make ?targetRouteTableId ?policyRule ?policyRuleNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetRouteTableId =
+        field_map json__ "TargetRouteTableId"
+          TransitGatewayRouteTableId.of_json in
+      let policyRule =
+        field_map json__ "PolicyRule" TransitGatewayPolicyRule.of_json in
+      let policyRuleNumber =
+        field_map json__ "PolicyRuleNumber" String_.of_json in
+      make ?targetRouteTableId ?policyRule ?policyRuleNumber ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a transit gateway policy table entry"]
+module TransitGatewayPolicyTableAssociation =
+  struct
+    type nonrec t =
+      {
+      transitGatewayPolicyTableId: TransitGatewayPolicyTableId.t option
+        [@ocaml.doc "The ID of the transit gateway policy table."];
+      transitGatewayAttachmentId: TransitGatewayAttachmentId.t option
+        [@ocaml.doc "The ID of the transit gateway attachment."];
+      resourceId: String_.t option
+        [@ocaml.doc "The resource ID of the transit gateway attachment."];
+      resourceType: TransitGatewayAttachmentResourceType.t option
+        [@ocaml.doc
+          "The resource type for the transit gateway policy table association."];
+      state: TransitGatewayAssociationState.t option
+        [@ocaml.doc
+          "The state of the transit gateway policy table association."]}
+    let make ?transitGatewayPolicyTableId =
+      fun ?transitGatewayAttachmentId ->
+        fun ?resourceId ->
+          fun ?resourceType ->
+            fun ?state ->
+              fun () ->
+                {
+                  transitGatewayPolicyTableId;
+                  transitGatewayAttachmentId;
+                  resourceId;
+                  resourceType;
+                  state
+                }
+    let to_value x =
+      structure_to_value
+        [("transitGatewayPolicyTableId",
+           (Option.map x.transitGatewayPolicyTableId
+              ~f:TransitGatewayPolicyTableId.to_value));
+        ("transitGatewayAttachmentId",
+          (Option.map x.transitGatewayAttachmentId
+             ~f:TransitGatewayAttachmentId.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType",
+          (Option.map x.resourceType
+             ~f:TransitGatewayAttachmentResourceType.to_value));
+        ("state",
+          (Option.map x.state ~f:TransitGatewayAssociationState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:TransitGatewayAssociationState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let resourceType =
+        (Option.map ~f:TransitGatewayAttachmentResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let resourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
+      let transitGatewayAttachmentId =
+        (Option.map ~f:TransitGatewayAttachmentId.of_xml)
+          (Xml.child xml_arg0 "transitGatewayAttachmentId") in
+      let transitGatewayPolicyTableId =
+        (Option.map ~f:TransitGatewayPolicyTableId.of_xml)
+          (Xml.child xml_arg0 "transitGatewayPolicyTableId") in
+      make ?state ?resourceType ?resourceId ?transitGatewayAttachmentId
+        ?transitGatewayPolicyTableId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state =
+        field_map json__ "State" TransitGatewayAssociationState.of_json in
+      let resourceType =
+        field_map json__ "ResourceType"
+          TransitGatewayAttachmentResourceType.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let transitGatewayAttachmentId =
+        field_map json__ "TransitGatewayAttachmentId"
+          TransitGatewayAttachmentId.of_json in
+      let transitGatewayPolicyTableId =
+        field_map json__ "TransitGatewayPolicyTableId"
+          TransitGatewayPolicyTableId.of_json in
+      make ?state ?resourceType ?resourceId ?transitGatewayAttachmentId
+        ?transitGatewayPolicyTableId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a transit gateway policy table association."]
 module TransitGatewayMulticastDomainAssociation =
   struct
     type nonrec t =
@@ -10430,20 +17809,116 @@ module TransitGatewayMulticastDomainAssociation =
       make ?subnet ?resourceOwnerId ?resourceType ?resourceId
         ?transitGatewayAttachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnet = field_map json "Subnet" SubnetAssociation.of_json in
-      let resourceOwnerId = field_map json "ResourceOwnerId" String_.of_json in
+    let of_json json__ =
+      let subnet = field_map json__ "Subnet" SubnetAssociation.of_json in
+      let resourceOwnerId =
+        field_map json__ "ResourceOwnerId" String_.of_json in
       let resourceType =
-        field_map json "ResourceType"
+        field_map json__ "ResourceType"
           TransitGatewayAttachmentResourceType.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
       let transitGatewayAttachmentId =
-        field_map json "TransitGatewayAttachmentId" String_.of_json in
+        field_map json__ "TransitGatewayAttachmentId" String_.of_json in
       make ?subnet ?resourceOwnerId ?resourceType ?resourceId
         ?transitGatewayAttachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the resources associated with the transit gateway multicast domain."]
+module TransitGatewayMeteringPolicyEntry =
+  struct
+    type nonrec t =
+      {
+      policyRuleNumber: String_.t option
+        [@ocaml.doc "The rule number of the metering policy entry."];
+      meteredAccount: TransitGatewayMeteringPayerType.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID to which the metered traffic is attributed."];
+      state: TransitGatewayMeteringPolicyEntryState.t option
+        [@ocaml.doc "The state of the metering policy entry."];
+      updatedAt: MillisecondDateTime.t option
+        [@ocaml.doc
+          "The date and time when the metering policy entry was last updated."];
+      updateEffectiveAt: MillisecondDateTime.t option
+        [@ocaml.doc
+          "The date and time when the metering policy entry update becomes effective."];
+      meteringPolicyRule: TransitGatewayMeteringPolicyRule.t option
+        [@ocaml.doc
+          "The metering policy rule that defines traffic matching criteria."]}
+    let make ?policyRuleNumber =
+      fun ?meteredAccount ->
+        fun ?state ->
+          fun ?updatedAt ->
+            fun ?updateEffectiveAt ->
+              fun ?meteringPolicyRule ->
+                fun () ->
+                  {
+                    policyRuleNumber;
+                    meteredAccount;
+                    state;
+                    updatedAt;
+                    updateEffectiveAt;
+                    meteringPolicyRule
+                  }
+    let to_value x =
+      structure_to_value
+        [("policyRuleNumber",
+           (Option.map x.policyRuleNumber ~f:String_.to_value));
+        ("meteredAccount",
+          (Option.map x.meteredAccount
+             ~f:TransitGatewayMeteringPayerType.to_value));
+        ("state",
+          (Option.map x.state
+             ~f:TransitGatewayMeteringPolicyEntryState.to_value));
+        ("updatedAt",
+          (Option.map x.updatedAt ~f:MillisecondDateTime.to_value));
+        ("updateEffectiveAt",
+          (Option.map x.updateEffectiveAt ~f:MillisecondDateTime.to_value));
+        ("meteringPolicyRule",
+          (Option.map x.meteringPolicyRule
+             ~f:TransitGatewayMeteringPolicyRule.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let meteringPolicyRule =
+        (Option.map ~f:TransitGatewayMeteringPolicyRule.of_xml)
+          (Xml.child xml_arg0 "meteringPolicyRule") in
+      let updateEffectiveAt =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "updateEffectiveAt") in
+      let updatedAt =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "updatedAt") in
+      let state =
+        (Option.map ~f:TransitGatewayMeteringPolicyEntryState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let meteredAccount =
+        (Option.map ~f:TransitGatewayMeteringPayerType.of_xml)
+          (Xml.child xml_arg0 "meteredAccount") in
+      let policyRuleNumber =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "policyRuleNumber") in
+      make ?meteringPolicyRule ?updateEffectiveAt ?updatedAt ?state
+        ?meteredAccount ?policyRuleNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let meteringPolicyRule =
+        field_map json__ "MeteringPolicyRule"
+          TransitGatewayMeteringPolicyRule.of_json in
+      let updateEffectiveAt =
+        field_map json__ "UpdateEffectiveAt" MillisecondDateTime.of_json in
+      let updatedAt =
+        field_map json__ "UpdatedAt" MillisecondDateTime.of_json in
+      let state =
+        field_map json__ "State"
+          TransitGatewayMeteringPolicyEntryState.of_json in
+      let meteredAccount =
+        field_map json__ "MeteredAccount"
+          TransitGatewayMeteringPayerType.of_json in
+      let policyRuleNumber =
+        field_map json__ "PolicyRuleNumber" String_.of_json in
+      make ?meteringPolicyRule ?updateEffectiveAt ?updatedAt ?state
+        ?meteredAccount ?policyRuleNumber ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an entry in a transit gateway metering policy."]
 module TransitGatewayAttachmentPropagation =
   struct
     type nonrec t =
@@ -10470,11 +17945,11 @@ module TransitGatewayAttachmentPropagation =
           (Xml.child xml_arg0 "transitGatewayRouteTableId") in
       make ?state ?transitGatewayRouteTableId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let state =
-        field_map json "State" TransitGatewayPropagationState.of_json in
+        field_map json__ "State" TransitGatewayPropagationState.of_json in
       let transitGatewayRouteTableId =
-        field_map json "TransitGatewayRouteTableId" String_.of_json in
+        field_map json__ "TransitGatewayRouteTableId" String_.of_json in
       make ?state ?transitGatewayRouteTableId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a propagation route table."]
@@ -10544,16 +18019,16 @@ module SubnetCidrReservation =
       make ?tags ?description ?ownerId ?reservationType ?cidr ?subnetId
         ?subnetCidrReservationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let ownerId = field_map json "OwnerId" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let ownerId = field_map json__ "OwnerId" String_.of_json in
       let reservationType =
-        field_map json "ReservationType" SubnetCidrReservationType.of_json in
-      let cidr = field_map json "Cidr" String_.of_json in
-      let subnetId = field_map json "SubnetId" SubnetId.of_json in
+        field_map json__ "ReservationType" SubnetCidrReservationType.of_json in
+      let cidr = field_map json__ "Cidr" String_.of_json in
+      let subnetId = field_map json__ "SubnetId" SubnetId.of_json in
       let subnetCidrReservationId =
-        field_map json "SubnetCidrReservationId"
+        field_map json__ "SubnetCidrReservationId"
           SubnetCidrReservationId.of_json in
       make ?tags ?description ?ownerId ?reservationType ?cidr ?subnetId
         ?subnetCidrReservationId ()
@@ -10588,11 +18063,11 @@ module SpotPlacementScore =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "region") in
       make ?score ?availabilityZoneId ?region ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Integer.of_json in
+    let of_json json__ =
+      let score = field_map json__ "Score" Integer.of_json in
       let availabilityZoneId =
-        field_map json "AvailabilityZoneId" String_.of_json in
-      let region = field_map json "Region" String_.of_json in
+        field_map json__ "AvailabilityZoneId" String_.of_json in
+      let region = field_map json__ "Region" String_.of_json in
       make ?score ?availabilityZoneId ?region ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10605,6 +18080,9 @@ module ArchitectureTypeSet =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ArchitectureType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10634,6 +18112,9 @@ module VirtualizationTypeSet =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualizationType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10655,6 +18136,258 @@ module VirtualizationTypeSet =
         ~of_json:VirtualizationType.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SecurityGroupForVpc =
+  struct
+    type nonrec t =
+      {
+      description: String_.t option
+        [@ocaml.doc "The security group's description."];
+      groupName: String_.t option [@ocaml.doc "The security group name."];
+      ownerId: String_.t option [@ocaml.doc "The security group owner ID."];
+      groupId: String_.t option [@ocaml.doc "The security group ID."];
+      tags: TagList.t option [@ocaml.doc "The security group tags."];
+      primaryVpcId: String_.t option
+        [@ocaml.doc "The VPC ID in which the security group was created."]}
+    let make ?description =
+      fun ?groupName ->
+        fun ?ownerId ->
+          fun ?groupId ->
+            fun ?tags ->
+              fun ?primaryVpcId ->
+                fun () ->
+                  {
+                    description;
+                    groupName;
+                    ownerId;
+                    groupId;
+                    tags;
+                    primaryVpcId
+                  }
+    let to_value x =
+      structure_to_value
+        [("description", (Option.map x.description ~f:String_.to_value));
+        ("groupName", (Option.map x.groupName ~f:String_.to_value));
+        ("ownerId", (Option.map x.ownerId ~f:String_.to_value));
+        ("groupId", (Option.map x.groupId ~f:String_.to_value));
+        ("tagSet", (Option.map x.tags ~f:TagList.to_value));
+        ("primaryVpcId", (Option.map x.primaryVpcId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let primaryVpcId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "primaryVpcId") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
+      let groupId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupId") in
+      let ownerId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ownerId") in
+      let groupName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupName") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
+      make ?primaryVpcId ?tags ?groupId ?ownerId ?groupName ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let primaryVpcId = field_map json__ "PrimaryVpcId" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let groupId = field_map json__ "GroupId" String_.of_json in
+      let ownerId = field_map json__ "OwnerId" String_.of_json in
+      let groupName = field_map json__ "GroupName" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      make ?primaryVpcId ?tags ?groupId ?ownerId ?groupName ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A security group that can be used by interfaces in the VPC."]
+module RouteServerRoute =
+  struct
+    type nonrec t =
+      {
+      routeServerEndpointId: RouteServerEndpointId.t option
+        [@ocaml.doc
+          "The ID of the route server endpoint that received this route."];
+      routeServerPeerId: RouteServerPeerId.t option
+        [@ocaml.doc
+          "The ID of the route server peer that advertised this route."];
+      routeInstallationDetails: RouteServerRouteInstallationDetails.t option
+        [@ocaml.doc
+          "Details about the installation status of this route in route tables."];
+      routeStatus: RouteServerRouteStatus.t option
+        [@ocaml.doc
+          "The current status of the route in the routing database. Values are in-rib or in-fib depending on if the routes are in the RIB or the FIB database. The Routing Information Base (RIB) serves as a database that stores all the routing information and network topology data collected by a router or routing system, such as routes learned from BGP peers. The RIB is constantly updated as new routing information is received or existing routes change. This ensures that the route server always has the most current view of the network topology and can make optimal routing decisions. The Forwarding Information Base (FIB) serves as a forwarding table for what route server has determined are the best-path routes in the RIB after evaluating all available routing information and policies. The FIB routes are installed on the route tables. The FIB is recomputed whenever there are changes to the RIB."];
+      prefix: String_.t option
+        [@ocaml.doc "The destination CIDR block of the route."];
+      asPaths: AsPath.t option
+        [@ocaml.doc "The AS path attributes of the BGP route."];
+      med: Integer.t option
+        [@ocaml.doc
+          "The Multi-Exit Discriminator (MED) value of the BGP route."];
+      nextHopIp: String_.t option
+        [@ocaml.doc "The IP address for the next hop."]}
+    let make ?routeServerEndpointId =
+      fun ?routeServerPeerId ->
+        fun ?routeInstallationDetails ->
+          fun ?routeStatus ->
+            fun ?prefix ->
+              fun ?asPaths ->
+                fun ?med ->
+                  fun ?nextHopIp ->
+                    fun () ->
+                      {
+                        routeServerEndpointId;
+                        routeServerPeerId;
+                        routeInstallationDetails;
+                        routeStatus;
+                        prefix;
+                        asPaths;
+                        med;
+                        nextHopIp
+                      }
+    let to_value x =
+      structure_to_value
+        [("routeServerEndpointId",
+           (Option.map x.routeServerEndpointId
+              ~f:RouteServerEndpointId.to_value));
+        ("routeServerPeerId",
+          (Option.map x.routeServerPeerId ~f:RouteServerPeerId.to_value));
+        ("routeInstallationDetailSet",
+          (Option.map x.routeInstallationDetails
+             ~f:RouteServerRouteInstallationDetails.to_value));
+        ("routeStatus",
+          (Option.map x.routeStatus ~f:RouteServerRouteStatus.to_value));
+        ("prefix", (Option.map x.prefix ~f:String_.to_value));
+        ("asPathSet", (Option.map x.asPaths ~f:AsPath.to_value));
+        ("med", (Option.map x.med ~f:Integer.to_value));
+        ("nextHopIp", (Option.map x.nextHopIp ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextHopIp =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextHopIp") in
+      let med = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "med") in
+      let asPaths =
+        (Option.map ~f:AsPath.of_xml) (Xml.child xml_arg0 "asPathSet") in
+      let prefix =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "prefix") in
+      let routeStatus =
+        (Option.map ~f:RouteServerRouteStatus.of_xml)
+          (Xml.child xml_arg0 "routeStatus") in
+      let routeInstallationDetails =
+        (Option.map ~f:RouteServerRouteInstallationDetails.of_xml)
+          (Xml.child xml_arg0 "routeInstallationDetailSet") in
+      let routeServerPeerId =
+        (Option.map ~f:RouteServerPeerId.of_xml)
+          (Xml.child xml_arg0 "routeServerPeerId") in
+      let routeServerEndpointId =
+        (Option.map ~f:RouteServerEndpointId.of_xml)
+          (Xml.child xml_arg0 "routeServerEndpointId") in
+      make ?nextHopIp ?med ?asPaths ?prefix ?routeStatus
+        ?routeInstallationDetails ?routeServerPeerId ?routeServerEndpointId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextHopIp = field_map json__ "NextHopIp" String_.of_json in
+      let med = field_map json__ "Med" Integer.of_json in
+      let asPaths = field_map json__ "AsPaths" AsPath.of_json in
+      let prefix = field_map json__ "Prefix" String_.of_json in
+      let routeStatus =
+        field_map json__ "RouteStatus" RouteServerRouteStatus.of_json in
+      let routeInstallationDetails =
+        field_map json__ "RouteInstallationDetails"
+          RouteServerRouteInstallationDetails.of_json in
+      let routeServerPeerId =
+        field_map json__ "RouteServerPeerId" RouteServerPeerId.of_json in
+      let routeServerEndpointId =
+        field_map json__ "RouteServerEndpointId"
+          RouteServerEndpointId.of_json in
+      make ?nextHopIp ?med ?asPaths ?prefix ?routeStatus
+        ?routeInstallationDetails ?routeServerPeerId ?routeServerEndpointId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a route in the route server's routing database."]
+module RouteServerPropagation =
+  struct
+    type nonrec t =
+      {
+      routeServerId: RouteServerId.t option
+        [@ocaml.doc
+          "The ID of the route server configured for route propagation."];
+      routeTableId: RouteTableId.t option
+        [@ocaml.doc
+          "The ID of the route table configured for route server propagation."];
+      state: RouteServerPropagationState.t option
+        [@ocaml.doc "The current state of route propagation."]}
+    let make ?routeServerId =
+      fun ?routeTableId ->
+        fun ?state -> fun () -> { routeServerId; routeTableId; state }
+    let to_value x =
+      structure_to_value
+        [("routeServerId",
+           (Option.map x.routeServerId ~f:RouteServerId.to_value));
+        ("routeTableId",
+          (Option.map x.routeTableId ~f:RouteTableId.to_value));
+        ("state",
+          (Option.map x.state ~f:RouteServerPropagationState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:RouteServerPropagationState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let routeTableId =
+        (Option.map ~f:RouteTableId.of_xml)
+          (Xml.child xml_arg0 "routeTableId") in
+      let routeServerId =
+        (Option.map ~f:RouteServerId.of_xml)
+          (Xml.child xml_arg0 "routeServerId") in
+      make ?state ?routeTableId ?routeServerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state =
+        field_map json__ "State" RouteServerPropagationState.of_json in
+      let routeTableId = field_map json__ "RouteTableId" RouteTableId.of_json in
+      let routeServerId =
+        field_map json__ "RouteServerId" RouteServerId.of_json in
+      make ?state ?routeTableId ?routeServerId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the route propagation configuration between a route server and a route table. When enabled, route server propagation installs the routes in the FIB on the route table you've specified. Route server supports IPv4 and IPv6 route propagation."]
+module RouteServerAssociation =
+  struct
+    type nonrec t =
+      {
+      routeServerId: RouteServerId.t option
+        [@ocaml.doc "The ID of the associated route server."];
+      vpcId: VpcId.t option [@ocaml.doc "The ID of the associated VPC."];
+      state: RouteServerAssociationState.t option
+        [@ocaml.doc "The current state of the association."]}
+    let make ?routeServerId =
+      fun ?vpcId -> fun ?state -> fun () -> { routeServerId; vpcId; state }
+    let to_value x =
+      structure_to_value
+        [("routeServerId",
+           (Option.map x.routeServerId ~f:RouteServerId.to_value));
+        ("vpcId", (Option.map x.vpcId ~f:VpcId.to_value));
+        ("state",
+          (Option.map x.state ~f:RouteServerAssociationState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:RouteServerAssociationState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let vpcId = (Option.map ~f:VpcId.of_xml) (Xml.child xml_arg0 "vpcId") in
+      let routeServerId =
+        (Option.map ~f:RouteServerId.of_xml)
+          (Xml.child xml_arg0 "routeServerId") in
+      make ?state ?vpcId ?routeServerId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state =
+        field_map json__ "State" RouteServerAssociationState.of_json in
+      let vpcId = field_map json__ "VpcId" VpcId.of_json in
+      let routeServerId =
+        field_map json__ "RouteServerId" RouteServerId.of_json in
+      make ?state ?vpcId ?routeServerId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the association between a route server and a VPC. A route server association is the connection established between a route server and a VPC."]
 module ReservedInstanceReservationValue =
   struct
     type nonrec t =
@@ -10684,11 +18417,11 @@ module ReservedInstanceReservationValue =
           (Xml.child xml_arg0 "reservationValue") in
       make ?reservedInstanceId ?reservationValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reservedInstanceId =
-        field_map json "ReservedInstanceId" String_.of_json in
+        field_map json__ "ReservedInstanceId" String_.of_json in
       let reservationValue =
-        field_map json "ReservationValue" ReservationValue.of_json in
+        field_map json__ "ReservationValue" ReservationValue.of_json in
       make ?reservedInstanceId ?reservationValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The total value of the Convertible Reserved Instance."]
@@ -10721,11 +18454,11 @@ module TargetReservationValue =
           (Xml.child xml_arg0 "reservationValue") in
       make ?targetConfiguration ?reservationValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetConfiguration =
-        field_map json "TargetConfiguration" TargetConfiguration.of_json in
+        field_map json__ "TargetConfiguration" TargetConfiguration.of_json in
       let reservationValue =
-        field_map json "ReservationValue" ReservationValue.of_json in
+        field_map json__ "ReservationValue" ReservationValue.of_json in
       make ?targetConfiguration ?reservationValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10756,10 +18489,10 @@ module TargetConfigurationRequest =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "InstanceCount") in
       make ~offeringId ?instanceCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let offeringId =
-        field_map_exn json "OfferingId" ReservedInstancesOfferingId.of_json in
-      let instanceCount = field_map json "InstanceCount" Integer.of_json in
+        field_map_exn json__ "OfferingId" ReservedInstancesOfferingId.of_json in
+      let instanceCount = field_map json__ "InstanceCount" Integer.of_json in
       make ~offeringId ?instanceCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about the target configuration."]
@@ -10767,6 +18500,9 @@ module AccessScopePathList =
   struct
     type nonrec t = AccessScopePath.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessScopePath.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10838,15 +18574,15 @@ module AccessScopeAnalysisFinding =
       make ?findingComponents ?findingId ?networkInsightsAccessScopeId
         ?networkInsightsAccessScopeAnalysisId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let findingComponents =
-        field_map json "FindingComponents" PathComponentList.of_json in
-      let findingId = field_map json "FindingId" String_.of_json in
+        field_map json__ "FindingComponents" PathComponentList.of_json in
+      let findingId = field_map json__ "FindingId" String_.of_json in
       let networkInsightsAccessScopeId =
-        field_map json "NetworkInsightsAccessScopeId"
+        field_map json__ "NetworkInsightsAccessScopeId"
           NetworkInsightsAccessScopeId.of_json in
       let networkInsightsAccessScopeAnalysisId =
-        field_map json "NetworkInsightsAccessScopeAnalysisId"
+        field_map json__ "NetworkInsightsAccessScopeAnalysisId"
           NetworkInsightsAccessScopeAnalysisId.of_json in
       make ?findingComponents ?findingId ?networkInsightsAccessScopeId
         ?networkInsightsAccessScopeAnalysisId ()
@@ -10870,9 +18606,9 @@ module PrefixListEntry =
       let cidr = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cidr") in
       make ?description ?cidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" String_.of_json in
-      let cidr = field_map json "Cidr" String_.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" String_.of_json in
+      let cidr = field_map json__ "Cidr" String_.of_json in
       make ?description ?cidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a prefix list entry."]
@@ -10897,9 +18633,9 @@ module PrefixListAssociation =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       make ?resourceOwner ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceOwner = field_map json "ResourceOwner" String_.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
+    let of_json json__ =
+      let resourceOwner = field_map json__ "ResourceOwner" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
       make ?resourceOwner ?resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10930,7 +18666,7 @@ module IpamResourceCidr =
         [@ocaml.doc "The tags for an IPAM resource."];
       ipUsage: BoxedDouble.t option
         [@ocaml.doc
-          "The IP address space in the IPAM pool that is allocated to this resource. To convert the decimal to a percentage, multiply the decimal by 100."];
+          "The percentage of IP address space in use. To convert the decimal to a percentage, multiply the decimal by 100. Note the following: For resources that are VPCs, this is the percentage of IP address space in the VPC that's taken up by subnet CIDRs. For resources that are subnets, if the subnet has an IPv4 CIDR provisioned to it, this is the percentage of IPv4 address space in the subnet that's in use. If the subnet has an IPv6 CIDR provisioned to it, the percentage of IPv6 address space in use is not represented. The percentage of IPv6 address space in use cannot currently be calculated. For resources that are public IPv4 pools, this is the percentage of IP address space in the pool that's been allocated to Elastic IP addresses (EIPs)."];
       complianceStatus: IpamComplianceStatus.t option
         [@ocaml.doc
           "The compliance status of the IPAM resource. For more information on compliance statuses, see Monitor CIDR usage by resource in the Amazon VPC IPAM User Guide."];
@@ -10940,7 +18676,9 @@ module IpamResourceCidr =
       overlapStatus: IpamOverlapStatus.t option
         [@ocaml.doc
           "The overlap status of an IPAM resource. The overlap status tells you if the CIDR for a resource overlaps with another CIDR in the scope. For more information on overlap statuses, see Monitor CIDR usage by resource in the Amazon VPC IPAM User Guide."];
-      vpcId: String_.t option [@ocaml.doc "The ID of a VPC."]}
+      vpcId: String_.t option [@ocaml.doc "The ID of a VPC."];
+      availabilityZoneId: String_.t option
+        [@ocaml.doc "The Availability Zone ID."]}
     let make ?ipamId =
       fun ?ipamScopeId ->
         fun ?ipamPoolId ->
@@ -10956,24 +18694,26 @@ module IpamResourceCidr =
                             fun ?managementState ->
                               fun ?overlapStatus ->
                                 fun ?vpcId ->
-                                  fun () ->
-                                    {
-                                      ipamId;
-                                      ipamScopeId;
-                                      ipamPoolId;
-                                      resourceRegion;
-                                      resourceOwnerId;
-                                      resourceId;
-                                      resourceName;
-                                      resourceCidr;
-                                      resourceType;
-                                      resourceTags;
-                                      ipUsage;
-                                      complianceStatus;
-                                      managementState;
-                                      overlapStatus;
-                                      vpcId
-                                    }
+                                  fun ?availabilityZoneId ->
+                                    fun () ->
+                                      {
+                                        ipamId;
+                                        ipamScopeId;
+                                        ipamPoolId;
+                                        resourceRegion;
+                                        resourceOwnerId;
+                                        resourceId;
+                                        resourceName;
+                                        resourceCidr;
+                                        resourceType;
+                                        resourceTags;
+                                        ipUsage;
+                                        complianceStatus;
+                                        managementState;
+                                        overlapStatus;
+                                        vpcId;
+                                        availabilityZoneId
+                                      }
     let to_value x =
       structure_to_value
         [("ipamId", (Option.map x.ipamId ~f:IpamId.to_value));
@@ -10996,9 +18736,14 @@ module IpamResourceCidr =
           (Option.map x.managementState ~f:IpamManagementState.to_value));
         ("overlapStatus",
           (Option.map x.overlapStatus ~f:IpamOverlapStatus.to_value));
-        ("vpcId", (Option.map x.vpcId ~f:String_.to_value))]
+        ("vpcId", (Option.map x.vpcId ~f:String_.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let availabilityZoneId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
       let vpcId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpcId") in
       let overlapStatus =
         (Option.map ~f:IpamOverlapStatus.of_xml)
@@ -11033,36 +18778,153 @@ module IpamResourceCidr =
         (Option.map ~f:IpamScopeId.of_xml) (Xml.child xml_arg0 "ipamScopeId") in
       let ipamId =
         (Option.map ~f:IpamId.of_xml) (Xml.child xml_arg0 "ipamId") in
-      make ?vpcId ?overlapStatus ?managementState ?complianceStatus ?ipUsage
-        ?resourceTags ?resourceType ?resourceCidr ?resourceName ?resourceId
-        ?resourceOwnerId ?resourceRegion ?ipamPoolId ?ipamScopeId ?ipamId ()
+      make ?availabilityZoneId ?vpcId ?overlapStatus ?managementState
+        ?complianceStatus ?ipUsage ?resourceTags ?resourceType ?resourceCidr
+        ?resourceName ?resourceId ?resourceOwnerId ?resourceRegion
+        ?ipamPoolId ?ipamScopeId ?ipamId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" String_.of_json in
+    let of_json json__ =
+      let availabilityZoneId =
+        field_map json__ "AvailabilityZoneId" String_.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
       let overlapStatus =
-        field_map json "OverlapStatus" IpamOverlapStatus.of_json in
+        field_map json__ "OverlapStatus" IpamOverlapStatus.of_json in
       let managementState =
-        field_map json "ManagementState" IpamManagementState.of_json in
+        field_map json__ "ManagementState" IpamManagementState.of_json in
       let complianceStatus =
-        field_map json "ComplianceStatus" IpamComplianceStatus.of_json in
-      let ipUsage = field_map json "IpUsage" BoxedDouble.of_json in
+        field_map json__ "ComplianceStatus" IpamComplianceStatus.of_json in
+      let ipUsage = field_map json__ "IpUsage" BoxedDouble.of_json in
       let resourceTags =
-        field_map json "ResourceTags" IpamResourceTagList.of_json in
+        field_map json__ "ResourceTags" IpamResourceTagList.of_json in
       let resourceType =
-        field_map json "ResourceType" IpamResourceType.of_json in
-      let resourceCidr = field_map json "ResourceCidr" String_.of_json in
-      let resourceName = field_map json "ResourceName" String_.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
-      let resourceOwnerId = field_map json "ResourceOwnerId" String_.of_json in
-      let resourceRegion = field_map json "ResourceRegion" String_.of_json in
-      let ipamPoolId = field_map json "IpamPoolId" IpamPoolId.of_json in
-      let ipamScopeId = field_map json "IpamScopeId" IpamScopeId.of_json in
-      let ipamId = field_map json "IpamId" IpamId.of_json in
-      make ?vpcId ?overlapStatus ?managementState ?complianceStatus ?ipUsage
-        ?resourceTags ?resourceType ?resourceCidr ?resourceName ?resourceId
-        ?resourceOwnerId ?resourceRegion ?ipamPoolId ?ipamScopeId ?ipamId ()
+        field_map json__ "ResourceType" IpamResourceType.of_json in
+      let resourceCidr = field_map json__ "ResourceCidr" String_.of_json in
+      let resourceName = field_map json__ "ResourceName" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let resourceOwnerId =
+        field_map json__ "ResourceOwnerId" String_.of_json in
+      let resourceRegion = field_map json__ "ResourceRegion" String_.of_json in
+      let ipamPoolId = field_map json__ "IpamPoolId" IpamPoolId.of_json in
+      let ipamScopeId = field_map json__ "IpamScopeId" IpamScopeId.of_json in
+      let ipamId = field_map json__ "IpamId" IpamId.of_json in
+      make ?availabilityZoneId ?vpcId ?overlapStatus ?managementState
+        ?complianceStatus ?ipUsage ?resourceTags ?resourceType ?resourceCidr
+        ?resourceName ?resourceId ?resourceOwnerId ?resourceRegion
+        ?ipamPoolId ?ipamScopeId ?ipamId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The CIDR for an IPAM resource."]
+module IpamPrefixListResolverVersion =
+  struct
+    type nonrec t =
+      {
+      version: Long.t option
+        [@ocaml.doc
+          "The version number of the IPAM prefix list resolver. Each version is a snapshot of what CIDRs matched your rules at that moment in time. The version number increments every time the CIDR list changes due to infrastructure changes."]}
+    let make ?version = fun () -> { version }
+    let to_value x =
+      structure_to_value
+        [("version", (Option.map x.version ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "version") in
+      make ?version ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map json__ "Version" Long.of_json in
+      make ?version ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a version of an IPAM prefix list resolver. Each version is a snapshot of what CIDRs matched your rules at that moment in time. The version number increments every time the CIDR list changes due to infrastructure changes. Version example: Initial State (Version 1) Production environment: vpc-prod-web (10.1.0.0/16) - tagged env=prod vpc-prod-db (10.2.0.0/16) - tagged env=prod Resolver rule: Include all VPCs tagged env=prod Version 1 CIDRs: 10.1.0.0/16, 10.2.0.0/16 Infrastructure Change (Version 2) New VPC added: vpc-prod-api (10.3.0.0/16) - tagged env=prod IPAM automatically detects the change and creates a new version. Version 2 CIDRs: 10.1.0.0/16, 10.2.0.0/16, 10.3.0.0/16"]
+module IpamPrefixListResolverVersionEntry =
+  struct
+    type nonrec t =
+      {
+      cidr: String_.t option
+        [@ocaml.doc
+          "The CIDR block that was selected and synchronized in this resolver version."]}
+    let make ?cidr = fun () -> { cidr }
+    let to_value x =
+      structure_to_value [("cidr", (Option.map x.cidr ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cidr = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cidr") in
+      make ?cidr ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cidr = field_map json__ "Cidr" String_.of_json in make ?cidr ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a CIDR entry in a specific version of an IPAM prefix list resolver. This represents a CIDR that was selected and synchronized at a particular point in time."]
+module IpamPrefixListResolverRule =
+  struct
+    type nonrec t =
+      {
+      ruleType: IpamPrefixListResolverRuleType.t option
+        [@ocaml.doc
+          "The type of CIDR selection rule. Valid values include include for selecting CIDRs that match the conditions, and exclude for excluding CIDRs that match the conditions."];
+      staticCidr: String_.t option
+        [@ocaml.doc
+          "A fixed list of CIDRs that do not change (like a manual list replicated across Regions)."];
+      ipamScopeId: IpamScopeId.t option
+        [@ocaml.doc
+          "The ID of the IPAM scope from which to select CIDRs. This determines whether to select from public or private IP address space."];
+      resourceType: IpamResourceType.t option
+        [@ocaml.doc
+          "For rules of type ipam-resource-cidr, this is the resource type."];
+      conditions: IpamPrefixListResolverRuleConditionSet.t option
+        [@ocaml.doc
+          "The conditions that determine which CIDRs are selected by this rule. Conditions specify criteria such as resource type, tags, account IDs, and Regions."]}
+    let make ?ruleType =
+      fun ?staticCidr ->
+        fun ?ipamScopeId ->
+          fun ?resourceType ->
+            fun ?conditions ->
+              fun () ->
+                { ruleType; staticCidr; ipamScopeId; resourceType; conditions
+                }
+    let to_value x =
+      structure_to_value
+        [("ruleType",
+           (Option.map x.ruleType ~f:IpamPrefixListResolverRuleType.to_value));
+        ("staticCidr", (Option.map x.staticCidr ~f:String_.to_value));
+        ("ipamScopeId", (Option.map x.ipamScopeId ~f:IpamScopeId.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:IpamResourceType.to_value));
+        ("conditionSet",
+          (Option.map x.conditions
+             ~f:IpamPrefixListResolverRuleConditionSet.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let conditions =
+        (Option.map ~f:IpamPrefixListResolverRuleConditionSet.of_xml)
+          (Xml.child xml_arg0 "conditionSet") in
+      let resourceType =
+        (Option.map ~f:IpamResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let ipamScopeId =
+        (Option.map ~f:IpamScopeId.of_xml) (Xml.child xml_arg0 "ipamScopeId") in
+      let staticCidr =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "staticCidr") in
+      let ruleType =
+        (Option.map ~f:IpamPrefixListResolverRuleType.of_xml)
+          (Xml.child xml_arg0 "ruleType") in
+      make ?conditions ?resourceType ?ipamScopeId ?staticCidr ?ruleType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let conditions =
+        field_map json__ "Conditions"
+          IpamPrefixListResolverRuleConditionSet.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" IpamResourceType.of_json in
+      let ipamScopeId = field_map json__ "IpamScopeId" IpamScopeId.of_json in
+      let staticCidr = field_map json__ "StaticCidr" String_.of_json in
+      let ruleType =
+        field_map json__ "RuleType" IpamPrefixListResolverRuleType.of_json in
+      make ?conditions ?resourceType ?ipamScopeId ?staticCidr ?ruleType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a CIDR selection rule. CIDR selection rules define the business logic for selecting CIDRs from IPAM. If a CIDR matches any of the rules, it will be included. If a rule has multiple conditions, the CIDR has to match every condition of that rule. You can create a prefix list resolver without any CIDR selection rules, but it will generate empty versions (containing no CIDRs) until you add rules."]
 module IpamPoolCidr =
   struct
     type nonrec t =
@@ -11073,32 +18935,52 @@ module IpamPoolCidr =
       state: IpamPoolCidrState.t option [@ocaml.doc "The state of the CIDR."];
       failureReason: IpamPoolCidrFailureReason.t option
         [@ocaml.doc
-          "Details related to why an IPAM pool CIDR failed to be provisioned."]}
+          "Details related to why an IPAM pool CIDR failed to be provisioned."];
+      ipamPoolCidrId: IpamPoolCidrId.t option
+        [@ocaml.doc "The IPAM pool CIDR ID."];
+      netmaskLength: Integer.t option
+        [@ocaml.doc
+          "The netmask length of the CIDR you'd like to provision to a pool. Can be used for provisioning Amazon-provided IPv6 CIDRs to top-level pools and for provisioning CIDRs to pools with source pools. Cannot be used to provision BYOIP CIDRs to top-level pools. \"NetmaskLength\" or \"Cidr\" is required."]}
     let make ?cidr =
       fun ?state ->
-        fun ?failureReason -> fun () -> { cidr; state; failureReason }
+        fun ?failureReason ->
+          fun ?ipamPoolCidrId ->
+            fun ?netmaskLength ->
+              fun () ->
+                { cidr; state; failureReason; ipamPoolCidrId; netmaskLength }
     let to_value x =
       structure_to_value
         [("cidr", (Option.map x.cidr ~f:String_.to_value));
         ("state", (Option.map x.state ~f:IpamPoolCidrState.to_value));
         ("failureReason",
-          (Option.map x.failureReason ~f:IpamPoolCidrFailureReason.to_value))]
+          (Option.map x.failureReason ~f:IpamPoolCidrFailureReason.to_value));
+        ("ipamPoolCidrId",
+          (Option.map x.ipamPoolCidrId ~f:IpamPoolCidrId.to_value));
+        ("netmaskLength", (Option.map x.netmaskLength ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let netmaskLength =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "netmaskLength") in
+      let ipamPoolCidrId =
+        (Option.map ~f:IpamPoolCidrId.of_xml)
+          (Xml.child xml_arg0 "ipamPoolCidrId") in
       let failureReason =
         (Option.map ~f:IpamPoolCidrFailureReason.of_xml)
           (Xml.child xml_arg0 "failureReason") in
       let state =
         (Option.map ~f:IpamPoolCidrState.of_xml) (Xml.child xml_arg0 "state") in
       let cidr = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cidr") in
-      make ?failureReason ?state ?cidr ()
+      make ?netmaskLength ?ipamPoolCidrId ?failureReason ?state ?cidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let netmaskLength = field_map json__ "NetmaskLength" Integer.of_json in
+      let ipamPoolCidrId =
+        field_map json__ "IpamPoolCidrId" IpamPoolCidrId.of_json in
       let failureReason =
-        field_map json "FailureReason" IpamPoolCidrFailureReason.of_json in
-      let state = field_map json "State" IpamPoolCidrState.of_json in
-      let cidr = field_map json "Cidr" String_.of_json in
-      make ?failureReason ?state ?cidr ()
+        field_map json__ "FailureReason" IpamPoolCidrFailureReason.of_json in
+      let state = field_map json__ "State" IpamPoolCidrState.of_json in
+      let cidr = field_map json__ "Cidr" String_.of_json in
+      make ?netmaskLength ?ipamPoolCidrId ?failureReason ?state ?cidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A CIDR provisioned to an IPAM pool."]
 module IpamPoolAllocation =
@@ -11168,21 +19050,581 @@ module IpamPoolAllocation =
       make ?resourceOwner ?resourceRegion ?resourceType ?resourceId
         ?description ?ipamPoolAllocationId ?cidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceOwner = field_map json "ResourceOwner" String_.of_json in
-      let resourceRegion = field_map json "ResourceRegion" String_.of_json in
+    let of_json json__ =
+      let resourceOwner = field_map json__ "ResourceOwner" String_.of_json in
+      let resourceRegion = field_map json__ "ResourceRegion" String_.of_json in
       let resourceType =
-        field_map json "ResourceType" IpamPoolAllocationResourceType.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map json__ "ResourceType"
+          IpamPoolAllocationResourceType.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let ipamPoolAllocationId =
-        field_map json "IpamPoolAllocationId" IpamPoolAllocationId.of_json in
-      let cidr = field_map json "Cidr" String_.of_json in
+        field_map json__ "IpamPoolAllocationId" IpamPoolAllocationId.of_json in
+      let cidr = field_map json__ "Cidr" String_.of_json in
       make ?resourceOwner ?resourceRegion ?resourceType ?resourceId
         ?description ?ipamPoolAllocationId ?cidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In IPAM, an allocation is a CIDR assignment from an IPAM pool to another resource or IPAM pool."]
+       "In IPAM, an allocation is a CIDR assignment from an IPAM pool to another IPAM pool or to a resource."]
+module IpamPolicyOrganizationTarget =
+  struct
+    type nonrec t =
+      {
+      organizationTargetId: String_.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services Organizations target. A target can be an individual Amazon Web Services account or an entity within an Amazon Web Services Organization to which an IPAM policy can be applied."]}
+    let make ?organizationTargetId = fun () -> { organizationTargetId }
+    let to_value x =
+      structure_to_value
+        [("organizationTargetId",
+           (Option.map x.organizationTargetId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let organizationTargetId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "organizationTargetId") in
+      make ?organizationTargetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let organizationTargetId =
+        field_map json__ "OrganizationTargetId" String_.of_json in
+      make ?organizationTargetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon Web Services Organizations target for an IPAM policy."]
+module IpamPolicyDocument =
+  struct
+    type nonrec t =
+      {
+      ipamPolicyId: IpamPolicyId.t option
+        [@ocaml.doc "The ID of the IPAM policy."];
+      locale: String_.t option
+        [@ocaml.doc "The locale of the IPAM policy document."];
+      resourceType: IpamPolicyResourceType.t option
+        [@ocaml.doc
+          "The resource type of the IPAM policy document. The Amazon Web Services service or resource type that can use IP addresses through IPAM policies. Supported services and resource types include: Elastic IP addresses"];
+      allocationRules: IpamPolicyAllocationRuleList.t option
+        [@ocaml.doc
+          "The allocation rules in the IPAM policy document. Allocation rules are optional configurations within an IPAM policy that map Amazon Web Services resource types to specific IPAM pools. If no rules are defined, the resource types default to using Amazon-provided IP addresses."]}
+    let make ?ipamPolicyId =
+      fun ?locale ->
+        fun ?resourceType ->
+          fun ?allocationRules ->
+            fun () -> { ipamPolicyId; locale; resourceType; allocationRules }
+    let to_value x =
+      structure_to_value
+        [("ipamPolicyId",
+           (Option.map x.ipamPolicyId ~f:IpamPolicyId.to_value));
+        ("locale", (Option.map x.locale ~f:String_.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:IpamPolicyResourceType.to_value));
+        ("allocationRuleSet",
+          (Option.map x.allocationRules
+             ~f:IpamPolicyAllocationRuleList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let allocationRules =
+        (Option.map ~f:IpamPolicyAllocationRuleList.of_xml)
+          (Xml.child xml_arg0 "allocationRuleSet") in
+      let resourceType =
+        (Option.map ~f:IpamPolicyResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let locale =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "locale") in
+      let ipamPolicyId =
+        (Option.map ~f:IpamPolicyId.of_xml)
+          (Xml.child xml_arg0 "ipamPolicyId") in
+      make ?allocationRules ?resourceType ?locale ?ipamPolicyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let allocationRules =
+        field_map json__ "AllocationRules"
+          IpamPolicyAllocationRuleList.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" IpamPolicyResourceType.of_json in
+      let locale = field_map json__ "Locale" String_.of_json in
+      let ipamPolicyId = field_map json__ "IpamPolicyId" IpamPolicyId.of_json in
+      make ?allocationRules ?resourceType ?locale ?ipamPolicyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about an IPAM policy."]
+module IpamDiscoveredResourceCidr =
+  struct
+    type nonrec t =
+      {
+      ipamResourceDiscoveryId: IpamResourceDiscoveryId.t option
+        [@ocaml.doc "The resource discovery ID."];
+      resourceRegion: String_.t option [@ocaml.doc "The resource Region."];
+      resourceId: String_.t option [@ocaml.doc "The resource ID."];
+      resourceOwnerId: String_.t option [@ocaml.doc "The resource owner ID."];
+      resourceCidr: String_.t option [@ocaml.doc "The resource CIDR."];
+      ipSource: IpamResourceCidrIpSource.t option
+        [@ocaml.doc
+          "The source that allocated the IP address space. byoip or amazon indicates public IP address space allocated by Amazon or space that you have allocated with Bring your own IP (BYOIP). none indicates private space."];
+      resourceType: IpamResourceType.t option
+        [@ocaml.doc "The resource type."];
+      resourceTags: IpamResourceTagList.t option
+        [@ocaml.doc "The resource tags."];
+      ipUsage: BoxedDouble.t option
+        [@ocaml.doc
+          "The percentage of IP address space in use. To convert the decimal to a percentage, multiply the decimal by 100. Note the following: For resources that are VPCs, this is the percentage of IP address space in the VPC that's taken up by subnet CIDRs. For resources that are subnets, if the subnet has an IPv4 CIDR provisioned to it, this is the percentage of IPv4 address space in the subnet that's in use. If the subnet has an IPv6 CIDR provisioned to it, the percentage of IPv6 address space in use is not represented. The percentage of IPv6 address space in use cannot currently be calculated. For resources that are public IPv4 pools, this is the percentage of IP address space in the pool that's been allocated to Elastic IP addresses (EIPs)."];
+      vpcId: String_.t option [@ocaml.doc "The VPC ID."];
+      subnetId: String_.t option [@ocaml.doc "The subnet ID."];
+      networkInterfaceAttachmentStatus:
+        IpamNetworkInterfaceAttachmentStatus.t option
+        [@ocaml.doc
+          "For elastic network interfaces, this is the status of whether or not the elastic network interface is attached."];
+      sampleTime: MillisecondDateTime.t option
+        [@ocaml.doc "The last successful resource discovery time."];
+      availabilityZoneId: String_.t option
+        [@ocaml.doc "The Availability Zone ID."]}
+    let make ?ipamResourceDiscoveryId =
+      fun ?resourceRegion ->
+        fun ?resourceId ->
+          fun ?resourceOwnerId ->
+            fun ?resourceCidr ->
+              fun ?ipSource ->
+                fun ?resourceType ->
+                  fun ?resourceTags ->
+                    fun ?ipUsage ->
+                      fun ?vpcId ->
+                        fun ?subnetId ->
+                          fun ?networkInterfaceAttachmentStatus ->
+                            fun ?sampleTime ->
+                              fun ?availabilityZoneId ->
+                                fun () ->
+                                  {
+                                    ipamResourceDiscoveryId;
+                                    resourceRegion;
+                                    resourceId;
+                                    resourceOwnerId;
+                                    resourceCidr;
+                                    ipSource;
+                                    resourceType;
+                                    resourceTags;
+                                    ipUsage;
+                                    vpcId;
+                                    subnetId;
+                                    networkInterfaceAttachmentStatus;
+                                    sampleTime;
+                                    availabilityZoneId
+                                  }
+    let to_value x =
+      structure_to_value
+        [("ipamResourceDiscoveryId",
+           (Option.map x.ipamResourceDiscoveryId
+              ~f:IpamResourceDiscoveryId.to_value));
+        ("resourceRegion", (Option.map x.resourceRegion ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceOwnerId",
+          (Option.map x.resourceOwnerId ~f:String_.to_value));
+        ("resourceCidr", (Option.map x.resourceCidr ~f:String_.to_value));
+        ("ipSource",
+          (Option.map x.ipSource ~f:IpamResourceCidrIpSource.to_value));
+        ("resourceType",
+          (Option.map x.resourceType ~f:IpamResourceType.to_value));
+        ("resourceTagSet",
+          (Option.map x.resourceTags ~f:IpamResourceTagList.to_value));
+        ("ipUsage", (Option.map x.ipUsage ~f:BoxedDouble.to_value));
+        ("vpcId", (Option.map x.vpcId ~f:String_.to_value));
+        ("subnetId", (Option.map x.subnetId ~f:String_.to_value));
+        ("networkInterfaceAttachmentStatus",
+          (Option.map x.networkInterfaceAttachmentStatus
+             ~f:IpamNetworkInterfaceAttachmentStatus.to_value));
+        ("sampleTime",
+          (Option.map x.sampleTime ~f:MillisecondDateTime.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let availabilityZoneId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let sampleTime =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "sampleTime") in
+      let networkInterfaceAttachmentStatus =
+        (Option.map ~f:IpamNetworkInterfaceAttachmentStatus.of_xml)
+          (Xml.child xml_arg0 "networkInterfaceAttachmentStatus") in
+      let subnetId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "subnetId") in
+      let vpcId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpcId") in
+      let ipUsage =
+        (Option.map ~f:BoxedDouble.of_xml) (Xml.child xml_arg0 "ipUsage") in
+      let resourceTags =
+        (Option.map ~f:IpamResourceTagList.of_xml)
+          (Xml.child xml_arg0 "resourceTagSet") in
+      let resourceType =
+        (Option.map ~f:IpamResourceType.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      let ipSource =
+        (Option.map ~f:IpamResourceCidrIpSource.of_xml)
+          (Xml.child xml_arg0 "ipSource") in
+      let resourceCidr =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceCidr") in
+      let resourceOwnerId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceOwnerId") in
+      let resourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
+      let resourceRegion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceRegion") in
+      let ipamResourceDiscoveryId =
+        (Option.map ~f:IpamResourceDiscoveryId.of_xml)
+          (Xml.child xml_arg0 "ipamResourceDiscoveryId") in
+      make ?availabilityZoneId ?sampleTime ?networkInterfaceAttachmentStatus
+        ?subnetId ?vpcId ?ipUsage ?resourceTags ?resourceType ?ipSource
+        ?resourceCidr ?resourceOwnerId ?resourceId ?resourceRegion
+        ?ipamResourceDiscoveryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let availabilityZoneId =
+        field_map json__ "AvailabilityZoneId" String_.of_json in
+      let sampleTime =
+        field_map json__ "SampleTime" MillisecondDateTime.of_json in
+      let networkInterfaceAttachmentStatus =
+        field_map json__ "NetworkInterfaceAttachmentStatus"
+          IpamNetworkInterfaceAttachmentStatus.of_json in
+      let subnetId = field_map json__ "SubnetId" String_.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
+      let ipUsage = field_map json__ "IpUsage" BoxedDouble.of_json in
+      let resourceTags =
+        field_map json__ "ResourceTags" IpamResourceTagList.of_json in
+      let resourceType =
+        field_map json__ "ResourceType" IpamResourceType.of_json in
+      let ipSource =
+        field_map json__ "IpSource" IpamResourceCidrIpSource.of_json in
+      let resourceCidr = field_map json__ "ResourceCidr" String_.of_json in
+      let resourceOwnerId =
+        field_map json__ "ResourceOwnerId" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let resourceRegion = field_map json__ "ResourceRegion" String_.of_json in
+      let ipamResourceDiscoveryId =
+        field_map json__ "IpamResourceDiscoveryId"
+          IpamResourceDiscoveryId.of_json in
+      make ?availabilityZoneId ?sampleTime ?networkInterfaceAttachmentStatus
+        ?subnetId ?vpcId ?ipUsage ?resourceTags ?resourceType ?ipSource
+        ?resourceCidr ?resourceOwnerId ?resourceId ?resourceRegion
+        ?ipamResourceDiscoveryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An IPAM discovered resource CIDR. A discovered resource is a resource CIDR monitored under a resource discovery. The following resources can be discovered: VPCs, Public IPv4 pools, VPC subnets, and Elastic IP addresses. The discovered resource CIDR is the IP address range in CIDR notation that is associated with the resource."]
+module IpamDiscoveredPublicAddress =
+  struct
+    type nonrec t =
+      {
+      ipamResourceDiscoveryId: IpamResourceDiscoveryId.t option
+        [@ocaml.doc "The resource discovery ID."];
+      addressRegion: String_.t option
+        [@ocaml.doc
+          "The Region of the resource the IP address is assigned to."];
+      address: String_.t option [@ocaml.doc "The IP address."];
+      addressOwnerId: String_.t option
+        [@ocaml.doc
+          "The ID of the owner of the resource the IP address is assigned to."];
+      addressAllocationId: String_.t option
+        [@ocaml.doc
+          "The allocation ID of the resource the IP address is assigned to."];
+      associationStatus: IpamPublicAddressAssociationStatus.t option
+        [@ocaml.doc "The association status."];
+      addressType: IpamPublicAddressType.t option
+        [@ocaml.doc "The IP address type."];
+      service: IpamPublicAddressAwsService.t option
+        [@ocaml.doc
+          "The Amazon Web Services service associated with the IP address."];
+      serviceResource: String_.t option
+        [@ocaml.doc "The resource ARN or ID."];
+      vpcId: String_.t option
+        [@ocaml.doc
+          "The ID of the VPC that the resource with the assigned IP address is in."];
+      subnetId: String_.t option
+        [@ocaml.doc
+          "The ID of the subnet that the resource with the assigned IP address is in."];
+      publicIpv4PoolId: String_.t option
+        [@ocaml.doc
+          "The ID of the public IPv4 pool that the resource with the assigned IP address is from."];
+      networkInterfaceId: String_.t option
+        [@ocaml.doc
+          "The network interface ID of the resource with the assigned IP address."];
+      networkInterfaceDescription: String_.t option
+        [@ocaml.doc
+          "The description of the network interface that IP address is assigned to."];
+      instanceId: String_.t option
+        [@ocaml.doc
+          "The instance ID of the instance the assigned IP address is assigned to."];
+      tags: IpamPublicAddressTags.t option
+        [@ocaml.doc "Tags associated with the IP address."];
+      networkBorderGroup: String_.t option
+        [@ocaml.doc
+          "The Availability Zone (AZ) or Local Zone (LZ) network border group that the resource that the IP address is assigned to is in. Defaults to an AZ network border group. For more information on available Local Zones, see Local Zone availability in the Amazon EC2 User Guide."];
+      securityGroups: IpamPublicAddressSecurityGroupList.t option
+        [@ocaml.doc
+          "Security groups associated with the resource that the IP address is assigned to."];
+      sampleTime: MillisecondDateTime.t option
+        [@ocaml.doc "The last successful resource discovery time."]}
+    let make ?ipamResourceDiscoveryId =
+      fun ?addressRegion ->
+        fun ?address ->
+          fun ?addressOwnerId ->
+            fun ?addressAllocationId ->
+              fun ?associationStatus ->
+                fun ?addressType ->
+                  fun ?service ->
+                    fun ?serviceResource ->
+                      fun ?vpcId ->
+                        fun ?subnetId ->
+                          fun ?publicIpv4PoolId ->
+                            fun ?networkInterfaceId ->
+                              fun ?networkInterfaceDescription ->
+                                fun ?instanceId ->
+                                  fun ?tags ->
+                                    fun ?networkBorderGroup ->
+                                      fun ?securityGroups ->
+                                        fun ?sampleTime ->
+                                          fun () ->
+                                            {
+                                              ipamResourceDiscoveryId;
+                                              addressRegion;
+                                              address;
+                                              addressOwnerId;
+                                              addressAllocationId;
+                                              associationStatus;
+                                              addressType;
+                                              service;
+                                              serviceResource;
+                                              vpcId;
+                                              subnetId;
+                                              publicIpv4PoolId;
+                                              networkInterfaceId;
+                                              networkInterfaceDescription;
+                                              instanceId;
+                                              tags;
+                                              networkBorderGroup;
+                                              securityGroups;
+                                              sampleTime
+                                            }
+    let to_value x =
+      structure_to_value
+        [("ipamResourceDiscoveryId",
+           (Option.map x.ipamResourceDiscoveryId
+              ~f:IpamResourceDiscoveryId.to_value));
+        ("addressRegion", (Option.map x.addressRegion ~f:String_.to_value));
+        ("address", (Option.map x.address ~f:String_.to_value));
+        ("addressOwnerId", (Option.map x.addressOwnerId ~f:String_.to_value));
+        ("addressAllocationId",
+          (Option.map x.addressAllocationId ~f:String_.to_value));
+        ("associationStatus",
+          (Option.map x.associationStatus
+             ~f:IpamPublicAddressAssociationStatus.to_value));
+        ("addressType",
+          (Option.map x.addressType ~f:IpamPublicAddressType.to_value));
+        ("service",
+          (Option.map x.service ~f:IpamPublicAddressAwsService.to_value));
+        ("serviceResource",
+          (Option.map x.serviceResource ~f:String_.to_value));
+        ("vpcId", (Option.map x.vpcId ~f:String_.to_value));
+        ("subnetId", (Option.map x.subnetId ~f:String_.to_value));
+        ("publicIpv4PoolId",
+          (Option.map x.publicIpv4PoolId ~f:String_.to_value));
+        ("networkInterfaceId",
+          (Option.map x.networkInterfaceId ~f:String_.to_value));
+        ("networkInterfaceDescription",
+          (Option.map x.networkInterfaceDescription ~f:String_.to_value));
+        ("instanceId", (Option.map x.instanceId ~f:String_.to_value));
+        ("tags", (Option.map x.tags ~f:IpamPublicAddressTags.to_value));
+        ("networkBorderGroup",
+          (Option.map x.networkBorderGroup ~f:String_.to_value));
+        ("securityGroupSet",
+          (Option.map x.securityGroups
+             ~f:IpamPublicAddressSecurityGroupList.to_value));
+        ("sampleTime",
+          (Option.map x.sampleTime ~f:MillisecondDateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sampleTime =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "sampleTime") in
+      let securityGroups =
+        (Option.map ~f:IpamPublicAddressSecurityGroupList.of_xml)
+          (Xml.child xml_arg0 "securityGroupSet") in
+      let networkBorderGroup =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "networkBorderGroup") in
+      let tags =
+        (Option.map ~f:IpamPublicAddressTags.of_xml)
+          (Xml.child xml_arg0 "tags") in
+      let instanceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceId") in
+      let networkInterfaceDescription =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "networkInterfaceDescription") in
+      let networkInterfaceId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "networkInterfaceId") in
+      let publicIpv4PoolId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "publicIpv4PoolId") in
+      let subnetId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "subnetId") in
+      let vpcId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpcId") in
+      let serviceResource =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceResource") in
+      let service =
+        (Option.map ~f:IpamPublicAddressAwsService.of_xml)
+          (Xml.child xml_arg0 "service") in
+      let addressType =
+        (Option.map ~f:IpamPublicAddressType.of_xml)
+          (Xml.child xml_arg0 "addressType") in
+      let associationStatus =
+        (Option.map ~f:IpamPublicAddressAssociationStatus.of_xml)
+          (Xml.child xml_arg0 "associationStatus") in
+      let addressAllocationId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "addressAllocationId") in
+      let addressOwnerId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addressOwnerId") in
+      let address =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "address") in
+      let addressRegion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "addressRegion") in
+      let ipamResourceDiscoveryId =
+        (Option.map ~f:IpamResourceDiscoveryId.of_xml)
+          (Xml.child xml_arg0 "ipamResourceDiscoveryId") in
+      make ?sampleTime ?securityGroups ?networkBorderGroup ?tags ?instanceId
+        ?networkInterfaceDescription ?networkInterfaceId ?publicIpv4PoolId
+        ?subnetId ?vpcId ?serviceResource ?service ?addressType
+        ?associationStatus ?addressAllocationId ?addressOwnerId ?address
+        ?addressRegion ?ipamResourceDiscoveryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sampleTime =
+        field_map json__ "SampleTime" MillisecondDateTime.of_json in
+      let securityGroups =
+        field_map json__ "SecurityGroups"
+          IpamPublicAddressSecurityGroupList.of_json in
+      let networkBorderGroup =
+        field_map json__ "NetworkBorderGroup" String_.of_json in
+      let tags = field_map json__ "Tags" IpamPublicAddressTags.of_json in
+      let instanceId = field_map json__ "InstanceId" String_.of_json in
+      let networkInterfaceDescription =
+        field_map json__ "NetworkInterfaceDescription" String_.of_json in
+      let networkInterfaceId =
+        field_map json__ "NetworkInterfaceId" String_.of_json in
+      let publicIpv4PoolId =
+        field_map json__ "PublicIpv4PoolId" String_.of_json in
+      let subnetId = field_map json__ "SubnetId" String_.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
+      let serviceResource =
+        field_map json__ "ServiceResource" String_.of_json in
+      let service =
+        field_map json__ "Service" IpamPublicAddressAwsService.of_json in
+      let addressType =
+        field_map json__ "AddressType" IpamPublicAddressType.of_json in
+      let associationStatus =
+        field_map json__ "AssociationStatus"
+          IpamPublicAddressAssociationStatus.of_json in
+      let addressAllocationId =
+        field_map json__ "AddressAllocationId" String_.of_json in
+      let addressOwnerId = field_map json__ "AddressOwnerId" String_.of_json in
+      let address = field_map json__ "Address" String_.of_json in
+      let addressRegion = field_map json__ "AddressRegion" String_.of_json in
+      let ipamResourceDiscoveryId =
+        field_map json__ "IpamResourceDiscoveryId"
+          IpamResourceDiscoveryId.of_json in
+      make ?sampleTime ?securityGroups ?networkBorderGroup ?tags ?instanceId
+        ?networkInterfaceDescription ?networkInterfaceId ?publicIpv4PoolId
+        ?subnetId ?vpcId ?serviceResource ?service ?addressType
+        ?associationStatus ?addressAllocationId ?addressOwnerId ?address
+        ?addressRegion ?ipamResourceDiscoveryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A public IP Address discovered by IPAM."]
+module IpamDiscoveredAccount =
+  struct
+    type nonrec t =
+      {
+      accountId: String_.t option [@ocaml.doc "The account ID."];
+      discoveryRegion: String_.t option
+        [@ocaml.doc
+          "The Amazon Web Services Region that the account information is returned from. An account can be discovered in multiple regions and will have a separate discovered account for each Region."];
+      failureReason: IpamDiscoveryFailureReason.t option
+        [@ocaml.doc "The resource discovery failure reason."];
+      lastAttemptedDiscoveryTime: MillisecondDateTime.t option
+        [@ocaml.doc "The last attempted resource discovery time."];
+      lastSuccessfulDiscoveryTime: MillisecondDateTime.t option
+        [@ocaml.doc "The last successful resource discovery time."];
+      organizationalUnitId: String_.t option
+        [@ocaml.doc
+          "The ID of an Organizational Unit in Amazon Web Services Organizations."]}
+    let make ?accountId =
+      fun ?discoveryRegion ->
+        fun ?failureReason ->
+          fun ?lastAttemptedDiscoveryTime ->
+            fun ?lastSuccessfulDiscoveryTime ->
+              fun ?organizationalUnitId ->
+                fun () ->
+                  {
+                    accountId;
+                    discoveryRegion;
+                    failureReason;
+                    lastAttemptedDiscoveryTime;
+                    lastSuccessfulDiscoveryTime;
+                    organizationalUnitId
+                  }
+    let to_value x =
+      structure_to_value
+        [("accountId", (Option.map x.accountId ~f:String_.to_value));
+        ("discoveryRegion",
+          (Option.map x.discoveryRegion ~f:String_.to_value));
+        ("failureReason",
+          (Option.map x.failureReason ~f:IpamDiscoveryFailureReason.to_value));
+        ("lastAttemptedDiscoveryTime",
+          (Option.map x.lastAttemptedDiscoveryTime
+             ~f:MillisecondDateTime.to_value));
+        ("lastSuccessfulDiscoveryTime",
+          (Option.map x.lastSuccessfulDiscoveryTime
+             ~f:MillisecondDateTime.to_value));
+        ("organizationalUnitId",
+          (Option.map x.organizationalUnitId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let organizationalUnitId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "organizationalUnitId") in
+      let lastSuccessfulDiscoveryTime =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "lastSuccessfulDiscoveryTime") in
+      let lastAttemptedDiscoveryTime =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "lastAttemptedDiscoveryTime") in
+      let failureReason =
+        (Option.map ~f:IpamDiscoveryFailureReason.of_xml)
+          (Xml.child xml_arg0 "failureReason") in
+      let discoveryRegion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "discoveryRegion") in
+      let accountId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accountId") in
+      make ?organizationalUnitId ?lastSuccessfulDiscoveryTime
+        ?lastAttemptedDiscoveryTime ?failureReason ?discoveryRegion
+        ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let organizationalUnitId =
+        field_map json__ "OrganizationalUnitId" String_.of_json in
+      let lastSuccessfulDiscoveryTime =
+        field_map json__ "LastSuccessfulDiscoveryTime"
+          MillisecondDateTime.of_json in
+      let lastAttemptedDiscoveryTime =
+        field_map json__ "LastAttemptedDiscoveryTime"
+          MillisecondDateTime.of_json in
+      let failureReason =
+        field_map json__ "FailureReason" IpamDiscoveryFailureReason.of_json in
+      let discoveryRegion =
+        field_map json__ "DiscoveryRegion" String_.of_json in
+      let accountId = field_map json__ "AccountId" String_.of_json in
+      make ?organizationalUnitId ?lastSuccessfulDiscoveryTime
+        ?lastAttemptedDiscoveryTime ?failureReason ?discoveryRegion
+        ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An IPAM discovered account. A discovered account is an Amazon Web Services account that is monitored under a resource discovery. If you have integrated IPAM with Amazon Web Services Organizations, all accounts in the organization are discovered accounts."]
 module IpamAddressHistoryRecord =
   struct
     type nonrec t =
@@ -11287,24 +19729,26 @@ module IpamAddressHistoryRecord =
         ?resourceComplianceStatus ?resourceName ?resourceCidr ?resourceId
         ?resourceType ?resourceRegion ?resourceOwnerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sampledEndTime =
-        field_map json "SampledEndTime" MillisecondDateTime.of_json in
+        field_map json__ "SampledEndTime" MillisecondDateTime.of_json in
       let sampledStartTime =
-        field_map json "SampledStartTime" MillisecondDateTime.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
+        field_map json__ "SampledStartTime" MillisecondDateTime.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
       let resourceOverlapStatus =
-        field_map json "ResourceOverlapStatus" IpamOverlapStatus.of_json in
+        field_map json__ "ResourceOverlapStatus" IpamOverlapStatus.of_json in
       let resourceComplianceStatus =
-        field_map json "ResourceComplianceStatus"
+        field_map json__ "ResourceComplianceStatus"
           IpamComplianceStatus.of_json in
-      let resourceName = field_map json "ResourceName" String_.of_json in
-      let resourceCidr = field_map json "ResourceCidr" String_.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
+      let resourceName = field_map json__ "ResourceName" String_.of_json in
+      let resourceCidr = field_map json__ "ResourceCidr" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
       let resourceType =
-        field_map json "ResourceType" IpamAddressHistoryResourceType.of_json in
-      let resourceRegion = field_map json "ResourceRegion" String_.of_json in
-      let resourceOwnerId = field_map json "ResourceOwnerId" String_.of_json in
+        field_map json__ "ResourceType"
+          IpamAddressHistoryResourceType.of_json in
+      let resourceRegion = field_map json__ "ResourceRegion" String_.of_json in
+      let resourceOwnerId =
+        field_map json__ "ResourceOwnerId" String_.of_json in
       make ?sampledEndTime ?sampledStartTime ?vpcId ?resourceOverlapStatus
         ?resourceComplianceStatus ?resourceName ?resourceCidr ?resourceId
         ?resourceType ?resourceRegion ?resourceOwnerId ()
@@ -11327,12 +19771,107 @@ module InstanceTypeInfoFromInstanceRequirements =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceType") in
       make ?instanceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceType = field_map json "InstanceType" String_.of_json in
+    let of_json json__ =
+      let instanceType = field_map json__ "InstanceType" String_.of_json in
       make ?instanceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The list of instance types with the specified instance attributes."]
+module HttpTokensEnforcedState =
+  struct
+    type nonrec t =
+      | Disabled 
+      | Enabled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Disabled -> "disabled"
+      | Enabled -> "enabled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "disabled" -> Disabled
+      | "enabled" -> Enabled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration HttpTokensEnforcedState" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"HttpTokensEnforcedState" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageAncestryEntry =
+  struct
+    type nonrec t =
+      {
+      creationDate: MillisecondDateTime.t option
+        [@ocaml.doc "The date and time when this AMI was created."];
+      imageId: ImageId.t option [@ocaml.doc "The ID of this AMI."];
+      imageOwnerAlias: String_.t option
+        [@ocaml.doc
+          "The owner alias (amazon | aws-backup-vault | aws-marketplace ) of this AMI, if one is assigned. Otherwise, the value is null."];
+      sourceImageId: ImageId.t option
+        [@ocaml.doc "The ID of the parent AMI."];
+      sourceImageRegion: String_.t option
+        [@ocaml.doc "The Amazon Web Services Region of the parent AMI."]}
+    let make ?creationDate =
+      fun ?imageId ->
+        fun ?imageOwnerAlias ->
+          fun ?sourceImageId ->
+            fun ?sourceImageRegion ->
+              fun () ->
+                {
+                  creationDate;
+                  imageId;
+                  imageOwnerAlias;
+                  sourceImageId;
+                  sourceImageRegion
+                }
+    let to_value x =
+      structure_to_value
+        [("creationDate",
+           (Option.map x.creationDate ~f:MillisecondDateTime.to_value));
+        ("imageId", (Option.map x.imageId ~f:ImageId.to_value));
+        ("imageOwnerAlias",
+          (Option.map x.imageOwnerAlias ~f:String_.to_value));
+        ("sourceImageId", (Option.map x.sourceImageId ~f:ImageId.to_value));
+        ("sourceImageRegion",
+          (Option.map x.sourceImageRegion ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceImageRegion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "sourceImageRegion") in
+      let sourceImageId =
+        (Option.map ~f:ImageId.of_xml) (Xml.child xml_arg0 "sourceImageId") in
+      let imageOwnerAlias =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "imageOwnerAlias") in
+      let imageId =
+        (Option.map ~f:ImageId.of_xml) (Xml.child xml_arg0 "imageId") in
+      let creationDate =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "creationDate") in
+      make ?sourceImageRegion ?sourceImageId ?imageOwnerAlias ?imageId
+        ?creationDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceImageRegion =
+        field_map json__ "SourceImageRegion" String_.of_json in
+      let sourceImageId = field_map json__ "SourceImageId" ImageId.of_json in
+      let imageOwnerAlias =
+        field_map json__ "ImageOwnerAlias" String_.of_json in
+      let imageId = field_map json__ "ImageId" ImageId.of_json in
+      let creationDate =
+        field_map json__ "CreationDate" MillisecondDateTime.of_json in
+      make ?sourceImageRegion ?sourceImageId ?imageOwnerAlias ?imageId
+        ?creationDate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a single AMI in the ancestry chain and its source (parent) AMI."]
 module CapacityReservationGroup =
   struct
     type nonrec t =
@@ -11355,9 +19894,9 @@ module CapacityReservationGroup =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupArn") in
       make ?ownerId ?groupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ownerId = field_map json "OwnerId" String_.of_json in
-      let groupArn = field_map json "GroupArn" String_.of_json in
+    let of_json json__ =
+      let ownerId = field_map json__ "OwnerId" String_.of_json in
+      let groupArn = field_map json__ "GroupArn" String_.of_json in
       make ?ownerId ?groupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11370,6 +19909,9 @@ module AthenaIntegrationsSet =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AthenaIntegration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11391,6 +19933,80 @@ module AthenaIntegrationsSet =
         ~of_json:AthenaIntegration.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AttributeSummary =
+  struct
+    type nonrec t =
+      {
+      attributeName: String_.t option
+        [@ocaml.doc "The name of the attribute."];
+      mostFrequentValue: String_.t option
+        [@ocaml.doc
+          "The configuration value that is most frequently observed for the attribute."];
+      numberOfMatchedAccounts: Integer.t option
+        [@ocaml.doc
+          "The number of accounts with the same configuration value for the attribute that is most frequently observed."];
+      numberOfUnmatchedAccounts: Integer.t option
+        [@ocaml.doc
+          "The number of accounts with a configuration value different from the most frequently observed value for the attribute."];
+      regionalSummaries: RegionalSummaryList.t option
+        [@ocaml.doc "The summary report for each Region for the attribute."]}
+    let make ?attributeName =
+      fun ?mostFrequentValue ->
+        fun ?numberOfMatchedAccounts ->
+          fun ?numberOfUnmatchedAccounts ->
+            fun ?regionalSummaries ->
+              fun () ->
+                {
+                  attributeName;
+                  mostFrequentValue;
+                  numberOfMatchedAccounts;
+                  numberOfUnmatchedAccounts;
+                  regionalSummaries
+                }
+    let to_value x =
+      structure_to_value
+        [("attributeName", (Option.map x.attributeName ~f:String_.to_value));
+        ("mostFrequentValue",
+          (Option.map x.mostFrequentValue ~f:String_.to_value));
+        ("numberOfMatchedAccounts",
+          (Option.map x.numberOfMatchedAccounts ~f:Integer.to_value));
+        ("numberOfUnmatchedAccounts",
+          (Option.map x.numberOfUnmatchedAccounts ~f:Integer.to_value));
+        ("regionalSummarySet",
+          (Option.map x.regionalSummaries ~f:RegionalSummaryList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let regionalSummaries =
+        (Option.map ~f:RegionalSummaryList.of_xml)
+          (Xml.child xml_arg0 "regionalSummarySet") in
+      let numberOfUnmatchedAccounts =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "numberOfUnmatchedAccounts") in
+      let numberOfMatchedAccounts =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "numberOfMatchedAccounts") in
+      let mostFrequentValue =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "mostFrequentValue") in
+      let attributeName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "attributeName") in
+      make ?regionalSummaries ?numberOfUnmatchedAccounts
+        ?numberOfMatchedAccounts ?mostFrequentValue ?attributeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let regionalSummaries =
+        field_map json__ "RegionalSummaries" RegionalSummaryList.of_json in
+      let numberOfUnmatchedAccounts =
+        field_map json__ "NumberOfUnmatchedAccounts" Integer.of_json in
+      let numberOfMatchedAccounts =
+        field_map json__ "NumberOfMatchedAccounts" Integer.of_json in
+      let mostFrequentValue =
+        field_map json__ "MostFrequentValue" String_.of_json in
+      let attributeName = field_map json__ "AttributeName" String_.of_json in
+      make ?regionalSummaries ?numberOfUnmatchedAccounts
+        ?numberOfMatchedAccounts ?mostFrequentValue ?attributeName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A summary report for the attribute across all Regions."]
 module CoipAddressUsage =
   struct
     type nonrec t =
@@ -11424,11 +20040,11 @@ module CoipAddressUsage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "allocationId") in
       make ?coIp ?awsService ?awsAccountId ?allocationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let coIp = field_map json "CoIp" String_.of_json in
-      let awsService = field_map json "AwsService" String_.of_json in
-      let awsAccountId = field_map json "AwsAccountId" String_.of_json in
-      let allocationId = field_map json "AllocationId" String_.of_json in
+    let of_json json__ =
+      let coIp = field_map json__ "CoIp" String_.of_json in
+      let awsService = field_map json__ "AwsService" String_.of_json in
+      let awsAccountId = field_map json__ "AwsAccountId" String_.of_json in
+      let allocationId = field_map json__ "AllocationId" String_.of_json in
       make ?coIp ?awsService ?awsAccountId ?allocationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11459,13 +20075,303 @@ module InstanceUsage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accountId") in
       make ?usedInstanceCount ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let usedInstanceCount =
-        field_map json "UsedInstanceCount" Integer.of_json in
-      let accountId = field_map json "AccountId" String_.of_json in
+        field_map json__ "UsedInstanceCount" Integer.of_json in
+      let accountId = field_map json__ "AccountId" String_.of_json in
       make ?usedInstanceCount ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the Capacity Reservation usage."]
+module CapacityManagerCondition =
+  struct
+    type nonrec t =
+      {
+      dimensionCondition: DimensionCondition.t option
+        [@ocaml.doc
+          "The dimension-based condition that specifies how to filter the data based on dimension values."]}
+    let make ?dimensionCondition = fun () -> { dimensionCondition }
+    let to_value x =
+      structure_to_value
+        [("DimensionCondition",
+           (Option.map x.dimensionCondition ~f:DimensionCondition.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dimensionCondition =
+        (Option.map ~f:DimensionCondition.of_xml)
+          (Xml.child xml_arg0 "DimensionCondition") in
+      make ?dimensionCondition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dimensionCondition =
+        field_map json__ "DimensionCondition" DimensionCondition.of_json in
+      make ?dimensionCondition ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a filter condition for Capacity Manager queries. Contains dimension-based filtering criteria used to narrow down metric data and dimension results."]
+module GroupBy =
+  struct
+    type nonrec t =
+      | Resource_region 
+      | Availability_zone_id 
+      | Account_id 
+      | Account_name 
+      | Instance_family 
+      | Instance_type 
+      | Instance_platform 
+      | Reservation_arn 
+      | Reservation_id 
+      | Reservation_type 
+      | Reservation_create_timestamp 
+      | Reservation_start_timestamp 
+      | Reservation_end_timestamp 
+      | Reservation_end_date_type 
+      | Tenancy 
+      | Reservation_state 
+      | Reservation_instance_match_criteria 
+      | Reservation_unused_financial_owner 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Resource_region -> "resource-region"
+      | Availability_zone_id -> "availability-zone-id"
+      | Account_id -> "account-id"
+      | Account_name -> "account-name"
+      | Instance_family -> "instance-family"
+      | Instance_type -> "instance-type"
+      | Instance_platform -> "instance-platform"
+      | Reservation_arn -> "reservation-arn"
+      | Reservation_id -> "reservation-id"
+      | Reservation_type -> "reservation-type"
+      | Reservation_create_timestamp -> "reservation-create-timestamp"
+      | Reservation_start_timestamp -> "reservation-start-timestamp"
+      | Reservation_end_timestamp -> "reservation-end-timestamp"
+      | Reservation_end_date_type -> "reservation-end-date-type"
+      | Tenancy -> "tenancy"
+      | Reservation_state -> "reservation-state"
+      | Reservation_instance_match_criteria ->
+          "reservation-instance-match-criteria"
+      | Reservation_unused_financial_owner ->
+          "reservation-unused-financial-owner"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "resource-region" -> Resource_region
+      | "availability-zone-id" -> Availability_zone_id
+      | "account-id" -> Account_id
+      | "account-name" -> Account_name
+      | "instance-family" -> Instance_family
+      | "instance-type" -> Instance_type
+      | "instance-platform" -> Instance_platform
+      | "reservation-arn" -> Reservation_arn
+      | "reservation-id" -> Reservation_id
+      | "reservation-type" -> Reservation_type
+      | "reservation-create-timestamp" -> Reservation_create_timestamp
+      | "reservation-start-timestamp" -> Reservation_start_timestamp
+      | "reservation-end-timestamp" -> Reservation_end_timestamp
+      | "reservation-end-date-type" -> Reservation_end_date_type
+      | "tenancy" -> Tenancy
+      | "reservation-state" -> Reservation_state
+      | "reservation-instance-match-criteria" ->
+          Reservation_instance_match_criteria
+      | "reservation-unused-financial-owner" ->
+          Reservation_unused_financial_owner
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration GroupBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"GroupBy" j)
+    let to_json = simple_to_json to_value
+  end
+module MetricDataResult =
+  struct
+    type nonrec t =
+      {
+      dimension: CapacityManagerDimension.t option
+        [@ocaml.doc
+          "The dimension values that identify this specific data point, such as account ID, region, and instance family."];
+      timestamp: MillisecondDateTime.t option
+        [@ocaml.doc
+          "The timestamp for this data point, indicating when the capacity usage occurred."];
+      metricValues: MetricValueSet.t option
+        [@ocaml.doc
+          "The metric values and statistics for this data point, containing the actual capacity usage numbers."]}
+    let make ?dimension =
+      fun ?timestamp ->
+        fun ?metricValues -> fun () -> { dimension; timestamp; metricValues }
+    let to_value x =
+      structure_to_value
+        [("dimension",
+           (Option.map x.dimension ~f:CapacityManagerDimension.to_value));
+        ("timestamp",
+          (Option.map x.timestamp ~f:MillisecondDateTime.to_value));
+        ("metricValueSet",
+          (Option.map x.metricValues ~f:MetricValueSet.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricValues =
+        (Option.map ~f:MetricValueSet.of_xml)
+          (Xml.child xml_arg0 "metricValueSet") in
+      let timestamp =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "timestamp") in
+      let dimension =
+        (Option.map ~f:CapacityManagerDimension.of_xml)
+          (Xml.child xml_arg0 "dimension") in
+      make ?metricValues ?timestamp ?dimension ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricValues =
+        field_map json__ "MetricValues" MetricValueSet.of_json in
+      let timestamp =
+        field_map json__ "Timestamp" MillisecondDateTime.of_json in
+      let dimension =
+        field_map json__ "Dimension" CapacityManagerDimension.of_json in
+      make ?metricValues ?timestamp ?dimension ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains a single data point from a capacity metrics query, including the dimension values, timestamp, and metric values for that specific combination."]
+module DataResponse =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option [@ocaml.doc "The ID passed in the DataQuery."];
+      source: String_.t option
+        [@ocaml.doc
+          "The Region or Availability Zone that's the source for the data query. For example, us-east-1."];
+      destination: String_.t option
+        [@ocaml.doc
+          "The Region or Availability Zone that's the destination for the data query. For example, eu-west-1."];
+      metric: MetricType.t option
+        [@ocaml.doc "The metric used for the network performance request."];
+      statistic: StatisticType.t option
+        [@ocaml.doc
+          "The statistic used for the network performance request."];
+      period: PeriodType.t option
+        [@ocaml.doc "The period used for the network performance request."];
+      metricPoints: MetricPoints.t option
+        [@ocaml.doc "A list of MetricPoint objects."]}
+    let make ?id =
+      fun ?source ->
+        fun ?destination ->
+          fun ?metric ->
+            fun ?statistic ->
+              fun ?period ->
+                fun ?metricPoints ->
+                  fun () ->
+                    {
+                      id;
+                      source;
+                      destination;
+                      metric;
+                      statistic;
+                      period;
+                      metricPoints
+                    }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:String_.to_value));
+        ("source", (Option.map x.source ~f:String_.to_value));
+        ("destination", (Option.map x.destination ~f:String_.to_value));
+        ("metric", (Option.map x.metric ~f:MetricType.to_value));
+        ("statistic", (Option.map x.statistic ~f:StatisticType.to_value));
+        ("period", (Option.map x.period ~f:PeriodType.to_value));
+        ("metricPointSet",
+          (Option.map x.metricPoints ~f:MetricPoints.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricPoints =
+        (Option.map ~f:MetricPoints.of_xml)
+          (Xml.child xml_arg0 "metricPointSet") in
+      let period =
+        (Option.map ~f:PeriodType.of_xml) (Xml.child xml_arg0 "period") in
+      let statistic =
+        (Option.map ~f:StatisticType.of_xml) (Xml.child xml_arg0 "statistic") in
+      let metric =
+        (Option.map ~f:MetricType.of_xml) (Xml.child xml_arg0 "metric") in
+      let destination =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "destination") in
+      let source =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "source") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
+      make ?metricPoints ?period ?statistic ?metric ?destination ?source ?id
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricPoints = field_map json__ "MetricPoints" MetricPoints.of_json in
+      let period = field_map json__ "Period" PeriodType.of_json in
+      let statistic = field_map json__ "Statistic" StatisticType.of_json in
+      let metric = field_map json__ "Metric" MetricType.of_json in
+      let destination = field_map json__ "Destination" String_.of_json in
+      let source = field_map json__ "Source" String_.of_json in
+      let id = field_map json__ "Id" String_.of_json in
+      make ?metricPoints ?period ?statistic ?metric ?destination ?source ?id
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The response to a DataQuery."]
+module DataQuery =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option
+        [@ocaml.doc
+          "A user-defined ID associated with a data query that's returned in the dataResponse identifying the query. For example, if you set the Id to MyQuery01in the query, the dataResponse identifies the query as MyQuery01."];
+      source: String_.t option
+        [@ocaml.doc
+          "The Region or Availability Zone that's the source for the data query. For example, us-east-1."];
+      destination: String_.t option
+        [@ocaml.doc
+          "The Region or Availability Zone that's the target for the data query. For example, eu-north-1."];
+      metric: MetricType.t option
+        [@ocaml.doc "The metric used for the network performance request."];
+      statistic: StatisticType.t option
+        [@ocaml.doc
+          "The metric data aggregation period, p50, between the specified startDate and endDate. For example, a metric of five_minutes is the median of all the data points gathered within those five minutes. p50 is the only supported metric."];
+      period: PeriodType.t option
+        [@ocaml.doc "The aggregation period used for the data query."]}
+    let make ?id =
+      fun ?source ->
+        fun ?destination ->
+          fun ?metric ->
+            fun ?statistic ->
+              fun ?period ->
+                fun () ->
+                  { id; source; destination; metric; statistic; period }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:String_.to_value));
+        ("Source", (Option.map x.source ~f:String_.to_value));
+        ("Destination", (Option.map x.destination ~f:String_.to_value));
+        ("Metric", (Option.map x.metric ~f:MetricType.to_value));
+        ("Statistic", (Option.map x.statistic ~f:StatisticType.to_value));
+        ("Period", (Option.map x.period ~f:PeriodType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let period =
+        (Option.map ~f:PeriodType.of_xml) (Xml.child xml_arg0 "Period") in
+      let statistic =
+        (Option.map ~f:StatisticType.of_xml) (Xml.child xml_arg0 "Statistic") in
+      let metric =
+        (Option.map ~f:MetricType.of_xml) (Xml.child xml_arg0 "Metric") in
+      let destination =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Destination") in
+      let source =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Source") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?period ?statistic ?metric ?destination ?source ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let period = field_map json__ "Period" PeriodType.of_json in
+      let statistic = field_map json__ "Statistic" StatisticType.of_json in
+      let metric = field_map json__ "Metric" MetricType.of_json in
+      let destination = field_map json__ "Destination" String_.of_json in
+      let source = field_map json__ "Source" String_.of_json in
+      let id = field_map json__ "Id" String_.of_json in
+      make ?period ?statistic ?metric ?destination ?source ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A query used for retrieving network health data."]
 module Ipv6CidrAssociation =
   struct
     type nonrec t =
@@ -11490,10 +20396,10 @@ module Ipv6CidrAssociation =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ipv6Cidr") in
       make ?associatedResource ?ipv6Cidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associatedResource =
-        field_map json "AssociatedResource" String_.of_json in
-      let ipv6Cidr = field_map json "Ipv6Cidr" String_.of_json in
+        field_map json__ "AssociatedResource" String_.of_json in
+      let ipv6Cidr = field_map json__ "Ipv6Cidr" String_.of_json in
       make ?associatedResource ?ipv6Cidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an IPv6 CIDR block association."]
@@ -11508,10 +20414,9 @@ module AssociatedRole =
           "The name of the Amazon S3 bucket in which the Amazon S3 object is stored."];
       certificateS3ObjectKey: String_.t option
         [@ocaml.doc
-          "The key of the Amazon S3 object ey where the certificate, certificate chain, and encrypted private key bundle is stored. The object key is formated as follows: role_arn/certificate_arn."];
+          "The key of the Amazon S3 object where the certificate, certificate chain, and encrypted private key bundle are stored. The object key is formatted as follows: role_arn/certificate_arn."];
       encryptionKmsKeyId: String_.t option
-        [@ocaml.doc
-          "The ID of the KMS customer master key (CMK) used to encrypt the private key."]}
+        [@ocaml.doc "The ID of the KMS key used to encrypt the private key."]}
     let make ?associatedRoleArn =
       fun ?certificateS3BucketName ->
         fun ?certificateS3ObjectKey ->
@@ -11550,19 +20455,167 @@ module AssociatedRole =
       make ?encryptionKmsKeyId ?certificateS3ObjectKey
         ?certificateS3BucketName ?associatedRoleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionKmsKeyId =
-        field_map json "EncryptionKmsKeyId" String_.of_json in
+        field_map json__ "EncryptionKmsKeyId" String_.of_json in
       let certificateS3ObjectKey =
-        field_map json "CertificateS3ObjectKey" String_.of_json in
+        field_map json__ "CertificateS3ObjectKey" String_.of_json in
       let certificateS3BucketName =
-        field_map json "CertificateS3BucketName" String_.of_json in
+        field_map json__ "CertificateS3BucketName" String_.of_json in
       let associatedRoleArn =
-        field_map json "AssociatedRoleArn" ResourceArn.of_json in
+        field_map json__ "AssociatedRoleArn" ResourceArn.of_json in
       make ?encryptionKmsKeyId ?certificateS3ObjectKey
         ?certificateS3BucketName ?associatedRoleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the associated IAM roles."]
+module ImageCriterion =
+  struct
+    type nonrec t =
+      {
+      imageProviders: ImageProviderList.t option
+        [@ocaml.doc
+          "The image providers whose images are allowed. Possible values: amazon: Allow AMIs created by Amazon or verified providers. aws-marketplace: Allow AMIs created by verified providers in the Amazon Web Services Marketplace. aws-backup-vault: Allow AMIs created by Amazon Web Services Backup. 12-digit account ID: Allow AMIs created by this account. One or more account IDs can be specified. none: Allow AMIs created by your own account only. Maximum: 200 values"];
+      marketplaceProductCodes: MarketplaceProductCodeList.t option
+        [@ocaml.doc
+          "The Amazon Web Services Marketplace product codes for allowed images. Length: 1-25 characters Valid characters: Letters (A\226\128\147Z, a\226\128\147z) and numbers (0\226\128\1479) Maximum: 50 values"];
+      imageNames: ImageNameList.t option
+        [@ocaml.doc
+          "The names of allowed images. Names can include wildcards (? and *). Length: 1\226\128\147128 characters. With ?, the minimum is 3 characters. Valid characters: Letters: A\226\128\147Z, a\226\128\147z Numbers: 0\226\128\1479 Special characters: ( ) \\[ \\] . / - ' \\@ _ * ? Spaces Maximum: 50 values"];
+      deprecationTimeCondition: DeprecationTimeCondition.t option
+        [@ocaml.doc
+          "The maximum period since deprecation for allowed images."];
+      creationDateCondition: CreationDateCondition.t option
+        [@ocaml.doc "The maximum age for allowed images."]}
+    let make ?imageProviders =
+      fun ?marketplaceProductCodes ->
+        fun ?imageNames ->
+          fun ?deprecationTimeCondition ->
+            fun ?creationDateCondition ->
+              fun () ->
+                {
+                  imageProviders;
+                  marketplaceProductCodes;
+                  imageNames;
+                  deprecationTimeCondition;
+                  creationDateCondition
+                }
+    let to_value x =
+      structure_to_value
+        [("imageProviderSet",
+           (Option.map x.imageProviders ~f:ImageProviderList.to_value));
+        ("marketplaceProductCodeSet",
+          (Option.map x.marketplaceProductCodes
+             ~f:MarketplaceProductCodeList.to_value));
+        ("imageNameSet", (Option.map x.imageNames ~f:ImageNameList.to_value));
+        ("deprecationTimeCondition",
+          (Option.map x.deprecationTimeCondition
+             ~f:DeprecationTimeCondition.to_value));
+        ("creationDateCondition",
+          (Option.map x.creationDateCondition
+             ~f:CreationDateCondition.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationDateCondition =
+        (Option.map ~f:CreationDateCondition.of_xml)
+          (Xml.child xml_arg0 "creationDateCondition") in
+      let deprecationTimeCondition =
+        (Option.map ~f:DeprecationTimeCondition.of_xml)
+          (Xml.child xml_arg0 "deprecationTimeCondition") in
+      let imageNames =
+        (Option.map ~f:ImageNameList.of_xml)
+          (Xml.child xml_arg0 "imageNameSet") in
+      let marketplaceProductCodes =
+        (Option.map ~f:MarketplaceProductCodeList.of_xml)
+          (Xml.child xml_arg0 "marketplaceProductCodeSet") in
+      let imageProviders =
+        (Option.map ~f:ImageProviderList.of_xml)
+          (Xml.child xml_arg0 "imageProviderSet") in
+      make ?creationDateCondition ?deprecationTimeCondition ?imageNames
+        ?marketplaceProductCodes ?imageProviders ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationDateCondition =
+        field_map json__ "CreationDateCondition"
+          CreationDateCondition.of_json in
+      let deprecationTimeCondition =
+        field_map json__ "DeprecationTimeCondition"
+          DeprecationTimeCondition.of_json in
+      let imageNames = field_map json__ "ImageNames" ImageNameList.of_json in
+      let marketplaceProductCodes =
+        field_map json__ "MarketplaceProductCodes"
+          MarketplaceProductCodeList.of_json in
+      let imageProviders =
+        field_map json__ "ImageProviders" ImageProviderList.of_json in
+      make ?creationDateCondition ?deprecationTimeCondition ?imageNames
+        ?marketplaceProductCodes ?imageProviders ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The criteria that are evaluated to determine which AMIs are discoverable and usable in your account for the specified Amazon Web Services Region. For more information, see How Allowed AMIs works in the Amazon EC2 User Guide."]
+module VpnTunnelProvisioningStatus =
+  struct
+    type nonrec t =
+      | Available 
+      | Pending 
+      | Failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Available -> "available"
+      | Pending -> "pending"
+      | Failed -> "failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "available" -> Available
+      | "pending" -> Pending
+      | "failed" -> Failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration VpnTunnelProvisioningStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"VpnTunnelProvisioningStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module VerifiedAccessInstanceOpenVpnClientConfiguration =
+  struct
+    type nonrec t =
+      {
+      config: String_.t option
+        [@ocaml.doc "The base64-encoded Open VPN client configuration."];
+      routes:
+        VerifiedAccessInstanceOpenVpnClientConfigurationRouteList.t option
+        [@ocaml.doc "The routes."]}
+    let make ?config = fun ?routes -> fun () -> { config; routes }
+    let to_value x =
+      structure_to_value
+        [("config", (Option.map x.config ~f:String_.to_value));
+        ("routeSet",
+          (Option.map x.routes
+             ~f:VerifiedAccessInstanceOpenVpnClientConfigurationRouteList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let routes =
+        (Option.map
+           ~f:VerifiedAccessInstanceOpenVpnClientConfigurationRouteList.of_xml)
+          (Xml.child xml_arg0 "routeSet") in
+      let config =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "config") in
+      make ?routes ?config ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let routes =
+        field_map json__ "Routes"
+          VerifiedAccessInstanceOpenVpnClientConfigurationRouteList.of_json in
+      let config = field_map json__ "Config" String_.of_json in
+      make ?routes ?config ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a set of routes."]
 module ClientCertificateRevocationListStatusCode =
   struct
     type nonrec t =
@@ -11593,6 +20646,101 @@ module ClientCertificateRevocationListStatusCode =
         (string_of_json ~kind:"ClientCertificateRevocationListStatusCode" j)
     let to_json = simple_to_json to_value
   end
+module RegisteredInstance =
+  struct
+    type nonrec t =
+      {
+      instanceId: InstanceId.t option
+        [@ocaml.doc "The ID of the SQL Server High Availability instance."];
+      sqlServerLicenseUsage: SqlServerLicenseUsage.t option
+        [@ocaml.doc
+          "The license type for the SQL Server license. Valid values include: full - The SQL Server High Availability instance is using a full SQL Server license. waived - The SQL Server High Availability instance is waived from the SQL Server license."];
+      haStatus: HaStatus.t option
+        [@ocaml.doc
+          "The SQL Server High Availability status of the instance. Valid values are: processing - The SQL Server High Availability status for the SQL Server High Availability instance is being updated. active - The SQL Server High Availability instance is an active node in an SQL Server High Availability cluster. standby - The SQL Server High Availability instance is a standby failover node in an SQL Server High Availability cluster. invalid - An error occurred due to misconfigured permissions, or unable to dertemine SQL Server High Availability status for the SQL Server High Availability instance."];
+      processingStatus: String_.t option
+        [@ocaml.doc
+          "A brief description of the SQL Server High Availability status. If the instance is in the invalid High Availability status, this parameter includes the error message."];
+      lastUpdatedTime: MillisecondDateTime.t option
+        [@ocaml.doc
+          "The date and time when the instance's SQL Server High Availability status was last updated, in the ISO 8601 format in the UTC time zone (YYYY-MM-DDThh:mm:ss.sssZ)."];
+      sqlServerCredentials: String_.t option
+        [@ocaml.doc
+          "The ARN of the Secrets Manager secret containing the SQL Server access credentials for the SQL Server High Availability instance. If not specified, deafult local user credentials will be used by the Amazon Web Services Systems Manager agent."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The tags assigned to the SQL Server High Availability instance."]}
+    let make ?instanceId =
+      fun ?sqlServerLicenseUsage ->
+        fun ?haStatus ->
+          fun ?processingStatus ->
+            fun ?lastUpdatedTime ->
+              fun ?sqlServerCredentials ->
+                fun ?tags ->
+                  fun () ->
+                    {
+                      instanceId;
+                      sqlServerLicenseUsage;
+                      haStatus;
+                      processingStatus;
+                      lastUpdatedTime;
+                      sqlServerCredentials;
+                      tags
+                    }
+    let to_value x =
+      structure_to_value
+        [("instanceId", (Option.map x.instanceId ~f:InstanceId.to_value));
+        ("sqlServerLicenseUsage",
+          (Option.map x.sqlServerLicenseUsage
+             ~f:SqlServerLicenseUsage.to_value));
+        ("haStatus", (Option.map x.haStatus ~f:HaStatus.to_value));
+        ("processingStatus",
+          (Option.map x.processingStatus ~f:String_.to_value));
+        ("lastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:MillisecondDateTime.to_value));
+        ("sqlServerCredentials",
+          (Option.map x.sqlServerCredentials ~f:String_.to_value));
+        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
+      let sqlServerCredentials =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "sqlServerCredentials") in
+      let lastUpdatedTime =
+        (Option.map ~f:MillisecondDateTime.of_xml)
+          (Xml.child xml_arg0 "lastUpdatedTime") in
+      let processingStatus =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "processingStatus") in
+      let haStatus =
+        (Option.map ~f:HaStatus.of_xml) (Xml.child xml_arg0 "haStatus") in
+      let sqlServerLicenseUsage =
+        (Option.map ~f:SqlServerLicenseUsage.of_xml)
+          (Xml.child xml_arg0 "sqlServerLicenseUsage") in
+      let instanceId =
+        (Option.map ~f:InstanceId.of_xml) (Xml.child xml_arg0 "instanceId") in
+      make ?tags ?sqlServerCredentials ?lastUpdatedTime ?processingStatus
+        ?haStatus ?sqlServerLicenseUsage ?instanceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let sqlServerCredentials =
+        field_map json__ "SqlServerCredentials" String_.of_json in
+      let lastUpdatedTime =
+        field_map json__ "LastUpdatedTime" MillisecondDateTime.of_json in
+      let processingStatus =
+        field_map json__ "ProcessingStatus" String_.of_json in
+      let haStatus = field_map json__ "HaStatus" HaStatus.of_json in
+      let sqlServerLicenseUsage =
+        field_map json__ "SqlServerLicenseUsage"
+          SqlServerLicenseUsage.of_json in
+      let instanceId = field_map json__ "InstanceId" InstanceId.of_json in
+      make ?tags ?sqlServerCredentials ?lastUpdatedTime ?processingStatus
+        ?haStatus ?sqlServerLicenseUsage ?instanceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an Amazon EC2 instance that is enabled for SQL Server High Availability standby detection monitoring."]
 module EnableFastSnapshotRestoreErrorItem =
   struct
     type nonrec t =
@@ -11619,11 +20767,11 @@ module EnableFastSnapshotRestoreErrorItem =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "snapshotId") in
       make ?fastSnapshotRestoreStateErrors ?snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fastSnapshotRestoreStateErrors =
-        field_map json "FastSnapshotRestoreStateErrors"
+        field_map json__ "FastSnapshotRestoreStateErrors"
           EnableFastSnapshotRestoreStateErrorSet.of_json in
-      let snapshotId = field_map json "SnapshotId" String_.of_json in
+      let snapshotId = field_map json__ "SnapshotId" String_.of_json in
       make ?fastSnapshotRestoreStateErrors ?snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11635,6 +20783,8 @@ module EnableFastSnapshotRestoreSuccessItem =
       snapshotId: String_.t option [@ocaml.doc "The ID of the snapshot."];
       availabilityZone: String_.t option
         [@ocaml.doc "The Availability Zone."];
+      availabilityZoneId: String_.t option
+        [@ocaml.doc "The ID of the Availability Zone."];
       state: FastSnapshotRestoreStateCode.t option
         [@ocaml.doc "The state of fast snapshot restores."];
       stateTransitionReason: String_.t option
@@ -11663,34 +20813,38 @@ module EnableFastSnapshotRestoreSuccessItem =
           "The time at which fast snapshot restores entered the disabled state."]}
     let make ?snapshotId =
       fun ?availabilityZone ->
-        fun ?state ->
-          fun ?stateTransitionReason ->
-            fun ?ownerId ->
-              fun ?ownerAlias ->
-                fun ?enablingTime ->
-                  fun ?optimizingTime ->
-                    fun ?enabledTime ->
-                      fun ?disablingTime ->
-                        fun ?disabledTime ->
-                          fun () ->
-                            {
-                              snapshotId;
-                              availabilityZone;
-                              state;
-                              stateTransitionReason;
-                              ownerId;
-                              ownerAlias;
-                              enablingTime;
-                              optimizingTime;
-                              enabledTime;
-                              disablingTime;
-                              disabledTime
-                            }
+        fun ?availabilityZoneId ->
+          fun ?state ->
+            fun ?stateTransitionReason ->
+              fun ?ownerId ->
+                fun ?ownerAlias ->
+                  fun ?enablingTime ->
+                    fun ?optimizingTime ->
+                      fun ?enabledTime ->
+                        fun ?disablingTime ->
+                          fun ?disabledTime ->
+                            fun () ->
+                              {
+                                snapshotId;
+                                availabilityZone;
+                                availabilityZoneId;
+                                state;
+                                stateTransitionReason;
+                                ownerId;
+                                ownerAlias;
+                                enablingTime;
+                                optimizingTime;
+                                enabledTime;
+                                disablingTime;
+                                disabledTime
+                              }
     let to_value x =
       structure_to_value
         [("snapshotId", (Option.map x.snapshotId ~f:String_.to_value));
         ("availabilityZone",
           (Option.map x.availabilityZone ~f:String_.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:String_.to_value));
         ("state",
           (Option.map x.state ~f:FastSnapshotRestoreStateCode.to_value));
         ("stateTransitionReason",
@@ -11734,6 +20888,9 @@ module EnableFastSnapshotRestoreSuccessItem =
       let state =
         (Option.map ~f:FastSnapshotRestoreStateCode.of_xml)
           (Xml.child xml_arg0 "state") in
+      let availabilityZoneId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
       let availabilityZone =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "availabilityZone") in
@@ -11741,33 +20898,49 @@ module EnableFastSnapshotRestoreSuccessItem =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "snapshotId") in
       make ?disabledTime ?disablingTime ?enabledTime ?optimizingTime
         ?enablingTime ?ownerAlias ?ownerId ?stateTransitionReason ?state
-        ?availabilityZone ?snapshotId ()
+        ?availabilityZoneId ?availabilityZone ?snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let disabledTime =
-        field_map json "DisabledTime" MillisecondDateTime.of_json in
+        field_map json__ "DisabledTime" MillisecondDateTime.of_json in
       let disablingTime =
-        field_map json "DisablingTime" MillisecondDateTime.of_json in
+        field_map json__ "DisablingTime" MillisecondDateTime.of_json in
       let enabledTime =
-        field_map json "EnabledTime" MillisecondDateTime.of_json in
+        field_map json__ "EnabledTime" MillisecondDateTime.of_json in
       let optimizingTime =
-        field_map json "OptimizingTime" MillisecondDateTime.of_json in
+        field_map json__ "OptimizingTime" MillisecondDateTime.of_json in
       let enablingTime =
-        field_map json "EnablingTime" MillisecondDateTime.of_json in
-      let ownerAlias = field_map json "OwnerAlias" String_.of_json in
-      let ownerId = field_map json "OwnerId" String_.of_json in
+        field_map json__ "EnablingTime" MillisecondDateTime.of_json in
+      let ownerAlias = field_map json__ "OwnerAlias" String_.of_json in
+      let ownerId = field_map json__ "OwnerId" String_.of_json in
       let stateTransitionReason =
-        field_map json "StateTransitionReason" String_.of_json in
-      let state = field_map json "State" FastSnapshotRestoreStateCode.of_json in
+        field_map json__ "StateTransitionReason" String_.of_json in
+      let state =
+        field_map json__ "State" FastSnapshotRestoreStateCode.of_json in
+      let availabilityZoneId =
+        field_map json__ "AvailabilityZoneId" String_.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
-      let snapshotId = field_map json "SnapshotId" String_.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
+      let snapshotId = field_map json__ "SnapshotId" String_.of_json in
       make ?disabledTime ?disablingTime ?enabledTime ?optimizingTime
         ?enablingTime ?ownerAlias ?ownerId ?stateTransitionReason ?state
-        ?availabilityZone ?snapshotId ()
+        ?availabilityZoneId ?availabilityZone ?snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes fast snapshot restores that were successfully enabled."]
+module ElasticIpAssociationId =
+  struct
+    type nonrec t = string
+    let context_ = "ElasticIpAssociationId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ElasticIpAssociationId" j
+    let to_json = simple_to_json to_value
+  end
 module DisableFastSnapshotRestoreErrorItem =
   struct
     type nonrec t =
@@ -11794,11 +20967,11 @@ module DisableFastSnapshotRestoreErrorItem =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "snapshotId") in
       make ?fastSnapshotRestoreStateErrors ?snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fastSnapshotRestoreStateErrors =
-        field_map json "FastSnapshotRestoreStateErrors"
+        field_map json__ "FastSnapshotRestoreStateErrors"
           DisableFastSnapshotRestoreStateErrorSet.of_json in
-      let snapshotId = field_map json "SnapshotId" String_.of_json in
+      let snapshotId = field_map json__ "SnapshotId" String_.of_json in
       make ?fastSnapshotRestoreStateErrors ?snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11810,6 +20983,8 @@ module DisableFastSnapshotRestoreSuccessItem =
       snapshotId: String_.t option [@ocaml.doc "The ID of the snapshot."];
       availabilityZone: String_.t option
         [@ocaml.doc "The Availability Zone."];
+      availabilityZoneId: String_.t option
+        [@ocaml.doc "The ID of the Availability Zone."];
       state: FastSnapshotRestoreStateCode.t option
         [@ocaml.doc "The state of fast snapshot restores for the snapshot."];
       stateTransitionReason: String_.t option
@@ -11838,34 +21013,38 @@ module DisableFastSnapshotRestoreSuccessItem =
           "The time at which fast snapshot restores entered the disabled state."]}
     let make ?snapshotId =
       fun ?availabilityZone ->
-        fun ?state ->
-          fun ?stateTransitionReason ->
-            fun ?ownerId ->
-              fun ?ownerAlias ->
-                fun ?enablingTime ->
-                  fun ?optimizingTime ->
-                    fun ?enabledTime ->
-                      fun ?disablingTime ->
-                        fun ?disabledTime ->
-                          fun () ->
-                            {
-                              snapshotId;
-                              availabilityZone;
-                              state;
-                              stateTransitionReason;
-                              ownerId;
-                              ownerAlias;
-                              enablingTime;
-                              optimizingTime;
-                              enabledTime;
-                              disablingTime;
-                              disabledTime
-                            }
+        fun ?availabilityZoneId ->
+          fun ?state ->
+            fun ?stateTransitionReason ->
+              fun ?ownerId ->
+                fun ?ownerAlias ->
+                  fun ?enablingTime ->
+                    fun ?optimizingTime ->
+                      fun ?enabledTime ->
+                        fun ?disablingTime ->
+                          fun ?disabledTime ->
+                            fun () ->
+                              {
+                                snapshotId;
+                                availabilityZone;
+                                availabilityZoneId;
+                                state;
+                                stateTransitionReason;
+                                ownerId;
+                                ownerAlias;
+                                enablingTime;
+                                optimizingTime;
+                                enabledTime;
+                                disablingTime;
+                                disabledTime
+                              }
     let to_value x =
       structure_to_value
         [("snapshotId", (Option.map x.snapshotId ~f:String_.to_value));
         ("availabilityZone",
           (Option.map x.availabilityZone ~f:String_.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:String_.to_value));
         ("state",
           (Option.map x.state ~f:FastSnapshotRestoreStateCode.to_value));
         ("stateTransitionReason",
@@ -11909,6 +21088,9 @@ module DisableFastSnapshotRestoreSuccessItem =
       let state =
         (Option.map ~f:FastSnapshotRestoreStateCode.of_xml)
           (Xml.child xml_arg0 "state") in
+      let availabilityZoneId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
       let availabilityZone =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "availabilityZone") in
@@ -11916,30 +21098,33 @@ module DisableFastSnapshotRestoreSuccessItem =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "snapshotId") in
       make ?disabledTime ?disablingTime ?enabledTime ?optimizingTime
         ?enablingTime ?ownerAlias ?ownerId ?stateTransitionReason ?state
-        ?availabilityZone ?snapshotId ()
+        ?availabilityZoneId ?availabilityZone ?snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let disabledTime =
-        field_map json "DisabledTime" MillisecondDateTime.of_json in
+        field_map json__ "DisabledTime" MillisecondDateTime.of_json in
       let disablingTime =
-        field_map json "DisablingTime" MillisecondDateTime.of_json in
+        field_map json__ "DisablingTime" MillisecondDateTime.of_json in
       let enabledTime =
-        field_map json "EnabledTime" MillisecondDateTime.of_json in
+        field_map json__ "EnabledTime" MillisecondDateTime.of_json in
       let optimizingTime =
-        field_map json "OptimizingTime" MillisecondDateTime.of_json in
+        field_map json__ "OptimizingTime" MillisecondDateTime.of_json in
       let enablingTime =
-        field_map json "EnablingTime" MillisecondDateTime.of_json in
-      let ownerAlias = field_map json "OwnerAlias" String_.of_json in
-      let ownerId = field_map json "OwnerId" String_.of_json in
+        field_map json__ "EnablingTime" MillisecondDateTime.of_json in
+      let ownerAlias = field_map json__ "OwnerAlias" String_.of_json in
+      let ownerId = field_map json__ "OwnerId" String_.of_json in
       let stateTransitionReason =
-        field_map json "StateTransitionReason" String_.of_json in
-      let state = field_map json "State" FastSnapshotRestoreStateCode.of_json in
+        field_map json__ "StateTransitionReason" String_.of_json in
+      let state =
+        field_map json__ "State" FastSnapshotRestoreStateCode.of_json in
+      let availabilityZoneId =
+        field_map json__ "AvailabilityZoneId" String_.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
-      let snapshotId = field_map json "SnapshotId" String_.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
+      let snapshotId = field_map json__ "SnapshotId" String_.of_json in
       make ?disabledTime ?disablingTime ?enabledTime ?optimizingTime
         ?enablingTime ?ownerAlias ?ownerId ?stateTransitionReason ?state
-        ?availabilityZone ?snapshotId ()
+        ?availabilityZoneId ?availabilityZone ?snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes fast snapshot restores that were successfully disabled."]
@@ -11947,2631 +21132,82 @@ module VpnGateway =
   struct
     type nonrec t =
       {
-      availabilityZone: String_.t option
+      amazonSideAsn: Long.t option
         [@ocaml.doc
-          "The Availability Zone where the virtual private gateway was created, if applicable. This field may be empty or not returned."];
+          "The private Autonomous System Number (ASN) for the Amazon side of a BGP session."];
+      tags: TagList.t option
+        [@ocaml.doc "Any tags assigned to the virtual private gateway."];
+      vpnGatewayId: String_.t option
+        [@ocaml.doc "The ID of the virtual private gateway."];
       state: VpnState.t option
         [@ocaml.doc "The current state of the virtual private gateway."];
       type_: GatewayType.t option
         [@ocaml.doc
           "The type of VPN connection the virtual private gateway supports."];
-      vpcAttachments: VpcAttachmentList.t option
-        [@ocaml.doc "Any VPCs attached to the virtual private gateway."];
-      vpnGatewayId: String_.t option
-        [@ocaml.doc "The ID of the virtual private gateway."];
-      amazonSideAsn: Long.t option
+      availabilityZone: String_.t option
         [@ocaml.doc
-          "The private Autonomous System Number (ASN) for the Amazon side of a BGP session."];
-      tags: TagList.t option
-        [@ocaml.doc "Any tags assigned to the virtual private gateway."]}
-    let make ?availabilityZone =
-      fun ?state ->
-        fun ?type_ ->
-          fun ?vpcAttachments ->
-            fun ?vpnGatewayId ->
-              fun ?amazonSideAsn ->
-                fun ?tags ->
+          "The Availability Zone where the virtual private gateway was created, if applicable. This field may be empty or not returned."];
+      vpcAttachments: VpcAttachmentList.t option
+        [@ocaml.doc "Any VPCs attached to the virtual private gateway."]}
+    let make ?amazonSideAsn =
+      fun ?tags ->
+        fun ?vpnGatewayId ->
+          fun ?state ->
+            fun ?type_ ->
+              fun ?availabilityZone ->
+                fun ?vpcAttachments ->
                   fun () ->
                     {
-                      availabilityZone;
+                      amazonSideAsn;
+                      tags;
+                      vpnGatewayId;
                       state;
                       type_;
-                      vpcAttachments;
-                      vpnGatewayId;
-                      amazonSideAsn;
-                      tags
+                      availabilityZone;
+                      vpcAttachments
                     }
     let to_value x =
       structure_to_value
-        [("availabilityZone",
-           (Option.map x.availabilityZone ~f:String_.to_value));
+        [("amazonSideAsn", (Option.map x.amazonSideAsn ~f:Long.to_value));
+        ("tagSet", (Option.map x.tags ~f:TagList.to_value));
+        ("vpnGatewayId", (Option.map x.vpnGatewayId ~f:String_.to_value));
         ("state", (Option.map x.state ~f:VpnState.to_value));
         ("type", (Option.map x.type_ ~f:GatewayType.to_value));
+        ("availabilityZone",
+          (Option.map x.availabilityZone ~f:String_.to_value));
         ("attachments",
-          (Option.map x.vpcAttachments ~f:VpcAttachmentList.to_value));
-        ("vpnGatewayId", (Option.map x.vpnGatewayId ~f:String_.to_value));
-        ("amazonSideAsn", (Option.map x.amazonSideAsn ~f:Long.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
+          (Option.map x.vpcAttachments ~f:VpcAttachmentList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let amazonSideAsn =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "amazonSideAsn") in
-      let vpnGatewayId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpnGatewayId") in
       let vpcAttachments =
         (Option.map ~f:VpcAttachmentList.of_xml)
           (Xml.child xml_arg0 "attachments") in
+      let availabilityZone =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "availabilityZone") in
       let type_ =
         (Option.map ~f:GatewayType.of_xml) (Xml.child xml_arg0 "type") in
       let state =
         (Option.map ~f:VpnState.of_xml) (Xml.child xml_arg0 "state") in
-      let availabilityZone =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "availabilityZone") in
-      make ?tags ?amazonSideAsn ?vpnGatewayId ?vpcAttachments ?type_ ?state
-        ?availabilityZone ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let amazonSideAsn = field_map json "AmazonSideAsn" Long.of_json in
-      let vpnGatewayId = field_map json "VpnGatewayId" String_.of_json in
-      let vpcAttachments =
-        field_map json "VpcAttachments" VpcAttachmentList.of_json in
-      let type_ = field_map json "Type" GatewayType.of_json in
-      let state = field_map json "State" VpnState.of_json in
-      let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
-      make ?tags ?amazonSideAsn ?vpnGatewayId ?vpcAttachments ?type_ ?state
-        ?availabilityZone ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a virtual private gateway."]
-module VpnGatewayId =
-  struct
-    type nonrec t = string
-    let context_ = "VpnGatewayId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"VpnGatewayId" j
-    let to_json = simple_to_json to_value
-  end
-module VpnConnection =
-  struct
-    type nonrec t =
-      {
-      customerGatewayConfiguration: String_.t option
-        [@ocaml.doc
-          "The configuration information for the VPN connection's customer gateway (in the native XML format). This element is always present in the CreateVpnConnection response; however, it's present in the DescribeVpnConnections response only if the VPN connection is in the pending or available state."];
-      customerGatewayId: String_.t option
-        [@ocaml.doc
-          "The ID of the customer gateway at your end of the VPN connection."];
-      category: String_.t option
-        [@ocaml.doc
-          "The category of the VPN connection. A value of VPN indicates an Amazon Web Services VPN connection. A value of VPN-Classic indicates an Amazon Web Services Classic VPN connection."];
-      state: VpnState.t option
-        [@ocaml.doc "The current state of the VPN connection."];
-      type_: GatewayType.t option [@ocaml.doc "The type of VPN connection."];
-      vpnConnectionId: String_.t option
-        [@ocaml.doc "The ID of the VPN connection."];
-      vpnGatewayId: String_.t option
-        [@ocaml.doc
-          "The ID of the virtual private gateway at the Amazon Web Services side of the VPN connection."];
-      transitGatewayId: String_.t option
-        [@ocaml.doc
-          "The ID of the transit gateway associated with the VPN connection."];
-      coreNetworkArn: String_.t option
-        [@ocaml.doc "The ARN of the core network."];
-      coreNetworkAttachmentArn: String_.t option
-        [@ocaml.doc "The ARN of the core network attachment."];
-      gatewayAssociationState: GatewayAssociationState.t option
-        [@ocaml.doc "The current state of the gateway association."];
-      options: VpnConnectionOptions.t option
-        [@ocaml.doc "The VPN connection options."];
-      routes: VpnStaticRouteList.t option
-        [@ocaml.doc "The static routes associated with the VPN connection."];
-      tags: TagList.t option
-        [@ocaml.doc "Any tags assigned to the VPN connection."];
-      vgwTelemetry: VgwTelemetryList.t option
-        [@ocaml.doc "Information about the VPN tunnel."]}
-    let make ?customerGatewayConfiguration =
-      fun ?customerGatewayId ->
-        fun ?category ->
-          fun ?state ->
-            fun ?type_ ->
-              fun ?vpnConnectionId ->
-                fun ?vpnGatewayId ->
-                  fun ?transitGatewayId ->
-                    fun ?coreNetworkArn ->
-                      fun ?coreNetworkAttachmentArn ->
-                        fun ?gatewayAssociationState ->
-                          fun ?options ->
-                            fun ?routes ->
-                              fun ?tags ->
-                                fun ?vgwTelemetry ->
-                                  fun () ->
-                                    {
-                                      customerGatewayConfiguration;
-                                      customerGatewayId;
-                                      category;
-                                      state;
-                                      type_;
-                                      vpnConnectionId;
-                                      vpnGatewayId;
-                                      transitGatewayId;
-                                      coreNetworkArn;
-                                      coreNetworkAttachmentArn;
-                                      gatewayAssociationState;
-                                      options;
-                                      routes;
-                                      tags;
-                                      vgwTelemetry
-                                    }
-    let to_value x =
-      structure_to_value
-        [("customerGatewayConfiguration",
-           (Option.map x.customerGatewayConfiguration ~f:String_.to_value));
-        ("customerGatewayId",
-          (Option.map x.customerGatewayId ~f:String_.to_value));
-        ("category", (Option.map x.category ~f:String_.to_value));
-        ("state", (Option.map x.state ~f:VpnState.to_value));
-        ("type", (Option.map x.type_ ~f:GatewayType.to_value));
-        ("vpnConnectionId",
-          (Option.map x.vpnConnectionId ~f:String_.to_value));
-        ("vpnGatewayId", (Option.map x.vpnGatewayId ~f:String_.to_value));
-        ("transitGatewayId",
-          (Option.map x.transitGatewayId ~f:String_.to_value));
-        ("coreNetworkArn", (Option.map x.coreNetworkArn ~f:String_.to_value));
-        ("coreNetworkAttachmentArn",
-          (Option.map x.coreNetworkAttachmentArn ~f:String_.to_value));
-        ("gatewayAssociationState",
-          (Option.map x.gatewayAssociationState
-             ~f:GatewayAssociationState.to_value));
-        ("options", (Option.map x.options ~f:VpnConnectionOptions.to_value));
-        ("routes", (Option.map x.routes ~f:VpnStaticRouteList.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value));
-        ("vgwTelemetry",
-          (Option.map x.vgwTelemetry ~f:VgwTelemetryList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let vgwTelemetry =
-        (Option.map ~f:VgwTelemetryList.of_xml)
-          (Xml.child xml_arg0 "vgwTelemetry") in
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let routes =
-        (Option.map ~f:VpnStaticRouteList.of_xml)
-          (Xml.child xml_arg0 "routes") in
-      let options =
-        (Option.map ~f:VpnConnectionOptions.of_xml)
-          (Xml.child xml_arg0 "options") in
-      let gatewayAssociationState =
-        (Option.map ~f:GatewayAssociationState.of_xml)
-          (Xml.child xml_arg0 "gatewayAssociationState") in
-      let coreNetworkAttachmentArn =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "coreNetworkAttachmentArn") in
-      let coreNetworkArn =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "coreNetworkArn") in
-      let transitGatewayId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayId") in
       let vpnGatewayId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpnGatewayId") in
-      let vpnConnectionId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpnConnectionId") in
-      let type_ =
-        (Option.map ~f:GatewayType.of_xml) (Xml.child xml_arg0 "type") in
-      let state =
-        (Option.map ~f:VpnState.of_xml) (Xml.child xml_arg0 "state") in
-      let category =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "category") in
-      let customerGatewayId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "customerGatewayId") in
-      let customerGatewayConfiguration =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "customerGatewayConfiguration") in
-      make ?vgwTelemetry ?tags ?routes ?options ?gatewayAssociationState
-        ?coreNetworkAttachmentArn ?coreNetworkArn ?transitGatewayId
-        ?vpnGatewayId ?vpnConnectionId ?type_ ?state ?category
-        ?customerGatewayId ?customerGatewayConfiguration ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vgwTelemetry =
-        field_map json "VgwTelemetry" VgwTelemetryList.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let routes = field_map json "Routes" VpnStaticRouteList.of_json in
-      let options = field_map json "Options" VpnConnectionOptions.of_json in
-      let gatewayAssociationState =
-        field_map json "GatewayAssociationState"
-          GatewayAssociationState.of_json in
-      let coreNetworkAttachmentArn =
-        field_map json "CoreNetworkAttachmentArn" String_.of_json in
-      let coreNetworkArn = field_map json "CoreNetworkArn" String_.of_json in
-      let transitGatewayId =
-        field_map json "TransitGatewayId" String_.of_json in
-      let vpnGatewayId = field_map json "VpnGatewayId" String_.of_json in
-      let vpnConnectionId = field_map json "VpnConnectionId" String_.of_json in
-      let type_ = field_map json "Type" GatewayType.of_json in
-      let state = field_map json "State" VpnState.of_json in
-      let category = field_map json "Category" String_.of_json in
-      let customerGatewayId =
-        field_map json "CustomerGatewayId" String_.of_json in
-      let customerGatewayConfiguration =
-        field_map json "CustomerGatewayConfiguration" String_.of_json in
-      make ?vgwTelemetry ?tags ?routes ?options ?gatewayAssociationState
-        ?coreNetworkAttachmentArn ?coreNetworkArn ?transitGatewayId
-        ?vpnGatewayId ?vpnConnectionId ?type_ ?state ?category
-        ?customerGatewayId ?customerGatewayConfiguration ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a VPN connection."]
-module VpnConnectionId =
-  struct
-    type nonrec t = string
-    let context_ = "VpnConnectionId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"VpnConnectionId" j
-    let to_json = simple_to_json to_value
-  end
-module Vpc =
-  struct
-    type nonrec t =
-      {
-      cidrBlock: String_.t option
-        [@ocaml.doc "The primary IPv4 CIDR block for the VPC."];
-      dhcpOptionsId: String_.t option
-        [@ocaml.doc
-          "The ID of the set of DHCP options you've associated with the VPC."];
-      state: VpcState.t option [@ocaml.doc "The current state of the VPC."];
-      vpcId: String_.t option [@ocaml.doc "The ID of the VPC."];
-      ownerId: String_.t option
-        [@ocaml.doc
-          "The ID of the Amazon Web Services account that owns the VPC."];
-      instanceTenancy: Tenancy.t option
-        [@ocaml.doc
-          "The allowed tenancy of instances launched into the VPC."];
-      ipv6CidrBlockAssociationSet: VpcIpv6CidrBlockAssociationSet.t option
-        [@ocaml.doc
-          "Information about the IPv6 CIDR blocks associated with the VPC."];
-      cidrBlockAssociationSet: VpcCidrBlockAssociationSet.t option
-        [@ocaml.doc
-          "Information about the IPv4 CIDR blocks associated with the VPC."];
-      isDefault: Boolean.t option
-        [@ocaml.doc "Indicates whether the VPC is the default VPC."];
-      tags: TagList.t option [@ocaml.doc "Any tags assigned to the VPC."]}
-    let make ?cidrBlock =
-      fun ?dhcpOptionsId ->
-        fun ?state ->
-          fun ?vpcId ->
-            fun ?ownerId ->
-              fun ?instanceTenancy ->
-                fun ?ipv6CidrBlockAssociationSet ->
-                  fun ?cidrBlockAssociationSet ->
-                    fun ?isDefault ->
-                      fun ?tags ->
-                        fun () ->
-                          {
-                            cidrBlock;
-                            dhcpOptionsId;
-                            state;
-                            vpcId;
-                            ownerId;
-                            instanceTenancy;
-                            ipv6CidrBlockAssociationSet;
-                            cidrBlockAssociationSet;
-                            isDefault;
-                            tags
-                          }
-    let to_value x =
-      structure_to_value
-        [("cidrBlock", (Option.map x.cidrBlock ~f:String_.to_value));
-        ("dhcpOptionsId", (Option.map x.dhcpOptionsId ~f:String_.to_value));
-        ("state", (Option.map x.state ~f:VpcState.to_value));
-        ("vpcId", (Option.map x.vpcId ~f:String_.to_value));
-        ("ownerId", (Option.map x.ownerId ~f:String_.to_value));
-        ("instanceTenancy",
-          (Option.map x.instanceTenancy ~f:Tenancy.to_value));
-        ("ipv6CidrBlockAssociationSet",
-          (Option.map x.ipv6CidrBlockAssociationSet
-             ~f:VpcIpv6CidrBlockAssociationSet.to_value));
-        ("cidrBlockAssociationSet",
-          (Option.map x.cidrBlockAssociationSet
-             ~f:VpcCidrBlockAssociationSet.to_value));
-        ("isDefault", (Option.map x.isDefault ~f:Boolean.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let isDefault =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isDefault") in
-      let cidrBlockAssociationSet =
-        (Option.map ~f:VpcCidrBlockAssociationSet.of_xml)
-          (Xml.child xml_arg0 "cidrBlockAssociationSet") in
-      let ipv6CidrBlockAssociationSet =
-        (Option.map ~f:VpcIpv6CidrBlockAssociationSet.of_xml)
-          (Xml.child xml_arg0 "ipv6CidrBlockAssociationSet") in
-      let instanceTenancy =
-        (Option.map ~f:Tenancy.of_xml) (Xml.child xml_arg0 "instanceTenancy") in
-      let ownerId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ownerId") in
-      let vpcId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpcId") in
-      let state =
-        (Option.map ~f:VpcState.of_xml) (Xml.child xml_arg0 "state") in
-      let dhcpOptionsId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "dhcpOptionsId") in
-      let cidrBlock =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cidrBlock") in
-      make ?tags ?isDefault ?cidrBlockAssociationSet
-        ?ipv6CidrBlockAssociationSet ?instanceTenancy ?ownerId ?vpcId ?state
-        ?dhcpOptionsId ?cidrBlock ()
+      let amazonSideAsn =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "amazonSideAsn") in
+      make ?vpcAttachments ?availabilityZone ?type_ ?state ?vpnGatewayId
+        ?tags ?amazonSideAsn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let isDefault = field_map json "IsDefault" Boolean.of_json in
-      let cidrBlockAssociationSet =
-        field_map json "CidrBlockAssociationSet"
-          VpcCidrBlockAssociationSet.of_json in
-      let ipv6CidrBlockAssociationSet =
-        field_map json "Ipv6CidrBlockAssociationSet"
-          VpcIpv6CidrBlockAssociationSet.of_json in
-      let instanceTenancy = field_map json "InstanceTenancy" Tenancy.of_json in
-      let ownerId = field_map json "OwnerId" String_.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let state = field_map json "State" VpcState.of_json in
-      let dhcpOptionsId = field_map json "DhcpOptionsId" String_.of_json in
-      let cidrBlock = field_map json "CidrBlock" String_.of_json in
-      make ?tags ?isDefault ?cidrBlockAssociationSet
-        ?ipv6CidrBlockAssociationSet ?instanceTenancy ?ownerId ?vpcId ?state
-        ?dhcpOptionsId ?cidrBlock ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a VPC."]
-module VpcPeeringConnection =
-  struct
-    type nonrec t =
-      {
-      accepterVpcInfo: VpcPeeringConnectionVpcInfo.t option
-        [@ocaml.doc
-          "Information about the accepter VPC. CIDR block information is only returned when describing an active VPC peering connection."];
-      expirationTime: DateTime.t option
-        [@ocaml.doc
-          "The time that an unaccepted VPC peering connection will expire."];
-      requesterVpcInfo: VpcPeeringConnectionVpcInfo.t option
-        [@ocaml.doc
-          "Information about the requester VPC. CIDR block information is only returned when describing an active VPC peering connection."];
-      status: VpcPeeringConnectionStateReason.t option
-        [@ocaml.doc "The status of the VPC peering connection."];
-      tags: TagList.t option
-        [@ocaml.doc "Any tags assigned to the resource."];
-      vpcPeeringConnectionId: String_.t option
-        [@ocaml.doc "The ID of the VPC peering connection."]}
-    let make ?accepterVpcInfo =
-      fun ?expirationTime ->
-        fun ?requesterVpcInfo ->
-          fun ?status ->
-            fun ?tags ->
-              fun ?vpcPeeringConnectionId ->
-                fun () ->
-                  {
-                    accepterVpcInfo;
-                    expirationTime;
-                    requesterVpcInfo;
-                    status;
-                    tags;
-                    vpcPeeringConnectionId
-                  }
-    let to_value x =
-      structure_to_value
-        [("accepterVpcInfo",
-           (Option.map x.accepterVpcInfo
-              ~f:VpcPeeringConnectionVpcInfo.to_value));
-        ("expirationTime",
-          (Option.map x.expirationTime ~f:DateTime.to_value));
-        ("requesterVpcInfo",
-          (Option.map x.requesterVpcInfo
-             ~f:VpcPeeringConnectionVpcInfo.to_value));
-        ("status",
-          (Option.map x.status ~f:VpcPeeringConnectionStateReason.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value));
-        ("vpcPeeringConnectionId",
-          (Option.map x.vpcPeeringConnectionId ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let vpcPeeringConnectionId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "vpcPeeringConnectionId") in
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let status =
-        (Option.map ~f:VpcPeeringConnectionStateReason.of_xml)
-          (Xml.child xml_arg0 "status") in
-      let requesterVpcInfo =
-        (Option.map ~f:VpcPeeringConnectionVpcInfo.of_xml)
-          (Xml.child xml_arg0 "requesterVpcInfo") in
-      let expirationTime =
-        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "expirationTime") in
-      let accepterVpcInfo =
-        (Option.map ~f:VpcPeeringConnectionVpcInfo.of_xml)
-          (Xml.child xml_arg0 "accepterVpcInfo") in
-      make ?vpcPeeringConnectionId ?tags ?status ?requesterVpcInfo
-        ?expirationTime ?accepterVpcInfo ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcPeeringConnectionId =
-        field_map json "VpcPeeringConnectionId" String_.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let status =
-        field_map json "Status" VpcPeeringConnectionStateReason.of_json in
-      let requesterVpcInfo =
-        field_map json "RequesterVpcInfo" VpcPeeringConnectionVpcInfo.of_json in
-      let expirationTime = field_map json "ExpirationTime" DateTime.of_json in
-      let accepterVpcInfo =
-        field_map json "AccepterVpcInfo" VpcPeeringConnectionVpcInfo.of_json in
-      make ?vpcPeeringConnectionId ?tags ?status ?requesterVpcInfo
-        ?expirationTime ?accepterVpcInfo ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a VPC peering connection."]
-module VpcPeeringConnectionId =
-  struct
-    type nonrec t = string
-    let context_ = "VpcPeeringConnectionId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"VpcPeeringConnectionId" j
-    let to_json = simple_to_json to_value
-  end
-module VpcEndpoint =
-  struct
-    type nonrec t =
-      {
-      vpcEndpointId: String_.t option
-        [@ocaml.doc "The ID of the VPC endpoint."];
-      vpcEndpointType: VpcEndpointType.t option
-        [@ocaml.doc "The type of endpoint."];
-      vpcId: String_.t option
-        [@ocaml.doc "The ID of the VPC to which the endpoint is associated."];
-      serviceName: String_.t option
-        [@ocaml.doc
-          "The name of the service to which the endpoint is associated."];
-      state: State.t option [@ocaml.doc "The state of the VPC endpoint."];
-      policyDocument: String_.t option
-        [@ocaml.doc
-          "The policy document associated with the endpoint, if applicable."];
-      routeTableIds: ValueStringList.t option
-        [@ocaml.doc
-          "(Gateway endpoint) One or more route tables associated with the endpoint."];
-      subnetIds: ValueStringList.t option
-        [@ocaml.doc
-          "(Interface endpoint) One or more subnets in which the endpoint is located."];
-      groups: GroupIdentifierSet.t option
-        [@ocaml.doc
-          "(Interface endpoint) Information about the security groups that are associated with the network interface."];
-      privateDnsEnabled: Boolean.t option
-        [@ocaml.doc
-          "(Interface endpoint) Indicates whether the VPC is associated with a private hosted zone."];
-      requesterManaged: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether the VPC endpoint is being managed by its service."];
-      networkInterfaceIds: ValueStringList.t option
-        [@ocaml.doc
-          "(Interface endpoint) One or more network interfaces for the endpoint."];
-      dnsEntries: DnsEntrySet.t option
-        [@ocaml.doc "(Interface endpoint) The DNS entries for the endpoint."];
-      creationTimestamp: MillisecondDateTime.t option
-        [@ocaml.doc "The date and time that the VPC endpoint was created."];
-      tags: TagList.t option
-        [@ocaml.doc "Any tags assigned to the VPC endpoint."];
-      ownerId: String_.t option
-        [@ocaml.doc
-          "The ID of the Amazon Web Services account that owns the VPC endpoint."];
-      lastError: LastError.t option
-        [@ocaml.doc "The last error that occurred for VPC endpoint."]}
-    let make ?vpcEndpointId =
-      fun ?vpcEndpointType ->
-        fun ?vpcId ->
-          fun ?serviceName ->
-            fun ?state ->
-              fun ?policyDocument ->
-                fun ?routeTableIds ->
-                  fun ?subnetIds ->
-                    fun ?groups ->
-                      fun ?privateDnsEnabled ->
-                        fun ?requesterManaged ->
-                          fun ?networkInterfaceIds ->
-                            fun ?dnsEntries ->
-                              fun ?creationTimestamp ->
-                                fun ?tags ->
-                                  fun ?ownerId ->
-                                    fun ?lastError ->
-                                      fun () ->
-                                        {
-                                          vpcEndpointId;
-                                          vpcEndpointType;
-                                          vpcId;
-                                          serviceName;
-                                          state;
-                                          policyDocument;
-                                          routeTableIds;
-                                          subnetIds;
-                                          groups;
-                                          privateDnsEnabled;
-                                          requesterManaged;
-                                          networkInterfaceIds;
-                                          dnsEntries;
-                                          creationTimestamp;
-                                          tags;
-                                          ownerId;
-                                          lastError
-                                        }
-    let to_value x =
-      structure_to_value
-        [("vpcEndpointId", (Option.map x.vpcEndpointId ~f:String_.to_value));
-        ("vpcEndpointType",
-          (Option.map x.vpcEndpointType ~f:VpcEndpointType.to_value));
-        ("vpcId", (Option.map x.vpcId ~f:String_.to_value));
-        ("serviceName", (Option.map x.serviceName ~f:String_.to_value));
-        ("state", (Option.map x.state ~f:State.to_value));
-        ("policyDocument", (Option.map x.policyDocument ~f:String_.to_value));
-        ("routeTableIdSet",
-          (Option.map x.routeTableIds ~f:ValueStringList.to_value));
-        ("subnetIdSet", (Option.map x.subnetIds ~f:ValueStringList.to_value));
-        ("groupSet", (Option.map x.groups ~f:GroupIdentifierSet.to_value));
-        ("privateDnsEnabled",
-          (Option.map x.privateDnsEnabled ~f:Boolean.to_value));
-        ("requesterManaged",
-          (Option.map x.requesterManaged ~f:Boolean.to_value));
-        ("networkInterfaceIdSet",
-          (Option.map x.networkInterfaceIds ~f:ValueStringList.to_value));
-        ("dnsEntrySet", (Option.map x.dnsEntries ~f:DnsEntrySet.to_value));
-        ("creationTimestamp",
-          (Option.map x.creationTimestamp ~f:MillisecondDateTime.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value));
-        ("ownerId", (Option.map x.ownerId ~f:String_.to_value));
-        ("lastError", (Option.map x.lastError ~f:LastError.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let lastError =
-        (Option.map ~f:LastError.of_xml) (Xml.child xml_arg0 "lastError") in
-      let ownerId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ownerId") in
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let creationTimestamp =
-        (Option.map ~f:MillisecondDateTime.of_xml)
-          (Xml.child xml_arg0 "creationTimestamp") in
-      let dnsEntries =
-        (Option.map ~f:DnsEntrySet.of_xml) (Xml.child xml_arg0 "dnsEntrySet") in
-      let networkInterfaceIds =
-        (Option.map ~f:ValueStringList.of_xml)
-          (Xml.child xml_arg0 "networkInterfaceIdSet") in
-      let requesterManaged =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "requesterManaged") in
-      let privateDnsEnabled =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "privateDnsEnabled") in
-      let groups =
-        (Option.map ~f:GroupIdentifierSet.of_xml)
-          (Xml.child xml_arg0 "groupSet") in
-      let subnetIds =
-        (Option.map ~f:ValueStringList.of_xml)
-          (Xml.child xml_arg0 "subnetIdSet") in
-      let routeTableIds =
-        (Option.map ~f:ValueStringList.of_xml)
-          (Xml.child xml_arg0 "routeTableIdSet") in
-      let policyDocument =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "policyDocument") in
-      let state = (Option.map ~f:State.of_xml) (Xml.child xml_arg0 "state") in
-      let serviceName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceName") in
-      let vpcId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpcId") in
-      let vpcEndpointType =
-        (Option.map ~f:VpcEndpointType.of_xml)
-          (Xml.child xml_arg0 "vpcEndpointType") in
-      let vpcEndpointId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpcEndpointId") in
-      make ?lastError ?ownerId ?tags ?creationTimestamp ?dnsEntries
-        ?networkInterfaceIds ?requesterManaged ?privateDnsEnabled ?groups
-        ?subnetIds ?routeTableIds ?policyDocument ?state ?serviceName ?vpcId
-        ?vpcEndpointType ?vpcEndpointId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastError = field_map json "LastError" LastError.of_json in
-      let ownerId = field_map json "OwnerId" String_.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let creationTimestamp =
-        field_map json "CreationTimestamp" MillisecondDateTime.of_json in
-      let dnsEntries = field_map json "DnsEntries" DnsEntrySet.of_json in
-      let networkInterfaceIds =
-        field_map json "NetworkInterfaceIds" ValueStringList.of_json in
-      let requesterManaged =
-        field_map json "RequesterManaged" Boolean.of_json in
-      let privateDnsEnabled =
-        field_map json "PrivateDnsEnabled" Boolean.of_json in
-      let groups = field_map json "Groups" GroupIdentifierSet.of_json in
-      let subnetIds = field_map json "SubnetIds" ValueStringList.of_json in
-      let routeTableIds =
-        field_map json "RouteTableIds" ValueStringList.of_json in
-      let policyDocument = field_map json "PolicyDocument" String_.of_json in
-      let state = field_map json "State" State.of_json in
-      let serviceName = field_map json "ServiceName" String_.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let vpcEndpointType =
-        field_map json "VpcEndpointType" VpcEndpointType.of_json in
-      let vpcEndpointId = field_map json "VpcEndpointId" String_.of_json in
-      make ?lastError ?ownerId ?tags ?creationTimestamp ?dnsEntries
-        ?networkInterfaceIds ?requesterManaged ?privateDnsEnabled ?groups
-        ?subnetIds ?routeTableIds ?policyDocument ?state ?serviceName ?vpcId
-        ?vpcEndpointType ?vpcEndpointId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a VPC endpoint."]
-module ServiceDetail =
-  struct
-    type nonrec t =
-      {
-      serviceName: String_.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the service."];
-      serviceId: String_.t option
-        [@ocaml.doc "The ID of the endpoint service."];
-      serviceType: ServiceTypeDetailSet.t option
-        [@ocaml.doc "The type of service."];
-      availabilityZones: ValueStringList.t option
-        [@ocaml.doc
-          "The Availability Zones in which the service is available."];
-      owner: String_.t option
-        [@ocaml.doc
-          "The Amazon Web Services account ID of the service owner."];
-      baseEndpointDnsNames: ValueStringList.t option
-        [@ocaml.doc "The DNS names for the service."];
-      privateDnsName: String_.t option
-        [@ocaml.doc "The private DNS name for the service."];
-      privateDnsNames: PrivateDnsDetailsSet.t option
-        [@ocaml.doc
-          "The private DNS names assigned to the VPC endpoint service."];
-      vpcEndpointPolicySupported: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether the service supports endpoint policies."];
-      acceptanceRequired: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether VPC endpoint connection requests to the service must be accepted by the service owner."];
-      managesVpcEndpoints: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether the service manages its VPC endpoints. Management of the service VPC endpoints using the VPC endpoint API is restricted."];
-      payerResponsibility: PayerResponsibility.t option
-        [@ocaml.doc "The payer responsibility."];
-      tags: TagList.t option [@ocaml.doc "Any tags assigned to the service."];
-      privateDnsNameVerificationState: DnsNameState.t option
-        [@ocaml.doc
-          "The verification state of the VPC endpoint service. Consumers of the endpoint service cannot use the private name when the state is not verified."]}
-    let make ?serviceName =
-      fun ?serviceId ->
-        fun ?serviceType ->
-          fun ?availabilityZones ->
-            fun ?owner ->
-              fun ?baseEndpointDnsNames ->
-                fun ?privateDnsName ->
-                  fun ?privateDnsNames ->
-                    fun ?vpcEndpointPolicySupported ->
-                      fun ?acceptanceRequired ->
-                        fun ?managesVpcEndpoints ->
-                          fun ?payerResponsibility ->
-                            fun ?tags ->
-                              fun ?privateDnsNameVerificationState ->
-                                fun () ->
-                                  {
-                                    serviceName;
-                                    serviceId;
-                                    serviceType;
-                                    availabilityZones;
-                                    owner;
-                                    baseEndpointDnsNames;
-                                    privateDnsName;
-                                    privateDnsNames;
-                                    vpcEndpointPolicySupported;
-                                    acceptanceRequired;
-                                    managesVpcEndpoints;
-                                    payerResponsibility;
-                                    tags;
-                                    privateDnsNameVerificationState
-                                  }
-    let to_value x =
-      structure_to_value
-        [("serviceName", (Option.map x.serviceName ~f:String_.to_value));
-        ("serviceId", (Option.map x.serviceId ~f:String_.to_value));
-        ("serviceType",
-          (Option.map x.serviceType ~f:ServiceTypeDetailSet.to_value));
-        ("availabilityZoneSet",
-          (Option.map x.availabilityZones ~f:ValueStringList.to_value));
-        ("owner", (Option.map x.owner ~f:String_.to_value));
-        ("baseEndpointDnsNameSet",
-          (Option.map x.baseEndpointDnsNames ~f:ValueStringList.to_value));
-        ("privateDnsName", (Option.map x.privateDnsName ~f:String_.to_value));
-        ("privateDnsNameSet",
-          (Option.map x.privateDnsNames ~f:PrivateDnsDetailsSet.to_value));
-        ("vpcEndpointPolicySupported",
-          (Option.map x.vpcEndpointPolicySupported ~f:Boolean.to_value));
-        ("acceptanceRequired",
-          (Option.map x.acceptanceRequired ~f:Boolean.to_value));
-        ("managesVpcEndpoints",
-          (Option.map x.managesVpcEndpoints ~f:Boolean.to_value));
-        ("payerResponsibility",
-          (Option.map x.payerResponsibility ~f:PayerResponsibility.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value));
-        ("privateDnsNameVerificationState",
-          (Option.map x.privateDnsNameVerificationState
-             ~f:DnsNameState.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let privateDnsNameVerificationState =
-        (Option.map ~f:DnsNameState.of_xml)
-          (Xml.child xml_arg0 "privateDnsNameVerificationState") in
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let payerResponsibility =
-        (Option.map ~f:PayerResponsibility.of_xml)
-          (Xml.child xml_arg0 "payerResponsibility") in
-      let managesVpcEndpoints =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "managesVpcEndpoints") in
-      let acceptanceRequired =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "acceptanceRequired") in
-      let vpcEndpointPolicySupported =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "vpcEndpointPolicySupported") in
-      let privateDnsNames =
-        (Option.map ~f:PrivateDnsDetailsSet.of_xml)
-          (Xml.child xml_arg0 "privateDnsNameSet") in
-      let privateDnsName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "privateDnsName") in
-      let baseEndpointDnsNames =
-        (Option.map ~f:ValueStringList.of_xml)
-          (Xml.child xml_arg0 "baseEndpointDnsNameSet") in
-      let owner = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "owner") in
-      let availabilityZones =
-        (Option.map ~f:ValueStringList.of_xml)
-          (Xml.child xml_arg0 "availabilityZoneSet") in
-      let serviceType =
-        (Option.map ~f:ServiceTypeDetailSet.of_xml)
-          (Xml.child xml_arg0 "serviceType") in
-      let serviceId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceId") in
-      let serviceName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceName") in
-      make ?privateDnsNameVerificationState ?tags ?payerResponsibility
-        ?managesVpcEndpoints ?acceptanceRequired ?vpcEndpointPolicySupported
-        ?privateDnsNames ?privateDnsName ?baseEndpointDnsNames ?owner
-        ?availabilityZones ?serviceType ?serviceId ?serviceName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let privateDnsNameVerificationState =
-        field_map json "PrivateDnsNameVerificationState" DnsNameState.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let payerResponsibility =
-        field_map json "PayerResponsibility" PayerResponsibility.of_json in
-      let managesVpcEndpoints =
-        field_map json "ManagesVpcEndpoints" Boolean.of_json in
-      let acceptanceRequired =
-        field_map json "AcceptanceRequired" Boolean.of_json in
-      let vpcEndpointPolicySupported =
-        field_map json "VpcEndpointPolicySupported" Boolean.of_json in
-      let privateDnsNames =
-        field_map json "PrivateDnsNames" PrivateDnsDetailsSet.of_json in
-      let privateDnsName = field_map json "PrivateDnsName" String_.of_json in
-      let baseEndpointDnsNames =
-        field_map json "BaseEndpointDnsNames" ValueStringList.of_json in
-      let owner = field_map json "Owner" String_.of_json in
-      let availabilityZones =
-        field_map json "AvailabilityZones" ValueStringList.of_json in
-      let serviceType =
-        field_map json "ServiceType" ServiceTypeDetailSet.of_json in
-      let serviceId = field_map json "ServiceId" String_.of_json in
-      let serviceName = field_map json "ServiceName" String_.of_json in
-      make ?privateDnsNameVerificationState ?tags ?payerResponsibility
-        ?managesVpcEndpoints ?acceptanceRequired ?vpcEndpointPolicySupported
-        ?privateDnsNames ?privateDnsName ?baseEndpointDnsNames ?owner
-        ?availabilityZones ?serviceType ?serviceId ?serviceName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a VPC endpoint service."]
-module AllowedPrincipal =
-  struct
-    type nonrec t =
-      {
-      principalType: PrincipalType.t option
-        [@ocaml.doc "The type of principal."];
-      principal: String_.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the principal."]}
-    let make ?principalType =
-      fun ?principal -> fun () -> { principalType; principal }
-    let to_value x =
-      structure_to_value
-        [("principalType",
-           (Option.map x.principalType ~f:PrincipalType.to_value));
-        ("principal", (Option.map x.principal ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let principal =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "principal") in
-      let principalType =
-        (Option.map ~f:PrincipalType.of_xml)
-          (Xml.child xml_arg0 "principalType") in
-      make ?principal ?principalType ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let principal = field_map json "Principal" String_.of_json in
-      let principalType =
-        field_map json "PrincipalType" PrincipalType.of_json in
-      make ?principal ?principalType ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a principal."]
-module ServiceConfiguration =
-  struct
-    type nonrec t =
-      {
-      serviceType: ServiceTypeDetailSet.t option
-        [@ocaml.doc "The type of service."];
-      serviceId: String_.t option [@ocaml.doc "The ID of the service."];
-      serviceName: String_.t option [@ocaml.doc "The name of the service."];
-      serviceState: ServiceState.t option [@ocaml.doc "The service state."];
-      availabilityZones: ValueStringList.t option
-        [@ocaml.doc
-          "The Availability Zones in which the service is available."];
-      acceptanceRequired: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether requests from other Amazon Web Services accounts to create an endpoint to the service must first be accepted."];
-      managesVpcEndpoints: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether the service manages its VPC endpoints. Management of the service VPC endpoints using the VPC endpoint API is restricted."];
-      networkLoadBalancerArns: ValueStringList.t option
-        [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the Network Load Balancers for the service."];
-      gatewayLoadBalancerArns: ValueStringList.t option
-        [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the Gateway Load Balancers for the service."];
-      baseEndpointDnsNames: ValueStringList.t option
-        [@ocaml.doc "The DNS names for the service."];
-      privateDnsName: String_.t option
-        [@ocaml.doc "The private DNS name for the service."];
-      privateDnsNameConfiguration: PrivateDnsNameConfiguration.t option
-        [@ocaml.doc
-          "Information about the endpoint service private DNS name configuration."];
-      payerResponsibility: PayerResponsibility.t option
-        [@ocaml.doc "The payer responsibility."];
-      tags: TagList.t option [@ocaml.doc "Any tags assigned to the service."]}
-    let make ?serviceType =
-      fun ?serviceId ->
-        fun ?serviceName ->
-          fun ?serviceState ->
-            fun ?availabilityZones ->
-              fun ?acceptanceRequired ->
-                fun ?managesVpcEndpoints ->
-                  fun ?networkLoadBalancerArns ->
-                    fun ?gatewayLoadBalancerArns ->
-                      fun ?baseEndpointDnsNames ->
-                        fun ?privateDnsName ->
-                          fun ?privateDnsNameConfiguration ->
-                            fun ?payerResponsibility ->
-                              fun ?tags ->
-                                fun () ->
-                                  {
-                                    serviceType;
-                                    serviceId;
-                                    serviceName;
-                                    serviceState;
-                                    availabilityZones;
-                                    acceptanceRequired;
-                                    managesVpcEndpoints;
-                                    networkLoadBalancerArns;
-                                    gatewayLoadBalancerArns;
-                                    baseEndpointDnsNames;
-                                    privateDnsName;
-                                    privateDnsNameConfiguration;
-                                    payerResponsibility;
-                                    tags
-                                  }
-    let to_value x =
-      structure_to_value
-        [("serviceType",
-           (Option.map x.serviceType ~f:ServiceTypeDetailSet.to_value));
-        ("serviceId", (Option.map x.serviceId ~f:String_.to_value));
-        ("serviceName", (Option.map x.serviceName ~f:String_.to_value));
-        ("serviceState",
-          (Option.map x.serviceState ~f:ServiceState.to_value));
-        ("availabilityZoneSet",
-          (Option.map x.availabilityZones ~f:ValueStringList.to_value));
-        ("acceptanceRequired",
-          (Option.map x.acceptanceRequired ~f:Boolean.to_value));
-        ("managesVpcEndpoints",
-          (Option.map x.managesVpcEndpoints ~f:Boolean.to_value));
-        ("networkLoadBalancerArnSet",
-          (Option.map x.networkLoadBalancerArns ~f:ValueStringList.to_value));
-        ("gatewayLoadBalancerArnSet",
-          (Option.map x.gatewayLoadBalancerArns ~f:ValueStringList.to_value));
-        ("baseEndpointDnsNameSet",
-          (Option.map x.baseEndpointDnsNames ~f:ValueStringList.to_value));
-        ("privateDnsName", (Option.map x.privateDnsName ~f:String_.to_value));
-        ("privateDnsNameConfiguration",
-          (Option.map x.privateDnsNameConfiguration
-             ~f:PrivateDnsNameConfiguration.to_value));
-        ("payerResponsibility",
-          (Option.map x.payerResponsibility ~f:PayerResponsibility.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let payerResponsibility =
-        (Option.map ~f:PayerResponsibility.of_xml)
-          (Xml.child xml_arg0 "payerResponsibility") in
-      let privateDnsNameConfiguration =
-        (Option.map ~f:PrivateDnsNameConfiguration.of_xml)
-          (Xml.child xml_arg0 "privateDnsNameConfiguration") in
-      let privateDnsName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "privateDnsName") in
-      let baseEndpointDnsNames =
-        (Option.map ~f:ValueStringList.of_xml)
-          (Xml.child xml_arg0 "baseEndpointDnsNameSet") in
-      let gatewayLoadBalancerArns =
-        (Option.map ~f:ValueStringList.of_xml)
-          (Xml.child xml_arg0 "gatewayLoadBalancerArnSet") in
-      let networkLoadBalancerArns =
-        (Option.map ~f:ValueStringList.of_xml)
-          (Xml.child xml_arg0 "networkLoadBalancerArnSet") in
-      let managesVpcEndpoints =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "managesVpcEndpoints") in
-      let acceptanceRequired =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "acceptanceRequired") in
-      let availabilityZones =
-        (Option.map ~f:ValueStringList.of_xml)
-          (Xml.child xml_arg0 "availabilityZoneSet") in
-      let serviceState =
-        (Option.map ~f:ServiceState.of_xml)
-          (Xml.child xml_arg0 "serviceState") in
-      let serviceName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceName") in
-      let serviceId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceId") in
-      let serviceType =
-        (Option.map ~f:ServiceTypeDetailSet.of_xml)
-          (Xml.child xml_arg0 "serviceType") in
-      make ?tags ?payerResponsibility ?privateDnsNameConfiguration
-        ?privateDnsName ?baseEndpointDnsNames ?gatewayLoadBalancerArns
-        ?networkLoadBalancerArns ?managesVpcEndpoints ?acceptanceRequired
-        ?availabilityZones ?serviceState ?serviceName ?serviceId ?serviceType
-        ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let payerResponsibility =
-        field_map json "PayerResponsibility" PayerResponsibility.of_json in
-      let privateDnsNameConfiguration =
-        field_map json "PrivateDnsNameConfiguration"
-          PrivateDnsNameConfiguration.of_json in
-      let privateDnsName = field_map json "PrivateDnsName" String_.of_json in
-      let baseEndpointDnsNames =
-        field_map json "BaseEndpointDnsNames" ValueStringList.of_json in
-      let gatewayLoadBalancerArns =
-        field_map json "GatewayLoadBalancerArns" ValueStringList.of_json in
-      let networkLoadBalancerArns =
-        field_map json "NetworkLoadBalancerArns" ValueStringList.of_json in
-      let managesVpcEndpoints =
-        field_map json "ManagesVpcEndpoints" Boolean.of_json in
-      let acceptanceRequired =
-        field_map json "AcceptanceRequired" Boolean.of_json in
-      let availabilityZones =
-        field_map json "AvailabilityZones" ValueStringList.of_json in
-      let serviceState = field_map json "ServiceState" ServiceState.of_json in
-      let serviceName = field_map json "ServiceName" String_.of_json in
-      let serviceId = field_map json "ServiceId" String_.of_json in
-      let serviceType =
-        field_map json "ServiceType" ServiceTypeDetailSet.of_json in
-      make ?tags ?payerResponsibility ?privateDnsNameConfiguration
-        ?privateDnsName ?baseEndpointDnsNames ?gatewayLoadBalancerArns
-        ?networkLoadBalancerArns ?managesVpcEndpoints ?acceptanceRequired
-        ?availabilityZones ?serviceState ?serviceName ?serviceId ?serviceType
-        ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes a service configuration for a VPC endpoint service."]
-module VpcEndpointServiceId =
-  struct
-    type nonrec t = string
-    let context_ = "VpcEndpointServiceId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"VpcEndpointServiceId" j
-    let to_json = simple_to_json to_value
-  end
-module VpcEndpointConnection =
-  struct
-    type nonrec t =
-      {
-      serviceId: String_.t option
-        [@ocaml.doc
-          "The ID of the service to which the endpoint is connected."];
-      vpcEndpointId: String_.t option
-        [@ocaml.doc "The ID of the VPC endpoint."];
-      vpcEndpointOwner: String_.t option
-        [@ocaml.doc
-          "The ID of the Amazon Web Services account that owns the VPC endpoint."];
-      vpcEndpointState: State.t option
-        [@ocaml.doc "The state of the VPC endpoint."];
-      creationTimestamp: MillisecondDateTime.t option
-        [@ocaml.doc "The date and time that the VPC endpoint was created."];
-      dnsEntries: DnsEntrySet.t option
-        [@ocaml.doc "The DNS entries for the VPC endpoint."];
-      networkLoadBalancerArns: ValueStringList.t option
-        [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the network load balancers for the service."];
-      gatewayLoadBalancerArns: ValueStringList.t option
-        [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the Gateway Load Balancers for the service."]}
-    let make ?serviceId =
-      fun ?vpcEndpointId ->
-        fun ?vpcEndpointOwner ->
-          fun ?vpcEndpointState ->
-            fun ?creationTimestamp ->
-              fun ?dnsEntries ->
-                fun ?networkLoadBalancerArns ->
-                  fun ?gatewayLoadBalancerArns ->
-                    fun () ->
-                      {
-                        serviceId;
-                        vpcEndpointId;
-                        vpcEndpointOwner;
-                        vpcEndpointState;
-                        creationTimestamp;
-                        dnsEntries;
-                        networkLoadBalancerArns;
-                        gatewayLoadBalancerArns
-                      }
-    let to_value x =
-      structure_to_value
-        [("serviceId", (Option.map x.serviceId ~f:String_.to_value));
-        ("vpcEndpointId", (Option.map x.vpcEndpointId ~f:String_.to_value));
-        ("vpcEndpointOwner",
-          (Option.map x.vpcEndpointOwner ~f:String_.to_value));
-        ("vpcEndpointState",
-          (Option.map x.vpcEndpointState ~f:State.to_value));
-        ("creationTimestamp",
-          (Option.map x.creationTimestamp ~f:MillisecondDateTime.to_value));
-        ("dnsEntrySet", (Option.map x.dnsEntries ~f:DnsEntrySet.to_value));
-        ("networkLoadBalancerArnSet",
-          (Option.map x.networkLoadBalancerArns ~f:ValueStringList.to_value));
-        ("gatewayLoadBalancerArnSet",
-          (Option.map x.gatewayLoadBalancerArns ~f:ValueStringList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let gatewayLoadBalancerArns =
-        (Option.map ~f:ValueStringList.of_xml)
-          (Xml.child xml_arg0 "gatewayLoadBalancerArnSet") in
-      let networkLoadBalancerArns =
-        (Option.map ~f:ValueStringList.of_xml)
-          (Xml.child xml_arg0 "networkLoadBalancerArnSet") in
-      let dnsEntries =
-        (Option.map ~f:DnsEntrySet.of_xml) (Xml.child xml_arg0 "dnsEntrySet") in
-      let creationTimestamp =
-        (Option.map ~f:MillisecondDateTime.of_xml)
-          (Xml.child xml_arg0 "creationTimestamp") in
-      let vpcEndpointState =
-        (Option.map ~f:State.of_xml) (Xml.child xml_arg0 "vpcEndpointState") in
-      let vpcEndpointOwner =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "vpcEndpointOwner") in
-      let vpcEndpointId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpcEndpointId") in
-      let serviceId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceId") in
-      make ?gatewayLoadBalancerArns ?networkLoadBalancerArns ?dnsEntries
-        ?creationTimestamp ?vpcEndpointState ?vpcEndpointOwner ?vpcEndpointId
-        ?serviceId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayLoadBalancerArns =
-        field_map json "GatewayLoadBalancerArns" ValueStringList.of_json in
-      let networkLoadBalancerArns =
-        field_map json "NetworkLoadBalancerArns" ValueStringList.of_json in
-      let dnsEntries = field_map json "DnsEntries" DnsEntrySet.of_json in
-      let creationTimestamp =
-        field_map json "CreationTimestamp" MillisecondDateTime.of_json in
-      let vpcEndpointState = field_map json "VpcEndpointState" State.of_json in
-      let vpcEndpointOwner =
-        field_map json "VpcEndpointOwner" String_.of_json in
-      let vpcEndpointId = field_map json "VpcEndpointId" String_.of_json in
-      let serviceId = field_map json "ServiceId" String_.of_json in
-      make ?gatewayLoadBalancerArns ?networkLoadBalancerArns ?dnsEntries
-        ?creationTimestamp ?vpcEndpointState ?vpcEndpointOwner ?vpcEndpointId
-        ?serviceId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a VPC endpoint connection to a service."]
-module ConnectionNotification =
-  struct
-    type nonrec t =
-      {
-      connectionNotificationId: String_.t option
-        [@ocaml.doc "The ID of the notification."];
-      serviceId: String_.t option
-        [@ocaml.doc "The ID of the endpoint service."];
-      vpcEndpointId: String_.t option
-        [@ocaml.doc "The ID of the VPC endpoint."];
-      connectionNotificationType: ConnectionNotificationType.t option
-        [@ocaml.doc "The type of notification."];
-      connectionNotificationArn: String_.t option
-        [@ocaml.doc "The ARN of the SNS topic for the notification."];
-      connectionEvents: ValueStringList.t option
-        [@ocaml.doc
-          "The events for the notification. Valid values are Accept, Connect, Delete, and Reject."];
-      connectionNotificationState: ConnectionNotificationState.t option
-        [@ocaml.doc "The state of the notification."]}
-    let make ?connectionNotificationId =
-      fun ?serviceId ->
-        fun ?vpcEndpointId ->
-          fun ?connectionNotificationType ->
-            fun ?connectionNotificationArn ->
-              fun ?connectionEvents ->
-                fun ?connectionNotificationState ->
-                  fun () ->
-                    {
-                      connectionNotificationId;
-                      serviceId;
-                      vpcEndpointId;
-                      connectionNotificationType;
-                      connectionNotificationArn;
-                      connectionEvents;
-                      connectionNotificationState
-                    }
-    let to_value x =
-      structure_to_value
-        [("connectionNotificationId",
-           (Option.map x.connectionNotificationId ~f:String_.to_value));
-        ("serviceId", (Option.map x.serviceId ~f:String_.to_value));
-        ("vpcEndpointId", (Option.map x.vpcEndpointId ~f:String_.to_value));
-        ("connectionNotificationType",
-          (Option.map x.connectionNotificationType
-             ~f:ConnectionNotificationType.to_value));
-        ("connectionNotificationArn",
-          (Option.map x.connectionNotificationArn ~f:String_.to_value));
-        ("connectionEvents",
-          (Option.map x.connectionEvents ~f:ValueStringList.to_value));
-        ("connectionNotificationState",
-          (Option.map x.connectionNotificationState
-             ~f:ConnectionNotificationState.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let connectionNotificationState =
-        (Option.map ~f:ConnectionNotificationState.of_xml)
-          (Xml.child xml_arg0 "connectionNotificationState") in
-      let connectionEvents =
-        (Option.map ~f:ValueStringList.of_xml)
-          (Xml.child xml_arg0 "connectionEvents") in
-      let connectionNotificationArn =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "connectionNotificationArn") in
-      let connectionNotificationType =
-        (Option.map ~f:ConnectionNotificationType.of_xml)
-          (Xml.child xml_arg0 "connectionNotificationType") in
-      let vpcEndpointId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpcEndpointId") in
-      let serviceId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceId") in
-      let connectionNotificationId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "connectionNotificationId") in
-      make ?connectionNotificationState ?connectionEvents
-        ?connectionNotificationArn ?connectionNotificationType ?vpcEndpointId
-        ?serviceId ?connectionNotificationId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connectionNotificationState =
-        field_map json "ConnectionNotificationState"
-          ConnectionNotificationState.of_json in
-      let connectionEvents =
-        field_map json "ConnectionEvents" ValueStringList.of_json in
-      let connectionNotificationArn =
-        field_map json "ConnectionNotificationArn" String_.of_json in
-      let connectionNotificationType =
-        field_map json "ConnectionNotificationType"
-          ConnectionNotificationType.of_json in
-      let vpcEndpointId = field_map json "VpcEndpointId" String_.of_json in
-      let serviceId = field_map json "ServiceId" String_.of_json in
-      let connectionNotificationId =
-        field_map json "ConnectionNotificationId" String_.of_json in
-      make ?connectionNotificationState ?connectionEvents
-        ?connectionNotificationArn ?connectionNotificationType ?vpcEndpointId
-        ?serviceId ?connectionNotificationId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes a connection notification for a VPC endpoint or VPC endpoint service."]
-module VpcClassicLink =
-  struct
-    type nonrec t =
-      {
-      classicLinkEnabled: Boolean.t option
-        [@ocaml.doc "Indicates whether the VPC is enabled for ClassicLink."];
-      tags: TagList.t option [@ocaml.doc "Any tags assigned to the VPC."];
-      vpcId: String_.t option [@ocaml.doc "The ID of the VPC."]}
-    let make ?classicLinkEnabled =
-      fun ?tags ->
-        fun ?vpcId -> fun () -> { classicLinkEnabled; tags; vpcId }
-    let to_value x =
-      structure_to_value
-        [("classicLinkEnabled",
-           (Option.map x.classicLinkEnabled ~f:Boolean.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value));
-        ("vpcId", (Option.map x.vpcId ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let vpcId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpcId") in
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let classicLinkEnabled =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "classicLinkEnabled") in
-      make ?vpcId ?tags ?classicLinkEnabled ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let classicLinkEnabled =
-        field_map json "ClassicLinkEnabled" Boolean.of_json in
-      make ?vpcId ?tags ?classicLinkEnabled ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes whether a VPC is enabled for ClassicLink."]
-module ClassicLinkDnsSupport =
-  struct
-    type nonrec t =
-      {
-      classicLinkDnsSupported: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether ClassicLink DNS support is enabled for the VPC."];
-      vpcId: String_.t option [@ocaml.doc "The ID of the VPC."]}
-    let make ?classicLinkDnsSupported =
-      fun ?vpcId -> fun () -> { classicLinkDnsSupported; vpcId }
-    let to_value x =
-      structure_to_value
-        [("classicLinkDnsSupported",
-           (Option.map x.classicLinkDnsSupported ~f:Boolean.to_value));
-        ("vpcId", (Option.map x.vpcId ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let vpcId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpcId") in
-      let classicLinkDnsSupported =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "classicLinkDnsSupported") in
-      make ?vpcId ?classicLinkDnsSupported ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let classicLinkDnsSupported =
-        field_map json "ClassicLinkDnsSupported" Boolean.of_json in
-      make ?vpcId ?classicLinkDnsSupported ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the ClassicLink DNS support status of a VPC."]
-module Volume =
-  struct
-    type nonrec t =
-      {
-      attachments: VolumeAttachmentList.t option
-        [@ocaml.doc "Information about the volume attachments."];
-      availabilityZone: String_.t option
-        [@ocaml.doc "The Availability Zone for the volume."];
-      createTime: DateTime.t option
-        [@ocaml.doc "The time stamp when volume creation was initiated."];
-      encrypted: Boolean.t option
-        [@ocaml.doc "Indicates whether the volume is encrypted."];
-      kmsKeyId: String_.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Key Management Service (KMS) KMS key that was used to protect the volume encryption key for the volume."];
-      outpostArn: String_.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the Outpost."];
-      size: Integer.t option [@ocaml.doc "The size of the volume, in GiBs."];
-      snapshotId: String_.t option
-        [@ocaml.doc
-          "The snapshot from which the volume was created, if applicable."];
-      state: VolumeState.t option [@ocaml.doc "The volume state."];
-      volumeId: String_.t option [@ocaml.doc "The ID of the volume."];
-      iops: Integer.t option
-        [@ocaml.doc
-          "The number of I/O operations per second (IOPS). For gp3, io1, and io2 volumes, this represents the number of IOPS that are provisioned for the volume. For gp2 volumes, this represents the baseline performance of the volume and the rate at which the volume accumulates I/O credits for bursting."];
-      tags: TagList.t option [@ocaml.doc "Any tags assigned to the volume."];
-      volumeType: VolumeType.t option [@ocaml.doc "The volume type."];
-      fastRestored: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether the volume was created using fast snapshot restore."];
-      multiAttachEnabled: Boolean.t option
-        [@ocaml.doc "Indicates whether Amazon EBS Multi-Attach is enabled."];
-      throughput: Integer.t option
-        [@ocaml.doc "The throughput that the volume supports, in MiB/s."]}
-    type nonrec error =
-      [ `Unknown_operation_error of (string * string option) ]
-    let make ?attachments =
-      fun ?availabilityZone ->
-        fun ?createTime ->
-          fun ?encrypted ->
-            fun ?kmsKeyId ->
-              fun ?outpostArn ->
-                fun ?size ->
-                  fun ?snapshotId ->
-                    fun ?state ->
-                      fun ?volumeId ->
-                        fun ?iops ->
-                          fun ?tags ->
-                            fun ?volumeType ->
-                              fun ?fastRestored ->
-                                fun ?multiAttachEnabled ->
-                                  fun ?throughput ->
-                                    fun () ->
-                                      {
-                                        attachments;
-                                        availabilityZone;
-                                        createTime;
-                                        encrypted;
-                                        kmsKeyId;
-                                        outpostArn;
-                                        size;
-                                        snapshotId;
-                                        state;
-                                        volumeId;
-                                        iops;
-                                        tags;
-                                        volumeType;
-                                        fastRestored;
-                                        multiAttachEnabled;
-                                        throughput
-                                      }
-    let error_of_json name json =
-      match name with
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("attachmentSet",
-           (Option.map x.attachments ~f:VolumeAttachmentList.to_value));
-        ("availabilityZone",
-          (Option.map x.availabilityZone ~f:String_.to_value));
-        ("createTime", (Option.map x.createTime ~f:DateTime.to_value));
-        ("encrypted", (Option.map x.encrypted ~f:Boolean.to_value));
-        ("kmsKeyId", (Option.map x.kmsKeyId ~f:String_.to_value));
-        ("outpostArn", (Option.map x.outpostArn ~f:String_.to_value));
-        ("size", (Option.map x.size ~f:Integer.to_value));
-        ("snapshotId", (Option.map x.snapshotId ~f:String_.to_value));
-        ("status", (Option.map x.state ~f:VolumeState.to_value));
-        ("volumeId", (Option.map x.volumeId ~f:String_.to_value));
-        ("iops", (Option.map x.iops ~f:Integer.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value));
-        ("volumeType", (Option.map x.volumeType ~f:VolumeType.to_value));
-        ("fastRestored", (Option.map x.fastRestored ~f:Boolean.to_value));
-        ("multiAttachEnabled",
-          (Option.map x.multiAttachEnabled ~f:Boolean.to_value));
-        ("throughput", (Option.map x.throughput ~f:Integer.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let throughput =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "throughput") in
-      let multiAttachEnabled =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "multiAttachEnabled") in
-      let fastRestored =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "fastRestored") in
-      let volumeType =
-        (Option.map ~f:VolumeType.of_xml) (Xml.child xml_arg0 "volumeType") in
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let iops = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "iops") in
-      let volumeId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "volumeId") in
-      let state =
-        (Option.map ~f:VolumeState.of_xml) (Xml.child xml_arg0 "status") in
-      let snapshotId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "snapshotId") in
-      let size = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "size") in
-      let outpostArn =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "outpostArn") in
-      let kmsKeyId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
-      let encrypted =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "encrypted") in
-      let createTime =
-        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "createTime") in
+    let of_json json__ =
+      let vpcAttachments =
+        field_map json__ "VpcAttachments" VpcAttachmentList.of_json in
       let availabilityZone =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "availabilityZone") in
-      let attachments =
-        (Option.map ~f:VolumeAttachmentList.of_xml)
-          (Xml.child xml_arg0 "attachmentSet") in
-      make ?throughput ?multiAttachEnabled ?fastRestored ?volumeType ?tags
-        ?iops ?volumeId ?state ?snapshotId ?size ?outpostArn ?kmsKeyId
-        ?encrypted ?createTime ?availabilityZone ?attachments ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let throughput = field_map json "Throughput" Integer.of_json in
-      let multiAttachEnabled =
-        field_map json "MultiAttachEnabled" Boolean.of_json in
-      let fastRestored = field_map json "FastRestored" Boolean.of_json in
-      let volumeType = field_map json "VolumeType" VolumeType.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let iops = field_map json "Iops" Integer.of_json in
-      let volumeId = field_map json "VolumeId" String_.of_json in
-      let state = field_map json "State" VolumeState.of_json in
-      let snapshotId = field_map json "SnapshotId" String_.of_json in
-      let size = field_map json "Size" Integer.of_json in
-      let outpostArn = field_map json "OutpostArn" String_.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let encrypted = field_map json "Encrypted" Boolean.of_json in
-      let createTime = field_map json "CreateTime" DateTime.of_json in
-      let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
-      let attachments =
-        field_map json "Attachments" VolumeAttachmentList.of_json in
-      make ?throughput ?multiAttachEnabled ?fastRestored ?volumeType ?tags
-        ?iops ?volumeId ?state ?snapshotId ?size ?outpostArn ?kmsKeyId
-        ?encrypted ?createTime ?availabilityZone ?attachments ()
+        field_map json__ "AvailabilityZone" String_.of_json in
+      let type_ = field_map json__ "Type" GatewayType.of_json in
+      let state = field_map json__ "State" VpnState.of_json in
+      let vpnGatewayId = field_map json__ "VpnGatewayId" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let amazonSideAsn = field_map json__ "AmazonSideAsn" Long.of_json in
+      make ?vpcAttachments ?availabilityZone ?type_ ?state ?vpnGatewayId
+        ?tags ?amazonSideAsn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a volume."]
-module VolumeModification =
-  struct
-    type nonrec t =
-      {
-      volumeId: String_.t option [@ocaml.doc "The ID of the volume."];
-      modificationState: VolumeModificationState.t option
-        [@ocaml.doc
-          "The current modification state. The modification state is null for unmodified volumes."];
-      statusMessage: String_.t option
-        [@ocaml.doc
-          "A status message about the modification progress or failure."];
-      targetSize: Integer.t option
-        [@ocaml.doc "The target size of the volume, in GiB."];
-      targetIops: Integer.t option
-        [@ocaml.doc "The target IOPS rate of the volume."];
-      targetVolumeType: VolumeType.t option
-        [@ocaml.doc "The target EBS volume type of the volume."];
-      targetThroughput: Integer.t option
-        [@ocaml.doc "The target throughput of the volume, in MiB/s."];
-      targetMultiAttachEnabled: Boolean.t option
-        [@ocaml.doc "The target setting for Amazon EBS Multi-Attach."];
-      originalSize: Integer.t option
-        [@ocaml.doc "The original size of the volume, in GiB."];
-      originalIops: Integer.t option
-        [@ocaml.doc "The original IOPS rate of the volume."];
-      originalVolumeType: VolumeType.t option
-        [@ocaml.doc "The original EBS volume type of the volume."];
-      originalThroughput: Integer.t option
-        [@ocaml.doc "The original throughput of the volume, in MiB/s."];
-      originalMultiAttachEnabled: Boolean.t option
-        [@ocaml.doc "The original setting for Amazon EBS Multi-Attach."];
-      progress: Long.t option
-        [@ocaml.doc
-          "The modification progress, from 0 to 100 percent complete."];
-      startTime: DateTime.t option
-        [@ocaml.doc "The modification start time."];
-      endTime: DateTime.t option
-        [@ocaml.doc "The modification completion or failure time."]}
-    let make ?volumeId =
-      fun ?modificationState ->
-        fun ?statusMessage ->
-          fun ?targetSize ->
-            fun ?targetIops ->
-              fun ?targetVolumeType ->
-                fun ?targetThroughput ->
-                  fun ?targetMultiAttachEnabled ->
-                    fun ?originalSize ->
-                      fun ?originalIops ->
-                        fun ?originalVolumeType ->
-                          fun ?originalThroughput ->
-                            fun ?originalMultiAttachEnabled ->
-                              fun ?progress ->
-                                fun ?startTime ->
-                                  fun ?endTime ->
-                                    fun () ->
-                                      {
-                                        volumeId;
-                                        modificationState;
-                                        statusMessage;
-                                        targetSize;
-                                        targetIops;
-                                        targetVolumeType;
-                                        targetThroughput;
-                                        targetMultiAttachEnabled;
-                                        originalSize;
-                                        originalIops;
-                                        originalVolumeType;
-                                        originalThroughput;
-                                        originalMultiAttachEnabled;
-                                        progress;
-                                        startTime;
-                                        endTime
-                                      }
-    let to_value x =
-      structure_to_value
-        [("volumeId", (Option.map x.volumeId ~f:String_.to_value));
-        ("modificationState",
-          (Option.map x.modificationState ~f:VolumeModificationState.to_value));
-        ("statusMessage", (Option.map x.statusMessage ~f:String_.to_value));
-        ("targetSize", (Option.map x.targetSize ~f:Integer.to_value));
-        ("targetIops", (Option.map x.targetIops ~f:Integer.to_value));
-        ("targetVolumeType",
-          (Option.map x.targetVolumeType ~f:VolumeType.to_value));
-        ("targetThroughput",
-          (Option.map x.targetThroughput ~f:Integer.to_value));
-        ("targetMultiAttachEnabled",
-          (Option.map x.targetMultiAttachEnabled ~f:Boolean.to_value));
-        ("originalSize", (Option.map x.originalSize ~f:Integer.to_value));
-        ("originalIops", (Option.map x.originalIops ~f:Integer.to_value));
-        ("originalVolumeType",
-          (Option.map x.originalVolumeType ~f:VolumeType.to_value));
-        ("originalThroughput",
-          (Option.map x.originalThroughput ~f:Integer.to_value));
-        ("originalMultiAttachEnabled",
-          (Option.map x.originalMultiAttachEnabled ~f:Boolean.to_value));
-        ("progress", (Option.map x.progress ~f:Long.to_value));
-        ("startTime", (Option.map x.startTime ~f:DateTime.to_value));
-        ("endTime", (Option.map x.endTime ~f:DateTime.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let endTime =
-        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "endTime") in
-      let startTime =
-        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "startTime") in
-      let progress =
-        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "progress") in
-      let originalMultiAttachEnabled =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "originalMultiAttachEnabled") in
-      let originalThroughput =
-        (Option.map ~f:Integer.of_xml)
-          (Xml.child xml_arg0 "originalThroughput") in
-      let originalVolumeType =
-        (Option.map ~f:VolumeType.of_xml)
-          (Xml.child xml_arg0 "originalVolumeType") in
-      let originalIops =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "originalIops") in
-      let originalSize =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "originalSize") in
-      let targetMultiAttachEnabled =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "targetMultiAttachEnabled") in
-      let targetThroughput =
-        (Option.map ~f:Integer.of_xml)
-          (Xml.child xml_arg0 "targetThroughput") in
-      let targetVolumeType =
-        (Option.map ~f:VolumeType.of_xml)
-          (Xml.child xml_arg0 "targetVolumeType") in
-      let targetIops =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "targetIops") in
-      let targetSize =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "targetSize") in
-      let statusMessage =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusMessage") in
-      let modificationState =
-        (Option.map ~f:VolumeModificationState.of_xml)
-          (Xml.child xml_arg0 "modificationState") in
-      let volumeId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "volumeId") in
-      make ?endTime ?startTime ?progress ?originalMultiAttachEnabled
-        ?originalThroughput ?originalVolumeType ?originalIops ?originalSize
-        ?targetMultiAttachEnabled ?targetThroughput ?targetVolumeType
-        ?targetIops ?targetSize ?statusMessage ?modificationState ?volumeId
-        ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
-      let progress = field_map json "Progress" Long.of_json in
-      let originalMultiAttachEnabled =
-        field_map json "OriginalMultiAttachEnabled" Boolean.of_json in
-      let originalThroughput =
-        field_map json "OriginalThroughput" Integer.of_json in
-      let originalVolumeType =
-        field_map json "OriginalVolumeType" VolumeType.of_json in
-      let originalIops = field_map json "OriginalIops" Integer.of_json in
-      let originalSize = field_map json "OriginalSize" Integer.of_json in
-      let targetMultiAttachEnabled =
-        field_map json "TargetMultiAttachEnabled" Boolean.of_json in
-      let targetThroughput =
-        field_map json "TargetThroughput" Integer.of_json in
-      let targetVolumeType =
-        field_map json "TargetVolumeType" VolumeType.of_json in
-      let targetIops = field_map json "TargetIops" Integer.of_json in
-      let targetSize = field_map json "TargetSize" Integer.of_json in
-      let statusMessage = field_map json "StatusMessage" String_.of_json in
-      let modificationState =
-        field_map json "ModificationState" VolumeModificationState.of_json in
-      let volumeId = field_map json "VolumeId" String_.of_json in
-      make ?endTime ?startTime ?progress ?originalMultiAttachEnabled
-        ?originalThroughput ?originalVolumeType ?originalIops ?originalSize
-        ?targetMultiAttachEnabled ?targetThroughput ?targetVolumeType
-        ?targetIops ?targetSize ?statusMessage ?modificationState ?volumeId
-        ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes the modification status of an EBS volume. If the volume has never been modified, some element values will be null."]
-module VolumeStatusItem =
-  struct
-    type nonrec t =
-      {
-      actions: VolumeStatusActionsList.t option
-        [@ocaml.doc "The details of the operation."];
-      availabilityZone: String_.t option
-        [@ocaml.doc "The Availability Zone of the volume."];
-      outpostArn: String_.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the Outpost."];
-      events: VolumeStatusEventsList.t option
-        [@ocaml.doc "A list of events associated with the volume."];
-      volumeId: String_.t option [@ocaml.doc "The volume ID."];
-      volumeStatus: VolumeStatusInfo.t option
-        [@ocaml.doc "The volume status."];
-      attachmentStatuses: VolumeStatusAttachmentStatusList.t option
-        [@ocaml.doc
-          "Information about the instances to which the volume is attached."]}
-    let make ?actions =
-      fun ?availabilityZone ->
-        fun ?outpostArn ->
-          fun ?events ->
-            fun ?volumeId ->
-              fun ?volumeStatus ->
-                fun ?attachmentStatuses ->
-                  fun () ->
-                    {
-                      actions;
-                      availabilityZone;
-                      outpostArn;
-                      events;
-                      volumeId;
-                      volumeStatus;
-                      attachmentStatuses
-                    }
-    let to_value x =
-      structure_to_value
-        [("actionsSet",
-           (Option.map x.actions ~f:VolumeStatusActionsList.to_value));
-        ("availabilityZone",
-          (Option.map x.availabilityZone ~f:String_.to_value));
-        ("outpostArn", (Option.map x.outpostArn ~f:String_.to_value));
-        ("eventsSet",
-          (Option.map x.events ~f:VolumeStatusEventsList.to_value));
-        ("volumeId", (Option.map x.volumeId ~f:String_.to_value));
-        ("volumeStatus",
-          (Option.map x.volumeStatus ~f:VolumeStatusInfo.to_value));
-        ("attachmentStatuses",
-          (Option.map x.attachmentStatuses
-             ~f:VolumeStatusAttachmentStatusList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let attachmentStatuses =
-        (Option.map ~f:VolumeStatusAttachmentStatusList.of_xml)
-          (Xml.child xml_arg0 "attachmentStatuses") in
-      let volumeStatus =
-        (Option.map ~f:VolumeStatusInfo.of_xml)
-          (Xml.child xml_arg0 "volumeStatus") in
-      let volumeId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "volumeId") in
-      let events =
-        (Option.map ~f:VolumeStatusEventsList.of_xml)
-          (Xml.child xml_arg0 "eventsSet") in
-      let outpostArn =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "outpostArn") in
-      let availabilityZone =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "availabilityZone") in
-      let actions =
-        (Option.map ~f:VolumeStatusActionsList.of_xml)
-          (Xml.child xml_arg0 "actionsSet") in
-      make ?attachmentStatuses ?volumeStatus ?volumeId ?events ?outpostArn
-        ?availabilityZone ?actions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attachmentStatuses =
-        field_map json "AttachmentStatuses"
-          VolumeStatusAttachmentStatusList.of_json in
-      let volumeStatus =
-        field_map json "VolumeStatus" VolumeStatusInfo.of_json in
-      let volumeId = field_map json "VolumeId" String_.of_json in
-      let events = field_map json "Events" VolumeStatusEventsList.of_json in
-      let outpostArn = field_map json "OutpostArn" String_.of_json in
-      let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
-      let actions = field_map json "Actions" VolumeStatusActionsList.of_json in
-      make ?attachmentStatuses ?volumeStatus ?volumeId ?events ?outpostArn
-        ?availabilityZone ?actions ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the volume status."]
-module TrunkInterfaceAssociation =
-  struct
-    type nonrec t =
-      {
-      associationId: TrunkInterfaceAssociationId.t option
-        [@ocaml.doc "The ID of the association."];
-      branchInterfaceId: String_.t option
-        [@ocaml.doc "The ID of the branch network interface."];
-      trunkInterfaceId: String_.t option
-        [@ocaml.doc "The ID of the trunk network interface."];
-      interfaceProtocol: InterfaceProtocolType.t option
-        [@ocaml.doc "The interface protocol. Valid values are VLAN and GRE."];
-      vlanId: Integer.t option
-        [@ocaml.doc "The ID of the VLAN when you use the VLAN protocol."];
-      greKey: Integer.t option
-        [@ocaml.doc "The application key when you use the GRE protocol."];
-      tags: TagList.t option
-        [@ocaml.doc "The tags for the trunk interface association."]}
-    let make ?associationId =
-      fun ?branchInterfaceId ->
-        fun ?trunkInterfaceId ->
-          fun ?interfaceProtocol ->
-            fun ?vlanId ->
-              fun ?greKey ->
-                fun ?tags ->
-                  fun () ->
-                    {
-                      associationId;
-                      branchInterfaceId;
-                      trunkInterfaceId;
-                      interfaceProtocol;
-                      vlanId;
-                      greKey;
-                      tags
-                    }
-    let to_value x =
-      structure_to_value
-        [("associationId",
-           (Option.map x.associationId
-              ~f:TrunkInterfaceAssociationId.to_value));
-        ("branchInterfaceId",
-          (Option.map x.branchInterfaceId ~f:String_.to_value));
-        ("trunkInterfaceId",
-          (Option.map x.trunkInterfaceId ~f:String_.to_value));
-        ("interfaceProtocol",
-          (Option.map x.interfaceProtocol ~f:InterfaceProtocolType.to_value));
-        ("vlanId", (Option.map x.vlanId ~f:Integer.to_value));
-        ("greKey", (Option.map x.greKey ~f:Integer.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let greKey =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "greKey") in
-      let vlanId =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "vlanId") in
-      let interfaceProtocol =
-        (Option.map ~f:InterfaceProtocolType.of_xml)
-          (Xml.child xml_arg0 "interfaceProtocol") in
-      let trunkInterfaceId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "trunkInterfaceId") in
-      let branchInterfaceId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "branchInterfaceId") in
-      let associationId =
-        (Option.map ~f:TrunkInterfaceAssociationId.of_xml)
-          (Xml.child xml_arg0 "associationId") in
-      make ?tags ?greKey ?vlanId ?interfaceProtocol ?trunkInterfaceId
-        ?branchInterfaceId ?associationId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let greKey = field_map json "GreKey" Integer.of_json in
-      let vlanId = field_map json "VlanId" Integer.of_json in
-      let interfaceProtocol =
-        field_map json "InterfaceProtocol" InterfaceProtocolType.of_json in
-      let trunkInterfaceId =
-        field_map json "TrunkInterfaceId" String_.of_json in
-      let branchInterfaceId =
-        field_map json "BranchInterfaceId" String_.of_json in
-      let associationId =
-        field_map json "AssociationId" TrunkInterfaceAssociationId.of_json in
-      make ?tags ?greKey ?vlanId ?interfaceProtocol ?trunkInterfaceId
-        ?branchInterfaceId ?associationId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Currently available in limited preview only. If you are interested in using this feature, contact your account manager. Information about an association between a branch network interface with a trunk network interface."]
-module TransitGateway =
-  struct
-    type nonrec t =
-      {
-      transitGatewayId: String_.t option
-        [@ocaml.doc "The ID of the transit gateway."];
-      transitGatewayArn: String_.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the transit gateway."];
-      state: TransitGatewayState.t option
-        [@ocaml.doc "The state of the transit gateway."];
-      ownerId: String_.t option
-        [@ocaml.doc
-          "The ID of the Amazon Web Services account that owns the transit gateway."];
-      description: String_.t option
-        [@ocaml.doc "The description of the transit gateway."];
-      creationTime: DateTime.t option [@ocaml.doc "The creation time."];
-      options: TransitGatewayOptions.t option
-        [@ocaml.doc "The transit gateway options."];
-      tags: TagList.t option [@ocaml.doc "The tags for the transit gateway."]}
-    let make ?transitGatewayId =
-      fun ?transitGatewayArn ->
-        fun ?state ->
-          fun ?ownerId ->
-            fun ?description ->
-              fun ?creationTime ->
-                fun ?options ->
-                  fun ?tags ->
-                    fun () ->
-                      {
-                        transitGatewayId;
-                        transitGatewayArn;
-                        state;
-                        ownerId;
-                        description;
-                        creationTime;
-                        options;
-                        tags
-                      }
-    let to_value x =
-      structure_to_value
-        [("transitGatewayId",
-           (Option.map x.transitGatewayId ~f:String_.to_value));
-        ("transitGatewayArn",
-          (Option.map x.transitGatewayArn ~f:String_.to_value));
-        ("state", (Option.map x.state ~f:TransitGatewayState.to_value));
-        ("ownerId", (Option.map x.ownerId ~f:String_.to_value));
-        ("description", (Option.map x.description ~f:String_.to_value));
-        ("creationTime", (Option.map x.creationTime ~f:DateTime.to_value));
-        ("options", (Option.map x.options ~f:TransitGatewayOptions.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let options =
-        (Option.map ~f:TransitGatewayOptions.of_xml)
-          (Xml.child xml_arg0 "options") in
-      let creationTime =
-        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "creationTime") in
-      let description =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
-      let ownerId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ownerId") in
-      let state =
-        (Option.map ~f:TransitGatewayState.of_xml)
-          (Xml.child xml_arg0 "state") in
-      let transitGatewayArn =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayArn") in
-      let transitGatewayId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayId") in
-      make ?tags ?options ?creationTime ?description ?ownerId ?state
-        ?transitGatewayArn ?transitGatewayId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let options = field_map json "Options" TransitGatewayOptions.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let ownerId = field_map json "OwnerId" String_.of_json in
-      let state = field_map json "State" TransitGatewayState.of_json in
-      let transitGatewayArn =
-        field_map json "TransitGatewayArn" String_.of_json in
-      let transitGatewayId =
-        field_map json "TransitGatewayId" String_.of_json in
-      make ?tags ?options ?creationTime ?description ?ownerId ?state
-        ?transitGatewayArn ?transitGatewayId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a transit gateway."]
-module TransitGatewayVpcAttachment =
-  struct
-    type nonrec t =
-      {
-      transitGatewayAttachmentId: String_.t option
-        [@ocaml.doc "The ID of the attachment."];
-      transitGatewayId: String_.t option
-        [@ocaml.doc "The ID of the transit gateway."];
-      vpcId: String_.t option [@ocaml.doc "The ID of the VPC."];
-      vpcOwnerId: String_.t option
-        [@ocaml.doc
-          "The ID of the Amazon Web Services account that owns the VPC."];
-      state: TransitGatewayAttachmentState.t option
-        [@ocaml.doc
-          "The state of the VPC attachment. Note that the initiating state has been deprecated."];
-      subnetIds: ValueStringList.t option
-        [@ocaml.doc "The IDs of the subnets."];
-      creationTime: DateTime.t option [@ocaml.doc "The creation time."];
-      options: TransitGatewayVpcAttachmentOptions.t option
-        [@ocaml.doc "The VPC attachment options."];
-      tags: TagList.t option [@ocaml.doc "The tags for the VPC attachment."]}
-    let make ?transitGatewayAttachmentId =
-      fun ?transitGatewayId ->
-        fun ?vpcId ->
-          fun ?vpcOwnerId ->
-            fun ?state ->
-              fun ?subnetIds ->
-                fun ?creationTime ->
-                  fun ?options ->
-                    fun ?tags ->
-                      fun () ->
-                        {
-                          transitGatewayAttachmentId;
-                          transitGatewayId;
-                          vpcId;
-                          vpcOwnerId;
-                          state;
-                          subnetIds;
-                          creationTime;
-                          options;
-                          tags
-                        }
-    let to_value x =
-      structure_to_value
-        [("transitGatewayAttachmentId",
-           (Option.map x.transitGatewayAttachmentId ~f:String_.to_value));
-        ("transitGatewayId",
-          (Option.map x.transitGatewayId ~f:String_.to_value));
-        ("vpcId", (Option.map x.vpcId ~f:String_.to_value));
-        ("vpcOwnerId", (Option.map x.vpcOwnerId ~f:String_.to_value));
-        ("state",
-          (Option.map x.state ~f:TransitGatewayAttachmentState.to_value));
-        ("subnetIds", (Option.map x.subnetIds ~f:ValueStringList.to_value));
-        ("creationTime", (Option.map x.creationTime ~f:DateTime.to_value));
-        ("options",
-          (Option.map x.options
-             ~f:TransitGatewayVpcAttachmentOptions.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let options =
-        (Option.map ~f:TransitGatewayVpcAttachmentOptions.of_xml)
-          (Xml.child xml_arg0 "options") in
-      let creationTime =
-        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "creationTime") in
-      let subnetIds =
-        (Option.map ~f:ValueStringList.of_xml)
-          (Xml.child xml_arg0 "subnetIds") in
-      let state =
-        (Option.map ~f:TransitGatewayAttachmentState.of_xml)
-          (Xml.child xml_arg0 "state") in
-      let vpcOwnerId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpcOwnerId") in
-      let vpcId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "vpcId") in
-      let transitGatewayId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayId") in
-      let transitGatewayAttachmentId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayAttachmentId") in
-      make ?tags ?options ?creationTime ?subnetIds ?state ?vpcOwnerId ?vpcId
-        ?transitGatewayId ?transitGatewayAttachmentId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let options =
-        field_map json "Options" TransitGatewayVpcAttachmentOptions.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
-      let subnetIds = field_map json "SubnetIds" ValueStringList.of_json in
-      let state =
-        field_map json "State" TransitGatewayAttachmentState.of_json in
-      let vpcOwnerId = field_map json "VpcOwnerId" String_.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let transitGatewayId =
-        field_map json "TransitGatewayId" String_.of_json in
-      let transitGatewayAttachmentId =
-        field_map json "TransitGatewayAttachmentId" String_.of_json in
-      make ?tags ?options ?creationTime ?subnetIds ?state ?vpcOwnerId ?vpcId
-        ?transitGatewayId ?transitGatewayAttachmentId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a VPC attachment."]
-module TransitGatewayRouteTable =
-  struct
-    type nonrec t =
-      {
-      transitGatewayRouteTableId: String_.t option
-        [@ocaml.doc "The ID of the transit gateway route table."];
-      transitGatewayId: String_.t option
-        [@ocaml.doc "The ID of the transit gateway."];
-      state: TransitGatewayRouteTableState.t option
-        [@ocaml.doc "The state of the transit gateway route table."];
-      defaultAssociationRouteTable: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether this is the default association route table for the transit gateway."];
-      defaultPropagationRouteTable: Boolean.t option
-        [@ocaml.doc
-          "Indicates whether this is the default propagation route table for the transit gateway."];
-      creationTime: DateTime.t option [@ocaml.doc "The creation time."];
-      tags: TagList.t option
-        [@ocaml.doc "Any tags assigned to the route table."]}
-    let make ?transitGatewayRouteTableId =
-      fun ?transitGatewayId ->
-        fun ?state ->
-          fun ?defaultAssociationRouteTable ->
-            fun ?defaultPropagationRouteTable ->
-              fun ?creationTime ->
-                fun ?tags ->
-                  fun () ->
-                    {
-                      transitGatewayRouteTableId;
-                      transitGatewayId;
-                      state;
-                      defaultAssociationRouteTable;
-                      defaultPropagationRouteTable;
-                      creationTime;
-                      tags
-                    }
-    let to_value x =
-      structure_to_value
-        [("transitGatewayRouteTableId",
-           (Option.map x.transitGatewayRouteTableId ~f:String_.to_value));
-        ("transitGatewayId",
-          (Option.map x.transitGatewayId ~f:String_.to_value));
-        ("state",
-          (Option.map x.state ~f:TransitGatewayRouteTableState.to_value));
-        ("defaultAssociationRouteTable",
-          (Option.map x.defaultAssociationRouteTable ~f:Boolean.to_value));
-        ("defaultPropagationRouteTable",
-          (Option.map x.defaultPropagationRouteTable ~f:Boolean.to_value));
-        ("creationTime", (Option.map x.creationTime ~f:DateTime.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let creationTime =
-        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "creationTime") in
-      let defaultPropagationRouteTable =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "defaultPropagationRouteTable") in
-      let defaultAssociationRouteTable =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "defaultAssociationRouteTable") in
-      let state =
-        (Option.map ~f:TransitGatewayRouteTableState.of_xml)
-          (Xml.child xml_arg0 "state") in
-      let transitGatewayId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayId") in
-      let transitGatewayRouteTableId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayRouteTableId") in
-      make ?tags ?creationTime ?defaultPropagationRouteTable
-        ?defaultAssociationRouteTable ?state ?transitGatewayId
-        ?transitGatewayRouteTableId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
-      let defaultPropagationRouteTable =
-        field_map json "DefaultPropagationRouteTable" Boolean.of_json in
-      let defaultAssociationRouteTable =
-        field_map json "DefaultAssociationRouteTable" Boolean.of_json in
-      let state =
-        field_map json "State" TransitGatewayRouteTableState.of_json in
-      let transitGatewayId =
-        field_map json "TransitGatewayId" String_.of_json in
-      let transitGatewayRouteTableId =
-        field_map json "TransitGatewayRouteTableId" String_.of_json in
-      make ?tags ?creationTime ?defaultPropagationRouteTable
-        ?defaultAssociationRouteTable ?state ?transitGatewayId
-        ?transitGatewayRouteTableId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a transit gateway route table."]
-module TransitGatewayPeeringAttachment =
-  struct
-    type nonrec t =
-      {
-      transitGatewayAttachmentId: String_.t option
-        [@ocaml.doc "The ID of the transit gateway peering attachment."];
-      requesterTgwInfo: PeeringTgwInfo.t option
-        [@ocaml.doc "Information about the requester transit gateway."];
-      accepterTgwInfo: PeeringTgwInfo.t option
-        [@ocaml.doc "Information about the accepter transit gateway."];
-      status: PeeringAttachmentStatus.t option
-        [@ocaml.doc "The status of the transit gateway peering attachment."];
-      state: TransitGatewayAttachmentState.t option
-        [@ocaml.doc
-          "The state of the transit gateway peering attachment. Note that the initiating state has been deprecated."];
-      creationTime: DateTime.t option
-        [@ocaml.doc
-          "The time the transit gateway peering attachment was created."];
-      tags: TagList.t option
-        [@ocaml.doc "The tags for the transit gateway peering attachment."]}
-    let make ?transitGatewayAttachmentId =
-      fun ?requesterTgwInfo ->
-        fun ?accepterTgwInfo ->
-          fun ?status ->
-            fun ?state ->
-              fun ?creationTime ->
-                fun ?tags ->
-                  fun () ->
-                    {
-                      transitGatewayAttachmentId;
-                      requesterTgwInfo;
-                      accepterTgwInfo;
-                      status;
-                      state;
-                      creationTime;
-                      tags
-                    }
-    let to_value x =
-      structure_to_value
-        [("transitGatewayAttachmentId",
-           (Option.map x.transitGatewayAttachmentId ~f:String_.to_value));
-        ("requesterTgwInfo",
-          (Option.map x.requesterTgwInfo ~f:PeeringTgwInfo.to_value));
-        ("accepterTgwInfo",
-          (Option.map x.accepterTgwInfo ~f:PeeringTgwInfo.to_value));
-        ("status", (Option.map x.status ~f:PeeringAttachmentStatus.to_value));
-        ("state",
-          (Option.map x.state ~f:TransitGatewayAttachmentState.to_value));
-        ("creationTime", (Option.map x.creationTime ~f:DateTime.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let creationTime =
-        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "creationTime") in
-      let state =
-        (Option.map ~f:TransitGatewayAttachmentState.of_xml)
-          (Xml.child xml_arg0 "state") in
-      let status =
-        (Option.map ~f:PeeringAttachmentStatus.of_xml)
-          (Xml.child xml_arg0 "status") in
-      let accepterTgwInfo =
-        (Option.map ~f:PeeringTgwInfo.of_xml)
-          (Xml.child xml_arg0 "accepterTgwInfo") in
-      let requesterTgwInfo =
-        (Option.map ~f:PeeringTgwInfo.of_xml)
-          (Xml.child xml_arg0 "requesterTgwInfo") in
-      let transitGatewayAttachmentId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayAttachmentId") in
-      make ?tags ?creationTime ?state ?status ?accepterTgwInfo
-        ?requesterTgwInfo ?transitGatewayAttachmentId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
-      let state =
-        field_map json "State" TransitGatewayAttachmentState.of_json in
-      let status = field_map json "Status" PeeringAttachmentStatus.of_json in
-      let accepterTgwInfo =
-        field_map json "AccepterTgwInfo" PeeringTgwInfo.of_json in
-      let requesterTgwInfo =
-        field_map json "RequesterTgwInfo" PeeringTgwInfo.of_json in
-      let transitGatewayAttachmentId =
-        field_map json "TransitGatewayAttachmentId" String_.of_json in
-      make ?tags ?creationTime ?state ?status ?accepterTgwInfo
-        ?requesterTgwInfo ?transitGatewayAttachmentId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the transit gateway peering attachment."]
-module TransitGatewayMulticastDomain =
-  struct
-    type nonrec t =
-      {
-      transitGatewayMulticastDomainId: String_.t option
-        [@ocaml.doc "The ID of the transit gateway multicast domain."];
-      transitGatewayId: String_.t option
-        [@ocaml.doc "The ID of the transit gateway."];
-      transitGatewayMulticastDomainArn: String_.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the transit gateway multicast domain."];
-      ownerId: String_.t option
-        [@ocaml.doc
-          "The ID of the Amazon Web Services account that owns the transit gateway multicast domain."];
-      options: TransitGatewayMulticastDomainOptions.t option
-        [@ocaml.doc "The options for the transit gateway multicast domain."];
-      state: TransitGatewayMulticastDomainState.t option
-        [@ocaml.doc "The state of the transit gateway multicast domain."];
-      creationTime: DateTime.t option
-        [@ocaml.doc
-          "The time the transit gateway multicast domain was created."];
-      tags: TagList.t option
-        [@ocaml.doc "The tags for the transit gateway multicast domain."]}
-    let make ?transitGatewayMulticastDomainId =
-      fun ?transitGatewayId ->
-        fun ?transitGatewayMulticastDomainArn ->
-          fun ?ownerId ->
-            fun ?options ->
-              fun ?state ->
-                fun ?creationTime ->
-                  fun ?tags ->
-                    fun () ->
-                      {
-                        transitGatewayMulticastDomainId;
-                        transitGatewayId;
-                        transitGatewayMulticastDomainArn;
-                        ownerId;
-                        options;
-                        state;
-                        creationTime;
-                        tags
-                      }
-    let to_value x =
-      structure_to_value
-        [("transitGatewayMulticastDomainId",
-           (Option.map x.transitGatewayMulticastDomainId ~f:String_.to_value));
-        ("transitGatewayId",
-          (Option.map x.transitGatewayId ~f:String_.to_value));
-        ("transitGatewayMulticastDomainArn",
-          (Option.map x.transitGatewayMulticastDomainArn ~f:String_.to_value));
-        ("ownerId", (Option.map x.ownerId ~f:String_.to_value));
-        ("options",
-          (Option.map x.options
-             ~f:TransitGatewayMulticastDomainOptions.to_value));
-        ("state",
-          (Option.map x.state ~f:TransitGatewayMulticastDomainState.to_value));
-        ("creationTime", (Option.map x.creationTime ~f:DateTime.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let creationTime =
-        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "creationTime") in
-      let state =
-        (Option.map ~f:TransitGatewayMulticastDomainState.of_xml)
-          (Xml.child xml_arg0 "state") in
-      let options =
-        (Option.map ~f:TransitGatewayMulticastDomainOptions.of_xml)
-          (Xml.child xml_arg0 "options") in
-      let ownerId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ownerId") in
-      let transitGatewayMulticastDomainArn =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayMulticastDomainArn") in
-      let transitGatewayId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayId") in
-      let transitGatewayMulticastDomainId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayMulticastDomainId") in
-      make ?tags ?creationTime ?state ?options ?ownerId
-        ?transitGatewayMulticastDomainArn ?transitGatewayId
-        ?transitGatewayMulticastDomainId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
-      let state =
-        field_map json "State" TransitGatewayMulticastDomainState.of_json in
-      let options =
-        field_map json "Options" TransitGatewayMulticastDomainOptions.of_json in
-      let ownerId = field_map json "OwnerId" String_.of_json in
-      let transitGatewayMulticastDomainArn =
-        field_map json "TransitGatewayMulticastDomainArn" String_.of_json in
-      let transitGatewayId =
-        field_map json "TransitGatewayId" String_.of_json in
-      let transitGatewayMulticastDomainId =
-        field_map json "TransitGatewayMulticastDomainId" String_.of_json in
-      make ?tags ?creationTime ?state ?options ?ownerId
-        ?transitGatewayMulticastDomainArn ?transitGatewayId
-        ?transitGatewayMulticastDomainId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the transit gateway multicast domain."]
-module TransitGatewayMulticastDomainId =
-  struct
-    type nonrec t = string
-    let context_ = "TransitGatewayMulticastDomainId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TransitGatewayMulticastDomainId" j
-    let to_json = simple_to_json to_value
-  end
-module TransitGatewayConnect =
-  struct
-    type nonrec t =
-      {
-      transitGatewayAttachmentId: TransitGatewayAttachmentId.t option
-        [@ocaml.doc "The ID of the Connect attachment."];
-      transportTransitGatewayAttachmentId:
-        TransitGatewayAttachmentId.t option
-        [@ocaml.doc
-          "The ID of the attachment from which the Connect attachment was created."];
-      transitGatewayId: TransitGatewayId.t option
-        [@ocaml.doc "The ID of the transit gateway."];
-      state: TransitGatewayAttachmentState.t option
-        [@ocaml.doc "The state of the attachment."];
-      creationTime: DateTime.t option [@ocaml.doc "The creation time."];
-      options: TransitGatewayConnectOptions.t option
-        [@ocaml.doc "The Connect attachment options."];
-      tags: TagList.t option [@ocaml.doc "The tags for the attachment."]}
-    let make ?transitGatewayAttachmentId =
-      fun ?transportTransitGatewayAttachmentId ->
-        fun ?transitGatewayId ->
-          fun ?state ->
-            fun ?creationTime ->
-              fun ?options ->
-                fun ?tags ->
-                  fun () ->
-                    {
-                      transitGatewayAttachmentId;
-                      transportTransitGatewayAttachmentId;
-                      transitGatewayId;
-                      state;
-                      creationTime;
-                      options;
-                      tags
-                    }
-    let to_value x =
-      structure_to_value
-        [("transitGatewayAttachmentId",
-           (Option.map x.transitGatewayAttachmentId
-              ~f:TransitGatewayAttachmentId.to_value));
-        ("transportTransitGatewayAttachmentId",
-          (Option.map x.transportTransitGatewayAttachmentId
-             ~f:TransitGatewayAttachmentId.to_value));
-        ("transitGatewayId",
-          (Option.map x.transitGatewayId ~f:TransitGatewayId.to_value));
-        ("state",
-          (Option.map x.state ~f:TransitGatewayAttachmentState.to_value));
-        ("creationTime", (Option.map x.creationTime ~f:DateTime.to_value));
-        ("options",
-          (Option.map x.options ~f:TransitGatewayConnectOptions.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let options =
-        (Option.map ~f:TransitGatewayConnectOptions.of_xml)
-          (Xml.child xml_arg0 "options") in
-      let creationTime =
-        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "creationTime") in
-      let state =
-        (Option.map ~f:TransitGatewayAttachmentState.of_xml)
-          (Xml.child xml_arg0 "state") in
-      let transitGatewayId =
-        (Option.map ~f:TransitGatewayId.of_xml)
-          (Xml.child xml_arg0 "transitGatewayId") in
-      let transportTransitGatewayAttachmentId =
-        (Option.map ~f:TransitGatewayAttachmentId.of_xml)
-          (Xml.child xml_arg0 "transportTransitGatewayAttachmentId") in
-      let transitGatewayAttachmentId =
-        (Option.map ~f:TransitGatewayAttachmentId.of_xml)
-          (Xml.child xml_arg0 "transitGatewayAttachmentId") in
-      make ?tags ?options ?creationTime ?state ?transitGatewayId
-        ?transportTransitGatewayAttachmentId ?transitGatewayAttachmentId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let options =
-        field_map json "Options" TransitGatewayConnectOptions.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
-      let state =
-        field_map json "State" TransitGatewayAttachmentState.of_json in
-      let transitGatewayId =
-        field_map json "TransitGatewayId" TransitGatewayId.of_json in
-      let transportTransitGatewayAttachmentId =
-        field_map json "TransportTransitGatewayAttachmentId"
-          TransitGatewayAttachmentId.of_json in
-      let transitGatewayAttachmentId =
-        field_map json "TransitGatewayAttachmentId"
-          TransitGatewayAttachmentId.of_json in
-      make ?tags ?options ?creationTime ?state ?transitGatewayId
-        ?transportTransitGatewayAttachmentId ?transitGatewayAttachmentId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a transit gateway Connect attachment."]
-module TransitGatewayConnectPeer =
-  struct
-    type nonrec t =
-      {
-      transitGatewayAttachmentId: TransitGatewayAttachmentId.t option
-        [@ocaml.doc "The ID of the Connect attachment."];
-      transitGatewayConnectPeerId: TransitGatewayConnectPeerId.t option
-        [@ocaml.doc "The ID of the Connect peer."];
-      state: TransitGatewayConnectPeerState.t option
-        [@ocaml.doc "The state of the Connect peer."];
-      creationTime: DateTime.t option [@ocaml.doc "The creation time."];
-      connectPeerConfiguration:
-        TransitGatewayConnectPeerConfiguration.t option
-        [@ocaml.doc "The Connect peer details."];
-      tags: TagList.t option [@ocaml.doc "The tags for the Connect peer."]}
-    let make ?transitGatewayAttachmentId =
-      fun ?transitGatewayConnectPeerId ->
-        fun ?state ->
-          fun ?creationTime ->
-            fun ?connectPeerConfiguration ->
-              fun ?tags ->
-                fun () ->
-                  {
-                    transitGatewayAttachmentId;
-                    transitGatewayConnectPeerId;
-                    state;
-                    creationTime;
-                    connectPeerConfiguration;
-                    tags
-                  }
-    let to_value x =
-      structure_to_value
-        [("transitGatewayAttachmentId",
-           (Option.map x.transitGatewayAttachmentId
-              ~f:TransitGatewayAttachmentId.to_value));
-        ("transitGatewayConnectPeerId",
-          (Option.map x.transitGatewayConnectPeerId
-             ~f:TransitGatewayConnectPeerId.to_value));
-        ("state",
-          (Option.map x.state ~f:TransitGatewayConnectPeerState.to_value));
-        ("creationTime", (Option.map x.creationTime ~f:DateTime.to_value));
-        ("connectPeerConfiguration",
-          (Option.map x.connectPeerConfiguration
-             ~f:TransitGatewayConnectPeerConfiguration.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let connectPeerConfiguration =
-        (Option.map ~f:TransitGatewayConnectPeerConfiguration.of_xml)
-          (Xml.child xml_arg0 "connectPeerConfiguration") in
-      let creationTime =
-        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "creationTime") in
-      let state =
-        (Option.map ~f:TransitGatewayConnectPeerState.of_xml)
-          (Xml.child xml_arg0 "state") in
-      let transitGatewayConnectPeerId =
-        (Option.map ~f:TransitGatewayConnectPeerId.of_xml)
-          (Xml.child xml_arg0 "transitGatewayConnectPeerId") in
-      let transitGatewayAttachmentId =
-        (Option.map ~f:TransitGatewayAttachmentId.of_xml)
-          (Xml.child xml_arg0 "transitGatewayAttachmentId") in
-      make ?tags ?connectPeerConfiguration ?creationTime ?state
-        ?transitGatewayConnectPeerId ?transitGatewayAttachmentId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let connectPeerConfiguration =
-        field_map json "ConnectPeerConfiguration"
-          TransitGatewayConnectPeerConfiguration.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
-      let state =
-        field_map json "State" TransitGatewayConnectPeerState.of_json in
-      let transitGatewayConnectPeerId =
-        field_map json "TransitGatewayConnectPeerId"
-          TransitGatewayConnectPeerId.of_json in
-      let transitGatewayAttachmentId =
-        field_map json "TransitGatewayAttachmentId"
-          TransitGatewayAttachmentId.of_json in
-      make ?tags ?connectPeerConfiguration ?creationTime ?state
-        ?transitGatewayConnectPeerId ?transitGatewayAttachmentId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a transit gateway Connect peer."]
-module TransitGatewayAttachment =
-  struct
-    type nonrec t =
-      {
-      transitGatewayAttachmentId: String_.t option
-        [@ocaml.doc "The ID of the attachment."];
-      transitGatewayId: String_.t option
-        [@ocaml.doc "The ID of the transit gateway."];
-      transitGatewayOwnerId: String_.t option
-        [@ocaml.doc
-          "The ID of the Amazon Web Services account that owns the transit gateway."];
-      resourceOwnerId: String_.t option
-        [@ocaml.doc
-          "The ID of the Amazon Web Services account that owns the resource."];
-      resourceType: TransitGatewayAttachmentResourceType.t option
-        [@ocaml.doc
-          "The resource type. Note that the tgw-peering resource type has been deprecated."];
-      resourceId: String_.t option [@ocaml.doc "The ID of the resource."];
-      state: TransitGatewayAttachmentState.t option
-        [@ocaml.doc
-          "The attachment state. Note that the initiating state has been deprecated."];
-      association: TransitGatewayAttachmentAssociation.t option
-        [@ocaml.doc "The association."];
-      creationTime: DateTime.t option [@ocaml.doc "The creation time."];
-      tags: TagList.t option [@ocaml.doc "The tags for the attachment."]}
-    let make ?transitGatewayAttachmentId =
-      fun ?transitGatewayId ->
-        fun ?transitGatewayOwnerId ->
-          fun ?resourceOwnerId ->
-            fun ?resourceType ->
-              fun ?resourceId ->
-                fun ?state ->
-                  fun ?association ->
-                    fun ?creationTime ->
-                      fun ?tags ->
-                        fun () ->
-                          {
-                            transitGatewayAttachmentId;
-                            transitGatewayId;
-                            transitGatewayOwnerId;
-                            resourceOwnerId;
-                            resourceType;
-                            resourceId;
-                            state;
-                            association;
-                            creationTime;
-                            tags
-                          }
-    let to_value x =
-      structure_to_value
-        [("transitGatewayAttachmentId",
-           (Option.map x.transitGatewayAttachmentId ~f:String_.to_value));
-        ("transitGatewayId",
-          (Option.map x.transitGatewayId ~f:String_.to_value));
-        ("transitGatewayOwnerId",
-          (Option.map x.transitGatewayOwnerId ~f:String_.to_value));
-        ("resourceOwnerId",
-          (Option.map x.resourceOwnerId ~f:String_.to_value));
-        ("resourceType",
-          (Option.map x.resourceType
-             ~f:TransitGatewayAttachmentResourceType.to_value));
-        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
-        ("state",
-          (Option.map x.state ~f:TransitGatewayAttachmentState.to_value));
-        ("association",
-          (Option.map x.association
-             ~f:TransitGatewayAttachmentAssociation.to_value));
-        ("creationTime", (Option.map x.creationTime ~f:DateTime.to_value));
-        ("tagSet", (Option.map x.tags ~f:TagList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagSet") in
-      let creationTime =
-        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "creationTime") in
-      let association =
-        (Option.map ~f:TransitGatewayAttachmentAssociation.of_xml)
-          (Xml.child xml_arg0 "association") in
-      let state =
-        (Option.map ~f:TransitGatewayAttachmentState.of_xml)
-          (Xml.child xml_arg0 "state") in
-      let resourceId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
-      let resourceType =
-        (Option.map ~f:TransitGatewayAttachmentResourceType.of_xml)
-          (Xml.child xml_arg0 "resourceType") in
-      let resourceOwnerId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceOwnerId") in
-      let transitGatewayOwnerId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayOwnerId") in
-      let transitGatewayId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayId") in
-      let transitGatewayAttachmentId =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "transitGatewayAttachmentId") in
-      make ?tags ?creationTime ?association ?state ?resourceId ?resourceType
-        ?resourceOwnerId ?transitGatewayOwnerId ?transitGatewayId
-        ?transitGatewayAttachmentId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
-      let association =
-        field_map json "Association"
-          TransitGatewayAttachmentAssociation.of_json in
-      let state =
-        field_map json "State" TransitGatewayAttachmentState.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
-      let resourceType =
-        field_map json "ResourceType"
-          TransitGatewayAttachmentResourceType.of_json in
-      let resourceOwnerId = field_map json "ResourceOwnerId" String_.of_json in
-      let transitGatewayOwnerId =
-        field_map json "TransitGatewayOwnerId" String_.of_json in
-      let transitGatewayId =
-        field_map json "TransitGatewayId" String_.of_json in
-      let transitGatewayAttachmentId =
-        field_map json "TransitGatewayAttachmentId" String_.of_json in
-      make ?tags ?creationTime ?association ?state ?resourceId ?resourceType
-        ?resourceOwnerId ?transitGatewayOwnerId ?transitGatewayId
-        ?transitGatewayAttachmentId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes an attachment between a resource and a transit gateway."]
+  end[@@ocaml.doc "Describes a virtual private gateway."]

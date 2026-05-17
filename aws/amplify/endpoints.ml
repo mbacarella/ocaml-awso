@@ -190,7 +190,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                   x.nextToken;
                Option.map
-                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 ~f:(fun v ->
+                       ("maxResults", (MaxResultsForListApps.to_header v)))
                  x.maxResults])
       | ListArtifacts ->
           Uri.add_query_params'
@@ -329,6 +330,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("repository", (Repository.to_value x)));
                       Option.map req.CreateAppRequest.platform
                         ~f:(fun x -> ("platform", (Platform.to_value x)));
+                      Option.map req.CreateAppRequest.computeRoleArn
+                        ~f:(fun x ->
+                              ("computeRoleArn", (ComputeRoleArn.to_value x)));
                       Option.map req.CreateAppRequest.iamServiceRoleArn
                         ~f:(fun x ->
                               ("iamServiceRoleArn",
@@ -383,7 +387,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateAppRequest.autoBranchCreationConfig
                         ~f:(fun x ->
                               ("autoBranchCreationConfig",
-                                (AutoBranchCreationConfig.to_value x)))])
+                                (AutoBranchCreationConfig.to_value x)));
+                      Option.map req.CreateAppRequest.jobConfig
+                        ~f:(fun x -> ("jobConfig", (JobConfig.to_value x)));
+                      Option.map req.CreateAppRequest.cacheConfig
+                        ~f:(fun x ->
+                              ("cacheConfig", (CacheConfig.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -447,6 +456,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("enableAutoBuild",
                                 (EnableAutoBuild.to_value x)));
+                      Option.map req.CreateBranchRequest.enableSkewProtection
+                        ~f:(fun x ->
+                              ("enableSkewProtection",
+                                (EnableSkewProtection.to_value x)));
                       Option.map req.CreateBranchRequest.environmentVariables
                         ~f:(fun x ->
                               ("environmentVariables",
@@ -487,7 +500,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateBranchRequest.backendEnvironmentArn
                         ~f:(fun x ->
                               ("backendEnvironmentArn",
-                                (BackendEnvironmentArn.to_value x)))])
+                                (BackendEnvironmentArn.to_value x)));
+                      Option.map req.CreateBranchRequest.backend
+                        ~f:(fun x -> ("backend", (Backend.to_value x)));
+                      Option.map req.CreateBranchRequest.computeRoleArn
+                        ~f:(fun x ->
+                              ("computeRoleArn", (ComputeRoleArn.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -544,7 +562,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateDomainAssociationRequest.autoSubDomainIAMRole
                         ~f:(fun x ->
                               ("autoSubDomainIAMRole",
-                                (AutoSubDomainIAMRole.to_value x)))])
+                                (AutoSubDomainIAMRole.to_value x)));
+                      Option.map
+                        req.CreateDomainAssociationRequest.certificateSettings
+                        ~f:(fun x ->
+                              ("certificateSettings",
+                                (CertificateSettings.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -664,7 +687,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.StartDeploymentRequest.jobId
                          ~f:(fun x -> ("jobId", (JobId.to_value x)));
                       Option.map req.StartDeploymentRequest.sourceUrl
-                        ~f:(fun x -> ("sourceUrl", (SourceUrl.to_value x)))])
+                        ~f:(fun x -> ("sourceUrl", (SourceUrl.to_value x)));
+                      Option.map req.StartDeploymentRequest.sourceUrlType
+                        ~f:(fun x ->
+                              ("sourceUrlType", (SourceUrlType.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -739,6 +765,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("description", (Description.to_value x)));
                       Option.map req.UpdateAppRequest.platform
                         ~f:(fun x -> ("platform", (Platform.to_value x)));
+                      Option.map req.UpdateAppRequest.computeRoleArn
+                        ~f:(fun x ->
+                              ("computeRoleArn", (ComputeRoleArn.to_value x)));
                       Option.map req.UpdateAppRequest.iamServiceRoleArn
                         ~f:(fun x ->
                               ("iamServiceRoleArn",
@@ -793,7 +822,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("oauthToken", (OauthToken.to_value x)));
                       Option.map req.UpdateAppRequest.accessToken
                         ~f:(fun x ->
-                              ("accessToken", (AccessToken.to_value x)))])
+                              ("accessToken", (AccessToken.to_value x)));
+                      Option.map req.UpdateAppRequest.jobConfig
+                        ~f:(fun x -> ("jobConfig", (JobConfig.to_value x)));
+                      Option.map req.UpdateAppRequest.cacheConfig
+                        ~f:(fun x ->
+                              ("cacheConfig", (CacheConfig.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -825,6 +859,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("enableAutoBuild",
                                 (EnableAutoBuild.to_value x)));
+                      Option.map req.UpdateBranchRequest.enableSkewProtection
+                        ~f:(fun x ->
+                              ("enableSkewProtection",
+                                (EnableSkewProtection.to_value x)));
                       Option.map req.UpdateBranchRequest.environmentVariables
                         ~f:(fun x ->
                               ("environmentVariables",
@@ -863,7 +901,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.UpdateBranchRequest.backendEnvironmentArn
                         ~f:(fun x ->
                               ("backendEnvironmentArn",
-                                (BackendEnvironmentArn.to_value x)))])
+                                (BackendEnvironmentArn.to_value x)));
+                      Option.map req.UpdateBranchRequest.backend
+                        ~f:(fun x -> ("backend", (Backend.to_value x)));
+                      Option.map req.UpdateBranchRequest.computeRoleArn
+                        ~f:(fun x ->
+                              ("computeRoleArn", (ComputeRoleArn.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -899,7 +942,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.UpdateDomainAssociationRequest.autoSubDomainIAMRole
                         ~f:(fun x ->
                               ("autoSubDomainIAMRole",
-                                (AutoSubDomainIAMRole.to_value x)))])
+                                (AutoSubDomainIAMRole.to_value x)));
+                      Option.map
+                        req.UpdateDomainAssociationRequest.certificateSettings
+                        ~f:(fun x ->
+                              ("certificateSettings",
+                                (CertificateSettings.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in

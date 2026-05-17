@@ -172,9 +172,9 @@ module S3Location =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "bucket") in
       make ~prefix ~bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefix = field_map_exn json "prefix" S3Prefix.of_json in
-      let bucket = field_map_exn json "bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let prefix = field_map_exn json__ "prefix" S3Prefix.of_json in
+      let bucket = field_map_exn json__ "bucket" S3Bucket.of_json in
       make ~prefix ~bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -275,17 +275,17 @@ module ReportDefinition =
       make ?lastUpdatedAt ?createdAt ?destinationS3Location ?format
         ?reportFrequency ?reportDescription ?reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdatedAt = field_map json "lastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
+    let of_json json__ =
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let destinationS3Location =
-        field_map json "destinationS3Location" S3Location.of_json in
-      let format = field_map json "format" Format_.of_json in
+        field_map json__ "destinationS3Location" S3Location.of_json in
+      let format = field_map json__ "format" Format_.of_json in
       let reportFrequency =
-        field_map json "reportFrequency" ReportFrequency.of_json in
+        field_map json__ "reportFrequency" ReportFrequency.of_json in
       let reportDescription =
-        field_map json "reportDescription" ReportDescription.of_json in
-      let reportId = field_map json "reportId" ReportId.of_json in
+        field_map json__ "reportDescription" ReportDescription.of_json in
+      let reportId = field_map json__ "reportId" ReportId.of_json in
       make ?lastUpdatedAt ?createdAt ?destinationS3Location ?format
         ?reportFrequency ?reportDescription ?reportId ()
     let to_json v = composed_to_json to_value v
@@ -356,8 +356,8 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You do not have permission to perform this action."]
@@ -375,8 +375,8 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal server error occurred. Retry your request."]
@@ -394,8 +394,8 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -414,8 +414,8 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input fails to satisfy the constraints for the API."]
@@ -433,8 +433,8 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Your request exceeds one or more of the service quotas."]
@@ -442,6 +442,9 @@ module ReportDefinitionList =
   struct
     type nonrec t = ReportDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReportDefinition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -548,10 +551,10 @@ module SourceS3Location =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "bucket") in
       make ?region ~key ~bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let region = field_map json "region" S3BucketRegion.of_json in
-      let key = field_map_exn json "key" S3Key.of_json in
-      let bucket = field_map_exn json "bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let region = field_map json__ "region" S3BucketRegion.of_json in
+      let key = field_map_exn json__ "key" S3Key.of_json in
+      let bucket = field_map_exn json__ "bucket" S3Bucket.of_json in
       make ?region ~key ~bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -625,8 +628,8 @@ module UpdateReportDefinitionResult =
         (Option.map ~f:ReportId.of_xml) (Xml.child xml_arg0 "reportId") in
       make ?reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reportId = field_map json "reportId" ReportId.of_json in
+    let of_json json__ =
+      let reportId = field_map json__ "reportId" ReportId.of_json in
       make ?reportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -688,15 +691,15 @@ module UpdateReportDefinitionRequest =
       make ~destinationS3Location ~format ~reportFrequency ~reportDescription
         ~reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationS3Location =
-        field_map_exn json "destinationS3Location" S3Location.of_json in
-      let format = field_map_exn json "format" Format_.of_json in
+        field_map_exn json__ "destinationS3Location" S3Location.of_json in
+      let format = field_map_exn json__ "format" Format_.of_json in
       let reportFrequency =
-        field_map_exn json "reportFrequency" ReportFrequency.of_json in
+        field_map_exn json__ "reportFrequency" ReportFrequency.of_json in
       let reportDescription =
-        field_map_exn json "reportDescription" ReportDescription.of_json in
-      let reportId = field_map_exn json "reportId" ReportId.of_json in
+        field_map_exn json__ "reportDescription" ReportDescription.of_json in
+      let reportId = field_map_exn json__ "reportId" ReportId.of_json in
       make ~destinationS3Location ~format ~reportFrequency ~reportDescription
         ~reportId ()
     let to_json v = composed_to_json to_value v
@@ -782,8 +785,8 @@ module PutReportDefinitionResult =
         (Option.map ~f:ReportId.of_xml) (Xml.child xml_arg0 "reportId") in
       make ?reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reportId = field_map json "reportId" ReportId.of_json in
+    let of_json json__ =
+      let reportId = field_map json__ "reportId" ReportId.of_json in
       make ?reportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -846,15 +849,15 @@ module PutReportDefinitionRequest =
       make ~destinationS3Location ~format ~reportFrequency ~reportDescription
         ~reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationS3Location =
-        field_map_exn json "destinationS3Location" S3Location.of_json in
-      let format = field_map_exn json "format" Format_.of_json in
+        field_map_exn json__ "destinationS3Location" S3Location.of_json in
+      let format = field_map_exn json__ "format" Format_.of_json in
       let reportFrequency =
-        field_map_exn json "reportFrequency" ReportFrequency.of_json in
+        field_map_exn json__ "reportFrequency" ReportFrequency.of_json in
       let reportDescription =
-        field_map_exn json "reportDescription" ReportDescription.of_json in
-      let reportId = field_map_exn json "reportId" ReportId.of_json in
+        field_map_exn json__ "reportDescription" ReportDescription.of_json in
+      let reportId = field_map_exn json__ "reportId" ReportId.of_json in
       make ~destinationS3Location ~format ~reportFrequency ~reportDescription
         ~reportId ()
     let to_json v = composed_to_json to_value v
@@ -939,10 +942,10 @@ module ListReportDefinitionsResult =
           (Xml.child xml_arg0 "reportDefinitions") in
       make ?nextToken ?reportDefinitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       let reportDefinitions =
-        field_map json "reportDefinitions" ReportDefinitionList.of_json in
+        field_map json__ "reportDefinitions" ReportDefinitionList.of_json in
       make ?nextToken ?reportDefinitions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -970,9 +973,9 @@ module ListReportDefinitionsRequest =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let nextToken = field_map json "nextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let nextToken = field_map json__ "nextToken" Token.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -981,15 +984,14 @@ module ImportApplicationUsageResult =
   struct
     type nonrec t =
       {
-      importId: ImportId.t [@ocaml.doc "ID of the import request."]}
+      importId: ImportId.t option [@ocaml.doc "ID of the import request."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ImportApplicationUsageResult"
-    let make ~importId = fun () -> { importId }
+    let make ?importId = fun () -> { importId }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1040,16 +1042,16 @@ module ImportApplicationUsageResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("importId", (Some (ImportId.to_value x.importId)))]
+        [("importId", (Option.map x.importId ~f:ImportId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let importId =
-        ImportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "importId") in
-      make ~importId ()
+        (Option.map ~f:ImportId.of_xml) (Xml.child xml_arg0 "importId") in
+      make ?importId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let importId = field_map_exn json "importId" ImportId.of_json in
-      make ~importId ()
+    let of_json json__ =
+      let importId = field_map json__ "importId" ImportId.of_json in
+      make ?importId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Ingests application usage data from Amazon Simple Storage Service (Amazon S3). The data must already exist in the S3 location. As part of the action, AWS Application Cost Profiler copies the object from your S3 bucket to an S3 bucket owned by Amazon for processing asynchronously."]
@@ -1073,9 +1075,9 @@ module ImportApplicationUsageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "sourceS3Location") in
       make ~sourceS3Location ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceS3Location =
-        field_map_exn json "sourceS3Location" SourceS3Location.of_json in
+        field_map_exn json__ "sourceS3Location" SourceS3Location.of_json in
       make ~sourceS3Location ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1084,19 +1086,19 @@ module GetReportDefinitionResult =
   struct
     type nonrec t =
       {
-      reportId: ReportId.t [@ocaml.doc "ID of the report retrieved."];
-      reportDescription: ReportDescription.t
+      reportId: ReportId.t option [@ocaml.doc "ID of the report retrieved."];
+      reportDescription: ReportDescription.t option
         [@ocaml.doc "Description of the report."];
-      reportFrequency: ReportFrequency.t
+      reportFrequency: ReportFrequency.t option
         [@ocaml.doc "Cadence used to generate the report."];
-      format: Format_.t [@ocaml.doc "Format of the generated report."];
-      destinationS3Location: S3Location.t
+      format: Format_.t option [@ocaml.doc "Format of the generated report."];
+      destinationS3Location: S3Location.t option
         [@ocaml.doc
           "Amazon Simple Storage Service (Amazon S3) location where the report is uploaded."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "Timestamp (milliseconds) when this report definition was created."];
-      lastUpdated: Timestamp.t
+      lastUpdated: Timestamp.t option
         [@ocaml.doc
           "Timestamp (milliseconds) when this report definition was last updated."]}
     type nonrec error =
@@ -1105,14 +1107,13 @@ module GetReportDefinitionResult =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetReportDefinitionResult"
-    let make ~reportId =
-      fun ~reportDescription ->
-        fun ~reportFrequency ->
-          fun ~format ->
-            fun ~destinationS3Location ->
-              fun ~createdAt ->
-                fun ~lastUpdated ->
+    let make ?reportId =
+      fun ?reportDescription ->
+        fun ?reportFrequency ->
+          fun ?format ->
+            fun ?destinationS3Location ->
+              fun ?createdAt ->
+                fun ?lastUpdated ->
                   fun () ->
                     {
                       reportId;
@@ -1173,53 +1174,51 @@ module GetReportDefinitionResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("reportId", (Some (ReportId.to_value x.reportId)));
+        [("reportId", (Option.map x.reportId ~f:ReportId.to_value));
         ("reportDescription",
-          (Some (ReportDescription.to_value x.reportDescription)));
+          (Option.map x.reportDescription ~f:ReportDescription.to_value));
         ("reportFrequency",
-          (Some (ReportFrequency.to_value x.reportFrequency)));
-        ("format", (Some (Format_.to_value x.format)));
+          (Option.map x.reportFrequency ~f:ReportFrequency.to_value));
+        ("format", (Option.map x.format ~f:Format_.to_value));
         ("destinationS3Location",
-          (Some (S3Location.to_value x.destinationS3Location)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("lastUpdated", (Some (Timestamp.to_value x.lastUpdated)))]
+          (Option.map x.destinationS3Location ~f:S3Location.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("lastUpdated", (Option.map x.lastUpdated ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let lastUpdated =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastUpdated") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastUpdated") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
       let destinationS3Location =
-        S3Location.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "destinationS3Location") in
+        (Option.map ~f:S3Location.of_xml)
+          (Xml.child xml_arg0 "destinationS3Location") in
       let format =
-        Format_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "format") in
+        (Option.map ~f:Format_.of_xml) (Xml.child xml_arg0 "format") in
       let reportFrequency =
-        ReportFrequency.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "reportFrequency") in
+        (Option.map ~f:ReportFrequency.of_xml)
+          (Xml.child xml_arg0 "reportFrequency") in
       let reportDescription =
-        ReportDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "reportDescription") in
+        (Option.map ~f:ReportDescription.of_xml)
+          (Xml.child xml_arg0 "reportDescription") in
       let reportId =
-        ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "reportId") in
-      make ~lastUpdated ~createdAt ~destinationS3Location ~format
-        ~reportFrequency ~reportDescription ~reportId ()
+        (Option.map ~f:ReportId.of_xml) (Xml.child xml_arg0 "reportId") in
+      make ?lastUpdated ?createdAt ?destinationS3Location ?format
+        ?reportFrequency ?reportDescription ?reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdated = field_map_exn json "lastUpdated" Timestamp.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
+    let of_json json__ =
+      let lastUpdated = field_map json__ "lastUpdated" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let destinationS3Location =
-        field_map_exn json "destinationS3Location" S3Location.of_json in
-      let format = field_map_exn json "format" Format_.of_json in
+        field_map json__ "destinationS3Location" S3Location.of_json in
+      let format = field_map json__ "format" Format_.of_json in
       let reportFrequency =
-        field_map_exn json "reportFrequency" ReportFrequency.of_json in
+        field_map json__ "reportFrequency" ReportFrequency.of_json in
       let reportDescription =
-        field_map_exn json "reportDescription" ReportDescription.of_json in
-      let reportId = field_map_exn json "reportId" ReportId.of_json in
-      make ~lastUpdated ~createdAt ~destinationS3Location ~format
-        ~reportFrequency ~reportDescription ~reportId ()
+        field_map json__ "reportDescription" ReportDescription.of_json in
+      let reportId = field_map json__ "reportId" ReportId.of_json in
+      make ?lastUpdated ?createdAt ?destinationS3Location ?format
+        ?reportFrequency ?reportDescription ?reportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the definition of a report already configured in AWS Application Cost Profiler."]
@@ -1239,8 +1238,8 @@ module GetReportDefinitionRequest =
         ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "reportId") in
       make ~reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reportId = field_map_exn json "reportId" ReportId.of_json in
+    let of_json json__ =
+      let reportId = field_map_exn json__ "reportId" ReportId.of_json in
       make ~reportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1315,8 +1314,8 @@ module DeleteReportDefinitionResult =
         (Option.map ~f:ReportId.of_xml) (Xml.child xml_arg0 "reportId") in
       make ?reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reportId = field_map json "reportId" ReportId.of_json in
+    let of_json json__ =
+      let reportId = field_map json__ "reportId" ReportId.of_json in
       make ?reportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1338,8 +1337,8 @@ module DeleteReportDefinitionRequest =
         ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "reportId") in
       make ~reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reportId = field_map_exn json "reportId" ReportId.of_json in
+    let of_json json__ =
+      let reportId = field_map_exn json__ "reportId" ReportId.of_json in
       make ~reportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

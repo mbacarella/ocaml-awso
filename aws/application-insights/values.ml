@@ -119,9 +119,14 @@ module Tier =
       | SAP_HANA_MULTI_NODE 
       | SAP_HANA_SINGLE_NODE 
       | SAP_HANA_HIGH_AVAILABILITY 
+      | SAP_ASE_SINGLE_NODE 
+      | SAP_ASE_HIGH_AVAILABILITY 
       | SQL_SERVER_FAILOVER_CLUSTER_INSTANCE 
       | SHAREPOINT 
       | ACTIVE_DIRECTORY 
+      | SAP_NETWEAVER_STANDARD 
+      | SAP_NETWEAVER_DISTRIBUTED 
+      | SAP_NETWEAVER_HIGH_AVAILABILITY 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -142,10 +147,15 @@ module Tier =
       | SAP_HANA_MULTI_NODE -> "SAP_HANA_MULTI_NODE"
       | SAP_HANA_SINGLE_NODE -> "SAP_HANA_SINGLE_NODE"
       | SAP_HANA_HIGH_AVAILABILITY -> "SAP_HANA_HIGH_AVAILABILITY"
+      | SAP_ASE_SINGLE_NODE -> "SAP_ASE_SINGLE_NODE"
+      | SAP_ASE_HIGH_AVAILABILITY -> "SAP_ASE_HIGH_AVAILABILITY"
       | SQL_SERVER_FAILOVER_CLUSTER_INSTANCE ->
           "SQL_SERVER_FAILOVER_CLUSTER_INSTANCE"
       | SHAREPOINT -> "SHAREPOINT"
       | ACTIVE_DIRECTORY -> "ACTIVE_DIRECTORY"
+      | SAP_NETWEAVER_STANDARD -> "SAP_NETWEAVER_STANDARD"
+      | SAP_NETWEAVER_DISTRIBUTED -> "SAP_NETWEAVER_DISTRIBUTED"
+      | SAP_NETWEAVER_HIGH_AVAILABILITY -> "SAP_NETWEAVER_HIGH_AVAILABILITY"
       | Non_static_id s -> s
     let of_string =
       function
@@ -165,10 +175,15 @@ module Tier =
       | "SAP_HANA_MULTI_NODE" -> SAP_HANA_MULTI_NODE
       | "SAP_HANA_SINGLE_NODE" -> SAP_HANA_SINGLE_NODE
       | "SAP_HANA_HIGH_AVAILABILITY" -> SAP_HANA_HIGH_AVAILABILITY
+      | "SAP_ASE_SINGLE_NODE" -> SAP_ASE_SINGLE_NODE
+      | "SAP_ASE_HIGH_AVAILABILITY" -> SAP_ASE_HIGH_AVAILABILITY
       | "SQL_SERVER_FAILOVER_CLUSTER_INSTANCE" ->
           SQL_SERVER_FAILOVER_CLUSTER_INSTANCE
       | "SHAREPOINT" -> SHAREPOINT
       | "ACTIVE_DIRECTORY" -> ACTIVE_DIRECTORY
+      | "SAP_NETWEAVER_STANDARD" -> SAP_NETWEAVER_STANDARD
+      | "SAP_NETWEAVER_DISTRIBUTED" -> SAP_NETWEAVER_DISTRIBUTED
+      | "SAP_NETWEAVER_HIGH_AVAILABILITY" -> SAP_NETWEAVER_HIGH_AVAILABILITY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -199,6 +214,8 @@ module WorkloadMetaData =
                     (fun x -> (MetaDataValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -880,6 +897,116 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
+module ComponentName =
+  struct
+    type nonrec t = string
+    let context_ = "ComponentName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1011) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(?:^[\\d\\w\\-_\\.+]*$)|(?:^arn:aws(-\\w+)*:[\\w\\d-]+:([\\w\\d-]*)?:[\\w\\d_-]*([:/].+)*$)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ComponentName" j
+    let to_json = simple_to_json to_value
+  end
+module MissingWorkloadConfig =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module Remarks =
+  struct
+    type nonrec t = string
+    let context_ = "Remarks"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Remarks" j
+    let to_json = simple_to_json to_value
+  end
+module WorkloadId =
+  struct
+    type nonrec t = string
+    let context_ = "WorkloadId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:38) >>=
+             (fun () ->
+                (check_string_max i ~max:38) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"w-[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkloadId" j
+    let to_json = simple_to_json to_value
+  end
+module WorkloadName =
+  struct
+    type nonrec t = string
+    let context_ = "WorkloadName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9\\.\\-_]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkloadName" j
+    let to_json = simple_to_json to_value
+  end
+module AccountId =
+  struct
+    type nonrec t = string
+    let context_ = "AccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\d{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccountId" j
+    let to_json = simple_to_json to_value
+  end
 module AffectedResource =
   struct
     type nonrec t = string
@@ -915,6 +1042,8 @@ module Feedback =
                     (fun x -> (FeedbackValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -982,6 +1111,34 @@ module RecurringCount =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
+module ResolutionMethod =
+  struct
+    type nonrec t =
+      | MANUAL 
+      | AUTOMATIC 
+      | UNRESOLVED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MANUAL -> "MANUAL"
+      | AUTOMATIC -> "AUTOMATIC"
+      | UNRESOLVED -> "UNRESOLVED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MANUAL" -> MANUAL
+      | "AUTOMATIC" -> AUTOMATIC
+      | "UNRESOLVED" -> UNRESOLVED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ResolutionMethod" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResolutionMethod" j)
+    let to_json = simple_to_json to_value
+  end
 module ResourceGroupName =
   struct
     type nonrec t = string
@@ -1005,6 +1162,7 @@ module ResourceGroupName =
 module SeverityLevel =
   struct
     type nonrec t =
+      | Informative 
       | Low 
       | Medium 
       | High 
@@ -1012,12 +1170,14 @@ module SeverityLevel =
     let make i = i
     let to_string =
       function
+      | Informative -> "Informative"
       | Low -> "Low"
       | Medium -> "Medium"
       | High -> "High"
       | Non_static_id s -> s
     let of_string =
       function
+      | "Informative" -> Informative
       | "Low" -> Low
       | "Medium" -> Medium
       | "High" -> High
@@ -1030,6 +1190,19 @@ module SeverityLevel =
     let of_json j = of_string (string_of_json ~kind:"SeverityLevel" j)
     let to_json = simple_to_json to_value
   end
+module ShortName =
+  struct
+    type nonrec t = string
+    let context_ = "ShortName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ShortName" j
+    let to_json = simple_to_json to_value
+  end
 module Status =
   struct
     type nonrec t =
@@ -1037,6 +1210,7 @@ module Status =
       | RESOLVED 
       | PENDING 
       | RECURRING 
+      | RECOVERING 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1045,6 +1219,7 @@ module Status =
       | RESOLVED -> "RESOLVED"
       | PENDING -> "PENDING"
       | RECURRING -> "RECURRING"
+      | RECOVERING -> "RECOVERING"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1052,6 +1227,7 @@ module Status =
       | "RESOLVED" -> RESOLVED
       | "PENDING" -> PENDING
       | "RECURRING" -> RECURRING
+      | "RECOVERING" -> RECOVERING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1072,6 +1248,31 @@ module Title =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Title" j
+    let to_json = simple_to_json to_value
+  end
+module Visibility =
+  struct
+    type nonrec t =
+      | IGNORED 
+      | VISIBLE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IGNORED -> "IGNORED"
+      | VISIBLE -> "VISIBLE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IGNORED" -> IGNORED
+      | "VISIBLE" -> VISIBLE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Visibility" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Visibility" j)
     let to_json = simple_to_json to_value
   end
 module LogPatternName =
@@ -1264,28 +1465,6 @@ module ConfigurationEventTime =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
-module ComponentName =
-  struct
-    type nonrec t = string
-    let context_ = "ComponentName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1011) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"(?:^[\\d\\w\\-_\\.+]*$)|(?:^arn:aws(-\\w+)*:[\\w\\d-]+:([\\w\\d-]*)?:[\\w\\d_-]*([:/].+)*$)")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ComponentName" j
-    let to_json = simple_to_json to_value
-  end
 module DetectedWorkload =
   struct
     type nonrec t = (Tier.t * WorkloadMetaData.t) list
@@ -1310,6 +1489,8 @@ module DetectedWorkload =
                        (WorkloadMetaData.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1355,19 +1536,6 @@ module OsType =
     let of_json j = of_string (string_of_json ~kind:"OsType" j)
     let to_json = simple_to_json to_value
   end
-module Remarks =
-  struct
-    type nonrec t = string
-    let context_ = "Remarks"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Remarks" j
-    let to_json = simple_to_json to_value
-  end
 module ResourceType =
   struct
     type nonrec t = string
@@ -1386,6 +1554,19 @@ module ResourceType =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ResourceType" j
+    let to_json = simple_to_json to_value
+  end
+module AttachMissingPermission =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
 module AutoConfigEnabled =
@@ -1487,6 +1668,28 @@ module OpsItemSNSTopicArn =
     let of_json j = string_of_json ~kind:"OpsItemSNSTopicArn" j
     let to_json = simple_to_json to_value
   end
+module SNSNotificationArn =
+  struct
+    type nonrec t = string
+    let context_ = "SNSNotificationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:300) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws(-\\w+)*:[\\w\\d-]+:([\\w\\d-]*)?:[\\w\\d_-]*([:/].+)*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SNSNotificationArn" j
+    let to_json = simple_to_json to_value
+  end
 module Observation =
   struct
     type nonrec t =
@@ -1528,18 +1731,18 @@ module Observation =
           "The detail type of the CloudWatch Event-based observation, for example, EC2 Instance State-change Notification."];
       healthEventArn: HealthEventArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Health Event-based observation."];
+          "The Amazon Resource Name (ARN) of the Health Event-based observation."];
       healthService: HealthService.t option
         [@ocaml.doc
-          "The service to which the AWS Health Event belongs, such as EC2."];
+          "The service to which the Health Event belongs, such as EC2."];
       healthEventTypeCode: HealthEventTypeCode.t option
         [@ocaml.doc
-          "The type of the AWS Health event, for example, AWS_EC2_POWER_CONNECTIVITY_ISSUE."];
+          "The type of the Health event, for example, AWS_EC2_POWER_CONNECTIVITY_ISSUE."];
       healthEventTypeCategory: HealthEventTypeCategory.t option
-        [@ocaml.doc "The category of the AWS Health event, such as issue."];
+        [@ocaml.doc "The category of the Health event, such as issue."];
       healthEventDescription: HealthEventDescription.t option
         [@ocaml.doc
-          "The description of the AWS Health event provided by the service, such as Amazon EC2."];
+          "The description of the Health event provided by the service, such as Amazon EC2."];
       codeDeployDeploymentId: CodeDeployDeploymentId.t option
         [@ocaml.doc
           "The deployment ID of the CodeDeploy-based observation related to the detected problem."];
@@ -1943,81 +2146,83 @@ module Observation =
         ?metricNamespace ?logFilter ?logText ?lineTime ?logGroup ?sourceARN
         ?sourceType ?endTime ?startTime ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let xRayNodeType = field_map json "XRayNodeType" XRayNodeType.of_json in
-      let xRayNodeName = field_map json "XRayNodeName" XRayNodeName.of_json in
+    let of_json json__ =
+      let xRayNodeType = field_map json__ "XRayNodeType" XRayNodeType.of_json in
+      let xRayNodeName = field_map json__ "XRayNodeName" XRayNodeName.of_json in
       let xRayRequestAverageLatency =
-        field_map json "XRayRequestAverageLatency"
+        field_map json__ "XRayRequestAverageLatency"
           XRayRequestAverageLatency.of_json in
       let xRayRequestCount =
-        field_map json "XRayRequestCount" XRayRequestCount.of_json in
+        field_map json__ "XRayRequestCount" XRayRequestCount.of_json in
       let xRayErrorPercent =
-        field_map json "XRayErrorPercent" XRayErrorPercent.of_json in
+        field_map json__ "XRayErrorPercent" XRayErrorPercent.of_json in
       let xRayThrottlePercent =
-        field_map json "XRayThrottlePercent" XRayThrottlePercent.of_json in
+        field_map json__ "XRayThrottlePercent" XRayThrottlePercent.of_json in
       let xRayFaultPercent =
-        field_map json "XRayFaultPercent" XRayFaultPercent.of_json in
-      let ebsRequestId = field_map json "EbsRequestId" EbsRequestId.of_json in
-      let ebsCause = field_map json "EbsCause" EbsCause.of_json in
-      let ebsResult = field_map json "EbsResult" EbsResult.of_json in
-      let ebsEvent = field_map json "EbsEvent" EbsEvent.of_json in
-      let statesInput = field_map json "StatesInput" StatesInput.of_json in
-      let statesStatus = field_map json "StatesStatus" StatesStatus.of_json in
-      let statesArn = field_map json "StatesArn" StatesArn.of_json in
+        field_map json__ "XRayFaultPercent" XRayFaultPercent.of_json in
+      let ebsRequestId = field_map json__ "EbsRequestId" EbsRequestId.of_json in
+      let ebsCause = field_map json__ "EbsCause" EbsCause.of_json in
+      let ebsResult = field_map json__ "EbsResult" EbsResult.of_json in
+      let ebsEvent = field_map json__ "EbsEvent" EbsEvent.of_json in
+      let statesInput = field_map json__ "StatesInput" StatesInput.of_json in
+      let statesStatus = field_map json__ "StatesStatus" StatesStatus.of_json in
+      let statesArn = field_map json__ "StatesArn" StatesArn.of_json in
       let statesExecutionArn =
-        field_map json "StatesExecutionArn" StatesExecutionArn.of_json in
-      let s3EventName = field_map json "S3EventName" S3EventName.of_json in
+        field_map json__ "StatesExecutionArn" StatesExecutionArn.of_json in
+      let s3EventName = field_map json__ "S3EventName" S3EventName.of_json in
       let rdsEventMessage =
-        field_map json "RdsEventMessage" RdsEventMessage.of_json in
+        field_map json__ "RdsEventMessage" RdsEventMessage.of_json in
       let rdsEventCategories =
-        field_map json "RdsEventCategories" RdsEventCategories.of_json in
-      let ec2State = field_map json "Ec2State" Ec2State.of_json in
+        field_map json__ "RdsEventCategories" RdsEventCategories.of_json in
+      let ec2State = field_map json__ "Ec2State" Ec2State.of_json in
       let codeDeployInstanceGroupId =
-        field_map json "CodeDeployInstanceGroupId"
+        field_map json__ "CodeDeployInstanceGroupId"
           CodeDeployInstanceGroupId.of_json in
       let codeDeployApplication =
-        field_map json "CodeDeployApplication" CodeDeployApplication.of_json in
+        field_map json__ "CodeDeployApplication"
+          CodeDeployApplication.of_json in
       let codeDeployState =
-        field_map json "CodeDeployState" CodeDeployState.of_json in
+        field_map json__ "CodeDeployState" CodeDeployState.of_json in
       let codeDeployDeploymentGroup =
-        field_map json "CodeDeployDeploymentGroup"
+        field_map json__ "CodeDeployDeploymentGroup"
           CodeDeployDeploymentGroup.of_json in
       let codeDeployDeploymentId =
-        field_map json "CodeDeployDeploymentId"
+        field_map json__ "CodeDeployDeploymentId"
           CodeDeployDeploymentId.of_json in
       let healthEventDescription =
-        field_map json "HealthEventDescription"
+        field_map json__ "HealthEventDescription"
           HealthEventDescription.of_json in
       let healthEventTypeCategory =
-        field_map json "HealthEventTypeCategory"
+        field_map json__ "HealthEventTypeCategory"
           HealthEventTypeCategory.of_json in
       let healthEventTypeCode =
-        field_map json "HealthEventTypeCode" HealthEventTypeCode.of_json in
+        field_map json__ "HealthEventTypeCode" HealthEventTypeCode.of_json in
       let healthService =
-        field_map json "HealthService" HealthService.of_json in
+        field_map json__ "HealthService" HealthService.of_json in
       let healthEventArn =
-        field_map json "HealthEventArn" HealthEventArn.of_json in
+        field_map json__ "HealthEventArn" HealthEventArn.of_json in
       let cloudWatchEventDetailType =
-        field_map json "CloudWatchEventDetailType"
+        field_map json__ "CloudWatchEventDetailType"
           CloudWatchEventDetailType.of_json in
       let cloudWatchEventSource =
-        field_map json "CloudWatchEventSource" CloudWatchEventSource.of_json in
+        field_map json__ "CloudWatchEventSource"
+          CloudWatchEventSource.of_json in
       let cloudWatchEventId =
-        field_map json "CloudWatchEventId" CloudWatchEventId.of_json in
-      let value = field_map json "Value" Value.of_json in
-      let unit = field_map json "Unit" Unit.of_json in
-      let metricName = field_map json "MetricName" MetricName.of_json in
+        field_map json__ "CloudWatchEventId" CloudWatchEventId.of_json in
+      let value = field_map json__ "Value" Value.of_json in
+      let unit = field_map json__ "Unit" Unit.of_json in
+      let metricName = field_map json__ "MetricName" MetricName.of_json in
       let metricNamespace =
-        field_map json "MetricNamespace" MetricNamespace.of_json in
-      let logFilter = field_map json "LogFilter" LogFilter.of_json in
-      let logText = field_map json "LogText" LogText.of_json in
-      let lineTime = field_map json "LineTime" LineTime.of_json in
-      let logGroup = field_map json "LogGroup" LogGroup.of_json in
-      let sourceARN = field_map json "SourceARN" SourceARN.of_json in
-      let sourceType = field_map json "SourceType" SourceType.of_json in
-      let endTime = field_map json "EndTime" EndTime.of_json in
-      let startTime = field_map json "StartTime" StartTime.of_json in
-      let id = field_map json "Id" ObservationId.of_json in
+        field_map json__ "MetricNamespace" MetricNamespace.of_json in
+      let logFilter = field_map json__ "LogFilter" LogFilter.of_json in
+      let logText = field_map json__ "LogText" LogText.of_json in
+      let lineTime = field_map json__ "LineTime" LineTime.of_json in
+      let logGroup = field_map json__ "LogGroup" LogGroup.of_json in
+      let sourceARN = field_map json__ "SourceARN" SourceARN.of_json in
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
+      let endTime = field_map json__ "EndTime" EndTime.of_json in
+      let startTime = field_map json__ "StartTime" StartTime.of_json in
+      let id = field_map json__ "Id" ObservationId.of_json in
       make ?xRayNodeType ?xRayNodeName ?xRayRequestAverageLatency
         ?xRayRequestCount ?xRayErrorPercent ?xRayThrottlePercent
         ?xRayFaultPercent ?ebsRequestId ?ebsCause ?ebsResult ?ebsEvent
@@ -2043,6 +2248,26 @@ module ErrorMsg =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ErrorMsg" j
+    let to_json = simple_to_json to_value
+  end
+module ComponentConfiguration =
+  struct
+    type nonrec t = string
+    let context_ = "ComponentConfiguration"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:10000) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\S\\s]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ComponentConfiguration" j
     let to_json = simple_to_json to_value
   end
 module ResourceARN =
@@ -2126,19 +2351,100 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that defines the tags associated with an application. A tag is a label that you optionally define and associate with an application. Tags can help you categorize and manage resources in different ways, such as by purpose, owner, environment, or other criteria. Each tag consists of a required tag key and an associated tag value, both of which you define. A tag key is a general label that acts as a category for a more specific tag value. A tag value acts as a descriptor within a tag key. A tag key can contain as many as 128 characters. A tag value can contain as many as 256 characters. The characters can be Unicode letters, digits, white space, or one of the following symbols: _ . : / = + -. The following additional restrictions apply to tags: Tag keys and values are case sensitive. For each associated resource, each tag key must be unique and it can have only one value. The aws: prefix is reserved for use by AWS; you can\226\128\153t use it in any tag keys or values that you define. In addition, you can't edit or remove tag keys or values that use this prefix."]
+       "An object that defines the tags associated with an application. A tag is a label that you optionally define and associate with an application. Tags can help you categorize and manage resources in different ways, such as by purpose, owner, environment, or other criteria. Each tag consists of a required tag key and an associated tag value, both of which you define. A tag key is a general label that acts as a category for a more specific tag value. A tag value acts as a descriptor within a tag key. A tag key can contain as many as 128 characters. A tag value can contain as many as 256 characters. The characters can be Unicode letters, digits, white space, or one of the following symbols: _ . : / = + -. The following additional restrictions apply to tags: Tag keys and values are case sensitive. For each associated resource, each tag key must be unique and it can have only one value. The aws: prefix is reserved for use by Amazon Web Services; you can\226\128\153t use it in any tag keys or values that you define. In addition, you can't edit or remove tag keys or values that use this prefix."]
+module Workload =
+  struct
+    type nonrec t =
+      {
+      workloadId: WorkloadId.t option [@ocaml.doc "The ID of the workload."];
+      componentName: ComponentName.t option
+        [@ocaml.doc "The name of the component."];
+      workloadName: WorkloadName.t option
+        [@ocaml.doc "The name of the workload."];
+      tier: Tier.t option [@ocaml.doc "The tier of the workload."];
+      workloadRemarks: Remarks.t option
+        [@ocaml.doc
+          "If logging is supported for the resource type, shows whether the component has configured logs to be monitored."];
+      missingWorkloadConfig: MissingWorkloadConfig.t option
+        [@ocaml.doc
+          "Indicates whether all of the component configurations required to monitor a workload were provided."]}
+    let make ?workloadId =
+      fun ?componentName ->
+        fun ?workloadName ->
+          fun ?tier ->
+            fun ?workloadRemarks ->
+              fun ?missingWorkloadConfig ->
+                fun () ->
+                  {
+                    workloadId;
+                    componentName;
+                    workloadName;
+                    tier;
+                    workloadRemarks;
+                    missingWorkloadConfig
+                  }
+    let to_value x =
+      structure_to_value
+        [("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
+        ("ComponentName",
+          (Option.map x.componentName ~f:ComponentName.to_value));
+        ("WorkloadName",
+          (Option.map x.workloadName ~f:WorkloadName.to_value));
+        ("Tier", (Option.map x.tier ~f:Tier.to_value));
+        ("WorkloadRemarks",
+          (Option.map x.workloadRemarks ~f:Remarks.to_value));
+        ("MissingWorkloadConfig",
+          (Option.map x.missingWorkloadConfig
+             ~f:MissingWorkloadConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let missingWorkloadConfig =
+        (Option.map ~f:MissingWorkloadConfig.of_xml)
+          (Xml.child xml_arg0 "MissingWorkloadConfig") in
+      let workloadRemarks =
+        (Option.map ~f:Remarks.of_xml) (Xml.child xml_arg0 "WorkloadRemarks") in
+      let tier = (Option.map ~f:Tier.of_xml) (Xml.child xml_arg0 "Tier") in
+      let workloadName =
+        (Option.map ~f:WorkloadName.of_xml)
+          (Xml.child xml_arg0 "WorkloadName") in
+      let componentName =
+        (Option.map ~f:ComponentName.of_xml)
+          (Xml.child xml_arg0 "ComponentName") in
+      let workloadId =
+        (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
+      make ?missingWorkloadConfig ?workloadRemarks ?tier ?workloadName
+        ?componentName ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let missingWorkloadConfig =
+        field_map json__ "MissingWorkloadConfig"
+          MissingWorkloadConfig.of_json in
+      let workloadRemarks =
+        field_map json__ "WorkloadRemarks" Remarks.of_json in
+      let tier = field_map json__ "Tier" Tier.of_json in
+      let workloadName = field_map json__ "WorkloadName" WorkloadName.of_json in
+      let componentName =
+        field_map json__ "ComponentName" ComponentName.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      make ?missingWorkloadConfig ?workloadRemarks ?tier ?workloadName
+        ?componentName ?workloadId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the workloads on a component."]
 module Problem =
   struct
     type nonrec t =
       {
       id: ProblemId.t option [@ocaml.doc "The ID of the problem."];
       title: Title.t option [@ocaml.doc "The name of the problem."];
+      shortName: ShortName.t option
+        [@ocaml.doc
+          "The short name of the problem associated with the SNS notification."];
       insights: Insights.t option
         [@ocaml.doc
           "A detailed analysis of the problem using machine learning."];
@@ -2151,44 +2457,66 @@ module Problem =
         [@ocaml.doc "The time when the problem ended, in epoch seconds."];
       severityLevel: SeverityLevel.t option
         [@ocaml.doc "A measure of the level of impact of the problem."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the owner of the resource group affected by the problem."];
       resourceGroupName: ResourceGroupName.t option
         [@ocaml.doc
           "The name of the resource group affected by the problem."];
       feedback: Feedback.t option
         [@ocaml.doc "Feedback provided by the user about the problem."];
-      recurringCount: RecurringCount.t option ;
-      lastRecurrenceTime: LastRecurrenceTime.t option }
+      recurringCount: RecurringCount.t option
+        [@ocaml.doc
+          "The number of times that the same problem reoccurred after the first time it was resolved."];
+      lastRecurrenceTime: LastRecurrenceTime.t option
+        [@ocaml.doc
+          "The last time that the problem reoccurred after its last resolution."];
+      visibility: Visibility.t option
+        [@ocaml.doc
+          "Specifies whether or not you can view the problem. Updates to ignored problems do not generate notifications."];
+      resolutionMethod: ResolutionMethod.t option
+        [@ocaml.doc
+          "Specifies how the problem was resolved. If the value is AUTOMATIC, the system resolved the problem. If the value is MANUAL, the user resolved the problem. If the value is UNRESOLVED, then the problem is not resolved."]}
     let make ?id =
       fun ?title ->
-        fun ?insights ->
-          fun ?status ->
-            fun ?affectedResource ->
-              fun ?startTime ->
-                fun ?endTime ->
-                  fun ?severityLevel ->
-                    fun ?resourceGroupName ->
-                      fun ?feedback ->
-                        fun ?recurringCount ->
-                          fun ?lastRecurrenceTime ->
-                            fun () ->
-                              {
-                                id;
-                                title;
-                                insights;
-                                status;
-                                affectedResource;
-                                startTime;
-                                endTime;
-                                severityLevel;
-                                resourceGroupName;
-                                feedback;
-                                recurringCount;
-                                lastRecurrenceTime
-                              }
+        fun ?shortName ->
+          fun ?insights ->
+            fun ?status ->
+              fun ?affectedResource ->
+                fun ?startTime ->
+                  fun ?endTime ->
+                    fun ?severityLevel ->
+                      fun ?accountId ->
+                        fun ?resourceGroupName ->
+                          fun ?feedback ->
+                            fun ?recurringCount ->
+                              fun ?lastRecurrenceTime ->
+                                fun ?visibility ->
+                                  fun ?resolutionMethod ->
+                                    fun () ->
+                                      {
+                                        id;
+                                        title;
+                                        shortName;
+                                        insights;
+                                        status;
+                                        affectedResource;
+                                        startTime;
+                                        endTime;
+                                        severityLevel;
+                                        accountId;
+                                        resourceGroupName;
+                                        feedback;
+                                        recurringCount;
+                                        lastRecurrenceTime;
+                                        visibility;
+                                        resolutionMethod
+                                      }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:ProblemId.to_value));
         ("Title", (Option.map x.title ~f:Title.to_value));
+        ("ShortName", (Option.map x.shortName ~f:ShortName.to_value));
         ("Insights", (Option.map x.insights ~f:Insights.to_value));
         ("Status", (Option.map x.status ~f:Status.to_value));
         ("AffectedResource",
@@ -2197,15 +2525,24 @@ module Problem =
         ("EndTime", (Option.map x.endTime ~f:EndTime.to_value));
         ("SeverityLevel",
           (Option.map x.severityLevel ~f:SeverityLevel.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
         ("ResourceGroupName",
           (Option.map x.resourceGroupName ~f:ResourceGroupName.to_value));
         ("Feedback", (Option.map x.feedback ~f:Feedback.to_value));
         ("RecurringCount",
           (Option.map x.recurringCount ~f:RecurringCount.to_value));
         ("LastRecurrenceTime",
-          (Option.map x.lastRecurrenceTime ~f:LastRecurrenceTime.to_value))]
+          (Option.map x.lastRecurrenceTime ~f:LastRecurrenceTime.to_value));
+        ("Visibility", (Option.map x.visibility ~f:Visibility.to_value));
+        ("ResolutionMethod",
+          (Option.map x.resolutionMethod ~f:ResolutionMethod.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resolutionMethod =
+        (Option.map ~f:ResolutionMethod.of_xml)
+          (Xml.child xml_arg0 "ResolutionMethod") in
+      let visibility =
+        (Option.map ~f:Visibility.of_xml) (Xml.child xml_arg0 "Visibility") in
       let lastRecurrenceTime =
         (Option.map ~f:LastRecurrenceTime.of_xml)
           (Xml.child xml_arg0 "LastRecurrenceTime") in
@@ -2217,6 +2554,8 @@ module Problem =
       let resourceGroupName =
         (Option.map ~f:ResourceGroupName.of_xml)
           (Xml.child xml_arg0 "ResourceGroupName") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let severityLevel =
         (Option.map ~f:SeverityLevel.of_xml)
           (Xml.child xml_arg0 "SeverityLevel") in
@@ -2231,33 +2570,42 @@ module Problem =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
       let insights =
         (Option.map ~f:Insights.of_xml) (Xml.child xml_arg0 "Insights") in
+      let shortName =
+        (Option.map ~f:ShortName.of_xml) (Xml.child xml_arg0 "ShortName") in
       let title = (Option.map ~f:Title.of_xml) (Xml.child xml_arg0 "Title") in
       let id = (Option.map ~f:ProblemId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?lastRecurrenceTime ?recurringCount ?feedback ?resourceGroupName
-        ?severityLevel ?endTime ?startTime ?affectedResource ?status
-        ?insights ?title ?id ()
+      make ?resolutionMethod ?visibility ?lastRecurrenceTime ?recurringCount
+        ?feedback ?resourceGroupName ?accountId ?severityLevel ?endTime
+        ?startTime ?affectedResource ?status ?insights ?shortName ?title ?id
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let resolutionMethod =
+        field_map json__ "ResolutionMethod" ResolutionMethod.of_json in
+      let visibility = field_map json__ "Visibility" Visibility.of_json in
       let lastRecurrenceTime =
-        field_map json "LastRecurrenceTime" LastRecurrenceTime.of_json in
+        field_map json__ "LastRecurrenceTime" LastRecurrenceTime.of_json in
       let recurringCount =
-        field_map json "RecurringCount" RecurringCount.of_json in
-      let feedback = field_map json "Feedback" Feedback.of_json in
+        field_map json__ "RecurringCount" RecurringCount.of_json in
+      let feedback = field_map json__ "Feedback" Feedback.of_json in
       let resourceGroupName =
-        field_map json "ResourceGroupName" ResourceGroupName.of_json in
+        field_map json__ "ResourceGroupName" ResourceGroupName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let severityLevel =
-        field_map json "SeverityLevel" SeverityLevel.of_json in
-      let endTime = field_map json "EndTime" EndTime.of_json in
-      let startTime = field_map json "StartTime" StartTime.of_json in
+        field_map json__ "SeverityLevel" SeverityLevel.of_json in
+      let endTime = field_map json__ "EndTime" EndTime.of_json in
+      let startTime = field_map json__ "StartTime" StartTime.of_json in
       let affectedResource =
-        field_map json "AffectedResource" AffectedResource.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let insights = field_map json "Insights" Insights.of_json in
-      let title = field_map json "Title" Title.of_json in
-      let id = field_map json "Id" ProblemId.of_json in
-      make ?lastRecurrenceTime ?recurringCount ?feedback ?resourceGroupName
-        ?severityLevel ?endTime ?startTime ?affectedResource ?status
-        ?insights ?title ?id ()
+        field_map json__ "AffectedResource" AffectedResource.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let insights = field_map json__ "Insights" Insights.of_json in
+      let shortName = field_map json__ "ShortName" ShortName.of_json in
+      let title = field_map json__ "Title" Title.of_json in
+      let id = field_map json__ "Id" ProblemId.of_json in
+      make ?resolutionMethod ?visibility ?lastRecurrenceTime ?recurringCount
+        ?feedback ?resourceGroupName ?accountId ?severityLevel ?endTime
+        ?startTime ?affectedResource ?status ?insights ?shortName ?title ?id
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a problem that is detected by correlating observations."]
@@ -2276,7 +2624,7 @@ module LogPattern =
           "A regular expression that defines the log pattern. A log pattern can contain as many as 50 characters, and it cannot be empty. The pattern must be DFA compatible. Patterns that utilize forward lookahead or backreference constructions are not supported."];
       rank: LogPatternRank.t option
         [@ocaml.doc
-          "Rank of the log pattern. Must be a value between 1 and 1,000,000. The patterns are sorted by rank, so we recommend that you set your highest priority patterns with the lowest rank. A pattern of rank 1 will be the first to get matched to a log line. A pattern of rank 1,000,000 will be last to get matched. When you configure custom log patterns from the console, a Low severity pattern translates to a 750,000 rank. A Medium severity pattern translates to a 500,000 rank. And a High severity pattern translates to a 250,000 rank. Rank values less than 1 or greater than 1,000,000 are reserved for AWS-provided patterns."]}
+          "Rank of the log pattern. Must be a value between 1 and 1,000,000. The patterns are sorted by rank, so we recommend that you set your highest priority patterns with the lowest rank. A pattern of rank 1 will be the first to get matched to a log line. A pattern of rank 1,000,000 will be last to get matched. When you configure custom log patterns from the console, a Low severity pattern translates to a 750,000 rank. A Medium severity pattern translates to a 500,000 rank. And a High severity pattern translates to a 250,000 rank. Rank values less than 1 or greater than 1,000,000 are reserved for Amazon Web Services provided patterns."]}
     let make ?patternSetName =
       fun ?patternName ->
         fun ?pattern ->
@@ -2304,12 +2652,12 @@ module LogPattern =
           (Xml.child xml_arg0 "PatternSetName") in
       make ?rank ?pattern ?patternName ?patternSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rank = field_map json "Rank" LogPatternRank.of_json in
-      let pattern = field_map json "Pattern" LogPatternRegex.of_json in
-      let patternName = field_map json "PatternName" LogPatternName.of_json in
+    let of_json json__ =
+      let rank = field_map json__ "Rank" LogPatternRank.of_json in
+      let pattern = field_map json__ "Pattern" LogPatternRegex.of_json in
+      let patternName = field_map json__ "PatternName" LogPatternName.of_json in
       let patternSetName =
-        field_map json "PatternSetName" LogPatternSetName.of_json in
+        field_map json__ "PatternSetName" LogPatternSetName.of_json in
       make ?rank ?pattern ?patternName ?patternSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2318,6 +2666,12 @@ module ConfigurationEvent =
   struct
     type nonrec t =
       {
+      resourceGroupName: ResourceGroupName.t option
+        [@ocaml.doc
+          "The name of the resource group of the application to which the configuration event belongs."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the owner of the application to which the configuration event belongs."];
       monitoredResourceARN: ConfigurationEventMonitoredResourceARN.t option
         [@ocaml.doc "The resource monitored by Application Insights."];
       eventStatus: ConfigurationEventStatus.t option
@@ -2333,26 +2687,33 @@ module ConfigurationEvent =
       eventResourceName: ConfigurationEventResourceName.t option
         [@ocaml.doc
           "The name of the resource Application Insights attempted to configure."]}
-    let make ?monitoredResourceARN =
-      fun ?eventStatus ->
-        fun ?eventResourceType ->
-          fun ?eventTime ->
-            fun ?eventDetail ->
-              fun ?eventResourceName ->
-                fun () ->
-                  {
-                    monitoredResourceARN;
-                    eventStatus;
-                    eventResourceType;
-                    eventTime;
-                    eventDetail;
-                    eventResourceName
-                  }
+    let make ?resourceGroupName =
+      fun ?accountId ->
+        fun ?monitoredResourceARN ->
+          fun ?eventStatus ->
+            fun ?eventResourceType ->
+              fun ?eventTime ->
+                fun ?eventDetail ->
+                  fun ?eventResourceName ->
+                    fun () ->
+                      {
+                        resourceGroupName;
+                        accountId;
+                        monitoredResourceARN;
+                        eventStatus;
+                        eventResourceType;
+                        eventTime;
+                        eventDetail;
+                        eventResourceName
+                      }
     let to_value x =
       structure_to_value
-        [("MonitoredResourceARN",
-           (Option.map x.monitoredResourceARN
-              ~f:ConfigurationEventMonitoredResourceARN.to_value));
+        [("ResourceGroupName",
+           (Option.map x.resourceGroupName ~f:ResourceGroupName.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("MonitoredResourceARN",
+          (Option.map x.monitoredResourceARN
+             ~f:ConfigurationEventMonitoredResourceARN.to_value));
         ("EventStatus",
           (Option.map x.eventStatus ~f:ConfigurationEventStatus.to_value));
         ("EventResourceType",
@@ -2385,27 +2746,35 @@ module ConfigurationEvent =
       let monitoredResourceARN =
         (Option.map ~f:ConfigurationEventMonitoredResourceARN.of_xml)
           (Xml.child xml_arg0 "MonitoredResourceARN") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let resourceGroupName =
+        (Option.map ~f:ResourceGroupName.of_xml)
+          (Xml.child xml_arg0 "ResourceGroupName") in
       make ?eventResourceName ?eventDetail ?eventTime ?eventResourceType
-        ?eventStatus ?monitoredResourceARN ()
+        ?eventStatus ?monitoredResourceARN ?accountId ?resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventResourceName =
-        field_map json "EventResourceName"
+        field_map json__ "EventResourceName"
           ConfigurationEventResourceName.of_json in
       let eventDetail =
-        field_map json "EventDetail" ConfigurationEventDetail.of_json in
+        field_map json__ "EventDetail" ConfigurationEventDetail.of_json in
       let eventTime =
-        field_map json "EventTime" ConfigurationEventTime.of_json in
+        field_map json__ "EventTime" ConfigurationEventTime.of_json in
       let eventResourceType =
-        field_map json "EventResourceType"
+        field_map json__ "EventResourceType"
           ConfigurationEventResourceType.of_json in
       let eventStatus =
-        field_map json "EventStatus" ConfigurationEventStatus.of_json in
+        field_map json__ "EventStatus" ConfigurationEventStatus.of_json in
       let monitoredResourceARN =
-        field_map json "MonitoredResourceARN"
+        field_map json__ "MonitoredResourceARN"
           ConfigurationEventMonitoredResourceARN.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let resourceGroupName =
+        field_map json__ "ResourceGroupName" ResourceGroupName.of_json in
       make ?eventResourceName ?eventDetail ?eventTime ?eventResourceType
-        ?eventStatus ?monitoredResourceARN ()
+        ?eventStatus ?monitoredResourceARN ?accountId ?resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The event information."]
 module ApplicationComponent =
@@ -2481,17 +2850,17 @@ module ApplicationComponent =
       make ?detectedWorkload ?monitor ?tier ?osType ?resourceType
         ?componentRemarks ?componentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let detectedWorkload =
-        field_map json "DetectedWorkload" DetectedWorkload.of_json in
-      let monitor = field_map json "Monitor" Monitor.of_json in
-      let tier = field_map json "Tier" Tier.of_json in
-      let osType = field_map json "OsType" OsType.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
+        field_map json__ "DetectedWorkload" DetectedWorkload.of_json in
+      let monitor = field_map json__ "Monitor" Monitor.of_json in
+      let tier = field_map json__ "Tier" Tier.of_json in
+      let osType = field_map json__ "OsType" OsType.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
       let componentRemarks =
-        field_map json "ComponentRemarks" Remarks.of_json in
+        field_map json__ "ComponentRemarks" Remarks.of_json in
       let componentName =
-        field_map json "ComponentName" ComponentName.of_json in
+        field_map json__ "ComponentName" ComponentName.of_json in
       make ?detectedWorkload ?monitor ?tier ?osType ?resourceType
         ?componentRemarks ?componentName ()
     let to_json v = composed_to_json to_value v
@@ -2501,6 +2870,9 @@ module ApplicationInfo =
   struct
     type nonrec t =
       {
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the owner of the application."];
       resourceGroupName: ResourceGroupName.t option
         [@ocaml.doc
           "The name of the resource group used for the application."];
@@ -2509,6 +2881,9 @@ module ApplicationInfo =
       opsItemSNSTopicArn: OpsItemSNSTopicArn.t option
         [@ocaml.doc
           "The SNS topic provided to Application Insights that is associated to the created opsItems to receive SNS notifications for opsItem updates."];
+      sNSNotificationArn: SNSNotificationArn.t option
+        [@ocaml.doc
+          "The SNS topic ARN that is associated with SNS notifications for updates or issues."];
       opsCenterEnabled: OpsCenterEnabled.t option
         [@ocaml.doc
           "Indicates whether Application Insights will create opsItems for any problem detected by Application Insights for an application."];
@@ -2518,34 +2893,50 @@ module ApplicationInfo =
       remarks: Remarks.t option
         [@ocaml.doc
           "The issues on the user side that block Application Insights from successfully monitoring an application. Example remarks include: \226\128\156Configuring application, detected 1 Errors, 3 Warnings\226\128\157 \226\128\156Configuring application, detected 1 Unconfigured Components\226\128\157"];
-      autoConfigEnabled: AutoConfigEnabled.t option ;
-      discoveryType: DiscoveryType.t option }
-    let make ?resourceGroupName =
-      fun ?lifeCycle ->
-        fun ?opsItemSNSTopicArn ->
-          fun ?opsCenterEnabled ->
-            fun ?cWEMonitorEnabled ->
-              fun ?remarks ->
-                fun ?autoConfigEnabled ->
-                  fun ?discoveryType ->
-                    fun () ->
-                      {
-                        resourceGroupName;
-                        lifeCycle;
-                        opsItemSNSTopicArn;
-                        opsCenterEnabled;
-                        cWEMonitorEnabled;
-                        remarks;
-                        autoConfigEnabled;
-                        discoveryType
-                      }
+      autoConfigEnabled: AutoConfigEnabled.t option
+        [@ocaml.doc
+          "Indicates whether auto-configuration is turned on for this application."];
+      discoveryType: DiscoveryType.t option
+        [@ocaml.doc
+          "The method used by Application Insights to onboard your resources."];
+      attachMissingPermission: AttachMissingPermission.t option
+        [@ocaml.doc
+          "If set to true, the managed policies for SSM and CW will be attached to the instance roles if they are missing."]}
+    let make ?accountId =
+      fun ?resourceGroupName ->
+        fun ?lifeCycle ->
+          fun ?opsItemSNSTopicArn ->
+            fun ?sNSNotificationArn ->
+              fun ?opsCenterEnabled ->
+                fun ?cWEMonitorEnabled ->
+                  fun ?remarks ->
+                    fun ?autoConfigEnabled ->
+                      fun ?discoveryType ->
+                        fun ?attachMissingPermission ->
+                          fun () ->
+                            {
+                              accountId;
+                              resourceGroupName;
+                              lifeCycle;
+                              opsItemSNSTopicArn;
+                              sNSNotificationArn;
+                              opsCenterEnabled;
+                              cWEMonitorEnabled;
+                              remarks;
+                              autoConfigEnabled;
+                              discoveryType;
+                              attachMissingPermission
+                            }
     let to_value x =
       structure_to_value
-        [("ResourceGroupName",
-           (Option.map x.resourceGroupName ~f:ResourceGroupName.to_value));
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("ResourceGroupName",
+          (Option.map x.resourceGroupName ~f:ResourceGroupName.to_value));
         ("LifeCycle", (Option.map x.lifeCycle ~f:LifeCycle.to_value));
         ("OpsItemSNSTopicArn",
           (Option.map x.opsItemSNSTopicArn ~f:OpsItemSNSTopicArn.to_value));
+        ("SNSNotificationArn",
+          (Option.map x.sNSNotificationArn ~f:SNSNotificationArn.to_value));
         ("OpsCenterEnabled",
           (Option.map x.opsCenterEnabled ~f:OpsCenterEnabled.to_value));
         ("CWEMonitorEnabled",
@@ -2554,9 +2945,15 @@ module ApplicationInfo =
         ("AutoConfigEnabled",
           (Option.map x.autoConfigEnabled ~f:AutoConfigEnabled.to_value));
         ("DiscoveryType",
-          (Option.map x.discoveryType ~f:DiscoveryType.to_value))]
+          (Option.map x.discoveryType ~f:DiscoveryType.to_value));
+        ("AttachMissingPermission",
+          (Option.map x.attachMissingPermission
+             ~f:AttachMissingPermission.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let attachMissingPermission =
+        (Option.map ~f:AttachMissingPermission.of_xml)
+          (Xml.child xml_arg0 "AttachMissingPermission") in
       let discoveryType =
         (Option.map ~f:DiscoveryType.of_xml)
           (Xml.child xml_arg0 "DiscoveryType") in
@@ -2571,6 +2968,9 @@ module ApplicationInfo =
       let opsCenterEnabled =
         (Option.map ~f:OpsCenterEnabled.of_xml)
           (Xml.child xml_arg0 "OpsCenterEnabled") in
+      let sNSNotificationArn =
+        (Option.map ~f:SNSNotificationArn.of_xml)
+          (Xml.child xml_arg0 "SNSNotificationArn") in
       let opsItemSNSTopicArn =
         (Option.map ~f:OpsItemSNSTopicArn.of_xml)
           (Xml.child xml_arg0 "OpsItemSNSTopicArn") in
@@ -2579,34 +2979,45 @@ module ApplicationInfo =
       let resourceGroupName =
         (Option.map ~f:ResourceGroupName.of_xml)
           (Xml.child xml_arg0 "ResourceGroupName") in
-      make ?discoveryType ?autoConfigEnabled ?remarks ?cWEMonitorEnabled
-        ?opsCenterEnabled ?opsItemSNSTopicArn ?lifeCycle ?resourceGroupName
-        ()
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?attachMissingPermission ?discoveryType ?autoConfigEnabled
+        ?remarks ?cWEMonitorEnabled ?opsCenterEnabled ?sNSNotificationArn
+        ?opsItemSNSTopicArn ?lifeCycle ?resourceGroupName ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let attachMissingPermission =
+        field_map json__ "AttachMissingPermission"
+          AttachMissingPermission.of_json in
       let discoveryType =
-        field_map json "DiscoveryType" DiscoveryType.of_json in
+        field_map json__ "DiscoveryType" DiscoveryType.of_json in
       let autoConfigEnabled =
-        field_map json "AutoConfigEnabled" AutoConfigEnabled.of_json in
-      let remarks = field_map json "Remarks" Remarks.of_json in
+        field_map json__ "AutoConfigEnabled" AutoConfigEnabled.of_json in
+      let remarks = field_map json__ "Remarks" Remarks.of_json in
       let cWEMonitorEnabled =
-        field_map json "CWEMonitorEnabled" CWEMonitorEnabled.of_json in
+        field_map json__ "CWEMonitorEnabled" CWEMonitorEnabled.of_json in
       let opsCenterEnabled =
-        field_map json "OpsCenterEnabled" OpsCenterEnabled.of_json in
+        field_map json__ "OpsCenterEnabled" OpsCenterEnabled.of_json in
+      let sNSNotificationArn =
+        field_map json__ "SNSNotificationArn" SNSNotificationArn.of_json in
       let opsItemSNSTopicArn =
-        field_map json "OpsItemSNSTopicArn" OpsItemSNSTopicArn.of_json in
-      let lifeCycle = field_map json "LifeCycle" LifeCycle.of_json in
+        field_map json__ "OpsItemSNSTopicArn" OpsItemSNSTopicArn.of_json in
+      let lifeCycle = field_map json__ "LifeCycle" LifeCycle.of_json in
       let resourceGroupName =
-        field_map json "ResourceGroupName" ResourceGroupName.of_json in
-      make ?discoveryType ?autoConfigEnabled ?remarks ?cWEMonitorEnabled
-        ?opsCenterEnabled ?opsItemSNSTopicArn ?lifeCycle ?resourceGroupName
-        ()
+        field_map json__ "ResourceGroupName" ResourceGroupName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?attachMissingPermission ?discoveryType ?autoConfigEnabled
+        ?remarks ?cWEMonitorEnabled ?opsCenterEnabled ?sNSNotificationArn
+        ?opsItemSNSTopicArn ?lifeCycle ?resourceGroupName ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the status of the application."]
 module ObservationList =
   struct
     type nonrec t = Observation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Observation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2641,31 +3052,12 @@ module InternalServerException =
         (Option.map ~f:ErrorMsg.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMsg.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMsg.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The server encountered an internal error and is unable to complete the request."]
-module ResourceInUseException =
-  struct
-    type nonrec t = {
-      message: ErrorMsg.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMsg.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMsg.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMsg.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The resource is already created or in use."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
@@ -2680,8 +3072,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMsg.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMsg.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMsg.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource does not exist in the customer account."]
@@ -2699,11 +3091,85 @@ module ValidationException =
         (Option.map ~f:ErrorMsg.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMsg.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMsg.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The parameter is not valid."]
+module WorkloadConfiguration =
+  struct
+    type nonrec t =
+      {
+      workloadName: WorkloadName.t option
+        [@ocaml.doc "The name of the workload."];
+      tier: Tier.t option
+        [@ocaml.doc "The configuration of the workload tier."];
+      configuration: ComponentConfiguration.t option
+        [@ocaml.doc "The configuration settings of the workload."]}
+    let make ?workloadName =
+      fun ?tier ->
+        fun ?configuration -> fun () -> { workloadName; tier; configuration }
+    let to_value x =
+      structure_to_value
+        [("WorkloadName",
+           (Option.map x.workloadName ~f:WorkloadName.to_value));
+        ("Tier", (Option.map x.tier ~f:Tier.to_value));
+        ("Configuration",
+          (Option.map x.configuration ~f:ComponentConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let configuration =
+        (Option.map ~f:ComponentConfiguration.of_xml)
+          (Xml.child xml_arg0 "Configuration") in
+      let tier = (Option.map ~f:Tier.of_xml) (Xml.child xml_arg0 "Tier") in
+      let workloadName =
+        (Option.map ~f:WorkloadName.of_xml)
+          (Xml.child xml_arg0 "WorkloadName") in
+      make ?configuration ?tier ?workloadName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let configuration =
+        field_map json__ "Configuration" ComponentConfiguration.of_json in
+      let tier = field_map json__ "Tier" Tier.of_json in
+      let workloadName = field_map json__ "WorkloadName" WorkloadName.of_json in
+      make ?configuration ?tier ?workloadName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration of the workload."]
+module UpdateStatus =
+  struct
+    type nonrec t =
+      | RESOLVED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | RESOLVED -> "RESOLVED" | Non_static_id s -> s
+    let of_string = function | "RESOLVED" -> RESOLVED | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration UpdateStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UpdateStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceInUseException =
+  struct
+    type nonrec t = {
+      message: ErrorMsg.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMsg.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMsg.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMsg.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The resource is already created or in use."]
 module CustomComponentName =
   struct
     type nonrec t = string
@@ -2728,6 +3194,9 @@ module ResourceList =
   struct
     type nonrec t = ResourceARN.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceARN.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2747,26 +3216,6 @@ module ResourceList =
     let of_json j =
       list_of_json ~kind:"ResourceList" ~of_json:ResourceARN.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module ComponentConfiguration =
-  struct
-    type nonrec t = string
-    let context_ = "ComponentConfiguration"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:10000) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\S\\s]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ComponentConfiguration" j
-    let to_json = simple_to_json to_value
   end
 module RemoveSNSTopic =
   struct
@@ -2790,6 +3239,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2833,10 +3285,10 @@ module TooManyTagsException =
           (Xml.child xml_arg0 "Message") in
       make ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceName =
-        field_map json "ResourceName" AmazonResourceName.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+        field_map json__ "ResourceName" AmazonResourceName.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2850,6 +3302,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2889,12 +3344,15 @@ module PaginationToken =
     let of_json j = string_of_json ~kind:"PaginationToken" j
     let to_json = simple_to_json to_value
   end
-module ProblemList =
+module WorkloadList =
   struct
-    type nonrec t = Problem.t list
+    type nonrec t = Workload.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:Problem.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:Workload.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -2908,9 +3366,9 @@ module ProblemList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:Problem.of_xml)
+                     | _ -> true))) ~f:Workload.of_xml)
     let of_json j =
-      list_of_json ~kind:"ProblemList" ~of_json:Problem.of_json j
+      list_of_json ~kind:"WorkloadList" ~of_json:Workload.of_json j
     let to_json v = composed_to_json to_value v
   end
 module MaxEntities =
@@ -2931,10 +3389,40 @@ module MaxEntities =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ProblemList =
+  struct
+    type nonrec t = Problem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Problem.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Problem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProblemList" ~of_json:Problem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module LogPatternList =
   struct
     type nonrec t = LogPattern.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LogPattern.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2959,6 +3447,9 @@ module LogPatternSetList =
   struct
     type nonrec t = LogPatternSetName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LogPatternSetName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2984,6 +3475,9 @@ module ConfigurationEventList =
   struct
     type nonrec t = ConfigurationEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigurationEvent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3009,6 +3503,9 @@ module ApplicationComponentList =
   struct
     type nonrec t = ApplicationComponent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationComponent.to_value)) |>
         (fun x -> `List x)
@@ -3035,6 +3532,9 @@ module ApplicationInfoList =
   struct
     type nonrec t = ApplicationInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3074,12 +3574,41 @@ module RelatedObservations =
           (Xml.child xml_arg0 "ObservationList") in
       make ?observationList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let observationList =
-        field_map json "ObservationList" ObservationList.of_json in
+        field_map json__ "ObservationList" ObservationList.of_json in
       make ?observationList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes observations related to the problem."]
+module RecommendationType =
+  struct
+    type nonrec t =
+      | INFRA_ONLY 
+      | WORKLOAD_ONLY 
+      | ALL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INFRA_ONLY -> "INFRA_ONLY"
+      | WORKLOAD_ONLY -> "WORKLOAD_ONLY"
+      | ALL -> "ALL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INFRA_ONLY" -> INFRA_ONLY
+      | "WORKLOAD_ONLY" -> WORKLOAD_ONLY
+      | "ALL" -> ALL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecommendationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RecommendationType" j)
+    let to_json = simple_to_json to_value
+  end
 module BadRequestException =
   struct
     type nonrec t = {
@@ -3094,8 +3623,8 @@ module BadRequestException =
         (Option.map ~f:ErrorMsg.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMsg.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMsg.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request is not understood by the server."]
@@ -3113,8 +3642,8 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMsg.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMsg.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMsg.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "User does not have permissions to perform this action."]
@@ -3133,8 +3662,8 @@ module TagsAlreadyExistException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3152,6 +3681,265 @@ module AutoCreate =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module GroupingType =
+  struct
+    type nonrec t =
+      | ACCOUNT_BASED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ACCOUNT_BASED -> "ACCOUNT_BASED" | Non_static_id s -> s
+    let of_string =
+      function | "ACCOUNT_BASED" -> ACCOUNT_BASED | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration GroupingType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"GroupingType" j)
+    let to_json = simple_to_json to_value
+  end
+module UpdateWorkloadResponse =
+  struct
+    type nonrec t =
+      {
+      workloadId: WorkloadId.t option [@ocaml.doc "The ID of the workload."];
+      workloadConfiguration: WorkloadConfiguration.t option
+        [@ocaml.doc
+          "The configuration settings of the workload. The value is the escaped JSON of the configuration."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?workloadId =
+      fun ?workloadConfiguration ->
+        fun () -> { workloadId; workloadConfiguration }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
+        ("WorkloadConfiguration",
+          (Option.map x.workloadConfiguration
+             ~f:WorkloadConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workloadConfiguration =
+        (Option.map ~f:WorkloadConfiguration.of_xml)
+          (Xml.child xml_arg0 "WorkloadConfiguration") in
+      let workloadId =
+        (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
+      make ?workloadConfiguration ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workloadConfiguration =
+        field_map json__ "WorkloadConfiguration"
+          WorkloadConfiguration.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      make ?workloadConfiguration ?workloadId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds a workload to a component. Each component can have at most five workloads."]
+module UpdateWorkloadRequest =
+  struct
+    type nonrec t =
+      {
+      resourceGroupName: ResourceGroupName.t
+        [@ocaml.doc "The name of the resource group."];
+      componentName: ComponentName.t
+        [@ocaml.doc "The name of the component."];
+      workloadId: WorkloadId.t option [@ocaml.doc "The ID of the workload."];
+      workloadConfiguration: WorkloadConfiguration.t
+        [@ocaml.doc
+          "The configuration settings of the workload. The value is the escaped JSON of the configuration."]}
+    let context_ = "UpdateWorkloadRequest"
+    let make ?workloadId =
+      fun ~resourceGroupName ->
+        fun ~componentName ->
+          fun ~workloadConfiguration ->
+            fun () ->
+              {
+                workloadId;
+                resourceGroupName;
+                componentName;
+                workloadConfiguration
+              }
+    let to_value x =
+      structure_to_value
+        [("ResourceGroupName",
+           (Some (ResourceGroupName.to_value x.resourceGroupName)));
+        ("ComponentName", (Some (ComponentName.to_value x.componentName)));
+        ("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
+        ("WorkloadConfiguration",
+          (Some (WorkloadConfiguration.to_value x.workloadConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workloadConfiguration =
+        WorkloadConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkloadConfiguration") in
+      let workloadId =
+        (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
+      let componentName =
+        ComponentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ComponentName") in
+      let resourceGroupName =
+        ResourceGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
+      make ~workloadConfiguration ?workloadId ~componentName
+        ~resourceGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workloadConfiguration =
+        field_map_exn json__ "WorkloadConfiguration"
+          WorkloadConfiguration.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      let componentName =
+        field_map_exn json__ "ComponentName" ComponentName.of_json in
+      let resourceGroupName =
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ~workloadConfiguration ?workloadId ~componentName
+        ~resourceGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds a workload to a component. Each component can have at most five workloads."]
+module UpdateProblemResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the visibility of the problem or specifies the problem as RESOLVED."]
+module UpdateProblemRequest =
+  struct
+    type nonrec t =
+      {
+      problemId: ProblemId.t [@ocaml.doc "The ID of the problem."];
+      updateStatus: UpdateStatus.t option
+        [@ocaml.doc
+          "The status of the problem. Arguments can be passed for only problems that show a status of RECOVERING."];
+      visibility: Visibility.t option
+        [@ocaml.doc
+          "The visibility of a problem. When you pass a value of IGNORED, the problem is removed from the default view, and all notifications for the problem are suspended. When VISIBLE is passed, the IGNORED action is reversed."]}
+    let context_ = "UpdateProblemRequest"
+    let make ?updateStatus =
+      fun ?visibility ->
+        fun ~problemId -> fun () -> { updateStatus; visibility; problemId }
+    let to_value x =
+      structure_to_value
+        [("ProblemId", (Some (ProblemId.to_value x.problemId)));
+        ("UpdateStatus",
+          (Option.map x.updateStatus ~f:UpdateStatus.to_value));
+        ("Visibility", (Option.map x.visibility ~f:Visibility.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let visibility =
+        (Option.map ~f:Visibility.of_xml) (Xml.child xml_arg0 "Visibility") in
+      let updateStatus =
+        (Option.map ~f:UpdateStatus.of_xml)
+          (Xml.child xml_arg0 "UpdateStatus") in
+      let problemId =
+        ProblemId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProblemId") in
+      make ?visibility ?updateStatus ~problemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let visibility = field_map json__ "Visibility" Visibility.of_json in
+      let updateStatus = field_map json__ "UpdateStatus" UpdateStatus.of_json in
+      let problemId = field_map_exn json__ "ProblemId" ProblemId.of_json in
+      make ?visibility ?updateStatus ~problemId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the visibility of the problem or specifies the problem as RESOLVED."]
 module UpdateLogPatternResponse =
   struct
     type nonrec t =
@@ -3230,10 +4018,10 @@ module UpdateLogPatternResponse =
           (Xml.child xml_arg0 "ResourceGroupName") in
       make ?logPattern ?resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logPattern = field_map json "LogPattern" LogPattern.of_json in
+    let of_json json__ =
+      let logPattern = field_map json__ "LogPattern" LogPattern.of_json in
       let resourceGroupName =
-        field_map json "ResourceGroupName" ResourceGroupName.of_json in
+        field_map json__ "ResourceGroupName" ResourceGroupName.of_json in
       make ?logPattern ?resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a log pattern to a LogPatternSet."]
@@ -3252,7 +4040,7 @@ module UpdateLogPatternRequest =
           "The log pattern. The pattern must be DFA compatible. Patterns that utilize forward lookahead or backreference constructions are not supported."];
       rank: LogPatternRank.t option
         [@ocaml.doc
-          "Rank of the log pattern. Must be a value between 1 and 1,000,000. The patterns are sorted by rank, so we recommend that you set your highest priority patterns with the lowest rank. A pattern of rank 1 will be the first to get matched to a log line. A pattern of rank 1,000,000 will be last to get matched. When you configure custom log patterns from the console, a Low severity pattern translates to a 750,000 rank. A Medium severity pattern translates to a 500,000 rank. And a High severity pattern translates to a 250,000 rank. Rank values less than 1 or greater than 1,000,000 are reserved for AWS-provided patterns."]}
+          "Rank of the log pattern. Must be a value between 1 and 1,000,000. The patterns are sorted by rank, so we recommend that you set your highest priority patterns with the lowest rank. A pattern of rank 1 will be the first to get matched to a log line. A pattern of rank 1,000,000 will be last to get matched. When you configure custom log patterns from the console, a Low severity pattern translates to a 750,000 rank. A Medium severity pattern translates to a 500,000 rank. And a High severity pattern translates to a 250,000 rank. Rank values less than 1 or greater than 1,000,000 are reserved for Amazon Web Services provided patterns."]}
     let context_ = "UpdateLogPatternRequest"
     let make ?pattern =
       fun ?rank ->
@@ -3293,15 +4081,15 @@ module UpdateLogPatternRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
       make ?rank ?pattern ~patternName ~patternSetName ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rank = field_map json "Rank" LogPatternRank.of_json in
-      let pattern = field_map json "Pattern" LogPatternRegex.of_json in
+    let of_json json__ =
+      let rank = field_map json__ "Rank" LogPatternRank.of_json in
+      let pattern = field_map json__ "Pattern" LogPatternRegex.of_json in
       let patternName =
-        field_map_exn json "PatternName" LogPatternName.of_json in
+        field_map_exn json__ "PatternName" LogPatternName.of_json in
       let patternSetName =
-        field_map_exn json "PatternSetName" LogPatternSetName.of_json in
+        field_map_exn json__ "PatternSetName" LogPatternSetName.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
       make ?rank ?pattern ~patternName ~patternSetName ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a log pattern to a LogPatternSet."]
@@ -3424,14 +4212,14 @@ module UpdateComponentRequest =
       make ?resourceList ?newComponentName ~componentName ~resourceGroupName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceList = field_map json "ResourceList" ResourceList.of_json in
+    let of_json json__ =
+      let resourceList = field_map json__ "ResourceList" ResourceList.of_json in
       let newComponentName =
-        field_map json "NewComponentName" CustomComponentName.of_json in
+        field_map json__ "NewComponentName" CustomComponentName.of_json in
       let componentName =
-        field_map_exn json "ComponentName" CustomComponentName.of_json in
+        field_map_exn json__ "ComponentName" CustomComponentName.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
       make ?resourceList ?newComponentName ~componentName ~resourceGroupName
         ()
     let to_json v = composed_to_json to_value v
@@ -3442,6 +4230,7 @@ module UpdateComponentConfigurationResponse =
     type nonrec t = unit
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -3450,6 +4239,8 @@ module UpdateComponentConfigurationResponse =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
@@ -3461,6 +4252,8 @@ module UpdateComponentConfigurationResponse =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
@@ -3473,6 +4266,10 @@ module UpdateComponentConfigurationResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -3507,12 +4304,13 @@ module UpdateComponentConfigurationRequest =
         [@ocaml.doc
           "Indicates whether the application component is monitored."];
       tier: Tier.t option
-        [@ocaml.doc
-          "The tier of the application component. Supported tiers include DOT_NET_WORKER, DOT_NET_WEB, DOT_NET_CORE, SQL_SERVER, and DEFAULT."];
+        [@ocaml.doc "The tier of the application component."];
       componentConfiguration: ComponentConfiguration.t option
         [@ocaml.doc
           "The configuration settings of the component. The value is the escaped JSON of the configuration. For more information about the JSON format, see Working with JSON. You can send a request to DescribeComponentConfigurationRecommendation to see the recommended configuration for a component. For the complete format of the component configuration file, see Component Configuration."];
-      autoConfigEnabled: AutoConfigEnabled.t option }
+      autoConfigEnabled: AutoConfigEnabled.t option
+        [@ocaml.doc
+          "Automatically configures the component by applying the recommended configurations."]}
     let context_ = "UpdateComponentConfigurationRequest"
     let make ?monitor =
       fun ?tier ->
@@ -3561,18 +4359,18 @@ module UpdateComponentConfigurationRequest =
       make ?autoConfigEnabled ?componentConfiguration ?tier ?monitor
         ~componentName ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoConfigEnabled =
-        field_map json "AutoConfigEnabled" AutoConfigEnabled.of_json in
+        field_map json__ "AutoConfigEnabled" AutoConfigEnabled.of_json in
       let componentConfiguration =
-        field_map json "ComponentConfiguration"
+        field_map json__ "ComponentConfiguration"
           ComponentConfiguration.of_json in
-      let tier = field_map json "Tier" Tier.of_json in
-      let monitor = field_map json "Monitor" Monitor.of_json in
+      let tier = field_map json__ "Tier" Tier.of_json in
+      let monitor = field_map json__ "Monitor" Monitor.of_json in
       let componentName =
-        field_map_exn json "ComponentName" ComponentName.of_json in
+        field_map_exn json__ "ComponentName" ComponentName.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
       make ?autoConfigEnabled ?componentConfiguration ?tier ?monitor
         ~componentName ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
@@ -3641,9 +4439,9 @@ module UpdateApplicationResponse =
           (Xml.child xml_arg0 "ApplicationInfo") in
       make ?applicationInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationInfo =
-        field_map json "ApplicationInfo" ApplicationInfo.of_json in
+        field_map json__ "ApplicationInfo" ApplicationInfo.of_json in
       make ?applicationInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the application."]
@@ -3662,26 +4460,37 @@ module UpdateApplicationRequest =
       opsItemSNSTopicArn: OpsItemSNSTopicArn.t option
         [@ocaml.doc
           "The SNS topic provided to Application Insights that is associated to the created opsItem. Allows you to receive notifications for updates to the opsItem."];
+      sNSNotificationArn: SNSNotificationArn.t option
+        [@ocaml.doc
+          "The SNS topic ARN. Allows you to receive SNS notifications for updates and issues with an application."];
       removeSNSTopic: RemoveSNSTopic.t option
         [@ocaml.doc
           "Disassociates the SNS topic from the opsItem created for detected problems."];
-      autoConfigEnabled: AutoConfigEnabled.t option }
+      autoConfigEnabled: AutoConfigEnabled.t option
+        [@ocaml.doc "Turns auto-configuration on or off."];
+      attachMissingPermission: AttachMissingPermission.t option
+        [@ocaml.doc
+          "If set to true, the managed policies for SSM and CW will be attached to the instance roles if they are missing."]}
     let context_ = "UpdateApplicationRequest"
     let make ?opsCenterEnabled =
       fun ?cWEMonitorEnabled ->
         fun ?opsItemSNSTopicArn ->
-          fun ?removeSNSTopic ->
-            fun ?autoConfigEnabled ->
-              fun ~resourceGroupName ->
-                fun () ->
-                  {
-                    opsCenterEnabled;
-                    cWEMonitorEnabled;
-                    opsItemSNSTopicArn;
-                    removeSNSTopic;
-                    autoConfigEnabled;
-                    resourceGroupName
-                  }
+          fun ?sNSNotificationArn ->
+            fun ?removeSNSTopic ->
+              fun ?autoConfigEnabled ->
+                fun ?attachMissingPermission ->
+                  fun ~resourceGroupName ->
+                    fun () ->
+                      {
+                        opsCenterEnabled;
+                        cWEMonitorEnabled;
+                        opsItemSNSTopicArn;
+                        sNSNotificationArn;
+                        removeSNSTopic;
+                        autoConfigEnabled;
+                        attachMissingPermission;
+                        resourceGroupName
+                      }
     let to_value x =
       structure_to_value
         [("ResourceGroupName",
@@ -3692,18 +4501,29 @@ module UpdateApplicationRequest =
           (Option.map x.cWEMonitorEnabled ~f:CWEMonitorEnabled.to_value));
         ("OpsItemSNSTopicArn",
           (Option.map x.opsItemSNSTopicArn ~f:OpsItemSNSTopicArn.to_value));
+        ("SNSNotificationArn",
+          (Option.map x.sNSNotificationArn ~f:SNSNotificationArn.to_value));
         ("RemoveSNSTopic",
           (Option.map x.removeSNSTopic ~f:RemoveSNSTopic.to_value));
         ("AutoConfigEnabled",
-          (Option.map x.autoConfigEnabled ~f:AutoConfigEnabled.to_value))]
+          (Option.map x.autoConfigEnabled ~f:AutoConfigEnabled.to_value));
+        ("AttachMissingPermission",
+          (Option.map x.attachMissingPermission
+             ~f:AttachMissingPermission.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let attachMissingPermission =
+        (Option.map ~f:AttachMissingPermission.of_xml)
+          (Xml.child xml_arg0 "AttachMissingPermission") in
       let autoConfigEnabled =
         (Option.map ~f:AutoConfigEnabled.of_xml)
           (Xml.child xml_arg0 "AutoConfigEnabled") in
       let removeSNSTopic =
         (Option.map ~f:RemoveSNSTopic.of_xml)
           (Xml.child xml_arg0 "RemoveSNSTopic") in
+      let sNSNotificationArn =
+        (Option.map ~f:SNSNotificationArn.of_xml)
+          (Xml.child xml_arg0 "SNSNotificationArn") in
       let opsItemSNSTopicArn =
         (Option.map ~f:OpsItemSNSTopicArn.of_xml)
           (Xml.child xml_arg0 "OpsItemSNSTopicArn") in
@@ -3716,24 +4536,31 @@ module UpdateApplicationRequest =
       let resourceGroupName =
         ResourceGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
-      make ?autoConfigEnabled ?removeSNSTopic ?opsItemSNSTopicArn
-        ?cWEMonitorEnabled ?opsCenterEnabled ~resourceGroupName ()
+      make ?attachMissingPermission ?autoConfigEnabled ?removeSNSTopic
+        ?sNSNotificationArn ?opsItemSNSTopicArn ?cWEMonitorEnabled
+        ?opsCenterEnabled ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let attachMissingPermission =
+        field_map json__ "AttachMissingPermission"
+          AttachMissingPermission.of_json in
       let autoConfigEnabled =
-        field_map json "AutoConfigEnabled" AutoConfigEnabled.of_json in
+        field_map json__ "AutoConfigEnabled" AutoConfigEnabled.of_json in
       let removeSNSTopic =
-        field_map json "RemoveSNSTopic" RemoveSNSTopic.of_json in
+        field_map json__ "RemoveSNSTopic" RemoveSNSTopic.of_json in
+      let sNSNotificationArn =
+        field_map json__ "SNSNotificationArn" SNSNotificationArn.of_json in
       let opsItemSNSTopicArn =
-        field_map json "OpsItemSNSTopicArn" OpsItemSNSTopicArn.of_json in
+        field_map json__ "OpsItemSNSTopicArn" OpsItemSNSTopicArn.of_json in
       let cWEMonitorEnabled =
-        field_map json "CWEMonitorEnabled" CWEMonitorEnabled.of_json in
+        field_map json__ "CWEMonitorEnabled" CWEMonitorEnabled.of_json in
       let opsCenterEnabled =
-        field_map json "OpsCenterEnabled" OpsCenterEnabled.of_json in
+        field_map json__ "OpsCenterEnabled" OpsCenterEnabled.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
-      make ?autoConfigEnabled ?removeSNSTopic ?opsItemSNSTopicArn
-        ?cWEMonitorEnabled ?opsCenterEnabled ~resourceGroupName ()
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?attachMissingPermission ?autoConfigEnabled ?removeSNSTopic
+        ?sNSNotificationArn ?opsItemSNSTopicArn ?cWEMonitorEnabled
+        ?opsCenterEnabled ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the application."]
 module UntagResourceResponse =
@@ -3812,10 +4639,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3903,14 +4730,259 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Add one or more tags (keys and values) to a specified application. A tag is a label that you optionally define and associate with an application. Tags can help you categorize and manage application in different ways, such as by purpose, owner, environment, or other criteria. Each tag consists of a required tag key and an associated tag value, both of which you define. A tag key is a general label that acts as a category for more specific tag values. A tag value acts as a descriptor within a tag key."]
+module RemoveWorkloadResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Remove workload from a component."]
+module RemoveWorkloadRequest =
+  struct
+    type nonrec t =
+      {
+      resourceGroupName: ResourceGroupName.t
+        [@ocaml.doc "The name of the resource group."];
+      componentName: ComponentName.t
+        [@ocaml.doc "The name of the component."];
+      workloadId: WorkloadId.t [@ocaml.doc "The ID of the workload."]}
+    let context_ = "RemoveWorkloadRequest"
+    let make ~resourceGroupName =
+      fun ~componentName ->
+        fun ~workloadId ->
+          fun () -> { resourceGroupName; componentName; workloadId }
+    let to_value x =
+      structure_to_value
+        [("ResourceGroupName",
+           (Some (ResourceGroupName.to_value x.resourceGroupName)));
+        ("ComponentName", (Some (ComponentName.to_value x.componentName)));
+        ("WorkloadId", (Some (WorkloadId.to_value x.workloadId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workloadId =
+        WorkloadId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
+      let componentName =
+        ComponentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ComponentName") in
+      let resourceGroupName =
+        ResourceGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
+      make ~workloadId ~componentName ~resourceGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      let componentName =
+        field_map_exn json__ "ComponentName" ComponentName.of_json in
+      let resourceGroupName =
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ~workloadId ~componentName ~resourceGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Remove workload from a component."]
+module ListWorkloadsResponse =
+  struct
+    type nonrec t =
+      {
+      workloadList: WorkloadList.t option
+        [@ocaml.doc "The list of workloads."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "The token to request the next page of results."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?workloadList =
+      fun ?nextToken -> fun () -> { workloadList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WorkloadList",
+           (Option.map x.workloadList ~f:WorkloadList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let workloadList =
+        (Option.map ~f:WorkloadList.of_xml)
+          (Xml.child xml_arg0 "WorkloadList") in
+      make ?nextToken ?workloadList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let workloadList = field_map json__ "WorkloadList" WorkloadList.of_json in
+      make ?nextToken ?workloadList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the workloads that are configured on a given component."]
+module ListWorkloadsRequest =
+  struct
+    type nonrec t =
+      {
+      resourceGroupName: ResourceGroupName.t
+        [@ocaml.doc "The name of the resource group."];
+      componentName: ComponentName.t
+        [@ocaml.doc "The name of the component."];
+      maxResults: MaxEntities.t option
+        [@ocaml.doc
+          "The maximum number of results to return in a single call. To retrieve the remaining results, make another call with the returned NextToken value."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "The token to request the next page of results."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the owner of the workload."]}
+    let context_ = "ListWorkloadsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?accountId ->
+          fun ~resourceGroupName ->
+            fun ~componentName ->
+              fun () ->
+                {
+                  maxResults;
+                  nextToken;
+                  accountId;
+                  resourceGroupName;
+                  componentName
+                }
+    let to_value x =
+      structure_to_value
+        [("ResourceGroupName",
+           (Some (ResourceGroupName.to_value x.resourceGroupName)));
+        ("ComponentName", (Some (ComponentName.to_value x.componentName)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxEntities.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxEntities.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let componentName =
+        ComponentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ComponentName") in
+      let resourceGroupName =
+        ResourceGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
+      make ?accountId ?nextToken ?maxResults ~componentName
+        ~resourceGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxEntities.of_json in
+      let componentName =
+        field_map_exn json__ "ComponentName" ComponentName.of_json in
+      let resourceGroupName =
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?accountId ?nextToken ?maxResults ~componentName
+        ~resourceGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the workloads that are configured on a given component."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -3962,8 +5034,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieve a list of the tags (keys and values) that are associated with a specified application. A tag is a label that you optionally define and associate with an application. Each tag consists of a required tag key and an optional associated tag value. A tag key is a general label that acts as a category for more specific tag values. A tag value acts as a descriptor within a tag key."]
@@ -3986,9 +5058,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4001,7 +5073,11 @@ module ListProblemsResponse =
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "The token used to retrieve the next page of results. This value is null when there are no more results to return."];
-      resourceGroupName: ResourceGroupName.t option }
+      resourceGroupName: ResourceGroupName.t option
+        [@ocaml.doc "The name of the resource group."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -4010,7 +5086,9 @@ module ListProblemsResponse =
     let make ?problemList =
       fun ?nextToken ->
         fun ?resourceGroupName ->
-          fun () -> { problemList; nextToken; resourceGroupName }
+          fun ?accountId ->
+            fun () ->
+              { problemList; nextToken; resourceGroupName; accountId }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -4056,9 +5134,12 @@ module ListProblemsResponse =
         [("ProblemList", (Option.map x.problemList ~f:ProblemList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("ResourceGroupName",
-          (Option.map x.resourceGroupName ~f:ResourceGroupName.to_value))]
+          (Option.map x.resourceGroupName ~f:ResourceGroupName.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let resourceGroupName =
         (Option.map ~f:ResourceGroupName.of_xml)
           (Xml.child xml_arg0 "ResourceGroupName") in
@@ -4067,20 +5148,24 @@ module ListProblemsResponse =
           (Xml.child xml_arg0 "NextToken") in
       let problemList =
         (Option.map ~f:ProblemList.of_xml) (Xml.child xml_arg0 "ProblemList") in
-      make ?resourceGroupName ?nextToken ?problemList ()
+      make ?accountId ?resourceGroupName ?nextToken ?problemList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let resourceGroupName =
-        field_map json "ResourceGroupName" ResourceGroupName.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let problemList = field_map json "ProblemList" ProblemList.of_json in
-      make ?resourceGroupName ?nextToken ?problemList ()
+        field_map json__ "ResourceGroupName" ResourceGroupName.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let problemList = field_map json__ "ProblemList" ProblemList.of_json in
+      make ?accountId ?resourceGroupName ?nextToken ?problemList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the problems with your application."]
 module ListProblemsRequest =
   struct
     type nonrec t =
       {
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."];
       resourceGroupName: ResourceGroupName.t option
         [@ocaml.doc "The name of the resource group."];
       startTime: StartTime.t option
@@ -4094,34 +5179,46 @@ module ListProblemsRequest =
           "The maximum number of results to return in a single call. To retrieve the remaining results, make another call with the returned NextToken value."];
       nextToken: PaginationToken.t option
         [@ocaml.doc "The token to request the next page of results."];
-      componentName: ComponentName.t option }
-    let make ?resourceGroupName =
-      fun ?startTime ->
-        fun ?endTime ->
-          fun ?maxResults ->
-            fun ?nextToken ->
-              fun ?componentName ->
-                fun () ->
-                  {
-                    resourceGroupName;
-                    startTime;
-                    endTime;
-                    maxResults;
-                    nextToken;
-                    componentName
-                  }
+      componentName: ComponentName.t option
+        [@ocaml.doc "The name of the component."];
+      visibility: Visibility.t option
+        [@ocaml.doc
+          "Specifies whether or not you can view the problem. If not specified, visible and ignored problems are returned."]}
+    let make ?accountId =
+      fun ?resourceGroupName ->
+        fun ?startTime ->
+          fun ?endTime ->
+            fun ?maxResults ->
+              fun ?nextToken ->
+                fun ?componentName ->
+                  fun ?visibility ->
+                    fun () ->
+                      {
+                        accountId;
+                        resourceGroupName;
+                        startTime;
+                        endTime;
+                        maxResults;
+                        nextToken;
+                        componentName;
+                        visibility
+                      }
     let to_value x =
       structure_to_value
-        [("ResourceGroupName",
-           (Option.map x.resourceGroupName ~f:ResourceGroupName.to_value));
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("ResourceGroupName",
+          (Option.map x.resourceGroupName ~f:ResourceGroupName.to_value));
         ("StartTime", (Option.map x.startTime ~f:StartTime.to_value));
         ("EndTime", (Option.map x.endTime ~f:EndTime.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxEntities.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
         ("ComponentName",
-          (Option.map x.componentName ~f:ComponentName.to_value))]
+          (Option.map x.componentName ~f:ComponentName.to_value));
+        ("Visibility", (Option.map x.visibility ~f:Visibility.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let visibility =
+        (Option.map ~f:Visibility.of_xml) (Xml.child xml_arg0 "Visibility") in
       let componentName =
         (Option.map ~f:ComponentName.of_xml)
           (Xml.child xml_arg0 "ComponentName") in
@@ -4137,20 +5234,24 @@ module ListProblemsRequest =
       let resourceGroupName =
         (Option.map ~f:ResourceGroupName.of_xml)
           (Xml.child xml_arg0 "ResourceGroupName") in
-      make ?componentName ?nextToken ?maxResults ?endTime ?startTime
-        ?resourceGroupName ()
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?visibility ?componentName ?nextToken ?maxResults ?endTime
+        ?startTime ?resourceGroupName ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let visibility = field_map json__ "Visibility" Visibility.of_json in
       let componentName =
-        field_map json "ComponentName" ComponentName.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxEntities.of_json in
-      let endTime = field_map json "EndTime" EndTime.of_json in
-      let startTime = field_map json "StartTime" StartTime.of_json in
+        field_map json__ "ComponentName" ComponentName.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxEntities.of_json in
+      let endTime = field_map json__ "EndTime" EndTime.of_json in
+      let startTime = field_map json__ "StartTime" StartTime.of_json in
       let resourceGroupName =
-        field_map json "ResourceGroupName" ResourceGroupName.of_json in
-      make ?componentName ?nextToken ?maxResults ?endTime ?startTime
-        ?resourceGroupName ()
+        field_map json__ "ResourceGroupName" ResourceGroupName.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?visibility ?componentName ?nextToken ?maxResults ?endTime
+        ?startTime ?resourceGroupName ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the problems with your application."]
 module ListLogPatternsResponse =
@@ -4159,6 +5260,9 @@ module ListLogPatternsResponse =
       {
       resourceGroupName: ResourceGroupName.t option
         [@ocaml.doc "The name of the resource group."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."];
       logPatterns: LogPatternList.t option
         [@ocaml.doc "The list of log patterns."];
       nextToken: PaginationToken.t option
@@ -4170,9 +5274,11 @@ module ListLogPatternsResponse =
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?resourceGroupName =
-      fun ?logPatterns ->
-        fun ?nextToken ->
-          fun () -> { resourceGroupName; logPatterns; nextToken }
+      fun ?accountId ->
+        fun ?logPatterns ->
+          fun ?nextToken ->
+            fun () ->
+              { resourceGroupName; accountId; logPatterns; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -4217,6 +5323,7 @@ module ListLogPatternsResponse =
       structure_to_value
         [("ResourceGroupName",
            (Option.map x.resourceGroupName ~f:ResourceGroupName.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
         ("LogPatterns",
           (Option.map x.logPatterns ~f:LogPatternList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
@@ -4228,17 +5335,20 @@ module ListLogPatternsResponse =
       let logPatterns =
         (Option.map ~f:LogPatternList.of_xml)
           (Xml.child xml_arg0 "LogPatterns") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let resourceGroupName =
         (Option.map ~f:ResourceGroupName.of_xml)
           (Xml.child xml_arg0 "ResourceGroupName") in
-      make ?nextToken ?logPatterns ?resourceGroupName ()
+      make ?nextToken ?logPatterns ?accountId ?resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let logPatterns = field_map json "LogPatterns" LogPatternList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let logPatterns = field_map json__ "LogPatterns" LogPatternList.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let resourceGroupName =
-        field_map json "ResourceGroupName" ResourceGroupName.of_json in
-      make ?nextToken ?logPatterns ?resourceGroupName ()
+        field_map json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?nextToken ?logPatterns ?accountId ?resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the log patterns in the specific log LogPatternSet."]
@@ -4254,14 +5364,24 @@ module ListLogPatternsRequest =
         [@ocaml.doc
           "The maximum number of results to return in a single call. To retrieve the remaining results, make another call with the returned NextToken value."];
       nextToken: PaginationToken.t option
-        [@ocaml.doc "The token to request the next page of results."]}
+        [@ocaml.doc "The token to request the next page of results."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."]}
     let context_ = "ListLogPatternsRequest"
     let make ?patternSetName =
       fun ?maxResults ->
         fun ?nextToken ->
-          fun ~resourceGroupName ->
-            fun () ->
-              { patternSetName; maxResults; nextToken; resourceGroupName }
+          fun ?accountId ->
+            fun ~resourceGroupName ->
+              fun () ->
+                {
+                  patternSetName;
+                  maxResults;
+                  nextToken;
+                  accountId;
+                  resourceGroupName
+                }
     let to_value x =
       structure_to_value
         [("ResourceGroupName",
@@ -4269,9 +5389,12 @@ module ListLogPatternsRequest =
         ("PatternSetName",
           (Option.map x.patternSetName ~f:LogPatternSetName.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxEntities.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
@@ -4283,16 +5406,19 @@ module ListLogPatternsRequest =
       let resourceGroupName =
         ResourceGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
-      make ?nextToken ?maxResults ?patternSetName ~resourceGroupName ()
+      make ?accountId ?nextToken ?maxResults ?patternSetName
+        ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxEntities.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxEntities.of_json in
       let patternSetName =
-        field_map json "PatternSetName" LogPatternSetName.of_json in
+        field_map json__ "PatternSetName" LogPatternSetName.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
-      make ?nextToken ?maxResults ?patternSetName ~resourceGroupName ()
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?accountId ?nextToken ?maxResults ?patternSetName
+        ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the log patterns in the specific log LogPatternSet."]
@@ -4302,6 +5428,9 @@ module ListLogPatternSetsResponse =
       {
       resourceGroupName: ResourceGroupName.t option
         [@ocaml.doc "The name of the resource group."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."];
       logPatternSets: LogPatternSetList.t option
         [@ocaml.doc "The list of log pattern sets."];
       nextToken: PaginationToken.t option
@@ -4313,9 +5442,11 @@ module ListLogPatternSetsResponse =
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?resourceGroupName =
-      fun ?logPatternSets ->
-        fun ?nextToken ->
-          fun () -> { resourceGroupName; logPatternSets; nextToken }
+      fun ?accountId ->
+        fun ?logPatternSets ->
+          fun ?nextToken ->
+            fun () ->
+              { resourceGroupName; accountId; logPatternSets; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -4360,6 +5491,7 @@ module ListLogPatternSetsResponse =
       structure_to_value
         [("ResourceGroupName",
            (Option.map x.resourceGroupName ~f:ResourceGroupName.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
         ("LogPatternSets",
           (Option.map x.logPatternSets ~f:LogPatternSetList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
@@ -4371,18 +5503,21 @@ module ListLogPatternSetsResponse =
       let logPatternSets =
         (Option.map ~f:LogPatternSetList.of_xml)
           (Xml.child xml_arg0 "LogPatternSets") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let resourceGroupName =
         (Option.map ~f:ResourceGroupName.of_xml)
           (Xml.child xml_arg0 "ResourceGroupName") in
-      make ?nextToken ?logPatternSets ?resourceGroupName ()
+      make ?nextToken ?logPatternSets ?accountId ?resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let logPatternSets =
-        field_map json "LogPatternSets" LogPatternSetList.of_json in
+        field_map json__ "LogPatternSets" LogPatternSetList.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let resourceGroupName =
-        field_map json "ResourceGroupName" ResourceGroupName.of_json in
-      make ?nextToken ?logPatternSets ?resourceGroupName ()
+        field_map json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?nextToken ?logPatternSets ?accountId ?resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the log pattern sets in the specific application."]
 module ListLogPatternSetsRequest =
@@ -4395,20 +5530,27 @@ module ListLogPatternSetsRequest =
         [@ocaml.doc
           "The maximum number of results to return in a single call. To retrieve the remaining results, make another call with the returned NextToken value."];
       nextToken: PaginationToken.t option
-        [@ocaml.doc "The token to request the next page of results."]}
+        [@ocaml.doc "The token to request the next page of results."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."]}
     let context_ = "ListLogPatternSetsRequest"
     let make ?maxResults =
       fun ?nextToken ->
-        fun ~resourceGroupName ->
-          fun () -> { maxResults; nextToken; resourceGroupName }
+        fun ?accountId ->
+          fun ~resourceGroupName ->
+            fun () -> { maxResults; nextToken; accountId; resourceGroupName }
     let to_value x =
       structure_to_value
         [("ResourceGroupName",
            (Some (ResourceGroupName.to_value x.resourceGroupName)));
         ("MaxResults", (Option.map x.maxResults ~f:MaxEntities.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
@@ -4417,14 +5559,15 @@ module ListLogPatternSetsRequest =
       let resourceGroupName =
         ResourceGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
-      make ?nextToken ?maxResults ~resourceGroupName ()
+      make ?accountId ?nextToken ?maxResults ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxEntities.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxEntities.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
-      make ?nextToken ?maxResults ~resourceGroupName ()
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?accountId ?nextToken ?maxResults ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the log pattern sets in the specific application."]
 module ListConfigurationHistoryResponse =
@@ -4499,10 +5642,10 @@ module ListConfigurationHistoryResponse =
           (Xml.child xml_arg0 "EventList") in
       make ?nextToken ?eventList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let eventList =
-        field_map json "EventList" ConfigurationEventList.of_json in
+        field_map json__ "EventList" ConfigurationEventList.of_json in
       make ?nextToken ?eventList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4524,22 +5667,27 @@ module ListConfigurationHistoryRequest =
           "The maximum number of results returned by ListConfigurationHistory in paginated output. When this parameter is used, ListConfigurationHistory returns only MaxResults in a single page along with a NextToken response element. The remaining results of the initial request can be seen by sending another ListConfigurationHistory request with the returned NextToken value. If this parameter is not used, then ListConfigurationHistory returns all results."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The NextToken value returned from a previous paginated ListConfigurationHistory request where MaxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the NextToken value. This value is null when there are no more results to return."]}
+          "The NextToken value returned from a previous paginated ListConfigurationHistory request where MaxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the NextToken value. This value is null when there are no more results to return."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."]}
     let make ?resourceGroupName =
       fun ?startTime ->
         fun ?endTime ->
           fun ?eventStatus ->
             fun ?maxResults ->
               fun ?nextToken ->
-                fun () ->
-                  {
-                    resourceGroupName;
-                    startTime;
-                    endTime;
-                    eventStatus;
-                    maxResults;
-                    nextToken
-                  }
+                fun ?accountId ->
+                  fun () ->
+                    {
+                      resourceGroupName;
+                      startTime;
+                      endTime;
+                      eventStatus;
+                      maxResults;
+                      nextToken;
+                      accountId
+                    }
     let to_value x =
       structure_to_value
         [("ResourceGroupName",
@@ -4549,9 +5697,12 @@ module ListConfigurationHistoryRequest =
         ("EventStatus",
           (Option.map x.eventStatus ~f:ConfigurationEventStatus.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxEntities.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
@@ -4567,19 +5718,20 @@ module ListConfigurationHistoryRequest =
       let resourceGroupName =
         (Option.map ~f:ResourceGroupName.of_xml)
           (Xml.child xml_arg0 "ResourceGroupName") in
-      make ?nextToken ?maxResults ?eventStatus ?endTime ?startTime
+      make ?accountId ?nextToken ?maxResults ?eventStatus ?endTime ?startTime
         ?resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxEntities.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxEntities.of_json in
       let eventStatus =
-        field_map json "EventStatus" ConfigurationEventStatus.of_json in
-      let endTime = field_map json "EndTime" EndTime.of_json in
-      let startTime = field_map json "StartTime" StartTime.of_json in
+        field_map json__ "EventStatus" ConfigurationEventStatus.of_json in
+      let endTime = field_map json__ "EndTime" EndTime.of_json in
+      let startTime = field_map json__ "StartTime" StartTime.of_json in
       let resourceGroupName =
-        field_map json "ResourceGroupName" ResourceGroupName.of_json in
-      make ?nextToken ?maxResults ?eventStatus ?endTime ?startTime
+        field_map json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?accountId ?nextToken ?maxResults ?eventStatus ?endTime ?startTime
         ?resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4655,10 +5807,10 @@ module ListComponentsResponse =
           (Xml.child xml_arg0 "ApplicationComponentList") in
       make ?nextToken ?applicationComponentList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let applicationComponentList =
-        field_map json "ApplicationComponentList"
+        field_map json__ "ApplicationComponentList"
           ApplicationComponentList.of_json in
       make ?nextToken ?applicationComponentList ()
     let to_json v = composed_to_json to_value v
@@ -4674,20 +5826,27 @@ module ListComponentsRequest =
         [@ocaml.doc
           "The maximum number of results to return in a single call. To retrieve the remaining results, make another call with the returned NextToken value."];
       nextToken: PaginationToken.t option
-        [@ocaml.doc "The token to request the next page of results."]}
+        [@ocaml.doc "The token to request the next page of results."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."]}
     let context_ = "ListComponentsRequest"
     let make ?maxResults =
       fun ?nextToken ->
-        fun ~resourceGroupName ->
-          fun () -> { maxResults; nextToken; resourceGroupName }
+        fun ?accountId ->
+          fun ~resourceGroupName ->
+            fun () -> { maxResults; nextToken; accountId; resourceGroupName }
     let to_value x =
       structure_to_value
         [("ResourceGroupName",
            (Some (ResourceGroupName.to_value x.resourceGroupName)));
         ("MaxResults", (Option.map x.maxResults ~f:MaxEntities.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
@@ -4696,14 +5855,15 @@ module ListComponentsRequest =
       let resourceGroupName =
         ResourceGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
-      make ?nextToken ?maxResults ~resourceGroupName ()
+      make ?accountId ?nextToken ?maxResults ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxEntities.of_json in
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxEntities.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
-      make ?nextToken ?maxResults ~resourceGroupName ()
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?accountId ?nextToken ?maxResults ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the auto-grouped, standalone, and custom components of the application."]
@@ -4769,10 +5929,10 @@ module ListApplicationsResponse =
           (Xml.child xml_arg0 "ApplicationInfoList") in
       make ?nextToken ?applicationInfoList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let applicationInfoList =
-        field_map json "ApplicationInfoList" ApplicationInfoList.of_json in
+        field_map json__ "ApplicationInfoList" ApplicationInfoList.of_json in
       make ?nextToken ?applicationInfoList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4785,40 +5945,57 @@ module ListApplicationsRequest =
         [@ocaml.doc
           "The maximum number of results to return in a single call. To retrieve the remaining results, make another call with the returned NextToken value."];
       nextToken: PaginationToken.t option
-        [@ocaml.doc "The token to request the next page of results."]}
+        [@ocaml.doc "The token to request the next page of results."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."]}
     let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
+      fun ?nextToken ->
+        fun ?accountId -> fun () -> { maxResults; nextToken; accountId }
     let to_value x =
       structure_to_value
         [("MaxResults", (Option.map x.maxResults ~f:MaxEntities.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       let maxResults =
         (Option.map ~f:MaxEntities.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      make ?nextToken ?maxResults ()
+      make ?accountId ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxEntities.of_json in
-      make ?nextToken ?maxResults ()
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxEntities.of_json in
+      make ?accountId ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the IDs of the applications that you are monitoring."]
-module DescribeProblemResponse =
+module DescribeWorkloadResponse =
   struct
     type nonrec t =
       {
-      problem: Problem.t option [@ocaml.doc "Information about the problem."]}
+      workloadId: WorkloadId.t option [@ocaml.doc "The ID of the workload."];
+      workloadRemarks: Remarks.t option
+        [@ocaml.doc
+          "If logging is supported for the resource type, shows whether the component has configured logs to be monitored."];
+      workloadConfiguration: WorkloadConfiguration.t option
+        [@ocaml.doc
+          "The configuration settings of the workload. The value is the escaped JSON of the configuration."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?problem = fun () -> { problem }
+    let make ?workloadId =
+      fun ?workloadRemarks ->
+        fun ?workloadConfiguration ->
+          fun () -> { workloadId; workloadRemarks; workloadConfiguration }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -4861,38 +6038,187 @@ module DescribeProblemResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Problem", (Option.map x.problem ~f:Problem.to_value))]
+        [("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
+        ("WorkloadRemarks",
+          (Option.map x.workloadRemarks ~f:Remarks.to_value));
+        ("WorkloadConfiguration",
+          (Option.map x.workloadConfiguration
+             ~f:WorkloadConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let workloadConfiguration =
+        (Option.map ~f:WorkloadConfiguration.of_xml)
+          (Xml.child xml_arg0 "WorkloadConfiguration") in
+      let workloadRemarks =
+        (Option.map ~f:Remarks.of_xml) (Xml.child xml_arg0 "WorkloadRemarks") in
+      let workloadId =
+        (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
+      make ?workloadConfiguration ?workloadRemarks ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workloadConfiguration =
+        field_map json__ "WorkloadConfiguration"
+          WorkloadConfiguration.of_json in
+      let workloadRemarks =
+        field_map json__ "WorkloadRemarks" Remarks.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      make ?workloadConfiguration ?workloadRemarks ?workloadId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a workload and its configuration."]
+module DescribeWorkloadRequest =
+  struct
+    type nonrec t =
+      {
+      resourceGroupName: ResourceGroupName.t
+        [@ocaml.doc "The name of the resource group."];
+      componentName: ComponentName.t
+        [@ocaml.doc "The name of the component."];
+      workloadId: WorkloadId.t [@ocaml.doc "The ID of the workload."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the workload owner."]}
+    let context_ = "DescribeWorkloadRequest"
+    let make ?accountId =
+      fun ~resourceGroupName ->
+        fun ~componentName ->
+          fun ~workloadId ->
+            fun () ->
+              { accountId; resourceGroupName; componentName; workloadId }
+    let to_value x =
+      structure_to_value
+        [("ResourceGroupName",
+           (Some (ResourceGroupName.to_value x.resourceGroupName)));
+        ("ComponentName", (Some (ComponentName.to_value x.componentName)));
+        ("WorkloadId", (Some (WorkloadId.to_value x.workloadId)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let workloadId =
+        WorkloadId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkloadId") in
+      let componentName =
+        ComponentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ComponentName") in
+      let resourceGroupName =
+        ResourceGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
+      make ?accountId ~workloadId ~componentName ~resourceGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let workloadId = field_map_exn json__ "WorkloadId" WorkloadId.of_json in
+      let componentName =
+        field_map_exn json__ "ComponentName" ComponentName.of_json in
+      let resourceGroupName =
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?accountId ~workloadId ~componentName ~resourceGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a workload and its configuration."]
+module DescribeProblemResponse =
+  struct
+    type nonrec t =
+      {
+      problem: Problem.t option [@ocaml.doc "Information about the problem."];
+      sNSNotificationArn: SNSNotificationArn.t option
+        [@ocaml.doc "The SNS notification topic ARN of the problem."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?problem =
+      fun ?sNSNotificationArn -> fun () -> { problem; sNSNotificationArn }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Problem", (Option.map x.problem ~f:Problem.to_value));
+        ("SNSNotificationArn",
+          (Option.map x.sNSNotificationArn ~f:SNSNotificationArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sNSNotificationArn =
+        (Option.map ~f:SNSNotificationArn.of_xml)
+          (Xml.child xml_arg0 "SNSNotificationArn") in
       let problem =
         (Option.map ~f:Problem.of_xml) (Xml.child xml_arg0 "Problem") in
-      make ?problem ()
+      make ?sNSNotificationArn ?problem ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let problem = field_map json "Problem" Problem.of_json in
-      make ?problem ()
+    let of_json json__ =
+      let sNSNotificationArn =
+        field_map json__ "SNSNotificationArn" SNSNotificationArn.of_json in
+      let problem = field_map json__ "Problem" Problem.of_json in
+      make ?sNSNotificationArn ?problem ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an application problem."]
 module DescribeProblemRequest =
   struct
     type nonrec t =
       {
-      problemId: ProblemId.t [@ocaml.doc "The ID of the problem."]}
+      problemId: ProblemId.t [@ocaml.doc "The ID of the problem."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the owner of the resource group affected by the problem."]}
     let context_ = "DescribeProblemRequest"
-    let make ~problemId = fun () -> { problemId }
+    let make ?accountId =
+      fun ~problemId -> fun () -> { accountId; problemId }
     let to_value x =
       structure_to_value
-        [("ProblemId", (Some (ProblemId.to_value x.problemId)))]
+        [("ProblemId", (Some (ProblemId.to_value x.problemId)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let problemId =
         ProblemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProblemId") in
-      make ~problemId ()
+      make ?accountId ~problemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let problemId = field_map_exn json "ProblemId" ProblemId.of_json in
-      make ~problemId ()
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let problemId = field_map_exn json__ "ProblemId" ProblemId.of_json in
+      make ?accountId ~problemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an application problem."]
 module DescribeProblemObservationsResponse =
@@ -4958,9 +6284,9 @@ module DescribeProblemObservationsResponse =
           (Xml.child xml_arg0 "RelatedObservations") in
       make ?relatedObservations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let relatedObservations =
-        field_map json "RelatedObservations" RelatedObservations.of_json in
+        field_map json__ "RelatedObservations" RelatedObservations.of_json in
       make ?relatedObservations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4969,22 +6295,30 @@ module DescribeProblemObservationsRequest =
   struct
     type nonrec t =
       {
-      problemId: ProblemId.t [@ocaml.doc "The ID of the problem."]}
+      problemId: ProblemId.t [@ocaml.doc "The ID of the problem."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."]}
     let context_ = "DescribeProblemObservationsRequest"
-    let make ~problemId = fun () -> { problemId }
+    let make ?accountId =
+      fun ~problemId -> fun () -> { accountId; problemId }
     let to_value x =
       structure_to_value
-        [("ProblemId", (Some (ProblemId.to_value x.problemId)))]
+        [("ProblemId", (Some (ProblemId.to_value x.problemId)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let problemId =
         ProblemId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ProblemId") in
-      make ~problemId ()
+      make ?accountId ~problemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let problemId = field_map_exn json "ProblemId" ProblemId.of_json in
-      make ~problemId ()
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let problemId = field_map_exn json__ "ProblemId" ProblemId.of_json in
+      make ?accountId ~problemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the anomalies or errors associated with the problem."]
@@ -5049,8 +6383,8 @@ module DescribeObservationResponse =
         (Option.map ~f:Observation.of_xml) (Xml.child xml_arg0 "Observation") in
       make ?observation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let observation = field_map json "Observation" Observation.of_json in
+    let of_json json__ =
+      let observation = field_map json__ "Observation" Observation.of_json in
       make ?observation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an anomaly or error with the application."]
@@ -5059,23 +6393,31 @@ module DescribeObservationRequest =
     type nonrec t =
       {
       observationId: ObservationId.t
-        [@ocaml.doc "The ID of the observation."]}
+        [@ocaml.doc "The ID of the observation."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."]}
     let context_ = "DescribeObservationRequest"
-    let make ~observationId = fun () -> { observationId }
+    let make ?accountId =
+      fun ~observationId -> fun () -> { accountId; observationId }
     let to_value x =
       structure_to_value
-        [("ObservationId", (Some (ObservationId.to_value x.observationId)))]
+        [("ObservationId", (Some (ObservationId.to_value x.observationId)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let observationId =
         ObservationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ObservationId") in
-      make ~observationId ()
+      make ?accountId ~observationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let observationId =
-        field_map_exn json "ObservationId" ObservationId.of_json in
-      make ~observationId ()
+        field_map_exn json__ "ObservationId" ObservationId.of_json in
+      make ?accountId ~observationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an anomaly or error with the application."]
 module DescribeLogPatternResponse =
@@ -5084,6 +6426,9 @@ module DescribeLogPatternResponse =
       {
       resourceGroupName: ResourceGroupName.t option
         [@ocaml.doc "The name of the resource group."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."];
       logPattern: LogPattern.t option
         [@ocaml.doc "The successfully created log pattern."]}
     type nonrec error =
@@ -5092,7 +6437,9 @@ module DescribeLogPatternResponse =
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?resourceGroupName =
-      fun ?logPattern -> fun () -> { resourceGroupName; logPattern }
+      fun ?accountId ->
+        fun ?logPattern ->
+          fun () -> { resourceGroupName; accountId; logPattern }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -5137,21 +6484,25 @@ module DescribeLogPatternResponse =
       structure_to_value
         [("ResourceGroupName",
            (Option.map x.resourceGroupName ~f:ResourceGroupName.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
         ("LogPattern", (Option.map x.logPattern ~f:LogPattern.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let logPattern =
         (Option.map ~f:LogPattern.of_xml) (Xml.child xml_arg0 "LogPattern") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let resourceGroupName =
         (Option.map ~f:ResourceGroupName.of_xml)
           (Xml.child xml_arg0 "ResourceGroupName") in
-      make ?logPattern ?resourceGroupName ()
+      make ?logPattern ?accountId ?resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logPattern = field_map json "LogPattern" LogPattern.of_json in
+    let of_json json__ =
+      let logPattern = field_map json__ "LogPattern" LogPattern.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let resourceGroupName =
-        field_map json "ResourceGroupName" ResourceGroupName.of_json in
-      make ?logPattern ?resourceGroupName ()
+        field_map json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?logPattern ?accountId ?resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe a specific log pattern from a LogPatternSet."]
 module DescribeLogPatternRequest =
@@ -5163,21 +6514,29 @@ module DescribeLogPatternRequest =
       patternSetName: LogPatternSetName.t
         [@ocaml.doc "The name of the log pattern set."];
       patternName: LogPatternName.t
-        [@ocaml.doc "The name of the log pattern."]}
+        [@ocaml.doc "The name of the log pattern."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."]}
     let context_ = "DescribeLogPatternRequest"
-    let make ~resourceGroupName =
-      fun ~patternSetName ->
-        fun ~patternName ->
-          fun () -> { resourceGroupName; patternSetName; patternName }
+    let make ?accountId =
+      fun ~resourceGroupName ->
+        fun ~patternSetName ->
+          fun ~patternName ->
+            fun () ->
+              { accountId; resourceGroupName; patternSetName; patternName }
     let to_value x =
       structure_to_value
         [("ResourceGroupName",
            (Some (ResourceGroupName.to_value x.resourceGroupName)));
         ("PatternSetName",
           (Some (LogPatternSetName.to_value x.patternSetName)));
-        ("PatternName", (Some (LogPatternName.to_value x.patternName)))]
+        ("PatternName", (Some (LogPatternName.to_value x.patternName)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let patternName =
         LogPatternName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PatternName") in
@@ -5187,16 +6546,17 @@ module DescribeLogPatternRequest =
       let resourceGroupName =
         ResourceGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
-      make ~patternName ~patternSetName ~resourceGroupName ()
+      make ?accountId ~patternName ~patternSetName ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let patternName =
-        field_map_exn json "PatternName" LogPatternName.of_json in
+        field_map_exn json__ "PatternName" LogPatternName.of_json in
       let patternSetName =
-        field_map_exn json "PatternSetName" LogPatternSetName.of_json in
+        field_map_exn json__ "PatternSetName" LogPatternSetName.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
-      make ~patternName ~patternSetName ~resourceGroupName ()
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?accountId ~patternName ~patternSetName ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describe a specific log pattern from a LogPatternSet."]
 module DescribeComponentResponse =
@@ -5271,10 +6631,10 @@ module DescribeComponentResponse =
           (Xml.child xml_arg0 "ApplicationComponent") in
       make ?resourceList ?applicationComponent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceList = field_map json "ResourceList" ResourceList.of_json in
+    let of_json json__ =
+      let resourceList = field_map json__ "ResourceList" ResourceList.of_json in
       let applicationComponent =
-        field_map json "ApplicationComponent" ApplicationComponent.of_json in
+        field_map json__ "ApplicationComponent" ApplicationComponent.of_json in
       make ?resourceList ?applicationComponent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5286,31 +6646,40 @@ module DescribeComponentRequest =
       resourceGroupName: ResourceGroupName.t
         [@ocaml.doc "The name of the resource group."];
       componentName: ComponentName.t
-        [@ocaml.doc "The name of the component."]}
+        [@ocaml.doc "The name of the component."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."]}
     let context_ = "DescribeComponentRequest"
-    let make ~resourceGroupName =
-      fun ~componentName -> fun () -> { resourceGroupName; componentName }
+    let make ?accountId =
+      fun ~resourceGroupName ->
+        fun ~componentName ->
+          fun () -> { accountId; resourceGroupName; componentName }
     let to_value x =
       structure_to_value
         [("ResourceGroupName",
            (Some (ResourceGroupName.to_value x.resourceGroupName)));
-        ("ComponentName", (Some (ComponentName.to_value x.componentName)))]
+        ("ComponentName", (Some (ComponentName.to_value x.componentName)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let componentName =
         ComponentName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ComponentName") in
       let resourceGroupName =
         ResourceGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
-      make ~componentName ~resourceGroupName ()
+      make ?accountId ~componentName ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let componentName =
-        field_map_exn json "ComponentName" ComponentName.of_json in
+        field_map_exn json__ "ComponentName" ComponentName.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
-      make ~componentName ~resourceGroupName ()
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?accountId ~componentName ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a component and lists the resources that are grouped together in a component."]
@@ -5393,12 +6762,12 @@ module DescribeComponentConfigurationResponse =
         (Option.map ~f:Monitor.of_xml) (Xml.child xml_arg0 "Monitor") in
       make ?componentConfiguration ?tier ?monitor ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let componentConfiguration =
-        field_map json "ComponentConfiguration"
+        field_map json__ "ComponentConfiguration"
           ComponentConfiguration.of_json in
-      let tier = field_map json "Tier" Tier.of_json in
-      let monitor = field_map json "Monitor" Monitor.of_json in
+      let tier = field_map json__ "Tier" Tier.of_json in
+      let monitor = field_map json__ "Monitor" Monitor.of_json in
       make ?componentConfiguration ?tier ?monitor ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the monitoring configuration of the component."]
@@ -5409,31 +6778,40 @@ module DescribeComponentConfigurationRequest =
       resourceGroupName: ResourceGroupName.t
         [@ocaml.doc "The name of the resource group."];
       componentName: ComponentName.t
-        [@ocaml.doc "The name of the component."]}
+        [@ocaml.doc "The name of the component."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."]}
     let context_ = "DescribeComponentConfigurationRequest"
-    let make ~resourceGroupName =
-      fun ~componentName -> fun () -> { resourceGroupName; componentName }
+    let make ?accountId =
+      fun ~resourceGroupName ->
+        fun ~componentName ->
+          fun () -> { accountId; resourceGroupName; componentName }
     let to_value x =
       structure_to_value
         [("ResourceGroupName",
            (Some (ResourceGroupName.to_value x.resourceGroupName)));
-        ("ComponentName", (Some (ComponentName.to_value x.componentName)))]
+        ("ComponentName", (Some (ComponentName.to_value x.componentName)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let componentName =
         ComponentName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ComponentName") in
       let resourceGroupName =
         ResourceGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
-      make ~componentName ~resourceGroupName ()
+      make ?accountId ~componentName ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let componentName =
-        field_map_exn json "ComponentName" ComponentName.of_json in
+        field_map_exn json__ "ComponentName" ComponentName.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
-      make ~componentName ~resourceGroupName ()
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?accountId ~componentName ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the monitoring configuration of the component."]
 module DescribeComponentConfigurationRecommendationResponse =
@@ -5501,9 +6879,9 @@ module DescribeComponentConfigurationRecommendationResponse =
           (Xml.child xml_arg0 "ComponentConfiguration") in
       make ?componentConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let componentConfiguration =
-        field_map json "ComponentConfiguration"
+        field_map json__ "ComponentConfiguration"
           ComponentConfiguration.of_json in
       make ?componentConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -5517,21 +6895,44 @@ module DescribeComponentConfigurationRecommendationRequest =
         [@ocaml.doc "The name of the resource group."];
       componentName: ComponentName.t
         [@ocaml.doc "The name of the component."];
-      tier: Tier.t
+      tier: Tier.t [@ocaml.doc "The tier of the application component."];
+      workloadName: WorkloadName.t option
         [@ocaml.doc
-          "The tier of the application component. Supported tiers include DOT_NET_CORE, DOT_NET_WORKER, DOT_NET_WEB, SQL_SERVER, and DEFAULT."]}
+          "The name of the workload. The name of the workload is required when the tier of the application component is SAP_ASE_SINGLE_NODE or SAP_ASE_HIGH_AVAILABILITY."];
+      recommendationType: RecommendationType.t option
+        [@ocaml.doc "The recommended configuration type."]}
     let context_ = "DescribeComponentConfigurationRecommendationRequest"
-    let make ~resourceGroupName =
-      fun ~componentName ->
-        fun ~tier -> fun () -> { resourceGroupName; componentName; tier }
+    let make ?workloadName =
+      fun ?recommendationType ->
+        fun ~resourceGroupName ->
+          fun ~componentName ->
+            fun ~tier ->
+              fun () ->
+                {
+                  workloadName;
+                  recommendationType;
+                  resourceGroupName;
+                  componentName;
+                  tier
+                }
     let to_value x =
       structure_to_value
         [("ResourceGroupName",
            (Some (ResourceGroupName.to_value x.resourceGroupName)));
         ("ComponentName", (Some (ComponentName.to_value x.componentName)));
-        ("Tier", (Some (Tier.to_value x.tier)))]
+        ("Tier", (Some (Tier.to_value x.tier)));
+        ("WorkloadName",
+          (Option.map x.workloadName ~f:WorkloadName.to_value));
+        ("RecommendationType",
+          (Option.map x.recommendationType ~f:RecommendationType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let recommendationType =
+        (Option.map ~f:RecommendationType.of_xml)
+          (Xml.child xml_arg0 "RecommendationType") in
+      let workloadName =
+        (Option.map ~f:WorkloadName.of_xml)
+          (Xml.child xml_arg0 "WorkloadName") in
       let tier =
         Tier.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tier") in
       let componentName =
@@ -5540,15 +6941,20 @@ module DescribeComponentConfigurationRecommendationRequest =
       let resourceGroupName =
         ResourceGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
-      make ~tier ~componentName ~resourceGroupName ()
+      make ?recommendationType ?workloadName ~tier ~componentName
+        ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tier = field_map_exn json "Tier" Tier.of_json in
+    let of_json json__ =
+      let recommendationType =
+        field_map json__ "RecommendationType" RecommendationType.of_json in
+      let workloadName = field_map json__ "WorkloadName" WorkloadName.of_json in
+      let tier = field_map_exn json__ "Tier" Tier.of_json in
       let componentName =
-        field_map_exn json "ComponentName" ComponentName.of_json in
+        field_map_exn json__ "ComponentName" ComponentName.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
-      make ~tier ~componentName ~resourceGroupName ()
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?recommendationType ?workloadName ~tier ~componentName
+        ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the recommended monitoring configuration of the component."]
@@ -5615,9 +7021,9 @@ module DescribeApplicationResponse =
           (Xml.child xml_arg0 "ApplicationInfo") in
       make ?applicationInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationInfo =
-        field_map json "ApplicationInfo" ApplicationInfo.of_json in
+        field_map json__ "ApplicationInfo" ApplicationInfo.of_json in
       make ?applicationInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the application."]
@@ -5626,24 +7032,32 @@ module DescribeApplicationRequest =
     type nonrec t =
       {
       resourceGroupName: ResourceGroupName.t
-        [@ocaml.doc "The name of the resource group."]}
+        [@ocaml.doc "The name of the resource group."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID for the resource group owner."]}
     let context_ = "DescribeApplicationRequest"
-    let make ~resourceGroupName = fun () -> { resourceGroupName }
+    let make ?accountId =
+      fun ~resourceGroupName -> fun () -> { accountId; resourceGroupName }
     let to_value x =
       structure_to_value
         [("ResourceGroupName",
-           (Some (ResourceGroupName.to_value x.resourceGroupName)))]
+           (Some (ResourceGroupName.to_value x.resourceGroupName)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let resourceGroupName =
         ResourceGroupName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
-      make ~resourceGroupName ()
+      make ?accountId ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
-      make ~resourceGroupName ()
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?accountId ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the application."]
 module DeleteLogPatternResponse =
@@ -5747,13 +7161,13 @@ module DeleteLogPatternRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
       make ~patternName ~patternSetName ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let patternName =
-        field_map_exn json "PatternName" LogPatternName.of_json in
+        field_map_exn json__ "PatternName" LogPatternName.of_json in
       let patternSetName =
-        field_map_exn json "PatternSetName" LogPatternSetName.of_json in
+        field_map_exn json__ "PatternSetName" LogPatternSetName.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
       make ~patternName ~patternSetName ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified log pattern from a LogPatternSet."]
@@ -5842,11 +7256,11 @@ module DeleteComponentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
       make ~componentName ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let componentName =
-        field_map_exn json "ComponentName" CustomComponentName.of_json in
+        field_map_exn json__ "ComponentName" CustomComponentName.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
       make ~componentName ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5937,9 +7351,9 @@ module DeleteApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
       make ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
       make ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6022,10 +7436,10 @@ module CreateLogPatternResponse =
         (Option.map ~f:LogPattern.of_xml) (Xml.child xml_arg0 "LogPattern") in
       make ?resourceGroupName ?logPattern ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceGroupName =
-        field_map json "ResourceGroupName" ResourceGroupName.of_json in
-      let logPattern = field_map json "LogPattern" LogPattern.of_json in
+        field_map json__ "ResourceGroupName" ResourceGroupName.of_json in
+      let logPattern = field_map json__ "LogPattern" LogPattern.of_json in
       make ?resourceGroupName ?logPattern ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds an log pattern to a LogPatternSet."]
@@ -6044,7 +7458,7 @@ module CreateLogPatternRequest =
           "The log pattern. The pattern must be DFA compatible. Patterns that utilize forward lookahead or backreference constructions are not supported."];
       rank: LogPatternRank.t
         [@ocaml.doc
-          "Rank of the log pattern. Must be a value between 1 and 1,000,000. The patterns are sorted by rank, so we recommend that you set your highest priority patterns with the lowest rank. A pattern of rank 1 will be the first to get matched to a log line. A pattern of rank 1,000,000 will be last to get matched. When you configure custom log patterns from the console, a Low severity pattern translates to a 750,000 rank. A Medium severity pattern translates to a 500,000 rank. And a High severity pattern translates to a 250,000 rank. Rank values less than 1 or greater than 1,000,000 are reserved for AWS-provided patterns."]}
+          "Rank of the log pattern. Must be a value between 1 and 1,000,000. The patterns are sorted by rank, so we recommend that you set your highest priority patterns with the lowest rank. A pattern of rank 1 will be the first to get matched to a log line. A pattern of rank 1,000,000 will be last to get matched. When you configure custom log patterns from the console, a Low severity pattern translates to a 750,000 rank. A Medium severity pattern translates to a 500,000 rank. And a High severity pattern translates to a 250,000 rank. Rank values less than 1 or greater than 1,000,000 are reserved for Amazon Web Services provided patterns."]}
     let context_ = "CreateLogPatternRequest"
     let make ~resourceGroupName =
       fun ~patternSetName ->
@@ -6087,15 +7501,15 @@ module CreateLogPatternRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
       make ~rank ~pattern ~patternName ~patternSetName ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rank = field_map_exn json "Rank" LogPatternRank.of_json in
-      let pattern = field_map_exn json "Pattern" LogPatternRegex.of_json in
+    let of_json json__ =
+      let rank = field_map_exn json__ "Rank" LogPatternRank.of_json in
+      let pattern = field_map_exn json__ "Pattern" LogPatternRegex.of_json in
       let patternName =
-        field_map_exn json "PatternName" LogPatternName.of_json in
+        field_map_exn json__ "PatternName" LogPatternName.of_json in
       let patternSetName =
-        field_map_exn json "PatternSetName" LogPatternSetName.of_json in
+        field_map_exn json__ "PatternSetName" LogPatternSetName.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
       make ~rank ~pattern ~patternName ~patternSetName ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds an log pattern to a LogPatternSet."]
@@ -6202,13 +7616,13 @@ module CreateComponentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
       make ~resourceList ~componentName ~resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceList =
-        field_map_exn json "ResourceList" ResourceList.of_json in
+        field_map_exn json__ "ResourceList" ResourceList.of_json in
       let componentName =
-        field_map_exn json "ComponentName" CustomComponentName.of_json in
+        field_map_exn json__ "ComponentName" CustomComponentName.of_json in
       let resourceGroupName =
-        field_map_exn json "ResourceGroupName" ResourceGroupName.of_json in
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
       make ~resourceList ~componentName ~resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6303,9 +7717,9 @@ module CreateApplicationResponse =
           (Xml.child xml_arg0 "ApplicationInfo") in
       make ?applicationInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationInfo =
-        field_map json "ApplicationInfo" ApplicationInfo.of_json in
+        field_map json__ "ApplicationInfo" ApplicationInfo.of_json in
       make ?applicationInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6325,28 +7739,46 @@ module CreateApplicationRequest =
       opsItemSNSTopicArn: OpsItemSNSTopicArn.t option
         [@ocaml.doc
           "The SNS topic provided to Application Insights that is associated to the created opsItem. Allows you to receive notifications for updates to the opsItem."];
+      sNSNotificationArn: SNSNotificationArn.t option
+        [@ocaml.doc "The SNS notification topic ARN."];
       tags: TagList.t option
         [@ocaml.doc
           "List of tags to add to the application. tag key (Key) and an associated tag value (Value). The maximum length of a tag key is 128 characters. The maximum length of a tag value is 256 characters."];
-      autoConfigEnabled: AutoConfigEnabled.t option ;
-      autoCreate: AutoCreate.t option }
+      autoConfigEnabled: AutoConfigEnabled.t option
+        [@ocaml.doc
+          "Indicates whether Application Insights automatically configures unmonitored resources in the resource group."];
+      autoCreate: AutoCreate.t option
+        [@ocaml.doc
+          "Configures all of the resources in the resource group by applying the recommended configurations."];
+      groupingType: GroupingType.t option
+        [@ocaml.doc
+          "Application Insights can create applications based on a resource group or on an account. To create an account-based application using all of the resources in the account, set this parameter to ACCOUNT_BASED."];
+      attachMissingPermission: AttachMissingPermission.t option
+        [@ocaml.doc
+          "If set to true, the managed policies for SSM and CW will be attached to the instance roles if they are missing."]}
     let make ?resourceGroupName =
       fun ?opsCenterEnabled ->
         fun ?cWEMonitorEnabled ->
           fun ?opsItemSNSTopicArn ->
-            fun ?tags ->
-              fun ?autoConfigEnabled ->
-                fun ?autoCreate ->
-                  fun () ->
-                    {
-                      resourceGroupName;
-                      opsCenterEnabled;
-                      cWEMonitorEnabled;
-                      opsItemSNSTopicArn;
-                      tags;
-                      autoConfigEnabled;
-                      autoCreate
-                    }
+            fun ?sNSNotificationArn ->
+              fun ?tags ->
+                fun ?autoConfigEnabled ->
+                  fun ?autoCreate ->
+                    fun ?groupingType ->
+                      fun ?attachMissingPermission ->
+                        fun () ->
+                          {
+                            resourceGroupName;
+                            opsCenterEnabled;
+                            cWEMonitorEnabled;
+                            opsItemSNSTopicArn;
+                            sNSNotificationArn;
+                            tags;
+                            autoConfigEnabled;
+                            autoCreate;
+                            groupingType;
+                            attachMissingPermission
+                          }
     let to_value x =
       structure_to_value
         [("ResourceGroupName",
@@ -6357,18 +7789,34 @@ module CreateApplicationRequest =
           (Option.map x.cWEMonitorEnabled ~f:CWEMonitorEnabled.to_value));
         ("OpsItemSNSTopicArn",
           (Option.map x.opsItemSNSTopicArn ~f:OpsItemSNSTopicArn.to_value));
+        ("SNSNotificationArn",
+          (Option.map x.sNSNotificationArn ~f:SNSNotificationArn.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("AutoConfigEnabled",
           (Option.map x.autoConfigEnabled ~f:AutoConfigEnabled.to_value));
-        ("AutoCreate", (Option.map x.autoCreate ~f:AutoCreate.to_value))]
+        ("AutoCreate", (Option.map x.autoCreate ~f:AutoCreate.to_value));
+        ("GroupingType",
+          (Option.map x.groupingType ~f:GroupingType.to_value));
+        ("AttachMissingPermission",
+          (Option.map x.attachMissingPermission
+             ~f:AttachMissingPermission.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let attachMissingPermission =
+        (Option.map ~f:AttachMissingPermission.of_xml)
+          (Xml.child xml_arg0 "AttachMissingPermission") in
+      let groupingType =
+        (Option.map ~f:GroupingType.of_xml)
+          (Xml.child xml_arg0 "GroupingType") in
       let autoCreate =
         (Option.map ~f:AutoCreate.of_xml) (Xml.child xml_arg0 "AutoCreate") in
       let autoConfigEnabled =
         (Option.map ~f:AutoConfigEnabled.of_xml)
           (Xml.child xml_arg0 "AutoConfigEnabled") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let sNSNotificationArn =
+        (Option.map ~f:SNSNotificationArn.of_xml)
+          (Xml.child xml_arg0 "SNSNotificationArn") in
       let opsItemSNSTopicArn =
         (Option.map ~f:OpsItemSNSTopicArn.of_xml)
           (Xml.child xml_arg0 "OpsItemSNSTopicArn") in
@@ -6381,24 +7829,170 @@ module CreateApplicationRequest =
       let resourceGroupName =
         (Option.map ~f:ResourceGroupName.of_xml)
           (Xml.child xml_arg0 "ResourceGroupName") in
-      make ?autoCreate ?autoConfigEnabled ?tags ?opsItemSNSTopicArn
+      make ?attachMissingPermission ?groupingType ?autoCreate
+        ?autoConfigEnabled ?tags ?sNSNotificationArn ?opsItemSNSTopicArn
         ?cWEMonitorEnabled ?opsCenterEnabled ?resourceGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let autoCreate = field_map json "AutoCreate" AutoCreate.of_json in
+    let of_json json__ =
+      let attachMissingPermission =
+        field_map json__ "AttachMissingPermission"
+          AttachMissingPermission.of_json in
+      let groupingType = field_map json__ "GroupingType" GroupingType.of_json in
+      let autoCreate = field_map json__ "AutoCreate" AutoCreate.of_json in
       let autoConfigEnabled =
-        field_map json "AutoConfigEnabled" AutoConfigEnabled.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "AutoConfigEnabled" AutoConfigEnabled.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let sNSNotificationArn =
+        field_map json__ "SNSNotificationArn" SNSNotificationArn.of_json in
       let opsItemSNSTopicArn =
-        field_map json "OpsItemSNSTopicArn" OpsItemSNSTopicArn.of_json in
+        field_map json__ "OpsItemSNSTopicArn" OpsItemSNSTopicArn.of_json in
       let cWEMonitorEnabled =
-        field_map json "CWEMonitorEnabled" CWEMonitorEnabled.of_json in
+        field_map json__ "CWEMonitorEnabled" CWEMonitorEnabled.of_json in
       let opsCenterEnabled =
-        field_map json "OpsCenterEnabled" OpsCenterEnabled.of_json in
+        field_map json__ "OpsCenterEnabled" OpsCenterEnabled.of_json in
       let resourceGroupName =
-        field_map json "ResourceGroupName" ResourceGroupName.of_json in
-      make ?autoCreate ?autoConfigEnabled ?tags ?opsItemSNSTopicArn
+        field_map json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ?attachMissingPermission ?groupingType ?autoCreate
+        ?autoConfigEnabled ?tags ?sNSNotificationArn ?opsItemSNSTopicArn
         ?cWEMonitorEnabled ?opsCenterEnabled ?resourceGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Adds an application that is created from a resource group."]
+module AddWorkloadResponse =
+  struct
+    type nonrec t =
+      {
+      workloadId: WorkloadId.t option [@ocaml.doc "The ID of the workload."];
+      workloadConfiguration: WorkloadConfiguration.t option
+        [@ocaml.doc
+          "The configuration settings of the workload. The value is the escaped JSON of the configuration."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?workloadId =
+      fun ?workloadConfiguration ->
+        fun () -> { workloadId; workloadConfiguration }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("WorkloadId", (Option.map x.workloadId ~f:WorkloadId.to_value));
+        ("WorkloadConfiguration",
+          (Option.map x.workloadConfiguration
+             ~f:WorkloadConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workloadConfiguration =
+        (Option.map ~f:WorkloadConfiguration.of_xml)
+          (Xml.child xml_arg0 "WorkloadConfiguration") in
+      let workloadId =
+        (Option.map ~f:WorkloadId.of_xml) (Xml.child xml_arg0 "WorkloadId") in
+      make ?workloadConfiguration ?workloadId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workloadConfiguration =
+        field_map json__ "WorkloadConfiguration"
+          WorkloadConfiguration.of_json in
+      let workloadId = field_map json__ "WorkloadId" WorkloadId.of_json in
+      make ?workloadConfiguration ?workloadId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds a workload to a component. Each component can have at most five workloads."]
+module AddWorkloadRequest =
+  struct
+    type nonrec t =
+      {
+      resourceGroupName: ResourceGroupName.t
+        [@ocaml.doc "The name of the resource group."];
+      componentName: ComponentName.t
+        [@ocaml.doc "The name of the component."];
+      workloadConfiguration: WorkloadConfiguration.t
+        [@ocaml.doc
+          "The configuration settings of the workload. The value is the escaped JSON of the configuration."]}
+    let context_ = "AddWorkloadRequest"
+    let make ~resourceGroupName =
+      fun ~componentName ->
+        fun ~workloadConfiguration ->
+          fun () ->
+            { resourceGroupName; componentName; workloadConfiguration }
+    let to_value x =
+      structure_to_value
+        [("ResourceGroupName",
+           (Some (ResourceGroupName.to_value x.resourceGroupName)));
+        ("ComponentName", (Some (ComponentName.to_value x.componentName)));
+        ("WorkloadConfiguration",
+          (Some (WorkloadConfiguration.to_value x.workloadConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workloadConfiguration =
+        WorkloadConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkloadConfiguration") in
+      let componentName =
+        ComponentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ComponentName") in
+      let resourceGroupName =
+        ResourceGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceGroupName") in
+      make ~workloadConfiguration ~componentName ~resourceGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workloadConfiguration =
+        field_map_exn json__ "WorkloadConfiguration"
+          WorkloadConfiguration.of_json in
+      let componentName =
+        field_map_exn json__ "ComponentName" ComponentName.of_json in
+      let resourceGroupName =
+        field_map_exn json__ "ResourceGroupName" ResourceGroupName.of_json in
+      make ~workloadConfiguration ~componentName ~resourceGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds a workload to a component. Each component can have at most five workloads."]

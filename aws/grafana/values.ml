@@ -155,6 +155,9 @@ module RoleValueList =
   struct
     type nonrec t = RoleValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RoleValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -197,9 +200,9 @@ module User =
       let id = SsoId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~type_ ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" UserType.of_json in
-      let id = field_map_exn json "id" SsoId.of_json in make ~type_ ~id ()
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" UserType.of_json in
+      let id = field_map_exn json__ "id" SsoId.of_json in make ~type_ ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that specifies one user or group in the workspace."]
@@ -225,10 +228,85 @@ module AuthenticationProviderTypes =
       of_string (string_of_json ~kind:"AuthenticationProviderTypes" j)
     let to_json = simple_to_json to_value
   end
+module PrefixListId =
+  struct
+    type nonrec t = string
+    let context_ = "PrefixListId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PrefixListId" j
+    let to_json = simple_to_json to_value
+  end
+module VpceId =
+  struct
+    type nonrec t = string
+    let context_ = "VpceId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VpceId" j
+    let to_json = simple_to_json to_value
+  end
+module SecurityGroupId =
+  struct
+    type nonrec t = string
+    let context_ = "SecurityGroupId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecurityGroupId" j
+    let to_json = simple_to_json to_value
+  end
+module SubnetId =
+  struct
+    type nonrec t = string
+    let context_ = "SubnetId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SubnetId" j
+    let to_json = simple_to_json to_value
+  end
 module AllowedOrganizations =
   struct
     type nonrec t = AllowedOrganization.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AllowedOrganization.to_value)) |>
         (fun x -> `List x)
@@ -255,66 +333,65 @@ module AssertionAttributes =
   struct
     type nonrec t =
       {
+      name: AssertionAttribute.t option
+        [@ocaml.doc
+          "The name of the attribute within the SAML assertion to use as the user full \"friendly\" names for SAML users."];
+      login: AssertionAttribute.t option
+        [@ocaml.doc
+          "The name of the attribute within the SAML assertion to use as the login names for SAML users."];
       email: AssertionAttribute.t option
         [@ocaml.doc
           "The name of the attribute within the SAML assertion to use as the email names for SAML users."];
       groups: AssertionAttribute.t option
         [@ocaml.doc
           "The name of the attribute within the SAML assertion to use as the user full \"friendly\" names for user groups."];
-      login: AssertionAttribute.t option
-        [@ocaml.doc
-          "The name of the attribute within the SAML assertion to use as the login names for SAML users."];
-      name: AssertionAttribute.t option
-        [@ocaml.doc
-          "The name of the attribute within the SAML assertion to use as the user full \"friendly\" names for SAML users."];
-      org: AssertionAttribute.t option
-        [@ocaml.doc
-          "The name of the attribute within the SAML assertion to use as the user full \"friendly\" names for the users' organizations."];
       role: AssertionAttribute.t option
         [@ocaml.doc
-          "The name of the attribute within the SAML assertion to use as the user roles."]}
-    let make ?email =
-      fun ?groups ->
-        fun ?login ->
-          fun ?name ->
-            fun ?org ->
-              fun ?role ->
-                fun () -> { email; groups; login; name; org; role }
+          "The name of the attribute within the SAML assertion to use as the user roles."];
+      org: AssertionAttribute.t option
+        [@ocaml.doc
+          "The name of the attribute within the SAML assertion to use as the user full \"friendly\" names for the users' organizations."]}
+    let make ?name =
+      fun ?login ->
+        fun ?email ->
+          fun ?groups ->
+            fun ?role ->
+              fun ?org -> fun () -> { name; login; email; groups; role; org }
     let to_value x =
       structure_to_value
-        [("email", (Option.map x.email ~f:AssertionAttribute.to_value));
-        ("groups", (Option.map x.groups ~f:AssertionAttribute.to_value));
+        [("name", (Option.map x.name ~f:AssertionAttribute.to_value));
         ("login", (Option.map x.login ~f:AssertionAttribute.to_value));
-        ("name", (Option.map x.name ~f:AssertionAttribute.to_value));
-        ("org", (Option.map x.org ~f:AssertionAttribute.to_value));
-        ("role", (Option.map x.role ~f:AssertionAttribute.to_value))]
+        ("email", (Option.map x.email ~f:AssertionAttribute.to_value));
+        ("groups", (Option.map x.groups ~f:AssertionAttribute.to_value));
+        ("role", (Option.map x.role ~f:AssertionAttribute.to_value));
+        ("org", (Option.map x.org ~f:AssertionAttribute.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let role =
-        (Option.map ~f:AssertionAttribute.of_xml) (Xml.child xml_arg0 "role") in
       let org =
         (Option.map ~f:AssertionAttribute.of_xml) (Xml.child xml_arg0 "org") in
-      let name =
-        (Option.map ~f:AssertionAttribute.of_xml) (Xml.child xml_arg0 "name") in
-      let login =
-        (Option.map ~f:AssertionAttribute.of_xml)
-          (Xml.child xml_arg0 "login") in
+      let role =
+        (Option.map ~f:AssertionAttribute.of_xml) (Xml.child xml_arg0 "role") in
       let groups =
         (Option.map ~f:AssertionAttribute.of_xml)
           (Xml.child xml_arg0 "groups") in
       let email =
         (Option.map ~f:AssertionAttribute.of_xml)
           (Xml.child xml_arg0 "email") in
-      make ?role ?org ?name ?login ?groups ?email ()
+      let login =
+        (Option.map ~f:AssertionAttribute.of_xml)
+          (Xml.child xml_arg0 "login") in
+      let name =
+        (Option.map ~f:AssertionAttribute.of_xml) (Xml.child xml_arg0 "name") in
+      make ?org ?role ?groups ?email ?login ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let role = field_map json "role" AssertionAttribute.of_json in
-      let org = field_map json "org" AssertionAttribute.of_json in
-      let name = field_map json "name" AssertionAttribute.of_json in
-      let login = field_map json "login" AssertionAttribute.of_json in
-      let groups = field_map json "groups" AssertionAttribute.of_json in
-      let email = field_map json "email" AssertionAttribute.of_json in
-      make ?role ?org ?name ?login ?groups ?email ()
+    let of_json json__ =
+      let org = field_map json__ "org" AssertionAttribute.of_json in
+      let role = field_map json__ "role" AssertionAttribute.of_json in
+      let groups = field_map json__ "groups" AssertionAttribute.of_json in
+      let email = field_map json__ "email" AssertionAttribute.of_json in
+      let login = field_map json__ "login" AssertionAttribute.of_json in
+      let name = field_map json__ "name" AssertionAttribute.of_json in
+      make ?org ?role ?groups ?email ?login ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that defines which attributes in the IdP assertion are to be used to define information about the users authenticated by the IdP to use the workspace."]
@@ -323,9 +400,9 @@ module IdpMetadata =
     type nonrec t =
       {
       url: IdpMetadataUrl.t option
-        [@ocaml.doc "The URL of the location containing the metadata."];
+        [@ocaml.doc "The URL of the location containing the IdP metadata."];
       xml: String_.t option
-        [@ocaml.doc "The actual full metadata file, in XML format."]}
+        [@ocaml.doc "The full IdP metadata, in XML format."]}
     let make ?url = fun ?xml -> fun () -> { url; xml }
     let to_value x =
       structure_to_value
@@ -338,13 +415,13 @@ module IdpMetadata =
         (Option.map ~f:IdpMetadataUrl.of_xml) (Xml.child xml_arg0 "url") in
       make ?xml ?url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let xml = field_map json "xml" String_.of_json in
-      let url = field_map json "url" IdpMetadataUrl.of_json in
+    let of_json json__ =
+      let xml = field_map json__ "xml" String_.of_json in
+      let url = field_map json__ "url" IdpMetadataUrl.of_json in
       make ?xml ?url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A structure containing the identity provider (IdP) metadata used to integrate the identity provider with this workspace. You can specify the metadata either by providing a URL to its location in the url parameter, or by specifying the full metadata in XML format in the xml parameter."]
+       "A structure containing the identity provider (IdP) metadata used to integrate the identity provider with this workspace. You can specify the metadata either by providing a URL to its location in the url parameter, or by specifying the full metadata in XML format in the xml parameter. Specifying both will cause an error."]
 module LoginValidityDuration =
   struct
     type nonrec t = int
@@ -363,43 +440,52 @@ module RoleValues =
   struct
     type nonrec t =
       {
-      admin: RoleValueList.t option
-        [@ocaml.doc
-          "A list of groups from the SAML assertion attribute to grant the Grafana Admin role to."];
       editor: RoleValueList.t option
         [@ocaml.doc
-          "A list of groups from the SAML assertion attribute to grant the Grafana Editor role to."]}
-    let make ?admin = fun ?editor -> fun () -> { admin; editor }
+          "A list of groups from the SAML assertion attribute to grant the Grafana Editor role to."];
+      admin: RoleValueList.t option
+        [@ocaml.doc
+          "A list of groups from the SAML assertion attribute to grant the Grafana Admin role to."]}
+    let make ?editor = fun ?admin -> fun () -> { editor; admin }
     let to_value x =
       structure_to_value
-        [("admin", (Option.map x.admin ~f:RoleValueList.to_value));
-        ("editor", (Option.map x.editor ~f:RoleValueList.to_value))]
+        [("editor", (Option.map x.editor ~f:RoleValueList.to_value));
+        ("admin", (Option.map x.admin ~f:RoleValueList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let editor =
-        (Option.map ~f:RoleValueList.of_xml) (Xml.child xml_arg0 "editor") in
       let admin =
         (Option.map ~f:RoleValueList.of_xml) (Xml.child xml_arg0 "admin") in
-      make ?editor ?admin ()
+      let editor =
+        (Option.map ~f:RoleValueList.of_xml) (Xml.child xml_arg0 "editor") in
+      make ?admin ?editor ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let editor = field_map json "editor" RoleValueList.of_json in
-      let admin = field_map json "admin" RoleValueList.of_json in
-      make ?editor ?admin ()
+    let of_json json__ =
+      let admin = field_map json__ "admin" RoleValueList.of_json in
+      let editor = field_map json__ "editor" RoleValueList.of_json in
+      make ?admin ?editor ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This structure defines which groups defined in the SAML assertion attribute are to be mapped to the Grafana Admin and Editor roles in the workspace."]
+       "This structure defines which groups defined in the SAML assertion attribute are to be mapped to the Grafana Admin and Editor roles in the workspace. SAML authenticated users not part of Admin or Editor role groups have Viewer permission over the workspace."]
 module Role =
   struct
     type nonrec t =
       | ADMIN 
       | EDITOR 
+      | VIEWER 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | ADMIN -> "ADMIN" | EDITOR -> "EDITOR" | Non_static_id s -> s
+      function
+      | ADMIN -> "ADMIN"
+      | EDITOR -> "EDITOR"
+      | VIEWER -> "VIEWER"
+      | Non_static_id s -> s
     let of_string =
-      function | "ADMIN" -> ADMIN | "EDITOR" -> EDITOR | x -> Non_static_id x
+      function
+      | "ADMIN" -> ADMIN
+      | "EDITOR" -> EDITOR
+      | "VIEWER" -> VIEWER
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -431,6 +517,9 @@ module UserList =
   struct
     type nonrec t = User.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:User.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -454,6 +543,9 @@ module AuthenticationProviders =
   struct
     type nonrec t = AuthenticationProviderTypes.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AuthenticationProviderTypes.to_value)) |>
         (fun x -> `List x)
@@ -562,30 +654,28 @@ module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      message: String_.t
+      name: String_.t option
         [@ocaml.doc
-          "A message describing why this field couldn't be validated."];
-      name: String_.t
+          "The name of the field that caused the validation error."];
+      message: String_.t option
         [@ocaml.doc
-          "The name of the field that caused the validation error."]}
-    let context_ = "ValidationExceptionField"
-    let make ~message = fun ~name -> fun () -> { message; name }
+          "A message describing why this field couldn't be validated."]}
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("name", (Some (String_.to_value x.name)))]
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~name ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~name ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains information about a request parameter that caused an error."]
@@ -600,6 +690,7 @@ module DataSourceType =
       | SITEWISE 
       | ATHENA 
       | REDSHIFT 
+      | TWINMAKER 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -612,6 +703,7 @@ module DataSourceType =
       | SITEWISE -> "SITEWISE"
       | ATHENA -> "ATHENA"
       | REDSHIFT -> "REDSHIFT"
+      | TWINMAKER -> "TWINMAKER"
       | Non_static_id s -> s
     let of_string =
       function
@@ -623,6 +715,7 @@ module DataSourceType =
       | "SITEWISE" -> SITEWISE
       | "ATHENA" -> ATHENA
       | "REDSHIFT" -> REDSHIFT
+      | "TWINMAKER" -> TWINMAKER
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -631,6 +724,59 @@ module DataSourceType =
       of_string (string_of_xml ~kind:"enumeration DataSourceType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"DataSourceType" j)
     let to_json = simple_to_json to_value
+  end
+module PrefixListIds =
+  struct
+    type nonrec t = PrefixListId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PrefixListId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PrefixListId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PrefixListIds" ~of_json:PrefixListId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VpceIds =
+  struct
+    type nonrec t = VpceId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpceId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpceId.of_xml)
+    let of_json j = list_of_json ~kind:"VpceIds" ~of_json:VpceId.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module OrganizationalUnit =
   struct
@@ -644,6 +790,69 @@ module OrganizationalUnit =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"OrganizationalUnit" j
     let to_json = simple_to_json to_value
+  end
+module SecurityGroupIds =
+  struct
+    type nonrec t = SecurityGroupId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecurityGroupId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecurityGroupIds" ~of_json:SecurityGroupId.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module SubnetIds =
+  struct
+    type nonrec t = SubnetId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:6) >>= (fun () -> check_list_min i ~min:2));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SubnetId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SubnetIds" ~of_json:SubnetId.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module SSOClientId =
   struct
@@ -662,77 +871,78 @@ module SamlConfiguration =
   struct
     type nonrec t =
       {
-      allowedOrganizations: AllowedOrganizations.t option
-        [@ocaml.doc
-          "Lists which organizations defined in the SAML assertion are allowed to use the Amazon Managed Grafana workspace. If this is empty, all organizations in the assertion attribute have access."];
-      assertionAttributes: AssertionAttributes.t option
-        [@ocaml.doc
-          "A structure that defines which attributes in the SAML assertion are to be used to define information about the users authenticated by that IdP to use the workspace."];
       idpMetadata: IdpMetadata.t
         [@ocaml.doc
           "A structure containing the identity provider (IdP) metadata used to integrate the identity provider with this workspace."];
-      loginValidityDuration: LoginValidityDuration.t option
+      assertionAttributes: AssertionAttributes.t option
         [@ocaml.doc
-          "How long a sign-on session by a SAML user is valid, before the user has to sign on again."];
+          "A structure that defines which attributes in the SAML assertion are to be used to define information about the users authenticated by that IdP to use the workspace."];
       roleValues: RoleValues.t option
         [@ocaml.doc
-          "A structure containing arrays that map group names in the SAML assertion to the Grafana Admin and Editor roles in the workspace."]}
+          "A structure containing arrays that map group names in the SAML assertion to the Grafana Admin and Editor roles in the workspace."];
+      allowedOrganizations: AllowedOrganizations.t option
+        [@ocaml.doc
+          "Lists which organizations defined in the SAML assertion are allowed to use the Amazon Managed Grafana workspace. If this is empty, all organizations in the assertion attribute have access."];
+      loginValidityDuration: LoginValidityDuration.t option
+        [@ocaml.doc
+          "How long a sign-on session by a SAML user is valid, before the user has to sign on again."]}
     let context_ = "SamlConfiguration"
-    let make ?allowedOrganizations =
-      fun ?assertionAttributes ->
-        fun ?loginValidityDuration ->
-          fun ?roleValues ->
+    let make ?assertionAttributes =
+      fun ?roleValues ->
+        fun ?allowedOrganizations ->
+          fun ?loginValidityDuration ->
             fun ~idpMetadata ->
               fun () ->
                 {
-                  allowedOrganizations;
                   assertionAttributes;
-                  loginValidityDuration;
                   roleValues;
+                  allowedOrganizations;
+                  loginValidityDuration;
                   idpMetadata
                 }
     let to_value x =
       structure_to_value
-        [("allowedOrganizations",
-           (Option.map x.allowedOrganizations
-              ~f:AllowedOrganizations.to_value));
+        [("idpMetadata", (Some (IdpMetadata.to_value x.idpMetadata)));
         ("assertionAttributes",
           (Option.map x.assertionAttributes ~f:AssertionAttributes.to_value));
-        ("idpMetadata", (Some (IdpMetadata.to_value x.idpMetadata)));
+        ("roleValues", (Option.map x.roleValues ~f:RoleValues.to_value));
+        ("allowedOrganizations",
+          (Option.map x.allowedOrganizations ~f:AllowedOrganizations.to_value));
         ("loginValidityDuration",
           (Option.map x.loginValidityDuration
-             ~f:LoginValidityDuration.to_value));
-        ("roleValues", (Option.map x.roleValues ~f:RoleValues.to_value))]
+             ~f:LoginValidityDuration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let roleValues =
-        (Option.map ~f:RoleValues.of_xml) (Xml.child xml_arg0 "roleValues") in
       let loginValidityDuration =
         (Option.map ~f:LoginValidityDuration.of_xml)
           (Xml.child xml_arg0 "loginValidityDuration") in
-      let idpMetadata =
-        IdpMetadata.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "idpMetadata") in
-      let assertionAttributes =
-        (Option.map ~f:AssertionAttributes.of_xml)
-          (Xml.child xml_arg0 "assertionAttributes") in
       let allowedOrganizations =
         (Option.map ~f:AllowedOrganizations.of_xml)
           (Xml.child xml_arg0 "allowedOrganizations") in
-      make ?roleValues ?loginValidityDuration ~idpMetadata
-        ?assertionAttributes ?allowedOrganizations ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleValues = field_map json "roleValues" RoleValues.of_json in
-      let loginValidityDuration =
-        field_map json "loginValidityDuration" LoginValidityDuration.of_json in
-      let idpMetadata = field_map_exn json "idpMetadata" IdpMetadata.of_json in
+      let roleValues =
+        (Option.map ~f:RoleValues.of_xml) (Xml.child xml_arg0 "roleValues") in
       let assertionAttributes =
-        field_map json "assertionAttributes" AssertionAttributes.of_json in
+        (Option.map ~f:AssertionAttributes.of_xml)
+          (Xml.child xml_arg0 "assertionAttributes") in
+      let idpMetadata =
+        IdpMetadata.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "idpMetadata") in
+      make ?loginValidityDuration ?allowedOrganizations ?roleValues
+        ?assertionAttributes ~idpMetadata ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let loginValidityDuration =
+        field_map json__ "loginValidityDuration"
+          LoginValidityDuration.of_json in
       let allowedOrganizations =
-        field_map json "allowedOrganizations" AllowedOrganizations.of_json in
-      make ?roleValues ?loginValidityDuration ~idpMetadata
-        ?assertionAttributes ?allowedOrganizations ()
+        field_map json__ "allowedOrganizations" AllowedOrganizations.of_json in
+      let roleValues = field_map json__ "roleValues" RoleValues.of_json in
+      let assertionAttributes =
+        field_map json__ "assertionAttributes" AssertionAttributes.of_json in
+      let idpMetadata =
+        field_map_exn json__ "idpMetadata" IdpMetadata.of_json in
+      make ?loginValidityDuration ?allowedOrganizations ?roleValues
+        ?assertionAttributes ~idpMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure containing information about how this workspace works with SAML."]
@@ -787,10 +997,10 @@ module UpdateInstruction =
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ~users ~role ~action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let users = field_map_exn json "users" UserList.of_json in
-      let role = field_map_exn json "role" Role.of_json in
-      let action = field_map_exn json "action" UpdateAction.of_json in
+    let of_json json__ =
+      let users = field_map_exn json__ "users" UserList.of_json in
+      let role = field_map_exn json__ "role" Role.of_json in
+      let action = field_map_exn json__ "action" UpdateAction.of_json in
       make ~users ~role ~action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -799,18 +1009,19 @@ module AuthenticationSummary =
   struct
     type nonrec t =
       {
-      providers: AuthenticationProviders.t
+      providers: AuthenticationProviders.t option
         [@ocaml.doc
-          "Specifies whether the workspace uses SAML, Amazon Web Services SSO, or both methods for user authentication."];
+          "Specifies whether the workspace uses SAML, IAM Identity Center, or both methods for user authentication."];
       samlConfigurationStatus: SamlConfigurationStatus.t option
         [@ocaml.doc
           "Specifies whether the workplace's user authentication method is fully configured."]}
-    let context_ = "AuthenticationSummary"
-    let make ?samlConfigurationStatus =
-      fun ~providers -> fun () -> { samlConfigurationStatus; providers }
+    let make ?providers =
+      fun ?samlConfigurationStatus ->
+        fun () -> { providers; samlConfigurationStatus }
     let to_value x =
       structure_to_value
-        [("providers", (Some (AuthenticationProviders.to_value x.providers)));
+        [("providers",
+           (Option.map x.providers ~f:AuthenticationProviders.to_value));
         ("samlConfigurationStatus",
           (Option.map x.samlConfigurationStatus
              ~f:SamlConfigurationStatus.to_value))]
@@ -820,20 +1031,20 @@ module AuthenticationSummary =
         (Option.map ~f:SamlConfigurationStatus.of_xml)
           (Xml.child xml_arg0 "samlConfigurationStatus") in
       let providers =
-        AuthenticationProviders.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "providers") in
-      make ?samlConfigurationStatus ~providers ()
+        (Option.map ~f:AuthenticationProviders.of_xml)
+          (Xml.child xml_arg0 "providers") in
+      make ?samlConfigurationStatus ?providers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let samlConfigurationStatus =
-        field_map json "samlConfigurationStatus"
+        field_map json__ "samlConfigurationStatus"
           SamlConfigurationStatus.of_json in
       let providers =
-        field_map_exn json "providers" AuthenticationProviders.of_json in
-      make ?samlConfigurationStatus ~providers ()
+        field_map json__ "providers" AuthenticationProviders.of_json in
+      make ?samlConfigurationStatus ?providers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A structure that describes whether the workspace uses SAML, Amazon Web Services SSO, or both methods for user authentication, and whether that authentication is fully configured."]
+       "A structure that describes whether the workspace uses SAML, IAM Identity Center, or both methods for user authentication, and whether that authentication is fully configured."]
 module Description =
   struct
     type nonrec t = string
@@ -870,6 +1081,24 @@ module Endpoint =
     let of_json j = string_of_json ~kind:"Endpoint" j
     let to_json = simple_to_json to_value
   end
+module GrafanaToken =
+  struct
+    type nonrec t = string
+    let context_ = "GrafanaToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:36) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GrafanaToken" j
+    let to_json = simple_to_json to_value
+  end
 module GrafanaVersion =
   struct
     type nonrec t = string
@@ -888,10 +1117,38 @@ module GrafanaVersion =
     let of_json j = string_of_json ~kind:"GrafanaVersion" j
     let to_json = simple_to_json to_value
   end
+module LicenseType =
+  struct
+    type nonrec t =
+      | ENTERPRISE 
+      | ENTERPRISE_FREE_TRIAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENTERPRISE -> "ENTERPRISE"
+      | ENTERPRISE_FREE_TRIAL -> "ENTERPRISE_FREE_TRIAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENTERPRISE" -> ENTERPRISE
+      | "ENTERPRISE_FREE_TRIAL" -> ENTERPRISE_FREE_TRIAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LicenseType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LicenseType" j)
+    let to_json = simple_to_json to_value
+  end
 module NotificationDestinationsList =
   struct
     type nonrec t = NotificationDestinationType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NotificationDestinationType.to_value)) |>
         (fun x -> `List x)
@@ -939,6 +1196,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -964,7 +1223,7 @@ module WorkspaceId =
     let context_ = "WorkspaceId"
     let make i =
       let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"^g-[0-9a-f]{10}$"); i
+        ok_or_failwith (check_pattern i ~pattern:"g-[0-9a-f]{10}"); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -979,8 +1238,7 @@ module WorkspaceName =
     let context_ = "WorkspaceName"
     let make i =
       let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"^[a-zA-Z0-9-._~]{1,255}$");
-        i
+        ok_or_failwith (check_pattern i ~pattern:"[a-zA-Z0-9-._~]{1,255}"); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -1003,6 +1261,8 @@ module WorkspaceStatus =
       | UPDATE_FAILED 
       | UPGRADE_FAILED 
       | LICENSE_REMOVAL_FAILED 
+      | VERSION_UPDATING 
+      | VERSION_UPDATE_FAILED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1018,6 +1278,8 @@ module WorkspaceStatus =
       | UPDATE_FAILED -> "UPDATE_FAILED"
       | UPGRADE_FAILED -> "UPGRADE_FAILED"
       | LICENSE_REMOVAL_FAILED -> "LICENSE_REMOVAL_FAILED"
+      | VERSION_UPDATING -> "VERSION_UPDATING"
+      | VERSION_UPDATE_FAILED -> "VERSION_UPDATE_FAILED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1032,6 +1294,8 @@ module WorkspaceStatus =
       | "UPDATE_FAILED" -> UPDATE_FAILED
       | "UPGRADE_FAILED" -> UPGRADE_FAILED
       | "LICENSE_REMOVAL_FAILED" -> LICENSE_REMOVAL_FAILED
+      | "VERSION_UPDATING" -> VERSION_UPDATING
+      | "VERSION_UPDATE_FAILED" -> VERSION_UPDATE_FAILED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1058,6 +1322,9 @@ module ValidationExceptionFieldList =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -1156,6 +1423,9 @@ module DataSourceTypesList =
   struct
     type nonrec t = DataSourceType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataSourceType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1177,6 +1447,31 @@ module DataSourceTypesList =
         ~of_json:DataSourceType.of_json j
     let to_json v = composed_to_json to_value v
   end
+module IPAddressType =
+  struct
+    type nonrec t =
+      | IPv4 
+      | DualStack 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IPv4 -> "IPv4"
+      | DualStack -> "DualStack"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IPv4" -> IPv4
+      | "DualStack" -> DualStack
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IPAddressType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IPAddressType" j)
+    let to_json = simple_to_json to_value
+  end
 module IamRoleArn =
   struct
     type nonrec t = string
@@ -1195,31 +1490,60 @@ module IamRoleArn =
     let of_json j = string_of_json ~kind:"IamRoleArn" j
     let to_json = simple_to_json to_value
   end
-module LicenseType =
+module KmsKeyId =
   struct
-    type nonrec t =
-      | ENTERPRISE 
-      | ENTERPRISE_FREE_TRIAL 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ENTERPRISE -> "ENTERPRISE"
-      | ENTERPRISE_FREE_TRIAL -> "ENTERPRISE_FREE_TRIAL"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ENTERPRISE" -> ENTERPRISE
-      | "ENTERPRISE_FREE_TRIAL" -> ENTERPRISE_FREE_TRIAL
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+    type nonrec t = string
+    let context_ = "KmsKeyId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9:/_-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration LicenseType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"LicenseType" j)
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KmsKeyId" j
     let to_json = simple_to_json to_value
   end
+module NetworkAccessConfiguration =
+  struct
+    type nonrec t =
+      {
+      prefixListIds: PrefixListIds.t
+        [@ocaml.doc
+          "An array of prefix list IDs. A prefix list is a list of CIDR ranges of IP addresses. The IP addresses specified are allowed to access your workspace. If the list is not included in the configuration (passed an empty array) then no IP addresses are allowed to access the workspace. You create a prefix list using the Amazon VPC console. Prefix list IDs have the format pl-1a2b3c4d . For more information about prefix lists, see Group CIDR blocks using managed prefix listsin the Amazon Virtual Private Cloud User Guide."];
+      vpceIds: VpceIds.t
+        [@ocaml.doc
+          "An array of Amazon VPC endpoint IDs for the workspace. You can create VPC endpoints to your Amazon Managed Grafana workspace for access from within a VPC. If a NetworkAccessConfiguration is specified then only VPC endpoints specified here are allowed to access the workspace. If you pass in an empty array of strings, then no VPCs are allowed to access the workspace. VPC endpoint IDs have the format vpce-1a2b3c4d . For more information about creating an interface VPC endpoint, see Interface VPC endpoints in the Amazon Managed Grafana User Guide. The only VPC endpoints that can be specified here are interface VPC endpoints for Grafana workspaces (using the com.amazonaws.\\[region\\].grafana-workspace service endpoint). Other VPC endpoints are ignored."]}
+    let context_ = "NetworkAccessConfiguration"
+    let make ~prefixListIds =
+      fun ~vpceIds -> fun () -> { prefixListIds; vpceIds }
+    let to_value x =
+      structure_to_value
+        [("prefixListIds", (Some (PrefixListIds.to_value x.prefixListIds)));
+        ("vpceIds", (Some (VpceIds.to_value x.vpceIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpceIds =
+        VpceIds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vpceIds") in
+      let prefixListIds =
+        PrefixListIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "prefixListIds") in
+      make ~vpceIds ~prefixListIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpceIds = field_map_exn json__ "vpceIds" VpceIds.of_json in
+      let prefixListIds =
+        field_map_exn json__ "prefixListIds" PrefixListIds.of_json in
+      make ~vpceIds ~prefixListIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration settings for in-bound network access to your workspace. When this is configured, only listed IP addresses and VPC endpoints will be able to access your workspace. Standard Grafana authentication and authorization are still required. Access is granted to a caller that is in either the IP address list or the VPC endpoint list - they do not need to be in both. If this is not configured, or is removed, then all IP addresses and VPC endpoints are allowed. Standard Grafana authentication and authorization are still required. While both prefixListIds and vpceIds are required, you can pass in an empty array of strings for either parameter if you do not want to allow any of that type. If both are passed as empty arrays, no traffic is allowed to the workspace, because only explicitly allowed connections are accepted."]
 module OrganizationRoleName =
   struct
     type nonrec t = string
@@ -1242,6 +1566,9 @@ module OrganizationalUnitList =
   struct
     type nonrec t = OrganizationalUnit.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationalUnit.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1301,13 +1628,49 @@ module StackSetName =
     let of_json j = string_of_json ~kind:"StackSetName" j
     let to_json = simple_to_json to_value
   end
+module VpcConfiguration =
+  struct
+    type nonrec t =
+      {
+      securityGroupIds: SecurityGroupIds.t
+        [@ocaml.doc
+          "The list of Amazon EC2 security group IDs attached to the Amazon VPC for your Grafana workspace to connect. Duplicates not allowed."];
+      subnetIds: SubnetIds.t
+        [@ocaml.doc
+          "The list of Amazon EC2 subnet IDs created in the Amazon VPC for your Grafana workspace to connect. Duplicates not allowed."]}
+    let context_ = "VpcConfiguration"
+    let make ~securityGroupIds =
+      fun ~subnetIds -> fun () -> { securityGroupIds; subnetIds }
+    let to_value x =
+      structure_to_value
+        [("securityGroupIds",
+           (Some (SecurityGroupIds.to_value x.securityGroupIds)));
+        ("subnetIds", (Some (SubnetIds.to_value x.subnetIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subnetIds =
+        SubnetIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "subnetIds") in
+      let securityGroupIds =
+        SecurityGroupIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "securityGroupIds") in
+      make ~subnetIds ~securityGroupIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subnetIds = field_map_exn json__ "subnetIds" SubnetIds.of_json in
+      let securityGroupIds =
+        field_map_exn json__ "securityGroupIds" SecurityGroupIds.of_json in
+      make ~subnetIds ~securityGroupIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration settings for an Amazon VPC that contains data sources for your Grafana workspace to connect to. Provided securityGroupIds and subnetIds must be part of the same VPC. Connecting to a private VPC is not yet available in the Asia Pacific (Seoul) Region (ap-northeast-2)."]
 module AwsSsoAuthentication =
   struct
     type nonrec t =
       {
       ssoClientId: SSOClientId.t option
         [@ocaml.doc
-          "The ID of the Amazon Web Services SSO-managed application that is created by Amazon Managed Grafana."]}
+          "The ID of the IAM Identity Center-managed application that is created by Amazon Managed Grafana."]}
     let make ?ssoClientId = fun () -> { ssoClientId }
     let to_value x =
       structure_to_value
@@ -1318,46 +1681,45 @@ module AwsSsoAuthentication =
         (Option.map ~f:SSOClientId.of_xml) (Xml.child xml_arg0 "ssoClientId") in
       make ?ssoClientId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ssoClientId = field_map json "ssoClientId" SSOClientId.of_json in
+    let of_json json__ =
+      let ssoClientId = field_map json__ "ssoClientId" SSOClientId.of_json in
       make ?ssoClientId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A structure containing information about how this workspace works with Amazon Web Services SSO."]
+       "A structure containing information about how this workspace works with IAM Identity Center."]
 module SamlAuthentication =
   struct
     type nonrec t =
       {
+      status: SamlConfigurationStatus.t option
+        [@ocaml.doc
+          "Specifies whether the workspace's SAML configuration is complete."];
       configuration: SamlConfiguration.t option
         [@ocaml.doc
-          "A structure containing details about how this workspace works with SAML."];
-      status: SamlConfigurationStatus.t
-        [@ocaml.doc
-          "Specifies whether the workspace's SAML configuration is complete."]}
-    let context_ = "SamlAuthentication"
-    let make ?configuration =
-      fun ~status -> fun () -> { configuration; status }
+          "A structure containing details about how this workspace works with SAML."]}
+    let make ?status =
+      fun ?configuration -> fun () -> { status; configuration }
     let to_value x =
       structure_to_value
-        [("configuration",
-           (Option.map x.configuration ~f:SamlConfiguration.to_value));
-        ("status", (Some (SamlConfigurationStatus.to_value x.status)))]
+        [("status",
+           (Option.map x.status ~f:SamlConfigurationStatus.to_value));
+        ("configuration",
+          (Option.map x.configuration ~f:SamlConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let status =
-        SamlConfigurationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
       let configuration =
         (Option.map ~f:SamlConfiguration.of_xml)
           (Xml.child xml_arg0 "configuration") in
-      make ~status ?configuration ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let status =
-        field_map_exn json "status" SamlConfigurationStatus.of_json in
+        (Option.map ~f:SamlConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?configuration ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let configuration =
-        field_map json "configuration" SamlConfiguration.of_json in
-      make ~status ?configuration ()
+        field_map json__ "configuration" SamlConfiguration.of_json in
+      let status = field_map json__ "status" SamlConfigurationStatus.of_json in
+      make ?configuration ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure containing information about how this workspace works with SAML."]
@@ -1365,35 +1727,34 @@ module UpdateError =
   struct
     type nonrec t =
       {
-      causedBy: UpdateInstruction.t
-        [@ocaml.doc "Specifies which permission update caused the error."];
-      code: UpdateErrorCodeInteger.t [@ocaml.doc "The error code."];
-      message: String_.t [@ocaml.doc "The message for this error."]}
-    let context_ = "UpdateError"
-    let make ~causedBy =
-      fun ~code -> fun ~message -> fun () -> { causedBy; code; message }
+      code: UpdateErrorCodeInteger.t option [@ocaml.doc "The error code."];
+      message: String_.t option [@ocaml.doc "The message for this error."];
+      causedBy: UpdateInstruction.t option
+        [@ocaml.doc "Specifies which permission update caused the error."]}
+    let make ?code =
+      fun ?message -> fun ?causedBy -> fun () -> { code; message; causedBy }
     let to_value x =
       structure_to_value
-        [("causedBy", (Some (UpdateInstruction.to_value x.causedBy)));
-        ("code", (Some (UpdateErrorCodeInteger.to_value x.code)));
-        ("message", (Some (String_.to_value x.message)))]
+        [("code", (Option.map x.code ~f:UpdateErrorCodeInteger.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value));
+        ("causedBy", (Option.map x.causedBy ~f:UpdateInstruction.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      let code =
-        UpdateErrorCodeInteger.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "code") in
       let causedBy =
-        UpdateInstruction.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "causedBy") in
-      make ~message ~code ~causedBy ()
+        (Option.map ~f:UpdateInstruction.of_xml)
+          (Xml.child xml_arg0 "causedBy") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let code =
+        (Option.map ~f:UpdateErrorCodeInteger.of_xml)
+          (Xml.child xml_arg0 "code") in
+      make ?causedBy ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      let code = field_map_exn json "code" UpdateErrorCodeInteger.of_json in
-      let causedBy = field_map_exn json "causedBy" UpdateInstruction.of_json in
-      make ~message ~code ~causedBy ()
+    let of_json json__ =
+      let causedBy = field_map json__ "causedBy" UpdateInstruction.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      let code = field_map json__ "code" UpdateErrorCodeInteger.of_json in
+      make ?causedBy ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure containing information about one error encountered while performing an UpdatePermissions operation."]
@@ -1401,171 +1762,291 @@ module WorkspaceSummary =
   struct
     type nonrec t =
       {
-      authentication: AuthenticationSummary.t
-        [@ocaml.doc
-          "A structure containing information about the authentication methods used in the workspace."];
-      created: Timestamp.t
+      created: Timestamp.t option
         [@ocaml.doc "The date that the workspace was created."];
       description: Description.t option
         [@ocaml.doc "The customer-entered description of the workspace."];
-      endpoint: Endpoint.t
+      endpoint: Endpoint.t option
         [@ocaml.doc
           "The URL endpoint to use to access the Grafana console in the workspace."];
-      grafanaVersion: GrafanaVersion.t
+      grafanaVersion: GrafanaVersion.t option
         [@ocaml.doc "The Grafana version that the workspace is running."];
-      id: WorkspaceId.t [@ocaml.doc "The unique ID of the workspace."];
-      modified: Timestamp.t
+      id: WorkspaceId.t option [@ocaml.doc "The unique ID of the workspace."];
+      modified: Timestamp.t option
         [@ocaml.doc "The most recent date that the workspace was modified."];
       name: WorkspaceName.t option [@ocaml.doc "The name of the workspace."];
       notificationDestinations: NotificationDestinationsList.t option
         [@ocaml.doc
           "The Amazon Web Services notification channels that Amazon Managed Grafana can automatically create IAM roles and permissions for, which allows Amazon Managed Grafana to use these channels."];
-      status: WorkspaceStatus.t
+      status: WorkspaceStatus.t option
         [@ocaml.doc "The current status of the workspace."];
+      authentication: AuthenticationSummary.t option
+        [@ocaml.doc
+          "A structure containing information about the authentication methods used in the workspace."];
       tags: TagMap.t option
-        [@ocaml.doc "The list of tags associated with the workspace."]}
-    let context_ = "WorkspaceSummary"
-    let make ?description =
-      fun ?name ->
-        fun ?notificationDestinations ->
-          fun ?tags ->
-            fun ~authentication ->
-              fun ~created ->
-                fun ~endpoint ->
-                  fun ~grafanaVersion ->
-                    fun ~id ->
-                      fun ~modified ->
-                        fun ~status ->
-                          fun () ->
-                            {
-                              description;
-                              name;
-                              notificationDestinations;
-                              tags;
-                              authentication;
-                              created;
-                              endpoint;
-                              grafanaVersion;
-                              id;
-                              modified;
-                              status
-                            }
+        [@ocaml.doc "The list of tags associated with the workspace."];
+      licenseType: LicenseType.t option
+        [@ocaml.doc
+          "Specifies whether this workspace has a full Grafana Enterprise license. Amazon Managed Grafana workspaces no longer support Grafana Enterprise free trials."];
+      grafanaToken: GrafanaToken.t option
+        [@ocaml.doc
+          "The token that ties this workspace to a Grafana Labs account. For more information, see Link your account with Grafana Labs."]}
+    let make ?created =
+      fun ?description ->
+        fun ?endpoint ->
+          fun ?grafanaVersion ->
+            fun ?id ->
+              fun ?modified ->
+                fun ?name ->
+                  fun ?notificationDestinations ->
+                    fun ?status ->
+                      fun ?authentication ->
+                        fun ?tags ->
+                          fun ?licenseType ->
+                            fun ?grafanaToken ->
+                              fun () ->
+                                {
+                                  created;
+                                  description;
+                                  endpoint;
+                                  grafanaVersion;
+                                  id;
+                                  modified;
+                                  name;
+                                  notificationDestinations;
+                                  status;
+                                  authentication;
+                                  tags;
+                                  licenseType;
+                                  grafanaToken
+                                }
     let to_value x =
       structure_to_value
-        [("authentication",
-           (Some (AuthenticationSummary.to_value x.authentication)));
-        ("created", (Some (Timestamp.to_value x.created)));
+        [("created", (Option.map x.created ~f:Timestamp.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
-        ("endpoint", (Some (Endpoint.to_value x.endpoint)));
-        ("grafanaVersion", (Some (GrafanaVersion.to_value x.grafanaVersion)));
-        ("id", (Some (WorkspaceId.to_value x.id)));
-        ("modified", (Some (Timestamp.to_value x.modified)));
+        ("endpoint", (Option.map x.endpoint ~f:Endpoint.to_value));
+        ("grafanaVersion",
+          (Option.map x.grafanaVersion ~f:GrafanaVersion.to_value));
+        ("id", (Option.map x.id ~f:WorkspaceId.to_value));
+        ("modified", (Option.map x.modified ~f:Timestamp.to_value));
         ("name", (Option.map x.name ~f:WorkspaceName.to_value));
         ("notificationDestinations",
           (Option.map x.notificationDestinations
              ~f:NotificationDestinationsList.to_value));
-        ("status", (Some (WorkspaceStatus.to_value x.status)));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("status", (Option.map x.status ~f:WorkspaceStatus.to_value));
+        ("authentication",
+          (Option.map x.authentication ~f:AuthenticationSummary.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("licenseType", (Option.map x.licenseType ~f:LicenseType.to_value));
+        ("grafanaToken",
+          (Option.map x.grafanaToken ~f:GrafanaToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let grafanaToken =
+        (Option.map ~f:GrafanaToken.of_xml)
+          (Xml.child xml_arg0 "grafanaToken") in
+      let licenseType =
+        (Option.map ~f:LicenseType.of_xml) (Xml.child xml_arg0 "licenseType") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let authentication =
+        (Option.map ~f:AuthenticationSummary.of_xml)
+          (Xml.child xml_arg0 "authentication") in
       let status =
-        WorkspaceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:WorkspaceStatus.of_xml) (Xml.child xml_arg0 "status") in
       let notificationDestinations =
         (Option.map ~f:NotificationDestinationsList.of_xml)
           (Xml.child xml_arg0 "notificationDestinations") in
       let name =
         (Option.map ~f:WorkspaceName.of_xml) (Xml.child xml_arg0 "name") in
       let modified =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "modified") in
-      let id =
-        WorkspaceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modified") in
+      let id = (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "id") in
       let grafanaVersion =
-        GrafanaVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "grafanaVersion") in
+        (Option.map ~f:GrafanaVersion.of_xml)
+          (Xml.child xml_arg0 "grafanaVersion") in
       let endpoint =
-        Endpoint.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endpoint") in
+        (Option.map ~f:Endpoint.of_xml) (Xml.child xml_arg0 "endpoint") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let created =
-        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "created") in
-      let authentication =
-        AuthenticationSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "authentication") in
-      make ?tags ~status ?notificationDestinations ?name ~modified ~id
-        ~grafanaVersion ~endpoint ?description ~created ~authentication ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "created") in
+      make ?grafanaToken ?licenseType ?tags ?authentication ?status
+        ?notificationDestinations ?name ?modified ?id ?grafanaVersion
+        ?endpoint ?description ?created ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let status = field_map_exn json "status" WorkspaceStatus.of_json in
-      let notificationDestinations =
-        field_map json "notificationDestinations"
-          NotificationDestinationsList.of_json in
-      let name = field_map json "name" WorkspaceName.of_json in
-      let modified = field_map_exn json "modified" Timestamp.of_json in
-      let id = field_map_exn json "id" WorkspaceId.of_json in
-      let grafanaVersion =
-        field_map_exn json "grafanaVersion" GrafanaVersion.of_json in
-      let endpoint = field_map_exn json "endpoint" Endpoint.of_json in
-      let description = field_map json "description" Description.of_json in
-      let created = field_map_exn json "created" Timestamp.of_json in
+    let of_json json__ =
+      let grafanaToken = field_map json__ "grafanaToken" GrafanaToken.of_json in
+      let licenseType = field_map json__ "licenseType" LicenseType.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let authentication =
-        field_map_exn json "authentication" AuthenticationSummary.of_json in
-      make ?tags ~status ?notificationDestinations ?name ~modified ~id
-        ~grafanaVersion ~endpoint ?description ~created ~authentication ()
+        field_map json__ "authentication" AuthenticationSummary.of_json in
+      let status = field_map json__ "status" WorkspaceStatus.of_json in
+      let notificationDestinations =
+        field_map json__ "notificationDestinations"
+          NotificationDestinationsList.of_json in
+      let name = field_map json__ "name" WorkspaceName.of_json in
+      let modified = field_map json__ "modified" Timestamp.of_json in
+      let id = field_map json__ "id" WorkspaceId.of_json in
+      let grafanaVersion =
+        field_map json__ "grafanaVersion" GrafanaVersion.of_json in
+      let endpoint = field_map json__ "endpoint" Endpoint.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let created = field_map json__ "created" Timestamp.of_json in
+      make ?grafanaToken ?licenseType ?tags ?authentication ?status
+        ?notificationDestinations ?name ?modified ?id ?grafanaVersion
+        ?endpoint ?description ?created ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains some information about one workspace in the account."]
+module ServiceAccountSummary =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option
+        [@ocaml.doc "The unique ID of the service account."];
+      name: String_.t option [@ocaml.doc "The name of the service account."];
+      isDisabled: String_.t option
+        [@ocaml.doc
+          "Returns true if the service account is disabled. Service accounts can be disabled and enabled in the Amazon Managed Grafana console."];
+      grafanaRole: Role.t option
+        [@ocaml.doc
+          "The role of the service account, which sets the permission level used when calling Grafana APIs."]}
+    let make ?id =
+      fun ?name ->
+        fun ?isDisabled ->
+          fun ?grafanaRole -> fun () -> { id; name; isDisabled; grafanaRole }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:String_.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("isDisabled", (Option.map x.isDisabled ~f:String_.to_value));
+        ("grafanaRole", (Option.map x.grafanaRole ~f:Role.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let grafanaRole =
+        (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "grafanaRole") in
+      let isDisabled =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "isDisabled") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
+      make ?grafanaRole ?isDisabled ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let grafanaRole = field_map json__ "grafanaRole" Role.of_json in
+      let isDisabled = field_map json__ "isDisabled" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      make ?grafanaRole ?isDisabled ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains the information about one service account."]
+module ServiceAccountTokenSummary =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option
+        [@ocaml.doc "The unique ID of the service account token."];
+      name: String_.t option
+        [@ocaml.doc "The name of the service account token."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "When the service account token was created."];
+      expiresAt: Timestamp.t option
+        [@ocaml.doc "When the service account token will expire."];
+      lastUsedAt: Timestamp.t option
+        [@ocaml.doc
+          "The last time the token was used to authorize a Grafana HTTP API."]}
+    let make ?id =
+      fun ?name ->
+        fun ?createdAt ->
+          fun ?expiresAt ->
+            fun ?lastUsedAt ->
+              fun () -> { id; name; createdAt; expiresAt; lastUsedAt }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:String_.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("expiresAt", (Option.map x.expiresAt ~f:Timestamp.to_value));
+        ("lastUsedAt", (Option.map x.lastUsedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUsedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastUsedAt") in
+      let expiresAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "expiresAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
+      make ?lastUsedAt ?expiresAt ?createdAt ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUsedAt = field_map json__ "lastUsedAt" Timestamp.of_json in
+      let expiresAt = field_map json__ "expiresAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      make ?lastUsedAt ?expiresAt ?createdAt ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains the information about a service account token."]
 module PermissionEntry =
   struct
     type nonrec t =
       {
-      role: Role.t
+      user: User.t option
         [@ocaml.doc
-          "Specifies whether the user or group has the Admin or Editor role."];
-      user: User.t
+          "A structure with the ID of the user or group with this role."];
+      role: Role.t option
         [@ocaml.doc
-          "A structure with the ID of the user or group with this role."]}
-    let context_ = "PermissionEntry"
-    let make ~role = fun ~user -> fun () -> { role; user }
+          "Specifies whether the user or group has the Admin, Editor, or Viewer role."]}
+    let make ?user = fun ?role -> fun () -> { user; role }
     let to_value x =
       structure_to_value
-        [("role", (Some (Role.to_value x.role)));
-        ("user", (Some (User.to_value x.user)))]
+        [("user", (Option.map x.user ~f:User.to_value));
+        ("role", (Option.map x.role ~f:Role.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let user =
-        User.of_xml (Xml.child_exn ~context:context_ xml_arg0 "user") in
-      let role =
-        Role.of_xml (Xml.child_exn ~context:context_ xml_arg0 "role") in
-      make ~user ~role ()
+      let role = (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "role") in
+      let user = (Option.map ~f:User.of_xml) (Xml.child xml_arg0 "user") in
+      make ?role ?user ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let user = field_map_exn json "user" User.of_json in
-      let role = field_map_exn json "role" Role.of_json in
-      make ~user ~role ()
+    let of_json json__ =
+      let role = field_map json__ "role" Role.of_json in
+      let user = field_map json__ "user" User.of_json in make ?role ?user ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A structure containing the identity of one user or group and the Admin or Editor role that they have."]
+       "A structure containing the identity of one user or group and the Admin, Editor, or Viewer role that they have."]
+module ServiceAccountTokenKey =
+  struct
+    type nonrec t = string
+    let context_ = "ServiceAccountTokenKey"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServiceAccountTokenKey" j
+    let to_json = simple_to_json to_value
+  end
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You do not have sufficient permissions to perform this action."]
@@ -1573,39 +2054,36 @@ module ConflictException =
   struct
     type nonrec t =
       {
-      message: String_.t [@ocaml.doc "A description of the error."];
-      resourceId: String_.t
+      message: String_.t option [@ocaml.doc "A description of the error."];
+      resourceId: String_.t option
         [@ocaml.doc
           "The ID of the resource that is associated with the error."];
-      resourceType: String_.t
+      resourceType: String_.t option
         [@ocaml.doc
           "The type of the resource that is associated with the error."]}
-    let context_ = "ConflictException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)))]
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A resource was in an inconsistent state during an update or a deletion."]
@@ -1613,29 +2091,28 @@ module InternalServerException =
   struct
     type nonrec t =
       {
-      message: String_.t [@ocaml.doc "A description of the error."];
+      message: String_.t option [@ocaml.doc "A description of the error."];
       retryAfterSeconds: Integer.t option
         [@ocaml.doc "How long to wait before you retry this operation."]}
-    let context_ = "InternalServerException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("Retry-After", (Option.map x.retryAfterSeconds ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let retryAfterSeconds =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Retry-After") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" Integer.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "retryAfterSeconds" Integer.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Unexpected error while processing the request. Retry the request."]
@@ -1643,87 +2120,83 @@ module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: String_.t
+      message: String_.t option
         [@ocaml.doc
           "The value of a parameter in the request caused an error."];
-      resourceId: String_.t
+      resourceId: String_.t option
         [@ocaml.doc
           "The ID of the resource that is associated with the error."];
-      resourceType: String_.t
+      resourceType: String_.t option
         [@ocaml.doc
           "The type of the resource that is associated with the error."]}
-    let context_ = "ResourceNotFoundException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)))]
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request references a resource that does not exist."]
 module ThrottlingException =
   struct
     type nonrec t =
       {
-      message: String_.t [@ocaml.doc "A description of the error."];
+      message: String_.t option [@ocaml.doc "A description of the error."];
+      serviceCode: String_.t option
+        [@ocaml.doc
+          "The ID of the service that is associated with the error."];
       quotaCode: String_.t option
         [@ocaml.doc "The ID of the service quota that was exceeded."];
       retryAfterSeconds: Integer.t option
         [@ocaml.doc
-          "The value of a parameter in the request caused an error."];
-      serviceCode: String_.t option
-        [@ocaml.doc
-          "The ID of the service that is associated with the error."]}
-    let context_ = "ThrottlingException"
-    let make ?quotaCode =
-      fun ?retryAfterSeconds ->
-        fun ?serviceCode ->
-          fun ~message ->
-            fun () -> { quotaCode; retryAfterSeconds; serviceCode; message }
+          "The value of a parameter in the request caused an error."]}
+    let make ?message =
+      fun ?serviceCode ->
+        fun ?quotaCode ->
+          fun ?retryAfterSeconds ->
+            fun () -> { message; serviceCode; quotaCode; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("serviceCode", (Option.map x.serviceCode ~f:String_.to_value));
         ("quotaCode", (Option.map x.quotaCode ~f:String_.to_value));
-        ("Retry-After", (Option.map x.retryAfterSeconds ~f:Integer.to_value));
-        ("serviceCode", (Option.map x.serviceCode ~f:String_.to_value))]
+        ("Retry-After", (Option.map x.retryAfterSeconds ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let serviceCode =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceCode") in
       let retryAfterSeconds =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Retry-After") in
       let quotaCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaCode") in
+      let serviceCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceCode") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?quotaCode ?serviceCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map json "serviceCode" String_.of_json in
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" Integer.of_json in
-      let quotaCode = field_map json "quotaCode" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
+        field_map json__ "retryAfterSeconds" Integer.of_json in
+      let quotaCode = field_map json__ "quotaCode" String_.of_json in
+      let serviceCode = field_map json__ "serviceCode" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?retryAfterSeconds ?quotaCode ?serviceCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request was denied because of request throttling. Retry the request."]
@@ -1731,40 +2204,41 @@ module ValidationException =
   struct
     type nonrec t =
       {
+      message: String_.t option [@ocaml.doc "A description of the error."];
+      reason: ValidationExceptionReason.t option
+        [@ocaml.doc "The reason that the operation failed."];
       fieldList: ValidationExceptionFieldList.t option
         [@ocaml.doc
-          "A list of fields that might be associated with the error."];
-      message: String_.t [@ocaml.doc "A description of the error."];
-      reason: ValidationExceptionReason.t
-        [@ocaml.doc "The reason that the operation failed."]}
-    let context_ = "ValidationException"
-    let make ?fieldList =
-      fun ~message -> fun ~reason -> fun () -> { fieldList; message; reason }
+          "A list of fields that might be associated with the error."]}
+    let make ?message =
+      fun ?reason ->
+        fun ?fieldList -> fun () -> { message; reason; fieldList }
     let to_value x =
       structure_to_value
-        [("fieldList",
-           (Option.map x.fieldList ~f:ValidationExceptionFieldList.to_value));
-        ("message", (Some (String_.to_value x.message)));
-        ("reason", (Some (ValidationExceptionReason.to_value x.reason)))]
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("reason",
+          (Option.map x.reason ~f:ValidationExceptionReason.to_value));
+        ("fieldList",
+          (Option.map x.fieldList ~f:ValidationExceptionFieldList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let reason =
-        ValidationExceptionReason.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "reason") in
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       let fieldList =
         (Option.map ~f:ValidationExceptionFieldList.of_xml)
           (Xml.child xml_arg0 "fieldList") in
-      make ~reason ~message ?fieldList ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
       let reason =
-        field_map_exn json "reason" ValidationExceptionReason.of_json in
-      let message = field_map_exn json "message" String_.of_json in
+        (Option.map ~f:ValidationExceptionReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?fieldList ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
       let fieldList =
-        field_map json "fieldList" ValidationExceptionFieldList.of_json in
-      make ~reason ~message ?fieldList ()
+        field_map json__ "fieldList" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?fieldList ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The value of a parameter in the request caused an error."]
 module WorkspaceDescription =
@@ -1774,133 +2248,152 @@ module WorkspaceDescription =
       accountAccessType: AccountAccessType.t option
         [@ocaml.doc
           "Specifies whether the workspace can access Amazon Web Services resources in this Amazon Web Services account only, or whether it can also access Amazon Web Services resources in other accounts in the same organization. If this is ORGANIZATION, the workspaceOrganizationalUnits parameter specifies which organizational units the workspace can access."];
-      authentication: AuthenticationSummary.t
-        [@ocaml.doc
-          "A structure that describes whether the workspace uses SAML, Amazon Web Services SSO, or both methods for user authentication."];
-      created: Timestamp.t
+      created: Timestamp.t option
         [@ocaml.doc "The date that the workspace was created."];
-      dataSources: DataSourceTypesList.t
+      dataSources: DataSourceTypesList.t option
         [@ocaml.doc
-          "Specifies the Amazon Web Services data sources that have been configured to have IAM roles and permissions created to allow Amazon Managed Grafana to read data from these sources."];
+          "Specifies the Amazon Web Services data sources that have been configured to have IAM roles and permissions created to allow Amazon Managed Grafana to read data from these sources. This list is only used when the workspace was created through the Amazon Web Services console, and the permissionType is SERVICE_MANAGED."];
       description: Description.t option
         [@ocaml.doc "The user-defined description of the workspace."];
-      endpoint: Endpoint.t
+      endpoint: Endpoint.t option
         [@ocaml.doc
           "The URL that users can use to access the Grafana console in the workspace."];
-      freeTrialConsumed: Boolean.t option
-        [@ocaml.doc
-          "Specifies whether this workspace has already fully used its free trial for Grafana Enterprise."];
-      freeTrialExpiration: Timestamp.t option
-        [@ocaml.doc
-          "If this workspace is currently in the free trial period for Grafana Enterprise, this value specifies when that free trial ends."];
-      grafanaVersion: GrafanaVersion.t
+      grafanaVersion: GrafanaVersion.t option
         [@ocaml.doc "The version of Grafana supported in this workspace."];
-      id: WorkspaceId.t [@ocaml.doc "The unique ID of this workspace."];
-      licenseExpiration: Timestamp.t option
-        [@ocaml.doc
-          "If this workspace has a full Grafana Enterprise license, this specifies when the license ends and will need to be renewed."];
-      licenseType: LicenseType.t option
-        [@ocaml.doc
-          "Specifies whether this workspace has a full Grafana Enterprise license or a free trial license."];
-      modified: Timestamp.t
+      id: WorkspaceId.t option
+        [@ocaml.doc "The unique ID of this workspace."];
+      modified: Timestamp.t option
         [@ocaml.doc "The most recent date that the workspace was modified."];
       name: WorkspaceName.t option [@ocaml.doc "The name of the workspace."];
-      notificationDestinations: NotificationDestinationsList.t option
-        [@ocaml.doc
-          "The Amazon Web Services notification channels that Amazon Managed Grafana can automatically create IAM roles and permissions for, to allow Amazon Managed Grafana to use these channels."];
       organizationRoleName: OrganizationRoleName.t option
         [@ocaml.doc
           "The name of the IAM role that is used to access resources through Organizations."];
+      notificationDestinations: NotificationDestinationsList.t option
+        [@ocaml.doc
+          "The Amazon Web Services notification channels that Amazon Managed Grafana can automatically create IAM roles and permissions for, to allow Amazon Managed Grafana to use these channels."];
       organizationalUnits: OrganizationalUnitList.t option
         [@ocaml.doc
           "Specifies the organizational units that this workspace is allowed to use data sources from, if this workspace is in an account that is part of an organization."];
       permissionType: PermissionType.t option
         [@ocaml.doc
-          "If this is Service Managed, Amazon Managed Grafana automatically creates the IAM roles and provisions the permissions that the workspace needs to use Amazon Web Services data sources and notification channels. If this is CUSTOMER_MANAGED, you manage those roles and permissions yourself. If you are creating this workspace in a member account of an organization and that account is not a delegated administrator account, and you want the workspace to access data sources in other Amazon Web Services accounts in the organization, you must choose CUSTOMER_MANAGED. For more information, see Amazon Managed Grafana permissions and policies for Amazon Web Services data sources and notification channels"];
+          "If this is SERVICE_MANAGED, and the workplace was created through the Amazon Managed Grafana console, then Amazon Managed Grafana automatically creates the IAM roles and provisions the permissions that the workspace needs to use Amazon Web Services data sources and notification channels. If this is CUSTOMER_MANAGED, you must manage those roles and permissions yourself. If you are working with a workspace in a member account of an organization and that account is not a delegated administrator account, and you want the workspace to access data sources in other Amazon Web Services accounts in the organization, this parameter must be set to CUSTOMER_MANAGED. For more information about converting between customer and service managed, see Managing permissions for data sources and notification channels. For more information about the roles and permissions that must be managed for customer managed workspaces, see Amazon Managed Grafana permissions and policies for Amazon Web Services data sources and notification channels"];
       stackSetName: StackSetName.t option
         [@ocaml.doc
           "The name of the CloudFormation stack set that is used to generate IAM roles to be used for this workspace."];
-      status: WorkspaceStatus.t
+      status: WorkspaceStatus.t option
         [@ocaml.doc "The current status of the workspace."];
-      tags: TagMap.t option
-        [@ocaml.doc "The list of tags associated with the workspace."];
       workspaceRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The IAM role that grants permissions to the Amazon Web Services resources that the workspace will view data from. This role must already exist."]}
-    let context_ = "WorkspaceDescription"
+          "The IAM role that grants permissions to the Amazon Web Services resources that the workspace will view data from. This role must already exist."];
+      licenseType: LicenseType.t option
+        [@ocaml.doc
+          "Specifies whether this workspace has a full Grafana Enterprise license. Amazon Managed Grafana workspaces no longer support Grafana Enterprise free trials."];
+      freeTrialConsumed: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether this workspace has already fully used its free trial for Grafana Enterprise. Amazon Managed Grafana workspaces no longer support Grafana Enterprise free trials."];
+      licenseExpiration: Timestamp.t option
+        [@ocaml.doc
+          "If this workspace has a full Grafana Enterprise license purchased through Amazon Web Services Marketplace, this specifies when the license ends and will need to be renewed. Purchasing the Enterprise plugins option through Amazon Managed Grafana does not have an expiration. It is valid until the license is removed."];
+      freeTrialExpiration: Timestamp.t option
+        [@ocaml.doc
+          "If this workspace is currently in the free trial period for Grafana Enterprise, this value specifies when that free trial ends. Amazon Managed Grafana workspaces no longer support Grafana Enterprise free trials."];
+      authentication: AuthenticationSummary.t option
+        [@ocaml.doc
+          "A structure that describes whether the workspace uses SAML, IAM Identity Center, or both methods for user authentication."];
+      tags: TagMap.t option
+        [@ocaml.doc "The list of tags associated with the workspace."];
+      vpcConfiguration: VpcConfiguration.t option
+        [@ocaml.doc
+          "The configuration for connecting to data sources in a private VPC (Amazon Virtual Private Cloud)."];
+      networkAccessControl: NetworkAccessConfiguration.t option
+        [@ocaml.doc
+          "The configuration settings for network access to your workspace."];
+      grafanaToken: GrafanaToken.t option
+        [@ocaml.doc
+          "The token that ties this workspace to a Grafana Labs account. For more information, see Link your account with Grafana Labs."];
+      ipAddressType: IPAddressType.t option
+        [@ocaml.doc
+          "The type of IP addresses supported for connection to the workspace. Valid values are IPv4 and DualStack."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The ID or ARN of the Key Management Service key used for encrypting workspace data."]}
     let make ?accountAccessType =
-      fun ?description ->
-        fun ?freeTrialConsumed ->
-          fun ?freeTrialExpiration ->
-            fun ?licenseExpiration ->
-              fun ?licenseType ->
-                fun ?name ->
-                  fun ?notificationDestinations ->
-                    fun ?organizationRoleName ->
-                      fun ?organizationalUnits ->
-                        fun ?permissionType ->
-                          fun ?stackSetName ->
-                            fun ?tags ->
-                              fun ?workspaceRoleArn ->
-                                fun ~authentication ->
-                                  fun ~created ->
-                                    fun ~dataSources ->
-                                      fun ~endpoint ->
-                                        fun ~grafanaVersion ->
-                                          fun ~id ->
-                                            fun ~modified ->
-                                              fun ~status ->
-                                                fun () ->
-                                                  {
-                                                    accountAccessType;
-                                                    description;
-                                                    freeTrialConsumed;
-                                                    freeTrialExpiration;
-                                                    licenseExpiration;
-                                                    licenseType;
-                                                    name;
-                                                    notificationDestinations;
-                                                    organizationRoleName;
-                                                    organizationalUnits;
-                                                    permissionType;
-                                                    stackSetName;
-                                                    tags;
-                                                    workspaceRoleArn;
-                                                    authentication;
-                                                    created;
-                                                    dataSources;
-                                                    endpoint;
-                                                    grafanaVersion;
-                                                    id;
-                                                    modified;
-                                                    status
-                                                  }
+      fun ?created ->
+        fun ?dataSources ->
+          fun ?description ->
+            fun ?endpoint ->
+              fun ?grafanaVersion ->
+                fun ?id ->
+                  fun ?modified ->
+                    fun ?name ->
+                      fun ?organizationRoleName ->
+                        fun ?notificationDestinations ->
+                          fun ?organizationalUnits ->
+                            fun ?permissionType ->
+                              fun ?stackSetName ->
+                                fun ?status ->
+                                  fun ?workspaceRoleArn ->
+                                    fun ?licenseType ->
+                                      fun ?freeTrialConsumed ->
+                                        fun ?licenseExpiration ->
+                                          fun ?freeTrialExpiration ->
+                                            fun ?authentication ->
+                                              fun ?tags ->
+                                                fun ?vpcConfiguration ->
+                                                  fun ?networkAccessControl
+                                                    ->
+                                                    fun ?grafanaToken ->
+                                                      fun ?ipAddressType ->
+                                                        fun ?kmsKeyId ->
+                                                          fun () ->
+                                                            {
+                                                              accountAccessType;
+                                                              created;
+                                                              dataSources;
+                                                              description;
+                                                              endpoint;
+                                                              grafanaVersion;
+                                                              id;
+                                                              modified;
+                                                              name;
+                                                              organizationRoleName;
+                                                              notificationDestinations;
+                                                              organizationalUnits;
+                                                              permissionType;
+                                                              stackSetName;
+                                                              status;
+                                                              workspaceRoleArn;
+                                                              licenseType;
+                                                              freeTrialConsumed;
+                                                              licenseExpiration;
+                                                              freeTrialExpiration;
+                                                              authentication;
+                                                              tags;
+                                                              vpcConfiguration;
+                                                              networkAccessControl;
+                                                              grafanaToken;
+                                                              ipAddressType;
+                                                              kmsKeyId
+                                                            }
     let to_value x =
       structure_to_value
         [("accountAccessType",
            (Option.map x.accountAccessType ~f:AccountAccessType.to_value));
-        ("authentication",
-          (Some (AuthenticationSummary.to_value x.authentication)));
-        ("created", (Some (Timestamp.to_value x.created)));
-        ("dataSources", (Some (DataSourceTypesList.to_value x.dataSources)));
+        ("created", (Option.map x.created ~f:Timestamp.to_value));
+        ("dataSources",
+          (Option.map x.dataSources ~f:DataSourceTypesList.to_value));
         ("description", (Option.map x.description ~f:Description.to_value));
-        ("endpoint", (Some (Endpoint.to_value x.endpoint)));
-        ("freeTrialConsumed",
-          (Option.map x.freeTrialConsumed ~f:Boolean.to_value));
-        ("freeTrialExpiration",
-          (Option.map x.freeTrialExpiration ~f:Timestamp.to_value));
-        ("grafanaVersion", (Some (GrafanaVersion.to_value x.grafanaVersion)));
-        ("id", (Some (WorkspaceId.to_value x.id)));
-        ("licenseExpiration",
-          (Option.map x.licenseExpiration ~f:Timestamp.to_value));
-        ("licenseType", (Option.map x.licenseType ~f:LicenseType.to_value));
-        ("modified", (Some (Timestamp.to_value x.modified)));
+        ("endpoint", (Option.map x.endpoint ~f:Endpoint.to_value));
+        ("grafanaVersion",
+          (Option.map x.grafanaVersion ~f:GrafanaVersion.to_value));
+        ("id", (Option.map x.id ~f:WorkspaceId.to_value));
+        ("modified", (Option.map x.modified ~f:Timestamp.to_value));
         ("name", (Option.map x.name ~f:WorkspaceName.to_value));
+        ("organizationRoleName",
+          (Option.map x.organizationRoleName ~f:OrganizationRoleName.to_value));
         ("notificationDestinations",
           (Option.map x.notificationDestinations
              ~f:NotificationDestinationsList.to_value));
-        ("organizationRoleName",
-          (Option.map x.organizationRoleName ~f:OrganizationRoleName.to_value));
         ("organizationalUnits",
           (Option.map x.organizationalUnits
              ~f:OrganizationalUnitList.to_value));
@@ -1908,19 +2401,65 @@ module WorkspaceDescription =
           (Option.map x.permissionType ~f:PermissionType.to_value));
         ("stackSetName",
           (Option.map x.stackSetName ~f:StackSetName.to_value));
-        ("status", (Some (WorkspaceStatus.to_value x.status)));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("status", (Option.map x.status ~f:WorkspaceStatus.to_value));
         ("workspaceRoleArn",
-          (Option.map x.workspaceRoleArn ~f:IamRoleArn.to_value))]
+          (Option.map x.workspaceRoleArn ~f:IamRoleArn.to_value));
+        ("licenseType", (Option.map x.licenseType ~f:LicenseType.to_value));
+        ("freeTrialConsumed",
+          (Option.map x.freeTrialConsumed ~f:Boolean.to_value));
+        ("licenseExpiration",
+          (Option.map x.licenseExpiration ~f:Timestamp.to_value));
+        ("freeTrialExpiration",
+          (Option.map x.freeTrialExpiration ~f:Timestamp.to_value));
+        ("authentication",
+          (Option.map x.authentication ~f:AuthenticationSummary.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("vpcConfiguration",
+          (Option.map x.vpcConfiguration ~f:VpcConfiguration.to_value));
+        ("networkAccessControl",
+          (Option.map x.networkAccessControl
+             ~f:NetworkAccessConfiguration.to_value));
+        ("grafanaToken",
+          (Option.map x.grafanaToken ~f:GrafanaToken.to_value));
+        ("ipAddressType",
+          (Option.map x.ipAddressType ~f:IPAddressType.to_value));
+        ("kmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
+      let ipAddressType =
+        (Option.map ~f:IPAddressType.of_xml)
+          (Xml.child xml_arg0 "ipAddressType") in
+      let grafanaToken =
+        (Option.map ~f:GrafanaToken.of_xml)
+          (Xml.child xml_arg0 "grafanaToken") in
+      let networkAccessControl =
+        (Option.map ~f:NetworkAccessConfiguration.of_xml)
+          (Xml.child xml_arg0 "networkAccessControl") in
+      let vpcConfiguration =
+        (Option.map ~f:VpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "vpcConfiguration") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let authentication =
+        (Option.map ~f:AuthenticationSummary.of_xml)
+          (Xml.child xml_arg0 "authentication") in
+      let freeTrialExpiration =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "freeTrialExpiration") in
+      let licenseExpiration =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "licenseExpiration") in
+      let freeTrialConsumed =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "freeTrialConsumed") in
+      let licenseType =
+        (Option.map ~f:LicenseType.of_xml) (Xml.child xml_arg0 "licenseType") in
       let workspaceRoleArn =
         (Option.map ~f:IamRoleArn.of_xml)
           (Xml.child xml_arg0 "workspaceRoleArn") in
-      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let status =
-        WorkspaceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:WorkspaceStatus.of_xml) (Xml.child xml_arg0 "status") in
       let stackSetName =
         (Option.map ~f:StackSetName.of_xml)
           (Xml.child xml_arg0 "stackSetName") in
@@ -1930,137 +2469,152 @@ module WorkspaceDescription =
       let organizationalUnits =
         (Option.map ~f:OrganizationalUnitList.of_xml)
           (Xml.child xml_arg0 "organizationalUnits") in
-      let organizationRoleName =
-        (Option.map ~f:OrganizationRoleName.of_xml)
-          (Xml.child xml_arg0 "organizationRoleName") in
       let notificationDestinations =
         (Option.map ~f:NotificationDestinationsList.of_xml)
           (Xml.child xml_arg0 "notificationDestinations") in
+      let organizationRoleName =
+        (Option.map ~f:OrganizationRoleName.of_xml)
+          (Xml.child xml_arg0 "organizationRoleName") in
       let name =
         (Option.map ~f:WorkspaceName.of_xml) (Xml.child xml_arg0 "name") in
       let modified =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "modified") in
-      let licenseType =
-        (Option.map ~f:LicenseType.of_xml) (Xml.child xml_arg0 "licenseType") in
-      let licenseExpiration =
-        (Option.map ~f:Timestamp.of_xml)
-          (Xml.child xml_arg0 "licenseExpiration") in
-      let id =
-        WorkspaceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "modified") in
+      let id = (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "id") in
       let grafanaVersion =
-        GrafanaVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "grafanaVersion") in
-      let freeTrialExpiration =
-        (Option.map ~f:Timestamp.of_xml)
-          (Xml.child xml_arg0 "freeTrialExpiration") in
-      let freeTrialConsumed =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "freeTrialConsumed") in
+        (Option.map ~f:GrafanaVersion.of_xml)
+          (Xml.child xml_arg0 "grafanaVersion") in
       let endpoint =
-        Endpoint.of_xml (Xml.child_exn ~context:context_ xml_arg0 "endpoint") in
+        (Option.map ~f:Endpoint.of_xml) (Xml.child xml_arg0 "endpoint") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let dataSources =
-        DataSourceTypesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "dataSources") in
+        (Option.map ~f:DataSourceTypesList.of_xml)
+          (Xml.child xml_arg0 "dataSources") in
       let created =
-        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "created") in
-      let authentication =
-        AuthenticationSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "authentication") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "created") in
       let accountAccessType =
         (Option.map ~f:AccountAccessType.of_xml)
           (Xml.child xml_arg0 "accountAccessType") in
-      make ?workspaceRoleArn ?tags ~status ?stackSetName ?permissionType
-        ?organizationalUnits ?organizationRoleName ?notificationDestinations
-        ?name ~modified ?licenseType ?licenseExpiration ~id ~grafanaVersion
-        ?freeTrialExpiration ?freeTrialConsumed ~endpoint ?description
-        ~dataSources ~created ~authentication ?accountAccessType ()
+      make ?kmsKeyId ?ipAddressType ?grafanaToken ?networkAccessControl
+        ?vpcConfiguration ?tags ?authentication ?freeTrialExpiration
+        ?licenseExpiration ?freeTrialConsumed ?licenseType ?workspaceRoleArn
+        ?status ?stackSetName ?permissionType ?organizationalUnits
+        ?notificationDestinations ?organizationRoleName ?name ?modified ?id
+        ?grafanaVersion ?endpoint ?description ?dataSources ?created
+        ?accountAccessType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceRoleArn =
-        field_map json "workspaceRoleArn" IamRoleArn.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let status = field_map_exn json "status" WorkspaceStatus.of_json in
-      let stackSetName = field_map json "stackSetName" StackSetName.of_json in
-      let permissionType =
-        field_map json "permissionType" PermissionType.of_json in
-      let organizationalUnits =
-        field_map json "organizationalUnits" OrganizationalUnitList.of_json in
-      let organizationRoleName =
-        field_map json "organizationRoleName" OrganizationRoleName.of_json in
-      let notificationDestinations =
-        field_map json "notificationDestinations"
-          NotificationDestinationsList.of_json in
-      let name = field_map json "name" WorkspaceName.of_json in
-      let modified = field_map_exn json "modified" Timestamp.of_json in
-      let licenseType = field_map json "licenseType" LicenseType.of_json in
-      let licenseExpiration =
-        field_map json "licenseExpiration" Timestamp.of_json in
-      let id = field_map_exn json "id" WorkspaceId.of_json in
-      let grafanaVersion =
-        field_map_exn json "grafanaVersion" GrafanaVersion.of_json in
-      let freeTrialExpiration =
-        field_map json "freeTrialExpiration" Timestamp.of_json in
-      let freeTrialConsumed =
-        field_map json "freeTrialConsumed" Boolean.of_json in
-      let endpoint = field_map_exn json "endpoint" Endpoint.of_json in
-      let description = field_map json "description" Description.of_json in
-      let dataSources =
-        field_map_exn json "dataSources" DataSourceTypesList.of_json in
-      let created = field_map_exn json "created" Timestamp.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "kmsKeyId" KmsKeyId.of_json in
+      let ipAddressType =
+        field_map json__ "ipAddressType" IPAddressType.of_json in
+      let grafanaToken = field_map json__ "grafanaToken" GrafanaToken.of_json in
+      let networkAccessControl =
+        field_map json__ "networkAccessControl"
+          NetworkAccessConfiguration.of_json in
+      let vpcConfiguration =
+        field_map json__ "vpcConfiguration" VpcConfiguration.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let authentication =
-        field_map_exn json "authentication" AuthenticationSummary.of_json in
+        field_map json__ "authentication" AuthenticationSummary.of_json in
+      let freeTrialExpiration =
+        field_map json__ "freeTrialExpiration" Timestamp.of_json in
+      let licenseExpiration =
+        field_map json__ "licenseExpiration" Timestamp.of_json in
+      let freeTrialConsumed =
+        field_map json__ "freeTrialConsumed" Boolean.of_json in
+      let licenseType = field_map json__ "licenseType" LicenseType.of_json in
+      let workspaceRoleArn =
+        field_map json__ "workspaceRoleArn" IamRoleArn.of_json in
+      let status = field_map json__ "status" WorkspaceStatus.of_json in
+      let stackSetName = field_map json__ "stackSetName" StackSetName.of_json in
+      let permissionType =
+        field_map json__ "permissionType" PermissionType.of_json in
+      let organizationalUnits =
+        field_map json__ "organizationalUnits" OrganizationalUnitList.of_json in
+      let notificationDestinations =
+        field_map json__ "notificationDestinations"
+          NotificationDestinationsList.of_json in
+      let organizationRoleName =
+        field_map json__ "organizationRoleName" OrganizationRoleName.of_json in
+      let name = field_map json__ "name" WorkspaceName.of_json in
+      let modified = field_map json__ "modified" Timestamp.of_json in
+      let id = field_map json__ "id" WorkspaceId.of_json in
+      let grafanaVersion =
+        field_map json__ "grafanaVersion" GrafanaVersion.of_json in
+      let endpoint = field_map json__ "endpoint" Endpoint.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let dataSources =
+        field_map json__ "dataSources" DataSourceTypesList.of_json in
+      let created = field_map json__ "created" Timestamp.of_json in
       let accountAccessType =
-        field_map json "accountAccessType" AccountAccessType.of_json in
-      make ?workspaceRoleArn ?tags ~status ?stackSetName ?permissionType
-        ?organizationalUnits ?organizationRoleName ?notificationDestinations
-        ?name ~modified ?licenseType ?licenseExpiration ~id ~grafanaVersion
-        ?freeTrialExpiration ?freeTrialConsumed ~endpoint ?description
-        ~dataSources ~created ~authentication ?accountAccessType ()
+        field_map json__ "accountAccessType" AccountAccessType.of_json in
+      make ?kmsKeyId ?ipAddressType ?grafanaToken ?networkAccessControl
+        ?vpcConfiguration ?tags ?authentication ?freeTrialExpiration
+        ?licenseExpiration ?freeTrialConsumed ?licenseType ?workspaceRoleArn
+        ?status ?stackSetName ?permissionType ?organizationalUnits
+        ?notificationDestinations ?organizationRoleName ?name ?modified ?id
+        ?grafanaVersion ?endpoint ?description ?dataSources ?created
+        ?accountAccessType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure containing information about an Amazon Managed Grafana workspace in your account."]
+module OverridableConfigurationJson =
+  struct
+    type nonrec t = string
+    let context_ = "OverridableConfigurationJson"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:65536) >>=
+             (fun () -> check_string_min i ~min:2));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OverridableConfigurationJson" j
+    let to_json = simple_to_json to_value
+  end
 module AuthenticationDescription =
   struct
     type nonrec t =
       {
-      awsSso: AwsSsoAuthentication.t option
+      providers: AuthenticationProviders.t option
         [@ocaml.doc
-          "A structure containing information about how this workspace works with Amazon Web Services SSO."];
-      providers: AuthenticationProviders.t
-        [@ocaml.doc
-          "Specifies whether this workspace uses Amazon Web Services SSO, SAML, or both methods to authenticate users to use the Grafana console in the Amazon Managed Grafana workspace."];
+          "Specifies whether this workspace uses IAM Identity Center, SAML, or both methods to authenticate users to use the Grafana console in the Amazon Managed Grafana workspace."];
       saml: SamlAuthentication.t option
         [@ocaml.doc
-          "A structure containing information about how this workspace works with SAML, including what attributes within the assertion are to be mapped to user information in the workspace."]}
-    let context_ = "AuthenticationDescription"
-    let make ?awsSso =
-      fun ?saml -> fun ~providers -> fun () -> { awsSso; saml; providers }
+          "A structure containing information about how this workspace works with SAML, including what attributes within the assertion are to be mapped to user information in the workspace."];
+      awsSso: AwsSsoAuthentication.t option
+        [@ocaml.doc
+          "A structure containing information about how this workspace works with IAM Identity Center."]}
+    let make ?providers =
+      fun ?saml -> fun ?awsSso -> fun () -> { providers; saml; awsSso }
     let to_value x =
       structure_to_value
-        [("awsSso", (Option.map x.awsSso ~f:AwsSsoAuthentication.to_value));
-        ("providers", (Some (AuthenticationProviders.to_value x.providers)));
-        ("saml", (Option.map x.saml ~f:SamlAuthentication.to_value))]
+        [("providers",
+           (Option.map x.providers ~f:AuthenticationProviders.to_value));
+        ("saml", (Option.map x.saml ~f:SamlAuthentication.to_value));
+        ("awsSso", (Option.map x.awsSso ~f:AwsSsoAuthentication.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let saml =
-        (Option.map ~f:SamlAuthentication.of_xml) (Xml.child xml_arg0 "saml") in
-      let providers =
-        AuthenticationProviders.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "providers") in
       let awsSso =
         (Option.map ~f:AwsSsoAuthentication.of_xml)
           (Xml.child xml_arg0 "awsSso") in
-      make ?saml ~providers ?awsSso ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let saml = field_map json "saml" SamlAuthentication.of_json in
+      let saml =
+        (Option.map ~f:SamlAuthentication.of_xml) (Xml.child xml_arg0 "saml") in
       let providers =
-        field_map_exn json "providers" AuthenticationProviders.of_json in
-      let awsSso = field_map json "awsSso" AwsSsoAuthentication.of_json in
-      make ?saml ~providers ?awsSso ()
+        (Option.map ~f:AuthenticationProviders.of_xml)
+          (Xml.child xml_arg0 "providers") in
+      make ?awsSso ?saml ?providers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let awsSso = field_map json__ "awsSso" AwsSsoAuthentication.of_json in
+      let saml = field_map json__ "saml" SamlAuthentication.of_json in
+      let providers =
+        field_map json__ "providers" AuthenticationProviders.of_json in
+      make ?awsSso ?saml ?providers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure containing information about the user authentication methods used by the workspace."]
@@ -2068,6 +2622,9 @@ module UpdateErrorList =
   struct
     type nonrec t = UpdateError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpdateError.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2096,6 +2653,9 @@ module UpdateInstructionBatch =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpdateInstruction.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2121,6 +2681,9 @@ module TagKeys =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2157,6 +2720,9 @@ module WorkspaceList =
   struct
     type nonrec t = WorkspaceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WorkspaceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2197,10 +2763,159 @@ module ListWorkspacesRequestMaxResultsInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ServiceAccountList =
+  struct
+    type nonrec t = ServiceAccountSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceAccountSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceAccountSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceAccountList"
+        ~of_json:ServiceAccountSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListWorkspaceServiceAccountsRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListWorkspaceServiceAccountsRequestMaxResultsInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceAccountTokenList =
+  struct
+    type nonrec t = ServiceAccountTokenSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceAccountTokenSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceAccountTokenSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceAccountTokenList"
+        ~of_json:ServiceAccountTokenSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListWorkspaceServiceAccountTokensRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListWorkspaceServiceAccountTokensRequestMaxResultsInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module GrafanaVersionList =
+  struct
+    type nonrec t = GrafanaVersion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GrafanaVersion.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GrafanaVersion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GrafanaVersionList" ~of_json:GrafanaVersion.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ListVersionsRequestMaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListVersionsRequestMaxResultsInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module PermissionEntryList =
   struct
     type nonrec t = PermissionEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PermissionEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2242,70 +2957,175 @@ module ListPermissionsRequestMaxResultsInteger =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ApiKeyName =
+  struct
+    type nonrec t = string
+    let context_ = "ApiKeyName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApiKeyName" j
+    let to_json = simple_to_json to_value
+  end
+module ServiceAccountTokenSummaryWithKey =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option
+        [@ocaml.doc "The unique ID of the service account token."];
+      name: String_.t option
+        [@ocaml.doc "The name of the service account token."];
+      key: ServiceAccountTokenKey.t option
+        [@ocaml.doc
+          "The key for the service account token. Used when making calls to the Grafana HTTP APIs to authenticate and authorize the requests."]}
+    let make ?id = fun ?name -> fun ?key -> fun () -> { id; name; key }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:String_.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("key", (Option.map x.key ~f:ServiceAccountTokenKey.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let key =
+        (Option.map ~f:ServiceAccountTokenKey.of_xml)
+          (Xml.child xml_arg0 "key") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
+      make ?key ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let key = field_map json__ "key" ServiceAccountTokenKey.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      make ?key ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains the information about a service account token. This structure is returned when creating the token. It is important to store the key that is returned, as it is not retrievable at a later time. If you lose the key, you can delete and recreate the token, which will create a new key."]
 module ServiceQuotaExceededException =
   struct
     type nonrec t =
       {
-      message: String_.t [@ocaml.doc "A description of the error."];
-      quotaCode: String_.t
-        [@ocaml.doc "The ID of the service quota that was exceeded."];
-      resourceId: String_.t
+      message: String_.t option [@ocaml.doc "A description of the error."];
+      resourceId: String_.t option
         [@ocaml.doc
           "The ID of the resource that is associated with the error."];
-      resourceType: String_.t
+      resourceType: String_.t option
         [@ocaml.doc
           "The type of the resource that is associated with the error."];
-      serviceCode: String_.t
+      serviceCode: String_.t option
         [@ocaml.doc
-          "The value of a parameter in the request caused an error."]}
-    let context_ = "ServiceQuotaExceededException"
-    let make ~message =
-      fun ~quotaCode ->
-        fun ~resourceId ->
-          fun ~resourceType ->
-            fun ~serviceCode ->
+          "The value of a parameter in the request caused an error."];
+      quotaCode: String_.t option
+        [@ocaml.doc "The ID of the service quota that was exceeded."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType ->
+          fun ?serviceCode ->
+            fun ?quotaCode ->
               fun () ->
-                { message; quotaCode; resourceId; resourceType; serviceCode }
+                { message; resourceId; resourceType; serviceCode; quotaCode }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("quotaCode", (Some (String_.to_value x.quotaCode)));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
-        ("resourceType", (Some (String_.to_value x.resourceType)));
-        ("serviceCode", (Some (String_.to_value x.serviceCode)))]
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value));
+        ("serviceCode", (Option.map x.serviceCode ~f:String_.to_value));
+        ("quotaCode", (Option.map x.quotaCode ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let serviceCode =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "serviceCode") in
-      let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
       let quotaCode =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "quotaCode") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaCode") in
+      let serviceCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceCode") in
+      let resourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
+      let resourceId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~serviceCode ~resourceType ~resourceId ~quotaCode ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?quotaCode ?serviceCode ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map_exn json "serviceCode" String_.of_json in
-      let resourceType = field_map_exn json "resourceType" String_.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let quotaCode = field_map_exn json "quotaCode" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ~serviceCode ~resourceType ~resourceId ~quotaCode ~message ()
+    let of_json json__ =
+      let quotaCode = field_map json__ "quotaCode" String_.of_json in
+      let serviceCode = field_map json__ "serviceCode" String_.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?quotaCode ?serviceCode ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request would cause a service quota to be exceeded."]
+module CreateWorkspaceServiceAccountTokenRequestSecondsToLiveInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:2592000) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for CreateWorkspaceServiceAccountTokenRequestSecondsToLiveInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceAccountTokenName =
+  struct
+    type nonrec t = string
+    let context_ = "ServiceAccountTokenName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServiceAccountTokenName" j
+    let to_json = simple_to_json to_value
+  end
+module ServiceAccountName =
+  struct
+    type nonrec t = string
+    let context_ = "ServiceAccountName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServiceAccountName" j
+    let to_json = simple_to_json to_value
+  end
 module ClientToken =
   struct
     type nonrec t = string
     let context_ = "ClientToken"
     let make i =
       let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"^[!-~]{1,64}$"); i
+        ok_or_failwith (check_pattern i ~pattern:"[!-~]{1,64}"); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -2314,11 +3134,45 @@ module ClientToken =
     let of_json j = string_of_json ~kind:"ClientToken" j
     let to_json = simple_to_json to_value
   end
+module ApiKeyToken =
+  struct
+    type nonrec t = string
+    let context_ = "ApiKeyToken"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApiKeyToken" j
+    let to_json = simple_to_json to_value
+  end
+module CreateWorkspaceApiKeyRequestSecondsToLiveInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:2592000) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for CreateWorkspaceApiKeyRequestSecondsToLiveInteger"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module UpdateWorkspaceResponse =
   struct
     type nonrec t =
       {
-      workspace: WorkspaceDescription.t
+      workspace: WorkspaceDescription.t option
         [@ocaml.doc
           "A structure containing data about the workspace that was created."]}
     type nonrec error =
@@ -2329,8 +3183,7 @@ module UpdateWorkspaceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateWorkspaceResponse"
-    let make ~workspace = fun () -> { workspace }
+    let make ?workspace = fun () -> { workspace }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2397,21 +3250,22 @@ module UpdateWorkspaceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("workspace", (Some (WorkspaceDescription.to_value x.workspace)))]
+        [("workspace",
+           (Option.map x.workspace ~f:WorkspaceDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workspace =
-        WorkspaceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
-      make ~workspace ()
+        (Option.map ~f:WorkspaceDescription.of_xml)
+          (Xml.child xml_arg0 "workspace") in
+      make ?workspace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workspace =
-        field_map_exn json "workspace" WorkspaceDescription.of_json in
-      make ~workspace ()
+        field_map json__ "workspace" WorkspaceDescription.of_json in
+      make ?workspace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies an existing Amazon Managed Grafana workspace. If you use this operation and omit any optional parameters, the existing values of those parameters are not changed. To modify the user authentication methods that the workspace uses, such as SAML or Amazon Web Services SSO, use UpdateWorkspaceAuthentication. To modify which users in the workspace have the Admin and Editor Grafana roles, use UpdatePermissions."]
+       "Modifies an existing Amazon Managed Grafana workspace. If you use this operation and omit any optional parameters, the existing values of those parameters are not changed. To modify the user authentication methods that the workspace uses, such as SAML or IAM Identity Center, use UpdateWorkspaceAuthentication. To modify which users in the workspace have the Admin and Editor Grafana roles, use UpdatePermissions."]
 module UpdateWorkspaceRequest =
   struct
     type nonrec t =
@@ -2421,16 +3275,16 @@ module UpdateWorkspaceRequest =
           "Specifies whether the workspace can access Amazon Web Services resources in this Amazon Web Services account only, or whether it can also access Amazon Web Services resources in other accounts in the same organization. If you specify ORGANIZATION, you must specify which organizational units the workspace can access in the workspaceOrganizationalUnits parameter."];
       organizationRoleName: OrganizationRoleName.t option
         [@ocaml.doc
-          "The name of an IAM role that already exists to use to access resources through Organizations."];
+          "The name of an IAM role that already exists to use to access resources through Organizations. This can only be used with a workspace that has the permissionType set to CUSTOMER_MANAGED."];
       permissionType: PermissionType.t option
         [@ocaml.doc
-          "If you specify Service Managed, Amazon Managed Grafana automatically creates the IAM roles and provisions the permissions that the workspace needs to use Amazon Web Services data sources and notification channels. If you specify CUSTOMER_MANAGED, you will manage those roles and permissions yourself. If you are creating this workspace in a member account of an organization and that account is not a delegated administrator account, and you want the workspace to access data sources in other Amazon Web Services accounts in the organization, you must choose CUSTOMER_MANAGED. For more information, see Amazon Managed Grafana permissions and policies for Amazon Web Services data sources and notification channels"];
+          "Use this parameter if you want to change a workspace from SERVICE_MANAGED to CUSTOMER_MANAGED. This allows you to manage the permissions that the workspace uses to access datasources and notification channels. If the workspace is in a member Amazon Web Services account of an organization, and that account is not a delegated administrator account, and you want the workspace to access data sources in other Amazon Web Services accounts in the organization, you must choose CUSTOMER_MANAGED. If you specify this as CUSTOMER_MANAGED, you must also specify a workspaceRoleArn that the workspace will use for accessing Amazon Web Services resources. For more information on the role and permissions needed, see Amazon Managed Grafana permissions and policies for Amazon Web Services data sources and notification channels Do not use this to convert a CUSTOMER_MANAGED workspace to SERVICE_MANAGED. Do not include this parameter if you want to leave the workspace as SERVICE_MANAGED. You can convert a CUSTOMER_MANAGED workspace to SERVICE_MANAGED using the Amazon Managed Grafana console. For more information, see Managing permissions for data sources and notification channels."];
       stackSetName: StackSetName.t option
         [@ocaml.doc
           "The name of the CloudFormation stack set to use to generate IAM roles to be used for this workspace."];
       workspaceDataSources: DataSourceTypesList.t option
         [@ocaml.doc
-          "Specify the Amazon Web Services data sources that you want to be queried in this workspace. Specifying these data sources here enables Amazon Managed Grafana to create IAM roles and permissions that allow Amazon Managed Grafana to read data from these sources. You must still add them as data sources in the Grafana console in the workspace. If you don't specify a data source here, you can still add it as a data source later in the workspace console. However, you will then have to manually configure permissions for it."];
+          "This parameter is for internal use only, and should not be used."];
       workspaceDescription: Description.t option
         [@ocaml.doc
           "A description for the workspace. This is used only to help you identify this workspace."];
@@ -2447,7 +3301,22 @@ module UpdateWorkspaceRequest =
           "Specifies the organizational units that this workspace is allowed to use data sources from, if this workspace is in an account that is part of an organization."];
       workspaceRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The workspace needs an IAM role that grants permissions to the Amazon Web Services resources that the workspace will view data from. If you already have a role that you want to use, specify it here. If you omit this field and you specify some Amazon Web Services resources in workspaceDataSources or workspaceNotificationDestinations, a new IAM role with the necessary permissions is automatically created."]}
+          "Specifies an IAM role that grants permissions to Amazon Web Services resources that the workspace accesses, such as data sources and notification channels. If this workspace has permissionType CUSTOMER_MANAGED, then this role is required."];
+      vpcConfiguration: VpcConfiguration.t option
+        [@ocaml.doc
+          "The configuration settings for an Amazon VPC that contains data sources for your Grafana workspace to connect to."];
+      removeVpcConfiguration: Boolean.t option
+        [@ocaml.doc
+          "Whether to remove the VPC configuration from the workspace. Setting this to true and providing a vpcConfiguration to set will return an error."];
+      networkAccessControl: NetworkAccessConfiguration.t option
+        [@ocaml.doc
+          "The configuration settings for network access to your workspace. When this is configured, only listed IP addresses and VPC endpoints will be able to access your workspace. Standard Grafana authentication and authorization will still be required. If this is not configured, or is removed, then all IP addresses and VPC endpoints will be allowed. Standard Grafana authentication and authorization will still be required."];
+      removeNetworkAccessConfiguration: Boolean.t option
+        [@ocaml.doc
+          "Whether to remove the network access configuration from the workspace. Setting this to true and providing a networkAccessControl to set will return an error. If you remove this configuration by setting this to true, then all IP addresses and VPC endpoints will be allowed. Standard Grafana authentication and authorization will still be required."];
+      ipAddressType: IPAddressType.t option
+        [@ocaml.doc
+          "Specifies whether the workspace supports IPv4 only, or IPv4 and IPv6. Valid values are IPv4 and DualStack. For more information about IP address types, see Network access control."]}
     let context_ = "UpdateWorkspaceRequest"
     let make ?accountAccessType =
       fun ?organizationRoleName ->
@@ -2459,21 +3328,31 @@ module UpdateWorkspaceRequest =
                   fun ?workspaceNotificationDestinations ->
                     fun ?workspaceOrganizationalUnits ->
                       fun ?workspaceRoleArn ->
-                        fun ~workspaceId ->
-                          fun () ->
-                            {
-                              accountAccessType;
-                              organizationRoleName;
-                              permissionType;
-                              stackSetName;
-                              workspaceDataSources;
-                              workspaceDescription;
-                              workspaceName;
-                              workspaceNotificationDestinations;
-                              workspaceOrganizationalUnits;
-                              workspaceRoleArn;
-                              workspaceId
-                            }
+                        fun ?vpcConfiguration ->
+                          fun ?removeVpcConfiguration ->
+                            fun ?networkAccessControl ->
+                              fun ?removeNetworkAccessConfiguration ->
+                                fun ?ipAddressType ->
+                                  fun ~workspaceId ->
+                                    fun () ->
+                                      {
+                                        accountAccessType;
+                                        organizationRoleName;
+                                        permissionType;
+                                        stackSetName;
+                                        workspaceDataSources;
+                                        workspaceDescription;
+                                        workspaceName;
+                                        workspaceNotificationDestinations;
+                                        workspaceOrganizationalUnits;
+                                        workspaceRoleArn;
+                                        vpcConfiguration;
+                                        removeVpcConfiguration;
+                                        networkAccessControl;
+                                        removeNetworkAccessConfiguration;
+                                        ipAddressType;
+                                        workspaceId
+                                      }
     let to_value x =
       structure_to_value
         [("accountAccessType",
@@ -2498,9 +3377,35 @@ module UpdateWorkspaceRequest =
           (Option.map x.workspaceOrganizationalUnits
              ~f:OrganizationalUnitList.to_value));
         ("workspaceRoleArn",
-          (Option.map x.workspaceRoleArn ~f:IamRoleArn.to_value))]
+          (Option.map x.workspaceRoleArn ~f:IamRoleArn.to_value));
+        ("vpcConfiguration",
+          (Option.map x.vpcConfiguration ~f:VpcConfiguration.to_value));
+        ("removeVpcConfiguration",
+          (Option.map x.removeVpcConfiguration ~f:Boolean.to_value));
+        ("networkAccessControl",
+          (Option.map x.networkAccessControl
+             ~f:NetworkAccessConfiguration.to_value));
+        ("removeNetworkAccessConfiguration",
+          (Option.map x.removeNetworkAccessConfiguration ~f:Boolean.to_value));
+        ("ipAddressType",
+          (Option.map x.ipAddressType ~f:IPAddressType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipAddressType =
+        (Option.map ~f:IPAddressType.of_xml)
+          (Xml.child xml_arg0 "ipAddressType") in
+      let removeNetworkAccessConfiguration =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "removeNetworkAccessConfiguration") in
+      let networkAccessControl =
+        (Option.map ~f:NetworkAccessConfiguration.of_xml)
+          (Xml.child xml_arg0 "networkAccessControl") in
+      let removeVpcConfiguration =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "removeVpcConfiguration") in
+      let vpcConfiguration =
+        (Option.map ~f:VpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "vpcConfiguration") in
       let workspaceRoleArn =
         (Option.map ~f:IamRoleArn.of_xml)
           (Xml.child xml_arg0 "workspaceRoleArn") in
@@ -2534,46 +3439,194 @@ module UpdateWorkspaceRequest =
       let accountAccessType =
         (Option.map ~f:AccountAccessType.of_xml)
           (Xml.child xml_arg0 "accountAccessType") in
-      make ?workspaceRoleArn ?workspaceOrganizationalUnits
+      make ?ipAddressType ?removeNetworkAccessConfiguration
+        ?networkAccessControl ?removeVpcConfiguration ?vpcConfiguration
+        ?workspaceRoleArn ?workspaceOrganizationalUnits
         ?workspaceNotificationDestinations ?workspaceName ~workspaceId
         ?workspaceDescription ?workspaceDataSources ?stackSetName
         ?permissionType ?organizationRoleName ?accountAccessType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipAddressType =
+        field_map json__ "ipAddressType" IPAddressType.of_json in
+      let removeNetworkAccessConfiguration =
+        field_map json__ "removeNetworkAccessConfiguration" Boolean.of_json in
+      let networkAccessControl =
+        field_map json__ "networkAccessControl"
+          NetworkAccessConfiguration.of_json in
+      let removeVpcConfiguration =
+        field_map json__ "removeVpcConfiguration" Boolean.of_json in
+      let vpcConfiguration =
+        field_map json__ "vpcConfiguration" VpcConfiguration.of_json in
       let workspaceRoleArn =
-        field_map json "workspaceRoleArn" IamRoleArn.of_json in
+        field_map json__ "workspaceRoleArn" IamRoleArn.of_json in
       let workspaceOrganizationalUnits =
-        field_map json "workspaceOrganizationalUnits"
+        field_map json__ "workspaceOrganizationalUnits"
           OrganizationalUnitList.of_json in
       let workspaceNotificationDestinations =
-        field_map json "workspaceNotificationDestinations"
+        field_map json__ "workspaceNotificationDestinations"
           NotificationDestinationsList.of_json in
       let workspaceName =
-        field_map json "workspaceName" WorkspaceName.of_json in
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
+        field_map json__ "workspaceName" WorkspaceName.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
       let workspaceDescription =
-        field_map json "workspaceDescription" Description.of_json in
+        field_map json__ "workspaceDescription" Description.of_json in
       let workspaceDataSources =
-        field_map json "workspaceDataSources" DataSourceTypesList.of_json in
-      let stackSetName = field_map json "stackSetName" StackSetName.of_json in
+        field_map json__ "workspaceDataSources" DataSourceTypesList.of_json in
+      let stackSetName = field_map json__ "stackSetName" StackSetName.of_json in
       let permissionType =
-        field_map json "permissionType" PermissionType.of_json in
+        field_map json__ "permissionType" PermissionType.of_json in
       let organizationRoleName =
-        field_map json "organizationRoleName" OrganizationRoleName.of_json in
+        field_map json__ "organizationRoleName" OrganizationRoleName.of_json in
       let accountAccessType =
-        field_map json "accountAccessType" AccountAccessType.of_json in
-      make ?workspaceRoleArn ?workspaceOrganizationalUnits
+        field_map json__ "accountAccessType" AccountAccessType.of_json in
+      make ?ipAddressType ?removeNetworkAccessConfiguration
+        ?networkAccessControl ?removeVpcConfiguration ?vpcConfiguration
+        ?workspaceRoleArn ?workspaceOrganizationalUnits
         ?workspaceNotificationDestinations ?workspaceName ~workspaceId
         ?workspaceDescription ?workspaceDataSources ?stackSetName
         ?permissionType ?organizationRoleName ?accountAccessType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies an existing Amazon Managed Grafana workspace. If you use this operation and omit any optional parameters, the existing values of those parameters are not changed. To modify the user authentication methods that the workspace uses, such as SAML or Amazon Web Services SSO, use UpdateWorkspaceAuthentication. To modify which users in the workspace have the Admin and Editor Grafana roles, use UpdatePermissions."]
+       "Modifies an existing Amazon Managed Grafana workspace. If you use this operation and omit any optional parameters, the existing values of those parameters are not changed. To modify the user authentication methods that the workspace uses, such as SAML or IAM Identity Center, use UpdateWorkspaceAuthentication. To modify which users in the workspace have the Admin and Editor Grafana roles, use UpdatePermissions."]
+module UpdateWorkspaceConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the configuration string for the given workspace"]
+module UpdateWorkspaceConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      configuration: OverridableConfigurationJson.t
+        [@ocaml.doc
+          "The new configuration string for the workspace. For more information about the format and configuration options available, see Working in your Grafana workspace."];
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc "The ID of the workspace to update."];
+      grafanaVersion: GrafanaVersion.t option
+        [@ocaml.doc
+          "Specifies the version of Grafana to support in the workspace. If not specified, keeps the current version of the workspace. Can only be used to upgrade (for example, from 8.4 to 9.4), not downgrade (for example, from 9.4 to 8.4). To know what versions are available to upgrade to for a specific workspace, see the ListVersions operation."]}
+    let context_ = "UpdateWorkspaceConfigurationRequest"
+    let make ?grafanaVersion =
+      fun ~configuration ->
+        fun ~workspaceId ->
+          fun () -> { grafanaVersion; configuration; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("configuration",
+           (Some (OverridableConfigurationJson.to_value x.configuration)));
+        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("grafanaVersion",
+          (Option.map x.grafanaVersion ~f:GrafanaVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let grafanaVersion =
+        (Option.map ~f:GrafanaVersion.of_xml)
+          (Xml.child xml_arg0 "grafanaVersion") in
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let configuration =
+        OverridableConfigurationJson.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "configuration") in
+      make ?grafanaVersion ~workspaceId ~configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let grafanaVersion =
+        field_map json__ "grafanaVersion" GrafanaVersion.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      let configuration =
+        field_map_exn json__ "configuration"
+          OverridableConfigurationJson.of_json in
+      make ?grafanaVersion ~workspaceId ~configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the configuration string for the given workspace"]
 module UpdateWorkspaceAuthenticationResponse =
   struct
     type nonrec t =
       {
-      authentication: AuthenticationDescription.t
+      authentication: AuthenticationDescription.t option
         [@ocaml.doc
           "A structure that describes the user authentication for this workspace after the update is made."]}
     type nonrec error =
@@ -2584,8 +3637,7 @@ module UpdateWorkspaceAuthenticationResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateWorkspaceAuthenticationResponse"
-    let make ~authentication = fun () -> { authentication }
+    let make ?authentication = fun () -> { authentication }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2653,76 +3705,77 @@ module UpdateWorkspaceAuthenticationResponse =
     let to_value x =
       structure_to_value
         [("authentication",
-           (Some (AuthenticationDescription.to_value x.authentication)))]
+           (Option.map x.authentication ~f:AuthenticationDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let authentication =
-        AuthenticationDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "authentication") in
-      make ~authentication ()
+        (Option.map ~f:AuthenticationDescription.of_xml)
+          (Xml.child xml_arg0 "authentication") in
+      make ?authentication ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authentication =
-        field_map_exn json "authentication" AuthenticationDescription.of_json in
-      make ~authentication ()
+        field_map json__ "authentication" AuthenticationDescription.of_json in
+      make ?authentication ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Use this operation to define the identity provider (IdP) that this workspace authenticates users from, using SAML. You can also map SAML assertion attributes to workspace user information and define which groups in the assertion attribute are to have the Admin and Editor roles in the workspace."]
+       "Use this operation to define the identity provider (IdP) that this workspace authenticates users from, using SAML. You can also map SAML assertion attributes to workspace user information and define which groups in the assertion attribute are to have the Admin and Editor roles in the workspace. Changes to the authentication method for a workspace may take a few minutes to take effect."]
 module UpdateWorkspaceAuthenticationRequest =
   struct
     type nonrec t =
       {
-      authenticationProviders: AuthenticationProviders.t
-        [@ocaml.doc
-          "Specifies whether this workspace uses SAML 2.0, Amazon Web Services Single Sign On, or both to authenticate users for using the Grafana console within a workspace. For more information, see User authentication in Amazon Managed Grafana."];
-      samlConfiguration: SamlConfiguration.t option
-        [@ocaml.doc
-          "If the workspace uses SAML, use this structure to map SAML assertion attributes to workspace user information and define which groups in the assertion attribute are to have the Admin and Editor roles in the workspace."];
       workspaceId: WorkspaceId.t
         [@ocaml.doc
-          "The ID of the workspace to update the authentication for."]}
+          "The ID of the workspace to update the authentication for."];
+      authenticationProviders: AuthenticationProviders.t
+        [@ocaml.doc
+          "Specifies whether this workspace uses SAML 2.0, IAM Identity Center, or both to authenticate users for using the Grafana console within a workspace. For more information, see User authentication in Amazon Managed Grafana."];
+      samlConfiguration: SamlConfiguration.t option
+        [@ocaml.doc
+          "If the workspace uses SAML, use this structure to map SAML assertion attributes to workspace user information and define which groups in the assertion attribute are to have the Admin and Editor roles in the workspace."]}
     let context_ = "UpdateWorkspaceAuthenticationRequest"
     let make ?samlConfiguration =
-      fun ~authenticationProviders ->
-        fun ~workspaceId ->
+      fun ~workspaceId ->
+        fun ~authenticationProviders ->
           fun () ->
-            { samlConfiguration; authenticationProviders; workspaceId }
+            { samlConfiguration; workspaceId; authenticationProviders }
     let to_value x =
       structure_to_value
-        [("authenticationProviders",
-           (Some (AuthenticationProviders.to_value x.authenticationProviders)));
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("authenticationProviders",
+          (Some (AuthenticationProviders.to_value x.authenticationProviders)));
         ("samlConfiguration",
-          (Option.map x.samlConfiguration ~f:SamlConfiguration.to_value));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+          (Option.map x.samlConfiguration ~f:SamlConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       let samlConfiguration =
         (Option.map ~f:SamlConfiguration.of_xml)
           (Xml.child xml_arg0 "samlConfiguration") in
       let authenticationProviders =
         AuthenticationProviders.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "authenticationProviders") in
-      make ~workspaceId ?samlConfiguration ~authenticationProviders ()
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?samlConfiguration ~authenticationProviders ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
+    let of_json json__ =
       let samlConfiguration =
-        field_map json "samlConfiguration" SamlConfiguration.of_json in
+        field_map json__ "samlConfiguration" SamlConfiguration.of_json in
       let authenticationProviders =
-        field_map_exn json "authenticationProviders"
+        field_map_exn json__ "authenticationProviders"
           AuthenticationProviders.of_json in
-      make ~workspaceId ?samlConfiguration ~authenticationProviders ()
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?samlConfiguration ~authenticationProviders ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Use this operation to define the identity provider (IdP) that this workspace authenticates users from, using SAML. You can also map SAML assertion attributes to workspace user information and define which groups in the assertion attribute are to have the Admin and Editor roles in the workspace."]
+       "Use this operation to define the identity provider (IdP) that this workspace authenticates users from, using SAML. You can also map SAML assertion attributes to workspace user information and define which groups in the assertion attribute are to have the Admin and Editor roles in the workspace. Changes to the authentication method for a workspace may take a few minutes to take effect."]
 module UpdatePermissionsResponse =
   struct
     type nonrec t =
       {
-      errors: UpdateErrorList.t
+      errors: UpdateErrorList.t option
         [@ocaml.doc
           "An array of structures that contain the errors from the operation, if any."]}
     type nonrec error =
@@ -2732,8 +3785,7 @@ module UpdatePermissionsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdatePermissionsResponse"
-    let make ~errors = fun () -> { errors }
+    let make ?errors = fun () -> { errors }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2792,17 +3844,16 @@ module UpdatePermissionsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("errors", (Some (UpdateErrorList.to_value x.errors)))]
+        [("errors", (Option.map x.errors ~f:UpdateErrorList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errors =
-        UpdateErrorList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "errors") in
-      make ~errors ()
+        (Option.map ~f:UpdateErrorList.of_xml) (Xml.child xml_arg0 "errors") in
+      make ?errors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors = field_map_exn json "errors" UpdateErrorList.of_json in
-      make ~errors ()
+    let of_json json__ =
+      let errors = field_map json__ "errors" UpdateErrorList.of_json in
+      make ?errors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates which users in a workspace have the Grafana Admin or Editor roles."]
@@ -2833,10 +3884,11 @@ module UpdatePermissionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "updateInstructionBatch") in
       make ~workspaceId ~updateInstructionBatch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
       let updateInstructionBatch =
-        field_map_exn json "updateInstructionBatch"
+        field_map_exn json__ "updateInstructionBatch"
           UpdateInstructionBatch.of_json in
       make ~workspaceId ~updateInstructionBatch ()
     let to_json v = composed_to_json to_value v
@@ -2944,9 +3996,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeys.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeys.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3051,9 +4103,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3062,20 +4114,19 @@ module ListWorkspacesResponse =
   struct
     type nonrec t =
       {
+      workspaces: WorkspaceList.t option
+        [@ocaml.doc
+          "An array of structures that contain some information about the workspaces in the account."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The token to use when requesting the next set of workspaces."];
-      workspaces: WorkspaceList.t
-        [@ocaml.doc
-          "An array of structures that contain some information about the workspaces in the account."]}
+          "The token to use when requesting the next set of workspaces."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListWorkspacesResponse"
-    let make ?nextToken =
-      fun ~workspaces -> fun () -> { nextToken; workspaces }
+    let make ?workspaces =
+      fun ?nextToken -> fun () -> { workspaces; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3118,22 +4169,22 @@ module ListWorkspacesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("workspaces", (Some (WorkspaceList.to_value x.workspaces)))]
+        [("workspaces", (Option.map x.workspaces ~f:WorkspaceList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaces =
-        WorkspaceList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaces") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~workspaces ?nextToken ()
+      let workspaces =
+        (Option.map ~f:WorkspaceList.of_xml)
+          (Xml.child xml_arg0 "workspaces") in
+      make ?nextToken ?workspaces ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaces = field_map_exn json "workspaces" WorkspaceList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      make ~workspaces ?nextToken ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let workspaces = field_map json__ "workspaces" WorkspaceList.of_json in
+      make ?nextToken ?workspaces ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of Amazon Managed Grafana workspaces in the account, with some information about each workspace. For more complete information about one workspace, use DescribeWorkspace."]
@@ -3165,15 +4216,518 @@ module ListWorkspacesRequest =
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults"
+        field_map json__ "maxResults"
           ListWorkspacesRequestMaxResultsInteger.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of Amazon Managed Grafana workspaces in the account, with some information about each workspace. For more complete information about one workspace, use DescribeWorkspace."]
+module ListWorkspaceServiceAccountsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of service accounts."];
+      serviceAccounts: ServiceAccountList.t option
+        [@ocaml.doc
+          "An array of structures containing information about the service accounts."];
+      workspaceId: WorkspaceId.t option
+        [@ocaml.doc
+          "The workspace to which the service accounts are associated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?serviceAccounts ->
+        fun ?workspaceId ->
+          fun () -> { nextToken; serviceAccounts; workspaceId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("serviceAccounts",
+          (Option.map x.serviceAccounts ~f:ServiceAccountList.to_value));
+        ("workspaceId", (Option.map x.workspaceId ~f:WorkspaceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "workspaceId") in
+      let serviceAccounts =
+        (Option.map ~f:ServiceAccountList.of_xml)
+          (Xml.child xml_arg0 "serviceAccounts") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?workspaceId ?serviceAccounts ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId = field_map json__ "workspaceId" WorkspaceId.of_json in
+      let serviceAccounts =
+        field_map json__ "serviceAccounts" ServiceAccountList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?workspaceId ?serviceAccounts ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of service accounts for a workspace. Service accounts are only available for workspaces that are compatible with Grafana version 9 and above."]
+module ListWorkspaceServiceAccountsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults:
+        ListWorkspaceServiceAccountsRequestMaxResultsInteger.t option
+        [@ocaml.doc
+          "The maximum number of service accounts to include in the results."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token for the next set of service accounts to return. (You receive this token from a previous ListWorkspaceServiceAccounts operation.)"];
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc "The workspace for which to list service accounts."]}
+    let context_ = "ListWorkspaceServiceAccountsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~workspaceId -> fun () -> { maxResults; nextToken; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("maxResults",
+           (Option.map x.maxResults
+              ~f:ListWorkspaceServiceAccountsRequestMaxResultsInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map
+           ~f:ListWorkspaceServiceAccountsRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      make ~workspaceId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          ListWorkspaceServiceAccountsRequestMaxResultsInteger.of_json in
+      make ~workspaceId ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of service accounts for a workspace. Service accounts are only available for workspaces that are compatible with Grafana version 9 and above."]
+module ListWorkspaceServiceAccountTokensResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of service accounts."];
+      serviceAccountTokens: ServiceAccountTokenList.t option
+        [@ocaml.doc
+          "An array of structures containing information about the tokens."];
+      serviceAccountId: String_.t option
+        [@ocaml.doc "The ID of the service account where the tokens reside."];
+      workspaceId: WorkspaceId.t option
+        [@ocaml.doc "The ID of the workspace where the tokens reside."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?serviceAccountTokens ->
+        fun ?serviceAccountId ->
+          fun ?workspaceId ->
+            fun () ->
+              {
+                nextToken;
+                serviceAccountTokens;
+                serviceAccountId;
+                workspaceId
+              }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("serviceAccountTokens",
+          (Option.map x.serviceAccountTokens
+             ~f:ServiceAccountTokenList.to_value));
+        ("serviceAccountId",
+          (Option.map x.serviceAccountId ~f:String_.to_value));
+        ("workspaceId", (Option.map x.workspaceId ~f:WorkspaceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "workspaceId") in
+      let serviceAccountId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceAccountId") in
+      let serviceAccountTokens =
+        (Option.map ~f:ServiceAccountTokenList.of_xml)
+          (Xml.child xml_arg0 "serviceAccountTokens") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?workspaceId ?serviceAccountId ?serviceAccountTokens ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId = field_map json__ "workspaceId" WorkspaceId.of_json in
+      let serviceAccountId =
+        field_map json__ "serviceAccountId" String_.of_json in
+      let serviceAccountTokens =
+        field_map json__ "serviceAccountTokens"
+          ServiceAccountTokenList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?workspaceId ?serviceAccountId ?serviceAccountTokens ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of tokens for a workspace service account. This does not return the key for each token. You cannot access keys after they are created. To create a new key, delete the token and recreate it. Service accounts are only available for workspaces that are compatible with Grafana version 9 and above."]
+module ListWorkspaceServiceAccountTokensRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults:
+        ListWorkspaceServiceAccountTokensRequestMaxResultsInteger.t option
+        [@ocaml.doc
+          "The maximum number of tokens to include in the results."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token for the next set of service accounts to return. (You receive this token from a previous ListWorkspaceServiceAccountTokens operation.)"];
+      serviceAccountId: String_.t
+        [@ocaml.doc
+          "The ID of the service account for which to return tokens."];
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc "The ID of the workspace for which to return tokens."]}
+    let context_ = "ListWorkspaceServiceAccountTokensRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~serviceAccountId ->
+          fun ~workspaceId ->
+            fun () ->
+              { maxResults; nextToken; serviceAccountId; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("maxResults",
+           (Option.map x.maxResults
+              ~f:ListWorkspaceServiceAccountTokensRequestMaxResultsInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("serviceAccountId", (Some (String_.to_value x.serviceAccountId)));
+        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let serviceAccountId =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceAccountId") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map
+           ~f:ListWorkspaceServiceAccountTokensRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      make ~workspaceId ~serviceAccountId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      let serviceAccountId =
+        field_map_exn json__ "serviceAccountId" String_.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          ListWorkspaceServiceAccountTokensRequestMaxResultsInteger.of_json in
+      make ~workspaceId ~serviceAccountId ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of tokens for a workspace service account. This does not return the key for each token. You cannot access keys after they are created. To create a new key, delete the token and recreate it. Service accounts are only available for workspaces that are compatible with Grafana version 9 and above."]
+module ListVersionsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token to use in a subsequent ListVersions operation to return the next set of results."];
+      grafanaVersions: GrafanaVersionList.t option
+        [@ocaml.doc
+          "The Grafana versions available to create. If a workspace ID is included in the request, the Grafana versions to which this workspace can be upgraded."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?grafanaVersions -> fun () -> { nextToken; grafanaVersions }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("grafanaVersions",
+          (Option.map x.grafanaVersions ~f:GrafanaVersionList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let grafanaVersions =
+        (Option.map ~f:GrafanaVersionList.of_xml)
+          (Xml.child xml_arg0 "grafanaVersions") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?grafanaVersions ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let grafanaVersions =
+        field_map json__ "grafanaVersions" GrafanaVersionList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?grafanaVersions ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists available versions of Grafana. These are available when calling CreateWorkspace. Optionally, include a workspace to list the versions to which it can be upgraded."]
+module ListVersionsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: ListVersionsRequestMaxResultsInteger.t option
+        [@ocaml.doc
+          "The maximum number of results to include in the response."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token to use when requesting the next set of results. You receive this token from a previous ListVersions operation."];
+      workspaceId: WorkspaceId.t option
+        [@ocaml.doc
+          "The ID of the workspace to list the available upgrade versions. If not included, lists all versions of Grafana that are supported for CreateWorkspace."]}
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?workspaceId -> fun () -> { maxResults; nextToken; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("maxResults",
+           (Option.map x.maxResults
+              ~f:ListVersionsRequestMaxResultsInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("workspace-id", (Option.map x.workspaceId ~f:WorkspaceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        (Option.map ~f:WorkspaceId.of_xml)
+          (Xml.child xml_arg0 "workspace-id") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:ListVersionsRequestMaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      make ?workspaceId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId = field_map json__ "workspaceId" WorkspaceId.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          ListVersionsRequestMaxResultsInteger.of_json in
+      make ?workspaceId ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists available versions of Grafana. These are available when calling CreateWorkspace. Optionally, include a workspace to list the versions to which it can be upgraded."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -3252,8 +4806,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The ListTagsForResource operation returns the tags that are associated with the Amazon Managed Service for Grafana resource specified by the resourceArn. Currently, the only resource that can be tagged is a workspace."]
@@ -3276,8 +4830,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3289,7 +4843,7 @@ module ListPermissionsResponse =
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "The token to use in a subsequent ListPermissions operation to return the next set of results."];
-      permissions: PermissionEntryList.t
+      permissions: PermissionEntryList.t option
         [@ocaml.doc "The permissions returned by the operation."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -3298,9 +4852,8 @@ module ListPermissionsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListPermissionsResponse"
     let make ?nextToken =
-      fun ~permissions -> fun () -> { nextToken; permissions }
+      fun ?permissions -> fun () -> { nextToken; permissions }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3360,22 +4913,23 @@ module ListPermissionsResponse =
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("permissions", (Some (PermissionEntryList.to_value x.permissions)))]
+        ("permissions",
+          (Option.map x.permissions ~f:PermissionEntryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let permissions =
-        PermissionEntryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "permissions") in
+        (Option.map ~f:PermissionEntryList.of_xml)
+          (Xml.child xml_arg0 "permissions") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
-      make ~permissions ?nextToken ()
+      make ?permissions ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissions =
-        field_map_exn json "permissions" PermissionEntryList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      make ~permissions ?nextToken ()
+        field_map json__ "permissions" PermissionEntryList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?permissions ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the users and groups who have the Grafana Admin and Editor roles in this workspace. If you use this operation without specifying userId or groupId, the operation returns the roles of all users and groups. If you specify a userId or a groupId, only the roles for that user or group are returned. If you do this, you can specify only one userId or one groupId."]
@@ -3383,78 +4937,79 @@ module ListPermissionsRequest =
   struct
     type nonrec t =
       {
-      groupId: SsoId.t option
-        [@ocaml.doc
-          "(Optional) Limits the results to only the group that matches this ID."];
       maxResults: ListPermissionsRequestMaxResultsInteger.t option
         [@ocaml.doc
           "The maximum number of results to include in the response."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "The token to use when requesting the next set of results. You received this token from a previous ListPermissions operation."];
+      userType: UserType.t option
+        [@ocaml.doc
+          "(Optional) If you specify SSO_USER, then only the permissions of IAM Identity Center users are returned. If you specify SSO_GROUP, only the permissions of IAM Identity Center groups are returned."];
       userId: SsoId.t option
         [@ocaml.doc
           "(Optional) Limits the results to only the user that matches this ID."];
-      userType: UserType.t option
+      groupId: SsoId.t option
         [@ocaml.doc
-          "(Optional) If you specify SSO_USER, then only the permissions of Amazon Web Services SSO users are returned. If you specify SSO_GROUP, only the permissions of Amazon Web Services SSO groups are returned."];
+          "(Optional) Limits the results to only the group that matches this ID."];
       workspaceId: WorkspaceId.t
         [@ocaml.doc
           "The ID of the workspace to list permissions for. This parameter is required."]}
     let context_ = "ListPermissionsRequest"
-    let make ?groupId =
-      fun ?maxResults ->
-        fun ?nextToken ->
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?userType ->
           fun ?userId ->
-            fun ?userType ->
+            fun ?groupId ->
               fun ~workspaceId ->
                 fun () ->
                   {
-                    groupId;
                     maxResults;
                     nextToken;
-                    userId;
                     userType;
+                    userId;
+                    groupId;
                     workspaceId
                   }
     let to_value x =
       structure_to_value
-        [("groupId", (Option.map x.groupId ~f:SsoId.to_value));
-        ("maxResults",
-          (Option.map x.maxResults
-             ~f:ListPermissionsRequestMaxResultsInteger.to_value));
+        [("maxResults",
+           (Option.map x.maxResults
+              ~f:ListPermissionsRequestMaxResultsInteger.to_value));
         ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("userId", (Option.map x.userId ~f:SsoId.to_value));
         ("userType", (Option.map x.userType ~f:UserType.to_value));
+        ("userId", (Option.map x.userId ~f:SsoId.to_value));
+        ("groupId", (Option.map x.groupId ~f:SsoId.to_value));
         ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workspaceId =
         WorkspaceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let groupId =
+        (Option.map ~f:SsoId.of_xml) (Xml.child xml_arg0 "groupId") in
+      let userId = (Option.map ~f:SsoId.of_xml) (Xml.child xml_arg0 "userId") in
       let userType =
         (Option.map ~f:UserType.of_xml) (Xml.child xml_arg0 "userType") in
-      let userId = (Option.map ~f:SsoId.of_xml) (Xml.child xml_arg0 "userId") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:ListPermissionsRequestMaxResultsInteger.of_xml)
           (Xml.child xml_arg0 "maxResults") in
-      let groupId =
-        (Option.map ~f:SsoId.of_xml) (Xml.child xml_arg0 "groupId") in
-      make ~workspaceId ?userType ?userId ?nextToken ?maxResults ?groupId ()
+      make ~workspaceId ?groupId ?userId ?userType ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let userType = field_map json "userType" UserType.of_json in
-      let userId = field_map json "userId" SsoId.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      let groupId = field_map json__ "groupId" SsoId.of_json in
+      let userId = field_map json__ "userId" SsoId.of_json in
+      let userType = field_map json__ "userType" UserType.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults"
+        field_map json__ "maxResults"
           ListPermissionsRequestMaxResultsInteger.of_json in
-      let groupId = field_map json "groupId" SsoId.of_json in
-      make ~workspaceId ?userType ?userId ?nextToken ?maxResults ?groupId ()
+      make ~workspaceId ?groupId ?userId ?userType ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the users and groups who have the Grafana Admin and Editor roles in this workspace. If you use this operation without specifying userId or groupId, the operation returns the roles of all users and groups. If you specify a userId or a groupId, only the roles for that user or group are returned. If you do this, you can specify only one userId or one groupId."]
@@ -3462,7 +5017,7 @@ module DisassociateLicenseResponse =
   struct
     type nonrec t =
       {
-      workspace: WorkspaceDescription.t
+      workspace: WorkspaceDescription.t option
         [@ocaml.doc
           "A structure containing information about the workspace."]}
     type nonrec error =
@@ -3472,8 +5027,7 @@ module DisassociateLicenseResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DisassociateLicenseResponse"
-    let make ~workspace = fun () -> { workspace }
+    let make ?workspace = fun () -> { workspace }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3532,57 +5086,60 @@ module DisassociateLicenseResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("workspace", (Some (WorkspaceDescription.to_value x.workspace)))]
+        [("workspace",
+           (Option.map x.workspace ~f:WorkspaceDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workspace =
-        WorkspaceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
-      make ~workspace ()
+        (Option.map ~f:WorkspaceDescription.of_xml)
+          (Xml.child xml_arg0 "workspace") in
+      make ?workspace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workspace =
-        field_map_exn json "workspace" WorkspaceDescription.of_json in
-      make ~workspace ()
+        field_map json__ "workspace" WorkspaceDescription.of_json in
+      make ?workspace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the Grafana Enterprise license from a workspace."]
 module DisassociateLicenseRequest =
   struct
     type nonrec t =
       {
-      licenseType: LicenseType.t
-        [@ocaml.doc "The type of license to remove from the workspace."];
       workspaceId: WorkspaceId.t
         [@ocaml.doc
-          "The ID of the workspace to remove the Grafana Enterprise license from."]}
+          "The ID of the workspace to remove the Grafana Enterprise license from."];
+      licenseType: LicenseType.t
+        [@ocaml.doc "The type of license to remove from the workspace."]}
     let context_ = "DisassociateLicenseRequest"
-    let make ~licenseType =
-      fun ~workspaceId -> fun () -> { licenseType; workspaceId }
+    let make ~workspaceId =
+      fun ~licenseType -> fun () -> { workspaceId; licenseType }
     let to_value x =
       structure_to_value
-        [("licenseType", (Some (LicenseType.to_value x.licenseType)));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("licenseType", (Some (LicenseType.to_value x.licenseType)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       let licenseType =
         LicenseType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "licenseType") in
-      make ~workspaceId ~licenseType ()
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ~licenseType ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let licenseType = field_map_exn json "licenseType" LicenseType.of_json in
-      make ~workspaceId ~licenseType ()
+    let of_json json__ =
+      let licenseType =
+        field_map_exn json__ "licenseType" LicenseType.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ~licenseType ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the Grafana Enterprise license from a workspace."]
 module DescribeWorkspaceResponse =
   struct
     type nonrec t =
       {
-      workspace: WorkspaceDescription.t
+      workspace: WorkspaceDescription.t option
         [@ocaml.doc
           "A structure containing information about the workspace."]}
     type nonrec error =
@@ -3592,8 +5149,7 @@ module DescribeWorkspaceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeWorkspaceResponse"
-    let make ~workspace = fun () -> { workspace }
+    let make ?workspace = fun () -> { workspace }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3652,18 +5208,19 @@ module DescribeWorkspaceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("workspace", (Some (WorkspaceDescription.to_value x.workspace)))]
+        [("workspace",
+           (Option.map x.workspace ~f:WorkspaceDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workspace =
-        WorkspaceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
-      make ~workspace ()
+        (Option.map ~f:WorkspaceDescription.of_xml)
+          (Xml.child xml_arg0 "workspace") in
+      make ?workspace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workspace =
-        field_map_exn json "workspace" WorkspaceDescription.of_json in
-      make ~workspace ()
+        field_map json__ "workspace" WorkspaceDescription.of_json in
+      make ?workspace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Displays information about one Amazon Managed Grafana workspace."]
@@ -3685,28 +5242,30 @@ module DescribeWorkspaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       make ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
       make ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Displays information about one Amazon Managed Grafana workspace."]
-module DescribeWorkspaceAuthenticationResponse =
+module DescribeWorkspaceConfigurationResponse =
   struct
     type nonrec t =
       {
-      authentication: AuthenticationDescription.t
+      configuration: OverridableConfigurationJson.t option
         [@ocaml.doc
-          "A structure containing information about the authentication methods used in the workspace."]}
+          "The configuration string for the workspace that you requested. For more information about the format and configuration options available, see Working in your Grafana workspace."];
+      grafanaVersion: GrafanaVersion.t option
+        [@ocaml.doc "The supported Grafana version for the workspace."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
-      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeWorkspaceAuthenticationResponse"
-    let make ~authentication = fun () -> { authentication }
+    let make ?configuration =
+      fun ?grafanaVersion -> fun () -> { configuration; grafanaVersion }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3717,8 +5276,6 @@ module DescribeWorkspaceAuthenticationResponse =
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3732,8 +5289,6 @@ module DescribeWorkspaceAuthenticationResponse =
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
-      | "ValidationException" ->
-          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3754,10 +5309,6 @@ module DescribeWorkspaceAuthenticationResponse =
           `Assoc
             [("error", (`String "ThrottlingException"));
             ("details", (ThrottlingException.to_json e))]
-      | `ValidationException e ->
-          `Assoc
-            [("error", (`String "ValidationException"));
-            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3765,30 +5316,38 @@ module DescribeWorkspaceAuthenticationResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("authentication",
-           (Some (AuthenticationDescription.to_value x.authentication)))]
+        [("configuration",
+           (Option.map x.configuration
+              ~f:OverridableConfigurationJson.to_value));
+        ("grafanaVersion",
+          (Option.map x.grafanaVersion ~f:GrafanaVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let authentication =
-        AuthenticationDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "authentication") in
-      make ~authentication ()
+      let grafanaVersion =
+        (Option.map ~f:GrafanaVersion.of_xml)
+          (Xml.child xml_arg0 "grafanaVersion") in
+      let configuration =
+        (Option.map ~f:OverridableConfigurationJson.of_xml)
+          (Xml.child xml_arg0 "configuration") in
+      make ?grafanaVersion ?configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let authentication =
-        field_map_exn json "authentication" AuthenticationDescription.of_json in
-      make ~authentication ()
+    let of_json json__ =
+      let grafanaVersion =
+        field_map json__ "grafanaVersion" GrafanaVersion.of_json in
+      let configuration =
+        field_map json__ "configuration" OverridableConfigurationJson.of_json in
+      make ?grafanaVersion ?configuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Displays information about the authentication methods used in one Amazon Managed Grafana workspace."]
-module DescribeWorkspaceAuthenticationRequest =
+       "Gets the current configuration string for the given workspace."]
+module DescribeWorkspaceConfigurationRequest =
   struct
     type nonrec t =
       {
       workspaceId: WorkspaceId.t
         [@ocaml.doc
-          "The ID of the workspace to return authentication information about."]}
-    let context_ = "DescribeWorkspaceAuthenticationRequest"
+          "The ID of the workspace to get configuration information for."]}
+    let context_ = "DescribeWorkspaceConfigurationRequest"
     let make ~workspaceId = fun () -> { workspaceId }
     let to_value x =
       structure_to_value
@@ -3800,19 +5359,20 @@ module DescribeWorkspaceAuthenticationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       make ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
       make ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Displays information about the authentication methods used in one Amazon Managed Grafana workspace."]
-module DeleteWorkspaceResponse =
+       "Gets the current configuration string for the given workspace."]
+module DescribeWorkspaceAuthenticationResponse =
   struct
     type nonrec t =
       {
-      workspace: WorkspaceDescription.t
+      authentication: AuthenticationDescription.t option
         [@ocaml.doc
-          "A structure containing information about the workspace that was deleted."]}
+          "A structure containing information about the authentication methods used in the workspace."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -3821,8 +5381,7 @@ module DeleteWorkspaceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteWorkspaceResponse"
-    let make ~workspace = fun () -> { workspace }
+    let make ?authentication = fun () -> { authentication }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3889,18 +5448,439 @@ module DeleteWorkspaceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("workspace", (Some (WorkspaceDescription.to_value x.workspace)))]
+        [("authentication",
+           (Option.map x.authentication ~f:AuthenticationDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authentication =
+        (Option.map ~f:AuthenticationDescription.of_xml)
+          (Xml.child xml_arg0 "authentication") in
+      make ?authentication ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authentication =
+        field_map json__ "authentication" AuthenticationDescription.of_json in
+      make ?authentication ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Displays information about the authentication methods used in one Amazon Managed Grafana workspace."]
+module DescribeWorkspaceAuthenticationRequest =
+  struct
+    type nonrec t =
+      {
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace to return authentication information about."]}
+    let context_ = "DescribeWorkspaceAuthenticationRequest"
+    let make ~workspaceId = fun () -> { workspaceId }
+    let to_value x =
+      structure_to_value
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ~workspaceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ~workspaceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Displays information about the authentication methods used in one Amazon Managed Grafana workspace."]
+module DeleteWorkspaceServiceAccountTokenResponse =
+  struct
+    type nonrec t =
+      {
+      tokenId: String_.t option
+        [@ocaml.doc "The ID of the token that was deleted."];
+      serviceAccountId: String_.t option
+        [@ocaml.doc
+          "The ID of the service account where the token was deleted."];
+      workspaceId: WorkspaceId.t option
+        [@ocaml.doc "The ID of the workspace where the token was deleted."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tokenId =
+      fun ?serviceAccountId ->
+        fun ?workspaceId ->
+          fun () -> { tokenId; serviceAccountId; workspaceId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("tokenId", (Option.map x.tokenId ~f:String_.to_value));
+        ("serviceAccountId",
+          (Option.map x.serviceAccountId ~f:String_.to_value));
+        ("workspaceId", (Option.map x.workspaceId ~f:WorkspaceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "workspaceId") in
+      let serviceAccountId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceAccountId") in
+      let tokenId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "tokenId") in
+      make ?workspaceId ?serviceAccountId ?tokenId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId = field_map json__ "workspaceId" WorkspaceId.of_json in
+      let serviceAccountId =
+        field_map json__ "serviceAccountId" String_.of_json in
+      let tokenId = field_map json__ "tokenId" String_.of_json in
+      make ?workspaceId ?serviceAccountId ?tokenId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a token for the workspace service account. This will disable the key associated with the token. If any automation is currently using the key, it will no longer be authenticated or authorized to perform actions with the Grafana HTTP APIs. Service accounts are only available for workspaces that are compatible with Grafana version 9 and above."]
+module DeleteWorkspaceServiceAccountTokenRequest =
+  struct
+    type nonrec t =
+      {
+      tokenId: String_.t [@ocaml.doc "The ID of the token to delete."];
+      serviceAccountId: String_.t
+        [@ocaml.doc
+          "The ID of the service account from which to delete the token."];
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace from which to delete the token."]}
+    let context_ = "DeleteWorkspaceServiceAccountTokenRequest"
+    let make ~tokenId =
+      fun ~serviceAccountId ->
+        fun ~workspaceId ->
+          fun () -> { tokenId; serviceAccountId; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("tokenId", (Some (String_.to_value x.tokenId)));
+        ("serviceAccountId", (Some (String_.to_value x.serviceAccountId)));
+        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let serviceAccountId =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceAccountId") in
+      let tokenId =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tokenId") in
+      make ~workspaceId ~serviceAccountId ~tokenId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      let serviceAccountId =
+        field_map_exn json__ "serviceAccountId" String_.of_json in
+      let tokenId = field_map_exn json__ "tokenId" String_.of_json in
+      make ~workspaceId ~serviceAccountId ~tokenId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a token for the workspace service account. This will disable the key associated with the token. If any automation is currently using the key, it will no longer be authenticated or authorized to perform actions with the Grafana HTTP APIs. Service accounts are only available for workspaces that are compatible with Grafana version 9 and above."]
+module DeleteWorkspaceServiceAccountResponse =
+  struct
+    type nonrec t =
+      {
+      serviceAccountId: String_.t option
+        [@ocaml.doc "The ID of the service account deleted."];
+      workspaceId: WorkspaceId.t option
+        [@ocaml.doc
+          "The ID of the workspace where the service account was deleted."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceAccountId =
+      fun ?workspaceId -> fun () -> { serviceAccountId; workspaceId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("serviceAccountId",
+           (Option.map x.serviceAccountId ~f:String_.to_value));
+        ("workspaceId", (Option.map x.workspaceId ~f:WorkspaceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "workspaceId") in
+      let serviceAccountId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceAccountId") in
+      make ?workspaceId ?serviceAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId = field_map json__ "workspaceId" WorkspaceId.of_json in
+      let serviceAccountId =
+        field_map json__ "serviceAccountId" String_.of_json in
+      make ?workspaceId ?serviceAccountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a workspace service account from the workspace. This will delete any tokens created for the service account, as well. If the tokens are currently in use, the will fail to authenticate / authorize after they are deleted. Service accounts are only available for workspaces that are compatible with Grafana version 9 and above."]
+module DeleteWorkspaceServiceAccountRequest =
+  struct
+    type nonrec t =
+      {
+      serviceAccountId: String_.t
+        [@ocaml.doc "The ID of the service account to delete."];
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace where the service account resides."]}
+    let context_ = "DeleteWorkspaceServiceAccountRequest"
+    let make ~serviceAccountId =
+      fun ~workspaceId -> fun () -> { serviceAccountId; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("serviceAccountId", (Some (String_.to_value x.serviceAccountId)));
+        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let serviceAccountId =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceAccountId") in
+      make ~workspaceId ~serviceAccountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      let serviceAccountId =
+        field_map_exn json__ "serviceAccountId" String_.of_json in
+      make ~workspaceId ~serviceAccountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a workspace service account from the workspace. This will delete any tokens created for the service account, as well. If the tokens are currently in use, the will fail to authenticate / authorize after they are deleted. Service accounts are only available for workspaces that are compatible with Grafana version 9 and above."]
+module DeleteWorkspaceResponse =
+  struct
+    type nonrec t =
+      {
+      workspace: WorkspaceDescription.t option
+        [@ocaml.doc
+          "A structure containing information about the workspace that was deleted."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?workspace = fun () -> { workspace }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("workspace",
+           (Option.map x.workspace ~f:WorkspaceDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workspace =
-        WorkspaceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
-      make ~workspace ()
+        (Option.map ~f:WorkspaceDescription.of_xml)
+          (Xml.child xml_arg0 "workspace") in
+      make ?workspace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workspace =
-        field_map_exn json "workspace" WorkspaceDescription.of_json in
-      make ~workspace ()
+        field_map json__ "workspace" WorkspaceDescription.of_json in
+      make ?workspace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an Amazon Managed Grafana workspace."]
 module DeleteWorkspaceRequest =
@@ -3921,16 +5901,507 @@ module DeleteWorkspaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
       make ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
       make ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an Amazon Managed Grafana workspace."]
+module DeleteWorkspaceApiKeyResponse =
+  struct
+    type nonrec t =
+      {
+      keyName: ApiKeyName.t option
+        [@ocaml.doc "The name of the key that was deleted."];
+      workspaceId: WorkspaceId.t option
+        [@ocaml.doc "The ID of the workspace where the key was deleted."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?keyName =
+      fun ?workspaceId -> fun () -> { keyName; workspaceId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("keyName", (Option.map x.keyName ~f:ApiKeyName.to_value));
+        ("workspaceId", (Option.map x.workspaceId ~f:WorkspaceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "workspaceId") in
+      let keyName =
+        (Option.map ~f:ApiKeyName.of_xml) (Xml.child xml_arg0 "keyName") in
+      make ?workspaceId ?keyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId = field_map json__ "workspaceId" WorkspaceId.of_json in
+      let keyName = field_map json__ "keyName" ApiKeyName.of_json in
+      make ?workspaceId ?keyName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a Grafana API key for the workspace. In workspaces compatible with Grafana version 9 or above, use workspace service accounts instead of API keys. API keys will be removed in a future release."]
+module DeleteWorkspaceApiKeyRequest =
+  struct
+    type nonrec t =
+      {
+      keyName: ApiKeyName.t [@ocaml.doc "The name of the API key to delete."];
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc "The ID of the workspace to delete."]}
+    let context_ = "DeleteWorkspaceApiKeyRequest"
+    let make ~keyName =
+      fun ~workspaceId -> fun () -> { keyName; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("keyName", (Some (ApiKeyName.to_value x.keyName)));
+        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let keyName =
+        ApiKeyName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "keyName") in
+      make ~workspaceId ~keyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      let keyName = field_map_exn json__ "keyName" ApiKeyName.of_json in
+      make ~workspaceId ~keyName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a Grafana API key for the workspace. In workspaces compatible with Grafana version 9 or above, use workspace service accounts instead of API keys. API keys will be removed in a future release."]
+module CreateWorkspaceServiceAccountTokenResponse =
+  struct
+    type nonrec t =
+      {
+      serviceAccountToken: ServiceAccountTokenSummaryWithKey.t option
+        [@ocaml.doc
+          "Information about the created token, including the key. Be sure to store the key securely."];
+      serviceAccountId: String_.t option
+        [@ocaml.doc
+          "The ID of the service account where the token was created."];
+      workspaceId: WorkspaceId.t option
+        [@ocaml.doc "The ID of the workspace where the token was created."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceAccountToken =
+      fun ?serviceAccountId ->
+        fun ?workspaceId ->
+          fun () -> { serviceAccountToken; serviceAccountId; workspaceId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("serviceAccountToken",
+           (Option.map x.serviceAccountToken
+              ~f:ServiceAccountTokenSummaryWithKey.to_value));
+        ("serviceAccountId",
+          (Option.map x.serviceAccountId ~f:String_.to_value));
+        ("workspaceId", (Option.map x.workspaceId ~f:WorkspaceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "workspaceId") in
+      let serviceAccountId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceAccountId") in
+      let serviceAccountToken =
+        (Option.map ~f:ServiceAccountTokenSummaryWithKey.of_xml)
+          (Xml.child xml_arg0 "serviceAccountToken") in
+      make ?workspaceId ?serviceAccountId ?serviceAccountToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId = field_map json__ "workspaceId" WorkspaceId.of_json in
+      let serviceAccountId =
+        field_map json__ "serviceAccountId" String_.of_json in
+      let serviceAccountToken =
+        field_map json__ "serviceAccountToken"
+          ServiceAccountTokenSummaryWithKey.of_json in
+      make ?workspaceId ?serviceAccountId ?serviceAccountToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a token that can be used to authenticate and authorize Grafana HTTP API operations for the given workspace service account. The service account acts as a user for the API operations, and defines the permissions that are used by the API. When you create the service account token, you will receive a key that is used when calling Grafana APIs. Do not lose this key, as it will not be retrievable again. If you do lose the key, you can delete the token and recreate it to receive a new key. This will disable the initial key. Service accounts are only available for workspaces that are compatible with Grafana version 9 and above."]
+module CreateWorkspaceServiceAccountTokenRequest =
+  struct
+    type nonrec t =
+      {
+      name: ServiceAccountTokenName.t
+        [@ocaml.doc "A name for the token to create."];
+      secondsToLive:
+        CreateWorkspaceServiceAccountTokenRequestSecondsToLiveInteger.t
+        [@ocaml.doc
+          "Sets how long the token will be valid, in seconds. You can set the time up to 30 days in the future."];
+      serviceAccountId: String_.t
+        [@ocaml.doc
+          "The ID of the service account for which to create a token."];
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace the service account resides within."]}
+    let context_ = "CreateWorkspaceServiceAccountTokenRequest"
+    let make ~name =
+      fun ~secondsToLive ->
+        fun ~serviceAccountId ->
+          fun ~workspaceId ->
+            fun () -> { name; secondsToLive; serviceAccountId; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (ServiceAccountTokenName.to_value x.name)));
+        ("secondsToLive",
+          (Some
+             (CreateWorkspaceServiceAccountTokenRequestSecondsToLiveInteger.to_value
+                x.secondsToLive)));
+        ("serviceAccountId", (Some (String_.to_value x.serviceAccountId)));
+        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let serviceAccountId =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceAccountId") in
+      let secondsToLive =
+        CreateWorkspaceServiceAccountTokenRequestSecondsToLiveInteger.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "secondsToLive") in
+      let name =
+        ServiceAccountTokenName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~workspaceId ~serviceAccountId ~secondsToLive ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      let serviceAccountId =
+        field_map_exn json__ "serviceAccountId" String_.of_json in
+      let secondsToLive =
+        field_map_exn json__ "secondsToLive"
+          CreateWorkspaceServiceAccountTokenRequestSecondsToLiveInteger.of_json in
+      let name = field_map_exn json__ "name" ServiceAccountTokenName.of_json in
+      make ~workspaceId ~serviceAccountId ~secondsToLive ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a token that can be used to authenticate and authorize Grafana HTTP API operations for the given workspace service account. The service account acts as a user for the API operations, and defines the permissions that are used by the API. When you create the service account token, you will receive a key that is used when calling Grafana APIs. Do not lose this key, as it will not be retrievable again. If you do lose the key, you can delete the token and recreate it to receive a new key. This will disable the initial key. Service accounts are only available for workspaces that are compatible with Grafana version 9 and above."]
+module CreateWorkspaceServiceAccountResponse =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option [@ocaml.doc "The ID of the service account."];
+      name: String_.t option [@ocaml.doc "The name of the service account."];
+      grafanaRole: Role.t option
+        [@ocaml.doc "The permission level given to the service account."];
+      workspaceId: WorkspaceId.t option
+        [@ocaml.doc
+          "The workspace with which the service account is associated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?id =
+      fun ?name ->
+        fun ?grafanaRole ->
+          fun ?workspaceId ->
+            fun () -> { id; name; grafanaRole; workspaceId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:String_.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("grafanaRole", (Option.map x.grafanaRole ~f:Role.to_value));
+        ("workspaceId", (Option.map x.workspaceId ~f:WorkspaceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "workspaceId") in
+      let grafanaRole =
+        (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "grafanaRole") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
+      make ?workspaceId ?grafanaRole ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId = field_map json__ "workspaceId" WorkspaceId.of_json in
+      let grafanaRole = field_map json__ "grafanaRole" Role.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      make ?workspaceId ?grafanaRole ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a service account for the workspace. A service account can be used to call Grafana HTTP APIs, and run automated workloads. After creating the service account with the correct GrafanaRole for your use case, use CreateWorkspaceServiceAccountToken to create a token that can be used to authenticate and authorize Grafana HTTP API calls. You can only create service accounts for workspaces that are compatible with Grafana version 9 and above. For more information about service accounts, see Service accounts in the Amazon Managed Grafana User Guide. For more information about the Grafana HTTP APIs, see Using Grafana HTTP APIs in the Amazon Managed Grafana User Guide."]
+module CreateWorkspaceServiceAccountRequest =
+  struct
+    type nonrec t =
+      {
+      name: ServiceAccountName.t
+        [@ocaml.doc
+          "A name for the service account. The name must be unique within the workspace, as it determines the ID associated with the service account."];
+      grafanaRole: Role.t
+        [@ocaml.doc
+          "The permission level to use for this service account. For more information about the roles and the permissions each has, see User roles in the Amazon Managed Grafana User Guide."];
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc
+          "The ID of the workspace within which to create the service account."]}
+    let context_ = "CreateWorkspaceServiceAccountRequest"
+    let make ~name =
+      fun ~grafanaRole ->
+        fun ~workspaceId -> fun () -> { name; grafanaRole; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (ServiceAccountName.to_value x.name)));
+        ("grafanaRole", (Some (Role.to_value x.grafanaRole)));
+        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let grafanaRole =
+        Role.of_xml (Xml.child_exn ~context:context_ xml_arg0 "grafanaRole") in
+      let name =
+        ServiceAccountName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~workspaceId ~grafanaRole ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      let grafanaRole = field_map_exn json__ "grafanaRole" Role.of_json in
+      let name = field_map_exn json__ "name" ServiceAccountName.of_json in
+      make ~workspaceId ~grafanaRole ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a service account for the workspace. A service account can be used to call Grafana HTTP APIs, and run automated workloads. After creating the service account with the correct GrafanaRole for your use case, use CreateWorkspaceServiceAccountToken to create a token that can be used to authenticate and authorize Grafana HTTP API calls. You can only create service accounts for workspaces that are compatible with Grafana version 9 and above. For more information about service accounts, see Service accounts in the Amazon Managed Grafana User Guide. For more information about the Grafana HTTP APIs, see Using Grafana HTTP APIs in the Amazon Managed Grafana User Guide."]
 module CreateWorkspaceResponse =
   struct
     type nonrec t =
       {
-      workspace: WorkspaceDescription.t
+      workspace: WorkspaceDescription.t option
         [@ocaml.doc
           "A structure containing data about the workspace that was created."]}
     type nonrec error =
@@ -3941,8 +6412,7 @@ module CreateWorkspaceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateWorkspaceResponse"
-    let make ~workspace = fun () -> { workspace }
+    let make ?workspace = fun () -> { workspace }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4011,18 +6481,19 @@ module CreateWorkspaceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("workspace", (Some (WorkspaceDescription.to_value x.workspace)))]
+        [("workspace",
+           (Option.map x.workspace ~f:WorkspaceDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workspace =
-        WorkspaceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
-      make ~workspace ()
+        (Option.map ~f:WorkspaceDescription.of_xml)
+          (Xml.child xml_arg0 "workspace") in
+      make ?workspace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workspace =
-        field_map_exn json "workspace" WorkspaceDescription.of_json in
-      make ~workspace ()
+        field_map json__ "workspace" WorkspaceDescription.of_json in
+      make ?workspace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a workspace. In a workspace, you can create Grafana dashboards and visualizations to analyze your metrics, logs, and traces. You don't have to build, package, or deploy any hardware to run the Grafana server. Don't use CreateWorkspace to modify an existing workspace. Instead, use UpdateWorkspace."]
@@ -4033,9 +6504,6 @@ module CreateWorkspaceRequest =
       accountAccessType: AccountAccessType.t
         [@ocaml.doc
           "Specifies whether the workspace can access Amazon Web Services resources in this Amazon Web Services account only, or whether it can also access Amazon Web Services resources in other accounts in the same organization. If you specify ORGANIZATION, you must specify which organizational units the workspace can access in the workspaceOrganizationalUnits parameter."];
-      authenticationProviders: AuthenticationProviders.t
-        [@ocaml.doc
-          "Specifies whether this workspace uses SAML 2.0, Amazon Web Services Single Sign On, or both to authenticate users for using the Grafana console within a workspace. For more information, see User authentication in Amazon Managed Grafana."];
       clientToken: ClientToken.t option
         [@ocaml.doc
           "A unique, case-sensitive, user-provided identifier to ensure the idempotency of the request."];
@@ -4044,15 +6512,13 @@ module CreateWorkspaceRequest =
           "The name of an IAM role that already exists to use with Organizations to access Amazon Web Services data sources and notification channels in other accounts in an organization."];
       permissionType: PermissionType.t
         [@ocaml.doc
-          "If you specify SERVICE_MANAGED on AWS Grafana console, Amazon Managed Grafana automatically creates the IAM roles and provisions the permissions that the workspace needs to use Amazon Web Services data sources and notification channels. In CLI mode, the permissionType SERVICE_MANAGED will not create the IAM role for you. If you specify CUSTOMER_MANAGED, you will manage those roles and permissions yourself. If you are creating this workspace in a member account of an organization that is not a delegated administrator account, and you want the workspace to access data sources in other Amazon Web Services accounts in the organization, you must choose CUSTOMER_MANAGED. For more information, see Amazon Managed Grafana permissions and policies for Amazon Web Services data sources and notification channels."];
+          "When creating a workspace through the Amazon Web Services API, CLI or Amazon Web Services CloudFormation, you must manage IAM roles and provision the permissions that the workspace needs to use Amazon Web Services data sources and notification channels. You must also specify a workspaceRoleArn for a role that you will manage for the workspace to use when accessing those datasources and notification channels. The ability for Amazon Managed Grafana to create and update IAM roles on behalf of the user is supported only in the Amazon Managed Grafana console, where this value may be set to SERVICE_MANAGED. Use only the CUSTOMER_MANAGED permission type when creating a workspace with the API, CLI or Amazon Web Services CloudFormation. For more information, see Amazon Managed Grafana permissions and policies for Amazon Web Services data sources and notification channels."];
       stackSetName: StackSetName.t option
         [@ocaml.doc
           "The name of the CloudFormation stack set to use to generate IAM roles to be used for this workspace."];
-      tags: TagMap.t option
-        [@ocaml.doc "The list of tags associated with the workspace."];
       workspaceDataSources: DataSourceTypesList.t option
         [@ocaml.doc
-          "Specify the Amazon Web Services data sources that you want to be queried in this workspace. Specifying these data sources here enables Amazon Managed Grafana to create IAM roles and permissions that allow Amazon Managed Grafana to read data from these sources. You must still add them as data sources in the Grafana console in the workspace. If you don't specify a data source here, you can still add it as a data source in the workspace console later. However, you will then have to manually configure permissions for it."];
+          "This parameter is for internal use only, and should not be used."];
       workspaceDescription: Description.t option
         [@ocaml.doc
           "A description for the workspace. This is used only to help you identify this workspace. Pattern: ^\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}\\\\p\\{P\\}\\]\\{0,2048\\}$"];
@@ -4068,50 +6534,82 @@ module CreateWorkspaceRequest =
           "Specifies the organizational units that this workspace is allowed to use data sources from, if this workspace is in an account that is part of an organization."];
       workspaceRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The workspace needs an IAM role that grants permissions to the Amazon Web Services resources that the workspace will view data from. If you already have a role that you want to use, specify it here. The permission type should be set to CUSTOMER_MANAGED."]}
+          "Specified the IAM role that grants permissions to the Amazon Web Services resources that the workspace will view data from, including both data sources and notification channels. You are responsible for managing the permissions for this role as new data sources or notification channels are added."];
+      authenticationProviders: AuthenticationProviders.t
+        [@ocaml.doc
+          "Specifies whether this workspace uses SAML 2.0, IAM Identity Center, or both to authenticate users for using the Grafana console within a workspace. For more information, see User authentication in Amazon Managed Grafana."];
+      tags: TagMap.t option
+        [@ocaml.doc "The list of tags associated with the workspace."];
+      vpcConfiguration: VpcConfiguration.t option
+        [@ocaml.doc
+          "The configuration settings for an Amazon VPC that contains data sources for your Grafana workspace to connect to. Connecting to a private VPC is not yet available in the Asia Pacific (Seoul) Region (ap-northeast-2)."];
+      configuration: OverridableConfigurationJson.t option
+        [@ocaml.doc
+          "The configuration string for the workspace that you create. For more information about the format and configuration options available, see Working in your Grafana workspace."];
+      networkAccessControl: NetworkAccessConfiguration.t option
+        [@ocaml.doc
+          "Configuration for network access to your workspace. When this is configured, only listed IP addresses and VPC endpoints will be able to access your workspace. Standard Grafana authentication and authorization will still be required. If this is not configured, or is removed, then all IP addresses and VPC endpoints will be allowed. Standard Grafana authentication and authorization will still be required."];
+      grafanaVersion: GrafanaVersion.t option
+        [@ocaml.doc
+          "Specifies the version of Grafana to support in the new workspace. If not specified, defaults to the latest version (for example, 10.4). To get a list of supported versions, use the ListVersions operation."];
+      ipAddressType: IPAddressType.t option
+        [@ocaml.doc
+          "Specifies whether the workspace supports IPv4 only, or IPv4 and IPv6. Valid values are IPv4 and DualStack. For more information about IP address types, see Network access control."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The ID or ARN of the Key Management Service key to use for encrypting workspace data."]}
     let context_ = "CreateWorkspaceRequest"
     let make ?clientToken =
       fun ?organizationRoleName ->
         fun ?stackSetName ->
-          fun ?tags ->
-            fun ?workspaceDataSources ->
-              fun ?workspaceDescription ->
-                fun ?workspaceName ->
-                  fun ?workspaceNotificationDestinations ->
-                    fun ?workspaceOrganizationalUnits ->
-                      fun ?workspaceRoleArn ->
-                        fun ~accountAccessType ->
-                          fun ~authenticationProviders ->
-                            fun ~permissionType ->
-                              fun () ->
-                                {
-                                  clientToken;
-                                  organizationRoleName;
-                                  stackSetName;
-                                  tags;
-                                  workspaceDataSources;
-                                  workspaceDescription;
-                                  workspaceName;
-                                  workspaceNotificationDestinations;
-                                  workspaceOrganizationalUnits;
-                                  workspaceRoleArn;
-                                  accountAccessType;
-                                  authenticationProviders;
-                                  permissionType
-                                }
+          fun ?workspaceDataSources ->
+            fun ?workspaceDescription ->
+              fun ?workspaceName ->
+                fun ?workspaceNotificationDestinations ->
+                  fun ?workspaceOrganizationalUnits ->
+                    fun ?workspaceRoleArn ->
+                      fun ?tags ->
+                        fun ?vpcConfiguration ->
+                          fun ?configuration ->
+                            fun ?networkAccessControl ->
+                              fun ?grafanaVersion ->
+                                fun ?ipAddressType ->
+                                  fun ?kmsKeyId ->
+                                    fun ~accountAccessType ->
+                                      fun ~permissionType ->
+                                        fun ~authenticationProviders ->
+                                          fun () ->
+                                            {
+                                              clientToken;
+                                              organizationRoleName;
+                                              stackSetName;
+                                              workspaceDataSources;
+                                              workspaceDescription;
+                                              workspaceName;
+                                              workspaceNotificationDestinations;
+                                              workspaceOrganizationalUnits;
+                                              workspaceRoleArn;
+                                              tags;
+                                              vpcConfiguration;
+                                              configuration;
+                                              networkAccessControl;
+                                              grafanaVersion;
+                                              ipAddressType;
+                                              kmsKeyId;
+                                              accountAccessType;
+                                              permissionType;
+                                              authenticationProviders
+                                            }
     let to_value x =
       structure_to_value
         [("accountAccessType",
            (Some (AccountAccessType.to_value x.accountAccessType)));
-        ("authenticationProviders",
-          (Some (AuthenticationProviders.to_value x.authenticationProviders)));
         ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
         ("organizationRoleName",
           (Option.map x.organizationRoleName ~f:OrganizationRoleName.to_value));
         ("permissionType", (Some (PermissionType.to_value x.permissionType)));
         ("stackSetName",
           (Option.map x.stackSetName ~f:StackSetName.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value));
         ("workspaceDataSources",
           (Option.map x.workspaceDataSources ~f:DataSourceTypesList.to_value));
         ("workspaceDescription",
@@ -4125,9 +6623,46 @@ module CreateWorkspaceRequest =
           (Option.map x.workspaceOrganizationalUnits
              ~f:OrganizationalUnitList.to_value));
         ("workspaceRoleArn",
-          (Option.map x.workspaceRoleArn ~f:IamRoleArn.to_value))]
+          (Option.map x.workspaceRoleArn ~f:IamRoleArn.to_value));
+        ("authenticationProviders",
+          (Some (AuthenticationProviders.to_value x.authenticationProviders)));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("vpcConfiguration",
+          (Option.map x.vpcConfiguration ~f:VpcConfiguration.to_value));
+        ("configuration",
+          (Option.map x.configuration
+             ~f:OverridableConfigurationJson.to_value));
+        ("networkAccessControl",
+          (Option.map x.networkAccessControl
+             ~f:NetworkAccessConfiguration.to_value));
+        ("grafanaVersion",
+          (Option.map x.grafanaVersion ~f:GrafanaVersion.to_value));
+        ("ipAddressType",
+          (Option.map x.ipAddressType ~f:IPAddressType.to_value));
+        ("kmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
+      let ipAddressType =
+        (Option.map ~f:IPAddressType.of_xml)
+          (Xml.child xml_arg0 "ipAddressType") in
+      let grafanaVersion =
+        (Option.map ~f:GrafanaVersion.of_xml)
+          (Xml.child xml_arg0 "grafanaVersion") in
+      let networkAccessControl =
+        (Option.map ~f:NetworkAccessConfiguration.of_xml)
+          (Xml.child xml_arg0 "networkAccessControl") in
+      let configuration =
+        (Option.map ~f:OverridableConfigurationJson.of_xml)
+          (Xml.child xml_arg0 "configuration") in
+      let vpcConfiguration =
+        (Option.map ~f:VpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "vpcConfiguration") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let authenticationProviders =
+        AuthenticationProviders.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "authenticationProviders") in
       let workspaceRoleArn =
         (Option.map ~f:IamRoleArn.of_xml)
           (Xml.child xml_arg0 "workspaceRoleArn") in
@@ -4146,7 +6681,6 @@ module CreateWorkspaceRequest =
       let workspaceDataSources =
         (Option.map ~f:DataSourceTypesList.of_xml)
           (Xml.child xml_arg0 "workspaceDataSources") in
-      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let stackSetName =
         (Option.map ~f:StackSetName.of_xml)
           (Xml.child xml_arg0 "stackSetName") in
@@ -4158,58 +6692,246 @@ module CreateWorkspaceRequest =
           (Xml.child xml_arg0 "organizationRoleName") in
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
-      let authenticationProviders =
-        AuthenticationProviders.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "authenticationProviders") in
       let accountAccessType =
         AccountAccessType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "accountAccessType") in
-      make ?workspaceRoleArn ?workspaceOrganizationalUnits
+      make ?kmsKeyId ?ipAddressType ?grafanaVersion ?networkAccessControl
+        ?configuration ?vpcConfiguration ?tags ~authenticationProviders
+        ?workspaceRoleArn ?workspaceOrganizationalUnits
         ?workspaceNotificationDestinations ?workspaceName
-        ?workspaceDescription ?workspaceDataSources ?tags ?stackSetName
-        ~permissionType ?organizationRoleName ?clientToken
-        ~authenticationProviders ~accountAccessType ()
+        ?workspaceDescription ?workspaceDataSources ?stackSetName
+        ~permissionType ?organizationRoleName ?clientToken ~accountAccessType
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "kmsKeyId" KmsKeyId.of_json in
+      let ipAddressType =
+        field_map json__ "ipAddressType" IPAddressType.of_json in
+      let grafanaVersion =
+        field_map json__ "grafanaVersion" GrafanaVersion.of_json in
+      let networkAccessControl =
+        field_map json__ "networkAccessControl"
+          NetworkAccessConfiguration.of_json in
+      let configuration =
+        field_map json__ "configuration" OverridableConfigurationJson.of_json in
+      let vpcConfiguration =
+        field_map json__ "vpcConfiguration" VpcConfiguration.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let authenticationProviders =
+        field_map_exn json__ "authenticationProviders"
+          AuthenticationProviders.of_json in
       let workspaceRoleArn =
-        field_map json "workspaceRoleArn" IamRoleArn.of_json in
+        field_map json__ "workspaceRoleArn" IamRoleArn.of_json in
       let workspaceOrganizationalUnits =
-        field_map json "workspaceOrganizationalUnits"
+        field_map json__ "workspaceOrganizationalUnits"
           OrganizationalUnitList.of_json in
       let workspaceNotificationDestinations =
-        field_map json "workspaceNotificationDestinations"
+        field_map json__ "workspaceNotificationDestinations"
           NotificationDestinationsList.of_json in
       let workspaceName =
-        field_map json "workspaceName" WorkspaceName.of_json in
+        field_map json__ "workspaceName" WorkspaceName.of_json in
       let workspaceDescription =
-        field_map json "workspaceDescription" Description.of_json in
+        field_map json__ "workspaceDescription" Description.of_json in
       let workspaceDataSources =
-        field_map json "workspaceDataSources" DataSourceTypesList.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let stackSetName = field_map json "stackSetName" StackSetName.of_json in
+        field_map json__ "workspaceDataSources" DataSourceTypesList.of_json in
+      let stackSetName = field_map json__ "stackSetName" StackSetName.of_json in
       let permissionType =
-        field_map_exn json "permissionType" PermissionType.of_json in
+        field_map_exn json__ "permissionType" PermissionType.of_json in
       let organizationRoleName =
-        field_map json "organizationRoleName" OrganizationRoleName.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let authenticationProviders =
-        field_map_exn json "authenticationProviders"
-          AuthenticationProviders.of_json in
+        field_map json__ "organizationRoleName" OrganizationRoleName.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let accountAccessType =
-        field_map_exn json "accountAccessType" AccountAccessType.of_json in
-      make ?workspaceRoleArn ?workspaceOrganizationalUnits
+        field_map_exn json__ "accountAccessType" AccountAccessType.of_json in
+      make ?kmsKeyId ?ipAddressType ?grafanaVersion ?networkAccessControl
+        ?configuration ?vpcConfiguration ?tags ~authenticationProviders
+        ?workspaceRoleArn ?workspaceOrganizationalUnits
         ?workspaceNotificationDestinations ?workspaceName
-        ?workspaceDescription ?workspaceDataSources ?tags ?stackSetName
-        ~permissionType ?organizationRoleName ?clientToken
-        ~authenticationProviders ~accountAccessType ()
+        ?workspaceDescription ?workspaceDataSources ?stackSetName
+        ~permissionType ?organizationRoleName ?clientToken ~accountAccessType
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a workspace. In a workspace, you can create Grafana dashboards and visualizations to analyze your metrics, logs, and traces. You don't have to build, package, or deploy any hardware to run the Grafana server. Don't use CreateWorkspace to modify an existing workspace. Instead, use UpdateWorkspace."]
+module CreateWorkspaceApiKeyResponse =
+  struct
+    type nonrec t =
+      {
+      keyName: ApiKeyName.t option
+        [@ocaml.doc "The name of the key that was created."];
+      key: ApiKeyToken.t option
+        [@ocaml.doc
+          "The key token. Use this value as a bearer token to authenticate HTTP requests to the workspace."];
+      workspaceId: WorkspaceId.t option
+        [@ocaml.doc "The ID of the workspace that the key is valid for."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?keyName =
+      fun ?key -> fun ?workspaceId -> fun () -> { keyName; key; workspaceId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("keyName", (Option.map x.keyName ~f:ApiKeyName.to_value));
+        ("key", (Option.map x.key ~f:ApiKeyToken.to_value));
+        ("workspaceId", (Option.map x.workspaceId ~f:WorkspaceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        (Option.map ~f:WorkspaceId.of_xml) (Xml.child xml_arg0 "workspaceId") in
+      let key = (Option.map ~f:ApiKeyToken.of_xml) (Xml.child xml_arg0 "key") in
+      let keyName =
+        (Option.map ~f:ApiKeyName.of_xml) (Xml.child xml_arg0 "keyName") in
+      make ?workspaceId ?key ?keyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId = field_map json__ "workspaceId" WorkspaceId.of_json in
+      let key = field_map json__ "key" ApiKeyToken.of_json in
+      let keyName = field_map json__ "keyName" ApiKeyName.of_json in
+      make ?workspaceId ?key ?keyName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a Grafana API key for the workspace. This key can be used to authenticate requests sent to the workspace's HTTP API. See https://docs.aws.amazon.com/grafana/latest/userguide/Using-Grafana-APIs.html for available APIs and example requests. In workspaces compatible with Grafana version 9 or above, use workspace service accounts instead of API keys. API keys will be removed in a future release."]
+module CreateWorkspaceApiKeyRequest =
+  struct
+    type nonrec t =
+      {
+      keyName: ApiKeyName.t
+        [@ocaml.doc
+          "Specifies the name of the key. Keynames must be unique to the workspace."];
+      keyRole: String_.t
+        [@ocaml.doc
+          "Specifies the permission level of the key. Valid values: ADMIN|EDITOR|VIEWER"];
+      secondsToLive: CreateWorkspaceApiKeyRequestSecondsToLiveInteger.t
+        [@ocaml.doc
+          "Specifies the time in seconds until the key expires. Keys can be valid for up to 30 days."];
+      workspaceId: WorkspaceId.t
+        [@ocaml.doc "The ID of the workspace to create an API key."]}
+    let context_ = "CreateWorkspaceApiKeyRequest"
+    let make ~keyName =
+      fun ~keyRole ->
+        fun ~secondsToLive ->
+          fun ~workspaceId ->
+            fun () -> { keyName; keyRole; secondsToLive; workspaceId }
+    let to_value x =
+      structure_to_value
+        [("keyName", (Some (ApiKeyName.to_value x.keyName)));
+        ("keyRole", (Some (String_.to_value x.keyRole)));
+        ("secondsToLive",
+          (Some
+             (CreateWorkspaceApiKeyRequestSecondsToLiveInteger.to_value
+                x.secondsToLive)));
+        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let secondsToLive =
+        CreateWorkspaceApiKeyRequestSecondsToLiveInteger.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "secondsToLive") in
+      let keyRole =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "keyRole") in
+      let keyName =
+        ApiKeyName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "keyName") in
+      make ~workspaceId ~secondsToLive ~keyRole ~keyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      let secondsToLive =
+        field_map_exn json__ "secondsToLive"
+          CreateWorkspaceApiKeyRequestSecondsToLiveInteger.of_json in
+      let keyRole = field_map_exn json__ "keyRole" String_.of_json in
+      let keyName = field_map_exn json__ "keyName" ApiKeyName.of_json in
+      make ~workspaceId ~secondsToLive ~keyRole ~keyName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a Grafana API key for the workspace. This key can be used to authenticate requests sent to the workspace's HTTP API. See https://docs.aws.amazon.com/grafana/latest/userguide/Using-Grafana-APIs.html for available APIs and example requests. In workspaces compatible with Grafana version 9 or above, use workspace service accounts instead of API keys. API keys will be removed in a future release."]
 module AssociateLicenseResponse =
   struct
     type nonrec t =
       {
-      workspace: WorkspaceDescription.t
+      workspace: WorkspaceDescription.t option
         [@ocaml.doc "A structure containing data about the workspace."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -4218,8 +6940,7 @@ module AssociateLicenseResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "AssociateLicenseResponse"
-    let make ~workspace = fun () -> { workspace }
+    let make ?workspace = fun () -> { workspace }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4278,50 +6999,65 @@ module AssociateLicenseResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("workspace", (Some (WorkspaceDescription.to_value x.workspace)))]
+        [("workspace",
+           (Option.map x.workspace ~f:WorkspaceDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let workspace =
-        WorkspaceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspace") in
-      make ~workspace ()
+        (Option.map ~f:WorkspaceDescription.of_xml)
+          (Xml.child xml_arg0 "workspace") in
+      make ?workspace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workspace =
-        field_map_exn json "workspace" WorkspaceDescription.of_json in
-      make ~workspace ()
+        field_map json__ "workspace" WorkspaceDescription.of_json in
+      make ?workspace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Assigns a Grafana Enterprise license to a workspace. Upgrading to Grafana Enterprise incurs additional fees. For more information, see Upgrade a workspace to Grafana Enterprise."]
+       "Assigns a Grafana Enterprise license to a workspace. To upgrade, you must use ENTERPRISE for the licenseType, and pass in a valid Grafana Labs token for the grafanaToken. Upgrading to Grafana Enterprise incurs additional fees. For more information, see Upgrade a workspace to Grafana Enterprise."]
 module AssociateLicenseRequest =
   struct
     type nonrec t =
       {
-      licenseType: LicenseType.t
-        [@ocaml.doc "The type of license to associate with the workspace."];
       workspaceId: WorkspaceId.t
-        [@ocaml.doc "The ID of the workspace to associate the license with."]}
+        [@ocaml.doc "The ID of the workspace to associate the license with."];
+      licenseType: LicenseType.t
+        [@ocaml.doc
+          "The type of license to associate with the workspace. Amazon Managed Grafana workspaces no longer support Grafana Enterprise free trials."];
+      grafanaToken: GrafanaToken.t option
+        [@ocaml.doc
+          "A token from Grafana Labs that ties your Amazon Web Services account with a Grafana Labs account. For more information, see Link your account with Grafana Labs."]}
     let context_ = "AssociateLicenseRequest"
-    let make ~licenseType =
-      fun ~workspaceId -> fun () -> { licenseType; workspaceId }
+    let make ?grafanaToken =
+      fun ~workspaceId ->
+        fun ~licenseType ->
+          fun () -> { grafanaToken; workspaceId; licenseType }
     let to_value x =
       structure_to_value
-        [("licenseType", (Some (LicenseType.to_value x.licenseType)));
-        ("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)))]
+        [("workspaceId", (Some (WorkspaceId.to_value x.workspaceId)));
+        ("licenseType", (Some (LicenseType.to_value x.licenseType)));
+        ("Grafana-Token",
+          (Option.map x.grafanaToken ~f:GrafanaToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let workspaceId =
-        WorkspaceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      let grafanaToken =
+        (Option.map ~f:GrafanaToken.of_xml)
+          (Xml.child xml_arg0 "Grafana-Token") in
       let licenseType =
         LicenseType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "licenseType") in
-      make ~workspaceId ~licenseType ()
+      let workspaceId =
+        WorkspaceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "workspaceId") in
+      make ?grafanaToken ~licenseType ~workspaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workspaceId = field_map_exn json "workspaceId" WorkspaceId.of_json in
-      let licenseType = field_map_exn json "licenseType" LicenseType.of_json in
-      make ~workspaceId ~licenseType ()
+    let of_json json__ =
+      let grafanaToken = field_map json__ "grafanaToken" GrafanaToken.of_json in
+      let licenseType =
+        field_map_exn json__ "licenseType" LicenseType.of_json in
+      let workspaceId =
+        field_map_exn json__ "workspaceId" WorkspaceId.of_json in
+      make ?grafanaToken ~licenseType ~workspaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Assigns a Grafana Enterprise license to a workspace. Upgrading to Grafana Enterprise incurs additional fees. For more information, see Upgrade a workspace to Grafana Enterprise."]
+       "Assigns a Grafana Enterprise license to a workspace. To upgrade, you must use ENTERPRISE for the licenseType, and pass in a valid Grafana Labs token for the grafanaToken. Upgrading to Grafana Enterprise incurs additional fees. For more information, see Upgrade a workspace to Grafana Enterprise."]

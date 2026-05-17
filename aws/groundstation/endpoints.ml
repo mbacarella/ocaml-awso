@@ -9,6 +9,11 @@ type ('i, 'o, 'e) t =
   | CreateDataflowEndpointGroup: (CreateDataflowEndpointGroupRequest.t,
   DataflowEndpointGroupIdResponse.t, DataflowEndpointGroupIdResponse.error) t
   
+  | CreateDataflowEndpointGroupV2: (CreateDataflowEndpointGroupV2Request.t,
+  CreateDataflowEndpointGroupV2Response.t,
+  CreateDataflowEndpointGroupV2Response.error) t 
+  | CreateEphemeris: (CreateEphemerisRequest.t, EphemerisIdResponse.t,
+  EphemerisIdResponse.error) t 
   | CreateMissionProfile: (CreateMissionProfileRequest.t,
   MissionProfileIdResponse.t, MissionProfileIdResponse.error) t 
   | DeleteConfig: (DeleteConfigRequest.t, ConfigIdResponse.t,
@@ -16,10 +21,21 @@ type ('i, 'o, 'e) t =
   | DeleteDataflowEndpointGroup: (DeleteDataflowEndpointGroupRequest.t,
   DataflowEndpointGroupIdResponse.t, DataflowEndpointGroupIdResponse.error) t
   
+  | DeleteEphemeris: (DeleteEphemerisRequest.t, EphemerisIdResponse.t,
+  EphemerisIdResponse.error) t 
   | DeleteMissionProfile: (DeleteMissionProfileRequest.t,
   MissionProfileIdResponse.t, MissionProfileIdResponse.error) t 
   | DescribeContact: (DescribeContactRequest.t, DescribeContactResponse.t,
   DescribeContactResponse.error) t 
+  | DescribeContactVersion: (DescribeContactVersionRequest.t,
+  DescribeContactVersionResponse.t, DescribeContactVersionResponse.error) t 
+  | DescribeEphemeris: (DescribeEphemerisRequest.t,
+  DescribeEphemerisResponse.t, DescribeEphemerisResponse.error) t 
+  | GetAgentConfiguration: (GetAgentConfigurationRequest.t,
+  GetAgentConfigurationResponse.t, GetAgentConfigurationResponse.error) t 
+  | GetAgentTaskResponseUrl: (GetAgentTaskResponseUrlRequest.t,
+  GetAgentTaskResponseUrlResponse.t, GetAgentTaskResponseUrlResponse.error) t
+  
   | GetConfig: (GetConfigRequest.t, GetConfigResponse.t,
   GetConfigResponse.error) t 
   | GetDataflowEndpointGroup: (GetDataflowEndpointGroupRequest.t,
@@ -31,13 +47,22 @@ type ('i, 'o, 'e) t =
   GetMissionProfileResponse.t, GetMissionProfileResponse.error) t 
   | GetSatellite: (GetSatelliteRequest.t, GetSatelliteResponse.t,
   GetSatelliteResponse.error) t 
+  | ListAntennas: (ListAntennasRequest.t, ListAntennasResponse.t,
+  ListAntennasResponse.error) t 
   | ListConfigs: (ListConfigsRequest.t, ListConfigsResponse.t,
   ListConfigsResponse.error) t 
+  | ListContactVersions: (ListContactVersionsRequest.t,
+  ListContactVersionsResponse.t, ListContactVersionsResponse.error) t 
   | ListContacts: (ListContactsRequest.t, ListContactsResponse.t,
   ListContactsResponse.error) t 
   | ListDataflowEndpointGroups: (ListDataflowEndpointGroupsRequest.t,
   ListDataflowEndpointGroupsResponse.t,
   ListDataflowEndpointGroupsResponse.error) t 
+  | ListEphemerides: (ListEphemeridesRequest.t, ListEphemeridesResponse.t,
+  ListEphemeridesResponse.error) t 
+  | ListGroundStationReservations: (ListGroundStationReservationsRequest.t,
+  ListGroundStationReservationsResponse.t,
+  ListGroundStationReservationsResponse.error) t 
   | ListGroundStations: (ListGroundStationsRequest.t,
   ListGroundStationsResponse.t, ListGroundStationsResponse.error) t 
   | ListMissionProfiles: (ListMissionProfilesRequest.t,
@@ -46,14 +71,22 @@ type ('i, 'o, 'e) t =
   ListSatellitesResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | RegisterAgent: (RegisterAgentRequest.t, RegisterAgentResponse.t,
+  RegisterAgentResponse.error) t 
   | ReserveContact: (ReserveContactRequest.t, ContactIdResponse.t,
   ContactIdResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateAgentStatus: (UpdateAgentStatusRequest.t,
+  UpdateAgentStatusResponse.t, UpdateAgentStatusResponse.error) t 
   | UpdateConfig: (UpdateConfigRequest.t, ConfigIdResponse.t,
   ConfigIdResponse.error) t 
+  | UpdateContact: (UpdateContactRequest.t, UpdateContactResponse.t,
+  UpdateContactResponse.error) t 
+  | UpdateEphemeris: (UpdateEphemerisRequest.t, EphemerisIdResponse.t,
+  EphemerisIdResponse.error) t 
   | UpdateMissionProfile: (UpdateMissionProfileRequest.t,
   MissionProfileIdResponse.t, MissionProfileIdResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
@@ -61,75 +94,137 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CancelContact -> `DELETE
   | CreateConfig -> `POST
   | CreateDataflowEndpointGroup -> `POST
+  | CreateDataflowEndpointGroupV2 -> `POST
+  | CreateEphemeris -> `POST
   | CreateMissionProfile -> `POST
   | DeleteConfig -> `DELETE
   | DeleteDataflowEndpointGroup -> `DELETE
+  | DeleteEphemeris -> `DELETE
   | DeleteMissionProfile -> `DELETE
   | DescribeContact -> `GET
+  | DescribeContactVersion -> `GET
+  | DescribeEphemeris -> `GET
+  | GetAgentConfiguration -> `GET
+  | GetAgentTaskResponseUrl -> `GET
   | GetConfig -> `GET
   | GetDataflowEndpointGroup -> `GET
   | GetMinuteUsage -> `POST
   | GetMissionProfile -> `GET
   | GetSatellite -> `GET
+  | ListAntennas -> `GET
   | ListConfigs -> `GET
+  | ListContactVersions -> `GET
   | ListContacts -> `POST
   | ListDataflowEndpointGroups -> `GET
+  | ListEphemerides -> `POST
+  | ListGroundStationReservations -> `GET
   | ListGroundStations -> `GET
   | ListMissionProfiles -> `GET
   | ListSatellites -> `GET
   | ListTagsForResource -> `GET
+  | RegisterAgent -> `POST
   | ReserveContact -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
+  | UpdateAgentStatus -> `PUT
   | UpdateConfig -> `PUT
+  | UpdateContact -> `POST
+  | UpdateEphemeris -> `PUT
   | UpdateMissionProfile -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CancelContact ->
           (Format.kasprintf Uri.of_string) "/contact/%s"
-            (String_.to_header x.CancelContactRequest.contactId)
+            (Uuid.to_header x.CancelContactRequest.contactId)
       | CreateConfig -> (Format.kasprintf Uri.of_string) "/config"
       | CreateDataflowEndpointGroup ->
           (Format.kasprintf Uri.of_string) "/dataflowEndpointGroup"
+      | CreateDataflowEndpointGroupV2 ->
+          (Format.kasprintf Uri.of_string) "/dataflowEndpointGroupV2"
+      | CreateEphemeris -> (Format.kasprintf Uri.of_string) "/ephemeris"
       | CreateMissionProfile ->
           (Format.kasprintf Uri.of_string) "/missionprofile"
       | DeleteConfig ->
           (Format.kasprintf Uri.of_string) "/config/%s/%s"
             (ConfigCapabilityType.to_header x.DeleteConfigRequest.configType)
-            (String_.to_header x.DeleteConfigRequest.configId)
+            (Uuid.to_header x.DeleteConfigRequest.configId)
       | DeleteDataflowEndpointGroup ->
           (Format.kasprintf Uri.of_string) "/dataflowEndpointGroup/%s"
-            (String_.to_header
+            (Uuid.to_header
                x.DeleteDataflowEndpointGroupRequest.dataflowEndpointGroupId)
+      | DeleteEphemeris ->
+          (Format.kasprintf Uri.of_string) "/ephemeris/%s"
+            (Uuid.to_header x.DeleteEphemerisRequest.ephemerisId)
       | DeleteMissionProfile ->
           (Format.kasprintf Uri.of_string) "/missionprofile/%s"
-            (String_.to_header x.DeleteMissionProfileRequest.missionProfileId)
+            (Uuid.to_header x.DeleteMissionProfileRequest.missionProfileId)
       | DescribeContact ->
           (Format.kasprintf Uri.of_string) "/contact/%s"
-            (String_.to_header x.DescribeContactRequest.contactId)
+            (Uuid.to_header x.DescribeContactRequest.contactId)
+      | DescribeContactVersion ->
+          (Format.kasprintf Uri.of_string) "/contact/%s/versions/%s"
+            (Uuid.to_header x.DescribeContactVersionRequest.contactId)
+            (VersionId.to_header x.DescribeContactVersionRequest.versionId)
+      | DescribeEphemeris ->
+          (Format.kasprintf Uri.of_string) "/ephemeris/%s"
+            (Uuid.to_header x.DescribeEphemerisRequest.ephemerisId)
+      | GetAgentConfiguration ->
+          (Format.kasprintf Uri.of_string) "/agent/%s/configuration"
+            (Uuid.to_header x.GetAgentConfigurationRequest.agentId)
+      | GetAgentTaskResponseUrl ->
+          (Format.kasprintf Uri.of_string) "/agentResponseUrl/%s/%s"
+            (Uuid.to_header x.GetAgentTaskResponseUrlRequest.agentId)
+            (Uuid.to_header x.GetAgentTaskResponseUrlRequest.taskId)
       | GetConfig ->
           (Format.kasprintf Uri.of_string) "/config/%s/%s"
             (ConfigCapabilityType.to_header x.GetConfigRequest.configType)
-            (String_.to_header x.GetConfigRequest.configId)
+            (Uuid.to_header x.GetConfigRequest.configId)
       | GetDataflowEndpointGroup ->
           (Format.kasprintf Uri.of_string) "/dataflowEndpointGroup/%s"
-            (String_.to_header
+            (Uuid.to_header
                x.GetDataflowEndpointGroupRequest.dataflowEndpointGroupId)
       | GetMinuteUsage -> (Format.kasprintf Uri.of_string) "/minute-usage"
       | GetMissionProfile ->
           (Format.kasprintf Uri.of_string) "/missionprofile/%s"
-            (String_.to_header x.GetMissionProfileRequest.missionProfileId)
+            (Uuid.to_header x.GetMissionProfileRequest.missionProfileId)
       | GetSatellite ->
           (Format.kasprintf Uri.of_string) "/satellite/%s"
-            (String_.to_header x.GetSatelliteRequest.satelliteId)
+            (Uuid.to_header x.GetSatelliteRequest.satelliteId)
+      | ListAntennas ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/groundstation/%s/antenna"
+               (GroundStationName.to_header
+                  x.ListAntennasRequest.groundStationId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults", (PaginationMaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken])
       | ListConfigs ->
           Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/config")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("maxResults", (Integer.to_header v)))
+                  ~f:(fun v ->
+                        ("maxResults", (PaginationMaxResults.to_header v)))
                   x.maxResults;
-               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken])
+      | ListContactVersions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/contact/%s/versions"
+               (Uuid.to_header x.ListContactVersionsRequest.contactId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults", (PaginationMaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
                  x.nextToken])
       | ListContacts -> (Format.kasprintf Uri.of_string) "/contacts"
       | ListDataflowEndpointGroups ->
@@ -137,60 +232,112 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string) "/dataflowEndpointGroup")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("maxResults", (Integer.to_header v)))
+                  ~f:(fun v ->
+                        ("maxResults", (PaginationMaxResults.to_header v)))
                   x.maxResults;
-               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken])
+      | ListEphemerides ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/ephemerides")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults", (PaginationMaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken])
+      | ListGroundStationReservations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/groundstation/%s/reservation"
+               (GroundStationName.to_header
+                  x.ListGroundStationReservationsRequest.groundStationId))
+            (List.filter_opt
+               [Some
+                  ("startTime",
+                    (SyntheticTimestamp_epoch_seconds.to_header x.startTime));
+               Some
+                 ("endTime",
+                   (SyntheticTimestamp_epoch_seconds.to_header x.endTime));
+               Option.map
+                 ~f:(fun v ->
+                       ("reservationTypes",
+                         (ReservationTypeFilterList.to_header v)))
+                 x.reservationTypes;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults", (PaginationMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
                  x.nextToken])
       | ListGroundStations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/groundstation")
             (List.filter_opt
-               [Option.map
-                  ~f:(fun v -> ("maxResults", (Integer.to_header v)))
-                  x.maxResults;
-               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
-                 x.nextToken;
+               [Option.map ~f:(fun v -> ("satelliteId", (Uuid.to_header v)))
+                  x.satelliteId;
                Option.map
-                 ~f:(fun v -> ("satelliteId", (String_.to_header v)))
-                 x.satelliteId])
+                 ~f:(fun v ->
+                       ("maxResults", (PaginationMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken])
       | ListMissionProfiles ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/missionprofile")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("maxResults", (Integer.to_header v)))
+                  ~f:(fun v ->
+                        ("maxResults", (PaginationMaxResults.to_header v)))
                   x.maxResults;
-               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
                  x.nextToken])
       | ListSatellites ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/satellite")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("maxResults", (Integer.to_header v)))
+                  ~f:(fun v ->
+                        ("maxResults", (PaginationMaxResults.to_header v)))
                   x.maxResults;
-               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
                  x.nextToken])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
-            (String_.to_header x.ListTagsForResourceRequest.resourceArn)
+            (AnyArn.to_header x.ListTagsForResourceRequest.resourceArn)
+      | RegisterAgent -> (Format.kasprintf Uri.of_string) "/agent"
       | ReserveContact -> (Format.kasprintf Uri.of_string) "/contact"
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
-            (String_.to_header x.TagResourceRequest.resourceArn)
+            (AnyArn.to_header x.TagResourceRequest.resourceArn)
       | UntagResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/tags/%s"
-               (String_.to_header x.UntagResourceRequest.resourceArn))
+               (AnyArn.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("tagKeys", (TagKeys.to_header x.tagKeys))])
+      | UpdateAgentStatus ->
+          (Format.kasprintf Uri.of_string) "/agent/%s"
+            (Uuid.to_header x.UpdateAgentStatusRequest.agentId)
       | UpdateConfig ->
           (Format.kasprintf Uri.of_string) "/config/%s/%s"
             (ConfigCapabilityType.to_header x.UpdateConfigRequest.configType)
-            (String_.to_header x.UpdateConfigRequest.configId)
+            (Uuid.to_header x.UpdateConfigRequest.configId)
+      | UpdateContact ->
+          (Format.kasprintf Uri.of_string) "/contact/%s/versions"
+            (Uuid.to_header x.UpdateContactRequest.contactId)
+      | UpdateEphemeris ->
+          (Format.kasprintf Uri.of_string) "/ephemeris/%s"
+            (Uuid.to_header x.UpdateEphemerisRequest.ephemerisId)
       | UpdateMissionProfile ->
           (Format.kasprintf Uri.of_string) "/missionprofile/%s"
-            (String_.to_header x.UpdateMissionProfileRequest.missionProfileId))
+            (Uuid.to_header x.UpdateMissionProfileRequest.missionProfileId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -206,12 +353,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Some
-                         ("configData",
-                           (ConfigTypeData.to_value
-                              req.CreateConfigRequest.configData));
+                         ("name",
+                           (SafeName.to_value req.CreateConfigRequest.name));
                       Some
-                        ("name",
-                          (SafeName.to_value req.CreateConfigRequest.name));
+                        ("configData",
+                          (ConfigTypeData.to_value
+                             req.CreateConfigRequest.configData));
                       Option.map req.CreateConfigRequest.tags
                         ~f:(fun x -> ("tags", (TagsMap.to_value x)))])
                    ~f:(fun (x, y) ->
@@ -235,6 +382,90 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (EndpointDetailsList.to_value
                               req.CreateDataflowEndpointGroupRequest.endpointDetails));
                       Option.map req.CreateDataflowEndpointGroupRequest.tags
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
+                      Option.map
+                        req.CreateDataflowEndpointGroupRequest.contactPrePassDurationSeconds
+                        ~f:(fun x ->
+                              ("contactPrePassDurationSeconds",
+                                (DataflowEndpointGroupDurationInSeconds.to_value
+                                   x)));
+                      Option.map
+                        req.CreateDataflowEndpointGroupRequest.contactPostPassDurationSeconds
+                        ~f:(fun x ->
+                              ("contactPostPassDurationSeconds",
+                                (DataflowEndpointGroupDurationInSeconds.to_value
+                                   x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateDataflowEndpointGroupV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("endpoints",
+                           (CreateEndpointDetailsList.to_value
+                              req.CreateDataflowEndpointGroupV2Request.endpoints));
+                      Option.map
+                        req.CreateDataflowEndpointGroupV2Request.contactPrePassDurationSeconds
+                        ~f:(fun x ->
+                              ("contactPrePassDurationSeconds",
+                                (DataflowEndpointGroupDurationInSeconds.to_value
+                                   x)));
+                      Option.map
+                        req.CreateDataflowEndpointGroupV2Request.contactPostPassDurationSeconds
+                        ~f:(fun x ->
+                              ("contactPostPassDurationSeconds",
+                                (DataflowEndpointGroupDurationInSeconds.to_value
+                                   x)));
+                      Option.map
+                        req.CreateDataflowEndpointGroupV2Request.tags
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateEphemeris ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.CreateEphemerisRequest.satelliteId
+                         ~f:(fun x -> ("satelliteId", (Uuid.to_value x)));
+                      Option.map req.CreateEphemerisRequest.enabled
+                        ~f:(fun x -> ("enabled", (Boolean.to_value x)));
+                      Option.map req.CreateEphemerisRequest.priority
+                        ~f:(fun x ->
+                              ("priority",
+                                (CustomerEphemerisPriority.to_value x)));
+                      Option.map req.CreateEphemerisRequest.expirationTime
+                        ~f:(fun x ->
+                              ("expirationTime", (Timestamp.to_value x)));
+                      Some
+                        ("name",
+                          (SafeName.to_value req.CreateEphemerisRequest.name));
+                      Option.map req.CreateEphemerisRequest.kmsKeyArn
+                        ~f:(fun x -> ("kmsKeyArn", (KeyArn.to_value x)));
+                      Option.map req.CreateEphemerisRequest.ephemeris
+                        ~f:(fun x ->
+                              ("ephemeris", (EphemerisData.to_value x)));
+                      Option.map req.CreateEphemerisRequest.tags
                         ~f:(fun x -> ("tags", (TagsMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -252,34 +483,45 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.CreateMissionProfileRequest.contactPostPassDurationSeconds
-                         ~f:(fun x ->
-                               ("contactPostPassDurationSeconds",
-                                 (DurationInSeconds.to_value x)));
+                      [Some
+                         ("name",
+                           (SafeName.to_value
+                              req.CreateMissionProfileRequest.name));
                       Option.map
                         req.CreateMissionProfileRequest.contactPrePassDurationSeconds
                         ~f:(fun x ->
                               ("contactPrePassDurationSeconds",
                                 (DurationInSeconds.to_value x)));
+                      Option.map
+                        req.CreateMissionProfileRequest.contactPostPassDurationSeconds
+                        ~f:(fun x ->
+                              ("contactPostPassDurationSeconds",
+                                (DurationInSeconds.to_value x)));
+                      Some
+                        ("minimumViableContactDurationSeconds",
+                          (PositiveDurationInSeconds.to_value
+                             req.CreateMissionProfileRequest.minimumViableContactDurationSeconds));
                       Some
                         ("dataflowEdges",
                           (DataflowEdgeList.to_value
                              req.CreateMissionProfileRequest.dataflowEdges));
                       Some
-                        ("minimumViableContactDurationSeconds",
-                          (DurationInSeconds.to_value
-                             req.CreateMissionProfileRequest.minimumViableContactDurationSeconds));
-                      Some
-                        ("name",
-                          (SafeName.to_value
-                             req.CreateMissionProfileRequest.name));
-                      Option.map req.CreateMissionProfileRequest.tags
-                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
-                      Some
                         ("trackingConfigArn",
                           (ConfigArn.to_value
-                             req.CreateMissionProfileRequest.trackingConfigArn))])
+                             req.CreateMissionProfileRequest.trackingConfigArn));
+                      Option.map
+                        req.CreateMissionProfileRequest.telemetrySinkConfigArn
+                        ~f:(fun x ->
+                              ("telemetrySinkConfigArn",
+                                (ConfigArn.to_value x)));
+                      Option.map req.CreateMissionProfileRequest.tags
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
+                      Option.map
+                        req.CreateMissionProfileRequest.streamsKmsKey
+                        ~f:(fun x -> ("streamsKmsKey", (KmsKey.to_value x)));
+                      Option.map
+                        req.CreateMissionProfileRequest.streamsKmsRole
+                        ~f:(fun x -> ("streamsKmsRole", (RoleArn.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -290,8 +532,21 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteConfig -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDataflowEndpointGroup ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteEphemeris -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteMissionProfile -> Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeContact ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeContactVersion ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeEphemeris ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetAgentConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetAgentTaskResponseUrl ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetConfig ->
@@ -311,10 +566,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Some
                          ("month",
-                           (Integer.to_value req.GetMinuteUsageRequest.month));
+                           (Month.to_value req.GetMinuteUsageRequest.month));
                       Some
                         ("year",
-                          (Integer.to_value req.GetMinuteUsageRequest.year))])
+                          (Year.to_value req.GetMinuteUsageRequest.year))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -328,7 +583,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetSatellite ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAntennas ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListConfigs ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListContactVersions ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListContacts ->
@@ -340,31 +601,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("endTime",
-                           (Timestamp.to_value
-                              req.ListContactsRequest.endTime));
-                      Option.map req.ListContactsRequest.groundStation
-                        ~f:(fun x -> ("groundStation", (String_.to_value x)));
-                      Option.map req.ListContactsRequest.maxResults
-                        ~f:(fun x -> ("maxResults", (Integer.to_value x)));
-                      Option.map req.ListContactsRequest.missionProfileArn
-                        ~f:(fun x ->
-                              ("missionProfileArn",
-                                (MissionProfileArn.to_value x)));
+                      [Option.map req.ListContactsRequest.maxResults
+                         ~f:(fun x ->
+                               ("maxResults",
+                                 (PaginationMaxResults.to_value x)));
                       Option.map req.ListContactsRequest.nextToken
-                        ~f:(fun x -> ("nextToken", (String_.to_value x)));
-                      Option.map req.ListContactsRequest.satelliteArn
                         ~f:(fun x ->
-                              ("satelliteArn", (SatelliteArn.to_value x)));
+                              ("nextToken", (PaginationToken.to_value x)));
+                      Some
+                        ("statusList",
+                          (StatusList.to_value
+                             req.ListContactsRequest.statusList));
                       Some
                         ("startTime",
                           (Timestamp.to_value
                              req.ListContactsRequest.startTime));
                       Some
-                        ("statusList",
-                          (StatusList.to_value
-                             req.ListContactsRequest.statusList))])
+                        ("endTime",
+                          (Timestamp.to_value req.ListContactsRequest.endTime));
+                      Option.map req.ListContactsRequest.groundStation
+                        ~f:(fun x ->
+                              ("groundStation",
+                                (GroundStationName.to_value x)));
+                      Option.map req.ListContactsRequest.satelliteArn
+                        ~f:(fun x ->
+                              ("satelliteArn", (SatelliteArn.to_value x)));
+                      Option.map req.ListContactsRequest.missionProfileArn
+                        ~f:(fun x ->
+                              ("missionProfileArn",
+                                (MissionProfileArn.to_value x)));
+                      Option.map req.ListContactsRequest.ephemeris
+                        ~f:(fun x ->
+                              ("ephemeris", (EphemerisFilter.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -373,6 +641,42 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListDataflowEndpointGroups ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListEphemerides ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListEphemeridesRequest.satelliteId
+                         ~f:(fun x -> ("satelliteId", (Uuid.to_value x)));
+                      Option.map req.ListEphemeridesRequest.ephemerisType
+                        ~f:(fun x ->
+                              ("ephemerisType", (EphemerisType.to_value x)));
+                      Some
+                        ("startTime",
+                          (Timestamp.to_value
+                             req.ListEphemeridesRequest.startTime));
+                      Some
+                        ("endTime",
+                          (Timestamp.to_value
+                             req.ListEphemeridesRequest.endTime));
+                      Option.map req.ListEphemeridesRequest.statusList
+                        ~f:(fun x ->
+                              ("statusList",
+                                (EphemerisStatusList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListGroundStationReservations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListGroundStations ->
@@ -387,6 +691,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | RegisterAgent ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("discoveryData",
+                           (DiscoveryData.to_value
+                              req.RegisterAgentRequest.discoveryData));
+                      Some
+                        ("agentDetails",
+                          (AgentDetails.to_value
+                             req.RegisterAgentRequest.agentDetails));
+                      Option.map req.RegisterAgentRequest.tags
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ReserveContact ->
       let (headers, body) =
         let headers =
@@ -397,27 +727,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                 (List.map
                    (List.filter_opt
                       [Some
-                         ("endTime",
-                           (Timestamp.to_value
-                              req.ReserveContactRequest.endTime));
-                      Some
-                        ("groundStation",
-                          (String_.to_value
-                             req.ReserveContactRequest.groundStation));
-                      Some
-                        ("missionProfileArn",
-                          (MissionProfileArn.to_value
-                             req.ReserveContactRequest.missionProfileArn));
-                      Some
-                        ("satelliteArn",
-                          (SatelliteArn.to_value
-                             req.ReserveContactRequest.satelliteArn));
+                         ("missionProfileArn",
+                           (MissionProfileArn.to_value
+                              req.ReserveContactRequest.missionProfileArn));
+                      Option.map req.ReserveContactRequest.satelliteArn
+                        ~f:(fun x ->
+                              ("satelliteArn", (SatelliteArn.to_value x)));
                       Some
                         ("startTime",
                           (Timestamp.to_value
                              req.ReserveContactRequest.startTime));
+                      Some
+                        ("endTime",
+                          (Timestamp.to_value
+                             req.ReserveContactRequest.endTime));
+                      Some
+                        ("groundStation",
+                          (GroundStationName.to_value
+                             req.ReserveContactRequest.groundStation));
                       Option.map req.ReserveContactRequest.tags
-                        ~f:(fun x -> ("tags", (TagsMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagsMap.to_value x)));
+                      Option.map req.ReserveContactRequest.trackingOverrides
+                        ~f:(fun x ->
+                              ("trackingOverrides",
+                                (TrackingOverrides.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -445,7 +778,35 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateAgentStatus -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateConfig -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateContact ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateContactRequest.clientToken
+                         ~f:(fun x ->
+                               ("clientToken", (ClientToken.to_value x)));
+                      Option.map req.UpdateContactRequest.trackingOverrides
+                        ~f:(fun x ->
+                              ("trackingOverrides",
+                                (TrackingOverrides.to_value x)));
+                      Option.map req.UpdateContactRequest.satelliteArn
+                        ~f:(fun x ->
+                              ("satelliteArn", (SatelliteArn.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateEphemeris -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateMissionProfile -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -511,6 +872,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DataflowEndpointGroupIdResponse.error_of_json))
+  | CreateDataflowEndpointGroupV2 ->
+      if is_success
+      then
+        Ok
+          (CreateDataflowEndpointGroupV2Response.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateDataflowEndpointGroupV2Response.error_of_json))
+  | CreateEphemeris ->
+      if is_success
+      then Ok (EphemerisIdResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some EphemerisIdResponse.error_of_json))
   | CreateMissionProfile ->
       if is_success
       then Ok (MissionProfileIdResponse.of_json (response_to_json resp))
@@ -528,6 +903,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DataflowEndpointGroupIdResponse.error_of_json))
+  | DeleteEphemeris ->
+      if is_success
+      then Ok (EphemerisIdResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some EphemerisIdResponse.error_of_json))
   | DeleteMissionProfile ->
       if is_success
       then Ok (MissionProfileIdResponse.of_json (response_to_json resp))
@@ -538,6 +917,34 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (DescribeContactResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DescribeContactResponse.error_of_json))
+  | DescribeContactVersion ->
+      if is_success
+      then
+        Ok (DescribeContactVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeContactVersionResponse.error_of_json))
+  | DescribeEphemeris ->
+      if is_success
+      then Ok (DescribeEphemerisResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeEphemerisResponse.error_of_json))
+  | GetAgentConfiguration ->
+      if is_success
+      then Ok (GetAgentConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetAgentConfigurationResponse.error_of_json))
+  | GetAgentTaskResponseUrl ->
+      if is_success
+      then
+        Ok (GetAgentTaskResponseUrlResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetAgentTaskResponseUrlResponse.error_of_json))
   | GetConfig ->
       if is_success
       then Ok (GetConfigResponse.of_json (response_to_json resp))
@@ -565,10 +972,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetSatelliteResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetSatelliteResponse.error_of_json))
+  | ListAntennas ->
+      if is_success
+      then Ok (ListAntennasResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListAntennasResponse.error_of_json))
   | ListConfigs ->
       if is_success
       then Ok (ListConfigsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListConfigsResponse.error_of_json))
+  | ListContactVersions ->
+      if is_success
+      then Ok (ListContactVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListContactVersionsResponse.error_of_json))
   | ListContacts ->
       if is_success
       then Ok (ListContactsResponse.of_json (response_to_json resp))
@@ -582,6 +999,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListDataflowEndpointGroupsResponse.error_of_json))
+  | ListEphemerides ->
+      if is_success
+      then Ok (ListEphemeridesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListEphemeridesResponse.error_of_json))
+  | ListGroundStationReservations ->
+      if is_success
+      then
+        Ok
+          (ListGroundStationReservationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListGroundStationReservationsResponse.error_of_json))
   | ListGroundStations ->
       if is_success
       then Ok (ListGroundStationsResponse.of_json (response_to_json resp))
@@ -605,6 +1037,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | RegisterAgent ->
+      if is_success
+      then Ok (RegisterAgentResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some RegisterAgentResponse.error_of_json))
   | ReserveContact ->
       if is_success
       then Ok (ContactIdResponse.of_json (response_to_json resp))
@@ -623,10 +1059,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UntagResourceResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateAgentStatus ->
+      if is_success
+      then Ok (UpdateAgentStatusResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateAgentStatusResponse.error_of_json))
   | UpdateConfig ->
       if is_success
       then Ok (ConfigIdResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ConfigIdResponse.error_of_json))
+  | UpdateContact ->
+      if is_success
+      then Ok (UpdateContactResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateContactResponse.error_of_json))
+  | UpdateEphemeris ->
+      if is_success
+      then Ok (EphemerisIdResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some EphemerisIdResponse.error_of_json))
   | UpdateMissionProfile ->
       if is_success
       then Ok (MissionProfileIdResponse.of_json (response_to_json resp))

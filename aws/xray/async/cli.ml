@@ -49,6 +49,25 @@ let batch_get_traces =
               ~traceIds:(Values.TraceIdList.of_json traceIds) ())
            (Some Values.BatchGetTracesResult.to_json)
            (Some Values.BatchGetTracesResult.error_to_json)])
+let cancel_trace_retrieval =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and retrievalToken =
+         flag "retrieval-token" (required string)
+           ~doc:"STRING RetrievalToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_trace_retrieval
+           (Values.CancelTraceRetrievalRequest.make ~retrievalToken ())
+           (Some Values.CancelTraceRetrievalResult.to_json)
+           (Some Values.CancelTraceRetrievalResult.error_to_json)])
 let create_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -119,6 +138,28 @@ let delete_group =
            (Values.DeleteGroupRequest.make ?groupName ?groupARN ())
            (Some Values.DeleteGroupResult.to_json)
            (Some Values.DeleteGroupResult.error_to_json)])
+let delete_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyRevisionId =
+         flag "policy-revision-id" (optional string)
+           ~doc:"STRING PolicyRevisionId"
+       and policyName =
+         flag "policy-name" (required string) ~doc:"STRING PolicyName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_policy
+           (Values.DeleteResourcePolicyRequest.make ?policyRevisionId
+              ~policyName ())
+           (Some Values.DeleteResourcePolicyResult.to_json)
+           (Some Values.DeleteResourcePolicyResult.error_to_json)])
 let delete_sampling_rule =
   Command.async ~summary:""
     ([%map_open.Command
@@ -190,6 +231,24 @@ let get_groups =
            Io.get_groups (Values.GetGroupsRequest.make ?nextToken ())
            (Some Values.GetGroupsResult.to_json)
            (Some Values.GetGroupsResult.error_to_json)])
+let get_indexing_rules =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_indexing_rules
+           (Values.GetIndexingRulesRequest.make ?nextToken ())
+           (Some Values.GetIndexingRulesResult.to_json)
+           (Some Values.GetIndexingRulesResult.error_to_json)])
 let get_insight =
   Command.async ~summary:""
     ([%map_open.Command
@@ -291,6 +350,28 @@ let get_insight_summaries =
               ~endTime:(Values.Timestamp.of_json endTime) ())
            (Some Values.GetInsightSummariesResult.to_json)
            (Some Values.GetInsightSummariesResult.error_to_json)])
+let get_retrieved_traces_graph =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and retrievalToken =
+         flag "retrieval-token" (required string)
+           ~doc:"STRING RetrievalToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_retrieved_traces_graph
+           (Values.GetRetrievedTracesGraphRequest.make ?nextToken
+              ~retrievalToken ())
+           (Some Values.GetRetrievedTracesGraphResult.to_json)
+           (Some Values.GetRetrievedTracesGraphResult.error_to_json)])
 let get_sampling_rules =
   Command.async ~summary:""
     ([%map_open.Command
@@ -337,6 +418,9 @@ let get_sampling_targets =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and samplingBoostStatisticsDocuments =
+         flag "sampling-boost-statistics-documents" (optional json_arg)
+           ~doc:"JSON SamplingBoostStatisticsDocumentList"
        and samplingStatisticsDocuments =
          flag "sampling-statistics-documents" (required json_arg)
            ~doc:"JSON SamplingStatisticsDocumentList" in
@@ -344,6 +428,9 @@ let get_sampling_targets =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_sampling_targets
            (Values.GetSamplingTargetsRequest.make
+              ?samplingBoostStatisticsDocuments:(Option.map
+                                                   ~f:Values.SamplingBoostStatisticsDocumentList.of_json
+                                                   samplingBoostStatisticsDocuments)
               ~samplingStatisticsDocuments:(Values.SamplingStatisticsDocumentList.of_json
                                               samplingStatisticsDocuments) ())
            (Some Values.GetSamplingTargetsResult.to_json)
@@ -433,6 +520,23 @@ let get_trace_graph =
               ~traceIds:(Values.TraceIdList.of_json traceIds) ())
            (Some Values.GetTraceGraphResult.to_json)
            (Some Values.GetTraceGraphResult.error_to_json)])
+let get_trace_segment_destination =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_trace_segment_destination
+           (Values.GetTraceSegmentDestinationRequest.make ())
+           (Some Values.GetTraceSegmentDestinationResult.to_json)
+           (Some Values.GetTraceSegmentDestinationResult.error_to_json)])
 let get_trace_summaries =
   Command.async ~summary:""
     ([%map_open.Command
@@ -472,6 +576,50 @@ let get_trace_summaries =
               ~endTime:(Values.Timestamp.of_json endTime) ())
            (Some Values.GetTraceSummariesResult.to_json)
            (Some Values.GetTraceSummariesResult.error_to_json)])
+let list_resource_policies =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING ResourcePolicyNextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_resource_policies
+           (Values.ListResourcePoliciesRequest.make ?nextToken ())
+           (Some Values.ListResourcePoliciesResult.to_json)
+           (Some Values.ListResourcePoliciesResult.error_to_json)])
+let list_retrieved_traces =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and traceFormat =
+         flag "trace-format" (optional json_arg) ~doc:"JSON TraceFormatType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and retrievalToken =
+         flag "retrieval-token" (required string)
+           ~doc:"STRING RetrievalToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_retrieved_traces
+           (Values.ListRetrievedTracesRequest.make
+              ?traceFormat:(Option.map ~f:Values.TraceFormatType.of_json
+                              traceFormat) ?nextToken ~retrievalToken ())
+           (Some Values.ListRetrievedTracesResult.to_json)
+           (Some Values.ListRetrievedTracesResult.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -514,6 +662,34 @@ let put_encryption_config =
               ~type_:(Values.EncryptionType.of_json type_) ())
            (Some Values.PutEncryptionConfigResult.to_json)
            (Some Values.PutEncryptionConfigResult.error_to_json)])
+let put_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyRevisionId =
+         flag "policy-revision-id" (optional string)
+           ~doc:"STRING PolicyRevisionId"
+       and bypassPolicyLockoutCheck =
+         flag "bypass-policy-lockout-check" (optional bool)
+           ~doc:"BOOL Boolean"
+       and policyName =
+         flag "policy-name" (required string) ~doc:"STRING PolicyName"
+       and policyDocument =
+         flag "policy-document" (required string)
+           ~doc:"STRING PolicyDocument" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_policy
+           (Values.PutResourcePolicyRequest.make ?policyRevisionId
+              ?bypassPolicyLockoutCheck ~policyName ~policyDocument ())
+           (Some Values.PutResourcePolicyResult.to_json)
+           (Some Values.PutResourcePolicyResult.error_to_json)])
 let put_telemetry_records =
   Command.async ~summary:""
     ([%map_open.Command
@@ -564,6 +740,32 @@ let put_trace_segments =
                                         traceSegmentDocuments) ())
            (Some Values.PutTraceSegmentsResult.to_json)
            (Some Values.PutTraceSegmentsResult.error_to_json)])
+let start_trace_retrieval =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and traceIds =
+         flag "trace-ids" (required json_arg)
+           ~doc:"JSON TraceIdListForRetrieval"
+       and startTime =
+         flag "start-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endTime =
+         flag "end-time" (required json_arg) ~doc:"JSON Timestamp" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_trace_retrieval
+           (Values.StartTraceRetrievalRequest.make
+              ~traceIds:(Values.TraceIdListForRetrieval.of_json traceIds)
+              ~startTime:(Values.Timestamp.of_json startTime)
+              ~endTime:(Values.Timestamp.of_json endTime) ())
+           (Some Values.StartTraceRetrievalResult.to_json)
+           (Some Values.StartTraceRetrievalResult.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -637,6 +839,26 @@ let update_group =
                                         insightsConfiguration) ())
            (Some Values.UpdateGroupResult.to_json)
            (Some Values.UpdateGroupResult.error_to_json)])
+let update_indexing_rule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING String"
+       and rule =
+         flag "rule" (required json_arg) ~doc:"JSON IndexingRuleValueUpdate" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_indexing_rule
+           (Values.UpdateIndexingRuleRequest.make ~name
+              ~rule:(Values.IndexingRuleValueUpdate.of_json rule) ())
+           (Some Values.UpdateIndexingRuleResult.to_json)
+           (Some Values.UpdateIndexingRuleResult.error_to_json)])
 let update_sampling_rule =
   Command.async ~summary:""
     ([%map_open.Command
@@ -658,21 +880,47 @@ let update_sampling_rule =
                                      samplingRuleUpdate) ())
            (Some Values.UpdateSamplingRuleResult.to_json)
            (Some Values.UpdateSamplingRuleResult.error_to_json)])
+let update_trace_segment_destination =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destination =
+         flag "destination" (optional json_arg)
+           ~doc:"JSON TraceSegmentDestination" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_trace_segment_destination
+           (Values.UpdateTraceSegmentDestinationRequest.make
+              ?destination:(Option.map
+                              ~f:Values.TraceSegmentDestination.of_json
+                              destination) ())
+           (Some Values.UpdateTraceSegmentDestinationResult.to_json)
+           (Some Values.UpdateTraceSegmentDestinationResult.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("batch-get-traces", batch_get_traces);
+    ("cancel-trace-retrieval", cancel_trace_retrieval);
     ("create-group", create_group);
     ("create-sampling-rule", create_sampling_rule);
     ("delete-group", delete_group);
+    ("delete-resource-policy", delete_resource_policy);
     ("delete-sampling-rule", delete_sampling_rule);
     ("get-encryption-config", get_encryption_config);
     ("get-group", get_group);
     ("get-groups", get_groups);
+    ("get-indexing-rules", get_indexing_rules);
     ("get-insight", get_insight);
     ("get-insight-events", get_insight_events);
     ("get-insight-impact-graph", get_insight_impact_graph);
     ("get-insight-summaries", get_insight_summaries);
+    ("get-retrieved-traces-graph", get_retrieved_traces_graph);
     ("get-sampling-rules", get_sampling_rules);
     ("get-sampling-statistic-summaries", get_sampling_statistic_summaries);
     ("get-sampling-targets", get_sampling_targets);
@@ -680,12 +928,19 @@ let main =
     ("get-time-series-service-statistics",
       get_time_series_service_statistics);
     ("get-trace-graph", get_trace_graph);
+    ("get-trace-segment-destination", get_trace_segment_destination);
     ("get-trace-summaries", get_trace_summaries);
+    ("list-resource-policies", list_resource_policies);
+    ("list-retrieved-traces", list_retrieved_traces);
     ("list-tags-for-resource", list_tags_for_resource);
     ("put-encryption-config", put_encryption_config);
+    ("put-resource-policy", put_resource_policy);
     ("put-telemetry-records", put_telemetry_records);
     ("put-trace-segments", put_trace_segments);
+    ("start-trace-retrieval", start_trace_retrieval);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-group", update_group);
-    ("update-sampling-rule", update_sampling_rule)]
+    ("update-indexing-rule", update_indexing_rule);
+    ("update-sampling-rule", update_sampling_rule);
+    ("update-trace-segment-destination", update_trace_segment_destination)]

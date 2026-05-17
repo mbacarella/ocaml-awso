@@ -15,6 +15,11 @@ let accept_invitation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AcceptInvitation input
 let batch_get_custom_data_identifiers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetCustomDataIdentifiers input
+let batch_update_automated_discovery_accounts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchUpdateAutomatedDiscoveryAccounts
+    input
+let create_allow_list ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAllowList input
 let create_classification_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateClassificationJob input
 let create_custom_data_identifier ?endpoint_url ?cfg input =
@@ -29,6 +34,8 @@ let create_sample_findings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSampleFindings input
 let decline_invitations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeclineInvitations input
+let delete_allow_list ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAllowList input
 let delete_custom_data_identifier ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCustomDataIdentifier input
 let delete_findings_filter ?endpoint_url ?cfg input =
@@ -60,11 +67,17 @@ let enable_organization_admin_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableOrganizationAdminAccount input
 let get_administrator_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAdministratorAccount input
+let get_allow_list ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAllowList input
+let get_automated_discovery_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAutomatedDiscoveryConfiguration input
 let get_bucket_statistics ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBucketStatistics input
 let get_classification_export_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetClassificationExportConfiguration
     input
+let get_classification_scope ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetClassificationScope input
 let get_custom_data_identifier ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCustomDataIdentifier input
 let get_finding_statistics ?endpoint_url ?cfg input =
@@ -83,12 +96,29 @@ let get_master_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMasterAccount input
 let get_member ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMember input
+let get_resource_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourceProfile input
+let get_reveal_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRevealConfiguration input
+let get_sensitive_data_occurrences ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSensitiveDataOccurrences input
+let get_sensitive_data_occurrences_availability ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSensitiveDataOccurrencesAvailability
+    input
+let get_sensitivity_inspection_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSensitivityInspectionTemplate input
 let get_usage_statistics ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetUsageStatistics input
 let get_usage_totals ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetUsageTotals input
+let list_allow_lists ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAllowLists input
+let list_automated_discovery_accounts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAutomatedDiscoveryAccounts input
 let list_classification_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListClassificationJobs input
+let list_classification_scopes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListClassificationScopes input
 let list_custom_data_identifiers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCustomDataIdentifiers input
 let list_findings ?endpoint_url ?cfg input =
@@ -103,6 +133,12 @@ let list_members ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMembers input
 let list_organization_admin_accounts ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListOrganizationAdminAccounts input
+let list_resource_profile_artifacts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListResourceProfileArtifacts input
+let list_resource_profile_detections ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListResourceProfileDetections input
+let list_sensitivity_inspection_templates ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSensitivityInspectionTemplates input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let put_classification_export_configuration ?endpoint_url ?cfg input =
@@ -118,8 +154,15 @@ let test_custom_data_identifier ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TestCustomDataIdentifier input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_allow_list ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAllowList input
+let update_automated_discovery_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAutomatedDiscoveryConfiguration
+    input
 let update_classification_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateClassificationJob input
+let update_classification_scope ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateClassificationScope input
 let update_findings_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFindingsFilter input
 let update_macie_session ?endpoint_url ?cfg input =
@@ -128,3 +171,11 @@ let update_member_session ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateMemberSession input
 let update_organization_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateOrganizationConfiguration input
+let update_resource_profile ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateResourceProfile input
+let update_resource_profile_detections ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateResourceProfileDetections input
+let update_reveal_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateRevealConfiguration input
+let update_sensitivity_inspection_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateSensitivityInspectionTemplate input

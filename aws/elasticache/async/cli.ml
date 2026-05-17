@@ -155,6 +155,34 @@ let complete_migration =
            (Values.CompleteMigrationMessage.make ?force ~replicationGroupId
               ()) (Some Values.CompleteMigrationResponse.to_json)
            (Some Values.CompleteMigrationResponse.error_to_json)])
+let copy_serverless_cache_snapshot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING String"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and sourceServerlessCacheSnapshotName =
+         flag "source-serverless-cache-snapshot-name" (required string)
+           ~doc:"STRING String"
+       and targetServerlessCacheSnapshotName =
+         flag "target-serverless-cache-snapshot-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.copy_serverless_cache_snapshot
+           (Values.CopyServerlessCacheSnapshotRequest.make ?kmsKeyId
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~sourceServerlessCacheSnapshotName
+              ~targetServerlessCacheSnapshotName ())
+           (Some Values.CopyServerlessCacheSnapshotResponse.to_json)
+           (Some Values.CopyServerlessCacheSnapshotResponse.error_to_json)])
 let copy_snapshot =
   Command.async ~summary:""
     ([%map_open.Command
@@ -252,6 +280,13 @@ let create_cache_cluster =
        and logDeliveryConfigurations =
          flag "log-delivery-configurations" (optional json_arg)
            ~doc:"JSON LogDeliveryConfigurationRequestList"
+       and transitEncryptionEnabled =
+         flag "transit-encryption-enabled" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
+       and ipDiscovery =
+         flag "ip-discovery" (optional json_arg) ~doc:"JSON IpDiscovery"
        and cacheClusterId =
          flag "cache-cluster-id" (required string) ~doc:"STRING String" in
        fun () ->
@@ -285,7 +320,11 @@ let create_cache_cluster =
               ?logDeliveryConfigurations:(Option.map
                                             ~f:Values.LogDeliveryConfigurationRequestList.of_json
                                             logDeliveryConfigurations)
-              ~cacheClusterId ())
+              ?transitEncryptionEnabled
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType)
+              ?ipDiscovery:(Option.map ~f:Values.IpDiscovery.of_json
+                              ipDiscovery) ~cacheClusterId ())
            (Some Values.CreateCacheClusterResult.to_json)
            (Some Values.CreateCacheClusterResult.error_to_json)])
 let create_cache_parameter_group =
@@ -485,6 +524,18 @@ let create_replication_group =
        and dataTieringEnabled =
          flag "data-tiering-enabled" (optional bool)
            ~doc:"BOOL BooleanOptional"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
+       and ipDiscovery =
+         flag "ip-discovery" (optional json_arg) ~doc:"JSON IpDiscovery"
+       and transitEncryptionMode =
+         flag "transit-encryption-mode" (optional json_arg)
+           ~doc:"JSON TransitEncryptionMode"
+       and clusterMode =
+         flag "cluster-mode" (optional json_arg) ~doc:"JSON ClusterMode"
+       and serverlessCacheSnapshotName =
+         flag "serverless-cache-snapshot-name" (optional string)
+           ~doc:"STRING String"
        and replicationGroupId =
          flag "replication-group-id" (required string) ~doc:"STRING String"
        and replicationGroupDescription =
@@ -524,10 +575,107 @@ let create_replication_group =
               ?logDeliveryConfigurations:(Option.map
                                             ~f:Values.LogDeliveryConfigurationRequestList.of_json
                                             logDeliveryConfigurations)
-              ?dataTieringEnabled ~replicationGroupId
-              ~replicationGroupDescription ())
+              ?dataTieringEnabled
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType)
+              ?ipDiscovery:(Option.map ~f:Values.IpDiscovery.of_json
+                              ipDiscovery)
+              ?transitEncryptionMode:(Option.map
+                                        ~f:Values.TransitEncryptionMode.of_json
+                                        transitEncryptionMode)
+              ?clusterMode:(Option.map ~f:Values.ClusterMode.of_json
+                              clusterMode) ?serverlessCacheSnapshotName
+              ~replicationGroupId ~replicationGroupDescription ())
            (Some Values.CreateReplicationGroupResult.to_json)
            (Some Values.CreateReplicationGroupResult.error_to_json)])
+let create_serverless_cache =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and majorEngineVersion =
+         flag "major-engine-version" (optional string) ~doc:"STRING String"
+       and cacheUsageLimits =
+         flag "cache-usage-limits" (optional json_arg)
+           ~doc:"JSON CacheUsageLimits"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING String"
+       and securityGroupIds =
+         flag "security-group-ids" (optional json_arg)
+           ~doc:"JSON SecurityGroupIdsList"
+       and snapshotArnsToRestore =
+         flag "snapshot-arns-to-restore" (optional json_arg)
+           ~doc:"JSON SnapshotArnsList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and userGroupId =
+         flag "user-group-id" (optional string) ~doc:"STRING String"
+       and subnetIds =
+         flag "subnet-ids" (optional json_arg) ~doc:"JSON SubnetIdsList"
+       and snapshotRetentionLimit =
+         flag "snapshot-retention-limit" (optional int)
+           ~doc:"INT IntegerOptional"
+       and dailySnapshotTime =
+         flag "daily-snapshot-time" (optional string) ~doc:"STRING String"
+       and networkType =
+         flag "network-type" (optional json_arg) ~doc:"JSON NetworkType"
+       and serverlessCacheName =
+         flag "serverless-cache-name" (required string) ~doc:"STRING String"
+       and engine = flag "engine" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_serverless_cache
+           (Values.CreateServerlessCacheRequest.make ?description
+              ?majorEngineVersion
+              ?cacheUsageLimits:(Option.map
+                                   ~f:Values.CacheUsageLimits.of_json
+                                   cacheUsageLimits) ?kmsKeyId
+              ?securityGroupIds:(Option.map
+                                   ~f:Values.SecurityGroupIdsList.of_json
+                                   securityGroupIds)
+              ?snapshotArnsToRestore:(Option.map
+                                        ~f:Values.SnapshotArnsList.of_json
+                                        snapshotArnsToRestore)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?userGroupId
+              ?subnetIds:(Option.map ~f:Values.SubnetIdsList.of_json
+                            subnetIds) ?snapshotRetentionLimit
+              ?dailySnapshotTime
+              ?networkType:(Option.map ~f:Values.NetworkType.of_json
+                              networkType) ~serverlessCacheName ~engine ())
+           (Some Values.CreateServerlessCacheResponse.to_json)
+           (Some Values.CreateServerlessCacheResponse.error_to_json)])
+let create_serverless_cache_snapshot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING String"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and serverlessCacheSnapshotName =
+         flag "serverless-cache-snapshot-name" (required string)
+           ~doc:"STRING String"
+       and serverlessCacheName =
+         flag "serverless-cache-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_serverless_cache_snapshot
+           (Values.CreateServerlessCacheSnapshotRequest.make ?kmsKeyId
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~serverlessCacheSnapshotName ~serverlessCacheName ())
+           (Some Values.CreateServerlessCacheSnapshotResponse.to_json)
+           (Some Values.CreateServerlessCacheSnapshotResponse.error_to_json)])
 let create_snapshot =
   Command.async ~summary:""
     ([%map_open.Command
@@ -571,6 +719,9 @@ let create_user =
          flag "no-password-required" (optional bool)
            ~doc:"BOOL BooleanOptional"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and authenticationMode =
+         flag "authentication-mode" (optional json_arg)
+           ~doc:"JSON AuthenticationMode"
        and userId = flag "user-id" (required string) ~doc:"STRING UserId"
        and userName =
          flag "user-name" (required string) ~doc:"STRING UserName"
@@ -583,8 +734,11 @@ let create_user =
            (Values.CreateUserMessage.make
               ?passwords:(Option.map ~f:Values.PasswordListInput.of_json
                             passwords) ?noPasswordRequired
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~userId
-              ~userName ~engine ~accessString ()) (Some Values.User.to_json)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?authenticationMode:(Option.map
+                                     ~f:Values.AuthenticationMode.of_json
+                                     authenticationMode) ~userId ~userName
+              ~engine ~accessString ()) (Some Values.User.to_json)
            (Some Values.User.error_to_json)])
 let create_user_group =
   Command.async ~summary:""
@@ -807,6 +961,47 @@ let delete_replication_group =
               ?finalSnapshotIdentifier ~replicationGroupId ())
            (Some Values.DeleteReplicationGroupResult.to_json)
            (Some Values.DeleteReplicationGroupResult.error_to_json)])
+let delete_serverless_cache =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and finalSnapshotName =
+         flag "final-snapshot-name" (optional string) ~doc:"STRING String"
+       and serverlessCacheName =
+         flag "serverless-cache-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_serverless_cache
+           (Values.DeleteServerlessCacheRequest.make ?finalSnapshotName
+              ~serverlessCacheName ())
+           (Some Values.DeleteServerlessCacheResponse.to_json)
+           (Some Values.DeleteServerlessCacheResponse.error_to_json)])
+let delete_serverless_cache_snapshot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serverlessCacheSnapshotName =
+         flag "serverless-cache-snapshot-name" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_serverless_cache_snapshot
+           (Values.DeleteServerlessCacheSnapshotRequest.make
+              ~serverlessCacheSnapshotName ())
+           (Some Values.DeleteServerlessCacheSnapshotResponse.to_json)
+           (Some Values.DeleteServerlessCacheSnapshotResponse.error_to_json)])
 let delete_snapshot =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1176,6 +1371,59 @@ let describe_reserved_cache_nodes_offerings =
               ?productDescription ?offeringType ?maxRecords ?marker ())
            (Some Values.ReservedCacheNodesOfferingMessage.to_json)
            (Some Values.ReservedCacheNodesOfferingMessage.error_to_json)])
+let describe_serverless_cache_snapshots =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serverlessCacheName =
+         flag "serverless-cache-name" (optional string) ~doc:"STRING String"
+       and serverlessCacheSnapshotName =
+         flag "serverless-cache-snapshot-name" (optional string)
+           ~doc:"STRING String"
+       and snapshotType =
+         flag "snapshot-type" (optional string) ~doc:"STRING String"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IntegerOptional" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_serverless_cache_snapshots
+           (Values.DescribeServerlessCacheSnapshotsRequest.make
+              ?serverlessCacheName ?serverlessCacheSnapshotName ?snapshotType
+              ?nextToken ?maxResults ())
+           (Some Values.DescribeServerlessCacheSnapshotsResponse.to_json)
+           (Some
+              Values.DescribeServerlessCacheSnapshotsResponse.error_to_json)])
+let describe_serverless_caches =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serverlessCacheName =
+         flag "serverless-cache-name" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IntegerOptional"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_serverless_caches
+           (Values.DescribeServerlessCachesRequest.make ?serverlessCacheName
+              ?maxResults ?nextToken ())
+           (Some Values.DescribeServerlessCachesResponse.to_json)
+           (Some Values.DescribeServerlessCachesResponse.error_to_json)])
 let describe_service_updates =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1364,6 +1612,28 @@ let disassociate_global_replication_group =
            (Some Values.DisassociateGlobalReplicationGroupResult.to_json)
            (Some
               Values.DisassociateGlobalReplicationGroupResult.error_to_json)])
+let export_serverless_cache_snapshot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serverlessCacheSnapshotName =
+         flag "serverless-cache-snapshot-name" (required string)
+           ~doc:"STRING String"
+       and s3BucketName =
+         flag "s3-bucket-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.export_serverless_cache_snapshot
+           (Values.ExportServerlessCacheSnapshotRequest.make
+              ~serverlessCacheSnapshotName ~s3BucketName ())
+           (Some Values.ExportServerlessCacheSnapshotResponse.to_json)
+           (Some Values.ExportServerlessCacheSnapshotResponse.error_to_json)])
 let failover_global_replication_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1528,6 +1798,7 @@ let modify_cache_cluster =
            ~doc:"STRING String"
        and applyImmediately =
          flag "apply-immediately" (optional bool) ~doc:"BOOL Boolean"
+       and engine = flag "engine" (optional string) ~doc:"STRING String"
        and engineVersion =
          flag "engine-version" (optional string) ~doc:"STRING String"
        and autoMinorVersionUpgrade =
@@ -1548,6 +1819,10 @@ let modify_cache_cluster =
        and logDeliveryConfigurations =
          flag "log-delivery-configurations" (optional json_arg)
            ~doc:"JSON LogDeliveryConfigurationRequestList"
+       and ipDiscovery =
+         flag "ip-discovery" (optional json_arg) ~doc:"JSON IpDiscovery"
+       and scaleConfig =
+         flag "scale-config" (optional json_arg) ~doc:"JSON ScaleConfig"
        and cacheClusterId =
          flag "cache-cluster-id" (required string) ~doc:"STRING String" in
        fun () ->
@@ -1569,16 +1844,19 @@ let modify_cache_cluster =
                                    securityGroupIds)
               ?preferredMaintenanceWindow ?notificationTopicArn
               ?cacheParameterGroupName ?notificationTopicStatus
-              ?applyImmediately ?engineVersion ?autoMinorVersionUpgrade
-              ?snapshotRetentionLimit ?snapshotWindow ?cacheNodeType
-              ?authToken
+              ?applyImmediately ?engine ?engineVersion
+              ?autoMinorVersionUpgrade ?snapshotRetentionLimit
+              ?snapshotWindow ?cacheNodeType ?authToken
               ?authTokenUpdateStrategy:(Option.map
                                           ~f:Values.AuthTokenUpdateStrategyType.of_json
                                           authTokenUpdateStrategy)
               ?logDeliveryConfigurations:(Option.map
                                             ~f:Values.LogDeliveryConfigurationRequestList.of_json
                                             logDeliveryConfigurations)
-              ~cacheClusterId ())
+              ?ipDiscovery:(Option.map ~f:Values.IpDiscovery.of_json
+                              ipDiscovery)
+              ?scaleConfig:(Option.map ~f:Values.ScaleConfig.of_json
+                              scaleConfig) ~cacheClusterId ())
            (Some Values.ModifyCacheClusterResult.to_json)
            (Some Values.ModifyCacheClusterResult.error_to_json)])
 let modify_cache_parameter_group =
@@ -1646,6 +1924,7 @@ let modify_global_replication_group =
            ~doc:"URL override endpoint url"
        and cacheNodeType =
          flag "cache-node-type" (optional string) ~doc:"STRING String"
+       and engine = flag "engine" (optional string) ~doc:"STRING String"
        and engineVersion =
          flag "engine-version" (optional string) ~doc:"STRING String"
        and cacheParameterGroupName =
@@ -1666,7 +1945,7 @@ let modify_global_replication_group =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_global_replication_group
            (Values.ModifyGlobalReplicationGroupMessage.make ?cacheNodeType
-              ?engineVersion ?cacheParameterGroupName
+              ?engine ?engineVersion ?cacheParameterGroupName
               ?globalReplicationGroupDescription ?automaticFailoverEnabled
               ~globalReplicationGroupId ~applyImmediately ())
            (Some Values.ModifyGlobalReplicationGroupResult.to_json)
@@ -1715,6 +1994,7 @@ let modify_replication_group =
            ~doc:"STRING String"
        and applyImmediately =
          flag "apply-immediately" (optional bool) ~doc:"BOOL Boolean"
+       and engine = flag "engine" (optional string) ~doc:"STRING String"
        and engineVersion =
          flag "engine-version" (optional string) ~doc:"STRING String"
        and autoMinorVersionUpgrade =
@@ -1744,6 +2024,16 @@ let modify_replication_group =
        and logDeliveryConfigurations =
          flag "log-delivery-configurations" (optional json_arg)
            ~doc:"JSON LogDeliveryConfigurationRequestList"
+       and ipDiscovery =
+         flag "ip-discovery" (optional json_arg) ~doc:"JSON IpDiscovery"
+       and transitEncryptionEnabled =
+         flag "transit-encryption-enabled" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and transitEncryptionMode =
+         flag "transit-encryption-mode" (optional json_arg)
+           ~doc:"JSON TransitEncryptionMode"
+       and clusterMode =
+         flag "cluster-mode" (optional json_arg) ~doc:"JSON ClusterMode"
        and replicationGroupId =
          flag "replication-group-id" (required string) ~doc:"STRING String" in
        fun () ->
@@ -1761,9 +2051,9 @@ let modify_replication_group =
                                    securityGroupIds)
               ?preferredMaintenanceWindow ?notificationTopicArn
               ?cacheParameterGroupName ?notificationTopicStatus
-              ?applyImmediately ?engineVersion ?autoMinorVersionUpgrade
-              ?snapshotRetentionLimit ?snapshotWindow ?cacheNodeType
-              ?authToken
+              ?applyImmediately ?engine ?engineVersion
+              ?autoMinorVersionUpgrade ?snapshotRetentionLimit
+              ?snapshotWindow ?cacheNodeType ?authToken
               ?authTokenUpdateStrategy:(Option.map
                                           ~f:Values.AuthTokenUpdateStrategyType.of_json
                                           authTokenUpdateStrategy)
@@ -1777,7 +2067,13 @@ let modify_replication_group =
               ?logDeliveryConfigurations:(Option.map
                                             ~f:Values.LogDeliveryConfigurationRequestList.of_json
                                             logDeliveryConfigurations)
-              ~replicationGroupId ())
+              ?ipDiscovery:(Option.map ~f:Values.IpDiscovery.of_json
+                              ipDiscovery) ?transitEncryptionEnabled
+              ?transitEncryptionMode:(Option.map
+                                        ~f:Values.TransitEncryptionMode.of_json
+                                        transitEncryptionMode)
+              ?clusterMode:(Option.map ~f:Values.ClusterMode.of_json
+                              clusterMode) ~replicationGroupId ())
            (Some Values.ModifyReplicationGroupResult.to_json)
            (Some Values.ModifyReplicationGroupResult.error_to_json)])
 let modify_replication_group_shard_configuration =
@@ -1823,6 +2119,53 @@ let modify_replication_group_shard_configuration =
               Values.ModifyReplicationGroupShardConfigurationResult.to_json)
            (Some
               Values.ModifyReplicationGroupShardConfigurationResult.error_to_json)])
+let modify_serverless_cache =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and cacheUsageLimits =
+         flag "cache-usage-limits" (optional json_arg)
+           ~doc:"JSON CacheUsageLimits"
+       and removeUserGroup =
+         flag "remove-user-group" (optional bool) ~doc:"BOOL BooleanOptional"
+       and userGroupId =
+         flag "user-group-id" (optional string) ~doc:"STRING String"
+       and securityGroupIds =
+         flag "security-group-ids" (optional json_arg)
+           ~doc:"JSON SecurityGroupIdsList"
+       and snapshotRetentionLimit =
+         flag "snapshot-retention-limit" (optional int)
+           ~doc:"INT IntegerOptional"
+       and dailySnapshotTime =
+         flag "daily-snapshot-time" (optional string) ~doc:"STRING String"
+       and engine = flag "engine" (optional string) ~doc:"STRING String"
+       and majorEngineVersion =
+         flag "major-engine-version" (optional string) ~doc:"STRING String"
+       and serverlessCacheName =
+         flag "serverless-cache-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_serverless_cache
+           (Values.ModifyServerlessCacheRequest.make ?description
+              ?cacheUsageLimits:(Option.map
+                                   ~f:Values.CacheUsageLimits.of_json
+                                   cacheUsageLimits) ?removeUserGroup
+              ?userGroupId
+              ?securityGroupIds:(Option.map
+                                   ~f:Values.SecurityGroupIdsList.of_json
+                                   securityGroupIds) ?snapshotRetentionLimit
+              ?dailySnapshotTime ?engine ?majorEngineVersion
+              ~serverlessCacheName ())
+           (Some Values.ModifyServerlessCacheResponse.to_json)
+           (Some Values.ModifyServerlessCacheResponse.error_to_json)])
 let modify_user =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1843,13 +2186,20 @@ let modify_user =
        and noPasswordRequired =
          flag "no-password-required" (optional bool)
            ~doc:"BOOL BooleanOptional"
+       and authenticationMode =
+         flag "authentication-mode" (optional json_arg)
+           ~doc:"JSON AuthenticationMode"
+       and engine = flag "engine" (optional string) ~doc:"STRING EngineType"
        and userId = flag "user-id" (required string) ~doc:"STRING UserId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_user
            (Values.ModifyUserMessage.make ?accessString ?appendAccessString
               ?passwords:(Option.map ~f:Values.PasswordListInput.of_json
-                            passwords) ?noPasswordRequired ~userId ())
+                            passwords) ?noPasswordRequired
+              ?authenticationMode:(Option.map
+                                     ~f:Values.AuthenticationMode.of_json
+                                     authenticationMode) ?engine ~userId ())
            (Some Values.User.to_json) (Some Values.User.error_to_json)])
 let modify_user_group =
   Command.async ~summary:""
@@ -1867,6 +2217,7 @@ let modify_user_group =
        and userIdsToRemove =
          flag "user-ids-to-remove" (optional json_arg)
            ~doc:"JSON UserIdListInput"
+       and engine = flag "engine" (optional string) ~doc:"STRING EngineType"
        and userGroupId =
          flag "user-group-id" (required string) ~doc:"STRING String" in
        fun () ->
@@ -1876,7 +2227,7 @@ let modify_user_group =
               ?userIdsToAdd:(Option.map ~f:Values.UserIdListInput.of_json
                                userIdsToAdd)
               ?userIdsToRemove:(Option.map ~f:Values.UserIdListInput.of_json
-                                  userIdsToRemove) ~userGroupId ())
+                                  userIdsToRemove) ?engine ~userGroupId ())
            (Some Values.UserGroup.to_json)
            (Some Values.UserGroup.error_to_json)])
 let purchase_reserved_cache_nodes_offering =
@@ -2072,6 +2423,29 @@ let test_failover =
            (Values.TestFailoverMessage.make ~replicationGroupId ~nodeGroupId
               ()) (Some Values.TestFailoverResult.to_json)
            (Some Values.TestFailoverResult.error_to_json)])
+let test_migration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and replicationGroupId =
+         flag "replication-group-id" (required string) ~doc:"STRING String"
+       and customerNodeEndpointList =
+         flag "customer-node-endpoint-list" (required json_arg)
+           ~doc:"JSON CustomerNodeEndpointList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.test_migration
+           (Values.TestMigrationMessage.make ~replicationGroupId
+              ~customerNodeEndpointList:(Values.CustomerNodeEndpointList.of_json
+                                           customerNodeEndpointList) ())
+           (Some Values.TestMigrationResponse.to_json)
+           (Some Values.TestMigrationResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -2081,6 +2455,7 @@ let main =
     ("batch-apply-update-action", batch_apply_update_action);
     ("batch-stop-update-action", batch_stop_update_action);
     ("complete-migration", complete_migration);
+    ("copy-serverless-cache-snapshot", copy_serverless_cache_snapshot);
     ("copy-snapshot", copy_snapshot);
     ("create-cache-cluster", create_cache_cluster);
     ("create-cache-parameter-group", create_cache_parameter_group);
@@ -2088,6 +2463,8 @@ let main =
     ("create-cache-subnet-group", create_cache_subnet_group);
     ("create-global-replication-group", create_global_replication_group);
     ("create-replication-group", create_replication_group);
+    ("create-serverless-cache", create_serverless_cache);
+    ("create-serverless-cache-snapshot", create_serverless_cache_snapshot);
     ("create-snapshot", create_snapshot);
     ("create-user", create_user);
     ("create-user-group", create_user_group);
@@ -2100,6 +2477,8 @@ let main =
     ("delete-cache-subnet-group", delete_cache_subnet_group);
     ("delete-global-replication-group", delete_global_replication_group);
     ("delete-replication-group", delete_replication_group);
+    ("delete-serverless-cache", delete_serverless_cache);
+    ("delete-serverless-cache-snapshot", delete_serverless_cache_snapshot);
     ("delete-snapshot", delete_snapshot);
     ("delete-user", delete_user);
     ("delete-user-group", delete_user_group);
@@ -2118,6 +2497,9 @@ let main =
     ("describe-reserved-cache-nodes", describe_reserved_cache_nodes);
     ("describe-reserved-cache-nodes-offerings",
       describe_reserved_cache_nodes_offerings);
+    ("describe-serverless-cache-snapshots",
+      describe_serverless_cache_snapshots);
+    ("describe-serverless-caches", describe_serverless_caches);
     ("describe-service-updates", describe_service_updates);
     ("describe-snapshots", describe_snapshots);
     ("describe-update-actions", describe_update_actions);
@@ -2125,6 +2507,7 @@ let main =
     ("describe-users", describe_users);
     ("disassociate-global-replication-group",
       disassociate_global_replication_group);
+    ("export-serverless-cache-snapshot", export_serverless_cache_snapshot);
     ("failover-global-replication-group", failover_global_replication_group);
     ("increase-node-groups-in-global-replication-group",
       increase_node_groups_in_global_replication_group);
@@ -2139,6 +2522,7 @@ let main =
     ("modify-replication-group", modify_replication_group);
     ("modify-replication-group-shard-configuration",
       modify_replication_group_shard_configuration);
+    ("modify-serverless-cache", modify_serverless_cache);
     ("modify-user", modify_user);
     ("modify-user-group", modify_user_group);
     ("purchase-reserved-cache-nodes-offering",
@@ -2151,4 +2535,5 @@ let main =
     ("revoke-cache-security-group-ingress",
       revoke_cache_security_group_ingress);
     ("start-migration", start_migration);
-    ("test-failover", test_failover)]
+    ("test-failover", test_failover);
+    ("test-migration", test_migration)]

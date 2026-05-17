@@ -11,6 +11,10 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let put_action_interactions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutActionInteractions input
+let put_actions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutActions input
 let put_events ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutEvents input
 let put_items ?endpoint_url ?cfg input =

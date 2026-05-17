@@ -101,6 +101,28 @@ let batch_delete_document =
               ~documentIdList:(Values.DocumentIdList.of_json documentIdList)
               ()) (Some Values.BatchDeleteDocumentResponse.to_json)
            (Some Values.BatchDeleteDocumentResponse.error_to_json)])
+let batch_delete_featured_results_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and indexId = flag "index-id" (required string) ~doc:"STRING IndexId"
+       and featuredResultsSetIds =
+         flag "featured-results-set-ids" (required json_arg)
+           ~doc:"JSON FeaturedResultsSetIdList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_delete_featured_results_set
+           (Values.BatchDeleteFeaturedResultsSetRequest.make ~indexId
+              ~featuredResultsSetIds:(Values.FeaturedResultsSetIdList.of_json
+                                        featuredResultsSetIds) ())
+           (Some Values.BatchDeleteFeaturedResultsSetResponse.to_json)
+           (Some Values.BatchDeleteFeaturedResultsSetResponse.error_to_json)])
 let batch_get_document_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -165,6 +187,43 @@ let clear_query_suggestions =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.clear_query_suggestions
            (Values.ClearQuerySuggestionsRequest.make ~indexId ()) None None])
+let create_access_control_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and accessControlList =
+         flag "access-control-list" (optional json_arg)
+           ~doc:"JSON PrincipalList"
+       and hierarchicalAccessControlList =
+         flag "hierarchical-access-control-list" (optional json_arg)
+           ~doc:"JSON HierarchicalPrincipalList"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientTokenName"
+       and indexId = flag "index-id" (required string) ~doc:"STRING IndexId"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING AccessControlConfigurationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_access_control_configuration
+           (Values.CreateAccessControlConfigurationRequest.make ?description
+              ?accessControlList:(Option.map ~f:Values.PrincipalList.of_json
+                                    accessControlList)
+              ?hierarchicalAccessControlList:(Option.map
+                                                ~f:Values.HierarchicalPrincipalList.of_json
+                                                hierarchicalAccessControlList)
+              ?clientToken ~indexId ~name ())
+           (Some Values.CreateAccessControlConfigurationResponse.to_json)
+           (Some
+              Values.CreateAccessControlConfigurationResponse.error_to_json)])
 let create_data_source =
   Command.async ~summary:""
     ([%map_open.Command
@@ -178,6 +237,9 @@ let create_data_source =
        and configuration =
          flag "configuration" (optional json_arg)
            ~doc:"JSON DataSourceConfiguration"
+       and vpcConfiguration =
+         flag "vpc-configuration" (optional json_arg)
+           ~doc:"JSON DataSourceVpcConfiguration"
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
        and schedule =
@@ -201,7 +263,10 @@ let create_data_source =
            (Values.CreateDataSourceRequest.make
               ?configuration:(Option.map
                                 ~f:Values.DataSourceConfiguration.of_json
-                                configuration) ?description ?schedule
+                                configuration)
+              ?vpcConfiguration:(Option.map
+                                   ~f:Values.DataSourceVpcConfiguration.of_json
+                                   vpcConfiguration) ?description ?schedule
               ?roleArn ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?clientToken ?languageCode
               ?customDocumentEnrichmentConfiguration:(Option.map
@@ -273,6 +338,50 @@ let create_faq =
               ~name ~s3Path:(Values.S3Path.of_json s3Path) ~roleArn ())
            (Some Values.CreateFaqResponse.to_json)
            (Some Values.CreateFaqResponse.error_to_json)])
+let create_featured_results_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING FeaturedResultsSetDescription"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientTokenName"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON FeaturedResultsSetStatus"
+       and queryTexts =
+         flag "query-texts" (optional json_arg) ~doc:"JSON QueryTextList"
+       and featuredDocuments =
+         flag "featured-documents" (optional json_arg)
+           ~doc:"JSON FeaturedDocumentList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and indexId = flag "index-id" (required string) ~doc:"STRING IndexId"
+       and featuredResultsSetName =
+         flag "featured-results-set-name" (required string)
+           ~doc:"STRING FeaturedResultsSetName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_featured_results_set
+           (Values.CreateFeaturedResultsSetRequest.make ?description
+              ?clientToken
+              ?status:(Option.map ~f:Values.FeaturedResultsSetStatus.of_json
+                         status)
+              ?queryTexts:(Option.map ~f:Values.QueryTextList.of_json
+                             queryTexts)
+              ?featuredDocuments:(Option.map
+                                    ~f:Values.FeaturedDocumentList.of_json
+                                    featuredDocuments)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~indexId
+              ~featuredResultsSetName ())
+           (Some Values.CreateFeaturedResultsSetResponse.to_json)
+           (Some Values.CreateFeaturedResultsSetResponse.error_to_json)])
 let create_index =
   Command.async ~summary:""
     ([%map_open.Command
@@ -385,6 +494,28 @@ let create_thesaurus =
               ~sourceS3Path:(Values.S3Path.of_json sourceS3Path) ())
            (Some Values.CreateThesaurusResponse.to_json)
            (Some Values.CreateThesaurusResponse.error_to_json)])
+let delete_access_control_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and indexId = flag "index-id" (required string) ~doc:"STRING IndexId"
+       and id =
+         flag "id" (required string)
+           ~doc:"STRING AccessControlConfigurationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_access_control_configuration
+           (Values.DeleteAccessControlConfigurationRequest.make ~indexId ~id
+              ())
+           (Some Values.DeleteAccessControlConfigurationResponse.to_json)
+           (Some
+              Values.DeleteAccessControlConfigurationResponse.error_to_json)])
 let delete_data_source =
   Command.async ~summary:""
     ([%map_open.Command
@@ -507,6 +638,28 @@ let delete_thesaurus =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_thesaurus
            (Values.DeleteThesaurusRequest.make ~id ~indexId ()) None None])
+let describe_access_control_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and indexId = flag "index-id" (required string) ~doc:"STRING IndexId"
+       and id =
+         flag "id" (required string)
+           ~doc:"STRING AccessControlConfigurationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_access_control_configuration
+           (Values.DescribeAccessControlConfigurationRequest.make ~indexId
+              ~id ())
+           (Some Values.DescribeAccessControlConfigurationResponse.to_json)
+           (Some
+              Values.DescribeAccessControlConfigurationResponse.error_to_json)])
 let describe_data_source =
   Command.async ~summary:""
     ([%map_open.Command
@@ -560,6 +713,27 @@ let describe_faq =
            Io.describe_faq (Values.DescribeFaqRequest.make ~id ~indexId ())
            (Some Values.DescribeFaqResponse.to_json)
            (Some Values.DescribeFaqResponse.error_to_json)])
+let describe_featured_results_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and indexId = flag "index-id" (required string) ~doc:"STRING IndexId"
+       and featuredResultsSetId =
+         flag "featured-results-set-id" (required string)
+           ~doc:"STRING FeaturedResultsSetId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_featured_results_set
+           (Values.DescribeFeaturedResultsSetRequest.make ~indexId
+              ~featuredResultsSetId ())
+           (Some Values.DescribeFeaturedResultsSetResponse.to_json)
+           (Some Values.DescribeFeaturedResultsSetResponse.error_to_json)])
 let describe_index =
   Command.async ~summary:""
     ([%map_open.Command
@@ -713,6 +887,12 @@ let get_query_suggestions =
            ~doc:"URL override endpoint url"
        and maxSuggestionsCount =
          flag "max-suggestions-count" (optional int) ~doc:"INT Integer"
+       and suggestionTypes =
+         flag "suggestion-types" (optional json_arg)
+           ~doc:"JSON SuggestionTypes"
+       and attributeSuggestionsConfig =
+         flag "attribute-suggestions-config" (optional json_arg)
+           ~doc:"JSON AttributeSuggestionsGetConfig"
        and indexId = flag "index-id" (required string) ~doc:"STRING IndexId"
        and queryText =
          flag "query-text" (required string)
@@ -721,6 +901,11 @@ let get_query_suggestions =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_query_suggestions
            (Values.GetQuerySuggestionsRequest.make ?maxSuggestionsCount
+              ?suggestionTypes:(Option.map ~f:Values.SuggestionTypes.of_json
+                                  suggestionTypes)
+              ?attributeSuggestionsConfig:(Option.map
+                                             ~f:Values.AttributeSuggestionsGetConfig.of_json
+                                             attributeSuggestionsConfig)
               ~indexId ~queryText ())
            (Some Values.GetQuerySuggestionsResponse.to_json)
            (Some Values.GetQuerySuggestionsResponse.error_to_json)])
@@ -750,6 +935,29 @@ let get_snapshots =
               ~metricType:(Values.MetricType.of_json metricType) ())
            (Some Values.GetSnapshotsResponse.to_json)
            (Some Values.GetSnapshotsResponse.error_to_json)])
+let list_access_control_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT MaxResultsIntegerForListAccessControlConfigurationsRequest"
+       and indexId = flag "index-id" (required string) ~doc:"STRING IndexId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_access_control_configurations
+           (Values.ListAccessControlConfigurationsRequest.make ?nextToken
+              ?maxResults ~indexId ())
+           (Some Values.ListAccessControlConfigurationsResponse.to_json)
+           (Some Values.ListAccessControlConfigurationsResponse.error_to_json)])
 let list_data_source_sync_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -892,6 +1100,29 @@ let list_faqs =
            (Values.ListFaqsRequest.make ?nextToken ?maxResults ~indexId ())
            (Some Values.ListFaqsResponse.to_json)
            (Some Values.ListFaqsResponse.error_to_json)])
+let list_featured_results_sets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT MaxResultsIntegerForListFeaturedResultsSetsRequest"
+       and indexId = flag "index-id" (required string) ~doc:"STRING IndexId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_featured_results_sets
+           (Values.ListFeaturedResultsSetsRequest.make ?nextToken ?maxResults
+              ~indexId ())
+           (Some Values.ListFeaturedResultsSetsResponse.to_json)
+           (Some Values.ListFeaturedResultsSetsResponse.error_to_json)])
 let list_groups_older_than_ordering_id =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1065,6 +1296,9 @@ let query =
        and sortingConfiguration =
          flag "sorting-configuration" (optional json_arg)
            ~doc:"JSON SortingConfiguration"
+       and sortingConfigurations =
+         flag "sorting-configurations" (optional json_arg)
+           ~doc:"JSON SortingConfigurationList"
        and userContext =
          flag "user-context" (optional json_arg) ~doc:"JSON UserContext"
        and visitorId =
@@ -1072,6 +1306,9 @@ let query =
        and spellCorrectionConfiguration =
          flag "spell-correction-configuration" (optional json_arg)
            ~doc:"JSON SpellCorrectionConfiguration"
+       and collapseConfiguration =
+         flag "collapse-configuration" (optional json_arg)
+           ~doc:"JSON CollapseConfiguration"
        and indexId = flag "index-id" (required string) ~doc:"STRING IndexId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region Io.query
@@ -1092,13 +1329,63 @@ let query =
               ?sortingConfiguration:(Option.map
                                        ~f:Values.SortingConfiguration.of_json
                                        sortingConfiguration)
+              ?sortingConfigurations:(Option.map
+                                        ~f:Values.SortingConfigurationList.of_json
+                                        sortingConfigurations)
               ?userContext:(Option.map ~f:Values.UserContext.of_json
                               userContext) ?visitorId
               ?spellCorrectionConfiguration:(Option.map
                                                ~f:Values.SpellCorrectionConfiguration.of_json
                                                spellCorrectionConfiguration)
-              ~indexId ()) (Some Values.QueryResult.to_json)
+              ?collapseConfiguration:(Option.map
+                                        ~f:Values.CollapseConfiguration.of_json
+                                        collapseConfiguration) ~indexId ())
+           (Some Values.QueryResult.to_json)
            (Some Values.QueryResult.error_to_json)])
+let retrieve =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and attributeFilter =
+         flag "attribute-filter" (optional json_arg)
+           ~doc:"JSON AttributeFilter"
+       and requestedDocumentAttributes =
+         flag "requested-document-attributes" (optional json_arg)
+           ~doc:"JSON DocumentAttributeKeyList"
+       and documentRelevanceOverrideConfigurations =
+         flag "document-relevance-override-configurations"
+           (optional json_arg)
+           ~doc:"JSON DocumentRelevanceOverrideConfigurationList"
+       and pageNumber = flag "page-number" (optional int) ~doc:"INT Integer"
+       and pageSize = flag "page-size" (optional int) ~doc:"INT Integer"
+       and userContext =
+         flag "user-context" (optional json_arg) ~doc:"JSON UserContext"
+       and indexId = flag "index-id" (required string) ~doc:"STRING IndexId"
+       and queryText =
+         flag "query-text" (required string) ~doc:"STRING QueryText" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.retrieve
+           (Values.RetrieveRequest.make
+              ?attributeFilter:(Option.map ~f:Values.AttributeFilter.of_json
+                                  attributeFilter)
+              ?requestedDocumentAttributes:(Option.map
+                                              ~f:Values.DocumentAttributeKeyList.of_json
+                                              requestedDocumentAttributes)
+              ?documentRelevanceOverrideConfigurations:(Option.map
+                                                          ~f:Values.DocumentRelevanceOverrideConfigurationList.of_json
+                                                          documentRelevanceOverrideConfigurations)
+              ?pageNumber ?pageSize
+              ?userContext:(Option.map ~f:Values.UserContext.of_json
+                              userContext) ~indexId ~queryText ())
+           (Some Values.RetrieveResult.to_json)
+           (Some Values.RetrieveResult.error_to_json)])
 let start_data_source_sync_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1206,6 +1493,45 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_access_control_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (optional string)
+           ~doc:"STRING AccessControlConfigurationName"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and accessControlList =
+         flag "access-control-list" (optional json_arg)
+           ~doc:"JSON PrincipalList"
+       and hierarchicalAccessControlList =
+         flag "hierarchical-access-control-list" (optional json_arg)
+           ~doc:"JSON HierarchicalPrincipalList"
+       and indexId = flag "index-id" (required string) ~doc:"STRING IndexId"
+       and id =
+         flag "id" (required string)
+           ~doc:"STRING AccessControlConfigurationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_access_control_configuration
+           (Values.UpdateAccessControlConfigurationRequest.make ?name
+              ?description
+              ?accessControlList:(Option.map ~f:Values.PrincipalList.of_json
+                                    accessControlList)
+              ?hierarchicalAccessControlList:(Option.map
+                                                ~f:Values.HierarchicalPrincipalList.of_json
+                                                hierarchicalAccessControlList)
+              ~indexId ~id ())
+           (Some Values.UpdateAccessControlConfigurationResponse.to_json)
+           (Some
+              Values.UpdateAccessControlConfigurationResponse.error_to_json)])
 let update_data_source =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1220,6 +1546,9 @@ let update_data_source =
        and configuration =
          flag "configuration" (optional json_arg)
            ~doc:"JSON DataSourceConfiguration"
+       and vpcConfiguration =
+         flag "vpc-configuration" (optional json_arg)
+           ~doc:"JSON DataSourceVpcConfiguration"
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
        and schedule =
@@ -1238,7 +1567,10 @@ let update_data_source =
            (Values.UpdateDataSourceRequest.make ?name
               ?configuration:(Option.map
                                 ~f:Values.DataSourceConfiguration.of_json
-                                configuration) ?description ?schedule
+                                configuration)
+              ?vpcConfiguration:(Option.map
+                                   ~f:Values.DataSourceVpcConfiguration.of_json
+                                   vpcConfiguration) ?description ?schedule
               ?roleArn ?languageCode
               ?customDocumentEnrichmentConfiguration:(Option.map
                                                         ~f:Values.CustomDocumentEnrichmentConfiguration.of_json
@@ -1271,6 +1603,49 @@ let update_experience =
                                 ~f:Values.ExperienceConfiguration.of_json
                                 configuration) ?description ~id ~indexId ())
            None None])
+let update_featured_results_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and featuredResultsSetName =
+         flag "featured-results-set-name" (optional string)
+           ~doc:"STRING FeaturedResultsSetName"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING FeaturedResultsSetDescription"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON FeaturedResultsSetStatus"
+       and queryTexts =
+         flag "query-texts" (optional json_arg) ~doc:"JSON QueryTextList"
+       and featuredDocuments =
+         flag "featured-documents" (optional json_arg)
+           ~doc:"JSON FeaturedDocumentList"
+       and indexId = flag "index-id" (required string) ~doc:"STRING IndexId"
+       and featuredResultsSetId =
+         flag "featured-results-set-id" (required string)
+           ~doc:"STRING FeaturedResultsSetId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_featured_results_set
+           (Values.UpdateFeaturedResultsSetRequest.make
+              ?featuredResultsSetName ?description
+              ?status:(Option.map ~f:Values.FeaturedResultsSetStatus.of_json
+                         status)
+              ?queryTexts:(Option.map ~f:Values.QueryTextList.of_json
+                             queryTexts)
+              ?featuredDocuments:(Option.map
+                                    ~f:Values.FeaturedDocumentList.of_json
+                                    featuredDocuments) ~indexId
+              ~featuredResultsSetId ())
+           (Some Values.UpdateFeaturedResultsSetResponse.to_json)
+           (Some Values.UpdateFeaturedResultsSetResponse.error_to_json)])
 let update_index =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1373,6 +1748,9 @@ let update_query_suggestions_config =
        and minimumQueryCount =
          flag "minimum-query-count" (optional int)
            ~doc:"INT MinimumQueryCount"
+       and attributeSuggestionsConfig =
+         flag "attribute-suggestions-config" (optional json_arg)
+           ~doc:"JSON AttributeSuggestionsUpdateConfig"
        and indexId = flag "index-id" (required string) ~doc:"STRING IndexId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1381,8 +1759,11 @@ let update_query_suggestions_config =
               ?mode:(Option.map ~f:Values.Mode.of_json mode)
               ?queryLogLookBackWindowInDays
               ?includeQueriesWithoutUserInformation
-              ?minimumNumberOfQueryingUsers ?minimumQueryCount ~indexId ())
-           None None])
+              ?minimumNumberOfQueryingUsers ?minimumQueryCount
+              ?attributeSuggestionsConfig:(Option.map
+                                             ~f:Values.AttributeSuggestionsUpdateConfig.of_json
+                                             attributeSuggestionsConfig)
+              ~indexId ()) None None])
 let update_thesaurus =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1413,16 +1794,22 @@ let main =
     [("associate-entities-to-experience", associate_entities_to_experience);
     ("associate-personas-to-entities", associate_personas_to_entities);
     ("batch-delete-document", batch_delete_document);
+    ("batch-delete-featured-results-set", batch_delete_featured_results_set);
     ("batch-get-document-status", batch_get_document_status);
     ("batch-put-document", batch_put_document);
     ("clear-query-suggestions", clear_query_suggestions);
+    ("create-access-control-configuration",
+      create_access_control_configuration);
     ("create-data-source", create_data_source);
     ("create-experience", create_experience);
     ("create-faq", create_faq);
+    ("create-featured-results-set", create_featured_results_set);
     ("create-index", create_index);
     ("create-query-suggestions-block-list",
       create_query_suggestions_block_list);
     ("create-thesaurus", create_thesaurus);
+    ("delete-access-control-configuration",
+      delete_access_control_configuration);
     ("delete-data-source", delete_data_source);
     ("delete-experience", delete_experience);
     ("delete-faq", delete_faq);
@@ -1431,9 +1818,12 @@ let main =
     ("delete-query-suggestions-block-list",
       delete_query_suggestions_block_list);
     ("delete-thesaurus", delete_thesaurus);
+    ("describe-access-control-configuration",
+      describe_access_control_configuration);
     ("describe-data-source", describe_data_source);
     ("describe-experience", describe_experience);
     ("describe-faq", describe_faq);
+    ("describe-featured-results-set", describe_featured_results_set);
     ("describe-index", describe_index);
     ("describe-principal-mapping", describe_principal_mapping);
     ("describe-query-suggestions-block-list",
@@ -1446,12 +1836,15 @@ let main =
       disassociate_personas_from_entities);
     ("get-query-suggestions", get_query_suggestions);
     ("get-snapshots", get_snapshots);
+    ("list-access-control-configurations",
+      list_access_control_configurations);
     ("list-data-source-sync-jobs", list_data_source_sync_jobs);
     ("list-data-sources", list_data_sources);
     ("list-entity-personas", list_entity_personas);
     ("list-experience-entities", list_experience_entities);
     ("list-experiences", list_experiences);
     ("list-faqs", list_faqs);
+    ("list-featured-results-sets", list_featured_results_sets);
     ("list-groups-older-than-ordering-id",
       list_groups_older_than_ordering_id);
     ("list-indices", list_indices);
@@ -1461,13 +1854,17 @@ let main =
     ("list-thesauri", list_thesauri);
     ("put-principal-mapping", put_principal_mapping);
     ("query", query);
+    ("retrieve", retrieve);
     ("start-data-source-sync-job", start_data_source_sync_job);
     ("stop-data-source-sync-job", stop_data_source_sync_job);
     ("submit-feedback", submit_feedback);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-access-control-configuration",
+      update_access_control_configuration);
     ("update-data-source", update_data_source);
     ("update-experience", update_experience);
+    ("update-featured-results-set", update_featured_results_set);
     ("update-index", update_index);
     ("update-query-suggestions-block-list",
       update_query_suggestions_block_list);

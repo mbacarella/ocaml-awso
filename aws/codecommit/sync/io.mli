@@ -243,6 +243,12 @@ val list_branches :
     ?cfg:Awso.Cfg.t ->
       ListBranchesInput.t ->
         (ListBranchesOutput.t, ListBranchesOutput.error) Result.t
+val list_file_commit_history :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListFileCommitHistoryRequest.t ->
+        (ListFileCommitHistoryResponse.t,
+          ListFileCommitHistoryResponse.error) Result.t
 val list_pull_requests :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -405,6 +411,12 @@ val update_repository_description :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateRepositoryDescriptionInput.t -> (unit, unit) Result.t
+val update_repository_encryption_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateRepositoryEncryptionKeyInput.t ->
+        (UpdateRepositoryEncryptionKeyOutput.t,
+          UpdateRepositoryEncryptionKeyOutput.error) Result.t
 val update_repository_name :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> UpdateRepositoryNameInput.t -> (unit, unit) Result.t

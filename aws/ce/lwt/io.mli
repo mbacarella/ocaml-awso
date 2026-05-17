@@ -59,12 +59,30 @@ val get_anomaly_subscriptions :
       GetAnomalySubscriptionsRequest.t ->
         (GetAnomalySubscriptionsResponse.t,
           GetAnomalySubscriptionsResponse.error) Result.t Lwt.t
+val get_approximate_usage_records :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetApproximateUsageRecordsRequest.t ->
+        (GetApproximateUsageRecordsResponse.t,
+          GetApproximateUsageRecordsResponse.error) Result.t Lwt.t
+val get_commitment_purchase_analysis :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCommitmentPurchaseAnalysisRequest.t ->
+        (GetCommitmentPurchaseAnalysisResponse.t,
+          GetCommitmentPurchaseAnalysisResponse.error) Result.t Lwt.t
 val get_cost_and_usage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCostAndUsageRequest.t ->
         (GetCostAndUsageResponse.t, GetCostAndUsageResponse.error) Result.t
           Lwt.t
+val get_cost_and_usage_comparisons :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCostAndUsageComparisonsRequest.t ->
+        (GetCostAndUsageComparisonsResponse.t,
+          GetCostAndUsageComparisonsResponse.error) Result.t Lwt.t
 val get_cost_and_usage_with_resources :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -77,6 +95,12 @@ val get_cost_categories :
       GetCostCategoriesRequest.t ->
         (GetCostCategoriesResponse.t, GetCostCategoriesResponse.error)
           Result.t Lwt.t
+val get_cost_comparison_drivers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCostComparisonDriversRequest.t ->
+        (GetCostComparisonDriversResponse.t,
+          GetCostComparisonDriversResponse.error) Result.t Lwt.t
 val get_cost_forecast :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -113,6 +137,13 @@ val get_rightsizing_recommendation :
       GetRightsizingRecommendationRequest.t ->
         (GetRightsizingRecommendationResponse.t,
           GetRightsizingRecommendationResponse.error) Result.t Lwt.t
+val get_savings_plan_purchase_recommendation_details :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSavingsPlanPurchaseRecommendationDetailsRequest.t ->
+        (GetSavingsPlanPurchaseRecommendationDetailsResponse.t,
+          GetSavingsPlanPurchaseRecommendationDetailsResponse.error) Result.t
+          Lwt.t
 val get_savings_plans_coverage :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -148,12 +179,43 @@ val get_usage_forecast :
       GetUsageForecastRequest.t ->
         (GetUsageForecastResponse.t, GetUsageForecastResponse.error) Result.t
           Lwt.t
+val list_commitment_purchase_analyses :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCommitmentPurchaseAnalysesRequest.t ->
+        (ListCommitmentPurchaseAnalysesResponse.t,
+          ListCommitmentPurchaseAnalysesResponse.error) Result.t Lwt.t
+val list_cost_allocation_tag_backfill_history :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCostAllocationTagBackfillHistoryRequest.t ->
+        (ListCostAllocationTagBackfillHistoryResponse.t,
+          ListCostAllocationTagBackfillHistoryResponse.error) Result.t Lwt.t
+val list_cost_allocation_tags :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCostAllocationTagsRequest.t ->
+        (ListCostAllocationTagsResponse.t,
+          ListCostAllocationTagsResponse.error) Result.t Lwt.t
 val list_cost_category_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCostCategoryDefinitionsRequest.t ->
         (ListCostCategoryDefinitionsResponse.t,
           ListCostCategoryDefinitionsResponse.error) Result.t Lwt.t
+val list_cost_category_resource_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCostCategoryResourceAssociationsRequest.t ->
+        (ListCostCategoryResourceAssociationsResponse.t,
+          ListCostCategoryResourceAssociationsResponse.error) Result.t Lwt.t
+val list_savings_plans_purchase_recommendation_generation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSavingsPlansPurchaseRecommendationGenerationRequest.t ->
+        (ListSavingsPlansPurchaseRecommendationGenerationResponse.t,
+          ListSavingsPlansPurchaseRecommendationGenerationResponse.error)
+          Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -166,6 +228,25 @@ val provide_anomaly_feedback :
       ProvideAnomalyFeedbackRequest.t ->
         (ProvideAnomalyFeedbackResponse.t,
           ProvideAnomalyFeedbackResponse.error) Result.t Lwt.t
+val start_commitment_purchase_analysis :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartCommitmentPurchaseAnalysisRequest.t ->
+        (StartCommitmentPurchaseAnalysisResponse.t,
+          StartCommitmentPurchaseAnalysisResponse.error) Result.t Lwt.t
+val start_cost_allocation_tag_backfill :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartCostAllocationTagBackfillRequest.t ->
+        (StartCostAllocationTagBackfillResponse.t,
+          StartCostAllocationTagBackfillResponse.error) Result.t Lwt.t
+val start_savings_plans_purchase_recommendation_generation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartSavingsPlansPurchaseRecommendationGenerationRequest.t ->
+        (StartSavingsPlansPurchaseRecommendationGenerationResponse.t,
+          StartSavingsPlansPurchaseRecommendationGenerationResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -188,6 +269,12 @@ val update_anomaly_subscription :
       UpdateAnomalySubscriptionRequest.t ->
         (UpdateAnomalySubscriptionResponse.t,
           UpdateAnomalySubscriptionResponse.error) Result.t Lwt.t
+val update_cost_allocation_tags_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateCostAllocationTagsStatusRequest.t ->
+        (UpdateCostAllocationTagsStatusResponse.t,
+          UpdateCostAllocationTagsStatusResponse.error) Result.t Lwt.t
 val update_cost_category_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

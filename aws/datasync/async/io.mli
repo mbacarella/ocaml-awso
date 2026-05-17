@@ -12,6 +12,12 @@ val create_agent :
       CreateAgentRequest.t ->
         (CreateAgentResponse.t, CreateAgentResponse.error) Result.t
           Async.Deferred.t
+val create_location_azure_blob :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLocationAzureBlobRequest.t ->
+        (CreateLocationAzureBlobResponse.t,
+          CreateLocationAzureBlobResponse.error) Result.t Async.Deferred.t
 val create_location_efs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -24,6 +30,12 @@ val create_location_fsx_lustre :
       CreateLocationFsxLustreRequest.t ->
         (CreateLocationFsxLustreResponse.t,
           CreateLocationFsxLustreResponse.error) Result.t Async.Deferred.t
+val create_location_fsx_ontap :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLocationFsxOntapRequest.t ->
+        (CreateLocationFsxOntapResponse.t,
+          CreateLocationFsxOntapResponse.error) Result.t Async.Deferred.t
 val create_location_fsx_open_zfs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -97,6 +109,12 @@ val describe_agent :
       DescribeAgentRequest.t ->
         (DescribeAgentResponse.t, DescribeAgentResponse.error) Result.t
           Async.Deferred.t
+val describe_location_azure_blob :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeLocationAzureBlobRequest.t ->
+        (DescribeLocationAzureBlobResponse.t,
+          DescribeLocationAzureBlobResponse.error) Result.t Async.Deferred.t
 val describe_location_efs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -109,6 +127,12 @@ val describe_location_fsx_lustre :
       DescribeLocationFsxLustreRequest.t ->
         (DescribeLocationFsxLustreResponse.t,
           DescribeLocationFsxLustreResponse.error) Result.t Async.Deferred.t
+val describe_location_fsx_ontap :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeLocationFsxOntapRequest.t ->
+        (DescribeLocationFsxOntapResponse.t,
+          DescribeLocationFsxOntapResponse.error) Result.t Async.Deferred.t
 val describe_location_fsx_open_zfs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -218,6 +242,42 @@ val update_agent :
       UpdateAgentRequest.t ->
         (UpdateAgentResponse.t, UpdateAgentResponse.error) Result.t
           Async.Deferred.t
+val update_location_azure_blob :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLocationAzureBlobRequest.t ->
+        (UpdateLocationAzureBlobResponse.t,
+          UpdateLocationAzureBlobResponse.error) Result.t Async.Deferred.t
+val update_location_efs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLocationEfsRequest.t ->
+        (UpdateLocationEfsResponse.t, UpdateLocationEfsResponse.error)
+          Result.t Async.Deferred.t
+val update_location_fsx_lustre :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLocationFsxLustreRequest.t ->
+        (UpdateLocationFsxLustreResponse.t,
+          UpdateLocationFsxLustreResponse.error) Result.t Async.Deferred.t
+val update_location_fsx_ontap :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLocationFsxOntapRequest.t ->
+        (UpdateLocationFsxOntapResponse.t,
+          UpdateLocationFsxOntapResponse.error) Result.t Async.Deferred.t
+val update_location_fsx_open_zfs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLocationFsxOpenZfsRequest.t ->
+        (UpdateLocationFsxOpenZfsResponse.t,
+          UpdateLocationFsxOpenZfsResponse.error) Result.t Async.Deferred.t
+val update_location_fsx_windows :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLocationFsxWindowsRequest.t ->
+        (UpdateLocationFsxWindowsResponse.t,
+          UpdateLocationFsxWindowsResponse.error) Result.t Async.Deferred.t
 val update_location_hdfs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -236,6 +296,12 @@ val update_location_object_storage :
       UpdateLocationObjectStorageRequest.t ->
         (UpdateLocationObjectStorageResponse.t,
           UpdateLocationObjectStorageResponse.error) Result.t
+          Async.Deferred.t
+val update_location_s3 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLocationS3Request.t ->
+        (UpdateLocationS3Response.t, UpdateLocationS3Response.error) Result.t
           Async.Deferred.t
 val update_location_smb :
   ?endpoint_url:string ->

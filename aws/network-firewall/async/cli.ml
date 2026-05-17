@@ -28,6 +28,56 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let accept_network_firewall_transit_gateway_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and transitGatewayAttachmentId =
+         flag "transit-gateway-attachment-id" (required string)
+           ~doc:"STRING TransitGatewayAttachmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.accept_network_firewall_transit_gateway_attachment
+           (Values.AcceptNetworkFirewallTransitGatewayAttachmentRequest.make
+              ~transitGatewayAttachmentId ())
+           (Some
+              Values.AcceptNetworkFirewallTransitGatewayAttachmentResponse.to_json)
+           (Some
+              Values.AcceptNetworkFirewallTransitGatewayAttachmentResponse.error_to_json)])
+let associate_availability_zones =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and updateToken =
+         flag "update-token" (optional string) ~doc:"STRING UpdateToken"
+       and firewallArn =
+         flag "firewall-arn" (optional string) ~doc:"STRING ResourceArn"
+       and firewallName =
+         flag "firewall-name" (optional string) ~doc:"STRING ResourceName"
+       and availabilityZoneMappings =
+         flag "availability-zone-mappings" (required json_arg)
+           ~doc:"JSON AvailabilityZoneMappings" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_availability_zones
+           (Values.AssociateAvailabilityZonesRequest.make ?updateToken
+              ?firewallArn ?firewallName
+              ~availabilityZoneMappings:(Values.AvailabilityZoneMappings.of_json
+                                           availabilityZoneMappings) ())
+           (Some Values.AssociateAvailabilityZonesResponse.to_json)
+           (Some Values.AssociateAvailabilityZonesResponse.error_to_json)])
 let associate_firewall_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -81,6 +131,37 @@ let associate_subnets =
               ~subnetMappings:(Values.SubnetMappings.of_json subnetMappings)
               ()) (Some Values.AssociateSubnetsResponse.to_json)
            (Some Values.AssociateSubnetsResponse.error_to_json)])
+let attach_rule_groups_to_proxy_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyConfigurationName =
+         flag "proxy-configuration-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and proxyConfigurationArn =
+         flag "proxy-configuration-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and ruleGroups =
+         flag "rule-groups" (required json_arg)
+           ~doc:"JSON ProxyRuleGroupAttachmentList"
+       and updateToken =
+         flag "update-token" (required string) ~doc:"STRING UpdateToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.attach_rule_groups_to_proxy_configuration
+           (Values.AttachRuleGroupsToProxyConfigurationRequest.make
+              ?proxyConfigurationName ?proxyConfigurationArn
+              ~ruleGroups:(Values.ProxyRuleGroupAttachmentList.of_json
+                             ruleGroups) ~updateToken ())
+           (Some Values.AttachRuleGroupsToProxyConfigurationResponse.to_json)
+           (Some
+              Values.AttachRuleGroupsToProxyConfigurationResponse.error_to_json)])
 let create_firewall =
   Command.async ~summary:""
     ([%map_open.Command
@@ -91,6 +172,10 @@ let create_firewall =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and vpcId = flag "vpc-id" (optional string) ~doc:"STRING VpcId"
+       and subnetMappings =
+         flag "subnet-mappings" (optional json_arg)
+           ~doc:"JSON SubnetMappings"
        and deleteProtection =
          flag "delete-protection" (optional bool) ~doc:"BOOL Boolean"
        and subnetChangeProtection =
@@ -101,24 +186,47 @@ let create_firewall =
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfiguration"
+       and enabledAnalysisTypes =
+         flag "enabled-analysis-types" (optional json_arg)
+           ~doc:"JSON EnabledAnalysisTypes"
+       and transitGatewayId =
+         flag "transit-gateway-id" (optional string)
+           ~doc:"STRING TransitGatewayId"
+       and availabilityZoneMappings =
+         flag "availability-zone-mappings" (optional json_arg)
+           ~doc:"JSON AvailabilityZoneMappings"
+       and availabilityZoneChangeProtection =
+         flag "availability-zone-change-protection" (optional bool)
+           ~doc:"BOOL Boolean"
        and firewallName =
          flag "firewall-name" (required string) ~doc:"STRING ResourceName"
        and firewallPolicyArn =
          flag "firewall-policy-arn" (required string)
-           ~doc:"STRING ResourceArn"
-       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId"
-       and subnetMappings =
-         flag "subnet-mappings" (required json_arg)
-           ~doc:"JSON SubnetMappings" in
+           ~doc:"STRING ResourceArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_firewall
-           (Values.CreateFirewallRequest.make ?deleteProtection
+           (Values.CreateFirewallRequest.make ?vpcId
+              ?subnetMappings:(Option.map ~f:Values.SubnetMappings.of_json
+                                 subnetMappings) ?deleteProtection
               ?subnetChangeProtection ?firewallPolicyChangeProtection
               ?description ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ~firewallName ~firewallPolicyArn ~vpcId
-              ~subnetMappings:(Values.SubnetMappings.of_json subnetMappings)
-              ()) (Some Values.CreateFirewallResponse.to_json)
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfiguration.of_json
+                                          encryptionConfiguration)
+              ?enabledAnalysisTypes:(Option.map
+                                       ~f:Values.EnabledAnalysisTypes.of_json
+                                       enabledAnalysisTypes)
+              ?transitGatewayId
+              ?availabilityZoneMappings:(Option.map
+                                           ~f:Values.AvailabilityZoneMappings.of_json
+                                           availabilityZoneMappings)
+              ?availabilityZoneChangeProtection ~firewallName
+              ~firewallPolicyArn ())
+           (Some Values.CreateFirewallResponse.to_json)
            (Some Values.CreateFirewallResponse.error_to_json)])
 let create_firewall_policy =
   Command.async ~summary:""
@@ -134,6 +242,9 @@ let create_firewall_policy =
          flag "description" (optional string) ~doc:"STRING Description"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfiguration"
        and firewallPolicyName =
          flag "firewall-policy-name" (required string)
            ~doc:"STRING ResourceName"
@@ -145,10 +256,149 @@ let create_firewall_policy =
            Io.create_firewall_policy
            (Values.CreateFirewallPolicyRequest.make ?description
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ?dryRun
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfiguration.of_json
+                                          encryptionConfiguration)
               ~firewallPolicyName
               ~firewallPolicy:(Values.FirewallPolicy.of_json firewallPolicy)
               ()) (Some Values.CreateFirewallPolicyResponse.to_json)
            (Some Values.CreateFirewallPolicyResponse.error_to_json)])
+let create_proxy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyConfigurationName =
+         flag "proxy-configuration-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and proxyConfigurationArn =
+         flag "proxy-configuration-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and listenerProperties =
+         flag "listener-properties" (optional json_arg)
+           ~doc:"JSON ListenerPropertiesRequest"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and proxyName =
+         flag "proxy-name" (required string) ~doc:"STRING ResourceName"
+       and natGatewayId =
+         flag "nat-gateway-id" (required string) ~doc:"STRING NatGatewayId"
+       and tlsInterceptProperties =
+         flag "tls-intercept-properties" (required json_arg)
+           ~doc:"JSON TlsInterceptPropertiesRequest" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_proxy
+           (Values.CreateProxyRequest.make ?proxyConfigurationName
+              ?proxyConfigurationArn
+              ?listenerProperties:(Option.map
+                                     ~f:Values.ListenerPropertiesRequest.of_json
+                                     listenerProperties)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~proxyName
+              ~natGatewayId
+              ~tlsInterceptProperties:(Values.TlsInterceptPropertiesRequest.of_json
+                                         tlsInterceptProperties) ())
+           (Some Values.CreateProxyResponse.to_json)
+           (Some Values.CreateProxyResponse.error_to_json)])
+let create_proxy_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and ruleGroupNames =
+         flag "rule-group-names" (optional json_arg)
+           ~doc:"JSON ResourceNameList"
+       and ruleGroupArns =
+         flag "rule-group-arns" (optional json_arg)
+           ~doc:"JSON ResourceArnList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and proxyConfigurationName =
+         flag "proxy-configuration-name" (required string)
+           ~doc:"STRING ResourceName"
+       and defaultRulePhaseActions =
+         flag "default-rule-phase-actions" (required json_arg)
+           ~doc:"JSON ProxyConfigDefaultRulePhaseActionsRequest" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_proxy_configuration
+           (Values.CreateProxyConfigurationRequest.make ?description
+              ?ruleGroupNames:(Option.map ~f:Values.ResourceNameList.of_json
+                                 ruleGroupNames)
+              ?ruleGroupArns:(Option.map ~f:Values.ResourceArnList.of_json
+                                ruleGroupArns)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~proxyConfigurationName
+              ~defaultRulePhaseActions:(Values.ProxyConfigDefaultRulePhaseActionsRequest.of_json
+                                          defaultRulePhaseActions) ())
+           (Some Values.CreateProxyConfigurationResponse.to_json)
+           (Some Values.CreateProxyConfigurationResponse.error_to_json)])
+let create_proxy_rule_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and rules =
+         flag "rules" (optional json_arg)
+           ~doc:"JSON ProxyRulesByRequestPhase"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and proxyRuleGroupName =
+         flag "proxy-rule-group-name" (required string)
+           ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_proxy_rule_group
+           (Values.CreateProxyRuleGroupRequest.make ?description
+              ?rules:(Option.map ~f:Values.ProxyRulesByRequestPhase.of_json
+                        rules)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~proxyRuleGroupName ())
+           (Some Values.CreateProxyRuleGroupResponse.to_json)
+           (Some Values.CreateProxyRuleGroupResponse.error_to_json)])
+let create_proxy_rules =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyRuleGroupArn =
+         flag "proxy-rule-group-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and proxyRuleGroupName =
+         flag "proxy-rule-group-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and rules =
+         flag "rules" (required json_arg)
+           ~doc:"JSON CreateProxyRulesByRequestPhase" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_proxy_rules
+           (Values.CreateProxyRulesRequest.make ?proxyRuleGroupArn
+              ?proxyRuleGroupName
+              ~rules:(Values.CreateProxyRulesByRequestPhase.of_json rules) ())
+           (Some Values.CreateProxyRulesResponse.to_json)
+           (Some Values.CreateProxyRulesResponse.error_to_json)])
 let create_rule_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -166,6 +416,17 @@ let create_rule_group =
          flag "description" (optional string) ~doc:"STRING Description"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfiguration"
+       and sourceMetadata =
+         flag "source-metadata" (optional json_arg)
+           ~doc:"JSON SourceMetadata"
+       and analyzeRuleGroup =
+         flag "analyze-rule-group" (optional bool) ~doc:"BOOL Boolean"
+       and summaryConfiguration =
+         flag "summary-configuration" (optional json_arg)
+           ~doc:"JSON SummaryConfiguration"
        and ruleGroupName =
          flag "rule-group-name" (required string) ~doc:"STRING ResourceName"
        and type_ = flag "type-" (required json_arg) ~doc:"JSON RuleGroupType"
@@ -177,9 +438,80 @@ let create_rule_group =
               ?ruleGroup:(Option.map ~f:Values.RuleGroup.of_json ruleGroup)
               ?rules ?description
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ?dryRun
-              ~ruleGroupName ~type_:(Values.RuleGroupType.of_json type_)
-              ~capacity ()) (Some Values.CreateRuleGroupResponse.to_json)
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfiguration.of_json
+                                          encryptionConfiguration)
+              ?sourceMetadata:(Option.map ~f:Values.SourceMetadata.of_json
+                                 sourceMetadata) ?analyzeRuleGroup
+              ?summaryConfiguration:(Option.map
+                                       ~f:Values.SummaryConfiguration.of_json
+                                       summaryConfiguration) ~ruleGroupName
+              ~type_:(Values.RuleGroupType.of_json type_) ~capacity ())
+           (Some Values.CreateRuleGroupResponse.to_json)
            (Some Values.CreateRuleGroupResponse.error_to_json)])
+let create_t_l_s_inspection_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfiguration"
+       and tLSInspectionConfigurationName =
+         flag "t-l-s-inspection-configuration-name" (required string)
+           ~doc:"STRING ResourceName"
+       and tLSInspectionConfiguration =
+         flag "t-l-s-inspection-configuration" (required json_arg)
+           ~doc:"JSON TLSInspectionConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_t_l_s_inspection_configuration
+           (Values.CreateTLSInspectionConfigurationRequest.make ?description
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfiguration.of_json
+                                          encryptionConfiguration)
+              ~tLSInspectionConfigurationName
+              ~tLSInspectionConfiguration:(Values.TLSInspectionConfiguration.of_json
+                                             tLSInspectionConfiguration) ())
+           (Some Values.CreateTLSInspectionConfigurationResponse.to_json)
+           (Some
+              Values.CreateTLSInspectionConfigurationResponse.error_to_json)])
+let create_vpc_endpoint_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and firewallArn =
+         flag "firewall-arn" (required string) ~doc:"STRING ResourceArn"
+       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId"
+       and subnetMapping =
+         flag "subnet-mapping" (required json_arg) ~doc:"JSON SubnetMapping" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_vpc_endpoint_association
+           (Values.CreateVpcEndpointAssociationRequest.make ?description
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~firewallArn
+              ~vpcId
+              ~subnetMapping:(Values.SubnetMapping.of_json subnetMapping) ())
+           (Some Values.CreateVpcEndpointAssociationResponse.to_json)
+           (Some Values.CreateVpcEndpointAssociationResponse.error_to_json)])
 let delete_firewall =
   Command.async ~summary:""
     ([%map_open.Command
@@ -223,6 +555,122 @@ let delete_firewall_policy =
               ?firewallPolicyArn ())
            (Some Values.DeleteFirewallPolicyResponse.to_json)
            (Some Values.DeleteFirewallPolicyResponse.error_to_json)])
+let delete_network_firewall_transit_gateway_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and transitGatewayAttachmentId =
+         flag "transit-gateway-attachment-id" (required string)
+           ~doc:"STRING TransitGatewayAttachmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_network_firewall_transit_gateway_attachment
+           (Values.DeleteNetworkFirewallTransitGatewayAttachmentRequest.make
+              ~transitGatewayAttachmentId ())
+           (Some
+              Values.DeleteNetworkFirewallTransitGatewayAttachmentResponse.to_json)
+           (Some
+              Values.DeleteNetworkFirewallTransitGatewayAttachmentResponse.error_to_json)])
+let delete_proxy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyName =
+         flag "proxy-name" (optional string) ~doc:"STRING ResourceName"
+       and proxyArn =
+         flag "proxy-arn" (optional string) ~doc:"STRING ResourceArn"
+       and natGatewayId =
+         flag "nat-gateway-id" (required string) ~doc:"STRING NatGatewayId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_proxy
+           (Values.DeleteProxyRequest.make ?proxyName ?proxyArn ~natGatewayId
+              ()) (Some Values.DeleteProxyResponse.to_json)
+           (Some Values.DeleteProxyResponse.error_to_json)])
+let delete_proxy_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyConfigurationName =
+         flag "proxy-configuration-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and proxyConfigurationArn =
+         flag "proxy-configuration-arn" (optional string)
+           ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_proxy_configuration
+           (Values.DeleteProxyConfigurationRequest.make
+              ?proxyConfigurationName ?proxyConfigurationArn ())
+           (Some Values.DeleteProxyConfigurationResponse.to_json)
+           (Some Values.DeleteProxyConfigurationResponse.error_to_json)])
+let delete_proxy_rule_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyRuleGroupName =
+         flag "proxy-rule-group-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and proxyRuleGroupArn =
+         flag "proxy-rule-group-arn" (optional string)
+           ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_proxy_rule_group
+           (Values.DeleteProxyRuleGroupRequest.make ?proxyRuleGroupName
+              ?proxyRuleGroupArn ())
+           (Some Values.DeleteProxyRuleGroupResponse.to_json)
+           (Some Values.DeleteProxyRuleGroupResponse.error_to_json)])
+let delete_proxy_rules =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyRuleGroupArn =
+         flag "proxy-rule-group-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and proxyRuleGroupName =
+         flag "proxy-rule-group-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and rules =
+         flag "rules" (required json_arg) ~doc:"JSON ResourceNameList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_proxy_rules
+           (Values.DeleteProxyRulesRequest.make ?proxyRuleGroupArn
+              ?proxyRuleGroupName
+              ~rules:(Values.ResourceNameList.of_json rules) ())
+           (Some Values.DeleteProxyRulesResponse.to_json)
+           (Some Values.DeleteProxyRulesResponse.error_to_json)])
 let delete_resource_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -263,6 +711,51 @@ let delete_rule_group =
               ?type_:(Option.map ~f:Values.RuleGroupType.of_json type_) ())
            (Some Values.DeleteRuleGroupResponse.to_json)
            (Some Values.DeleteRuleGroupResponse.error_to_json)])
+let delete_t_l_s_inspection_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tLSInspectionConfigurationArn =
+         flag "t-l-s-inspection-configuration-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and tLSInspectionConfigurationName =
+         flag "t-l-s-inspection-configuration-name" (optional string)
+           ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_t_l_s_inspection_configuration
+           (Values.DeleteTLSInspectionConfigurationRequest.make
+              ?tLSInspectionConfigurationArn ?tLSInspectionConfigurationName
+              ())
+           (Some Values.DeleteTLSInspectionConfigurationResponse.to_json)
+           (Some
+              Values.DeleteTLSInspectionConfigurationResponse.error_to_json)])
+let delete_vpc_endpoint_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vpcEndpointAssociationArn =
+         flag "vpc-endpoint-association-arn" (required string)
+           ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_vpc_endpoint_association
+           (Values.DeleteVpcEndpointAssociationRequest.make
+              ~vpcEndpointAssociationArn ())
+           (Some Values.DeleteVpcEndpointAssociationResponse.to_json)
+           (Some Values.DeleteVpcEndpointAssociationResponse.error_to_json)])
 let describe_firewall =
   Command.async ~summary:""
     ([%map_open.Command
@@ -283,6 +776,24 @@ let describe_firewall =
            (Values.DescribeFirewallRequest.make ?firewallName ?firewallArn ())
            (Some Values.DescribeFirewallResponse.to_json)
            (Some Values.DescribeFirewallResponse.error_to_json)])
+let describe_firewall_metadata =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and firewallArn =
+         flag "firewall-arn" (optional string) ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_firewall_metadata
+           (Values.DescribeFirewallMetadataRequest.make ?firewallArn ())
+           (Some Values.DescribeFirewallMetadataResponse.to_json)
+           (Some Values.DescribeFirewallMetadataResponse.error_to_json)])
 let describe_firewall_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -306,6 +817,37 @@ let describe_firewall_policy =
               ?firewallPolicyArn ())
            (Some Values.DescribeFirewallPolicyResponse.to_json)
            (Some Values.DescribeFirewallPolicyResponse.error_to_json)])
+let describe_flow_operation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and availabilityZone =
+         flag "availability-zone" (optional string)
+           ~doc:"STRING AvailabilityZone"
+       and vpcEndpointAssociationArn =
+         flag "vpc-endpoint-association-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and vpcEndpointId =
+         flag "vpc-endpoint-id" (optional string) ~doc:"STRING VpcEndpointId"
+       and firewallArn =
+         flag "firewall-arn" (required string) ~doc:"STRING ResourceArn"
+       and flowOperationId =
+         flag "flow-operation-id" (required string)
+           ~doc:"STRING FlowOperationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_flow_operation
+           (Values.DescribeFlowOperationRequest.make ?availabilityZone
+              ?vpcEndpointAssociationArn ?vpcEndpointId ~firewallArn
+              ~flowOperationId ())
+           (Some Values.DescribeFlowOperationResponse.to_json)
+           (Some Values.DescribeFlowOperationResponse.error_to_json)])
 let describe_logging_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -327,6 +869,97 @@ let describe_logging_configuration =
               ?firewallName ())
            (Some Values.DescribeLoggingConfigurationResponse.to_json)
            (Some Values.DescribeLoggingConfigurationResponse.error_to_json)])
+let describe_proxy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyName =
+         flag "proxy-name" (optional string) ~doc:"STRING ResourceName"
+       and proxyArn =
+         flag "proxy-arn" (optional string) ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_proxy
+           (Values.DescribeProxyRequest.make ?proxyName ?proxyArn ())
+           (Some Values.DescribeProxyResponse.to_json)
+           (Some Values.DescribeProxyResponse.error_to_json)])
+let describe_proxy_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyConfigurationName =
+         flag "proxy-configuration-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and proxyConfigurationArn =
+         flag "proxy-configuration-arn" (optional string)
+           ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_proxy_configuration
+           (Values.DescribeProxyConfigurationRequest.make
+              ?proxyConfigurationName ?proxyConfigurationArn ())
+           (Some Values.DescribeProxyConfigurationResponse.to_json)
+           (Some Values.DescribeProxyConfigurationResponse.error_to_json)])
+let describe_proxy_rule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyRuleGroupName =
+         flag "proxy-rule-group-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and proxyRuleGroupArn =
+         flag "proxy-rule-group-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and proxyRuleName =
+         flag "proxy-rule-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_proxy_rule
+           (Values.DescribeProxyRuleRequest.make ?proxyRuleGroupName
+              ?proxyRuleGroupArn ~proxyRuleName ())
+           (Some Values.DescribeProxyRuleResponse.to_json)
+           (Some Values.DescribeProxyRuleResponse.error_to_json)])
+let describe_proxy_rule_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyRuleGroupName =
+         flag "proxy-rule-group-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and proxyRuleGroupArn =
+         flag "proxy-rule-group-arn" (optional string)
+           ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_proxy_rule_group
+           (Values.DescribeProxyRuleGroupRequest.make ?proxyRuleGroupName
+              ?proxyRuleGroupArn ())
+           (Some Values.DescribeProxyRuleGroupResponse.to_json)
+           (Some Values.DescribeProxyRuleGroupResponse.error_to_json)])
 let describe_resource_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -359,12 +992,15 @@ let describe_rule_group =
          flag "rule-group-name" (optional string) ~doc:"STRING ResourceName"
        and ruleGroupArn =
          flag "rule-group-arn" (optional string) ~doc:"STRING ResourceArn"
-       and type_ = flag "type-" (optional json_arg) ~doc:"JSON RuleGroupType" in
+       and type_ = flag "type-" (optional json_arg) ~doc:"JSON RuleGroupType"
+       and analyzeRuleGroup =
+         flag "analyze-rule-group" (optional bool) ~doc:"BOOL Boolean" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_rule_group
            (Values.DescribeRuleGroupRequest.make ?ruleGroupName ?ruleGroupArn
-              ?type_:(Option.map ~f:Values.RuleGroupType.of_json type_) ())
+              ?type_:(Option.map ~f:Values.RuleGroupType.of_json type_)
+              ?analyzeRuleGroup ())
            (Some Values.DescribeRuleGroupResponse.to_json)
            (Some Values.DescribeRuleGroupResponse.error_to_json)])
 let describe_rule_group_metadata =
@@ -390,6 +1026,139 @@ let describe_rule_group_metadata =
               ?type_:(Option.map ~f:Values.RuleGroupType.of_json type_) ())
            (Some Values.DescribeRuleGroupMetadataResponse.to_json)
            (Some Values.DescribeRuleGroupMetadataResponse.error_to_json)])
+let describe_rule_group_summary =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ruleGroupName =
+         flag "rule-group-name" (optional string) ~doc:"STRING ResourceName"
+       and ruleGroupArn =
+         flag "rule-group-arn" (optional string) ~doc:"STRING ResourceArn"
+       and type_ = flag "type-" (optional json_arg) ~doc:"JSON RuleGroupType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_rule_group_summary
+           (Values.DescribeRuleGroupSummaryRequest.make ?ruleGroupName
+              ?ruleGroupArn
+              ?type_:(Option.map ~f:Values.RuleGroupType.of_json type_) ())
+           (Some Values.DescribeRuleGroupSummaryResponse.to_json)
+           (Some Values.DescribeRuleGroupSummaryResponse.error_to_json)])
+let describe_t_l_s_inspection_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tLSInspectionConfigurationArn =
+         flag "t-l-s-inspection-configuration-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and tLSInspectionConfigurationName =
+         flag "t-l-s-inspection-configuration-name" (optional string)
+           ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_t_l_s_inspection_configuration
+           (Values.DescribeTLSInspectionConfigurationRequest.make
+              ?tLSInspectionConfigurationArn ?tLSInspectionConfigurationName
+              ())
+           (Some Values.DescribeTLSInspectionConfigurationResponse.to_json)
+           (Some
+              Values.DescribeTLSInspectionConfigurationResponse.error_to_json)])
+let describe_vpc_endpoint_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vpcEndpointAssociationArn =
+         flag "vpc-endpoint-association-arn" (required string)
+           ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_vpc_endpoint_association
+           (Values.DescribeVpcEndpointAssociationRequest.make
+              ~vpcEndpointAssociationArn ())
+           (Some Values.DescribeVpcEndpointAssociationResponse.to_json)
+           (Some Values.DescribeVpcEndpointAssociationResponse.error_to_json)])
+let detach_rule_groups_from_proxy_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyConfigurationName =
+         flag "proxy-configuration-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and proxyConfigurationArn =
+         flag "proxy-configuration-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and ruleGroupNames =
+         flag "rule-group-names" (optional json_arg)
+           ~doc:"JSON ResourceNameList"
+       and ruleGroupArns =
+         flag "rule-group-arns" (optional json_arg)
+           ~doc:"JSON ResourceArnList"
+       and updateToken =
+         flag "update-token" (required string) ~doc:"STRING UpdateToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.detach_rule_groups_from_proxy_configuration
+           (Values.DetachRuleGroupsFromProxyConfigurationRequest.make
+              ?proxyConfigurationName ?proxyConfigurationArn
+              ?ruleGroupNames:(Option.map ~f:Values.ResourceNameList.of_json
+                                 ruleGroupNames)
+              ?ruleGroupArns:(Option.map ~f:Values.ResourceArnList.of_json
+                                ruleGroupArns) ~updateToken ())
+           (Some
+              Values.DetachRuleGroupsFromProxyConfigurationResponse.to_json)
+           (Some
+              Values.DetachRuleGroupsFromProxyConfigurationResponse.error_to_json)])
+let disassociate_availability_zones =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and updateToken =
+         flag "update-token" (optional string) ~doc:"STRING UpdateToken"
+       and firewallArn =
+         flag "firewall-arn" (optional string) ~doc:"STRING ResourceArn"
+       and firewallName =
+         flag "firewall-name" (optional string) ~doc:"STRING ResourceName"
+       and availabilityZoneMappings =
+         flag "availability-zone-mappings" (required json_arg)
+           ~doc:"JSON AvailabilityZoneMappings" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_availability_zones
+           (Values.DisassociateAvailabilityZonesRequest.make ?updateToken
+              ?firewallArn ?firewallName
+              ~availabilityZoneMappings:(Values.AvailabilityZoneMappings.of_json
+                                           availabilityZoneMappings) ())
+           (Some Values.DisassociateAvailabilityZonesResponse.to_json)
+           (Some Values.DisassociateAvailabilityZonesResponse.error_to_json)])
 let disassociate_subnets =
   Command.async ~summary:""
     ([%map_open.Command
@@ -415,6 +1184,60 @@ let disassociate_subnets =
               ?firewallName ~subnetIds:(Values.AzSubnets.of_json subnetIds)
               ()) (Some Values.DisassociateSubnetsResponse.to_json)
            (Some Values.DisassociateSubnetsResponse.error_to_json)])
+let get_analysis_report_results =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and firewallName =
+         flag "firewall-name" (optional string) ~doc:"STRING ResourceName"
+       and firewallArn =
+         flag "firewall-arn" (optional string) ~doc:"STRING ResourceArn"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING AnalysisReportNextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
+       and analysisReportId =
+         flag "analysis-report-id" (required string)
+           ~doc:"STRING AnalysisReportId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_analysis_report_results
+           (Values.GetAnalysisReportResultsRequest.make ?firewallName
+              ?firewallArn ?nextToken ?maxResults ~analysisReportId ())
+           (Some Values.GetAnalysisReportResultsResponse.to_json)
+           (Some Values.GetAnalysisReportResultsResponse.error_to_json)])
+let list_analysis_reports =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and firewallName =
+         flag "firewall-name" (optional string) ~doc:"STRING ResourceName"
+       and firewallArn =
+         flag "firewall-arn" (optional string) ~doc:"STRING ResourceArn"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_analysis_reports
+           (Values.ListAnalysisReportsRequest.make ?firewallName ?firewallArn
+              ?nextToken ?maxResults ())
+           (Some Values.ListAnalysisReportsResponse.to_json)
+           (Some Values.ListAnalysisReportsResponse.error_to_json)])
 let list_firewall_policies =
   Command.async ~summary:""
     ([%map_open.Command
@@ -457,6 +1280,139 @@ let list_firewalls =
               ?vpcIds:(Option.map ~f:Values.VpcIds.of_json vpcIds)
               ?maxResults ()) (Some Values.ListFirewallsResponse.to_json)
            (Some Values.ListFirewallsResponse.error_to_json)])
+let list_flow_operation_results =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
+       and availabilityZone =
+         flag "availability-zone" (optional string)
+           ~doc:"STRING AvailabilityZone"
+       and vpcEndpointId =
+         flag "vpc-endpoint-id" (optional string) ~doc:"STRING VpcEndpointId"
+       and vpcEndpointAssociationArn =
+         flag "vpc-endpoint-association-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and firewallArn =
+         flag "firewall-arn" (required string) ~doc:"STRING ResourceArn"
+       and flowOperationId =
+         flag "flow-operation-id" (required string)
+           ~doc:"STRING FlowOperationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_flow_operation_results
+           (Values.ListFlowOperationResultsRequest.make ?nextToken
+              ?maxResults ?availabilityZone ?vpcEndpointId
+              ?vpcEndpointAssociationArn ~firewallArn ~flowOperationId ())
+           (Some Values.ListFlowOperationResultsResponse.to_json)
+           (Some Values.ListFlowOperationResultsResponse.error_to_json)])
+let list_flow_operations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and availabilityZone =
+         flag "availability-zone" (optional string)
+           ~doc:"STRING AvailabilityZone"
+       and vpcEndpointAssociationArn =
+         flag "vpc-endpoint-association-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and vpcEndpointId =
+         flag "vpc-endpoint-id" (optional string) ~doc:"STRING VpcEndpointId"
+       and flowOperationType =
+         flag "flow-operation-type" (optional json_arg)
+           ~doc:"JSON FlowOperationType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
+       and firewallArn =
+         flag "firewall-arn" (required string) ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_flow_operations
+           (Values.ListFlowOperationsRequest.make ?availabilityZone
+              ?vpcEndpointAssociationArn ?vpcEndpointId
+              ?flowOperationType:(Option.map
+                                    ~f:Values.FlowOperationType.of_json
+                                    flowOperationType) ?nextToken ?maxResults
+              ~firewallArn ())
+           (Some Values.ListFlowOperationsResponse.to_json)
+           (Some Values.ListFlowOperationsResponse.error_to_json)])
+let list_proxies =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_proxies
+           (Values.ListProxiesRequest.make ?nextToken ?maxResults ())
+           (Some Values.ListProxiesResponse.to_json)
+           (Some Values.ListProxiesResponse.error_to_json)])
+let list_proxy_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_proxy_configurations
+           (Values.ListProxyConfigurationsRequest.make ?nextToken ?maxResults
+              ()) (Some Values.ListProxyConfigurationsResponse.to_json)
+           (Some Values.ListProxyConfigurationsResponse.error_to_json)])
+let list_proxy_rule_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_proxy_rule_groups
+           (Values.ListProxyRuleGroupsRequest.make ?nextToken ?maxResults ())
+           (Some Values.ListProxyRuleGroupsResponse.to_json)
+           (Some Values.ListProxyRuleGroupsResponse.error_to_json)])
 let list_rule_groups =
   Command.async ~summary:""
     ([%map_open.Command
@@ -472,15 +1428,49 @@ let list_rule_groups =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
        and scope =
-         flag "scope" (optional json_arg) ~doc:"JSON ResourceManagedStatus" in
+         flag "scope" (optional json_arg) ~doc:"JSON ResourceManagedStatus"
+       and managedType =
+         flag "managed-type" (optional json_arg)
+           ~doc:"JSON ResourceManagedType"
+       and subscriptionStatus =
+         flag "subscription-status" (optional json_arg)
+           ~doc:"JSON SubscriptionStatus"
+       and type_ = flag "type-" (optional json_arg) ~doc:"JSON RuleGroupType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_rule_groups
            (Values.ListRuleGroupsRequest.make ?nextToken ?maxResults
               ?scope:(Option.map ~f:Values.ResourceManagedStatus.of_json
-                        scope) ())
+                        scope)
+              ?managedType:(Option.map ~f:Values.ResourceManagedType.of_json
+                              managedType)
+              ?subscriptionStatus:(Option.map
+                                     ~f:Values.SubscriptionStatus.of_json
+                                     subscriptionStatus)
+              ?type_:(Option.map ~f:Values.RuleGroupType.of_json type_) ())
            (Some Values.ListRuleGroupsResponse.to_json)
            (Some Values.ListRuleGroupsResponse.error_to_json)])
+let list_t_l_s_inspection_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_t_l_s_inspection_configurations
+           (Values.ListTLSInspectionConfigurationsRequest.make ?nextToken
+              ?maxResults ())
+           (Some Values.ListTLSInspectionConfigurationsResponse.to_json)
+           (Some Values.ListTLSInspectionConfigurationsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -505,6 +1495,29 @@ let list_tags_for_resource =
               ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_vpc_endpoint_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT PaginationMaxResults"
+       and firewallArn =
+         flag "firewall-arn" (optional string) ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_vpc_endpoint_associations
+           (Values.ListVpcEndpointAssociationsRequest.make ?nextToken
+              ?maxResults ?firewallArn ())
+           (Some Values.ListVpcEndpointAssociationsResponse.to_json)
+           (Some Values.ListVpcEndpointAssociationsResponse.error_to_json)])
 let put_resource_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -525,6 +1538,118 @@ let put_resource_policy =
            (Values.PutResourcePolicyRequest.make ~resourceArn ~policy ())
            (Some Values.PutResourcePolicyResponse.to_json)
            (Some Values.PutResourcePolicyResponse.error_to_json)])
+let reject_network_firewall_transit_gateway_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and transitGatewayAttachmentId =
+         flag "transit-gateway-attachment-id" (required string)
+           ~doc:"STRING TransitGatewayAttachmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.reject_network_firewall_transit_gateway_attachment
+           (Values.RejectNetworkFirewallTransitGatewayAttachmentRequest.make
+              ~transitGatewayAttachmentId ())
+           (Some
+              Values.RejectNetworkFirewallTransitGatewayAttachmentResponse.to_json)
+           (Some
+              Values.RejectNetworkFirewallTransitGatewayAttachmentResponse.error_to_json)])
+let start_analysis_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and firewallName =
+         flag "firewall-name" (optional string) ~doc:"STRING ResourceName"
+       and firewallArn =
+         flag "firewall-arn" (optional string) ~doc:"STRING ResourceArn"
+       and analysisType =
+         flag "analysis-type" (required json_arg)
+           ~doc:"JSON EnabledAnalysisType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_analysis_report
+           (Values.StartAnalysisReportRequest.make ?firewallName ?firewallArn
+              ~analysisType:(Values.EnabledAnalysisType.of_json analysisType)
+              ()) (Some Values.StartAnalysisReportResponse.to_json)
+           (Some Values.StartAnalysisReportResponse.error_to_json)])
+let start_flow_capture =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and availabilityZone =
+         flag "availability-zone" (optional string)
+           ~doc:"STRING AvailabilityZone"
+       and vpcEndpointAssociationArn =
+         flag "vpc-endpoint-association-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and vpcEndpointId =
+         flag "vpc-endpoint-id" (optional string) ~doc:"STRING VpcEndpointId"
+       and minimumFlowAgeInSeconds =
+         flag "minimum-flow-age-in-seconds" (optional int) ~doc:"INT Age"
+       and firewallArn =
+         flag "firewall-arn" (required string) ~doc:"STRING ResourceArn"
+       and flowFilters =
+         flag "flow-filters" (required json_arg) ~doc:"JSON FlowFilters" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_flow_capture
+           (Values.StartFlowCaptureRequest.make ?availabilityZone
+              ?vpcEndpointAssociationArn ?vpcEndpointId
+              ?minimumFlowAgeInSeconds ~firewallArn
+              ~flowFilters:(Values.FlowFilters.of_json flowFilters) ())
+           (Some Values.StartFlowCaptureResponse.to_json)
+           (Some Values.StartFlowCaptureResponse.error_to_json)])
+let start_flow_flush =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and availabilityZone =
+         flag "availability-zone" (optional string)
+           ~doc:"STRING AvailabilityZone"
+       and vpcEndpointAssociationArn =
+         flag "vpc-endpoint-association-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and vpcEndpointId =
+         flag "vpc-endpoint-id" (optional string) ~doc:"STRING VpcEndpointId"
+       and minimumFlowAgeInSeconds =
+         flag "minimum-flow-age-in-seconds" (optional int) ~doc:"INT Age"
+       and firewallArn =
+         flag "firewall-arn" (required string) ~doc:"STRING ResourceArn"
+       and flowFilters =
+         flag "flow-filters" (required json_arg) ~doc:"JSON FlowFilters" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_flow_flush
+           (Values.StartFlowFlushRequest.make ?availabilityZone
+              ?vpcEndpointAssociationArn ?vpcEndpointId
+              ?minimumFlowAgeInSeconds ~firewallArn
+              ~flowFilters:(Values.FlowFilters.of_json flowFilters) ())
+           (Some Values.StartFlowFlushResponse.to_json)
+           (Some Values.StartFlowFlushResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -566,6 +1691,64 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_availability_zone_change_protection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and updateToken =
+         flag "update-token" (optional string) ~doc:"STRING UpdateToken"
+       and firewallArn =
+         flag "firewall-arn" (optional string) ~doc:"STRING ResourceArn"
+       and firewallName =
+         flag "firewall-name" (optional string) ~doc:"STRING ResourceName"
+       and availabilityZoneChangeProtection =
+         flag "availability-zone-change-protection" (required bool)
+           ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_availability_zone_change_protection
+           (Values.UpdateAvailabilityZoneChangeProtectionRequest.make
+              ?updateToken ?firewallArn ?firewallName
+              ~availabilityZoneChangeProtection ())
+           (Some
+              Values.UpdateAvailabilityZoneChangeProtectionResponse.to_json)
+           (Some
+              Values.UpdateAvailabilityZoneChangeProtectionResponse.error_to_json)])
+let update_firewall_analysis_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and enabledAnalysisTypes =
+         flag "enabled-analysis-types" (optional json_arg)
+           ~doc:"JSON EnabledAnalysisTypes"
+       and firewallArn =
+         flag "firewall-arn" (optional string) ~doc:"STRING ResourceArn"
+       and firewallName =
+         flag "firewall-name" (optional string) ~doc:"STRING ResourceName"
+       and updateToken =
+         flag "update-token" (optional string) ~doc:"STRING UpdateToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_firewall_analysis_settings
+           (Values.UpdateFirewallAnalysisSettingsRequest.make
+              ?enabledAnalysisTypes:(Option.map
+                                       ~f:Values.EnabledAnalysisTypes.of_json
+                                       enabledAnalysisTypes) ?firewallArn
+              ?firewallName ?updateToken ())
+           (Some Values.UpdateFirewallAnalysisSettingsResponse.to_json)
+           (Some Values.UpdateFirewallAnalysisSettingsResponse.error_to_json)])
 let update_firewall_delete_protection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -616,6 +1799,36 @@ let update_firewall_description =
               ?firewallArn ?firewallName ?description ())
            (Some Values.UpdateFirewallDescriptionResponse.to_json)
            (Some Values.UpdateFirewallDescriptionResponse.error_to_json)])
+let update_firewall_encryption_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and updateToken =
+         flag "update-token" (optional string) ~doc:"STRING UpdateToken"
+       and firewallArn =
+         flag "firewall-arn" (optional string) ~doc:"STRING ResourceArn"
+       and firewallName =
+         flag "firewall-name" (optional string) ~doc:"STRING ResourceName"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_firewall_encryption_configuration
+           (Values.UpdateFirewallEncryptionConfigurationRequest.make
+              ?updateToken ?firewallArn ?firewallName
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfiguration.of_json
+                                          encryptionConfiguration) ())
+           (Some Values.UpdateFirewallEncryptionConfigurationResponse.to_json)
+           (Some
+              Values.UpdateFirewallEncryptionConfigurationResponse.error_to_json)])
 let update_firewall_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -635,6 +1848,9 @@ let update_firewall_policy =
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfiguration"
        and updateToken =
          flag "update-token" (required string) ~doc:"STRING UpdateToken"
        and firewallPolicy =
@@ -644,7 +1860,11 @@ let update_firewall_policy =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_firewall_policy
            (Values.UpdateFirewallPolicyRequest.make ?firewallPolicyArn
-              ?firewallPolicyName ?description ?dryRun ~updateToken
+              ?firewallPolicyName ?description ?dryRun
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfiguration.of_json
+                                          encryptionConfiguration)
+              ~updateToken
               ~firewallPolicy:(Values.FirewallPolicy.of_json firewallPolicy)
               ()) (Some Values.UpdateFirewallPolicyResponse.to_json)
            (Some Values.UpdateFirewallPolicyResponse.error_to_json)])
@@ -692,7 +1912,10 @@ let update_logging_configuration =
          flag "firewall-name" (optional string) ~doc:"STRING ResourceName"
        and loggingConfiguration =
          flag "logging-configuration" (optional json_arg)
-           ~doc:"JSON LoggingConfiguration" in
+           ~doc:"JSON LoggingConfiguration"
+       and enableMonitoringDashboard =
+         flag "enable-monitoring-dashboard" (optional bool)
+           ~doc:"BOOL EnableMonitoringDashboard" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_logging_configuration
@@ -700,9 +1923,193 @@ let update_logging_configuration =
               ?firewallName
               ?loggingConfiguration:(Option.map
                                        ~f:Values.LoggingConfiguration.of_json
-                                       loggingConfiguration) ())
+                                       loggingConfiguration)
+              ?enableMonitoringDashboard ())
            (Some Values.UpdateLoggingConfigurationResponse.to_json)
            (Some Values.UpdateLoggingConfigurationResponse.error_to_json)])
+let update_proxy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyName =
+         flag "proxy-name" (optional string) ~doc:"STRING ResourceName"
+       and proxyArn =
+         flag "proxy-arn" (optional string) ~doc:"STRING ResourceArn"
+       and listenerPropertiesToAdd =
+         flag "listener-properties-to-add" (optional json_arg)
+           ~doc:"JSON ListenerPropertiesRequest"
+       and listenerPropertiesToRemove =
+         flag "listener-properties-to-remove" (optional json_arg)
+           ~doc:"JSON ListenerPropertiesRequest"
+       and tlsInterceptProperties =
+         flag "tls-intercept-properties" (optional json_arg)
+           ~doc:"JSON TlsInterceptPropertiesRequest"
+       and natGatewayId =
+         flag "nat-gateway-id" (required string) ~doc:"STRING NatGatewayId"
+       and updateToken =
+         flag "update-token" (required string) ~doc:"STRING UpdateToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_proxy
+           (Values.UpdateProxyRequest.make ?proxyName ?proxyArn
+              ?listenerPropertiesToAdd:(Option.map
+                                          ~f:Values.ListenerPropertiesRequest.of_json
+                                          listenerPropertiesToAdd)
+              ?listenerPropertiesToRemove:(Option.map
+                                             ~f:Values.ListenerPropertiesRequest.of_json
+                                             listenerPropertiesToRemove)
+              ?tlsInterceptProperties:(Option.map
+                                         ~f:Values.TlsInterceptPropertiesRequest.of_json
+                                         tlsInterceptProperties)
+              ~natGatewayId ~updateToken ())
+           (Some Values.UpdateProxyResponse.to_json)
+           (Some Values.UpdateProxyResponse.error_to_json)])
+let update_proxy_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyConfigurationName =
+         flag "proxy-configuration-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and proxyConfigurationArn =
+         flag "proxy-configuration-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and defaultRulePhaseActions =
+         flag "default-rule-phase-actions" (required json_arg)
+           ~doc:"JSON ProxyConfigDefaultRulePhaseActionsRequest"
+       and updateToken =
+         flag "update-token" (required string) ~doc:"STRING UpdateToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_proxy_configuration
+           (Values.UpdateProxyConfigurationRequest.make
+              ?proxyConfigurationName ?proxyConfigurationArn
+              ~defaultRulePhaseActions:(Values.ProxyConfigDefaultRulePhaseActionsRequest.of_json
+                                          defaultRulePhaseActions)
+              ~updateToken ())
+           (Some Values.UpdateProxyConfigurationResponse.to_json)
+           (Some Values.UpdateProxyConfigurationResponse.error_to_json)])
+let update_proxy_rule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyRuleGroupName =
+         flag "proxy-rule-group-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and proxyRuleGroupArn =
+         flag "proxy-rule-group-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and action =
+         flag "action" (optional json_arg) ~doc:"JSON ProxyRulePhaseAction"
+       and addConditions =
+         flag "add-conditions" (optional json_arg)
+           ~doc:"JSON ProxyRuleConditionList"
+       and removeConditions =
+         flag "remove-conditions" (optional json_arg)
+           ~doc:"JSON ProxyRuleConditionList"
+       and proxyRuleName =
+         flag "proxy-rule-name" (required string) ~doc:"STRING ResourceName"
+       and updateToken =
+         flag "update-token" (required string) ~doc:"STRING UpdateToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_proxy_rule
+           (Values.UpdateProxyRuleRequest.make ?proxyRuleGroupName
+              ?proxyRuleGroupArn ?description
+              ?action:(Option.map ~f:Values.ProxyRulePhaseAction.of_json
+                         action)
+              ?addConditions:(Option.map
+                                ~f:Values.ProxyRuleConditionList.of_json
+                                addConditions)
+              ?removeConditions:(Option.map
+                                   ~f:Values.ProxyRuleConditionList.of_json
+                                   removeConditions) ~proxyRuleName
+              ~updateToken ()) (Some Values.UpdateProxyRuleResponse.to_json)
+           (Some Values.UpdateProxyRuleResponse.error_to_json)])
+let update_proxy_rule_group_priorities =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyConfigurationName =
+         flag "proxy-configuration-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and proxyConfigurationArn =
+         flag "proxy-configuration-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and ruleGroups =
+         flag "rule-groups" (required json_arg)
+           ~doc:"JSON ProxyRuleGroupPriorityList"
+       and updateToken =
+         flag "update-token" (required string) ~doc:"STRING UpdateToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_proxy_rule_group_priorities
+           (Values.UpdateProxyRuleGroupPrioritiesRequest.make
+              ?proxyConfigurationName ?proxyConfigurationArn
+              ~ruleGroups:(Values.ProxyRuleGroupPriorityList.of_json
+                             ruleGroups) ~updateToken ())
+           (Some Values.UpdateProxyRuleGroupPrioritiesResponse.to_json)
+           (Some Values.UpdateProxyRuleGroupPrioritiesResponse.error_to_json)])
+let update_proxy_rule_priorities =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and proxyRuleGroupName =
+         flag "proxy-rule-group-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and proxyRuleGroupArn =
+         flag "proxy-rule-group-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and ruleGroupRequestPhase =
+         flag "rule-group-request-phase" (required json_arg)
+           ~doc:"JSON RuleGroupRequestPhase"
+       and rules =
+         flag "rules" (required json_arg) ~doc:"JSON ProxyRulePriorityList"
+       and updateToken =
+         flag "update-token" (required string) ~doc:"STRING UpdateToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_proxy_rule_priorities
+           (Values.UpdateProxyRulePrioritiesRequest.make ?proxyRuleGroupName
+              ?proxyRuleGroupArn
+              ~ruleGroupRequestPhase:(Values.RuleGroupRequestPhase.of_json
+                                        ruleGroupRequestPhase)
+              ~rules:(Values.ProxyRulePriorityList.of_json rules)
+              ~updateToken ())
+           (Some Values.UpdateProxyRulePrioritiesResponse.to_json)
+           (Some Values.UpdateProxyRulePrioritiesResponse.error_to_json)])
 let update_rule_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -724,6 +2131,17 @@ let update_rule_group =
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfiguration"
+       and sourceMetadata =
+         flag "source-metadata" (optional json_arg)
+           ~doc:"JSON SourceMetadata"
+       and analyzeRuleGroup =
+         flag "analyze-rule-group" (optional bool) ~doc:"BOOL Boolean"
+       and summaryConfiguration =
+         flag "summary-configuration" (optional json_arg)
+           ~doc:"JSON SummaryConfiguration"
        and updateToken =
          flag "update-token" (required string) ~doc:"STRING UpdateToken" in
        fun () ->
@@ -733,7 +2151,15 @@ let update_rule_group =
               ?ruleGroup:(Option.map ~f:Values.RuleGroup.of_json ruleGroup)
               ?rules
               ?type_:(Option.map ~f:Values.RuleGroupType.of_json type_)
-              ?description ?dryRun ~updateToken ())
+              ?description ?dryRun
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfiguration.of_json
+                                          encryptionConfiguration)
+              ?sourceMetadata:(Option.map ~f:Values.SourceMetadata.of_json
+                                 sourceMetadata) ?analyzeRuleGroup
+              ?summaryConfiguration:(Option.map
+                                       ~f:Values.SummaryConfiguration.of_json
+                                       summaryConfiguration) ~updateToken ())
            (Some Values.UpdateRuleGroupResponse.to_json)
            (Some Values.UpdateRuleGroupResponse.error_to_json)])
 let update_subnet_change_protection =
@@ -761,37 +2187,140 @@ let update_subnet_change_protection =
               ?firewallArn ?firewallName ~subnetChangeProtection ())
            (Some Values.UpdateSubnetChangeProtectionResponse.to_json)
            (Some Values.UpdateSubnetChangeProtectionResponse.error_to_json)])
+let update_t_l_s_inspection_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tLSInspectionConfigurationArn =
+         flag "t-l-s-inspection-configuration-arn" (optional string)
+           ~doc:"STRING ResourceArn"
+       and tLSInspectionConfigurationName =
+         flag "t-l-s-inspection-configuration-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfiguration"
+       and tLSInspectionConfiguration =
+         flag "t-l-s-inspection-configuration" (required json_arg)
+           ~doc:"JSON TLSInspectionConfiguration"
+       and updateToken =
+         flag "update-token" (required string) ~doc:"STRING UpdateToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_t_l_s_inspection_configuration
+           (Values.UpdateTLSInspectionConfigurationRequest.make
+              ?tLSInspectionConfigurationArn ?tLSInspectionConfigurationName
+              ?description
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfiguration.of_json
+                                          encryptionConfiguration)
+              ~tLSInspectionConfiguration:(Values.TLSInspectionConfiguration.of_json
+                                             tLSInspectionConfiguration)
+              ~updateToken ())
+           (Some Values.UpdateTLSInspectionConfigurationResponse.to_json)
+           (Some
+              Values.UpdateTLSInspectionConfigurationResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("associate-firewall-policy", associate_firewall_policy);
+    [("accept-network-firewall-transit-gateway-attachment",
+       accept_network_firewall_transit_gateway_attachment);
+    ("associate-availability-zones", associate_availability_zones);
+    ("associate-firewall-policy", associate_firewall_policy);
     ("associate-subnets", associate_subnets);
+    ("attach-rule-groups-to-proxy-configuration",
+      attach_rule_groups_to_proxy_configuration);
     ("create-firewall", create_firewall);
     ("create-firewall-policy", create_firewall_policy);
+    ("create-proxy", create_proxy);
+    ("create-proxy-configuration", create_proxy_configuration);
+    ("create-proxy-rule-group", create_proxy_rule_group);
+    ("create-proxy-rules", create_proxy_rules);
     ("create-rule-group", create_rule_group);
+    ("create-t-l-s-inspection-configuration",
+      create_t_l_s_inspection_configuration);
+    ("create-vpc-endpoint-association", create_vpc_endpoint_association);
     ("delete-firewall", delete_firewall);
     ("delete-firewall-policy", delete_firewall_policy);
+    ("delete-network-firewall-transit-gateway-attachment",
+      delete_network_firewall_transit_gateway_attachment);
+    ("delete-proxy", delete_proxy);
+    ("delete-proxy-configuration", delete_proxy_configuration);
+    ("delete-proxy-rule-group", delete_proxy_rule_group);
+    ("delete-proxy-rules", delete_proxy_rules);
     ("delete-resource-policy", delete_resource_policy);
     ("delete-rule-group", delete_rule_group);
+    ("delete-t-l-s-inspection-configuration",
+      delete_t_l_s_inspection_configuration);
+    ("delete-vpc-endpoint-association", delete_vpc_endpoint_association);
     ("describe-firewall", describe_firewall);
+    ("describe-firewall-metadata", describe_firewall_metadata);
     ("describe-firewall-policy", describe_firewall_policy);
+    ("describe-flow-operation", describe_flow_operation);
     ("describe-logging-configuration", describe_logging_configuration);
+    ("describe-proxy", describe_proxy);
+    ("describe-proxy-configuration", describe_proxy_configuration);
+    ("describe-proxy-rule", describe_proxy_rule);
+    ("describe-proxy-rule-group", describe_proxy_rule_group);
     ("describe-resource-policy", describe_resource_policy);
     ("describe-rule-group", describe_rule_group);
     ("describe-rule-group-metadata", describe_rule_group_metadata);
+    ("describe-rule-group-summary", describe_rule_group_summary);
+    ("describe-t-l-s-inspection-configuration",
+      describe_t_l_s_inspection_configuration);
+    ("describe-vpc-endpoint-association", describe_vpc_endpoint_association);
+    ("detach-rule-groups-from-proxy-configuration",
+      detach_rule_groups_from_proxy_configuration);
+    ("disassociate-availability-zones", disassociate_availability_zones);
     ("disassociate-subnets", disassociate_subnets);
+    ("get-analysis-report-results", get_analysis_report_results);
+    ("list-analysis-reports", list_analysis_reports);
     ("list-firewall-policies", list_firewall_policies);
     ("list-firewalls", list_firewalls);
+    ("list-flow-operation-results", list_flow_operation_results);
+    ("list-flow-operations", list_flow_operations);
+    ("list-proxies", list_proxies);
+    ("list-proxy-configurations", list_proxy_configurations);
+    ("list-proxy-rule-groups", list_proxy_rule_groups);
     ("list-rule-groups", list_rule_groups);
+    ("list-t-l-s-inspection-configurations",
+      list_t_l_s_inspection_configurations);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-vpc-endpoint-associations", list_vpc_endpoint_associations);
     ("put-resource-policy", put_resource_policy);
+    ("reject-network-firewall-transit-gateway-attachment",
+      reject_network_firewall_transit_gateway_attachment);
+    ("start-analysis-report", start_analysis_report);
+    ("start-flow-capture", start_flow_capture);
+    ("start-flow-flush", start_flow_flush);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-availability-zone-change-protection",
+      update_availability_zone_change_protection);
+    ("update-firewall-analysis-settings", update_firewall_analysis_settings);
     ("update-firewall-delete-protection", update_firewall_delete_protection);
     ("update-firewall-description", update_firewall_description);
+    ("update-firewall-encryption-configuration",
+      update_firewall_encryption_configuration);
     ("update-firewall-policy", update_firewall_policy);
     ("update-firewall-policy-change-protection",
       update_firewall_policy_change_protection);
     ("update-logging-configuration", update_logging_configuration);
+    ("update-proxy", update_proxy);
+    ("update-proxy-configuration", update_proxy_configuration);
+    ("update-proxy-rule", update_proxy_rule);
+    ("update-proxy-rule-group-priorities",
+      update_proxy_rule_group_priorities);
+    ("update-proxy-rule-priorities", update_proxy_rule_priorities);
     ("update-rule-group", update_rule_group);
-    ("update-subnet-change-protection", update_subnet_change_protection)]
+    ("update-subnet-change-protection", update_subnet_change_protection);
+    ("update-t-l-s-inspection-configuration",
+      update_t_l_s_inspection_configuration)]

@@ -30,12 +30,24 @@ val delete_custom_plugin :
       DeleteCustomPluginRequest.t ->
         (DeleteCustomPluginResponse.t, DeleteCustomPluginResponse.error)
           Result.t Lwt.t
+val delete_worker_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteWorkerConfigurationRequest.t ->
+        (DeleteWorkerConfigurationResponse.t,
+          DeleteWorkerConfigurationResponse.error) Result.t Lwt.t
 val describe_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeConnectorRequest.t ->
         (DescribeConnectorResponse.t, DescribeConnectorResponse.error)
           Result.t Lwt.t
+val describe_connector_operation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeConnectorOperationRequest.t ->
+        (DescribeConnectorOperationResponse.t,
+          DescribeConnectorOperationResponse.error) Result.t Lwt.t
 val describe_custom_plugin :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -48,6 +60,12 @@ val describe_worker_configuration :
       DescribeWorkerConfigurationRequest.t ->
         (DescribeWorkerConfigurationResponse.t,
           DescribeWorkerConfigurationResponse.error) Result.t Lwt.t
+val list_connector_operations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListConnectorOperationsRequest.t ->
+        (ListConnectorOperationsResponse.t,
+          ListConnectorOperationsResponse.error) Result.t Lwt.t
 val list_connectors :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -60,12 +78,28 @@ val list_custom_plugins :
       ListCustomPluginsRequest.t ->
         (ListCustomPluginsResponse.t, ListCustomPluginsResponse.error)
           Result.t Lwt.t
+val list_tags_for_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTagsForResourceRequest.t ->
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Lwt.t
 val list_worker_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorkerConfigurationsRequest.t ->
         (ListWorkerConfigurationsResponse.t,
           ListWorkerConfigurationsResponse.error) Result.t Lwt.t
+val tag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TagResourceRequest.t ->
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t Lwt.t
+val untag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UntagResourceRequest.t ->
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
 val update_connector :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

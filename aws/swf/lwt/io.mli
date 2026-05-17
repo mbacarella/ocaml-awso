@@ -22,6 +22,14 @@ val count_pending_decision_tasks :
     ?cfg:Awso.Cfg.t ->
       CountPendingDecisionTasksInput.t ->
         (PendingTaskCount.t, PendingTaskCount.error) Result.t Lwt.t
+val delete_activity_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteActivityTypeInput.t -> (unit, unit) Result.t Lwt.t
+val delete_workflow_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteWorkflowTypeInput.t -> (unit, unit) Result.t Lwt.t
 val deprecate_activity_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

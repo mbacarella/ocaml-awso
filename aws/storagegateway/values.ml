@@ -24,6 +24,116 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module CacheReportFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "CacheReportFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:25) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CacheReportFilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module CacheReportFilterName =
+  struct
+    type nonrec t =
+      | UploadState 
+      | UploadFailureReason 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UploadState -> "UploadState"
+      | UploadFailureReason -> "UploadFailureReason"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UploadState" -> UploadState
+      | "UploadFailureReason" -> UploadFailureReason
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CacheReportFilterName" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CacheReportFilterName" j)
+    let to_json = simple_to_json to_value
+  end
+module CacheReportFilterValues =
+  struct
+    type nonrec t = CacheReportFilterValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CacheReportFilterValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CacheReportFilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CacheReportFilterValues"
+        ~of_json:CacheReportFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
 module Boolean__lc1 =
   struct
     type nonrec t = bool
@@ -104,42 +214,6 @@ module TapeSize =
     let of_xml xml_arg0 =
       Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
-    let to_json = simple_to_json to_value
-  end
-module TagKey =
-  struct
-    type nonrec t = string
-    let context_ = "TagKey"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagKey" j
-    let to_json = simple_to_json to_value
-  end
-module TagValue =
-  struct
-    type nonrec t = string
-    let context_ = "TagValue"
-    let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:256); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
 module IPV4Address =
@@ -226,6 +300,67 @@ module DiskAttribute =
     let of_json j = string_of_json ~kind:"DiskAttribute" j
     let to_json = simple_to_json to_value
   end
+module CacheReportFilter =
+  struct
+    type nonrec t =
+      {
+      name: CacheReportFilterName.t
+        [@ocaml.doc
+          "The parameter name for a filter that determines which files are included or excluded from a cache report. Valid Names: UploadFailureReason | UploadState"];
+      values: CacheReportFilterValues.t
+        [@ocaml.doc
+          "The parameter value for a filter that determines which files are included or excluded from a cache report. Valid UploadFailureReason Values: InaccessibleStorageClass | InvalidObjectState | ObjectMissing | S3AccessDenied Valid UploadState Values: FailingUpload"]}
+    let context_ = "CacheReportFilter"
+    let make ~name = fun ~values -> fun () -> { name; values }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (CacheReportFilterName.to_value x.name)));
+        ("Values", (Some (CacheReportFilterValues.to_value x.values)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        CacheReportFilterValues.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Values") in
+      let name =
+        CacheReportFilterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map_exn json__ "Values" CacheReportFilterValues.of_json in
+      let name = field_map_exn json__ "Name" CacheReportFilterName.of_json in
+      make ~values ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list of filter parameters and associated values that determine which files are included or excluded from a cache report created by a StartCacheReport request. Multiple instances of the same filter parameter are combined with an OR operation, while different parameters are combined with an AND operation."]
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t [@ocaml.doc "Tag key. The key can't start with aws:."];
+      value: TagValue.t [@ocaml.doc "Value of the tag key."]}
+    let context_ = "Tag"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (TagKey.to_value x.key)));
+        ("Value", (Some (TagValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A key-value pair that helps you manage, filter, and search for your resource. Allowed characters: letters, white space, and numbers, representable in UTF-8, and the following characters: + - = . _ : /."]
 module AutomaticTapeCreationRule =
   struct
     type nonrec t =
@@ -235,7 +370,7 @@ module AutomaticTapeCreationRule =
           "A prefix that you append to the barcode of the virtual tape that you are creating. This prefix makes the barcode unique. The prefix must be 1-4 characters in length and must be one of the uppercase letters from A to Z."];
       poolId: PoolId.t
         [@ocaml.doc
-          "The ID of the pool that you want to add your tape to for archiving. The tape in this pool is archived in the Amazon S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool. Valid Values: GLACIER | DEEP_ARCHIVE"];
+          "The ID of the pool that you want to add your tape to for archiving. The tape in this pool is archived in the Amazon S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool."];
       tapeSizeInBytes: TapeSize.t
         [@ocaml.doc "The size, in bytes, of the virtual tape capacity."];
       minimumNumTapes: MinimumNumTapes.t
@@ -285,15 +420,15 @@ module AutomaticTapeCreationRule =
       make ?worm ~minimumNumTapes ~tapeSizeInBytes ~poolId ~tapeBarcodePrefix
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let worm = field_map json "Worm" Boolean__lc1.of_json in
+    let of_json json__ =
+      let worm = field_map json__ "Worm" Boolean__lc1.of_json in
       let minimumNumTapes =
-        field_map_exn json "MinimumNumTapes" MinimumNumTapes.of_json in
+        field_map_exn json__ "MinimumNumTapes" MinimumNumTapes.of_json in
       let tapeSizeInBytes =
-        field_map_exn json "TapeSizeInBytes" TapeSize.of_json in
-      let poolId = field_map_exn json "PoolId" PoolId.of_json in
+        field_map_exn json__ "TapeSizeInBytes" TapeSize.of_json in
+      let poolId = field_map_exn json__ "PoolId" PoolId.of_json in
       let tapeBarcodePrefix =
-        field_map_exn json "TapeBarcodePrefix" TapeBarcodePrefix.of_json in
+        field_map_exn json__ "TapeBarcodePrefix" TapeBarcodePrefix.of_json in
       make ?worm ~minimumNumTapes ~tapeSizeInBytes ~poolId ~tapeBarcodePrefix
         ()
     let to_json v = composed_to_json to_value v
@@ -303,12 +438,7 @@ module NetworkInterfaceId =
   struct
     type nonrec t = string
     let context_ = "NetworkInterfaceId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          (check_pattern i
-             ~pattern:"\\A(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}\\z");
-        i
+    let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -378,33 +508,6 @@ module CacheStaleTimeoutInSeconds =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module Tag =
-  struct
-    type nonrec t =
-      {
-      key: TagKey.t [@ocaml.doc "Tag key. The key can't start with aws:."];
-      value: TagValue.t [@ocaml.doc "Value of the tag key."]}
-    let context_ = "Tag"
-    let make ~key = fun ~value -> fun () -> { key; value }
-    let to_value x =
-      structure_to_value
-        [("Key", (Some (TagKey.to_value x.key)));
-        ("Value", (Some (TagValue.to_value x.value)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let value =
-        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
-      let key =
-        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
-      make ~value ~key ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
-      make ~value ~key ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A key-value pair that helps you manage, filter, and search for your resource. Allowed characters: letters, white space, and numbers, representable in UTF-8, and the following characters: + - = . _ : /."]
 module UserListUser =
   struct
     type nonrec t = string
@@ -423,22 +526,22 @@ module UserListUser =
     let of_json j = string_of_json ~kind:"UserListUser" j
     let to_json = simple_to_json to_value
   end
-module IPV4AddressCIDR =
+module Ipv4OrIpv6AddressCIDR =
   struct
     type nonrec t = string
-    let context_ = "IPV4AddressCIDR"
+    let context_ = "Ipv4OrIpv6AddressCIDR"
     let make i =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))?$");
+             ~pattern:"^(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(?:\\/(?:[0-9]|[1-2][0-9]|3[0-2]))?$|^(?:(?:(?:[A-Fa-f0-9]{1,4}:){6}|(?=(?:[A-Fa-f0-9]{0,4}:){0,6}(?:[0-9]{1,3}\\.){3}[0-9]{1,3}(?![:.\\w]))(?:(?:[0-9A-Fa-f]{1,4}:){0,5}|:)(?:(?::[0-9A-Fa-f]{1,4}){1,5}:|:)|::(?:[A-Fa-f0-9]{1,4}:){5})(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?=(?:[A-Fa-f0-9]{0,4}:){0,7}[A-Fa-f0-9]{0,4}(?![:.\\w]))(?:(?:[0-9A-Fa-f]{1,4}:){1,7}|:)(?:(:[0-9A-Fa-f]{1,4}){1,7}|:)|(?:[A-Fa-f0-9]{1,4}:){7}:|:(:[A-Fa-f0-9]{1,4}){7})(?:\\/(?:12[0-8]|1[01][0-9]|[1-9]?[0-9]))?$");
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"IPV4AddressCIDR" j
+    let of_json j = string_of_json ~kind:"Ipv4OrIpv6AddressCIDR" j
     let to_json = simple_to_json to_value
   end
 module PermissionId =
@@ -487,6 +590,9 @@ module IpAddressList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IPV4Address.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -527,9 +633,10 @@ module FileSystemAssociationStatusDetail =
           (Xml.child xml_arg0 "ErrorCode") in
       make ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorCode =
-        field_map json "ErrorCode" FileSystemAssociationSyncErrorCode.of_json in
+        field_map json__ "ErrorCode"
+          FileSystemAssociationSyncErrorCode.of_json in
       make ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detailed information on file system association status."]
@@ -767,6 +874,8 @@ module ErrorDetails =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -810,6 +919,9 @@ module DaysOfWeek =
         ok_or_failwith
           ((check_list_max i ~max:7) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DayOfWeek.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -910,8 +1022,12 @@ module VolumeARN =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:500) >>=
-             (fun () -> check_string_min i ~min:50));
+          ((check_string_min i ~min:50) >>=
+             (fun () ->
+                (check_string_max i ~max:500) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:(aws(|-cn|-us-gov|-iso[A-Za-z0-9_-]*|-eusc)):storagegateway:[a-z\\-0-9]+:[0-9]+:gateway\\/(.+)\\/volume\\/vol-(\\S+)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1000,7 +1116,7 @@ module TapeARN =
                 (check_string_max i ~max:500) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:(aws|aws-cn|aws-us-gov):storagegateway:[a-z\\-0-9]+:[0-9]+:tape\\/[0-9A-Z]{7,16}$")));
+                       ~pattern:"arn:(aws(|-cn|-us-gov|-iso[A-Za-z0-9_-]*|-eusc)):storagegateway:[a-z\\-0-9]+:[0-9]+:tape\\/[0-9A-Z]{5,16}$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1017,7 +1133,7 @@ module TapeBarcode =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:7) >>=
+          ((check_string_min i ~min:5) >>=
              (fun () ->
                 (check_string_max i ~max:16) >>=
                   (fun () -> check_pattern i ~pattern:"^[A-Z0-9]*$")));
@@ -1222,6 +1338,9 @@ module DiskAttributeList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DiskAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1258,6 +1377,24 @@ module DiskId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"DiskId" j
+    let to_json = simple_to_json to_value
+  end
+module DeprecationDate =
+  struct
+    type nonrec t = string
+    let context_ = "DeprecationDate"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:25) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeprecationDate" j
     let to_json = simple_to_json to_value
   end
 module Ec2InstanceId =
@@ -1375,6 +1512,19 @@ module HostEnvironmentId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"HostEnvironmentId" j
+    let to_json = simple_to_json to_value
+  end
+module SoftwareVersion =
+  struct
+    type nonrec t = string
+    let context_ = "SoftwareVersion"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SoftwareVersion" j
     let to_json = simple_to_json to_value
   end
 module FileSystemAssociationARN =
@@ -1507,6 +1657,194 @@ module FileShareType =
     let of_json j = of_string (string_of_json ~kind:"FileShareType" j)
     let to_json = simple_to_json to_value
   end
+module CacheReportARN =
+  struct
+    type nonrec t = string
+    let context_ = "CacheReportARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:500) >>=
+             (fun () -> check_string_min i ~min:50));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CacheReportARN" j
+    let to_json = simple_to_json to_value
+  end
+module CacheReportFilterList =
+  struct
+    type nonrec t = CacheReportFilter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CacheReportFilter.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CacheReportFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CacheReportFilterList"
+        ~of_json:CacheReportFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CacheReportName =
+  struct
+    type nonrec t = string
+    let context_ = "CacheReportName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CacheReportName" j
+    let to_json = simple_to_json to_value
+  end
+module CacheReportStatus =
+  struct
+    type nonrec t =
+      | IN_PROGRESS 
+      | COMPLETED 
+      | CANCELED 
+      | FAILED 
+      | ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | COMPLETED -> "COMPLETED"
+      | CANCELED -> "CANCELED"
+      | FAILED -> "FAILED"
+      | ERROR -> "ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "COMPLETED" -> COMPLETED
+      | "CANCELED" -> CANCELED
+      | "FAILED" -> FAILED
+      | "ERROR" -> ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CacheReportStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CacheReportStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module LocationARN =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "A custom ARN for the backend storage used for storing data for file shares. It includes a resource ARN with an optional prefix concatenation. The prefix must end with a forward slash (/). You can specify LocationARN as a bucket ARN, access point ARN or access point alias, as shown in the following examples. Bucket ARN: arn:aws:s3:::amzn-s3-demo-bucket/prefix/ Access point ARN: arn:aws:s3:region:account-id:accesspoint/access-point-name/prefix/ If you specify an access point, the bucket policy must be configured to delegate access control to the access point. For information, see Delegating access control to access points in the Amazon S3 User Guide. Access point alias: test-ap-ab123cdef4gehijklmn5opqrstuvuse1a-s3alias"]
+    let context_ = "LocationARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1400) >>=
+             (fun () -> check_string_min i ~min:16));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LocationARN" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "A custom ARN for the backend storage used for storing data for file shares. It includes a resource ARN with an optional prefix concatenation. The prefix must end with a forward slash (/). You can specify LocationARN as a bucket ARN, access point ARN or access point alias, as shown in the following examples. Bucket ARN: arn:aws:s3:::amzn-s3-demo-bucket/prefix/ Access point ARN: arn:aws:s3:region:account-id:accesspoint/access-point-name/prefix/ If you specify an access point, the bucket policy must be configured to delegate access control to the access point. For information, see Delegating access control to access points in the Amazon S3 User Guide. Access point alias: test-ap-ab123cdef4gehijklmn5opqrstuvuse1a-s3alias"]
+module ReportCompletionPercent =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ReportCompletionPercent"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Role =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The ARN of the IAM role that an S3 File Gateway assumes when it accesses the underlying storage."]
+    let context_ = "Role"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:(aws(|-cn|-us-gov|-iso[A-Za-z0-9_-]*|-eusc)):iam::([0-9]+):role/(\\S+)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Role" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The ARN of the IAM role that an S3 File Gateway assumes when it accesses the underlying storage."]
+module Tags =
+  struct
+    type nonrec t = Tag.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"Tags" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AutomaticTapeCreationRules =
   struct
     type nonrec t = AutomaticTapeCreationRule.t list
@@ -1515,6 +1853,9 @@ module AutomaticTapeCreationRules =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutomaticTapeCreationRule.to_value)) |>
         (fun x -> `List x)
@@ -1587,13 +1928,13 @@ module DeviceiSCSIAttributes =
       make ?chapEnabled ?networkInterfacePort ?networkInterfaceId ?targetARN
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chapEnabled = field_map json "ChapEnabled" Boolean__lc1.of_json in
+    let of_json json__ =
+      let chapEnabled = field_map json__ "ChapEnabled" Boolean__lc1.of_json in
       let networkInterfacePort =
-        field_map json "NetworkInterfacePort" Integer.of_json in
+        field_map json__ "NetworkInterfacePort" Integer.of_json in
       let networkInterfaceId =
-        field_map json "NetworkInterfaceId" NetworkInterfaceId.of_json in
-      let targetARN = field_map json "TargetARN" TargetARN.of_json in
+        field_map json__ "NetworkInterfaceId" NetworkInterfaceId.of_json in
+      let targetARN = field_map json__ "TargetARN" TargetARN.of_json in
       make ?chapEnabled ?networkInterfacePort ?networkInterfaceId ?targetARN
         ()
     let to_json v = composed_to_json to_value v
@@ -1671,7 +2012,7 @@ module DoubleObject =
 module KMSKey =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value can only be set when KMSEncrypted is true. Optional."]
+                            "Optional. The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value must be set if KMSEncrypted is true, or if EncryptionType is SseKms or DsseKms."]
     let context_ = "KMSKey"
     let make i =
       let open Result in
@@ -1681,7 +2022,7 @@ module KMSKey =
                 (check_string_max i ~max:2048) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"(^arn:(aws|aws-cn|aws-us-gov):kms:([a-zA-Z0-9-]+):([0-9]+):(key|alias)/(\\S+)$)|(^alias/(\\S+)$)")));
+                       ~pattern:"(^arn:(aws(|-cn|-us-gov|-iso[A-Za-z0-9_-]*|-eusc)):kms:([a-zA-Z0-9-]+):([0-9]+):(key|alias)/(\\S+)$)|(^alias/(\\S+)$)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1691,7 +2032,7 @@ module KMSKey =
     let of_json j = string_of_json ~kind:"KMSKey" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value can only be set when KMSEncrypted is true. Optional."]
+       "Optional. The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value must be set if KMSEncrypted is true, or if EncryptionType is SseKms or DsseKms."]
 module TapeUsage =
   struct
     type nonrec t = Int64.t
@@ -1868,14 +2209,14 @@ module VolumeiSCSIAttributes =
       make ?chapEnabled ?lunNumber ?networkInterfacePort ?networkInterfaceId
         ?targetARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chapEnabled = field_map json "ChapEnabled" Boolean__lc1.of_json in
-      let lunNumber = field_map json "LunNumber" PositiveIntObject.of_json in
+    let of_json json__ =
+      let chapEnabled = field_map json__ "ChapEnabled" Boolean__lc1.of_json in
+      let lunNumber = field_map json__ "LunNumber" PositiveIntObject.of_json in
       let networkInterfacePort =
-        field_map json "NetworkInterfacePort" Integer.of_json in
+        field_map json__ "NetworkInterfacePort" Integer.of_json in
       let networkInterfaceId =
-        field_map json "NetworkInterfaceId" NetworkInterfaceId.of_json in
-      let targetARN = field_map json "TargetARN" TargetARN.of_json in
+        field_map json__ "NetworkInterfaceId" NetworkInterfaceId.of_json in
+      let targetARN = field_map json__ "TargetARN" TargetARN.of_json in
       make ?chapEnabled ?lunNumber ?networkInterfacePort ?networkInterfaceId
         ?targetARN ()
     let to_json v = composed_to_json to_value v
@@ -1948,9 +2289,9 @@ module CacheAttributes =
           (Xml.child xml_arg0 "CacheStaleTimeoutInSeconds") in
       make ?cacheStaleTimeoutInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheStaleTimeoutInSeconds =
-        field_map json "CacheStaleTimeoutInSeconds"
+        field_map json__ "CacheStaleTimeoutInSeconds"
           CacheStaleTimeoutInSeconds.of_json in
       make ?cacheStaleTimeoutInSeconds ()
     let to_json v = composed_to_json to_value v
@@ -2003,6 +2344,34 @@ module DNSHostName =
     let of_json j = string_of_json ~kind:"DNSHostName" j
     let to_json = simple_to_json to_value
   end
+module EncryptionType =
+  struct
+    type nonrec t =
+      | SseS3 
+      | SseKms 
+      | DsseKms 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SseS3 -> "SseS3"
+      | SseKms -> "SseKms"
+      | DsseKms -> "DsseKms"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SseS3" -> SseS3
+      | "SseKms" -> SseKms
+      | "DsseKms" -> DsseKms
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EncryptionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EncryptionType" j)
+    let to_json = simple_to_json to_value
+  end
 module FileShareName =
   struct
     type nonrec t = string
@@ -2021,26 +2390,6 @@ module FileShareName =
     let of_json j = string_of_json ~kind:"FileShareName" j
     let to_json = simple_to_json to_value
   end
-module LocationARN =
-  struct
-    type nonrec t = string[@@ocaml.doc
-                            "A custom ARN for the backend storage used for storing data for file shares. It includes a resource ARN with an optional prefix concatenation. The prefix must end with a forward slash (/). You can specify LocationARN as a bucket ARN, access point ARN or access point alias, as shown in the following examples. Bucket ARN: arn:aws:s3:::my-bucket/prefix/ Access point ARN: arn:aws:s3:region:account-id:accesspoint/access-point-name/prefix/ If you specify an access point, the bucket policy must be configured to delegate access control to the access point. For information, see Delegating access control to access points in the Amazon S3 User Guide. Access point alias: test-ap-ab123cdef4gehijklmn5opqrstuvuse1a-s3alias"]
-    let context_ = "LocationARN"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1400) >>=
-             (fun () -> check_string_min i ~min:16));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"LocationARN" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "A custom ARN for the backend storage used for storing data for file shares. It includes a resource ARN with an optional prefix concatenation. The prefix must end with a forward slash (/). You can specify LocationARN as a bucket ARN, access point ARN or access point alias, as shown in the following examples. Bucket ARN: arn:aws:s3:::my-bucket/prefix/ Access point ARN: arn:aws:s3:region:account-id:accesspoint/access-point-name/prefix/ If you specify an access point, the bucket policy must be configured to delegate access control to the access point. For information, see Delegating access control to access points in the Amazon S3 User Guide. Access point alias: test-ap-ab123cdef4gehijklmn5opqrstuvuse1a-s3alias"]
 module NotificationPolicy =
   struct
     type nonrec t = string
@@ -2136,30 +2485,6 @@ module RegionId =
     let of_json j = string_of_json ~kind:"RegionId" j
     let to_json = simple_to_json to_value
   end
-module Role =
-  struct
-    type nonrec t = string[@@ocaml.doc
-                            "The ARN of the IAM role that an S3 File Gateway assumes when it accesses the underlying storage."]
-    let context_ = "Role"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:20) >>=
-             (fun () ->
-                (check_string_max i ~max:2048) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^arn:(aws|aws-cn|aws-us-gov):iam::([0-9]+):role/(\\S+)$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Role" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "The ARN of the IAM role that an S3 File Gateway assumes when it accesses the underlying storage."]
 module StorageClass =
   struct
     type nonrec t = string
@@ -2178,29 +2503,6 @@ module StorageClass =
     let of_json j = string_of_json ~kind:"StorageClass" j
     let to_json = simple_to_json to_value
   end
-module Tags =
-  struct
-    type nonrec t = Tag.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Tag.of_xml)
-    let of_json j = list_of_json ~kind:"Tags" ~of_json:Tag.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module UserList =
   struct
     type nonrec t = UserListUser.t list
@@ -2210,6 +2512,9 @@ module UserList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UserListUser.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2232,15 +2537,19 @@ module UserList =
   end
 module FileShareClientList =
   struct
-    type nonrec t = IPV4AddressCIDR.t list
+    type nonrec t = Ipv4OrIpv6AddressCIDR.t list
     let make i =
       let open Result in
         ok_or_failwith
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:IPV4AddressCIDR.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:Ipv4OrIpv6AddressCIDR.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -2254,10 +2563,10 @@ module FileShareClientList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:IPV4AddressCIDR.of_xml)
+                     | _ -> true))) ~f:Ipv4OrIpv6AddressCIDR.of_xml)
     let of_json j =
       list_of_json ~kind:"FileShareClientList"
-        ~of_json:IPV4AddressCIDR.of_json j
+        ~of_json:Ipv4OrIpv6AddressCIDR.of_json j
     let to_json v = composed_to_json to_value v
   end
 module NFSFileShareDefaults =
@@ -2301,12 +2610,12 @@ module NFSFileShareDefaults =
         (Option.map ~f:PermissionMode.of_xml) (Xml.child xml_arg0 "FileMode") in
       make ?ownerId ?groupId ?directoryMode ?fileMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ownerId = field_map json "OwnerId" PermissionId.of_json in
-      let groupId = field_map json "GroupId" PermissionId.of_json in
+    let of_json json__ =
+      let ownerId = field_map json__ "OwnerId" PermissionId.of_json in
+      let groupId = field_map json__ "GroupId" PermissionId.of_json in
       let directoryMode =
-        field_map json "DirectoryMode" PermissionMode.of_json in
-      let fileMode = field_map json "FileMode" PermissionMode.of_json in
+        field_map json__ "DirectoryMode" PermissionMode.of_json in
+      let fileMode = field_map json__ "FileMode" PermissionMode.of_json in
       make ?ownerId ?groupId ?directoryMode ?fileMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2350,8 +2659,8 @@ module EndpointNetworkConfiguration =
           (Xml.child xml_arg0 "IpAddresses") in
       make ?ipAddresses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipAddresses = field_map json "IpAddresses" IpAddressList.of_json in
+    let of_json json__ =
+      let ipAddresses = field_map json__ "IpAddresses" IpAddressList.of_json in
       make ?ipAddresses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2360,6 +2669,9 @@ module FileSystemAssociationStatusDetails =
   struct
     type nonrec t = FileSystemAssociationStatusDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FileSystemAssociationStatusDetail.to_value)) |>
         (fun x -> `List x)
@@ -2464,13 +2776,40 @@ module StorageGatewayError =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "errorCode") in
       make ?errorDetails ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorDetails = field_map json "errorDetails" ErrorDetails.of_json in
-      let errorCode = field_map json "errorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let errorDetails = field_map json__ "errorDetails" ErrorDetails.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
       make ?errorDetails ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides additional information about an error that was returned by the service. See the errorCode and errorDetails members for more information about the error."]
+module AutomaticUpdatePolicy =
+  struct
+    type nonrec t =
+      | ALL_VERSIONS 
+      | EMERGENCY_VERSIONS_ONLY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALL_VERSIONS -> "ALL_VERSIONS"
+      | EMERGENCY_VERSIONS_ONLY -> "EMERGENCY_VERSIONS_ONLY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALL_VERSIONS" -> ALL_VERSIONS
+      | "EMERGENCY_VERSIONS_ONLY" -> EMERGENCY_VERSIONS_ONLY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AutomaticUpdatePolicy" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AutomaticUpdatePolicy" j)
+    let to_json = simple_to_json to_value
+  end
 module BandwidthRateLimitInterval =
   struct
     type nonrec t =
@@ -2492,11 +2831,11 @@ module BandwidthRateLimitInterval =
           "The days of the week component of the bandwidth rate limit interval, represented as ordinal numbers from 0 to 6, where 0 represents Sunday and 6 represents Saturday."];
       averageUploadRateLimitInBitsPerSec: BandwidthUploadRateLimit.t option
         [@ocaml.doc
-          "The average upload rate limit component of the bandwidth rate limit interval, in bits per second. This field does not appear in the response if the upload rate limit is not set."];
+          "The average upload rate limit component of the bandwidth rate limit interval, in bits per second. This field does not appear in the response if the upload rate limit is not set. For Tape Gateway and Volume Gateway, the minimum value is 51200. This field is required for S3 File Gateway, and the minimum value is 104857600."];
       averageDownloadRateLimitInBitsPerSec:
         BandwidthDownloadRateLimit.t option
         [@ocaml.doc
-          "The average download rate limit component of the bandwidth rate limit interval, in bits per second. This field does not appear in the response if the download rate limit is not set."]}
+          "The average download rate limit component of the bandwidth rate limit interval, in bits per second. This field does not appear in the response if the download rate limit is not set. S3 File Gateway does not support this feature."]}
     let context_ = "BandwidthRateLimitInterval"
     let make ?averageUploadRateLimitInBitsPerSec =
       fun ?averageDownloadRateLimitInBitsPerSec ->
@@ -2556,27 +2895,28 @@ module BandwidthRateLimitInterval =
         ?averageUploadRateLimitInBitsPerSec ~daysOfWeek ~endMinuteOfHour
         ~endHourOfDay ~startMinuteOfHour ~startHourOfDay ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let averageDownloadRateLimitInBitsPerSec =
-        field_map json "AverageDownloadRateLimitInBitsPerSec"
+        field_map json__ "AverageDownloadRateLimitInBitsPerSec"
           BandwidthDownloadRateLimit.of_json in
       let averageUploadRateLimitInBitsPerSec =
-        field_map json "AverageUploadRateLimitInBitsPerSec"
+        field_map json__ "AverageUploadRateLimitInBitsPerSec"
           BandwidthUploadRateLimit.of_json in
-      let daysOfWeek = field_map_exn json "DaysOfWeek" DaysOfWeek.of_json in
+      let daysOfWeek = field_map_exn json__ "DaysOfWeek" DaysOfWeek.of_json in
       let endMinuteOfHour =
-        field_map_exn json "EndMinuteOfHour" MinuteOfHour.of_json in
-      let endHourOfDay = field_map_exn json "EndHourOfDay" HourOfDay.of_json in
+        field_map_exn json__ "EndMinuteOfHour" MinuteOfHour.of_json in
+      let endHourOfDay =
+        field_map_exn json__ "EndHourOfDay" HourOfDay.of_json in
       let startMinuteOfHour =
-        field_map_exn json "StartMinuteOfHour" MinuteOfHour.of_json in
+        field_map_exn json__ "StartMinuteOfHour" MinuteOfHour.of_json in
       let startHourOfDay =
-        field_map_exn json "StartHourOfDay" HourOfDay.of_json in
+        field_map_exn json__ "StartHourOfDay" HourOfDay.of_json in
       make ?averageDownloadRateLimitInBitsPerSec
         ?averageUploadRateLimitInBitsPerSec ~daysOfWeek ~endMinuteOfHour
         ~endHourOfDay ~startMinuteOfHour ~startHourOfDay ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes a bandwidth rate limit interval for a gateway. A bandwidth rate limit schedule consists of one or more bandwidth rate limit intervals. A bandwidth rate limit interval defines a period of time on one or more days of the week, during which bandwidth rate limits are specified for uploading, downloading, or both."]
+       "Describes a bandwidth rate limit interval for a gateway. A bandwidth rate limit schedule consists of one or more bandwidth rate limit intervals. A bandwidth rate limit interval defines a period of time on one or more days of the week, during which bandwidth rate limits are specified for uploading, downloading, or both. FSx File Gateway does not support this feature."]
 module Folder =
   struct
     type nonrec t = string
@@ -2667,16 +3007,17 @@ module VolumeInfo =
       make ?volumeAttachmentStatus ?volumeSizeInBytes ?volumeType ?gatewayId
         ?gatewayARN ?volumeId ?volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let volumeAttachmentStatus =
-        field_map json "VolumeAttachmentStatus"
+        field_map json__ "VolumeAttachmentStatus"
           VolumeAttachmentStatus.of_json in
-      let volumeSizeInBytes = field_map json "VolumeSizeInBytes" Long.of_json in
-      let volumeType = field_map json "VolumeType" VolumeType.of_json in
-      let gatewayId = field_map json "GatewayId" GatewayId.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
-      let volumeId = field_map json "VolumeId" VolumeId.of_json in
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
+      let volumeSizeInBytes =
+        field_map json__ "VolumeSizeInBytes" Long.of_json in
+      let volumeType = field_map json__ "VolumeType" VolumeType.of_json in
+      let gatewayId = field_map json__ "GatewayId" GatewayId.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
+      let volumeId = field_map json__ "VolumeId" VolumeId.of_json in
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
       make ?volumeAttachmentStatus ?volumeSizeInBytes ?volumeType ?gatewayId
         ?gatewayARN ?volumeId ?volumeARN ()
     let to_json v = composed_to_json to_value v
@@ -2728,13 +3069,14 @@ module VolumeRecoveryPointInfo =
       make ?volumeRecoveryPointTime ?volumeUsageInBytes ?volumeSizeInBytes
         ?volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let volumeRecoveryPointTime =
-        field_map json "VolumeRecoveryPointTime" String_.of_json in
+        field_map json__ "VolumeRecoveryPointTime" String_.of_json in
       let volumeUsageInBytes =
-        field_map json "VolumeUsageInBytes" Long.of_json in
-      let volumeSizeInBytes = field_map json "VolumeSizeInBytes" Long.of_json in
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
+        field_map json__ "VolumeUsageInBytes" Long.of_json in
+      let volumeSizeInBytes =
+        field_map json__ "VolumeSizeInBytes" Long.of_json in
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
       make ?volumeRecoveryPointTime ?volumeUsageInBytes ?volumeSizeInBytes
         ?volumeARN ()
     let to_json v = composed_to_json to_value v
@@ -2773,7 +3115,7 @@ module TapeInfo =
           "The Amazon Resource Name (ARN) of the gateway. Use the ListGateways operation to return a list of gateways for your account and Amazon Web Services Region."];
       poolId: PoolId.t option
         [@ocaml.doc
-          "The ID of the pool that you want to add your tape to for archiving. The tape in this pool is archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool. Valid Values: GLACIER | DEEP_ARCHIVE"];
+          "The ID of the pool that you want to add your tape to for archiving. The tape in this pool is archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool."];
       retentionStartDate: Time.t option
         [@ocaml.doc
           "The date that the tape became subject to tape retention lock."];
@@ -2833,16 +3175,17 @@ module TapeInfo =
       make ?poolEntryDate ?retentionStartDate ?poolId ?gatewayARN ?tapeStatus
         ?tapeSizeInBytes ?tapeBarcode ?tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let poolEntryDate = field_map json "PoolEntryDate" Time.of_json in
+    let of_json json__ =
+      let poolEntryDate = field_map json__ "PoolEntryDate" Time.of_json in
       let retentionStartDate =
-        field_map json "RetentionStartDate" Time.of_json in
-      let poolId = field_map json "PoolId" PoolId.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
-      let tapeStatus = field_map json "TapeStatus" TapeStatus.of_json in
-      let tapeSizeInBytes = field_map json "TapeSizeInBytes" TapeSize.of_json in
-      let tapeBarcode = field_map json "TapeBarcode" TapeBarcode.of_json in
-      let tapeARN = field_map json "TapeARN" TapeARN.of_json in
+        field_map json__ "RetentionStartDate" Time.of_json in
+      let poolId = field_map json__ "PoolId" PoolId.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
+      let tapeStatus = field_map json__ "TapeStatus" TapeStatus.of_json in
+      let tapeSizeInBytes =
+        field_map json__ "TapeSizeInBytes" TapeSize.of_json in
+      let tapeBarcode = field_map json__ "TapeBarcode" TapeBarcode.of_json in
+      let tapeARN = field_map json__ "TapeARN" TapeARN.of_json in
       make ?poolEntryDate ?retentionStartDate ?poolId ?gatewayARN ?tapeStatus
         ?tapeSizeInBytes ?tapeBarcode ?tapeARN ()
     let to_json v = composed_to_json to_value v
@@ -2916,17 +3259,17 @@ module PoolInfo =
       make ?poolStatus ?retentionLockTimeInDays ?retentionLockType
         ?storageClass ?poolName ?poolARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let poolStatus = field_map json "PoolStatus" PoolStatus.of_json in
+    let of_json json__ =
+      let poolStatus = field_map json__ "PoolStatus" PoolStatus.of_json in
       let retentionLockTimeInDays =
-        field_map json "RetentionLockTimeInDays"
+        field_map json__ "RetentionLockTimeInDays"
           RetentionLockTimeInDays.of_json in
       let retentionLockType =
-        field_map json "RetentionLockType" RetentionLockType.of_json in
+        field_map json__ "RetentionLockType" RetentionLockType.of_json in
       let storageClass =
-        field_map json "StorageClass" TapeStorageClass.of_json in
-      let poolName = field_map json "PoolName" PoolName.of_json in
-      let poolARN = field_map json "PoolARN" PoolARN.of_json in
+        field_map json__ "StorageClass" TapeStorageClass.of_json in
+      let poolName = field_map json__ "PoolName" PoolName.of_json in
+      let poolARN = field_map json__ "PoolARN" PoolARN.of_json in
       make ?poolStatus ?retentionLockTimeInDays ?retentionLockType
         ?storageClass ?poolName ?poolARN ()
     let to_json v = composed_to_json to_value v
@@ -3009,18 +3352,18 @@ module Disk =
       make ?diskAttributeList ?diskAllocationResource ?diskAllocationType
         ?diskSizeInBytes ?diskStatus ?diskNode ?diskPath ?diskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let diskAttributeList =
-        field_map json "DiskAttributeList" DiskAttributeList.of_json in
+        field_map json__ "DiskAttributeList" DiskAttributeList.of_json in
       let diskAllocationResource =
-        field_map json "DiskAllocationResource" String_.of_json in
+        field_map json__ "DiskAllocationResource" String_.of_json in
       let diskAllocationType =
-        field_map json "DiskAllocationType" DiskAllocationType.of_json in
-      let diskSizeInBytes = field_map json "DiskSizeInBytes" Long.of_json in
-      let diskStatus = field_map json "DiskStatus" String_.of_json in
-      let diskNode = field_map json "DiskNode" String_.of_json in
-      let diskPath = field_map json "DiskPath" String_.of_json in
-      let diskId = field_map json "DiskId" DiskId.of_json in
+        field_map json__ "DiskAllocationType" DiskAllocationType.of_json in
+      let diskSizeInBytes = field_map json__ "DiskSizeInBytes" Long.of_json in
+      let diskStatus = field_map json__ "DiskStatus" String_.of_json in
+      let diskNode = field_map json__ "DiskNode" String_.of_json in
+      let diskPath = field_map json__ "DiskPath" String_.of_json in
+      let diskId = field_map json__ "DiskId" DiskId.of_json in
       make ?diskAttributeList ?diskAllocationResource ?diskAllocationType
         ?diskSizeInBytes ?diskStatus ?diskNode ?diskPath ?diskId ()
     let to_json v = composed_to_json to_value v
@@ -3036,7 +3379,8 @@ module GatewayInfo =
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the gateway. Use the ListGateways operation to return a list of gateways for your account and Amazon Web Services Region."];
       gatewayType: GatewayType.t option
-        [@ocaml.doc "The type of the gateway."];
+        [@ocaml.doc
+          "The type of the gateway. Amazon FSx File Gateway is no longer available to new customers. Existing customers of FSx File Gateway can continue to use the service normally. For capabilities similar to FSx File Gateway, visit this blog post."];
       gatewayOperationalState: GatewayOperationalState.t option
         [@ocaml.doc
           "The state of the gateway. Valid Values: DISABLED | ACTIVE"];
@@ -3049,10 +3393,16 @@ module GatewayInfo =
           "The Amazon Web Services Region where the Amazon EC2 instance is located."];
       hostEnvironment: HostEnvironment.t option
         [@ocaml.doc
-          "The type of hardware or software platform on which the gateway is running."];
+          "The type of hardware or software platform on which the gateway is running. Tape Gateway is no longer available on Snow Family devices."];
       hostEnvironmentId: HostEnvironmentId.t option
         [@ocaml.doc
-          "A unique identifier for the specific instance of the host platform running the gateway. This value is only available for certain host environments, and its format depends on the host environment type."]}
+          "A unique identifier for the specific instance of the host platform running the gateway. This value is only available for certain host environments, and its format depends on the host environment type."];
+      deprecationDate: DeprecationDate.t option
+        [@ocaml.doc
+          "Date after which this gateway will not receive software updates for new features and bug fixes."];
+      softwareVersion: SoftwareVersion.t option
+        [@ocaml.doc
+          "The version number of the software running on the gateway appliance."]}
     let make ?gatewayId =
       fun ?gatewayARN ->
         fun ?gatewayType ->
@@ -3062,18 +3412,22 @@ module GatewayInfo =
                 fun ?ec2InstanceRegion ->
                   fun ?hostEnvironment ->
                     fun ?hostEnvironmentId ->
-                      fun () ->
-                        {
-                          gatewayId;
-                          gatewayARN;
-                          gatewayType;
-                          gatewayOperationalState;
-                          gatewayName;
-                          ec2InstanceId;
-                          ec2InstanceRegion;
-                          hostEnvironment;
-                          hostEnvironmentId
-                        }
+                      fun ?deprecationDate ->
+                        fun ?softwareVersion ->
+                          fun () ->
+                            {
+                              gatewayId;
+                              gatewayARN;
+                              gatewayType;
+                              gatewayOperationalState;
+                              gatewayName;
+                              ec2InstanceId;
+                              ec2InstanceRegion;
+                              hostEnvironment;
+                              hostEnvironmentId;
+                              deprecationDate;
+                              softwareVersion
+                            }
     let to_value x =
       structure_to_value
         [("GatewayId", (Option.map x.gatewayId ~f:GatewayId.to_value));
@@ -3090,9 +3444,19 @@ module GatewayInfo =
         ("HostEnvironment",
           (Option.map x.hostEnvironment ~f:HostEnvironment.to_value));
         ("HostEnvironmentId",
-          (Option.map x.hostEnvironmentId ~f:HostEnvironmentId.to_value))]
+          (Option.map x.hostEnvironmentId ~f:HostEnvironmentId.to_value));
+        ("DeprecationDate",
+          (Option.map x.deprecationDate ~f:DeprecationDate.to_value));
+        ("SoftwareVersion",
+          (Option.map x.softwareVersion ~f:SoftwareVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let softwareVersion =
+        (Option.map ~f:SoftwareVersion.of_xml)
+          (Xml.child xml_arg0 "SoftwareVersion") in
+      let deprecationDate =
+        (Option.map ~f:DeprecationDate.of_xml)
+          (Xml.child xml_arg0 "DeprecationDate") in
       let hostEnvironmentId =
         (Option.map ~f:HostEnvironmentId.of_xml)
           (Xml.child xml_arg0 "HostEnvironmentId") in
@@ -3116,29 +3480,33 @@ module GatewayInfo =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       let gatewayId =
         (Option.map ~f:GatewayId.of_xml) (Xml.child xml_arg0 "GatewayId") in
-      make ?hostEnvironmentId ?hostEnvironment ?ec2InstanceRegion
-        ?ec2InstanceId ?gatewayName ?gatewayOperationalState ?gatewayType
-        ?gatewayARN ?gatewayId ()
+      make ?softwareVersion ?deprecationDate ?hostEnvironmentId
+        ?hostEnvironment ?ec2InstanceRegion ?ec2InstanceId ?gatewayName
+        ?gatewayOperationalState ?gatewayType ?gatewayARN ?gatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let softwareVersion =
+        field_map json__ "SoftwareVersion" SoftwareVersion.of_json in
+      let deprecationDate =
+        field_map json__ "DeprecationDate" DeprecationDate.of_json in
       let hostEnvironmentId =
-        field_map json "HostEnvironmentId" HostEnvironmentId.of_json in
+        field_map json__ "HostEnvironmentId" HostEnvironmentId.of_json in
       let hostEnvironment =
-        field_map json "HostEnvironment" HostEnvironment.of_json in
+        field_map json__ "HostEnvironment" HostEnvironment.of_json in
       let ec2InstanceRegion =
-        field_map json "Ec2InstanceRegion" Ec2InstanceRegion.of_json in
+        field_map json__ "Ec2InstanceRegion" Ec2InstanceRegion.of_json in
       let ec2InstanceId =
-        field_map json "Ec2InstanceId" Ec2InstanceId.of_json in
-      let gatewayName = field_map json "GatewayName" String_.of_json in
+        field_map json__ "Ec2InstanceId" Ec2InstanceId.of_json in
+      let gatewayName = field_map json__ "GatewayName" String_.of_json in
       let gatewayOperationalState =
-        field_map json "GatewayOperationalState"
+        field_map json__ "GatewayOperationalState"
           GatewayOperationalState.of_json in
-      let gatewayType = field_map json "GatewayType" GatewayType.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
-      let gatewayId = field_map json "GatewayId" GatewayId.of_json in
-      make ?hostEnvironmentId ?hostEnvironment ?ec2InstanceRegion
-        ?ec2InstanceId ?gatewayName ?gatewayOperationalState ?gatewayType
-        ?gatewayARN ?gatewayId ()
+      let gatewayType = field_map json__ "GatewayType" GatewayType.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
+      let gatewayId = field_map json__ "GatewayId" GatewayId.of_json in
+      make ?softwareVersion ?deprecationDate ?hostEnvironmentId
+        ?hostEnvironment ?ec2InstanceRegion ?ec2InstanceId ?gatewayName
+        ?gatewayOperationalState ?gatewayType ?gatewayARN ?gatewayId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a gateway object."]
 module FileSystemAssociationSummary =
@@ -3193,16 +3561,16 @@ module FileSystemAssociationSummary =
       make ?gatewayARN ?fileSystemAssociationStatus ?fileSystemAssociationARN
         ?fileSystemAssociationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       let fileSystemAssociationStatus =
-        field_map json "FileSystemAssociationStatus"
+        field_map json__ "FileSystemAssociationStatus"
           FileSystemAssociationStatus.of_json in
       let fileSystemAssociationARN =
-        field_map json "FileSystemAssociationARN"
+        field_map json__ "FileSystemAssociationARN"
           FileSystemAssociationARN.of_json in
       let fileSystemAssociationId =
-        field_map json "FileSystemAssociationId"
+        field_map json__ "FileSystemAssociationId"
           FileSystemAssociationId.of_json in
       make ?gatewayARN ?fileSystemAssociationStatus ?fileSystemAssociationARN
         ?fileSystemAssociationId ()
@@ -3259,18 +3627,160 @@ module FileShareInfo =
       make ?gatewayARN ?fileShareStatus ?fileShareId ?fileShareARN
         ?fileShareType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       let fileShareStatus =
-        field_map json "FileShareStatus" FileShareStatus.of_json in
-      let fileShareId = field_map json "FileShareId" FileShareId.of_json in
-      let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
+        field_map json__ "FileShareStatus" FileShareStatus.of_json in
+      let fileShareId = field_map json__ "FileShareId" FileShareId.of_json in
+      let fileShareARN = field_map json__ "FileShareARN" FileShareARN.of_json in
       let fileShareType =
-        field_map json "FileShareType" FileShareType.of_json in
+        field_map json__ "FileShareType" FileShareType.of_json in
       make ?gatewayARN ?fileShareStatus ?fileShareId ?fileShareARN
         ?fileShareType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a file share. Only supported S3 File Gateway."]
+module CacheReportInfo =
+  struct
+    type nonrec t =
+      {
+      cacheReportARN: CacheReportARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the cache report you want to describe."];
+      cacheReportStatus: CacheReportStatus.t option
+        [@ocaml.doc "The status of the specified cache report."];
+      reportCompletionPercent: ReportCompletionPercent.t option
+        [@ocaml.doc
+          "The percentage of the report generation process that has been completed at time of inquiry."];
+      endTime: Time.t option
+        [@ocaml.doc
+          "The time at which the gateway stopped generating the cache report."];
+      role: Role.t option ;
+      fileShareARN: FileShareARN.t option ;
+      locationARN: LocationARN.t option
+        [@ocaml.doc
+          "The ARN of the Amazon S3 bucket location where the cache report is saved."];
+      startTime: Time.t option
+        [@ocaml.doc
+          "The time at which the gateway started generating the cache report."];
+      inclusionFilters: CacheReportFilterList.t option
+        [@ocaml.doc
+          "The list of filters and parameters that determine which files are included in the report."];
+      exclusionFilters: CacheReportFilterList.t option
+        [@ocaml.doc
+          "The list of filters and parameters that determine which files are excluded from the report."];
+      reportName: CacheReportName.t option
+        [@ocaml.doc
+          "The file name of the completed cache report object stored in Amazon S3."];
+      tags: Tags.t option
+        [@ocaml.doc "The list of key/value tags associated with the report."]}
+    let make ?cacheReportARN =
+      fun ?cacheReportStatus ->
+        fun ?reportCompletionPercent ->
+          fun ?endTime ->
+            fun ?role ->
+              fun ?fileShareARN ->
+                fun ?locationARN ->
+                  fun ?startTime ->
+                    fun ?inclusionFilters ->
+                      fun ?exclusionFilters ->
+                        fun ?reportName ->
+                          fun ?tags ->
+                            fun () ->
+                              {
+                                cacheReportARN;
+                                cacheReportStatus;
+                                reportCompletionPercent;
+                                endTime;
+                                role;
+                                fileShareARN;
+                                locationARN;
+                                startTime;
+                                inclusionFilters;
+                                exclusionFilters;
+                                reportName;
+                                tags
+                              }
+    let to_value x =
+      structure_to_value
+        [("CacheReportARN",
+           (Option.map x.cacheReportARN ~f:CacheReportARN.to_value));
+        ("CacheReportStatus",
+          (Option.map x.cacheReportStatus ~f:CacheReportStatus.to_value));
+        ("ReportCompletionPercent",
+          (Option.map x.reportCompletionPercent
+             ~f:ReportCompletionPercent.to_value));
+        ("EndTime", (Option.map x.endTime ~f:Time.to_value));
+        ("Role", (Option.map x.role ~f:Role.to_value));
+        ("FileShareARN",
+          (Option.map x.fileShareARN ~f:FileShareARN.to_value));
+        ("LocationARN", (Option.map x.locationARN ~f:LocationARN.to_value));
+        ("StartTime", (Option.map x.startTime ~f:Time.to_value));
+        ("InclusionFilters",
+          (Option.map x.inclusionFilters ~f:CacheReportFilterList.to_value));
+        ("ExclusionFilters",
+          (Option.map x.exclusionFilters ~f:CacheReportFilterList.to_value));
+        ("ReportName", (Option.map x.reportName ~f:CacheReportName.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let reportName =
+        (Option.map ~f:CacheReportName.of_xml)
+          (Xml.child xml_arg0 "ReportName") in
+      let exclusionFilters =
+        (Option.map ~f:CacheReportFilterList.of_xml)
+          (Xml.child xml_arg0 "ExclusionFilters") in
+      let inclusionFilters =
+        (Option.map ~f:CacheReportFilterList.of_xml)
+          (Xml.child xml_arg0 "InclusionFilters") in
+      let startTime =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let locationARN =
+        (Option.map ~f:LocationARN.of_xml) (Xml.child xml_arg0 "LocationARN") in
+      let fileShareARN =
+        (Option.map ~f:FileShareARN.of_xml)
+          (Xml.child xml_arg0 "FileShareARN") in
+      let role = (Option.map ~f:Role.of_xml) (Xml.child xml_arg0 "Role") in
+      let endTime =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let reportCompletionPercent =
+        (Option.map ~f:ReportCompletionPercent.of_xml)
+          (Xml.child xml_arg0 "ReportCompletionPercent") in
+      let cacheReportStatus =
+        (Option.map ~f:CacheReportStatus.of_xml)
+          (Xml.child xml_arg0 "CacheReportStatus") in
+      let cacheReportARN =
+        (Option.map ~f:CacheReportARN.of_xml)
+          (Xml.child xml_arg0 "CacheReportARN") in
+      make ?tags ?reportName ?exclusionFilters ?inclusionFilters ?startTime
+        ?locationARN ?fileShareARN ?role ?endTime ?reportCompletionPercent
+        ?cacheReportStatus ?cacheReportARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let reportName = field_map json__ "ReportName" CacheReportName.of_json in
+      let exclusionFilters =
+        field_map json__ "ExclusionFilters" CacheReportFilterList.of_json in
+      let inclusionFilters =
+        field_map json__ "InclusionFilters" CacheReportFilterList.of_json in
+      let startTime = field_map json__ "StartTime" Time.of_json in
+      let locationARN = field_map json__ "LocationARN" LocationARN.of_json in
+      let fileShareARN = field_map json__ "FileShareARN" FileShareARN.of_json in
+      let role = field_map json__ "Role" Role.of_json in
+      let endTime = field_map json__ "EndTime" Time.of_json in
+      let reportCompletionPercent =
+        field_map json__ "ReportCompletionPercent"
+          ReportCompletionPercent.of_json in
+      let cacheReportStatus =
+        field_map json__ "CacheReportStatus" CacheReportStatus.of_json in
+      let cacheReportARN =
+        field_map json__ "CacheReportARN" CacheReportARN.of_json in
+      make ?tags ?reportName ?exclusionFilters ?inclusionFilters ?startTime
+        ?locationARN ?fileShareARN ?role ?endTime ?reportCompletionPercent
+        ?cacheReportStatus ?cacheReportARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains all informational fields associated with a cache report. Includes name, ARN, tags, status, progress, filters, start time, and end time."]
 module AutomaticTapeCreationPolicyInfo =
   struct
     type nonrec t =
@@ -3296,10 +3806,10 @@ module AutomaticTapeCreationPolicyInfo =
           (Xml.child xml_arg0 "AutomaticTapeCreationRules") in
       make ?gatewayARN ?automaticTapeCreationRules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       let automaticTapeCreationRules =
-        field_map json "AutomaticTapeCreationRules"
+        field_map json__ "AutomaticTapeCreationRules"
           AutomaticTapeCreationRules.of_json in
       make ?gatewayARN ?automaticTapeCreationRules ()
     let to_json v = composed_to_json to_value v
@@ -3312,12 +3822,12 @@ module Host =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:6) >>=
+          ((check_string_min i ~min:2) >>=
              (fun () ->
                 (check_string_max i ~max:1024) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^(([a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9\\-]*[A-Za-z0-9])(:(\\d+))?$")));
+                       ~pattern:"^(([a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9\\-]*[A-Za-z0-9])(:(\\d+))?$|^(?:\\[(?:(?:(?:[A-Fa-f0-9]{1,4}:){6}|(?=(?:[A-Fa-f0-9]{0,4}:){0,6}(?:[0-9]{1,3}\\.){3}[0-9]{1,3}(?![:.\\w]))(?:(?:[0-9A-Fa-f]{1,4}:){0,5}|:)(?:(?::[0-9A-Fa-f]{1,4}){1,5}:|:)|::(?:[A-Fa-f0-9]{1,4}:){5})(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?=(?:[A-Fa-f0-9]{0,4}:){0,7}[A-Fa-f0-9]{0,4}(?![:.\\w]))(?:(?:[0-9A-Fa-f]{1,4}:){1,7}|:)(?:(:[0-9A-Fa-f]{1,4}){1,7}|:)|(?:[A-Fa-f0-9]{1,4}:){7}:|:(:[A-Fa-f0-9]{1,4}){7})\\]:\\d+$|^(?:(?:(?:[A-Fa-f0-9]{1,4}:){6}|(?=(?:[A-Fa-f0-9]{0,4}:){0,6}(?:[0-9]{1,3}\\.){3}[0-9]{1,3}(?![:.\\w]))(?:(?:[0-9A-Fa-f]{1,4}:){0,5}|:)(?:(?::[0-9A-Fa-f]{1,4}){1,5}:|:)|::(?:[A-Fa-f0-9]{1,4}:){5})(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:[A-Fa-f0-9]{1,4}:){7}[A-Fa-f0-9]{1,4}|(?=(?:[A-Fa-f0-9]{0,4}:){0,7}[A-Fa-f0-9]{0,4}(?![:.\\w]))(?:(?:[0-9A-Fa-f]{1,4}:){1,7}|:)(?:(:[0-9A-Fa-f]{1,4}){1,7}|:)|(?:[A-Fa-f0-9]{1,4}:){7}:|:(:[A-Fa-f0-9]{1,4}){7})$)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -3392,17 +3902,18 @@ module VTLDevice =
       make ?deviceiSCSIAttributes ?vTLDeviceProductIdentifier
         ?vTLDeviceVendor ?vTLDeviceType ?vTLDeviceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deviceiSCSIAttributes =
-        field_map json "DeviceiSCSIAttributes" DeviceiSCSIAttributes.of_json in
+        field_map json__ "DeviceiSCSIAttributes"
+          DeviceiSCSIAttributes.of_json in
       let vTLDeviceProductIdentifier =
-        field_map json "VTLDeviceProductIdentifier"
+        field_map json__ "VTLDeviceProductIdentifier"
           VTLDeviceProductIdentifier.of_json in
       let vTLDeviceVendor =
-        field_map json "VTLDeviceVendor" VTLDeviceVendor.of_json in
+        field_map json__ "VTLDeviceVendor" VTLDeviceVendor.of_json in
       let vTLDeviceType =
-        field_map json "VTLDeviceType" VTLDeviceType.of_json in
-      let vTLDeviceARN = field_map json "VTLDeviceARN" VTLDeviceARN.of_json in
+        field_map json__ "VTLDeviceType" VTLDeviceType.of_json in
+      let vTLDeviceARN = field_map json__ "VTLDeviceARN" VTLDeviceARN.of_json in
       make ?deviceiSCSIAttributes ?vTLDeviceProductIdentifier
         ?vTLDeviceVendor ?vTLDeviceType ?vTLDeviceARN ()
     let to_json v = composed_to_json to_value v
@@ -3434,7 +3945,7 @@ module Tape =
       kMSKey: KMSKey.t option ;
       poolId: PoolId.t option
         [@ocaml.doc
-          "The ID of the pool that contains tapes that will be archived. The tapes in this pool are archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool. Valid Values: GLACIER | DEEP_ARCHIVE"];
+          "The ID of the pool that contains tapes that will be archived. The tapes in this pool are archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool."];
       worm: Boolean__lc1.t option
         [@ocaml.doc
           "If the tape is archived as write-once-read-many (WORM), this value is true."];
@@ -3524,22 +4035,23 @@ module Tape =
         ?tapeUsedInBytes ?progress ?vTLDevice ?tapeStatus ?tapeSizeInBytes
         ?tapeCreatedDate ?tapeBarcode ?tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let poolEntryDate = field_map json "PoolEntryDate" Time.of_json in
+    let of_json json__ =
+      let poolEntryDate = field_map json__ "PoolEntryDate" Time.of_json in
       let retentionStartDate =
-        field_map json "RetentionStartDate" Time.of_json in
-      let worm = field_map json "Worm" Boolean__lc1.of_json in
-      let poolId = field_map json "PoolId" PoolId.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
+        field_map json__ "RetentionStartDate" Time.of_json in
+      let worm = field_map json__ "Worm" Boolean__lc1.of_json in
+      let poolId = field_map json__ "PoolId" PoolId.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
       let tapeUsedInBytes =
-        field_map json "TapeUsedInBytes" TapeUsage.of_json in
-      let progress = field_map json "Progress" DoubleObject.of_json in
-      let vTLDevice = field_map json "VTLDevice" VTLDeviceARN.of_json in
-      let tapeStatus = field_map json "TapeStatus" TapeStatus.of_json in
-      let tapeSizeInBytes = field_map json "TapeSizeInBytes" TapeSize.of_json in
-      let tapeCreatedDate = field_map json "TapeCreatedDate" Time.of_json in
-      let tapeBarcode = field_map json "TapeBarcode" TapeBarcode.of_json in
-      let tapeARN = field_map json "TapeARN" TapeARN.of_json in
+        field_map json__ "TapeUsedInBytes" TapeUsage.of_json in
+      let progress = field_map json__ "Progress" DoubleObject.of_json in
+      let vTLDevice = field_map json__ "VTLDevice" VTLDeviceARN.of_json in
+      let tapeStatus = field_map json__ "TapeStatus" TapeStatus.of_json in
+      let tapeSizeInBytes =
+        field_map json__ "TapeSizeInBytes" TapeSize.of_json in
+      let tapeCreatedDate = field_map json__ "TapeCreatedDate" Time.of_json in
+      let tapeBarcode = field_map json__ "TapeBarcode" TapeBarcode.of_json in
+      let tapeARN = field_map json__ "TapeARN" TapeARN.of_json in
       make ?poolEntryDate ?retentionStartDate ?worm ?poolId ?kMSKey
         ?tapeUsedInBytes ?progress ?vTLDevice ?tapeStatus ?tapeSizeInBytes
         ?tapeCreatedDate ?tapeBarcode ?tapeARN ()
@@ -3588,13 +4100,14 @@ module TapeRecoveryPointInfo =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeStatus ?tapeSizeInBytes ?tapeRecoveryPointTime ?tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tapeStatus =
-        field_map json "TapeStatus" TapeRecoveryPointStatus.of_json in
-      let tapeSizeInBytes = field_map json "TapeSizeInBytes" TapeSize.of_json in
+        field_map json__ "TapeStatus" TapeRecoveryPointStatus.of_json in
+      let tapeSizeInBytes =
+        field_map json__ "TapeSizeInBytes" TapeSize.of_json in
       let tapeRecoveryPointTime =
-        field_map json "TapeRecoveryPointTime" Time.of_json in
-      let tapeARN = field_map json "TapeARN" TapeARN.of_json in
+        field_map json__ "TapeRecoveryPointTime" Time.of_json in
+      let tapeARN = field_map json__ "TapeARN" TapeARN.of_json in
       make ?tapeStatus ?tapeSizeInBytes ?tapeRecoveryPointTime ?tapeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a recovery point."]
@@ -3625,7 +4138,7 @@ module TapeArchive =
       kMSKey: KMSKey.t option ;
       poolId: PoolId.t option
         [@ocaml.doc
-          "The ID of the pool that was used to archive the tape. The tapes in this pool are archived in the S3 storage class that is associated with the pool. Valid Values: GLACIER | DEEP_ARCHIVE"];
+          "The ID of the pool that was used to archive the tape. The tapes in this pool are archived in the S3 storage class that is associated with the pool."];
       worm: Boolean__lc1.t option
         [@ocaml.doc
           "Set to true if the archived tape is stored as write-once-read-many (WORM)."];
@@ -3718,22 +4231,24 @@ module TapeArchive =
         ?tapeUsedInBytes ?tapeStatus ?retrievedTo ?completionTime
         ?tapeSizeInBytes ?tapeCreatedDate ?tapeBarcode ?tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let poolEntryDate = field_map json "PoolEntryDate" Time.of_json in
+    let of_json json__ =
+      let poolEntryDate = field_map json__ "PoolEntryDate" Time.of_json in
       let retentionStartDate =
-        field_map json "RetentionStartDate" Time.of_json in
-      let worm = field_map json "Worm" Boolean__lc1.of_json in
-      let poolId = field_map json "PoolId" PoolId.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
+        field_map json__ "RetentionStartDate" Time.of_json in
+      let worm = field_map json__ "Worm" Boolean__lc1.of_json in
+      let poolId = field_map json__ "PoolId" PoolId.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
       let tapeUsedInBytes =
-        field_map json "TapeUsedInBytes" TapeUsage.of_json in
-      let tapeStatus = field_map json "TapeStatus" TapeArchiveStatus.of_json in
-      let retrievedTo = field_map json "RetrievedTo" GatewayARN.of_json in
-      let completionTime = field_map json "CompletionTime" Time.of_json in
-      let tapeSizeInBytes = field_map json "TapeSizeInBytes" TapeSize.of_json in
-      let tapeCreatedDate = field_map json "TapeCreatedDate" Time.of_json in
-      let tapeBarcode = field_map json "TapeBarcode" TapeBarcode.of_json in
-      let tapeARN = field_map json "TapeARN" TapeARN.of_json in
+        field_map json__ "TapeUsedInBytes" TapeUsage.of_json in
+      let tapeStatus =
+        field_map json__ "TapeStatus" TapeArchiveStatus.of_json in
+      let retrievedTo = field_map json__ "RetrievedTo" GatewayARN.of_json in
+      let completionTime = field_map json__ "CompletionTime" Time.of_json in
+      let tapeSizeInBytes =
+        field_map json__ "TapeSizeInBytes" TapeSize.of_json in
+      let tapeCreatedDate = field_map json__ "TapeCreatedDate" Time.of_json in
+      let tapeBarcode = field_map json__ "TapeBarcode" TapeBarcode.of_json in
+      let tapeARN = field_map json__ "TapeARN" TapeARN.of_json in
       make ?poolEntryDate ?retentionStartDate ?worm ?poolId ?kMSKey
         ?tapeUsedInBytes ?tapeStatus ?retrievedTo ?completionTime
         ?tapeSizeInBytes ?tapeCreatedDate ?tapeBarcode ?tapeARN ()
@@ -3890,29 +4405,31 @@ module StorediSCSIVolume =
         ?volumeAttachmentStatus ?volumeStatus ?volumeType ?volumeId
         ?volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetName = field_map json "TargetName" TargetName.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
+    let of_json json__ =
+      let targetName = field_map json__ "TargetName" TargetName.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
       let volumeUsedInBytes =
-        field_map json "VolumeUsedInBytes" VolumeUsedInBytes.of_json in
-      let createdDate = field_map json "CreatedDate" CreatedDate.of_json in
+        field_map json__ "VolumeUsedInBytes" VolumeUsedInBytes.of_json in
+      let createdDate = field_map json__ "CreatedDate" CreatedDate.of_json in
       let volumeiSCSIAttributes =
-        field_map json "VolumeiSCSIAttributes" VolumeiSCSIAttributes.of_json in
+        field_map json__ "VolumeiSCSIAttributes"
+          VolumeiSCSIAttributes.of_json in
       let preservedExistingData =
-        field_map json "PreservedExistingData" Boolean__lc1.of_json in
+        field_map json__ "PreservedExistingData" Boolean__lc1.of_json in
       let sourceSnapshotId =
-        field_map json "SourceSnapshotId" SnapshotId.of_json in
-      let volumeDiskId = field_map json "VolumeDiskId" DiskId.of_json in
+        field_map json__ "SourceSnapshotId" SnapshotId.of_json in
+      let volumeDiskId = field_map json__ "VolumeDiskId" DiskId.of_json in
       let volumeProgress =
-        field_map json "VolumeProgress" DoubleObject.of_json in
-      let volumeSizeInBytes = field_map json "VolumeSizeInBytes" Long.of_json in
+        field_map json__ "VolumeProgress" DoubleObject.of_json in
+      let volumeSizeInBytes =
+        field_map json__ "VolumeSizeInBytes" Long.of_json in
       let volumeAttachmentStatus =
-        field_map json "VolumeAttachmentStatus"
+        field_map json__ "VolumeAttachmentStatus"
           VolumeAttachmentStatus.of_json in
-      let volumeStatus = field_map json "VolumeStatus" VolumeStatus.of_json in
-      let volumeType = field_map json "VolumeType" VolumeType.of_json in
-      let volumeId = field_map json "VolumeId" VolumeId.of_json in
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
+      let volumeStatus = field_map json__ "VolumeStatus" VolumeStatus.of_json in
+      let volumeType = field_map json__ "VolumeType" VolumeType.of_json in
+      let volumeId = field_map json__ "VolumeId" VolumeId.of_json in
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
       make ?targetName ?kMSKey ?volumeUsedInBytes ?createdDate
         ?volumeiSCSIAttributes ?preservedExistingData ?sourceSnapshotId
         ?volumeDiskId ?volumeProgress ?volumeSizeInBytes
@@ -3928,9 +4445,12 @@ module SMBFileShareInfo =
       fileShareId: FileShareId.t option ;
       fileShareStatus: FileShareStatus.t option ;
       gatewayARN: GatewayARN.t option ;
+      encryptionType: EncryptionType.t option
+        [@ocaml.doc
+          "A value that specifies the type of server-side encryption that the file share will use for the data that it stores in Amazon S3. We recommend using EncryptionType instead of KMSEncrypted to set the file share encryption method. You do not need to provide values for both parameters. If values for both parameters exist in the same request, then the specified encryption methods must not conflict. For example, if EncryptionType is SseS3, then KMSEncrypted must be false. If EncryptionType is SseKms or DsseKms, then KMSEncrypted must be true."];
       kMSEncrypted: Boolean__lc1.t option
         [@ocaml.doc
-          "Set to true to use Amazon S3 server-side encryption with your own KMS key, or false to use a key managed by Amazon S3. Optional. Valid Values: true | false"];
+          "Optional. Set to true to use Amazon S3 server-side encryption with your own KMS key (SSE-KMS), or false to use a key managed by Amazon S3 (SSE-S3). To use dual-layer encryption (DSSE-KMS), set the EncryptionType parameter instead. We recommend using EncryptionType instead of KMSEncrypted to set the file share encryption method. You do not need to provide values for both parameters. If values for both parameters exist in the same request, then the specified encryption methods must not conflict. For example, if EncryptionType is SseS3, then KMSEncrypted must be false. If EncryptionType is SseKms or DsseKms, then KMSEncrypted must be true. Valid Values: true | false"];
       kMSKey: KMSKey.t option ;
       path: Path.t option
         [@ocaml.doc
@@ -3939,7 +4459,7 @@ module SMBFileShareInfo =
       locationARN: LocationARN.t option ;
       defaultStorageClass: StorageClass.t option
         [@ocaml.doc
-          "The default storage class for objects put into an Amazon S3 bucket by the S3 File Gateway. The default value is S3_INTELLIGENT_TIERING. Optional. Valid Values: S3_STANDARD | S3_INTELLIGENT_TIERING | S3_STANDARD_IA | S3_ONEZONE_IA"];
+          "The default storage class for objects put into an Amazon S3 bucket by the S3 File Gateway. The default value is S3_STANDARD. Optional. Valid Values: S3_STANDARD | S3_INTELLIGENT_TIERING | S3_STANDARD_IA | S3_ONEZONE_IA"];
       objectACL: ObjectACL.t option ;
       readOnly: Boolean.t option
         [@ocaml.doc
@@ -3952,7 +4472,7 @@ module SMBFileShareInfo =
           "A value that sets who pays the cost of the request and the cost associated with data download from the S3 bucket. If this value is set to true, the requester pays the costs; otherwise, the S3 bucket owner pays. However, the S3 bucket owner always pays the cost of storing data. RequesterPays is a configuration for the S3 bucket that backs the file share, so make sure that the configuration on the file share is the same as the S3 bucket configuration. Valid Values: true | false"];
       sMBACLEnabled: Boolean.t option
         [@ocaml.doc
-          "If this value is set to true, it indicates that access control list (ACL) is enabled on the SMB file share. If it is set to false, it indicates that file and directory permissions are mapped to the POSIX permission. For more information, see Using Microsoft Windows ACLs to control access to an SMB file share in the Storage Gateway User Guide."];
+          "If this value is set to true, it indicates that access control list (ACL) is enabled on the SMB file share. If it is set to false, it indicates that file and directory permissions are mapped to the POSIX permission. For more information, see Using Windows ACLs to limit SMB file share access in the Amazon S3 File Gateway User Guide."];
       accessBasedEnumeration: Boolean.t option
         [@ocaml.doc "Indicates whether AccessBasedEnumeration is enabled."];
       adminUserList: UserList.t option
@@ -3981,7 +4501,7 @@ module SMBFileShareInfo =
         [@ocaml.doc "Refresh cache information for the file share."];
       notificationPolicy: NotificationPolicy.t option
         [@ocaml.doc
-          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
+          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. This setting is not meant to specify an exact time at which the notification will be sent. In some cases, the gateway might require more than the specified delay time to generate and send notifications. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
       vPCEndpointDNSName: DNSHostName.t option
         [@ocaml.doc
           "Specifies the DNS name for the VPC endpoint that the SMB file share uses to connect to Amazon S3. This parameter is required for SMB file shares that connect to Amazon S3 through a VPC endpoint, a VPC access point, or an access point alias that points to a VPC access point."];
@@ -3995,69 +4515,72 @@ module SMBFileShareInfo =
       fun ?fileShareId ->
         fun ?fileShareStatus ->
           fun ?gatewayARN ->
-            fun ?kMSEncrypted ->
-              fun ?kMSKey ->
-                fun ?path ->
-                  fun ?role ->
-                    fun ?locationARN ->
-                      fun ?defaultStorageClass ->
-                        fun ?objectACL ->
-                          fun ?readOnly ->
-                            fun ?guessMIMETypeEnabled ->
-                              fun ?requesterPays ->
-                                fun ?sMBACLEnabled ->
-                                  fun ?accessBasedEnumeration ->
-                                    fun ?adminUserList ->
-                                      fun ?validUserList ->
-                                        fun ?invalidUserList ->
-                                          fun ?auditDestinationARN ->
-                                            fun ?authentication ->
-                                              fun ?caseSensitivity ->
-                                                fun ?tags ->
-                                                  fun ?fileShareName ->
-                                                    fun ?cacheAttributes ->
-                                                      fun ?notificationPolicy
-                                                        ->
+            fun ?encryptionType ->
+              fun ?kMSEncrypted ->
+                fun ?kMSKey ->
+                  fun ?path ->
+                    fun ?role ->
+                      fun ?locationARN ->
+                        fun ?defaultStorageClass ->
+                          fun ?objectACL ->
+                            fun ?readOnly ->
+                              fun ?guessMIMETypeEnabled ->
+                                fun ?requesterPays ->
+                                  fun ?sMBACLEnabled ->
+                                    fun ?accessBasedEnumeration ->
+                                      fun ?adminUserList ->
+                                        fun ?validUserList ->
+                                          fun ?invalidUserList ->
+                                            fun ?auditDestinationARN ->
+                                              fun ?authentication ->
+                                                fun ?caseSensitivity ->
+                                                  fun ?tags ->
+                                                    fun ?fileShareName ->
+                                                      fun ?cacheAttributes ->
                                                         fun
-                                                          ?vPCEndpointDNSName
+                                                          ?notificationPolicy
                                                           ->
-                                                          fun ?bucketRegion
+                                                          fun
+                                                            ?vPCEndpointDNSName
                                                             ->
-                                                            fun
-                                                              ?oplocksEnabled
+                                                            fun ?bucketRegion
                                                               ->
-                                                              fun () ->
-                                                                {
-                                                                  fileShareARN;
-                                                                  fileShareId;
-                                                                  fileShareStatus;
-                                                                  gatewayARN;
-                                                                  kMSEncrypted;
-                                                                  kMSKey;
-                                                                  path;
-                                                                  role;
-                                                                  locationARN;
-                                                                  defaultStorageClass;
-                                                                  objectACL;
-                                                                  readOnly;
-                                                                  guessMIMETypeEnabled;
-                                                                  requesterPays;
-                                                                  sMBACLEnabled;
-                                                                  accessBasedEnumeration;
-                                                                  adminUserList;
-                                                                  validUserList;
-                                                                  invalidUserList;
-                                                                  auditDestinationARN;
-                                                                  authentication;
-                                                                  caseSensitivity;
-                                                                  tags;
-                                                                  fileShareName;
-                                                                  cacheAttributes;
-                                                                  notificationPolicy;
-                                                                  vPCEndpointDNSName;
-                                                                  bucketRegion;
-                                                                  oplocksEnabled
-                                                                }
+                                                              fun
+                                                                ?oplocksEnabled
+                                                                ->
+                                                                fun () ->
+                                                                  {
+                                                                    fileShareARN;
+                                                                    fileShareId;
+                                                                    fileShareStatus;
+                                                                    gatewayARN;
+                                                                    encryptionType;
+                                                                    kMSEncrypted;
+                                                                    kMSKey;
+                                                                    path;
+                                                                    role;
+                                                                    locationARN;
+                                                                    defaultStorageClass;
+                                                                    objectACL;
+                                                                    readOnly;
+                                                                    guessMIMETypeEnabled;
+                                                                    requesterPays;
+                                                                    sMBACLEnabled;
+                                                                    accessBasedEnumeration;
+                                                                    adminUserList;
+                                                                    validUserList;
+                                                                    invalidUserList;
+                                                                    auditDestinationARN;
+                                                                    authentication;
+                                                                    caseSensitivity;
+                                                                    tags;
+                                                                    fileShareName;
+                                                                    cacheAttributes;
+                                                                    notificationPolicy;
+                                                                    vPCEndpointDNSName;
+                                                                    bucketRegion;
+                                                                    oplocksEnabled
+                                                                  }
     let to_value x =
       structure_to_value
         [("FileShareARN",
@@ -4066,6 +4589,8 @@ module SMBFileShareInfo =
         ("FileShareStatus",
           (Option.map x.fileShareStatus ~f:FileShareStatus.to_value));
         ("GatewayARN", (Option.map x.gatewayARN ~f:GatewayARN.to_value));
+        ("EncryptionType",
+          (Option.map x.encryptionType ~f:EncryptionType.to_value));
         ("KMSEncrypted",
           (Option.map x.kMSEncrypted ~f:Boolean__lc1.to_value));
         ("KMSKey", (Option.map x.kMSKey ~f:KMSKey.to_value));
@@ -4164,6 +4689,9 @@ module SMBFileShareInfo =
       let kMSEncrypted =
         (Option.map ~f:Boolean__lc1.of_xml)
           (Xml.child xml_arg0 "KMSEncrypted") in
+      let encryptionType =
+        (Option.map ~f:EncryptionType.of_xml)
+          (Xml.child xml_arg0 "EncryptionType") in
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       let fileShareStatus =
@@ -4180,58 +4708,61 @@ module SMBFileShareInfo =
         ?invalidUserList ?validUserList ?adminUserList
         ?accessBasedEnumeration ?sMBACLEnabled ?requesterPays
         ?guessMIMETypeEnabled ?readOnly ?objectACL ?defaultStorageClass
-        ?locationARN ?role ?path ?kMSKey ?kMSEncrypted ?gatewayARN
-        ?fileShareStatus ?fileShareId ?fileShareARN ()
+        ?locationARN ?role ?path ?kMSKey ?kMSEncrypted ?encryptionType
+        ?gatewayARN ?fileShareStatus ?fileShareId ?fileShareARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let oplocksEnabled = field_map json "OplocksEnabled" Boolean.of_json in
-      let bucketRegion = field_map json "BucketRegion" RegionId.of_json in
+    let of_json json__ =
+      let oplocksEnabled = field_map json__ "OplocksEnabled" Boolean.of_json in
+      let bucketRegion = field_map json__ "BucketRegion" RegionId.of_json in
       let vPCEndpointDNSName =
-        field_map json "VPCEndpointDNSName" DNSHostName.of_json in
+        field_map json__ "VPCEndpointDNSName" DNSHostName.of_json in
       let notificationPolicy =
-        field_map json "NotificationPolicy" NotificationPolicy.of_json in
+        field_map json__ "NotificationPolicy" NotificationPolicy.of_json in
       let cacheAttributes =
-        field_map json "CacheAttributes" CacheAttributes.of_json in
+        field_map json__ "CacheAttributes" CacheAttributes.of_json in
       let fileShareName =
-        field_map json "FileShareName" FileShareName.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "FileShareName" FileShareName.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let caseSensitivity =
-        field_map json "CaseSensitivity" CaseSensitivity.of_json in
+        field_map json__ "CaseSensitivity" CaseSensitivity.of_json in
       let authentication =
-        field_map json "Authentication" Authentication.of_json in
+        field_map json__ "Authentication" Authentication.of_json in
       let auditDestinationARN =
-        field_map json "AuditDestinationARN" AuditDestinationARN.of_json in
-      let invalidUserList = field_map json "InvalidUserList" UserList.of_json in
-      let validUserList = field_map json "ValidUserList" UserList.of_json in
-      let adminUserList = field_map json "AdminUserList" UserList.of_json in
+        field_map json__ "AuditDestinationARN" AuditDestinationARN.of_json in
+      let invalidUserList =
+        field_map json__ "InvalidUserList" UserList.of_json in
+      let validUserList = field_map json__ "ValidUserList" UserList.of_json in
+      let adminUserList = field_map json__ "AdminUserList" UserList.of_json in
       let accessBasedEnumeration =
-        field_map json "AccessBasedEnumeration" Boolean.of_json in
-      let sMBACLEnabled = field_map json "SMBACLEnabled" Boolean.of_json in
-      let requesterPays = field_map json "RequesterPays" Boolean.of_json in
+        field_map json__ "AccessBasedEnumeration" Boolean.of_json in
+      let sMBACLEnabled = field_map json__ "SMBACLEnabled" Boolean.of_json in
+      let requesterPays = field_map json__ "RequesterPays" Boolean.of_json in
       let guessMIMETypeEnabled =
-        field_map json "GuessMIMETypeEnabled" Boolean.of_json in
-      let readOnly = field_map json "ReadOnly" Boolean.of_json in
-      let objectACL = field_map json "ObjectACL" ObjectACL.of_json in
+        field_map json__ "GuessMIMETypeEnabled" Boolean.of_json in
+      let readOnly = field_map json__ "ReadOnly" Boolean.of_json in
+      let objectACL = field_map json__ "ObjectACL" ObjectACL.of_json in
       let defaultStorageClass =
-        field_map json "DefaultStorageClass" StorageClass.of_json in
-      let locationARN = field_map json "LocationARN" LocationARN.of_json in
-      let role = field_map json "Role" Role.of_json in
-      let path = field_map json "Path" Path.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
-      let kMSEncrypted = field_map json "KMSEncrypted" Boolean__lc1.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "DefaultStorageClass" StorageClass.of_json in
+      let locationARN = field_map json__ "LocationARN" LocationARN.of_json in
+      let role = field_map json__ "Role" Role.of_json in
+      let path = field_map json__ "Path" Path.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
+      let kMSEncrypted = field_map json__ "KMSEncrypted" Boolean__lc1.of_json in
+      let encryptionType =
+        field_map json__ "EncryptionType" EncryptionType.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       let fileShareStatus =
-        field_map json "FileShareStatus" FileShareStatus.of_json in
-      let fileShareId = field_map json "FileShareId" FileShareId.of_json in
-      let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
+        field_map json__ "FileShareStatus" FileShareStatus.of_json in
+      let fileShareId = field_map json__ "FileShareId" FileShareId.of_json in
+      let fileShareARN = field_map json__ "FileShareARN" FileShareARN.of_json in
       make ?oplocksEnabled ?bucketRegion ?vPCEndpointDNSName
         ?notificationPolicy ?cacheAttributes ?fileShareName ?tags
         ?caseSensitivity ?authentication ?auditDestinationARN
         ?invalidUserList ?validUserList ?adminUserList
         ?accessBasedEnumeration ?sMBACLEnabled ?requesterPays
         ?guessMIMETypeEnabled ?readOnly ?objectACL ?defaultStorageClass
-        ?locationARN ?role ?path ?kMSKey ?kMSEncrypted ?gatewayARN
-        ?fileShareStatus ?fileShareId ?fileShareARN ()
+        ?locationARN ?role ?path ?kMSKey ?kMSEncrypted ?encryptionType
+        ?gatewayARN ?fileShareStatus ?fileShareId ?fileShareARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Windows file permissions and ownership information assigned, by default, to native S3 objects when S3 File Gateway discovers them in S3 buckets. This operation is only supported for S3 File Gateways."]
@@ -4244,16 +4775,19 @@ module NFSFileShareInfo =
       fileShareId: FileShareId.t option ;
       fileShareStatus: FileShareStatus.t option ;
       gatewayARN: GatewayARN.t option ;
+      encryptionType: EncryptionType.t option
+        [@ocaml.doc
+          "A value that specifies the type of server-side encryption that the file share will use for the data that it stores in Amazon S3. We recommend using EncryptionType instead of KMSEncrypted to set the file share encryption method. You do not need to provide values for both parameters. If values for both parameters exist in the same request, then the specified encryption methods must not conflict. For example, if EncryptionType is SseS3, then KMSEncrypted must be false. If EncryptionType is SseKms or DsseKms, then KMSEncrypted must be true."];
       kMSEncrypted: Boolean__lc1.t option
         [@ocaml.doc
-          "Set to true to use Amazon S3 server-side encryption with your own KMS key, or false to use a key managed by Amazon S3. Optional. Valid Values: true | false"];
+          "Optional. Set to true to use Amazon S3 server-side encryption with your own KMS key (SSE-KMS), or false to use a key managed by Amazon S3 (SSE-S3). To use dual-layer encryption (DSSE-KMS), set the EncryptionType parameter instead. We recommend using EncryptionType instead of KMSEncrypted to set the file share encryption method. You do not need to provide values for both parameters. If values for both parameters exist in the same request, then the specified encryption methods must not conflict. For example, if EncryptionType is SseS3, then KMSEncrypted must be false. If EncryptionType is SseKms or DsseKms, then KMSEncrypted must be true. Valid Values: true | false"];
       kMSKey: KMSKey.t option ;
       path: Path.t option ;
       role: Role.t option ;
       locationARN: LocationARN.t option ;
       defaultStorageClass: StorageClass.t option
         [@ocaml.doc
-          "The default storage class for objects put into an Amazon S3 bucket by the S3 File Gateway. The default value is S3_INTELLIGENT_TIERING. Optional. Valid Values: S3_STANDARD | S3_INTELLIGENT_TIERING | S3_STANDARD_IA | S3_ONEZONE_IA"];
+          "The default storage class for objects put into an Amazon S3 bucket by the S3 File Gateway. The default value is S3_STANDARD. Optional. Valid Values: S3_STANDARD | S3_INTELLIGENT_TIERING | S3_STANDARD_IA | S3_ONEZONE_IA"];
       objectACL: ObjectACL.t option ;
       clientList: FileShareClientList.t option ;
       squash: Squash.t option ;
@@ -4276,7 +4810,7 @@ module NFSFileShareInfo =
         [@ocaml.doc "Refresh cache information for the file share."];
       notificationPolicy: NotificationPolicy.t option
         [@ocaml.doc
-          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
+          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. This setting is not meant to specify an exact time at which the notification will be sent. In some cases, the gateway might require more than the specified delay time to generate and send notifications. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
       vPCEndpointDNSName: DNSHostName.t option
         [@ocaml.doc
           "Specifies the DNS name for the VPC endpoint that the NFS file share uses to connect to Amazon S3. This parameter is required for NFS file shares that connect to Amazon S3 through a VPC endpoint, a VPC access point, or an access point alias that points to a VPC access point."];
@@ -4291,52 +4825,55 @@ module NFSFileShareInfo =
         fun ?fileShareId ->
           fun ?fileShareStatus ->
             fun ?gatewayARN ->
-              fun ?kMSEncrypted ->
-                fun ?kMSKey ->
-                  fun ?path ->
-                    fun ?role ->
-                      fun ?locationARN ->
-                        fun ?defaultStorageClass ->
-                          fun ?objectACL ->
-                            fun ?clientList ->
-                              fun ?squash ->
-                                fun ?readOnly ->
-                                  fun ?guessMIMETypeEnabled ->
-                                    fun ?requesterPays ->
-                                      fun ?tags ->
-                                        fun ?fileShareName ->
-                                          fun ?cacheAttributes ->
-                                            fun ?notificationPolicy ->
-                                              fun ?vPCEndpointDNSName ->
-                                                fun ?bucketRegion ->
-                                                  fun ?auditDestinationARN ->
-                                                    fun () ->
-                                                      {
-                                                        nFSFileShareDefaults;
-                                                        fileShareARN;
-                                                        fileShareId;
-                                                        fileShareStatus;
-                                                        gatewayARN;
-                                                        kMSEncrypted;
-                                                        kMSKey;
-                                                        path;
-                                                        role;
-                                                        locationARN;
-                                                        defaultStorageClass;
-                                                        objectACL;
-                                                        clientList;
-                                                        squash;
-                                                        readOnly;
-                                                        guessMIMETypeEnabled;
-                                                        requesterPays;
-                                                        tags;
-                                                        fileShareName;
-                                                        cacheAttributes;
-                                                        notificationPolicy;
-                                                        vPCEndpointDNSName;
-                                                        bucketRegion;
-                                                        auditDestinationARN
-                                                      }
+              fun ?encryptionType ->
+                fun ?kMSEncrypted ->
+                  fun ?kMSKey ->
+                    fun ?path ->
+                      fun ?role ->
+                        fun ?locationARN ->
+                          fun ?defaultStorageClass ->
+                            fun ?objectACL ->
+                              fun ?clientList ->
+                                fun ?squash ->
+                                  fun ?readOnly ->
+                                    fun ?guessMIMETypeEnabled ->
+                                      fun ?requesterPays ->
+                                        fun ?tags ->
+                                          fun ?fileShareName ->
+                                            fun ?cacheAttributes ->
+                                              fun ?notificationPolicy ->
+                                                fun ?vPCEndpointDNSName ->
+                                                  fun ?bucketRegion ->
+                                                    fun ?auditDestinationARN
+                                                      ->
+                                                      fun () ->
+                                                        {
+                                                          nFSFileShareDefaults;
+                                                          fileShareARN;
+                                                          fileShareId;
+                                                          fileShareStatus;
+                                                          gatewayARN;
+                                                          encryptionType;
+                                                          kMSEncrypted;
+                                                          kMSKey;
+                                                          path;
+                                                          role;
+                                                          locationARN;
+                                                          defaultStorageClass;
+                                                          objectACL;
+                                                          clientList;
+                                                          squash;
+                                                          readOnly;
+                                                          guessMIMETypeEnabled;
+                                                          requesterPays;
+                                                          tags;
+                                                          fileShareName;
+                                                          cacheAttributes;
+                                                          notificationPolicy;
+                                                          vPCEndpointDNSName;
+                                                          bucketRegion;
+                                                          auditDestinationARN
+                                                        }
     let to_value x =
       structure_to_value
         [("NFSFileShareDefaults",
@@ -4348,6 +4885,8 @@ module NFSFileShareInfo =
         ("FileShareStatus",
           (Option.map x.fileShareStatus ~f:FileShareStatus.to_value));
         ("GatewayARN", (Option.map x.gatewayARN ~f:GatewayARN.to_value));
+        ("EncryptionType",
+          (Option.map x.encryptionType ~f:EncryptionType.to_value));
         ("KMSEncrypted",
           (Option.map x.kMSEncrypted ~f:Boolean__lc1.to_value));
         ("KMSKey", (Option.map x.kMSKey ~f:KMSKey.to_value));
@@ -4422,6 +4961,9 @@ module NFSFileShareInfo =
       let kMSEncrypted =
         (Option.map ~f:Boolean__lc1.of_xml)
           (Xml.child xml_arg0 "KMSEncrypted") in
+      let encryptionType =
+        (Option.map ~f:EncryptionType.of_xml)
+          (Xml.child xml_arg0 "EncryptionType") in
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       let fileShareStatus =
@@ -4439,50 +4981,52 @@ module NFSFileShareInfo =
         ?notificationPolicy ?cacheAttributes ?fileShareName ?tags
         ?requesterPays ?guessMIMETypeEnabled ?readOnly ?squash ?clientList
         ?objectACL ?defaultStorageClass ?locationARN ?role ?path ?kMSKey
-        ?kMSEncrypted ?gatewayARN ?fileShareStatus ?fileShareId ?fileShareARN
-        ?nFSFileShareDefaults ()
+        ?kMSEncrypted ?encryptionType ?gatewayARN ?fileShareStatus
+        ?fileShareId ?fileShareARN ?nFSFileShareDefaults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let auditDestinationARN =
-        field_map json "AuditDestinationARN" AuditDestinationARN.of_json in
-      let bucketRegion = field_map json "BucketRegion" RegionId.of_json in
+        field_map json__ "AuditDestinationARN" AuditDestinationARN.of_json in
+      let bucketRegion = field_map json__ "BucketRegion" RegionId.of_json in
       let vPCEndpointDNSName =
-        field_map json "VPCEndpointDNSName" DNSHostName.of_json in
+        field_map json__ "VPCEndpointDNSName" DNSHostName.of_json in
       let notificationPolicy =
-        field_map json "NotificationPolicy" NotificationPolicy.of_json in
+        field_map json__ "NotificationPolicy" NotificationPolicy.of_json in
       let cacheAttributes =
-        field_map json "CacheAttributes" CacheAttributes.of_json in
+        field_map json__ "CacheAttributes" CacheAttributes.of_json in
       let fileShareName =
-        field_map json "FileShareName" FileShareName.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let requesterPays = field_map json "RequesterPays" Boolean.of_json in
+        field_map json__ "FileShareName" FileShareName.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let requesterPays = field_map json__ "RequesterPays" Boolean.of_json in
       let guessMIMETypeEnabled =
-        field_map json "GuessMIMETypeEnabled" Boolean.of_json in
-      let readOnly = field_map json "ReadOnly" Boolean.of_json in
-      let squash = field_map json "Squash" Squash.of_json in
+        field_map json__ "GuessMIMETypeEnabled" Boolean.of_json in
+      let readOnly = field_map json__ "ReadOnly" Boolean.of_json in
+      let squash = field_map json__ "Squash" Squash.of_json in
       let clientList =
-        field_map json "ClientList" FileShareClientList.of_json in
-      let objectACL = field_map json "ObjectACL" ObjectACL.of_json in
+        field_map json__ "ClientList" FileShareClientList.of_json in
+      let objectACL = field_map json__ "ObjectACL" ObjectACL.of_json in
       let defaultStorageClass =
-        field_map json "DefaultStorageClass" StorageClass.of_json in
-      let locationARN = field_map json "LocationARN" LocationARN.of_json in
-      let role = field_map json "Role" Role.of_json in
-      let path = field_map json "Path" Path.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
-      let kMSEncrypted = field_map json "KMSEncrypted" Boolean__lc1.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "DefaultStorageClass" StorageClass.of_json in
+      let locationARN = field_map json__ "LocationARN" LocationARN.of_json in
+      let role = field_map json__ "Role" Role.of_json in
+      let path = field_map json__ "Path" Path.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
+      let kMSEncrypted = field_map json__ "KMSEncrypted" Boolean__lc1.of_json in
+      let encryptionType =
+        field_map json__ "EncryptionType" EncryptionType.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       let fileShareStatus =
-        field_map json "FileShareStatus" FileShareStatus.of_json in
-      let fileShareId = field_map json "FileShareId" FileShareId.of_json in
-      let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
+        field_map json__ "FileShareStatus" FileShareStatus.of_json in
+      let fileShareId = field_map json__ "FileShareId" FileShareId.of_json in
+      let fileShareARN = field_map json__ "FileShareARN" FileShareARN.of_json in
       let nFSFileShareDefaults =
-        field_map json "NFSFileShareDefaults" NFSFileShareDefaults.of_json in
+        field_map json__ "NFSFileShareDefaults" NFSFileShareDefaults.of_json in
       make ?auditDestinationARN ?bucketRegion ?vPCEndpointDNSName
         ?notificationPolicy ?cacheAttributes ?fileShareName ?tags
         ?requesterPays ?guessMIMETypeEnabled ?readOnly ?squash ?clientList
         ?objectACL ?defaultStorageClass ?locationARN ?role ?path ?kMSKey
-        ?kMSEncrypted ?gatewayARN ?fileShareStatus ?fileShareId ?fileShareARN
-        ?nFSFileShareDefaults ()
+        ?kMSEncrypted ?encryptionType ?gatewayARN ?fileShareStatus
+        ?fileShareId ?fileShareARN ?nFSFileShareDefaults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Unix file permissions and ownership information assigned, by default, to native S3 objects when an S3 File Gateway discovers them in S3 buckets. This operation is only supported in S3 File Gateways."]
@@ -4498,7 +5042,7 @@ module NetworkInterface =
           "The Media Access Control (MAC) address of the interface. This is currently unsupported and will not be returned in output."];
       ipv6Address: String_.t option
         [@ocaml.doc
-          "The Internet Protocol version 6 (IPv6) address of the interface. Currently not supported."]}
+          "The Internet Protocol version 6 (IPv6) address of the interface. This element returns IPv6 addresses for all gateway types except FSx File Gateway."]}
     let make ?ipv4Address =
       fun ?macAddress ->
         fun ?ipv6Address ->
@@ -4518,10 +5062,10 @@ module NetworkInterface =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Ipv4Address") in
       make ?ipv6Address ?macAddress ?ipv4Address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipv6Address = field_map json "Ipv6Address" String_.of_json in
-      let macAddress = field_map json "MacAddress" String_.of_json in
-      let ipv4Address = field_map json "Ipv4Address" String_.of_json in
+    let of_json json__ =
+      let ipv6Address = field_map json__ "Ipv6Address" String_.of_json in
+      let macAddress = field_map json__ "MacAddress" String_.of_json in
+      let ipv4Address = field_map json__ "Ipv4Address" String_.of_json in
       make ?ipv6Address ?macAddress ?ipv4Address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a gateway's network interface."]
@@ -4655,26 +5199,26 @@ module FileSystemAssociationInfo =
         ?fileSystemAssociationStatus ?locationARN ?fileSystemAssociationARN
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSystemAssociationStatusDetails =
-        field_map json "FileSystemAssociationStatusDetails"
+        field_map json__ "FileSystemAssociationStatusDetails"
           FileSystemAssociationStatusDetails.of_json in
       let endpointNetworkConfiguration =
-        field_map json "EndpointNetworkConfiguration"
+        field_map json__ "EndpointNetworkConfiguration"
           EndpointNetworkConfiguration.of_json in
       let cacheAttributes =
-        field_map json "CacheAttributes" CacheAttributes.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "CacheAttributes" CacheAttributes.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       let auditDestinationARN =
-        field_map json "AuditDestinationARN" AuditDestinationARN.of_json in
+        field_map json__ "AuditDestinationARN" AuditDestinationARN.of_json in
       let fileSystemAssociationStatus =
-        field_map json "FileSystemAssociationStatus"
+        field_map json__ "FileSystemAssociationStatus"
           FileSystemAssociationStatus.of_json in
       let locationARN =
-        field_map json "LocationARN" FileSystemLocationARN.of_json in
+        field_map json__ "LocationARN" FileSystemLocationARN.of_json in
       let fileSystemAssociationARN =
-        field_map json "FileSystemAssociationARN"
+        field_map json__ "FileSystemAssociationARN"
           FileSystemAssociationARN.of_json in
       make ?fileSystemAssociationStatusDetails ?endpointNetworkConfiguration
         ?cacheAttributes ?tags ?gatewayARN ?auditDestinationARN
@@ -4732,13 +5276,13 @@ module ChapInfo =
       make ?secretToAuthenticateTarget ?initiatorName
         ?secretToAuthenticateInitiator ?targetARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secretToAuthenticateTarget =
-        field_map json "SecretToAuthenticateTarget" ChapSecret.of_json in
-      let initiatorName = field_map json "InitiatorName" IqnName.of_json in
+        field_map json__ "SecretToAuthenticateTarget" ChapSecret.of_json in
+      let initiatorName = field_map json__ "InitiatorName" IqnName.of_json in
       let secretToAuthenticateInitiator =
-        field_map json "SecretToAuthenticateInitiator" ChapSecret.of_json in
-      let targetARN = field_map json "TargetARN" TargetARN.of_json in
+        field_map json__ "SecretToAuthenticateInitiator" ChapSecret.of_json in
+      let targetARN = field_map json__ "TargetARN" TargetARN.of_json in
       make ?secretToAuthenticateTarget ?initiatorName
         ?secretToAuthenticateInitiator ?targetARN ()
     let to_json v = composed_to_json to_value v
@@ -4778,7 +5322,7 @@ module CachediSCSIVolume =
           "The date the volume was created. Volumes created prior to March 28, 2017 don\226\128\153t have this timestamp."];
       volumeUsedInBytes: VolumeUsedInBytes.t option
         [@ocaml.doc
-          "The size of the data stored on the volume in bytes. This value is calculated based on the number of blocks that are touched, instead of the actual amount of data written. This value can be useful for sequential write patterns but less accurate for random write patterns. VolumeUsedInBytes is different from the compressed size of the volume, which is the value that is used to calculate your bill. This value is not available for volumes created prior to May 13, 2015, until you store data on the volume."];
+          "The size of the data stored on the volume in bytes. This value is calculated based on the number of blocks that are touched, instead of the actual amount of data written. This value can be useful for sequential write patterns but less accurate for random write patterns. VolumeUsedInBytes is different from the compressed size of the volume, which is the value that is used to calculate your bill. This value is not available for volumes created prior to May 13, 2015, until you store data on the volume. If you use a delete tool that overwrites the data on your volume with random data, your usage will not be reduced. This is because the random data is not compressible. If you want to reduce the amount of billed storage on your volume, we recommend overwriting your files with zeros to compress the data to a negligible amount of actual storage."];
       kMSKey: KMSKey.t option ;
       targetName: TargetName.t option
         [@ocaml.doc
@@ -4875,26 +5419,28 @@ module CachediSCSIVolume =
         ?volumeSizeInBytes ?volumeAttachmentStatus ?volumeStatus ?volumeType
         ?volumeId ?volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetName = field_map json "TargetName" TargetName.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
+    let of_json json__ =
+      let targetName = field_map json__ "TargetName" TargetName.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
       let volumeUsedInBytes =
-        field_map json "VolumeUsedInBytes" VolumeUsedInBytes.of_json in
-      let createdDate = field_map json "CreatedDate" CreatedDate.of_json in
+        field_map json__ "VolumeUsedInBytes" VolumeUsedInBytes.of_json in
+      let createdDate = field_map json__ "CreatedDate" CreatedDate.of_json in
       let volumeiSCSIAttributes =
-        field_map json "VolumeiSCSIAttributes" VolumeiSCSIAttributes.of_json in
+        field_map json__ "VolumeiSCSIAttributes"
+          VolumeiSCSIAttributes.of_json in
       let sourceSnapshotId =
-        field_map json "SourceSnapshotId" SnapshotId.of_json in
+        field_map json__ "SourceSnapshotId" SnapshotId.of_json in
       let volumeProgress =
-        field_map json "VolumeProgress" DoubleObject.of_json in
-      let volumeSizeInBytes = field_map json "VolumeSizeInBytes" Long.of_json in
+        field_map json__ "VolumeProgress" DoubleObject.of_json in
+      let volumeSizeInBytes =
+        field_map json__ "VolumeSizeInBytes" Long.of_json in
       let volumeAttachmentStatus =
-        field_map json "VolumeAttachmentStatus"
+        field_map json__ "VolumeAttachmentStatus"
           VolumeAttachmentStatus.of_json in
-      let volumeStatus = field_map json "VolumeStatus" VolumeStatus.of_json in
-      let volumeType = field_map json "VolumeType" VolumeType.of_json in
-      let volumeId = field_map json "VolumeId" VolumeId.of_json in
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
+      let volumeStatus = field_map json__ "VolumeStatus" VolumeStatus.of_json in
+      let volumeType = field_map json__ "VolumeType" VolumeType.of_json in
+      let volumeId = field_map json__ "VolumeId" VolumeId.of_json in
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
       make ?targetName ?kMSKey ?volumeUsedInBytes ?createdDate
         ?volumeiSCSIAttributes ?sourceSnapshotId ?volumeProgress
         ?volumeSizeInBytes ?volumeAttachmentStatus ?volumeStatus ?volumeType
@@ -4925,9 +5471,9 @@ module InternalServerError =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?error ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "error" StorageGatewayError.of_json in
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let error = field_map json__ "error" StorageGatewayError.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?error ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4956,9 +5502,9 @@ module InvalidGatewayRequestException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?error ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "error" StorageGatewayError.of_json in
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let error = field_map json__ "error" StorageGatewayError.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?error ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5023,6 +5569,7 @@ module SMBSecurityStrategy =
       | ClientSpecified 
       | MandatorySigning 
       | MandatoryEncryption 
+      | MandatoryEncryptionNoAes128 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -5030,12 +5577,14 @@ module SMBSecurityStrategy =
       | ClientSpecified -> "ClientSpecified"
       | MandatorySigning -> "MandatorySigning"
       | MandatoryEncryption -> "MandatoryEncryption"
+      | MandatoryEncryptionNoAes128 -> "MandatoryEncryptionNoAes128"
       | Non_static_id s -> s
     let of_string =
       function
       | "ClientSpecified" -> ClientSpecified
       | "MandatorySigning" -> MandatorySigning
       | "MandatoryEncryption" -> MandatoryEncryption
+      | "MandatoryEncryptionNoAes128" -> MandatoryEncryptionNoAes128
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -5063,8 +5612,8 @@ module SMBLocalGroups =
         (Option.map ~f:UserList.of_xml) (Xml.child xml_arg0 "GatewayAdmins") in
       make ?gatewayAdmins ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayAdmins = field_map json "GatewayAdmins" UserList.of_json in
+    let of_json json__ =
+      let gatewayAdmins = field_map json__ "GatewayAdmins" UserList.of_json in
       make ?gatewayAdmins ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5087,6 +5636,34 @@ module DayOfMonth =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module SoftwareUpdatePreferences =
+  struct
+    type nonrec t =
+      {
+      automaticUpdatePolicy: AutomaticUpdatePolicy.t option
+        [@ocaml.doc
+          "Indicates the automatic update policy for a gateway. ALL_VERSIONS - Enables regular gateway maintenance updates. EMERGENCY_VERSIONS_ONLY - Disables regular gateway maintenance updates. The gateway will still receive emergency version updates on rare occasions if necessary to remedy highly critical security or durability issues. You will be notified before an emergency version update is applied. These updates are applied during your gateway's scheduled maintenance window."]}
+    let make ?automaticUpdatePolicy = fun () -> { automaticUpdatePolicy }
+    let to_value x =
+      structure_to_value
+        [("AutomaticUpdatePolicy",
+           (Option.map x.automaticUpdatePolicy
+              ~f:AutomaticUpdatePolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let automaticUpdatePolicy =
+        (Option.map ~f:AutomaticUpdatePolicy.of_xml)
+          (Xml.child xml_arg0 "AutomaticUpdatePolicy") in
+      make ?automaticUpdatePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let automaticUpdatePolicy =
+        field_map json__ "AutomaticUpdatePolicy"
+          AutomaticUpdatePolicy.of_json in
+      make ?automaticUpdatePolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A set of variables indicating the software update preferences for the gateway."]
 module CloudWatchLogGroupARN =
   struct
     type nonrec t = string
@@ -5190,6 +5767,9 @@ module BandwidthRateLimitIntervals =
         ok_or_failwith
           ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BandwidthRateLimitInterval.to_value)) |>
         (fun x -> `List x)
@@ -5211,6 +5791,24 @@ module BandwidthRateLimitIntervals =
       list_of_json ~kind:"BandwidthRateLimitIntervals"
         ~of_json:BandwidthRateLimitInterval.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module ClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:5));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
   end
 module SMBGuestPassword =
   struct
@@ -5274,6 +5872,9 @@ module TagKeys =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5321,6 +5922,9 @@ module FolderList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Folder.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5347,7 +5951,7 @@ module Marker =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1000) >>=
+          ((check_string_max i ~max:2000) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -5362,6 +5966,9 @@ module VolumeInfos =
   struct
     type nonrec t = VolumeInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VolumeInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5386,6 +5993,9 @@ module VolumeRecoveryPointInfos =
   struct
     type nonrec t = VolumeRecoveryPointInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VolumeRecoveryPointInfo.to_value)) |>
         (fun x -> `List x)
@@ -5412,6 +6022,9 @@ module Initiators =
   struct
     type nonrec t = Initiator.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Initiator.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5436,6 +6049,9 @@ module TapeInfos =
   struct
     type nonrec t = TapeInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TapeInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5460,6 +6076,9 @@ module TapeARNs =
   struct
     type nonrec t = TapeARN.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TapeARN.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5483,6 +6102,9 @@ module PoolInfos =
   struct
     type nonrec t = PoolInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PoolInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5507,6 +6129,9 @@ module PoolARNs =
   struct
     type nonrec t = PoolARN.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PoolARN.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5530,6 +6155,9 @@ module Disks =
   struct
     type nonrec t = Disk.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Disk.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5553,6 +6181,9 @@ module Gateways =
   struct
     type nonrec t = GatewayInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GatewayInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5577,6 +6208,9 @@ module FileSystemAssociationSummaryList =
   struct
     type nonrec t = FileSystemAssociationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FileSystemAssociationSummary.to_value)) |>
         (fun x -> `List x)
@@ -5603,6 +6237,9 @@ module FileShareInfoList =
   struct
     type nonrec t = FileShareInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FileShareInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5623,10 +6260,40 @@ module FileShareInfoList =
       list_of_json ~kind:"FileShareInfoList" ~of_json:FileShareInfo.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CacheReportList =
+  struct
+    type nonrec t = CacheReportInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CacheReportInfo.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CacheReportInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CacheReportList" ~of_json:CacheReportInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AutomaticTapeCreationPolicyInfos =
   struct
     type nonrec t = AutomaticTapeCreationPolicyInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutomaticTapeCreationPolicyInfo.to_value)) |>
         (fun x -> `List x)
@@ -5659,6 +6326,7 @@ module ActiveDirectoryStatus =
       | NETWORK_ERROR 
       | TIMEOUT 
       | UNKNOWN_ERROR 
+      | INSUFFICIENT_PERMISSIONS 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -5670,6 +6338,7 @@ module ActiveDirectoryStatus =
       | NETWORK_ERROR -> "NETWORK_ERROR"
       | TIMEOUT -> "TIMEOUT"
       | UNKNOWN_ERROR -> "UNKNOWN_ERROR"
+      | INSUFFICIENT_PERMISSIONS -> "INSUFFICIENT_PERMISSIONS"
       | Non_static_id s -> s
     let of_string =
       function
@@ -5680,6 +6349,7 @@ module ActiveDirectoryStatus =
       | "NETWORK_ERROR" -> NETWORK_ERROR
       | "TIMEOUT" -> TIMEOUT
       | "UNKNOWN_ERROR" -> UNKNOWN_ERROR
+      | "INSUFFICIENT_PERMISSIONS" -> INSUFFICIENT_PERMISSIONS
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -5717,6 +6387,9 @@ module Hosts =
   struct
     type nonrec t = Host.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Host.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5776,6 +6449,9 @@ module DiskIds =
   struct
     type nonrec t = DiskId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DiskId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5799,6 +6475,9 @@ module VTLDevices =
   struct
     type nonrec t = VTLDevice.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VTLDevice.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5823,6 +6502,9 @@ module VTLDeviceARNs =
   struct
     type nonrec t = VTLDeviceARN.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VTLDeviceARN.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5847,6 +6529,9 @@ module Tapes =
   struct
     type nonrec t = Tape.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tape.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5870,6 +6555,9 @@ module TapeRecoveryPointInfos =
   struct
     type nonrec t = TapeRecoveryPointInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TapeRecoveryPointInfo.to_value)) |>
         (fun x -> `List x)
@@ -5896,6 +6584,9 @@ module TapeArchives =
   struct
     type nonrec t = TapeArchive.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TapeArchive.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5920,6 +6611,9 @@ module StorediSCSIVolumes =
   struct
     type nonrec t = StorediSCSIVolume.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StorediSCSIVolume.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5945,6 +6639,9 @@ module VolumeARNs =
   struct
     type nonrec t = VolumeARN.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VolumeARN.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5969,6 +6666,9 @@ module SMBFileShareInfoList =
   struct
     type nonrec t = SMBFileShareInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SMBFileShareInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5998,6 +6698,9 @@ module FileShareARNList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FileShareARN.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6022,6 +6725,9 @@ module NFSFileShareInfoList =
   struct
     type nonrec t = NFSFileShareInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NFSFileShareInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6042,24 +6748,6 @@ module NFSFileShareInfoList =
       list_of_json ~kind:"NFSFileShareInfoList"
         ~of_json:NFSFileShareInfo.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module DeprecationDate =
-  struct
-    type nonrec t = string
-    let context_ = "DeprecationDate"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:25) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DeprecationDate" j
-    let to_json = simple_to_json to_value
   end
 module EndpointType =
   struct
@@ -6083,6 +6771,9 @@ module GatewayNetworkInterfaces =
   struct
     type nonrec t = NetworkInterface.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterface.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6180,6 +6871,9 @@ module SupportedGatewayCapacities =
   struct
     type nonrec t = GatewayCapacity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GatewayCapacity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6205,6 +6899,9 @@ module FileSystemAssociationInfoList =
   struct
     type nonrec t = FileSystemAssociationInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FileSystemAssociationInfo.to_value)) |>
         (fun x -> `List x)
@@ -6235,6 +6932,9 @@ module FileSystemAssociationARNList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FileSystemAssociationARN.to_value)) |>
         (fun x -> `List x)
@@ -6261,6 +6961,9 @@ module ChapCredentials =
   struct
     type nonrec t = ChapInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChapInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6285,6 +6988,9 @@ module CachediSCSIVolumes =
   struct
     type nonrec t = CachediSCSIVolume.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CachediSCSIVolume.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6368,24 +7074,6 @@ module BandwidthType =
     let of_json j = string_of_json ~kind:"BandwidthType" j
     let to_json = simple_to_json to_value
   end
-module ClientToken =
-  struct
-    type nonrec t = string
-    let context_ = "ClientToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:100) >>=
-             (fun () -> check_string_min i ~min:5));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ClientToken" j
-    let to_json = simple_to_json to_value
-  end
 module NumTapesToCreate =
   struct
     type nonrec t = int
@@ -6428,9 +7116,9 @@ module ServiceUnavailableError =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?error ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "error" StorageGatewayError.of_json in
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let error = field_map json__ "error" StorageGatewayError.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?error ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6564,8 +7252,8 @@ module UpdateVTLDeviceTypeOutput =
           (Xml.child xml_arg0 "VTLDeviceARN") in
       make ?vTLDeviceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vTLDeviceARN = field_map json "VTLDeviceARN" VTLDeviceARN.of_json in
+    let of_json json__ =
+      let vTLDeviceARN = field_map json__ "VTLDeviceARN" VTLDeviceARN.of_json in
       make ?vTLDeviceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "UpdateVTLDeviceTypeOutput"]
@@ -6596,10 +7284,10 @@ module UpdateVTLDeviceTypeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "VTLDeviceARN") in
       make ~deviceType ~vTLDeviceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deviceType = field_map_exn json "DeviceType" DeviceType.of_json in
+    let of_json json__ =
+      let deviceType = field_map_exn json__ "DeviceType" DeviceType.of_json in
       let vTLDeviceARN =
-        field_map_exn json "VTLDeviceARN" VTLDeviceARN.of_json in
+        field_map_exn json__ "VTLDeviceARN" VTLDeviceARN.of_json in
       make ~deviceType ~vTLDeviceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6659,8 +7347,8 @@ module UpdateSnapshotScheduleOutput =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
+    let of_json json__ =
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
       make ?volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6715,13 +7403,13 @@ module UpdateSnapshotScheduleInput =
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ?tags ?description ~recurrenceInHours ~startAt ~volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let description = field_map json "Description" Description.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let recurrenceInHours =
-        field_map_exn json "RecurrenceInHours" RecurrenceInHours.of_json in
-      let startAt = field_map_exn json "StartAt" HourOfDay.of_json in
-      let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
+        field_map_exn json__ "RecurrenceInHours" RecurrenceInHours.of_json in
+      let startAt = field_map_exn json__ "StartAt" HourOfDay.of_json in
+      let volumeARN = field_map_exn json__ "VolumeARN" VolumeARN.of_json in
       make ?tags ?description ~recurrenceInHours ~startAt ~volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6778,12 +7466,12 @@ module UpdateSMBSecurityStrategyOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the SMB security strategy on a file gateway. This action is only supported in file gateways. This API is called Security level in the User Guide. A higher security level can affect performance of the gateway."]
+       "Updates the SMB security strategy level for an Amazon S3 file gateway. This action is only supported for Amazon S3 file gateways. For information about configuring this setting using the Amazon Web Services console, see Setting a security level for your gateway in the Amazon S3 File Gateway User Guide. A higher security strategy level can affect performance of the gateway."]
 module UpdateSMBSecurityStrategyInput =
   struct
     type nonrec t =
@@ -6791,7 +7479,7 @@ module UpdateSMBSecurityStrategyInput =
       gatewayARN: GatewayARN.t ;
       sMBSecurityStrategy: SMBSecurityStrategy.t
         [@ocaml.doc
-          "Specifies the type of security strategy. ClientSpecified: if you use this option, requests are established based on what is negotiated by the client. This option is recommended when you want to maximize compatibility across different clients in your environment. Supported only in S3 File Gateway. MandatorySigning: if you use this option, file gateway only allows connections from SMBv2 or SMBv3 clients that have signing enabled. This option works with SMB clients on Microsoft Windows Vista, Windows Server 2008 or newer. MandatoryEncryption: if you use this option, file gateway only allows connections from SMBv3 clients that have encryption enabled. This option is highly recommended for environments that handle sensitive data. This option works with SMB clients on Microsoft Windows 8, Windows Server 2012 or newer."]}
+          "Specifies the type of security strategy. ClientSpecified: If you choose this option, requests are established based on what is negotiated by the client. This option is recommended when you want to maximize compatibility across different clients in your environment. Supported only for S3 File Gateway. MandatorySigning: If you choose this option, File Gateway only allows connections from SMBv2 or SMBv3 clients that have signing enabled. This option works with SMB clients on Microsoft Windows Vista, Windows Server 2008 or newer. MandatoryEncryption: If you choose this option, File Gateway only allows connections from SMBv3 clients that have encryption enabled. This option is recommended for environments that handle sensitive data. This option works with SMB clients on Microsoft Windows 8, Windows Server 2012 or newer. MandatoryEncryptionNoAes128: If you choose this option, File Gateway only allows connections from SMBv3 clients that use 256-bit AES encryption algorithms. 128-bit algorithms are not allowed. This option is recommended for environments that handle sensitive data. It works with SMB clients on Microsoft Windows 8, Windows Server 2012, or later."]}
     let context_ = "UpdateSMBSecurityStrategyInput"
     let make ~gatewayARN =
       fun ~sMBSecurityStrategy ->
@@ -6811,14 +7499,15 @@ module UpdateSMBSecurityStrategyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~sMBSecurityStrategy ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sMBSecurityStrategy =
-        field_map_exn json "SMBSecurityStrategy" SMBSecurityStrategy.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map_exn json__ "SMBSecurityStrategy"
+          SMBSecurityStrategy.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~sMBSecurityStrategy ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the SMB security strategy on a file gateway. This action is only supported in file gateways. This API is called Security level in the User Guide. A higher security level can affect performance of the gateway."]
+       "Updates the SMB security strategy level for an Amazon S3 file gateway. This action is only supported for Amazon S3 file gateways. For information about configuring this setting using the Amazon Web Services console, see Setting a security level for your gateway in the Amazon S3 File Gateway User Guide. A higher security strategy level can affect performance of the gateway."]
 module UpdateSMBLocalGroupsOutput =
   struct
     type nonrec t = {
@@ -6871,8 +7560,8 @@ module UpdateSMBLocalGroupsOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6902,10 +7591,10 @@ module UpdateSMBLocalGroupsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~sMBLocalGroups ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sMBLocalGroups =
-        field_map_exn json "SMBLocalGroups" SMBLocalGroups.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map_exn json__ "SMBLocalGroups" SMBLocalGroups.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~sMBLocalGroups ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6962,8 +7651,8 @@ module UpdateSMBFileShareVisibilityOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6992,10 +7681,10 @@ module UpdateSMBFileShareVisibilityInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~fileSharesVisible ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSharesVisible =
-        field_map_exn json "FileSharesVisible" Boolean.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map_exn json__ "FileSharesVisible" Boolean.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~fileSharesVisible ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7057,8 +7746,8 @@ module UpdateSMBFileShareOutput =
           (Xml.child xml_arg0 "FileShareARN") in
       make ?fileShareARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
+    let of_json json__ =
+      let fileShareARN = field_map json__ "FileShareARN" FileShareARN.of_json in
       make ?fileShareARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "UpdateSMBFileShareOutput"]
@@ -7069,15 +7758,18 @@ module UpdateSMBFileShareInput =
       fileShareARN: FileShareARN.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the SMB file share that you want to update."];
+      encryptionType: EncryptionType.t option
+        [@ocaml.doc
+          "A value that specifies the type of server-side encryption that the file share will use for the data that it stores in Amazon S3. We recommend using EncryptionType instead of KMSEncrypted to set the file share encryption method. You do not need to provide values for both parameters. If values for both parameters exist in the same request, then the specified encryption methods must not conflict. For example, if EncryptionType is SseS3, then KMSEncrypted must be false. If EncryptionType is SseKms or DsseKms, then KMSEncrypted must be true."];
       kMSEncrypted: Boolean.t option
         [@ocaml.doc
-          "Set to true to use Amazon S3 server-side encryption with your own KMS key, or false to use a key managed by Amazon S3. Optional. Valid Values: true | false"];
+          "Optional. Set to true to use Amazon S3 server-side encryption with your own KMS key (SSE-KMS), or false to use a key managed by Amazon S3 (SSE-S3). To use dual-layer encryption (DSSE-KMS), set the EncryptionType parameter instead. We recommend using EncryptionType instead of KMSEncrypted to set the file share encryption method. You do not need to provide values for both parameters. If values for both parameters exist in the same request, then the specified encryption methods must not conflict. For example, if EncryptionType is SseS3, then KMSEncrypted must be false. If EncryptionType is SseKms or DsseKms, then KMSEncrypted must be true. Valid Values: true | false"];
       kMSKey: KMSKey.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value can only be set when KMSEncrypted is true. Optional."];
+          "Optional. The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value must be set if KMSEncrypted is true, or if EncryptionType is SseKms or DsseKms."];
       defaultStorageClass: StorageClass.t option
         [@ocaml.doc
-          "The default storage class for objects put into an Amazon S3 bucket by the S3 File Gateway. The default value is S3_INTELLIGENT_TIERING. Optional. Valid Values: S3_STANDARD | S3_INTELLIGENT_TIERING | S3_STANDARD_IA | S3_ONEZONE_IA"];
+          "The default storage class for objects put into an Amazon S3 bucket by the S3 File Gateway. The default value is S3_STANDARD. Optional. Valid Values: S3_STANDARD | S3_INTELLIGENT_TIERING | S3_STANDARD_IA | S3_ONEZONE_IA"];
       objectACL: ObjectACL.t option
         [@ocaml.doc
           "A value that sets the access control list (ACL) permission for objects in the S3 bucket that a S3 File Gateway puts objects into. The default value is private."];
@@ -7092,7 +7784,7 @@ module UpdateSMBFileShareInput =
           "A value that sets who pays the cost of the request and the cost associated with data download from the S3 bucket. If this value is set to true, the requester pays the costs; otherwise, the S3 bucket owner pays. However, the S3 bucket owner always pays the cost of storing data. RequesterPays is a configuration for the S3 bucket that backs the file share, so make sure that the configuration on the file share is the same as the S3 bucket configuration. Valid Values: true | false"];
       sMBACLEnabled: Boolean.t option
         [@ocaml.doc
-          "Set this value to true to enable access control list (ACL) on the SMB file share. Set it to false to map file and directory permissions to the POSIX permissions. For more information, see Using Microsoft Windows ACLs to control access to an SMB file share in the Storage Gateway User Guide. Valid Values: true | false"];
+          "Set this value to true to enable access control list (ACL) on the SMB file share. Set it to false to map file and directory permissions to the POSIX permissions. For more information, see Using Windows ACLs to limit SMB file share access in the Amazon S3 File Gateway User Guide. Valid Values: true | false"];
       accessBasedEnumeration: Boolean.t option
         [@ocaml.doc
           "The files and folders on this share will only be visible to users with read access."];
@@ -7113,61 +7805,65 @@ module UpdateSMBFileShareInput =
           "The case of an object name in an Amazon S3 bucket. For ClientSpecified, the client determines the case sensitivity. For CaseSensitive, the gateway determines the case sensitivity. The default value is ClientSpecified."];
       fileShareName: FileShareName.t option
         [@ocaml.doc
-          "The name of the file share. Optional. FileShareName must be set if an S3 prefix name is set in LocationARN, or if an access point or access point alias is used."];
+          "The name of the file share. Optional. FileShareName must be set if an S3 prefix name is set in LocationARN, or if an access point or access point alias is used. A valid SMB file share name cannot contain the following characters: \\[,\\],#,;,<,>,:,\",\\,/,|,?,*,+, or ASCII control characters 1-31."];
       cacheAttributes: CacheAttributes.t option
         [@ocaml.doc
           "Specifies refresh cache information for the file share."];
       notificationPolicy: NotificationPolicy.t option
         [@ocaml.doc
-          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
+          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. This setting is not meant to specify an exact time at which the notification will be sent. In some cases, the gateway might require more than the specified delay time to generate and send notifications. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
       oplocksEnabled: Boolean.t option
         [@ocaml.doc
           "Specifies whether opportunistic locking is enabled for the SMB file share. Enabling opportunistic locking on case-sensitive shares is not recommended for workloads that involve access to files with the same name in different case. Valid Values: true | false"]}
     let context_ = "UpdateSMBFileShareInput"
-    let make ?kMSEncrypted =
-      fun ?kMSKey ->
-        fun ?defaultStorageClass ->
-          fun ?objectACL ->
-            fun ?readOnly ->
-              fun ?guessMIMETypeEnabled ->
-                fun ?requesterPays ->
-                  fun ?sMBACLEnabled ->
-                    fun ?accessBasedEnumeration ->
-                      fun ?adminUserList ->
-                        fun ?validUserList ->
-                          fun ?invalidUserList ->
-                            fun ?auditDestinationARN ->
-                              fun ?caseSensitivity ->
-                                fun ?fileShareName ->
-                                  fun ?cacheAttributes ->
-                                    fun ?notificationPolicy ->
-                                      fun ?oplocksEnabled ->
-                                        fun ~fileShareARN ->
-                                          fun () ->
-                                            {
-                                              kMSEncrypted;
-                                              kMSKey;
-                                              defaultStorageClass;
-                                              objectACL;
-                                              readOnly;
-                                              guessMIMETypeEnabled;
-                                              requesterPays;
-                                              sMBACLEnabled;
-                                              accessBasedEnumeration;
-                                              adminUserList;
-                                              validUserList;
-                                              invalidUserList;
-                                              auditDestinationARN;
-                                              caseSensitivity;
-                                              fileShareName;
-                                              cacheAttributes;
-                                              notificationPolicy;
-                                              oplocksEnabled;
-                                              fileShareARN
-                                            }
+    let make ?encryptionType =
+      fun ?kMSEncrypted ->
+        fun ?kMSKey ->
+          fun ?defaultStorageClass ->
+            fun ?objectACL ->
+              fun ?readOnly ->
+                fun ?guessMIMETypeEnabled ->
+                  fun ?requesterPays ->
+                    fun ?sMBACLEnabled ->
+                      fun ?accessBasedEnumeration ->
+                        fun ?adminUserList ->
+                          fun ?validUserList ->
+                            fun ?invalidUserList ->
+                              fun ?auditDestinationARN ->
+                                fun ?caseSensitivity ->
+                                  fun ?fileShareName ->
+                                    fun ?cacheAttributes ->
+                                      fun ?notificationPolicy ->
+                                        fun ?oplocksEnabled ->
+                                          fun ~fileShareARN ->
+                                            fun () ->
+                                              {
+                                                encryptionType;
+                                                kMSEncrypted;
+                                                kMSKey;
+                                                defaultStorageClass;
+                                                objectACL;
+                                                readOnly;
+                                                guessMIMETypeEnabled;
+                                                requesterPays;
+                                                sMBACLEnabled;
+                                                accessBasedEnumeration;
+                                                adminUserList;
+                                                validUserList;
+                                                invalidUserList;
+                                                auditDestinationARN;
+                                                caseSensitivity;
+                                                fileShareName;
+                                                cacheAttributes;
+                                                notificationPolicy;
+                                                oplocksEnabled;
+                                                fileShareARN
+                                              }
     let to_value x =
       structure_to_value
         [("FileShareARN", (Some (FileShareARN.to_value x.fileShareARN)));
+        ("EncryptionType",
+          (Option.map x.encryptionType ~f:EncryptionType.to_value));
         ("KMSEncrypted", (Option.map x.kMSEncrypted ~f:Boolean.to_value));
         ("KMSKey", (Option.map x.kMSKey ~f:KMSKey.to_value));
         ("DefaultStorageClass",
@@ -7242,6 +7938,9 @@ module UpdateSMBFileShareInput =
         (Option.map ~f:KMSKey.of_xml) (Xml.child xml_arg0 "KMSKey") in
       let kMSEncrypted =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "KMSEncrypted") in
+      let encryptionType =
+        (Option.map ~f:EncryptionType.of_xml)
+          (Xml.child xml_arg0 "EncryptionType") in
       let fileShareARN =
         FileShareARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileShareARN") in
@@ -7249,42 +7948,47 @@ module UpdateSMBFileShareInput =
         ?fileShareName ?caseSensitivity ?auditDestinationARN ?invalidUserList
         ?validUserList ?adminUserList ?accessBasedEnumeration ?sMBACLEnabled
         ?requesterPays ?guessMIMETypeEnabled ?readOnly ?objectACL
-        ?defaultStorageClass ?kMSKey ?kMSEncrypted ~fileShareARN ()
+        ?defaultStorageClass ?kMSKey ?kMSEncrypted ?encryptionType
+        ~fileShareARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let oplocksEnabled = field_map json "OplocksEnabled" Boolean.of_json in
+    let of_json json__ =
+      let oplocksEnabled = field_map json__ "OplocksEnabled" Boolean.of_json in
       let notificationPolicy =
-        field_map json "NotificationPolicy" NotificationPolicy.of_json in
+        field_map json__ "NotificationPolicy" NotificationPolicy.of_json in
       let cacheAttributes =
-        field_map json "CacheAttributes" CacheAttributes.of_json in
+        field_map json__ "CacheAttributes" CacheAttributes.of_json in
       let fileShareName =
-        field_map json "FileShareName" FileShareName.of_json in
+        field_map json__ "FileShareName" FileShareName.of_json in
       let caseSensitivity =
-        field_map json "CaseSensitivity" CaseSensitivity.of_json in
+        field_map json__ "CaseSensitivity" CaseSensitivity.of_json in
       let auditDestinationARN =
-        field_map json "AuditDestinationARN" AuditDestinationARN.of_json in
-      let invalidUserList = field_map json "InvalidUserList" UserList.of_json in
-      let validUserList = field_map json "ValidUserList" UserList.of_json in
-      let adminUserList = field_map json "AdminUserList" UserList.of_json in
+        field_map json__ "AuditDestinationARN" AuditDestinationARN.of_json in
+      let invalidUserList =
+        field_map json__ "InvalidUserList" UserList.of_json in
+      let validUserList = field_map json__ "ValidUserList" UserList.of_json in
+      let adminUserList = field_map json__ "AdminUserList" UserList.of_json in
       let accessBasedEnumeration =
-        field_map json "AccessBasedEnumeration" Boolean.of_json in
-      let sMBACLEnabled = field_map json "SMBACLEnabled" Boolean.of_json in
-      let requesterPays = field_map json "RequesterPays" Boolean.of_json in
+        field_map json__ "AccessBasedEnumeration" Boolean.of_json in
+      let sMBACLEnabled = field_map json__ "SMBACLEnabled" Boolean.of_json in
+      let requesterPays = field_map json__ "RequesterPays" Boolean.of_json in
       let guessMIMETypeEnabled =
-        field_map json "GuessMIMETypeEnabled" Boolean.of_json in
-      let readOnly = field_map json "ReadOnly" Boolean.of_json in
-      let objectACL = field_map json "ObjectACL" ObjectACL.of_json in
+        field_map json__ "GuessMIMETypeEnabled" Boolean.of_json in
+      let readOnly = field_map json__ "ReadOnly" Boolean.of_json in
+      let objectACL = field_map json__ "ObjectACL" ObjectACL.of_json in
       let defaultStorageClass =
-        field_map json "DefaultStorageClass" StorageClass.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
-      let kMSEncrypted = field_map json "KMSEncrypted" Boolean.of_json in
+        field_map json__ "DefaultStorageClass" StorageClass.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
+      let kMSEncrypted = field_map json__ "KMSEncrypted" Boolean.of_json in
+      let encryptionType =
+        field_map json__ "EncryptionType" EncryptionType.of_json in
       let fileShareARN =
-        field_map_exn json "FileShareARN" FileShareARN.of_json in
+        field_map_exn json__ "FileShareARN" FileShareARN.of_json in
       make ?oplocksEnabled ?notificationPolicy ?cacheAttributes
         ?fileShareName ?caseSensitivity ?auditDestinationARN ?invalidUserList
         ?validUserList ?adminUserList ?accessBasedEnumeration ?sMBACLEnabled
         ?requesterPays ?guessMIMETypeEnabled ?readOnly ?objectACL
-        ?defaultStorageClass ?kMSKey ?kMSEncrypted ~fileShareARN ()
+        ?defaultStorageClass ?kMSKey ?kMSEncrypted ?encryptionType
+        ~fileShareARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "UpdateSMBFileShareInput"]
 module UpdateNFSFileShareOutput =
@@ -7344,8 +8048,8 @@ module UpdateNFSFileShareOutput =
           (Xml.child xml_arg0 "FileShareARN") in
       make ?fileShareARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
+    let of_json json__ =
+      let fileShareARN = field_map json__ "FileShareARN" FileShareARN.of_json in
       make ?fileShareARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "UpdateNFSFileShareOutput"]
@@ -7356,23 +8060,26 @@ module UpdateNFSFileShareInput =
       fileShareARN: FileShareARN.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the file share to be updated."];
+      encryptionType: EncryptionType.t option
+        [@ocaml.doc
+          "A value that specifies the type of server-side encryption that the file share will use for the data that it stores in Amazon S3. We recommend using EncryptionType instead of KMSEncrypted to set the file share encryption method. You do not need to provide values for both parameters. If values for both parameters exist in the same request, then the specified encryption methods must not conflict. For example, if EncryptionType is SseS3, then KMSEncrypted must be false. If EncryptionType is SseKms or DsseKms, then KMSEncrypted must be true."];
       kMSEncrypted: Boolean.t option
         [@ocaml.doc
-          "Set to true to use Amazon S3 server-side encryption with your own KMS key, or false to use a key managed by Amazon S3. Optional. Valid Values: true | false"];
+          "Optional. Set to true to use Amazon S3 server-side encryption with your own KMS key (SSE-KMS), or false to use a key managed by Amazon S3 (SSE-S3). To use dual-layer encryption (DSSE-KMS), set the EncryptionType parameter instead. We recommend using EncryptionType instead of KMSEncrypted to set the file share encryption method. You do not need to provide values for both parameters. If values for both parameters exist in the same request, then the specified encryption methods must not conflict. For example, if EncryptionType is SseS3, then KMSEncrypted must be false. If EncryptionType is SseKms or DsseKms, then KMSEncrypted must be true. Valid Values: true | false"];
       kMSKey: KMSKey.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value can only be set when KMSEncrypted is true. Optional."];
+          "Optional. The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value must be set if KMSEncrypted is true, or if EncryptionType is SseKms or DsseKms."];
       nFSFileShareDefaults: NFSFileShareDefaults.t option
         [@ocaml.doc "The default values for the file share. Optional."];
       defaultStorageClass: StorageClass.t option
         [@ocaml.doc
-          "The default storage class for objects put into an Amazon S3 bucket by the S3 File Gateway. The default value is S3_INTELLIGENT_TIERING. Optional. Valid Values: S3_STANDARD | S3_INTELLIGENT_TIERING | S3_STANDARD_IA | S3_ONEZONE_IA"];
+          "The default storage class for objects put into an Amazon S3 bucket by the S3 File Gateway. The default value is S3_STANDARD. Optional. Valid Values: S3_STANDARD | S3_INTELLIGENT_TIERING | S3_STANDARD_IA | S3_ONEZONE_IA"];
       objectACL: ObjectACL.t option
         [@ocaml.doc
           "A value that sets the access control list (ACL) permission for objects in the S3 bucket that a S3 File Gateway puts objects into. The default value is private."];
       clientList: FileShareClientList.t option
         [@ocaml.doc
-          "The list of clients that are allowed to access the S3 File Gateway. The list must contain either valid IP addresses or valid CIDR blocks."];
+          "The list of clients that are allowed to access the S3 File Gateway. The list must contain either valid IPv4/IPv6 addresses or valid CIDR blocks."];
       squash: Squash.t option
         [@ocaml.doc
           "The user mapped to anonymous user. Valid values are the following: RootSquash: Only root is mapped to anonymous user. NoSquash: No one is mapped to anonymous user. AllSquash: Everyone is mapped to anonymous user."];
@@ -7387,53 +8094,57 @@ module UpdateNFSFileShareInput =
           "A value that sets who pays the cost of the request and the cost associated with data download from the S3 bucket. If this value is set to true, the requester pays the costs; otherwise, the S3 bucket owner pays. However, the S3 bucket owner always pays the cost of storing data. RequesterPays is a configuration for the S3 bucket that backs the file share, so make sure that the configuration on the file share is the same as the S3 bucket configuration. Valid Values: true | false"];
       fileShareName: FileShareName.t option
         [@ocaml.doc
-          "The name of the file share. Optional. FileShareName must be set if an S3 prefix name is set in LocationARN, or if an access point or access point alias is used."];
+          "The name of the file share. Optional. FileShareName must be set if an S3 prefix name is set in LocationARN, or if an access point or access point alias is used. A valid NFS file share name can only contain the following characters: a-z, A-Z, 0-9, -, ., and _."];
       cacheAttributes: CacheAttributes.t option
         [@ocaml.doc
           "Specifies refresh cache information for the file share."];
       notificationPolicy: NotificationPolicy.t option
         [@ocaml.doc
-          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
+          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. This setting is not meant to specify an exact time at which the notification will be sent. In some cases, the gateway might require more than the specified delay time to generate and send notifications. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
       auditDestinationARN: AuditDestinationARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the storage used for audit logs."]}
     let context_ = "UpdateNFSFileShareInput"
-    let make ?kMSEncrypted =
-      fun ?kMSKey ->
-        fun ?nFSFileShareDefaults ->
-          fun ?defaultStorageClass ->
-            fun ?objectACL ->
-              fun ?clientList ->
-                fun ?squash ->
-                  fun ?readOnly ->
-                    fun ?guessMIMETypeEnabled ->
-                      fun ?requesterPays ->
-                        fun ?fileShareName ->
-                          fun ?cacheAttributes ->
-                            fun ?notificationPolicy ->
-                              fun ?auditDestinationARN ->
-                                fun ~fileShareARN ->
-                                  fun () ->
-                                    {
-                                      kMSEncrypted;
-                                      kMSKey;
-                                      nFSFileShareDefaults;
-                                      defaultStorageClass;
-                                      objectACL;
-                                      clientList;
-                                      squash;
-                                      readOnly;
-                                      guessMIMETypeEnabled;
-                                      requesterPays;
-                                      fileShareName;
-                                      cacheAttributes;
-                                      notificationPolicy;
-                                      auditDestinationARN;
-                                      fileShareARN
-                                    }
+    let make ?encryptionType =
+      fun ?kMSEncrypted ->
+        fun ?kMSKey ->
+          fun ?nFSFileShareDefaults ->
+            fun ?defaultStorageClass ->
+              fun ?objectACL ->
+                fun ?clientList ->
+                  fun ?squash ->
+                    fun ?readOnly ->
+                      fun ?guessMIMETypeEnabled ->
+                        fun ?requesterPays ->
+                          fun ?fileShareName ->
+                            fun ?cacheAttributes ->
+                              fun ?notificationPolicy ->
+                                fun ?auditDestinationARN ->
+                                  fun ~fileShareARN ->
+                                    fun () ->
+                                      {
+                                        encryptionType;
+                                        kMSEncrypted;
+                                        kMSKey;
+                                        nFSFileShareDefaults;
+                                        defaultStorageClass;
+                                        objectACL;
+                                        clientList;
+                                        squash;
+                                        readOnly;
+                                        guessMIMETypeEnabled;
+                                        requesterPays;
+                                        fileShareName;
+                                        cacheAttributes;
+                                        notificationPolicy;
+                                        auditDestinationARN;
+                                        fileShareARN
+                                      }
     let to_value x =
       structure_to_value
         [("FileShareARN", (Some (FileShareARN.to_value x.fileShareARN)));
+        ("EncryptionType",
+          (Option.map x.encryptionType ~f:EncryptionType.to_value));
         ("KMSEncrypted", (Option.map x.kMSEncrypted ~f:Boolean.to_value));
         ("KMSKey", (Option.map x.kMSKey ~f:KMSKey.to_value));
         ("NFSFileShareDefaults",
@@ -7494,43 +8205,48 @@ module UpdateNFSFileShareInput =
         (Option.map ~f:KMSKey.of_xml) (Xml.child xml_arg0 "KMSKey") in
       let kMSEncrypted =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "KMSEncrypted") in
+      let encryptionType =
+        (Option.map ~f:EncryptionType.of_xml)
+          (Xml.child xml_arg0 "EncryptionType") in
       let fileShareARN =
         FileShareARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FileShareARN") in
       make ?auditDestinationARN ?notificationPolicy ?cacheAttributes
         ?fileShareName ?requesterPays ?guessMIMETypeEnabled ?readOnly ?squash
         ?clientList ?objectACL ?defaultStorageClass ?nFSFileShareDefaults
-        ?kMSKey ?kMSEncrypted ~fileShareARN ()
+        ?kMSKey ?kMSEncrypted ?encryptionType ~fileShareARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let auditDestinationARN =
-        field_map json "AuditDestinationARN" AuditDestinationARN.of_json in
+        field_map json__ "AuditDestinationARN" AuditDestinationARN.of_json in
       let notificationPolicy =
-        field_map json "NotificationPolicy" NotificationPolicy.of_json in
+        field_map json__ "NotificationPolicy" NotificationPolicy.of_json in
       let cacheAttributes =
-        field_map json "CacheAttributes" CacheAttributes.of_json in
+        field_map json__ "CacheAttributes" CacheAttributes.of_json in
       let fileShareName =
-        field_map json "FileShareName" FileShareName.of_json in
-      let requesterPays = field_map json "RequesterPays" Boolean.of_json in
+        field_map json__ "FileShareName" FileShareName.of_json in
+      let requesterPays = field_map json__ "RequesterPays" Boolean.of_json in
       let guessMIMETypeEnabled =
-        field_map json "GuessMIMETypeEnabled" Boolean.of_json in
-      let readOnly = field_map json "ReadOnly" Boolean.of_json in
-      let squash = field_map json "Squash" Squash.of_json in
+        field_map json__ "GuessMIMETypeEnabled" Boolean.of_json in
+      let readOnly = field_map json__ "ReadOnly" Boolean.of_json in
+      let squash = field_map json__ "Squash" Squash.of_json in
       let clientList =
-        field_map json "ClientList" FileShareClientList.of_json in
-      let objectACL = field_map json "ObjectACL" ObjectACL.of_json in
+        field_map json__ "ClientList" FileShareClientList.of_json in
+      let objectACL = field_map json__ "ObjectACL" ObjectACL.of_json in
       let defaultStorageClass =
-        field_map json "DefaultStorageClass" StorageClass.of_json in
+        field_map json__ "DefaultStorageClass" StorageClass.of_json in
       let nFSFileShareDefaults =
-        field_map json "NFSFileShareDefaults" NFSFileShareDefaults.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
-      let kMSEncrypted = field_map json "KMSEncrypted" Boolean.of_json in
+        field_map json__ "NFSFileShareDefaults" NFSFileShareDefaults.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
+      let kMSEncrypted = field_map json__ "KMSEncrypted" Boolean.of_json in
+      let encryptionType =
+        field_map json__ "EncryptionType" EncryptionType.of_json in
       let fileShareARN =
-        field_map_exn json "FileShareARN" FileShareARN.of_json in
+        field_map_exn json__ "FileShareARN" FileShareARN.of_json in
       make ?auditDestinationARN ?notificationPolicy ?cacheAttributes
         ?fileShareName ?requesterPays ?guessMIMETypeEnabled ?readOnly ?squash
         ?clientList ?objectACL ?defaultStorageClass ?nFSFileShareDefaults
-        ?kMSKey ?kMSEncrypted ~fileShareARN ()
+        ?kMSKey ?kMSEncrypted ?encryptionType ~fileShareARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "UpdateNFSFileShareInput"]
 module UpdateMaintenanceStartTimeOutput =
@@ -7585,8 +8301,8 @@ module UpdateMaintenanceStartTimeOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7596,62 +8312,82 @@ module UpdateMaintenanceStartTimeInput =
     type nonrec t =
       {
       gatewayARN: GatewayARN.t ;
-      hourOfDay: HourOfDay.t
+      hourOfDay: HourOfDay.t option
         [@ocaml.doc
           "The hour component of the maintenance start time represented as hh, where hh is the hour (00 to 23). The hour of the day is in the time zone of the gateway."];
-      minuteOfHour: MinuteOfHour.t
+      minuteOfHour: MinuteOfHour.t option
         [@ocaml.doc
           "The minute component of the maintenance start time represented as mm, where mm is the minute (00 to 59). The minute of the hour is in the time zone of the gateway."];
       dayOfWeek: DayOfWeek.t option
         [@ocaml.doc
-          "The day of the week component of the maintenance start time week represented as an ordinal number from 0 to 6, where 0 represents Sunday and 6 Saturday."];
+          "The day of the week component of the maintenance start time week represented as an ordinal number from 0 to 6, where 0 represents Sunday and 6 represents Saturday."];
       dayOfMonth: DayOfMonth.t option
         [@ocaml.doc
-          "The day of the month component of the maintenance start time represented as an ordinal number from 1 to 28, where 1 represents the first day of the month and 28 represents the last day of the month."]}
+          "The day of the month component of the maintenance start time represented as an ordinal number from 1 to 28, where 1 represents the first day of the month. It is not possible to set the maintenance schedule to start on days 29 through 31."];
+      softwareUpdatePreferences: SoftwareUpdatePreferences.t option
+        [@ocaml.doc
+          "A set of variables indicating the software update preferences for the gateway. Includes AutomaticUpdatePolicy field with the following inputs: ALL_VERSIONS - Enables regular gateway maintenance updates. EMERGENCY_VERSIONS_ONLY - Disables regular gateway maintenance updates. The gateway will still receive emergency version updates on rare occasions if necessary to remedy highly critical security or durability issues. You will be notified before an emergency version update is applied. These updates are applied during your gateway's scheduled maintenance window."]}
     let context_ = "UpdateMaintenanceStartTimeInput"
-    let make ?dayOfWeek =
-      fun ?dayOfMonth ->
-        fun ~gatewayARN ->
-          fun ~hourOfDay ->
-            fun ~minuteOfHour ->
-              fun () ->
-                { dayOfWeek; dayOfMonth; gatewayARN; hourOfDay; minuteOfHour
-                }
+    let make ?hourOfDay =
+      fun ?minuteOfHour ->
+        fun ?dayOfWeek ->
+          fun ?dayOfMonth ->
+            fun ?softwareUpdatePreferences ->
+              fun ~gatewayARN ->
+                fun () ->
+                  {
+                    hourOfDay;
+                    minuteOfHour;
+                    dayOfWeek;
+                    dayOfMonth;
+                    softwareUpdatePreferences;
+                    gatewayARN
+                  }
     let to_value x =
       structure_to_value
         [("GatewayARN", (Some (GatewayARN.to_value x.gatewayARN)));
-        ("HourOfDay", (Some (HourOfDay.to_value x.hourOfDay)));
-        ("MinuteOfHour", (Some (MinuteOfHour.to_value x.minuteOfHour)));
+        ("HourOfDay", (Option.map x.hourOfDay ~f:HourOfDay.to_value));
+        ("MinuteOfHour",
+          (Option.map x.minuteOfHour ~f:MinuteOfHour.to_value));
         ("DayOfWeek", (Option.map x.dayOfWeek ~f:DayOfWeek.to_value));
-        ("DayOfMonth", (Option.map x.dayOfMonth ~f:DayOfMonth.to_value))]
+        ("DayOfMonth", (Option.map x.dayOfMonth ~f:DayOfMonth.to_value));
+        ("SoftwareUpdatePreferences",
+          (Option.map x.softwareUpdatePreferences
+             ~f:SoftwareUpdatePreferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let softwareUpdatePreferences =
+        (Option.map ~f:SoftwareUpdatePreferences.of_xml)
+          (Xml.child xml_arg0 "SoftwareUpdatePreferences") in
       let dayOfMonth =
         (Option.map ~f:DayOfMonth.of_xml) (Xml.child xml_arg0 "DayOfMonth") in
       let dayOfWeek =
         (Option.map ~f:DayOfWeek.of_xml) (Xml.child xml_arg0 "DayOfWeek") in
       let minuteOfHour =
-        MinuteOfHour.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MinuteOfHour") in
+        (Option.map ~f:MinuteOfHour.of_xml)
+          (Xml.child xml_arg0 "MinuteOfHour") in
       let hourOfDay =
-        HourOfDay.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HourOfDay") in
+        (Option.map ~f:HourOfDay.of_xml) (Xml.child xml_arg0 "HourOfDay") in
       let gatewayARN =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
-      make ?dayOfMonth ?dayOfWeek ~minuteOfHour ~hourOfDay ~gatewayARN ()
+      make ?softwareUpdatePreferences ?dayOfMonth ?dayOfWeek ?minuteOfHour
+        ?hourOfDay ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dayOfMonth = field_map json "DayOfMonth" DayOfMonth.of_json in
-      let dayOfWeek = field_map json "DayOfWeek" DayOfWeek.of_json in
-      let minuteOfHour =
-        field_map_exn json "MinuteOfHour" MinuteOfHour.of_json in
-      let hourOfDay = field_map_exn json "HourOfDay" HourOfDay.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
-      make ?dayOfMonth ?dayOfWeek ~minuteOfHour ~hourOfDay ~gatewayARN ()
+    let of_json json__ =
+      let softwareUpdatePreferences =
+        field_map json__ "SoftwareUpdatePreferences"
+          SoftwareUpdatePreferences.of_json in
+      let dayOfMonth = field_map json__ "DayOfMonth" DayOfMonth.of_json in
+      let dayOfWeek = field_map json__ "DayOfWeek" DayOfWeek.of_json in
+      let minuteOfHour = field_map json__ "MinuteOfHour" MinuteOfHour.of_json in
+      let hourOfDay = field_map json__ "HourOfDay" HourOfDay.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
+      make ?softwareUpdatePreferences ?dayOfMonth ?dayOfWeek ?minuteOfHour
+        ?hourOfDay ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A JSON object containing the following fields: UpdateMaintenanceStartTimeInput$DayOfMonth UpdateMaintenanceStartTimeInput$DayOfWeek UpdateMaintenanceStartTimeInput$HourOfDay UpdateMaintenanceStartTimeInput$MinuteOfHour"]
+       "A JSON object containing the following fields: UpdateMaintenanceStartTimeInput$SoftwareUpdatePreferences UpdateMaintenanceStartTimeInput$DayOfMonth UpdateMaintenanceStartTimeInput$DayOfWeek UpdateMaintenanceStartTimeInput$HourOfDay UpdateMaintenanceStartTimeInput$MinuteOfHour"]
 module UpdateGatewaySoftwareNowOutput =
   struct
     type nonrec t = {
@@ -7704,8 +8440,8 @@ module UpdateGatewaySoftwareNowOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7726,8 +8462,8 @@ module UpdateGatewaySoftwareNowInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7791,9 +8527,9 @@ module UpdateGatewayInformationOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayName ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayName = field_map json "GatewayName" String_.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayName = field_map json__ "GatewayName" String_.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayName ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7810,7 +8546,8 @@ module UpdateGatewayInformationInput =
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Amazon CloudWatch log group that you want to use to monitor and log events in the gateway. For more information, see What is Amazon CloudWatch Logs?"];
       gatewayCapacity: GatewayCapacity.t option
-        [@ocaml.doc "Specifies the size of the gateway's metadata cache."]}
+        [@ocaml.doc
+          "Specifies the size of the gateway's metadata cache. This setting impacts gateway performance and hardware recommendations. For more information, see Performance guidance for gateways with multiple file shares in the Amazon S3 File Gateway User Guide."]}
     let context_ = "UpdateGatewayInformationInput"
     let make ?gatewayName =
       fun ?gatewayTimezone ->
@@ -7855,20 +8592,21 @@ module UpdateGatewayInformationInput =
       make ?gatewayCapacity ?cloudWatchLogGroupARN ?gatewayTimezone
         ?gatewayName ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let gatewayCapacity =
-        field_map json "GatewayCapacity" GatewayCapacity.of_json in
+        field_map json__ "GatewayCapacity" GatewayCapacity.of_json in
       let cloudWatchLogGroupARN =
-        field_map json "CloudWatchLogGroupARN" CloudWatchLogGroupARN.of_json in
+        field_map json__ "CloudWatchLogGroupARN"
+          CloudWatchLogGroupARN.of_json in
       let gatewayTimezone =
-        field_map json "GatewayTimezone" GatewayTimezone.of_json in
-      let gatewayName = field_map json "GatewayName" GatewayName.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "GatewayTimezone" GatewayTimezone.of_json in
+      let gatewayName = field_map json__ "GatewayName" GatewayName.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayCapacity ?cloudWatchLogGroupARN ?gatewayTimezone
         ?gatewayName ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a gateway's metadata, which includes the gateway's name and time zone. To specify which gateway to update, use the Amazon Resource Name (ARN) of the gateway in your request. For gateways activated after September 2, 2015, the gateway's ARN contains the gateway ID rather than the gateway name. However, changing the name of the gateway has no effect on the gateway's ARN."]
+       "Updates a gateway's metadata, which includes the gateway's name, time zone, and metadata cache size. To specify which gateway to update, use the Amazon Resource Name (ARN) of the gateway in your request. For gateways activated after September 2, 2015, the gateway's ARN contains the gateway ID rather than the gateway name. However, changing the name of the gateway has no effect on the gateway's ARN."]
 module UpdateFileSystemAssociationOutput =
   struct
     type nonrec t =
@@ -7927,9 +8665,9 @@ module UpdateFileSystemAssociationOutput =
           (Xml.child xml_arg0 "FileSystemAssociationARN") in
       make ?fileSystemAssociationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSystemAssociationARN =
-        field_map json "FileSystemAssociationARN"
+        field_map json__ "FileSystemAssociationARN"
           FileSystemAssociationARN.of_json in
       make ?fileSystemAssociationARN ()
     let to_json v = composed_to_json to_value v
@@ -7996,15 +8734,15 @@ module UpdateFileSystemAssociationInput =
       make ?cacheAttributes ?auditDestinationARN ?password ?userName
         ~fileSystemAssociationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheAttributes =
-        field_map json "CacheAttributes" CacheAttributes.of_json in
+        field_map json__ "CacheAttributes" CacheAttributes.of_json in
       let auditDestinationARN =
-        field_map json "AuditDestinationARN" AuditDestinationARN.of_json in
-      let password = field_map json "Password" DomainUserPassword.of_json in
-      let userName = field_map json "UserName" DomainUserName.of_json in
+        field_map json__ "AuditDestinationARN" AuditDestinationARN.of_json in
+      let password = field_map json__ "Password" DomainUserPassword.of_json in
+      let userName = field_map json__ "UserName" DomainUserName.of_json in
       let fileSystemAssociationARN =
-        field_map_exn json "FileSystemAssociationARN"
+        field_map_exn json__ "FileSystemAssociationARN"
           FileSystemAssociationARN.of_json in
       make ?cacheAttributes ?auditDestinationARN ?password ?userName
         ~fileSystemAssociationARN ()
@@ -8073,9 +8811,9 @@ module UpdateChapCredentialsOutput =
         (Option.map ~f:TargetARN.of_xml) (Xml.child xml_arg0 "TargetARN") in
       make ?initiatorName ?targetARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let initiatorName = field_map json "InitiatorName" IqnName.of_json in
-      let targetARN = field_map json "TargetARN" TargetARN.of_json in
+    let of_json json__ =
+      let initiatorName = field_map json__ "InitiatorName" IqnName.of_json in
+      let targetARN = field_map json__ "TargetARN" TargetARN.of_json in
       make ?initiatorName ?targetARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A JSON object containing the following fields:"]
@@ -8132,13 +8870,15 @@ module UpdateChapCredentialsInput =
       make ?secretToAuthenticateTarget ~initiatorName
         ~secretToAuthenticateInitiator ~targetARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secretToAuthenticateTarget =
-        field_map json "SecretToAuthenticateTarget" ChapSecret.of_json in
-      let initiatorName = field_map_exn json "InitiatorName" IqnName.of_json in
+        field_map json__ "SecretToAuthenticateTarget" ChapSecret.of_json in
+      let initiatorName =
+        field_map_exn json__ "InitiatorName" IqnName.of_json in
       let secretToAuthenticateInitiator =
-        field_map_exn json "SecretToAuthenticateInitiator" ChapSecret.of_json in
-      let targetARN = field_map_exn json "TargetARN" TargetARN.of_json in
+        field_map_exn json__ "SecretToAuthenticateInitiator"
+          ChapSecret.of_json in
+      let targetARN = field_map_exn json__ "TargetARN" TargetARN.of_json in
       make ?secretToAuthenticateTarget ~initiatorName
         ~secretToAuthenticateInitiator ~targetARN ()
     let to_json v = composed_to_json to_value v
@@ -8196,12 +8936,12 @@ module UpdateBandwidthRateLimitScheduleOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the bandwidth rate limit schedule for a specified gateway. By default, gateways do not have bandwidth rate limit schedules, which means no bandwidth rate limiting is in effect. Use this to initiate or update a gateway's bandwidth rate limit schedule. This operation is supported only for volume, tape and S3 file gateways. FSx file gateways do not support bandwidth rate limits."]
+       "Updates the bandwidth rate limit schedule for a specified gateway. By default, gateways do not have bandwidth rate limit schedules, which means no bandwidth rate limiting is in effect. Use this to initiate or update a gateway's bandwidth rate limit schedule. This operation is supported for volume, tape, and S3 file gateways. S3 file gateways support bandwidth rate limits for upload only. FSx file gateways do not support bandwidth rate limits."]
 module UpdateBandwidthRateLimitScheduleInput =
   struct
     type nonrec t =
@@ -8232,15 +8972,15 @@ module UpdateBandwidthRateLimitScheduleInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~bandwidthRateLimitIntervals ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bandwidthRateLimitIntervals =
-        field_map_exn json "BandwidthRateLimitIntervals"
+        field_map_exn json__ "BandwidthRateLimitIntervals"
           BandwidthRateLimitIntervals.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~bandwidthRateLimitIntervals ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the bandwidth rate limit schedule for a specified gateway. By default, gateways do not have bandwidth rate limit schedules, which means no bandwidth rate limiting is in effect. Use this to initiate or update a gateway's bandwidth rate limit schedule. This operation is supported only for volume, tape and S3 file gateways. FSx file gateways do not support bandwidth rate limits."]
+       "Updates the bandwidth rate limit schedule for a specified gateway. By default, gateways do not have bandwidth rate limit schedules, which means no bandwidth rate limiting is in effect. Use this to initiate or update a gateway's bandwidth rate limit schedule. This operation is supported for volume, tape, and S3 file gateways. S3 file gateways support bandwidth rate limits for upload only. FSx file gateways do not support bandwidth rate limits."]
 module UpdateBandwidthRateLimitOutput =
   struct
     type nonrec t = {
@@ -8293,8 +9033,8 @@ module UpdateBandwidthRateLimitOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8344,14 +9084,14 @@ module UpdateBandwidthRateLimitInput =
       make ?averageDownloadRateLimitInBitsPerSec
         ?averageUploadRateLimitInBitsPerSec ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let averageDownloadRateLimitInBitsPerSec =
-        field_map json "AverageDownloadRateLimitInBitsPerSec"
+        field_map json__ "AverageDownloadRateLimitInBitsPerSec"
           BandwidthDownloadRateLimit.of_json in
       let averageUploadRateLimitInBitsPerSec =
-        field_map json "AverageUploadRateLimitInBitsPerSec"
+        field_map json__ "AverageUploadRateLimitInBitsPerSec"
           BandwidthUploadRateLimit.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ?averageDownloadRateLimitInBitsPerSec
         ?averageUploadRateLimitInBitsPerSec ~gatewayARN ()
     let to_json v = composed_to_json to_value v
@@ -8409,8 +9149,8 @@ module UpdateAutomaticTapeCreationPolicyOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8444,10 +9184,10 @@ module UpdateAutomaticTapeCreationPolicyInput =
              "AutomaticTapeCreationRules") in
       make ~gatewayARN ~automaticTapeCreationRules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       let automaticTapeCreationRules =
-        field_map_exn json "AutomaticTapeCreationRules"
+        field_map_exn json__ "AutomaticTapeCreationRules"
           AutomaticTapeCreationRules.of_json in
       make ~gatewayARN ~automaticTapeCreationRules ()
     let to_json v = composed_to_json to_value v
@@ -8505,8 +9245,8 @@ module StartGatewayOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8527,12 +9267,191 @@ module StartGatewayInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A JSON object containing the Amazon Resource Name (ARN) of the gateway to start."]
+module StartCacheReportOutput =
+  struct
+    type nonrec t =
+      {
+      cacheReportARN: CacheReportARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the cache report generated by the StartCacheReport request."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidGatewayRequestException of InvalidGatewayRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?cacheReportARN = fun () -> { cacheReportARN }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidGatewayRequestException" ->
+          `InvalidGatewayRequestException
+            (InvalidGatewayRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidGatewayRequestException" ->
+          `InvalidGatewayRequestException
+            (InvalidGatewayRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidGatewayRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidGatewayRequestException"));
+            ("details", (InvalidGatewayRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CacheReportARN",
+           (Option.map x.cacheReportARN ~f:CacheReportARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cacheReportARN =
+        (Option.map ~f:CacheReportARN.of_xml)
+          (Xml.child xml_arg0 "CacheReportARN") in
+      make ?cacheReportARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cacheReportARN =
+        field_map json__ "CacheReportARN" CacheReportARN.of_json in
+      make ?cacheReportARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts generating a report of the file metadata currently cached by an S3 File Gateway for a specific file share. You can use this report to identify and resolve issues if you have files failing upload from your gateway to Amazon S3. The report is a CSV file containing a list of files which match the set of filter parameters you specify in the request. The Files Failing Upload flag is reset every 24 hours and during gateway reboot. If this report captures the files after the reset, but before they become flagged again, they will not be reported as Files Failing Upload. The following requirements must be met to successfully generate a cache report: You must have s3:PutObject and s3:AbortMultipartUpload permissions for the Amazon S3 bucket where you want to store the cache report. No other cache reports can currently be in-progress for the specified file share. There must be fewer than 10 existing cache reports for the specified file share. The gateway must be online and connected to Amazon Web Services. The root disk must have at least 20GB of free space when report generation starts. You must specify at least one value for InclusionFilters or ExclusionFilters in the request."]
+module StartCacheReportInput =
+  struct
+    type nonrec t =
+      {
+      fileShareARN: FileShareARN.t ;
+      role: Role.t
+        [@ocaml.doc
+          "The ARN of the IAM role used when saving the cache report to Amazon S3."];
+      locationARN: LocationARN.t
+        [@ocaml.doc
+          "The ARN of the Amazon S3 bucket where you want to save the cache report. We do not recommend saving the cache report to the same Amazon S3 bucket for which you are generating the report. This field does not accept access point ARNs."];
+      bucketRegion: RegionId.t
+        [@ocaml.doc
+          "The Amazon Web Services Region of the Amazon S3 bucket where you want to save the cache report."];
+      vPCEndpointDNSName: DNSHostName.t option
+        [@ocaml.doc
+          "The DNS name of the VPC endpoint associated with the Amazon S3 where you want to save the cache report. Optional."];
+      inclusionFilters: CacheReportFilterList.t option
+        [@ocaml.doc
+          "The list of filters and parameters that determine which files are included in the report. You must specify at least one value for InclusionFilters or ExclusionFilters in a StartCacheReport request."];
+      exclusionFilters: CacheReportFilterList.t option
+        [@ocaml.doc
+          "The list of filters and parameters that determine which files are excluded from the report. You must specify at least one value for InclusionFilters or ExclusionFilters in a StartCacheReport request."];
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "A unique identifier that you use to ensure idempotent report generation if you need to retry an unsuccessful StartCacheReport request. If you retry a request, use the same ClientToken you specified in the initial request."];
+      tags: Tags.t option
+        [@ocaml.doc
+          "A list of up to 50 key/value tags that you can assign to the cache report. Using tags can help you categorize your reports and more easily locate them in search results."]}
+    let context_ = "StartCacheReportInput"
+    let make ?vPCEndpointDNSName =
+      fun ?inclusionFilters ->
+        fun ?exclusionFilters ->
+          fun ?tags ->
+            fun ~fileShareARN ->
+              fun ~role ->
+                fun ~locationARN ->
+                  fun ~bucketRegion ->
+                    fun ~clientToken ->
+                      fun () ->
+                        {
+                          vPCEndpointDNSName;
+                          inclusionFilters;
+                          exclusionFilters;
+                          tags;
+                          fileShareARN;
+                          role;
+                          locationARN;
+                          bucketRegion;
+                          clientToken
+                        }
+    let to_value x =
+      structure_to_value
+        [("FileShareARN", (Some (FileShareARN.to_value x.fileShareARN)));
+        ("Role", (Some (Role.to_value x.role)));
+        ("LocationARN", (Some (LocationARN.to_value x.locationARN)));
+        ("BucketRegion", (Some (RegionId.to_value x.bucketRegion)));
+        ("VPCEndpointDNSName",
+          (Option.map x.vPCEndpointDNSName ~f:DNSHostName.to_value));
+        ("InclusionFilters",
+          (Option.map x.inclusionFilters ~f:CacheReportFilterList.to_value));
+        ("ExclusionFilters",
+          (Option.map x.exclusionFilters ~f:CacheReportFilterList.to_value));
+        ("ClientToken", (Some (ClientToken.to_value x.clientToken)));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+      let exclusionFilters =
+        (Option.map ~f:CacheReportFilterList.of_xml)
+          (Xml.child xml_arg0 "ExclusionFilters") in
+      let inclusionFilters =
+        (Option.map ~f:CacheReportFilterList.of_xml)
+          (Xml.child xml_arg0 "InclusionFilters") in
+      let vPCEndpointDNSName =
+        (Option.map ~f:DNSHostName.of_xml)
+          (Xml.child xml_arg0 "VPCEndpointDNSName") in
+      let bucketRegion =
+        RegionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BucketRegion") in
+      let locationARN =
+        LocationARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LocationARN") in
+      let role =
+        Role.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Role") in
+      let fileShareARN =
+        FileShareARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FileShareARN") in
+      make ?tags ~clientToken ?exclusionFilters ?inclusionFilters
+        ?vPCEndpointDNSName ~bucketRegion ~locationARN ~role ~fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
+      let exclusionFilters =
+        field_map json__ "ExclusionFilters" CacheReportFilterList.of_json in
+      let inclusionFilters =
+        field_map json__ "InclusionFilters" CacheReportFilterList.of_json in
+      let vPCEndpointDNSName =
+        field_map json__ "VPCEndpointDNSName" DNSHostName.of_json in
+      let bucketRegion = field_map_exn json__ "BucketRegion" RegionId.of_json in
+      let locationARN =
+        field_map_exn json__ "LocationARN" LocationARN.of_json in
+      let role = field_map_exn json__ "Role" Role.of_json in
+      let fileShareARN =
+        field_map_exn json__ "FileShareARN" FileShareARN.of_json in
+      make ?tags ~clientToken ?exclusionFilters ?inclusionFilters
+        ?vPCEndpointDNSName ~bucketRegion ~locationARN ~role ~fileShareARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts generating a report of the file metadata currently cached by an S3 File Gateway for a specific file share. You can use this report to identify and resolve issues if you have files failing upload from your gateway to Amazon S3. The report is a CSV file containing a list of files which match the set of filter parameters you specify in the request. The Files Failing Upload flag is reset every 24 hours and during gateway reboot. If this report captures the files after the reset, but before they become flagged again, they will not be reported as Files Failing Upload. The following requirements must be met to successfully generate a cache report: You must have s3:PutObject and s3:AbortMultipartUpload permissions for the Amazon S3 bucket where you want to store the cache report. No other cache reports can currently be in-progress for the specified file share. There must be fewer than 10 existing cache reports for the specified file share. The gateway must be online and connected to Amazon Web Services. The root disk must have at least 20GB of free space when report generation starts. You must specify at least one value for InclusionFilters or ExclusionFilters in the request."]
 module StartAvailabilityMonitorTestOutput =
   struct
     type nonrec t = {
@@ -8585,8 +9504,8 @@ module StartAvailabilityMonitorTestOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8607,8 +9526,8 @@ module StartAvailabilityMonitorTestInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8665,8 +9584,8 @@ module ShutdownGatewayOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8687,8 +9606,8 @@ module ShutdownGatewayInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8745,8 +9664,8 @@ module SetSMBGuestPasswordOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8777,9 +9696,9 @@ module SetSMBGuestPasswordInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~password ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map_exn json "Password" SMBGuestPassword.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let password = field_map_exn json__ "Password" SMBGuestPassword.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~password ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "SetSMBGuestPasswordInput"]
@@ -8835,8 +9754,8 @@ module SetLocalConsolePasswordOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8868,11 +9787,11 @@ module SetLocalConsolePasswordInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~localConsolePassword ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let localConsolePassword =
-        field_map_exn json "LocalConsolePassword"
+        field_map_exn json__ "LocalConsolePassword"
           LocalConsolePassword.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~localConsolePassword ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "SetLocalConsolePasswordInput"]
@@ -8931,8 +9850,8 @@ module RetrieveTapeRecoveryPointOutput =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tapeARN = field_map json "TapeARN" TapeARN.of_json in
+    let of_json json__ =
+      let tapeARN = field_map json__ "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "RetrieveTapeRecoveryPointOutput"]
@@ -8959,9 +9878,9 @@ module RetrieveTapeRecoveryPointInput =
         TapeARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TapeARN") in
       make ~gatewayARN ~tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
-      let tapeARN = field_map_exn json "TapeARN" TapeARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
+      let tapeARN = field_map_exn json__ "TapeARN" TapeARN.of_json in
       make ~gatewayARN ~tapeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "RetrieveTapeRecoveryPointInput"]
@@ -9020,8 +9939,8 @@ module RetrieveTapeArchiveOutput =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tapeARN = field_map json "TapeARN" TapeARN.of_json in
+    let of_json json__ =
+      let tapeARN = field_map json__ "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "RetrieveTapeArchiveOutput"]
@@ -9050,9 +9969,9 @@ module RetrieveTapeArchiveInput =
         TapeARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TapeARN") in
       make ~gatewayARN ~tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
-      let tapeARN = field_map_exn json "TapeARN" TapeARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
+      let tapeARN = field_map_exn json__ "TapeARN" TapeARN.of_json in
       make ~gatewayARN ~tapeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "RetrieveTapeArchiveInput"]
@@ -9108,8 +10027,8 @@ module ResetCacheOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9130,8 +10049,8 @@ module ResetCacheInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9191,8 +10110,8 @@ module RemoveTagsFromResourceOutput =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       make ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "RemoveTagsFromResourceOutput"]
@@ -9222,9 +10141,10 @@ module RemoveTagsFromResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "RemoveTagsFromResourceInput"]
@@ -9290,10 +10210,10 @@ module RefreshCacheOutput =
           (Xml.child xml_arg0 "FileShareARN") in
       make ?notificationId ?fileShareARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notificationId =
-        field_map json "NotificationId" NotificationId.of_json in
-      let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
+        field_map json__ "NotificationId" NotificationId.of_json in
+      let fileShareARN = field_map json__ "FileShareARN" FileShareARN.of_json in
       make ?notificationId ?fileShareARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "RefreshCacheOutput"]
@@ -9306,7 +10226,7 @@ module RefreshCacheInput =
           "The Amazon Resource Name (ARN) of the file share you want to refresh."];
       folderList: FolderList.t option
         [@ocaml.doc
-          "A comma-separated list of the paths of folders to refresh in the cache. The default is \\[\"/\"\\]. The default refreshes objects and folders at the root of the Amazon S3 bucket. If Recursive is set to true, the entire S3 bucket that the file share has access to is refreshed."];
+          "A comma-separated list of the paths of folders to refresh in the cache. The default is \\[\"/\"\\]. The default refreshes objects and folders at the root of the Amazon S3 bucket. If Recursive is set to true, the entire S3 bucket that the file share has access to is refreshed. Do not include / when specifying folder names. For example, you would specify samplefolder rather than samplefolder/."];
       recursive: Boolean.t option
         [@ocaml.doc
           "A value that specifies whether to recursively refresh folders in the cache. The refresh includes folders that were in the cache the last time the gateway listed the folder's contents. If this value set to true, each folder that is listed in FolderList is recursively updated. Otherwise, subfolders listed in FolderList are not refreshed. Only objects that are in folders listed directly under FolderList are found and used for the update. The default is true. Valid Values: true | false"]}
@@ -9331,11 +10251,11 @@ module RefreshCacheInput =
           (Xml.child_exn ~context:context_ xml_arg0 "FileShareARN") in
       make ?recursive ?folderList ~fileShareARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recursive = field_map json "Recursive" Boolean.of_json in
-      let folderList = field_map json "FolderList" FolderList.of_json in
+    let of_json json__ =
+      let recursive = field_map json__ "Recursive" Boolean.of_json in
+      let folderList = field_map json__ "FolderList" FolderList.of_json in
       let fileShareARN =
-        field_map_exn json "FileShareARN" FileShareARN.of_json in
+        field_map_exn json__ "FileShareARN" FileShareARN.of_json in
       make ?recursive ?folderList ~fileShareARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "RefreshCacheInput"]
@@ -9401,14 +10321,14 @@ module NotifyWhenUploadedOutput =
           (Xml.child xml_arg0 "FileShareARN") in
       make ?notificationId ?fileShareARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notificationId =
-        field_map json "NotificationId" NotificationId.of_json in
-      let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
+        field_map json__ "NotificationId" NotificationId.of_json in
+      let fileShareARN = field_map json__ "FileShareARN" FileShareARN.of_json in
       make ?notificationId ?fileShareARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends you notification through CloudWatch Events when all files written to your file share have been uploaded to Amazon S3. Storage Gateway can send a notification through Amazon CloudWatch Events when all files written to your file share up to that point in time have been uploaded to Amazon S3. These files include files written to the file share up to the time that you make a request for notification. When the upload is done, Storage Gateway sends you notification through an Amazon CloudWatch Event. You can configure CloudWatch Events to send the notification through event targets such as Amazon SNS or Lambda function. This operation is only supported for S3 File Gateways. For more information, see Getting file upload notification in the Storage Gateway User Guide."]
+       "Sends you notification through Amazon EventBridge when all files written to your file share have been uploaded to Amazon S3. Storage Gateway can send a notification through Amazon EventBridge when all files written to your file share up to that point in time have been uploaded to Amazon S3. These files include files written to the file share up to the time that you make a request for notification. When the upload is done, Storage Gateway sends you notification through EventBridge. You can configure EventBridge to send the notification through event targets such as Amazon SNS or Lambda function. This operation is only supported for S3 File Gateways. For more information, see Getting file upload notification in the Amazon S3 File Gateway User Guide."]
 module NotifyWhenUploadedInput =
   struct
     type nonrec t = {
@@ -9425,13 +10345,13 @@ module NotifyWhenUploadedInput =
           (Xml.child_exn ~context:context_ xml_arg0 "FileShareARN") in
       make ~fileShareARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileShareARN =
-        field_map_exn json "FileShareARN" FileShareARN.of_json in
+        field_map_exn json__ "FileShareARN" FileShareARN.of_json in
       make ~fileShareARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends you notification through CloudWatch Events when all files written to your file share have been uploaded to Amazon S3. Storage Gateway can send a notification through Amazon CloudWatch Events when all files written to your file share up to that point in time have been uploaded to Amazon S3. These files include files written to the file share up to the time that you make a request for notification. When the upload is done, Storage Gateway sends you notification through an Amazon CloudWatch Event. You can configure CloudWatch Events to send the notification through event targets such as Amazon SNS or Lambda function. This operation is only supported for S3 File Gateways. For more information, see Getting file upload notification in the Storage Gateway User Guide."]
+       "Sends you notification through Amazon EventBridge when all files written to your file share have been uploaded to Amazon S3. Storage Gateway can send a notification through Amazon EventBridge when all files written to your file share up to that point in time have been uploaded to Amazon S3. These files include files written to the file share up to the time that you make a request for notification. When the upload is done, Storage Gateway sends you notification through EventBridge. You can configure EventBridge to send the notification through event targets such as Amazon SNS or Lambda function. This operation is only supported for S3 File Gateways. For more information, see Getting file upload notification in the Amazon S3 File Gateway User Guide."]
 module ListVolumesOutput =
   struct
     type nonrec t =
@@ -9499,10 +10419,10 @@ module ListVolumesOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?volumeInfos ?marker ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeInfos = field_map json "VolumeInfos" VolumeInfos.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let volumeInfos = field_map json__ "VolumeInfos" VolumeInfos.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?volumeInfos ?marker ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9535,10 +10455,10 @@ module ListVolumesInput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?limit ?marker ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PositiveIntObject.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PositiveIntObject.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?limit ?marker ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9606,11 +10526,11 @@ module ListVolumeRecoveryPointsOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?volumeRecoveryPointInfos ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let volumeRecoveryPointInfos =
-        field_map json "VolumeRecoveryPointInfos"
+        field_map json__ "VolumeRecoveryPointInfos"
           VolumeRecoveryPointInfos.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?volumeRecoveryPointInfos ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9631,8 +10551,8 @@ module ListVolumeRecoveryPointsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9692,8 +10612,8 @@ module ListVolumeInitiatorsOutput =
         (Option.map ~f:Initiators.of_xml) (Xml.child xml_arg0 "Initiators") in
       make ?initiators ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let initiators = field_map json "Initiators" Initiators.of_json in
+    let of_json json__ =
+      let initiators = field_map json__ "Initiators" Initiators.of_json in
       make ?initiators ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListVolumeInitiatorsOutput"]
@@ -9716,8 +10636,8 @@ module ListVolumeInitiatorsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ~volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
+    let of_json json__ =
+      let volumeARN = field_map_exn json__ "VolumeARN" VolumeARN.of_json in
       make ~volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListVolumeInitiatorsInput"]
@@ -9780,9 +10700,9 @@ module ListTapesOutput =
         (Option.map ~f:TapeInfos.of_xml) (Xml.child xml_arg0 "TapeInfos") in
       make ?marker ?tapeInfos ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let tapeInfos = field_map json "TapeInfos" TapeInfos.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let tapeInfos = field_map json__ "TapeInfos" TapeInfos.of_json in
       make ?marker ?tapeInfos ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9815,10 +10735,10 @@ module ListTapesInput =
         (Option.map ~f:TapeARNs.of_xml) (Xml.child xml_arg0 "TapeARNs") in
       make ?limit ?marker ?tapeARNs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PositiveIntObject.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let tapeARNs = field_map json "TapeARNs" TapeARNs.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PositiveIntObject.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let tapeARNs = field_map json__ "TapeARNs" TapeARNs.of_json in
       make ?limit ?marker ?tapeARNs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9884,9 +10804,9 @@ module ListTapePoolsOutput =
         (Option.map ~f:PoolInfos.of_xml) (Xml.child xml_arg0 "PoolInfos") in
       make ?marker ?poolInfos ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let poolInfos = field_map json "PoolInfos" PoolInfos.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let poolInfos = field_map json__ "PoolInfos" PoolInfos.of_json in
       make ?marker ?poolInfos ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9921,10 +10841,10 @@ module ListTapePoolsInput =
         (Option.map ~f:PoolARNs.of_xml) (Xml.child xml_arg0 "PoolARNs") in
       make ?limit ?marker ?poolARNs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PositiveIntObject.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let poolARNs = field_map json "PoolARNs" PoolARNs.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PositiveIntObject.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let poolARNs = field_map json__ "PoolARNs" PoolARNs.of_json in
       make ?limit ?marker ?poolARNs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9996,10 +10916,10 @@ module ListTagsForResourceOutput =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?tags ?marker ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       make ?tags ?marker ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListTagsForResourceOutput"]
@@ -10036,10 +10956,11 @@ module ListTagsForResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ?limit ?marker ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PositiveIntObject.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PositiveIntObject.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ?limit ?marker ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListTagsForResourceInput"]
@@ -10101,9 +11022,9 @@ module ListLocalDisksOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?disks ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let disks = field_map json "Disks" Disks.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let disks = field_map json__ "Disks" Disks.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?disks ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10124,8 +11045,8 @@ module ListLocalDisksInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10190,9 +11111,9 @@ module ListGatewaysOutput =
         (Option.map ~f:Gateways.of_xml) (Xml.child xml_arg0 "Gateways") in
       make ?marker ?gateways ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let gateways = field_map json "Gateways" Gateways.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let gateways = field_map json__ "Gateways" Gateways.of_json in
       make ?marker ?gateways ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10220,9 +11141,9 @@ module ListGatewaysInput =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?limit ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PositiveIntObject.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PositiveIntObject.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
       make ?limit ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10301,12 +11222,12 @@ module ListFileSystemAssociationsOutput =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?fileSystemAssociationSummaryList ?nextMarker ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSystemAssociationSummaryList =
-        field_map json "FileSystemAssociationSummaryList"
+        field_map json__ "FileSystemAssociationSummaryList"
           FileSystemAssociationSummaryList.of_json in
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
       make ?fileSystemAssociationSummaryList ?nextMarker ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10339,10 +11260,10 @@ module ListFileSystemAssociationsInput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?marker ?limit ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let limit = field_map json "Limit" PositiveIntObject.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let limit = field_map json__ "Limit" PositiveIntObject.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?marker ?limit ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10419,11 +11340,11 @@ module ListFileSharesOutput =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?fileShareInfoList ?nextMarker ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileShareInfoList =
-        field_map json "FileShareInfoList" FileShareInfoList.of_json in
-      let nextMarker = field_map json "NextMarker" Marker.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
+        field_map json__ "FileShareInfoList" FileShareInfoList.of_json in
+      let nextMarker = field_map json__ "NextMarker" Marker.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
       make ?fileShareInfoList ?nextMarker ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListFileShareOutput"]
@@ -10457,13 +11378,108 @@ module ListFileSharesInput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?marker ?limit ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let limit = field_map json "Limit" PositiveIntObject.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let limit = field_map json__ "Limit" PositiveIntObject.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?marker ?limit ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ListFileShareInput"]
+module ListCacheReportsOutput =
+  struct
+    type nonrec t =
+      {
+      cacheReportList: CacheReportList.t option
+        [@ocaml.doc
+          "A list of existing cache reports for all file shares associated with your Amazon Web Services account. This list includes all information provided by the DescribeCacheReport action, such as report status, completion progress, start time, end time, filters, and tags."];
+      marker: Marker.t option
+        [@ocaml.doc
+          "If the request includes Marker, the response returns that value in this field."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidGatewayRequestException of InvalidGatewayRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?cacheReportList =
+      fun ?marker -> fun () -> { cacheReportList; marker }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidGatewayRequestException" ->
+          `InvalidGatewayRequestException
+            (InvalidGatewayRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidGatewayRequestException" ->
+          `InvalidGatewayRequestException
+            (InvalidGatewayRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidGatewayRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidGatewayRequestException"));
+            ("details", (InvalidGatewayRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CacheReportList",
+           (Option.map x.cacheReportList ~f:CacheReportList.to_value));
+        ("Marker", (Option.map x.marker ~f:Marker.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let marker =
+        (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
+      let cacheReportList =
+        (Option.map ~f:CacheReportList.of_xml)
+          (Xml.child xml_arg0 "CacheReportList") in
+      make ?marker ?cacheReportList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let cacheReportList =
+        field_map json__ "CacheReportList" CacheReportList.of_json in
+      make ?marker ?cacheReportList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of existing cache reports for all file shares associated with your Amazon Web Services account. This list includes all information provided by the DescribeCacheReport action, such as report name, status, completion progress, start time, end time, filters, and tags."]
+module ListCacheReportsInput =
+  struct
+    type nonrec t =
+      {
+      marker: Marker.t option
+        [@ocaml.doc
+          "Opaque pagination token returned from a previous ListCacheReports operation. If present, Marker specifies where to continue the list from after a previous call to ListCacheReports. Optional."]}
+    let make ?marker = fun () -> { marker }
+    let to_value x =
+      structure_to_value
+        [("Marker", (Option.map x.marker ~f:Marker.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let marker =
+        (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
+      make ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      make ?marker ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of existing cache reports for all file shares associated with your Amazon Web Services account. This list includes all information provided by the DescribeCacheReport action, such as report name, status, completion progress, start time, end time, filters, and tags."]
 module ListAutomaticTapeCreationPoliciesOutput =
   struct
     type nonrec t =
@@ -10524,9 +11540,9 @@ module ListAutomaticTapeCreationPoliciesOutput =
           (Xml.child xml_arg0 "AutomaticTapeCreationPolicyInfos") in
       make ?automaticTapeCreationPolicyInfos ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let automaticTapeCreationPolicyInfos =
-        field_map json "AutomaticTapeCreationPolicyInfos"
+        field_map json__ "AutomaticTapeCreationPolicyInfos"
           AutomaticTapeCreationPolicyInfos.of_json in
       make ?automaticTapeCreationPolicyInfos ()
     let to_json v = composed_to_json to_value v
@@ -10546,8 +11562,8 @@ module ListAutomaticTapeCreationPoliciesInput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10561,7 +11577,7 @@ module JoinDomainOutput =
           "The unique Amazon Resource Name (ARN) of the gateway that joined the domain."];
       activeDirectoryStatus: ActiveDirectoryStatus.t option
         [@ocaml.doc
-          "Indicates the status of the gateway as a member of the Active Directory domain. ACCESS_DENIED: Indicates that the JoinDomain operation failed due to an authentication error. DETACHED: Indicates that gateway is not joined to a domain. JOINED: Indicates that the gateway has successfully joined a domain. JOINING: Indicates that a JoinDomain operation is in progress. NETWORK_ERROR: Indicates that JoinDomain operation failed due to a network or connectivity error. TIMEOUT: Indicates that the JoinDomain operation failed because the operation didn't complete within the allotted time. UNKNOWN_ERROR: Indicates that the JoinDomain operation failed due to another type of error."]}
+          "Indicates the status of the gateway as a member of the Active Directory domain. This field is only used as part of a JoinDomain request. It is not affected by Active Directory connectivity changes that occur after the JoinDomain request succeeds. ACCESS_DENIED: Indicates that the JoinDomain operation failed due to an authentication error. DETACHED: Indicates that gateway is not joined to a domain. JOINED: Indicates that the gateway has successfully joined a domain. JOINING: Indicates that a JoinDomain operation is in progress. INSUFFICIENT_PERMISSIONS: Indicates that the JoinDomain operation failed because the specified user lacks the necessary permissions to join the domain. NETWORK_ERROR: Indicates that JoinDomain operation failed due to a network or connectivity error. TIMEOUT: Indicates that the JoinDomain operation failed because the operation didn't complete within the allotted time. UNKNOWN_ERROR: Indicates that the JoinDomain operation failed due to another type of error."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `InvalidGatewayRequestException of InvalidGatewayRequestException.t 
@@ -10618,10 +11634,11 @@ module JoinDomainOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?activeDirectoryStatus ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let activeDirectoryStatus =
-        field_map json "ActiveDirectoryStatus" ActiveDirectoryStatus.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "ActiveDirectoryStatus"
+          ActiveDirectoryStatus.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?activeDirectoryStatus ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "JoinDomainOutput"]
@@ -10640,7 +11657,7 @@ module JoinDomainInput =
           "The organizational unit (OU) is a container in an Active Directory that can hold users, groups, computers, and other OUs and this parameter specifies the OU that the gateway will join within the AD domain."];
       domainControllers: Hosts.t option
         [@ocaml.doc
-          "List of IPv4 addresses, NetBIOS names, or host names of your domain server. If you need to specify the port number include it after the colon (\226\128\156:\226\128\157). For example, mydc.mydomain.com:389."];
+          "List of IP addresses, NetBIOS names, or host names of your domain server. If you need to specify the port number include it after the colon (\226\128\156:\226\128\157). For example, mydc.mydomain.com:389. S3 File Gateway supports IPv6 addresses in addition to IPv4 and other existing formats. FSx File Gateway does not support IPv6."];
       timeoutInSeconds: TimeoutInSeconds.t option
         [@ocaml.doc
           "Specifies the time in seconds, in which the JoinDomain operation must complete. The default is 20 seconds."];
@@ -10705,21 +11722,119 @@ module JoinDomainInput =
       make ~password ~userName ?timeoutInSeconds ?domainControllers
         ?organizationalUnit ~domainName ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map_exn json "Password" DomainUserPassword.of_json in
-      let userName = field_map_exn json "UserName" DomainUserName.of_json in
+    let of_json json__ =
+      let password =
+        field_map_exn json__ "Password" DomainUserPassword.of_json in
+      let userName = field_map_exn json__ "UserName" DomainUserName.of_json in
       let timeoutInSeconds =
-        field_map json "TimeoutInSeconds" TimeoutInSeconds.of_json in
+        field_map json__ "TimeoutInSeconds" TimeoutInSeconds.of_json in
       let domainControllers =
-        field_map json "DomainControllers" Hosts.of_json in
+        field_map json__ "DomainControllers" Hosts.of_json in
       let organizationalUnit =
-        field_map json "OrganizationalUnit" OrganizationalUnit.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "OrganizationalUnit" OrganizationalUnit.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~password ~userName ?timeoutInSeconds ?domainControllers
         ?organizationalUnit ~domainName ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "JoinDomainInput"]
+module EvictFilesFailingUploadOutput =
+  struct
+    type nonrec t =
+      {
+      notificationId: String_.t option
+        [@ocaml.doc
+          "The randomly generated ID of the CloudWatch notification associated with the cache clean operation. This ID is in UUID format."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidGatewayRequestException of InvalidGatewayRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?notificationId = fun () -> { notificationId }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidGatewayRequestException" ->
+          `InvalidGatewayRequestException
+            (InvalidGatewayRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidGatewayRequestException" ->
+          `InvalidGatewayRequestException
+            (InvalidGatewayRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidGatewayRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidGatewayRequestException"));
+            ("details", (InvalidGatewayRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NotificationId",
+           (Option.map x.notificationId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notificationId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NotificationId") in
+      make ?notificationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notificationId = field_map json__ "NotificationId" String_.of_json in
+      make ?notificationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts a process that cleans the specified file share's cache of file entries that are failing upload to Amazon S3. This API operation reports success if the request is received with valid arguments, and there are no other cache clean operations currently in-progress for the specified file share. After a successful request, the cache clean operation occurs asynchronously and reports progress using CloudWatch logs and notifications. If ForceRemove is set to True, the cache clean operation will delete file data from the gateway which might otherwise be recoverable. We recommend using this operation only after all other methods to clear files failing upload have been exhausted, and if your business need outweighs the potential data loss."]
+module EvictFilesFailingUploadInput =
+  struct
+    type nonrec t =
+      {
+      fileShareARN: FileShareARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the file share for which you want to start the cache clean operation."];
+      forceRemove: Boolean__lc1.t option
+        [@ocaml.doc
+          "Specifies whether cache entries with full or partial file data currently stored on the gateway will be forcibly removed by the cache clean operation. Valid arguments: False - The cache clean operation skips cache entries failing upload if they are associated with data currently stored on the gateway. This preserves the cached data. True - The cache clean operation removes cache entries failing upload even if they are associated with data currently stored on the gateway. This deletes the cached data. If ForceRemove is set to True, the cache clean operation will delete file data from the gateway which might otherwise be recoverable."]}
+    let context_ = "EvictFilesFailingUploadInput"
+    let make ?forceRemove =
+      fun ~fileShareARN -> fun () -> { forceRemove; fileShareARN }
+    let to_value x =
+      structure_to_value
+        [("FileShareARN", (Some (FileShareARN.to_value x.fileShareARN)));
+        ("ForceRemove", (Option.map x.forceRemove ~f:Boolean__lc1.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let forceRemove =
+        (Option.map ~f:Boolean__lc1.of_xml)
+          (Xml.child xml_arg0 "ForceRemove") in
+      let fileShareARN =
+        FileShareARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FileShareARN") in
+      make ?forceRemove ~fileShareARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let forceRemove = field_map json__ "ForceRemove" Boolean__lc1.of_json in
+      let fileShareARN =
+        field_map_exn json__ "FileShareARN" FileShareARN.of_json in
+      make ?forceRemove ~fileShareARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts a process that cleans the specified file share's cache of file entries that are failing upload to Amazon S3. This API operation reports success if the request is received with valid arguments, and there are no other cache clean operations currently in-progress for the specified file share. After a successful request, the cache clean operation occurs asynchronously and reports progress using CloudWatch logs and notifications. If ForceRemove is set to True, the cache clean operation will delete file data from the gateway which might otherwise be recoverable. We recommend using this operation only after all other methods to clear files failing upload have been exhausted, and if your business need outweighs the potential data loss."]
 module DisassociateFileSystemOutput =
   struct
     type nonrec t =
@@ -10779,9 +11894,9 @@ module DisassociateFileSystemOutput =
           (Xml.child xml_arg0 "FileSystemAssociationARN") in
       make ?fileSystemAssociationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSystemAssociationARN =
-        field_map json "FileSystemAssociationARN"
+        field_map json__ "FileSystemAssociationARN"
           FileSystemAssociationARN.of_json in
       make ?fileSystemAssociationARN ()
     let to_json v = composed_to_json to_value v
@@ -10818,10 +11933,10 @@ module DisassociateFileSystemInput =
              "FileSystemAssociationARN") in
       make ?forceDelete ~fileSystemAssociationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forceDelete = field_map json "ForceDelete" Boolean__lc1.of_json in
+    let of_json json__ =
+      let forceDelete = field_map json__ "ForceDelete" Boolean__lc1.of_json in
       let fileSystemAssociationARN =
-        field_map_exn json "FileSystemAssociationARN"
+        field_map_exn json__ "FileSystemAssociationARN"
           FileSystemAssociationARN.of_json in
       make ?forceDelete ~fileSystemAssociationARN ()
     let to_json v = composed_to_json to_value v
@@ -10882,8 +11997,8 @@ module DisableGatewayOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DisableGatewayOutput"]
@@ -10903,8 +12018,8 @@ module DisableGatewayInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DisableGatewayInput"]
@@ -10963,8 +12078,8 @@ module DetachVolumeOutput =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
+    let of_json json__ =
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
       make ?volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "AttachVolumeOutput"]
@@ -10994,9 +12109,9 @@ module DetachVolumeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ?forceDetach ~volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forceDetach = field_map json "ForceDetach" Boolean.of_json in
-      let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
+    let of_json json__ =
+      let forceDetach = field_map json__ "ForceDetach" Boolean.of_json in
+      let volumeARN = field_map_exn json__ "VolumeARN" VolumeARN.of_json in
       make ?forceDetach ~volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "AttachVolumeInput"]
@@ -11086,13 +12201,13 @@ module DescribeWorkingStorageOutput =
       make ?workingStorageAllocatedInBytes ?workingStorageUsedInBytes
         ?diskIds ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workingStorageAllocatedInBytes =
-        field_map json "WorkingStorageAllocatedInBytes" Long.of_json in
+        field_map json__ "WorkingStorageAllocatedInBytes" Long.of_json in
       let workingStorageUsedInBytes =
-        field_map json "WorkingStorageUsedInBytes" Long.of_json in
-      let diskIds = field_map json "DiskIds" DiskIds.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "WorkingStorageUsedInBytes" Long.of_json in
+      let diskIds = field_map json__ "DiskIds" DiskIds.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?workingStorageAllocatedInBytes ?workingStorageUsedInBytes
         ?diskIds ?gatewayARN ()
     let to_json v = composed_to_json to_value v
@@ -11113,8 +12228,8 @@ module DescribeWorkingStorageInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11186,10 +12301,10 @@ module DescribeVTLDevicesOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?marker ?vTLDevices ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let vTLDevices = field_map json "VTLDevices" VTLDevices.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let vTLDevices = field_map json__ "VTLDevices" VTLDevices.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?marker ?vTLDevices ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeVTLDevicesOutput"]
@@ -11234,12 +12349,12 @@ module DescribeVTLDevicesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?limit ?marker ?vTLDeviceARNs ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PositiveIntObject.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PositiveIntObject.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
       let vTLDeviceARNs =
-        field_map json "VTLDeviceARNs" VTLDeviceARNs.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "VTLDeviceARNs" VTLDeviceARNs.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ?limit ?marker ?vTLDeviceARNs ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeVTLDevicesInput"]
@@ -11329,13 +12444,13 @@ module DescribeUploadBufferOutput =
       make ?uploadBufferAllocatedInBytes ?uploadBufferUsedInBytes ?diskIds
         ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let uploadBufferAllocatedInBytes =
-        field_map json "UploadBufferAllocatedInBytes" Long.of_json in
+        field_map json__ "UploadBufferAllocatedInBytes" Long.of_json in
       let uploadBufferUsedInBytes =
-        field_map json "UploadBufferUsedInBytes" Long.of_json in
-      let diskIds = field_map json "DiskIds" DiskIds.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "UploadBufferUsedInBytes" Long.of_json in
+      let diskIds = field_map json__ "DiskIds" DiskIds.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?uploadBufferAllocatedInBytes ?uploadBufferUsedInBytes ?diskIds
         ?gatewayARN ()
     let to_json v = composed_to_json to_value v
@@ -11357,8 +12472,8 @@ module DescribeUploadBufferInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11422,9 +12537,9 @@ module DescribeTapesOutput =
       let tapes = (Option.map ~f:Tapes.of_xml) (Xml.child xml_arg0 "Tapes") in
       make ?marker ?tapes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let tapes = field_map json "Tapes" Tapes.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let tapes = field_map json__ "Tapes" Tapes.of_json in
       make ?marker ?tapes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeTapesOutput"]
@@ -11467,11 +12582,11 @@ module DescribeTapesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?limit ?marker ?tapeARNs ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PositiveIntObject.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let tapeARNs = field_map json "TapeARNs" TapeARNs.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PositiveIntObject.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let tapeARNs = field_map json__ "TapeARNs" TapeARNs.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ?limit ?marker ?tapeARNs ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeTapesInput"]
@@ -11546,12 +12661,12 @@ module DescribeTapeRecoveryPointsOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?marker ?tapeRecoveryPointInfos ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
       let tapeRecoveryPointInfos =
-        field_map json "TapeRecoveryPointInfos"
+        field_map json__ "TapeRecoveryPointInfos"
           TapeRecoveryPointInfos.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?marker ?tapeRecoveryPointInfos ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeTapeRecoveryPointsOutput"]
@@ -11586,10 +12701,10 @@ module DescribeTapeRecoveryPointsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?limit ?marker ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PositiveIntObject.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PositiveIntObject.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ?limit ?marker ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeTapeRecoveryPointsInput"]
@@ -11657,9 +12772,9 @@ module DescribeTapeArchivesOutput =
           (Xml.child xml_arg0 "TapeArchives") in
       make ?marker ?tapeArchives ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let tapeArchives = field_map json "TapeArchives" TapeArchives.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let tapeArchives = field_map json__ "TapeArchives" TapeArchives.of_json in
       make ?marker ?tapeArchives ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeTapeArchivesOutput"]
@@ -11693,10 +12808,10 @@ module DescribeTapeArchivesInput =
         (Option.map ~f:TapeARNs.of_xml) (Xml.child xml_arg0 "TapeARNs") in
       make ?limit ?marker ?tapeARNs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PositiveIntObject.of_json in
-      let marker = field_map json "Marker" Marker.of_json in
-      let tapeARNs = field_map json "TapeARNs" TapeARNs.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PositiveIntObject.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let tapeARNs = field_map json__ "TapeARNs" TapeARNs.of_json in
       make ?limit ?marker ?tapeARNs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeTapeArchivesInput"]
@@ -11757,9 +12872,9 @@ module DescribeStorediSCSIVolumesOutput =
           (Xml.child xml_arg0 "StorediSCSIVolumes") in
       make ?storediSCSIVolumes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let storediSCSIVolumes =
-        field_map json "StorediSCSIVolumes" StorediSCSIVolumes.of_json in
+        field_map json__ "StorediSCSIVolumes" StorediSCSIVolumes.of_json in
       make ?storediSCSIVolumes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11783,8 +12898,8 @@ module DescribeStorediSCSIVolumesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARNs") in
       make ~volumeARNs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeARNs = field_map_exn json "VolumeARNs" VolumeARNs.of_json in
+    let of_json json__ =
+      let volumeARNs = field_map_exn json__ "VolumeARNs" VolumeARNs.of_json in
       make ~volumeARNs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11888,14 +13003,14 @@ module DescribeSnapshotScheduleOutput =
       make ?tags ?timezone ?description ?recurrenceInHours ?startAt
         ?volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let timezone = field_map json "Timezone" GatewayTimezone.of_json in
-      let description = field_map json "Description" Description.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let timezone = field_map json__ "Timezone" GatewayTimezone.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let recurrenceInHours =
-        field_map json "RecurrenceInHours" RecurrenceInHours.of_json in
-      let startAt = field_map json "StartAt" HourOfDay.of_json in
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
+        field_map json__ "RecurrenceInHours" RecurrenceInHours.of_json in
+      let startAt = field_map json__ "StartAt" HourOfDay.of_json in
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
       make ?tags ?timezone ?description ?recurrenceInHours ?startAt
         ?volumeARN ()
     let to_json v = composed_to_json to_value v
@@ -11920,8 +13035,8 @@ module DescribeSnapshotScheduleInput =
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ~volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
+    let of_json json__ =
+      let volumeARN = field_map_exn json__ "VolumeARN" VolumeARN.of_json in
       make ~volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11935,13 +13050,13 @@ module DescribeSMBSettingsOutput =
         [@ocaml.doc "The name of the domain that the gateway is joined to."];
       activeDirectoryStatus: ActiveDirectoryStatus.t option
         [@ocaml.doc
-          "Indicates the status of a gateway that is a member of the Active Directory domain. ACCESS_DENIED: Indicates that the JoinDomain operation failed due to an authentication error. DETACHED: Indicates that gateway is not joined to a domain. JOINED: Indicates that the gateway has successfully joined a domain. JOINING: Indicates that a JoinDomain operation is in progress. NETWORK_ERROR: Indicates that JoinDomain operation failed due to a network or connectivity error. TIMEOUT: Indicates that the JoinDomain operation failed because the operation didn't complete within the allotted time. UNKNOWN_ERROR: Indicates that the JoinDomain operation failed due to another type of error."];
+          "Indicates the status of a gateway that is a member of the Active Directory domain. This field is only used as part of a JoinDomain request. It is not affected by Active Directory connectivity changes that occur after the JoinDomain request succeeds. ACCESS_DENIED: Indicates that the JoinDomain operation failed due to an authentication error. DETACHED: Indicates that gateway is not joined to a domain. JOINED: Indicates that the gateway has successfully joined a domain. JOINING: Indicates that a JoinDomain operation is in progress. NETWORK_ERROR: Indicates that JoinDomain operation failed due to a network or connectivity error. TIMEOUT: Indicates that the JoinDomain operation failed because the operation didn't complete within the allotted time. UNKNOWN_ERROR: Indicates that the JoinDomain operation failed due to another type of error."];
       sMBGuestPasswordSet: Boolean.t option
         [@ocaml.doc
           "This value is true if a password for the guest user smbguest is set, otherwise false. Only supported for S3 File Gateways. Valid Values: true | false"];
       sMBSecurityStrategy: SMBSecurityStrategy.t option
         [@ocaml.doc
-          "The type of security strategy that was specified for file gateway. ClientSpecified: If you use this option, requests are established based on what is negotiated by the client. This option is recommended when you want to maximize compatibility across different clients in your environment. Only supported for S3 File Gateways. MandatorySigning: If you use this option, file gateway only allows connections from SMBv2 or SMBv3 clients that have signing enabled. This option works with SMB clients on Microsoft Windows Vista, Windows Server 2008 or newer. MandatoryEncryption: If you use this option, file gateway only allows connections from SMBv3 clients that have encryption enabled. This option is highly recommended for environments that handle sensitive data. This option works with SMB clients on Microsoft Windows 8, Windows Server 2012 or newer."];
+          "The type of security strategy that was specified for file gateway. ClientSpecified: If you choose this option, requests are established based on what is negotiated by the client. This option is recommended when you want to maximize compatibility across different clients in your environment. Supported only for S3 File Gateway. MandatorySigning: If you choose this option, File Gateway only allows connections from SMBv2 or SMBv3 clients that have signing turned on. This option works with SMB clients on Microsoft Windows Vista, Windows Server 2008, or later. MandatoryEncryption: If you choose this option, File Gateway only allows connections from SMBv3 clients that have encryption turned on. Both 256-bit and 128-bit algorithms are allowed. This option is recommended for environments that handle sensitive data. It works with SMB clients on Microsoft Windows 8, Windows Server 2012, or later. MandatoryEncryptionNoAes128: If you choose this option, File Gateway only allows connections from SMBv3 clients that use 256-bit AES encryption algorithms. 128-bit algorithms are not allowed. This option is recommended for environments that handle sensitive data. It works with SMB clients on Microsoft Windows 8, Windows Server 2012, or later."];
       fileSharesVisible: Boolean.t option
         [@ocaml.doc
           "The shares on this gateway appear when listing shares. Only supported for S3 File Gateways."];
@@ -12043,19 +13158,20 @@ module DescribeSMBSettingsOutput =
         ?sMBGuestPasswordSet ?activeDirectoryStatus ?domainName ?gatewayARN
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sMBLocalGroups =
-        field_map json "SMBLocalGroups" SMBLocalGroups.of_json in
+        field_map json__ "SMBLocalGroups" SMBLocalGroups.of_json in
       let fileSharesVisible =
-        field_map json "FileSharesVisible" Boolean.of_json in
+        field_map json__ "FileSharesVisible" Boolean.of_json in
       let sMBSecurityStrategy =
-        field_map json "SMBSecurityStrategy" SMBSecurityStrategy.of_json in
+        field_map json__ "SMBSecurityStrategy" SMBSecurityStrategy.of_json in
       let sMBGuestPasswordSet =
-        field_map json "SMBGuestPasswordSet" Boolean.of_json in
+        field_map json__ "SMBGuestPasswordSet" Boolean.of_json in
       let activeDirectoryStatus =
-        field_map json "ActiveDirectoryStatus" ActiveDirectoryStatus.of_json in
-      let domainName = field_map json "DomainName" DomainName.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "ActiveDirectoryStatus"
+          ActiveDirectoryStatus.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?sMBLocalGroups ?fileSharesVisible ?sMBSecurityStrategy
         ?sMBGuestPasswordSet ?activeDirectoryStatus ?domainName ?gatewayARN
         ()
@@ -12078,8 +13194,8 @@ module DescribeSMBSettingsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12142,9 +13258,9 @@ module DescribeSMBFileSharesOutput =
           (Xml.child xml_arg0 "SMBFileShareInfoList") in
       make ?sMBFileShareInfoList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sMBFileShareInfoList =
-        field_map json "SMBFileShareInfoList" SMBFileShareInfoList.of_json in
+        field_map json__ "SMBFileShareInfoList" SMBFileShareInfoList.of_json in
       make ?sMBFileShareInfoList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeSMBFileSharesOutput"]
@@ -12168,9 +13284,9 @@ module DescribeSMBFileSharesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "FileShareARNList") in
       make ~fileShareARNList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileShareARNList =
-        field_map_exn json "FileShareARNList" FileShareARNList.of_json in
+        field_map_exn json__ "FileShareARNList" FileShareARNList.of_json in
       make ~fileShareARNList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeSMBFileSharesInput"]
@@ -12232,9 +13348,9 @@ module DescribeNFSFileSharesOutput =
           (Xml.child xml_arg0 "NFSFileShareInfoList") in
       make ?nFSFileShareInfoList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nFSFileShareInfoList =
-        field_map json "NFSFileShareInfoList" NFSFileShareInfoList.of_json in
+        field_map json__ "NFSFileShareInfoList" NFSFileShareInfoList.of_json in
       make ?nFSFileShareInfoList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeNFSFileSharesOutput"]
@@ -12258,9 +13374,9 @@ module DescribeNFSFileSharesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "FileShareARNList") in
       make ~fileShareARNList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileShareARNList =
-        field_map_exn json "FileShareARNList" FileShareARNList.of_json in
+        field_map_exn json__ "FileShareARNList" FileShareARNList.of_json in
       make ~fileShareARNList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DescribeNFSFileSharesInput"]
@@ -12280,10 +13396,13 @@ module DescribeMaintenanceStartTimeOutput =
           "An ordinal number between 0 and 6 that represents the day of the week, where 0 represents Sunday and 6 represents Saturday. The day of week is in the time zone of the gateway."];
       dayOfMonth: DayOfMonth.t option
         [@ocaml.doc
-          "The day of the month component of the maintenance start time represented as an ordinal number from 1 to 28, where 1 represents the first day of the month and 28 represents the last day of the month."];
+          "The day of the month component of the maintenance start time represented as an ordinal number from 1 to 28, where 1 represents the first day of the month. It is not possible to set the maintenance schedule to start on days 29 through 31."];
       timezone: GatewayTimezone.t option
         [@ocaml.doc
-          "A value that indicates the time zone that is set for the gateway. The start time and day of week specified should be in the time zone of the gateway."]}
+          "A value that indicates the time zone that is set for the gateway. The start time and day of week specified should be in the time zone of the gateway."];
+      softwareUpdatePreferences: SoftwareUpdatePreferences.t option
+        [@ocaml.doc
+          "A set of variables indicating the software update preferences for the gateway. Includes AutomaticUpdatePolicy parameter with the following inputs: ALL_VERSIONS - Enables regular gateway maintenance updates. EMERGENCY_VERSIONS_ONLY - Disables regular gateway maintenance updates. The gateway will still receive emergency version updates on rare occasions if necessary to remedy highly critical security or durability issues. You will be notified before an emergency version update is applied. These updates are applied during your gateway's scheduled maintenance window."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `InvalidGatewayRequestException of InvalidGatewayRequestException.t 
@@ -12294,15 +13413,17 @@ module DescribeMaintenanceStartTimeOutput =
           fun ?dayOfWeek ->
             fun ?dayOfMonth ->
               fun ?timezone ->
-                fun () ->
-                  {
-                    gatewayARN;
-                    hourOfDay;
-                    minuteOfHour;
-                    dayOfWeek;
-                    dayOfMonth;
-                    timezone
-                  }
+                fun ?softwareUpdatePreferences ->
+                  fun () ->
+                    {
+                      gatewayARN;
+                      hourOfDay;
+                      minuteOfHour;
+                      dayOfWeek;
+                      dayOfMonth;
+                      timezone;
+                      softwareUpdatePreferences
+                    }
     let error_of_json name json =
       match name with
       | "InternalServerError" ->
@@ -12345,9 +13466,15 @@ module DescribeMaintenanceStartTimeOutput =
           (Option.map x.minuteOfHour ~f:MinuteOfHour.to_value));
         ("DayOfWeek", (Option.map x.dayOfWeek ~f:DayOfWeek.to_value));
         ("DayOfMonth", (Option.map x.dayOfMonth ~f:DayOfMonth.to_value));
-        ("Timezone", (Option.map x.timezone ~f:GatewayTimezone.to_value))]
+        ("Timezone", (Option.map x.timezone ~f:GatewayTimezone.to_value));
+        ("SoftwareUpdatePreferences",
+          (Option.map x.softwareUpdatePreferences
+             ~f:SoftwareUpdatePreferences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let softwareUpdatePreferences =
+        (Option.map ~f:SoftwareUpdatePreferences.of_xml)
+          (Xml.child xml_arg0 "SoftwareUpdatePreferences") in
       let timezone =
         (Option.map ~f:GatewayTimezone.of_xml)
           (Xml.child xml_arg0 "Timezone") in
@@ -12362,21 +13489,24 @@ module DescribeMaintenanceStartTimeOutput =
         (Option.map ~f:HourOfDay.of_xml) (Xml.child xml_arg0 "HourOfDay") in
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
-      make ?timezone ?dayOfMonth ?dayOfWeek ?minuteOfHour ?hourOfDay
-        ?gatewayARN ()
+      make ?softwareUpdatePreferences ?timezone ?dayOfMonth ?dayOfWeek
+        ?minuteOfHour ?hourOfDay ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timezone = field_map json "Timezone" GatewayTimezone.of_json in
-      let dayOfMonth = field_map json "DayOfMonth" DayOfMonth.of_json in
-      let dayOfWeek = field_map json "DayOfWeek" DayOfWeek.of_json in
-      let minuteOfHour = field_map json "MinuteOfHour" MinuteOfHour.of_json in
-      let hourOfDay = field_map json "HourOfDay" HourOfDay.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
-      make ?timezone ?dayOfMonth ?dayOfWeek ?minuteOfHour ?hourOfDay
-        ?gatewayARN ()
+    let of_json json__ =
+      let softwareUpdatePreferences =
+        field_map json__ "SoftwareUpdatePreferences"
+          SoftwareUpdatePreferences.of_json in
+      let timezone = field_map json__ "Timezone" GatewayTimezone.of_json in
+      let dayOfMonth = field_map json__ "DayOfMonth" DayOfMonth.of_json in
+      let dayOfWeek = field_map json__ "DayOfWeek" DayOfWeek.of_json in
+      let minuteOfHour = field_map json__ "MinuteOfHour" MinuteOfHour.of_json in
+      let hourOfDay = field_map json__ "HourOfDay" HourOfDay.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
+      make ?softwareUpdatePreferences ?timezone ?dayOfMonth ?dayOfWeek
+        ?minuteOfHour ?hourOfDay ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A JSON object containing the following fields: DescribeMaintenanceStartTimeOutput$DayOfMonth DescribeMaintenanceStartTimeOutput$DayOfWeek DescribeMaintenanceStartTimeOutput$HourOfDay DescribeMaintenanceStartTimeOutput$MinuteOfHour DescribeMaintenanceStartTimeOutput$Timezone"]
+       "A JSON object containing the following fields: DescribeMaintenanceStartTimeOutput$SoftwareUpdatePreferences DescribeMaintenanceStartTimeOutput$DayOfMonth DescribeMaintenanceStartTimeOutput$DayOfWeek DescribeMaintenanceStartTimeOutput$HourOfDay DescribeMaintenanceStartTimeOutput$MinuteOfHour DescribeMaintenanceStartTimeOutput$Timezone"]
 module DescribeMaintenanceStartTimeInput =
   struct
     type nonrec t = {
@@ -12393,8 +13523,8 @@ module DescribeMaintenanceStartTimeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12419,13 +13549,14 @@ module DescribeGatewayInformationOutput =
         [@ocaml.doc
           "A NetworkInterface array that contains descriptions of the gateway network interfaces."];
       gatewayType: GatewayType.t option
-        [@ocaml.doc "The type of the gateway."];
+        [@ocaml.doc
+          "The type of the gateway. Amazon FSx File Gateway is no longer available to new customers. Existing customers of FSx File Gateway can continue to use the service normally. For capabilities similar to FSx File Gateway, visit this blog post."];
       nextUpdateAvailabilityDate: NextUpdateAvailabilityDate.t option
         [@ocaml.doc
           "The date on which an update to the gateway is available. This date is in the time zone of the gateway. If the gateway is not available for an update this field is not returned in the response."];
       lastSoftwareUpdate: LastSoftwareUpdate.t option
         [@ocaml.doc
-          "The date on which the last software update was applied to the gateway. If the gateway has never been updated, this field does not return a value in the response."];
+          "The date on which the last software update was applied to the gateway. If the gateway has never been updated, this field does not return a value in the response. This only only exist and returns once it have been chosen and set by the SGW service, based on the OS version of the gateway VM"];
       ec2InstanceId: Ec2InstanceId.t option
         [@ocaml.doc
           "The ID of the Amazon EC2 instance that was used to launch the gateway."];
@@ -12440,10 +13571,10 @@ module DescribeGatewayInformationOutput =
           "The configuration settings for the virtual private cloud (VPC) endpoint for your gateway."];
       cloudWatchLogGroupARN: CloudWatchLogGroupARN.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon CloudWatch log group that is used to monitor events in the gateway."];
+          "The Amazon Resource Name (ARN) of the Amazon CloudWatch log group that is used to monitor events in the gateway. This field only only exist and returns once it have been chosen and set by the SGW service, based on the OS version of the gateway VM"];
       hostEnvironment: HostEnvironment.t option
         [@ocaml.doc
-          "The type of hardware or software platform on which the gateway is running."];
+          "The type of hardware or software platform on which the gateway is running. Tape Gateway is no longer available on Snow Family devices."];
       endpointType: EndpointType.t option
         [@ocaml.doc
           "The type of endpoint for your gateway. Valid Values: STANDARD | FIPS"];
@@ -12460,7 +13591,10 @@ module DescribeGatewayInformationOutput =
           "A list of the metadata cache sizes that the gateway can support based on its current hardware specifications."];
       hostEnvironmentId: HostEnvironmentId.t option
         [@ocaml.doc
-          "A unique identifier for the specific instance of the host platform running the gateway. This value is only available for certain host environments, and its format depends on the host environment type."]}
+          "A unique identifier for the specific instance of the host platform running the gateway. This value is only available for certain host environments, and its format depends on the host environment type."];
+      softwareVersion: SoftwareVersion.t option
+        [@ocaml.doc
+          "The version number of the software running on the gateway appliance."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `InvalidGatewayRequestException of InvalidGatewayRequestException.t 
@@ -12486,30 +13620,32 @@ module DescribeGatewayInformationOutput =
                                         fun ?gatewayCapacity ->
                                           fun ?supportedGatewayCapacities ->
                                             fun ?hostEnvironmentId ->
-                                              fun () ->
-                                                {
-                                                  gatewayARN;
-                                                  gatewayId;
-                                                  gatewayName;
-                                                  gatewayTimezone;
-                                                  gatewayState;
-                                                  gatewayNetworkInterfaces;
-                                                  gatewayType;
-                                                  nextUpdateAvailabilityDate;
-                                                  lastSoftwareUpdate;
-                                                  ec2InstanceId;
-                                                  ec2InstanceRegion;
-                                                  tags;
-                                                  vPCEndpoint;
-                                                  cloudWatchLogGroupARN;
-                                                  hostEnvironment;
-                                                  endpointType;
-                                                  softwareUpdatesEndDate;
-                                                  deprecationDate;
-                                                  gatewayCapacity;
-                                                  supportedGatewayCapacities;
-                                                  hostEnvironmentId
-                                                }
+                                              fun ?softwareVersion ->
+                                                fun () ->
+                                                  {
+                                                    gatewayARN;
+                                                    gatewayId;
+                                                    gatewayName;
+                                                    gatewayTimezone;
+                                                    gatewayState;
+                                                    gatewayNetworkInterfaces;
+                                                    gatewayType;
+                                                    nextUpdateAvailabilityDate;
+                                                    lastSoftwareUpdate;
+                                                    ec2InstanceId;
+                                                    ec2InstanceRegion;
+                                                    tags;
+                                                    vPCEndpoint;
+                                                    cloudWatchLogGroupARN;
+                                                    hostEnvironment;
+                                                    endpointType;
+                                                    softwareUpdatesEndDate;
+                                                    deprecationDate;
+                                                    gatewayCapacity;
+                                                    supportedGatewayCapacities;
+                                                    hostEnvironmentId;
+                                                    softwareVersion
+                                                  }
     let error_of_json name json =
       match name with
       | "InternalServerError" ->
@@ -12586,9 +13722,14 @@ module DescribeGatewayInformationOutput =
           (Option.map x.supportedGatewayCapacities
              ~f:SupportedGatewayCapacities.to_value));
         ("HostEnvironmentId",
-          (Option.map x.hostEnvironmentId ~f:HostEnvironmentId.to_value))]
+          (Option.map x.hostEnvironmentId ~f:HostEnvironmentId.to_value));
+        ("SoftwareVersion",
+          (Option.map x.softwareVersion ~f:SoftwareVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let softwareVersion =
+        (Option.map ~f:SoftwareVersion.of_xml)
+          (Xml.child xml_arg0 "SoftwareVersion") in
       let hostEnvironmentId =
         (Option.map ~f:HostEnvironmentId.of_xml)
           (Xml.child xml_arg0 "HostEnvironmentId") in
@@ -12645,56 +13786,59 @@ module DescribeGatewayInformationOutput =
         (Option.map ~f:GatewayId.of_xml) (Xml.child xml_arg0 "GatewayId") in
       let gatewayARN =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
-      make ?hostEnvironmentId ?supportedGatewayCapacities ?gatewayCapacity
-        ?deprecationDate ?softwareUpdatesEndDate ?endpointType
-        ?hostEnvironment ?cloudWatchLogGroupARN ?vPCEndpoint ?tags
-        ?ec2InstanceRegion ?ec2InstanceId ?lastSoftwareUpdate
+      make ?softwareVersion ?hostEnvironmentId ?supportedGatewayCapacities
+        ?gatewayCapacity ?deprecationDate ?softwareUpdatesEndDate
+        ?endpointType ?hostEnvironment ?cloudWatchLogGroupARN ?vPCEndpoint
+        ?tags ?ec2InstanceRegion ?ec2InstanceId ?lastSoftwareUpdate
         ?nextUpdateAvailabilityDate ?gatewayType ?gatewayNetworkInterfaces
         ?gatewayState ?gatewayTimezone ?gatewayName ?gatewayId ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let softwareVersion =
+        field_map json__ "SoftwareVersion" SoftwareVersion.of_json in
       let hostEnvironmentId =
-        field_map json "HostEnvironmentId" HostEnvironmentId.of_json in
+        field_map json__ "HostEnvironmentId" HostEnvironmentId.of_json in
       let supportedGatewayCapacities =
-        field_map json "SupportedGatewayCapacities"
+        field_map json__ "SupportedGatewayCapacities"
           SupportedGatewayCapacities.of_json in
       let gatewayCapacity =
-        field_map json "GatewayCapacity" GatewayCapacity.of_json in
+        field_map json__ "GatewayCapacity" GatewayCapacity.of_json in
       let deprecationDate =
-        field_map json "DeprecationDate" DeprecationDate.of_json in
+        field_map json__ "DeprecationDate" DeprecationDate.of_json in
       let softwareUpdatesEndDate =
-        field_map json "SoftwareUpdatesEndDate"
+        field_map json__ "SoftwareUpdatesEndDate"
           SoftwareUpdatesEndDate.of_json in
-      let endpointType = field_map json "EndpointType" EndpointType.of_json in
+      let endpointType = field_map json__ "EndpointType" EndpointType.of_json in
       let hostEnvironment =
-        field_map json "HostEnvironment" HostEnvironment.of_json in
+        field_map json__ "HostEnvironment" HostEnvironment.of_json in
       let cloudWatchLogGroupARN =
-        field_map json "CloudWatchLogGroupARN" CloudWatchLogGroupARN.of_json in
-      let vPCEndpoint = field_map json "VPCEndpoint" String_.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "CloudWatchLogGroupARN"
+          CloudWatchLogGroupARN.of_json in
+      let vPCEndpoint = field_map json__ "VPCEndpoint" String_.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let ec2InstanceRegion =
-        field_map json "Ec2InstanceRegion" Ec2InstanceRegion.of_json in
+        field_map json__ "Ec2InstanceRegion" Ec2InstanceRegion.of_json in
       let ec2InstanceId =
-        field_map json "Ec2InstanceId" Ec2InstanceId.of_json in
+        field_map json__ "Ec2InstanceId" Ec2InstanceId.of_json in
       let lastSoftwareUpdate =
-        field_map json "LastSoftwareUpdate" LastSoftwareUpdate.of_json in
+        field_map json__ "LastSoftwareUpdate" LastSoftwareUpdate.of_json in
       let nextUpdateAvailabilityDate =
-        field_map json "NextUpdateAvailabilityDate"
+        field_map json__ "NextUpdateAvailabilityDate"
           NextUpdateAvailabilityDate.of_json in
-      let gatewayType = field_map json "GatewayType" GatewayType.of_json in
+      let gatewayType = field_map json__ "GatewayType" GatewayType.of_json in
       let gatewayNetworkInterfaces =
-        field_map json "GatewayNetworkInterfaces"
+        field_map json__ "GatewayNetworkInterfaces"
           GatewayNetworkInterfaces.of_json in
-      let gatewayState = field_map json "GatewayState" GatewayState.of_json in
+      let gatewayState = field_map json__ "GatewayState" GatewayState.of_json in
       let gatewayTimezone =
-        field_map json "GatewayTimezone" GatewayTimezone.of_json in
-      let gatewayName = field_map json "GatewayName" String_.of_json in
-      let gatewayId = field_map json "GatewayId" GatewayId.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
-      make ?hostEnvironmentId ?supportedGatewayCapacities ?gatewayCapacity
-        ?deprecationDate ?softwareUpdatesEndDate ?endpointType
-        ?hostEnvironment ?cloudWatchLogGroupARN ?vPCEndpoint ?tags
-        ?ec2InstanceRegion ?ec2InstanceId ?lastSoftwareUpdate
+        field_map json__ "GatewayTimezone" GatewayTimezone.of_json in
+      let gatewayName = field_map json__ "GatewayName" String_.of_json in
+      let gatewayId = field_map json__ "GatewayId" GatewayId.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
+      make ?softwareVersion ?hostEnvironmentId ?supportedGatewayCapacities
+        ?gatewayCapacity ?deprecationDate ?softwareUpdatesEndDate
+        ?endpointType ?hostEnvironment ?cloudWatchLogGroupARN ?vPCEndpoint
+        ?tags ?ec2InstanceRegion ?ec2InstanceId ?lastSoftwareUpdate
         ?nextUpdateAvailabilityDate ?gatewayType ?gatewayNetworkInterfaces
         ?gatewayState ?gatewayTimezone ?gatewayName ?gatewayId ?gatewayARN ()
     let to_json v = composed_to_json to_value v
@@ -12715,8 +13859,8 @@ module DescribeGatewayInformationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A JSON object containing the ID of the gateway."]
@@ -12779,9 +13923,9 @@ module DescribeFileSystemAssociationsOutput =
           (Xml.child xml_arg0 "FileSystemAssociationInfoList") in
       make ?fileSystemAssociationInfoList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSystemAssociationInfoList =
-        field_map json "FileSystemAssociationInfoList"
+        field_map json__ "FileSystemAssociationInfoList"
           FileSystemAssociationInfoList.of_json in
       make ?fileSystemAssociationInfoList ()
     let to_json v = composed_to_json to_value v
@@ -12811,9 +13955,9 @@ module DescribeFileSystemAssociationsInput =
              "FileSystemAssociationARNList") in
       make ~fileSystemAssociationARNList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSystemAssociationARNList =
-        field_map_exn json "FileSystemAssociationARNList"
+        field_map_exn json__ "FileSystemAssociationARNList"
           FileSystemAssociationARNList.of_json in
       make ~fileSystemAssociationARNList ()
     let to_json v = composed_to_json to_value v
@@ -12876,9 +14020,9 @@ module DescribeChapCredentialsOutput =
           (Xml.child xml_arg0 "ChapCredentials") in
       make ?chapCredentials ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let chapCredentials =
-        field_map json "ChapCredentials" ChapCredentials.of_json in
+        field_map json__ "ChapCredentials" ChapCredentials.of_json in
       make ?chapCredentials ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A JSON object containing the following fields:"]
@@ -12901,8 +14045,8 @@ module DescribeChapCredentialsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetARN") in
       make ~targetARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetARN = field_map_exn json "TargetARN" TargetARN.of_json in
+    let of_json json__ =
+      let targetARN = field_map_exn json__ "TargetARN" TargetARN.of_json in
       make ~targetARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12964,9 +14108,9 @@ module DescribeCachediSCSIVolumesOutput =
           (Xml.child xml_arg0 "CachediSCSIVolumes") in
       make ?cachediSCSIVolumes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cachediSCSIVolumes =
-        field_map json "CachediSCSIVolumes" CachediSCSIVolumes.of_json in
+        field_map json__ "CachediSCSIVolumes" CachediSCSIVolumes.of_json in
       make ?cachediSCSIVolumes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A JSON object containing the following fields:"]
@@ -12989,12 +14133,103 @@ module DescribeCachediSCSIVolumesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARNs") in
       make ~volumeARNs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeARNs = field_map_exn json "VolumeARNs" VolumeARNs.of_json in
+    let of_json json__ =
+      let volumeARNs = field_map_exn json__ "VolumeARNs" VolumeARNs.of_json in
       make ~volumeARNs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a description of the gateway volumes specified in the request. This operation is only supported in the cached volume gateway types. The list of gateway volumes in the request must be from one gateway. In the response, Storage Gateway returns volume information sorted by volume Amazon Resource Name (ARN)."]
+module DescribeCacheReportOutput =
+  struct
+    type nonrec t =
+      {
+      cacheReportInfo: CacheReportInfo.t option
+        [@ocaml.doc
+          "Contains all informational fields associated with a cache report. Includes name, ARN, tags, status, progress, filters, start time, and end time."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidGatewayRequestException of InvalidGatewayRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?cacheReportInfo = fun () -> { cacheReportInfo }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidGatewayRequestException" ->
+          `InvalidGatewayRequestException
+            (InvalidGatewayRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidGatewayRequestException" ->
+          `InvalidGatewayRequestException
+            (InvalidGatewayRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidGatewayRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidGatewayRequestException"));
+            ("details", (InvalidGatewayRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CacheReportInfo",
+           (Option.map x.cacheReportInfo ~f:CacheReportInfo.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cacheReportInfo =
+        (Option.map ~f:CacheReportInfo.of_xml)
+          (Xml.child xml_arg0 "CacheReportInfo") in
+      make ?cacheReportInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cacheReportInfo =
+        field_map json__ "CacheReportInfo" CacheReportInfo.of_json in
+      make ?cacheReportInfo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the specified cache report, including completion status and generation progress."]
+module DescribeCacheReportInput =
+  struct
+    type nonrec t =
+      {
+      cacheReportARN: CacheReportARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the cache report you want to describe."]}
+    let context_ = "DescribeCacheReportInput"
+    let make ~cacheReportARN = fun () -> { cacheReportARN }
+    let to_value x =
+      structure_to_value
+        [("CacheReportARN",
+           (Some (CacheReportARN.to_value x.cacheReportARN)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cacheReportARN =
+        CacheReportARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CacheReportARN") in
+      make ~cacheReportARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cacheReportARN =
+        field_map_exn json__ "CacheReportARN" CacheReportARN.of_json in
+      make ~cacheReportARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the specified cache report, including completion status and generation progress."]
 module DescribeCacheOutput =
   struct
     type nonrec t =
@@ -13110,19 +14345,19 @@ module DescribeCacheOutput =
       make ?cacheMissPercentage ?cacheHitPercentage ?cacheDirtyPercentage
         ?cacheUsedPercentage ?cacheAllocatedInBytes ?diskIds ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cacheMissPercentage =
-        field_map json "CacheMissPercentage" Double.of_json in
+        field_map json__ "CacheMissPercentage" Double.of_json in
       let cacheHitPercentage =
-        field_map json "CacheHitPercentage" Double.of_json in
+        field_map json__ "CacheHitPercentage" Double.of_json in
       let cacheDirtyPercentage =
-        field_map json "CacheDirtyPercentage" Double.of_json in
+        field_map json__ "CacheDirtyPercentage" Double.of_json in
       let cacheUsedPercentage =
-        field_map json "CacheUsedPercentage" Double.of_json in
+        field_map json__ "CacheUsedPercentage" Double.of_json in
       let cacheAllocatedInBytes =
-        field_map json "CacheAllocatedInBytes" Long.of_json in
-      let diskIds = field_map json "DiskIds" DiskIds.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "CacheAllocatedInBytes" Long.of_json in
+      let diskIds = field_map json__ "DiskIds" DiskIds.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?cacheMissPercentage ?cacheHitPercentage ?cacheDirtyPercentage
         ?cacheUsedPercentage ?cacheAllocatedInBytes ?diskIds ?gatewayARN ()
     let to_json v = composed_to_json to_value v
@@ -13144,8 +14379,8 @@ module DescribeCacheInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13214,11 +14449,11 @@ module DescribeBandwidthRateLimitScheduleOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?bandwidthRateLimitIntervals ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bandwidthRateLimitIntervals =
-        field_map json "BandwidthRateLimitIntervals"
+        field_map json__ "BandwidthRateLimitIntervals"
           BandwidthRateLimitIntervals.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?bandwidthRateLimitIntervals ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13239,8 +14474,8 @@ module DescribeBandwidthRateLimitScheduleInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13326,14 +14561,14 @@ module DescribeBandwidthRateLimitOutput =
       make ?averageDownloadRateLimitInBitsPerSec
         ?averageUploadRateLimitInBitsPerSec ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let averageDownloadRateLimitInBitsPerSec =
-        field_map json "AverageDownloadRateLimitInBitsPerSec"
+        field_map json__ "AverageDownloadRateLimitInBitsPerSec"
           BandwidthDownloadRateLimit.of_json in
       let averageUploadRateLimitInBitsPerSec =
-        field_map json "AverageUploadRateLimitInBitsPerSec"
+        field_map json__ "AverageUploadRateLimitInBitsPerSec"
           BandwidthUploadRateLimit.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?averageDownloadRateLimitInBitsPerSec
         ?averageUploadRateLimitInBitsPerSec ?gatewayARN ()
     let to_json v = composed_to_json to_value v
@@ -13354,8 +14589,8 @@ module DescribeBandwidthRateLimitInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13429,11 +14664,11 @@ module DescribeAvailabilityMonitorTestOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?startTime ?status ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startTime = field_map json "StartTime" Time.of_json in
+    let of_json json__ =
+      let startTime = field_map json__ "StartTime" Time.of_json in
       let status =
-        field_map json "Status" AvailabilityMonitorTestStatus.of_json in
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "Status" AvailabilityMonitorTestStatus.of_json in
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?startTime ?status ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13454,8 +14689,8 @@ module DescribeAvailabilityMonitorTestInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13515,8 +14750,8 @@ module DeleteVolumeOutput =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
+    let of_json json__ =
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
       make ?volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13540,8 +14775,8 @@ module DeleteVolumeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ~volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
+    let of_json json__ =
+      let volumeARN = field_map_exn json__ "VolumeARN" VolumeARN.of_json in
       make ~volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13601,8 +14836,8 @@ module DeleteTapePoolOutput =
         (Option.map ~f:PoolARN.of_xml) (Xml.child xml_arg0 "PoolARN") in
       make ?poolARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let poolARN = field_map json "PoolARN" PoolARN.of_json in
+    let of_json json__ =
+      let poolARN = field_map json__ "PoolARN" PoolARN.of_json in
       make ?poolARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13624,8 +14859,8 @@ module DeleteTapePoolInput =
         PoolARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PoolARN") in
       make ~poolARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let poolARN = field_map_exn json "PoolARN" PoolARN.of_json in
+    let of_json json__ =
+      let poolARN = field_map_exn json__ "PoolARN" PoolARN.of_json in
       make ~poolARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13685,8 +14920,8 @@ module DeleteTapeOutput =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tapeARN = field_map json "TapeARN" TapeARN.of_json in
+    let of_json json__ =
+      let tapeARN = field_map json__ "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DeleteTapeOutput"]
@@ -13726,11 +14961,11 @@ module DeleteTapeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?bypassGovernanceRetention ~tapeARN ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bypassGovernanceRetention =
-        field_map json "BypassGovernanceRetention" Boolean__lc1.of_json in
-      let tapeARN = field_map_exn json "TapeARN" TapeARN.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "BypassGovernanceRetention" Boolean__lc1.of_json in
+      let tapeARN = field_map_exn json__ "TapeARN" TapeARN.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ?bypassGovernanceRetention ~tapeARN ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DeleteTapeInput"]
@@ -13789,8 +15024,8 @@ module DeleteTapeArchiveOutput =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tapeARN = field_map json "TapeARN" TapeARN.of_json in
+    let of_json json__ =
+      let tapeARN = field_map json__ "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DeleteTapeArchiveOutput"]
@@ -13821,10 +15056,10 @@ module DeleteTapeArchiveInput =
         TapeARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TapeARN") in
       make ?bypassGovernanceRetention ~tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bypassGovernanceRetention =
-        field_map json "BypassGovernanceRetention" Boolean__lc1.of_json in
-      let tapeARN = field_map_exn json "TapeARN" TapeARN.of_json in
+        field_map json__ "BypassGovernanceRetention" Boolean__lc1.of_json in
+      let tapeARN = field_map_exn json__ "TapeARN" TapeARN.of_json in
       make ?bypassGovernanceRetention ~tapeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DeleteTapeArchiveInput"]
@@ -13882,12 +15117,12 @@ module DeleteSnapshotScheduleOutput =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
+    let of_json json__ =
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
       make ?volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a snapshot of a volume. You can take snapshots of your gateway volumes on a scheduled or ad hoc basis. This API action enables you to delete a snapshot schedule for a volume. For more information, see Backing up your volumes. In the DeleteSnapshotSchedule request, you identify the volume by providing its Amazon Resource Name (ARN). This operation is only supported in stored and cached volume gateway types. To list or delete a snapshot, you must use the Amazon EC2 API. For more information, go to DescribeSnapshots in the Amazon Elastic Compute Cloud API Reference."]
+       "Deletes a snapshot of a volume. You can take snapshots of your gateway volumes on a scheduled or ad hoc basis. This API action enables you to delete a snapshot schedule for a volume. For more information, see Backing up your volumes. In the DeleteSnapshotSchedule request, you identify the volume by providing its Amazon Resource Name (ARN). This operation is only supported for cached volume gateway types. To list or delete a snapshot, you must use the Amazon EC2 API. For more information, go to DescribeSnapshots in the Amazon Elastic Compute Cloud API Reference."]
 module DeleteSnapshotScheduleInput =
   struct
     type nonrec t =
@@ -13906,12 +15141,12 @@ module DeleteSnapshotScheduleInput =
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ~volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
+    let of_json json__ =
+      let volumeARN = field_map_exn json__ "VolumeARN" VolumeARN.of_json in
       make ~volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a snapshot of a volume. You can take snapshots of your gateway volumes on a scheduled or ad hoc basis. This API action enables you to delete a snapshot schedule for a volume. For more information, see Backing up your volumes. In the DeleteSnapshotSchedule request, you identify the volume by providing its Amazon Resource Name (ARN). This operation is only supported in stored and cached volume gateway types. To list or delete a snapshot, you must use the Amazon EC2 API. For more information, go to DescribeSnapshots in the Amazon Elastic Compute Cloud API Reference."]
+       "Deletes a snapshot of a volume. You can take snapshots of your gateway volumes on a scheduled or ad hoc basis. This API action enables you to delete a snapshot schedule for a volume. For more information, see Backing up your volumes. In the DeleteSnapshotSchedule request, you identify the volume by providing its Amazon Resource Name (ARN). This operation is only supported for cached volume gateway types. To list or delete a snapshot, you must use the Amazon EC2 API. For more information, go to DescribeSnapshots in the Amazon Elastic Compute Cloud API Reference."]
 module DeleteGatewayOutput =
   struct
     type nonrec t = {
@@ -13964,8 +15199,8 @@ module DeleteGatewayOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A JSON object containing the ID of the deleted gateway."]
@@ -13985,8 +15220,8 @@ module DeleteGatewayInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14048,8 +15283,8 @@ module DeleteFileShareOutput =
           (Xml.child xml_arg0 "FileShareARN") in
       make ?fileShareARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
+    let of_json json__ =
+      let fileShareARN = field_map json__ "FileShareARN" FileShareARN.of_json in
       make ?fileShareARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DeleteFileShareOutput"]
@@ -14080,10 +15315,10 @@ module DeleteFileShareInput =
           (Xml.child_exn ~context:context_ xml_arg0 "FileShareARN") in
       make ?forceDelete ~fileShareARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let forceDelete = field_map json "ForceDelete" Boolean__lc1.of_json in
+    let of_json json__ =
+      let forceDelete = field_map json__ "ForceDelete" Boolean__lc1.of_json in
       let fileShareARN =
-        field_map_exn json "FileShareARN" FileShareARN.of_json in
+        field_map_exn json__ "FileShareARN" FileShareARN.of_json in
       make ?forceDelete ~fileShareARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DeleteFileShareInput"]
@@ -14147,9 +15382,9 @@ module DeleteChapCredentialsOutput =
         (Option.map ~f:TargetARN.of_xml) (Xml.child xml_arg0 "TargetARN") in
       make ?initiatorName ?targetARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let initiatorName = field_map json "InitiatorName" IqnName.of_json in
-      let targetARN = field_map json "TargetARN" TargetARN.of_json in
+    let of_json json__ =
+      let initiatorName = field_map json__ "InitiatorName" IqnName.of_json in
+      let targetARN = field_map json__ "TargetARN" TargetARN.of_json in
       make ?initiatorName ?targetARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A JSON object containing the following fields:"]
@@ -14179,13 +15414,105 @@ module DeleteChapCredentialsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetARN") in
       make ~initiatorName ~targetARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let initiatorName = field_map_exn json "InitiatorName" IqnName.of_json in
-      let targetARN = field_map_exn json "TargetARN" TargetARN.of_json in
+    let of_json json__ =
+      let initiatorName =
+        field_map_exn json__ "InitiatorName" IqnName.of_json in
+      let targetARN = field_map_exn json__ "TargetARN" TargetARN.of_json in
       make ~initiatorName ~targetARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A JSON object containing one or more of the following fields: DeleteChapCredentialsInput$InitiatorName DeleteChapCredentialsInput$TargetARN"]
+module DeleteCacheReportOutput =
+  struct
+    type nonrec t =
+      {
+      cacheReportARN: CacheReportARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the cache report you want to delete."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidGatewayRequestException of InvalidGatewayRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?cacheReportARN = fun () -> { cacheReportARN }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidGatewayRequestException" ->
+          `InvalidGatewayRequestException
+            (InvalidGatewayRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidGatewayRequestException" ->
+          `InvalidGatewayRequestException
+            (InvalidGatewayRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidGatewayRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidGatewayRequestException"));
+            ("details", (InvalidGatewayRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CacheReportARN",
+           (Option.map x.cacheReportARN ~f:CacheReportARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cacheReportARN =
+        (Option.map ~f:CacheReportARN.of_xml)
+          (Xml.child xml_arg0 "CacheReportARN") in
+      make ?cacheReportARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cacheReportARN =
+        field_map json__ "CacheReportARN" CacheReportARN.of_json in
+      make ?cacheReportARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified cache report and any associated tags from the Storage Gateway database. You can only delete completed reports. If the status of the report you attempt to delete still IN-PROGRESS, the delete operation returns an error. You can use CancelCacheReport to cancel an IN-PROGRESS report. DeleteCacheReport does not delete the report object from your Amazon S3 bucket."]
+module DeleteCacheReportInput =
+  struct
+    type nonrec t =
+      {
+      cacheReportARN: CacheReportARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the cache report you want to delete."]}
+    let context_ = "DeleteCacheReportInput"
+    let make ~cacheReportARN = fun () -> { cacheReportARN }
+    let to_value x =
+      structure_to_value
+        [("CacheReportARN",
+           (Some (CacheReportARN.to_value x.cacheReportARN)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cacheReportARN =
+        CacheReportARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CacheReportARN") in
+      make ~cacheReportARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cacheReportARN =
+        field_map_exn json__ "CacheReportARN" CacheReportARN.of_json in
+      make ~cacheReportARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified cache report and any associated tags from the Storage Gateway database. You can only delete completed reports. If the status of the report you attempt to delete still IN-PROGRESS, the delete operation returns an error. You can use CancelCacheReport to cancel an IN-PROGRESS report. DeleteCacheReport does not delete the report object from your Amazon S3 bucket."]
 module DeleteBandwidthRateLimitOutput =
   struct
     type nonrec t = {
@@ -14238,8 +15565,8 @@ module DeleteBandwidthRateLimitOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14269,10 +15596,10 @@ module DeleteBandwidthRateLimitInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~bandwidthType ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bandwidthType =
-        field_map_exn json "BandwidthType" BandwidthType.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map_exn json__ "BandwidthType" BandwidthType.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~bandwidthType ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14329,8 +15656,8 @@ module DeleteAutomaticTapeCreationPolicyOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14351,8 +15678,8 @@ module DeleteAutomaticTapeCreationPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14412,8 +15739,8 @@ module CreateTapesOutput =
         (Option.map ~f:TapeARNs.of_xml) (Xml.child xml_arg0 "TapeARNs") in
       make ?tapeARNs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tapeARNs = field_map json "TapeARNs" TapeARNs.of_json in
+    let of_json json__ =
+      let tapeARNs = field_map json__ "TapeARNs" TapeARNs.of_json in
       make ?tapeARNs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateTapeOutput"]
@@ -14443,7 +15770,7 @@ module CreateTapesInput =
           "The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value can only be set when KMSEncrypted is true. Optional."];
       poolId: PoolId.t option
         [@ocaml.doc
-          "The ID of the pool that you want to add your tape to for archiving. The tape in this pool is archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool. Valid Values: GLACIER | DEEP_ARCHIVE"];
+          "The ID of the pool that you want to add your tape to for archiving. The tape in this pool is archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool."];
       worm: Boolean__lc1.t option
         [@ocaml.doc
           "Set to TRUE if the tape you are creating is to be configured as a write-once-read-many (WORM) tape."];
@@ -14517,20 +15844,21 @@ module CreateTapesInput =
       make ?tags ?worm ?poolId ?kMSKey ?kMSEncrypted ~tapeBarcodePrefix
         ~numTapesToCreate ~clientToken ~tapeSizeInBytes ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let worm = field_map json "Worm" Boolean__lc1.of_json in
-      let poolId = field_map json "PoolId" PoolId.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
-      let kMSEncrypted = field_map json "KMSEncrypted" Boolean.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let worm = field_map json__ "Worm" Boolean__lc1.of_json in
+      let poolId = field_map json__ "PoolId" PoolId.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
+      let kMSEncrypted = field_map json__ "KMSEncrypted" Boolean.of_json in
       let tapeBarcodePrefix =
-        field_map_exn json "TapeBarcodePrefix" TapeBarcodePrefix.of_json in
+        field_map_exn json__ "TapeBarcodePrefix" TapeBarcodePrefix.of_json in
       let numTapesToCreate =
-        field_map_exn json "NumTapesToCreate" NumTapesToCreate.of_json in
-      let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
+        field_map_exn json__ "NumTapesToCreate" NumTapesToCreate.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
       let tapeSizeInBytes =
-        field_map_exn json "TapeSizeInBytes" TapeSize.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map_exn json__ "TapeSizeInBytes" TapeSize.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ?tags ?worm ?poolId ?kMSKey ?kMSEncrypted ~tapeBarcodePrefix
         ~numTapesToCreate ~clientToken ~tapeSizeInBytes ~gatewayARN ()
     let to_json v = composed_to_json to_value v
@@ -14590,8 +15918,8 @@ module CreateTapeWithBarcodeOutput =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tapeARN = field_map json "TapeARN" TapeARN.of_json in
+    let of_json json__ =
+      let tapeARN = field_map json__ "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateTapeOutput"]
@@ -14616,7 +15944,7 @@ module CreateTapeWithBarcodeInput =
           "The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value can only be set when KMSEncrypted is true. Optional."];
       poolId: PoolId.t option
         [@ocaml.doc
-          "The ID of the pool that you want to add your tape to for archiving. The tape in this pool is archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the storage class (S3 Glacier or S3 Deep Archive) that corresponds to the pool. Valid Values: GLACIER | DEEP_ARCHIVE"];
+          "The ID of the pool that you want to add your tape to for archiving. The tape in this pool is archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the storage class (S3 Glacier or S3 Deep Archive) that corresponds to the pool."];
       worm: Boolean__lc1.t option
         [@ocaml.doc
           "Set to TRUE if the tape you are creating is to be configured as a write-once-read-many (WORM) tape."];
@@ -14676,16 +16004,17 @@ module CreateTapeWithBarcodeInput =
       make ?tags ?worm ?poolId ?kMSKey ?kMSEncrypted ~tapeBarcode
         ~tapeSizeInBytes ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let worm = field_map json "Worm" Boolean__lc1.of_json in
-      let poolId = field_map json "PoolId" PoolId.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
-      let kMSEncrypted = field_map json "KMSEncrypted" Boolean.of_json in
-      let tapeBarcode = field_map_exn json "TapeBarcode" TapeBarcode.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let worm = field_map json__ "Worm" Boolean__lc1.of_json in
+      let poolId = field_map json__ "PoolId" PoolId.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
+      let kMSEncrypted = field_map json__ "KMSEncrypted" Boolean.of_json in
+      let tapeBarcode =
+        field_map_exn json__ "TapeBarcode" TapeBarcode.of_json in
       let tapeSizeInBytes =
-        field_map_exn json "TapeSizeInBytes" TapeSize.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map_exn json__ "TapeSizeInBytes" TapeSize.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ?tags ?worm ?poolId ?kMSKey ?kMSEncrypted ~tapeBarcode
         ~tapeSizeInBytes ~gatewayARN ()
     let to_json v = composed_to_json to_value v
@@ -14745,8 +16074,8 @@ module CreateTapePoolOutput =
         (Option.map ~f:PoolARN.of_xml) (Xml.child xml_arg0 "PoolARN") in
       make ?poolARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let poolARN = field_map json "PoolARN" PoolARN.of_json in
+    let of_json json__ =
+      let poolARN = field_map json__ "PoolARN" PoolARN.of_json in
       make ?poolARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14810,16 +16139,16 @@ module CreateTapePoolInput =
       make ?tags ?retentionLockTimeInDays ?retentionLockType ~storageClass
         ~poolName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let retentionLockTimeInDays =
-        field_map json "RetentionLockTimeInDays"
+        field_map json__ "RetentionLockTimeInDays"
           RetentionLockTimeInDays.of_json in
       let retentionLockType =
-        field_map json "RetentionLockType" RetentionLockType.of_json in
+        field_map json__ "RetentionLockType" RetentionLockType.of_json in
       let storageClass =
-        field_map_exn json "StorageClass" TapeStorageClass.of_json in
-      let poolName = field_map_exn json "PoolName" PoolName.of_json in
+        field_map_exn json__ "StorageClass" TapeStorageClass.of_json in
+      let poolName = field_map_exn json__ "PoolName" PoolName.of_json in
       make ?tags ?retentionLockTimeInDays ?retentionLockType ~storageClass
         ~poolName ()
     let to_json v = composed_to_json to_value v
@@ -14895,10 +16224,11 @@ module CreateStorediSCSIVolumeOutput =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?targetARN ?volumeSizeInBytes ?volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetARN = field_map json "TargetARN" TargetARN.of_json in
-      let volumeSizeInBytes = field_map json "VolumeSizeInBytes" Long.of_json in
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
+    let of_json json__ =
+      let targetARN = field_map json__ "TargetARN" TargetARN.of_json in
+      let volumeSizeInBytes =
+        field_map json__ "VolumeSizeInBytes" Long.of_json in
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
       make ?targetARN ?volumeSizeInBytes ?volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A JSON object containing the following fields:"]
@@ -14921,7 +16251,7 @@ module CreateStorediSCSIVolumeInput =
           "The name of the iSCSI target used by an initiator to connect to a volume and used as a suffix for the target ARN. For example, specifying TargetName as myvolume results in the target ARN of arn:aws:storagegateway:us-east-2:111122223333:gateway/sgw-12A3456B/target/iqn.1997-05.com.amazon:myvolume. The target name must be unique across all volumes on a gateway. If you don't specify a value, Storage Gateway uses the value that was previously used for this volume as the new target name."];
       networkInterfaceId: NetworkInterfaceId.t
         [@ocaml.doc
-          "The network interface of the gateway on which to expose the iSCSI target. Only IPv4 addresses are accepted. Use DescribeGatewayInformation to get a list of the network interfaces available on a gateway. Valid Values: A valid IP address."];
+          "The network interface of the gateway on which to expose the iSCSI target. Accepts IPv4 and IPv6 addresses. Use DescribeGatewayInformation to get a list of the network interfaces available on a gateway. Valid Values: A valid IP address."];
       kMSEncrypted: Boolean.t option
         [@ocaml.doc
           "Set to true to use Amazon S3 server-side encryption with your own KMS key, or false to use a key managed by Amazon S3. Optional. Valid Values: true | false"];
@@ -14992,18 +16322,18 @@ module CreateStorediSCSIVolumeInput =
       make ?tags ?kMSKey ?kMSEncrypted ~networkInterfaceId ~targetName
         ~preserveExistingData ?snapshotId ~diskId ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
-      let kMSEncrypted = field_map json "KMSEncrypted" Boolean.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
+      let kMSEncrypted = field_map json__ "KMSEncrypted" Boolean.of_json in
       let networkInterfaceId =
-        field_map_exn json "NetworkInterfaceId" NetworkInterfaceId.of_json in
-      let targetName = field_map_exn json "TargetName" TargetName.of_json in
+        field_map_exn json__ "NetworkInterfaceId" NetworkInterfaceId.of_json in
+      let targetName = field_map_exn json__ "TargetName" TargetName.of_json in
       let preserveExistingData =
-        field_map_exn json "PreserveExistingData" Boolean__lc1.of_json in
-      let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
-      let diskId = field_map_exn json "DiskId" DiskId.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map_exn json__ "PreserveExistingData" Boolean__lc1.of_json in
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
+      let diskId = field_map_exn json__ "DiskId" DiskId.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ?tags ?kMSKey ?kMSEncrypted ~networkInterfaceId ~targetName
         ~preserveExistingData ?snapshotId ~diskId ~gatewayARN ()
     let to_json v = composed_to_json to_value v
@@ -15080,9 +16410,9 @@ module CreateSnapshotOutput =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?snapshotId ?volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
+    let of_json json__ =
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
       make ?snapshotId ?volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A JSON object containing the following fields:"]
@@ -15121,11 +16451,12 @@ module CreateSnapshotInput =
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ?tags ~snapshotDescription ~volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let snapshotDescription =
-        field_map_exn json "SnapshotDescription" SnapshotDescription.of_json in
-      let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
+        field_map_exn json__ "SnapshotDescription"
+          SnapshotDescription.of_json in
+      let volumeARN = field_map_exn json__ "VolumeARN" VolumeARN.of_json in
       make ?tags ~snapshotDescription ~volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15209,11 +16540,11 @@ module CreateSnapshotFromVolumeRecoveryPointOutput =
         (Option.map ~f:SnapshotId.of_xml) (Xml.child xml_arg0 "SnapshotId") in
       make ?volumeRecoveryPointTime ?volumeARN ?snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let volumeRecoveryPointTime =
-        field_map json "VolumeRecoveryPointTime" String_.of_json in
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
-      let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
+        field_map json__ "VolumeRecoveryPointTime" String_.of_json in
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
       make ?volumeRecoveryPointTime ?volumeARN ?snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15253,11 +16584,12 @@ module CreateSnapshotFromVolumeRecoveryPointInput =
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeARN") in
       make ?tags ~snapshotDescription ~volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let snapshotDescription =
-        field_map_exn json "SnapshotDescription" SnapshotDescription.of_json in
-      let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
+        field_map_exn json__ "SnapshotDescription"
+          SnapshotDescription.of_json in
+      let volumeARN = field_map_exn json__ "VolumeARN" VolumeARN.of_json in
       make ?tags ~snapshotDescription ~volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15319,8 +16651,8 @@ module CreateSMBFileShareOutput =
           (Xml.child xml_arg0 "FileShareARN") in
       make ?fileShareARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
+    let of_json json__ =
+      let fileShareARN = field_map json__ "FileShareARN" FileShareARN.of_json in
       make ?fileShareARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateSMBFileShareOutput"]
@@ -15334,21 +16666,24 @@ module CreateSMBFileShareInput =
       gatewayARN: GatewayARN.t
         [@ocaml.doc
           "The ARN of the S3 File Gateway on which you want to create a file share."];
+      encryptionType: EncryptionType.t option
+        [@ocaml.doc
+          "A value that specifies the type of server-side encryption that the file share will use for the data that it stores in Amazon S3. We recommend using EncryptionType instead of KMSEncrypted to set the file share encryption method. You do not need to provide values for both parameters. If values for both parameters exist in the same request, then the specified encryption methods must not conflict. For example, if EncryptionType is SseS3, then KMSEncrypted must be false. If EncryptionType is SseKms or DsseKms, then KMSEncrypted must be true."];
       kMSEncrypted: Boolean.t option
         [@ocaml.doc
-          "Set to true to use Amazon S3 server-side encryption with your own KMS key, or false to use a key managed by Amazon S3. Optional. Valid Values: true | false"];
+          "Optional. Set to true to use Amazon S3 server-side encryption with your own KMS key (SSE-KMS), or false to use a key managed by Amazon S3 (SSE-S3). To use dual-layer encryption (DSSE-KMS), set the EncryptionType parameter instead. We recommend using EncryptionType instead of KMSEncrypted to set the file share encryption method. You do not need to provide values for both parameters. If values for both parameters exist in the same request, then the specified encryption methods must not conflict. For example, if EncryptionType is SseS3, then KMSEncrypted must be false. If EncryptionType is SseKms or DsseKms, then KMSEncrypted must be true. Valid Values: true | false"];
       kMSKey: KMSKey.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value can only be set when KMSEncrypted is true. Optional."];
+          "Optional. The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value must be set if KMSEncrypted is true, or if EncryptionType is SseKms or DsseKms."];
       role: Role.t
         [@ocaml.doc
           "The ARN of the Identity and Access Management (IAM) role that an S3 File Gateway assumes when it accesses the underlying storage."];
       locationARN: LocationARN.t
         [@ocaml.doc
-          "A custom ARN for the backend storage used for storing data for file shares. It includes a resource ARN with an optional prefix concatenation. The prefix must end with a forward slash (/). You can specify LocationARN as a bucket ARN, access point ARN or access point alias, as shown in the following examples. Bucket ARN: arn:aws:s3:::my-bucket/prefix/ Access point ARN: arn:aws:s3:region:account-id:accesspoint/access-point-name/prefix/ If you specify an access point, the bucket policy must be configured to delegate access control to the access point. For information, see Delegating access control to access points in the Amazon S3 User Guide. Access point alias: test-ap-ab123cdef4gehijklmn5opqrstuvuse1a-s3alias"];
+          "A custom ARN for the backend storage used for storing data for file shares. It includes a resource ARN with an optional prefix concatenation. The prefix must end with a forward slash (/). You can specify LocationARN as a bucket ARN, access point ARN or access point alias, as shown in the following examples. Bucket ARN: arn:aws:s3:::amzn-s3-demo-bucket/prefix/ Access point ARN: arn:aws:s3:region:account-id:accesspoint/access-point-name/prefix/ If you specify an access point, the bucket policy must be configured to delegate access control to the access point. For information, see Delegating access control to access points in the Amazon S3 User Guide. Access point alias: test-ap-ab123cdef4gehijklmn5opqrstuvuse1a-s3alias"];
       defaultStorageClass: StorageClass.t option
         [@ocaml.doc
-          "The default storage class for objects put into an Amazon S3 bucket by the S3 File Gateway. The default value is S3_INTELLIGENT_TIERING. Optional. Valid Values: S3_STANDARD | S3_INTELLIGENT_TIERING | S3_STANDARD_IA | S3_ONEZONE_IA"];
+          "The default storage class for objects put into an Amazon S3 bucket by the S3 File Gateway. The default value is S3_STANDARD. Optional. Valid Values: S3_STANDARD | S3_INTELLIGENT_TIERING | S3_STANDARD_IA | S3_ONEZONE_IA"];
       objectACL: ObjectACL.t option
         [@ocaml.doc
           "A value that sets the access control list (ACL) permission for objects in the S3 bucket that a S3 File Gateway puts objects into. The default value is private."];
@@ -15363,7 +16698,7 @@ module CreateSMBFileShareInput =
           "A value that sets who pays the cost of the request and the cost associated with data download from the S3 bucket. If this value is set to true, the requester pays the costs; otherwise, the S3 bucket owner pays. However, the S3 bucket owner always pays the cost of storing data. RequesterPays is a configuration for the S3 bucket that backs the file share, so make sure that the configuration on the file share is the same as the S3 bucket configuration. Valid Values: true | false"];
       sMBACLEnabled: Boolean.t option
         [@ocaml.doc
-          "Set this value to true to enable access control list (ACL) on the SMB file share. Set it to false to map file and directory permissions to the POSIX permissions. For more information, see Using Microsoft Windows ACLs to control access to an SMB file share in the Storage Gateway User Guide. Valid Values: true | false"];
+          "Set this value to true to enable access control list (ACL) on the SMB file share. Set it to false to map file and directory permissions to the POSIX permissions. For more information, see Using Windows ACLs to limit SMB file share access in the Amazon S3 File Gateway User Guide. Valid Values: true | false"];
       accessBasedEnumeration: Boolean.t option
         [@ocaml.doc
           "The files and folders on this share will only be visible to users with read access."];
@@ -15390,13 +16725,13 @@ module CreateSMBFileShareInput =
           "A list of up to 50 tags that can be assigned to the NFS file share. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."];
       fileShareName: FileShareName.t option
         [@ocaml.doc
-          "The name of the file share. Optional. FileShareName must be set if an S3 prefix name is set in LocationARN, or if an access point or access point alias is used."];
+          "The name of the file share. Optional. FileShareName must be set if an S3 prefix name is set in LocationARN, or if an access point or access point alias is used. A valid SMB file share name cannot contain the following characters: \\[,\\],#,;,<,>,:,\",\\,/,|,?,*,+, or ASCII control characters 1-31."];
       cacheAttributes: CacheAttributes.t option
         [@ocaml.doc
           "Specifies refresh cache information for the file share."];
       notificationPolicy: NotificationPolicy.t option
         [@ocaml.doc
-          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
+          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. This setting is not meant to specify an exact time at which the notification will be sent. In some cases, the gateway might require more than the specified delay time to generate and send notifications. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
       vPCEndpointDNSName: DNSHostName.t option
         [@ocaml.doc
           "Specifies the DNS name for the VPC endpoint that the SMB file share uses to connect to Amazon S3. This parameter is required for SMB file shares that connect to Amazon S3 through a VPC endpoint, a VPC access point, or an access point alias that points to a VPC access point."];
@@ -15407,65 +16742,69 @@ module CreateSMBFileShareInput =
         [@ocaml.doc
           "Specifies whether opportunistic locking is enabled for the SMB file share. Enabling opportunistic locking on case-sensitive shares is not recommended for workloads that involve access to files with the same name in different case. Valid Values: true | false"]}
     let context_ = "CreateSMBFileShareInput"
-    let make ?kMSEncrypted =
-      fun ?kMSKey ->
-        fun ?defaultStorageClass ->
-          fun ?objectACL ->
-            fun ?readOnly ->
-              fun ?guessMIMETypeEnabled ->
-                fun ?requesterPays ->
-                  fun ?sMBACLEnabled ->
-                    fun ?accessBasedEnumeration ->
-                      fun ?adminUserList ->
-                        fun ?validUserList ->
-                          fun ?invalidUserList ->
-                            fun ?auditDestinationARN ->
-                              fun ?authentication ->
-                                fun ?caseSensitivity ->
-                                  fun ?tags ->
-                                    fun ?fileShareName ->
-                                      fun ?cacheAttributes ->
-                                        fun ?notificationPolicy ->
-                                          fun ?vPCEndpointDNSName ->
-                                            fun ?bucketRegion ->
-                                              fun ?oplocksEnabled ->
-                                                fun ~clientToken ->
-                                                  fun ~gatewayARN ->
-                                                    fun ~role ->
-                                                      fun ~locationARN ->
-                                                        fun () ->
-                                                          {
-                                                            kMSEncrypted;
-                                                            kMSKey;
-                                                            defaultStorageClass;
-                                                            objectACL;
-                                                            readOnly;
-                                                            guessMIMETypeEnabled;
-                                                            requesterPays;
-                                                            sMBACLEnabled;
-                                                            accessBasedEnumeration;
-                                                            adminUserList;
-                                                            validUserList;
-                                                            invalidUserList;
-                                                            auditDestinationARN;
-                                                            authentication;
-                                                            caseSensitivity;
-                                                            tags;
-                                                            fileShareName;
-                                                            cacheAttributes;
-                                                            notificationPolicy;
-                                                            vPCEndpointDNSName;
-                                                            bucketRegion;
-                                                            oplocksEnabled;
-                                                            clientToken;
-                                                            gatewayARN;
-                                                            role;
-                                                            locationARN
-                                                          }
+    let make ?encryptionType =
+      fun ?kMSEncrypted ->
+        fun ?kMSKey ->
+          fun ?defaultStorageClass ->
+            fun ?objectACL ->
+              fun ?readOnly ->
+                fun ?guessMIMETypeEnabled ->
+                  fun ?requesterPays ->
+                    fun ?sMBACLEnabled ->
+                      fun ?accessBasedEnumeration ->
+                        fun ?adminUserList ->
+                          fun ?validUserList ->
+                            fun ?invalidUserList ->
+                              fun ?auditDestinationARN ->
+                                fun ?authentication ->
+                                  fun ?caseSensitivity ->
+                                    fun ?tags ->
+                                      fun ?fileShareName ->
+                                        fun ?cacheAttributes ->
+                                          fun ?notificationPolicy ->
+                                            fun ?vPCEndpointDNSName ->
+                                              fun ?bucketRegion ->
+                                                fun ?oplocksEnabled ->
+                                                  fun ~clientToken ->
+                                                    fun ~gatewayARN ->
+                                                      fun ~role ->
+                                                        fun ~locationARN ->
+                                                          fun () ->
+                                                            {
+                                                              encryptionType;
+                                                              kMSEncrypted;
+                                                              kMSKey;
+                                                              defaultStorageClass;
+                                                              objectACL;
+                                                              readOnly;
+                                                              guessMIMETypeEnabled;
+                                                              requesterPays;
+                                                              sMBACLEnabled;
+                                                              accessBasedEnumeration;
+                                                              adminUserList;
+                                                              validUserList;
+                                                              invalidUserList;
+                                                              auditDestinationARN;
+                                                              authentication;
+                                                              caseSensitivity;
+                                                              tags;
+                                                              fileShareName;
+                                                              cacheAttributes;
+                                                              notificationPolicy;
+                                                              vPCEndpointDNSName;
+                                                              bucketRegion;
+                                                              oplocksEnabled;
+                                                              clientToken;
+                                                              gatewayARN;
+                                                              role;
+                                                              locationARN
+                                                            }
     let to_value x =
       structure_to_value
         [("ClientToken", (Some (ClientToken.to_value x.clientToken)));
         ("GatewayARN", (Some (GatewayARN.to_value x.gatewayARN)));
+        ("EncryptionType",
+          (Option.map x.encryptionType ~f:EncryptionType.to_value));
         ("KMSEncrypted", (Option.map x.kMSEncrypted ~f:Boolean.to_value));
         ("KMSKey", (Option.map x.kMSKey ~f:KMSKey.to_value));
         ("Role", (Some (Role.to_value x.role)));
@@ -15562,6 +16901,9 @@ module CreateSMBFileShareInput =
         (Option.map ~f:KMSKey.of_xml) (Xml.child xml_arg0 "KMSKey") in
       let kMSEncrypted =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "KMSEncrypted") in
+      let encryptionType =
+        (Option.map ~f:EncryptionType.of_xml)
+          (Xml.child xml_arg0 "EncryptionType") in
       let gatewayARN =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
@@ -15574,52 +16916,59 @@ module CreateSMBFileShareInput =
         ?invalidUserList ?validUserList ?adminUserList
         ?accessBasedEnumeration ?sMBACLEnabled ?requesterPays
         ?guessMIMETypeEnabled ?readOnly ?objectACL ?defaultStorageClass
-        ~locationARN ~role ?kMSKey ?kMSEncrypted ~gatewayARN ~clientToken ()
+        ~locationARN ~role ?kMSKey ?kMSEncrypted ?encryptionType ~gatewayARN
+        ~clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let oplocksEnabled = field_map json "OplocksEnabled" Boolean.of_json in
-      let bucketRegion = field_map json "BucketRegion" RegionId.of_json in
+    let of_json json__ =
+      let oplocksEnabled = field_map json__ "OplocksEnabled" Boolean.of_json in
+      let bucketRegion = field_map json__ "BucketRegion" RegionId.of_json in
       let vPCEndpointDNSName =
-        field_map json "VPCEndpointDNSName" DNSHostName.of_json in
+        field_map json__ "VPCEndpointDNSName" DNSHostName.of_json in
       let notificationPolicy =
-        field_map json "NotificationPolicy" NotificationPolicy.of_json in
+        field_map json__ "NotificationPolicy" NotificationPolicy.of_json in
       let cacheAttributes =
-        field_map json "CacheAttributes" CacheAttributes.of_json in
+        field_map json__ "CacheAttributes" CacheAttributes.of_json in
       let fileShareName =
-        field_map json "FileShareName" FileShareName.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "FileShareName" FileShareName.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let caseSensitivity =
-        field_map json "CaseSensitivity" CaseSensitivity.of_json in
+        field_map json__ "CaseSensitivity" CaseSensitivity.of_json in
       let authentication =
-        field_map json "Authentication" Authentication.of_json in
+        field_map json__ "Authentication" Authentication.of_json in
       let auditDestinationARN =
-        field_map json "AuditDestinationARN" AuditDestinationARN.of_json in
-      let invalidUserList = field_map json "InvalidUserList" UserList.of_json in
-      let validUserList = field_map json "ValidUserList" UserList.of_json in
-      let adminUserList = field_map json "AdminUserList" UserList.of_json in
+        field_map json__ "AuditDestinationARN" AuditDestinationARN.of_json in
+      let invalidUserList =
+        field_map json__ "InvalidUserList" UserList.of_json in
+      let validUserList = field_map json__ "ValidUserList" UserList.of_json in
+      let adminUserList = field_map json__ "AdminUserList" UserList.of_json in
       let accessBasedEnumeration =
-        field_map json "AccessBasedEnumeration" Boolean.of_json in
-      let sMBACLEnabled = field_map json "SMBACLEnabled" Boolean.of_json in
-      let requesterPays = field_map json "RequesterPays" Boolean.of_json in
+        field_map json__ "AccessBasedEnumeration" Boolean.of_json in
+      let sMBACLEnabled = field_map json__ "SMBACLEnabled" Boolean.of_json in
+      let requesterPays = field_map json__ "RequesterPays" Boolean.of_json in
       let guessMIMETypeEnabled =
-        field_map json "GuessMIMETypeEnabled" Boolean.of_json in
-      let readOnly = field_map json "ReadOnly" Boolean.of_json in
-      let objectACL = field_map json "ObjectACL" ObjectACL.of_json in
+        field_map json__ "GuessMIMETypeEnabled" Boolean.of_json in
+      let readOnly = field_map json__ "ReadOnly" Boolean.of_json in
+      let objectACL = field_map json__ "ObjectACL" ObjectACL.of_json in
       let defaultStorageClass =
-        field_map json "DefaultStorageClass" StorageClass.of_json in
-      let locationARN = field_map_exn json "LocationARN" LocationARN.of_json in
-      let role = field_map_exn json "Role" Role.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
-      let kMSEncrypted = field_map json "KMSEncrypted" Boolean.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
-      let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
+        field_map json__ "DefaultStorageClass" StorageClass.of_json in
+      let locationARN =
+        field_map_exn json__ "LocationARN" LocationARN.of_json in
+      let role = field_map_exn json__ "Role" Role.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
+      let kMSEncrypted = field_map json__ "KMSEncrypted" Boolean.of_json in
+      let encryptionType =
+        field_map json__ "EncryptionType" EncryptionType.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
       make ?oplocksEnabled ?bucketRegion ?vPCEndpointDNSName
         ?notificationPolicy ?cacheAttributes ?fileShareName ?tags
         ?caseSensitivity ?authentication ?auditDestinationARN
         ?invalidUserList ?validUserList ?adminUserList
         ?accessBasedEnumeration ?sMBACLEnabled ?requesterPays
         ?guessMIMETypeEnabled ?readOnly ?objectACL ?defaultStorageClass
-        ~locationARN ~role ?kMSKey ?kMSEncrypted ~gatewayARN ~clientToken ()
+        ~locationARN ~role ?kMSKey ?kMSEncrypted ?encryptionType ~gatewayARN
+        ~clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateSMBFileShareInput"]
 module CreateNFSFileShareOutput =
@@ -15679,8 +17028,8 @@ module CreateNFSFileShareOutput =
           (Xml.child xml_arg0 "FileShareARN") in
       make ?fileShareARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileShareARN = field_map json "FileShareARN" FileShareARN.of_json in
+    let of_json json__ =
+      let fileShareARN = field_map json__ "FileShareARN" FileShareARN.of_json in
       make ?fileShareARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateNFSFileShareOutput"]
@@ -15696,27 +17045,30 @@ module CreateNFSFileShareInput =
       gatewayARN: GatewayARN.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the S3 File Gateway on which you want to create a file share."];
+      encryptionType: EncryptionType.t option
+        [@ocaml.doc
+          "A value that specifies the type of server-side encryption that the file share will use for the data that it stores in Amazon S3. We recommend using EncryptionType instead of KMSEncrypted to set the file share encryption method. You do not need to provide values for both parameters. If values for both parameters exist in the same request, then the specified encryption methods must not conflict. For example, if EncryptionType is SseS3, then KMSEncrypted must be false. If EncryptionType is SseKms or DsseKms, then KMSEncrypted must be true."];
       kMSEncrypted: Boolean.t option
         [@ocaml.doc
-          "Set to true to use Amazon S3 server-side encryption with your own KMS key, or false to use a key managed by Amazon S3. Optional. Valid Values: true | false"];
+          "Optional. Set to true to use Amazon S3 server-side encryption with your own KMS key (SSE-KMS), or false to use a key managed by Amazon S3 (SSE-S3). To use dual-layer encryption (DSSE-KMS), set the EncryptionType parameter instead. We recommend using EncryptionType instead of KMSEncrypted to set the file share encryption method. You do not need to provide values for both parameters. If values for both parameters exist in the same request, then the specified encryption methods must not conflict. For example, if EncryptionType is SseS3, then KMSEncrypted must be false. If EncryptionType is SseKms or DsseKms, then KMSEncrypted must be true. Valid Values: true | false"];
       kMSKey: KMSKey.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value can only be set when KMSEncrypted is true. Optional."];
+          "Optional. The Amazon Resource Name (ARN) of a symmetric customer master key (CMK) used for Amazon S3 server-side encryption. Storage Gateway does not support asymmetric CMKs. This value must be set if KMSEncrypted is true, or if EncryptionType is SseKms or DsseKms."];
       role: Role.t
         [@ocaml.doc
           "The ARN of the Identity and Access Management (IAM) role that an S3 File Gateway assumes when it accesses the underlying storage."];
       locationARN: LocationARN.t
         [@ocaml.doc
-          "A custom ARN for the backend storage used for storing data for file shares. It includes a resource ARN with an optional prefix concatenation. The prefix must end with a forward slash (/). You can specify LocationARN as a bucket ARN, access point ARN or access point alias, as shown in the following examples. Bucket ARN: arn:aws:s3:::my-bucket/prefix/ Access point ARN: arn:aws:s3:region:account-id:accesspoint/access-point-name/prefix/ If you specify an access point, the bucket policy must be configured to delegate access control to the access point. For information, see Delegating access control to access points in the Amazon S3 User Guide. Access point alias: test-ap-ab123cdef4gehijklmn5opqrstuvuse1a-s3alias"];
+          "A custom ARN for the backend storage used for storing data for file shares. It includes a resource ARN with an optional prefix concatenation. The prefix must end with a forward slash (/). You can specify LocationARN as a bucket ARN, access point ARN or access point alias, as shown in the following examples. Bucket ARN: arn:aws:s3:::amzn-s3-demo-bucket/prefix/ Access point ARN: arn:aws:s3:region:account-id:accesspoint/access-point-name/prefix/ If you specify an access point, the bucket policy must be configured to delegate access control to the access point. For information, see Delegating access control to access points in the Amazon S3 User Guide. Access point alias: test-ap-ab123cdef4gehijklmn5opqrstuvuse1a-s3alias"];
       defaultStorageClass: StorageClass.t option
         [@ocaml.doc
-          "The default storage class for objects put into an Amazon S3 bucket by the S3 File Gateway. The default value is S3_INTELLIGENT_TIERING. Optional. Valid Values: S3_STANDARD | S3_INTELLIGENT_TIERING | S3_STANDARD_IA | S3_ONEZONE_IA"];
+          "The default storage class for objects put into an Amazon S3 bucket by the S3 File Gateway. The default value is S3_STANDARD. Optional. Valid Values: S3_STANDARD | S3_INTELLIGENT_TIERING | S3_STANDARD_IA | S3_ONEZONE_IA"];
       objectACL: ObjectACL.t option
         [@ocaml.doc
           "A value that sets the access control list (ACL) permission for objects in the S3 bucket that a S3 File Gateway puts objects into. The default value is private."];
       clientList: FileShareClientList.t option
         [@ocaml.doc
-          "The list of clients that are allowed to access the S3 File Gateway. The list must contain either valid IP addresses or valid CIDR blocks."];
+          "The list of clients that are allowed to access the S3 File Gateway. The list must contain either valid IPv4/IPv6 addresses or valid CIDR blocks."];
       squash: Squash.t option
         [@ocaml.doc
           "A value that maps a user to anonymous user. Valid values are the following: RootSquash: Only root is mapped to anonymous user. NoSquash: No one is mapped to anonymous user. AllSquash: Everyone is mapped to anonymous user."];
@@ -15734,13 +17086,13 @@ module CreateNFSFileShareInput =
           "A list of up to 50 tags that can be assigned to the NFS file share. Each tag is a key-value pair. Valid characters for key and value are letters, spaces, and numbers representable in UTF-8 format, and the following special characters: + - = . _ : / \\@. The maximum length of a tag's key is 128 characters, and the maximum length for a tag's value is 256."];
       fileShareName: FileShareName.t option
         [@ocaml.doc
-          "The name of the file share. Optional. FileShareName must be set if an S3 prefix name is set in LocationARN, or if an access point or access point alias is used."];
+          "The name of the file share. Optional. FileShareName must be set if an S3 prefix name is set in LocationARN, or if an access point or access point alias is used. A valid NFS file share name can only contain the following characters: a-z, A-Z, 0-9, -, ., and _."];
       cacheAttributes: CacheAttributes.t option
         [@ocaml.doc
           "Specifies refresh cache information for the file share."];
       notificationPolicy: NotificationPolicy.t option
         [@ocaml.doc
-          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
+          "The notification policy of the file share. SettlingTimeInSeconds controls the number of seconds to wait after the last point in time a client wrote to a file before generating an ObjectUploaded notification. Because clients can make many small writes to files, it's best to set this parameter for as long as possible to avoid generating multiple notifications for the same file in a small time period. SettlingTimeInSeconds has no effect on the timing of the object uploading to Amazon S3, only the timing of the notification. This setting is not meant to specify an exact time at which the notification will be sent. In some cases, the gateway might require more than the specified delay time to generate and send notifications. The following example sets NotificationPolicy on with SettlingTimeInSeconds set to 60. \\{\\\"Upload\\\": \\{\\\"SettlingTimeInSeconds\\\": 60\\}\\} The following example sets NotificationPolicy off. \\{\\}"];
       vPCEndpointDNSName: DNSHostName.t option
         [@ocaml.doc
           "Specifies the DNS name for the VPC endpoint that the NFS file share uses to connect to Amazon S3. This parameter is required for NFS file shares that connect to Amazon S3 through a VPC endpoint, a VPC access point, or an access point alias that points to a VPC access point."];
@@ -15752,56 +17104,60 @@ module CreateNFSFileShareInput =
           "The Amazon Resource Name (ARN) of the storage used for audit logs."]}
     let context_ = "CreateNFSFileShareInput"
     let make ?nFSFileShareDefaults =
-      fun ?kMSEncrypted ->
-        fun ?kMSKey ->
-          fun ?defaultStorageClass ->
-            fun ?objectACL ->
-              fun ?clientList ->
-                fun ?squash ->
-                  fun ?readOnly ->
-                    fun ?guessMIMETypeEnabled ->
-                      fun ?requesterPays ->
-                        fun ?tags ->
-                          fun ?fileShareName ->
-                            fun ?cacheAttributes ->
-                              fun ?notificationPolicy ->
-                                fun ?vPCEndpointDNSName ->
-                                  fun ?bucketRegion ->
-                                    fun ?auditDestinationARN ->
-                                      fun ~clientToken ->
-                                        fun ~gatewayARN ->
-                                          fun ~role ->
-                                            fun ~locationARN ->
-                                              fun () ->
-                                                {
-                                                  nFSFileShareDefaults;
-                                                  kMSEncrypted;
-                                                  kMSKey;
-                                                  defaultStorageClass;
-                                                  objectACL;
-                                                  clientList;
-                                                  squash;
-                                                  readOnly;
-                                                  guessMIMETypeEnabled;
-                                                  requesterPays;
-                                                  tags;
-                                                  fileShareName;
-                                                  cacheAttributes;
-                                                  notificationPolicy;
-                                                  vPCEndpointDNSName;
-                                                  bucketRegion;
-                                                  auditDestinationARN;
-                                                  clientToken;
-                                                  gatewayARN;
-                                                  role;
-                                                  locationARN
-                                                }
+      fun ?encryptionType ->
+        fun ?kMSEncrypted ->
+          fun ?kMSKey ->
+            fun ?defaultStorageClass ->
+              fun ?objectACL ->
+                fun ?clientList ->
+                  fun ?squash ->
+                    fun ?readOnly ->
+                      fun ?guessMIMETypeEnabled ->
+                        fun ?requesterPays ->
+                          fun ?tags ->
+                            fun ?fileShareName ->
+                              fun ?cacheAttributes ->
+                                fun ?notificationPolicy ->
+                                  fun ?vPCEndpointDNSName ->
+                                    fun ?bucketRegion ->
+                                      fun ?auditDestinationARN ->
+                                        fun ~clientToken ->
+                                          fun ~gatewayARN ->
+                                            fun ~role ->
+                                              fun ~locationARN ->
+                                                fun () ->
+                                                  {
+                                                    nFSFileShareDefaults;
+                                                    encryptionType;
+                                                    kMSEncrypted;
+                                                    kMSKey;
+                                                    defaultStorageClass;
+                                                    objectACL;
+                                                    clientList;
+                                                    squash;
+                                                    readOnly;
+                                                    guessMIMETypeEnabled;
+                                                    requesterPays;
+                                                    tags;
+                                                    fileShareName;
+                                                    cacheAttributes;
+                                                    notificationPolicy;
+                                                    vPCEndpointDNSName;
+                                                    bucketRegion;
+                                                    auditDestinationARN;
+                                                    clientToken;
+                                                    gatewayARN;
+                                                    role;
+                                                    locationARN
+                                                  }
     let to_value x =
       structure_to_value
         [("ClientToken", (Some (ClientToken.to_value x.clientToken)));
         ("NFSFileShareDefaults",
           (Option.map x.nFSFileShareDefaults ~f:NFSFileShareDefaults.to_value));
         ("GatewayARN", (Some (GatewayARN.to_value x.gatewayARN)));
+        ("EncryptionType",
+          (Option.map x.encryptionType ~f:EncryptionType.to_value));
         ("KMSEncrypted", (Option.map x.kMSEncrypted ~f:Boolean.to_value));
         ("KMSKey", (Option.map x.kMSKey ~f:KMSKey.to_value));
         ("Role", (Some (Role.to_value x.role)));
@@ -15874,6 +17230,9 @@ module CreateNFSFileShareInput =
         (Option.map ~f:KMSKey.of_xml) (Xml.child xml_arg0 "KMSKey") in
       let kMSEncrypted =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "KMSEncrypted") in
+      let encryptionType =
+        (Option.map ~f:EncryptionType.of_xml)
+          (Xml.child xml_arg0 "EncryptionType") in
       let gatewayARN =
         GatewayARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
@@ -15887,44 +17246,50 @@ module CreateNFSFileShareInput =
         ?notificationPolicy ?cacheAttributes ?fileShareName ?tags
         ?requesterPays ?guessMIMETypeEnabled ?readOnly ?squash ?clientList
         ?objectACL ?defaultStorageClass ~locationARN ~role ?kMSKey
-        ?kMSEncrypted ~gatewayARN ?nFSFileShareDefaults ~clientToken ()
+        ?kMSEncrypted ?encryptionType ~gatewayARN ?nFSFileShareDefaults
+        ~clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let auditDestinationARN =
-        field_map json "AuditDestinationARN" AuditDestinationARN.of_json in
-      let bucketRegion = field_map json "BucketRegion" RegionId.of_json in
+        field_map json__ "AuditDestinationARN" AuditDestinationARN.of_json in
+      let bucketRegion = field_map json__ "BucketRegion" RegionId.of_json in
       let vPCEndpointDNSName =
-        field_map json "VPCEndpointDNSName" DNSHostName.of_json in
+        field_map json__ "VPCEndpointDNSName" DNSHostName.of_json in
       let notificationPolicy =
-        field_map json "NotificationPolicy" NotificationPolicy.of_json in
+        field_map json__ "NotificationPolicy" NotificationPolicy.of_json in
       let cacheAttributes =
-        field_map json "CacheAttributes" CacheAttributes.of_json in
+        field_map json__ "CacheAttributes" CacheAttributes.of_json in
       let fileShareName =
-        field_map json "FileShareName" FileShareName.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let requesterPays = field_map json "RequesterPays" Boolean.of_json in
+        field_map json__ "FileShareName" FileShareName.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let requesterPays = field_map json__ "RequesterPays" Boolean.of_json in
       let guessMIMETypeEnabled =
-        field_map json "GuessMIMETypeEnabled" Boolean.of_json in
-      let readOnly = field_map json "ReadOnly" Boolean.of_json in
-      let squash = field_map json "Squash" Squash.of_json in
+        field_map json__ "GuessMIMETypeEnabled" Boolean.of_json in
+      let readOnly = field_map json__ "ReadOnly" Boolean.of_json in
+      let squash = field_map json__ "Squash" Squash.of_json in
       let clientList =
-        field_map json "ClientList" FileShareClientList.of_json in
-      let objectACL = field_map json "ObjectACL" ObjectACL.of_json in
+        field_map json__ "ClientList" FileShareClientList.of_json in
+      let objectACL = field_map json__ "ObjectACL" ObjectACL.of_json in
       let defaultStorageClass =
-        field_map json "DefaultStorageClass" StorageClass.of_json in
-      let locationARN = field_map_exn json "LocationARN" LocationARN.of_json in
-      let role = field_map_exn json "Role" Role.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
-      let kMSEncrypted = field_map json "KMSEncrypted" Boolean.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map json__ "DefaultStorageClass" StorageClass.of_json in
+      let locationARN =
+        field_map_exn json__ "LocationARN" LocationARN.of_json in
+      let role = field_map_exn json__ "Role" Role.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
+      let kMSEncrypted = field_map json__ "KMSEncrypted" Boolean.of_json in
+      let encryptionType =
+        field_map json__ "EncryptionType" EncryptionType.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       let nFSFileShareDefaults =
-        field_map json "NFSFileShareDefaults" NFSFileShareDefaults.of_json in
-      let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
+        field_map json__ "NFSFileShareDefaults" NFSFileShareDefaults.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
       make ?auditDestinationARN ?bucketRegion ?vPCEndpointDNSName
         ?notificationPolicy ?cacheAttributes ?fileShareName ?tags
         ?requesterPays ?guessMIMETypeEnabled ?readOnly ?squash ?clientList
         ?objectACL ?defaultStorageClass ~locationARN ~role ?kMSKey
-        ?kMSEncrypted ~gatewayARN ?nFSFileShareDefaults ~clientToken ()
+        ?kMSEncrypted ?encryptionType ~gatewayARN ?nFSFileShareDefaults
+        ~clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CreateNFSFileShareInput"]
 module CreateCachediSCSIVolumeOutput =
@@ -15989,9 +17354,9 @@ module CreateCachediSCSIVolumeOutput =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?targetARN ?volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetARN = field_map json "TargetARN" TargetARN.of_json in
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
+    let of_json json__ =
+      let targetARN = field_map json__ "TargetARN" TargetARN.of_json in
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
       make ?targetARN ?volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16014,7 +17379,7 @@ module CreateCachediSCSIVolumeInput =
           "The ARN for an existing volume. Specifying this ARN makes the new volume into an exact copy of the specified existing volume's latest recovery point. The VolumeSizeInBytes value for this new volume must be equal to or larger than the size of the existing volume, in bytes."];
       networkInterfaceId: NetworkInterfaceId.t
         [@ocaml.doc
-          "The network interface of the gateway on which to expose the iSCSI target. Only IPv4 addresses are accepted. Use DescribeGatewayInformation to get a list of the network interfaces available on a gateway. Valid Values: A valid IP address."];
+          "The network interface of the gateway on which to expose the iSCSI target. Accepts IPv4 and IPv6 addresses. Use DescribeGatewayInformation to get a list of the network interfaces available on a gateway. Valid Values: A valid IP address."];
       clientToken: ClientToken.t
         [@ocaml.doc
           "A unique identifier that you use to retry a request. If you retry a request, use the same ClientToken you specified in the initial request."];
@@ -16096,20 +17461,21 @@ module CreateCachediSCSIVolumeInput =
         ?sourceVolumeARN ~targetName ?snapshotId ~volumeSizeInBytes
         ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
-      let kMSEncrypted = field_map json "KMSEncrypted" Boolean.of_json in
-      let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
+      let kMSEncrypted = field_map json__ "KMSEncrypted" Boolean.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
       let networkInterfaceId =
-        field_map_exn json "NetworkInterfaceId" NetworkInterfaceId.of_json in
+        field_map_exn json__ "NetworkInterfaceId" NetworkInterfaceId.of_json in
       let sourceVolumeARN =
-        field_map json "SourceVolumeARN" VolumeARN.of_json in
-      let targetName = field_map_exn json "TargetName" TargetName.of_json in
-      let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
+        field_map json__ "SourceVolumeARN" VolumeARN.of_json in
+      let targetName = field_map_exn json__ "TargetName" TargetName.of_json in
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
       let volumeSizeInBytes =
-        field_map_exn json "VolumeSizeInBytes" Long.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map_exn json__ "VolumeSizeInBytes" Long.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ?tags ?kMSKey ?kMSEncrypted ~clientToken ~networkInterfaceId
         ?sourceVolumeARN ~targetName ?snapshotId ~volumeSizeInBytes
         ~gatewayARN ()
@@ -16171,8 +17537,8 @@ module CancelRetrievalOutput =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tapeARN = field_map json "TapeARN" TapeARN.of_json in
+    let of_json json__ =
+      let tapeARN = field_map json__ "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CancelRetrievalOutput"]
@@ -16199,12 +17565,103 @@ module CancelRetrievalInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~tapeARN ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tapeARN = field_map_exn json "TapeARN" TapeARN.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let tapeARN = field_map_exn json__ "TapeARN" TapeARN.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~tapeARN ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CancelRetrievalInput"]
+module CancelCacheReportOutput =
+  struct
+    type nonrec t =
+      {
+      cacheReportARN: CacheReportARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the cache report you want to cancel."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidGatewayRequestException of InvalidGatewayRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?cacheReportARN = fun () -> { cacheReportARN }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidGatewayRequestException" ->
+          `InvalidGatewayRequestException
+            (InvalidGatewayRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidGatewayRequestException" ->
+          `InvalidGatewayRequestException
+            (InvalidGatewayRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidGatewayRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidGatewayRequestException"));
+            ("details", (InvalidGatewayRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CacheReportARN",
+           (Option.map x.cacheReportARN ~f:CacheReportARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cacheReportARN =
+        (Option.map ~f:CacheReportARN.of_xml)
+          (Xml.child xml_arg0 "CacheReportARN") in
+      make ?cacheReportARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cacheReportARN =
+        field_map json__ "CacheReportARN" CacheReportARN.of_json in
+      make ?cacheReportARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancels generation of a specified cache report. You can use this operation to manually cancel an IN-PROGRESS report for any reason. This action changes the report status from IN-PROGRESS to CANCELLED. You can only cancel in-progress reports. If the the report you attempt to cancel is in FAILED, ERROR, or COMPLETED state, the cancel operation returns an error."]
+module CancelCacheReportInput =
+  struct
+    type nonrec t =
+      {
+      cacheReportARN: CacheReportARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the cache report you want to cancel."]}
+    let context_ = "CancelCacheReportInput"
+    let make ~cacheReportARN = fun () -> { cacheReportARN }
+    let to_value x =
+      structure_to_value
+        [("CacheReportARN",
+           (Some (CacheReportARN.to_value x.cacheReportARN)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cacheReportARN =
+        CacheReportARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CacheReportARN") in
+      make ~cacheReportARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cacheReportARN =
+        field_map_exn json__ "CacheReportARN" CacheReportARN.of_json in
+      make ~cacheReportARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Cancels generation of a specified cache report. You can use this operation to manually cancel an IN-PROGRESS report for any reason. This action changes the report status from IN-PROGRESS to CANCELLED. You can only cancel in-progress reports. If the the report you attempt to cancel is in FAILED, ERROR, or COMPLETED state, the cancel operation returns an error."]
 module CancelArchivalOutput =
   struct
     type nonrec t =
@@ -16260,8 +17717,8 @@ module CancelArchivalOutput =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tapeARN = field_map json "TapeARN" TapeARN.of_json in
+    let of_json json__ =
+      let tapeARN = field_map json__ "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CancelArchivalOutput"]
@@ -16288,9 +17745,9 @@ module CancelArchivalInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~tapeARN ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tapeARN = field_map_exn json "TapeARN" TapeARN.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let tapeARN = field_map_exn json__ "TapeARN" TapeARN.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~tapeARN ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "CancelArchivalInput"]
@@ -16356,9 +17813,9 @@ module AttachVolumeOutput =
         (Option.map ~f:VolumeARN.of_xml) (Xml.child xml_arg0 "VolumeARN") in
       make ?targetARN ?volumeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetARN = field_map json "TargetARN" TargetARN.of_json in
-      let volumeARN = field_map json "VolumeARN" VolumeARN.of_json in
+    let of_json json__ =
+      let targetARN = field_map json__ "TargetARN" TargetARN.of_json in
+      let volumeARN = field_map json__ "VolumeARN" VolumeARN.of_json in
       make ?targetARN ?volumeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "AttachVolumeOutput"]
@@ -16377,7 +17834,7 @@ module AttachVolumeInput =
           "The Amazon Resource Name (ARN) of the volume to attach to the specified gateway."];
       networkInterfaceId: NetworkInterfaceId.t
         [@ocaml.doc
-          "The network interface of the gateway on which to expose the iSCSI target. Only IPv4 addresses are accepted. Use DescribeGatewayInformation to get a list of the network interfaces available on a gateway. Valid Values: A valid IP address."];
+          "The network interface of the gateway on which to expose the iSCSI target. Accepts IPv4 and IPv6 addresses. Use DescribeGatewayInformation to get a list of the network interfaces available on a gateway. Valid Values: A valid IP address."];
       diskId: DiskId.t option
         [@ocaml.doc
           "The unique device ID or other distinguishing data that identifies the local disk used to create the volume. This value is only required when you are attaching a stored volume."]}
@@ -16420,13 +17877,13 @@ module AttachVolumeInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ?diskId ~networkInterfaceId ~volumeARN ?targetName ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let diskId = field_map json "DiskId" DiskId.of_json in
+    let of_json json__ =
+      let diskId = field_map json__ "DiskId" DiskId.of_json in
       let networkInterfaceId =
-        field_map_exn json "NetworkInterfaceId" NetworkInterfaceId.of_json in
-      let volumeARN = field_map_exn json "VolumeARN" VolumeARN.of_json in
-      let targetName = field_map json "TargetName" TargetName.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+        field_map_exn json__ "NetworkInterfaceId" NetworkInterfaceId.of_json in
+      let volumeARN = field_map_exn json__ "VolumeARN" VolumeARN.of_json in
+      let targetName = field_map json__ "TargetName" TargetName.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ?diskId ~networkInterfaceId ~volumeARN ?targetName ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "AttachVolumeInput"]
@@ -16488,9 +17945,9 @@ module AssociateFileSystemOutput =
           (Xml.child xml_arg0 "FileSystemAssociationARN") in
       make ?fileSystemAssociationARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fileSystemAssociationARN =
-        field_map json "FileSystemAssociationARN"
+        field_map json__ "FileSystemAssociationARN"
           FileSystemAssociationARN.of_json in
       make ?fileSystemAssociationARN ()
     let to_json v = composed_to_json to_value v
@@ -16591,21 +18048,23 @@ module AssociateFileSystemInput =
         ?auditDestinationARN ?tags ~locationARN ~gatewayARN ~clientToken
         ~password ~userName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpointNetworkConfiguration =
-        field_map json "EndpointNetworkConfiguration"
+        field_map json__ "EndpointNetworkConfiguration"
           EndpointNetworkConfiguration.of_json in
       let cacheAttributes =
-        field_map json "CacheAttributes" CacheAttributes.of_json in
+        field_map json__ "CacheAttributes" CacheAttributes.of_json in
       let auditDestinationARN =
-        field_map json "AuditDestinationARN" AuditDestinationARN.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+        field_map json__ "AuditDestinationARN" AuditDestinationARN.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let locationARN =
-        field_map_exn json "LocationARN" FileSystemLocationARN.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
-      let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
-      let password = field_map_exn json "Password" DomainUserPassword.of_json in
-      let userName = field_map_exn json "UserName" DomainUserName.of_json in
+        field_map_exn json__ "LocationARN" FileSystemLocationARN.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
+      let password =
+        field_map_exn json__ "Password" DomainUserPassword.of_json in
+      let userName = field_map_exn json__ "UserName" DomainUserName.of_json in
       make ?endpointNetworkConfiguration ?cacheAttributes
         ?auditDestinationARN ?tags ~locationARN ~gatewayARN ~clientToken
         ~password ~userName ()
@@ -16667,12 +18126,12 @@ module AssignTapePoolOutput =
         (Option.map ~f:TapeARN.of_xml) (Xml.child xml_arg0 "TapeARN") in
       make ?tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tapeARN = field_map json "TapeARN" TapeARN.of_json in
+    let of_json json__ =
+      let tapeARN = field_map json__ "TapeARN" TapeARN.of_json in
       make ?tapeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Assigns a tape to a tape pool for archiving. The tape assigned to a pool is archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the S3 storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool. Valid Values: GLACIER | DEEP_ARCHIVE"]
+       "Assigns a tape to a tape pool for archiving. The tape assigned to a pool is archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the S3 storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool."]
 module AssignTapePoolInput =
   struct
     type nonrec t =
@@ -16682,7 +18141,7 @@ module AssignTapePoolInput =
           "The unique Amazon Resource Name (ARN) of the virtual tape that you want to add to the tape pool."];
       poolId: PoolId.t
         [@ocaml.doc
-          "The ID of the pool that you want to add your tape to for archiving. The tape in this pool is archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool. Valid Values: GLACIER | DEEP_ARCHIVE"];
+          "The ID of the pool that you want to add your tape to for archiving. The tape in this pool is archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool."];
       bypassGovernanceRetention: Boolean__lc1.t option
         [@ocaml.doc
           "Set permissions to bypass governance retention. If the lock type of the archived tape is Governance, the tape's archived age is not older than RetentionLockInDays, and the user does not already have BypassGovernanceRetention, setting this to TRUE enables the user to bypass the retention lock. This parameter is set to true by default for calls from the console. Valid values: TRUE | FALSE"]}
@@ -16708,15 +18167,15 @@ module AssignTapePoolInput =
         TapeARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TapeARN") in
       make ?bypassGovernanceRetention ~poolId ~tapeARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bypassGovernanceRetention =
-        field_map json "BypassGovernanceRetention" Boolean__lc1.of_json in
-      let poolId = field_map_exn json "PoolId" PoolId.of_json in
-      let tapeARN = field_map_exn json "TapeARN" TapeARN.of_json in
+        field_map json__ "BypassGovernanceRetention" Boolean__lc1.of_json in
+      let poolId = field_map_exn json__ "PoolId" PoolId.of_json in
+      let tapeARN = field_map_exn json__ "TapeARN" TapeARN.of_json in
       make ?bypassGovernanceRetention ~poolId ~tapeARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Assigns a tape to a tape pool for archiving. The tape assigned to a pool is archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the S3 storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool. Valid Values: GLACIER | DEEP_ARCHIVE"]
+       "Assigns a tape to a tape pool for archiving. The tape assigned to a pool is archived in the S3 storage class that is associated with the pool. When you use your backup application to eject the tape, the tape is archived directly into the S3 storage class (S3 Glacier or S3 Glacier Deep Archive) that corresponds to the pool."]
 module AddWorkingStorageOutput =
   struct
     type nonrec t = {
@@ -16769,8 +18228,8 @@ module AddWorkingStorageOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16798,9 +18257,9 @@ module AddWorkingStorageInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~diskIds ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let diskIds = field_map_exn json "DiskIds" DiskIds.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let diskIds = field_map_exn json__ "DiskIds" DiskIds.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~diskIds ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16857,8 +18316,8 @@ module AddUploadBufferOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16886,9 +18345,9 @@ module AddUploadBufferInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~diskIds ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let diskIds = field_map_exn json "DiskIds" DiskIds.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let diskIds = field_map_exn json__ "DiskIds" DiskIds.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~diskIds ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16948,8 +18407,8 @@ module AddTagsToResourceOutput =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       make ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "AddTagsToResourceOutput"]
@@ -16978,9 +18437,10 @@ module AddTagsToResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "AddTagsToResourceInput"]
@@ -17036,8 +18496,8 @@ module AddCacheOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17065,9 +18525,9 @@ module AddCacheInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayARN") in
       make ~diskIds ~gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let diskIds = field_map_exn json "DiskIds" DiskIds.of_json in
-      let gatewayARN = field_map_exn json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let diskIds = field_map_exn json__ "DiskIds" DiskIds.of_json in
+      let gatewayARN = field_map_exn json__ "GatewayARN" GatewayARN.of_json in
       make ~diskIds ~gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17124,8 +18584,8 @@ module ActivateGatewayOutput =
         (Option.map ~f:GatewayARN.of_xml) (Xml.child xml_arg0 "GatewayARN") in
       make ?gatewayARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayARN = field_map json "GatewayARN" GatewayARN.of_json in
+    let of_json json__ =
+      let gatewayARN = field_map json__ "GatewayARN" GatewayARN.of_json in
       make ?gatewayARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17141,13 +18601,13 @@ module ActivateGatewayInput =
         [@ocaml.doc "The name you configured for your gateway."];
       gatewayTimezone: GatewayTimezone.t
         [@ocaml.doc
-          "A value that indicates the time zone you want to set for the gateway. The time zone is of the format \"GMT-hr:mm\" or \"GMT+hr:mm\". For example, GMT-4:00 indicates the time is 4 hours behind GMT. GMT+2:00 indicates the time is 2 hours ahead of GMT. The time zone is used, for example, for scheduling snapshots and your gateway's maintenance schedule."];
+          "A value that indicates the time zone you want to set for the gateway. The time zone is of the format \"GMT\", \"GMT-hr:mm\", or \"GMT+hr:mm\". For example, GMT indicates Greenwich Mean Time without any offset. GMT-4:00 indicates the time is 4 hours behind GMT. GMT+2:00 indicates the time is 2 hours ahead of GMT. The time zone is used, for example, for scheduling snapshots and your gateway's maintenance schedule."];
       gatewayRegion: RegionId.t
         [@ocaml.doc
           "A value that indicates the Amazon Web Services Region where you want to store your data. The gateway Amazon Web Services Region specified must be the same Amazon Web Services Region as the Amazon Web Services Region in your Host header in the request. For more information about available Amazon Web Services Regions and endpoints for Storage Gateway, see Storage Gateway endpoints and quotas in the Amazon Web Services General Reference. Valid Values: See Storage Gateway endpoints and quotas in the Amazon Web Services General Reference."];
       gatewayType: GatewayType.t option
         [@ocaml.doc
-          "A value that defines the type of gateway to activate. The type specified is critical to all later functions of the gateway and cannot be changed after activation. The default value is CACHED. Valid Values: STORED | CACHED | VTL | VTL_SNOW | FILE_S3 | FILE_FSX_SMB"];
+          "A value that defines the type of gateway to activate. The type specified is critical to all later functions of the gateway and cannot be changed after activation. The default value is CACHED. Amazon FSx File Gateway is no longer available to new customers. Existing customers of FSx File Gateway can continue to use the service normally. For capabilities similar to FSx File Gateway, visit this blog post. Valid Values: STORED | CACHED | VTL | FILE_S3 | FILE_FSX_SMB"];
       tapeDriveType: TapeDriveType.t option
         [@ocaml.doc
           "The value that indicates the type of tape drive to use for tape gateway. This field is optional. Valid Values: IBM-ULT3580-TD5"];
@@ -17216,19 +18676,21 @@ module ActivateGatewayInput =
       make ?tags ?mediumChangerType ?tapeDriveType ?gatewayType
         ~gatewayRegion ~gatewayTimezone ~gatewayName ~activationKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let mediumChangerType =
-        field_map json "MediumChangerType" MediumChangerType.of_json in
+        field_map json__ "MediumChangerType" MediumChangerType.of_json in
       let tapeDriveType =
-        field_map json "TapeDriveType" TapeDriveType.of_json in
-      let gatewayType = field_map json "GatewayType" GatewayType.of_json in
-      let gatewayRegion = field_map_exn json "GatewayRegion" RegionId.of_json in
+        field_map json__ "TapeDriveType" TapeDriveType.of_json in
+      let gatewayType = field_map json__ "GatewayType" GatewayType.of_json in
+      let gatewayRegion =
+        field_map_exn json__ "GatewayRegion" RegionId.of_json in
       let gatewayTimezone =
-        field_map_exn json "GatewayTimezone" GatewayTimezone.of_json in
-      let gatewayName = field_map_exn json "GatewayName" GatewayName.of_json in
+        field_map_exn json__ "GatewayTimezone" GatewayTimezone.of_json in
+      let gatewayName =
+        field_map_exn json__ "GatewayName" GatewayName.of_json in
       let activationKey =
-        field_map_exn json "ActivationKey" ActivationKey.of_json in
+        field_map_exn json__ "ActivationKey" ActivationKey.of_json in
       make ?tags ?mediumChangerType ?tapeDriveType ?gatewayType
         ~gatewayRegion ~gatewayTimezone ~gatewayName ~activationKey ()
     let to_json v = composed_to_json to_value v

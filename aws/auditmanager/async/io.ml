@@ -70,6 +70,8 @@ let get_evidence ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEvidence input
 let get_evidence_by_evidence_folder ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEvidenceByEvidenceFolder input
+let get_evidence_file_upload_url ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetEvidenceFileUploadUrl input
 let get_evidence_folder ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEvidenceFolder input
 let get_evidence_folders_by_assessment ?endpoint_url ?cfg input =

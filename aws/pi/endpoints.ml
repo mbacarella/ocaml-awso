@@ -2,10 +2,21 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | CreatePerformanceAnalysisReport:
+  (CreatePerformanceAnalysisReportRequest.t,
+  CreatePerformanceAnalysisReportResponse.t,
+  CreatePerformanceAnalysisReportResponse.error) t 
+  | DeletePerformanceAnalysisReport:
+  (DeletePerformanceAnalysisReportRequest.t,
+  DeletePerformanceAnalysisReportResponse.t,
+  DeletePerformanceAnalysisReportResponse.error) t 
   | DescribeDimensionKeys: (DescribeDimensionKeysRequest.t,
   DescribeDimensionKeysResponse.t, DescribeDimensionKeysResponse.error) t 
   | GetDimensionKeyDetails: (GetDimensionKeyDetailsRequest.t,
   GetDimensionKeyDetailsResponse.t, GetDimensionKeyDetailsResponse.error) t 
+  | GetPerformanceAnalysisReport: (GetPerformanceAnalysisReportRequest.t,
+  GetPerformanceAnalysisReportResponse.t,
+  GetPerformanceAnalysisReportResponse.error) t 
   | GetResourceMetadata: (GetResourceMetadataRequest.t,
   GetResourceMetadataResponse.t, GetResourceMetadataResponse.error) t 
   | GetResourceMetrics: (GetResourceMetricsRequest.t,
@@ -17,27 +28,71 @@ type ('i, 'o, 'e) t =
   | ListAvailableResourceMetrics: (ListAvailableResourceMetricsRequest.t,
   ListAvailableResourceMetricsResponse.t,
   ListAvailableResourceMetricsResponse.error) t 
+  | ListPerformanceAnalysisReports: (ListPerformanceAnalysisReportsRequest.t,
+  ListPerformanceAnalysisReportsResponse.t,
+  ListPerformanceAnalysisReportsResponse.error) t 
+  | ListTagsForResource: (ListTagsForResourceRequest.t,
+  ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
+  TagResourceResponse.error) t 
+  | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
+  UntagResourceResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | CreatePerformanceAnalysisReport -> `POST
+  | DeletePerformanceAnalysisReport -> `POST
   | DescribeDimensionKeys -> `POST
   | GetDimensionKeyDetails -> `POST
+  | GetPerformanceAnalysisReport -> `POST
   | GetResourceMetadata -> `POST
   | GetResourceMetrics -> `POST
   | ListAvailableResourceDimensions -> `POST
   | ListAvailableResourceMetrics -> `POST
+  | ListPerformanceAnalysisReports -> `POST
+  | ListTagsForResource -> `POST
+  | TagResource -> `POST
+  | UntagResource -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | CreatePerformanceAnalysisReport ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeletePerformanceAnalysisReport ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeDimensionKeys -> (Format.kasprintf Uri.of_string) "/"
       | GetDimensionKeyDetails -> (Format.kasprintf Uri.of_string) "/"
+      | GetPerformanceAnalysisReport -> (Format.kasprintf Uri.of_string) "/"
       | GetResourceMetadata -> (Format.kasprintf Uri.of_string) "/"
       | GetResourceMetrics -> (Format.kasprintf Uri.of_string) "/"
       | ListAvailableResourceDimensions ->
           (Format.kasprintf Uri.of_string) "/"
-      | ListAvailableResourceMetrics -> (Format.kasprintf Uri.of_string) "/")
+      | ListAvailableResourceMetrics -> (Format.kasprintf Uri.of_string) "/"
+      | ListPerformanceAnalysisReports ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UntagResource -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
+  | CreatePerformanceAnalysisReport ->
+      let json = CreatePerformanceAnalysisReportRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PerformanceInsightsv20180227.CreatePerformanceAnalysisReport")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeletePerformanceAnalysisReport ->
+      let json = DeletePerformanceAnalysisReportRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PerformanceInsightsv20180227.DeletePerformanceAnalysisReport")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeDimensionKeys ->
       let json = DescribeDimensionKeysRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -55,6 +110,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "PerformanceInsightsv20180227.GetDimensionKeyDetails")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetPerformanceAnalysisReport ->
+      let json = GetPerformanceAnalysisReportRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PerformanceInsightsv20180227.GetPerformanceAnalysisReport")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetResourceMetadata ->
       let json = GetResourceMetadataRequest.to_json req in
@@ -91,6 +155,40 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "PerformanceInsightsv20180227.ListAvailableResourceMetrics")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListPerformanceAnalysisReports ->
+      let json = ListPerformanceAnalysisReportsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PerformanceInsightsv20180227.ListPerformanceAnalysisReports")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTagsForResource ->
+      let json = ListTagsForResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PerformanceInsightsv20180227.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TagResource ->
+      let json = TagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PerformanceInsightsv20180227.TagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UntagResource ->
+      let json = UntagResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PerformanceInsightsv20180227.UntagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -114,6 +212,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | CreatePerformanceAnalysisReport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreatePerformanceAnalysisReportResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePerformanceAnalysisReportResponse.error_of_json))
+  | DeletePerformanceAnalysisReport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeletePerformanceAnalysisReportResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeletePerformanceAnalysisReportResponse.error_of_json))
   | DescribeDimensionKeys ->
       if is_success
       then
@@ -131,6 +247,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetDimensionKeyDetailsResponse.error_of_json))
+  | GetPerformanceAnalysisReport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetPerformanceAnalysisReportResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetPerformanceAnalysisReportResponse.error_of_json))
   | GetResourceMetadata ->
       if is_success
       then
@@ -165,3 +290,32 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListAvailableResourceMetricsResponse.error_of_json))
+  | ListPerformanceAnalysisReports ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPerformanceAnalysisReportsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListPerformanceAnalysisReportsResponse.error_of_json))
+  | ListTagsForResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | TagResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | UntagResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UntagResourceResponse.of_json json)
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))

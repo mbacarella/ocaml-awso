@@ -28,6 +28,23 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let activate_organizations_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.activate_organizations_access
+           (Values.ActivateOrganizationsAccessInput.make ())
+           (Some Values.ActivateOrganizationsAccessOutput.to_json)
+           (Some Values.ActivateOrganizationsAccessOutput.error_to_json)])
 let activate_type =
   Command.async ~summary:""
     ([%map_open.Command
@@ -188,6 +205,15 @@ let create_change_set =
        and includeNestedStacks =
          flag "include-nested-stacks" (optional bool)
            ~doc:"BOOL IncludeNestedStacks"
+       and onStackFailure =
+         flag "on-stack-failure" (optional json_arg)
+           ~doc:"JSON OnStackFailure"
+       and importExistingResources =
+         flag "import-existing-resources" (optional bool)
+           ~doc:"BOOL ImportExistingResources"
+       and deploymentMode =
+         flag "deployment-mode" (optional json_arg)
+           ~doc:"JSON DeploymentMode"
        and stackName =
          flag "stack-name" (required string) ~doc:"STRING StackNameOrId"
        and changeSetName =
@@ -215,9 +241,44 @@ let create_change_set =
               ?resourcesToImport:(Option.map
                                     ~f:Values.ResourcesToImport.of_json
                                     resourcesToImport) ?includeNestedStacks
-              ~stackName ~changeSetName ())
+              ?onStackFailure:(Option.map ~f:Values.OnStackFailure.of_json
+                                 onStackFailure) ?importExistingResources
+              ?deploymentMode:(Option.map ~f:Values.DeploymentMode.of_json
+                                 deploymentMode) ~stackName ~changeSetName ())
            (Some Values.CreateChangeSetOutput.to_json)
            (Some Values.CreateChangeSetOutput.error_to_json)])
+let create_generated_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resources =
+         flag "resources" (optional json_arg) ~doc:"JSON ResourceDefinitions"
+       and stackName =
+         flag "stack-name" (optional string) ~doc:"STRING StackName"
+       and templateConfiguration =
+         flag "template-configuration" (optional json_arg)
+           ~doc:"JSON TemplateConfiguration"
+       and generatedTemplateName =
+         flag "generated-template-name" (required string)
+           ~doc:"STRING GeneratedTemplateName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_generated_template
+           (Values.CreateGeneratedTemplateInput.make
+              ?resources:(Option.map ~f:Values.ResourceDefinitions.of_json
+                            resources) ?stackName
+              ?templateConfiguration:(Option.map
+                                        ~f:Values.TemplateConfiguration.of_json
+                                        templateConfiguration)
+              ~generatedTemplateName ())
+           (Some Values.CreateGeneratedTemplateOutput.to_json)
+           (Some Values.CreateGeneratedTemplateOutput.error_to_json)])
 let create_stack =
   Command.async ~summary:""
     ([%map_open.Command
@@ -265,6 +326,9 @@ let create_stack =
        and enableTerminationProtection =
          flag "enable-termination-protection" (optional bool)
            ~doc:"BOOL EnableTerminationProtection"
+       and retainExceptOnCreate =
+         flag "retain-except-on-create" (optional bool)
+           ~doc:"BOOL RetainExceptOnCreate"
        and stackName =
          flag "stack-name" (required string) ~doc:"STRING StackName" in
        fun () ->
@@ -287,7 +351,8 @@ let create_stack =
               ?onFailure:(Option.map ~f:Values.OnFailure.of_json onFailure)
               ?stackPolicyBody ?stackPolicyURL
               ?tags:(Option.map ~f:Values.Tags.of_json tags)
-              ?clientRequestToken ?enableTerminationProtection ~stackName ())
+              ?clientRequestToken ?enableTerminationProtection
+              ?retainExceptOnCreate ~stackName ())
            (Some Values.CreateStackOutput.to_json)
            (Some Values.CreateStackOutput.error_to_json)])
 let create_stack_instances =
@@ -336,6 +401,39 @@ let create_stack_instances =
               ~stackSetName ~regions:(Values.RegionList.of_json regions) ())
            (Some Values.CreateStackInstancesOutput.to_json)
            (Some Values.CreateStackInstancesOutput.error_to_json)])
+let create_stack_refactor =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and enableStackCreation =
+         flag "enable-stack-creation" (optional bool)
+           ~doc:"BOOL EnableStackCreation"
+       and resourceMappings =
+         flag "resource-mappings" (optional json_arg)
+           ~doc:"JSON ResourceMappings"
+       and stackDefinitions =
+         flag "stack-definitions" (required json_arg)
+           ~doc:"JSON StackDefinitions" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_stack_refactor
+           (Values.CreateStackRefactorInput.make ?description
+              ?enableStackCreation
+              ?resourceMappings:(Option.map
+                                   ~f:Values.ResourceMappings.of_json
+                                   resourceMappings)
+              ~stackDefinitions:(Values.StackDefinitions.of_json
+                                   stackDefinitions) ())
+           (Some Values.CreateStackRefactorOutput.to_json)
+           (Some Values.CreateStackRefactorOutput.error_to_json)])
 let create_stack_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -400,6 +498,23 @@ let create_stack_set =
                                    managedExecution) ~stackSetName ())
            (Some Values.CreateStackSetOutput.to_json)
            (Some Values.CreateStackSetOutput.error_to_json)])
+let deactivate_organizations_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.deactivate_organizations_access
+           (Values.DeactivateOrganizationsAccessInput.make ())
+           (Some Values.DeactivateOrganizationsAccessOutput.to_json)
+           (Some Values.DeactivateOrganizationsAccessOutput.error_to_json)])
 let deactivate_type =
   Command.async ~summary:""
     ([%map_open.Command
@@ -443,6 +558,24 @@ let delete_change_set =
            (Values.DeleteChangeSetInput.make ?stackName ~changeSetName ())
            (Some Values.DeleteChangeSetOutput.to_json)
            (Some Values.DeleteChangeSetOutput.error_to_json)])
+let delete_generated_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and generatedTemplateName =
+         flag "generated-template-name" (required string)
+           ~doc:"STRING GeneratedTemplateName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_generated_template
+           (Values.DeleteGeneratedTemplateInput.make ~generatedTemplateName
+              ()) None None])
 let delete_stack =
   Command.async ~summary:""
     ([%map_open.Command
@@ -461,6 +594,8 @@ let delete_stack =
        and clientRequestToken =
          flag "client-request-token" (optional string)
            ~doc:"STRING ClientRequestToken"
+       and deletionMode =
+         flag "deletion-mode" (optional json_arg) ~doc:"JSON DeletionMode"
        and stackName =
          flag "stack-name" (required string) ~doc:"STRING StackName" in
        fun () ->
@@ -469,7 +604,9 @@ let delete_stack =
            (Values.DeleteStackInput.make
               ?retainResources:(Option.map ~f:Values.RetainResources.of_json
                                   retainResources) ?roleARN
-              ?clientRequestToken ~stackName ()) None None])
+              ?clientRequestToken
+              ?deletionMode:(Option.map ~f:Values.DeletionMode.of_json
+                               deletionMode) ~stackName ()) None None])
 let delete_stack_instances =
   Command.async ~summary:""
     ([%map_open.Command
@@ -590,6 +727,9 @@ let describe_change_set =
          flag "stack-name" (optional string) ~doc:"STRING StackNameOrId"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and includePropertyValues =
+         flag "include-property-values" (optional bool)
+           ~doc:"BOOL IncludePropertyValues"
        and changeSetName =
          flag "change-set-name" (required string)
            ~doc:"STRING ChangeSetNameOrId" in
@@ -597,7 +737,7 @@ let describe_change_set =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_change_set
            (Values.DescribeChangeSetInput.make ?stackName ?nextToken
-              ~changeSetName ())
+              ?includePropertyValues ~changeSetName ())
            (Some Values.DescribeChangeSetOutput.to_json)
            (Some Values.DescribeChangeSetOutput.error_to_json)])
 let describe_change_set_hooks =
@@ -627,6 +767,72 @@ let describe_change_set_hooks =
               ?logicalResourceId ~changeSetName ())
            (Some Values.DescribeChangeSetHooksOutput.to_json)
            (Some Values.DescribeChangeSetHooksOutput.error_to_json)])
+let describe_events =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stackName =
+         flag "stack-name" (optional string) ~doc:"STRING StackNameOrId"
+       and changeSetName =
+         flag "change-set-name" (optional string)
+           ~doc:"STRING ChangeSetNameOrId"
+       and operationId =
+         flag "operation-id" (optional string) ~doc:"STRING OperationId"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON EventFilter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_events
+           (Values.DescribeEventsInput.make ?stackName ?changeSetName
+              ?operationId
+              ?filters:(Option.map ~f:Values.EventFilter.of_json filters)
+              ?nextToken ()) (Some Values.DescribeEventsOutput.to_json)
+           (Some Values.DescribeEventsOutput.error_to_json)])
+let describe_generated_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and generatedTemplateName =
+         flag "generated-template-name" (required string)
+           ~doc:"STRING GeneratedTemplateName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_generated_template
+           (Values.DescribeGeneratedTemplateInput.make ~generatedTemplateName
+              ()) (Some Values.DescribeGeneratedTemplateOutput.to_json)
+           (Some Values.DescribeGeneratedTemplateOutput.error_to_json)])
+let describe_organizations_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and callAs = flag "call-as" (optional json_arg) ~doc:"JSON CallAs" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_organizations_access
+           (Values.DescribeOrganizationsAccessInput.make
+              ?callAs:(Option.map ~f:Values.CallAs.of_json callAs) ())
+           (Some Values.DescribeOrganizationsAccessOutput.to_json)
+           (Some Values.DescribeOrganizationsAccessOutput.error_to_json)])
 let describe_publisher =
   Command.async ~summary:""
     ([%map_open.Command
@@ -645,6 +851,25 @@ let describe_publisher =
            (Values.DescribePublisherInput.make ?publisherId ())
            (Some Values.DescribePublisherOutput.to_json)
            (Some Values.DescribePublisherOutput.error_to_json)])
+let describe_resource_scan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceScanId =
+         flag "resource-scan-id" (required string)
+           ~doc:"STRING ResourceScanId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_resource_scan
+           (Values.DescribeResourceScanInput.make ~resourceScanId ())
+           (Some Values.DescribeResourceScanOutput.to_json)
+           (Some Values.DescribeResourceScanOutput.error_to_json)])
 let describe_stack_drift_detection_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -675,14 +900,14 @@ let describe_stack_events =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and stackName =
-         flag "stack-name" (optional string) ~doc:"STRING StackName"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and stackName =
+         flag "stack-name" (required string) ~doc:"STRING StackName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_stack_events
-           (Values.DescribeStackEventsInput.make ?stackName ?nextToken ())
+           (Values.DescribeStackEventsInput.make ?nextToken ~stackName ())
            (Some Values.DescribeStackEventsOutput.to_json)
            (Some Values.DescribeStackEventsOutput.error_to_json)])
 let describe_stack_instance =
@@ -711,6 +936,25 @@ let describe_stack_instance =
               ~stackSetName ~stackInstanceAccount ~stackInstanceRegion ())
            (Some Values.DescribeStackInstanceOutput.to_json)
            (Some Values.DescribeStackInstanceOutput.error_to_json)])
+let describe_stack_refactor =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stackRefactorId =
+         flag "stack-refactor-id" (required string)
+           ~doc:"STRING StackRefactorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_stack_refactor
+           (Values.DescribeStackRefactorInput.make ~stackRefactorId ())
+           (Some Values.DescribeStackRefactorOutput.to_json)
+           (Some Values.DescribeStackRefactorOutput.error_to_json)])
 let describe_stack_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1016,6 +1260,9 @@ let execute_change_set =
            ~doc:"STRING ClientRequestToken"
        and disableRollback =
          flag "disable-rollback" (optional bool) ~doc:"BOOL DisableRollback"
+       and retainExceptOnCreate =
+         flag "retain-except-on-create" (optional bool)
+           ~doc:"BOOL RetainExceptOnCreate"
        and changeSetName =
          flag "change-set-name" (required string)
            ~doc:"STRING ChangeSetNameOrId" in
@@ -1023,9 +1270,69 @@ let execute_change_set =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.execute_change_set
            (Values.ExecuteChangeSetInput.make ?stackName ?clientRequestToken
-              ?disableRollback ~changeSetName ())
+              ?disableRollback ?retainExceptOnCreate ~changeSetName ())
            (Some Values.ExecuteChangeSetOutput.to_json)
            (Some Values.ExecuteChangeSetOutput.error_to_json)])
+let execute_stack_refactor =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stackRefactorId =
+         flag "stack-refactor-id" (required string)
+           ~doc:"STRING StackRefactorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.execute_stack_refactor
+           (Values.ExecuteStackRefactorInput.make ~stackRefactorId ()) None
+           None])
+let get_generated_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and format =
+         flag "format" (optional json_arg) ~doc:"JSON TemplateFormat"
+       and generatedTemplateName =
+         flag "generated-template-name" (required string)
+           ~doc:"STRING GeneratedTemplateName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_generated_template
+           (Values.GetGeneratedTemplateInput.make
+              ?format:(Option.map ~f:Values.TemplateFormat.of_json format)
+              ~generatedTemplateName ())
+           (Some Values.GetGeneratedTemplateOutput.to_json)
+           (Some Values.GetGeneratedTemplateOutput.error_to_json)])
+let get_hook_result =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and hookResultId =
+         flag "hook-result-id" (optional string)
+           ~doc:"STRING HookInvocationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_hook_result
+           (Values.GetHookResultInput.make ?hookResultId ())
+           (Some Values.GetHookResultOutput.to_json)
+           (Some Values.GetHookResultOutput.error_to_json)])
 let get_stack_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1088,13 +1395,19 @@ let get_template_summary =
        and stackSetName =
          flag "stack-set-name" (optional string)
            ~doc:"STRING StackSetNameOrId"
-       and callAs = flag "call-as" (optional json_arg) ~doc:"JSON CallAs" in
+       and callAs = flag "call-as" (optional json_arg) ~doc:"JSON CallAs"
+       and templateSummaryConfig =
+         flag "template-summary-config" (optional json_arg)
+           ~doc:"JSON TemplateSummaryConfig" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_template_summary
            (Values.GetTemplateSummaryInput.make ?templateBody ?templateURL
               ?stackName ?stackSetName
-              ?callAs:(Option.map ~f:Values.CallAs.of_json callAs) ())
+              ?callAs:(Option.map ~f:Values.CallAs.of_json callAs)
+              ?templateSummaryConfig:(Option.map
+                                        ~f:Values.TemplateSummaryConfig.of_json
+                                        templateSummaryConfig) ())
            (Some Values.GetTemplateSummaryOutput.to_json)
            (Some Values.GetTemplateSummaryOutput.error_to_json)])
 let import_stacks_to_stack_set =
@@ -1177,6 +1490,56 @@ let list_exports =
            Io.list_exports (Values.ListExportsInput.make ?nextToken ())
            (Some Values.ListExportsOutput.to_json)
            (Some Values.ListExportsOutput.error_to_json)])
+let list_generated_templates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_generated_templates
+           (Values.ListGeneratedTemplatesInput.make ?nextToken ?maxResults ())
+           (Some Values.ListGeneratedTemplatesOutput.to_json)
+           (Some Values.ListGeneratedTemplatesOutput.error_to_json)])
+let list_hook_results =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and targetType =
+         flag "target-type" (optional json_arg)
+           ~doc:"JSON ListHookResultsTargetType"
+       and targetId =
+         flag "target-id" (optional string) ~doc:"STRING HookResultId"
+       and typeArn =
+         flag "type-arn" (optional string) ~doc:"STRING HookTypeArn"
+       and status = flag "status" (optional json_arg) ~doc:"JSON HookStatus"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_hook_results
+           (Values.ListHookResultsInput.make
+              ?targetType:(Option.map
+                             ~f:Values.ListHookResultsTargetType.of_json
+                             targetType) ?targetId ?typeArn
+              ?status:(Option.map ~f:Values.HookStatus.of_json status)
+              ?nextToken ()) (Some Values.ListHookResultsOutput.to_json)
+           (Some Values.ListHookResultsOutput.error_to_json)])
 let list_imports =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1197,6 +1560,137 @@ let list_imports =
            (Values.ListImportsInput.make ?nextToken ~exportName ())
            (Some Values.ListImportsOutput.to_json)
            (Some Values.ListImportsOutput.error_to_json)])
+let list_resource_scan_related_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT BoxedMaxResults"
+       and resourceScanId =
+         flag "resource-scan-id" (required string)
+           ~doc:"STRING ResourceScanId"
+       and resources =
+         flag "resources" (required json_arg)
+           ~doc:"JSON ScannedResourceIdentifiers" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_resource_scan_related_resources
+           (Values.ListResourceScanRelatedResourcesInput.make ?nextToken
+              ?maxResults ~resourceScanId
+              ~resources:(Values.ScannedResourceIdentifiers.of_json resources)
+              ())
+           (Some Values.ListResourceScanRelatedResourcesOutput.to_json)
+           (Some Values.ListResourceScanRelatedResourcesOutput.error_to_json)])
+let list_resource_scan_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceIdentifier =
+         flag "resource-identifier" (optional string)
+           ~doc:"STRING ResourceIdentifier"
+       and resourceTypePrefix =
+         flag "resource-type-prefix" (optional string)
+           ~doc:"STRING ResourceTypePrefix"
+       and tagKey = flag "tag-key" (optional string) ~doc:"STRING TagKey"
+       and tagValue =
+         flag "tag-value" (optional string) ~doc:"STRING TagValue"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ResourceScannerMaxResults"
+       and resourceScanId =
+         flag "resource-scan-id" (required string)
+           ~doc:"STRING ResourceScanId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_resource_scan_resources
+           (Values.ListResourceScanResourcesInput.make ?resourceIdentifier
+              ?resourceTypePrefix ?tagKey ?tagValue ?nextToken ?maxResults
+              ~resourceScanId ())
+           (Some Values.ListResourceScanResourcesOutput.to_json)
+           (Some Values.ListResourceScanResourcesOutput.error_to_json)])
+let list_resource_scans =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ResourceScannerMaxResults"
+       and scanTypeFilter =
+         flag "scan-type-filter" (optional json_arg) ~doc:"JSON ScanType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_resource_scans
+           (Values.ListResourceScansInput.make ?nextToken ?maxResults
+              ?scanTypeFilter:(Option.map ~f:Values.ScanType.of_json
+                                 scanTypeFilter) ())
+           (Some Values.ListResourceScansOutput.to_json)
+           (Some Values.ListResourceScansOutput.error_to_json)])
+let list_stack_instance_resource_drifts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and stackInstanceResourceDriftStatuses =
+         flag "stack-instance-resource-drift-statuses" (optional json_arg)
+           ~doc:"JSON StackResourceDriftStatusFilters"
+       and callAs = flag "call-as" (optional json_arg) ~doc:"JSON CallAs"
+       and stackSetName =
+         flag "stack-set-name" (required string)
+           ~doc:"STRING StackSetNameOrId"
+       and stackInstanceAccount =
+         flag "stack-instance-account" (required string)
+           ~doc:"STRING Account"
+       and stackInstanceRegion =
+         flag "stack-instance-region" (required string) ~doc:"STRING Region"
+       and operationId =
+         flag "operation-id" (required string)
+           ~doc:"STRING ClientRequestToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_stack_instance_resource_drifts
+           (Values.ListStackInstanceResourceDriftsInput.make ?nextToken
+              ?maxResults
+              ?stackInstanceResourceDriftStatuses:(Option.map
+                                                     ~f:Values.StackResourceDriftStatusFilters.of_json
+                                                     stackInstanceResourceDriftStatuses)
+              ?callAs:(Option.map ~f:Values.CallAs.of_json callAs)
+              ~stackSetName ~stackInstanceAccount ~stackInstanceRegion
+              ~operationId ())
+           (Some Values.ListStackInstanceResourceDriftsOutput.to_json)
+           (Some Values.ListStackInstanceResourceDriftsOutput.error_to_json)])
 let list_stack_instances =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1231,6 +1725,56 @@ let list_stack_instances =
               ~stackSetName ())
            (Some Values.ListStackInstancesOutput.to_json)
            (Some Values.ListStackInstancesOutput.error_to_json)])
+let list_stack_refactor_actions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and stackRefactorId =
+         flag "stack-refactor-id" (required string)
+           ~doc:"STRING StackRefactorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_stack_refactor_actions
+           (Values.ListStackRefactorActionsInput.make ?nextToken ?maxResults
+              ~stackRefactorId ())
+           (Some Values.ListStackRefactorActionsOutput.to_json)
+           (Some Values.ListStackRefactorActionsOutput.error_to_json)])
+let list_stack_refactors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and executionStatusFilter =
+         flag "execution-status-filter" (optional json_arg)
+           ~doc:"JSON StackRefactorExecutionStatusFilter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_stack_refactors
+           (Values.ListStackRefactorsInput.make
+              ?executionStatusFilter:(Option.map
+                                        ~f:Values.StackRefactorExecutionStatusFilter.of_json
+                                        executionStatusFilter) ?nextToken
+              ?maxResults ()) (Some Values.ListStackRefactorsOutput.to_json)
+           (Some Values.ListStackRefactorsOutput.error_to_json)])
 let list_stack_resources =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1251,7 +1795,7 @@ let list_stack_resources =
            (Values.ListStackResourcesInput.make ?nextToken ~stackName ())
            (Some Values.ListStackResourcesOutput.to_json)
            (Some Values.ListStackResourcesOutput.error_to_json)])
-let list_stack_set_operation_results =
+let list_stack_set_auto_deployment_targets =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -1267,6 +1811,36 @@ let list_stack_set_operation_results =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and callAs = flag "call-as" (optional json_arg) ~doc:"JSON CallAs"
        and stackSetName =
+         flag "stack-set-name" (required string)
+           ~doc:"STRING StackSetNameOrId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_stack_set_auto_deployment_targets
+           (Values.ListStackSetAutoDeploymentTargetsInput.make ?nextToken
+              ?maxResults
+              ?callAs:(Option.map ~f:Values.CallAs.of_json callAs)
+              ~stackSetName ())
+           (Some Values.ListStackSetAutoDeploymentTargetsOutput.to_json)
+           (Some Values.ListStackSetAutoDeploymentTargetsOutput.error_to_json)])
+let list_stack_set_operation_results =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and callAs = flag "call-as" (optional json_arg) ~doc:"JSON CallAs"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON OperationResultFilters"
+       and stackSetName =
          flag "stack-set-name" (required string) ~doc:"STRING StackSetName"
        and operationId =
          flag "operation-id" (required string)
@@ -1277,7 +1851,8 @@ let list_stack_set_operation_results =
            (Values.ListStackSetOperationResultsInput.make ?nextToken
               ?maxResults
               ?callAs:(Option.map ~f:Values.CallAs.of_json callAs)
-              ~stackSetName ~operationId ())
+              ?filters:(Option.map ~f:Values.OperationResultFilters.of_json
+                          filters) ~stackSetName ~operationId ())
            (Some Values.ListStackSetOperationResultsOutput.to_json)
            (Some Values.ListStackSetOperationResultsOutput.error_to_json)])
 let list_stack_set_operations =
@@ -1599,13 +2174,17 @@ let rollback_stack =
        and clientRequestToken =
          flag "client-request-token" (optional string)
            ~doc:"STRING ClientRequestToken"
+       and retainExceptOnCreate =
+         flag "retain-except-on-create" (optional bool)
+           ~doc:"BOOL RetainExceptOnCreate"
        and stackName =
          flag "stack-name" (required string) ~doc:"STRING StackNameOrId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.rollback_stack
            (Values.RollbackStackInput.make ?roleARN ?clientRequestToken
-              ~stackName ()) (Some Values.RollbackStackOutput.to_json)
+              ?retainExceptOnCreate ~stackName ())
+           (Some Values.RollbackStackOutput.to_json)
            (Some Values.RollbackStackOutput.error_to_json)])
 let set_stack_policy =
   Command.async ~summary:""
@@ -1710,6 +2289,29 @@ let signal_resource =
            (Values.SignalResourceInput.make ~stackName ~logicalResourceId
               ~uniqueId ~status:(Values.ResourceSignalStatus.of_json status)
               ()) None None])
+let start_resource_scan =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and scanFilters =
+         flag "scan-filters" (optional json_arg) ~doc:"JSON ScanFilters" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_resource_scan
+           (Values.StartResourceScanInput.make ?clientRequestToken
+              ?scanFilters:(Option.map ~f:Values.ScanFilters.of_json
+                              scanFilters) ())
+           (Some Values.StartResourceScanOutput.to_json)
+           (Some Values.StartResourceScanOutput.error_to_json)])
 let stop_stack_set_operation =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1761,6 +2363,50 @@ let test_type =
               ?typeName ?versionId ?logDeliveryBucket ())
            (Some Values.TestTypeOutput.to_json)
            (Some Values.TestTypeOutput.error_to_json)])
+let update_generated_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and newGeneratedTemplateName =
+         flag "new-generated-template-name" (optional string)
+           ~doc:"STRING GeneratedTemplateName"
+       and addResources =
+         flag "add-resources" (optional json_arg)
+           ~doc:"JSON ResourceDefinitions"
+       and removeResources =
+         flag "remove-resources" (optional json_arg)
+           ~doc:"JSON JazzLogicalResourceIds"
+       and refreshAllResources =
+         flag "refresh-all-resources" (optional bool)
+           ~doc:"BOOL RefreshAllResources"
+       and templateConfiguration =
+         flag "template-configuration" (optional json_arg)
+           ~doc:"JSON TemplateConfiguration"
+       and generatedTemplateName =
+         flag "generated-template-name" (required string)
+           ~doc:"STRING GeneratedTemplateName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_generated_template
+           (Values.UpdateGeneratedTemplateInput.make
+              ?newGeneratedTemplateName
+              ?addResources:(Option.map ~f:Values.ResourceDefinitions.of_json
+                               addResources)
+              ?removeResources:(Option.map
+                                  ~f:Values.JazzLogicalResourceIds.of_json
+                                  removeResources) ?refreshAllResources
+              ?templateConfiguration:(Option.map
+                                        ~f:Values.TemplateConfiguration.of_json
+                                        templateConfiguration)
+              ~generatedTemplateName ())
+           (Some Values.UpdateGeneratedTemplateOutput.to_json)
+           (Some Values.UpdateGeneratedTemplateOutput.error_to_json)])
 let update_stack =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1810,6 +2456,9 @@ let update_stack =
        and clientRequestToken =
          flag "client-request-token" (optional string)
            ~doc:"STRING ClientRequestToken"
+       and retainExceptOnCreate =
+         flag "retain-except-on-create" (optional bool)
+           ~doc:"BOOL RetainExceptOnCreate"
        and stackName =
          flag "stack-name" (required string) ~doc:"STRING StackName" in
        fun () ->
@@ -1831,7 +2480,7 @@ let update_stack =
                                    ~f:Values.NotificationARNs.of_json
                                    notificationARNs)
               ?tags:(Option.map ~f:Values.Tags.of_json tags) ?disableRollback
-              ?clientRequestToken ~stackName ())
+              ?clientRequestToken ?retainExceptOnCreate ~stackName ())
            (Some Values.UpdateStackOutput.to_json)
            (Some Values.UpdateStackOutput.error_to_json)])
 let update_stack_instances =
@@ -2009,17 +2658,22 @@ let validate_template =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("activate-type", activate_type);
+    [("activate-organizations-access", activate_organizations_access);
+    ("activate-type", activate_type);
     ("batch-describe-type-configurations",
       batch_describe_type_configurations);
     ("cancel-update-stack", cancel_update_stack);
     ("continue-update-rollback", continue_update_rollback);
     ("create-change-set", create_change_set);
+    ("create-generated-template", create_generated_template);
     ("create-stack", create_stack);
     ("create-stack-instances", create_stack_instances);
+    ("create-stack-refactor", create_stack_refactor);
     ("create-stack-set", create_stack_set);
+    ("deactivate-organizations-access", deactivate_organizations_access);
     ("deactivate-type", deactivate_type);
     ("delete-change-set", delete_change_set);
+    ("delete-generated-template", delete_generated_template);
     ("delete-stack", delete_stack);
     ("delete-stack-instances", delete_stack_instances);
     ("delete-stack-set", delete_stack_set);
@@ -2027,11 +2681,16 @@ let main =
     ("describe-account-limits", describe_account_limits);
     ("describe-change-set", describe_change_set);
     ("describe-change-set-hooks", describe_change_set_hooks);
+    ("describe-events", describe_events);
+    ("describe-generated-template", describe_generated_template);
+    ("describe-organizations-access", describe_organizations_access);
     ("describe-publisher", describe_publisher);
+    ("describe-resource-scan", describe_resource_scan);
     ("describe-stack-drift-detection-status",
       describe_stack_drift_detection_status);
     ("describe-stack-events", describe_stack_events);
     ("describe-stack-instance", describe_stack_instance);
+    ("describe-stack-refactor", describe_stack_refactor);
     ("describe-stack-resource", describe_stack_resource);
     ("describe-stack-resource-drifts", describe_stack_resource_drifts);
     ("describe-stack-resources", describe_stack_resources);
@@ -2045,15 +2704,30 @@ let main =
     ("detect-stack-set-drift", detect_stack_set_drift);
     ("estimate-template-cost", estimate_template_cost);
     ("execute-change-set", execute_change_set);
+    ("execute-stack-refactor", execute_stack_refactor);
+    ("get-generated-template", get_generated_template);
+    ("get-hook-result", get_hook_result);
     ("get-stack-policy", get_stack_policy);
     ("get-template", get_template);
     ("get-template-summary", get_template_summary);
     ("import-stacks-to-stack-set", import_stacks_to_stack_set);
     ("list-change-sets", list_change_sets);
     ("list-exports", list_exports);
+    ("list-generated-templates", list_generated_templates);
+    ("list-hook-results", list_hook_results);
     ("list-imports", list_imports);
+    ("list-resource-scan-related-resources",
+      list_resource_scan_related_resources);
+    ("list-resource-scan-resources", list_resource_scan_resources);
+    ("list-resource-scans", list_resource_scans);
+    ("list-stack-instance-resource-drifts",
+      list_stack_instance_resource_drifts);
     ("list-stack-instances", list_stack_instances);
+    ("list-stack-refactor-actions", list_stack_refactor_actions);
+    ("list-stack-refactors", list_stack_refactors);
     ("list-stack-resources", list_stack_resources);
+    ("list-stack-set-auto-deployment-targets",
+      list_stack_set_auto_deployment_targets);
     ("list-stack-set-operation-results", list_stack_set_operation_results);
     ("list-stack-set-operations", list_stack_set_operations);
     ("list-stack-sets", list_stack_sets);
@@ -2070,8 +2744,10 @@ let main =
     ("set-type-configuration", set_type_configuration);
     ("set-type-default-version", set_type_default_version);
     ("signal-resource", signal_resource);
+    ("start-resource-scan", start_resource_scan);
     ("stop-stack-set-operation", stop_stack_set_operation);
     ("test-type", test_type);
+    ("update-generated-template", update_generated_template);
     ("update-stack", update_stack);
     ("update-stack-instances", update_stack_instances);
     ("update-stack-set", update_stack_set);

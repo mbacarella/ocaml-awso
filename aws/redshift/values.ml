@@ -24,6 +24,32 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module ServiceAuthorization =
+  struct
+    type nonrec t =
+      | Enabled 
+      | Disabled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Enabled -> "Enabled"
+      | Disabled -> "Disabled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Enabled" -> Enabled
+      | "Disabled" -> Disabled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ServiceAuthorization" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ServiceAuthorization" j)
+    let to_json = simple_to_json to_value
+  end
 module String_ =
   struct
     type nonrec t = string
@@ -39,6 +65,85 @@ module String_ =
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
+module LakeFormationQuery =
+  struct
+    type nonrec t =
+      {
+      authorization: ServiceAuthorization.t
+        [@ocaml.doc
+          "Determines whether the query scope is enabled or disabled."]}
+    let context_ = "LakeFormationQuery"
+    let make ~authorization = fun () -> { authorization }
+    let to_value x =
+      structure_to_value
+        [("Authorization",
+           (Some (ServiceAuthorization.to_value x.authorization)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authorization =
+        ServiceAuthorization.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Authorization") in
+      make ~authorization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authorization =
+        field_map_exn json__ "Authorization" ServiceAuthorization.of_json in
+      make ~authorization ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The Lake Formation scope."]
+module Connect =
+  struct
+    type nonrec t =
+      {
+      authorization: ServiceAuthorization.t
+        [@ocaml.doc
+          "Determines whether the Amazon Redshift connect integration is enabled or disabled for the application."]}
+    let context_ = "Connect"
+    let make ~authorization = fun () -> { authorization }
+    let to_value x =
+      structure_to_value
+        [("Authorization",
+           (Some (ServiceAuthorization.to_value x.authorization)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authorization =
+        ServiceAuthorization.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Authorization") in
+      make ~authorization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authorization =
+        field_map_exn json__ "Authorization" ServiceAuthorization.of_json in
+      make ~authorization ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that defines the Amazon Redshift connect service integration scope."]
+module ReadWriteAccess =
+  struct
+    type nonrec t =
+      {
+      authorization: ServiceAuthorization.t
+        [@ocaml.doc
+          "Determines whether the read/write scope is enabled or disabled."]}
+    let context_ = "ReadWriteAccess"
+    let make ~authorization = fun () -> { authorization }
+    let to_value x =
+      structure_to_value
+        [("Authorization",
+           (Some (ServiceAuthorization.to_value x.authorization)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authorization =
+        ServiceAuthorization.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Authorization") in
+      make ~authorization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authorization =
+        field_map_exn json__ "Authorization" ServiceAuthorization.of_json in
+      make ~authorization ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The S3 Access Grants scope."]
 module NetworkInterface =
   struct
     type nonrec t =
@@ -50,18 +155,23 @@ module NetworkInterface =
         [@ocaml.doc
           "The IPv4 address of the network interface within the subnet."];
       availabilityZone: String_.t option
-        [@ocaml.doc "The Availability Zone."]}
+        [@ocaml.doc "The Availability Zone."];
+      ipv6Address: String_.t option
+        [@ocaml.doc
+          "The IPv6 address of the network interface within the subnet."]}
     let make ?networkInterfaceId =
       fun ?subnetId ->
         fun ?privateIpAddress ->
           fun ?availabilityZone ->
-            fun () ->
-              {
-                networkInterfaceId;
-                subnetId;
-                privateIpAddress;
-                availabilityZone
-              }
+            fun ?ipv6Address ->
+              fun () ->
+                {
+                  networkInterfaceId;
+                  subnetId;
+                  privateIpAddress;
+                  availabilityZone;
+                  ipv6Address
+                }
     let to_value x =
       structure_to_value
         [("NetworkInterfaceId",
@@ -70,9 +180,12 @@ module NetworkInterface =
         ("PrivateIpAddress",
           (Option.map x.privateIpAddress ~f:String_.to_value));
         ("AvailabilityZone",
-          (Option.map x.availabilityZone ~f:String_.to_value))]
+          (Option.map x.availabilityZone ~f:String_.to_value));
+        ("Ipv6Address", (Option.map x.ipv6Address ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipv6Address =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Ipv6Address") in
       let availabilityZone =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "AvailabilityZone") in
@@ -84,19 +197,20 @@ module NetworkInterface =
       let networkInterfaceId =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "NetworkInterfaceId") in
-      make ?availabilityZone ?privateIpAddress ?subnetId ?networkInterfaceId
-        ()
+      make ?ipv6Address ?availabilityZone ?privateIpAddress ?subnetId
+        ?networkInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipv6Address = field_map json__ "Ipv6Address" String_.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
       let privateIpAddress =
-        field_map json "PrivateIpAddress" String_.of_json in
-      let subnetId = field_map json "SubnetId" String_.of_json in
+        field_map json__ "PrivateIpAddress" String_.of_json in
+      let subnetId = field_map json__ "SubnetId" String_.of_json in
       let networkInterfaceId =
-        field_map json "NetworkInterfaceId" String_.of_json in
-      make ?availabilityZone ?privateIpAddress ?subnetId ?networkInterfaceId
-        ()
+        field_map json__ "NetworkInterfaceId" String_.of_json in
+      make ?ipv6Address ?availabilityZone ?privateIpAddress ?subnetId
+        ?networkInterfaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a network interface."]
 module SupportedPlatform =
@@ -111,8 +225,8 @@ module SupportedPlatform =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" String_.of_json in make ?name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" String_.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of supported platforms for orderable clusters."]
 module SupportedOperation =
@@ -131,8 +245,8 @@ module SupportedOperation =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OperationName") in
       make ?operationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationName = field_map json "OperationName" String_.of_json in
+    let of_json json__ =
+      let operationName = field_map json__ "OperationName" String_.of_json in
       make ?operationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -150,6 +264,78 @@ module Double =
     let of_json j = float_of_json ~kind:"a double" j
     let to_json = simple_to_json to_value
   end
+module LakeFormationScopeUnion =
+  struct
+    type nonrec t =
+      {
+      lakeFormationQuery: LakeFormationQuery.t option
+        [@ocaml.doc "The Lake Formation scope."]}
+    let make ?lakeFormationQuery = fun () -> { lakeFormationQuery }
+    let to_value x =
+      structure_to_value
+        [("LakeFormationQuery",
+           (Option.map x.lakeFormationQuery ~f:LakeFormationQuery.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lakeFormationQuery =
+        (Option.map ~f:LakeFormationQuery.of_xml)
+          (Xml.child xml_arg0 "LakeFormationQuery") in
+      make ?lakeFormationQuery ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lakeFormationQuery =
+        field_map json__ "LakeFormationQuery" LakeFormationQuery.of_json in
+      make ?lakeFormationQuery ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A list of scopes set up for Lake Formation integration."]
+module RedshiftScopeUnion =
+  struct
+    type nonrec t =
+      {
+      connect: Connect.t option
+        [@ocaml.doc
+          "The Amazon Redshift connect integration scope configuration. Defines authorization settings for Amazon Redshift connect service integration."]}
+    let make ?connect = fun () -> { connect }
+    let to_value x =
+      structure_to_value
+        [("Connect", (Option.map x.connect ~f:Connect.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let connect =
+        (Option.map ~f:Connect.of_xml) (Xml.child xml_arg0 "Connect") in
+      make ?connect ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let connect = field_map json__ "Connect" Connect.of_json in
+      make ?connect ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A union structure that defines the scope of Amazon Redshift service integrations. Contains configuration for different integration types such as Amazon Redshift."]
+module S3AccessGrantsScopeUnion =
+  struct
+    type nonrec t =
+      {
+      readWriteAccess: ReadWriteAccess.t option
+        [@ocaml.doc "The S3 Access Grants scope."]}
+    let make ?readWriteAccess = fun () -> { readWriteAccess }
+    let to_value x =
+      structure_to_value
+        [("ReadWriteAccess",
+           (Option.map x.readWriteAccess ~f:ReadWriteAccess.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let readWriteAccess =
+        (Option.map ~f:ReadWriteAccess.of_xml)
+          (Xml.child xml_arg0 "ReadWriteAccess") in
+      make ?readWriteAccess ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let readWriteAccess =
+        field_map json__ "ReadWriteAccess" ReadWriteAccess.of_json in
+      make ?readWriteAccess ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list of scopes set up for S3 Access Grants integration."]
 module ClusterParameterStatus =
   struct
     type nonrec t =
@@ -191,12 +377,12 @@ module ClusterParameterStatus =
       make ?parameterApplyErrorDescription ?parameterApplyStatus
         ?parameterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterApplyErrorDescription =
-        field_map json "ParameterApplyErrorDescription" String_.of_json in
+        field_map json__ "ParameterApplyErrorDescription" String_.of_json in
       let parameterApplyStatus =
-        field_map json "ParameterApplyStatus" String_.of_json in
-      let parameterName = field_map json "ParameterName" String_.of_json in
+        field_map json__ "ParameterApplyStatus" String_.of_json in
+      let parameterName = field_map json__ "ParameterName" String_.of_json in
       make ?parameterApplyErrorDescription ?parameterApplyStatus
         ?parameterName ()
     let to_json v = composed_to_json to_value v
@@ -205,6 +391,9 @@ module NetworkInterfaceList =
   struct
     type nonrec t = NetworkInterface.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterface.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -230,6 +419,9 @@ module SupportedPlatformsList =
   struct
     type nonrec t = SupportedPlatform.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SupportedPlatform.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -269,15 +461,18 @@ module Tag =
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let key = field_map json "Key" String_.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let key = field_map json__ "Key" String_.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A tag consisting of a name/value pair for a resource."]
 module SupportedOperationList =
   struct
     type nonrec t = SupportedOperation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SupportedOperation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -326,6 +521,27 @@ module IntegerOptional =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module RecommendedActionType =
+  struct
+    type nonrec t =
+      | SQL 
+      | CLI 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | SQL -> "SQL" | CLI -> "CLI" | Non_static_id s -> s
+    let of_string =
+      function | "SQL" -> SQL | "CLI" -> CLI | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecommendedActionType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"RecommendedActionType" j)
+    let to_json = simple_to_json to_value
+  end
 module RecurringCharge =
   struct
     type nonrec t =
@@ -355,11 +571,11 @@ module RecurringCharge =
           (Xml.child xml_arg0 "RecurringChargeAmount") in
       make ?recurringChargeFrequency ?recurringChargeAmount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recurringChargeFrequency =
-        field_map json "RecurringChargeFrequency" String_.of_json in
+        field_map json__ "RecurringChargeFrequency" String_.of_json in
       let recurringChargeAmount =
-        field_map json "RecurringChargeAmount" Double.of_json in
+        field_map json__ "RecurringChargeAmount" Double.of_json in
       make ?recurringChargeFrequency ?recurringChargeAmount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a recurring charge."]
@@ -367,6 +583,9 @@ module EventCategoriesList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -414,6 +633,119 @@ module ScheduleState =
       of_string (string_of_xml ~kind:"enumeration ScheduleState" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"ScheduleState" j)
     let to_json = simple_to_json to_value
+  end
+module AuthorizedAudienceList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AuthorizedAudienceList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LakeFormationServiceIntegrations =
+  struct
+    type nonrec t = LakeFormationScopeUnion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LakeFormationScopeUnion.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LakeFormationScopeUnion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LakeFormationServiceIntegrations"
+        ~of_json:LakeFormationScopeUnion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RedshiftServiceIntegrations =
+  struct
+    type nonrec t = RedshiftScopeUnion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RedshiftScopeUnion.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RedshiftScopeUnion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RedshiftServiceIntegrations"
+        ~of_json:RedshiftScopeUnion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module S3AccessGrantsServiceIntegrations =
+  struct
+    type nonrec t = S3AccessGrantsScopeUnion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:S3AccessGrantsScopeUnion.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:S3AccessGrantsScopeUnion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"S3AccessGrantsServiceIntegrations"
+        ~of_json:S3AccessGrantsScopeUnion.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module DataShareStatus =
   struct
@@ -468,6 +800,9 @@ module ClusterParameterStatusList =
   struct
     type nonrec t = ClusterParameterStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterParameterStatus.to_value)) |>
         (fun x -> `List x)
@@ -522,15 +857,56 @@ module VpcEndpoint =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "VpcEndpointId") in
       make ?networkInterfaces ?vpcId ?vpcEndpointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let networkInterfaces =
-        field_map json "NetworkInterfaces" NetworkInterfaceList.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let vpcEndpointId = field_map json "VpcEndpointId" String_.of_json in
+        field_map json__ "NetworkInterfaces" NetworkInterfaceList.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
+      let vpcEndpointId = field_map json__ "VpcEndpointId" String_.of_json in
       make ?networkInterfaces ?vpcId ?vpcEndpointId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The connection endpoint for connecting to an Amazon Redshift cluster through the proxy."]
+module ClusterNode =
+  struct
+    type nonrec t =
+      {
+      nodeRole: String_.t option
+        [@ocaml.doc "Whether the node is a leader node or a compute node."];
+      privateIPAddress: String_.t option
+        [@ocaml.doc "The private IP address of a node within a cluster."];
+      publicIPAddress: String_.t option
+        [@ocaml.doc "The public IP address of a node within a cluster."]}
+    let make ?nodeRole =
+      fun ?privateIPAddress ->
+        fun ?publicIPAddress ->
+          fun () -> { nodeRole; privateIPAddress; publicIPAddress }
+    let to_value x =
+      structure_to_value
+        [("NodeRole", (Option.map x.nodeRole ~f:String_.to_value));
+        ("PrivateIPAddress",
+          (Option.map x.privateIPAddress ~f:String_.to_value));
+        ("PublicIPAddress",
+          (Option.map x.publicIPAddress ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let publicIPAddress =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PublicIPAddress") in
+      let privateIPAddress =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "PrivateIPAddress") in
+      let nodeRole =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeRole") in
+      make ?publicIPAddress ?privateIPAddress ?nodeRole ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let publicIPAddress =
+        field_map json__ "PublicIPAddress" String_.of_json in
+      let privateIPAddress =
+        field_map json__ "PrivateIPAddress" String_.of_json in
+      let nodeRole = field_map json__ "NodeRole" String_.of_json in
+      make ?publicIPAddress ?privateIPAddress ?nodeRole ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The identifier of a node in a cluster."]
 module AvailabilityZone =
   struct
     type nonrec t =
@@ -553,10 +929,10 @@ module AvailabilityZone =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?supportedPlatforms ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supportedPlatforms =
-        field_map json "SupportedPlatforms" SupportedPlatformsList.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "SupportedPlatforms" SupportedPlatformsList.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?supportedPlatforms ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an availability zone."]
@@ -564,6 +940,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -620,12 +999,13 @@ module UpdateTarget =
           (Xml.child xml_arg0 "MaintenanceTrackName") in
       make ?supportedOperations ?databaseVersion ?maintenanceTrackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supportedOperations =
-        field_map json "SupportedOperations" SupportedOperationList.of_json in
-      let databaseVersion = field_map json "DatabaseVersion" String_.of_json in
+        field_map json__ "SupportedOperations" SupportedOperationList.of_json in
+      let databaseVersion =
+        field_map json__ "DatabaseVersion" String_.of_json in
       let maintenanceTrackName =
-        field_map json "MaintenanceTrackName" String_.of_json in
+        field_map json__ "MaintenanceTrackName" String_.of_json in
       make ?supportedOperations ?databaseVersion ?maintenanceTrackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -654,9 +1034,9 @@ module AccountWithRestoreAccess =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?accountAlias ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountAlias = field_map json "AccountAlias" String_.of_json in
-      let accountId = field_map json "AccountId" String_.of_json in
+    let of_json json__ =
+      let accountAlias = field_map json__ "AccountAlias" String_.of_json in
+      let accountId = field_map json__ "AccountId" String_.of_json in
       make ?accountAlias ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -679,9 +1059,9 @@ module PauseClusterMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       make ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -758,17 +1138,17 @@ module ResizeClusterMessage =
       make ?targetReservedNodeOfferingId ?reservedNodeId ?classic
         ?numberOfNodes ?nodeType ?clusterType ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetReservedNodeOfferingId =
-        field_map json "TargetReservedNodeOfferingId" String_.of_json in
-      let reservedNodeId = field_map json "ReservedNodeId" String_.of_json in
-      let classic = field_map json "Classic" BooleanOptional.of_json in
+        field_map json__ "TargetReservedNodeOfferingId" String_.of_json in
+      let reservedNodeId = field_map json__ "ReservedNodeId" String_.of_json in
+      let classic = field_map json__ "Classic" BooleanOptional.of_json in
       let numberOfNodes =
-        field_map json "NumberOfNodes" IntegerOptional.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
-      let clusterType = field_map json "ClusterType" String_.of_json in
+        field_map json__ "NumberOfNodes" IntegerOptional.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let clusterType = field_map json__ "ClusterType" String_.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ?targetReservedNodeOfferingId ?reservedNodeId ?classic
         ?numberOfNodes ?nodeType ?clusterType ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -792,13 +1172,111 @@ module ResumeClusterMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       make ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a resume cluster operation. For example, a scheduled action to run the ResumeCluster API operation."]
+module RecommendedAction =
+  struct
+    type nonrec t =
+      {
+      text: String_.t option
+        [@ocaml.doc "The specific instruction about the command."];
+      database: String_.t option
+        [@ocaml.doc
+          "The database name to perform the action on. Only applicable if the type of command is SQL."];
+      command: String_.t option [@ocaml.doc "The command to run."];
+      type_: RecommendedActionType.t option
+        [@ocaml.doc "The type of command."]}
+    let make ?text =
+      fun ?database ->
+        fun ?command ->
+          fun ?type_ -> fun () -> { text; database; command; type_ }
+    let to_value x =
+      structure_to_value
+        [("Text", (Option.map x.text ~f:String_.to_value));
+        ("Database", (Option.map x.database ~f:String_.to_value));
+        ("Command", (Option.map x.command ~f:String_.to_value));
+        ("Type", (Option.map x.type_ ~f:RecommendedActionType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:RecommendedActionType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let command =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Command") in
+      let database =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Database") in
+      let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
+      make ?type_ ?command ?database ?text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" RecommendedActionType.of_json in
+      let command = field_map json__ "Command" String_.of_json in
+      let database = field_map json__ "Database" String_.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      make ?type_ ?command ?database ?text ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The recommended action from the Amazon Redshift Advisor recommendation."]
+module ReferenceLink =
+  struct
+    type nonrec t =
+      {
+      text: String_.t option
+        [@ocaml.doc
+          "The hyperlink text that describes the link to more information."];
+      link: String_.t option
+        [@ocaml.doc "The URL address to find more information."]}
+    let make ?text = fun ?link -> fun () -> { text; link }
+    let to_value x =
+      structure_to_value
+        [("Text", (Option.map x.text ~f:String_.to_value));
+        ("Link", (Option.map x.link ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let link = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Link") in
+      let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
+      make ?link ?text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let link = field_map json__ "Link" String_.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      make ?link ?text ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A link to an Amazon Redshift Advisor reference for more information about a recommendation."]
+module IntegrationError =
+  struct
+    type nonrec t =
+      {
+      errorCode: String_.t option
+        [@ocaml.doc "The error code of an inbound integration error."];
+      errorMessage: String_.t option
+        [@ocaml.doc "The error message of an inbound integration error."]}
+    let make ?errorCode =
+      fun ?errorMessage -> fun () -> { errorCode; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:String_.to_value));
+        ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorMessage") in
+      let errorCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?errorMessage ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+      make ?errorMessage ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The error of an inbound integration."]
 module Integer =
   struct
     type nonrec t = int
@@ -816,6 +1294,9 @@ module RecurringChargeList =
   struct
     type nonrec t = RecurringCharge.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecurringCharge.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -904,13 +1385,13 @@ module EventInfoMap =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "EventId") in
       make ?severity ?eventDescription ?eventCategories ?eventId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let severity = field_map json "Severity" String_.of_json in
+    let of_json json__ =
+      let severity = field_map json__ "Severity" String_.of_json in
       let eventDescription =
-        field_map json "EventDescription" String_.of_json in
+        field_map json__ "EventDescription" String_.of_json in
       let eventCategories =
-        field_map json "EventCategories" EventCategoriesList.of_json in
-      let eventId = field_map json "EventId" String_.of_json in
+        field_map json__ "EventCategories" EventCategoriesList.of_json in
+      let eventId = field_map json__ "EventId" String_.of_json in
       make ?severity ?eventDescription ?eventCategories ?eventId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes event information."]
@@ -938,10 +1419,10 @@ module VpcSecurityGroupMembership =
           (Xml.child xml_arg0 "VpcSecurityGroupId") in
       make ?status ?vpcSecurityGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
       let vpcSecurityGroupId =
-        field_map json "VpcSecurityGroupId" String_.of_json in
+        field_map json__ "VpcSecurityGroupId" String_.of_json in
       make ?status ?vpcSecurityGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the members of a VPC security group."]
@@ -970,14 +1451,106 @@ module ClusterAssociatedToSchedule =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?scheduleAssociationState ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduleAssociationState =
-        field_map json "ScheduleAssociationState" ScheduleState.of_json in
+        field_map json__ "ScheduleAssociationState" ScheduleState.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       make ?scheduleAssociationState ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end
+module AuthorizedTokenIssuer =
+  struct
+    type nonrec t =
+      {
+      trustedTokenIssuerArn: String_.t option
+        [@ocaml.doc
+          "The ARN for the authorized token issuer for integrating Amazon Redshift with IDC Identity Center."];
+      authorizedAudiencesList: AuthorizedAudienceList.t option
+        [@ocaml.doc
+          "The list of audiences for the authorized token issuer for integrating Amazon Redshift with IDC Identity Center."]}
+    let make ?trustedTokenIssuerArn =
+      fun ?authorizedAudiencesList ->
+        fun () -> { trustedTokenIssuerArn; authorizedAudiencesList }
+    let to_value x =
+      structure_to_value
+        [("TrustedTokenIssuerArn",
+           (Option.map x.trustedTokenIssuerArn ~f:String_.to_value));
+        ("AuthorizedAudiencesList",
+          (Option.map x.authorizedAudiencesList
+             ~f:AuthorizedAudienceList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authorizedAudiencesList =
+        (Option.map ~f:AuthorizedAudienceList.of_xml)
+          (Xml.child xml_arg0 "AuthorizedAudiencesList") in
+      let trustedTokenIssuerArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "TrustedTokenIssuerArn") in
+      make ?authorizedAudiencesList ?trustedTokenIssuerArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authorizedAudiencesList =
+        field_map json__ "AuthorizedAudiencesList"
+          AuthorizedAudienceList.of_json in
+      let trustedTokenIssuerArn =
+        field_map json__ "TrustedTokenIssuerArn" String_.of_json in
+      make ?authorizedAudiencesList ?trustedTokenIssuerArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The authorized token issuer for the Amazon Redshift IAM Identity Center application."]
+module ServiceIntegrationsUnion =
+  struct
+    type nonrec t =
+      {
+      lakeFormation: LakeFormationServiceIntegrations.t option
+        [@ocaml.doc
+          "A list of scopes set up for Lake Formation integration."];
+      s3AccessGrants: S3AccessGrantsServiceIntegrations.t option
+        [@ocaml.doc
+          "A list of scopes set up for S3 Access Grants integration."];
+      redshift: RedshiftServiceIntegrations.t option
+        [@ocaml.doc
+          "A list of scopes set up for Amazon Redshift integration."]}
+    let make ?lakeFormation =
+      fun ?s3AccessGrants ->
+        fun ?redshift ->
+          fun () -> { lakeFormation; s3AccessGrants; redshift }
+    let to_value x =
+      structure_to_value
+        [("LakeFormation",
+           (Option.map x.lakeFormation
+              ~f:LakeFormationServiceIntegrations.to_value));
+        ("S3AccessGrants",
+          (Option.map x.s3AccessGrants
+             ~f:S3AccessGrantsServiceIntegrations.to_value));
+        ("Redshift",
+          (Option.map x.redshift ~f:RedshiftServiceIntegrations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let redshift =
+        (Option.map ~f:RedshiftServiceIntegrations.of_xml)
+          (Xml.child xml_arg0 "Redshift") in
+      let s3AccessGrants =
+        (Option.map ~f:S3AccessGrantsServiceIntegrations.of_xml)
+          (Xml.child xml_arg0 "S3AccessGrants") in
+      let lakeFormation =
+        (Option.map ~f:LakeFormationServiceIntegrations.of_xml)
+          (Xml.child xml_arg0 "LakeFormation") in
+      make ?redshift ?s3AccessGrants ?lakeFormation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redshift =
+        field_map json__ "Redshift" RedshiftServiceIntegrations.of_json in
+      let s3AccessGrants =
+        field_map json__ "S3AccessGrants"
+          S3AccessGrantsServiceIntegrations.of_json in
+      let lakeFormation =
+        field_map json__ "LakeFormation"
+          LakeFormationServiceIntegrations.of_json in
+      make ?redshift ?s3AccessGrants ?lakeFormation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A list of service integrations."]
 module Boolean =
   struct
     type nonrec t = bool
@@ -1033,20 +1606,30 @@ module DataShareAssociation =
         [@ocaml.doc "The creation date of the datashare that is associated."];
       statusChangeDate: TStamp.t option
         [@ocaml.doc
-          "The status change data of the datashare that is associated."]}
+          "The status change data of the datashare that is associated."];
+      producerAllowedWrites: BooleanOptional.t option
+        [@ocaml.doc
+          "Specifies whether write operations were allowed during data share authorization."];
+      consumerAcceptedWrites: BooleanOptional.t option
+        [@ocaml.doc
+          "Specifies whether write operations were allowed during data share association."]}
     let make ?consumerIdentifier =
       fun ?status ->
         fun ?consumerRegion ->
           fun ?createdDate ->
             fun ?statusChangeDate ->
-              fun () ->
-                {
-                  consumerIdentifier;
-                  status;
-                  consumerRegion;
-                  createdDate;
-                  statusChangeDate
-                }
+              fun ?producerAllowedWrites ->
+                fun ?consumerAcceptedWrites ->
+                  fun () ->
+                    {
+                      consumerIdentifier;
+                      status;
+                      consumerRegion;
+                      createdDate;
+                      statusChangeDate;
+                      producerAllowedWrites;
+                      consumerAcceptedWrites
+                    }
     let to_value x =
       structure_to_value
         [("ConsumerIdentifier",
@@ -1055,9 +1638,19 @@ module DataShareAssociation =
         ("ConsumerRegion", (Option.map x.consumerRegion ~f:String_.to_value));
         ("CreatedDate", (Option.map x.createdDate ~f:TStamp.to_value));
         ("StatusChangeDate",
-          (Option.map x.statusChangeDate ~f:TStamp.to_value))]
+          (Option.map x.statusChangeDate ~f:TStamp.to_value));
+        ("ProducerAllowedWrites",
+          (Option.map x.producerAllowedWrites ~f:BooleanOptional.to_value));
+        ("ConsumerAcceptedWrites",
+          (Option.map x.consumerAcceptedWrites ~f:BooleanOptional.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let consumerAcceptedWrites =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "ConsumerAcceptedWrites") in
+      let producerAllowedWrites =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "ProducerAllowedWrites") in
       let statusChangeDate =
         (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "StatusChangeDate") in
       let createdDate =
@@ -1069,21 +1662,64 @@ module DataShareAssociation =
       let consumerIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ConsumerIdentifier") in
-      make ?statusChangeDate ?createdDate ?consumerRegion ?status
-        ?consumerIdentifier ()
+      make ?consumerAcceptedWrites ?producerAllowedWrites ?statusChangeDate
+        ?createdDate ?consumerRegion ?status ?consumerIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusChangeDate = field_map json "StatusChangeDate" TStamp.of_json in
-      let createdDate = field_map json "CreatedDate" TStamp.of_json in
-      let consumerRegion = field_map json "ConsumerRegion" String_.of_json in
-      let status = field_map json "Status" DataShareStatus.of_json in
+    let of_json json__ =
+      let consumerAcceptedWrites =
+        field_map json__ "ConsumerAcceptedWrites" BooleanOptional.of_json in
+      let producerAllowedWrites =
+        field_map json__ "ProducerAllowedWrites" BooleanOptional.of_json in
+      let statusChangeDate =
+        field_map json__ "StatusChangeDate" TStamp.of_json in
+      let createdDate = field_map json__ "CreatedDate" TStamp.of_json in
+      let consumerRegion = field_map json__ "ConsumerRegion" String_.of_json in
+      let status = field_map json__ "Status" DataShareStatus.of_json in
       let consumerIdentifier =
-        field_map json "ConsumerIdentifier" String_.of_json in
-      make ?statusChangeDate ?createdDate ?consumerRegion ?status
-        ?consumerIdentifier ()
+        field_map json__ "ConsumerIdentifier" String_.of_json in
+      make ?consumerAcceptedWrites ?producerAllowedWrites ?statusChangeDate
+        ?createdDate ?consumerRegion ?status ?consumerIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The association of a datashare from a producer account with a data consumer."]
+module CertificateAssociation =
+  struct
+    type nonrec t =
+      {
+      customDomainName: String_.t option
+        [@ocaml.doc
+          "The custom domain name for the certificate association."];
+      clusterIdentifier: String_.t option
+        [@ocaml.doc
+          "The cluster identifier for the certificate association."]}
+    let make ?customDomainName =
+      fun ?clusterIdentifier ->
+        fun () -> { customDomainName; clusterIdentifier }
+    let to_value x =
+      structure_to_value
+        [("CustomDomainName",
+           (Option.map x.customDomainName ~f:String_.to_value));
+        ("ClusterIdentifier",
+          (Option.map x.clusterIdentifier ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clusterIdentifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ClusterIdentifier") in
+      let customDomainName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "CustomDomainName") in
+      make ?clusterIdentifier ?customDomainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clusterIdentifier =
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      let customDomainName =
+        field_map json__ "CustomDomainName" String_.of_json in
+      make ?clusterIdentifier ?customDomainName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A cluster ID and custom domain name tied to a specific certificate. These are typically returned in a list."]
 module AquaConfigurationStatus =
   struct
     type nonrec t =
@@ -1166,53 +1802,13 @@ module ClusterIamRole =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "IamRoleArn") in
       make ?applyStatus ?iamRoleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let applyStatus = field_map json "ApplyStatus" String_.of_json in
-      let iamRoleArn = field_map json "IamRoleArn" String_.of_json in
+    let of_json json__ =
+      let applyStatus = field_map json__ "ApplyStatus" String_.of_json in
+      let iamRoleArn = field_map json__ "IamRoleArn" String_.of_json in
       make ?applyStatus ?iamRoleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An Identity and Access Management (IAM) role that can be used by the associated Amazon Redshift cluster to access other Amazon Web Services services."]
-module ClusterNode =
-  struct
-    type nonrec t =
-      {
-      nodeRole: String_.t option
-        [@ocaml.doc "Whether the node is a leader node or a compute node."];
-      privateIPAddress: String_.t option
-        [@ocaml.doc "The private IP address of a node within a cluster."];
-      publicIPAddress: String_.t option
-        [@ocaml.doc "The public IP address of a node within a cluster."]}
-    let make ?nodeRole =
-      fun ?privateIPAddress ->
-        fun ?publicIPAddress ->
-          fun () -> { nodeRole; privateIPAddress; publicIPAddress }
-    let to_value x =
-      structure_to_value
-        [("NodeRole", (Option.map x.nodeRole ~f:String_.to_value));
-        ("PrivateIPAddress",
-          (Option.map x.privateIPAddress ~f:String_.to_value));
-        ("PublicIPAddress",
-          (Option.map x.publicIPAddress ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let publicIPAddress =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PublicIPAddress") in
-      let privateIPAddress =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "PrivateIPAddress") in
-      let nodeRole =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeRole") in
-      make ?publicIPAddress ?privateIPAddress ?nodeRole ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let publicIPAddress = field_map json "PublicIPAddress" String_.of_json in
-      let privateIPAddress =
-        field_map json "PrivateIPAddress" String_.of_json in
-      let nodeRole = field_map json "NodeRole" String_.of_json in
-      make ?publicIPAddress ?privateIPAddress ?nodeRole ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The identifier of a node in a cluster."]
 module ClusterParameterGroupStatus =
   struct
     type nonrec t =
@@ -1256,14 +1852,14 @@ module ClusterParameterGroupStatus =
       make ?clusterParameterStatusList ?parameterApplyStatus
         ?parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterParameterStatusList =
-        field_map json "ClusterParameterStatusList"
+        field_map json__ "ClusterParameterStatusList"
           ClusterParameterStatusList.of_json in
       let parameterApplyStatus =
-        field_map json "ParameterApplyStatus" String_.of_json in
+        field_map json__ "ParameterApplyStatus" String_.of_json in
       let parameterGroupName =
-        field_map json "ParameterGroupName" String_.of_json in
+        field_map json__ "ParameterGroupName" String_.of_json in
       make ?clusterParameterStatusList ?parameterApplyStatus
         ?parameterGroupName ()
     let to_json v = composed_to_json to_value v
@@ -1292,10 +1888,10 @@ module ClusterSecurityGroupMembership =
           (Xml.child xml_arg0 "ClusterSecurityGroupName") in
       make ?status ?clusterSecurityGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
       let clusterSecurityGroupName =
-        field_map json "ClusterSecurityGroupName" String_.of_json in
+        field_map json__ "ClusterSecurityGroupName" String_.of_json in
       make ?status ?clusterSecurityGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a cluster security group."]
@@ -1381,13 +1977,13 @@ module DeferredMaintenanceWindow =
       make ?deferMaintenanceEndTime ?deferMaintenanceStartTime
         ?deferMaintenanceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deferMaintenanceEndTime =
-        field_map json "DeferMaintenanceEndTime" TStamp.of_json in
+        field_map json__ "DeferMaintenanceEndTime" TStamp.of_json in
       let deferMaintenanceStartTime =
-        field_map json "DeferMaintenanceStartTime" TStamp.of_json in
+        field_map json__ "DeferMaintenanceStartTime" TStamp.of_json in
       let deferMaintenanceIdentifier =
-        field_map json "DeferMaintenanceIdentifier" String_.of_json in
+        field_map json__ "DeferMaintenanceIdentifier" String_.of_json in
       make ?deferMaintenanceEndTime ?deferMaintenanceStartTime
         ?deferMaintenanceIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -1396,6 +1992,9 @@ module VpcEndpointsList =
   struct
     type nonrec t = VpcEndpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcEndpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1415,6 +2014,19 @@ module VpcEndpointsList =
     let of_json j =
       list_of_json ~kind:"VpcEndpointsList" ~of_json:VpcEndpoint.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module SensitiveString =
+  struct
+    type nonrec t = string
+    let context_ = "SensitiveString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SensitiveString" j
+    let to_json = simple_to_json to_value
   end
 module ReservedNodeExchangeStatusType =
   struct
@@ -1456,6 +2068,33 @@ module ReservedNodeExchangeStatusType =
       of_string (string_of_json ~kind:"ReservedNodeExchangeStatusType" j)
     let to_json = simple_to_json to_value
   end
+module ClusterNodesList =
+  struct
+    type nonrec t = ClusterNode.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ClusterNode.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ClusterNode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ClusterNodesList" ~of_json:ClusterNode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Subnet =
   struct
     type nonrec t =
@@ -1488,12 +2127,12 @@ module Subnet =
           (Xml.child xml_arg0 "SubnetIdentifier") in
       make ?subnetStatus ?subnetAvailabilityZone ?subnetIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subnetStatus = field_map json "SubnetStatus" String_.of_json in
+    let of_json json__ =
+      let subnetStatus = field_map json__ "SubnetStatus" String_.of_json in
       let subnetAvailabilityZone =
-        field_map json "SubnetAvailabilityZone" AvailabilityZone.of_json in
+        field_map json__ "SubnetAvailabilityZone" AvailabilityZone.of_json in
       let subnetIdentifier =
-        field_map json "SubnetIdentifier" String_.of_json in
+        field_map json__ "SubnetIdentifier" String_.of_json in
       make ?subnetStatus ?subnetAvailabilityZone ?subnetIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a subnet."]
@@ -1537,13 +2176,13 @@ module EC2SecurityGroup =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
       make ?tags ?eC2SecurityGroupOwnerId ?eC2SecurityGroupName ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let eC2SecurityGroupOwnerId =
-        field_map json "EC2SecurityGroupOwnerId" String_.of_json in
+        field_map json__ "EC2SecurityGroupOwnerId" String_.of_json in
       let eC2SecurityGroupName =
-        field_map json "EC2SecurityGroupName" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
+        field_map json__ "EC2SecurityGroupName" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       make ?tags ?eC2SecurityGroupOwnerId ?eC2SecurityGroupName ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an Amazon EC2 security group."]
@@ -1575,10 +2214,10 @@ module IPRange =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
       make ?tags ?cIDRIP ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let cIDRIP = field_map json "CIDRIP" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let cIDRIP = field_map json__ "CIDRIP" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       make ?tags ?cIDRIP ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an IP range used in a security group."]
@@ -1618,12 +2257,12 @@ module RevisionTarget =
           (Xml.child xml_arg0 "DatabaseRevision") in
       make ?databaseRevisionReleaseDate ?description ?databaseRevision ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let databaseRevisionReleaseDate =
-        field_map json "DatabaseRevisionReleaseDate" TStamp.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map json__ "DatabaseRevisionReleaseDate" TStamp.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let databaseRevision =
-        field_map json "DatabaseRevision" String_.of_json in
+        field_map json__ "DatabaseRevision" String_.of_json in
       make ?databaseRevisionReleaseDate ?description ?databaseRevision ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a RevisionTarget."]
@@ -1644,8 +2283,8 @@ module AttributeValueTarget =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AttributeValue") in
       make ?attributeValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributeValue = field_map json "AttributeValue" String_.of_json in
+    let of_json json__ =
+      let attributeValue = field_map json__ "AttributeValue" String_.of_json in
       make ?attributeValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an attribute value."]
@@ -1771,6 +2410,7 @@ module UsageLimitFeatureType =
       | Spectrum 
       | Concurrency_scaling 
       | Cross_region_datasharing 
+      | Extra_compute_for_automatic_optimization 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1778,12 +2418,16 @@ module UsageLimitFeatureType =
       | Spectrum -> "spectrum"
       | Concurrency_scaling -> "concurrency-scaling"
       | Cross_region_datasharing -> "cross-region-datasharing"
+      | Extra_compute_for_automatic_optimization ->
+          "extra-compute-for-automatic-optimization"
       | Non_static_id s -> s
     let of_string =
       function
       | "spectrum" -> Spectrum
       | "concurrency-scaling" -> Concurrency_scaling
       | "cross-region-datasharing" -> Cross_region_datasharing
+      | "extra-compute-for-automatic-optimization" ->
+          Extra_compute_for_automatic_optimization
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1865,6 +2509,9 @@ module EligibleTracksToUpdateList =
   struct
     type nonrec t = UpdateTarget.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpdateTarget.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1926,6 +2573,9 @@ module AccountsWithRestoreAccessList =
   struct
     type nonrec t = AccountWithRestoreAccess.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountWithRestoreAccess.to_value)) |>
         (fun x -> `List x)
@@ -1952,6 +2602,9 @@ module RestorableNodeTypeList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2062,6 +2715,9 @@ module ScheduledActionTimeList =
   struct
     type nonrec t = TStamp.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TStamp.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2117,13 +2773,13 @@ module ScheduledActionType =
           (Xml.child xml_arg0 "ResizeCluster") in
       make ?resumeCluster ?pauseCluster ?resizeCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resumeCluster =
-        field_map json "ResumeCluster" ResumeClusterMessage.of_json in
+        field_map json__ "ResumeCluster" ResumeClusterMessage.of_json in
       let pauseCluster =
-        field_map json "PauseCluster" PauseClusterMessage.of_json in
+        field_map json__ "PauseCluster" PauseClusterMessage.of_json in
       let resizeCluster =
-        field_map json "ResizeCluster" ResizeClusterMessage.of_json in
+        field_map json__ "ResizeCluster" ResizeClusterMessage.of_json in
       make ?resumeCluster ?pauseCluster ?resizeCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2158,6 +2814,9 @@ module AvailabilityZoneList =
   struct
     type nonrec t = AvailabilityZone.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AvailabilityZone.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2202,6 +2861,419 @@ module Mode =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration Mode" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"Mode" j)
+    let to_json = simple_to_json to_value
+  end
+module ImpactRankingType =
+  struct
+    type nonrec t =
+      | HIGH 
+      | MEDIUM 
+      | LOW 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HIGH -> "HIGH"
+      | MEDIUM -> "MEDIUM"
+      | LOW -> "LOW"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HIGH" -> HIGH
+      | "MEDIUM" -> MEDIUM
+      | "LOW" -> LOW
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ImpactRankingType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImpactRankingType" j)
+    let to_json = simple_to_json to_value
+  end
+module RecommendedActionList =
+  struct
+    type nonrec t = RecommendedAction.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RecommendedAction.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RecommendedAction.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RecommendedActionList"
+        ~of_json:RecommendedAction.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ReferenceLinkList =
+  struct
+    type nonrec t = ReferenceLink.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ReferenceLink.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ReferenceLink.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReferenceLinkList" ~of_json:ReferenceLink.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Description =
+  struct
+    type nonrec t = string
+    let context_ = "Description"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Description" j
+    let to_json = simple_to_json to_value
+  end
+module EncryptionContextMap =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IntegrationAlreadyExistsFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The integration you are trying to create already exists."]
+module IntegrationArn =
+  struct
+    type nonrec t = string
+    let context_ = "IntegrationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws[a-z\\-]*:redshift:[a-z0-9\\-]*:[0-9]*:integration:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IntegrationArn" j
+    let to_json = simple_to_json to_value
+  end
+module IntegrationConflictOperationFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A conflicting conditional operation is currently in progress against this resource. This typically occurs when there are multiple requests being made to the same resource at the same time, and these requests conflict with each other."]
+module IntegrationConflictStateFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The integration is in an invalid state and can't perform the requested operation."]
+module IntegrationErrorList =
+  struct
+    type nonrec t = IntegrationError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:IntegrationError.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:IntegrationError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IntegrationErrorList"
+        ~of_json:IntegrationError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IntegrationName =
+  struct
+    type nonrec t = string
+    let context_ = "IntegrationName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z][a-zA-Z0-9]*(-[a-zA-Z0-9]+)*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IntegrationName" j
+    let to_json = simple_to_json to_value
+  end
+module IntegrationNotFoundFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The integration can't be found."]
+module IntegrationQuotaExceededFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You can't create any more zero-ETL or S3 event integrations because the quota has been reached."]
+module IntegrationSourceNotFoundFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified integration source can't be found."]
+module IntegrationTargetNotFoundFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified integration target can't be found."]
+module InvalidTagFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The tag is invalid."]
+module SourceArn =
+  struct
+    type nonrec t = string
+    let context_ = "SourceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws[a-z\\-]*:(s3|dynamodb):.*:.*:[a-zA-Z0-9._\\-\\/]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SourceArn" j
+    let to_json = simple_to_json to_value
+  end
+module TargetArn =
+  struct
+    type nonrec t = string
+    let context_ = "TargetArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws[a-z\\-]*:redshift(-serverless)?:[a-z0-9\\-]+:[0-9]{12}:(namespace\\/|namespace:)[a-z0-9\\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TargetArn" j
+    let to_json = simple_to_json to_value
+  end
+module ZeroETLIntegrationStatus =
+  struct
+    type nonrec t =
+      | Creating 
+      | Active 
+      | Modifying 
+      | Failed 
+      | Deleting 
+      | Syncing 
+      | Needs_attention 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Creating -> "creating"
+      | Active -> "active"
+      | Modifying -> "modifying"
+      | Failed -> "failed"
+      | Deleting -> "deleting"
+      | Syncing -> "syncing"
+      | Needs_attention -> "needs_attention"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "creating" -> Creating
+      | "active" -> Active
+      | "modifying" -> Modifying
+      | "failed" -> Failed
+      | "deleting" -> Deleting
+      | "syncing" -> Syncing
+      | "needs_attention" -> Needs_attention
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ZeroETLIntegrationStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ZeroETLIntegrationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module InboundIntegrationArn =
+  struct
+    type nonrec t = string
+    let context_ = "InboundIntegrationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws[a-z\\-]*:.+:[a-z0-9\\-]*:[0-9]*:integration:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InboundIntegrationArn" j
     let to_json = simple_to_json to_value
   end
 module ReservedNode =
@@ -2321,24 +3393,24 @@ module ReservedNode =
         ?nodeCount ?currencyCode ?usagePrice ?fixedPrice ?duration ?startTime
         ?nodeType ?reservedNodeOfferingId ?reservedNodeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reservedNodeOfferingType =
-        field_map json "ReservedNodeOfferingType"
+        field_map json__ "ReservedNodeOfferingType"
           ReservedNodeOfferingType.of_json in
       let recurringCharges =
-        field_map json "RecurringCharges" RecurringChargeList.of_json in
-      let offeringType = field_map json "OfferingType" String_.of_json in
-      let state = field_map json "State" String_.of_json in
-      let nodeCount = field_map json "NodeCount" Integer.of_json in
-      let currencyCode = field_map json "CurrencyCode" String_.of_json in
-      let usagePrice = field_map json "UsagePrice" Double.of_json in
-      let fixedPrice = field_map json "FixedPrice" Double.of_json in
-      let duration = field_map json "Duration" Integer.of_json in
-      let startTime = field_map json "StartTime" TStamp.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
+        field_map json__ "RecurringCharges" RecurringChargeList.of_json in
+      let offeringType = field_map json__ "OfferingType" String_.of_json in
+      let state = field_map json__ "State" String_.of_json in
+      let nodeCount = field_map json__ "NodeCount" Integer.of_json in
+      let currencyCode = field_map json__ "CurrencyCode" String_.of_json in
+      let usagePrice = field_map json__ "UsagePrice" Double.of_json in
+      let fixedPrice = field_map json__ "FixedPrice" Double.of_json in
+      let duration = field_map json__ "Duration" Integer.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
       let reservedNodeOfferingId =
-        field_map json "ReservedNodeOfferingId" String_.of_json in
-      let reservedNodeId = field_map json "ReservedNodeId" String_.of_json in
+        field_map json__ "ReservedNodeOfferingId" String_.of_json in
+      let reservedNodeId = field_map json__ "ReservedNodeId" String_.of_json in
       make ?reservedNodeOfferingType ?recurringCharges ?offeringType ?state
         ?nodeCount ?currencyCode ?usagePrice ?fixedPrice ?duration ?startTime
         ?nodeType ?reservedNodeOfferingId ?reservedNodeId ()
@@ -2434,20 +3506,20 @@ module ReservedNodeOffering =
         ?currencyCode ?usagePrice ?fixedPrice ?duration ?nodeType
         ?reservedNodeOfferingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reservedNodeOfferingType =
-        field_map json "ReservedNodeOfferingType"
+        field_map json__ "ReservedNodeOfferingType"
           ReservedNodeOfferingType.of_json in
       let recurringCharges =
-        field_map json "RecurringCharges" RecurringChargeList.of_json in
-      let offeringType = field_map json "OfferingType" String_.of_json in
-      let currencyCode = field_map json "CurrencyCode" String_.of_json in
-      let usagePrice = field_map json "UsagePrice" Double.of_json in
-      let fixedPrice = field_map json "FixedPrice" Double.of_json in
-      let duration = field_map json "Duration" Integer.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
+        field_map json__ "RecurringCharges" RecurringChargeList.of_json in
+      let offeringType = field_map json__ "OfferingType" String_.of_json in
+      let currencyCode = field_map json__ "CurrencyCode" String_.of_json in
+      let usagePrice = field_map json__ "UsagePrice" Double.of_json in
+      let fixedPrice = field_map json__ "FixedPrice" Double.of_json in
+      let duration = field_map json__ "Duration" Integer.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
       let reservedNodeOfferingId =
-        field_map json "ReservedNodeOfferingId" String_.of_json in
+        field_map json__ "ReservedNodeOfferingId" String_.of_json in
       make ?reservedNodeOfferingType ?recurringCharges ?offeringType
         ?currencyCode ?usagePrice ?fixedPrice ?duration ?nodeType
         ?reservedNodeOfferingId ()
@@ -2491,6 +3563,9 @@ module SourceIdsList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2515,6 +3590,9 @@ module EventInfoMapList =
   struct
     type nonrec t = EventInfoMap.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventInfoMap.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2651,6 +3729,9 @@ module VpcIdentifierList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2739,6 +3820,9 @@ module VpcSecurityGroupMembershipList =
   struct
     type nonrec t = VpcSecurityGroupMembership.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcSecurityGroupMembership.to_value)) |>
         (fun x -> `List x)
@@ -2765,6 +3849,9 @@ module AssociatedClusterList =
   struct
     type nonrec t = ClusterAssociatedToSchedule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterAssociatedToSchedule.to_value)) |>
         (fun x -> `List x)
@@ -2787,22 +3874,13 @@ module AssociatedClusterList =
         ~of_json:ClusterAssociatedToSchedule.of_json j
     let to_json v = composed_to_json to_value v
   end
-module InvalidTagFault =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The tag is invalid."]
 module ScheduleDefinitionList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2839,6 +3917,9 @@ module ScheduledSnapshotTimeList =
   struct
     type nonrec t = TStamp.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TStamp.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2940,6 +4021,9 @@ module ValueStringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2958,6 +4042,177 @@ module ValueStringList =
                      | _ -> true))) ~f:String_.of_xml)
     let of_json j =
       list_of_json ~kind:"ValueStringList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ApplicationType =
+  struct
+    type nonrec t =
+      | None 
+      | Lakehouse 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | None -> "None"
+      | Lakehouse -> "Lakehouse"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "None" -> None
+      | "Lakehouse" -> Lakehouse
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ApplicationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ApplicationType" j)
+    let to_json = simple_to_json to_value
+  end
+module AuthorizedTokenIssuerList =
+  struct
+    type nonrec t = AuthorizedTokenIssuer.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AuthorizedTokenIssuer.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AuthorizedTokenIssuer.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AuthorizedTokenIssuerList"
+        ~of_json:AuthorizedTokenIssuer.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IdcDisplayNameString =
+  struct
+    type nonrec t = string
+    let context_ = "IdcDisplayNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:127) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\w+=,.@-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdcDisplayNameString" j
+    let to_json = simple_to_json to_value
+  end
+module IdentityNamespaceString =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityNamespaceString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:127) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9_+.#@$-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityNamespaceString" j
+    let to_json = simple_to_json to_value
+  end
+module RedshiftIdcApplicationName =
+  struct
+    type nonrec t = string
+    let context_ = "RedshiftIdcApplicationName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[a-z][a-z0-9]*(-[a-z0-9]+)*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RedshiftIdcApplicationName" j
+    let to_json = simple_to_json to_value
+  end
+module ServiceIntegrationList =
+  struct
+    type nonrec t = ServiceIntegrationsUnion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceIntegrationsUnion.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceIntegrationsUnion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceIntegrationList"
+        ~of_json:ServiceIntegrationsUnion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagKeyList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TagKeyList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
 module PartnerIntegrationDatabaseName =
@@ -3122,6 +4377,68 @@ module OperatorType =
     let of_json j = of_string (string_of_json ~kind:"OperatorType" j)
     let to_json = simple_to_json to_value
   end
+module DescribeIntegrationsFilterName =
+  struct
+    type nonrec t =
+      | Integration_arn 
+      | Source_arn 
+      | Source_types 
+      | Status 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Integration_arn -> "integration-arn"
+      | Source_arn -> "source-arn"
+      | Source_types -> "source-types"
+      | Status -> "status"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "integration-arn" -> Integration_arn
+      | "source-arn" -> Source_arn
+      | "source-types" -> Source_types
+      | "status" -> Status
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DescribeIntegrationsFilterName"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DescribeIntegrationsFilterName" j)
+    let to_json = simple_to_json to_value
+  end
+module DescribeIntegrationsFilterValueList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DescribeIntegrationsFilterValueList"
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Parameter =
   struct
     type nonrec t =
@@ -3208,17 +4525,17 @@ module Parameter =
       make ?minimumEngineVersion ?isModifiable ?applyType ?allowedValues
         ?dataType ?source ?description ?parameterValue ?parameterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let minimumEngineVersion =
-        field_map json "MinimumEngineVersion" String_.of_json in
-      let isModifiable = field_map json "IsModifiable" Boolean.of_json in
-      let applyType = field_map json "ApplyType" ParameterApplyType.of_json in
-      let allowedValues = field_map json "AllowedValues" String_.of_json in
-      let dataType = field_map json "DataType" String_.of_json in
-      let source = field_map json "Source" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let parameterValue = field_map json "ParameterValue" String_.of_json in
-      let parameterName = field_map json "ParameterName" String_.of_json in
+        field_map json__ "MinimumEngineVersion" String_.of_json in
+      let isModifiable = field_map json__ "IsModifiable" Boolean.of_json in
+      let applyType = field_map json__ "ApplyType" ParameterApplyType.of_json in
+      let allowedValues = field_map json__ "AllowedValues" String_.of_json in
+      let dataType = field_map json__ "DataType" String_.of_json in
+      let source = field_map json__ "Source" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let parameterValue = field_map json__ "ParameterValue" String_.of_json in
+      let parameterName = field_map json__ "ParameterName" String_.of_json in
       make ?minimumEngineVersion ?isModifiable ?applyType ?allowedValues
         ?dataType ?source ?description ?parameterValue ?parameterName ()
     let to_json v = composed_to_json to_value v
@@ -3227,6 +4544,9 @@ module DataShareAssociationList =
   struct
     type nonrec t = DataShareAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataShareAssociation.to_value)) |>
         (fun x -> `List x)
@@ -3248,6 +4568,22 @@ module DataShareAssociationList =
       list_of_json ~kind:"DataShareAssociationList"
         ~of_json:DataShareAssociation.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module DataShareType =
+  struct
+    type nonrec t =
+      | INTERNAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | INTERNAL -> "INTERNAL" | Non_static_id s -> s
+    let of_string = function | "INTERNAL" -> INTERNAL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DataShareType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DataShareType" j)
+    let to_json = simple_to_json to_value
   end
 module InvalidDataShareFault =
   struct
@@ -3341,16 +4677,45 @@ module AuthenticationProfileNameString =
     let of_json j = string_of_json ~kind:"AuthenticationProfileNameString" j
     let to_json = simple_to_json to_value
   end
+module CertificateAssociationList =
+  struct
+    type nonrec t = CertificateAssociation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CertificateAssociation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CertificateAssociation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CertificateAssociationList"
+        ~of_json:CertificateAssociation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AquaConfiguration =
   struct
     type nonrec t =
       {
       aquaStatus: AquaStatus.t option
         [@ocaml.doc
-          "The value indicates the status of AQUA on the cluster. Possible values include the following. enabled - AQUA is enabled. disabled - AQUA is not enabled. applying - AQUA status is being applied."];
+          "This field is retired. Amazon Redshift automatically determines whether to use AQUA (Advanced Query Accelerator)."];
       aquaConfigurationStatus: AquaConfigurationStatus.t option
         [@ocaml.doc
-          "The value represents how the cluster is configured to use AQUA. Possible values include the following. enabled - Use AQUA if it is available for the current Amazon Web Services Region and Amazon Redshift node type. disabled - Don't use AQUA. auto - Amazon Redshift determines whether to use AQUA."]}
+          "This field is retired. Amazon Redshift automatically determines whether to use AQUA (Advanced Query Accelerator)."]}
     let make ?aquaStatus =
       fun ?aquaConfigurationStatus ->
         fun () -> { aquaStatus; aquaConfigurationStatus }
@@ -3369,19 +4734,22 @@ module AquaConfiguration =
         (Option.map ~f:AquaStatus.of_xml) (Xml.child xml_arg0 "AquaStatus") in
       make ?aquaConfigurationStatus ?aquaStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let aquaConfigurationStatus =
-        field_map json "AquaConfigurationStatus"
+        field_map json__ "AquaConfigurationStatus"
           AquaConfigurationStatus.of_json in
-      let aquaStatus = field_map json "AquaStatus" AquaStatus.of_json in
+      let aquaStatus = field_map json__ "AquaStatus" AquaStatus.of_json in
       make ?aquaConfigurationStatus ?aquaStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The AQUA (Advanced Query Accelerator) configuration of the cluster."]
+       "The operation that uses this structure is retired. Amazon Redshift automatically determines whether to use AQUA (Advanced Query Accelerator)."]
 module ClusterIamRoleList =
   struct
     type nonrec t = ClusterIamRole.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterIamRole.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3403,34 +4771,13 @@ module ClusterIamRoleList =
         j
     let to_json v = composed_to_json to_value v
   end
-module ClusterNodesList =
-  struct
-    type nonrec t = ClusterNode.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:ClusterNode.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ClusterNode.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ClusterNodesList" ~of_json:ClusterNode.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module ClusterParameterGroupStatusList =
   struct
     type nonrec t = ClusterParameterGroupStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterParameterGroupStatus.to_value)) |>
         (fun x -> `List x)
@@ -3457,6 +4804,9 @@ module ClusterSecurityGroupMembershipList =
   struct
     type nonrec t = ClusterSecurityGroupMembership.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterSecurityGroupMembership.to_value)) |>
         (fun x -> `List x)
@@ -3530,14 +4880,14 @@ module ClusterSnapshotCopyStatus =
       make ?snapshotCopyGrantName ?manualSnapshotRetentionPeriod
         ?retentionPeriod ?destinationRegion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotCopyGrantName =
-        field_map json "SnapshotCopyGrantName" String_.of_json in
+        field_map json__ "SnapshotCopyGrantName" String_.of_json in
       let manualSnapshotRetentionPeriod =
-        field_map json "ManualSnapshotRetentionPeriod" Integer.of_json in
-      let retentionPeriod = field_map json "RetentionPeriod" Long.of_json in
+        field_map json__ "ManualSnapshotRetentionPeriod" Integer.of_json in
+      let retentionPeriod = field_map json__ "RetentionPeriod" Long.of_json in
       let destinationRegion =
-        field_map json "DestinationRegion" String_.of_json in
+        field_map json__ "DestinationRegion" String_.of_json in
       make ?snapshotCopyGrantName ?manualSnapshotRetentionPeriod
         ?retentionPeriod ?destinationRegion ()
     let to_json v = composed_to_json to_value v
@@ -3617,20 +4967,20 @@ module DataTransferProgress =
         ?dataTransferredInMegaBytes ?totalDataInMegaBytes
         ?currentRateInMegaBytesPerSecond ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let elapsedTimeInSeconds =
-        field_map json "ElapsedTimeInSeconds" LongOptional.of_json in
+        field_map json__ "ElapsedTimeInSeconds" LongOptional.of_json in
       let estimatedTimeToCompletionInSeconds =
-        field_map json "EstimatedTimeToCompletionInSeconds"
+        field_map json__ "EstimatedTimeToCompletionInSeconds"
           LongOptional.of_json in
       let dataTransferredInMegaBytes =
-        field_map json "DataTransferredInMegaBytes" Long.of_json in
+        field_map json__ "DataTransferredInMegaBytes" Long.of_json in
       let totalDataInMegaBytes =
-        field_map json "TotalDataInMegaBytes" Long.of_json in
+        field_map json__ "TotalDataInMegaBytes" Long.of_json in
       let currentRateInMegaBytesPerSecond =
-        field_map json "CurrentRateInMegaBytesPerSecond"
+        field_map json__ "CurrentRateInMegaBytesPerSecond"
           DoubleOptional.of_json in
-      let status = field_map json "Status" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       make ?elapsedTimeInSeconds ?estimatedTimeToCompletionInSeconds
         ?dataTransferredInMegaBytes ?totalDataInMegaBytes
         ?currentRateInMegaBytesPerSecond ?status ()
@@ -3641,6 +4991,9 @@ module DeferredMaintenanceWindowsList =
   struct
     type nonrec t = DeferredMaintenanceWindow.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeferredMaintenanceWindow.to_value)) |>
         (fun x -> `List x)
@@ -3684,9 +5037,9 @@ module ElasticIpStatus =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ElasticIp") in
       make ?status ?elasticIp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
-      let elasticIp = field_map json "ElasticIp" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
+      let elasticIp = field_map json__ "ElasticIp" String_.of_json in
       make ?status ?elasticIp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the status of the elastic IP (EIP) address."]
@@ -3719,11 +5072,11 @@ module Endpoint =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Address") in
       make ?vpcEndpoints ?port ?address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vpcEndpoints =
-        field_map json "VpcEndpoints" VpcEndpointsList.of_json in
-      let port = field_map json "Port" Integer.of_json in
-      let address = field_map json "Address" String_.of_json in
+        field_map json__ "VpcEndpoints" VpcEndpointsList.of_json in
+      let port = field_map json__ "Port" Integer.of_json in
+      let address = field_map json__ "Address" String_.of_json in
       make ?vpcEndpoints ?port ?address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a connection endpoint."]
@@ -3769,12 +5122,12 @@ module HsmStatus =
       make ?status ?hsmConfigurationIdentifier
         ?hsmClientCertificateIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
       let hsmConfigurationIdentifier =
-        field_map json "HsmConfigurationIdentifier" String_.of_json in
+        field_map json__ "HsmConfigurationIdentifier" String_.of_json in
       let hsmClientCertificateIdentifier =
-        field_map json "HsmClientCertificateIdentifier" String_.of_json in
+        field_map json__ "HsmClientCertificateIdentifier" String_.of_json in
       make ?status ?hsmConfigurationIdentifier
         ?hsmClientCertificateIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -3783,6 +5136,9 @@ module PendingActionsList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3807,7 +5163,7 @@ module PendingModifiedValues =
   struct
     type nonrec t =
       {
-      masterUserPassword: String_.t option
+      masterUserPassword: SensitiveString.t option
         [@ocaml.doc
           "The pending or in-progress change of the admin user password for the cluster."];
       nodeType: String_.t option
@@ -3867,7 +5223,7 @@ module PendingModifiedValues =
     let to_value x =
       structure_to_value
         [("MasterUserPassword",
-           (Option.map x.masterUserPassword ~f:String_.to_value));
+           (Option.map x.masterUserPassword ~f:SensitiveString.to_value));
         ("NodeType", (Option.map x.nodeType ~f:String_.to_value));
         ("NumberOfNodes",
           (Option.map x.numberOfNodes ~f:IntegerOptional.to_value));
@@ -3914,33 +5270,33 @@ module PendingModifiedValues =
       let nodeType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeType") in
       let masterUserPassword =
-        (Option.map ~f:String_.of_xml)
+        (Option.map ~f:SensitiveString.of_xml)
           (Xml.child xml_arg0 "MasterUserPassword") in
       make ?encryptionType ?maintenanceTrackName ?enhancedVpcRouting
         ?publiclyAccessible ?clusterIdentifier
         ?automatedSnapshotRetentionPeriod ?clusterVersion ?clusterType
         ?numberOfNodes ?nodeType ?masterUserPassword ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let encryptionType = field_map json "EncryptionType" String_.of_json in
+    let of_json json__ =
+      let encryptionType = field_map json__ "EncryptionType" String_.of_json in
       let maintenanceTrackName =
-        field_map json "MaintenanceTrackName" String_.of_json in
+        field_map json__ "MaintenanceTrackName" String_.of_json in
       let enhancedVpcRouting =
-        field_map json "EnhancedVpcRouting" BooleanOptional.of_json in
+        field_map json__ "EnhancedVpcRouting" BooleanOptional.of_json in
       let publiclyAccessible =
-        field_map json "PubliclyAccessible" BooleanOptional.of_json in
+        field_map json__ "PubliclyAccessible" BooleanOptional.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       let automatedSnapshotRetentionPeriod =
-        field_map json "AutomatedSnapshotRetentionPeriod"
+        field_map json__ "AutomatedSnapshotRetentionPeriod"
           IntegerOptional.of_json in
-      let clusterVersion = field_map json "ClusterVersion" String_.of_json in
-      let clusterType = field_map json "ClusterType" String_.of_json in
+      let clusterVersion = field_map json__ "ClusterVersion" String_.of_json in
+      let clusterType = field_map json__ "ClusterType" String_.of_json in
       let numberOfNodes =
-        field_map json "NumberOfNodes" IntegerOptional.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
+        field_map json__ "NumberOfNodes" IntegerOptional.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
       let masterUserPassword =
-        field_map json "MasterUserPassword" String_.of_json in
+        field_map json__ "MasterUserPassword" SensitiveString.of_json in
       make ?encryptionType ?maintenanceTrackName ?enhancedVpcRouting
         ?publiclyAccessible ?clusterIdentifier
         ?automatedSnapshotRetentionPeriod ?clusterVersion ?clusterType
@@ -3963,7 +5319,8 @@ module ReservedNodeExchangeStatus =
       sourceReservedNodeId: String_.t option
         [@ocaml.doc "The identifier of the source reserved node."];
       sourceReservedNodeType: String_.t option
-        [@ocaml.doc "The source reserved-node type, for example ds2.xlarge."];
+        [@ocaml.doc
+          "The source reserved-node type, for example ra3.4xlarge."];
       sourceReservedNodeCount: Integer.t option
         [@ocaml.doc "The source reserved-node count in the cluster."];
       targetReservedNodeOfferingId: String_.t option
@@ -4046,24 +5403,24 @@ module ReservedNodeExchangeStatus =
         ?sourceReservedNodeType ?sourceReservedNodeId ?requestTime ?status
         ?reservedNodeExchangeRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetReservedNodeCount =
-        field_map json "TargetReservedNodeCount" Integer.of_json in
+        field_map json__ "TargetReservedNodeCount" Integer.of_json in
       let targetReservedNodeType =
-        field_map json "TargetReservedNodeType" String_.of_json in
+        field_map json__ "TargetReservedNodeType" String_.of_json in
       let targetReservedNodeOfferingId =
-        field_map json "TargetReservedNodeOfferingId" String_.of_json in
+        field_map json__ "TargetReservedNodeOfferingId" String_.of_json in
       let sourceReservedNodeCount =
-        field_map json "SourceReservedNodeCount" Integer.of_json in
+        field_map json__ "SourceReservedNodeCount" Integer.of_json in
       let sourceReservedNodeType =
-        field_map json "SourceReservedNodeType" String_.of_json in
+        field_map json__ "SourceReservedNodeType" String_.of_json in
       let sourceReservedNodeId =
-        field_map json "SourceReservedNodeId" String_.of_json in
-      let requestTime = field_map json "RequestTime" TStamp.of_json in
+        field_map json__ "SourceReservedNodeId" String_.of_json in
+      let requestTime = field_map json__ "RequestTime" TStamp.of_json in
       let status =
-        field_map json "Status" ReservedNodeExchangeStatusType.of_json in
+        field_map json__ "Status" ReservedNodeExchangeStatusType.of_json in
       let reservedNodeExchangeRequestId =
-        field_map json "ReservedNodeExchangeRequestId" String_.of_json in
+        field_map json__ "ReservedNodeExchangeRequestId" String_.of_json in
       make ?targetReservedNodeCount ?targetReservedNodeType
         ?targetReservedNodeOfferingId ?sourceReservedNodeCount
         ?sourceReservedNodeType ?sourceReservedNodeId ?requestTime ?status
@@ -4096,10 +5453,10 @@ module ResizeInfo =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResizeType") in
       make ?allowCancelResize ?resizeType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowCancelResize =
-        field_map json "AllowCancelResize" Boolean.of_json in
-      let resizeType = field_map json "ResizeType" String_.of_json in
+        field_map json__ "AllowCancelResize" Boolean.of_json in
+      let resizeType = field_map json__ "ResizeType" String_.of_json in
       make ?allowCancelResize ?resizeType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a resize operation."]
@@ -4112,19 +5469,19 @@ module RestoreStatus =
           "The status of the restore action. Returns starting, restoring, completed, or failed."];
       currentRestoreRateInMegaBytesPerSecond: Double.t option
         [@ocaml.doc
-          "The number of megabytes per second being transferred from the backup storage. Returns the average rate for a completed backup. This field is only updated when you restore to DC2 and DS2 node types."];
+          "The number of megabytes per second being transferred from the backup storage. Returns the average rate for a completed backup. This field is only updated when you restore to DC2 node types."];
       snapshotSizeInMegaBytes: Long.t option
         [@ocaml.doc
-          "The size of the set of snapshot data used to restore the cluster. This field is only updated when you restore to DC2 and DS2 node types."];
+          "The size of the set of snapshot data used to restore the cluster. This field is only updated when you restore to DC2 node types."];
       progressInMegaBytes: Long.t option
         [@ocaml.doc
-          "The number of megabytes that have been transferred from snapshot storage. This field is only updated when you restore to DC2 and DS2 node types."];
+          "The number of megabytes that have been transferred from snapshot storage. This field is only updated when you restore to DC2 node types."];
       elapsedTimeInSeconds: Long.t option
         [@ocaml.doc
-          "The amount of time an in-progress restore has been running, or the amount of time it took a completed restore to finish. This field is only updated when you restore to DC2 and DS2 node types."];
+          "The amount of time an in-progress restore has been running, or the amount of time it took a completed restore to finish. This field is only updated when you restore to DC2 node types."];
       estimatedTimeToCompletionInSeconds: Long.t option
         [@ocaml.doc
-          "The estimate of the time remaining before the restore will complete. Returns 0 for a completed restore. This field is only updated when you restore to DC2 and DS2 node types."]}
+          "The estimate of the time remaining before the restore will complete. Returns 0 for a completed restore. This field is only updated when you restore to DC2 node types."]}
     let make ?status =
       fun ?currentRestoreRateInMegaBytesPerSecond ->
         fun ?snapshotSizeInMegaBytes ->
@@ -4177,29 +5534,68 @@ module RestoreStatus =
         ?progressInMegaBytes ?snapshotSizeInMegaBytes
         ?currentRestoreRateInMegaBytesPerSecond ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let estimatedTimeToCompletionInSeconds =
-        field_map json "EstimatedTimeToCompletionInSeconds" Long.of_json in
+        field_map json__ "EstimatedTimeToCompletionInSeconds" Long.of_json in
       let elapsedTimeInSeconds =
-        field_map json "ElapsedTimeInSeconds" Long.of_json in
+        field_map json__ "ElapsedTimeInSeconds" Long.of_json in
       let progressInMegaBytes =
-        field_map json "ProgressInMegaBytes" Long.of_json in
+        field_map json__ "ProgressInMegaBytes" Long.of_json in
       let snapshotSizeInMegaBytes =
-        field_map json "SnapshotSizeInMegaBytes" Long.of_json in
+        field_map json__ "SnapshotSizeInMegaBytes" Long.of_json in
       let currentRestoreRateInMegaBytesPerSecond =
-        field_map json "CurrentRestoreRateInMegaBytesPerSecond"
+        field_map json__ "CurrentRestoreRateInMegaBytesPerSecond"
           Double.of_json in
-      let status = field_map json "Status" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       make ?estimatedTimeToCompletionInSeconds ?elapsedTimeInSeconds
         ?progressInMegaBytes ?snapshotSizeInMegaBytes
         ?currentRestoreRateInMegaBytesPerSecond ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the status of a cluster restore action. Returns null if the cluster was not created by restoring a snapshot."]
+module SecondaryClusterInfo =
+  struct
+    type nonrec t =
+      {
+      availabilityZone: String_.t option
+        [@ocaml.doc
+          "The name of the Availability Zone in which the secondary compute unit of the cluster is located."];
+      clusterNodes: ClusterNodesList.t option
+        [@ocaml.doc "The nodes in the secondary compute unit."]}
+    let make ?availabilityZone =
+      fun ?clusterNodes -> fun () -> { availabilityZone; clusterNodes }
+    let to_value x =
+      structure_to_value
+        [("AvailabilityZone",
+           (Option.map x.availabilityZone ~f:String_.to_value));
+        ("ClusterNodes",
+          (Option.map x.clusterNodes ~f:ClusterNodesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clusterNodes =
+        (Option.map ~f:ClusterNodesList.of_xml)
+          (Xml.child xml_arg0 "ClusterNodes") in
+      let availabilityZone =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "AvailabilityZone") in
+      make ?clusterNodes ?availabilityZone ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clusterNodes =
+        field_map json__ "ClusterNodes" ClusterNodesList.of_json in
+      let availabilityZone =
+        field_map json__ "AvailabilityZone" String_.of_json in
+      make ?clusterNodes ?availabilityZone ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The AvailabilityZone and ClusterNodes information of the secondary compute unit."]
 module SubnetList =
   struct
     type nonrec t = Subnet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Subnet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4223,6 +5619,9 @@ module EC2SecurityGroupList =
   struct
     type nonrec t = EC2SecurityGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EC2SecurityGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4248,6 +5647,9 @@ module IPRangeList =
   struct
     type nonrec t = IPRange.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IPRange.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4272,6 +5674,9 @@ module RevisionTargetsList =
   struct
     type nonrec t = RevisionTarget.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RevisionTarget.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4297,6 +5702,9 @@ module AttributeValueList =
   struct
     type nonrec t = AttributeValueTarget.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeValueTarget.to_value)) |>
         (fun x -> `List x)
@@ -4496,18 +5904,19 @@ module UsageLimit =
       make ?tags ?breachAction ?period ?amount ?limitType ?featureType
         ?clusterIdentifier ?usageLimitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let breachAction =
-        field_map json "BreachAction" UsageLimitBreachAction.of_json in
-      let period = field_map json "Period" UsageLimitPeriod.of_json in
-      let amount = field_map json "Amount" Long.of_json in
-      let limitType = field_map json "LimitType" UsageLimitLimitType.of_json in
+        field_map json__ "BreachAction" UsageLimitBreachAction.of_json in
+      let period = field_map json__ "Period" UsageLimitPeriod.of_json in
+      let amount = field_map json__ "Amount" Long.of_json in
+      let limitType =
+        field_map json__ "LimitType" UsageLimitLimitType.of_json in
       let featureType =
-        field_map json "FeatureType" UsageLimitFeatureType.of_json in
+        field_map json__ "FeatureType" UsageLimitFeatureType.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
-      let usageLimitId = field_map json "UsageLimitId" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      let usageLimitId = field_map json__ "UsageLimitId" String_.of_json in
       make ?tags ?breachAction ?period ?amount ?limitType ?featureType
         ?clusterIdentifier ?usageLimitId ()
     let to_json v = composed_to_json to_value v
@@ -4548,12 +5957,13 @@ module MaintenanceTrack =
           (Xml.child xml_arg0 "MaintenanceTrackName") in
       make ?updateTargets ?databaseVersion ?maintenanceTrackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updateTargets =
-        field_map json "UpdateTargets" EligibleTracksToUpdateList.of_json in
-      let databaseVersion = field_map json "DatabaseVersion" String_.of_json in
+        field_map json__ "UpdateTargets" EligibleTracksToUpdateList.of_json in
+      let databaseVersion =
+        field_map json__ "DatabaseVersion" String_.of_json in
       let maintenanceTrackName =
-        field_map json "MaintenanceTrackName" String_.of_json in
+        field_map json__ "MaintenanceTrackName" String_.of_json in
       make ?updateTargets ?databaseVersion ?maintenanceTrackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4586,10 +5996,10 @@ module TaggedResource =
       let tag = (Option.map ~f:Tag.of_xml) (Xml.child xml_arg0 "Tag") in
       make ?resourceType ?resourceName ?tag ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" String_.of_json in
-      let resourceName = field_map json "ResourceName" String_.of_json in
-      let tag = field_map json "Tag" Tag.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let resourceName = field_map json__ "ResourceName" String_.of_json in
+      let tag = field_map json__ "Tag" Tag.of_json in
       make ?resourceType ?resourceName ?tag ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A tag and its associated resource."]
@@ -4738,30 +6148,31 @@ module TableRestoreStatus =
         ?progressInMegaBytes ?requestTime ?message ?status
         ?tableRestoreRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let newTableName = field_map json "NewTableName" String_.of_json in
+    let of_json json__ =
+      let newTableName = field_map json__ "NewTableName" String_.of_json in
       let targetSchemaName =
-        field_map json "TargetSchemaName" String_.of_json in
+        field_map json__ "TargetSchemaName" String_.of_json in
       let targetDatabaseName =
-        field_map json "TargetDatabaseName" String_.of_json in
-      let sourceTableName = field_map json "SourceTableName" String_.of_json in
+        field_map json__ "TargetDatabaseName" String_.of_json in
+      let sourceTableName =
+        field_map json__ "SourceTableName" String_.of_json in
       let sourceSchemaName =
-        field_map json "SourceSchemaName" String_.of_json in
+        field_map json__ "SourceSchemaName" String_.of_json in
       let sourceDatabaseName =
-        field_map json "SourceDatabaseName" String_.of_json in
+        field_map json__ "SourceDatabaseName" String_.of_json in
       let snapshotIdentifier =
-        field_map json "SnapshotIdentifier" String_.of_json in
+        field_map json__ "SnapshotIdentifier" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       let totalDataInMegaBytes =
-        field_map json "TotalDataInMegaBytes" LongOptional.of_json in
+        field_map json__ "TotalDataInMegaBytes" LongOptional.of_json in
       let progressInMegaBytes =
-        field_map json "ProgressInMegaBytes" LongOptional.of_json in
-      let requestTime = field_map json "RequestTime" TStamp.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let status = field_map json "Status" TableRestoreStatusType.of_json in
+        field_map json__ "ProgressInMegaBytes" LongOptional.of_json in
+      let requestTime = field_map json__ "RequestTime" TStamp.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let status = field_map json__ "Status" TableRestoreStatusType.of_json in
       let tableRestoreRequestId =
-        field_map json "TableRestoreRequestId" String_.of_json in
+        field_map json__ "TableRestoreRequestId" String_.of_json in
       make ?newTableName ?targetSchemaName ?targetDatabaseName
         ?sourceTableName ?sourceSchemaName ?sourceDatabaseName
         ?snapshotIdentifier ?clusterIdentifier ?totalDataInMegaBytes
@@ -4867,7 +6278,15 @@ module Snapshot =
           "The number of days until a manual snapshot will pass its retention period."];
       snapshotRetentionStartTime: TStamp.t option
         [@ocaml.doc
-          "A timestamp representing the start of the retention period for the snapshot."]}
+          "A timestamp representing the start of the retention period for the snapshot."];
+      masterPasswordSecretArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the cluster's admin user credentials secret."];
+      masterPasswordSecretKmsKeyId: String_.t option
+        [@ocaml.doc
+          "The ID of the Key Management Service (KMS) key used to encrypt and store the cluster's admin credentials secret."];
+      snapshotArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the snapshot."]}
     let make ?snapshotIdentifier =
       fun ?clusterIdentifier ->
         fun ?snapshotCreateTime ->
@@ -4925,6 +6344,15 @@ module Snapshot =
                                                                     fun
                                                                     ?snapshotRetentionStartTime
                                                                     ->
+                                                                    fun
+                                                                    ?masterPasswordSecretArn
+                                                                    ->
+                                                                    fun
+                                                                    ?masterPasswordSecretKmsKeyId
+                                                                    ->
+                                                                    fun
+                                                                    ?snapshotArn
+                                                                    ->
                                                                     fun () ->
                                                                     {
                                                                     snapshotIdentifier;
@@ -4960,7 +6388,10 @@ module Snapshot =
                                                                     maintenanceTrackName;
                                                                     manualSnapshotRetentionPeriod;
                                                                     manualSnapshotRemainingDays;
-                                                                    snapshotRetentionStartTime
+                                                                    snapshotRetentionStartTime;
+                                                                    masterPasswordSecretArn;
+                                                                    masterPasswordSecretKmsKeyId;
+                                                                    snapshotArn
                                                                     }
     let to_value x =
       structure_to_value
@@ -5023,9 +6454,22 @@ module Snapshot =
           (Option.map x.manualSnapshotRemainingDays
              ~f:IntegerOptional.to_value));
         ("SnapshotRetentionStartTime",
-          (Option.map x.snapshotRetentionStartTime ~f:TStamp.to_value))]
+          (Option.map x.snapshotRetentionStartTime ~f:TStamp.to_value));
+        ("MasterPasswordSecretArn",
+          (Option.map x.masterPasswordSecretArn ~f:String_.to_value));
+        ("MasterPasswordSecretKmsKeyId",
+          (Option.map x.masterPasswordSecretKmsKeyId ~f:String_.to_value));
+        ("SnapshotArn", (Option.map x.snapshotArn ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let snapshotArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SnapshotArn") in
+      let masterPasswordSecretKmsKeyId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MasterPasswordSecretKmsKeyId") in
+      let masterPasswordSecretArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MasterPasswordSecretArn") in
       let snapshotRetentionStartTime =
         (Option.map ~f:TStamp.of_xml)
           (Xml.child xml_arg0 "SnapshotRetentionStartTime") in
@@ -5111,10 +6555,11 @@ module Snapshot =
       let snapshotIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SnapshotIdentifier") in
-      make ?snapshotRetentionStartTime ?manualSnapshotRemainingDays
-        ?manualSnapshotRetentionPeriod ?maintenanceTrackName
-        ?enhancedVpcRouting ?restorableNodeTypes ?tags ?sourceRegion
-        ?elapsedTimeInSeconds ?estimatedSecondsToCompletion
+      make ?snapshotArn ?masterPasswordSecretKmsKeyId
+        ?masterPasswordSecretArn ?snapshotRetentionStartTime
+        ?manualSnapshotRemainingDays ?manualSnapshotRetentionPeriod
+        ?maintenanceTrackName ?enhancedVpcRouting ?restorableNodeTypes ?tags
+        ?sourceRegion ?elapsedTimeInSeconds ?estimatedSecondsToCompletion
         ?currentBackupRateInMegaBytesPerSecond ?backupProgressInMegaBytes
         ?actualIncrementalBackupSizeInMegaBytes ?totalBackupSizeInMegaBytes
         ?ownerAccount ?accountsWithRestoreAccess ?encryptedWithHSM ?kmsKeyId
@@ -5123,68 +6568,76 @@ module Snapshot =
         ?availabilityZone ?port ?status ?snapshotCreateTime
         ?clusterIdentifier ?snapshotIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let snapshotArn = field_map json__ "SnapshotArn" String_.of_json in
+      let masterPasswordSecretKmsKeyId =
+        field_map json__ "MasterPasswordSecretKmsKeyId" String_.of_json in
+      let masterPasswordSecretArn =
+        field_map json__ "MasterPasswordSecretArn" String_.of_json in
       let snapshotRetentionStartTime =
-        field_map json "SnapshotRetentionStartTime" TStamp.of_json in
+        field_map json__ "SnapshotRetentionStartTime" TStamp.of_json in
       let manualSnapshotRemainingDays =
-        field_map json "ManualSnapshotRemainingDays" IntegerOptional.of_json in
+        field_map json__ "ManualSnapshotRemainingDays"
+          IntegerOptional.of_json in
       let manualSnapshotRetentionPeriod =
-        field_map json "ManualSnapshotRetentionPeriod"
+        field_map json__ "ManualSnapshotRetentionPeriod"
           IntegerOptional.of_json in
       let maintenanceTrackName =
-        field_map json "MaintenanceTrackName" String_.of_json in
+        field_map json__ "MaintenanceTrackName" String_.of_json in
       let enhancedVpcRouting =
-        field_map json "EnhancedVpcRouting" Boolean.of_json in
+        field_map json__ "EnhancedVpcRouting" Boolean.of_json in
       let restorableNodeTypes =
-        field_map json "RestorableNodeTypes" RestorableNodeTypeList.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let sourceRegion = field_map json "SourceRegion" String_.of_json in
+        field_map json__ "RestorableNodeTypes" RestorableNodeTypeList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let sourceRegion = field_map json__ "SourceRegion" String_.of_json in
       let elapsedTimeInSeconds =
-        field_map json "ElapsedTimeInSeconds" Long.of_json in
+        field_map json__ "ElapsedTimeInSeconds" Long.of_json in
       let estimatedSecondsToCompletion =
-        field_map json "EstimatedSecondsToCompletion" Long.of_json in
+        field_map json__ "EstimatedSecondsToCompletion" Long.of_json in
       let currentBackupRateInMegaBytesPerSecond =
-        field_map json "CurrentBackupRateInMegaBytesPerSecond" Double.of_json in
+        field_map json__ "CurrentBackupRateInMegaBytesPerSecond"
+          Double.of_json in
       let backupProgressInMegaBytes =
-        field_map json "BackupProgressInMegaBytes" Double.of_json in
+        field_map json__ "BackupProgressInMegaBytes" Double.of_json in
       let actualIncrementalBackupSizeInMegaBytes =
-        field_map json "ActualIncrementalBackupSizeInMegaBytes"
+        field_map json__ "ActualIncrementalBackupSizeInMegaBytes"
           Double.of_json in
       let totalBackupSizeInMegaBytes =
-        field_map json "TotalBackupSizeInMegaBytes" Double.of_json in
-      let ownerAccount = field_map json "OwnerAccount" String_.of_json in
+        field_map json__ "TotalBackupSizeInMegaBytes" Double.of_json in
+      let ownerAccount = field_map json__ "OwnerAccount" String_.of_json in
       let accountsWithRestoreAccess =
-        field_map json "AccountsWithRestoreAccess"
+        field_map json__ "AccountsWithRestoreAccess"
           AccountsWithRestoreAccessList.of_json in
       let encryptedWithHSM =
-        field_map json "EncryptedWithHSM" Boolean.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let encrypted = field_map json "Encrypted" Boolean.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let dBName = field_map json "DBName" String_.of_json in
-      let numberOfNodes = field_map json "NumberOfNodes" Integer.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
-      let snapshotType = field_map json "SnapshotType" String_.of_json in
+        field_map json__ "EncryptedWithHSM" Boolean.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let encrypted = field_map json__ "Encrypted" Boolean.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
+      let dBName = field_map json__ "DBName" String_.of_json in
+      let numberOfNodes = field_map json__ "NumberOfNodes" Integer.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let snapshotType = field_map json__ "SnapshotType" String_.of_json in
       let engineFullVersion =
-        field_map json "EngineFullVersion" String_.of_json in
-      let clusterVersion = field_map json "ClusterVersion" String_.of_json in
-      let masterUsername = field_map json "MasterUsername" String_.of_json in
+        field_map json__ "EngineFullVersion" String_.of_json in
+      let clusterVersion = field_map json__ "ClusterVersion" String_.of_json in
+      let masterUsername = field_map json__ "MasterUsername" String_.of_json in
       let clusterCreateTime =
-        field_map json "ClusterCreateTime" TStamp.of_json in
+        field_map json__ "ClusterCreateTime" TStamp.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
-      let port = field_map json "Port" Integer.of_json in
-      let status = field_map json "Status" String_.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
+      let port = field_map json__ "Port" Integer.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       let snapshotCreateTime =
-        field_map json "SnapshotCreateTime" TStamp.of_json in
+        field_map json__ "SnapshotCreateTime" TStamp.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       let snapshotIdentifier =
-        field_map json "SnapshotIdentifier" String_.of_json in
-      make ?snapshotRetentionStartTime ?manualSnapshotRemainingDays
-        ?manualSnapshotRetentionPeriod ?maintenanceTrackName
-        ?enhancedVpcRouting ?restorableNodeTypes ?tags ?sourceRegion
-        ?elapsedTimeInSeconds ?estimatedSecondsToCompletion
+        field_map json__ "SnapshotIdentifier" String_.of_json in
+      make ?snapshotArn ?masterPasswordSecretKmsKeyId
+        ?masterPasswordSecretArn ?snapshotRetentionStartTime
+        ?manualSnapshotRemainingDays ?manualSnapshotRetentionPeriod
+        ?maintenanceTrackName ?enhancedVpcRouting ?restorableNodeTypes ?tags
+        ?sourceRegion ?elapsedTimeInSeconds ?estimatedSecondsToCompletion
         ?currentBackupRateInMegaBytesPerSecond ?backupProgressInMegaBytes
         ?actualIncrementalBackupSizeInMegaBytes ?totalBackupSizeInMegaBytes
         ?ownerAccount ?accountsWithRestoreAccess ?encryptedWithHSM ?kmsKeyId
@@ -5223,11 +6676,11 @@ module SnapshotCopyGrant =
           (Xml.child xml_arg0 "SnapshotCopyGrantName") in
       make ?tags ?kmsKeyId ?snapshotCopyGrantName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let snapshotCopyGrantName =
-        field_map json "SnapshotCopyGrantName" String_.of_json in
+        field_map json__ "SnapshotCopyGrantName" String_.of_json in
       make ?tags ?kmsKeyId ?snapshotCopyGrantName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5240,7 +6693,7 @@ module ScheduledAction =
         [@ocaml.doc "The name of the scheduled action."];
       targetAction: ScheduledActionType.t option
         [@ocaml.doc
-          "A JSON format string of the Amazon Redshift API operation with input parameters. \"\\{\\\"ResizeCluster\\\":\\{\\\"NodeType\\\":\\\"ds2.8xlarge\\\",\\\"ClusterIdentifier\\\":\\\"my-test-cluster\\\",\\\"NumberOfNodes\\\":3\\}\\}\"."];
+          "A JSON format string of the Amazon Redshift API operation with input parameters. \"\\{\\\"ResizeCluster\\\":\\{\\\"NodeType\\\":\\\"ra3.4xlarge\\\",\\\"ClusterIdentifier\\\":\\\"my-test-cluster\\\",\\\"NumberOfNodes\\\":3\\}\\}\"."];
       schedule: String_.t option
         [@ocaml.doc
           "The schedule for a one-time (at format) or recurring (cron format) scheduled action. Schedule invocations must be separated by at least one hour. Format of at expressions is \"at(yyyy-mm-ddThh:mm:ss)\". For example, \"at(2016-03-04T17:27:00)\". Format of cron expressions is \"cron(Minutes Hours Day-of-month Month Day-of-week Year)\". For example, \"cron(0 10 ? * MON *)\". For more information, see Cron Expressions in the Amazon CloudWatch Events User Guide."];
@@ -5266,7 +6719,8 @@ module ScheduledAction =
       createScheduledActionResult: createScheduledActionResult ;
       responseMetaData: responseMetaData }
     type error =
-      [ `InvalidScheduleFault of InvalidScheduleFault.t 
+      [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
+      | `InvalidScheduleFault of InvalidScheduleFault.t 
       | `InvalidScheduledActionFault of InvalidScheduledActionFault.t 
       | `ScheduledActionAlreadyExistsFault of
           ScheduledActionAlreadyExistsFault.t 
@@ -5275,6 +6729,7 @@ module ScheduledAction =
       | `ScheduledActionTypeUnsupportedFault of
           ScheduledActionTypeUnsupportedFault.t 
       | `UnauthorizedOperation of UnauthorizedOperation.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ScheduledAction"
     let make ?scheduledActionName =
@@ -5304,6 +6759,8 @@ module ScheduledAction =
                         }
     let error_of_json name json =
       match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
       | "InvalidScheduleFault" ->
           `InvalidScheduleFault (InvalidScheduleFault.of_json json)
       | "InvalidScheduledActionFault" ->
@@ -5320,11 +6777,15 @@ module ScheduledAction =
             (ScheduledActionTypeUnsupportedFault.of_json json)
       | "UnauthorizedOperation" ->
           `UnauthorizedOperation (UnauthorizedOperation.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
       | "InvalidScheduleFault" ->
           `InvalidScheduleFault (InvalidScheduleFault.of_xml xml)
       | "InvalidScheduledActionFault" ->
@@ -5341,10 +6802,16 @@ module ScheduledAction =
             (ScheduledActionTypeUnsupportedFault.of_xml xml)
       | "UnauthorizedOperation" ->
           `UnauthorizedOperation (UnauthorizedOperation.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ClusterNotFoundFault"));
+            ("details", (ClusterNotFoundFault.to_json e))]
       | `InvalidScheduleFault e ->
           `Assoc
             [("error", (`String "InvalidScheduleFault"));
@@ -5369,6 +6836,10 @@ module ScheduledAction =
           `Assoc
             [("error", (`String "UnauthorizedOperation"));
             ("details", (UnauthorizedOperation.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5422,26 +6893,87 @@ module ScheduledAction =
         ?scheduledActionDescription ?iamRole ?schedule ?targetAction
         ?scheduledActionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" TStamp.of_json in
-      let startTime = field_map json "StartTime" TStamp.of_json in
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" TStamp.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
       let nextInvocations =
-        field_map json "NextInvocations" ScheduledActionTimeList.of_json in
-      let state = field_map json "State" ScheduledActionState.of_json in
+        field_map json__ "NextInvocations" ScheduledActionTimeList.of_json in
+      let state = field_map json__ "State" ScheduledActionState.of_json in
       let scheduledActionDescription =
-        field_map json "ScheduledActionDescription" String_.of_json in
-      let iamRole = field_map json "IamRole" String_.of_json in
-      let schedule = field_map json "Schedule" String_.of_json in
+        field_map json__ "ScheduledActionDescription" String_.of_json in
+      let iamRole = field_map json__ "IamRole" String_.of_json in
+      let schedule = field_map json__ "Schedule" String_.of_json in
       let targetAction =
-        field_map json "TargetAction" ScheduledActionType.of_json in
+        field_map json__ "TargetAction" ScheduledActionType.of_json in
       let scheduledActionName =
-        field_map json "ScheduledActionName" String_.of_json in
+        field_map json__ "ScheduledActionName" String_.of_json in
       make ?endTime ?startTime ?nextInvocations ?state
         ?scheduledActionDescription ?iamRole ?schedule ?targetAction
         ?scheduledActionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a scheduled action. You can use a scheduled action to trigger some Amazon Redshift API operations on a schedule. For information about which API operations can be scheduled, see ScheduledActionType."]
+module ProvisionedIdentifier =
+  struct
+    type nonrec t =
+      {
+      clusterIdentifier: String_.t
+        [@ocaml.doc "The unique identifier for the provisioned cluster."]}
+    let context_ = "ProvisionedIdentifier"
+    let make ~clusterIdentifier = fun () -> { clusterIdentifier }
+    let to_value x =
+      structure_to_value
+        [("ClusterIdentifier", (Some (String_.to_value x.clusterIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clusterIdentifier =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
+      make ~clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clusterIdentifier =
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
+      make ~clusterIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The identifier for a provisioned cluster."]
+module ServerlessIdentifier =
+  struct
+    type nonrec t =
+      {
+      namespaceIdentifier: String_.t
+        [@ocaml.doc "The unique identifier for the serverless namespace."];
+      workgroupIdentifier: String_.t
+        [@ocaml.doc
+          "The unique identifier for the workgroup associated with the serverless namespace."]}
+    let context_ = "ServerlessIdentifier"
+    let make ~namespaceIdentifier =
+      fun ~workgroupIdentifier ->
+        fun () -> { namespaceIdentifier; workgroupIdentifier }
+    let to_value x =
+      structure_to_value
+        [("NamespaceIdentifier",
+           (Some (String_.to_value x.namespaceIdentifier)));
+        ("WorkgroupIdentifier",
+          (Some (String_.to_value x.workgroupIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let workgroupIdentifier =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WorkgroupIdentifier") in
+      let namespaceIdentifier =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NamespaceIdentifier") in
+      make ~workgroupIdentifier ~namespaceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let workgroupIdentifier =
+        field_map_exn json__ "WorkgroupIdentifier" String_.of_json in
+      let namespaceIdentifier =
+        field_map_exn json__ "NamespaceIdentifier" String_.of_json in
+      make ~workgroupIdentifier ~namespaceIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The identifier for a serverless namespace."]
 module OrderableClusterOption =
   struct
     type nonrec t =
@@ -5482,12 +7014,12 @@ module OrderableClusterOption =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClusterVersion") in
       make ?availabilityZones ?nodeType ?clusterType ?clusterVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availabilityZones =
-        field_map json "AvailabilityZones" AvailabilityZoneList.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
-      let clusterType = field_map json "ClusterType" String_.of_json in
-      let clusterVersion = field_map json "ClusterVersion" String_.of_json in
+        field_map json__ "AvailabilityZones" AvailabilityZoneList.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let clusterType = field_map json__ "ClusterType" String_.of_json in
+      let clusterVersion = field_map json__ "ClusterVersion" String_.of_json in
       make ?availabilityZones ?nodeType ?clusterType ?clusterVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an orderable cluster option."]
@@ -5496,7 +7028,7 @@ module NodeConfigurationOption =
     type nonrec t =
       {
       nodeType: String_.t option
-        [@ocaml.doc "The node type, such as, \"ds2.8xlarge\"."];
+        [@ocaml.doc "The node type, such as, \"ra3.4xlarge\"."];
       numberOfNodes: Integer.t option [@ocaml.doc "The number of nodes."];
       estimatedDiskUtilizationPercent: DoubleOptional.t option
         [@ocaml.doc "The estimated disk utilizaton percentage."];
@@ -5533,16 +7065,481 @@ module NodeConfigurationOption =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NodeType") in
       make ?mode ?estimatedDiskUtilizationPercent ?numberOfNodes ?nodeType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mode = field_map json "Mode" Mode.of_json in
+    let of_json json__ =
+      let mode = field_map json__ "Mode" Mode.of_json in
       let estimatedDiskUtilizationPercent =
-        field_map json "EstimatedDiskUtilizationPercent"
+        field_map json__ "EstimatedDiskUtilizationPercent"
           DoubleOptional.of_json in
-      let numberOfNodes = field_map json "NumberOfNodes" Integer.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
+      let numberOfNodes = field_map json__ "NumberOfNodes" Integer.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
       make ?mode ?estimatedDiskUtilizationPercent ?numberOfNodes ?nodeType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of node configurations."]
+module Recommendation =
+  struct
+    type nonrec t =
+      {
+      id: String_.t option
+        [@ocaml.doc "A unique identifier of the Advisor recommendation."];
+      clusterIdentifier: String_.t option
+        [@ocaml.doc
+          "The unique identifier of the cluster for which the recommendation is returned."];
+      namespaceArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Redshift cluster namespace ARN for which the recommendations is returned."];
+      createdAt: TStamp.t option
+        [@ocaml.doc
+          "The date and time (UTC) that the recommendation was created."];
+      recommendationType: String_.t option
+        [@ocaml.doc "The type of Advisor recommendation."];
+      title: String_.t option [@ocaml.doc "The title of the recommendation."];
+      description: String_.t option
+        [@ocaml.doc "The description of the recommendation."];
+      observation: String_.t option
+        [@ocaml.doc
+          "The description of what was observed about your cluster."];
+      impactRanking: ImpactRankingType.t option
+        [@ocaml.doc
+          "The scale of the impact that the Advisor recommendation has to the performance and cost of the cluster."];
+      recommendationText: String_.t option
+        [@ocaml.doc "The description of the recommendation."];
+      recommendedActions: RecommendedActionList.t option
+        [@ocaml.doc "List of Amazon Redshift recommended actions."];
+      referenceLinks: ReferenceLinkList.t option
+        [@ocaml.doc
+          "List of helpful links for more information about the Advisor recommendation."]}
+    let make ?id =
+      fun ?clusterIdentifier ->
+        fun ?namespaceArn ->
+          fun ?createdAt ->
+            fun ?recommendationType ->
+              fun ?title ->
+                fun ?description ->
+                  fun ?observation ->
+                    fun ?impactRanking ->
+                      fun ?recommendationText ->
+                        fun ?recommendedActions ->
+                          fun ?referenceLinks ->
+                            fun () ->
+                              {
+                                id;
+                                clusterIdentifier;
+                                namespaceArn;
+                                createdAt;
+                                recommendationType;
+                                title;
+                                description;
+                                observation;
+                                impactRanking;
+                                recommendationText;
+                                recommendedActions;
+                                referenceLinks
+                              }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:String_.to_value));
+        ("ClusterIdentifier",
+          (Option.map x.clusterIdentifier ~f:String_.to_value));
+        ("NamespaceArn", (Option.map x.namespaceArn ~f:String_.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:TStamp.to_value));
+        ("RecommendationType",
+          (Option.map x.recommendationType ~f:String_.to_value));
+        ("Title", (Option.map x.title ~f:String_.to_value));
+        ("Description", (Option.map x.description ~f:String_.to_value));
+        ("Observation", (Option.map x.observation ~f:String_.to_value));
+        ("ImpactRanking",
+          (Option.map x.impactRanking ~f:ImpactRankingType.to_value));
+        ("RecommendationText",
+          (Option.map x.recommendationText ~f:String_.to_value));
+        ("RecommendedActions",
+          (Option.map x.recommendedActions ~f:RecommendedActionList.to_value));
+        ("ReferenceLinks",
+          (Option.map x.referenceLinks ~f:ReferenceLinkList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let referenceLinks =
+        (Option.map ~f:ReferenceLinkList.of_xml)
+          (Xml.child xml_arg0 "ReferenceLinks") in
+      let recommendedActions =
+        (Option.map ~f:RecommendedActionList.of_xml)
+          (Xml.child xml_arg0 "RecommendedActions") in
+      let recommendationText =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "RecommendationText") in
+      let impactRanking =
+        (Option.map ~f:ImpactRankingType.of_xml)
+          (Xml.child xml_arg0 "ImpactRanking") in
+      let observation =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Observation") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
+      let title = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Title") in
+      let recommendationType =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "RecommendationType") in
+      let createdAt =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let namespaceArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NamespaceArn") in
+      let clusterIdentifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ClusterIdentifier") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?referenceLinks ?recommendedActions ?recommendationText
+        ?impactRanking ?observation ?description ?title ?recommendationType
+        ?createdAt ?namespaceArn ?clusterIdentifier ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let referenceLinks =
+        field_map json__ "ReferenceLinks" ReferenceLinkList.of_json in
+      let recommendedActions =
+        field_map json__ "RecommendedActions" RecommendedActionList.of_json in
+      let recommendationText =
+        field_map json__ "RecommendationText" String_.of_json in
+      let impactRanking =
+        field_map json__ "ImpactRanking" ImpactRankingType.of_json in
+      let observation = field_map json__ "Observation" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let title = field_map json__ "Title" String_.of_json in
+      let recommendationType =
+        field_map json__ "RecommendationType" String_.of_json in
+      let createdAt = field_map json__ "CreatedAt" TStamp.of_json in
+      let namespaceArn = field_map json__ "NamespaceArn" String_.of_json in
+      let clusterIdentifier =
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      let id = field_map json__ "Id" String_.of_json in
+      make ?referenceLinks ?recommendedActions ?recommendationText
+        ?impactRanking ?observation ?description ?title ?recommendationType
+        ?createdAt ?namespaceArn ?clusterIdentifier ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An Amazon Redshift Advisor recommended action on the Amazon Redshift cluster."]
+module Integration =
+  struct
+    type createIntegrationResult =
+      {
+      integrationArn: IntegrationArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the integration."];
+      integrationName: IntegrationName.t option
+        [@ocaml.doc "The name of the integration."];
+      sourceArn: SourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the database used as the source for replication."];
+      targetArn: TargetArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Redshift data warehouse to use as the target for replication."];
+      status: ZeroETLIntegrationStatus.t option
+        [@ocaml.doc "The current status of the integration."];
+      errors: IntegrationErrorList.t option
+        [@ocaml.doc "Any errors associated with the integration."];
+      createTime: TStamp.t option
+        [@ocaml.doc "The time (UTC) when the integration was created."];
+      description: Description.t option
+        [@ocaml.doc "The description of the integration."];
+      kMSKeyId: String_.t option
+        [@ocaml.doc
+          "The Key Management Service (KMS) key identifier for the key used to encrypt the integration."];
+      additionalEncryptionContext: EncryptionContextMap.t option
+        [@ocaml.doc
+          "The encryption context for the integration. For more information, see Encryption context in the Amazon Web Services Key Management Service Developer Guide."];
+      tags: TagList.t option
+        [@ocaml.doc "The list of tags associated with the integration."]}
+    and responseMetaData = unit
+    and t =
+      {
+      createIntegrationResult: createIntegrationResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `IntegrationAlreadyExistsFault of IntegrationAlreadyExistsFault.t 
+      | `IntegrationConflictOperationFault of
+          IntegrationConflictOperationFault.t 
+      | `IntegrationQuotaExceededFault of IntegrationQuotaExceededFault.t 
+      | `IntegrationSourceNotFoundFault of IntegrationSourceNotFoundFault.t 
+      | `IntegrationTargetNotFoundFault of IntegrationTargetNotFoundFault.t 
+      | `InvalidClusterStateFault of InvalidClusterStateFault.t 
+      | `InvalidTagFault of InvalidTagFault.t 
+      | `TagLimitExceededFault of TagLimitExceededFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "Integration"
+    let make ?integrationArn =
+      fun ?integrationName ->
+        fun ?sourceArn ->
+          fun ?targetArn ->
+            fun ?status ->
+              fun ?errors ->
+                fun ?createTime ->
+                  fun ?description ->
+                    fun ?kMSKeyId ->
+                      fun ?additionalEncryptionContext ->
+                        fun ?tags ->
+                          fun () ->
+                            {
+                              createIntegrationResult =
+                                {
+                                  integrationArn;
+                                  integrationName;
+                                  sourceArn;
+                                  targetArn;
+                                  status;
+                                  errors;
+                                  createTime;
+                                  description;
+                                  kMSKeyId;
+                                  additionalEncryptionContext;
+                                  tags
+                                };
+                              responseMetaData = ()
+                            }
+    let error_of_json name json =
+      match name with
+      | "IntegrationAlreadyExistsFault" ->
+          `IntegrationAlreadyExistsFault
+            (IntegrationAlreadyExistsFault.of_json json)
+      | "IntegrationConflictOperationFault" ->
+          `IntegrationConflictOperationFault
+            (IntegrationConflictOperationFault.of_json json)
+      | "IntegrationQuotaExceededFault" ->
+          `IntegrationQuotaExceededFault
+            (IntegrationQuotaExceededFault.of_json json)
+      | "IntegrationSourceNotFoundFault" ->
+          `IntegrationSourceNotFoundFault
+            (IntegrationSourceNotFoundFault.of_json json)
+      | "IntegrationTargetNotFoundFault" ->
+          `IntegrationTargetNotFoundFault
+            (IntegrationTargetNotFoundFault.of_json json)
+      | "InvalidClusterStateFault" ->
+          `InvalidClusterStateFault (InvalidClusterStateFault.of_json json)
+      | "InvalidTagFault" -> `InvalidTagFault (InvalidTagFault.of_json json)
+      | "TagLimitExceededFault" ->
+          `TagLimitExceededFault (TagLimitExceededFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "IntegrationAlreadyExistsFault" ->
+          `IntegrationAlreadyExistsFault
+            (IntegrationAlreadyExistsFault.of_xml xml)
+      | "IntegrationConflictOperationFault" ->
+          `IntegrationConflictOperationFault
+            (IntegrationConflictOperationFault.of_xml xml)
+      | "IntegrationQuotaExceededFault" ->
+          `IntegrationQuotaExceededFault
+            (IntegrationQuotaExceededFault.of_xml xml)
+      | "IntegrationSourceNotFoundFault" ->
+          `IntegrationSourceNotFoundFault
+            (IntegrationSourceNotFoundFault.of_xml xml)
+      | "IntegrationTargetNotFoundFault" ->
+          `IntegrationTargetNotFoundFault
+            (IntegrationTargetNotFoundFault.of_xml xml)
+      | "InvalidClusterStateFault" ->
+          `InvalidClusterStateFault (InvalidClusterStateFault.of_xml xml)
+      | "InvalidTagFault" -> `InvalidTagFault (InvalidTagFault.of_xml xml)
+      | "TagLimitExceededFault" ->
+          `TagLimitExceededFault (TagLimitExceededFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `IntegrationAlreadyExistsFault e ->
+          `Assoc
+            [("error", (`String "IntegrationAlreadyExistsFault"));
+            ("details", (IntegrationAlreadyExistsFault.to_json e))]
+      | `IntegrationConflictOperationFault e ->
+          `Assoc
+            [("error", (`String "IntegrationConflictOperationFault"));
+            ("details", (IntegrationConflictOperationFault.to_json e))]
+      | `IntegrationQuotaExceededFault e ->
+          `Assoc
+            [("error", (`String "IntegrationQuotaExceededFault"));
+            ("details", (IntegrationQuotaExceededFault.to_json e))]
+      | `IntegrationSourceNotFoundFault e ->
+          `Assoc
+            [("error", (`String "IntegrationSourceNotFoundFault"));
+            ("details", (IntegrationSourceNotFoundFault.to_json e))]
+      | `IntegrationTargetNotFoundFault e ->
+          `Assoc
+            [("error", (`String "IntegrationTargetNotFoundFault"));
+            ("details", (IntegrationTargetNotFoundFault.to_json e))]
+      | `InvalidClusterStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidClusterStateFault"));
+            ("details", (InvalidClusterStateFault.to_json e))]
+      | `InvalidTagFault e ->
+          `Assoc
+            [("error", (`String "InvalidTagFault"));
+            ("details", (InvalidTagFault.to_json e))]
+      | `TagLimitExceededFault e ->
+          `Assoc
+            [("error", (`String "TagLimitExceededFault"));
+            ("details", (TagLimitExceededFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.createIntegrationResult in
+      structure_to_wrapped_value
+        [("IntegrationArn",
+           (Option.map x.integrationArn ~f:IntegrationArn.to_value));
+        ("IntegrationName",
+          (Option.map x.integrationName ~f:IntegrationName.to_value));
+        ("SourceArn", (Option.map x.sourceArn ~f:SourceArn.to_value));
+        ("TargetArn", (Option.map x.targetArn ~f:TargetArn.to_value));
+        ("Status",
+          (Option.map x.status ~f:ZeroETLIntegrationStatus.to_value));
+        ("Errors", (Option.map x.errors ~f:IntegrationErrorList.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:TStamp.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("KMSKeyId", (Option.map x.kMSKeyId ~f:String_.to_value));
+        ("AdditionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ~wrapper:"CreateIntegrationResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "CreateIntegrationResult" in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let additionalEncryptionContext =
+        (Option.map ~f:EncryptionContextMap.of_xml)
+          (Xml.child xml_arg0 "AdditionalEncryptionContext") in
+      let kMSKeyId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "KMSKeyId") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let createTime =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let errors =
+        (Option.map ~f:IntegrationErrorList.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      let status =
+        (Option.map ~f:ZeroETLIntegrationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let targetArn =
+        (Option.map ~f:TargetArn.of_xml) (Xml.child xml_arg0 "TargetArn") in
+      let sourceArn =
+        (Option.map ~f:SourceArn.of_xml) (Xml.child xml_arg0 "SourceArn") in
+      let integrationName =
+        (Option.map ~f:IntegrationName.of_xml)
+          (Xml.child xml_arg0 "IntegrationName") in
+      let integrationArn =
+        (Option.map ~f:IntegrationArn.of_xml)
+          (Xml.child xml_arg0 "IntegrationArn") in
+      make ?tags ?additionalEncryptionContext ?kMSKeyId ?description
+        ?createTime ?errors ?status ?targetArn ?sourceArn ?integrationName
+        ?integrationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let additionalEncryptionContext =
+        field_map json__ "AdditionalEncryptionContext"
+          EncryptionContextMap.of_json in
+      let kMSKeyId = field_map json__ "KMSKeyId" String_.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let createTime = field_map json__ "CreateTime" TStamp.of_json in
+      let errors = field_map json__ "Errors" IntegrationErrorList.of_json in
+      let status = field_map json__ "Status" ZeroETLIntegrationStatus.of_json in
+      let targetArn = field_map json__ "TargetArn" TargetArn.of_json in
+      let sourceArn = field_map json__ "SourceArn" SourceArn.of_json in
+      let integrationName =
+        field_map json__ "IntegrationName" IntegrationName.of_json in
+      let integrationArn =
+        field_map json__ "IntegrationArn" IntegrationArn.of_json in
+      make ?tags ?additionalEncryptionContext ?kMSKeyId ?description
+        ?createTime ?errors ?status ?targetArn ?sourceArn ?integrationName
+        ?integrationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a zero-ETL integration or S3 event integration with Amazon Redshift."]
+module InboundIntegration =
+  struct
+    type nonrec t =
+      {
+      integrationArn: InboundIntegrationArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an inbound integration."];
+      sourceArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the source of an inbound integration."];
+      targetArn: TargetArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the target of an inbound integration."];
+      status: ZeroETLIntegrationStatus.t option
+        [@ocaml.doc "The status of an inbound integration."];
+      errors: IntegrationErrorList.t option
+        [@ocaml.doc
+          "The outstanding errors of an inbound integration. Each item is an \"IntegrationError\". This is null if there is no error."];
+      createTime: TStamp.t option
+        [@ocaml.doc "The creation time of an inbound integration."]}
+    let make ?integrationArn =
+      fun ?sourceArn ->
+        fun ?targetArn ->
+          fun ?status ->
+            fun ?errors ->
+              fun ?createTime ->
+                fun () ->
+                  {
+                    integrationArn;
+                    sourceArn;
+                    targetArn;
+                    status;
+                    errors;
+                    createTime
+                  }
+    let to_value x =
+      structure_to_value
+        [("IntegrationArn",
+           (Option.map x.integrationArn ~f:InboundIntegrationArn.to_value));
+        ("SourceArn", (Option.map x.sourceArn ~f:String_.to_value));
+        ("TargetArn", (Option.map x.targetArn ~f:TargetArn.to_value));
+        ("Status",
+          (Option.map x.status ~f:ZeroETLIntegrationStatus.to_value));
+        ("Errors", (Option.map x.errors ~f:IntegrationErrorList.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:TStamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createTime =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let errors =
+        (Option.map ~f:IntegrationErrorList.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      let status =
+        (Option.map ~f:ZeroETLIntegrationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let targetArn =
+        (Option.map ~f:TargetArn.of_xml) (Xml.child xml_arg0 "TargetArn") in
+      let sourceArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceArn") in
+      let integrationArn =
+        (Option.map ~f:InboundIntegrationArn.of_xml)
+          (Xml.child xml_arg0 "IntegrationArn") in
+      make ?createTime ?errors ?status ?targetArn ?sourceArn ?integrationArn
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createTime = field_map json__ "CreateTime" TStamp.of_json in
+      let errors = field_map json__ "Errors" IntegrationErrorList.of_json in
+      let status = field_map json__ "Status" ZeroETLIntegrationStatus.of_json in
+      let targetArn = field_map json__ "TargetArn" TargetArn.of_json in
+      let sourceArn = field_map json__ "SourceArn" String_.of_json in
+      let integrationArn =
+        field_map json__ "IntegrationArn" InboundIntegrationArn.of_json in
+      make ?createTime ?errors ?status ?targetArn ?sourceArn ?integrationArn
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The content of an inbound integration."]
 module HsmConfiguration =
   struct
     type nonrec t =
@@ -5597,14 +7594,14 @@ module HsmConfiguration =
       make ?tags ?hsmPartitionName ?hsmIpAddress ?description
         ?hsmConfigurationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let hsmPartitionName =
-        field_map json "HsmPartitionName" String_.of_json in
-      let hsmIpAddress = field_map json "HsmIpAddress" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map json__ "HsmPartitionName" String_.of_json in
+      let hsmIpAddress = field_map json__ "HsmIpAddress" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let hsmConfigurationIdentifier =
-        field_map json "HsmConfigurationIdentifier" String_.of_json in
+        field_map json__ "HsmConfigurationIdentifier" String_.of_json in
       make ?tags ?hsmPartitionName ?hsmIpAddress ?description
         ?hsmConfigurationIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -5649,12 +7646,12 @@ module HsmClientCertificate =
       make ?tags ?hsmClientCertificatePublicKey
         ?hsmClientCertificateIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let hsmClientCertificatePublicKey =
-        field_map json "HsmClientCertificatePublicKey" String_.of_json in
+        field_map json__ "HsmClientCertificatePublicKey" String_.of_json in
       let hsmClientCertificateIdentifier =
-        field_map json "HsmClientCertificateIdentifier" String_.of_json in
+        field_map json__ "HsmClientCertificateIdentifier" String_.of_json in
       make ?tags ?hsmClientCertificatePublicKey
         ?hsmClientCertificateIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -5700,14 +7697,14 @@ module ReservedNodeConfigurationOption =
       make ?targetReservedNodeOffering ?targetReservedNodeCount
         ?sourceReservedNode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetReservedNodeOffering =
-        field_map json "TargetReservedNodeOffering"
+        field_map json__ "TargetReservedNodeOffering"
           ReservedNodeOffering.of_json in
       let targetReservedNodeCount =
-        field_map json "TargetReservedNodeCount" Integer.of_json in
+        field_map json__ "TargetReservedNodeCount" Integer.of_json in
       let sourceReservedNode =
-        field_map json "SourceReservedNode" ReservedNode.of_json in
+        field_map json__ "SourceReservedNode" ReservedNode.of_json in
       make ?targetReservedNodeOffering ?targetReservedNodeCount
         ?sourceReservedNode ()
     let to_json v = composed_to_json to_value v
@@ -5777,16 +7774,16 @@ module Event =
       make ?eventId ?date ?severity ?eventCategories ?message ?sourceType
         ?sourceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eventId = field_map json "EventId" String_.of_json in
-      let date = field_map json "Date" TStamp.of_json in
-      let severity = field_map json "Severity" String_.of_json in
+    let of_json json__ =
+      let eventId = field_map json__ "EventId" String_.of_json in
+      let date = field_map json__ "Date" TStamp.of_json in
+      let severity = field_map json__ "Severity" String_.of_json in
       let eventCategories =
-        field_map json "EventCategories" EventCategoriesList.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let sourceType = field_map json "SourceType" SourceType.of_json in
+        field_map json__ "EventCategories" EventCategoriesList.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
       let sourceIdentifier =
-        field_map json "SourceIdentifier" String_.of_json in
+        field_map json__ "SourceIdentifier" String_.of_json in
       make ?eventId ?date ?severity ?eventCategories ?message ?sourceType
         ?sourceIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -5900,22 +7897,22 @@ module EventSubscription =
         ?sourceType ?subscriptionCreationTime ?status ?snsTopicArn
         ?custSubscriptionId ?customerAwsId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let enabled = field_map json "Enabled" Boolean.of_json in
-      let severity = field_map json "Severity" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
+      let severity = field_map json__ "Severity" String_.of_json in
       let eventCategoriesList =
-        field_map json "EventCategoriesList" EventCategoriesList.of_json in
+        field_map json__ "EventCategoriesList" EventCategoriesList.of_json in
       let sourceIdsList =
-        field_map json "SourceIdsList" SourceIdsList.of_json in
-      let sourceType = field_map json "SourceType" String_.of_json in
+        field_map json__ "SourceIdsList" SourceIdsList.of_json in
+      let sourceType = field_map json__ "SourceType" String_.of_json in
       let subscriptionCreationTime =
-        field_map json "SubscriptionCreationTime" TStamp.of_json in
-      let status = field_map json "Status" String_.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" String_.of_json in
+        field_map json__ "SubscriptionCreationTime" TStamp.of_json in
+      let status = field_map json__ "Status" String_.of_json in
+      let snsTopicArn = field_map json__ "SnsTopicArn" String_.of_json in
       let custSubscriptionId =
-        field_map json "CustSubscriptionId" String_.of_json in
-      let customerAwsId = field_map json "CustomerAwsId" String_.of_json in
+        field_map json__ "CustSubscriptionId" String_.of_json in
+      let customerAwsId = field_map json__ "CustomerAwsId" String_.of_json in
       make ?tags ?enabled ?severity ?eventCategoriesList ?sourceIdsList
         ?sourceType ?subscriptionCreationTime ?status ?snsTopicArn
         ?custSubscriptionId ?customerAwsId ()
@@ -5943,9 +7940,9 @@ module EventCategoriesMap =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceType") in
       make ?events ?sourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let events = field_map json "Events" EventInfoMapList.of_json in
-      let sourceType = field_map json "SourceType" String_.of_json in
+    let of_json json__ =
+      let events = field_map json__ "Events" EventInfoMapList.of_json in
+      let sourceType = field_map json__ "SourceType" String_.of_json in
       make ?events ?sourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes event categories."]
@@ -6131,18 +8128,18 @@ module EndpointAuthorization =
       make ?endpointCount ?allowedVPCs ?allowedAllVPCs ?status ?clusterStatus
         ?authorizeTime ?clusterIdentifier ?grantee ?grantor ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointCount = field_map json "EndpointCount" Integer.of_json in
+    let of_json json__ =
+      let endpointCount = field_map json__ "EndpointCount" Integer.of_json in
       let allowedVPCs =
-        field_map json "AllowedVPCs" VpcIdentifierList.of_json in
-      let allowedAllVPCs = field_map json "AllowedAllVPCs" Boolean.of_json in
-      let status = field_map json "Status" AuthorizationStatus.of_json in
-      let clusterStatus = field_map json "ClusterStatus" String_.of_json in
-      let authorizeTime = field_map json "AuthorizeTime" TStamp.of_json in
+        field_map json__ "AllowedVPCs" VpcIdentifierList.of_json in
+      let allowedAllVPCs = field_map json__ "AllowedAllVPCs" Boolean.of_json in
+      let status = field_map json__ "Status" AuthorizationStatus.of_json in
+      let clusterStatus = field_map json__ "ClusterStatus" String_.of_json in
+      let authorizeTime = field_map json__ "AuthorizeTime" TStamp.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
-      let grantee = field_map json "Grantee" String_.of_json in
-      let grantor = field_map json "Grantor" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      let grantee = field_map json__ "Grantee" String_.of_json in
+      let grantor = field_map json__ "Grantor" String_.of_json in
       make ?endpointCount ?allowedVPCs ?allowedAllVPCs ?status ?clusterStatus
         ?authorizeTime ?clusterIdentifier ?grantee ?grantor ()
     let to_json v = composed_to_json to_value v
@@ -6379,21 +8376,22 @@ module EndpointAccess =
         ?endpointName ?endpointStatus ?subnetGroupName ?resourceOwner
         ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcEndpoint = field_map json "VpcEndpoint" VpcEndpoint.of_json in
+    let of_json json__ =
+      let vpcEndpoint = field_map json__ "VpcEndpoint" VpcEndpoint.of_json in
       let vpcSecurityGroups =
-        field_map json "VpcSecurityGroups"
+        field_map json__ "VpcSecurityGroups"
           VpcSecurityGroupMembershipList.of_json in
-      let address = field_map json "Address" String_.of_json in
-      let port = field_map json "Port" Integer.of_json in
+      let address = field_map json__ "Address" String_.of_json in
+      let port = field_map json__ "Port" Integer.of_json in
       let endpointCreateTime =
-        field_map json "EndpointCreateTime" TStamp.of_json in
-      let endpointName = field_map json "EndpointName" String_.of_json in
-      let endpointStatus = field_map json "EndpointStatus" String_.of_json in
-      let subnetGroupName = field_map json "SubnetGroupName" String_.of_json in
-      let resourceOwner = field_map json "ResourceOwner" String_.of_json in
+        field_map json__ "EndpointCreateTime" TStamp.of_json in
+      let endpointName = field_map json__ "EndpointName" String_.of_json in
+      let endpointStatus = field_map json__ "EndpointStatus" String_.of_json in
+      let subnetGroupName =
+        field_map json__ "SubnetGroupName" String_.of_json in
+      let resourceOwner = field_map json__ "ResourceOwner" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       make ?vpcEndpoint ?vpcSecurityGroups ?address ?port ?endpointCreateTime
         ?endpointName ?endpointStatus ?subnetGroupName ?resourceOwner
         ?clusterIdentifier ()
@@ -6567,20 +8565,20 @@ module SnapshotSchedule =
       make ?associatedClusters ?associatedClusterCount ?nextInvocations ?tags
         ?scheduleDescription ?scheduleIdentifier ?scheduleDefinitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associatedClusters =
-        field_map json "AssociatedClusters" AssociatedClusterList.of_json in
+        field_map json__ "AssociatedClusters" AssociatedClusterList.of_json in
       let associatedClusterCount =
-        field_map json "AssociatedClusterCount" IntegerOptional.of_json in
+        field_map json__ "AssociatedClusterCount" IntegerOptional.of_json in
       let nextInvocations =
-        field_map json "NextInvocations" ScheduledSnapshotTimeList.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "NextInvocations" ScheduledSnapshotTimeList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let scheduleDescription =
-        field_map json "ScheduleDescription" String_.of_json in
+        field_map json__ "ScheduleDescription" String_.of_json in
       let scheduleIdentifier =
-        field_map json "ScheduleIdentifier" String_.of_json in
+        field_map json__ "ScheduleIdentifier" String_.of_json in
       let scheduleDefinitions =
-        field_map json "ScheduleDefinitions" ScheduleDefinitionList.of_json in
+        field_map json__ "ScheduleDefinitions" ScheduleDefinitionList.of_json in
       make ?associatedClusters ?associatedClusterCount ?nextInvocations ?tags
         ?scheduleDescription ?scheduleIdentifier ?scheduleDefinitions ()
     let to_json v = composed_to_json to_value v
@@ -6611,13 +8609,186 @@ module ScheduledActionFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "Values" ValueStringList.of_json in
-      let name = field_map_exn json "Name" ScheduledActionFilterName.of_json in
+    let of_json json__ =
+      let values = field_map_exn json__ "Values" ValueStringList.of_json in
+      let name =
+        field_map_exn json__ "Name" ScheduledActionFilterName.of_json in
       make ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A set of elements to filter the returned scheduled actions."]
+module RedshiftIdcApplication =
+  struct
+    type nonrec t =
+      {
+      idcInstanceArn: String_.t option
+        [@ocaml.doc
+          "The ARN for the IAM Identity Center instance that Redshift integrates with."];
+      redshiftIdcApplicationName: RedshiftIdcApplicationName.t option
+        [@ocaml.doc
+          "The name of the Redshift application in IAM Identity Center."];
+      redshiftIdcApplicationArn: String_.t option
+        [@ocaml.doc
+          "The ARN for the Redshift application that integrates with IAM Identity Center."];
+      identityNamespace: IdentityNamespaceString.t option
+        [@ocaml.doc
+          "The identity namespace for the Amazon Redshift IAM Identity Center application. It determines which managed application verifies the connection token."];
+      idcDisplayName: IdcDisplayNameString.t option
+        [@ocaml.doc
+          "The display name for the Amazon Redshift IAM Identity Center application. It appears on the console."];
+      iamRoleArn: String_.t option
+        [@ocaml.doc
+          "The ARN for the Amazon Redshift IAM Identity Center application. It has the required permissions to be assumed and invoke the IDC Identity Center API."];
+      idcManagedApplicationArn: String_.t option
+        [@ocaml.doc
+          "The ARN for the Amazon Redshift IAM Identity Center application."];
+      idcOnboardStatus: String_.t option
+        [@ocaml.doc
+          "The onboarding status for the Amazon Redshift IAM Identity Center application."];
+      authorizedTokenIssuerList: AuthorizedTokenIssuerList.t option
+        [@ocaml.doc
+          "The authorized token issuer list for the Amazon Redshift IAM Identity Center application."];
+      serviceIntegrations: ServiceIntegrationList.t option
+        [@ocaml.doc
+          "A list of service integrations for the Redshift IAM Identity Center application."];
+      applicationType: ApplicationType.t option
+        [@ocaml.doc
+          "The type of application being created. Valid values are None or Lakehouse. Use Lakehouse to enable Amazon Redshift federated permissions on cluster."];
+      tags: TagList.t option [@ocaml.doc "A list of tags."];
+      ssoTagKeys: TagKeyList.t option
+        [@ocaml.doc
+          "A list of tags keys that Redshift Identity Center applications copy to IAM Identity Center. For each input key, the tag corresponding to the key-value pair is propagated."]}
+    let make ?idcInstanceArn =
+      fun ?redshiftIdcApplicationName ->
+        fun ?redshiftIdcApplicationArn ->
+          fun ?identityNamespace ->
+            fun ?idcDisplayName ->
+              fun ?iamRoleArn ->
+                fun ?idcManagedApplicationArn ->
+                  fun ?idcOnboardStatus ->
+                    fun ?authorizedTokenIssuerList ->
+                      fun ?serviceIntegrations ->
+                        fun ?applicationType ->
+                          fun ?tags ->
+                            fun ?ssoTagKeys ->
+                              fun () ->
+                                {
+                                  idcInstanceArn;
+                                  redshiftIdcApplicationName;
+                                  redshiftIdcApplicationArn;
+                                  identityNamespace;
+                                  idcDisplayName;
+                                  iamRoleArn;
+                                  idcManagedApplicationArn;
+                                  idcOnboardStatus;
+                                  authorizedTokenIssuerList;
+                                  serviceIntegrations;
+                                  applicationType;
+                                  tags;
+                                  ssoTagKeys
+                                }
+    let to_value x =
+      structure_to_value
+        [("IdcInstanceArn",
+           (Option.map x.idcInstanceArn ~f:String_.to_value));
+        ("RedshiftIdcApplicationName",
+          (Option.map x.redshiftIdcApplicationName
+             ~f:RedshiftIdcApplicationName.to_value));
+        ("RedshiftIdcApplicationArn",
+          (Option.map x.redshiftIdcApplicationArn ~f:String_.to_value));
+        ("IdentityNamespace",
+          (Option.map x.identityNamespace ~f:IdentityNamespaceString.to_value));
+        ("IdcDisplayName",
+          (Option.map x.idcDisplayName ~f:IdcDisplayNameString.to_value));
+        ("IamRoleArn", (Option.map x.iamRoleArn ~f:String_.to_value));
+        ("IdcManagedApplicationArn",
+          (Option.map x.idcManagedApplicationArn ~f:String_.to_value));
+        ("IdcOnboardStatus",
+          (Option.map x.idcOnboardStatus ~f:String_.to_value));
+        ("AuthorizedTokenIssuerList",
+          (Option.map x.authorizedTokenIssuerList
+             ~f:AuthorizedTokenIssuerList.to_value));
+        ("ServiceIntegrations",
+          (Option.map x.serviceIntegrations
+             ~f:ServiceIntegrationList.to_value));
+        ("ApplicationType",
+          (Option.map x.applicationType ~f:ApplicationType.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("SsoTagKeys", (Option.map x.ssoTagKeys ~f:TagKeyList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ssoTagKeys =
+        (Option.map ~f:TagKeyList.of_xml) (Xml.child xml_arg0 "SsoTagKeys") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let applicationType =
+        (Option.map ~f:ApplicationType.of_xml)
+          (Xml.child xml_arg0 "ApplicationType") in
+      let serviceIntegrations =
+        (Option.map ~f:ServiceIntegrationList.of_xml)
+          (Xml.child xml_arg0 "ServiceIntegrations") in
+      let authorizedTokenIssuerList =
+        (Option.map ~f:AuthorizedTokenIssuerList.of_xml)
+          (Xml.child xml_arg0 "AuthorizedTokenIssuerList") in
+      let idcOnboardStatus =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "IdcOnboardStatus") in
+      let idcManagedApplicationArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "IdcManagedApplicationArn") in
+      let iamRoleArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "IamRoleArn") in
+      let idcDisplayName =
+        (Option.map ~f:IdcDisplayNameString.of_xml)
+          (Xml.child xml_arg0 "IdcDisplayName") in
+      let identityNamespace =
+        (Option.map ~f:IdentityNamespaceString.of_xml)
+          (Xml.child xml_arg0 "IdentityNamespace") in
+      let redshiftIdcApplicationArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "RedshiftIdcApplicationArn") in
+      let redshiftIdcApplicationName =
+        (Option.map ~f:RedshiftIdcApplicationName.of_xml)
+          (Xml.child xml_arg0 "RedshiftIdcApplicationName") in
+      let idcInstanceArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "IdcInstanceArn") in
+      make ?ssoTagKeys ?tags ?applicationType ?serviceIntegrations
+        ?authorizedTokenIssuerList ?idcOnboardStatus
+        ?idcManagedApplicationArn ?iamRoleArn ?idcDisplayName
+        ?identityNamespace ?redshiftIdcApplicationArn
+        ?redshiftIdcApplicationName ?idcInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ssoTagKeys = field_map json__ "SsoTagKeys" TagKeyList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let applicationType =
+        field_map json__ "ApplicationType" ApplicationType.of_json in
+      let serviceIntegrations =
+        field_map json__ "ServiceIntegrations" ServiceIntegrationList.of_json in
+      let authorizedTokenIssuerList =
+        field_map json__ "AuthorizedTokenIssuerList"
+          AuthorizedTokenIssuerList.of_json in
+      let idcOnboardStatus =
+        field_map json__ "IdcOnboardStatus" String_.of_json in
+      let idcManagedApplicationArn =
+        field_map json__ "IdcManagedApplicationArn" String_.of_json in
+      let iamRoleArn = field_map json__ "IamRoleArn" String_.of_json in
+      let idcDisplayName =
+        field_map json__ "IdcDisplayName" IdcDisplayNameString.of_json in
+      let identityNamespace =
+        field_map json__ "IdentityNamespace" IdentityNamespaceString.of_json in
+      let redshiftIdcApplicationArn =
+        field_map json__ "RedshiftIdcApplicationArn" String_.of_json in
+      let redshiftIdcApplicationName =
+        field_map json__ "RedshiftIdcApplicationName"
+          RedshiftIdcApplicationName.of_json in
+      let idcInstanceArn = field_map json__ "IdcInstanceArn" String_.of_json in
+      make ?ssoTagKeys ?tags ?applicationType ?serviceIntegrations
+        ?authorizedTokenIssuerList ?idcOnboardStatus
+        ?idcManagedApplicationArn ?iamRoleArn ?idcDisplayName
+        ?identityNamespace ?redshiftIdcApplicationArn
+        ?redshiftIdcApplicationName ?idcInstanceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains properties for the Redshift IDC application."]
 module PartnerIntegrationInfo =
   struct
     type nonrec t =
@@ -6687,17 +8858,18 @@ module PartnerIntegrationInfo =
       make ?updatedAt ?createdAt ?statusMessage ?status ?partnerName
         ?databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "UpdatedAt" TStamp.of_json in
-      let createdAt = field_map json "CreatedAt" TStamp.of_json in
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" TStamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" TStamp.of_json in
       let statusMessage =
-        field_map json "StatusMessage"
+        field_map json__ "StatusMessage"
           PartnerIntegrationStatusMessage.of_json in
-      let status = field_map json "Status" PartnerIntegrationStatus.of_json in
+      let status = field_map json__ "Status" PartnerIntegrationStatus.of_json in
       let partnerName =
-        field_map json "PartnerName" PartnerIntegrationPartnerName.of_json in
+        field_map json__ "PartnerName" PartnerIntegrationPartnerName.of_json in
       let databaseName =
-        field_map json "DatabaseName" PartnerIntegrationDatabaseName.of_json in
+        field_map json__ "DatabaseName"
+          PartnerIntegrationDatabaseName.of_json in
       make ?updatedAt ?createdAt ?statusMessage ?status ?partnerName
         ?databaseName ()
     let to_json v = composed_to_json to_value v
@@ -6733,19 +8905,56 @@ module NodeConfigurationOptionsFilter =
           (Xml.child xml_arg0 "Name") in
       make ?values ?operator ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" ValueStringList.of_json in
-      let operator = field_map json "Operator" OperatorType.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" ValueStringList.of_json in
+      let operator = field_map json__ "Operator" OperatorType.of_json in
       let name =
-        field_map json "Name" NodeConfigurationOptionsFilterName.of_json in
+        field_map json__ "Name" NodeConfigurationOptionsFilterName.of_json in
       make ?values ?operator ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A set of elements to filter the returned node configurations."]
+module DescribeIntegrationsFilter =
+  struct
+    type nonrec t =
+      {
+      name: DescribeIntegrationsFilterName.t
+        [@ocaml.doc "Specifies the type of integration filter."];
+      values: DescribeIntegrationsFilterValueList.t
+        [@ocaml.doc "Specifies the values to filter on."]}
+    let context_ = "DescribeIntegrationsFilter"
+    let make ~name = fun ~values -> fun () -> { name; values }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (DescribeIntegrationsFilterName.to_value x.name)));
+        ("Values",
+          (Some (DescribeIntegrationsFilterValueList.to_value x.values)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        DescribeIntegrationsFilterValueList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Values") in
+      let name =
+        DescribeIntegrationsFilterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~values ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values =
+        field_map_exn json__ "Values"
+          DescribeIntegrationsFilterValueList.of_json in
+      let name =
+        field_map_exn json__ "Name" DescribeIntegrationsFilterName.of_json in
+      make ~values ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A set of elements to filter the returned integrations."]
 module ParametersList =
   struct
     type nonrec t = Parameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Parameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6772,18 +8981,22 @@ module DataShare =
       {
       dataShareArn: String_.t option
         [@ocaml.doc
-          "An Amazon Resource Name (ARN) that references the datashare that is owned by a specific namespace of the producer cluster. A datashare ARN is in the arn:aws:redshift:\\{region\\}:\\{account-id\\}:\\{datashare\\}:\\{namespace-guid\\}/\\{datashare-name\\} format."];
+          "The Amazon Resource Name (ARN) of the datashare that the consumer is to use."];
       producerArn: String_.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the producer."];
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the producer namespace."];
       allowPubliclyAccessibleConsumers: Boolean.t option
         [@ocaml.doc
           "A value that specifies whether the datashare can be shared to a publicly accessible cluster."];
       dataShareAssociations: DataShareAssociationList.t option
         [@ocaml.doc
-          "A value that specifies when the datashare has an association between a producer and data consumers."];
+          "A value that specifies when the datashare has an association between producer and data consumers."];
       managedBy: String_.t option
         [@ocaml.doc
-          "The identifier of a datashare to show its managing entity."]}
+          "The identifier of a datashare to show its managing entity."];
+      dataShareType: DataShareType.t option
+        [@ocaml.doc
+          "The type of the datashare created by RegisterNamespace."]}
     and responseMetaData = unit
     and t =
       {
@@ -6799,18 +9012,20 @@ module DataShare =
         fun ?allowPubliclyAccessibleConsumers ->
           fun ?dataShareAssociations ->
             fun ?managedBy ->
-              fun () ->
-                {
-                  associateDataShareConsumerResult =
-                    {
-                      dataShareArn;
-                      producerArn;
-                      allowPubliclyAccessibleConsumers;
-                      dataShareAssociations;
-                      managedBy
-                    };
-                  responseMetaData = ()
-                }
+              fun ?dataShareType ->
+                fun () ->
+                  {
+                    associateDataShareConsumerResult =
+                      {
+                        dataShareArn;
+                        producerArn;
+                        allowPubliclyAccessibleConsumers;
+                        dataShareAssociations;
+                        managedBy;
+                        dataShareType
+                      };
+                    responseMetaData = ()
+                  }
     let error_of_json name json =
       match name with
       | "InvalidDataShareFault" ->
@@ -6853,13 +9068,18 @@ module DataShare =
         ("DataShareAssociations",
           (Option.map x.dataShareAssociations
              ~f:DataShareAssociationList.to_value));
-        ("ManagedBy", (Option.map x.managedBy ~f:String_.to_value))]
+        ("ManagedBy", (Option.map x.managedBy ~f:String_.to_value));
+        ("DataShareType",
+          (Option.map x.dataShareType ~f:DataShareType.to_value))]
         ~wrapper:"AssociateDataShareConsumerResult"
         ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "AssociateDataShareConsumerResult" in
+      let dataShareType =
+        (Option.map ~f:DataShareType.of_xml)
+          (Xml.child xml_arg0 "DataShareType") in
       let managedBy =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ManagedBy") in
       let dataShareAssociations =
@@ -6872,19 +9092,21 @@ module DataShare =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ProducerArn") in
       let dataShareArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataShareArn") in
-      make ?managedBy ?dataShareAssociations
+      make ?dataShareType ?managedBy ?dataShareAssociations
         ?allowPubliclyAccessibleConsumers ?producerArn ?dataShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let managedBy = field_map json "ManagedBy" String_.of_json in
+    let of_json json__ =
+      let dataShareType =
+        field_map json__ "DataShareType" DataShareType.of_json in
+      let managedBy = field_map json__ "ManagedBy" String_.of_json in
       let dataShareAssociations =
-        field_map json "DataShareAssociations"
+        field_map json__ "DataShareAssociations"
           DataShareAssociationList.of_json in
       let allowPubliclyAccessibleConsumers =
-        field_map json "AllowPubliclyAccessibleConsumers" Boolean.of_json in
-      let producerArn = field_map json "ProducerArn" String_.of_json in
-      let dataShareArn = field_map json "DataShareArn" String_.of_json in
-      make ?managedBy ?dataShareAssociations
+        field_map json__ "AllowPubliclyAccessibleConsumers" Boolean.of_json in
+      let producerArn = field_map json__ "ProducerArn" String_.of_json in
+      let dataShareArn = field_map json__ "DataShareArn" String_.of_json in
+      make ?dataShareType ?managedBy ?dataShareAssociations
         ?allowPubliclyAccessibleConsumers ?producerArn ?dataShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6914,10 +9136,10 @@ module SnapshotSortingEntity =
           (Xml.child_exn ~context:context_ xml_arg0 "Attribute") in
       make ?sortOrder ~attribute ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortOrder = field_map json "SortOrder" SortByOrder.of_json in
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortByOrder.of_json in
       let attribute =
-        field_map_exn json "Attribute" SnapshotAttributeToSortBy.of_json in
+        field_map_exn json__ "Attribute" SnapshotAttributeToSortBy.of_json in
       make ?sortOrder ~attribute ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a sorting entity"]
@@ -6950,15 +9172,72 @@ module AuthenticationProfile =
           (Xml.child xml_arg0 "AuthenticationProfileName") in
       make ?authenticationProfileContent ?authenticationProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationProfileContent =
-        field_map json "AuthenticationProfileContent" String_.of_json in
+        field_map json__ "AuthenticationProfileContent" String_.of_json in
       let authenticationProfileName =
-        field_map json "AuthenticationProfileName"
+        field_map json__ "AuthenticationProfileName"
           AuthenticationProfileNameString.of_json in
       make ?authenticationProfileContent ?authenticationProfileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an authentication profile."]
+module Association =
+  struct
+    type nonrec t =
+      {
+      customDomainCertificateArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the certificate associated with the custom domain."];
+      customDomainCertificateExpiryDate: TStamp.t option
+        [@ocaml.doc "The expiration date for the certificate."];
+      certificateAssociations: CertificateAssociationList.t option
+        [@ocaml.doc
+          "A list of all associated clusters and domain names tied to a specific certificate."]}
+    let make ?customDomainCertificateArn =
+      fun ?customDomainCertificateExpiryDate ->
+        fun ?certificateAssociations ->
+          fun () ->
+            {
+              customDomainCertificateArn;
+              customDomainCertificateExpiryDate;
+              certificateAssociations
+            }
+    let to_value x =
+      structure_to_value
+        [("CustomDomainCertificateArn",
+           (Option.map x.customDomainCertificateArn ~f:String_.to_value));
+        ("CustomDomainCertificateExpiryDate",
+          (Option.map x.customDomainCertificateExpiryDate ~f:TStamp.to_value));
+        ("CertificateAssociations",
+          (Option.map x.certificateAssociations
+             ~f:CertificateAssociationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateAssociations =
+        (Option.map ~f:CertificateAssociationList.of_xml)
+          (Xml.child xml_arg0 "CertificateAssociations") in
+      let customDomainCertificateExpiryDate =
+        (Option.map ~f:TStamp.of_xml)
+          (Xml.child xml_arg0 "CustomDomainCertificateExpiryDate") in
+      let customDomainCertificateArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "CustomDomainCertificateArn") in
+      make ?certificateAssociations ?customDomainCertificateExpiryDate
+        ?customDomainCertificateArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateAssociations =
+        field_map json__ "CertificateAssociations"
+          CertificateAssociationList.of_json in
+      let customDomainCertificateExpiryDate =
+        field_map json__ "CustomDomainCertificateExpiryDate" TStamp.of_json in
+      let customDomainCertificateArn =
+        field_map json__ "CustomDomainCertificateArn" String_.of_json in
+      make ?certificateAssociations ?customDomainCertificateExpiryDate
+        ?customDomainCertificateArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the custom domain name association."]
 module Cluster =
   struct
     type nonrec t =
@@ -7025,7 +9304,7 @@ module Cluster =
         [@ocaml.doc "The number of compute nodes in the cluster."];
       publiclyAccessible: Boolean.t option
         [@ocaml.doc
-          "A boolean value that, if true, indicates that the cluster can be accessed from a public network."];
+          "A boolean value that, if true, indicates that the cluster can be accessed from a public network. Default: false"];
       encrypted: Boolean.t option
         [@ocaml.doc
           "A boolean value that, if true, indicates that data in the cluster is encrypted at rest."];
@@ -7095,13 +9374,45 @@ module Cluster =
           "The total storage capacity of the cluster in megabytes."];
       aquaConfiguration: AquaConfiguration.t option
         [@ocaml.doc
-          "The AQUA (Advanced Query Accelerator) configuration of the cluster."];
+          "This field is retired. Amazon Redshift automatically determines whether to use AQUA (Advanced Query Accelerator)."];
       defaultIamRoleArn: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for the IAM role set as default for the cluster."];
       reservedNodeExchangeStatus: ReservedNodeExchangeStatus.t option
         [@ocaml.doc
-          "The status of the reserved-node exchange request. Statuses include in-progress and requested."]}
+          "The status of the reserved-node exchange request. Statuses include in-progress and requested."];
+      customDomainName: String_.t option
+        [@ocaml.doc "The custom domain name associated with the cluster."];
+      customDomainCertificateArn: String_.t option
+        [@ocaml.doc
+          "The certificate Amazon Resource Name (ARN) for the custom domain name."];
+      customDomainCertificateExpiryDate: TStamp.t option
+        [@ocaml.doc
+          "The expiration date for the certificate associated with the custom domain name."];
+      masterPasswordSecretArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the cluster's admin user credentials secret."];
+      masterPasswordSecretKmsKeyId: String_.t option
+        [@ocaml.doc
+          "The ID of the Key Management Service (KMS) key used to encrypt and store the cluster's admin credentials secret."];
+      ipAddressType: String_.t option
+        [@ocaml.doc
+          "The IP address type for the cluster. Possible values are ipv4 and dualstack."];
+      multiAZ: String_.t option
+        [@ocaml.doc
+          "A boolean value that, if true, indicates that the cluster is deployed in two Availability Zones."];
+      multiAZSecondary: SecondaryClusterInfo.t option
+        [@ocaml.doc
+          "The secondary compute unit of a cluster, if Multi-AZ deployment is turned on."];
+      lakehouseRegistrationStatus: String_.t option
+        [@ocaml.doc
+          "The status of the lakehouse registration for the cluster. Indicates whether the cluster is successfully registered with Amazon Redshift federated permissions."];
+      catalogArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Glue data catalog associated with the cluster enabled with Amazon Redshift federated permissions."];
+      extraComputeForAutomaticOptimization: String_.t option
+        [@ocaml.doc
+          "A boolean value that, if true, indicates that the cluster allocates additional compute resources to run automatic optimization operations. Default: false"]}
     let make ?clusterIdentifier =
       fun ?nodeType ->
         fun ?clusterStatus ->
@@ -7205,6 +9516,39 @@ module Cluster =
                                                                     fun
                                                                     ?reservedNodeExchangeStatus
                                                                     ->
+                                                                    fun
+                                                                    ?customDomainName
+                                                                    ->
+                                                                    fun
+                                                                    ?customDomainCertificateArn
+                                                                    ->
+                                                                    fun
+                                                                    ?customDomainCertificateExpiryDate
+                                                                    ->
+                                                                    fun
+                                                                    ?masterPasswordSecretArn
+                                                                    ->
+                                                                    fun
+                                                                    ?masterPasswordSecretKmsKeyId
+                                                                    ->
+                                                                    fun
+                                                                    ?ipAddressType
+                                                                    ->
+                                                                    fun
+                                                                    ?multiAZ
+                                                                    ->
+                                                                    fun
+                                                                    ?multiAZSecondary
+                                                                    ->
+                                                                    fun
+                                                                    ?lakehouseRegistrationStatus
+                                                                    ->
+                                                                    fun
+                                                                    ?catalogArn
+                                                                    ->
+                                                                    fun
+                                                                    ?extraComputeForAutomaticOptimization
+                                                                    ->
                                                                     fun () ->
                                                                     {
                                                                     clusterIdentifier;
@@ -7258,7 +9602,18 @@ module Cluster =
                                                                     totalStorageCapacityInMegaBytes;
                                                                     aquaConfiguration;
                                                                     defaultIamRoleArn;
-                                                                    reservedNodeExchangeStatus
+                                                                    reservedNodeExchangeStatus;
+                                                                    customDomainName;
+                                                                    customDomainCertificateArn;
+                                                                    customDomainCertificateExpiryDate;
+                                                                    masterPasswordSecretArn;
+                                                                    masterPasswordSecretKmsKeyId;
+                                                                    ipAddressType;
+                                                                    multiAZ;
+                                                                    multiAZSecondary;
+                                                                    lakehouseRegistrationStatus;
+                                                                    catalogArn;
+                                                                    extraComputeForAutomaticOptimization
                                                                     }
     let to_value x =
       structure_to_value
@@ -7359,9 +9714,59 @@ module Cluster =
           (Option.map x.defaultIamRoleArn ~f:String_.to_value));
         ("ReservedNodeExchangeStatus",
           (Option.map x.reservedNodeExchangeStatus
-             ~f:ReservedNodeExchangeStatus.to_value))]
+             ~f:ReservedNodeExchangeStatus.to_value));
+        ("CustomDomainName",
+          (Option.map x.customDomainName ~f:String_.to_value));
+        ("CustomDomainCertificateArn",
+          (Option.map x.customDomainCertificateArn ~f:String_.to_value));
+        ("CustomDomainCertificateExpiryDate",
+          (Option.map x.customDomainCertificateExpiryDate ~f:TStamp.to_value));
+        ("MasterPasswordSecretArn",
+          (Option.map x.masterPasswordSecretArn ~f:String_.to_value));
+        ("MasterPasswordSecretKmsKeyId",
+          (Option.map x.masterPasswordSecretKmsKeyId ~f:String_.to_value));
+        ("IpAddressType", (Option.map x.ipAddressType ~f:String_.to_value));
+        ("MultiAZ", (Option.map x.multiAZ ~f:String_.to_value));
+        ("MultiAZSecondary",
+          (Option.map x.multiAZSecondary ~f:SecondaryClusterInfo.to_value));
+        ("LakehouseRegistrationStatus",
+          (Option.map x.lakehouseRegistrationStatus ~f:String_.to_value));
+        ("CatalogArn", (Option.map x.catalogArn ~f:String_.to_value));
+        ("ExtraComputeForAutomaticOptimization",
+          (Option.map x.extraComputeForAutomaticOptimization
+             ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let extraComputeForAutomaticOptimization =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ExtraComputeForAutomaticOptimization") in
+      let catalogArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CatalogArn") in
+      let lakehouseRegistrationStatus =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "LakehouseRegistrationStatus") in
+      let multiAZSecondary =
+        (Option.map ~f:SecondaryClusterInfo.of_xml)
+          (Xml.child xml_arg0 "MultiAZSecondary") in
+      let multiAZ =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "MultiAZ") in
+      let ipAddressType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "IpAddressType") in
+      let masterPasswordSecretKmsKeyId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MasterPasswordSecretKmsKeyId") in
+      let masterPasswordSecretArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MasterPasswordSecretArn") in
+      let customDomainCertificateExpiryDate =
+        (Option.map ~f:TStamp.of_xml)
+          (Xml.child xml_arg0 "CustomDomainCertificateExpiryDate") in
+      let customDomainCertificateArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "CustomDomainCertificateArn") in
+      let customDomainName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "CustomDomainName") in
       let reservedNodeExchangeStatus =
         (Option.map ~f:ReservedNodeExchangeStatus.of_xml)
           (Xml.child xml_arg0 "ReservedNodeExchangeStatus") in
@@ -7502,9 +9907,13 @@ module Cluster =
       let clusterIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ClusterIdentifier") in
-      make ?reservedNodeExchangeStatus ?defaultIamRoleArn ?aquaConfiguration
-        ?totalStorageCapacityInMegaBytes ?clusterNamespaceArn
-        ?availabilityZoneRelocationStatus ?resizeInfo
+      make ?extraComputeForAutomaticOptimization ?catalogArn
+        ?lakehouseRegistrationStatus ?multiAZSecondary ?multiAZ
+        ?ipAddressType ?masterPasswordSecretKmsKeyId ?masterPasswordSecretArn
+        ?customDomainCertificateExpiryDate ?customDomainCertificateArn
+        ?customDomainName ?reservedNodeExchangeStatus ?defaultIamRoleArn
+        ?aquaConfiguration ?totalStorageCapacityInMegaBytes
+        ?clusterNamespaceArn ?availabilityZoneRelocationStatus ?resizeInfo
         ?nextMaintenanceWindowStartTime
         ?expectedNextSnapshotScheduleTimeStatus
         ?expectedNextSnapshotScheduleTime ?snapshotScheduleState
@@ -7523,106 +9932,132 @@ module Cluster =
         ?clusterAvailabilityStatus ?clusterStatus ?nodeType
         ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let extraComputeForAutomaticOptimization =
+        field_map json__ "ExtraComputeForAutomaticOptimization"
+          String_.of_json in
+      let catalogArn = field_map json__ "CatalogArn" String_.of_json in
+      let lakehouseRegistrationStatus =
+        field_map json__ "LakehouseRegistrationStatus" String_.of_json in
+      let multiAZSecondary =
+        field_map json__ "MultiAZSecondary" SecondaryClusterInfo.of_json in
+      let multiAZ = field_map json__ "MultiAZ" String_.of_json in
+      let ipAddressType = field_map json__ "IpAddressType" String_.of_json in
+      let masterPasswordSecretKmsKeyId =
+        field_map json__ "MasterPasswordSecretKmsKeyId" String_.of_json in
+      let masterPasswordSecretArn =
+        field_map json__ "MasterPasswordSecretArn" String_.of_json in
+      let customDomainCertificateExpiryDate =
+        field_map json__ "CustomDomainCertificateExpiryDate" TStamp.of_json in
+      let customDomainCertificateArn =
+        field_map json__ "CustomDomainCertificateArn" String_.of_json in
+      let customDomainName =
+        field_map json__ "CustomDomainName" String_.of_json in
       let reservedNodeExchangeStatus =
-        field_map json "ReservedNodeExchangeStatus"
+        field_map json__ "ReservedNodeExchangeStatus"
           ReservedNodeExchangeStatus.of_json in
       let defaultIamRoleArn =
-        field_map json "DefaultIamRoleArn" String_.of_json in
+        field_map json__ "DefaultIamRoleArn" String_.of_json in
       let aquaConfiguration =
-        field_map json "AquaConfiguration" AquaConfiguration.of_json in
+        field_map json__ "AquaConfiguration" AquaConfiguration.of_json in
       let totalStorageCapacityInMegaBytes =
-        field_map json "TotalStorageCapacityInMegaBytes" LongOptional.of_json in
+        field_map json__ "TotalStorageCapacityInMegaBytes"
+          LongOptional.of_json in
       let clusterNamespaceArn =
-        field_map json "ClusterNamespaceArn" String_.of_json in
+        field_map json__ "ClusterNamespaceArn" String_.of_json in
       let availabilityZoneRelocationStatus =
-        field_map json "AvailabilityZoneRelocationStatus" String_.of_json in
-      let resizeInfo = field_map json "ResizeInfo" ResizeInfo.of_json in
+        field_map json__ "AvailabilityZoneRelocationStatus" String_.of_json in
+      let resizeInfo = field_map json__ "ResizeInfo" ResizeInfo.of_json in
       let nextMaintenanceWindowStartTime =
-        field_map json "NextMaintenanceWindowStartTime" TStamp.of_json in
+        field_map json__ "NextMaintenanceWindowStartTime" TStamp.of_json in
       let expectedNextSnapshotScheduleTimeStatus =
-        field_map json "ExpectedNextSnapshotScheduleTimeStatus"
+        field_map json__ "ExpectedNextSnapshotScheduleTimeStatus"
           String_.of_json in
       let expectedNextSnapshotScheduleTime =
-        field_map json "ExpectedNextSnapshotScheduleTime" TStamp.of_json in
+        field_map json__ "ExpectedNextSnapshotScheduleTime" TStamp.of_json in
       let snapshotScheduleState =
-        field_map json "SnapshotScheduleState" ScheduleState.of_json in
+        field_map json__ "SnapshotScheduleState" ScheduleState.of_json in
       let snapshotScheduleIdentifier =
-        field_map json "SnapshotScheduleIdentifier" String_.of_json in
+        field_map json__ "SnapshotScheduleIdentifier" String_.of_json in
       let deferredMaintenanceWindows =
-        field_map json "DeferredMaintenanceWindows"
+        field_map json__ "DeferredMaintenanceWindows"
           DeferredMaintenanceWindowsList.of_json in
       let elasticResizeNumberOfNodeOptions =
-        field_map json "ElasticResizeNumberOfNodeOptions" String_.of_json in
+        field_map json__ "ElasticResizeNumberOfNodeOptions" String_.of_json in
       let maintenanceTrackName =
-        field_map json "MaintenanceTrackName" String_.of_json in
+        field_map json__ "MaintenanceTrackName" String_.of_json in
       let pendingActions =
-        field_map json "PendingActions" PendingActionsList.of_json in
-      let iamRoles = field_map json "IamRoles" ClusterIamRoleList.of_json in
+        field_map json__ "PendingActions" PendingActionsList.of_json in
+      let iamRoles = field_map json__ "IamRoles" ClusterIamRoleList.of_json in
       let enhancedVpcRouting =
-        field_map json "EnhancedVpcRouting" Boolean.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "EnhancedVpcRouting" Boolean.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let clusterRevisionNumber =
-        field_map json "ClusterRevisionNumber" String_.of_json in
+        field_map json__ "ClusterRevisionNumber" String_.of_json in
       let elasticIpStatus =
-        field_map json "ElasticIpStatus" ElasticIpStatus.of_json in
+        field_map json__ "ElasticIpStatus" ElasticIpStatus.of_json in
       let clusterNodes =
-        field_map json "ClusterNodes" ClusterNodesList.of_json in
+        field_map json__ "ClusterNodes" ClusterNodesList.of_json in
       let clusterPublicKey =
-        field_map json "ClusterPublicKey" String_.of_json in
+        field_map json__ "ClusterPublicKey" String_.of_json in
       let clusterSnapshotCopyStatus =
-        field_map json "ClusterSnapshotCopyStatus"
+        field_map json__ "ClusterSnapshotCopyStatus"
           ClusterSnapshotCopyStatus.of_json in
-      let hsmStatus = field_map json "HsmStatus" HsmStatus.of_json in
+      let hsmStatus = field_map json__ "HsmStatus" HsmStatus.of_json in
       let dataTransferProgress =
-        field_map json "DataTransferProgress" DataTransferProgress.of_json in
+        field_map json__ "DataTransferProgress" DataTransferProgress.of_json in
       let restoreStatus =
-        field_map json "RestoreStatus" RestoreStatus.of_json in
-      let encrypted = field_map json "Encrypted" Boolean.of_json in
+        field_map json__ "RestoreStatus" RestoreStatus.of_json in
+      let encrypted = field_map json__ "Encrypted" Boolean.of_json in
       let publiclyAccessible =
-        field_map json "PubliclyAccessible" Boolean.of_json in
-      let numberOfNodes = field_map json "NumberOfNodes" Integer.of_json in
+        field_map json__ "PubliclyAccessible" Boolean.of_json in
+      let numberOfNodes = field_map json__ "NumberOfNodes" Integer.of_json in
       let allowVersionUpgrade =
-        field_map json "AllowVersionUpgrade" Boolean.of_json in
-      let clusterVersion = field_map json "ClusterVersion" String_.of_json in
+        field_map json__ "AllowVersionUpgrade" Boolean.of_json in
+      let clusterVersion = field_map json__ "ClusterVersion" String_.of_json in
       let pendingModifiedValues =
-        field_map json "PendingModifiedValues" PendingModifiedValues.of_json in
+        field_map json__ "PendingModifiedValues"
+          PendingModifiedValues.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
       let clusterSubnetGroupName =
-        field_map json "ClusterSubnetGroupName" String_.of_json in
+        field_map json__ "ClusterSubnetGroupName" String_.of_json in
       let clusterParameterGroups =
-        field_map json "ClusterParameterGroups"
+        field_map json__ "ClusterParameterGroups"
           ClusterParameterGroupStatusList.of_json in
       let vpcSecurityGroups =
-        field_map json "VpcSecurityGroups"
+        field_map json__ "VpcSecurityGroups"
           VpcSecurityGroupMembershipList.of_json in
       let clusterSecurityGroups =
-        field_map json "ClusterSecurityGroups"
+        field_map json__ "ClusterSecurityGroups"
           ClusterSecurityGroupMembershipList.of_json in
       let manualSnapshotRetentionPeriod =
-        field_map json "ManualSnapshotRetentionPeriod" Integer.of_json in
+        field_map json__ "ManualSnapshotRetentionPeriod" Integer.of_json in
       let automatedSnapshotRetentionPeriod =
-        field_map json "AutomatedSnapshotRetentionPeriod" Integer.of_json in
+        field_map json__ "AutomatedSnapshotRetentionPeriod" Integer.of_json in
       let clusterCreateTime =
-        field_map json "ClusterCreateTime" TStamp.of_json in
-      let endpoint = field_map json "Endpoint" Endpoint.of_json in
-      let dBName = field_map json "DBName" String_.of_json in
-      let masterUsername = field_map json "MasterUsername" String_.of_json in
-      let modifyStatus = field_map json "ModifyStatus" String_.of_json in
+        field_map json__ "ClusterCreateTime" TStamp.of_json in
+      let endpoint = field_map json__ "Endpoint" Endpoint.of_json in
+      let dBName = field_map json__ "DBName" String_.of_json in
+      let masterUsername = field_map json__ "MasterUsername" String_.of_json in
+      let modifyStatus = field_map json__ "ModifyStatus" String_.of_json in
       let clusterAvailabilityStatus =
-        field_map json "ClusterAvailabilityStatus" String_.of_json in
-      let clusterStatus = field_map json "ClusterStatus" String_.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
+        field_map json__ "ClusterAvailabilityStatus" String_.of_json in
+      let clusterStatus = field_map json__ "ClusterStatus" String_.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
-      make ?reservedNodeExchangeStatus ?defaultIamRoleArn ?aquaConfiguration
-        ?totalStorageCapacityInMegaBytes ?clusterNamespaceArn
-        ?availabilityZoneRelocationStatus ?resizeInfo
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      make ?extraComputeForAutomaticOptimization ?catalogArn
+        ?lakehouseRegistrationStatus ?multiAZSecondary ?multiAZ
+        ?ipAddressType ?masterPasswordSecretKmsKeyId ?masterPasswordSecretArn
+        ?customDomainCertificateExpiryDate ?customDomainCertificateArn
+        ?customDomainName ?reservedNodeExchangeStatus ?defaultIamRoleArn
+        ?aquaConfiguration ?totalStorageCapacityInMegaBytes
+        ?clusterNamespaceArn ?availabilityZoneRelocationStatus ?resizeInfo
         ?nextMaintenanceWindowStartTime
         ?expectedNextSnapshotScheduleTimeStatus
         ?expectedNextSnapshotScheduleTime ?snapshotScheduleState
@@ -7676,11 +10111,11 @@ module ClusterVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClusterVersion") in
       make ?description ?clusterParameterGroupFamily ?clusterVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" String_.of_json in
       let clusterParameterGroupFamily =
-        field_map json "ClusterParameterGroupFamily" String_.of_json in
-      let clusterVersion = field_map json "ClusterVersion" String_.of_json in
+        field_map json__ "ClusterParameterGroupFamily" String_.of_json in
+      let clusterVersion = field_map json__ "ClusterVersion" String_.of_json in
       make ?description ?clusterParameterGroupFamily ?clusterVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7701,22 +10136,27 @@ module ClusterSubnetGroup =
       subnets: SubnetList.t option
         [@ocaml.doc "A list of the VPC Subnet elements."];
       tags: TagList.t option
-        [@ocaml.doc "The list of tags for the cluster subnet group."]}
+        [@ocaml.doc "The list of tags for the cluster subnet group."];
+      supportedClusterIpAddressTypes: ValueStringList.t option
+        [@ocaml.doc
+          "The IP address types supported by this cluster subnet group. Possible values are ipv4 and dualstack."]}
     let make ?clusterSubnetGroupName =
       fun ?description ->
         fun ?vpcId ->
           fun ?subnetGroupStatus ->
             fun ?subnets ->
               fun ?tags ->
-                fun () ->
-                  {
-                    clusterSubnetGroupName;
-                    description;
-                    vpcId;
-                    subnetGroupStatus;
-                    subnets;
-                    tags
-                  }
+                fun ?supportedClusterIpAddressTypes ->
+                  fun () ->
+                    {
+                      clusterSubnetGroupName;
+                      description;
+                      vpcId;
+                      subnetGroupStatus;
+                      subnets;
+                      tags;
+                      supportedClusterIpAddressTypes
+                    }
     let to_value x =
       structure_to_value
         [("ClusterSubnetGroupName",
@@ -7726,9 +10166,15 @@ module ClusterSubnetGroup =
         ("SubnetGroupStatus",
           (Option.map x.subnetGroupStatus ~f:String_.to_value));
         ("Subnets", (Option.map x.subnets ~f:SubnetList.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("SupportedClusterIpAddressTypes",
+          (Option.map x.supportedClusterIpAddressTypes
+             ~f:ValueStringList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supportedClusterIpAddressTypes =
+        (Option.map ~f:ValueStringList.of_xml)
+          (Xml.child xml_arg0 "SupportedClusterIpAddressTypes") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let subnets =
         (Option.map ~f:SubnetList.of_xml) (Xml.child xml_arg0 "Subnets") in
@@ -7741,20 +10187,23 @@ module ClusterSubnetGroup =
       let clusterSubnetGroupName =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ClusterSubnetGroupName") in
-      make ?tags ?subnets ?subnetGroupStatus ?vpcId ?description
-        ?clusterSubnetGroupName ()
+      make ?supportedClusterIpAddressTypes ?tags ?subnets ?subnetGroupStatus
+        ?vpcId ?description ?clusterSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let subnets = field_map json "Subnets" SubnetList.of_json in
+    let of_json json__ =
+      let supportedClusterIpAddressTypes =
+        field_map json__ "SupportedClusterIpAddressTypes"
+          ValueStringList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let subnets = field_map json__ "Subnets" SubnetList.of_json in
       let subnetGroupStatus =
-        field_map json "SubnetGroupStatus" String_.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map json__ "SubnetGroupStatus" String_.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let clusterSubnetGroupName =
-        field_map json "ClusterSubnetGroupName" String_.of_json in
-      make ?tags ?subnets ?subnetGroupStatus ?vpcId ?description
-        ?clusterSubnetGroupName ()
+        field_map json__ "ClusterSubnetGroupName" String_.of_json in
+      make ?supportedClusterIpAddressTypes ?tags ?subnets ?subnetGroupStatus
+        ?vpcId ?description ?clusterSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a subnet group."]
 module ClusterSecurityGroup =
@@ -7812,14 +10261,14 @@ module ClusterSecurityGroup =
       make ?tags ?iPRanges ?eC2SecurityGroups ?description
         ?clusterSecurityGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let iPRanges = field_map json "IPRanges" IPRangeList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let iPRanges = field_map json__ "IPRanges" IPRangeList.of_json in
       let eC2SecurityGroups =
-        field_map json "EC2SecurityGroups" EC2SecurityGroupList.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map json__ "EC2SecurityGroups" EC2SecurityGroupList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let clusterSecurityGroupName =
-        field_map json "ClusterSecurityGroupName" String_.of_json in
+        field_map json__ "ClusterSecurityGroupName" String_.of_json in
       make ?tags ?iPRanges ?eC2SecurityGroups ?description
         ?clusterSecurityGroupName ()
     let to_json v = composed_to_json to_value v
@@ -7864,13 +10313,13 @@ module ClusterParameterGroup =
           (Xml.child xml_arg0 "ParameterGroupName") in
       make ?tags ?description ?parameterGroupFamily ?parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let parameterGroupFamily =
-        field_map json "ParameterGroupFamily" String_.of_json in
+        field_map json__ "ParameterGroupFamily" String_.of_json in
       let parameterGroupName =
-        field_map json "ParameterGroupName" String_.of_json in
+        field_map json__ "ParameterGroupName" String_.of_json in
       make ?tags ?description ?parameterGroupFamily ?parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a parameter group."]
@@ -7925,15 +10374,15 @@ module ClusterDbRevision =
       make ?revisionTargets ?databaseRevisionReleaseDate
         ?currentDatabaseRevision ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let revisionTargets =
-        field_map json "RevisionTargets" RevisionTargetsList.of_json in
+        field_map json__ "RevisionTargets" RevisionTargetsList.of_json in
       let databaseRevisionReleaseDate =
-        field_map json "DatabaseRevisionReleaseDate" TStamp.of_json in
+        field_map json__ "DatabaseRevisionReleaseDate" TStamp.of_json in
       let currentDatabaseRevision =
-        field_map json "CurrentDatabaseRevision" String_.of_json in
+        field_map json__ "CurrentDatabaseRevision" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       make ?revisionTargets ?databaseRevisionReleaseDate
         ?currentDatabaseRevision ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -7985,13 +10434,13 @@ module SnapshotErrorMessage =
       make ?failureReason ?failureCode ?snapshotClusterIdentifier
         ?snapshotIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failureReason = field_map json "FailureReason" String_.of_json in
-      let failureCode = field_map json "FailureCode" String_.of_json in
+    let of_json json__ =
+      let failureReason = field_map json__ "FailureReason" String_.of_json in
+      let failureCode = field_map json__ "FailureCode" String_.of_json in
       let snapshotClusterIdentifier =
-        field_map json "SnapshotClusterIdentifier" String_.of_json in
+        field_map json__ "SnapshotClusterIdentifier" String_.of_json in
       let snapshotIdentifier =
-        field_map json "SnapshotIdentifier" String_.of_json in
+        field_map json__ "SnapshotIdentifier" String_.of_json in
       make ?failureReason ?failureCode ?snapshotClusterIdentifier
         ?snapshotIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -8026,11 +10475,11 @@ module DeleteClusterSnapshotMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotIdentifier") in
       make ?snapshotClusterIdentifier ~snapshotIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotClusterIdentifier =
-        field_map json "SnapshotClusterIdentifier" String_.of_json in
+        field_map json__ "SnapshotClusterIdentifier" String_.of_json in
       let snapshotIdentifier =
-        field_map_exn json "SnapshotIdentifier" String_.of_json in
+        field_map_exn json__ "SnapshotIdentifier" String_.of_json in
       make ?snapshotClusterIdentifier ~snapshotIdentifier ()
     let to_json v = composed_to_json to_value v
   end
@@ -8058,10 +10507,10 @@ module AccountAttribute =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AttributeName") in
       make ?attributeValues ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeValues =
-        field_map json "AttributeValues" AttributeValueList.of_json in
-      let attributeName = field_map json "AttributeName" String_.of_json in
+        field_map json__ "AttributeValues" AttributeValueList.of_json in
+      let attributeName = field_map json__ "AttributeName" String_.of_json in
       make ?attributeValues ?attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8070,6 +10519,9 @@ module UsageLimits =
   struct
     type nonrec t = UsageLimit.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UsageLimit.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8145,6 +10597,9 @@ module TrackList =
   struct
     type nonrec t = MaintenanceTrack.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MaintenanceTrack.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8181,6 +10636,9 @@ module TaggedResourceList =
   struct
     type nonrec t = TaggedResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TaggedResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8218,6 +10676,9 @@ module TableRestoreStatusList =
   struct
     type nonrec t = TableRestoreStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TableRestoreStatus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8256,6 +10717,9 @@ module SnapshotList =
   struct
     type nonrec t = Snapshot.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Snapshot.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8280,6 +10744,9 @@ module SnapshotCopyGrantList =
   struct
     type nonrec t = SnapshotCopyGrant.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotCopyGrant.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8318,6 +10785,9 @@ module ScheduledActionList =
   struct
     type nonrec t = ScheduledAction.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduledAction.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8482,6 +10952,18 @@ module ClusterQuotaExceededFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request would exceed the allowed number of cluster instances for this account. For information about increasing your quota, go to Limits in Amazon Redshift in the Amazon Redshift Cluster Management Guide."]
+module DependentServiceAccessDeniedFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A dependent service denied access for the integration."]
 module DependentServiceUnavailableFault =
   struct
     type nonrec t = unit
@@ -8597,6 +11079,19 @@ module InvalidVPCNetworkStateFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The cluster subnet group does not cover all Availability Zones."]
+module Ipv6CidrBlockNotFoundFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "There are no subnets in your VPC with associated IPv6 CIDR blocks. To use dual-stack mode, associate an IPv6 CIDR block with each subnet in your VPC."]
 module NumberOfNodesPerClusterLimitExceededFault =
   struct
     type nonrec t = unit
@@ -8623,6 +11118,18 @@ module NumberOfNodesQuotaExceededFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The operation would exceed the number of nodes allotted to the account. For information about increasing your quota, go to Limits in Amazon Redshift in the Amazon Redshift Cluster Management Guide."]
+module RedshiftIdcApplicationNotExistsFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The application you attempted to find doesn't exist."]
 module ReservedNodeAlreadyExistsFault =
   struct
     type nonrec t = unit
@@ -8673,10 +11180,35 @@ module ReservedNodeOfferingNotFoundFault =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specified offering does not exist."]
+module CatalogNameString =
+  struct
+    type nonrec t = string
+    let context_ = "CatalogNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-z0-9_-]*[a-z]+[a-z0-9_-]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CatalogNameString" j
+    let to_json = simple_to_json to_value
+  end
 module ClusterSecurityGroupNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8702,6 +11234,9 @@ module IamRoleArnList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8726,6 +11261,9 @@ module VpcSecurityGroupIdList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8750,6 +11288,9 @@ module ImportTablesCompleted =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8774,6 +11315,9 @@ module ImportTablesInProgress =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8798,6 +11342,9 @@ module ImportTablesNotStarted =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8847,6 +11394,9 @@ module ReservedNodeList =
   struct
     type nonrec t = ReservedNode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedNode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8871,6 +11421,9 @@ module ReservedNodeOfferingList =
   struct
     type nonrec t = ReservedNodeOffering.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedNodeOffering.to_value)) |>
         (fun x -> `List x)
@@ -8893,6 +11446,155 @@ module ReservedNodeOfferingList =
         ~of_json:ReservedNodeOffering.of_json j
     let to_json v = composed_to_json to_value v
   end
+module NamespaceRegistrationStatus =
+  struct
+    type nonrec t =
+      | Registering 
+      | Deregistering 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Registering -> "Registering"
+      | Deregistering -> "Deregistering"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Registering" -> Registering
+      | "Deregistering" -> Deregistering
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration NamespaceRegistrationStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"NamespaceRegistrationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ConsumerIdentifierList =
+  struct
+    type nonrec t = String_.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConsumerIdentifierList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NamespaceIdentifierUnion =
+  struct
+    type nonrec t =
+      {
+      serverlessIdentifier: ServerlessIdentifier.t option
+        [@ocaml.doc "The identifier for a serverless namespace."];
+      provisionedIdentifier: ProvisionedIdentifier.t option
+        [@ocaml.doc "The identifier for a provisioned cluster."]}
+    let make ?serverlessIdentifier =
+      fun ?provisionedIdentifier ->
+        fun () -> { serverlessIdentifier; provisionedIdentifier }
+    let to_value x =
+      structure_to_value
+        [("ServerlessIdentifier",
+           (Option.map x.serverlessIdentifier
+              ~f:ServerlessIdentifier.to_value));
+        ("ProvisionedIdentifier",
+          (Option.map x.provisionedIdentifier
+             ~f:ProvisionedIdentifier.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let provisionedIdentifier =
+        (Option.map ~f:ProvisionedIdentifier.of_xml)
+          (Xml.child xml_arg0 "ProvisionedIdentifier") in
+      let serverlessIdentifier =
+        (Option.map ~f:ServerlessIdentifier.of_xml)
+          (Xml.child xml_arg0 "ServerlessIdentifier") in
+      make ?provisionedIdentifier ?serverlessIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let provisionedIdentifier =
+        field_map json__ "ProvisionedIdentifier"
+          ProvisionedIdentifier.of_json in
+      let serverlessIdentifier =
+        field_map json__ "ServerlessIdentifier" ServerlessIdentifier.of_json in
+      make ?provisionedIdentifier ?serverlessIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object to store union of values for a provisioned cluster or serverless namespace\226\128\153s identifier."]
+module ConflictPolicyUpdateFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "There is a conflict while updating the resource policy."]
+module InvalidPolicyFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The resource policy isn't valid."]
+module ResourcePolicy =
+  struct
+    type nonrec t =
+      {
+      resourceArn: String_.t option
+        [@ocaml.doc "The resources that a policy is attached to."];
+      policy: String_.t option
+        [@ocaml.doc "The content of a resource policy."]}
+    let make ?resourceArn = fun ?policy -> fun () -> { resourceArn; policy }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Option.map x.resourceArn ~f:String_.to_value));
+        ("Policy", (Option.map x.policy ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Policy") in
+      let resourceArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?policy ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map json__ "Policy" String_.of_json in
+      let resourceArn = field_map json__ "ResourceArn" String_.of_json in
+      make ?policy ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The policy that is attached to a resource."]
 module ReservedNodeQuotaExceededFault =
   struct
     type nonrec t = unit
@@ -8934,6 +11636,9 @@ module OrderableClusterOptionsList =
   struct
     type nonrec t = OrderableClusterOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrderableClusterOption.to_value)) |>
         (fun x -> `List x)
@@ -8960,6 +11665,9 @@ module NodeConfigurationOptionList =
   struct
     type nonrec t = NodeConfigurationOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NodeConfigurationOption.to_value)) |>
         (fun x -> `List x)
@@ -9008,6 +11716,80 @@ module SnapshotCopyDisabledFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Cross-region snapshot copy was temporarily disabled. Try your request again."]
+module LakehouseIdcRegistration =
+  struct
+    type nonrec t =
+      | Associate 
+      | Disassociate 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Associate -> "Associate"
+      | Disassociate -> "Disassociate"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Associate" -> Associate
+      | "Disassociate" -> Disassociate
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LakehouseIdcRegistration" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LakehouseIdcRegistration" j)
+    let to_json = simple_to_json to_value
+  end
+module LakehouseRegistration =
+  struct
+    type nonrec t =
+      | Register 
+      | Deregister 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Register -> "Register"
+      | Deregister -> "Deregister"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Register" -> Register
+      | "Deregister" -> Deregister
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LakehouseRegistration" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LakehouseRegistration" j)
+    let to_json = simple_to_json to_value
+  end
+module IntegrationDescription =
+  struct
+    type nonrec t = string
+    let context_ = "IntegrationDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IntegrationDescription" j
+    let to_json = simple_to_json to_value
+  end
 module InvalidSubscriptionStateFault =
   struct
     type nonrec t = unit
@@ -9125,6 +11907,76 @@ module SubscriptionSeverityNotFoundFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The value specified for the event severity was not one of the allowed values, or it specified a severity that does not apply to the specified source type. The allowed values are ERROR and INFO."]
+module CustomCnameAssociationFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An error occurred when an attempt was made to change the custom domain association."]
+module CustomDomainAssociationNotFoundFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An error occurred. The custom domain name couldn't be found."]
+module CustomDomainCertificateArnString =
+  struct
+    type nonrec t = string
+    let context_ = "CustomDomainCertificateArnString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[\\w+=/,.@-]+:acm:[\\w+=/,.@-]*:[0-9]+:[\\w+=,.@-]+(/[\\w+=,.@-]+)*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CustomDomainCertificateArnString" j
+    let to_json = simple_to_json to_value
+  end
+module CustomDomainNameString =
+  struct
+    type nonrec t = string
+    let context_ = "CustomDomainNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:253) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(((?!-)[A-Za-z0-9-]{0,62}[A-Za-z0-9])\\.)+((?!-)[A-Za-z0-9-]{1,62}[A-Za-z0-9])$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CustomDomainNameString" j
+    let to_json = simple_to_json to_value
+  end
 module ClusterSubnetQuotaExceededFault =
   struct
     type nonrec t = unit
@@ -9154,6 +12006,9 @@ module SubnetIdentifierList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9288,10 +12143,168 @@ module InvalidS3KeyPrefixFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The string specified for the logging S3 key prefix does not comply with the documented constraints."]
+module LogDestinationType =
+  struct
+    type nonrec t =
+      | S3 
+      | Cloudwatch 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | S3 -> "s3"
+      | Cloudwatch -> "cloudwatch"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "s3" -> S3
+      | "cloudwatch" -> Cloudwatch
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LogDestinationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LogDestinationType" j)
+    let to_json = simple_to_json to_value
+  end
+module LogTypeList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LogTypeList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module S3KeyPrefixValue =
+  struct
+    type nonrec t = string
+    let context_ = "S3KeyPrefixValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () ->
+                check_pattern i ~pattern:"[\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3KeyPrefixValue" j
+    let to_json = simple_to_json to_value
+  end
+module RecommendationList =
+  struct
+    type nonrec t = Recommendation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Recommendation.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Recommendation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RecommendationList" ~of_json:Recommendation.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module IntegrationList =
+  struct
+    type nonrec t = Integration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Integration.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Integration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"IntegrationList" ~of_json:Integration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InboundIntegrationList =
+  struct
+    type nonrec t = InboundIntegration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InboundIntegration.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InboundIntegration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InboundIntegrationList"
+        ~of_json:InboundIntegration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module HsmConfigurationList =
   struct
     type nonrec t = HsmConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HsmConfiguration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9317,6 +12330,9 @@ module HsmClientCertificateList =
   struct
     type nonrec t = HsmClientCertificate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HsmClientCertificate.to_value)) |>
         (fun x -> `List x)
@@ -9343,6 +12359,9 @@ module ReservedNodeConfigurationOptionList =
   struct
     type nonrec t = ReservedNodeConfigurationOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedNodeConfigurationOption.to_value)) |>
         (fun x -> `List x)
@@ -9393,10 +12412,53 @@ module ReservedNodeExchangeActionType =
       of_string (string_of_json ~kind:"ReservedNodeExchangeActionType" j)
     let to_json = simple_to_json to_value
   end
+module RedshiftInvalidParameterFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request contains one or more invalid parameters. This error occurs when required parameters are missing, parameter values are outside acceptable ranges, or parameter formats are incorrect."]
+module ClusterIdentifierList =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ClusterIdentifierList" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DbGroupList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9421,6 +12483,9 @@ module EventList =
   struct
     type nonrec t = Event.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Event.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9444,6 +12509,9 @@ module EventSubscriptionsList =
   struct
     type nonrec t = EventSubscription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventSubscription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9469,6 +12537,9 @@ module EventCategoriesMapList =
   struct
     type nonrec t = EventCategoriesMap.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventCategoriesMap.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9494,6 +12565,9 @@ module EndpointAuthorizations =
   struct
     type nonrec t = EndpointAuthorization.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EndpointAuthorization.to_value)) |>
         (fun x -> `List x)
@@ -9520,6 +12594,9 @@ module EndpointAccesses =
   struct
     type nonrec t = EndpointAccess.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EndpointAccess.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9603,34 +12680,13 @@ module SnapshotCopyAlreadyDisabledFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The cluster already has cross-region snapshot copy disabled."]
-module TagKeyList =
-  struct
-    type nonrec t = String_.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:String_.of_xml)
-    let of_json j =
-      list_of_json ~kind:"TagKeyList" ~of_json:String_.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module TagValueList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9655,6 +12711,9 @@ module SnapshotScheduleList =
   struct
     type nonrec t = SnapshotSchedule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotSchedule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9680,6 +12739,9 @@ module ScheduledActionFilterList =
   struct
     type nonrec t = ScheduledActionFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduledActionFilter.to_value)) |>
         (fun x -> `List x)
@@ -9748,6 +12810,9 @@ module ReservedNodeExchangeStatusList =
   struct
     type nonrec t = ReservedNodeExchangeStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedNodeExchangeStatus.to_value)) |>
         (fun x -> `List x)
@@ -9770,10 +12835,42 @@ module ReservedNodeExchangeStatusList =
         ~of_json:ReservedNodeExchangeStatus.of_json j
     let to_json v = composed_to_json to_value v
   end
+module RedshiftIdcApplicationList =
+  struct
+    type nonrec t = RedshiftIdcApplication.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RedshiftIdcApplication.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RedshiftIdcApplication.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RedshiftIdcApplicationList"
+        ~of_json:RedshiftIdcApplication.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PartnerIntegrationInfoList =
   struct
     type nonrec t = PartnerIntegrationInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PartnerIntegrationInfo.to_value)) |>
         (fun x -> `List x)
@@ -9828,6 +12925,9 @@ module NodeConfigurationOptionsFilterList =
   struct
     type nonrec t = NodeConfigurationOptionsFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NodeConfigurationOptionsFilter.to_value)) |>
         (fun x -> `List x)
@@ -9848,6 +12948,35 @@ module NodeConfigurationOptionsFilterList =
     let of_json j =
       list_of_json ~kind:"NodeConfigurationOptionsFilterList"
         ~of_json:NodeConfigurationOptionsFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeIntegrationsFilterList =
+  struct
+    type nonrec t = DescribeIntegrationsFilter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DescribeIntegrationsFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DescribeIntegrationsFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DescribeIntegrationsFilterList"
+        ~of_json:DescribeIntegrationsFilter.of_json j
     let to_json v = composed_to_json to_value v
   end
 module DefaultClusterParameters =
@@ -9884,11 +13013,11 @@ module DefaultClusterParameters =
           (Xml.child xml_arg0 "ParameterGroupFamily") in
       make ?parameters ?marker ?parameterGroupFamily ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" ParametersList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let parameters = field_map json__ "Parameters" ParametersList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       let parameterGroupFamily =
-        field_map json "ParameterGroupFamily" String_.of_json in
+        field_map json__ "ParameterGroupFamily" String_.of_json in
       make ?parameters ?marker ?parameterGroupFamily ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9897,6 +13026,9 @@ module DataShareList =
   struct
     type nonrec t = DataShare.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataShare.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9986,6 +13118,9 @@ module SnapshotSortingEntityList =
   struct
     type nonrec t = SnapshotSortingEntity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotSortingEntity.to_value)) |>
         (fun x -> `List x)
@@ -10012,6 +13147,9 @@ module AuthenticationProfileList =
   struct
     type nonrec t = AuthenticationProfile.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AuthenticationProfile.to_value)) |>
         (fun x -> `List x)
@@ -10038,6 +13176,9 @@ module AttributeNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10084,6 +13225,33 @@ module ClusterSnapshotQuotaExceededFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request would result in the user exceeding the allowed number of cluster snapshots."]
+module AssociationList =
+  struct
+    type nonrec t = Association.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Association.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Association.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssociationList" ~of_json:Association.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SnapshotCopyGrantAlreadyExistsFault =
   struct
     type nonrec t = unit
@@ -10110,6 +13278,31 @@ module SnapshotCopyGrantQuotaExceededFault =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Amazon Web Services account has exceeded the maximum number of snapshot copy grants in this region."]
+module RedshiftIdcApplicationAlreadyExistsFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The application you attempted to add already exists."]
+module RedshiftIdcApplicationQuotaExceededFault =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The maximum number of Redshift IAM Identity Center applications was exceeded."]
 module HsmConfigurationAlreadyExistsFault =
   struct
     type nonrec t = unit
@@ -10282,6 +13475,9 @@ module ClusterList =
   struct
     type nonrec t = Cluster.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Cluster.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10306,6 +13502,9 @@ module ClusterVersionList =
   struct
     type nonrec t = ClusterVersion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterVersion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10331,6 +13530,9 @@ module ClusterSubnetGroups =
   struct
     type nonrec t = ClusterSubnetGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterSubnetGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10356,6 +13558,9 @@ module ClusterSecurityGroups =
   struct
     type nonrec t = ClusterSecurityGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterSecurityGroup.to_value)) |>
         (fun x -> `List x)
@@ -10382,6 +13587,9 @@ module ParameterGroupList =
   struct
     type nonrec t = ClusterParameterGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterParameterGroup.to_value)) |>
         (fun x -> `List x)
@@ -10421,6 +13629,9 @@ module ClusterDbRevisionsList =
   struct
     type nonrec t = ClusterDbRevision.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterDbRevision.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10442,19 +13653,6 @@ module ClusterDbRevisionsList =
         ~of_json:ClusterDbRevision.of_json j
     let to_json v = composed_to_json to_value v
   end
-module SensitiveString =
-  struct
-    type nonrec t = string
-    let context_ = "SensitiveString"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SensitiveString" j
-    let to_json = simple_to_json to_value
-  end
 module BatchModifyClusterSnapshotsLimitExceededFault =
   struct
     type nonrec t = unit
@@ -10472,6 +13670,9 @@ module BatchSnapshotOperationErrors =
   struct
     type nonrec t = SnapshotErrorMessage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotErrorMessage.to_value)) |>
         (fun x -> `List x)
@@ -10498,6 +13699,9 @@ module SnapshotIdentifierList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10535,6 +13739,9 @@ module BatchSnapshotOperationErrorList =
   struct
     type nonrec t = SnapshotErrorMessage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnapshotErrorMessage.to_value)) |>
         (fun x -> `List x)
@@ -10561,6 +13768,9 @@ module DeleteClusterSnapshotMessageList =
   struct
     type nonrec t = DeleteClusterSnapshotMessage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeleteClusterSnapshotMessage.to_value)) |>
         (fun x -> `List x)
@@ -10613,6 +13823,9 @@ module AttributeList =
   struct
     type nonrec t = AccountAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10708,9 +13921,9 @@ module UsageLimitList =
         (Option.map ~f:UsageLimits.of_xml) (Xml.child xml_arg0 "UsageLimits") in
       make ?marker ?usageLimits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let usageLimits = field_map json "UsageLimits" UsageLimits.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let usageLimits = field_map json__ "UsageLimits" UsageLimits.of_json in
       make ?marker ?usageLimits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10790,23 +14003,23 @@ module UpdatePartnerStatusInputMessage =
       make ?statusMessage ~status ~partnerName ~databaseName
         ~clusterIdentifier ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusMessage =
-        field_map json "StatusMessage"
+        field_map json__ "StatusMessage"
           PartnerIntegrationStatusMessage.of_json in
       let status =
-        field_map_exn json "Status" PartnerIntegrationStatus.of_json in
+        field_map_exn json__ "Status" PartnerIntegrationStatus.of_json in
       let partnerName =
-        field_map_exn json "PartnerName"
+        field_map_exn json__ "PartnerName"
           PartnerIntegrationPartnerName.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName"
+        field_map_exn json__ "DatabaseName"
           PartnerIntegrationDatabaseName.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier"
+        field_map_exn json__ "ClusterIdentifier"
           PartnerIntegrationClusterIdentifier.of_json in
       let accountId =
-        field_map_exn json "AccountId" PartnerIntegrationAccountId.of_json in
+        field_map_exn json__ "AccountId" PartnerIntegrationAccountId.of_json in
       make ?statusMessage ~status ~partnerName ~databaseName
         ~clusterIdentifier ~accountId ()
     let to_json v = composed_to_json to_value v
@@ -10888,10 +14101,10 @@ module TrackListMessage =
           (Xml.child xml_arg0 "MaintenanceTracks") in
       make ?marker ?maintenanceTracks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
       let maintenanceTracks =
-        field_map json "MaintenanceTracks" TrackList.of_json in
+        field_map json__ "MaintenanceTracks" TrackList.of_json in
       make ?marker ?maintenanceTracks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of all the available maintenance tracks."]
@@ -10968,10 +14181,10 @@ module TaggedResourceListMessage =
           (Xml.child xml_arg0 "TaggedResources") in
       make ?marker ?taggedResources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
       let taggedResources =
-        field_map json "TaggedResources" TaggedResourceList.of_json in
+        field_map json__ "TaggedResources" TaggedResourceList.of_json in
       make ?marker ?taggedResources ()
     let to_json v = composed_to_json to_value v
   end
@@ -11055,10 +14268,10 @@ module TableRestoreStatusMessage =
           (Xml.child xml_arg0 "TableRestoreStatusDetails") in
       make ?marker ?tableRestoreStatusDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
       let tableRestoreStatusDetails =
-        field_map json "TableRestoreStatusDetails"
+        field_map json__ "TableRestoreStatusDetails"
           TableRestoreStatusList.of_json in
       make ?marker ?tableRestoreStatusDetails ()
     let to_json v = composed_to_json to_value v
@@ -11081,6 +14294,7 @@ module SnapshotMessage =
       [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
       | `ClusterSnapshotNotFoundFault of ClusterSnapshotNotFoundFault.t 
       | `InvalidTagFault of InvalidTagFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "SnapshotMessage"
     let make ?marker =
@@ -11098,6 +14312,8 @@ module SnapshotMessage =
           `ClusterSnapshotNotFoundFault
             (ClusterSnapshotNotFoundFault.of_json json)
       | "InvalidTagFault" -> `InvalidTagFault (InvalidTagFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -11109,6 +14325,8 @@ module SnapshotMessage =
           `ClusterSnapshotNotFoundFault
             (ClusterSnapshotNotFoundFault.of_xml xml)
       | "InvalidTagFault" -> `InvalidTagFault (InvalidTagFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -11125,6 +14343,10 @@ module SnapshotMessage =
           `Assoc
             [("error", (`String "InvalidTagFault"));
             ("details", (InvalidTagFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -11147,9 +14369,9 @@ module SnapshotMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?snapshots ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshots = field_map json "Snapshots" SnapshotList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let snapshots = field_map json__ "Snapshots" SnapshotList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?snapshots ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11231,10 +14453,10 @@ module SnapshotCopyGrantMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?snapshotCopyGrants ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotCopyGrants =
-        field_map json "SnapshotCopyGrants" SnapshotCopyGrantList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "SnapshotCopyGrants" SnapshotCopyGrantList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?snapshotCopyGrants ?marker ()
     let to_json v = composed_to_json to_value v
   end
@@ -11317,10 +14539,10 @@ module ScheduledActionsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?scheduledActions ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledActions =
-        field_map json "ScheduledActions" ScheduledActionList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "ScheduledActions" ScheduledActionList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?scheduledActions ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes properties of scheduled actions."]
@@ -11338,6 +14560,7 @@ module RotateEncryptionKeyResult =
       | `DependentServiceRequestThrottlingFault of
           DependentServiceRequestThrottlingFault.t 
       | `InvalidClusterStateFault of InvalidClusterStateFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "RotateEncryptionKeyResult"
     let make ?cluster =
@@ -11352,6 +14575,8 @@ module RotateEncryptionKeyResult =
             (DependentServiceRequestThrottlingFault.of_json json)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -11364,6 +14589,8 @@ module RotateEncryptionKeyResult =
             (DependentServiceRequestThrottlingFault.of_xml xml)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -11380,6 +14607,10 @@ module RotateEncryptionKeyResult =
           `Assoc
             [("error", (`String "InvalidClusterStateFault"));
             ("details", (InvalidClusterStateFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -11398,8 +14629,8 @@ module RotateEncryptionKeyResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Rotates the encryption keys for a cluster."]
@@ -11422,9 +14653,9 @@ module RotateEncryptionKeyMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       make ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end
@@ -11441,6 +14672,7 @@ module RevokeSnapshotAccessResult =
       [ `AccessToSnapshotDeniedFault of AccessToSnapshotDeniedFault.t 
       | `AuthorizationNotFoundFault of AuthorizationNotFoundFault.t 
       | `ClusterSnapshotNotFoundFault of ClusterSnapshotNotFoundFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "RevokeSnapshotAccessResult"
     let make ?snapshot =
@@ -11457,6 +14689,8 @@ module RevokeSnapshotAccessResult =
       | "ClusterSnapshotNotFoundFault" ->
           `ClusterSnapshotNotFoundFault
             (ClusterSnapshotNotFoundFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -11470,6 +14704,8 @@ module RevokeSnapshotAccessResult =
       | "ClusterSnapshotNotFoundFault" ->
           `ClusterSnapshotNotFoundFault
             (ClusterSnapshotNotFoundFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -11486,6 +14722,10 @@ module RevokeSnapshotAccessResult =
           `Assoc
             [("error", (`String "ClusterSnapshotNotFoundFault"));
             ("details", (ClusterSnapshotNotFoundFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -11504,8 +14744,8 @@ module RevokeSnapshotAccessResult =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11514,9 +14754,12 @@ module RevokeSnapshotAccessMessage =
   struct
     type nonrec t =
       {
-      snapshotIdentifier: String_.t
+      snapshotIdentifier: String_.t option
         [@ocaml.doc
           "The identifier of the snapshot that the account can no longer access."];
+      snapshotArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the snapshot associated with the message to revoke access."];
       snapshotClusterIdentifier: String_.t option
         [@ocaml.doc
           "The identifier of the cluster the snapshot was created from. This parameter is required if your IAM user has a policy containing a snapshot resource element that specifies anything other than * for the cluster name."];
@@ -11524,19 +14767,22 @@ module RevokeSnapshotAccessMessage =
         [@ocaml.doc
           "The identifier of the Amazon Web Services account that can no longer restore the specified snapshot."]}
     let context_ = "RevokeSnapshotAccessMessage"
-    let make ?snapshotClusterIdentifier =
-      fun ~snapshotIdentifier ->
-        fun ~accountWithRestoreAccess ->
-          fun () ->
-            {
-              snapshotClusterIdentifier;
-              snapshotIdentifier;
-              accountWithRestoreAccess
-            }
+    let make ?snapshotIdentifier =
+      fun ?snapshotArn ->
+        fun ?snapshotClusterIdentifier ->
+          fun ~accountWithRestoreAccess ->
+            fun () ->
+              {
+                snapshotIdentifier;
+                snapshotArn;
+                snapshotClusterIdentifier;
+                accountWithRestoreAccess
+              }
     let to_value x =
       structure_to_value
         [("SnapshotIdentifier",
-           (Some (String_.to_value x.snapshotIdentifier)));
+           (Option.map x.snapshotIdentifier ~f:String_.to_value));
+        ("SnapshotArn", (Option.map x.snapshotArn ~f:String_.to_value));
         ("SnapshotClusterIdentifier",
           (Option.map x.snapshotClusterIdentifier ~f:String_.to_value));
         ("AccountWithRestoreAccess",
@@ -11550,21 +14796,24 @@ module RevokeSnapshotAccessMessage =
       let snapshotClusterIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SnapshotClusterIdentifier") in
+      let snapshotArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SnapshotArn") in
       let snapshotIdentifier =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SnapshotIdentifier") in
-      make ~accountWithRestoreAccess ?snapshotClusterIdentifier
-        ~snapshotIdentifier ()
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "SnapshotIdentifier") in
+      make ~accountWithRestoreAccess ?snapshotClusterIdentifier ?snapshotArn
+        ?snapshotIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accountWithRestoreAccess =
-        field_map_exn json "AccountWithRestoreAccess" String_.of_json in
+        field_map_exn json__ "AccountWithRestoreAccess" String_.of_json in
       let snapshotClusterIdentifier =
-        field_map json "SnapshotClusterIdentifier" String_.of_json in
+        field_map json__ "SnapshotClusterIdentifier" String_.of_json in
+      let snapshotArn = field_map json__ "SnapshotArn" String_.of_json in
       let snapshotIdentifier =
-        field_map_exn json "SnapshotIdentifier" String_.of_json in
-      make ~accountWithRestoreAccess ?snapshotClusterIdentifier
-        ~snapshotIdentifier ()
+        field_map json__ "SnapshotIdentifier" String_.of_json in
+      make ~accountWithRestoreAccess ?snapshotClusterIdentifier ?snapshotArn
+        ?snapshotIdentifier ()
     let to_json v = composed_to_json to_value v
   end
 module RevokeEndpointAccessMessage =
@@ -11607,12 +14856,12 @@ module RevokeEndpointAccessMessage =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?force ?vpcIds ?account ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let force = field_map json "Force" Boolean.of_json in
-      let vpcIds = field_map json "VpcIds" VpcIdentifierList.of_json in
-      let account = field_map json "Account" String_.of_json in
+    let of_json json__ =
+      let force = field_map json__ "Force" Boolean.of_json in
+      let vpcIds = field_map json__ "VpcIds" VpcIdentifierList.of_json in
+      let account = field_map json__ "Account" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       make ?force ?vpcIds ?account ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Revokes access to a cluster."]
@@ -11704,9 +14953,9 @@ module RevokeClusterSecurityGroupIngressResult =
           (Xml.child xml_arg0 "ClusterSecurityGroup") in
       make ?clusterSecurityGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterSecurityGroup =
-        field_map json "ClusterSecurityGroup" ClusterSecurityGroup.of_json in
+        field_map json__ "ClusterSecurityGroup" ClusterSecurityGroup.of_json in
       make ?clusterSecurityGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11765,14 +15014,14 @@ module RevokeClusterSecurityGroupIngressMessage =
       make ?eC2SecurityGroupOwnerId ?eC2SecurityGroupName ?cIDRIP
         ~clusterSecurityGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eC2SecurityGroupOwnerId =
-        field_map json "EC2SecurityGroupOwnerId" String_.of_json in
+        field_map json__ "EC2SecurityGroupOwnerId" String_.of_json in
       let eC2SecurityGroupName =
-        field_map json "EC2SecurityGroupName" String_.of_json in
-      let cIDRIP = field_map json "CIDRIP" String_.of_json in
+        field_map json__ "EC2SecurityGroupName" String_.of_json in
+      let cIDRIP = field_map json__ "CIDRIP" String_.of_json in
       let clusterSecurityGroupName =
-        field_map_exn json "ClusterSecurityGroupName" String_.of_json in
+        field_map_exn json__ "ClusterSecurityGroupName" String_.of_json in
       make ?eC2SecurityGroupOwnerId ?eC2SecurityGroupName ?cIDRIP
         ~clusterSecurityGroupName ()
     let to_json v = composed_to_json to_value v
@@ -11791,6 +15040,7 @@ module ResumeClusterResult =
       | `InsufficientClusterCapacityFault of
           InsufficientClusterCapacityFault.t 
       | `InvalidClusterStateFault of InvalidClusterStateFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ResumeClusterResult"
     let make ?cluster =
@@ -11804,6 +15054,8 @@ module ResumeClusterResult =
             (InsufficientClusterCapacityFault.of_json json)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -11816,6 +15068,8 @@ module ResumeClusterResult =
             (InsufficientClusterCapacityFault.of_xml xml)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -11832,6 +15086,10 @@ module ResumeClusterResult =
           `Assoc
             [("error", (`String "InvalidClusterStateFault"));
             ("details", (InvalidClusterStateFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -11849,8 +15107,8 @@ module ResumeClusterResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Resumes a paused cluster."]
@@ -11981,13 +15239,13 @@ module RestoreTableFromClusterSnapshotResult =
           (Xml.child xml_arg0 "TableRestoreStatus") in
       make ?tableRestoreStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tableRestoreStatus =
-        field_map json "TableRestoreStatus" TableRestoreStatus.of_json in
+        field_map json__ "TableRestoreStatus" TableRestoreStatus.of_json in
       make ?tableRestoreStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new table from a table in an Amazon Redshift cluster snapshot. You must create the new table within the Amazon Redshift cluster that the snapshot was taken from. You cannot use RestoreTableFromClusterSnapshot to restore a table with the same name as an existing table in an Amazon Redshift cluster. That is, you cannot overwrite an existing table in a cluster with a restored table. If you want to replace your original table with a new, restored table, then rename or drop your original table before you call RestoreTableFromClusterSnapshot. When you have renamed your original table, then you can pass the original name of the table as the NewTableName parameter value in the call to RestoreTableFromClusterSnapshot. This way, you can replace the original table with the table created from the snapshot."]
+       "Creates a new table from a table in an Amazon Redshift cluster snapshot. You must create the new table within the Amazon Redshift cluster that the snapshot was taken from. You cannot use RestoreTableFromClusterSnapshot to restore a table with the same name as an existing table in an Amazon Redshift cluster. That is, you cannot overwrite an existing table in a cluster with a restored table. If you want to replace your original table with a new, restored table, then rename or drop your original table before you call RestoreTableFromClusterSnapshot. When you have renamed your original table, then you can pass the original name of the table as the NewTableName parameter value in the call to RestoreTableFromClusterSnapshot. This way, you can replace the original table with the table created from the snapshot. You can't use this operation to restore tables with interleaved sort keys."]
 module RestoreTableFromClusterSnapshotMessage =
   struct
     type nonrec t =
@@ -12089,25 +15347,25 @@ module RestoreTableFromClusterSnapshotMessage =
         ?targetDatabaseName ~sourceTableName ?sourceSchemaName
         ~sourceDatabaseName ~snapshotIdentifier ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let enableCaseSensitiveIdentifier =
-        field_map json "EnableCaseSensitiveIdentifier"
+        field_map json__ "EnableCaseSensitiveIdentifier"
           BooleanOptional.of_json in
-      let newTableName = field_map_exn json "NewTableName" String_.of_json in
+      let newTableName = field_map_exn json__ "NewTableName" String_.of_json in
       let targetSchemaName =
-        field_map json "TargetSchemaName" String_.of_json in
+        field_map json__ "TargetSchemaName" String_.of_json in
       let targetDatabaseName =
-        field_map json "TargetDatabaseName" String_.of_json in
+        field_map json__ "TargetDatabaseName" String_.of_json in
       let sourceTableName =
-        field_map_exn json "SourceTableName" String_.of_json in
+        field_map_exn json__ "SourceTableName" String_.of_json in
       let sourceSchemaName =
-        field_map json "SourceSchemaName" String_.of_json in
+        field_map json__ "SourceSchemaName" String_.of_json in
       let sourceDatabaseName =
-        field_map_exn json "SourceDatabaseName" String_.of_json in
+        field_map_exn json__ "SourceDatabaseName" String_.of_json in
       let snapshotIdentifier =
-        field_map_exn json "SnapshotIdentifier" String_.of_json in
+        field_map_exn json__ "SnapshotIdentifier" String_.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ?enableCaseSensitiveIdentifier ~newTableName ?targetSchemaName
         ?targetDatabaseName ~sourceTableName ?sourceSchemaName
         ~sourceDatabaseName ~snapshotIdentifier ~clusterIdentifier ()
@@ -12132,6 +15390,8 @@ module RestoreFromClusterSnapshotResult =
           ClusterSecurityGroupNotFoundFault.t 
       | `ClusterSnapshotNotFoundFault of ClusterSnapshotNotFoundFault.t 
       | `ClusterSubnetGroupNotFoundFault of ClusterSubnetGroupNotFoundFault.t 
+      | `DependentServiceAccessDeniedFault of
+          DependentServiceAccessDeniedFault.t 
       | `DependentServiceRequestThrottlingFault of
           DependentServiceRequestThrottlingFault.t 
       | `DependentServiceUnavailableFault of
@@ -12152,10 +15412,13 @@ module RestoreFromClusterSnapshotResult =
       | `InvalidSubnet of InvalidSubnet.t 
       | `InvalidTagFault of InvalidTagFault.t 
       | `InvalidVPCNetworkStateFault of InvalidVPCNetworkStateFault.t 
+      | `Ipv6CidrBlockNotFoundFault of Ipv6CidrBlockNotFoundFault.t 
       | `LimitExceededFault of LimitExceededFault.t 
       | `NumberOfNodesPerClusterLimitExceededFault of
           NumberOfNodesPerClusterLimitExceededFault.t 
       | `NumberOfNodesQuotaExceededFault of NumberOfNodesQuotaExceededFault.t 
+      | `RedshiftIdcApplicationNotExistsFault of
+          RedshiftIdcApplicationNotExistsFault.t 
       | `ReservedNodeAlreadyExistsFault of ReservedNodeAlreadyExistsFault.t 
       | `ReservedNodeAlreadyMigratedFault of
           ReservedNodeAlreadyMigratedFault.t 
@@ -12195,6 +15458,9 @@ module RestoreFromClusterSnapshotResult =
       | "ClusterSubnetGroupNotFoundFault" ->
           `ClusterSubnetGroupNotFoundFault
             (ClusterSubnetGroupNotFoundFault.of_json json)
+      | "DependentServiceAccessDeniedFault" ->
+          `DependentServiceAccessDeniedFault
+            (DependentServiceAccessDeniedFault.of_json json)
       | "DependentServiceRequestThrottlingFault" ->
           `DependentServiceRequestThrottlingFault
             (DependentServiceRequestThrottlingFault.of_json json)
@@ -12230,6 +15496,9 @@ module RestoreFromClusterSnapshotResult =
       | "InvalidVPCNetworkStateFault" ->
           `InvalidVPCNetworkStateFault
             (InvalidVPCNetworkStateFault.of_json json)
+      | "Ipv6CidrBlockNotFoundFault" ->
+          `Ipv6CidrBlockNotFoundFault
+            (Ipv6CidrBlockNotFoundFault.of_json json)
       | "LimitExceededFault" ->
           `LimitExceededFault (LimitExceededFault.of_json json)
       | "NumberOfNodesPerClusterLimitExceededFault" ->
@@ -12238,6 +15507,9 @@ module RestoreFromClusterSnapshotResult =
       | "NumberOfNodesQuotaExceededFault" ->
           `NumberOfNodesQuotaExceededFault
             (NumberOfNodesQuotaExceededFault.of_json json)
+      | "RedshiftIdcApplicationNotExistsFault" ->
+          `RedshiftIdcApplicationNotExistsFault
+            (RedshiftIdcApplicationNotExistsFault.of_json json)
       | "ReservedNodeAlreadyExistsFault" ->
           `ReservedNodeAlreadyExistsFault
             (ReservedNodeAlreadyExistsFault.of_json json)
@@ -12282,6 +15554,9 @@ module RestoreFromClusterSnapshotResult =
       | "ClusterSubnetGroupNotFoundFault" ->
           `ClusterSubnetGroupNotFoundFault
             (ClusterSubnetGroupNotFoundFault.of_xml xml)
+      | "DependentServiceAccessDeniedFault" ->
+          `DependentServiceAccessDeniedFault
+            (DependentServiceAccessDeniedFault.of_xml xml)
       | "DependentServiceRequestThrottlingFault" ->
           `DependentServiceRequestThrottlingFault
             (DependentServiceRequestThrottlingFault.of_xml xml)
@@ -12317,6 +15592,8 @@ module RestoreFromClusterSnapshotResult =
       | "InvalidVPCNetworkStateFault" ->
           `InvalidVPCNetworkStateFault
             (InvalidVPCNetworkStateFault.of_xml xml)
+      | "Ipv6CidrBlockNotFoundFault" ->
+          `Ipv6CidrBlockNotFoundFault (Ipv6CidrBlockNotFoundFault.of_xml xml)
       | "LimitExceededFault" ->
           `LimitExceededFault (LimitExceededFault.of_xml xml)
       | "NumberOfNodesPerClusterLimitExceededFault" ->
@@ -12325,6 +15602,9 @@ module RestoreFromClusterSnapshotResult =
       | "NumberOfNodesQuotaExceededFault" ->
           `NumberOfNodesQuotaExceededFault
             (NumberOfNodesQuotaExceededFault.of_xml xml)
+      | "RedshiftIdcApplicationNotExistsFault" ->
+          `RedshiftIdcApplicationNotExistsFault
+            (RedshiftIdcApplicationNotExistsFault.of_xml xml)
       | "ReservedNodeAlreadyExistsFault" ->
           `ReservedNodeAlreadyExistsFault
             (ReservedNodeAlreadyExistsFault.of_xml xml)
@@ -12377,6 +15657,10 @@ module RestoreFromClusterSnapshotResult =
           `Assoc
             [("error", (`String "ClusterSubnetGroupNotFoundFault"));
             ("details", (ClusterSubnetGroupNotFoundFault.to_json e))]
+      | `DependentServiceAccessDeniedFault e ->
+          `Assoc
+            [("error", (`String "DependentServiceAccessDeniedFault"));
+            ("details", (DependentServiceAccessDeniedFault.to_json e))]
       | `DependentServiceRequestThrottlingFault e ->
           `Assoc
             [("error", (`String "DependentServiceRequestThrottlingFault"));
@@ -12433,6 +15717,10 @@ module RestoreFromClusterSnapshotResult =
           `Assoc
             [("error", (`String "InvalidVPCNetworkStateFault"));
             ("details", (InvalidVPCNetworkStateFault.to_json e))]
+      | `Ipv6CidrBlockNotFoundFault e ->
+          `Assoc
+            [("error", (`String "Ipv6CidrBlockNotFoundFault"));
+            ("details", (Ipv6CidrBlockNotFoundFault.to_json e))]
       | `LimitExceededFault e ->
           `Assoc
             [("error", (`String "LimitExceededFault"));
@@ -12446,6 +15734,10 @@ module RestoreFromClusterSnapshotResult =
           `Assoc
             [("error", (`String "NumberOfNodesQuotaExceededFault"));
             ("details", (NumberOfNodesQuotaExceededFault.to_json e))]
+      | `RedshiftIdcApplicationNotExistsFault e ->
+          `Assoc
+            [("error", (`String "RedshiftIdcApplicationNotExistsFault"));
+            ("details", (RedshiftIdcApplicationNotExistsFault.to_json e))]
       | `ReservedNodeAlreadyExistsFault e ->
           `Assoc
             [("error", (`String "ReservedNodeAlreadyExistsFault"));
@@ -12497,12 +15789,12 @@ module RestoreFromClusterSnapshotResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new cluster from a snapshot. By default, Amazon Redshift creates the resulting cluster with the same configuration as the original cluster from which the snapshot was created, except that the new cluster is created with the default cluster security and parameter groups. After Amazon Redshift creates the cluster, you can use the ModifyCluster API to associate a different security group and different parameter group with the restored cluster. If you are using a DS node type, you can also choose to change to another DS node type of the same size during restore. If you restore a cluster into a VPC, you must provide a cluster subnet group where you want the cluster restored. For more information about working with snapshots, go to Amazon Redshift Snapshots in the Amazon Redshift Cluster Management Guide."]
+       "Creates a new cluster from a snapshot. By default, Amazon Redshift creates the resulting cluster with the same configuration as the original cluster from which the snapshot was created, except that the new cluster is created with the default cluster security and parameter groups. After Amazon Redshift creates the cluster, you can use the ModifyCluster API to associate a different security group and different parameter group with the restored cluster. If you are using a DS node type, you can also choose to change to another DS node type of the same size during restore. If you restore a cluster into a VPC, you must provide a cluster subnet group where you want the cluster restored. VPC Block Public Access (BPA) enables you to block resources in VPCs and subnets that you own in a Region from reaching or being reached from the internet through internet gateways and egress-only internet gateways. If a subnet group for a provisioned cluster is in an account with VPC BPA turned on, the following capabilities are blocked: Creating a public cluster Restoring a public cluster Modifying a private cluster to be public Adding a subnet with VPC BPA turned on to the subnet group when there's at least one public cluster within the group For more information about VPC BPA, see Block public access to VPCs and subnets in the Amazon VPC User Guide. For more information about working with snapshots, go to Amazon Redshift Snapshots in the Amazon Redshift Cluster Management Guide."]
 module RestoreFromClusterSnapshotMessage =
   struct
     type nonrec t =
@@ -12510,15 +15802,18 @@ module RestoreFromClusterSnapshotMessage =
       clusterIdentifier: String_.t
         [@ocaml.doc
           "The identifier of the cluster that will be created from restoring the snapshot. Constraints: Must contain from 1 to 63 alphanumeric characters or hyphens. Alphabetic characters must be lowercase. First character must be a letter. Cannot end with a hyphen or contain two consecutive hyphens. Must be unique for all clusters within an Amazon Web Services account."];
-      snapshotIdentifier: String_.t
+      snapshotIdentifier: String_.t option
         [@ocaml.doc
-          "The name of the snapshot from which to create the new cluster. This parameter isn't case sensitive. Example: my-snapshot-id"];
+          "The name of the snapshot from which to create the new cluster. This parameter isn't case sensitive. You must specify this parameter or snapshotArn, but not both. Example: my-snapshot-id"];
+      snapshotArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the snapshot associated with the message to restore from a cluster. You must specify this parameter or snapshotIdentifier, but not both."];
       snapshotClusterIdentifier: String_.t option
         [@ocaml.doc
           "The name of the cluster the source snapshot was created from. This parameter is required if your IAM user has a policy containing a snapshot resource element that specifies anything other than * for the cluster name."];
       port: IntegerOptional.t option
         [@ocaml.doc
-          "The port number on which the cluster accepts connections. Default: The same port as the original cluster. Constraints: Must be between 1115 and 65535."];
+          "The port number on which the cluster accepts connections. Default: The same port as the original cluster. Valid values: For clusters with DC2 nodes, must be within the range 1150-65535. For clusters with RG or RA3 nodes, must be within the ranges 5431-5455 or 8191-8215."];
       availabilityZone: String_.t option
         [@ocaml.doc
           "The Amazon EC2 Availability Zone in which to restore the cluster. Default: A random, system-chosen Availability Zone. Example: us-east-2a"];
@@ -12530,7 +15825,7 @@ module RestoreFromClusterSnapshotMessage =
           "The name of the subnet group where you want to cluster restored. A snapshot of cluster in VPC can be restored only in VPC. Therefore, you must provide subnet group name where you want the cluster restored."];
       publiclyAccessible: BooleanOptional.t option
         [@ocaml.doc
-          "If true, the cluster can be accessed from a public network."];
+          "If true, the cluster can be accessed from a public network. Default: false"];
       ownerAccount: String_.t option
         [@ocaml.doc
           "The Amazon Web Services account used to create or copy the snapshot. Required if you are restoring a snapshot you do not own, optional if you own the snapshot."];
@@ -12541,7 +15836,8 @@ module RestoreFromClusterSnapshotMessage =
         [@ocaml.doc
           "Specifies the name of the HSM configuration that contains the information the Amazon Redshift cluster can use to retrieve and store keys in an HSM."];
       elasticIp: String_.t option
-        [@ocaml.doc "The elastic IP (EIP) address for the cluster."];
+        [@ocaml.doc
+          "The Elastic IP (EIP) address for the cluster. Don't specify the Elastic IP address for a publicly accessible cluster with availability zone relocation turned on."];
       clusterParameterGroupName: String_.t option
         [@ocaml.doc
           "The name of the parameter group to be associated with this cluster. Default: The default Amazon Redshift cluster parameter group. For information about the default parameter group, go to Working with Amazon Redshift Parameter Groups. Constraints: Must be 1 to 255 alphanumeric characters or hyphens. First character must be a letter. Cannot end with a hyphen or contain two consecutive hyphens."];
@@ -12556,16 +15852,16 @@ module RestoreFromClusterSnapshotMessage =
           "The weekly time range (in UTC) during which automated cluster maintenance can occur. Format: ddd:hh24:mi-ddd:hh24:mi Default: The value selected for the cluster from which the snapshot was taken. For more information about the time blocks for each region, see Maintenance Windows in Amazon Redshift Cluster Management Guide. Valid Days: Mon | Tue | Wed | Thu | Fri | Sat | Sun Constraints: Minimum 30-minute window."];
       automatedSnapshotRetentionPeriod: IntegerOptional.t option
         [@ocaml.doc
-          "The number of days that automated snapshots are retained. If the value is 0, automated snapshots are disabled. Even if automated snapshots are disabled, you can still create manual snapshots when you want with CreateClusterSnapshot. You can't disable automated snapshots for RA3 node types. Set the automated retention period from 1-35 days. Default: The value selected for the cluster from which the snapshot was taken. Constraints: Must be a value from 0 to 35."];
+          "The number of days that automated snapshots are retained. If the value is 0, automated snapshots are disabled. Even if automated snapshots are disabled, you can still create manual snapshots when you want with CreateClusterSnapshot. You can't disable automated snapshots for RG or RA3 node types. Set the automated retention period from 1-35 days. Default: The value selected for the cluster from which the snapshot was taken. Constraints: Must be a value from 0 to 35."];
       manualSnapshotRetentionPeriod: IntegerOptional.t option
         [@ocaml.doc
           "The default number of days to retain a manual snapshot. If the value is -1, the snapshot is retained indefinitely. This setting doesn't change the retention period of existing snapshots. The value must be either -1 or an integer between 1 and 3,653."];
       kmsKeyId: String_.t option
         [@ocaml.doc
-          "The Key Management Service (KMS) key ID of the encryption key to encrypt data in the cluster restored from a shared snapshot. You can also provide the key ID when you restore from an unencrypted snapshot to an encrypted cluster in the same account. Additionally, you can specify a new KMS key ID when you restore from an encrypted snapshot in the same account in order to change it. In that case, the restored cluster is encrypted with the new KMS key ID."];
+          "The Key Management Service (KMS) key ID of the encryption key that encrypts data in the cluster restored from a shared snapshot. You can also provide the key ID when you restore from an unencrypted snapshot to an encrypted cluster in the same account. Additionally, you can specify a new KMS key ID when you restore from an encrypted snapshot in the same account in order to change it. In that case, the restored cluster is encrypted with the new KMS key ID."];
       nodeType: String_.t option
         [@ocaml.doc
-          "The node type that the restored cluster will be provisioned with. Default: The node type of the cluster from which the snapshot was taken. You can modify this if you are using any DS node type. In that case, you can choose to restore into another DS node type of the same size. For example, you can restore ds1.8xlarge into ds2.8xlarge, or ds1.xlarge into ds2.xlarge. If you have a DC instance type, you must restore into that same instance type and size. In other words, you can only restore a dc1.large instance type into another dc1.large instance type or dc2.large instance type. You can't restore dc1.8xlarge to dc2.8xlarge. First restore to a dc1.8xlarge cluster, then resize to a dc2.8large cluster. For more information about node types, see About Clusters and Nodes in the Amazon Redshift Cluster Management Guide."];
+          "The node type that the restored cluster will be provisioned with. If you have a DC instance type, you must restore into that same instance type and size. In other words, you can only restore a dc2.large node type into another dc2 type. For more information about node types, see About Clusters and Nodes in the Amazon Redshift Cluster Management Guide."];
       enhancedVpcRouting: BooleanOptional.t option
         [@ocaml.doc
           "An option that specifies whether to create the cluster with enhanced VPC routing enabled. To create a cluster that uses enhanced VPC routing, the cluster must be in a VPC. For more information, see Enhanced VPC Routing in the Amazon Redshift Cluster Management Guide. If this option is true, enhanced VPC routing is enabled. Default: false"];
@@ -12586,7 +15882,7 @@ module RestoreFromClusterSnapshotMessage =
           "The option to enable relocation for an Amazon Redshift cluster between Availability Zones after the cluster is restored."];
       aquaConfigurationStatus: AquaConfigurationStatus.t option
         [@ocaml.doc
-          "The value represents how the cluster is configured to use AQUA (Advanced Query Accelerator) after the cluster is restored. Possible values include the following. enabled - Use AQUA if it is available for the current Amazon Web Services Region and Amazon Redshift node type. disabled - Don't use AQUA. auto - Amazon Redshift determines whether to use AQUA."];
+          "This parameter is retired. It does not set the AQUA configuration status. Amazon Redshift automatically determines whether to use AQUA (Advanced Query Accelerator)."];
       defaultIamRoleArn: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for the IAM role that was set as default for the cluster when the cluster was last modified while it was restored from a snapshot."];
@@ -12596,58 +15892,98 @@ module RestoreFromClusterSnapshotMessage =
         [@ocaml.doc "The identifier of the target reserved node offering."];
       encrypted: BooleanOptional.t option
         [@ocaml.doc
-          "Enables support for restoring an unencrypted snapshot to a cluster encrypted with Key Management Service (KMS) and a CMK."]}
+          "Enables support for restoring an unencrypted snapshot to a cluster encrypted with Key Management Service (KMS) and a customer managed key."];
+      manageMasterPassword: BooleanOptional.t option
+        [@ocaml.doc
+          "If true, Amazon Redshift uses Secrets Manager to manage the restored cluster's admin credentials. If ManageMasterPassword is false or not set, Amazon Redshift uses the admin credentials the cluster had at the time the snapshot was taken."];
+      masterPasswordSecretKmsKeyId: String_.t option
+        [@ocaml.doc
+          "The ID of the Key Management Service (KMS) key used to encrypt and store the cluster's admin credentials secret. You can only use this parameter if ManageMasterPassword is true."];
+      ipAddressType: String_.t option
+        [@ocaml.doc
+          "The IP address type for the cluster. Possible values are ipv4 and dualstack."];
+      multiAZ: BooleanOptional.t option
+        [@ocaml.doc
+          "If true, the snapshot will be restored to a cluster deployed in two Availability Zones."];
+      catalogName: CatalogNameString.t option
+        [@ocaml.doc
+          "The name of the Glue Data Catalog that will be associated with the cluster enabled with Amazon Redshift federated permissions. Constraints: Must contain at least one lowercase letter. Can only contain lowercase letters (a-z), numbers (0-9), underscores (_), and hyphens (-). Pattern: ^\\[a-z0-9_-\\]*\\[a-z\\]+\\[a-z0-9_-\\]*$ Example: my-catalog_01"];
+      redshiftIdcApplicationArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM Identity Center application used for enabling Amazon Web Services IAM Identity Center trusted identity propagation on a cluster enabled with Amazon Redshift federated permissions."]}
     let context_ = "RestoreFromClusterSnapshotMessage"
-    let make ?snapshotClusterIdentifier =
-      fun ?port ->
-        fun ?availabilityZone ->
-          fun ?allowVersionUpgrade ->
-            fun ?clusterSubnetGroupName ->
-              fun ?publiclyAccessible ->
-                fun ?ownerAccount ->
-                  fun ?hsmClientCertificateIdentifier ->
-                    fun ?hsmConfigurationIdentifier ->
-                      fun ?elasticIp ->
-                        fun ?clusterParameterGroupName ->
-                          fun ?clusterSecurityGroups ->
-                            fun ?vpcSecurityGroupIds ->
-                              fun ?preferredMaintenanceWindow ->
-                                fun ?automatedSnapshotRetentionPeriod ->
-                                  fun ?manualSnapshotRetentionPeriod ->
-                                    fun ?kmsKeyId ->
-                                      fun ?nodeType ->
-                                        fun ?enhancedVpcRouting ->
-                                          fun ?additionalInfo ->
-                                            fun ?iamRoles ->
-                                              fun ?maintenanceTrackName ->
-                                                fun
-                                                  ?snapshotScheduleIdentifier
-                                                  ->
-                                                  fun ?numberOfNodes ->
+    let make ?snapshotIdentifier =
+      fun ?snapshotArn ->
+        fun ?snapshotClusterIdentifier ->
+          fun ?port ->
+            fun ?availabilityZone ->
+              fun ?allowVersionUpgrade ->
+                fun ?clusterSubnetGroupName ->
+                  fun ?publiclyAccessible ->
+                    fun ?ownerAccount ->
+                      fun ?hsmClientCertificateIdentifier ->
+                        fun ?hsmConfigurationIdentifier ->
+                          fun ?elasticIp ->
+                            fun ?clusterParameterGroupName ->
+                              fun ?clusterSecurityGroups ->
+                                fun ?vpcSecurityGroupIds ->
+                                  fun ?preferredMaintenanceWindow ->
+                                    fun ?automatedSnapshotRetentionPeriod ->
+                                      fun ?manualSnapshotRetentionPeriod ->
+                                        fun ?kmsKeyId ->
+                                          fun ?nodeType ->
+                                            fun ?enhancedVpcRouting ->
+                                              fun ?additionalInfo ->
+                                                fun ?iamRoles ->
+                                                  fun ?maintenanceTrackName
+                                                    ->
                                                     fun
-                                                      ?availabilityZoneRelocation
+                                                      ?snapshotScheduleIdentifier
                                                       ->
-                                                      fun
-                                                        ?aquaConfigurationStatus
-                                                        ->
+                                                      fun ?numberOfNodes ->
                                                         fun
-                                                          ?defaultIamRoleArn
+                                                          ?availabilityZoneRelocation
                                                           ->
-                                                          fun ?reservedNodeId
+                                                          fun
+                                                            ?aquaConfigurationStatus
                                                             ->
                                                             fun
-                                                              ?targetReservedNodeOfferingId
+                                                              ?defaultIamRoleArn
                                                               ->
-                                                              fun ?encrypted
+                                                              fun
+                                                                ?reservedNodeId
                                                                 ->
                                                                 fun
-                                                                  ~clusterIdentifier
+                                                                  ?targetReservedNodeOfferingId
                                                                   ->
                                                                   fun
-                                                                    ~snapshotIdentifier
+                                                                    ?encrypted
+                                                                    ->
+                                                                    fun
+                                                                    ?manageMasterPassword
+                                                                    ->
+                                                                    fun
+                                                                    ?masterPasswordSecretKmsKeyId
+                                                                    ->
+                                                                    fun
+                                                                    ?ipAddressType
+                                                                    ->
+                                                                    fun
+                                                                    ?multiAZ
+                                                                    ->
+                                                                    fun
+                                                                    ?catalogName
+                                                                    ->
+                                                                    fun
+                                                                    ?redshiftIdcApplicationArn
+                                                                    ->
+                                                                    fun
+                                                                    ~clusterIdentifier
                                                                     ->
                                                                     fun () ->
                                                                     {
+                                                                    snapshotIdentifier;
+                                                                    snapshotArn;
                                                                     snapshotClusterIdentifier;
                                                                     port;
                                                                     availabilityZone;
@@ -12678,14 +16014,20 @@ module RestoreFromClusterSnapshotMessage =
                                                                     reservedNodeId;
                                                                     targetReservedNodeOfferingId;
                                                                     encrypted;
-                                                                    clusterIdentifier;
-                                                                    snapshotIdentifier
+                                                                    manageMasterPassword;
+                                                                    masterPasswordSecretKmsKeyId;
+                                                                    ipAddressType;
+                                                                    multiAZ;
+                                                                    catalogName;
+                                                                    redshiftIdcApplicationArn;
+                                                                    clusterIdentifier
                                                                     }
     let to_value x =
       structure_to_value
         [("ClusterIdentifier", (Some (String_.to_value x.clusterIdentifier)));
         ("SnapshotIdentifier",
-          (Some (String_.to_value x.snapshotIdentifier)));
+          (Option.map x.snapshotIdentifier ~f:String_.to_value));
+        ("SnapshotArn", (Option.map x.snapshotArn ~f:String_.to_value));
         ("SnapshotClusterIdentifier",
           (Option.map x.snapshotClusterIdentifier ~f:String_.to_value));
         ("Port", (Option.map x.port ~f:IntegerOptional.to_value));
@@ -12742,9 +16084,35 @@ module RestoreFromClusterSnapshotMessage =
         ("ReservedNodeId", (Option.map x.reservedNodeId ~f:String_.to_value));
         ("TargetReservedNodeOfferingId",
           (Option.map x.targetReservedNodeOfferingId ~f:String_.to_value));
-        ("Encrypted", (Option.map x.encrypted ~f:BooleanOptional.to_value))]
+        ("Encrypted", (Option.map x.encrypted ~f:BooleanOptional.to_value));
+        ("ManageMasterPassword",
+          (Option.map x.manageMasterPassword ~f:BooleanOptional.to_value));
+        ("MasterPasswordSecretKmsKeyId",
+          (Option.map x.masterPasswordSecretKmsKeyId ~f:String_.to_value));
+        ("IpAddressType", (Option.map x.ipAddressType ~f:String_.to_value));
+        ("MultiAZ", (Option.map x.multiAZ ~f:BooleanOptional.to_value));
+        ("CatalogName",
+          (Option.map x.catalogName ~f:CatalogNameString.to_value));
+        ("RedshiftIdcApplicationArn",
+          (Option.map x.redshiftIdcApplicationArn ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let redshiftIdcApplicationArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "RedshiftIdcApplicationArn") in
+      let catalogName =
+        (Option.map ~f:CatalogNameString.of_xml)
+          (Xml.child xml_arg0 "CatalogName") in
+      let multiAZ =
+        (Option.map ~f:BooleanOptional.of_xml) (Xml.child xml_arg0 "MultiAZ") in
+      let ipAddressType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "IpAddressType") in
+      let masterPasswordSecretKmsKeyId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MasterPasswordSecretKmsKeyId") in
+      let manageMasterPassword =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "ManageMasterPassword") in
       let encrypted =
         (Option.map ~f:BooleanOptional.of_xml)
           (Xml.child xml_arg0 "Encrypted") in
@@ -12827,15 +16195,18 @@ module RestoreFromClusterSnapshotMessage =
       let snapshotClusterIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SnapshotClusterIdentifier") in
+      let snapshotArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SnapshotArn") in
       let snapshotIdentifier =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SnapshotIdentifier") in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "SnapshotIdentifier") in
       let clusterIdentifier =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
-      make ?encrypted ?targetReservedNodeOfferingId ?reservedNodeId
-        ?defaultIamRoleArn ?aquaConfigurationStatus
-        ?availabilityZoneRelocation ?numberOfNodes
+      make ?redshiftIdcApplicationArn ?catalogName ?multiAZ ?ipAddressType
+        ?masterPasswordSecretKmsKeyId ?manageMasterPassword ?encrypted
+        ?targetReservedNodeOfferingId ?reservedNodeId ?defaultIamRoleArn
+        ?aquaConfigurationStatus ?availabilityZoneRelocation ?numberOfNodes
         ?snapshotScheduleIdentifier ?maintenanceTrackName ?iamRoles
         ?additionalInfo ?enhancedVpcRouting ?nodeType ?kmsKeyId
         ?manualSnapshotRetentionPeriod ?automatedSnapshotRetentionPeriod
@@ -12844,71 +16215,84 @@ module RestoreFromClusterSnapshotMessage =
         ?hsmConfigurationIdentifier ?hsmClientCertificateIdentifier
         ?ownerAccount ?publiclyAccessible ?clusterSubnetGroupName
         ?allowVersionUpgrade ?availabilityZone ?port
-        ?snapshotClusterIdentifier ~snapshotIdentifier ~clusterIdentifier ()
+        ?snapshotClusterIdentifier ?snapshotArn ?snapshotIdentifier
+        ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let encrypted = field_map json "Encrypted" BooleanOptional.of_json in
+    let of_json json__ =
+      let redshiftIdcApplicationArn =
+        field_map json__ "RedshiftIdcApplicationArn" String_.of_json in
+      let catalogName =
+        field_map json__ "CatalogName" CatalogNameString.of_json in
+      let multiAZ = field_map json__ "MultiAZ" BooleanOptional.of_json in
+      let ipAddressType = field_map json__ "IpAddressType" String_.of_json in
+      let masterPasswordSecretKmsKeyId =
+        field_map json__ "MasterPasswordSecretKmsKeyId" String_.of_json in
+      let manageMasterPassword =
+        field_map json__ "ManageMasterPassword" BooleanOptional.of_json in
+      let encrypted = field_map json__ "Encrypted" BooleanOptional.of_json in
       let targetReservedNodeOfferingId =
-        field_map json "TargetReservedNodeOfferingId" String_.of_json in
-      let reservedNodeId = field_map json "ReservedNodeId" String_.of_json in
+        field_map json__ "TargetReservedNodeOfferingId" String_.of_json in
+      let reservedNodeId = field_map json__ "ReservedNodeId" String_.of_json in
       let defaultIamRoleArn =
-        field_map json "DefaultIamRoleArn" String_.of_json in
+        field_map json__ "DefaultIamRoleArn" String_.of_json in
       let aquaConfigurationStatus =
-        field_map json "AquaConfigurationStatus"
+        field_map json__ "AquaConfigurationStatus"
           AquaConfigurationStatus.of_json in
       let availabilityZoneRelocation =
-        field_map json "AvailabilityZoneRelocation" BooleanOptional.of_json in
+        field_map json__ "AvailabilityZoneRelocation" BooleanOptional.of_json in
       let numberOfNodes =
-        field_map json "NumberOfNodes" IntegerOptional.of_json in
+        field_map json__ "NumberOfNodes" IntegerOptional.of_json in
       let snapshotScheduleIdentifier =
-        field_map json "SnapshotScheduleIdentifier" String_.of_json in
+        field_map json__ "SnapshotScheduleIdentifier" String_.of_json in
       let maintenanceTrackName =
-        field_map json "MaintenanceTrackName" String_.of_json in
-      let iamRoles = field_map json "IamRoles" IamRoleArnList.of_json in
-      let additionalInfo = field_map json "AdditionalInfo" String_.of_json in
+        field_map json__ "MaintenanceTrackName" String_.of_json in
+      let iamRoles = field_map json__ "IamRoles" IamRoleArnList.of_json in
+      let additionalInfo = field_map json__ "AdditionalInfo" String_.of_json in
       let enhancedVpcRouting =
-        field_map json "EnhancedVpcRouting" BooleanOptional.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+        field_map json__ "EnhancedVpcRouting" BooleanOptional.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let manualSnapshotRetentionPeriod =
-        field_map json "ManualSnapshotRetentionPeriod"
+        field_map json__ "ManualSnapshotRetentionPeriod"
           IntegerOptional.of_json in
       let automatedSnapshotRetentionPeriod =
-        field_map json "AutomatedSnapshotRetentionPeriod"
+        field_map json__ "AutomatedSnapshotRetentionPeriod"
           IntegerOptional.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let vpcSecurityGroupIds =
-        field_map json "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
+        field_map json__ "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
       let clusterSecurityGroups =
-        field_map json "ClusterSecurityGroups"
+        field_map json__ "ClusterSecurityGroups"
           ClusterSecurityGroupNameList.of_json in
       let clusterParameterGroupName =
-        field_map json "ClusterParameterGroupName" String_.of_json in
-      let elasticIp = field_map json "ElasticIp" String_.of_json in
+        field_map json__ "ClusterParameterGroupName" String_.of_json in
+      let elasticIp = field_map json__ "ElasticIp" String_.of_json in
       let hsmConfigurationIdentifier =
-        field_map json "HsmConfigurationIdentifier" String_.of_json in
+        field_map json__ "HsmConfigurationIdentifier" String_.of_json in
       let hsmClientCertificateIdentifier =
-        field_map json "HsmClientCertificateIdentifier" String_.of_json in
-      let ownerAccount = field_map json "OwnerAccount" String_.of_json in
+        field_map json__ "HsmClientCertificateIdentifier" String_.of_json in
+      let ownerAccount = field_map json__ "OwnerAccount" String_.of_json in
       let publiclyAccessible =
-        field_map json "PubliclyAccessible" BooleanOptional.of_json in
+        field_map json__ "PubliclyAccessible" BooleanOptional.of_json in
       let clusterSubnetGroupName =
-        field_map json "ClusterSubnetGroupName" String_.of_json in
+        field_map json__ "ClusterSubnetGroupName" String_.of_json in
       let allowVersionUpgrade =
-        field_map json "AllowVersionUpgrade" BooleanOptional.of_json in
+        field_map json__ "AllowVersionUpgrade" BooleanOptional.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
-      let port = field_map json "Port" IntegerOptional.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
       let snapshotClusterIdentifier =
-        field_map json "SnapshotClusterIdentifier" String_.of_json in
+        field_map json__ "SnapshotClusterIdentifier" String_.of_json in
+      let snapshotArn = field_map json__ "SnapshotArn" String_.of_json in
       let snapshotIdentifier =
-        field_map_exn json "SnapshotIdentifier" String_.of_json in
+        field_map json__ "SnapshotIdentifier" String_.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
-      make ?encrypted ?targetReservedNodeOfferingId ?reservedNodeId
-        ?defaultIamRoleArn ?aquaConfigurationStatus
-        ?availabilityZoneRelocation ?numberOfNodes
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
+      make ?redshiftIdcApplicationArn ?catalogName ?multiAZ ?ipAddressType
+        ?masterPasswordSecretKmsKeyId ?manageMasterPassword ?encrypted
+        ?targetReservedNodeOfferingId ?reservedNodeId ?defaultIamRoleArn
+        ?aquaConfigurationStatus ?availabilityZoneRelocation ?numberOfNodes
         ?snapshotScheduleIdentifier ?maintenanceTrackName ?iamRoles
         ?additionalInfo ?enhancedVpcRouting ?nodeType ?kmsKeyId
         ?manualSnapshotRetentionPeriod ?automatedSnapshotRetentionPeriod
@@ -12917,7 +16301,8 @@ module RestoreFromClusterSnapshotMessage =
         ?hsmConfigurationIdentifier ?hsmClientCertificateIdentifier
         ?ownerAccount ?publiclyAccessible ?clusterSubnetGroupName
         ?allowVersionUpgrade ?availabilityZone ?port
-        ?snapshotClusterIdentifier ~snapshotIdentifier ~clusterIdentifier ()
+        ?snapshotClusterIdentifier ?snapshotArn ?snapshotIdentifier
+        ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end
 module ResizeProgressMessage =
@@ -13164,39 +16549,40 @@ module ResizeProgressMessage =
         ?importTablesInProgress ?importTablesCompleted ?status
         ?targetClusterType ?targetNumberOfNodes ?targetNodeType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataTransferProgressPercent =
-        field_map json "DataTransferProgressPercent" DoubleOptional.of_json in
+        field_map json__ "DataTransferProgressPercent" DoubleOptional.of_json in
       let targetEncryptionType =
-        field_map json "TargetEncryptionType" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let resizeType = field_map json "ResizeType" String_.of_json in
+        field_map json__ "TargetEncryptionType" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let resizeType = field_map json__ "ResizeType" String_.of_json in
       let estimatedTimeToCompletionInSeconds =
-        field_map json "EstimatedTimeToCompletionInSeconds"
+        field_map json__ "EstimatedTimeToCompletionInSeconds"
           LongOptional.of_json in
       let elapsedTimeInSeconds =
-        field_map json "ElapsedTimeInSeconds" LongOptional.of_json in
+        field_map json__ "ElapsedTimeInSeconds" LongOptional.of_json in
       let progressInMegaBytes =
-        field_map json "ProgressInMegaBytes" LongOptional.of_json in
+        field_map json__ "ProgressInMegaBytes" LongOptional.of_json in
       let totalResizeDataInMegaBytes =
-        field_map json "TotalResizeDataInMegaBytes" LongOptional.of_json in
+        field_map json__ "TotalResizeDataInMegaBytes" LongOptional.of_json in
       let avgResizeRateInMegaBytesPerSecond =
-        field_map json "AvgResizeRateInMegaBytesPerSecond"
+        field_map json__ "AvgResizeRateInMegaBytesPerSecond"
           DoubleOptional.of_json in
       let importTablesNotStarted =
-        field_map json "ImportTablesNotStarted"
+        field_map json__ "ImportTablesNotStarted"
           ImportTablesNotStarted.of_json in
       let importTablesInProgress =
-        field_map json "ImportTablesInProgress"
+        field_map json__ "ImportTablesInProgress"
           ImportTablesInProgress.of_json in
       let importTablesCompleted =
-        field_map json "ImportTablesCompleted" ImportTablesCompleted.of_json in
-      let status = field_map json "Status" String_.of_json in
+        field_map json__ "ImportTablesCompleted"
+          ImportTablesCompleted.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       let targetClusterType =
-        field_map json "TargetClusterType" String_.of_json in
+        field_map json__ "TargetClusterType" String_.of_json in
       let targetNumberOfNodes =
-        field_map json "TargetNumberOfNodes" IntegerOptional.of_json in
-      let targetNodeType = field_map json "TargetNodeType" String_.of_json in
+        field_map json__ "TargetNumberOfNodes" IntegerOptional.of_json in
+      let targetNodeType = field_map json__ "TargetNodeType" String_.of_json in
       make ?dataTransferProgressPercent ?targetEncryptionType ?message
         ?resizeType ?estimatedTimeToCompletionInSeconds ?elapsedTimeInSeconds
         ?progressInMegaBytes ?totalResizeDataInMegaBytes
@@ -13404,12 +16790,12 @@ module ResizeClusterResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Changes the size of the cluster. You can change the cluster's type, or change the number or type of nodes. The default behavior is to use the elastic resize method. With an elastic resize, your cluster is available for read and write operations more quickly than with the classic resize method. Elastic resize operations have the following restrictions: You can only resize clusters of the following types: dc1.large (if your cluster is in a VPC) dc1.8xlarge (if your cluster is in a VPC) dc2.large dc2.8xlarge ds2.xlarge ds2.8xlarge ra3.xlplus ra3.4xlarge ra3.16xlarge The type of nodes that you add must match the node type for the cluster."]
+       "Changes the size of the cluster. You can change the cluster's type, or change the number or type of nodes. The default behavior is to use the elastic resize method. With an elastic resize, your cluster is available for read and write operations more quickly than with the classic resize method. Elastic resize operations have the following restrictions: You can only resize clusters of the following types: dc2.large dc2.8xlarge rg.xlarge rg.4xlarge ra3.large ra3.xlplus ra3.4xlarge ra3.16xlarge The type of nodes that you add must match the node type for the cluster."]
 module ResetClusterParameterGroupMessage =
   struct
     type nonrec t =
@@ -13447,12 +16833,12 @@ module ResetClusterParameterGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ?parameters ?resetAllParameters ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map json "Parameters" ParametersList.of_json in
+    let of_json json__ =
+      let parameters = field_map json__ "Parameters" ParametersList.of_json in
       let resetAllParameters =
-        field_map json "ResetAllParameters" Boolean.of_json in
+        field_map json__ "ResetAllParameters" Boolean.of_json in
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ?parameters ?resetAllParameters ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end
@@ -13536,10 +16922,10 @@ module ReservedNodesMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?reservedNodes ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reservedNodes =
-        field_map json "ReservedNodes" ReservedNodeList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "ReservedNodes" ReservedNodeList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?reservedNodes ?marker ()
     let to_json v = composed_to_json to_value v
   end
@@ -13640,11 +17026,11 @@ module ReservedNodeOfferingsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?reservedNodeOfferings ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reservedNodeOfferings =
-        field_map json "ReservedNodeOfferings"
+        field_map json__ "ReservedNodeOfferings"
           ReservedNodeOfferingList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?reservedNodeOfferings ?marker ()
     let to_json v = composed_to_json to_value v
   end
@@ -13667,12 +17053,136 @@ module RejectDataShareMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DataShareArn") in
       make ~dataShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataShareArn = field_map_exn json "DataShareArn" String_.of_json in
+    let of_json json__ =
+      let dataShareArn = field_map_exn json__ "DataShareArn" String_.of_json in
       make ~dataShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "From the consumer account, rejects the specified datashare."]
+       "From a datashare consumer account, rejects the specified datashare."]
+module RegisterNamespaceOutputMessage =
+  struct
+    type registerNamespaceResult =
+      {
+      status: NamespaceRegistrationStatus.t option
+        [@ocaml.doc
+          "The registration status of the cluster or serverless namespace."]}
+    and responseMetaData = unit
+    and t =
+      {
+      registerNamespaceResult: registerNamespaceResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
+      | `InvalidClusterStateFault of InvalidClusterStateFault.t 
+      | `InvalidNamespaceFault of InvalidNamespaceFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "RegisterNamespaceOutputMessage"
+    let make ?status =
+      fun () ->
+        { registerNamespaceResult = { status }; responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
+      | "InvalidClusterStateFault" ->
+          `InvalidClusterStateFault (InvalidClusterStateFault.of_json json)
+      | "InvalidNamespaceFault" ->
+          `InvalidNamespaceFault (InvalidNamespaceFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
+      | "InvalidClusterStateFault" ->
+          `InvalidClusterStateFault (InvalidClusterStateFault.of_xml xml)
+      | "InvalidNamespaceFault" ->
+          `InvalidNamespaceFault (InvalidNamespaceFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ClusterNotFoundFault"));
+            ("details", (ClusterNotFoundFault.to_json e))]
+      | `InvalidClusterStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidClusterStateFault"));
+            ("details", (InvalidClusterStateFault.to_json e))]
+      | `InvalidNamespaceFault e ->
+          `Assoc
+            [("error", (`String "InvalidNamespaceFault"));
+            ("details", (InvalidNamespaceFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.registerNamespaceResult in
+      structure_to_wrapped_value
+        [("Status",
+           (Option.map x.status ~f:NamespaceRegistrationStatus.to_value))]
+        ~wrapper:"RegisterNamespaceResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "RegisterNamespaceResult" in
+      let status =
+        (Option.map ~f:NamespaceRegistrationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "Status" NamespaceRegistrationStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Registers a cluster or serverless namespace to the Amazon Web Services Glue Data Catalog."]
+module RegisterNamespaceInputMessage =
+  struct
+    type nonrec t =
+      {
+      namespaceIdentifier: NamespaceIdentifierUnion.t
+        [@ocaml.doc
+          "The unique identifier of the cluster or serverless namespace that you want to register."];
+      consumerIdentifiers: ConsumerIdentifierList.t
+        [@ocaml.doc
+          "An array containing the ID of the consumer account that you want to register the namespace to."]}
+    let context_ = "RegisterNamespaceInputMessage"
+    let make ~namespaceIdentifier =
+      fun ~consumerIdentifiers ->
+        fun () -> { namespaceIdentifier; consumerIdentifiers }
+    let to_value x =
+      structure_to_value
+        [("NamespaceIdentifier",
+           (Some (NamespaceIdentifierUnion.to_value x.namespaceIdentifier)));
+        ("ConsumerIdentifiers",
+          (Some (ConsumerIdentifierList.to_value x.consumerIdentifiers)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let consumerIdentifiers =
+        ConsumerIdentifierList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConsumerIdentifiers") in
+      let namespaceIdentifier =
+        NamespaceIdentifierUnion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NamespaceIdentifier") in
+      make ~consumerIdentifiers ~namespaceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let consumerIdentifiers =
+        field_map_exn json__ "ConsumerIdentifiers"
+          ConsumerIdentifierList.of_json in
+      let namespaceIdentifier =
+        field_map_exn json__ "NamespaceIdentifier"
+          NamespaceIdentifierUnion.of_json in
+      make ~consumerIdentifiers ~namespaceIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Registers a cluster or serverless namespace to the Amazon Web Services Glue Data Catalog."]
 module RebootClusterResult =
   struct
     type rebootClusterResult = {
@@ -13733,8 +17243,8 @@ module RebootClusterResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13756,12 +17266,133 @@ module RebootClusterMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       make ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end
+module PutResourcePolicyResult =
+  struct
+    type putResourcePolicyResult =
+      {
+      resourcePolicy: ResourcePolicy.t option
+        [@ocaml.doc "The content of the updated resource policy."]}
+    and responseMetaData = unit
+    and t =
+      {
+      putResourcePolicyResult: putResourcePolicyResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ConflictPolicyUpdateFault of ConflictPolicyUpdateFault.t 
+      | `InvalidPolicyFault of InvalidPolicyFault.t 
+      | `ResourceNotFoundFault of ResourceNotFoundFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "PutResourcePolicyResult"
+    let make ?resourcePolicy =
+      fun () ->
+        { putResourcePolicyResult = { resourcePolicy }; responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "ConflictPolicyUpdateFault" ->
+          `ConflictPolicyUpdateFault (ConflictPolicyUpdateFault.of_json json)
+      | "InvalidPolicyFault" ->
+          `InvalidPolicyFault (InvalidPolicyFault.of_json json)
+      | "ResourceNotFoundFault" ->
+          `ResourceNotFoundFault (ResourceNotFoundFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictPolicyUpdateFault" ->
+          `ConflictPolicyUpdateFault (ConflictPolicyUpdateFault.of_xml xml)
+      | "InvalidPolicyFault" ->
+          `InvalidPolicyFault (InvalidPolicyFault.of_xml xml)
+      | "ResourceNotFoundFault" ->
+          `ResourceNotFoundFault (ResourceNotFoundFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictPolicyUpdateFault e ->
+          `Assoc
+            [("error", (`String "ConflictPolicyUpdateFault"));
+            ("details", (ConflictPolicyUpdateFault.to_json e))]
+      | `InvalidPolicyFault e ->
+          `Assoc
+            [("error", (`String "InvalidPolicyFault"));
+            ("details", (InvalidPolicyFault.to_json e))]
+      | `ResourceNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundFault"));
+            ("details", (ResourceNotFoundFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.putResourcePolicyResult in
+      structure_to_wrapped_value
+        [("ResourcePolicy",
+           (Option.map x.resourcePolicy ~f:ResourcePolicy.to_value))]
+        ~wrapper:"PutResourcePolicyResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "PutResourcePolicyResult" in
+      let resourcePolicy =
+        (Option.map ~f:ResourcePolicy.of_xml)
+          (Xml.child xml_arg0 "ResourcePolicy") in
+      make ?resourcePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourcePolicy =
+        field_map json__ "ResourcePolicy" ResourcePolicy.of_json in
+      make ?resourcePolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the resource policy for a specified resource."]
+module PutResourcePolicyMessage =
+  struct
+    type nonrec t =
+      {
+      resourceArn: String_.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource of which its resource policy is updated."];
+      policy: String_.t
+        [@ocaml.doc "The content of the resource policy being updated."]}
+    let context_ = "PutResourcePolicyMessage"
+    let make ~resourceArn = fun ~policy -> fun () -> { resourceArn; policy }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (String_.to_value x.resourceArn)));
+        ("Policy", (Some (String_.to_value x.policy)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
+      let resourceArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~policy ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map_exn json__ "Policy" String_.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
+      make ~policy ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the resource policy for a specified resource."]
 module PurchaseReservedNodeOfferingResult =
   struct
     type purchaseReservedNodeOfferingResult =
@@ -13857,8 +17488,8 @@ module PurchaseReservedNodeOfferingResult =
           (Xml.child xml_arg0 "ReservedNode") in
       make ?reservedNode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reservedNode = field_map json "ReservedNode" ReservedNode.of_json in
+    let of_json json__ =
+      let reservedNode = field_map json__ "ReservedNode" ReservedNode.of_json in
       make ?reservedNode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13892,10 +17523,10 @@ module PurchaseReservedNodeOfferingMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ReservedNodeOfferingId") in
       make ?nodeCount ~reservedNodeOfferingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nodeCount = field_map json "NodeCount" IntegerOptional.of_json in
+    let of_json json__ =
+      let nodeCount = field_map json__ "NodeCount" IntegerOptional.of_json in
       let reservedNodeOfferingId =
-        field_map_exn json "ReservedNodeOfferingId" String_.of_json in
+        field_map_exn json__ "ReservedNodeOfferingId" String_.of_json in
       make ?nodeCount ~reservedNodeOfferingId ()
     let to_json v = composed_to_json to_value v
   end
@@ -13911,6 +17542,7 @@ module PauseClusterResult =
     type error =
       [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
       | `InvalidClusterStateFault of InvalidClusterStateFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "PauseClusterResult"
     let make ?cluster =
@@ -13921,6 +17553,8 @@ module PauseClusterResult =
           `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -13930,6 +17564,8 @@ module PauseClusterResult =
           `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -13942,6 +17578,10 @@ module PauseClusterResult =
           `Assoc
             [("error", (`String "InvalidClusterStateFault"));
             ("details", (InvalidClusterStateFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -13959,8 +17599,8 @@ module PauseClusterResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Pauses a cluster."]
@@ -13984,6 +17624,7 @@ module PartnerIntegrationOutputMessage =
       | `PartnerNotFoundFault of PartnerNotFoundFault.t 
       | `UnauthorizedPartnerIntegrationFault of
           UnauthorizedPartnerIntegrationFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "PartnerIntegrationOutputMessage"
     let make ?databaseName =
@@ -14002,6 +17643,8 @@ module PartnerIntegrationOutputMessage =
       | "UnauthorizedPartnerIntegrationFault" ->
           `UnauthorizedPartnerIntegrationFault
             (UnauthorizedPartnerIntegrationFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -14014,6 +17657,8 @@ module PartnerIntegrationOutputMessage =
       | "UnauthorizedPartnerIntegrationFault" ->
           `UnauthorizedPartnerIntegrationFault
             (UnauthorizedPartnerIntegrationFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -14030,6 +17675,10 @@ module PartnerIntegrationOutputMessage =
           `Assoc
             [("error", (`String "UnauthorizedPartnerIntegrationFault"));
             ("details", (UnauthorizedPartnerIntegrationFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -14055,11 +17704,12 @@ module PartnerIntegrationOutputMessage =
           (Xml.child xml_arg0 "DatabaseName") in
       make ?partnerName ?databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let partnerName =
-        field_map json "PartnerName" PartnerIntegrationPartnerName.of_json in
+        field_map json__ "PartnerName" PartnerIntegrationPartnerName.of_json in
       let databaseName =
-        field_map json "DatabaseName" PartnerIntegrationDatabaseName.of_json in
+        field_map json__ "DatabaseName"
+          PartnerIntegrationDatabaseName.of_json in
       make ?partnerName ?databaseName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14115,18 +17765,18 @@ module PartnerIntegrationInputMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~partnerName ~databaseName ~clusterIdentifier ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let partnerName =
-        field_map_exn json "PartnerName"
+        field_map_exn json__ "PartnerName"
           PartnerIntegrationPartnerName.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName"
+        field_map_exn json__ "DatabaseName"
           PartnerIntegrationDatabaseName.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier"
+        field_map_exn json__ "ClusterIdentifier"
           PartnerIntegrationClusterIdentifier.of_json in
       let accountId =
-        field_map_exn json "AccountId" PartnerIntegrationAccountId.of_json in
+        field_map_exn json__ "AccountId" PartnerIntegrationAccountId.of_json in
       make ~partnerName ~databaseName ~clusterIdentifier ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14194,10 +17844,10 @@ module OrderableClusterOptionsMessage =
           (Xml.child xml_arg0 "OrderableClusterOptions") in
       make ?marker ?orderableClusterOptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
       let orderableClusterOptions =
-        field_map json "OrderableClusterOptions"
+        field_map json__ "OrderableClusterOptions"
           OrderableClusterOptionsList.of_json in
       make ?marker ?orderableClusterOptions ()
     let to_json v = composed_to_json to_value v
@@ -14224,6 +17874,7 @@ module NodeConfigurationOptionsMessage =
       | `ClusterSnapshotNotFoundFault of ClusterSnapshotNotFoundFault.t 
       | `InvalidClusterSnapshotStateFault of
           InvalidClusterSnapshotStateFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "NodeConfigurationOptionsMessage"
     let make ?nodeConfigurationOptionList =
@@ -14247,6 +17898,8 @@ module NodeConfigurationOptionsMessage =
       | "InvalidClusterSnapshotStateFault" ->
           `InvalidClusterSnapshotStateFault
             (InvalidClusterSnapshotStateFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -14263,6 +17916,8 @@ module NodeConfigurationOptionsMessage =
       | "InvalidClusterSnapshotStateFault" ->
           `InvalidClusterSnapshotStateFault
             (InvalidClusterSnapshotStateFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -14283,6 +17938,10 @@ module NodeConfigurationOptionsMessage =
           `Assoc
             [("error", (`String "InvalidClusterSnapshotStateFault"));
             ("details", (InvalidClusterSnapshotStateFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -14309,10 +17968,10 @@ module NodeConfigurationOptionsMessage =
           (Xml.child xml_arg0 "NodeConfigurationOptionList") in
       make ?marker ?nodeConfigurationOptionList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
       let nodeConfigurationOptionList =
-        field_map json "NodeConfigurationOptionList"
+        field_map json__ "NodeConfigurationOptionList"
           NodeConfigurationOptionList.of_json in
       make ?marker ?nodeConfigurationOptionList ()
     let to_json v = composed_to_json to_value v
@@ -14352,11 +18011,11 @@ module ModifyUsageLimitMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "UsageLimitId") in
       make ?breachAction ?amount ~usageLimitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let breachAction =
-        field_map json "BreachAction" UsageLimitBreachAction.of_json in
-      let amount = field_map json "Amount" LongOptional.of_json in
-      let usageLimitId = field_map_exn json "UsageLimitId" String_.of_json in
+        field_map json__ "BreachAction" UsageLimitBreachAction.of_json in
+      let amount = field_map json__ "Amount" LongOptional.of_json in
+      let usageLimitId = field_map_exn json__ "UsageLimitId" String_.of_json in
       make ?breachAction ?amount ~usageLimitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14391,12 +18050,12 @@ module ModifySnapshotScheduleMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduleIdentifier") in
       make ~scheduleDefinitions ~scheduleIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduleDefinitions =
-        field_map_exn json "ScheduleDefinitions"
+        field_map_exn json__ "ScheduleDefinitions"
           ScheduleDefinitionList.of_json in
       let scheduleIdentifier =
-        field_map_exn json "ScheduleIdentifier" String_.of_json in
+        field_map_exn json__ "ScheduleIdentifier" String_.of_json in
       make ~scheduleDefinitions ~scheduleIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14499,8 +18158,8 @@ module ModifySnapshotCopyRetentionPeriodResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14540,12 +18199,12 @@ module ModifySnapshotCopyRetentionPeriodMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       make ?manual ~retentionPeriod ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let manual = field_map json "Manual" Boolean.of_json in
+    let of_json json__ =
+      let manual = field_map json__ "Manual" Boolean.of_json in
       let retentionPeriod =
-        field_map_exn json "RetentionPeriod" Integer.of_json in
+        field_map_exn json__ "RetentionPeriod" Integer.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ?manual ~retentionPeriod ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end
@@ -14632,22 +18291,363 @@ module ModifyScheduledActionMessage =
       make ?enable ?endTime ?startTime ?scheduledActionDescription ?iamRole
         ?schedule ?targetAction ~scheduledActionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enable = field_map json "Enable" BooleanOptional.of_json in
-      let endTime = field_map json "EndTime" TStamp.of_json in
-      let startTime = field_map json "StartTime" TStamp.of_json in
+    let of_json json__ =
+      let enable = field_map json__ "Enable" BooleanOptional.of_json in
+      let endTime = field_map json__ "EndTime" TStamp.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
       let scheduledActionDescription =
-        field_map json "ScheduledActionDescription" String_.of_json in
-      let iamRole = field_map json "IamRole" String_.of_json in
-      let schedule = field_map json "Schedule" String_.of_json in
+        field_map json__ "ScheduledActionDescription" String_.of_json in
+      let iamRole = field_map json__ "IamRole" String_.of_json in
+      let schedule = field_map json__ "Schedule" String_.of_json in
       let targetAction =
-        field_map json "TargetAction" ScheduledActionType.of_json in
+        field_map json__ "TargetAction" ScheduledActionType.of_json in
       let scheduledActionName =
-        field_map_exn json "ScheduledActionName" String_.of_json in
+        field_map_exn json__ "ScheduledActionName" String_.of_json in
       make ?enable ?endTime ?startTime ?scheduledActionDescription ?iamRole
         ?schedule ?targetAction ~scheduledActionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies a scheduled action."]
+module ModifyRedshiftIdcApplicationResult =
+  struct
+    type modifyRedshiftIdcApplicationResult =
+      {
+      redshiftIdcApplication: RedshiftIdcApplication.t option }
+    and responseMetaData = unit
+    and t =
+      {
+      modifyRedshiftIdcApplicationResult: modifyRedshiftIdcApplicationResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `DependentServiceAccessDeniedFault of
+          DependentServiceAccessDeniedFault.t 
+      | `DependentServiceUnavailableFault of
+          DependentServiceUnavailableFault.t 
+      | `RedshiftIdcApplicationNotExistsFault of
+          RedshiftIdcApplicationNotExistsFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ModifyRedshiftIdcApplicationResult"
+    let make ?redshiftIdcApplication =
+      fun () ->
+        {
+          modifyRedshiftIdcApplicationResult = { redshiftIdcApplication };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "DependentServiceAccessDeniedFault" ->
+          `DependentServiceAccessDeniedFault
+            (DependentServiceAccessDeniedFault.of_json json)
+      | "DependentServiceUnavailableFault" ->
+          `DependentServiceUnavailableFault
+            (DependentServiceUnavailableFault.of_json json)
+      | "RedshiftIdcApplicationNotExistsFault" ->
+          `RedshiftIdcApplicationNotExistsFault
+            (RedshiftIdcApplicationNotExistsFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependentServiceAccessDeniedFault" ->
+          `DependentServiceAccessDeniedFault
+            (DependentServiceAccessDeniedFault.of_xml xml)
+      | "DependentServiceUnavailableFault" ->
+          `DependentServiceUnavailableFault
+            (DependentServiceUnavailableFault.of_xml xml)
+      | "RedshiftIdcApplicationNotExistsFault" ->
+          `RedshiftIdcApplicationNotExistsFault
+            (RedshiftIdcApplicationNotExistsFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependentServiceAccessDeniedFault e ->
+          `Assoc
+            [("error", (`String "DependentServiceAccessDeniedFault"));
+            ("details", (DependentServiceAccessDeniedFault.to_json e))]
+      | `DependentServiceUnavailableFault e ->
+          `Assoc
+            [("error", (`String "DependentServiceUnavailableFault"));
+            ("details", (DependentServiceUnavailableFault.to_json e))]
+      | `RedshiftIdcApplicationNotExistsFault e ->
+          `Assoc
+            [("error", (`String "RedshiftIdcApplicationNotExistsFault"));
+            ("details", (RedshiftIdcApplicationNotExistsFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.modifyRedshiftIdcApplicationResult in
+      structure_to_wrapped_value
+        [("RedshiftIdcApplication",
+           (Option.map x.redshiftIdcApplication
+              ~f:RedshiftIdcApplication.to_value))]
+        ~wrapper:"ModifyRedshiftIdcApplicationResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "ModifyRedshiftIdcApplicationResult" in
+      let redshiftIdcApplication =
+        (Option.map ~f:RedshiftIdcApplication.of_xml)
+          (Xml.child xml_arg0 "RedshiftIdcApplication") in
+      make ?redshiftIdcApplication ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redshiftIdcApplication =
+        field_map json__ "RedshiftIdcApplication"
+          RedshiftIdcApplication.of_json in
+      make ?redshiftIdcApplication ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Changes an existing Amazon Redshift IAM Identity Center application."]
+module ModifyRedshiftIdcApplicationMessage =
+  struct
+    type nonrec t =
+      {
+      redshiftIdcApplicationArn: String_.t
+        [@ocaml.doc
+          "The ARN for the Redshift application that integrates with IAM Identity Center."];
+      identityNamespace: IdentityNamespaceString.t option
+        [@ocaml.doc
+          "The namespace for the Amazon Redshift IAM Identity Center application to change. It determines which managed application verifies the connection token."];
+      iamRoleArn: String_.t option
+        [@ocaml.doc
+          "The IAM role ARN associated with the Amazon Redshift IAM Identity Center application to change. It has the required permissions to be assumed and invoke the IDC Identity Center API."];
+      idcDisplayName: IdcDisplayNameString.t option
+        [@ocaml.doc
+          "The display name for the Amazon Redshift IAM Identity Center application to change. It appears on the console."];
+      authorizedTokenIssuerList: AuthorizedTokenIssuerList.t option
+        [@ocaml.doc
+          "The authorized token issuer list for the Amazon Redshift IAM Identity Center application to change."];
+      serviceIntegrations: ServiceIntegrationList.t option
+        [@ocaml.doc
+          "A collection of service integrations associated with the application."]}
+    let context_ = "ModifyRedshiftIdcApplicationMessage"
+    let make ?identityNamespace =
+      fun ?iamRoleArn ->
+        fun ?idcDisplayName ->
+          fun ?authorizedTokenIssuerList ->
+            fun ?serviceIntegrations ->
+              fun ~redshiftIdcApplicationArn ->
+                fun () ->
+                  {
+                    identityNamespace;
+                    iamRoleArn;
+                    idcDisplayName;
+                    authorizedTokenIssuerList;
+                    serviceIntegrations;
+                    redshiftIdcApplicationArn
+                  }
+    let to_value x =
+      structure_to_value
+        [("RedshiftIdcApplicationArn",
+           (Some (String_.to_value x.redshiftIdcApplicationArn)));
+        ("IdentityNamespace",
+          (Option.map x.identityNamespace ~f:IdentityNamespaceString.to_value));
+        ("IamRoleArn", (Option.map x.iamRoleArn ~f:String_.to_value));
+        ("IdcDisplayName",
+          (Option.map x.idcDisplayName ~f:IdcDisplayNameString.to_value));
+        ("AuthorizedTokenIssuerList",
+          (Option.map x.authorizedTokenIssuerList
+             ~f:AuthorizedTokenIssuerList.to_value));
+        ("ServiceIntegrations",
+          (Option.map x.serviceIntegrations
+             ~f:ServiceIntegrationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceIntegrations =
+        (Option.map ~f:ServiceIntegrationList.of_xml)
+          (Xml.child xml_arg0 "ServiceIntegrations") in
+      let authorizedTokenIssuerList =
+        (Option.map ~f:AuthorizedTokenIssuerList.of_xml)
+          (Xml.child xml_arg0 "AuthorizedTokenIssuerList") in
+      let idcDisplayName =
+        (Option.map ~f:IdcDisplayNameString.of_xml)
+          (Xml.child xml_arg0 "IdcDisplayName") in
+      let iamRoleArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "IamRoleArn") in
+      let identityNamespace =
+        (Option.map ~f:IdentityNamespaceString.of_xml)
+          (Xml.child xml_arg0 "IdentityNamespace") in
+      let redshiftIdcApplicationArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "RedshiftIdcApplicationArn") in
+      make ?serviceIntegrations ?authorizedTokenIssuerList ?idcDisplayName
+        ?iamRoleArn ?identityNamespace ~redshiftIdcApplicationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceIntegrations =
+        field_map json__ "ServiceIntegrations" ServiceIntegrationList.of_json in
+      let authorizedTokenIssuerList =
+        field_map json__ "AuthorizedTokenIssuerList"
+          AuthorizedTokenIssuerList.of_json in
+      let idcDisplayName =
+        field_map json__ "IdcDisplayName" IdcDisplayNameString.of_json in
+      let iamRoleArn = field_map json__ "IamRoleArn" String_.of_json in
+      let identityNamespace =
+        field_map json__ "IdentityNamespace" IdentityNamespaceString.of_json in
+      let redshiftIdcApplicationArn =
+        field_map_exn json__ "RedshiftIdcApplicationArn" String_.of_json in
+      make ?serviceIntegrations ?authorizedTokenIssuerList ?idcDisplayName
+        ?iamRoleArn ?identityNamespace ~redshiftIdcApplicationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Changes an existing Amazon Redshift IAM Identity Center application."]
+module ModifyLakehouseConfigurationMessage =
+  struct
+    type nonrec t =
+      {
+      clusterIdentifier: String_.t
+        [@ocaml.doc
+          "The unique identifier of the cluster whose lakehouse configuration you want to modify."];
+      lakehouseRegistration: LakehouseRegistration.t option
+        [@ocaml.doc
+          "Specifies whether to register or deregister the cluster with Amazon Redshift federated permissions. Valid values are Register or Deregister."];
+      catalogName: CatalogNameString.t option
+        [@ocaml.doc
+          "The name of the Glue data catalog that will be associated with the cluster enabled with Amazon Redshift federated permissions. Constraints: Must contain at least one lowercase letter. Can only contain lowercase letters (a-z), numbers (0-9), underscores (_), and hyphens (-). Pattern: ^\\[a-z0-9_-\\]*\\[a-z\\]+\\[a-z0-9_-\\]*$ Example: my-catalog_01"];
+      lakehouseIdcRegistration: LakehouseIdcRegistration.t option
+        [@ocaml.doc
+          "Modifies the Amazon Web Services IAM Identity Center trusted identity propagation on a cluster enabled with Amazon Redshift federated permissions. Valid values are Associate or Disassociate."];
+      lakehouseIdcApplicationArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM Identity Center application used for enabling Amazon Web Services IAM Identity Center trusted identity propagation on a cluster enabled with Amazon Redshift federated permissions."];
+      dryRun: BooleanOptional.t option
+        [@ocaml.doc
+          "A boolean value that, if true, validates the request without actually modifying the lakehouse configuration. Use this to check for errors before making changes."]}
+    let context_ = "ModifyLakehouseConfigurationMessage"
+    let make ?lakehouseRegistration =
+      fun ?catalogName ->
+        fun ?lakehouseIdcRegistration ->
+          fun ?lakehouseIdcApplicationArn ->
+            fun ?dryRun ->
+              fun ~clusterIdentifier ->
+                fun () ->
+                  {
+                    lakehouseRegistration;
+                    catalogName;
+                    lakehouseIdcRegistration;
+                    lakehouseIdcApplicationArn;
+                    dryRun;
+                    clusterIdentifier
+                  }
+    let to_value x =
+      structure_to_value
+        [("ClusterIdentifier", (Some (String_.to_value x.clusterIdentifier)));
+        ("LakehouseRegistration",
+          (Option.map x.lakehouseRegistration
+             ~f:LakehouseRegistration.to_value));
+        ("CatalogName",
+          (Option.map x.catalogName ~f:CatalogNameString.to_value));
+        ("LakehouseIdcRegistration",
+          (Option.map x.lakehouseIdcRegistration
+             ~f:LakehouseIdcRegistration.to_value));
+        ("LakehouseIdcApplicationArn",
+          (Option.map x.lakehouseIdcApplicationArn ~f:String_.to_value));
+        ("DryRun", (Option.map x.dryRun ~f:BooleanOptional.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dryRun =
+        (Option.map ~f:BooleanOptional.of_xml) (Xml.child xml_arg0 "DryRun") in
+      let lakehouseIdcApplicationArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "LakehouseIdcApplicationArn") in
+      let lakehouseIdcRegistration =
+        (Option.map ~f:LakehouseIdcRegistration.of_xml)
+          (Xml.child xml_arg0 "LakehouseIdcRegistration") in
+      let catalogName =
+        (Option.map ~f:CatalogNameString.of_xml)
+          (Xml.child xml_arg0 "CatalogName") in
+      let lakehouseRegistration =
+        (Option.map ~f:LakehouseRegistration.of_xml)
+          (Xml.child xml_arg0 "LakehouseRegistration") in
+      let clusterIdentifier =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
+      make ?dryRun ?lakehouseIdcApplicationArn ?lakehouseIdcRegistration
+        ?catalogName ?lakehouseRegistration ~clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" BooleanOptional.of_json in
+      let lakehouseIdcApplicationArn =
+        field_map json__ "LakehouseIdcApplicationArn" String_.of_json in
+      let lakehouseIdcRegistration =
+        field_map json__ "LakehouseIdcRegistration"
+          LakehouseIdcRegistration.of_json in
+      let catalogName =
+        field_map json__ "CatalogName" CatalogNameString.of_json in
+      let lakehouseRegistration =
+        field_map json__ "LakehouseRegistration"
+          LakehouseRegistration.of_json in
+      let clusterIdentifier =
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
+      make ?dryRun ?lakehouseIdcApplicationArn ?lakehouseIdcRegistration
+        ?catalogName ?lakehouseRegistration ~clusterIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies the lakehouse configuration for a cluster. This operation allows you to manage Amazon Redshift federated permissions and Amazon Web Services IAM Identity Center trusted identity propagation."]
+module ModifyIntegrationMessage =
+  struct
+    type nonrec t =
+      {
+      integrationArn: IntegrationArn.t
+        [@ocaml.doc "The unique identifier of the integration to modify."];
+      description: IntegrationDescription.t option
+        [@ocaml.doc "A new description for the integration."];
+      integrationName: IntegrationName.t option
+        [@ocaml.doc "A new name for the integration."]}
+    let context_ = "ModifyIntegrationMessage"
+    let make ?description =
+      fun ?integrationName ->
+        fun ~integrationArn ->
+          fun () -> { description; integrationName; integrationArn }
+    let to_value x =
+      structure_to_value
+        [("IntegrationArn",
+           (Some (IntegrationArn.to_value x.integrationArn)));
+        ("Description",
+          (Option.map x.description ~f:IntegrationDescription.to_value));
+        ("IntegrationName",
+          (Option.map x.integrationName ~f:IntegrationName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let integrationName =
+        (Option.map ~f:IntegrationName.of_xml)
+          (Xml.child xml_arg0 "IntegrationName") in
+      let description =
+        (Option.map ~f:IntegrationDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let integrationArn =
+        IntegrationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IntegrationArn") in
+      make ?integrationName ?description ~integrationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let integrationName =
+        field_map json__ "IntegrationName" IntegrationName.of_json in
+      let description =
+        field_map json__ "Description" IntegrationDescription.of_json in
+      let integrationArn =
+        field_map_exn json__ "IntegrationArn" IntegrationArn.of_json in
+      make ?integrationName ?description ~integrationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies a zero-ETL integration or S3 event integration with Amazon Redshift."]
 module ModifyEventSubscriptionResult =
   struct
     type modifyEventSubscriptionResult =
@@ -14790,9 +18790,9 @@ module ModifyEventSubscriptionResult =
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventSubscription =
-        field_map json "EventSubscription" EventSubscription.of_json in
+        field_map json__ "EventSubscription" EventSubscription.of_json in
       make ?eventSubscription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14871,16 +18871,16 @@ module ModifyEventSubscriptionMessage =
       make ?enabled ?severity ?eventCategories ?sourceIds ?sourceType
         ?snsTopicArn ~subscriptionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" BooleanOptional.of_json in
-      let severity = field_map json "Severity" String_.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" BooleanOptional.of_json in
+      let severity = field_map json__ "Severity" String_.of_json in
       let eventCategories =
-        field_map json "EventCategories" EventCategoriesList.of_json in
-      let sourceIds = field_map json "SourceIds" SourceIdsList.of_json in
-      let sourceType = field_map json "SourceType" String_.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" String_.of_json in
+        field_map json__ "EventCategories" EventCategoriesList.of_json in
+      let sourceIds = field_map json__ "SourceIds" SourceIdsList.of_json in
+      let sourceType = field_map json__ "SourceType" String_.of_json in
+      let snsTopicArn = field_map json__ "SnsTopicArn" String_.of_json in
       let subscriptionName =
-        field_map_exn json "SubscriptionName" String_.of_json in
+        field_map_exn json__ "SubscriptionName" String_.of_json in
       make ?enabled ?severity ?eventCategories ?sourceIds ?sourceType
         ?snsTopicArn ~subscriptionName ()
     let to_json v = composed_to_json to_value v
@@ -14912,13 +18912,217 @@ module ModifyEndpointAccessMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointName") in
       make ?vpcSecurityGroupIds ~endpointName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vpcSecurityGroupIds =
-        field_map json "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
-      let endpointName = field_map_exn json "EndpointName" String_.of_json in
+        field_map json__ "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
+      let endpointName = field_map_exn json__ "EndpointName" String_.of_json in
       make ?vpcSecurityGroupIds ~endpointName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies a Redshift-managed VPC endpoint."]
+module ModifyCustomDomainAssociationResult =
+  struct
+    type modifyCustomDomainAssociationResult =
+      {
+      customDomainName: CustomDomainNameString.t option
+        [@ocaml.doc
+          "The custom domain name associated with the result for the changed custom domain association."];
+      customDomainCertificateArn: CustomDomainCertificateArnString.t option
+        [@ocaml.doc
+          "The certificate Amazon Resource Name (ARN) associated with the result for the changed custom domain association."];
+      clusterIdentifier: String_.t option
+        [@ocaml.doc
+          "The identifier of the cluster associated with the result for the changed custom domain association."];
+      customDomainCertExpiryTime: String_.t option
+        [@ocaml.doc
+          "The certificate expiration time associated with the result for the changed custom domain association."]}
+    and responseMetaData = unit
+    and t =
+      {
+      modifyCustomDomainAssociationResult:
+        modifyCustomDomainAssociationResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
+      | `CustomCnameAssociationFault of CustomCnameAssociationFault.t 
+      | `CustomDomainAssociationNotFoundFault of
+          CustomDomainAssociationNotFoundFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ModifyCustomDomainAssociationResult"
+    let make ?customDomainName =
+      fun ?customDomainCertificateArn ->
+        fun ?clusterIdentifier ->
+          fun ?customDomainCertExpiryTime ->
+            fun () ->
+              {
+                modifyCustomDomainAssociationResult =
+                  {
+                    customDomainName;
+                    customDomainCertificateArn;
+                    clusterIdentifier;
+                    customDomainCertExpiryTime
+                  };
+                responseMetaData = ()
+              }
+    let error_of_json name json =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
+      | "CustomCnameAssociationFault" ->
+          `CustomCnameAssociationFault
+            (CustomCnameAssociationFault.of_json json)
+      | "CustomDomainAssociationNotFoundFault" ->
+          `CustomDomainAssociationNotFoundFault
+            (CustomDomainAssociationNotFoundFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
+      | "CustomCnameAssociationFault" ->
+          `CustomCnameAssociationFault
+            (CustomCnameAssociationFault.of_xml xml)
+      | "CustomDomainAssociationNotFoundFault" ->
+          `CustomDomainAssociationNotFoundFault
+            (CustomDomainAssociationNotFoundFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ClusterNotFoundFault"));
+            ("details", (ClusterNotFoundFault.to_json e))]
+      | `CustomCnameAssociationFault e ->
+          `Assoc
+            [("error", (`String "CustomCnameAssociationFault"));
+            ("details", (CustomCnameAssociationFault.to_json e))]
+      | `CustomDomainAssociationNotFoundFault e ->
+          `Assoc
+            [("error", (`String "CustomDomainAssociationNotFoundFault"));
+            ("details", (CustomDomainAssociationNotFoundFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.modifyCustomDomainAssociationResult in
+      structure_to_wrapped_value
+        [("CustomDomainName",
+           (Option.map x.customDomainName ~f:CustomDomainNameString.to_value));
+        ("CustomDomainCertificateArn",
+          (Option.map x.customDomainCertificateArn
+             ~f:CustomDomainCertificateArnString.to_value));
+        ("ClusterIdentifier",
+          (Option.map x.clusterIdentifier ~f:String_.to_value));
+        ("CustomDomainCertExpiryTime",
+          (Option.map x.customDomainCertExpiryTime ~f:String_.to_value))]
+        ~wrapper:"ModifyCustomDomainAssociationResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "ModifyCustomDomainAssociationResult" in
+      let customDomainCertExpiryTime =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "CustomDomainCertExpiryTime") in
+      let clusterIdentifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ClusterIdentifier") in
+      let customDomainCertificateArn =
+        (Option.map ~f:CustomDomainCertificateArnString.of_xml)
+          (Xml.child xml_arg0 "CustomDomainCertificateArn") in
+      let customDomainName =
+        (Option.map ~f:CustomDomainNameString.of_xml)
+          (Xml.child xml_arg0 "CustomDomainName") in
+      make ?customDomainCertExpiryTime ?clusterIdentifier
+        ?customDomainCertificateArn ?customDomainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customDomainCertExpiryTime =
+        field_map json__ "CustomDomainCertExpiryTime" String_.of_json in
+      let clusterIdentifier =
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      let customDomainCertificateArn =
+        field_map json__ "CustomDomainCertificateArn"
+          CustomDomainCertificateArnString.of_json in
+      let customDomainName =
+        field_map json__ "CustomDomainName" CustomDomainNameString.of_json in
+      make ?customDomainCertExpiryTime ?clusterIdentifier
+        ?customDomainCertificateArn ?customDomainName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information for changing a custom domain association."]
+module ModifyCustomDomainAssociationMessage =
+  struct
+    type nonrec t =
+      {
+      customDomainName: CustomDomainNameString.t
+        [@ocaml.doc
+          "The custom domain name for a changed custom domain association."];
+      customDomainCertificateArn: CustomDomainCertificateArnString.t
+        [@ocaml.doc
+          "The certificate Amazon Resource Name (ARN) for the changed custom domain association."];
+      clusterIdentifier: String_.t
+        [@ocaml.doc
+          "The identifier of the cluster to change a custom domain association for."]}
+    let context_ = "ModifyCustomDomainAssociationMessage"
+    let make ~customDomainName =
+      fun ~customDomainCertificateArn ->
+        fun ~clusterIdentifier ->
+          fun () ->
+            { customDomainName; customDomainCertificateArn; clusterIdentifier
+            }
+    let to_value x =
+      structure_to_value
+        [("CustomDomainName",
+           (Some (CustomDomainNameString.to_value x.customDomainName)));
+        ("CustomDomainCertificateArn",
+          (Some
+             (CustomDomainCertificateArnString.to_value
+                x.customDomainCertificateArn)));
+        ("ClusterIdentifier", (Some (String_.to_value x.clusterIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clusterIdentifier =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
+      let customDomainCertificateArn =
+        CustomDomainCertificateArnString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "CustomDomainCertificateArn") in
+      let customDomainName =
+        CustomDomainNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CustomDomainName") in
+      make ~clusterIdentifier ~customDomainCertificateArn ~customDomainName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clusterIdentifier =
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
+      let customDomainCertificateArn =
+        field_map_exn json__ "CustomDomainCertificateArn"
+          CustomDomainCertificateArnString.of_json in
+      let customDomainName =
+        field_map_exn json__ "CustomDomainName"
+          CustomDomainNameString.of_json in
+      make ~clusterIdentifier ~customDomainCertificateArn ~customDomainName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information for changing a custom domain association."]
 module ModifyClusterSubnetGroupResult =
   struct
     type modifyClusterSubnetGroupResult =
@@ -15030,13 +19234,13 @@ module ModifyClusterSubnetGroupResult =
           (Xml.child xml_arg0 "ClusterSubnetGroup") in
       make ?clusterSubnetGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterSubnetGroup =
-        field_map json "ClusterSubnetGroup" ClusterSubnetGroup.of_json in
+        field_map json__ "ClusterSubnetGroup" ClusterSubnetGroup.of_json in
       make ?clusterSubnetGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies a cluster subnet group to include the specified list of VPC subnets. The operation replaces the existing list of subnets with the new list of subnets."]
+       "Modifies a cluster subnet group to include the specified list of VPC subnets. The operation replaces the existing list of subnets with the new list of subnets. VPC Block Public Access (BPA) enables you to block resources in VPCs and subnets that you own in a Region from reaching or being reached from the internet through internet gateways and egress-only internet gateways. If a subnet group for a provisioned cluster is in an account with VPC BPA turned on, the following capabilities are blocked: Creating a public cluster Restoring a public cluster Modifying a private cluster to be public Adding a subnet with VPC BPA turned on to the subnet group when there's at least one public cluster within the group For more information about VPC BPA, see Block public access to VPCs and subnets in the Amazon VPC User Guide."]
 module ModifyClusterSubnetGroupMessage =
   struct
     type nonrec t =
@@ -15071,12 +19275,12 @@ module ModifyClusterSubnetGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterSubnetGroupName") in
       make ~subnetIds ?description ~clusterSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subnetIds =
-        field_map_exn json "SubnetIds" SubnetIdentifierList.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map_exn json__ "SubnetIds" SubnetIdentifierList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let clusterSubnetGroupName =
-        field_map_exn json "ClusterSubnetGroupName" String_.of_json in
+        field_map_exn json__ "ClusterSubnetGroupName" String_.of_json in
       make ~subnetIds ?description ~clusterSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end
@@ -15119,13 +19323,13 @@ module ModifyClusterSnapshotScheduleMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       make ?disassociateSchedule ?scheduleIdentifier ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let disassociateSchedule =
-        field_map json "DisassociateSchedule" BooleanOptional.of_json in
+        field_map json__ "DisassociateSchedule" BooleanOptional.of_json in
       let scheduleIdentifier =
-        field_map json "ScheduleIdentifier" String_.of_json in
+        field_map json__ "ScheduleIdentifier" String_.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ?disassociateSchedule ?scheduleIdentifier ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies a snapshot schedule for a cluster."]
@@ -15207,8 +19411,8 @@ module ModifyClusterSnapshotResult =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15251,13 +19455,13 @@ module ModifyClusterSnapshotMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotIdentifier") in
       make ?force ?manualSnapshotRetentionPeriod ~snapshotIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let force = field_map json "Force" Boolean.of_json in
+    let of_json json__ =
+      let force = field_map json__ "Force" Boolean.of_json in
       let manualSnapshotRetentionPeriod =
-        field_map json "ManualSnapshotRetentionPeriod"
+        field_map json__ "ManualSnapshotRetentionPeriod"
           IntegerOptional.of_json in
       let snapshotIdentifier =
-        field_map_exn json "SnapshotIdentifier" String_.of_json in
+        field_map_exn json__ "SnapshotIdentifier" String_.of_json in
       make ?force ?manualSnapshotRetentionPeriod ~snapshotIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15278,6 +19482,7 @@ module ModifyClusterResult =
           ClusterParameterGroupNotFoundFault.t 
       | `ClusterSecurityGroupNotFoundFault of
           ClusterSecurityGroupNotFoundFault.t 
+      | `CustomCnameAssociationFault of CustomCnameAssociationFault.t 
       | `DependentServiceRequestThrottlingFault of
           DependentServiceRequestThrottlingFault.t 
       | `HsmClientCertificateNotFoundFault of
@@ -15291,12 +19496,14 @@ module ModifyClusterResult =
       | `InvalidClusterTrackFault of InvalidClusterTrackFault.t 
       | `InvalidElasticIpFault of InvalidElasticIpFault.t 
       | `InvalidRetentionPeriodFault of InvalidRetentionPeriodFault.t 
+      | `Ipv6CidrBlockNotFoundFault of Ipv6CidrBlockNotFoundFault.t 
       | `LimitExceededFault of LimitExceededFault.t 
       | `NumberOfNodesPerClusterLimitExceededFault of
           NumberOfNodesPerClusterLimitExceededFault.t 
       | `NumberOfNodesQuotaExceededFault of NumberOfNodesQuotaExceededFault.t 
       | `TableLimitExceededFault of TableLimitExceededFault.t 
       | `UnauthorizedOperation of UnauthorizedOperation.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `UnsupportedOptionFault of UnsupportedOptionFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ModifyClusterResult"
@@ -15314,6 +19521,9 @@ module ModifyClusterResult =
       | "ClusterSecurityGroupNotFoundFault" ->
           `ClusterSecurityGroupNotFoundFault
             (ClusterSecurityGroupNotFoundFault.of_json json)
+      | "CustomCnameAssociationFault" ->
+          `CustomCnameAssociationFault
+            (CustomCnameAssociationFault.of_json json)
       | "DependentServiceRequestThrottlingFault" ->
           `DependentServiceRequestThrottlingFault
             (DependentServiceRequestThrottlingFault.of_json json)
@@ -15338,6 +19548,9 @@ module ModifyClusterResult =
       | "InvalidRetentionPeriodFault" ->
           `InvalidRetentionPeriodFault
             (InvalidRetentionPeriodFault.of_json json)
+      | "Ipv6CidrBlockNotFoundFault" ->
+          `Ipv6CidrBlockNotFoundFault
+            (Ipv6CidrBlockNotFoundFault.of_json json)
       | "LimitExceededFault" ->
           `LimitExceededFault (LimitExceededFault.of_json json)
       | "NumberOfNodesPerClusterLimitExceededFault" ->
@@ -15350,6 +19563,8 @@ module ModifyClusterResult =
           `TableLimitExceededFault (TableLimitExceededFault.of_json json)
       | "UnauthorizedOperation" ->
           `UnauthorizedOperation (UnauthorizedOperation.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | "UnsupportedOptionFault" ->
           `UnsupportedOptionFault (UnsupportedOptionFault.of_json json)
       | name ->
@@ -15367,6 +19582,9 @@ module ModifyClusterResult =
       | "ClusterSecurityGroupNotFoundFault" ->
           `ClusterSecurityGroupNotFoundFault
             (ClusterSecurityGroupNotFoundFault.of_xml xml)
+      | "CustomCnameAssociationFault" ->
+          `CustomCnameAssociationFault
+            (CustomCnameAssociationFault.of_xml xml)
       | "DependentServiceRequestThrottlingFault" ->
           `DependentServiceRequestThrottlingFault
             (DependentServiceRequestThrottlingFault.of_xml xml)
@@ -15391,6 +19609,8 @@ module ModifyClusterResult =
       | "InvalidRetentionPeriodFault" ->
           `InvalidRetentionPeriodFault
             (InvalidRetentionPeriodFault.of_xml xml)
+      | "Ipv6CidrBlockNotFoundFault" ->
+          `Ipv6CidrBlockNotFoundFault (Ipv6CidrBlockNotFoundFault.of_xml xml)
       | "LimitExceededFault" ->
           `LimitExceededFault (LimitExceededFault.of_xml xml)
       | "NumberOfNodesPerClusterLimitExceededFault" ->
@@ -15403,6 +19623,8 @@ module ModifyClusterResult =
           `TableLimitExceededFault (TableLimitExceededFault.of_xml xml)
       | "UnauthorizedOperation" ->
           `UnauthorizedOperation (UnauthorizedOperation.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | "UnsupportedOptionFault" ->
           `UnsupportedOptionFault (UnsupportedOptionFault.of_xml xml)
       | name ->
@@ -15425,6 +19647,10 @@ module ModifyClusterResult =
           `Assoc
             [("error", (`String "ClusterSecurityGroupNotFoundFault"));
             ("details", (ClusterSecurityGroupNotFoundFault.to_json e))]
+      | `CustomCnameAssociationFault e ->
+          `Assoc
+            [("error", (`String "CustomCnameAssociationFault"));
+            ("details", (CustomCnameAssociationFault.to_json e))]
       | `DependentServiceRequestThrottlingFault e ->
           `Assoc
             [("error", (`String "DependentServiceRequestThrottlingFault"));
@@ -15461,6 +19687,10 @@ module ModifyClusterResult =
           `Assoc
             [("error", (`String "InvalidRetentionPeriodFault"));
             ("details", (InvalidRetentionPeriodFault.to_json e))]
+      | `Ipv6CidrBlockNotFoundFault e ->
+          `Assoc
+            [("error", (`String "Ipv6CidrBlockNotFoundFault"));
+            ("details", (Ipv6CidrBlockNotFoundFault.to_json e))]
       | `LimitExceededFault e ->
           `Assoc
             [("error", (`String "LimitExceededFault"));
@@ -15482,6 +19712,10 @@ module ModifyClusterResult =
           `Assoc
             [("error", (`String "UnauthorizedOperation"));
             ("details", (UnauthorizedOperation.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `UnsupportedOptionFault e ->
           `Assoc
             [("error", (`String "UnsupportedOptionFault"));
@@ -15503,12 +19737,12 @@ module ModifyClusterResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies the settings for a cluster. You can also change node type and the number of nodes to scale up or down the cluster. When resizing a cluster, you must specify both the number of nodes and the node type even if one of the parameters does not change. You can add another security or parameter group, or change the admin user password. Resetting a cluster password or modifying the security groups associated with a cluster do not need a reboot. However, modifying a parameter group requires a reboot for parameters to take effect. For more information about managing clusters, go to Amazon Redshift Clusters in the Amazon Redshift Cluster Management Guide."]
+       "Modifies the settings for a cluster. You can also change node type and the number of nodes to scale up or down the cluster. When resizing a cluster, you must specify both the number of nodes and the node type even if one of the parameters does not change. You can add another security or parameter group, or change the admin user password. Resetting a cluster password or modifying the security groups associated with a cluster do not need a reboot. However, modifying a parameter group requires a reboot for parameters to take effect. For more information about managing clusters, go to Amazon Redshift Clusters in the Amazon Redshift Cluster Management Guide. VPC Block Public Access (BPA) enables you to block resources in VPCs and subnets that you own in a Region from reaching or being reached from the internet through internet gateways and egress-only internet gateways. If a subnet group for a provisioned cluster is in an account with VPC BPA turned on, the following capabilities are blocked: Creating a public cluster Restoring a public cluster Modifying a private cluster to be public Adding a subnet with VPC BPA turned on to the subnet group when there's at least one public cluster within the group For more information about VPC BPA, see Block public access to VPCs and subnets in the Amazon VPC User Guide."]
 module ModifyClusterParameterGroupMessage =
   struct
     type nonrec t =
@@ -15536,10 +19770,11 @@ module ModifyClusterParameterGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ~parameters ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parameters = field_map_exn json "Parameters" ParametersList.of_json in
+    let of_json json__ =
+      let parameters =
+        field_map_exn json__ "Parameters" ParametersList.of_json in
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ~parameters ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a modify cluster parameter group operation."]
@@ -15555,7 +19790,7 @@ module ModifyClusterMessage =
           "The new cluster type. When you submit your cluster resize request, your existing cluster goes into a read-only mode. After Amazon Redshift provisions a new cluster based on your resize requirements, there will be outage for a period while the old cluster is deleted and your connection is switched to the new cluster. You can use DescribeResize to track the progress of the resize request. Valid Values: multi-node | single-node"];
       nodeType: String_.t option
         [@ocaml.doc
-          "The new node type of the cluster. If you specify a new node type, you must also specify the number of nodes parameter. For more information about resizing clusters, go to Resizing Clusters in Amazon Redshift in the Amazon Redshift Cluster Management Guide. Valid Values: ds2.xlarge | ds2.8xlarge | dc1.large | dc1.8xlarge | dc2.large | dc2.8xlarge | ra3.xlplus | ra3.4xlarge | ra3.16xlarge"];
+          "The new node type of the cluster. If you specify a new node type, you must also specify the number of nodes parameter. For more information about resizing clusters, go to Resizing Clusters in Amazon Redshift in the Amazon Redshift Cluster Management Guide. Valid Values: dc2.large | dc2.8xlarge| rg.xlarge | rg.4xlarge | ra3.large | ra3.xlplus | ra3.4xlarge | ra3.16xlarge"];
       numberOfNodes: IntegerOptional.t option
         [@ocaml.doc
           "The new number of nodes of the cluster. If you specify a new number of nodes, you must also specify the node type parameter. For more information about resizing clusters, go to Resizing Clusters in Amazon Redshift in the Amazon Redshift Cluster Management Guide. Valid Values: Integer greater than 0."];
@@ -15565,15 +19800,15 @@ module ModifyClusterMessage =
       vpcSecurityGroupIds: VpcSecurityGroupIdList.t option
         [@ocaml.doc
           "A list of virtual private cloud (VPC) security groups to be associated with the cluster. This change is asynchronously applied as soon as possible."];
-      masterUserPassword: String_.t option
+      masterUserPassword: SensitiveString.t option
         [@ocaml.doc
-          "The new password for the cluster admin user. This change is asynchronously applied as soon as possible. Between the time of the request and the completion of the request, the MasterUserPassword element exists in the PendingModifiedValues element of the operation response. Operations never return the password, so this operation provides a way to regain access to the admin user account for a cluster if the password is lost. Default: Uses existing setting. Constraints: Must be between 8 and 64 characters in length. Must contain at least one uppercase letter. Must contain at least one lowercase letter. Must contain one number. Can be any printable ASCII character (ASCII code 33-126) except ' (single quote), \" (double quote), \\, /, or \\@."];
+          "The new password for the cluster admin user. This change is asynchronously applied as soon as possible. Between the time of the request and the completion of the request, the MasterUserPassword element exists in the PendingModifiedValues element of the operation response. You can't use MasterUserPassword if ManageMasterPassword is true. Operations never return the password, so this operation provides a way to regain access to the admin user account for a cluster if the password is lost. Default: Uses existing setting. Constraints: Must be between 8 and 64 characters in length. Must contain at least one uppercase letter. Must contain at least one lowercase letter. Must contain one number. Can be any printable ASCII character (ASCII code 33-126) except ' (single quote), \" (double quote), \\, /, or \\@."];
       clusterParameterGroupName: String_.t option
         [@ocaml.doc
           "The name of the cluster parameter group to apply to this cluster. This change is applied only after the cluster is rebooted. To reboot a cluster use RebootCluster. Default: Uses existing setting. Constraints: The cluster parameter group must be in the same parameter group family that matches the cluster version."];
       automatedSnapshotRetentionPeriod: IntegerOptional.t option
         [@ocaml.doc
-          "The number of days that automated snapshots are retained. If the value is 0, automated snapshots are disabled. Even if automated snapshots are disabled, you can still create manual snapshots when you want with CreateClusterSnapshot. If you decrease the automated snapshot retention period from its current value, existing automated snapshots that fall outside of the new retention period will be immediately deleted. You can't disable automated snapshots for RA3 node types. Set the automated retention period from 1-35 days. Default: Uses existing setting. Constraints: Must be a value from 0 to 35."];
+          "The number of days that automated snapshots are retained. If the value is 0, automated snapshots are disabled. Even if automated snapshots are disabled, you can still create manual snapshots when you want with CreateClusterSnapshot. If you decrease the automated snapshot retention period from its current value, existing automated snapshots that fall outside of the new retention period will be immediately deleted. You can't disable automated snapshots for RG or RA3 node types. Set the automated retention period from 1-35 days. Default: Uses existing setting. Constraints: Must be a value from 0 to 35."];
       manualSnapshotRetentionPeriod: IntegerOptional.t option
         [@ocaml.doc
           "The default for number of days that a newly created manual snapshot is retained. If the value is -1, the manual snapshot is retained indefinitely. This value doesn't retroactively change the retention periods of existing manual snapshots. The value must be either -1 or an integer between 1 and 3,653. The default value is -1."];
@@ -15597,7 +19832,7 @@ module ModifyClusterMessage =
           "The new identifier for the cluster. Constraints: Must contain from 1 to 63 alphanumeric characters or hyphens. Alphabetic characters must be lowercase. First character must be a letter. Cannot end with a hyphen or contain two consecutive hyphens. Must be unique for all clusters within an Amazon Web Services account. Example: examplecluster"];
       publiclyAccessible: BooleanOptional.t option
         [@ocaml.doc
-          "If true, the cluster can be accessed from a public network. Only clusters in VPCs can be set to be publicly available."];
+          "If true, the cluster can be accessed from a public network. Only clusters in VPCs can be set to be publicly available. Default: false"];
       elasticIp: String_.t option
         [@ocaml.doc
           "The Elastic IP (EIP) address for the cluster. Constraints: The cluster must be provisioned in EC2-VPC and publicly-accessible through an Internet gateway. For more information about provisioning clusters in EC2-VPC, go to Supported Platforms to Launch Your Cluster in the Amazon Redshift Cluster Management Guide."];
@@ -15621,7 +19856,22 @@ module ModifyClusterMessage =
           "The option to initiate relocation for an Amazon Redshift cluster to the target Availability Zone."];
       port: IntegerOptional.t option
         [@ocaml.doc
-          "The option to change the port of an Amazon Redshift cluster."]}
+          "The option to change the port of an Amazon Redshift cluster. Valid Values: For clusters with RG or RA3 nodes - Select a port within the ranges 5431-5455 or 8191-8215. (If you have an existing cluster with RG or RA3 nodes, it isn't required that you change the port to these ranges.) For clusters with dc2 nodes - Select a port within the range 1150-65535."];
+      manageMasterPassword: BooleanOptional.t option
+        [@ocaml.doc
+          "If true, Amazon Redshift uses Secrets Manager to manage this cluster's admin credentials. You can't use MasterUserPassword if ManageMasterPassword is true. If ManageMasterPassword is false or not set, Amazon Redshift uses MasterUserPassword for the admin user account's password."];
+      masterPasswordSecretKmsKeyId: String_.t option
+        [@ocaml.doc
+          "The ID of the Key Management Service (KMS) key used to encrypt and store the cluster's admin credentials secret. You can only use this parameter if ManageMasterPassword is true."];
+      ipAddressType: String_.t option
+        [@ocaml.doc
+          "The IP address types that the cluster supports. Possible values are ipv4 and dualstack."];
+      multiAZ: BooleanOptional.t option
+        [@ocaml.doc
+          "If true and the cluster is currently only deployed in a single Availability Zone, the cluster will be modified to be deployed in two Availability Zones."];
+      extraComputeForAutomaticOptimization: BooleanOptional.t option
+        [@ocaml.doc
+          "If true, allocates additional compute resources for running automatic optimization operations. Default: false"]}
     let context_ = "ModifyClusterMessage"
     let make ?clusterType =
       fun ?nodeType ->
@@ -15648,35 +19898,52 @@ module ModifyClusterMessage =
                                                 ->
                                                 fun ?availabilityZone ->
                                                   fun ?port ->
-                                                    fun ~clusterIdentifier ->
-                                                      fun () ->
-                                                        {
-                                                          clusterType;
-                                                          nodeType;
-                                                          numberOfNodes;
-                                                          clusterSecurityGroups;
-                                                          vpcSecurityGroupIds;
-                                                          masterUserPassword;
-                                                          clusterParameterGroupName;
-                                                          automatedSnapshotRetentionPeriod;
-                                                          manualSnapshotRetentionPeriod;
-                                                          preferredMaintenanceWindow;
-                                                          clusterVersion;
-                                                          allowVersionUpgrade;
-                                                          hsmClientCertificateIdentifier;
-                                                          hsmConfigurationIdentifier;
-                                                          newClusterIdentifier;
-                                                          publiclyAccessible;
-                                                          elasticIp;
-                                                          enhancedVpcRouting;
-                                                          maintenanceTrackName;
-                                                          encrypted;
-                                                          kmsKeyId;
-                                                          availabilityZoneRelocation;
-                                                          availabilityZone;
-                                                          port;
-                                                          clusterIdentifier
-                                                        }
+                                                    fun ?manageMasterPassword
+                                                      ->
+                                                      fun
+                                                        ?masterPasswordSecretKmsKeyId
+                                                        ->
+                                                        fun ?ipAddressType ->
+                                                          fun ?multiAZ ->
+                                                            fun
+                                                              ?extraComputeForAutomaticOptimization
+                                                              ->
+                                                              fun
+                                                                ~clusterIdentifier
+                                                                ->
+                                                                fun () ->
+                                                                  {
+                                                                    clusterType;
+                                                                    nodeType;
+                                                                    numberOfNodes;
+                                                                    clusterSecurityGroups;
+                                                                    vpcSecurityGroupIds;
+                                                                    masterUserPassword;
+                                                                    clusterParameterGroupName;
+                                                                    automatedSnapshotRetentionPeriod;
+                                                                    manualSnapshotRetentionPeriod;
+                                                                    preferredMaintenanceWindow;
+                                                                    clusterVersion;
+                                                                    allowVersionUpgrade;
+                                                                    hsmClientCertificateIdentifier;
+                                                                    hsmConfigurationIdentifier;
+                                                                    newClusterIdentifier;
+                                                                    publiclyAccessible;
+                                                                    elasticIp;
+                                                                    enhancedVpcRouting;
+                                                                    maintenanceTrackName;
+                                                                    encrypted;
+                                                                    kmsKeyId;
+                                                                    availabilityZoneRelocation;
+                                                                    availabilityZone;
+                                                                    port;
+                                                                    manageMasterPassword;
+                                                                    masterPasswordSecretKmsKeyId;
+                                                                    ipAddressType;
+                                                                    multiAZ;
+                                                                    extraComputeForAutomaticOptimization;
+                                                                    clusterIdentifier
+                                                                  }
     let to_value x =
       structure_to_value
         [("ClusterIdentifier", (Some (String_.to_value x.clusterIdentifier)));
@@ -15691,7 +19958,7 @@ module ModifyClusterMessage =
           (Option.map x.vpcSecurityGroupIds
              ~f:VpcSecurityGroupIdList.to_value));
         ("MasterUserPassword",
-          (Option.map x.masterUserPassword ~f:String_.to_value));
+          (Option.map x.masterUserPassword ~f:SensitiveString.to_value));
         ("ClusterParameterGroupName",
           (Option.map x.clusterParameterGroupName ~f:String_.to_value));
         ("AutomatedSnapshotRetentionPeriod",
@@ -15725,9 +19992,31 @@ module ModifyClusterMessage =
              ~f:BooleanOptional.to_value));
         ("AvailabilityZone",
           (Option.map x.availabilityZone ~f:String_.to_value));
-        ("Port", (Option.map x.port ~f:IntegerOptional.to_value))]
+        ("Port", (Option.map x.port ~f:IntegerOptional.to_value));
+        ("ManageMasterPassword",
+          (Option.map x.manageMasterPassword ~f:BooleanOptional.to_value));
+        ("MasterPasswordSecretKmsKeyId",
+          (Option.map x.masterPasswordSecretKmsKeyId ~f:String_.to_value));
+        ("IpAddressType", (Option.map x.ipAddressType ~f:String_.to_value));
+        ("MultiAZ", (Option.map x.multiAZ ~f:BooleanOptional.to_value));
+        ("ExtraComputeForAutomaticOptimization",
+          (Option.map x.extraComputeForAutomaticOptimization
+             ~f:BooleanOptional.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let extraComputeForAutomaticOptimization =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "ExtraComputeForAutomaticOptimization") in
+      let multiAZ =
+        (Option.map ~f:BooleanOptional.of_xml) (Xml.child xml_arg0 "MultiAZ") in
+      let ipAddressType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "IpAddressType") in
+      let masterPasswordSecretKmsKeyId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MasterPasswordSecretKmsKeyId") in
+      let manageMasterPassword =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "ManageMasterPassword") in
       let port =
         (Option.map ~f:IntegerOptional.of_xml) (Xml.child xml_arg0 "Port") in
       let availabilityZone =
@@ -15779,7 +20068,7 @@ module ModifyClusterMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ClusterParameterGroupName") in
       let masterUserPassword =
-        (Option.map ~f:String_.of_xml)
+        (Option.map ~f:SensitiveString.of_xml)
           (Xml.child xml_arg0 "MasterUserPassword") in
       let vpcSecurityGroupIds =
         (Option.map ~f:VpcSecurityGroupIdList.of_xml)
@@ -15797,8 +20086,10 @@ module ModifyClusterMessage =
       let clusterIdentifier =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
-      make ?port ?availabilityZone ?availabilityZoneRelocation ?kmsKeyId
-        ?encrypted ?maintenanceTrackName ?enhancedVpcRouting ?elasticIp
+      make ?extraComputeForAutomaticOptimization ?multiAZ ?ipAddressType
+        ?masterPasswordSecretKmsKeyId ?manageMasterPassword ?port
+        ?availabilityZone ?availabilityZoneRelocation ?kmsKeyId ?encrypted
+        ?maintenanceTrackName ?enhancedVpcRouting ?elasticIp
         ?publiclyAccessible ?newClusterIdentifier ?hsmConfigurationIdentifier
         ?hsmClientCertificateIdentifier ?allowVersionUpgrade ?clusterVersion
         ?preferredMaintenanceWindow ?manualSnapshotRetentionPeriod
@@ -15806,55 +20097,66 @@ module ModifyClusterMessage =
         ?masterUserPassword ?vpcSecurityGroupIds ?clusterSecurityGroups
         ?numberOfNodes ?nodeType ?clusterType ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let port = field_map json "Port" IntegerOptional.of_json in
+    let of_json json__ =
+      let extraComputeForAutomaticOptimization =
+        field_map json__ "ExtraComputeForAutomaticOptimization"
+          BooleanOptional.of_json in
+      let multiAZ = field_map json__ "MultiAZ" BooleanOptional.of_json in
+      let ipAddressType = field_map json__ "IpAddressType" String_.of_json in
+      let masterPasswordSecretKmsKeyId =
+        field_map json__ "MasterPasswordSecretKmsKeyId" String_.of_json in
+      let manageMasterPassword =
+        field_map json__ "ManageMasterPassword" BooleanOptional.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
       let availabilityZoneRelocation =
-        field_map json "AvailabilityZoneRelocation" BooleanOptional.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let encrypted = field_map json "Encrypted" BooleanOptional.of_json in
+        field_map json__ "AvailabilityZoneRelocation" BooleanOptional.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let encrypted = field_map json__ "Encrypted" BooleanOptional.of_json in
       let maintenanceTrackName =
-        field_map json "MaintenanceTrackName" String_.of_json in
+        field_map json__ "MaintenanceTrackName" String_.of_json in
       let enhancedVpcRouting =
-        field_map json "EnhancedVpcRouting" BooleanOptional.of_json in
-      let elasticIp = field_map json "ElasticIp" String_.of_json in
+        field_map json__ "EnhancedVpcRouting" BooleanOptional.of_json in
+      let elasticIp = field_map json__ "ElasticIp" String_.of_json in
       let publiclyAccessible =
-        field_map json "PubliclyAccessible" BooleanOptional.of_json in
+        field_map json__ "PubliclyAccessible" BooleanOptional.of_json in
       let newClusterIdentifier =
-        field_map json "NewClusterIdentifier" String_.of_json in
+        field_map json__ "NewClusterIdentifier" String_.of_json in
       let hsmConfigurationIdentifier =
-        field_map json "HsmConfigurationIdentifier" String_.of_json in
+        field_map json__ "HsmConfigurationIdentifier" String_.of_json in
       let hsmClientCertificateIdentifier =
-        field_map json "HsmClientCertificateIdentifier" String_.of_json in
+        field_map json__ "HsmClientCertificateIdentifier" String_.of_json in
       let allowVersionUpgrade =
-        field_map json "AllowVersionUpgrade" BooleanOptional.of_json in
-      let clusterVersion = field_map json "ClusterVersion" String_.of_json in
+        field_map json__ "AllowVersionUpgrade" BooleanOptional.of_json in
+      let clusterVersion = field_map json__ "ClusterVersion" String_.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let manualSnapshotRetentionPeriod =
-        field_map json "ManualSnapshotRetentionPeriod"
+        field_map json__ "ManualSnapshotRetentionPeriod"
           IntegerOptional.of_json in
       let automatedSnapshotRetentionPeriod =
-        field_map json "AutomatedSnapshotRetentionPeriod"
+        field_map json__ "AutomatedSnapshotRetentionPeriod"
           IntegerOptional.of_json in
       let clusterParameterGroupName =
-        field_map json "ClusterParameterGroupName" String_.of_json in
+        field_map json__ "ClusterParameterGroupName" String_.of_json in
       let masterUserPassword =
-        field_map json "MasterUserPassword" String_.of_json in
+        field_map json__ "MasterUserPassword" SensitiveString.of_json in
       let vpcSecurityGroupIds =
-        field_map json "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
+        field_map json__ "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
       let clusterSecurityGroups =
-        field_map json "ClusterSecurityGroups"
+        field_map json__ "ClusterSecurityGroups"
           ClusterSecurityGroupNameList.of_json in
       let numberOfNodes =
-        field_map json "NumberOfNodes" IntegerOptional.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
-      let clusterType = field_map json "ClusterType" String_.of_json in
+        field_map json__ "NumberOfNodes" IntegerOptional.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let clusterType = field_map json__ "ClusterType" String_.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
-      make ?port ?availabilityZone ?availabilityZoneRelocation ?kmsKeyId
-        ?encrypted ?maintenanceTrackName ?enhancedVpcRouting ?elasticIp
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
+      make ?extraComputeForAutomaticOptimization ?multiAZ ?ipAddressType
+        ?masterPasswordSecretKmsKeyId ?manageMasterPassword ?port
+        ?availabilityZone ?availabilityZoneRelocation ?kmsKeyId ?encrypted
+        ?maintenanceTrackName ?enhancedVpcRouting ?elasticIp
         ?publiclyAccessible ?newClusterIdentifier ?hsmConfigurationIdentifier
         ?hsmClientCertificateIdentifier ?allowVersionUpgrade ?clusterVersion
         ?preferredMaintenanceWindow ?manualSnapshotRetentionPeriod
@@ -15927,8 +20229,8 @@ module ModifyClusterMaintenanceResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies the maintenance settings of a cluster."]
@@ -15952,7 +20254,7 @@ module ModifyClusterMaintenanceMessage =
           "A timestamp indicating end time for the deferred maintenance window. If you specify an end time, you can't specify a duration."];
       deferMaintenanceDuration: IntegerOptional.t option
         [@ocaml.doc
-          "An integer indicating the duration of the maintenance window in days. If you specify a duration, you can't specify an end time. The duration must be 45 days or less."]}
+          "An integer indicating the duration of the maintenance window in days. If you specify a duration, you can't specify an end time. The duration must be 60 days or less."]}
     let context_ = "ModifyClusterMaintenanceMessage"
     let make ?deferMaintenance =
       fun ?deferMaintenanceIdentifier ->
@@ -16006,19 +20308,19 @@ module ModifyClusterMaintenanceMessage =
         ?deferMaintenanceStartTime ?deferMaintenanceIdentifier
         ?deferMaintenance ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deferMaintenanceDuration =
-        field_map json "DeferMaintenanceDuration" IntegerOptional.of_json in
+        field_map json__ "DeferMaintenanceDuration" IntegerOptional.of_json in
       let deferMaintenanceEndTime =
-        field_map json "DeferMaintenanceEndTime" TStamp.of_json in
+        field_map json__ "DeferMaintenanceEndTime" TStamp.of_json in
       let deferMaintenanceStartTime =
-        field_map json "DeferMaintenanceStartTime" TStamp.of_json in
+        field_map json__ "DeferMaintenanceStartTime" TStamp.of_json in
       let deferMaintenanceIdentifier =
-        field_map json "DeferMaintenanceIdentifier" String_.of_json in
+        field_map json__ "DeferMaintenanceIdentifier" String_.of_json in
       let deferMaintenance =
-        field_map json "DeferMaintenance" BooleanOptional.of_json in
+        field_map json__ "DeferMaintenance" BooleanOptional.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ?deferMaintenanceDuration ?deferMaintenanceEndTime
         ?deferMaintenanceStartTime ?deferMaintenanceIdentifier
         ?deferMaintenance ~clusterIdentifier ()
@@ -16086,8 +20388,8 @@ module ModifyClusterIamRolesResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16146,14 +20448,14 @@ module ModifyClusterIamRolesMessage =
       make ?defaultIamRoleArn ?removeIamRoles ?addIamRoles ~clusterIdentifier
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultIamRoleArn =
-        field_map json "DefaultIamRoleArn" String_.of_json in
+        field_map json__ "DefaultIamRoleArn" String_.of_json in
       let removeIamRoles =
-        field_map json "RemoveIamRoles" IamRoleArnList.of_json in
-      let addIamRoles = field_map json "AddIamRoles" IamRoleArnList.of_json in
+        field_map json__ "RemoveIamRoles" IamRoleArnList.of_json in
+      let addIamRoles = field_map json__ "AddIamRoles" IamRoleArnList.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ?defaultIamRoleArn ?removeIamRoles ?addIamRoles ~clusterIdentifier
         ()
     let to_json v = composed_to_json to_value v
@@ -16171,6 +20473,7 @@ module ModifyClusterDbRevisionResult =
       [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
       | `ClusterOnLatestRevisionFault of ClusterOnLatestRevisionFault.t 
       | `InvalidClusterStateFault of InvalidClusterStateFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "ModifyClusterDbRevisionResult"
     let make ?cluster =
@@ -16186,6 +20489,8 @@ module ModifyClusterDbRevisionResult =
             (ClusterOnLatestRevisionFault.of_json json)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -16198,6 +20503,8 @@ module ModifyClusterDbRevisionResult =
             (ClusterOnLatestRevisionFault.of_xml xml)
       | "InvalidClusterStateFault" ->
           `InvalidClusterStateFault (InvalidClusterStateFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -16214,6 +20521,10 @@ module ModifyClusterDbRevisionResult =
           `Assoc
             [("error", (`String "InvalidClusterStateFault"));
             ("details", (InvalidClusterStateFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -16232,8 +20543,8 @@ module ModifyClusterDbRevisionResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16265,11 +20576,11 @@ module ModifyClusterDbRevisionMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       make ~revisionTarget ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let revisionTarget =
-        field_map_exn json "RevisionTarget" String_.of_json in
+        field_map_exn json__ "RevisionTarget" String_.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ~revisionTarget ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16375,11 +20686,11 @@ module ModifyAuthenticationProfileResult =
           (Xml.child xml_arg0 "AuthenticationProfileName") in
       make ?authenticationProfileContent ?authenticationProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationProfileContent =
-        field_map json "AuthenticationProfileContent" String_.of_json in
+        field_map json__ "AuthenticationProfileContent" String_.of_json in
       let authenticationProfileName =
-        field_map json "AuthenticationProfileName"
+        field_map json__ "AuthenticationProfileName"
           AuthenticationProfileNameString.of_json in
       make ?authenticationProfileContent ?authenticationProfileName ()
     let to_json v = composed_to_json to_value v
@@ -16417,11 +20728,11 @@ module ModifyAuthenticationProfileMessage =
              "AuthenticationProfileName") in
       make ~authenticationProfileContent ~authenticationProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationProfileContent =
-        field_map_exn json "AuthenticationProfileContent" String_.of_json in
+        field_map_exn json__ "AuthenticationProfileContent" String_.of_json in
       let authenticationProfileName =
-        field_map_exn json "AuthenticationProfileName"
+        field_map_exn json__ "AuthenticationProfileName"
           AuthenticationProfileNameString.of_json in
       make ~authenticationProfileContent ~authenticationProfileName ()
     let to_json v = composed_to_json to_value v
@@ -16431,7 +20742,8 @@ module ModifyAquaOutputMessage =
     type modifyAquaConfigurationResult =
       {
       aquaConfiguration: AquaConfiguration.t option
-        [@ocaml.doc "The updated AQUA configuration of the cluster."]}
+        [@ocaml.doc
+          "This parameter is retired. Amazon Redshift automatically determines whether to use AQUA (Advanced Query Accelerator)."]}
     and responseMetaData = unit
     and t =
       {
@@ -16504,13 +20816,13 @@ module ModifyAquaOutputMessage =
           (Xml.child xml_arg0 "AquaConfiguration") in
       make ?aquaConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let aquaConfiguration =
-        field_map json "AquaConfiguration" AquaConfiguration.of_json in
+        field_map json__ "AquaConfiguration" AquaConfiguration.of_json in
       make ?aquaConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies whether a cluster can use AQUA (Advanced Query Accelerator)."]
+       "This operation is retired. Calling this operation does not change AQUA configuration. Amazon Redshift automatically determines whether to use AQUA (Advanced Query Accelerator)."]
 module ModifyAquaInputMessage =
   struct
     type nonrec t =
@@ -16519,7 +20831,7 @@ module ModifyAquaInputMessage =
         [@ocaml.doc "The identifier of the cluster to be modified."];
       aquaConfigurationStatus: AquaConfigurationStatus.t option
         [@ocaml.doc
-          "The new value of AQUA configuration status. Possible values include the following. enabled - Use AQUA if it is available for the current Amazon Web Services Region and Amazon Redshift node type. disabled - Don't use AQUA. auto - Amazon Redshift determines whether to use AQUA."]}
+          "This parameter is retired. Amazon Redshift automatically determines whether to use AQUA (Advanced Query Accelerator)."]}
     let context_ = "ModifyAquaInputMessage"
     let make ?aquaConfigurationStatus =
       fun ~clusterIdentifier ->
@@ -16540,16 +20852,16 @@ module ModifyAquaInputMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       make ?aquaConfigurationStatus ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let aquaConfigurationStatus =
-        field_map json "AquaConfigurationStatus"
+        field_map json__ "AquaConfigurationStatus"
           AquaConfigurationStatus.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ?aquaConfigurationStatus ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies whether a cluster can use AQUA (Advanced Query Accelerator)."]
+       "This operation is retired. Calling this operation does not change AQUA configuration. Amazon Redshift automatically determines whether to use AQUA (Advanced Query Accelerator)."]
 module LoggingStatus =
   struct
     type describeLoggingStatusResult =
@@ -16559,7 +20871,7 @@ module LoggingStatus =
       bucketName: String_.t option
         [@ocaml.doc
           "The name of the S3 bucket where the log files are stored."];
-      s3KeyPrefix: String_.t option
+      s3KeyPrefix: S3KeyPrefixValue.t option
         [@ocaml.doc "The prefix applied to the log file names."];
       lastSuccessfulDeliveryTime: TStamp.t option
         [@ocaml.doc "The last time that logs were delivered."];
@@ -16567,7 +20879,13 @@ module LoggingStatus =
         [@ocaml.doc "The last time when logs failed to be delivered."];
       lastFailureMessage: String_.t option
         [@ocaml.doc
-          "The message indicating that logs failed to be delivered."]}
+          "The message indicating that logs failed to be delivered."];
+      logDestinationType: LogDestinationType.t option
+        [@ocaml.doc
+          "The log destination type. An enum with possible values of s3 and cloudwatch."];
+      logExports: LogTypeList.t option
+        [@ocaml.doc
+          "The collection of exported log types. Possible values are connectionlog, useractivitylog, and userlog."]}
     and responseMetaData = unit
     and t =
       {
@@ -16575,6 +20893,7 @@ module LoggingStatus =
       responseMetaData: responseMetaData }
     type error =
       [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "LoggingStatus"
     let make ?loggingEnabled =
@@ -16583,23 +20902,29 @@ module LoggingStatus =
           fun ?lastSuccessfulDeliveryTime ->
             fun ?lastFailureTime ->
               fun ?lastFailureMessage ->
-                fun () ->
-                  {
-                    describeLoggingStatusResult =
+                fun ?logDestinationType ->
+                  fun ?logExports ->
+                    fun () ->
                       {
-                        loggingEnabled;
-                        bucketName;
-                        s3KeyPrefix;
-                        lastSuccessfulDeliveryTime;
-                        lastFailureTime;
-                        lastFailureMessage
-                      };
-                    responseMetaData = ()
-                  }
+                        describeLoggingStatusResult =
+                          {
+                            loggingEnabled;
+                            bucketName;
+                            s3KeyPrefix;
+                            lastSuccessfulDeliveryTime;
+                            lastFailureTime;
+                            lastFailureMessage;
+                            logDestinationType;
+                            logExports
+                          };
+                        responseMetaData = ()
+                      }
     let error_of_json name json =
       match name with
       | "ClusterNotFoundFault" ->
           `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -16607,6 +20932,8 @@ module LoggingStatus =
       match name with
       | "ClusterNotFoundFault" ->
           `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -16615,6 +20942,10 @@ module LoggingStatus =
           `Assoc
             [("error", (`String "ClusterNotFoundFault"));
             ("details", (ClusterNotFoundFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -16626,18 +20957,27 @@ module LoggingStatus =
         [("LoggingEnabled",
            (Option.map x.loggingEnabled ~f:Boolean.to_value));
         ("BucketName", (Option.map x.bucketName ~f:String_.to_value));
-        ("S3KeyPrefix", (Option.map x.s3KeyPrefix ~f:String_.to_value));
+        ("S3KeyPrefix",
+          (Option.map x.s3KeyPrefix ~f:S3KeyPrefixValue.to_value));
         ("LastSuccessfulDeliveryTime",
           (Option.map x.lastSuccessfulDeliveryTime ~f:TStamp.to_value));
         ("LastFailureTime",
           (Option.map x.lastFailureTime ~f:TStamp.to_value));
         ("LastFailureMessage",
-          (Option.map x.lastFailureMessage ~f:String_.to_value))]
+          (Option.map x.lastFailureMessage ~f:String_.to_value));
+        ("LogDestinationType",
+          (Option.map x.logDestinationType ~f:LogDestinationType.to_value));
+        ("LogExports", (Option.map x.logExports ~f:LogTypeList.to_value))]
         ~wrapper:"DescribeLoggingStatusResult" ~response:"ResponseMetaData"
     let to_query v = to_query to_value v
     let of_xml t =
       let xml_arg0 =
         Xml.child_exn ~context:context_ t "DescribeLoggingStatusResult" in
+      let logExports =
+        (Option.map ~f:LogTypeList.of_xml) (Xml.child xml_arg0 "LogExports") in
+      let logDestinationType =
+        (Option.map ~f:LogDestinationType.of_xml)
+          (Xml.child xml_arg0 "LogDestinationType") in
       let lastFailureMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "LastFailureMessage") in
@@ -16647,27 +20987,342 @@ module LoggingStatus =
         (Option.map ~f:TStamp.of_xml)
           (Xml.child xml_arg0 "LastSuccessfulDeliveryTime") in
       let s3KeyPrefix =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "S3KeyPrefix") in
+        (Option.map ~f:S3KeyPrefixValue.of_xml)
+          (Xml.child xml_arg0 "S3KeyPrefix") in
       let bucketName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BucketName") in
       let loggingEnabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "LoggingEnabled") in
-      make ?lastFailureMessage ?lastFailureTime ?lastSuccessfulDeliveryTime
-        ?s3KeyPrefix ?bucketName ?loggingEnabled ()
+      make ?logExports ?logDestinationType ?lastFailureMessage
+        ?lastFailureTime ?lastSuccessfulDeliveryTime ?s3KeyPrefix ?bucketName
+        ?loggingEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let logExports = field_map json__ "LogExports" LogTypeList.of_json in
+      let logDestinationType =
+        field_map json__ "LogDestinationType" LogDestinationType.of_json in
       let lastFailureMessage =
-        field_map json "LastFailureMessage" String_.of_json in
-      let lastFailureTime = field_map json "LastFailureTime" TStamp.of_json in
+        field_map json__ "LastFailureMessage" String_.of_json in
+      let lastFailureTime = field_map json__ "LastFailureTime" TStamp.of_json in
       let lastSuccessfulDeliveryTime =
-        field_map json "LastSuccessfulDeliveryTime" TStamp.of_json in
-      let s3KeyPrefix = field_map json "S3KeyPrefix" String_.of_json in
-      let bucketName = field_map json "BucketName" String_.of_json in
-      let loggingEnabled = field_map json "LoggingEnabled" Boolean.of_json in
-      make ?lastFailureMessage ?lastFailureTime ?lastSuccessfulDeliveryTime
-        ?s3KeyPrefix ?bucketName ?loggingEnabled ()
+        field_map json__ "LastSuccessfulDeliveryTime" TStamp.of_json in
+      let s3KeyPrefix =
+        field_map json__ "S3KeyPrefix" S3KeyPrefixValue.of_json in
+      let bucketName = field_map json__ "BucketName" String_.of_json in
+      let loggingEnabled = field_map json__ "LoggingEnabled" Boolean.of_json in
+      make ?logExports ?logDestinationType ?lastFailureMessage
+        ?lastFailureTime ?lastSuccessfulDeliveryTime ?s3KeyPrefix ?bucketName
+        ?loggingEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the status of logging for a cluster."]
+module ListRecommendationsResult =
+  struct
+    type listRecommendationsResult =
+      {
+      recommendations: RecommendationList.t option
+        [@ocaml.doc
+          "The Advisor recommendations for action on the Amazon Redshift cluster."];
+      marker: String_.t option
+        [@ocaml.doc
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned marker value in the Marker parameter and retrying the command. If the Marker field is empty, all response records have been retrieved for the request."]}
+    and responseMetaData = unit
+    and t =
+      {
+      listRecommendationsResult: listRecommendationsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ListRecommendationsResult"
+    let make ?recommendations =
+      fun ?marker ->
+        fun () ->
+          {
+            listRecommendationsResult = { recommendations; marker };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ClusterNotFoundFault"));
+            ("details", (ClusterNotFoundFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.listRecommendationsResult in
+      structure_to_wrapped_value
+        [("Recommendations",
+           (Option.map x.recommendations ~f:RecommendationList.to_value));
+        ("Marker", (Option.map x.marker ~f:String_.to_value))]
+        ~wrapper:"ListRecommendationsResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "ListRecommendationsResult" in
+      let marker =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
+      let recommendations =
+        (Option.map ~f:RecommendationList.of_xml)
+          (Xml.child xml_arg0 "Recommendations") in
+      make ?marker ?recommendations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let recommendations =
+        field_map json__ "Recommendations" RecommendationList.of_json in
+      make ?marker ?recommendations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List the Amazon Redshift Advisor recommendations for one or multiple Amazon Redshift clusters in an Amazon Web Services account."]
+module ListRecommendationsMessage =
+  struct
+    type nonrec t =
+      {
+      clusterIdentifier: String_.t option
+        [@ocaml.doc
+          "The unique identifier of the Amazon Redshift cluster for which the list of Advisor recommendations is returned. If the neither the cluster identifier and the cluster namespace ARN parameters are specified, then recommendations for all clusters in the account are returned."];
+      namespaceArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Redshift cluster namespace Amazon Resource Name (ARN) for which the list of Advisor recommendations is returned. If the neither the cluster identifier and the cluster namespace ARN parameters are specified, then recommendations for all clusters in the account are returned."];
+      maxRecords: IntegerOptional.t option
+        [@ocaml.doc
+          "The maximum number of response records to return in each call. If the number of remaining response records exceeds the specified MaxRecords value, a value is returned in a marker field of the response. You can retrieve the next set of records by retrying the command with the returned marker value."];
+      marker: String_.t option
+        [@ocaml.doc
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned marker value in the Marker parameter and retrying the command. If the Marker field is empty, all response records have been retrieved for the request."]}
+    let make ?clusterIdentifier =
+      fun ?namespaceArn ->
+        fun ?maxRecords ->
+          fun ?marker ->
+            fun () -> { clusterIdentifier; namespaceArn; maxRecords; marker }
+    let to_value x =
+      structure_to_value
+        [("ClusterIdentifier",
+           (Option.map x.clusterIdentifier ~f:String_.to_value));
+        ("NamespaceArn", (Option.map x.namespaceArn ~f:String_.to_value));
+        ("MaxRecords", (Option.map x.maxRecords ~f:IntegerOptional.to_value));
+        ("Marker", (Option.map x.marker ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let marker =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
+      let maxRecords =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "MaxRecords") in
+      let namespaceArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NamespaceArn") in
+      let clusterIdentifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ClusterIdentifier") in
+      make ?marker ?maxRecords ?namespaceArn ?clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let namespaceArn = field_map json__ "NamespaceArn" String_.of_json in
+      let clusterIdentifier =
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      make ?marker ?maxRecords ?namespaceArn ?clusterIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List the Amazon Redshift Advisor recommendations for one or multiple Amazon Redshift clusters in an Amazon Web Services account."]
+module LakehouseConfiguration =
+  struct
+    type modifyLakehouseConfigurationResult =
+      {
+      clusterIdentifier: String_.t option
+        [@ocaml.doc
+          "The unique identifier of the cluster associated with this lakehouse configuration."];
+      lakehouseIdcApplicationArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM Identity Center application used for enabling Amazon Web Services IAM Identity Center trusted identity propagation on a cluster enabled with Amazon Redshift federated permissions."];
+      lakehouseRegistrationStatus: String_.t option
+        [@ocaml.doc
+          "The current status of the lakehouse registration. Indicates whether the cluster is successfully registered with the lakehouse."];
+      catalogArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Glue data catalog associated with the lakehouse configuration."]}
+    and responseMetaData = unit
+    and t =
+      {
+      modifyLakehouseConfigurationResult: modifyLakehouseConfigurationResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
+      | `DependentServiceAccessDeniedFault of
+          DependentServiceAccessDeniedFault.t 
+      | `DependentServiceUnavailableFault of
+          DependentServiceUnavailableFault.t 
+      | `InvalidClusterStateFault of InvalidClusterStateFault.t 
+      | `RedshiftIdcApplicationNotExistsFault of
+          RedshiftIdcApplicationNotExistsFault.t 
+      | `UnauthorizedOperation of UnauthorizedOperation.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "LakehouseConfiguration"
+    let make ?clusterIdentifier =
+      fun ?lakehouseIdcApplicationArn ->
+        fun ?lakehouseRegistrationStatus ->
+          fun ?catalogArn ->
+            fun () ->
+              {
+                modifyLakehouseConfigurationResult =
+                  {
+                    clusterIdentifier;
+                    lakehouseIdcApplicationArn;
+                    lakehouseRegistrationStatus;
+                    catalogArn
+                  };
+                responseMetaData = ()
+              }
+    let error_of_json name json =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
+      | "DependentServiceAccessDeniedFault" ->
+          `DependentServiceAccessDeniedFault
+            (DependentServiceAccessDeniedFault.of_json json)
+      | "DependentServiceUnavailableFault" ->
+          `DependentServiceUnavailableFault
+            (DependentServiceUnavailableFault.of_json json)
+      | "InvalidClusterStateFault" ->
+          `InvalidClusterStateFault (InvalidClusterStateFault.of_json json)
+      | "RedshiftIdcApplicationNotExistsFault" ->
+          `RedshiftIdcApplicationNotExistsFault
+            (RedshiftIdcApplicationNotExistsFault.of_json json)
+      | "UnauthorizedOperation" ->
+          `UnauthorizedOperation (UnauthorizedOperation.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
+      | "DependentServiceAccessDeniedFault" ->
+          `DependentServiceAccessDeniedFault
+            (DependentServiceAccessDeniedFault.of_xml xml)
+      | "DependentServiceUnavailableFault" ->
+          `DependentServiceUnavailableFault
+            (DependentServiceUnavailableFault.of_xml xml)
+      | "InvalidClusterStateFault" ->
+          `InvalidClusterStateFault (InvalidClusterStateFault.of_xml xml)
+      | "RedshiftIdcApplicationNotExistsFault" ->
+          `RedshiftIdcApplicationNotExistsFault
+            (RedshiftIdcApplicationNotExistsFault.of_xml xml)
+      | "UnauthorizedOperation" ->
+          `UnauthorizedOperation (UnauthorizedOperation.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ClusterNotFoundFault"));
+            ("details", (ClusterNotFoundFault.to_json e))]
+      | `DependentServiceAccessDeniedFault e ->
+          `Assoc
+            [("error", (`String "DependentServiceAccessDeniedFault"));
+            ("details", (DependentServiceAccessDeniedFault.to_json e))]
+      | `DependentServiceUnavailableFault e ->
+          `Assoc
+            [("error", (`String "DependentServiceUnavailableFault"));
+            ("details", (DependentServiceUnavailableFault.to_json e))]
+      | `InvalidClusterStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidClusterStateFault"));
+            ("details", (InvalidClusterStateFault.to_json e))]
+      | `RedshiftIdcApplicationNotExistsFault e ->
+          `Assoc
+            [("error", (`String "RedshiftIdcApplicationNotExistsFault"));
+            ("details", (RedshiftIdcApplicationNotExistsFault.to_json e))]
+      | `UnauthorizedOperation e ->
+          `Assoc
+            [("error", (`String "UnauthorizedOperation"));
+            ("details", (UnauthorizedOperation.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.modifyLakehouseConfigurationResult in
+      structure_to_wrapped_value
+        [("ClusterIdentifier",
+           (Option.map x.clusterIdentifier ~f:String_.to_value));
+        ("LakehouseIdcApplicationArn",
+          (Option.map x.lakehouseIdcApplicationArn ~f:String_.to_value));
+        ("LakehouseRegistrationStatus",
+          (Option.map x.lakehouseRegistrationStatus ~f:String_.to_value));
+        ("CatalogArn", (Option.map x.catalogArn ~f:String_.to_value))]
+        ~wrapper:"ModifyLakehouseConfigurationResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "ModifyLakehouseConfigurationResult" in
+      let catalogArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CatalogArn") in
+      let lakehouseRegistrationStatus =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "LakehouseRegistrationStatus") in
+      let lakehouseIdcApplicationArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "LakehouseIdcApplicationArn") in
+      let clusterIdentifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ClusterIdentifier") in
+      make ?catalogArn ?lakehouseRegistrationStatus
+        ?lakehouseIdcApplicationArn ?clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let catalogArn = field_map json__ "CatalogArn" String_.of_json in
+      let lakehouseRegistrationStatus =
+        field_map json__ "LakehouseRegistrationStatus" String_.of_json in
+      let lakehouseIdcApplicationArn =
+        field_map json__ "LakehouseIdcApplicationArn" String_.of_json in
+      let clusterIdentifier =
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      make ?catalogArn ?lakehouseRegistrationStatus
+        ?lakehouseIdcApplicationArn ?clusterIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains configuration information for lakehouse integration, including the cluster identifier, catalog ARN, and registration status."]
 module InvalidSnapshotCopyGrantStateFault =
   struct
     type nonrec t = unit
@@ -16731,6 +21386,185 @@ module InvalidClusterSnapshotScheduleStateFault =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The cluster snapshot schedule state is not valid."]
+module IntegrationsMessage =
+  struct
+    type describeIntegrationsResult =
+      {
+      marker: String_.t option
+        [@ocaml.doc
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned marker value in the Marker parameter and retrying the command. If the Marker field is empty, all response records have been retrieved for the request."];
+      integrations: IntegrationList.t option
+        [@ocaml.doc "List of integrations that are described."]}
+    and responseMetaData = unit
+    and t =
+      {
+      describeIntegrationsResult: describeIntegrationsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `IntegrationNotFoundFault of IntegrationNotFoundFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "IntegrationsMessage"
+    let make ?marker =
+      fun ?integrations ->
+        fun () ->
+          {
+            describeIntegrationsResult = { marker; integrations };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "IntegrationNotFoundFault" ->
+          `IntegrationNotFoundFault (IntegrationNotFoundFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "IntegrationNotFoundFault" ->
+          `IntegrationNotFoundFault (IntegrationNotFoundFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `IntegrationNotFoundFault e ->
+          `Assoc
+            [("error", (`String "IntegrationNotFoundFault"));
+            ("details", (IntegrationNotFoundFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.describeIntegrationsResult in
+      structure_to_wrapped_value
+        [("Marker", (Option.map x.marker ~f:String_.to_value));
+        ("Integrations",
+          (Option.map x.integrations ~f:IntegrationList.to_value))]
+        ~wrapper:"DescribeIntegrationsResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "DescribeIntegrationsResult" in
+      let integrations =
+        (Option.map ~f:IntegrationList.of_xml)
+          (Xml.child xml_arg0 "Integrations") in
+      let marker =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
+      make ?integrations ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let integrations =
+        field_map json__ "Integrations" IntegrationList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      make ?integrations ?marker ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes one or more zero-ETL or S3 event integrations with Amazon Redshift."]
+module InboundIntegrationsMessage =
+  struct
+    type describeInboundIntegrationsResult =
+      {
+      marker: String_.t option
+        [@ocaml.doc
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned marker value in the Marker parameter and retrying the command. If the Marker field is empty, all response records have been retrieved for the request."];
+      inboundIntegrations: InboundIntegrationList.t option
+        [@ocaml.doc "A list of InboundIntegration instances."]}
+    and responseMetaData = unit
+    and t =
+      {
+      describeInboundIntegrationsResult: describeInboundIntegrationsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `IntegrationNotFoundFault of IntegrationNotFoundFault.t 
+      | `InvalidNamespaceFault of InvalidNamespaceFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "InboundIntegrationsMessage"
+    let make ?marker =
+      fun ?inboundIntegrations ->
+        fun () ->
+          {
+            describeInboundIntegrationsResult =
+              { marker; inboundIntegrations };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "IntegrationNotFoundFault" ->
+          `IntegrationNotFoundFault (IntegrationNotFoundFault.of_json json)
+      | "InvalidNamespaceFault" ->
+          `InvalidNamespaceFault (InvalidNamespaceFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "IntegrationNotFoundFault" ->
+          `IntegrationNotFoundFault (IntegrationNotFoundFault.of_xml xml)
+      | "InvalidNamespaceFault" ->
+          `InvalidNamespaceFault (InvalidNamespaceFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `IntegrationNotFoundFault e ->
+          `Assoc
+            [("error", (`String "IntegrationNotFoundFault"));
+            ("details", (IntegrationNotFoundFault.to_json e))]
+      | `InvalidNamespaceFault e ->
+          `Assoc
+            [("error", (`String "InvalidNamespaceFault"));
+            ("details", (InvalidNamespaceFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.describeInboundIntegrationsResult in
+      structure_to_wrapped_value
+        [("Marker", (Option.map x.marker ~f:String_.to_value));
+        ("InboundIntegrations",
+          (Option.map x.inboundIntegrations
+             ~f:InboundIntegrationList.to_value))]
+        ~wrapper:"DescribeInboundIntegrationsResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "DescribeInboundIntegrationsResult" in
+      let inboundIntegrations =
+        (Option.map ~f:InboundIntegrationList.of_xml)
+          (Xml.child xml_arg0 "InboundIntegrations") in
+      let marker =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
+      make ?inboundIntegrations ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let inboundIntegrations =
+        field_map json__ "InboundIntegrations" InboundIntegrationList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      make ?inboundIntegrations ?marker ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of inbound integrations."]
 module HsmConfigurationMessage =
   struct
     type describeHsmConfigurationsResult =
@@ -16808,10 +21642,10 @@ module HsmConfigurationMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?hsmConfigurations ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hsmConfigurations =
-        field_map json "HsmConfigurations" HsmConfigurationList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "HsmConfigurations" HsmConfigurationList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?hsmConfigurations ?marker ()
     let to_json v = composed_to_json to_value v
   end
@@ -16899,14 +21733,120 @@ module HsmClientCertificateMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?hsmClientCertificates ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hsmClientCertificates =
-        field_map json "HsmClientCertificates"
+        field_map json__ "HsmClientCertificates"
           HsmClientCertificateList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?hsmClientCertificates ?marker ()
     let to_json v = composed_to_json to_value v
   end
+module GetResourcePolicyResult =
+  struct
+    type getResourcePolicyResult =
+      {
+      resourcePolicy: ResourcePolicy.t option
+        [@ocaml.doc "The content of the resource policy."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getResourcePolicyResult: getResourcePolicyResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `InvalidPolicyFault of InvalidPolicyFault.t 
+      | `ResourceNotFoundFault of ResourceNotFoundFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetResourcePolicyResult"
+    let make ?resourcePolicy =
+      fun () ->
+        { getResourcePolicyResult = { resourcePolicy }; responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "InvalidPolicyFault" ->
+          `InvalidPolicyFault (InvalidPolicyFault.of_json json)
+      | "ResourceNotFoundFault" ->
+          `ResourceNotFoundFault (ResourceNotFoundFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidPolicyFault" ->
+          `InvalidPolicyFault (InvalidPolicyFault.of_xml xml)
+      | "ResourceNotFoundFault" ->
+          `ResourceNotFoundFault (ResourceNotFoundFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidPolicyFault e ->
+          `Assoc
+            [("error", (`String "InvalidPolicyFault"));
+            ("details", (InvalidPolicyFault.to_json e))]
+      | `ResourceNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundFault"));
+            ("details", (ResourceNotFoundFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getResourcePolicyResult in
+      structure_to_wrapped_value
+        [("ResourcePolicy",
+           (Option.map x.resourcePolicy ~f:ResourcePolicy.to_value))]
+        ~wrapper:"GetResourcePolicyResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "GetResourcePolicyResult" in
+      let resourcePolicy =
+        (Option.map ~f:ResourcePolicy.of_xml)
+          (Xml.child xml_arg0 "ResourcePolicy") in
+      make ?resourcePolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourcePolicy =
+        field_map json__ "ResourcePolicy" ResourcePolicy.of_json in
+      make ?resourcePolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get the resource policy for a specified resource."]
+module GetResourcePolicyMessage =
+  struct
+    type nonrec t =
+      {
+      resourceArn: String_.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource of which its resource policy is fetched."]}
+    let context_ = "GetResourcePolicyMessage"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (String_.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get the resource policy for a specified resource."]
 module GetReservedNodeExchangeOfferingsOutputMessage =
   struct
     type getReservedNodeExchangeOfferingsResult =
@@ -17036,11 +21976,11 @@ module GetReservedNodeExchangeOfferingsOutputMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?reservedNodeOfferings ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reservedNodeOfferings =
-        field_map json "ReservedNodeOfferings"
+        field_map json__ "ReservedNodeOfferings"
           ReservedNodeOfferingList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?reservedNodeOfferings ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17080,11 +22020,11 @@ module GetReservedNodeExchangeOfferingsInputMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ReservedNodeId") in
       make ?marker ?maxRecords ~reservedNodeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let reservedNodeId =
-        field_map_exn json "ReservedNodeId" String_.of_json in
+        field_map_exn json__ "ReservedNodeId" String_.of_json in
       make ?marker ?maxRecords ~reservedNodeId ()
     let to_json v = composed_to_json to_value v
   end
@@ -17238,11 +22178,11 @@ module GetReservedNodeExchangeConfigurationOptionsOutputMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?reservedNodeConfigurationOptionList ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reservedNodeConfigurationOptionList =
-        field_map json "ReservedNodeConfigurationOptionList"
+        field_map json__ "ReservedNodeConfigurationOptionList"
           ReservedNodeConfigurationOptionList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?reservedNodeConfigurationOptionList ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17309,34 +22249,221 @@ module GetReservedNodeExchangeConfigurationOptionsInputMessage =
       make ?marker ?maxRecords ?snapshotIdentifier ?clusterIdentifier
         ~actionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let snapshotIdentifier =
-        field_map json "SnapshotIdentifier" String_.of_json in
+        field_map json__ "SnapshotIdentifier" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       let actionType =
-        field_map_exn json "ActionType"
+        field_map_exn json__ "ActionType"
           ReservedNodeExchangeActionType.of_json in
       make ?marker ?maxRecords ?snapshotIdentifier ?clusterIdentifier
         ~actionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the configuration options for the reserved-node exchange. These options include information about the source reserved node and target reserved node offering. Details include the node type, the price, the node count, and the offering type."]
+module GetIdentityCenterAuthTokenResponse =
+  struct
+    type getIdentityCenterAuthTokenResult =
+      {
+      token: SensitiveString.t option
+        [@ocaml.doc
+          "The encrypted authentication token containing the caller's Amazon Web Services IAM Identity Center identity information. This token is encrypted using Key Management Service and can only be decrypted by the specified Amazon Redshift clusters. Use this token with Amazon Redshift drivers to authenticate using your Amazon Web Services IAM Identity Center identity."];
+      expirationTime: TStamp.t option
+        [@ocaml.doc
+          "The time (UTC) when the token expires. After this timestamp, the token will no longer be valid for authentication."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getIdentityCenterAuthTokenResult: getIdentityCenterAuthTokenResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
+      | `InvalidClusterStateFault of InvalidClusterStateFault.t 
+      | `RedshiftInvalidParameterFault of RedshiftInvalidParameterFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "GetIdentityCenterAuthTokenResponse"
+    let make ?token =
+      fun ?expirationTime ->
+        fun () ->
+          {
+            getIdentityCenterAuthTokenResult = { token; expirationTime };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
+      | "InvalidClusterStateFault" ->
+          `InvalidClusterStateFault (InvalidClusterStateFault.of_json json)
+      | "RedshiftInvalidParameterFault" ->
+          `RedshiftInvalidParameterFault
+            (RedshiftInvalidParameterFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
+      | "InvalidClusterStateFault" ->
+          `InvalidClusterStateFault (InvalidClusterStateFault.of_xml xml)
+      | "RedshiftInvalidParameterFault" ->
+          `RedshiftInvalidParameterFault
+            (RedshiftInvalidParameterFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ClusterNotFoundFault"));
+            ("details", (ClusterNotFoundFault.to_json e))]
+      | `InvalidClusterStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidClusterStateFault"));
+            ("details", (InvalidClusterStateFault.to_json e))]
+      | `RedshiftInvalidParameterFault e ->
+          `Assoc
+            [("error", (`String "RedshiftInvalidParameterFault"));
+            ("details", (RedshiftInvalidParameterFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getIdentityCenterAuthTokenResult in
+      structure_to_wrapped_value
+        [("Token", (Option.map x.token ~f:SensitiveString.to_value));
+        ("ExpirationTime", (Option.map x.expirationTime ~f:TStamp.to_value))]
+        ~wrapper:"GetIdentityCenterAuthTokenResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "GetIdentityCenterAuthTokenResult" in
+      let expirationTime =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "ExpirationTime") in
+      let token =
+        (Option.map ~f:SensitiveString.of_xml) (Xml.child xml_arg0 "Token") in
+      make ?expirationTime ?token ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expirationTime = field_map json__ "ExpirationTime" TStamp.of_json in
+      let token = field_map json__ "Token" SensitiveString.of_json in
+      make ?expirationTime ?token ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The response from GetIdentityCenterAuthToken containing the encrypted authentication token and expiration time."]
+module GetIdentityCenterAuthTokenRequest =
+  struct
+    type nonrec t =
+      {
+      clusterIds: ClusterIdentifierList.t
+        [@ocaml.doc
+          "A list of cluster identifiers that the generated token can be used with. The token will be scoped to only allow authentication to the specified clusters. Constraints: ClusterIds must contain at least 1 cluster identifier. ClusterIds can hold a maximum of 20 cluster identifiers. Cluster identifiers must be 1 to 63 characters in length. The characters accepted for cluster identifiers are the following: Alphanumeric characters Hyphens Cluster identifiers must start with a letter. Cluster identifiers can't end with a hyphen or contain two consecutive hyphens."]}
+    let context_ = "GetIdentityCenterAuthTokenRequest"
+    let make ~clusterIds = fun () -> { clusterIds }
+    let to_value x =
+      structure_to_value
+        [("ClusterIds", (Some (ClusterIdentifierList.to_value x.clusterIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clusterIds =
+        ClusterIdentifierList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClusterIds") in
+      make ~clusterIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clusterIds =
+        field_map_exn json__ "ClusterIds" ClusterIdentifierList.of_json in
+      make ~clusterIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request parameters for GetIdentityCenterAuthToken."]
+module GetClusterCredentialsWithIAMMessage =
+  struct
+    type nonrec t =
+      {
+      dbName: String_.t option
+        [@ocaml.doc
+          "The name of the database for which you are requesting credentials. If the database name is specified, the IAM policy must allow access to the resource dbname for the specified database name. If the database name is not specified, access to all databases is allowed."];
+      clusterIdentifier: String_.t option
+        [@ocaml.doc
+          "The unique identifier of the cluster that contains the database for which you are requesting credentials."];
+      durationSeconds: IntegerOptional.t option
+        [@ocaml.doc
+          "The number of seconds until the returned temporary password expires. Range: 900-3600. Default: 900."];
+      customDomainName: String_.t option
+        [@ocaml.doc
+          "The custom domain name for the IAM message cluster credentials."]}
+    let make ?dbName =
+      fun ?clusterIdentifier ->
+        fun ?durationSeconds ->
+          fun ?customDomainName ->
+            fun () ->
+              { dbName; clusterIdentifier; durationSeconds; customDomainName
+              }
+    let to_value x =
+      structure_to_value
+        [("DbName", (Option.map x.dbName ~f:String_.to_value));
+        ("ClusterIdentifier",
+          (Option.map x.clusterIdentifier ~f:String_.to_value));
+        ("DurationSeconds",
+          (Option.map x.durationSeconds ~f:IntegerOptional.to_value));
+        ("CustomDomainName",
+          (Option.map x.customDomainName ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customDomainName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "CustomDomainName") in
+      let durationSeconds =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "DurationSeconds") in
+      let clusterIdentifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ClusterIdentifier") in
+      let dbName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbName") in
+      make ?customDomainName ?durationSeconds ?clusterIdentifier ?dbName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customDomainName =
+        field_map json__ "CustomDomainName" String_.of_json in
+      let durationSeconds =
+        field_map json__ "DurationSeconds" IntegerOptional.of_json in
+      let clusterIdentifier =
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      let dbName = field_map json__ "DbName" String_.of_json in
+      make ?customDomainName ?durationSeconds ?clusterIdentifier ?dbName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a database user name and temporary password with temporary authorization to log in to an Amazon Redshift database. The database user is mapped 1:1 to the source Identity and Access Management (IAM) identity. For more information about IAM identities, see IAM Identities (users, user groups, and roles) in the Amazon Web Services Identity and Access Management User Guide. The Identity and Access Management (IAM) identity that runs this operation must have an IAM policy attached that allows access to all necessary actions and resources. For more information about permissions, see Using identity-based policies (IAM policies) in the Amazon Redshift Cluster Management Guide."]
 module GetClusterCredentialsMessage =
   struct
     type nonrec t =
       {
       dbUser: String_.t
         [@ocaml.doc
-          "The name of a database user. If a user name matching DbUser exists in the database, the temporary user credentials have the same permissions as the existing user. If DbUser doesn't exist in the database and Autocreate is True, a new user is created using the value for DbUser with PUBLIC permissions. If a database user matching the value for DbUser doesn't exist and Autocreate is False, then the command succeeds but the connection attempt will fail because the user doesn't exist in the database. For more information, see CREATE USER in the Amazon Redshift Database Developer Guide. Constraints: Must be 1 to 64 alphanumeric characters or hyphens. The user name can't be PUBLIC. Must contain only lowercase letters, numbers, underscore, plus sign, period (dot), at symbol (\\@), or hyphen. First character must be a letter. Must not contain a colon ( : ) or slash ( / ). Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."];
+          "The name of a database user. If a user name matching DbUser exists in the database, the temporary user credentials have the same permissions as the existing user. If DbUser doesn't exist in the database and Autocreate is True, a new user is created using the value for DbUser with PUBLIC permissions. If a database user matching the value for DbUser doesn't exist and Autocreate is False, then the command succeeds but the connection attempt will fail because the user doesn't exist in the database. For more information, see CREATE USER in the Amazon Redshift Database Developer Guide. Constraints: Must be 1 to 64 alphanumeric characters or hyphens. The user name can't be PUBLIC. Must contain uppercase or lowercase letters, numbers, underscore, plus sign, period (dot), at symbol (\\@), or hyphen. First character must be a letter. Must not contain a colon ( : ) or slash ( / ). Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."];
       dbName: String_.t option
         [@ocaml.doc
-          "The name of a database that DbUser is authorized to log on to. If DbName is not specified, DbUser can log on to any existing database. Constraints: Must be 1 to 64 alphanumeric characters or hyphens Must contain only lowercase letters, numbers, underscore, plus sign, period (dot), at symbol (\\@), or hyphen. First character must be a letter. Must not contain a colon ( : ) or slash ( / ). Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."];
-      clusterIdentifier: String_.t
+          "The name of a database that DbUser is authorized to log on to. If DbName is not specified, DbUser can log on to any existing database. Constraints: Must be 1 to 64 alphanumeric characters or hyphens Must contain uppercase or lowercase letters, numbers, underscore, plus sign, period (dot), at symbol (\\@), or hyphen. First character must be a letter. Must not contain a colon ( : ) or slash ( / ). Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."];
+      clusterIdentifier: String_.t option
         [@ocaml.doc
-          "The unique identifier of the cluster that contains the database for which your are requesting credentials. This parameter is case sensitive."];
+          "The unique identifier of the cluster that contains the database for which you are requesting credentials. This parameter is case sensitive."];
       durationSeconds: IntegerOptional.t option
         [@ocaml.doc
           "The number of seconds until the returned temporary password expires. Constraint: minimum 900, maximum 3600. Default: 900"];
@@ -17345,34 +22472,44 @@ module GetClusterCredentialsMessage =
           "Create a database user with the name specified for the user named in DbUser if one does not exist."];
       dbGroups: DbGroupList.t option
         [@ocaml.doc
-          "A list of the names of existing database groups that the user named in DbUser will join for the current session, in addition to any group memberships for an existing user. If not specified, a new user is added only to PUBLIC. Database group name constraints Must be 1 to 64 alphanumeric characters or hyphens Must contain only lowercase letters, numbers, underscore, plus sign, period (dot), at symbol (\\@), or hyphen. First character must be a letter. Must not contain a colon ( : ) or slash ( / ). Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."]}
+          "A list of the names of existing database groups that the user named in DbUser will join for the current session, in addition to any group memberships for an existing user. If not specified, a new user is added only to PUBLIC. Database group name constraints Must be 1 to 64 alphanumeric characters or hyphens Must contain only lowercase letters, numbers, underscore, plus sign, period (dot), at symbol (\\@), or hyphen. First character must be a letter. Must not contain a colon ( : ) or slash ( / ). Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."];
+      customDomainName: String_.t option
+        [@ocaml.doc "The custom domain name for the cluster credentials."]}
     let context_ = "GetClusterCredentialsMessage"
     let make ?dbName =
-      fun ?durationSeconds ->
-        fun ?autoCreate ->
-          fun ?dbGroups ->
-            fun ~dbUser ->
-              fun ~clusterIdentifier ->
-                fun () ->
-                  {
-                    dbName;
-                    durationSeconds;
-                    autoCreate;
-                    dbGroups;
-                    dbUser;
-                    clusterIdentifier
-                  }
+      fun ?clusterIdentifier ->
+        fun ?durationSeconds ->
+          fun ?autoCreate ->
+            fun ?dbGroups ->
+              fun ?customDomainName ->
+                fun ~dbUser ->
+                  fun () ->
+                    {
+                      dbName;
+                      clusterIdentifier;
+                      durationSeconds;
+                      autoCreate;
+                      dbGroups;
+                      customDomainName;
+                      dbUser
+                    }
     let to_value x =
       structure_to_value
         [("DbUser", (Some (String_.to_value x.dbUser)));
         ("DbName", (Option.map x.dbName ~f:String_.to_value));
-        ("ClusterIdentifier", (Some (String_.to_value x.clusterIdentifier)));
+        ("ClusterIdentifier",
+          (Option.map x.clusterIdentifier ~f:String_.to_value));
         ("DurationSeconds",
           (Option.map x.durationSeconds ~f:IntegerOptional.to_value));
         ("AutoCreate", (Option.map x.autoCreate ~f:BooleanOptional.to_value));
-        ("DbGroups", (Option.map x.dbGroups ~f:DbGroupList.to_value))]
+        ("DbGroups", (Option.map x.dbGroups ~f:DbGroupList.to_value));
+        ("CustomDomainName",
+          (Option.map x.customDomainName ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customDomainName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "CustomDomainName") in
       let dbGroups =
         (Option.map ~f:DbGroupList.of_xml) (Xml.child xml_arg0 "DbGroups") in
       let autoCreate =
@@ -17382,28 +22519,142 @@ module GetClusterCredentialsMessage =
         (Option.map ~f:IntegerOptional.of_xml)
           (Xml.child xml_arg0 "DurationSeconds") in
       let clusterIdentifier =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ClusterIdentifier") in
       let dbName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbName") in
       let dbUser =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DbUser") in
-      make ?dbGroups ?autoCreate ?durationSeconds ~clusterIdentifier ?dbName
-        ~dbUser ()
+      make ?customDomainName ?dbGroups ?autoCreate ?durationSeconds
+        ?clusterIdentifier ?dbName ~dbUser ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dbGroups = field_map json "DbGroups" DbGroupList.of_json in
-      let autoCreate = field_map json "AutoCreate" BooleanOptional.of_json in
+    let of_json json__ =
+      let customDomainName =
+        field_map json__ "CustomDomainName" String_.of_json in
+      let dbGroups = field_map json__ "DbGroups" DbGroupList.of_json in
+      let autoCreate = field_map json__ "AutoCreate" BooleanOptional.of_json in
       let durationSeconds =
-        field_map json "DurationSeconds" IntegerOptional.of_json in
+        field_map json__ "DurationSeconds" IntegerOptional.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
-      let dbName = field_map json "DbName" String_.of_json in
-      let dbUser = field_map_exn json "DbUser" String_.of_json in
-      make ?dbGroups ?autoCreate ?durationSeconds ~clusterIdentifier ?dbName
-        ~dbUser ()
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      let dbName = field_map json__ "DbName" String_.of_json in
+      let dbUser = field_map_exn json__ "DbUser" String_.of_json in
+      make ?customDomainName ?dbGroups ?autoCreate ?durationSeconds
+        ?clusterIdentifier ?dbName ~dbUser ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request parameters to get cluster credentials."]
+module FailoverPrimaryComputeResult =
+  struct
+    type failoverPrimaryComputeResult = {
+      cluster: Cluster.t option }
+    and responseMetaData = unit
+    and t =
+      {
+      failoverPrimaryComputeResult: failoverPrimaryComputeResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
+      | `InvalidClusterStateFault of InvalidClusterStateFault.t 
+      | `UnauthorizedOperation of UnauthorizedOperation.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "FailoverPrimaryComputeResult"
+    let make ?cluster =
+      fun () ->
+        { failoverPrimaryComputeResult = { cluster }; responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
+      | "InvalidClusterStateFault" ->
+          `InvalidClusterStateFault (InvalidClusterStateFault.of_json json)
+      | "UnauthorizedOperation" ->
+          `UnauthorizedOperation (UnauthorizedOperation.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
+      | "InvalidClusterStateFault" ->
+          `InvalidClusterStateFault (InvalidClusterStateFault.of_xml xml)
+      | "UnauthorizedOperation" ->
+          `UnauthorizedOperation (UnauthorizedOperation.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ClusterNotFoundFault"));
+            ("details", (ClusterNotFoundFault.to_json e))]
+      | `InvalidClusterStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidClusterStateFault"));
+            ("details", (InvalidClusterStateFault.to_json e))]
+      | `UnauthorizedOperation e ->
+          `Assoc
+            [("error", (`String "UnauthorizedOperation"));
+            ("details", (UnauthorizedOperation.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.failoverPrimaryComputeResult in
+      structure_to_wrapped_value
+        [("Cluster", (Option.map x.cluster ~f:Cluster.to_value))]
+        ~wrapper:"FailoverPrimaryComputeResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "FailoverPrimaryComputeResult" in
+      let cluster =
+        (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
+      make ?cluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
+      make ?cluster ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Fails over the primary compute unit of the specified Multi-AZ cluster to another Availability Zone."]
+module FailoverPrimaryComputeInputMessage =
+  struct
+    type nonrec t =
+      {
+      clusterIdentifier: String_.t
+        [@ocaml.doc
+          "The unique identifier of the cluster for which the primary compute unit will be failed over to another Availability Zone."]}
+    let context_ = "FailoverPrimaryComputeInputMessage"
+    let make ~clusterIdentifier = fun () -> { clusterIdentifier }
+    let to_value x =
+      structure_to_value
+        [("ClusterIdentifier", (Some (String_.to_value x.clusterIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clusterIdentifier =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
+      make ~clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clusterIdentifier =
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
+      make ~clusterIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Fails over the primary compute unit of the specified Multi-AZ cluster to another Availability Zone."]
 module EventsMessage =
   struct
     type describeEventsResult =
@@ -17455,9 +22706,9 @@ module EventsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?events ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let events = field_map json "Events" EventList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let events = field_map json__ "Events" EventList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?events ?marker ()
     let to_json v = composed_to_json to_value v
   end
@@ -17538,11 +22789,11 @@ module EventSubscriptionsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?eventSubscriptionsList ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventSubscriptionsList =
-        field_map json "EventSubscriptionsList"
+        field_map json__ "EventSubscriptionsList"
           EventSubscriptionsList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?eventSubscriptionsList ?marker ()
     let to_json v = composed_to_json to_value v
   end
@@ -17597,9 +22848,9 @@ module EventCategoriesMessage =
           (Xml.child xml_arg0 "EventCategoriesMapList") in
       make ?eventCategoriesMapList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventCategoriesMapList =
-        field_map json "EventCategoriesMapList"
+        field_map json__ "EventCategoriesMapList"
           EventCategoriesMapList.of_json in
       make ?eventCategoriesMapList ()
     let to_json v = composed_to_json to_value v
@@ -17685,10 +22936,10 @@ module EndpointAuthorizationList =
           (Xml.child xml_arg0 "EndpointAuthorizationList") in
       make ?marker ?endpointAuthorizationList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
       let endpointAuthorizationList =
-        field_map json "EndpointAuthorizationList"
+        field_map json__ "EndpointAuthorizationList"
           EndpointAuthorizations.of_json in
       make ?marker ?endpointAuthorizationList ()
     let to_json v = composed_to_json to_value v
@@ -17778,10 +23029,10 @@ module EndpointAccessList =
           (Xml.child xml_arg0 "EndpointAccessList") in
       make ?marker ?endpointAccessList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
       let endpointAccessList =
-        field_map json "EndpointAccessList" EndpointAccesses.of_json in
+        field_map json__ "EndpointAccessList" EndpointAccesses.of_json in
       make ?marker ?endpointAccessList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a Redshift-managed VPC endpoint."]
@@ -17941,8 +23192,8 @@ module EnableSnapshotCopyResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18011,18 +23262,18 @@ module EnableSnapshotCopyMessage =
       make ?manualSnapshotRetentionPeriod ?snapshotCopyGrantName
         ?retentionPeriod ~destinationRegion ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let manualSnapshotRetentionPeriod =
-        field_map json "ManualSnapshotRetentionPeriod"
+        field_map json__ "ManualSnapshotRetentionPeriod"
           IntegerOptional.of_json in
       let snapshotCopyGrantName =
-        field_map json "SnapshotCopyGrantName" String_.of_json in
+        field_map json__ "SnapshotCopyGrantName" String_.of_json in
       let retentionPeriod =
-        field_map json "RetentionPeriod" IntegerOptional.of_json in
+        field_map json__ "RetentionPeriod" IntegerOptional.of_json in
       let destinationRegion =
-        field_map_exn json "DestinationRegion" String_.of_json in
+        field_map_exn json__ "DestinationRegion" String_.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ?manualSnapshotRetentionPeriod ?snapshotCopyGrantName
         ?retentionPeriod ~destinationRegion ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -18034,40 +23285,70 @@ module EnableLoggingMessage =
       clusterIdentifier: String_.t
         [@ocaml.doc
           "The identifier of the cluster on which logging is to be started. Example: examplecluster"];
-      bucketName: String_.t
+      bucketName: String_.t option
         [@ocaml.doc
           "The name of an existing S3 bucket where the log files are to be stored. Constraints: Must be in the same region as the cluster The cluster must have read bucket and put object permissions"];
-      s3KeyPrefix: String_.t option
+      s3KeyPrefix: S3KeyPrefixValue.t option
         [@ocaml.doc
-          "The prefix applied to the log file names. Constraints: Cannot exceed 512 characters Cannot contain spaces( ), double quotes (\"), single quotes ('), a backslash (\\), or control characters. The hexadecimal codes for invalid characters are: x00 to x20 x22 x27 x5c x7f or larger"]}
+          "The prefix applied to the log file names. Valid characters are any letter from any language, any whitespace character, any numeric character, and the following characters: underscore (_), period (.), colon (:), slash (/), equal (=), plus (+), backslash (\\), hyphen (-), at symbol (\\@)."];
+      logDestinationType: LogDestinationType.t option
+        [@ocaml.doc
+          "The log destination type. An enum with possible values of s3 and cloudwatch."];
+      logExports: LogTypeList.t option
+        [@ocaml.doc
+          "The collection of exported log types. Possible values are connectionlog, useractivitylog, and userlog."]}
     let context_ = "EnableLoggingMessage"
-    let make ?s3KeyPrefix =
-      fun ~clusterIdentifier ->
-        fun ~bucketName ->
-          fun () -> { s3KeyPrefix; clusterIdentifier; bucketName }
+    let make ?bucketName =
+      fun ?s3KeyPrefix ->
+        fun ?logDestinationType ->
+          fun ?logExports ->
+            fun ~clusterIdentifier ->
+              fun () ->
+                {
+                  bucketName;
+                  s3KeyPrefix;
+                  logDestinationType;
+                  logExports;
+                  clusterIdentifier
+                }
     let to_value x =
       structure_to_value
         [("ClusterIdentifier", (Some (String_.to_value x.clusterIdentifier)));
-        ("BucketName", (Some (String_.to_value x.bucketName)));
-        ("S3KeyPrefix", (Option.map x.s3KeyPrefix ~f:String_.to_value))]
+        ("BucketName", (Option.map x.bucketName ~f:String_.to_value));
+        ("S3KeyPrefix",
+          (Option.map x.s3KeyPrefix ~f:S3KeyPrefixValue.to_value));
+        ("LogDestinationType",
+          (Option.map x.logDestinationType ~f:LogDestinationType.to_value));
+        ("LogExports", (Option.map x.logExports ~f:LogTypeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let logExports =
+        (Option.map ~f:LogTypeList.of_xml) (Xml.child xml_arg0 "LogExports") in
+      let logDestinationType =
+        (Option.map ~f:LogDestinationType.of_xml)
+          (Xml.child xml_arg0 "LogDestinationType") in
       let s3KeyPrefix =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "S3KeyPrefix") in
+        (Option.map ~f:S3KeyPrefixValue.of_xml)
+          (Xml.child xml_arg0 "S3KeyPrefix") in
       let bucketName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BucketName") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BucketName") in
       let clusterIdentifier =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
-      make ?s3KeyPrefix ~bucketName ~clusterIdentifier ()
+      make ?logExports ?logDestinationType ?s3KeyPrefix ?bucketName
+        ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3KeyPrefix = field_map json "S3KeyPrefix" String_.of_json in
-      let bucketName = field_map_exn json "BucketName" String_.of_json in
+    let of_json json__ =
+      let logExports = field_map json__ "LogExports" LogTypeList.of_json in
+      let logDestinationType =
+        field_map json__ "LogDestinationType" LogDestinationType.of_json in
+      let s3KeyPrefix =
+        field_map json__ "S3KeyPrefix" S3KeyPrefixValue.of_json in
+      let bucketName = field_map json__ "BucketName" String_.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
-      make ?s3KeyPrefix ~bucketName ~clusterIdentifier ()
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
+      make ?logExports ?logDestinationType ?s3KeyPrefix ?bucketName
+        ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end
 module DisassociateDataShareConsumerMessage =
@@ -18082,7 +23363,7 @@ module DisassociateDataShareConsumerMessage =
           "A value that specifies whether association for the datashare is removed from the entire account."];
       consumerArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the consumer that association for the datashare is removed from."];
+          "The Amazon Resource Name (ARN) of the consumer namespace that association for the datashare is removed from."];
       consumerRegion: String_.t option
         [@ocaml.doc
           "From a datashare consumer account, removes association of a datashare from all the existing and future namespaces in the specified Amazon Web Services Region."]}
@@ -18120,17 +23401,17 @@ module DisassociateDataShareConsumerMessage =
       make ?consumerRegion ?consumerArn ?disassociateEntireAccount
         ~dataShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let consumerRegion = field_map json "ConsumerRegion" String_.of_json in
-      let consumerArn = field_map json "ConsumerArn" String_.of_json in
+    let of_json json__ =
+      let consumerRegion = field_map json__ "ConsumerRegion" String_.of_json in
+      let consumerArn = field_map json__ "ConsumerArn" String_.of_json in
       let disassociateEntireAccount =
-        field_map json "DisassociateEntireAccount" BooleanOptional.of_json in
-      let dataShareArn = field_map_exn json "DataShareArn" String_.of_json in
+        field_map json__ "DisassociateEntireAccount" BooleanOptional.of_json in
+      let dataShareArn = field_map_exn json__ "DataShareArn" String_.of_json in
       make ?consumerRegion ?consumerArn ?disassociateEntireAccount
         ~dataShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "From a consumer account, remove association for the specified datashare."]
+       "From a datashare consumer account, remove association for the specified datashare."]
 module DisableSnapshotCopyResult =
   struct
     type disableSnapshotCopyResult = {
@@ -18146,6 +23427,7 @@ module DisableSnapshotCopyResult =
       | `SnapshotCopyAlreadyDisabledFault of
           SnapshotCopyAlreadyDisabledFault.t 
       | `UnauthorizedOperation of UnauthorizedOperation.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "DisableSnapshotCopyResult"
     let make ?cluster =
@@ -18162,6 +23444,8 @@ module DisableSnapshotCopyResult =
             (SnapshotCopyAlreadyDisabledFault.of_json json)
       | "UnauthorizedOperation" ->
           `UnauthorizedOperation (UnauthorizedOperation.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -18176,6 +23460,8 @@ module DisableSnapshotCopyResult =
             (SnapshotCopyAlreadyDisabledFault.of_xml xml)
       | "UnauthorizedOperation" ->
           `UnauthorizedOperation (UnauthorizedOperation.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -18196,6 +23482,10 @@ module DisableSnapshotCopyResult =
           `Assoc
             [("error", (`String "UnauthorizedOperation"));
             ("details", (UnauthorizedOperation.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -18214,8 +23504,8 @@ module DisableSnapshotCopyResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18239,9 +23529,9 @@ module DisableSnapshotCopyMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       make ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end
@@ -18264,9 +23554,9 @@ module DisableLoggingMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       make ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end
@@ -18344,16 +23634,16 @@ module DescribeUsageLimitsMessage =
       make ?tagValues ?tagKeys ?marker ?maxRecords ?featureType
         ?clusterIdentifier ?usageLimitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map json "TagValues" TagValueList.of_json in
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let tagValues = field_map json__ "TagValues" TagValueList.of_json in
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let featureType =
-        field_map json "FeatureType" UsageLimitFeatureType.of_json in
+        field_map json__ "FeatureType" UsageLimitFeatureType.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
-      let usageLimitId = field_map json "UsageLimitId" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      let usageLimitId = field_map json__ "UsageLimitId" String_.of_json in
       make ?tagValues ?tagKeys ?marker ?maxRecords ?featureType
         ?clusterIdentifier ?usageLimitId ()
     let to_json v = composed_to_json to_value v
@@ -18368,7 +23658,7 @@ module DescribeTagsMessage =
           "The Amazon Resource Name (ARN) for which you want to describe the tag or tags. For example, arn:aws:redshift:us-east-2:123456789:cluster:t1."];
       resourceType: String_.t option
         [@ocaml.doc
-          "The type of resource with which you want to view tags. Valid resource types are: Cluster CIDR/IP EC2 security group Snapshot Cluster security group Subnet group HSM connection HSM certificate Parameter group Snapshot copy grant For more information about Amazon Redshift resource types and constructing ARNs, go to Specifying Policy Elements: Actions, Effects, Resources, and Principals in the Amazon Redshift Cluster Management Guide."];
+          "The type of resource with which you want to view tags. Valid resource types are: Cluster CIDR/IP EC2 security group Snapshot Cluster security group Subnet group HSM connection HSM certificate Parameter group Snapshot copy grant Integration (zero-ETL integration or S3 event integration) To describe the tags associated with an integration, don't specify ResourceType, instead specify the ResourceName of the integration. For more information about Amazon Redshift resource types and constructing ARNs, go to Specifying Policy Elements: Actions, Effects, Resources, and Principals in the Amazon Redshift Cluster Management Guide."];
       maxRecords: IntegerOptional.t option
         [@ocaml.doc
           "The maximum number or response records to return in each call. If the number of remaining response records exceeds the specified MaxRecords value, a value is returned in a marker field of the response. You can retrieve the next set of records by retrying the command with the returned marker value."];
@@ -18422,13 +23712,13 @@ module DescribeTagsMessage =
       make ?tagValues ?tagKeys ?marker ?maxRecords ?resourceType
         ?resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map json "TagValues" TagValueList.of_json in
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let resourceType = field_map json "ResourceType" String_.of_json in
-      let resourceName = field_map json "ResourceName" String_.of_json in
+    let of_json json__ =
+      let tagValues = field_map json__ "TagValues" TagValueList.of_json in
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let resourceName = field_map json__ "ResourceName" String_.of_json in
       make ?tagValues ?tagKeys ?marker ?maxRecords ?resourceType
         ?resourceName ()
     let to_json v = composed_to_json to_value v
@@ -18479,13 +23769,13 @@ module DescribeTableRestoreStatusMessage =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?marker ?maxRecords ?tableRestoreRequestId ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let tableRestoreRequestId =
-        field_map json "TableRestoreRequestId" String_.of_json in
+        field_map json__ "TableRestoreRequestId" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       make ?marker ?maxRecords ?tableRestoreRequestId ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end
@@ -18547,10 +23837,10 @@ module DescribeSnapshotSchedulesOutputMessage =
           (Xml.child xml_arg0 "SnapshotSchedules") in
       make ?marker ?snapshotSchedules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
       let snapshotSchedules =
-        field_map json "SnapshotSchedules" SnapshotScheduleList.of_json in
+        field_map json__ "SnapshotSchedules" SnapshotScheduleList.of_json in
       make ?marker ?snapshotSchedules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of snapshot schedules."]
@@ -18619,15 +23909,15 @@ module DescribeSnapshotSchedulesMessage =
       make ?maxRecords ?marker ?tagValues ?tagKeys ?scheduleIdentifier
         ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let tagValues = field_map json "TagValues" TagValueList.of_json in
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let tagValues = field_map json__ "TagValues" TagValueList.of_json in
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
       let scheduleIdentifier =
-        field_map json "ScheduleIdentifier" String_.of_json in
+        field_map json__ "ScheduleIdentifier" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       make ?maxRecords ?marker ?tagValues ?tagKeys ?scheduleIdentifier
         ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -18687,13 +23977,13 @@ module DescribeSnapshotCopyGrantsMessage =
           (Xml.child xml_arg0 "SnapshotCopyGrantName") in
       make ?tagValues ?tagKeys ?marker ?maxRecords ?snapshotCopyGrantName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map json "TagValues" TagValueList.of_json in
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let tagValues = field_map json__ "TagValues" TagValueList.of_json in
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let snapshotCopyGrantName =
-        field_map json "SnapshotCopyGrantName" String_.of_json in
+        field_map json__ "SnapshotCopyGrantName" String_.of_json in
       make ?tagValues ?tagKeys ?marker ?maxRecords ?snapshotCopyGrantName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of the DescribeSnapshotCopyGrants action."]
@@ -18780,18 +24070,18 @@ module DescribeScheduledActionsMessage =
       make ?maxRecords ?marker ?filters ?active ?endTime ?startTime
         ?targetActionType ?scheduledActionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       let filters =
-        field_map json "Filters" ScheduledActionFilterList.of_json in
-      let active = field_map json "Active" BooleanOptional.of_json in
-      let endTime = field_map json "EndTime" TStamp.of_json in
-      let startTime = field_map json "StartTime" TStamp.of_json in
+        field_map json__ "Filters" ScheduledActionFilterList.of_json in
+      let active = field_map json__ "Active" BooleanOptional.of_json in
+      let endTime = field_map json__ "EndTime" TStamp.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
       let targetActionType =
-        field_map json "TargetActionType" ScheduledActionTypeValues.of_json in
+        field_map json__ "TargetActionType" ScheduledActionTypeValues.of_json in
       let scheduledActionName =
-        field_map json "ScheduledActionName" String_.of_json in
+        field_map json__ "ScheduledActionName" String_.of_json in
       make ?maxRecords ?marker ?filters ?active ?endTime ?startTime
         ?targetActionType ?scheduledActionName ()
     let to_json v = composed_to_json to_value v
@@ -18815,9 +24105,9 @@ module DescribeResizeMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       make ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end
@@ -18853,10 +24143,10 @@ module DescribeReservedNodesMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ReservedNodeId") in
       make ?marker ?maxRecords ?reservedNodeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let reservedNodeId = field_map json "ReservedNodeId" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let reservedNodeId = field_map json__ "ReservedNodeId" String_.of_json in
       make ?marker ?maxRecords ?reservedNodeId ()
     let to_json v = composed_to_json to_value v
   end
@@ -18894,11 +24184,11 @@ module DescribeReservedNodeOfferingsMessage =
           (Xml.child xml_arg0 "ReservedNodeOfferingId") in
       make ?marker ?maxRecords ?reservedNodeOfferingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let reservedNodeOfferingId =
-        field_map json "ReservedNodeOfferingId" String_.of_json in
+        field_map json__ "ReservedNodeOfferingId" String_.of_json in
       make ?marker ?maxRecords ?reservedNodeOfferingId ()
     let to_json v = composed_to_json to_value v
   end
@@ -18998,10 +24288,10 @@ module DescribeReservedNodeExchangeStatusOutputMessage =
           (Xml.child xml_arg0 "ReservedNodeExchangeStatusDetails") in
       make ?marker ?reservedNodeExchangeStatusDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
       let reservedNodeExchangeStatusDetails =
-        field_map json "ReservedNodeExchangeStatusDetails"
+        field_map json__ "ReservedNodeExchangeStatusDetails"
           ReservedNodeExchangeStatusList.of_json in
       make ?marker ?reservedNodeExchangeStatusDetails ()
     let to_json v = composed_to_json to_value v
@@ -19056,17 +24346,180 @@ module DescribeReservedNodeExchangeStatusInputMessage =
       make ?marker ?maxRecords ?reservedNodeExchangeRequestId ?reservedNodeId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let reservedNodeExchangeRequestId =
-        field_map json "ReservedNodeExchangeRequestId" String_.of_json in
-      let reservedNodeId = field_map json "ReservedNodeId" String_.of_json in
+        field_map json__ "ReservedNodeExchangeRequestId" String_.of_json in
+      let reservedNodeId = field_map json__ "ReservedNodeId" String_.of_json in
       make ?marker ?maxRecords ?reservedNodeExchangeRequestId ?reservedNodeId
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns exchange status details and associated metadata for a reserved-node exchange. Statuses include such values as in progress and requested."]
+module DescribeRedshiftIdcApplicationsResult =
+  struct
+    type describeRedshiftIdcApplicationsResult =
+      {
+      redshiftIdcApplications: RedshiftIdcApplicationList.t option
+        [@ocaml.doc
+          "The list of Amazon Redshift IAM Identity Center applications."];
+      marker: String_.t option
+        [@ocaml.doc
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned marker value in the Marker parameter and retrying the command. If the Marker field is empty, all response records have been retrieved for the request."]}
+    and responseMetaData = unit
+    and t =
+      {
+      describeRedshiftIdcApplicationsResult:
+        describeRedshiftIdcApplicationsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `DependentServiceAccessDeniedFault of
+          DependentServiceAccessDeniedFault.t 
+      | `DependentServiceUnavailableFault of
+          DependentServiceUnavailableFault.t 
+      | `RedshiftIdcApplicationNotExistsFault of
+          RedshiftIdcApplicationNotExistsFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DescribeRedshiftIdcApplicationsResult"
+    let make ?redshiftIdcApplications =
+      fun ?marker ->
+        fun () ->
+          {
+            describeRedshiftIdcApplicationsResult =
+              { redshiftIdcApplications; marker };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "DependentServiceAccessDeniedFault" ->
+          `DependentServiceAccessDeniedFault
+            (DependentServiceAccessDeniedFault.of_json json)
+      | "DependentServiceUnavailableFault" ->
+          `DependentServiceUnavailableFault
+            (DependentServiceUnavailableFault.of_json json)
+      | "RedshiftIdcApplicationNotExistsFault" ->
+          `RedshiftIdcApplicationNotExistsFault
+            (RedshiftIdcApplicationNotExistsFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependentServiceAccessDeniedFault" ->
+          `DependentServiceAccessDeniedFault
+            (DependentServiceAccessDeniedFault.of_xml xml)
+      | "DependentServiceUnavailableFault" ->
+          `DependentServiceUnavailableFault
+            (DependentServiceUnavailableFault.of_xml xml)
+      | "RedshiftIdcApplicationNotExistsFault" ->
+          `RedshiftIdcApplicationNotExistsFault
+            (RedshiftIdcApplicationNotExistsFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependentServiceAccessDeniedFault e ->
+          `Assoc
+            [("error", (`String "DependentServiceAccessDeniedFault"));
+            ("details", (DependentServiceAccessDeniedFault.to_json e))]
+      | `DependentServiceUnavailableFault e ->
+          `Assoc
+            [("error", (`String "DependentServiceUnavailableFault"));
+            ("details", (DependentServiceUnavailableFault.to_json e))]
+      | `RedshiftIdcApplicationNotExistsFault e ->
+          `Assoc
+            [("error", (`String "RedshiftIdcApplicationNotExistsFault"));
+            ("details", (RedshiftIdcApplicationNotExistsFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.describeRedshiftIdcApplicationsResult in
+      structure_to_wrapped_value
+        [("RedshiftIdcApplications",
+           (Option.map x.redshiftIdcApplications
+              ~f:RedshiftIdcApplicationList.to_value));
+        ("Marker", (Option.map x.marker ~f:String_.to_value))]
+        ~wrapper:"DescribeRedshiftIdcApplicationsResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "DescribeRedshiftIdcApplicationsResult" in
+      let marker =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
+      let redshiftIdcApplications =
+        (Option.map ~f:RedshiftIdcApplicationList.of_xml)
+          (Xml.child xml_arg0 "RedshiftIdcApplications") in
+      make ?marker ?redshiftIdcApplications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let redshiftIdcApplications =
+        field_map json__ "RedshiftIdcApplications"
+          RedshiftIdcApplicationList.of_json in
+      make ?marker ?redshiftIdcApplications ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the Amazon Redshift IAM Identity Center applications."]
+module DescribeRedshiftIdcApplicationsMessage =
+  struct
+    type nonrec t =
+      {
+      redshiftIdcApplicationArn: String_.t option
+        [@ocaml.doc
+          "The ARN for the Redshift application that integrates with IAM Identity Center."];
+      maxRecords: IntegerOptional.t option
+        [@ocaml.doc
+          "The maximum number of response records to return in each call. If the number of remaining response records exceeds the specified MaxRecords value, a value is returned in a marker field of the response. You can retrieve the next set of records by retrying the command with the returned marker value."];
+      marker: String_.t option
+        [@ocaml.doc
+          "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned marker value in the Marker parameter and retrying the command. If the Marker field is empty, all response records have been retrieved for the request."]}
+    let make ?redshiftIdcApplicationArn =
+      fun ?maxRecords ->
+        fun ?marker ->
+          fun () -> { redshiftIdcApplicationArn; maxRecords; marker }
+    let to_value x =
+      structure_to_value
+        [("RedshiftIdcApplicationArn",
+           (Option.map x.redshiftIdcApplicationArn ~f:String_.to_value));
+        ("MaxRecords", (Option.map x.maxRecords ~f:IntegerOptional.to_value));
+        ("Marker", (Option.map x.marker ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let marker =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
+      let maxRecords =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "MaxRecords") in
+      let redshiftIdcApplicationArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "RedshiftIdcApplicationArn") in
+      make ?marker ?maxRecords ?redshiftIdcApplicationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let redshiftIdcApplicationArn =
+        field_map json__ "RedshiftIdcApplicationArn" String_.of_json in
+      make ?marker ?maxRecords ?redshiftIdcApplicationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the Amazon Redshift IAM Identity Center applications."]
 module DescribePartnersOutputMessage =
   struct
     type describePartnersResult =
@@ -19082,6 +24535,7 @@ module DescribePartnersOutputMessage =
       [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
       | `UnauthorizedPartnerIntegrationFault of
           UnauthorizedPartnerIntegrationFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "DescribePartnersOutputMessage"
     let make ?partnerIntegrationInfoList =
@@ -19097,6 +24551,8 @@ module DescribePartnersOutputMessage =
       | "UnauthorizedPartnerIntegrationFault" ->
           `UnauthorizedPartnerIntegrationFault
             (UnauthorizedPartnerIntegrationFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -19107,6 +24563,8 @@ module DescribePartnersOutputMessage =
       | "UnauthorizedPartnerIntegrationFault" ->
           `UnauthorizedPartnerIntegrationFault
             (UnauthorizedPartnerIntegrationFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -19119,6 +24577,10 @@ module DescribePartnersOutputMessage =
           `Assoc
             [("error", (`String "UnauthorizedPartnerIntegrationFault"));
             ("details", (UnauthorizedPartnerIntegrationFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -19140,9 +24602,9 @@ module DescribePartnersOutputMessage =
           (Xml.child xml_arg0 "PartnerIntegrationInfoList") in
       make ?partnerIntegrationInfoList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let partnerIntegrationInfoList =
-        field_map json "PartnerIntegrationInfoList"
+        field_map json__ "PartnerIntegrationInfoList"
           PartnerIntegrationInfoList.of_json in
       make ?partnerIntegrationInfoList ()
     let to_json v = composed_to_json to_value v
@@ -19200,16 +24662,17 @@ module DescribePartnersInputMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ?partnerName ?databaseName ~clusterIdentifier ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let partnerName =
-        field_map json "PartnerName" PartnerIntegrationPartnerName.of_json in
+        field_map json__ "PartnerName" PartnerIntegrationPartnerName.of_json in
       let databaseName =
-        field_map json "DatabaseName" PartnerIntegrationDatabaseName.of_json in
+        field_map json__ "DatabaseName"
+          PartnerIntegrationDatabaseName.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier"
+        field_map_exn json__ "ClusterIdentifier"
           PartnerIntegrationClusterIdentifier.of_json in
       let accountId =
-        field_map_exn json "AccountId" PartnerIntegrationAccountId.of_json in
+        field_map_exn json__ "AccountId" PartnerIntegrationAccountId.of_json in
       make ?partnerName ?databaseName ~clusterIdentifier ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19255,11 +24718,11 @@ module DescribeOrderableClusterOptionsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClusterVersion") in
       make ?marker ?maxRecords ?nodeType ?clusterVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let nodeType = field_map json "NodeType" String_.of_json in
-      let clusterVersion = field_map json "ClusterVersion" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let nodeType = field_map json__ "NodeType" String_.of_json in
+      let clusterVersion = field_map json__ "ClusterVersion" String_.of_json in
       make ?marker ?maxRecords ?nodeType ?clusterVersion ()
     let to_json v = composed_to_json to_value v
   end
@@ -19276,6 +24739,9 @@ module DescribeNodeConfigurationOptionsMessage =
       snapshotIdentifier: String_.t option
         [@ocaml.doc
           "The identifier of the snapshot to evaluate for possible node configurations."];
+      snapshotArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the snapshot associated with the message to describe node configuration."];
       ownerAccount: String_.t option
         [@ocaml.doc
           "The Amazon Web Services account used to create or copy the snapshot. Required if you are restoring a snapshot you do not own, optional if you own the snapshot."];
@@ -19291,21 +24757,23 @@ module DescribeNodeConfigurationOptionsMessage =
     let context_ = "DescribeNodeConfigurationOptionsMessage"
     let make ?clusterIdentifier =
       fun ?snapshotIdentifier ->
-        fun ?ownerAccount ->
-          fun ?filters ->
-            fun ?marker ->
-              fun ?maxRecords ->
-                fun ~actionType ->
-                  fun () ->
-                    {
-                      clusterIdentifier;
-                      snapshotIdentifier;
-                      ownerAccount;
-                      filters;
-                      marker;
-                      maxRecords;
-                      actionType
-                    }
+        fun ?snapshotArn ->
+          fun ?ownerAccount ->
+            fun ?filters ->
+              fun ?marker ->
+                fun ?maxRecords ->
+                  fun ~actionType ->
+                    fun () ->
+                      {
+                        clusterIdentifier;
+                        snapshotIdentifier;
+                        snapshotArn;
+                        ownerAccount;
+                        filters;
+                        marker;
+                        maxRecords;
+                        actionType
+                      }
     let to_value x =
       structure_to_value
         [("ActionType", (Some (ActionType.to_value x.actionType)));
@@ -19313,6 +24781,7 @@ module DescribeNodeConfigurationOptionsMessage =
           (Option.map x.clusterIdentifier ~f:String_.to_value));
         ("SnapshotIdentifier",
           (Option.map x.snapshotIdentifier ~f:String_.to_value));
+        ("SnapshotArn", (Option.map x.snapshotArn ~f:String_.to_value));
         ("OwnerAccount", (Option.map x.ownerAccount ~f:String_.to_value));
         ("Filter",
           (Option.map x.filters
@@ -19331,6 +24800,8 @@ module DescribeNodeConfigurationOptionsMessage =
           (Xml.child xml_arg0 "Filter") in
       let ownerAccount =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OwnerAccount") in
+      let snapshotArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SnapshotArn") in
       let snapshotIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SnapshotIdentifier") in
@@ -19340,22 +24811,23 @@ module DescribeNodeConfigurationOptionsMessage =
       let actionType =
         ActionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ActionType") in
-      make ?maxRecords ?marker ?filters ?ownerAccount ?snapshotIdentifier
-        ?clusterIdentifier ~actionType ()
+      make ?maxRecords ?marker ?filters ?ownerAccount ?snapshotArn
+        ?snapshotIdentifier ?clusterIdentifier ~actionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       let filters =
-        field_map json "Filters" NodeConfigurationOptionsFilterList.of_json in
-      let ownerAccount = field_map json "OwnerAccount" String_.of_json in
+        field_map json__ "Filters" NodeConfigurationOptionsFilterList.of_json in
+      let ownerAccount = field_map json__ "OwnerAccount" String_.of_json in
+      let snapshotArn = field_map json__ "SnapshotArn" String_.of_json in
       let snapshotIdentifier =
-        field_map json "SnapshotIdentifier" String_.of_json in
+        field_map json__ "SnapshotIdentifier" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
-      let actionType = field_map_exn json "ActionType" ActionType.of_json in
-      make ?maxRecords ?marker ?filters ?ownerAccount ?snapshotIdentifier
-        ?clusterIdentifier ~actionType ()
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      let actionType = field_map_exn json__ "ActionType" ActionType.of_json in
+      make ?maxRecords ?marker ?filters ?ownerAccount ?snapshotArn
+        ?snapshotIdentifier ?clusterIdentifier ~actionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns properties of possible node configurations such as node type, number of nodes, and disk usage for the specified action type."]
@@ -19378,12 +24850,117 @@ module DescribeLoggingStatusMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       make ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end
+module DescribeIntegrationsMessage =
+  struct
+    type nonrec t =
+      {
+      integrationArn: IntegrationArn.t option
+        [@ocaml.doc "The unique identifier of the integration."];
+      maxRecords: IntegerOptional.t option
+        [@ocaml.doc
+          "The maximum number of response records to return in each call. If the number of remaining response records exceeds the specified MaxRecords value, a value is returned in a marker field of the response. You can retrieve the next set of records by retrying the command with the returned marker value. Default: 100 Constraints: minimum 20, maximum 100."];
+      marker: String_.t option
+        [@ocaml.doc
+          "An optional pagination token provided by a previous DescribeIntegrations request. If this parameter is specified, the response includes only records beyond the marker, up to the value specified by MaxRecords."];
+      filters: DescribeIntegrationsFilterList.t option
+        [@ocaml.doc
+          "A filter that specifies one or more resources to return."]}
+    let make ?integrationArn =
+      fun ?maxRecords ->
+        fun ?marker ->
+          fun ?filters ->
+            fun () -> { integrationArn; maxRecords; marker; filters }
+    let to_value x =
+      structure_to_value
+        [("IntegrationArn",
+           (Option.map x.integrationArn ~f:IntegrationArn.to_value));
+        ("MaxRecords", (Option.map x.maxRecords ~f:IntegerOptional.to_value));
+        ("Marker", (Option.map x.marker ~f:String_.to_value));
+        ("Filters",
+          (Option.map x.filters ~f:DescribeIntegrationsFilterList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:DescribeIntegrationsFilterList.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let marker =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
+      let maxRecords =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "MaxRecords") in
+      let integrationArn =
+        (Option.map ~f:IntegrationArn.of_xml)
+          (Xml.child xml_arg0 "IntegrationArn") in
+      make ?filters ?marker ?maxRecords ?integrationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filters =
+        field_map json__ "Filters" DescribeIntegrationsFilterList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let integrationArn =
+        field_map json__ "IntegrationArn" IntegrationArn.of_json in
+      make ?filters ?marker ?maxRecords ?integrationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes one or more zero-ETL or S3 event integrations with Amazon Redshift."]
+module DescribeInboundIntegrationsMessage =
+  struct
+    type nonrec t =
+      {
+      integrationArn: InboundIntegrationArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the inbound integration."];
+      targetArn: TargetArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the target of an inbound integration."];
+      maxRecords: IntegerOptional.t option
+        [@ocaml.doc
+          "The maximum number of response records to return in each call. If the number of remaining response records exceeds the specified MaxRecords value, a value is returned in a marker field of the response. You can retrieve the next set of records by retrying the command with the returned marker value. Default: 100 Constraints: minimum 20, maximum 100."];
+      marker: String_.t option
+        [@ocaml.doc
+          "An optional parameter that specifies the starting point to return a set of response records. When the results of a DescribeInboundIntegrations request exceed the value specified in MaxRecords, Amazon Web Services returns a value in the Marker field of the response. You can retrieve the next set of response records by providing the returned marker value in the Marker parameter and retrying the request."]}
+    let make ?integrationArn =
+      fun ?targetArn ->
+        fun ?maxRecords ->
+          fun ?marker ->
+            fun () -> { integrationArn; targetArn; maxRecords; marker }
+    let to_value x =
+      structure_to_value
+        [("IntegrationArn",
+           (Option.map x.integrationArn ~f:InboundIntegrationArn.to_value));
+        ("TargetArn", (Option.map x.targetArn ~f:TargetArn.to_value));
+        ("MaxRecords", (Option.map x.maxRecords ~f:IntegerOptional.to_value));
+        ("Marker", (Option.map x.marker ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let marker =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
+      let maxRecords =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "MaxRecords") in
+      let targetArn =
+        (Option.map ~f:TargetArn.of_xml) (Xml.child xml_arg0 "TargetArn") in
+      let integrationArn =
+        (Option.map ~f:InboundIntegrationArn.of_xml)
+          (Xml.child xml_arg0 "IntegrationArn") in
+      make ?marker ?maxRecords ?targetArn ?integrationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let targetArn = field_map json__ "TargetArn" TargetArn.of_json in
+      let integrationArn =
+        field_map json__ "IntegrationArn" InboundIntegrationArn.of_json in
+      make ?marker ?maxRecords ?targetArn ?integrationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of inbound integrations."]
 module DescribeHsmConfigurationsMessage =
   struct
     type nonrec t =
@@ -19441,13 +25018,13 @@ module DescribeHsmConfigurationsMessage =
       make ?tagValues ?tagKeys ?marker ?maxRecords
         ?hsmConfigurationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map json "TagValues" TagValueList.of_json in
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let tagValues = field_map json__ "TagValues" TagValueList.of_json in
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let hsmConfigurationIdentifier =
-        field_map json "HsmConfigurationIdentifier" String_.of_json in
+        field_map json__ "HsmConfigurationIdentifier" String_.of_json in
       make ?tagValues ?tagKeys ?marker ?maxRecords
         ?hsmConfigurationIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -19509,13 +25086,13 @@ module DescribeHsmClientCertificatesMessage =
       make ?tagValues ?tagKeys ?marker ?maxRecords
         ?hsmClientCertificateIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map json "TagValues" TagValueList.of_json in
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let tagValues = field_map json__ "TagValues" TagValueList.of_json in
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let hsmClientCertificateIdentifier =
-        field_map json "HsmClientCertificateIdentifier" String_.of_json in
+        field_map json__ "HsmClientCertificateIdentifier" String_.of_json in
       make ?tagValues ?tagKeys ?marker ?maxRecords
         ?hsmClientCertificateIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -19594,15 +25171,15 @@ module DescribeEventsMessage =
       make ?marker ?maxRecords ?duration ?endTime ?startTime ?sourceType
         ?sourceIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let duration = field_map json "Duration" IntegerOptional.of_json in
-      let endTime = field_map json "EndTime" TStamp.of_json in
-      let startTime = field_map json "StartTime" TStamp.of_json in
-      let sourceType = field_map json "SourceType" SourceType.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let duration = field_map json__ "Duration" IntegerOptional.of_json in
+      let endTime = field_map json__ "EndTime" TStamp.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
       let sourceIdentifier =
-        field_map json "SourceIdentifier" String_.of_json in
+        field_map json__ "SourceIdentifier" String_.of_json in
       make ?marker ?maxRecords ?duration ?endTime ?startTime ?sourceType
         ?sourceIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -19657,13 +25234,13 @@ module DescribeEventSubscriptionsMessage =
           (Xml.child xml_arg0 "SubscriptionName") in
       make ?tagValues ?tagKeys ?marker ?maxRecords ?subscriptionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map json "TagValues" TagValueList.of_json in
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let tagValues = field_map json__ "TagValues" TagValueList.of_json in
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let subscriptionName =
-        field_map json "SubscriptionName" String_.of_json in
+        field_map json__ "SubscriptionName" String_.of_json in
       make ?tagValues ?tagKeys ?marker ?maxRecords ?subscriptionName ()
     let to_json v = composed_to_json to_value v
   end
@@ -19684,8 +25261,8 @@ module DescribeEventCategoriesMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceType") in
       make ?sourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceType = field_map json "SourceType" String_.of_json in
+    let of_json json__ =
+      let sourceType = field_map json__ "SourceType" String_.of_json in
       make ?sourceType ()
     let to_json v = composed_to_json to_value v
   end
@@ -19697,7 +25274,7 @@ module DescribeEndpointAuthorizationMessage =
         [@ocaml.doc "The cluster identifier of the cluster to access."];
       account: String_.t option
         [@ocaml.doc
-          "The AAmazon Web Services account ID of either the cluster owner (grantor) or grantee. If Grantee parameter is true, then the Account value is of the grantor."];
+          "The Amazon Web Services account ID of either the cluster owner (grantor) or grantee. If Grantee parameter is true, then the Account value is of the grantor."];
       grantee: BooleanOptional.t option
         [@ocaml.doc
           "Indicates whether to check authorization from a grantor or grantee point of view. If true, Amazon Redshift returns endpoint authorizations that you've been granted. If false (default), checks authorization from a grantor point of view."];
@@ -19738,13 +25315,13 @@ module DescribeEndpointAuthorizationMessage =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?marker ?maxRecords ?grantee ?account ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let grantee = field_map json "Grantee" BooleanOptional.of_json in
-      let account = field_map json "Account" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let grantee = field_map json__ "Grantee" BooleanOptional.of_json in
+      let account = field_map json__ "Account" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       make ?marker ?maxRecords ?grantee ?account ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an endpoint authorization."]
@@ -19811,14 +25388,14 @@ module DescribeEndpointAccessMessage =
       make ?marker ?maxRecords ?vpcId ?endpointName ?resourceOwner
         ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let vpcId = field_map json "VpcId" String_.of_json in
-      let endpointName = field_map json "EndpointName" String_.of_json in
-      let resourceOwner = field_map json "ResourceOwner" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
+      let endpointName = field_map json__ "EndpointName" String_.of_json in
+      let resourceOwner = field_map json__ "ResourceOwner" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       make ?marker ?maxRecords ?vpcId ?endpointName ?resourceOwner
         ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -19877,9 +25454,9 @@ module DescribeDefaultClusterParametersResult =
           (Xml.child xml_arg0 "DefaultClusterParameters") in
       make ?defaultClusterParameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultClusterParameters =
-        field_map json "DefaultClusterParameters"
+        field_map json__ "DefaultClusterParameters"
           DefaultClusterParameters.of_json in
       make ?defaultClusterParameters ()
     let to_json v = composed_to_json to_value v
@@ -19920,11 +25497,11 @@ module DescribeDefaultClusterParametersMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupFamily") in
       make ?marker ?maxRecords ~parameterGroupFamily ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let parameterGroupFamily =
-        field_map_exn json "ParameterGroupFamily" String_.of_json in
+        field_map_exn json__ "ParameterGroupFamily" String_.of_json in
       make ?marker ?maxRecords ~parameterGroupFamily ()
     let to_json v = composed_to_json to_value v
   end
@@ -19994,9 +25571,9 @@ module DescribeDataSharesResult =
           (Xml.child xml_arg0 "DataShares") in
       make ?marker ?dataShares ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let dataShares = field_map json "DataShares" DataShareList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let dataShares = field_map json__ "DataShares" DataShareList.of_json in
       make ?marker ?dataShares ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20007,7 +25584,7 @@ module DescribeDataSharesMessage =
       {
       dataShareArn: String_.t option
         [@ocaml.doc
-          "The identifier of the datashare to describe details of."];
+          "The Amazon resource name (ARN) of the datashare to describe details of."];
       maxRecords: IntegerOptional.t option
         [@ocaml.doc
           "The maximum number of response records to return in each call. If the number of remaining response records exceeds the specified MaxRecords value, a value is returned in a marker field of the response. You can retrieve the next set of records by retrying the command with the returned marker value."];
@@ -20033,10 +25610,10 @@ module DescribeDataSharesMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DataShareArn") in
       make ?marker ?maxRecords ?dataShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let dataShareArn = field_map json "DataShareArn" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let dataShareArn = field_map json__ "DataShareArn" String_.of_json in
       make ?marker ?maxRecords ?dataShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20111,9 +25688,9 @@ module DescribeDataSharesForProducerResult =
           (Xml.child xml_arg0 "DataShares") in
       make ?marker ?dataShares ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let dataShares = field_map json "DataShares" DataShareList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let dataShares = field_map json__ "DataShares" DataShareList.of_json in
       make ?marker ?dataShares ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20124,7 +25701,7 @@ module DescribeDataSharesForProducerMessage =
       {
       producerArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the producer that returns in the list of datashares."];
+          "The Amazon Resource Name (ARN) of the producer namespace that returns in the list of datashares."];
       status: DataShareStatusForProducer.t option
         [@ocaml.doc
           "An identifier giving the status of a datashare in the producer. If this field is specified, Amazon Redshift returns the list of datashares that have the specified status."];
@@ -20160,11 +25737,12 @@ module DescribeDataSharesForProducerMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ProducerArn") in
       make ?marker ?maxRecords ?status ?producerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let status = field_map json "Status" DataShareStatusForProducer.of_json in
-      let producerArn = field_map json "ProducerArn" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let status =
+        field_map json__ "Status" DataShareStatusForProducer.of_json in
+      let producerArn = field_map json__ "ProducerArn" String_.of_json in
       make ?marker ?maxRecords ?status ?producerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20239,9 +25817,9 @@ module DescribeDataSharesForConsumerResult =
           (Xml.child xml_arg0 "DataShares") in
       make ?marker ?dataShares ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let dataShares = field_map json "DataShares" DataShareList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let dataShares = field_map json__ "DataShares" DataShareList.of_json in
       make ?marker ?dataShares ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20252,7 +25830,7 @@ module DescribeDataSharesForConsumerMessage =
       {
       consumerArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the consumer that returns in the list of datashares."];
+          "The Amazon Resource Name (ARN) of the consumer namespace that returns in the list of datashares."];
       status: DataShareStatusForConsumer.t option
         [@ocaml.doc
           "An identifier giving the status of a datashare in the consumer cluster. If this field is specified, Amazon Redshift returns the list of datashares that have the specified status."];
@@ -20288,15 +25866,80 @@ module DescribeDataSharesForConsumerMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ConsumerArn") in
       make ?marker ?maxRecords ?status ?consumerArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let status = field_map json "Status" DataShareStatusForConsumer.of_json in
-      let consumerArn = field_map json "ConsumerArn" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let status =
+        field_map json__ "Status" DataShareStatusForConsumer.of_json in
+      let consumerArn = field_map json__ "ConsumerArn" String_.of_json in
       make ?marker ?maxRecords ?status ?consumerArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of datashares where the account identifier being called is a consumer account identifier."]
+module DescribeCustomDomainAssociationsMessage =
+  struct
+    type nonrec t =
+      {
+      customDomainName: CustomDomainNameString.t option
+        [@ocaml.doc
+          "The custom domain name for the custom domain association."];
+      customDomainCertificateArn: CustomDomainCertificateArnString.t option
+        [@ocaml.doc
+          "The certificate Amazon Resource Name (ARN) for the custom domain association."];
+      maxRecords: IntegerOptional.t option
+        [@ocaml.doc
+          "The maximum records setting for the associated custom domain."];
+      marker: String_.t option
+        [@ocaml.doc "The marker for the custom domain association."]}
+    let make ?customDomainName =
+      fun ?customDomainCertificateArn ->
+        fun ?maxRecords ->
+          fun ?marker ->
+            fun () ->
+              {
+                customDomainName;
+                customDomainCertificateArn;
+                maxRecords;
+                marker
+              }
+    let to_value x =
+      structure_to_value
+        [("CustomDomainName",
+           (Option.map x.customDomainName ~f:CustomDomainNameString.to_value));
+        ("CustomDomainCertificateArn",
+          (Option.map x.customDomainCertificateArn
+             ~f:CustomDomainCertificateArnString.to_value));
+        ("MaxRecords", (Option.map x.maxRecords ~f:IntegerOptional.to_value));
+        ("Marker", (Option.map x.marker ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let marker =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
+      let maxRecords =
+        (Option.map ~f:IntegerOptional.of_xml)
+          (Xml.child xml_arg0 "MaxRecords") in
+      let customDomainCertificateArn =
+        (Option.map ~f:CustomDomainCertificateArnString.of_xml)
+          (Xml.child xml_arg0 "CustomDomainCertificateArn") in
+      let customDomainName =
+        (Option.map ~f:CustomDomainNameString.of_xml)
+          (Xml.child xml_arg0 "CustomDomainName") in
+      make ?marker ?maxRecords ?customDomainCertificateArn ?customDomainName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let customDomainCertificateArn =
+        field_map json__ "CustomDomainCertificateArn"
+          CustomDomainCertificateArnString.of_json in
+      let customDomainName =
+        field_map json__ "CustomDomainName" CustomDomainNameString.of_json in
+      make ?marker ?maxRecords ?customDomainCertificateArn ?customDomainName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about custom domain associations for a cluster."]
 module DescribeClustersMessage =
   struct
     type nonrec t =
@@ -20347,13 +25990,13 @@ module DescribeClustersMessage =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?tagValues ?tagKeys ?marker ?maxRecords ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map json "TagValues" TagValueList.of_json in
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let tagValues = field_map json__ "TagValues" TagValueList.of_json in
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       make ?tagValues ?tagKeys ?marker ?maxRecords ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end
@@ -20406,12 +26049,12 @@ module DescribeClusterVersionsMessage =
       make ?marker ?maxRecords ?clusterParameterGroupFamily ?clusterVersion
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let clusterParameterGroupFamily =
-        field_map json "ClusterParameterGroupFamily" String_.of_json in
-      let clusterVersion = field_map json "ClusterVersion" String_.of_json in
+        field_map json__ "ClusterParameterGroupFamily" String_.of_json in
+      let clusterVersion = field_map json__ "ClusterVersion" String_.of_json in
       make ?marker ?maxRecords ?clusterParameterGroupFamily ?clusterVersion
         ()
     let to_json v = composed_to_json to_value v
@@ -20449,11 +26092,11 @@ module DescribeClusterTracksMessage =
           (Xml.child xml_arg0 "MaintenanceTrackName") in
       make ?marker ?maxRecords ?maintenanceTrackName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let maintenanceTrackName =
-        field_map json "MaintenanceTrackName" String_.of_json in
+        field_map json__ "MaintenanceTrackName" String_.of_json in
       make ?marker ?maxRecords ?maintenanceTrackName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of all the available maintenance tracks."]
@@ -20513,13 +26156,13 @@ module DescribeClusterSubnetGroupsMessage =
           (Xml.child xml_arg0 "ClusterSubnetGroupName") in
       make ?tagValues ?tagKeys ?marker ?maxRecords ?clusterSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map json "TagValues" TagValueList.of_json in
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let tagValues = field_map json__ "TagValues" TagValueList.of_json in
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let clusterSubnetGroupName =
-        field_map json "ClusterSubnetGroupName" String_.of_json in
+        field_map json__ "ClusterSubnetGroupName" String_.of_json in
       make ?tagValues ?tagKeys ?marker ?maxRecords ?clusterSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end
@@ -20533,6 +26176,9 @@ module DescribeClusterSnapshotsMessage =
       snapshotIdentifier: String_.t option
         [@ocaml.doc
           "The snapshot identifier of the snapshot about which to return information."];
+      snapshotArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the snapshot associated with the message to describe cluster snapshots."];
       snapshotType: String_.t option
         [@ocaml.doc
           "The type of snapshots for which you are requesting information. By default, snapshots of all types are returned. Valid Values: automated | manual"];
@@ -20563,37 +26209,40 @@ module DescribeClusterSnapshotsMessage =
       sortingEntities: SnapshotSortingEntityList.t option }
     let make ?clusterIdentifier =
       fun ?snapshotIdentifier ->
-        fun ?snapshotType ->
-          fun ?startTime ->
-            fun ?endTime ->
-              fun ?maxRecords ->
-                fun ?marker ->
-                  fun ?ownerAccount ->
-                    fun ?tagKeys ->
-                      fun ?tagValues ->
-                        fun ?clusterExists ->
-                          fun ?sortingEntities ->
-                            fun () ->
-                              {
-                                clusterIdentifier;
-                                snapshotIdentifier;
-                                snapshotType;
-                                startTime;
-                                endTime;
-                                maxRecords;
-                                marker;
-                                ownerAccount;
-                                tagKeys;
-                                tagValues;
-                                clusterExists;
-                                sortingEntities
-                              }
+        fun ?snapshotArn ->
+          fun ?snapshotType ->
+            fun ?startTime ->
+              fun ?endTime ->
+                fun ?maxRecords ->
+                  fun ?marker ->
+                    fun ?ownerAccount ->
+                      fun ?tagKeys ->
+                        fun ?tagValues ->
+                          fun ?clusterExists ->
+                            fun ?sortingEntities ->
+                              fun () ->
+                                {
+                                  clusterIdentifier;
+                                  snapshotIdentifier;
+                                  snapshotArn;
+                                  snapshotType;
+                                  startTime;
+                                  endTime;
+                                  maxRecords;
+                                  marker;
+                                  ownerAccount;
+                                  tagKeys;
+                                  tagValues;
+                                  clusterExists;
+                                  sortingEntities
+                                }
     let to_value x =
       structure_to_value
         [("ClusterIdentifier",
            (Option.map x.clusterIdentifier ~f:String_.to_value));
         ("SnapshotIdentifier",
           (Option.map x.snapshotIdentifier ~f:String_.to_value));
+        ("SnapshotArn", (Option.map x.snapshotArn ~f:String_.to_value));
         ("SnapshotType", (Option.map x.snapshotType ~f:String_.to_value));
         ("StartTime", (Option.map x.startTime ~f:TStamp.to_value));
         ("EndTime", (Option.map x.endTime ~f:TStamp.to_value));
@@ -20631,6 +26280,8 @@ module DescribeClusterSnapshotsMessage =
         (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "StartTime") in
       let snapshotType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SnapshotType") in
+      let snapshotArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SnapshotArn") in
       let snapshotIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SnapshotIdentifier") in
@@ -20638,28 +26289,29 @@ module DescribeClusterSnapshotsMessage =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?sortingEntities ?clusterExists ?tagValues ?tagKeys ?ownerAccount
-        ?marker ?maxRecords ?endTime ?startTime ?snapshotType
+        ?marker ?maxRecords ?endTime ?startTime ?snapshotType ?snapshotArn
         ?snapshotIdentifier ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sortingEntities =
-        field_map json "SortingEntities" SnapshotSortingEntityList.of_json in
+        field_map json__ "SortingEntities" SnapshotSortingEntityList.of_json in
       let clusterExists =
-        field_map json "ClusterExists" BooleanOptional.of_json in
-      let tagValues = field_map json "TagValues" TagValueList.of_json in
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
-      let ownerAccount = field_map json "OwnerAccount" String_.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let endTime = field_map json "EndTime" TStamp.of_json in
-      let startTime = field_map json "StartTime" TStamp.of_json in
-      let snapshotType = field_map json "SnapshotType" String_.of_json in
+        field_map json__ "ClusterExists" BooleanOptional.of_json in
+      let tagValues = field_map json__ "TagValues" TagValueList.of_json in
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
+      let ownerAccount = field_map json__ "OwnerAccount" String_.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let endTime = field_map json__ "EndTime" TStamp.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
+      let snapshotType = field_map json__ "SnapshotType" String_.of_json in
+      let snapshotArn = field_map json__ "SnapshotArn" String_.of_json in
       let snapshotIdentifier =
-        field_map json "SnapshotIdentifier" String_.of_json in
+        field_map json__ "SnapshotIdentifier" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       make ?sortingEntities ?clusterExists ?tagValues ?tagKeys ?ownerAccount
-        ?marker ?maxRecords ?endTime ?startTime ?snapshotType
+        ?marker ?maxRecords ?endTime ?startTime ?snapshotType ?snapshotArn
         ?snapshotIdentifier ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end
@@ -20669,13 +26321,13 @@ module DescribeClusterSecurityGroupsMessage =
       {
       clusterSecurityGroupName: String_.t option
         [@ocaml.doc
-          "The name of a cluster security group for which you are requesting details. You can specify either the Marker parameter or a ClusterSecurityGroupName parameter, but not both. Example: securitygroup1"];
+          "The name of a cluster security group for which you are requesting details. You must specify either the Marker parameter or a ClusterSecurityGroupName parameter, but not both. Example: securitygroup1"];
       maxRecords: IntegerOptional.t option
         [@ocaml.doc
           "The maximum number of response records to return in each call. If the number of remaining response records exceeds the specified MaxRecords value, a value is returned in a marker field of the response. You can retrieve the next set of records by retrying the command with the returned marker value. Default: 100 Constraints: minimum 20, maximum 100."];
       marker: String_.t option
         [@ocaml.doc
-          "An optional parameter that specifies the starting point to return a set of response records. When the results of a DescribeClusterSecurityGroups request exceed the value specified in MaxRecords, Amazon Web Services returns a value in the Marker field of the response. You can retrieve the next set of response records by providing the returned marker value in the Marker parameter and retrying the request. Constraints: You can specify either the ClusterSecurityGroupName parameter or the Marker parameter, but not both."];
+          "An optional parameter that specifies the starting point to return a set of response records. When the results of a DescribeClusterSecurityGroups request exceed the value specified in MaxRecords, Amazon Web Services returns a value in the Marker field of the response. You can retrieve the next set of response records by providing the returned marker value in the Marker parameter and retrying the request. Constraints: You must specify either the ClusterSecurityGroupName parameter or the Marker parameter, but not both."];
       tagKeys: TagKeyList.t option
         [@ocaml.doc
           "A tag key or keys for which you want to return all matching cluster security groups that are associated with the specified key or keys. For example, suppose that you have security groups that are tagged with keys called owner and environment. If you specify both of these tag keys in the request, Amazon Redshift returns a response with the security groups that have either or both of these tag keys associated with them."];
@@ -20720,13 +26372,13 @@ module DescribeClusterSecurityGroupsMessage =
       make ?tagValues ?tagKeys ?marker ?maxRecords ?clusterSecurityGroupName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map json "TagValues" TagValueList.of_json in
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let tagValues = field_map json__ "TagValues" TagValueList.of_json in
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let clusterSecurityGroupName =
-        field_map json "ClusterSecurityGroupName" String_.of_json in
+        field_map json__ "ClusterSecurityGroupName" String_.of_json in
       make ?tagValues ?tagKeys ?marker ?maxRecords ?clusterSecurityGroupName
         ()
     let to_json v = composed_to_json to_value v
@@ -20774,12 +26426,12 @@ module DescribeClusterParametersMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ?marker ?maxRecords ?source ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
-      let source = field_map json "Source" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
+      let source = field_map json__ "Source" String_.of_json in
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ?marker ?maxRecords ?source ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end
@@ -20834,13 +26486,13 @@ module DescribeClusterParameterGroupsMessage =
           (Xml.child xml_arg0 "ParameterGroupName") in
       make ?tagValues ?tagKeys ?marker ?maxRecords ?parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagValues = field_map json "TagValues" TagValueList.of_json in
-      let tagKeys = field_map json "TagKeys" TagKeyList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let tagValues = field_map json__ "TagValues" TagValueList.of_json in
+      let tagKeys = field_map json__ "TagKeys" TagKeyList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let parameterGroupName =
-        field_map json "ParameterGroupName" String_.of_json in
+        field_map json__ "ParameterGroupName" String_.of_json in
       make ?tagValues ?tagKeys ?marker ?maxRecords ?parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end
@@ -20878,11 +26530,11 @@ module DescribeClusterDbRevisionsMessage =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?marker ?maxRecords ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let maxRecords = field_map json "MaxRecords" IntegerOptional.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let maxRecords = field_map json__ "MaxRecords" IntegerOptional.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       make ?marker ?maxRecords ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of ClusterDbRevision objects."]
@@ -20966,9 +26618,9 @@ module DescribeAuthenticationProfilesResult =
           (Xml.child xml_arg0 "AuthenticationProfiles") in
       make ?authenticationProfiles ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationProfiles =
-        field_map json "AuthenticationProfiles"
+        field_map json__ "AuthenticationProfiles"
           AuthenticationProfileList.of_json in
       make ?authenticationProfiles ()
     let to_json v = composed_to_json to_value v
@@ -20994,9 +26646,9 @@ module DescribeAuthenticationProfilesMessage =
           (Xml.child xml_arg0 "AuthenticationProfileName") in
       make ?authenticationProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationProfileName =
-        field_map json "AuthenticationProfileName"
+        field_map json__ "AuthenticationProfileName"
           AuthenticationProfileNameString.of_json in
       make ?authenticationProfileName ()
     let to_json v = composed_to_json to_value v
@@ -21019,12 +26671,136 @@ module DescribeAccountAttributesMessage =
           (Xml.child xml_arg0 "AttributeNames") in
       make ?attributeNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeNames =
-        field_map json "AttributeNames" AttributeNameList.of_json in
+        field_map json__ "AttributeNames" AttributeNameList.of_json in
       make ?attributeNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of attributes attached to an account"]
+module DeregisterNamespaceOutputMessage =
+  struct
+    type deregisterNamespaceResult =
+      {
+      status: NamespaceRegistrationStatus.t option
+        [@ocaml.doc
+          "The registration status of the cluster or serverless namespace."]}
+    and responseMetaData = unit
+    and t =
+      {
+      deregisterNamespaceResult: deregisterNamespaceResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
+      | `InvalidClusterStateFault of InvalidClusterStateFault.t 
+      | `InvalidNamespaceFault of InvalidNamespaceFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "DeregisterNamespaceOutputMessage"
+    let make ?status =
+      fun () ->
+        { deregisterNamespaceResult = { status }; responseMetaData = () }
+    let error_of_json name json =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
+      | "InvalidClusterStateFault" ->
+          `InvalidClusterStateFault (InvalidClusterStateFault.of_json json)
+      | "InvalidNamespaceFault" ->
+          `InvalidNamespaceFault (InvalidNamespaceFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
+      | "InvalidClusterStateFault" ->
+          `InvalidClusterStateFault (InvalidClusterStateFault.of_xml xml)
+      | "InvalidNamespaceFault" ->
+          `InvalidNamespaceFault (InvalidNamespaceFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ClusterNotFoundFault"));
+            ("details", (ClusterNotFoundFault.to_json e))]
+      | `InvalidClusterStateFault e ->
+          `Assoc
+            [("error", (`String "InvalidClusterStateFault"));
+            ("details", (InvalidClusterStateFault.to_json e))]
+      | `InvalidNamespaceFault e ->
+          `Assoc
+            [("error", (`String "InvalidNamespaceFault"));
+            ("details", (InvalidNamespaceFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.deregisterNamespaceResult in
+      structure_to_wrapped_value
+        [("Status",
+           (Option.map x.status ~f:NamespaceRegistrationStatus.to_value))]
+        ~wrapper:"DeregisterNamespaceResult" ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t "DeregisterNamespaceResult" in
+      let status =
+        (Option.map ~f:NamespaceRegistrationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map json__ "Status" NamespaceRegistrationStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deregisters a cluster or serverless namespace from the Amazon Web Services Glue Data Catalog."]
+module DeregisterNamespaceInputMessage =
+  struct
+    type nonrec t =
+      {
+      namespaceIdentifier: NamespaceIdentifierUnion.t
+        [@ocaml.doc
+          "The unique identifier of the cluster or serverless namespace that you want to deregister."];
+      consumerIdentifiers: ConsumerIdentifierList.t
+        [@ocaml.doc
+          "An array containing the ID of the consumer account that you want to deregister the cluster or serverless namespace from."]}
+    let context_ = "DeregisterNamespaceInputMessage"
+    let make ~namespaceIdentifier =
+      fun ~consumerIdentifiers ->
+        fun () -> { namespaceIdentifier; consumerIdentifiers }
+    let to_value x =
+      structure_to_value
+        [("NamespaceIdentifier",
+           (Some (NamespaceIdentifierUnion.to_value x.namespaceIdentifier)));
+        ("ConsumerIdentifiers",
+          (Some (ConsumerIdentifierList.to_value x.consumerIdentifiers)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let consumerIdentifiers =
+        ConsumerIdentifierList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConsumerIdentifiers") in
+      let namespaceIdentifier =
+        NamespaceIdentifierUnion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NamespaceIdentifier") in
+      make ~consumerIdentifiers ~namespaceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let consumerIdentifiers =
+        field_map_exn json__ "ConsumerIdentifiers"
+          ConsumerIdentifierList.of_json in
+      let namespaceIdentifier =
+        field_map_exn json__ "NamespaceIdentifier"
+          NamespaceIdentifierUnion.of_json in
+      make ~consumerIdentifiers ~namespaceIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deregisters a cluster or serverless namespace from the Amazon Web Services Glue Data Catalog."]
 module DeleteUsageLimitMessage =
   struct
     type nonrec t =
@@ -21043,8 +26819,8 @@ module DeleteUsageLimitMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "UsageLimitId") in
       make ~usageLimitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let usageLimitId = field_map_exn json "UsageLimitId" String_.of_json in
+    let of_json json__ =
+      let usageLimitId = field_map_exn json__ "UsageLimitId" String_.of_json in
       make ~usageLimitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a usage limit from a cluster."]
@@ -21074,9 +26850,9 @@ module DeleteTagsMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ~tagKeys ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceName = field_map_exn json "ResourceName" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceName = field_map_exn json__ "ResourceName" String_.of_json in
       make ~tagKeys ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output from the DeleteTags action."]
@@ -21100,9 +26876,9 @@ module DeleteSnapshotScheduleMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduleIdentifier") in
       make ~scheduleIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduleIdentifier =
-        field_map_exn json "ScheduleIdentifier" String_.of_json in
+        field_map_exn json__ "ScheduleIdentifier" String_.of_json in
       make ~scheduleIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a snapshot schedule."]
@@ -21125,9 +26901,9 @@ module DeleteSnapshotCopyGrantMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotCopyGrantName") in
       make ~snapshotCopyGrantName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotCopyGrantName =
-        field_map_exn json "SnapshotCopyGrantName" String_.of_json in
+        field_map_exn json__ "SnapshotCopyGrantName" String_.of_json in
       make ~snapshotCopyGrantName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of the DeleteSnapshotCopyGrant action."]
@@ -21150,12 +26926,91 @@ module DeleteScheduledActionMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduledActionName") in
       make ~scheduledActionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledActionName =
-        field_map_exn json "ScheduledActionName" String_.of_json in
+        field_map_exn json__ "ScheduledActionName" String_.of_json in
       make ~scheduledActionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a scheduled action."]
+module DeleteResourcePolicyMessage =
+  struct
+    type nonrec t =
+      {
+      resourceArn: String_.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource of which its resource policy is deleted."]}
+    let context_ = "DeleteResourcePolicyMessage"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (String_.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the resource policy for a specified resource."]
+module DeleteRedshiftIdcApplicationMessage =
+  struct
+    type nonrec t =
+      {
+      redshiftIdcApplicationArn: String_.t
+        [@ocaml.doc
+          "The ARN for a deleted Amazon Redshift IAM Identity Center application."]}
+    let context_ = "DeleteRedshiftIdcApplicationMessage"
+    let make ~redshiftIdcApplicationArn =
+      fun () -> { redshiftIdcApplicationArn }
+    let to_value x =
+      structure_to_value
+        [("RedshiftIdcApplicationArn",
+           (Some (String_.to_value x.redshiftIdcApplicationArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let redshiftIdcApplicationArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "RedshiftIdcApplicationArn") in
+      make ~redshiftIdcApplicationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redshiftIdcApplicationArn =
+        field_map_exn json__ "RedshiftIdcApplicationArn" String_.of_json in
+      make ~redshiftIdcApplicationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an Amazon Redshift IAM Identity Center application."]
+module DeleteIntegrationMessage =
+  struct
+    type nonrec t =
+      {
+      integrationArn: IntegrationArn.t
+        [@ocaml.doc "The unique identifier of the integration to delete."]}
+    let context_ = "DeleteIntegrationMessage"
+    let make ~integrationArn = fun () -> { integrationArn }
+    let to_value x =
+      structure_to_value
+        [("IntegrationArn",
+           (Some (IntegrationArn.to_value x.integrationArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let integrationArn =
+        IntegrationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IntegrationArn") in
+      make ~integrationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let integrationArn =
+        field_map_exn json__ "IntegrationArn" IntegrationArn.of_json in
+      make ~integrationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a zero-ETL integration or S3 event integration with Amazon Redshift."]
 module DeleteHsmConfigurationMessage =
   struct
     type nonrec t =
@@ -21178,9 +27033,9 @@ module DeleteHsmConfigurationMessage =
              "HsmConfigurationIdentifier") in
       make ~hsmConfigurationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hsmConfigurationIdentifier =
-        field_map_exn json "HsmConfigurationIdentifier" String_.of_json in
+        field_map_exn json__ "HsmConfigurationIdentifier" String_.of_json in
       make ~hsmConfigurationIdentifier ()
     let to_json v = composed_to_json to_value v
   end
@@ -21206,9 +27061,9 @@ module DeleteHsmClientCertificateMessage =
              "HsmClientCertificateIdentifier") in
       make ~hsmClientCertificateIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hsmClientCertificateIdentifier =
-        field_map_exn json "HsmClientCertificateIdentifier" String_.of_json in
+        field_map_exn json__ "HsmClientCertificateIdentifier" String_.of_json in
       make ~hsmClientCertificateIdentifier ()
     let to_json v = composed_to_json to_value v
   end
@@ -21231,9 +27086,9 @@ module DeleteEventSubscriptionMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionName") in
       make ~subscriptionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionName =
-        field_map_exn json "SubscriptionName" String_.of_json in
+        field_map_exn json__ "SubscriptionName" String_.of_json in
       make ~subscriptionName ()
     let to_json v = composed_to_json to_value v
   end
@@ -21255,11 +27110,50 @@ module DeleteEndpointAccessMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "EndpointName") in
       make ~endpointName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpointName = field_map_exn json "EndpointName" String_.of_json in
+    let of_json json__ =
+      let endpointName = field_map_exn json__ "EndpointName" String_.of_json in
       make ~endpointName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a Redshift-managed VPC endpoint."]
+module DeleteCustomDomainAssociationMessage =
+  struct
+    type nonrec t =
+      {
+      clusterIdentifier: String_.t
+        [@ocaml.doc
+          "The identifier of the cluster to delete a custom domain association for."];
+      customDomainName: CustomDomainNameString.t
+        [@ocaml.doc
+          "The custom domain name for the custom domain association."]}
+    let context_ = "DeleteCustomDomainAssociationMessage"
+    let make ~clusterIdentifier =
+      fun ~customDomainName ->
+        fun () -> { clusterIdentifier; customDomainName }
+    let to_value x =
+      structure_to_value
+        [("ClusterIdentifier", (Some (String_.to_value x.clusterIdentifier)));
+        ("CustomDomainName",
+          (Some (CustomDomainNameString.to_value x.customDomainName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customDomainName =
+        CustomDomainNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CustomDomainName") in
+      let clusterIdentifier =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
+      make ~customDomainName ~clusterIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customDomainName =
+        field_map_exn json__ "CustomDomainName"
+          CustomDomainNameString.of_json in
+      let clusterIdentifier =
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
+      make ~customDomainName ~clusterIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about deleting a custom domain association for a cluster."]
 module DeleteClusterSubnetGroupMessage =
   struct
     type nonrec t =
@@ -21280,9 +27174,9 @@ module DeleteClusterSubnetGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterSubnetGroupName") in
       make ~clusterSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterSubnetGroupName =
-        field_map_exn json "ClusterSubnetGroupName" String_.of_json in
+        field_map_exn json__ "ClusterSubnetGroupName" String_.of_json in
       make ~clusterSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end
@@ -21353,8 +27247,8 @@ module DeleteClusterSnapshotResult =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21380,9 +27274,9 @@ module DeleteClusterSecurityGroupMessage =
              "ClusterSecurityGroupName") in
       make ~clusterSecurityGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterSecurityGroupName =
-        field_map_exn json "ClusterSecurityGroupName" String_.of_json in
+        field_map_exn json__ "ClusterSecurityGroupName" String_.of_json in
       make ~clusterSecurityGroupName ()
     let to_json v = composed_to_json to_value v
   end
@@ -21481,8 +27375,8 @@ module DeleteClusterResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21507,9 +27401,9 @@ module DeleteClusterParameterGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end
@@ -21569,16 +27463,16 @@ module DeleteClusterMessage =
         ?finalClusterSnapshotIdentifier ?skipFinalClusterSnapshot
         ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let finalClusterSnapshotRetentionPeriod =
-        field_map json "FinalClusterSnapshotRetentionPeriod"
+        field_map json__ "FinalClusterSnapshotRetentionPeriod"
           IntegerOptional.of_json in
       let finalClusterSnapshotIdentifier =
-        field_map json "FinalClusterSnapshotIdentifier" String_.of_json in
+        field_map json__ "FinalClusterSnapshotIdentifier" String_.of_json in
       let skipFinalClusterSnapshot =
-        field_map json "SkipFinalClusterSnapshot" Boolean.of_json in
+        field_map json__ "SkipFinalClusterSnapshot" Boolean.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ?finalClusterSnapshotRetentionPeriod
         ?finalClusterSnapshotIdentifier ?skipFinalClusterSnapshot
         ~clusterIdentifier ()
@@ -21663,9 +27557,9 @@ module DeleteAuthenticationProfileResult =
           (Xml.child xml_arg0 "AuthenticationProfileName") in
       make ?authenticationProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationProfileName =
-        field_map json "AuthenticationProfileName"
+        field_map json__ "AuthenticationProfileName"
           AuthenticationProfileNameString.of_json in
       make ?authenticationProfileName ()
     let to_json v = composed_to_json to_value v
@@ -21693,9 +27587,9 @@ module DeleteAuthenticationProfileMessage =
              "AuthenticationProfileName") in
       make ~authenticationProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationProfileName =
-        field_map_exn json "AuthenticationProfileName"
+        field_map_exn json__ "AuthenticationProfileName"
           AuthenticationProfileNameString.of_json in
       make ~authenticationProfileName ()
     let to_json v = composed_to_json to_value v
@@ -21706,7 +27600,7 @@ module DeauthorizeDataShareMessage =
       {
       dataShareArn: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the datashare to remove authorization from."];
+          "The namespace Amazon Resource Name (ARN) of the datashare to remove authorization from."];
       consumerIdentifier: String_.t
         [@ocaml.doc
           "The identifier of the data consumer that is to have authorization removed from the datashare. This identifier is an Amazon Web Services account ID or a keyword, such as ADX."]}
@@ -21729,14 +27623,14 @@ module DeauthorizeDataShareMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "DataShareArn") in
       make ~consumerIdentifier ~dataShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumerIdentifier =
-        field_map_exn json "ConsumerIdentifier" String_.of_json in
-      let dataShareArn = field_map_exn json "DataShareArn" String_.of_json in
+        field_map_exn json__ "ConsumerIdentifier" String_.of_json in
+      let dataShareArn = field_map_exn json__ "DataShareArn" String_.of_json in
       make ~consumerIdentifier ~dataShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "From the producer account, removes authorization from the specified datashare."]
+       "From a datashare producer account, removes authorization from the specified datashare."]
 module CustomerStorageMessage =
   struct
     type describeStorageResult =
@@ -21800,15 +27694,105 @@ module CustomerStorageMessage =
           (Xml.child xml_arg0 "TotalBackupSizeInMegaBytes") in
       make ?totalProvisionedStorageInMegaBytes ?totalBackupSizeInMegaBytes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let totalProvisionedStorageInMegaBytes =
-        field_map json "TotalProvisionedStorageInMegaBytes" Double.of_json in
+        field_map json__ "TotalProvisionedStorageInMegaBytes" Double.of_json in
       let totalBackupSizeInMegaBytes =
-        field_map json "TotalBackupSizeInMegaBytes" Double.of_json in
+        field_map json__ "TotalBackupSizeInMegaBytes" Double.of_json in
       make ?totalProvisionedStorageInMegaBytes ?totalBackupSizeInMegaBytes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns account level backups storage size and provisional storage."]
+module CustomDomainAssociationsMessage =
+  struct
+    type describeCustomDomainAssociationsResult =
+      {
+      marker: String_.t option
+        [@ocaml.doc "The marker for the custom domain association."];
+      associations: AssociationList.t option
+        [@ocaml.doc "The associations for the custom domain."]}
+    and responseMetaData = unit
+    and t =
+      {
+      describeCustomDomainAssociationsResult:
+        describeCustomDomainAssociationsResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `CustomDomainAssociationNotFoundFault of
+          CustomDomainAssociationNotFoundFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "CustomDomainAssociationsMessage"
+    let make ?marker =
+      fun ?associations ->
+        fun () ->
+          {
+            describeCustomDomainAssociationsResult = { marker; associations };
+            responseMetaData = ()
+          }
+    let error_of_json name json =
+      match name with
+      | "CustomDomainAssociationNotFoundFault" ->
+          `CustomDomainAssociationNotFoundFault
+            (CustomDomainAssociationNotFoundFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CustomDomainAssociationNotFoundFault" ->
+          `CustomDomainAssociationNotFoundFault
+            (CustomDomainAssociationNotFoundFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CustomDomainAssociationNotFoundFault e ->
+          `Assoc
+            [("error", (`String "CustomDomainAssociationNotFoundFault"));
+            ("details", (CustomDomainAssociationNotFoundFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.describeCustomDomainAssociationsResult in
+      structure_to_wrapped_value
+        [("Marker", (Option.map x.marker ~f:String_.to_value));
+        ("Associations",
+          (Option.map x.associations ~f:AssociationList.to_value))]
+        ~wrapper:"DescribeCustomDomainAssociationsResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "DescribeCustomDomainAssociationsResult" in
+      let associations =
+        (Option.map ~f:AssociationList.of_xml)
+          (Xml.child xml_arg0 "Associations") in
+      let marker =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
+      make ?associations ?marker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let associations =
+        field_map json__ "Associations" AssociationList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
+      make ?associations ?marker ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about custom domain associations for a cluster."]
 module CreateUsageLimitMessage =
   struct
     type nonrec t =
@@ -21820,7 +27804,7 @@ module CreateUsageLimitMessage =
         [@ocaml.doc "The Amazon Redshift feature that you want to limit."];
       limitType: UsageLimitLimitType.t
         [@ocaml.doc
-          "The type of limit. Depending on the feature type, this can be based on a time duration or data size. If FeatureType is spectrum, then LimitType must be data-scanned. If FeatureType is concurrency-scaling, then LimitType must be time. If FeatureType is cross-region-datasharing, then LimitType must be data-scanned."];
+          "The type of limit. Depending on the feature type, this can be based on a time duration or data size. If FeatureType is spectrum, then LimitType must be data-scanned. If FeatureType is concurrency-scaling, then LimitType must be time. If FeatureType is cross-region-datasharing, then LimitType must be data-scanned. If FeatureType is extra-compute-for-automatic-optimization, then LimitType must be time."];
       amount: Long.t
         [@ocaml.doc
           "The limit amount. If time-based, this amount is in minutes. If data-based, this amount is in terabytes (TB). The value must be a positive number."];
@@ -21882,18 +27866,18 @@ module CreateUsageLimitMessage =
       make ?tags ?breachAction ?period ~amount ~limitType ~featureType
         ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let breachAction =
-        field_map json "BreachAction" UsageLimitBreachAction.of_json in
-      let period = field_map json "Period" UsageLimitPeriod.of_json in
-      let amount = field_map_exn json "Amount" Long.of_json in
+        field_map json__ "BreachAction" UsageLimitBreachAction.of_json in
+      let period = field_map json__ "Period" UsageLimitPeriod.of_json in
+      let amount = field_map_exn json__ "Amount" Long.of_json in
       let limitType =
-        field_map_exn json "LimitType" UsageLimitLimitType.of_json in
+        field_map_exn json__ "LimitType" UsageLimitLimitType.of_json in
       let featureType =
-        field_map_exn json "FeatureType" UsageLimitFeatureType.of_json in
+        field_map_exn json__ "FeatureType" UsageLimitFeatureType.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ?tags ?breachAction ?period ~amount ~limitType ~featureType
         ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -21924,9 +27908,9 @@ module CreateTagsMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
       make ~tags ~resourceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceName = field_map_exn json "ResourceName" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceName = field_map_exn json__ "ResourceName" String_.of_json in
       make ~tags ~resourceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output from the CreateTags action."]
@@ -21995,17 +27979,17 @@ module CreateSnapshotScheduleMessage =
       make ?nextInvocations ?dryRun ?tags ?scheduleDescription
         ?scheduleIdentifier ?scheduleDefinitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextInvocations =
-        field_map json "NextInvocations" IntegerOptional.of_json in
-      let dryRun = field_map json "DryRun" BooleanOptional.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "NextInvocations" IntegerOptional.of_json in
+      let dryRun = field_map json__ "DryRun" BooleanOptional.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let scheduleDescription =
-        field_map json "ScheduleDescription" String_.of_json in
+        field_map json__ "ScheduleDescription" String_.of_json in
       let scheduleIdentifier =
-        field_map json "ScheduleIdentifier" String_.of_json in
+        field_map json__ "ScheduleIdentifier" String_.of_json in
       let scheduleDefinitions =
-        field_map json "ScheduleDefinitions" ScheduleDefinitionList.of_json in
+        field_map json__ "ScheduleDefinitions" ScheduleDefinitionList.of_json in
       make ?nextInvocations ?dryRun ?tags ?scheduleDescription
         ?scheduleIdentifier ?scheduleDefinitions ()
     let to_json v = composed_to_json to_value v
@@ -22123,9 +28107,9 @@ module CreateSnapshotCopyGrantResult =
           (Xml.child xml_arg0 "SnapshotCopyGrant") in
       make ?snapshotCopyGrant ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snapshotCopyGrant =
-        field_map json "SnapshotCopyGrant" SnapshotCopyGrant.of_json in
+        field_map json__ "SnapshotCopyGrant" SnapshotCopyGrant.of_json in
       make ?snapshotCopyGrant ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22162,11 +28146,11 @@ module CreateSnapshotCopyGrantMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotCopyGrantName") in
       make ?tags ?kmsKeyId ~snapshotCopyGrantName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
       let snapshotCopyGrantName =
-        field_map_exn json "SnapshotCopyGrantName" String_.of_json in
+        field_map_exn json__ "SnapshotCopyGrantName" String_.of_json in
       make ?tags ?kmsKeyId ~snapshotCopyGrantName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of the CreateSnapshotCopyGrant action."]
@@ -22254,23 +28238,389 @@ module CreateScheduledActionMessage =
       make ?enable ?endTime ?startTime ?scheduledActionDescription ~iamRole
         ~schedule ~targetAction ~scheduledActionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enable = field_map json "Enable" BooleanOptional.of_json in
-      let endTime = field_map json "EndTime" TStamp.of_json in
-      let startTime = field_map json "StartTime" TStamp.of_json in
+    let of_json json__ =
+      let enable = field_map json__ "Enable" BooleanOptional.of_json in
+      let endTime = field_map json__ "EndTime" TStamp.of_json in
+      let startTime = field_map json__ "StartTime" TStamp.of_json in
       let scheduledActionDescription =
-        field_map json "ScheduledActionDescription" String_.of_json in
-      let iamRole = field_map_exn json "IamRole" String_.of_json in
-      let schedule = field_map_exn json "Schedule" String_.of_json in
+        field_map json__ "ScheduledActionDescription" String_.of_json in
+      let iamRole = field_map_exn json__ "IamRole" String_.of_json in
+      let schedule = field_map_exn json__ "Schedule" String_.of_json in
       let targetAction =
-        field_map_exn json "TargetAction" ScheduledActionType.of_json in
+        field_map_exn json__ "TargetAction" ScheduledActionType.of_json in
       let scheduledActionName =
-        field_map_exn json "ScheduledActionName" String_.of_json in
+        field_map_exn json__ "ScheduledActionName" String_.of_json in
       make ?enable ?endTime ?startTime ?scheduledActionDescription ~iamRole
         ~schedule ~targetAction ~scheduledActionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a scheduled action. A scheduled action contains a schedule and an Amazon Redshift API action. For example, you can create a schedule of when to run the ResizeCluster API operation."]
+module CreateRedshiftIdcApplicationResult =
+  struct
+    type createRedshiftIdcApplicationResult =
+      {
+      redshiftIdcApplication: RedshiftIdcApplication.t option }
+    and responseMetaData = unit
+    and t =
+      {
+      createRedshiftIdcApplicationResult: createRedshiftIdcApplicationResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [
+        `DependentServiceAccessDeniedFault of
+          DependentServiceAccessDeniedFault.t 
+      | `DependentServiceUnavailableFault of
+          DependentServiceUnavailableFault.t 
+      | `InvalidTagFault of InvalidTagFault.t 
+      | `RedshiftIdcApplicationAlreadyExistsFault of
+          RedshiftIdcApplicationAlreadyExistsFault.t 
+      | `RedshiftIdcApplicationQuotaExceededFault of
+          RedshiftIdcApplicationQuotaExceededFault.t 
+      | `TagLimitExceededFault of TagLimitExceededFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "CreateRedshiftIdcApplicationResult"
+    let make ?redshiftIdcApplication =
+      fun () ->
+        {
+          createRedshiftIdcApplicationResult = { redshiftIdcApplication };
+          responseMetaData = ()
+        }
+    let error_of_json name json =
+      match name with
+      | "DependentServiceAccessDeniedFault" ->
+          `DependentServiceAccessDeniedFault
+            (DependentServiceAccessDeniedFault.of_json json)
+      | "DependentServiceUnavailableFault" ->
+          `DependentServiceUnavailableFault
+            (DependentServiceUnavailableFault.of_json json)
+      | "InvalidTagFault" -> `InvalidTagFault (InvalidTagFault.of_json json)
+      | "RedshiftIdcApplicationAlreadyExistsFault" ->
+          `RedshiftIdcApplicationAlreadyExistsFault
+            (RedshiftIdcApplicationAlreadyExistsFault.of_json json)
+      | "RedshiftIdcApplicationQuotaExceededFault" ->
+          `RedshiftIdcApplicationQuotaExceededFault
+            (RedshiftIdcApplicationQuotaExceededFault.of_json json)
+      | "TagLimitExceededFault" ->
+          `TagLimitExceededFault (TagLimitExceededFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DependentServiceAccessDeniedFault" ->
+          `DependentServiceAccessDeniedFault
+            (DependentServiceAccessDeniedFault.of_xml xml)
+      | "DependentServiceUnavailableFault" ->
+          `DependentServiceUnavailableFault
+            (DependentServiceUnavailableFault.of_xml xml)
+      | "InvalidTagFault" -> `InvalidTagFault (InvalidTagFault.of_xml xml)
+      | "RedshiftIdcApplicationAlreadyExistsFault" ->
+          `RedshiftIdcApplicationAlreadyExistsFault
+            (RedshiftIdcApplicationAlreadyExistsFault.of_xml xml)
+      | "RedshiftIdcApplicationQuotaExceededFault" ->
+          `RedshiftIdcApplicationQuotaExceededFault
+            (RedshiftIdcApplicationQuotaExceededFault.of_xml xml)
+      | "TagLimitExceededFault" ->
+          `TagLimitExceededFault (TagLimitExceededFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DependentServiceAccessDeniedFault e ->
+          `Assoc
+            [("error", (`String "DependentServiceAccessDeniedFault"));
+            ("details", (DependentServiceAccessDeniedFault.to_json e))]
+      | `DependentServiceUnavailableFault e ->
+          `Assoc
+            [("error", (`String "DependentServiceUnavailableFault"));
+            ("details", (DependentServiceUnavailableFault.to_json e))]
+      | `InvalidTagFault e ->
+          `Assoc
+            [("error", (`String "InvalidTagFault"));
+            ("details", (InvalidTagFault.to_json e))]
+      | `RedshiftIdcApplicationAlreadyExistsFault e ->
+          `Assoc
+            [("error", (`String "RedshiftIdcApplicationAlreadyExistsFault"));
+            ("details", (RedshiftIdcApplicationAlreadyExistsFault.to_json e))]
+      | `RedshiftIdcApplicationQuotaExceededFault e ->
+          `Assoc
+            [("error", (`String "RedshiftIdcApplicationQuotaExceededFault"));
+            ("details", (RedshiftIdcApplicationQuotaExceededFault.to_json e))]
+      | `TagLimitExceededFault e ->
+          `Assoc
+            [("error", (`String "TagLimitExceededFault"));
+            ("details", (TagLimitExceededFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.createRedshiftIdcApplicationResult in
+      structure_to_wrapped_value
+        [("RedshiftIdcApplication",
+           (Option.map x.redshiftIdcApplication
+              ~f:RedshiftIdcApplication.to_value))]
+        ~wrapper:"CreateRedshiftIdcApplicationResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "CreateRedshiftIdcApplicationResult" in
+      let redshiftIdcApplication =
+        (Option.map ~f:RedshiftIdcApplication.of_xml)
+          (Xml.child xml_arg0 "RedshiftIdcApplication") in
+      make ?redshiftIdcApplication ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let redshiftIdcApplication =
+        field_map json__ "RedshiftIdcApplication"
+          RedshiftIdcApplication.of_json in
+      make ?redshiftIdcApplication ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an Amazon Redshift application for use with IAM Identity Center."]
+module CreateRedshiftIdcApplicationMessage =
+  struct
+    type nonrec t =
+      {
+      idcInstanceArn: String_.t
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the IAM Identity Center instance where Amazon Redshift creates a new managed application."];
+      redshiftIdcApplicationName: RedshiftIdcApplicationName.t
+        [@ocaml.doc
+          "The name of the Redshift application in IAM Identity Center."];
+      identityNamespace: IdentityNamespaceString.t option
+        [@ocaml.doc
+          "The namespace for the Amazon Redshift IAM Identity Center application instance. It determines which managed application verifies the connection token."];
+      idcDisplayName: IdcDisplayNameString.t
+        [@ocaml.doc
+          "The display name for the Amazon Redshift IAM Identity Center application instance. It appears in the console."];
+      iamRoleArn: String_.t
+        [@ocaml.doc
+          "The IAM role ARN for the Amazon Redshift IAM Identity Center application instance. It has the required permissions to be assumed and invoke the IDC Identity Center API."];
+      authorizedTokenIssuerList: AuthorizedTokenIssuerList.t option
+        [@ocaml.doc
+          "The token issuer list for the Amazon Redshift IAM Identity Center application instance."];
+      serviceIntegrations: ServiceIntegrationList.t option
+        [@ocaml.doc
+          "A collection of service integrations for the Redshift IAM Identity Center application."];
+      applicationType: ApplicationType.t option
+        [@ocaml.doc
+          "The type of application being created. Valid values are None or Lakehouse. Use Lakehouse to enable Amazon Redshift federated permissions on cluster."];
+      tags: TagList.t option [@ocaml.doc "A list of tags."];
+      ssoTagKeys: TagKeyList.t option
+        [@ocaml.doc
+          "A list of tags keys that Redshift Identity Center applications copy to IAM Identity Center. For each input key, the tag corresponding to the key-value pair is propagated."]}
+    let context_ = "CreateRedshiftIdcApplicationMessage"
+    let make ?identityNamespace =
+      fun ?authorizedTokenIssuerList ->
+        fun ?serviceIntegrations ->
+          fun ?applicationType ->
+            fun ?tags ->
+              fun ?ssoTagKeys ->
+                fun ~idcInstanceArn ->
+                  fun ~redshiftIdcApplicationName ->
+                    fun ~idcDisplayName ->
+                      fun ~iamRoleArn ->
+                        fun () ->
+                          {
+                            identityNamespace;
+                            authorizedTokenIssuerList;
+                            serviceIntegrations;
+                            applicationType;
+                            tags;
+                            ssoTagKeys;
+                            idcInstanceArn;
+                            redshiftIdcApplicationName;
+                            idcDisplayName;
+                            iamRoleArn
+                          }
+    let to_value x =
+      structure_to_value
+        [("IdcInstanceArn", (Some (String_.to_value x.idcInstanceArn)));
+        ("RedshiftIdcApplicationName",
+          (Some
+             (RedshiftIdcApplicationName.to_value
+                x.redshiftIdcApplicationName)));
+        ("IdentityNamespace",
+          (Option.map x.identityNamespace ~f:IdentityNamespaceString.to_value));
+        ("IdcDisplayName",
+          (Some (IdcDisplayNameString.to_value x.idcDisplayName)));
+        ("IamRoleArn", (Some (String_.to_value x.iamRoleArn)));
+        ("AuthorizedTokenIssuerList",
+          (Option.map x.authorizedTokenIssuerList
+             ~f:AuthorizedTokenIssuerList.to_value));
+        ("ServiceIntegrations",
+          (Option.map x.serviceIntegrations
+             ~f:ServiceIntegrationList.to_value));
+        ("ApplicationType",
+          (Option.map x.applicationType ~f:ApplicationType.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("SsoTagKeys", (Option.map x.ssoTagKeys ~f:TagKeyList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ssoTagKeys =
+        (Option.map ~f:TagKeyList.of_xml) (Xml.child xml_arg0 "SsoTagKeys") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let applicationType =
+        (Option.map ~f:ApplicationType.of_xml)
+          (Xml.child xml_arg0 "ApplicationType") in
+      let serviceIntegrations =
+        (Option.map ~f:ServiceIntegrationList.of_xml)
+          (Xml.child xml_arg0 "ServiceIntegrations") in
+      let authorizedTokenIssuerList =
+        (Option.map ~f:AuthorizedTokenIssuerList.of_xml)
+          (Xml.child xml_arg0 "AuthorizedTokenIssuerList") in
+      let iamRoleArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IamRoleArn") in
+      let idcDisplayName =
+        IdcDisplayNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdcDisplayName") in
+      let identityNamespace =
+        (Option.map ~f:IdentityNamespaceString.of_xml)
+          (Xml.child xml_arg0 "IdentityNamespace") in
+      let redshiftIdcApplicationName =
+        RedshiftIdcApplicationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "RedshiftIdcApplicationName") in
+      let idcInstanceArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IdcInstanceArn") in
+      make ?ssoTagKeys ?tags ?applicationType ?serviceIntegrations
+        ?authorizedTokenIssuerList ~iamRoleArn ~idcDisplayName
+        ?identityNamespace ~redshiftIdcApplicationName ~idcInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ssoTagKeys = field_map json__ "SsoTagKeys" TagKeyList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let applicationType =
+        field_map json__ "ApplicationType" ApplicationType.of_json in
+      let serviceIntegrations =
+        field_map json__ "ServiceIntegrations" ServiceIntegrationList.of_json in
+      let authorizedTokenIssuerList =
+        field_map json__ "AuthorizedTokenIssuerList"
+          AuthorizedTokenIssuerList.of_json in
+      let iamRoleArn = field_map_exn json__ "IamRoleArn" String_.of_json in
+      let idcDisplayName =
+        field_map_exn json__ "IdcDisplayName" IdcDisplayNameString.of_json in
+      let identityNamespace =
+        field_map json__ "IdentityNamespace" IdentityNamespaceString.of_json in
+      let redshiftIdcApplicationName =
+        field_map_exn json__ "RedshiftIdcApplicationName"
+          RedshiftIdcApplicationName.of_json in
+      let idcInstanceArn =
+        field_map_exn json__ "IdcInstanceArn" String_.of_json in
+      make ?ssoTagKeys ?tags ?applicationType ?serviceIntegrations
+        ?authorizedTokenIssuerList ~iamRoleArn ~idcDisplayName
+        ?identityNamespace ~redshiftIdcApplicationName ~idcInstanceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an Amazon Redshift application for use with IAM Identity Center."]
+module CreateIntegrationMessage =
+  struct
+    type nonrec t =
+      {
+      sourceArn: SourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the database to use as the source for replication."];
+      targetArn: TargetArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Redshift data warehouse to use as the target for replication."];
+      integrationName: IntegrationName.t
+        [@ocaml.doc "The name of the integration."];
+      kMSKeyId: String_.t option
+        [@ocaml.doc
+          "An Key Management Service (KMS) key identifier for the key to use to encrypt the integration. If you don't specify an encryption key, the default Amazon Web Services owned key is used."];
+      tagList: TagList.t option [@ocaml.doc "A list of tags."];
+      additionalEncryptionContext: EncryptionContextMap.t option
+        [@ocaml.doc
+          "An optional set of non-secret key\226\128\147value pairs that contains additional contextual information about the data. For more information, see Encryption context in the Amazon Web Services Key Management Service Developer Guide. You can only include this parameter if you specify the KMSKeyId parameter."];
+      description: IntegrationDescription.t option
+        [@ocaml.doc "A description of the integration."]}
+    let context_ = "CreateIntegrationMessage"
+    let make ?kMSKeyId =
+      fun ?tagList ->
+        fun ?additionalEncryptionContext ->
+          fun ?description ->
+            fun ~sourceArn ->
+              fun ~targetArn ->
+                fun ~integrationName ->
+                  fun () ->
+                    {
+                      kMSKeyId;
+                      tagList;
+                      additionalEncryptionContext;
+                      description;
+                      sourceArn;
+                      targetArn;
+                      integrationName
+                    }
+    let to_value x =
+      structure_to_value
+        [("SourceArn", (Some (SourceArn.to_value x.sourceArn)));
+        ("TargetArn", (Some (TargetArn.to_value x.targetArn)));
+        ("IntegrationName",
+          (Some (IntegrationName.to_value x.integrationName)));
+        ("KMSKeyId", (Option.map x.kMSKeyId ~f:String_.to_value));
+        ("TagList", (Option.map x.tagList ~f:TagList.to_value));
+        ("AdditionalEncryptionContext",
+          (Option.map x.additionalEncryptionContext
+             ~f:EncryptionContextMap.to_value));
+        ("Description",
+          (Option.map x.description ~f:IntegrationDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:IntegrationDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let additionalEncryptionContext =
+        (Option.map ~f:EncryptionContextMap.of_xml)
+          (Xml.child xml_arg0 "AdditionalEncryptionContext") in
+      let tagList =
+        (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
+      let kMSKeyId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "KMSKeyId") in
+      let integrationName =
+        IntegrationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IntegrationName") in
+      let targetArn =
+        TargetArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetArn") in
+      let sourceArn =
+        SourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceArn") in
+      make ?description ?additionalEncryptionContext ?tagList ?kMSKeyId
+        ~integrationName ~targetArn ~sourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "Description" IntegrationDescription.of_json in
+      let additionalEncryptionContext =
+        field_map json__ "AdditionalEncryptionContext"
+          EncryptionContextMap.of_json in
+      let tagList = field_map json__ "TagList" TagList.of_json in
+      let kMSKeyId = field_map json__ "KMSKeyId" String_.of_json in
+      let integrationName =
+        field_map_exn json__ "IntegrationName" IntegrationName.of_json in
+      let targetArn = field_map_exn json__ "TargetArn" TargetArn.of_json in
+      let sourceArn = field_map_exn json__ "SourceArn" SourceArn.of_json in
+      make ?description ?additionalEncryptionContext ?tagList ?kMSKeyId
+        ~integrationName ~targetArn ~sourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a zero-ETL integration or S3 event integration with Amazon Redshift."]
 module CreateHsmConfigurationResult =
   struct
     type createHsmConfigurationResult =
@@ -22362,9 +28712,9 @@ module CreateHsmConfigurationResult =
           (Xml.child xml_arg0 "HsmConfiguration") in
       make ?hsmConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hsmConfiguration =
-        field_map json "HsmConfiguration" HsmConfiguration.of_json in
+        field_map json__ "HsmConfiguration" HsmConfiguration.of_json in
       make ?hsmConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22448,18 +28798,18 @@ module CreateHsmConfigurationMessage =
         ~hsmPartitionName ~hsmIpAddress ~description
         ~hsmConfigurationIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let hsmServerPublicCertificate =
-        field_map_exn json "HsmServerPublicCertificate" String_.of_json in
+        field_map_exn json__ "HsmServerPublicCertificate" String_.of_json in
       let hsmPartitionPassword =
-        field_map_exn json "HsmPartitionPassword" String_.of_json in
+        field_map_exn json__ "HsmPartitionPassword" String_.of_json in
       let hsmPartitionName =
-        field_map_exn json "HsmPartitionName" String_.of_json in
-      let hsmIpAddress = field_map_exn json "HsmIpAddress" String_.of_json in
-      let description = field_map_exn json "Description" String_.of_json in
+        field_map_exn json__ "HsmPartitionName" String_.of_json in
+      let hsmIpAddress = field_map_exn json__ "HsmIpAddress" String_.of_json in
+      let description = field_map_exn json__ "Description" String_.of_json in
       let hsmConfigurationIdentifier =
-        field_map_exn json "HsmConfigurationIdentifier" String_.of_json in
+        field_map_exn json__ "HsmConfigurationIdentifier" String_.of_json in
       make ?tags ~hsmServerPublicCertificate ~hsmPartitionPassword
         ~hsmPartitionName ~hsmIpAddress ~description
         ~hsmConfigurationIdentifier ()
@@ -22558,9 +28908,9 @@ module CreateHsmClientCertificateResult =
           (Xml.child xml_arg0 "HsmClientCertificate") in
       make ?hsmClientCertificate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hsmClientCertificate =
-        field_map json "HsmClientCertificate" HsmClientCertificate.of_json in
+        field_map json__ "HsmClientCertificate" HsmClientCertificate.of_json in
       make ?hsmClientCertificate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22591,10 +28941,10 @@ module CreateHsmClientCertificateMessage =
              "HsmClientCertificateIdentifier") in
       make ?tags ~hsmClientCertificateIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let hsmClientCertificateIdentifier =
-        field_map_exn json "HsmClientCertificateIdentifier" String_.of_json in
+        field_map_exn json__ "HsmClientCertificateIdentifier" String_.of_json in
       make ?tags ~hsmClientCertificateIdentifier ()
     let to_json v = composed_to_json to_value v
   end
@@ -22760,9 +29110,9 @@ module CreateEventSubscriptionResult =
           (Xml.child xml_arg0 "EventSubscription") in
       make ?eventSubscription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventSubscription =
-        field_map json "EventSubscription" EventSubscription.of_json in
+        field_map json__ "EventSubscription" EventSubscription.of_json in
       make ?eventSubscription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22847,17 +29197,17 @@ module CreateEventSubscriptionMessage =
       make ?tags ?enabled ?severity ?eventCategories ?sourceIds ?sourceType
         ~snsTopicArn ~subscriptionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let enabled = field_map json "Enabled" BooleanOptional.of_json in
-      let severity = field_map json "Severity" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let enabled = field_map json__ "Enabled" BooleanOptional.of_json in
+      let severity = field_map json__ "Severity" String_.of_json in
       let eventCategories =
-        field_map json "EventCategories" EventCategoriesList.of_json in
-      let sourceIds = field_map json "SourceIds" SourceIdsList.of_json in
-      let sourceType = field_map json "SourceType" String_.of_json in
-      let snsTopicArn = field_map_exn json "SnsTopicArn" String_.of_json in
+        field_map json__ "EventCategories" EventCategoriesList.of_json in
+      let sourceIds = field_map json__ "SourceIds" SourceIdsList.of_json in
+      let sourceType = field_map json__ "SourceType" String_.of_json in
+      let snsTopicArn = field_map_exn json__ "SnsTopicArn" String_.of_json in
       let subscriptionName =
-        field_map_exn json "SubscriptionName" String_.of_json in
+        field_map_exn json__ "SubscriptionName" String_.of_json in
       make ?tags ?enabled ?severity ?eventCategories ?sourceIds ?sourceType
         ~snsTopicArn ~subscriptionName ()
     let to_json v = composed_to_json to_value v
@@ -22923,19 +29273,210 @@ module CreateEndpointAccessMessage =
       make ?vpcSecurityGroupIds ~subnetGroupName ~endpointName ?resourceOwner
         ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vpcSecurityGroupIds =
-        field_map json "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
+        field_map json__ "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
       let subnetGroupName =
-        field_map_exn json "SubnetGroupName" String_.of_json in
-      let endpointName = field_map_exn json "EndpointName" String_.of_json in
-      let resourceOwner = field_map json "ResourceOwner" String_.of_json in
+        field_map_exn json__ "SubnetGroupName" String_.of_json in
+      let endpointName = field_map_exn json__ "EndpointName" String_.of_json in
+      let resourceOwner = field_map json__ "ResourceOwner" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       make ?vpcSecurityGroupIds ~subnetGroupName ~endpointName ?resourceOwner
         ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a Redshift-managed VPC endpoint."]
+module CreateCustomDomainAssociationResult =
+  struct
+    type createCustomDomainAssociationResult =
+      {
+      customDomainName: CustomDomainNameString.t option
+        [@ocaml.doc "The custom domain name for the association result."];
+      customDomainCertificateArn: CustomDomainCertificateArnString.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the certificate associated with the custom domain name."];
+      clusterIdentifier: String_.t option
+        [@ocaml.doc
+          "The identifier of the cluster that the custom domain is associated with."];
+      customDomainCertExpiryTime: String_.t option
+        [@ocaml.doc
+          "The expiration time for the certificate for the custom domain."]}
+    and responseMetaData = unit
+    and t =
+      {
+      createCustomDomainAssociationResult:
+        createCustomDomainAssociationResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
+      | `CustomCnameAssociationFault of CustomCnameAssociationFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "CreateCustomDomainAssociationResult"
+    let make ?customDomainName =
+      fun ?customDomainCertificateArn ->
+        fun ?clusterIdentifier ->
+          fun ?customDomainCertExpiryTime ->
+            fun () ->
+              {
+                createCustomDomainAssociationResult =
+                  {
+                    customDomainName;
+                    customDomainCertificateArn;
+                    clusterIdentifier;
+                    customDomainCertExpiryTime
+                  };
+                responseMetaData = ()
+              }
+    let error_of_json name json =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
+      | "CustomCnameAssociationFault" ->
+          `CustomCnameAssociationFault
+            (CustomCnameAssociationFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
+      | "CustomCnameAssociationFault" ->
+          `CustomCnameAssociationFault
+            (CustomCnameAssociationFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ClusterNotFoundFault"));
+            ("details", (ClusterNotFoundFault.to_json e))]
+      | `CustomCnameAssociationFault e ->
+          `Assoc
+            [("error", (`String "CustomCnameAssociationFault"));
+            ("details", (CustomCnameAssociationFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.createCustomDomainAssociationResult in
+      structure_to_wrapped_value
+        [("CustomDomainName",
+           (Option.map x.customDomainName ~f:CustomDomainNameString.to_value));
+        ("CustomDomainCertificateArn",
+          (Option.map x.customDomainCertificateArn
+             ~f:CustomDomainCertificateArnString.to_value));
+        ("ClusterIdentifier",
+          (Option.map x.clusterIdentifier ~f:String_.to_value));
+        ("CustomDomainCertExpiryTime",
+          (Option.map x.customDomainCertExpiryTime ~f:String_.to_value))]
+        ~wrapper:"CreateCustomDomainAssociationResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "CreateCustomDomainAssociationResult" in
+      let customDomainCertExpiryTime =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "CustomDomainCertExpiryTime") in
+      let clusterIdentifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "ClusterIdentifier") in
+      let customDomainCertificateArn =
+        (Option.map ~f:CustomDomainCertificateArnString.of_xml)
+          (Xml.child xml_arg0 "CustomDomainCertificateArn") in
+      let customDomainName =
+        (Option.map ~f:CustomDomainNameString.of_xml)
+          (Xml.child xml_arg0 "CustomDomainName") in
+      make ?customDomainCertExpiryTime ?clusterIdentifier
+        ?customDomainCertificateArn ?customDomainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customDomainCertExpiryTime =
+        field_map json__ "CustomDomainCertExpiryTime" String_.of_json in
+      let clusterIdentifier =
+        field_map json__ "ClusterIdentifier" String_.of_json in
+      let customDomainCertificateArn =
+        field_map json__ "CustomDomainCertificateArn"
+          CustomDomainCertificateArnString.of_json in
+      let customDomainName =
+        field_map json__ "CustomDomainName" CustomDomainNameString.of_json in
+      make ?customDomainCertExpiryTime ?clusterIdentifier
+        ?customDomainCertificateArn ?customDomainName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Used to create a custom domain name for a cluster. Properties include the custom domain name, the cluster the custom domain is associated with, and the certificate Amazon Resource Name (ARN)."]
+module CreateCustomDomainAssociationMessage =
+  struct
+    type nonrec t =
+      {
+      customDomainName: CustomDomainNameString.t
+        [@ocaml.doc
+          "The custom domain name for a custom domain association."];
+      customDomainCertificateArn: CustomDomainCertificateArnString.t
+        [@ocaml.doc
+          "The certificate Amazon Resource Name (ARN) for the custom domain name association."];
+      clusterIdentifier: String_.t
+        [@ocaml.doc
+          "The cluster identifier that the custom domain is associated with."]}
+    let context_ = "CreateCustomDomainAssociationMessage"
+    let make ~customDomainName =
+      fun ~customDomainCertificateArn ->
+        fun ~clusterIdentifier ->
+          fun () ->
+            { customDomainName; customDomainCertificateArn; clusterIdentifier
+            }
+    let to_value x =
+      structure_to_value
+        [("CustomDomainName",
+           (Some (CustomDomainNameString.to_value x.customDomainName)));
+        ("CustomDomainCertificateArn",
+          (Some
+             (CustomDomainCertificateArnString.to_value
+                x.customDomainCertificateArn)));
+        ("ClusterIdentifier", (Some (String_.to_value x.clusterIdentifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clusterIdentifier =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
+      let customDomainCertificateArn =
+        CustomDomainCertificateArnString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "CustomDomainCertificateArn") in
+      let customDomainName =
+        CustomDomainNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CustomDomainName") in
+      make ~clusterIdentifier ~customDomainCertificateArn ~customDomainName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clusterIdentifier =
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
+      let customDomainCertificateArn =
+        field_map_exn json__ "CustomDomainCertificateArn"
+          CustomDomainCertificateArnString.of_json in
+      let customDomainName =
+        field_map_exn json__ "CustomDomainName"
+          CustomDomainNameString.of_json in
+      make ~clusterIdentifier ~customDomainCertificateArn ~customDomainName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Used to create a custom domain name for a cluster. Properties include the custom domain name, the cluster the custom domain is associated with, and the certificate Amazon Resource Name (ARN)."]
 module CreateClusterSubnetGroupResult =
   struct
     type createClusterSubnetGroupResult =
@@ -23067,9 +29608,9 @@ module CreateClusterSubnetGroupResult =
           (Xml.child xml_arg0 "ClusterSubnetGroup") in
       make ?clusterSubnetGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterSubnetGroup =
-        field_map json "ClusterSubnetGroup" ClusterSubnetGroup.of_json in
+        field_map json__ "ClusterSubnetGroup" ClusterSubnetGroup.of_json in
       make ?clusterSubnetGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23115,13 +29656,13 @@ module CreateClusterSubnetGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterSubnetGroupName") in
       make ?tags ~subnetIds ~description ~clusterSubnetGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let subnetIds =
-        field_map_exn json "SubnetIds" SubnetIdentifierList.of_json in
-      let description = field_map_exn json "Description" String_.of_json in
+        field_map_exn json__ "SubnetIds" SubnetIdentifierList.of_json in
+      let description = field_map_exn json__ "Description" String_.of_json in
       let clusterSubnetGroupName =
-        field_map_exn json "ClusterSubnetGroupName" String_.of_json in
+        field_map_exn json__ "ClusterSubnetGroupName" String_.of_json in
       make ?tags ~subnetIds ~description ~clusterSubnetGroupName ()
     let to_json v = composed_to_json to_value v
   end
@@ -23238,8 +29779,8 @@ module CreateClusterSnapshotResult =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23293,15 +29834,15 @@ module CreateClusterSnapshotMessage =
       make ?tags ?manualSnapshotRetentionPeriod ~clusterIdentifier
         ~snapshotIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let manualSnapshotRetentionPeriod =
-        field_map json "ManualSnapshotRetentionPeriod"
+        field_map json__ "ManualSnapshotRetentionPeriod"
           IntegerOptional.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       let snapshotIdentifier =
-        field_map_exn json "SnapshotIdentifier" String_.of_json in
+        field_map_exn json__ "SnapshotIdentifier" String_.of_json in
       make ?tags ?manualSnapshotRetentionPeriod ~clusterIdentifier
         ~snapshotIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -23399,9 +29940,9 @@ module CreateClusterSecurityGroupResult =
           (Xml.child xml_arg0 "ClusterSecurityGroup") in
       make ?clusterSecurityGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterSecurityGroup =
-        field_map json "ClusterSecurityGroup" ClusterSecurityGroup.of_json in
+        field_map json__ "ClusterSecurityGroup" ClusterSecurityGroup.of_json in
       make ?clusterSecurityGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23439,11 +29980,11 @@ module CreateClusterSecurityGroupMessage =
              "ClusterSecurityGroupName") in
       make ?tags ~description ~clusterSecurityGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let description = field_map_exn json "Description" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description = field_map_exn json__ "Description" String_.of_json in
       let clusterSecurityGroupName =
-        field_map_exn json "ClusterSecurityGroupName" String_.of_json in
+        field_map_exn json__ "ClusterSecurityGroupName" String_.of_json in
       make ?tags ~description ~clusterSecurityGroupName ()
     let to_json v = composed_to_json to_value v
   end
@@ -23464,8 +30005,12 @@ module CreateClusterResult =
       | `ClusterSecurityGroupNotFoundFault of
           ClusterSecurityGroupNotFoundFault.t 
       | `ClusterSubnetGroupNotFoundFault of ClusterSubnetGroupNotFoundFault.t 
+      | `DependentServiceAccessDeniedFault of
+          DependentServiceAccessDeniedFault.t 
       | `DependentServiceRequestThrottlingFault of
           DependentServiceRequestThrottlingFault.t 
+      | `DependentServiceUnavailableFault of
+          DependentServiceUnavailableFault.t 
       | `HsmClientCertificateNotFoundFault of
           HsmClientCertificateNotFoundFault.t 
       | `HsmConfigurationNotFoundFault of HsmConfigurationNotFoundFault.t 
@@ -23479,13 +30024,17 @@ module CreateClusterResult =
       | `InvalidSubnet of InvalidSubnet.t 
       | `InvalidTagFault of InvalidTagFault.t 
       | `InvalidVPCNetworkStateFault of InvalidVPCNetworkStateFault.t 
+      | `Ipv6CidrBlockNotFoundFault of Ipv6CidrBlockNotFoundFault.t 
       | `LimitExceededFault of LimitExceededFault.t 
       | `NumberOfNodesPerClusterLimitExceededFault of
           NumberOfNodesPerClusterLimitExceededFault.t 
       | `NumberOfNodesQuotaExceededFault of NumberOfNodesQuotaExceededFault.t 
+      | `RedshiftIdcApplicationNotExistsFault of
+          RedshiftIdcApplicationNotExistsFault.t 
       | `SnapshotScheduleNotFoundFault of SnapshotScheduleNotFoundFault.t 
       | `TagLimitExceededFault of TagLimitExceededFault.t 
       | `UnauthorizedOperation of UnauthorizedOperation.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "CreateClusterResult"
     let make ?cluster =
@@ -23505,9 +30054,15 @@ module CreateClusterResult =
       | "ClusterSubnetGroupNotFoundFault" ->
           `ClusterSubnetGroupNotFoundFault
             (ClusterSubnetGroupNotFoundFault.of_json json)
+      | "DependentServiceAccessDeniedFault" ->
+          `DependentServiceAccessDeniedFault
+            (DependentServiceAccessDeniedFault.of_json json)
       | "DependentServiceRequestThrottlingFault" ->
           `DependentServiceRequestThrottlingFault
             (DependentServiceRequestThrottlingFault.of_json json)
+      | "DependentServiceUnavailableFault" ->
+          `DependentServiceUnavailableFault
+            (DependentServiceUnavailableFault.of_json json)
       | "HsmClientCertificateNotFoundFault" ->
           `HsmClientCertificateNotFoundFault
             (HsmClientCertificateNotFoundFault.of_json json)
@@ -23532,6 +30087,9 @@ module CreateClusterResult =
       | "InvalidVPCNetworkStateFault" ->
           `InvalidVPCNetworkStateFault
             (InvalidVPCNetworkStateFault.of_json json)
+      | "Ipv6CidrBlockNotFoundFault" ->
+          `Ipv6CidrBlockNotFoundFault
+            (Ipv6CidrBlockNotFoundFault.of_json json)
       | "LimitExceededFault" ->
           `LimitExceededFault (LimitExceededFault.of_json json)
       | "NumberOfNodesPerClusterLimitExceededFault" ->
@@ -23540,6 +30098,9 @@ module CreateClusterResult =
       | "NumberOfNodesQuotaExceededFault" ->
           `NumberOfNodesQuotaExceededFault
             (NumberOfNodesQuotaExceededFault.of_json json)
+      | "RedshiftIdcApplicationNotExistsFault" ->
+          `RedshiftIdcApplicationNotExistsFault
+            (RedshiftIdcApplicationNotExistsFault.of_json json)
       | "SnapshotScheduleNotFoundFault" ->
           `SnapshotScheduleNotFoundFault
             (SnapshotScheduleNotFoundFault.of_json json)
@@ -23547,6 +30108,8 @@ module CreateClusterResult =
           `TagLimitExceededFault (TagLimitExceededFault.of_json json)
       | "UnauthorizedOperation" ->
           `UnauthorizedOperation (UnauthorizedOperation.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -23565,9 +30128,15 @@ module CreateClusterResult =
       | "ClusterSubnetGroupNotFoundFault" ->
           `ClusterSubnetGroupNotFoundFault
             (ClusterSubnetGroupNotFoundFault.of_xml xml)
+      | "DependentServiceAccessDeniedFault" ->
+          `DependentServiceAccessDeniedFault
+            (DependentServiceAccessDeniedFault.of_xml xml)
       | "DependentServiceRequestThrottlingFault" ->
           `DependentServiceRequestThrottlingFault
             (DependentServiceRequestThrottlingFault.of_xml xml)
+      | "DependentServiceUnavailableFault" ->
+          `DependentServiceUnavailableFault
+            (DependentServiceUnavailableFault.of_xml xml)
       | "HsmClientCertificateNotFoundFault" ->
           `HsmClientCertificateNotFoundFault
             (HsmClientCertificateNotFoundFault.of_xml xml)
@@ -23592,6 +30161,8 @@ module CreateClusterResult =
       | "InvalidVPCNetworkStateFault" ->
           `InvalidVPCNetworkStateFault
             (InvalidVPCNetworkStateFault.of_xml xml)
+      | "Ipv6CidrBlockNotFoundFault" ->
+          `Ipv6CidrBlockNotFoundFault (Ipv6CidrBlockNotFoundFault.of_xml xml)
       | "LimitExceededFault" ->
           `LimitExceededFault (LimitExceededFault.of_xml xml)
       | "NumberOfNodesPerClusterLimitExceededFault" ->
@@ -23600,6 +30171,9 @@ module CreateClusterResult =
       | "NumberOfNodesQuotaExceededFault" ->
           `NumberOfNodesQuotaExceededFault
             (NumberOfNodesQuotaExceededFault.of_xml xml)
+      | "RedshiftIdcApplicationNotExistsFault" ->
+          `RedshiftIdcApplicationNotExistsFault
+            (RedshiftIdcApplicationNotExistsFault.of_xml xml)
       | "SnapshotScheduleNotFoundFault" ->
           `SnapshotScheduleNotFoundFault
             (SnapshotScheduleNotFoundFault.of_xml xml)
@@ -23607,6 +30181,8 @@ module CreateClusterResult =
           `TagLimitExceededFault (TagLimitExceededFault.of_xml xml)
       | "UnauthorizedOperation" ->
           `UnauthorizedOperation (UnauthorizedOperation.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -23631,10 +30207,18 @@ module CreateClusterResult =
           `Assoc
             [("error", (`String "ClusterSubnetGroupNotFoundFault"));
             ("details", (ClusterSubnetGroupNotFoundFault.to_json e))]
+      | `DependentServiceAccessDeniedFault e ->
+          `Assoc
+            [("error", (`String "DependentServiceAccessDeniedFault"));
+            ("details", (DependentServiceAccessDeniedFault.to_json e))]
       | `DependentServiceRequestThrottlingFault e ->
           `Assoc
             [("error", (`String "DependentServiceRequestThrottlingFault"));
             ("details", (DependentServiceRequestThrottlingFault.to_json e))]
+      | `DependentServiceUnavailableFault e ->
+          `Assoc
+            [("error", (`String "DependentServiceUnavailableFault"));
+            ("details", (DependentServiceUnavailableFault.to_json e))]
       | `HsmClientCertificateNotFoundFault e ->
           `Assoc
             [("error", (`String "HsmClientCertificateNotFoundFault"));
@@ -23675,6 +30259,10 @@ module CreateClusterResult =
           `Assoc
             [("error", (`String "InvalidVPCNetworkStateFault"));
             ("details", (InvalidVPCNetworkStateFault.to_json e))]
+      | `Ipv6CidrBlockNotFoundFault e ->
+          `Assoc
+            [("error", (`String "Ipv6CidrBlockNotFoundFault"));
+            ("details", (Ipv6CidrBlockNotFoundFault.to_json e))]
       | `LimitExceededFault e ->
           `Assoc
             [("error", (`String "LimitExceededFault"));
@@ -23688,6 +30276,10 @@ module CreateClusterResult =
           `Assoc
             [("error", (`String "NumberOfNodesQuotaExceededFault"));
             ("details", (NumberOfNodesQuotaExceededFault.to_json e))]
+      | `RedshiftIdcApplicationNotExistsFault e ->
+          `Assoc
+            [("error", (`String "RedshiftIdcApplicationNotExistsFault"));
+            ("details", (RedshiftIdcApplicationNotExistsFault.to_json e))]
       | `SnapshotScheduleNotFoundFault e ->
           `Assoc
             [("error", (`String "SnapshotScheduleNotFoundFault"));
@@ -23700,6 +30292,10 @@ module CreateClusterResult =
           `Assoc
             [("error", (`String "UnauthorizedOperation"));
             ("details", (UnauthorizedOperation.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -23717,12 +30313,12 @@ module CreateClusterResult =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new cluster with the specified parameters. To create a cluster in Virtual Private Cloud (VPC), you must provide a cluster subnet group name. The cluster subnet group identifies the subnets of your VPC that Amazon Redshift uses when creating the cluster. For more information about managing clusters, go to Amazon Redshift Clusters in the Amazon Redshift Cluster Management Guide."]
+       "Creates a new cluster with the specified parameters. To create a cluster in Virtual Private Cloud (VPC), you must provide a cluster subnet group name. The cluster subnet group identifies the subnets of your VPC that Amazon Redshift uses when creating the cluster. For more information about managing clusters, go to Amazon Redshift Clusters in the Amazon Redshift Cluster Management Guide. VPC Block Public Access (BPA) enables you to block resources in VPCs and subnets that you own in a Region from reaching or being reached from the internet through internet gateways and egress-only internet gateways. If a subnet group for a provisioned cluster is in an account with VPC BPA turned on, the following capabilities are blocked: Creating a public cluster Restoring a public cluster Modifying a private cluster to be public Adding a subnet with VPC BPA turned on to the subnet group when there's at least one public cluster within the group For more information about VPC BPA, see Block public access to VPCs and subnets in the Amazon VPC User Guide."]
 module CreateClusterParameterGroupResult =
   struct
     type createClusterParameterGroupResult =
@@ -23816,9 +30412,10 @@ module CreateClusterParameterGroupResult =
           (Xml.child xml_arg0 "ClusterParameterGroup") in
       make ?clusterParameterGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterParameterGroup =
-        field_map json "ClusterParameterGroup" ClusterParameterGroup.of_json in
+        field_map json__ "ClusterParameterGroup"
+          ClusterParameterGroup.of_json in
       make ?clusterParameterGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23865,13 +30462,13 @@ module CreateClusterParameterGroupMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ParameterGroupName") in
       make ?tags ~description ~parameterGroupFamily ~parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let description = field_map_exn json "Description" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description = field_map_exn json__ "Description" String_.of_json in
       let parameterGroupFamily =
-        field_map_exn json "ParameterGroupFamily" String_.of_json in
+        field_map_exn json__ "ParameterGroupFamily" String_.of_json in
       let parameterGroupName =
-        field_map_exn json "ParameterGroupName" String_.of_json in
+        field_map_exn json__ "ParameterGroupName" String_.of_json in
       make ?tags ~description ~parameterGroupFamily ~parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end
@@ -23890,13 +30487,13 @@ module CreateClusterMessage =
           "The type of the cluster. When cluster type is specified as single-node, the NumberOfNodes parameter is not required. multi-node, the NumberOfNodes parameter is required. Valid Values: multi-node | single-node Default: multi-node"];
       nodeType: String_.t
         [@ocaml.doc
-          "The node type to be provisioned for the cluster. For information about node types, go to Working with Clusters in the Amazon Redshift Cluster Management Guide. Valid Values: ds2.xlarge | ds2.8xlarge | dc1.large | dc1.8xlarge | dc2.large | dc2.8xlarge | ra3.xlplus | ra3.4xlarge | ra3.16xlarge"];
+          "The node type to be provisioned for the cluster. For information about node types, go to Working with Clusters in the Amazon Redshift Cluster Management Guide. Valid Values: dc2.large | dc2.8xlarge| rg.xlarge | rg.4xlarge | ra3.large | ra3.xlplus | ra3.4xlarge | ra3.16xlarge"];
       masterUsername: String_.t
         [@ocaml.doc
-          "The user name associated with the admin user account for the cluster that is being created. Constraints: Must be 1 - 128 alphanumeric characters. The user name can't be PUBLIC. First character must be a letter. Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."];
-      masterUserPassword: String_.t
+          "The user name associated with the admin user account for the cluster that is being created. Constraints: Must be 1 - 128 alphanumeric characters or hyphens. The user name can't be PUBLIC. Must contain only lowercase letters, numbers, underscore, plus sign, period (dot), at symbol (\\@), or hyphen. The first character must be a letter. Must not contain a colon (:) or a slash (/). Cannot be a reserved word. A list of reserved words can be found in Reserved Words in the Amazon Redshift Database Developer Guide."];
+      masterUserPassword: SensitiveString.t option
         [@ocaml.doc
-          "The password associated with the admin user account for the cluster that is being created. Constraints: Must be between 8 and 64 characters in length. Must contain at least one uppercase letter. Must contain at least one lowercase letter. Must contain one number. Can be any printable ASCII character (ASCII code 33-126) except ' (single quote), \" (double quote), \\, /, or \\@."];
+          "The password associated with the admin user account for the cluster that is being created. You can't use MasterUserPassword if ManageMasterPassword is true. Constraints: Must be between 8 and 64 characters in length. Must contain at least one uppercase letter. Must contain at least one lowercase letter. Must contain one number. Can be any printable ASCII character (ASCII code 33-126) except ' (single quote), \" (double quote), \\, /, or \\@."];
       clusterSecurityGroups: ClusterSecurityGroupNameList.t option
         [@ocaml.doc
           "A list of security groups to be associated with this cluster. Default: The default cluster security group for Amazon Redshift."];
@@ -23917,13 +30514,13 @@ module CreateClusterMessage =
           "The name of the parameter group to be associated with this cluster. Default: The default Amazon Redshift cluster parameter group. For information about the default parameter group, go to Working with Amazon Redshift Parameter Groups Constraints: Must be 1 to 255 alphanumeric characters or hyphens. First character must be a letter. Cannot end with a hyphen or contain two consecutive hyphens."];
       automatedSnapshotRetentionPeriod: IntegerOptional.t option
         [@ocaml.doc
-          "The number of days that automated snapshots are retained. If the value is 0, automated snapshots are disabled. Even if automated snapshots are disabled, you can still create manual snapshots when you want with CreateClusterSnapshot. You can't disable automated snapshots for RA3 node types. Set the automated retention period from 1-35 days. Default: 1 Constraints: Must be a value from 0 to 35."];
+          "The number of days that automated snapshots are retained. If the value is 0, automated snapshots are disabled. Even if automated snapshots are disabled, you can still create manual snapshots when you want with CreateClusterSnapshot. You can't disable automated snapshots for RG or RA3 node types. Set the automated retention period from 1-35 days. Default: 1 Constraints: Must be a value from 0 to 35."];
       manualSnapshotRetentionPeriod: IntegerOptional.t option
         [@ocaml.doc
           "The default number of days to retain a manual snapshot. If the value is -1, the snapshot is retained indefinitely. This setting doesn't change the retention period of existing snapshots. The value must be either -1 or an integer between 1 and 3,653."];
       port: IntegerOptional.t option
         [@ocaml.doc
-          "The port number on which the cluster accepts incoming connections. The cluster is accessible only via the JDBC and ODBC connection strings. Part of the connection string requires the port on which the cluster will listen for incoming connections. Default: 5439 Valid Values: 1150-65535"];
+          "The port number on which the cluster accepts incoming connections. The cluster is accessible only via the JDBC and ODBC connection strings. Part of the connection string requires the port on which the cluster will listen for incoming connections. Default: 5439 Valid Values: For clusters with RG or RA3 nodes - Select a port within the ranges 5431-5455 or 8191-8215. (If you have an existing cluster with RG or RA3 nodes, it isn't required that you change the port to these ranges.) For clusters with dc2 nodes - Select a port within the range 1150-65535."];
       clusterVersion: String_.t option
         [@ocaml.doc
           "The version of the Amazon Redshift engine software that you want to deploy on the cluster. The version selected runs on all the nodes in the cluster. Constraints: Only version 1.0 is currently available. Example: 1.0"];
@@ -23935,10 +30532,10 @@ module CreateClusterMessage =
           "The number of compute nodes in the cluster. This parameter is required when the ClusterType parameter is specified as multi-node. For information about determining how many nodes you need, go to Working with Clusters in the Amazon Redshift Cluster Management Guide. If you don't specify this parameter, you get a single-node cluster. When requesting a multi-node cluster, you must specify the number of nodes that you want in the cluster. Default: 1 Constraints: Value must be at least 1 and no more than 100."];
       publiclyAccessible: BooleanOptional.t option
         [@ocaml.doc
-          "If true, the cluster can be accessed from a public network."];
+          "If true, the cluster can be accessed from a public network. Default: false"];
       encrypted: BooleanOptional.t option
         [@ocaml.doc
-          "If true, the data in the cluster is encrypted at rest. Default: false"];
+          "If true, the data in the cluster is encrypted at rest. If you set the value on this parameter to false, the request will fail. Default: true"];
       hsmClientCertificateIdentifier: String_.t option
         [@ocaml.doc
           "Specifies the name of the HSM client certificate the Amazon Redshift cluster uses to retrieve the data encryption keys stored in an HSM."];
@@ -23947,7 +30544,7 @@ module CreateClusterMessage =
           "Specifies the name of the HSM configuration that contains the information the Amazon Redshift cluster can use to retrieve and store keys in an HSM."];
       elasticIp: String_.t option
         [@ocaml.doc
-          "The Elastic IP (EIP) address for the cluster. Constraints: The cluster must be provisioned in EC2-VPC and publicly-accessible through an Internet gateway. For more information about provisioning clusters in EC2-VPC, go to Supported Platforms to Launch Your Cluster in the Amazon Redshift Cluster Management Guide."];
+          "The Elastic IP (EIP) address for the cluster. Constraints: The cluster must be provisioned in EC2-VPC and publicly-accessible through an Internet gateway. Don't specify the Elastic IP address for a publicly accessible cluster with availability zone relocation turned on. For more information about provisioning clusters in EC2-VPC, go to Supported Platforms to Launch Your Cluster in the Amazon Redshift Cluster Management Guide."];
       tags: TagList.t option [@ocaml.doc "A list of tag instances."];
       kmsKeyId: String_.t option
         [@ocaml.doc
@@ -23969,64 +30566,113 @@ module CreateClusterMessage =
           "The option to enable relocation for an Amazon Redshift cluster between Availability Zones after the cluster is created."];
       aquaConfigurationStatus: AquaConfigurationStatus.t option
         [@ocaml.doc
-          "The value represents how the cluster is configured to use AQUA (Advanced Query Accelerator) when it is created. Possible values include the following. enabled - Use AQUA if it is available for the current Amazon Web Services Region and Amazon Redshift node type. disabled - Don't use AQUA. auto - Amazon Redshift determines whether to use AQUA."];
+          "This parameter is retired. It does not set the AQUA configuration status. Amazon Redshift automatically determines whether to use AQUA (Advanced Query Accelerator)."];
       defaultIamRoleArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the IAM role that was set as default for the cluster when the cluster was created."]}
+          "The Amazon Resource Name (ARN) for the IAM role that was set as default for the cluster when the cluster was created."];
+      loadSampleData: String_.t option
+        [@ocaml.doc
+          "A flag that specifies whether to load sample data once the cluster is created."];
+      manageMasterPassword: BooleanOptional.t option
+        [@ocaml.doc
+          "If true, Amazon Redshift uses Secrets Manager to manage this cluster's admin credentials. You can't use MasterUserPassword if ManageMasterPassword is true. If ManageMasterPassword is false or not set, Amazon Redshift uses MasterUserPassword for the admin user account's password."];
+      masterPasswordSecretKmsKeyId: String_.t option
+        [@ocaml.doc
+          "The ID of the Key Management Service (KMS) key used to encrypt and store the cluster's admin credentials secret. You can only use this parameter if ManageMasterPassword is true."];
+      ipAddressType: String_.t option
+        [@ocaml.doc
+          "The IP address types that the cluster supports. Possible values are ipv4 and dualstack."];
+      multiAZ: BooleanOptional.t option
+        [@ocaml.doc
+          "If true, Amazon Redshift will deploy the cluster in two Availability Zones (AZ)."];
+      redshiftIdcApplicationArn: String_.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the Amazon Redshift IAM Identity Center application."];
+      catalogName: CatalogNameString.t option
+        [@ocaml.doc
+          "The name of the Glue data catalog that will be associated with the cluster enabled with Amazon Redshift federated permissions. Constraints: Must contain at least one lowercase letter. Can only contain lowercase letters (a-z), numbers (0-9), underscores (_), and hyphens (-). Pattern: ^\\[a-z0-9_-\\]*\\[a-z\\]+\\[a-z0-9_-\\]*$ Example: my-catalog_01"];
+      extraComputeForAutomaticOptimization: BooleanOptional.t option
+        [@ocaml.doc
+          "If true, allocates additional compute resources for running automatic optimization operations. Default: false"]}
     let context_ = "CreateClusterMessage"
     let make ?dBName =
       fun ?clusterType ->
-        fun ?clusterSecurityGroups ->
-          fun ?vpcSecurityGroupIds ->
-            fun ?clusterSubnetGroupName ->
-              fun ?availabilityZone ->
-                fun ?preferredMaintenanceWindow ->
-                  fun ?clusterParameterGroupName ->
-                    fun ?automatedSnapshotRetentionPeriod ->
-                      fun ?manualSnapshotRetentionPeriod ->
-                        fun ?port ->
-                          fun ?clusterVersion ->
-                            fun ?allowVersionUpgrade ->
-                              fun ?numberOfNodes ->
-                                fun ?publiclyAccessible ->
-                                  fun ?encrypted ->
-                                    fun ?hsmClientCertificateIdentifier ->
-                                      fun ?hsmConfigurationIdentifier ->
-                                        fun ?elasticIp ->
-                                          fun ?tags ->
-                                            fun ?kmsKeyId ->
-                                              fun ?enhancedVpcRouting ->
-                                                fun ?additionalInfo ->
-                                                  fun ?iamRoles ->
-                                                    fun ?maintenanceTrackName
-                                                      ->
+        fun ?masterUserPassword ->
+          fun ?clusterSecurityGroups ->
+            fun ?vpcSecurityGroupIds ->
+              fun ?clusterSubnetGroupName ->
+                fun ?availabilityZone ->
+                  fun ?preferredMaintenanceWindow ->
+                    fun ?clusterParameterGroupName ->
+                      fun ?automatedSnapshotRetentionPeriod ->
+                        fun ?manualSnapshotRetentionPeriod ->
+                          fun ?port ->
+                            fun ?clusterVersion ->
+                              fun ?allowVersionUpgrade ->
+                                fun ?numberOfNodes ->
+                                  fun ?publiclyAccessible ->
+                                    fun ?encrypted ->
+                                      fun ?hsmClientCertificateIdentifier ->
+                                        fun ?hsmConfigurationIdentifier ->
+                                          fun ?elasticIp ->
+                                            fun ?tags ->
+                                              fun ?kmsKeyId ->
+                                                fun ?enhancedVpcRouting ->
+                                                  fun ?additionalInfo ->
+                                                    fun ?iamRoles ->
                                                       fun
-                                                        ?snapshotScheduleIdentifier
+                                                        ?maintenanceTrackName
                                                         ->
                                                         fun
-                                                          ?availabilityZoneRelocation
+                                                          ?snapshotScheduleIdentifier
                                                           ->
                                                           fun
-                                                            ?aquaConfigurationStatus
+                                                            ?availabilityZoneRelocation
                                                             ->
                                                             fun
-                                                              ?defaultIamRoleArn
+                                                              ?aquaConfigurationStatus
                                                               ->
                                                               fun
-                                                                ~clusterIdentifier
+                                                                ?defaultIamRoleArn
                                                                 ->
-                                                                fun ~nodeType
+                                                                fun
+                                                                  ?loadSampleData
                                                                   ->
                                                                   fun
-                                                                    ~masterUsername
+                                                                    ?manageMasterPassword
                                                                     ->
                                                                     fun
-                                                                    ~masterUserPassword
+                                                                    ?masterPasswordSecretKmsKeyId
+                                                                    ->
+                                                                    fun
+                                                                    ?ipAddressType
+                                                                    ->
+                                                                    fun
+                                                                    ?multiAZ
+                                                                    ->
+                                                                    fun
+                                                                    ?redshiftIdcApplicationArn
+                                                                    ->
+                                                                    fun
+                                                                    ?catalogName
+                                                                    ->
+                                                                    fun
+                                                                    ?extraComputeForAutomaticOptimization
+                                                                    ->
+                                                                    fun
+                                                                    ~clusterIdentifier
+                                                                    ->
+                                                                    fun
+                                                                    ~nodeType
+                                                                    ->
+                                                                    fun
+                                                                    ~masterUsername
                                                                     ->
                                                                     fun () ->
                                                                     {
                                                                     dBName;
                                                                     clusterType;
+                                                                    masterUserPassword;
                                                                     clusterSecurityGroups;
                                                                     vpcSecurityGroupIds;
                                                                     clusterSubnetGroupName;
@@ -24054,10 +30700,17 @@ module CreateClusterMessage =
                                                                     availabilityZoneRelocation;
                                                                     aquaConfigurationStatus;
                                                                     defaultIamRoleArn;
+                                                                    loadSampleData;
+                                                                    manageMasterPassword;
+                                                                    masterPasswordSecretKmsKeyId;
+                                                                    ipAddressType;
+                                                                    multiAZ;
+                                                                    redshiftIdcApplicationArn;
+                                                                    catalogName;
+                                                                    extraComputeForAutomaticOptimization;
                                                                     clusterIdentifier;
                                                                     nodeType;
-                                                                    masterUsername;
-                                                                    masterUserPassword
+                                                                    masterUsername
                                                                     }
     let to_value x =
       structure_to_value
@@ -24067,7 +30720,7 @@ module CreateClusterMessage =
         ("NodeType", (Some (String_.to_value x.nodeType)));
         ("MasterUsername", (Some (String_.to_value x.masterUsername)));
         ("MasterUserPassword",
-          (Some (String_.to_value x.masterUserPassword)));
+          (Option.map x.masterUserPassword ~f:SensitiveString.to_value));
         ("ClusterSecurityGroups",
           (Option.map x.clusterSecurityGroups
              ~f:ClusterSecurityGroupNameList.to_value));
@@ -24119,9 +30772,44 @@ module CreateClusterMessage =
           (Option.map x.aquaConfigurationStatus
              ~f:AquaConfigurationStatus.to_value));
         ("DefaultIamRoleArn",
-          (Option.map x.defaultIamRoleArn ~f:String_.to_value))]
+          (Option.map x.defaultIamRoleArn ~f:String_.to_value));
+        ("LoadSampleData", (Option.map x.loadSampleData ~f:String_.to_value));
+        ("ManageMasterPassword",
+          (Option.map x.manageMasterPassword ~f:BooleanOptional.to_value));
+        ("MasterPasswordSecretKmsKeyId",
+          (Option.map x.masterPasswordSecretKmsKeyId ~f:String_.to_value));
+        ("IpAddressType", (Option.map x.ipAddressType ~f:String_.to_value));
+        ("MultiAZ", (Option.map x.multiAZ ~f:BooleanOptional.to_value));
+        ("RedshiftIdcApplicationArn",
+          (Option.map x.redshiftIdcApplicationArn ~f:String_.to_value));
+        ("CatalogName",
+          (Option.map x.catalogName ~f:CatalogNameString.to_value));
+        ("ExtraComputeForAutomaticOptimization",
+          (Option.map x.extraComputeForAutomaticOptimization
+             ~f:BooleanOptional.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let extraComputeForAutomaticOptimization =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "ExtraComputeForAutomaticOptimization") in
+      let catalogName =
+        (Option.map ~f:CatalogNameString.of_xml)
+          (Xml.child xml_arg0 "CatalogName") in
+      let redshiftIdcApplicationArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "RedshiftIdcApplicationArn") in
+      let multiAZ =
+        (Option.map ~f:BooleanOptional.of_xml) (Xml.child xml_arg0 "MultiAZ") in
+      let ipAddressType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "IpAddressType") in
+      let masterPasswordSecretKmsKeyId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "MasterPasswordSecretKmsKeyId") in
+      let manageMasterPassword =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "ManageMasterPassword") in
+      let loadSampleData =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "LoadSampleData") in
       let defaultIamRoleArn =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "DefaultIamRoleArn") in
@@ -24196,8 +30884,8 @@ module CreateClusterMessage =
         (Option.map ~f:ClusterSecurityGroupNameList.of_xml)
           (Xml.child xml_arg0 "ClusterSecurityGroups") in
       let masterUserPassword =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MasterUserPassword") in
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "MasterUserPassword") in
       let masterUsername =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MasterUsername") in
@@ -24210,7 +30898,10 @@ module CreateClusterMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       let dBName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DBName") in
-      make ?defaultIamRoleArn ?aquaConfigurationStatus
+      make ?extraComputeForAutomaticOptimization ?catalogName
+        ?redshiftIdcApplicationArn ?multiAZ ?ipAddressType
+        ?masterPasswordSecretKmsKeyId ?manageMasterPassword ?loadSampleData
+        ?defaultIamRoleArn ?aquaConfigurationStatus
         ?availabilityZoneRelocation ?snapshotScheduleIdentifier
         ?maintenanceTrackName ?iamRoles ?additionalInfo ?enhancedVpcRouting
         ?kmsKeyId ?tags ?elasticIp ?hsmConfigurationIdentifier
@@ -24219,70 +30910,87 @@ module CreateClusterMessage =
         ?manualSnapshotRetentionPeriod ?automatedSnapshotRetentionPeriod
         ?clusterParameterGroupName ?preferredMaintenanceWindow
         ?availabilityZone ?clusterSubnetGroupName ?vpcSecurityGroupIds
-        ?clusterSecurityGroups ~masterUserPassword ~masterUsername ~nodeType
+        ?clusterSecurityGroups ?masterUserPassword ~masterUsername ~nodeType
         ?clusterType ~clusterIdentifier ?dBName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let extraComputeForAutomaticOptimization =
+        field_map json__ "ExtraComputeForAutomaticOptimization"
+          BooleanOptional.of_json in
+      let catalogName =
+        field_map json__ "CatalogName" CatalogNameString.of_json in
+      let redshiftIdcApplicationArn =
+        field_map json__ "RedshiftIdcApplicationArn" String_.of_json in
+      let multiAZ = field_map json__ "MultiAZ" BooleanOptional.of_json in
+      let ipAddressType = field_map json__ "IpAddressType" String_.of_json in
+      let masterPasswordSecretKmsKeyId =
+        field_map json__ "MasterPasswordSecretKmsKeyId" String_.of_json in
+      let manageMasterPassword =
+        field_map json__ "ManageMasterPassword" BooleanOptional.of_json in
+      let loadSampleData = field_map json__ "LoadSampleData" String_.of_json in
       let defaultIamRoleArn =
-        field_map json "DefaultIamRoleArn" String_.of_json in
+        field_map json__ "DefaultIamRoleArn" String_.of_json in
       let aquaConfigurationStatus =
-        field_map json "AquaConfigurationStatus"
+        field_map json__ "AquaConfigurationStatus"
           AquaConfigurationStatus.of_json in
       let availabilityZoneRelocation =
-        field_map json "AvailabilityZoneRelocation" BooleanOptional.of_json in
+        field_map json__ "AvailabilityZoneRelocation" BooleanOptional.of_json in
       let snapshotScheduleIdentifier =
-        field_map json "SnapshotScheduleIdentifier" String_.of_json in
+        field_map json__ "SnapshotScheduleIdentifier" String_.of_json in
       let maintenanceTrackName =
-        field_map json "MaintenanceTrackName" String_.of_json in
-      let iamRoles = field_map json "IamRoles" IamRoleArnList.of_json in
-      let additionalInfo = field_map json "AdditionalInfo" String_.of_json in
+        field_map json__ "MaintenanceTrackName" String_.of_json in
+      let iamRoles = field_map json__ "IamRoles" IamRoleArnList.of_json in
+      let additionalInfo = field_map json__ "AdditionalInfo" String_.of_json in
       let enhancedVpcRouting =
-        field_map json "EnhancedVpcRouting" BooleanOptional.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" String_.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let elasticIp = field_map json "ElasticIp" String_.of_json in
+        field_map json__ "EnhancedVpcRouting" BooleanOptional.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let elasticIp = field_map json__ "ElasticIp" String_.of_json in
       let hsmConfigurationIdentifier =
-        field_map json "HsmConfigurationIdentifier" String_.of_json in
+        field_map json__ "HsmConfigurationIdentifier" String_.of_json in
       let hsmClientCertificateIdentifier =
-        field_map json "HsmClientCertificateIdentifier" String_.of_json in
-      let encrypted = field_map json "Encrypted" BooleanOptional.of_json in
+        field_map json__ "HsmClientCertificateIdentifier" String_.of_json in
+      let encrypted = field_map json__ "Encrypted" BooleanOptional.of_json in
       let publiclyAccessible =
-        field_map json "PubliclyAccessible" BooleanOptional.of_json in
+        field_map json__ "PubliclyAccessible" BooleanOptional.of_json in
       let numberOfNodes =
-        field_map json "NumberOfNodes" IntegerOptional.of_json in
+        field_map json__ "NumberOfNodes" IntegerOptional.of_json in
       let allowVersionUpgrade =
-        field_map json "AllowVersionUpgrade" BooleanOptional.of_json in
-      let clusterVersion = field_map json "ClusterVersion" String_.of_json in
-      let port = field_map json "Port" IntegerOptional.of_json in
+        field_map json__ "AllowVersionUpgrade" BooleanOptional.of_json in
+      let clusterVersion = field_map json__ "ClusterVersion" String_.of_json in
+      let port = field_map json__ "Port" IntegerOptional.of_json in
       let manualSnapshotRetentionPeriod =
-        field_map json "ManualSnapshotRetentionPeriod"
+        field_map json__ "ManualSnapshotRetentionPeriod"
           IntegerOptional.of_json in
       let automatedSnapshotRetentionPeriod =
-        field_map json "AutomatedSnapshotRetentionPeriod"
+        field_map json__ "AutomatedSnapshotRetentionPeriod"
           IntegerOptional.of_json in
       let clusterParameterGroupName =
-        field_map json "ClusterParameterGroupName" String_.of_json in
+        field_map json__ "ClusterParameterGroupName" String_.of_json in
       let preferredMaintenanceWindow =
-        field_map json "PreferredMaintenanceWindow" String_.of_json in
+        field_map json__ "PreferredMaintenanceWindow" String_.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" String_.of_json in
+        field_map json__ "AvailabilityZone" String_.of_json in
       let clusterSubnetGroupName =
-        field_map json "ClusterSubnetGroupName" String_.of_json in
+        field_map json__ "ClusterSubnetGroupName" String_.of_json in
       let vpcSecurityGroupIds =
-        field_map json "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
+        field_map json__ "VpcSecurityGroupIds" VpcSecurityGroupIdList.of_json in
       let clusterSecurityGroups =
-        field_map json "ClusterSecurityGroups"
+        field_map json__ "ClusterSecurityGroups"
           ClusterSecurityGroupNameList.of_json in
       let masterUserPassword =
-        field_map_exn json "MasterUserPassword" String_.of_json in
+        field_map json__ "MasterUserPassword" SensitiveString.of_json in
       let masterUsername =
-        field_map_exn json "MasterUsername" String_.of_json in
-      let nodeType = field_map_exn json "NodeType" String_.of_json in
-      let clusterType = field_map json "ClusterType" String_.of_json in
+        field_map_exn json__ "MasterUsername" String_.of_json in
+      let nodeType = field_map_exn json__ "NodeType" String_.of_json in
+      let clusterType = field_map json__ "ClusterType" String_.of_json in
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
-      let dBName = field_map json "DBName" String_.of_json in
-      make ?defaultIamRoleArn ?aquaConfigurationStatus
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
+      let dBName = field_map json__ "DBName" String_.of_json in
+      make ?extraComputeForAutomaticOptimization ?catalogName
+        ?redshiftIdcApplicationArn ?multiAZ ?ipAddressType
+        ?masterPasswordSecretKmsKeyId ?manageMasterPassword ?loadSampleData
+        ?defaultIamRoleArn ?aquaConfigurationStatus
         ?availabilityZoneRelocation ?snapshotScheduleIdentifier
         ?maintenanceTrackName ?iamRoles ?additionalInfo ?enhancedVpcRouting
         ?kmsKeyId ?tags ?elasticIp ?hsmConfigurationIdentifier
@@ -24291,7 +30999,7 @@ module CreateClusterMessage =
         ?manualSnapshotRetentionPeriod ?automatedSnapshotRetentionPeriod
         ?clusterParameterGroupName ?preferredMaintenanceWindow
         ?availabilityZone ?clusterSubnetGroupName ?vpcSecurityGroupIds
-        ?clusterSecurityGroups ~masterUserPassword ~masterUsername ~nodeType
+        ?clusterSecurityGroups ?masterUserPassword ~masterUsername ~nodeType
         ?clusterType ~clusterIdentifier ?dBName ()
     let to_json v = composed_to_json to_value v
   end
@@ -24396,11 +31104,11 @@ module CreateAuthenticationProfileResult =
           (Xml.child xml_arg0 "AuthenticationProfileName") in
       make ?authenticationProfileContent ?authenticationProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationProfileContent =
-        field_map json "AuthenticationProfileContent" String_.of_json in
+        field_map json__ "AuthenticationProfileContent" String_.of_json in
       let authenticationProfileName =
-        field_map json "AuthenticationProfileName"
+        field_map json__ "AuthenticationProfileName"
           AuthenticationProfileNameString.of_json in
       make ?authenticationProfileContent ?authenticationProfileName ()
     let to_json v = composed_to_json to_value v
@@ -24439,11 +31147,11 @@ module CreateAuthenticationProfileMessage =
              "AuthenticationProfileName") in
       make ~authenticationProfileContent ~authenticationProfileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationProfileContent =
-        field_map_exn json "AuthenticationProfileContent" String_.of_json in
+        field_map_exn json__ "AuthenticationProfileContent" String_.of_json in
       let authenticationProfileName =
-        field_map_exn json "AuthenticationProfileName"
+        field_map_exn json__ "AuthenticationProfileName"
           AuthenticationProfileNameString.of_json in
       make ~authenticationProfileContent ~authenticationProfileName ()
     let to_json v = composed_to_json to_value v
@@ -24459,8 +31167,8 @@ module CopyClusterSnapshotResult =
       copyClusterSnapshotResult: copyClusterSnapshotResult ;
       responseMetaData: responseMetaData }
     type error =
-      [
-        `ClusterSnapshotAlreadyExistsFault of
+      [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
+      | `ClusterSnapshotAlreadyExistsFault of
           ClusterSnapshotAlreadyExistsFault.t 
       | `ClusterSnapshotNotFoundFault of ClusterSnapshotNotFoundFault.t 
       | `ClusterSnapshotQuotaExceededFault of
@@ -24475,6 +31183,8 @@ module CopyClusterSnapshotResult =
         { copyClusterSnapshotResult = { snapshot }; responseMetaData = () }
     let error_of_json name json =
       match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
       | "ClusterSnapshotAlreadyExistsFault" ->
           `ClusterSnapshotAlreadyExistsFault
             (ClusterSnapshotAlreadyExistsFault.of_json json)
@@ -24495,6 +31205,8 @@ module CopyClusterSnapshotResult =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
       | "ClusterSnapshotAlreadyExistsFault" ->
           `ClusterSnapshotAlreadyExistsFault
             (ClusterSnapshotAlreadyExistsFault.of_xml xml)
@@ -24514,6 +31226,10 @@ module CopyClusterSnapshotResult =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ClusterNotFoundFault"));
+            ("details", (ClusterNotFoundFault.to_json e))]
       | `ClusterSnapshotAlreadyExistsFault e ->
           `Assoc
             [("error", (`String "ClusterSnapshotAlreadyExistsFault"));
@@ -24552,8 +31268,8 @@ module CopyClusterSnapshotResult =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -24616,16 +31332,16 @@ module CopyClusterSnapshotMessage =
       make ?manualSnapshotRetentionPeriod ~targetSnapshotIdentifier
         ?sourceSnapshotClusterIdentifier ~sourceSnapshotIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let manualSnapshotRetentionPeriod =
-        field_map json "ManualSnapshotRetentionPeriod"
+        field_map json__ "ManualSnapshotRetentionPeriod"
           IntegerOptional.of_json in
       let targetSnapshotIdentifier =
-        field_map_exn json "TargetSnapshotIdentifier" String_.of_json in
+        field_map_exn json__ "TargetSnapshotIdentifier" String_.of_json in
       let sourceSnapshotClusterIdentifier =
-        field_map json "SourceSnapshotClusterIdentifier" String_.of_json in
+        field_map json__ "SourceSnapshotClusterIdentifier" String_.of_json in
       let sourceSnapshotIdentifier =
-        field_map_exn json "SourceSnapshotIdentifier" String_.of_json in
+        field_map_exn json__ "SourceSnapshotIdentifier" String_.of_json in
       make ?manualSnapshotRetentionPeriod ~targetSnapshotIdentifier
         ?sourceSnapshotClusterIdentifier ~sourceSnapshotIdentifier ()
     let to_json v = composed_to_json to_value v
@@ -24703,9 +31419,9 @@ module ClustersMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?clusters ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusters = field_map json "Clusters" ClusterList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+    let of_json json__ =
+      let clusters = field_map json__ "Clusters" ClusterList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?clusters ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output from the DescribeClusters action."]
@@ -24766,10 +31482,10 @@ module ClusterVersionsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?clusterVersions ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterVersions =
-        field_map json "ClusterVersions" ClusterVersionList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "ClusterVersions" ClusterVersionList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?clusterVersions ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -24853,10 +31569,10 @@ module ClusterSubnetGroupMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?clusterSubnetGroups ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterSubnetGroups =
-        field_map json "ClusterSubnetGroups" ClusterSubnetGroups.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "ClusterSubnetGroups" ClusterSubnetGroups.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?clusterSubnetGroups ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -24944,10 +31660,11 @@ module ClusterSecurityGroupMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?clusterSecurityGroups ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterSecurityGroups =
-        field_map json "ClusterSecurityGroups" ClusterSecurityGroups.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "ClusterSecurityGroups"
+          ClusterSecurityGroups.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?clusterSecurityGroups ?marker ()
     let to_json v = composed_to_json to_value v
   end
@@ -25034,10 +31751,10 @@ module ClusterParameterGroupsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?parameterGroups ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroups =
-        field_map json "ParameterGroups" ParameterGroupList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "ParameterGroups" ParameterGroupList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?parameterGroups ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25129,11 +31846,11 @@ module ClusterParameterGroupNameMessage =
           (Xml.child xml_arg0 "ParameterGroupName") in
       make ?parameterGroupStatus ?parameterGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterGroupStatus =
-        field_map json "ParameterGroupStatus" String_.of_json in
+        field_map json__ "ParameterGroupStatus" String_.of_json in
       let parameterGroupName =
-        field_map json "ParameterGroupName" String_.of_json in
+        field_map json__ "ParameterGroupName" String_.of_json in
       make ?parameterGroupStatus ?parameterGroupName ()
     let to_json v = composed_to_json to_value v
   end
@@ -25209,13 +31926,115 @@ module ClusterParameterGroupDetails =
           (Xml.child xml_arg0 "Parameters") in
       make ?marker ?parameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" String_.of_json in
-      let parameters = field_map json "Parameters" ParametersList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let parameters = field_map json__ "Parameters" ParametersList.of_json in
       make ?marker ?parameters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the output from the DescribeClusterParameters action."]
+module ClusterExtendedCredentials =
+  struct
+    type getClusterCredentialsWithIAMResult =
+      {
+      dbUser: String_.t option
+        [@ocaml.doc
+          "A database user name that you provide when you connect to a database. The database user is mapped 1:1 to the source IAM identity."];
+      dbPassword: SensitiveString.t option
+        [@ocaml.doc
+          "A temporary password that you provide when you connect to a database."];
+      expiration: TStamp.t option
+        [@ocaml.doc
+          "The time (UTC) when the temporary password expires. After this timestamp, a log in with the temporary password fails."];
+      nextRefreshTime: TStamp.t option
+        [@ocaml.doc "Reserved for future use."]}
+    and responseMetaData = unit
+    and t =
+      {
+      getClusterCredentialsWithIAMResult: getClusterCredentialsWithIAMResult ;
+      responseMetaData: responseMetaData }
+    type error =
+      [ `ClusterNotFoundFault of ClusterNotFoundFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let context_ = "ClusterExtendedCredentials"
+    let make ?dbUser =
+      fun ?dbPassword ->
+        fun ?expiration ->
+          fun ?nextRefreshTime ->
+            fun () ->
+              {
+                getClusterCredentialsWithIAMResult =
+                  { dbUser; dbPassword; expiration; nextRefreshTime };
+                responseMetaData = ()
+              }
+    let error_of_json name json =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClusterNotFoundFault" ->
+          `ClusterNotFoundFault (ClusterNotFoundFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClusterNotFoundFault e ->
+          `Assoc
+            [("error", (`String "ClusterNotFoundFault"));
+            ("details", (ClusterNotFoundFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value t =
+      let x = t.getClusterCredentialsWithIAMResult in
+      structure_to_wrapped_value
+        [("DbUser", (Option.map x.dbUser ~f:String_.to_value));
+        ("DbPassword", (Option.map x.dbPassword ~f:SensitiveString.to_value));
+        ("Expiration", (Option.map x.expiration ~f:TStamp.to_value));
+        ("NextRefreshTime",
+          (Option.map x.nextRefreshTime ~f:TStamp.to_value))]
+        ~wrapper:"GetClusterCredentialsWithIAMResult"
+        ~response:"ResponseMetaData"
+    let to_query v = to_query to_value v
+    let of_xml t =
+      let xml_arg0 =
+        Xml.child_exn ~context:context_ t
+          "GetClusterCredentialsWithIAMResult" in
+      let nextRefreshTime =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "NextRefreshTime") in
+      let expiration =
+        (Option.map ~f:TStamp.of_xml) (Xml.child xml_arg0 "Expiration") in
+      let dbPassword =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "DbPassword") in
+      let dbUser =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
+      make ?nextRefreshTime ?expiration ?dbPassword ?dbUser ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextRefreshTime = field_map json__ "NextRefreshTime" TStamp.of_json in
+      let expiration = field_map json__ "Expiration" TStamp.of_json in
+      let dbPassword = field_map json__ "DbPassword" SensitiveString.of_json in
+      let dbUser = field_map json__ "DbUser" String_.of_json in
+      make ?nextRefreshTime ?expiration ?dbPassword ?dbUser ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a database user name and temporary password with temporary authorization to log in to an Amazon Redshift database. The database user is mapped 1:1 to the source Identity and Access Management (IAM) identity. For more information about IAM identities, see IAM Identities (users, user groups, and roles) in the Amazon Web Services Identity and Access Management User Guide. The Identity and Access Management (IAM) identity that runs this operation must have an IAM policy attached that allows access to all necessary actions and resources. For more information about permissions, see Using identity-based policies (IAM policies) in the Amazon Redshift Cluster Management Guide."]
 module ClusterDbRevisionsMessage =
   struct
     type describeClusterDbRevisionsResult =
@@ -25293,10 +32112,10 @@ module ClusterDbRevisionsMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?clusterDbRevisions ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterDbRevisions =
-        field_map json "ClusterDbRevisions" ClusterDbRevisionsList.of_json in
-      let marker = field_map json "Marker" String_.of_json in
+        field_map json__ "ClusterDbRevisions" ClusterDbRevisionsList.of_json in
+      let marker = field_map json__ "Marker" String_.of_json in
       make ?clusterDbRevisions ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of ClusterDbRevision objects."]
@@ -25306,7 +32125,7 @@ module ClusterCredentials =
       {
       dbUser: String_.t option
         [@ocaml.doc
-          "A database user name that is authorized to log on to the database DbName using the password DbPassword. If the specified DbUser exists in the database, the new user name has the same database privileges as the the user named in DbUser. By default, the user is added to PUBLIC. If the DbGroups parameter is specifed, DbUser is added to the listed groups for any sessions created using these credentials."];
+          "A database user name that is authorized to log on to the database DbName using the password DbPassword. If the specified DbUser exists in the database, the new user name has the same database permissions as the the user named in DbUser. By default, the user is added to PUBLIC. If the DbGroups parameter is specifed, DbUser is added to the listed groups for any sessions created using these credentials."];
       dbPassword: SensitiveString.t option
         [@ocaml.doc
           "A temporary password that authorizes the user name returned by DbUser to log on to the database DbName."];
@@ -25383,10 +32202,10 @@ module ClusterCredentials =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DbUser") in
       make ?expiration ?dbPassword ?dbUser ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expiration = field_map json "Expiration" TStamp.of_json in
-      let dbPassword = field_map json "DbPassword" SensitiveString.of_json in
-      let dbUser = field_map json "DbUser" String_.of_json in
+    let of_json json__ =
+      let expiration = field_map json__ "Expiration" TStamp.of_json in
+      let dbPassword = field_map json__ "DbPassword" SensitiveString.of_json in
+      let dbUser = field_map json__ "DbUser" String_.of_json in
       make ?expiration ?dbPassword ?dbUser ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25410,9 +32229,9 @@ module CancelResizeMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterIdentifier") in
       make ~clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterIdentifier =
-        field_map_exn json "ClusterIdentifier" String_.of_json in
+        field_map_exn json__ "ClusterIdentifier" String_.of_json in
       make ~clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Cancels a resize operation for a cluster."]
@@ -25502,11 +32321,11 @@ module BatchModifyClusterSnapshotsOutputMessage =
           (Xml.child xml_arg0 "Resources") in
       make ?errors ?resources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map json "Errors" BatchSnapshotOperationErrors.of_json in
+        field_map json__ "Errors" BatchSnapshotOperationErrors.of_json in
       let resources =
-        field_map json "Resources" SnapshotIdentifierList.of_json in
+        field_map json__ "Resources" SnapshotIdentifierList.of_json in
       make ?errors ?resources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies the settings for a set of cluster snapshots."]
@@ -25547,13 +32366,13 @@ module BatchModifyClusterSnapshotsMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "SnapshotIdentifierList") in
       make ?force ?manualSnapshotRetentionPeriod ~snapshotIdentifierList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let force = field_map json "Force" Boolean.of_json in
+    let of_json json__ =
+      let force = field_map json__ "Force" Boolean.of_json in
       let manualSnapshotRetentionPeriod =
-        field_map json "ManualSnapshotRetentionPeriod"
+        field_map json__ "ManualSnapshotRetentionPeriod"
           IntegerOptional.of_json in
       let snapshotIdentifierList =
-        field_map_exn json "SnapshotIdentifierList"
+        field_map_exn json__ "SnapshotIdentifierList"
           SnapshotIdentifierList.of_json in
       make ?force ?manualSnapshotRetentionPeriod ~snapshotIdentifierList ()
     let to_json v = composed_to_json to_value v
@@ -25631,11 +32450,11 @@ module BatchDeleteClusterSnapshotsResult =
           (Xml.child xml_arg0 "Resources") in
       make ?errors ?resources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map json "Errors" BatchSnapshotOperationErrorList.of_json in
+        field_map json__ "Errors" BatchSnapshotOperationErrorList.of_json in
       let resources =
-        field_map json "Resources" SnapshotIdentifierList.of_json in
+        field_map json__ "Resources" SnapshotIdentifierList.of_json in
       make ?errors ?resources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a set of cluster snapshots."]
@@ -25659,9 +32478,9 @@ module BatchDeleteClusterSnapshotsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Identifiers") in
       make ~identifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identifiers =
-        field_map_exn json "Identifiers"
+        field_map_exn json__ "Identifiers"
           DeleteClusterSnapshotMessageList.of_json in
       make ~identifiers ()
     let to_json v = composed_to_json to_value v
@@ -25685,6 +32504,7 @@ module AuthorizeSnapshotAccessResult =
       | `InvalidClusterSnapshotStateFault of
           InvalidClusterSnapshotStateFault.t 
       | `LimitExceededFault of LimitExceededFault.t 
+      | `UnsupportedOperationFault of UnsupportedOperationFault.t 
       | `Unknown_operation_error of (string * string option) ]
     let context_ = "AuthorizeSnapshotAccessResult"
     let make ?snapshot =
@@ -25710,6 +32530,8 @@ module AuthorizeSnapshotAccessResult =
             (InvalidClusterSnapshotStateFault.of_json json)
       | "LimitExceededFault" ->
           `LimitExceededFault (LimitExceededFault.of_json json)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -25732,6 +32554,8 @@ module AuthorizeSnapshotAccessResult =
             (InvalidClusterSnapshotStateFault.of_xml xml)
       | "LimitExceededFault" ->
           `LimitExceededFault (LimitExceededFault.of_xml xml)
+      | "UnsupportedOperationFault" ->
+          `UnsupportedOperationFault (UnsupportedOperationFault.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -25760,6 +32584,10 @@ module AuthorizeSnapshotAccessResult =
           `Assoc
             [("error", (`String "LimitExceededFault"));
             ("details", (LimitExceededFault.to_json e))]
+      | `UnsupportedOperationFault e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationFault"));
+            ("details", (UnsupportedOperationFault.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -25778,8 +32606,8 @@ module AuthorizeSnapshotAccessResult =
         (Option.map ~f:Snapshot.of_xml) (Xml.child xml_arg0 "Snapshot") in
       make ?snapshot ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snapshot = field_map json "Snapshot" Snapshot.of_json in
+    let of_json json__ =
+      let snapshot = field_map json__ "Snapshot" Snapshot.of_json in
       make ?snapshot ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25788,29 +32616,35 @@ module AuthorizeSnapshotAccessMessage =
   struct
     type nonrec t =
       {
-      snapshotIdentifier: String_.t
+      snapshotIdentifier: String_.t option
         [@ocaml.doc
           "The identifier of the snapshot the account is authorized to restore."];
+      snapshotArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the snapshot to authorize access to."];
       snapshotClusterIdentifier: String_.t option
         [@ocaml.doc
-          "The identifier of the cluster the snapshot was created from. This parameter is required if your IAM user has a policy containing a snapshot resource element that specifies anything other than * for the cluster name."];
+          "The identifier of the cluster the snapshot was created from. If the snapshot to access doesn't exist and the associated IAM policy doesn't allow access to all (*) snapshots - This parameter is required. Otherwise, permissions aren't available to check if the snapshot exists. If the snapshot to access exists - This parameter isn't required. Redshift can retrieve the cluster identifier and use it to validate snapshot authorization."];
       accountWithRestoreAccess: String_.t
         [@ocaml.doc
           "The identifier of the Amazon Web Services account authorized to restore the specified snapshot. To share a snapshot with Amazon Web Services Support, specify amazon-redshift-support."]}
     let context_ = "AuthorizeSnapshotAccessMessage"
-    let make ?snapshotClusterIdentifier =
-      fun ~snapshotIdentifier ->
-        fun ~accountWithRestoreAccess ->
-          fun () ->
-            {
-              snapshotClusterIdentifier;
-              snapshotIdentifier;
-              accountWithRestoreAccess
-            }
+    let make ?snapshotIdentifier =
+      fun ?snapshotArn ->
+        fun ?snapshotClusterIdentifier ->
+          fun ~accountWithRestoreAccess ->
+            fun () ->
+              {
+                snapshotIdentifier;
+                snapshotArn;
+                snapshotClusterIdentifier;
+                accountWithRestoreAccess
+              }
     let to_value x =
       structure_to_value
         [("SnapshotIdentifier",
-           (Some (String_.to_value x.snapshotIdentifier)));
+           (Option.map x.snapshotIdentifier ~f:String_.to_value));
+        ("SnapshotArn", (Option.map x.snapshotArn ~f:String_.to_value));
         ("SnapshotClusterIdentifier",
           (Option.map x.snapshotClusterIdentifier ~f:String_.to_value));
         ("AccountWithRestoreAccess",
@@ -25824,21 +32658,24 @@ module AuthorizeSnapshotAccessMessage =
       let snapshotClusterIdentifier =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "SnapshotClusterIdentifier") in
+      let snapshotArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SnapshotArn") in
       let snapshotIdentifier =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SnapshotIdentifier") in
-      make ~accountWithRestoreAccess ?snapshotClusterIdentifier
-        ~snapshotIdentifier ()
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "SnapshotIdentifier") in
+      make ~accountWithRestoreAccess ?snapshotClusterIdentifier ?snapshotArn
+        ?snapshotIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accountWithRestoreAccess =
-        field_map_exn json "AccountWithRestoreAccess" String_.of_json in
+        field_map_exn json__ "AccountWithRestoreAccess" String_.of_json in
       let snapshotClusterIdentifier =
-        field_map json "SnapshotClusterIdentifier" String_.of_json in
+        field_map json__ "SnapshotClusterIdentifier" String_.of_json in
+      let snapshotArn = field_map json__ "SnapshotArn" String_.of_json in
       let snapshotIdentifier =
-        field_map_exn json "SnapshotIdentifier" String_.of_json in
-      make ~accountWithRestoreAccess ?snapshotClusterIdentifier
-        ~snapshotIdentifier ()
+        field_map json__ "SnapshotIdentifier" String_.of_json in
+      make ~accountWithRestoreAccess ?snapshotClusterIdentifier ?snapshotArn
+        ?snapshotIdentifier ()
     let to_json v = composed_to_json to_value v
   end
 module AuthorizeEndpointAccessMessage =
@@ -25875,11 +32712,11 @@ module AuthorizeEndpointAccessMessage =
           (Xml.child xml_arg0 "ClusterIdentifier") in
       make ?vpcIds ~account ?clusterIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcIds = field_map json "VpcIds" VpcIdentifierList.of_json in
-      let account = field_map_exn json "Account" String_.of_json in
+    let of_json json__ =
+      let vpcIds = field_map json__ "VpcIds" VpcIdentifierList.of_json in
+      let account = field_map_exn json__ "Account" String_.of_json in
       let clusterIdentifier =
-        field_map json "ClusterIdentifier" String_.of_json in
+        field_map json__ "ClusterIdentifier" String_.of_json in
       make ?vpcIds ~account ?clusterIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Grants access to a cluster."]
@@ -25889,37 +32726,48 @@ module AuthorizeDataShareMessage =
       {
       dataShareArn: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the datashare that producers are to authorize sharing for."];
+          "The Amazon Resource Name (ARN) of the datashare namespace that producers are to authorize sharing for."];
       consumerIdentifier: String_.t
         [@ocaml.doc
-          "The identifier of the data consumer that is authorized to access the datashare. This identifier is an Amazon Web Services account ID or a keyword, such as ADX."]}
+          "The identifier of the data consumer that is authorized to access the datashare. This identifier is an Amazon Web Services account ID or a keyword, such as ADX."];
+      allowWrites: BooleanOptional.t option
+        [@ocaml.doc
+          "If set to true, allows write operations for a datashare."]}
     let context_ = "AuthorizeDataShareMessage"
-    let make ~dataShareArn =
-      fun ~consumerIdentifier ->
-        fun () -> { dataShareArn; consumerIdentifier }
+    let make ?allowWrites =
+      fun ~dataShareArn ->
+        fun ~consumerIdentifier ->
+          fun () -> { allowWrites; dataShareArn; consumerIdentifier }
     let to_value x =
       structure_to_value
         [("DataShareArn", (Some (String_.to_value x.dataShareArn)));
         ("ConsumerIdentifier",
-          (Some (String_.to_value x.consumerIdentifier)))]
+          (Some (String_.to_value x.consumerIdentifier)));
+        ("AllowWrites",
+          (Option.map x.allowWrites ~f:BooleanOptional.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let allowWrites =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "AllowWrites") in
       let consumerIdentifier =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConsumerIdentifier") in
       let dataShareArn =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataShareArn") in
-      make ~consumerIdentifier ~dataShareArn ()
+      make ?allowWrites ~consumerIdentifier ~dataShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let allowWrites =
+        field_map json__ "AllowWrites" BooleanOptional.of_json in
       let consumerIdentifier =
-        field_map_exn json "ConsumerIdentifier" String_.of_json in
-      let dataShareArn = field_map_exn json "DataShareArn" String_.of_json in
-      make ~consumerIdentifier ~dataShareArn ()
+        field_map_exn json__ "ConsumerIdentifier" String_.of_json in
+      let dataShareArn = field_map_exn json__ "DataShareArn" String_.of_json in
+      make ?allowWrites ~consumerIdentifier ~dataShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "From a data producer account, authorizes the sharing of a datashare with one or more consumer accounts or managing entities. To authorize a datashare for a data consumer, the producer account must have the correct access privileges."]
+       "From a data producer account, authorizes the sharing of a datashare with one or more consumer accounts or managing entities. To authorize a datashare for a data consumer, the producer account must have the correct access permissions."]
 module AuthorizeClusterSecurityGroupIngressResult =
   struct
     type authorizeClusterSecurityGroupIngressResult =
@@ -26022,9 +32870,9 @@ module AuthorizeClusterSecurityGroupIngressResult =
           (Xml.child xml_arg0 "ClusterSecurityGroup") in
       make ?clusterSecurityGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterSecurityGroup =
-        field_map json "ClusterSecurityGroup" ClusterSecurityGroup.of_json in
+        field_map json__ "ClusterSecurityGroup" ClusterSecurityGroup.of_json in
       make ?clusterSecurityGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -26083,14 +32931,14 @@ module AuthorizeClusterSecurityGroupIngressMessage =
       make ?eC2SecurityGroupOwnerId ?eC2SecurityGroupName ?cIDRIP
         ~clusterSecurityGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eC2SecurityGroupOwnerId =
-        field_map json "EC2SecurityGroupOwnerId" String_.of_json in
+        field_map json__ "EC2SecurityGroupOwnerId" String_.of_json in
       let eC2SecurityGroupName =
-        field_map json "EC2SecurityGroupName" String_.of_json in
-      let cIDRIP = field_map json "CIDRIP" String_.of_json in
+        field_map json__ "EC2SecurityGroupName" String_.of_json in
+      let cIDRIP = field_map json__ "CIDRIP" String_.of_json in
       let clusterSecurityGroupName =
-        field_map_exn json "ClusterSecurityGroupName" String_.of_json in
+        field_map_exn json__ "ClusterSecurityGroupName" String_.of_json in
       make ?eC2SecurityGroupOwnerId ?eC2SecurityGroupName ?cIDRIP
         ~clusterSecurityGroupName ()
     let to_json v = composed_to_json to_value v
@@ -26101,37 +32949,47 @@ module AssociateDataShareConsumerMessage =
       {
       dataShareArn: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the datashare that the consumer is to use with the account or the namespace."];
+          "The Amazon Resource Name (ARN) of the datashare that the consumer is to use."];
       associateEntireAccount: BooleanOptional.t option
         [@ocaml.doc
           "A value that specifies whether the datashare is associated with the entire account."];
       consumerArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the consumer that is associated with the datashare."];
+          "The Amazon Resource Name (ARN) of the consumer namespace associated with the datashare."];
       consumerRegion: String_.t option
         [@ocaml.doc
-          "From a datashare consumer account, associates a datashare with all existing and future namespaces in the specified Amazon Web Services Region."]}
+          "From a datashare consumer account, associates a datashare with all existing and future namespaces in the specified Amazon Web Services Region."];
+      allowWrites: BooleanOptional.t option
+        [@ocaml.doc
+          "If set to true, allows write operations for a datashare."]}
     let context_ = "AssociateDataShareConsumerMessage"
     let make ?associateEntireAccount =
       fun ?consumerArn ->
         fun ?consumerRegion ->
-          fun ~dataShareArn ->
-            fun () ->
-              {
-                associateEntireAccount;
-                consumerArn;
-                consumerRegion;
-                dataShareArn
-              }
+          fun ?allowWrites ->
+            fun ~dataShareArn ->
+              fun () ->
+                {
+                  associateEntireAccount;
+                  consumerArn;
+                  consumerRegion;
+                  allowWrites;
+                  dataShareArn
+                }
     let to_value x =
       structure_to_value
         [("DataShareArn", (Some (String_.to_value x.dataShareArn)));
         ("AssociateEntireAccount",
           (Option.map x.associateEntireAccount ~f:BooleanOptional.to_value));
         ("ConsumerArn", (Option.map x.consumerArn ~f:String_.to_value));
-        ("ConsumerRegion", (Option.map x.consumerRegion ~f:String_.to_value))]
+        ("ConsumerRegion", (Option.map x.consumerRegion ~f:String_.to_value));
+        ("AllowWrites",
+          (Option.map x.allowWrites ~f:BooleanOptional.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let allowWrites =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "AllowWrites") in
       let consumerRegion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ConsumerRegion") in
       let consumerArn =
@@ -26142,17 +33000,19 @@ module AssociateDataShareConsumerMessage =
       let dataShareArn =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DataShareArn") in
-      make ?consumerRegion ?consumerArn ?associateEntireAccount ~dataShareArn
-        ()
+      make ?allowWrites ?consumerRegion ?consumerArn ?associateEntireAccount
+        ~dataShareArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let consumerRegion = field_map json "ConsumerRegion" String_.of_json in
-      let consumerArn = field_map json "ConsumerArn" String_.of_json in
+    let of_json json__ =
+      let allowWrites =
+        field_map json__ "AllowWrites" BooleanOptional.of_json in
+      let consumerRegion = field_map json__ "ConsumerRegion" String_.of_json in
+      let consumerArn = field_map json__ "ConsumerArn" String_.of_json in
       let associateEntireAccount =
-        field_map json "AssociateEntireAccount" BooleanOptional.of_json in
-      let dataShareArn = field_map_exn json "DataShareArn" String_.of_json in
-      make ?consumerRegion ?consumerArn ?associateEntireAccount ~dataShareArn
-        ()
+        field_map json__ "AssociateEntireAccount" BooleanOptional.of_json in
+      let dataShareArn = field_map_exn json__ "DataShareArn" String_.of_json in
+      make ?allowWrites ?consumerRegion ?consumerArn ?associateEntireAccount
+        ~dataShareArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "From a datashare consumer account, associates a datashare with the account (AssociateEntireAccount) or the specified namespace (ConsumerArn). If you make this association, the consumer can consume the datashare."]
@@ -26207,9 +33067,9 @@ module AccountAttributeList =
           (Xml.child xml_arg0 "AccountAttributes") in
       make ?accountAttributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accountAttributes =
-        field_map json "AccountAttributes" AttributeList.of_json in
+        field_map json__ "AccountAttributes" AttributeList.of_json in
       make ?accountAttributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of attributes attached to an account"]
@@ -26341,9 +33201,9 @@ module AcceptReservedNodeExchangeOutputMessage =
           (Xml.child xml_arg0 "ExchangedReservedNode") in
       make ?exchangedReservedNode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exchangedReservedNode =
-        field_map json "ExchangedReservedNode" ReservedNode.of_json in
+        field_map json__ "ExchangedReservedNode" ReservedNode.of_json in
       make ?exchangedReservedNode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -26378,11 +33238,11 @@ module AcceptReservedNodeExchangeInputMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "ReservedNodeId") in
       make ~targetReservedNodeOfferingId ~reservedNodeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetReservedNodeOfferingId =
-        field_map_exn json "TargetReservedNodeOfferingId" String_.of_json in
+        field_map_exn json__ "TargetReservedNodeOfferingId" String_.of_json in
       let reservedNodeId =
-        field_map_exn json "ReservedNodeId" String_.of_json in
+        field_map_exn json__ "ReservedNodeId" String_.of_json in
       make ~targetReservedNodeOfferingId ~reservedNodeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

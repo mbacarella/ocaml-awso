@@ -38,16 +38,18 @@ let associate_license =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and licenseType =
-         flag "license-type" (required json_arg) ~doc:"JSON LicenseType"
+       and grafanaToken =
+         flag "grafana-token" (optional string) ~doc:"STRING GrafanaToken"
        and workspaceId =
-         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and licenseType =
+         flag "license-type" (required json_arg) ~doc:"JSON LicenseType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.associate_license
-           (Values.AssociateLicenseRequest.make
-              ~licenseType:(Values.LicenseType.of_json licenseType)
-              ~workspaceId ()) (Some Values.AssociateLicenseResponse.to_json)
+           (Values.AssociateLicenseRequest.make ?grafanaToken ~workspaceId
+              ~licenseType:(Values.LicenseType.of_json licenseType) ())
+           (Some Values.AssociateLicenseResponse.to_json)
            (Some Values.AssociateLicenseResponse.error_to_json)])
 let create_workspace =
   Command.async ~summary:""
@@ -66,7 +68,6 @@ let create_workspace =
            ~doc:"STRING OrganizationRoleName"
        and stackSetName =
          flag "stack-set-name" (optional string) ~doc:"STRING StackSetName"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and workspaceDataSources =
          flag "workspace-data-sources" (optional json_arg)
            ~doc:"JSON DataSourceTypesList"
@@ -83,21 +84,37 @@ let create_workspace =
            ~doc:"JSON OrganizationalUnitList"
        and workspaceRoleArn =
          flag "workspace-role-arn" (optional string) ~doc:"STRING IamRoleArn"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and vpcConfiguration =
+         flag "vpc-configuration" (optional json_arg)
+           ~doc:"JSON VpcConfiguration"
+       and configuration =
+         flag "configuration" (optional string)
+           ~doc:"STRING OverridableConfigurationJson"
+       and networkAccessControl =
+         flag "network-access-control" (optional json_arg)
+           ~doc:"JSON NetworkAccessConfiguration"
+       and grafanaVersion =
+         flag "grafana-version" (optional string)
+           ~doc:"STRING GrafanaVersion"
+       and ipAddressType =
+         flag "ip-address-type" (optional json_arg) ~doc:"JSON IPAddressType"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING KmsKeyId"
        and accountAccessType =
          flag "account-access-type" (required json_arg)
            ~doc:"JSON AccountAccessType"
-       and authenticationProviders =
-         flag "authentication-providers" (required json_arg)
-           ~doc:"JSON AuthenticationProviders"
        and permissionType =
          flag "permission-type" (required json_arg)
-           ~doc:"JSON PermissionType" in
+           ~doc:"JSON PermissionType"
+       and authenticationProviders =
+         flag "authentication-providers" (required json_arg)
+           ~doc:"JSON AuthenticationProviders" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_workspace
            (Values.CreateWorkspaceRequest.make ?clientToken
               ?organizationRoleName ?stackSetName
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ?workspaceDataSources:(Option.map
                                        ~f:Values.DataSourceTypesList.of_json
                                        workspaceDataSources)
@@ -109,13 +126,97 @@ let create_workspace =
                                                ~f:Values.OrganizationalUnitList.of_json
                                                workspaceOrganizationalUnits)
               ?workspaceRoleArn
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?vpcConfiguration:(Option.map
+                                   ~f:Values.VpcConfiguration.of_json
+                                   vpcConfiguration) ?configuration
+              ?networkAccessControl:(Option.map
+                                       ~f:Values.NetworkAccessConfiguration.of_json
+                                       networkAccessControl) ?grafanaVersion
+              ?ipAddressType:(Option.map ~f:Values.IPAddressType.of_json
+                                ipAddressType) ?kmsKeyId
               ~accountAccessType:(Values.AccountAccessType.of_json
                                     accountAccessType)
-              ~authenticationProviders:(Values.AuthenticationProviders.of_json
-                                          authenticationProviders)
               ~permissionType:(Values.PermissionType.of_json permissionType)
-              ()) (Some Values.CreateWorkspaceResponse.to_json)
+              ~authenticationProviders:(Values.AuthenticationProviders.of_json
+                                          authenticationProviders) ())
+           (Some Values.CreateWorkspaceResponse.to_json)
            (Some Values.CreateWorkspaceResponse.error_to_json)])
+let create_workspace_api_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and keyName =
+         flag "key-name" (required string) ~doc:"STRING ApiKeyName"
+       and keyRole = flag "key-role" (required string) ~doc:"STRING String"
+       and secondsToLive =
+         flag "seconds-to-live" (required int)
+           ~doc:"INT CreateWorkspaceApiKeyRequestSecondsToLiveInteger"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_workspace_api_key
+           (Values.CreateWorkspaceApiKeyRequest.make ~keyName ~keyRole
+              ~secondsToLive ~workspaceId ())
+           (Some Values.CreateWorkspaceApiKeyResponse.to_json)
+           (Some Values.CreateWorkspaceApiKeyResponse.error_to_json)])
+let create_workspace_service_account =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING ServiceAccountName"
+       and grafanaRole =
+         flag "grafana-role" (required json_arg) ~doc:"JSON Role"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_workspace_service_account
+           (Values.CreateWorkspaceServiceAccountRequest.make ~name
+              ~grafanaRole:(Values.Role.of_json grafanaRole) ~workspaceId ())
+           (Some Values.CreateWorkspaceServiceAccountResponse.to_json)
+           (Some Values.CreateWorkspaceServiceAccountResponse.error_to_json)])
+let create_workspace_service_account_token =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING ServiceAccountTokenName"
+       and secondsToLive =
+         flag "seconds-to-live" (required int)
+           ~doc:"INT CreateWorkspaceServiceAccountTokenRequestSecondsToLiveInteger"
+       and serviceAccountId =
+         flag "service-account-id" (required string) ~doc:"STRING String"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_workspace_service_account_token
+           (Values.CreateWorkspaceServiceAccountTokenRequest.make ~name
+              ~secondsToLive ~serviceAccountId ~workspaceId ())
+           (Some Values.CreateWorkspaceServiceAccountTokenResponse.to_json)
+           (Some
+              Values.CreateWorkspaceServiceAccountTokenResponse.error_to_json)])
 let delete_workspace =
   Command.async ~summary:""
     ([%map_open.Command
@@ -134,6 +235,70 @@ let delete_workspace =
            (Values.DeleteWorkspaceRequest.make ~workspaceId ())
            (Some Values.DeleteWorkspaceResponse.to_json)
            (Some Values.DeleteWorkspaceResponse.error_to_json)])
+let delete_workspace_api_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and keyName =
+         flag "key-name" (required string) ~doc:"STRING ApiKeyName"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_workspace_api_key
+           (Values.DeleteWorkspaceApiKeyRequest.make ~keyName ~workspaceId ())
+           (Some Values.DeleteWorkspaceApiKeyResponse.to_json)
+           (Some Values.DeleteWorkspaceApiKeyResponse.error_to_json)])
+let delete_workspace_service_account =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceAccountId =
+         flag "service-account-id" (required string) ~doc:"STRING String"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_workspace_service_account
+           (Values.DeleteWorkspaceServiceAccountRequest.make
+              ~serviceAccountId ~workspaceId ())
+           (Some Values.DeleteWorkspaceServiceAccountResponse.to_json)
+           (Some Values.DeleteWorkspaceServiceAccountResponse.error_to_json)])
+let delete_workspace_service_account_token =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tokenId = flag "token-id" (required string) ~doc:"STRING String"
+       and serviceAccountId =
+         flag "service-account-id" (required string) ~doc:"STRING String"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_workspace_service_account_token
+           (Values.DeleteWorkspaceServiceAccountTokenRequest.make ~tokenId
+              ~serviceAccountId ~workspaceId ())
+           (Some Values.DeleteWorkspaceServiceAccountTokenResponse.to_json)
+           (Some
+              Values.DeleteWorkspaceServiceAccountTokenResponse.error_to_json)])
 let describe_workspace =
   Command.async ~summary:""
     ([%map_open.Command
@@ -171,6 +336,24 @@ let describe_workspace_authentication =
               ())
            (Some Values.DescribeWorkspaceAuthenticationResponse.to_json)
            (Some Values.DescribeWorkspaceAuthenticationResponse.error_to_json)])
+let describe_workspace_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_workspace_configuration
+           (Values.DescribeWorkspaceConfigurationRequest.make ~workspaceId ())
+           (Some Values.DescribeWorkspaceConfigurationResponse.to_json)
+           (Some Values.DescribeWorkspaceConfigurationResponse.error_to_json)])
 let disassociate_license =
   Command.async ~summary:""
     ([%map_open.Command
@@ -181,16 +364,15 @@ let disassociate_license =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and licenseType =
-         flag "license-type" (required json_arg) ~doc:"JSON LicenseType"
        and workspaceId =
-         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and licenseType =
+         flag "license-type" (required json_arg) ~doc:"JSON LicenseType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.disassociate_license
-           (Values.DisassociateLicenseRequest.make
-              ~licenseType:(Values.LicenseType.of_json licenseType)
-              ~workspaceId ())
+           (Values.DisassociateLicenseRequest.make ~workspaceId
+              ~licenseType:(Values.LicenseType.of_json licenseType) ())
            (Some Values.DisassociateLicenseResponse.to_json)
            (Some Values.DisassociateLicenseResponse.error_to_json)])
 let list_permissions =
@@ -203,24 +385,24 @@ let list_permissions =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and groupId = flag "group-id" (optional string) ~doc:"STRING SsoId"
        and maxResults =
          flag "max-results" (optional int)
            ~doc:"INT ListPermissionsRequestMaxResultsInteger"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
-       and userId = flag "user-id" (optional string) ~doc:"STRING SsoId"
        and userType =
          flag "user-type" (optional json_arg) ~doc:"JSON UserType"
+       and userId = flag "user-id" (optional string) ~doc:"STRING SsoId"
+       and groupId = flag "group-id" (optional string) ~doc:"STRING SsoId"
        and workspaceId =
          flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_permissions
-           (Values.ListPermissionsRequest.make ?groupId ?maxResults
-              ?nextToken ?userId
+           (Values.ListPermissionsRequest.make ?maxResults ?nextToken
               ?userType:(Option.map ~f:Values.UserType.of_json userType)
-              ~workspaceId ()) (Some Values.ListPermissionsResponse.to_json)
+              ?userId ?groupId ~workspaceId ())
+           (Some Values.ListPermissionsResponse.to_json)
            (Some Values.ListPermissionsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
@@ -240,6 +422,80 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListVersionsRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and workspaceId =
+         flag "workspace-id" (optional string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_versions
+           (Values.ListVersionsRequest.make ?maxResults ?nextToken
+              ?workspaceId ()) (Some Values.ListVersionsResponse.to_json)
+           (Some Values.ListVersionsResponse.error_to_json)])
+let list_workspace_service_account_tokens =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListWorkspaceServiceAccountTokensRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and serviceAccountId =
+         flag "service-account-id" (required string) ~doc:"STRING String"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_workspace_service_account_tokens
+           (Values.ListWorkspaceServiceAccountTokensRequest.make ?maxResults
+              ?nextToken ~serviceAccountId ~workspaceId ())
+           (Some Values.ListWorkspaceServiceAccountTokensResponse.to_json)
+           (Some
+              Values.ListWorkspaceServiceAccountTokensResponse.error_to_json)])
+let list_workspace_service_accounts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListWorkspaceServiceAccountsRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_workspace_service_accounts
+           (Values.ListWorkspaceServiceAccountsRequest.make ?maxResults
+              ?nextToken ~workspaceId ())
+           (Some Values.ListWorkspaceServiceAccountsResponse.to_json)
+           (Some Values.ListWorkspaceServiceAccountsResponse.error_to_json)])
 let list_workspaces =
   Command.async ~summary:""
     ([%map_open.Command
@@ -361,6 +617,19 @@ let update_workspace =
            ~doc:"JSON OrganizationalUnitList"
        and workspaceRoleArn =
          flag "workspace-role-arn" (optional string) ~doc:"STRING IamRoleArn"
+       and vpcConfiguration =
+         flag "vpc-configuration" (optional json_arg)
+           ~doc:"JSON VpcConfiguration"
+       and removeVpcConfiguration =
+         flag "remove-vpc-configuration" (optional bool) ~doc:"BOOL Boolean"
+       and networkAccessControl =
+         flag "network-access-control" (optional json_arg)
+           ~doc:"JSON NetworkAccessConfiguration"
+       and removeNetworkAccessConfiguration =
+         flag "remove-network-access-configuration" (optional bool)
+           ~doc:"BOOL Boolean"
+       and ipAddressType =
+         flag "ip-address-type" (optional json_arg) ~doc:"JSON IPAddressType"
        and workspaceId =
          flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
        fun () ->
@@ -382,7 +651,16 @@ let update_workspace =
               ?workspaceOrganizationalUnits:(Option.map
                                                ~f:Values.OrganizationalUnitList.of_json
                                                workspaceOrganizationalUnits)
-              ?workspaceRoleArn ~workspaceId ())
+              ?workspaceRoleArn
+              ?vpcConfiguration:(Option.map
+                                   ~f:Values.VpcConfiguration.of_json
+                                   vpcConfiguration) ?removeVpcConfiguration
+              ?networkAccessControl:(Option.map
+                                       ~f:Values.NetworkAccessConfiguration.of_json
+                                       networkAccessControl)
+              ?removeNetworkAccessConfiguration
+              ?ipAddressType:(Option.map ~f:Values.IPAddressType.of_json
+                                ipAddressType) ~workspaceId ())
            (Some Values.UpdateWorkspaceResponse.to_json)
            (Some Values.UpdateWorkspaceResponse.error_to_json)])
 let update_workspace_authentication =
@@ -398,37 +676,75 @@ let update_workspace_authentication =
        and samlConfiguration =
          flag "saml-configuration" (optional json_arg)
            ~doc:"JSON SamlConfiguration"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
        and authenticationProviders =
          flag "authentication-providers" (required json_arg)
-           ~doc:"JSON AuthenticationProviders"
-       and workspaceId =
-         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+           ~doc:"JSON AuthenticationProviders" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_workspace_authentication
            (Values.UpdateWorkspaceAuthenticationRequest.make
               ?samlConfiguration:(Option.map
                                     ~f:Values.SamlConfiguration.of_json
-                                    samlConfiguration)
+                                    samlConfiguration) ~workspaceId
               ~authenticationProviders:(Values.AuthenticationProviders.of_json
-                                          authenticationProviders)
-              ~workspaceId ())
+                                          authenticationProviders) ())
            (Some Values.UpdateWorkspaceAuthenticationResponse.to_json)
            (Some Values.UpdateWorkspaceAuthenticationResponse.error_to_json)])
+let update_workspace_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and grafanaVersion =
+         flag "grafana-version" (optional string)
+           ~doc:"STRING GrafanaVersion"
+       and configuration =
+         flag "configuration" (required string)
+           ~doc:"STRING OverridableConfigurationJson"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_workspace_configuration
+           (Values.UpdateWorkspaceConfigurationRequest.make ?grafanaVersion
+              ~configuration ~workspaceId ())
+           (Some Values.UpdateWorkspaceConfigurationResponse.to_json)
+           (Some Values.UpdateWorkspaceConfigurationResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-license", associate_license);
     ("create-workspace", create_workspace);
+    ("create-workspace-api-key", create_workspace_api_key);
+    ("create-workspace-service-account", create_workspace_service_account);
+    ("create-workspace-service-account-token",
+      create_workspace_service_account_token);
     ("delete-workspace", delete_workspace);
+    ("delete-workspace-api-key", delete_workspace_api_key);
+    ("delete-workspace-service-account", delete_workspace_service_account);
+    ("delete-workspace-service-account-token",
+      delete_workspace_service_account_token);
     ("describe-workspace", describe_workspace);
     ("describe-workspace-authentication", describe_workspace_authentication);
+    ("describe-workspace-configuration", describe_workspace_configuration);
     ("disassociate-license", disassociate_license);
     ("list-permissions", list_permissions);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-versions", list_versions);
+    ("list-workspace-service-account-tokens",
+      list_workspace_service_account_tokens);
+    ("list-workspace-service-accounts", list_workspace_service_accounts);
     ("list-workspaces", list_workspaces);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-permissions", update_permissions);
     ("update-workspace", update_workspace);
-    ("update-workspace-authentication", update_workspace_authentication)]
+    ("update-workspace-authentication", update_workspace_authentication);
+    ("update-workspace-configuration", update_workspace_configuration)]

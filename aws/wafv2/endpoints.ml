@@ -6,6 +6,8 @@ type ('i, 'o, 'e) t =
   AssociateWebACLResponse.error) t 
   | CheckCapacity: (CheckCapacityRequest.t, CheckCapacityResponse.t,
   CheckCapacityResponse.error) t 
+  | CreateAPIKey: (CreateAPIKeyRequest.t, CreateAPIKeyResponse.t,
+  CreateAPIKeyResponse.error) t 
   | CreateIPSet: (CreateIPSetRequest.t, CreateIPSetResponse.t,
   CreateIPSetResponse.error) t 
   | CreateRegexPatternSet: (CreateRegexPatternSetRequest.t,
@@ -14,6 +16,8 @@ type ('i, 'o, 'e) t =
   CreateRuleGroupResponse.error) t 
   | CreateWebACL: (CreateWebACLRequest.t, CreateWebACLResponse.t,
   CreateWebACLResponse.error) t 
+  | DeleteAPIKey: (DeleteAPIKeyRequest.t, DeleteAPIKeyResponse.t,
+  DeleteAPIKeyResponse.error) t 
   | DeleteFirewallManagerRuleGroups:
   (DeleteFirewallManagerRuleGroupsRequest.t,
   DeleteFirewallManagerRuleGroupsResponse.t,
@@ -31,6 +35,13 @@ type ('i, 'o, 'e) t =
   DeleteRuleGroupResponse.error) t 
   | DeleteWebACL: (DeleteWebACLRequest.t, DeleteWebACLResponse.t,
   DeleteWebACLResponse.error) t 
+  | DescribeAllManagedProducts: (DescribeAllManagedProductsRequest.t,
+  DescribeAllManagedProductsResponse.t,
+  DescribeAllManagedProductsResponse.error) t 
+  | DescribeManagedProductsByVendor:
+  (DescribeManagedProductsByVendorRequest.t,
+  DescribeManagedProductsByVendorResponse.t,
+  DescribeManagedProductsByVendorResponse.error) t 
   | DescribeManagedRuleGroup: (DescribeManagedRuleGroupRequest.t,
   DescribeManagedRuleGroupResponse.t, DescribeManagedRuleGroupResponse.error)
   t 
@@ -39,6 +50,8 @@ type ('i, 'o, 'e) t =
   | GenerateMobileSdkReleaseUrl: (GenerateMobileSdkReleaseUrlRequest.t,
   GenerateMobileSdkReleaseUrlResponse.t,
   GenerateMobileSdkReleaseUrlResponse.error) t 
+  | GetDecryptedAPIKey: (GetDecryptedAPIKeyRequest.t,
+  GetDecryptedAPIKeyResponse.t, GetDecryptedAPIKeyResponse.error) t 
   | GetIPSet: (GetIPSetRequest.t, GetIPSetResponse.t, GetIPSetResponse.error)
   t 
   | GetLoggingConfiguration: (GetLoggingConfigurationRequest.t,
@@ -60,10 +73,15 @@ type ('i, 'o, 'e) t =
   GetRuleGroupResponse.error) t 
   | GetSampledRequests: (GetSampledRequestsRequest.t,
   GetSampledRequestsResponse.t, GetSampledRequestsResponse.error) t 
+  | GetTopPathStatisticsByTraffic: (GetTopPathStatisticsByTrafficRequest.t,
+  GetTopPathStatisticsByTrafficResponse.t,
+  GetTopPathStatisticsByTrafficResponse.error) t 
   | GetWebACL: (GetWebACLRequest.t, GetWebACLResponse.t,
   GetWebACLResponse.error) t 
   | GetWebACLForResource: (GetWebACLForResourceRequest.t,
   GetWebACLForResourceResponse.t, GetWebACLForResourceResponse.error) t 
+  | ListAPIKeys: (ListAPIKeysRequest.t, ListAPIKeysResponse.t,
+  ListAPIKeysResponse.error) t 
   | ListAvailableManagedRuleGroupVersions:
   (ListAvailableManagedRuleGroupVersionsRequest.t,
   ListAvailableManagedRuleGroupVersionsResponse.t,
@@ -118,10 +136,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateWebACL -> `POST
   | CheckCapacity -> `POST
+  | CreateAPIKey -> `POST
   | CreateIPSet -> `POST
   | CreateRegexPatternSet -> `POST
   | CreateRuleGroup -> `POST
   | CreateWebACL -> `POST
+  | DeleteAPIKey -> `POST
   | DeleteFirewallManagerRuleGroups -> `POST
   | DeleteIPSet -> `POST
   | DeleteLoggingConfiguration -> `POST
@@ -129,9 +149,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteRegexPatternSet -> `POST
   | DeleteRuleGroup -> `POST
   | DeleteWebACL -> `POST
+  | DescribeAllManagedProducts -> `POST
+  | DescribeManagedProductsByVendor -> `POST
   | DescribeManagedRuleGroup -> `POST
   | DisassociateWebACL -> `POST
   | GenerateMobileSdkReleaseUrl -> `POST
+  | GetDecryptedAPIKey -> `POST
   | GetIPSet -> `POST
   | GetLoggingConfiguration -> `POST
   | GetManagedRuleSet -> `POST
@@ -141,8 +164,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetRegexPatternSet -> `POST
   | GetRuleGroup -> `POST
   | GetSampledRequests -> `POST
+  | GetTopPathStatisticsByTraffic -> `POST
   | GetWebACL -> `POST
   | GetWebACLForResource -> `POST
+  | ListAPIKeys -> `POST
   | ListAvailableManagedRuleGroupVersions -> `POST
   | ListAvailableManagedRuleGroups -> `POST
   | ListIPSets -> `POST
@@ -169,10 +194,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       match endpoint with
       | AssociateWebACL -> (Format.kasprintf Uri.of_string) "/"
       | CheckCapacity -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAPIKey -> (Format.kasprintf Uri.of_string) "/"
       | CreateIPSet -> (Format.kasprintf Uri.of_string) "/"
       | CreateRegexPatternSet -> (Format.kasprintf Uri.of_string) "/"
       | CreateRuleGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateWebACL -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteAPIKey -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFirewallManagerRuleGroups ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteIPSet -> (Format.kasprintf Uri.of_string) "/"
@@ -181,9 +208,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteRegexPatternSet -> (Format.kasprintf Uri.of_string) "/"
       | DeleteRuleGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteWebACL -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAllManagedProducts -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeManagedProductsByVendor ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeManagedRuleGroup -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateWebACL -> (Format.kasprintf Uri.of_string) "/"
       | GenerateMobileSdkReleaseUrl -> (Format.kasprintf Uri.of_string) "/"
+      | GetDecryptedAPIKey -> (Format.kasprintf Uri.of_string) "/"
       | GetIPSet -> (Format.kasprintf Uri.of_string) "/"
       | GetLoggingConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | GetManagedRuleSet -> (Format.kasprintf Uri.of_string) "/"
@@ -194,8 +225,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetRegexPatternSet -> (Format.kasprintf Uri.of_string) "/"
       | GetRuleGroup -> (Format.kasprintf Uri.of_string) "/"
       | GetSampledRequests -> (Format.kasprintf Uri.of_string) "/"
+      | GetTopPathStatisticsByTraffic -> (Format.kasprintf Uri.of_string) "/"
       | GetWebACL -> (Format.kasprintf Uri.of_string) "/"
       | GetWebACLForResource -> (Format.kasprintf Uri.of_string) "/"
+      | ListAPIKeys -> (Format.kasprintf Uri.of_string) "/"
       | ListAvailableManagedRuleGroupVersions ->
           (Format.kasprintf Uri.of_string) "/"
       | ListAvailableManagedRuleGroups ->
@@ -239,6 +272,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSWAF_20190729.CheckCapacity")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAPIKey ->
+      let json = CreateAPIKeyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSWAF_20190729.CreateAPIKey")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateIPSet ->
       let json = CreateIPSetRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -270,6 +311,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSWAF_20190729.CreateWebACL")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteAPIKey ->
+      let json = DeleteAPIKeyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSWAF_20190729.DeleteAPIKey")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteFirewallManagerRuleGroups ->
       let json = DeleteFirewallManagerRuleGroupsRequest.to_json req in
@@ -327,6 +376,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSWAF_20190729.DeleteWebACL")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeAllManagedProducts ->
+      let json = DescribeAllManagedProductsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSWAF_20190729.DescribeAllManagedProducts")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeManagedProductsByVendor ->
+      let json = DescribeManagedProductsByVendorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSWAF_20190729.DescribeManagedProductsByVendor")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeManagedRuleGroup ->
       let json = DescribeManagedRuleGroupRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -350,6 +415,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSWAF_20190729.GenerateMobileSdkReleaseUrl")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDecryptedAPIKey ->
+      let json = GetDecryptedAPIKeyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSWAF_20190729.GetDecryptedAPIKey")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetIPSet ->
       let json = GetIPSetRequest.to_json req in
@@ -424,6 +497,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSWAF_20190729.GetSampledRequests")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetTopPathStatisticsByTraffic ->
+      let json = GetTopPathStatisticsByTrafficRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSWAF_20190729.GetTopPathStatisticsByTraffic")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetWebACL ->
       let json = GetWebACLRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -439,6 +520,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSWAF_20190729.GetWebACLForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAPIKeys ->
+      let json = ListAPIKeysRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSWAF_20190729.ListAPIKeys")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListAvailableManagedRuleGroupVersions ->
       let json = ListAvailableManagedRuleGroupVersionsRequest.to_json req in
@@ -646,6 +735,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CheckCapacityResponse.of_json json)
       else Error (parse_aws_error (Some CheckCapacityResponse.error_of_json))
+  | CreateAPIKey ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAPIKeyResponse.of_json json)
+      else Error (parse_aws_error (Some CreateAPIKeyResponse.error_of_json))
   | CreateIPSet ->
       if is_success
       then
@@ -673,6 +768,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateWebACLResponse.of_json json)
       else Error (parse_aws_error (Some CreateWebACLResponse.error_of_json))
+  | DeleteAPIKey ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAPIKeyResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteAPIKeyResponse.error_of_json))
   | DeleteFirewallManagerRuleGroups ->
       if is_success
       then
@@ -727,6 +828,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteWebACLResponse.of_json json)
       else Error (parse_aws_error (Some DeleteWebACLResponse.error_of_json))
+  | DescribeAllManagedProducts ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAllManagedProductsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAllManagedProductsResponse.error_of_json))
+  | DescribeManagedProductsByVendor ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeManagedProductsByVendorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeManagedProductsByVendorResponse.error_of_json))
   | DescribeManagedRuleGroup ->
       if is_success
       then
@@ -753,6 +872,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GenerateMobileSdkReleaseUrlResponse.error_of_json))
+  | GetDecryptedAPIKey ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDecryptedAPIKeyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetDecryptedAPIKeyResponse.error_of_json))
   | GetIPSet ->
       if is_success
       then
@@ -823,6 +950,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetSampledRequestsResponse.error_of_json))
+  | GetTopPathStatisticsByTraffic ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetTopPathStatisticsByTrafficResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetTopPathStatisticsByTrafficResponse.error_of_json))
   | GetWebACL ->
       if is_success
       then
@@ -837,6 +973,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetWebACLForResourceResponse.error_of_json))
+  | ListAPIKeys ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAPIKeysResponse.of_json json)
+      else Error (parse_aws_error (Some ListAPIKeysResponse.error_of_json))
   | ListAvailableManagedRuleGroupVersions ->
       if is_success
       then

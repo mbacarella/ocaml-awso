@@ -4,35 +4,83 @@ open Values
 type ('i, 'o, 'e) t =
   | CreateAccess: (CreateAccessRequest.t, CreateAccessResponse.t,
   CreateAccessResponse.error) t 
+  | CreateAgreement: (CreateAgreementRequest.t, CreateAgreementResponse.t,
+  CreateAgreementResponse.error) t 
+  | CreateConnector: (CreateConnectorRequest.t, CreateConnectorResponse.t,
+  CreateConnectorResponse.error) t 
+  | CreateProfile: (CreateProfileRequest.t, CreateProfileResponse.t,
+  CreateProfileResponse.error) t 
   | CreateServer: (CreateServerRequest.t, CreateServerResponse.t,
   CreateServerResponse.error) t 
   | CreateUser: (CreateUserRequest.t, CreateUserResponse.t,
   CreateUserResponse.error) t 
+  | CreateWebApp: (CreateWebAppRequest.t, CreateWebAppResponse.t,
+  CreateWebAppResponse.error) t 
   | CreateWorkflow: (CreateWorkflowRequest.t, CreateWorkflowResponse.t,
   CreateWorkflowResponse.error) t 
   | DeleteAccess: (DeleteAccessRequest.t, unit, unit) t 
+  | DeleteAgreement: (DeleteAgreementRequest.t, unit, unit) t 
+  | DeleteCertificate: (DeleteCertificateRequest.t, unit, unit) t 
+  | DeleteConnector: (DeleteConnectorRequest.t, unit, unit) t 
+  | DeleteHostKey: (DeleteHostKeyRequest.t, unit, unit) t 
+  | DeleteProfile: (DeleteProfileRequest.t, unit, unit) t 
   | DeleteServer: (DeleteServerRequest.t, unit, unit) t 
   | DeleteSshPublicKey: (DeleteSshPublicKeyRequest.t, unit, unit) t 
   | DeleteUser: (DeleteUserRequest.t, unit, unit) t 
+  | DeleteWebApp: (DeleteWebAppRequest.t, unit, unit) t 
+  | DeleteWebAppCustomization: (DeleteWebAppCustomizationRequest.t, unit,
+  unit) t 
   | DeleteWorkflow: (DeleteWorkflowRequest.t, unit, unit) t 
   | DescribeAccess: (DescribeAccessRequest.t, DescribeAccessResponse.t,
   DescribeAccessResponse.error) t 
+  | DescribeAgreement: (DescribeAgreementRequest.t,
+  DescribeAgreementResponse.t, DescribeAgreementResponse.error) t 
+  | DescribeCertificate: (DescribeCertificateRequest.t,
+  DescribeCertificateResponse.t, DescribeCertificateResponse.error) t 
+  | DescribeConnector: (DescribeConnectorRequest.t,
+  DescribeConnectorResponse.t, DescribeConnectorResponse.error) t 
   | DescribeExecution: (DescribeExecutionRequest.t,
   DescribeExecutionResponse.t, DescribeExecutionResponse.error) t 
+  | DescribeHostKey: (DescribeHostKeyRequest.t, DescribeHostKeyResponse.t,
+  DescribeHostKeyResponse.error) t 
+  | DescribeProfile: (DescribeProfileRequest.t, DescribeProfileResponse.t,
+  DescribeProfileResponse.error) t 
   | DescribeSecurityPolicy: (DescribeSecurityPolicyRequest.t,
   DescribeSecurityPolicyResponse.t, DescribeSecurityPolicyResponse.error) t 
   | DescribeServer: (DescribeServerRequest.t, DescribeServerResponse.t,
   DescribeServerResponse.error) t 
   | DescribeUser: (DescribeUserRequest.t, DescribeUserResponse.t,
   DescribeUserResponse.error) t 
+  | DescribeWebApp: (DescribeWebAppRequest.t, DescribeWebAppResponse.t,
+  DescribeWebAppResponse.error) t 
+  | DescribeWebAppCustomization: (DescribeWebAppCustomizationRequest.t,
+  DescribeWebAppCustomizationResponse.t,
+  DescribeWebAppCustomizationResponse.error) t 
   | DescribeWorkflow: (DescribeWorkflowRequest.t, DescribeWorkflowResponse.t,
   DescribeWorkflowResponse.error) t 
+  | ImportCertificate: (ImportCertificateRequest.t,
+  ImportCertificateResponse.t, ImportCertificateResponse.error) t 
+  | ImportHostKey: (ImportHostKeyRequest.t, ImportHostKeyResponse.t,
+  ImportHostKeyResponse.error) t 
   | ImportSshPublicKey: (ImportSshPublicKeyRequest.t,
   ImportSshPublicKeyResponse.t, ImportSshPublicKeyResponse.error) t 
   | ListAccesses: (ListAccessesRequest.t, ListAccessesResponse.t,
   ListAccessesResponse.error) t 
+  | ListAgreements: (ListAgreementsRequest.t, ListAgreementsResponse.t,
+  ListAgreementsResponse.error) t 
+  | ListCertificates: (ListCertificatesRequest.t, ListCertificatesResponse.t,
+  ListCertificatesResponse.error) t 
+  | ListConnectors: (ListConnectorsRequest.t, ListConnectorsResponse.t,
+  ListConnectorsResponse.error) t 
   | ListExecutions: (ListExecutionsRequest.t, ListExecutionsResponse.t,
   ListExecutionsResponse.error) t 
+  | ListFileTransferResults: (ListFileTransferResultsRequest.t,
+  ListFileTransferResultsResponse.t, ListFileTransferResultsResponse.error) t
+  
+  | ListHostKeys: (ListHostKeysRequest.t, ListHostKeysResponse.t,
+  ListHostKeysResponse.error) t 
+  | ListProfiles: (ListProfilesRequest.t, ListProfilesResponse.t,
+  ListProfilesResponse.error) t 
   | ListSecurityPolicies: (ListSecurityPoliciesRequest.t,
   ListSecurityPoliciesResponse.t, ListSecurityPoliciesResponse.error) t 
   | ListServers: (ListServersRequest.t, ListServersResponse.t,
@@ -41,91 +89,196 @@ type ('i, 'o, 'e) t =
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListUsers: (ListUsersRequest.t, ListUsersResponse.t,
   ListUsersResponse.error) t 
+  | ListWebApps: (ListWebAppsRequest.t, ListWebAppsResponse.t,
+  ListWebAppsResponse.error) t 
   | ListWorkflows: (ListWorkflowsRequest.t, ListWorkflowsResponse.t,
   ListWorkflowsResponse.error) t 
   | SendWorkflowStepState: (SendWorkflowStepStateRequest.t,
   SendWorkflowStepStateResponse.t, SendWorkflowStepStateResponse.error) t 
+  | StartDirectoryListing: (StartDirectoryListingRequest.t,
+  StartDirectoryListingResponse.t, StartDirectoryListingResponse.error) t 
+  | StartFileTransfer: (StartFileTransferRequest.t,
+  StartFileTransferResponse.t, StartFileTransferResponse.error) t 
+  | StartRemoteDelete: (StartRemoteDeleteRequest.t,
+  StartRemoteDeleteResponse.t, StartRemoteDeleteResponse.error) t 
+  | StartRemoteMove: (StartRemoteMoveRequest.t, StartRemoteMoveResponse.t,
+  StartRemoteMoveResponse.error) t 
   | StartServer: (StartServerRequest.t, unit, unit) t 
   | StopServer: (StopServerRequest.t, unit, unit) t 
   | TagResource: (TagResourceRequest.t, unit, unit) t 
+  | TestConnection: (TestConnectionRequest.t, TestConnectionResponse.t,
+  TestConnectionResponse.error) t 
   | TestIdentityProvider: (TestIdentityProviderRequest.t,
   TestIdentityProviderResponse.t, TestIdentityProviderResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, unit, unit) t 
   | UpdateAccess: (UpdateAccessRequest.t, UpdateAccessResponse.t,
   UpdateAccessResponse.error) t 
+  | UpdateAgreement: (UpdateAgreementRequest.t, UpdateAgreementResponse.t,
+  UpdateAgreementResponse.error) t 
+  | UpdateCertificate: (UpdateCertificateRequest.t,
+  UpdateCertificateResponse.t, UpdateCertificateResponse.error) t 
+  | UpdateConnector: (UpdateConnectorRequest.t, UpdateConnectorResponse.t,
+  UpdateConnectorResponse.error) t 
+  | UpdateHostKey: (UpdateHostKeyRequest.t, UpdateHostKeyResponse.t,
+  UpdateHostKeyResponse.error) t 
+  | UpdateProfile: (UpdateProfileRequest.t, UpdateProfileResponse.t,
+  UpdateProfileResponse.error) t 
   | UpdateServer: (UpdateServerRequest.t, UpdateServerResponse.t,
   UpdateServerResponse.error) t 
   | UpdateUser: (UpdateUserRequest.t, UpdateUserResponse.t,
   UpdateUserResponse.error) t 
+  | UpdateWebApp: (UpdateWebAppRequest.t, UpdateWebAppResponse.t,
+  UpdateWebAppResponse.error) t 
+  | UpdateWebAppCustomization: (UpdateWebAppCustomizationRequest.t,
+  UpdateWebAppCustomizationResponse.t,
+  UpdateWebAppCustomizationResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateAccess -> `POST
+  | CreateAgreement -> `POST
+  | CreateConnector -> `POST
+  | CreateProfile -> `POST
   | CreateServer -> `POST
   | CreateUser -> `POST
+  | CreateWebApp -> `POST
   | CreateWorkflow -> `POST
   | DeleteAccess -> `POST
+  | DeleteAgreement -> `POST
+  | DeleteCertificate -> `POST
+  | DeleteConnector -> `POST
+  | DeleteHostKey -> `POST
+  | DeleteProfile -> `POST
   | DeleteServer -> `POST
   | DeleteSshPublicKey -> `POST
   | DeleteUser -> `POST
+  | DeleteWebApp -> `POST
+  | DeleteWebAppCustomization -> `POST
   | DeleteWorkflow -> `POST
   | DescribeAccess -> `POST
+  | DescribeAgreement -> `POST
+  | DescribeCertificate -> `POST
+  | DescribeConnector -> `POST
   | DescribeExecution -> `POST
+  | DescribeHostKey -> `POST
+  | DescribeProfile -> `POST
   | DescribeSecurityPolicy -> `POST
   | DescribeServer -> `POST
   | DescribeUser -> `POST
+  | DescribeWebApp -> `POST
+  | DescribeWebAppCustomization -> `POST
   | DescribeWorkflow -> `POST
+  | ImportCertificate -> `POST
+  | ImportHostKey -> `POST
   | ImportSshPublicKey -> `POST
   | ListAccesses -> `POST
+  | ListAgreements -> `POST
+  | ListCertificates -> `POST
+  | ListConnectors -> `POST
   | ListExecutions -> `POST
+  | ListFileTransferResults -> `POST
+  | ListHostKeys -> `POST
+  | ListProfiles -> `POST
   | ListSecurityPolicies -> `POST
   | ListServers -> `POST
   | ListTagsForResource -> `POST
   | ListUsers -> `POST
+  | ListWebApps -> `POST
   | ListWorkflows -> `POST
   | SendWorkflowStepState -> `POST
+  | StartDirectoryListing -> `POST
+  | StartFileTransfer -> `POST
+  | StartRemoteDelete -> `POST
+  | StartRemoteMove -> `POST
   | StartServer -> `POST
   | StopServer -> `POST
   | TagResource -> `POST
+  | TestConnection -> `POST
   | TestIdentityProvider -> `POST
   | UntagResource -> `POST
   | UpdateAccess -> `POST
+  | UpdateAgreement -> `POST
+  | UpdateCertificate -> `POST
+  | UpdateConnector -> `POST
+  | UpdateHostKey -> `POST
+  | UpdateProfile -> `POST
   | UpdateServer -> `POST
   | UpdateUser -> `POST
+  | UpdateWebApp -> `POST
+  | UpdateWebAppCustomization -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | CreateAccess -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAgreement -> (Format.kasprintf Uri.of_string) "/"
+      | CreateConnector -> (Format.kasprintf Uri.of_string) "/"
+      | CreateProfile -> (Format.kasprintf Uri.of_string) "/"
       | CreateServer -> (Format.kasprintf Uri.of_string) "/"
       | CreateUser -> (Format.kasprintf Uri.of_string) "/"
+      | CreateWebApp -> (Format.kasprintf Uri.of_string) "/"
       | CreateWorkflow -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAccess -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteAgreement -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteCertificate -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteConnector -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteHostKey -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteProfile -> (Format.kasprintf Uri.of_string) "/"
       | DeleteServer -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSshPublicKey -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUser -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteWebApp -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteWebAppCustomization -> (Format.kasprintf Uri.of_string) "/"
       | DeleteWorkflow -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAccess -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAgreement -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeCertificate -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeConnector -> (Format.kasprintf Uri.of_string) "/"
       | DescribeExecution -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeHostKey -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeProfile -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSecurityPolicy -> (Format.kasprintf Uri.of_string) "/"
       | DescribeServer -> (Format.kasprintf Uri.of_string) "/"
       | DescribeUser -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeWebApp -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeWebAppCustomization -> (Format.kasprintf Uri.of_string) "/"
       | DescribeWorkflow -> (Format.kasprintf Uri.of_string) "/"
+      | ImportCertificate -> (Format.kasprintf Uri.of_string) "/"
+      | ImportHostKey -> (Format.kasprintf Uri.of_string) "/"
       | ImportSshPublicKey -> (Format.kasprintf Uri.of_string) "/"
       | ListAccesses -> (Format.kasprintf Uri.of_string) "/"
+      | ListAgreements -> (Format.kasprintf Uri.of_string) "/"
+      | ListCertificates -> (Format.kasprintf Uri.of_string) "/"
+      | ListConnectors -> (Format.kasprintf Uri.of_string) "/"
       | ListExecutions -> (Format.kasprintf Uri.of_string) "/"
+      | ListFileTransferResults -> (Format.kasprintf Uri.of_string) "/"
+      | ListHostKeys -> (Format.kasprintf Uri.of_string) "/"
+      | ListProfiles -> (Format.kasprintf Uri.of_string) "/"
       | ListSecurityPolicies -> (Format.kasprintf Uri.of_string) "/"
       | ListServers -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListUsers -> (Format.kasprintf Uri.of_string) "/"
+      | ListWebApps -> (Format.kasprintf Uri.of_string) "/"
       | ListWorkflows -> (Format.kasprintf Uri.of_string) "/"
       | SendWorkflowStepState -> (Format.kasprintf Uri.of_string) "/"
+      | StartDirectoryListing -> (Format.kasprintf Uri.of_string) "/"
+      | StartFileTransfer -> (Format.kasprintf Uri.of_string) "/"
+      | StartRemoteDelete -> (Format.kasprintf Uri.of_string) "/"
+      | StartRemoteMove -> (Format.kasprintf Uri.of_string) "/"
       | StartServer -> (Format.kasprintf Uri.of_string) "/"
       | StopServer -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | TestConnection -> (Format.kasprintf Uri.of_string) "/"
       | TestIdentityProvider -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateAccess -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateAgreement -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateCertificate -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateConnector -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateHostKey -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateProfile -> (Format.kasprintf Uri.of_string) "/"
       | UpdateServer -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateUser -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateUser -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateWebApp -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateWebAppCustomization -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -136,6 +289,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.CreateAccess")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAgreement ->
+      let json = CreateAgreementRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.CreateAgreement")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateConnector ->
+      let json = CreateConnectorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.CreateConnector")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateProfile ->
+      let json = CreateProfileRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.CreateProfile")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateServer ->
       let json = CreateServerRequest.to_json req in
@@ -153,6 +330,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.CreateUser")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateWebApp ->
+      let json = CreateWebAppRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.CreateWebApp")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateWorkflow ->
       let json = CreateWorkflowRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -168,6 +353,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.DeleteAccess")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteAgreement ->
+      let json = DeleteAgreementRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DeleteAgreement")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteCertificate ->
+      let json = DeleteCertificateRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DeleteCertificate")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteConnector ->
+      let json = DeleteConnectorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DeleteConnector")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteHostKey ->
+      let json = DeleteHostKeyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DeleteHostKey")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteProfile ->
+      let json = DeleteProfileRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DeleteProfile")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteServer ->
       let json = DeleteServerRequest.to_json req in
@@ -193,6 +418,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.DeleteUser")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteWebApp ->
+      let json = DeleteWebAppRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DeleteWebApp")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteWebAppCustomization ->
+      let json = DeleteWebAppCustomizationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DeleteWebAppCustomization")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteWorkflow ->
       let json = DeleteWorkflowRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -209,6 +450,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.DescribeAccess")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeAgreement ->
+      let json = DescribeAgreementRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DescribeAgreement")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeCertificate ->
+      let json = DescribeCertificateRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DescribeCertificate")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeConnector ->
+      let json = DescribeConnectorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DescribeConnector")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeExecution ->
       let json = DescribeExecutionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -216,6 +481,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.DescribeExecution")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeHostKey ->
+      let json = DescribeHostKeyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DescribeHostKey")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeProfile ->
+      let json = DescribeProfileRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DescribeProfile")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeSecurityPolicy ->
       let json = DescribeSecurityPolicyRequest.to_json req in
@@ -241,6 +522,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.DescribeUser")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeWebApp ->
+      let json = DescribeWebAppRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DescribeWebApp")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeWebAppCustomization ->
+      let json = DescribeWebAppCustomizationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.DescribeWebAppCustomization")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeWorkflow ->
       let json = DescribeWorkflowRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -248,6 +545,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.DescribeWorkflow")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ImportCertificate ->
+      let json = ImportCertificateRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.ImportCertificate")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ImportHostKey ->
+      let json = ImportHostKeyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.ImportHostKey")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ImportSshPublicKey ->
       let json = ImportSshPublicKeyRequest.to_json req in
@@ -265,6 +578,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.ListAccesses")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAgreements ->
+      let json = ListAgreementsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.ListAgreements")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCertificates ->
+      let json = ListCertificatesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.ListCertificates")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListConnectors ->
+      let json = ListConnectorsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.ListConnectors")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListExecutions ->
       let json = ListExecutionsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -272,6 +609,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.ListExecutions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListFileTransferResults ->
+      let json = ListFileTransferResultsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.ListFileTransferResults")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListHostKeys ->
+      let json = ListHostKeysRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.ListHostKeys")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListProfiles ->
+      let json = ListProfilesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.ListProfiles")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListSecurityPolicies ->
       let json = ListSecurityPoliciesRequest.to_json req in
@@ -305,6 +666,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.ListUsers")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListWebApps ->
+      let json = ListWebAppsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.ListWebApps")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListWorkflows ->
       let json = ListWorkflowsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -320,6 +689,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.SendWorkflowStepState")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartDirectoryListing ->
+      let json = StartDirectoryListingRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.StartDirectoryListing")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartFileTransfer ->
+      let json = StartFileTransferRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.StartFileTransfer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartRemoteDelete ->
+      let json = StartRemoteDeleteRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.StartRemoteDelete")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartRemoteMove ->
+      let json = StartRemoteMoveRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.StartRemoteMove")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartServer ->
       let json = StartServerRequest.to_json req in
@@ -345,6 +746,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.TagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TestConnection ->
+      let json = TestConnectionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.TestConnection")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TestIdentityProvider ->
       let json = TestIdentityProviderRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -369,6 +778,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.UpdateAccess")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateAgreement ->
+      let json = UpdateAgreementRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.UpdateAgreement")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateCertificate ->
+      let json = UpdateCertificateRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.UpdateCertificate")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateConnector ->
+      let json = UpdateConnectorRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.UpdateConnector")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateHostKey ->
+      let json = UpdateHostKeyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.UpdateHostKey")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateProfile ->
+      let json = UpdateProfileRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.UpdateProfile")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateServer ->
       let json = UpdateServerRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -384,6 +833,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TransferService.UpdateUser")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateWebApp ->
+      let json = UpdateWebAppRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.UpdateWebApp")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateWebAppCustomization ->
+      let json = UpdateWebAppCustomizationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TransferService.UpdateWebAppCustomization")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -414,6 +879,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateAccessResponse.of_json json)
       else Error (parse_aws_error (Some CreateAccessResponse.error_of_json))
+  | CreateAgreement ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAgreementResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateAgreementResponse.error_of_json))
+  | CreateConnector ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateConnectorResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateConnectorResponse.error_of_json))
+  | CreateProfile ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateProfileResponse.of_json json)
+      else Error (parse_aws_error (Some CreateProfileResponse.error_of_json))
   | CreateServer ->
       if is_success
       then
@@ -426,6 +911,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateUserResponse.of_json json)
       else Error (parse_aws_error (Some CreateUserResponse.error_of_json))
+  | CreateWebApp ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateWebAppResponse.of_json json)
+      else Error (parse_aws_error (Some CreateWebAppResponse.error_of_json))
   | CreateWorkflow ->
       if is_success
       then
@@ -435,11 +926,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error (parse_aws_error (Some CreateWorkflowResponse.error_of_json))
   | DeleteAccess ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAgreement ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteCertificate ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteConnector ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteHostKey ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteProfile ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteServer ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteSshPublicKey ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteUser -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteWebApp ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteWebAppCustomization ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteWorkflow ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DescribeAccess ->
@@ -449,6 +954,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeAccessResponse.of_json json)
       else
         Error (parse_aws_error (Some DescribeAccessResponse.error_of_json))
+  | DescribeAgreement ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAgreementResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeAgreementResponse.error_of_json))
+  | DescribeCertificate ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeCertificateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeCertificateResponse.error_of_json))
+  | DescribeConnector ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeConnectorResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeConnectorResponse.error_of_json))
   | DescribeExecution ->
       if is_success
       then
@@ -457,6 +986,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeExecutionResponse.error_of_json))
+  | DescribeHostKey ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeHostKeyResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeHostKeyResponse.error_of_json))
+  | DescribeProfile ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeProfileResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeProfileResponse.error_of_json))
   | DescribeSecurityPolicy ->
       if is_success
       then
@@ -479,6 +1022,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeUserResponse.of_json json)
       else Error (parse_aws_error (Some DescribeUserResponse.error_of_json))
+  | DescribeWebApp ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeWebAppResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeWebAppResponse.error_of_json))
+  | DescribeWebAppCustomization ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeWebAppCustomizationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeWebAppCustomizationResponse.error_of_json))
   | DescribeWorkflow ->
       if is_success
       then
@@ -486,6 +1045,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeWorkflowResponse.of_json json)
       else
         Error (parse_aws_error (Some DescribeWorkflowResponse.error_of_json))
+  | ImportCertificate ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ImportCertificateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ImportCertificateResponse.error_of_json))
+  | ImportHostKey ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ImportHostKeyResponse.of_json json)
+      else Error (parse_aws_error (Some ImportHostKeyResponse.error_of_json))
   | ImportSshPublicKey ->
       if is_success
       then
@@ -500,6 +1073,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListAccessesResponse.of_json json)
       else Error (parse_aws_error (Some ListAccessesResponse.error_of_json))
+  | ListAgreements ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAgreementsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListAgreementsResponse.error_of_json))
+  | ListCertificates ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCertificatesResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListCertificatesResponse.error_of_json))
+  | ListConnectors ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListConnectorsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListConnectorsResponse.error_of_json))
   | ListExecutions ->
       if is_success
       then
@@ -507,6 +1101,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListExecutionsResponse.of_json json)
       else
         Error (parse_aws_error (Some ListExecutionsResponse.error_of_json))
+  | ListFileTransferResults ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListFileTransferResultsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListFileTransferResultsResponse.error_of_json))
+  | ListHostKeys ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListHostKeysResponse.of_json json)
+      else Error (parse_aws_error (Some ListHostKeysResponse.error_of_json))
+  | ListProfiles ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListProfilesResponse.of_json json)
+      else Error (parse_aws_error (Some ListProfilesResponse.error_of_json))
   | ListSecurityPolicies ->
       if is_success
       then
@@ -535,6 +1150,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListUsersResponse.of_json json)
       else Error (parse_aws_error (Some ListUsersResponse.error_of_json))
+  | ListWebApps ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListWebAppsResponse.of_json json)
+      else Error (parse_aws_error (Some ListWebAppsResponse.error_of_json))
   | ListWorkflows ->
       if is_success
       then
@@ -549,9 +1170,47 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some SendWorkflowStepStateResponse.error_of_json))
+  | StartDirectoryListing ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartDirectoryListingResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartDirectoryListingResponse.error_of_json))
+  | StartFileTransfer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartFileTransferResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartFileTransferResponse.error_of_json))
+  | StartRemoteDelete ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartRemoteDeleteResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartRemoteDeleteResponse.error_of_json))
+  | StartRemoteMove ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartRemoteMoveResponse.of_json json)
+      else
+        Error (parse_aws_error (Some StartRemoteMoveResponse.error_of_json))
   | StartServer -> if is_success then Ok () else Error (parse_aws_error None)
   | StopServer -> if is_success then Ok () else Error (parse_aws_error None)
   | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | TestConnection ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TestConnectionResponse.of_json json)
+      else
+        Error (parse_aws_error (Some TestConnectionResponse.error_of_json))
   | TestIdentityProvider ->
       if is_success
       then
@@ -568,6 +1227,40 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateAccessResponse.of_json json)
       else Error (parse_aws_error (Some UpdateAccessResponse.error_of_json))
+  | UpdateAgreement ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateAgreementResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateAgreementResponse.error_of_json))
+  | UpdateCertificate ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateCertificateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateCertificateResponse.error_of_json))
+  | UpdateConnector ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateConnectorResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateConnectorResponse.error_of_json))
+  | UpdateHostKey ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateHostKeyResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateHostKeyResponse.error_of_json))
+  | UpdateProfile ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateProfileResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateProfileResponse.error_of_json))
   | UpdateServer ->
       if is_success
       then
@@ -580,3 +1273,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateUserResponse.of_json json)
       else Error (parse_aws_error (Some UpdateUserResponse.error_of_json))
+  | UpdateWebApp ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateWebAppResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateWebAppResponse.error_of_json))
+  | UpdateWebAppCustomization ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateWebAppCustomizationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateWebAppCustomizationResponse.error_of_json))

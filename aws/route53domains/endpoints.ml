@@ -6,6 +6,10 @@ type ('i, 'o, 'e) t =
   (AcceptDomainTransferFromAnotherAwsAccountRequest.t,
   AcceptDomainTransferFromAnotherAwsAccountResponse.t,
   AcceptDomainTransferFromAnotherAwsAccountResponse.error) t 
+  | AssociateDelegationSignerToDomain:
+  (AssociateDelegationSignerToDomainRequest.t,
+  AssociateDelegationSignerToDomainResponse.t,
+  AssociateDelegationSignerToDomainResponse.error) t 
   | CancelDomainTransferToAnotherAwsAccount:
   (CancelDomainTransferToAnotherAwsAccountRequest.t,
   CancelDomainTransferToAnotherAwsAccountResponse.t,
@@ -25,6 +29,10 @@ type ('i, 'o, 'e) t =
   | DisableDomainTransferLock: (DisableDomainTransferLockRequest.t,
   DisableDomainTransferLockResponse.t,
   DisableDomainTransferLockResponse.error) t 
+  | DisassociateDelegationSignerFromDomain:
+  (DisassociateDelegationSignerFromDomainRequest.t,
+  DisassociateDelegationSignerFromDomainResponse.t,
+  DisassociateDelegationSignerFromDomainResponse.error) t 
   | EnableDomainAutoRenew: (EnableDomainAutoRenewRequest.t,
   EnableDomainAutoRenewResponse.t, EnableDomainAutoRenewResponse.error) t 
   | EnableDomainTransferLock: (EnableDomainTransferLockRequest.t,
@@ -47,6 +55,7 @@ type ('i, 'o, 'e) t =
   ListPricesResponse.error) t 
   | ListTagsForDomain: (ListTagsForDomainRequest.t,
   ListTagsForDomainResponse.t, ListTagsForDomainResponse.error) t 
+  | PushDomain: (PushDomainRequest.t, unit, unit) t 
   | RegisterDomain: (RegisterDomainRequest.t, RegisterDomainResponse.t,
   RegisterDomainResponse.error) t 
   | RejectDomainTransferFromAnotherAwsAccount:
@@ -58,6 +67,8 @@ type ('i, 'o, 'e) t =
   | ResendContactReachabilityEmail: (ResendContactReachabilityEmailRequest.t,
   ResendContactReachabilityEmailResponse.t,
   ResendContactReachabilityEmailResponse.error) t 
+  | ResendOperationAuthorization: (ResendOperationAuthorizationRequest.t,
+  unit, unit) t 
   | RetrieveDomainAuthCode: (RetrieveDomainAuthCodeRequest.t,
   RetrieveDomainAuthCodeResponse.t, RetrieveDomainAuthCodeResponse.error) t 
   | TransferDomain: (TransferDomainRequest.t, TransferDomainResponse.t,
@@ -81,6 +92,7 @@ type ('i, 'o, 'e) t =
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AcceptDomainTransferFromAnotherAwsAccount -> `POST
+  | AssociateDelegationSignerToDomain -> `POST
   | CancelDomainTransferToAnotherAwsAccount -> `POST
   | CheckDomainAvailability -> `POST
   | CheckDomainTransferability -> `POST
@@ -88,6 +100,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteTagsForDomain -> `POST
   | DisableDomainAutoRenew -> `POST
   | DisableDomainTransferLock -> `POST
+  | DisassociateDelegationSignerFromDomain -> `POST
   | EnableDomainAutoRenew -> `POST
   | EnableDomainTransferLock -> `POST
   | GetContactReachabilityStatus -> `POST
@@ -98,10 +111,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListOperations -> `POST
   | ListPrices -> `POST
   | ListTagsForDomain -> `POST
+  | PushDomain -> `POST
   | RegisterDomain -> `POST
   | RejectDomainTransferFromAnotherAwsAccount -> `POST
   | RenewDomain -> `POST
   | ResendContactReachabilityEmail -> `POST
+  | ResendOperationAuthorization -> `POST
   | RetrieveDomainAuthCode -> `POST
   | TransferDomain -> `POST
   | TransferDomainToAnotherAwsAccount -> `POST
@@ -115,6 +130,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       match endpoint with
       | AcceptDomainTransferFromAnotherAwsAccount ->
           (Format.kasprintf Uri.of_string) "/"
+      | AssociateDelegationSignerToDomain ->
+          (Format.kasprintf Uri.of_string) "/"
       | CancelDomainTransferToAnotherAwsAccount ->
           (Format.kasprintf Uri.of_string) "/"
       | CheckDomainAvailability -> (Format.kasprintf Uri.of_string) "/"
@@ -123,6 +140,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteTagsForDomain -> (Format.kasprintf Uri.of_string) "/"
       | DisableDomainAutoRenew -> (Format.kasprintf Uri.of_string) "/"
       | DisableDomainTransferLock -> (Format.kasprintf Uri.of_string) "/"
+      | DisassociateDelegationSignerFromDomain ->
+          (Format.kasprintf Uri.of_string) "/"
       | EnableDomainAutoRenew -> (Format.kasprintf Uri.of_string) "/"
       | EnableDomainTransferLock -> (Format.kasprintf Uri.of_string) "/"
       | GetContactReachabilityStatus -> (Format.kasprintf Uri.of_string) "/"
@@ -133,12 +152,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListOperations -> (Format.kasprintf Uri.of_string) "/"
       | ListPrices -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForDomain -> (Format.kasprintf Uri.of_string) "/"
+      | PushDomain -> (Format.kasprintf Uri.of_string) "/"
       | RegisterDomain -> (Format.kasprintf Uri.of_string) "/"
       | RejectDomainTransferFromAnotherAwsAccount ->
           (Format.kasprintf Uri.of_string) "/"
       | RenewDomain -> (Format.kasprintf Uri.of_string) "/"
       | ResendContactReachabilityEmail ->
           (Format.kasprintf Uri.of_string) "/"
+      | ResendOperationAuthorization -> (Format.kasprintf Uri.of_string) "/"
       | RetrieveDomainAuthCode -> (Format.kasprintf Uri.of_string) "/"
       | TransferDomain -> (Format.kasprintf Uri.of_string) "/"
       | TransferDomainToAnotherAwsAccount ->
@@ -159,6 +180,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "Route53Domains_v20140515.AcceptDomainTransferFromAnotherAwsAccount")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | AssociateDelegationSignerToDomain ->
+      let json = AssociateDelegationSignerToDomainRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "Route53Domains_v20140515.AssociateDelegationSignerToDomain")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CancelDomainTransferToAnotherAwsAccount ->
       let json = CancelDomainTransferToAnotherAwsAccountRequest.to_json req in
@@ -219,6 +249,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "Route53Domains_v20140515.DisableDomainTransferLock")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisassociateDelegationSignerFromDomain ->
+      let json = DisassociateDelegationSignerFromDomainRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "Route53Domains_v20140515.DisassociateDelegationSignerFromDomain")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | EnableDomainAutoRenew ->
       let json = EnableDomainAutoRenewRequest.to_json req in
@@ -302,6 +341,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Route53Domains_v20140515.ListTagsForDomain")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PushDomain ->
+      let json = PushDomainRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Route53Domains_v20140515.PushDomain")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RegisterDomain ->
       let json = RegisterDomainRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -335,6 +382,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "Route53Domains_v20140515.ResendContactReachabilityEmail")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ResendOperationAuthorization ->
+      let json = ResendOperationAuthorizationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "Route53Domains_v20140515.ResendOperationAuthorization")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RetrieveDomainAuthCode ->
       let json = RetrieveDomainAuthCodeRequest.to_json req in
@@ -436,6 +492,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 AcceptDomainTransferFromAnotherAwsAccountResponse.error_of_json))
+  | AssociateDelegationSignerToDomain ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateDelegationSignerToDomainResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateDelegationSignerToDomainResponse.error_of_json))
   | CancelDomainTransferToAnotherAwsAccount ->
       if is_success
       then
@@ -496,6 +561,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisableDomainTransferLockResponse.error_of_json))
+  | DisassociateDelegationSignerFromDomain ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateDelegationSignerFromDomainResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DisassociateDelegationSignerFromDomainResponse.error_of_json))
   | EnableDomainAutoRenew ->
       if is_success
       then
@@ -572,6 +647,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForDomainResponse.error_of_json))
+  | PushDomain -> if is_success then Ok () else Error (parse_aws_error None)
   | RegisterDomain ->
       if is_success
       then
@@ -604,6 +680,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ResendContactReachabilityEmailResponse.error_of_json))
+  | ResendOperationAuthorization ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | RetrieveDomainAuthCode ->
       if is_success
       then

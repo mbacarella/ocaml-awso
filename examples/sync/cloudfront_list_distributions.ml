@@ -6,9 +6,7 @@ module CF = Awso_cloudfront_sync
 let () =
   match CF.list_distributions (CF.ListDistributionsRequest.make ()) with
   | Error err ->
-    let s =
-      err |> CF.ListDistributionsResult.error_to_json |> Yojson.Safe.to_string
-    in
+    let s = err |> CF.ListDistributionsResult.error_to_json |> Yojson.Safe.to_string in
     prerr_endline ("list_distributions failed: " ^ s);
     exit 1
   | Ok response ->
@@ -21,12 +19,9 @@ let () =
     in
     let items = Option.value dl.items ~default:[] in
     Printf.printf "%d distribution(s):\n" (List.length items);
+    let str x = Option.value x ~default:"?" in
     List.iter
       (fun (d : CF.DistributionSummary.t) ->
-         Printf.printf
-           "  %s  %s  [%s]\n"
-           (d.id :> string)
-           (d.domainName :> string)
-           (d.status :> string))
+         Printf.printf "  %s  %s  [%s]\n" (str d.id) (str d.domainName) (str d.status))
       items
 ;;

@@ -6,6 +6,19 @@ val associate_origination_identity :
       AssociateOriginationIdentityRequest.t ->
         (AssociateOriginationIdentityResult.t,
           AssociateOriginationIdentityResult.error) Result.t Async.Deferred.t
+val associate_protect_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssociateProtectConfigurationRequest.t ->
+        (AssociateProtectConfigurationResult.t,
+          AssociateProtectConfigurationResult.error) Result.t
+          Async.Deferred.t
+val carrier_lookup :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CarrierLookupRequest.t ->
+        (CarrierLookupResult.t, CarrierLookupResult.error) Result.t
+          Async.Deferred.t
 val create_configuration_set :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -18,6 +31,12 @@ val create_event_destination :
       CreateEventDestinationRequest.t ->
         (CreateEventDestinationResult.t, CreateEventDestinationResult.error)
           Result.t Async.Deferred.t
+val create_notify_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateNotifyConfigurationRequest.t ->
+        (CreateNotifyConfigurationResult.t,
+          CreateNotifyConfigurationResult.error) Result.t Async.Deferred.t
 val create_opt_out_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -29,6 +48,57 @@ val create_pool :
     ?cfg:Awso.Cfg.t ->
       CreatePoolRequest.t ->
         (CreatePoolResult.t, CreatePoolResult.error) Result.t
+          Async.Deferred.t
+val create_protect_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateProtectConfigurationRequest.t ->
+        (CreateProtectConfigurationResult.t,
+          CreateProtectConfigurationResult.error) Result.t Async.Deferred.t
+val create_rcs_agent :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRcsAgentRequest.t ->
+        (CreateRcsAgentResult.t, CreateRcsAgentResult.error) Result.t
+          Async.Deferred.t
+val create_registration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRegistrationRequest.t ->
+        (CreateRegistrationResult.t, CreateRegistrationResult.error) Result.t
+          Async.Deferred.t
+val create_registration_association :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRegistrationAssociationRequest.t ->
+        (CreateRegistrationAssociationResult.t,
+          CreateRegistrationAssociationResult.error) Result.t
+          Async.Deferred.t
+val create_registration_attachment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRegistrationAttachmentRequest.t ->
+        (CreateRegistrationAttachmentResult.t,
+          CreateRegistrationAttachmentResult.error) Result.t Async.Deferred.t
+val create_registration_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRegistrationVersionRequest.t ->
+        (CreateRegistrationVersionResult.t,
+          CreateRegistrationVersionResult.error) Result.t Async.Deferred.t
+val create_verified_destination_number :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateVerifiedDestinationNumberRequest.t ->
+        (CreateVerifiedDestinationNumberResult.t,
+          CreateVerifiedDestinationNumberResult.error) Result.t
+          Async.Deferred.t
+val delete_account_default_protect_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAccountDefaultProtectConfigurationRequest.t ->
+        (DeleteAccountDefaultProtectConfigurationResult.t,
+          DeleteAccountDefaultProtectConfigurationResult.error) Result.t
           Async.Deferred.t
 val delete_configuration_set :
   ?endpoint_url:string ->
@@ -60,6 +130,26 @@ val delete_keyword :
       DeleteKeywordRequest.t ->
         (DeleteKeywordResult.t, DeleteKeywordResult.error) Result.t
           Async.Deferred.t
+val delete_media_message_spend_limit_override :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteMediaMessageSpendLimitOverrideRequest.t ->
+        (DeleteMediaMessageSpendLimitOverrideResult.t,
+          DeleteMediaMessageSpendLimitOverrideResult.error) Result.t
+          Async.Deferred.t
+val delete_notify_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteNotifyConfigurationRequest.t ->
+        (DeleteNotifyConfigurationResult.t,
+          DeleteNotifyConfigurationResult.error) Result.t Async.Deferred.t
+val delete_notify_message_spend_limit_override :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteNotifyMessageSpendLimitOverrideRequest.t ->
+        (DeleteNotifyMessageSpendLimitOverrideResult.t,
+          DeleteNotifyMessageSpendLimitOverrideResult.error) Result.t
+          Async.Deferred.t
 val delete_opt_out_list :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -78,12 +168,62 @@ val delete_pool :
       DeletePoolRequest.t ->
         (DeletePoolResult.t, DeletePoolResult.error) Result.t
           Async.Deferred.t
+val delete_protect_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteProtectConfigurationRequest.t ->
+        (DeleteProtectConfigurationResult.t,
+          DeleteProtectConfigurationResult.error) Result.t Async.Deferred.t
+val delete_protect_configuration_rule_set_number_override :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteProtectConfigurationRuleSetNumberOverrideRequest.t ->
+        (DeleteProtectConfigurationRuleSetNumberOverrideResult.t,
+          DeleteProtectConfigurationRuleSetNumberOverrideResult.error)
+          Result.t Async.Deferred.t
+val delete_rcs_agent :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteRcsAgentRequest.t ->
+        (DeleteRcsAgentResult.t, DeleteRcsAgentResult.error) Result.t
+          Async.Deferred.t
+val delete_registration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteRegistrationRequest.t ->
+        (DeleteRegistrationResult.t, DeleteRegistrationResult.error) Result.t
+          Async.Deferred.t
+val delete_registration_attachment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteRegistrationAttachmentRequest.t ->
+        (DeleteRegistrationAttachmentResult.t,
+          DeleteRegistrationAttachmentResult.error) Result.t Async.Deferred.t
+val delete_registration_field_value :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteRegistrationFieldValueRequest.t ->
+        (DeleteRegistrationFieldValueResult.t,
+          DeleteRegistrationFieldValueResult.error) Result.t Async.Deferred.t
+val delete_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteResourcePolicyRequest.t ->
+        (DeleteResourcePolicyResult.t, DeleteResourcePolicyResult.error)
+          Result.t Async.Deferred.t
 val delete_text_message_spend_limit_override :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTextMessageSpendLimitOverrideRequest.t ->
         (DeleteTextMessageSpendLimitOverrideResult.t,
           DeleteTextMessageSpendLimitOverrideResult.error) Result.t
+          Async.Deferred.t
+val delete_verified_destination_number :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteVerifiedDestinationNumberRequest.t ->
+        (DeleteVerifiedDestinationNumberResult.t,
+          DeleteVerifiedDestinationNumberResult.error) Result.t
           Async.Deferred.t
 val delete_voice_message_spend_limit_override :
   ?endpoint_url:string ->
@@ -116,6 +256,18 @@ val describe_keywords :
       DescribeKeywordsRequest.t ->
         (DescribeKeywordsResult.t, DescribeKeywordsResult.error) Result.t
           Async.Deferred.t
+val describe_notify_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeNotifyConfigurationsRequest.t ->
+        (DescribeNotifyConfigurationsResult.t,
+          DescribeNotifyConfigurationsResult.error) Result.t Async.Deferred.t
+val describe_notify_templates :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeNotifyTemplatesRequest.t ->
+        (DescribeNotifyTemplatesResult.t,
+          DescribeNotifyTemplatesResult.error) Result.t Async.Deferred.t
 val describe_opt_out_lists :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -140,6 +292,73 @@ val describe_pools :
       DescribePoolsRequest.t ->
         (DescribePoolsResult.t, DescribePoolsResult.error) Result.t
           Async.Deferred.t
+val describe_protect_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeProtectConfigurationsRequest.t ->
+        (DescribeProtectConfigurationsResult.t,
+          DescribeProtectConfigurationsResult.error) Result.t
+          Async.Deferred.t
+val describe_rcs_agent_country_launch_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRcsAgentCountryLaunchStatusRequest.t ->
+        (DescribeRcsAgentCountryLaunchStatusResult.t,
+          DescribeRcsAgentCountryLaunchStatusResult.error) Result.t
+          Async.Deferred.t
+val describe_rcs_agents :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRcsAgentsRequest.t ->
+        (DescribeRcsAgentsResult.t, DescribeRcsAgentsResult.error) Result.t
+          Async.Deferred.t
+val describe_registration_attachments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRegistrationAttachmentsRequest.t ->
+        (DescribeRegistrationAttachmentsResult.t,
+          DescribeRegistrationAttachmentsResult.error) Result.t
+          Async.Deferred.t
+val describe_registration_field_definitions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRegistrationFieldDefinitionsRequest.t ->
+        (DescribeRegistrationFieldDefinitionsResult.t,
+          DescribeRegistrationFieldDefinitionsResult.error) Result.t
+          Async.Deferred.t
+val describe_registration_field_values :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRegistrationFieldValuesRequest.t ->
+        (DescribeRegistrationFieldValuesResult.t,
+          DescribeRegistrationFieldValuesResult.error) Result.t
+          Async.Deferred.t
+val describe_registration_section_definitions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRegistrationSectionDefinitionsRequest.t ->
+        (DescribeRegistrationSectionDefinitionsResult.t,
+          DescribeRegistrationSectionDefinitionsResult.error) Result.t
+          Async.Deferred.t
+val describe_registration_type_definitions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRegistrationTypeDefinitionsRequest.t ->
+        (DescribeRegistrationTypeDefinitionsResult.t,
+          DescribeRegistrationTypeDefinitionsResult.error) Result.t
+          Async.Deferred.t
+val describe_registration_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRegistrationVersionsRequest.t ->
+        (DescribeRegistrationVersionsResult.t,
+          DescribeRegistrationVersionsResult.error) Result.t Async.Deferred.t
+val describe_registrations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRegistrationsRequest.t ->
+        (DescribeRegistrationsResult.t, DescribeRegistrationsResult.error)
+          Result.t Async.Deferred.t
 val describe_sender_ids :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -152,6 +371,13 @@ val describe_spend_limits :
       DescribeSpendLimitsRequest.t ->
         (DescribeSpendLimitsResult.t, DescribeSpendLimitsResult.error)
           Result.t Async.Deferred.t
+val describe_verified_destination_numbers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeVerifiedDestinationNumbersRequest.t ->
+        (DescribeVerifiedDestinationNumbersResult.t,
+          DescribeVerifiedDestinationNumbersResult.error) Result.t
+          Async.Deferred.t
 val disassociate_origination_identity :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -159,6 +385,38 @@ val disassociate_origination_identity :
         (DisassociateOriginationIdentityResult.t,
           DisassociateOriginationIdentityResult.error) Result.t
           Async.Deferred.t
+val disassociate_protect_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisassociateProtectConfigurationRequest.t ->
+        (DisassociateProtectConfigurationResult.t,
+          DisassociateProtectConfigurationResult.error) Result.t
+          Async.Deferred.t
+val discard_registration_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DiscardRegistrationVersionRequest.t ->
+        (DiscardRegistrationVersionResult.t,
+          DiscardRegistrationVersionResult.error) Result.t Async.Deferred.t
+val get_protect_configuration_country_rule_set :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetProtectConfigurationCountryRuleSetRequest.t ->
+        (GetProtectConfigurationCountryRuleSetResult.t,
+          GetProtectConfigurationCountryRuleSetResult.error) Result.t
+          Async.Deferred.t
+val get_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcePolicyRequest.t ->
+        (GetResourcePolicyResult.t, GetResourcePolicyResult.error) Result.t
+          Async.Deferred.t
+val list_notify_countries :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListNotifyCountriesRequest.t ->
+        (ListNotifyCountriesResult.t, ListNotifyCountriesResult.error)
+          Result.t Async.Deferred.t
 val list_pool_origination_identities :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -166,6 +424,19 @@ val list_pool_origination_identities :
         (ListPoolOriginationIdentitiesResult.t,
           ListPoolOriginationIdentitiesResult.error) Result.t
           Async.Deferred.t
+val list_protect_configuration_rule_set_number_overrides :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListProtectConfigurationRuleSetNumberOverridesRequest.t ->
+        (ListProtectConfigurationRuleSetNumberOverridesResult.t,
+          ListProtectConfigurationRuleSetNumberOverridesResult.error)
+          Result.t Async.Deferred.t
+val list_registration_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRegistrationAssociationsRequest.t ->
+        (ListRegistrationAssociationsResult.t,
+          ListRegistrationAssociationsResult.error) Result.t Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -178,11 +449,36 @@ val put_keyword :
       PutKeywordRequest.t ->
         (PutKeywordResult.t, PutKeywordResult.error) Result.t
           Async.Deferred.t
+val put_message_feedback :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutMessageFeedbackRequest.t ->
+        (PutMessageFeedbackResult.t, PutMessageFeedbackResult.error) Result.t
+          Async.Deferred.t
 val put_opted_out_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutOptedOutNumberRequest.t ->
         (PutOptedOutNumberResult.t, PutOptedOutNumberResult.error) Result.t
+          Async.Deferred.t
+val put_protect_configuration_rule_set_number_override :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutProtectConfigurationRuleSetNumberOverrideRequest.t ->
+        (PutProtectConfigurationRuleSetNumberOverrideResult.t,
+          PutProtectConfigurationRuleSetNumberOverrideResult.error) Result.t
+          Async.Deferred.t
+val put_registration_field_value :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutRegistrationFieldValueRequest.t ->
+        (PutRegistrationFieldValueResult.t,
+          PutRegistrationFieldValueResult.error) Result.t Async.Deferred.t
+val put_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutResourcePolicyRequest.t ->
+        (PutResourcePolicyResult.t, PutResourcePolicyResult.error) Result.t
           Async.Deferred.t
 val release_phone_number :
   ?endpoint_url:string ->
@@ -190,12 +486,49 @@ val release_phone_number :
       ReleasePhoneNumberRequest.t ->
         (ReleasePhoneNumberResult.t, ReleasePhoneNumberResult.error) Result.t
           Async.Deferred.t
+val release_sender_id :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ReleaseSenderIdRequest.t ->
+        (ReleaseSenderIdResult.t, ReleaseSenderIdResult.error) Result.t
+          Async.Deferred.t
 val request_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RequestPhoneNumberRequest.t ->
         (RequestPhoneNumberResult.t, RequestPhoneNumberResult.error) Result.t
           Async.Deferred.t
+val request_sender_id :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RequestSenderIdRequest.t ->
+        (RequestSenderIdResult.t, RequestSenderIdResult.error) Result.t
+          Async.Deferred.t
+val send_destination_number_verification_code :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SendDestinationNumberVerificationCodeRequest.t ->
+        (SendDestinationNumberVerificationCodeResult.t,
+          SendDestinationNumberVerificationCodeResult.error) Result.t
+          Async.Deferred.t
+val send_media_message :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SendMediaMessageRequest.t ->
+        (SendMediaMessageResult.t, SendMediaMessageResult.error) Result.t
+          Async.Deferred.t
+val send_notify_text_message :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SendNotifyTextMessageRequest.t ->
+        (SendNotifyTextMessageResult.t, SendNotifyTextMessageResult.error)
+          Result.t Async.Deferred.t
+val send_notify_voice_message :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SendNotifyVoiceMessageRequest.t ->
+        (SendNotifyVoiceMessageResult.t, SendNotifyVoiceMessageResult.error)
+          Result.t Async.Deferred.t
 val send_text_message :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -208,6 +541,20 @@ val send_voice_message :
       SendVoiceMessageRequest.t ->
         (SendVoiceMessageResult.t, SendVoiceMessageResult.error) Result.t
           Async.Deferred.t
+val set_account_default_protect_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SetAccountDefaultProtectConfigurationRequest.t ->
+        (SetAccountDefaultProtectConfigurationResult.t,
+          SetAccountDefaultProtectConfigurationResult.error) Result.t
+          Async.Deferred.t
+val set_default_message_feedback_enabled :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SetDefaultMessageFeedbackEnabledRequest.t ->
+        (SetDefaultMessageFeedbackEnabledResult.t,
+          SetDefaultMessageFeedbackEnabledResult.error) Result.t
+          Async.Deferred.t
 val set_default_message_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -219,6 +566,20 @@ val set_default_sender_id :
     ?cfg:Awso.Cfg.t ->
       SetDefaultSenderIdRequest.t ->
         (SetDefaultSenderIdResult.t, SetDefaultSenderIdResult.error) Result.t
+          Async.Deferred.t
+val set_media_message_spend_limit_override :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SetMediaMessageSpendLimitOverrideRequest.t ->
+        (SetMediaMessageSpendLimitOverrideResult.t,
+          SetMediaMessageSpendLimitOverrideResult.error) Result.t
+          Async.Deferred.t
+val set_notify_message_spend_limit_override :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SetNotifyMessageSpendLimitOverrideRequest.t ->
+        (SetNotifyMessageSpendLimitOverrideResult.t,
+          SetNotifyMessageSpendLimitOverrideResult.error) Result.t
           Async.Deferred.t
 val set_text_message_spend_limit_override :
   ?endpoint_url:string ->
@@ -234,6 +595,12 @@ val set_voice_message_spend_limit_override :
         (SetVoiceMessageSpendLimitOverrideResult.t,
           SetVoiceMessageSpendLimitOverrideResult.error) Result.t
           Async.Deferred.t
+val submit_registration_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SubmitRegistrationVersionRequest.t ->
+        (SubmitRegistrationVersionResult.t,
+          SubmitRegistrationVersionResult.error) Result.t Async.Deferred.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -252,6 +619,12 @@ val update_event_destination :
       UpdateEventDestinationRequest.t ->
         (UpdateEventDestinationResult.t, UpdateEventDestinationResult.error)
           Result.t Async.Deferred.t
+val update_notify_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateNotifyConfigurationRequest.t ->
+        (UpdateNotifyConfigurationResult.t,
+          UpdateNotifyConfigurationResult.error) Result.t Async.Deferred.t
 val update_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -264,3 +637,34 @@ val update_pool :
       UpdatePoolRequest.t ->
         (UpdatePoolResult.t, UpdatePoolResult.error) Result.t
           Async.Deferred.t
+val update_protect_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateProtectConfigurationRequest.t ->
+        (UpdateProtectConfigurationResult.t,
+          UpdateProtectConfigurationResult.error) Result.t Async.Deferred.t
+val update_protect_configuration_country_rule_set :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateProtectConfigurationCountryRuleSetRequest.t ->
+        (UpdateProtectConfigurationCountryRuleSetResult.t,
+          UpdateProtectConfigurationCountryRuleSetResult.error) Result.t
+          Async.Deferred.t
+val update_rcs_agent :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateRcsAgentRequest.t ->
+        (UpdateRcsAgentResult.t, UpdateRcsAgentResult.error) Result.t
+          Async.Deferred.t
+val update_sender_id :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSenderIdRequest.t ->
+        (UpdateSenderIdResult.t, UpdateSenderIdResult.error) Result.t
+          Async.Deferred.t
+val verify_destination_number :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      VerifyDestinationNumberRequest.t ->
+        (VerifyDestinationNumberResult.t,
+          VerifyDestinationNumberResult.error) Result.t Async.Deferred.t

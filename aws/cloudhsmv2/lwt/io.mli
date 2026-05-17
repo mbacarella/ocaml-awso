@@ -31,6 +31,12 @@ val delete_hsm :
     ?cfg:Awso.Cfg.t ->
       DeleteHsmRequest.t ->
         (DeleteHsmResponse.t, DeleteHsmResponse.error) Result.t Lwt.t
+val delete_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteResourcePolicyRequest.t ->
+        (DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error)
+          Result.t Lwt.t
 val describe_backups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -43,6 +49,12 @@ val describe_clusters :
       DescribeClustersRequest.t ->
         (DescribeClustersResponse.t, DescribeClustersResponse.error) Result.t
           Lwt.t
+val get_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcePolicyRequest.t ->
+        (GetResourcePolicyResponse.t, GetResourcePolicyResponse.error)
+          Result.t Lwt.t
 val initialize_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -65,6 +77,12 @@ val modify_cluster :
     ?cfg:Awso.Cfg.t ->
       ModifyClusterRequest.t ->
         (ModifyClusterResponse.t, ModifyClusterResponse.error) Result.t Lwt.t
+val put_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutResourcePolicyRequest.t ->
+        (PutResourcePolicyResponse.t, PutResourcePolicyResponse.error)
+          Result.t Lwt.t
 val restore_backup :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

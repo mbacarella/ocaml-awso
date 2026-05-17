@@ -6,20 +6,6 @@ val associate_phone_number_with_user :
       AssociatePhoneNumberWithUserRequest.t ->
         (AssociatePhoneNumberWithUserResponse.t,
           AssociatePhoneNumberWithUserResponse.error) Result.t Lwt.t
-val associate_phone_numbers_with_voice_connector :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      AssociatePhoneNumbersWithVoiceConnectorRequest.t ->
-        (AssociatePhoneNumbersWithVoiceConnectorResponse.t,
-          AssociatePhoneNumbersWithVoiceConnectorResponse.error) Result.t
-          Lwt.t
-val associate_phone_numbers_with_voice_connector_group :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      AssociatePhoneNumbersWithVoiceConnectorGroupRequest.t ->
-        (AssociatePhoneNumbersWithVoiceConnectorGroupResponse.t,
-          AssociatePhoneNumbersWithVoiceConnectorGroupResponse.error)
-          Result.t Lwt.t
 val associate_signin_delegate_groups_with_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -27,18 +13,6 @@ val associate_signin_delegate_groups_with_account :
         (AssociateSigninDelegateGroupsWithAccountResponse.t,
           AssociateSigninDelegateGroupsWithAccountResponse.error) Result.t
           Lwt.t
-val batch_create_attendee :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      BatchCreateAttendeeRequest.t ->
-        (BatchCreateAttendeeResponse.t, BatchCreateAttendeeResponse.error)
-          Result.t Lwt.t
-val batch_create_channel_membership :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      BatchCreateChannelMembershipRequest.t ->
-        (BatchCreateChannelMembershipResponse.t,
-          BatchCreateChannelMembershipResponse.error) Result.t Lwt.t
 val batch_create_room_membership :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -80,93 +54,23 @@ val create_account :
     ?cfg:Awso.Cfg.t ->
       CreateAccountRequest.t ->
         (CreateAccountResponse.t, CreateAccountResponse.error) Result.t Lwt.t
-val create_app_instance :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateAppInstanceRequest.t ->
-        (CreateAppInstanceResponse.t, CreateAppInstanceResponse.error)
-          Result.t Lwt.t
-val create_app_instance_admin :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateAppInstanceAdminRequest.t ->
-        (CreateAppInstanceAdminResponse.t,
-          CreateAppInstanceAdminResponse.error) Result.t Lwt.t
-val create_app_instance_user :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateAppInstanceUserRequest.t ->
-        (CreateAppInstanceUserResponse.t,
-          CreateAppInstanceUserResponse.error) Result.t Lwt.t
-val create_attendee :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateAttendeeRequest.t ->
-        (CreateAttendeeResponse.t, CreateAttendeeResponse.error) Result.t
-          Lwt.t
 val create_bot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateBotRequest.t ->
         (CreateBotResponse.t, CreateBotResponse.error) Result.t Lwt.t
-val create_channel :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateChannelRequest.t ->
-        (CreateChannelResponse.t, CreateChannelResponse.error) Result.t Lwt.t
-val create_channel_ban :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateChannelBanRequest.t ->
-        (CreateChannelBanResponse.t, CreateChannelBanResponse.error) Result.t
-          Lwt.t
-val create_channel_membership :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateChannelMembershipRequest.t ->
-        (CreateChannelMembershipResponse.t,
-          CreateChannelMembershipResponse.error) Result.t Lwt.t
-val create_channel_moderator :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateChannelModeratorRequest.t ->
-        (CreateChannelModeratorResponse.t,
-          CreateChannelModeratorResponse.error) Result.t Lwt.t
-val create_media_capture_pipeline :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateMediaCapturePipelineRequest.t ->
-        (CreateMediaCapturePipelineResponse.t,
-          CreateMediaCapturePipelineResponse.error) Result.t Lwt.t
-val create_meeting :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateMeetingRequest.t ->
-        (CreateMeetingResponse.t, CreateMeetingResponse.error) Result.t Lwt.t
 val create_meeting_dial_out :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateMeetingDialOutRequest.t ->
         (CreateMeetingDialOutResponse.t, CreateMeetingDialOutResponse.error)
           Result.t Lwt.t
-val create_meeting_with_attendees :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateMeetingWithAttendeesRequest.t ->
-        (CreateMeetingWithAttendeesResponse.t,
-          CreateMeetingWithAttendeesResponse.error) Result.t Lwt.t
 val create_phone_number_order :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreatePhoneNumberOrderRequest.t ->
         (CreatePhoneNumberOrderResponse.t,
           CreatePhoneNumberOrderResponse.error) Result.t Lwt.t
-val create_proxy_session :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateProxySessionRequest.t ->
-        (CreateProxySessionResponse.t, CreateProxySessionResponse.error)
-          Result.t Lwt.t
 val create_room :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -178,103 +82,24 @@ val create_room_membership :
       CreateRoomMembershipRequest.t ->
         (CreateRoomMembershipResponse.t, CreateRoomMembershipResponse.error)
           Result.t Lwt.t
-val create_sip_media_application :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateSipMediaApplicationRequest.t ->
-        (CreateSipMediaApplicationResponse.t,
-          CreateSipMediaApplicationResponse.error) Result.t Lwt.t
-val create_sip_media_application_call :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateSipMediaApplicationCallRequest.t ->
-        (CreateSipMediaApplicationCallResponse.t,
-          CreateSipMediaApplicationCallResponse.error) Result.t Lwt.t
-val create_sip_rule :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateSipRuleRequest.t ->
-        (CreateSipRuleResponse.t, CreateSipRuleResponse.error) Result.t Lwt.t
 val create_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateUserRequest.t ->
         (CreateUserResponse.t, CreateUserResponse.error) Result.t Lwt.t
-val create_voice_connector :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateVoiceConnectorRequest.t ->
-        (CreateVoiceConnectorResponse.t, CreateVoiceConnectorResponse.error)
-          Result.t Lwt.t
-val create_voice_connector_group :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      CreateVoiceConnectorGroupRequest.t ->
-        (CreateVoiceConnectorGroupResponse.t,
-          CreateVoiceConnectorGroupResponse.error) Result.t Lwt.t
 val delete_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteAccountRequest.t ->
         (DeleteAccountResponse.t, DeleteAccountResponse.error) Result.t Lwt.t
-val delete_app_instance :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteAppInstanceRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_app_instance_admin :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteAppInstanceAdminRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_app_instance_streaming_configurations :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteAppInstanceStreamingConfigurationsRequest.t ->
-        (unit, unit) Result.t Lwt.t
-val delete_app_instance_user :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteAppInstanceUserRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_attendee :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t -> DeleteAttendeeRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_channel :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t -> DeleteChannelRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_channel_ban :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteChannelBanRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_channel_membership :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteChannelMembershipRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_channel_message :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteChannelMessageRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_channel_moderator :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteChannelModeratorRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_events_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEventsConfigurationRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_media_capture_pipeline :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteMediaCapturePipelineRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_meeting :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t -> DeleteMeetingRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeletePhoneNumberRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_proxy_session :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteProxySessionRequest.t -> (unit, unit) Result.t Lwt.t
 val delete_room :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteRoomRequest.t -> (unit, unit) Result.t Lwt.t
@@ -282,124 +107,12 @@ val delete_room_membership :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteRoomMembershipRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_sip_media_application :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteSipMediaApplicationRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_sip_rule :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t -> DeleteSipRuleRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_voice_connector :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteVoiceConnectorRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_voice_connector_emergency_calling_configuration :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteVoiceConnectorEmergencyCallingConfigurationRequest.t ->
-        (unit, unit) Result.t Lwt.t
-val delete_voice_connector_group :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteVoiceConnectorGroupRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_voice_connector_origination :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteVoiceConnectorOriginationRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_voice_connector_proxy :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteVoiceConnectorProxyRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_voice_connector_streaming_configuration :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteVoiceConnectorStreamingConfigurationRequest.t ->
-        (unit, unit) Result.t Lwt.t
-val delete_voice_connector_termination :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteVoiceConnectorTerminationRequest.t -> (unit, unit) Result.t Lwt.t
-val delete_voice_connector_termination_credentials :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DeleteVoiceConnectorTerminationCredentialsRequest.t ->
-        (unit, unit) Result.t Lwt.t
-val describe_app_instance :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DescribeAppInstanceRequest.t ->
-        (DescribeAppInstanceResponse.t, DescribeAppInstanceResponse.error)
-          Result.t Lwt.t
-val describe_app_instance_admin :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DescribeAppInstanceAdminRequest.t ->
-        (DescribeAppInstanceAdminResponse.t,
-          DescribeAppInstanceAdminResponse.error) Result.t Lwt.t
-val describe_app_instance_user :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DescribeAppInstanceUserRequest.t ->
-        (DescribeAppInstanceUserResponse.t,
-          DescribeAppInstanceUserResponse.error) Result.t Lwt.t
-val describe_channel :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DescribeChannelRequest.t ->
-        (DescribeChannelResponse.t, DescribeChannelResponse.error) Result.t
-          Lwt.t
-val describe_channel_ban :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DescribeChannelBanRequest.t ->
-        (DescribeChannelBanResponse.t, DescribeChannelBanResponse.error)
-          Result.t Lwt.t
-val describe_channel_membership :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DescribeChannelMembershipRequest.t ->
-        (DescribeChannelMembershipResponse.t,
-          DescribeChannelMembershipResponse.error) Result.t Lwt.t
-val describe_channel_membership_for_app_instance_user :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DescribeChannelMembershipForAppInstanceUserRequest.t ->
-        (DescribeChannelMembershipForAppInstanceUserResponse.t,
-          DescribeChannelMembershipForAppInstanceUserResponse.error) Result.t
-          Lwt.t
-val describe_channel_moderated_by_app_instance_user :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DescribeChannelModeratedByAppInstanceUserRequest.t ->
-        (DescribeChannelModeratedByAppInstanceUserResponse.t,
-          DescribeChannelModeratedByAppInstanceUserResponse.error) Result.t
-          Lwt.t
-val describe_channel_moderator :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DescribeChannelModeratorRequest.t ->
-        (DescribeChannelModeratorResponse.t,
-          DescribeChannelModeratorResponse.error) Result.t Lwt.t
 val disassociate_phone_number_from_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisassociatePhoneNumberFromUserRequest.t ->
         (DisassociatePhoneNumberFromUserResponse.t,
           DisassociatePhoneNumberFromUserResponse.error) Result.t Lwt.t
-val disassociate_phone_numbers_from_voice_connector :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DisassociatePhoneNumbersFromVoiceConnectorRequest.t ->
-        (DisassociatePhoneNumbersFromVoiceConnectorResponse.t,
-          DisassociatePhoneNumbersFromVoiceConnectorResponse.error) Result.t
-          Lwt.t
-val disassociate_phone_numbers_from_voice_connector_group :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      DisassociatePhoneNumbersFromVoiceConnectorGroupRequest.t ->
-        (DisassociatePhoneNumbersFromVoiceConnectorGroupResponse.t,
-          DisassociatePhoneNumbersFromVoiceConnectorGroupResponse.error)
-          Result.t Lwt.t
 val disassociate_signin_delegate_groups_from_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -418,34 +131,11 @@ val get_account_settings :
       GetAccountSettingsRequest.t ->
         (GetAccountSettingsResponse.t, GetAccountSettingsResponse.error)
           Result.t Lwt.t
-val get_app_instance_retention_settings :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetAppInstanceRetentionSettingsRequest.t ->
-        (GetAppInstanceRetentionSettingsResponse.t,
-          GetAppInstanceRetentionSettingsResponse.error) Result.t Lwt.t
-val get_app_instance_streaming_configurations :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetAppInstanceStreamingConfigurationsRequest.t ->
-        (GetAppInstanceStreamingConfigurationsResponse.t,
-          GetAppInstanceStreamingConfigurationsResponse.error) Result.t Lwt.t
-val get_attendee :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetAttendeeRequest.t ->
-        (GetAttendeeResponse.t, GetAttendeeResponse.error) Result.t Lwt.t
 val get_bot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetBotRequest.t ->
         (GetBotResponse.t, GetBotResponse.error) Result.t Lwt.t
-val get_channel_message :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetChannelMessageRequest.t ->
-        (GetChannelMessageResponse.t, GetChannelMessageResponse.error)
-          Result.t Lwt.t
 val get_events_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -458,23 +148,6 @@ val get_global_settings :
       unit ->
         (GetGlobalSettingsResponse.t, GetGlobalSettingsResponse.error)
           Result.t Lwt.t
-val get_media_capture_pipeline :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetMediaCapturePipelineRequest.t ->
-        (GetMediaCapturePipelineResponse.t,
-          GetMediaCapturePipelineResponse.error) Result.t Lwt.t
-val get_meeting :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetMeetingRequest.t ->
-        (GetMeetingResponse.t, GetMeetingResponse.error) Result.t Lwt.t
-val get_messaging_session_endpoint :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetMessagingSessionEndpointRequest.t ->
-        (GetMessagingSessionEndpointResponse.t,
-          GetMessagingSessionEndpointResponse.error) Result.t Lwt.t
 val get_phone_number :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -493,12 +166,6 @@ val get_phone_number_settings :
       unit ->
         (GetPhoneNumberSettingsResponse.t,
           GetPhoneNumberSettingsResponse.error) Result.t Lwt.t
-val get_proxy_session :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetProxySessionRequest.t ->
-        (GetProxySessionResponse.t, GetProxySessionResponse.error) Result.t
-          Lwt.t
 val get_retention_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -510,24 +177,6 @@ val get_room :
     ?cfg:Awso.Cfg.t ->
       GetRoomRequest.t ->
         (GetRoomResponse.t, GetRoomResponse.error) Result.t Lwt.t
-val get_sip_media_application :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetSipMediaApplicationRequest.t ->
-        (GetSipMediaApplicationResponse.t,
-          GetSipMediaApplicationResponse.error) Result.t Lwt.t
-val get_sip_media_application_logging_configuration :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetSipMediaApplicationLoggingConfigurationRequest.t ->
-        (GetSipMediaApplicationLoggingConfigurationResponse.t,
-          GetSipMediaApplicationLoggingConfigurationResponse.error) Result.t
-          Lwt.t
-val get_sip_rule :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetSipRuleRequest.t ->
-        (GetSipRuleResponse.t, GetSipRuleResponse.error) Result.t Lwt.t
 val get_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -539,62 +188,6 @@ val get_user_settings :
       GetUserSettingsRequest.t ->
         (GetUserSettingsResponse.t, GetUserSettingsResponse.error) Result.t
           Lwt.t
-val get_voice_connector :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetVoiceConnectorRequest.t ->
-        (GetVoiceConnectorResponse.t, GetVoiceConnectorResponse.error)
-          Result.t Lwt.t
-val get_voice_connector_emergency_calling_configuration :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetVoiceConnectorEmergencyCallingConfigurationRequest.t ->
-        (GetVoiceConnectorEmergencyCallingConfigurationResponse.t,
-          GetVoiceConnectorEmergencyCallingConfigurationResponse.error)
-          Result.t Lwt.t
-val get_voice_connector_group :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetVoiceConnectorGroupRequest.t ->
-        (GetVoiceConnectorGroupResponse.t,
-          GetVoiceConnectorGroupResponse.error) Result.t Lwt.t
-val get_voice_connector_logging_configuration :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetVoiceConnectorLoggingConfigurationRequest.t ->
-        (GetVoiceConnectorLoggingConfigurationResponse.t,
-          GetVoiceConnectorLoggingConfigurationResponse.error) Result.t Lwt.t
-val get_voice_connector_origination :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetVoiceConnectorOriginationRequest.t ->
-        (GetVoiceConnectorOriginationResponse.t,
-          GetVoiceConnectorOriginationResponse.error) Result.t Lwt.t
-val get_voice_connector_proxy :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetVoiceConnectorProxyRequest.t ->
-        (GetVoiceConnectorProxyResponse.t,
-          GetVoiceConnectorProxyResponse.error) Result.t Lwt.t
-val get_voice_connector_streaming_configuration :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetVoiceConnectorStreamingConfigurationRequest.t ->
-        (GetVoiceConnectorStreamingConfigurationResponse.t,
-          GetVoiceConnectorStreamingConfigurationResponse.error) Result.t
-          Lwt.t
-val get_voice_connector_termination :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetVoiceConnectorTerminationRequest.t ->
-        (GetVoiceConnectorTerminationResponse.t,
-          GetVoiceConnectorTerminationResponse.error) Result.t Lwt.t
-val get_voice_connector_termination_health :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      GetVoiceConnectorTerminationHealthRequest.t ->
-        (GetVoiceConnectorTerminationHealthResponse.t,
-          GetVoiceConnectorTerminationHealthResponse.error) Result.t Lwt.t
 val invite_users :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -605,100 +198,11 @@ val list_accounts :
     ?cfg:Awso.Cfg.t ->
       ListAccountsRequest.t ->
         (ListAccountsResponse.t, ListAccountsResponse.error) Result.t Lwt.t
-val list_app_instance_admins :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListAppInstanceAdminsRequest.t ->
-        (ListAppInstanceAdminsResponse.t,
-          ListAppInstanceAdminsResponse.error) Result.t Lwt.t
-val list_app_instance_users :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListAppInstanceUsersRequest.t ->
-        (ListAppInstanceUsersResponse.t, ListAppInstanceUsersResponse.error)
-          Result.t Lwt.t
-val list_app_instances :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListAppInstancesRequest.t ->
-        (ListAppInstancesResponse.t, ListAppInstancesResponse.error) Result.t
-          Lwt.t
-val list_attendee_tags :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListAttendeeTagsRequest.t ->
-        (ListAttendeeTagsResponse.t, ListAttendeeTagsResponse.error) Result.t
-          Lwt.t
-val list_attendees :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListAttendeesRequest.t ->
-        (ListAttendeesResponse.t, ListAttendeesResponse.error) Result.t Lwt.t
 val list_bots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListBotsRequest.t ->
         (ListBotsResponse.t, ListBotsResponse.error) Result.t Lwt.t
-val list_channel_bans :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListChannelBansRequest.t ->
-        (ListChannelBansResponse.t, ListChannelBansResponse.error) Result.t
-          Lwt.t
-val list_channel_memberships :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListChannelMembershipsRequest.t ->
-        (ListChannelMembershipsResponse.t,
-          ListChannelMembershipsResponse.error) Result.t Lwt.t
-val list_channel_memberships_for_app_instance_user :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListChannelMembershipsForAppInstanceUserRequest.t ->
-        (ListChannelMembershipsForAppInstanceUserResponse.t,
-          ListChannelMembershipsForAppInstanceUserResponse.error) Result.t
-          Lwt.t
-val list_channel_messages :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListChannelMessagesRequest.t ->
-        (ListChannelMessagesResponse.t, ListChannelMessagesResponse.error)
-          Result.t Lwt.t
-val list_channel_moderators :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListChannelModeratorsRequest.t ->
-        (ListChannelModeratorsResponse.t,
-          ListChannelModeratorsResponse.error) Result.t Lwt.t
-val list_channels :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListChannelsRequest.t ->
-        (ListChannelsResponse.t, ListChannelsResponse.error) Result.t Lwt.t
-val list_channels_moderated_by_app_instance_user :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListChannelsModeratedByAppInstanceUserRequest.t ->
-        (ListChannelsModeratedByAppInstanceUserResponse.t,
-          ListChannelsModeratedByAppInstanceUserResponse.error) Result.t
-          Lwt.t
-val list_media_capture_pipelines :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListMediaCapturePipelinesRequest.t ->
-        (ListMediaCapturePipelinesResponse.t,
-          ListMediaCapturePipelinesResponse.error) Result.t Lwt.t
-val list_meeting_tags :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListMeetingTagsRequest.t ->
-        (ListMeetingTagsResponse.t, ListMeetingTagsResponse.error) Result.t
-          Lwt.t
-val list_meetings :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListMeetingsRequest.t ->
-        (ListMeetingsResponse.t, ListMeetingsResponse.error) Result.t Lwt.t
 val list_phone_number_orders :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -711,12 +215,6 @@ val list_phone_numbers :
       ListPhoneNumbersRequest.t ->
         (ListPhoneNumbersResponse.t, ListPhoneNumbersResponse.error) Result.t
           Lwt.t
-val list_proxy_sessions :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListProxySessionsRequest.t ->
-        (ListProxySessionsResponse.t, ListProxySessionsResponse.error)
-          Result.t Lwt.t
 val list_room_memberships :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -728,70 +226,22 @@ val list_rooms :
     ?cfg:Awso.Cfg.t ->
       ListRoomsRequest.t ->
         (ListRoomsResponse.t, ListRoomsResponse.error) Result.t Lwt.t
-val list_sip_media_applications :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListSipMediaApplicationsRequest.t ->
-        (ListSipMediaApplicationsResponse.t,
-          ListSipMediaApplicationsResponse.error) Result.t Lwt.t
-val list_sip_rules :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListSipRulesRequest.t ->
-        (ListSipRulesResponse.t, ListSipRulesResponse.error) Result.t Lwt.t
 val list_supported_phone_number_countries :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSupportedPhoneNumberCountriesRequest.t ->
         (ListSupportedPhoneNumberCountriesResponse.t,
           ListSupportedPhoneNumberCountriesResponse.error) Result.t Lwt.t
-val list_tags_for_resource :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListTagsForResourceRequest.t ->
-        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
-          Result.t Lwt.t
 val list_users :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListUsersRequest.t ->
         (ListUsersResponse.t, ListUsersResponse.error) Result.t Lwt.t
-val list_voice_connector_groups :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListVoiceConnectorGroupsRequest.t ->
-        (ListVoiceConnectorGroupsResponse.t,
-          ListVoiceConnectorGroupsResponse.error) Result.t Lwt.t
-val list_voice_connector_termination_credentials :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListVoiceConnectorTerminationCredentialsRequest.t ->
-        (ListVoiceConnectorTerminationCredentialsResponse.t,
-          ListVoiceConnectorTerminationCredentialsResponse.error) Result.t
-          Lwt.t
-val list_voice_connectors :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ListVoiceConnectorsRequest.t ->
-        (ListVoiceConnectorsResponse.t, ListVoiceConnectorsResponse.error)
-          Result.t Lwt.t
 val logout_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       LogoutUserRequest.t ->
         (LogoutUserResponse.t, LogoutUserResponse.error) Result.t Lwt.t
-val put_app_instance_retention_settings :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutAppInstanceRetentionSettingsRequest.t ->
-        (PutAppInstanceRetentionSettingsResponse.t,
-          PutAppInstanceRetentionSettingsResponse.error) Result.t Lwt.t
-val put_app_instance_streaming_configurations :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutAppInstanceStreamingConfigurationsRequest.t ->
-        (PutAppInstanceStreamingConfigurationsResponse.t,
-          PutAppInstanceStreamingConfigurationsResponse.error) Result.t Lwt.t
 val put_events_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -803,62 +253,6 @@ val put_retention_settings :
     ?cfg:Awso.Cfg.t ->
       PutRetentionSettingsRequest.t ->
         (PutRetentionSettingsResponse.t, PutRetentionSettingsResponse.error)
-          Result.t Lwt.t
-val put_sip_media_application_logging_configuration :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutSipMediaApplicationLoggingConfigurationRequest.t ->
-        (PutSipMediaApplicationLoggingConfigurationResponse.t,
-          PutSipMediaApplicationLoggingConfigurationResponse.error) Result.t
-          Lwt.t
-val put_voice_connector_emergency_calling_configuration :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutVoiceConnectorEmergencyCallingConfigurationRequest.t ->
-        (PutVoiceConnectorEmergencyCallingConfigurationResponse.t,
-          PutVoiceConnectorEmergencyCallingConfigurationResponse.error)
-          Result.t Lwt.t
-val put_voice_connector_logging_configuration :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutVoiceConnectorLoggingConfigurationRequest.t ->
-        (PutVoiceConnectorLoggingConfigurationResponse.t,
-          PutVoiceConnectorLoggingConfigurationResponse.error) Result.t Lwt.t
-val put_voice_connector_origination :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutVoiceConnectorOriginationRequest.t ->
-        (PutVoiceConnectorOriginationResponse.t,
-          PutVoiceConnectorOriginationResponse.error) Result.t Lwt.t
-val put_voice_connector_proxy :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutVoiceConnectorProxyRequest.t ->
-        (PutVoiceConnectorProxyResponse.t,
-          PutVoiceConnectorProxyResponse.error) Result.t Lwt.t
-val put_voice_connector_streaming_configuration :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutVoiceConnectorStreamingConfigurationRequest.t ->
-        (PutVoiceConnectorStreamingConfigurationResponse.t,
-          PutVoiceConnectorStreamingConfigurationResponse.error) Result.t
-          Lwt.t
-val put_voice_connector_termination :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutVoiceConnectorTerminationRequest.t ->
-        (PutVoiceConnectorTerminationResponse.t,
-          PutVoiceConnectorTerminationResponse.error) Result.t Lwt.t
-val put_voice_connector_termination_credentials :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      PutVoiceConnectorTerminationCredentialsRequest.t ->
-        (unit, unit) Result.t Lwt.t
-val redact_channel_message :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      RedactChannelMessageRequest.t ->
-        (RedactChannelMessageResponse.t, RedactChannelMessageResponse.error)
           Result.t Lwt.t
 val redact_conversation_message :
   ?endpoint_url:string ->
@@ -896,42 +290,6 @@ val search_available_phone_numbers :
       SearchAvailablePhoneNumbersRequest.t ->
         (SearchAvailablePhoneNumbersResponse.t,
           SearchAvailablePhoneNumbersResponse.error) Result.t Lwt.t
-val send_channel_message :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      SendChannelMessageRequest.t ->
-        (SendChannelMessageResponse.t, SendChannelMessageResponse.error)
-          Result.t Lwt.t
-val start_meeting_transcription :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      StartMeetingTranscriptionRequest.t ->
-        (StartMeetingTranscriptionResponse.t,
-          StartMeetingTranscriptionResponse.error) Result.t Lwt.t
-val stop_meeting_transcription :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      StopMeetingTranscriptionRequest.t ->
-        (StopMeetingTranscriptionResponse.t,
-          StopMeetingTranscriptionResponse.error) Result.t Lwt.t
-val tag_attendee :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t -> TagAttendeeRequest.t -> (unit, unit) Result.t Lwt.t
-val tag_meeting :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t -> TagMeetingRequest.t -> (unit, unit) Result.t Lwt.t
-val tag_resource :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t -> TagResourceRequest.t -> (unit, unit) Result.t Lwt.t
-val untag_attendee :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t -> UntagAttendeeRequest.t -> (unit, unit) Result.t Lwt.t
-val untag_meeting :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t -> UntagMeetingRequest.t -> (unit, unit) Result.t Lwt.t
-val untag_resource :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t -> UntagResourceRequest.t -> (unit, unit) Result.t Lwt.t
 val update_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -943,40 +301,11 @@ val update_account_settings :
       UpdateAccountSettingsRequest.t ->
         (UpdateAccountSettingsResponse.t,
           UpdateAccountSettingsResponse.error) Result.t Lwt.t
-val update_app_instance :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateAppInstanceRequest.t ->
-        (UpdateAppInstanceResponse.t, UpdateAppInstanceResponse.error)
-          Result.t Lwt.t
-val update_app_instance_user :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateAppInstanceUserRequest.t ->
-        (UpdateAppInstanceUserResponse.t,
-          UpdateAppInstanceUserResponse.error) Result.t Lwt.t
 val update_bot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateBotRequest.t ->
         (UpdateBotResponse.t, UpdateBotResponse.error) Result.t Lwt.t
-val update_channel :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateChannelRequest.t ->
-        (UpdateChannelResponse.t, UpdateChannelResponse.error) Result.t Lwt.t
-val update_channel_message :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateChannelMessageRequest.t ->
-        (UpdateChannelMessageResponse.t, UpdateChannelMessageResponse.error)
-          Result.t Lwt.t
-val update_channel_read_marker :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateChannelReadMarkerRequest.t ->
-        (UpdateChannelReadMarkerResponse.t,
-          UpdateChannelReadMarkerResponse.error) Result.t Lwt.t
 val update_global_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -991,12 +320,6 @@ val update_phone_number_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdatePhoneNumberSettingsRequest.t -> (unit, unit) Result.t Lwt.t
-val update_proxy_session :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateProxySessionRequest.t ->
-        (UpdateProxySessionResponse.t, UpdateProxySessionResponse.error)
-          Result.t Lwt.t
 val update_room :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1008,23 +331,6 @@ val update_room_membership :
       UpdateRoomMembershipRequest.t ->
         (UpdateRoomMembershipResponse.t, UpdateRoomMembershipResponse.error)
           Result.t Lwt.t
-val update_sip_media_application :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateSipMediaApplicationRequest.t ->
-        (UpdateSipMediaApplicationResponse.t,
-          UpdateSipMediaApplicationResponse.error) Result.t Lwt.t
-val update_sip_media_application_call :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateSipMediaApplicationCallRequest.t ->
-        (UpdateSipMediaApplicationCallResponse.t,
-          UpdateSipMediaApplicationCallResponse.error) Result.t Lwt.t
-val update_sip_rule :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateSipRuleRequest.t ->
-        (UpdateSipRuleResponse.t, UpdateSipRuleResponse.error) Result.t Lwt.t
 val update_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1034,15 +340,3 @@ val update_user_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateUserSettingsRequest.t -> (unit, unit) Result.t Lwt.t
-val update_voice_connector :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateVoiceConnectorRequest.t ->
-        (UpdateVoiceConnectorResponse.t, UpdateVoiceConnectorResponse.error)
-          Result.t Lwt.t
-val update_voice_connector_group :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      UpdateVoiceConnectorGroupRequest.t ->
-        (UpdateVoiceConnectorGroupResponse.t,
-          UpdateVoiceConnectorGroupResponse.error) Result.t Lwt.t

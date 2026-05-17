@@ -25,6 +25,8 @@ let describe_savings_plans_offerings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSavingsPlansOfferings input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let return_savings_plan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ReturnSavingsPlan input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =

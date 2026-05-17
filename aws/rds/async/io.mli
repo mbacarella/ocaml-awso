@@ -74,12 +74,12 @@ val copy_option_group :
       CopyOptionGroupMessage.t ->
         (CopyOptionGroupResult.t, CopyOptionGroupResult.error) Result.t
           Async.Deferred.t
-val create_custom_availability_zone :
+val create_blue_green_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      CreateCustomAvailabilityZoneMessage.t ->
-        (CreateCustomAvailabilityZoneResult.t,
-          CreateCustomAvailabilityZoneResult.error) Result.t Async.Deferred.t
+      CreateBlueGreenDeploymentRequest.t ->
+        (CreateBlueGreenDeploymentResponse.t,
+          CreateBlueGreenDeploymentResponse.error) Result.t Async.Deferred.t
 val create_custom_d_b_engine_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -146,6 +146,11 @@ val create_d_b_security_group :
       CreateDBSecurityGroupMessage.t ->
         (CreateDBSecurityGroupResult.t, CreateDBSecurityGroupResult.error)
           Result.t Async.Deferred.t
+val create_d_b_shard_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDBShardGroupMessage.t ->
+        (DBShardGroup.t, DBShardGroup.error) Result.t Async.Deferred.t
 val create_d_b_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -170,18 +175,29 @@ val create_global_cluster :
       CreateGlobalClusterMessage.t ->
         (CreateGlobalClusterResult.t, CreateGlobalClusterResult.error)
           Result.t Async.Deferred.t
+val create_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateIntegrationMessage.t ->
+        (Integration.t, Integration.error) Result.t Async.Deferred.t
 val create_option_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateOptionGroupMessage.t ->
         (CreateOptionGroupResult.t, CreateOptionGroupResult.error) Result.t
           Async.Deferred.t
-val delete_custom_availability_zone :
+val create_tenant_database :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteCustomAvailabilityZoneMessage.t ->
-        (DeleteCustomAvailabilityZoneResult.t,
-          DeleteCustomAvailabilityZoneResult.error) Result.t Async.Deferred.t
+      CreateTenantDatabaseMessage.t ->
+        (CreateTenantDatabaseResult.t, CreateTenantDatabaseResult.error)
+          Result.t Async.Deferred.t
+val delete_blue_green_deployment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteBlueGreenDeploymentRequest.t ->
+        (DeleteBlueGreenDeploymentResponse.t,
+          DeleteBlueGreenDeploymentResponse.error) Result.t Async.Deferred.t
 val delete_custom_d_b_engine_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -192,6 +208,13 @@ val delete_d_b_cluster :
     ?cfg:Awso.Cfg.t ->
       DeleteDBClusterMessage.t ->
         (DeleteDBClusterResult.t, DeleteDBClusterResult.error) Result.t
+          Async.Deferred.t
+val delete_d_b_cluster_automated_backup :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDBClusterAutomatedBackupMessage.t ->
+        (DeleteDBClusterAutomatedBackupResult.t,
+          DeleteDBClusterAutomatedBackupResult.error) Result.t
           Async.Deferred.t
 val delete_d_b_cluster_endpoint :
   ?endpoint_url:string ->
@@ -245,6 +268,11 @@ val delete_d_b_security_group :
     ?cfg:Awso.Cfg.t ->
       DeleteDBSecurityGroupMessage.t ->
         (unit, unit) Result.t Async.Deferred.t
+val delete_d_b_shard_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDBShardGroupMessage.t ->
+        (DBShardGroup.t, DBShardGroup.error) Result.t Async.Deferred.t
 val delete_d_b_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -267,16 +295,21 @@ val delete_global_cluster :
       DeleteGlobalClusterMessage.t ->
         (DeleteGlobalClusterResult.t, DeleteGlobalClusterResult.error)
           Result.t Async.Deferred.t
-val delete_installation_media :
+val delete_integration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteInstallationMediaMessage.t ->
-        (InstallationMedia.t, InstallationMedia.error) Result.t
-          Async.Deferred.t
+      DeleteIntegrationMessage.t ->
+        (Integration.t, Integration.error) Result.t Async.Deferred.t
 val delete_option_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteOptionGroupMessage.t -> (unit, unit) Result.t Async.Deferred.t
+val delete_tenant_database :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteTenantDatabaseMessage.t ->
+        (DeleteTenantDatabaseResult.t, DeleteTenantDatabaseResult.error)
+          Result.t Async.Deferred.t
 val deregister_d_b_proxy_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -289,18 +322,25 @@ val describe_account_attributes :
       DescribeAccountAttributesMessage.t ->
         (AccountAttributesMessage.t, AccountAttributesMessage.error) Result.t
           Async.Deferred.t
+val describe_blue_green_deployments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeBlueGreenDeploymentsRequest.t ->
+        (DescribeBlueGreenDeploymentsResponse.t,
+          DescribeBlueGreenDeploymentsResponse.error) Result.t
+          Async.Deferred.t
 val describe_certificates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeCertificatesMessage.t ->
         (CertificateMessage.t, CertificateMessage.error) Result.t
           Async.Deferred.t
-val describe_custom_availability_zones :
+val describe_d_b_cluster_automated_backups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DescribeCustomAvailabilityZonesMessage.t ->
-        (CustomAvailabilityZoneMessage.t,
-          CustomAvailabilityZoneMessage.error) Result.t Async.Deferred.t
+      DescribeDBClusterAutomatedBackupsMessage.t ->
+        (DBClusterAutomatedBackupMessage.t,
+          DBClusterAutomatedBackupMessage.error) Result.t Async.Deferred.t
 val describe_d_b_cluster_backtracks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -368,6 +408,13 @@ val describe_d_b_log_files :
       DescribeDBLogFilesMessage.t ->
         (DescribeDBLogFilesResponse.t, DescribeDBLogFilesResponse.error)
           Result.t Async.Deferred.t
+val describe_d_b_major_engine_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDBMajorEngineVersionsRequest.t ->
+        (DescribeDBMajorEngineVersionsResponse.t,
+          DescribeDBMajorEngineVersionsResponse.error) Result.t
+          Async.Deferred.t
 val describe_d_b_parameter_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -405,18 +452,36 @@ val describe_d_b_proxy_targets :
       DescribeDBProxyTargetsRequest.t ->
         (DescribeDBProxyTargetsResponse.t,
           DescribeDBProxyTargetsResponse.error) Result.t Async.Deferred.t
+val describe_d_b_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDBRecommendationsMessage.t ->
+        (DBRecommendationsMessage.t, DBRecommendationsMessage.error) Result.t
+          Async.Deferred.t
 val describe_d_b_security_groups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDBSecurityGroupsMessage.t ->
         (DBSecurityGroupMessage.t, DBSecurityGroupMessage.error) Result.t
           Async.Deferred.t
+val describe_d_b_shard_groups :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDBShardGroupsMessage.t ->
+        (DescribeDBShardGroupsResponse.t,
+          DescribeDBShardGroupsResponse.error) Result.t Async.Deferred.t
 val describe_d_b_snapshot_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeDBSnapshotAttributesMessage.t ->
         (DescribeDBSnapshotAttributesResult.t,
           DescribeDBSnapshotAttributesResult.error) Result.t Async.Deferred.t
+val describe_d_b_snapshot_tenant_databases :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDBSnapshotTenantDatabasesMessage.t ->
+        (DBSnapshotTenantDatabasesMessage.t,
+          DBSnapshotTenantDatabasesMessage.error) Result.t Async.Deferred.t
 val describe_d_b_snapshots :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -472,12 +537,12 @@ val describe_global_clusters :
       DescribeGlobalClustersMessage.t ->
         (GlobalClustersMessage.t, GlobalClustersMessage.error) Result.t
           Async.Deferred.t
-val describe_installation_media :
+val describe_integrations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DescribeInstallationMediaMessage.t ->
-        (InstallationMediaMessage.t, InstallationMediaMessage.error) Result.t
-          Async.Deferred.t
+      DescribeIntegrationsMessage.t ->
+        (DescribeIntegrationsResponse.t, DescribeIntegrationsResponse.error)
+          Result.t Async.Deferred.t
 val describe_option_group_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -513,11 +578,24 @@ val describe_reserved_d_b_instances_offerings :
       DescribeReservedDBInstancesOfferingsMessage.t ->
         (ReservedDBInstancesOfferingMessage.t,
           ReservedDBInstancesOfferingMessage.error) Result.t Async.Deferred.t
+val describe_serverless_v2_platform_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeServerlessV2PlatformVersionsMessage.t ->
+        (ServerlessV2PlatformVersionsMessage.t,
+          ServerlessV2PlatformVersionsMessage.error) Result.t
+          Async.Deferred.t
 val describe_source_regions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSourceRegionsMessage.t ->
         (SourceRegionMessage.t, SourceRegionMessage.error) Result.t
+          Async.Deferred.t
+val describe_tenant_databases :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeTenantDatabasesMessage.t ->
+        (TenantDatabasesMessage.t, TenantDatabasesMessage.error) Result.t
           Async.Deferred.t
 val describe_valid_d_b_instance_modifications :
   ?endpoint_url:string ->
@@ -526,12 +604,24 @@ val describe_valid_d_b_instance_modifications :
         (DescribeValidDBInstanceModificationsResult.t,
           DescribeValidDBInstanceModificationsResult.error) Result.t
           Async.Deferred.t
+val disable_http_endpoint :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisableHttpEndpointRequest.t ->
+        (DisableHttpEndpointResponse.t, DisableHttpEndpointResponse.error)
+          Result.t Async.Deferred.t
 val download_d_b_log_file_portion :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DownloadDBLogFilePortionMessage.t ->
         (DownloadDBLogFilePortionDetails.t,
           DownloadDBLogFilePortionDetails.error) Result.t Async.Deferred.t
+val enable_http_endpoint :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      EnableHttpEndpointRequest.t ->
+        (EnableHttpEndpointResponse.t, EnableHttpEndpointResponse.error)
+          Result.t Async.Deferred.t
 val failover_d_b_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -544,17 +634,17 @@ val failover_global_cluster :
       FailoverGlobalClusterMessage.t ->
         (FailoverGlobalClusterResult.t, FailoverGlobalClusterResult.error)
           Result.t Async.Deferred.t
-val import_installation_media :
-  ?endpoint_url:string ->
-    ?cfg:Awso.Cfg.t ->
-      ImportInstallationMediaMessage.t ->
-        (InstallationMedia.t, InstallationMedia.error) Result.t
-          Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceMessage.t ->
         (TagListMessage.t, TagListMessage.error) Result.t Async.Deferred.t
+val modify_activity_stream :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyActivityStreamRequest.t ->
+        (ModifyActivityStreamResponse.t, ModifyActivityStreamResponse.error)
+          Result.t Async.Deferred.t
 val modify_certificates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -627,6 +717,17 @@ val modify_d_b_proxy_target_group :
       ModifyDBProxyTargetGroupRequest.t ->
         (ModifyDBProxyTargetGroupResponse.t,
           ModifyDBProxyTargetGroupResponse.error) Result.t Async.Deferred.t
+val modify_d_b_recommendation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyDBRecommendationMessage.t ->
+        (DBRecommendationMessage.t, DBRecommendationMessage.error) Result.t
+          Async.Deferred.t
+val modify_d_b_shard_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyDBShardGroupMessage.t ->
+        (DBShardGroup.t, DBShardGroup.error) Result.t Async.Deferred.t
 val modify_d_b_snapshot :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -657,12 +758,23 @@ val modify_global_cluster :
       ModifyGlobalClusterMessage.t ->
         (ModifyGlobalClusterResult.t, ModifyGlobalClusterResult.error)
           Result.t Async.Deferred.t
+val modify_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyIntegrationMessage.t ->
+        (Integration.t, Integration.error) Result.t Async.Deferred.t
 val modify_option_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyOptionGroupMessage.t ->
         (ModifyOptionGroupResult.t, ModifyOptionGroupResult.error) Result.t
           Async.Deferred.t
+val modify_tenant_database :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyTenantDatabaseMessage.t ->
+        (ModifyTenantDatabaseResult.t, ModifyTenantDatabaseResult.error)
+          Result.t Async.Deferred.t
 val promote_read_replica :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -694,6 +806,11 @@ val reboot_d_b_instance :
       RebootDBInstanceMessage.t ->
         (RebootDBInstanceResult.t, RebootDBInstanceResult.error) Result.t
           Async.Deferred.t
+val reboot_d_b_shard_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RebootDBShardGroupMessage.t ->
+        (DBShardGroup.t, DBShardGroup.error) Result.t Async.Deferred.t
 val register_d_b_proxy_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -840,3 +957,22 @@ val stop_d_b_instance_automated_backups_replication :
         (StopDBInstanceAutomatedBackupsReplicationResult.t,
           StopDBInstanceAutomatedBackupsReplicationResult.error) Result.t
           Async.Deferred.t
+val switchover_blue_green_deployment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SwitchoverBlueGreenDeploymentRequest.t ->
+        (SwitchoverBlueGreenDeploymentResponse.t,
+          SwitchoverBlueGreenDeploymentResponse.error) Result.t
+          Async.Deferred.t
+val switchover_global_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SwitchoverGlobalClusterMessage.t ->
+        (SwitchoverGlobalClusterResult.t,
+          SwitchoverGlobalClusterResult.error) Result.t Async.Deferred.t
+val switchover_read_replica :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SwitchoverReadReplicaMessage.t ->
+        (SwitchoverReadReplicaResult.t, SwitchoverReadReplicaResult.error)
+          Result.t Async.Deferred.t

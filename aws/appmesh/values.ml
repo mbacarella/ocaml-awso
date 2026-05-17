@@ -58,6 +58,9 @@ module SubjectAlternativeNameList =
   struct
     type nonrec t = SubjectAlternativeName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubjectAlternativeName.to_value)) |>
         (fun x -> `List x)
@@ -88,6 +91,9 @@ module CertificateAuthorityArns =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -158,9 +164,9 @@ module SubjectAlternativeNameMatchers =
           (Xml.child_exn ~context:context_ xml_arg0 "exact") in
       make ~exact ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exact =
-        field_map_exn json "exact" SubjectAlternativeNameList.of_json in
+        field_map_exn json__ "exact" SubjectAlternativeNameList.of_json in
       make ~exact ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -187,9 +193,9 @@ module TlsValidationContextAcmTrust =
              "certificateAuthorityArns") in
       make ~certificateAuthorityArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateAuthorityArns =
-        field_map_exn json "certificateAuthorityArns"
+        field_map_exn json__ "certificateAuthorityArns"
           CertificateAuthorityArns.of_json in
       make ~certificateAuthorityArns ()
     let to_json v = composed_to_json to_value v
@@ -214,9 +220,9 @@ module TlsValidationContextFileTrust =
           (Xml.child_exn ~context:context_ xml_arg0 "certificateChain") in
       make ~certificateChain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateChain =
-        field_map_exn json "certificateChain" FilePath.of_json in
+        field_map_exn json__ "certificateChain" FilePath.of_json in
       make ~certificateChain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -240,8 +246,9 @@ module TlsValidationContextSdsTrust =
           (Xml.child_exn ~context:context_ xml_arg0 "secretName") in
       make ~secretName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretName = field_map_exn json "secretName" SdsSecretName.of_json in
+    let of_json json__ =
+      let secretName =
+        field_map_exn json__ "secretName" SdsSecretName.of_json in
       make ~secretName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -272,10 +279,10 @@ module ListenerTlsFileCertificate =
           (Xml.child_exn ~context:context_ xml_arg0 "certificateChain") in
       make ~privateKey ~certificateChain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let privateKey = field_map_exn json "privateKey" FilePath.of_json in
+    let of_json json__ =
+      let privateKey = field_map_exn json__ "privateKey" FilePath.of_json in
       let certificateChain =
-        field_map_exn json "certificateChain" FilePath.of_json in
+        field_map_exn json__ "certificateChain" FilePath.of_json in
       make ~privateKey ~certificateChain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -299,8 +306,9 @@ module ListenerTlsSdsCertificate =
           (Xml.child_exn ~context:context_ xml_arg0 "secretName") in
       make ~secretName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretName = field_map_exn json "secretName" SdsSecretName.of_json in
+    let of_json json__ =
+      let secretName =
+        field_map_exn json__ "secretName" SdsSecretName.of_json in
       make ~secretName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -343,9 +351,9 @@ module SubjectAlternativeNames =
           (Xml.child_exn ~context:context_ xml_arg0 "match") in
       make ~match_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let match_ =
-        field_map_exn json "match" SubjectAlternativeNameMatchers.of_json in
+        field_map_exn json__ "match" SubjectAlternativeNameMatchers.of_json in
       make ~match_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -383,14 +391,51 @@ module TlsValidationContextTrust =
           (Xml.child xml_arg0 "acm") in
       make ?sds ?file ?acm ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sds = field_map json "sds" TlsValidationContextSdsTrust.of_json in
-      let file = field_map json "file" TlsValidationContextFileTrust.of_json in
-      let acm = field_map json "acm" TlsValidationContextAcmTrust.of_json in
+    let of_json json__ =
+      let sds = field_map json__ "sds" TlsValidationContextSdsTrust.of_json in
+      let file =
+        field_map json__ "file" TlsValidationContextFileTrust.of_json in
+      let acm = field_map json__ "acm" TlsValidationContextAcmTrust.of_json in
       make ?sds ?file ?acm ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a Transport Layer Security (TLS) validation context trust."]
+module JsonKey =
+  struct
+    type nonrec t = string
+    let context_ = "JsonKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JsonKey" j
+    let to_json = simple_to_json to_value
+  end
+module JsonValue =
+  struct
+    type nonrec t = string
+    let context_ = "JsonValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JsonValue" j
+    let to_json = simple_to_json to_value
+  end
 module VirtualGatewayCertificateAuthorityArns =
   struct
     type nonrec t = Arn.t list
@@ -399,6 +444,9 @@ module VirtualGatewayCertificateAuthorityArns =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -484,9 +532,9 @@ module ClientTlsCertificate =
           (Xml.child xml_arg0 "file") in
       make ?sds ?file ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sds = field_map json "sds" ListenerTlsSdsCertificate.of_json in
-      let file = field_map json "file" ListenerTlsFileCertificate.of_json in
+    let of_json json__ =
+      let sds = field_map json__ "sds" ListenerTlsSdsCertificate.of_json in
+      let file = field_map json__ "file" ListenerTlsFileCertificate.of_json in
       make ?sds ?file ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents the client's certificate."]
@@ -494,6 +542,9 @@ module PortSet =
   struct
     type nonrec t = PortNumber.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PortNumber.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -520,7 +571,7 @@ module TlsValidationContext =
       {
       subjectAlternativeNames: SubjectAlternativeNames.t option
         [@ocaml.doc
-          "A reference to an object that represents the SANs for a Transport Layer Security (TLS) validation context."];
+          "A reference to an object that represents the SANs for a Transport Layer Security (TLS) validation context. If you don't specify SANs on the terminating mesh endpoint, the Envoy proxy for that node doesn't verify the SAN on a peer client certificate. If you don't specify SANs on the originating mesh endpoint, the SAN on the certificate provided by the terminating endpoint must match the mesh endpoint service discovery configuration. Since SPIRE vended certificates have a SPIFFE ID as a name, you must set the SAN since the name doesn't match the service discovery name."];
       trust: TlsValidationContextTrust.t
         [@ocaml.doc
           "A reference to where to retrieve the trust chain when validating a peer\226\128\153s Transport Layer Security (TLS) certificate."]}
@@ -543,11 +594,11 @@ module TlsValidationContext =
           (Xml.child xml_arg0 "subjectAlternativeNames") in
       make ~trust ?subjectAlternativeNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trust =
-        field_map_exn json "trust" TlsValidationContextTrust.of_json in
+        field_map_exn json__ "trust" TlsValidationContextTrust.of_json in
       let subjectAlternativeNames =
-        field_map json "subjectAlternativeNames"
+        field_map json__ "subjectAlternativeNames"
           SubjectAlternativeNames.of_json in
       make ~trust ?subjectAlternativeNames ()
     let to_json v = composed_to_json to_value v
@@ -584,6 +635,33 @@ module DurationValue =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
+module JsonFormatRef =
+  struct
+    type nonrec t =
+      {
+      key: JsonKey.t [@ocaml.doc "The specified key for the JSON."];
+      value: JsonValue.t [@ocaml.doc "The specified value for the JSON."]}
+    let context_ = "JsonFormatRef"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("key", (Some (JsonKey.to_value x.key)));
+        ("value", (Some (JsonValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        JsonValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
+      let key =
+        JsonKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "value" JsonValue.of_json in
+      let key = field_map_exn json__ "key" JsonKey.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that represents the key value pairs for the JSON."]
 module VirtualGatewayTlsValidationContextAcmTrust =
   struct
     type nonrec t =
@@ -607,9 +685,9 @@ module VirtualGatewayTlsValidationContextAcmTrust =
              "certificateAuthorityArns") in
       make ~certificateAuthorityArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateAuthorityArns =
-        field_map_exn json "certificateAuthorityArns"
+        field_map_exn json__ "certificateAuthorityArns"
           VirtualGatewayCertificateAuthorityArns.of_json in
       make ~certificateAuthorityArns ()
     let to_json v = composed_to_json to_value v
@@ -634,9 +712,9 @@ module VirtualGatewayTlsValidationContextFileTrust =
           (Xml.child_exn ~context:context_ xml_arg0 "certificateChain") in
       make ~certificateChain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateChain =
-        field_map_exn json "certificateChain" FilePath.of_json in
+        field_map_exn json__ "certificateChain" FilePath.of_json in
       make ~certificateChain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -661,9 +739,9 @@ module VirtualGatewayTlsValidationContextSdsTrust =
           (Xml.child_exn ~context:context_ xml_arg0 "secretName") in
       make ~secretName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secretName =
-        field_map_exn json "secretName" VirtualGatewaySdsSecretName.of_json in
+        field_map_exn json__ "secretName" VirtualGatewaySdsSecretName.of_json in
       make ~secretName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -705,9 +783,9 @@ module MatchRange =
       let end_ = Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "end") in
       make ~start ~end_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let start = field_map_exn json "start" Long.of_json in
-      let end_ = field_map_exn json "end" Long.of_json in
+    let of_json json__ =
+      let start = field_map_exn json__ "start" Long.of_json in
+      let end_ = field_map_exn json__ "end" Long.of_json in
       make ~start ~end_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -766,13 +844,13 @@ module ClientPolicyTls =
           (Xml.child xml_arg0 "certificate") in
       make ~validation ?ports ?enforce ?certificate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validation =
-        field_map_exn json "validation" TlsValidationContext.of_json in
-      let ports = field_map json "ports" PortSet.of_json in
-      let enforce = field_map json "enforce" Boolean.of_json in
+        field_map_exn json__ "validation" TlsValidationContext.of_json in
+      let ports = field_map json__ "ports" PortSet.of_json in
+      let enforce = field_map json__ "enforce" Boolean.of_json in
       let certificate =
-        field_map json "certificate" ClientTlsCertificate.of_json in
+        field_map json__ "certificate" ClientTlsCertificate.of_json in
       make ~validation ?ports ?enforce ?certificate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -796,9 +874,9 @@ module Duration =
         (Option.map ~f:DurationUnit.of_xml) (Xml.child xml_arg0 "unit") in
       make ?value ?unit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" DurationValue.of_json in
-      let unit = field_map json "unit" DurationUnit.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" DurationValue.of_json in
+      let unit = field_map json__ "unit" DurationUnit.of_json in
       make ?value ?unit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a duration of time."]
@@ -821,12 +899,12 @@ module ListenerTlsAcmCertificate =
           (Xml.child_exn ~context:context_ xml_arg0 "certificateArn") in
       make ~certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateArn = field_map_exn json "certificateArn" Arn.of_json in
+    let of_json json__ =
+      let certificateArn = field_map_exn json__ "certificateArn" Arn.of_json in
       make ~certificateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that represents an AWS Certicate Manager (ACM) certificate."]
+       "An object that represents an Certificate Manager certificate."]
 module ListenerTlsValidationContextTrust =
   struct
     type nonrec t =
@@ -853,9 +931,10 @@ module ListenerTlsValidationContextTrust =
           (Xml.child xml_arg0 "file") in
       make ?sds ?file ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sds = field_map json "sds" TlsValidationContextSdsTrust.of_json in
-      let file = field_map json "file" TlsValidationContextFileTrust.of_json in
+    let of_json json__ =
+      let sds = field_map json__ "sds" TlsValidationContextSdsTrust.of_json in
+      let file =
+        field_map json__ "file" TlsValidationContextFileTrust.of_json in
       make ?sds ?file ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -903,6 +982,51 @@ module MaxPendingRequests =
       Int.of_string
         (string_of_xml ~kind:"an integer for MaxPendingRequests" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module JsonFormat =
+  struct
+    type nonrec t = JsonFormatRef.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:JsonFormatRef.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:JsonFormatRef.of_xml)
+    let of_json j =
+      list_of_json ~kind:"JsonFormat" ~of_json:JsonFormatRef.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TextFormat =
+  struct
+    type nonrec t = string
+    let context_ = "TextFormat"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TextFormat" j
     let to_json = simple_to_json to_value
   end
 module AwsCloudMapInstanceAttributeKey =
@@ -974,10 +1098,10 @@ module VirtualGatewayListenerTlsFileCertificate =
           (Xml.child_exn ~context:context_ xml_arg0 "certificateChain") in
       make ~privateKey ~certificateChain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let privateKey = field_map_exn json "privateKey" FilePath.of_json in
+    let of_json json__ =
+      let privateKey = field_map_exn json__ "privateKey" FilePath.of_json in
       let certificateChain =
-        field_map_exn json "certificateChain" FilePath.of_json in
+        field_map_exn json__ "certificateChain" FilePath.of_json in
       make ~privateKey ~certificateChain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1002,9 +1126,9 @@ module VirtualGatewayListenerTlsSdsCertificate =
           (Xml.child_exn ~context:context_ xml_arg0 "secretName") in
       make ~secretName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secretName =
-        field_map_exn json "secretName" VirtualGatewaySdsSecretName.of_json in
+        field_map_exn json__ "secretName" VirtualGatewaySdsSecretName.of_json in
       make ~secretName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1047,15 +1171,15 @@ module VirtualGatewayTlsValidationContextTrust =
           (Xml.child xml_arg0 "acm") in
       make ?sds ?file ?acm ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sds =
-        field_map json "sds"
+        field_map json__ "sds"
           VirtualGatewayTlsValidationContextSdsTrust.of_json in
       let file =
-        field_map json "file"
+        field_map json__ "file"
           VirtualGatewayTlsValidationContextFileTrust.of_json in
       let acm =
-        field_map json "acm"
+        field_map json__ "acm"
           VirtualGatewayTlsValidationContextAcmTrust.of_json in
       make ?sds ?file ?acm ()
     let to_json v = composed_to_json to_value v
@@ -1080,8 +1204,8 @@ module VirtualGatewayListenerTlsAcmCertificate =
           (Xml.child_exn ~context:context_ xml_arg0 "certificateArn") in
       make ~certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let certificateArn = field_map_exn json "certificateArn" Arn.of_json in
+    let of_json json__ =
+      let certificateArn = field_map_exn json__ "certificateArn" Arn.of_json in
       make ~certificateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1115,17 +1239,36 @@ module VirtualGatewayListenerTlsValidationContextTrust =
           (Xml.child xml_arg0 "file") in
       make ?sds ?file ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sds =
-        field_map json "sds"
+        field_map json__ "sds"
           VirtualGatewayTlsValidationContextSdsTrust.of_json in
       let file =
-        field_map json "file"
+        field_map json__ "file"
           VirtualGatewayTlsValidationContextFileTrust.of_json in
       make ?sds ?file ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a virtual gateway's listener's Transport Layer Security (TLS) validation context trust."]
+module ListenerPort =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListenerPort" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module PercentInt =
   struct
     type nonrec t = int
@@ -1207,12 +1350,12 @@ module GrpcRouteMetadataMatchMethod =
         (Option.map ~f:HeaderMatch.of_xml) (Xml.child xml_arg0 "exact") in
       make ?suffix ?regex ?range ?prefix ?exact ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let suffix = field_map json "suffix" HeaderMatch.of_json in
-      let regex = field_map json "regex" HeaderMatch.of_json in
-      let range = field_map json "range" MatchRange.of_json in
-      let prefix = field_map json "prefix" HeaderMatch.of_json in
-      let exact = field_map json "exact" HeaderMatch.of_json in
+    let of_json json__ =
+      let suffix = field_map json__ "suffix" HeaderMatch.of_json in
+      let regex = field_map json__ "regex" HeaderMatch.of_json in
+      let range = field_map json__ "range" MatchRange.of_json in
+      let prefix = field_map json__ "prefix" HeaderMatch.of_json in
+      let exact = field_map json__ "exact" HeaderMatch.of_json in
       make ?suffix ?regex ?range ?prefix ?exact ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1250,8 +1393,8 @@ module QueryParameterMatch =
       let exact = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "exact") in
       make ?exact ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let exact = field_map json "exact" String_.of_json in make ?exact ()
+    let of_json json__ =
+      let exact = field_map json__ "exact" String_.of_json in make ?exact ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing the query parameter to match."]
 module QueryParameterName =
@@ -1312,12 +1455,12 @@ module HeaderMatchMethod =
         (Option.map ~f:HeaderMatch.of_xml) (Xml.child xml_arg0 "exact") in
       make ?suffix ?regex ?range ?prefix ?exact ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let suffix = field_map json "suffix" HeaderMatch.of_json in
-      let regex = field_map json "regex" HeaderMatch.of_json in
-      let range = field_map json "range" MatchRange.of_json in
-      let prefix = field_map json "prefix" HeaderMatch.of_json in
-      let exact = field_map json "exact" HeaderMatch.of_json in
+    let of_json json__ =
+      let suffix = field_map json__ "suffix" HeaderMatch.of_json in
+      let regex = field_map json__ "regex" HeaderMatch.of_json in
+      let range = field_map json__ "range" MatchRange.of_json in
+      let prefix = field_map json__ "prefix" HeaderMatch.of_json in
+      let exact = field_map json__ "exact" HeaderMatch.of_json in
       make ?suffix ?regex ?range ?prefix ?exact ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1391,12 +1534,12 @@ module GrpcMetadataMatchMethod =
         (Option.map ~f:HeaderMatch.of_xml) (Xml.child xml_arg0 "exact") in
       make ?suffix ?regex ?range ?prefix ?exact ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let suffix = field_map json "suffix" HeaderMatch.of_json in
-      let regex = field_map json "regex" HeaderMatch.of_json in
-      let range = field_map json "range" MatchRange.of_json in
-      let prefix = field_map json "prefix" HeaderMatch.of_json in
-      let exact = field_map json "exact" HeaderMatch.of_json in
+    let of_json json__ =
+      let suffix = field_map json__ "suffix" HeaderMatch.of_json in
+      let regex = field_map json__ "regex" HeaderMatch.of_json in
+      let range = field_map json__ "range" MatchRange.of_json in
+      let prefix = field_map json__ "prefix" HeaderMatch.of_json in
+      let exact = field_map json__ "exact" HeaderMatch.of_json in
       make ?suffix ?regex ?range ?prefix ?exact ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing the method header to be matched."]
@@ -1484,8 +1627,9 @@ module ClientPolicy =
         (Option.map ~f:ClientPolicyTls.of_xml) (Xml.child xml_arg0 "tls") in
       make ?tls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tls = field_map json "tls" ClientPolicyTls.of_json in make ?tls ()
+    let of_json json__ =
+      let tls = field_map json__ "tls" ClientPolicyTls.of_json in
+      make ?tls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a client policy."]
 module ServiceName =
@@ -1577,9 +1721,9 @@ module GrpcTimeout =
       let idle = (Option.map ~f:Duration.of_xml) (Xml.child xml_arg0 "idle") in
       make ?perRequest ?idle ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let perRequest = field_map json "perRequest" Duration.of_json in
-      let idle = field_map json "idle" Duration.of_json in
+    let of_json json__ =
+      let perRequest = field_map json__ "perRequest" Duration.of_json in
+      let idle = field_map json__ "idle" Duration.of_json in
       make ?perRequest ?idle ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents types of timeouts."]
@@ -1605,9 +1749,9 @@ module HttpTimeout =
       let idle = (Option.map ~f:Duration.of_xml) (Xml.child xml_arg0 "idle") in
       make ?perRequest ?idle ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let perRequest = field_map json "perRequest" Duration.of_json in
-      let idle = field_map json "idle" Duration.of_json in
+    let of_json json__ =
+      let perRequest = field_map json__ "perRequest" Duration.of_json in
+      let idle = field_map json__ "idle" Duration.of_json in
       make ?perRequest ?idle ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents types of timeouts."]
@@ -1626,8 +1770,8 @@ module TcpTimeout =
       let idle = (Option.map ~f:Duration.of_xml) (Xml.child xml_arg0 "idle") in
       make ?idle ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let idle = field_map json "idle" Duration.of_json in make ?idle ()
+    let of_json json__ =
+      let idle = field_map json__ "idle" Duration.of_json in make ?idle ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents types of timeouts."]
 module ListenerTlsCertificate =
@@ -1636,7 +1780,7 @@ module ListenerTlsCertificate =
       {
       acm: ListenerTlsAcmCertificate.t option
         [@ocaml.doc
-          "A reference to an object that represents an AWS Certicate Manager (ACM) certificate."];
+          "A reference to an object that represents an Certificate Manager certificate."];
       file: ListenerTlsFileCertificate.t option
         [@ocaml.doc
           "A reference to an object that represents a local file certificate."];
@@ -1662,10 +1806,10 @@ module ListenerTlsCertificate =
           (Xml.child xml_arg0 "acm") in
       make ?sds ?file ?acm ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sds = field_map json "sds" ListenerTlsSdsCertificate.of_json in
-      let file = field_map json "file" ListenerTlsFileCertificate.of_json in
-      let acm = field_map json "acm" ListenerTlsAcmCertificate.of_json in
+    let of_json json__ =
+      let sds = field_map json__ "sds" ListenerTlsSdsCertificate.of_json in
+      let file = field_map json__ "file" ListenerTlsFileCertificate.of_json in
+      let acm = field_map json__ "acm" ListenerTlsAcmCertificate.of_json in
       make ?sds ?file ?acm ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1728,11 +1872,12 @@ module ListenerTlsValidationContext =
           (Xml.child xml_arg0 "subjectAlternativeNames") in
       make ~trust ?subjectAlternativeNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trust =
-        field_map_exn json "trust" ListenerTlsValidationContextTrust.of_json in
+        field_map_exn json__ "trust"
+          ListenerTlsValidationContextTrust.of_json in
       let subjectAlternativeNames =
-        field_map json "subjectAlternativeNames"
+        field_map json__ "subjectAlternativeNames"
           SubjectAlternativeNames.of_json in
       make ~trust ?subjectAlternativeNames ()
     let to_json v = composed_to_json to_value v
@@ -1790,8 +1935,9 @@ module VirtualNodeGrpcConnectionPool =
           (Xml.child_exn ~context:context_ xml_arg0 "maxRequests") in
       make ~maxRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRequests = field_map_exn json "maxRequests" MaxRequests.of_json in
+    let of_json json__ =
+      let maxRequests =
+        field_map_exn json__ "maxRequests" MaxRequests.of_json in
       make ~maxRequests ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a type of connection pool."]
@@ -1814,8 +1960,9 @@ module VirtualNodeHttp2ConnectionPool =
           (Xml.child_exn ~context:context_ xml_arg0 "maxRequests") in
       make ~maxRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRequests = field_map_exn json "maxRequests" MaxRequests.of_json in
+    let of_json json__ =
+      let maxRequests =
+        field_map_exn json__ "maxRequests" MaxRequests.of_json in
       make ~maxRequests ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a type of connection pool."]
@@ -1848,11 +1995,11 @@ module VirtualNodeHttpConnectionPool =
           (Xml.child_exn ~context:context_ xml_arg0 "maxConnections") in
       make ?maxPendingRequests ~maxConnections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxPendingRequests =
-        field_map json "maxPendingRequests" MaxPendingRequests.of_json in
+        field_map json__ "maxPendingRequests" MaxPendingRequests.of_json in
       let maxConnections =
-        field_map_exn json "maxConnections" MaxConnections.of_json in
+        field_map_exn json__ "maxConnections" MaxConnections.of_json in
       make ?maxPendingRequests ~maxConnections ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a type of connection pool."]
@@ -1876,12 +2023,36 @@ module VirtualNodeTcpConnectionPool =
           (Xml.child_exn ~context:context_ xml_arg0 "maxConnections") in
       make ~maxConnections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxConnections =
-        field_map_exn json "maxConnections" MaxConnections.of_json in
+        field_map_exn json__ "maxConnections" MaxConnections.of_json in
       make ~maxConnections ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a type of connection pool."]
+module LoggingFormat =
+  struct
+    type nonrec t = {
+      json: JsonFormat.t option ;
+      text: TextFormat.t option }
+    let make ?json = fun ?text -> fun () -> { json; text }
+    let to_value x =
+      structure_to_value
+        [("json", (Option.map x.json ~f:JsonFormat.to_value));
+        ("text", (Option.map x.text ~f:TextFormat.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let text =
+        (Option.map ~f:TextFormat.of_xml) (Xml.child xml_arg0 "text") in
+      let json =
+        (Option.map ~f:JsonFormat.of_xml) (Xml.child xml_arg0 "json") in
+      make ?text ?json ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let text = field_map json__ "text" TextFormat.of_json in
+      let json = field_map json__ "json" JsonFormat.of_json in
+      make ?text ?json ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An object that represents the format for the logs."]
 module AwsCloudMapInstanceAttribute =
   struct
     type nonrec t =
@@ -1909,15 +2080,16 @@ module AwsCloudMapInstanceAttribute =
           (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let value =
-        field_map_exn json "value" AwsCloudMapInstanceAttributeValue.of_json in
+        field_map_exn json__ "value"
+          AwsCloudMapInstanceAttributeValue.of_json in
       let key =
-        field_map_exn json "key" AwsCloudMapInstanceAttributeKey.of_json in
+        field_map_exn json__ "key" AwsCloudMapInstanceAttributeKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that represents the Cloud Map attribute information for your virtual node. AWS Cloud Map is not available in the eu-south-1 Region."]
+       "An object that represents the Cloud Map attribute information for your virtual node. Cloud Map is not available in the eu-south-1 Region."]
 module VirtualGatewayClientTlsCertificate =
   struct
     type nonrec t =
@@ -1947,11 +2119,12 @@ module VirtualGatewayClientTlsCertificate =
           (Xml.child xml_arg0 "file") in
       make ?sds ?file ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sds =
-        field_map json "sds" VirtualGatewayListenerTlsSdsCertificate.of_json in
+        field_map json__ "sds"
+          VirtualGatewayListenerTlsSdsCertificate.of_json in
       let file =
-        field_map json "file"
+        field_map json__ "file"
           VirtualGatewayListenerTlsFileCertificate.of_json in
       make ?sds ?file ()
     let to_json v = composed_to_json to_value v
@@ -1987,12 +2160,12 @@ module VirtualGatewayTlsValidationContext =
           (Xml.child xml_arg0 "subjectAlternativeNames") in
       make ~trust ?subjectAlternativeNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trust =
-        field_map_exn json "trust"
+        field_map_exn json__ "trust"
           VirtualGatewayTlsValidationContextTrust.of_json in
       let subjectAlternativeNames =
-        field_map json "subjectAlternativeNames"
+        field_map json__ "subjectAlternativeNames"
           SubjectAlternativeNames.of_json in
       make ~trust ?subjectAlternativeNames ()
     let to_json v = composed_to_json to_value v
@@ -2017,8 +2190,9 @@ module VirtualGatewayGrpcConnectionPool =
           (Xml.child_exn ~context:context_ xml_arg0 "maxRequests") in
       make ~maxRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRequests = field_map_exn json "maxRequests" MaxRequests.of_json in
+    let of_json json__ =
+      let maxRequests =
+        field_map_exn json__ "maxRequests" MaxRequests.of_json in
       make ~maxRequests ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a type of connection pool."]
@@ -2041,8 +2215,9 @@ module VirtualGatewayHttp2ConnectionPool =
           (Xml.child_exn ~context:context_ xml_arg0 "maxRequests") in
       make ~maxRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRequests = field_map_exn json "maxRequests" MaxRequests.of_json in
+    let of_json json__ =
+      let maxRequests =
+        field_map_exn json__ "maxRequests" MaxRequests.of_json in
       make ~maxRequests ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a type of connection pool."]
@@ -2075,11 +2250,11 @@ module VirtualGatewayHttpConnectionPool =
           (Xml.child_exn ~context:context_ xml_arg0 "maxConnections") in
       make ?maxPendingRequests ~maxConnections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxPendingRequests =
-        field_map json "maxPendingRequests" MaxPendingRequests.of_json in
+        field_map json__ "maxPendingRequests" MaxPendingRequests.of_json in
       let maxConnections =
-        field_map_exn json "maxConnections" MaxConnections.of_json in
+        field_map_exn json__ "maxConnections" MaxConnections.of_json in
       make ?maxPendingRequests ~maxConnections ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a type of connection pool."]
@@ -2207,14 +2382,16 @@ module VirtualGatewayListenerTlsCertificate =
           (Xml.child xml_arg0 "acm") in
       make ?sds ?file ?acm ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sds =
-        field_map json "sds" VirtualGatewayListenerTlsSdsCertificate.of_json in
+        field_map json__ "sds"
+          VirtualGatewayListenerTlsSdsCertificate.of_json in
       let file =
-        field_map json "file"
+        field_map json__ "file"
           VirtualGatewayListenerTlsFileCertificate.of_json in
       let acm =
-        field_map json "acm" VirtualGatewayListenerTlsAcmCertificate.of_json in
+        field_map json__ "acm"
+          VirtualGatewayListenerTlsAcmCertificate.of_json in
       make ?sds ?file ?acm ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2282,12 +2459,12 @@ module VirtualGatewayListenerTlsValidationContext =
           (Xml.child xml_arg0 "subjectAlternativeNames") in
       make ~trust ?subjectAlternativeNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trust =
-        field_map_exn json "trust"
+        field_map_exn json__ "trust"
           VirtualGatewayListenerTlsValidationContextTrust.of_json in
       let subjectAlternativeNames =
-        field_map json "subjectAlternativeNames"
+        field_map json__ "subjectAlternativeNames"
           SubjectAlternativeNames.of_json in
       make ~trust ?subjectAlternativeNames ()
     let to_json v = composed_to_json to_value v
@@ -2373,16 +2550,21 @@ module WeightedTarget =
   struct
     type nonrec t =
       {
+      port: ListenerPort.t option
+        [@ocaml.doc "The targeted port of the weighted object."];
       virtualNode: ResourceName.t
         [@ocaml.doc
           "The virtual node to associate with the weighted target."];
       weight: PercentInt.t
         [@ocaml.doc "The relative weight of the weighted target."]}
     let context_ = "WeightedTarget"
-    let make ~virtualNode = fun ~weight -> fun () -> { virtualNode; weight }
+    let make ?port =
+      fun ~virtualNode ->
+        fun ~weight -> fun () -> { port; virtualNode; weight }
     let to_value x =
       structure_to_value
-        [("virtualNode", (Some (ResourceName.to_value x.virtualNode)));
+        [("port", (Option.map x.port ~f:ListenerPort.to_value));
+        ("virtualNode", (Some (ResourceName.to_value x.virtualNode)));
         ("weight", (Some (PercentInt.to_value x.weight)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -2391,12 +2573,16 @@ module WeightedTarget =
       let virtualNode =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualNode") in
-      make ~weight ~virtualNode ()
+      let port =
+        (Option.map ~f:ListenerPort.of_xml) (Xml.child xml_arg0 "port") in
+      make ~weight ~virtualNode ?port ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let weight = field_map_exn json "weight" PercentInt.of_json in
-      let virtualNode = field_map_exn json "virtualNode" ResourceName.of_json in
-      make ~weight ~virtualNode ()
+    let of_json json__ =
+      let weight = field_map_exn json__ "weight" PercentInt.of_json in
+      let virtualNode =
+        field_map_exn json__ "virtualNode" ResourceName.of_json in
+      let port = field_map json__ "port" ListenerPort.of_json in
+      make ~weight ~virtualNode ?port ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a target and its relative weight. Traffic is distributed across targets according to their relative weight. For example, a weighted target with a relative weight of 50 receives five times as much traffic as one with a relative weight of 10. The total weight for all targets combined must be less than or equal to 100."]
@@ -2431,11 +2617,11 @@ module GrpcRouteMetadata =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "invert") in
       make ~name ?match_ ?invert ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" HeaderName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" HeaderName.of_json in
       let match_ =
-        field_map json "match" GrpcRouteMetadataMatchMethod.of_json in
-      let invert = field_map json "invert" Boolean.of_json in
+        field_map json__ "match" GrpcRouteMetadataMatchMethod.of_json in
+      let invert = field_map json__ "invert" Boolean.of_json in
       make ~name ?match_ ?invert ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2483,9 +2669,9 @@ module HttpQueryParameter =
           (Xml.child xml_arg0 "match") in
       make ~name ?match_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" QueryParameterName.of_json in
-      let match_ = field_map json "match" QueryParameterMatch.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" QueryParameterName.of_json in
+      let match_ = field_map json__ "match" QueryParameterMatch.of_json in
       make ~name ?match_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2520,10 +2706,10 @@ module HttpRouteHeader =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "invert") in
       make ~name ?match_ ?invert ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" HeaderName.of_json in
-      let match_ = field_map json "match" HeaderMatchMethod.of_json in
-      let invert = field_map json "invert" Boolean.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" HeaderName.of_json in
+      let match_ = field_map json__ "match" HeaderMatchMethod.of_json in
+      let invert = field_map json__ "invert" Boolean.of_json in
       make ~name ?match_ ?invert ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2548,9 +2734,9 @@ module GatewayRouteVirtualService =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualServiceName") in
       make ~virtualServiceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualServiceName =
-        field_map_exn json "virtualServiceName" ResourceName.of_json in
+        field_map_exn json__ "virtualServiceName" ResourceName.of_json in
       make ~virtualServiceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2574,9 +2760,9 @@ module GatewayRouteHostnameRewrite =
           (Xml.child xml_arg0 "defaultTargetHostname") in
       make ?defaultTargetHostname ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultTargetHostname =
-        field_map json "defaultTargetHostname"
+        field_map json__ "defaultTargetHostname"
           DefaultGatewayRouteRewrite.of_json in
       make ?defaultTargetHostname ()
     let to_json v = composed_to_json to_value v
@@ -2648,10 +2834,10 @@ module GrpcGatewayRouteMetadata =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "invert") in
       make ~name ?match_ ?invert ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" HeaderName.of_json in
-      let match_ = field_map json "match" GrpcMetadataMatchMethod.of_json in
-      let invert = field_map json "invert" Boolean.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" HeaderName.of_json in
+      let match_ = field_map json__ "match" GrpcMetadataMatchMethod.of_json in
+      let invert = field_map json__ "invert" Boolean.of_json in
       make ~name ?match_ ?invert ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2671,8 +2857,8 @@ module HttpGatewayRoutePathRewrite =
         (Option.map ~f:HttpPathExact.of_xml) (Xml.child xml_arg0 "exact") in
       make ?exact ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let exact = field_map json "exact" HttpPathExact.of_json in
+    let of_json json__ =
+      let exact = field_map json__ "exact" HttpPathExact.of_json in
       make ?exact ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents the path to rewrite."]
@@ -2703,10 +2889,10 @@ module HttpGatewayRoutePrefixRewrite =
           (Xml.child xml_arg0 "defaultPrefix") in
       make ?value ?defaultPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" HttpGatewayRoutePrefix.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" HttpGatewayRoutePrefix.of_json in
       let defaultPrefix =
-        field_map json "defaultPrefix" DefaultGatewayRouteRewrite.of_json in
+        field_map json__ "defaultPrefix" DefaultGatewayRouteRewrite.of_json in
       make ?value ?defaultPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2718,7 +2904,9 @@ module HttpGatewayRouteHeader =
       invert: Boolean.t option
         [@ocaml.doc
           "Specify True to match anything except the match criteria. The default value is False."];
-      match_: HeaderMatchMethod.t option ;
+      match_: HeaderMatchMethod.t option
+        [@ocaml.doc
+          "An object that represents the method and value to match with the header value sent in a request. Specify one match method."];
       name: HeaderName.t
         [@ocaml.doc
           "A name for the HTTP header in the gateway route that will be matched on."]}
@@ -2740,10 +2928,10 @@ module HttpGatewayRouteHeader =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "invert") in
       make ~name ?match_ ?invert ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" HeaderName.of_json in
-      let match_ = field_map json "match" HeaderMatchMethod.of_json in
-      let invert = field_map json "invert" Boolean.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" HeaderName.of_json in
+      let match_ = field_map json__ "match" HeaderMatchMethod.of_json in
+      let invert = field_map json__ "invert" Boolean.of_json in
       make ~name ?match_ ?invert ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2771,9 +2959,9 @@ module PortMapping =
         PortNumber.of_xml (Xml.child_exn ~context:context_ xml_arg0 "port") in
       make ~protocol ~port ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let protocol = field_map_exn json "protocol" PortProtocol.of_json in
-      let port = field_map_exn json "port" PortNumber.of_json in
+    let of_json json__ =
+      let protocol = field_map_exn json__ "protocol" PortProtocol.of_json in
+      let port = field_map_exn json__ "port" PortNumber.of_json in
       make ~protocol ~port ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a port mapping."]
@@ -2807,10 +2995,10 @@ module VirtualServiceBackend =
           (Xml.child xml_arg0 "clientPolicy") in
       make ~virtualServiceName ?clientPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualServiceName =
-        field_map_exn json "virtualServiceName" ServiceName.of_json in
-      let clientPolicy = field_map json "clientPolicy" ClientPolicy.of_json in
+        field_map_exn json__ "virtualServiceName" ServiceName.of_json in
+      let clientPolicy = field_map json__ "clientPolicy" ClientPolicy.of_json in
       make ~virtualServiceName ?clientPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2894,18 +3082,20 @@ module HealthCheckPolicy =
       make ~unhealthyThreshold ~timeoutMillis ~protocol ?port ?path
         ~intervalMillis ~healthyThreshold ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unhealthyThreshold =
-        field_map_exn json "unhealthyThreshold" HealthCheckThreshold.of_json in
+        field_map_exn json__ "unhealthyThreshold"
+          HealthCheckThreshold.of_json in
       let timeoutMillis =
-        field_map_exn json "timeoutMillis" HealthCheckTimeoutMillis.of_json in
-      let protocol = field_map_exn json "protocol" PortProtocol.of_json in
-      let port = field_map json "port" PortNumber.of_json in
-      let path = field_map json "path" String_.of_json in
+        field_map_exn json__ "timeoutMillis" HealthCheckTimeoutMillis.of_json in
+      let protocol = field_map_exn json__ "protocol" PortProtocol.of_json in
+      let port = field_map json__ "port" PortNumber.of_json in
+      let path = field_map json__ "path" String_.of_json in
       let intervalMillis =
-        field_map_exn json "intervalMillis" HealthCheckIntervalMillis.of_json in
+        field_map_exn json__ "intervalMillis"
+          HealthCheckIntervalMillis.of_json in
       let healthyThreshold =
-        field_map_exn json "healthyThreshold" HealthCheckThreshold.of_json in
+        field_map_exn json__ "healthyThreshold" HealthCheckThreshold.of_json in
       make ~unhealthyThreshold ~timeoutMillis ~protocol ?port ?path
         ~intervalMillis ~healthyThreshold ()
     let to_json v = composed_to_json to_value v
@@ -2943,11 +3133,11 @@ module ListenerTimeout =
         (Option.map ~f:GrpcTimeout.of_xml) (Xml.child xml_arg0 "grpc") in
       make ?tcp ?http2 ?http ?grpc ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tcp = field_map json "tcp" TcpTimeout.of_json in
-      let http2 = field_map json "http2" HttpTimeout.of_json in
-      let http = field_map json "http" HttpTimeout.of_json in
-      let grpc = field_map json "grpc" GrpcTimeout.of_json in
+    let of_json json__ =
+      let tcp = field_map json__ "tcp" TcpTimeout.of_json in
+      let http2 = field_map json__ "http2" HttpTimeout.of_json in
+      let http = field_map json__ "http" HttpTimeout.of_json in
+      let grpc = field_map json__ "grpc" GrpcTimeout.of_json in
       make ?tcp ?http2 ?http ?grpc ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2989,12 +3179,12 @@ module ListenerTls =
           (Xml.child_exn ~context:context_ xml_arg0 "certificate") in
       make ?validation ~mode ~certificate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validation =
-        field_map json "validation" ListenerTlsValidationContext.of_json in
-      let mode = field_map_exn json "mode" ListenerTlsMode.of_json in
+        field_map json__ "validation" ListenerTlsValidationContext.of_json in
+      let mode = field_map_exn json__ "mode" ListenerTlsMode.of_json in
       let certificate =
-        field_map_exn json "certificate" ListenerTlsCertificate.of_json in
+        field_map_exn json__ "certificate" ListenerTlsCertificate.of_json in
       make ?validation ~mode ~certificate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3052,16 +3242,16 @@ module OutlierDetection =
       make ~maxServerErrors ~maxEjectionPercent ~interval
         ~baseEjectionDuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxServerErrors =
-        field_map_exn json "maxServerErrors"
+        field_map_exn json__ "maxServerErrors"
           OutlierDetectionMaxServerErrors.of_json in
       let maxEjectionPercent =
-        field_map_exn json "maxEjectionPercent"
+        field_map_exn json__ "maxEjectionPercent"
           OutlierDetectionMaxEjectionPercent.of_json in
-      let interval = field_map_exn json "interval" Duration.of_json in
+      let interval = field_map_exn json__ "interval" Duration.of_json in
       let baseEjectionDuration =
-        field_map_exn json "baseEjectionDuration" Duration.of_json in
+        field_map_exn json__ "baseEjectionDuration" Duration.of_json in
       make ~maxServerErrors ~maxEjectionPercent ~interval
         ~baseEjectionDuration ()
     let to_json v = composed_to_json to_value v
@@ -3107,12 +3297,14 @@ module VirtualNodeConnectionPool =
           (Xml.child xml_arg0 "grpc") in
       make ?tcp ?http2 ?http ?grpc ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tcp = field_map json "tcp" VirtualNodeTcpConnectionPool.of_json in
+    let of_json json__ =
+      let tcp = field_map json__ "tcp" VirtualNodeTcpConnectionPool.of_json in
       let http2 =
-        field_map json "http2" VirtualNodeHttp2ConnectionPool.of_json in
-      let http = field_map json "http" VirtualNodeHttpConnectionPool.of_json in
-      let grpc = field_map json "grpc" VirtualNodeGrpcConnectionPool.of_json in
+        field_map json__ "http2" VirtualNodeHttp2ConnectionPool.of_json in
+      let http =
+        field_map json__ "http" VirtualNodeHttpConnectionPool.of_json in
+      let grpc =
+        field_map json__ "grpc" VirtualNodeGrpcConnectionPool.of_json in
       make ?tcp ?http2 ?http ?grpc ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3121,27 +3313,39 @@ module FileAccessLog =
   struct
     type nonrec t =
       {
+      format: LoggingFormat.t option
+        [@ocaml.doc
+          "The specified format for the logs. The format is either json_format or text_format."];
       path: FilePath.t
         [@ocaml.doc
           "The file path to write access logs to. You can use /dev/stdout to send access logs to standard out and configure your Envoy container to use a log driver, such as awslogs, to export the access logs to a log storage service such as Amazon CloudWatch Logs. You can also specify a path in the Envoy container's file system to write the files to disk. The Envoy process must have write permissions to the path that you specify here. Otherwise, Envoy fails to bootstrap properly."]}
     let context_ = "FileAccessLog"
-    let make ~path = fun () -> { path }
+    let make ?format = fun ~path -> fun () -> { format; path }
     let to_value x =
-      structure_to_value [("path", (Some (FilePath.to_value x.path)))]
+      structure_to_value
+        [("format", (Option.map x.format ~f:LoggingFormat.to_value));
+        ("path", (Some (FilePath.to_value x.path)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let path =
         FilePath.of_xml (Xml.child_exn ~context:context_ xml_arg0 "path") in
-      make ~path ()
+      let format =
+        (Option.map ~f:LoggingFormat.of_xml) (Xml.child xml_arg0 "format") in
+      make ~path ?format ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let path = field_map_exn json "path" FilePath.of_json in make ~path ()
+    let of_json json__ =
+      let path = field_map_exn json__ "path" FilePath.of_json in
+      let format = field_map json__ "format" LoggingFormat.of_json in
+      make ~path ?format ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents an access log file."]
 module AwsCloudMapInstanceAttributes =
   struct
     type nonrec t = AwsCloudMapInstanceAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AwsCloudMapInstanceAttribute.to_value)) |>
         (fun x -> `List x)
@@ -3180,6 +3384,37 @@ module AwsCloudMapName =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"AwsCloudMapName" j
+    let to_json = simple_to_json to_value
+  end
+module IpPreference =
+  struct
+    type nonrec t =
+      | IPv6_PREFERRED 
+      | IPv4_PREFERRED 
+      | IPv4_ONLY 
+      | IPv6_ONLY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IPv6_PREFERRED -> "IPv6_PREFERRED"
+      | IPv4_PREFERRED -> "IPv4_PREFERRED"
+      | IPv4_ONLY -> "IPv4_ONLY"
+      | IPv6_ONLY -> "IPv6_ONLY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IPv6_PREFERRED" -> IPv6_PREFERRED
+      | "IPv4_PREFERRED" -> IPv4_PREFERRED
+      | "IPv4_ONLY" -> IPv4_ONLY
+      | "IPv6_ONLY" -> IPv6_ONLY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IpPreference" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IpPreference" j)
     let to_json = simple_to_json to_value
   end
 module DnsResponseType =
@@ -3263,14 +3498,14 @@ module VirtualGatewayClientPolicyTls =
           (Xml.child xml_arg0 "certificate") in
       make ~validation ?ports ?enforce ?certificate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validation =
-        field_map_exn json "validation"
+        field_map_exn json__ "validation"
           VirtualGatewayTlsValidationContext.of_json in
-      let ports = field_map json "ports" PortSet.of_json in
-      let enforce = field_map json "enforce" Boolean.of_json in
+      let ports = field_map json__ "ports" PortSet.of_json in
+      let enforce = field_map json__ "enforce" Boolean.of_json in
       let certificate =
-        field_map json "certificate"
+        field_map json__ "certificate"
           VirtualGatewayClientTlsCertificate.of_json in
       make ~validation ?ports ?enforce ?certificate ()
     let to_json v = composed_to_json to_value v
@@ -3309,13 +3544,13 @@ module VirtualGatewayConnectionPool =
           (Xml.child xml_arg0 "grpc") in
       make ?http2 ?http ?grpc ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let http2 =
-        field_map json "http2" VirtualGatewayHttp2ConnectionPool.of_json in
+        field_map json__ "http2" VirtualGatewayHttp2ConnectionPool.of_json in
       let http =
-        field_map json "http" VirtualGatewayHttpConnectionPool.of_json in
+        field_map json__ "http" VirtualGatewayHttpConnectionPool.of_json in
       let grpc =
-        field_map json "grpc" VirtualGatewayGrpcConnectionPool.of_json in
+        field_map json__ "grpc" VirtualGatewayGrpcConnectionPool.of_json in
       make ?http2 ?http ?grpc ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3405,22 +3640,22 @@ module VirtualGatewayHealthCheckPolicy =
       make ~unhealthyThreshold ~timeoutMillis ~protocol ?port ?path
         ~intervalMillis ~healthyThreshold ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unhealthyThreshold =
-        field_map_exn json "unhealthyThreshold"
+        field_map_exn json__ "unhealthyThreshold"
           VirtualGatewayHealthCheckThreshold.of_json in
       let timeoutMillis =
-        field_map_exn json "timeoutMillis"
+        field_map_exn json__ "timeoutMillis"
           VirtualGatewayHealthCheckTimeoutMillis.of_json in
       let protocol =
-        field_map_exn json "protocol" VirtualGatewayPortProtocol.of_json in
-      let port = field_map json "port" PortNumber.of_json in
-      let path = field_map json "path" String_.of_json in
+        field_map_exn json__ "protocol" VirtualGatewayPortProtocol.of_json in
+      let port = field_map json__ "port" PortNumber.of_json in
+      let path = field_map json__ "path" String_.of_json in
       let intervalMillis =
-        field_map_exn json "intervalMillis"
+        field_map_exn json__ "intervalMillis"
           VirtualGatewayHealthCheckIntervalMillis.of_json in
       let healthyThreshold =
-        field_map_exn json "healthyThreshold"
+        field_map_exn json__ "healthyThreshold"
           VirtualGatewayHealthCheckThreshold.of_json in
       make ~unhealthyThreshold ~timeoutMillis ~protocol ?port ?path
         ~intervalMillis ~healthyThreshold ()
@@ -3466,14 +3701,14 @@ module VirtualGatewayListenerTls =
           (Xml.child_exn ~context:context_ xml_arg0 "certificate") in
       make ?validation ~mode ~certificate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validation =
-        field_map json "validation"
+        field_map json__ "validation"
           VirtualGatewayListenerTlsValidationContext.of_json in
       let mode =
-        field_map_exn json "mode" VirtualGatewayListenerTlsMode.of_json in
+        field_map_exn json__ "mode" VirtualGatewayListenerTlsMode.of_json in
       let certificate =
-        field_map_exn json "certificate"
+        field_map_exn json__ "certificate"
           VirtualGatewayListenerTlsCertificate.of_json in
       make ?validation ~mode ~certificate ()
     let to_json v = composed_to_json to_value v
@@ -3503,10 +3738,10 @@ module VirtualGatewayPortMapping =
         PortNumber.of_xml (Xml.child_exn ~context:context_ xml_arg0 "port") in
       make ~protocol ~port ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protocol =
-        field_map_exn json "protocol" VirtualGatewayPortProtocol.of_json in
-      let port = field_map_exn json "port" PortNumber.of_json in
+        field_map_exn json__ "protocol" VirtualGatewayPortProtocol.of_json in
+      let port = field_map_exn json__ "port" PortNumber.of_json in
       make ~protocol ~port ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a port mapping."]
@@ -3514,21 +3749,30 @@ module VirtualGatewayFileAccessLog =
   struct
     type nonrec t =
       {
+      format: LoggingFormat.t option
+        [@ocaml.doc
+          "The specified format for the virtual gateway access logs. It can be either json_format or text_format."];
       path: FilePath.t
         [@ocaml.doc
           "The file path to write access logs to. You can use /dev/stdout to send access logs to standard out and configure your Envoy container to use a log driver, such as awslogs, to export the access logs to a log storage service such as Amazon CloudWatch Logs. You can also specify a path in the Envoy container's file system to write the files to disk."]}
     let context_ = "VirtualGatewayFileAccessLog"
-    let make ~path = fun () -> { path }
+    let make ?format = fun ~path -> fun () -> { format; path }
     let to_value x =
-      structure_to_value [("path", (Some (FilePath.to_value x.path)))]
+      structure_to_value
+        [("format", (Option.map x.format ~f:LoggingFormat.to_value));
+        ("path", (Some (FilePath.to_value x.path)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let path =
         FilePath.of_xml (Xml.child_exn ~context:context_ xml_arg0 "path") in
-      make ~path ()
+      let format =
+        (Option.map ~f:LoggingFormat.of_xml) (Xml.child xml_arg0 "format") in
+      make ~path ?format ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let path = field_map_exn json "path" FilePath.of_json in make ~path ()
+    let of_json json__ =
+      let path = field_map_exn json__ "path" FilePath.of_json in
+      let format = field_map json__ "format" LoggingFormat.of_json in
+      make ~path ?format ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents an access log file."]
 module GrpcRetryPolicyEvents =
@@ -3539,6 +3783,9 @@ module GrpcRetryPolicyEvents =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GrpcRetryPolicyEvent.to_value)) |>
         (fun x -> `List x)
@@ -3569,6 +3816,9 @@ module HttpRetryPolicyEvents =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HttpRetryPolicyEvent.to_value)) |>
         (fun x -> `List x)
@@ -3613,6 +3863,9 @@ module TcpRetryPolicyEvents =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TcpRetryPolicyEvent.to_value)) |>
         (fun x -> `List x)
@@ -3643,6 +3896,9 @@ module WeightedTargets =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WeightedTarget.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3671,6 +3927,9 @@ module GrpcRouteMetadataList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GrpcRouteMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3777,9 +4036,9 @@ module HttpPathMatch =
         (Option.map ~f:HttpPathExact.of_xml) (Xml.child xml_arg0 "exact") in
       make ?regex ?exact ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regex = field_map json "regex" HttpPathRegex.of_json in
-      let exact = field_map json "exact" HttpPathExact.of_json in
+    let of_json json__ =
+      let regex = field_map json__ "regex" HttpPathRegex.of_json in
+      let exact = field_map json__ "exact" HttpPathExact.of_json in
       make ?regex ?exact ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing the path to match in the request."]
@@ -3791,6 +4050,9 @@ module HttpQueryParameters =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HttpQueryParameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3820,6 +4082,9 @@ module HttpRouteHeaders =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HttpRouteHeader.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3864,27 +4129,34 @@ module GatewayRouteTarget =
   struct
     type nonrec t =
       {
+      port: ListenerPort.t option
+        [@ocaml.doc "The port number of the gateway route target."];
       virtualService: GatewayRouteVirtualService.t
         [@ocaml.doc
           "An object that represents a virtual service gateway route target."]}
     let context_ = "GatewayRouteTarget"
-    let make ~virtualService = fun () -> { virtualService }
+    let make ?port =
+      fun ~virtualService -> fun () -> { port; virtualService }
     let to_value x =
       structure_to_value
-        [("virtualService",
-           (Some (GatewayRouteVirtualService.to_value x.virtualService)))]
+        [("port", (Option.map x.port ~f:ListenerPort.to_value));
+        ("virtualService",
+          (Some (GatewayRouteVirtualService.to_value x.virtualService)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualService =
         GatewayRouteVirtualService.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualService") in
-      make ~virtualService ()
+      let port =
+        (Option.map ~f:ListenerPort.of_xml) (Xml.child xml_arg0 "port") in
+      make ~virtualService ?port ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualService =
-        field_map_exn json "virtualService"
+        field_map_exn json__ "virtualService"
           GatewayRouteVirtualService.of_json in
-      make ~virtualService ()
+      let port = field_map json__ "port" ListenerPort.of_json in
+      make ~virtualService ?port ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a gateway route target."]
 module GrpcGatewayRouteRewrite =
@@ -3905,9 +4177,9 @@ module GrpcGatewayRouteRewrite =
           (Xml.child xml_arg0 "hostname") in
       make ?hostname ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hostname =
-        field_map json "hostname" GatewayRouteHostnameRewrite.of_json in
+        field_map json__ "hostname" GatewayRouteHostnameRewrite.of_json in
       make ?hostname ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents the gateway route to rewrite."]
@@ -3933,9 +4205,9 @@ module GatewayRouteHostnameMatch =
         (Option.map ~f:ExactHostName.of_xml) (Xml.child xml_arg0 "exact") in
       make ?suffix ?exact ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let suffix = field_map json "suffix" SuffixHostname.of_json in
-      let exact = field_map json "exact" ExactHostName.of_json in
+    let of_json json__ =
+      let suffix = field_map json__ "suffix" SuffixHostname.of_json in
+      let exact = field_map json__ "exact" ExactHostName.of_json in
       make ?suffix ?exact ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3948,6 +4220,9 @@ module GrpcGatewayRouteMetadataList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GrpcGatewayRouteMetadata.to_value)) |>
         (fun x -> `List x)
@@ -4002,12 +4277,12 @@ module HttpGatewayRouteRewrite =
           (Xml.child xml_arg0 "hostname") in
       make ?prefix ?path ?hostname ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let prefix =
-        field_map json "prefix" HttpGatewayRoutePrefixRewrite.of_json in
-      let path = field_map json "path" HttpGatewayRoutePathRewrite.of_json in
+        field_map json__ "prefix" HttpGatewayRoutePrefixRewrite.of_json in
+      let path = field_map json__ "path" HttpGatewayRoutePathRewrite.of_json in
       let hostname =
-        field_map json "hostname" GatewayRouteHostnameRewrite.of_json in
+        field_map json__ "hostname" GatewayRouteHostnameRewrite.of_json in
       make ?prefix ?path ?hostname ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing the gateway route to rewrite."]
@@ -4019,6 +4294,9 @@ module HttpGatewayRouteHeaders =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HttpGatewayRouteHeader.to_value)) |>
         (fun x -> `List x)
@@ -4061,9 +4339,9 @@ module VirtualNodeServiceProvider =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualNodeName") in
       make ~virtualNodeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualNodeName =
-        field_map_exn json "virtualNodeName" ResourceName.of_json in
+        field_map_exn json__ "virtualNodeName" ResourceName.of_json in
       make ~virtualNodeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4088,9 +4366,9 @@ module VirtualRouterServiceProvider =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
       make ~virtualRouterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
+        field_map_exn json__ "virtualRouterName" ResourceName.of_json in
       make ~virtualRouterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4111,8 +4389,9 @@ module VirtualRouterListener =
           (Xml.child_exn ~context:context_ xml_arg0 "portMapping") in
       make ~portMapping ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let portMapping = field_map_exn json "portMapping" PortMapping.of_json in
+    let of_json json__ =
+      let portMapping =
+        field_map_exn json__ "portMapping" PortMapping.of_json in
       make ~portMapping ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a virtual router listener."]
@@ -4134,9 +4413,9 @@ module Backend =
           (Xml.child xml_arg0 "virtualService") in
       make ?virtualService ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualService =
-        field_map json "virtualService" VirtualServiceBackend.of_json in
+        field_map json__ "virtualService" VirtualServiceBackend.of_json in
       make ?virtualService ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4206,16 +4485,17 @@ module Listener =
       make ?tls ?timeout ~portMapping ?outlierDetection ?healthCheck
         ?connectionPool ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tls = field_map json "tls" ListenerTls.of_json in
-      let timeout = field_map json "timeout" ListenerTimeout.of_json in
-      let portMapping = field_map_exn json "portMapping" PortMapping.of_json in
+    let of_json json__ =
+      let tls = field_map json__ "tls" ListenerTls.of_json in
+      let timeout = field_map json__ "timeout" ListenerTimeout.of_json in
+      let portMapping =
+        field_map_exn json__ "portMapping" PortMapping.of_json in
       let outlierDetection =
-        field_map json "outlierDetection" OutlierDetection.of_json in
+        field_map json__ "outlierDetection" OutlierDetection.of_json in
       let healthCheck =
-        field_map json "healthCheck" HealthCheckPolicy.of_json in
+        field_map json__ "healthCheck" HealthCheckPolicy.of_json in
       let connectionPool =
-        field_map json "connectionPool" VirtualNodeConnectionPool.of_json in
+        field_map json__ "connectionPool" VirtualNodeConnectionPool.of_json in
       make ?tls ?timeout ~portMapping ?outlierDetection ?healthCheck
         ?connectionPool ()
     let to_json v = composed_to_json to_value v
@@ -4236,8 +4516,9 @@ module AccessLog =
         (Option.map ~f:FileAccessLog.of_xml) (Xml.child xml_arg0 "file") in
       make ?file ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let file = field_map json "file" FileAccessLog.of_json in make ?file ()
+    let of_json json__ =
+      let file = field_map json__ "file" FileAccessLog.of_json in
+      make ?file ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the access logging information for a virtual node."]
@@ -4248,19 +4529,26 @@ module AwsCloudMapServiceDiscovery =
       attributes: AwsCloudMapInstanceAttributes.t option
         [@ocaml.doc
           "A string map that contains attributes with values that you can use to filter instances by any custom attribute that you specified when you registered the instance. Only instances that match all of the specified key/value pairs will be returned."];
+      ipPreference: IpPreference.t option
+        [@ocaml.doc
+          "The preferred IP version that this virtual node uses. Setting the IP preference on the virtual node only overrides the IP preference set for the mesh on this specific node."];
       namespaceName: AwsCloudMapName.t
         [@ocaml.doc "The name of the Cloud Map namespace to use."];
       serviceName: AwsCloudMapName.t
         [@ocaml.doc "The name of the Cloud Map service to use."]}
     let context_ = "AwsCloudMapServiceDiscovery"
     let make ?attributes =
-      fun ~namespaceName ->
-        fun ~serviceName ->
-          fun () -> { attributes; namespaceName; serviceName }
+      fun ?ipPreference ->
+        fun ~namespaceName ->
+          fun ~serviceName ->
+            fun () ->
+              { attributes; ipPreference; namespaceName; serviceName }
     let to_value x =
       structure_to_value
         [("attributes",
            (Option.map x.attributes ~f:AwsCloudMapInstanceAttributes.to_value));
+        ("ipPreference",
+          (Option.map x.ipPreference ~f:IpPreference.to_value));
         ("namespaceName", (Some (AwsCloudMapName.to_value x.namespaceName)));
         ("serviceName", (Some (AwsCloudMapName.to_value x.serviceName)))]
     let to_query v = to_query to_value v
@@ -4271,19 +4559,23 @@ module AwsCloudMapServiceDiscovery =
       let namespaceName =
         AwsCloudMapName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "namespaceName") in
+      let ipPreference =
+        (Option.map ~f:IpPreference.of_xml)
+          (Xml.child xml_arg0 "ipPreference") in
       let attributes =
         (Option.map ~f:AwsCloudMapInstanceAttributes.of_xml)
           (Xml.child xml_arg0 "attributes") in
-      make ~serviceName ~namespaceName ?attributes ()
+      make ~serviceName ~namespaceName ?ipPreference ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceName =
-        field_map_exn json "serviceName" AwsCloudMapName.of_json in
+        field_map_exn json__ "serviceName" AwsCloudMapName.of_json in
       let namespaceName =
-        field_map_exn json "namespaceName" AwsCloudMapName.of_json in
+        field_map_exn json__ "namespaceName" AwsCloudMapName.of_json in
+      let ipPreference = field_map json__ "ipPreference" IpPreference.of_json in
       let attributes =
-        field_map json "attributes" AwsCloudMapInstanceAttributes.of_json in
-      make ~serviceName ~namespaceName ?attributes ()
+        field_map json__ "attributes" AwsCloudMapInstanceAttributes.of_json in
+      make ~serviceName ~namespaceName ?ipPreference ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the Cloud Map service discovery information for your virtual node. Cloud Map is not available in the eu-south-1 Region."]
@@ -4294,14 +4586,20 @@ module DnsServiceDiscovery =
       hostname: Hostname.t
         [@ocaml.doc
           "Specifies the DNS service discovery hostname for the virtual node."];
+      ipPreference: IpPreference.t option
+        [@ocaml.doc
+          "The preferred IP version that this virtual node uses. Setting the IP preference on the virtual node only overrides the IP preference set for the mesh on this specific node."];
       responseType: DnsResponseType.t option
         [@ocaml.doc "Specifies the DNS response type for the virtual node."]}
     let context_ = "DnsServiceDiscovery"
-    let make ?responseType =
-      fun ~hostname -> fun () -> { responseType; hostname }
+    let make ?ipPreference =
+      fun ?responseType ->
+        fun ~hostname -> fun () -> { ipPreference; responseType; hostname }
     let to_value x =
       structure_to_value
         [("hostname", (Some (Hostname.to_value x.hostname)));
+        ("ipPreference",
+          (Option.map x.ipPreference ~f:IpPreference.to_value));
         ("responseType",
           (Option.map x.responseType ~f:DnsResponseType.to_value))]
     let to_query v = to_query to_value v
@@ -4309,15 +4607,19 @@ module DnsServiceDiscovery =
       let responseType =
         (Option.map ~f:DnsResponseType.of_xml)
           (Xml.child xml_arg0 "responseType") in
+      let ipPreference =
+        (Option.map ~f:IpPreference.of_xml)
+          (Xml.child xml_arg0 "ipPreference") in
       let hostname =
         Hostname.of_xml (Xml.child_exn ~context:context_ xml_arg0 "hostname") in
-      make ?responseType ~hostname ()
+      make ?responseType ?ipPreference ~hostname ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let responseType =
-        field_map json "responseType" DnsResponseType.of_json in
-      let hostname = field_map_exn json "hostname" Hostname.of_json in
-      make ?responseType ~hostname ()
+        field_map json__ "responseType" DnsResponseType.of_json in
+      let ipPreference = field_map json__ "ipPreference" IpPreference.of_json in
+      let hostname = field_map_exn json__ "hostname" Hostname.of_json in
+      make ?responseType ?ipPreference ~hostname ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the DNS service discovery information for your virtual node."]
@@ -4340,8 +4642,8 @@ module VirtualGatewayClientPolicy =
           (Xml.child xml_arg0 "tls") in
       make ?tls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tls = field_map json "tls" VirtualGatewayClientPolicyTls.of_json in
+    let of_json json__ =
+      let tls = field_map json__ "tls" VirtualGatewayClientPolicyTls.of_json in
       make ?tls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a client policy."]
@@ -4392,14 +4694,16 @@ module VirtualGatewayListener =
           (Xml.child xml_arg0 "connectionPool") in
       make ?tls ~portMapping ?healthCheck ?connectionPool ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tls = field_map json "tls" VirtualGatewayListenerTls.of_json in
+    let of_json json__ =
+      let tls = field_map json__ "tls" VirtualGatewayListenerTls.of_json in
       let portMapping =
-        field_map_exn json "portMapping" VirtualGatewayPortMapping.of_json in
+        field_map_exn json__ "portMapping" VirtualGatewayPortMapping.of_json in
       let healthCheck =
-        field_map json "healthCheck" VirtualGatewayHealthCheckPolicy.of_json in
+        field_map json__ "healthCheck"
+          VirtualGatewayHealthCheckPolicy.of_json in
       let connectionPool =
-        field_map json "connectionPool" VirtualGatewayConnectionPool.of_json in
+        field_map json__ "connectionPool"
+          VirtualGatewayConnectionPool.of_json in
       make ?tls ~portMapping ?healthCheck ?connectionPool ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4423,8 +4727,8 @@ module VirtualGatewayAccessLog =
           (Xml.child xml_arg0 "file") in
       make ?file ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let file = field_map json "file" VirtualGatewayFileAccessLog.of_json in
+    let of_json json__ =
+      let file = field_map json__ "file" VirtualGatewayFileAccessLog.of_json in
       make ?file ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The access log configuration for a virtual gateway."]
@@ -4488,16 +4792,16 @@ module GrpcRetryPolicy =
       make ?tcpRetryEvents ~perRetryTimeout ~maxRetries ?httpRetryEvents
         ?grpcRetryEvents ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tcpRetryEvents =
-        field_map json "tcpRetryEvents" TcpRetryPolicyEvents.of_json in
+        field_map json__ "tcpRetryEvents" TcpRetryPolicyEvents.of_json in
       let perRetryTimeout =
-        field_map_exn json "perRetryTimeout" Duration.of_json in
-      let maxRetries = field_map_exn json "maxRetries" MaxRetries.of_json in
+        field_map_exn json__ "perRetryTimeout" Duration.of_json in
+      let maxRetries = field_map_exn json__ "maxRetries" MaxRetries.of_json in
       let httpRetryEvents =
-        field_map json "httpRetryEvents" HttpRetryPolicyEvents.of_json in
+        field_map json__ "httpRetryEvents" HttpRetryPolicyEvents.of_json in
       let grpcRetryEvents =
-        field_map json "grpcRetryEvents" GrpcRetryPolicyEvents.of_json in
+        field_map json__ "grpcRetryEvents" GrpcRetryPolicyEvents.of_json in
       make ?tcpRetryEvents ~perRetryTimeout ~maxRetries ?httpRetryEvents
         ?grpcRetryEvents ()
     let to_json v = composed_to_json to_value v
@@ -4523,9 +4827,9 @@ module GrpcRouteAction =
           (Xml.child_exn ~context:context_ xml_arg0 "weightedTargets") in
       make ~weightedTargets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let weightedTargets =
-        field_map_exn json "weightedTargets" WeightedTargets.of_json in
+        field_map_exn json__ "weightedTargets" WeightedTargets.of_json in
       make ~weightedTargets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4540,34 +4844,42 @@ module GrpcRouteMatch =
       methodName: MethodName.t option
         [@ocaml.doc
           "The method name to match from the request. If you specify a name, you must also specify a serviceName."];
+      port: ListenerPort.t option [@ocaml.doc "The port number to match on."];
       serviceName: ServiceName.t option
         [@ocaml.doc
           "The fully qualified domain name for the service to match from the request."]}
     let make ?metadata =
       fun ?methodName ->
-        fun ?serviceName -> fun () -> { metadata; methodName; serviceName }
+        fun ?port ->
+          fun ?serviceName ->
+            fun () -> { metadata; methodName; port; serviceName }
     let to_value x =
       structure_to_value
         [("metadata",
            (Option.map x.metadata ~f:GrpcRouteMetadataList.to_value));
         ("methodName", (Option.map x.methodName ~f:MethodName.to_value));
+        ("port", (Option.map x.port ~f:ListenerPort.to_value));
         ("serviceName", (Option.map x.serviceName ~f:ServiceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceName =
         (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "serviceName") in
+      let port =
+        (Option.map ~f:ListenerPort.of_xml) (Xml.child xml_arg0 "port") in
       let methodName =
         (Option.map ~f:MethodName.of_xml) (Xml.child xml_arg0 "methodName") in
       let metadata =
         (Option.map ~f:GrpcRouteMetadataList.of_xml)
           (Xml.child xml_arg0 "metadata") in
-      make ?serviceName ?methodName ?metadata ()
+      make ?serviceName ?port ?methodName ?metadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map json "serviceName" ServiceName.of_json in
-      let methodName = field_map json "methodName" MethodName.of_json in
-      let metadata = field_map json "metadata" GrpcRouteMetadataList.of_json in
-      make ?serviceName ?methodName ?metadata ()
+    let of_json json__ =
+      let serviceName = field_map json__ "serviceName" ServiceName.of_json in
+      let port = field_map json__ "port" ListenerPort.of_json in
+      let methodName = field_map json__ "methodName" MethodName.of_json in
+      let metadata =
+        field_map json__ "metadata" GrpcRouteMetadataList.of_json in
+      make ?serviceName ?port ?methodName ?metadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the criteria for determining a request match."]
@@ -4617,14 +4929,14 @@ module HttpRetryPolicy =
           (Xml.child xml_arg0 "httpRetryEvents") in
       make ?tcpRetryEvents ~perRetryTimeout ~maxRetries ?httpRetryEvents ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tcpRetryEvents =
-        field_map json "tcpRetryEvents" TcpRetryPolicyEvents.of_json in
+        field_map json__ "tcpRetryEvents" TcpRetryPolicyEvents.of_json in
       let perRetryTimeout =
-        field_map_exn json "perRetryTimeout" Duration.of_json in
-      let maxRetries = field_map_exn json "maxRetries" MaxRetries.of_json in
+        field_map_exn json__ "perRetryTimeout" Duration.of_json in
+      let maxRetries = field_map_exn json__ "maxRetries" MaxRetries.of_json in
       let httpRetryEvents =
-        field_map json "httpRetryEvents" HttpRetryPolicyEvents.of_json in
+        field_map json__ "httpRetryEvents" HttpRetryPolicyEvents.of_json in
       make ?tcpRetryEvents ~perRetryTimeout ~maxRetries ?httpRetryEvents ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4649,9 +4961,9 @@ module HttpRouteAction =
           (Xml.child_exn ~context:context_ xml_arg0 "weightedTargets") in
       make ~weightedTargets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let weightedTargets =
-        field_map_exn json "weightedTargets" WeightedTargets.of_json in
+        field_map_exn json__ "weightedTargets" WeightedTargets.of_json in
       make ~weightedTargets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4667,6 +4979,7 @@ module HttpRouteMatch =
           "The client request method to match on. Specify only one."];
       path: HttpPathMatch.t option
         [@ocaml.doc "The client request path to match on."];
+      port: ListenerPort.t option [@ocaml.doc "The port number to match on."];
       prefix: String_.t option
         [@ocaml.doc
           "Specifies the path to match requests with. This parameter must always start with /, which by itself matches all requests to the virtual service name. You can also match for path-based routing of requests. For example, if your virtual service name is my-service.local and you want the route to match requests to my-service.local/metrics, your prefix should be /metrics."];
@@ -4678,16 +4991,26 @@ module HttpRouteMatch =
     let make ?headers =
       fun ?method_ ->
         fun ?path ->
-          fun ?prefix ->
-            fun ?queryParameters ->
-              fun ?scheme ->
-                fun () ->
-                  { headers; method_; path; prefix; queryParameters; scheme }
+          fun ?port ->
+            fun ?prefix ->
+              fun ?queryParameters ->
+                fun ?scheme ->
+                  fun () ->
+                    {
+                      headers;
+                      method_;
+                      path;
+                      port;
+                      prefix;
+                      queryParameters;
+                      scheme
+                    }
     let to_value x =
       structure_to_value
         [("headers", (Option.map x.headers ~f:HttpRouteHeaders.to_value));
         ("method", (Option.map x.method_ ~f:HttpMethod.to_value));
         ("path", (Option.map x.path ~f:HttpPathMatch.to_value));
+        ("port", (Option.map x.port ~f:ListenerPort.to_value));
         ("prefix", (Option.map x.prefix ~f:String_.to_value));
         ("queryParameters",
           (Option.map x.queryParameters ~f:HttpQueryParameters.to_value));
@@ -4701,6 +5024,8 @@ module HttpRouteMatch =
           (Xml.child xml_arg0 "queryParameters") in
       let prefix =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "prefix") in
+      let port =
+        (Option.map ~f:ListenerPort.of_xml) (Xml.child xml_arg0 "port") in
       let path =
         (Option.map ~f:HttpPathMatch.of_xml) (Xml.child xml_arg0 "path") in
       let method_ =
@@ -4708,17 +5033,18 @@ module HttpRouteMatch =
       let headers =
         (Option.map ~f:HttpRouteHeaders.of_xml)
           (Xml.child xml_arg0 "headers") in
-      make ?scheme ?queryParameters ?prefix ?path ?method_ ?headers ()
+      make ?scheme ?queryParameters ?prefix ?port ?path ?method_ ?headers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let scheme = field_map json "scheme" HttpScheme.of_json in
+    let of_json json__ =
+      let scheme = field_map json__ "scheme" HttpScheme.of_json in
       let queryParameters =
-        field_map json "queryParameters" HttpQueryParameters.of_json in
-      let prefix = field_map json "prefix" String_.of_json in
-      let path = field_map json "path" HttpPathMatch.of_json in
-      let method_ = field_map json "method" HttpMethod.of_json in
-      let headers = field_map json "headers" HttpRouteHeaders.of_json in
-      make ?scheme ?queryParameters ?prefix ?path ?method_ ?headers ()
+        field_map json__ "queryParameters" HttpQueryParameters.of_json in
+      let prefix = field_map json__ "prefix" String_.of_json in
+      let port = field_map json__ "port" ListenerPort.of_json in
+      let path = field_map json__ "path" HttpPathMatch.of_json in
+      let method_ = field_map json__ "method" HttpMethod.of_json in
+      let headers = field_map json__ "headers" HttpRouteHeaders.of_json in
+      make ?scheme ?queryParameters ?prefix ?port ?path ?method_ ?headers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the requirements for a route to match HTTP requests for a virtual router."]
@@ -4742,13 +5068,33 @@ module TcpRouteAction =
           (Xml.child_exn ~context:context_ xml_arg0 "weightedTargets") in
       make ~weightedTargets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let weightedTargets =
-        field_map_exn json "weightedTargets" WeightedTargets.of_json in
+        field_map_exn json__ "weightedTargets" WeightedTargets.of_json in
       make ~weightedTargets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the action to take if a match is determined."]
+module TcpRouteMatch =
+  struct
+    type nonrec t =
+      {
+      port: ListenerPort.t option [@ocaml.doc "The port number to match on."]}
+    let make ?port = fun () -> { port }
+    let to_value x =
+      structure_to_value
+        [("port", (Option.map x.port ~f:ListenerPort.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let port =
+        (Option.map ~f:ListenerPort.of_xml) (Xml.child xml_arg0 "port") in
+      make ?port ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let port = field_map json__ "port" ListenerPort.of_json in
+      make ?port ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An object representing the TCP route to match."]
 module EgressFilterType =
   struct
     type nonrec t =
@@ -4800,9 +5146,10 @@ module GrpcGatewayRouteAction =
           (Xml.child xml_arg0 "rewrite") in
       make ~target ?rewrite ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let target = field_map_exn json "target" GatewayRouteTarget.of_json in
-      let rewrite = field_map json "rewrite" GrpcGatewayRouteRewrite.of_json in
+    let of_json json__ =
+      let target = field_map_exn json__ "target" GatewayRouteTarget.of_json in
+      let rewrite =
+        field_map json__ "rewrite" GrpcGatewayRouteRewrite.of_json in
       make ~target ?rewrite ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4815,38 +5162,46 @@ module GrpcGatewayRouteMatch =
         [@ocaml.doc "The gateway route host name to be matched on."];
       metadata: GrpcGatewayRouteMetadataList.t option
         [@ocaml.doc "The gateway route metadata to be matched on."];
+      port: ListenerPort.t option
+        [@ocaml.doc "The gateway route port to be matched on."];
       serviceName: ServiceName.t option
         [@ocaml.doc
           "The fully qualified domain name for the service to match from the request."]}
     let make ?hostname =
       fun ?metadata ->
-        fun ?serviceName -> fun () -> { hostname; metadata; serviceName }
+        fun ?port ->
+          fun ?serviceName ->
+            fun () -> { hostname; metadata; port; serviceName }
     let to_value x =
       structure_to_value
         [("hostname",
            (Option.map x.hostname ~f:GatewayRouteHostnameMatch.to_value));
         ("metadata",
           (Option.map x.metadata ~f:GrpcGatewayRouteMetadataList.to_value));
+        ("port", (Option.map x.port ~f:ListenerPort.to_value));
         ("serviceName", (Option.map x.serviceName ~f:ServiceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceName =
         (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "serviceName") in
+      let port =
+        (Option.map ~f:ListenerPort.of_xml) (Xml.child xml_arg0 "port") in
       let metadata =
         (Option.map ~f:GrpcGatewayRouteMetadataList.of_xml)
           (Xml.child xml_arg0 "metadata") in
       let hostname =
         (Option.map ~f:GatewayRouteHostnameMatch.of_xml)
           (Xml.child xml_arg0 "hostname") in
-      make ?serviceName ?metadata ?hostname ()
+      make ?serviceName ?port ?metadata ?hostname ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceName = field_map json "serviceName" ServiceName.of_json in
+    let of_json json__ =
+      let serviceName = field_map json__ "serviceName" ServiceName.of_json in
+      let port = field_map json__ "port" ListenerPort.of_json in
       let metadata =
-        field_map json "metadata" GrpcGatewayRouteMetadataList.of_json in
+        field_map json__ "metadata" GrpcGatewayRouteMetadataList.of_json in
       let hostname =
-        field_map json "hostname" GatewayRouteHostnameMatch.of_json in
-      make ?serviceName ?metadata ?hostname ()
+        field_map json__ "hostname" GatewayRouteHostnameMatch.of_json in
+      make ?serviceName ?port ?metadata ?hostname ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the criteria for determining a request match."]
@@ -4876,9 +5231,10 @@ module HttpGatewayRouteAction =
           (Xml.child xml_arg0 "rewrite") in
       make ~target ?rewrite ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let target = field_map_exn json "target" GatewayRouteTarget.of_json in
-      let rewrite = field_map json "rewrite" HttpGatewayRouteRewrite.of_json in
+    let of_json json__ =
+      let target = field_map_exn json__ "target" GatewayRouteTarget.of_json in
+      let rewrite =
+        field_map json__ "rewrite" HttpGatewayRouteRewrite.of_json in
       make ~target ?rewrite ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4893,6 +5249,7 @@ module HttpGatewayRouteMatch =
         [@ocaml.doc "The host name to match on."];
       method_: HttpMethod.t option [@ocaml.doc "The method to match on."];
       path: HttpPathMatch.t option [@ocaml.doc "The path to match on."];
+      port: ListenerPort.t option [@ocaml.doc "The port number to match on."];
       prefix: String_.t option
         [@ocaml.doc
           "Specifies the path to match requests with. This parameter must always start with /, which by itself matches all requests to the virtual service name. You can also match for path-based routing of requests. For example, if your virtual service name is my-service.local and you want the route to match requests to my-service.local/metrics, your prefix should be /metrics."];
@@ -4902,11 +5259,19 @@ module HttpGatewayRouteMatch =
       fun ?hostname ->
         fun ?method_ ->
           fun ?path ->
-            fun ?prefix ->
-              fun ?queryParameters ->
-                fun () ->
-                  { headers; hostname; method_; path; prefix; queryParameters
-                  }
+            fun ?port ->
+              fun ?prefix ->
+                fun ?queryParameters ->
+                  fun () ->
+                    {
+                      headers;
+                      hostname;
+                      method_;
+                      path;
+                      port;
+                      prefix;
+                      queryParameters
+                    }
     let to_value x =
       structure_to_value
         [("headers",
@@ -4915,6 +5280,7 @@ module HttpGatewayRouteMatch =
           (Option.map x.hostname ~f:GatewayRouteHostnameMatch.to_value));
         ("method", (Option.map x.method_ ~f:HttpMethod.to_value));
         ("path", (Option.map x.path ~f:HttpPathMatch.to_value));
+        ("port", (Option.map x.port ~f:ListenerPort.to_value));
         ("prefix", (Option.map x.prefix ~f:String_.to_value));
         ("queryParameters",
           (Option.map x.queryParameters ~f:HttpQueryParameters.to_value))]
@@ -4925,6 +5291,8 @@ module HttpGatewayRouteMatch =
           (Xml.child xml_arg0 "queryParameters") in
       let prefix =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "prefix") in
+      let port =
+        (Option.map ~f:ListenerPort.of_xml) (Xml.child xml_arg0 "port") in
       let path =
         (Option.map ~f:HttpPathMatch.of_xml) (Xml.child xml_arg0 "path") in
       let method_ =
@@ -4935,18 +5303,22 @@ module HttpGatewayRouteMatch =
       let headers =
         (Option.map ~f:HttpGatewayRouteHeaders.of_xml)
           (Xml.child xml_arg0 "headers") in
-      make ?queryParameters ?prefix ?path ?method_ ?hostname ?headers ()
+      make ?queryParameters ?prefix ?port ?path ?method_ ?hostname ?headers
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let queryParameters =
-        field_map json "queryParameters" HttpQueryParameters.of_json in
-      let prefix = field_map json "prefix" String_.of_json in
-      let path = field_map json "path" HttpPathMatch.of_json in
-      let method_ = field_map json "method" HttpMethod.of_json in
+        field_map json__ "queryParameters" HttpQueryParameters.of_json in
+      let prefix = field_map json__ "prefix" String_.of_json in
+      let port = field_map json__ "port" ListenerPort.of_json in
+      let path = field_map json__ "path" HttpPathMatch.of_json in
+      let method_ = field_map json__ "method" HttpMethod.of_json in
       let hostname =
-        field_map json "hostname" GatewayRouteHostnameMatch.of_json in
-      let headers = field_map json "headers" HttpGatewayRouteHeaders.of_json in
-      make ?queryParameters ?prefix ?path ?method_ ?hostname ?headers ()
+        field_map json__ "hostname" GatewayRouteHostnameMatch.of_json in
+      let headers =
+        field_map json__ "headers" HttpGatewayRouteHeaders.of_json in
+      make ?queryParameters ?prefix ?port ?path ?method_ ?hostname ?headers
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the criteria for determining a request match."]
@@ -5007,11 +5379,11 @@ module VirtualServiceProvider =
           (Xml.child xml_arg0 "virtualNode") in
       make ?virtualRouter ?virtualNode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualRouter =
-        field_map json "virtualRouter" VirtualRouterServiceProvider.of_json in
+        field_map json__ "virtualRouter" VirtualRouterServiceProvider.of_json in
       let virtualNode =
-        field_map json "virtualNode" VirtualNodeServiceProvider.of_json in
+        field_map json__ "virtualNode" VirtualNodeServiceProvider.of_json in
       make ?virtualRouter ?virtualNode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5049,11 +5421,10 @@ module VirtualServiceStatusCode =
 module VirtualRouterListeners =
   struct
     type nonrec t = VirtualRouterListener.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
-        i
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualRouterListener.to_value)) |>
         (fun x -> `List x)
@@ -5125,8 +5496,8 @@ module BackendDefaults =
           (Xml.child xml_arg0 "clientPolicy") in
       make ?clientPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientPolicy = field_map json "clientPolicy" ClientPolicy.of_json in
+    let of_json json__ =
+      let clientPolicy = field_map json__ "clientPolicy" ClientPolicy.of_json in
       make ?clientPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5135,6 +5506,9 @@ module Backends =
   struct
     type nonrec t = Backend.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Backend.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5157,11 +5531,10 @@ module Backends =
 module Listeners =
   struct
     type nonrec t = Listener.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
-        i
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Listener.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5198,8 +5571,8 @@ module Logging =
         (Option.map ~f:AccessLog.of_xml) (Xml.child xml_arg0 "accessLog") in
       make ?accessLog ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accessLog = field_map json "accessLog" AccessLog.of_json in
+    let of_json json__ =
+      let accessLog = field_map json__ "accessLog" AccessLog.of_json in
       make ?accessLog ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5228,10 +5601,10 @@ module ServiceDiscovery =
           (Xml.child xml_arg0 "awsCloudMap") in
       make ?dns ?awsCloudMap ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dns = field_map json "dns" DnsServiceDiscovery.of_json in
+    let of_json json__ =
+      let dns = field_map json__ "dns" DnsServiceDiscovery.of_json in
       let awsCloudMap =
-        field_map json "awsCloudMap" AwsCloudMapServiceDiscovery.of_json in
+        field_map json__ "awsCloudMap" AwsCloudMapServiceDiscovery.of_json in
       make ?dns ?awsCloudMap ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5285,9 +5658,9 @@ module VirtualGatewayBackendDefaults =
           (Xml.child xml_arg0 "clientPolicy") in
       make ?clientPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientPolicy =
-        field_map json "clientPolicy" VirtualGatewayClientPolicy.of_json in
+        field_map json__ "clientPolicy" VirtualGatewayClientPolicy.of_json in
       make ?clientPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5295,11 +5668,10 @@ module VirtualGatewayBackendDefaults =
 module VirtualGatewayListeners =
   struct
     type nonrec t = VirtualGatewayListener.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
-        i
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualGatewayListener.to_value)) |>
         (fun x -> `List x)
@@ -5340,9 +5712,9 @@ module VirtualGatewayLogging =
           (Xml.child xml_arg0 "accessLog") in
       make ?accessLog ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessLog =
-        field_map json "accessLog" VirtualGatewayAccessLog.of_json in
+        field_map json__ "accessLog" VirtualGatewayAccessLog.of_json in
       make ?accessLog ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents logging information."]
@@ -5417,11 +5789,12 @@ module GrpcRoute =
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ?timeout ?retryPolicy ~match_ ~action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeout = field_map json "timeout" GrpcTimeout.of_json in
-      let retryPolicy = field_map json "retryPolicy" GrpcRetryPolicy.of_json in
-      let match_ = field_map_exn json "match" GrpcRouteMatch.of_json in
-      let action = field_map_exn json "action" GrpcRouteAction.of_json in
+    let of_json json__ =
+      let timeout = field_map json__ "timeout" GrpcTimeout.of_json in
+      let retryPolicy =
+        field_map json__ "retryPolicy" GrpcRetryPolicy.of_json in
+      let match_ = field_map_exn json__ "match" GrpcRouteMatch.of_json in
+      let action = field_map_exn json__ "action" GrpcRouteAction.of_json in
       make ?timeout ?retryPolicy ~match_ ~action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a gRPC route type."]
@@ -5466,11 +5839,12 @@ module HttpRoute =
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ?timeout ?retryPolicy ~match_ ~action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeout = field_map json "timeout" HttpTimeout.of_json in
-      let retryPolicy = field_map json "retryPolicy" HttpRetryPolicy.of_json in
-      let match_ = field_map_exn json "match" HttpRouteMatch.of_json in
-      let action = field_map_exn json "action" HttpRouteAction.of_json in
+    let of_json json__ =
+      let timeout = field_map json__ "timeout" HttpTimeout.of_json in
+      let retryPolicy =
+        field_map json__ "retryPolicy" HttpRetryPolicy.of_json in
+      let match_ = field_map_exn json__ "match" HttpRouteMatch.of_json in
+      let action = field_map_exn json__ "action" HttpRouteAction.of_json in
       make ?timeout ?retryPolicy ~match_ ~action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents an HTTP or HTTP/2 route type."]
@@ -5498,27 +5872,35 @@ module TcpRoute =
       {
       action: TcpRouteAction.t
         [@ocaml.doc "The action to take if a match is determined."];
+      match_: TcpRouteMatch.t option
+        [@ocaml.doc
+          "An object that represents the criteria for determining a request match."];
       timeout: TcpTimeout.t option
         [@ocaml.doc "An object that represents types of timeouts."]}
     let context_ = "TcpRoute"
-    let make ?timeout = fun ~action -> fun () -> { timeout; action }
+    let make ?match_ =
+      fun ?timeout -> fun ~action -> fun () -> { match_; timeout; action }
     let to_value x =
       structure_to_value
         [("action", (Some (TcpRouteAction.to_value x.action)));
+        ("match", (Option.map x.match_ ~f:TcpRouteMatch.to_value));
         ("timeout", (Option.map x.timeout ~f:TcpTimeout.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let timeout =
         (Option.map ~f:TcpTimeout.of_xml) (Xml.child xml_arg0 "timeout") in
+      let match_ =
+        (Option.map ~f:TcpRouteMatch.of_xml) (Xml.child xml_arg0 "match") in
       let action =
         TcpRouteAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
-      make ?timeout ~action ()
+      make ?timeout ?match_ ~action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeout = field_map json "timeout" TcpTimeout.of_json in
-      let action = field_map_exn json "action" TcpRouteAction.of_json in
-      make ?timeout ~action ()
+    let of_json json__ =
+      let timeout = field_map json__ "timeout" TcpTimeout.of_json in
+      let match_ = field_map json__ "match" TcpRouteMatch.of_json in
+      let action = field_map_exn json__ "action" TcpRouteAction.of_json in
+      make ?timeout ?match_ ~action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a TCP route type."]
 module RouteStatusCode =
@@ -5568,12 +5950,37 @@ module EgressFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" EgressFilterType.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" EgressFilterType.of_json in
       make ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the egress filter rules for a service mesh."]
+module MeshServiceDiscovery =
+  struct
+    type nonrec t =
+      {
+      ipPreference: IpPreference.t option
+        [@ocaml.doc
+          "The IP version to use to control traffic within the mesh."]}
+    let make ?ipPreference = fun () -> { ipPreference }
+    let to_value x =
+      structure_to_value
+        [("ipPreference",
+           (Option.map x.ipPreference ~f:IpPreference.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipPreference =
+        (Option.map ~f:IpPreference.of_xml)
+          (Xml.child xml_arg0 "ipPreference") in
+      make ?ipPreference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipPreference = field_map json__ "ipPreference" IpPreference.of_json in
+      make ?ipPreference ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that represents the service discovery information for a service mesh."]
 module MeshStatusCode =
   struct
     type nonrec t =
@@ -5646,9 +6053,10 @@ module GrpcGatewayRoute =
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ~match_ ~action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let match_ = field_map_exn json "match" GrpcGatewayRouteMatch.of_json in
-      let action = field_map_exn json "action" GrpcGatewayRouteAction.of_json in
+    let of_json json__ =
+      let match_ = field_map_exn json__ "match" GrpcGatewayRouteMatch.of_json in
+      let action =
+        field_map_exn json__ "action" GrpcGatewayRouteAction.of_json in
       make ~match_ ~action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a gRPC gateway route."]
@@ -5678,9 +6086,10 @@ module HttpGatewayRoute =
           (Xml.child_exn ~context:context_ xml_arg0 "action") in
       make ~match_ ~action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let match_ = field_map_exn json "match" HttpGatewayRouteMatch.of_json in
-      let action = field_map_exn json "action" HttpGatewayRouteAction.of_json in
+    let of_json json__ =
+      let match_ = field_map_exn json__ "match" HttpGatewayRouteMatch.of_json in
+      let action =
+        field_map_exn json__ "action" HttpGatewayRouteAction.of_json in
       make ~match_ ~action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents an HTTP gateway route."]
@@ -5754,32 +6163,32 @@ module ResourceMetadata =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc "The full Amazon Resource Name (ARN) for the resource."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was created."];
-      lastUpdatedAt: Timestamp.t
+      lastUpdatedAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was last updated."];
-      meshOwner: AccountId.t
+      meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      resourceOwner: AccountId.t
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      resourceOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
-      uid: String_.t [@ocaml.doc "The unique identifier for the resource."];
-      version: Long.t
+          "The Amazon Web Services IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
+      uid: String_.t option
+        [@ocaml.doc "The unique identifier for the resource."];
+      version: Long.t option
         [@ocaml.doc
           "The version of the resource. Resources are created at version 1, and this version is incremented each time that they're updated."]}
-    let context_ = "ResourceMetadata"
-    let make ~arn =
-      fun ~createdAt ->
-        fun ~lastUpdatedAt ->
-          fun ~meshOwner ->
-            fun ~resourceOwner ->
-              fun ~uid ->
-                fun ~version ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?lastUpdatedAt ->
+          fun ?meshOwner ->
+            fun ?resourceOwner ->
+              fun ?uid ->
+                fun ?version ->
                   fun () ->
                     {
                       arn;
@@ -5792,47 +6201,40 @@ module ResourceMetadata =
                     }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("lastUpdatedAt", (Some (Timestamp.to_value x.lastUpdatedAt)));
-        ("meshOwner", (Some (AccountId.to_value x.meshOwner)));
-        ("resourceOwner", (Some (AccountId.to_value x.resourceOwner)));
-        ("uid", (Some (String_.to_value x.uid)));
-        ("version", (Some (Long.to_value x.version)))]
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Timestamp.to_value));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("resourceOwner", (Option.map x.resourceOwner ~f:AccountId.to_value));
+        ("uid", (Option.map x.uid ~f:String_.to_value));
+        ("version", (Option.map x.version ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let version =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "version") in
-      let uid =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "uid") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "version") in
+      let uid = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "uid") in
       let resourceOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "resourceOwner") in
       let meshOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
       let lastUpdatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastUpdatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastUpdatedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~version ~uid ~resourceOwner ~meshOwner ~lastUpdatedAt ~createdAt
-        ~arn ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?version ?uid ?resourceOwner ?meshOwner ?lastUpdatedAt ?createdAt
+        ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "version" Long.of_json in
-      let uid = field_map_exn json "uid" String_.of_json in
-      let resourceOwner =
-        field_map_exn json "resourceOwner" AccountId.of_json in
-      let meshOwner = field_map_exn json "meshOwner" AccountId.of_json in
-      let lastUpdatedAt =
-        field_map_exn json "lastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~version ~uid ~resourceOwner ~meshOwner ~lastUpdatedAt ~createdAt
-        ~arn ()
+    let of_json json__ =
+      let version = field_map json__ "version" Long.of_json in
+      let uid = field_map json__ "uid" String_.of_json in
+      let resourceOwner = field_map json__ "resourceOwner" AccountId.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?version ?uid ?resourceOwner ?meshOwner ?lastUpdatedAt ?createdAt
+        ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents metadata for a resource."]
 module VirtualServiceSpec =
@@ -5854,8 +6256,9 @@ module VirtualServiceSpec =
           (Xml.child xml_arg0 "provider") in
       make ?provider ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let provider = field_map json "provider" VirtualServiceProvider.of_json in
+    let of_json json__ =
+      let provider =
+        field_map json__ "provider" VirtualServiceProvider.of_json in
       make ?provider ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5864,24 +6267,23 @@ module VirtualServiceStatus =
   struct
     type nonrec t =
       {
-      status: VirtualServiceStatusCode.t
+      status: VirtualServiceStatusCode.t option
         [@ocaml.doc "The current status of the virtual service."]}
-    let context_ = "VirtualServiceStatus"
-    let make ~status = fun () -> { status }
+    let make ?status = fun () -> { status }
     let to_value x =
       structure_to_value
-        [("status", (Some (VirtualServiceStatusCode.to_value x.status)))]
+        [("status",
+           (Option.map x.status ~f:VirtualServiceStatusCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        VirtualServiceStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ~status ()
+        (Option.map ~f:VirtualServiceStatusCode.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status =
-        field_map_exn json "status" VirtualServiceStatusCode.of_json in
-      make ~status ()
+    let of_json json__ =
+      let status = field_map json__ "status" VirtualServiceStatusCode.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the status of a virtual service."]
@@ -5904,9 +6306,9 @@ module VirtualRouterSpec =
           (Xml.child xml_arg0 "listeners") in
       make ?listeners ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let listeners =
-        field_map json "listeners" VirtualRouterListeners.of_json in
+        field_map json__ "listeners" VirtualRouterListeners.of_json in
       make ?listeners ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5915,24 +6317,23 @@ module VirtualRouterStatus =
   struct
     type nonrec t =
       {
-      status: VirtualRouterStatusCode.t
+      status: VirtualRouterStatusCode.t option
         [@ocaml.doc "The current status of the virtual router."]}
-    let context_ = "VirtualRouterStatus"
-    let make ~status = fun () -> { status }
+    let make ?status = fun () -> { status }
     let to_value x =
       structure_to_value
-        [("status", (Some (VirtualRouterStatusCode.to_value x.status)))]
+        [("status",
+           (Option.map x.status ~f:VirtualRouterStatusCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        VirtualRouterStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ~status ()
+        (Option.map ~f:VirtualRouterStatusCode.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status =
-        field_map_exn json "status" VirtualRouterStatusCode.of_json in
-      make ~status ()
+    let of_json json__ =
+      let status = field_map json__ "status" VirtualRouterStatusCode.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the status of a virtual router."]
@@ -5994,14 +6395,14 @@ module VirtualNodeSpec =
       make ?serviceDiscovery ?logging ?listeners ?backends ?backendDefaults
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceDiscovery =
-        field_map json "serviceDiscovery" ServiceDiscovery.of_json in
-      let logging = field_map json "logging" Logging.of_json in
-      let listeners = field_map json "listeners" Listeners.of_json in
-      let backends = field_map json "backends" Backends.of_json in
+        field_map json__ "serviceDiscovery" ServiceDiscovery.of_json in
+      let logging = field_map json__ "logging" Logging.of_json in
+      let listeners = field_map json__ "listeners" Listeners.of_json in
+      let backends = field_map json__ "backends" Backends.of_json in
       let backendDefaults =
-        field_map json "backendDefaults" BackendDefaults.of_json in
+        field_map json__ "backendDefaults" BackendDefaults.of_json in
       make ?serviceDiscovery ?logging ?listeners ?backends ?backendDefaults
         ()
     let to_json v = composed_to_json to_value v
@@ -6011,23 +6412,22 @@ module VirtualNodeStatus =
   struct
     type nonrec t =
       {
-      status: VirtualNodeStatusCode.t
+      status: VirtualNodeStatusCode.t option
         [@ocaml.doc "The current status of the virtual node."]}
-    let context_ = "VirtualNodeStatus"
-    let make ~status = fun () -> { status }
+    let make ?status = fun () -> { status }
     let to_value x =
       structure_to_value
-        [("status", (Some (VirtualNodeStatusCode.to_value x.status)))]
+        [("status", (Option.map x.status ~f:VirtualNodeStatusCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        VirtualNodeStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ~status ()
+        (Option.map ~f:VirtualNodeStatusCode.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" VirtualNodeStatusCode.of_json in
-      make ~status ()
+    let of_json json__ =
+      let status = field_map json__ "status" VirtualNodeStatusCode.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the current status of the virtual node."]
@@ -6066,12 +6466,12 @@ module VirtualGatewaySpec =
           (Xml.child xml_arg0 "backendDefaults") in
       make ?logging ~listeners ?backendDefaults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logging = field_map json "logging" VirtualGatewayLogging.of_json in
+    let of_json json__ =
+      let logging = field_map json__ "logging" VirtualGatewayLogging.of_json in
       let listeners =
-        field_map_exn json "listeners" VirtualGatewayListeners.of_json in
+        field_map_exn json__ "listeners" VirtualGatewayListeners.of_json in
       let backendDefaults =
-        field_map json "backendDefaults"
+        field_map json__ "backendDefaults"
           VirtualGatewayBackendDefaults.of_json in
       make ?logging ~listeners ?backendDefaults ()
     let to_json v = composed_to_json to_value v
@@ -6081,23 +6481,23 @@ module VirtualGatewayStatus =
   struct
     type nonrec t =
       {
-      status: VirtualGatewayStatusCode.t [@ocaml.doc "The current status."]}
-    let context_ = "VirtualGatewayStatus"
-    let make ~status = fun () -> { status }
+      status: VirtualGatewayStatusCode.t option
+        [@ocaml.doc "The current status."]}
+    let make ?status = fun () -> { status }
     let to_value x =
       structure_to_value
-        [("status", (Some (VirtualGatewayStatusCode.to_value x.status)))]
+        [("status",
+           (Option.map x.status ~f:VirtualGatewayStatusCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        VirtualGatewayStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ~status ()
+        (Option.map ~f:VirtualGatewayStatusCode.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status =
-        field_map_exn json "status" VirtualGatewayStatusCode.of_json in
-      make ~status ()
+    let of_json json__ =
+      let status = field_map json__ "status" VirtualGatewayStatusCode.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the status of the mesh resource."]
@@ -6148,12 +6548,12 @@ module RouteSpec =
         (Option.map ~f:GrpcRoute.of_xml) (Xml.child xml_arg0 "grpcRoute") in
       make ?tcpRoute ?priority ?httpRoute ?http2Route ?grpcRoute ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tcpRoute = field_map json "tcpRoute" TcpRoute.of_json in
-      let priority = field_map json "priority" RoutePriority.of_json in
-      let httpRoute = field_map json "httpRoute" HttpRoute.of_json in
-      let http2Route = field_map json "http2Route" HttpRoute.of_json in
-      let grpcRoute = field_map json "grpcRoute" GrpcRoute.of_json in
+    let of_json json__ =
+      let tcpRoute = field_map json__ "tcpRoute" TcpRoute.of_json in
+      let priority = field_map json__ "priority" RoutePriority.of_json in
+      let httpRoute = field_map json__ "httpRoute" HttpRoute.of_json in
+      let http2Route = field_map json__ "http2Route" HttpRoute.of_json in
+      let grpcRoute = field_map json__ "grpcRoute" GrpcRoute.of_json in
       make ?tcpRoute ?priority ?httpRoute ?http2Route ?grpcRoute ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6162,23 +6562,21 @@ module RouteStatus =
   struct
     type nonrec t =
       {
-      status: RouteStatusCode.t
+      status: RouteStatusCode.t option
         [@ocaml.doc "The current status for the route."]}
-    let context_ = "RouteStatus"
-    let make ~status = fun () -> { status }
+    let make ?status = fun () -> { status }
     let to_value x =
       structure_to_value
-        [("status", (Some (RouteStatusCode.to_value x.status)))]
+        [("status", (Option.map x.status ~f:RouteStatusCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        RouteStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ~status ()
+        (Option.map ~f:RouteStatusCode.of_xml) (Xml.child xml_arg0 "status") in
+      make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" RouteStatusCode.of_json in
-      make ~status ()
+    let of_json json__ =
+      let status = field_map json__ "status" RouteStatusCode.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents the current status of a route."]
 module MeshSpec =
@@ -6186,22 +6584,31 @@ module MeshSpec =
     type nonrec t =
       {
       egressFilter: EgressFilter.t option
-        [@ocaml.doc "The egress filter rules for the service mesh."]}
-    let make ?egressFilter = fun () -> { egressFilter }
+        [@ocaml.doc "The egress filter rules for the service mesh."];
+      serviceDiscovery: MeshServiceDiscovery.t option }
+    let make ?egressFilter =
+      fun ?serviceDiscovery -> fun () -> { egressFilter; serviceDiscovery }
     let to_value x =
       structure_to_value
         [("egressFilter",
-           (Option.map x.egressFilter ~f:EgressFilter.to_value))]
+           (Option.map x.egressFilter ~f:EgressFilter.to_value));
+        ("serviceDiscovery",
+          (Option.map x.serviceDiscovery ~f:MeshServiceDiscovery.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let serviceDiscovery =
+        (Option.map ~f:MeshServiceDiscovery.of_xml)
+          (Xml.child xml_arg0 "serviceDiscovery") in
       let egressFilter =
         (Option.map ~f:EgressFilter.of_xml)
           (Xml.child xml_arg0 "egressFilter") in
-      make ?egressFilter ()
+      make ?serviceDiscovery ?egressFilter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let egressFilter = field_map json "egressFilter" EgressFilter.of_json in
-      make ?egressFilter ()
+    let of_json json__ =
+      let serviceDiscovery =
+        field_map json__ "serviceDiscovery" MeshServiceDiscovery.of_json in
+      let egressFilter = field_map json__ "egressFilter" EgressFilter.of_json in
+      make ?serviceDiscovery ?egressFilter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the specification of a service mesh."]
@@ -6220,8 +6627,8 @@ module MeshStatus =
         (Option.map ~f:MeshStatusCode.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" MeshStatusCode.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" MeshStatusCode.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents the status of a service mesh."]
@@ -6269,11 +6676,11 @@ module GatewayRouteSpec =
           (Xml.child xml_arg0 "grpcRoute") in
       make ?priority ?httpRoute ?http2Route ?grpcRoute ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let priority = field_map json "priority" GatewayRoutePriority.of_json in
-      let httpRoute = field_map json "httpRoute" HttpGatewayRoute.of_json in
-      let http2Route = field_map json "http2Route" HttpGatewayRoute.of_json in
-      let grpcRoute = field_map json "grpcRoute" GrpcGatewayRoute.of_json in
+    let of_json json__ =
+      let priority = field_map json__ "priority" GatewayRoutePriority.of_json in
+      let httpRoute = field_map json__ "httpRoute" HttpGatewayRoute.of_json in
+      let http2Route = field_map json__ "http2Route" HttpGatewayRoute.of_json in
+      let grpcRoute = field_map json__ "grpcRoute" GrpcGatewayRoute.of_json in
       make ?priority ?httpRoute ?http2Route ?grpcRoute ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6282,23 +6689,22 @@ module GatewayRouteStatus =
   struct
     type nonrec t =
       {
-      status: GatewayRouteStatusCode.t
+      status: GatewayRouteStatusCode.t option
         [@ocaml.doc "The current status for the gateway route."]}
-    let context_ = "GatewayRouteStatus"
-    let make ~status = fun () -> { status }
+    let make ?status = fun () -> { status }
     let to_value x =
       structure_to_value
-        [("status", (Some (GatewayRouteStatusCode.to_value x.status)))]
+        [("status", (Option.map x.status ~f:GatewayRouteStatusCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        GatewayRouteStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ~status ()
+        (Option.map ~f:GatewayRouteStatusCode.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" GatewayRouteStatusCode.of_json in
-      make ~status ()
+    let of_json json__ =
+      let status = field_map json__ "status" GatewayRouteStatusCode.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the current status of a gateway route."]
@@ -6326,9 +6732,9 @@ module TagRef =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" TagValue.of_json in
-      let key = field_map_exn json "key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "value" TagValue.of_json in
+      let key = field_map_exn json__ "key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6337,38 +6743,37 @@ module VirtualServiceRef =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc
           "The full Amazon Resource Name (ARN) for the virtual service."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was created."];
-      lastUpdatedAt: Timestamp.t
+      lastUpdatedAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was last updated."];
-      meshName: ResourceName.t
+      meshName: ResourceName.t option
         [@ocaml.doc
           "The name of the service mesh that the virtual service resides in."];
-      meshOwner: AccountId.t
+      meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      resourceOwner: AccountId.t
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      resourceOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
-      version: Long.t
+          "The Amazon Web Services IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
+      version: Long.t option
         [@ocaml.doc
           "The version of the resource. Resources are created at version 1, and this version is incremented each time that they're updated."];
-      virtualServiceName: ServiceName.t
+      virtualServiceName: ServiceName.t option
         [@ocaml.doc "The name of the virtual service."]}
-    let context_ = "VirtualServiceRef"
-    let make ~arn =
-      fun ~createdAt ->
-        fun ~lastUpdatedAt ->
-          fun ~meshName ->
-            fun ~meshOwner ->
-              fun ~resourceOwner ->
-                fun ~version ->
-                  fun ~virtualServiceName ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?lastUpdatedAt ->
+          fun ?meshName ->
+            fun ?meshOwner ->
+              fun ?resourceOwner ->
+                fun ?version ->
+                  fun ?virtualServiceName ->
                     fun () ->
                       {
                         arn;
@@ -6382,55 +6787,48 @@ module VirtualServiceRef =
                       }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("lastUpdatedAt", (Some (Timestamp.to_value x.lastUpdatedAt)));
-        ("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Some (AccountId.to_value x.meshOwner)));
-        ("resourceOwner", (Some (AccountId.to_value x.resourceOwner)));
-        ("version", (Some (Long.to_value x.version)));
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Timestamp.to_value));
+        ("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("resourceOwner", (Option.map x.resourceOwner ~f:AccountId.to_value));
+        ("version", (Option.map x.version ~f:Long.to_value));
         ("virtualServiceName",
-          (Some (ServiceName.to_value x.virtualServiceName)))]
+          (Option.map x.virtualServiceName ~f:ServiceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualServiceName =
-        ServiceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualServiceName") in
+        (Option.map ~f:ServiceName.of_xml)
+          (Xml.child xml_arg0 "virtualServiceName") in
       let version =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "version") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "version") in
       let resourceOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "resourceOwner") in
       let meshOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
       let lastUpdatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastUpdatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastUpdatedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~virtualServiceName ~version ~resourceOwner ~meshOwner ~meshName
-        ~lastUpdatedAt ~createdAt ~arn ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?virtualServiceName ?version ?resourceOwner ?meshOwner ?meshName
+        ?lastUpdatedAt ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualServiceName =
-        field_map_exn json "virtualServiceName" ServiceName.of_json in
-      let version = field_map_exn json "version" Long.of_json in
-      let resourceOwner =
-        field_map_exn json "resourceOwner" AccountId.of_json in
-      let meshOwner = field_map_exn json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let lastUpdatedAt =
-        field_map_exn json "lastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~virtualServiceName ~version ~resourceOwner ~meshOwner ~meshName
-        ~lastUpdatedAt ~createdAt ~arn ()
+        field_map json__ "virtualServiceName" ServiceName.of_json in
+      let version = field_map json__ "version" Long.of_json in
+      let resourceOwner = field_map json__ "resourceOwner" AccountId.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?virtualServiceName ?version ?resourceOwner ?meshOwner ?meshName
+        ?lastUpdatedAt ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a virtual service returned by a list operation."]
@@ -6438,38 +6836,37 @@ module VirtualRouterRef =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc
           "The full Amazon Resource Name (ARN) for the virtual router."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was created."];
-      lastUpdatedAt: Timestamp.t
+      lastUpdatedAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was last updated."];
-      meshName: ResourceName.t
+      meshName: ResourceName.t option
         [@ocaml.doc
           "The name of the service mesh that the virtual router resides in."];
-      meshOwner: AccountId.t
+      meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      resourceOwner: AccountId.t
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      resourceOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
-      version: Long.t
+          "The Amazon Web Services IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
+      version: Long.t option
         [@ocaml.doc
           "The version of the resource. Resources are created at version 1, and this version is incremented each time that they're updated."];
-      virtualRouterName: ResourceName.t
+      virtualRouterName: ResourceName.t option
         [@ocaml.doc "The name of the virtual router."]}
-    let context_ = "VirtualRouterRef"
-    let make ~arn =
-      fun ~createdAt ->
-        fun ~lastUpdatedAt ->
-          fun ~meshName ->
-            fun ~meshOwner ->
-              fun ~resourceOwner ->
-                fun ~version ->
-                  fun ~virtualRouterName ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?lastUpdatedAt ->
+          fun ?meshName ->
+            fun ?meshOwner ->
+              fun ?resourceOwner ->
+                fun ?version ->
+                  fun ?virtualRouterName ->
                     fun () ->
                       {
                         arn;
@@ -6483,55 +6880,48 @@ module VirtualRouterRef =
                       }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("lastUpdatedAt", (Some (Timestamp.to_value x.lastUpdatedAt)));
-        ("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Some (AccountId.to_value x.meshOwner)));
-        ("resourceOwner", (Some (AccountId.to_value x.resourceOwner)));
-        ("version", (Some (Long.to_value x.version)));
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Timestamp.to_value));
+        ("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("resourceOwner", (Option.map x.resourceOwner ~f:AccountId.to_value));
+        ("version", (Option.map x.version ~f:Long.to_value));
         ("virtualRouterName",
-          (Some (ResourceName.to_value x.virtualRouterName)))]
+          (Option.map x.virtualRouterName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualRouterName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "virtualRouterName") in
       let version =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "version") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "version") in
       let resourceOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "resourceOwner") in
       let meshOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
       let lastUpdatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastUpdatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastUpdatedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~virtualRouterName ~version ~resourceOwner ~meshOwner ~meshName
-        ~lastUpdatedAt ~createdAt ~arn ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?virtualRouterName ?version ?resourceOwner ?meshOwner ?meshName
+        ?lastUpdatedAt ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
-      let version = field_map_exn json "version" Long.of_json in
-      let resourceOwner =
-        field_map_exn json "resourceOwner" AccountId.of_json in
-      let meshOwner = field_map_exn json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let lastUpdatedAt =
-        field_map_exn json "lastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~virtualRouterName ~version ~resourceOwner ~meshOwner ~meshName
-        ~lastUpdatedAt ~createdAt ~arn ()
+        field_map json__ "virtualRouterName" ResourceName.of_json in
+      let version = field_map json__ "version" Long.of_json in
+      let resourceOwner = field_map json__ "resourceOwner" AccountId.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?virtualRouterName ?version ?resourceOwner ?meshOwner ?meshName
+        ?lastUpdatedAt ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a virtual router returned by a list operation."]
@@ -6539,38 +6929,37 @@ module VirtualNodeRef =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc
           "The full Amazon Resource Name (ARN) for the virtual node."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was created."];
-      lastUpdatedAt: Timestamp.t
+      lastUpdatedAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was last updated."];
-      meshName: ResourceName.t
+      meshName: ResourceName.t option
         [@ocaml.doc
           "The name of the service mesh that the virtual node resides in."];
-      meshOwner: AccountId.t
+      meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      resourceOwner: AccountId.t
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      resourceOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
-      version: Long.t
+          "The Amazon Web Services IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
+      version: Long.t option
         [@ocaml.doc
           "The version of the resource. Resources are created at version 1, and this version is incremented each time that they're updated."];
-      virtualNodeName: ResourceName.t
+      virtualNodeName: ResourceName.t option
         [@ocaml.doc "The name of the virtual node."]}
-    let context_ = "VirtualNodeRef"
-    let make ~arn =
-      fun ~createdAt ->
-        fun ~lastUpdatedAt ->
-          fun ~meshName ->
-            fun ~meshOwner ->
-              fun ~resourceOwner ->
-                fun ~version ->
-                  fun ~virtualNodeName ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?lastUpdatedAt ->
+          fun ?meshName ->
+            fun ?meshOwner ->
+              fun ?resourceOwner ->
+                fun ?version ->
+                  fun ?virtualNodeName ->
                     fun () ->
                       {
                         arn;
@@ -6584,54 +6973,48 @@ module VirtualNodeRef =
                       }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("lastUpdatedAt", (Some (Timestamp.to_value x.lastUpdatedAt)));
-        ("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Some (AccountId.to_value x.meshOwner)));
-        ("resourceOwner", (Some (AccountId.to_value x.resourceOwner)));
-        ("version", (Some (Long.to_value x.version)));
-        ("virtualNodeName", (Some (ResourceName.to_value x.virtualNodeName)))]
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Timestamp.to_value));
+        ("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("resourceOwner", (Option.map x.resourceOwner ~f:AccountId.to_value));
+        ("version", (Option.map x.version ~f:Long.to_value));
+        ("virtualNodeName",
+          (Option.map x.virtualNodeName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualNodeName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualNodeName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "virtualNodeName") in
       let version =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "version") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "version") in
       let resourceOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "resourceOwner") in
       let meshOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
       let lastUpdatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastUpdatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastUpdatedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~virtualNodeName ~version ~resourceOwner ~meshOwner ~meshName
-        ~lastUpdatedAt ~createdAt ~arn ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?virtualNodeName ?version ?resourceOwner ?meshOwner ?meshName
+        ?lastUpdatedAt ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualNodeName =
-        field_map_exn json "virtualNodeName" ResourceName.of_json in
-      let version = field_map_exn json "version" Long.of_json in
-      let resourceOwner =
-        field_map_exn json "resourceOwner" AccountId.of_json in
-      let meshOwner = field_map_exn json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let lastUpdatedAt =
-        field_map_exn json "lastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~virtualNodeName ~version ~resourceOwner ~meshOwner ~meshName
-        ~lastUpdatedAt ~createdAt ~arn ()
+        field_map json__ "virtualNodeName" ResourceName.of_json in
+      let version = field_map json__ "version" Long.of_json in
+      let resourceOwner = field_map json__ "resourceOwner" AccountId.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?virtualNodeName ?version ?resourceOwner ?meshOwner ?meshName
+        ?lastUpdatedAt ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a virtual node returned by a list operation."]
@@ -6639,37 +7022,36 @@ module VirtualGatewayRef =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc "The full Amazon Resource Name (ARN) for the resource."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was created."];
-      lastUpdatedAt: Timestamp.t
+      lastUpdatedAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was last updated."];
-      meshName: ResourceName.t
+      meshName: ResourceName.t option
         [@ocaml.doc
           "The name of the service mesh that the resource resides in."];
-      meshOwner: AccountId.t
+      meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      resourceOwner: AccountId.t
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      resourceOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
-      version: Long.t
+          "The Amazon Web Services IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
+      version: Long.t option
         [@ocaml.doc
           "The version of the resource. Resources are created at version 1, and this version is incremented each time that they're updated."];
-      virtualGatewayName: ResourceName.t
+      virtualGatewayName: ResourceName.t option
         [@ocaml.doc "The name of the resource."]}
-    let context_ = "VirtualGatewayRef"
-    let make ~arn =
-      fun ~createdAt ->
-        fun ~lastUpdatedAt ->
-          fun ~meshName ->
-            fun ~meshOwner ->
-              fun ~resourceOwner ->
-                fun ~version ->
-                  fun ~virtualGatewayName ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?lastUpdatedAt ->
+          fun ?meshName ->
+            fun ?meshOwner ->
+              fun ?resourceOwner ->
+                fun ?version ->
+                  fun ?virtualGatewayName ->
                     fun () ->
                       {
                         arn;
@@ -6683,55 +7065,48 @@ module VirtualGatewayRef =
                       }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("lastUpdatedAt", (Some (Timestamp.to_value x.lastUpdatedAt)));
-        ("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Some (AccountId.to_value x.meshOwner)));
-        ("resourceOwner", (Some (AccountId.to_value x.resourceOwner)));
-        ("version", (Some (Long.to_value x.version)));
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Timestamp.to_value));
+        ("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("resourceOwner", (Option.map x.resourceOwner ~f:AccountId.to_value));
+        ("version", (Option.map x.version ~f:Long.to_value));
         ("virtualGatewayName",
-          (Some (ResourceName.to_value x.virtualGatewayName)))]
+          (Option.map x.virtualGatewayName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualGatewayName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualGatewayName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "virtualGatewayName") in
       let version =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "version") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "version") in
       let resourceOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "resourceOwner") in
       let meshOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
       let lastUpdatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastUpdatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastUpdatedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~virtualGatewayName ~version ~resourceOwner ~meshOwner ~meshName
-        ~lastUpdatedAt ~createdAt ~arn ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?virtualGatewayName ?version ?resourceOwner ?meshOwner ?meshName
+        ?lastUpdatedAt ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayName =
-        field_map_exn json "virtualGatewayName" ResourceName.of_json in
-      let version = field_map_exn json "version" Long.of_json in
-      let resourceOwner =
-        field_map_exn json "resourceOwner" AccountId.of_json in
-      let meshOwner = field_map_exn json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let lastUpdatedAt =
-        field_map_exn json "lastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~virtualGatewayName ~version ~resourceOwner ~meshOwner ~meshName
-        ~lastUpdatedAt ~createdAt ~arn ()
+        field_map json__ "virtualGatewayName" ResourceName.of_json in
+      let version = field_map json__ "version" Long.of_json in
+      let resourceOwner = field_map json__ "resourceOwner" AccountId.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?virtualGatewayName ?version ?resourceOwner ?meshOwner ?meshName
+        ?lastUpdatedAt ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a virtual gateway returned by a list operation."]
@@ -6739,39 +7114,38 @@ module RouteRef =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc "The full Amazon Resource Name (ARN) for the route."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was created."];
-      lastUpdatedAt: Timestamp.t
+      lastUpdatedAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was last updated."];
-      meshName: ResourceName.t
+      meshName: ResourceName.t option
         [@ocaml.doc
           "The name of the service mesh that the route resides in."];
-      meshOwner: AccountId.t
+      meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      resourceOwner: AccountId.t
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      resourceOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
-      routeName: ResourceName.t [@ocaml.doc "The name of the route."];
-      version: Long.t
+          "The Amazon Web Services IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
+      routeName: ResourceName.t option [@ocaml.doc "The name of the route."];
+      version: Long.t option
         [@ocaml.doc
           "The version of the resource. Resources are created at version 1, and this version is incremented each time that they're updated."];
-      virtualRouterName: ResourceName.t
+      virtualRouterName: ResourceName.t option
         [@ocaml.doc "The virtual router that the route is associated with."]}
-    let context_ = "RouteRef"
-    let make ~arn =
-      fun ~createdAt ->
-        fun ~lastUpdatedAt ->
-          fun ~meshName ->
-            fun ~meshOwner ->
-              fun ~resourceOwner ->
-                fun ~routeName ->
-                  fun ~version ->
-                    fun ~virtualRouterName ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?lastUpdatedAt ->
+          fun ?meshName ->
+            fun ?meshOwner ->
+              fun ?resourceOwner ->
+                fun ?routeName ->
+                  fun ?version ->
+                    fun ?virtualRouterName ->
                       fun () ->
                         {
                           arn;
@@ -6786,60 +7160,52 @@ module RouteRef =
                         }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("lastUpdatedAt", (Some (Timestamp.to_value x.lastUpdatedAt)));
-        ("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Some (AccountId.to_value x.meshOwner)));
-        ("resourceOwner", (Some (AccountId.to_value x.resourceOwner)));
-        ("routeName", (Some (ResourceName.to_value x.routeName)));
-        ("version", (Some (Long.to_value x.version)));
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Timestamp.to_value));
+        ("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("resourceOwner", (Option.map x.resourceOwner ~f:AccountId.to_value));
+        ("routeName", (Option.map x.routeName ~f:ResourceName.to_value));
+        ("version", (Option.map x.version ~f:Long.to_value));
         ("virtualRouterName",
-          (Some (ResourceName.to_value x.virtualRouterName)))]
+          (Option.map x.virtualRouterName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualRouterName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "virtualRouterName") in
       let version =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "version") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "version") in
       let routeName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "routeName") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "routeName") in
       let resourceOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "resourceOwner") in
       let meshOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
       let lastUpdatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastUpdatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastUpdatedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~virtualRouterName ~version ~routeName ~resourceOwner ~meshOwner
-        ~meshName ~lastUpdatedAt ~createdAt ~arn ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?virtualRouterName ?version ?routeName ?resourceOwner ?meshOwner
+        ?meshName ?lastUpdatedAt ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
-      let version = field_map_exn json "version" Long.of_json in
-      let routeName = field_map_exn json "routeName" ResourceName.of_json in
-      let resourceOwner =
-        field_map_exn json "resourceOwner" AccountId.of_json in
-      let meshOwner = field_map_exn json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let lastUpdatedAt =
-        field_map_exn json "lastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~virtualRouterName ~version ~routeName ~resourceOwner ~meshOwner
-        ~meshName ~lastUpdatedAt ~createdAt ~arn ()
+        field_map json__ "virtualRouterName" ResourceName.of_json in
+      let version = field_map json__ "version" Long.of_json in
+      let routeName = field_map json__ "routeName" ResourceName.of_json in
+      let resourceOwner = field_map json__ "resourceOwner" AccountId.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?virtualRouterName ?version ?routeName ?resourceOwner ?meshOwner
+        ?meshName ?lastUpdatedAt ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a route returned by a list operation."]
@@ -6847,33 +7213,33 @@ module MeshRef =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc
           "The full Amazon Resource Name (ARN) of the service mesh."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was created."];
-      lastUpdatedAt: Timestamp.t
+      lastUpdatedAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was last updated."];
-      meshName: ResourceName.t [@ocaml.doc "The name of the service mesh."];
-      meshOwner: AccountId.t
+      meshName: ResourceName.t option
+        [@ocaml.doc "The name of the service mesh."];
+      meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      resourceOwner: AccountId.t
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      resourceOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
-      version: Long.t
+          "The Amazon Web Services IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
+      version: Long.t option
         [@ocaml.doc
           "The version of the resource. Resources are created at version 1, and this version is incremented each time that they're updated."]}
-    let context_ = "MeshRef"
-    let make ~arn =
-      fun ~createdAt ->
-        fun ~lastUpdatedAt ->
-          fun ~meshName ->
-            fun ~meshOwner ->
-              fun ~resourceOwner ->
-                fun ~version ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?lastUpdatedAt ->
+          fun ?meshName ->
+            fun ?meshOwner ->
+              fun ?resourceOwner ->
+                fun ?version ->
                   fun () ->
                     {
                       arn;
@@ -6886,48 +7252,41 @@ module MeshRef =
                     }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
-        ("lastUpdatedAt", (Some (Timestamp.to_value x.lastUpdatedAt)));
-        ("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Some (AccountId.to_value x.meshOwner)));
-        ("resourceOwner", (Some (AccountId.to_value x.resourceOwner)));
-        ("version", (Some (Long.to_value x.version)))]
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Timestamp.to_value));
+        ("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("resourceOwner", (Option.map x.resourceOwner ~f:AccountId.to_value));
+        ("version", (Option.map x.version ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let version =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "version") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "version") in
       let resourceOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "resourceOwner") in
       let meshOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
       let lastUpdatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastUpdatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastUpdatedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~version ~resourceOwner ~meshOwner ~meshName ~lastUpdatedAt
-        ~createdAt ~arn ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?version ?resourceOwner ?meshOwner ?meshName ?lastUpdatedAt
+        ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "version" Long.of_json in
-      let resourceOwner =
-        field_map_exn json "resourceOwner" AccountId.of_json in
-      let meshOwner = field_map_exn json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let lastUpdatedAt =
-        field_map_exn json "lastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~version ~resourceOwner ~meshOwner ~meshName ~lastUpdatedAt
-        ~createdAt ~arn ()
+    let of_json json__ =
+      let version = field_map json__ "version" Long.of_json in
+      let resourceOwner = field_map json__ "resourceOwner" AccountId.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?version ?resourceOwner ?meshOwner ?meshName ?lastUpdatedAt
+        ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a service mesh returned by a list operation."]
@@ -6935,42 +7294,41 @@ module GatewayRouteRef =
   struct
     type nonrec t =
       {
-      arn: Arn.t
+      arn: Arn.t option
         [@ocaml.doc
           "The full Amazon Resource Name (ARN) for the gateway route."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was created."];
-      gatewayRouteName: ResourceName.t
+      gatewayRouteName: ResourceName.t option
         [@ocaml.doc "The name of the gateway route."];
-      lastUpdatedAt: Timestamp.t
+      lastUpdatedAt: Timestamp.t option
         [@ocaml.doc
           "The Unix epoch timestamp in seconds for when the resource was last updated."];
-      meshName: ResourceName.t
+      meshName: ResourceName.t option
         [@ocaml.doc
           "The name of the service mesh that the resource resides in."];
-      meshOwner: AccountId.t
+      meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      resourceOwner: AccountId.t
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      resourceOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
-      version: Long.t
+          "The Amazon Web Services IAM account ID of the resource owner. If the account ID is not your own, then it's the ID of the mesh owner or of another account that the mesh is shared with. For more information about mesh sharing, see Working with shared meshes."];
+      version: Long.t option
         [@ocaml.doc
           "The version of the resource. Resources are created at version 1, and this version is incremented each time that they're updated."];
-      virtualGatewayName: ResourceName.t
+      virtualGatewayName: ResourceName.t option
         [@ocaml.doc
           "The virtual gateway that the gateway route is associated with."]}
-    let context_ = "GatewayRouteRef"
-    let make ~arn =
-      fun ~createdAt ->
-        fun ~gatewayRouteName ->
-          fun ~lastUpdatedAt ->
-            fun ~meshName ->
-              fun ~meshOwner ->
-                fun ~resourceOwner ->
-                  fun ~version ->
-                    fun ~virtualGatewayName ->
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?gatewayRouteName ->
+          fun ?lastUpdatedAt ->
+            fun ?meshName ->
+              fun ?meshOwner ->
+                fun ?resourceOwner ->
+                  fun ?version ->
+                    fun ?virtualGatewayName ->
                       fun () ->
                         {
                           arn;
@@ -6985,62 +7343,55 @@ module GatewayRouteRef =
                         }
     let to_value x =
       structure_to_value
-        [("arn", (Some (Arn.to_value x.arn)));
-        ("createdAt", (Some (Timestamp.to_value x.createdAt)));
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("gatewayRouteName",
-          (Some (ResourceName.to_value x.gatewayRouteName)));
-        ("lastUpdatedAt", (Some (Timestamp.to_value x.lastUpdatedAt)));
-        ("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Some (AccountId.to_value x.meshOwner)));
-        ("resourceOwner", (Some (AccountId.to_value x.resourceOwner)));
-        ("version", (Some (Long.to_value x.version)));
+          (Option.map x.gatewayRouteName ~f:ResourceName.to_value));
+        ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Timestamp.to_value));
+        ("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("resourceOwner", (Option.map x.resourceOwner ~f:AccountId.to_value));
+        ("version", (Option.map x.version ~f:Long.to_value));
         ("virtualGatewayName",
-          (Some (ResourceName.to_value x.virtualGatewayName)))]
+          (Option.map x.virtualGatewayName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualGatewayName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualGatewayName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "virtualGatewayName") in
       let version =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "version") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "version") in
       let resourceOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "resourceOwner") in
       let meshOwner =
-        AccountId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshOwner") in
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
       let lastUpdatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastUpdatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastUpdatedAt") in
       let gatewayRouteName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "gatewayRouteName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "gatewayRouteName") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "createdAt") in
-      let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~virtualGatewayName ~version ~resourceOwner ~meshOwner ~meshName
-        ~lastUpdatedAt ~gatewayRouteName ~createdAt ~arn ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?virtualGatewayName ?version ?resourceOwner ?meshOwner ?meshName
+        ?lastUpdatedAt ?gatewayRouteName ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayName =
-        field_map_exn json "virtualGatewayName" ResourceName.of_json in
-      let version = field_map_exn json "version" Long.of_json in
-      let resourceOwner =
-        field_map_exn json "resourceOwner" AccountId.of_json in
-      let meshOwner = field_map_exn json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let lastUpdatedAt =
-        field_map_exn json "lastUpdatedAt" Timestamp.of_json in
+        field_map json__ "virtualGatewayName" ResourceName.of_json in
+      let version = field_map json__ "version" Long.of_json in
+      let resourceOwner = field_map json__ "resourceOwner" AccountId.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Timestamp.of_json in
       let gatewayRouteName =
-        field_map_exn json "gatewayRouteName" ResourceName.of_json in
-      let createdAt = field_map_exn json "createdAt" Timestamp.of_json in
-      let arn = field_map_exn json "arn" Arn.of_json in
-      make ~virtualGatewayName ~version ~resourceOwner ~meshOwner ~meshName
-        ~lastUpdatedAt ~gatewayRouteName ~createdAt ~arn ()
+        field_map json__ "gatewayRouteName" ResourceName.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?virtualGatewayName ?version ?resourceOwner ?meshOwner ?meshName
+        ?lastUpdatedAt ?gatewayRouteName ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a gateway route returned by a list operation."]
@@ -7058,8 +7409,8 @@ module BadRequestException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7078,8 +7429,8 @@ module ConflictException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7098,8 +7449,8 @@ module ForbiddenException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You don't have permissions to perform this action."]
@@ -7117,8 +7468,8 @@ module InternalServerErrorException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7137,12 +7488,12 @@ module LimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You have exceeded a service limit for your account. For more information, see Service Limits in the AWS App Mesh User Guide."]
+       "You have exceeded a service limit for your account. For more information, see Service Limits in the App Mesh User Guide."]
 module NotFoundException =
   struct
     type nonrec t = {
@@ -7157,8 +7508,8 @@ module NotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7177,8 +7528,8 @@ module ServiceUnavailableException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7197,8 +7548,8 @@ module TooManyRequestsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7207,59 +7558,56 @@ module VirtualServiceData =
   struct
     type nonrec t =
       {
-      meshName: ResourceName.t
+      meshName: ResourceName.t option
         [@ocaml.doc
           "The name of the service mesh that the virtual service resides in."];
-      metadata: ResourceMetadata.t ;
-      spec: VirtualServiceSpec.t
+      metadata: ResourceMetadata.t option ;
+      spec: VirtualServiceSpec.t option
         [@ocaml.doc "The specifications of the virtual service."];
-      status: VirtualServiceStatus.t
+      status: VirtualServiceStatus.t option
         [@ocaml.doc "The current status of the virtual service."];
-      virtualServiceName: ServiceName.t
+      virtualServiceName: ServiceName.t option
         [@ocaml.doc "The name of the virtual service."]}
-    let context_ = "VirtualServiceData"
-    let make ~meshName =
-      fun ~metadata ->
-        fun ~spec ->
-          fun ~status ->
-            fun ~virtualServiceName ->
+    let make ?meshName =
+      fun ?metadata ->
+        fun ?spec ->
+          fun ?status ->
+            fun ?virtualServiceName ->
               fun () ->
                 { meshName; metadata; spec; status; virtualServiceName }
     let to_value x =
       structure_to_value
-        [("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("metadata", (Some (ResourceMetadata.to_value x.metadata)));
-        ("spec", (Some (VirtualServiceSpec.to_value x.spec)));
-        ("status", (Some (VirtualServiceStatus.to_value x.status)));
+        [("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("metadata", (Option.map x.metadata ~f:ResourceMetadata.to_value));
+        ("spec", (Option.map x.spec ~f:VirtualServiceSpec.to_value));
+        ("status", (Option.map x.status ~f:VirtualServiceStatus.to_value));
         ("virtualServiceName",
-          (Some (ServiceName.to_value x.virtualServiceName)))]
+          (Option.map x.virtualServiceName ~f:ServiceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualServiceName =
-        ServiceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualServiceName") in
+        (Option.map ~f:ServiceName.of_xml)
+          (Xml.child xml_arg0 "virtualServiceName") in
       let status =
-        VirtualServiceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:VirtualServiceStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let spec =
-        VirtualServiceSpec.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "spec") in
+        (Option.map ~f:VirtualServiceSpec.of_xml) (Xml.child xml_arg0 "spec") in
       let metadata =
-        ResourceMetadata.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "metadata") in
+        (Option.map ~f:ResourceMetadata.of_xml)
+          (Xml.child xml_arg0 "metadata") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      make ~virtualServiceName ~status ~spec ~metadata ~meshName ()
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
+      make ?virtualServiceName ?status ?spec ?metadata ?meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualServiceName =
-        field_map_exn json "virtualServiceName" ServiceName.of_json in
-      let status = field_map_exn json "status" VirtualServiceStatus.of_json in
-      let spec = field_map_exn json "spec" VirtualServiceSpec.of_json in
-      let metadata = field_map_exn json "metadata" ResourceMetadata.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      make ~virtualServiceName ~status ~spec ~metadata ~meshName ()
+        field_map json__ "virtualServiceName" ServiceName.of_json in
+      let status = field_map json__ "status" VirtualServiceStatus.of_json in
+      let spec = field_map json__ "spec" VirtualServiceSpec.of_json in
+      let metadata = field_map json__ "metadata" ResourceMetadata.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
+      make ?virtualServiceName ?status ?spec ?metadata ?meshName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a virtual service returned by a describe operation."]
@@ -7267,60 +7615,57 @@ module VirtualRouterData =
   struct
     type nonrec t =
       {
-      meshName: ResourceName.t
+      meshName: ResourceName.t option
         [@ocaml.doc
           "The name of the service mesh that the virtual router resides in."];
-      metadata: ResourceMetadata.t
+      metadata: ResourceMetadata.t option
         [@ocaml.doc "The associated metadata for the virtual router."];
-      spec: VirtualRouterSpec.t
+      spec: VirtualRouterSpec.t option
         [@ocaml.doc "The specifications of the virtual router."];
-      status: VirtualRouterStatus.t
+      status: VirtualRouterStatus.t option
         [@ocaml.doc "The current status of the virtual router."];
-      virtualRouterName: ResourceName.t
+      virtualRouterName: ResourceName.t option
         [@ocaml.doc "The name of the virtual router."]}
-    let context_ = "VirtualRouterData"
-    let make ~meshName =
-      fun ~metadata ->
-        fun ~spec ->
-          fun ~status ->
-            fun ~virtualRouterName ->
+    let make ?meshName =
+      fun ?metadata ->
+        fun ?spec ->
+          fun ?status ->
+            fun ?virtualRouterName ->
               fun () ->
                 { meshName; metadata; spec; status; virtualRouterName }
     let to_value x =
       structure_to_value
-        [("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("metadata", (Some (ResourceMetadata.to_value x.metadata)));
-        ("spec", (Some (VirtualRouterSpec.to_value x.spec)));
-        ("status", (Some (VirtualRouterStatus.to_value x.status)));
+        [("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("metadata", (Option.map x.metadata ~f:ResourceMetadata.to_value));
+        ("spec", (Option.map x.spec ~f:VirtualRouterSpec.to_value));
+        ("status", (Option.map x.status ~f:VirtualRouterStatus.to_value));
         ("virtualRouterName",
-          (Some (ResourceName.to_value x.virtualRouterName)))]
+          (Option.map x.virtualRouterName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualRouterName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "virtualRouterName") in
       let status =
-        VirtualRouterStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:VirtualRouterStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let spec =
-        VirtualRouterSpec.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "spec") in
+        (Option.map ~f:VirtualRouterSpec.of_xml) (Xml.child xml_arg0 "spec") in
       let metadata =
-        ResourceMetadata.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "metadata") in
+        (Option.map ~f:ResourceMetadata.of_xml)
+          (Xml.child xml_arg0 "metadata") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      make ~virtualRouterName ~status ~spec ~metadata ~meshName ()
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
+      make ?virtualRouterName ?status ?spec ?metadata ?meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
-      let status = field_map_exn json "status" VirtualRouterStatus.of_json in
-      let spec = field_map_exn json "spec" VirtualRouterSpec.of_json in
-      let metadata = field_map_exn json "metadata" ResourceMetadata.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      make ~virtualRouterName ~status ~spec ~metadata ~meshName ()
+        field_map json__ "virtualRouterName" ResourceName.of_json in
+      let status = field_map json__ "status" VirtualRouterStatus.of_json in
+      let spec = field_map json__ "spec" VirtualRouterSpec.of_json in
+      let metadata = field_map json__ "metadata" ResourceMetadata.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
+      make ?virtualRouterName ?status ?spec ?metadata ?meshName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a virtual router returned by a describe operation."]
@@ -7328,58 +7673,56 @@ module VirtualNodeData =
   struct
     type nonrec t =
       {
-      meshName: ResourceName.t
+      meshName: ResourceName.t option
         [@ocaml.doc
           "The name of the service mesh that the virtual node resides in."];
-      metadata: ResourceMetadata.t
+      metadata: ResourceMetadata.t option
         [@ocaml.doc "The associated metadata for the virtual node."];
-      spec: VirtualNodeSpec.t
+      spec: VirtualNodeSpec.t option
         [@ocaml.doc "The specifications of the virtual node."];
-      status: VirtualNodeStatus.t
+      status: VirtualNodeStatus.t option
         [@ocaml.doc "The current status for the virtual node."];
-      virtualNodeName: ResourceName.t
+      virtualNodeName: ResourceName.t option
         [@ocaml.doc "The name of the virtual node."]}
-    let context_ = "VirtualNodeData"
-    let make ~meshName =
-      fun ~metadata ->
-        fun ~spec ->
-          fun ~status ->
-            fun ~virtualNodeName ->
+    let make ?meshName =
+      fun ?metadata ->
+        fun ?spec ->
+          fun ?status ->
+            fun ?virtualNodeName ->
               fun () -> { meshName; metadata; spec; status; virtualNodeName }
     let to_value x =
       structure_to_value
-        [("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("metadata", (Some (ResourceMetadata.to_value x.metadata)));
-        ("spec", (Some (VirtualNodeSpec.to_value x.spec)));
-        ("status", (Some (VirtualNodeStatus.to_value x.status)));
-        ("virtualNodeName", (Some (ResourceName.to_value x.virtualNodeName)))]
+        [("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("metadata", (Option.map x.metadata ~f:ResourceMetadata.to_value));
+        ("spec", (Option.map x.spec ~f:VirtualNodeSpec.to_value));
+        ("status", (Option.map x.status ~f:VirtualNodeStatus.to_value));
+        ("virtualNodeName",
+          (Option.map x.virtualNodeName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualNodeName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualNodeName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "virtualNodeName") in
       let status =
-        VirtualNodeStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:VirtualNodeStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let spec =
-        VirtualNodeSpec.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "spec") in
+        (Option.map ~f:VirtualNodeSpec.of_xml) (Xml.child xml_arg0 "spec") in
       let metadata =
-        ResourceMetadata.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "metadata") in
+        (Option.map ~f:ResourceMetadata.of_xml)
+          (Xml.child xml_arg0 "metadata") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      make ~virtualNodeName ~status ~spec ~metadata ~meshName ()
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
+      make ?virtualNodeName ?status ?spec ?metadata ?meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualNodeName =
-        field_map_exn json "virtualNodeName" ResourceName.of_json in
-      let status = field_map_exn json "status" VirtualNodeStatus.of_json in
-      let spec = field_map_exn json "spec" VirtualNodeSpec.of_json in
-      let metadata = field_map_exn json "metadata" ResourceMetadata.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      make ~virtualNodeName ~status ~spec ~metadata ~meshName ()
+        field_map json__ "virtualNodeName" ResourceName.of_json in
+      let status = field_map json__ "status" VirtualNodeStatus.of_json in
+      let spec = field_map json__ "spec" VirtualNodeSpec.of_json in
+      let metadata = field_map json__ "metadata" ResourceMetadata.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
+      make ?virtualNodeName ?status ?spec ?metadata ?meshName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a virtual node returned by a describe operation."]
@@ -7387,59 +7730,56 @@ module VirtualGatewayData =
   struct
     type nonrec t =
       {
-      meshName: ResourceName.t
+      meshName: ResourceName.t option
         [@ocaml.doc
           "The name of the service mesh that the virtual gateway resides in."];
-      metadata: ResourceMetadata.t ;
-      spec: VirtualGatewaySpec.t
+      metadata: ResourceMetadata.t option ;
+      spec: VirtualGatewaySpec.t option
         [@ocaml.doc "The specifications of the virtual gateway."];
-      status: VirtualGatewayStatus.t
+      status: VirtualGatewayStatus.t option
         [@ocaml.doc "The current status of the virtual gateway."];
-      virtualGatewayName: ResourceName.t
+      virtualGatewayName: ResourceName.t option
         [@ocaml.doc "The name of the virtual gateway."]}
-    let context_ = "VirtualGatewayData"
-    let make ~meshName =
-      fun ~metadata ->
-        fun ~spec ->
-          fun ~status ->
-            fun ~virtualGatewayName ->
+    let make ?meshName =
+      fun ?metadata ->
+        fun ?spec ->
+          fun ?status ->
+            fun ?virtualGatewayName ->
               fun () ->
                 { meshName; metadata; spec; status; virtualGatewayName }
     let to_value x =
       structure_to_value
-        [("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("metadata", (Some (ResourceMetadata.to_value x.metadata)));
-        ("spec", (Some (VirtualGatewaySpec.to_value x.spec)));
-        ("status", (Some (VirtualGatewayStatus.to_value x.status)));
+        [("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("metadata", (Option.map x.metadata ~f:ResourceMetadata.to_value));
+        ("spec", (Option.map x.spec ~f:VirtualGatewaySpec.to_value));
+        ("status", (Option.map x.status ~f:VirtualGatewayStatus.to_value));
         ("virtualGatewayName",
-          (Some (ResourceName.to_value x.virtualGatewayName)))]
+          (Option.map x.virtualGatewayName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualGatewayName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualGatewayName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "virtualGatewayName") in
       let status =
-        VirtualGatewayStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:VirtualGatewayStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let spec =
-        VirtualGatewaySpec.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "spec") in
+        (Option.map ~f:VirtualGatewaySpec.of_xml) (Xml.child xml_arg0 "spec") in
       let metadata =
-        ResourceMetadata.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "metadata") in
+        (Option.map ~f:ResourceMetadata.of_xml)
+          (Xml.child xml_arg0 "metadata") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      make ~virtualGatewayName ~status ~spec ~metadata ~meshName ()
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
+      make ?virtualGatewayName ?status ?spec ?metadata ?meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayName =
-        field_map_exn json "virtualGatewayName" ResourceName.of_json in
-      let status = field_map_exn json "status" VirtualGatewayStatus.of_json in
-      let spec = field_map_exn json "spec" VirtualGatewaySpec.of_json in
-      let metadata = field_map_exn json "metadata" ResourceMetadata.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      make ~virtualGatewayName ~status ~spec ~metadata ~meshName ()
+        field_map json__ "virtualGatewayName" ResourceName.of_json in
+      let status = field_map json__ "status" VirtualGatewayStatus.of_json in
+      let spec = field_map json__ "spec" VirtualGatewaySpec.of_json in
+      let metadata = field_map json__ "metadata" ResourceMetadata.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
+      make ?virtualGatewayName ?status ?spec ?metadata ?meshName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a virtual gateway returned by a describe operation."]
@@ -7447,23 +7787,23 @@ module RouteData =
   struct
     type nonrec t =
       {
-      meshName: ResourceName.t
+      meshName: ResourceName.t option
         [@ocaml.doc
           "The name of the service mesh that the route resides in."];
-      metadata: ResourceMetadata.t
+      metadata: ResourceMetadata.t option
         [@ocaml.doc "The associated metadata for the route."];
-      routeName: ResourceName.t [@ocaml.doc "The name of the route."];
-      spec: RouteSpec.t [@ocaml.doc "The specifications of the route."];
-      status: RouteStatus.t [@ocaml.doc "The status of the route."];
-      virtualRouterName: ResourceName.t
+      routeName: ResourceName.t option [@ocaml.doc "The name of the route."];
+      spec: RouteSpec.t option
+        [@ocaml.doc "The specifications of the route."];
+      status: RouteStatus.t option [@ocaml.doc "The status of the route."];
+      virtualRouterName: ResourceName.t option
         [@ocaml.doc "The virtual router that the route is associated with."]}
-    let context_ = "RouteData"
-    let make ~meshName =
-      fun ~metadata ->
-        fun ~routeName ->
-          fun ~spec ->
-            fun ~status ->
-              fun ~virtualRouterName ->
+    let make ?meshName =
+      fun ?metadata ->
+        fun ?routeName ->
+          fun ?spec ->
+            fun ?status ->
+              fun ?virtualRouterName ->
                 fun () ->
                   {
                     meshName;
@@ -7475,43 +7815,39 @@ module RouteData =
                   }
     let to_value x =
       structure_to_value
-        [("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("metadata", (Some (ResourceMetadata.to_value x.metadata)));
-        ("routeName", (Some (ResourceName.to_value x.routeName)));
-        ("spec", (Some (RouteSpec.to_value x.spec)));
-        ("status", (Some (RouteStatus.to_value x.status)));
+        [("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("metadata", (Option.map x.metadata ~f:ResourceMetadata.to_value));
+        ("routeName", (Option.map x.routeName ~f:ResourceName.to_value));
+        ("spec", (Option.map x.spec ~f:RouteSpec.to_value));
+        ("status", (Option.map x.status ~f:RouteStatus.to_value));
         ("virtualRouterName",
-          (Some (ResourceName.to_value x.virtualRouterName)))]
+          (Option.map x.virtualRouterName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualRouterName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "virtualRouterName") in
       let status =
-        RouteStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let spec =
-        RouteSpec.of_xml (Xml.child_exn ~context:context_ xml_arg0 "spec") in
+        (Option.map ~f:RouteStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let spec = (Option.map ~f:RouteSpec.of_xml) (Xml.child xml_arg0 "spec") in
       let routeName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "routeName") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "routeName") in
       let metadata =
-        ResourceMetadata.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "metadata") in
+        (Option.map ~f:ResourceMetadata.of_xml)
+          (Xml.child xml_arg0 "metadata") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      make ~virtualRouterName ~status ~spec ~routeName ~metadata ~meshName ()
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
+      make ?virtualRouterName ?status ?spec ?routeName ?metadata ?meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
-      let status = field_map_exn json "status" RouteStatus.of_json in
-      let spec = field_map_exn json "spec" RouteSpec.of_json in
-      let routeName = field_map_exn json "routeName" ResourceName.of_json in
-      let metadata = field_map_exn json "metadata" ResourceMetadata.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      make ~virtualRouterName ~status ~spec ~routeName ~metadata ~meshName ()
+        field_map json__ "virtualRouterName" ResourceName.of_json in
+      let status = field_map json__ "status" RouteStatus.of_json in
+      let spec = field_map json__ "spec" RouteSpec.of_json in
+      let routeName = field_map json__ "routeName" ResourceName.of_json in
+      let metadata = field_map json__ "metadata" ResourceMetadata.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
+      make ?virtualRouterName ?status ?spec ?routeName ?metadata ?meshName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a route returned by a describe operation."]
@@ -7519,43 +7855,42 @@ module MeshData =
   struct
     type nonrec t =
       {
-      meshName: ResourceName.t [@ocaml.doc "The name of the service mesh."];
-      metadata: ResourceMetadata.t
+      meshName: ResourceName.t option
+        [@ocaml.doc "The name of the service mesh."];
+      metadata: ResourceMetadata.t option
         [@ocaml.doc "The associated metadata for the service mesh."];
-      spec: MeshSpec.t
+      spec: MeshSpec.t option
         [@ocaml.doc "The associated specification for the service mesh."];
-      status: MeshStatus.t [@ocaml.doc "The status of the service mesh."]}
-    let context_ = "MeshData"
-    let make ~meshName =
-      fun ~metadata ->
-        fun ~spec ->
-          fun ~status -> fun () -> { meshName; metadata; spec; status }
+      status: MeshStatus.t option
+        [@ocaml.doc "The status of the service mesh."]}
+    let make ?meshName =
+      fun ?metadata ->
+        fun ?spec ->
+          fun ?status -> fun () -> { meshName; metadata; spec; status }
     let to_value x =
       structure_to_value
-        [("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("metadata", (Some (ResourceMetadata.to_value x.metadata)));
-        ("spec", (Some (MeshSpec.to_value x.spec)));
-        ("status", (Some (MeshStatus.to_value x.status)))]
+        [("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("metadata", (Option.map x.metadata ~f:ResourceMetadata.to_value));
+        ("spec", (Option.map x.spec ~f:MeshSpec.to_value));
+        ("status", (Option.map x.status ~f:MeshStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        MeshStatus.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      let spec =
-        MeshSpec.of_xml (Xml.child_exn ~context:context_ xml_arg0 "spec") in
+        (Option.map ~f:MeshStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let spec = (Option.map ~f:MeshSpec.of_xml) (Xml.child xml_arg0 "spec") in
       let metadata =
-        ResourceMetadata.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "metadata") in
+        (Option.map ~f:ResourceMetadata.of_xml)
+          (Xml.child xml_arg0 "metadata") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      make ~status ~spec ~metadata ~meshName ()
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
+      make ?status ?spec ?metadata ?meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" MeshStatus.of_json in
-      let spec = field_map_exn json "spec" MeshSpec.of_json in
-      let metadata = field_map_exn json "metadata" ResourceMetadata.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      make ~status ~spec ~metadata ~meshName ()
+    let of_json json__ =
+      let status = field_map json__ "status" MeshStatus.of_json in
+      let spec = field_map json__ "spec" MeshSpec.of_json in
+      let metadata = field_map json__ "metadata" ResourceMetadata.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
+      make ?status ?spec ?metadata ?meshName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a service mesh returned by a describe operation."]
@@ -7563,26 +7898,25 @@ module GatewayRouteData =
   struct
     type nonrec t =
       {
-      gatewayRouteName: ResourceName.t
+      gatewayRouteName: ResourceName.t option
         [@ocaml.doc "The name of the gateway route."];
-      meshName: ResourceName.t
+      meshName: ResourceName.t option
         [@ocaml.doc
           "The name of the service mesh that the resource resides in."];
-      metadata: ResourceMetadata.t ;
-      spec: GatewayRouteSpec.t
+      metadata: ResourceMetadata.t option ;
+      spec: GatewayRouteSpec.t option
         [@ocaml.doc "The specifications of the gateway route."];
-      status: GatewayRouteStatus.t
+      status: GatewayRouteStatus.t option
         [@ocaml.doc "The status of the gateway route."];
-      virtualGatewayName: ResourceName.t
+      virtualGatewayName: ResourceName.t option
         [@ocaml.doc
           "The virtual gateway that the gateway route is associated with."]}
-    let context_ = "GatewayRouteData"
-    let make ~gatewayRouteName =
-      fun ~meshName ->
-        fun ~metadata ->
-          fun ~spec ->
-            fun ~status ->
-              fun ~virtualGatewayName ->
+    let make ?gatewayRouteName =
+      fun ?meshName ->
+        fun ?metadata ->
+          fun ?spec ->
+            fun ?status ->
+              fun ?virtualGatewayName ->
                 fun () ->
                   {
                     gatewayRouteName;
@@ -7595,47 +7929,45 @@ module GatewayRouteData =
     let to_value x =
       structure_to_value
         [("gatewayRouteName",
-           (Some (ResourceName.to_value x.gatewayRouteName)));
-        ("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("metadata", (Some (ResourceMetadata.to_value x.metadata)));
-        ("spec", (Some (GatewayRouteSpec.to_value x.spec)));
-        ("status", (Some (GatewayRouteStatus.to_value x.status)));
+           (Option.map x.gatewayRouteName ~f:ResourceName.to_value));
+        ("meshName", (Option.map x.meshName ~f:ResourceName.to_value));
+        ("metadata", (Option.map x.metadata ~f:ResourceMetadata.to_value));
+        ("spec", (Option.map x.spec ~f:GatewayRouteSpec.to_value));
+        ("status", (Option.map x.status ~f:GatewayRouteStatus.to_value));
         ("virtualGatewayName",
-          (Some (ResourceName.to_value x.virtualGatewayName)))]
+          (Option.map x.virtualGatewayName ~f:ResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualGatewayName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualGatewayName") in
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "virtualGatewayName") in
       let status =
-        GatewayRouteStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:GatewayRouteStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let spec =
-        GatewayRouteSpec.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "spec") in
+        (Option.map ~f:GatewayRouteSpec.of_xml) (Xml.child xml_arg0 "spec") in
       let metadata =
-        ResourceMetadata.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "metadata") in
+        (Option.map ~f:ResourceMetadata.of_xml)
+          (Xml.child xml_arg0 "metadata") in
       let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "meshName") in
       let gatewayRouteName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "gatewayRouteName") in
-      make ~virtualGatewayName ~status ~spec ~metadata ~meshName
-        ~gatewayRouteName ()
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "gatewayRouteName") in
+      make ?virtualGatewayName ?status ?spec ?metadata ?meshName
+        ?gatewayRouteName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayName =
-        field_map_exn json "virtualGatewayName" ResourceName.of_json in
-      let status = field_map_exn json "status" GatewayRouteStatus.of_json in
-      let spec = field_map_exn json "spec" GatewayRouteSpec.of_json in
-      let metadata = field_map_exn json "metadata" ResourceMetadata.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
+        field_map json__ "virtualGatewayName" ResourceName.of_json in
+      let status = field_map json__ "status" GatewayRouteStatus.of_json in
+      let spec = field_map json__ "spec" GatewayRouteSpec.of_json in
+      let metadata = field_map json__ "metadata" ResourceMetadata.of_json in
+      let meshName = field_map json__ "meshName" ResourceName.of_json in
       let gatewayRouteName =
-        field_map_exn json "gatewayRouteName" ResourceName.of_json in
-      make ~virtualGatewayName ~status ~spec ~metadata ~meshName
-        ~gatewayRouteName ()
+        field_map json__ "gatewayRouteName" ResourceName.of_json in
+      make ?virtualGatewayName ?status ?spec ?metadata ?meshName
+        ?gatewayRouteName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a gateway route returned by a describe operation."]
@@ -7647,6 +7979,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7680,8 +8015,8 @@ module TooManyTagsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7694,6 +8029,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagRef.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7717,6 +8055,9 @@ module VirtualServiceList =
   struct
     type nonrec t = VirtualServiceRef.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualServiceRef.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7761,6 +8102,9 @@ module VirtualRouterList =
   struct
     type nonrec t = VirtualRouterRef.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualRouterRef.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7805,6 +8149,9 @@ module VirtualNodeList =
   struct
     type nonrec t = VirtualNodeRef.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualNodeRef.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7847,6 +8194,9 @@ module VirtualGatewayList =
   struct
     type nonrec t = VirtualGatewayRef.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualGatewayRef.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7908,6 +8258,9 @@ module RouteList =
   struct
     type nonrec t = RouteRef.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RouteRef.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7950,6 +8303,9 @@ module MeshList =
   struct
     type nonrec t = MeshRef.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MeshRef.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7991,6 +8347,9 @@ module GatewayRouteList =
   struct
     type nonrec t = GatewayRouteRef.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GatewayRouteRef.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8044,8 +8403,8 @@ module ResourceInUseException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8054,7 +8413,7 @@ module UpdateVirtualServiceOutput =
   struct
     type nonrec t =
       {
-      virtualService: VirtualServiceData.t
+      virtualService: VirtualServiceData.t option
         [@ocaml.doc
           "A full description of the virtual service that was updated."]}
     type nonrec error =
@@ -8067,8 +8426,7 @@ module UpdateVirtualServiceOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateVirtualServiceOutput"
-    let make ~virtualService = fun () -> { virtualService }
+    let make ?virtualService = fun () -> { virtualService }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -8154,22 +8512,23 @@ module UpdateVirtualServiceOutput =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let of_header_and_body =
-      ((fun (xs, pipe) -> make ~virtualService:pipe ())[@warning "-27"])
+      ((fun (xs, pipe) -> make ?virtualService:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualService",
-           (Some (VirtualServiceData.to_value x.virtualService)))]
+           (Option.map x.virtualService ~f:VirtualServiceData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualService =
-        VirtualServiceData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualService") in
-      make ~virtualService ()
+        (Option.map ~f:VirtualServiceData.of_xml)
+          (Xml.child xml_arg0 "virtualService") in
+      make ?virtualService ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualService =
-        field_map_exn json "virtualService" VirtualServiceData.of_json in
-      make ~virtualService ()
+        field_map json__ "virtualService" VirtualServiceData.of_json in
+      make ?virtualService ()
     let to_json v = composed_to_json to_value v
   end
 module UpdateVirtualServiceInput =
@@ -8184,7 +8543,7 @@ module UpdateVirtualServiceInput =
           "The name of the service mesh that the virtual service resides in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       spec: VirtualServiceSpec.t
         [@ocaml.doc
           "The new virtual service specification to apply. This overwrites the existing data."];
@@ -8224,13 +8583,13 @@ module UpdateVirtualServiceInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~virtualServiceName ~spec ?meshOwner ~meshName ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualServiceName =
-        field_map_exn json "virtualServiceName" ServiceName.of_json in
-      let spec = field_map_exn json "spec" VirtualServiceSpec.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
+        field_map_exn json__ "virtualServiceName" ServiceName.of_json in
+      let spec = field_map_exn json__ "spec" VirtualServiceSpec.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       make ~virtualServiceName ~spec ?meshOwner ~meshName ?clientToken ()
     let to_json v = composed_to_json to_value v
   end
@@ -8238,7 +8597,7 @@ module UpdateVirtualRouterOutput =
   struct
     type nonrec t =
       {
-      virtualRouter: VirtualRouterData.t
+      virtualRouter: VirtualRouterData.t option
         [@ocaml.doc
           "A full description of the virtual router that was updated."]}
     type nonrec error =
@@ -8251,372 +8610,7 @@ module UpdateVirtualRouterOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateVirtualRouterOutput"
-    let make ~virtualRouter = fun () -> { virtualRouter }
-    let error_of_json name json =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_json json)
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_json json)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_json json)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_json json)
-      | "LimitExceededException" ->
-          `LimitExceededException (LimitExceededException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_json json)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_xml xml)
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_xml xml)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_xml xml)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_xml xml)
-      | "LimitExceededException" ->
-          `LimitExceededException (LimitExceededException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_xml xml)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `BadRequestException e ->
-          `Assoc
-            [("error", (`String "BadRequestException"));
-            ("details", (BadRequestException.to_json e))]
-      | `ConflictException e ->
-          `Assoc
-            [("error", (`String "ConflictException"));
-            ("details", (ConflictException.to_json e))]
-      | `ForbiddenException e ->
-          `Assoc
-            [("error", (`String "ForbiddenException"));
-            ("details", (ForbiddenException.to_json e))]
-      | `InternalServerErrorException e ->
-          `Assoc
-            [("error", (`String "InternalServerErrorException"));
-            ("details", (InternalServerErrorException.to_json e))]
-      | `LimitExceededException e ->
-          `Assoc
-            [("error", (`String "LimitExceededException"));
-            ("details", (LimitExceededException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `ServiceUnavailableException e ->
-          `Assoc
-            [("error", (`String "ServiceUnavailableException"));
-            ("details", (ServiceUnavailableException.to_json e))]
-      | `TooManyRequestsException e ->
-          `Assoc
-            [("error", (`String "TooManyRequestsException"));
-            ("details", (TooManyRequestsException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualRouter:pipe ())
-      [@warning "-27"])
-    let to_value x =
-      structure_to_value
-        [("virtualRouter",
-           (Some (VirtualRouterData.to_value x.virtualRouter)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualRouter =
-        VirtualRouterData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouter") in
-      make ~virtualRouter ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualRouter =
-        field_map_exn json "virtualRouter" VirtualRouterData.of_json in
-      make ~virtualRouter ()
-    let to_json v = composed_to_json to_value v
-  end
-module UpdateVirtualRouterInput =
-  struct
-    type nonrec t =
-      {
-      clientToken: String_.t option
-        [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Up to 36 letters, numbers, hyphens, and underscores are allowed."];
-      meshName: ResourceName.t
-        [@ocaml.doc
-          "The name of the service mesh that the virtual router resides in."];
-      meshOwner: AccountId.t option
-        [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      spec: VirtualRouterSpec.t
-        [@ocaml.doc
-          "The new virtual router specification to apply. This overwrites the existing data."];
-      virtualRouterName: ResourceName.t
-        [@ocaml.doc "The name of the virtual router to update."]}
-    let context_ = "UpdateVirtualRouterInput"
-    let make ?clientToken =
-      fun ?meshOwner ->
-        fun ~meshName ->
-          fun ~spec ->
-            fun ~virtualRouterName ->
-              fun () ->
-                { clientToken; meshOwner; meshName; spec; virtualRouterName }
-    let to_value x =
-      structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:String_.to_value));
-        ("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
-        ("spec", (Some (VirtualRouterSpec.to_value x.spec)));
-        ("virtualRouterName",
-          (Some (ResourceName.to_value x.virtualRouterName)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualRouterName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
-      let spec =
-        VirtualRouterSpec.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "spec") in
-      let meshOwner =
-        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
-      let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      let clientToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ~virtualRouterName ~spec ?meshOwner ~meshName ?clientToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
-      let spec = field_map_exn json "spec" VirtualRouterSpec.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      make ~virtualRouterName ~spec ?meshOwner ~meshName ?clientToken ()
-    let to_json v = composed_to_json to_value v
-  end
-module UpdateVirtualNodeOutput =
-  struct
-    type nonrec t =
-      {
-      virtualNode: VirtualNodeData.t
-        [@ocaml.doc
-          "A full description of the virtual node that was updated."]}
-    type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
-      | `ConflictException of ConflictException.t 
-      | `ForbiddenException of ForbiddenException.t 
-      | `InternalServerErrorException of InternalServerErrorException.t 
-      | `LimitExceededException of LimitExceededException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `ServiceUnavailableException of ServiceUnavailableException.t 
-      | `TooManyRequestsException of TooManyRequestsException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateVirtualNodeOutput"
-    let make ~virtualNode = fun () -> { virtualNode }
-    let error_of_json name json =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_json json)
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_json json)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_json json)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_json json)
-      | "LimitExceededException" ->
-          `LimitExceededException (LimitExceededException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_json json)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_xml xml)
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_xml xml)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_xml xml)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_xml xml)
-      | "LimitExceededException" ->
-          `LimitExceededException (LimitExceededException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_xml xml)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `BadRequestException e ->
-          `Assoc
-            [("error", (`String "BadRequestException"));
-            ("details", (BadRequestException.to_json e))]
-      | `ConflictException e ->
-          `Assoc
-            [("error", (`String "ConflictException"));
-            ("details", (ConflictException.to_json e))]
-      | `ForbiddenException e ->
-          `Assoc
-            [("error", (`String "ForbiddenException"));
-            ("details", (ForbiddenException.to_json e))]
-      | `InternalServerErrorException e ->
-          `Assoc
-            [("error", (`String "InternalServerErrorException"));
-            ("details", (InternalServerErrorException.to_json e))]
-      | `LimitExceededException e ->
-          `Assoc
-            [("error", (`String "LimitExceededException"));
-            ("details", (LimitExceededException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `ServiceUnavailableException e ->
-          `Assoc
-            [("error", (`String "ServiceUnavailableException"));
-            ("details", (ServiceUnavailableException.to_json e))]
-      | `TooManyRequestsException e ->
-          `Assoc
-            [("error", (`String "TooManyRequestsException"));
-            ("details", (TooManyRequestsException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualNode:pipe ())
-      [@warning "-27"])
-    let to_value x =
-      structure_to_value
-        [("virtualNode", (Some (VirtualNodeData.to_value x.virtualNode)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualNode =
-        VirtualNodeData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualNode") in
-      make ~virtualNode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualNode =
-        field_map_exn json "virtualNode" VirtualNodeData.of_json in
-      make ~virtualNode ()
-    let to_json v = composed_to_json to_value v
-  end
-module UpdateVirtualNodeInput =
-  struct
-    type nonrec t =
-      {
-      clientToken: String_.t option
-        [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Up to 36 letters, numbers, hyphens, and underscores are allowed."];
-      meshName: ResourceName.t
-        [@ocaml.doc
-          "The name of the service mesh that the virtual node resides in."];
-      meshOwner: AccountId.t option
-        [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      spec: VirtualNodeSpec.t
-        [@ocaml.doc
-          "The new virtual node specification to apply. This overwrites the existing data."];
-      virtualNodeName: ResourceName.t
-        [@ocaml.doc "The name of the virtual node to update."]}
-    let context_ = "UpdateVirtualNodeInput"
-    let make ?clientToken =
-      fun ?meshOwner ->
-        fun ~meshName ->
-          fun ~spec ->
-            fun ~virtualNodeName ->
-              fun () ->
-                { clientToken; meshOwner; meshName; spec; virtualNodeName }
-    let to_value x =
-      structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:String_.to_value));
-        ("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
-        ("spec", (Some (VirtualNodeSpec.to_value x.spec)));
-        ("virtualNodeName", (Some (ResourceName.to_value x.virtualNodeName)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualNodeName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualNodeName") in
-      let spec =
-        VirtualNodeSpec.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "spec") in
-      let meshOwner =
-        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
-      let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      let clientToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ~virtualNodeName ~spec ?meshOwner ~meshName ?clientToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualNodeName =
-        field_map_exn json "virtualNodeName" ResourceName.of_json in
-      let spec = field_map_exn json "spec" VirtualNodeSpec.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      make ~virtualNodeName ~spec ?meshOwner ~meshName ?clientToken ()
-    let to_json v = composed_to_json to_value v
-  end
-module UpdateVirtualGatewayOutput =
-  struct
-    type nonrec t =
-      {
-      virtualGateway: VirtualGatewayData.t
-        [@ocaml.doc
-          "A full description of the virtual gateway that was updated."]}
-    type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
-      | `ConflictException of ConflictException.t 
-      | `ForbiddenException of ForbiddenException.t 
-      | `InternalServerErrorException of InternalServerErrorException.t 
-      | `LimitExceededException of LimitExceededException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `ServiceUnavailableException of ServiceUnavailableException.t 
-      | `TooManyRequestsException of TooManyRequestsException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateVirtualGatewayOutput"
-    let make ~virtualGateway = fun () -> { virtualGateway }
+    let make ?virtualRouter = fun () -> { virtualRouter }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -8702,26 +8696,26 @@ module UpdateVirtualGatewayOutput =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let of_header_and_body =
-      ((fun (xs, pipe) -> make ~virtualGateway:pipe ())[@warning "-27"])
+      ((fun (xs, pipe) -> make ?virtualRouter:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
-        [("virtualGateway",
-           (Some (VirtualGatewayData.to_value x.virtualGateway)))]
+        [("virtualRouter",
+           (Option.map x.virtualRouter ~f:VirtualRouterData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let virtualGateway =
-        VirtualGatewayData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualGateway") in
-      make ~virtualGateway ()
+      let virtualRouter =
+        (Option.map ~f:VirtualRouterData.of_xml)
+          (Xml.child xml_arg0 "virtualRouter") in
+      make ?virtualRouter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualGateway =
-        field_map_exn json "virtualGateway" VirtualGatewayData.of_json in
-      make ~virtualGateway ()
+    let of_json json__ =
+      let virtualRouter =
+        field_map json__ "virtualRouter" VirtualRouterData.of_json in
+      make ?virtualRouter ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updates an existing virtual gateway in a specified service mesh."]
-module UpdateVirtualGatewayInput =
+  end
+module UpdateVirtualRouterInput =
   struct
     type nonrec t =
       {
@@ -8730,39 +8724,38 @@ module UpdateVirtualGatewayInput =
           "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Up to 36 letters, numbers, hyphens, and underscores are allowed."];
       meshName: ResourceName.t
         [@ocaml.doc
-          "The name of the service mesh that the virtual gateway resides in."];
+          "The name of the service mesh that the virtual router resides in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      spec: VirtualGatewaySpec.t
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      spec: VirtualRouterSpec.t
         [@ocaml.doc
-          "The new virtual gateway specification to apply. This overwrites the existing data."];
-      virtualGatewayName: ResourceName.t
-        [@ocaml.doc "The name of the virtual gateway to update."]}
-    let context_ = "UpdateVirtualGatewayInput"
+          "The new virtual router specification to apply. This overwrites the existing data."];
+      virtualRouterName: ResourceName.t
+        [@ocaml.doc "The name of the virtual router to update."]}
+    let context_ = "UpdateVirtualRouterInput"
     let make ?clientToken =
       fun ?meshOwner ->
         fun ~meshName ->
           fun ~spec ->
-            fun ~virtualGatewayName ->
+            fun ~virtualRouterName ->
               fun () ->
-                { clientToken; meshOwner; meshName; spec; virtualGatewayName
-                }
+                { clientToken; meshOwner; meshName; spec; virtualRouterName }
     let to_value x =
       structure_to_value
         [("clientToken", (Option.map x.clientToken ~f:String_.to_value));
         ("meshName", (Some (ResourceName.to_value x.meshName)));
         ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
-        ("spec", (Some (VirtualGatewaySpec.to_value x.spec)));
-        ("virtualGatewayName",
-          (Some (ResourceName.to_value x.virtualGatewayName)))]
+        ("spec", (Some (VirtualRouterSpec.to_value x.spec)));
+        ("virtualRouterName",
+          (Some (ResourceName.to_value x.virtualRouterName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let virtualGatewayName =
+      let virtualRouterName =
         ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualGatewayName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
       let spec =
-        VirtualGatewaySpec.of_xml
+        VirtualRouterSpec.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "spec") in
       let meshOwner =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
@@ -8771,25 +8764,25 @@ module UpdateVirtualGatewayInput =
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ~virtualGatewayName ~spec ?meshOwner ~meshName ?clientToken ()
+      make ~virtualRouterName ~spec ?meshOwner ~meshName ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualGatewayName =
-        field_map_exn json "virtualGatewayName" ResourceName.of_json in
-      let spec = field_map_exn json "spec" VirtualGatewaySpec.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      make ~virtualGatewayName ~spec ?meshOwner ~meshName ?clientToken ()
+    let of_json json__ =
+      let virtualRouterName =
+        field_map_exn json__ "virtualRouterName" ResourceName.of_json in
+      let spec = field_map_exn json__ "spec" VirtualRouterSpec.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      make ~virtualRouterName ~spec ?meshOwner ~meshName ?clientToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updates an existing virtual gateway in a specified service mesh."]
-module UpdateRouteOutput =
+  end
+module UpdateVirtualNodeOutput =
   struct
     type nonrec t =
       {
-      route: RouteData.t
-        [@ocaml.doc "A full description of the route that was updated."]}
+      virtualNode: VirtualNodeData.t option
+        [@ocaml.doc
+          "A full description of the virtual node that was updated."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -8800,8 +8793,7 @@ module UpdateRouteOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateRouteOutput"
-    let make ~route = fun () -> { route }
+    let make ?virtualNode = fun () -> { virtualNode }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -8886,19 +8878,386 @@ module UpdateRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~route:pipe ())
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?virtualNode:(Some pipe) ())[@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("virtualNode",
+           (Option.map x.virtualNode ~f:VirtualNodeData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualNode =
+        (Option.map ~f:VirtualNodeData.of_xml)
+          (Xml.child xml_arg0 "virtualNode") in
+      make ?virtualNode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualNode =
+        field_map json__ "virtualNode" VirtualNodeData.of_json in
+      make ?virtualNode ()
+    let to_json v = composed_to_json to_value v
+  end
+module UpdateVirtualNodeInput =
+  struct
+    type nonrec t =
+      {
+      clientToken: String_.t option
+        [@ocaml.doc
+          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Up to 36 letters, numbers, hyphens, and underscores are allowed."];
+      meshName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service mesh that the virtual node resides in."];
+      meshOwner: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      spec: VirtualNodeSpec.t
+        [@ocaml.doc
+          "The new virtual node specification to apply. This overwrites the existing data."];
+      virtualNodeName: ResourceName.t
+        [@ocaml.doc "The name of the virtual node to update."]}
+    let context_ = "UpdateVirtualNodeInput"
+    let make ?clientToken =
+      fun ?meshOwner ->
+        fun ~meshName ->
+          fun ~spec ->
+            fun ~virtualNodeName ->
+              fun () ->
+                { clientToken; meshOwner; meshName; spec; virtualNodeName }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("meshName", (Some (ResourceName.to_value x.meshName)));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("spec", (Some (VirtualNodeSpec.to_value x.spec)));
+        ("virtualNodeName", (Some (ResourceName.to_value x.virtualNodeName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualNodeName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "virtualNodeName") in
+      let spec =
+        VirtualNodeSpec.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "spec") in
+      let meshOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
+      let meshName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ~virtualNodeName ~spec ?meshOwner ~meshName ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualNodeName =
+        field_map_exn json__ "virtualNodeName" ResourceName.of_json in
+      let spec = field_map_exn json__ "spec" VirtualNodeSpec.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      make ~virtualNodeName ~spec ?meshOwner ~meshName ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end
+module UpdateVirtualGatewayOutput =
+  struct
+    type nonrec t =
+      {
+      virtualGateway: VirtualGatewayData.t option
+        [@ocaml.doc
+          "A full description of the virtual gateway that was updated."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?virtualGateway = fun () -> { virtualGateway }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?virtualGateway:(Some pipe) ())
       [@warning "-27"])
     let to_value x =
-      structure_to_value [("route", (Some (RouteData.to_value x.route)))]
+      structure_to_value
+        [("virtualGateway",
+           (Option.map x.virtualGateway ~f:VirtualGatewayData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualGateway =
+        (Option.map ~f:VirtualGatewayData.of_xml)
+          (Xml.child xml_arg0 "virtualGateway") in
+      make ?virtualGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualGateway =
+        field_map json__ "virtualGateway" VirtualGatewayData.of_json in
+      make ?virtualGateway ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing virtual gateway in a specified service mesh."]
+module UpdateVirtualGatewayInput =
+  struct
+    type nonrec t =
+      {
+      clientToken: String_.t option
+        [@ocaml.doc
+          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Up to 36 letters, numbers, hyphens, and underscores are allowed."];
+      meshName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service mesh that the virtual gateway resides in."];
+      meshOwner: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      spec: VirtualGatewaySpec.t
+        [@ocaml.doc
+          "The new virtual gateway specification to apply. This overwrites the existing data."];
+      virtualGatewayName: ResourceName.t
+        [@ocaml.doc "The name of the virtual gateway to update."]}
+    let context_ = "UpdateVirtualGatewayInput"
+    let make ?clientToken =
+      fun ?meshOwner ->
+        fun ~meshName ->
+          fun ~spec ->
+            fun ~virtualGatewayName ->
+              fun () ->
+                { clientToken; meshOwner; meshName; spec; virtualGatewayName
+                }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("meshName", (Some (ResourceName.to_value x.meshName)));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("spec", (Some (VirtualGatewaySpec.to_value x.spec)));
+        ("virtualGatewayName",
+          (Some (ResourceName.to_value x.virtualGatewayName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualGatewayName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "virtualGatewayName") in
+      let spec =
+        VirtualGatewaySpec.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "spec") in
+      let meshOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
+      let meshName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ~virtualGatewayName ~spec ?meshOwner ~meshName ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualGatewayName =
+        field_map_exn json__ "virtualGatewayName" ResourceName.of_json in
+      let spec = field_map_exn json__ "spec" VirtualGatewaySpec.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      make ~virtualGatewayName ~spec ?meshOwner ~meshName ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing virtual gateway in a specified service mesh."]
+module UpdateRouteOutput =
+  struct
+    type nonrec t =
+      {
+      route: RouteData.t option
+        [@ocaml.doc "A full description of the route that was updated."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?route = fun () -> { route }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?route:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("route", (Option.map x.route ~f:RouteData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let route =
-        RouteData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "route") in
-      make ~route ()
+        (Option.map ~f:RouteData.of_xml) (Xml.child xml_arg0 "route") in
+      make ?route ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let route = field_map_exn json "route" RouteData.of_json in
-      make ~route ()
+    let of_json json__ =
+      let route = field_map json__ "route" RouteData.of_json in
+      make ?route ()
     let to_json v = composed_to_json to_value v
   end
 module UpdateRouteInput =
@@ -8913,7 +9272,7 @@ module UpdateRouteInput =
           "The name of the service mesh that the route resides in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       routeName: ResourceName.t
         [@ocaml.doc "The name of the route to update."];
       spec: RouteSpec.t
@@ -8967,14 +9326,14 @@ module UpdateRouteInput =
       make ~virtualRouterName ~spec ~routeName ?meshOwner ~meshName
         ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
-      let spec = field_map_exn json "spec" RouteSpec.of_json in
-      let routeName = field_map_exn json "routeName" ResourceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
+        field_map_exn json__ "virtualRouterName" ResourceName.of_json in
+      let spec = field_map_exn json__ "spec" RouteSpec.of_json in
+      let routeName = field_map_exn json__ "routeName" ResourceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       make ~virtualRouterName ~spec ~routeName ?meshOwner ~meshName
         ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -8982,7 +9341,7 @@ module UpdateRouteInput =
 module UpdateMeshOutput =
   struct
     type nonrec t = {
-      mesh: MeshData.t }
+      mesh: MeshData.t option }
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -8992,8 +9351,7 @@ module UpdateMeshOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateMeshOutput"
-    let make ~mesh = fun () -> { mesh }
+    let make ?mesh = fun () -> { mesh }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -9070,18 +9428,17 @@ module UpdateMeshOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~mesh:pipe ())
+    let of_header_and_body = ((fun (xs, pipe) -> make ?mesh:(Some pipe) ())
       [@warning "-27"])
     let to_value x =
-      structure_to_value [("mesh", (Some (MeshData.to_value x.mesh)))]
+      structure_to_value [("mesh", (Option.map x.mesh ~f:MeshData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let mesh =
-        MeshData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "mesh") in
-      make ~mesh ()
+      let mesh = (Option.map ~f:MeshData.of_xml) (Xml.child xml_arg0 "mesh") in
+      make ?mesh ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mesh = field_map_exn json "mesh" MeshData.of_json in make ~mesh ()
+    let of_json json__ =
+      let mesh = field_map json__ "mesh" MeshData.of_json in make ?mesh ()
     let to_json v = composed_to_json to_value v
   end
 module UpdateMeshInput =
@@ -9113,10 +9470,10 @@ module UpdateMeshInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?spec ~meshName ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let spec = field_map json "spec" MeshSpec.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let spec = field_map json__ "spec" MeshSpec.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       make ?spec ~meshName ?clientToken ()
     let to_json v = composed_to_json to_value v
   end
@@ -9124,7 +9481,7 @@ module UpdateGatewayRouteOutput =
   struct
     type nonrec t =
       {
-      gatewayRoute: GatewayRouteData.t
+      gatewayRoute: GatewayRouteData.t option
         [@ocaml.doc
           "A full description of the gateway route that was updated."]}
     type nonrec error =
@@ -9137,8 +9494,7 @@ module UpdateGatewayRouteOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateGatewayRouteOutput"
-    let make ~gatewayRoute = fun () -> { gatewayRoute }
+    let make ?gatewayRoute = fun () -> { gatewayRoute }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -9223,22 +9579,23 @@ module UpdateGatewayRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~gatewayRoute:pipe ())
-      [@warning "-27"])
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?gatewayRoute:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
-        [("gatewayRoute", (Some (GatewayRouteData.to_value x.gatewayRoute)))]
+        [("gatewayRoute",
+           (Option.map x.gatewayRoute ~f:GatewayRouteData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let gatewayRoute =
-        GatewayRouteData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "gatewayRoute") in
-      make ~gatewayRoute ()
+        (Option.map ~f:GatewayRouteData.of_xml)
+          (Xml.child xml_arg0 "gatewayRoute") in
+      make ?gatewayRoute ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let gatewayRoute =
-        field_map_exn json "gatewayRoute" GatewayRouteData.of_json in
-      make ~gatewayRoute ()
+        field_map json__ "gatewayRoute" GatewayRouteData.of_json in
+      make ?gatewayRoute ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates an existing gateway route that is associated to a specified virtual gateway in a service mesh."]
@@ -9256,7 +9613,7 @@ module UpdateGatewayRouteInput =
           "The name of the service mesh that the gateway route resides in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       spec: GatewayRouteSpec.t
         [@ocaml.doc
           "The new gateway route specification to apply. This overwrites the existing data."];
@@ -9310,15 +9667,15 @@ module UpdateGatewayRouteInput =
       make ~virtualGatewayName ~spec ?meshOwner ~meshName ~gatewayRouteName
         ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayName =
-        field_map_exn json "virtualGatewayName" ResourceName.of_json in
-      let spec = field_map_exn json "spec" GatewayRouteSpec.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
+        field_map_exn json__ "virtualGatewayName" ResourceName.of_json in
+      let spec = field_map_exn json__ "spec" GatewayRouteSpec.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
       let gatewayRouteName =
-        field_map_exn json "gatewayRouteName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
+        field_map_exn json__ "gatewayRouteName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       make ~virtualGatewayName ~spec ?meshOwner ~meshName ~gatewayRouteName
         ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -9437,9 +9794,9 @@ module UntagResourceInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end
@@ -9564,9 +9921,9 @@ module TagResourceInput =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end
@@ -9577,7 +9934,7 @@ module ListVirtualServicesOutput =
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken value to include in a future ListVirtualServices request. When the results of a ListVirtualServices request exceed limit, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."];
-      virtualServices: VirtualServiceList.t
+      virtualServices: VirtualServiceList.t option
         [@ocaml.doc
           "The list of existing virtual services for the specified service mesh."]}
     type nonrec error =
@@ -9588,9 +9945,8 @@ module ListVirtualServicesOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListVirtualServicesOutput"
     let make ?nextToken =
-      fun ~virtualServices -> fun () -> { nextToken; virtualServices }
+      fun ?virtualServices -> fun () -> { nextToken; virtualServices }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -9663,21 +10019,21 @@ module ListVirtualServicesOutput =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
         ("virtualServices",
-          (Some (VirtualServiceList.to_value x.virtualServices)))]
+          (Option.map x.virtualServices ~f:VirtualServiceList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualServices =
-        VirtualServiceList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualServices") in
+        (Option.map ~f:VirtualServiceList.of_xml)
+          (Xml.child xml_arg0 "virtualServices") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~virtualServices ?nextToken ()
+      make ?virtualServices ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualServices =
-        field_map_exn json "virtualServices" VirtualServiceList.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      make ~virtualServices ?nextToken ()
+        field_map json__ "virtualServices" VirtualServiceList.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      make ?virtualServices ?nextToken ()
     let to_json v = composed_to_json to_value v
   end
 module ListVirtualServicesInput =
@@ -9692,7 +10048,7 @@ module ListVirtualServicesInput =
           "The name of the service mesh to list virtual services in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken value returned from a previous paginated ListVirtualServices request where limit was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value."]}
@@ -9722,11 +10078,11 @@ module ListVirtualServicesInput =
           (Xml.child xml_arg0 "limit") in
       make ?nextToken ?meshOwner ~meshName ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let limit = field_map json "limit" ListVirtualServicesLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let limit = field_map json__ "limit" ListVirtualServicesLimit.of_json in
       make ?nextToken ?meshOwner ~meshName ?limit ()
     let to_json v = composed_to_json to_value v
   end
@@ -9737,7 +10093,7 @@ module ListVirtualRoutersOutput =
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken value to include in a future ListVirtualRouters request. When the results of a ListVirtualRouters request exceed limit, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."];
-      virtualRouters: VirtualRouterList.t
+      virtualRouters: VirtualRouterList.t option
         [@ocaml.doc
           "The list of existing virtual routers for the specified service mesh."]}
     type nonrec error =
@@ -9748,9 +10104,8 @@ module ListVirtualRoutersOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListVirtualRoutersOutput"
     let make ?nextToken =
-      fun ~virtualRouters -> fun () -> { nextToken; virtualRouters }
+      fun ?virtualRouters -> fun () -> { nextToken; virtualRouters }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -9823,21 +10178,21 @@ module ListVirtualRoutersOutput =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
         ("virtualRouters",
-          (Some (VirtualRouterList.to_value x.virtualRouters)))]
+          (Option.map x.virtualRouters ~f:VirtualRouterList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualRouters =
-        VirtualRouterList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouters") in
+        (Option.map ~f:VirtualRouterList.of_xml)
+          (Xml.child xml_arg0 "virtualRouters") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~virtualRouters ?nextToken ()
+      make ?virtualRouters ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualRouters =
-        field_map_exn json "virtualRouters" VirtualRouterList.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      make ~virtualRouters ?nextToken ()
+        field_map json__ "virtualRouters" VirtualRouterList.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      make ?virtualRouters ?nextToken ()
     let to_json v = composed_to_json to_value v
   end
 module ListVirtualRoutersInput =
@@ -9852,7 +10207,7 @@ module ListVirtualRoutersInput =
           "The name of the service mesh to list virtual routers in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken value returned from a previous paginated ListVirtualRouters request where limit was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value."]}
@@ -9882,11 +10237,11 @@ module ListVirtualRoutersInput =
           (Xml.child xml_arg0 "limit") in
       make ?nextToken ?meshOwner ~meshName ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let limit = field_map json "limit" ListVirtualRoutersLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let limit = field_map json__ "limit" ListVirtualRoutersLimit.of_json in
       make ?nextToken ?meshOwner ~meshName ?limit ()
     let to_json v = composed_to_json to_value v
   end
@@ -9897,7 +10252,7 @@ module ListVirtualNodesOutput =
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken value to include in a future ListVirtualNodes request. When the results of a ListVirtualNodes request exceed limit, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."];
-      virtualNodes: VirtualNodeList.t
+      virtualNodes: VirtualNodeList.t option
         [@ocaml.doc
           "The list of existing virtual nodes for the specified service mesh."]}
     type nonrec error =
@@ -9908,9 +10263,8 @@ module ListVirtualNodesOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListVirtualNodesOutput"
     let make ?nextToken =
-      fun ~virtualNodes -> fun () -> { nextToken; virtualNodes }
+      fun ?virtualNodes -> fun () -> { nextToken; virtualNodes }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -9982,21 +10336,22 @@ module ListVirtualNodesOutput =
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("virtualNodes", (Some (VirtualNodeList.to_value x.virtualNodes)))]
+        ("virtualNodes",
+          (Option.map x.virtualNodes ~f:VirtualNodeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualNodes =
-        VirtualNodeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualNodes") in
+        (Option.map ~f:VirtualNodeList.of_xml)
+          (Xml.child xml_arg0 "virtualNodes") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~virtualNodes ?nextToken ()
+      make ?virtualNodes ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualNodes =
-        field_map_exn json "virtualNodes" VirtualNodeList.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      make ~virtualNodes ?nextToken ()
+        field_map json__ "virtualNodes" VirtualNodeList.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      make ?virtualNodes ?nextToken ()
     let to_json v = composed_to_json to_value v
   end
 module ListVirtualNodesInput =
@@ -10010,7 +10365,7 @@ module ListVirtualNodesInput =
         [@ocaml.doc "The name of the service mesh to list virtual nodes in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken value returned from a previous paginated ListVirtualNodes request where limit was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value."]}
@@ -10040,11 +10395,11 @@ module ListVirtualNodesInput =
           (Xml.child xml_arg0 "limit") in
       make ?nextToken ?meshOwner ~meshName ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let limit = field_map json "limit" ListVirtualNodesLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let limit = field_map json__ "limit" ListVirtualNodesLimit.of_json in
       make ?nextToken ?meshOwner ~meshName ?limit ()
     let to_json v = composed_to_json to_value v
   end
@@ -10055,7 +10410,7 @@ module ListVirtualGatewaysOutput =
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken value to include in a future ListVirtualGateways request. When the results of a ListVirtualGateways request exceed limit, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."];
-      virtualGateways: VirtualGatewayList.t
+      virtualGateways: VirtualGatewayList.t option
         [@ocaml.doc
           "The list of existing virtual gateways for the specified service mesh."]}
     type nonrec error =
@@ -10066,9 +10421,8 @@ module ListVirtualGatewaysOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListVirtualGatewaysOutput"
     let make ?nextToken =
-      fun ~virtualGateways -> fun () -> { nextToken; virtualGateways }
+      fun ?virtualGateways -> fun () -> { nextToken; virtualGateways }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -10141,21 +10495,21 @@ module ListVirtualGatewaysOutput =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
         ("virtualGateways",
-          (Some (VirtualGatewayList.to_value x.virtualGateways)))]
+          (Option.map x.virtualGateways ~f:VirtualGatewayList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualGateways =
-        VirtualGatewayList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualGateways") in
+        (Option.map ~f:VirtualGatewayList.of_xml)
+          (Xml.child xml_arg0 "virtualGateways") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~virtualGateways ?nextToken ()
+      make ?virtualGateways ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGateways =
-        field_map_exn json "virtualGateways" VirtualGatewayList.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      make ~virtualGateways ?nextToken ()
+        field_map json__ "virtualGateways" VirtualGatewayList.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      make ?virtualGateways ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of existing virtual gateways in a service mesh."]
@@ -10171,7 +10525,7 @@ module ListVirtualGatewaysInput =
           "The name of the service mesh to list virtual gateways in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken value returned from a previous paginated ListVirtualGateways request where limit was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value."]}
@@ -10201,11 +10555,11 @@ module ListVirtualGatewaysInput =
           (Xml.child xml_arg0 "limit") in
       make ?nextToken ?meshOwner ~meshName ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let limit = field_map json "limit" ListVirtualGatewaysLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let limit = field_map json__ "limit" ListVirtualGatewaysLimit.of_json in
       make ?nextToken ?meshOwner ~meshName ?limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10217,7 +10571,7 @@ module ListTagsForResourceOutput =
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken value to include in a future ListTagsForResource request. When the results of a ListTagsForResource request exceed limit, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."];
-      tags: TagList.t [@ocaml.doc "The tags for the resource."]}
+      tags: TagList.t option [@ocaml.doc "The tags for the resource."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -10226,8 +10580,7 @@ module ListTagsForResourceOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsForResourceOutput"
-    let make ?nextToken = fun ~tags -> fun () -> { nextToken; tags }
+    let make ?nextToken = fun ?tags -> fun () -> { nextToken; tags }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -10299,19 +10652,18 @@ module ListTagsForResourceOutput =
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("tags", (Some (TagList.to_value x.tags)))]
+        ("tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags =
-        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~tags ?nextToken ()
+      make ?tags ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      make ~tags ?nextToken ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      make ?tags ?nextToken ()
     let to_json v = composed_to_json to_value v
   end
 module ListTagsForResourceInput =
@@ -10346,10 +10698,10 @@ module ListTagsForResourceInput =
         (Option.map ~f:TagsLimit.of_xml) (Xml.child xml_arg0 "limit") in
       make ~resourceArn ?nextToken ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let limit = field_map json "limit" TagsLimit.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let limit = field_map json__ "limit" TagsLimit.of_json in
       make ~resourceArn ?nextToken ?limit ()
     let to_json v = composed_to_json to_value v
   end
@@ -10360,7 +10712,7 @@ module ListRoutesOutput =
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken value to include in a future ListRoutes request. When the results of a ListRoutes request exceed limit, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."];
-      routes: RouteList.t
+      routes: RouteList.t option
         [@ocaml.doc
           "The list of existing routes for the specified service mesh and virtual router."]}
     type nonrec error =
@@ -10371,8 +10723,7 @@ module ListRoutesOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListRoutesOutput"
-    let make ?nextToken = fun ~routes -> fun () -> { nextToken; routes }
+    let make ?nextToken = fun ?routes -> fun () -> { nextToken; routes }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -10444,19 +10795,19 @@ module ListRoutesOutput =
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("routes", (Some (RouteList.to_value x.routes)))]
+        ("routes", (Option.map x.routes ~f:RouteList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let routes =
-        RouteList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "routes") in
+        (Option.map ~f:RouteList.of_xml) (Xml.child xml_arg0 "routes") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~routes ?nextToken ()
+      make ?routes ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let routes = field_map_exn json "routes" RouteList.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      make ~routes ?nextToken ()
+    let of_json json__ =
+      let routes = field_map json__ "routes" RouteList.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      make ?routes ?nextToken ()
     let to_json v = composed_to_json to_value v
   end
 module ListRoutesInput =
@@ -10470,7 +10821,7 @@ module ListRoutesInput =
         [@ocaml.doc "The name of the service mesh to list routes in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken value returned from a previous paginated ListRoutes request where limit was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value."];
@@ -10508,13 +10859,13 @@ module ListRoutesInput =
         (Option.map ~f:ListRoutesLimit.of_xml) (Xml.child xml_arg0 "limit") in
       make ~virtualRouterName ?nextToken ?meshOwner ~meshName ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let limit = field_map json "limit" ListRoutesLimit.of_json in
+        field_map_exn json__ "virtualRouterName" ResourceName.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let limit = field_map json__ "limit" ListRoutesLimit.of_json in
       make ~virtualRouterName ?nextToken ?meshOwner ~meshName ?limit ()
     let to_json v = composed_to_json to_value v
   end
@@ -10522,7 +10873,8 @@ module ListMeshesOutput =
   struct
     type nonrec t =
       {
-      meshes: MeshList.t [@ocaml.doc "The list of existing service meshes."];
+      meshes: MeshList.t option
+        [@ocaml.doc "The list of existing service meshes."];
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken value to include in a future ListMeshes request. When the results of a ListMeshes request exceed limit, you can use this value to retrieve the next page of results. This value is null when there are no more results to return."]}
@@ -10534,8 +10886,7 @@ module ListMeshesOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListMeshesOutput"
-    let make ?nextToken = fun ~meshes -> fun () -> { nextToken; meshes }
+    let make ?meshes = fun ?nextToken -> fun () -> { meshes; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -10606,20 +10957,20 @@ module ListMeshesOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("meshes", (Some (MeshList.to_value x.meshes)));
+        [("meshes", (Option.map x.meshes ~f:MeshList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let meshes =
-        MeshList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "meshes") in
-      make ?nextToken ~meshes ()
+        (Option.map ~f:MeshList.of_xml) (Xml.child xml_arg0 "meshes") in
+      make ?nextToken ?meshes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let meshes = field_map_exn json "meshes" MeshList.of_json in
-      make ?nextToken ~meshes ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let meshes = field_map json__ "meshes" MeshList.of_json in
+      make ?nextToken ?meshes ()
     let to_json v = composed_to_json to_value v
   end
 module ListMeshesInput =
@@ -10645,9 +10996,9 @@ module ListMeshesInput =
         (Option.map ~f:ListMeshesLimit.of_xml) (Xml.child xml_arg0 "limit") in
       make ?nextToken ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let limit = field_map json "limit" ListMeshesLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let limit = field_map json__ "limit" ListMeshesLimit.of_json in
       make ?nextToken ?limit ()
     let to_json v = composed_to_json to_value v
   end
@@ -10655,7 +11006,7 @@ module ListGatewayRoutesOutput =
   struct
     type nonrec t =
       {
-      gatewayRoutes: GatewayRouteList.t
+      gatewayRoutes: GatewayRouteList.t option
         [@ocaml.doc
           "The list of existing gateway routes for the specified service mesh and virtual gateway."];
       nextToken: String_.t option
@@ -10669,9 +11020,8 @@ module ListGatewayRoutesOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListGatewayRoutesOutput"
-    let make ?nextToken =
-      fun ~gatewayRoutes -> fun () -> { nextToken; gatewayRoutes }
+    let make ?gatewayRoutes =
+      fun ?nextToken -> fun () -> { gatewayRoutes; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -10743,22 +11093,22 @@ module ListGatewayRoutesOutput =
     let to_value x =
       structure_to_value
         [("gatewayRoutes",
-           (Some (GatewayRouteList.to_value x.gatewayRoutes)));
+           (Option.map x.gatewayRoutes ~f:GatewayRouteList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let gatewayRoutes =
-        GatewayRouteList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "gatewayRoutes") in
-      make ?nextToken ~gatewayRoutes ()
+        (Option.map ~f:GatewayRouteList.of_xml)
+          (Xml.child xml_arg0 "gatewayRoutes") in
+      make ?nextToken ?gatewayRoutes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let gatewayRoutes =
-        field_map_exn json "gatewayRoutes" GatewayRouteList.of_json in
-      make ?nextToken ~gatewayRoutes ()
+        field_map json__ "gatewayRoutes" GatewayRouteList.of_json in
+      make ?nextToken ?gatewayRoutes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of existing gateway routes that are associated to a virtual gateway."]
@@ -10774,7 +11124,7 @@ module ListGatewayRoutesInput =
           "The name of the service mesh to list gateway routes in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       nextToken: String_.t option
         [@ocaml.doc
           "The nextToken value returned from a previous paginated ListGatewayRoutes request where limit was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value."];
@@ -10814,13 +11164,13 @@ module ListGatewayRoutesInput =
           (Xml.child xml_arg0 "limit") in
       make ~virtualGatewayName ?nextToken ?meshOwner ~meshName ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayName =
-        field_map_exn json "virtualGatewayName" ResourceName.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let limit = field_map json "limit" ListGatewayRoutesLimit.of_json in
+        field_map_exn json__ "virtualGatewayName" ResourceName.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let limit = field_map json__ "limit" ListGatewayRoutesLimit.of_json in
       make ~virtualGatewayName ?nextToken ?meshOwner ~meshName ?limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10829,7 +11179,7 @@ module DescribeVirtualServiceOutput =
   struct
     type nonrec t =
       {
-      virtualService: VirtualServiceData.t
+      virtualService: VirtualServiceData.t option
         [@ocaml.doc "The full description of your virtual service."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
@@ -10839,8 +11189,7 @@ module DescribeVirtualServiceOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeVirtualServiceOutput"
-    let make ~virtualService = fun () -> { virtualService }
+    let make ?virtualService = fun () -> { virtualService }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -10910,22 +11259,23 @@ module DescribeVirtualServiceOutput =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let of_header_and_body =
-      ((fun (xs, pipe) -> make ~virtualService:pipe ())[@warning "-27"])
+      ((fun (xs, pipe) -> make ?virtualService:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualService",
-           (Some (VirtualServiceData.to_value x.virtualService)))]
+           (Option.map x.virtualService ~f:VirtualServiceData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualService =
-        VirtualServiceData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualService") in
-      make ~virtualService ()
+        (Option.map ~f:VirtualServiceData.of_xml)
+          (Xml.child xml_arg0 "virtualService") in
+      make ?virtualService ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualService =
-        field_map_exn json "virtualService" VirtualServiceData.of_json in
-      make ~virtualService ()
+        field_map json__ "virtualService" VirtualServiceData.of_json in
+      make ?virtualService ()
     let to_json v = composed_to_json to_value v
   end
 module DescribeVirtualServiceInput =
@@ -10937,7 +11287,7 @@ module DescribeVirtualServiceInput =
           "The name of the service mesh that the virtual service resides in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       virtualServiceName: ServiceName.t
         [@ocaml.doc "The name of the virtual service to describe."]}
     let context_ = "DescribeVirtualServiceInput"
@@ -10963,11 +11313,11 @@ module DescribeVirtualServiceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualServiceName ?meshOwner ~meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualServiceName =
-        field_map_exn json "virtualServiceName" ServiceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
+        field_map_exn json__ "virtualServiceName" ServiceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
       make ~virtualServiceName ?meshOwner ~meshName ()
     let to_json v = composed_to_json to_value v
   end
@@ -10975,7 +11325,7 @@ module DescribeVirtualRouterOutput =
   struct
     type nonrec t =
       {
-      virtualRouter: VirtualRouterData.t
+      virtualRouter: VirtualRouterData.t option
         [@ocaml.doc "The full description of your virtual router."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
@@ -10985,298 +11335,7 @@ module DescribeVirtualRouterOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeVirtualRouterOutput"
-    let make ~virtualRouter = fun () -> { virtualRouter }
-    let error_of_json name json =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_json json)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_json json)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_json json)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_xml xml)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_xml xml)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_xml xml)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `BadRequestException e ->
-          `Assoc
-            [("error", (`String "BadRequestException"));
-            ("details", (BadRequestException.to_json e))]
-      | `ForbiddenException e ->
-          `Assoc
-            [("error", (`String "ForbiddenException"));
-            ("details", (ForbiddenException.to_json e))]
-      | `InternalServerErrorException e ->
-          `Assoc
-            [("error", (`String "InternalServerErrorException"));
-            ("details", (InternalServerErrorException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `ServiceUnavailableException e ->
-          `Assoc
-            [("error", (`String "ServiceUnavailableException"));
-            ("details", (ServiceUnavailableException.to_json e))]
-      | `TooManyRequestsException e ->
-          `Assoc
-            [("error", (`String "TooManyRequestsException"));
-            ("details", (TooManyRequestsException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualRouter:pipe ())
-      [@warning "-27"])
-    let to_value x =
-      structure_to_value
-        [("virtualRouter",
-           (Some (VirtualRouterData.to_value x.virtualRouter)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualRouter =
-        VirtualRouterData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouter") in
-      make ~virtualRouter ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualRouter =
-        field_map_exn json "virtualRouter" VirtualRouterData.of_json in
-      make ~virtualRouter ()
-    let to_json v = composed_to_json to_value v
-  end
-module DescribeVirtualRouterInput =
-  struct
-    type nonrec t =
-      {
-      meshName: ResourceName.t
-        [@ocaml.doc
-          "The name of the service mesh that the virtual router resides in."];
-      meshOwner: AccountId.t option
-        [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      virtualRouterName: ResourceName.t
-        [@ocaml.doc "The name of the virtual router to describe."]}
-    let context_ = "DescribeVirtualRouterInput"
-    let make ?meshOwner =
-      fun ~meshName ->
-        fun ~virtualRouterName ->
-          fun () -> { meshOwner; meshName; virtualRouterName }
-    let to_value x =
-      structure_to_value
-        [("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
-        ("virtualRouterName",
-          (Some (ResourceName.to_value x.virtualRouterName)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualRouterName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
-      let meshOwner =
-        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
-      let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      make ~virtualRouterName ?meshOwner ~meshName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      make ~virtualRouterName ?meshOwner ~meshName ()
-    let to_json v = composed_to_json to_value v
-  end
-module DescribeVirtualNodeOutput =
-  struct
-    type nonrec t =
-      {
-      virtualNode: VirtualNodeData.t
-        [@ocaml.doc "The full description of your virtual node."]}
-    type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
-      | `ForbiddenException of ForbiddenException.t 
-      | `InternalServerErrorException of InternalServerErrorException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `ServiceUnavailableException of ServiceUnavailableException.t 
-      | `TooManyRequestsException of TooManyRequestsException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeVirtualNodeOutput"
-    let make ~virtualNode = fun () -> { virtualNode }
-    let error_of_json name json =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_json json)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_json json)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_json json)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_xml xml)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_xml xml)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_xml xml)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `BadRequestException e ->
-          `Assoc
-            [("error", (`String "BadRequestException"));
-            ("details", (BadRequestException.to_json e))]
-      | `ForbiddenException e ->
-          `Assoc
-            [("error", (`String "ForbiddenException"));
-            ("details", (ForbiddenException.to_json e))]
-      | `InternalServerErrorException e ->
-          `Assoc
-            [("error", (`String "InternalServerErrorException"));
-            ("details", (InternalServerErrorException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `ServiceUnavailableException e ->
-          `Assoc
-            [("error", (`String "ServiceUnavailableException"));
-            ("details", (ServiceUnavailableException.to_json e))]
-      | `TooManyRequestsException e ->
-          `Assoc
-            [("error", (`String "TooManyRequestsException"));
-            ("details", (TooManyRequestsException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualNode:pipe ())
-      [@warning "-27"])
-    let to_value x =
-      structure_to_value
-        [("virtualNode", (Some (VirtualNodeData.to_value x.virtualNode)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualNode =
-        VirtualNodeData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualNode") in
-      make ~virtualNode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualNode =
-        field_map_exn json "virtualNode" VirtualNodeData.of_json in
-      make ~virtualNode ()
-    let to_json v = composed_to_json to_value v
-  end
-module DescribeVirtualNodeInput =
-  struct
-    type nonrec t =
-      {
-      meshName: ResourceName.t
-        [@ocaml.doc
-          "The name of the service mesh that the virtual node resides in."];
-      meshOwner: AccountId.t option
-        [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      virtualNodeName: ResourceName.t
-        [@ocaml.doc "The name of the virtual node to describe."]}
-    let context_ = "DescribeVirtualNodeInput"
-    let make ?meshOwner =
-      fun ~meshName ->
-        fun ~virtualNodeName ->
-          fun () -> { meshOwner; meshName; virtualNodeName }
-    let to_value x =
-      structure_to_value
-        [("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
-        ("virtualNodeName", (Some (ResourceName.to_value x.virtualNodeName)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualNodeName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualNodeName") in
-      let meshOwner =
-        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
-      let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      make ~virtualNodeName ?meshOwner ~meshName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualNodeName =
-        field_map_exn json "virtualNodeName" ResourceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      make ~virtualNodeName ?meshOwner ~meshName ()
-    let to_json v = composed_to_json to_value v
-  end
-module DescribeVirtualGatewayOutput =
-  struct
-    type nonrec t =
-      {
-      virtualGateway: VirtualGatewayData.t
-        [@ocaml.doc "The full description of your virtual gateway."]}
-    type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
-      | `ForbiddenException of ForbiddenException.t 
-      | `InternalServerErrorException of InternalServerErrorException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `ServiceUnavailableException of ServiceUnavailableException.t 
-      | `TooManyRequestsException of TooManyRequestsException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeVirtualGatewayOutput"
-    let make ~virtualGateway = fun () -> { virtualGateway }
+    let make ?virtualRouter = fun () -> { virtualRouter }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -11346,72 +11405,74 @@ module DescribeVirtualGatewayOutput =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let of_header_and_body =
-      ((fun (xs, pipe) -> make ~virtualGateway:pipe ())[@warning "-27"])
+      ((fun (xs, pipe) -> make ?virtualRouter:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
-        [("virtualGateway",
-           (Some (VirtualGatewayData.to_value x.virtualGateway)))]
+        [("virtualRouter",
+           (Option.map x.virtualRouter ~f:VirtualRouterData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let virtualGateway =
-        VirtualGatewayData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualGateway") in
-      make ~virtualGateway ()
+      let virtualRouter =
+        (Option.map ~f:VirtualRouterData.of_xml)
+          (Xml.child xml_arg0 "virtualRouter") in
+      make ?virtualRouter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualGateway =
-        field_map_exn json "virtualGateway" VirtualGatewayData.of_json in
-      make ~virtualGateway ()
+    let of_json json__ =
+      let virtualRouter =
+        field_map json__ "virtualRouter" VirtualRouterData.of_json in
+      make ?virtualRouter ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes an existing virtual gateway."]
-module DescribeVirtualGatewayInput =
+  end
+module DescribeVirtualRouterInput =
   struct
     type nonrec t =
       {
       meshName: ResourceName.t
         [@ocaml.doc
-          "The name of the service mesh that the gateway route resides in."];
+          "The name of the service mesh that the virtual router resides in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      virtualGatewayName: ResourceName.t
-        [@ocaml.doc "The name of the virtual gateway to describe."]}
-    let context_ = "DescribeVirtualGatewayInput"
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      virtualRouterName: ResourceName.t
+        [@ocaml.doc "The name of the virtual router to describe."]}
+    let context_ = "DescribeVirtualRouterInput"
     let make ?meshOwner =
       fun ~meshName ->
-        fun ~virtualGatewayName ->
-          fun () -> { meshOwner; meshName; virtualGatewayName }
+        fun ~virtualRouterName ->
+          fun () -> { meshOwner; meshName; virtualRouterName }
     let to_value x =
       structure_to_value
         [("meshName", (Some (ResourceName.to_value x.meshName)));
         ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
-        ("virtualGatewayName",
-          (Some (ResourceName.to_value x.virtualGatewayName)))]
+        ("virtualRouterName",
+          (Some (ResourceName.to_value x.virtualRouterName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let virtualGatewayName =
+      let virtualRouterName =
         ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualGatewayName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
       let meshOwner =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
       let meshName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      make ~virtualGatewayName ?meshOwner ~meshName ()
+      make ~virtualRouterName ?meshOwner ~meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualGatewayName =
-        field_map_exn json "virtualGatewayName" ResourceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      make ~virtualGatewayName ?meshOwner ~meshName ()
+    let of_json json__ =
+      let virtualRouterName =
+        field_map_exn json__ "virtualRouterName" ResourceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      make ~virtualRouterName ?meshOwner ~meshName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes an existing virtual gateway."]
-module DescribeRouteOutput =
+  end
+module DescribeVirtualNodeOutput =
   struct
     type nonrec t =
       {
-      route: RouteData.t [@ocaml.doc "The full description of your route."]}
+      virtualNode: VirtualNodeData.t option
+        [@ocaml.doc "The full description of your virtual node."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -11420,8 +11481,7 @@ module DescribeRouteOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeRouteOutput"
-    let make ~route = fun () -> { route }
+    let make ?virtualNode = fun () -> { virtualNode }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -11490,19 +11550,310 @@ module DescribeRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~route:pipe ())
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?virtualNode:(Some pipe) ())[@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("virtualNode",
+           (Option.map x.virtualNode ~f:VirtualNodeData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualNode =
+        (Option.map ~f:VirtualNodeData.of_xml)
+          (Xml.child xml_arg0 "virtualNode") in
+      make ?virtualNode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualNode =
+        field_map json__ "virtualNode" VirtualNodeData.of_json in
+      make ?virtualNode ()
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeVirtualNodeInput =
+  struct
+    type nonrec t =
+      {
+      meshName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service mesh that the virtual node resides in."];
+      meshOwner: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      virtualNodeName: ResourceName.t
+        [@ocaml.doc "The name of the virtual node to describe."]}
+    let context_ = "DescribeVirtualNodeInput"
+    let make ?meshOwner =
+      fun ~meshName ->
+        fun ~virtualNodeName ->
+          fun () -> { meshOwner; meshName; virtualNodeName }
+    let to_value x =
+      structure_to_value
+        [("meshName", (Some (ResourceName.to_value x.meshName)));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("virtualNodeName", (Some (ResourceName.to_value x.virtualNodeName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualNodeName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "virtualNodeName") in
+      let meshOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
+      let meshName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+      make ~virtualNodeName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualNodeName =
+        field_map_exn json__ "virtualNodeName" ResourceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      make ~virtualNodeName ?meshOwner ~meshName ()
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeVirtualGatewayOutput =
+  struct
+    type nonrec t =
+      {
+      virtualGateway: VirtualGatewayData.t option
+        [@ocaml.doc "The full description of your virtual gateway."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?virtualGateway = fun () -> { virtualGateway }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?virtualGateway:(Some pipe) ())
       [@warning "-27"])
     let to_value x =
-      structure_to_value [("route", (Some (RouteData.to_value x.route)))]
+      structure_to_value
+        [("virtualGateway",
+           (Option.map x.virtualGateway ~f:VirtualGatewayData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualGateway =
+        (Option.map ~f:VirtualGatewayData.of_xml)
+          (Xml.child xml_arg0 "virtualGateway") in
+      make ?virtualGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualGateway =
+        field_map json__ "virtualGateway" VirtualGatewayData.of_json in
+      make ?virtualGateway ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an existing virtual gateway."]
+module DescribeVirtualGatewayInput =
+  struct
+    type nonrec t =
+      {
+      meshName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service mesh that the gateway route resides in."];
+      meshOwner: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      virtualGatewayName: ResourceName.t
+        [@ocaml.doc "The name of the virtual gateway to describe."]}
+    let context_ = "DescribeVirtualGatewayInput"
+    let make ?meshOwner =
+      fun ~meshName ->
+        fun ~virtualGatewayName ->
+          fun () -> { meshOwner; meshName; virtualGatewayName }
+    let to_value x =
+      structure_to_value
+        [("meshName", (Some (ResourceName.to_value x.meshName)));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("virtualGatewayName",
+          (Some (ResourceName.to_value x.virtualGatewayName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualGatewayName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "virtualGatewayName") in
+      let meshOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
+      let meshName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+      make ~virtualGatewayName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualGatewayName =
+        field_map_exn json__ "virtualGatewayName" ResourceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      make ~virtualGatewayName ?meshOwner ~meshName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes an existing virtual gateway."]
+module DescribeRouteOutput =
+  struct
+    type nonrec t =
+      {
+      route: RouteData.t option
+        [@ocaml.doc "The full description of your route."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?route = fun () -> { route }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?route:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("route", (Option.map x.route ~f:RouteData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let route =
-        RouteData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "route") in
-      make ~route ()
+        (Option.map ~f:RouteData.of_xml) (Xml.child xml_arg0 "route") in
+      make ?route ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let route = field_map_exn json "route" RouteData.of_json in
-      make ~route ()
+    let of_json json__ =
+      let route = field_map json__ "route" RouteData.of_json in
+      make ?route ()
     let to_json v = composed_to_json to_value v
   end
 module DescribeRouteInput =
@@ -11514,7 +11865,7 @@ module DescribeRouteInput =
           "The name of the service mesh that the route resides in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       routeName: ResourceName.t
         [@ocaml.doc "The name of the route to describe."];
       virtualRouterName: ResourceName.t
@@ -11548,12 +11899,12 @@ module DescribeRouteInput =
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualRouterName ~routeName ?meshOwner ~meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
-      let routeName = field_map_exn json "routeName" ResourceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
+        field_map_exn json__ "virtualRouterName" ResourceName.of_json in
+      let routeName = field_map_exn json__ "routeName" ResourceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
       make ~virtualRouterName ~routeName ?meshOwner ~meshName ()
     let to_json v = composed_to_json to_value v
   end
@@ -11561,7 +11912,7 @@ module DescribeMeshOutput =
   struct
     type nonrec t =
       {
-      mesh: MeshData.t
+      mesh: MeshData.t option
         [@ocaml.doc "The full description of your service mesh."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
@@ -11571,8 +11922,7 @@ module DescribeMeshOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeMeshOutput"
-    let make ~mesh = fun () -> { mesh }
+    let make ?mesh = fun () -> { mesh }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -11641,18 +11991,17 @@ module DescribeMeshOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~mesh:pipe ())
+    let of_header_and_body = ((fun (xs, pipe) -> make ?mesh:(Some pipe) ())
       [@warning "-27"])
     let to_value x =
-      structure_to_value [("mesh", (Some (MeshData.to_value x.mesh)))]
+      structure_to_value [("mesh", (Option.map x.mesh ~f:MeshData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let mesh =
-        MeshData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "mesh") in
-      make ~mesh ()
+      let mesh = (Option.map ~f:MeshData.of_xml) (Xml.child xml_arg0 "mesh") in
+      make ?mesh ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mesh = field_map_exn json "mesh" MeshData.of_json in make ~mesh ()
+    let of_json json__ =
+      let mesh = field_map json__ "mesh" MeshData.of_json in make ?mesh ()
     let to_json v = composed_to_json to_value v
   end
 module DescribeMeshInput =
@@ -11663,7 +12012,7 @@ module DescribeMeshInput =
         [@ocaml.doc "The name of the service mesh to describe."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."]}
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."]}
     let context_ = "DescribeMeshInput"
     let make ?meshOwner = fun ~meshName -> fun () -> { meshOwner; meshName }
     let to_value x =
@@ -11679,9 +12028,9 @@ module DescribeMeshInput =
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ?meshOwner ~meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
+    let of_json json__ =
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
       make ?meshOwner ~meshName ()
     let to_json v = composed_to_json to_value v
   end
@@ -11689,7 +12038,7 @@ module DescribeGatewayRouteOutput =
   struct
     type nonrec t =
       {
-      gatewayRoute: GatewayRouteData.t
+      gatewayRoute: GatewayRouteData.t option
         [@ocaml.doc "The full description of your gateway route."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
@@ -11699,8 +12048,7 @@ module DescribeGatewayRouteOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeGatewayRouteOutput"
-    let make ~gatewayRoute = fun () -> { gatewayRoute }
+    let make ?gatewayRoute = fun () -> { gatewayRoute }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -11769,22 +12117,23 @@ module DescribeGatewayRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~gatewayRoute:pipe ())
-      [@warning "-27"])
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?gatewayRoute:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
-        [("gatewayRoute", (Some (GatewayRouteData.to_value x.gatewayRoute)))]
+        [("gatewayRoute",
+           (Option.map x.gatewayRoute ~f:GatewayRouteData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let gatewayRoute =
-        GatewayRouteData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "gatewayRoute") in
-      make ~gatewayRoute ()
+        (Option.map ~f:GatewayRouteData.of_xml)
+          (Xml.child xml_arg0 "gatewayRoute") in
+      make ?gatewayRoute ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let gatewayRoute =
-        field_map_exn json "gatewayRoute" GatewayRouteData.of_json in
-      make ~gatewayRoute ()
+        field_map json__ "gatewayRoute" GatewayRouteData.of_json in
+      make ?gatewayRoute ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an existing gateway route."]
 module DescribeGatewayRouteInput =
@@ -11798,7 +12147,7 @@ module DescribeGatewayRouteInput =
           "The name of the service mesh that the gateway route resides in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       virtualGatewayName: ResourceName.t
         [@ocaml.doc
           "The name of the virtual gateway that the gateway route is associated with."]}
@@ -11832,13 +12181,13 @@ module DescribeGatewayRouteInput =
           (Xml.child_exn ~context:context_ xml_arg0 "gatewayRouteName") in
       make ~virtualGatewayName ?meshOwner ~meshName ~gatewayRouteName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayName =
-        field_map_exn json "virtualGatewayName" ResourceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
+        field_map_exn json__ "virtualGatewayName" ResourceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
       let gatewayRouteName =
-        field_map_exn json "gatewayRouteName" ResourceName.of_json in
+        field_map_exn json__ "gatewayRouteName" ResourceName.of_json in
       make ~virtualGatewayName ?meshOwner ~meshName ~gatewayRouteName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an existing gateway route."]
@@ -11846,7 +12195,7 @@ module DeleteVirtualServiceOutput =
   struct
     type nonrec t =
       {
-      virtualService: VirtualServiceData.t
+      virtualService: VirtualServiceData.t option
         [@ocaml.doc "The virtual service that was deleted."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
@@ -11857,8 +12206,7 @@ module DeleteVirtualServiceOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteVirtualServiceOutput"
-    let make ~virtualService = fun () -> { virtualService }
+    let make ?virtualService = fun () -> { virtualService }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -11936,22 +12284,23 @@ module DeleteVirtualServiceOutput =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let of_header_and_body =
-      ((fun (xs, pipe) -> make ~virtualService:pipe ())[@warning "-27"])
+      ((fun (xs, pipe) -> make ?virtualService:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualService",
-           (Some (VirtualServiceData.to_value x.virtualService)))]
+           (Option.map x.virtualService ~f:VirtualServiceData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualService =
-        VirtualServiceData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualService") in
-      make ~virtualService ()
+        (Option.map ~f:VirtualServiceData.of_xml)
+          (Xml.child xml_arg0 "virtualService") in
+      make ?virtualService ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualService =
-        field_map_exn json "virtualService" VirtualServiceData.of_json in
-      make ~virtualService ()
+        field_map json__ "virtualService" VirtualServiceData.of_json in
+      make ?virtualService ()
     let to_json v = composed_to_json to_value v
   end
 module DeleteVirtualServiceInput =
@@ -11963,7 +12312,7 @@ module DeleteVirtualServiceInput =
           "The name of the service mesh to delete the virtual service in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       virtualServiceName: ServiceName.t
         [@ocaml.doc "The name of the virtual service to delete."]}
     let context_ = "DeleteVirtualServiceInput"
@@ -11989,11 +12338,11 @@ module DeleteVirtualServiceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualServiceName ?meshOwner ~meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualServiceName =
-        field_map_exn json "virtualServiceName" ServiceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
+        field_map_exn json__ "virtualServiceName" ServiceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
       make ~virtualServiceName ?meshOwner ~meshName ()
     let to_json v = composed_to_json to_value v
   end
@@ -12001,7 +12350,7 @@ module DeleteVirtualRouterOutput =
   struct
     type nonrec t =
       {
-      virtualRouter: VirtualRouterData.t
+      virtualRouter: VirtualRouterData.t option
         [@ocaml.doc "The virtual router that was deleted."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
@@ -12012,316 +12361,7 @@ module DeleteVirtualRouterOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteVirtualRouterOutput"
-    let make ~virtualRouter = fun () -> { virtualRouter }
-    let error_of_json name json =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_json json)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_json json)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | "ResourceInUseException" ->
-          `ResourceInUseException (ResourceInUseException.of_json json)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_json json)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_xml xml)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_xml xml)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | "ResourceInUseException" ->
-          `ResourceInUseException (ResourceInUseException.of_xml xml)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_xml xml)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `BadRequestException e ->
-          `Assoc
-            [("error", (`String "BadRequestException"));
-            ("details", (BadRequestException.to_json e))]
-      | `ForbiddenException e ->
-          `Assoc
-            [("error", (`String "ForbiddenException"));
-            ("details", (ForbiddenException.to_json e))]
-      | `InternalServerErrorException e ->
-          `Assoc
-            [("error", (`String "InternalServerErrorException"));
-            ("details", (InternalServerErrorException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `ResourceInUseException e ->
-          `Assoc
-            [("error", (`String "ResourceInUseException"));
-            ("details", (ResourceInUseException.to_json e))]
-      | `ServiceUnavailableException e ->
-          `Assoc
-            [("error", (`String "ServiceUnavailableException"));
-            ("details", (ServiceUnavailableException.to_json e))]
-      | `TooManyRequestsException e ->
-          `Assoc
-            [("error", (`String "TooManyRequestsException"));
-            ("details", (TooManyRequestsException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualRouter:pipe ())
-      [@warning "-27"])
-    let to_value x =
-      structure_to_value
-        [("virtualRouter",
-           (Some (VirtualRouterData.to_value x.virtualRouter)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualRouter =
-        VirtualRouterData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouter") in
-      make ~virtualRouter ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualRouter =
-        field_map_exn json "virtualRouter" VirtualRouterData.of_json in
-      make ~virtualRouter ()
-    let to_json v = composed_to_json to_value v
-  end
-module DeleteVirtualRouterInput =
-  struct
-    type nonrec t =
-      {
-      meshName: ResourceName.t
-        [@ocaml.doc
-          "The name of the service mesh to delete the virtual router in."];
-      meshOwner: AccountId.t option
-        [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      virtualRouterName: ResourceName.t
-        [@ocaml.doc "The name of the virtual router to delete."]}
-    let context_ = "DeleteVirtualRouterInput"
-    let make ?meshOwner =
-      fun ~meshName ->
-        fun ~virtualRouterName ->
-          fun () -> { meshOwner; meshName; virtualRouterName }
-    let to_value x =
-      structure_to_value
-        [("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
-        ("virtualRouterName",
-          (Some (ResourceName.to_value x.virtualRouterName)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualRouterName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
-      let meshOwner =
-        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
-      let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      make ~virtualRouterName ?meshOwner ~meshName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      make ~virtualRouterName ?meshOwner ~meshName ()
-    let to_json v = composed_to_json to_value v
-  end
-module DeleteVirtualNodeOutput =
-  struct
-    type nonrec t =
-      {
-      virtualNode: VirtualNodeData.t
-        [@ocaml.doc "The virtual node that was deleted."]}
-    type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
-      | `ForbiddenException of ForbiddenException.t 
-      | `InternalServerErrorException of InternalServerErrorException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `ResourceInUseException of ResourceInUseException.t 
-      | `ServiceUnavailableException of ServiceUnavailableException.t 
-      | `TooManyRequestsException of TooManyRequestsException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteVirtualNodeOutput"
-    let make ~virtualNode = fun () -> { virtualNode }
-    let error_of_json name json =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_json json)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_json json)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | "ResourceInUseException" ->
-          `ResourceInUseException (ResourceInUseException.of_json json)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_json json)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_xml xml)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_xml xml)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | "ResourceInUseException" ->
-          `ResourceInUseException (ResourceInUseException.of_xml xml)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_xml xml)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `BadRequestException e ->
-          `Assoc
-            [("error", (`String "BadRequestException"));
-            ("details", (BadRequestException.to_json e))]
-      | `ForbiddenException e ->
-          `Assoc
-            [("error", (`String "ForbiddenException"));
-            ("details", (ForbiddenException.to_json e))]
-      | `InternalServerErrorException e ->
-          `Assoc
-            [("error", (`String "InternalServerErrorException"));
-            ("details", (InternalServerErrorException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `ResourceInUseException e ->
-          `Assoc
-            [("error", (`String "ResourceInUseException"));
-            ("details", (ResourceInUseException.to_json e))]
-      | `ServiceUnavailableException e ->
-          `Assoc
-            [("error", (`String "ServiceUnavailableException"));
-            ("details", (ServiceUnavailableException.to_json e))]
-      | `TooManyRequestsException e ->
-          `Assoc
-            [("error", (`String "TooManyRequestsException"));
-            ("details", (TooManyRequestsException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualNode:pipe ())
-      [@warning "-27"])
-    let to_value x =
-      structure_to_value
-        [("virtualNode", (Some (VirtualNodeData.to_value x.virtualNode)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualNode =
-        VirtualNodeData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualNode") in
-      make ~virtualNode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualNode =
-        field_map_exn json "virtualNode" VirtualNodeData.of_json in
-      make ~virtualNode ()
-    let to_json v = composed_to_json to_value v
-  end
-module DeleteVirtualNodeInput =
-  struct
-    type nonrec t =
-      {
-      meshName: ResourceName.t
-        [@ocaml.doc
-          "The name of the service mesh to delete the virtual node in."];
-      meshOwner: AccountId.t option
-        [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      virtualNodeName: ResourceName.t
-        [@ocaml.doc "The name of the virtual node to delete."]}
-    let context_ = "DeleteVirtualNodeInput"
-    let make ?meshOwner =
-      fun ~meshName ->
-        fun ~virtualNodeName ->
-          fun () -> { meshOwner; meshName; virtualNodeName }
-    let to_value x =
-      structure_to_value
-        [("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
-        ("virtualNodeName", (Some (ResourceName.to_value x.virtualNodeName)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualNodeName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualNodeName") in
-      let meshOwner =
-        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
-      let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      make ~virtualNodeName ?meshOwner ~meshName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualNodeName =
-        field_map_exn json "virtualNodeName" ResourceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      make ~virtualNodeName ?meshOwner ~meshName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a virtual node input."]
-module DeleteVirtualGatewayOutput =
-  struct
-    type nonrec t =
-      {
-      virtualGateway: VirtualGatewayData.t
-        [@ocaml.doc "The virtual gateway that was deleted."]}
-    type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
-      | `ForbiddenException of ForbiddenException.t 
-      | `InternalServerErrorException of InternalServerErrorException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `ResourceInUseException of ResourceInUseException.t 
-      | `ServiceUnavailableException of ServiceUnavailableException.t 
-      | `TooManyRequestsException of TooManyRequestsException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteVirtualGatewayOutput"
-    let make ~virtualGateway = fun () -> { virtualGateway }
+    let make ?virtualRouter = fun () -> { virtualRouter }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -12399,74 +12439,74 @@ module DeleteVirtualGatewayOutput =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let of_header_and_body =
-      ((fun (xs, pipe) -> make ~virtualGateway:pipe ())[@warning "-27"])
+      ((fun (xs, pipe) -> make ?virtualRouter:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
-        [("virtualGateway",
-           (Some (VirtualGatewayData.to_value x.virtualGateway)))]
+        [("virtualRouter",
+           (Option.map x.virtualRouter ~f:VirtualRouterData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let virtualGateway =
-        VirtualGatewayData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualGateway") in
-      make ~virtualGateway ()
+      let virtualRouter =
+        (Option.map ~f:VirtualRouterData.of_xml)
+          (Xml.child xml_arg0 "virtualRouter") in
+      make ?virtualRouter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualGateway =
-        field_map_exn json "virtualGateway" VirtualGatewayData.of_json in
-      make ~virtualGateway ()
+    let of_json json__ =
+      let virtualRouter =
+        field_map json__ "virtualRouter" VirtualRouterData.of_json in
+      make ?virtualRouter ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Deletes an existing virtual gateway. You cannot delete a virtual gateway if any gateway routes are associated to it."]
-module DeleteVirtualGatewayInput =
+  end
+module DeleteVirtualRouterInput =
   struct
     type nonrec t =
       {
       meshName: ResourceName.t
         [@ocaml.doc
-          "The name of the service mesh to delete the virtual gateway from."];
+          "The name of the service mesh to delete the virtual router in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
-      virtualGatewayName: ResourceName.t
-        [@ocaml.doc "The name of the virtual gateway to delete."]}
-    let context_ = "DeleteVirtualGatewayInput"
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      virtualRouterName: ResourceName.t
+        [@ocaml.doc "The name of the virtual router to delete."]}
+    let context_ = "DeleteVirtualRouterInput"
     let make ?meshOwner =
       fun ~meshName ->
-        fun ~virtualGatewayName ->
-          fun () -> { meshOwner; meshName; virtualGatewayName }
+        fun ~virtualRouterName ->
+          fun () -> { meshOwner; meshName; virtualRouterName }
     let to_value x =
       structure_to_value
         [("meshName", (Some (ResourceName.to_value x.meshName)));
         ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
-        ("virtualGatewayName",
-          (Some (ResourceName.to_value x.virtualGatewayName)))]
+        ("virtualRouterName",
+          (Some (ResourceName.to_value x.virtualRouterName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let virtualGatewayName =
+      let virtualRouterName =
         ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualGatewayName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
       let meshOwner =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
       let meshName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      make ~virtualGatewayName ?meshOwner ~meshName ()
+      make ~virtualRouterName ?meshOwner ~meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualGatewayName =
-        field_map_exn json "virtualGatewayName" ResourceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      make ~virtualGatewayName ?meshOwner ~meshName ()
+    let of_json json__ =
+      let virtualRouterName =
+        field_map_exn json__ "virtualRouterName" ResourceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      make ~virtualRouterName ?meshOwner ~meshName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Deletes an existing virtual gateway. You cannot delete a virtual gateway if any gateway routes are associated to it."]
-module DeleteRouteOutput =
+  end
+module DeleteVirtualNodeOutput =
   struct
     type nonrec t =
       {
-      route: RouteData.t [@ocaml.doc "The route that was deleted."]}
+      virtualNode: VirtualNodeData.t option
+        [@ocaml.doc "The virtual node that was deleted."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -12476,8 +12516,7 @@ module DeleteRouteOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteRouteOutput"
-    let make ~route = fun () -> { route }
+    let make ?virtualNode = fun () -> { virtualNode }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -12554,19 +12593,329 @@ module DeleteRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~route:pipe ())
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?virtualNode:(Some pipe) ())[@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("virtualNode",
+           (Option.map x.virtualNode ~f:VirtualNodeData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualNode =
+        (Option.map ~f:VirtualNodeData.of_xml)
+          (Xml.child xml_arg0 "virtualNode") in
+      make ?virtualNode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualNode =
+        field_map json__ "virtualNode" VirtualNodeData.of_json in
+      make ?virtualNode ()
+    let to_json v = composed_to_json to_value v
+  end
+module DeleteVirtualNodeInput =
+  struct
+    type nonrec t =
+      {
+      meshName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service mesh to delete the virtual node in."];
+      meshOwner: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      virtualNodeName: ResourceName.t
+        [@ocaml.doc "The name of the virtual node to delete."]}
+    let context_ = "DeleteVirtualNodeInput"
+    let make ?meshOwner =
+      fun ~meshName ->
+        fun ~virtualNodeName ->
+          fun () -> { meshOwner; meshName; virtualNodeName }
+    let to_value x =
+      structure_to_value
+        [("meshName", (Some (ResourceName.to_value x.meshName)));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("virtualNodeName", (Some (ResourceName.to_value x.virtualNodeName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualNodeName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "virtualNodeName") in
+      let meshOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
+      let meshName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+      make ~virtualNodeName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualNodeName =
+        field_map_exn json__ "virtualNodeName" ResourceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      make ~virtualNodeName ?meshOwner ~meshName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a virtual node input."]
+module DeleteVirtualGatewayOutput =
+  struct
+    type nonrec t =
+      {
+      virtualGateway: VirtualGatewayData.t option
+        [@ocaml.doc "The virtual gateway that was deleted."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?virtualGateway = fun () -> { virtualGateway }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?virtualGateway:(Some pipe) ())
       [@warning "-27"])
     let to_value x =
-      structure_to_value [("route", (Some (RouteData.to_value x.route)))]
+      structure_to_value
+        [("virtualGateway",
+           (Option.map x.virtualGateway ~f:VirtualGatewayData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualGateway =
+        (Option.map ~f:VirtualGatewayData.of_xml)
+          (Xml.child xml_arg0 "virtualGateway") in
+      make ?virtualGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualGateway =
+        field_map json__ "virtualGateway" VirtualGatewayData.of_json in
+      make ?virtualGateway ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an existing virtual gateway. You cannot delete a virtual gateway if any gateway routes are associated to it."]
+module DeleteVirtualGatewayInput =
+  struct
+    type nonrec t =
+      {
+      meshName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service mesh to delete the virtual gateway from."];
+      meshOwner: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+      virtualGatewayName: ResourceName.t
+        [@ocaml.doc "The name of the virtual gateway to delete."]}
+    let context_ = "DeleteVirtualGatewayInput"
+    let make ?meshOwner =
+      fun ~meshName ->
+        fun ~virtualGatewayName ->
+          fun () -> { meshOwner; meshName; virtualGatewayName }
+    let to_value x =
+      structure_to_value
+        [("meshName", (Some (ResourceName.to_value x.meshName)));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("virtualGatewayName",
+          (Some (ResourceName.to_value x.virtualGatewayName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualGatewayName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "virtualGatewayName") in
+      let meshOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
+      let meshName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+      make ~virtualGatewayName ?meshOwner ~meshName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualGatewayName =
+        field_map_exn json__ "virtualGatewayName" ResourceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      make ~virtualGatewayName ?meshOwner ~meshName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an existing virtual gateway. You cannot delete a virtual gateway if any gateway routes are associated to it."]
+module DeleteRouteOutput =
+  struct
+    type nonrec t =
+      {
+      route: RouteData.t option [@ocaml.doc "The route that was deleted."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?route = fun () -> { route }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?route:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("route", (Option.map x.route ~f:RouteData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let route =
-        RouteData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "route") in
-      make ~route ()
+        (Option.map ~f:RouteData.of_xml) (Xml.child xml_arg0 "route") in
+      make ?route ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let route = field_map_exn json "route" RouteData.of_json in
-      make ~route ()
+    let of_json json__ =
+      let route = field_map json__ "route" RouteData.of_json in
+      make ?route ()
     let to_json v = composed_to_json to_value v
   end
 module DeleteRouteInput =
@@ -12577,7 +12926,7 @@ module DeleteRouteInput =
         [@ocaml.doc "The name of the service mesh to delete the route in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       routeName: ResourceName.t
         [@ocaml.doc "The name of the route to delete."];
       virtualRouterName: ResourceName.t
@@ -12610,12 +12959,12 @@ module DeleteRouteInput =
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~virtualRouterName ~routeName ?meshOwner ~meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
-      let routeName = field_map_exn json "routeName" ResourceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
+        field_map_exn json__ "virtualRouterName" ResourceName.of_json in
+      let routeName = field_map_exn json__ "routeName" ResourceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
       make ~virtualRouterName ~routeName ?meshOwner ~meshName ()
     let to_json v = composed_to_json to_value v
   end
@@ -12623,7 +12972,8 @@ module DeleteMeshOutput =
   struct
     type nonrec t =
       {
-      mesh: MeshData.t [@ocaml.doc "The service mesh that was deleted."]}
+      mesh: MeshData.t option
+        [@ocaml.doc "The service mesh that was deleted."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -12633,8 +12983,7 @@ module DeleteMeshOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteMeshOutput"
-    let make ~mesh = fun () -> { mesh }
+    let make ?mesh = fun () -> { mesh }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -12711,18 +13060,17 @@ module DeleteMeshOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~mesh:pipe ())
+    let of_header_and_body = ((fun (xs, pipe) -> make ?mesh:(Some pipe) ())
       [@warning "-27"])
     let to_value x =
-      structure_to_value [("mesh", (Some (MeshData.to_value x.mesh)))]
+      structure_to_value [("mesh", (Option.map x.mesh ~f:MeshData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let mesh =
-        MeshData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "mesh") in
-      make ~mesh ()
+      let mesh = (Option.map ~f:MeshData.of_xml) (Xml.child xml_arg0 "mesh") in
+      make ?mesh ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mesh = field_map_exn json "mesh" MeshData.of_json in make ~mesh ()
+    let of_json json__ =
+      let mesh = field_map json__ "mesh" MeshData.of_json in make ?mesh ()
     let to_json v = composed_to_json to_value v
   end
 module DeleteMeshInput =
@@ -12743,8 +13091,8 @@ module DeleteMeshInput =
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       make ~meshName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
+    let of_json json__ =
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
       make ~meshName ()
     let to_json v = composed_to_json to_value v
   end
@@ -12752,7 +13100,7 @@ module DeleteGatewayRouteOutput =
   struct
     type nonrec t =
       {
-      gatewayRoute: GatewayRouteData.t
+      gatewayRoute: GatewayRouteData.t option
         [@ocaml.doc "The gateway route that was deleted."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
@@ -12763,8 +13111,7 @@ module DeleteGatewayRouteOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteGatewayRouteOutput"
-    let make ~gatewayRoute = fun () -> { gatewayRoute }
+    let make ?gatewayRoute = fun () -> { gatewayRoute }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -12841,22 +13188,23 @@ module DeleteGatewayRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~gatewayRoute:pipe ())
-      [@warning "-27"])
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?gatewayRoute:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
-        [("gatewayRoute", (Some (GatewayRouteData.to_value x.gatewayRoute)))]
+        [("gatewayRoute",
+           (Option.map x.gatewayRoute ~f:GatewayRouteData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let gatewayRoute =
-        GatewayRouteData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "gatewayRoute") in
-      make ~gatewayRoute ()
+        (Option.map ~f:GatewayRouteData.of_xml)
+          (Xml.child xml_arg0 "gatewayRoute") in
+      make ?gatewayRoute ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let gatewayRoute =
-        field_map_exn json "gatewayRoute" GatewayRouteData.of_json in
-      make ~gatewayRoute ()
+        field_map json__ "gatewayRoute" GatewayRouteData.of_json in
+      make ?gatewayRoute ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an existing gateway route."]
 module DeleteGatewayRouteInput =
@@ -12870,7 +13218,7 @@ module DeleteGatewayRouteInput =
           "The name of the service mesh to delete the gateway route from."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then it's the ID of the account that shared the mesh with your account. For more information about mesh sharing, see Working with shared meshes."];
       virtualGatewayName: ResourceName.t
         [@ocaml.doc
           "The name of the virtual gateway to delete the route from."]}
@@ -12904,13 +13252,13 @@ module DeleteGatewayRouteInput =
           (Xml.child_exn ~context:context_ xml_arg0 "gatewayRouteName") in
       make ~virtualGatewayName ?meshOwner ~meshName ~gatewayRouteName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayName =
-        field_map_exn json "virtualGatewayName" ResourceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
+        field_map_exn json__ "virtualGatewayName" ResourceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
       let gatewayRouteName =
-        field_map_exn json "gatewayRouteName" ResourceName.of_json in
+        field_map_exn json__ "gatewayRouteName" ResourceName.of_json in
       make ~virtualGatewayName ?meshOwner ~meshName ~gatewayRouteName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an existing gateway route."]
@@ -12918,7 +13266,7 @@ module CreateVirtualServiceOutput =
   struct
     type nonrec t =
       {
-      virtualService: VirtualServiceData.t
+      virtualService: VirtualServiceData.t option
         [@ocaml.doc
           "The full description of your virtual service following the create call."]}
     type nonrec error =
@@ -12931,8 +13279,7 @@ module CreateVirtualServiceOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateVirtualServiceOutput"
-    let make ~virtualService = fun () -> { virtualService }
+    let make ?virtualService = fun () -> { virtualService }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -13018,22 +13365,23 @@ module CreateVirtualServiceOutput =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let of_header_and_body =
-      ((fun (xs, pipe) -> make ~virtualService:pipe ())[@warning "-27"])
+      ((fun (xs, pipe) -> make ?virtualService:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
         [("virtualService",
-           (Some (VirtualServiceData.to_value x.virtualService)))]
+           (Option.map x.virtualService ~f:VirtualServiceData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let virtualService =
-        VirtualServiceData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualService") in
-      make ~virtualService ()
+        (Option.map ~f:VirtualServiceData.of_xml)
+          (Xml.child xml_arg0 "virtualService") in
+      make ?virtualService ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualService =
-        field_map_exn json "virtualService" VirtualServiceData.of_json in
-      make ~virtualService ()
+        field_map json__ "virtualService" VirtualServiceData.of_json in
+      make ?virtualService ()
     let to_json v = composed_to_json to_value v
   end
 module CreateVirtualServiceInput =
@@ -13048,7 +13396,7 @@ module CreateVirtualServiceInput =
           "The name of the service mesh to create the virtual service in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then the account that you specify must share the mesh with your account before you can create the resource in the service mesh. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then the account that you specify must share the mesh with your account before you can create the resource in the service mesh. For more information about mesh sharing, see Working with shared meshes."];
       spec: VirtualServiceSpec.t
         [@ocaml.doc "The virtual service specification to apply."];
       tags: TagList.t option
@@ -13100,14 +13448,14 @@ module CreateVirtualServiceInput =
       make ~virtualServiceName ?tags ~spec ?meshOwner ~meshName ?clientToken
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualServiceName =
-        field_map_exn json "virtualServiceName" ServiceName.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let spec = field_map_exn json "spec" VirtualServiceSpec.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
+        field_map_exn json__ "virtualServiceName" ServiceName.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let spec = field_map_exn json__ "spec" VirtualServiceSpec.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       make ~virtualServiceName ?tags ~spec ?meshOwner ~meshName ?clientToken
         ()
     let to_json v = composed_to_json to_value v
@@ -13116,7 +13464,7 @@ module CreateVirtualRouterOutput =
   struct
     type nonrec t =
       {
-      virtualRouter: VirtualRouterData.t
+      virtualRouter: VirtualRouterData.t option
         [@ocaml.doc
           "The full description of your virtual router following the create call."]}
     type nonrec error =
@@ -13129,400 +13477,7 @@ module CreateVirtualRouterOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateVirtualRouterOutput"
-    let make ~virtualRouter = fun () -> { virtualRouter }
-    let error_of_json name json =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_json json)
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_json json)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_json json)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_json json)
-      | "LimitExceededException" ->
-          `LimitExceededException (LimitExceededException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_json json)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_xml xml)
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_xml xml)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_xml xml)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_xml xml)
-      | "LimitExceededException" ->
-          `LimitExceededException (LimitExceededException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_xml xml)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `BadRequestException e ->
-          `Assoc
-            [("error", (`String "BadRequestException"));
-            ("details", (BadRequestException.to_json e))]
-      | `ConflictException e ->
-          `Assoc
-            [("error", (`String "ConflictException"));
-            ("details", (ConflictException.to_json e))]
-      | `ForbiddenException e ->
-          `Assoc
-            [("error", (`String "ForbiddenException"));
-            ("details", (ForbiddenException.to_json e))]
-      | `InternalServerErrorException e ->
-          `Assoc
-            [("error", (`String "InternalServerErrorException"));
-            ("details", (InternalServerErrorException.to_json e))]
-      | `LimitExceededException e ->
-          `Assoc
-            [("error", (`String "LimitExceededException"));
-            ("details", (LimitExceededException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `ServiceUnavailableException e ->
-          `Assoc
-            [("error", (`String "ServiceUnavailableException"));
-            ("details", (ServiceUnavailableException.to_json e))]
-      | `TooManyRequestsException e ->
-          `Assoc
-            [("error", (`String "TooManyRequestsException"));
-            ("details", (TooManyRequestsException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualRouter:pipe ())
-      [@warning "-27"])
-    let to_value x =
-      structure_to_value
-        [("virtualRouter",
-           (Some (VirtualRouterData.to_value x.virtualRouter)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualRouter =
-        VirtualRouterData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouter") in
-      make ~virtualRouter ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualRouter =
-        field_map_exn json "virtualRouter" VirtualRouterData.of_json in
-      make ~virtualRouter ()
-    let to_json v = composed_to_json to_value v
-  end
-module CreateVirtualRouterInput =
-  struct
-    type nonrec t =
-      {
-      clientToken: String_.t option
-        [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Up to 36 letters, numbers, hyphens, and underscores are allowed."];
-      meshName: ResourceName.t
-        [@ocaml.doc
-          "The name of the service mesh to create the virtual router in."];
-      meshOwner: AccountId.t option
-        [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then the account that you specify must share the mesh with your account before you can create the resource in the service mesh. For more information about mesh sharing, see Working with shared meshes."];
-      spec: VirtualRouterSpec.t
-        [@ocaml.doc "The virtual router specification to apply."];
-      tags: TagList.t option
-        [@ocaml.doc
-          "Optional metadata that you can apply to the virtual router to assist with categorization and organization. Each tag consists of a key and an optional value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."];
-      virtualRouterName: ResourceName.t
-        [@ocaml.doc "The name to use for the virtual router."]}
-    let context_ = "CreateVirtualRouterInput"
-    let make ?clientToken =
-      fun ?meshOwner ->
-        fun ?tags ->
-          fun ~meshName ->
-            fun ~spec ->
-              fun ~virtualRouterName ->
-                fun () ->
-                  {
-                    clientToken;
-                    meshOwner;
-                    tags;
-                    meshName;
-                    spec;
-                    virtualRouterName
-                  }
-    let to_value x =
-      structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:String_.to_value));
-        ("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
-        ("spec", (Some (VirtualRouterSpec.to_value x.spec)));
-        ("tags", (Option.map x.tags ~f:TagList.to_value));
-        ("virtualRouterName",
-          (Some (ResourceName.to_value x.virtualRouterName)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualRouterName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
-      let spec =
-        VirtualRouterSpec.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "spec") in
-      let meshOwner =
-        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
-      let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      let clientToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ~virtualRouterName ?tags ~spec ?meshOwner ~meshName ?clientToken
-        ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let spec = field_map_exn json "spec" VirtualRouterSpec.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      make ~virtualRouterName ?tags ~spec ?meshOwner ~meshName ?clientToken
-        ()
-    let to_json v = composed_to_json to_value v
-  end
-module CreateVirtualNodeOutput =
-  struct
-    type nonrec t =
-      {
-      virtualNode: VirtualNodeData.t
-        [@ocaml.doc
-          "The full description of your virtual node following the create call."]}
-    type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
-      | `ConflictException of ConflictException.t 
-      | `ForbiddenException of ForbiddenException.t 
-      | `InternalServerErrorException of InternalServerErrorException.t 
-      | `LimitExceededException of LimitExceededException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `ServiceUnavailableException of ServiceUnavailableException.t 
-      | `TooManyRequestsException of TooManyRequestsException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateVirtualNodeOutput"
-    let make ~virtualNode = fun () -> { virtualNode }
-    let error_of_json name json =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_json json)
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_json json)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_json json)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_json json)
-      | "LimitExceededException" ->
-          `LimitExceededException (LimitExceededException.of_json json)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_json json)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_json json)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "BadRequestException" ->
-          `BadRequestException (BadRequestException.of_xml xml)
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_xml xml)
-      | "ForbiddenException" ->
-          `ForbiddenException (ForbiddenException.of_xml xml)
-      | "InternalServerErrorException" ->
-          `InternalServerErrorException
-            (InternalServerErrorException.of_xml xml)
-      | "LimitExceededException" ->
-          `LimitExceededException (LimitExceededException.of_xml xml)
-      | "NotFoundException" ->
-          `NotFoundException (NotFoundException.of_xml xml)
-      | "ServiceUnavailableException" ->
-          `ServiceUnavailableException
-            (ServiceUnavailableException.of_xml xml)
-      | "TooManyRequestsException" ->
-          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `BadRequestException e ->
-          `Assoc
-            [("error", (`String "BadRequestException"));
-            ("details", (BadRequestException.to_json e))]
-      | `ConflictException e ->
-          `Assoc
-            [("error", (`String "ConflictException"));
-            ("details", (ConflictException.to_json e))]
-      | `ForbiddenException e ->
-          `Assoc
-            [("error", (`String "ForbiddenException"));
-            ("details", (ForbiddenException.to_json e))]
-      | `InternalServerErrorException e ->
-          `Assoc
-            [("error", (`String "InternalServerErrorException"));
-            ("details", (InternalServerErrorException.to_json e))]
-      | `LimitExceededException e ->
-          `Assoc
-            [("error", (`String "LimitExceededException"));
-            ("details", (LimitExceededException.to_json e))]
-      | `NotFoundException e ->
-          `Assoc
-            [("error", (`String "NotFoundException"));
-            ("details", (NotFoundException.to_json e))]
-      | `ServiceUnavailableException e ->
-          `Assoc
-            [("error", (`String "ServiceUnavailableException"));
-            ("details", (ServiceUnavailableException.to_json e))]
-      | `TooManyRequestsException e ->
-          `Assoc
-            [("error", (`String "TooManyRequestsException"));
-            ("details", (TooManyRequestsException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~virtualNode:pipe ())
-      [@warning "-27"])
-    let to_value x =
-      structure_to_value
-        [("virtualNode", (Some (VirtualNodeData.to_value x.virtualNode)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualNode =
-        VirtualNodeData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualNode") in
-      make ~virtualNode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualNode =
-        field_map_exn json "virtualNode" VirtualNodeData.of_json in
-      make ~virtualNode ()
-    let to_json v = composed_to_json to_value v
-  end
-module CreateVirtualNodeInput =
-  struct
-    type nonrec t =
-      {
-      clientToken: String_.t option
-        [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Up to 36 letters, numbers, hyphens, and underscores are allowed."];
-      meshName: ResourceName.t
-        [@ocaml.doc
-          "The name of the service mesh to create the virtual node in."];
-      meshOwner: AccountId.t option
-        [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then the account that you specify must share the mesh with your account before you can create the resource in the service mesh. For more information about mesh sharing, see Working with shared meshes."];
-      spec: VirtualNodeSpec.t
-        [@ocaml.doc "The virtual node specification to apply."];
-      tags: TagList.t option
-        [@ocaml.doc
-          "Optional metadata that you can apply to the virtual node to assist with categorization and organization. Each tag consists of a key and an optional value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."];
-      virtualNodeName: ResourceName.t
-        [@ocaml.doc "The name to use for the virtual node."]}
-    let context_ = "CreateVirtualNodeInput"
-    let make ?clientToken =
-      fun ?meshOwner ->
-        fun ?tags ->
-          fun ~meshName ->
-            fun ~spec ->
-              fun ~virtualNodeName ->
-                fun () ->
-                  {
-                    clientToken;
-                    meshOwner;
-                    tags;
-                    meshName;
-                    spec;
-                    virtualNodeName
-                  }
-    let to_value x =
-      structure_to_value
-        [("clientToken", (Option.map x.clientToken ~f:String_.to_value));
-        ("meshName", (Some (ResourceName.to_value x.meshName)));
-        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
-        ("spec", (Some (VirtualNodeSpec.to_value x.spec)));
-        ("tags", (Option.map x.tags ~f:TagList.to_value));
-        ("virtualNodeName", (Some (ResourceName.to_value x.virtualNodeName)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let virtualNodeName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualNodeName") in
-      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
-      let spec =
-        VirtualNodeSpec.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "spec") in
-      let meshOwner =
-        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
-      let meshName =
-        ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
-      let clientToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ~virtualNodeName ?tags ~spec ?meshOwner ~meshName ?clientToken ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualNodeName =
-        field_map_exn json "virtualNodeName" ResourceName.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let spec = field_map_exn json "spec" VirtualNodeSpec.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      make ~virtualNodeName ?tags ~spec ?meshOwner ~meshName ?clientToken ()
-    let to_json v = composed_to_json to_value v
-  end
-module CreateVirtualGatewayOutput =
-  struct
-    type nonrec t =
-      {
-      virtualGateway: VirtualGatewayData.t
-        [@ocaml.doc
-          "The full description of your virtual gateway following the create call."]}
-    type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
-      | `ConflictException of ConflictException.t 
-      | `ForbiddenException of ForbiddenException.t 
-      | `InternalServerErrorException of InternalServerErrorException.t 
-      | `LimitExceededException of LimitExceededException.t 
-      | `NotFoundException of NotFoundException.t 
-      | `ServiceUnavailableException of ServiceUnavailableException.t 
-      | `TooManyRequestsException of TooManyRequestsException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateVirtualGatewayOutput"
-    let make ~virtualGateway = fun () -> { virtualGateway }
+    let make ?virtualRouter = fun () -> { virtualRouter }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -13608,26 +13563,26 @@ module CreateVirtualGatewayOutput =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let of_header_and_body =
-      ((fun (xs, pipe) -> make ~virtualGateway:pipe ())[@warning "-27"])
+      ((fun (xs, pipe) -> make ?virtualRouter:(Some pipe) ())
+      [@warning "-27"])
     let to_value x =
       structure_to_value
-        [("virtualGateway",
-           (Some (VirtualGatewayData.to_value x.virtualGateway)))]
+        [("virtualRouter",
+           (Option.map x.virtualRouter ~f:VirtualRouterData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let virtualGateway =
-        VirtualGatewayData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualGateway") in
-      make ~virtualGateway ()
+      let virtualRouter =
+        (Option.map ~f:VirtualRouterData.of_xml)
+          (Xml.child xml_arg0 "virtualRouter") in
+      make ?virtualRouter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualGateway =
-        field_map_exn json "virtualGateway" VirtualGatewayData.of_json in
-      make ~virtualGateway ()
+    let of_json json__ =
+      let virtualRouter =
+        field_map json__ "virtualRouter" VirtualRouterData.of_json in
+      make ?virtualRouter ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Creates a virtual gateway. A virtual gateway allows resources outside your mesh to communicate to resources that are inside your mesh. The virtual gateway represents an Envoy proxy running in an Amazon ECS task, in a Kubernetes service, or on an Amazon EC2 instance. Unlike a virtual node, which represents an Envoy running with an application, a virtual gateway represents Envoy deployed by itself. For more information about virtual gateways, see Virtual gateways."]
-module CreateVirtualGatewayInput =
+  end
+module CreateVirtualRouterInput =
   struct
     type nonrec t =
       {
@@ -13636,24 +13591,24 @@ module CreateVirtualGatewayInput =
           "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Up to 36 letters, numbers, hyphens, and underscores are allowed."];
       meshName: ResourceName.t
         [@ocaml.doc
-          "The name of the service mesh to create the virtual gateway in."];
+          "The name of the service mesh to create the virtual router in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then the account that you specify must share the mesh with your account before you can create the resource in the service mesh. For more information about mesh sharing, see Working with shared meshes."];
-      spec: VirtualGatewaySpec.t
-        [@ocaml.doc "The virtual gateway specification to apply."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then the account that you specify must share the mesh with your account before you can create the resource in the service mesh. For more information about mesh sharing, see Working with shared meshes."];
+      spec: VirtualRouterSpec.t
+        [@ocaml.doc "The virtual router specification to apply."];
       tags: TagList.t option
         [@ocaml.doc
-          "Optional metadata that you can apply to the virtual gateway to assist with categorization and organization. Each tag consists of a key and an optional value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."];
-      virtualGatewayName: ResourceName.t
-        [@ocaml.doc "The name to use for the virtual gateway."]}
-    let context_ = "CreateVirtualGatewayInput"
+          "Optional metadata that you can apply to the virtual router to assist with categorization and organization. Each tag consists of a key and an optional value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."];
+      virtualRouterName: ResourceName.t
+        [@ocaml.doc "The name to use for the virtual router."]}
+    let context_ = "CreateVirtualRouterInput"
     let make ?clientToken =
       fun ?meshOwner ->
         fun ?tags ->
           fun ~meshName ->
             fun ~spec ->
-              fun ~virtualGatewayName ->
+              fun ~virtualRouterName ->
                 fun () ->
                   {
                     clientToken;
@@ -13661,25 +13616,25 @@ module CreateVirtualGatewayInput =
                     tags;
                     meshName;
                     spec;
-                    virtualGatewayName
+                    virtualRouterName
                   }
     let to_value x =
       structure_to_value
         [("clientToken", (Option.map x.clientToken ~f:String_.to_value));
         ("meshName", (Some (ResourceName.to_value x.meshName)));
         ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
-        ("spec", (Some (VirtualGatewaySpec.to_value x.spec)));
+        ("spec", (Some (VirtualRouterSpec.to_value x.spec)));
         ("tags", (Option.map x.tags ~f:TagList.to_value));
-        ("virtualGatewayName",
-          (Some (ResourceName.to_value x.virtualGatewayName)))]
+        ("virtualRouterName",
+          (Some (ResourceName.to_value x.virtualRouterName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let virtualGatewayName =
+      let virtualRouterName =
         ResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "virtualGatewayName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "virtualRouterName") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let spec =
-        VirtualGatewaySpec.of_xml
+        VirtualRouterSpec.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "spec") in
       let meshOwner =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
@@ -13688,29 +13643,28 @@ module CreateVirtualGatewayInput =
           (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
       let clientToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
-      make ~virtualGatewayName ?tags ~spec ?meshOwner ~meshName ?clientToken
+      make ~virtualRouterName ?tags ~spec ?meshOwner ~meshName ?clientToken
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualGatewayName =
-        field_map_exn json "virtualGatewayName" ResourceName.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let spec = field_map_exn json "spec" VirtualGatewaySpec.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
-      make ~virtualGatewayName ?tags ~spec ?meshOwner ~meshName ?clientToken
+    let of_json json__ =
+      let virtualRouterName =
+        field_map_exn json__ "virtualRouterName" ResourceName.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let spec = field_map_exn json__ "spec" VirtualRouterSpec.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      make ~virtualRouterName ?tags ~spec ?meshOwner ~meshName ?clientToken
         ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Creates a virtual gateway. A virtual gateway allows resources outside your mesh to communicate to resources that are inside your mesh. The virtual gateway represents an Envoy proxy running in an Amazon ECS task, in a Kubernetes service, or on an Amazon EC2 instance. Unlike a virtual node, which represents an Envoy running with an application, a virtual gateway represents Envoy deployed by itself. For more information about virtual gateways, see Virtual gateways."]
-module CreateRouteOutput =
+  end
+module CreateVirtualNodeOutput =
   struct
     type nonrec t =
       {
-      route: RouteData.t
+      virtualNode: VirtualNodeData.t option
         [@ocaml.doc
-          "The full description of your mesh following the create call."]}
+          "The full description of your virtual node following the create call."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -13721,8 +13675,7 @@ module CreateRouteOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateRouteOutput"
-    let make ~route = fun () -> { route }
+    let make ?virtualNode = fun () -> { virtualNode }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -13807,19 +13760,414 @@ module CreateRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~route:pipe ())
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?virtualNode:(Some pipe) ())[@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("virtualNode",
+           (Option.map x.virtualNode ~f:VirtualNodeData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualNode =
+        (Option.map ~f:VirtualNodeData.of_xml)
+          (Xml.child xml_arg0 "virtualNode") in
+      make ?virtualNode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualNode =
+        field_map json__ "virtualNode" VirtualNodeData.of_json in
+      make ?virtualNode ()
+    let to_json v = composed_to_json to_value v
+  end
+module CreateVirtualNodeInput =
+  struct
+    type nonrec t =
+      {
+      clientToken: String_.t option
+        [@ocaml.doc
+          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Up to 36 letters, numbers, hyphens, and underscores are allowed."];
+      meshName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service mesh to create the virtual node in."];
+      meshOwner: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then the account that you specify must share the mesh with your account before you can create the resource in the service mesh. For more information about mesh sharing, see Working with shared meshes."];
+      spec: VirtualNodeSpec.t
+        [@ocaml.doc "The virtual node specification to apply."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Optional metadata that you can apply to the virtual node to assist with categorization and organization. Each tag consists of a key and an optional value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."];
+      virtualNodeName: ResourceName.t
+        [@ocaml.doc "The name to use for the virtual node."]}
+    let context_ = "CreateVirtualNodeInput"
+    let make ?clientToken =
+      fun ?meshOwner ->
+        fun ?tags ->
+          fun ~meshName ->
+            fun ~spec ->
+              fun ~virtualNodeName ->
+                fun () ->
+                  {
+                    clientToken;
+                    meshOwner;
+                    tags;
+                    meshName;
+                    spec;
+                    virtualNodeName
+                  }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("meshName", (Some (ResourceName.to_value x.meshName)));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("spec", (Some (VirtualNodeSpec.to_value x.spec)));
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("virtualNodeName", (Some (ResourceName.to_value x.virtualNodeName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualNodeName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "virtualNodeName") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let spec =
+        VirtualNodeSpec.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "spec") in
+      let meshOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
+      let meshName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ~virtualNodeName ?tags ~spec ?meshOwner ~meshName ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualNodeName =
+        field_map_exn json__ "virtualNodeName" ResourceName.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let spec = field_map_exn json__ "spec" VirtualNodeSpec.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      make ~virtualNodeName ?tags ~spec ?meshOwner ~meshName ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end
+module CreateVirtualGatewayOutput =
+  struct
+    type nonrec t =
+      {
+      virtualGateway: VirtualGatewayData.t option
+        [@ocaml.doc
+          "The full description of your virtual gateway following the create call."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?virtualGateway = fun () -> { virtualGateway }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?virtualGateway:(Some pipe) ())
       [@warning "-27"])
     let to_value x =
-      structure_to_value [("route", (Some (RouteData.to_value x.route)))]
+      structure_to_value
+        [("virtualGateway",
+           (Option.map x.virtualGateway ~f:VirtualGatewayData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualGateway =
+        (Option.map ~f:VirtualGatewayData.of_xml)
+          (Xml.child xml_arg0 "virtualGateway") in
+      make ?virtualGateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualGateway =
+        field_map json__ "virtualGateway" VirtualGatewayData.of_json in
+      make ?virtualGateway ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a virtual gateway. A virtual gateway allows resources outside your mesh to communicate to resources that are inside your mesh. The virtual gateway represents an Envoy proxy running in an Amazon ECS task, in a Kubernetes service, or on an Amazon EC2 instance. Unlike a virtual node, which represents an Envoy running with an application, a virtual gateway represents Envoy deployed by itself. For more information about virtual gateways, see Virtual gateways."]
+module CreateVirtualGatewayInput =
+  struct
+    type nonrec t =
+      {
+      clientToken: String_.t option
+        [@ocaml.doc
+          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request. Up to 36 letters, numbers, hyphens, and underscores are allowed."];
+      meshName: ResourceName.t
+        [@ocaml.doc
+          "The name of the service mesh to create the virtual gateway in."];
+      meshOwner: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then the account that you specify must share the mesh with your account before you can create the resource in the service mesh. For more information about mesh sharing, see Working with shared meshes."];
+      spec: VirtualGatewaySpec.t
+        [@ocaml.doc "The virtual gateway specification to apply."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Optional metadata that you can apply to the virtual gateway to assist with categorization and organization. Each tag consists of a key and an optional value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."];
+      virtualGatewayName: ResourceName.t
+        [@ocaml.doc "The name to use for the virtual gateway."]}
+    let context_ = "CreateVirtualGatewayInput"
+    let make ?clientToken =
+      fun ?meshOwner ->
+        fun ?tags ->
+          fun ~meshName ->
+            fun ~spec ->
+              fun ~virtualGatewayName ->
+                fun () ->
+                  {
+                    clientToken;
+                    meshOwner;
+                    tags;
+                    meshName;
+                    spec;
+                    virtualGatewayName
+                  }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:String_.to_value));
+        ("meshName", (Some (ResourceName.to_value x.meshName)));
+        ("meshOwner", (Option.map x.meshOwner ~f:AccountId.to_value));
+        ("spec", (Some (VirtualGatewaySpec.to_value x.spec)));
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("virtualGatewayName",
+          (Some (ResourceName.to_value x.virtualGatewayName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualGatewayName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "virtualGatewayName") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let spec =
+        VirtualGatewaySpec.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "spec") in
+      let meshOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "meshOwner") in
+      let meshName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "meshName") in
+      let clientToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ~virtualGatewayName ?tags ~spec ?meshOwner ~meshName ?clientToken
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualGatewayName =
+        field_map_exn json__ "virtualGatewayName" ResourceName.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let spec = field_map_exn json__ "spec" VirtualGatewaySpec.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
+      make ~virtualGatewayName ?tags ~spec ?meshOwner ~meshName ?clientToken
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a virtual gateway. A virtual gateway allows resources outside your mesh to communicate to resources that are inside your mesh. The virtual gateway represents an Envoy proxy running in an Amazon ECS task, in a Kubernetes service, or on an Amazon EC2 instance. Unlike a virtual node, which represents an Envoy running with an application, a virtual gateway represents Envoy deployed by itself. For more information about virtual gateways, see Virtual gateways."]
+module CreateRouteOutput =
+  struct
+    type nonrec t =
+      {
+      route: RouteData.t option
+        [@ocaml.doc
+          "The full description of your mesh following the create call."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `InternalServerErrorException of InternalServerErrorException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?route = fun () -> { route }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "InternalServerErrorException" ->
+          `InternalServerErrorException
+            (InternalServerErrorException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `InternalServerErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServerErrorException"));
+            ("details", (InternalServerErrorException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ?route:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("route", (Option.map x.route ~f:RouteData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let route =
-        RouteData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "route") in
-      make ~route ()
+        (Option.map ~f:RouteData.of_xml) (Xml.child xml_arg0 "route") in
+      make ?route ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let route = field_map_exn json "route" RouteData.of_json in
-      make ~route ()
+    let of_json json__ =
+      let route = field_map json__ "route" RouteData.of_json in
+      make ?route ()
     let to_json v = composed_to_json to_value v
   end
 module CreateRouteInput =
@@ -13833,7 +14181,7 @@ module CreateRouteInput =
         [@ocaml.doc "The name of the service mesh to create the route in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then the account that you specify must share the mesh with your account before you can create the resource in the service mesh. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then the account that you specify must share the mesh with your account before you can create the resource in the service mesh. For more information about mesh sharing, see Working with shared meshes."];
       routeName: ResourceName.t [@ocaml.doc "The name to use for the route."];
       spec: RouteSpec.t [@ocaml.doc "The route specification to apply."];
       tags: TagList.t option
@@ -13891,15 +14239,15 @@ module CreateRouteInput =
       make ~virtualRouterName ?tags ~spec ~routeName ?meshOwner ~meshName
         ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualRouterName =
-        field_map_exn json "virtualRouterName" ResourceName.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let spec = field_map_exn json "spec" RouteSpec.of_json in
-      let routeName = field_map_exn json "routeName" ResourceName.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
+        field_map_exn json__ "virtualRouterName" ResourceName.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let spec = field_map_exn json__ "spec" RouteSpec.of_json in
+      let routeName = field_map_exn json__ "routeName" ResourceName.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       make ~virtualRouterName ?tags ~spec ~routeName ?meshOwner ~meshName
         ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -13908,7 +14256,7 @@ module CreateMeshOutput =
   struct
     type nonrec t =
       {
-      mesh: MeshData.t
+      mesh: MeshData.t option
         [@ocaml.doc
           "The full description of your service mesh following the create call."]}
     type nonrec error =
@@ -13921,8 +14269,7 @@ module CreateMeshOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateMeshOutput"
-    let make ~mesh = fun () -> { mesh }
+    let make ?mesh = fun () -> { mesh }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -14007,18 +14354,17 @@ module CreateMeshOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~mesh:pipe ())
+    let of_header_and_body = ((fun (xs, pipe) -> make ?mesh:(Some pipe) ())
       [@warning "-27"])
     let to_value x =
-      structure_to_value [("mesh", (Some (MeshData.to_value x.mesh)))]
+      structure_to_value [("mesh", (Option.map x.mesh ~f:MeshData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let mesh =
-        MeshData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "mesh") in
-      make ~mesh ()
+      let mesh = (Option.map ~f:MeshData.of_xml) (Xml.child xml_arg0 "mesh") in
+      make ?mesh ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mesh = field_map_exn json "mesh" MeshData.of_json in make ~mesh ()
+    let of_json json__ =
+      let mesh = field_map json__ "mesh" MeshData.of_json in make ?mesh ()
     let to_json v = composed_to_json to_value v
   end
 module CreateMeshInput =
@@ -14057,11 +14403,11 @@ module CreateMeshInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ?tags ?spec ~meshName ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let spec = field_map json "spec" MeshSpec.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let spec = field_map json__ "spec" MeshSpec.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       make ?tags ?spec ~meshName ?clientToken ()
     let to_json v = composed_to_json to_value v
   end
@@ -14069,7 +14415,7 @@ module CreateGatewayRouteOutput =
   struct
     type nonrec t =
       {
-      gatewayRoute: GatewayRouteData.t
+      gatewayRoute: GatewayRouteData.t option
         [@ocaml.doc
           "The full description of your gateway route following the create call."]}
     type nonrec error =
@@ -14082,8 +14428,7 @@ module CreateGatewayRouteOutput =
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateGatewayRouteOutput"
-    let make ~gatewayRoute = fun () -> { gatewayRoute }
+    let make ?gatewayRoute = fun () -> { gatewayRoute }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -14168,22 +14513,23 @@ module CreateGatewayRouteOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~gatewayRoute:pipe ())
-      [@warning "-27"])
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?gatewayRoute:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
-        [("gatewayRoute", (Some (GatewayRouteData.to_value x.gatewayRoute)))]
+        [("gatewayRoute",
+           (Option.map x.gatewayRoute ~f:GatewayRouteData.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let gatewayRoute =
-        GatewayRouteData.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "gatewayRoute") in
-      make ~gatewayRoute ()
+        (Option.map ~f:GatewayRouteData.of_xml)
+          (Xml.child xml_arg0 "gatewayRoute") in
+      make ?gatewayRoute ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let gatewayRoute =
-        field_map_exn json "gatewayRoute" GatewayRouteData.of_json in
-      make ~gatewayRoute ()
+        field_map json__ "gatewayRoute" GatewayRouteData.of_json in
+      make ?gatewayRoute ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a gateway route. A gateway route is attached to a virtual gateway and routes traffic to an existing virtual service. If a route matches a request, it can distribute traffic to a target virtual service. For more information about gateway routes, see Gateway routes."]
@@ -14201,7 +14547,7 @@ module CreateGatewayRouteInput =
           "The name of the service mesh to create the gateway route in."];
       meshOwner: AccountId.t option
         [@ocaml.doc
-          "The AWS IAM account ID of the service mesh owner. If the account ID is not your own, then the account that you specify must share the mesh with your account before you can create the resource in the service mesh. For more information about mesh sharing, see Working with shared meshes."];
+          "The Amazon Web Services IAM account ID of the service mesh owner. If the account ID is not your own, then the account that you specify must share the mesh with your account before you can create the resource in the service mesh. For more information about mesh sharing, see Working with shared meshes."];
       spec: GatewayRouteSpec.t
         [@ocaml.doc "The gateway route specification to apply."];
       tags: TagList.t option
@@ -14261,16 +14607,16 @@ module CreateGatewayRouteInput =
       make ~virtualGatewayName ?tags ~spec ?meshOwner ~meshName
         ~gatewayRouteName ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayName =
-        field_map_exn json "virtualGatewayName" ResourceName.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let spec = field_map_exn json "spec" GatewayRouteSpec.of_json in
-      let meshOwner = field_map json "meshOwner" AccountId.of_json in
-      let meshName = field_map_exn json "meshName" ResourceName.of_json in
+        field_map_exn json__ "virtualGatewayName" ResourceName.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let spec = field_map_exn json__ "spec" GatewayRouteSpec.of_json in
+      let meshOwner = field_map json__ "meshOwner" AccountId.of_json in
+      let meshName = field_map_exn json__ "meshName" ResourceName.of_json in
       let gatewayRouteName =
-        field_map_exn json "gatewayRouteName" ResourceName.of_json in
-      let clientToken = field_map json "clientToken" String_.of_json in
+        field_map_exn json__ "gatewayRouteName" ResourceName.of_json in
+      let clientToken = field_map json__ "clientToken" String_.of_json in
       make ~virtualGatewayName ?tags ~spec ?meshOwner ~meshName
         ~gatewayRouteName ?clientToken ()
     let to_json v = composed_to_json to_value v

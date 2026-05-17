@@ -116,9 +116,9 @@ module EventTriggerDefinition =
           (Xml.child xml_arg0 "EventResourceARN") in
       make ?eventResourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventResourceARN =
-        field_map json "EventResourceARN" ResourceARN.of_json in
+        field_map json__ "EventResourceARN" ResourceARN.of_json in
       make ?eventResourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -171,11 +171,11 @@ module TargetOnDeviceService =
           (Xml.child xml_arg0 "ServiceName") in
       make ?transferOption ?serviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transferOption =
-        field_map json "TransferOption" TransferOption.of_json in
+        field_map json__ "TransferOption" TransferOption.of_json in
       let serviceName =
-        field_map json "ServiceName" DeviceServiceName.of_json in
+        field_map json__ "ServiceName" DeviceServiceName.of_json in
       make ?transferOption ?serviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -219,6 +219,9 @@ module EventTriggerDefinitionList =
   struct
     type nonrec t = EventTriggerDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventTriggerDefinition.to_value)) |>
         (fun x -> `List x)
@@ -265,9 +268,9 @@ module KeyRange =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "BeginMarker") in
       make ?endMarker ?beginMarker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endMarker = field_map json "EndMarker" String_.of_json in
-      let beginMarker = field_map json "BeginMarker" String_.of_json in
+    let of_json json__ =
+      let endMarker = field_map json__ "EndMarker" String_.of_json in
+      let beginMarker = field_map json__ "BeginMarker" String_.of_json in
       make ?endMarker ?beginMarker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -276,6 +279,9 @@ module TargetOnDeviceServiceList =
   struct
     type nonrec t = TargetOnDeviceService.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetOnDeviceService.to_value)) |>
         (fun x -> `List x)
@@ -303,7 +309,7 @@ module WirelessConnection =
     type nonrec t =
       {
       isWifiEnabled: Boolean.t option
-        [@ocaml.doc "Enables the Wi-Fi adapter on an Snowcone device."]}
+        [@ocaml.doc "Enables the Wi-Fi adapter on an Snowball Edge device."]}
     let make ?isWifiEnabled = fun () -> { isWifiEnabled }
     let to_value x =
       structure_to_value
@@ -314,12 +320,12 @@ module WirelessConnection =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsWifiEnabled") in
       make ?isWifiEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isWifiEnabled = field_map json "IsWifiEnabled" Boolean.of_json in
+    let of_json json__ =
+      let isWifiEnabled = field_map json__ "IsWifiEnabled" Boolean.of_json in
       make ?isWifiEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configures the wireless connection on an Snowcone device."]
+       "Configures the wireless connection on an Snowball Edge device."]
 module Ec2AmiResource =
   struct
     type nonrec t =
@@ -342,13 +348,13 @@ module Ec2AmiResource =
         AmiId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AmiId") in
       make ?snowballAmiId ~amiId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snowballAmiId = field_map json "SnowballAmiId" String_.of_json in
-      let amiId = field_map_exn json "AmiId" AmiId.of_json in
+    let of_json json__ =
+      let snowballAmiId = field_map json__ "SnowballAmiId" String_.of_json in
+      let amiId = field_map_exn json__ "AmiId" AmiId.of_json in
       make ?snowballAmiId ~amiId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A JSON-formatted object that contains the IDs for an Amazon Machine Image (AMI), including the Amazon EC2 AMI ID and the Snow device AMI ID. Each AMI has these two IDs to simplify identifying the AMI in both the Amazon Web Services Cloud and on the device."]
+       "A JSON-formatted object that contains the IDs for an Amazon Machine Image (AMI), including the Amazon EC2-compatible AMI ID and the Snow device AMI ID. Each AMI has these two IDs to simplify identifying the AMI in both the Amazon Web Services Cloud and on the device."]
 module LambdaResource =
   struct
     type nonrec t =
@@ -375,10 +381,10 @@ module LambdaResource =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "LambdaArn") in
       make ?eventTriggers ?lambdaArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventTriggers =
-        field_map json "EventTriggers" EventTriggerDefinitionList.of_json in
-      let lambdaArn = field_map json "LambdaArn" ResourceARN.of_json in
+        field_map json__ "EventTriggers" EventTriggerDefinitionList.of_json in
+      let lambdaArn = field_map json__ "LambdaArn" ResourceARN.of_json in
       make ?eventTriggers ?lambdaArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Identifies"]
@@ -416,12 +422,12 @@ module S3Resource =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "BucketArn") in
       make ?targetOnDeviceServices ?keyRange ?bucketArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetOnDeviceServices =
-        field_map json "TargetOnDeviceServices"
+        field_map json__ "TargetOnDeviceServices"
           TargetOnDeviceServiceList.of_json in
-      let keyRange = field_map json "KeyRange" KeyRange.of_json in
-      let bucketArn = field_map json "BucketArn" ResourceARN.of_json in
+      let keyRange = field_map json__ "KeyRange" KeyRange.of_json in
+      let bucketArn = field_map json__ "BucketArn" ResourceARN.of_json in
       make ?targetOnDeviceServices ?keyRange ?bucketArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -515,6 +521,56 @@ module StorageUnit =
     let of_json j = of_string (string_of_json ~kind:"StorageUnit" j)
     let to_json = simple_to_json to_value
   end
+module NodeFaultTolerance =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:4) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NodeFaultTolerance" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module S3StorageLimit =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in ok_or_failwith (check_float_min i ~min:0.); i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module ServiceSize =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:16) >>= (fun () -> check_int_min i ~min:3));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ServiceSize" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module GSTIN =
   struct
     type nonrec t = string
@@ -578,7 +634,7 @@ module SnowconeDeviceConfiguration =
       {
       wirelessConnection: WirelessConnection.t option
         [@ocaml.doc
-          "Configures the wireless connection for the Snowcone device."]}
+          "Configures the wireless connection for the Snowball Edge device."]}
     let make ?wirelessConnection = fun () -> { wirelessConnection }
     let to_value x =
       structure_to_value
@@ -591,16 +647,20 @@ module SnowconeDeviceConfiguration =
           (Xml.child xml_arg0 "WirelessConnection") in
       make ?wirelessConnection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let wirelessConnection =
-        field_map json "WirelessConnection" WirelessConnection.of_json in
+        field_map json__ "WirelessConnection" WirelessConnection.of_json in
       make ?wirelessConnection ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Specifies the device configuration for an Snowcone job."]
+  end[@@ocaml.doc
+       "Specifies the device configuration for an Snowball Edge job."]
 module Ec2AmiResourceList =
   struct
     type nonrec t = Ec2AmiResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ec2AmiResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -626,6 +686,9 @@ module LambdaResourceList =
   struct
     type nonrec t = LambdaResource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LambdaResource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -651,6 +714,9 @@ module S3ResourceList =
   struct
     type nonrec t = S3Resource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:S3Resource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -675,6 +741,9 @@ module JobStateList =
   struct
     type nonrec t = JobState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -714,6 +783,44 @@ module SnsTopicARN =
     let of_json j = string_of_json ~kind:"SnsTopicARN" j
     let to_json = simple_to_json to_value
   end
+module EKSOnDeviceServiceConfiguration =
+  struct
+    type nonrec t =
+      {
+      kubernetesVersion: String_.t option
+        [@ocaml.doc
+          "The Kubernetes version for EKS Anywhere on the Snow Family device."];
+      eKSAnywhereVersion: String_.t option
+        [@ocaml.doc
+          "The optional version of EKS Anywhere on the Snow Family device."]}
+    let make ?kubernetesVersion =
+      fun ?eKSAnywhereVersion ->
+        fun () -> { kubernetesVersion; eKSAnywhereVersion }
+    let to_value x =
+      structure_to_value
+        [("KubernetesVersion",
+           (Option.map x.kubernetesVersion ~f:String_.to_value));
+        ("EKSAnywhereVersion",
+          (Option.map x.eKSAnywhereVersion ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eKSAnywhereVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "EKSAnywhereVersion") in
+      let kubernetesVersion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "KubernetesVersion") in
+      make ?eKSAnywhereVersion ?kubernetesVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eKSAnywhereVersion =
+        field_map json__ "EKSAnywhereVersion" String_.of_json in
+      let kubernetesVersion =
+        field_map json__ "KubernetesVersion" String_.of_json in
+      make ?eKSAnywhereVersion ?kubernetesVersion ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object representing the metadata and configuration settings of EKS Anywhere on the Snow Family device."]
 module NFSOnDeviceServiceConfiguration =
   struct
     type nonrec t =
@@ -739,13 +846,67 @@ module NFSOnDeviceServiceConfiguration =
           (Xml.child xml_arg0 "StorageLimit") in
       make ?storageUnit ?storageLimit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let storageUnit = field_map json "StorageUnit" StorageUnit.of_json in
-      let storageLimit = field_map json "StorageLimit" StorageLimit.of_json in
+    let of_json json__ =
+      let storageUnit = field_map json__ "StorageUnit" StorageUnit.of_json in
+      let storageLimit = field_map json__ "StorageLimit" StorageLimit.of_json in
       make ?storageUnit ?storageLimit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the metadata and configuration settings for the NFS (Network File System) service on an Amazon Web Services Snow Family device."]
+module S3OnDeviceServiceConfiguration =
+  struct
+    type nonrec t =
+      {
+      storageLimit: S3StorageLimit.t option
+        [@ocaml.doc
+          "If the specified storage limit value matches storage limit of one of the defined configurations, that configuration will be used. If the specified storage limit value does not match any defined configuration, the request will fail. If more than one configuration has the same storage limit as specified, the other input need to be provided."];
+      storageUnit: StorageUnit.t option
+        [@ocaml.doc "Storage unit. Currently the only supported unit is TB."];
+      serviceSize: ServiceSize.t option
+        [@ocaml.doc
+          "Applicable when creating a cluster. Specifies how many nodes are needed for Amazon S3 compatible storage on Snow family devices. If specified, the other input can be omitted."];
+      faultTolerance: NodeFaultTolerance.t option
+        [@ocaml.doc
+          ">Fault tolerance level of the cluster. This indicates the number of nodes that can go down without degrading the performance of the cluster. This additional input helps when the specified StorageLimit matches more than one Amazon S3 compatible storage on Snow family devices service configuration."]}
+    let make ?storageLimit =
+      fun ?storageUnit ->
+        fun ?serviceSize ->
+          fun ?faultTolerance ->
+            fun () ->
+              { storageLimit; storageUnit; serviceSize; faultTolerance }
+    let to_value x =
+      structure_to_value
+        [("StorageLimit",
+           (Option.map x.storageLimit ~f:S3StorageLimit.to_value));
+        ("StorageUnit", (Option.map x.storageUnit ~f:StorageUnit.to_value));
+        ("ServiceSize", (Option.map x.serviceSize ~f:ServiceSize.to_value));
+        ("FaultTolerance",
+          (Option.map x.faultTolerance ~f:NodeFaultTolerance.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let faultTolerance =
+        (Option.map ~f:NodeFaultTolerance.of_xml)
+          (Xml.child xml_arg0 "FaultTolerance") in
+      let serviceSize =
+        (Option.map ~f:ServiceSize.of_xml) (Xml.child xml_arg0 "ServiceSize") in
+      let storageUnit =
+        (Option.map ~f:StorageUnit.of_xml) (Xml.child xml_arg0 "StorageUnit") in
+      let storageLimit =
+        (Option.map ~f:S3StorageLimit.of_xml)
+          (Xml.child xml_arg0 "StorageLimit") in
+      make ?faultTolerance ?serviceSize ?storageUnit ?storageLimit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let faultTolerance =
+        field_map json__ "FaultTolerance" NodeFaultTolerance.of_json in
+      let serviceSize = field_map json__ "ServiceSize" ServiceSize.of_json in
+      let storageUnit = field_map json__ "StorageUnit" StorageUnit.of_json in
+      let storageLimit =
+        field_map json__ "StorageLimit" S3StorageLimit.of_json in
+      make ?faultTolerance ?serviceSize ?storageUnit ?storageLimit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Amazon S3 compatible storage on Snow family devices configuration items."]
 module TGWOnDeviceServiceConfiguration =
   struct
     type nonrec t =
@@ -771,13 +932,90 @@ module TGWOnDeviceServiceConfiguration =
           (Xml.child xml_arg0 "StorageLimit") in
       make ?storageUnit ?storageLimit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let storageUnit = field_map json "StorageUnit" StorageUnit.of_json in
-      let storageLimit = field_map json "StorageLimit" StorageLimit.of_json in
+    let of_json json__ =
+      let storageUnit = field_map json__ "StorageUnit" StorageUnit.of_json in
+      let storageLimit = field_map json__ "StorageLimit" StorageLimit.of_json in
       make ?storageUnit ?storageLimit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the metadata and configuration settings for the Storage Gateway service Tape Gateway type on an Amazon Web Services Snow Family device."]
+module DevicePickupId =
+  struct
+    type nonrec t = string
+    let context_ = "DevicePickupId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:40) >>=
+             (fun () ->
+                (check_string_max i ~max:40) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"DPID[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DevicePickupId" j
+    let to_json = simple_to_json to_value
+  end
+module Email =
+  struct
+    type nonrec t = string
+    let context_ = "Email"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:320) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^(?=.{3,100}$).+@.+[.].+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Email" j
+    let to_json = simple_to_json to_value
+  end
+module PhoneNumber =
+  struct
+    type nonrec t = string
+    let context_ = "PhoneNumber"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:7) >>=
+             (fun () ->
+                (check_string_max i ~max:30) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^\\s*(?:\\+?(\\d{1,3}))?[-. (]*(\\d{3})[-. )]*(\\d{3})[-. ]*(\\d{4})(?: *x(\\d+))?\\s*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PhoneNumber" j
+    let to_json = simple_to_json to_value
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
 module Shipment =
   struct
     type nonrec t =
@@ -801,9 +1039,9 @@ module Shipment =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
       make ?trackingNumber ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackingNumber = field_map json "TrackingNumber" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
+    let of_json json__ =
+      let trackingNumber = field_map json__ "TrackingNumber" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       make ?trackingNumber ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -854,11 +1092,104 @@ module INDTaxDocuments =
       let gSTIN = (Option.map ~f:GSTIN.of_xml) (Xml.child xml_arg0 "GSTIN") in
       make ?gSTIN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gSTIN = field_map json "GSTIN" GSTIN.of_json in make ?gSTIN ()
+    let of_json json__ =
+      let gSTIN = field_map json__ "GSTIN" GSTIN.of_json in make ?gSTIN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The tax documents required in Amazon Web Services Region in India."]
+module ServiceName =
+  struct
+    type nonrec t =
+      | KUBERNETES 
+      | EKS_ANYWHERE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | KUBERNETES -> "KUBERNETES"
+      | EKS_ANYWHERE -> "EKS_ANYWHERE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "KUBERNETES" -> KUBERNETES
+      | "EKS_ANYWHERE" -> EKS_ANYWHERE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ServiceName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ServiceName" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceVersion =
+  struct
+    type nonrec t =
+      {
+      version: String_.t option
+        [@ocaml.doc "The version number of the requested service."]}
+    let make ?version = fun () -> { version }
+    let to_value x =
+      structure_to_value
+        [("Version", (Option.map x.version ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Version") in
+      make ?version ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map json__ "Version" String_.of_json in
+      make ?version ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The version of the requested service."]
+module AddressId =
+  struct
+    type nonrec t = string
+    let context_ = "AddressId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:40) >>=
+             (fun () ->
+                (check_string_max i ~max:40) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"ADID[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AddressId" j
+    let to_json = simple_to_json to_value
+  end
+module AddressType =
+  struct
+    type nonrec t =
+      | CUST_PICKUP 
+      | AWS_SHIP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CUST_PICKUP -> "CUST_PICKUP"
+      | AWS_SHIP -> "AWS_SHIP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CUST_PICKUP" -> CUST_PICKUP
+      | "AWS_SHIP" -> AWS_SHIP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AddressType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AddressType" j)
+    let to_json = simple_to_json to_value
+  end
 module JavaBoolean =
   struct
     type nonrec t = bool
@@ -876,6 +1207,9 @@ module LongTermPricingAssociatedJobIdList =
   struct
     type nonrec t = JobId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -924,17 +1258,20 @@ module LongTermPricingType =
     type nonrec t =
       | OneYear 
       | ThreeYear 
+      | OneMonth 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | OneYear -> "OneYear"
       | ThreeYear -> "ThreeYear"
+      | OneMonth -> "OneMonth"
       | Non_static_id s -> s
     let of_string =
       function
       | "OneYear" -> OneYear
       | "ThreeYear" -> ThreeYear
+      | "OneMonth" -> OneMonth
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -955,6 +1292,9 @@ module SnowballType =
       | EDGE_S 
       | SNC1_HDD 
       | SNC1_SSD 
+      | V3_5C 
+      | V3_5S 
+      | RACK_5U_C 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -966,6 +1306,9 @@ module SnowballType =
       | EDGE_S -> "EDGE_S"
       | SNC1_HDD -> "SNC1_HDD"
       | SNC1_SSD -> "SNC1_SSD"
+      | V3_5C -> "V3_5C"
+      | V3_5S -> "V3_5S"
+      | RACK_5U_C -> "RACK_5U_C"
       | Non_static_id s -> s
     let of_string =
       function
@@ -976,6 +1319,9 @@ module SnowballType =
       | "EDGE_S" -> EDGE_S
       | "SNC1_HDD" -> SNC1_HDD
       | "SNC1_SSD" -> SNC1_SSD
+      | "V3_5C" -> V3_5C
+      | "V3_5S" -> V3_5S
+      | "RACK_5U_C" -> RACK_5U_C
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -983,18 +1329,6 @@ module SnowballType =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration SnowballType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"SnowballType" j)
-    let to_json = simple_to_json to_value
-  end
-module Timestamp =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
 module JobType =
@@ -1059,28 +1393,6 @@ module ClusterState =
     let of_json j = of_string (string_of_json ~kind:"ClusterState" j)
     let to_json = simple_to_json to_value
   end
-module AddressId =
-  struct
-    type nonrec t = string
-    let context_ = "AddressId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:40) >>=
-             (fun () ->
-                (check_string_max i ~max:40) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"ADID[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AddressId" j
-    let to_json = simple_to_json to_value
-  end
 module DataTransfer =
   struct
     type nonrec t =
@@ -1128,12 +1440,12 @@ module DataTransfer =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "BytesTransferred") in
       make ?totalObjects ?totalBytes ?objectsTransferred ?bytesTransferred ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let totalObjects = field_map json "TotalObjects" Long.of_json in
-      let totalBytes = field_map json "TotalBytes" Long.of_json in
+    let of_json json__ =
+      let totalObjects = field_map json__ "TotalObjects" Long.of_json in
+      let totalBytes = field_map json__ "TotalBytes" Long.of_json in
       let objectsTransferred =
-        field_map json "ObjectsTransferred" Long.of_json in
-      let bytesTransferred = field_map json "BytesTransferred" Long.of_json in
+        field_map json__ "ObjectsTransferred" Long.of_json in
+      let bytesTransferred = field_map json__ "BytesTransferred" Long.of_json in
       make ?totalObjects ?totalBytes ?objectsTransferred ?bytesTransferred ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1144,7 +1456,7 @@ module DeviceConfiguration =
       {
       snowconeDeviceConfiguration: SnowconeDeviceConfiguration.t option
         [@ocaml.doc
-          "Returns information about the device configuration for an Snowcone job."]}
+          "Returns information about the device configuration for an Snowball Edge job."]}
     let make ?snowconeDeviceConfiguration =
       fun () -> { snowconeDeviceConfiguration }
     let to_value x =
@@ -1159,13 +1471,47 @@ module DeviceConfiguration =
           (Xml.child xml_arg0 "SnowconeDeviceConfiguration") in
       make ?snowconeDeviceConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snowconeDeviceConfiguration =
-        field_map json "SnowconeDeviceConfiguration"
+        field_map json__ "SnowconeDeviceConfiguration"
           SnowconeDeviceConfiguration.of_json in
       make ?snowconeDeviceConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The container for SnowconeDeviceConfiguration."]
+module ImpactLevel =
+  struct
+    type nonrec t =
+      | IL2 
+      | IL4 
+      | IL5 
+      | IL6 
+      | IL99 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IL2 -> "IL2"
+      | IL4 -> "IL4"
+      | IL5 -> "IL5"
+      | IL6 -> "IL6"
+      | IL99 -> "IL99"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IL2" -> IL2
+      | "IL4" -> IL4
+      | "IL5" -> IL5
+      | "IL6" -> IL6
+      | "IL99" -> IL99
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ImpactLevel" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImpactLevel" j)
+    let to_json = simple_to_json to_value
+  end
 module JobLogs =
   struct
     type nonrec t =
@@ -1205,13 +1551,13 @@ module JobLogs =
           (Xml.child xml_arg0 "JobCompletionReportURI") in
       make ?jobFailureLogURI ?jobSuccessLogURI ?jobCompletionReportURI ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let jobFailureLogURI =
-        field_map json "JobFailureLogURI" String_.of_json in
+        field_map json__ "JobFailureLogURI" String_.of_json in
       let jobSuccessLogURI =
-        field_map json "JobSuccessLogURI" String_.of_json in
+        field_map json__ "JobSuccessLogURI" String_.of_json in
       let jobCompletionReportURI =
-        field_map json "JobCompletionReportURI" String_.of_json in
+        field_map json__ "JobCompletionReportURI" String_.of_json in
       make ?jobFailureLogURI ?jobSuccessLogURI ?jobCompletionReportURI ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1252,12 +1598,12 @@ module JobResource =
           (Xml.child xml_arg0 "S3Resources") in
       make ?ec2AmiResources ?lambdaResources ?s3Resources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ec2AmiResources =
-        field_map json "Ec2AmiResources" Ec2AmiResourceList.of_json in
+        field_map json__ "Ec2AmiResources" Ec2AmiResourceList.of_json in
       let lambdaResources =
-        field_map json "LambdaResources" LambdaResourceList.of_json in
-      let s3Resources = field_map json "S3Resources" S3ResourceList.of_json in
+        field_map json__ "LambdaResources" LambdaResourceList.of_json in
+      let s3Resources = field_map json__ "S3Resources" S3ResourceList.of_json in
       make ?ec2AmiResources ?lambdaResources ?s3Resources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1293,19 +1639,34 @@ module Notification =
           "The list of job states that will trigger a notification for this job."];
       notifyAll: Boolean.t option
         [@ocaml.doc
-          "Any change in job state will trigger a notification for this job."]}
+          "Any change in job state will trigger a notification for this job."];
+      devicePickupSnsTopicARN: SnsTopicARN.t option
+        [@ocaml.doc
+          "Used to send SNS notifications for the person picking up the device (identified during job creation)."]}
     let make ?snsTopicARN =
       fun ?jobStatesToNotify ->
         fun ?notifyAll ->
-          fun () -> { snsTopicARN; jobStatesToNotify; notifyAll }
+          fun ?devicePickupSnsTopicARN ->
+            fun () ->
+              {
+                snsTopicARN;
+                jobStatesToNotify;
+                notifyAll;
+                devicePickupSnsTopicARN
+              }
     let to_value x =
       structure_to_value
         [("SnsTopicARN", (Option.map x.snsTopicARN ~f:SnsTopicARN.to_value));
         ("JobStatesToNotify",
           (Option.map x.jobStatesToNotify ~f:JobStateList.to_value));
-        ("NotifyAll", (Option.map x.notifyAll ~f:Boolean.to_value))]
+        ("NotifyAll", (Option.map x.notifyAll ~f:Boolean.to_value));
+        ("DevicePickupSnsTopicARN",
+          (Option.map x.devicePickupSnsTopicARN ~f:SnsTopicARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let devicePickupSnsTopicARN =
+        (Option.map ~f:SnsTopicARN.of_xml)
+          (Xml.child xml_arg0 "DevicePickupSnsTopicARN") in
       let notifyAll =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "NotifyAll") in
       let jobStatesToNotify =
@@ -1313,14 +1674,18 @@ module Notification =
           (Xml.child xml_arg0 "JobStatesToNotify") in
       let snsTopicARN =
         (Option.map ~f:SnsTopicARN.of_xml) (Xml.child xml_arg0 "SnsTopicARN") in
-      make ?notifyAll ?jobStatesToNotify ?snsTopicARN ()
+      make ?devicePickupSnsTopicARN ?notifyAll ?jobStatesToNotify
+        ?snsTopicARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let notifyAll = field_map json "NotifyAll" Boolean.of_json in
+    let of_json json__ =
+      let devicePickupSnsTopicARN =
+        field_map json__ "DevicePickupSnsTopicARN" SnsTopicARN.of_json in
+      let notifyAll = field_map json__ "NotifyAll" Boolean.of_json in
       let jobStatesToNotify =
-        field_map json "JobStatesToNotify" JobStateList.of_json in
-      let snsTopicARN = field_map json "SnsTopicARN" SnsTopicARN.of_json in
-      make ?notifyAll ?jobStatesToNotify ?snsTopicARN ()
+        field_map json__ "JobStatesToNotify" JobStateList.of_json in
+      let snsTopicARN = field_map json__ "SnsTopicARN" SnsTopicARN.of_json in
+      make ?devicePickupSnsTopicARN ?notifyAll ?jobStatesToNotify
+        ?snsTopicARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Amazon Simple Notification Service (Amazon SNS) notification settings associated with a specific job. The Notification object is returned as a part of the response syntax of the DescribeJob action in the JobMetadata data type. When the notification settings are defined during job creation, you can choose to notify based on a specific set of job states using the JobStatesToNotify array of strings, or you can specify that you want to have Amazon SNS notifications sent out for all job states with NotifyAll set to true."]
@@ -1333,10 +1698,24 @@ module OnDeviceServiceConfiguration =
           "Represents the NFS (Network File System) service on a Snow Family device."];
       tGWOnDeviceService: TGWOnDeviceServiceConfiguration.t option
         [@ocaml.doc
-          "Represents the Storage Gateway service Tape Gateway type on a Snow Family device."]}
+          "Represents the Storage Gateway service Tape Gateway type on a Snow Family device."];
+      eKSOnDeviceService: EKSOnDeviceServiceConfiguration.t option
+        [@ocaml.doc
+          "The configuration of EKS Anywhere on the Snow Family device."];
+      s3OnDeviceService: S3OnDeviceServiceConfiguration.t option
+        [@ocaml.doc
+          "Configuration for Amazon S3 compatible storage on Snow family devices."]}
     let make ?nFSOnDeviceService =
       fun ?tGWOnDeviceService ->
-        fun () -> { nFSOnDeviceService; tGWOnDeviceService }
+        fun ?eKSOnDeviceService ->
+          fun ?s3OnDeviceService ->
+            fun () ->
+              {
+                nFSOnDeviceService;
+                tGWOnDeviceService;
+                eKSOnDeviceService;
+                s3OnDeviceService
+              }
     let to_value x =
       structure_to_value
         [("NFSOnDeviceService",
@@ -1344,44 +1723,158 @@ module OnDeviceServiceConfiguration =
               ~f:NFSOnDeviceServiceConfiguration.to_value));
         ("TGWOnDeviceService",
           (Option.map x.tGWOnDeviceService
-             ~f:TGWOnDeviceServiceConfiguration.to_value))]
+             ~f:TGWOnDeviceServiceConfiguration.to_value));
+        ("EKSOnDeviceService",
+          (Option.map x.eKSOnDeviceService
+             ~f:EKSOnDeviceServiceConfiguration.to_value));
+        ("S3OnDeviceService",
+          (Option.map x.s3OnDeviceService
+             ~f:S3OnDeviceServiceConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let s3OnDeviceService =
+        (Option.map ~f:S3OnDeviceServiceConfiguration.of_xml)
+          (Xml.child xml_arg0 "S3OnDeviceService") in
+      let eKSOnDeviceService =
+        (Option.map ~f:EKSOnDeviceServiceConfiguration.of_xml)
+          (Xml.child xml_arg0 "EKSOnDeviceService") in
       let tGWOnDeviceService =
         (Option.map ~f:TGWOnDeviceServiceConfiguration.of_xml)
           (Xml.child xml_arg0 "TGWOnDeviceService") in
       let nFSOnDeviceService =
         (Option.map ~f:NFSOnDeviceServiceConfiguration.of_xml)
           (Xml.child xml_arg0 "NFSOnDeviceService") in
-      make ?tGWOnDeviceService ?nFSOnDeviceService ()
+      make ?s3OnDeviceService ?eKSOnDeviceService ?tGWOnDeviceService
+        ?nFSOnDeviceService ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let s3OnDeviceService =
+        field_map json__ "S3OnDeviceService"
+          S3OnDeviceServiceConfiguration.of_json in
+      let eKSOnDeviceService =
+        field_map json__ "EKSOnDeviceService"
+          EKSOnDeviceServiceConfiguration.of_json in
       let tGWOnDeviceService =
-        field_map json "TGWOnDeviceService"
+        field_map json__ "TGWOnDeviceService"
           TGWOnDeviceServiceConfiguration.of_json in
       let nFSOnDeviceService =
-        field_map json "NFSOnDeviceService"
+        field_map json__ "NFSOnDeviceService"
           NFSOnDeviceServiceConfiguration.of_json in
-      make ?tGWOnDeviceService ?nFSOnDeviceService ()
+      make ?s3OnDeviceService ?eKSOnDeviceService ?tGWOnDeviceService
+        ?nFSOnDeviceService ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the metadata and configuration settings for services on an Amazon Web Services Snow Family device."]
+module PickupDetails =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc "The name of the person picking up the device."];
+      phoneNumber: PhoneNumber.t option
+        [@ocaml.doc "The phone number of the person picking up the device."];
+      email: Email.t option
+        [@ocaml.doc "The email address of the person picking up the device."];
+      identificationNumber: String_.t option
+        [@ocaml.doc
+          "The number on the credential identifying the person picking up the device."];
+      identificationExpirationDate: Timestamp.t option
+        [@ocaml.doc
+          "Expiration date of the credential identifying the person picking up the device."];
+      identificationIssuingOrg: String_.t option
+        [@ocaml.doc
+          "Organization that issued the credential identifying the person picking up the device."];
+      devicePickupId: DevicePickupId.t option
+        [@ocaml.doc "The unique ID for a device that will be picked up."]}
+    let make ?name =
+      fun ?phoneNumber ->
+        fun ?email ->
+          fun ?identificationNumber ->
+            fun ?identificationExpirationDate ->
+              fun ?identificationIssuingOrg ->
+                fun ?devicePickupId ->
+                  fun () ->
+                    {
+                      name;
+                      phoneNumber;
+                      email;
+                      identificationNumber;
+                      identificationExpirationDate;
+                      identificationIssuingOrg;
+                      devicePickupId
+                    }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:String_.to_value));
+        ("PhoneNumber", (Option.map x.phoneNumber ~f:PhoneNumber.to_value));
+        ("Email", (Option.map x.email ~f:Email.to_value));
+        ("IdentificationNumber",
+          (Option.map x.identificationNumber ~f:String_.to_value));
+        ("IdentificationExpirationDate",
+          (Option.map x.identificationExpirationDate ~f:Timestamp.to_value));
+        ("IdentificationIssuingOrg",
+          (Option.map x.identificationIssuingOrg ~f:String_.to_value));
+        ("DevicePickupId",
+          (Option.map x.devicePickupId ~f:DevicePickupId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let devicePickupId =
+        (Option.map ~f:DevicePickupId.of_xml)
+          (Xml.child xml_arg0 "DevicePickupId") in
+      let identificationIssuingOrg =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "IdentificationIssuingOrg") in
+      let identificationExpirationDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "IdentificationExpirationDate") in
+      let identificationNumber =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "IdentificationNumber") in
+      let email = (Option.map ~f:Email.of_xml) (Xml.child xml_arg0 "Email") in
+      let phoneNumber =
+        (Option.map ~f:PhoneNumber.of_xml) (Xml.child xml_arg0 "PhoneNumber") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?devicePickupId ?identificationIssuingOrg
+        ?identificationExpirationDate ?identificationNumber ?email
+        ?phoneNumber ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let devicePickupId =
+        field_map json__ "DevicePickupId" DevicePickupId.of_json in
+      let identificationIssuingOrg =
+        field_map json__ "IdentificationIssuingOrg" String_.of_json in
+      let identificationExpirationDate =
+        field_map json__ "IdentificationExpirationDate" Timestamp.of_json in
+      let identificationNumber =
+        field_map json__ "IdentificationNumber" String_.of_json in
+      let email = field_map json__ "Email" Email.of_json in
+      let phoneNumber = field_map json__ "PhoneNumber" PhoneNumber.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?devicePickupId ?identificationIssuingOrg
+        ?identificationExpirationDate ?identificationNumber ?email
+        ?phoneNumber ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information identifying the person picking up the device."]
 module RemoteManagement =
   struct
     type nonrec t =
       | INSTALLED_ONLY 
       | INSTALLED_AUTOSTART 
+      | NOT_INSTALLED 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | INSTALLED_ONLY -> "INSTALLED_ONLY"
       | INSTALLED_AUTOSTART -> "INSTALLED_AUTOSTART"
+      | NOT_INSTALLED -> "NOT_INSTALLED"
       | Non_static_id s -> s
     let of_string =
       function
       | "INSTALLED_ONLY" -> INSTALLED_ONLY
       | "INSTALLED_AUTOSTART" -> INSTALLED_AUTOSTART
+      | "NOT_INSTALLED" -> NOT_INSTALLED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1448,12 +1941,13 @@ module ShippingDetails =
           (Xml.child xml_arg0 "ShippingOption") in
       make ?outboundShipment ?inboundShipment ?shippingOption ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outboundShipment =
-        field_map json "OutboundShipment" Shipment.of_json in
-      let inboundShipment = field_map json "InboundShipment" Shipment.of_json in
+        field_map json__ "OutboundShipment" Shipment.of_json in
+      let inboundShipment =
+        field_map json__ "InboundShipment" Shipment.of_json in
       let shippingOption =
-        field_map json "ShippingOption" ShippingOption.of_json in
+        field_map json__ "ShippingOption" ShippingOption.of_json in
       make ?outboundShipment ?inboundShipment ?shippingOption ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1468,7 +1962,10 @@ module SnowballCapacity =
       | T98 
       | T8 
       | T14 
+      | T32 
       | NoPreference 
+      | T240 
+      | T13 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1480,7 +1977,10 @@ module SnowballCapacity =
       | T98 -> "T98"
       | T8 -> "T8"
       | T14 -> "T14"
+      | T32 -> "T32"
       | NoPreference -> "NoPreference"
+      | T240 -> "T240"
+      | T13 -> "T13"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1491,7 +1991,10 @@ module SnowballCapacity =
       | "T98" -> T98
       | "T8" -> T8
       | "T14" -> T14
+      | "T32" -> T32
       | "NoPreference" -> NoPreference
+      | "T240" -> T240
+      | "T13" -> T13
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1515,11 +2018,201 @@ module TaxDocuments =
         (Option.map ~f:INDTaxDocuments.of_xml) (Xml.child xml_arg0 "IND") in
       make ?iND ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let iND = field_map json "IND" INDTaxDocuments.of_json in make ?iND ()
+    let of_json json__ =
+      let iND = field_map json__ "IND" INDTaxDocuments.of_json in
+      make ?iND ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The tax documents required in your Amazon Web Services Region."]
+module DependentService =
+  struct
+    type nonrec t =
+      {
+      serviceName: ServiceName.t option
+        [@ocaml.doc "The name of the dependent service."];
+      serviceVersion: ServiceVersion.t option
+        [@ocaml.doc "The version of the dependent service."]}
+    let make ?serviceName =
+      fun ?serviceVersion -> fun () -> { serviceName; serviceVersion }
+    let to_value x =
+      structure_to_value
+        [("ServiceName", (Option.map x.serviceName ~f:ServiceName.to_value));
+        ("ServiceVersion",
+          (Option.map x.serviceVersion ~f:ServiceVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceVersion =
+        (Option.map ~f:ServiceVersion.of_xml)
+          (Xml.child xml_arg0 "ServiceVersion") in
+      let serviceName =
+        (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "ServiceName") in
+      make ?serviceVersion ?serviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceVersion =
+        field_map json__ "ServiceVersion" ServiceVersion.of_json in
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
+      make ?serviceVersion ?serviceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The name and version of the service dependant on the requested service."]
+module Address =
+  struct
+    type nonrec t =
+      {
+      addressId: AddressId.t option
+        [@ocaml.doc "The unique ID for an address."];
+      name: String_.t option
+        [@ocaml.doc
+          "The name of a person to receive a Snow device at an address."];
+      company: String_.t option
+        [@ocaml.doc
+          "The name of the company to receive a Snow device at an address."];
+      street1: String_.t option
+        [@ocaml.doc
+          "The first line in a street address that a Snow device is to be delivered to."];
+      street2: String_.t option
+        [@ocaml.doc
+          "The second line in a street address that a Snow device is to be delivered to."];
+      street3: String_.t option
+        [@ocaml.doc
+          "The third line in a street address that a Snow device is to be delivered to."];
+      city: String_.t option
+        [@ocaml.doc
+          "The city in an address that a Snow device is to be delivered to."];
+      stateOrProvince: String_.t option
+        [@ocaml.doc
+          "The state or province in an address that a Snow device is to be delivered to."];
+      prefectureOrDistrict: String_.t option
+        [@ocaml.doc "This field is no longer used and the value is ignored."];
+      landmark: String_.t option
+        [@ocaml.doc "This field is no longer used and the value is ignored."];
+      country: String_.t option
+        [@ocaml.doc
+          "The country in an address that a Snow device is to be delivered to."];
+      postalCode: String_.t option
+        [@ocaml.doc
+          "The postal code in an address that a Snow device is to be delivered to."];
+      phoneNumber: String_.t option
+        [@ocaml.doc
+          "The phone number associated with an address that a Snow device is to be delivered to."];
+      isRestricted: Boolean.t option
+        [@ocaml.doc
+          "If the address you are creating is a primary address, then set this option to true. This field is not supported in most regions."];
+      type_: AddressType.t option
+        [@ocaml.doc
+          "Differentiates between delivery address and pickup address in the customer account. Provided at job creation."]}
+    let make ?addressId =
+      fun ?name ->
+        fun ?company ->
+          fun ?street1 ->
+            fun ?street2 ->
+              fun ?street3 ->
+                fun ?city ->
+                  fun ?stateOrProvince ->
+                    fun ?prefectureOrDistrict ->
+                      fun ?landmark ->
+                        fun ?country ->
+                          fun ?postalCode ->
+                            fun ?phoneNumber ->
+                              fun ?isRestricted ->
+                                fun ?type_ ->
+                                  fun () ->
+                                    {
+                                      addressId;
+                                      name;
+                                      company;
+                                      street1;
+                                      street2;
+                                      street3;
+                                      city;
+                                      stateOrProvince;
+                                      prefectureOrDistrict;
+                                      landmark;
+                                      country;
+                                      postalCode;
+                                      phoneNumber;
+                                      isRestricted;
+                                      type_
+                                    }
+    let to_value x =
+      structure_to_value
+        [("AddressId", (Option.map x.addressId ~f:AddressId.to_value));
+        ("Name", (Option.map x.name ~f:String_.to_value));
+        ("Company", (Option.map x.company ~f:String_.to_value));
+        ("Street1", (Option.map x.street1 ~f:String_.to_value));
+        ("Street2", (Option.map x.street2 ~f:String_.to_value));
+        ("Street3", (Option.map x.street3 ~f:String_.to_value));
+        ("City", (Option.map x.city ~f:String_.to_value));
+        ("StateOrProvince",
+          (Option.map x.stateOrProvince ~f:String_.to_value));
+        ("PrefectureOrDistrict",
+          (Option.map x.prefectureOrDistrict ~f:String_.to_value));
+        ("Landmark", (Option.map x.landmark ~f:String_.to_value));
+        ("Country", (Option.map x.country ~f:String_.to_value));
+        ("PostalCode", (Option.map x.postalCode ~f:String_.to_value));
+        ("PhoneNumber", (Option.map x.phoneNumber ~f:String_.to_value));
+        ("IsRestricted", (Option.map x.isRestricted ~f:Boolean.to_value));
+        ("Type", (Option.map x.type_ ~f:AddressType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:AddressType.of_xml) (Xml.child xml_arg0 "Type") in
+      let isRestricted =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsRestricted") in
+      let phoneNumber =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PhoneNumber") in
+      let postalCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PostalCode") in
+      let country =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Country") in
+      let landmark =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Landmark") in
+      let prefectureOrDistrict =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "PrefectureOrDistrict") in
+      let stateOrProvince =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StateOrProvince") in
+      let city = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "City") in
+      let street3 =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Street3") in
+      let street2 =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Street2") in
+      let street1 =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Street1") in
+      let company =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Company") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      let addressId =
+        (Option.map ~f:AddressId.of_xml) (Xml.child xml_arg0 "AddressId") in
+      make ?type_ ?isRestricted ?phoneNumber ?postalCode ?country ?landmark
+        ?prefectureOrDistrict ?stateOrProvince ?city ?street3 ?street2
+        ?street1 ?company ?name ?addressId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" AddressType.of_json in
+      let isRestricted = field_map json__ "IsRestricted" Boolean.of_json in
+      let phoneNumber = field_map json__ "PhoneNumber" String_.of_json in
+      let postalCode = field_map json__ "PostalCode" String_.of_json in
+      let country = field_map json__ "Country" String_.of_json in
+      let landmark = field_map json__ "Landmark" String_.of_json in
+      let prefectureOrDistrict =
+        field_map json__ "PrefectureOrDistrict" String_.of_json in
+      let stateOrProvince =
+        field_map json__ "StateOrProvince" String_.of_json in
+      let city = field_map json__ "City" String_.of_json in
+      let street3 = field_map json__ "Street3" String_.of_json in
+      let street2 = field_map json__ "Street2" String_.of_json in
+      let street1 = field_map json__ "Street1" String_.of_json in
+      let company = field_map json__ "Company" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let addressId = field_map json__ "AddressId" AddressId.of_json in
+      make ?type_ ?isRestricted ?phoneNumber ?postalCode ?country ?landmark
+        ?prefectureOrDistrict ?stateOrProvince ?city ?street3 ?street2
+        ?street1 ?company ?name ?addressId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The address that you want the Snow device(s) associated with a specific job to be shipped to. Addresses are validated at the time of creation. The address you provide must be located within the serviceable area of your region. Although no individual elements of the Address are required, if the address is invalid or unsupported, then an exception is thrown."]
 module LongTermPricingListEntry =
   struct
     type nonrec t =
@@ -1546,7 +2239,7 @@ module LongTermPricingListEntry =
         [@ocaml.doc "The status of the long-term pricing type."];
       snowballType: SnowballType.t option
         [@ocaml.doc
-          "The type of Snow Family Devices associated with this long-term pricing job."];
+          "The type of Snow Family devices associated with this long-term pricing job."];
       jobIds: LongTermPricingAssociatedJobIdList.t option
         [@ocaml.doc
           "The IDs of the jobs that are associated with a long-term pricing type."]}
@@ -1629,24 +2322,25 @@ module LongTermPricingListEntry =
         ?longTermPricingType ?longTermPricingStartDate
         ?longTermPricingEndDate ?longTermPricingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let jobIds =
-        field_map json "JobIds" LongTermPricingAssociatedJobIdList.of_json in
-      let snowballType = field_map json "SnowballType" SnowballType.of_json in
+        field_map json__ "JobIds" LongTermPricingAssociatedJobIdList.of_json in
+      let snowballType = field_map json__ "SnowballType" SnowballType.of_json in
       let longTermPricingStatus =
-        field_map json "LongTermPricingStatus" String_.of_json in
+        field_map json__ "LongTermPricingStatus" String_.of_json in
       let isLongTermPricingAutoRenew =
-        field_map json "IsLongTermPricingAutoRenew" JavaBoolean.of_json in
-      let replacementJob = field_map json "ReplacementJob" JobId.of_json in
-      let currentActiveJob = field_map json "CurrentActiveJob" JobId.of_json in
+        field_map json__ "IsLongTermPricingAutoRenew" JavaBoolean.of_json in
+      let replacementJob = field_map json__ "ReplacementJob" JobId.of_json in
+      let currentActiveJob =
+        field_map json__ "CurrentActiveJob" JobId.of_json in
       let longTermPricingType =
-        field_map json "LongTermPricingType" LongTermPricingType.of_json in
+        field_map json__ "LongTermPricingType" LongTermPricingType.of_json in
       let longTermPricingStartDate =
-        field_map json "LongTermPricingStartDate" Timestamp.of_json in
+        field_map json__ "LongTermPricingStartDate" Timestamp.of_json in
       let longTermPricingEndDate =
-        field_map json "LongTermPricingEndDate" Timestamp.of_json in
+        field_map json__ "LongTermPricingEndDate" Timestamp.of_json in
       let longTermPricingId =
-        field_map json "LongTermPricingId" LongTermPricingId.of_json in
+        field_map json__ "LongTermPricingId" LongTermPricingId.of_json in
       make ?jobIds ?snowballType ?longTermPricingStatus
         ?isLongTermPricingAutoRenew ?replacementJob ?currentActiveJob
         ?longTermPricingType ?longTermPricingStartDate
@@ -1720,14 +2414,14 @@ module JobListEntry =
       make ?description ?creationDate ?snowballType ?jobType ?isMaster
         ?jobState ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" String_.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let snowballType = field_map json "SnowballType" SnowballType.of_json in
-      let jobType = field_map json "JobType" JobType.of_json in
-      let isMaster = field_map json "IsMaster" Boolean.of_json in
-      let jobState = field_map json "JobState" JobState.of_json in
-      let jobId = field_map json "JobId" String_.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" String_.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let snowballType = field_map json__ "SnowballType" SnowballType.of_json in
+      let jobType = field_map json__ "JobType" JobType.of_json in
+      let isMaster = field_map json__ "IsMaster" Boolean.of_json in
+      let jobState = field_map json__ "JobState" JobState.of_json in
+      let jobId = field_map json__ "JobId" String_.of_json in
       make ?description ?creationDate ?snowballType ?jobType ?isMaster
         ?jobState ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -1753,9 +2447,9 @@ module CompatibleImage =
       let amiId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AmiId") in
       make ?name ?amiId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" String_.of_json in
-      let amiId = field_map json "AmiId" String_.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" String_.of_json in
+      let amiId = field_map json__ "AmiId" String_.of_json in
       make ?name ?amiId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1800,11 +2494,11 @@ module ClusterListEntry =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ClusterId") in
       make ?description ?creationDate ?clusterState ?clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" String_.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let clusterState = field_map json "ClusterState" ClusterState.of_json in
-      let clusterId = field_map json "ClusterId" String_.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" String_.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let clusterState = field_map json__ "ClusterState" ClusterState.of_json in
+      let clusterId = field_map json__ "ClusterId" String_.of_json in
       make ?description ?creationDate ?clusterState ?clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1869,7 +2563,15 @@ module JobMetadata =
         [@ocaml.doc "The ID of the long-term pricing type for the device."];
       onDeviceServiceConfiguration: OnDeviceServiceConfiguration.t option
         [@ocaml.doc
-          "Represents metadata and configuration settings for services on an Amazon Web Services Snow Family device."]}
+          "Represents metadata and configuration settings for services on an Amazon Web Services Snow Family device."];
+      impactLevel: ImpactLevel.t option
+        [@ocaml.doc
+          "The highest impact level of data that will be stored or processed on the device, provided at job creation."];
+      pickupDetails: PickupDetails.t option
+        [@ocaml.doc
+          "Information identifying the person picking up the device."];
+      snowballId: String_.t option
+        [@ocaml.doc "Unique ID associated with a device."]}
     let make ?jobId =
       fun ?jobState ->
         fun ?jobType ->
@@ -1894,31 +2596,37 @@ module JobMetadata =
                                               fun
                                                 ?onDeviceServiceConfiguration
                                                 ->
-                                                fun () ->
-                                                  {
-                                                    jobId;
-                                                    jobState;
-                                                    jobType;
-                                                    snowballType;
-                                                    creationDate;
-                                                    resources;
-                                                    description;
-                                                    kmsKeyARN;
-                                                    roleARN;
-                                                    addressId;
-                                                    shippingDetails;
-                                                    snowballCapacityPreference;
-                                                    notification;
-                                                    dataTransferProgress;
-                                                    jobLogInfo;
-                                                    clusterId;
-                                                    forwardingAddressId;
-                                                    taxDocuments;
-                                                    deviceConfiguration;
-                                                    remoteManagement;
-                                                    longTermPricingId;
-                                                    onDeviceServiceConfiguration
-                                                  }
+                                                fun ?impactLevel ->
+                                                  fun ?pickupDetails ->
+                                                    fun ?snowballId ->
+                                                      fun () ->
+                                                        {
+                                                          jobId;
+                                                          jobState;
+                                                          jobType;
+                                                          snowballType;
+                                                          creationDate;
+                                                          resources;
+                                                          description;
+                                                          kmsKeyARN;
+                                                          roleARN;
+                                                          addressId;
+                                                          shippingDetails;
+                                                          snowballCapacityPreference;
+                                                          notification;
+                                                          dataTransferProgress;
+                                                          jobLogInfo;
+                                                          clusterId;
+                                                          forwardingAddressId;
+                                                          taxDocuments;
+                                                          deviceConfiguration;
+                                                          remoteManagement;
+                                                          longTermPricingId;
+                                                          onDeviceServiceConfiguration;
+                                                          impactLevel;
+                                                          pickupDetails;
+                                                          snowballId
+                                                        }
     let to_value x =
       structure_to_value
         [("JobId", (Option.map x.jobId ~f:String_.to_value));
@@ -1955,9 +2663,20 @@ module JobMetadata =
           (Option.map x.longTermPricingId ~f:LongTermPricingId.to_value));
         ("OnDeviceServiceConfiguration",
           (Option.map x.onDeviceServiceConfiguration
-             ~f:OnDeviceServiceConfiguration.to_value))]
+             ~f:OnDeviceServiceConfiguration.to_value));
+        ("ImpactLevel", (Option.map x.impactLevel ~f:ImpactLevel.to_value));
+        ("PickupDetails",
+          (Option.map x.pickupDetails ~f:PickupDetails.to_value));
+        ("SnowballId", (Option.map x.snowballId ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let snowballId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SnowballId") in
+      let pickupDetails =
+        (Option.map ~f:PickupDetails.of_xml)
+          (Xml.child xml_arg0 "PickupDetails") in
+      let impactLevel =
+        (Option.map ~f:ImpactLevel.of_xml) (Xml.child xml_arg0 "ImpactLevel") in
       let onDeviceServiceConfiguration =
         (Option.map ~f:OnDeviceServiceConfiguration.of_xml)
           (Xml.child xml_arg0 "OnDeviceServiceConfiguration") in
@@ -2012,46 +2731,53 @@ module JobMetadata =
       let jobState =
         (Option.map ~f:JobState.of_xml) (Xml.child xml_arg0 "JobState") in
       let jobId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "JobId") in
-      make ?onDeviceServiceConfiguration ?longTermPricingId ?remoteManagement
+      make ?snowballId ?pickupDetails ?impactLevel
+        ?onDeviceServiceConfiguration ?longTermPricingId ?remoteManagement
         ?deviceConfiguration ?taxDocuments ?forwardingAddressId ?clusterId
         ?jobLogInfo ?dataTransferProgress ?notification
         ?snowballCapacityPreference ?shippingDetails ?addressId ?roleARN
         ?kmsKeyARN ?description ?resources ?creationDate ?snowballType
         ?jobType ?jobState ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let snowballId = field_map json__ "SnowballId" String_.of_json in
+      let pickupDetails =
+        field_map json__ "PickupDetails" PickupDetails.of_json in
+      let impactLevel = field_map json__ "ImpactLevel" ImpactLevel.of_json in
       let onDeviceServiceConfiguration =
-        field_map json "OnDeviceServiceConfiguration"
+        field_map json__ "OnDeviceServiceConfiguration"
           OnDeviceServiceConfiguration.of_json in
       let longTermPricingId =
-        field_map json "LongTermPricingId" LongTermPricingId.of_json in
+        field_map json__ "LongTermPricingId" LongTermPricingId.of_json in
       let remoteManagement =
-        field_map json "RemoteManagement" RemoteManagement.of_json in
+        field_map json__ "RemoteManagement" RemoteManagement.of_json in
       let deviceConfiguration =
-        field_map json "DeviceConfiguration" DeviceConfiguration.of_json in
-      let taxDocuments = field_map json "TaxDocuments" TaxDocuments.of_json in
+        field_map json__ "DeviceConfiguration" DeviceConfiguration.of_json in
+      let taxDocuments = field_map json__ "TaxDocuments" TaxDocuments.of_json in
       let forwardingAddressId =
-        field_map json "ForwardingAddressId" AddressId.of_json in
-      let clusterId = field_map json "ClusterId" String_.of_json in
-      let jobLogInfo = field_map json "JobLogInfo" JobLogs.of_json in
+        field_map json__ "ForwardingAddressId" AddressId.of_json in
+      let clusterId = field_map json__ "ClusterId" String_.of_json in
+      let jobLogInfo = field_map json__ "JobLogInfo" JobLogs.of_json in
       let dataTransferProgress =
-        field_map json "DataTransferProgress" DataTransfer.of_json in
-      let notification = field_map json "Notification" Notification.of_json in
+        field_map json__ "DataTransferProgress" DataTransfer.of_json in
+      let notification = field_map json__ "Notification" Notification.of_json in
       let snowballCapacityPreference =
-        field_map json "SnowballCapacityPreference" SnowballCapacity.of_json in
+        field_map json__ "SnowballCapacityPreference"
+          SnowballCapacity.of_json in
       let shippingDetails =
-        field_map json "ShippingDetails" ShippingDetails.of_json in
-      let addressId = field_map json "AddressId" AddressId.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let kmsKeyARN = field_map json "KmsKeyARN" KmsKeyARN.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let resources = field_map json "Resources" JobResource.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let snowballType = field_map json "SnowballType" SnowballType.of_json in
-      let jobType = field_map json "JobType" JobType.of_json in
-      let jobState = field_map json "JobState" JobState.of_json in
-      let jobId = field_map json "JobId" String_.of_json in
-      make ?onDeviceServiceConfiguration ?longTermPricingId ?remoteManagement
+        field_map json__ "ShippingDetails" ShippingDetails.of_json in
+      let addressId = field_map json__ "AddressId" AddressId.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let kmsKeyARN = field_map json__ "KmsKeyARN" KmsKeyARN.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let resources = field_map json__ "Resources" JobResource.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let snowballType = field_map json__ "SnowballType" SnowballType.of_json in
+      let jobType = field_map json__ "JobType" JobType.of_json in
+      let jobState = field_map json__ "JobState" JobState.of_json in
+      let jobId = field_map json__ "JobId" String_.of_json in
+      make ?snowballId ?pickupDetails ?impactLevel
+        ?onDeviceServiceConfiguration ?longTermPricingId ?remoteManagement
         ?deviceConfiguration ?taxDocuments ?forwardingAddressId ?clusterId
         ?jobLogInfo ?dataTransferProgress ?notification
         ?snowballCapacityPreference ?shippingDetails ?addressId ?roleARN
@@ -2060,153 +2786,6 @@ module JobMetadata =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about a specific job including shipping information, job status, and other important metadata. This information is returned as a part of the response syntax of the DescribeJob action."]
-module Address =
-  struct
-    type nonrec t =
-      {
-      addressId: AddressId.t option
-        [@ocaml.doc "The unique ID for an address."];
-      name: String_.t option
-        [@ocaml.doc
-          "The name of a person to receive a Snow device at an address."];
-      company: String_.t option
-        [@ocaml.doc
-          "The name of the company to receive a Snow device at an address."];
-      street1: String_.t option
-        [@ocaml.doc
-          "The first line in a street address that a Snow device is to be delivered to."];
-      street2: String_.t option
-        [@ocaml.doc
-          "The second line in a street address that a Snow device is to be delivered to."];
-      street3: String_.t option
-        [@ocaml.doc
-          "The third line in a street address that a Snow device is to be delivered to."];
-      city: String_.t option
-        [@ocaml.doc
-          "The city in an address that a Snow device is to be delivered to."];
-      stateOrProvince: String_.t option
-        [@ocaml.doc
-          "The state or province in an address that a Snow device is to be delivered to."];
-      prefectureOrDistrict: String_.t option
-        [@ocaml.doc "This field is no longer used and the value is ignored."];
-      landmark: String_.t option
-        [@ocaml.doc "This field is no longer used and the value is ignored."];
-      country: String_.t option
-        [@ocaml.doc
-          "The country in an address that a Snow device is to be delivered to."];
-      postalCode: String_.t option
-        [@ocaml.doc
-          "The postal code in an address that a Snow device is to be delivered to."];
-      phoneNumber: String_.t option
-        [@ocaml.doc
-          "The phone number associated with an address that a Snow device is to be delivered to."];
-      isRestricted: Boolean.t option
-        [@ocaml.doc
-          "If the address you are creating is a primary address, then set this option to true. This field is not supported in most regions."]}
-    let make ?addressId =
-      fun ?name ->
-        fun ?company ->
-          fun ?street1 ->
-            fun ?street2 ->
-              fun ?street3 ->
-                fun ?city ->
-                  fun ?stateOrProvince ->
-                    fun ?prefectureOrDistrict ->
-                      fun ?landmark ->
-                        fun ?country ->
-                          fun ?postalCode ->
-                            fun ?phoneNumber ->
-                              fun ?isRestricted ->
-                                fun () ->
-                                  {
-                                    addressId;
-                                    name;
-                                    company;
-                                    street1;
-                                    street2;
-                                    street3;
-                                    city;
-                                    stateOrProvince;
-                                    prefectureOrDistrict;
-                                    landmark;
-                                    country;
-                                    postalCode;
-                                    phoneNumber;
-                                    isRestricted
-                                  }
-    let to_value x =
-      structure_to_value
-        [("AddressId", (Option.map x.addressId ~f:AddressId.to_value));
-        ("Name", (Option.map x.name ~f:String_.to_value));
-        ("Company", (Option.map x.company ~f:String_.to_value));
-        ("Street1", (Option.map x.street1 ~f:String_.to_value));
-        ("Street2", (Option.map x.street2 ~f:String_.to_value));
-        ("Street3", (Option.map x.street3 ~f:String_.to_value));
-        ("City", (Option.map x.city ~f:String_.to_value));
-        ("StateOrProvince",
-          (Option.map x.stateOrProvince ~f:String_.to_value));
-        ("PrefectureOrDistrict",
-          (Option.map x.prefectureOrDistrict ~f:String_.to_value));
-        ("Landmark", (Option.map x.landmark ~f:String_.to_value));
-        ("Country", (Option.map x.country ~f:String_.to_value));
-        ("PostalCode", (Option.map x.postalCode ~f:String_.to_value));
-        ("PhoneNumber", (Option.map x.phoneNumber ~f:String_.to_value));
-        ("IsRestricted", (Option.map x.isRestricted ~f:Boolean.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let isRestricted =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "IsRestricted") in
-      let phoneNumber =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PhoneNumber") in
-      let postalCode =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PostalCode") in
-      let country =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Country") in
-      let landmark =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Landmark") in
-      let prefectureOrDistrict =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "PrefectureOrDistrict") in
-      let stateOrProvince =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StateOrProvince") in
-      let city = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "City") in
-      let street3 =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Street3") in
-      let street2 =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Street2") in
-      let street1 =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Street1") in
-      let company =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Company") in
-      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
-      let addressId =
-        (Option.map ~f:AddressId.of_xml) (Xml.child xml_arg0 "AddressId") in
-      make ?isRestricted ?phoneNumber ?postalCode ?country ?landmark
-        ?prefectureOrDistrict ?stateOrProvince ?city ?street3 ?street2
-        ?street1 ?company ?name ?addressId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isRestricted = field_map json "IsRestricted" Boolean.of_json in
-      let phoneNumber = field_map json "PhoneNumber" String_.of_json in
-      let postalCode = field_map json "PostalCode" String_.of_json in
-      let country = field_map json "Country" String_.of_json in
-      let landmark = field_map json "Landmark" String_.of_json in
-      let prefectureOrDistrict =
-        field_map json "PrefectureOrDistrict" String_.of_json in
-      let stateOrProvince = field_map json "StateOrProvince" String_.of_json in
-      let city = field_map json "City" String_.of_json in
-      let street3 = field_map json "Street3" String_.of_json in
-      let street2 = field_map json "Street2" String_.of_json in
-      let street1 = field_map json "Street1" String_.of_json in
-      let company = field_map json "Company" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let addressId = field_map json "AddressId" AddressId.of_json in
-      make ?isRestricted ?phoneNumber ?postalCode ?country ?landmark
-        ?prefectureOrDistrict ?stateOrProvince ?city ?street3 ?street2
-        ?street1 ?company ?name ?addressId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The address that you want the Snow device(s) associated with a specific job to be shipped to. Addresses are validated at the time of creation. The address you provide must be located within the serviceable area of your region. Although no individual elements of the Address are required, if the address is invalid or unsupported, then an exception is thrown."]
 module InvalidResourceException =
   struct
     type nonrec t =
@@ -2228,9 +2807,9 @@ module InvalidResourceException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
       make ?resourceType ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2249,8 +2828,8 @@ module InvalidJobStateException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2294,8 +2873,8 @@ module ClusterLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2314,12 +2893,12 @@ module Ec2RequestFailedException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Your IAM user lacks the necessary Amazon EC2 permissions to perform the attempted action."]
+       "Your user lacks the necessary Amazon EC2 permissions to perform the attempted action."]
 module InvalidInputCombinationException =
   struct
     type nonrec t = {
@@ -2334,8 +2913,8 @@ module InvalidInputCombinationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2354,8 +2933,8 @@ module KMSRequestFailedException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2382,6 +2961,34 @@ module ClusterId =
     let of_json j = string_of_json ~kind:"ClusterId" j
     let to_json = simple_to_json to_value
   end
+module DependentServiceList =
+  struct
+    type nonrec t = DependentService.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DependentService.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DependentService.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DependentServiceList"
+        ~of_json:DependentService.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module InvalidNextTokenException =
   struct
     type nonrec t = {
@@ -2396,16 +3003,91 @@ module InvalidNextTokenException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The NextToken string was altered unexpectedly, and the operation has stopped. Run the operation without changing the NextToken string, and try again."]
+module ServiceVersionList =
+  struct
+    type nonrec t = ServiceVersion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceVersion.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceVersion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceVersionList" ~of_json:ServiceVersion.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ListLimit =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for ListLimit" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AddressList =
+  struct
+    type nonrec t = Address.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Address.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Address.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AddressList" ~of_json:Address.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module LongTermPricingEntryList =
   struct
     type nonrec t = LongTermPricingListEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LongTermPricingListEntry.to_value)) |>
         (fun x -> `List x)
@@ -2428,27 +3110,13 @@ module LongTermPricingEntryList =
         ~of_json:LongTermPricingListEntry.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ListLimit =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for ListLimit" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
 module JobListEntryList =
   struct
     type nonrec t = JobListEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobListEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2473,6 +3141,9 @@ module CompatibleImageList =
   struct
     type nonrec t = CompatibleImage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CompatibleImage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2498,6 +3169,9 @@ module ClusterListEntryList =
   struct
     type nonrec t = ClusterListEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterListEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2556,10 +3230,10 @@ module ConflictException =
           (Xml.child xml_arg0 "ConflictResource") in
       make ?message ?conflictResource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       let conflictResource =
-        field_map json "ConflictResource" String_.of_json in
+        field_map json__ "ConflictResource" String_.of_json in
       make ?message ?conflictResource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2600,6 +3274,9 @@ module JobMetadataList =
   struct
     type nonrec t = JobMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2641,7 +3318,7 @@ module ClusterMetadata =
           "The type of job for this cluster. Currently, the only job type supported for clusters is LOCAL_USE."];
       snowballType: SnowballType.t option
         [@ocaml.doc
-          "The type of Snowcone device to use for this cluster. For cluster jobs, Amazon Web Services Snow Family currently supports only the EDGE device type."];
+          "The type of Snowball Edge device to use for this cluster. For cluster jobs, Amazon Web Services Snow Family currently supports only the EDGE device type."];
       creationDate: Timestamp.t option
         [@ocaml.doc "The creation date for this cluster."];
       resources: JobResource.t option
@@ -2766,56 +3443,32 @@ module ClusterMetadata =
         ?snowballType ?jobType ?clusterState ?roleARN ?kmsKeyARN ?description
         ?clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let onDeviceServiceConfiguration =
-        field_map json "OnDeviceServiceConfiguration"
+        field_map json__ "OnDeviceServiceConfiguration"
           OnDeviceServiceConfiguration.of_json in
-      let taxDocuments = field_map json "TaxDocuments" TaxDocuments.of_json in
+      let taxDocuments = field_map json__ "TaxDocuments" TaxDocuments.of_json in
       let forwardingAddressId =
-        field_map json "ForwardingAddressId" AddressId.of_json in
-      let notification = field_map json "Notification" Notification.of_json in
+        field_map json__ "ForwardingAddressId" AddressId.of_json in
+      let notification = field_map json__ "Notification" Notification.of_json in
       let shippingOption =
-        field_map json "ShippingOption" ShippingOption.of_json in
-      let addressId = field_map json "AddressId" AddressId.of_json in
-      let resources = field_map json "Resources" JobResource.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
-      let snowballType = field_map json "SnowballType" SnowballType.of_json in
-      let jobType = field_map json "JobType" JobType.of_json in
-      let clusterState = field_map json "ClusterState" ClusterState.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let kmsKeyARN = field_map json "KmsKeyARN" KmsKeyARN.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let clusterId = field_map json "ClusterId" String_.of_json in
+        field_map json__ "ShippingOption" ShippingOption.of_json in
+      let addressId = field_map json__ "AddressId" AddressId.of_json in
+      let resources = field_map json__ "Resources" JobResource.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
+      let snowballType = field_map json__ "SnowballType" SnowballType.of_json in
+      let jobType = field_map json__ "JobType" JobType.of_json in
+      let clusterState = field_map json__ "ClusterState" ClusterState.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let kmsKeyARN = field_map json__ "KmsKeyARN" KmsKeyARN.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let clusterId = field_map json__ "ClusterId" String_.of_json in
       make ?onDeviceServiceConfiguration ?taxDocuments ?forwardingAddressId
         ?notification ?shippingOption ?addressId ?resources ?creationDate
         ?snowballType ?jobType ?clusterState ?roleARN ?kmsKeyARN ?description
         ?clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains metadata about a specific cluster."]
-module AddressList =
-  struct
-    type nonrec t = Address.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Address.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Address.of_xml)
-    let of_json j =
-      list_of_json ~kind:"AddressList" ~of_json:Address.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module ReturnShippingLabelAlreadyExistsException =
   struct
     type nonrec t = {
@@ -2830,12 +3483,58 @@ module ReturnShippingLabelAlreadyExistsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You get this exception if you call CreateReturnShippingLabel and a valid return shipping label already exists. In this case, use DescribeReturnShippingLabel to get the URL."]
+module InitialClusterSize =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:16) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for InitialClusterSize" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LongTermPricingIdList =
+  struct
+    type nonrec t = LongTermPricingId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LongTermPricingId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LongTermPricingId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LongTermPricingIdList"
+        ~of_json:LongTermPricingId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module InvalidAddressException =
   struct
     type nonrec t = {
@@ -2850,8 +3549,8 @@ module InvalidAddressException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2870,8 +3569,8 @@ module UnsupportedAddressException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2952,12 +3651,12 @@ module UpdateLongTermPricingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LongTermPricingId") in
       make ?isLongTermPricingAutoRenew ?replacementJob ~longTermPricingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let isLongTermPricingAutoRenew =
-        field_map json "IsLongTermPricingAutoRenew" JavaBoolean.of_json in
-      let replacementJob = field_map json "ReplacementJob" JobId.of_json in
+        field_map json__ "IsLongTermPricingAutoRenew" JavaBoolean.of_json in
+      let replacementJob = field_map json__ "ReplacementJob" JobId.of_json in
       let longTermPricingId =
-        field_map_exn json "LongTermPricingId" LongTermPricingId.of_json in
+        field_map_exn json__ "LongTermPricingId" LongTermPricingId.of_json in
       make ?isLongTermPricingAutoRenew ?replacementJob ~longTermPricingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the long-term pricing type."]
@@ -3036,10 +3735,10 @@ module UpdateJobShipmentStateRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~shipmentState ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shipmentState =
-        field_map_exn json "ShipmentState" ShipmentState.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
+        field_map_exn json__ "ShipmentState" ShipmentState.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
       make ~shipmentState ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3165,7 +3864,8 @@ module UpdateJobRequest =
           "The updated SnowballCapacityPreference of this job's JobMetadata object. The 50 TB Snowballs are only available in the US regions. For more information, see \"https://docs.aws.amazon.com/snowball/latest/snowcone-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide or \"https://docs.aws.amazon.com/snowball/latest/developer-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide."];
       forwardingAddressId: AddressId.t option
         [@ocaml.doc
-          "The updated ID for the forwarding address for a job. This field is not supported in most regions."]}
+          "The updated ID for the forwarding address for a job. This field is not supported in most regions."];
+      pickupDetails: PickupDetails.t option }
     let context_ = "UpdateJobRequest"
     let make ?roleARN =
       fun ?notification ->
@@ -3176,20 +3876,22 @@ module UpdateJobRequest =
                 fun ?description ->
                   fun ?snowballCapacityPreference ->
                     fun ?forwardingAddressId ->
-                      fun ~jobId ->
-                        fun () ->
-                          {
-                            roleARN;
-                            notification;
-                            resources;
-                            onDeviceServiceConfiguration;
-                            addressId;
-                            shippingOption;
-                            description;
-                            snowballCapacityPreference;
-                            forwardingAddressId;
-                            jobId
-                          }
+                      fun ?pickupDetails ->
+                        fun ~jobId ->
+                          fun () ->
+                            {
+                              roleARN;
+                              notification;
+                              resources;
+                              onDeviceServiceConfiguration;
+                              addressId;
+                              shippingOption;
+                              description;
+                              snowballCapacityPreference;
+                              forwardingAddressId;
+                              pickupDetails;
+                              jobId
+                            }
     let to_value x =
       structure_to_value
         [("JobId", (Some (JobId.to_value x.jobId)));
@@ -3208,9 +3910,14 @@ module UpdateJobRequest =
           (Option.map x.snowballCapacityPreference
              ~f:SnowballCapacity.to_value));
         ("ForwardingAddressId",
-          (Option.map x.forwardingAddressId ~f:AddressId.to_value))]
+          (Option.map x.forwardingAddressId ~f:AddressId.to_value));
+        ("PickupDetails",
+          (Option.map x.pickupDetails ~f:PickupDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let pickupDetails =
+        (Option.map ~f:PickupDetails.of_xml)
+          (Xml.child xml_arg0 "PickupDetails") in
       let forwardingAddressId =
         (Option.map ~f:AddressId.of_xml)
           (Xml.child xml_arg0 "ForwardingAddressId") in
@@ -3236,29 +3943,32 @@ module UpdateJobRequest =
         (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
       let jobId =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
-      make ?forwardingAddressId ?snowballCapacityPreference ?description
-        ?shippingOption ?addressId ?onDeviceServiceConfiguration ?resources
-        ?notification ?roleARN ~jobId ()
+      make ?pickupDetails ?forwardingAddressId ?snowballCapacityPreference
+        ?description ?shippingOption ?addressId ?onDeviceServiceConfiguration
+        ?resources ?notification ?roleARN ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let pickupDetails =
+        field_map json__ "PickupDetails" PickupDetails.of_json in
       let forwardingAddressId =
-        field_map json "ForwardingAddressId" AddressId.of_json in
+        field_map json__ "ForwardingAddressId" AddressId.of_json in
       let snowballCapacityPreference =
-        field_map json "SnowballCapacityPreference" SnowballCapacity.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map json__ "SnowballCapacityPreference"
+          SnowballCapacity.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let shippingOption =
-        field_map json "ShippingOption" ShippingOption.of_json in
-      let addressId = field_map json "AddressId" AddressId.of_json in
+        field_map json__ "ShippingOption" ShippingOption.of_json in
+      let addressId = field_map json__ "AddressId" AddressId.of_json in
       let onDeviceServiceConfiguration =
-        field_map json "OnDeviceServiceConfiguration"
+        field_map json__ "OnDeviceServiceConfiguration"
           OnDeviceServiceConfiguration.of_json in
-      let resources = field_map json "Resources" JobResource.of_json in
-      let notification = field_map json "Notification" Notification.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
-      make ?forwardingAddressId ?snowballCapacityPreference ?description
-        ?shippingOption ?addressId ?onDeviceServiceConfiguration ?resources
-        ?notification ?roleARN ~jobId ()
+      let resources = field_map json__ "Resources" JobResource.of_json in
+      let notification = field_map json__ "Notification" Notification.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ?pickupDetails ?forwardingAddressId ?snowballCapacityPreference
+        ?description ?shippingOption ?addressId ?onDeviceServiceConfiguration
+        ?resources ?notification ?roleARN ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "While a job's JobState value is New, you can update some of the information associated with a job. Once the job changes to a different job state, usually within 60 minutes of the job being created, this action is no longer available."]
@@ -3436,26 +4146,258 @@ module UpdateClusterRequest =
         ?onDeviceServiceConfiguration ?resources ?description ?roleARN
         ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let forwardingAddressId =
-        field_map json "ForwardingAddressId" AddressId.of_json in
-      let notification = field_map json "Notification" Notification.of_json in
+        field_map json__ "ForwardingAddressId" AddressId.of_json in
+      let notification = field_map json__ "Notification" Notification.of_json in
       let shippingOption =
-        field_map json "ShippingOption" ShippingOption.of_json in
-      let addressId = field_map json "AddressId" AddressId.of_json in
+        field_map json__ "ShippingOption" ShippingOption.of_json in
+      let addressId = field_map json__ "AddressId" AddressId.of_json in
       let onDeviceServiceConfiguration =
-        field_map json "OnDeviceServiceConfiguration"
+        field_map json__ "OnDeviceServiceConfiguration"
           OnDeviceServiceConfiguration.of_json in
-      let resources = field_map json "Resources" JobResource.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+      let resources = field_map json__ "Resources" JobResource.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ?forwardingAddressId ?notification ?shippingOption ?addressId
         ?onDeviceServiceConfiguration ?resources ?description ?roleARN
         ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "While a cluster's ClusterState value is in the AwaitingQuorum state, you can update some of the information associated with a cluster. Once the cluster changes to a different job state, usually 60 minutes after the cluster being created, this action is no longer available."]
+module ListServiceVersionsResult =
+  struct
+    type nonrec t =
+      {
+      serviceVersions: ServiceVersionList.t option
+        [@ocaml.doc "A list of supported versions."];
+      serviceName: ServiceName.t option
+        [@ocaml.doc
+          "The name of the service for which the system provided supported versions."];
+      dependentServices: DependentServiceList.t option
+        [@ocaml.doc
+          "A list of names and versions of dependant services of the service for which the system provided supported versions."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "Because HTTP requests are stateless, this is the starting point of the next list of returned ListServiceVersionsResult results."]}
+    type nonrec error =
+      [ `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidResourceException of InvalidResourceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceVersions =
+      fun ?serviceName ->
+        fun ?dependentServices ->
+          fun ?nextToken ->
+            fun () ->
+              { serviceVersions; serviceName; dependentServices; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidResourceException" ->
+          `InvalidResourceException (InvalidResourceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidResourceException" ->
+          `InvalidResourceException (InvalidResourceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidResourceException e ->
+          `Assoc
+            [("error", (`String "InvalidResourceException"));
+            ("details", (InvalidResourceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ServiceVersions",
+           (Option.map x.serviceVersions ~f:ServiceVersionList.to_value));
+        ("ServiceName", (Option.map x.serviceName ~f:ServiceName.to_value));
+        ("DependentServices",
+          (Option.map x.dependentServices ~f:DependentServiceList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let dependentServices =
+        (Option.map ~f:DependentServiceList.of_xml)
+          (Xml.child xml_arg0 "DependentServices") in
+      let serviceName =
+        (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "ServiceName") in
+      let serviceVersions =
+        (Option.map ~f:ServiceVersionList.of_xml)
+          (Xml.child xml_arg0 "ServiceVersions") in
+      make ?nextToken ?dependentServices ?serviceName ?serviceVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let dependentServices =
+        field_map json__ "DependentServices" DependentServiceList.of_json in
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
+      let serviceVersions =
+        field_map json__ "ServiceVersions" ServiceVersionList.of_json in
+      make ?nextToken ?dependentServices ?serviceName ?serviceVersions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all supported versions for Snow on-device services. Returns an array of ServiceVersion object containing the supported versions for a particular service."]
+module ListServiceVersionsRequest =
+  struct
+    type nonrec t =
+      {
+      serviceName: ServiceName.t
+        [@ocaml.doc
+          "The name of the service for which you're requesting supported versions."];
+      dependentServices: DependentServiceList.t option
+        [@ocaml.doc
+          "A list of names and versions of dependant services of the requested service."];
+      maxResults: ListLimit.t option
+        [@ocaml.doc
+          "The maximum number of ListServiceVersions objects to return."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "Because HTTP requests are stateless, this is the starting point for the next list of returned ListServiceVersionsRequest versions."]}
+    let context_ = "ListServiceVersionsRequest"
+    let make ?dependentServices =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~serviceName ->
+            fun () ->
+              { dependentServices; maxResults; nextToken; serviceName }
+    let to_value x =
+      structure_to_value
+        [("ServiceName", (Some (ServiceName.to_value x.serviceName)));
+        ("DependentServices",
+          (Option.map x.dependentServices ~f:DependentServiceList.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:ListLimit.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:ListLimit.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let dependentServices =
+        (Option.map ~f:DependentServiceList.of_xml)
+          (Xml.child xml_arg0 "DependentServices") in
+      let serviceName =
+        ServiceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceName") in
+      make ?nextToken ?maxResults ?dependentServices ~serviceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" ListLimit.of_json in
+      let dependentServices =
+        field_map json__ "DependentServices" DependentServiceList.of_json in
+      let serviceName =
+        field_map_exn json__ "ServiceName" ServiceName.of_json in
+      make ?nextToken ?maxResults ?dependentServices ~serviceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all supported versions for Snow on-device services. Returns an array of ServiceVersion object containing the supported versions for a particular service."]
+module ListPickupLocationsResult =
+  struct
+    type nonrec t =
+      {
+      addresses: AddressList.t option
+        [@ocaml.doc "Information about the address of pickup locations."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "HTTP requests are stateless. To identify what object comes \"next\" in the list of ListPickupLocationsResult objects, you have the option of specifying NextToken as the starting point for your returned list."]}
+    type nonrec error =
+      [ `InvalidResourceException of InvalidResourceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?addresses =
+      fun ?nextToken -> fun () -> { addresses; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidResourceException" ->
+          `InvalidResourceException (InvalidResourceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidResourceException" ->
+          `InvalidResourceException (InvalidResourceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidResourceException e ->
+          `Assoc
+            [("error", (`String "InvalidResourceException"));
+            ("details", (InvalidResourceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Addresses", (Option.map x.addresses ~f:AddressList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let addresses =
+        (Option.map ~f:AddressList.of_xml) (Xml.child xml_arg0 "Addresses") in
+      make ?nextToken ?addresses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let addresses = field_map json__ "Addresses" AddressList.of_json in
+      make ?nextToken ?addresses ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list of locations from which the customer can choose to pickup a device."]
+module ListPickupLocationsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: ListLimit.t option
+        [@ocaml.doc "The maximum number of locations to list per page."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "HTTP requests are stateless. To identify what object comes \"next\" in the list of ListPickupLocationsRequest objects, you have the option of specifying NextToken as the starting point for your returned list."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("MaxResults", (Option.map x.maxResults ~f:ListLimit.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:ListLimit.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" ListLimit.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list of locations from which the customer can choose to pickup a device."]
 module ListLongTermPricingResult =
   struct
     type nonrec t =
@@ -3519,10 +4461,10 @@ module ListLongTermPricingResult =
           (Xml.child xml_arg0 "LongTermPricingEntries") in
       make ?nextToken ?longTermPricingEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let longTermPricingEntries =
-        field_map json "LongTermPricingEntries"
+        field_map json__ "LongTermPricingEntries"
           LongTermPricingEntryList.of_json in
       make ?nextToken ?longTermPricingEntries ()
     let to_json v = composed_to_json to_value v
@@ -3551,9 +4493,9 @@ module ListLongTermPricingRequest =
         (Option.map ~f:ListLimit.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" ListLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" ListLimit.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all long-term pricing types."]
@@ -3610,10 +4552,10 @@ module ListJobsResult =
           (Xml.child xml_arg0 "JobListEntries") in
       make ?nextToken ?jobListEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let jobListEntries =
-        field_map json "JobListEntries" JobListEntryList.of_json in
+        field_map json__ "JobListEntries" JobListEntryList.of_json in
       make ?nextToken ?jobListEntries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3641,9 +4583,9 @@ module ListJobsRequest =
         (Option.map ~f:ListLimit.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" ListLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" ListLimit.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3710,14 +4652,14 @@ module ListCompatibleImagesResult =
           (Xml.child xml_arg0 "CompatibleImages") in
       make ?nextToken ?compatibleImages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let compatibleImages =
-        field_map json "CompatibleImages" CompatibleImageList.of_json in
+        field_map json__ "CompatibleImages" CompatibleImageList.of_json in
       make ?nextToken ?compatibleImages ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This action returns a list of the different Amazon EC2 Amazon Machine Images (AMIs) that are owned by your Amazon Web Services accountthat would be supported for use on a Snow device. Currently, supported AMIs are based on the CentOS 7 (x86_64) - with Updates HVM, Ubuntu Server 14.04 LTS (HVM), and Ubuntu 16.04 LTS - Xenial (HVM) images, available on the Amazon Web Services Marketplace."]
+       "This action returns a list of the different Amazon EC2-compatible Amazon Machine Images (AMIs) that are owned by your Amazon Web Services accountthat would be supported for use on a Snow device. Currently, supported AMIs are based on the Amazon Linux-2, Ubuntu 20.04 LTS - Focal, or Ubuntu 22.04 LTS - Jammy images, available on the Amazon Web Services Marketplace. Ubuntu 16.04 LTS - Xenial (HVM) images are no longer supported in the Market, but still supported for use on devices through Amazon EC2 VM Import/Export and running locally in AMIs."]
 module ListCompatibleImagesRequest =
   struct
     type nonrec t =
@@ -3742,13 +4684,13 @@ module ListCompatibleImagesRequest =
         (Option.map ~f:ListLimit.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" ListLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" ListLimit.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This action returns a list of the different Amazon EC2 Amazon Machine Images (AMIs) that are owned by your Amazon Web Services accountthat would be supported for use on a Snow device. Currently, supported AMIs are based on the CentOS 7 (x86_64) - with Updates HVM, Ubuntu Server 14.04 LTS (HVM), and Ubuntu 16.04 LTS - Xenial (HVM) images, available on the Amazon Web Services Marketplace."]
+       "This action returns a list of the different Amazon EC2-compatible Amazon Machine Images (AMIs) that are owned by your Amazon Web Services accountthat would be supported for use on a Snow device. Currently, supported AMIs are based on the Amazon Linux-2, Ubuntu 20.04 LTS - Focal, or Ubuntu 22.04 LTS - Jammy images, available on the Amazon Web Services Marketplace. Ubuntu 16.04 LTS - Xenial (HVM) images are no longer supported in the Market, but still supported for use on devices through Amazon EC2 VM Import/Export and running locally in AMIs."]
 module ListClustersResult =
   struct
     type nonrec t =
@@ -3802,10 +4744,10 @@ module ListClustersResult =
           (Xml.child xml_arg0 "ClusterListEntries") in
       make ?nextToken ?clusterListEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let clusterListEntries =
-        field_map json "ClusterListEntries" ClusterListEntryList.of_json in
+        field_map json__ "ClusterListEntries" ClusterListEntryList.of_json in
       make ?nextToken ?clusterListEntries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3833,9 +4775,9 @@ module ListClustersRequest =
         (Option.map ~f:ListLimit.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" ListLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" ListLimit.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3902,10 +4844,10 @@ module ListClusterJobsResult =
           (Xml.child xml_arg0 "JobListEntries") in
       make ?nextToken ?jobListEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let jobListEntries =
-        field_map json "JobListEntries" JobListEntryList.of_json in
+        field_map json__ "JobListEntries" JobListEntryList.of_json in
       make ?nextToken ?jobListEntries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3942,10 +4884,10 @@ module ListClusterJobsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ?nextToken ?maxResults ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" ListLimit.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" ListLimit.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ?nextToken ?maxResults ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4003,8 +4945,8 @@ module GetSoftwareUpdatesResult =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "UpdatesURI") in
       make ?updatesURI ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatesURI = field_map json "UpdatesURI" String_.of_json in
+    let of_json json__ =
+      let updatesURI = field_map json__ "UpdatesURI" String_.of_json in
       make ?updatesURI ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4026,8 +4968,9 @@ module GetSoftwareUpdatesRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns an Amazon S3 presigned URL for an update file associated with a specified JobId."]
@@ -4073,9 +5016,9 @@ module GetSnowballUsageResult =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "SnowballLimit") in
       make ?snowballsInUse ?snowballLimit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snowballsInUse = field_map json "SnowballsInUse" Integer.of_json in
-      let snowballLimit = field_map json "SnowballLimit" Integer.of_json in
+    let of_json json__ =
+      let snowballsInUse = field_map json__ "SnowballsInUse" Integer.of_json in
+      let snowballLimit = field_map json__ "SnowballLimit" Integer.of_json in
       make ?snowballsInUse ?snowballLimit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4146,12 +5089,12 @@ module GetJobUnlockCodeResult =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "UnlockCode") in
       make ?unlockCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unlockCode = field_map json "UnlockCode" String_.of_json in
+    let of_json json__ =
+      let unlockCode = field_map json__ "UnlockCode" String_.of_json in
       make ?unlockCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the UnlockCode code value for the specified job. A particular UnlockCode value can be accessed for up to 360 days after the associated job has been created. The UnlockCode value is a 29-character code with 25 alphanumeric characters and 4 hyphens. This code is used to decrypt the manifest file when it is passed along with the manifest to the Snow device through the Snowball client when the client is started for the first time. As a best practice, we recommend that you don't save a copy of the UnlockCode in the same location as the manifest file for that job. Saving these separately helps prevent unauthorized parties from gaining access to the Snow device associated with that job."]
+       "Returns the UnlockCode code value for the specified job. A particular UnlockCode value can be accessed for up to 360 days after the associated job has been created. The UnlockCode value is a 29-character code with 25 alphanumeric characters and 4 hyphens. This code is used to decrypt the manifest file when it is passed along with the manifest to the Snow device through the Snowball client when the client is started for the first time. The only valid status for calling this API is WithCustomer as the manifest and Unlock code values are used for securing your device and should only be used when you have the device. As a best practice, we recommend that you don't save a copy of the UnlockCode in the same location as the manifest file for that job. Saving these separately helps prevent unauthorized parties from gaining access to the Snow device associated with that job."]
 module GetJobUnlockCodeRequest =
   struct
     type nonrec t =
@@ -4169,11 +5112,12 @@ module GetJobUnlockCodeRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the UnlockCode code value for the specified job. A particular UnlockCode value can be accessed for up to 360 days after the associated job has been created. The UnlockCode value is a 29-character code with 25 alphanumeric characters and 4 hyphens. This code is used to decrypt the manifest file when it is passed along with the manifest to the Snow device through the Snowball client when the client is started for the first time. As a best practice, we recommend that you don't save a copy of the UnlockCode in the same location as the manifest file for that job. Saving these separately helps prevent unauthorized parties from gaining access to the Snow device associated with that job."]
+       "Returns the UnlockCode code value for the specified job. A particular UnlockCode value can be accessed for up to 360 days after the associated job has been created. The UnlockCode value is a 29-character code with 25 alphanumeric characters and 4 hyphens. This code is used to decrypt the manifest file when it is passed along with the manifest to the Snow device through the Snowball client when the client is started for the first time. The only valid status for calling this API is WithCustomer as the manifest and Unlock code values are used for securing your device and should only be used when you have the device. As a best practice, we recommend that you don't save a copy of the UnlockCode in the same location as the manifest file for that job. Saving these separately helps prevent unauthorized parties from gaining access to the Snow device associated with that job."]
 module GetJobManifestResult =
   struct
     type nonrec t =
@@ -4227,12 +5171,12 @@ module GetJobManifestResult =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ManifestURI") in
       make ?manifestURI ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let manifestURI = field_map json "ManifestURI" String_.of_json in
+    let of_json json__ =
+      let manifestURI = field_map json__ "ManifestURI" String_.of_json in
       make ?manifestURI ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a link to an Amazon S3 presigned URL for the manifest file associated with the specified JobId value. You can access the manifest file for up to 60 minutes after this request has been made. To access the manifest file after 60 minutes have passed, you'll have to make another call to the GetJobManifest action. The manifest is an encrypted file that you can download after your job enters the WithCustomer status. The manifest is decrypted by using the UnlockCode code value, when you pass both values to the Snow device through the Snowball client when the client is started for the first time. As a best practice, we recommend that you don't save a copy of an UnlockCode value in the same location as the manifest file for that job. Saving these separately helps prevent unauthorized parties from gaining access to the Snow device associated with that job. The credentials of a given job, including its manifest file and unlock code, expire 360 days after the job is created."]
+       "Returns a link to an Amazon S3 presigned URL for the manifest file associated with the specified JobId value. You can access the manifest file for up to 60 minutes after this request has been made. To access the manifest file after 60 minutes have passed, you'll have to make another call to the GetJobManifest action. The manifest is an encrypted file that you can download after your job enters the WithCustomer status. This is the only valid status for calling this API as the manifest and UnlockCode code value are used for securing your device and should only be used when you have the device. The manifest is decrypted by using the UnlockCode code value, when you pass both values to the Snow device through the Snowball client when the client is started for the first time. As a best practice, we recommend that you don't save a copy of an UnlockCode value in the same location as the manifest file for that job. Saving these separately helps prevent unauthorized parties from gaining access to the Snow device associated with that job. The credentials of a given job, including its manifest file and unlock code, expire 360 days after the job is created."]
 module GetJobManifestRequest =
   struct
     type nonrec t =
@@ -4250,11 +5194,12 @@ module GetJobManifestRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a link to an Amazon S3 presigned URL for the manifest file associated with the specified JobId value. You can access the manifest file for up to 60 minutes after this request has been made. To access the manifest file after 60 minutes have passed, you'll have to make another call to the GetJobManifest action. The manifest is an encrypted file that you can download after your job enters the WithCustomer status. The manifest is decrypted by using the UnlockCode code value, when you pass both values to the Snow device through the Snowball client when the client is started for the first time. As a best practice, we recommend that you don't save a copy of an UnlockCode value in the same location as the manifest file for that job. Saving these separately helps prevent unauthorized parties from gaining access to the Snow device associated with that job. The credentials of a given job, including its manifest file and unlock code, expire 360 days after the job is created."]
+       "Returns a link to an Amazon S3 presigned URL for the manifest file associated with the specified JobId value. You can access the manifest file for up to 60 minutes after this request has been made. To access the manifest file after 60 minutes have passed, you'll have to make another call to the GetJobManifest action. The manifest is an encrypted file that you can download after your job enters the WithCustomer status. This is the only valid status for calling this API as the manifest and UnlockCode code value are used for securing your device and should only be used when you have the device. The manifest is decrypted by using the UnlockCode code value, when you pass both values to the Snow device through the Snowball client when the client is started for the first time. As a best practice, we recommend that you don't save a copy of an UnlockCode value in the same location as the manifest file for that job. Saving these separately helps prevent unauthorized parties from gaining access to the Snow device associated with that job. The credentials of a given job, including its manifest file and unlock code, expire 360 days after the job is created."]
 module DescribeReturnShippingLabelResult =
   struct
     type nonrec t =
@@ -4337,11 +5282,12 @@ module DescribeReturnShippingLabelResult =
           (Xml.child xml_arg0 "Status") in
       make ?returnShippingLabelURI ?expirationDate ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let returnShippingLabelURI =
-        field_map json "ReturnShippingLabelURI" String_.of_json in
-      let expirationDate = field_map json "ExpirationDate" Timestamp.of_json in
-      let status = field_map json "Status" ShippingLabelStatus.of_json in
+        field_map json__ "ReturnShippingLabelURI" String_.of_json in
+      let expirationDate =
+        field_map json__ "ExpirationDate" Timestamp.of_json in
+      let status = field_map json__ "Status" ShippingLabelStatus.of_json in
       make ?returnShippingLabelURI ?expirationDate ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4363,8 +5309,9 @@ module DescribeReturnShippingLabelRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information on the shipping label of a Snow device that is being returned to Amazon Web Services."]
@@ -4421,10 +5368,10 @@ module DescribeJobResult =
         (Option.map ~f:JobMetadata.of_xml) (Xml.child xml_arg0 "JobMetadata") in
       make ?subJobMetadata ?jobMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subJobMetadata =
-        field_map json "SubJobMetadata" JobMetadataList.of_json in
-      let jobMetadata = field_map json "JobMetadata" JobMetadata.of_json in
+        field_map json__ "SubJobMetadata" JobMetadataList.of_json in
+      let jobMetadata = field_map json__ "JobMetadata" JobMetadata.of_json in
       make ?subJobMetadata ?jobMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4446,8 +5393,9 @@ module DescribeJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about a specific job including shipping information, job status, and other important metadata."]
@@ -4497,9 +5445,9 @@ module DescribeClusterResult =
           (Xml.child xml_arg0 "ClusterMetadata") in
       make ?clusterMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clusterMetadata =
-        field_map json "ClusterMetadata" ClusterMetadata.of_json in
+        field_map json__ "ClusterMetadata" ClusterMetadata.of_json in
       make ?clusterMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4522,8 +5470,8 @@ module DescribeClusterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4588,9 +5536,9 @@ module DescribeAddressesResult =
         (Option.map ~f:AddressList.of_xml) (Xml.child xml_arg0 "Addresses") in
       make ?nextToken ?addresses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let addresses = field_map json "Addresses" AddressList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let addresses = field_map json__ "Addresses" AddressList.of_json in
       make ?nextToken ?addresses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4618,9 +5566,9 @@ module DescribeAddressesRequest =
         (Option.map ~f:ListLimit.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" ListLimit.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" ListLimit.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4669,8 +5617,8 @@ module DescribeAddressResult =
         (Option.map ~f:Address.of_xml) (Xml.child xml_arg0 "Address") in
       make ?address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let address = field_map json "Address" Address.of_json in
+    let of_json json__ =
+      let address = field_map json__ "Address" Address.of_json in
       make ?address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4693,8 +5641,8 @@ module DescribeAddressRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AddressId") in
       make ~addressId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let addressId = field_map_exn json "AddressId" AddressId.of_json in
+    let of_json json__ =
+      let addressId = field_map_exn json__ "AddressId" AddressId.of_json in
       make ~addressId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4787,8 +5735,8 @@ module CreateReturnShippingLabelResult =
           (Xml.child xml_arg0 "Status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ShippingLabelStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ShippingLabelStatus.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4820,10 +5768,10 @@ module CreateReturnShippingLabelRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ?shippingOption ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shippingOption =
-        field_map json "ShippingOption" ShippingOption.of_json in
-      let jobId = field_map_exn json "JobId" JobId.of_json in
+        field_map json__ "ShippingOption" ShippingOption.of_json in
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
       make ?shippingOption ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4873,9 +5821,9 @@ module CreateLongTermPricingResult =
           (Xml.child xml_arg0 "LongTermPricingId") in
       make ?longTermPricingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let longTermPricingId =
-        field_map json "LongTermPricingId" LongTermPricingId.of_json in
+        field_map json__ "LongTermPricingId" LongTermPricingId.of_json in
       make ?longTermPricingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4890,43 +5838,44 @@ module CreateLongTermPricingRequest =
       isLongTermPricingAutoRenew: JavaBoolean.t option
         [@ocaml.doc
           "Specifies whether the current long-term pricing type for the device should be renewed."];
-      snowballType: SnowballType.t option
+      snowballType: SnowballType.t
         [@ocaml.doc
-          "The type of Snow Family Devices to use for the long-term pricing job."]}
+          "The type of Snow Family devices to use for the long-term pricing job."]}
     let context_ = "CreateLongTermPricingRequest"
     let make ?isLongTermPricingAutoRenew =
-      fun ?snowballType ->
-        fun ~longTermPricingType ->
+      fun ~longTermPricingType ->
+        fun ~snowballType ->
           fun () ->
-            { isLongTermPricingAutoRenew; snowballType; longTermPricingType }
+            { isLongTermPricingAutoRenew; longTermPricingType; snowballType }
     let to_value x =
       structure_to_value
         [("LongTermPricingType",
            (Some (LongTermPricingType.to_value x.longTermPricingType)));
         ("IsLongTermPricingAutoRenew",
           (Option.map x.isLongTermPricingAutoRenew ~f:JavaBoolean.to_value));
-        ("SnowballType",
-          (Option.map x.snowballType ~f:SnowballType.to_value))]
+        ("SnowballType", (Some (SnowballType.to_value x.snowballType)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let snowballType =
-        (Option.map ~f:SnowballType.of_xml)
-          (Xml.child xml_arg0 "SnowballType") in
+        SnowballType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SnowballType") in
       let isLongTermPricingAutoRenew =
         (Option.map ~f:JavaBoolean.of_xml)
           (Xml.child xml_arg0 "IsLongTermPricingAutoRenew") in
       let longTermPricingType =
         LongTermPricingType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LongTermPricingType") in
-      make ?snowballType ?isLongTermPricingAutoRenew ~longTermPricingType ()
+      make ~snowballType ?isLongTermPricingAutoRenew ~longTermPricingType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let snowballType = field_map json "SnowballType" SnowballType.of_json in
+    let of_json json__ =
+      let snowballType =
+        field_map_exn json__ "SnowballType" SnowballType.of_json in
       let isLongTermPricingAutoRenew =
-        field_map json "IsLongTermPricingAutoRenew" JavaBoolean.of_json in
+        field_map json__ "IsLongTermPricingAutoRenew" JavaBoolean.of_json in
       let longTermPricingType =
-        field_map_exn json "LongTermPricingType" LongTermPricingType.of_json in
-      make ?snowballType ?isLongTermPricingAutoRenew ~longTermPricingType ()
+        field_map_exn json__ "LongTermPricingType"
+          LongTermPricingType.of_json in
+      make ~snowballType ?isLongTermPricingAutoRenew ~longTermPricingType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a job with the long-term usage option for a device. The long-term usage is a 1-year or 3-year long-term pricing type for the device. You are billed upfront, and Amazon Web Services provides discounts for long-term pricing."]
@@ -5013,11 +5962,11 @@ module CreateJobResult =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a job to import or export data between Amazon S3 and your on-premises data center. Your Amazon Web Services account must have the right trust policies and permissions in place to create a job for a Snow device. If you're creating a job for a node in a cluster, you only need to provide the clusterId value; the other job attributes are inherited from the cluster. Only the Snowball; Edge device type is supported when ordering clustered jobs. The device capacity is optional. Availability of device types differ by Amazon Web Services Region. For more information about Region availability, see Amazon Web Services Regional Services. Snow Family Devices and their capacities. Snow Family device type: SNC1_SSD Capacity: T14 Description: Snowcone Snow Family device type: SNC1_HDD Capacity: T8 Description: Snowcone Device type: EDGE_S Capacity: T98 Description: Snowball Edge Storage Optimized for data transfer only Device type: EDGE_CG Capacity: T42 Description: Snowball Edge Compute Optimized with GPU Device type: EDGE_C Capacity: T42 Description: Snowball Edge Compute Optimized without GPU Device type: EDGE Capacity: T100 Description: Snowball Edge Storage Optimized with EC2 Compute Device type: STANDARD Capacity: T50 Description: Original Snowball device This device is only available in the Ningxia, Beijing, and Singapore Amazon Web Services Region Device type: STANDARD Capacity: T80 Description: Original Snowball device This device is only available in the Ningxia, Beijing, and Singapore Amazon Web Services Region."]
+       "Creates a job to import or export data between Amazon S3 and your on-premises data center. Your Amazon Web Services account must have the right trust policies and permissions in place to create a job for a Snow device. If you're creating a job for a node in a cluster, you only need to provide the clusterId value; the other job attributes are inherited from the cluster. Only the Snowball; Edge device type is supported when ordering clustered jobs. The device capacity is optional. Availability of device types differ by Amazon Web Services Region. For more information about Region availability, see Amazon Web Services Regional Services. Snow Family devices and their capacities. Device type: SNC1_SSD Capacity: T14 Description: Snowcone Device type: SNC1_HDD Capacity: T8 Description: Snowcone Device type: EDGE_S Capacity: T98 Description: Snowball Edge Storage Optimized for data transfer only Device type: EDGE_CG Capacity: T42 Description: Snowball Edge Compute Optimized with GPU Device type: EDGE_C Capacity: T42 Description: Snowball Edge Compute Optimized without GPU Device type: EDGE Capacity: T100 Description: Snowball Edge Storage Optimized with EC2 Compute This device is replaced with T98. Device type: STANDARD Capacity: T50 Description: Original Snowball device This device is only available in the Ningxia, Beijing, and Singapore Amazon Web Services Region Device type: STANDARD Capacity: T80 Description: Original Snowball device This device is only available in the Ningxia, Beijing, and Singapore Amazon Web Services Region. Snow Family device type: RACK_5U_C Capacity: T13 Description: Snowblade. Device type: V3_5S Capacity: T240 Description: Snowball Edge Storage Optimized 210TB"]
 module CreateJobRequest =
   struct
     type nonrec t =
@@ -5056,7 +6005,7 @@ module CreateJobRequest =
           "The ID of a cluster. If you're creating a job for a node in a cluster, you need to provide only this clusterId value. The other job attributes are inherited from the cluster."];
       snowballType: SnowballType.t option
         [@ocaml.doc
-          "The type of Snow Family Devices to use for this job. For cluster jobs, Amazon Web Services Snow Family currently supports only the EDGE device type. The type of Amazon Web Services Snow device to use for this job. Currently, the only supported device type for cluster jobs is EDGE. For more information, see Snowball Edge Device Options in the Snowball Edge Developer Guide. For more information, see \"https://docs.aws.amazon.com/snowball/latest/snowcone-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide or \"https://docs.aws.amazon.com/snowball/latest/developer-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide."];
+          "The type of Snow Family devices to use for this job. For cluster jobs, Amazon Web Services Snow Family currently supports only the EDGE device type. The type of Amazon Web Services Snow device to use for this job. Currently, the only supported device type for cluster jobs is EDGE. For more information, see Snowball Edge Device Options in the Snowball Edge Developer Guide. For more information, see \"https://docs.aws.amazon.com/snowball/latest/snowcone-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide or \"https://docs.aws.amazon.com/snowball/latest/developer-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide."];
       forwardingAddressId: AddressId.t option
         [@ocaml.doc
           "The forwarding address ID for a job. This field is not supported in most Regions."];
@@ -5065,12 +6014,18 @@ module CreateJobRequest =
           "The tax documents required in your Amazon Web Services Region."];
       deviceConfiguration: DeviceConfiguration.t option
         [@ocaml.doc
-          "Defines the device configuration for an Snowcone job. For more information, see \"https://docs.aws.amazon.com/snowball/latest/snowcone-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide or \"https://docs.aws.amazon.com/snowball/latest/developer-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide."];
+          "Defines the device configuration for an Snowball Edge job. For more information, see \"https://docs.aws.amazon.com/snowball/latest/snowcone-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide or \"https://docs.aws.amazon.com/snowball/latest/developer-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide."];
       remoteManagement: RemoteManagement.t option
         [@ocaml.doc
-          "Allows you to securely operate and manage Snowcone devices remotely from outside of your internal network. When set to INSTALLED_AUTOSTART, remote management will automatically be available when the device arrives at your location. Otherwise, you need to use the Snowball Client to manage the device."];
+          "Allows you to securely operate and manage Snowcone devices remotely from outside of your internal network. When set to INSTALLED_AUTOSTART, remote management will automatically be available when the device arrives at your location. Otherwise, you need to use the Snowball Edge client to manage the device. When set to NOT_INSTALLED, remote management will not be available on the device."];
       longTermPricingId: LongTermPricingId.t option
-        [@ocaml.doc "The ID of the long-term pricing type for the device."]}
+        [@ocaml.doc "The ID of the long-term pricing type for the device."];
+      impactLevel: ImpactLevel.t option
+        [@ocaml.doc
+          "The highest impact level of data that will be stored or processed on the device, provided at job creation."];
+      pickupDetails: PickupDetails.t option
+        [@ocaml.doc
+          "Information identifying the person picking up the device."]}
     let make ?jobType =
       fun ?resources ->
         fun ?onDeviceServiceConfiguration ->
@@ -5088,26 +6043,30 @@ module CreateJobRequest =
                                 fun ?deviceConfiguration ->
                                   fun ?remoteManagement ->
                                     fun ?longTermPricingId ->
-                                      fun () ->
-                                        {
-                                          jobType;
-                                          resources;
-                                          onDeviceServiceConfiguration;
-                                          description;
-                                          addressId;
-                                          kmsKeyARN;
-                                          roleARN;
-                                          snowballCapacityPreference;
-                                          shippingOption;
-                                          notification;
-                                          clusterId;
-                                          snowballType;
-                                          forwardingAddressId;
-                                          taxDocuments;
-                                          deviceConfiguration;
-                                          remoteManagement;
-                                          longTermPricingId
-                                        }
+                                      fun ?impactLevel ->
+                                        fun ?pickupDetails ->
+                                          fun () ->
+                                            {
+                                              jobType;
+                                              resources;
+                                              onDeviceServiceConfiguration;
+                                              description;
+                                              addressId;
+                                              kmsKeyARN;
+                                              roleARN;
+                                              snowballCapacityPreference;
+                                              shippingOption;
+                                              notification;
+                                              clusterId;
+                                              snowballType;
+                                              forwardingAddressId;
+                                              taxDocuments;
+                                              deviceConfiguration;
+                                              remoteManagement;
+                                              longTermPricingId;
+                                              impactLevel;
+                                              pickupDetails
+                                            }
     let to_value x =
       structure_to_value
         [("JobType", (Option.map x.jobType ~f:JobType.to_value));
@@ -5138,9 +6097,17 @@ module CreateJobRequest =
         ("RemoteManagement",
           (Option.map x.remoteManagement ~f:RemoteManagement.to_value));
         ("LongTermPricingId",
-          (Option.map x.longTermPricingId ~f:LongTermPricingId.to_value))]
+          (Option.map x.longTermPricingId ~f:LongTermPricingId.to_value));
+        ("ImpactLevel", (Option.map x.impactLevel ~f:ImpactLevel.to_value));
+        ("PickupDetails",
+          (Option.map x.pickupDetails ~f:PickupDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let pickupDetails =
+        (Option.map ~f:PickupDetails.of_xml)
+          (Xml.child xml_arg0 "PickupDetails") in
+      let impactLevel =
+        (Option.map ~f:ImpactLevel.of_xml) (Xml.child xml_arg0 "ImpactLevel") in
       let longTermPricingId =
         (Option.map ~f:LongTermPricingId.of_xml)
           (Xml.child xml_arg0 "LongTermPricingId") in
@@ -5185,52 +6152,59 @@ module CreateJobRequest =
         (Option.map ~f:JobResource.of_xml) (Xml.child xml_arg0 "Resources") in
       let jobType =
         (Option.map ~f:JobType.of_xml) (Xml.child xml_arg0 "JobType") in
-      make ?longTermPricingId ?remoteManagement ?deviceConfiguration
-        ?taxDocuments ?forwardingAddressId ?snowballType ?clusterId
-        ?notification ?shippingOption ?snowballCapacityPreference ?roleARN
-        ?kmsKeyARN ?addressId ?description ?onDeviceServiceConfiguration
-        ?resources ?jobType ()
+      make ?pickupDetails ?impactLevel ?longTermPricingId ?remoteManagement
+        ?deviceConfiguration ?taxDocuments ?forwardingAddressId ?snowballType
+        ?clusterId ?notification ?shippingOption ?snowballCapacityPreference
+        ?roleARN ?kmsKeyARN ?addressId ?description
+        ?onDeviceServiceConfiguration ?resources ?jobType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let pickupDetails =
+        field_map json__ "PickupDetails" PickupDetails.of_json in
+      let impactLevel = field_map json__ "ImpactLevel" ImpactLevel.of_json in
       let longTermPricingId =
-        field_map json "LongTermPricingId" LongTermPricingId.of_json in
+        field_map json__ "LongTermPricingId" LongTermPricingId.of_json in
       let remoteManagement =
-        field_map json "RemoteManagement" RemoteManagement.of_json in
+        field_map json__ "RemoteManagement" RemoteManagement.of_json in
       let deviceConfiguration =
-        field_map json "DeviceConfiguration" DeviceConfiguration.of_json in
-      let taxDocuments = field_map json "TaxDocuments" TaxDocuments.of_json in
+        field_map json__ "DeviceConfiguration" DeviceConfiguration.of_json in
+      let taxDocuments = field_map json__ "TaxDocuments" TaxDocuments.of_json in
       let forwardingAddressId =
-        field_map json "ForwardingAddressId" AddressId.of_json in
-      let snowballType = field_map json "SnowballType" SnowballType.of_json in
-      let clusterId = field_map json "ClusterId" ClusterId.of_json in
-      let notification = field_map json "Notification" Notification.of_json in
+        field_map json__ "ForwardingAddressId" AddressId.of_json in
+      let snowballType = field_map json__ "SnowballType" SnowballType.of_json in
+      let clusterId = field_map json__ "ClusterId" ClusterId.of_json in
+      let notification = field_map json__ "Notification" Notification.of_json in
       let shippingOption =
-        field_map json "ShippingOption" ShippingOption.of_json in
+        field_map json__ "ShippingOption" ShippingOption.of_json in
       let snowballCapacityPreference =
-        field_map json "SnowballCapacityPreference" SnowballCapacity.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let kmsKeyARN = field_map json "KmsKeyARN" KmsKeyARN.of_json in
-      let addressId = field_map json "AddressId" AddressId.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map json__ "SnowballCapacityPreference"
+          SnowballCapacity.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let kmsKeyARN = field_map json__ "KmsKeyARN" KmsKeyARN.of_json in
+      let addressId = field_map json__ "AddressId" AddressId.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let onDeviceServiceConfiguration =
-        field_map json "OnDeviceServiceConfiguration"
+        field_map json__ "OnDeviceServiceConfiguration"
           OnDeviceServiceConfiguration.of_json in
-      let resources = field_map json "Resources" JobResource.of_json in
-      let jobType = field_map json "JobType" JobType.of_json in
-      make ?longTermPricingId ?remoteManagement ?deviceConfiguration
-        ?taxDocuments ?forwardingAddressId ?snowballType ?clusterId
-        ?notification ?shippingOption ?snowballCapacityPreference ?roleARN
-        ?kmsKeyARN ?addressId ?description ?onDeviceServiceConfiguration
-        ?resources ?jobType ()
+      let resources = field_map json__ "Resources" JobResource.of_json in
+      let jobType = field_map json__ "JobType" JobType.of_json in
+      make ?pickupDetails ?impactLevel ?longTermPricingId ?remoteManagement
+        ?deviceConfiguration ?taxDocuments ?forwardingAddressId ?snowballType
+        ?clusterId ?notification ?shippingOption ?snowballCapacityPreference
+        ?roleARN ?kmsKeyARN ?addressId ?description
+        ?onDeviceServiceConfiguration ?resources ?jobType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a job to import or export data between Amazon S3 and your on-premises data center. Your Amazon Web Services account must have the right trust policies and permissions in place to create a job for a Snow device. If you're creating a job for a node in a cluster, you only need to provide the clusterId value; the other job attributes are inherited from the cluster. Only the Snowball; Edge device type is supported when ordering clustered jobs. The device capacity is optional. Availability of device types differ by Amazon Web Services Region. For more information about Region availability, see Amazon Web Services Regional Services. Snow Family Devices and their capacities. Snow Family device type: SNC1_SSD Capacity: T14 Description: Snowcone Snow Family device type: SNC1_HDD Capacity: T8 Description: Snowcone Device type: EDGE_S Capacity: T98 Description: Snowball Edge Storage Optimized for data transfer only Device type: EDGE_CG Capacity: T42 Description: Snowball Edge Compute Optimized with GPU Device type: EDGE_C Capacity: T42 Description: Snowball Edge Compute Optimized without GPU Device type: EDGE Capacity: T100 Description: Snowball Edge Storage Optimized with EC2 Compute Device type: STANDARD Capacity: T50 Description: Original Snowball device This device is only available in the Ningxia, Beijing, and Singapore Amazon Web Services Region Device type: STANDARD Capacity: T80 Description: Original Snowball device This device is only available in the Ningxia, Beijing, and Singapore Amazon Web Services Region."]
+       "Creates a job to import or export data between Amazon S3 and your on-premises data center. Your Amazon Web Services account must have the right trust policies and permissions in place to create a job for a Snow device. If you're creating a job for a node in a cluster, you only need to provide the clusterId value; the other job attributes are inherited from the cluster. Only the Snowball; Edge device type is supported when ordering clustered jobs. The device capacity is optional. Availability of device types differ by Amazon Web Services Region. For more information about Region availability, see Amazon Web Services Regional Services. Snow Family devices and their capacities. Device type: SNC1_SSD Capacity: T14 Description: Snowcone Device type: SNC1_HDD Capacity: T8 Description: Snowcone Device type: EDGE_S Capacity: T98 Description: Snowball Edge Storage Optimized for data transfer only Device type: EDGE_CG Capacity: T42 Description: Snowball Edge Compute Optimized with GPU Device type: EDGE_C Capacity: T42 Description: Snowball Edge Compute Optimized without GPU Device type: EDGE Capacity: T100 Description: Snowball Edge Storage Optimized with EC2 Compute This device is replaced with T98. Device type: STANDARD Capacity: T50 Description: Original Snowball device This device is only available in the Ningxia, Beijing, and Singapore Amazon Web Services Region Device type: STANDARD Capacity: T80 Description: Original Snowball device This device is only available in the Ningxia, Beijing, and Singapore Amazon Web Services Region. Snow Family device type: RACK_5U_C Capacity: T13 Description: Snowblade. Device type: V3_5S Capacity: T240 Description: Snowball Edge Storage Optimized 210TB"]
 module CreateClusterResult =
   struct
     type nonrec t =
       {
       clusterId: ClusterId.t option
-        [@ocaml.doc "The automatically generated ID for a cluster."]}
+        [@ocaml.doc "The automatically generated ID for a cluster."];
+      jobListEntries: JobListEntryList.t option
+        [@ocaml.doc
+          "List of jobs created for this cluster. For syntax, see ListJobsResult$JobListEntries in this guide."]}
     type nonrec error =
       [ `Ec2RequestFailedException of Ec2RequestFailedException.t 
       | `InvalidInputCombinationException of
@@ -5238,7 +6212,8 @@ module CreateClusterResult =
       | `InvalidResourceException of InvalidResourceException.t 
       | `KMSRequestFailedException of KMSRequestFailedException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?clusterId = fun () -> { clusterId }
+    let make ?clusterId =
+      fun ?jobListEntries -> fun () -> { clusterId; jobListEntries }
     let error_of_json name json =
       match name with
       | "Ec2RequestFailedException" ->
@@ -5291,16 +6266,23 @@ module CreateClusterResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ClusterId", (Option.map x.clusterId ~f:ClusterId.to_value))]
+        [("ClusterId", (Option.map x.clusterId ~f:ClusterId.to_value));
+        ("JobListEntries",
+          (Option.map x.jobListEntries ~f:JobListEntryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jobListEntries =
+        (Option.map ~f:JobListEntryList.of_xml)
+          (Xml.child xml_arg0 "JobListEntries") in
       let clusterId =
         (Option.map ~f:ClusterId.of_xml) (Xml.child xml_arg0 "ClusterId") in
-      make ?clusterId ()
+      make ?jobListEntries ?clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterId = field_map json "ClusterId" ClusterId.of_json in
-      make ?clusterId ()
+    let of_json json__ =
+      let jobListEntries =
+        field_map json__ "JobListEntries" JobListEntryList.of_json in
+      let clusterId = field_map json__ "ClusterId" ClusterId.of_json in
+      make ?jobListEntries ?clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an empty cluster. Each cluster supports five nodes. You use the CreateJob action separately to create the jobs for each of these nodes. The cluster does not ship until these five node jobs have been created."]
@@ -5311,7 +6293,7 @@ module CreateClusterRequest =
       jobType: JobType.t
         [@ocaml.doc
           "The type of job for this cluster. Currently, the only job type supported for clusters is LOCAL_USE. For more information, see \"https://docs.aws.amazon.com/snowball/latest/snowcone-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide or \"https://docs.aws.amazon.com/snowball/latest/developer-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide."];
-      resources: JobResource.t
+      resources: JobResource.t option
         [@ocaml.doc
           "The resources associated with the cluster job. These resources include Amazon S3 buckets and optional Lambda functions written in the Python language."];
       onDeviceServiceConfiguration: OnDeviceServiceConfiguration.t option
@@ -5326,12 +6308,12 @@ module CreateClusterRequest =
       kmsKeyARN: KmsKeyARN.t option
         [@ocaml.doc
           "The KmsKeyARN value that you want to associate with this cluster. KmsKeyARN values are created by using the CreateKey API action in Key Management Service (KMS)."];
-      roleARN: RoleARN.t
+      roleARN: RoleARN.t option
         [@ocaml.doc
           "The RoleARN that you want to associate with this cluster. RoleArn values are created by using the CreateRole API action in Identity and Access Management (IAM)."];
       snowballType: SnowballType.t
         [@ocaml.doc
-          "The type of Snow Family Devices to use for this cluster. For cluster jobs, Amazon Web Services Snow Family currently supports only the EDGE device type. For more information, see \"https://docs.aws.amazon.com/snowball/latest/snowcone-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide or \"https://docs.aws.amazon.com/snowball/latest/developer-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide."];
+          "The type of Snow Family devices to use for this cluster. For cluster jobs, Amazon Web Services Snow Family currently supports only the EDGE device type. For more information, see \"https://docs.aws.amazon.com/snowball/latest/snowcone-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide or \"https://docs.aws.amazon.com/snowball/latest/developer-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide."];
       shippingOption: ShippingOption.t
         [@ocaml.doc
           "The shipping speed for each node in this cluster. This speed doesn't dictate how soon you'll get each Snowball Edge device, rather it represents how quickly each device moves to its destination while in transit. Regional shipping speeds are as follows: In Australia, you have access to express shipping. Typically, Snow devices shipped express are delivered in about a day. In the European Union (EU), you have access to express shipping. Typically, Snow devices shipped express are delivered in about a day. In addition, most countries in the EU have access to standard shipping, which typically takes less than a week, one way. In India, Snow devices are delivered in one to seven days. In the United States of America (US), you have access to one-day shipping and two-day shipping. In Australia, you have access to express shipping. Typically, devices shipped express are delivered in about a day. In the European Union (EU), you have access to express shipping. Typically, Snow devices shipped express are delivered in about a day. In addition, most countries in the EU have access to standard shipping, which typically takes less than a week, one way. In India, Snow devices are delivered in one to seven days. In the US, you have access to one-day shipping and two-day shipping."];
@@ -5346,48 +6328,68 @@ module CreateClusterRequest =
           "The tax documents required in your Amazon Web Services Region."];
       remoteManagement: RemoteManagement.t option
         [@ocaml.doc
-          "Allows you to securely operate and manage Snow devices in a cluster remotely from outside of your internal network. When set to INSTALLED_AUTOSTART, remote management will automatically be available when the device arrives at your location. Otherwise, you need to use the Snowball Client to manage the device."]}
+          "Allows you to securely operate and manage Snow devices in a cluster remotely from outside of your internal network. When set to INSTALLED_AUTOSTART, remote management will automatically be available when the device arrives at your location. Otherwise, you need to use the Snowball Client to manage the device."];
+      initialClusterSize: InitialClusterSize.t option
+        [@ocaml.doc
+          "If provided, each job will be automatically created and associated with the new cluster. If not provided, will be treated as 0."];
+      forceCreateJobs: Boolean.t option
+        [@ocaml.doc
+          "Force to create cluster when user attempts to overprovision or underprovision a cluster. A cluster is overprovisioned or underprovisioned if the initial size of the cluster is more (overprovisioned) or less (underprovisioned) than what needed to meet capacity requirement specified with OnDeviceServiceConfiguration."];
+      longTermPricingIds: LongTermPricingIdList.t option
+        [@ocaml.doc
+          "Lists long-term pricing id that will be used to associate with jobs automatically created for the new cluster."];
+      snowballCapacityPreference: SnowballCapacity.t option
+        [@ocaml.doc
+          "If your job is being created in one of the US regions, you have the option of specifying what size Snow device you'd like for this job. In all other regions, Snowballs come with 80 TB in storage capacity. For more information, see \"https://docs.aws.amazon.com/snowball/latest/snowcone-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide or \"https://docs.aws.amazon.com/snowball/latest/developer-guide/snow-device-types.html\" (Snow Family Devices and Capacity) in the Snowcone User Guide."]}
     let context_ = "CreateClusterRequest"
-    let make ?onDeviceServiceConfiguration =
-      fun ?description ->
-        fun ?kmsKeyARN ->
-          fun ?notification ->
-            fun ?forwardingAddressId ->
-              fun ?taxDocuments ->
-                fun ?remoteManagement ->
-                  fun ~jobType ->
-                    fun ~resources ->
-                      fun ~addressId ->
-                        fun ~roleARN ->
-                          fun ~snowballType ->
-                            fun ~shippingOption ->
-                              fun () ->
-                                {
-                                  onDeviceServiceConfiguration;
-                                  description;
-                                  kmsKeyARN;
-                                  notification;
-                                  forwardingAddressId;
-                                  taxDocuments;
-                                  remoteManagement;
-                                  jobType;
-                                  resources;
-                                  addressId;
-                                  roleARN;
-                                  snowballType;
-                                  shippingOption
-                                }
+    let make ?resources =
+      fun ?onDeviceServiceConfiguration ->
+        fun ?description ->
+          fun ?kmsKeyARN ->
+            fun ?roleARN ->
+              fun ?notification ->
+                fun ?forwardingAddressId ->
+                  fun ?taxDocuments ->
+                    fun ?remoteManagement ->
+                      fun ?initialClusterSize ->
+                        fun ?forceCreateJobs ->
+                          fun ?longTermPricingIds ->
+                            fun ?snowballCapacityPreference ->
+                              fun ~jobType ->
+                                fun ~addressId ->
+                                  fun ~snowballType ->
+                                    fun ~shippingOption ->
+                                      fun () ->
+                                        {
+                                          resources;
+                                          onDeviceServiceConfiguration;
+                                          description;
+                                          kmsKeyARN;
+                                          roleARN;
+                                          notification;
+                                          forwardingAddressId;
+                                          taxDocuments;
+                                          remoteManagement;
+                                          initialClusterSize;
+                                          forceCreateJobs;
+                                          longTermPricingIds;
+                                          snowballCapacityPreference;
+                                          jobType;
+                                          addressId;
+                                          snowballType;
+                                          shippingOption
+                                        }
     let to_value x =
       structure_to_value
         [("JobType", (Some (JobType.to_value x.jobType)));
-        ("Resources", (Some (JobResource.to_value x.resources)));
+        ("Resources", (Option.map x.resources ~f:JobResource.to_value));
         ("OnDeviceServiceConfiguration",
           (Option.map x.onDeviceServiceConfiguration
              ~f:OnDeviceServiceConfiguration.to_value));
         ("Description", (Option.map x.description ~f:String_.to_value));
         ("AddressId", (Some (AddressId.to_value x.addressId)));
         ("KmsKeyARN", (Option.map x.kmsKeyARN ~f:KmsKeyARN.to_value));
-        ("RoleARN", (Some (RoleARN.to_value x.roleARN)));
+        ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value));
         ("SnowballType", (Some (SnowballType.to_value x.snowballType)));
         ("ShippingOption", (Some (ShippingOption.to_value x.shippingOption)));
         ("Notification",
@@ -5397,9 +6399,29 @@ module CreateClusterRequest =
         ("TaxDocuments",
           (Option.map x.taxDocuments ~f:TaxDocuments.to_value));
         ("RemoteManagement",
-          (Option.map x.remoteManagement ~f:RemoteManagement.to_value))]
+          (Option.map x.remoteManagement ~f:RemoteManagement.to_value));
+        ("InitialClusterSize",
+          (Option.map x.initialClusterSize ~f:InitialClusterSize.to_value));
+        ("ForceCreateJobs",
+          (Option.map x.forceCreateJobs ~f:Boolean.to_value));
+        ("LongTermPricingIds",
+          (Option.map x.longTermPricingIds ~f:LongTermPricingIdList.to_value));
+        ("SnowballCapacityPreference",
+          (Option.map x.snowballCapacityPreference
+             ~f:SnowballCapacity.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let snowballCapacityPreference =
+        (Option.map ~f:SnowballCapacity.of_xml)
+          (Xml.child xml_arg0 "SnowballCapacityPreference") in
+      let longTermPricingIds =
+        (Option.map ~f:LongTermPricingIdList.of_xml)
+          (Xml.child xml_arg0 "LongTermPricingIds") in
+      let forceCreateJobs =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ForceCreateJobs") in
+      let initialClusterSize =
+        (Option.map ~f:InitialClusterSize.of_xml)
+          (Xml.child xml_arg0 "InitialClusterSize") in
       let remoteManagement =
         (Option.map ~f:RemoteManagement.of_xml)
           (Xml.child xml_arg0 "RemoteManagement") in
@@ -5419,7 +6441,7 @@ module CreateClusterRequest =
         SnowballType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SnowballType") in
       let roleARN =
-        RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
+        (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
       let kmsKeyARN =
         (Option.map ~f:KmsKeyARN.of_xml) (Xml.child xml_arg0 "KmsKeyARN") in
       let addressId =
@@ -5431,37 +6453,49 @@ module CreateClusterRequest =
         (Option.map ~f:OnDeviceServiceConfiguration.of_xml)
           (Xml.child xml_arg0 "OnDeviceServiceConfiguration") in
       let resources =
-        JobResource.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Resources") in
+        (Option.map ~f:JobResource.of_xml) (Xml.child xml_arg0 "Resources") in
       let jobType =
         JobType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobType") in
-      make ?remoteManagement ?taxDocuments ?forwardingAddressId ?notification
-        ~shippingOption ~snowballType ~roleARN ?kmsKeyARN ~addressId
-        ?description ?onDeviceServiceConfiguration ~resources ~jobType ()
+      make ?snowballCapacityPreference ?longTermPricingIds ?forceCreateJobs
+        ?initialClusterSize ?remoteManagement ?taxDocuments
+        ?forwardingAddressId ?notification ~shippingOption ~snowballType
+        ?roleARN ?kmsKeyARN ~addressId ?description
+        ?onDeviceServiceConfiguration ?resources ~jobType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let snowballCapacityPreference =
+        field_map json__ "SnowballCapacityPreference"
+          SnowballCapacity.of_json in
+      let longTermPricingIds =
+        field_map json__ "LongTermPricingIds" LongTermPricingIdList.of_json in
+      let forceCreateJobs =
+        field_map json__ "ForceCreateJobs" Boolean.of_json in
+      let initialClusterSize =
+        field_map json__ "InitialClusterSize" InitialClusterSize.of_json in
       let remoteManagement =
-        field_map json "RemoteManagement" RemoteManagement.of_json in
-      let taxDocuments = field_map json "TaxDocuments" TaxDocuments.of_json in
+        field_map json__ "RemoteManagement" RemoteManagement.of_json in
+      let taxDocuments = field_map json__ "TaxDocuments" TaxDocuments.of_json in
       let forwardingAddressId =
-        field_map json "ForwardingAddressId" AddressId.of_json in
-      let notification = field_map json "Notification" Notification.of_json in
+        field_map json__ "ForwardingAddressId" AddressId.of_json in
+      let notification = field_map json__ "Notification" Notification.of_json in
       let shippingOption =
-        field_map_exn json "ShippingOption" ShippingOption.of_json in
+        field_map_exn json__ "ShippingOption" ShippingOption.of_json in
       let snowballType =
-        field_map_exn json "SnowballType" SnowballType.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      let kmsKeyARN = field_map json "KmsKeyARN" KmsKeyARN.of_json in
-      let addressId = field_map_exn json "AddressId" AddressId.of_json in
-      let description = field_map json "Description" String_.of_json in
+        field_map_exn json__ "SnowballType" SnowballType.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let kmsKeyARN = field_map json__ "KmsKeyARN" KmsKeyARN.of_json in
+      let addressId = field_map_exn json__ "AddressId" AddressId.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let onDeviceServiceConfiguration =
-        field_map json "OnDeviceServiceConfiguration"
+        field_map json__ "OnDeviceServiceConfiguration"
           OnDeviceServiceConfiguration.of_json in
-      let resources = field_map_exn json "Resources" JobResource.of_json in
-      let jobType = field_map_exn json "JobType" JobType.of_json in
-      make ?remoteManagement ?taxDocuments ?forwardingAddressId ?notification
-        ~shippingOption ~snowballType ~roleARN ?kmsKeyARN ~addressId
-        ?description ?onDeviceServiceConfiguration ~resources ~jobType ()
+      let resources = field_map json__ "Resources" JobResource.of_json in
+      let jobType = field_map_exn json__ "JobType" JobType.of_json in
+      make ?snowballCapacityPreference ?longTermPricingIds ?forceCreateJobs
+        ?initialClusterSize ?remoteManagement ?taxDocuments
+        ?forwardingAddressId ?notification ~shippingOption ~snowballType
+        ?roleARN ?kmsKeyARN ~addressId ?description
+        ?onDeviceServiceConfiguration ?resources ~jobType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an empty cluster. Each cluster supports five nodes. You use the CreateJob action separately to create the jobs for each of these nodes. The cluster does not ship until these five node jobs have been created."]
@@ -5520,12 +6554,12 @@ module CreateAddressResult =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AddressId") in
       make ?addressId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let addressId = field_map json "AddressId" String_.of_json in
+    let of_json json__ =
+      let addressId = field_map json__ "AddressId" String_.of_json in
       make ?addressId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an address for a Snow device to be shipped to. In most regions, addresses are validated at the time of creation. The address you provide must be located within the serviceable area of your region. If the address is invalid or unsupported, then an exception is thrown."]
+       "Creates an address for a Snow device to be shipped to. In most regions, addresses are validated at the time of creation. The address you provide must be located within the serviceable area of your region. If the address is invalid or unsupported, then an exception is thrown. If providing an address as a JSON file through the cli-input-json option, include the full file path. For example, --cli-input-json file://create-address.json."]
 module CreateAddressRequest =
   struct
     type nonrec t =
@@ -5542,12 +6576,12 @@ module CreateAddressRequest =
         Address.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Address") in
       make ~address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let address = field_map_exn json "Address" Address.of_json in
+    let of_json json__ =
+      let address = field_map_exn json__ "Address" Address.of_json in
       make ~address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an address for a Snow device to be shipped to. In most regions, addresses are validated at the time of creation. The address you provide must be located within the serviceable area of your region. If the address is invalid or unsupported, then an exception is thrown."]
+       "Creates an address for a Snow device to be shipped to. In most regions, addresses are validated at the time of creation. The address you provide must be located within the serviceable area of your region. If the address is invalid or unsupported, then an exception is thrown. If providing an address as a JSON file through the cli-input-json option, include the full file path. For example, --cli-input-json file://create-address.json."]
 module CancelJobResult =
   struct
     type nonrec t = unit
@@ -5623,8 +6657,9 @@ module CancelJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Cancels the specified job. You can only cancel a job before its JobState value changes to PreparingAppliance. Requesting the ListJobs or DescribeJob action returns a job's JobState as part of the response element data returned."]
@@ -5705,8 +6740,8 @@ module CancelClusterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

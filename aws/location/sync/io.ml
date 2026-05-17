@@ -29,8 +29,12 @@ let calculate_route ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CalculateRoute input
 let calculate_route_matrix ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CalculateRouteMatrix input
+let cancel_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelJob input
 let create_geofence_collection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGeofenceCollection input
+let create_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateKey input
 let create_map ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateMap input
 let create_place_index ?endpoint_url ?cfg input =
@@ -41,6 +45,8 @@ let create_tracker ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTracker input
 let delete_geofence_collection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteGeofenceCollection input
+let delete_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteKey input
 let delete_map ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteMap input
 let delete_place_index ?endpoint_url ?cfg input =
@@ -51,6 +57,8 @@ let delete_tracker ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTracker input
 let describe_geofence_collection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeGeofenceCollection input
+let describe_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeKey input
 let describe_map ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeMap input
 let describe_place_index ?endpoint_url ?cfg input =
@@ -61,12 +69,16 @@ let describe_tracker ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTracker input
 let disassociate_tracker_consumer ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateTrackerConsumer input
+let forecast_geofence_events ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ForecastGeofenceEvents input
 let get_device_position ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDevicePosition input
 let get_device_position_history ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDevicePositionHistory input
 let get_geofence ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetGeofence input
+let get_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetJob input
 let get_map_glyphs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMapGlyphs input
 let get_map_sprites ?endpoint_url ?cfg input =
@@ -75,12 +87,18 @@ let get_map_style_descriptor ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMapStyleDescriptor input
 let get_map_tile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMapTile input
+let get_place ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPlace input
 let list_device_positions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDevicePositions input
 let list_geofence_collections ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGeofenceCollections input
 let list_geofences ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGeofences input
+let list_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListJobs input
+let list_keys ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListKeys input
 let list_maps ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMaps input
 let list_place_indexes ?endpoint_url ?cfg input =
@@ -101,12 +119,16 @@ let search_place_index_for_suggestions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SearchPlaceIndexForSuggestions input
 let search_place_index_for_text ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SearchPlaceIndexForText input
+let start_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartJob input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_geofence_collection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateGeofenceCollection input
+let update_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateKey input
 let update_map ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateMap input
 let update_place_index ?endpoint_url ?cfg input =
@@ -115,3 +137,5 @@ let update_route_calculator ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateRouteCalculator input
 let update_tracker ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateTracker input
+let verify_device_position ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.VerifyDevicePosition input

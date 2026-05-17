@@ -24,6 +24,72 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module DayOfWeek =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:6) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for DayOfWeek" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module VmwareCategory =
+  struct
+    type nonrec t = string
+    let context_ = "VmwareCategory"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:80) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VmwareCategory" j
+    let to_json = simple_to_json to_value
+  end
+module VmwareTagName =
+  struct
+    type nonrec t = string
+    let context_ = "VmwareTagName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:80) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VmwareTagName" j
+    let to_json = simple_to_json to_value
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "string"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"string" j
+    let to_json = simple_to_json to_value
+  end
 module TagKey =
   struct
     type nonrec t = string
@@ -36,7 +102,7 @@ module TagKey =
                 (check_string_max i ~max:128) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$")));
+                       ~pattern:"([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -56,7 +122,7 @@ module TagValue =
           ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"^[^\\x00]*$")));
+                  (fun () -> check_pattern i ~pattern:"[^\\x00]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -64,6 +130,90 @@ module TagValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module AverageUploadRateLimit =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int64_max i ~max:8000000000000L) >>=
+             (fun () -> check_int64_min i ~min:51200L));
+        i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module DaysOfWeek =
+  struct
+    type nonrec t = DayOfWeek.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:7) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DayOfWeek.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DayOfWeek.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DaysOfWeek" ~of_json:DayOfWeek.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module HourOfDay =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:23) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for HourOfDay" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MinuteOfHour =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:59) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MinuteOfHour" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module Name =
@@ -76,7 +226,7 @@ module Name =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:100) >>=
-                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9-]*$")));
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9-]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -96,7 +246,7 @@ module Path =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:4096) >>=
-                  (fun () -> check_pattern i ~pattern:"^[^\\x00]+$")));
+                  (fun () -> check_pattern i ~pattern:"[^\\x00]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -118,7 +268,7 @@ module ResourceArn =
                 (check_string_max i ~max:500) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:(aws|aws-cn|aws-us-gov):backup-gateway(:[a-zA-Z-0-9]+){3}\\/[a-zA-Z-0-9]+$")));
+                       ~pattern:"arn:(aws|aws-cn|aws-us-gov):backup-gateway(:[a-zA-Z-0-9]+){3}\\/[a-zA-Z-0-9]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -140,19 +290,6 @@ module Time =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
-module String_ =
-  struct
-    type nonrec t = string
-    let context_ = "string"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"string" j
-    let to_json = simple_to_json to_value
-  end
 module Host =
   struct
     type nonrec t = string
@@ -163,7 +300,7 @@ module Host =
           ((check_string_min i ~min:3) >>=
              (fun () ->
                 (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"^.+$")));
+                  (fun () -> check_pattern i ~pattern:".+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -216,7 +353,7 @@ module KmsKeyArn =
                 (check_string_max i ~max:500) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^(^arn:(aws|aws-cn|aws-us-gov):kms:([a-zA-Z0-9-]+):([0-9]+):(key|alias)/(\\S+)$)|(^alias/(\\S+)$)$")));
+                       ~pattern:"(^arn:(aws|aws-cn|aws-us-gov):kms:([a-zA-Z0-9-]+):([0-9]+):(key|alias)/(\\S+)$)|(^alias/(\\S+)$)")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -238,7 +375,7 @@ module ServerArn =
                 (check_string_max i ~max:500) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:(aws|aws-cn|aws-us-gov):backup-gateway(:[a-zA-Z-0-9]+){3}\\/[a-zA-Z-0-9]+$")));
+                       ~pattern:"arn:(aws|aws-cn|aws-us-gov):backup-gateway(:[a-zA-Z-0-9]+){3}\\/[a-zA-Z-0-9]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -257,10 +394,10 @@ module GatewayArn =
         ok_or_failwith
           ((check_string_min i ~min:50) >>=
              (fun () ->
-                (check_string_max i ~max:500) >>=
+                (check_string_max i ~max:180) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^arn:(aws|aws-cn|aws-us-gov):backup-gateway(:[a-zA-Z-0-9]+){3}\\/[a-zA-Z-0-9]+$")));
+                       ~pattern:"arn:(aws|aws-cn|aws-us-gov):backup-gateway(:[a-zA-Z-0-9]+){3}\\/[a-zA-Z-0-9]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -306,6 +443,70 @@ module HypervisorId =
     let of_json j = string_of_json ~kind:"HypervisorId" j
     let to_json = simple_to_json to_value
   end
+module VmwareTag =
+  struct
+    type nonrec t =
+      {
+      vmwareCategory: VmwareCategory.t option
+        [@ocaml.doc "The is the category of VMware."];
+      vmwareTagName: VmwareTagName.t option
+        [@ocaml.doc "This is the user-defined name of a VMware tag."];
+      vmwareTagDescription: String_.t option
+        [@ocaml.doc "This is a user-defined description of a VMware tag."]}
+    let make ?vmwareCategory =
+      fun ?vmwareTagName ->
+        fun ?vmwareTagDescription ->
+          fun () -> { vmwareCategory; vmwareTagName; vmwareTagDescription }
+    let to_value x =
+      structure_to_value
+        [("VmwareCategory",
+           (Option.map x.vmwareCategory ~f:VmwareCategory.to_value));
+        ("VmwareTagName",
+          (Option.map x.vmwareTagName ~f:VmwareTagName.to_value));
+        ("VmwareTagDescription",
+          (Option.map x.vmwareTagDescription ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vmwareTagDescription =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "VmwareTagDescription") in
+      let vmwareTagName =
+        (Option.map ~f:VmwareTagName.of_xml)
+          (Xml.child xml_arg0 "VmwareTagName") in
+      let vmwareCategory =
+        (Option.map ~f:VmwareCategory.of_xml)
+          (Xml.child xml_arg0 "VmwareCategory") in
+      make ?vmwareTagDescription ?vmwareTagName ?vmwareCategory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vmwareTagDescription =
+        field_map json__ "VmwareTagDescription" String_.of_json in
+      let vmwareTagName =
+        field_map json__ "VmwareTagName" VmwareTagName.of_json in
+      let vmwareCategory =
+        field_map json__ "VmwareCategory" VmwareCategory.of_json in
+      make ?vmwareTagDescription ?vmwareTagName ?vmwareCategory ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A VMware tag is a tag attached to a specific virtual machine. A tag is a key-value pair you can use to manage, filter, and search for your resources. The content of VMware tags can be matched to Amazon Web Services tags."]
+module DayOfMonth =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:31) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for DayOfMonth" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module Tag =
   struct
     type nonrec t =
@@ -314,7 +515,7 @@ module Tag =
         [@ocaml.doc
           "The key part of a tag's key-value pair. The key can't start with aws:."];
       value: TagValue.t
-        [@ocaml.doc "The key part of a value's key-value pair."]}
+        [@ocaml.doc "The value part of a tag's key-value pair."]}
     let context_ = "Tag"
     let make ~key = fun ~value -> fun () -> { key; value }
     let to_value x =
@@ -329,13 +530,157 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A key-value pair you can use to manage, filter, and search for your resources. Allowed characters include UTF-8 letters, numbers, spaces, and the following characters: + - = . _ : /."]
+       "A key-value pair you can use to manage, filter, and search for your resources. Allowed characters include UTF-8 letters, numbers, and the following characters: + - = . _ : /. Spaces are not allowed in tag values."]
+module VmwareToAwsTagMapping =
+  struct
+    type nonrec t =
+      {
+      vmwareCategory: VmwareCategory.t
+        [@ocaml.doc "The is the category of VMware."];
+      vmwareTagName: VmwareTagName.t
+        [@ocaml.doc "This is the user-defined name of a VMware tag."];
+      awsTagKey: TagKey.t
+        [@ocaml.doc
+          "The key part of the Amazon Web Services tag's key-value pair."];
+      awsTagValue: TagValue.t
+        [@ocaml.doc
+          "The value part of the Amazon Web Services tag's key-value pair."]}
+    let context_ = "VmwareToAwsTagMapping"
+    let make ~vmwareCategory =
+      fun ~vmwareTagName ->
+        fun ~awsTagKey ->
+          fun ~awsTagValue ->
+            fun () ->
+              { vmwareCategory; vmwareTagName; awsTagKey; awsTagValue }
+    let to_value x =
+      structure_to_value
+        [("VmwareCategory",
+           (Some (VmwareCategory.to_value x.vmwareCategory)));
+        ("VmwareTagName", (Some (VmwareTagName.to_value x.vmwareTagName)));
+        ("AwsTagKey", (Some (TagKey.to_value x.awsTagKey)));
+        ("AwsTagValue", (Some (TagValue.to_value x.awsTagValue)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let awsTagValue =
+        TagValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AwsTagValue") in
+      let awsTagKey =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AwsTagKey") in
+      let vmwareTagName =
+        VmwareTagName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VmwareTagName") in
+      let vmwareCategory =
+        VmwareCategory.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VmwareCategory") in
+      make ~awsTagValue ~awsTagKey ~vmwareTagName ~vmwareCategory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let awsTagValue = field_map_exn json__ "AwsTagValue" TagValue.of_json in
+      let awsTagKey = field_map_exn json__ "AwsTagKey" TagKey.of_json in
+      let vmwareTagName =
+        field_map_exn json__ "VmwareTagName" VmwareTagName.of_json in
+      let vmwareCategory =
+        field_map_exn json__ "VmwareCategory" VmwareCategory.of_json in
+      make ~awsTagValue ~awsTagKey ~vmwareTagName ~vmwareCategory ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This displays the mapping of VMware tags to the corresponding Amazon Web Services tags."]
+module BandwidthRateLimitInterval =
+  struct
+    type nonrec t =
+      {
+      averageUploadRateLimitInBitsPerSec: AverageUploadRateLimit.t option
+        [@ocaml.doc
+          "The average upload rate limit component of the bandwidth rate limit interval, in bits per second. This field does not appear in the response if the upload rate limit is not set."];
+      startHourOfDay: HourOfDay.t
+        [@ocaml.doc
+          "The hour of the day to start the bandwidth rate limit interval."];
+      endHourOfDay: HourOfDay.t
+        [@ocaml.doc
+          "The hour of the day to end the bandwidth rate limit interval."];
+      startMinuteOfHour: MinuteOfHour.t
+        [@ocaml.doc
+          "The minute of the hour to start the bandwidth rate limit interval. The interval begins at the start of that minute. To begin an interval exactly at the start of the hour, use the value 0."];
+      endMinuteOfHour: MinuteOfHour.t
+        [@ocaml.doc
+          "The minute of the hour to end the bandwidth rate limit interval. The bandwidth rate limit interval ends at the end of the minute. To end an interval at the end of an hour, use the value 59."];
+      daysOfWeek: DaysOfWeek.t
+        [@ocaml.doc
+          "The days of the week component of the bandwidth rate limit interval, represented as ordinal numbers from 0 to 6, where 0 represents Sunday and 6 represents Saturday."]}
+    let context_ = "BandwidthRateLimitInterval"
+    let make ?averageUploadRateLimitInBitsPerSec =
+      fun ~startHourOfDay ->
+        fun ~endHourOfDay ->
+          fun ~startMinuteOfHour ->
+            fun ~endMinuteOfHour ->
+              fun ~daysOfWeek ->
+                fun () ->
+                  {
+                    averageUploadRateLimitInBitsPerSec;
+                    startHourOfDay;
+                    endHourOfDay;
+                    startMinuteOfHour;
+                    endMinuteOfHour;
+                    daysOfWeek
+                  }
+    let to_value x =
+      structure_to_value
+        [("AverageUploadRateLimitInBitsPerSec",
+           (Option.map x.averageUploadRateLimitInBitsPerSec
+              ~f:AverageUploadRateLimit.to_value));
+        ("StartHourOfDay", (Some (HourOfDay.to_value x.startHourOfDay)));
+        ("EndHourOfDay", (Some (HourOfDay.to_value x.endHourOfDay)));
+        ("StartMinuteOfHour",
+          (Some (MinuteOfHour.to_value x.startMinuteOfHour)));
+        ("EndMinuteOfHour", (Some (MinuteOfHour.to_value x.endMinuteOfHour)));
+        ("DaysOfWeek", (Some (DaysOfWeek.to_value x.daysOfWeek)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let daysOfWeek =
+        DaysOfWeek.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DaysOfWeek") in
+      let endMinuteOfHour =
+        MinuteOfHour.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndMinuteOfHour") in
+      let startMinuteOfHour =
+        MinuteOfHour.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StartMinuteOfHour") in
+      let endHourOfDay =
+        HourOfDay.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndHourOfDay") in
+      let startHourOfDay =
+        HourOfDay.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StartHourOfDay") in
+      let averageUploadRateLimitInBitsPerSec =
+        (Option.map ~f:AverageUploadRateLimit.of_xml)
+          (Xml.child xml_arg0 "AverageUploadRateLimitInBitsPerSec") in
+      make ~daysOfWeek ~endMinuteOfHour ~startMinuteOfHour ~endHourOfDay
+        ~startHourOfDay ?averageUploadRateLimitInBitsPerSec ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let daysOfWeek = field_map_exn json__ "DaysOfWeek" DaysOfWeek.of_json in
+      let endMinuteOfHour =
+        field_map_exn json__ "EndMinuteOfHour" MinuteOfHour.of_json in
+      let startMinuteOfHour =
+        field_map_exn json__ "StartMinuteOfHour" MinuteOfHour.of_json in
+      let endHourOfDay =
+        field_map_exn json__ "EndHourOfDay" HourOfDay.of_json in
+      let startHourOfDay =
+        field_map_exn json__ "StartHourOfDay" HourOfDay.of_json in
+      let averageUploadRateLimitInBitsPerSec =
+        field_map json__ "AverageUploadRateLimitInBitsPerSec"
+          AverageUploadRateLimit.of_json in
+      make ~daysOfWeek ~endMinuteOfHour ~startMinuteOfHour ~endHourOfDay
+        ~startHourOfDay ?averageUploadRateLimitInBitsPerSec ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a bandwidth rate limit interval for a gateway. A bandwidth rate limit schedule consists of one or more bandwidth rate limit intervals. A bandwidth rate limit interval defines a period of time on one or more days of the week, during which bandwidth rate limits are specified for uploading, downloading, or both."]
 module VirtualMachine =
   struct
     type nonrec t =
@@ -344,59 +689,60 @@ module VirtualMachine =
         [@ocaml.doc "The host name of the virtual machine."];
       hypervisorId: String_.t option
         [@ocaml.doc "The ID of the virtual machine's hypervisor."];
-      lastBackupDate: Time.t option
-        [@ocaml.doc
-          "The most recent date a virtual machine was backed up, in Unix format and UTC time."];
       name: Name.t option [@ocaml.doc "The name of the virtual machine."];
       path: Path.t option [@ocaml.doc "The path of the virtual machine."];
       resourceArn: ResourceArn.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the virtual machine."]}
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the virtual machine. For example, arn:aws:backup-gateway:us-west-1:0000000000000:vm/vm-0000ABCDEFGIJKL."];
+      lastBackupDate: Time.t option
+        [@ocaml.doc
+          "The most recent date a virtual machine was backed up, in Unix format and UTC time."]}
     let make ?hostName =
       fun ?hypervisorId ->
-        fun ?lastBackupDate ->
-          fun ?name ->
-            fun ?path ->
-              fun ?resourceArn ->
+        fun ?name ->
+          fun ?path ->
+            fun ?resourceArn ->
+              fun ?lastBackupDate ->
                 fun () ->
                   {
                     hostName;
                     hypervisorId;
-                    lastBackupDate;
                     name;
                     path;
-                    resourceArn
+                    resourceArn;
+                    lastBackupDate
                   }
     let to_value x =
       structure_to_value
         [("HostName", (Option.map x.hostName ~f:Name.to_value));
         ("HypervisorId", (Option.map x.hypervisorId ~f:String_.to_value));
-        ("LastBackupDate", (Option.map x.lastBackupDate ~f:Time.to_value));
         ("Name", (Option.map x.name ~f:Name.to_value));
         ("Path", (Option.map x.path ~f:Path.to_value));
-        ("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value))]
+        ("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("LastBackupDate", (Option.map x.lastBackupDate ~f:Time.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let lastBackupDate =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "LastBackupDate") in
       let resourceArn =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       let path = (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "Path") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
-      let lastBackupDate =
-        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "LastBackupDate") in
       let hypervisorId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "HypervisorId") in
       let hostName =
         (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "HostName") in
-      make ?resourceArn ?path ?name ?lastBackupDate ?hypervisorId ?hostName
+      make ?lastBackupDate ?resourceArn ?path ?name ?hypervisorId ?hostName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
-      let path = field_map json "Path" Path.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let lastBackupDate = field_map json "LastBackupDate" Time.of_json in
-      let hypervisorId = field_map json "HypervisorId" String_.of_json in
-      let hostName = field_map json "HostName" Name.of_json in
-      make ?resourceArn ?path ?name ?lastBackupDate ?hypervisorId ?hostName
+    let of_json json__ =
+      let lastBackupDate = field_map json__ "LastBackupDate" Time.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      let path = field_map json__ "Path" Path.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let hypervisorId = field_map json__ "HypervisorId" String_.of_json in
+      let hostName = field_map json__ "HostName" Name.of_json in
+      make ?lastBackupDate ?resourceArn ?path ?name ?hypervisorId ?hostName
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A virtual machine that is on a hypervisor."]
@@ -440,12 +786,12 @@ module Hypervisor =
       let host = (Option.map ~f:Host.of_xml) (Xml.child xml_arg0 "Host") in
       make ?state ?name ?kmsKeyArn ?hypervisorArn ?host ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" HypervisorState.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let kmsKeyArn = field_map json "KmsKeyArn" KmsKeyArn.of_json in
-      let hypervisorArn = field_map json "HypervisorArn" ServerArn.of_json in
-      let host = field_map json "Host" Host.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" HypervisorState.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let kmsKeyArn = field_map json__ "KmsKeyArn" KmsKeyArn.of_json in
+      let hypervisorArn = field_map json__ "HypervisorArn" ServerArn.of_json in
+      let host = field_map json__ "Host" Host.of_json in
       make ?state ?name ?kmsKeyArn ?hypervisorArn ?host ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -504,47 +850,225 @@ module Gateway =
       make ?lastSeenTime ?hypervisorId ?gatewayType ?gatewayDisplayName
         ?gatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastSeenTime = field_map json "LastSeenTime" Time.of_json in
-      let hypervisorId = field_map json "HypervisorId" HypervisorId.of_json in
-      let gatewayType = field_map json "GatewayType" GatewayType.of_json in
+    let of_json json__ =
+      let lastSeenTime = field_map json__ "LastSeenTime" Time.of_json in
+      let hypervisorId = field_map json__ "HypervisorId" HypervisorId.of_json in
+      let gatewayType = field_map json__ "GatewayType" GatewayType.of_json in
       let gatewayDisplayName =
-        field_map json "GatewayDisplayName" Name.of_json in
-      let gatewayArn = field_map json "GatewayArn" GatewayArn.of_json in
+        field_map json__ "GatewayDisplayName" Name.of_json in
+      let gatewayArn = field_map json__ "GatewayArn" GatewayArn.of_json in
       make ?lastSeenTime ?hypervisorId ?gatewayType ?gatewayDisplayName
         ?gatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A gateway is an Backup Gateway appliance that runs on the customer's network to provide seamless connectivity to backup storage in the Amazon Web Services Cloud."]
+module VmwareTags =
+  struct
+    type nonrec t = VmwareTag.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VmwareTag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VmwareTag.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VmwareTags" ~of_json:VmwareTag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LogGroupArn =
+  struct
+    type nonrec t = string
+    let context_ = "LogGroupArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"$|^arn:(aws|aws-cn|aws-us-gov):logs:([a-zA-Z0-9-]+):([0-9]+):log-group:[a-zA-Z0-9_\\-\\/\\.]+:\\*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LogGroupArn" j
+    let to_json = simple_to_json to_value
+  end
+module SyncMetadataStatus =
+  struct
+    type nonrec t =
+      | CREATED 
+      | RUNNING 
+      | FAILED 
+      | PARTIALLY_FAILED 
+      | SUCCEEDED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATED -> "CREATED"
+      | RUNNING -> "RUNNING"
+      | FAILED -> "FAILED"
+      | PARTIALLY_FAILED -> "PARTIALLY_FAILED"
+      | SUCCEEDED -> "SUCCEEDED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATED" -> CREATED
+      | "RUNNING" -> RUNNING
+      | "FAILED" -> FAILED
+      | "PARTIALLY_FAILED" -> PARTIALLY_FAILED
+      | "SUCCEEDED" -> SUCCEEDED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SyncMetadataStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SyncMetadataStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module MaintenanceStartTime =
+  struct
+    type nonrec t =
+      {
+      dayOfMonth: DayOfMonth.t option
+        [@ocaml.doc
+          "The day of the month component of the maintenance start time represented as an ordinal number from 1 to 28, where 1 represents the first day of the month and 28 represents the last day of the month."];
+      dayOfWeek: DayOfWeek.t option
+        [@ocaml.doc
+          "An ordinal number between 0 and 6 that represents the day of the week, where 0 represents Sunday and 6 represents Saturday. The day of week is in the time zone of the gateway."];
+      hourOfDay: HourOfDay.t option
+        [@ocaml.doc
+          "The hour component of the maintenance start time represented as hh, where hh is the hour (0 to 23). The hour of the day is in the time zone of the gateway."];
+      minuteOfHour: MinuteOfHour.t option
+        [@ocaml.doc
+          "The minute component of the maintenance start time represented as mm, where mm is the minute (0 to 59). The minute of the hour is in the time zone of the gateway."]}
+    let make ?dayOfMonth =
+      fun ?dayOfWeek ->
+        fun ?hourOfDay ->
+          fun ?minuteOfHour ->
+            fun () -> { dayOfMonth; dayOfWeek; hourOfDay; minuteOfHour }
+    let to_value x =
+      structure_to_value
+        [("DayOfMonth", (Option.map x.dayOfMonth ~f:DayOfMonth.to_value));
+        ("DayOfWeek", (Option.map x.dayOfWeek ~f:DayOfWeek.to_value));
+        ("HourOfDay", (Option.map x.hourOfDay ~f:HourOfDay.to_value));
+        ("MinuteOfHour",
+          (Option.map x.minuteOfHour ~f:MinuteOfHour.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let minuteOfHour =
+        (Option.map ~f:MinuteOfHour.of_xml)
+          (Xml.child xml_arg0 "MinuteOfHour") in
+      let hourOfDay =
+        (Option.map ~f:HourOfDay.of_xml) (Xml.child xml_arg0 "HourOfDay") in
+      let dayOfWeek =
+        (Option.map ~f:DayOfWeek.of_xml) (Xml.child xml_arg0 "DayOfWeek") in
+      let dayOfMonth =
+        (Option.map ~f:DayOfMonth.of_xml) (Xml.child xml_arg0 "DayOfMonth") in
+      make ?minuteOfHour ?hourOfDay ?dayOfWeek ?dayOfMonth ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let minuteOfHour = field_map json__ "MinuteOfHour" MinuteOfHour.of_json in
+      let hourOfDay = field_map json__ "HourOfDay" HourOfDay.of_json in
+      let dayOfWeek = field_map json__ "DayOfWeek" DayOfWeek.of_json in
+      let dayOfMonth = field_map json__ "DayOfMonth" DayOfMonth.of_json in
+      make ?minuteOfHour ?hourOfDay ?dayOfWeek ?dayOfMonth ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This is your gateway's weekly maintenance start time including the day and time of the week. Note that values are in terms of the gateway's time zone. Can be weekly or monthly."]
+module VpcEndpoint =
+  struct
+    type nonrec t = string
+    let context_ = "VpcEndpoint"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VpcEndpoint" j
+    let to_json = simple_to_json to_value
+  end
 module AccessDeniedException =
   struct
     type nonrec t =
       {
-      errorCode: String_.t
+      errorCode: String_.t option
         [@ocaml.doc
           "A description of why you have insufficient permissions."];
       message: String_.t option }
-    let context_ = "AccessDeniedException"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
     let to_value x =
       structure_to_value
-        [("ErrorCode", (Some (String_.to_value x.errorCode)));
+        [("ErrorCode", (Option.map x.errorCode ~f:String_.to_value));
         ("Message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       let errorCode =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let errorCode = field_map_exn json "ErrorCode" String_.of_json in
-      make ?message ~errorCode ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+      make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The operation cannot proceed because you have insufficient permissions."]
+module ConflictException =
+  struct
+    type nonrec t =
+      {
+      errorCode: String_.t option
+        [@ocaml.doc "A description of why the operation is not supported."];
+      message: String_.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:String_.to_value));
+        ("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation cannot proceed because it is not supported."]
 module InternalServerException =
   struct
     type nonrec t =
@@ -565,9 +1089,9 @@ module InternalServerException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let errorCode = field_map json "ErrorCode" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -592,12 +1116,40 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let errorCode = field_map json "ErrorCode" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A resource that is required for the action wasn't found."]
+module ThrottlingException =
+  struct
+    type nonrec t =
+      {
+      errorCode: String_.t option
+        [@ocaml.doc
+          "Error: TPS has been limited to protect against intentional or unintentional high request volumes."];
+      message: String_.t option }
+    let make ?errorCode = fun ?message -> fun () -> { errorCode; message }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:String_.to_value));
+        ("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      let errorCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?message ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+      make ?message ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "TPS has been limited to protect against intentional or unintentional high request volumes."]
 module ValidationException =
   struct
     type nonrec t =
@@ -618,9 +1170,9 @@ module ValidationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let errorCode = field_map json "ErrorCode" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -635,7 +1187,7 @@ module Password =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:100) >>=
-                  (fun () -> check_pattern i ~pattern:"^[ -~]+$")));
+                  (fun () -> check_pattern i ~pattern:"[ -~]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -657,7 +1209,7 @@ module Username =
                 (check_string_max i ~max:100) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[ -\\.0-\\[\\]-~]*[!-\\.0-\\[\\]-~][ -\\.0-\\[\\]-~]*$")));
+                       ~pattern:"[ -\\.0-\\[\\]-~]*[!-\\.0-\\[\\]-~][ -\\.0-\\[\\]-~]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -667,38 +1219,13 @@ module Username =
     let of_json j = string_of_json ~kind:"Username" j
     let to_json = simple_to_json to_value
   end
-module ConflictException =
-  struct
-    type nonrec t =
-      {
-      errorCode: String_.t
-        [@ocaml.doc "A description of why the operation is not supported."];
-      message: String_.t option }
-    let context_ = "ConflictException"
-    let make ?message = fun ~errorCode -> fun () -> { message; errorCode }
-    let to_value x =
-      structure_to_value
-        [("ErrorCode", (Some (String_.to_value x.errorCode)));
-        ("Message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      let errorCode =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ErrorCode") in
-      make ?message ~errorCode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let errorCode = field_map_exn json "ErrorCode" String_.of_json in
-      make ?message ~errorCode ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The operation cannot proceed because it is not supported."]
 module TagKeys =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -722,6 +1249,9 @@ module Tags =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -741,75 +1271,89 @@ module Tags =
     let of_json j = list_of_json ~kind:"Tags" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
-module DayOfMonth =
+module IamRoleArn =
   struct
-    type nonrec t = int
+    type nonrec t = string
+    let context_ = "IamRoleArn"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:31) >>= (fun () -> check_int_min i ~min:1));
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:(aws|aws-cn|aws-us-gov):iam::([0-9]+):role/(\\S+)")));
         i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for DayOfMonth" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IamRoleArn" j
     let to_json = simple_to_json to_value
   end
-module DayOfWeek =
+module VmwareToAwsTagMappings =
   struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:6) >>= (fun () -> check_int_min i ~min:0));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t = VmwareToAwsTagMapping.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VmwareToAwsTagMapping.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for DayOfWeek" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VmwareToAwsTagMapping.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VmwareToAwsTagMappings"
+        ~of_json:VmwareToAwsTagMapping.of_json j
+    let to_json v = composed_to_json to_value v
   end
-module HourOfDay =
+module BandwidthRateLimitIntervals =
   struct
-    type nonrec t = int
+    type nonrec t = BandwidthRateLimitInterval.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:23) >>= (fun () -> check_int_min i ~min:0));
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
         i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BandwidthRateLimitInterval.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for HourOfDay" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module MinuteOfHour =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:59) >>= (fun () -> check_int_min i ~min:0));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MinuteOfHour" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BandwidthRateLimitInterval.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BandwidthRateLimitIntervals"
+        ~of_json:BandwidthRateLimitInterval.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module NextToken =
   struct
@@ -821,7 +1365,7 @@ module NextToken =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:1000) >>=
-                  (fun () -> check_pattern i ~pattern:"^.+$")));
+                  (fun () -> check_pattern i ~pattern:".+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -835,6 +1379,9 @@ module VirtualMachines =
   struct
     type nonrec t = VirtualMachine.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualMachine.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -874,6 +1421,9 @@ module Hypervisors =
   struct
     type nonrec t = Hypervisor.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Hypervisor.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -898,6 +1448,9 @@ module Gateways =
   struct
     type nonrec t = Gateway.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Gateway.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -917,6 +1470,309 @@ module Gateways =
     let of_json j = list_of_json ~kind:"Gateways" ~of_json:Gateway.of_json j
     let to_json v = composed_to_json to_value v
   end
+module VirtualMachineDetails =
+  struct
+    type nonrec t =
+      {
+      hostName: Name.t option
+        [@ocaml.doc "The host name of the virtual machine."];
+      hypervisorId: String_.t option
+        [@ocaml.doc "The ID of the virtual machine's hypervisor."];
+      name: Name.t option [@ocaml.doc "The name of the virtual machine."];
+      path: Path.t option [@ocaml.doc "The path of the virtual machine."];
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the virtual machine. For example, arn:aws:backup-gateway:us-west-1:0000000000000:vm/vm-0000ABCDEFGIJKL."];
+      lastBackupDate: Time.t option
+        [@ocaml.doc
+          "The most recent date a virtual machine was backed up, in Unix format and UTC time."];
+      vmwareTags: VmwareTags.t option
+        [@ocaml.doc
+          "These are the details of the VMware tags associated with the specified virtual machine."]}
+    let make ?hostName =
+      fun ?hypervisorId ->
+        fun ?name ->
+          fun ?path ->
+            fun ?resourceArn ->
+              fun ?lastBackupDate ->
+                fun ?vmwareTags ->
+                  fun () ->
+                    {
+                      hostName;
+                      hypervisorId;
+                      name;
+                      path;
+                      resourceArn;
+                      lastBackupDate;
+                      vmwareTags
+                    }
+    let to_value x =
+      structure_to_value
+        [("HostName", (Option.map x.hostName ~f:Name.to_value));
+        ("HypervisorId", (Option.map x.hypervisorId ~f:String_.to_value));
+        ("Name", (Option.map x.name ~f:Name.to_value));
+        ("Path", (Option.map x.path ~f:Path.to_value));
+        ("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value));
+        ("LastBackupDate", (Option.map x.lastBackupDate ~f:Time.to_value));
+        ("VmwareTags", (Option.map x.vmwareTags ~f:VmwareTags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vmwareTags =
+        (Option.map ~f:VmwareTags.of_xml) (Xml.child xml_arg0 "VmwareTags") in
+      let lastBackupDate =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "LastBackupDate") in
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      let path = (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "Path") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
+      let hypervisorId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "HypervisorId") in
+      let hostName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "HostName") in
+      make ?vmwareTags ?lastBackupDate ?resourceArn ?path ?name ?hypervisorId
+        ?hostName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vmwareTags = field_map json__ "VmwareTags" VmwareTags.of_json in
+      let lastBackupDate = field_map json__ "LastBackupDate" Time.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      let path = field_map json__ "Path" Path.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let hypervisorId = field_map json__ "HypervisorId" String_.of_json in
+      let hostName = field_map json__ "HostName" Name.of_json in
+      make ?vmwareTags ?lastBackupDate ?resourceArn ?path ?name ?hypervisorId
+        ?hostName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Your VirtualMachine objects, ordered by their Amazon Resource Names (ARNs)."]
+module HypervisorDetails =
+  struct
+    type nonrec t =
+      {
+      host: Host.t option
+        [@ocaml.doc
+          "The server host of the hypervisor. This can be either an IP address or a fully-qualified domain name (FQDN)."];
+      hypervisorArn: ServerArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the hypervisor."];
+      kmsKeyArn: KmsKeyArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the KMS used to encrypt the hypervisor."];
+      name: Name.t option
+        [@ocaml.doc "This is the name of the specified hypervisor."];
+      logGroupArn: LogGroupArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the group of gateways within the requested log."];
+      state: HypervisorState.t option
+        [@ocaml.doc
+          "This is the current state of the specified hypervisor. The possible states are PENDING, ONLINE, OFFLINE, or ERROR."];
+      lastSuccessfulMetadataSyncTime: Time.t option
+        [@ocaml.doc
+          "This is the time when the most recent successful sync of metadata occurred."];
+      latestMetadataSyncStatusMessage: String_.t option
+        [@ocaml.doc
+          "This is the most recent status for the indicated metadata sync."];
+      latestMetadataSyncStatus: SyncMetadataStatus.t option
+        [@ocaml.doc
+          "This is the most recent status for the indicated metadata sync."]}
+    let make ?host =
+      fun ?hypervisorArn ->
+        fun ?kmsKeyArn ->
+          fun ?name ->
+            fun ?logGroupArn ->
+              fun ?state ->
+                fun ?lastSuccessfulMetadataSyncTime ->
+                  fun ?latestMetadataSyncStatusMessage ->
+                    fun ?latestMetadataSyncStatus ->
+                      fun () ->
+                        {
+                          host;
+                          hypervisorArn;
+                          kmsKeyArn;
+                          name;
+                          logGroupArn;
+                          state;
+                          lastSuccessfulMetadataSyncTime;
+                          latestMetadataSyncStatusMessage;
+                          latestMetadataSyncStatus
+                        }
+    let to_value x =
+      structure_to_value
+        [("Host", (Option.map x.host ~f:Host.to_value));
+        ("HypervisorArn", (Option.map x.hypervisorArn ~f:ServerArn.to_value));
+        ("KmsKeyArn", (Option.map x.kmsKeyArn ~f:KmsKeyArn.to_value));
+        ("Name", (Option.map x.name ~f:Name.to_value));
+        ("LogGroupArn", (Option.map x.logGroupArn ~f:LogGroupArn.to_value));
+        ("State", (Option.map x.state ~f:HypervisorState.to_value));
+        ("LastSuccessfulMetadataSyncTime",
+          (Option.map x.lastSuccessfulMetadataSyncTime ~f:Time.to_value));
+        ("LatestMetadataSyncStatusMessage",
+          (Option.map x.latestMetadataSyncStatusMessage ~f:String_.to_value));
+        ("LatestMetadataSyncStatus",
+          (Option.map x.latestMetadataSyncStatus
+             ~f:SyncMetadataStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestMetadataSyncStatus =
+        (Option.map ~f:SyncMetadataStatus.of_xml)
+          (Xml.child xml_arg0 "LatestMetadataSyncStatus") in
+      let latestMetadataSyncStatusMessage =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "LatestMetadataSyncStatusMessage") in
+      let lastSuccessfulMetadataSyncTime =
+        (Option.map ~f:Time.of_xml)
+          (Xml.child xml_arg0 "LastSuccessfulMetadataSyncTime") in
+      let state =
+        (Option.map ~f:HypervisorState.of_xml) (Xml.child xml_arg0 "State") in
+      let logGroupArn =
+        (Option.map ~f:LogGroupArn.of_xml) (Xml.child xml_arg0 "LogGroupArn") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
+      let kmsKeyArn =
+        (Option.map ~f:KmsKeyArn.of_xml) (Xml.child xml_arg0 "KmsKeyArn") in
+      let hypervisorArn =
+        (Option.map ~f:ServerArn.of_xml) (Xml.child xml_arg0 "HypervisorArn") in
+      let host = (Option.map ~f:Host.of_xml) (Xml.child xml_arg0 "Host") in
+      make ?latestMetadataSyncStatus ?latestMetadataSyncStatusMessage
+        ?lastSuccessfulMetadataSyncTime ?state ?logGroupArn ?name ?kmsKeyArn
+        ?hypervisorArn ?host ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestMetadataSyncStatus =
+        field_map json__ "LatestMetadataSyncStatus"
+          SyncMetadataStatus.of_json in
+      let latestMetadataSyncStatusMessage =
+        field_map json__ "LatestMetadataSyncStatusMessage" String_.of_json in
+      let lastSuccessfulMetadataSyncTime =
+        field_map json__ "LastSuccessfulMetadataSyncTime" Time.of_json in
+      let state = field_map json__ "State" HypervisorState.of_json in
+      let logGroupArn = field_map json__ "LogGroupArn" LogGroupArn.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let kmsKeyArn = field_map json__ "KmsKeyArn" KmsKeyArn.of_json in
+      let hypervisorArn = field_map json__ "HypervisorArn" ServerArn.of_json in
+      let host = field_map json__ "Host" Host.of_json in
+      make ?latestMetadataSyncStatus ?latestMetadataSyncStatusMessage
+        ?lastSuccessfulMetadataSyncTime ?state ?logGroupArn ?name ?kmsKeyArn
+        ?hypervisorArn ?host ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "These are the details of the specified hypervisor. A hypervisor is hardware, software, or firmware that creates and manages virtual machines, and allocates resources to them."]
+module GatewayDetails =
+  struct
+    type nonrec t =
+      {
+      gatewayArn: GatewayArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the gateway. Use the ListGateways operation to return a list of gateways for your account and Amazon Web Services Region."];
+      gatewayDisplayName: Name.t option
+        [@ocaml.doc "The display name of the gateway."];
+      gatewayType: GatewayType.t option
+        [@ocaml.doc "The type of the gateway type."];
+      hypervisorId: HypervisorId.t option
+        [@ocaml.doc "The hypervisor ID of the gateway."];
+      lastSeenTime: Time.t option
+        [@ocaml.doc
+          "Details showing the last time Backup gateway communicated with the cloud, in Unix format and UTC time."];
+      maintenanceStartTime: MaintenanceStartTime.t option
+        [@ocaml.doc
+          "Returns your gateway's weekly maintenance start time including the day and time of the week. Note that values are in terms of the gateway's time zone. Can be weekly or monthly."];
+      nextUpdateAvailabilityTime: Time.t option
+        [@ocaml.doc
+          "Details showing the next update availability time of the gateway."];
+      vpcEndpoint: VpcEndpoint.t option
+        [@ocaml.doc
+          "The DNS name for the virtual private cloud (VPC) endpoint the gateway uses to connect to the cloud for backup gateway."];
+      deprecationDate: Time.t option
+        [@ocaml.doc
+          "Date after which this gateway will not receive software updates for new features and bug fixes."];
+      softwareVersion: Name.t option
+        [@ocaml.doc
+          "The version number of the software running on the gateway appliance."]}
+    let make ?gatewayArn =
+      fun ?gatewayDisplayName ->
+        fun ?gatewayType ->
+          fun ?hypervisorId ->
+            fun ?lastSeenTime ->
+              fun ?maintenanceStartTime ->
+                fun ?nextUpdateAvailabilityTime ->
+                  fun ?vpcEndpoint ->
+                    fun ?deprecationDate ->
+                      fun ?softwareVersion ->
+                        fun () ->
+                          {
+                            gatewayArn;
+                            gatewayDisplayName;
+                            gatewayType;
+                            hypervisorId;
+                            lastSeenTime;
+                            maintenanceStartTime;
+                            nextUpdateAvailabilityTime;
+                            vpcEndpoint;
+                            deprecationDate;
+                            softwareVersion
+                          }
+    let to_value x =
+      structure_to_value
+        [("GatewayArn", (Option.map x.gatewayArn ~f:GatewayArn.to_value));
+        ("GatewayDisplayName",
+          (Option.map x.gatewayDisplayName ~f:Name.to_value));
+        ("GatewayType", (Option.map x.gatewayType ~f:GatewayType.to_value));
+        ("HypervisorId",
+          (Option.map x.hypervisorId ~f:HypervisorId.to_value));
+        ("LastSeenTime", (Option.map x.lastSeenTime ~f:Time.to_value));
+        ("MaintenanceStartTime",
+          (Option.map x.maintenanceStartTime ~f:MaintenanceStartTime.to_value));
+        ("NextUpdateAvailabilityTime",
+          (Option.map x.nextUpdateAvailabilityTime ~f:Time.to_value));
+        ("VpcEndpoint", (Option.map x.vpcEndpoint ~f:VpcEndpoint.to_value));
+        ("DeprecationDate", (Option.map x.deprecationDate ~f:Time.to_value));
+        ("SoftwareVersion", (Option.map x.softwareVersion ~f:Name.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let softwareVersion =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "SoftwareVersion") in
+      let deprecationDate =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "DeprecationDate") in
+      let vpcEndpoint =
+        (Option.map ~f:VpcEndpoint.of_xml) (Xml.child xml_arg0 "VpcEndpoint") in
+      let nextUpdateAvailabilityTime =
+        (Option.map ~f:Time.of_xml)
+          (Xml.child xml_arg0 "NextUpdateAvailabilityTime") in
+      let maintenanceStartTime =
+        (Option.map ~f:MaintenanceStartTime.of_xml)
+          (Xml.child xml_arg0 "MaintenanceStartTime") in
+      let lastSeenTime =
+        (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "LastSeenTime") in
+      let hypervisorId =
+        (Option.map ~f:HypervisorId.of_xml)
+          (Xml.child xml_arg0 "HypervisorId") in
+      let gatewayType =
+        (Option.map ~f:GatewayType.of_xml) (Xml.child xml_arg0 "GatewayType") in
+      let gatewayDisplayName =
+        (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "GatewayDisplayName") in
+      let gatewayArn =
+        (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
+      make ?softwareVersion ?deprecationDate ?vpcEndpoint
+        ?nextUpdateAvailabilityTime ?maintenanceStartTime ?lastSeenTime
+        ?hypervisorId ?gatewayType ?gatewayDisplayName ?gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let softwareVersion = field_map json__ "SoftwareVersion" Name.of_json in
+      let deprecationDate = field_map json__ "DeprecationDate" Time.of_json in
+      let vpcEndpoint = field_map json__ "VpcEndpoint" VpcEndpoint.of_json in
+      let nextUpdateAvailabilityTime =
+        field_map json__ "NextUpdateAvailabilityTime" Time.of_json in
+      let maintenanceStartTime =
+        field_map json__ "MaintenanceStartTime" MaintenanceStartTime.of_json in
+      let lastSeenTime = field_map json__ "LastSeenTime" Time.of_json in
+      let hypervisorId = field_map json__ "HypervisorId" HypervisorId.of_json in
+      let gatewayType = field_map json__ "GatewayType" GatewayType.of_json in
+      let gatewayDisplayName =
+        field_map json__ "GatewayDisplayName" Name.of_json in
+      let gatewayArn = field_map json__ "GatewayArn" GatewayArn.of_json in
+      make ?softwareVersion ?deprecationDate ?vpcEndpoint
+        ?nextUpdateAvailabilityTime ?maintenanceStartTime ?lastSeenTime
+        ?hypervisorId ?gatewayType ?gatewayDisplayName ?gatewayArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The details of gateway."]
 module ActivationKey =
   struct
     type nonrec t = string
@@ -927,7 +1783,7 @@ module ActivationKey =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:50) >>=
-                  (fun () -> check_pattern i ~pattern:"^[0-9a-zA-Z\\-]+$")));
+                  (fun () -> check_pattern i ~pattern:"[0-9a-zA-Z\\-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -946,8 +1802,10 @@ module UpdateHypervisorOutput =
           "The Amazon Resource Name (ARN) of the hypervisor you updated."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?hypervisorArn = fun () -> { hypervisorArn }
@@ -955,10 +1813,14 @@ module UpdateHypervisorOutput =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -968,10 +1830,14 @@ module UpdateHypervisorOutput =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -982,6 +1848,10 @@ module UpdateHypervisorOutput =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -990,6 +1860,10 @@ module UpdateHypervisorOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1009,8 +1883,8 @@ module UpdateHypervisorOutput =
         (Option.map ~f:ServerArn.of_xml) (Xml.child xml_arg0 "HypervisorArn") in
       make ?hypervisorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hypervisorArn = field_map json "HypervisorArn" ServerArn.of_json in
+    let of_json json__ =
+      let hypervisorArn = field_map json__ "HypervisorArn" ServerArn.of_json in
       make ?hypervisorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1019,51 +1893,72 @@ module UpdateHypervisorInput =
   struct
     type nonrec t =
       {
-      host: Host.t option
-        [@ocaml.doc
-          "The updated host of the hypervisor. This can be either an IP address or a fully-qualified domain name (FQDN)."];
       hypervisorArn: ServerArn.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the hypervisor to update."];
+      host: Host.t option
+        [@ocaml.doc
+          "The updated host of the hypervisor. This can be either an IP address or a fully-qualified domain name (FQDN)."];
+      username: Username.t option
+        [@ocaml.doc "The updated username for the hypervisor."];
       password: Password.t option
         [@ocaml.doc "The updated password for the hypervisor."];
-      username: Username.t option
-        [@ocaml.doc "The updated username for the hypervisor."]}
+      name: Name.t option [@ocaml.doc "The updated name for the hypervisor"];
+      logGroupArn: LogGroupArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the group of gateways within the requested log."]}
     let context_ = "UpdateHypervisorInput"
     let make ?host =
-      fun ?password ->
-        fun ?username ->
-          fun ~hypervisorArn ->
-            fun () -> { host; password; username; hypervisorArn }
+      fun ?username ->
+        fun ?password ->
+          fun ?name ->
+            fun ?logGroupArn ->
+              fun ~hypervisorArn ->
+                fun () ->
+                  {
+                    host;
+                    username;
+                    password;
+                    name;
+                    logGroupArn;
+                    hypervisorArn
+                  }
     let to_value x =
       structure_to_value
-        [("Host", (Option.map x.host ~f:Host.to_value));
-        ("HypervisorArn", (Some (ServerArn.to_value x.hypervisorArn)));
+        [("HypervisorArn", (Some (ServerArn.to_value x.hypervisorArn)));
+        ("Host", (Option.map x.host ~f:Host.to_value));
+        ("Username", (Option.map x.username ~f:Username.to_value));
         ("Password", (Option.map x.password ~f:Password.to_value));
-        ("Username", (Option.map x.username ~f:Username.to_value))]
+        ("Name", (Option.map x.name ~f:Name.to_value));
+        ("LogGroupArn", (Option.map x.logGroupArn ~f:LogGroupArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let username =
-        (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "Username") in
+      let logGroupArn =
+        (Option.map ~f:LogGroupArn.of_xml) (Xml.child xml_arg0 "LogGroupArn") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       let password =
         (Option.map ~f:Password.of_xml) (Xml.child xml_arg0 "Password") in
+      let username =
+        (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "Username") in
+      let host = (Option.map ~f:Host.of_xml) (Xml.child xml_arg0 "Host") in
       let hypervisorArn =
         ServerArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HypervisorArn") in
-      let host = (Option.map ~f:Host.of_xml) (Xml.child xml_arg0 "Host") in
-      make ?username ?password ~hypervisorArn ?host ()
+      make ?logGroupArn ?name ?password ?username ?host ~hypervisorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let username = field_map json "Username" Username.of_json in
-      let password = field_map json "Password" Password.of_json in
+    let of_json json__ =
+      let logGroupArn = field_map json__ "LogGroupArn" LogGroupArn.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let password = field_map json__ "Password" Password.of_json in
+      let username = field_map json__ "Username" Username.of_json in
+      let host = field_map json__ "Host" Host.of_json in
       let hypervisorArn =
-        field_map_exn json "HypervisorArn" ServerArn.of_json in
-      let host = field_map json "Host" Host.of_json in
-      make ?username ?password ~hypervisorArn ?host ()
+        field_map_exn json__ "HypervisorArn" ServerArn.of_json in
+      make ?logGroupArn ?name ?password ?username ?host ~hypervisorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates a hypervisor metadata, including its host, username, and password. Specify which hypervisor to update using the Amazon Resource Name (ARN) of the hypervisor in your request."]
-module UpdateGatewayInformationOutput =
+module UpdateGatewaySoftwareNowOutput =
   struct
     type nonrec t =
       {
@@ -1071,20 +1966,20 @@ module UpdateGatewayInformationOutput =
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the gateway you updated."]}
     type nonrec error =
-      [ `ConflictException of ConflictException.t 
-      | `InternalServerException of InternalServerException.t 
+      [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?gatewayArn = fun () -> { gatewayArn }
     let error_of_json name json =
       match name with
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -1092,22 +1987,18 @@ module UpdateGatewayInformationOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
-      | "ConflictException" ->
-          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
-      | `ConflictException e ->
-          `Assoc
-            [("error", (`String "ConflictException"));
-            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1116,6 +2007,10 @@ module UpdateGatewayInformationOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1134,8 +2029,119 @@ module UpdateGatewayInformationOutput =
         (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
       make ?gatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayArn = field_map json "GatewayArn" GatewayArn.of_json in
+    let of_json json__ =
+      let gatewayArn = field_map json__ "GatewayArn" GatewayArn.of_json in
+      make ?gatewayArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the gateway virtual machine (VM) software. The request immediately triggers the software update. When you make this request, you get a 200 OK success response immediately. However, it might take some time for the update to complete."]
+module UpdateGatewaySoftwareNowInput =
+  struct
+    type nonrec t =
+      {
+      gatewayArn: GatewayArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the gateway to be updated."]}
+    let context_ = "UpdateGatewaySoftwareNowInput"
+    let make ~gatewayArn = fun () -> { gatewayArn }
+    let to_value x =
+      structure_to_value
+        [("GatewayArn", (Some (GatewayArn.to_value x.gatewayArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let gatewayArn =
+        GatewayArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
+      make ~gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let gatewayArn = field_map_exn json__ "GatewayArn" GatewayArn.of_json in
+      make ~gatewayArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the gateway virtual machine (VM) software. The request immediately triggers the software update. When you make this request, you get a 200 OK success response immediately. However, it might take some time for the update to complete."]
+module UpdateGatewayInformationOutput =
+  struct
+    type nonrec t =
+      {
+      gatewayArn: GatewayArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the gateway you updated."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?gatewayArn = fun () -> { gatewayArn }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("GatewayArn", (Option.map x.gatewayArn ~f:GatewayArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let gatewayArn =
+        (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
+      make ?gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let gatewayArn = field_map json__ "GatewayArn" GatewayArn.of_json in
       make ?gatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1166,10 +2172,10 @@ module UpdateGatewayInformationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
       make ?gatewayDisplayName ~gatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let gatewayDisplayName =
-        field_map json "GatewayDisplayName" Name.of_json in
-      let gatewayArn = field_map_exn json "GatewayArn" GatewayArn.of_json in
+        field_map json__ "GatewayDisplayName" Name.of_json in
+      let gatewayArn = field_map_exn json__ "GatewayArn" GatewayArn.of_json in
       make ?gatewayDisplayName ~gatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1184,6 +2190,7 @@ module UntagResourceOutput =
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?resourceARN = fun () -> { resourceARN }
@@ -1193,6 +2200,8 @@ module UntagResourceOutput =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -1204,6 +2213,8 @@ module UntagResourceOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -1218,6 +2229,10 @@ module UntagResourceOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1236,8 +2251,8 @@ module UntagResourceOutput =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map json "ResourceARN" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceARN = field_map json__ "ResourceARN" ResourceArn.of_json in
       make ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from the resource."]
@@ -1266,9 +2281,10 @@ module UntagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceArn.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from the resource."]
@@ -1279,6 +2295,7 @@ module TestHypervisorConfigurationOutput =
       [ `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
@@ -1290,6 +2307,8 @@ module TestHypervisorConfigurationOutput =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -1303,6 +2322,8 @@ module TestHypervisorConfigurationOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -1321,6 +2342,10 @@ module TestHypervisorConfigurationOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1349,40 +2374,40 @@ module TestHypervisorConfigurationInput =
       host: Host.t
         [@ocaml.doc
           "The server host of the hypervisor. This can be either an IP address or a fully-qualified domain name (FQDN)."];
-      password: Password.t option
-        [@ocaml.doc "The password for the hypervisor."];
       username: Username.t option
-        [@ocaml.doc "The username for the hypervisor."]}
+        [@ocaml.doc "The username for the hypervisor."];
+      password: Password.t option
+        [@ocaml.doc "The password for the hypervisor."]}
     let context_ = "TestHypervisorConfigurationInput"
-    let make ?password =
-      fun ?username ->
+    let make ?username =
+      fun ?password ->
         fun ~gatewayArn ->
-          fun ~host -> fun () -> { password; username; gatewayArn; host }
+          fun ~host -> fun () -> { username; password; gatewayArn; host }
     let to_value x =
       structure_to_value
         [("GatewayArn", (Some (GatewayArn.to_value x.gatewayArn)));
         ("Host", (Some (Host.to_value x.host)));
-        ("Password", (Option.map x.password ~f:Password.to_value));
-        ("Username", (Option.map x.username ~f:Username.to_value))]
+        ("Username", (Option.map x.username ~f:Username.to_value));
+        ("Password", (Option.map x.password ~f:Password.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let username =
-        (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "Username") in
       let password =
         (Option.map ~f:Password.of_xml) (Xml.child xml_arg0 "Password") in
+      let username =
+        (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "Username") in
       let host =
         Host.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Host") in
       let gatewayArn =
         GatewayArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
-      make ?username ?password ~host ~gatewayArn ()
+      make ?password ?username ~host ~gatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let username = field_map json "Username" Username.of_json in
-      let password = field_map json "Password" Password.of_json in
-      let host = field_map_exn json "Host" Host.of_json in
-      let gatewayArn = field_map_exn json "GatewayArn" GatewayArn.of_json in
-      make ?username ?password ~host ~gatewayArn ()
+    let of_json json__ =
+      let password = field_map json__ "Password" Password.of_json in
+      let username = field_map json__ "Username" Username.of_json in
+      let host = field_map_exn json__ "Host" Host.of_json in
+      let gatewayArn = field_map_exn json__ "GatewayArn" GatewayArn.of_json in
+      make ?password ?username ~host ~gatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Tests your hypervisor configuration to validate that backup gateway can connect with the hypervisor and its resources."]
@@ -1396,6 +2421,7 @@ module TagResourceOutput =
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?resourceARN = fun () -> { resourceARN }
@@ -1405,6 +2431,8 @@ module TagResourceOutput =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -1416,6 +2444,8 @@ module TagResourceOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -1430,6 +2460,10 @@ module TagResourceOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1448,8 +2482,8 @@ module TagResourceOutput =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map json "ResourceARN" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceARN = field_map json__ "ResourceARN" ResourceArn.of_json in
       make ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Tag the resource."]
@@ -1475,12 +2509,124 @@ module TagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceArn.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Tag the resource."]
+module StartVirtualMachinesMetadataSyncOutput =
+  struct
+    type nonrec t =
+      {
+      hypervisorArn: ServerArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the hypervisor."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?hypervisorArn = fun () -> { hypervisorArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("HypervisorArn",
+           (Option.map x.hypervisorArn ~f:ServerArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hypervisorArn =
+        (Option.map ~f:ServerArn.of_xml) (Xml.child xml_arg0 "HypervisorArn") in
+      make ?hypervisorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hypervisorArn = field_map json__ "HypervisorArn" ServerArn.of_json in
+      make ?hypervisorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This action sends a request to sync metadata across the specified virtual machines."]
+module StartVirtualMachinesMetadataSyncInput =
+  struct
+    type nonrec t =
+      {
+      hypervisorArn: ServerArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the hypervisor."]}
+    let context_ = "StartVirtualMachinesMetadataSyncInput"
+    let make ~hypervisorArn = fun () -> { hypervisorArn }
+    let to_value x =
+      structure_to_value
+        [("HypervisorArn", (Some (ServerArn.to_value x.hypervisorArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hypervisorArn =
+        ServerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "HypervisorArn") in
+      make ~hypervisorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hypervisorArn =
+        field_map_exn json__ "HypervisorArn" ServerArn.of_json in
+      make ~hypervisorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This action sends a request to sync metadata across the specified virtual machines."]
 module PutMaintenanceStartTimeOutput =
   struct
     type nonrec t =
@@ -1492,6 +2638,7 @@ module PutMaintenanceStartTimeOutput =
       [ `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?gatewayArn = fun () -> { gatewayArn }
@@ -1503,6 +2650,8 @@ module PutMaintenanceStartTimeOutput =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -1516,6 +2665,8 @@ module PutMaintenanceStartTimeOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -1534,6 +2685,10 @@ module PutMaintenanceStartTimeOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1552,8 +2707,8 @@ module PutMaintenanceStartTimeOutput =
         (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
       make ?gatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayArn = field_map json "GatewayArn" GatewayArn.of_json in
+    let of_json json__ =
+      let gatewayArn = field_map json__ "GatewayArn" GatewayArn.of_json in
       make ?gatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Set the maintenance start time for a gateway."]
@@ -1561,11 +2716,6 @@ module PutMaintenanceStartTimeInput =
   struct
     type nonrec t =
       {
-      dayOfMonth: DayOfMonth.t option
-        [@ocaml.doc
-          "The day of the month start maintenance on a gateway. Valid values range from Sunday to Saturday."];
-      dayOfWeek: DayOfWeek.t option
-        [@ocaml.doc "The day of the week to start maintenance on a gateway."];
       gatewayArn: GatewayArn.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for the gateway, used to specify its maintenance start time."];
@@ -1573,25 +2723,34 @@ module PutMaintenanceStartTimeInput =
         [@ocaml.doc "The hour of the day to start maintenance on a gateway."];
       minuteOfHour: MinuteOfHour.t
         [@ocaml.doc
-          "The minute of the hour to start maintenance on a gateway."]}
+          "The minute of the hour to start maintenance on a gateway."];
+      dayOfWeek: DayOfWeek.t option
+        [@ocaml.doc "The day of the week to start maintenance on a gateway."];
+      dayOfMonth: DayOfMonth.t option
+        [@ocaml.doc
+          "The day of the month start maintenance on a gateway. Valid values range from Sunday to Saturday."]}
     let context_ = "PutMaintenanceStartTimeInput"
-    let make ?dayOfMonth =
-      fun ?dayOfWeek ->
+    let make ?dayOfWeek =
+      fun ?dayOfMonth ->
         fun ~gatewayArn ->
           fun ~hourOfDay ->
             fun ~minuteOfHour ->
               fun () ->
-                { dayOfMonth; dayOfWeek; gatewayArn; hourOfDay; minuteOfHour
+                { dayOfWeek; dayOfMonth; gatewayArn; hourOfDay; minuteOfHour
                 }
     let to_value x =
       structure_to_value
-        [("DayOfMonth", (Option.map x.dayOfMonth ~f:DayOfMonth.to_value));
-        ("DayOfWeek", (Option.map x.dayOfWeek ~f:DayOfWeek.to_value));
-        ("GatewayArn", (Some (GatewayArn.to_value x.gatewayArn)));
+        [("GatewayArn", (Some (GatewayArn.to_value x.gatewayArn)));
         ("HourOfDay", (Some (HourOfDay.to_value x.hourOfDay)));
-        ("MinuteOfHour", (Some (MinuteOfHour.to_value x.minuteOfHour)))]
+        ("MinuteOfHour", (Some (MinuteOfHour.to_value x.minuteOfHour)));
+        ("DayOfWeek", (Option.map x.dayOfWeek ~f:DayOfWeek.to_value));
+        ("DayOfMonth", (Option.map x.dayOfMonth ~f:DayOfMonth.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let dayOfMonth =
+        (Option.map ~f:DayOfMonth.of_xml) (Xml.child xml_arg0 "DayOfMonth") in
+      let dayOfWeek =
+        (Option.map ~f:DayOfWeek.of_xml) (Xml.child xml_arg0 "DayOfWeek") in
       let minuteOfHour =
         MinuteOfHour.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MinuteOfHour") in
@@ -1601,42 +2760,45 @@ module PutMaintenanceStartTimeInput =
       let gatewayArn =
         GatewayArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
-      let dayOfWeek =
-        (Option.map ~f:DayOfWeek.of_xml) (Xml.child xml_arg0 "DayOfWeek") in
-      let dayOfMonth =
-        (Option.map ~f:DayOfMonth.of_xml) (Xml.child xml_arg0 "DayOfMonth") in
-      make ~minuteOfHour ~hourOfDay ~gatewayArn ?dayOfWeek ?dayOfMonth ()
+      make ?dayOfMonth ?dayOfWeek ~minuteOfHour ~hourOfDay ~gatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let dayOfMonth = field_map json__ "DayOfMonth" DayOfMonth.of_json in
+      let dayOfWeek = field_map json__ "DayOfWeek" DayOfWeek.of_json in
       let minuteOfHour =
-        field_map_exn json "MinuteOfHour" MinuteOfHour.of_json in
-      let hourOfDay = field_map_exn json "HourOfDay" HourOfDay.of_json in
-      let gatewayArn = field_map_exn json "GatewayArn" GatewayArn.of_json in
-      let dayOfWeek = field_map json "DayOfWeek" DayOfWeek.of_json in
-      let dayOfMonth = field_map json "DayOfMonth" DayOfMonth.of_json in
-      make ~minuteOfHour ~hourOfDay ~gatewayArn ?dayOfWeek ?dayOfMonth ()
+        field_map_exn json__ "MinuteOfHour" MinuteOfHour.of_json in
+      let hourOfDay = field_map_exn json__ "HourOfDay" HourOfDay.of_json in
+      let gatewayArn = field_map_exn json__ "GatewayArn" GatewayArn.of_json in
+      make ?dayOfMonth ?dayOfWeek ~minuteOfHour ~hourOfDay ~gatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Set the maintenance start time for a gateway."]
-module ListVirtualMachinesOutput =
+module PutHypervisorPropertyMappingsOutput =
   struct
     type nonrec t =
       {
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "The next item following a partial list of returned resources. For example, if a request is made to return maxResults number of resources, NextToken allows you to return more items in your list starting at the location pointed to by the next token."];
-      virtualMachines: VirtualMachines.t option
-        [@ocaml.doc
-          "A list of your VirtualMachine objects, ordered by their Amazon Resource Names (ARNs)."]}
+      hypervisorArn: ServerArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the hypervisor."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?nextToken =
-      fun ?virtualMachines -> fun () -> { nextToken; virtualMachines }
+    let make ?hypervisorArn = fun () -> { hypervisorArn }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -1644,18 +2806,42 @@ module ListVirtualMachinesOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1667,74 +2853,88 @@ module ListVirtualMachinesOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("VirtualMachines",
-          (Option.map x.virtualMachines ~f:VirtualMachines.to_value))]
+        [("HypervisorArn",
+           (Option.map x.hypervisorArn ~f:ServerArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let virtualMachines =
-        (Option.map ~f:VirtualMachines.of_xml)
-          (Xml.child xml_arg0 "VirtualMachines") in
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?virtualMachines ?nextToken ()
+      let hypervisorArn =
+        (Option.map ~f:ServerArn.of_xml) (Xml.child xml_arg0 "HypervisorArn") in
+      make ?hypervisorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let virtualMachines =
-        field_map json "VirtualMachines" VirtualMachines.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      make ?virtualMachines ?nextToken ()
+    let of_json json__ =
+      let hypervisorArn = field_map json__ "HypervisorArn" ServerArn.of_json in
+      make ?hypervisorArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists your virtual machines."]
-module ListVirtualMachinesInput =
+  end[@@ocaml.doc
+       "This action sets the property mappings for the specified hypervisor. A hypervisor property mapping displays the relationship of entity properties available from the hypervisor to the properties available in Amazon Web Services."]
+module PutHypervisorPropertyMappingsInput =
   struct
     type nonrec t =
       {
-      maxResults: MaxResults.t option
-        [@ocaml.doc "The maximum number of virtual machines to list."];
-      nextToken: NextToken.t option
+      hypervisorArn: ServerArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the hypervisor."];
+      vmwareToAwsTagMappings: VmwareToAwsTagMappings.t
         [@ocaml.doc
-          "The next item following a partial list of returned resources. For example, if a request is made to return maxResults number of resources, NextToken allows you to return more items in your list starting at the location pointed to by the next token."]}
-    let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
+          "This action requests the mappings of VMware tags to the Amazon Web Services tags."];
+      iamRoleArn: IamRoleArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the IAM role."]}
+    let context_ = "PutHypervisorPropertyMappingsInput"
+    let make ~hypervisorArn =
+      fun ~vmwareToAwsTagMappings ->
+        fun ~iamRoleArn ->
+          fun () -> { hypervisorArn; vmwareToAwsTagMappings; iamRoleArn }
     let to_value x =
       structure_to_value
-        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        [("HypervisorArn", (Some (ServerArn.to_value x.hypervisorArn)));
+        ("VmwareToAwsTagMappings",
+          (Some (VmwareToAwsTagMappings.to_value x.vmwareToAwsTagMappings)));
+        ("IamRoleArn", (Some (IamRoleArn.to_value x.iamRoleArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      make ?nextToken ?maxResults ()
+      let iamRoleArn =
+        IamRoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IamRoleArn") in
+      let vmwareToAwsTagMappings =
+        VmwareToAwsTagMappings.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VmwareToAwsTagMappings") in
+      let hypervisorArn =
+        ServerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "HypervisorArn") in
+      make ~iamRoleArn ~vmwareToAwsTagMappings ~hypervisorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      make ?nextToken ?maxResults ()
+    let of_json json__ =
+      let iamRoleArn = field_map_exn json__ "IamRoleArn" IamRoleArn.of_json in
+      let vmwareToAwsTagMappings =
+        field_map_exn json__ "VmwareToAwsTagMappings"
+          VmwareToAwsTagMappings.of_json in
+      let hypervisorArn =
+        field_map_exn json__ "HypervisorArn" ServerArn.of_json in
+      make ~iamRoleArn ~vmwareToAwsTagMappings ~hypervisorArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists your virtual machines."]
-module ListTagsForResourceOutput =
+  end[@@ocaml.doc
+       "This action sets the property mappings for the specified hypervisor. A hypervisor property mapping displays the relationship of entity properties available from the hypervisor to the properties available in Amazon Web Services."]
+module PutBandwidthRateLimitScheduleOutput =
   struct
     type nonrec t =
       {
-      resourceArn: ResourceArn.t option
+      gatewayArn: GatewayArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource's tags that you listed."];
-      tags: Tags.t option [@ocaml.doc "A list of the resource's tags."]}
+          "The Amazon Resource Name (ARN) of the gateway. Use the ListGateways operation to return a list of gateways for your account and Amazon Web Services Region."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?resourceArn = fun ?tags -> fun () -> { resourceArn; tags }
+    let make ?gatewayArn = fun () -> { gatewayArn }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -1746,6 +2946,8 @@ module ListTagsForResourceOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -1760,6 +2962,245 @@ module ListTagsForResourceOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("GatewayArn", (Option.map x.gatewayArn ~f:GatewayArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let gatewayArn =
+        (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
+      make ?gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let gatewayArn = field_map json__ "GatewayArn" GatewayArn.of_json in
+      make ?gatewayArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This action sets the bandwidth rate limit schedule for a specified gateway. By default, gateways do not have a bandwidth rate limit schedule, which means no bandwidth rate limiting is in effect. Use this to initiate a gateway's bandwidth rate limit schedule."]
+module PutBandwidthRateLimitScheduleInput =
+  struct
+    type nonrec t =
+      {
+      gatewayArn: GatewayArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the gateway. Use the ListGateways operation to return a list of gateways for your account and Amazon Web Services Region."];
+      bandwidthRateLimitIntervals: BandwidthRateLimitIntervals.t
+        [@ocaml.doc
+          "An array containing bandwidth rate limit schedule intervals for a gateway. When no bandwidth rate limit intervals have been scheduled, the array is empty."]}
+    let context_ = "PutBandwidthRateLimitScheduleInput"
+    let make ~gatewayArn =
+      fun ~bandwidthRateLimitIntervals ->
+        fun () -> { gatewayArn; bandwidthRateLimitIntervals }
+    let to_value x =
+      structure_to_value
+        [("GatewayArn", (Some (GatewayArn.to_value x.gatewayArn)));
+        ("BandwidthRateLimitIntervals",
+          (Some
+             (BandwidthRateLimitIntervals.to_value
+                x.bandwidthRateLimitIntervals)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bandwidthRateLimitIntervals =
+        BandwidthRateLimitIntervals.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "BandwidthRateLimitIntervals") in
+      let gatewayArn =
+        GatewayArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
+      make ~bandwidthRateLimitIntervals ~gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bandwidthRateLimitIntervals =
+        field_map_exn json__ "BandwidthRateLimitIntervals"
+          BandwidthRateLimitIntervals.of_json in
+      let gatewayArn = field_map_exn json__ "GatewayArn" GatewayArn.of_json in
+      make ~bandwidthRateLimitIntervals ~gatewayArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This action sets the bandwidth rate limit schedule for a specified gateway. By default, gateways do not have a bandwidth rate limit schedule, which means no bandwidth rate limiting is in effect. Use this to initiate a gateway's bandwidth rate limit schedule."]
+module ListVirtualMachinesOutput =
+  struct
+    type nonrec t =
+      {
+      virtualMachines: VirtualMachines.t option
+        [@ocaml.doc
+          "A list of your VirtualMachine objects, ordered by their Amazon Resource Names (ARNs)."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The next item following a partial list of returned resources. For example, if a request is made to return maxResults number of resources, NextToken allows you to return more items in your list starting at the location pointed to by the next token."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?virtualMachines =
+      fun ?nextToken -> fun () -> { virtualMachines; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("VirtualMachines",
+           (Option.map x.virtualMachines ~f:VirtualMachines.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let virtualMachines =
+        (Option.map ~f:VirtualMachines.of_xml)
+          (Xml.child xml_arg0 "VirtualMachines") in
+      make ?nextToken ?virtualMachines ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let virtualMachines =
+        field_map json__ "VirtualMachines" VirtualMachines.of_json in
+      make ?nextToken ?virtualMachines ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists your virtual machines."]
+module ListVirtualMachinesInput =
+  struct
+    type nonrec t =
+      {
+      hypervisorArn: ServerArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the hypervisor connected to your virtual machine."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of virtual machines to list."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The next item following a partial list of returned resources. For example, if a request is made to return maxResults number of resources, NextToken allows you to return more items in your list starting at the location pointed to by the next token."]}
+    let make ?hypervisorArn =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { hypervisorArn; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("HypervisorArn",
+           (Option.map x.hypervisorArn ~f:ServerArn.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let hypervisorArn =
+        (Option.map ~f:ServerArn.of_xml) (Xml.child xml_arg0 "HypervisorArn") in
+      make ?nextToken ?maxResults ?hypervisorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let hypervisorArn = field_map json__ "HypervisorArn" ServerArn.of_json in
+      make ?nextToken ?maxResults ?hypervisorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists your virtual machines."]
+module ListTagsForResourceOutput =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource's tags that you listed."];
+      tags: Tags.t option [@ocaml.doc "A list of the resource's tags."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceArn = fun ?tags -> fun () -> { resourceArn; tags }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1780,9 +3221,9 @@ module ListTagsForResourceOutput =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       make ?tags ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
       make ?tags ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1806,8 +3247,9 @@ module ListTagsForResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1824,6 +3266,7 @@ module ListHypervisorsOutput =
           "The next item following a partial list of returned resources. For example, if a request is made to return maxResults number of resources, NextToken allows you to return more items in your list starting at the location pointed to by the next token."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?hypervisors =
@@ -1832,6 +3275,8 @@ module ListHypervisorsOutput =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -1841,6 +3286,8 @@ module ListHypervisorsOutput =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -1851,6 +3298,10 @@ module ListHypervisorsOutput =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1872,9 +3323,9 @@ module ListHypervisorsOutput =
         (Option.map ~f:Hypervisors.of_xml) (Xml.child xml_arg0 "Hypervisors") in
       make ?nextToken ?hypervisors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let hypervisors = field_map json "Hypervisors" Hypervisors.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let hypervisors = field_map json__ "Hypervisors" Hypervisors.of_json in
       make ?nextToken ?hypervisors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists your hypervisors."]
@@ -1901,9 +3352,9 @@ module ListHypervisorsInput =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists your hypervisors."]
@@ -1917,6 +3368,7 @@ module ListGatewaysOutput =
           "The next item following a partial list of returned resources. For example, if a request is made to return maxResults number of resources, NextToken allows you to return more items in your list starting at the location pointed to by the next token."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?gateways = fun ?nextToken -> fun () -> { gateways; nextToken }
@@ -1924,6 +3376,8 @@ module ListGatewaysOutput =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -1933,6 +3387,8 @@ module ListGatewaysOutput =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -1943,6 +3399,10 @@ module ListGatewaysOutput =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -1964,9 +3424,9 @@ module ListGatewaysOutput =
         (Option.map ~f:Gateways.of_xml) (Xml.child xml_arg0 "Gateways") in
       make ?nextToken ?gateways ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let gateways = field_map json "Gateways" Gateways.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let gateways = field_map json__ "Gateways" Gateways.of_json in
       make ?nextToken ?gateways ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1994,9 +3454,9 @@ module ListGatewaysInput =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2010,7 +3470,9 @@ module ImportHypervisorConfigurationOutput =
           "The Amazon Resource Name (ARN) of the hypervisor you disassociated."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?hypervisorArn = fun () -> { hypervisorArn }
@@ -2018,8 +3480,12 @@ module ImportHypervisorConfigurationOutput =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -2029,8 +3495,12 @@ module ImportHypervisorConfigurationOutput =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -2041,10 +3511,18 @@ module ImportHypervisorConfigurationOutput =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -2064,8 +3542,8 @@ module ImportHypervisorConfigurationOutput =
         (Option.map ~f:ServerArn.of_xml) (Xml.child xml_arg0 "HypervisorArn") in
       make ?hypervisorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hypervisorArn = field_map json "HypervisorArn" ServerArn.of_json in
+    let of_json json__ =
+      let hypervisorArn = field_map json__ "HypervisorArn" ServerArn.of_json in
       make ?hypervisorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Connect to a hypervisor by importing its configuration."]
@@ -2073,59 +3551,608 @@ module ImportHypervisorConfigurationInput =
   struct
     type nonrec t =
       {
+      name: Name.t [@ocaml.doc "The name of the hypervisor."];
       host: Host.t
         [@ocaml.doc
           "The server host of the hypervisor. This can be either an IP address or a fully-qualified domain name (FQDN)."];
-      kmsKeyArn: KmsKeyArn.t option
-        [@ocaml.doc "The Key Management Service for the hypervisor."];
-      name: Name.t [@ocaml.doc "The name of the hypervisor."];
+      username: Username.t option
+        [@ocaml.doc "The username for the hypervisor."];
       password: Password.t option
         [@ocaml.doc "The password for the hypervisor."];
+      kmsKeyArn: KmsKeyArn.t option
+        [@ocaml.doc "The Key Management Service for the hypervisor."];
       tags: Tags.t option
-        [@ocaml.doc "The tags of the hypervisor configuration to import."];
-      username: Username.t option
-        [@ocaml.doc "The username for the hypervisor."]}
+        [@ocaml.doc "The tags of the hypervisor configuration to import."]}
     let context_ = "ImportHypervisorConfigurationInput"
-    let make ?kmsKeyArn =
+    let make ?username =
       fun ?password ->
-        fun ?tags ->
-          fun ?username ->
-            fun ~host ->
-              fun ~name ->
-                fun () -> { kmsKeyArn; password; tags; username; host; name }
+        fun ?kmsKeyArn ->
+          fun ?tags ->
+            fun ~name ->
+              fun ~host ->
+                fun () -> { username; password; kmsKeyArn; tags; name; host }
     let to_value x =
       structure_to_value
-        [("Host", (Some (Host.to_value x.host)));
-        ("KmsKeyArn", (Option.map x.kmsKeyArn ~f:KmsKeyArn.to_value));
-        ("Name", (Some (Name.to_value x.name)));
+        [("Name", (Some (Name.to_value x.name)));
+        ("Host", (Some (Host.to_value x.host)));
+        ("Username", (Option.map x.username ~f:Username.to_value));
         ("Password", (Option.map x.password ~f:Password.to_value));
-        ("Tags", (Option.map x.tags ~f:Tags.to_value));
-        ("Username", (Option.map x.username ~f:Username.to_value))]
+        ("KmsKeyArn", (Option.map x.kmsKeyArn ~f:KmsKeyArn.to_value));
+        ("Tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let username =
-        (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "Username") in
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
-      let password =
-        (Option.map ~f:Password.of_xml) (Xml.child xml_arg0 "Password") in
-      let name =
-        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       let kmsKeyArn =
         (Option.map ~f:KmsKeyArn.of_xml) (Xml.child xml_arg0 "KmsKeyArn") in
+      let password =
+        (Option.map ~f:Password.of_xml) (Xml.child xml_arg0 "Password") in
+      let username =
+        (Option.map ~f:Username.of_xml) (Xml.child xml_arg0 "Username") in
       let host =
         Host.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Host") in
-      make ?username ?tags ?password ~name ?kmsKeyArn ~host ()
+      let name =
+        Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?tags ?kmsKeyArn ?password ?username ~host ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let username = field_map json "Username" Username.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let password = field_map json "Password" Password.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
-      let kmsKeyArn = field_map json "KmsKeyArn" KmsKeyArn.of_json in
-      let host = field_map_exn json "Host" Host.of_json in
-      make ?username ?tags ?password ~name ?kmsKeyArn ~host ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let kmsKeyArn = field_map json__ "KmsKeyArn" KmsKeyArn.of_json in
+      let password = field_map json__ "Password" Password.of_json in
+      let username = field_map json__ "Username" Username.of_json in
+      let host = field_map_exn json__ "Host" Host.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
+      make ?tags ?kmsKeyArn ?password ?username ~host ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Connect to a hypervisor by importing its configuration."]
+module GetVirtualMachineOutput =
+  struct
+    type nonrec t =
+      {
+      virtualMachine: VirtualMachineDetails.t option
+        [@ocaml.doc
+          "This object contains the basic attributes of VirtualMachine contained by the output of GetVirtualMachine"]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?virtualMachine = fun () -> { virtualMachine }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("VirtualMachine",
+           (Option.map x.virtualMachine ~f:VirtualMachineDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let virtualMachine =
+        (Option.map ~f:VirtualMachineDetails.of_xml)
+          (Xml.child xml_arg0 "VirtualMachine") in
+      make ?virtualMachine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let virtualMachine =
+        field_map json__ "VirtualMachine" VirtualMachineDetails.of_json in
+      make ?virtualMachine ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "By providing the ARN (Amazon Resource Name), this API returns the virtual machine."]
+module GetVirtualMachineInput =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the virtual machine."]}
+    let context_ = "GetVirtualMachineInput"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "By providing the ARN (Amazon Resource Name), this API returns the virtual machine."]
+module GetHypervisorPropertyMappingsOutput =
+  struct
+    type nonrec t =
+      {
+      hypervisorArn: ServerArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the hypervisor."];
+      vmwareToAwsTagMappings: VmwareToAwsTagMappings.t option
+        [@ocaml.doc
+          "This is a display of the mappings of VMware tags to the Amazon Web Services tags."];
+      iamRoleArn: IamRoleArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the IAM role."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?hypervisorArn =
+      fun ?vmwareToAwsTagMappings ->
+        fun ?iamRoleArn ->
+          fun () -> { hypervisorArn; vmwareToAwsTagMappings; iamRoleArn }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("HypervisorArn",
+           (Option.map x.hypervisorArn ~f:ServerArn.to_value));
+        ("VmwareToAwsTagMappings",
+          (Option.map x.vmwareToAwsTagMappings
+             ~f:VmwareToAwsTagMappings.to_value));
+        ("IamRoleArn", (Option.map x.iamRoleArn ~f:IamRoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let iamRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml) (Xml.child xml_arg0 "IamRoleArn") in
+      let vmwareToAwsTagMappings =
+        (Option.map ~f:VmwareToAwsTagMappings.of_xml)
+          (Xml.child xml_arg0 "VmwareToAwsTagMappings") in
+      let hypervisorArn =
+        (Option.map ~f:ServerArn.of_xml) (Xml.child xml_arg0 "HypervisorArn") in
+      make ?iamRoleArn ?vmwareToAwsTagMappings ?hypervisorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let iamRoleArn = field_map json__ "IamRoleArn" IamRoleArn.of_json in
+      let vmwareToAwsTagMappings =
+        field_map json__ "VmwareToAwsTagMappings"
+          VmwareToAwsTagMappings.of_json in
+      let hypervisorArn = field_map json__ "HypervisorArn" ServerArn.of_json in
+      make ?iamRoleArn ?vmwareToAwsTagMappings ?hypervisorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This action retrieves the property mappings for the specified hypervisor. A hypervisor property mapping displays the relationship of entity properties available from the hypervisor to the properties available in Amazon Web Services."]
+module GetHypervisorPropertyMappingsInput =
+  struct
+    type nonrec t =
+      {
+      hypervisorArn: ServerArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the hypervisor."]}
+    let context_ = "GetHypervisorPropertyMappingsInput"
+    let make ~hypervisorArn = fun () -> { hypervisorArn }
+    let to_value x =
+      structure_to_value
+        [("HypervisorArn", (Some (ServerArn.to_value x.hypervisorArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hypervisorArn =
+        ServerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "HypervisorArn") in
+      make ~hypervisorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hypervisorArn =
+        field_map_exn json__ "HypervisorArn" ServerArn.of_json in
+      make ~hypervisorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This action retrieves the property mappings for the specified hypervisor. A hypervisor property mapping displays the relationship of entity properties available from the hypervisor to the properties available in Amazon Web Services."]
+module GetHypervisorOutput =
+  struct
+    type nonrec t =
+      {
+      hypervisor: HypervisorDetails.t option
+        [@ocaml.doc "Details about the requested hypervisor."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?hypervisor = fun () -> { hypervisor }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Hypervisor",
+           (Option.map x.hypervisor ~f:HypervisorDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hypervisor =
+        (Option.map ~f:HypervisorDetails.of_xml)
+          (Xml.child xml_arg0 "Hypervisor") in
+      make ?hypervisor ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hypervisor =
+        field_map json__ "Hypervisor" HypervisorDetails.of_json in
+      make ?hypervisor ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This action requests information about the specified hypervisor to which the gateway will connect. A hypervisor is hardware, software, or firmware that creates and manages virtual machines, and allocates resources to them."]
+module GetHypervisorInput =
+  struct
+    type nonrec t =
+      {
+      hypervisorArn: ServerArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the hypervisor."]}
+    let context_ = "GetHypervisorInput"
+    let make ~hypervisorArn = fun () -> { hypervisorArn }
+    let to_value x =
+      structure_to_value
+        [("HypervisorArn", (Some (ServerArn.to_value x.hypervisorArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hypervisorArn =
+        ServerArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "HypervisorArn") in
+      make ~hypervisorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hypervisorArn =
+        field_map_exn json__ "HypervisorArn" ServerArn.of_json in
+      make ~hypervisorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This action requests information about the specified hypervisor to which the gateway will connect. A hypervisor is hardware, software, or firmware that creates and manages virtual machines, and allocates resources to them."]
+module GetGatewayOutput =
+  struct
+    type nonrec t =
+      {
+      gateway: GatewayDetails.t option
+        [@ocaml.doc
+          "By providing the ARN (Amazon Resource Name), this API returns the gateway."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?gateway = fun () -> { gateway }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Gateway", (Option.map x.gateway ~f:GatewayDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let gateway =
+        (Option.map ~f:GatewayDetails.of_xml) (Xml.child xml_arg0 "Gateway") in
+      make ?gateway ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let gateway = field_map json__ "Gateway" GatewayDetails.of_json in
+      make ?gateway ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "By providing the ARN (Amazon Resource Name), this API returns the gateway."]
+module GetGatewayInput =
+  struct
+    type nonrec t =
+      {
+      gatewayArn: GatewayArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the gateway."]}
+    let context_ = "GetGatewayInput"
+    let make ~gatewayArn = fun () -> { gatewayArn }
+    let to_value x =
+      structure_to_value
+        [("GatewayArn", (Some (GatewayArn.to_value x.gatewayArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let gatewayArn =
+        GatewayArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
+      make ~gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let gatewayArn = field_map_exn json__ "GatewayArn" GatewayArn.of_json in
+      make ~gatewayArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "By providing the ARN (Amazon Resource Name), this API returns the gateway."]
+module GetBandwidthRateLimitScheduleOutput =
+  struct
+    type nonrec t =
+      {
+      gatewayArn: GatewayArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the gateway. Use the ListGateways operation to return a list of gateways for your account and Amazon Web Services Region."];
+      bandwidthRateLimitIntervals: BandwidthRateLimitIntervals.t option
+        [@ocaml.doc
+          "An array containing bandwidth rate limit schedule intervals for a gateway. When no bandwidth rate limit intervals have been scheduled, the array is empty."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?gatewayArn =
+      fun ?bandwidthRateLimitIntervals ->
+        fun () -> { gatewayArn; bandwidthRateLimitIntervals }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("GatewayArn", (Option.map x.gatewayArn ~f:GatewayArn.to_value));
+        ("BandwidthRateLimitIntervals",
+          (Option.map x.bandwidthRateLimitIntervals
+             ~f:BandwidthRateLimitIntervals.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bandwidthRateLimitIntervals =
+        (Option.map ~f:BandwidthRateLimitIntervals.of_xml)
+          (Xml.child xml_arg0 "BandwidthRateLimitIntervals") in
+      let gatewayArn =
+        (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
+      make ?bandwidthRateLimitIntervals ?gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bandwidthRateLimitIntervals =
+        field_map json__ "BandwidthRateLimitIntervals"
+          BandwidthRateLimitIntervals.of_json in
+      let gatewayArn = field_map json__ "GatewayArn" GatewayArn.of_json in
+      make ?bandwidthRateLimitIntervals ?gatewayArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the bandwidth rate limit schedule for a specified gateway. By default, gateways do not have bandwidth rate limit schedules, which means no bandwidth rate limiting is in effect. Use this to get a gateway's bandwidth rate limit schedule."]
+module GetBandwidthRateLimitScheduleInput =
+  struct
+    type nonrec t =
+      {
+      gatewayArn: GatewayArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the gateway. Use the ListGateways operation to return a list of gateways for your account and Amazon Web Services Region."]}
+    let context_ = "GetBandwidthRateLimitScheduleInput"
+    let make ~gatewayArn = fun () -> { gatewayArn }
+    let to_value x =
+      structure_to_value
+        [("GatewayArn", (Some (GatewayArn.to_value x.gatewayArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let gatewayArn =
+        GatewayArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
+      make ~gatewayArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let gatewayArn = field_map_exn json__ "GatewayArn" GatewayArn.of_json in
+      make ~gatewayArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the bandwidth rate limit schedule for a specified gateway. By default, gateways do not have bandwidth rate limit schedules, which means no bandwidth rate limiting is in effect. Use this to get a gateway's bandwidth rate limit schedule."]
 module DisassociateGatewayFromServerOutput =
   struct
     type nonrec t =
@@ -2137,6 +4164,7 @@ module DisassociateGatewayFromServerOutput =
       [ `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?gatewayArn = fun () -> { gatewayArn }
@@ -2148,6 +4176,8 @@ module DisassociateGatewayFromServerOutput =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -2161,6 +4191,8 @@ module DisassociateGatewayFromServerOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -2179,6 +4211,10 @@ module DisassociateGatewayFromServerOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -2197,8 +4233,8 @@ module DisassociateGatewayFromServerOutput =
         (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
       make ?gatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayArn = field_map json "GatewayArn" GatewayArn.of_json in
+    let of_json json__ =
+      let gatewayArn = field_map json__ "GatewayArn" GatewayArn.of_json in
       make ?gatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2222,8 +4258,8 @@ module DisassociateGatewayFromServerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
       make ~gatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayArn = field_map_exn json "GatewayArn" GatewayArn.of_json in
+    let of_json json__ =
+      let gatewayArn = field_map_exn json__ "GatewayArn" GatewayArn.of_json in
       make ~gatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2237,8 +4273,10 @@ module DeleteHypervisorOutput =
           "The Amazon Resource Name (ARN) of the hypervisor you deleted."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?hypervisorArn = fun () -> { hypervisorArn }
@@ -2246,10 +4284,14 @@ module DeleteHypervisorOutput =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -2259,10 +4301,14 @@ module DeleteHypervisorOutput =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -2273,6 +4319,10 @@ module DeleteHypervisorOutput =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -2281,6 +4331,10 @@ module DeleteHypervisorOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -2300,8 +4354,8 @@ module DeleteHypervisorOutput =
         (Option.map ~f:ServerArn.of_xml) (Xml.child xml_arg0 "HypervisorArn") in
       make ?hypervisorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hypervisorArn = field_map json "HypervisorArn" ServerArn.of_json in
+    let of_json json__ =
+      let hypervisorArn = field_map json__ "HypervisorArn" ServerArn.of_json in
       make ?hypervisorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a hypervisor."]
@@ -2324,9 +4378,9 @@ module DeleteHypervisorInput =
           (Xml.child_exn ~context:context_ xml_arg0 "HypervisorArn") in
       make ~hypervisorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hypervisorArn =
-        field_map_exn json "HypervisorArn" ServerArn.of_json in
+        field_map_exn json__ "HypervisorArn" ServerArn.of_json in
       make ~hypervisorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a hypervisor."]
@@ -2340,6 +4394,7 @@ module DeleteGatewayOutput =
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?gatewayArn = fun () -> { gatewayArn }
@@ -2349,6 +4404,8 @@ module DeleteGatewayOutput =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -2360,6 +4417,8 @@ module DeleteGatewayOutput =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -2374,6 +4433,10 @@ module DeleteGatewayOutput =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -2392,8 +4455,8 @@ module DeleteGatewayOutput =
         (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
       make ?gatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayArn = field_map json "GatewayArn" GatewayArn.of_json in
+    let of_json json__ =
+      let gatewayArn = field_map json__ "GatewayArn" GatewayArn.of_json in
       make ?gatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a backup gateway."]
@@ -2416,8 +4479,8 @@ module DeleteGatewayInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
       make ~gatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayArn = field_map_exn json "GatewayArn" GatewayArn.of_json in
+    let of_json json__ =
+      let gatewayArn = field_map_exn json__ "GatewayArn" GatewayArn.of_json in
       make ~gatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a backup gateway."]
@@ -2430,6 +4493,7 @@ module CreateGatewayOutput =
           "The Amazon Resource Name (ARN) of the gateway you create."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?gatewayArn = fun () -> { gatewayArn }
@@ -2437,6 +4501,8 @@ module CreateGatewayOutput =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -2446,6 +4512,8 @@ module CreateGatewayOutput =
       match name with
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -2456,6 +4524,10 @@ module CreateGatewayOutput =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -2474,8 +4546,8 @@ module CreateGatewayOutput =
         (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
       make ?gatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayArn = field_map json "GatewayArn" GatewayArn.of_json in
+    let of_json json__ =
+      let gatewayArn = field_map json__ "GatewayArn" GatewayArn.of_json in
       make ?gatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2519,13 +4591,14 @@ module CreateGatewayInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ActivationKey") in
       make ?tags ~gatewayType ~gatewayDisplayName ~activationKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let gatewayType = field_map_exn json "GatewayType" GatewayType.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let gatewayType =
+        field_map_exn json__ "GatewayType" GatewayType.of_json in
       let gatewayDisplayName =
-        field_map_exn json "GatewayDisplayName" Name.of_json in
+        field_map_exn json__ "GatewayDisplayName" Name.of_json in
       let activationKey =
-        field_map_exn json "ActivationKey" ActivationKey.of_json in
+        field_map_exn json__ "ActivationKey" ActivationKey.of_json in
       make ?tags ~gatewayType ~gatewayDisplayName ~activationKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2539,6 +4612,7 @@ module AssociateGatewayToServerOutput =
     type nonrec error =
       [ `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?gatewayArn = fun () -> { gatewayArn }
@@ -2548,6 +4622,8 @@ module AssociateGatewayToServerOutput =
           `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_json json)
       | name ->
@@ -2559,6 +4635,8 @@ module AssociateGatewayToServerOutput =
           `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
           `ValidationException (ValidationException.of_xml xml)
       | name ->
@@ -2573,6 +4651,10 @@ module AssociateGatewayToServerOutput =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `ValidationException e ->
           `Assoc
             [("error", (`String "ValidationException"));
@@ -2591,8 +4673,8 @@ module AssociateGatewayToServerOutput =
         (Option.map ~f:GatewayArn.of_xml) (Xml.child xml_arg0 "GatewayArn") in
       make ?gatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatewayArn = field_map json "GatewayArn" GatewayArn.of_json in
+    let of_json json__ =
+      let gatewayArn = field_map json__ "GatewayArn" GatewayArn.of_json in
       make ?gatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2624,9 +4706,9 @@ module AssociateGatewayToServerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "GatewayArn") in
       make ~serverArn ~gatewayArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serverArn = field_map_exn json "ServerArn" ServerArn.of_json in
-      let gatewayArn = field_map_exn json "GatewayArn" GatewayArn.of_json in
+    let of_json json__ =
+      let serverArn = field_map_exn json__ "ServerArn" ServerArn.of_json in
+      let gatewayArn = field_map_exn json__ "GatewayArn" GatewayArn.of_json in
       make ~serverArn ~gatewayArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

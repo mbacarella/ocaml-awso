@@ -15,11 +15,44 @@ val analyze_i_d :
     ?cfg:Awso.Cfg.t ->
       AnalyzeIDRequest.t ->
         (AnalyzeIDResponse.t, AnalyzeIDResponse.error) Result.t
+val create_adapter :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAdapterRequest.t ->
+        (CreateAdapterResponse.t, CreateAdapterResponse.error) Result.t
+val create_adapter_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAdapterVersionRequest.t ->
+        (CreateAdapterVersionResponse.t, CreateAdapterVersionResponse.error)
+          Result.t
+val delete_adapter :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAdapterRequest.t ->
+        (DeleteAdapterResponse.t, DeleteAdapterResponse.error) Result.t
+val delete_adapter_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAdapterVersionRequest.t ->
+        (DeleteAdapterVersionResponse.t, DeleteAdapterVersionResponse.error)
+          Result.t
 val detect_document_text :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DetectDocumentTextRequest.t ->
         (DetectDocumentTextResponse.t, DetectDocumentTextResponse.error)
+          Result.t
+val get_adapter :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAdapterRequest.t ->
+        (GetAdapterResponse.t, GetAdapterResponse.error) Result.t
+val get_adapter_version :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAdapterVersionRequest.t ->
+        (GetAdapterVersionResponse.t, GetAdapterVersionResponse.error)
           Result.t
 val get_document_analysis :
   ?endpoint_url:string ->
@@ -39,6 +72,35 @@ val get_expense_analysis :
       GetExpenseAnalysisRequest.t ->
         (GetExpenseAnalysisResponse.t, GetExpenseAnalysisResponse.error)
           Result.t
+val get_lending_analysis :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLendingAnalysisRequest.t ->
+        (GetLendingAnalysisResponse.t, GetLendingAnalysisResponse.error)
+          Result.t
+val get_lending_analysis_summary :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLendingAnalysisSummaryRequest.t ->
+        (GetLendingAnalysisSummaryResponse.t,
+          GetLendingAnalysisSummaryResponse.error) Result.t
+val list_adapter_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAdapterVersionsRequest.t ->
+        (ListAdapterVersionsResponse.t, ListAdapterVersionsResponse.error)
+          Result.t
+val list_adapters :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAdaptersRequest.t ->
+        (ListAdaptersResponse.t, ListAdaptersResponse.error) Result.t
+val list_tags_for_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTagsForResourceRequest.t ->
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t
 val start_document_analysis :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -57,3 +119,24 @@ val start_expense_analysis :
       StartExpenseAnalysisRequest.t ->
         (StartExpenseAnalysisResponse.t, StartExpenseAnalysisResponse.error)
           Result.t
+val start_lending_analysis :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartLendingAnalysisRequest.t ->
+        (StartLendingAnalysisResponse.t, StartLendingAnalysisResponse.error)
+          Result.t
+val tag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TagResourceRequest.t ->
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
+val untag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UntagResourceRequest.t ->
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
+val update_adapter :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAdapterRequest.t ->
+        (UpdateAdapterResponse.t, UpdateAdapterResponse.error) Result.t
